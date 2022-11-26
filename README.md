@@ -1,5 +1,5 @@
 # 医院门诊信息管理系统
-
+[中文](README.md) [English](README.en.md)
 ## 如何运行
 - 运行前端
 ``` bash

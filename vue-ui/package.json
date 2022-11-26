@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "author": "vue-admin-beautiful",
   "participants": [],
-  "homepage": "https://chu1204505056.gitee.io/vue-admin-better",
+  "homepage": "https://github.com/Palpitate-xus/hoimsystem",
   "publishConfig": {
     "registry": "https://npm.pkg.github.com/"
   },
@@ -27,7 +27,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/chuzhixin/vue-admin-beautiful.git"
+    "url": "git+https://github.com/Palpitate-xus/hoimsystem"
   },
   "gitHooks": {
     "pre-commit": "lint-staged"

@@ -1,12 +1,5 @@
 <template>
   <div class="register-container">
-    <el-alert
-      v-if="nodeEnv !== 'development'"
-      title="beautiful boys and girls欢迎加入vue-admin-beautifulQQ群：972435319"
-      type="success"
-      :closable="false"
-      style="position: fixed"
-    ></el-alert>
     <el-row>
       <el-col :xs="24" :sm="24" :md="12" :lg="16" :xl="16">
         <div style="color: transparent">占位符</div>

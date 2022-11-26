@@ -20,7 +20,6 @@ const setting = {
   devPort: '81',
   //版本号
   version: process.env.VUE_APP_VERSION,
-  //这一项非常重要！请务必保留MIT协议下package.json及copyright作者信息 即可免费商用，不遵守此项约定你将无法使用该框架，如需自定义版权信息请联系QQ1204505056
   copyright: 'vab',
   //是否显示页面底部自定义版权信息
   footerCopyright: true,
@@ -65,6 +64,6 @@ const setting = {
   //代码生成机生成在view下的文件夹名称
   templateFolder: 'project',
   //是否显示终端donation打印
-  donation: true,
+  donation: false,
 }
 module.exports = setting

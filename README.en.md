@@ -1,5 +1,5 @@
 # Hospital Outpatient Information Management System
-[中文](README.md) [English](README.en.md)
+[中文](README.md) | [English](README.en.md) | [需求文档](./doc/demandDoc.md) | [数据库文档](./doc/database.md) | [API文档](./doc/api.md) | [TODO](./doc/todos.md)
 ## How to run
 - Run front-end
 ``` bash

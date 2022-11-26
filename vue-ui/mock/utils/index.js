@@ -3,7 +3,6 @@ const { join } = require('path')
 const fs = require('fs')
 
 /**
- * @author https://vue-admin-beautiful.com （不想保留author可删除）
  * @description 随机生成图片url。
  * @param width
  * @param height

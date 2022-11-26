@@ -75,8 +75,8 @@ module.exports = [
           permissions,
           username,
           'avatar|1': [
-            'https://i.gtimg.cn/club/item/face/img/2/15922_100.gif',
-            'https://i.gtimg.cn/club/item/face/img/8/15918_100.gif',
+            'https://gimg2.baidu.com/image_search/src=http%3A%2F%2Fc-ssl.duitang.com%2Fuploads%2Fblog%2F202105%2F10%2F20210510174256_4b4d0.thumb.1000_0.jpeg&refer=http%3A%2F%2Fc-ssl.duitang.com&app=2002&size=f9999,10000&q=a80&n=0&g=0n&fmt=auto?sec=1672052383&t=8739b4df4bab4402dfbdb58ebceadcea',
+            'https://gimg2.baidu.com/image_search/src=http%3A%2F%2Fc-ssl.duitang.com%2Fuploads%2Fblog%2F202105%2F19%2F20210519212438_ced7e.jpg&refer=http%3A%2F%2Fc-ssl.duitang.com&app=2002&size=f9999,10000&q=a80&n=0&g=0n&fmt=auto?sec=1672052383&t=f87a08cb01e22327f6a6195e26d88a67',
           ],
         },
       }

@@ -6,7 +6,9 @@
 
 ## 系统功能分析
 ![img](../doc_assets/PatientAccessFlow.png)
-<center> 图1 病人就医的主要流程 <center>
+<p align="center">
+    图1 病人就医的主要流程
+</p>
 - 病人管理
     - 病人的信息录入、维护与查询
     - 医生对病人病历的录入、维护与查询

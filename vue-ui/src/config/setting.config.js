@@ -13,14 +13,14 @@ const setting = {
   // 进行编译的依赖
   transpileDependencies: [],
   //标题 （包括初次加载雪花屏的标题 页面的标题 浏览器的标题）
-  title: 'vue-admin-better',
+  title: '医院门诊信息管理系统',
   //简写
-  abbreviation: 'vab',
+  abbreviation: 'hoimsystem',
   //开发环境端口号
   devPort: '81',
   //版本号
   version: process.env.VUE_APP_VERSION,
-  copyright: 'vab',
+  copyright: '',
   //是否显示页面底部自定义版权信息
   footerCopyright: true,
   //是否显示顶部进度条

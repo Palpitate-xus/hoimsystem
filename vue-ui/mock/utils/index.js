@@ -13,7 +13,6 @@ function handleRandomImage(width = 50, height = 50) {
 }
 
 /**
- * @author https://vue-admin-beautiful.com （不想保留author可删除）
  * @description 处理所有 controller 模块，npm run serve时在node环境中自动输出controller文件夹下Mock接口，请勿修改。
  * @returns {[]}
  */

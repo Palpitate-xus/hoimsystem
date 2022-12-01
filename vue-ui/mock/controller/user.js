@@ -1,6 +1,7 @@
 const accessTokens = {
   admin: 'admin-accessToken',
   editor: 'editor-accessToken',
+  doctor: 'doctor-accessToken',
   test: 'test-accessToken',
 }
 
@@ -63,6 +64,10 @@ module.exports = [
       if ('editor-accessToken' === accessToken) {
         permissions = ['editor']
         username = 'editor'
+      }
+      if ('doctor-accessToken' === accessToken) {
+        permissions = ['doctor']
+        username = 'doctor'
       }
       if ('test-accessToken' === accessToken) {
         permissions = ['admin', 'editor']

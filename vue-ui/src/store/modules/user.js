@@ -1,5 +1,4 @@
 /**
- * @author https://vue-admin-beautiful.com （不想保留author可删除）
  * @description 登录、获取用户信息、退出登录、清除accessToken逻辑，不建议修改
  */
 

@@ -9,17 +9,17 @@ export function getList(data) {
 }
 
 export function doEdit(data) {
-    return request({
-      url: '/patientManagement/doEdit',
-      method: 'post',
-      data,
-    })
+  return request({
+    url: '/patientManagement/doEdit',
+    method: 'post',
+    data,
+  })
 }
 
 export function doDelete(data) {
-    return request({
-      url: '/patientManagement/doDelete',
-      method: 'post',
-      data,
-    })
+  return request({
+    url: '/patientManagement/doDelete',
+    method: 'post',
+    data,
+  })
 }

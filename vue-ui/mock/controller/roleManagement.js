@@ -8,6 +8,10 @@ const List = [
     id: '@id',
     permission: 'editor',
   },
+  {
+    id: '@id',
+    permission: 'doctor',
+  },
 ]
 module.exports = [
   {

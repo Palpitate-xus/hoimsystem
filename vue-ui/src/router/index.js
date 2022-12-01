@@ -46,30 +46,67 @@ export const asyncRoutes = [
         name: 'Index',
         component: () => import('@/views/index/index'),
         meta: {
-          title: '首页',
+          title: '医生首页',
           icon: 'home',
           affix: true,
+          permissions: ['editor'],
         },
       },
     ],
   },
-  /* {
-    path: "/test",
+  {
+    path: '/',
     component: Layout,
-    redirect: "noRedirect",
+    redirect: '/index',
     children: [
       {
-        path: "test",
-        name: "Test",
-        component: () => import("@/views/test/index"),
+        path: 'index',
+        name: 'Index',
+        component: () => import('@/views/admin/index'),
         meta: {
-          title: "test",
-          icon: "marker",
-          permissions: ["admin"],
+          title: '首页',
+          icon: 'home',
+          affix: true,
+          permissions: ['admin'],
         },
       },
     ],
-  }, */
+  },
+  {
+    path: '/',
+    component: Layout,
+    redirect: '/index',
+    children: [
+      {
+        path: 'index',
+        name: 'Index',
+        component: () => import('@/views/doctor/index'),
+        meta: {
+          title: '首页',
+          icon: 'home',
+          affix: true,
+          permissions: ['doctor'],
+        },
+      },
+    ],
+  },
+  {
+    path: '/patient',
+    component: Layout,
+    redirect: 'noRedirect',
+    children: [
+      {
+        path: 'test',
+        name: 'Test',
+        component: () => import('@/views/test/index'),
+        meta: {
+          title: '病人管理',
+          icon: 'marker',
+          permissions: ['admin'],
+        },
+      },
+    ],
+  },
 
   {
     path: '/vab',
@@ -85,7 +122,7 @@ export const asyncRoutes = [
         component: () => import('@/views/vab/permissions/index'),
         meta: {
           title: '角色权限',
-          permissions: ['admin', 'editor'],
+          permissions: ['admin', 'editor', 'doctor'],
         },
       },
       {

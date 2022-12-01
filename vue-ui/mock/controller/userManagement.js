@@ -18,6 +18,14 @@ const List = [
   },
   {
     id: '@id',
+    username: 'doctor',
+    password: 'doctor',
+    email: '@email',
+    permissions: ['doctor'],
+    datatime: '@datetime',
+  },
+  {
+    id: '@id',
     username: 'test',
     password: 'test',
     email: '@email',

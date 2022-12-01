@@ -20,7 +20,7 @@ const setting = {
   devPort: '81',
   //版本号
   version: process.env.VUE_APP_VERSION,
-  copyright: '',
+  copyright: 'palpitate.xus@mail.ecust.edu.cn',
   //是否显示页面底部自定义版权信息
   footerCopyright: true,
   //是否显示顶部进度条
@@ -42,9 +42,9 @@ const setting = {
   //token失效回退到登录页时是否记录本次的路由
   recordRoute: true,
   //是否显示logo，不显示时设置false，显示时请填写remixIcon图标名称，暂时只支持设置remixIcon
-  logo: 'vuejs-fill',
+  logo: 'false',
   //是否显示在页面高亮错误
-  errorLog: ['development', 'production'],
+  // errorLog: ['development', 'production'],
   //是否开启登录拦截
   loginInterception: true,
   //是否开启登录RSA加密

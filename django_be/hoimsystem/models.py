@@ -1,3 +1,4 @@
 from django.db import models
-from uuidfield import UUIDField
+import uuid
+from django.db import models
 # Create your models here.

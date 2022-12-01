@@ -2,6 +2,7 @@ const accessTokens = {
   admin: 'admin-accessToken',
   editor: 'editor-accessToken',
   doctor: 'doctor-accessToken',
+  patient: 'patient-accessToken',
   test: 'test-accessToken',
 }
 

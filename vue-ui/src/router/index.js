@@ -91,16 +91,34 @@ export const asyncRoutes = [
     ],
   },
   {
-    path: '/patient',
+    path: '/patientManagement',
     component: Layout,
     redirect: 'noRedirect',
     children: [
       {
-        path: 'test',
-        name: 'Test',
-        component: () => import('@/views/test/index'),
+        path: 'patientManagement',
+        name: 'patientManagement',
+        component: () => import('@/views/patientManagement/index'),
         meta: {
           title: '病人管理',
+          icon: 'marker',
+          permissions: ['admin'],
+        },
+      },
+    ],
+  },
+
+  {
+    path: '/doctorManagement',
+    component: Layout,
+    redirect: 'noRedirect',
+    children: [
+      {
+        path: 'doctorManagement',
+        name: 'doctorManagement',
+        component: () => import('@/views/doctorManagement/index'),
+        meta: {
+          title: '医生管理',
           icon: 'marker',
           permissions: ['admin'],
         },

@@ -15,8 +15,13 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, re_path
-from hoimsystem.views import *
+from hoimsystem.views import userManagement
 urlpatterns = [
     path('admin/', admin.site.urls),
-    re_path('^api/test', test)
+    re_path('^api/test', userManagement.test),
+    re_path('^api/publicKey', userManagement.get_public_key),
+    re_path('^api/login', userManagement.login),
+    re_path('^api/register', userManagement.register),
+    re_path('^api/userInfo', userManagement.get_user_info),
+    re_path('^api/logout', userManagement.logout),
 ]

@@ -9,7 +9,7 @@
   },
   "scripts": {
     "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build",
+    "build": "vue-cli-service --openssl-legacy-provider build",
     "build:report": "vue-cli-service build --report",
     "globle": "npm install -g cnpm --registry=https://registry.npmmirror.com&&cnpm i rimraf npm-check-updates nrm -g&&rimraf node_modules&&cnpm i",
     "lint": "vue-cli-service lint",

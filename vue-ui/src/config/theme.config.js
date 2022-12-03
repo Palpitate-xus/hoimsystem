@@ -9,6 +9,6 @@ const theme = {
   //是否开启主题配置按钮
   themeBar: false,
   //是否显示多标签页
-  tabsBar: true,
+  tabsBar: false,
 }
 module.exports = theme

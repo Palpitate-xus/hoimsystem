@@ -91,6 +91,24 @@ export const asyncRoutes = [
     ],
   },
   {
+    path: '/',
+    component: Layout,
+    redirect: '/index',
+    children: [
+      {
+        path: 'index',
+        name: 'Index',
+        component: () => import('@/views/patient/index'),
+        meta: {
+          title: '首页',
+          icon: 'home',
+          affix: true,
+          permissions: ['patient'],
+        },
+      },
+    ],
+  },
+  {
     path: '/patientManagement',
     component: Layout,
     redirect: 'noRedirect',
@@ -107,7 +125,40 @@ export const asyncRoutes = [
       },
     ],
   },
-
+  {
+    path: '/patientManagement',
+    component: Layout,
+    redirect: 'noRedirect',
+    children: [
+      {
+        path: 'patientManagement',
+        name: 'patientManagement',
+        component: () => import('@/views/patientManagement/index'),
+        meta: {
+          title: '病人管理',
+          icon: 'marker',
+          permissions: ['doctor'],
+        },
+      },
+    ],
+  },
+  {
+    path: '/prescriptionManagement',
+    component: Layout,
+    redirect: 'noRedirect',
+    children: [
+      {
+        path: 'prescriptionManagement',
+        name: 'prescriptionManagement',
+        component: () => import('@/views/prescriptionManagement/index'),
+        meta: {
+          title: '处方管理',
+          icon: 'marker',
+          permissions: ['doctor'],
+        },
+      },
+    ],
+  },
   {
     path: '/doctorManagement',
     component: Layout,
@@ -126,6 +177,23 @@ export const asyncRoutes = [
     ],
   },
 
+  {
+    path: '/registrationManagement',
+    component: Layout,
+    redirect: 'noRedirect',
+    children: [
+      {
+        path: 'registrationManagement',
+        name: 'registrationManagement',
+        component: () => import('@/views/registrationManagement/index'),
+        meta: {
+          title: '挂号',
+          icon: 'marker',
+          permissions: ['patient'],
+        },
+      },
+    ],
+  },
   {
     path: '/vab',
     component: Layout,

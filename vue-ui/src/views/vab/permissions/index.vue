@@ -10,6 +10,7 @@
           <el-radio label="admin">admin</el-radio>
           <el-radio label="editor">editor</el-radio>
           <el-radio label="doctor">doctor</el-radio>
+          <el-radio label="patient">patient</el-radio>
           <el-radio label="test">test</el-radio>
         </el-radio-group>
       </el-form-item>
@@ -32,6 +33,9 @@
     </el-button>
     <el-button v-permissions="['doctor']" type="primary">
       我是拥有["doctor"]权限的按钮
+    </el-button>
+    <el-button v-permissions="['patient']" type="primary">
+      我是拥有["patient"]权限的按钮
     </el-button>
     <el-button v-permissions="['test']" type="primary">
       我是拥有["test"]权限的按钮

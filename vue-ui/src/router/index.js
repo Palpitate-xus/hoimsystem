@@ -44,24 +44,6 @@ export const asyncRoutes = [
       {
         path: 'index',
         name: 'Index',
-        component: () => import('@/views/index/index'),
-        meta: {
-          title: '医生首页',
-          icon: 'home',
-          affix: true,
-          permissions: ['editor'],
-        },
-      },
-    ],
-  },
-  {
-    path: '/',
-    component: Layout,
-    redirect: '/index',
-    children: [
-      {
-        path: 'index',
-        name: 'Index',
         component: () => import('@/views/admin/index'),
         meta: {
           title: '首页',
@@ -176,21 +158,157 @@ export const asyncRoutes = [
       },
     ],
   },
-
   {
-    path: '/registrationManagement',
+    path: '/patient',
     component: Layout,
     redirect: 'noRedirect',
+    name: 'patient',
+    meta: { title: '预约挂号', icon: 'users-cog', permissions: ['patient'] },
     children: [
       {
-        path: 'registrationManagement',
-        name: 'registrationManagement',
-        component: () => import('@/views/registrationManagement/index'),
-        meta: {
-          title: '挂号',
-          icon: 'marker',
-          permissions: ['patient'],
-        },
+        path: '/registrationManagement',
+        component: Layout,
+        redirect: 'noRedirect',
+        children: [
+          {
+            path: 'registrationManagement',
+            name: 'registrationManagement',
+            component: () => import('@/views/registrationManagement/index'),
+            meta: {
+              title: '挂号',
+              icon: 'marker',
+              permissions: ['patient'],
+            },
+          },
+        ],
+      },
+      {
+        path: '/appointmentManagement',
+        component: Layout,
+        redirect: 'noRedirect',
+        children: [
+          {
+            path: 'appointmentManagement',
+            name: 'appointmentManagement',
+            component: () => import('@/views/appointmentManagement/index'),
+            meta: {
+              title: '预约',
+              icon: 'marker',
+              permissions: ['patient'],
+            },
+          },
+        ],
+      },
+      {
+        path: '/adviceManagement',
+        component: Layout,
+        redirect: 'noRedirect',
+        children: [
+          {
+            path: 'adviceManagement',
+            name: 'adviceManagement',
+            component: () => import('@/views/adviceManagement/index'),
+            meta: {
+              title: '医嘱',
+              icon: 'marker',
+              permissions: ['patient'],
+            },
+          },
+        ],
+      },
+      {
+        path: '/inspectionManagement',
+        component: Layout,
+        redirect: 'noRedirect',
+        children: [
+          {
+            path: 'inspectionManagement',
+            name: 'inspectionManagement',
+            component: () => import('@/views/inspectionManagement/index'),
+            meta: {
+              title: '检查结果',
+              icon: 'marker',
+              permissions: ['patient'],
+            },
+          },
+        ],
+      },
+      {
+        path: '/priscriptionPatient',
+        component: Layout,
+        redirect: 'noRedirect',
+        children: [
+          {
+            path: 'priscriptionPatient',
+            name: 'priscriptionPatient',
+            component: () => import('@/views/prescriptionManagement/patient'),
+            meta: {
+              title: '处方',
+              icon: 'marker',
+              permissions: ['patient'],
+            },
+          },
+        ],
+      },
+    ],
+  },
+  {
+    path: '/patientinfo',
+    component: Layout,
+    redirect: 'noRedirect',
+    name: 'patientinfo',
+    meta: { title: 'message', icon: 'users-cog', permissions: ['patient'] },
+    children: [
+      {
+        path: '/adviceManagement',
+        component: Layout,
+        redirect: 'noRedirect',
+        children: [
+          {
+            path: 'adviceManagement',
+            name: 'adviceManagement',
+            component: () => import('@/views/adviceManagement/index'),
+            meta: {
+              title: '医嘱',
+              icon: 'marker',
+              permissions: ['patient'],
+            },
+          },
+        ],
+      },
+      {
+        path: '/inspectionManagement',
+        component: Layout,
+        redirect: 'noRedirect',
+        children: [
+          {
+            path: 'inspectionManagement',
+            name: 'inspectionManagement',
+            component: () => import('@/views/inspectionManagement/index'),
+            meta: {
+              title: '检查结果',
+              icon: 'marker',
+              permissions: ['patient'],
+            },
+          },
+        ],
+      },
+      {
+        path: '/priscriptionPatient',
+        component: Layout,
+        redirect: 'noRedirect',
+        children: [
+          {
+            path: 'priscriptionPatient',
+            name: 'priscriptionPatient',
+            component: () => import('@/views/prescriptionManagement/patient'),
+            meta: {
+              title: '处方',
+              icon: 'marker',
+              permissions: ['patient'],
+            },
+          },
+        ],
       },
     ],
   },

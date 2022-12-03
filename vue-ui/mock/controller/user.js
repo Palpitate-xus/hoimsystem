@@ -70,6 +70,10 @@ module.exports = [
         permissions = ['doctor']
         username = 'doctor'
       }
+      if ('patient-accessToken' === accessToken) {
+        permissions = ['patient']
+        username = 'patient'
+      }
       if ('test-accessToken' === accessToken) {
         permissions = ['admin', 'editor']
         username = 'test'

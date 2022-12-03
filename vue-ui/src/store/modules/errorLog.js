@@ -1,5 +1,4 @@
 /**
- * @author https://vue-admin-beautiful.com （不想保留author可删除）
  * @description 异常捕获的状态拦截，请勿修改
  */
 

@@ -1,5 +1,4 @@
 /**
- * @author https://vue-admin-beautiful.com （不想保留author可删除）
  * @description router全局配置，如有必要可分文件抽离，其中asyncRoutes只有在intelligence模式下才会用到，vip文档中已提供路由的基础图标与小清新图标的配置方案，请仔细阅读
  */
 
@@ -199,57 +198,6 @@ export const asyncRoutes = [
           },
         ],
       },
-      {
-        path: '/adviceManagement',
-        component: Layout,
-        redirect: 'noRedirect',
-        children: [
-          {
-            path: 'adviceManagement',
-            name: 'adviceManagement',
-            component: () => import('@/views/adviceManagement/index'),
-            meta: {
-              title: '医嘱',
-              icon: 'marker',
-              permissions: ['patient'],
-            },
-          },
-        ],
-      },
-      {
-        path: '/inspectionManagement',
-        component: Layout,
-        redirect: 'noRedirect',
-        children: [
-          {
-            path: 'inspectionManagement',
-            name: 'inspectionManagement',
-            component: () => import('@/views/inspectionManagement/index'),
-            meta: {
-              title: '检查结果',
-              icon: 'marker',
-              permissions: ['patient'],
-            },
-          },
-        ],
-      },
-      {
-        path: '/priscriptionPatient',
-        component: Layout,
-        redirect: 'noRedirect',
-        children: [
-          {
-            path: 'priscriptionPatient',
-            name: 'priscriptionPatient',
-            component: () => import('@/views/prescriptionManagement/patient'),
-            meta: {
-              title: '处方',
-              icon: 'marker',
-              permissions: ['patient'],
-            },
-          },
-        ],
-      },
     ],
   },
   {
@@ -326,7 +274,7 @@ export const asyncRoutes = [
         component: () => import('@/views/vab/permissions/index'),
         meta: {
           title: '角色权限',
-          permissions: ['admin', 'editor', 'doctor'],
+          permissions: ['admin', 'editor', 'doctor', 'patient'],
         },
       },
       {

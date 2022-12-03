@@ -16,6 +16,10 @@ const List = [
     id: '@id',
     permission: 'patient',
   },
+  {
+    id: '@id',
+    permission: 'test',
+  },
 ]
 module.exports = [
   {

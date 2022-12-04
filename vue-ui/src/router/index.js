@@ -48,7 +48,7 @@ export const asyncRoutes = [
           title: '首页',
           icon: 'home',
           affix: true,
-          permissions: ['admin'],
+          permissions: ['admin', 'editor'],
         },
       },
     ],

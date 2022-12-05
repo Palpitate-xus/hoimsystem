@@ -15,6 +15,7 @@ class patient(models.Model):
   phone = models.CharField(max_length=11)  # 病人联系方式
   password = models.CharField(max_length=24)  # 病人密码
   address = models.CharField(max_length=100)  # 病人住址
+  permission = models.CharField(max_length=10)  # 病人权限
 
 class doctor(models.Model):
   doctor_id = models.AutoField(primary_key=True)  # 自动递增的医生id
@@ -24,3 +25,4 @@ class doctor(models.Model):
   education = models.CharField(max_length=10)  # 医生学历
   phone = models.CharField(max_length=11)  # 医生联系方式
   password = models.CharField(max_length=24)  # 医生密码
+  permission = models.CharField(max_length=10)  # 医生权限

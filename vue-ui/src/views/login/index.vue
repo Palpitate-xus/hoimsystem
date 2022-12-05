@@ -50,11 +50,6 @@
               <vab-icon :icon="['fas', 'eye']"></vab-icon>
             </span>
           </el-form-item>
-          <el-radio-group v-model="form.role">
-            <el-radio :label="0">病人</el-radio>
-            <el-radio :label="1">医生</el-radio>
-            <el-radio :label="2">管理员</el-radio>
-          </el-radio-group>
           <el-button
             :loading="loading"
             class="login-btn"
@@ -105,7 +100,6 @@
         form: {
           username: '',
           password: '',
-          role: '',
         },
         rules: {
           username: [

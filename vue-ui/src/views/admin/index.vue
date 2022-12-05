@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="magnifier-container">
     <h1>这是管理员页面</h1>
     <el-row>
       <el-col :xs="12" :sm="12" :md="12" :lg="12" :xl="12">

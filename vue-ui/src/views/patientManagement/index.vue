@@ -1,68 +1,134 @@
 <template>
   <div class="test-container">
-    <el-divider content-position="left">这是病人管理</el-divider>
-    <el-table ref="filterTable" :data="tableData" style="width: 100%">
+    <el-divider content-position="left">这是医生管理的页面</el-divider>
+    <el-table
+      v-loading="listLoading"
+      :data="list"
+      :element-loading-text="elementLoadingText"
+      @selection-change="setSelectRows"
+    >
+      <el-table-column show-overflow-tooltip type="selection"></el-table-column>
       <el-table-column
-        prop="address"
-        label="地址"
-        :formatter="formatter"
+        show-overflow-tooltip
+        prop="id"
+        label="id"
       ></el-table-column>
       <el-table-column
-        prop="tag"
-        label="标签"
-        width="100"
-        :filter-method="filterTag"
-        filter-placement="bottom-end"
-      >
-        <template slot-scope="scope">
-          <el-tag
-            :type="scope.row.tag === '家' ? 'primary' : 'success'"
-            disable-transitions
-          >
-            {{ scope.row.tag }}
+        show-overflow-tooltip
+        prop="username"
+        label="用户名"
+      ></el-table-column>
+      <el-table-column
+        show-overflow-tooltip
+        prop="email"
+        label="邮箱"
+      ></el-table-column>
+
+      <el-table-column show-overflow-tooltip label="权限">
+        <template #default="{ row }">
+          <el-tag v-for="(item, index) in row.permissions" :key="index">
+            {{ item }}
           </el-tag>
         </template>
       </el-table-column>
+
+      <el-table-column
+        show-overflow-tooltip
+        prop="datatime"
+        label="修改时间"
+      ></el-table-column>
+      <el-table-column show-overflow-tooltip label="操作" width="200">
+        <template #default="{ row }">
+          <el-button type="text" @click="handleEdit(row)">编辑</el-button>
+          <el-button type="text" @click="handleDelete(row)">删除</el-button>
+        </template>
+      </el-table-column>
     </el-table>
+    <el-pagination
+      background
+      :current-page="queryForm.pageNo"
+      :page-size="queryForm.pageSize"
+      :layout="layout"
+      :total="total"
+      @size-change="handleSizeChange"
+      @current-change="handleCurrentChange"
+    ></el-pagination>
   </div>
 </template>
 <script>
+  import { getList, doDelete } from '@/api/userManagement'
   export default {
     name: 'Index',
     data() {
       return {
-        tableData: [
-          {
-            date: '2016-05-01',
-            name: '王小虎',
-            address: '上海市普陀区金沙江路 1519 弄',
-            tag: '家',
-          },
-          {
-            date: '2016-05-03',
-            name: '王小虎',
-            address: '上海市普陀区金沙江路 1516 弄',
-            tag: '公司',
-          },
-        ],
+        list: null,
+        listLoading: true,
+        layout: 'total, sizes, prev, pager, next, jumper',
+        total: 0,
+        selectRows: '',
+        elementLoadingText: '正在加载...',
+        queryForm: {
+          pageNo: 1,
+          pageSize: 10,
+          username: '',
+        },
       }
     },
+    created() {
+      this.fetchData()
+    },
     methods: {
-      resetDateFilter() {
-        this.$refs.filterTable.clearFilter('date')
+      setSelectRows(val) {
+        this.selectRows = val
       },
-      clearFilter() {
-        this.$refs.filterTable.clearFilter()
+      handleEdit(row) {
+        if (row.id) {
+          this.$refs['edit'].showEdit(row)
+        } else {
+          this.$refs['edit'].showEdit()
+        }
       },
-      formatter(row, column) {
-        return row.address
+      handleDelete(row) {
+        if (row.id) {
+          this.$baseConfirm('你确定要删除当前项吗', null, async () => {
+            const { msg } = await doDelete({ ids: row.id })
+            this.$baseMessage(msg, 'success')
+            this.fetchData()
+          })
+        } else {
+          if (this.selectRows.length > 0) {
+            const ids = this.selectRows.map((item) => item.id).join()
+            this.$baseConfirm('你确定要删除选中项吗', null, async () => {
+              const { msg } = await doDelete({ ids })
+              this.$baseMessage(msg, 'success')
+              this.fetchData()
+            })
+          } else {
+            this.$baseMessage('未选中任何行', 'error')
+            return false
+          }
+        }
       },
-      filterTag(value, row) {
-        return row.tag === value
+      handleSizeChange(val) {
+        this.queryForm.pageSize = val
+        this.fetchData()
       },
-      filterHandler(value, row, column) {
-        const property = column['property']
-        return row[property] === value
+      handleCurrentChange(val) {
+        this.queryForm.pageNo = val
+        this.fetchData()
+      },
+      queryData() {
+        this.queryForm.pageNo = 1
+        this.fetchData()
+      },
+      async fetchData() {
+        this.listLoading = true
+        const { data, totalCount } = await getList(this.queryForm)
+        this.list = data
+        this.total = totalCount
+        setTimeout(() => {
+          this.listLoading = false
+        }, 300)
       },
     },
   }

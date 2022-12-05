@@ -19,4 +19,4 @@ class reg_category(models.Model):
 # 预约就诊时间段
 class timeslot(models.Model):
   timeslot_id = models.AutoField(primary_key=True)
-  time = models.CharField(max_length=20)  
+  time = models.CharField(max_length=20)

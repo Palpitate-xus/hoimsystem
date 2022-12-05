@@ -36,6 +36,32 @@
               <vab-icon slot="prefix" :icon="['fas', 'user-alt']"></vab-icon>
             </el-input>
           </el-form-item>
+          <el-form-item label="性别">
+            <el-radio-group v-model="form.sex">
+              <el-radio :label="0">女</el-radio>
+              <el-radio :label="1">男</el-radio>
+            </el-radio-group>
+          </el-form-item>
+          <el-form-item label="出生日期">
+            <el-date-picker
+              v-model="form.birthday"
+              type="date"
+              placeholder="选择出生日期"
+              value-format="yyyy-MM-dd"
+            ></el-date-picker>
+          </el-form-item>
+          <el-form-item prop="address">
+            <el-input
+              v-model.trim="form.address"
+              v-focus
+              style="margin-top: 20px"
+              type="text"
+              placeholder="请输入住址"
+              auto-complete="off"
+            >
+              <vab-icon slot="prefix" :icon="['fas', 'user-alt']"></vab-icon>
+            </el-input>
+          </el-form-item>
           <el-form-item prop="phone">
             <el-input
               v-model.trim="form.phone"
@@ -82,7 +108,7 @@
             <el-button
               class="register-btn"
               type="primary"
-              @click.native.prevent="handleReister"
+              @click.native.prevent="handleRegister"
             >
               注册
             </el-button>
@@ -198,7 +224,7 @@
           }
         }, 1000)
       },
-      handleReister() {
+      handleRegister() {
         this.$refs['registerForm'].validate(async (valid) => {
           if (valid) {
             const param = {
@@ -206,6 +232,10 @@
               phone: this.form.phone,
               password: this.form.password,
               phoneCode: this.form.phoneCode,
+              identity: this.form.identity,
+              address: this.form.address,
+              sex: this.form.sex,
+              birthday: this.form.birthday,
             }
             const { msg } = await register(param)
             this.$baseMessage(msg, 'success')

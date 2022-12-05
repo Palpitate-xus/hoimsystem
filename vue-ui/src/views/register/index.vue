@@ -18,7 +18,19 @@
               v-focus
               style="margin-top: 20px"
               type="text"
-              placeholder="请输入用户名"
+              placeholder="请输入姓名"
+              auto-complete="off"
+            >
+              <vab-icon slot="prefix" :icon="['fas', 'user-alt']"></vab-icon>
+            </el-input>
+          </el-form-item>
+          <el-form-item prop="identity">
+            <el-input
+              v-model.trim="form.identity"
+              v-focus
+              style="margin-top: 20px"
+              type="text"
+              placeholder="请输入身份证号"
               auto-complete="off"
             >
               <vab-icon slot="prefix" :icon="['fas', 'user-alt']"></vab-icon>
@@ -117,6 +129,13 @@
           callback()
         }
       }
+      const validateIdentity = (rule, value, callback) => {
+        if ('' == value) {
+          callback(new Error('身份证号不能为空'))
+        } else {
+          callback()
+        }
+      }
       return {
         isGetphone: false,
         getPhoneIntval: null,
@@ -127,7 +146,7 @@
         form: {},
         registerRules: {
           username: [
-            { required: true, trigger: 'blur', message: '请输入用户名' },
+            { required: true, trigger: 'blur', message: '请输入姓名' },
             { max: 20, trigger: 'blur', message: '最多不能超过20个字' },
             { validator: validateusername, trigger: 'blur' },
           ],
@@ -141,6 +160,9 @@
           ],
           phoneCode: [
             { required: true, trigger: 'blur', message: '请输入手机验证码' },
+          ],
+          identity: [
+            { required: true, trigger: 'blur', message: '请输入身份证号' },
           ],
         },
         loading: false,

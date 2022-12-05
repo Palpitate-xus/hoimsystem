@@ -90,16 +90,16 @@ export const asyncRoutes = [
     ],
   },
   {
-    path: '/patientManagement',
+    path: '/settings',
     component: Layout,
     redirect: 'noRedirect',
     children: [
       {
-        path: 'patientManagement',
-        name: 'patientManagement',
-        component: () => import('@/views/patientManagement/index'),
+        path: 'settings',
+        name: 'settings',
+        component: () => import('@/views/admin/settings'),
         meta: {
-          title: '病人管理',
+          title: '全局设置',
           icon: 'marker',
           permissions: ['admin'],
         },
@@ -141,9 +141,11 @@ export const asyncRoutes = [
     ],
   },
   {
-    path: '/doctorManagement',
+    path: '/Management',
     component: Layout,
     redirect: 'noRedirect',
+    name: 'adminManagement',
+    meta: { title: '管理工具', icon: 'users-cog', permissions: ['admin'] },
     children: [
       {
         path: 'doctorManagement',
@@ -151,6 +153,16 @@ export const asyncRoutes = [
         component: () => import('@/views/doctorManagement/index'),
         meta: {
           title: '医生管理',
+          icon: 'marker',
+          permissions: ['admin'],
+        },
+      },
+      {
+        path: 'patientManagement',
+        name: 'patientManagement',
+        component: () => import('@/views/patientManagement/index'),
+        meta: {
+          title: '病人管理',
           icon: 'marker',
           permissions: ['admin'],
         },
@@ -182,6 +194,23 @@ export const asyncRoutes = [
         ],
       },
       {
+        path: '/registrationRecords',
+        component: Layout,
+        redirect: 'noRedirect',
+        children: [
+          {
+            path: 'registrationRecords',
+            name: 'registrationRecords',
+            component: () => import('@/views/registrationManagement/records'),
+            meta: {
+              title: '挂号记录',
+              icon: 'marker',
+              permissions: ['patient'],
+            },
+          },
+        ],
+      },
+      {
         path: '/appointmentManagement',
         component: Layout,
         redirect: 'noRedirect',
@@ -192,6 +221,23 @@ export const asyncRoutes = [
             component: () => import('@/views/appointmentManagement/index'),
             meta: {
               title: '预约',
+              icon: 'marker',
+              permissions: ['patient'],
+            },
+          },
+        ],
+      },
+      {
+        path: '/appointmentRecords',
+        component: Layout,
+        redirect: 'noRedirect',
+        children: [
+          {
+            path: 'appointmentRecords',
+            name: 'appointmentRecords',
+            component: () => import('@/views/appointmentManagement/records'),
+            meta: {
+              title: '预约记录',
               icon: 'marker',
               permissions: ['patient'],
             },

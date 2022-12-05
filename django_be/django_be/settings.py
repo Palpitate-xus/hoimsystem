@@ -54,6 +54,19 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'django_be.urls'
+# 允许的请求头，注意accesstoken
+CORS_ALLOW_HEADERS = (
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+    'accesstoken',
+)
 # 允许全部来源
 CORS_ORIGIN_ALLOW_ALL = True
 TEMPLATES = [

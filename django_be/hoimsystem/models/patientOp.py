@@ -6,12 +6,12 @@ from django.db import models
 # 挂号
 class registration(models.Model):
   registration_uuid = models.UUIDField()  # 挂号id
-  registration_id = models.IntegerField(max_length=2)  # 就诊顺序
+  registration_id = models.IntegerField()  # 就诊顺序
   patient_id = models.ForeignKey('patient', on_delete=models.CASCADE)  # 病人id
   doctor_id = models.ForeignKey('doctor', on_delete=models.CASCADE)  # 医生id
   category = models.ForeignKey('reg_category', on_delete=models.PROTECT)  # 挂号类别id
   department_id = models.ForeignKey('department', on_delete=models.CASCADE)  # 科室id
-  status = models.IntegerField(max_length=1)  # 挂号状态（是否就诊）
+  status = models.IntegerField()  # 挂号状态（是否就诊）
 
 # 预约
 class appointment(models.Model):
@@ -21,7 +21,7 @@ class appointment(models.Model):
   category = models.ForeignKey('reg_category', on_delete=models.PROTECT)
   department_id = models.ForeignKey('department', on_delete=models.CASCADE)
   prefer_time = models.ForeignKey
-  status = models.IntegerField(max_length=1)
+  status = models.IntegerField()
 
 
 # 预约违约记录

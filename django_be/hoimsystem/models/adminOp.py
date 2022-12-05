@@ -15,3 +15,8 @@ class department(models.Model):
 class reg_category(models.Model):
   reg_category_id = models.AutoField(primary_key=True)  # 挂号类别id
   name = models.CharField(max_length=10)  # 挂号类别名称
+
+# 预约就诊时间段
+class timeslot(models.Model):
+  timeslot_id = models.AutoField(primary_key=True)
+  time = models.CharField(max_length=20)  

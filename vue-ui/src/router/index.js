@@ -304,6 +304,23 @@ export const asyncRoutes = [
           },
         ],
       },
+      {
+        path: '/medicalRecordsManagement',
+        component: Layout,
+        redirect: 'noRedirect',
+        children: [
+          {
+            path: 'medicalRecordsPatient',
+            name: 'medicalRecordsPatient',
+            component: () => import('@/views/medicalRecordsManagement/patient'),
+            meta: {
+              title: '病历',
+              icon: 'marker',
+              permissions: ['patient'],
+            },
+          },
+        ],
+      },
     ],
   },
   {

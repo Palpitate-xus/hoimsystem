@@ -2,20 +2,11 @@
   <div>
     <h1>这是管理员页面</h1>
     <el-row>
-      <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
-        <div
-          style="display: flex; align-items: center; justify-content: center"
-        >
-          <a
-            target="_blank"
-            href="https://github.com/chuzhixin/vue-admin-better"
-          >
-            <img
-              style="margin-right: 10px"
-              src="https://img.shields.io/github/stars/chuzhixin/vue-admin-better?style=flat-square&label=Stars&logo=github"
-            />
-          </a>
-        </div>
+      <el-col :xs="12" :sm="12" :md="12" :lg="12" :xl="12">
+        <el-card>待办事项</el-card>
+      </el-col>
+      <el-col :xs="12" :sm="12" :md="12" :lg="12" :xl="12">
+        <el-card>当前设置</el-card>
       </el-col>
     </el-row>
   </div>

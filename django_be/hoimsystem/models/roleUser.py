@@ -7,6 +7,11 @@ class role(models.Model):
   role_id = models.UUIDField(primary_key=True)
   accessToken = models.CharField(max_length=50)
 
+class admins(models.Model):
+  admin_id = models.AutoField(primary_key=True)
+  username = models.CharField(max_length=20)
+  password = models.CharField(max_length=20)
+
 class patient(models.Model):
   patient_id = models.AutoField(primary_key=True)  # 自动递增的病人id
   name = models.CharField(max_length=24)  # 病人姓名

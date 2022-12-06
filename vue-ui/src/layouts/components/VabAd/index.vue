@@ -1,5 +1,6 @@
 <template>
-  <div class="vab-ad" />
+  <div></div>
+  <!-- <div class="vab-ad" /> -->
 </template>
 <script>
   export default {

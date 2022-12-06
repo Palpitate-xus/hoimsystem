@@ -20,3 +20,9 @@ class reg_category(models.Model):
 class timeslot(models.Model):
   timeslot_id = models.AutoField(primary_key=True)
   time = models.CharField(max_length=20)
+
+# 医生排班表
+class doctor_schedule(models.Model):
+  schedule_id = models.AutoField(primary_key=True)
+  date = models.DateField()
+  doctor_id = models.ForeignKey('doctor', on_delete=models.PROTECT)

@@ -1,8 +1,14 @@
 <template>
   <div>
-    <el-form ref="form" :model="form" label-width="80px">
+    <el-form ref="form" :model="form" label-width="140px">
       <el-form-item label="过号需重排号数">
         <el-input v-model="form.name"></el-input>
+      </el-form-item>
+      <el-form-item label="管理员密码重置">
+        <el-row>
+          <el-input v-model="form.password"></el-input>
+          <el-button type="primary" @click="onSubmit">立即创建</el-button>
+        </el-row>
       </el-form-item>
       <el-form-item label="活动区域">
         <el-select v-model="form.region" placeholder="请选择活动区域">

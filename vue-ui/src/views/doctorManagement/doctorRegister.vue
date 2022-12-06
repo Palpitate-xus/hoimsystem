@@ -20,10 +20,13 @@
         <el-input v-model="form.phone"></el-input>
       </el-form-item>
       <el-form-item label="医生科室">
-        <el-select v-model="form.education" placeholder="请选择医生科室">
-          <el-option label="本科" value="本科"></el-option>
-          <el-option label="硕士" value="硕士"></el-option>
-          <el-option label="博士" value="博士"></el-option>
+        <el-select v-model="form.department" placeholder="请选择医生科室">
+          <el-option
+            v-for="item in departmentList"
+            :key="item.id"
+            :label="item.name"
+            :value="item.id"
+          ></el-option>
         </el-select>
       </el-form-item>
       <el-form-item label="医生学历">
@@ -56,17 +59,32 @@
 </template>
 
 <script>
+  import { doctorRegister } from '@/api/doctorManagement'
+  import { getDepartmentList } from '../../api/departmentManagement'
   export default {
     name: 'DoctorRegister',
     data() {
       return {
-        form: {},
+        form: {
+          department: 1,
+        },
+        departmentList: [],
       }
     },
+    created() {
+      this.fetchData()
+    },
     methods: {
-      onSubmit() {
+      async fetchData() {
+        const { data } = await getDepartmentList()
+        this.departmentList = data
+        console.log(this.departmentList)
+      },
+      async onSubmit() {
         console.log('submit!')
         console.log(this.form)
+        await doctorRegister(this.form)
+        this.form = {}
       },
     },
   }

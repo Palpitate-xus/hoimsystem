@@ -58,6 +58,8 @@ def get_user_info(request):
         permissions = ['admin']
     elif userinfo.user_role == 'doctor':
         permissions = ['doctor']
+    elif userinfo.user_role == 'director':
+        permissions = ['director', 'doctor']
     elif userinfo.user_role == 'patient':
         permissions = ['patient']
     username = userinfo.username

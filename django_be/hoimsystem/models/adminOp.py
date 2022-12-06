@@ -21,6 +21,12 @@ class timeslot(models.Model):
   timeslot_id = models.AutoField(primary_key=True)
   time = models.CharField(max_length=20)
 
+# 通知
+class notice(models.Model):
+  notice_id = models.UUIDField(primary_key=True)  # 通知id
+  title = models.CharField(max_length=12)  # 通知标题
+  content = models.TextField()  # 通知内容
+
 # 医生排班表
 class doctor_schedule(models.Model):
   schedule_id = models.AutoField(primary_key=True)

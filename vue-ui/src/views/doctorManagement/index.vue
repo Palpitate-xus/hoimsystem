@@ -1,6 +1,5 @@
 <template>
   <div class="test-container">
-    <el-divider content-position="left">这是医生管理的页面</el-divider>
     <el-table
       v-loading="listLoading"
       :data="list"
@@ -15,63 +14,54 @@
       ></el-table-column>
       <el-table-column
         show-overflow-tooltip
-        prop="username"
-        label="用户名"
+        prop="name"
+        label="医生姓名"
       ></el-table-column>
       <el-table-column
         show-overflow-tooltip
-        prop="email"
-        label="邮箱"
+        prop="sex"
+        label="性别"
       ></el-table-column>
-
-      <el-table-column show-overflow-tooltip label="权限">
-        <template #default="{ row }">
-          <el-tag v-for="(item, index) in row.permissions" :key="index">
-            {{ item }}
-          </el-tag>
-        </template>
-      </el-table-column>
-
       <el-table-column
         show-overflow-tooltip
-        prop="datatime"
-        label="修改时间"
+        prop="title"
+        label="职称"
       ></el-table-column>
+      <el-table-column
+        show-overflow-tooltip
+        prop="education"
+        label="学历"
+      ></el-table-column>
+      <el-table-column
+        show-overflow-tooltip
+        prop="phone"
+        label="联系方式"
+      ></el-table-column>
+      <el-table-column
+        show-overflow-tooltip
+        prop="permission"
+        label="权限"
+      ></el-table-column>
+
       <el-table-column show-overflow-tooltip label="操作" width="200">
         <template #default="{ row }">
-          <el-button type="text" @click="handleEdit(row)">编辑</el-button>
           <el-button type="text" @click="handleDelete(row)">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
-    <el-pagination
-      background
-      :current-page="queryForm.pageNo"
-      :page-size="queryForm.pageSize"
-      :layout="layout"
-      :total="total"
-      @size-change="handleSizeChange"
-      @current-change="handleCurrentChange"
-    ></el-pagination>
   </div>
 </template>
 <script>
-  import { getList, doDelete } from '@/api/userManagement'
+  import { getDoctorList } from '../../api/doctorManagement'
   export default {
     name: 'Index',
     data() {
       return {
         list: null,
         listLoading: true,
-        layout: 'total, sizes, prev, pager, next, jumper',
         total: 0,
         selectRows: '',
         elementLoadingText: '正在加载...',
-        queryForm: {
-          pageNo: 1,
-          pageSize: 10,
-          username: '',
-        },
       }
     },
     created() {
@@ -109,26 +99,11 @@
           }
         }
       },
-      handleSizeChange(val) {
-        this.queryForm.pageSize = val
-        this.fetchData()
-      },
-      handleCurrentChange(val) {
-        this.queryForm.pageNo = val
-        this.fetchData()
-      },
-      queryData() {
-        this.queryForm.pageNo = 1
-        this.fetchData()
-      },
       async fetchData() {
         this.listLoading = true
-        const { data, totalCount } = await getList(this.queryForm)
+        const { data } = await getDoctorList()
         this.list = data
-        this.total = totalCount
-        setTimeout(() => {
-          this.listLoading = false
-        }, 300)
+        this.listLoading = false
       },
     },
   }

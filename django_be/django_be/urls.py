@@ -36,6 +36,12 @@ urlpatterns = [
 
     # 管理员操作组
     re_path('^api/doctorManagement/getList', adminManagement.get_doctor_list),
+    re_path('^api/patientManagement/getList', adminManagement.get_patient_list),
+    re_path('^api/departmentManagement/getList', adminManagement.get_department_list),
     re_path('^api/departmentManagement/create', adminManagement.department_register),
+    re_path('^api/notice/getList', adminManagement.get_notice_list),
+
+    # 医生操作组
+    re_path('^api/doctorManagement/register', doctorManagement.add_doctor),
 
 ]

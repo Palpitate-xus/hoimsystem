@@ -268,14 +268,14 @@ export const asyncRoutes = [
     meta: { title: 'message', icon: 'users-cog', permissions: ['patient'] },
     children: [
       {
-        path: '/adviceManagement',
+        path: '/advicePatient',
         component: Layout,
         redirect: 'noRedirect',
         children: [
           {
-            path: 'adviceManagement',
-            name: 'adviceManagement',
-            component: () => import('@/views/adviceManagement/index'),
+            path: 'advicePatient',
+            name: 'advicePatient',
+            component: () => import('@/views/adviceManagement/patient'),
             meta: {
               title: '医嘱',
               icon: 'marker',
@@ -285,14 +285,14 @@ export const asyncRoutes = [
         ],
       },
       {
-        path: '/inspectionManagement',
+        path: '/inspectionPatient',
         component: Layout,
         redirect: 'noRedirect',
         children: [
           {
-            path: 'inspectionManagement',
-            name: 'inspectionManagement',
-            component: () => import('@/views/inspectionManagement/index'),
+            path: 'inspectionPatient',
+            name: 'inspectionPatient',
+            component: () => import('@/views/inspectionManagement/patient'),
             meta: {
               title: '检查结果',
               icon: 'marker',

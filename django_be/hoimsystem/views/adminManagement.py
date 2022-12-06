@@ -54,7 +54,14 @@ def get_department_list(request):
     doctors = department.objects.all()
     data = []
     for item in doctors:
-      data.append({'id': item.department_id, 'name': item.name})
+      director_name = doctor.objects.get(doctor_id=item.director).name
+      data.append({
+        'id': item.department_id,
+        'name': item.name,
+        'phone': item.phone,
+        'location': item.location,
+        'director': director_name
+        })
     response = {"code": 200, "msg": 'success', "data": data}
     return HttpResponse(json.dumps(response))
 

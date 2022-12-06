@@ -14,6 +14,12 @@ def patient_registration(request):
     response = {"code": 200, "msg": 'success'}
     return HttpResponse(json.dumps(response))
 
+# 病人取消挂号
+def patient_registration_cancel(request):
+    received_data = json.loads(request.body.decode())
+    response = {"code": 200, "msg": 'success'}
+    return HttpResponse(json.dumps(response))
+
 # 挂号记录查看
 def get_registration_list(request):
     received_data = json.loads(request.body.decode())
@@ -22,6 +28,12 @@ def get_registration_list(request):
 
 # 病人预约
 def patient_appointment(request):
+    received_data = json.loads(request.body.decode())
+    response = {"code": 200, "msg": 'success'}
+    return HttpResponse(json.dumps(response))
+
+# 病人取消预约
+def patient_appointment_cancel(request):
     received_data = json.loads(request.body.decode())
     response = {"code": 200, "msg": 'success'}
     return HttpResponse(json.dumps(response))

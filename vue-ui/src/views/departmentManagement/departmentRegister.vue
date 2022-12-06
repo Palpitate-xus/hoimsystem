@@ -9,9 +9,12 @@
       </el-form-item>
       <el-form-item label="科室主任">
         <el-select v-model="form.director" placeholder="请选择科室主任">
-          <el-option label="本科" value="本科"></el-option>
-          <el-option label="硕士" value="硕士"></el-option>
-          <el-option label="博士" value="博士"></el-option>
+          <el-option
+            v-for="item in doctorList"
+            :key="item.id"
+            :label="item.name"
+            :value="item.id"
+          ></el-option>
         </el-select>
       </el-form-item>
       <el-form-item label="科室位置">
@@ -32,15 +35,25 @@
     name: 'DepartmentRegister',
     data() {
       return {
-        form: {},
+        form: {
+          director: 1,
+        },
+        doctorList: [],
       }
     },
+    created() {
+      this.fetchData()
+    },
     methods: {
+      async fetchData() {
+        const { data } = await getDoctorList()
+        this.doctorList = data
+      },
       async onSubmit() {
         console.log('submit!')
         console.log(this.form)
-        await getDoctorList()
         await createDepartment(this.form)
+        this.form = { director: 1 }
       },
     },
   }

@@ -15,13 +15,27 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, re_path
-from hoimsystem.views import userManagement
+from hoimsystem.views import *
 urlpatterns = [
     path('admin/', admin.site.urls),
     re_path('^api/test', userManagement.test),
+    # 登录组
     re_path('^api/publicKey', userManagement.get_public_key),
     re_path('^api/login', userManagement.login),
     re_path('^api/register', userManagement.register),
     re_path('^api/userInfo', userManagement.get_user_info),
     re_path('^api/logout', userManagement.logout),
+
+    # 病人操作组
+    re_path('^api/appointManagement/getList', patientManagement.get_appointment_list),
+    re_path('^api/appointManagement/create', patientManagement.patient_appointment),
+    re_path('^api/appointManagement/cancel', patientManagement.patient_appointment_cancel),
+    re_path('^api/registrationManagement/getList', patientManagement.get_registration_list),
+    re_path('^api/registrationManagement/create', patientManagement.patient_registration),
+    re_path('^api/registrationManagement/cancel', patientManagement.patient_registration_cancel),
+
+    # 管理员操作组
+    re_path('^api/doctorManagement/getList', adminManagement.get_doctor_list),
+    re_path('^api/departmentManagement/create', adminManagement.department_register),
+
 ]

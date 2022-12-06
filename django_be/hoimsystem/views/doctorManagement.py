@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from django.shortcuts import HttpResponse
 import json
+import traceback
 from hoimsystem.models.roleUser import *
 from hoimsystem.models.adminOp import *
 # Create your views here.
@@ -17,10 +18,13 @@ def add_doctor(request):
     password = received_data.get('password')
     name = received_data.get('name')
     title = received_data.get('title')
-    sex = received_data.get('sex')
+    if received_data.get('sex') == '女':
+        sex = 0
+    else:
+        sex = 1
     phone = received_data.get('phone')
-    department_in = department.objects.get(name=received_data.get('department'))
-    permission = received_data('permission')
+    department_in = department.objects.get(department_id=received_data.get('department'))
+    permission = received_data.get('permission')
     education = received_data.get('education')
     try:
         # 在医生表中插入记录
@@ -32,5 +36,6 @@ def add_doctor(request):
             users.objects.create(username=username, password=password, user_role="doctor")
         response = {"code": 200, "msg": 'success'}
     except:
+        traceback.print_exc()
         response = {"code": 500, "msg": '用户注册失败'}
     return HttpResponse(json.dumps(response))

@@ -57,7 +57,7 @@
 
 <script>
   export default {
-    name: 'AddDoctor',
+    name: 'DoctorRegister',
     data() {
       return {
         form: {},

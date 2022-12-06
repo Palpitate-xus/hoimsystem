@@ -152,6 +152,27 @@ export const asyncRoutes = [
     },
     children: [
       {
+        path: 'departmentManagement',
+        name: 'departmentManagement',
+        component: () => import('@/views/departmentManagement/index'),
+        meta: {
+          title: '科室管理',
+          icon: 'marker',
+          permissions: ['admin'],
+        },
+      },
+      {
+        path: 'departmentRegister',
+        name: 'departmentRegister',
+        // eslint-disable-next-line
+        component: () => import('@/views/departmentManagement/departmentRegister'),
+        meta: {
+          title: '科室注册',
+          icon: 'marker',
+          permissions: ['admin'],
+        },
+      },
+      {
         path: 'doctorManagement',
         name: 'doctorManagement',
         component: () => import('@/views/doctorManagement/index'),
@@ -162,8 +183,8 @@ export const asyncRoutes = [
         },
       },
       {
-        path: 'addDoctor',
-        name: 'addDoctor',
+        path: 'doctorRegister',
+        name: 'doctorRegister',
         component: () => import('@/views/doctorManagement/doctorRegister'),
         meta: {
           title: '医生注册',

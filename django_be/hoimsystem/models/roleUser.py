@@ -23,6 +23,7 @@ class doctor(models.Model):
   doctor_id = models.AutoField(primary_key=True)  # 自动递增的医生id
   name = models.CharField(max_length=24)  # 医生姓名
   sex = models.IntegerField()  # 医生性别，0女1男
+  department_id = models.ForeignKey('department', on_delete=models.PROTECT)  # 科室id
   title = models.CharField(max_length=10)  # 医生职称
   education = models.CharField(max_length=10)  # 医生学历
   phone = models.CharField(max_length=11)  # 医生联系方式

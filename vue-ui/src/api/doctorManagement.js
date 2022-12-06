@@ -7,3 +7,11 @@ export function getDoctorList(data) {
     data,
   })
 }
+
+export function doctorRegister(data) {
+  return request({
+    url: '/doctorManagement/register',
+    method: 'post',
+    data,
+  })
+}

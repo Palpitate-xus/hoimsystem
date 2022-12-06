@@ -145,7 +145,11 @@ export const asyncRoutes = [
     component: Layout,
     redirect: 'noRedirect',
     name: 'adminManagement',
-    meta: { title: '管理工具', icon: 'users-cog', permissions: ['admin'] },
+    meta: {
+      title: '管理工具',
+      icon: 'users-cog',
+      permissions: ['admin', 'director'],
+    },
     children: [
       {
         path: 'doctorManagement',
@@ -154,7 +158,17 @@ export const asyncRoutes = [
         meta: {
           title: '医生管理',
           icon: 'marker',
-          permissions: ['admin'],
+          permissions: ['admin', 'director'],
+        },
+      },
+      {
+        path: 'addDoctor',
+        name: 'addDoctor',
+        component: () => import('@/views/doctorManagement/addDoctor'),
+        meta: {
+          title: '医生注册',
+          icon: 'marker',
+          permissions: ['admin', 'director'],
         },
       },
       {

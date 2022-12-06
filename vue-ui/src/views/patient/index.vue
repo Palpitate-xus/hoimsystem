@@ -23,7 +23,27 @@
 </template>
 
 <script>
+  import { getNoticeList } from '../../api/notice'
+  import { getAppointmentList } from '../../api/appointmentManagement'
+  import { getRegistrationList } from '../../api/registrationManagement'
   export default {
     name: 'Index',
+    data() {
+      return {
+        notices: [],
+        appointments: [],
+        registrations: [],
+      }
+    },
+    created() {
+      this.fetchData()
+    },
+    methods: {
+      fetchData() {
+        this.notices = getNoticeList()
+        this.appointments = getAppointmentList()
+        this.registrations = getRegistrationList()
+      },
+    },
   }
 </script>

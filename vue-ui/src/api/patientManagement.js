@@ -1,6 +1,6 @@
 import request from '@/utils/request'
 
-export function getList(data) {
+export function getPatientList(data) {
   return request({
     url: '/patientManagement/getList',
     method: 'post',

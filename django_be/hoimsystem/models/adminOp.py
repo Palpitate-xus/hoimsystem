@@ -9,7 +9,7 @@ class department(models.Model):
   name = models.CharField(max_length=24)  # 科室名字
   phone = models.CharField(max_length=11)  # 科室联系方式
   location = models.CharField(max_length=24)  # 科室位置
-  director = models.ForeignKey('doctor', on_delete=models.PROTECT)  # 科室主任id
+  director = models.IntegerField()  # 科室主任id
 
 # 挂号类别管理
 class reg_category(models.Model):

@@ -164,7 +164,7 @@ export const asyncRoutes = [
       {
         path: 'addDoctor',
         name: 'addDoctor',
-        component: () => import('@/views/doctorManagement/addDoctor'),
+        component: () => import('@/views/doctorManagement/doctorRegister'),
         meta: {
           title: '医生注册',
           icon: 'marker',
@@ -334,6 +334,23 @@ export const asyncRoutes = [
             },
           },
         ],
+      },
+    ],
+  },
+  {
+    path: '/chargesPatient',
+    component: Layout,
+    redirect: 'noRedirect',
+    children: [
+      {
+        path: 'chargesPatient',
+        name: 'chargesPatient',
+        component: () => import('@/views/chargesManagement/patient'),
+        meta: {
+          title: '收费',
+          icon: 'marker',
+          permissions: ['patient'],
+        },
       },
     ],
   },

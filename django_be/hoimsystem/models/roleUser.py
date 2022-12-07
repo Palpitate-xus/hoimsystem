@@ -28,3 +28,4 @@ class doctor(models.Model):
   education = models.CharField(max_length=10)  # 医生学历
   phone = models.CharField(max_length=11)  # 医生联系方式
   permission = models.CharField(max_length=10)  # 医生权限
+  user_id = models.ForeignKey('users', on_delete=models.PROTECT)  # 用户id

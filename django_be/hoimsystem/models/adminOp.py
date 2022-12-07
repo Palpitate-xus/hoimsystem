@@ -23,9 +23,15 @@ class timeslot(models.Model):
 
 # 通知
 class notice(models.Model):
-  notice_id = models.UUIDField(primary_key=True)  # 通知id
+  notice_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)  # 通知id
   title = models.CharField(max_length=12)  # 通知标题
   content = models.TextField()  # 通知内容
+  isemergency = models.IntegerField()  # 是否紧急
+  towho = models.CharField(max_length=100)  # 发送对象
+  sendtime = models.DateTimeField()  # 发送时间
+  expiredtime = models.DateTimeField()  # 过期时间
+  readnum = models.IntegerField()  # 已读数量
+  writer = models.ForeignKey('users', on_delete=models.CASCADE)  # 发送人
 
 # 医生排班表
 class doctor_schedule(models.Model):

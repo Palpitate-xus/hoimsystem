@@ -9,43 +9,57 @@
       <el-table-column show-overflow-tooltip type="selection"></el-table-column>
       <el-table-column
         show-overflow-tooltip
-        prop="id"
-        label="id"
+        prop="uuid"
+        label="uuid"
       ></el-table-column>
       <el-table-column
         show-overflow-tooltip
-        prop="name"
-        label="姓名"
+        prop="title"
+        label="标题"
       ></el-table-column>
       <el-table-column
         show-overflow-tooltip
-        prop="sex"
-        label="性别"
+        prop="content"
+        label="内容"
       ></el-table-column>
       <el-table-column
         show-overflow-tooltip
-        prop="birthday"
-        label="出生日期"
+        prop="isemergency"
+        label="是否紧急"
+      >
+        <template slot-scope="scope">
+          <el-tag
+            :type="scope.row.isemergency === 1 ? 'danger' : 'success'"
+            disable-transitions
+          >
+            {{ scope.row.isemergency === 1 ? '是' : '否' }}
+          </el-tag>
+        </template>
+      </el-table-column>
+      <el-table-column
+        show-overflow-tooltip
+        prop="towho"
+        label="发送对象"
       ></el-table-column>
       <el-table-column
         show-overflow-tooltip
-        prop="phone"
-        label="联系方式"
+        prop="readnum"
+        label="已读数量"
       ></el-table-column>
       <el-table-column
         show-overflow-tooltip
-        prop="address"
-        label="地址"
+        prop="sendtime"
+        label="发送时间"
       ></el-table-column>
       <el-table-column
         show-overflow-tooltip
-        prop="identity"
-        label="身份证号"
+        prop="expiredtime"
+        label="过期时间"
       ></el-table-column>
       <el-table-column
         show-overflow-tooltip
-        prop="permission"
-        label="挂号权限"
+        prop="writer"
+        label="发送人"
       ></el-table-column>
       <el-table-column show-overflow-tooltip label="操作" width="200">
         <template #default="{ row }">
@@ -56,7 +70,7 @@
   </div>
 </template>
 <script>
-  import { getPatientList } from '@/api/patientManagement'
+  import { getNoticeList } from '../../api/notice'
   export default {
     name: 'Index',
     data() {
@@ -103,21 +117,9 @@
           }
         }
       },
-      handleSizeChange(val) {
-        this.queryForm.pageSize = val
-        this.fetchData()
-      },
-      handleCurrentChange(val) {
-        this.queryForm.pageNo = val
-        this.fetchData()
-      },
-      queryData() {
-        this.queryForm.pageNo = 1
-        this.fetchData()
-      },
       async fetchData() {
         this.listLoading = true
-        const { data } = await getPatientList()
+        const { data } = await getNoticeList()
         this.list = data
         this.listLoading = false
       },

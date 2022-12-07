@@ -320,7 +320,7 @@ export const asyncRoutes = [
     children: [
       {
         path: '/registrationManagement',
-        component: Layout,
+        component: EmptyLayout,
         redirect: 'noRedirect',
         children: [
           {
@@ -337,7 +337,7 @@ export const asyncRoutes = [
       },
       {
         path: '/registrationRecords',
-        component: Layout,
+        component: EmptyLayout,
         redirect: 'noRedirect',
         children: [
           {
@@ -354,7 +354,7 @@ export const asyncRoutes = [
       },
       {
         path: '/appointmentManagement',
-        component: Layout,
+        component: EmptyLayout,
         redirect: 'noRedirect',
         children: [
           {
@@ -371,7 +371,7 @@ export const asyncRoutes = [
       },
       {
         path: '/appointmentRecords',
-        component: Layout,
+        component: EmptyLayout,
         redirect: 'noRedirect',
         children: [
           {
@@ -397,7 +397,7 @@ export const asyncRoutes = [
     children: [
       {
         path: '/advicePatient',
-        component: Layout,
+        component: EmptyLayout,
         redirect: 'noRedirect',
         children: [
           {
@@ -414,7 +414,7 @@ export const asyncRoutes = [
       },
       {
         path: '/inspectionPatient',
-        component: Layout,
+        component: EmptyLayout,
         redirect: 'noRedirect',
         children: [
           {
@@ -431,7 +431,7 @@ export const asyncRoutes = [
       },
       {
         path: '/priscriptionPatient',
-        component: Layout,
+        component: EmptyLayout,
         redirect: 'noRedirect',
         children: [
           {
@@ -448,7 +448,7 @@ export const asyncRoutes = [
       },
       {
         path: '/medicalRecordsManagement',
-        component: Layout,
+        component: EmptyLayout,
         redirect: 'noRedirect',
         children: [
           {

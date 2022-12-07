@@ -78,6 +78,8 @@
             <el-input
               v-model.trim="form.phoneCode"
               type="text"
+              maxlength="6"
+              show-word-limit
               placeholder="手机验证码"
             >
               <vab-icon

@@ -15,32 +15,37 @@
       <el-table-column
         show-overflow-tooltip
         prop="name"
-        label="医生姓名"
+        label="药品名称"
       ></el-table-column>
       <el-table-column
         show-overflow-tooltip
-        prop="sex"
-        label="性别"
+        prop="stock"
+        label="库存数量"
       ></el-table-column>
       <el-table-column
         show-overflow-tooltip
-        prop="title"
-        label="职称"
+        prop="price"
+        label="单价"
       ></el-table-column>
       <el-table-column
         show-overflow-tooltip
-        prop="education"
-        label="学历"
+        prop="expireddate"
+        label="过期时间"
       ></el-table-column>
       <el-table-column
         show-overflow-tooltip
-        prop="phone"
-        label="联系方式"
+        prop="purchasing_time"
+        label="采购时间"
       ></el-table-column>
       <el-table-column
         show-overflow-tooltip
-        prop="permission"
-        label="权限"
+        prop="supplier"
+        label="供应商"
+      ></el-table-column>
+      <el-table-column
+        show-overflow-tooltip
+        prop="supplier"
+        label="备注"
       ></el-table-column>
 
       <el-table-column show-overflow-tooltip label="操作" width="200">
@@ -52,7 +57,7 @@
   </div>
 </template>
 <script>
-  import { getDoctorList } from '../../api/doctorManagement'
+  import { getPharmaceuticalList } from '../../api/pharmaceuticalManagement'
   export default {
     name: 'Index',
     data() {
@@ -101,7 +106,7 @@
       },
       async fetchData() {
         this.listLoading = true
-        const { data } = await getDoctorList()
+        const { data } = await getPharmaceuticalList()
         this.list = data
         this.listLoading = false
       },

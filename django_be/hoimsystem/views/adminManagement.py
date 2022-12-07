@@ -2,6 +2,7 @@ from django.shortcuts import render
 from django.shortcuts import HttpResponse
 import json
 import traceback
+from django.utils import timezone
 from hoimsystem.models.adminOp import *
 from hoimsystem.models.roleUser import *
 # Create your views here.
@@ -30,9 +31,37 @@ def get_doctor_list(request):
 
 # 获取通知列表
 def get_notice_list(request):
+    notices = notice.objects.all()
     data = []
+    for item in notices:
+      data.append({
+        'uuid': str(item.notice_id),
+        'title': item.title,
+        'content': item.content,
+        'isemergency': item.isemergency,
+        'towho': item.towho,
+        'sendtime': str(item.sendtime),
+        'expiredtime': str(item.expiredtime),
+        'readnum': item.readnum,
+        'writer': item.writer.username,
+      })
     response = {"code": 200, "msg": 'success', "data": data}
     return HttpResponse(json.dumps(response))
+
+# 通知发布
+def notice_register(request):
+  received_data = json.loads(request.body.decode())
+  title = received_data.get('title')
+  content = received_data.get('content')
+  isemergency = received_data.get('isemergency')
+  towho = str(received_data.get('towho'))
+  sendtime = timezone.now()
+  expiredtime = received_data.get('expiredtime')
+  readnum = 0
+  writer = users.objects.get(username=request.META.get('HTTP_ACCESSTOKEN'))
+  notice.objects.create(title=title, content=content, isemergency=isemergency, towho=towho,sendtime=sendtime, expiredtime=expiredtime, readnum=readnum, writer=writer)
+  response = {"code": 200, "msg": 'success'}
+  return HttpResponse(json.dumps(response))
 
 # department注册
 def department_register(request):

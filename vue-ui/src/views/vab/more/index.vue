@@ -2,8 +2,6 @@
   <div class="more-container">
     <el-row :gutter="20">
       <el-col :xs="24" :sm="24" :md="24" :lg="8" :xl="8">
-      </el-col>
-      <el-col :xs="24" :sm="24" :md="24" :lg="8" :xl="8">
         <el-card>
           <div slot="header">
             test

@@ -26,8 +26,8 @@ const FileManagerPlugin = require('filemanager-webpack-plugin')
 const dayjs = require('dayjs')
 const date = dayjs().format('YYYY_M_D')
 const time = dayjs().format('YYYY-M-D HH:mm:ss')
-process.env.VUE_APP_TITLE = title || 'vue-admin-beautiful'
-process.env.VUE_APP_AUTHOR = author || 'https://vue-admin-beautiful.com'
+process.env.VUE_APP_TITLE = title || 'hoimsystem'
+process.env.VUE_APP_AUTHOR = author || 'palpitate.xus@mail.ecust.edu.cn'
 process.env.VUE_APP_UPDATE_TIME = time
 process.env.VUE_APP_VERSION = version
 

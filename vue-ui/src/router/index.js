@@ -107,23 +107,6 @@ export const asyncRoutes = [
     ],
   },
   {
-    path: '/patientManagement',
-    component: Layout,
-    redirect: 'noRedirect',
-    children: [
-      {
-        path: 'patientManagement',
-        name: 'patientManagement',
-        component: () => import('@/views/patientManagement/index'),
-        meta: {
-          title: '病人管理',
-          icon: 'marker',
-          permissions: ['doctor'],
-        },
-      },
-    ],
-  },
-  {
     path: '/prescriptionManagement',
     component: Layout,
     redirect: 'noRedirect',
@@ -175,19 +158,52 @@ export const asyncRoutes = [
       {
         path: 'doctorManagement',
         name: 'doctorManagement',
-        component: () => import('@/views/doctorManagement/index'),
         meta: {
           title: '医生管理',
           icon: 'marker',
           permissions: ['admin', 'director'],
         },
+        redirect: 'noRedirect',
+        children: [
+          {
+            path: 'doctorRegister',
+            name: 'doctorRegister',
+            component: () => import('@/views/doctorManagement/doctorRegister'),
+            meta: {
+              title: '医生注册',
+              icon: 'marker',
+              permissions: ['admin', 'director'],
+            },
+          },
+          {
+            path: 'doctorManagement',
+            name: 'doctorManagement',
+            component: () => import('@/views/doctorManagement/index'),
+            meta: {
+              title: '医生管理',
+              icon: 'marker',
+              permissions: ['admin', 'director'],
+            },
+          },
+        ],
       },
       {
-        path: 'doctorRegister',
-        name: 'doctorRegister',
-        component: () => import('@/views/doctorManagement/doctorRegister'),
+        path: 'doctorScheduleRegister',
+        name: 'doctorScheduleRegister',
+        component: () =>
+          import('@/views/doctorScheduleManagement/doctorScheduleRegister'),
         meta: {
-          title: '医生注册',
+          title: '医生排班',
+          icon: 'marker',
+          permissions: ['admin', 'director'],
+        },
+      },
+      {
+        path: 'doctorScheduleManagement',
+        name: 'doctorScheduleManagement',
+        component: () => import('@/views/doctorScheduleManagement/index'),
+        meta: {
+          title: '医生排班管理',
           icon: 'marker',
           permissions: ['admin', 'director'],
         },
@@ -199,7 +215,61 @@ export const asyncRoutes = [
         meta: {
           title: '病人管理',
           icon: 'marker',
-          permissions: ['admin'],
+          permissions: ['admin', 'doctor'],
+        },
+      },
+      {
+        path: 'pharmaceuticalManagement',
+        name: 'pharmaceuticalManagement',
+        component: () => import('@/views/pharmaceuticalManagement/index'),
+        meta: {
+          title: '药品管理',
+          icon: 'marker',
+          permissions: ['admin', 'director'],
+        },
+      },
+      {
+        path: 'pharmaceuticalRegister',
+        name: 'pharmaceuticalRegister',
+        component: () =>
+          import('@/views/pharmaceuticalManagement/pharmaceuticalRegister'),
+        meta: {
+          title: '药品注册',
+          icon: 'marker',
+          permissions: ['admin', 'director'],
+        },
+      },
+    ],
+  },
+  {
+    path: '/notice',
+    name: 'notice',
+    component: Layout,
+    redirect: 'noRedirect',
+    meta: {
+      title: '通知管理',
+      icon: 'marker',
+      permissions: ['admin', 'director'],
+    },
+    children: [
+      {
+        path: 'noticeManagement',
+        name: 'noticeManagement',
+        component: () => import('@/views/noticeManagement/index'),
+        meta: {
+          title: '通知管理',
+          icon: 'marker',
+          permissions: ['admin', 'director'],
+        },
+      },
+      {
+        path: 'noticeRegister',
+        name: 'noticeRegister',
+        component: () => import('@/views/noticeManagement/noticeRegister'),
+        meta: {
+          title: '通知发布',
+          icon: 'marker',
+          permissions: ['admin', 'director'],
         },
       },
     ],

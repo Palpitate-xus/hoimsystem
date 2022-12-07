@@ -14,7 +14,7 @@
         <el-date-picker
           v-model="form.expireddate"
           type="date"
-          value-format="yyyy-MM-DD"
+          value-format="yyyy-MM-dd"
           placeholder="选择有效期"
         ></el-date-picker>
       </el-form-item>

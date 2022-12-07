@@ -32,8 +32,15 @@ def get_doctor_list(request):
 # 获取通知列表
 def get_notice_list(request):
     notices = notice.objects.all()
+    token = users.objects.get(username=request.META.get('HTTP_ACCESSTOKEN')).user_role
     data = []
     for item in notices:
+      if token == "director" and "科室主任" not in item.towho:
+        continue
+      if token == "doctor" and "医生" not in item.towho:
+        continue
+      if token == "patient" and "病人" not in item.towho:
+        continue
       data.append({
         'uuid': str(item.notice_id),
         'title': item.title,

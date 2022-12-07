@@ -17,7 +17,11 @@
         </el-radio-group>
       </el-form-item>
       <el-form-item label="医生电话">
-        <el-input v-model="form.phone"></el-input>
+        <el-input
+          v-model="form.phone"
+          maxlength="11"
+          show-word-limit
+        ></el-input>
       </el-form-item>
       <el-form-item label="医生科室">
         <el-select v-model="form.department" placeholder="请选择医生科室">

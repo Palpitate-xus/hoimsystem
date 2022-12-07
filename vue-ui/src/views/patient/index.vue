@@ -1,9 +1,18 @@
 <template>
   <div class="magnifier-container">
-    <h1>病人主页</h1>
     <el-row :gutter="20">
       <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
-        <el-card>医院通知</el-card>
+        <el-card class="box-card">
+          <div slot="header" class="clearfix">
+            <span>卡片名称</span>
+            <el-button style="float: right; padding: 3px 0" type="text">
+              操作按钮
+            </el-button>
+          </div>
+          <div v-for="o in 4" :key="o" class="text item">
+            {{ '列表内容 ' + o }}
+          </div>
+        </el-card>
       </el-col>
     </el-row>
     <el-row>

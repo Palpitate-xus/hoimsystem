@@ -40,6 +40,7 @@ urlpatterns = [
     re_path('^api/departmentManagement/getList', adminManagement.get_department_list),
     re_path('^api/departmentManagement/create', adminManagement.department_register),
     re_path('^api/notice/getList', adminManagement.get_notice_list),
+    re_path('^api/notice/create', adminManagement.notice_register),
 
     # 医生操作组
     re_path('^api/doctorManagement/register', doctorManagement.add_doctor),

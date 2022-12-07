@@ -1,31 +1,32 @@
 <template>
   <div class="magnifier-container">
-    <el-row :gutter="20">
-      <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
-        <el-card class="box-card">
-          <div slot="header" class="clearfix">
-            <span>卡片名称</span>
-            <el-button style="float: right; padding: 3px 0" type="text">
-              操作按钮
-            </el-button>
-          </div>
-          <div v-for="o in 4" :key="o" class="text item">
-            {{ '列表内容 ' + o }}
-          </div>
-        </el-card>
-      </el-col>
-    </el-row>
+    <el-divider content-position="left">通知</el-divider>
+    <el-card
+      v-for="item in notices"
+      :key="item"
+      class="box-card"
+      shadow="hover"
+    >
+      <div slot="header" class="clearfix">
+        <span>{{ item.title }}</span>
+      </div>
+      <div>
+        {{ item.content }}
+      </div>
+    </el-card>
+    <el-divider content-position="left">挂号与预约</el-divider>
     <el-row>
       <el-col :xs="12" :sm="12" :md="12" :lg="12" :xl="12">
-        <el-card>当前挂号情况</el-card>
+        <el-card shadow="hover">当前挂号情况</el-card>
       </el-col>
       <el-col :xs="12" :sm="12" :md="12" :lg="12" :xl="12">
-        <el-card>当前预约情况</el-card>
+        <el-card shadow="hover">当前预约情况</el-card>
       </el-col>
     </el-row>
+    <el-divider content-position="left">医嘱</el-divider>
     <el-row>
       <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
-        <el-card>当前医嘱</el-card>
+        <el-card shadow="hover">当前医嘱</el-card>
       </el-col>
     </el-row>
   </div>
@@ -48,8 +49,10 @@
       this.fetchData()
     },
     methods: {
-      fetchData() {
-        this.notices = getNoticeList()
+      async fetchData() {
+        const notices = await getNoticeList()
+        this.notices = notices.data
+        console.log(this.notices)
         this.appointments = getAppointmentList()
         this.registrations = getRegistrationList()
       },

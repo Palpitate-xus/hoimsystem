@@ -10,39 +10,25 @@
       <el-table-column
         show-overflow-tooltip
         prop="id"
-        label="id"
+        label="医生编号"
       ></el-table-column>
       <el-table-column
         show-overflow-tooltip
         prop="name"
         label="医生姓名"
       ></el-table-column>
-      <el-table-column
-        show-overflow-tooltip
-        prop="sex"
-        label="性别"
-      ></el-table-column>
-      <el-table-column
-        show-overflow-tooltip
-        prop="title"
-        label="职称"
-      ></el-table-column>
-      <el-table-column
-        show-overflow-tooltip
-        prop="education"
-        label="学历"
-      ></el-table-column>
-      <el-table-column
-        show-overflow-tooltip
-        prop="phone"
-        label="联系方式"
-      ></el-table-column>
-      <el-table-column
-        show-overflow-tooltip
-        prop="permission"
-        label="权限"
-      ></el-table-column>
-
+      <el-table-column show-overflow-tooltip prop="schedule" label="医生排班">
+        <template slot-scope="scope">
+          <el-tag
+            v-for="item in scope.row.schedule"
+            :key="item"
+            :type="success"
+            disable-transitions
+          >
+            {{ item }}
+          </el-tag>
+        </template>
+      </el-table-column>
       <el-table-column show-overflow-tooltip label="操作" width="200">
         <template #default="{ row }">
           <el-button type="text" @click="handleDelete(row)">删除</el-button>
@@ -52,7 +38,7 @@
   </div>
 </template>
 <script>
-  import { getDoctorList } from '../../api/doctorManagement'
+  import { getDoctorScheduleList } from '@/api/doctorScheduleManagement'
   export default {
     name: 'Index',
     data() {
@@ -101,7 +87,7 @@
       },
       async fetchData() {
         this.listLoading = true
-        const { data } = await getDoctorList()
+        const { data } = await getDoctorScheduleList()
         this.list = data
         this.listLoading = false
       },

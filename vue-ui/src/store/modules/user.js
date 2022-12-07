@@ -59,7 +59,10 @@ const actions = {
           : hour < 18
           ? '下午好'
           : '晚上好'
-      Vue.prototype.$baseNotify(`欢迎登录${title}`, `${thisTime}！`)
+      Vue.prototype.$baseNotify(
+        `欢迎登录${title}`,
+        `${thisTime}！${accessToken}`
+      )
     } else {
       Vue.prototype.$baseMessage(
         `登录接口异常，未正确返回${tokenName}...`,

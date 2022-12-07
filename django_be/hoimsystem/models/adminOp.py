@@ -18,8 +18,8 @@ class reg_category(models.Model):
 
 # 预约就诊时间段
 class timeslot(models.Model):
-  timeslot_id = models.AutoField(primary_key=True)
-  time = models.CharField(max_length=20)
+  timeslot_id = models.AutoField(primary_key=True)  # 时间段id
+  time = models.CharField(max_length=20)  # 时间段
 
 # 通知
 class notice(models.Model):
@@ -35,9 +35,9 @@ class notice(models.Model):
 
 # 医生排班表
 class doctor_schedule(models.Model):
-  schedule_id = models.AutoField(primary_key=True)
-  week = models.IntegerField()  # 星期几
-  time = models.IntegerField()  # 上午 or 下午
+  schedule_id = models.AutoField(primary_key=True)  # 排班id
+  week = models.CharField(max_length=5)  # 星期几
+  time = models.CharField(max_length=2)  # 上午 or 下午
   number = models.IntegerField()  # 最大就诊人数
   specialist = models.IntegerField()  # 是否专家号
-  doctor_id = models.ForeignKey('doctor', on_delete=models.PROTECT)
+  doctor_id = models.ForeignKey('doctor', on_delete=models.PROTECT)  # 医生id

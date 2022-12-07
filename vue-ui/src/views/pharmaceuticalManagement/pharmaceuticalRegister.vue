@@ -1,54 +1,28 @@
 <template>
   <div>
     <el-form ref="form" :model="form" label-width="124px">
-      <el-form-item label="医生姓名">
+      <el-form-item label="药品名称">
         <el-input v-model="form.name"></el-input>
       </el-form-item>
-      <el-form-item label="医生用户名">
-        <el-input v-model="form.username"></el-input>
+      <el-form-item label="数量">
+        <el-input v-model="form.stock"></el-input>
       </el-form-item>
-      <el-form-item label="医生登陆密码">
-        <el-input v-model="form.password"></el-input>
+      <el-form-item label="单价">
+        <el-input v-model="form.price"></el-input>
       </el-form-item>
-      <el-form-item label="医生性别">
-        <el-radio-group v-model="form.sex">
-          <el-radio label="女"></el-radio>
-          <el-radio label="男"></el-radio>
-        </el-radio-group>
+      <el-form-item label="有效期">
+        <el-date-picker
+          v-model="form.expireddate"
+          type="date"
+          value-format="yyyy-MM-DD"
+          placeholder="选择有效期"
+        ></el-date-picker>
       </el-form-item>
-      <el-form-item label="医生电话">
-        <el-input v-model="form.phone"></el-input>
+      <el-form-item label="供应商">
+        <el-input v-model="form.supplier"></el-input>
       </el-form-item>
-      <el-form-item label="医生科室">
-        <el-select v-model="form.department" placeholder="请选择医生科室">
-          <el-option
-            v-for="item in departmentList"
-            :key="item.id"
-            :label="item.name"
-            :value="item.id"
-          ></el-option>
-        </el-select>
-      </el-form-item>
-      <el-form-item label="医生学历">
-        <el-select v-model="form.education" placeholder="请选择医生学历">
-          <el-option label="本科" value="本科"></el-option>
-          <el-option label="硕士" value="硕士"></el-option>
-          <el-option label="博士" value="博士"></el-option>
-        </el-select>
-      </el-form-item>
-      <el-form-item label="医生职称">
-        <el-select v-model="form.title" placeholder="请选择医生职称">
-          <el-option label="主任医生" value="主任医生"></el-option>
-          <el-option label="副主任医生" value="副主任医生"></el-option>
-          <el-option label="主治医生" value="主治医生"></el-option>
-          <el-option label="实习医生" value="实习医生"></el-option>
-        </el-select>
-      </el-form-item>
-      <el-form-item label="医生权限">
-        <el-select v-model="form.permission" placeholder="请选择医生权限">
-          <el-option label="科室主任" value="director"></el-option>
-          <el-option label="科室医生" value="doctor"></el-option>
-        </el-select>
+      <el-form-item label="备注">
+        <el-input v-model="form.remark"></el-input>
       </el-form-item>
       <el-form-item>
         <el-button type="primary" @click="onSubmit">注册</el-button>
@@ -59,31 +33,19 @@
 </template>
 
 <script>
-  import { doctorRegister } from '@/api/doctorManagement'
-  import { getDepartmentList } from '../../api/departmentManagement'
+  import { pharmaceuticalRegister } from '@/api/pharmaceuticalManagement'
   export default {
     name: 'PharmaceuticalRegister',
     data() {
       return {
-        form: {
-          department: 1,
-        },
-        departmentList: [],
+        form: {},
       }
     },
-    created() {
-      this.fetchData()
-    },
     methods: {
-      async fetchData() {
-        const { data } = await getDepartmentList()
-        this.departmentList = data
-        console.log(this.departmentList)
-      },
       async onSubmit() {
         console.log('submit!')
         console.log(this.form)
-        await doctorRegister(this.form)
+        await pharmaceuticalRegister(this.form)
         this.form = {}
       },
     },

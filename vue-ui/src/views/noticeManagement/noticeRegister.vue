@@ -2,7 +2,11 @@
   <div>
     <el-form ref="form" :model="form" label-width="124px">
       <el-form-item label="通知标题">
-        <el-input v-model="form.title"></el-input>
+        <el-input
+          v-model="form.title"
+          maxlength="12"
+          show-word-limit
+        ></el-input>
       </el-form-item>
       <el-form-item label="通知内容">
         <el-input

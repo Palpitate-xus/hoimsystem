@@ -6,6 +6,6 @@
 
 <script>
   export default {
-    name: 'AdviceManagement',
+    name: 'Index',
   }
 </script>

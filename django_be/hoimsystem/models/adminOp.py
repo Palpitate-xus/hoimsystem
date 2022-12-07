@@ -30,5 +30,8 @@ class notice(models.Model):
 # 医生排班表
 class doctor_schedule(models.Model):
   schedule_id = models.AutoField(primary_key=True)
-  date = models.DateField()
+  week = models.IntegerField()  # 星期几
+  time = models.IntegerField()  # 上午 or 下午
+  number = models.IntegerField()  # 最大就诊人数
+  specialist = models.IntegerField()  # 是否专家号
   doctor_id = models.ForeignKey('doctor', on_delete=models.PROTECT)

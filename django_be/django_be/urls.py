@@ -44,5 +44,9 @@ urlpatterns = [
 
     # 医生操作组
     re_path('^api/doctorManagement/register', doctorManagement.add_doctor),
+    re_path('^api/doctorScheduleManagement/register', doctorManagement.doctor_schedule_register),
+    re_path('^api/doctorScheduleManagement/getList', doctorManagement.doctor_schedule_getlist),
+    re_path('^api/pharmaceuticalManagement/create', doctorManagement.pharmaceutical_register),
+    re_path('^api/pharmaceuticalManagement/getList', doctorManagement.get_pharmaceutical_list),
 
 ]

@@ -2,15 +2,23 @@
   <div>
     <el-form ref="form" :model="form" label-width="140px">
       <el-form-item label="科室选择">
-        <el-select v-model="form.region" placeholder="请选择科室">
-          <el-option label="上午" value="shanghai"></el-option>
-          <el-option label="下午" value="beijing"></el-option>
+        <el-select v-model="form.department" placeholder="请选择科室">
+          <el-option
+            v-for="item in departmentList"
+            :key="item.id"
+            :label="item.name"
+            :value="item.id"
+          ></el-option>
         </el-select>
       </el-form-item>
       <el-form-item label="医生姓名">
-        <el-select v-model="form.region" placeholder="请选择医生">
-          <el-option label="上午" value="shanghai"></el-option>
-          <el-option label="下午" value="beijing"></el-option>
+        <el-select v-model="form.doctor" placeholder="请选择医生">
+          <el-option
+            v-for="item in doctorList"
+            :key="item.id"
+            :label="item.name"
+            :value="item.id"
+          ></el-option>
         </el-select>
       </el-form-item>
       <el-form-item label="预约日期">
@@ -80,20 +88,13 @@
 </template>
 
 <script>
+  import { getDepartmentList } from '../../api/departmentManagement'
+  import { getDoctorList } from '../../api/doctorManagement'
   export default {
     name: 'Index',
     data() {
       return {
-        form: {
-          name: '',
-          region: '',
-          date1: '',
-          date2: '',
-          delivery: false,
-          type: [],
-          resource: '',
-          desc: '',
-        },
+        form: {},
         pickerOptions: {
           disabledDate(time) {
             return time.getTime() > Date.now() + 3600 * 1000 * 24 * 7
@@ -101,7 +102,16 @@
         },
       }
     },
+    created() {
+      this.fetchData()
+    },
     methods: {
+      async fetchData() {
+        const { data_department } = await getDepartmentList()
+        const { data_doctor } = await getDoctorList()
+        this.departmentList = data_department
+        this.doctorList = data_doctor
+      },
       onSubmit() {
         console.log('submit!')
       },

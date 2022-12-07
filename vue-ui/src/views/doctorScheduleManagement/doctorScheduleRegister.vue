@@ -44,7 +44,8 @@
 </template>
 
 <script>
-  import { getDoctorList } from '../../api/doctorManagement'
+  import { getDoctorList } from '@/api/doctorManagement'
+  import { doctorScheduleRegister } from '@/api/doctorScheduleManagement'
   export default {
     name: 'DoctorScheduleRegister',
     data() {
@@ -69,11 +70,15 @@
       async onSubmit() {
         console.log('submit!')
         console.log(this.form)
-        await doctorRegister(this.form)
-        this.form = {}
+        await doctorScheduleRegister(this.form)
+        this.cancel
       },
       cancel() {
-        this.form = {}
+        this.form = {
+          schedule: [],
+          doctor: 1,
+          specialist: 0,
+        }
       },
     },
   }

@@ -107,6 +107,23 @@ export const asyncRoutes = [
     ],
   },
   {
+    path: '/workspace',
+    component: Layout,
+    redirect: 'noRedirect',
+    children: [
+      {
+        path: 'workspace',
+        name: 'workspace',
+        component: () => import('@/views/workspace/index'),
+        meta: {
+          title: '工作台',
+          icon: 'marker',
+          permissions: ['doctor', 'director'],
+        },
+      },
+    ],
+  },
+  {
     path: '/prescriptionManagement',
     component: Layout,
     redirect: 'noRedirect',
@@ -118,7 +135,7 @@ export const asyncRoutes = [
         meta: {
           title: '处方管理',
           icon: 'marker',
-          permissions: ['doctor'],
+          permissions: ['doctor', 'director'],
         },
       },
     ],

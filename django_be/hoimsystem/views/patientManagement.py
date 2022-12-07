@@ -22,7 +22,6 @@ def patient_registration_cancel(request):
 
 # 挂号记录查看
 def get_registration_list(request):
-    received_data = json.loads(request.body.decode())
     response = {"code": 200, "msg": 'success'}
     return HttpResponse(json.dumps(response))
 
@@ -40,7 +39,6 @@ def patient_appointment_cancel(request):
 
 # 预约记录查看
 def get_appointment_list(request):
-    received_data = json.loads(request.body.decode())
     response = {"code": 200, "msg": 'success'}
     return HttpResponse(json.dumps(response))
 
@@ -58,7 +56,6 @@ def get_medicalrecords_list(request):
 
 # 收费记录查看
 def get_charges_list(request):
-    received_data = json.loads(request.body.decode())
     response = {"code": 200, "msg": 'success'}
     return HttpResponse(json.dumps(response))
 

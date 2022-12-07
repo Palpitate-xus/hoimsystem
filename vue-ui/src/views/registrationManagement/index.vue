@@ -2,21 +2,33 @@
   <div>
     <el-form ref="form" :model="form" label-width="140px">
       <el-form-item label="科室选择">
-        <el-select v-model="form.region" placeholder="请选择科室">
-          <el-option label="上午" value="shanghai"></el-option>
-          <el-option label="下午" value="beijing"></el-option>
+        <el-select v-model="form.department" placeholder="请选择科室">
+          <el-option
+            v-for="item in departmentList"
+            :key="item.id"
+            :label="item.name"
+            :value="item.id"
+          ></el-option>
         </el-select>
       </el-form-item>
       <el-form-item label="医生姓名">
-        <el-select v-model="form.region" placeholder="请选择医生">
-          <el-option label="上午" value="shanghai"></el-option>
-          <el-option label="下午" value="beijing"></el-option>
+        <el-select v-model="form.doctor" placeholder="请选择医生">
+          <el-option
+            v-for="item in doctorList"
+            :key="item.id"
+            :label="item.name"
+            :value="item.id"
+          ></el-option>
         </el-select>
       </el-form-item>
       <el-form-item label="就诊时间段">
-        <el-select v-model="form.region" placeholder="请选择就诊时间段">
-          <el-option label="上午" value="shanghai"></el-option>
-          <el-option label="下午" value="beijing"></el-option>
+        <el-select v-model="form.time" placeholder="请选择就诊时间段">
+          <el-option
+            v-for="item in timeSlotList"
+            :key="item.id"
+            :label="item.name"
+            :value="item.id"
+          ></el-option>
         </el-select>
       </el-form-item>
       <el-form-item label="是否专家号">
@@ -66,14 +78,28 @@
 </template>
 
 <script>
+  import { getDepartmentList } from '../../api/departmentManagement'
+  import { getDoctorList } from '../../api/doctorManagement'
   export default {
     name: 'RegistrationManagement',
     data() {
       return {
         form: {},
+        departmentList: [],
+        doctorList: [],
+        timeSlotList: [],
       }
     },
+    created() {
+      this.fetchData()
+    },
     methods: {
+      async fetchData() {
+        const data_department = await getDepartmentList()
+        const data_doctor = await getDoctorList()
+        this.departmentList = data_department.data
+        this.doctorList = data_doctor.data
+      },
       onSubmit() {
         console.log('submit!')
       },

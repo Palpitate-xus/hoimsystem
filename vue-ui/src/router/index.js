@@ -141,6 +141,24 @@ export const asyncRoutes = [
     ],
   },
   {
+    path: '/prescriptionRegister',
+    component: Layout,
+    redirect: 'noRedirect',
+    children: [
+      {
+        path: 'prescriptionRegister',
+        name: 'prescriptionRegister',
+        component: () => import('@/views/prescriptionManagement/doctor'),
+        meta: {
+          title: '写处方',
+          icon: 'mark',
+          affix: true,
+          permissions: ['doctor', 'director'],
+        },
+      },
+    ],
+  },
+  {
     path: '/Management',
     component: Layout,
     redirect: 'noRedirect',
@@ -258,6 +276,16 @@ export const asyncRoutes = [
           title: '病人管理',
           icon: 'marker',
           permissions: ['admin', 'doctor'],
+        },
+      },
+      {
+        path: 'prescriptionManagement',
+        name: 'prescriptionManagement',
+        component: () => import('@/views/prescriptionManagement/index'),
+        meta: {
+          title: '处方管理',
+          icon: 'marker',
+          permissions: ['admin'],
         },
       },
       {

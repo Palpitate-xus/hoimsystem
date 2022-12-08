@@ -12,27 +12,37 @@
       ></el-table-column>
       <el-table-column
         show-overflow-tooltip
-        prop="username"
-        label="收费日期"
-      ></el-table-column>
-      <el-table-column
-        show-overflow-tooltip
-        prop="username"
+        prop="charge_time"
         label="收费时间"
       ></el-table-column>
       <el-table-column
         show-overflow-tooltip
-        prop="username"
-        label="具体项目"
+        prop="time"
+        label="缴费时间"
       ></el-table-column>
       <el-table-column
         show-overflow-tooltip
-        prop="username"
-        label="状态"
+        prop="pre_id"
+        label="处方编号"
       ></el-table-column>
+      <el-table-column
+        show-overflow-tooltip
+        prop="amount"
+        label="收费金额"
+      ></el-table-column>
+      <el-table-column show-overflow-tooltip prop="status" label="状态">
+        <template slot-scope="scope">
+          <el-tag
+            :type="scope.row.status === 0 ? 'danger' : 'success'"
+            disable-transitions
+          >
+            {{ scope.row.status === 0 ? '未缴费' : '已缴费' }}
+          </el-tag>
+        </template>
+      </el-table-column>
       <el-table-column show-overflow-tooltip label="操作" width="200">
         <template #default="{ row }">
-          <el-button type="text" @click="handleEdit(row)">付款</el-button>
+          <el-button type="text" @click="handleEdit(row)">缴费</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -40,7 +50,59 @@
 </template>
 
 <script>
+  import { getChargeList } from '../../api/chargesManagement'
   export default {
     name: 'ChargesPatient',
+    data() {
+      return {
+        list: null,
+        listLoading: true,
+        total: 0,
+        selectRows: '',
+        elementLoadingText: '正在加载...',
+      }
+    },
+    created() {
+      this.fetchData()
+    },
+    methods: {
+      setSelectRows(val) {
+        this.selectRows = val
+      },
+      handleEdit(row) {
+        if (row.id) {
+          this.$refs['edit'].showEdit(row)
+        } else {
+          this.$refs['edit'].showEdit()
+        }
+      },
+      handleDelete(row) {
+        if (row.id) {
+          this.$baseConfirm('你确定要删除当前项吗', null, async () => {
+            const { msg } = await doDelete({ ids: row.id })
+            this.$baseMessage(msg, 'success')
+            this.fetchData()
+          })
+        } else {
+          if (this.selectRows.length > 0) {
+            const ids = this.selectRows.map((item) => item.id).join()
+            this.$baseConfirm('你确定要删除选中项吗', null, async () => {
+              const { msg } = await doDelete({ ids })
+              this.$baseMessage(msg, 'success')
+              this.fetchData()
+            })
+          } else {
+            this.$baseMessage('未选中任何行', 'error')
+            return false
+          }
+        }
+      },
+      async fetchData() {
+        this.listLoading = true
+        const { data } = await getChargeList()
+        this.list = data
+        this.listLoading = false
+      },
+    },
   }
 </script>

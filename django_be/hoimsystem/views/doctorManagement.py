@@ -6,6 +6,8 @@ import traceback
 from hoimsystem.models.roleUser import *
 from hoimsystem.models.adminOp import *
 from hoimsystem.models.doctorOp import *
+from hoimsystem.models.roleUser import *
+from hoimsystem.models.patientOp import *
 # Create your views here.
 
 # 测试api
@@ -123,3 +125,95 @@ def get_pharmaceutical_list(request):
         })
     response = {"code": 200, "msg": 'success', "data": data}
     return HttpResponse(json.dumps(response))
+
+# 处方注册
+def prescription_register(request):
+    received_data = json.loads(request.body.decode())
+    doctor_uid = users.objects.get(username=request.META.get('HTTP_ACCESSTOKEN')).user_id
+    doctor_obj = doctor.objects.get(user_id=doctor_uid)
+    patient_id = received_data.get('patient')
+    patient_obj = patient.objects.get(patient_id=patient_id)
+    pre = prescription.objects.create(patient_id=patient_obj, doctor_id=doctor_obj)
+    prescription_obj = prescription.objects.get(prescription_id=pre.prescription_id)
+    phas = received_data.get('phas')
+    amount = 0
+    for item in phas:
+        pharmaceutical_obj = pharmaceutical.objects.get(pharmaceutical_id=item['id'])
+        pre_pha.objects.create(prescription_id=pre.prescription_id, pharmaceutical_id=pharmaceutical_obj, number=item['number'])
+        price = pharmaceutical.objects.get(pharmaceutical_id=item['id']).price
+        amount = amount + float(price) * int(item['number'])
+        print(amount)
+    charge.objects.create(charge_time=timezone.now(), time="1970-1-1", prescription_id=prescription_obj, amount=amount, status=0)
+    response = {"code": 200, "msg": 'success'}
+    return HttpResponse(json.dumps(response))
+
+# 获取处方信息
+def get_prescription_list(request):
+    role = users.objects.get(username=request.META.get('HTTP_ACCESSTOKEN')).user_role
+    username = users.objects.get(username=request.META.get('HTTP_ACCESSTOKEN')).username
+    data = []
+    if role == 'admin':
+        prescriptions = prescription.objects.all()
+        for item in prescriptions:
+            doctor_id = item.doctor_id.doctor_id
+            doctor_name = item.doctor_id.name
+            patient_id = item.patient_id.patient_id
+            patient_name = item.patient_id.name
+            phas = []
+            phas_raw = pre_pha.objects.filter(prescription_id=item.prescription_id)
+            for j in phas_raw:
+                pha_name = j.pharmaceutical_id.name
+                number = j.number
+                phas.append({"name": pha_name, "number": number})
+            data.append({
+                "doctor_id": doctor_id,
+                "doctor_name": doctor_name,
+                "patient_id": patient_id,
+                "patient_name": patient_name,
+                "phas": phas,
+            })
+    elif role == 'doctor' or role == 'director':
+        id = doctor.objects.get(user_id=users.objects.get(username=username).user_id).doctor_id
+        prescriptions = prescription.objects.filter(doctor_id=id)
+        for item in prescriptions:
+            doctor_id = item.doctor_id.doctor_id
+            doctor_name = item.doctor_id.name
+            patient_id = item.patient_id.patient_id
+            patient_name = item.patient_id.name
+            phas = []
+            phas_raw = pre_pha.objects.filter(prescription_id=item.prescription_id)
+            for j in phas_raw:
+                pha_name = j.pharmaceutical_id.name
+                number = j.number
+                phas.append({"name": pha_name, "number": number})
+            data.append({
+                "doctor_id": doctor_id,
+                "doctor_name": doctor_name,
+                "patient_id": patient_id,
+                "patient_name": patient_name,
+                "phas": phas,
+            })
+    elif role == 'patient':
+        id = patient.objects.get(user_id=users.objects.get(username=username).user_id).patient_id
+        prescriptions = prescription.objects.filter(patient_id=id)
+        for item in prescriptions:
+            doctor_id = item.doctor_id.doctor_id
+            doctor_name = item.doctor_id.name
+            patient_id = item.patient_id.patient_id
+            patient_name = item.patient_id.name
+            phas = []
+            phas_raw = pre_pha.objects.filter(prescription_id=item.prescription_id)
+            for j in phas_raw:
+                pha_name = j.pharmaceutical_id.name
+                number = j.number
+                phas.append({"name": pha_name, "number": number})
+            data.append({
+                "doctor_id": doctor_id,
+                "doctor_name": doctor_name,
+                "patient_id": patient_id,
+                "patient_name": patient_name,
+                "phas": phas,
+            })
+    response = {"code": 200, "msg": 'success', "data": data}
+    return HttpResponse(json.dumps(response))
+    

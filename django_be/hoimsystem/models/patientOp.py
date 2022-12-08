@@ -23,8 +23,16 @@ class appointment(models.Model):
   prefer_time = models.ForeignKey('timeslot', on_delete=models.PROTECT)  # 预约时间段
   status = models.IntegerField()  # 预约状态
 
-
 # 预约违约记录
 class breach_record(models.Model):
   breach_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)  # 违约记录id
   registration_id = models.ForeignKey('registration', on_delete=models.CASCADE)
+
+# 收费信息
+class charge(models.Model):
+    charge_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)  # 收费记录id
+    charge_time = models.DateTimeField()  # 收费时间
+    time = models.DateTimeField()  # 缴费时间
+    prescription_id = models.ForeignKey('prescription', on_delete=models.PROTECT)  # 处方id
+    amount = models.FloatField()  # 收费金额
+    status = models.IntegerField()  # 状态

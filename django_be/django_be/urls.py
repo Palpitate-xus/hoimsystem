@@ -33,6 +33,7 @@ urlpatterns = [
     re_path('^api/registrationManagement/getList', patientManagement.get_registration_list),
     re_path('^api/registrationManagement/create', patientManagement.patient_registration),
     re_path('^api/registrationManagement/cancel', patientManagement.patient_registration_cancel),
+    re_path('^api/chargeManagement/getList', patientManagement.get_charges_list),
 
     # 管理员操作组
     re_path('^api/doctorManagement/getList', adminManagement.get_doctor_list),
@@ -48,5 +49,7 @@ urlpatterns = [
     re_path('^api/doctorScheduleManagement/getList', doctorManagement.doctor_schedule_getlist),
     re_path('^api/pharmaceuticalManagement/create', doctorManagement.pharmaceutical_register),
     re_path('^api/pharmaceuticalManagement/getList', doctorManagement.get_pharmaceutical_list),
+    re_path('^api/prescriptionManagement/getList', doctorManagement.get_prescription_list),
+    re_path('^api/prescriptionManagement/create', doctorManagement.prescription_register),
 
 ]

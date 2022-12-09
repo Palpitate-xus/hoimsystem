@@ -69,18 +69,19 @@
       提交
     </el-button>
     <el-button @click="cancel">取消</el-button>
+    <bultrasound ref="bus"></bultrasound>
   </div>
 </template>
 
 <script>
-  import { getPatientList } from '@/api/patientManagement'
-  import {
-    getPharmaceuticalList,
-    getPharmaceuticalStock,
-  } from '../../api/pharmaceuticalManagement'
+
   import { prescriptionRegister } from '../../api/prescriptionManagement'
+  import Bultrasound from './InspectionTemplates/Bultrasound.vue'
   export default {
     name: 'InspectionDoctor',
+    components: {
+      Bultrasound,
+    },
     data() {
       return {
         form: {

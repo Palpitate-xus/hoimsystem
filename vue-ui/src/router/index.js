@@ -61,12 +61,12 @@ export const asyncRoutes = [
       {
         path: 'index',
         name: 'Index',
-        component: () => import('@/views/doctor/index'),
+        component: () => import('@/views/workspace/index'),
         meta: {
           title: '首页',
           icon: 'home',
           affix: true,
-          permissions: ['doctor'],
+          permissions: ['doctor', 'director'],
         },
       },
     ],
@@ -102,23 +102,6 @@ export const asyncRoutes = [
           title: '全局设置',
           icon: 'marker',
           permissions: ['admin'],
-        },
-      },
-    ],
-  },
-  {
-    path: '/workspace',
-    component: Layout,
-    redirect: 'noRedirect',
-    children: [
-      {
-        path: 'workspace',
-        name: 'workspace',
-        component: () => import('@/views/workspace/index'),
-        meta: {
-          title: '工作台',
-          icon: 'marker',
-          permissions: ['doctor', 'director'],
         },
       },
     ],

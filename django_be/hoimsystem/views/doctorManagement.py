@@ -155,6 +155,7 @@ def prescription_register(request):
     for item in phas:
         pharmaceutical_obj = pharmaceutical.objects.get(pharmaceutical_id=item['id'])
         pharmaceutical_obj.stock -= int(item['number'])
+        pharmaceutical_obj.save()
         pre_pha.objects.create(prescription_id=pre.prescription_id, pharmaceutical_id=pharmaceutical_obj, number=item['number'])
         price = pharmaceutical.objects.get(pharmaceutical_id=item['id']).price
         amount = amount + float(price) * int(item['number'])

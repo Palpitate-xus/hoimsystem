@@ -71,7 +71,8 @@
         console.log('submit!')
         console.log(this.form)
         await doctorScheduleRegister(this.form)
-        this.cancel
+        this.$baseMessage('添加成功', 'success')
+        this.cancel()
       },
       cancel() {
         this.form = {

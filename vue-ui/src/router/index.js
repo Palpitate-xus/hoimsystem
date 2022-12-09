@@ -107,26 +107,14 @@ export const asyncRoutes = [
     ],
   },
   {
-    path: '/prescriptionManagement',
+    path: '/doctor',
     component: Layout,
     redirect: 'noRedirect',
-    children: [
-      {
-        path: 'prescriptionManagement',
-        name: 'prescriptionManagement',
-        component: () => import('@/views/prescriptionManagement/index'),
-        meta: {
-          title: '处方管理',
-          icon: 'marker',
-          permissions: ['doctor', 'director'],
-        },
-      },
-    ],
-  },
-  {
-    path: '/prescriptionRegister',
-    component: Layout,
-    redirect: 'noRedirect',
+    name: 'doctortoPatient',
+    meta: {
+      title: '处方与检查',
+      icon: 'users-cog',
+    },
     children: [
       {
         path: 'prescriptionRegister',
@@ -134,8 +122,29 @@ export const asyncRoutes = [
         component: () => import('@/views/prescriptionManagement/doctor'),
         meta: {
           title: '写处方',
-          icon: 'mark',
+          icon: 'marker',
           affix: true,
+          permissions: ['doctor', 'director'],
+        },
+      },
+      {
+        path: 'inspectionRegister',
+        name: 'inspectionRegister',
+        component: () => import('@/views/inspectionManagement/doctor'),
+        meta: {
+          title: '开检查',
+          icon: 'marker',
+          affix: true,
+          permissions: ['doctor', 'director'],
+        },
+      },
+      {
+        path: 'prescriptionManagement',
+        name: 'prescriptionManagement',
+        component: () => import('@/views/prescriptionManagement/index'),
+        meta: {
+          title: '处方管理',
+          icon: 'marker',
           permissions: ['doctor', 'director'],
         },
       },

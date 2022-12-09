@@ -74,7 +74,10 @@
 
 <script>
   import { getPatientList } from '@/api/patientManagement'
-  import { getPharmaceuticalList } from '../../api/pharmaceuticalManagement'
+  import {
+    getPharmaceuticalList,
+    getPharmaceuticalStock,
+  } from '../../api/pharmaceuticalManagement'
   import { prescriptionRegister } from '../../api/prescriptionManagement'
   export default {
     name: 'PrescriptionRegister',
@@ -108,7 +111,7 @@
         this.$baseMessage('提交成功', 'success')
         this.cancel()
       },
-      addPha() {
+      async addPha() {
         let array = this.pha_submit
         let flag = 1
         for (let index = 0; index < array.length; index++) {
@@ -124,6 +127,11 @@
             pha_name = array[index].name
             console.log(pha_name)
           }
+        }
+        const { data } = await getPharmaceuticalStock({ id: this.pha_choose })
+        if (data.stock < this.pha_number) {
+          flag = 0
+          this.$baseMessage('库存不足，当前库存：' + data.stock, 'error')
         }
         if (flag) {
           this.pha_submit.push({

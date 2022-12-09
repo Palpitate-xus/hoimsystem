@@ -58,7 +58,13 @@ def doctor_schedule_register(request):
     for i in schedule_list:
         week = i[0:3]
         time = i[3:5]
-        doctor_schedule.objects.create(week=week, time=time, number=number, specialist=specialist, doctor_id=doctor_obj)
+        if doctor_schedule.objects.filter(week=week, time=time, doctor_id=doctor_obj).exists():
+            doctor_schedule_obj = doctor_schedule.objects.get(week=week, time=time, doctor_id=doctor_obj)
+            doctor_schedule_obj.number = number
+            doctor_schedule_obj.specialist = specialist
+            doctor_schedule_obj.save()
+        else:
+            doctor_schedule.objects.create(week=week, time=time, number=number, specialist=specialist, doctor_id=doctor_obj)
     response = {"code": 200, "msg": 'success'}
     return HttpResponse(json.dumps(response))
 
@@ -66,26 +72,26 @@ def doctor_schedule_register(request):
 def doctor_schedule_getlist(request):
     token = users.objects.get(username=request.META.get('HTTP_ACCESSTOKEN')).user_role
     data = []
-    if token == 'admin':
+    if token == 'admin' or token == 'patient':
         schedule_list = doctor_schedule.objects.all()
         doctor_list = doctor.objects.all()
         for i in doctor_list:
             schedule_list = doctor_schedule.objects.filter(doctor_id=i.doctor_id)
             schedule = []
             for j in schedule_list:
-                schedule.append(j.week + j.time)
+                schedule.append(j.week[2] + j.time[0])
             data.append({
                 'id': i.doctor_id,
                 'name': i.name,
                 'schedule': schedule
             })
-    else:
+    elif token == 'doctor' or token == 'director':
         token = users.objects.get(username=request.META.get('HTTP_ACCESSTOKEN')).user_role
         doctor_obj = doctor.objects.get(user_id=users.objects.get(username=request.META.get('HTTP_ACCESSTOKEN')))
         schedule_list = doctor_schedule.objects.filter(doctor_id=doctor_obj.doctor_id)
         schedule = []
         for i in schedule_list:
-            schedule.append(i.week + i.time)
+            schedule.append(i.week[2] + i.time[0])
         data.append({
                 'id': doctor_obj.doctor_id,
                 'name': doctor_obj.name,
@@ -126,6 +132,15 @@ def get_pharmaceutical_list(request):
     response = {"code": 200, "msg": 'success', "data": data}
     return HttpResponse(json.dumps(response))
 
+# 药品处方查询
+def pharmaceutical_stock_query(request):
+    received_data = json.loads(request.body.decode())
+    pharmaceutical_id = received_data.get('id')
+    stock_status = pharmaceutical.objects.get(pharmaceutical_id=pharmaceutical_id).stock
+    data = {"stock": stock_status}
+    response = {"code": 200, "msg": 'success', "data": data}
+    return HttpResponse(json.dumps(response))
+
 # 处方注册
 def prescription_register(request):
     received_data = json.loads(request.body.decode())
@@ -139,6 +154,7 @@ def prescription_register(request):
     amount = 0
     for item in phas:
         pharmaceutical_obj = pharmaceutical.objects.get(pharmaceutical_id=item['id'])
+        pharmaceutical_obj.stock -= int(item['number'])
         pre_pha.objects.create(prescription_id=pre.prescription_id, pharmaceutical_id=pharmaceutical_obj, number=item['number'])
         price = pharmaceutical.objects.get(pharmaceutical_id=item['id']).price
         amount = amount + float(price) * int(item['number'])
@@ -166,6 +182,7 @@ def get_prescription_list(request):
                 number = j.number
                 phas.append({"name": pha_name, "number": number})
             data.append({
+                "uuid": str(item.prescription_id),
                 "doctor_id": doctor_id,
                 "doctor_name": doctor_name,
                 "patient_id": patient_id,
@@ -187,6 +204,7 @@ def get_prescription_list(request):
                 number = j.number
                 phas.append({"name": pha_name, "number": number})
             data.append({
+                "uuid": str(item.prescription_id),
                 "doctor_id": doctor_id,
                 "doctor_name": doctor_name,
                 "patient_id": patient_id,

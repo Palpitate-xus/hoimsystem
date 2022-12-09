@@ -42,7 +42,7 @@
       </el-table-column>
       <el-table-column show-overflow-tooltip label="操作" width="200">
         <template #default="{ row }">
-          <el-button type="text" @click="handleEdit(row)">缴费</el-button>
+          <el-button type="text" @click="handleCharge(row)">缴费</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -50,7 +50,7 @@
 </template>
 
 <script>
-  import { getChargeList } from '../../api/chargesManagement'
+  import { getChargeList, charge } from '../../api/chargesManagement'
   export default {
     name: 'ChargesPatient',
     data() {
@@ -59,6 +59,7 @@
         listLoading: true,
         total: 0,
         selectRows: '',
+        form: {},
         elementLoadingText: '正在加载...',
       }
     },
@@ -69,33 +70,10 @@
       setSelectRows(val) {
         this.selectRows = val
       },
-      handleEdit(row) {
-        if (row.id) {
-          this.$refs['edit'].showEdit(row)
-        } else {
-          this.$refs['edit'].showEdit()
-        }
-      },
-      handleDelete(row) {
-        if (row.id) {
-          this.$baseConfirm('你确定要删除当前项吗', null, async () => {
-            const { msg } = await doDelete({ ids: row.id })
-            this.$baseMessage(msg, 'success')
-            this.fetchData()
-          })
-        } else {
-          if (this.selectRows.length > 0) {
-            const ids = this.selectRows.map((item) => item.id).join()
-            this.$baseConfirm('你确定要删除选中项吗', null, async () => {
-              const { msg } = await doDelete({ ids })
-              this.$baseMessage(msg, 'success')
-              this.fetchData()
-            })
-          } else {
-            this.$baseMessage('未选中任何行', 'error')
-            return false
-          }
-        }
+      async handleCharge(row) {
+        this.form.id = row.id
+        await charge(this.form)
+        this.fetchData()
       },
       async fetchData() {
         this.listLoading = true

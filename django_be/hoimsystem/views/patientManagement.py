@@ -71,7 +71,7 @@ def get_charges_list(request):
                 'charge_time': str(item.charge_time),
                 'time': str(item.time),
                 'pre_id': str(item.prescription_id.prescription_id),
-                'amount': item.amount,
+                'amount': round(item.amount, 2),
                 'status': item.status,
             })
     elif role == 'patient':
@@ -84,10 +84,23 @@ def get_charges_list(request):
                 'charge_time': str(item.charge_time),
                 'time': str(item.time),
                 'pre_id': str(item.prescription_id.prescription_id),
-                'amount': item.amount,
+                'amount': round(item.amount, 2),
                 'status': item.status,
             })
     response = {"code": 200, "msg": 'success', "data": data}
     return HttpResponse(json.dumps(response))
+
+# 缴费
+def charge_commit(request):
+    received_data = json.loads(request.body.decode())
+    charge_id = received_data.get('id')
+    charge_obj = charge.objects.get(charge_id=charge_id)
+    charge_obj.status = 1
+    charge_obj.time = timezone.now()
+    charge_obj.save()
+    response = {"code": 200, "msg": 'success'}
+    return HttpResponse(json.dumps(response))
+
+    
 
 

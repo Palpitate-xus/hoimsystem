@@ -77,9 +77,9 @@
         }
       },
       async fetchData() {
-        this.listLoading = true
-        const { data } = await getDoctorList()
-        this.list = data
+        // this.listLoading = true
+        // const { data } = await getDoctorList()
+        // this.list = data
         this.listLoading = false
       },
     },

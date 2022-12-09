@@ -14,21 +14,25 @@
         show-overflow-tooltip
         prop="username"
         label="医生"
+        sortable
       ></el-table-column>
       <el-table-column
         show-overflow-tooltip
         prop="username"
         label="时间段"
+        sortable
       ></el-table-column>
       <el-table-column
         show-overflow-tooltip
         prop="username"
         label="类别"
+        sortable
       ></el-table-column>
       <el-table-column
         show-overflow-tooltip
         prop="email"
         label="剩余号源数量"
+        sortable
       ></el-table-column>
       <el-table-column show-overflow-tooltip label="操作" width="200">
         <template #default="{ row }">

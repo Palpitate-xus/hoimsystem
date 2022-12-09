@@ -15,3 +15,11 @@ export function pharmaceuticalRegister(data) {
     data,
   })
 }
+
+export function getPharmaceuticalStock(data) {
+  return request({
+    url: '/pharmaceuticalManagement/stock_query',
+    method: 'post',
+    data,
+  })
+}

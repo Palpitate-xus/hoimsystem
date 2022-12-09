@@ -7,3 +7,11 @@ export function getChargeList(data) {
     data,
   })
 }
+
+export function charge(data) {
+  return request({
+    url: '/chargeManagement/charge',
+    method: 'post',
+    data,
+  })
+}

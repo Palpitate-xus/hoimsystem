@@ -14,20 +14,22 @@
       ></el-table-column>
       <el-table-column
         show-overflow-tooltip
-        prop="patient"
+        prop="patient_name"
         label="病人"
       ></el-table-column>
       <el-table-column
         v-permissions="['admin']"
         show-overflow-tooltip
-        prop="doctor"
+        prop="doctor_name"
         label="医生"
       ></el-table-column>
-      <el-table-column
-        show-overflow-tooltip
-        prop="phas"
-        label="内容"
-      ></el-table-column>
+      <el-table-column show-overflow-tooltip label="内容">
+        <template #default="{ row }">
+          <span v-for="item in row.phas" :key="item.id">
+            {{ item.name + ' * ' + item.number }}
+          </span>
+        </template>
+      </el-table-column>
     </el-table>
   </div>
 </template>

@@ -12,22 +12,22 @@
       ></el-table-column>
       <el-table-column
         show-overflow-tooltip
-        prop="username"
+        prop="doctor"
         label="医生"
       ></el-table-column>
       <el-table-column
         show-overflow-tooltip
-        prop="username"
+        prop="time"
         label="时间段"
       ></el-table-column>
       <el-table-column
         show-overflow-tooltip
-        prop="username"
+        prop="specialist"
         label="类别"
       ></el-table-column>
       <el-table-column show-overflow-tooltip label="操作" width="200">
         <template #default="{ row }">
-          <el-button type="text" @click="handleEdit(row)">取消预约</el-button>
+          <el-button type="text" @click="handleCancel(row)">取消预约</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -60,7 +60,7 @@
           this.$refs['edit'].showEdit()
         }
       },
-      handleDelete(row) {
+      handleCancel(row) {
         if (row.id) {
           this.$baseConfirm('你确定要删除当前项吗', null, async () => {
             const { msg } = await doDelete({ ids: row.id })

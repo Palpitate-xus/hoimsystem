@@ -23,10 +23,10 @@
         <el-card shadow="hover">当前预约情况</el-card>
       </el-col>
     </el-row>
-    <el-divider content-position="left">医嘱</el-divider>
+    <el-divider content-position="left">当前病人</el-divider>
     <el-row>
       <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
-        <el-card shadow="hover">当前医嘱</el-card>
+        <el-card shadow="hover">已完成</el-card>
       </el-col>
     </el-row>
   </div>

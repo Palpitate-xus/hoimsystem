@@ -74,7 +74,6 @@
 </template>
 
 <script>
-
   import { prescriptionRegister } from '../../api/prescriptionManagement'
   import Bultrasound from './InspectionTemplates/Bultrasound.vue'
   export default {

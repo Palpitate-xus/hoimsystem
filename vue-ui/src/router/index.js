@@ -110,10 +110,10 @@ export const asyncRoutes = [
     path: '/doctor',
     component: Layout,
     redirect: 'noRedirect',
-    name: 'doctortoPatient',
     meta: {
       title: '处方与检查',
       icon: 'users-cog',
+      permissions: ['doctor', 'director'],
     },
     children: [
       {

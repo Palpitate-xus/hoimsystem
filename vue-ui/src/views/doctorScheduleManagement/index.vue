@@ -11,11 +11,13 @@
         show-overflow-tooltip
         prop="id"
         label="医生编号"
+        width="100"
       ></el-table-column>
       <el-table-column
         show-overflow-tooltip
         prop="name"
         label="医生姓名"
+        width="100"
       ></el-table-column>
       <el-table-column show-overflow-tooltip prop="schedule" label="医生排班">
         <template slot-scope="scope">

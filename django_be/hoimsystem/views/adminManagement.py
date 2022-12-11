@@ -90,7 +90,10 @@ def get_department_list(request):
     doctors = department.objects.all()
     data = []
     for item in doctors:
-      director_name = doctor.objects.get(doctor_id=item.director).name
+      try:
+        director_name = doctor.objects.get(doctor_id=item.director).name
+      except:
+        director_name = ''
       data.append({
         'id': item.department_id,
         'name': item.name,

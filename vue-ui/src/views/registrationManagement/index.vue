@@ -12,25 +12,25 @@
       ></el-table-column>
       <el-table-column
         show-overflow-tooltip
-        prop="username"
+        prop="doctor"
         label="医生"
         sortable
       ></el-table-column>
       <el-table-column
         show-overflow-tooltip
-        prop="username"
+        prop="time"
         label="时间段"
         sortable
       ></el-table-column>
       <el-table-column
         show-overflow-tooltip
-        prop="username"
+        prop="specialist"
         label="类别"
         sortable
       ></el-table-column>
       <el-table-column
         show-overflow-tooltip
-        prop="email"
+        prop="stock"
         label="剩余号源数量"
         sortable
       ></el-table-column>
@@ -44,7 +44,7 @@
 </template>
 
 <script>
-  import { getDoctorScheduleList } from '@/api/doctorScheduleManagement'
+  import { getList, makeRegistration } from '@/api/registrationManagement'
   export default {
     name: 'RegistrationManagement',
     data() {
@@ -52,9 +52,7 @@
         form: {
           specialist: 0,
         },
-        departmentList: [],
-        doctorList: [],
-        timeSlotList: [],
+        schedules_list: [],
       }
     },
     created() {
@@ -62,7 +60,12 @@
     },
     methods: {
       async fetchData() {
-        const { data } = await getDoctorScheduleList()
+        const { data } = await getList()
+        if (data === '今天为休息日') {
+          this.$baseMessage(data, 'warning')
+        } else {
+          this.schedules_list = data
+        }
         console.log(data)
       },
       onSubmit() {

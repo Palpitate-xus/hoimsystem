@@ -88,6 +88,7 @@
         console.log('submit!')
         console.log(this.form)
         await doctorRegister(this.form)
+        this.$baseMessage('注册成功！', 'success')
         this.form = {}
       },
     },

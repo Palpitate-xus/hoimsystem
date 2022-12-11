@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from django.shortcuts import HttpResponse
 from django.utils import timezone
+from datetime import datetime
 import json
 from hoimsystem.models.roleUser import *
 from hoimsystem.models.patientOp import *
@@ -10,6 +11,14 @@ from hoimsystem.models.doctorOp import *
 # 测试api
 def test(request):
     response = {"code": 200, "msg": 'success'}
+    return HttpResponse(json.dumps(response))
+
+# 挂号信息
+def registrationList(request):
+    data = []
+    today_weeky = datetime.now().weekday()
+    print(today_weeky)
+    response = {"code": 200, "msg": 'success', "data": data}
     return HttpResponse(json.dumps(response))
 
 # 病人挂号

@@ -8,6 +8,14 @@ export function getRegistrationList(data) {
   })
 }
 
+export function getList(data) {
+  return request({
+    url: '/registrationManagement/registrationList',
+    method: 'post',
+    data,
+  })
+}
+
 export function makeRegistration(data) {
   return request({
     url: '/registrationManagement/create',

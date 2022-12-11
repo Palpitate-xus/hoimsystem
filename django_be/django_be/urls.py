@@ -31,6 +31,7 @@ urlpatterns = [
     re_path('^api/appointmentManagement/create', patientManagement.patient_appointment),
     re_path('^api/appointmentManagement/cancel', patientManagement.patient_appointment_cancel),
     re_path('^api/registrationManagement/getList', patientManagement.get_registration_list),
+    re_path('^api/registrationManagement/registrationList', patientManagement.registrationList),
     re_path('^api/registrationManagement/create', patientManagement.patient_registration),
     re_path('^api/registrationManagement/cancel', patientManagement.patient_registration_cancel),
     re_path('^api/chargeManagement/getList', patientManagement.get_charges_list),

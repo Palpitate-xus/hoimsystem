@@ -53,6 +53,7 @@
         console.log('submit!')
         console.log(this.form)
         await createDepartment(this.form)
+        this.$baseMessage('注册成功！', 'success')
         this.form = { director: 1 }
       },
     },

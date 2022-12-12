@@ -25,7 +25,7 @@
           </el-col>
           <el-col :span="4">
             <el-input
-              v-model="pha_number"
+              v-model.trim="pha_number"
               placeholder="请输入药品数量"
             ></el-input>
           </el-col>

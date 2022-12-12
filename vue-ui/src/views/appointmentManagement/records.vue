@@ -35,6 +35,7 @@
 </template>
 
 <script>
+  import { getAppointmentList } from '@/api/appointmentManagement'
   export default {
     name: 'AppointmentRecords',
     data() {
@@ -83,7 +84,7 @@
       },
       async fetchData() {
         this.listLoading = true
-        const { data } = await getDoctorList()
+        const { data } = await getAppointmentList()
         this.list = data
         this.listLoading = false
       },

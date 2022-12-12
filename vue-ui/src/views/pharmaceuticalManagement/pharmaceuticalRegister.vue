@@ -2,13 +2,13 @@
   <div>
     <el-form ref="form" :model="form" label-width="124px">
       <el-form-item label="药品名称">
-        <el-input v-model="form.name"></el-input>
+        <el-input v-model.trim="form.name"></el-input>
       </el-form-item>
       <el-form-item label="数量">
-        <el-input v-model="form.stock"></el-input>
+        <el-input v-model.trim="form.stock"></el-input>
       </el-form-item>
       <el-form-item label="单价">
-        <el-input v-model="form.price"></el-input>
+        <el-input v-model.trim="form.price"></el-input>
       </el-form-item>
       <el-form-item label="有效期">
         <el-date-picker
@@ -19,10 +19,10 @@
         ></el-date-picker>
       </el-form-item>
       <el-form-item label="供应商">
-        <el-input v-model="form.supplier"></el-input>
+        <el-input v-model.trim="form.supplier"></el-input>
       </el-form-item>
       <el-form-item label="备注">
-        <el-input v-model="form.remark"></el-input>
+        <el-input v-model.trim="form.remark"></el-input>
       </el-form-item>
       <el-form-item>
         <el-button type="primary" @click="onSubmit">注册</el-button>

@@ -11,11 +11,6 @@ class department(models.Model):
   location = models.CharField(max_length=24)  # 科室位置
   director = models.IntegerField()  # 科室主任id
 
-# 挂号类别管理
-class reg_category(models.Model):
-  reg_category_id = models.AutoField(primary_key=True)  # 挂号类别id
-  name = models.CharField(max_length=10)  # 挂号类别名称
-
 # 预约就诊时间段
 class timeslot(models.Model):
   timeslot_id = models.AutoField(primary_key=True)  # 时间段id

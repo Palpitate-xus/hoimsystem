@@ -2,6 +2,7 @@ from django.shortcuts import render
 from django.shortcuts import HttpResponse
 from django.utils import timezone
 from datetime import datetime
+import time
 import json
 from hoimsystem.models.roleUser import *
 from hoimsystem.models.patientOp import *
@@ -32,6 +33,7 @@ def registrationList(request):
                 'doctor': item.doctor_id.name,
                 'doctor_id': item.doctor_id.doctor_id,
                 'department_id': item.doctor_id.department_id.department_id,
+                'stock': item.number,
             })
     response = {"code": 200, "msg": 'success', "data": data}
     return HttpResponse(json.dumps(response))
@@ -39,14 +41,18 @@ def registrationList(request):
 # 病人挂号
 def patient_registration(request):
     token = users.objects.get(username=request.META.get('HTTP_ACCESSTOKEN')).username
-    patient_id = patient.objects.get(identity=token).patient_id
+    patient_id = patient.objects.get(identity=token)
     received_data = json.loads(request.body.decode())
+    reg_id = received_data.get('id')
+    reg_obj = doctor_schedule.objects.get(schedule_id=reg_id)
+    reg_obj.number-=1
+    reg_obj.save()
     registration_id = 1
-    doctor_id = received_data.get('doctor_id')
+    doctor_id = doctor.objects.get(doctor_id=received_data.get('doctor_id'))
     specialist = received_data.get('specialist')
     time = timezone.now()
     status = 0
-    department_id = received_data.get('department_id')
+    department_id = department.objects.get(department_id=received_data.get('department_id'))
     registration.objects.create(registration_id=registration_id, patient_id=patient_id, doctor_id=doctor_id, specialist=specialist, department_id=department_id, time=time, status=status)
     response = {"code": 200, "msg": 'success'}
     return HttpResponse(json.dumps(response))
@@ -67,15 +73,16 @@ def get_registration_list(request):
     patient_id = patient.objects.get(identity=token).patient_id
     registration_list = registration.objects.filter(patient_id=patient_id)
     data = []
+    status = ['未就诊', '已就诊', '','已取消']
     for item in registration_list:
         data.append({
-            'uuid': item.registration_uuid,
+            'uuid': str(item.registration_uuid),
             'order': item.registration_id,
             'doctor': item.doctor_id.name,
             'specialist': item.specialist,
             'department': item.department_id.name,
-            'time': item.time,
-            'status': item.status,
+            'time': str(item.time)[0:10],
+            'status': status[item.status],
         })
     response = {"code": 200, "msg": 'success', "data": data}
     return HttpResponse(json.dumps(response))

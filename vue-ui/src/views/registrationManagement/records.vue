@@ -18,7 +18,7 @@
       <el-table-column
         show-overflow-tooltip
         prop="username"
-        label="时间段"
+        label="日期"
       ></el-table-column>
       <el-table-column
         show-overflow-tooltip
@@ -35,6 +35,7 @@
 </template>
 
 <script>
+  import { cancelRegistration } from '@/api/registrationManagement'
   export default {
     name: 'RegistrationRecords',
   }

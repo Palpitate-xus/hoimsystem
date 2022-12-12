@@ -19,21 +19,24 @@
         {{ item.content }}
       </div>
     </el-card>
-    <el-divider content-position="left">挂号与预约</el-divider>
-    <el-row>
-      <el-col :xs="12" :sm="12" :md="12" :lg="12" :xl="12">
-        <el-card shadow="hover">当前挂号情况</el-card>
-      </el-col>
-      <el-col :xs="12" :sm="12" :md="12" :lg="12" :xl="12">
-        <el-card shadow="hover">当前预约情况</el-card>
-      </el-col>
-    </el-row>
+    <el-divider content-position="left">当前挂号情况</el-divider>
+    <el-card
+      v-for="item in registrations"
+      :key="item"
+      class="box-card"
+      shadow="hover"
+    >
+      <div slot="header" class="clearfix">
+        <span>
+          {{ '科室：' + item.department + '     日期：' + item.time }}
+        </span>
+      </div>
+      <div>
+        {{ '医生：' + item.doctor }}
+      </div>
+    </el-card>
+    <el-divider content-position="left">当前预约情况</el-divider>
     <el-divider content-position="left">医嘱</el-divider>
-    <el-row>
-      <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
-        <el-card shadow="hover">当前医嘱</el-card>
-      </el-col>
-    </el-row>
   </div>
 </template>
 
@@ -71,8 +74,12 @@
         const notices = await getNoticeList()
         this.notices = notices.data
         console.log(this.notices)
-        this.appointments = getAppointmentList()
-        this.registrations = getRegistrationList()
+        const regs = await getRegistrationList()
+        this.registrations = regs.data
+        console.log(this.registrations)
+        const apps = await getAppointmentList
+        this.appointments = apps.data
+        console.log(this.appointments)
       },
     },
   }

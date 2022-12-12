@@ -36,7 +36,7 @@
       ></el-table-column>
       <el-table-column show-overflow-tooltip label="操作" width="200">
         <template #default="{ row }">
-          <el-button type="text" @click="handleEdit(row)">挂号</el-button>
+          <el-button type="text" @click="handleRegister(row)">挂号</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -68,8 +68,8 @@
         }
         console.log(data)
       },
-      onSubmit() {
-        console.log('submit!')
+      async handleRegister(row) {
+        await makeRegistration(row)
       },
     },
   }

@@ -2,7 +2,7 @@
   <div>
     <el-table
       v-loading="listLoading"
-      :data="list"
+      :data="schedules_list"
       :element-loading-text="elementLoadingText"
     >
       <el-table-column
@@ -27,7 +27,16 @@
         prop="specialist"
         label="类别"
         sortable
-      ></el-table-column>
+      >
+        <template slot-scope="scope">
+          <el-tag
+            :type="scope.row.specialist === 1 ? 'warning' : 'info'"
+            disable-transitions
+          >
+            {{ scope.row.specialist === 1 ? '专家号' : '普通号' }}
+          </el-tag>
+        </template>
+      </el-table-column>
       <el-table-column
         show-overflow-tooltip
         prop="stock"
@@ -70,6 +79,7 @@
       },
       async handleRegister(row) {
         await makeRegistration(row)
+        this.$baseMessage('挂号成功！', 'success')
       },
     },
   }

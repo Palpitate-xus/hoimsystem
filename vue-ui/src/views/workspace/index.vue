@@ -32,7 +32,7 @@
             <el-button style="float: right">下一个</el-button>
           </div>
           <div>病人基本信息</div>
-          <div>年龄：</div>
+          <div>年龄：1 性别：男 联系电话：13588888888 家庭住址：sdfsafas</div>
         </el-card>
       </el-col>
     </el-row>

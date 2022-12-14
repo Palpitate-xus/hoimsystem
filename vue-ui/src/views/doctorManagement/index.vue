@@ -17,11 +17,16 @@
         prop="name"
         label="医生姓名"
       ></el-table-column>
-      <el-table-column
-        show-overflow-tooltip
-        prop="sex"
-        label="性别"
-      ></el-table-column>
+      <el-table-column show-overflow-tooltip prop="sex" label="性别" sortable>
+        <template slot-scope="scope">
+          <el-tag
+            :type="scope.row.sex === 1 ? 'warning' : 'success'"
+            disable-transitions
+          >
+            {{ scope.row.sex === 1 ? '男' : '女' }}
+          </el-tag>
+        </template>
+      </el-table-column>
       <el-table-column
         show-overflow-tooltip
         prop="title"
@@ -41,7 +46,17 @@
         show-overflow-tooltip
         prop="permission"
         label="权限"
-      ></el-table-column>
+        sortable
+      >
+        <template slot-scope="scope">
+          <el-tag
+            :type="scope.row.permission === 'director' ? 'warning' : 'info'"
+            disable-transitions
+          >
+            {{ scope.row.permission === 'director' ? '科室主任' : '科室医生' }}
+          </el-tag>
+        </template>
+      </el-table-column>
 
       <el-table-column show-overflow-tooltip label="操作" width="200">
         <template #default="{ row }">

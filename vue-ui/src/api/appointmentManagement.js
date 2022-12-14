@@ -8,6 +8,14 @@ export function getAppointmentList(data) {
   })
 }
 
+export function appointmentList(data) {
+  return request({
+    url: '/appointmentManagement/appointmentList',
+    method: 'post',
+    data,
+  })
+}
+
 export function makeAppointment(data) {
   return request({
     url: '/appointmentManagement/create',

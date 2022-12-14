@@ -7,8 +7,13 @@
     >
       <el-table-column
         show-overflow-tooltip
-        prop="id"
+        prop="uuid"
         label="id"
+      ></el-table-column>
+      <el-table-column
+        show-overflow-tooltip
+        prop="department"
+        label="科室"
       ></el-table-column>
       <el-table-column
         show-overflow-tooltip
@@ -17,17 +22,55 @@
       ></el-table-column>
       <el-table-column
         show-overflow-tooltip
-        prop="time"
+        prop="prefer_time"
         label="时间段"
+      ></el-table-column>
+      <el-table-column
+        show-overflow-tooltip
+        prop="appointment_time"
+        label="预约时间"
+      ></el-table-column>
+      <el-table-column
+        show-overflow-tooltip
+        prop="time"
+        label="就诊时间"
       ></el-table-column>
       <el-table-column
         show-overflow-tooltip
         prop="specialist"
         label="类别"
-      ></el-table-column>
+        sortable
+      >
+        <template slot-scope="scope">
+          <el-tag
+            :type="scope.row.specialist === 1 ? 'warning' : 'info'"
+            disable-transitions
+          >
+            {{ scope.row.specialist === 1 ? '专家号' : '普通号' }}
+          </el-tag>
+        </template>
+      </el-table-column>
+      <el-table-column
+        show-overflow-tooltip
+        prop="status"
+        label="状态"
+        sortable
+      >
+        <template slot-scope="scope">
+          <el-tag :type="success">
+            {{ scope.row.status }}
+          </el-tag>
+        </template>
+      </el-table-column>
       <el-table-column show-overflow-tooltip label="操作" width="200">
         <template #default="{ row }">
-          <el-button type="text" @click="handleCancel(row)">取消预约</el-button>
+          <el-button
+            type="text"
+            :disabled="row.status === '已取消'"
+            @click="handleCancel(row)"
+          >
+            取消预约
+          </el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -35,7 +78,10 @@
 </template>
 
 <script>
-  import { getAppointmentList } from '@/api/appointmentManagement'
+  import {
+    getAppointmentList,
+    cancelAppointment,
+  } from '@/api/appointmentManagement'
   export default {
     name: 'AppointmentRecords',
     data() {
@@ -51,42 +97,15 @@
       this.fetchData()
     },
     methods: {
-      setSelectRows(val) {
-        this.selectRows = val
-      },
-      handleEdit(row) {
-        if (row.id) {
-          this.$refs['edit'].showEdit(row)
-        } else {
-          this.$refs['edit'].showEdit()
-        }
-      },
-      handleCancel(row) {
-        if (row.id) {
-          this.$baseConfirm('你确定要删除当前项吗', null, async () => {
-            const { msg } = await doDelete({ ids: row.id })
-            this.$baseMessage(msg, 'success')
-            this.fetchData()
-          })
-        } else {
-          if (this.selectRows.length > 0) {
-            const ids = this.selectRows.map((item) => item.id).join()
-            this.$baseConfirm('你确定要删除选中项吗', null, async () => {
-              const { msg } = await doDelete({ ids })
-              this.$baseMessage(msg, 'success')
-              this.fetchData()
-            })
-          } else {
-            this.$baseMessage('未选中任何行', 'error')
-            return false
-          }
-        }
-      },
       async fetchData() {
         this.listLoading = true
         const { data } = await getAppointmentList()
         this.list = data
         this.listLoading = false
+      },
+      async handleCancel(row) {
+        await cancelAppointment(row)
+        this.fetchData()
       },
     },
   }

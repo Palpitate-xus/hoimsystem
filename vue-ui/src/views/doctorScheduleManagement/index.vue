@@ -31,6 +31,26 @@
           </el-tag>
         </template>
       </el-table-column>
+      <el-table-column
+        show-overflow-tooltip
+        prop="specialist"
+        label="类别"
+        sortable
+      >
+        <template slot-scope="scope">
+          <el-tag
+            :type="scope.row.specialist === 1 ? 'warning' : 'info'"
+            disable-transitions
+          >
+            {{ scope.row.specialist === 1 ? '专家号' : '普通号' }}
+          </el-tag>
+        </template>
+      </el-table-column>
+      <el-table-column
+        show-overflow-tooltip
+        prop="number"
+        label="最大接诊数"
+      ></el-table-column>
       <el-table-column show-overflow-tooltip label="操作" width="200">
         <template #default="{ row }">
           <el-button type="text" @click="handleDelete(row)">删除</el-button>

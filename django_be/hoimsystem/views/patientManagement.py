@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.shortcuts import HttpResponse
 from django.utils import timezone
-from datetime import datetime
+import datetime
 import time
 import json
 from hoimsystem.models.roleUser import *
@@ -17,14 +17,20 @@ def test(request):
 
 # 挂号信息
 def registrationList(request):
-    today_weeky = datetime.now().weekday()
+    today_weeky = datetime.datetime.now().weekday()
     weekdays = ['星期一', '星期二', '星期三', '星期四', '星期五']
     if today_weeky > 4:
         data = '今天为休息日'
     else:
         data = []
         schedules = doctor_schedule.objects.filter(week=weekdays[today_weeky])
+        token = users.objects.get(username=request.META.get('HTTP_ACCESSTOKEN')).username
+        patient_id = patient.objects.get(identity=token)
         for item in schedules:
+            if registration.objects.filter(patient_id=patient_id, doctor_id=item.doctor_id, specialist=item.specialist, status=0).exists():
+                status = 1
+            else:
+                status = 0
             data.append({
                 'id': item.schedule_id,
                 'time': item.time,
@@ -34,6 +40,7 @@ def registrationList(request):
                 'doctor_id': item.doctor_id.doctor_id,
                 'department_id': item.doctor_id.department_id.department_id,
                 'stock': item.number,
+                'status': status,
             })
     response = {"code": 200, "msg": 'success', "data": data}
     return HttpResponse(json.dumps(response))
@@ -50,11 +57,15 @@ def patient_registration(request):
     registration_id = 1
     doctor_id = doctor.objects.get(doctor_id=received_data.get('doctor_id'))
     specialist = received_data.get('specialist')
+    department_id = department.objects.get(department_id=received_data.get('department_id'))
+    if registration.objects.filter(patient_id=patient_id, doctor_id=doctor_id, specialist=specialist, department_id=department_id, status=0).exists():
+        response = {"code": 500, "msg": '您的挂号次数被限制'}
+    else:
+        response = {"code": 200, "msg": 'success'}
     time = timezone.now()
     status = 0
-    department_id = department.objects.get(department_id=received_data.get('department_id'))
     registration.objects.create(registration_id=registration_id, patient_id=patient_id, doctor_id=doctor_id, specialist=specialist, department_id=department_id, time=time, status=status)
-    response = {"code": 200, "msg": 'success'}
+        
     return HttpResponse(json.dumps(response))
 
 # 病人取消挂号
@@ -89,18 +100,58 @@ def get_registration_list(request):
 
 # 预约信息
 def appointmentList(request):
-    response = {"code": 200, "msg": 'success'}
+    schedules = doctor_schedule.objects.all()
+    today_weeky = datetime.datetime.now().weekday()
+    weekdays = ['星期一', '星期二', '星期三', '星期四', '星期五', '星期六', '星期天']
+    dict = {}
+    begin = datetime.datetime.now()
+    for i in range(7):
+        dict.update({weekdays[(begin + datetime.timedelta(days=i)).weekday()]: str(begin + datetime.timedelta(days=i))[0:10]})
+    data = []
+    for item in schedules:
+        if dict[item.week] == str(begin)[0:10]:
+            continue
+        data.append({
+            'id': item.schedule_id,
+            'time': item.time,
+            'specialist': item.specialist,
+            'time': item.time,
+            'date': dict[item.week],
+            'doctor': item.doctor_id.name,
+            'doctor_id': item.doctor_id.doctor_id,
+            'department_id': item.doctor_id.department_id.department_id,
+            'stock': item.number,
+        })
+    response = {"code": 200, "msg": 'success', "data": data}
     return HttpResponse(json.dumps(response))
 
 # 病人预约
 def patient_appointment(request):
+    token = users.objects.get(username=request.META.get('HTTP_ACCESSTOKEN')).username
+    patient_id = patient.objects.get(identity=token)
     received_data = json.loads(request.body.decode())
+    time = received_data.get('date')
+    department_id = department.objects.get(department_id=received_data.get('department_id'))
+    doctor_id = doctor.objects.get(doctor_id=received_data.get('doctor_id'))
+    prefer_time = received_data.get('time')
+    appointment_time = timezone.now()
+    specialist = received_data.get('specialist')
+    status = 0
+    reg_id = received_data.get('id')
+    reg_obj = doctor_schedule.objects.get(schedule_id=reg_id)
+    reg_obj.number-=1
+    reg_obj.save()
+    appointment.objects.create(patient_id=patient_id, doctor_id=doctor_id, specialist=specialist, department_id=department_id, prefer_time=prefer_time, appointment_time=appointment_time, time=time, status=status)
     response = {"code": 200, "msg": 'success'}
     return HttpResponse(json.dumps(response))
 
 # 病人取消预约
 def patient_appointment_cancel(request):
     received_data = json.loads(request.body.decode())
+    app_uuid = received_data.get('uuid')
+    app = appointment.objects.get(registration_uuid=app_uuid)
+    app.status = 2
+    app.save()
     response = {"code": 200, "msg": 'success'}
     return HttpResponse(json.dumps(response))
 
@@ -110,15 +161,17 @@ def get_appointment_list(request):
     patient_id = patient.objects.get(identity=token).patient_id
     appointment_list = appointment.objects.filter(patient_id=patient_id)
     data = []
+    status = ['未就诊', '已就诊','已取消']
     for item in appointment_list:
         data.append({
-            'uuid': item.registration_uuid,
-            'order': item.registration_id,
+            'uuid': str(item.registration_uuid),
             'doctor': item.doctor_id.name,
             'specialist': item.specialist,
             'department': item.department_id.name,
-            'time': item.time,
-            'status': item.status,
+            'time': str(item.time),
+            'prefer_time': item.prefer_time,
+            'appointment_time': str(item.appointment_time)[0:10],
+            'status': status[item.status],
         })
     response = {"code": 200, "msg": 'success', "data": data}
     return HttpResponse(json.dumps(response))

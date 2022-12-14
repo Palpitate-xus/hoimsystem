@@ -7,29 +7,24 @@
     >
       <el-table-column
         show-overflow-tooltip
-        prop="id"
+        prop="uuid"
         label="id"
       ></el-table-column>
       <el-table-column
         show-overflow-tooltip
-        prop="username"
+        prop="doctor"
         label="医生"
       ></el-table-column>
       <el-table-column
         show-overflow-tooltip
-        prop="username"
-        label="时间段"
+        prop="symptom"
+        label="病人症状"
       ></el-table-column>
       <el-table-column
         show-overflow-tooltip
-        prop="username"
-        label="类别"
+        prop="result"
+        label="诊断结果"
       ></el-table-column>
-      <el-table-column show-overflow-tooltip label="操作" width="200">
-        <template #default="{ row }">
-          <el-button type="text" @click="handleEdit(row)">取消预约</el-button>
-        </template>
-      </el-table-column>
     </el-table>
   </div>
 </template>

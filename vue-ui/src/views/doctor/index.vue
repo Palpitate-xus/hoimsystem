@@ -25,6 +25,7 @@
 
 <script>
   import { getNoticeList } from '../../api/notice'
+  import { getDoctorScheduleList } from '../../api/doctorScheduleManagement'
   import { getAppointmentList } from '../../api/appointmentManagement'
   import { getRegistrationList } from '../../api/registrationManagement'
   export default {
@@ -34,6 +35,7 @@
         notices: [],
         appointments: [],
         registrations: [],
+        schedules: [],
       }
     },
     created() {
@@ -44,6 +46,8 @@
         const notices = await getNoticeList()
         this.notices = notices.data
         console.log(this.notices)
+        const schedule = await getDoctorScheduleList()
+        this.schedules = schedule.data
         this.appointments = getAppointmentList()
         this.registrations = getRegistrationList()
       },

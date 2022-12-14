@@ -21,7 +21,7 @@ class appointment(models.Model):
   doctor_id = models.ForeignKey('doctor', on_delete=models.CASCADE)  # 医生id
   specialist = models.IntegerField()  # 挂号类别
   department_id = models.ForeignKey('department', on_delete=models.CASCADE)  # 科室id
-  prefer_time = models.ForeignKey('timeslot', on_delete=models.PROTECT)  # 预约时间段
+  prefer_time = models.CharField(max_length=5)  # 预约时间段
   appointment_time = models.DateTimeField()  # 预约时间
   time = models.DateField()  # 预约日期
   status = models.IntegerField()  # 预约状态

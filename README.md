@@ -1,5 +1,5 @@
 # 医院门诊信息管理系统
-[中文](README.md) | [English](README.en.md) | [需求文档](./doc/demandDoc.md) | [数据库文档](./doc/database.md) | [API文档](./doc/api.md) | [TODO](./doc/todos.md)
+[中文](README.md) | [English](README.en.md) | [需求文档](./doc/demandDoc.md) | [数据库文档](./doc/databaseDoc.md) | [API文档](./doc/apiDoc.md) | [TODO](./doc/todos.md)
 ## 如何运行
 - 运行前端
 ``` bash

@@ -54,7 +54,13 @@
       </el-table-column>
       <el-table-column show-overflow-tooltip label="操作" width="200">
         <template #default="{ row }">
-          <el-button type="text" @click="handleCancel(row)">取消挂号</el-button>
+          <el-button
+            type="text"
+            :disabled="row.status === '已取消'"
+            @click="handleCancel(row)"
+          >
+            取消挂号
+          </el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -91,6 +97,7 @@
         } else {
           await cancelRegistration(row)
           this.$baseMessage('取消成功', 'success')
+          this.fetchData()
         }
       },
     },

@@ -28,6 +28,7 @@ urlpatterns = [
 
     # 病人操作组
     re_path('^api/appointmentManagement/getList', patientManagement.get_appointment_list),
+    re_path('^api/appointmentManagement/appointmentList', patientManagement.appointmentList),
     re_path('^api/appointmentManagement/create', patientManagement.patient_appointment),
     re_path('^api/appointmentManagement/cancel', patientManagement.patient_appointment_cancel),
     re_path('^api/registrationManagement/getList', patientManagement.get_registration_list),

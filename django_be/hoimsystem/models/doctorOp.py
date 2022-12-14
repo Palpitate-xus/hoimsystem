@@ -24,7 +24,6 @@ class medical_record(models.Model):
   patient_id = models.ForeignKey('patient', on_delete=models.PROTECT)  # 病人id
   symptom = models.CharField(max_length=100)  # 病人症状
   result = models.CharField(max_length=100)  # 诊断结果
-  prescription_id = models.ForeignKey('prescription', on_delete=models.PROTECT)  # 处方id
 
 # 药品
 class pharmaceutical(models.Model):

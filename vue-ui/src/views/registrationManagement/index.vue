@@ -45,7 +45,13 @@
       ></el-table-column>
       <el-table-column show-overflow-tooltip label="操作" width="200">
         <template #default="{ row }">
-          <el-button type="text" @click="handleRegister(row)">挂号</el-button>
+          <el-button
+            type="text"
+            :disabled="row.status"
+            @click="handleRegister(row)"
+          >
+            挂号
+          </el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -80,6 +86,7 @@
       async handleRegister(row) {
         await makeRegistration(row)
         this.$baseMessage('挂号成功！', 'success')
+        this.fetchData()
       },
     },
   }

@@ -83,7 +83,9 @@ def doctor_schedule_getlist(request):
             data.append({
                 'id': i.doctor_id,
                 'name': i.name,
-                'schedule': schedule
+                'schedule': schedule,
+                'number': j.number,
+                'specialist': j.specialist
             })
     elif token == 'doctor' or token == 'director':
         token = users.objects.get(username=request.META.get('HTTP_ACCESSTOKEN')).user_role

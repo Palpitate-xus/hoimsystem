@@ -14,30 +14,46 @@
         show-overflow-tooltip
         prop="date"
         label="日期"
+        sotrable
       ></el-table-column>
       <el-table-column
         show-overflow-tooltip
         prop="time"
         label="时间段"
+        sotrable
       ></el-table-column>
       <el-table-column
         show-overflow-tooltip
         prop="doctor"
         label="医生"
+        sotrable
       ></el-table-column>
       <el-table-column
         show-overflow-tooltip
         prop="specialist"
         label="类别"
-      ></el-table-column>
+        sortable
+      >
+        <template slot-scope="scope">
+          <el-tag
+            :type="scope.row.specialist === 1 ? 'warning' : 'info'"
+            disable-transitions
+          >
+            {{ scope.row.specialist === 1 ? '专家号' : '普通号' }}
+          </el-tag>
+        </template>
+      </el-table-column>
       <el-table-column
         show-overflow-tooltip
-        prop="available"
+        prop="stock"
         label="剩余号源数量"
+        sotrable
       ></el-table-column>
       <el-table-column show-overflow-tooltip label="操作" width="200">
         <template #default="{ row }">
-          <el-button type="text" @click="handleEdit(row)">预约</el-button>
+          <el-button type="text" @click="handleAppointment(row)">
+            预约
+          </el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -45,18 +61,16 @@
 </template>
 
 <script>
-  import { getDepartmentList } from '../../api/departmentManagement'
-  import { getDoctorList } from '../../api/doctorManagement'
+  import {
+    appointmentList,
+    makeAppointment,
+  } from '../../api/appointmentManagement'
   export default {
     name: 'Index',
     data() {
       return {
         form: {},
-        pickerOptions: {
-          disabledDate(time) {
-            return time.getTime() > Date.now() + 3600 * 1000 * 24 * 7
-          },
-        },
+        list: [],
       }
     },
     created() {
@@ -64,13 +78,13 @@
     },
     methods: {
       async fetchData() {
-        const { data_department } = await getDepartmentList()
-        const { data_doctor } = await getDoctorList()
-        this.departmentList = data_department
-        this.doctorList = data_doctor
+        const { data } = await appointmentList()
+        this.list = data
       },
-      onSubmit() {
-        console.log('submit!')
+      async handleAppointment(row) {
+        console.log(row)
+        await makeAppointment(row)
+        this.$baseMessage('预约成功！', 'success')
       },
     },
   }

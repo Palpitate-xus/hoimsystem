@@ -271,16 +271,6 @@ export const asyncRoutes = [
         },
       },
       {
-        path: 'prescriptionManagement',
-        name: 'prescriptionManagement',
-        component: () => import('@/views/prescriptionManagement/index'),
-        meta: {
-          title: '处方管理',
-          icon: 'marker',
-          permissions: ['admin'],
-        },
-      },
-      {
         path: 'pharmaceuticalManagement',
         name: 'pharmaceuticalManagement',
         component: EmptyLayout,

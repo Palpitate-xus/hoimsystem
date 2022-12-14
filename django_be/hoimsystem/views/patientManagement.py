@@ -184,8 +184,19 @@ def get_inspection_list(request):
 
 # 病历查看
 def get_medicalrecords_list(request):
-    received_data = json.loads(request.body.decode())
-    response = {"code": 200, "msg": 'success'}
+    token = users.objects.get(username=request.META.get('HTTP_ACCESSTOKEN')).username
+    patient_id = patient.objects.get(identity=token)
+    mrs = medical_record.objects.filter(patient_id=patient_id)
+    data = []
+    for item in mrs:
+        data.append({
+            'uuid': str(item.medical_record_id),
+            'time': str(item.consultation_time),
+            'doctor': item.doctor_id.name,
+            'symptom': item.symptom,
+            'result': item.result,
+        })
+    response = {"code": 200, "msg": 'success', "data": data}
     return HttpResponse(json.dumps(response))
 
 # 收费记录查看

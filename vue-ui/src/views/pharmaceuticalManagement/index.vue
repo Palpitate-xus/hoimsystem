@@ -44,7 +44,7 @@
       ></el-table-column>
       <el-table-column
         show-overflow-tooltip
-        prop="supplier"
+        prop="remark"
         label="备注"
       ></el-table-column>
       <el-table-column show-overflow-tooltip label="操作" width="200">

@@ -12,6 +12,11 @@
       ></el-table-column>
       <el-table-column
         show-overflow-tooltip
+        prop="time"
+        label="就诊时间"
+      ></el-table-column>
+      <el-table-column
+        show-overflow-tooltip
         prop="department"
         label="科室"
       ></el-table-column>
@@ -34,7 +39,15 @@
     name: 'AdviceManagement',
     data() {
       return {
-        list: null,
+        list: [
+          {
+            uuid: '3a792385-b3bc-4b33-9e77-90df51ddedf3',
+            department: '口腔科',
+            doctor: 'wms',
+            content: '好好休息',
+            time: '2022-12-17',
+          },
+        ],
         listLoading: true,
         total: 0,
         selectRows: '',

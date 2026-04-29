@@ -1,0 +1,236 @@
+import datetime
+from fastapi import APIRouter, Depends
+from sqlalchemy.orm import Session
+from app.database import get_db
+from app.models import User, Patient, Doctor, Department, Notice, Charge, Prescription
+from app.schemas import (
+    DepartmentCreateRequest, NoticeCreateRequest, NoticeUpdateRequest,
+    NoticeDeleteRequest, DoctorUpdateRequest, DoctorDeleteRequest,
+    PatientUpdateRequest, DepartmentUpdateRequest, DepartmentDeleteRequest
+)
+from app.dependencies import get_current_user
+
+router = APIRouter()
+
+
+@router.get("/doctorManagement/getList")
+def get_doctor_list(db: Session = Depends(get_db)):
+    doctors = db.query(Doctor).all()
+    data = []
+    for item in doctors:
+        data.append({
+            "id": item.doctor_id,
+            "name": item.name,
+            "sex": item.sex,
+            "education": item.education,
+            "phone": item.phone,
+            "permission": item.permission,
+            "title": item.title,
+        })
+    return {"code": 200, "msg": "success", "data": data}
+
+
+@router.post("/doctorManagement/update")
+def update_doctor(req: DoctorUpdateRequest, db: Session = Depends(get_db)):
+    doctor = db.query(Doctor).filter(Doctor.doctor_id == req.doctor_id).first()
+    if not doctor:
+        return {"code": 500, "msg": "医生不存在"}
+    doctor.name = req.name
+    doctor.title = req.title
+    doctor.sex = 0 if req.sex == "女" else 1
+    doctor.phone = req.phone
+    doctor.department_id = req.department
+    doctor.permission = req.permission
+    doctor.education = req.education
+    db.add(doctor)
+    db.commit()
+    return {"code": 200, "msg": "success"}
+
+
+@router.post("/doctorManagement/delete")
+def delete_doctor(req: DoctorDeleteRequest, db: Session = Depends(get_db)):
+    doctor = db.query(Doctor).filter(Doctor.doctor_id == req.doctor_id).first()
+    if not doctor:
+        return {"code": 500, "msg": "医生不存在"}
+    if doctor.user_id:
+        user = db.query(User).filter(User.user_id == doctor.user_id).first()
+        if user:
+            db.delete(user)
+    db.delete(doctor)
+    db.commit()
+    return {"code": 200, "msg": "success"}
+
+
+@router.get("/patientManagement/getList")
+def get_patient_list(db: Session = Depends(get_db)):
+    patient_data = db.query(Patient).all()
+    data = []
+    for item in patient_data:
+        sex = "女" if item.sex == 0 else "男"
+        data.append({
+            "id": item.patient_id,
+            "name": item.name,
+            "sex": sex,
+            "birthday": str(item.birthday),
+            "phone": item.phone,
+            "permission": item.permission,
+            "address": item.address,
+            "identity": item.identity,
+        })
+    return {"code": 200, "msg": "success", "data": data}
+
+
+@router.post("/patientManagement/update")
+def update_patient(req: PatientUpdateRequest, db: Session = Depends(get_db)):
+    patient = db.query(Patient).filter(Patient.patient_id == req.patient_id).first()
+    if not patient:
+        return {"code": 500, "msg": "病人不存在"}
+    patient.name = req.name
+    patient.sex = req.sex
+    patient.phone = req.phone
+    patient.address = req.address
+    db.add(patient)
+    db.commit()
+    return {"code": 200, "msg": "success"}
+
+
+@router.get("/departmentManagement/getList")
+def get_department_list(db: Session = Depends(get_db)):
+    departments = db.query(Department).all()
+    data = []
+    for item in departments:
+        director = db.query(Doctor).filter(Doctor.doctor_id == item.director).first()
+        director_name = director.name if director else ""
+        data.append({
+            "id": item.department_id,
+            "name": item.name,
+            "phone": item.phone,
+            "location": item.location,
+            "director": director_name,
+        })
+    return {"code": 200, "msg": "success", "data": data}
+
+
+@router.post("/departmentManagement/create")
+def department_register(req: DepartmentCreateRequest, db: Session = Depends(get_db)):
+    try:
+        dept = Department(
+            name=req.name,
+            phone=req.phone,
+            location=req.location,
+            director=req.director,
+        )
+        db.add(dept)
+        db.commit()
+        return {"code": 200, "msg": "success"}
+    except Exception:
+        db.rollback()
+        return {"code": 500, "msg": "科室注册失败"}
+
+
+@router.post("/departmentManagement/update")
+def update_department(req: DepartmentUpdateRequest, db: Session = Depends(get_db)):
+    dept = db.query(Department).filter(Department.department_id == req.department_id).first()
+    if not dept:
+        return {"code": 500, "msg": "科室不存在"}
+    dept.name = req.name
+    dept.phone = req.phone
+    dept.location = req.location
+    dept.director = req.director
+    db.add(dept)
+    db.commit()
+    return {"code": 200, "msg": "success"}
+
+
+@router.post("/departmentManagement/delete")
+def delete_department(req: DepartmentDeleteRequest, db: Session = Depends(get_db)):
+    dept = db.query(Department).filter(Department.department_id == req.department_id).first()
+    if not dept:
+        return {"code": 500, "msg": "科室不存在"}
+    db.delete(dept)
+    db.commit()
+    return {"code": 200, "msg": "success"}
+
+
+@router.get("/notice/getList")
+def get_notice_list(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    notices = db.query(Notice).all()
+    data = []
+    for item in notices:
+        if current_user.user_role == "director" and "科室主任" not in item.towho:
+            continue
+        if current_user.user_role == "doctor" and "医生" not in item.towho:
+            continue
+        if current_user.user_role == "patient" and "病人" not in item.towho:
+            continue
+        data.append({
+            "uuid": str(item.notice_id),
+            "title": item.title,
+            "content": item.content,
+            "isemergency": item.isemergency,
+            "towho": item.towho,
+            "sendtime": str(item.sendtime),
+            "expiredtime": str(item.expiredtime),
+            "readnum": item.readnum,
+            "writer": item.writer.username if item.writer else "",
+        })
+    return {"code": 200, "msg": "success", "data": data}
+
+
+@router.post("/notice/create")
+def notice_register(req: NoticeCreateRequest, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    notice = Notice(
+        title=req.title,
+        content=req.content,
+        isemergency=req.isemergency,
+        towho=str(req.towho),
+        sendtime=datetime.datetime.now(),
+        expiredtime=req.expiredtime,
+        readnum=0,
+        writer_id=current_user.user_id,
+    )
+    db.add(notice)
+    db.commit()
+    return {"code": 200, "msg": "success"}
+
+
+@router.post("/notice/update")
+def update_notice(req: NoticeUpdateRequest, db: Session = Depends(get_db)):
+    notice = db.query(Notice).filter(Notice.notice_id == req.notice_id).first()
+    if not notice:
+        return {"code": 500, "msg": "通知不存在"}
+    notice.title = req.title
+    notice.content = req.content
+    notice.isemergency = req.isemergency
+    notice.towho = str(req.towho)
+    notice.expiredtime = req.expiredtime
+    db.add(notice)
+    db.commit()
+    return {"code": 200, "msg": "success"}
+
+
+@router.post("/notice/delete")
+def delete_notice(req: NoticeDeleteRequest, db: Session = Depends(get_db)):
+    notice = db.query(Notice).filter(Notice.notice_id == req.notice_id).first()
+    if not notice:
+        return {"code": 500, "msg": "通知不存在"}
+    db.delete(notice)
+    db.commit()
+    return {"code": 200, "msg": "success"}
+
+
+@router.get("/chargeManagement/getList")
+def get_charges_list_admin(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    data = []
+    if current_user.user_role == "admin":
+        charge_list = db.query(Charge).all()
+        for item in charge_list:
+            data.append({
+                "id": str(item.charge_id),
+                "charge_time": str(item.charge_time),
+                "time": str(item.time),
+                "pre_id": str(item.prescription.prescription_id) if item.prescription else "",
+                "amount": round(item.amount, 2) if item.amount else 0,
+                "status": item.status,
+            })
+    return {"code": 200, "msg": "success", "data": data}

@@ -1,0 +1,12 @@
+from pydantic_settings import BaseSettings
+
+
+class Settings(BaseSettings):
+    DATABASE_URL: str = "mysql+pymysql://root:123456789@127.0.0.1:3306/hoimsystem"
+    SECRET_KEY: str = "django-insecure-zc+tdrflp4r^4oq)m-yodvi+wk3j6!c)dm%8pct(*g*evmowf+"
+
+    class Config:
+        env_file = ".env"
+
+
+settings = Settings()

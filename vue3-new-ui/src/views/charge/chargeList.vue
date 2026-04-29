@@ -1,0 +1,85 @@
+<template>
+  <div class="app-container">
+    <vab-page-header title="费用管理" />
+    <el-card>
+      <el-table :data="list" v-loading="loading">
+        <el-table-column prop="id" label="ID" />
+        <el-table-column prop="charge_time" label="创建时间" />
+        <el-table-column prop="time" label="缴费时间" />
+        <el-table-column prop="pre_id" label="处方ID" />
+        <el-table-column prop="amount" label="金额" />
+        <el-table-column prop="status" label="状态">
+          <template #default="{row}">
+            <el-tag v-if="row.status===0" type="warning">未缴费</el-tag>
+            <el-tag v-else-if="row.status===1" type="success">已缴费</el-tag>
+            <el-tag v-else type="danger">已退费</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" width="200">
+          <template #default="{row}">
+            <el-button v-if="row.status===0" size="small" type="primary" @click="pay(row)">收费</el-button>
+            <el-button v-if="row.status===1" size="small" type="danger" @click="refund(row)">退费</el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+    </el-card>
+
+    <el-dialog v-model="refundVisible" title="退费" width="500px">
+      <el-form :model="refundForm" label-width="100px">
+        <el-form-item label="退费原因">
+          <el-input v-model="refundForm.reason" type="textarea" :rows="3" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="refundVisible=false">取消</el-button>
+        <el-button type="primary" @click="submitRefund">确定</el-button>
+      </template>
+    </el-dialog>
+  </div>
+</template>
+
+<script setup>
+import { ref, onMounted } from "vue";
+import { ElMessage } from "element-plus";
+import { getChargeList, commitCharge, refundCharge } from "@/api/charge";
+
+const list = ref([]);
+const loading = ref(false);
+const refundVisible = ref(false);
+const refundForm = ref({});
+
+const fetchList = async () => {
+  loading.value = true;
+  const res = await getChargeList();
+  list.value = res.data || [];
+  loading.value = false;
+};
+
+const pay = async (row) => {
+  try {
+    await commitCharge({ id: row.id });
+    ElMessage.success("收费成功");
+    fetchList();
+  } catch (e) {
+    ElMessage.error(e.msg || "收费失败");
+  }
+};
+
+const refund = (row) => {
+  refundForm.value = { charge_id: row.id, reason: "" };
+  refundVisible.value = true;
+};
+
+const submitRefund = async () => {
+  try {
+    await refundCharge(refundForm.value);
+    ElMessage.success("退费成功");
+    refundVisible.value = false;
+    fetchList();
+  } catch (e) {
+    ElMessage.error(e.msg || "退费失败");
+  }
+};
+
+onMounted(fetchList);
+</script>

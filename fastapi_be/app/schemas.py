@@ -25,7 +25,7 @@ class RegisterRequest(BaseModel):
 
 
 class UserInfoRequest(BaseModel):
-    accessToken: str
+    accesstoken: str
 
 
 class IdRequest(BaseModel):

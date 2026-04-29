@@ -1,12 +1,31 @@
 import json
+import datetime
+import jwt
 from fastapi import APIRouter, Request, Depends
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models import User, Patient
 from app.schemas import LoginRequest, RegisterRequest, UserInfoRequest, TestRequest
 from app.dependencies import get_current_user
+from app.config import settings
 
 router = APIRouter()
+
+
+def create_access_token(username: str) -> str:
+    expire = datetime.datetime.utcnow() + datetime.timedelta(hours=24)
+    payload = {"sub": username, "exp": expire, "iat": datetime.datetime.utcnow()}
+    return jwt.encode(payload, settings.SECRET_KEY, algorithm="HS256")
+
+
+def decode_access_token(token: str) -> str:
+    try:
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
+        return payload.get("sub")
+    except jwt.ExpiredSignatureError:
+        return None
+    except jwt.InvalidTokenError:
+        return None
 
 
 @router.post("/test")
@@ -32,7 +51,8 @@ def get_public_key():
 def login(req: LoginRequest, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.username == req.username, User.password == req.password).first()
     if user:
-        return {"code": 200, "msg": "success", "data": {"accessToken": req.username}}
+        token = create_access_token(user.username)
+        return {"code": 200, "msg": "success", "data": {"accesstoken": token}}
     return {"code": 500, "msg": "账户或密码不正确"}
 
 
@@ -71,7 +91,10 @@ def register(req: RegisterRequest, db: Session = Depends(get_db)):
 
 @router.post("/userInfo")
 def get_user_info(req: UserInfoRequest, db: Session = Depends(get_db)):
-    user = db.query(User).filter(User.username == req.accessToken).first()
+    username = decode_access_token(req.accesstoken)
+    if not username:
+        return {"code": 500, "msg": "token无效或已过期"}
+    user = db.query(User).filter(User.username == username).first()
     if not user:
         return {"code": 500, "msg": "用户不存在"}
     if user.user_role == "admin":

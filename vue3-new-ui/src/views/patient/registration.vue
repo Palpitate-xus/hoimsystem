@@ -1,0 +1,100 @@
+<template>
+  <div class="app-container">
+    <vab-page-header title="现场挂号" />
+    <el-card>
+      <el-button type="primary" @click="openDialog">现场挂号</el-button>
+      <el-table :data="list" v-loading="loading" style="margin-top: 15px">
+        <el-table-column prop="uuid" label="挂号ID" />
+        <el-table-column prop="order" label="序号" />
+        <el-table-column prop="doctor" label="医生" />
+        <el-table-column prop="department" label="科室" />
+        <el-table-column prop="time" label="挂号时间" />
+        <el-table-column prop="status" label="状态" />
+        <el-table-column label="操作" width="120">
+          <template #default="{row}">
+            <el-button size="small" type="danger" @click="cancel(row)">取消</el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+    </el-card>
+
+    <el-dialog v-model="dialogVisible" title="选择号源" width="900px">
+      <el-table :data="schedules" v-loading="schedLoading">
+        <el-table-column prop="doctor" label="医生" />
+        <el-table-column prop="time" label="时段" />
+        <el-table-column prop="stock" label="剩余号源" />
+        <el-table-column prop="specialist" label="专家号">
+          <template #default="{row}">
+            <el-tag v-if="row.specialist">是</el-tag>
+            <el-tag v-else type="info">否</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" width="120">
+          <template #default="{row}">
+            <el-button size="small" type="primary" @click="register(row)">挂号</el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+    </el-dialog>
+  </div>
+</template>
+
+<script setup>
+import { ref, onMounted } from "vue";
+import { ElMessage } from "element-plus";
+import { getRegistrationList, getRegistrationSchedules, createRegistration, cancelRegistration } from "@/api/patient";
+
+const list = ref([]);
+const schedules = ref([]);
+const loading = ref(false);
+const schedLoading = ref(false);
+const dialogVisible = ref(false);
+
+const fetchList = async () => {
+  loading.value = true;
+  const res = await getRegistrationList();
+  list.value = res.data || [];
+  loading.value = false;
+};
+
+const openDialog = async () => {
+  dialogVisible.value = true;
+  schedLoading.value = true;
+  const res = await getRegistrationSchedules();
+  if (typeof res.data === "string") {
+    ElMessage.warning(res.data);
+    schedules.value = [];
+  } else {
+    schedules.value = res.data || [];
+  }
+  schedLoading.value = false;
+};
+
+const register = async (row) => {
+  try {
+    await createRegistration({
+      id: row.id,
+      doctor_id: row.doctor_id,
+      department_id: row.department_id,
+      specialist: row.specialist,
+    });
+    ElMessage.success("挂号成功");
+    dialogVisible.value = false;
+    fetchList();
+  } catch (e) {
+    ElMessage.error(e.msg || "挂号失败");
+  }
+};
+
+const cancel = async (row) => {
+  try {
+    await cancelRegistration({ uuid: row.uuid });
+    ElMessage.success("取消成功");
+    fetchList();
+  } catch (e) {
+    ElMessage.error(e.msg || "取消失败");
+  }
+};
+
+onMounted(fetchList);
+</script>

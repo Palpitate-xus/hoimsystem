@@ -179,13 +179,19 @@ def get_notice_list(current_user: User = Depends(get_current_user), db: Session 
 
 @router.post("/notice/create")
 def notice_register(req: NoticeCreateRequest, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    expired = None
+    if req.expiredtime:
+        try:
+            expired = datetime.datetime.strptime(req.expiredtime, "%Y-%m-%d")
+        except ValueError:
+            expired = datetime.datetime.strptime(req.expiredtime, "%Y-%m-%d %H:%M:%S")
     notice = Notice(
         title=req.title,
         content=req.content,
         isemergency=req.isemergency,
         towho=str(req.towho),
         sendtime=datetime.datetime.now(),
-        expiredtime=req.expiredtime,
+        expiredtime=expired,
         readnum=0,
         writer_id=current_user.user_id,
     )
@@ -203,7 +209,11 @@ def update_notice(req: NoticeUpdateRequest, db: Session = Depends(get_db)):
     notice.content = req.content
     notice.isemergency = req.isemergency
     notice.towho = str(req.towho)
-    notice.expiredtime = req.expiredtime
+    if req.expiredtime:
+        try:
+            notice.expiredtime = datetime.datetime.strptime(req.expiredtime, "%Y-%m-%d")
+        except ValueError:
+            notice.expiredtime = datetime.datetime.strptime(req.expiredtime, "%Y-%m-%d %H:%M:%S")
     db.add(notice)
     db.commit()
     return {"code": 200, "msg": "success"}

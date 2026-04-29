@@ -123,13 +123,22 @@ def doctor_schedule_getlist(current_user: User = Depends(get_current_user), db: 
     return {"code": 200, "msg": "success", "data": data}
 
 
+def parse_date_str(val):
+    if isinstance(val, str):
+        try:
+            return datetime.datetime.strptime(val, "%Y-%m-%d").date()
+        except ValueError:
+            return datetime.datetime.strptime(val, "%Y-%m-%d %H:%M:%S").date()
+    return val
+
+
 @router.post("/pharmaceuticalManagement/create")
 def pharmaceutical_register(req: PharmaceuticalCreateRequest, db: Session = Depends(get_db)):
     pha = Pharmaceutical(
         name=req.name,
         stock=req.stock,
         price=float(req.price),
-        expireddate=req.expireddate,
+        expireddate=parse_date_str(req.expireddate),
         purchasing_time=datetime.datetime.now(),
         supplier=req.supplier,
         remark=req.remark,
@@ -165,7 +174,7 @@ def update_pharmaceutical(req: PharmaceuticalUpdateRequest, db: Session = Depend
     pha.name = req.name
     pha.stock = req.stock
     pha.price = float(req.price)
-    pha.expireddate = req.expireddate
+    pha.expireddate = parse_date_str(req.expireddate)
     pha.supplier = req.supplier
     pha.remark = req.remark
     db.add(pha)

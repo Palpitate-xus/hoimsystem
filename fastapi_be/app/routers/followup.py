@@ -12,6 +12,15 @@ from app.dependencies import get_current_user
 router = APIRouter()
 
 
+def parse_date_str(val):
+    if isinstance(val, str):
+        try:
+            return datetime.datetime.strptime(val, "%Y-%m-%d").date()
+        except ValueError:
+            return datetime.datetime.strptime(val, "%Y-%m-%d %H:%M:%S").date()
+    return val
+
+
 @router.post("/followUpAppointment/create")
 def create_follow_up_appointment(req: FollowUpAppointmentCreateRequest, db: Session = Depends(get_db)):
     appointment = Appointment(
@@ -21,7 +30,7 @@ def create_follow_up_appointment(req: FollowUpAppointmentCreateRequest, db: Sess
         department_id=db.query(Doctor).filter(Doctor.doctor_id == req.doctor_id).first().department_id if db.query(Doctor).filter(Doctor.doctor_id == req.doctor_id).first() else None,
         prefer_time=req.time,
         appointment_time=datetime.datetime.now(),
-        time=req.date,
+        time=parse_date_str(req.date),
         status=0,
     )
     db.add(appointment)
@@ -35,7 +44,7 @@ def create_follow_up_plan(req: FollowUpCreatePlanRequest, current_user=Depends(g
     follow_up = FollowUp(
         patient_id=req.patient_id,
         doctor_id=doctor_obj.doctor_id if doctor_obj else None,
-        plan_date=req.plan_date,
+        plan_date=parse_date_str(req.plan_date),
         content=req.content,
         status=0,
         create_time=datetime.datetime.now(),

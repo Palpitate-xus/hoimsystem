@@ -75,6 +75,10 @@ def patient_appointment(req: AppointmentCreateRequest, current_user: User = Depe
     if reg_obj:
         reg_obj.number -= 1
         db.add(reg_obj)
+    try:
+        appt_date = datetime.datetime.strptime(req.date, "%Y-%m-%d").date()
+    except ValueError:
+        appt_date = req.date
     appointment = Appointment(
         patient_id=patient_obj.patient_id,
         doctor_id=req.doctor_id,
@@ -82,7 +86,7 @@ def patient_appointment(req: AppointmentCreateRequest, current_user: User = Depe
         department_id=req.department_id,
         prefer_time=req.time,
         appointment_time=datetime.datetime.now(),
-        time=req.date,
+        time=appt_date,
         status=0,
     )
     db.add(appointment)

@@ -36,6 +36,16 @@ def login(req: LoginRequest, db: Session = Depends(get_db)):
     return {"code": 500, "msg": "账户或密码不正确"}
 
 
+def parse_date_str(val):
+    if isinstance(val, str):
+        import datetime
+        try:
+            return datetime.datetime.strptime(val, "%Y-%m-%d").date()
+        except ValueError:
+            return datetime.datetime.strptime(val, "%Y-%m-%d %H:%M:%S").date()
+    return val
+
+
 @router.post("/register")
 def register(req: RegisterRequest, db: Session = Depends(get_db)):
     try:
@@ -45,7 +55,7 @@ def register(req: RegisterRequest, db: Session = Depends(get_db)):
             address=req.address,
             sex=req.sex,
             phone=req.phone,
-            birthday=req.birthday,
+            birthday=parse_date_str(req.birthday),
             permission="allow",
         )
         db.add(patient)

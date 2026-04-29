@@ -8,7 +8,7 @@ from app.models import (
 )
 from app.schemas import (
     UuidRequest, AppointmentCreateRequest,
-    RegistrationCreateRequest, ChargeCommitRequest,
+    RegistrationCreateRequest,
     MedicalRecordDetailRequest, ReviewCreateRequest
 )
 from app.dependencies import get_current_user
@@ -197,65 +197,40 @@ def patient_registration_cancel(req: UuidRequest, db: Session = Depends(get_db))
     return {"code": 200, "msg": "success"}
 
 
-@router.get("/chargeManagement/getList")
-def get_charges_list(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    data = []
-    if current_user.user_role == "admin":
-        charge_list = db.query(Charge).all()
-        for item in charge_list:
-            data.append({
-                "id": str(item.charge_id),
-                "charge_time": str(item.charge_time),
-                "time": str(item.time),
-                "pre_id": str(item.prescription.prescription_id) if item.prescription else "",
-                "amount": round(item.amount, 2) if item.amount else 0,
-                "status": item.status,
-            })
-    elif current_user.user_role == "patient":
-        patient_obj = db.query(Patient).filter(Patient.identity == current_user.username).first()
-        if patient_obj:
-            pres = db.query(Prescription).filter(Prescription.patient_id == patient_obj.patient_id).all()
-            for pre in pres:
-                item = db.query(Charge).filter(Charge.prescription_id == pre.prescription_id).first()
-                if item:
-                    data.append({
-                        "id": str(item.charge_id),
-                        "charge_time": str(item.charge_time),
-                        "time": str(item.time),
-                        "pre_id": str(item.prescription.prescription_id) if item.prescription else "",
-                        "amount": round(item.amount, 2) if item.amount else 0,
-                        "status": item.status,
-                    })
-    return {"code": 200, "msg": "success", "data": data}
-
-
-@router.post("/chargeManagement/charge")
-def charge_commit(req: ChargeCommitRequest, db: Session = Depends(get_db)):
-    charge_obj = db.query(Charge).filter(Charge.charge_id == req.id).first()
-    if charge_obj:
-        charge_obj.status = 1
-        charge_obj.time = datetime.datetime.now()
-        db.add(charge_obj)
-        db.commit()
-    return {"code": 200, "msg": "success"}
-
-
 @router.get("/medicalRecord/getList")
 def get_medical_record_list(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    patient_obj = db.query(Patient).filter(Patient.identity == current_user.username).first()
-    if not patient_obj:
-        return {"code": 200, "msg": "success", "data": []}
-    records = db.query(MedicalRecord).filter(MedicalRecord.patient_id == patient_obj.patient_id).order_by(MedicalRecord.consultation_time.desc()).all()
-    data = []
-    for item in records:
-        data.append({
-            "uuid": str(item.medical_record_id),
-            "consultation_time": str(item.consultation_time),
-            "doctor_name": item.doctor.name if item.doctor else "",
-            "symptom": item.symptom,
-            "result": item.result,
-        })
-    return {"code": 200, "msg": "success", "data": data}
+    if current_user.user_role == "patient":
+        patient_obj = db.query(Patient).filter(Patient.identity == current_user.username).first()
+        if not patient_obj:
+            return {"code": 200, "msg": "success", "data": []}
+        records = db.query(MedicalRecord).filter(MedicalRecord.patient_id == patient_obj.patient_id).order_by(MedicalRecord.consultation_time.desc()).all()
+        data = []
+        for item in records:
+            data.append({
+                "uuid": str(item.medical_record_id),
+                "consultation_time": str(item.consultation_time),
+                "doctor_name": item.doctor.name if item.doctor else "",
+                "symptom": item.symptom,
+                "result": item.result,
+            })
+        return {"code": 200, "msg": "success", "data": data}
+    elif current_user.user_role in ("doctor", "director"):
+        doctor_obj = db.query(Doctor).filter(Doctor.user_id == current_user.user_id).first()
+        if not doctor_obj:
+            return {"code": 200, "msg": "success", "data": []}
+        records = db.query(MedicalRecord).filter(MedicalRecord.doctor_id == doctor_obj.doctor_id).order_by(MedicalRecord.consultation_time.desc()).all()
+        data = []
+        for item in records:
+            data.append({
+                "uuid": str(item.medical_record_id),
+                "consultation_time": str(item.consultation_time),
+                "patient_id": item.patient_id,
+                "patient_name": item.patient.name if item.patient else "",
+                "symptom": item.symptom,
+                "result": item.result,
+            })
+        return {"code": 200, "msg": "success", "data": data}
+    return {"code": 200, "msg": "success", "data": []}
 
 
 @router.post("/medicalRecord/detail")

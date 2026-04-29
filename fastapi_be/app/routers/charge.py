@@ -2,31 +2,59 @@ import datetime
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from app.database import get_db
-from app.models import Charge, Invoice, Prescription, PrePha, Pharmaceutical
-from app.schemas import ChargeRefundRequest, InvoiceCreateRequest, InvoicePrintRequest
+from app.models import Charge, Invoice, Prescription, PrePha, Pharmaceutical, Patient, User
+from app.schemas import ChargeRefundRequest, InvoiceCreateRequest, InvoicePrintRequest, ChargeCommitRequest
+from app.dependencies import get_current_user
 
 router = APIRouter()
 
 
 @router.get("/chargeManagement/getList")
-def get_charge_list(db: Session = Depends(get_db)):
-    charge_list = db.query(Charge).all()
+def get_charge_list(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     data = []
-    for item in charge_list:
-        data.append({
-            "id": str(item.charge_id),
-            "charge_time": str(item.charge_time),
-            "time": str(item.time),
-            "pre_id": str(item.prescription.prescription_id) if item.prescription else "",
-            "amount": round(item.amount, 2) if item.amount else 0,
-            "status": item.status,
-        })
+    if current_user.user_role == "admin":
+        charge_list = db.query(Charge).all()
+        for item in charge_list:
+            data.append({
+                "id": str(item.charge_id),
+                "charge_time": str(item.charge_time),
+                "time": str(item.time),
+                "pre_id": str(item.prescription.prescription_id) if item.prescription else "",
+                "amount": round(item.amount, 2) if item.amount else 0,
+                "status": item.status,
+            })
+    elif current_user.user_role == "patient":
+        patient_obj = db.query(Patient).filter(Patient.identity == current_user.username).first()
+        if patient_obj:
+            pres = db.query(Prescription).filter(Prescription.patient_id == patient_obj.patient_id).all()
+            for pre in pres:
+                item = db.query(Charge).filter(Charge.prescription_id == pre.prescription_id).first()
+                if item:
+                    data.append({
+                        "id": str(item.charge_id),
+                        "charge_time": str(item.charge_time),
+                        "time": str(item.time),
+                        "pre_id": str(item.prescription.prescription_id) if item.prescription else "",
+                        "amount": round(item.amount, 2) if item.amount else 0,
+                        "status": item.status,
+                    })
+    else:
+        charge_list = db.query(Charge).all()
+        for item in charge_list:
+            data.append({
+                "id": str(item.charge_id),
+                "charge_time": str(item.charge_time),
+                "time": str(item.time),
+                "pre_id": str(item.prescription.prescription_id) if item.prescription else "",
+                "amount": round(item.amount, 2) if item.amount else 0,
+                "status": item.status,
+            })
     return {"code": 200, "msg": "success", "data": data}
 
 
 @router.post("/chargeManagement/charge")
-def charge_commit(req: ChargeRefundRequest, db: Session = Depends(get_db)):
-    charge_obj = db.query(Charge).filter(Charge.charge_id == req.charge_id).first()
+def charge_commit(req: ChargeCommitRequest, db: Session = Depends(get_db)):
+    charge_obj = db.query(Charge).filter(Charge.charge_id == req.id).first()
     if charge_obj:
         charge_obj.status = 1
         charge_obj.time = datetime.datetime.now()

@@ -13,7 +13,7 @@ from app.schemas import (
     PharmaceuticalCreateRequest, PharmaceuticalStockQueryRequest,
     PrescriptionCreateRequest, PrescriptionCancelRequest,
     PharmaceuticalUpdateRequest, PharmaceuticalDeleteRequest,
-    MedicalRecordCreateRequest, MedicalRecordUpdateRequest, MedicalRecordDetailRequest,
+    MedicalRecordCreateRequest, MedicalRecordUpdateRequest,
     LabOrderCreateRequest
 )
 from app.dependencies import get_current_user
@@ -293,43 +293,6 @@ def create_medical_record(req: MedicalRecordCreateRequest, current_user: User = 
     db.add(record)
     db.commit()
     return {"code": 200, "msg": "success"}
-
-
-@router.get("/medicalRecord/getList")
-def get_medical_record_list_doctor(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    doctor_obj = db.query(Doctor).filter(Doctor.user_id == current_user.user_id).first()
-    if not doctor_obj:
-        return {"code": 200, "msg": "success", "data": []}
-    records = db.query(MedicalRecord).filter(MedicalRecord.doctor_id == doctor_obj.doctor_id).order_by(MedicalRecord.consultation_time.desc()).all()
-    data = []
-    for item in records:
-        data.append({
-            "uuid": str(item.medical_record_id),
-            "consultation_time": str(item.consultation_time),
-            "patient_id": item.patient_id,
-            "patient_name": item.patient.name if item.patient else "",
-            "symptom": item.symptom,
-            "result": item.result,
-        })
-    return {"code": 200, "msg": "success", "data": data}
-
-
-@router.post("/medicalRecord/detail")
-def get_medical_record_detail_doctor(req: MedicalRecordDetailRequest, db: Session = Depends(get_db)):
-    record = db.query(MedicalRecord).filter(MedicalRecord.medical_record_id == req.medical_record_id).first()
-    if not record:
-        return {"code": 500, "msg": "病历不存在"}
-    data = {
-        "uuid": str(record.medical_record_id),
-        "consultation_time": str(record.consultation_time),
-        "doctor_id": record.doctor_id,
-        "doctor_name": record.doctor.name if record.doctor else "",
-        "patient_id": record.patient_id,
-        "patient_name": record.patient.name if record.patient else "",
-        "symptom": record.symptom,
-        "result": record.result,
-    }
-    return {"code": 200, "msg": "success", "data": data}
 
 
 @router.post("/medicalRecord/update")

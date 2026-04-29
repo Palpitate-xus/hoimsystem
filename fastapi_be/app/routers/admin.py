@@ -2,7 +2,7 @@ import datetime
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from app.database import get_db
-from app.models import User, Patient, Doctor, Department, Notice, Charge, Prescription
+from app.models import User, Patient, Doctor, Department, Notice
 from app.schemas import (
     DepartmentCreateRequest, NoticeCreateRequest, NoticeUpdateRequest,
     NoticeDeleteRequest, DoctorUpdateRequest, DoctorDeleteRequest,
@@ -218,19 +218,3 @@ def delete_notice(req: NoticeDeleteRequest, db: Session = Depends(get_db)):
     db.commit()
     return {"code": 200, "msg": "success"}
 
-
-@router.get("/chargeManagement/getList")
-def get_charges_list_admin(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    data = []
-    if current_user.user_role == "admin":
-        charge_list = db.query(Charge).all()
-        for item in charge_list:
-            data.append({
-                "id": str(item.charge_id),
-                "charge_time": str(item.charge_time),
-                "time": str(item.time),
-                "pre_id": str(item.prescription.prescription_id) if item.prescription else "",
-                "amount": round(item.amount, 2) if item.amount else 0,
-                "status": item.status,
-            })
-    return {"code": 200, "msg": "success", "data": data}

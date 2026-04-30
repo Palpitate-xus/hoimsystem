@@ -3,7 +3,7 @@
     <vab-page-header title="处方管理" />
     <el-card>
       <el-button type="primary" @click="handleAdd">开处方</el-button>
-      <el-table :data="list" v-loading="loading" style="margin-top: 15px">
+      <el-table :data="paginatedList" v-loading="loading" style="margin-top: 15px">
         <el-table-column prop="uuid" label="处方ID" />
         <el-table-column prop="doctor_name" label="医生" />
         <el-table-column prop="patient_name" label="患者" />
@@ -27,12 +27,23 @@
           </template>
         </el-table-column>
       </el-table>
+      <el-pagination
+        v-model:current-page="currentPage"
+        v-model:page-size="pageSize"
+        :page-sizes="[10, 20, 50, 100]"
+        layout="total, sizes, prev, pager, next, jumper"
+        :total="total"
+        style="margin-top: 15px; justify-content: flex-end;"
+      />
+
     </el-card>
 
     <el-dialog v-model="dialogVisible" title="开处方" width="700px">
       <el-form :model="form" label-width="100px">
-        <el-form-item label="患者ID">
-          <el-input-number v-model="form.patient" :min="1" />
+        <el-form-item label="患者">
+          <el-select v-model="form.patient" placeholder="请选择患者" style="width:100%">
+            <el-option v-for="p in patientOptions" :key="p.id" :label="p.name" :value="p.id" />
+          </el-select>
         </el-form-item>
         <el-form-item label="药品">
           <div v-for="(item, i) in form.phas" :key="i" style="margin-bottom:10px">
@@ -54,28 +65,41 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import { ElMessage } from "element-plus";
 import { getPrescriptionList, createPrescription, cancelPrescription } from "@/api/doctor";
 import { getPharmaceuticalList } from "@/api/pharmacy";
+import { getPatientList } from "@/api/admin";
 
 const list = ref([]);
+const currentPage = ref(1);
+const pageSize = ref(10);
+const total = ref(0);
+const paginatedList = computed(() => {
+  const start = (currentPage.value - 1) * pageSize.value;
+  return list.value.slice(start, start + pageSize.value);
+});
+
 const pharmaceuticals = ref([]);
+const patientOptions = ref([]);
 const loading = ref(false);
 const dialogVisible = ref(false);
-const form = ref({ patient: 1, phas: [] });
+const form = ref({ patient: null, phas: [] });
 
 const fetchList = async () => {
   loading.value = true;
   const res = await getPrescriptionList();
   list.value = res.data || [];
+  total.value = list.value.length;
   loading.value = false;
 };
 
 const handleAdd = async () => {
-  const res = await getPharmaceuticalList();
-  pharmaceuticals.value = res.data || [];
-  form.value = { patient: 1, phas: [{ id: null, number: 1 }] };
+  const phRes = await getPharmaceuticalList();
+  pharmaceuticals.value = phRes.data || [];
+  const pRes = await getPatientList();
+  patientOptions.value = pRes.data || [];
+  form.value = { patient: null, phas: [{ id: null, number: 1 }] };
   dialogVisible.value = true;
 };
 

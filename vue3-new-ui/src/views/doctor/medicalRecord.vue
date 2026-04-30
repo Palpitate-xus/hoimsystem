@@ -3,7 +3,7 @@
     <vab-page-header title="病历管理" />
     <el-card>
       <el-button type="primary" @click="handleAdd">新增病历</el-button>
-      <el-table :data="list" v-loading="loading" style="margin-top: 15px">
+      <el-table :data="paginatedList" v-loading="loading" style="margin-top: 15px">
         <el-table-column prop="uuid" label="病历ID" />
         <el-table-column prop="consultation_time" label="就诊时间" />
         <el-table-column prop="patient_name" label="患者" />
@@ -16,12 +16,23 @@
           </template>
         </el-table-column>
       </el-table>
+      <el-pagination
+        v-model:current-page="currentPage"
+        v-model:page-size="pageSize"
+        :page-sizes="[10, 20, 50, 100]"
+        layout="total, sizes, prev, pager, next, jumper"
+        :total="total"
+        style="margin-top: 15px; justify-content: flex-end;"
+      />
+
     </el-card>
 
     <el-dialog v-model="dialogVisible" :title="isEdit?'编辑病历':'新增病历'" width="600px">
       <el-form :model="form" label-width="100px">
-        <el-form-item label="患者ID">
-          <el-input-number v-model="form.patient_id" :min="1" />
+        <el-form-item label="患者">
+          <el-select v-model="form.patient_id" placeholder="请选择患者" style="width:100%">
+            <el-option v-for="p in patientOptions" :key="p.id" :label="p.name" :value="p.id" />
+          </el-select>
         </el-form-item>
         <el-form-item label="症状">
           <el-input v-model="form.symptom" type="textarea" :rows="3" />
@@ -50,28 +61,39 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import { ElMessage } from "element-plus";
 import { getMedicalRecordList, createMedicalRecord, updateMedicalRecord, getMedicalRecordDetail } from "@/api/doctor";
+import { getPatientList } from "@/api/admin";
 
 const list = ref([]);
+const currentPage = ref(1);
+const pageSize = ref(10);
+const total = ref(0);
+const paginatedList = computed(() => {
+  const start = (currentPage.value - 1) * pageSize.value;
+  return list.value.slice(start, start + pageSize.value);
+});
+
 const loading = ref(false);
 const dialogVisible = ref(false);
 const detailVisible = ref(false);
 const isEdit = ref(false);
 const form = ref({});
 const detail = ref({});
+const patientOptions = ref([]);
 
 const fetchList = async () => {
   loading.value = true;
   const res = await getMedicalRecordList();
   list.value = res.data || [];
+  total.value = list.value.length;
   loading.value = false;
 };
 
 const handleAdd = () => {
   isEdit.value = false;
-  form.value = { patient_id: 1, symptom: "", result: "" };
+  form.value = { patient_id: null, symptom: "", result: "" };
   dialogVisible.value = true;
 };
 
@@ -102,5 +124,13 @@ const viewDetail = async (row) => {
   detailVisible.value = true;
 };
 
-onMounted(fetchList);
+const loadPatients = async () => {
+  const res = await getPatientList();
+  patientOptions.value = res.data || [];
+};
+
+onMounted(() => {
+  fetchList();
+  loadPatients();
+});
 </script>

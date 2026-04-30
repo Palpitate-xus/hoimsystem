@@ -3,7 +3,7 @@
     <vab-page-header title="检查检验申请" />
     <el-card>
       <el-button type="primary" @click="handleAdd">新增申请</el-button>
-      <el-table :data="list" v-loading="loading" style="margin-top: 15px">
+      <el-table :data="paginatedList" v-loading="loading" style="margin-top: 15px">
         <el-table-column prop="id" label="申请单ID" />
         <el-table-column prop="patient_name" label="患者" />
         <el-table-column prop="check_type" label="检查类型" />
@@ -16,12 +16,23 @@
         </el-table-column>
         <el-table-column prop="create_time" label="申请时间" />
       </el-table>
+      <el-pagination
+        v-model:current-page="currentPage"
+        v-model:page-size="pageSize"
+        :page-sizes="[10, 20, 50, 100]"
+        layout="total, sizes, prev, pager, next, jumper"
+        :total="total"
+        style="margin-top: 15px; justify-content: flex-end;"
+      />
+
     </el-card>
 
     <el-dialog v-model="dialogVisible" title="新增检查申请" width="600px">
       <el-form :model="form" label-width="100px">
-        <el-form-item label="患者ID">
-          <el-input-number v-model="form.patient_id" :min="1" />
+        <el-form-item label="患者">
+          <el-select v-model="form.patient_id" placeholder="请选择患者" style="width:100%">
+            <el-option v-for="p in patientOptions" :key="p.id" :label="p.name" :value="p.id" />
+          </el-select>
         </el-form-item>
         <el-form-item label="检查类型">
           <el-input v-model="form.check_type" />
@@ -45,11 +56,21 @@
 import { ref, computed, onMounted } from "vue";
 import { ElMessage } from "element-plus";
 import { getLabOrderList, createLabOrder } from "@/api/doctor";
+import { getPatientList } from "@/api/admin";
 
 const list = ref([]);
+const currentPage = ref(1);
+const pageSize = ref(10);
+const total = ref(0);
+const paginatedList = computed(() => {
+  const start = (currentPage.value - 1) * pageSize.value;
+  return list.value.slice(start, start + pageSize.value);
+});
+
 const loading = ref(false);
 const dialogVisible = ref(false);
-const form = ref({ patient_id: 1, check_type: "", check_items: [], urgent: 0 });
+const form = ref({ patient_id: null, check_type: "", check_items: [], urgent: 0 });
+const patientOptions = ref([]);
 
 const checkItemsStr = computed({
   get: () => form.value.check_items.join(","),
@@ -60,11 +81,12 @@ const fetchList = async () => {
   loading.value = true;
   const res = await getLabOrderList();
   list.value = res.data || [];
+  total.value = list.value.length;
   loading.value = false;
 };
 
 const handleAdd = () => {
-  form.value = { patient_id: 1, check_type: "", check_items: [], urgent: 0 };
+  form.value = { patient_id: null, check_type: "", check_items: [], urgent: 0 };
   dialogVisible.value = true;
 };
 
@@ -79,5 +101,13 @@ const submit = async () => {
   }
 };
 
-onMounted(fetchList);
+const loadPatients = async () => {
+  const res = await getPatientList();
+  patientOptions.value = res.data || [];
+};
+
+onMounted(() => {
+  fetchList();
+  loadPatients();
+});
 </script>

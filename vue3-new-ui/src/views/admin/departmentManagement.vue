@@ -3,7 +3,7 @@
     <vab-page-header title="科室管理" />
     <el-card>
       <el-button type="primary" @click="handleAdd">新增科室</el-button>
-      <el-table :data="list" v-loading="loading" style="margin-top: 15px">
+      <el-table :data="paginatedList" v-loading="loading" style="margin-top: 15px">
         <el-table-column prop="id" label="ID" width="60" />
         <el-table-column prop="name" label="科室名称" />
         <el-table-column prop="phone" label="电话" />
@@ -16,6 +16,15 @@
           </template>
         </el-table-column>
       </el-table>
+      <el-pagination
+        v-model:current-page="currentPage"
+        v-model:page-size="pageSize"
+        :page-sizes="[10, 20, 50, 100]"
+        layout="total, sizes, prev, pager, next, jumper"
+        :total="total"
+        style="margin-top: 15px; justify-content: flex-end;"
+      />
+
     </el-card>
 
     <el-dialog v-model="dialogVisible" :title="isEdit?'编辑科室':'新增科室'" width="500px">
@@ -29,8 +38,10 @@
         <el-form-item label="位置">
           <el-input v-model="form.location" />
         </el-form-item>
-        <el-form-item label="主任医生ID">
-          <el-input-number v-model="form.director" :min="0" />
+        <el-form-item label="主任医生">
+          <el-select v-model="form.director" placeholder="请选择主任医生" clearable style="width:100%">
+            <el-option v-for="d in doctorOptions" :key="d.id" :label="d.name" :value="d.id" />
+          </el-select>
         </el-form-item>
       </el-form>
       <template #footer>
@@ -42,32 +53,49 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
-import { getDepartmentList, createDepartment, updateDepartment, deleteDepartment } from "@/api/admin";
+import { getDepartmentList, createDepartment, updateDepartment, deleteDepartment, getDoctorList } from "@/api/admin";
 
 const list = ref([]);
+const currentPage = ref(1);
+const pageSize = ref(10);
+const total = ref(0);
+const paginatedList = computed(() => {
+  const start = (currentPage.value - 1) * pageSize.value;
+  return list.value.slice(start, start + pageSize.value);
+});
+
 const loading = ref(false);
 const dialogVisible = ref(false);
 const isEdit = ref(false);
 const form = ref({});
+const doctorOptions = ref([]);
+
+const loadDoctors = async () => {
+  const res = await getDoctorList();
+  doctorOptions.value = res.data || [];
+};
 
 const fetchList = async () => {
   loading.value = true;
   const res = await getDepartmentList();
   list.value = res.data || [];
+  total.value = list.value.length;
   loading.value = false;
 };
 
 const handleAdd = () => {
   isEdit.value = false;
   form.value = {};
+  loadDoctors();
   dialogVisible.value = true;
 };
 
 const handleEdit = (row) => {
   isEdit.value = true;
   form.value = { ...row, department_id: row.id };
+  loadDoctors();
   dialogVisible.value = true;
 };
 

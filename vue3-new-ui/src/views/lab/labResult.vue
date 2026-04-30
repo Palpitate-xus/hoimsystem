@@ -3,7 +3,7 @@
     <vab-page-header title="检验科管理" />
     <el-tabs v-model="activeTab">
       <el-tab-pane label="待处理申请" name="pending">
-        <el-table :data="pendingList" v-loading="loading">
+        <el-table :data="paginatedPendingList" v-loading="loading">
           <el-table-column prop="id" label="申请单ID" />
           <el-table-column prop="patient_name" label="患者" />
           <el-table-column prop="check_type" label="检查类型" />
@@ -14,9 +14,18 @@
             </template>
           </el-table-column>
         </el-table>
+      <el-pagination
+        v-model:current-page="currentPage"
+        v-model:page-size="pageSize"
+        :page-sizes="[10, 20, 50, 100]"
+        layout="total, sizes, prev, pager, next, jumper"
+        :total="pendingList.length"
+        style="margin-top: 15px; justify-content: flex-end;"
+      />
+
       </el-tab-pane>
       <el-tab-pane label="检查结果" name="results">
-        <el-table :data="resultList" v-loading="loading2">
+        <el-table :data="paginatedResultList" v-loading="loading2">
           <el-table-column prop="id" label="结果ID" />
           <el-table-column prop="check_name" label="检查名称" />
           <el-table-column prop="check_time" label="检查时间" />
@@ -29,6 +38,15 @@
           </el-table-column>
           <el-table-column prop="technician_name" label="技师" />
         </el-table>
+      <el-pagination
+        v-model:current-page="currentPage"
+        v-model:page-size="pageSize"
+        :page-sizes="[10, 20, 50, 100]"
+        layout="total, sizes, prev, pager, next, jumper"
+        :total="resultList.length"
+        style="margin-top: 15px; justify-content: flex-end;"
+      />
+
       </el-tab-pane>
     </el-tabs>
 
@@ -56,7 +74,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import { ElMessage } from "element-plus";
 import { getPendingLabOrders, getLabResultList, createLabResult } from "@/api/lab";
 
@@ -67,6 +85,18 @@ const loading = ref(false);
 const loading2 = ref(false);
 const dialogVisible = ref(false);
 const form = ref({});
+const currentPage = ref(1);
+const pageSize = ref(10);
+
+const paginatedPendingList = computed(() => {
+  const start = (currentPage.value - 1) * pageSize.value;
+  return pendingList.value.slice(start, start + pageSize.value);
+});
+
+const paginatedResultList = computed(() => {
+  const start = (currentPage.value - 1) * pageSize.value;
+  return resultList.value.slice(start, start + pageSize.value);
+});
 
 const fetchPending = async () => {
   loading.value = true;

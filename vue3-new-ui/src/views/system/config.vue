@@ -2,7 +2,7 @@
   <div class="app-container">
     <vab-page-header title="系统参数" />
     <el-card>
-      <el-table :data="list" v-loading="loading">
+      <el-table :data="paginatedList" v-loading="loading">
         <el-table-column prop="config_key" label="参数键" />
         <el-table-column prop="config_value" label="参数值" />
         <el-table-column prop="description" label="说明" />
@@ -12,6 +12,15 @@
           </template>
         </el-table-column>
       </el-table>
+      <el-pagination
+        v-model:current-page="currentPage"
+        v-model:page-size="pageSize"
+        :page-sizes="[10, 20, 50, 100]"
+        layout="total, sizes, prev, pager, next, jumper"
+        :total="total"
+        style="margin-top: 15px; justify-content: flex-end;"
+      />
+
     </el-card>
 
     <el-dialog v-model="dialogVisible" title="编辑参数" width="500px">
@@ -32,11 +41,19 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import { ElMessage } from "element-plus";
 import { getConfigList, updateConfig } from "@/api/system";
 
 const list = ref([]);
+const currentPage = ref(1);
+const pageSize = ref(10);
+const total = ref(0);
+const paginatedList = computed(() => {
+  const start = (currentPage.value - 1) * pageSize.value;
+  return list.value.slice(start, start + pageSize.value);
+});
+
 const loading = ref(false);
 const dialogVisible = ref(false);
 const form = ref({});
@@ -45,6 +62,7 @@ const fetchList = async () => {
   loading.value = true;
   const res = await getConfigList();
   list.value = res.data || [];
+  total.value = list.value.length;
   loading.value = false;
 };
 

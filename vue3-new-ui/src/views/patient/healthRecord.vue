@@ -15,23 +15,39 @@
 
     <el-card style="margin-top: 20px">
       <template #header>就诊记录</template>
-      <el-table :data="visits" v-loading="loading">
+      <el-table :data="paginatedVisits" v-loading="loading">
         <el-table-column prop="visit_time" label="就诊时间" />
         <el-table-column prop="doctor_name" label="医生" />
         <el-table-column prop="department" label="科室" />
         <el-table-column prop="diagnosis" label="诊断" />
       </el-table>
+      <el-pagination
+        v-model:current-page="currentPage"
+        v-model:page-size="pageSize"
+        :page-sizes="[10, 20, 50, 100]"
+        layout="total, sizes, prev, pager, next, jumper"
+        :total="total"
+        style="margin-top: 15px; justify-content: flex-end;"
+      />
+
     </el-card>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import { getHealthProfile, getVisitRecords } from "@/api/patient";
 
 const profile = ref({});
 const visits = ref([]);
 const loading = ref(false);
+const currentPage = ref(1);
+const pageSize = ref(10);
+const total = ref(0);
+const paginatedVisits = computed(() => {
+  const start = (currentPage.value - 1) * pageSize.value;
+  return visits.value.slice(start, start + pageSize.value);
+});
 
 onMounted(async () => {
   const p = await getHealthProfile();
@@ -39,6 +55,7 @@ onMounted(async () => {
   loading.value = true;
   const v = await getVisitRecords();
   visits.value = v.data || [];
+  total.value = visits.value.length;
   loading.value = false;
 });
 </script>

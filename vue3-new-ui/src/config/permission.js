@@ -77,8 +77,6 @@ router.beforeEach(async (to, from, next) => {
           // 确保路由添加完成后，跳转到目标页面
           next({ ...to, replace: true });
         } catch (error) {
-          console.error("路由守卫错误:", error);
-          ElMessage.error(error.message || "发生错误，请重新登录");
           await store.dispatch("user/resetAccessToken");
           next(`/login?redirect=${to.path}`);
           if (progressBar) VabProgress.done();

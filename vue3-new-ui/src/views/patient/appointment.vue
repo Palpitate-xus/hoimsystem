@@ -3,7 +3,7 @@
     <vab-page-header title="预约挂号" />
     <el-card>
       <el-button type="primary" @click="openDialog">预约挂号</el-button>
-      <el-table :data="list" v-loading="loading" style="margin-top: 15px">
+      <el-table :data="paginatedList" v-loading="loading" style="margin-top: 15px">
         <el-table-column prop="uuid" label="预约ID" />
         <el-table-column prop="doctor" label="医生" />
         <el-table-column prop="department" label="科室" />
@@ -22,6 +22,15 @@
           </template>
         </el-table-column>
       </el-table>
+      <el-pagination
+        v-model:current-page="currentPage"
+        v-model:page-size="pageSize"
+        :page-sizes="[10, 20, 50, 100]"
+        layout="total, sizes, prev, pager, next, jumper"
+        :total="total"
+        style="margin-top: 15px; justify-content: flex-end;"
+      />
+
     </el-card>
 
     <el-dialog v-model="dialogVisible" title="选择号源" width="900px">
@@ -47,11 +56,19 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import { ElMessage } from "element-plus";
 import { getAppointmentList, getAppointmentSchedules, createAppointment, cancelAppointment } from "@/api/patient";
 
 const list = ref([]);
+const currentPage = ref(1);
+const pageSize = ref(10);
+const total = ref(0);
+const paginatedList = computed(() => {
+  const start = (currentPage.value - 1) * pageSize.value;
+  return list.value.slice(start, start + pageSize.value);
+});
+
 const schedules = ref([]);
 const loading = ref(false);
 const schedLoading = ref(false);
@@ -61,6 +78,7 @@ const fetchList = async () => {
   loading.value = true;
   const res = await getAppointmentList();
   list.value = res.data || [];
+  total.value = list.value.length;
   loading.value = false;
 };
 

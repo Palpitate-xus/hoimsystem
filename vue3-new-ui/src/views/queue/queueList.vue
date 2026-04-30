@@ -2,7 +2,7 @@
   <div class="app-container">
     <vab-page-header title="候诊队列" />
     <el-card>
-      <el-table :data="list" v-loading="loading">
+      <el-table :data="paginatedList" v-loading="loading">
         <el-table-column prop="queue_id" label="队列ID" />
         <el-table-column prop="queue_number" label="排队序号" />
         <el-table-column prop="patient_name" label="患者" />
@@ -29,22 +29,40 @@
           </template>
         </el-table-column>
       </el-table>
+      <el-pagination
+        v-model:current-page="currentPage"
+        v-model:page-size="pageSize"
+        :page-sizes="[10, 20, 50, 100]"
+        layout="total, sizes, prev, pager, next, jumper"
+        :total="total"
+        style="margin-top: 15px; justify-content: flex-end;"
+      />
+
     </el-card>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import { ElMessage } from "element-plus";
 import { getQueueList, callNext, passQueue, skipQueue } from "@/api/queue";
 
 const list = ref([]);
+const currentPage = ref(1);
+const pageSize = ref(10);
+const total = ref(0);
+const paginatedList = computed(() => {
+  const start = (currentPage.value - 1) * pageSize.value;
+  return list.value.slice(start, start + pageSize.value);
+});
+
 const loading = ref(false);
 
 const fetchList = async () => {
   loading.value = true;
   const res = await getQueueList();
   list.value = res.data || [];
+  total.value = list.value.length;
   loading.value = false;
 };
 

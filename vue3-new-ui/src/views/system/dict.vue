@@ -11,7 +11,7 @@
         </el-form-item>
       </el-form>
       <el-button type="primary" @click="handleAdd">新增字典项</el-button>
-      <el-table :data="list" v-loading="loading" style="margin-top: 15px">
+      <el-table :data="paginatedList" v-loading="loading" style="margin-top: 15px">
         <el-table-column prop="dict_id" label="ID" />
         <el-table-column prop="dict_type" label="类型" />
         <el-table-column prop="dict_code" label="编码" />
@@ -24,6 +24,15 @@
           </template>
         </el-table-column>
       </el-table>
+      <el-pagination
+        v-model:current-page="currentPage"
+        v-model:page-size="pageSize"
+        :page-sizes="[10, 20, 50, 100]"
+        layout="total, sizes, prev, pager, next, jumper"
+        :total="total"
+        style="margin-top: 15px; justify-content: flex-end;"
+      />
+
     </el-card>
 
     <el-dialog v-model="dialogVisible" :title="isEdit?'编辑字典项':'新增字典项'" width="500px">
@@ -50,11 +59,19 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { getDictList, createDict, updateDict, deleteDict } from "@/api/system";
 
 const list = ref([]);
+const currentPage = ref(1);
+const pageSize = ref(10);
+const total = ref(0);
+const paginatedList = computed(() => {
+  const start = (currentPage.value - 1) * pageSize.value;
+  return list.value.slice(start, start + pageSize.value);
+});
+
 const loading = ref(false);
 const dialogVisible = ref(false);
 const isEdit = ref(false);
@@ -65,6 +82,7 @@ const fetchList = async () => {
   loading.value = true;
   const res = await getDictList(queryForm.value);
   list.value = res.data || [];
+  total.value = list.value.length;
   loading.value = false;
 };
 

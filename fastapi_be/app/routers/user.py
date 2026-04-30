@@ -1,7 +1,7 @@
 import json
 import datetime
 import jwt
-from fastapi import APIRouter, Request, Depends
+from fastapi import APIRouter, Request, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models import User, Patient
@@ -93,10 +93,10 @@ def register(req: RegisterRequest, db: Session = Depends(get_db)):
 def get_user_info(req: UserInfoRequest, db: Session = Depends(get_db)):
     username = decode_access_token(req.accesstoken)
     if not username:
-        return {"code": 500, "msg": "token无效或已过期"}
+        raise HTTPException(status_code=401, detail="token无效或已过期")
     user = db.query(User).filter(User.username == username).first()
     if not user:
-        return {"code": 500, "msg": "用户不存在"}
+        raise HTTPException(status_code=401, detail="用户不存在")
     if user.user_role == "admin":
         permissions = ["admin"]
     elif user.user_role == "doctor":

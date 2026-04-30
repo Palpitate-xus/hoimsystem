@@ -26,10 +26,19 @@
         <el-descriptions title="统计结果" :column="1" border v-if="outpatientResult.total_visits !== undefined">
           <el-descriptions-item label="总就诊人次">{{ outpatientResult.total_visits }}</el-descriptions-item>
         </el-descriptions>
-        <el-table :data="outpatientResult.details" style="margin-top:15px">
+        <el-table :data="paginatedOutpatientDetails" style="margin-top:15px">
           <el-table-column prop="label" label="分组" />
           <el-table-column prop="value" label="人次" />
         </el-table>
+      <el-pagination
+        v-model:current-page="currentPage"
+        v-model:page-size="pageSize"
+        :page-sizes="[10, 20, 50, 100]"
+        layout="total, sizes, prev, pager, next, jumper"
+        :total="outpatientResult.details?.length || 0"
+        style="margin-top: 15px; justify-content: flex-end;"
+      />
+
       </el-tab-pane>
 
       <el-tab-pane label="财务统计" name="finance">
@@ -64,10 +73,19 @@
             <el-button type="primary" @click="queryPharma">查询</el-button>
           </el-form-item>
         </el-form>
-        <el-table :data="pharmaResult">
+        <el-table :data="paginatedPharmaResult">
           <el-table-column prop="name" label="药品名称" />
           <el-table-column prop="total_number" label="消耗数量" />
         </el-table>
+      <el-pagination
+        v-model:current-page="currentPage"
+        v-model:page-size="pageSize"
+        :page-sizes="[10, 20, 50, 100]"
+        layout="total, sizes, prev, pager, next, jumper"
+        :total="pharmaResult.length"
+        style="margin-top: 15px; justify-content: flex-end;"
+      />
+
       </el-tab-pane>
 
       <el-tab-pane label="医生工作量" name="workload">
@@ -78,30 +96,43 @@
           <el-form-item label="结束日期">
             <el-date-picker v-model="workloadForm.end_date" type="date" value-format="YYYY-MM-DD" />
           </el-form-item>
-          <el-form-item label="医生ID">
-            <el-input-number v-model="workloadForm.doctor_id" :min="1" />
+          <el-form-item label="医生">
+            <el-select v-model="workloadForm.doctor_id" placeholder="请选择医生" clearable style="width:180px">
+              <el-option v-for="d in doctorOptions" :key="d.id" :label="d.name" :value="d.id" />
+            </el-select>
           </el-form-item>
           <el-form-item>
             <el-button type="primary" @click="queryWorkload">查询</el-button>
           </el-form-item>
         </el-form>
-        <el-table :data="workloadResult">
+        <el-table :data="paginatedWorkloadResult">
           <el-table-column prop="doctor_name" label="医生" />
           <el-table-column prop="visit_count" label="接诊人数" />
           <el-table-column prop="prescription_count" label="处方数" />
           <el-table-column prop="lab_order_count" label="检查申请数" />
         </el-table>
+      <el-pagination
+        v-model:current-page="currentPage"
+        v-model:page-size="pageSize"
+        :page-sizes="[10, 20, 50, 100]"
+        layout="total, sizes, prev, pager, next, jumper"
+        :total="workloadResult.length"
+        style="margin-top: 15px; justify-content: flex-end;"
+      />
+
       </el-tab-pane>
     </el-tabs>
   </div>
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted, computed } from "vue";
 import { ElMessage } from "element-plus";
 import { reportOutpatientVolume, reportFinance, reportPharmaceutical, reportDoctorWorkload } from "@/api/report";
+import { getDoctorList } from "@/api/admin";
 
 const activeTab = ref("outpatient");
+const doctorOptions = ref([]);
 const outpatientForm = ref({ start_date: "", end_date: "", group_by: "day" });
 const financeForm = ref({ start_date: "", end_date: "" });
 const pharmaForm = ref({ start_date: "", end_date: "" });
@@ -111,6 +142,24 @@ const outpatientResult = ref({ total_visits: undefined, details: [] });
 const financeResult = ref({});
 const pharmaResult = ref([]);
 const workloadResult = ref([]);
+
+const currentPage = ref(1);
+const pageSize = ref(10);
+
+const paginatedOutpatientDetails = computed(() => {
+  const start = (currentPage.value - 1) * pageSize.value;
+  return (outpatientResult.value.details || []).slice(start, start + pageSize.value);
+});
+
+const paginatedPharmaResult = computed(() => {
+  const start = (currentPage.value - 1) * pageSize.value;
+  return pharmaResult.value.slice(start, start + pageSize.value);
+});
+
+const paginatedWorkloadResult = computed(() => {
+  const start = (currentPage.value - 1) * pageSize.value;
+  return workloadResult.value.slice(start, start + pageSize.value);
+});
 
 const queryOutpatient = async () => {
   try {
@@ -147,4 +196,11 @@ const queryWorkload = async () => {
     ElMessage.error(e.msg || "查询失败");
   }
 };
+
+const loadDoctors = async () => {
+  const res = await getDoctorList();
+  doctorOptions.value = res.data || [];
+};
+
+onMounted(loadDoctors);
 </script>

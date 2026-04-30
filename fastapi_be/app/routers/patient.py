@@ -283,6 +283,7 @@ def get_visit_records(current_user: User = Depends(get_current_user), db: Sessio
     data = []
     for item in records:
         data.append({
+            "medical_record_id": item.medical_record_id,
             "visit_time": str(item.consultation_time),
             "doctor_name": item.doctor.name if item.doctor else "",
             "department": item.doctor.department.name if item.doctor and item.doctor.department else "",

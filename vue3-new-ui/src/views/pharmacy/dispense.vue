@@ -2,7 +2,7 @@
   <div class="app-container">
     <vab-page-header title="处方审核与发药" />
     <el-card>
-      <el-table :data="list" v-loading="loading">
+      <el-table :data="paginatedList" v-loading="loading">
         <el-table-column prop="uuid" label="处方ID" />
         <el-table-column prop="patient_name" label="患者" />
         <el-table-column prop="doctor_name" label="医生" />
@@ -27,6 +27,15 @@
           </template>
         </el-table-column>
       </el-table>
+      <el-pagination
+        v-model:current-page="currentPage"
+        v-model:page-size="pageSize"
+        :page-sizes="[10, 20, 50, 100]"
+        layout="total, sizes, prev, pager, next, jumper"
+        :total="total"
+        style="margin-top: 15px; justify-content: flex-end;"
+      />
+
     </el-card>
 
     <el-dialog v-model="returnVisible" title="退药" width="500px">
@@ -52,11 +61,19 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import { ElMessage } from "element-plus";
 import { getDispenseList, auditPrescription, dispensePrescription, returnMedicine } from "@/api/pharmacy";
 
 const list = ref([]);
+const currentPage = ref(1);
+const pageSize = ref(10);
+const total = ref(0);
+const paginatedList = computed(() => {
+  const start = (currentPage.value - 1) * pageSize.value;
+  return list.value.slice(start, start + pageSize.value);
+});
+
 const loading = ref(false);
 const returnVisible = ref(false);
 const returnForm = ref({});
@@ -66,6 +83,7 @@ const fetchList = async () => {
   loading.value = true;
   const res = await getDispenseList();
   list.value = res.data || [];
+  total.value = list.value.length;
   loading.value = false;
 };
 

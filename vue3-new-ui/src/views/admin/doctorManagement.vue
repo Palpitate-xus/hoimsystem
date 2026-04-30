@@ -3,7 +3,7 @@
     <vab-page-header title="医生管理" />
     <el-card>
       <el-button type="primary" @click="handleAdd">新增医生</el-button>
-      <el-table :data="list" v-loading="loading" style="margin-top: 15px">
+      <el-table :data="paginatedList" v-loading="loading" style="margin-top: 15px">
         <el-table-column prop="id" label="ID" width="60" />
         <el-table-column prop="name" label="姓名" />
         <el-table-column prop="sex" label="性别" :formatter="(row)=>row.sex===0?'女':'男'" />
@@ -18,6 +18,15 @@
           </template>
         </el-table-column>
       </el-table>
+      <el-pagination
+        v-model:current-page="currentPage"
+        v-model:page-size="pageSize"
+        :page-sizes="[10, 20, 50, 100]"
+        layout="total, sizes, prev, pager, next, jumper"
+        :total="total"
+        style="margin-top: 15px; justify-content: flex-end;"
+      />
+
     </el-card>
 
     <el-dialog v-model="dialogVisible" :title="isEdit?'编辑医生':'新增医生'" width="600px">
@@ -46,8 +55,10 @@
         <el-form-item label="手机号">
           <el-input v-model="form.phone" />
         </el-form-item>
-        <el-form-item label="科室ID">
-          <el-input-number v-model="form.department" :min="1" />
+        <el-form-item label="科室">
+          <el-select v-model="form.department" placeholder="请选择科室" style="width:100%">
+            <el-option v-for="d in departmentOptions" :key="d.id" :label="d.name" :value="d.id" />
+          </el-select>
         </el-form-item>
         <el-form-item label="权限">
           <el-select v-model="form.permission">
@@ -65,11 +76,20 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
-import { getDoctorList, registerDoctor, updateDoctor, deleteDoctor } from "@/api/admin";
+import { getDoctorList, registerDoctor, updateDoctor, deleteDoctor, getDepartmentList } from "@/api/admin";
 
 const list = ref([]);
+const departmentOptions = ref([]);
+const currentPage = ref(1);
+const pageSize = ref(10);
+const total = ref(0);
+const paginatedList = computed(() => {
+  const start = (currentPage.value - 1) * pageSize.value;
+  return list.value.slice(start, start + pageSize.value);
+});
+
 const loading = ref(false);
 const dialogVisible = ref(false);
 const isEdit = ref(false);
@@ -79,18 +99,26 @@ const fetchList = async () => {
   loading.value = true;
   const res = await getDoctorList();
   list.value = res.data || [];
+  total.value = list.value.length;
   loading.value = false;
+};
+
+const loadDepartments = async () => {
+  const res = await getDepartmentList();
+  departmentOptions.value = res.data || [];
 };
 
 const handleAdd = () => {
   isEdit.value = false;
-  form.value = { sex: "男", permission: "doctor", department: 1 };
+  form.value = { sex: "男", permission: "doctor", department: null };
+  loadDepartments();
   dialogVisible.value = true;
 };
 
 const handleEdit = (row) => {
   isEdit.value = true;
   form.value = { ...row, sex: row.sex === 0 ? "女" : "男", doctor_id: row.id };
+  loadDepartments();
   dialogVisible.value = true;
 };
 

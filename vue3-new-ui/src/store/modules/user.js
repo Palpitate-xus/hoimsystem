@@ -69,7 +69,6 @@ const actions = {
     try {
       const { data } = await getUserInfo(state.accessToken);
       if (!data) {
-        ElMessage.error("验证失败，请重新登录...");
         return false;
       }
       let { permissions, username, avatar } = data;
@@ -79,12 +78,9 @@ const actions = {
         commit("setAvatar", avatar);
         return permissions;
       } else {
-        ElMessage.error("用户信息接口异常");
         return false;
       }
     } catch (error) {
-      console.error("获取用户信息失败:", error);
-      ElMessage.error("获取用户信息失败，请重新登录");
       return false;
     }
   },

@@ -3,7 +3,7 @@
     <vab-page-header title="随访管理" />
     <el-card>
       <el-button type="primary" @click="handleAdd">新增随访计划</el-button>
-      <el-table :data="list" v-loading="loading" style="margin-top: 15px">
+      <el-table :data="paginatedList" v-loading="loading" style="margin-top: 15px">
         <el-table-column prop="id" label="ID" />
         <el-table-column prop="patient_name" label="患者" />
         <el-table-column prop="plan_date" label="计划日期" />
@@ -20,12 +20,23 @@
           </template>
         </el-table-column>
       </el-table>
+      <el-pagination
+        v-model:current-page="currentPage"
+        v-model:page-size="pageSize"
+        :page-sizes="[10, 20, 50, 100]"
+        layout="total, sizes, prev, pager, next, jumper"
+        :total="total"
+        style="margin-top: 15px; justify-content: flex-end;"
+      />
+
     </el-card>
 
     <el-dialog v-model="dialogVisible" title="新增随访计划" width="600px">
       <el-form :model="form" label-width="100px">
-        <el-form-item label="患者ID">
-          <el-input-number v-model="form.patient_id" :min="1" />
+        <el-form-item label="患者">
+          <el-select v-model="form.patient_id" placeholder="请选择患者" style="width:100%">
+            <el-option v-for="p in patientOptions" :key="p.id" :label="p.name" :value="p.id" />
+          </el-select>
         </el-form-item>
         <el-form-item label="计划日期">
           <el-date-picker v-model="form.plan_date" type="date" value-format="YYYY-MM-DD" />
@@ -58,28 +69,49 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import { ElMessage } from "element-plus";
 import { getFollowUpList, createFollowUpPlan, recordFollowUp } from "@/api/followup";
+import { getPatientList } from "@/api/admin";
 
 const list = ref([]);
+const currentPage = ref(1);
+const pageSize = ref(10);
+const total = ref(0);
+const paginatedList = computed(() => {
+  const start = (currentPage.value - 1) * pageSize.value;
+  return list.value.slice(start, start + pageSize.value);
+});
+
 const loading = ref(false);
 const dialogVisible = ref(false);
 const recordVisible = ref(false);
 const form = ref({});
 const recordForm = ref({});
+const patientOptions = ref([]);
 
 const fetchList = async () => {
   loading.value = true;
   const res = await getFollowUpList();
   list.value = res.data || [];
+  total.value = list.value.length;
   loading.value = false;
 };
 
 const handleAdd = () => {
-  form.value = { patient_id: 1 };
+  form.value = { patient_id: null };
   dialogVisible.value = true;
 };
+
+const loadPatients = async () => {
+  const res = await getPatientList();
+  patientOptions.value = res.data || [];
+};
+
+onMounted(() => {
+  fetchList();
+  loadPatients();
+});
 
 const submit = async () => {
   try {
@@ -108,5 +140,4 @@ const submitRecord = async () => {
   }
 };
 
-onMounted(fetchList);
 </script>

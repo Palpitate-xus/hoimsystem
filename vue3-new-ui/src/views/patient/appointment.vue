@@ -94,7 +94,7 @@ const dialogVisible = ref(false);
 
 const fetchList = async () => {
   loading.value = true;
-  const res = await getAppointmentList();
+  const res = await getAppointmentList(searchQuery.value);
   list.value = res.data || [];
   total.value = filteredList.value.length;
   loading.value = false;

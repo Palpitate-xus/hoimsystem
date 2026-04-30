@@ -63,7 +63,7 @@ const loading = ref(false);
 
 const fetchList = async () => {
   loading.value = true;
-  const res = await getInvoiceList();
+  const res = await getInvoiceList(searchQuery.value);
   list.value = res.data || [];
   total.value = filteredList.value.length;
   loading.value = false;

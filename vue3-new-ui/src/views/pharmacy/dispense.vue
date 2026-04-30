@@ -99,7 +99,7 @@ const returnPhas = ref([]);
 
 const fetchList = async () => {
   loading.value = true;
-  const res = await getDispenseList();
+  const res = await getDispenseList(searchQuery.value);
   list.value = res.data || [];
   total.value = filteredList.value.length;
   loading.value = false;

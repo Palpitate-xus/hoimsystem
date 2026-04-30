@@ -184,6 +184,18 @@ export default {
       },
     };
   },
+  computed: {
+    filteredRoles() {
+      if (!this.searchQuery) return this.roles;
+      const kw = this.searchQuery.toLowerCase();
+      return this.roles.filter(item =>
+        Object.values(item).some(val =>
+          String(val ?? "").toLowerCase().includes(kw)
+        )
+      );
+    },
+  },
+
   methods: {
     editRole(role) {
       this.currentRole = { ...role };
@@ -218,17 +230,5 @@ export default {
   .el-tag {
     margin-bottom: 5px;
   }
-
-  computed: {
-    filteredRoles() {
-      if (!this.searchQuery) return this.roles;
-      const kw = this.searchQuery.toLowerCase();
-      return this.roles.filter(item =>
-        Object.values(item).some(val =>
-          String(val ?? "").toLowerCase().includes(kw)
-        )
-      );
-    },
-  },
 }
 </style>

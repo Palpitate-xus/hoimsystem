@@ -1,5 +1,6 @@
 import datetime
 from fastapi import APIRouter, Depends
+from typing import Optional
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models import User, Patient, Doctor, Department, Notice
@@ -14,7 +15,7 @@ router = APIRouter()
 
 
 @router.get("/doctorManagement/getList")
-def get_doctor_list(db: Session = Depends(get_db)):
+def get_doctor_list(keyword: Optional[str] = None, db: Session = Depends(get_db)):
     doctors = db.query(Doctor).all()
     data = []
     for item in doctors:
@@ -27,6 +28,9 @@ def get_doctor_list(db: Session = Depends(get_db)):
             "permission": item.permission,
             "title": item.title,
         })
+    if keyword:
+        kw = keyword.lower()
+        data = [item for item in data if any(kw in str(val).lower() for val in item.values())]
     return {"code": 200, "msg": "success", "data": data}
 
 
@@ -62,7 +66,7 @@ def delete_doctor(req: DoctorDeleteRequest, db: Session = Depends(get_db)):
 
 
 @router.get("/patientManagement/getList")
-def get_patient_list(db: Session = Depends(get_db)):
+def get_patient_list(keyword: Optional[str] = None, db: Session = Depends(get_db)):
     patient_data = db.query(Patient).all()
     data = []
     for item in patient_data:
@@ -77,6 +81,9 @@ def get_patient_list(db: Session = Depends(get_db)):
             "address": item.address,
             "identity": item.identity,
         })
+    if keyword:
+        kw = keyword.lower()
+        data = [item for item in data if any(kw in str(val).lower() for val in item.values())]
     return {"code": 200, "msg": "success", "data": data}
 
 
@@ -95,7 +102,7 @@ def update_patient(req: PatientUpdateRequest, db: Session = Depends(get_db)):
 
 
 @router.get("/departmentManagement/getList")
-def get_department_list(db: Session = Depends(get_db)):
+def get_department_list(keyword: Optional[str] = None, db: Session = Depends(get_db)):
     departments = db.query(Department).all()
     data = []
     for item in departments:
@@ -108,6 +115,9 @@ def get_department_list(db: Session = Depends(get_db)):
             "location": item.location,
             "director": director_name,
         })
+    if keyword:
+        kw = keyword.lower()
+        data = [item for item in data if any(kw in str(val).lower() for val in item.values())]
     return {"code": 200, "msg": "success", "data": data}
 
 
@@ -153,7 +163,7 @@ def delete_department(req: DepartmentDeleteRequest, db: Session = Depends(get_db
 
 
 @router.get("/notice/getList")
-def get_notice_list(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+def get_notice_list(current_user: User = Depends(get_current_user), keyword: Optional[str] = None, db: Session = Depends(get_db)):
     notices = db.query(Notice).all()
     data = []
     for item in notices:
@@ -174,6 +184,9 @@ def get_notice_list(current_user: User = Depends(get_current_user), db: Session 
             "readnum": item.readnum,
             "writer": item.writer.username if item.writer else "",
         })
+    if keyword:
+        kw = keyword.lower()
+        data = [item for item in data if any(kw in str(val).lower() for val in item.values())]
     return {"code": 200, "msg": "success", "data": data}
 
 

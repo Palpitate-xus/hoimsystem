@@ -1,5 +1,6 @@
 import datetime
 from fastapi import APIRouter, Depends
+from typing import Optional
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models import VitalSign, Patient
@@ -30,7 +31,7 @@ def create_vital_sign(req: VitalSignCreateRequest, current_user = Depends(get_cu
 
 
 @router.get("/vitalSign/getList")
-def get_vital_sign_list(db: Session = Depends(get_db)):
+def get_vital_sign_list(keyword: Optional[str] = None, db: Session = Depends(get_db)):
     vitals = db.query(VitalSign).order_by(VitalSign.check_time.desc()).all()
     data = []
     for item in vitals:
@@ -43,4 +44,7 @@ def get_vital_sign_list(db: Session = Depends(get_db)):
             "weight": item.weight,
             "check_time": str(item.check_time),
         })
+    if keyword:
+        kw = keyword.lower()
+        data = [item for item in data if any(kw in str(val).lower() for val in item.values())]
     return {"code": 200, "msg": "success", "data": data}

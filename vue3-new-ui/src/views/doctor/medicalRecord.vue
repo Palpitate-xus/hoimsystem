@@ -103,7 +103,7 @@ const patientOptions = ref([]);
 
 const fetchList = async () => {
   loading.value = true;
-  const res = await getMedicalRecordList();
+  const res = await getMedicalRecordList(searchQuery.value);
   list.value = res.data || [];
   total.value = filteredList.value.length;
   loading.value = false;
@@ -143,7 +143,7 @@ const viewDetail = async (row) => {
 };
 
 const loadPatients = async () => {
-  const res = await getPatientList();
+  const res = await getPatientList(searchQuery.value);
   patientOptions.value = res.data || [];
 };
 

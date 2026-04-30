@@ -203,6 +203,18 @@ export default {
     if (this.taskPriorityChart) this.taskPriorityChart.dispose();
     if (this.userActivityChart) this.userActivityChart.dispose();
   },
+  computed: {
+    filteredDetailData() {
+      if (!this.searchQuery) return this.detailData;
+      const kw = this.searchQuery.toLowerCase();
+      return this.detailData.filter(item =>
+        Object.values(item).some(val =>
+          String(val ?? "").toLowerCase().includes(kw)
+        )
+      );
+    },
+  },
+
   methods: {
     formatDate(date) {
       const d = new Date(date);
@@ -435,17 +447,5 @@ export default {
     color: #F56C6C;
     font-weight: bold;
   }
-
-  computed: {
-    filteredDetailData() {
-      if (!this.searchQuery) return this.detailData;
-      const kw = this.searchQuery.toLowerCase();
-      return this.detailData.filter(item =>
-        Object.values(item).some(val =>
-          String(val ?? "").toLowerCase().includes(kw)
-        )
-      );
-    },
-  },
 }
 </style>

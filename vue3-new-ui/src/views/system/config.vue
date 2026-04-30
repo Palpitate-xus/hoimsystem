@@ -78,7 +78,7 @@ const form = ref({});
 
 const fetchList = async () => {
   loading.value = true;
-  const res = await getConfigList();
+  const res = await getConfigList(searchQuery.value);
   list.value = res.data || [];
   total.value = filteredList.value.length;
   loading.value = false;

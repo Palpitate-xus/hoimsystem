@@ -1,7 +1,7 @@
 import request from "@/utils/request";
 
-export function getQueueList() {
-  return request({ url: "queue/getList", method: "get" });
+export function getQueueList(keyword = "") {
+  return request({ url: "queue/getList", method: "get", params: { keyword } });
 }
 
 export function callNext(data) {

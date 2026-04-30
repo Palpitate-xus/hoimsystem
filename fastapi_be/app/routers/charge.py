@@ -1,5 +1,6 @@
 import datetime
 from fastapi import APIRouter, Depends
+from typing import Optional
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models import Charge, Invoice, Prescription, PrePha, Pharmaceutical, Patient, User
@@ -10,7 +11,7 @@ router = APIRouter()
 
 
 @router.get("/chargeManagement/getList")
-def get_charge_list(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+def get_charge_list(current_user: User = Depends(get_current_user), keyword: Optional[str] = None, db: Session = Depends(get_db)):
     data = []
     if current_user.user_role == "admin":
         charge_list = db.query(Charge).all()
@@ -49,6 +50,9 @@ def get_charge_list(current_user: User = Depends(get_current_user), db: Session 
                 "amount": round(item.amount, 2) if item.amount else 0,
                 "status": item.status,
             })
+    if keyword:
+        kw = keyword.lower()
+        data = [item for item in data if any(kw in str(val).lower() for val in item.values())]
     return {"code": 200, "msg": "success", "data": data}
 
 
@@ -77,7 +81,7 @@ def charge_refund(req: ChargeRefundRequest, db: Session = Depends(get_db)):
 
 
 @router.get("/invoice/getList")
-def get_invoice_list(db: Session = Depends(get_db)):
+def get_invoice_list(keyword: Optional[str] = None, db: Session = Depends(get_db)):
     invoices = db.query(Invoice).all()
     data = []
     for item in invoices:
@@ -88,6 +92,9 @@ def get_invoice_list(db: Session = Depends(get_db)):
             "amount": round(item.amount, 2) if item.amount else 0,
             "invoice_time": str(item.invoice_time),
         })
+    if keyword:
+        kw = keyword.lower()
+        data = [item for item in data if any(kw in str(val).lower() for val in item.values())]
     return {"code": 200, "msg": "success", "data": data}
 
 

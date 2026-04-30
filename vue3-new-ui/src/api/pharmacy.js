@@ -1,7 +1,7 @@
 import request from "@/utils/request";
 
-export function getPharmaceuticalList() {
-  return request({ url: "pharmaceuticalManagement/getList", method: "get" });
+export function getPharmaceuticalList(keyword = "") {
+  return request({ url: "pharmaceuticalManagement/getList", method: "get", params: { keyword } });
 }
 
 export function createPharmaceutical(data) {
@@ -20,8 +20,8 @@ export function stockQuery(data) {
   return request({ url: "pharmaceuticalManagement/stock_query", method: "post", data });
 }
 
-export function getDispenseList() {
-  return request({ url: "pharmacy/dispenseList", method: "get" });
+export function getDispenseList(keyword = "") {
+  return request({ url: "pharmacy/dispenseList", method: "get", params: { keyword } });
 }
 
 export function auditPrescription(data) {

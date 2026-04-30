@@ -1,5 +1,6 @@
 import datetime
 from fastapi import APIRouter, Depends
+from typing import Optional
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models import LabOrder, LabResult
@@ -60,7 +61,7 @@ def get_pending_lab_orders(db: Session = Depends(get_db)):
 
 
 @router.get("/labResult/getList")
-def get_lab_result_list(db: Session = Depends(get_db)):
+def get_lab_result_list(keyword: Optional[str] = None, db: Session = Depends(get_db)):
     results = db.query(LabResult).order_by(LabResult.report_time.desc()).all()
     data = []
     for item in results:
@@ -72,6 +73,9 @@ def get_lab_result_list(db: Session = Depends(get_db)):
             "abnormal_flag": item.abnormal_flag,
             "technician_name": item.technician.username if item.technician else "",
         })
+    if keyword:
+        kw = keyword.lower()
+        data = [item for item in data if any(kw in str(val).lower() for val in item.values())]
     return {"code": 200, "msg": "success", "data": data}
 
 

@@ -75,7 +75,7 @@ const detail = ref({});
 
 const fetchList = async () => {
   loading.value = true;
-  const res = await getMedicalRecordList();
+  const res = await getMedicalRecordList(searchQuery.value);
   list.value = res.data || [];
   total.value = filteredList.value.length;
   loading.value = false;

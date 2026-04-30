@@ -251,7 +251,7 @@ const queryWorkload = async () => {
 };
 
 const loadDoctors = async () => {
-  const res = await getDoctorList();
+  const res = await getDoctorList(searchQuery.value);
   doctorOptions.value = res.data || [];
 };
 

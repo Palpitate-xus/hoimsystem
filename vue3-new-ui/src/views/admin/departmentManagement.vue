@@ -91,13 +91,13 @@ const form = ref({});
 const doctorOptions = ref([]);
 
 const loadDoctors = async () => {
-  const res = await getDoctorList();
+  const res = await getDoctorList(searchQuery.value);
   doctorOptions.value = res.data || [];
 };
 
 const fetchList = async () => {
   loading.value = true;
-  const res = await getDepartmentList();
+  const res = await getDepartmentList(searchQuery.value);
   list.value = res.data || [];
   total.value = filteredList.value.length;
   loading.value = false;

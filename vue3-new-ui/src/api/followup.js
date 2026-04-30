@@ -8,8 +8,8 @@ export function createFollowUpPlan(data) {
   return request({ url: "followUp/createPlan", method: "post", data });
 }
 
-export function getFollowUpList() {
-  return request({ url: "followUp/getList", method: "get" });
+export function getFollowUpList(keyword = "") {
+  return request({ url: "followUp/getList", method: "get", params: { keyword } });
 }
 
 export function recordFollowUp(data) {

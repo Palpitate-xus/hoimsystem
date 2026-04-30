@@ -315,15 +315,6 @@ export default {
       const start = (this.currentPage - 1) * this.pageSize;
       const end = start + this.pageSize;
       return this.notifications.slice(start, end);
-    filteredFilteredNotifications() {
-      if (!this.searchQuery) return this.filteredNotifications;
-      const kw = this.searchQuery.toLowerCase();
-      return this.filteredNotifications.filter(item =>
-        Object.values(item).some(val =>
-          String(val ?? "").toLowerCase().includes(kw)
-        )
-      );
-    },
     },
     unreadNotifications() {
       return this.notifications.filter(n => !n.read);

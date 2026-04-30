@@ -1,5 +1,6 @@
 import datetime
 from fastapi import APIRouter, Depends
+from typing import Optional
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models import Prescription, PrePha, Pharmaceutical
@@ -9,7 +10,7 @@ router = APIRouter()
 
 
 @router.get("/pharmacy/dispenseList")
-def get_dispense_list(db: Session = Depends(get_db)):
+def get_dispense_list(keyword: Optional[str] = None, db: Session = Depends(get_db)):
     prescriptions = db.query(Prescription).filter(Prescription.status.in_([0, 1])).all()
     data = []
     for item in prescriptions:
@@ -28,6 +29,9 @@ def get_dispense_list(db: Session = Depends(get_db)):
             "status": item.status,
             "create_time": str(item.create_time),
         })
+    if keyword:
+        kw = keyword.lower()
+        data = [item for item in data if any(kw in str(val).lower() for val in item.values())]
     return {"code": 200, "msg": "success", "data": data}
 
 

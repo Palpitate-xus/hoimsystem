@@ -97,7 +97,7 @@ const form = ref({});
 
 const fetchList = async () => {
   loading.value = true;
-  const res = await getPharmaceuticalList();
+  const res = await getPharmaceuticalList(searchQuery.value);
   list.value = res.data || [];
   total.value = filteredList.value.length;
   loading.value = false;

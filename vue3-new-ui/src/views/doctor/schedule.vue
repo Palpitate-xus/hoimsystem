@@ -106,14 +106,14 @@ const form = ref({ scheduleArr: [], number: 10, specialist: 0 });
 
 const fetchList = async () => {
   loading.value = true;
-  const res = await getDoctorScheduleList();
+  const res = await getDoctorScheduleList(searchQuery.value);
   list.value = res.data || [];
   total.value = filteredList.value.length;
   loading.value = false;
 };
 
 const handleAdd = async () => {
-  const res = await getDoctorList();
+  const res = await getDoctorList(searchQuery.value);
   doctors.value = res.data || [];
   form.value = { scheduleArr: [], number: 10, specialist: 0 };
   dialogVisible.value = true;

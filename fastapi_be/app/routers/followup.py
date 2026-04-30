@@ -1,5 +1,6 @@
 import datetime
 from fastapi import APIRouter, Depends
+from typing import Optional
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models import FollowUp, Appointment, DoctorSchedule, Queue, Doctor
@@ -55,7 +56,7 @@ def create_follow_up_plan(req: FollowUpCreatePlanRequest, current_user=Depends(g
 
 
 @router.get("/followUp/getList")
-def get_follow_up_list(current_user=Depends(get_current_user), db: Session = Depends(get_db)):
+def get_follow_up_list(current_user=Depends(get_current_user), keyword: Optional[str] = None, db: Session = Depends(get_db)):
     doctor_obj = db.query(Doctor).filter(Doctor.user_id == current_user.user_id).first()
     if doctor_obj:
         follow_ups = db.query(FollowUp).filter(FollowUp.doctor_id == doctor_obj.doctor_id).order_by(FollowUp.plan_date.desc()).all()
@@ -72,6 +73,9 @@ def get_follow_up_list(current_user=Depends(get_current_user), db: Session = Dep
             "result": item.result or "",
             "patient_feedback": item.patient_feedback or "",
         })
+    if keyword:
+        kw = keyword.lower()
+        data = [item for item in data if any(kw in str(val).lower() for val in item.values())]
     return {"code": 200, "msg": "success", "data": data}
 
 

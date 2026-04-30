@@ -219,6 +219,7 @@ export default {
     firstDayOfMonth() {
       const date = new Date(`${this.currentDate}-01`);
       return date.getDay();
+    },
     filteredSelectedDateEvents() {
       if (!this.searchQuery) return this.selectedDateEvents;
       const kw = this.searchQuery.toLowerCase();
@@ -227,7 +228,6 @@ export default {
           String(val ?? "").toLowerCase().includes(kw)
         )
       );
-    },
     },
     // 当前月份的天数
     daysInMonth() {

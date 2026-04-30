@@ -85,7 +85,7 @@ const refundForm = ref({});
 
 const fetchList = async () => {
   loading.value = true;
-  const res = await getChargeList();
+  const res = await getChargeList(searchQuery.value);
   list.value = res.data || [];
   total.value = filteredList.value.length;
   loading.value = false;

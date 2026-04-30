@@ -1,7 +1,7 @@
 import request from "@/utils/request";
 
-export function getVitalSignList() {
-  return request({ url: "vitalSign/getList", method: "get" });
+export function getVitalSignList(keyword = "") {
+  return request({ url: "vitalSign/getList", method: "get", params: { keyword } });
 }
 
 export function createVitalSign(data) {

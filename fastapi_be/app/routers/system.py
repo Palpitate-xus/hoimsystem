@@ -1,5 +1,6 @@
 import datetime
 from fastapi import APIRouter, Depends
+from typing import Optional
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models import OperationLog, Dict, Config, User
@@ -13,7 +14,7 @@ router = APIRouter()
 
 
 @router.post("/log/getList")
-def get_log_list(req: LogListRequest, db: Session = Depends(get_db)):
+def get_log_list(req: LogListRequest, keyword: Optional[str] = None, db: Session = Depends(get_db)):
     query = db.query(OperationLog)
     if req.user_id:
         query = query.filter(OperationLog.user_id == req.user_id)
@@ -41,7 +42,7 @@ def get_log_list(req: LogListRequest, db: Session = Depends(get_db)):
 
 
 @router.post("/dict/getList")
-def get_dict_list(req: DictListRequest, db: Session = Depends(get_db)):
+def get_dict_list(req: DictListRequest, keyword: Optional[str] = None, db: Session = Depends(get_db)):
     dicts = db.query(Dict).filter(Dict.dict_type == req.dict_type).order_by(Dict.sort_order).all()
     data = []
     for item in dicts:
@@ -53,6 +54,9 @@ def get_dict_list(req: DictListRequest, db: Session = Depends(get_db)):
             "sort_order": item.sort_order,
             "status": item.status,
         })
+    if keyword:
+        kw = keyword.lower()
+        data = [item for item in data if any(kw in str(val).lower() for val in item.values())]
     return {"code": 200, "msg": "success", "data": data}
 
 
@@ -94,7 +98,7 @@ def delete_dict(req: DictDeleteRequest, db: Session = Depends(get_db)):
 
 
 @router.get("/config/getList")
-def get_config_list(db: Session = Depends(get_db)):
+def get_config_list(keyword: Optional[str] = None, db: Session = Depends(get_db)):
     configs = db.query(Config).all()
     data = []
     for item in configs:
@@ -103,6 +107,9 @@ def get_config_list(db: Session = Depends(get_db)):
             "config_value": item.config_value,
             "description": item.description,
         })
+    if keyword:
+        kw = keyword.lower()
+        data = [item for item in data if any(kw in str(val).lower() for val in item.values())]
     return {"code": 200, "msg": "success", "data": data}
 
 

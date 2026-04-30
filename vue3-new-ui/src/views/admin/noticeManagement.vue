@@ -99,7 +99,7 @@ const form = ref({ towhoArr: [] });
 
 const fetchList = async () => {
   loading.value = true;
-  const res = await getNoticeList();
+  const res = await getNoticeList(searchQuery.value);
   list.value = res.data || [];
   total.value = filteredList.value.length;
   loading.value = false;

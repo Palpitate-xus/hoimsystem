@@ -1,5 +1,6 @@
 import datetime
 from fastapi import APIRouter, Depends
+from typing import Optional
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models import (
@@ -17,7 +18,7 @@ router = APIRouter()
 
 
 @router.get("/appointmentManagement/getList")
-def get_appointment_list(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+def get_appointment_list(current_user: User = Depends(get_current_user), keyword: Optional[str] = None, db: Session = Depends(get_db)):
     patient_obj = db.query(Patient).filter(Patient.identity == current_user.username).first()
     if not patient_obj:
         return {"code": 200, "msg": "success", "data": []}
@@ -35,11 +36,14 @@ def get_appointment_list(current_user: User = Depends(get_current_user), db: Ses
             "appointment_time": str(item.appointment_time)[0:10] if item.appointment_time else "",
             "status": status_map[item.status] if item.status is not None and item.status < len(status_map) else "",
         })
+    if keyword:
+        kw = keyword.lower()
+        data = [item for item in data if any(kw in str(val).lower() for val in item.values())]
     return {"code": 200, "msg": "success", "data": data}
 
 
 @router.get("/appointmentManagement/appointmentList")
-def appointmentList(db: Session = Depends(get_db)):
+def appointmentList(keyword: Optional[str] = None, db: Session = Depends(get_db)):
     schedules = db.query(DoctorSchedule).all()
     today_weeky = datetime.datetime.now().weekday()
     weekdays = ["星期一", "星期二", "星期三", "星期四", "星期五", "星期六", "星期天"]
@@ -61,6 +65,9 @@ def appointmentList(db: Session = Depends(get_db)):
             "department_id": item.doctor.department.department_id if item.doctor and item.doctor.department else None,
             "stock": item.number,
         })
+    if keyword:
+        kw = keyword.lower()
+        data = [item for item in data if any(kw in str(val).lower() for val in item.values())]
     return {"code": 200, "msg": "success", "data": data}
 
 
@@ -105,7 +112,7 @@ def patient_appointment_cancel(req: UuidRequest, db: Session = Depends(get_db)):
 
 
 @router.get("/registrationManagement/getList")
-def get_registration_list(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+def get_registration_list(current_user: User = Depends(get_current_user), keyword: Optional[str] = None, db: Session = Depends(get_db)):
     patient_obj = db.query(Patient).filter(Patient.identity == current_user.username).first()
     if not patient_obj:
         return {"code": 200, "msg": "success", "data": []}
@@ -122,11 +129,14 @@ def get_registration_list(current_user: User = Depends(get_current_user), db: Se
             "time": str(item.time)[0:10] if item.time else "",
             "status": status_map[item.status] if item.status is not None and item.status < len(status_map) else "",
         })
+    if keyword:
+        kw = keyword.lower()
+        data = [item for item in data if any(kw in str(val).lower() for val in item.values())]
     return {"code": 200, "msg": "success", "data": data}
 
 
 @router.get("/registrationManagement/registrationList")
-def registrationList(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+def registrationList(current_user: User = Depends(get_current_user), keyword: Optional[str] = None, db: Session = Depends(get_db)):
     today_weeky = datetime.datetime.now().weekday()
     weekdays = ["星期一", "星期二", "星期三", "星期四", "星期五"]
     if today_weeky > 4:
@@ -154,6 +164,9 @@ def registrationList(current_user: User = Depends(get_current_user), db: Session
             "stock": item.number,
             "status": status,
         })
+    if keyword:
+        kw = keyword.lower()
+        data = [item for item in data if any(kw in str(val).lower() for val in item.values())]
     return {"code": 200, "msg": "success", "data": data}
 
 
@@ -202,7 +215,7 @@ def patient_registration_cancel(req: UuidRequest, db: Session = Depends(get_db))
 
 
 @router.get("/medicalRecord/getList")
-def get_medical_record_list(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+def get_medical_record_list(current_user: User = Depends(get_current_user), keyword: Optional[str] = None, db: Session = Depends(get_db)):
     if current_user.user_role == "patient":
         patient_obj = db.query(Patient).filter(Patient.identity == current_user.username).first()
         if not patient_obj:

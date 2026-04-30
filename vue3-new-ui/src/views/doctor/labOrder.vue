@@ -97,7 +97,7 @@ const checkItemsStr = computed({
 
 const fetchList = async () => {
   loading.value = true;
-  const res = await getLabOrderList();
+  const res = await getLabOrderList(searchQuery.value);
   list.value = res.data || [];
   total.value = filteredList.value.length;
   loading.value = false;
@@ -120,7 +120,7 @@ const submit = async () => {
 };
 
 const loadPatients = async () => {
-  const res = await getPatientList();
+  const res = await getPatientList(searchQuery.value);
   patientOptions.value = res.data || [];
 };
 

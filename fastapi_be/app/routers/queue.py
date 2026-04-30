@@ -1,5 +1,6 @@
 import datetime
 from fastapi import APIRouter, Depends
+from typing import Optional
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models import Queue, Patient, Doctor, Registration, Appointment
@@ -9,7 +10,7 @@ router = APIRouter()
 
 
 @router.get("/queue/getList")
-def get_queue_list(db: Session = Depends(get_db)):
+def get_queue_list(keyword: Optional[str] = None, db: Session = Depends(get_db)):
     queues = db.query(Queue).order_by(Queue.queue_number).all()
     data = []
     for item in queues:
@@ -21,6 +22,9 @@ def get_queue_list(db: Session = Depends(get_db)):
             "status": item.status,
             "type": item.type,
         })
+    if keyword:
+        kw = keyword.lower()
+        data = [item for item in data if any(kw in str(val).lower() for val in item.values())]
     return {"code": 200, "msg": "success", "data": data}
 
 

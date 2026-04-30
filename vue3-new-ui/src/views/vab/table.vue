@@ -80,6 +80,18 @@ export default {
   created() {
     this.getList();
   },
+  computed: {
+    filteredList() {
+      if (!this.searchQuery) return this.list;
+      const kw = this.searchQuery.toLowerCase();
+      return this.list.filter(item =>
+        Object.values(item).some(val =>
+          String(val ?? "").toLowerCase().includes(kw)
+        )
+      );
+    },
+  },
+
   methods: {
     async getList() {
       this.listLoading = true;
@@ -114,17 +126,5 @@ export default {
     margin-top: 20px;
     text-align: center;
   }
-
-  computed: {
-    filteredList() {
-      if (!this.searchQuery) return this.list;
-      const kw = this.searchQuery.toLowerCase();
-      return this.list.filter(item =>
-        Object.values(item).some(val =>
-          String(val ?? "").toLowerCase().includes(kw)
-        )
-      );
-    },
-  },
 }
 </style>

@@ -342,6 +342,18 @@ export default {
       ]
     };
   },
+  computed: {
+    filteredResources() {
+      if (!this.searchQuery) return this.resources;
+      const kw = this.searchQuery.toLowerCase();
+      return this.resources.filter(item =>
+        Object.values(item).some(val =>
+          String(val ?? "").toLowerCase().includes(kw)
+        )
+      );
+    },
+  },
+
   methods: {
     handleMenuSelect(key) {
       this.activeMenu = key;
@@ -394,17 +406,5 @@ export default {
       }
     }
   }
-
-  computed: {
-    filteredResources() {
-      if (!this.searchQuery) return this.resources;
-      const kw = this.searchQuery.toLowerCase();
-      return this.resources.filter(item =>
-        Object.values(item).some(val =>
-          String(val ?? "").toLowerCase().includes(kw)
-        )
-      );
-    },
-  },
 }
 </style>

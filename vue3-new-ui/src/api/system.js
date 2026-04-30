@@ -20,8 +20,8 @@ export function deleteDict(data) {
   return request({ url: "dict/delete", method: "post", data });
 }
 
-export function getConfigList() {
-  return request({ url: "config/getList", method: "get" });
+export function getConfigList(keyword = "") {
+  return request({ url: "config/getList", method: "get", params: { keyword } });
 }
 
 export function updateConfig(data) {

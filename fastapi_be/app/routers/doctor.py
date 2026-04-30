@@ -1,6 +1,7 @@
 import traceback
 import datetime
 from fastapi import APIRouter, Depends
+from typing import Optional
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models import (
@@ -88,7 +89,7 @@ def doctor_schedule_register(req: DoctorScheduleCreateRequest, db: Session = Dep
 
 
 @router.get("/doctorScheduleManagement/getList")
-def doctor_schedule_getlist(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+def doctor_schedule_getlist(current_user: User = Depends(get_current_user), keyword: Optional[str] = None, db: Session = Depends(get_db)):
     data = []
     if current_user.user_role in ("admin", "patient"):
         doctor_list = db.query(Doctor).all()
@@ -120,6 +121,9 @@ def doctor_schedule_getlist(current_user: User = Depends(get_current_user), db: 
                 "name": doctor_obj.name,
                 "schedule": schedule,
             })
+    if keyword:
+        kw = keyword.lower()
+        data = [item for item in data if any(kw in str(val).lower() for val in item.values())]
     return {"code": 200, "msg": "success", "data": data}
 
 
@@ -149,7 +153,7 @@ def pharmaceutical_register(req: PharmaceuticalCreateRequest, db: Session = Depe
 
 
 @router.get("/pharmaceuticalManagement/getList")
-def get_pharmaceutical_list(db: Session = Depends(get_db)):
+def get_pharmaceutical_list(keyword: Optional[str] = None, db: Session = Depends(get_db)):
     pharmaceutical_list = db.query(Pharmaceutical).all()
     data = []
     for item in pharmaceutical_list:
@@ -163,6 +167,9 @@ def get_pharmaceutical_list(db: Session = Depends(get_db)):
             "supplier": item.supplier,
             "remark": item.remark,
         })
+    if keyword:
+        kw = keyword.lower()
+        data = [item for item in data if any(kw in str(val).lower() for val in item.values())]
     return {"code": 200, "msg": "success", "data": data}
 
 
@@ -240,7 +247,7 @@ def prescription_register(req: PrescriptionCreateRequest, current_user: User = D
 
 
 @router.get("/prescriptionManagement/getList")
-def get_prescription_list(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+def get_prescription_list(current_user: User = Depends(get_current_user), keyword: Optional[str] = None, db: Session = Depends(get_db)):
     data = []
     if current_user.user_role == "admin":
         prescriptions = db.query(Prescription).all()
@@ -273,6 +280,9 @@ def get_prescription_list(current_user: User = Depends(get_current_user), db: Se
             "status": item.status,
             "create_time": str(item.create_time),
         })
+    if keyword:
+        kw = keyword.lower()
+        data = [item for item in data if any(kw in str(val).lower() for val in item.values())]
     return {"code": 200, "msg": "success", "data": data}
 
 
@@ -336,7 +346,7 @@ def create_lab_order(req: LabOrderCreateRequest, current_user: User = Depends(ge
 
 
 @router.get("/labOrder/getList")
-def get_lab_order_list(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+def get_lab_order_list(current_user: User = Depends(get_current_user), keyword: Optional[str] = None, db: Session = Depends(get_db)):
     doctor_obj = db.query(Doctor).filter(Doctor.user_id == current_user.user_id).first()
     if not doctor_obj:
         return {"code": 200, "msg": "success", "data": []}
@@ -350,4 +360,7 @@ def get_lab_order_list(current_user: User = Depends(get_current_user), db: Sessi
             "status": item.status,
             "create_time": str(item.create_time),
         })
+    if keyword:
+        kw = keyword.lower()
+        data = [item for item in data if any(kw in str(val).lower() for val in item.values())]
     return {"code": 200, "msg": "success", "data": data}

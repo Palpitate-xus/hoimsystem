@@ -1,7 +1,7 @@
 import request from "@/utils/request";
 
-export function getAppointmentList() {
-  return request({ url: "appointmentManagement/getList", method: "get" });
+export function getAppointmentList(keyword = "") {
+  return request({ url: "appointmentManagement/getList", method: "get", params: { keyword } });
 }
 
 export function getAppointmentSchedules() {
@@ -16,8 +16,8 @@ export function cancelAppointment(data) {
   return request({ url: "appointmentManagement/cancel", method: "post", data });
 }
 
-export function getRegistrationList() {
-  return request({ url: "registrationManagement/getList", method: "get" });
+export function getRegistrationList(keyword = "") {
+  return request({ url: "registrationManagement/getList", method: "get", params: { keyword } });
 }
 
 export function getRegistrationSchedules() {
@@ -32,16 +32,16 @@ export function cancelRegistration(data) {
   return request({ url: "registrationManagement/cancel", method: "post", data });
 }
 
-export function getMedicalRecordList() {
-  return request({ url: "medicalRecord/getList", method: "get" });
+export function getMedicalRecordList(keyword = "") {
+  return request({ url: "medicalRecord/getList", method: "get", params: { keyword } });
 }
 
 export function getMedicalRecordDetail(data) {
   return request({ url: "medicalRecord/detail", method: "post", data });
 }
 
-export function getPrescriptionList() {
-  return request({ url: "prescriptionManagement/getList", method: "get" });
+export function getPrescriptionList(keyword = "") {
+  return request({ url: "prescriptionManagement/getList", method: "get", params: { keyword } });
 }
 
 export function getHealthProfile() {

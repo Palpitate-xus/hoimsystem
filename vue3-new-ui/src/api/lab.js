@@ -4,8 +4,8 @@ export function getPendingLabOrders() {
   return request({ url: "labResult/getPending", method: "get" });
 }
 
-export function getLabResultList() {
-  return request({ url: "labResult/getList", method: "get" });
+export function getLabResultList(keyword = "") {
+  return request({ url: "labResult/getList", method: "get", params: { keyword } });
 }
 
 export function getLabResultDetail(data) {

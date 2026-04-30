@@ -115,14 +115,14 @@ const form = ref({});
 
 const fetchList = async () => {
   loading.value = true;
-  const res = await getDoctorList();
+  const res = await getDoctorList(searchQuery.value);
   list.value = res.data || [];
   total.value = filteredList.value.length;
   loading.value = false;
 };
 
 const loadDepartments = async () => {
-  const res = await getDepartmentList();
+  const res = await getDepartmentList(searchQuery.value);
   departmentOptions.value = res.data || [];
 };
 

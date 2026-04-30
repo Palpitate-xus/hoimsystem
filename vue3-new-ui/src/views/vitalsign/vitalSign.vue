@@ -94,7 +94,7 @@ const patientOptions = ref([]);
 
 const fetchList = async () => {
   loading.value = true;
-  const res = await getVitalSignList();
+  const res = await getVitalSignList(searchQuery.value);
   list.value = res.data || [];
   total.value = filteredList.value.length;
   loading.value = false;
@@ -117,7 +117,7 @@ const submit = async () => {
 };
 
 const loadPatients = async () => {
-  const res = await getPatientList();
+  const res = await getPatientList(searchQuery.value);
   patientOptions.value = res.data || [];
 };
 

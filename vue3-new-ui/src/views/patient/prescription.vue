@@ -69,7 +69,7 @@ const loading = ref(false);
 
 const fetchList = async () => {
   loading.value = true;
-  const res = await getPrescriptionList();
+  const res = await getPrescriptionList(searchQuery.value);
   list.value = res.data || [];
   total.value = filteredList.value.length;
   loading.value = false;

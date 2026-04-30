@@ -1,7 +1,7 @@
 import request from "@/utils/request";
 
-export function getDoctorList() {
-  return request({ url: "doctorManagement/getList", method: "get" });
+export function getDoctorList(keyword = "") {
+  return request({ url: "doctorManagement/getList", method: "get", params: { keyword } });
 }
 
 export function registerDoctor(data) {
@@ -16,16 +16,16 @@ export function deleteDoctor(data) {
   return request({ url: "doctorManagement/delete", method: "post", data });
 }
 
-export function getPatientList() {
-  return request({ url: "patientManagement/getList", method: "get" });
+export function getPatientList(keyword = "") {
+  return request({ url: "patientManagement/getList", method: "get", params: { keyword } });
 }
 
 export function updatePatient(data) {
   return request({ url: "patientManagement/update", method: "post", data });
 }
 
-export function getDepartmentList() {
-  return request({ url: "departmentManagement/getList", method: "get" });
+export function getDepartmentList(keyword = "") {
+  return request({ url: "departmentManagement/getList", method: "get", params: { keyword } });
 }
 
 export function createDepartment(data) {
@@ -40,8 +40,8 @@ export function deleteDepartment(data) {
   return request({ url: "departmentManagement/delete", method: "post", data });
 }
 
-export function getNoticeList() {
-  return request({ url: "notice/getList", method: "get" });
+export function getNoticeList(keyword = "") {
+  return request({ url: "notice/getList", method: "get", params: { keyword } });
 }
 
 export function createNotice(data) {

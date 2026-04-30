@@ -141,7 +141,7 @@ const fetchPending = async () => {
 
 const fetchResults = async () => {
   loading2.value = true;
-  const res = await getLabResultList();
+  const res = await getLabResultList(searchQuery2.value);
   resultList.value = res.data || [];
   loading2.value = false;
 };

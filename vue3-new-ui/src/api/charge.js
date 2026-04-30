@@ -1,7 +1,7 @@
 import request from "@/utils/request";
 
-export function getChargeList() {
-  return request({ url: "chargeManagement/getList", method: "get" });
+export function getChargeList(keyword = "") {
+  return request({ url: "chargeManagement/getList", method: "get", params: { keyword } });
 }
 
 export function commitCharge(data) {
@@ -12,8 +12,8 @@ export function refundCharge(data) {
   return request({ url: "chargeManagement/refund", method: "post", data });
 }
 
-export function getInvoiceList() {
-  return request({ url: "invoice/getList", method: "get" });
+export function getInvoiceList(keyword = "") {
+  return request({ url: "invoice/getList", method: "get", params: { keyword } });
 }
 
 export function createInvoice(data) {

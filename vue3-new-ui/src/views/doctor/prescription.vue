@@ -106,16 +106,16 @@ const form = ref({ patient: null, phas: [] });
 
 const fetchList = async () => {
   loading.value = true;
-  const res = await getPrescriptionList();
+  const res = await getPrescriptionList(searchQuery.value);
   list.value = res.data || [];
   total.value = filteredList.value.length;
   loading.value = false;
 };
 
 const handleAdd = async () => {
-  const phRes = await getPharmaceuticalList();
+  const phRes = await getPharmaceuticalList(searchQuery.value);
   pharmaceuticals.value = phRes.data || [];
-  const pRes = await getPatientList();
+  const pRes = await getPatientList(searchQuery.value);
   patientOptions.value = pRes.data || [];
   form.value = { patient: null, phas: [{ id: null, number: 1 }] };
   dialogVisible.value = true;

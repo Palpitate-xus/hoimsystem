@@ -1,7 +1,7 @@
 import request from "@/utils/request";
 
-export function getDoctorScheduleList() {
-  return request({ url: "doctorScheduleManagement/getList", method: "get" });
+export function getDoctorScheduleList(keyword = "") {
+  return request({ url: "doctorScheduleManagement/getList", method: "get", params: { keyword } });
 }
 
 export function registerDoctorSchedule(data) {
@@ -16,16 +16,16 @@ export function updateMedicalRecord(data) {
   return request({ url: "medicalRecord/update", method: "post", data });
 }
 
-export function getMedicalRecordList() {
-  return request({ url: "medicalRecord/getList", method: "get" });
+export function getMedicalRecordList(keyword = "") {
+  return request({ url: "medicalRecord/getList", method: "get", params: { keyword } });
 }
 
 export function getMedicalRecordDetail(data) {
   return request({ url: "medicalRecord/detail", method: "post", data });
 }
 
-export function getPrescriptionList() {
-  return request({ url: "prescriptionManagement/getList", method: "get" });
+export function getPrescriptionList(keyword = "") {
+  return request({ url: "prescriptionManagement/getList", method: "get", params: { keyword } });
 }
 
 export function createPrescription(data) {
@@ -40,6 +40,6 @@ export function createLabOrder(data) {
   return request({ url: "labOrder/create", method: "post", data });
 }
 
-export function getLabOrderList() {
-  return request({ url: "labOrder/getList", method: "get" });
+export function getLabOrderList(keyword = "") {
+  return request({ url: "labOrder/getList", method: "get", params: { keyword } });
 }

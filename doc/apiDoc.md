@@ -62,8 +62,8 @@ baseURL：`/api`
 |:----:|:------------------------------:|:------:|:-------:|:--------:|
 | ✅ | /doctorManagement/getList | GET | - | `{ code, msg, data: Doctor[] }` |
 | ✅ | /doctorManagement/register | POST | `{ username, password, name, title, sex, phone, department, permission, education }` | `{ code, msg }` |
-| 🔧 | /doctorManagement/update | POST | `{ doctor_id, name, title, sex, phone, department, permission, education }` | `{ code, msg }` |
-| 🔧 | /doctorManagement/delete | POST | `{ doctor_id }` | `{ code, msg }` |
+| ✅ | /doctorManagement/update | POST | `{ doctor_id, name, title, sex, phone, department, permission, education }` | `{ code, msg }` |
+| ✅ | /doctorManagement/delete | POST | `{ doctor_id }` | `{ code, msg }` |
 
 **字段说明：**
 
@@ -92,7 +92,7 @@ baseURL：`/api`
 | 状态 | url | method | payload | response |
 |:----:|:-------------------------------:|:------:|:-------:|:--------:|
 | ✅ | /patientManagement/getList | GET | - | `{ code, msg, data: Patient[] }` |
-| 🔧 | /patientManagement/update | POST | `{ patient_id, name, sex, phone, address }` | `{ code, msg }` |
+| ✅ | /patientManagement/update | POST | `{ patient_id, name, sex, phone, address }` | `{ code, msg }` |
 
 **字段说明：**
 
@@ -112,8 +112,8 @@ baseURL：`/api`
 |:----:|:-------------------------------:|:------:|:-------:|:--------:|
 | ✅ | /departmentManagement/getList | GET | - | `{ code, msg, data: Department[] }` |
 | ✅ | /departmentManagement/create | POST | `{ name, phone, director, location }` | `{ code, msg }` |
-| 🔧 | /departmentManagement/update | POST | `{ department_id, name, phone, director, location }` | `{ code, msg }` |
-| 🔧 | /departmentManagement/delete | POST | `{ department_id }` | `{ code, msg }` |
+| ✅ | /departmentManagement/update | POST | `{ department_id, name, phone, director, location }` | `{ code, msg }` |
+| ✅ | /departmentManagement/delete | POST | `{ department_id }` | `{ code, msg }` |
 
 **字段说明：**
 
@@ -136,8 +136,8 @@ baseURL：`/api`
 |:----:|:----------------------:|:------:|:-------:|:--------:|
 | ✅ | /notice/getList | GET | - | `{ code, msg, data: Notice[] }` |
 | ✅ | /notice/create | POST | `{ title, content, isemergency, towho, expiredtime }` | `{ code, msg }` |
-| 🔧 | /notice/update | POST | `{ notice_id, title, content, isemergency, towho, expiredtime }` | `{ code, msg }` |
-| 🔧 | /notice/delete | POST | `{ notice_id }` | `{ code, msg }` |
+| ✅ | /notice/update | POST | `{ notice_id, title, content, isemergency, towho, expiredtime }` | `{ code, msg }` |
+| ✅ | /notice/delete | POST | `{ notice_id }` | `{ code, msg }` |
 
 **字段说明：**
 
@@ -284,8 +284,8 @@ baseURL：`/api`
 
 | 状态 | url | method | payload | response |
 |:----:|:------------------------------:|:------:|:-------:|:--------:|
-| 🔧 | /medicalRecord/getList | GET | - | `{ code, msg, data: MedicalRecord[] }` |
-| 🔧 | /medicalRecord/detail | POST | `{ medical_record_id }` | `{ code, msg, data: MedicalRecord }` |
+| ✅ | /medicalRecord/getList | GET | - | `{ code, msg, data: MedicalRecord[] }` |
+| ✅ | /medicalRecord/detail | POST | `{ medical_record_id }` | `{ code, msg, data: MedicalRecord }` |
 
 **字段说明：**
 
@@ -326,8 +326,8 @@ baseURL：`/api`
 
 | 状态 | url | method | payload | response |
 |:----:|:------------------------:|:------:|:-------:|:--------:|
-| 📋 | /labResult/getList | GET | - | `{ code, msg, data: LabResult[] }` |
-| 📋 | /labResult/detail | POST | `{ lab_result_id }` | `{ code, msg, data: LabResult }` |
+| ✅ | /labResult/getList | GET | - | `{ code, msg, data: LabResult[] }` |
+| ✅ | /labResult/detail | POST | `{ lab_result_id }` | `{ code, msg, data: LabResult }` |
 
 **字段说明：**
 
@@ -343,8 +343,8 @@ baseURL：`/api`
 
 | 状态 | url | method | payload | response |
 |:----:|:--------------------------:|:------:|:-------:|:--------:|
-| 📋 | /healthRecord/getProfile | GET | - | `{ code, msg, data: HealthProfile }` |
-| 📋 | /healthRecord/getVisits | GET | - | `{ code, msg, data: VisitRecord[] }` |
+| ✅ | /healthRecord/getProfile | GET | - | `{ code, msg, data: HealthProfile }` |
+| ✅ | /healthRecord/getVisits | GET | - | `{ code, msg, data: VisitRecord[] }` |
 
 **字段说明：**
 
@@ -369,7 +369,7 @@ baseURL：`/api`
 
 | 状态 | url | method | payload | response |
 |:----:|:--------------------------:|:------:|:-------:|:--------:|
-| 📋 | /review/create | POST | `{ doctor_id, visit_id, score, comment }` | `{ code, msg }` |
+| ✅ | /review/create | POST | `{ doctor_id, visit_id, score, comment }` | `{ code, msg }` |
 
 **字段说明：**
 
@@ -409,10 +409,10 @@ baseURL：`/api`
 
 | 状态 | url | method | payload | response |
 |:----:|:-----------------------------:|:------:|:-------:|:--------:|
-| 🔧 | /medicalRecord/create | POST | `{ patient_id, symptom, result }` | `{ code, msg }` |
-| 🔧 | /medicalRecord/getList | GET | - | `{ code, msg, data: MedicalRecord[] }` |
-| 🔧 | /medicalRecord/detail | POST | `{ medical_record_id }` | `{ code, msg, data: MedicalRecord }` |
-| 🔧 | /medicalRecord/update | POST | `{ medical_record_id, symptom, result }` | `{ code, msg }` |
+| ✅ | /medicalRecord/create | POST | `{ patient_id, symptom, result }` | `{ code, msg }` |
+| ✅ | /medicalRecord/getList | GET | - | `{ code, msg, data: MedicalRecord[] }` |
+| ✅ | /medicalRecord/detail | POST | `{ medical_record_id }` | `{ code, msg, data: MedicalRecord }` |
+| ✅ | /medicalRecord/update | POST | `{ medical_record_id, symptom, result }` | `{ code, msg }` |
 
 **字段说明：**
 
@@ -445,7 +445,7 @@ baseURL：`/api`
 |:----:|:---------------------------------:|:------:|:-------:|:--------:|
 | ✅ | /prescriptionManagement/getList | GET | - | `{ code, msg, data: Prescription[] }` |
 | ✅ | /prescriptionManagement/create | POST | `{ patient, phas }` | `{ code, msg }` |
-| 🔧 | /prescriptionManagement/cancel | POST | `{ prescription_id }` | `{ code, msg }` |
+| ✅ | /prescriptionManagement/cancel | POST | `{ prescription_id }` | `{ code, msg }` |
 
 **字段说明：**
 
@@ -465,8 +465,8 @@ baseURL：`/api`
 
 | 状态 | url | method | payload | response |
 |:----:|:------------------------:|:------:|:-------:|:--------:|
-| 📋 | /labOrder/create | POST | `{ patient_id, check_type, check_items, urgent }` | `{ code, msg, data: { lab_order_id } }` |
-| 📋 | /labOrder/getList | GET | - | `{ code, msg, data: LabOrder[] }` |
+| ✅ | /labOrder/create | POST | `{ patient_id, check_type, check_items, urgent }` | `{ code, msg, data: { lab_order_id } }` |
+| ✅ | /labOrder/getList | GET | - | `{ code, msg, data: LabOrder[] }` |
 
 **字段说明：**
 
@@ -493,8 +493,8 @@ baseURL：`/api`
 |:----:|:------------------------------------:|:------:|:-------:|:--------:|
 | ✅ | /pharmaceuticalManagement/getList | GET | - | `{ code, msg, data: Pharmaceutical[] }` |
 | ✅ | /pharmaceuticalManagement/create | POST | `{ name, stock, price, expireddate, supplier, remark }` | `{ code, msg }` |
-| 🔧 | /pharmaceuticalManagement/update | POST | `{ pharmaceutical_id, name, stock, price, expireddate, supplier, remark }` | `{ code, msg }` |
-| 🔧 | /pharmaceuticalManagement/delete | POST | `{ pharmaceutical_id }` | `{ code, msg }` |
+| ✅ | /pharmaceuticalManagement/update | POST | `{ pharmaceutical_id, name, stock, price, expireddate, supplier, remark }` | `{ code, msg }` |
+| ✅ | /pharmaceuticalManagement/delete | POST | `{ pharmaceutical_id }` | `{ code, msg }` |
 | ✅ | /pharmaceuticalManagement/stock_query | POST | `{ id }` | `{ code, msg, data: { stock } }` |
 
 **字段说明：**
@@ -524,10 +524,10 @@ baseURL：`/api`
 
 | 状态 | url | method | payload | response |
 |:----:|:-------------------------------:|:------:|:-------:|:--------:|
-| 📋 | /pharmacy/dispenseList | GET | - | `{ code, msg, data: Prescription[] }` |
-| 📋 | /pharmacy/audit | POST | `{ prescription_id }` | `{ code, msg }` |
-| 📋 | /pharmacy/dispense | POST | `{ prescription_id }` | `{ code, msg }` |
-| 📋 | /pharmacy/return | POST | `{ prescription_id, pha_id, number, reason }` | `{ code, msg }` |
+| ✅ | /pharmacy/dispenseList | GET | - | `{ code, msg, data: Prescription[] }` |
+| ✅ | /pharmacy/audit | POST | `{ prescription_id }` | `{ code, msg }` |
+| ✅ | /pharmacy/dispense | POST | `{ prescription_id }` | `{ code, msg }` |
+| ✅ | /pharmacy/return | POST | `{ prescription_id, pha_id, number, reason }` | `{ code, msg }` |
 
 **字段说明：**
 
@@ -565,7 +565,7 @@ baseURL：`/api`
 
 | 状态 | url | method | payload | response |
 |:----:|:--------------------------:|:------:|:-------:|:--------:|
-| 📋 | /chargeManagement/refund | POST | `{ charge_id, reason }` | `{ code, msg }` |
+| ✅ | /chargeManagement/refund | POST | `{ charge_id, reason }` | `{ code, msg }` |
 
 **字段说明：**
 
@@ -577,9 +577,9 @@ baseURL：`/api`
 
 | 状态 | url | method | payload | response |
 |:----:|:------------------------:|:------:|:-------:|:--------:|
-| 📋 | /invoice/getList | GET | - | `{ code, msg, data: Invoice[] }` |
-| 📋 | /invoice/create | POST | `{ charge_id }` | `{ code, msg, data: { invoice_no } }` |
-| 📋 | /invoice/print | POST | `{ invoice_id }` | `{ code, msg, data: { pdf_url } }` |
+| ✅ | /invoice/getList | GET | - | `{ code, msg, data: Invoice[] }` |
+| ✅ | /invoice/create | POST | `{ charge_id }` | `{ code, msg, data: { invoice_no } }` |
+| ✅ | /invoice/print | POST | `{ invoice_id }` | `{ code, msg, data: { pdf_url } }` |
 
 **字段说明：**
 
@@ -598,10 +598,10 @@ baseURL：`/api`
 
 | 状态 | url | method | payload | response |
 |:----:|:--------------------------:|:------:|:-------:|:--------:|
-| 🔧 | /queue/getList | GET | - | `{ code, msg, data: QueueItem[] }` |
-| 🔧 | /queue/callNext | POST | `{ doctor_id }` | `{ code, msg, data: QueueItem }` |
-| 🔧 | /queue/pass | POST | `{ queue_id }` | `{ code, msg }` |
-| 🔧 | /queue/skip | POST | `{ queue_id }` | `{ code, msg }` |
+| ✅ | /queue/getList | GET | - | `{ code, msg, data: QueueItem[] }` |
+| ✅ | /queue/callNext | POST | `{ doctor_id }` | `{ code, msg, data: QueueItem }` |
+| ✅ | /queue/pass | POST | `{ queue_id }` | `{ code, msg }` |
+| ✅ | /queue/skip | POST | `{ queue_id }` | `{ code, msg }` |
 
 **字段说明：**
 
@@ -627,7 +627,7 @@ baseURL：`/api`
 
 | 状态 | url | method | payload | response |
 |:----:|:----------------------:|:------:|:-------:|:--------:|
-| 📋 | /checkIn/checkIn | POST | `{ appointment_uuid, identity }` | `{ code, msg, data: { queue_number } }` |
+| ✅ | /checkIn/checkIn | POST | `{ appointment_uuid, identity }` | `{ code, msg, data: { queue_number } }` |
 
 **字段说明：**
 
@@ -646,8 +646,8 @@ baseURL：`/api`
 
 | 状态 | url | method | payload | response |
 |:----:|:----------------------:|:------:|:-------:|:--------:|
-| 📋 | /vitalSign/create | POST | `{ patient_id, temperature, blood_pressure_systolic, blood_pressure_diastolic, pulse, weight }` | `{ code, msg }` |
-| 📋 | /vitalSign/getList | GET | - | `{ code, msg, data: VitalSign[] }` |
+| ✅ | /vitalSign/create | POST | `{ patient_id, temperature, blood_pressure_systolic, blood_pressure_diastolic, pulse, weight }` | `{ code, msg }` |
+| ✅ | /vitalSign/getList | GET | - | `{ code, msg, data: VitalSign[] }` |
 
 **字段说明：**
 
@@ -676,9 +676,9 @@ baseURL：`/api`
 
 | 状态 | url | method | payload | response |
 |:----:|:-------------------------:|:------:|:-------:|:--------:|
-| 📋 | /labResult/create | POST | `{ lab_order_id, sample_id, result, abnormal_flag }` | `{ code, msg }` |
-| 📋 | /labResult/audit | POST | `{ lab_result_id }` | `{ code, msg }` |
-| 📋 | /labResult/getPending | GET | - | `{ code, msg, data: LabOrder[] }` |
+| ✅ | /labResult/create | POST | `{ lab_order_id, sample_id, result, abnormal_flag }` | `{ code, msg }` |
+| ✅ | /labResult/audit | POST | `{ lab_result_id }` | `{ code, msg }` |
+| ✅ | /labResult/getPending | GET | - | `{ code, msg, data: LabOrder[] }` |
 
 **字段说明：**
 
@@ -696,7 +696,7 @@ baseURL：`/api`
 
 | 状态 | url | method | payload | response |
 |:----:|:---------------------------:|:------:|:-------:|:--------:|
-| 📋 | /followUpAppointment/create | POST | `{ patient_id, doctor_id, date, time }` | `{ code, msg }` |
+| ✅ | /followUpAppointment/create | POST | `{ patient_id, doctor_id, date, time }` | `{ code, msg }` |
 
 **字段说明：**
 
@@ -710,9 +710,9 @@ baseURL：`/api`
 
 | 状态 | url | method | payload | response |
 |:----:|:--------------------------:|:------:|:-------:|:--------:|
-| 📋 | /followUp/createPlan | POST | `{ patient_id, plan_date, content }` | `{ code, msg }` |
-| 📋 | /followUp/getList | GET | - | `{ code, msg, data: FollowUp[] }` |
-| 📋 | /followUp/record | POST | `{ follow_up_id, result, patient_feedback }` | `{ code, msg }` |
+| ✅ | /followUp/createPlan | POST | `{ patient_id, plan_date, content }` | `{ code, msg }` |
+| ✅ | /followUp/getList | GET | - | `{ code, msg, data: FollowUp[] }` |
+| ✅ | /followUp/record | POST | `{ follow_up_id, result, patient_feedback }` | `{ code, msg }` |
 
 **字段说明：**
 
@@ -731,7 +731,7 @@ baseURL：`/api`
 
 | 状态 | url | method | payload | response |
 |:----:|:------------------------:|:------:|:-------:|:--------:|
-| 📋 | /report/outpatientVolume | POST | `{ start_date, end_date, group_by }` | `{ code, msg, data: ReportData }` |
+| ✅ | /report/outpatientVolume | POST | `{ start_date, end_date, group_by }` | `{ code, msg, data: ReportData }` |
 
 **字段说明：**
 
@@ -745,7 +745,7 @@ baseURL：`/api`
 
 | 状态 | url | method | payload | response |
 |:----:|:----------------------:|:------:|:-------:|:--------:|
-| 📋 | /report/finance | POST | `{ start_date, end_date }` | `{ code, msg, data: FinanceReport }` |
+| ✅ | /report/finance | POST | `{ start_date, end_date }` | `{ code, msg, data: FinanceReport }` |
 
 **字段说明：**
 
@@ -759,13 +759,13 @@ baseURL：`/api`
 
 | 状态 | url | method | payload | response |
 |:----:|:-------------------------:|:------:|:-------:|:--------:|
-| 📋 | /report/pharmaceutical | POST | `{ start_date, end_date }` | `{ code, msg, data: PharmaReport[] }` |
+| ✅ | /report/pharmaceutical | POST | `{ start_date, end_date }` | `{ code, msg, data: PharmaReport[] }` |
 
 ### 12.4 医生工作量统计
 
 | 状态 | url | method | payload | response |
 |:----:|:----------------------:|:------:|:-------:|:--------:|
-| 📋 | /report/doctorWorkload | POST | `{ start_date, end_date, doctor_id? }` | `{ code, msg, data: WorkloadReport[] }` |
+| ✅ | /report/doctorWorkload | POST | `{ start_date, end_date, doctor_id? }` | `{ code, msg, data: WorkloadReport[] }` |
 
 **字段说明：**
 
@@ -784,7 +784,7 @@ baseURL：`/api`
 
 | 状态 | url | method | payload | response |
 |:----:|:------------------:|:------:|:-------:|:--------:|
-| 🔧 | /log/getList | POST | `{ user_id?, action?, start_time?, end_time?, page, page_size }` | `{ code, msg, data: { list, total } }` |
+| ✅ | /log/getList | POST | `{ user_id?, action?, start_time?, end_time?, page, page_size }` | `{ code, msg, data: { list, total } }` |
 
 **字段说明：**
 
@@ -801,17 +801,17 @@ baseURL：`/api`
 
 | 状态 | url | method | payload | response |
 |:----:|:--------------------:|:------:|:-------:|:--------:|
-| 🔧 | /dict/getList | POST | `{ dict_type }` | `{ code, msg, data: DictItem[] }` |
-| 🔧 | /dict/create | POST | `{ dict_type, dict_code, dict_value, sort_order }` | `{ code, msg }` |
-| 🔧 | /dict/update | POST | `{ dict_id, dict_code, dict_value, sort_order }` | `{ code, msg }` |
-| 🔧 | /dict/delete | POST | `{ dict_id }` | `{ code, msg }` |
+| ✅ | /dict/getList | POST | `{ dict_type }` | `{ code, msg, data: DictItem[] }` |
+| ✅ | /dict/create | POST | `{ dict_type, dict_code, dict_value, sort_order }` | `{ code, msg }` |
+| ✅ | /dict/update | POST | `{ dict_id, dict_code, dict_value, sort_order }` | `{ code, msg }` |
+| ✅ | /dict/delete | POST | `{ dict_id }` | `{ code, msg }` |
 
 ### 13.3 系统参数
 
 | 状态 | url | method | payload | response |
 |:----:|:-------------------:|:------:|:-------:|:--------:|
-| 🔧 | /config/getList | GET | - | `{ code, msg, data: ConfigItem[] }` |
-| 🔧 | /config/update | POST | `{ config_key, config_value }` | `{ code, msg }` |
+| ✅ | /config/getList | GET | - | `{ code, msg, data: ConfigItem[] }` |
+| ✅ | /config/update | POST | `{ config_key, config_value }` | `{ code, msg }` |
 
 **字段说明：**
 
@@ -827,16 +827,16 @@ baseURL：`/api`
 | 模块 | 接口总数 | ✅ 已实现 | 🔧 待实现 | 📋 规划中 |
 |:----:|:--------:|:--------:|:--------:|:--------:|
 | 公共模块 | 6 | 6 | 0 | 0 |
-| 管理员模块 | 10 | 4 | 6 | 0 |
-| 病人模块 | 17 | 6 | 2 | 9 |
-| 医生模块 | 10 | 4 | 4 | 2 |
-| 药房模块 | 9 | 4 | 2 | 3 |
-| 收费模块 | 5 | 2 | 0 | 3 |
-| 排队叫号 | 4 | 0 | 4 | 0 |
-| 报到签到 | 1 | 0 | 0 | 1 |
-| 护士预检 | 2 | 0 | 0 | 2 |
-| 检验科 | 3 | 0 | 0 | 3 |
-| 复诊随访 | 4 | 0 | 0 | 4 |
-| 报表统计 | 4 | 0 | 0 | 4 |
-| 系统管理 | 7 | 0 | 7 | 0 |
-| **合计** | **82** | **26** | **25** | **31** |
+| 管理员模块 | 10 | 10 | 0 | 0 |
+| 病人模块 | 17 | 17 | 0 | 0 |
+| 医生模块 | 10 | 10 | 0 | 0 |
+| 药房模块 | 9 | 9 | 0 | 0 |
+| 收费模块 | 5 | 5 | 0 | 0 |
+| 排队叫号 | 4 | 4 | 0 | 0 |
+| 报到签到 | 1 | 1 | 0 | 0 |
+| 护士预检 | 2 | 2 | 0 | 0 |
+| 检验科 | 3 | 3 | 0 | 0 |
+| 复诊随访 | 4 | 4 | 0 | 0 |
+| 报表统计 | 4 | 4 | 0 | 0 |
+| 系统管理 | 7 | 7 | 0 | 0 |
+| **合计** | **82** | **76** | **0** | **0** |

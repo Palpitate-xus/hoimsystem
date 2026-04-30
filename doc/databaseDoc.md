@@ -310,13 +310,13 @@
 
 ---
 
-## 新增表（规划中）
+## 新增表（已建表）
 
 以下为根据需求文档规划的新增表，待后续迭代开发时建表。
 
 ---
 
-### 16. hoimsystem_queue（候诊队列表）📋
+### 16. hoimsystem_queue（候诊队列表）✅
 
 存储候诊叫号队列信息。
 
@@ -334,7 +334,7 @@
 
 ---
 
-### 17. hoimsystem_vital_sign（生命体征表）📋
+### 17. hoimsystem_vital_sign（生命体征表）✅
 
 存储护士预检时录入的生命体征数据。
 
@@ -352,7 +352,7 @@
 
 ---
 
-### 18. hoimsystem_lab_order（检查申请单表）📋
+### 18. hoimsystem_lab_order（检查申请单表）✅
 
 存储医生开具的检查检验申请单。
 
@@ -369,7 +369,7 @@
 
 ---
 
-### 19. hoimsystem_lab_result（检查结果表）📋
+### 19. hoimsystem_lab_result（检查结果表）✅
 
 存储检查检验结果。
 
@@ -386,7 +386,7 @@
 
 ---
 
-### 20. hoimsystem_invoice（发票记录表）📋
+### 20. hoimsystem_invoice（发票记录表）✅
 
 存储收费发票信息。
 
@@ -402,7 +402,7 @@
 
 ---
 
-### 21. hoimsystem_follow_up（随访计划表）📋
+### 21. hoimsystem_follow_up（随访计划表）✅
 
 存储随访计划与记录。
 
@@ -420,7 +420,7 @@
 
 ---
 
-### 22. hoimsystem_review（满意度评价表）📋
+### 22. hoimsystem_review（满意度评价表）✅
 
 存储病人就诊后的满意度评价。
 
@@ -436,7 +436,7 @@
 
 ---
 
-### 23. hoimsystem_operation_log（操作日志表）📋
+### 23. hoimsystem_operation_log（操作日志表）✅
 
 存储系统操作审计日志。
 
@@ -452,7 +452,7 @@
 
 ---
 
-### 24. hoimsystem_dict（数据字典表）📋
+### 24. hoimsystem_dict（数据字典表）✅
 
 存储系统数据字典。
 
@@ -467,7 +467,7 @@
 
 ---
 
-### 25. hoimsystem_config（系统参数表）📋
+### 25. hoimsystem_config（系统参数表）✅
 
 存储系统运行参数。
 
@@ -583,13 +583,13 @@
 | 13 | hoimsystem_pre_pha | 处方药品关联表 | ✅ | |
 | 14 | hoimsystem_medical_record | 病历表 | ✅ | 新增 registration_uuid |
 | 15 | hoimsystem_pharmaceutical | 药品表 | ✅ | 新增 status |
-| 16 | hoimsystem_queue | 候诊队列表 | 📋 | 新增 |
-| 17 | hoimsystem_vital_sign | 生命体征表 | 📋 | 新增 |
-| 18 | hoimsystem_lab_order | 检查申请单表 | 📋 | 新增 |
-| 19 | hoimsystem_lab_result | 检查结果表 | 📋 | 新增 |
-| 20 | hoimsystem_invoice | 发票记录表 | 📋 | 新增 |
-| 21 | hoimsystem_follow_up | 随访计划表 | 📋 | 新增 |
-| 22 | hoimsystem_review | 满意度评价表 | 📋 | 新增 |
-| 23 | hoimsystem_operation_log | 操作日志表 | 📋 | 新增 |
-| 24 | hoimsystem_dict | 数据字典表 | 📋 | 新增 |
-| 25 | hoimsystem_config | 系统参数表 | 📋 | 新增 |
+| 16 | hoimsystem_queue | 候诊队列表 | ✅ | 新增 |
+| 17 | hoimsystem_vital_sign | 生命体征表 | ✅ | 新增 |
+| 18 | hoimsystem_lab_order | 检查申请单表 | ✅ | 新增 |
+| 19 | hoimsystem_lab_result | 检查结果表 | ✅ | 新增 |
+| 20 | hoimsystem_invoice | 发票记录表 | ✅ | 新增 |
+| 21 | hoimsystem_follow_up | 随访计划表 | ✅ | 新增 |
+| 22 | hoimsystem_review | 满意度评价表 | ✅ | 新增 |
+| 23 | hoimsystem_operation_log | 操作日志表 | ✅ | 新增 |
+| 24 | hoimsystem_dict | 数据字典表 | ✅ | 新增 |
+| 25 | hoimsystem_config | 系统参数表 | ✅ | 新增 |

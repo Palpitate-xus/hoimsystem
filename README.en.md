@@ -26,14 +26,14 @@ A hospital outpatient information management system based on Vue 3 + FastAPI, co
 
 | Module | Description | Status |
 |:------:|:-----------|:------:|
-| Medical Record | Electronic medical record creation, query | 🔧 |
-| Lab & Examination | Lab request, result entry, report viewing | 📋 |
-| Queue & Calling | Waiting queue, voice calling, pass handling | 🔧 |
-| Pharmacy Dispensing | Prescription audit, dispensing confirmation, return handling | 📋 |
-| Nurse Triage | Vital signs entry, allergy history marking | 📋 |
-| Reports & Statistics | Outpatient volume, finance, pharmacy, workload stats | 📋 |
-| Follow-up Management | Follow-up plans, revisit reminders | 📋 |
-| Satisfaction Review | Post-visit review, rating statistics | 📋 |
+| Medical Record | Electronic medical record creation, query | ✅ |
+| Lab & Examination | Lab request, result entry, report viewing | ✅ |
+| Queue & Calling | Waiting queue, voice calling, pass handling | ✅ |
+| Pharmacy Dispensing | Prescription audit, dispensing confirmation, return handling | ✅ |
+| Nurse Triage | Vital signs entry, allergy history marking | ✅ |
+| Reports & Statistics | Outpatient volume, finance, pharmacy, workload stats | ✅ |
+| Follow-up Management | Follow-up plans, revisit reminders | ✅ |
+| Satisfaction Review | Post-visit review, rating statistics | ✅ |
 
 ---
 
@@ -80,10 +80,19 @@ hoimsystem/
 ├── fastapi_be/           # FastAPI backend (current main branch)
 │   ├── app/
 │   │   ├── routers/      # Route modules
-│   │   │   ├── user.py   # Authentication
-│   │   │   ├── admin.py  # Admin
-│   │   │   ├── patient.py # Patient
-│   │   │   └── doctor.py # Doctor
+│   │   │   ├── user.py        # Authentication
+│   │   │   ├── admin.py       # Admin
+│   │   │   ├── patient.py     # Patient
+│   │   │   ├── doctor.py      # Doctor
+│   │   │   ├── pharmacy.py    # Pharmacy
+│   │   │   ├── charge.py      # Billing
+│   │   │   ├── queue.py       # Queue & Calling
+│   │   │   ├── checkin.py     # Check-in
+│   │   │   ├── vitalsign.py   # Nurse Triage
+│   │   │   ├── lab.py         # Lab & Examination
+│   │   │   ├── followup.py    # Follow-up
+│   │   │   ├── report.py      # Reports
+│   │   │   └── system.py      # System Management
 │   │   ├── models.py     # Database models
 │   │   ├── schemas.py    # Pydantic models
 │   │   └── main.py       # Application entry
@@ -187,7 +196,7 @@ The system supports four roles with cascading permissions:
 | Document | Description |
 |:--------:|:-----------|
 | [Requirements](doc/demandDoc.md) | Functional requirements, business flow, data needs, non-functional requirements |
-| [API Document](doc/apiDoc.md) | All 82 API endpoints (26 implemented + 25 pending + 31 planned) |
+| [API Document](doc/apiDoc.md) | All 82 API endpoints (76 implemented + 6 planned) |
 | [Database Document](doc/databaseDoc.md) | 25 table definitions and ER diagram |
 | [TODO](doc/todos.md) | Project todo list (categorized by priority) |
 
@@ -206,10 +215,10 @@ More screenshots in [doc_assets/](doc_assets/) directory.
 See [doc/todos.md](doc/todos.md) for details.
 
 Near-term priorities:
-1. Medical record management API
-2. Queue & calling module
-3. Password hashing with bcrypt
-4. JWT token replacing plain string accessToken
+1. Password hashing with bcrypt
+2. JWT token replacing plain string accessToken
+3. API permission validation refinement
+4. Frontend page completion (CRUD, reports)
 
 ---
 

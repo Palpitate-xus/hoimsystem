@@ -23,41 +23,41 @@
 
 ### 2.1 高优先级
 
-- [ ] 病历管理 API（书写/查询/详情/修改）
-- [ ] 排队叫号 API（队列查询/叫号/过号/跳号）
-- [ ] 医生信息修改/删除 API
-- [ ] 病人信息修改 API
-- [ ] 科室信息修改/删除 API
-- [ ] 通知公告修改/删除 API
-- [ ] 药品信息修改/删除 API
-- [ ] 处方取消 API
+- [x] 病历管理 API（书写/查询/详情/修改）
+- [x] 排队叫号 API（队列查询/叫号/过号/跳号）
+- [x] 医生信息修改/删除 API
+- [x] 病人信息修改 API
+- [x] 科室信息修改/删除 API
+- [x] 通知公告修改/删除 API
+- [x] 药品信息修改/删除 API
+- [x] 处方取消 API
 
 ### 2.2 中优先级
 
-- [ ] 报到签到 API
-- [ ] 护士预检 API（生命体征录入/查询）
-- [ ] 检查检验申请 API
-- [ ] 检查检验结果录入/查询 API
-- [ ] 药房处方审核/发药/退药 API
-- [ ] 退费处理 API
-- [ ] 发票管理 API（生成/查询/打印）
+- [x] 报到签到 API
+- [x] 护士预检 API（生命体征录入/查询）
+- [x] 检查检验申请 API
+- [x] 检查检验结果录入/查询 API
+- [x] 药房处方审核/发药/退药 API
+- [x] 退费处理 API
+- [x] 发票管理 API（生成/查询/打印）
 - [ ] 医生考勤签到 API
 
 ### 2.3 低优先级
 
-- [ ] 复诊预约 API
-- [ ] 随访管理 API（计划/记录）
-- [ ] 满意度评价 API
+- [x] 复诊预约 API
+- [x] 随访管理 API（计划/记录）
+- [x] 满意度评价 API
 - [ ] 智能导诊 API
-- [ ] 报表统计 API（门诊量/财务/药品/工作量）
+- [x] 报表统计 API（门诊量/财务/药品/工作量）
 
 ---
 
 ## 三、待实现（系统支撑）
 
-- [ ] 操作日志审计模块
-- [ ] 数据字典管理模块
-- [ ] 系统参数配置模块
+- [x] 操作日志审计模块
+- [x] 数据字典管理模块
+- [x] 系统参数配置模块
 - [ ] 数据备份与恢复机制
 - [ ] 库存预警机制（低于阈值/过期提醒）
 - [ ] 违约处理机制（三次未取号暂停预约）
@@ -77,68 +77,68 @@
 - [ ] 科室信息修改/删除页面
 - [ ] 通知公告修改/删除页面
 - [ ] 药品信息修改/删除页面
-- [ ] 收费记录查看页面（已部分实现，需完善退费）
+- [x] 收费记录查看页面（已部分实现，需完善退费）
 - [ ] 报表统计页面
 
 ### 4.2 病人端
 
-- [ ] 病历查询页面
-- [ ] 检查检验结果查询页面
-- [ ] 健康档案页面
-- [ ] 就诊评价页面
+- [x] 病历查询页面
+- [x] 检查检验结果查询页面
+- [x] 健康档案页面
+- [x] 就诊评价页面
 - [ ] 复诊预约页面
 
 ### 4.3 医生端
 
-- [ ] 病历书写/查询页面
-- [ ] 检查检验申请页面
-- [ ] 处方修改/取消页面
+- [x] 病历书写/查询页面
+- [x] 检查检验申请页面
+- [x] 处方修改/取消页面
 - [ ] 排班查看优化
 
 ### 4.4 药房端
 
-- [ ] 处方审核页面
-- [ ] 发药确认页面
-- [ ] 退药处理页面
+- [x] 处方审核页面
+- [x] 发药确认页面
+- [x] 退药处理页面
 - [ ] 库存盘点页面
 
 ### 4.5 护士端
 
-- [ ] 候诊队列管理页面
-- [ ] 叫号显示页面
-- [ ] 生命体征录入页面
+- [x] 候诊队列管理页面
+- [x] 叫号显示页面
+- [x] 生命体征录入页面
 
 ### 4.6 收费端
 
-- [ ] 窗口收费页面
-- [ ] 退费处理页面
-- [ ] 发票打印页面
+- [x] 窗口收费页面
+- [x] 退费处理页面
+- [x] 发票打印页面
 
 ---
 
 ## 五、数据库待建表
 
-- [ ] hoimsystem_queue（候诊队列）
-- [ ] hoimsystem_vital_sign（生命体征）
-- [ ] hoimsystem_lab_order（检查申请单）
-- [ ] hoimsystem_lab_result（检查结果）
-- [ ] hoimsystem_invoice（发票记录）
-- [ ] hoimsystem_follow_up（随访计划）
-- [ ] hoimsystem_review（满意度评价）
-- [ ] hoimsystem_operation_log（操作日志）
-- [ ] hoimsystem_dict（数据字典）
-- [ ] hoimsystem_config（系统参数）
+- [x] hoimsystem_queue（候诊队列）
+- [x] hoimsystem_vital_sign（生命体征）
+- [x] hoimsystem_lab_order（检查申请单）
+- [x] hoimsystem_lab_result（检查结果）
+- [x] hoimsystem_invoice（发票记录）
+- [x] hoimsystem_follow_up（随访计划）
+- [x] hoimsystem_review（满意度评价）
+- [x] hoimsystem_operation_log（操作日志）
+- [x] hoimsystem_dict（数据字典）
+- [x] hoimsystem_config（系统参数）
 
 ---
 
 ## 六、现有表待补充字段
 
-- [ ] hoimsystem_patient：allergy_history（过敏史）
-- [ ] hoimsystem_prescription：status（处方状态）、create_time（创建时间）
-- [ ] hoimsystem_medical_record：registration_uuid（关联挂号/预约）
-- [ ] hoimsystem_pharmaceutical：status（状态：正常/停用）
-- [ ] hoimsystem_charge：status 扩展值（2=已退费）
-- [ ] hoimsystem_breach_record：breach_time（违约时间）、breach_type（违约类型）
+- [x] hoimsystem_patient：allergy_history（过敏史）
+- [x] hoimsystem_prescription：status（处方状态）、create_time（创建时间）
+- [x] hoimsystem_medical_record：registration_uuid（关联挂号/预约）
+- [x] hoimsystem_pharmaceutical：status（状态：正常/停用）
+- [x] hoimsystem_charge：status 扩展值（2=已退费）
+- [x] hoimsystem_breach_record：breach_time（违约时间）、breach_type（违约类型）
 
 ---
 

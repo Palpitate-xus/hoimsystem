@@ -125,10 +125,9 @@ cd hoimsystem
 ```bash
 # 创建 MySQL 数据库（或使用 SQLite）
 mysql -u root -p -e "CREATE DATABASE hoimsystem CHARACTER SET utf8mb4;"
-
-# 导入表结构（可选，首次运行时SQLAlchemy会自动建表）
-mysql -u root -p hoimsystem < doc_assets/hoimsystem.sql
 ```
+
+> 无需手动导入表结构，首次启动 FastAPI 后端时 SQLAlchemy 会自动建表。
 
 ### 3. 启动后端（FastAPI）
 

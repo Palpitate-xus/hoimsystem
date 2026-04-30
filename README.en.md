@@ -125,10 +125,9 @@ cd hoimsystem
 ```bash
 # Create MySQL database (or use SQLite)
 mysql -u root -p -e "CREATE DATABASE hoimsystem CHARACTER SET utf8mb4;"
-
-# Import table structure (optional, SQLAlchemy auto-creates on first run)
-mysql -u root -p hoimsystem < doc_assets/hoimsystem.sql
 ```
+
+> No need to manually import table schema. SQLAlchemy will auto-create tables on the first FastAPI backend startup.
 
 ### 3. Start the backend (FastAPI)
 

@@ -2,7 +2,7 @@
 
 [English](README.en.md) | **中文**
 
-一个基于 Vue + FastAPI/Django 的医院门诊信息管理系统，覆盖挂号、就诊、收费、取药等门诊全流程。
+一个基于 Vue 3 + FastAPI 的医院门诊信息管理系统，覆盖挂号、就诊、收费、取药等门诊全流程。
 
 ---
 
@@ -42,18 +42,12 @@
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                        前端层                                │
-│  ┌──────────────┐  ┌──────────────┐                        │
-│  │  vue-ui      │  │ vue3-new-ui  │                        │
-│  │  Vue 2.x     │  │ Vue 3        │                        │
-│  │  Element-UI  │  │ Rspack       │                        │
-│  └──────────────┘  └──────────────┘                        │
+│                   vue3-new-ui                                │
+│                   Vue 3 + Element-Plus                       │
 ├─────────────────────────────────────────────────────────────┤
 │                        后端层                                │
-│  ┌──────────────┐  ┌──────────────┐                        │
-│  │  fastapi_be  │  │  django_be   │                        │
-│  │  FastAPI     │  │  Django      │                        │
-│  │  SQLAlchemy  │  │  Django ORM  │                        │
-│  └──────────────┘  └──────────────┘                        │
+│                    fastapi_be                                │
+│              FastAPI + SQLAlchemy                            │
 ├─────────────────────────────────────────────────────────────┤
 │                        数据层                                │
 │                   MySQL / SQLite                             │
@@ -64,8 +58,8 @@
 
 | 层级 | 技术 |
 |:----:|:-----|
-| 前端 | Vue 2.x / Vue 3, Element-UI, Axios |
-| 后端 | FastAPI / Django, SQLAlchemy / Django ORM |
+| 前端 | Vue 3, Element-Plus, Axios, Pinia |
+| 后端 | FastAPI, SQLAlchemy, Pydantic |
 | 数据库 | MySQL 8.0, SQLite（开发环境） |
 | 安全 | RSA密码加密, accessToken会话认证 |
 
@@ -75,17 +69,15 @@
 
 ```
 hoimsystem/
-├── vue-ui/               # Vue 2.x 前端（主分支）
+├── vue3-new-ui/          # Vue 3 前端（当前主分支）
 │   ├── src/
 │   │   ├── views/        # 页面组件
 │   │   ├── api/          # 接口封装
 │   │   ├── router/       # 路由配置
-│   │   └── store/        # Vuex状态管理
+│   │   └── store/        # Pinia状态管理
 │   └── package.json
 │
-├── vue3-new-ui/          # Vue 3 前端（新UI实验）
-│
-├── fastapi_be/           # FastAPI 后端
+├── fastapi_be/           # FastAPI 后端（当前主分支）
 │   ├── app/
 │   │   ├── routers/      # 路由模块
 │   │   │   ├── user.py   # 登录认证
@@ -97,8 +89,6 @@ hoimsystem/
 │   │   └── main.py       # 应用入口
 │   └── requirements.txt
 │
-├── django_be/            # Django 后端（原版）
-│
 ├── doc/                  # 项目文档
 │   ├── demandDoc.md      # 需求文档
 │   ├── apiDoc.md         # API接口文档（82个接口）
@@ -106,6 +96,10 @@ hoimsystem/
 │   └── todos.md          # 待办事项
 │
 ├── doc_assets/           # 文档资源（截图、流程图、SQL）
+│
+├── vue-ui/               # Vue 2.x 前端（已弃用，保留参考）
+├── django_be/            # Django 后端（已弃用，保留参考）
+│
 └── README.md             # 本文件
 ```
 
@@ -153,10 +147,10 @@ pip install -r requirements.txt
 python -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
-### 4. 启动前端（Vue 2.x）
+### 4. 启动前端（Vue 3）
 
 ```bash
-cd vue-ui
+cd vue3-new-ui
 
 # 安装依赖
 npm install
@@ -217,7 +211,6 @@ npm run build
 2. 排队叫号模块
 3. 密码加密存储（bcrypt）
 4. JWT Token 替换纯字符串 accessToken
-5. Vue 3 新版 UI 完善
 
 ---
 

@@ -2,7 +2,7 @@
 
 [中文](README.md) | **English**
 
-A hospital outpatient information management system based on Vue + FastAPI/Django, covering the full outpatient workflow including registration, diagnosis, billing, and pharmacy.
+A hospital outpatient information management system based on Vue 3 + FastAPI, covering the full outpatient workflow including registration, diagnosis, billing, and pharmacy.
 
 ---
 
@@ -42,18 +42,12 @@ A hospital outpatient information management system based on Vue + FastAPI/Djang
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                      Frontend Layer                          │
-│  ┌──────────────┐  ┌──────────────┐                        │
-│  │  vue-ui      │  │ vue3-new-ui  │                        │
-│  │  Vue 2.x     │  │ Vue 3        │                        │
-│  │  Element-UI  │  │ Rspack       │                        │
-│  └──────────────┘  └──────────────┘                        │
+│                   vue3-new-ui                                │
+│              Vue 3 + Element-Plus                            │
 ├─────────────────────────────────────────────────────────────┤
 │                      Backend Layer                           │
-│  ┌──────────────┐  ┌──────────────┐                        │
-│  │  fastapi_be  │  │  django_be   │                        │
-│  │  FastAPI     │  │  Django      │                        │
-│  │  SQLAlchemy  │  │  Django ORM  │                        │
-│  └──────────────┘  └──────────────┘                        │
+│                   fastapi_be                                 │
+│            FastAPI + SQLAlchemy                              │
 ├─────────────────────────────────────────────────────────────┤
 │                      Data Layer                              │
 │                   MySQL / SQLite                             │
@@ -64,8 +58,8 @@ A hospital outpatient information management system based on Vue + FastAPI/Djang
 
 | Layer | Technology |
 |:-----:|:-----------|
-| Frontend | Vue 2.x / Vue 3, Element-UI, Axios |
-| Backend | FastAPI / Django, SQLAlchemy / Django ORM |
+| Frontend | Vue 3, Element-Plus, Axios, Pinia |
+| Backend | FastAPI, SQLAlchemy, Pydantic |
 | Database | MySQL 8.0, SQLite (development) |
 | Security | RSA password encryption, accessToken session auth |
 
@@ -75,17 +69,15 @@ A hospital outpatient information management system based on Vue + FastAPI/Djang
 
 ```
 hoimsystem/
-├── vue-ui/               # Vue 2.x frontend (main branch)
+├── vue3-new-ui/          # Vue 3 frontend (current main branch)
 │   ├── src/
 │   │   ├── views/        # Page components
 │   │   ├── api/          # API wrappers
 │   │   ├── router/       # Router config
-│   │   └── store/        # Vuex state management
+│   │   └── store/        # Pinia state management
 │   └── package.json
 │
-├── vue3-new-ui/          # Vue 3 frontend (new UI experiment)
-│
-├── fastapi_be/           # FastAPI backend
+├── fastapi_be/           # FastAPI backend (current main branch)
 │   ├── app/
 │   │   ├── routers/      # Route modules
 │   │   │   ├── user.py   # Authentication
@@ -97,8 +89,6 @@ hoimsystem/
 │   │   └── main.py       # Application entry
 │   └── requirements.txt
 │
-├── django_be/            # Django backend (original)
-│
 ├── doc/                  # Project documents
 │   ├── demandDoc.md      # Requirements document
 │   ├── apiDoc.md         # API document (82 endpoints)
@@ -106,6 +96,10 @@ hoimsystem/
 │   └── todos.md          # TODO list
 │
 ├── doc_assets/           # Doc resources (screenshots, diagrams, SQL)
+│
+├── vue-ui/               # Vue 2.x frontend (deprecated, kept for reference)
+├── django_be/            # Django backend (deprecated, kept for reference)
+│
 └── README.md             # This file
 ```
 
@@ -153,10 +147,10 @@ pip install -r requirements.txt
 python -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
-### 4. Start the frontend (Vue 2.x)
+### 4. Start the frontend (Vue 3)
 
 ```bash
-cd vue-ui
+cd vue3-new-ui
 
 # Install dependencies
 npm install
@@ -217,7 +211,6 @@ Near-term priorities:
 2. Queue & calling module
 3. Password hashing with bcrypt
 4. JWT token replacing plain string accessToken
-5. Vue 3 new UI completion
 
 ---
 

@@ -10,10 +10,11 @@
         clearable
         style="width: 200px; margin-left: 10px;"
       ></el-input>
+      <el-button type="primary" @click="fetchList" style="margin-left: 10px;">搜索</el-button>
       <el-table :data="paginatedList" v-loading="loading" style="margin-top: 15px">
-        <el-table-column prop="id" label="ID" width="60" />
-        <el-table-column prop="name" label="科室名称" />
-        <el-table-column prop="phone" label="电话" />
+        <el-table-column prop="id" label="ID" width="60"  sortable />
+        <el-table-column prop="name" label="科室名称"  sortable />
+        <el-table-column prop="phone" label="电话"  sortable />
         <el-table-column prop="location" label="位置" />
         <el-table-column prop="director" label="主任" />
         <el-table-column label="操作" width="180">
@@ -69,19 +70,9 @@ const searchQuery = ref("");
 const currentPage = ref(1);
 const pageSize = ref(10);
 const total = ref(0);
-const filteredList = computed(() => {
-  if (!searchQuery.value) return list.value;
-  const kw = searchQuery.value.toLowerCase();
-  return list.value.filter((item) =>
-    Object.values(item).some((val) =>
-      String(val ?? "").toLowerCase().includes(kw)
-    )
-  );
-});
-
 const paginatedList = computed(() => {
   const start = (currentPage.value - 1) * pageSize.value;
-  return filteredList.value.slice(start, start + pageSize.value);
+  return list.value.slice(start, start + pageSize.value);
 });
 
 const loading = ref(false);
@@ -99,7 +90,7 @@ const fetchList = async () => {
   loading.value = true;
   const res = await getDepartmentList(searchQuery.value);
   list.value = res.data || [];
-  total.value = filteredList.value.length;
+  total.value = list.value.length;
   loading.value = false;
 };
 

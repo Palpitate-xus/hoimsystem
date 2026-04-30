@@ -48,8 +48,8 @@ export function getHealthProfile() {
   return request({ url: "healthRecord/getProfile", method: "get" });
 }
 
-export function getVisitRecords() {
-  return request({ url: "healthRecord/getVisits", method: "get" });
+export function getVisitRecords(keyword = "") {
+  return request({ url: "healthRecord/getVisits", method: "get", params: { keyword } });
 }
 
 export function createReview(data) {

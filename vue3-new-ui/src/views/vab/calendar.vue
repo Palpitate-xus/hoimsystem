@@ -71,8 +71,8 @@
         style="width: 200px; margin-bottom: 10px;"
       ></el-input>
         <el-table :data="filteredSelectedDateEvents" style="width: 100%">
-          <el-table-column prop="title" label="事件标题" />
-          <el-table-column prop="time" label="时间" width="120" />
+          <el-table-column prop="title" label="事件标题"  sortable />
+          <el-table-column prop="time" label="时间" width="120"  sortable />
           <el-table-column prop="description" label="描述" />
           <el-table-column label="操作" width="120">
             <template #default="{ row }">

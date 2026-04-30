@@ -328,7 +328,7 @@
                 ¥{{ row.amount.toLocaleString() }}
               </template>
             </el-table-column>
-            <el-table-column prop="date" label="销售时间" width="180" />
+            <el-table-column prop="date" label="销售时间" width="180"  sortable />
           </el-table>
         </el-tab-pane>
         <el-tab-pane label="评价" name="reviews">
@@ -346,7 +346,7 @@
               </template>
             </el-table-column>
             <el-table-column prop="content" label="评价内容" />
-            <el-table-column prop="date" label="评价时间" width="180" />
+            <el-table-column prop="date" label="评价时间" width="180"  sortable />
           </el-table>
         </el-tab-pane>
       </el-tabs>

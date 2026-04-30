@@ -288,7 +288,7 @@ def get_health_profile(current_user: User = Depends(get_current_user), db: Sessi
 
 
 @router.get("/healthRecord/getVisits")
-def get_visit_records(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+def get_visit_records(current_user: User = Depends(get_current_user), keyword: Optional[str] = None, db: Session = Depends(get_db)):
     patient_obj = db.query(Patient).filter(Patient.identity == current_user.username).first()
     if not patient_obj:
         return {"code": 200, "msg": "success", "data": []}
@@ -303,6 +303,9 @@ def get_visit_records(current_user: User = Depends(get_current_user), db: Sessio
             "diagnosis": item.result,
             "prescription_id": "",
         })
+    if keyword:
+        kw = keyword.lower()
+        data = [item for item in data if any(kw in str(val).lower() for val in item.values())]
     return {"code": 200, "msg": "success", "data": data}
 
 

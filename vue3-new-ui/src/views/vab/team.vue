@@ -222,7 +222,7 @@
       <el-tabs v-model="memberActiveTab" style="margin-top: 20px">
         <el-tab-pane label="项目参与" name="projects">
           <el-table :data="memberProjects" style="width: 100%">
-            <el-table-column prop="name" label="项目名称" />
+            <el-table-column prop="name" label="项目名称"  sortable />
             <el-table-column prop="role" label="担任角色" width="120" />
             <el-table-column label="进度" width="150">
               <template #default="{ row }">
@@ -233,7 +233,7 @@
         </el-tab-pane>
         <el-tab-pane label="任务分配" name="tasks">
           <el-table :data="memberTasks" style="width: 100%">
-            <el-table-column prop="title" label="任务标题" />
+            <el-table-column prop="title" label="任务标题"  sortable />
             <el-table-column prop="project" label="所属项目" width="120" />
             <el-table-column label="状态" width="100">
               <template #default="{ row }">

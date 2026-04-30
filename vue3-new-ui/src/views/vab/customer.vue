@@ -37,8 +37,8 @@
           </template>
         </el-table-column>
         <el-table-column prop="contact" label="联系人" width="120" />
-        <el-table-column prop="phone" label="联系电话" width="150" />
-        <el-table-column prop="email" label="邮箱" width="200" />
+        <el-table-column prop="phone" label="联系电话" width="150"  sortable />
+        <el-table-column prop="email" label="邮箱" width="200"  sortable />
         <el-table-column label="客户等级" width="100">
           <template #default="{ row }">
             <el-tag :type="getLevelType(row.level)">
@@ -46,7 +46,7 @@
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="address" label="地址" min-width="200" />
+        <el-table-column prop="address" label="地址" min-width="200"  sortable />
         <el-table-column prop="createTime" label="创建时间" width="180" />
         <el-table-column label="操作" width="200">
           <template #default="{ row }">
@@ -176,7 +176,7 @@
       <el-tabs v-model="activeTab" style="margin-top: 20px">
         <el-tab-pane label="交易记录" name="transactions">
           <el-table :data="customerTransactions" style="width: 100%">
-            <el-table-column prop="id" label="订单号" width="120" />
+            <el-table-column prop="id" label="订单号" width="120"  sortable />
             <el-table-column prop="product" label="产品" />
             <el-table-column prop="amount" label="金额" width="120">
               <template #default="{ row }">
@@ -190,7 +190,7 @@
                 </el-tag>
               </template>
             </el-table-column>
-            <el-table-column prop="date" label="交易时间" width="180" />
+            <el-table-column prop="date" label="交易时间" width="180"  sortable />
           </el-table>
         </el-tab-pane>
         <el-tab-pane label="联系记录" name="contacts">
@@ -198,7 +198,7 @@
             <el-table-column prop="contactPerson" label="联系人" width="120" />
             <el-table-column prop="method" label="联系方式" width="120" />
             <el-table-column prop="content" label="联系内容" />
-            <el-table-column prop="date" label="联系时间" width="180" />
+            <el-table-column prop="date" label="联系时间" width="180"  sortable />
           </el-table>
           
           <div style="margin-top: 20px; text-align: center">

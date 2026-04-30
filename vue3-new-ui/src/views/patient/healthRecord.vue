@@ -21,18 +21,19 @@
         clearable
         style="width: 200px; margin-bottom: 10px;"
       ></el-input>
+      <el-button type="primary" @click="fetchVisits" style="margin-left: 10px; margin-bottom: 10px;">搜索</el-button>
       <el-table :data="paginatedVisits" v-loading="loading">
-        <el-table-column prop="visit_time" label="就诊时间" />
-        <el-table-column prop="doctor_name" label="医生" />
-        <el-table-column prop="department" label="科室" />
-        <el-table-column prop="diagnosis" label="诊断" />
+        <el-table-column prop="visit_time" label="就诊时间"  sortable />
+        <el-table-column prop="doctor_name" label="医生"  sortable />
+        <el-table-column prop="department" label="科室"  sortable />
+        <el-table-column prop="diagnosis" label="诊断"  sortable />
       </el-table>
       <el-pagination
         v-model:current-page="currentPage"
         v-model:page-size="pageSize"
         :page-sizes="[10, 20, 50, 100]"
         layout="total, sizes, prev, pager, next, jumper"
-        :total="filteredVisits.length"
+        :total="visits.length"
         style="margin-top: 15px; justify-content: flex-end;"
       />
 
@@ -52,28 +53,22 @@ const currentPage = ref(1);
 const pageSize = ref(10);
 const total = ref(0);
 
-const filteredVisits = computed(() => {
-  if (!searchQuery.value) return visits.value;
-  const kw = searchQuery.value.toLowerCase();
-  return visits.value.filter((item) =>
-    Object.values(item).some((val) =>
-      String(val ?? "").toLowerCase().includes(kw)
-    )
-  );
-});
-
 const paginatedVisits = computed(() => {
   const start = (currentPage.value - 1) * pageSize.value;
-  return filteredVisits.value.slice(start, start + pageSize.value);
+  return visits.value.slice(start, start + pageSize.value);
 });
+
+const fetchVisits = async () => {
+  loading.value = true;
+  const v = await getVisitRecords(searchQuery.value);
+  visits.value = v.data || [];
+  total.value = visits.value.length;
+  loading.value = false;
+};
 
 onMounted(async () => {
   const p = await getHealthProfile();
   profile.value = p.data || {};
-  loading.value = true;
-  const v = await getVisitRecords();
-  visits.value = v.data || [];
-  total.value = filteredVisits.value.length;
-  loading.value = false;
+  fetchVisits();
 });
 </script>

@@ -46,7 +46,7 @@ def audit_lab_result(req: LabResultAuditRequest, db: Session = Depends(get_db)):
 
 
 @router.get("/labResult/getPending")
-def get_pending_lab_orders(db: Session = Depends(get_db)):
+def get_pending_lab_orders(keyword: Optional[str] = None, db: Session = Depends(get_db)):
     orders = db.query(LabOrder).filter(LabOrder.status == 0).order_by(LabOrder.create_time.desc()).all()
     data = []
     for item in orders:
@@ -57,6 +57,9 @@ def get_pending_lab_orders(db: Session = Depends(get_db)):
             "status": item.status,
             "create_time": str(item.create_time),
         })
+    if keyword:
+        kw = keyword.lower()
+        data = [item for item in data if any(kw in str(val).lower() for val in item.values())]
     return {"code": 200, "msg": "success", "data": data}
 
 

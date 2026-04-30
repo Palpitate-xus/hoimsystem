@@ -128,7 +128,7 @@
         style="width: 200px; margin-bottom: 10px;"
       ></el-input>
         <el-table :data="filteredDetailData" style="width: 100%">
-          <el-table-column prop="name" label="指标名称" />
+          <el-table-column prop="name" label="指标名称"  sortable />
           <el-table-column prop="value" label="数值" />
           <el-table-column prop="change" label="较昨日变化">
             <template #default="{ row }">

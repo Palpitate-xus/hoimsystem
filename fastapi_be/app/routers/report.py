@@ -10,7 +10,7 @@ router = APIRouter()
 
 
 @router.post("/report/outpatientVolume")
-def report_outpatient_volume(req: dict, db: Session = Depends(get_db)):
+def report_outpatient_volume(req: dict, keyword: Optional[str] = None, db: Session = Depends(get_db)):
     start_date = req.get("start_date")
     end_date = req.get("end_date")
     group_by = req.get("group_by", "day")
@@ -61,6 +61,10 @@ def report_outpatient_volume(req: dict, db: Session = Depends(get_db)):
         for k, v in groups.items():
             details.append({"label": k, "value": v})
 
+    if keyword:
+        kw = keyword.lower()
+        details = [item for item in details if any(kw in str(val).lower() for val in item.values())]
+
     return {"code": 200, "msg": "success", "data": {"total_visits": total_visits, "details": details}}
 
 
@@ -90,7 +94,7 @@ def report_finance(req: dict, db: Session = Depends(get_db)):
 
 
 @router.post("/report/pharmaceutical")
-def report_pharmaceutical(req: dict, db: Session = Depends(get_db)):
+def report_pharmaceutical(req: dict, keyword: Optional[str] = None, db: Session = Depends(get_db)):
     start_date = req.get("start_date")
     end_date = req.get("end_date")
 
@@ -107,11 +111,16 @@ def report_pharmaceutical(req: dict, db: Session = Depends(get_db)):
         groups[name] = groups.get(name, {"name": name, "total_number": 0})
         groups[name]["total_number"] += pp.number
 
-    return {"code": 200, "msg": "success", "data": list(groups.values())}
+    data = list(groups.values())
+    if keyword:
+        kw = keyword.lower()
+        data = [item for item in data if any(kw in str(val).lower() for val in item.values())]
+
+    return {"code": 200, "msg": "success", "data": data}
 
 
 @router.post("/report/doctorWorkload")
-def report_doctor_workload(req: dict, db: Session = Depends(get_db)):
+def report_doctor_workload(req: dict, keyword: Optional[str] = None, db: Session = Depends(get_db)):
     start_date = req.get("start_date")
     end_date = req.get("end_date")
     doctor_id = req.get("doctor_id")
@@ -142,4 +151,9 @@ def report_doctor_workload(req: dict, db: Session = Depends(get_db)):
             "prescription_count": pre_query.count(),
             "lab_order_count": lab_query.count(),
         })
+
+    if keyword:
+        kw = keyword.lower()
+        data = [item for item in data if any(kw in str(val).lower() for val in item.values())]
+
     return {"code": 200, "msg": "success", "data": data}

@@ -11,7 +11,7 @@
         style="width: 200px; margin-bottom: 10px;"
       ></el-input>
           <el-table :data="filteredRoles" style="width: 100%" row-key="id">
-            <el-table-column prop="name" label="角色名称" width="180" />
+            <el-table-column prop="name" label="角色名称" width="180"  sortable />
             <el-table-column label="权限">
               <template #default="{ row }">
                 <el-tag
@@ -33,7 +33,7 @@
         </el-tab-pane>
         <el-tab-pane label="用户管理" name="user">
           <el-table :data="users" style="width: 100%" row-key="id">
-            <el-table-column prop="name" label="用户名" width="180" />
+            <el-table-column prop="name" label="用户名" width="180"  sortable />
             <el-table-column label="角色">
               <template #default="{ row }">
                 <el-tag
@@ -45,7 +45,7 @@
                 </el-tag>
               </template>
             </el-table-column>
-            <el-table-column prop="email" label="邮箱" width="200" />
+            <el-table-column prop="email" label="邮箱" width="200"  sortable />
             <el-table-column label="操作" width="180">
               <template #default="{ row }">
                 <el-button type="text" @click="editUser(row)">编辑</el-button>

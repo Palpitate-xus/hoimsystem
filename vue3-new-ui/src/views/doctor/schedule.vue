@@ -10,15 +10,16 @@
         clearable
         style="width: 200px; margin-left: 10px;"
       ></el-input>
+      <el-button type="primary" @click="fetchList" style="margin-left: 10px;">搜索</el-button>
       <el-table :data="paginatedList" v-loading="loading" style="margin-top: 15px">
-        <el-table-column prop="id" label="医生ID" />
-        <el-table-column prop="name" label="医生姓名" />
+        <el-table-column prop="id" label="医生ID"  sortable />
+        <el-table-column prop="name" label="医生姓名"  sortable />
         <el-table-column prop="schedule" label="排班">
           <template #default="{row}">
             <el-tag v-for="(s,i) in row.schedule" :key="i" style="margin-right:5px">{{ s }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="number" label="号源数" />
+        <el-table-column prop="number" label="号源数"  sortable />
         <el-table-column prop="specialist" label="专家号">
           <template #default="{row}">
             <el-tag v-if="row.specialist">是</el-tag>
@@ -84,19 +85,9 @@ const searchQuery = ref("");
 const currentPage = ref(1);
 const pageSize = ref(10);
 const total = ref(0);
-const filteredList = computed(() => {
-  if (!searchQuery.value) return list.value;
-  const kw = searchQuery.value.toLowerCase();
-  return list.value.filter((item) =>
-    Object.values(item).some((val) =>
-      String(val ?? "").toLowerCase().includes(kw)
-    )
-  );
-});
-
 const paginatedList = computed(() => {
   const start = (currentPage.value - 1) * pageSize.value;
-  return filteredList.value.slice(start, start + pageSize.value);
+  return list.value.slice(start, start + pageSize.value);
 });
 
 const doctors = ref([]);
@@ -108,7 +99,7 @@ const fetchList = async () => {
   loading.value = true;
   const res = await getDoctorScheduleList(searchQuery.value);
   list.value = res.data || [];
-  total.value = filteredList.value.length;
+  total.value = list.value.length;
   loading.value = false;
 };
 

@@ -9,11 +9,12 @@
           clearable
           style="width: 200px; margin-bottom: 10px;"
         ></el-input>
+        <el-button type="primary" @click="fetchPending" style="margin-left: 10px; margin-bottom: 10px;">搜索</el-button>
         <el-table :data="paginatedPendingList" v-loading="loading">
-          <el-table-column prop="id" label="申请单ID" />
-          <el-table-column prop="patient_name" label="患者" />
-          <el-table-column prop="check_type" label="检查类型" />
-          <el-table-column prop="create_time" label="申请时间" />
+          <el-table-column prop="id" label="申请单ID"  sortable />
+          <el-table-column prop="patient_name" label="患者"  sortable />
+          <el-table-column prop="check_type" label="检查类型"  sortable />
+          <el-table-column prop="create_time" label="申请时间"  sortable />
           <el-table-column label="操作" width="120">
             <template #default="{row}">
               <el-button size="small" type="primary" @click="handleResult(row)">录入结果</el-button>
@@ -25,7 +26,7 @@
         v-model:page-size="pageSize"
         :page-sizes="[10, 20, 50, 100]"
         layout="total, sizes, prev, pager, next, jumper"
-        :total="filteredPendingList.length"
+        :total="pendingList.length"
         style="margin-top: 15px; justify-content: flex-end;"
       />
 
@@ -37,11 +38,12 @@
           clearable
           style="width: 200px; margin-bottom: 10px;"
         ></el-input>
+        <el-button type="primary" @click="fetchResults" style="margin-left: 10px; margin-bottom: 10px;">搜索</el-button>
         <el-table :data="paginatedResultList" v-loading="loading2">
-          <el-table-column prop="id" label="结果ID" />
-          <el-table-column prop="check_name" label="检查名称" />
-          <el-table-column prop="check_time" label="检查时间" />
-          <el-table-column prop="result" label="结果" />
+          <el-table-column prop="id" label="结果ID"  sortable />
+          <el-table-column prop="check_name" label="检查名称"  sortable />
+          <el-table-column prop="check_time" label="检查时间"  sortable />
+          <el-table-column prop="result" label="结果"  sortable />
           <el-table-column prop="abnormal_flag" label="是否异常">
             <template #default="{row}">
               <el-tag v-if="row.abnormal_flag" type="danger">异常</el-tag>
@@ -55,7 +57,7 @@
         v-model:page-size="pageSize"
         :page-sizes="[10, 20, 50, 100]"
         layout="total, sizes, prev, pager, next, jumper"
-        :total="filteredResultList.length"
+        :total="resultList.length"
         style="margin-top: 15px; justify-content: flex-end;"
       />
 
@@ -102,39 +104,19 @@ const form = ref({});
 const currentPage = ref(1);
 const pageSize = ref(10);
 
-const filteredPendingList = computed(() => {
-  if (!searchQuery1.value) return pendingList.value;
-  const kw = searchQuery1.value.toLowerCase();
-  return pendingList.value.filter((item) =>
-    Object.values(item).some((val) =>
-      String(val ?? "").toLowerCase().includes(kw)
-    )
-  );
-});
-
-const filteredResultList = computed(() => {
-  if (!searchQuery2.value) return resultList.value;
-  const kw = searchQuery2.value.toLowerCase();
-  return resultList.value.filter((item) =>
-    Object.values(item).some((val) =>
-      String(val ?? "").toLowerCase().includes(kw)
-    )
-  );
-});
-
 const paginatedPendingList = computed(() => {
   const start = (currentPage.value - 1) * pageSize.value;
-  return filteredPendingList.value.slice(start, start + pageSize.value);
+  return pendingList.value.slice(start, start + pageSize.value);
 });
 
 const paginatedResultList = computed(() => {
   const start = (currentPage.value - 1) * pageSize.value;
-  return filteredResultList.value.slice(start, start + pageSize.value);
+  return resultList.value.slice(start, start + pageSize.value);
 });
 
 const fetchPending = async () => {
   loading.value = true;
-  const res = await getPendingLabOrders();
+  const res = await getPendingLabOrders(searchQuery1.value);
   pendingList.value = res.data || [];
   loading.value = false;
 };

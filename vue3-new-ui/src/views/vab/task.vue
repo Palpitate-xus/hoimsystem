@@ -127,7 +127,7 @@
             style="width: 100%"
             row-key="id"
           >
-            <el-table-column prop="title" label="任务标题" min-width="200" />
+            <el-table-column prop="title" label="任务标题" min-width="200"  sortable />
             <el-table-column prop="description" label="描述" min-width="200" />
             <el-table-column prop="assignee" label="负责人" width="120" />
             <el-table-column prop="startDate" label="开始日期" width="120" />
@@ -154,7 +154,7 @@
             style="width: 100%"
             row-key="id"
           >
-            <el-table-column prop="title" label="任务标题" min-width="200" />
+            <el-table-column prop="title" label="任务标题" min-width="200"  sortable />
             <el-table-column prop="description" label="描述" min-width="200" />
             <el-table-column prop="assignee" label="负责人" width="120" />
             <el-table-column prop="completedDate" label="完成日期" width="120" />

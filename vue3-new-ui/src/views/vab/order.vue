@@ -38,7 +38,7 @@
         row-key="id"
         v-loading="loading"
       >
-        <el-table-column prop="id" label="订单号" width="180" />
+        <el-table-column prop="id" label="订单号" width="180"  sortable />
         <el-table-column prop="customer" label="客户" width="120" />
         <el-table-column prop="products" label="商品" min-width="250">
           <template #default="{ row }">

@@ -10,14 +10,15 @@
         clearable
         style="width: 200px; margin-left: 10px;"
       ></el-input>
+      <el-button type="primary" @click="fetchList" style="margin-left: 10px;">搜索</el-button>
       <el-table :data="paginatedList" v-loading="loading" style="margin-top: 15px">
-        <el-table-column prop="uuid" label="ID" width="80" />
-        <el-table-column prop="title" label="标题" />
+        <el-table-column prop="uuid" label="ID" width="80"  sortable />
+        <el-table-column prop="title" label="标题"  sortable />
         <el-table-column prop="content" label="内容" show-overflow-tooltip />
-        <el-table-column prop="isemergency" label="紧急" width="80" :formatter="(row)=>row.isemergency?'是':'否'" />
+        <el-table-column prop="isemergency" label="紧急" width="80" :formatter="(row)=>row.isemergency?'是':'否'" sortable />
         <el-table-column prop="towho" label="目标人群" />
-        <el-table-column prop="sendtime" label="发送时间" />
-        <el-table-column prop="expiredtime" label="过期时间" />
+        <el-table-column prop="sendtime" label="发送时间"  sortable />
+        <el-table-column prop="expiredtime" label="过期时间"  sortable />
         <el-table-column prop="writer" label="发布人" />
         <el-table-column label="操作" width="180">
           <template #default="{row}">
@@ -77,19 +78,9 @@ const searchQuery = ref("");
 const currentPage = ref(1);
 const pageSize = ref(10);
 const total = ref(0);
-const filteredList = computed(() => {
-  if (!searchQuery.value) return list.value;
-  const kw = searchQuery.value.toLowerCase();
-  return list.value.filter((item) =>
-    Object.values(item).some((val) =>
-      String(val ?? "").toLowerCase().includes(kw)
-    )
-  );
-});
-
 const paginatedList = computed(() => {
   const start = (currentPage.value - 1) * pageSize.value;
-  return filteredList.value.slice(start, start + pageSize.value);
+  return list.value.slice(start, start + pageSize.value);
 });
 
 const loading = ref(false);
@@ -101,7 +92,7 @@ const fetchList = async () => {
   loading.value = true;
   const res = await getNoticeList(searchQuery.value);
   list.value = res.data || [];
-  total.value = filteredList.value.length;
+  total.value = list.value.length;
   loading.value = false;
 };
 

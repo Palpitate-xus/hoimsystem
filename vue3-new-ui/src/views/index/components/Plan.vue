@@ -19,7 +19,7 @@
         </template>
       </el-table-column>
       <el-table-column width="20px" />
-      <el-table-column label="目标" prop="title" width="230px" />
+      <el-table-column label="目标" prop="title" width="230px"  sortable />
       <el-table-column label="进度" width="220px">
         <template #default="{ row }">
           <el-progress :color="row.color" :percentage="row.percentage" />

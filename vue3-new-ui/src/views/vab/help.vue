@@ -210,7 +210,7 @@
       ></el-input>
             
             <el-table :data="filteredResources" style="width: 100%">
-              <el-table-column prop="name" label="资源名称" />
+              <el-table-column prop="name" label="资源名称"  sortable />
               <el-table-column prop="description" label="描述" />
               <el-table-column prop="size" label="大小" width="100" />
               <el-table-column label="操作" width="120">

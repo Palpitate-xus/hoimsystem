@@ -447,9 +447,9 @@
         </el-tab-pane>
         <el-tab-pane label="参与用户" name="participants">
           <el-table :data="campaignParticipants" style="width: 100%">
-            <el-table-column prop="id" label="用户ID" width="100" />
-            <el-table-column prop="name" label="用户名" width="150" />
-            <el-table-column prop="phone" label="手机号" width="150" />
+            <el-table-column prop="id" label="用户ID" width="100"  sortable />
+            <el-table-column prop="name" label="用户名" width="150"  sortable />
+            <el-table-column prop="phone" label="手机号" width="150"  sortable />
             <el-table-column prop="orderTime" label="下单时间" width="180" />
             <el-table-column prop="orderAmount" label="订单金额" width="120">
               <template #default="{ row }">

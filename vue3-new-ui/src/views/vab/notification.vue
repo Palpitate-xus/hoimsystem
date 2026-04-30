@@ -52,7 +52,7 @@
               </template>
             </el-table-column>
             <el-table-column prop="sender" label="发送者" width="120" />
-            <el-table-column prop="date" label="时间" width="180" />
+            <el-table-column prop="date" label="时间" width="180"  sortable />
             <el-table-column label="操作" width="200">
               <template #default="{ row }">
                 <el-button 
@@ -94,7 +94,7 @@
               </template>
             </el-table-column>
             <el-table-column prop="sender" label="发送者" width="120" />
-            <el-table-column prop="date" label="时间" width="180" />
+            <el-table-column prop="date" label="时间" width="180"  sortable />
             <el-table-column label="操作" width="200">
               <template #default="{ row }">
                 <el-button 
@@ -122,14 +122,14 @@
             style="width: 100%"
             v-loading="loading"
           >
-            <el-table-column prop="title" label="标题" width="200" />
+            <el-table-column prop="title" label="标题" width="200"  sortable />
             <el-table-column prop="content" label="内容">
               <template #default="{ row }">
                 <div class="notification-content">{{ row.content }}</div>
               </template>
             </el-table-column>
             <el-table-column prop="sender" label="发送者" width="120" />
-            <el-table-column prop="date" label="时间" width="180" />
+            <el-table-column prop="date" label="时间" width="180"  sortable />
             <el-table-column label="操作" width="120">
               <template #default="{ row }">
                 <el-button 

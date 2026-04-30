@@ -344,8 +344,8 @@
         </el-tab-pane>
         <el-tab-pane label="实例" name="instances">
           <el-table :data="workflowInstances" style="width: 100%">
-            <el-table-column prop="id" label="实例ID" width="100" />
-            <el-table-column prop="title" label="标题" />
+            <el-table-column prop="id" label="实例ID" width="100"  sortable />
+            <el-table-column prop="title" label="标题"  sortable />
             <el-table-column label="当前节点" width="150">
               <template #default="{ row }">
                 {{ getCurrentNodeName(row.currentNodeId) }}

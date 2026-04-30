@@ -9,8 +9,8 @@
         style="width: 200px; margin-bottom: 10px;"
       ></el-input>
       <el-table v-loading="listLoading" :data="filteredList" style="width: 100%">
-        <el-table-column label="ID" prop="id" />
-        <el-table-column label="标题" prop="title" show-overflow-tooltip />
+        <el-table-column label="ID" prop="id"  sortable />
+        <el-table-column label="标题" prop="title" show-overflow-tooltip  sortable />
         <el-table-column label="作者" prop="author" />
         <el-table-column label="状态" width="100">
           <template #default="{ row }">

@@ -10,13 +10,14 @@
         clearable
         style="width: 200px; margin-left: 10px;"
       ></el-input>
+      <el-button type="primary" @click="fetchList" style="margin-left: 10px;">搜索</el-button>
       <el-table :data="paginatedList" v-loading="loading" style="margin-top: 15px">
-        <el-table-column prop="uuid" label="挂号ID" />
-        <el-table-column prop="order" label="序号" />
+        <el-table-column prop="uuid" label="挂号ID"  sortable />
+        <el-table-column prop="order" label="序号"  sortable />
         <el-table-column prop="doctor" label="医生" />
-        <el-table-column prop="department" label="科室" />
-        <el-table-column prop="time" label="挂号时间" />
-        <el-table-column prop="status" label="状态" />
+        <el-table-column prop="department" label="科室"  sortable />
+        <el-table-column prop="time" label="挂号时间"  sortable />
+        <el-table-column prop="status" label="状态"  sortable />
         <el-table-column label="操作" width="120">
           <template #default="{row}">
             <el-button size="small" type="danger" @click="cancel(row)">取消</el-button>
@@ -37,8 +38,8 @@
     <el-dialog v-model="dialogVisible" title="选择号源" width="900px">
       <el-table :data="schedules" v-loading="schedLoading">
         <el-table-column prop="doctor" label="医生" />
-        <el-table-column prop="time" label="时段" />
-        <el-table-column prop="stock" label="剩余号源" />
+        <el-table-column prop="time" label="时段"  sortable />
+        <el-table-column prop="stock" label="剩余号源"  sortable />
         <el-table-column prop="specialist" label="专家号">
           <template #default="{row}">
             <el-tag v-if="row.specialist">是</el-tag>
@@ -65,19 +66,9 @@ const searchQuery = ref("");
 const currentPage = ref(1);
 const pageSize = ref(10);
 const total = ref(0);
-const filteredList = computed(() => {
-  if (!searchQuery.value) return list.value;
-  const kw = searchQuery.value.toLowerCase();
-  return list.value.filter((item) =>
-    Object.values(item).some((val) =>
-      String(val ?? "").toLowerCase().includes(kw)
-    )
-  );
-});
-
 const paginatedList = computed(() => {
   const start = (currentPage.value - 1) * pageSize.value;
-  return filteredList.value.slice(start, start + pageSize.value);
+  return list.value.slice(start, start + pageSize.value);
 });
 
 const schedules = ref([]);
@@ -89,7 +80,7 @@ const fetchList = async () => {
   loading.value = true;
   const res = await getRegistrationList(searchQuery.value);
   list.value = res.data || [];
-  total.value = filteredList.value.length;
+  total.value = list.value.length;
   loading.value = false;
 };
 

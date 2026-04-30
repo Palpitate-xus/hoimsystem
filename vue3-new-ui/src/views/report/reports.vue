@@ -32,8 +32,9 @@
           clearable
           style="width: 200px; margin-top: 10px;"
         ></el-input>
+        <el-button type="primary" @click="queryOutpatient" style="margin-left: 10px;">搜索</el-button>
         <el-table :data="paginatedOutpatientDetails" style="margin-top:15px">
-          <el-table-column prop="label" label="分组" />
+          <el-table-column prop="label" label="分组"  sortable />
           <el-table-column prop="value" label="人次" />
         </el-table>
       <el-pagination
@@ -41,7 +42,7 @@
         v-model:page-size="pageSize"
         :page-sizes="[10, 20, 50, 100]"
         layout="total, sizes, prev, pager, next, jumper"
-        :total="filteredOutpatientDetails.length"
+        :total="(outpatientResult.details || []).length"
         style="margin-top: 15px; justify-content: flex-end;"
       />
 
@@ -85,16 +86,17 @@
           clearable
           style="width: 200px; margin-bottom: 10px;"
         ></el-input>
+        <el-button type="primary" @click="queryPharma" style="margin-left: 10px;">搜索</el-button>
         <el-table :data="paginatedPharmaResult">
-          <el-table-column prop="name" label="药品名称" />
-          <el-table-column prop="total_number" label="消耗数量" />
+          <el-table-column prop="name" label="药品名称"  sortable />
+          <el-table-column prop="total_number" label="消耗数量"  sortable />
         </el-table>
       <el-pagination
         v-model:current-page="currentPage"
         v-model:page-size="pageSize"
         :page-sizes="[10, 20, 50, 100]"
         layout="total, sizes, prev, pager, next, jumper"
-        :total="filteredPharmaResult.length"
+        :total="(pharmaResult || []).length"
         style="margin-top: 15px; justify-content: flex-end;"
       />
 
@@ -123,8 +125,9 @@
           clearable
           style="width: 200px; margin-bottom: 10px;"
         ></el-input>
+        <el-button type="primary" @click="queryWorkload" style="margin-left: 10px;">搜索</el-button>
         <el-table :data="paginatedWorkloadResult">
-          <el-table-column prop="doctor_name" label="医生" />
+          <el-table-column prop="doctor_name" label="医生"  sortable />
           <el-table-column prop="visit_count" label="接诊人数" />
           <el-table-column prop="prescription_count" label="处方数" />
           <el-table-column prop="lab_order_count" label="检查申请数" />
@@ -134,7 +137,7 @@
         v-model:page-size="pageSize"
         :page-sizes="[10, 20, 50, 100]"
         layout="total, sizes, prev, pager, next, jumper"
-        :total="filteredWorkloadResult.length"
+        :total="(workloadResult || []).length"
         style="margin-top: 15px; justify-content: flex-end;"
       />
 
@@ -168,55 +171,25 @@ const searchQuery3 = ref("");
 const currentPage = ref(1);
 const pageSize = ref(10);
 
-const filteredOutpatientDetails = computed(() => {
-  const data = outpatientResult.value.details || [];
-  if (!searchQuery1.value) return data;
-  const kw = searchQuery1.value.toLowerCase();
-  return data.filter((item) =>
-    Object.values(item).some((val) =>
-      String(val ?? "").toLowerCase().includes(kw)
-    )
-  );
-});
-
-const filteredPharmaResult = computed(() => {
-  if (!searchQuery2.value) return pharmaResult.value;
-  const kw = searchQuery2.value.toLowerCase();
-  return pharmaResult.value.filter((item) =>
-    Object.values(item).some((val) =>
-      String(val ?? "").toLowerCase().includes(kw)
-    )
-  );
-});
-
-const filteredWorkloadResult = computed(() => {
-  if (!searchQuery3.value) return workloadResult.value;
-  const kw = searchQuery3.value.toLowerCase();
-  return workloadResult.value.filter((item) =>
-    Object.values(item).some((val) =>
-      String(val ?? "").toLowerCase().includes(kw)
-    )
-  );
-});
-
 const paginatedOutpatientDetails = computed(() => {
   const start = (currentPage.value - 1) * pageSize.value;
-  return filteredOutpatientDetails.value.slice(start, start + pageSize.value);
+  return (outpatientResult.value.details || []).slice(start, start + pageSize.value);
 });
 
 const paginatedPharmaResult = computed(() => {
   const start = (currentPage.value - 1) * pageSize.value;
-  return filteredPharmaResult.value.slice(start, start + pageSize.value);
+  return (pharmaResult.value || []).slice(start, start + pageSize.value);
 });
 
 const paginatedWorkloadResult = computed(() => {
   const start = (currentPage.value - 1) * pageSize.value;
-  return filteredWorkloadResult.value.slice(start, start + pageSize.value);
+  return (workloadResult.value || []).slice(start, start + pageSize.value);
 });
 
 const queryOutpatient = async () => {
   try {
-    const res = await reportOutpatientVolume(outpatientForm.value);
+    currentPage.value = 1;
+    const res = await reportOutpatientVolume(outpatientForm.value, searchQuery1.value);
     outpatientResult.value = res.data || { total_visits: 0, details: [] };
   } catch (e) {
     ElMessage.error(e.msg || "查询失败");
@@ -234,7 +207,8 @@ const queryFinance = async () => {
 
 const queryPharma = async () => {
   try {
-    const res = await reportPharmaceutical(pharmaForm.value);
+    currentPage.value = 1;
+    const res = await reportPharmaceutical(pharmaForm.value, searchQuery2.value);
     pharmaResult.value = res.data || [];
   } catch (e) {
     ElMessage.error(e.msg || "查询失败");
@@ -243,7 +217,8 @@ const queryPharma = async () => {
 
 const queryWorkload = async () => {
   try {
-    const res = await reportDoctorWorkload(workloadForm.value);
+    currentPage.value = 1;
+    const res = await reportDoctorWorkload(workloadForm.value, searchQuery3.value);
     workloadResult.value = res.data || [];
   } catch (e) {
     ElMessage.error(e.msg || "查询失败");

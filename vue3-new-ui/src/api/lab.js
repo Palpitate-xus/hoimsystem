@@ -1,7 +1,7 @@
 import request from "@/utils/request";
 
-export function getPendingLabOrders() {
-  return request({ url: "labResult/getPending", method: "get" });
+export function getPendingLabOrders(keyword = "") {
+  return request({ url: "labResult/getPending", method: "get", params: { keyword } });
 }
 
 export function getLabResultList(keyword = "") {

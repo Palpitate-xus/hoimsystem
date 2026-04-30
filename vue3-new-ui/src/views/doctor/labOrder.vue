@@ -10,10 +10,11 @@
         clearable
         style="width: 200px; margin-left: 10px;"
       ></el-input>
+      <el-button type="primary" @click="fetchList" style="margin-left: 10px;">搜索</el-button>
       <el-table :data="paginatedList" v-loading="loading" style="margin-top: 15px">
-        <el-table-column prop="id" label="申请单ID" />
-        <el-table-column prop="patient_name" label="患者" />
-        <el-table-column prop="check_type" label="检查类型" />
+        <el-table-column prop="id" label="申请单ID"  sortable />
+        <el-table-column prop="patient_name" label="患者"  sortable />
+        <el-table-column prop="check_type" label="检查类型"  sortable />
         <el-table-column prop="status" label="状态">
           <template #default="{row}">
             <el-tag v-if="row.status===0" type="warning">待缴费</el-tag>
@@ -21,7 +22,7 @@
             <el-tag v-else type="success">已完成</el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="create_time" label="申请时间" />
+        <el-table-column prop="create_time" label="申请时间"  sortable />
       </el-table>
       <el-pagination
         v-model:current-page="currentPage"
@@ -70,19 +71,9 @@ const searchQuery = ref("");
 const currentPage = ref(1);
 const pageSize = ref(10);
 const total = ref(0);
-const filteredList = computed(() => {
-  if (!searchQuery.value) return list.value;
-  const kw = searchQuery.value.toLowerCase();
-  return list.value.filter((item) =>
-    Object.values(item).some((val) =>
-      String(val ?? "").toLowerCase().includes(kw)
-    )
-  );
-});
-
 const paginatedList = computed(() => {
   const start = (currentPage.value - 1) * pageSize.value;
-  return filteredList.value.slice(start, start + pageSize.value);
+  return list.value.slice(start, start + pageSize.value);
 });
 
 const loading = ref(false);
@@ -99,7 +90,7 @@ const fetchList = async () => {
   loading.value = true;
   const res = await getLabOrderList(searchQuery.value);
   list.value = res.data || [];
-  total.value = filteredList.value.length;
+  total.value = list.value.length;
   loading.value = false;
 };
 

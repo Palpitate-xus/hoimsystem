@@ -19,7 +19,7 @@
               v-model="filterStatus" 
               placeholder="状态筛选" 
               style="width: 120px; margin-right: 10px"
-            >
+             filterable>
               <el-option label="全部" value=""></el-option>
               <el-option label="待办" value="pending"></el-option>
               <el-option label="进行中" value="in-progress"></el-option>
@@ -205,7 +205,7 @@
         </el-form-item>
         
         <el-form-item label="负责人" prop="assignee">
-          <el-select v-model="taskForm.assignee" placeholder="请选择负责人" style="width: 100%">
+          <el-select v-model="taskForm.assignee" placeholder="请选择负责人" style="width: 100%" filterable>
             <el-option
               v-for="user in users"
               :key="user.id"
@@ -227,7 +227,7 @@
         </el-form-item>
         
         <el-form-item label="优先级" prop="priority">
-          <el-select v-model="taskForm.priority" placeholder="请选择优先级" style="width: 100%">
+          <el-select v-model="taskForm.priority" placeholder="请选择优先级" style="width: 100%" filterable>
             <el-option label="低" value="low"></el-option>
             <el-option label="中" value="medium"></el-option>
             <el-option label="高" value="high"></el-option>
@@ -235,7 +235,7 @@
         </el-form-item>
         
         <el-form-item label="状态" prop="status">
-          <el-select v-model="taskForm.status" placeholder="请选择状态" style="width: 100%">
+          <el-select v-model="taskForm.status" placeholder="请选择状态" style="width: 100%" filterable>
             <el-option label="待办" value="pending"></el-option>
             <el-option label="进行中" value="in-progress"></el-option>
             <el-option label="已完成" value="completed"></el-option>

@@ -13,7 +13,14 @@
           <el-button type="primary" @click="fetchList">查询</el-button>
         </el-form-item>
       </el-form>
-      <el-table :data="list" v-loading="loading">
+      
+      <el-input
+        v-model="searchQuery"
+        placeholder="搜索..."
+        clearable
+        style="width: 200px; margin-left: 10px;"
+      ></el-input>
+      <el-table :data="filteredList" v-loading="loading">
         <el-table-column prop="log_id" label="日志ID" />
         <el-table-column prop="user_name" label="用户" />
         <el-table-column prop="action" label="操作" />
@@ -38,6 +45,18 @@ import { ref, onMounted } from "vue";
 import { getLogList } from "@/api/system";
 
 const list = ref([]);
+const searchQuery = ref("");
+const filteredList = computed(() => {
+  if (!searchQuery.value) return list.value;
+  const kw = searchQuery.value.toLowerCase();
+  return list.value.filter((item) =>
+    Object.values(item).some((val) =>
+      String(val ?? "").toLowerCase().includes(kw)
+    )
+  );
+});
+
+
 const loading = ref(false);
 const total = ref(0);
 const queryForm = ref({ user_id: null, action: "", start_time: "", end_time: "", page: 1, page_size: 10 });

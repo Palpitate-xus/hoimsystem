@@ -201,8 +201,15 @@
             <p>以下是一些可供下载的资源：</p>
             
             <el-divider />
+
+      <el-input
+        v-model="searchQuery"
+        placeholder="搜索..."
+        clearable
+        style="width: 200px; margin-bottom: 10px;"
+      ></el-input>
             
-            <el-table :data="resources" style="width: 100%">
+            <el-table :data="filteredResources" style="width: 100%">
               <el-table-column prop="name" label="资源名称" />
               <el-table-column prop="description" label="描述" />
               <el-table-column prop="size" label="大小" width="100" />
@@ -238,7 +245,7 @@
               </el-form-item>
               
               <el-form-item label="反馈类型">
-                <el-select v-model="feedbackForm.type" placeholder="请选择反馈类型" style="width: 100%">
+                <el-select v-model="feedbackForm.type" placeholder="请选择反馈类型" style="width: 100%" filterable>
                   <el-option label="功能建议" value="suggestion"></el-option>
                   <el-option label="问题反馈" value="issue"></el-option>
                   <el-option label="使用咨询" value="question"></el-option>
@@ -293,6 +300,7 @@ export default {
   },
   data() {
     return {
+      searchQuery: "",
       activeMenu: "guide-basic",
       activeFaq: "",
       feedbackForm: {
@@ -386,5 +394,17 @@ export default {
       }
     }
   }
+
+  computed: {
+    filteredResources() {
+      if (!this.searchQuery) return this.resources;
+      const kw = this.searchQuery.toLowerCase();
+      return this.resources.filter(item =>
+        Object.values(item).some(val =>
+          String(val ?? "").toLowerCase().includes(kw)
+        )
+      );
+    },
+  },
 }
 </style>

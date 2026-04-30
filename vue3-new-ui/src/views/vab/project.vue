@@ -106,7 +106,7 @@
         </el-form-item>
         
         <el-form-item label="项目经理" prop="manager">
-          <el-select v-model="projectForm.manager" placeholder="请选择项目经理" style="width: 100%">
+          <el-select v-model="projectForm.manager" placeholder="请选择项目经理" style="width: 100%" filterable>
             <el-option
               v-for="user in users"
               :key="user.id"
@@ -139,7 +139,7 @@
         </el-form-item>
         
         <el-form-item label="状态" prop="status">
-          <el-select v-model="projectForm.status" placeholder="请选择状态" style="width: 100%">
+          <el-select v-model="projectForm.status" placeholder="请选择状态" style="width: 100%" filterable>
             <el-option label="未开始" value="not-started"></el-option>
             <el-option label="进行中" value="in-progress"></el-option>
             <el-option label="已完成" value="completed"></el-option>

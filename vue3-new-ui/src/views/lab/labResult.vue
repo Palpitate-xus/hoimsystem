@@ -3,6 +3,12 @@
     <vab-page-header title="检验科管理" />
     <el-tabs v-model="activeTab">
       <el-tab-pane label="待处理申请" name="pending">
+        <el-input
+          v-model="searchQuery1"
+          placeholder="搜索..."
+          clearable
+          style="width: 200px; margin-bottom: 10px;"
+        ></el-input>
         <el-table :data="paginatedPendingList" v-loading="loading">
           <el-table-column prop="id" label="申请单ID" />
           <el-table-column prop="patient_name" label="患者" />
@@ -19,12 +25,18 @@
         v-model:page-size="pageSize"
         :page-sizes="[10, 20, 50, 100]"
         layout="total, sizes, prev, pager, next, jumper"
-        :total="pendingList.length"
+        :total="filteredPendingList.length"
         style="margin-top: 15px; justify-content: flex-end;"
       />
 
       </el-tab-pane>
       <el-tab-pane label="检查结果" name="results">
+        <el-input
+          v-model="searchQuery2"
+          placeholder="搜索..."
+          clearable
+          style="width: 200px; margin-bottom: 10px;"
+        ></el-input>
         <el-table :data="paginatedResultList" v-loading="loading2">
           <el-table-column prop="id" label="结果ID" />
           <el-table-column prop="check_name" label="检查名称" />
@@ -43,7 +55,7 @@
         v-model:page-size="pageSize"
         :page-sizes="[10, 20, 50, 100]"
         layout="total, sizes, prev, pager, next, jumper"
-        :total="resultList.length"
+        :total="filteredResultList.length"
         style="margin-top: 15px; justify-content: flex-end;"
       />
 
@@ -81,6 +93,8 @@ import { getPendingLabOrders, getLabResultList, createLabResult } from "@/api/la
 const activeTab = ref("pending");
 const pendingList = ref([]);
 const resultList = ref([]);
+const searchQuery1 = ref("");
+const searchQuery2 = ref("");
 const loading = ref(false);
 const loading2 = ref(false);
 const dialogVisible = ref(false);
@@ -88,14 +102,34 @@ const form = ref({});
 const currentPage = ref(1);
 const pageSize = ref(10);
 
+const filteredPendingList = computed(() => {
+  if (!searchQuery1.value) return pendingList.value;
+  const kw = searchQuery1.value.toLowerCase();
+  return pendingList.value.filter((item) =>
+    Object.values(item).some((val) =>
+      String(val ?? "").toLowerCase().includes(kw)
+    )
+  );
+});
+
+const filteredResultList = computed(() => {
+  if (!searchQuery2.value) return resultList.value;
+  const kw = searchQuery2.value.toLowerCase();
+  return resultList.value.filter((item) =>
+    Object.values(item).some((val) =>
+      String(val ?? "").toLowerCase().includes(kw)
+    )
+  );
+});
+
 const paginatedPendingList = computed(() => {
   const start = (currentPage.value - 1) * pageSize.value;
-  return pendingList.value.slice(start, start + pageSize.value);
+  return filteredPendingList.value.slice(start, start + pageSize.value);
 });
 
 const paginatedResultList = computed(() => {
   const start = (currentPage.value - 1) * pageSize.value;
-  return resultList.value.slice(start, start + pageSize.value);
+  return filteredResultList.value.slice(start, start + pageSize.value);
 });
 
 const fetchPending = async () => {

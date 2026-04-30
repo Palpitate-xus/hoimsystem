@@ -186,7 +186,7 @@
             </el-form-item>
             
             <el-form-item label="产品分类" prop="category">
-              <el-select v-model="productForm.category" placeholder="请选择产品分类" style="width: 100%">
+              <el-select v-model="productForm.category" placeholder="请选择产品分类" style="width: 100%" filterable>
                 <el-option
                   v-for="category in categories"
                   :key="category.id"
@@ -220,7 +220,7 @@
             </el-form-item>
             
             <el-form-item label="状态" prop="status">
-              <el-select v-model="productForm.status" placeholder="请选择状态" style="width: 100%">
+              <el-select v-model="productForm.status" placeholder="请选择状态" style="width: 100%" filterable>
                 <el-option label="在售" value="onsale"></el-option>
                 <el-option label="下架" value="offsale"></el-option>
                 <el-option label="缺货" value="outofstock"></el-option>

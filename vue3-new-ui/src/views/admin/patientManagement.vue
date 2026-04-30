@@ -2,6 +2,13 @@
   <div class="app-container">
     <vab-page-header title="病人管理" />
     <el-card>
+      
+      <el-input
+        v-model="searchQuery"
+        placeholder="搜索..."
+        clearable
+        style="width: 200px; margin-left: 10px;"
+      ></el-input>
       <el-table :data="paginatedList" v-loading="loading">
         <el-table-column prop="id" label="ID" width="60" />
         <el-table-column prop="name" label="姓名" />
@@ -33,7 +40,7 @@
           <el-input v-model="form.name" />
         </el-form-item>
         <el-form-item label="性别">
-          <el-select v-model="form.sex">
+          <el-select v-model="form.sex" filterable>
             <el-option label="男" value="男" />
             <el-option label="女" value="女" />
           </el-select>
@@ -59,12 +66,23 @@ import { ElMessage } from "element-plus";
 import { getPatientList, updatePatient } from "@/api/admin";
 
 const list = ref([]);
+const searchQuery = ref("");
 const currentPage = ref(1);
 const pageSize = ref(10);
 const total = ref(0);
+const filteredList = computed(() => {
+  if (!searchQuery.value) return list.value;
+  const kw = searchQuery.value.toLowerCase();
+  return list.value.filter((item) =>
+    Object.values(item).some((val) =>
+      String(val ?? "").toLowerCase().includes(kw)
+    )
+  );
+});
+
 const paginatedList = computed(() => {
   const start = (currentPage.value - 1) * pageSize.value;
-  return list.value.slice(start, start + pageSize.value);
+  return filteredList.value.slice(start, start + pageSize.value);
 });
 
 const loading = ref(false);
@@ -75,7 +93,7 @@ const fetchList = async () => {
   loading.value = true;
   const res = await getPatientList();
   list.value = res.data || [];
-  total.value = list.value.length;
+  total.value = filteredList.value.length;
   loading.value = false;
 };
 

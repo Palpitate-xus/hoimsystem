@@ -22,8 +22,15 @@
       
       <el-tabs v-model="activeTab" @tab-change="handleTabChange">
         <el-tab-pane label="全部通知" name="all">
+
+      <el-input
+        v-model="searchQuery"
+        placeholder="搜索..."
+        clearable
+        style="width: 200px; margin-bottom: 10px;"
+      ></el-input>
           <el-table 
-            :data="filteredNotifications" 
+            :data="filteredFilteredNotifications" 
             style="width: 100%"
             v-loading="loading"
           >
@@ -181,7 +188,7 @@
             multiple 
             placeholder="请选择接收者"
             style="width: 100%"
-          >
+           filterable>
             <el-option
               v-for="user in users"
               :key="user.id"
@@ -221,6 +228,7 @@ export default {
   name: "Notification",
   data() {
     return {
+      searchQuery: "",
       activeTab: "all",
       currentPage: 1,
       pageSize: 10,
@@ -307,6 +315,15 @@ export default {
       const start = (this.currentPage - 1) * this.pageSize;
       const end = start + this.pageSize;
       return this.notifications.slice(start, end);
+    filteredFilteredNotifications() {
+      if (!this.searchQuery) return this.filteredNotifications;
+      const kw = this.searchQuery.toLowerCase();
+      return this.filteredNotifications.filter(item =>
+        Object.values(item).some(val =>
+          String(val ?? "").toLowerCase().includes(kw)
+        )
+      );
+    },
     },
     unreadNotifications() {
       return this.notifications.filter(n => !n.read);

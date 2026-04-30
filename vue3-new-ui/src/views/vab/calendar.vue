@@ -63,7 +63,14 @@
       <!-- 事件列表 -->
       <div class="events-panel" v-if="selectedDateEvents.length > 0">
         <h3>{{ selectedDateString }} 的事件</h3>
-        <el-table :data="selectedDateEvents" style="width: 100%">
+
+      <el-input
+        v-model="searchQuery"
+        placeholder="搜索..."
+        clearable
+        style="width: 200px; margin-bottom: 10px;"
+      ></el-input>
+        <el-table :data="filteredSelectedDateEvents" style="width: 100%">
           <el-table-column prop="title" label="事件标题" />
           <el-table-column prop="time" label="时间" width="120" />
           <el-table-column prop="description" label="描述" />
@@ -158,6 +165,7 @@ export default {
   name: "Calendar",
   data() {
     return {
+      searchQuery: "",
       currentDate: this.formatDate(new Date(), 'YYYY-MM'), // 当前选中的月份
       selectedDate: null, // 当前选中的日期
       weekdays: ['日', '一', '二', '三', '四', '五', '六'],
@@ -211,6 +219,15 @@ export default {
     firstDayOfMonth() {
       const date = new Date(`${this.currentDate}-01`);
       return date.getDay();
+    filteredSelectedDateEvents() {
+      if (!this.searchQuery) return this.selectedDateEvents;
+      const kw = this.searchQuery.toLowerCase();
+      return this.selectedDateEvents.filter(item =>
+        Object.values(item).some(val =>
+          String(val ?? "").toLowerCase().includes(kw)
+        )
+      );
+    },
     },
     // 当前月份的天数
     daysInMonth() {

@@ -147,7 +147,7 @@
         </el-form-item>
         
         <el-form-item label="图标">
-          <el-select v-model="categoryForm.icon" placeholder="请选择图标" style="width: 100%">
+          <el-select v-model="categoryForm.icon" placeholder="请选择图标" style="width: 100%" filterable>
             <el-option label="文档" value="Document">
               <el-icon><Document /></el-icon>
               <span style="margin-left: 10px">文档</span>
@@ -214,7 +214,7 @@
           
           <el-col :span="8">
             <el-form-item label="分类" prop="categoryId">
-              <el-select v-model="knowledgeForm.categoryId" placeholder="请选择分类" style="width: 100%">
+              <el-select v-model="knowledgeForm.categoryId" placeholder="请选择分类" style="width: 100%" filterable>
                 <el-option
                   v-for="category in categories"
                   :key="category.id"

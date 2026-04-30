@@ -120,7 +120,14 @@
         <template #header>
           <span>详细数据</span>
         </template>
-        <el-table :data="detailData" style="width: 100%">
+
+      <el-input
+        v-model="searchQuery"
+        placeholder="搜索..."
+        clearable
+        style="width: 200px; margin-bottom: 10px;"
+      ></el-input>
+        <el-table :data="filteredDetailData" style="width: 100%">
           <el-table-column prop="name" label="指标名称" />
           <el-table-column prop="value" label="数值" />
           <el-table-column prop="change" label="较昨日变化">
@@ -161,6 +168,7 @@ export default {
   },
   data() {
     return {
+      searchQuery: "",
       dateRange: [
         this.formatDate(new Date(new Date().getTime() - 30 * 24 * 60 * 60 * 1000)), // 30天前
         this.formatDate(new Date())
@@ -427,5 +435,17 @@ export default {
     color: #F56C6C;
     font-weight: bold;
   }
+
+  computed: {
+    filteredDetailData() {
+      if (!this.searchQuery) return this.detailData;
+      const kw = this.searchQuery.toLowerCase();
+      return this.detailData.filter(item =>
+        Object.values(item).some(val =>
+          String(val ?? "").toLowerCase().includes(kw)
+        )
+      );
+    },
+  },
 }
 </style>

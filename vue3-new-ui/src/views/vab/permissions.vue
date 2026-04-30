@@ -3,7 +3,14 @@
     <el-card shadow="never">
       <el-tabs v-model="activeTab">
         <el-tab-pane label="角色权限" name="role">
-          <el-table :data="roles" style="width: 100%" row-key="id">
+
+      <el-input
+        v-model="searchQuery"
+        placeholder="搜索..."
+        clearable
+        style="width: 200px; margin-bottom: 10px;"
+      ></el-input>
+          <el-table :data="filteredRoles" style="width: 100%" row-key="id">
             <el-table-column prop="name" label="角色名称" width="180" />
             <el-table-column label="权限">
               <template #default="{ row }">
@@ -112,6 +119,7 @@ export default {
   name: "Permissions",
   data() {
     return {
+      searchQuery: "",
       activeTab: "role",
       roleDialogVisible: false,
       userDialogVisible: false,
@@ -210,5 +218,17 @@ export default {
   .el-tag {
     margin-bottom: 5px;
   }
+
+  computed: {
+    filteredRoles() {
+      if (!this.searchQuery) return this.roles;
+      const kw = this.searchQuery.toLowerCase();
+      return this.roles.filter(item =>
+        Object.values(item).some(val =>
+          String(val ?? "").toLowerCase().includes(kw)
+        )
+      );
+    },
+  },
 }
 </style>

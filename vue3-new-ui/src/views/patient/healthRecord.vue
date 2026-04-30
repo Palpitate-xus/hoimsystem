@@ -15,6 +15,12 @@
 
     <el-card style="margin-top: 20px">
       <template #header>就诊记录</template>
+      <el-input
+        v-model="searchQuery"
+        placeholder="搜索..."
+        clearable
+        style="width: 200px; margin-bottom: 10px;"
+      ></el-input>
       <el-table :data="paginatedVisits" v-loading="loading">
         <el-table-column prop="visit_time" label="就诊时间" />
         <el-table-column prop="doctor_name" label="医生" />
@@ -26,7 +32,7 @@
         v-model:page-size="pageSize"
         :page-sizes="[10, 20, 50, 100]"
         layout="total, sizes, prev, pager, next, jumper"
-        :total="total"
+        :total="filteredVisits.length"
         style="margin-top: 15px; justify-content: flex-end;"
       />
 
@@ -40,13 +46,25 @@ import { getHealthProfile, getVisitRecords } from "@/api/patient";
 
 const profile = ref({});
 const visits = ref([]);
+const searchQuery = ref("");
 const loading = ref(false);
 const currentPage = ref(1);
 const pageSize = ref(10);
 const total = ref(0);
+
+const filteredVisits = computed(() => {
+  if (!searchQuery.value) return visits.value;
+  const kw = searchQuery.value.toLowerCase();
+  return visits.value.filter((item) =>
+    Object.values(item).some((val) =>
+      String(val ?? "").toLowerCase().includes(kw)
+    )
+  );
+});
+
 const paginatedVisits = computed(() => {
   const start = (currentPage.value - 1) * pageSize.value;
-  return visits.value.slice(start, start + pageSize.value);
+  return filteredVisits.value.slice(start, start + pageSize.value);
 });
 
 onMounted(async () => {
@@ -55,7 +73,7 @@ onMounted(async () => {
   loading.value = true;
   const v = await getVisitRecords();
   visits.value = v.data || [];
-  total.value = visits.value.length;
+  total.value = filteredVisits.value.length;
   loading.value = false;
 });
 </script>

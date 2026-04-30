@@ -6,7 +6,7 @@
           <el-input v-model="form.name" />
         </el-form-item>
         <el-form-item label="活动区域" prop="region">
-          <el-select v-model="form.region" placeholder="请选择活动区域">
+          <el-select v-model="form.region" placeholder="请选择活动区域" filterable>
             <el-option label="区域一" value="shanghai" />
             <el-option label="区域二" value="beijing" />
           </el-select>

@@ -3,6 +3,13 @@
     <vab-page-header title="通知公告" />
     <el-card>
       <el-button type="primary" @click="handleAdd">发布公告</el-button>
+      
+      <el-input
+        v-model="searchQuery"
+        placeholder="搜索..."
+        clearable
+        style="width: 200px; margin-left: 10px;"
+      ></el-input>
       <el-table :data="paginatedList" v-loading="loading" style="margin-top: 15px">
         <el-table-column prop="uuid" label="ID" width="80" />
         <el-table-column prop="title" label="标题" />
@@ -66,12 +73,23 @@ import { ElMessage, ElMessageBox } from "element-plus";
 import { getNoticeList, createNotice, updateNotice, deleteNotice } from "@/api/admin";
 
 const list = ref([]);
+const searchQuery = ref("");
 const currentPage = ref(1);
 const pageSize = ref(10);
 const total = ref(0);
+const filteredList = computed(() => {
+  if (!searchQuery.value) return list.value;
+  const kw = searchQuery.value.toLowerCase();
+  return list.value.filter((item) =>
+    Object.values(item).some((val) =>
+      String(val ?? "").toLowerCase().includes(kw)
+    )
+  );
+});
+
 const paginatedList = computed(() => {
   const start = (currentPage.value - 1) * pageSize.value;
-  return list.value.slice(start, start + pageSize.value);
+  return filteredList.value.slice(start, start + pageSize.value);
 });
 
 const loading = ref(false);
@@ -83,7 +101,7 @@ const fetchList = async () => {
   loading.value = true;
   const res = await getNoticeList();
   list.value = res.data || [];
-  total.value = list.value.length;
+  total.value = filteredList.value.length;
   loading.value = false;
 };
 

@@ -103,7 +103,7 @@
           
           <el-col :span="12">
             <el-form-item label="客户等级" prop="level">
-              <el-select v-model="customerForm.level" placeholder="请选择客户等级" style="width: 100%">
+              <el-select v-model="customerForm.level" placeholder="请选择客户等级" style="width: 100%" filterable>
                 <el-option label="普通客户" value="normal"></el-option>
                 <el-option label="重要客户" value="important"></el-option>
                 <el-option label="VIP客户" value="vip"></el-option>
@@ -232,7 +232,7 @@
         </el-form-item>
         
         <el-form-item label="联系方式" prop="method">
-          <el-select v-model="contactForm.method" placeholder="请选择联系方式" style="width: 100%">
+          <el-select v-model="contactForm.method" placeholder="请选择联系方式" style="width: 100%" filterable>
             <el-option label="电话" value="电话"></el-option>
             <el-option label="邮件" value="邮件"></el-option>
             <el-option label="面谈" value="面谈"></el-option>

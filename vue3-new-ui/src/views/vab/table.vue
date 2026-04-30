@@ -1,7 +1,14 @@
 <template>
   <div class="table-container">
     <el-card shadow="never">
-      <el-table v-loading="listLoading" :data="list" style="width: 100%">
+
+      <el-input
+        v-model="searchQuery"
+        placeholder="搜索..."
+        clearable
+        style="width: 200px; margin-bottom: 10px;"
+      ></el-input>
+      <el-table v-loading="listLoading" :data="filteredList" style="width: 100%">
         <el-table-column label="ID" prop="id" />
         <el-table-column label="标题" prop="title" show-overflow-tooltip />
         <el-table-column label="作者" prop="author" />
@@ -59,6 +66,7 @@ export default {
   },
   data() {
     return {
+      searchQuery: "",
       list: null,
       totalCount: 0,
       listLoading: true,
@@ -106,5 +114,17 @@ export default {
     margin-top: 20px;
     text-align: center;
   }
+
+  computed: {
+    filteredList() {
+      if (!this.searchQuery) return this.list;
+      const kw = this.searchQuery.toLowerCase();
+      return this.list.filter(item =>
+        Object.values(item).some(val =>
+          String(val ?? "").toLowerCase().includes(kw)
+        )
+      );
+    },
+  },
 }
 </style>

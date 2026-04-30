@@ -3,11 +3,16 @@
     <template #header>
       <vab-icon icon="send-plane-2-line" />
       <!-- 计划 -->
-      <el-tag class="card-header-tag" type="success"
-        >祝用框架的小伙伴都能住上别墅，开上保时捷</el-tag
-      >
+      <el-tag class="card-header-tag" type="success">今日计划</el-tag>
     </template>
-    <el-table :data="tableData" height="283px" row-key="title">
+
+      <el-input
+        v-model="searchQuery"
+        placeholder="搜索..."
+        clearable
+        style="width: 200px; margin-bottom: 10px;"
+      ></el-input>
+    <el-table :data="filteredTableData" height="283px" row-key="title">
       <el-table-column align="center" label="拖拽" width="50px">
         <template #default="{}">
           <vab-icon :icon="['fas', 'arrows-alt']" style="cursor: pointer" />
@@ -29,6 +34,7 @@
 export default {
   data() {
     return {
+      searchQuery: "",
       tableData: [
         {
           title: "帮助中小企业盈利1个亿",
@@ -68,6 +74,18 @@ export default {
         },
       ],
     };
+  },
+
+  computed: {
+    filteredTableData() {
+      if (!this.searchQuery) return this.tableData;
+      const kw = this.searchQuery.toLowerCase();
+      return this.tableData.filter(item =>
+        Object.values(item).some(val =>
+          String(val ?? "").toLowerCase().includes(kw)
+        )
+      );
+    },
   },
 };
 </script>

@@ -216,7 +216,7 @@
             </el-form-item>
             
             <el-form-item label="活动类型" prop="type">
-              <el-select v-model="campaignForm.type" placeholder="请选择活动类型" style="width: 100%">
+              <el-select v-model="campaignForm.type" placeholder="请选择活动类型" style="width: 100%" filterable>
                 <el-option label="折扣活动" value="discount">
                   <el-icon><Discount /></el-icon>
                   <span style="margin-left: 10px">折扣活动</span>
@@ -255,7 +255,7 @@
                 multiple 
                 placeholder="请选择目标用户"
                 style="width: 100%"
-              >
+               filterable>
                 <el-option label="所有用户" value="all"></el-option>
                 <el-option label="新用户" value="new"></el-option>
                 <el-option label="老用户" value="old"></el-option>

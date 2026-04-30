@@ -19,7 +19,7 @@
               v-model="filterStatus" 
               placeholder="状态筛选" 
               style="width: 120px; margin-right: 10px"
-            >
+             filterable>
               <el-option label="全部" value=""></el-option>
               <el-option label="待付款" value="pending"></el-option>
               <el-option label="待发货" value="paid"></el-option>

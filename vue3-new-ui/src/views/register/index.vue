@@ -75,7 +75,7 @@
           </el-form-item>
 
           <el-form-item prop="sex">
-            <el-select v-model="form.sex" placeholder="性别" style="width:100%">
+            <el-select v-model="form.sex" placeholder="性别" style="width:100%" filterable>
               <el-option label="男" value="1" />
               <el-option label="女" value="0" />
             </el-select>

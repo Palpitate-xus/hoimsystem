@@ -3,6 +3,13 @@
     <vab-page-header title="随访管理" />
     <el-card>
       <el-button type="primary" @click="handleAdd">新增随访计划</el-button>
+      
+      <el-input
+        v-model="searchQuery"
+        placeholder="搜索..."
+        clearable
+        style="width: 200px; margin-left: 10px;"
+      ></el-input>
       <el-table :data="paginatedList" v-loading="loading" style="margin-top: 15px">
         <el-table-column prop="id" label="ID" />
         <el-table-column prop="patient_name" label="患者" />
@@ -35,7 +42,7 @@
     <el-dialog v-model="dialogVisible" title="新增随访计划" width="600px">
       <el-form :model="form" label-width="100px">
         <el-form-item label="患者">
-          <el-select v-model="form.patient_id" placeholder="请选择患者" style="width:100%">
+          <el-select v-model="form.patient_id" placeholder="请选择患者" style="width:100%" filterable>
             <el-option v-for="p in patientOptions" :key="p.id" :label="p.name" :value="p.id" />
           </el-select>
         </el-form-item>
@@ -90,12 +97,23 @@ import { getFollowUpList, createFollowUpPlan, recordFollowUp } from "@/api/follo
 import { getPatientList } from "@/api/admin";
 
 const list = ref([]);
+const searchQuery = ref("");
 const currentPage = ref(1);
 const pageSize = ref(10);
 const total = ref(0);
+const filteredList = computed(() => {
+  if (!searchQuery.value) return list.value;
+  const kw = searchQuery.value.toLowerCase();
+  return list.value.filter((item) =>
+    Object.values(item).some((val) =>
+      String(val ?? "").toLowerCase().includes(kw)
+    )
+  );
+});
+
 const paginatedList = computed(() => {
   const start = (currentPage.value - 1) * pageSize.value;
-  return list.value.slice(start, start + pageSize.value);
+  return filteredList.value.slice(start, start + pageSize.value);
 });
 
 const loading = ref(false);
@@ -111,7 +129,7 @@ const fetchList = async () => {
   loading.value = true;
   const res = await getFollowUpList();
   list.value = res.data || [];
-  total.value = list.value.length;
+  total.value = filteredList.value.length;
   loading.value = false;
 };
 

@@ -178,7 +178,7 @@
           
           <el-col :span="12">
             <el-form-item label="状态">
-              <el-select v-model="workflowForm.status" placeholder="请选择状态" style="width: 100%">
+              <el-select v-model="workflowForm.status" placeholder="请选择状态" style="width: 100%" filterable>
                 <el-option label="草稿" value="draft"></el-option>
                 <el-option label="已发布" value="published"></el-option>
                 <el-option label="已停用" value="disabled"></el-option>
@@ -190,7 +190,7 @@
             </el-form-item>
             
             <el-form-item label="可见范围">
-              <el-select v-model="workflowForm.visibility" placeholder="请选择可见范围" style="width: 100%">
+              <el-select v-model="workflowForm.visibility" placeholder="请选择可见范围" style="width: 100%" filterable>
                 <el-option label="所有人" value="public"></el-option>
                 <el-option label="仅创建者" value="private"></el-option>
                 <el-option label="指定部门" value="department"></el-option>
@@ -224,7 +224,7 @@
                     :prop="`nodes.${index}.assigneeType`"
                     :rules="[{ required: true, message: '请选择处理人类型', trigger: 'change' }]"
                   >
-                    <el-select v-model="element.assigneeType" placeholder="处理人类型" style="width: 100%">
+                    <el-select v-model="element.assigneeType" placeholder="处理人类型" style="width: 100%" filterable>
                       <el-option label="指定人员" value="user"></el-option>
                       <el-option label="指定角色" value="role"></el-option>
                       <el-option label="表单字段" value="field"></el-option>
@@ -236,7 +236,7 @@
                     :prop="`nodes.${index}.assignee`"
                     :rules="[{ required: true, message: '请选择处理人', trigger: 'change' }]"
                   >
-                    <el-select v-model="element.assignee" placeholder="处理人" style="width: 100%">
+                    <el-select v-model="element.assignee" placeholder="处理人" style="width: 100%" filterable>
                       <el-option
                         v-for="user in users"
                         :key="user.id"
@@ -251,7 +251,7 @@
                     :prop="`nodes.${index}.role`"
                     :rules="[{ required: true, message: '请选择角色', trigger: 'change' }]"
                   >
-                    <el-select v-model="element.role" placeholder="角色" style="width: 100%">
+                    <el-select v-model="element.role" placeholder="角色" style="width: 100%" filterable>
                       <el-option label="管理员" value="admin"></el-option>
                       <el-option label="经理" value="manager"></el-option>
                       <el-option label="员工" value="employee"></el-option>

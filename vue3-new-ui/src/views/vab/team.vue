@@ -128,7 +128,7 @@
             </el-form-item>
             
             <el-form-item label="部门" prop="department">
-              <el-select v-model="memberForm.department" placeholder="请选择部门" style="width: 100%">
+              <el-select v-model="memberForm.department" placeholder="请选择部门" style="width: 100%" filterable>
                 <el-option
                   v-for="dept in departments"
                   :key="dept.id"
@@ -167,7 +167,7 @@
             </el-form-item>
             
             <el-form-item label="状态" prop="status">
-              <el-select v-model="memberForm.status" placeholder="请选择状态" style="width: 100%">
+              <el-select v-model="memberForm.status" placeholder="请选择状态" style="width: 100%" filterable>
                 <el-option label="在线" value="online"></el-option>
                 <el-option label="忙碌" value="busy"></el-option>
                 <el-option label="离开" value="away"></el-option>

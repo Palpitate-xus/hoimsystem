@@ -9,7 +9,7 @@
       </div>
       <div class="user-info">
         <div class="username">{{ username }}</div>
-        <div class="user-role">管理员</div>
+        <div class="user-role">{{ userRole }}</div>
       </div>
       <!-- 直接使用图标组件 -->
       <ArrowDown class="avatar-dropdown-icon" />
@@ -75,6 +75,15 @@ const avatar = computed(() => store.getters["user/avatar"]);
 const username = computed(() => store.getters["user/username"]);
 const layout = computed(() => store.getters["settings/layout"]);
 const isHorizontalLayout = computed(() => layout.value === "horizontal");
+
+const userRole = computed(() => {
+  const permissions = store.getters["user/permissions"] || [];
+  if (permissions.includes("admin")) return "管理员";
+  if (permissions.includes("director")) return "科室主任";
+  if (permissions.includes("doctor")) return "医生";
+  if (permissions.includes("patient")) return "患者";
+  return "用户";
+});
 
 // 方法
 const handleCommand = (command) => {

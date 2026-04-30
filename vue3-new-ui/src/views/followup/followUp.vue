@@ -14,8 +14,9 @@
             <el-tag v-else type="success">已完成</el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="180">
+        <el-table-column label="操作" width="200">
           <template #default="{row}">
+            <el-button size="small" @click="handleView(row)">查看</el-button>
             <el-button v-if="row.status===0" size="small" type="primary" @click="handleRecord(row)">记录</el-button>
           </template>
         </el-table-column>
@@ -49,6 +50,20 @@
         <el-button @click="dialogVisible=false">取消</el-button>
         <el-button type="primary" @click="submit">确定</el-button>
       </template>
+    </el-dialog>
+
+    <el-dialog v-model="detailVisible" title="随访详情" width="600px">
+      <el-descriptions :column="1" border>
+        <el-descriptions-item label="患者">{{ detail.patient_name }}</el-descriptions-item>
+        <el-descriptions-item label="计划日期">{{ detail.plan_date }}</el-descriptions-item>
+        <el-descriptions-item label="随访内容">{{ detail.content }}</el-descriptions-item>
+        <el-descriptions-item label="状态">
+          <el-tag v-if="detail.status===0" type="warning">待随访</el-tag>
+          <el-tag v-else type="success">已完成</el-tag>
+        </el-descriptions-item>
+        <el-descriptions-item label="随访结果">{{ detail.result || "—" }}</el-descriptions-item>
+        <el-descriptions-item label="患者反馈">{{ detail.patient_feedback || "—" }}</el-descriptions-item>
+      </el-descriptions>
     </el-dialog>
 
     <el-dialog v-model="recordVisible" title="记录随访结果" width="600px">
@@ -86,8 +101,10 @@ const paginatedList = computed(() => {
 const loading = ref(false);
 const dialogVisible = ref(false);
 const recordVisible = ref(false);
+const detailVisible = ref(false);
 const form = ref({});
 const recordForm = ref({});
+const detail = ref({});
 const patientOptions = ref([]);
 
 const fetchList = async () => {
@@ -122,6 +139,11 @@ const submit = async () => {
   } catch (e) {
     ElMessage.error(e.msg || "创建失败");
   }
+};
+
+const handleView = (row) => {
+  detail.value = { ...row };
+  detailVisible.value = true;
 };
 
 const handleRecord = (row) => {

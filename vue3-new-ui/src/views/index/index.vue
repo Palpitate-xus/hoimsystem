@@ -56,12 +56,12 @@
             <span>快捷入口</span>
           </template>
           <div class="quick-actions">
-            <el-button type="primary" size="large" @click="goTo('/patient/appointment')">预约挂号</el-button>
-            <el-button type="success" size="large" @click="goTo('/patient/registration')">现场挂号</el-button>
-            <el-button type="warning" size="large" @click="goTo('/patient/charge')">缴费</el-button>
-            <el-button type="info" size="large" @click="goTo('/doctor/medicalRecord')">写病历</el-button>
-            <el-button type="danger" size="large" @click="goTo('/doctor/prescription')">开处方</el-button>
-            <el-button type="primary" size="large" plain @click="goTo('/pharmacy/dispense')">处方审核</el-button>
+            <el-button v-if="hasPermission(['patient'])" type="primary" size="large" @click="goTo('/patient/appointment')">预约挂号</el-button>
+            <el-button v-if="hasPermission(['patient'])" type="success" size="large" @click="goTo('/patient/registration')">现场挂号</el-button>
+            <el-button v-if="hasPermission(['patient'])" type="warning" size="large" @click="goTo('/patient/charge')">缴费</el-button>
+            <el-button v-if="hasPermission(['doctor', 'director'])" type="info" size="large" @click="goTo('/doctor/medicalRecord')">写病历</el-button>
+            <el-button v-if="hasPermission(['doctor', 'director'])" type="danger" size="large" @click="goTo('/doctor/prescription')">开处方</el-button>
+            <el-button v-if="hasPermission(['admin', 'doctor', 'director'])" type="primary" size="large" plain @click="goTo('/pharmacy/dispense')">处方审核</el-button>
           </div>
         </el-card>
       </el-col>
@@ -70,8 +70,9 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import { useRouter } from "vue-router";
+import { useStore } from "vuex";
 import { User, FirstAidKit, Money, Document, Bell, Box, Calendar } from "@element-plus/icons-vue";
 import { getNoticeList } from "@/api/admin";
 import { getChargeList } from "@/api/charge";
@@ -79,6 +80,15 @@ import { getPrescriptionList } from "@/api/doctor";
 import { getAppointmentList, getRegistrationList } from "@/api/patient";
 
 const router = useRouter();
+const store = useStore();
+
+const permissions = computed(() => store.getters["user/permissions"] || []);
+
+const hasPermission = (required) => {
+  const perms = permissions.value;
+  if (!perms || perms.length === 0) return false;
+  return required.some((p) => perms.includes(p));
+};
 
 const statCards = ref([
   { label: "今日患者", value: 0, icon: "User", color: "#409EFF" },

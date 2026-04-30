@@ -358,6 +358,7 @@ export const asyncRoutes = [
     component: EmptyLayout,
     redirect: "noRedirect",
     name: "Error",
+    hidden: true,
     meta: { title: "错误页", icon: "bug" },
     children: [
       {

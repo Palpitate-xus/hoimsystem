@@ -129,8 +129,22 @@ export const faToElIcon = (icon) => {
     default: "More",
   };
 
-  // 返回映射的Element Plus图标名，如果没有映射则返回默认图标
-  return iconMap[iconName] || iconMap["default"];
+  // 先查映射表
+  if (iconMap[iconName]) {
+    return iconMap[iconName];
+  }
+
+  // 如果没有映射，尝试将 kebab-case 转为 PascalCase（Element Plus 图标命名规则）
+  const pascal = iconName
+    .split("-")
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join("");
+
+  if (pascal) {
+    return pascal;
+  }
+
+  return iconMap["default"];
 };
 
 const install = (app) => {

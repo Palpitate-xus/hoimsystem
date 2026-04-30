@@ -69,6 +69,8 @@ def get_follow_up_list(current_user=Depends(get_current_user), db: Session = Dep
             "plan_date": str(item.plan_date),
             "content": item.content,
             "status": item.status,
+            "result": item.result or "",
+            "patient_feedback": item.patient_feedback or "",
         })
     return {"code": 200, "msg": "success", "data": data}
 

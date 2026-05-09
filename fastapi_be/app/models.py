@@ -380,3 +380,16 @@ class Config(Base):
     config_key = Column(String(50))
     config_value = Column(String(200))
     description = Column(String(200))
+
+
+class Attendance(Base):
+    __tablename__ = "hoimsystem_attendance"
+
+    attendance_id = Column(Integer, primary_key=True, autoincrement=True)
+    doctor_id = Column(Integer, ForeignKey("hoimsystem_doctor.doctor_id"))
+    date = Column(Date)
+    check_in_time = Column(DateTime)
+    check_out_time = Column(DateTime)
+    status = Column(Integer, default=0)  # 0=正常, 1=迟到, 2=早退, 3=缺勤
+
+    doctor = relationship("Doctor")

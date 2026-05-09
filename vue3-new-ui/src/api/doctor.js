@@ -43,3 +43,15 @@ export function createLabOrder(data) {
 export function getLabOrderList(keyword = "") {
   return request({ url: "labOrder/getList", method: "get", params: { keyword } });
 }
+
+export function attendanceCheckIn() {
+  return request({ url: "attendance/checkIn", method: "post" });
+}
+
+export function attendanceCheckOut() {
+  return request({ url: "attendance/checkOut", method: "post" });
+}
+
+export function getAttendanceList(params) {
+  return request({ url: "attendance/getList", method: "get", params });
+}

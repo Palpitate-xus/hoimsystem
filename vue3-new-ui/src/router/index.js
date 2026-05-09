@@ -173,6 +173,12 @@ export const asyncRoutes = [
         component: () => import("@/views/doctor/labOrder.vue"),
         meta: { title: "检查检验申请", permissions: ["doctor", "director"] },
       },
+      {
+        path: "attendance",
+        name: "Attendance",
+        component: () => import("@/views/doctor/attendance.vue"),
+        meta: { title: "考勤签到", permissions: ["doctor", "director"] },
+      },
     ],
   },
 

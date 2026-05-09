@@ -7,7 +7,7 @@ from app.database import get_db
 from app.models import (
     User, Patient, Doctor, Department, DoctorSchedule,
     Pharmaceutical, Prescription, PrePha, Charge,
-    MedicalRecord, LabOrder
+    MedicalRecord, LabOrder, Attendance
 )
 from app.schemas import (
     DoctorCreateRequest, DoctorScheduleCreateRequest,
@@ -427,4 +427,78 @@ def get_lab_order_list(current_user: User = Depends(get_current_user), keyword: 
     if keyword:
         kw = keyword.lower()
         data = [item for item in data if any(kw in str(val).lower() for val in item.values())]
+    return {"code": 200, "msg": "success", "data": data}
+
+
+@router.post("/attendance/checkIn")
+def attendance_check_in(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    doctor_obj = db.query(Doctor).filter(Doctor.user_id == current_user.user_id).first()
+    if not doctor_obj:
+        return {"code": 500, "msg": "医生信息不存在"}
+    today = datetime.datetime.now().date()
+    existing = db.query(Attendance).filter(Attendance.doctor_id == doctor_obj.doctor_id, Attendance.date == today).first()
+    if existing and existing.check_in_time:
+        return {"code": 500, "msg": "今日已签到"}
+    now = datetime.datetime.now()
+    is_late = now.hour >= 9 and (now.hour > 9 or now.minute > 0)
+    if existing:
+        existing.check_in_time = now
+        existing.status = 1 if is_late else 0
+        db.add(existing)
+    else:
+        att = Attendance(
+            doctor_id=doctor_obj.doctor_id,
+            date=today,
+            check_in_time=now,
+            status=1 if is_late else 0,
+        )
+        db.add(att)
+    db.commit()
+    return {"code": 200, "msg": "success", "data": {"status": "迟到" if is_late else "正常", "check_in_time": str(now)}}
+
+
+@router.post("/attendance/checkOut")
+def attendance_check_out(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    doctor_obj = db.query(Doctor).filter(Doctor.user_id == current_user.user_id).first()
+    if not doctor_obj:
+        return {"code": 500, "msg": "医生信息不存在"}
+    today = datetime.datetime.now().date()
+    att = db.query(Attendance).filter(Attendance.doctor_id == doctor_obj.doctor_id, Attendance.date == today).first()
+    if not att:
+        return {"code": 500, "msg": "今日未签到，无法签退"}
+    if att.check_out_time:
+        return {"code": 500, "msg": "今日已签退"}
+    now = datetime.datetime.now()
+    is_early = now.hour < 17
+    att.check_out_time = now
+    if att.status == 0 and is_early:
+        att.status = 2
+    db.add(att)
+    db.commit()
+    return {"code": 200, "msg": "success", "data": {"status": "早退" if is_early else "正常", "check_out_time": str(now)}}
+
+
+@router.get("/attendance/getList")
+def get_attendance_list(doctor_id: Optional[int] = None, start_date: Optional[str] = None, end_date: Optional[str] = None, db: Session = Depends(get_db)):
+    query = db.query(Attendance).order_by(Attendance.date.desc())
+    if doctor_id:
+        query = query.filter(Attendance.doctor_id == doctor_id)
+    if start_date:
+        query = query.filter(Attendance.date >= start_date)
+    if end_date:
+        query = query.filter(Attendance.date <= end_date)
+    records = query.all()
+    data = []
+    status_map = {0: "正常", 1: "迟到", 2: "早退", 3: "缺勤"}
+    for item in records:
+        data.append({
+            "id": item.attendance_id,
+            "doctor_id": item.doctor_id,
+            "doctor_name": item.doctor.name if item.doctor else "",
+            "date": str(item.date),
+            "check_in_time": str(item.check_in_time) if item.check_in_time else "",
+            "check_out_time": str(item.check_out_time) if item.check_out_time else "",
+            "status": status_map.get(item.status, "未知"),
+            "status_code": item.status,
+        })
     return {"code": 200, "msg": "success", "data": data}

@@ -259,6 +259,12 @@ export const asyncRoutes = [
         component: () => import("@/views/checkin/checkIn.vue"),
         meta: { title: "预约报到", permissions: ["admin", "patient"] },
       },
+      {
+        path: "breachRecord",
+        name: "BreachRecord",
+        component: () => import("@/views/checkin/breachRecord.vue"),
+        meta: { title: "违约记录", permissions: ["admin"] },
+      },
     ],
   },
 

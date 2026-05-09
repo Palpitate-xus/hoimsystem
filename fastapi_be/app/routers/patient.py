@@ -76,6 +76,15 @@ def patient_appointment(req: AppointmentCreateRequest, current_user: User = Depe
     patient_obj = db.query(Patient).filter(Patient.identity == current_user.username).first()
     if not patient_obj:
         return {"code": 500, "msg": "病人信息不存在"}
+    # 检查是否处于暂停预约状态
+    from app.models import BreachRecord
+    since = datetime.datetime.now() - datetime.timedelta(days=30)
+    breach_count = db.query(BreachRecord).join(Appointment, BreachRecord.registration_id == Appointment.registration_uuid).filter(
+        Appointment.patient_id == patient_obj.patient_id,
+        BreachRecord.breach_time >= since
+    ).count()
+    if breach_count >= 3:
+        return {"code": 500, "msg": "您30天内违约3次，预约资格已暂停30天"}
     reg_obj = db.query(DoctorSchedule).filter(DoctorSchedule.schedule_id == req.id).first()
     if reg_obj and reg_obj.number <= 0:
         return {"code": 500, "msg": "该时段号源已满"}

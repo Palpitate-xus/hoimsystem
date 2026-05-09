@@ -35,3 +35,11 @@ export function dispensePrescription(data) {
 export function returnMedicine(data) {
   return request({ url: "pharmacy/return", method: "post", data });
 }
+
+export function getLowStockDrugs(threshold = 10, keyword = "") {
+  return request({ url: "pharmaceuticalManagement/lowStock", method: "get", params: { threshold, keyword } });
+}
+
+export function getNearExpiryDrugs(days = 30, keyword = "") {
+  return request({ url: "pharmaceuticalManagement/nearExpiry", method: "get", params: { days, keyword } });
+}

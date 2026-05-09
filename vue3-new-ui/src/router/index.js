@@ -196,6 +196,12 @@ export const asyncRoutes = [
         component: () => import("@/views/pharmacy/dispense.vue"),
         meta: { title: "处方审核与发药", permissions: ["admin", "doctor", "director"] },
       },
+      {
+        path: "stockAlert",
+        name: "StockAlert",
+        component: () => import("@/views/pharmacy/stockAlert.vue"),
+        meta: { title: "库存预警", permissions: ["admin", "doctor", "director"] },
+      },
     ],
   },
 

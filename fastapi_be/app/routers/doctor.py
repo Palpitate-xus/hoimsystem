@@ -213,6 +213,48 @@ def pharmaceutical_stock_query(req: PharmaceuticalStockQueryRequest, db: Session
     return {"code": 200, "msg": "success", "data": {"stock": 0}}
 
 
+@router.get("/pharmaceuticalManagement/lowStock")
+def get_low_stock_drugs(threshold: int = 10, keyword: Optional[str] = None, db: Session = Depends(get_db)):
+    drugs = db.query(Pharmaceutical).filter(Pharmaceutical.stock <= threshold).order_by(Pharmaceutical.stock.asc()).all()
+    data = []
+    for item in drugs:
+        data.append({
+            "id": item.pharmaceutical_id,
+            "name": item.name,
+            "stock": item.stock,
+            "threshold": threshold,
+            "price": item.price,
+            "expireddate": str(item.expireddate),
+            "supplier": item.supplier,
+        })
+    if keyword:
+        kw = keyword.lower()
+        data = [item for item in data if any(kw in str(val).lower() for val in item.values())]
+    return {"code": 200, "msg": "success", "data": data}
+
+
+@router.get("/pharmaceuticalManagement/nearExpiry")
+def get_near_expiry_drugs(days: int = 30, keyword: Optional[str] = None, db: Session = Depends(get_db)):
+    from datetime import date, timedelta
+    cutoff = date.today() + timedelta(days=days)
+    drugs = db.query(Pharmaceutical).filter(Pharmaceutical.expireddate <= cutoff).order_by(Pharmaceutical.expireddate.asc()).all()
+    data = []
+    for item in drugs:
+        days_left = (item.expireddate - date.today()).days
+        data.append({
+            "id": item.pharmaceutical_id,
+            "name": item.name,
+            "stock": item.stock,
+            "expireddate": str(item.expireddate),
+            "days_left": days_left,
+            "supplier": item.supplier,
+        })
+    if keyword:
+        kw = keyword.lower()
+        data = [item for item in data if any(kw in str(val).lower() for val in item.values())]
+    return {"code": 200, "msg": "success", "data": data}
+
+
 @router.post("/prescriptionManagement/create")
 def prescription_register(req: PrescriptionCreateRequest, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     doctor_obj = db.query(Doctor).filter(Doctor.user_id == current_user.user_id).first()

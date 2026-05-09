@@ -1,4 +1,6 @@
 import datetime
+import traceback
+import random
 from fastapi import APIRouter, Depends
 from typing import Optional
 from sqlalchemy.orm import Session
@@ -6,15 +8,18 @@ from app.database import get_db
 from app.models import Charge, Invoice, Prescription, PrePha, Pharmaceutical, Patient, User
 from app.schemas import ChargeRefundRequest, InvoiceCreateRequest, InvoicePrintRequest, ChargeCommitRequest
 from app.dependencies import get_current_user
+from app.pagination import paginate
 
 router = APIRouter()
 
 
 @router.get("/chargeManagement/getList")
-def get_charge_list(current_user: User = Depends(get_current_user), keyword: Optional[str] = None, db: Session = Depends(get_db)):
+def get_charge_list(current_user: User = Depends(get_current_user), keyword: Optional[str] = None, page: Optional[int] = None, page_size: Optional[int] = None, db: Session = Depends(get_db)):
     data = []
-    if current_user.user_role == "admin":
-        charge_list = db.query(Charge).all()
+    total = 0
+    if current_user.user_role == "admin" or current_user.user_role not in ("admin", "patient"):
+        query = db.query(Charge)
+        charge_list, total = paginate(query, page, page_size)
         for item in charge_list:
             data.append({
                 "id": str(item.charge_id),
@@ -39,21 +44,13 @@ def get_charge_list(current_user: User = Depends(get_current_user), keyword: Opt
                         "amount": round(item.amount, 2) if item.amount else 0,
                         "status": item.status,
                     })
-    else:
-        charge_list = db.query(Charge).all()
-        for item in charge_list:
-            data.append({
-                "id": str(item.charge_id),
-                "charge_time": str(item.charge_time),
-                "time": str(item.time),
-                "pre_id": str(item.prescription.prescription_id) if item.prescription else "",
-                "amount": round(item.amount, 2) if item.amount else 0,
-                "status": item.status,
-            })
     if keyword:
         kw = keyword.lower()
         data = [item for item in data if any(kw in str(val).lower() for val in item.values())]
-    return {"code": 200, "msg": "success", "data": data}
+    result = {"code": 200, "msg": "success", "data": data}
+    if page and page_size:
+        result["total"] = total
+    return result
 
 
 @router.post("/chargeManagement/charge")
@@ -98,24 +95,31 @@ def get_invoice_list(keyword: Optional[str] = None, db: Session = Depends(get_db
     return {"code": 200, "msg": "success", "data": data}
 
 
+import traceback
+import random
+
 @router.post("/invoice/create")
 def create_invoice(req: InvoiceCreateRequest, db: Session = Depends(get_db)):
     charge = db.query(Charge).filter(Charge.charge_id == req.charge_id).first()
     if not charge:
         return {"code": 500, "msg": "收费记录不存在"}
-    import random
-    invoice_no = "INV" + datetime.datetime.now().strftime("%Y%m%d%H%M%S") + str(random.randint(1000, 9999))
-    invoice = Invoice(
-        charge_id=req.charge_id,
-        invoice_no=invoice_no,
-        amount=charge.amount,
-        tax=round(charge.amount * 0.06, 2) if charge.amount else 0,
-        invoice_time=datetime.datetime.now(),
-        status=0,
-    )
-    db.add(invoice)
-    db.commit()
-    return {"code": 200, "msg": "success", "data": {"invoice_no": invoice_no}}
+    try:
+        invoice_no = "INV" + datetime.datetime.now().strftime("%Y%m%d%H%M%S") + str(random.randint(1000, 9999))
+        invoice = Invoice(
+            charge_id=req.charge_id,
+            invoice_no=invoice_no,
+            amount=charge.amount,
+            tax=round(charge.amount * 0.06, 2) if charge.amount else 0,
+            invoice_time=datetime.datetime.now(),
+            status=0,
+        )
+        db.add(invoice)
+        db.commit()
+        return {"code": 200, "msg": "success", "data": {"invoice_no": invoice_no}}
+    except Exception:
+        db.rollback()
+        traceback.print_exc()
+        return {"code": 500, "msg": "发票生成失败"}
 
 
 @router.post("/invoice/print")

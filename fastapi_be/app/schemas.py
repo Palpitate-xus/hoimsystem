@@ -1,6 +1,7 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, field_validator
 from typing import Optional, List
 from datetime import date, datetime
+import re
 
 
 class ResponseModel(BaseModel):
@@ -10,18 +11,32 @@ class ResponseModel(BaseModel):
 
 
 class LoginRequest(BaseModel):
-    username: str
-    password: str
+    username: str = Field(..., min_length=1, max_length=50)
+    password: str = Field(..., min_length=1, max_length=50)
 
 
 class RegisterRequest(BaseModel):
-    username: str
-    password: str
-    identity: str
-    address: str
-    sex: int
-    phone: str
+    username: str = Field(..., min_length=1, max_length=24)
+    password: str = Field(..., min_length=6, max_length=20)
+    identity: str = Field(..., min_length=15, max_length=18)
+    address: str = Field(default="", max_length=100)
+    sex: int = Field(..., ge=0, le=1)
+    phone: str = Field(..., min_length=11, max_length=11)
     birthday: str
+
+    @field_validator("phone")
+    @classmethod
+    def validate_phone(cls, v):
+        if not re.match(r"^1[3-9]\d{9}$", v):
+            raise ValueError("手机号格式不正确")
+        return v
+
+    @field_validator("identity")
+    @classmethod
+    def validate_identity(cls, v):
+        if not re.match(r"(^\d{15}$)|(^\d{17}([0-9]|X)$)", v, re.I):
+            raise ValueError("身份证号格式不正确")
+        return v
 
 
 class UserInfoRequest(BaseModel):
@@ -102,22 +117,44 @@ class DoctorScheduleCreateRequest(BaseModel):
 
 
 class PharmaceuticalCreateRequest(BaseModel):
-    name: str
-    stock: int
+    name: str = Field(..., min_length=1, max_length=24)
+    stock: int = Field(..., ge=0)
     price: str
     expireddate: str
-    supplier: str
-    remark: str
+    supplier: str = Field(..., min_length=1, max_length=24)
+    remark: str = Field(default="", max_length=100)
+
+    @field_validator("price")
+    @classmethod
+    def validate_price(cls, v):
+        try:
+            p = float(v)
+            if p < 0:
+                raise ValueError("价格不能为负数")
+            return v
+        except ValueError:
+            raise ValueError("价格必须是有效数字")
 
 
 class PharmaceuticalUpdateRequest(BaseModel):
     pharmaceutical_id: int
-    name: str
-    stock: int
+    name: str = Field(..., min_length=1, max_length=24)
+    stock: int = Field(..., ge=0)
     price: str
     expireddate: str
-    supplier: str
-    remark: str
+    supplier: str = Field(..., min_length=1, max_length=24)
+    remark: str = Field(default="", max_length=100)
+
+    @field_validator("price")
+    @classmethod
+    def validate_price(cls, v):
+        try:
+            p = float(v)
+            if p < 0:
+                raise ValueError("价格不能为负数")
+            return v
+        except ValueError:
+            raise ValueError("价格必须是有效数字")
 
 
 class PharmaceuticalStockQueryRequest(BaseModel):
@@ -222,11 +259,11 @@ class CheckInRequest(BaseModel):
 
 class VitalSignCreateRequest(BaseModel):
     patient_id: int
-    temperature: float
-    blood_pressure_systolic: int
-    blood_pressure_diastolic: int
-    pulse: int
-    weight: float
+    temperature: float = Field(..., gt=30, lt=45)
+    blood_pressure_systolic: int = Field(..., gt=0, lt=300)
+    blood_pressure_diastolic: int = Field(..., gt=0, lt=200)
+    pulse: int = Field(..., gt=0, lt=300)
+    weight: float = Field(..., gt=0, lt=500)
 
 
 class LabOrderCreateRequest(BaseModel):
@@ -262,8 +299,8 @@ class FollowUpRecordRequest(BaseModel):
 class ReviewCreateRequest(BaseModel):
     doctor_id: int
     visit_id: str
-    score: int
-    comment: Optional[str] = ""
+    score: int = Field(..., ge=1, le=5)
+    comment: Optional[str] = Field(default="", max_length=500)
 
 
 class FollowUpAppointmentCreateRequest(BaseModel):

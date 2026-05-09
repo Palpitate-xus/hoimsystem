@@ -9,7 +9,7 @@ class User(Base):
 
     user_id = Column(Integer, primary_key=True, autoincrement=True)
     username = Column(String(20))
-    password = Column(String(20))
+    password = Column(String(128))
     user_role = Column(String(10))
 
     notices = relationship("Notice", back_populates="writer")

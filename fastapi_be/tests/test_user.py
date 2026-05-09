@@ -27,7 +27,8 @@ class TestUserAuth:
         assert r.status_code == 200
         body = r.json()
         assert body["code"] == 200
-        assert body["data"]["accessToken"] == "110101200001011111"
+        assert "accesstoken" in body["data"]
+        assert len(body["data"]["accesstoken"]) > 20
 
     async def test_login_fail(self, async_client):
         r = await async_client.post("/api/login", json={
@@ -37,8 +38,13 @@ class TestUserAuth:
         assert r.json()["code"] == 500
 
     async def test_user_info(self, async_client, seed_data):
+        # login to get JWT token
+        r = await async_client.post("/api/login", json={
+            "username": seed_data["patient_user"].username, "password": "123456"
+        })
+        token = r.json()["data"]["accesstoken"]
         r = await async_client.post("/api/userInfo", json={
-            "accessToken": seed_data["patient_user"].username
+            "accesstoken": token
         })
         assert r.status_code == 200
         body = r.json()

@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routers import user, patient, admin, doctor, pharmacy, charge, queue, checkin, vitalsign, lab, followup, report, system
+from app.routers import user, patient, admin, doctor, pharmacy, charge, queue, checkin, vitalsign, lab, followup, report, system, upload
 
 app = FastAPI(title="HOIM System FastAPI")
 
@@ -36,6 +36,12 @@ app.include_router(lab.router, prefix="/api")
 app.include_router(followup.router, prefix="/api")
 app.include_router(report.router, prefix="/api")
 app.include_router(system.router, prefix="/api")
+app.include_router(upload.router, prefix="/api")
+
+from fastapi.staticfiles import StaticFiles
+import os
+upload_dir = os.path.join(os.path.dirname(__file__), "..", "uploads")
+app.mount("/uploads", StaticFiles(directory=upload_dir), name="uploads")
 
 
 @app.get("/")

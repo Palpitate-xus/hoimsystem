@@ -76,29 +76,35 @@ def patient_appointment(req: AppointmentCreateRequest, current_user: User = Depe
     patient_obj = db.query(Patient).filter(Patient.identity == current_user.username).first()
     if not patient_obj:
         return {"code": 500, "msg": "病人信息不存在"}
-    department_obj = db.query(Department).filter(Department.department_id == req.department_id).first()
-    doctor_obj = db.query(Doctor).filter(Doctor.doctor_id == req.doctor_id).first()
     reg_obj = db.query(DoctorSchedule).filter(DoctorSchedule.schedule_id == req.id).first()
-    if reg_obj:
-        reg_obj.number -= 1
-        db.add(reg_obj)
+    if reg_obj and reg_obj.number <= 0:
+        return {"code": 500, "msg": "该时段号源已满"}
     try:
-        appt_date = datetime.datetime.strptime(req.date, "%Y-%m-%d").date()
-    except ValueError:
-        appt_date = req.date
-    appointment = Appointment(
-        patient_id=patient_obj.patient_id,
-        doctor_id=req.doctor_id,
-        specialist=req.specialist,
-        department_id=req.department_id,
-        prefer_time=req.time,
-        appointment_time=datetime.datetime.now(),
-        time=appt_date,
-        status=0,
-    )
-    db.add(appointment)
-    db.commit()
-    return {"code": 200, "msg": "success"}
+        if reg_obj:
+            reg_obj.number -= 1
+            db.add(reg_obj)
+        try:
+            appt_date = datetime.datetime.strptime(req.date, "%Y-%m-%d").date()
+        except ValueError:
+            appt_date = req.date
+        appointment = Appointment(
+            patient_id=patient_obj.patient_id,
+            doctor_id=req.doctor_id,
+            specialist=req.specialist,
+            department_id=req.department_id,
+            prefer_time=req.time,
+            appointment_time=datetime.datetime.now(),
+            time=appt_date,
+            status=0,
+        )
+        db.add(appointment)
+        db.commit()
+        return {"code": 200, "msg": "success"}
+    except Exception:
+        db.rollback()
+        import traceback
+        traceback.print_exc()
+        return {"code": 500, "msg": "预约失败"}
 
 
 @router.post("/appointmentManagement/cancel")
@@ -176,11 +182,8 @@ def patient_registration(req: RegistrationCreateRequest, current_user: User = De
     if not patient_obj:
         return {"code": 500, "msg": "病人信息不存在"}
     reg_obj = db.query(DoctorSchedule).filter(DoctorSchedule.schedule_id == req.id).first()
-    if reg_obj:
-        reg_obj.number -= 1
-        db.add(reg_obj)
-    doctor_obj = db.query(Doctor).filter(Doctor.doctor_id == req.doctor_id).first()
-    department_obj = db.query(Department).filter(Department.department_id == req.department_id).first()
+    if reg_obj and reg_obj.number <= 0:
+        return {"code": 500, "msg": "该时段号源已满"}
     exists = db.query(Registration).filter(
         Registration.patient_id == patient_obj.patient_id,
         Registration.doctor_id == req.doctor_id,
@@ -190,18 +193,27 @@ def patient_registration(req: RegistrationCreateRequest, current_user: User = De
     ).first()
     if exists:
         return {"code": 500, "msg": "您的挂号次数被限制"}
-    registration = Registration(
-        registration_id=1,
-        patient_id=patient_obj.patient_id,
-        doctor_id=req.doctor_id,
-        specialist=req.specialist,
-        department_id=req.department_id,
-        time=datetime.datetime.now(),
-        status=0,
-    )
-    db.add(registration)
-    db.commit()
-    return {"code": 200, "msg": "success"}
+    try:
+        if reg_obj:
+            reg_obj.number -= 1
+            db.add(reg_obj)
+        registration = Registration(
+            registration_id=1,
+            patient_id=patient_obj.patient_id,
+            doctor_id=req.doctor_id,
+            specialist=req.specialist,
+            department_id=req.department_id,
+            time=datetime.datetime.now(),
+            status=0,
+        )
+        db.add(registration)
+        db.commit()
+        return {"code": 200, "msg": "success"}
+    except Exception:
+        db.rollback()
+        import traceback
+        traceback.print_exc()
+        return {"code": 500, "msg": "挂号失败"}
 
 
 @router.post("/registrationManagement/cancel")
@@ -215,13 +227,16 @@ def patient_registration_cancel(req: UuidRequest, db: Session = Depends(get_db))
 
 
 @router.get("/medicalRecord/getList")
-def get_medical_record_list(current_user: User = Depends(get_current_user), keyword: Optional[str] = None, db: Session = Depends(get_db)):
+def get_medical_record_list(current_user: User = Depends(get_current_user), keyword: Optional[str] = None, page: Optional[int] = None, page_size: Optional[int] = None, db: Session = Depends(get_db)):
+    from app.pagination import paginate
+    data = []
+    total = 0
     if current_user.user_role == "patient":
         patient_obj = db.query(Patient).filter(Patient.identity == current_user.username).first()
         if not patient_obj:
             return {"code": 200, "msg": "success", "data": []}
-        records = db.query(MedicalRecord).filter(MedicalRecord.patient_id == patient_obj.patient_id).order_by(MedicalRecord.consultation_time.desc()).all()
-        data = []
+        query = db.query(MedicalRecord).filter(MedicalRecord.patient_id == patient_obj.patient_id).order_by(MedicalRecord.consultation_time.desc())
+        records, total = paginate(query, page, page_size)
         for item in records:
             data.append({
                 "uuid": str(item.medical_record_id),
@@ -230,13 +245,12 @@ def get_medical_record_list(current_user: User = Depends(get_current_user), keyw
                 "symptom": item.symptom,
                 "result": item.result,
             })
-        return {"code": 200, "msg": "success", "data": data}
     elif current_user.user_role in ("doctor", "director"):
         doctor_obj = db.query(Doctor).filter(Doctor.user_id == current_user.user_id).first()
         if not doctor_obj:
             return {"code": 200, "msg": "success", "data": []}
-        records = db.query(MedicalRecord).filter(MedicalRecord.doctor_id == doctor_obj.doctor_id).order_by(MedicalRecord.consultation_time.desc()).all()
-        data = []
+        query = db.query(MedicalRecord).filter(MedicalRecord.doctor_id == doctor_obj.doctor_id).order_by(MedicalRecord.consultation_time.desc())
+        records, total = paginate(query, page, page_size)
         for item in records:
             data.append({
                 "uuid": str(item.medical_record_id),
@@ -246,8 +260,15 @@ def get_medical_record_list(current_user: User = Depends(get_current_user), keyw
                 "symptom": item.symptom,
                 "result": item.result,
             })
-        return {"code": 200, "msg": "success", "data": data}
-    return {"code": 200, "msg": "success", "data": []}
+    else:
+        return {"code": 200, "msg": "success", "data": []}
+    if keyword:
+        kw = keyword.lower()
+        data = [item for item in data if any(kw in str(val).lower() for val in item.values())]
+    result = {"code": 200, "msg": "success", "data": data}
+    if page and page_size:
+        result["total"] = total
+    return result
 
 
 @router.post("/medicalRecord/detail")

@@ -10,13 +10,15 @@ from app.schemas import (
     PatientUpdateRequest, DepartmentUpdateRequest, DepartmentDeleteRequest
 )
 from app.dependencies import get_current_user
+from app.pagination import paginate
 
 router = APIRouter()
 
 
 @router.get("/doctorManagement/getList")
-def get_doctor_list(keyword: Optional[str] = None, db: Session = Depends(get_db)):
-    doctors = db.query(Doctor).all()
+def get_doctor_list(keyword: Optional[str] = None, page: Optional[int] = None, page_size: Optional[int] = None, db: Session = Depends(get_db)):
+    query = db.query(Doctor)
+    doctors, total = paginate(query, page, page_size)
     data = []
     for item in doctors:
         data.append({
@@ -31,7 +33,10 @@ def get_doctor_list(keyword: Optional[str] = None, db: Session = Depends(get_db)
     if keyword:
         kw = keyword.lower()
         data = [item for item in data if any(kw in str(val).lower() for val in item.values())]
-    return {"code": 200, "msg": "success", "data": data}
+    result = {"code": 200, "msg": "success", "data": data}
+    if page and page_size:
+        result["total"] = total
+    return result
 
 
 @router.post("/doctorManagement/update")
@@ -66,8 +71,9 @@ def delete_doctor(req: DoctorDeleteRequest, db: Session = Depends(get_db)):
 
 
 @router.get("/patientManagement/getList")
-def get_patient_list(keyword: Optional[str] = None, db: Session = Depends(get_db)):
-    patient_data = db.query(Patient).all()
+def get_patient_list(keyword: Optional[str] = None, page: Optional[int] = None, page_size: Optional[int] = None, db: Session = Depends(get_db)):
+    query = db.query(Patient)
+    patient_data, total = paginate(query, page, page_size)
     data = []
     for item in patient_data:
         sex = "女" if item.sex == 0 else "男"
@@ -84,7 +90,10 @@ def get_patient_list(keyword: Optional[str] = None, db: Session = Depends(get_db
     if keyword:
         kw = keyword.lower()
         data = [item for item in data if any(kw in str(val).lower() for val in item.values())]
-    return {"code": 200, "msg": "success", "data": data}
+    result = {"code": 200, "msg": "success", "data": data}
+    if page and page_size:
+        result["total"] = total
+    return result
 
 
 @router.post("/patientManagement/update")
@@ -102,8 +111,9 @@ def update_patient(req: PatientUpdateRequest, db: Session = Depends(get_db)):
 
 
 @router.get("/departmentManagement/getList")
-def get_department_list(keyword: Optional[str] = None, db: Session = Depends(get_db)):
-    departments = db.query(Department).all()
+def get_department_list(keyword: Optional[str] = None, page: Optional[int] = None, page_size: Optional[int] = None, db: Session = Depends(get_db)):
+    query = db.query(Department)
+    departments, total = paginate(query, page, page_size)
     data = []
     for item in departments:
         director = db.query(Doctor).filter(Doctor.doctor_id == item.director).first()
@@ -118,7 +128,10 @@ def get_department_list(keyword: Optional[str] = None, db: Session = Depends(get
     if keyword:
         kw = keyword.lower()
         data = [item for item in data if any(kw in str(val).lower() for val in item.values())]
-    return {"code": 200, "msg": "success", "data": data}
+    result = {"code": 200, "msg": "success", "data": data}
+    if page and page_size:
+        result["total"] = total
+    return result
 
 
 @router.post("/departmentManagement/create")
@@ -163,8 +176,9 @@ def delete_department(req: DepartmentDeleteRequest, db: Session = Depends(get_db
 
 
 @router.get("/notice/getList")
-def get_notice_list(current_user: User = Depends(get_current_user), keyword: Optional[str] = None, db: Session = Depends(get_db)):
-    notices = db.query(Notice).all()
+def get_notice_list(current_user: User = Depends(get_current_user), keyword: Optional[str] = None, page: Optional[int] = None, page_size: Optional[int] = None, db: Session = Depends(get_db)):
+    query = db.query(Notice)
+    notices, total = paginate(query, page, page_size)
     data = []
     for item in notices:
         if current_user.user_role == "director" and "科室主任" not in item.towho:
@@ -187,7 +201,10 @@ def get_notice_list(current_user: User = Depends(get_current_user), keyword: Opt
     if keyword:
         kw = keyword.lower()
         data = [item for item in data if any(kw in str(val).lower() for val in item.values())]
-    return {"code": 200, "msg": "success", "data": data}
+    result = {"code": 200, "msg": "success", "data": data}
+    if page and page_size:
+        result["total"] = total
+    return result
 
 
 @router.post("/notice/create")

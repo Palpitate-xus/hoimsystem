@@ -9,6 +9,7 @@ from app.models import User, Patient
 from app.schemas import LoginRequest, RegisterRequest, UserInfoRequest, TestRequest
 from app.dependencies import get_current_user
 from app.config import settings
+from app.security import hash_password, verify_password, is_bcrypt_hash
 
 router = APIRouter()
 
@@ -50,11 +51,14 @@ def get_public_key():
 
 @router.post("/login")
 def login(req: LoginRequest, db: Session = Depends(get_db)):
-    user = db.query(User).filter(User.username == req.username, User.password == req.password).first()
-    if user:
-        token = create_access_token(user.username)
-        return {"code": 200, "msg": "success", "data": {"accesstoken": token}}
-    return {"code": 500, "msg": "账户或密码不正确"}
+    user = db.query(User).filter(User.username == req.username).first()
+    if not user or not verify_password(req.password, user.password):
+        return {"code": 500, "msg": "账户或密码不正确"}
+    if not is_bcrypt_hash(user.password):
+        user.password = hash_password(req.password)
+        db.commit()
+    token = create_access_token(user.username)
+    return {"code": 200, "msg": "success", "data": {"accesstoken": token}}
 
 
 def parse_date_str(val):
@@ -81,7 +85,7 @@ def register(req: RegisterRequest, db: Session = Depends(get_db)):
         )
         db.add(patient)
         db.flush()
-        user = User(username=req.identity, password=req.password, user_role="patient")
+        user = User(username=req.identity, password=hash_password(req.password), user_role="patient")
         db.add(user)
         db.commit()
         return {"code": 200, "msg": "success"}

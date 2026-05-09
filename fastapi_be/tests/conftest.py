@@ -71,8 +71,10 @@ def seed_data(db_session: Session):
     """Create a consistent baseline dataset for tests."""
     sess = db_session
 
+    from app.security import hash_password
+
     # Admin user
-    admin_user = User(username="admin", password="admin123", user_role="admin")
+    admin_user = User(username="admin", password=hash_password("admin123"), user_role="admin")
     sess.add(admin_user)
     sess.flush()
 
@@ -82,7 +84,7 @@ def seed_data(db_session: Session):
     sess.flush()
 
     # Doctor user + doctor
-    doc_user = User(username="doc01", password="123456", user_role="doctor")
+    doc_user = User(username="doc01", password=hash_password("123456"), user_role="doctor")
     sess.add(doc_user)
     sess.flush()
     doctor = Doctor(
@@ -102,7 +104,7 @@ def seed_data(db_session: Session):
     sess.flush()
 
     # Patient user + patient
-    pat_user = User(username="370101199001011234", password="123456", user_role="patient")
+    pat_user = User(username="370101199001011234", password=hash_password("123456"), user_role="patient")
     sess.add(pat_user)
     sess.flush()
     patient = Patient(
@@ -114,7 +116,7 @@ def seed_data(db_session: Session):
     sess.flush()
 
     # Second patient
-    pat_user2 = User(username="370101199001015678", password="123456", user_role="patient")
+    pat_user2 = User(username="370101199001015678", password=hash_password("123456"), user_role="patient")
     sess.add(pat_user2)
     sess.flush()
     patient2 = Patient(

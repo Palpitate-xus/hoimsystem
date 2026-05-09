@@ -18,6 +18,7 @@ from app.schemas import (
     LabOrderCreateRequest
 )
 from app.dependencies import get_current_user
+from app.security import hash_password
 
 router = APIRouter()
 
@@ -26,7 +27,7 @@ router = APIRouter()
 def add_doctor(req: DoctorCreateRequest, db: Session = Depends(get_db)):
     if db.query(User).filter(User.username == req.username).first():
         return {"code": 500, "msg": "已存在相同用户"}
-    password = req.password
+    password = hash_password(req.password)
     name = req.name
     title = req.title
     sex = 0 if req.sex == "女" else 1
@@ -62,30 +63,35 @@ def add_doctor(req: DoctorCreateRequest, db: Session = Depends(get_db)):
 
 @router.post("/doctorScheduleManagement/register")
 def doctor_schedule_register(req: DoctorScheduleCreateRequest, db: Session = Depends(get_db)):
-    doctor_obj = db.query(Doctor).filter(Doctor.doctor_id == req.doctor).first()
-    for i in req.schedule:
-        week = i[0:3]
-        time = i[3:5]
-        existing = db.query(DoctorSchedule).filter(
-            DoctorSchedule.week == week,
-            DoctorSchedule.time == time,
-            DoctorSchedule.doctor_id == req.doctor
-        ).first()
-        if existing:
-            existing.number = req.number
-            existing.specialist = req.specialist
-            db.add(existing)
-        else:
-            new_schedule = DoctorSchedule(
-                week=week,
-                time=time,
-                number=req.number,
-                specialist=req.specialist,
-                doctor_id=req.doctor,
-            )
-            db.add(new_schedule)
-    db.commit()
-    return {"code": 200, "msg": "success"}
+    try:
+        doctor_obj = db.query(Doctor).filter(Doctor.doctor_id == req.doctor).first()
+        for i in req.schedule:
+            week = i[0:3]
+            time = i[3:5]
+            existing = db.query(DoctorSchedule).filter(
+                DoctorSchedule.week == week,
+                DoctorSchedule.time == time,
+                DoctorSchedule.doctor_id == req.doctor
+            ).first()
+            if existing:
+                existing.number = req.number
+                existing.specialist = req.specialist
+                db.add(existing)
+            else:
+                new_schedule = DoctorSchedule(
+                    week=week,
+                    time=time,
+                    number=req.number,
+                    specialist=req.specialist,
+                    doctor_id=req.doctor,
+                )
+                db.add(new_schedule)
+        db.commit()
+        return {"code": 200, "msg": "success"}
+    except Exception:
+        db.rollback()
+        traceback.print_exc()
+        return {"code": 500, "msg": "排班保存失败"}
 
 
 @router.get("/doctorScheduleManagement/getList")
@@ -213,59 +219,72 @@ def prescription_register(req: PrescriptionCreateRequest, current_user: User = D
     patient_obj = db.query(Patient).filter(Patient.patient_id == req.patient).first()
     if not doctor_obj or not patient_obj:
         return {"code": 500, "msg": "医生或病人信息不存在"}
-    pre = Prescription(
-        patient_id=patient_obj.patient_id,
-        doctor_id=doctor_obj.doctor_id,
-        status=0,
-        create_time=datetime.datetime.now(),
-    )
-    db.add(pre)
-    db.flush()
-    amount = 0
-    for item in req.phas:
-        pha = db.query(Pharmaceutical).filter(Pharmaceutical.pharmaceutical_id == item["id"]).first()
-        if pha:
-            pha.stock -= int(item["number"])
-            db.add(pha)
-            pp = PrePha(
-                prescription_id=str(pre.prescription_id),
-                pharmaceutical_id=pha.pharmaceutical_id,
-                number=item["number"],
-            )
-            db.add(pp)
-            amount += float(pha.price) * int(item["number"])
-    charge = Charge(
-        charge_time=datetime.datetime.now(),
-        time=datetime.datetime(1970, 1, 1),
-        prescription_id=pre.prescription_id,
-        amount=amount,
-        status=0,
-    )
-    db.add(charge)
-    db.commit()
-    return {"code": 200, "msg": "success"}
+    try:
+        pre = Prescription(
+            patient_id=patient_obj.patient_id,
+            doctor_id=doctor_obj.doctor_id,
+            status=0,
+            create_time=datetime.datetime.now(),
+        )
+        db.add(pre)
+        db.flush()
+        amount = 0
+        for item in req.phas:
+            pha = db.query(Pharmaceutical).filter(Pharmaceutical.pharmaceutical_id == item["id"]).first()
+            if pha:
+                if pha.stock < int(item["number"]):
+                    db.rollback()
+                    return {"code": 500, "msg": f"药品 {pha.name} 库存不足"}
+                pha.stock -= int(item["number"])
+                db.add(pha)
+                pp = PrePha(
+                    prescription_id=str(pre.prescription_id),
+                    pharmaceutical_id=pha.pharmaceutical_id,
+                    number=item["number"],
+                )
+                db.add(pp)
+                amount += float(pha.price) * int(item["number"])
+        charge = Charge(
+            charge_time=datetime.datetime.now(),
+            time=datetime.datetime(1970, 1, 1),
+            prescription_id=pre.prescription_id,
+            amount=amount,
+            status=0,
+        )
+        db.add(charge)
+        db.commit()
+        return {"code": 200, "msg": "success"}
+    except Exception:
+        db.rollback()
+        traceback.print_exc()
+        return {"code": 500, "msg": "处方开具失败"}
 
+
+from app.pagination import paginate
 
 @router.get("/prescriptionManagement/getList")
-def get_prescription_list(current_user: User = Depends(get_current_user), keyword: Optional[str] = None, db: Session = Depends(get_db)):
+def get_prescription_list(current_user: User = Depends(get_current_user), keyword: Optional[str] = None, page: Optional[int] = None, page_size: Optional[int] = None, db: Session = Depends(get_db)):
     data = []
+    total = 0
+    query = db.query(Prescription)
     if current_user.user_role == "admin":
-        prescriptions = db.query(Prescription).all()
+        pass
     elif current_user.user_role in ("doctor", "director"):
         doctor_obj = db.query(Doctor).filter(Doctor.user_id == current_user.user_id).first()
         if doctor_obj:
-            prescriptions = db.query(Prescription).filter(Prescription.doctor_id == doctor_obj.doctor_id).all()
+            query = query.filter(Prescription.doctor_id == doctor_obj.doctor_id)
         else:
-            prescriptions = []
+            query = query.filter(Prescription.prescription_id == -1)
     elif current_user.user_role == "patient":
         patient_obj = db.query(Patient).filter(Patient.identity == current_user.username).first()
         if patient_obj:
-            prescriptions = db.query(Prescription).filter(Prescription.patient_id == patient_obj.patient_id).all()
+            query = query.filter(Prescription.patient_id == patient_obj.patient_id)
         else:
-            prescriptions = []
+            query = query.filter(Prescription.prescription_id == -1)
     else:
-        prescriptions = []
+        query = query.filter(Prescription.prescription_id == -1)
 
+    prescriptions, total = paginate(query, page, page_size)
     for item in prescriptions:
         phas = []
         for j in item.pre_phas:
@@ -283,7 +302,10 @@ def get_prescription_list(current_user: User = Depends(get_current_user), keywor
     if keyword:
         kw = keyword.lower()
         data = [item for item in data if any(kw in str(val).lower() for val in item.values())]
-    return {"code": 200, "msg": "success", "data": data}
+    result = {"code": 200, "msg": "success", "data": data}
+    if page and page_size:
+        result["total"] = total
+    return result
 
 
 @router.post("/prescriptionManagement/cancel")

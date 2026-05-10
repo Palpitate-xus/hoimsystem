@@ -1,6 +1,5 @@
 import bcrypt
 
-
 _BCRYPT_PREFIXES = ("$2a$", "$2b$", "$2y$")
 
 

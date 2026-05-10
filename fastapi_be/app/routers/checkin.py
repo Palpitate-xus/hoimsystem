@@ -1,9 +1,10 @@
 import datetime
+
 from fastapi import APIRouter, Depends
-from typing import Optional
 from sqlalchemy.orm import Session
+
 from app.database import get_db
-from app.models import Appointment, Patient, Queue, BreachRecord
+from app.models import Appointment, BreachRecord, Patient, Queue
 from app.schemas import CheckInRequest
 
 router = APIRouter()
@@ -30,12 +31,10 @@ def record_breach(db, appointment, breach_type="未取号"):
 
 def get_breach_count(db, patient_id, days=30):
     """查询病人最近 N 天内违约次数"""
-    from sqlalchemy import func
     since = datetime.datetime.now() - datetime.timedelta(days=days)
-    return db.query(BreachRecord).join(Appointment, BreachRecord.registration_id == Appointment.registration_uuid).filter(
-        Appointment.patient_id == patient_id,
-        BreachRecord.breach_time >= since
-    ).count()
+    return (
+        db.query(BreachRecord).join(Appointment, BreachRecord.registration_id == Appointment.registration_uuid).filter(Appointment.patient_id == patient_id, BreachRecord.breach_time >= since).count()
+    )
 
 
 @router.post("/checkIn/checkIn")
@@ -71,23 +70,23 @@ def check_in(req: CheckInRequest, db: Session = Depends(get_db)):
 
 
 @router.get("/breach/getList")
-def get_breach_list(patient_id: Optional[int] = None, db: Session = Depends(get_db)):
-    query = db.query(BreachRecord, Appointment, Patient).join(
-        Appointment, BreachRecord.registration_id == Appointment.registration_uuid
-    ).join(Patient, Appointment.patient_id == Patient.patient_id)
+def get_breach_list(patient_id: int | None = None, db: Session = Depends(get_db)):
+    query = db.query(BreachRecord, Appointment, Patient).join(Appointment, BreachRecord.registration_id == Appointment.registration_uuid).join(Patient, Appointment.patient_id == Patient.patient_id)
     if patient_id:
         query = query.filter(Appointment.patient_id == patient_id)
     results = query.order_by(BreachRecord.breach_time.desc()).all()
     data = []
     for breach, appt, pat in results:
-        data.append({
-            "breach_id": breach.breach_id,
-            "registration_id": breach.registration_id,
-            "breach_time": str(breach.breach_time),
-            "breach_type": breach.breach_type,
-            "patient_name": pat.name if pat else "",
-            "patient_id": pat.patient_id if pat else None,
-        })
+        data.append(
+            {
+                "breach_id": breach.breach_id,
+                "registration_id": breach.registration_id,
+                "breach_time": str(breach.breach_time),
+                "breach_type": breach.breach_type,
+                "patient_name": pat.name if pat else "",
+                "patient_id": pat.patient_id if pat else None,
+            }
+        )
     return {"code": 200, "msg": "success", "data": data}
 
 
@@ -96,8 +95,4 @@ def check_suspend(patient_id: int, db: Session = Depends(get_db)):
     """检查病人是否处于暂停预约状态：30天内违约3次则暂停30天"""
     count = get_breach_count(db, patient_id, days=30)
     suspended = count >= 3
-    return {"code": 200, "msg": "success", "data": {
-        "breach_count": count,
-        "suspended": suspended,
-        "suspend_reason": "30天内违约3次，暂停预约资格30天" if suspended else ""
-    }}
+    return {"code": 200, "msg": "success", "data": {"breach_count": count, "suspended": suspended, "suspend_reason": "30天内违约3次，暂停预约资格30天" if suspended else ""}}

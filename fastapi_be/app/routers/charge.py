@@ -1,34 +1,44 @@
 import datetime
-import traceback
 import random
+import traceback
+
 from fastapi import APIRouter, Depends
-from typing import Optional
 from sqlalchemy.orm import Session
+
 from app.database import get_db
-from app.models import Charge, Invoice, Prescription, PrePha, Pharmaceutical, Patient, User
-from app.schemas import ChargeRefundRequest, InvoiceCreateRequest, InvoicePrintRequest, ChargeCommitRequest, PaymentCreateRequest, PaymentQueryRequest, PaymentMockNotifyRequest
 from app.dependencies import get_current_user
+from app.models import Charge, Invoice, Patient, Prescription, User
 from app.pagination import paginate
+from app.schemas import (
+    ChargeCommitRequest,
+    ChargeRefundRequest,
+    InvoiceCreateRequest,
+    InvoicePrintRequest,
+    PaymentCreateRequest,
+    PaymentMockNotifyRequest,
+)
 
 router = APIRouter()
 
 
 @router.get("/chargeManagement/getList")
-def get_charge_list(current_user: User = Depends(get_current_user), keyword: Optional[str] = None, page: Optional[int] = None, page_size: Optional[int] = None, db: Session = Depends(get_db)):
+def get_charge_list(current_user: User = Depends(get_current_user), keyword: str | None = None, page: int | None = None, page_size: int | None = None, db: Session = Depends(get_db)):
     data = []
     total = 0
     if current_user.user_role == "admin" or current_user.user_role not in ("admin", "patient"):
         query = db.query(Charge)
         charge_list, total = paginate(query, page, page_size)
         for item in charge_list:
-            data.append({
-                "id": str(item.charge_id),
-                "charge_time": str(item.charge_time),
-                "time": str(item.time),
-                "pre_id": str(item.prescription.prescription_id) if item.prescription else "",
-                "amount": round(item.amount, 2) if item.amount else 0,
-                "status": item.status,
-            })
+            data.append(
+                {
+                    "id": str(item.charge_id),
+                    "charge_time": str(item.charge_time),
+                    "time": str(item.time),
+                    "pre_id": str(item.prescription.prescription_id) if item.prescription else "",
+                    "amount": round(item.amount, 2) if item.amount else 0,
+                    "status": item.status,
+                }
+            )
     elif current_user.user_role == "patient":
         patient_obj = db.query(Patient).filter(Patient.identity == current_user.username).first()
         if patient_obj:
@@ -36,14 +46,16 @@ def get_charge_list(current_user: User = Depends(get_current_user), keyword: Opt
             for pre in pres:
                 item = db.query(Charge).filter(Charge.prescription_id == pre.prescription_id).first()
                 if item:
-                    data.append({
-                        "id": str(item.charge_id),
-                        "charge_time": str(item.charge_time),
-                        "time": str(item.time),
-                        "pre_id": str(item.prescription.prescription_id) if item.prescription else "",
-                        "amount": round(item.amount, 2) if item.amount else 0,
-                        "status": item.status,
-                    })
+                    data.append(
+                        {
+                            "id": str(item.charge_id),
+                            "charge_time": str(item.charge_time),
+                            "time": str(item.time),
+                            "pre_id": str(item.prescription.prescription_id) if item.prescription else "",
+                            "amount": round(item.amount, 2) if item.amount else 0,
+                            "status": item.status,
+                        }
+                    )
     if keyword:
         kw = keyword.lower()
         data = [item for item in data if any(kw in str(val).lower() for val in item.values())]
@@ -78,25 +90,24 @@ def charge_refund(req: ChargeRefundRequest, db: Session = Depends(get_db)):
 
 
 @router.get("/invoice/getList")
-def get_invoice_list(keyword: Optional[str] = None, db: Session = Depends(get_db)):
+def get_invoice_list(keyword: str | None = None, db: Session = Depends(get_db)):
     invoices = db.query(Invoice).all()
     data = []
     for item in invoices:
-        data.append({
-            "id": str(item.invoice_id),
-            "invoice_no": item.invoice_no,
-            "charge_id": str(item.charge_id),
-            "amount": round(item.amount, 2) if item.amount else 0,
-            "invoice_time": str(item.invoice_time),
-        })
+        data.append(
+            {
+                "id": str(item.invoice_id),
+                "invoice_no": item.invoice_no,
+                "charge_id": str(item.charge_id),
+                "amount": round(item.amount, 2) if item.amount else 0,
+                "invoice_time": str(item.invoice_time),
+            }
+        )
     if keyword:
         kw = keyword.lower()
         data = [item for item in data if any(kw in str(val).lower() for val in item.values())]
     return {"code": 200, "msg": "success", "data": data}
 
-
-import traceback
-import random
 
 @router.post("/invoice/create")
 def create_invoice(req: InvoiceCreateRequest, db: Session = Depends(get_db)):
@@ -133,7 +144,8 @@ def print_invoice(req: InvoicePrintRequest, db: Session = Depends(get_db)):
 @router.post("/windowRegistration/create")
 def window_registration(req: dict, db: Session = Depends(get_db)):
     """窗口挂号：收费员代病人现场挂号"""
-    from app.models import Patient, Registration, DoctorSchedule
+    from app.models import DoctorSchedule, Patient, Registration
+
     identity = req.get("identity")
     patient = db.query(Patient).filter(Patient.identity == identity).first()
     if not patient:
@@ -171,6 +183,7 @@ def window_registration(req: dict, db: Session = Depends(get_db)):
 def window_cancel_registration(req: dict, db: Session = Depends(get_db)):
     """窗口退号"""
     from app.models import Registration
+
     reg = db.query(Registration).filter(Registration.registration_uuid == req.get("uuid")).first()
     if not reg:
         return {"code": 500, "msg": "挂号记录不存在"}
@@ -184,7 +197,9 @@ def window_cancel_registration(req: dict, db: Session = Depends(get_db)):
 def daily_settlement(req: dict, db: Session = Depends(get_db)):
     """日结对账"""
     from sqlalchemy import func
+
     from app.models import Charge
+
     date = req.get("date")
     if not date:
         date = str(datetime.datetime.now().date())
@@ -196,24 +211,30 @@ def daily_settlement(req: dict, db: Session = Depends(get_db)):
     count_paid = len([c for c in charges if c.status == 1])
     count_refund = len([c for c in charges if c.status == 2])
     count_pending = len([c for c in charges if c.status == 0])
-    return {"code": 200, "msg": "success", "data": {
-        "date": date,
-        "total_income": round(total_income, 2),
-        "total_refund": round(total_refund, 2),
-        "total_pending": round(total_pending, 2),
-        "count_paid": count_paid,
-        "count_refund": count_refund,
-        "count_pending": count_pending,
-        "record_count": len(charges),
-    }}
+    return {
+        "code": 200,
+        "msg": "success",
+        "data": {
+            "date": date,
+            "total_income": round(total_income, 2),
+            "total_refund": round(total_refund, 2),
+            "total_pending": round(total_pending, 2),
+            "count_paid": count_paid,
+            "count_refund": count_refund,
+            "count_pending": count_pending,
+            "record_count": len(charges),
+        },
+    }
 
 
 # ===== 支付接口（微信/支付宝 Mock）=====
+
 
 @router.post("/payment/create")
 def create_payment(req: PaymentCreateRequest, db: Session = Depends(get_db)):
     """创建支付订单"""
     from app.models import Payment
+
     charge = db.query(Charge).filter(Charge.charge_id == req.charge_id).first()
     if not charge:
         return {"code": 500, "msg": "收费记录不存在"}
@@ -240,7 +261,7 @@ def create_payment(req: PaymentCreateRequest, db: Session = Depends(get_db)):
             "qr_code_data": qr_data,
             "channel": req.channel,
             "amount": req.amount,
-        }
+        },
     }
 
 
@@ -248,6 +269,7 @@ def create_payment(req: PaymentCreateRequest, db: Session = Depends(get_db)):
 def query_payment(payment_no: str, db: Session = Depends(get_db)):
     """查询支付状态"""
     from app.models import Payment
+
     payment = db.query(Payment).filter(Payment.payment_no == payment_no).first()
     if not payment:
         return {"code": 500, "msg": "支付单不存在"}
@@ -262,7 +284,7 @@ def query_payment(payment_no: str, db: Session = Depends(get_db)):
             "status": payment.status,
             "paid_time": str(payment.paid_time) if payment.paid_time else None,
             "create_time": str(payment.create_time),
-        }
+        },
     }
 
 
@@ -270,6 +292,7 @@ def query_payment(payment_no: str, db: Session = Depends(get_db)):
 def mock_payment_notify(req: PaymentMockNotifyRequest, db: Session = Depends(get_db)):
     """Mock 支付回调（模拟微信/支付宝异步通知）"""
     from app.models import Payment
+
     payment = db.query(Payment).filter(Payment.payment_no == req.payment_no).first()
     if not payment:
         return {"code": 500, "msg": "支付单不存在"}
@@ -294,22 +317,25 @@ def mock_payment_notify(req: PaymentMockNotifyRequest, db: Session = Depends(get
 
 
 @router.get("/payment/getList")
-def get_payment_list(keyword: Optional[str] = None, db: Session = Depends(get_db)):
+def get_payment_list(keyword: str | None = None, db: Session = Depends(get_db)):
     """支付流水列表"""
     from app.models import Payment
+
     payments = db.query(Payment).order_by(Payment.create_time.desc()).all()
     data = []
     for item in payments:
-        data.append({
-            "payment_id": item.payment_id,
-            "payment_no": item.payment_no,
-            "charge_id": item.charge_id,
-            "channel": item.channel,
-            "amount": round(item.amount, 2) if item.amount else 0,
-            "status": item.status,
-            "paid_time": str(item.paid_time) if item.paid_time else "",
-            "create_time": str(item.create_time),
-        })
+        data.append(
+            {
+                "payment_id": item.payment_id,
+                "payment_no": item.payment_no,
+                "charge_id": item.charge_id,
+                "channel": item.channel,
+                "amount": round(item.amount, 2) if item.amount else 0,
+                "status": item.status,
+                "paid_time": str(item.paid_time) if item.paid_time else "",
+                "create_time": str(item.create_time),
+            }
+        )
     if keyword:
         kw = keyword.lower()
         data = [item for item in data if any(kw in str(val).lower() for val in item.values())]

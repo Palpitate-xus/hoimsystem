@@ -1,9 +1,10 @@
 import jwt
-from fastapi import Header, HTTPException, Depends
+from fastapi import Depends, Header, HTTPException
 from sqlalchemy.orm import Session
+
+from app.config import settings
 from app.database import get_db
 from app.models import User
-from app.config import settings
 
 
 def decode_access_token(token: str) -> str:

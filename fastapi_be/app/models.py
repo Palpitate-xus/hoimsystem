@@ -1,6 +1,8 @@
 import uuid
-from sqlalchemy import Column, Integer, String, Float, DateTime, Date, ForeignKey, Text
+
+from sqlalchemy import Column, Date, DateTime, Float, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import relationship
+
 from app.database import Base
 
 
@@ -189,9 +191,7 @@ class Prescription(Base):
     patient = relationship("Patient", back_populates="prescriptions")
     doctor = relationship("Doctor", back_populates="prescriptions")
     charges = relationship("Charge", back_populates="prescription")
-    pre_phas = relationship("PrePha", back_populates="prescription",
-                            primaryjoin="PrePha.prescription_id == Prescription.prescription_id",
-                            foreign_keys="PrePha.prescription_id")
+    pre_phas = relationship("PrePha", back_populates="prescription", primaryjoin="PrePha.prescription_id == Prescription.prescription_id", foreign_keys="PrePha.prescription_id")
 
 
 class PrePha(Base):
@@ -203,9 +203,7 @@ class PrePha(Base):
     number = Column(Integer)
 
     pharmaceutical = relationship("Pharmaceutical")
-    prescription = relationship("Prescription", back_populates="pre_phas",
-                                primaryjoin="PrePha.prescription_id == Prescription.prescription_id",
-                                foreign_keys="PrePha.prescription_id")
+    prescription = relationship("Prescription", back_populates="pre_phas", primaryjoin="PrePha.prescription_id == Prescription.prescription_id", foreign_keys="PrePha.prescription_id")
 
 
 class MedicalRecord(Base):
@@ -239,6 +237,7 @@ class Pharmaceutical(Base):
 
 
 # ===== 新增表 =====
+
 
 class Queue(Base):
     __tablename__ = "hoimsystem_queue"

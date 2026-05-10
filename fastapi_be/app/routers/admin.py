@@ -1,35 +1,44 @@
 import datetime
+
 from fastapi import APIRouter, Depends
-from typing import Optional
 from sqlalchemy.orm import Session
+
 from app.database import get_db
-from app.models import User, Patient, Doctor, Department, Notice
-from app.schemas import (
-    DepartmentCreateRequest, NoticeCreateRequest, NoticeUpdateRequest,
-    NoticeDeleteRequest, DoctorUpdateRequest, DoctorDeleteRequest,
-    PatientUpdateRequest, DepartmentUpdateRequest, DepartmentDeleteRequest
-)
 from app.dependencies import get_current_user
+from app.models import Department, Doctor, Notice, Patient, User
 from app.pagination import paginate
+from app.schemas import (
+    DepartmentCreateRequest,
+    DepartmentDeleteRequest,
+    DepartmentUpdateRequest,
+    DoctorDeleteRequest,
+    DoctorUpdateRequest,
+    NoticeCreateRequest,
+    NoticeDeleteRequest,
+    NoticeUpdateRequest,
+    PatientUpdateRequest,
+)
 
 router = APIRouter()
 
 
 @router.get("/doctorManagement/getList")
-def get_doctor_list(keyword: Optional[str] = None, page: Optional[int] = None, page_size: Optional[int] = None, db: Session = Depends(get_db)):
+def get_doctor_list(keyword: str | None = None, page: int | None = None, page_size: int | None = None, db: Session = Depends(get_db)):
     query = db.query(Doctor)
     doctors, total = paginate(query, page, page_size)
     data = []
     for item in doctors:
-        data.append({
-            "id": item.doctor_id,
-            "name": item.name,
-            "sex": item.sex,
-            "education": item.education,
-            "phone": item.phone,
-            "permission": item.permission,
-            "title": item.title,
-        })
+        data.append(
+            {
+                "id": item.doctor_id,
+                "name": item.name,
+                "sex": item.sex,
+                "education": item.education,
+                "phone": item.phone,
+                "permission": item.permission,
+                "title": item.title,
+            }
+        )
     if keyword:
         kw = keyword.lower()
         data = [item for item in data if any(kw in str(val).lower() for val in item.values())]
@@ -71,23 +80,25 @@ def delete_doctor(req: DoctorDeleteRequest, db: Session = Depends(get_db)):
 
 
 @router.get("/patientManagement/getList")
-def get_patient_list(keyword: Optional[str] = None, page: Optional[int] = None, page_size: Optional[int] = None, db: Session = Depends(get_db)):
+def get_patient_list(keyword: str | None = None, page: int | None = None, page_size: int | None = None, db: Session = Depends(get_db)):
     query = db.query(Patient)
     patient_data, total = paginate(query, page, page_size)
     data = []
     for item in patient_data:
         sex = "女" if item.sex == 0 else "男"
-        data.append({
-            "id": item.patient_id,
-            "name": item.name,
-            "sex": sex,
-            "birthday": str(item.birthday),
-            "phone": item.phone,
-            "permission": item.permission,
-            "address": item.address,
-            "identity": item.identity,
-            "allergy_history": item.allergy_history or "",
-        })
+        data.append(
+            {
+                "id": item.patient_id,
+                "name": item.name,
+                "sex": sex,
+                "birthday": str(item.birthday),
+                "phone": item.phone,
+                "permission": item.permission,
+                "address": item.address,
+                "identity": item.identity,
+                "allergy_history": item.allergy_history or "",
+            }
+        )
     if keyword:
         kw = keyword.lower()
         data = [item for item in data if any(kw in str(val).lower() for val in item.values())]
@@ -114,20 +125,22 @@ def update_patient(req: PatientUpdateRequest, db: Session = Depends(get_db)):
 
 
 @router.get("/departmentManagement/getList")
-def get_department_list(keyword: Optional[str] = None, page: Optional[int] = None, page_size: Optional[int] = None, db: Session = Depends(get_db)):
+def get_department_list(keyword: str | None = None, page: int | None = None, page_size: int | None = None, db: Session = Depends(get_db)):
     query = db.query(Department)
     departments, total = paginate(query, page, page_size)
     data = []
     for item in departments:
         director = db.query(Doctor).filter(Doctor.doctor_id == item.director).first()
         director_name = director.name if director else ""
-        data.append({
-            "id": item.department_id,
-            "name": item.name,
-            "phone": item.phone,
-            "location": item.location,
-            "director": director_name,
-        })
+        data.append(
+            {
+                "id": item.department_id,
+                "name": item.name,
+                "phone": item.phone,
+                "location": item.location,
+                "director": director_name,
+            }
+        )
     if keyword:
         kw = keyword.lower()
         data = [item for item in data if any(kw in str(val).lower() for val in item.values())]
@@ -179,7 +192,7 @@ def delete_department(req: DepartmentDeleteRequest, db: Session = Depends(get_db
 
 
 @router.get("/notice/getList")
-def get_notice_list(current_user: User = Depends(get_current_user), keyword: Optional[str] = None, page: Optional[int] = None, page_size: Optional[int] = None, db: Session = Depends(get_db)):
+def get_notice_list(current_user: User = Depends(get_current_user), keyword: str | None = None, page: int | None = None, page_size: int | None = None, db: Session = Depends(get_db)):
     query = db.query(Notice)
     notices, total = paginate(query, page, page_size)
     data = []
@@ -190,17 +203,19 @@ def get_notice_list(current_user: User = Depends(get_current_user), keyword: Opt
             continue
         if current_user.user_role == "patient" and "病人" not in item.towho:
             continue
-        data.append({
-            "uuid": str(item.notice_id),
-            "title": item.title,
-            "content": item.content,
-            "isemergency": item.isemergency,
-            "towho": item.towho,
-            "sendtime": str(item.sendtime),
-            "expiredtime": str(item.expiredtime),
-            "readnum": item.readnum,
-            "writer": item.writer.username if item.writer else "",
-        })
+        data.append(
+            {
+                "uuid": str(item.notice_id),
+                "title": item.title,
+                "content": item.content,
+                "isemergency": item.isemergency,
+                "towho": item.towho,
+                "sendtime": str(item.sendtime),
+                "expiredtime": str(item.expiredtime),
+                "readnum": item.readnum,
+                "writer": item.writer.username if item.writer else "",
+            }
+        )
     if keyword:
         kw = keyword.lower()
         data = [item for item in data if any(kw in str(val).lower() for val in item.values())]
@@ -260,4 +275,3 @@ def delete_notice(req: NoticeDeleteRequest, db: Session = Depends(get_db)):
     db.delete(notice)
     db.commit()
     return {"code": 200, "msg": "success"}
-

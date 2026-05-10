@@ -1,12 +1,12 @@
 import datetime
 import random
+
 from fastapi import APIRouter, Depends
-from typing import Optional
 from sqlalchemy.orm import Session
+
 from app.database import get_db
-from app.models import PurchaseOrder, PurchaseOrderItem, Pharmaceutical, Consumable
 from app.dependencies import get_current_user
-from app.pagination import paginate
+from app.models import Consumable, Pharmaceutical, PurchaseOrder, PurchaseOrderItem
 
 router = APIRouter()
 
@@ -46,24 +46,26 @@ def create_purchase(req: dict, db: Session = Depends(get_db), current_user=Depen
 
 
 @router.get("/purchase/getList")
-def get_purchase_list(status: Optional[int] = None, db: Session = Depends(get_db)):
+def get_purchase_list(status: int | None = None, db: Session = Depends(get_db)):
     query = db.query(PurchaseOrder)
     if status is not None:
         query = query.filter(PurchaseOrder.status == status)
     orders = query.order_by(PurchaseOrder.create_time.desc()).all()
     data = []
     for o in orders:
-        data.append({
-            "purchase_id": o.purchase_id,
-            "order_no": o.order_no,
-            "supplier": o.supplier,
-            "total_amount": round(o.total_amount, 2) if o.total_amount else 0,
-            "status": o.status,
-            "status_text": {0: "待审批", 1: "已审批", 2: "已入库", 3: "已取消"}.get(o.status, ""),
-            "create_by": o.creator.username if o.creator else "",
-            "create_time": str(o.create_time) if o.create_time else "",
-            "items": [{"item_name": i.item_name, "quantity": i.quantity, "unit_price": i.unit_price} for i in o.items],
-        })
+        data.append(
+            {
+                "purchase_id": o.purchase_id,
+                "order_no": o.order_no,
+                "supplier": o.supplier,
+                "total_amount": round(o.total_amount, 2) if o.total_amount else 0,
+                "status": o.status,
+                "status_text": {0: "待审批", 1: "已审批", 2: "已入库", 3: "已取消"}.get(o.status, ""),
+                "create_by": o.creator.username if o.creator else "",
+                "create_time": str(o.create_time) if o.create_time else "",
+                "items": [{"item_name": i.item_name, "quantity": i.quantity, "unit_price": i.unit_price} for i in o.items],
+            }
+        )
     return {"code": 200, "msg": "success", "data": data}
 
 

@@ -1,14 +1,16 @@
 import datetime
+
 from fastapi import APIRouter, Depends
-from typing import Optional
 from sqlalchemy.orm import Session
+
 from app.database import get_db
-from app.models import FollowUp, Appointment, DoctorSchedule, Queue, Doctor
-from app.schemas import (
-    FollowUpCreatePlanRequest, FollowUpRecordRequest,
-    FollowUpAppointmentCreateRequest, AppointmentCreateRequest
-)
 from app.dependencies import get_current_user
+from app.models import Appointment, Doctor, FollowUp
+from app.schemas import (
+    FollowUpAppointmentCreateRequest,
+    FollowUpCreatePlanRequest,
+    FollowUpRecordRequest,
+)
 
 router = APIRouter()
 
@@ -56,7 +58,7 @@ def create_follow_up_plan(req: FollowUpCreatePlanRequest, current_user=Depends(g
 
 
 @router.get("/followUp/getList")
-def get_follow_up_list(current_user=Depends(get_current_user), keyword: Optional[str] = None, db: Session = Depends(get_db)):
+def get_follow_up_list(current_user=Depends(get_current_user), keyword: str | None = None, db: Session = Depends(get_db)):
     doctor_obj = db.query(Doctor).filter(Doctor.user_id == current_user.user_id).first()
     if doctor_obj:
         follow_ups = db.query(FollowUp).filter(FollowUp.doctor_id == doctor_obj.doctor_id).order_by(FollowUp.plan_date.desc()).all()
@@ -64,15 +66,17 @@ def get_follow_up_list(current_user=Depends(get_current_user), keyword: Optional
         follow_ups = db.query(FollowUp).order_by(FollowUp.plan_date.desc()).all()
     data = []
     for item in follow_ups:
-        data.append({
-            "id": item.follow_up_id,
-            "patient_name": item.patient.name if item.patient else "",
-            "plan_date": str(item.plan_date),
-            "content": item.content,
-            "status": item.status,
-            "result": item.result or "",
-            "patient_feedback": item.patient_feedback or "",
-        })
+        data.append(
+            {
+                "id": item.follow_up_id,
+                "patient_name": item.patient.name if item.patient else "",
+                "plan_date": str(item.plan_date),
+                "content": item.content,
+                "status": item.status,
+                "result": item.result or "",
+                "patient_feedback": item.patient_feedback or "",
+            }
+        )
     if keyword:
         kw = keyword.lower()
         data = [item for item in data if any(kw in str(val).lower() for val in item.values())]

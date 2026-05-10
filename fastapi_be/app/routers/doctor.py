@@ -1,23 +1,38 @@
-import traceback
 import datetime
+import traceback
+
 from fastapi import APIRouter, Depends
-from typing import Optional
 from sqlalchemy.orm import Session
+
 from app.database import get_db
+from app.dependencies import get_current_user
 from app.models import (
-    User, Patient, Doctor, Department, DoctorSchedule,
-    Pharmaceutical, Prescription, PrePha, Charge,
-    MedicalRecord, LabOrder, Attendance
+    Attendance,
+    Charge,
+    Department,
+    Doctor,
+    DoctorSchedule,
+    LabOrder,
+    MedicalRecord,
+    Patient,
+    Pharmaceutical,
+    PrePha,
+    Prescription,
+    User,
 )
 from app.schemas import (
-    DoctorCreateRequest, DoctorScheduleCreateRequest,
-    PharmaceuticalCreateRequest, PharmaceuticalStockQueryRequest,
-    PrescriptionCreateRequest, PrescriptionCancelRequest,
-    PharmaceuticalUpdateRequest, PharmaceuticalDeleteRequest,
-    MedicalRecordCreateRequest, MedicalRecordUpdateRequest,
-    LabOrderCreateRequest
+    DoctorCreateRequest,
+    DoctorScheduleCreateRequest,
+    LabOrderCreateRequest,
+    MedicalRecordCreateRequest,
+    MedicalRecordUpdateRequest,
+    PharmaceuticalCreateRequest,
+    PharmaceuticalDeleteRequest,
+    PharmaceuticalStockQueryRequest,
+    PharmaceuticalUpdateRequest,
+    PrescriptionCancelRequest,
+    PrescriptionCreateRequest,
 )
-from app.dependencies import get_current_user
 from app.security import hash_password
 
 router = APIRouter()
@@ -32,7 +47,6 @@ def add_doctor(req: DoctorCreateRequest, db: Session = Depends(get_db)):
     title = req.title
     sex = 0 if req.sex == "女" else 1
     phone = req.phone
-    department_obj = db.query(Department).filter(Department.department_id == req.department).first()
     permission = req.permission
     education = req.education
     try:
@@ -64,15 +78,11 @@ def add_doctor(req: DoctorCreateRequest, db: Session = Depends(get_db)):
 @router.post("/doctorScheduleManagement/register")
 def doctor_schedule_register(req: DoctorScheduleCreateRequest, db: Session = Depends(get_db)):
     try:
-        doctor_obj = db.query(Doctor).filter(Doctor.doctor_id == req.doctor).first()
+        db.query(Doctor).filter(Doctor.doctor_id == req.doctor).first()
         for i in req.schedule:
             week = i[0:3]
             time = i[3:5]
-            existing = db.query(DoctorSchedule).filter(
-                DoctorSchedule.week == week,
-                DoctorSchedule.time == time,
-                DoctorSchedule.doctor_id == req.doctor
-            ).first()
+            existing = db.query(DoctorSchedule).filter(DoctorSchedule.week == week, DoctorSchedule.time == time, DoctorSchedule.doctor_id == req.doctor).first()
             if existing:
                 existing.number = req.number
                 existing.specialist = req.specialist
@@ -95,7 +105,7 @@ def doctor_schedule_register(req: DoctorScheduleCreateRequest, db: Session = Dep
 
 
 @router.get("/doctorScheduleManagement/getList")
-def doctor_schedule_getlist(current_user: User = Depends(get_current_user), keyword: Optional[str] = None, db: Session = Depends(get_db)):
+def doctor_schedule_getlist(current_user: User = Depends(get_current_user), keyword: str | None = None, db: Session = Depends(get_db)):
     data = []
     if current_user.user_role in ("admin", "patient"):
         doctor_list = db.query(Doctor).all()
@@ -108,13 +118,15 @@ def doctor_schedule_getlist(current_user: User = Depends(get_current_user), keyw
                 schedule.append(j.week[2] + j.time[0])
                 number = j.number
                 specialist = j.specialist
-            data.append({
-                "id": i.doctor_id,
-                "name": i.name,
-                "schedule": schedule,
-                "number": number,
-                "specialist": specialist,
-            })
+            data.append(
+                {
+                    "id": i.doctor_id,
+                    "name": i.name,
+                    "schedule": schedule,
+                    "number": number,
+                    "specialist": specialist,
+                }
+            )
     elif current_user.user_role in ("doctor", "director"):
         doctor_obj = db.query(Doctor).filter(Doctor.user_id == current_user.user_id).first()
         if doctor_obj:
@@ -122,11 +134,13 @@ def doctor_schedule_getlist(current_user: User = Depends(get_current_user), keyw
             schedule = []
             for i in schedule_list:
                 schedule.append(i.week[2] + i.time[0])
-            data.append({
-                "id": doctor_obj.doctor_id,
-                "name": doctor_obj.name,
-                "schedule": schedule,
-            })
+            data.append(
+                {
+                    "id": doctor_obj.doctor_id,
+                    "name": doctor_obj.name,
+                    "schedule": schedule,
+                }
+            )
     if keyword:
         kw = keyword.lower()
         data = [item for item in data if any(kw in str(val).lower() for val in item.values())]
@@ -159,21 +173,23 @@ def pharmaceutical_register(req: PharmaceuticalCreateRequest, db: Session = Depe
 
 
 @router.get("/pharmaceuticalManagement/getList")
-def get_pharmaceutical_list(keyword: Optional[str] = None, db: Session = Depends(get_db)):
+def get_pharmaceutical_list(keyword: str | None = None, db: Session = Depends(get_db)):
     pharmaceutical_list = db.query(Pharmaceutical).all()
     data = []
     for item in pharmaceutical_list:
-        data.append({
-            "id": item.pharmaceutical_id,
-            "name": item.name,
-            "stock": item.stock,
-            "price": item.price,
-            "expireddate": str(item.expireddate),
-            "purchasing_time": str(item.purchasing_time),
-            "supplier": item.supplier,
-            "remark": item.remark,
-            "antibiotic_level": item.antibiotic_level,
-        })
+        data.append(
+            {
+                "id": item.pharmaceutical_id,
+                "name": item.name,
+                "stock": item.stock,
+                "price": item.price,
+                "expireddate": str(item.expireddate),
+                "purchasing_time": str(item.purchasing_time),
+                "supplier": item.supplier,
+                "remark": item.remark,
+                "antibiotic_level": item.antibiotic_level,
+            }
+        )
     if keyword:
         kw = keyword.lower()
         data = [item for item in data if any(kw in str(val).lower() for val in item.values())]
@@ -191,7 +207,7 @@ def update_pharmaceutical(req: PharmaceuticalUpdateRequest, db: Session = Depend
     pha.expireddate = parse_date_str(req.expireddate)
     pha.supplier = req.supplier
     pha.remark = req.remark
-    if hasattr(req, 'antibiotic_level'):
+    if hasattr(req, "antibiotic_level"):
         pha.antibiotic_level = req.antibiotic_level
     db.add(pha)
     db.commit()
@@ -217,19 +233,21 @@ def pharmaceutical_stock_query(req: PharmaceuticalStockQueryRequest, db: Session
 
 
 @router.get("/pharmaceuticalManagement/lowStock")
-def get_low_stock_drugs(threshold: int = 10, keyword: Optional[str] = None, db: Session = Depends(get_db)):
+def get_low_stock_drugs(threshold: int = 10, keyword: str | None = None, db: Session = Depends(get_db)):
     drugs = db.query(Pharmaceutical).filter(Pharmaceutical.stock <= threshold).order_by(Pharmaceutical.stock.asc()).all()
     data = []
     for item in drugs:
-        data.append({
-            "id": item.pharmaceutical_id,
-            "name": item.name,
-            "stock": item.stock,
-            "threshold": threshold,
-            "price": item.price,
-            "expireddate": str(item.expireddate),
-            "supplier": item.supplier,
-        })
+        data.append(
+            {
+                "id": item.pharmaceutical_id,
+                "name": item.name,
+                "stock": item.stock,
+                "threshold": threshold,
+                "price": item.price,
+                "expireddate": str(item.expireddate),
+                "supplier": item.supplier,
+            }
+        )
     if keyword:
         kw = keyword.lower()
         data = [item for item in data if any(kw in str(val).lower() for val in item.values())]
@@ -237,21 +255,24 @@ def get_low_stock_drugs(threshold: int = 10, keyword: Optional[str] = None, db: 
 
 
 @router.get("/pharmaceuticalManagement/nearExpiry")
-def get_near_expiry_drugs(days: int = 30, keyword: Optional[str] = None, db: Session = Depends(get_db)):
+def get_near_expiry_drugs(days: int = 30, keyword: str | None = None, db: Session = Depends(get_db)):
     from datetime import date, timedelta
+
     cutoff = date.today() + timedelta(days=days)
     drugs = db.query(Pharmaceutical).filter(Pharmaceutical.expireddate <= cutoff).order_by(Pharmaceutical.expireddate.asc()).all()
     data = []
     for item in drugs:
         days_left = (item.expireddate - date.today()).days
-        data.append({
-            "id": item.pharmaceutical_id,
-            "name": item.name,
-            "stock": item.stock,
-            "expireddate": str(item.expireddate),
-            "days_left": days_left,
-            "supplier": item.supplier,
-        })
+        data.append(
+            {
+                "id": item.pharmaceutical_id,
+                "name": item.name,
+                "stock": item.stock,
+                "expireddate": str(item.expireddate),
+                "days_left": days_left,
+                "supplier": item.supplier,
+            }
+        )
     if keyword:
         kw = keyword.lower()
         data = [item for item in data if any(kw in str(val).lower() for val in item.values())]
@@ -299,10 +320,10 @@ def prescription_register(req: PrescriptionCreateRequest, current_user: User = D
 
         # 2. 配伍禁忌检查（硬编码常见禁忌组合）
         pha_ids = {item["id"] for item in req.phas}
-        INCOMPATIBILITY = {
+        incompatibility = {
             # (药品A_id, 药品B_id): "禁忌原因"
         }
-        for (a, b), reason in INCOMPATIBILITY.items():
+        for (a, b), reason in incompatibility.items():
             if a in pha_ids and b in pha_ids:
                 db.rollback()
                 return {"code": 500, "msg": f"配伍禁忌：{reason}"}
@@ -349,8 +370,9 @@ def prescription_register(req: PrescriptionCreateRequest, current_user: User = D
 
 from app.pagination import paginate
 
+
 @router.get("/prescriptionManagement/getList")
-def get_prescription_list(current_user: User = Depends(get_current_user), keyword: Optional[str] = None, page: Optional[int] = None, page_size: Optional[int] = None, db: Session = Depends(get_db)):
+def get_prescription_list(current_user: User = Depends(get_current_user), keyword: str | None = None, page: int | None = None, page_size: int | None = None, db: Session = Depends(get_db)):
     data = []
     total = 0
     query = db.query(Prescription)
@@ -377,18 +399,20 @@ def get_prescription_list(current_user: User = Depends(get_current_user), keywor
         for j in item.pre_phas:
             phas.append({"name": j.pharmaceutical.name if j.pharmaceutical else "", "number": j.number})
         charge_obj = db.query(Charge).filter(Charge.prescription_id == item.prescription_id).first()
-        data.append({
-            "uuid": str(item.prescription_id),
-            "doctor_id": item.doctor.doctor_id if item.doctor else None,
-            "doctor_name": item.doctor.name if item.doctor else "",
-            "patient_id": item.patient.patient_id if item.patient else None,
-            "patient_name": item.patient.name if item.patient else "",
-            "phas": phas,
-            "status": item.status,
-            "create_time": str(item.create_time),
-            "charge_id": str(charge_obj.charge_id) if charge_obj else "",
-            "amount": round(charge_obj.amount, 2) if charge_obj else 0,
-        })
+        data.append(
+            {
+                "uuid": str(item.prescription_id),
+                "doctor_id": item.doctor.doctor_id if item.doctor else None,
+                "doctor_name": item.doctor.name if item.doctor else "",
+                "patient_id": item.patient.patient_id if item.patient else None,
+                "patient_name": item.patient.name if item.patient else "",
+                "phas": phas,
+                "status": item.status,
+                "create_time": str(item.create_time),
+                "charge_id": str(charge_obj.charge_id) if charge_obj else "",
+                "amount": round(charge_obj.amount, 2) if charge_obj else 0,
+            }
+        )
     if keyword:
         kw = keyword.lower()
         data = [item for item in data if any(kw in str(val).lower() for val in item.values())]
@@ -458,20 +482,22 @@ def create_lab_order(req: LabOrderCreateRequest, current_user: User = Depends(ge
 
 
 @router.get("/labOrder/getList")
-def get_lab_order_list(current_user: User = Depends(get_current_user), keyword: Optional[str] = None, db: Session = Depends(get_db)):
+def get_lab_order_list(current_user: User = Depends(get_current_user), keyword: str | None = None, db: Session = Depends(get_db)):
     doctor_obj = db.query(Doctor).filter(Doctor.user_id == current_user.user_id).first()
     if not doctor_obj:
         return {"code": 200, "msg": "success", "data": []}
     orders = db.query(LabOrder).filter(LabOrder.doctor_id == doctor_obj.doctor_id).order_by(LabOrder.create_time.desc()).all()
     data = []
     for item in orders:
-        data.append({
-            "id": str(item.lab_order_id),
-            "patient_name": item.patient.name if item.patient else "",
-            "check_type": item.check_type,
-            "status": item.status,
-            "create_time": str(item.create_time),
-        })
+        data.append(
+            {
+                "id": str(item.lab_order_id),
+                "patient_name": item.patient.name if item.patient else "",
+                "check_type": item.check_type,
+                "status": item.status,
+                "create_time": str(item.create_time),
+            }
+        )
     if keyword:
         kw = keyword.lower()
         data = [item for item in data if any(kw in str(val).lower() for val in item.values())]
@@ -527,7 +553,7 @@ def attendance_check_out(current_user: User = Depends(get_current_user), db: Ses
 
 
 @router.get("/attendance/getList")
-def get_attendance_list(doctor_id: Optional[int] = None, start_date: Optional[str] = None, end_date: Optional[str] = None, db: Session = Depends(get_db)):
+def get_attendance_list(doctor_id: int | None = None, start_date: str | None = None, end_date: str | None = None, db: Session = Depends(get_db)):
     query = db.query(Attendance).order_by(Attendance.date.desc())
     if doctor_id:
         query = query.filter(Attendance.doctor_id == doctor_id)
@@ -539,38 +565,39 @@ def get_attendance_list(doctor_id: Optional[int] = None, start_date: Optional[st
     data = []
     status_map = {0: "正常", 1: "迟到", 2: "早退", 3: "缺勤"}
     for item in records:
-        data.append({
-            "id": item.attendance_id,
-            "doctor_id": item.doctor_id,
-            "doctor_name": item.doctor.name if item.doctor else "",
-            "date": str(item.date),
-            "check_in_time": str(item.check_in_time) if item.check_in_time else "",
-            "check_out_time": str(item.check_out_time) if item.check_out_time else "",
-            "status": status_map.get(item.status, "未知"),
-            "status_code": item.status,
-        })
+        data.append(
+            {
+                "id": item.attendance_id,
+                "doctor_id": item.doctor_id,
+                "doctor_name": item.doctor.name if item.doctor else "",
+                "date": str(item.date),
+                "check_in_time": str(item.check_in_time) if item.check_in_time else "",
+                "check_out_time": str(item.check_out_time) if item.check_out_time else "",
+                "status": status_map.get(item.status, "未知"),
+                "status_code": item.status,
+            }
+        )
     return {"code": 200, "msg": "success", "data": data}
 
 
 @router.get("/slotPool/getList")
 def get_slot_pool(db: Session = Depends(get_db)):
     """号源池：按科室统计各时段号源总数"""
-    from sqlalchemy import func
-    from app.models import Department
+
     depts = db.query(Department).all()
     data = []
     for d in depts:
-        schedules = db.query(DoctorSchedule).filter(DoctorSchedule.doctor_id.in_(
-            db.query(Doctor.doctor_id).filter(Doctor.department_id == d.department_id)
-        )).all()
+        schedules = db.query(DoctorSchedule).filter(DoctorSchedule.doctor_id.in_(db.query(Doctor.doctor_id).filter(Doctor.department_id == d.department_id))).all()
         total_slots = sum(s.number for s in schedules)
-        data.append({
-            "department_id": d.department_id,
-            "department_name": d.name,
-            "doctor_count": len(set(s.doctor_id for s in schedules)),
-            "total_slots": total_slots,
-            "schedules_count": len(schedules),
-        })
+        data.append(
+            {
+                "department_id": d.department_id,
+                "department_name": d.name,
+                "doctor_count": len(set(s.doctor_id for s in schedules)),
+                "total_slots": total_slots,
+                "schedules_count": len(schedules),
+            }
+        )
     return {"code": 200, "msg": "success", "data": data}
 
 
@@ -586,4 +613,3 @@ def adjust_slot(req: dict, db: Session = Depends(get_db)):
         db.add(schedule)
         db.commit()
     return {"code": 200, "msg": "success"}
-

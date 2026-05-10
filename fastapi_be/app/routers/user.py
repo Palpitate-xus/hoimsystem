@@ -1,15 +1,16 @@
-import json
 import datetime
+import json
+
 import jwt
-from fastapi import APIRouter, Request, Depends, HTTPException
-from typing import Optional
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
-from app.database import get_db
-from app.models import User, Patient
-from app.schemas import LoginRequest, RegisterRequest, UserInfoRequest, TestRequest
-from app.dependencies import get_current_user
+
 from app.config import settings
-from app.security import hash_password, verify_password, is_bcrypt_hash
+from app.database import get_db
+from app.dependencies import get_current_user
+from app.models import Patient, User
+from app.schemas import LoginRequest, RegisterRequest, UserInfoRequest
+from app.security import hash_password, is_bcrypt_hash, verify_password
 
 router = APIRouter()
 
@@ -64,6 +65,7 @@ def login(req: LoginRequest, db: Session = Depends(get_db)):
 def parse_date_str(val):
     if isinstance(val, str):
         import datetime
+
         try:
             return datetime.datetime.strptime(val, "%Y-%m-%d").date()
         except ValueError:
@@ -126,7 +128,7 @@ def logout():
 
 
 @router.get("/user/getList")
-def get_user_list(role: Optional[str] = None, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+def get_user_list(role: str | None = None, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     """获取用户列表（管理员权限）"""
     if current_user.user_role != "admin":
         return {"code": 403, "msg": "无权访问"}
@@ -136,11 +138,13 @@ def get_user_list(role: Optional[str] = None, db: Session = Depends(get_db), cur
     users = query.order_by(User.user_id).all()
     data = []
     for item in users:
-        data.append({
-            "user_id": item.user_id,
-            "username": item.username,
-            "user_role": item.user_role,
-        })
+        data.append(
+            {
+                "user_id": item.user_id,
+                "username": item.username,
+                "user_role": item.user_role,
+            }
+        )
     return {"code": 200, "msg": "success", "data": data}
 
 

@@ -1,7 +1,4 @@
-from typing import Optional, List, Any
-
-
-def paginate(query, page: Optional[int] = None, page_size: Optional[int] = None):
+def paginate(query, page: int | None = None, page_size: int | None = None):
     """对 SQLAlchemy Query 进行分页，返回 (items, total)。"""
     total = query.count()
     if page and page_size:

@@ -1,11 +1,12 @@
 import datetime
+
 from fastapi import APIRouter, Depends
-from typing import Optional
 from sqlalchemy.orm import Session
+
 from app.database import get_db
-from app.models import LabOrder, LabResult
-from app.schemas import LabResultCreateRequest, LabResultAuditRequest
 from app.dependencies import get_current_user
+from app.models import LabOrder, LabResult
+from app.schemas import LabResultAuditRequest, LabResultCreateRequest
 
 router = APIRouter()
 
@@ -17,7 +18,8 @@ def check_critical_value(check_type: str, result_text: str) -> bool:
     if "血压" in check_type or "blood pressure" in result_lower:
         try:
             import re
-            nums = re.findall(r'\d+', result_text)
+
+            nums = re.findall(r"\d+", result_text)
             if len(nums) >= 2:
                 sbp, dbp = int(nums[0]), int(nums[1])
                 return sbp >= 180 or sbp <= 90 or dbp >= 110 or dbp <= 60
@@ -27,7 +29,8 @@ def check_critical_value(check_type: str, result_text: str) -> bool:
     if "血糖" in check_type or "glucose" in result_lower:
         try:
             import re
-            nums = re.findall(r'\d+\.?\d*', result_text)
+
+            nums = re.findall(r"\d+\.?\d*", result_text)
             if nums:
                 val = float(nums[0])
                 return val >= 16.7 or val <= 2.8
@@ -37,7 +40,8 @@ def check_critical_value(check_type: str, result_text: str) -> bool:
     if "心率" in check_type or "heart rate" in result_lower:
         try:
             import re
-            nums = re.findall(r'\d+', result_text)
+
+            nums = re.findall(r"\d+", result_text)
             if nums:
                 val = int(nums[0])
                 return val >= 120 or val <= 50
@@ -129,17 +133,19 @@ def audit_lab_result(req: LabResultAuditRequest, db: Session = Depends(get_db)):
 
 
 @router.get("/labResult/getPending")
-def get_pending_lab_orders(keyword: Optional[str] = None, db: Session = Depends(get_db)):
+def get_pending_lab_orders(keyword: str | None = None, db: Session = Depends(get_db)):
     orders = db.query(LabOrder).filter(LabOrder.status == 0).order_by(LabOrder.create_time.desc()).all()
     data = []
     for item in orders:
-        data.append({
-            "id": str(item.lab_order_id),
-            "patient_name": item.patient.name if item.patient else "",
-            "check_type": item.check_type,
-            "status": item.status,
-            "create_time": str(item.create_time),
-        })
+        data.append(
+            {
+                "id": str(item.lab_order_id),
+                "patient_name": item.patient.name if item.patient else "",
+                "check_type": item.check_type,
+                "status": item.status,
+                "create_time": str(item.create_time),
+            }
+        )
     if keyword:
         kw = keyword.lower()
         data = [item for item in data if any(kw in str(val).lower() for val in item.values())]
@@ -147,18 +153,20 @@ def get_pending_lab_orders(keyword: Optional[str] = None, db: Session = Depends(
 
 
 @router.get("/labResult/getList")
-def get_lab_result_list(keyword: Optional[str] = None, db: Session = Depends(get_db)):
+def get_lab_result_list(keyword: str | None = None, db: Session = Depends(get_db)):
     results = db.query(LabResult).order_by(LabResult.report_time.desc()).all()
     data = []
     for item in results:
-        data.append({
-            "id": str(item.lab_result_id),
-            "check_name": item.lab_order.check_type if item.lab_order else "",
-            "check_time": str(item.report_time),
-            "result": item.result,
-            "abnormal_flag": item.abnormal_flag,
-            "technician_name": item.technician.username if item.technician else "",
-        })
+        data.append(
+            {
+                "id": str(item.lab_result_id),
+                "check_name": item.lab_order.check_type if item.lab_order else "",
+                "check_time": str(item.report_time),
+                "result": item.result,
+                "abnormal_flag": item.abnormal_flag,
+                "technician_name": item.technician.username if item.technician else "",
+            }
+        )
     if keyword:
         kw = keyword.lower()
         data = [item for item in data if any(kw in str(val).lower() for val in item.values())]

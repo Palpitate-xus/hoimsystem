@@ -1,24 +1,33 @@
 import datetime
+
 from fastapi import APIRouter, Depends
-from typing import Optional
 from sqlalchemy.orm import Session
+
 from app.database import get_db
+from app.dependencies import get_current_user
 from app.models import (
-    User, Patient, Doctor, Department, DoctorSchedule,
-    Registration, Appointment, MedicalRecord, Charge, Prescription, Review
+    Appointment,
+    Doctor,
+    DoctorSchedule,
+    MedicalRecord,
+    Patient,
+    Registration,
+    Review,
+    User,
 )
 from app.schemas import (
-    UuidRequest, AppointmentCreateRequest,
+    AppointmentCreateRequest,
+    MedicalRecordDetailRequest,
     RegistrationCreateRequest,
-    MedicalRecordDetailRequest, ReviewCreateRequest
+    ReviewCreateRequest,
+    UuidRequest,
 )
-from app.dependencies import get_current_user
 
 router = APIRouter()
 
 
 @router.get("/appointmentManagement/getList")
-def get_appointment_list(current_user: User = Depends(get_current_user), keyword: Optional[str] = None, db: Session = Depends(get_db)):
+def get_appointment_list(current_user: User = Depends(get_current_user), keyword: str | None = None, db: Session = Depends(get_db)):
     patient_obj = db.query(Patient).filter(Patient.identity == current_user.username).first()
     if not patient_obj:
         return {"code": 200, "msg": "success", "data": []}
@@ -26,16 +35,18 @@ def get_appointment_list(current_user: User = Depends(get_current_user), keyword
     data = []
     status_map = ["未就诊", "已就诊", "已取消"]
     for item in appointment_list:
-        data.append({
-            "uuid": str(item.registration_uuid),
-            "doctor": item.doctor.name if item.doctor else "",
-            "specialist": item.specialist,
-            "department": item.department.name if item.department else "",
-            "time": str(item.time),
-            "prefer_time": item.prefer_time,
-            "appointment_time": str(item.appointment_time)[0:10] if item.appointment_time else "",
-            "status": status_map[item.status] if item.status is not None and item.status < len(status_map) else "",
-        })
+        data.append(
+            {
+                "uuid": str(item.registration_uuid),
+                "doctor": item.doctor.name if item.doctor else "",
+                "specialist": item.specialist,
+                "department": item.department.name if item.department else "",
+                "time": str(item.time),
+                "prefer_time": item.prefer_time,
+                "appointment_time": str(item.appointment_time)[0:10] if item.appointment_time else "",
+                "status": status_map[item.status] if item.status is not None and item.status < len(status_map) else "",
+            }
+        )
     if keyword:
         kw = keyword.lower()
         data = [item for item in data if any(kw in str(val).lower() for val in item.values())]
@@ -43,9 +54,8 @@ def get_appointment_list(current_user: User = Depends(get_current_user), keyword
 
 
 @router.get("/appointmentManagement/appointmentList")
-def appointmentList(keyword: Optional[str] = None, db: Session = Depends(get_db)):
+def appointment_list(keyword: str | None = None, db: Session = Depends(get_db)):
     schedules = db.query(DoctorSchedule).all()
-    today_weeky = datetime.datetime.now().weekday()
     weekdays = ["星期一", "星期二", "星期三", "星期四", "星期五", "星期六", "星期天"]
     date_map = {}
     begin = datetime.datetime.now()
@@ -55,16 +65,18 @@ def appointmentList(keyword: Optional[str] = None, db: Session = Depends(get_db)
     for item in schedules:
         if date_map[item.week] == str(begin)[0:10]:
             continue
-        data.append({
-            "id": item.schedule_id,
-            "time": item.time,
-            "specialist": item.specialist,
-            "date": date_map[item.week],
-            "doctor": item.doctor.name if item.doctor else "",
-            "doctor_id": item.doctor.doctor_id if item.doctor else None,
-            "department_id": item.doctor.department.department_id if item.doctor and item.doctor.department else None,
-            "stock": item.number,
-        })
+        data.append(
+            {
+                "id": item.schedule_id,
+                "time": item.time,
+                "specialist": item.specialist,
+                "date": date_map[item.week],
+                "doctor": item.doctor.name if item.doctor else "",
+                "doctor_id": item.doctor.doctor_id if item.doctor else None,
+                "department_id": item.doctor.department.department_id if item.doctor and item.doctor.department else None,
+                "stock": item.number,
+            }
+        )
     if keyword:
         kw = keyword.lower()
         data = [item for item in data if any(kw in str(val).lower() for val in item.values())]
@@ -78,11 +90,14 @@ def patient_appointment(req: AppointmentCreateRequest, current_user: User = Depe
         return {"code": 500, "msg": "病人信息不存在"}
     # 检查是否处于暂停预约状态
     from app.models import BreachRecord
+
     since = datetime.datetime.now() - datetime.timedelta(days=30)
-    breach_count = db.query(BreachRecord).join(Appointment, BreachRecord.registration_id == Appointment.registration_uuid).filter(
-        Appointment.patient_id == patient_obj.patient_id,
-        BreachRecord.breach_time >= since
-    ).count()
+    breach_count = (
+        db.query(BreachRecord)
+        .join(Appointment, BreachRecord.registration_id == Appointment.registration_uuid)
+        .filter(Appointment.patient_id == patient_obj.patient_id, BreachRecord.breach_time >= since)
+        .count()
+    )
     if breach_count >= 3:
         return {"code": 500, "msg": "您30天内违约3次，预约资格已暂停30天"}
     reg_obj = db.query(DoctorSchedule).filter(DoctorSchedule.schedule_id == req.id).first()
@@ -112,6 +127,7 @@ def patient_appointment(req: AppointmentCreateRequest, current_user: User = Depe
     except Exception:
         db.rollback()
         import traceback
+
         traceback.print_exc()
         return {"code": 500, "msg": "预约失败"}
 
@@ -127,7 +143,7 @@ def patient_appointment_cancel(req: UuidRequest, db: Session = Depends(get_db)):
 
 
 @router.get("/registrationManagement/getList")
-def get_registration_list(current_user: User = Depends(get_current_user), keyword: Optional[str] = None, db: Session = Depends(get_db)):
+def get_registration_list(current_user: User = Depends(get_current_user), keyword: str | None = None, db: Session = Depends(get_db)):
     patient_obj = db.query(Patient).filter(Patient.identity == current_user.username).first()
     if not patient_obj:
         return {"code": 200, "msg": "success", "data": []}
@@ -135,15 +151,17 @@ def get_registration_list(current_user: User = Depends(get_current_user), keywor
     data = []
     status_map = ["未就诊", "已就诊", "", "已取消"]
     for item in registration_list:
-        data.append({
-            "uuid": str(item.registration_uuid),
-            "order": item.registration_id,
-            "doctor": item.doctor.name if item.doctor else "",
-            "specialist": item.specialist,
-            "department": item.department.name if item.department else "",
-            "time": str(item.time)[0:10] if item.time else "",
-            "status": status_map[item.status] if item.status is not None and item.status < len(status_map) else "",
-        })
+        data.append(
+            {
+                "uuid": str(item.registration_uuid),
+                "order": item.registration_id,
+                "doctor": item.doctor.name if item.doctor else "",
+                "specialist": item.specialist,
+                "department": item.department.name if item.department else "",
+                "time": str(item.time)[0:10] if item.time else "",
+                "status": status_map[item.status] if item.status is not None and item.status < len(status_map) else "",
+            }
+        )
     if keyword:
         kw = keyword.lower()
         data = [item for item in data if any(kw in str(val).lower() for val in item.values())]
@@ -151,7 +169,7 @@ def get_registration_list(current_user: User = Depends(get_current_user), keywor
 
 
 @router.get("/registrationManagement/registrationList")
-def registrationList(current_user: User = Depends(get_current_user), keyword: Optional[str] = None, db: Session = Depends(get_db)):
+def registration_list(current_user: User = Depends(get_current_user), keyword: str | None = None, db: Session = Depends(get_db)):
     today_weeky = datetime.datetime.now().weekday()
     weekdays = ["星期一", "星期二", "星期三", "星期四", "星期五"]
     if today_weeky > 4:
@@ -160,25 +178,27 @@ def registrationList(current_user: User = Depends(get_current_user), keyword: Op
     schedules = db.query(DoctorSchedule).filter(DoctorSchedule.week == weekdays[today_weeky]).all()
     patient_obj = db.query(Patient).filter(Patient.identity == current_user.username).first()
     for item in schedules:
-        if patient_obj and db.query(Registration).filter(
-            Registration.patient_id == patient_obj.patient_id,
-            Registration.doctor_id == item.doctor_id,
-            Registration.specialist == item.specialist,
-            Registration.status == 0
-        ).first():
+        if (
+            patient_obj
+            and db.query(Registration)
+            .filter(Registration.patient_id == patient_obj.patient_id, Registration.doctor_id == item.doctor_id, Registration.specialist == item.specialist, Registration.status == 0)
+            .first()
+        ):
             status = 1
         else:
             status = 0
-        data.append({
-            "id": item.schedule_id,
-            "time": item.time,
-            "specialist": item.specialist,
-            "doctor": item.doctor.name if item.doctor else "",
-            "doctor_id": item.doctor.doctor_id if item.doctor else None,
-            "department_id": item.doctor.department.department_id if item.doctor and item.doctor.department else None,
-            "stock": item.number,
-            "status": status,
-        })
+        data.append(
+            {
+                "id": item.schedule_id,
+                "time": item.time,
+                "specialist": item.specialist,
+                "doctor": item.doctor.name if item.doctor else "",
+                "doctor_id": item.doctor.doctor_id if item.doctor else None,
+                "department_id": item.doctor.department.department_id if item.doctor and item.doctor.department else None,
+                "stock": item.number,
+                "status": status,
+            }
+        )
     if keyword:
         kw = keyword.lower()
         data = [item for item in data if any(kw in str(val).lower() for val in item.values())]
@@ -193,13 +213,17 @@ def patient_registration(req: RegistrationCreateRequest, current_user: User = De
     reg_obj = db.query(DoctorSchedule).filter(DoctorSchedule.schedule_id == req.id).first()
     if reg_obj and reg_obj.number <= 0:
         return {"code": 500, "msg": "该时段号源已满"}
-    exists = db.query(Registration).filter(
-        Registration.patient_id == patient_obj.patient_id,
-        Registration.doctor_id == req.doctor_id,
-        Registration.specialist == req.specialist,
-        Registration.department_id == req.department_id,
-        Registration.status == 0
-    ).first()
+    exists = (
+        db.query(Registration)
+        .filter(
+            Registration.patient_id == patient_obj.patient_id,
+            Registration.doctor_id == req.doctor_id,
+            Registration.specialist == req.specialist,
+            Registration.department_id == req.department_id,
+            Registration.status == 0,
+        )
+        .first()
+    )
     if exists:
         return {"code": 500, "msg": "您的挂号次数被限制"}
     try:
@@ -221,6 +245,7 @@ def patient_registration(req: RegistrationCreateRequest, current_user: User = De
     except Exception:
         db.rollback()
         import traceback
+
         traceback.print_exc()
         return {"code": 500, "msg": "挂号失败"}
 
@@ -236,8 +261,9 @@ def patient_registration_cancel(req: UuidRequest, db: Session = Depends(get_db))
 
 
 @router.get("/medicalRecord/getList")
-def get_medical_record_list(current_user: User = Depends(get_current_user), keyword: Optional[str] = None, page: Optional[int] = None, page_size: Optional[int] = None, db: Session = Depends(get_db)):
+def get_medical_record_list(current_user: User = Depends(get_current_user), keyword: str | None = None, page: int | None = None, page_size: int | None = None, db: Session = Depends(get_db)):
     from app.pagination import paginate
+
     data = []
     total = 0
     if current_user.user_role == "patient":
@@ -247,13 +273,15 @@ def get_medical_record_list(current_user: User = Depends(get_current_user), keyw
         query = db.query(MedicalRecord).filter(MedicalRecord.patient_id == patient_obj.patient_id).order_by(MedicalRecord.consultation_time.desc())
         records, total = paginate(query, page, page_size)
         for item in records:
-            data.append({
-                "uuid": str(item.medical_record_id),
-                "consultation_time": str(item.consultation_time),
-                "doctor_name": item.doctor.name if item.doctor else "",
-                "symptom": item.symptom,
-                "result": item.result,
-            })
+            data.append(
+                {
+                    "uuid": str(item.medical_record_id),
+                    "consultation_time": str(item.consultation_time),
+                    "doctor_name": item.doctor.name if item.doctor else "",
+                    "symptom": item.symptom,
+                    "result": item.result,
+                }
+            )
     elif current_user.user_role in ("doctor", "director"):
         doctor_obj = db.query(Doctor).filter(Doctor.user_id == current_user.user_id).first()
         if not doctor_obj:
@@ -261,14 +289,16 @@ def get_medical_record_list(current_user: User = Depends(get_current_user), keyw
         query = db.query(MedicalRecord).filter(MedicalRecord.doctor_id == doctor_obj.doctor_id).order_by(MedicalRecord.consultation_time.desc())
         records, total = paginate(query, page, page_size)
         for item in records:
-            data.append({
-                "uuid": str(item.medical_record_id),
-                "consultation_time": str(item.consultation_time),
-                "patient_id": item.patient_id,
-                "patient_name": item.patient.name if item.patient else "",
-                "symptom": item.symptom,
-                "result": item.result,
-            })
+            data.append(
+                {
+                    "uuid": str(item.medical_record_id),
+                    "consultation_time": str(item.consultation_time),
+                    "patient_id": item.patient_id,
+                    "patient_name": item.patient.name if item.patient else "",
+                    "symptom": item.symptom,
+                    "result": item.result,
+                }
+            )
     else:
         return {"code": 200, "msg": "success", "data": []}
     if keyword:
@@ -318,21 +348,23 @@ def get_health_profile(current_user: User = Depends(get_current_user), db: Sessi
 
 
 @router.get("/healthRecord/getVisits")
-def get_visit_records(current_user: User = Depends(get_current_user), keyword: Optional[str] = None, db: Session = Depends(get_db)):
+def get_visit_records(current_user: User = Depends(get_current_user), keyword: str | None = None, db: Session = Depends(get_db)):
     patient_obj = db.query(Patient).filter(Patient.identity == current_user.username).first()
     if not patient_obj:
         return {"code": 200, "msg": "success", "data": []}
     records = db.query(MedicalRecord).filter(MedicalRecord.patient_id == patient_obj.patient_id).order_by(MedicalRecord.consultation_time.desc()).all()
     data = []
     for item in records:
-        data.append({
-            "medical_record_id": item.medical_record_id,
-            "visit_time": str(item.consultation_time),
-            "doctor_name": item.doctor.name if item.doctor else "",
-            "department": item.doctor.department.name if item.doctor and item.doctor.department else "",
-            "diagnosis": item.result,
-            "prescription_id": "",
-        })
+        data.append(
+            {
+                "medical_record_id": item.medical_record_id,
+                "visit_time": str(item.consultation_time),
+                "doctor_name": item.doctor.name if item.doctor else "",
+                "department": item.doctor.department.name if item.doctor and item.doctor.department else "",
+                "diagnosis": item.result,
+                "prescription_id": "",
+            }
+        )
     if keyword:
         kw = keyword.lower()
         data = [item for item in data if any(kw in str(val).lower() for val in item.values())]

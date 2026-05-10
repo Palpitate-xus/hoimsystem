@@ -1,10 +1,32 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+
 from app.routers import (
-    user, patient, admin, doctor, pharmacy, charge, queue, checkin,
-    vitalsign, lab, followup, report, system, upload, triage, backup,
-    triage_desk, consumable, purchase, adverse_reaction, adverse_event,
-    digital_signature, referral, mdt, clinical_pathway
+    admin,
+    adverse_event,
+    adverse_reaction,
+    backup,
+    charge,
+    checkin,
+    clinical_pathway,
+    consumable,
+    digital_signature,
+    doctor,
+    followup,
+    lab,
+    mdt,
+    patient,
+    pharmacy,
+    purchase,
+    queue,
+    referral,
+    report,
+    system,
+    triage,
+    triage_desk,
+    upload,
+    user,
+    vitalsign,
 )
 
 app = FastAPI(title="HOIM System FastAPI")
@@ -54,8 +76,10 @@ app.include_router(referral.router, prefix="/api")
 app.include_router(mdt.router, prefix="/api")
 app.include_router(clinical_pathway.router, prefix="/api")
 
-from fastapi.staticfiles import StaticFiles
 import os
+
+from fastapi.staticfiles import StaticFiles
+
 upload_dir = os.path.join(os.path.dirname(__file__), "..", "uploads")
 app.mount("/uploads", StaticFiles(directory=upload_dir), name="uploads")
 

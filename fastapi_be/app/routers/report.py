@@ -1,16 +1,15 @@
-import datetime
 from fastapi import APIRouter, Depends
-from typing import Optional
-from sqlalchemy.orm import Session
 from sqlalchemy import func
+from sqlalchemy.orm import Session
+
 from app.database import get_db
-from app.models import MedicalRecord, Charge, Prescription, PrePha, LabOrder, Doctor
+from app.models import Charge, Doctor, LabOrder, MedicalRecord, PrePha, Prescription
 
 router = APIRouter()
 
 
 @router.post("/report/outpatientVolume")
-def report_outpatient_volume(req: dict, keyword: Optional[str] = None, db: Session = Depends(get_db)):
+def report_outpatient_volume(req: dict, keyword: str | None = None, db: Session = Depends(get_db)):
     start_date = req.get("start_date")
     end_date = req.get("end_date")
     group_by = req.get("group_by", "day")
@@ -85,16 +84,20 @@ def report_finance(req: dict, db: Session = Depends(get_db)):
     prescription_income = sum(c.amount for c in charges if c.status == 1 and c.prescription_id)
     lab_income = 0
 
-    return {"code": 200, "msg": "success", "data": {
-        "total_income": round(total_income, 2),
-        "total_refund": round(total_refund, 2),
-        "prescription_income": round(prescription_income, 2),
-        "lab_income": round(lab_income, 2),
-    }}
+    return {
+        "code": 200,
+        "msg": "success",
+        "data": {
+            "total_income": round(total_income, 2),
+            "total_refund": round(total_refund, 2),
+            "prescription_income": round(prescription_income, 2),
+            "lab_income": round(lab_income, 2),
+        },
+    }
 
 
 @router.post("/report/pharmaceutical")
-def report_pharmaceutical(req: dict, keyword: Optional[str] = None, db: Session = Depends(get_db)):
+def report_pharmaceutical(req: dict, keyword: str | None = None, db: Session = Depends(get_db)):
     start_date = req.get("start_date")
     end_date = req.get("end_date")
 
@@ -120,7 +123,7 @@ def report_pharmaceutical(req: dict, keyword: Optional[str] = None, db: Session 
 
 
 @router.post("/report/doctorWorkload")
-def report_doctor_workload(req: dict, keyword: Optional[str] = None, db: Session = Depends(get_db)):
+def report_doctor_workload(req: dict, keyword: str | None = None, db: Session = Depends(get_db)):
     start_date = req.get("start_date")
     end_date = req.get("end_date")
     doctor_id = req.get("doctor_id")
@@ -144,13 +147,15 @@ def report_doctor_workload(req: dict, keyword: Optional[str] = None, db: Session
             pre_query = pre_query.filter(func.date(Prescription.create_time) <= end_date)
             lab_query = lab_query.filter(func.date(LabOrder.create_time) <= end_date)
 
-        data.append({
-            "doctor_id": doc.doctor_id,
-            "doctor_name": doc.name,
-            "visit_count": mr_query.count(),
-            "prescription_count": pre_query.count(),
-            "lab_order_count": lab_query.count(),
-        })
+        data.append(
+            {
+                "doctor_id": doc.doctor_id,
+                "doctor_name": doc.name,
+                "visit_count": mr_query.count(),
+                "prescription_count": pre_query.count(),
+                "lab_order_count": lab_query.count(),
+            }
+        )
 
     if keyword:
         kw = keyword.lower()

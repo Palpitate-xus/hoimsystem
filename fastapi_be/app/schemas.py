@@ -1,13 +1,12 @@
-from pydantic import BaseModel, Field, field_validator
-from typing import Optional, List
-from datetime import date, datetime
 import re
+
+from pydantic import BaseModel, Field, field_validator
 
 
 class ResponseModel(BaseModel):
     code: int = 200
     msg: str = "success"
-    data: Optional[dict] = None
+    data: dict | None = None
 
 
 class LoginRequest(BaseModel):
@@ -110,7 +109,7 @@ class DoctorUpdateRequest(BaseModel):
 
 
 class DoctorScheduleCreateRequest(BaseModel):
-    schedule: List[str]
+    schedule: list[str]
     specialist: int
     number: int
     doctor: int
@@ -163,7 +162,7 @@ class PharmaceuticalStockQueryRequest(BaseModel):
 
 class PrescriptionCreateRequest(BaseModel):
     patient: int
-    phas: List[dict]
+    phas: list[dict]
 
 
 class PrescriptionCancelRequest(BaseModel):
@@ -192,7 +191,7 @@ class PatientUpdateRequest(BaseModel):
     sex: int
     phone: str
     address: str
-    allergy_history: Optional[str] = None
+    allergy_history: str | None = None
 
 
 class DepartmentUpdateRequest(BaseModel):
@@ -270,7 +269,7 @@ class VitalSignCreateRequest(BaseModel):
 class LabOrderCreateRequest(BaseModel):
     patient_id: int
     check_type: str
-    check_items: List[str]
+    check_items: list[str]
     urgent: int
 
 
@@ -301,7 +300,7 @@ class ReviewCreateRequest(BaseModel):
     doctor_id: int
     visit_id: str
     score: int = Field(..., ge=1, le=5)
-    comment: Optional[str] = Field(default="", max_length=500)
+    comment: str | None = Field(default="", max_length=500)
 
 
 class FollowUpAppointmentCreateRequest(BaseModel):
@@ -327,10 +326,10 @@ class PharmacyReturnRequest(BaseModel):
 
 
 class LogListRequest(BaseModel):
-    user_id: Optional[int] = None
-    action: Optional[str] = None
-    start_time: Optional[str] = None
-    end_time: Optional[str] = None
+    user_id: int | None = None
+    action: str | None = None
+    start_time: str | None = None
+    end_time: str | None = None
     page: int
     page_size: int
 
@@ -381,7 +380,7 @@ class ReportPharmaceuticalRequest(BaseModel):
 class ReportDoctorWorkloadRequest(BaseModel):
     start_date: str
     end_date: str
-    doctor_id: Optional[int] = None
+    doctor_id: int | None = None
 
 
 class PaymentCreateRequest(BaseModel):
@@ -399,4 +398,4 @@ class PaymentMockNotifyRequest(BaseModel):
 
 
 class TestRequest(BaseModel):
-    data: Optional[str] = None
+    data: str | None = None

@@ -1,6 +1,7 @@
 import os
 import uuid
-from fastapi import APIRouter, UploadFile, File, HTTPException
+
+from fastapi import APIRouter, File, HTTPException, UploadFile
 from fastapi.responses import FileResponse
 
 router = APIRouter()

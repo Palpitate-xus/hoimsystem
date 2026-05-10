@@ -1,33 +1,35 @@
 import datetime
+
 from fastapi import APIRouter, Depends
-from typing import Optional
 from sqlalchemy.orm import Session
+
 from app.database import get_db
 from app.models import Consumable
-from app.dependencies import get_current_user
 from app.pagination import paginate
 
 router = APIRouter()
 
 
 @router.get("/consumable/getList")
-def get_consumable_list(keyword: Optional[str] = None, page: Optional[int] = None, page_size: Optional[int] = None, db: Session = Depends(get_db)):
+def get_consumable_list(keyword: str | None = None, page: int | None = None, page_size: int | None = None, db: Session = Depends(get_db)):
     query = db.query(Consumable)
     items, total = paginate(query, page, page_size)
     data = []
     for item in items:
-        data.append({
-            "consumable_id": item.consumable_id,
-            "name": item.name,
-            "category": item.category,
-            "stock": item.stock,
-            "unit": item.unit,
-            "price": round(item.price, 2) if item.price else 0,
-            "supplier": item.supplier,
-            "remark": item.remark,
-            "status": item.status,
-            "create_time": str(item.create_time) if item.create_time else "",
-        })
+        data.append(
+            {
+                "consumable_id": item.consumable_id,
+                "name": item.name,
+                "category": item.category,
+                "stock": item.stock,
+                "unit": item.unit,
+                "price": round(item.price, 2) if item.price else 0,
+                "supplier": item.supplier,
+                "remark": item.remark,
+                "status": item.status,
+                "create_time": str(item.create_time) if item.create_time else "",
+            }
+        )
     if keyword:
         kw = keyword.lower()
         data = [item for item in data if any(kw in str(val).lower() for val in item.values())]

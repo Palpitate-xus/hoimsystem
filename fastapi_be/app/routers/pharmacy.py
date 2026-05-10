@@ -1,37 +1,42 @@
 import datetime
 import traceback
+
 from fastapi import APIRouter, Depends
-from typing import Optional
 from sqlalchemy.orm import Session
+
 from app.database import get_db
-from app.models import Prescription, PrePha, Pharmaceutical
-from app.schemas import PharmacyAuditRequest, PharmacyDispenseRequest, PharmacyReturnRequest, PrescriptionCancelRequest
+from app.models import Pharmaceutical, PrePha, Prescription
 from app.pagination import paginate
+from app.schemas import PharmacyAuditRequest, PharmacyDispenseRequest, PharmacyReturnRequest
 
 router = APIRouter()
 
 
 @router.get("/pharmacy/dispenseList")
-def get_dispense_list(keyword: Optional[str] = None, page: Optional[int] = None, page_size: Optional[int] = None, db: Session = Depends(get_db)):
+def get_dispense_list(keyword: str | None = None, page: int | None = None, page_size: int | None = None, db: Session = Depends(get_db)):
     query = db.query(Prescription).filter(Prescription.status.in_([0, 1]))
     prescriptions, total = paginate(query, page, page_size)
     data = []
     for item in prescriptions:
         phas = []
         for j in item.pre_phas:
-            phas.append({
-                "name": j.pharmaceutical.name if j.pharmaceutical else "",
-                "number": j.number,
-                "pharmaceutical_id": j.pharmaceutical_id,
-            })
-        data.append({
-            "uuid": str(item.prescription_id),
-            "patient_name": item.patient.name if item.patient else "",
-            "doctor_name": item.doctor.name if item.doctor else "",
-            "phas": phas,
-            "status": item.status,
-            "create_time": str(item.create_time),
-        })
+            phas.append(
+                {
+                    "name": j.pharmaceutical.name if j.pharmaceutical else "",
+                    "number": j.number,
+                    "pharmaceutical_id": j.pharmaceutical_id,
+                }
+            )
+        data.append(
+            {
+                "uuid": str(item.prescription_id),
+                "patient_name": item.patient.name if item.patient else "",
+                "doctor_name": item.doctor.name if item.doctor else "",
+                "phas": phas,
+                "status": item.status,
+                "create_time": str(item.create_time),
+            }
+        )
     if keyword:
         kw = keyword.lower()
         data = [item for item in data if any(kw in str(val).lower() for val in item.values())]
@@ -67,17 +72,12 @@ def dispense_prescription(req: PharmacyDispenseRequest, db: Session = Depends(ge
     return {"code": 200, "msg": "success"}
 
 
-import traceback
-
 @router.post("/pharmacy/return")
 def return_medicine(req: PharmacyReturnRequest, db: Session = Depends(get_db)):
     pre = db.query(Prescription).filter(Prescription.prescription_id == req.prescription_id).first()
     if not pre:
         return {"code": 500, "msg": "处方不存在"}
-    pp = db.query(PrePha).filter(
-        PrePha.prescription_id == req.prescription_id,
-        PrePha.pharmaceutical_id == req.pha_id
-    ).first()
+    pp = db.query(PrePha).filter(PrePha.prescription_id == req.prescription_id, PrePha.pharmaceutical_id == req.pha_id).first()
     if not pp:
         return {"code": 500, "msg": "药品记录不存在"}
     if pp.number < req.number:
@@ -111,13 +111,15 @@ def stock_check(req: dict, db: Session = Depends(get_db)):
         pha = db.query(Pharmaceutical).filter(Pharmaceutical.pharmaceutical_id == pha_id).first()
         if pha:
             diff = actual - pha.stock
-            result.append({
-                "pharmaceutical_id": pha_id,
-                "name": pha.name,
-                "system_stock": pha.stock,
-                "actual_stock": actual,
-                "diff": diff,
-            })
+            result.append(
+                {
+                    "pharmaceutical_id": pha_id,
+                    "name": pha.name,
+                    "system_stock": pha.stock,
+                    "actual_stock": actual,
+                    "diff": diff,
+                }
+            )
             # 以实盘数为准更新库存
             pha.stock = actual
             db.add(pha)
@@ -140,7 +142,7 @@ def review_prescription(req: dict, db: Session = Depends(get_db)):
 
 
 @router.get("/pharmacy/reviewList")
-def get_review_list(keyword: Optional[str] = None, db: Session = Depends(get_db)):
+def get_review_list(keyword: str | None = None, db: Session = Depends(get_db)):
     """已点评处方列表"""
     prescriptions = db.query(Prescription).filter(Prescription.review_score.isnot(None)).order_by(Prescription.review_time.desc()).all()
     data = []
@@ -148,15 +150,17 @@ def get_review_list(keyword: Optional[str] = None, db: Session = Depends(get_db)
         phas = []
         for j in item.pre_phas:
             phas.append({"name": j.pharmaceutical.name if j.pharmaceutical else "", "number": j.number})
-        data.append({
-            "uuid": str(item.prescription_id),
-            "patient_name": item.patient.name if item.patient else "",
-            "doctor_name": item.doctor.name if item.doctor else "",
-            "phas": phas,
-            "review_score": item.review_score,
-            "review_comment": item.review_comment or "",
-            "review_time": str(item.review_time) if item.review_time else "",
-        })
+        data.append(
+            {
+                "uuid": str(item.prescription_id),
+                "patient_name": item.patient.name if item.patient else "",
+                "doctor_name": item.doctor.name if item.doctor else "",
+                "phas": phas,
+                "review_score": item.review_score,
+                "review_comment": item.review_comment or "",
+                "review_time": str(item.review_time) if item.review_time else "",
+            }
+        )
     if keyword:
         kw = keyword.lower()
         data = [item for item in data if any(kw in str(val).lower() for val in item.values())]

@@ -1,9 +1,9 @@
+import datetime
 import os
 import shutil
-import datetime
-from fastapi import APIRouter, Depends, UploadFile, File
-from sqlalchemy.orm import Session
-from app.database import get_db
+
+from fastapi import APIRouter, Depends
+
 from app.dependencies import get_current_user
 
 router = APIRouter()
@@ -20,12 +20,14 @@ def _get_backup_list():
         fpath = os.path.join(BACKUP_DIR, fname)
         if os.path.isfile(fpath) and fname.endswith(".db"):
             stat = os.stat(fpath)
-            backups.append({
-                "filename": fname,
-                "size": stat.st_size,
-                "size_human": f"{stat.st_size / 1024:.1f} KB" if stat.st_size < 1024 * 1024 else f"{stat.st_size / (1024 * 1024):.2f} MB",
-                "create_time": datetime.datetime.fromtimestamp(stat.st_mtime).strftime("%Y-%m-%d %H:%M:%S"),
-            })
+            backups.append(
+                {
+                    "filename": fname,
+                    "size": stat.st_size,
+                    "size_human": f"{stat.st_size / 1024:.1f} KB" if stat.st_size < 1024 * 1024 else f"{stat.st_size / (1024 * 1024):.2f} MB",
+                    "create_time": datetime.datetime.fromtimestamp(stat.st_mtime).strftime("%Y-%m-%d %H:%M:%S"),
+                }
+            )
     return backups
 
 
@@ -88,7 +90,7 @@ def restore_backup(req: dict, current_user=Depends(get_current_user)):
             "data": {
                 "need_restart": True,
                 "note": "数据库已恢复，请重启后端服务以生效",
-            }
+            },
         }
     except Exception as e:
         return {"code": 500, "msg": f"恢复失败: {str(e)}"}
@@ -98,6 +100,7 @@ def restore_backup(req: dict, current_user=Depends(get_current_user)):
 def download_backup(filename: str, current_user=Depends(get_current_user)):
     """下载备份文件"""
     from fastapi.responses import FileResponse
+
     if ".." in filename or "/" in filename:
         return {"code": 500, "msg": "非法文件名"}
     fpath = os.path.join(BACKUP_DIR, filename)

@@ -122,3 +122,53 @@ def update_config(req: ConfigUpdateRequest, db: Session = Depends(get_db)):
     db.add(config)
     db.commit()
     return {"code": 200, "msg": "success"}
+
+
+@router.post("/message/send")
+def send_message(req: dict, db: Session = Depends(get_db)):
+    """发送消息（模拟短信/站内信）"""
+    import datetime
+    from app.models import Message
+    msg = Message(
+        recipient_id=req.get("recipient_id"),
+        title=req.get("title", ""),
+        content=req.get("content", ""),
+        msg_type=req.get("msg_type", "app"),
+        is_read=0,
+        create_time=datetime.datetime.now(),
+    )
+    db.add(msg)
+    db.commit()
+    return {"code": 200, "msg": "success"}
+
+
+@router.get("/message/getList")
+def get_message_list(current_user=Depends(get_current_user), keyword: Optional[str] = None, db: Session = Depends(get_db)):
+    from app.models import Message
+    query = db.query(Message).filter(Message.recipient_id == current_user.user_id).order_by(Message.create_time.desc())
+    messages = query.all()
+    data = []
+    for item in messages:
+        data.append({
+            "message_id": item.message_id,
+            "title": item.title,
+            "content": item.content,
+            "msg_type": item.msg_type,
+            "is_read": item.is_read,
+            "create_time": str(item.create_time),
+        })
+    if keyword:
+        kw = keyword.lower()
+        data = [item for item in data if any(kw in str(val).lower() for val in item.values())]
+    return {"code": 200, "msg": "success", "data": data}
+
+
+@router.post("/message/read")
+def read_message(req: dict, db: Session = Depends(get_db)):
+    from app.models import Message
+    msg = db.query(Message).filter(Message.message_id == req.get("message_id")).first()
+    if msg:
+        msg.is_read = 1
+        db.add(msg)
+        db.commit()
+    return {"code": 200, "msg": "success"}

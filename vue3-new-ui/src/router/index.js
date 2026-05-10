@@ -398,6 +398,12 @@ export const asyncRoutes = [
         component: () => import("@/views/system/config.vue"),
         meta: { title: "系统参数", permissions: ["admin"] },
       },
+      {
+        path: "messageCenter",
+        name: "MessageCenter",
+        component: () => import("@/views/system/messageCenter.vue"),
+        meta: { title: "消息中心", permissions: ["admin", "patient", "doctor", "director"] },
+      },
     ],
   },
 

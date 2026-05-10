@@ -411,3 +411,17 @@ class PatrolRecord(Base):
 
     nurse = relationship("User")
     patient = relationship("Patient")
+
+
+class Message(Base):
+    __tablename__ = "hoimsystem_message"
+
+    message_id = Column(Integer, primary_key=True, autoincrement=True)
+    recipient_id = Column(Integer, ForeignKey("hoimsystem_users.user_id"))
+    title = Column(String(100))
+    content = Column(String(500))
+    msg_type = Column(String(20))  # sms, app, email
+    is_read = Column(Integer, default=0)
+    create_time = Column(DateTime)
+
+    recipient = relationship("User")

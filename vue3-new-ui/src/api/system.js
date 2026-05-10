@@ -27,3 +27,15 @@ export function getConfigList(keyword = "") {
 export function updateConfig(data) {
   return request({ url: "config/update", method: "post", data });
 }
+
+export function getMessageList(keyword = "") {
+  return request({ url: "message/getList", method: "get", params: { keyword } });
+}
+
+export function readMessage(data) {
+  return request({ url: "message/read", method: "post", data });
+}
+
+export function sendMessage(data) {
+  return request({ url: "message/send", method: "post", data });
+}

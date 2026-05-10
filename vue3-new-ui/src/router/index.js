@@ -208,6 +208,18 @@ export const asyncRoutes = [
         component: () => import("@/views/pharmacy/stockAlert.vue"),
         meta: { title: "库存预警", permissions: ["admin", "doctor", "director"] },
       },
+      {
+        path: "stockCheck",
+        name: "StockCheck",
+        component: () => import("@/views/pharmacy/stockCheck.vue"),
+        meta: { title: "库存盘点", permissions: ["admin", "director"] },
+      },
+      {
+        path: "prescriptionReview",
+        name: "PrescriptionReview",
+        component: () => import("@/views/pharmacy/prescriptionReview.vue"),
+        meta: { title: "处方点评", permissions: ["admin", "doctor", "director"] },
+      },
     ],
   },
 

@@ -181,6 +181,9 @@ class Prescription(Base):
     doctor_id = Column(Integer, ForeignKey("hoimsystem_doctor.doctor_id"))
     status = Column(Integer, default=0)
     create_time = Column(DateTime)
+    review_score = Column(Integer, nullable=True)
+    review_comment = Column(String(500), nullable=True)
+    review_time = Column(DateTime, nullable=True)
 
     patient = relationship("Patient", back_populates="prescriptions")
     doctor = relationship("Doctor", back_populates="prescriptions")

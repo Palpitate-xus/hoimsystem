@@ -43,3 +43,15 @@ export function getLowStockDrugs(threshold = 10, keyword = "") {
 export function getNearExpiryDrugs(days = 30, keyword = "") {
   return request({ url: "pharmaceuticalManagement/nearExpiry", method: "get", params: { days, keyword } });
 }
+
+export function stockCheck(data) {
+  return request({ url: "pharmacy/stockCheck", method: "post", data });
+}
+
+export function reviewPrescription(data) {
+  return request({ url: "pharmacy/review", method: "post", data });
+}
+
+export function getReviewList(keyword = "") {
+  return request({ url: "pharmacy/reviewList", method: "get", params: { keyword } });
+}

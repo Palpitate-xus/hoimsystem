@@ -98,3 +98,66 @@ def return_medicine(req: PharmacyReturnRequest, db: Session = Depends(get_db)):
         db.rollback()
         traceback.print_exc()
         return {"code": 500, "msg": "退药失败"}
+
+
+@router.post("/pharmacy/stockCheck")
+def stock_check(req: dict, db: Session = Depends(get_db)):
+    """库存盘点：传入 {items: [{pharmaceutical_id, actual_stock}]}，返回盈亏"""
+    items = req.get("items", [])
+    result = []
+    for item in items:
+        pha_id = item.get("pharmaceutical_id")
+        actual = item.get("actual_stock")
+        pha = db.query(Pharmaceutical).filter(Pharmaceutical.pharmaceutical_id == pha_id).first()
+        if pha:
+            diff = actual - pha.stock
+            result.append({
+                "pharmaceutical_id": pha_id,
+                "name": pha.name,
+                "system_stock": pha.stock,
+                "actual_stock": actual,
+                "diff": diff,
+            })
+            # 以实盘数为准更新库存
+            pha.stock = actual
+            db.add(pha)
+    db.commit()
+    return {"code": 200, "msg": "success", "data": result}
+
+
+@router.post("/pharmacy/review")
+def review_prescription(req: dict, db: Session = Depends(get_db)):
+    """处方点评"""
+    pre = db.query(Prescription).filter(Prescription.prescription_id == req.get("prescription_id")).first()
+    if not pre:
+        return {"code": 500, "msg": "处方不存在"}
+    pre.review_score = req.get("score")
+    pre.review_comment = req.get("comment", "")
+    pre.review_time = datetime.datetime.now()
+    db.add(pre)
+    db.commit()
+    return {"code": 200, "msg": "success"}
+
+
+@router.get("/pharmacy/reviewList")
+def get_review_list(keyword: Optional[str] = None, db: Session = Depends(get_db)):
+    """已点评处方列表"""
+    prescriptions = db.query(Prescription).filter(Prescription.review_score.isnot(None)).order_by(Prescription.review_time.desc()).all()
+    data = []
+    for item in prescriptions:
+        phas = []
+        for j in item.pre_phas:
+            phas.append({"name": j.pharmaceutical.name if j.pharmaceutical else "", "number": j.number})
+        data.append({
+            "uuid": str(item.prescription_id),
+            "patient_name": item.patient.name if item.patient else "",
+            "doctor_name": item.doctor.name if item.doctor else "",
+            "phas": phas,
+            "review_score": item.review_score,
+            "review_comment": item.review_comment or "",
+            "review_time": str(item.review_time) if item.review_time else "",
+        })
+    if keyword:
+        kw = keyword.lower()
+        data = [item for item in data if any(kw in str(val).lower() for val in item.values())]
+    return {"code": 200, "msg": "success", "data": data}

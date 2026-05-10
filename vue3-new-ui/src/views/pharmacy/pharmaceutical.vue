@@ -18,6 +18,14 @@
         <el-table-column prop="price" label="单价"  sortable />
         <el-table-column prop="expireddate" label="过期日期" />
         <el-table-column prop="supplier" label="供应商" />
+        <el-table-column prop="antibiotic_level" label="抗菌级别" width="100">
+          <template #default="{row}">
+            <el-tag v-if="row.antibiotic_level===0" type="info">非抗菌</el-tag>
+            <el-tag v-else-if="row.antibiotic_level===1" type="success">非限制</el-tag>
+            <el-tag v-else-if="row.antibiotic_level===2" type="warning">限制级</el-tag>
+            <el-tag v-else type="danger">特殊级</el-tag>
+          </template>
+        </el-table-column>
         <el-table-column prop="remark" label="备注" />
         <el-table-column label="操作" width="180">
           <template #default="{row}">
@@ -53,6 +61,14 @@
         </el-form-item>
         <el-form-item label="供应商">
           <el-input v-model="form.supplier" />
+        </el-form-item>
+        <el-form-item label="抗菌级别">
+          <el-radio-group v-model="form.antibiotic_level">
+            <el-radio :label="0">非抗菌药</el-radio>
+            <el-radio :label="1">非限制级</el-radio>
+            <el-radio :label="2">限制级</el-radio>
+            <el-radio :label="3">特殊使用级</el-radio>
+          </el-radio-group>
         </el-form-item>
         <el-form-item label="备注">
           <el-input v-model="form.remark" />
@@ -96,7 +112,7 @@ const fetchList = async () => {
 
 const handleAdd = () => {
   isEdit.value = false;
-  form.value = { stock: 0, price: "0" };
+  form.value = { stock: 0, price: "0", antibiotic_level: 0 };
   dialogVisible.value = true;
 };
 

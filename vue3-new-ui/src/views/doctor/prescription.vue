@@ -58,10 +58,12 @@
         <el-form-item label="药品">
           <div v-for="(item, i) in form.phas" :key="i" style="margin-bottom:10px">
             <el-select v-model="item.id" placeholder="选择药品" style="width:200px;margin-right:10px" filterable>
-              <el-option v-for="p in pharmaceuticals" :key="p.pharmaceutical_id" :label="p.name" :value="p.pharmaceutical_id" />
+              <el-option v-for="p in pharmaceuticals" :key="p.id" :label="p.name" :value="p.id" />
             </el-select>
             <el-input-number v-model="item.number" :min="1" style="width:120px;margin-right:10px" />
             <el-button type="danger" size="small" @click="removePharmaceutical(i)">删除</el-button>
+            <el-tag v-if="getAntibioticLevel(item.id) === 2" type="warning" size="small" style="margin-left:5px">限制级抗菌药</el-tag>
+            <el-tag v-if="getAntibioticLevel(item.id) === 3" type="danger" size="small" style="margin-left:5px">特殊使用级抗菌药</el-tag>
           </div>
           <el-button type="primary" size="small" @click="addPharmaceutical">添加药品</el-button>
         </el-form-item>
@@ -123,7 +125,19 @@ const removePharmaceutical = (i) => {
   form.value.phas.splice(i, 1);
 };
 
+const getAntibioticLevel = (id) => {
+  const pha = pharmaceuticals.value.find((p) => p.id === id);
+  return pha ? pha.antibiotic_level : 0;
+};
+
 const submit = async () => {
+  const restricted = form.value.phas.filter((item) => getAntibioticLevel(item.id) === 2);
+  const special = form.value.phas.filter((item) => getAntibioticLevel(item.id) === 3);
+  if (special.length > 0) {
+    ElMessage.warning("特殊使用级抗菌药需抗菌药物管理组审批后方可开具");
+    return;
+  }
+  try {
   try {
     await createPrescription(form.value);
     ElMessage.success("开方成功");

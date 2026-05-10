@@ -172,6 +172,7 @@ def get_pharmaceutical_list(keyword: Optional[str] = None, db: Session = Depends
             "purchasing_time": str(item.purchasing_time),
             "supplier": item.supplier,
             "remark": item.remark,
+            "antibiotic_level": item.antibiotic_level,
         })
     if keyword:
         kw = keyword.lower()
@@ -190,6 +191,8 @@ def update_pharmaceutical(req: PharmaceuticalUpdateRequest, db: Session = Depend
     pha.expireddate = parse_date_str(req.expireddate)
     pha.supplier = req.supplier
     pha.remark = req.remark
+    if hasattr(req, 'antibiotic_level'):
+        pha.antibiotic_level = req.antibiotic_level
     db.add(pha)
     db.commit()
     return {"code": 200, "msg": "success"}
@@ -262,6 +265,24 @@ def prescription_register(req: PrescriptionCreateRequest, current_user: User = D
     if not doctor_obj or not patient_obj:
         return {"code": 500, "msg": "医生或病人信息不存在"}
     try:
+        # 抗菌药物分级审核
+        restricted_phas = []  # 限制级
+        special_phas = []  # 特殊使用级
+        for item in req.phas:
+            pha = db.query(Pharmaceutical).filter(Pharmaceutical.pharmaceutical_id == item["id"]).first()
+            if pha:
+                if pha.antibiotic_level == 2:
+                    restricted_phas.append(pha.name)
+                elif pha.antibiotic_level == 3:
+                    special_phas.append(pha.name)
+        # 限制级抗菌药：需要科室主任权限
+        if restricted_phas and current_user.user_role not in ("director", "admin"):
+            db.rollback()
+            return {"code": 500, "msg": f"限制级抗菌药 [{', '.join(restricted_phas)}] 需科室主任审批后方可开具"}
+        # 特殊使用级抗菌药：需要更高权限
+        if special_phas and current_user.user_role != "admin":
+            db.rollback()
+            return {"code": 500, "msg": f"特殊使用级抗菌药 [{', '.join(special_phas)}] 需抗菌药物管理组审批后方可开具"}
         pre = Prescription(
             patient_id=patient_obj.patient_id,
             doctor_id=doctor_obj.doctor_id,

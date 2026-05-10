@@ -234,6 +234,7 @@ class Pharmaceutical(Base):
     supplier = Column(String(24))
     remark = Column(String(100))
     status = Column(Integer, default=0)
+    antibiotic_level = Column(Integer, default=0)  # 0=非抗菌药 1=非限制级 2=限制级 3=特殊使用级
 
 
 # ===== 新增表 =====

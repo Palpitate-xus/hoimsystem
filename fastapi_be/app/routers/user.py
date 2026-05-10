@@ -123,3 +123,76 @@ def get_user_info(req: UserInfoRequest, db: Session = Depends(get_db)):
 @router.post("/logout")
 def logout():
     return {"code": 200, "msg": "success"}
+
+
+@router.get("/user/getList")
+def get_user_list(role: Optional[str] = None, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    """获取用户列表（管理员权限）"""
+    if current_user.user_role != "admin":
+        return {"code": 403, "msg": "无权访问"}
+    query = db.query(User)
+    if role:
+        query = query.filter(User.user_role == role)
+    users = query.order_by(User.user_id).all()
+    data = []
+    for item in users:
+        data.append({
+            "user_id": item.user_id,
+            "username": item.username,
+            "user_role": item.user_role,
+        })
+    return {"code": 200, "msg": "success", "data": data}
+
+
+@router.post("/user/updateRole")
+def update_user_role(req: dict, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    """修改用户角色"""
+    if current_user.user_role != "admin":
+        return {"code": 403, "msg": "无权访问"}
+    user_id = req.get("user_id")
+    new_role = req.get("user_role")
+    if not user_id or not new_role:
+        return {"code": 500, "msg": "参数错误"}
+    if new_role not in ("admin", "doctor", "director", "patient"):
+        return {"code": 500, "msg": "无效的角色"}
+    user = db.query(User).filter(User.user_id == user_id).first()
+    if not user:
+        return {"code": 500, "msg": "用户不存在"}
+    user.user_role = new_role
+    db.commit()
+    return {"code": 200, "msg": "success"}
+
+
+@router.post("/user/resetPassword")
+def reset_user_password(req: dict, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    """重置用户密码"""
+    if current_user.user_role != "admin":
+        return {"code": 403, "msg": "无权访问"}
+    user_id = req.get("user_id")
+    new_password = req.get("new_password", "123456")
+    if not user_id:
+        return {"code": 500, "msg": "参数错误"}
+    user = db.query(User).filter(User.user_id == user_id).first()
+    if not user:
+        return {"code": 500, "msg": "用户不存在"}
+    user.password = hash_password(new_password)
+    db.commit()
+    return {"code": 200, "msg": "success", "data": {"new_password": new_password}}
+
+
+@router.post("/user/delete")
+def delete_user(req: dict, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    """删除用户"""
+    if current_user.user_role != "admin":
+        return {"code": 403, "msg": "无权访问"}
+    user_id = req.get("user_id")
+    if not user_id:
+        return {"code": 500, "msg": "参数错误"}
+    if user_id == current_user.user_id:
+        return {"code": 500, "msg": "不能删除当前登录用户"}
+    user = db.query(User).filter(User.user_id == user_id).first()
+    if not user:
+        return {"code": 500, "msg": "用户不存在"}
+    db.delete(user)
+    db.commit()
+    return {"code": 200, "msg": "success"}

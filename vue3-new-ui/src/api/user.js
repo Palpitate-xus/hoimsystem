@@ -40,3 +40,19 @@ export function getPublicKey() {
     method: "get",
   });
 }
+
+export function getUserList(params) {
+  return request({ url: "user/getList", method: "get", params });
+}
+
+export function updateUserRole(data) {
+  return request({ url: "user/updateRole", method: "post", data });
+}
+
+export function resetUserPassword(data) {
+  return request({ url: "user/resetPassword", method: "post", data });
+}
+
+export function deleteUser(data) {
+  return request({ url: "user/delete", method: "post", data });
+}

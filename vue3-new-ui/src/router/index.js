@@ -416,6 +416,12 @@ export const asyncRoutes = [
         component: () => import("@/views/system/backup.vue"),
         meta: { title: "数据备份恢复", permissions: ["admin"] },
       },
+      {
+        path: "permission",
+        name: "Permission",
+        component: () => import("@/views/system/permission.vue"),
+        meta: { title: "权限分配", permissions: ["admin"] },
+      },
     ],
   },
 

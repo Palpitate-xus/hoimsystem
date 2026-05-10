@@ -53,3 +53,6 @@ vue3-new-ui/frontend.log
 
 # Misc
 EOF
+
+!.vscode/settings.json
+!.vscode/extensions.json

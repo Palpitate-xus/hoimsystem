@@ -282,6 +282,7 @@ class LabOrder(Base):
     check_items = Column(String(200))
     urgent = Column(Integer)
     status = Column(Integer, default=0)
+    sample_status = Column(Integer, default=0)  # 0=待接收, 1=已接收, 2=已拒收
     create_time = Column(DateTime)
 
     patient = relationship("Patient", back_populates="lab_orders")

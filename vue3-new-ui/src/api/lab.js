@@ -19,3 +19,15 @@ export function createLabResult(data) {
 export function auditLabResult(data) {
   return request({ url: "labResult/audit", method: "post", data });
 }
+
+export function sampleReceive(data) {
+  return request({ url: "lab/sampleReceive", method: "post", data });
+}
+
+export function sampleReject(data) {
+  return request({ url: "lab/sampleReject", method: "post", data });
+}
+
+export function sampleTracking(lab_order_id) {
+  return request({ url: "lab/sampleTracking", method: "get", params: { lab_order_id } });
+}

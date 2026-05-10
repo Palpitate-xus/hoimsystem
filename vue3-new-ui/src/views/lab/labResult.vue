@@ -15,9 +15,12 @@
           <el-table-column prop="patient_name" label="患者"  sortable />
           <el-table-column prop="check_type" label="检查类型"  sortable />
           <el-table-column prop="create_time" label="申请时间"  sortable />
-          <el-table-column label="操作" width="120">
+          <el-table-column label="操作" width="280">
             <template #default="{row}">
               <el-button size="small" type="primary" @click="handleResult(row)">录入结果</el-button>
+              <el-button size="small" type="success" @click="receiveSample(row)">接收</el-button>
+              <el-button size="small" type="danger" @click="rejectSample(row)">拒收</el-button>
+              <el-button size="small" @click="viewTracking(row)">流转</el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -84,13 +87,21 @@
         <el-button type="primary" @click="submit">确定</el-button>
       </template>
     </el-dialog>
+
+    <el-dialog v-model="trackingVisible" title="样本流转跟踪" width="500px">
+      <el-timeline>
+        <el-timeline-item v-for="(item, i) in trackingList" :key="i" :timestamp="item.time">
+          {{ item.stage }} - {{ item.operator }}
+        </el-timeline-item>
+      </el-timeline>
+    </el-dialog>
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted, computed } from "vue";
 import { ElMessage } from "element-plus";
-import { getPendingLabOrders, getLabResultList, createLabResult } from "@/api/lab";
+import { getPendingLabOrders, getLabResultList, createLabResult, sampleReceive, sampleReject, sampleTracking } from "@/api/lab";
 
 const activeTab = ref("pending");
 const pendingList = ref([]);
@@ -100,6 +111,8 @@ const searchQuery2 = ref("");
 const loading = ref(false);
 const loading2 = ref(false);
 const dialogVisible = ref(false);
+const trackingVisible = ref(false);
+const trackingList = ref([]);
 const form = ref({});
 const currentPage = ref(1);
 const pageSize = ref(10);
@@ -142,6 +155,36 @@ const submit = async () => {
     fetchResults();
   } catch (e) {
     ElMessage.error(e.msg || "录入失败");
+  }
+};
+
+const receiveSample = async (row) => {
+  try {
+    await sampleReceive({ lab_order_id: row.id });
+    ElMessage.success("样本已接收");
+    fetchPending();
+  } catch (e) {
+    ElMessage.error(e.msg || "操作失败");
+  }
+};
+
+const rejectSample = async (row) => {
+  try {
+    await sampleReject({ lab_order_id: row.id });
+    ElMessage.success("样本已拒收");
+    fetchPending();
+  } catch (e) {
+    ElMessage.error(e.msg || "操作失败");
+  }
+};
+
+const viewTracking = async (row) => {
+  try {
+    const res = await sampleTracking(row.id);
+    trackingList.value = res.data || [];
+    trackingVisible.value = true;
+  } catch (e) {
+    ElMessage.error(e.msg || "查询失败");
   }
 };
 

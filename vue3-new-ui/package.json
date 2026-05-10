@@ -84,6 +84,12 @@
     "admin-template",
     "management-system"
   ],
+  "overrides": {
+    "minimatch": "^10.2.5",
+    "picomatch": "^4.0.4",
+    "serialize-javascript": "^7.0.5",
+    "immutable": "^5.1.5"
+  },
   "engines": {
     "node": ">=16.0.0",
     "npm": ">= 7.0.0"

@@ -1,3 +1,55 @@
+# OS
 .DS_Store
-.vscode
-.idea
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Node
+node_modules/
+dist/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment
+.env
+.env.local
+.env.*.local
+.venv/
+venv/
+env/
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Backend runtime
+fastapi_be/backend.log
+fastapi_be/test.db
+fastapi_be/migrate_passwords.py
+fastapi_be/test_*.py
+
+# Frontend runtime
+vue3-new-ui/frontend.log
+
+# Misc
+EOF

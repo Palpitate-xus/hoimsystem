@@ -41,6 +41,40 @@ app.config.globalProperties.$baseTitle = title;
 window.$eventBus = eventBus;
 window.$baseTitle = title;
 
+// 抑制 ResizeObserver loop 运行时警告（Element Plus 组件常见，不影响功能）
+const resizeObserverLoopErr = "ResizeObserver loop completed with undelivered notifications";
+const isResizeObserverErr = (msg) =>
+  typeof msg === "string" && msg.includes("ResizeObserver loop");
+
+// Vue 全局错误处理
+app.config.errorHandler = (err) => {
+  if (isResizeObserverErr(err?.message)) return;
+  console.error(err);
+};
+
+// window 错误事件拦截
+window.addEventListener("error", (e) => {
+  if (isResizeObserverErr(e.message)) {
+    e.stopImmediatePropagation();
+    e.preventDefault();
+  }
+});
+
+// unhandledrejection 拦截
+window.addEventListener("unhandledrejection", (e) => {
+  if (isResizeObserverErr(e.reason?.message)) {
+    e.stopImmediatePropagation();
+    e.preventDefault();
+  }
+});
+
+// console.error 过滤，阻止 rspack overlay 弹窗
+const originalConsoleError = console.error;
+console.error = function (...args) {
+  if (args[0] && isResizeObserverErr(args[0]?.message ?? args[0])) return;
+  originalConsoleError.apply(console, args);
+};
+
 // 检测环境变量，生产环境启用mock
 if (process.env.NODE_ENV === "production") {
   // 生产环境初始化mock

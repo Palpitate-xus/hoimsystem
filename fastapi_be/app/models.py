@@ -479,3 +479,35 @@ class Consumable(Base):
     remark = Column(String(200))
     status = Column(Integer, default=0)  # 0=正常 1=停用
     create_time = Column(DateTime)
+
+
+class PurchaseOrder(Base):
+    __tablename__ = "hoimsystem_purchase_order"
+
+    purchase_id = Column(Integer, primary_key=True, autoincrement=True)
+    order_no = Column(String(32), unique=True)
+    supplier = Column(String(50))
+    total_amount = Column(Float, default=0)
+    status = Column(Integer, default=0)  # 0=待审批 1=已审批 2=已入库 3=已取消
+    create_by = Column(Integer, ForeignKey("hoimsystem_users.user_id"))
+    create_time = Column(DateTime)
+    approve_time = Column(DateTime, nullable=True)
+    storage_time = Column(DateTime, nullable=True)
+
+    creator = relationship("User")
+    items = relationship("PurchaseOrderItem", back_populates="order", cascade="all, delete-orphan")
+
+
+class PurchaseOrderItem(Base):
+    __tablename__ = "hoimsystem_purchase_order_item"
+
+    item_id = Column(Integer, primary_key=True, autoincrement=True)
+    purchase_id = Column(Integer, ForeignKey("hoimsystem_purchase_order.purchase_id"))
+    item_type = Column(String(10))  # drug=药品 consumable=耗材
+    item_id_ref = Column(Integer)  # 药品ID或耗材ID
+    item_name = Column(String(50))
+    quantity = Column(Integer)
+    unit_price = Column(Float)
+    total_price = Column(Float)
+
+    order = relationship("PurchaseOrder", back_populates="items")

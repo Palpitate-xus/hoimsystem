@@ -393,3 +393,17 @@ class Attendance(Base):
     status = Column(Integer, default=0)  # 0=正常, 1=迟到, 2=早退, 3=缺勤
 
     doctor = relationship("Doctor")
+
+
+class PatrolRecord(Base):
+    __tablename__ = "hoimsystem_patrol_record"
+
+    patrol_id = Column(Integer, primary_key=True, autoincrement=True)
+    nurse_id = Column(Integer, ForeignKey("hoimsystem_users.user_id"))
+    patient_id = Column(Integer, ForeignKey("hoimsystem_patient.patient_id"))
+    content = Column(String(500))
+    status = Column(Integer, default=0)  # 0=正常, 1=需关注, 2=急诊绿色通道
+    create_time = Column(DateTime)
+
+    nurse = relationship("User")
+    patient = relationship("Patient")

@@ -248,6 +248,12 @@ export const asyncRoutes = [
         component: () => import("@/views/queue/queueList.vue"),
         meta: { title: "候诊队列", permissions: ["admin", "doctor", "director"] },
       },
+      {
+        path: "patrolRecord",
+        name: "PatrolRecord",
+        component: () => import("@/views/queue/patrolRecord.vue"),
+        meta: { title: "候诊巡视", permissions: ["admin", "doctor", "director"] },
+      },
     ],
   },
 

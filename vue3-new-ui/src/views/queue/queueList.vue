@@ -29,11 +29,12 @@
             <el-tag v-else type="success">已就诊</el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="200">
+        <el-table-column label="操作" width="280">
           <template #default="{row}">
             <el-button size="small" type="primary" @click="callNext(row)">叫号</el-button>
             <el-button size="small" @click="pass(row)">过号</el-button>
             <el-button size="small" @click="skip(row)">跳过</el-button>
+            <el-button size="small" type="danger" @click="emergency(row)">急诊优先</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -53,7 +54,7 @@
 <script setup>
 import { ref, onMounted, computed } from "vue";
 import { ElMessage } from "element-plus";
-import { getQueueList, callNext, passQueue, skipQueue } from "@/api/queue";
+import { getQueueList, callNext, passQueue, skipQueue, markEmergency } from "@/api/queue";
 
 const list = ref([]);
 const searchQuery = ref("");
@@ -99,6 +100,16 @@ const skip = async (row) => {
   try {
     await skipQueue({ queue_id: row.queue_id });
     ElMessage.success("操作成功");
+    fetchList();
+  } catch (e) {
+    ElMessage.error(e.msg || "操作失败");
+  }
+};
+
+const emergency = async (row) => {
+  try {
+    await markEmergency({ queue_id: row.queue_id });
+    ElMessage.success("已标记为急诊优先");
     fetchList();
   } catch (e) {
     ElMessage.error(e.msg || "操作失败");

@@ -3,10 +3,39 @@ from fastapi import APIRouter, Depends
 from typing import Optional
 from sqlalchemy.orm import Session
 from app.database import get_db
-from app.models import Queue, Patient, Doctor, Registration, Appointment
+from app.models import Queue, Patient, Doctor, Registration, Appointment, PatrolRecord
 from app.schemas import QueueCallNextRequest, QueuePassRequest, QueueSkipRequest
+from app.dependencies import get_current_user
 
 router = APIRouter()
+
+
+@router.post("/queue/emergency")
+def mark_emergency(req: QueueSkipRequest, db: Session = Depends(get_db)):
+    """护士将队列记录标记为急诊优先"""
+    queue_item = db.query(Queue).filter(Queue.queue_id == req.queue_id).first()
+    if not queue_item:
+        return {"code": 500, "msg": "队列记录不存在"}
+    queue_item.type = 2  # 2 = 急诊优先
+    db.add(queue_item)
+    db.commit()
+    return {"code": 200, "msg": "success"}
+
+
+@router.post("/queue/reorder")
+def reorder_queue(req: dict, db: Session = Depends(get_db)):
+    """护士调整队列顺序（将指定记录移到最前面）"""
+    queue_id = req.get("queue_id")
+    queue_item = db.query(Queue).filter(Queue.queue_id == queue_id).first()
+    if not queue_item:
+        return {"code": 500, "msg": "队列记录不存在"}
+    # 将该记录设为最小序号（优先）
+    min_queue = db.query(Queue).filter(Queue.doctor_id == queue_item.doctor_id, Queue.status == 0).order_by(Queue.queue_number).first()
+    if min_queue and min_queue.queue_id != queue_id:
+        queue_item.queue_number = min_queue.queue_number - 1
+        db.add(queue_item)
+        db.commit()
+    return {"code": 200, "msg": "success"}
 
 
 @router.get("/queue/getList")
@@ -69,3 +98,36 @@ def skip_queue(req: QueueSkipRequest, db: Session = Depends(get_db)):
     db.add(queue_item)
     db.commit()
     return {"code": 200, "msg": "success"}
+
+
+@router.post("/patrol/create")
+def create_patrol_record(req: dict, current_user=Depends(get_current_user), db: Session = Depends(get_db)):
+    record = PatrolRecord(
+        nurse_id=current_user.user_id,
+        patient_id=req.get("patient_id"),
+        content=req.get("content", ""),
+        status=req.get("status", 0),
+        create_time=datetime.datetime.now(),
+    )
+    db.add(record)
+    db.commit()
+    return {"code": 200, "msg": "success"}
+
+
+@router.get("/patrol/getList")
+def get_patrol_list(keyword: Optional[str] = None, db: Session = Depends(get_db)):
+    records = db.query(PatrolRecord).order_by(PatrolRecord.create_time.desc()).all()
+    data = []
+    for item in records:
+        data.append({
+            "patrol_id": item.patrol_id,
+            "nurse_name": item.nurse.username if item.nurse else "",
+            "patient_name": item.patient.name if item.patient else "",
+            "content": item.content,
+            "status": item.status,
+            "create_time": str(item.create_time),
+        })
+    if keyword:
+        kw = keyword.lower()
+        data = [item for item in data if any(kw in str(val).lower() for val in item.values())]
+    return {"code": 200, "msg": "success", "data": data}

@@ -47,13 +47,13 @@
 | **director** | **科室主任** | 负责本科室排班管理、医生管理、本科室业务监管、发布通知 | ✅ 已实现 |
 | **doctor** | **门诊医生** | 负责病人接诊、病历书写、处方开具、查看排班 | ✅ 已实现 |
 | **patient** | **病人** | 负责挂号/预约、查询就诊记录、缴费、查看通知 | ✅ 已实现 |
-| nurse | 护士 | 负责分诊、病人基本信息核对、医嘱执行、生命体征录入 | ⬜ 规划中 |
-| pharmacist | 药房人员/药剂师 | 负责药品入库、处方审核、发药、库存盘点、报损 | ⬜ 规划中 |
-| cashier | 收费员 | 负责窗口收费、退费、发票打印、日结对账 | ⬜ 规划中 |
-| lab_technician | 检验科技师 | 负责检查检验申请接收、样本处理、结果录入 | ⬜ 规划中 |
-| registrar | 挂号员 | 负责窗口挂号、退号、号源管理、现场咨询 | ⬜ 规划中 |
-| guide | 导医 | 负责病人引导、科室指引、就诊流程协助 | ⬜ 规划中 |
-| super_admin | 超级管理员 | 负责系统运维、数据备份恢复、日志审计、权限分配 | ⬜ 规划中 |
+| nurse | 护士 | 负责分诊、病人基本信息核对、医嘱执行、生命体征录入 | ✅ 已实现（生命体征录入） |
+| pharmacist | 药房人员/药剂师 | 负责药品入库、处方审核、发药、库存盘点、报损 | ✅ 已实现 |
+| cashier | 收费员 | 负责窗口收费、退费、发票打印、日结对账 | ✅ 已实现 |
+| lab_technician | 检验科技师 | 负责检查检验申请接收、样本处理、结果录入 | ✅ 已实现 |
+| registrar | 挂号员 | 负责窗口挂号、退号、号源管理、现场咨询 | ✅ 已实现（窗口挂号/退号） |
+| guide | 导医 | 负责病人引导、科室指引、就诊流程协助 | ✅ 已实现（智能导诊） |
+| super_admin | 超级管理员 | 负责系统运维、数据备份恢复、日志审计、权限分配 | ✅ 已实现（权限分配+备份恢复） |
 
 ### 2.2 核心角色权限矩阵（当前已实现）
 
@@ -164,9 +164,10 @@
 - **需求描述**：修改医生基本信息、调整所属科室、变更职称等。
 - **约束**：涉及科室调动时需处理历史数据归属
 
-#### 3.3.4 医生考勤签到（待实现）
+#### 3.3.4 医生考勤签到（已实现）
 - **需求描述**：医生每日上班签到，记录出勤状态。
 - **业务规则**：签到时间与排班时间对比，计算迟到/早退/缺勤
+- **实现**：/doctor/attendance 签到/签退 API，attendance.vue 考勤页面
 
 ---
 
@@ -257,11 +258,12 @@
 - **处理**：将预约状态设为"已取消"
 - **约束**：就诊前一天允许取消，就诊当天不可取消
 
-#### 3.7.4 违约处理（待实现）
+#### 3.7.4 违约处理（已实现）
 - **需求描述**：系统自动记录病人违约行为并执行处罚。
 - **业务规则**：
   - 一个月内三次预约未取号，暂停预约资格一个月
   - 违约次数记录在 `hoimsystem_breach_record` 表中
+- **实现**：报到时超时自动记录违约，/breach/getList 查询违约记录，/breach/checkSuspend 检查是否暂停预约
 
 ---
 
@@ -364,11 +366,12 @@
 - **需求描述**：按药品 ID 查询当前库存。
 - **输出**：库存数量
 
-#### 3.12.4 库存预警（待实现）
+#### 3.12.4 库存预警（已实现）
 - **需求描述**：系统自动监控药品库存和有效期。
 - **业务规则**：
   - 库存低于安全阈值时提醒采购
   - 药品过期前 1 个月提醒处理
+- **实现**：/pharmaceuticalManagement/lowStock、/pharmaceuticalManagement/nearExpiry API，stockAlert.vue 库存预警页面
 
 #### 3.12.5 药品出库/发药（已实现：处方开具时自动出库）
 - **需求描述**：处方确认时自动扣减药品库存。
@@ -407,8 +410,9 @@
 - **需求描述**：配置系统运行参数。
 - **示例**：预约提前天数、违约次数阈值、库存预警阈值
 
-#### 3.14.4 数据备份与恢复
+#### 3.14.4 数据备份与恢复（已实现）
 - **需求描述**：定期自动备份数据库，支持手动备份和恢复。
+- **实现**：/backup/create、/backup/getList、/backup/restore、/backup/delete、/backup/download API，backup.vue 备份恢复页面
 
 ---
 
@@ -529,9 +533,10 @@
 - **需求描述**：病人查看各科室介绍、医生专长、出诊时间。
 - **输出**：科室列表、医生列表、排班信息
 
-#### 5.1.2 智能导诊（规划中）
+#### 5.1.2 智能导诊（已实现）
 - **需求描述**：病人输入症状，系统推荐可能科室。
 - **示例**：输入"头痛"→ 推荐神经内科/急诊科
+- **实现**：/triage/suggest API，内置 310+ 症状关键词映射 16 个科室，triage.vue 导诊页面
 
 ---
 
@@ -713,18 +718,23 @@
 | 病历 | medical_record_id | consultation_time, doctor_id, patient_id, symptom, result | doctor(n:1), patient(n:1) |
 | 违约记录 | breach_id | registration_id | registration(n:1) |
 
-### 新增实体（规划中）
+### 新增实体
 
-| 实体 | 主键 | 核心属性 | 说明 |
-|:----:|:----:|:--------:|:----:|
-| 队列记录 | queue_id | registration_uuid, doctor_id, queue_number, status, call_time | 候诊叫号队列 |
-| 预检记录 | vital_id | patient_id, nurse_id, temperature, blood_pressure, pulse, weight, check_time | 护士预检生命体征 |
-| 检查申请单 | lab_order_id | patient_id, doctor_id, check_type, check_item, status, create_time | 检查检验申请 |
-| 检查结果 | lab_result_id | lab_order_id, sample_id, result, abnormal_flag, technician_id, report_time | 检验结果 |
-| 发票记录 | invoice_id | charge_id, invoice_no, invoice_time, amount, tax | 电子发票 |
-| 随访计划 | followup_id | patient_id, doctor_id, plan_date, content, status, result | 随访管理 |
-| 评价记录 | review_id | patient_id, doctor_id, visit_id, score, comment, review_time | 满意度评价 |
-| 操作日志 | log_id | user_id, action, target, result, ip, create_time | 审计日志 |
+| 实体 | 主键 | 核心属性 | 说明 | 状态 |
+|:----:|:----:|:--------:|:----:|:----:|
+| 队列记录 | queue_id | registration_uuid, doctor_id, queue_number, status, call_time | 候诊叫号队列 | ✅ |
+| 预检记录 | vital_id | patient_id, nurse_id, temperature, blood_pressure, pulse, weight, check_time | 护士预检生命体征 | ✅ |
+| 检查申请单 | lab_order_id | patient_id, doctor_id, check_type, check_item, status, create_time | 检查检验申请 | ✅ |
+| 检查结果 | lab_result_id | lab_order_id, sample_id, result, abnormal_flag, technician_id, report_time | 检验结果 | ✅ |
+| 发票记录 | invoice_id | charge_id, invoice_no, invoice_time, amount, tax | 电子发票 | ✅ |
+| 随访计划 | followup_id | patient_id, doctor_id, plan_date, content, status, result | 随访管理 | ✅ |
+| 评价记录 | review_id | patient_id, doctor_id, visit_id, score, comment, review_time | 满意度评价 | ✅ |
+| 操作日志 | log_id | user_id, action, target, result, ip, create_time | 审计日志 | ✅ |
+| 违约记录 | breach_id | registration_id, breach_time, breach_type | 违约记录 | ✅ |
+| 考勤记录 | attendance_id | doctor_id, date, check_in_time, check_out_time, status | 医生考勤 | ✅ |
+| 巡视记录 | patrol_id | nurse_id, patient_id, content, status, create_time | 候诊巡视 | ✅ |
+| 消息记录 | message_id | recipient_id, title, content, msg_type, is_read, create_time | 消息通知 | ✅ |
+| 支付流水 | payment_id | payment_no, charge_id, channel, amount, status, create_time | 支付记录 | ✅ |
 
 ### 4.3 数据字典
 
@@ -785,14 +795,14 @@
 - `code = 200`：业务成功
 - `code = 500`：业务失败，`msg` 返回错误信息
 
-### 5.2 外部接口（待实现）
+### 5.2 外部接口
 
-| 接口 | 说明 | 优先级 |
-|:----:|:----:|:------:|
-| 医保结算接口 | 与医保系统对接实现实时结算 | 高 |
-| 短信接口 | 预约提醒、就诊提醒短信通知 | 中 |
-| 微信/支付宝支付 | 在线缴费支付通道 | 中 |
-| LIS/PACS 接口 | 检查检验系统数据交换 | 低 |
+| 接口 | 说明 | 优先级 | 状态 |
+|:----:|:----:|:------:|:----:|
+| 医保结算接口 | 与医保系统对接实现实时结算 | 高 | ⬜ 待实现 |
+| 短信接口 | 预约提醒、就诊提醒短信通知 | 中 | ✅ 已实现（消息中心站内信/短信） |
+| 微信/支付宝支付 | 在线缴费支付通道 | 中 | ✅ 已实现（Mock 支付） |
+| LIS/PACS 接口 | 检查检验系统数据交换 | 低 | ⬜ 待实现 |
 
 ---
 
@@ -855,9 +865,9 @@
 | 10 | 药品管理 | ✅ 已实现 | |
 | 11 | 通知公告 | ✅ 已实现 | |
 | **门诊前台** |
-| 12 | 导诊分诊 | ⬜ 规划中 | 智能导诊 |
+| 12 | 导诊分诊 | ✅ 已实现 | 智能导诊（症状→科室） |
 | 13 | 报到签到 | ✅ 已实现 | |
-| 14 | 窗口挂号（挂号员） | ⬜ 规划中 | 目前仅支持病人自助挂号 |
+| 14 | 窗口挂号（挂号员） | ✅ 已实现 | /windowRegistration/create |
 | **候诊就诊** |
 | 15 | 候诊叫号 | ✅ 已实现 | |
 | 16 | 护士预检 | ✅ 已实现 | |
@@ -876,15 +886,17 @@
 | 27 | 满意度评价 | ✅ 已实现 | |
 | **系统支撑** |
 | 28 | 健康档案 | ✅ 已实现 | |
-| 29 | 医生考勤 | ⬜ 待实现 | |
-| 30 | 违约处理 | ⬜ 待实现 | 有表结构，缺业务逻辑 |
-| 31 | 库存预警 | ⬜ 待实现 | |
+| 29 | 医生考勤 | ✅ 已实现 | /attendance/checkIn/checkOut |
+| 30 | 违约处理 | ✅ 已实现 | 超时未报到自动记录违约 |
+| 31 | 库存预警 | ✅ 已实现 | 低库存/近效期提醒 |
 | 32 | 报表统计 | ✅ 已实现 | |
 | 33 | 操作日志 | ✅ 已实现 | |
 | 34 | 数据字典管理 | ✅ 已实现 | |
 | 35 | 系统参数配置 | ✅ 已实现 | |
-| 36 | 数据备份恢复 | ⬜ 待实现 | |
+| 36 | 数据备份恢复 | ✅ 已实现 | 手动备份/恢复/下载 |
+| 37 | 权限分配 | ✅ 已实现 | 用户角色管理、密码重置 |
+| 38 | 消息中心 | ✅ 已实现 | 站内信/短信通知 |
 | **外部接口** |
-| 37 | 医保接口 | ⬜ 待实现 | |
-| 38 | 短信接口 | ⬜ 规划中 | 预约提醒 |
-| 39 | 支付接口 | ⬜ 规划中 | 微信/支付宝 |
+| 39 | 医保接口 | ⬜ 待实现 | |
+| 40 | 短信接口 | ✅ 已实现 | 消息中心（站内信+短信） |
+| 41 | 支付接口 | ✅ 已实现 | 微信/支付宝 Mock 支付 |

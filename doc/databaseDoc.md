@@ -20,7 +20,7 @@
 |:------:|:----:|:----:|:----:|:----:|
 | user_id | INT | - | PK, AI | 用户 ID |
 | username | VARCHAR | 20 | - | 登录用户名 |
-| password | VARCHAR | 20 | - | 登录密码（明文存储） |
+| password | VARCHAR | 128 | - | 登录密码（bcrypt加密存储） |
 | user_role | VARCHAR | 10 | - | 用户角色：admin / doctor / director / patient |
 
 **关联关系：**
@@ -45,6 +45,7 @@
 | address | VARCHAR | 100 | - | 地址 |
 | permission | VARCHAR | 10 | - | 权限状态 |
 | allergy_history | VARCHAR | 200 | - | 过敏史 |
+| prepaid_balance | FLOAT | - | - | 预交金余额 |
 
 **关联关系：**
 - 一对多 → `hoimsystem_registration`（patient_id）
@@ -305,8 +306,9 @@
 | supplier | VARCHAR | 24 | - | 供应商 |
 | remark | VARCHAR | 100 | - | 备注 |
 | status | INT | - | - | 状态（0=正常，1=停用） |
+| antibiotic_level | INT | - | - | 抗菌级别（0=非抗菌 1=非限制 2=限制 3=特殊） |
 
-> 注：`status` 为规划中新增字段。
+> 注：`status`、`antibiotic_level` 为新增字段。
 
 ---
 
@@ -593,3 +595,16 @@
 | 23 | hoimsystem_operation_log | 操作日志表 | ✅ | 新增 |
 | 24 | hoimsystem_dict | 数据字典表 | ✅ | 新增 |
 | 25 | hoimsystem_config | 系统参数表 | ✅ | 新增 |
+| 26 | hoimsystem_attendance | 考勤记录表 | ✅ | 新增 |
+| 27 | hoimsystem_patrol_record | 巡视记录表 | ✅ | 新增 |
+| 28 | hoimsystem_message | 消息记录表 | ✅ | 新增 |
+| 29 | hoimsystem_payment | 支付流水表 | ✅ | 新增 |
+| 30 | hoimsystem_triage_record | 分诊记录表 | ✅ | 新增 |
+| 31 | hoimsystem_consumable | 耗材表 | ✅ | 新增 |
+| 32 | hoimsystem_purchase_order | 采购订单表 | ✅ | 新增 |
+| 33 | hoimsystem_purchase_order_item | 采购明细表 | ✅ | 新增 |
+| 34 | hoimsystem_adverse_reaction | 不良反应表 | ✅ | 新增 |
+| 35 | hoimsystem_adverse_event | 不良事件表 | ✅ | 新增 |
+| 36 | hoimsystem_referral | 转诊记录表 | ✅ | 新增 |
+| 37 | hoimsystem_mdt_case | MDT会诊表 | ✅ | 新增 |
+| 38 | hoimsystem_clinical_pathway | 临床路径表 | ✅ | 新增 |

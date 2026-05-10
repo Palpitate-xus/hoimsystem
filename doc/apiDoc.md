@@ -820,9 +820,154 @@ baseURL：`/api`
   - `config_value`: 参数值
   - `description`: 参数说明
 
+### 13.4 消息中心
+
+| 状态 | url | method | payload | response |
+|:----:|:--------------------:|:------:|:-------:|:--------:|
+| ✅ | /message/getList | GET | - | `{ code, msg, data: Message[] }` |
+| ✅ | /message/send | POST | `{ recipient_id, title, content, msg_type }` | `{ code, msg }` |
+| ✅ | /message/read | POST | `{ message_id }` | `{ code, msg }` |
+
+### 13.5 数据备份恢复
+
+| 状态 | url | method | payload | response |
+|:----:|:--------------------:|:------:|:-------:|:--------:|
+| ✅ | /backup/create | POST | - | `{ code, msg, data: { filename } }` |
+| ✅ | /backup/getList | GET | - | `{ code, msg, data: Backup[] }` |
+| ✅ | /backup/restore | POST | `{ filename }` | `{ code, msg }` |
+| ✅ | /backup/delete | POST | `{ filename }` | `{ code, msg }` |
+| ✅ | /backup/download/{filename} | GET | - | file |
+
+### 13.6 权限分配
+
+| 状态 | url | method | payload | response |
+|:----:|:--------------------:|:------:|:-------:|:--------:|
+| ✅ | /user/getList | GET | `?role=` | `{ code, msg, data: User[] }` |
+| ✅ | /user/updateRole | POST | `{ user_id, user_role }` | `{ code, msg }` |
+| ✅ | /user/resetPassword | POST | `{ user_id }` | `{ code, msg, data: { new_password } }` |
+| ✅ | /user/delete | POST | `{ user_id }` | `{ code, msg }` |
+
 ---
 
-## 十四、接口状态汇总
+## 十四、新增扩展模块
+
+### 14.1 支付接口
+
+| 状态 | url | method | payload | response |
+|:----:|:--------------------:|:------:|:-------:|:--------:|
+| ✅ | /payment/create | POST | `{ charge_id, channel, amount }` | `{ code, msg, data: { payment_no, qr_code_data } }` |
+| ✅ | /payment/query/{payment_no} | GET | - | `{ code, msg, data: Payment }` |
+| ✅ | /payment/mockNotify | POST | `{ payment_no }` | `{ code, msg }` |
+| ✅ | /payment/getList | GET | - | `{ code, msg, data: Payment[] }` |
+
+### 14.2 智能导诊
+
+| 状态 | url | method | payload | response |
+|:----:|:--------------------:|:------:|:-------:|:--------:|
+| ✅ | /triage/suggest | POST | `{ symptom }` | `{ code, msg, data: { suggestions } }` |
+| ✅ | /triage/keywords | GET | - | `{ code, msg, data: string[] }` |
+
+### 14.3 分诊台管理
+
+| 状态 | url | method | payload | response |
+|:----:|:--------------------:|:------:|:-------:|:--------:|
+| ✅ | /triageDesk/create | POST | `{ identity, symptom, level, department_id, ... }` | `{ code, msg }` |
+| ✅ | /triageDesk/getList | GET | `?level=&status=` | `{ code, msg, data: TriageRecord[] }` |
+| ✅ | /triageDesk/updateStatus | POST | `{ triage_record_id, status }` | `{ code, msg }` |
+
+### 14.4 耗材管理
+
+| 状态 | url | method | payload | response |
+|:----:|:--------------------:|:------:|:-------:|:--------:|
+| ✅ | /consumable/getList | GET | - | `{ code, msg, data: Consumable[] }` |
+| ✅ | /consumable/create | POST | `{ name, category, stock, unit, price, supplier }` | `{ code, msg }` |
+| ✅ | /consumable/update | POST | `{ consumable_id, ... }` | `{ code, msg }` |
+| ✅ | /consumable/delete | POST | `{ consumable_id }` | `{ code, msg }` |
+
+### 14.5 药品采购管理
+
+| 状态 | url | method | payload | response |
+|:----:|:--------------------:|:------:|:-------:|:--------:|
+| ✅ | /purchase/create | POST | `{ supplier, items[] }` | `{ code, msg, data: { order_no } }` |
+| ✅ | /purchase/getList | GET | `?status=` | `{ code, msg, data: PurchaseOrder[] }` |
+| ✅ | /purchase/approve | POST | `{ purchase_id }` | `{ code, msg }` |
+| ✅ | /purchase/storage | POST | `{ purchase_id }` | `{ code, msg }` |
+| ✅ | /purchase/cancel | POST | `{ purchase_id }` | `{ code, msg }` |
+
+### 14.6 药品不良反应监测
+
+| 状态 | url | method | payload | response |
+|:----:|:--------------------:|:------:|:-------:|:--------:|
+| ✅ | /adverseReaction/create | POST | `{ patient_id, pharmaceutical_id, symptom, severity }` | `{ code, msg }` |
+| ✅ | /adverseReaction/getList | GET | - | `{ code, msg, data: AdverseReaction[] }` |
+| ✅ | /adverseReaction/updateStatus | POST | `{ reaction_id, status }` | `{ code, msg }` |
+
+### 14.7 不良事件上报
+
+| 状态 | url | method | payload | response |
+|:----:|:--------------------:|:------:|:-------:|:--------:|
+| ✅ | /adverseEvent/create | POST | `{ event_type, patient_id, description, severity }` | `{ code, msg }` |
+| ✅ | /adverseEvent/getList | GET | - | `{ code, msg, data: AdverseEvent[] }` |
+| ✅ | /adverseEvent/updateStatus | POST | `{ event_id, status, handle_result }` | `{ code, msg }` |
+
+### 14.8 CA数字签名
+
+| 状态 | url | method | payload | response |
+|:----:|:--------------------:|:------:|:-------:|:--------:|
+| ✅ | /digitalSignature/sign | POST | `{ content }` | `{ code, msg, data: { signer, sign_time, sign_hash, cert_sn } }` |
+| ✅ | /digitalSignature/verify | POST | `{ content, sign_hash }` | `{ code, msg, data: { valid } }` |
+
+### 14.9 预交金管理
+
+| 状态 | url | method | payload | response |
+|:----:|:--------------------:|:------:|:-------:|:--------:|
+| ✅ | /prepaid/getBalance | GET | `?identity=` | `{ code, msg, data: { balance } }` |
+| ✅ | /prepaid/recharge | POST | `{ identity, amount }` | `{ code, msg, data: { balance } }` |
+| ✅ | /prepaid/deduct | POST | `{ identity, amount }` | `{ code, msg, data: { balance } }` |
+
+### 14.10 双向转诊
+
+| 状态 | url | method | payload | response |
+|:----:|:--------------------:|:------:|:-------:|:--------:|
+| ✅ | /referral/create | POST | `{ patient_id, from_department_id, to_department_id, referral_type, reason }` | `{ code, msg }` |
+| ✅ | /referral/getList | GET | - | `{ code, msg, data: Referral[] }` |
+| ✅ | /referral/updateStatus | POST | `{ referral_id, status }` | `{ code, msg }` |
+
+### 14.11 多学科会诊MDT
+
+| 状态 | url | method | payload | response |
+|:----:|:--------------------:|:------:|:-------:|:--------:|
+| ✅ | /mdt/create | POST | `{ patient_id, diagnosis, department_ids }` | `{ code, msg }` |
+| ✅ | /mdt/getList | GET | - | `{ code, msg, data: MdtCase[] }` |
+| ✅ | /mdt/update | POST | `{ mdt_id, status, result }` | `{ code, msg }` |
+
+### 14.12 临床路径
+
+| 状态 | url | method | payload | response |
+|:----:|:--------------------:|:------:|:-------:|:--------:|
+| ✅ | /clinicalPathway/create | POST | `{ name, disease_code, disease_name, steps, expected_days }` | `{ code, msg }` |
+| ✅ | /clinicalPathway/getList | GET | - | `{ code, msg, data: ClinicalPathway[] }` |
+| ✅ | /clinicalPathway/update | POST | `{ pathway_id, ... }` | `{ code, msg }` |
+| ✅ | /clinicalPathway/delete | POST | `{ pathway_id }` | `{ code, msg }` |
+
+### 14.13 号源池管理
+
+| 状态 | url | method | payload | response |
+|:----:|:--------------------:|:------:|:-------:|:--------:|
+| ✅ | /slotPool/getList | GET | - | `{ code, msg, data: SlotPool[] }` |
+| ✅ | /slotPool/adjust | POST | `{ schedule_id, number }` | `{ code, msg }` |
+
+### 14.14 医生考勤
+
+| 状态 | url | method | payload | response |
+|:----:|:--------------------:|:------:|:-------:|:--------:|
+| ✅ | /attendance/checkIn | POST | - | `{ code, msg, data: { status } }` |
+| ✅ | /attendance/checkOut | POST | - | `{ code, msg, data: { status } }` |
+| ✅ | /attendance/getList | GET | `?doctor_id=&start_date=&end_date=` | `{ code, msg, data: Attendance[] }` |
+
+---
+
+## 十五、接口状态汇总
 
 | 模块 | 接口总数 | ✅ 已实现 | 🔧 待实现 | 📋 规划中 |
 |:----:|:--------:|:--------:|:--------:|:--------:|
@@ -838,5 +983,19 @@ baseURL：`/api`
 | 检验科 | 3 | 3 | 0 | 0 |
 | 复诊随访 | 4 | 4 | 0 | 0 |
 | 报表统计 | 4 | 4 | 0 | 0 |
-| 系统管理 | 7 | 7 | 0 | 0 |
-| **合计** | **82** | **76** | **0** | **0** |
+| 系统管理 | 14 | 14 | 0 | 0 |
+| 支付接口 | 4 | 4 | 0 | 0 |
+| 智能导诊 | 2 | 2 | 0 | 0 |
+| 分诊台 | 3 | 3 | 0 | 0 |
+| 耗材管理 | 4 | 4 | 0 | 0 |
+| 采购管理 | 5 | 5 | 0 | 0 |
+| ADR监测 | 3 | 3 | 0 | 0 |
+| 不良事件 | 3 | 3 | 0 | 0 |
+| 数字签名 | 2 | 2 | 0 | 0 |
+| 预交金 | 3 | 3 | 0 | 0 |
+| 双向转诊 | 3 | 3 | 0 | 0 |
+| MDT会诊 | 3 | 3 | 0 | 0 |
+| 临床路径 | 4 | 4 | 0 | 0 |
+| 号源池 | 2 | 2 | 0 | 0 |
+| 医生考勤 | 3 | 3 | 0 | 0 |
+| **合计** | **143** | **143** | **0** | **0** |

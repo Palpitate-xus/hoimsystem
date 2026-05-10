@@ -550,3 +550,40 @@ def get_attendance_list(doctor_id: Optional[int] = None, start_date: Optional[st
             "status_code": item.status,
         })
     return {"code": 200, "msg": "success", "data": data}
+
+
+@router.get("/slotPool/getList")
+def get_slot_pool(db: Session = Depends(get_db)):
+    """号源池：按科室统计各时段号源总数"""
+    from sqlalchemy import func
+    from app.models import Department
+    depts = db.query(Department).all()
+    data = []
+    for d in depts:
+        schedules = db.query(DoctorSchedule).filter(DoctorSchedule.doctor_id.in_(
+            db.query(Doctor.doctor_id).filter(Doctor.department_id == d.department_id)
+        )).all()
+        total_slots = sum(s.number for s in schedules)
+        data.append({
+            "department_id": d.department_id,
+            "department_name": d.name,
+            "doctor_count": len(set(s.doctor_id for s in schedules)),
+            "total_slots": total_slots,
+            "schedules_count": len(schedules),
+        })
+    return {"code": 200, "msg": "success", "data": data}
+
+
+@router.post("/slotPool/adjust")
+def adjust_slot(req: dict, db: Session = Depends(get_db)):
+    """调整号源数量"""
+    schedule = db.query(DoctorSchedule).filter(DoctorSchedule.schedule_id == req.get("schedule_id")).first()
+    if not schedule:
+        return {"code": 500, "msg": "排班记录不存在"}
+    new_number = req.get("number")
+    if new_number is not None and new_number >= 0:
+        schedule.number = new_number
+        db.add(schedule)
+        db.commit()
+    return {"code": 200, "msg": "success"}
+

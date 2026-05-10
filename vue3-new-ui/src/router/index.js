@@ -85,6 +85,12 @@ export const asyncRoutes = [
         component: () => import("@/views/admin/chargeRecords.vue"),
         meta: { title: "收费记录查询", permissions: ["admin"] },
       },
+      {
+        path: "slotPool",
+        name: "SlotPool",
+        component: () => import("@/views/admin/slotPool.vue"),
+        meta: { title: "号源池管理", permissions: ["admin"] },
+      },
     ],
   },
 

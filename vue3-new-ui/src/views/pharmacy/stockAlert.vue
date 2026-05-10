@@ -1,9 +1,9 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="库存预警" />
+    <vab-page-header title="库存预警" description="监控药品库存，查看预警和效期提醒" />
     <el-tabs v-model="activeTab">
       <el-tab-pane label="库存不足预警" name="lowStock">
-        <el-form :inline="true">
+        <el-form :inline="true" class="page-toolbar">
           <el-form-item label="阈值">
             <el-input-number v-model="threshold" :min="1" :max="1000" />
           </el-form-item>
@@ -16,7 +16,7 @@
         </el-form>
         <el-alert v-if="lowStockList.length > 0" :title="`发现 ${lowStockList.length} 种药品库存不足`" type="warning" :closable="false" show-icon />
         <el-alert v-else title="所有药品库存充足" type="success" :closable="false" show-icon />
-        <el-table :data="lowStockList" style="margin-top:15px">
+        <el-table :data="lowStockList">
           <el-table-column prop="id" label="ID" width="60" />
           <el-table-column prop="name" label="药品名称" />
           <el-table-column prop="stock" label="当前库存" sortable>
@@ -34,7 +34,7 @@
       </el-tab-pane>
 
       <el-tab-pane label="有效期预警" name="nearExpiry">
-        <el-form :inline="true">
+        <el-form :inline="true" class="page-toolbar">
           <el-form-item label="提前天数">
             <el-input-number v-model="days" :min="7" :max="365" />
           </el-form-item>
@@ -47,7 +47,7 @@
         </el-form>
         <el-alert v-if="nearExpiryList.length > 0" :title="`发现 ${nearExpiryList.length} 种药品即将过期`" type="warning" :closable="false" show-icon />
         <el-alert v-else title="暂无即将过期的药品" type="success" :closable="false" show-icon />
-        <el-table :data="nearExpiryList" style="margin-top:15px">
+        <el-table :data="nearExpiryList">
           <el-table-column prop="id" label="ID" width="60" />
           <el-table-column prop="name" label="药品名称" />
           <el-table-column prop="stock" label="库存" />

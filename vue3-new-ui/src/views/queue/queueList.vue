@@ -1,15 +1,16 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="候诊队列" />
+    <vab-page-header title="候诊队列" description="管理患者候诊队列，执行叫号和过号操作" />
     <el-card>
-      
-      <el-input
-        v-model="searchQuery"
-        placeholder="搜索..."
-        clearable
-        style="width: 200px; margin-left: 10px;"
-      ></el-input>
-      <el-button type="primary" @click="fetchList" style="margin-left: 10px;">搜索</el-button>
+      <div class="page-toolbar">
+        <el-input
+          v-model="searchQuery"
+          placeholder="搜索..."
+          clearable
+          class="page-search-input"
+        ></el-input>
+        <el-button type="primary" @click="fetchList">搜索</el-button>
+      </div>
       <el-table :data="paginatedList" v-loading="loading">
         <el-table-column prop="queue_id" label="队列ID" />
         <el-table-column prop="queue_number" label="排队序号" />
@@ -44,7 +45,7 @@
         :page-sizes="[10, 20, 50, 100]"
         layout="total, sizes, prev, pager, next, jumper"
         :total="total"
-        style="margin-top: 15px; justify-content: flex-end;"
+        class="pagination-wrapper"
       />
 
     </el-card>

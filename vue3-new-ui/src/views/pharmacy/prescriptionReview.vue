@@ -1,11 +1,13 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="处方点评" />
+    <vab-page-header title="处方点评" description="对处方用药合理性进行专业点评" />
     <el-card>
-      <el-input v-model="keyword" placeholder="搜索..." clearable style="width: 200px;" />
-      <el-button type="primary" @click="loadData" style="margin-left: 10px;">搜索</el-button>
+      <div class="page-toolbar">
+        <el-input v-model="keyword" placeholder="搜索..." clearable class="page-search-input" />
+        <el-button type="primary" @click="loadData">搜索</el-button>
+      </div>
 
-      <el-table :data="list" style="margin-top: 15px;">
+      <el-table :data="list">
         <el-table-column prop="uuid" label="处方ID" width="280" />
         <el-table-column prop="patient_name" label="病人" />
         <el-table-column prop="doctor_name" label="医生" />
@@ -37,7 +39,7 @@
       <p>处方ID: {{ currentRow.uuid }}</p>
       <p>病人: {{ currentRow.patient_name }}</p>
       <p>医生: {{ currentRow.doctor_name }}</p>
-      <el-form :model="form" label-width="80px" style="margin-top: 15px;">
+      <el-form :model="form" label-width="80px" class="dialog-form">
         <el-form-item label="评分">
           <el-rate v-model="form.score" :max="5" />
         </el-form-item>

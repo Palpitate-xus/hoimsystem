@@ -1,17 +1,18 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="生命体征录入" />
+    <vab-page-header title="生命体征录入" description="为患者录入和查询生命体征数据" />
     <el-card>
-      <el-button type="primary" @click="handleAdd">录入体征</el-button>
-      
-      <el-input
-        v-model="searchQuery"
-        placeholder="搜索..."
-        clearable
-        style="width: 200px; margin-left: 10px;"
-      ></el-input>
-      <el-button type="primary" @click="fetchList" style="margin-left: 10px;">搜索</el-button>
-      <el-table :data="paginatedList" v-loading="loading" style="margin-top: 15px">
+      <div class="page-toolbar">
+        <el-button type="primary" @click="handleAdd">录入体征</el-button>
+        <el-input
+          v-model="searchQuery"
+          placeholder="搜索..."
+          clearable
+          class="page-search-input"
+        ></el-input>
+        <el-button type="primary" @click="fetchList">搜索</el-button>
+      </div>
+      <el-table :data="paginatedList" v-loading="loading">
         <el-table-column prop="id" label="ID"  sortable />
         <el-table-column prop="patient_name" label="患者"  sortable />
         <el-table-column prop="temperature" label="体温" />
@@ -26,15 +27,15 @@
         :page-sizes="[10, 20, 50, 100]"
         layout="total, sizes, prev, pager, next, jumper"
         :total="total"
-        style="margin-top: 15px; justify-content: flex-end;"
+        class="pagination-wrapper"
       />
 
     </el-card>
 
     <el-dialog v-model="dialogVisible" title="录入生命体征" width="600px">
-      <el-form :model="form" label-width="120px">
+      <el-form :model="form" label-width="120px" class="dialog-form">
         <el-form-item label="患者">
-          <el-select v-model="form.patient_id" placeholder="请选择患者" style="width:100%" filterable>
+          <el-select v-model="form.patient_id" placeholder="请选择患者" class="form-full-width" filterable>
             <el-option v-for="p in patientOptions" :key="p.id" :label="p.name" :value="p.id" />
           </el-select>
         </el-form-item>

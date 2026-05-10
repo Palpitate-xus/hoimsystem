@@ -1,6 +1,6 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="窗口挂号" />
+    <vab-page-header title="窗口挂号" description="收费窗口代患者办理现场挂号" />
     <el-card>
       <el-form :model="form" label-width="100px">
         <el-form-item label="身份证号">

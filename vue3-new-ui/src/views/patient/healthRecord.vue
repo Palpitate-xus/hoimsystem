@@ -1,6 +1,6 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="健康档案" />
+    <vab-page-header title="健康档案" description="查看和管理个人健康档案信息" />
     <el-card>
       <el-descriptions title="基本信息" :column="2" border>
         <el-descriptions-item label="姓名">{{ profile.name }}</el-descriptions-item>
@@ -15,13 +15,15 @@
 
     <el-card style="margin-top: 20px">
       <template #header>就诊记录</template>
-      <el-input
-        v-model="searchQuery"
-        placeholder="搜索..."
-        clearable
-        style="width: 200px; margin-bottom: 10px;"
-      ></el-input>
-      <el-button type="primary" @click="fetchVisits" style="margin-left: 10px; margin-bottom: 10px;">搜索</el-button>
+      <div class="page-toolbar">
+        <el-input
+          v-model="searchQuery"
+          placeholder="搜索..."
+          clearable
+          class="page-search-input"
+        ></el-input>
+        <el-button type="primary" @click="fetchVisits">搜索</el-button>
+      </div>
       <el-table :data="paginatedVisits" v-loading="loading">
         <el-table-column prop="visit_time" label="就诊时间"  sortable />
         <el-table-column prop="doctor_name" label="医生"  sortable />
@@ -34,7 +36,7 @@
         :page-sizes="[10, 20, 50, 100]"
         layout="total, sizes, prev, pager, next, jumper"
         :total="visits.length"
-        style="margin-top: 15px; justify-content: flex-end;"
+        class="pagination-wrapper"
       />
 
     </el-card>

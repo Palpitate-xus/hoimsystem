@@ -1,6 +1,6 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="报到签到" />
+    <vab-page-header title="报到签到" description="预约患者到院报到签到，管理违约记录" />
     <el-card>
       <el-form :model="form" label-width="120px">
         <el-form-item label="预约ID">

@@ -1,9 +1,9 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="报表统计" />
+    <vab-page-header title="报表统计" description="统计分析门诊量、财务、药品和医生工作量" />
     <el-tabs v-model="activeTab">
       <el-tab-pane label="门诊量统计" name="outpatient">
-        <el-form :inline="true" :model="outpatientForm">
+        <el-form :inline="true" :model="outpatientForm" class="page-toolbar">
           <el-form-item label="开始日期">
             <el-date-picker v-model="outpatientForm.start_date" type="date" value-format="YYYY-MM-DD" />
           </el-form-item>
@@ -26,14 +26,7 @@
         <el-descriptions title="统计结果" :column="1" border v-if="outpatientResult.total_visits !== undefined">
           <el-descriptions-item label="总就诊人次">{{ outpatientResult.total_visits }}</el-descriptions-item>
         </el-descriptions>
-        <el-input
-          v-model="searchQuery1"
-          placeholder="搜索..."
-          clearable
-          style="width: 200px; margin-top: 10px;"
-        ></el-input>
-        <el-button type="primary" @click="queryOutpatient" style="margin-left: 10px;">搜索</el-button>
-        <el-table :data="paginatedOutpatientDetails" style="margin-top:15px">
+        <el-table :data="paginatedOutpatientDetails">
           <el-table-column prop="label" label="分组"  sortable />
           <el-table-column prop="value" label="人次" />
         </el-table>
@@ -43,13 +36,13 @@
         :page-sizes="[10, 20, 50, 100]"
         layout="total, sizes, prev, pager, next, jumper"
         :total="(outpatientResult.details || []).length"
-        style="margin-top: 15px; justify-content: flex-end;"
+        class="pagination-wrapper"
       />
 
       </el-tab-pane>
 
       <el-tab-pane label="财务统计" name="finance">
-        <el-form :inline="true" :model="financeForm">
+        <el-form :inline="true" :model="financeForm" class="page-toolbar">
           <el-form-item label="开始日期">
             <el-date-picker v-model="financeForm.start_date" type="date" value-format="YYYY-MM-DD" />
           </el-form-item>
@@ -69,7 +62,7 @@
       </el-tab-pane>
 
       <el-tab-pane label="药品消耗统计" name="pharma">
-        <el-form :inline="true" :model="pharmaForm">
+        <el-form :inline="true" :model="pharmaForm" class="page-toolbar">
           <el-form-item label="开始日期">
             <el-date-picker v-model="pharmaForm.start_date" type="date" value-format="YYYY-MM-DD" />
           </el-form-item>
@@ -80,13 +73,6 @@
             <el-button type="primary" @click="queryPharma">查询</el-button>
           </el-form-item>
         </el-form>
-        <el-input
-          v-model="searchQuery2"
-          placeholder="搜索..."
-          clearable
-          style="width: 200px; margin-bottom: 10px;"
-        ></el-input>
-        <el-button type="primary" @click="queryPharma" style="margin-left: 10px;">搜索</el-button>
         <el-table :data="paginatedPharmaResult">
           <el-table-column prop="name" label="药品名称"  sortable />
           <el-table-column prop="total_number" label="消耗数量"  sortable />
@@ -97,13 +83,13 @@
         :page-sizes="[10, 20, 50, 100]"
         layout="total, sizes, prev, pager, next, jumper"
         :total="(pharmaResult || []).length"
-        style="margin-top: 15px; justify-content: flex-end;"
+        class="pagination-wrapper"
       />
 
       </el-tab-pane>
 
       <el-tab-pane label="医生工作量" name="workload">
-        <el-form :inline="true" :model="workloadForm">
+        <el-form :inline="true" :model="workloadForm" class="page-toolbar">
           <el-form-item label="开始日期">
             <el-date-picker v-model="workloadForm.start_date" type="date" value-format="YYYY-MM-DD" />
           </el-form-item>
@@ -119,13 +105,6 @@
             <el-button type="primary" @click="queryWorkload">查询</el-button>
           </el-form-item>
         </el-form>
-        <el-input
-          v-model="searchQuery3"
-          placeholder="搜索..."
-          clearable
-          style="width: 200px; margin-bottom: 10px;"
-        ></el-input>
-        <el-button type="primary" @click="queryWorkload" style="margin-left: 10px;">搜索</el-button>
         <el-table :data="paginatedWorkloadResult">
           <el-table-column prop="doctor_name" label="医生"  sortable />
           <el-table-column prop="visit_count" label="接诊人数" />
@@ -138,7 +117,7 @@
         :page-sizes="[10, 20, 50, 100]"
         layout="total, sizes, prev, pager, next, jumper"
         :total="(workloadResult || []).length"
-        style="margin-top: 15px; justify-content: flex-end;"
+        class="pagination-wrapper"
       />
 
       </el-tab-pane>

@@ -1,9 +1,11 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="候诊巡视记录" />
+    <vab-page-header title="候诊巡视记录" description="记录候诊区巡视情况和特殊患者状态" />
     <el-card>
-      <el-button type="primary" @click="dialogVisible = true">新增巡视记录</el-button>
-      <el-table :data="patrolList" style="margin-top: 15px;">
+      <div class="page-toolbar">
+        <el-button type="primary" @click="dialogVisible = true">新增巡视记录</el-button>
+      </div>
+      <el-table :data="patrolList">
         <el-table-column prop="patrol_id" label="ID" width="60" />
         <el-table-column prop="nurse_name" label="护士" />
         <el-table-column prop="patient_name" label="病人" />

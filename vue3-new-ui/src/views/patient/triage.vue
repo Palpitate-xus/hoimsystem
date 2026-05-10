@@ -1,6 +1,6 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="智能导诊" />
+    <vab-page-header title="智能导诊" description="输入症状描述，获取智能科室推荐" />
     <el-card>
       <div style="max-width: 700px; margin: 0 auto;">
         <h3 style="text-align: center; margin-bottom: 20px; color: #303133;">

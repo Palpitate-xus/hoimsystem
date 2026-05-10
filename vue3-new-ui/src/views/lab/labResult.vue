@@ -1,15 +1,17 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="检验科管理" />
+    <vab-page-header title="检验科管理" description="录入和查询检验检查结果数据" />
     <el-tabs v-model="activeTab">
       <el-tab-pane label="待处理申请" name="pending">
-        <el-input
-          v-model="searchQuery1"
-          placeholder="搜索..."
-          clearable
-          style="width: 200px; margin-bottom: 10px;"
-        ></el-input>
-        <el-button type="primary" @click="fetchPending" style="margin-left: 10px; margin-bottom: 10px;">搜索</el-button>
+        <div class="page-toolbar">
+          <el-input
+            v-model="searchQuery1"
+            placeholder="搜索..."
+            clearable
+            class="page-search-input"
+          ></el-input>
+          <el-button type="primary" @click="fetchPending">搜索</el-button>
+        </div>
         <el-table :data="paginatedPendingList" v-loading="loading">
           <el-table-column prop="id" label="申请单ID"  sortable />
           <el-table-column prop="patient_name" label="患者"  sortable />
@@ -30,18 +32,20 @@
         :page-sizes="[10, 20, 50, 100]"
         layout="total, sizes, prev, pager, next, jumper"
         :total="pendingList.length"
-        style="margin-top: 15px; justify-content: flex-end;"
+        class="pagination-wrapper"
       />
 
       </el-tab-pane>
       <el-tab-pane label="检查结果" name="results">
-        <el-input
-          v-model="searchQuery2"
-          placeholder="搜索..."
-          clearable
-          style="width: 200px; margin-bottom: 10px;"
-        ></el-input>
-        <el-button type="primary" @click="fetchResults" style="margin-left: 10px; margin-bottom: 10px;">搜索</el-button>
+        <div class="page-toolbar">
+          <el-input
+            v-model="searchQuery2"
+            placeholder="搜索..."
+            clearable
+            class="page-search-input"
+          ></el-input>
+          <el-button type="primary" @click="fetchResults">搜索</el-button>
+        </div>
         <el-table :data="paginatedResultList" v-loading="loading2">
           <el-table-column prop="id" label="结果ID"  sortable />
           <el-table-column prop="check_name" label="检查名称"  sortable />
@@ -61,14 +65,14 @@
         :page-sizes="[10, 20, 50, 100]"
         layout="total, sizes, prev, pager, next, jumper"
         :total="resultList.length"
-        style="margin-top: 15px; justify-content: flex-end;"
+        class="pagination-wrapper"
       />
 
       </el-tab-pane>
     </el-tabs>
 
     <el-dialog v-model="dialogVisible" title="录入检查结果" width="600px">
-      <el-form :model="form" label-width="100px">
+      <el-form :model="form" label-width="100px" class="dialog-form">
         <el-form-item label="申请单ID">
           <el-input v-model="form.lab_order_id" disabled />
         </el-form-item>

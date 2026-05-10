@@ -1,12 +1,14 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="耗材管理" />
+    <vab-page-header title="耗材管理" description="管理医疗耗材信息和库存" />
     <el-card>
-      <el-button type="primary" @click="handleAdd">新增耗材</el-button>
-      <el-input v-model="searchQuery" placeholder="搜索..." clearable style="width: 200px; margin-left: 10px;" />
-      <el-button type="primary" @click="fetchList" style="margin-left: 10px;">搜索</el-button>
+      <div class="page-toolbar">
+        <el-button type="primary" @click="handleAdd">新增耗材</el-button>
+        <el-input v-model="searchQuery" placeholder="搜索..." clearable class="page-search-input" />
+        <el-button type="primary" @click="fetchList">搜索</el-button>
+      </div>
 
-      <el-table :data="list" v-loading="loading" style="margin-top: 15px">
+      <el-table :data="list" v-loading="loading">
         <el-table-column prop="consumable_id" label="ID" width="60" />
         <el-table-column prop="name" label="名称" />
         <el-table-column prop="category" label="分类" width="100" />
@@ -30,7 +32,7 @@
     </el-card>
 
     <el-dialog v-model="dialogVisible" :title="isEdit ? '编辑耗材' : '新增耗材'" width="500px">
-      <el-form :model="form" label-width="80px">
+      <el-form :model="form" label-width="80px" class="dialog-form">
         <el-form-item label="名称">
           <el-input v-model="form.name" />
         </el-form-item>

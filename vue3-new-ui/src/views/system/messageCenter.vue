@@ -1,6 +1,6 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="消息中心" />
+    <vab-page-header title="消息中心" description="查看和管理系统消息通知" />
     <el-card>
       <el-table :data="messageList">
         <el-table-column prop="title" label="标题" />

@@ -1,15 +1,17 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="费用管理" />
+    <vab-page-header title="费用管理" description="管理患者费用记录，支持缴费和退费处理" />
     <el-card>
 
-      <el-input
-        v-model="searchQuery"
-        placeholder="搜索..."
-        clearable
-        style="width: 200px; margin-left: 10px;"
-      ></el-input>
-      <el-button type="primary" @click="fetchList" style="margin-left: 10px;">搜索</el-button>
+      <div class="page-toolbar">
+        <el-input
+          v-model="searchQuery"
+          placeholder="搜索..."
+          clearable
+          class="page-search-input"
+        ></el-input>
+        <el-button type="primary" @click="fetchList">搜索</el-button>
+      </div>
       <el-table :data="paginatedList" v-loading="loading">
         <el-table-column prop="id" label="ID"  sortable />
         <el-table-column prop="charge_time" label="创建时间"  sortable />
@@ -36,13 +38,13 @@
         :page-sizes="[10, 20, 50, 100]"
         layout="total, sizes, prev, pager, next, jumper"
         :total="total"
-        style="margin-top: 15px; justify-content: flex-end;"
+        class="pagination-wrapper"
       />
 
     </el-card>
 
     <el-dialog v-model="refundVisible" title="退费" width="500px">
-      <el-form :model="refundForm" label-width="100px">
+      <el-form :model="refundForm" label-width="100px" class="dialog-form">
         <el-form-item label="退费原因">
           <el-input v-model="refundForm.reason" type="textarea" :rows="3" />
         </el-form-item>

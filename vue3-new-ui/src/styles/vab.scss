@@ -474,4 +474,121 @@ html {
       }
     }
   }
+
+  /* ========== 页面美观性统一工具类 ========== */
+
+  /* 页面顶部操作栏：搜索、筛选、新增按钮等区域 */
+  .page-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px dashed #e4e7ed;
+    flex-wrap: wrap;
+
+    &.no-border {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .page-search-input {
+      width: 220px;
+    }
+
+    .el-form--inline {
+      .el-form-item {
+        margin-bottom: 0;
+        margin-right: 12px;
+      }
+    }
+  }
+
+  /* 分页容器 */
+  .pagination-wrapper {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 20px;
+    padding-top: 10px;
+  }
+
+  /* 表单元素全宽 */
+  .form-full-width {
+    width: 100% !important;
+  }
+
+  /* 对话框表单统一样式 */
+  .dialog-form {
+    .el-form-item {
+      margin-bottom: 18px;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+
+    .el-select,
+    .el-input,
+    .el-input-number,
+    .el-date-editor {
+      width: 100%;
+    }
+  }
+
+  /* 表格空状态美化 */
+  .el-table__empty-block {
+    padding: 40px 0;
+
+    .el-empty__image {
+      width: 120px;
+    }
+
+    .el-empty__description {
+      font-size: 14px;
+      color: #909399;
+      margin-top: 12px;
+    }
+  }
+
+  /* 统计卡片增强 */
+  .stat-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    cursor: default;
+
+    &:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12) !important;
+    }
+  }
+
+  /* 状态标签颜色映射 */
+  .status-tag {
+    &-success { color: #67c23a; }
+    &-warning { color: #e6a23c; }
+    &-danger { color: #f56c6c; }
+    &-info { color: #909399; }
+    &-primary { color: #409eff; }
+  }
+
+  /* 信息展示卡片 */
+  .info-card {
+    .el-card__header {
+      font-weight: 600;
+      font-size: 15px;
+      color: #303133;
+      border-bottom: 1px solid #f0f0f0;
+      padding: 14px 20px;
+    }
+  }
+
+  /* 响应式：小屏幕下工具栏自动换行 */
+  @media (max-width: 768px) {
+    .page-toolbar {
+      gap: 8px;
+
+      .page-search-input {
+        width: 100%;
+      }
+    }
+  }
 }

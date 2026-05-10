@@ -1,8 +1,8 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="多学科会诊" />
+    <vab-page-header title="多学科会诊" description="发起和参与多学科联合会诊申请" />
     <el-card>
-      <div style="margin-bottom: 16px;">
+      <div class="page-toolbar">
         <el-button type="primary" @click="handleAdd">新增会诊</el-button>
       </div>
       <el-table :data="tableData" v-loading="loading" border>
@@ -25,7 +25,7 @@
     </el-card>
 
     <el-dialog v-model="dialogVisible" title="新增会诊" width="500px">
-      <el-form :model="form" label-width="100px">
+      <el-form :model="form" label-width="100px" class="dialog-form">
         <el-form-item label="患者ID">
           <el-input v-model="form.patient_id" />
         </el-form-item>
@@ -43,7 +43,7 @@
     </el-dialog>
 
     <el-dialog v-model="resultDialogVisible" title="录入会诊结果" width="500px">
-      <el-form :model="resultForm" label-width="100px">
+      <el-form :model="resultForm" label-width="100px" class="dialog-form">
         <el-form-item label="会诊结果">
           <el-input v-model="resultForm.result" type="textarea" :rows="4" />
         </el-form-item>

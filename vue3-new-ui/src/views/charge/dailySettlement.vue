@@ -1,8 +1,8 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="日结对账" />
+    <vab-page-header title="日结对账" description="收费员每日结算和对账管理" />
     <el-card>
-      <el-form :inline="true">
+      <el-form :inline="true" class="page-toolbar">
         <el-form-item label="日期">
           <el-date-picker v-model="date" type="date" value-format="YYYY-MM-DD" />
         </el-form-item>

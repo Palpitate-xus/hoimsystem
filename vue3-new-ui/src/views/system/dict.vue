@@ -1,8 +1,8 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="数据字典" />
+    <vab-page-header title="数据字典" description="维护系统数据字典和编码规范" />
     <el-card>
-      <el-form :inline="true" :model="queryForm">
+      <el-form :inline="true" :model="queryForm" class="page-toolbar">
         <el-form-item label="字典类型">
           <el-input v-model="queryForm.dict_type" placeholder="例如 gender" />
         </el-form-item>
@@ -10,16 +10,17 @@
           <el-button type="primary" @click="fetchList">查询</el-button>
         </el-form-item>
       </el-form>
-      <el-button type="primary" @click="handleAdd">新增字典项</el-button>
-      
-      <el-input
-        v-model="searchQuery"
-        placeholder="搜索..."
-        clearable
-        style="width: 200px; margin-left: 10px;"
-      ></el-input>
-      <el-button type="primary" @click="fetchList" style="margin-left: 10px;">搜索</el-button>
-      <el-table :data="paginatedList" v-loading="loading" style="margin-top: 15px">
+      <div class="page-toolbar">
+        <el-button type="primary" @click="handleAdd">新增字典项</el-button>
+        <el-input
+          v-model="searchQuery"
+          placeholder="搜索..."
+          clearable
+          class="page-search-input"
+        ></el-input>
+        <el-button type="primary" @click="fetchList">搜索</el-button>
+      </div>
+      <el-table :data="paginatedList" v-loading="loading">
         <el-table-column prop="dict_id" label="ID" />
         <el-table-column prop="dict_type" label="类型" />
         <el-table-column prop="dict_code" label="编码" />
@@ -38,13 +39,13 @@
         :page-sizes="[10, 20, 50, 100]"
         layout="total, sizes, prev, pager, next, jumper"
         :total="total"
-        style="margin-top: 15px; justify-content: flex-end;"
+        class="pagination-wrapper"
       />
 
     </el-card>
 
     <el-dialog v-model="dialogVisible" :title="isEdit?'编辑字典项':'新增字典项'" width="500px">
-      <el-form :model="form" label-width="100px">
+      <el-form :model="form" label-width="100px" class="dialog-form">
         <el-form-item label="字典类型">
           <el-input v-model="form.dict_type" />
         </el-form-item>

@@ -1,7 +1,7 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="违约记录" />
-    <el-form :inline="true">
+    <vab-page-header title="违约记录" description="查看患者预约挂号违约记录和处理情况" />
+    <el-form :inline="true" class="page-toolbar">
       <el-form-item label="病人ID">
         <el-input v-model="searchPatientId" placeholder="输入病人ID筛选" clearable style="width:180px" />
       </el-form-item>
@@ -13,7 +13,7 @@
     <el-alert v-if="breachList.length > 0" :title="`共 ${breachList.length} 条违约记录`" type="warning" :closable="false" show-icon />
     <el-alert v-else title="暂无违约记录" type="success" :closable="false" show-icon />
 
-    <el-table :data="breachList" style="margin-top:15px">
+    <el-table :data="breachList">
       <el-table-column prop="breach_id" label="违约ID" width="280" />
       <el-table-column prop="patient_name" label="病人姓名" />
       <el-table-column prop="patient_id" label="病人ID" />

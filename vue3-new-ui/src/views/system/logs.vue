@@ -1,8 +1,8 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="操作日志" />
+    <vab-page-header title="操作日志" description="审计系统操作日志，支持筛选和查询" />
     <el-card>
-      <el-form :inline="true" :model="queryForm">
+      <el-form :inline="true" :model="queryForm" class="page-toolbar">
         <el-form-item label="用户ID">
           <el-input-number v-model="queryForm.user_id" :min="1" />
         </el-form-item>

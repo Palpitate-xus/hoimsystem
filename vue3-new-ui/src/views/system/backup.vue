@@ -1,6 +1,6 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="数据备份恢复" />
+    <vab-page-header title="数据备份恢复" description="执行数据备份和恢复操作" />
     <el-card>
       <el-alert
         title="备份恢复说明"
@@ -11,12 +11,14 @@
         style="margin-bottom: 20px;"
       />
 
-      <el-button type="primary" @click="createBackup" :loading="creating"
-        >立即备份</el-button
-      >
-      <el-button @click="fetchList">刷新列表</el-button>
+      <div class="page-toolbar">
+        <el-button type="primary" @click="createBackup" :loading="creating"
+          >立即备份</el-button
+        >
+        <el-button @click="fetchList">刷新列表</el-button>
+      </div>
 
-      <el-table :data="list" v-loading="loading" style="margin-top: 20px;">
+      <el-table :data="list" v-loading="loading">
         <el-table-column prop="filename" label="文件名" />
         <el-table-column prop="size_human" label="大小" width="120" />
         <el-table-column

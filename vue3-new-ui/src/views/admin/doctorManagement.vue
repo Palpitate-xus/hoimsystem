@@ -1,17 +1,18 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="医生管理" />
+    <vab-page-header title="医生管理" description="维护医生档案信息，支持新增、编辑和删除操作" />
     <el-card>
-      <el-button type="primary" @click="handleAdd">新增医生</el-button>
-      
-      <el-input
-        v-model="searchQuery"
-        placeholder="搜索..."
-        clearable
-        style="width: 200px; margin-left: 10px;"
-      ></el-input>
-      <el-button type="primary" @click="fetchList" style="margin-left: 10px;">搜索</el-button>
-      <el-table :data="paginatedList" v-loading="loading" style="margin-top: 15px">
+      <div class="page-toolbar">
+        <el-button type="primary" @click="handleAdd">新增医生</el-button>
+        <el-input
+          v-model="searchQuery"
+          placeholder="搜索..."
+          clearable
+          class="page-search-input"
+        ></el-input>
+        <el-button type="primary" @click="fetchList">搜索</el-button>
+      </div>
+      <el-table :data="paginatedList" v-loading="loading">
         <el-table-column prop="id" label="ID" width="60"  sortable />
         <el-table-column prop="name" label="姓名"  sortable />
         <el-table-column prop="sex" label="性别" :formatter="(row)=>row.sex===0?'女':'男'" sortable />
@@ -32,13 +33,13 @@
         :page-sizes="[10, 20, 50, 100]"
         layout="total, sizes, prev, pager, next, jumper"
         :total="total"
-        style="margin-top: 15px; justify-content: flex-end;"
+        class="pagination-wrapper"
       />
 
     </el-card>
 
     <el-dialog v-model="dialogVisible" :title="isEdit?'编辑医生':'新增医生'" width="600px">
-      <el-form :model="form" label-width="100px">
+      <el-form :model="form" label-width="100px" class="dialog-form">
         <el-form-item label="登录用户名" v-if="!isEdit">
           <el-input v-model="form.username" />
         </el-form-item>
@@ -64,7 +65,7 @@
           <el-input v-model="form.phone" />
         </el-form-item>
         <el-form-item label="科室">
-          <el-select v-model="form.department" placeholder="请选择科室" style="width:100%" filterable>
+          <el-select v-model="form.department" placeholder="请选择科室" class="form-full-width" filterable>
             <el-option v-for="d in departmentOptions" :key="d.id" :label="d.name" :value="d.id" />
           </el-select>
         </el-form-item>

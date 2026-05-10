@@ -1,15 +1,16 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="系统参数" />
+    <vab-page-header title="系统参数" description="配置系统运行参数和基础设置" />
     <el-card>
-      
-      <el-input
-        v-model="searchQuery"
-        placeholder="搜索..."
-        clearable
-        style="width: 200px; margin-left: 10px;"
-      ></el-input>
-      <el-button type="primary" @click="fetchList" style="margin-left: 10px;">搜索</el-button>
+      <div class="page-toolbar">
+        <el-input
+          v-model="searchQuery"
+          placeholder="搜索..."
+          clearable
+          class="page-search-input"
+        ></el-input>
+        <el-button type="primary" @click="fetchList">搜索</el-button>
+      </div>
       <el-table :data="paginatedList" v-loading="loading">
         <el-table-column prop="config_key" label="参数键" />
         <el-table-column prop="config_value" label="参数值" />
@@ -26,13 +27,13 @@
         :page-sizes="[10, 20, 50, 100]"
         layout="total, sizes, prev, pager, next, jumper"
         :total="total"
-        style="margin-top: 15px; justify-content: flex-end;"
+        class="pagination-wrapper"
       />
 
     </el-card>
 
     <el-dialog v-model="dialogVisible" title="编辑参数" width="500px">
-      <el-form :model="form" label-width="100px">
+      <el-form :model="form" label-width="100px" class="dialog-form">
         <el-form-item label="参数键">
           <el-input v-model="form.config_key" disabled />
         </el-form-item>

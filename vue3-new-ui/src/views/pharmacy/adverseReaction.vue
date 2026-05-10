@@ -1,9 +1,11 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="药品不良反应监测" />
+    <vab-page-header title="药品不良反应监测" description="记录和跟踪药品不良反应事件" />
     <el-card>
-      <el-button type="primary" @click="handleAdd">上报ADR</el-button>
-      <el-table :data="list" v-loading="loading" style="margin-top: 15px">
+      <div class="page-toolbar">
+        <el-button type="primary" @click="handleAdd">上报ADR</el-button>
+      </div>
+      <el-table :data="list" v-loading="loading">
         <el-table-column prop="patient_name" label="患者" />
         <el-table-column prop="pharmaceutical_name" label="药品" />
         <el-table-column prop="symptom" label="症状" show-overflow-tooltip />
@@ -19,7 +21,7 @@
       </el-table>
     </el-card>
     <el-dialog v-model="dialogVisible" title="上报ADR" width="500px">
-      <el-form :model="form" label-width="80px">
+      <el-form :model="form" label-width="80px" class="dialog-form">
         <el-form-item label="患者ID"><el-input v-model="form.patient_id" /></el-form-item>
         <el-form-item label="药品ID"><el-input v-model="form.pharmaceutical_id" /></el-form-item>
         <el-form-item label="症状"><el-input v-model="form.symptom" type="textarea" :rows="3" /></el-form-item>

@@ -1,17 +1,19 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="药品采购管理" />
+    <vab-page-header title="药品采购管理" description="创建采购订单，跟踪采购入库流程" />
     <el-card>
-      <el-button type="primary" @click="handleAdd">新建采购单</el-button>
-      <el-select v-model="filterStatus" placeholder="筛选状态" clearable style="width: 150px; margin-left: 10px;" @change="fetchList">
-        <el-option label="待审批" :value="0" />
-        <el-option label="已审批" :value="1" />
-        <el-option label="已入库" :value="2" />
-        <el-option label="已取消" :value="3" />
-      </el-select>
-      <el-button @click="fetchList" style="margin-left: 10px;">刷新</el-button>
+      <div class="page-toolbar">
+        <el-button type="primary" @click="handleAdd">新建采购单</el-button>
+        <el-select v-model="filterStatus" placeholder="筛选状态" clearable class="page-search-input" @change="fetchList">
+          <el-option label="待审批" :value="0" />
+          <el-option label="已审批" :value="1" />
+          <el-option label="已入库" :value="2" />
+          <el-option label="已取消" :value="3" />
+        </el-select>
+        <el-button @click="fetchList">刷新</el-button>
+      </div>
 
-      <el-table :data="list" v-loading="loading" style="margin-top: 15px">
+      <el-table :data="list" v-loading="loading">
         <el-table-column prop="order_no" label="采购单号" />
         <el-table-column prop="supplier" label="供应商" />
         <el-table-column prop="total_amount" label="总金额" />
@@ -41,7 +43,7 @@
     </el-card>
 
     <el-dialog v-model="dialogVisible" title="新建采购单" width="600px">
-      <el-form :model="form" label-width="80px">
+      <el-form :model="form" label-width="80px" class="dialog-form">
         <el-form-item label="供应商">
           <el-input v-model="form.supplier" />
         </el-form-item>

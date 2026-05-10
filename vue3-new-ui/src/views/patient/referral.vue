@@ -1,8 +1,8 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="双向转诊" />
+    <vab-page-header title="双向转诊" description="查看转诊申请状态和转诊记录" />
     <el-card>
-      <div style="margin-bottom: 16px;">
+      <div class="page-toolbar">
         <el-button type="primary" @click="handleAdd">新增转诊</el-button>
       </div>
       <el-table :data="tableData" v-loading="loading" border>
@@ -31,7 +31,7 @@
     </el-card>
 
     <el-dialog v-model="dialogVisible" title="新增转诊" width="500px">
-      <el-form :model="form" label-width="120px">
+      <el-form :model="form" label-width="120px" class="dialog-form">
         <el-form-item label="患者ID">
           <el-input v-model="form.patient_id" />
         </el-form-item>

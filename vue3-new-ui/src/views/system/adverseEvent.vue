@@ -1,8 +1,8 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="不良事件上报" />
+    <vab-page-header title="不良事件上报" description="上报和处理医疗安全不良事件" />
     <el-card>
-      <div style="margin-bottom: 16px;">
+      <div class="page-toolbar">
         <el-button type="primary" @click="handleAdd">新增不良事件</el-button>
       </div>
       <el-table :data="tableData" v-loading="loading" border>
@@ -31,7 +31,7 @@
     </el-card>
 
     <el-dialog v-model="dialogVisible" title="新增不良事件" width="500px">
-      <el-form :model="form" label-width="100px">
+      <el-form :model="form" label-width="100px" class="dialog-form">
         <el-form-item label="事件类型">
           <el-select v-model="form.event_type" placeholder="请选择事件类型">
             <el-option label="用药错误" value="用药错误" />

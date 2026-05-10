@@ -1,8 +1,8 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="临床路径" />
+    <vab-page-header title="临床路径" description="管理临床路径方案和患者入径记录" />
     <el-card>
-      <div style="margin-bottom: 16px;">
+      <div class="page-toolbar">
         <el-button type="primary" @click="handleAdd">新增路径</el-button>
       </div>
       <el-table :data="tableData" v-loading="loading" border>
@@ -21,7 +21,7 @@
     </el-card>
 
     <el-dialog v-model="dialogVisible" :title="isEdit ? '编辑临床路径' : '新增临床路径'" width="500px">
-      <el-form :model="form" label-width="100px">
+      <el-form :model="form" label-width="100px" class="dialog-form">
         <el-form-item label="路径名称">
           <el-input v-model="form.name" />
         </el-form-item>

@@ -1,17 +1,18 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="处方管理" />
+    <vab-page-header title="处方管理" description="开具处方、查看处方状态和药品明细" />
     <el-card>
-      <el-button type="primary" @click="handleAdd">开处方</el-button>
-
-      <el-input
-        v-model="searchQuery"
-        placeholder="搜索..."
-        clearable
-        style="width: 200px; margin-left: 10px;"
-      ></el-input>
-      <el-button type="primary" @click="fetchList" style="margin-left: 10px;">搜索</el-button>
-      <el-table :data="paginatedList" v-loading="loading" style="margin-top: 15px">
+      <div class="page-toolbar">
+        <el-button type="primary" @click="handleAdd">开处方</el-button>
+        <el-input
+          v-model="searchQuery"
+          placeholder="搜索..."
+          clearable
+          class="page-search-input"
+        ></el-input>
+        <el-button type="primary" @click="fetchList">搜索</el-button>
+      </div>
+      <el-table :data="paginatedList" v-loading="loading">
         <el-table-column prop="uuid" label="处方ID"  sortable />
         <el-table-column prop="doctor_name" label="医生"  sortable />
         <el-table-column prop="patient_name" label="患者"  sortable />
@@ -43,15 +44,15 @@
         :page-sizes="[10, 20, 50, 100]"
         layout="total, sizes, prev, pager, next, jumper"
         :total="total"
-        style="margin-top: 15px; justify-content: flex-end;"
+        class="pagination-wrapper"
       />
 
     </el-card>
 
     <el-dialog v-model="dialogVisible" title="开处方" width="700px">
-      <el-form :model="form" label-width="100px">
+      <el-form :model="form" label-width="100px" class="dialog-form">
         <el-form-item label="患者">
-          <el-select v-model="form.patient" placeholder="请选择患者" style="width:100%" filterable @change="onPatientChange">
+          <el-select v-model="form.patient" placeholder="请选择患者" class="form-full-width" filterable @change="onPatientChange">
             <el-option v-for="p in patientOptions" :key="p.id" :label="p.name" :value="p.id" />
           </el-select>
         </el-form-item>

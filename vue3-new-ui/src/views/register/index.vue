@@ -75,7 +75,7 @@
           </el-form-item>
 
           <el-form-item prop="sex">
-            <el-select v-model="form.sex" placeholder="性别" style="width:100%" filterable>
+            <el-select v-model="form.sex" placeholder="性别" class="form-full-width" filterable>
               <el-option label="男" value="1" />
               <el-option label="女" value="0" />
             </el-select>
@@ -87,7 +87,7 @@
               type="date"
               placeholder="生日"
               value-format="YYYY-MM-DD"
-              style="width:100%"
+              class="form-full-width"
             />
           </el-form-item>
 

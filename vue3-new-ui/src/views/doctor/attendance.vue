@@ -1,6 +1,6 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="医生考勤" />
+    <vab-page-header title="医生考勤" description="每日签到签退，查看考勤记录和统计" />
     <el-row :gutter="20" style="margin-bottom: 20px;">
       <el-col :span="12">
         <el-card>
@@ -37,7 +37,7 @@
       <template #header>
         <span>考勤记录</span>
       </template>
-      <el-form :inline="true">
+      <el-form :inline="true" class="page-toolbar">
         <el-form-item label="开始日期">
           <el-date-picker v-model="searchForm.start_date" type="date" value-format="YYYY-MM-DD" />
         </el-form-item>

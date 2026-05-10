@@ -1,8 +1,8 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="权限分配" />
+    <vab-page-header title="权限分配" description="分配用户角色和系统操作权限" />
     <el-card>
-      <div style="margin-bottom: 15px;">
+      <div class="page-toolbar">
         <el-select v-model="roleFilter" placeholder="筛选角色" clearable style="width: 150px; margin-right: 10px;">
           <el-option label="全部" value="" />
           <el-option label="管理员" value="admin" />

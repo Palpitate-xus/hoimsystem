@@ -1,15 +1,15 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="就诊评价" />
+    <vab-page-header title="就诊评价" description="对就诊医生和医院进行满意度评价" />
     <el-card>
       <el-form :model="form" label-width="100px">
         <el-form-item label="医生">
-          <el-select v-model="form.doctor_id" placeholder="请选择医生" style="width:100%" filterable>
+          <el-select v-model="form.doctor_id" placeholder="请选择医生" class="form-full-width" filterable>
             <el-option v-for="d in doctorOptions" :key="d.id" :label="d.name" :value="d.id" />
           </el-select>
         </el-form-item>
         <el-form-item label="就诊记录">
-          <el-select v-model="form.visit_id" placeholder="请选择就诊记录" style="width:100%" filterable>
+          <el-select v-model="form.visit_id" placeholder="请选择就诊记录" class="form-full-width" filterable>
             <el-option v-for="v in visitOptions" :key="v.medical_record_id" :label="v.visit_time + ' - ' + v.doctor_name + ' - ' + v.diagnosis" :value="v.medical_record_id" />
           </el-select>
         </el-form-item>

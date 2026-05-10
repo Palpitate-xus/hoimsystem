@@ -425,3 +425,19 @@ class Message(Base):
     create_time = Column(DateTime)
 
     recipient = relationship("User")
+
+
+class Payment(Base):
+    __tablename__ = "hoimsystem_payment"
+
+    payment_id = Column(Integer, primary_key=True, autoincrement=True)
+    payment_no = Column(String(32), unique=True)
+    charge_id = Column(String(36), ForeignKey("hoimsystem_charge.charge_id"))
+    channel = Column(String(10))  # wechat, alipay, cash
+    amount = Column(Float)
+    status = Column(Integer, default=0)  # 0=待支付, 1=支付成功, 2=支付失败, 3=已退款
+    qr_code_data = Column(String(200))
+    paid_time = Column(DateTime, nullable=True)
+    create_time = Column(DateTime)
+
+    charge = relationship("Charge")

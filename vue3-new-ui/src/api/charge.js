@@ -35,3 +35,19 @@ export function windowCancelRegistration(data) {
 export function dailySettlement(data) {
   return request({ url: "dailySettlement/report", method: "post", data });
 }
+
+export function createPayment(data) {
+  return request({ url: "payment/create", method: "post", data });
+}
+
+export function queryPayment(paymentNo) {
+  return request({ url: `payment/query/${paymentNo}`, method: "get" });
+}
+
+export function mockPaymentNotify(data) {
+  return request({ url: "payment/mockNotify", method: "post", data });
+}
+
+export function getPaymentList(keyword = "") {
+  return request({ url: "payment/getList", method: "get", params: { keyword } });
+}

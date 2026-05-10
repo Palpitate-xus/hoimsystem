@@ -383,5 +383,19 @@ class ReportDoctorWorkloadRequest(BaseModel):
     doctor_id: Optional[int] = None
 
 
+class PaymentCreateRequest(BaseModel):
+    charge_id: str
+    channel: str  # wechat, alipay, cash
+    amount: float
+
+
+class PaymentQueryRequest(BaseModel):
+    payment_no: str
+
+
+class PaymentMockNotifyRequest(BaseModel):
+    payment_no: str
+
+
 class TestRequest(BaseModel):
     data: Optional[str] = None

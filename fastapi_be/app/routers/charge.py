@@ -6,7 +6,7 @@ from typing import Optional
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models import Charge, Invoice, Prescription, PrePha, Pharmaceutical, Patient, User
-from app.schemas import ChargeRefundRequest, InvoiceCreateRequest, InvoicePrintRequest, ChargeCommitRequest
+from app.schemas import ChargeRefundRequest, InvoiceCreateRequest, InvoicePrintRequest, ChargeCommitRequest, PaymentCreateRequest, PaymentQueryRequest, PaymentMockNotifyRequest
 from app.dependencies import get_current_user
 from app.pagination import paginate
 
@@ -206,3 +206,111 @@ def daily_settlement(req: dict, db: Session = Depends(get_db)):
         "count_pending": count_pending,
         "record_count": len(charges),
     }}
+
+
+# ===== 支付接口（微信/支付宝 Mock）=====
+
+@router.post("/payment/create")
+def create_payment(req: PaymentCreateRequest, db: Session = Depends(get_db)):
+    """创建支付订单"""
+    from app.models import Payment
+    charge = db.query(Charge).filter(Charge.charge_id == req.charge_id).first()
+    if not charge:
+        return {"code": 500, "msg": "收费记录不存在"}
+    if charge.status == 1:
+        return {"code": 500, "msg": "该订单已缴费"}
+    payment_no = "PAY" + datetime.datetime.now().strftime("%Y%m%d%H%M%S") + str(random.randint(1000, 9999))
+    qr_data = f"mock://payment?no={payment_no}&amount={req.amount}&channel={req.channel}"
+    payment = Payment(
+        payment_no=payment_no,
+        charge_id=req.charge_id,
+        channel=req.channel,
+        amount=req.amount,
+        status=0,
+        qr_code_data=qr_data,
+        create_time=datetime.datetime.now(),
+    )
+    db.add(payment)
+    db.commit()
+    return {
+        "code": 200,
+        "msg": "success",
+        "data": {
+            "payment_no": payment_no,
+            "qr_code_data": qr_data,
+            "channel": req.channel,
+            "amount": req.amount,
+        }
+    }
+
+
+@router.get("/payment/query/{payment_no}")
+def query_payment(payment_no: str, db: Session = Depends(get_db)):
+    """查询支付状态"""
+    from app.models import Payment
+    payment = db.query(Payment).filter(Payment.payment_no == payment_no).first()
+    if not payment:
+        return {"code": 500, "msg": "支付单不存在"}
+    return {
+        "code": 200,
+        "msg": "success",
+        "data": {
+            "payment_no": payment.payment_no,
+            "charge_id": payment.charge_id,
+            "channel": payment.channel,
+            "amount": payment.amount,
+            "status": payment.status,
+            "paid_time": str(payment.paid_time) if payment.paid_time else None,
+            "create_time": str(payment.create_time),
+        }
+    }
+
+
+@router.post("/payment/mockNotify")
+def mock_payment_notify(req: PaymentMockNotifyRequest, db: Session = Depends(get_db)):
+    """Mock 支付回调（模拟微信/支付宝异步通知）"""
+    from app.models import Payment
+    payment = db.query(Payment).filter(Payment.payment_no == req.payment_no).first()
+    if not payment:
+        return {"code": 500, "msg": "支付单不存在"}
+    if payment.status != 0:
+        return {"code": 500, "msg": "支付单状态异常"}
+    try:
+        payment.status = 1
+        payment.paid_time = datetime.datetime.now()
+        db.add(payment)
+        # 更新收费记录状态为已缴费
+        charge = db.query(Charge).filter(Charge.charge_id == payment.charge_id).first()
+        if charge:
+            charge.status = 1
+            charge.time = datetime.datetime.now()
+            db.add(charge)
+        db.commit()
+        return {"code": 200, "msg": "支付成功"}
+    except Exception:
+        db.rollback()
+        traceback.print_exc()
+        return {"code": 500, "msg": "支付处理失败"}
+
+
+@router.get("/payment/getList")
+def get_payment_list(keyword: Optional[str] = None, db: Session = Depends(get_db)):
+    """支付流水列表"""
+    from app.models import Payment
+    payments = db.query(Payment).order_by(Payment.create_time.desc()).all()
+    data = []
+    for item in payments:
+        data.append({
+            "payment_id": item.payment_id,
+            "payment_no": item.payment_no,
+            "charge_id": item.charge_id,
+            "channel": item.channel,
+            "amount": round(item.amount, 2) if item.amount else 0,
+            "status": item.status,
+            "paid_time": str(item.paid_time) if item.paid_time else "",
+            "create_time": str(item.create_time),
+        })
+    if keyword:
+        kw = keyword.lower()
+        data = [item for item in data if any(kw in str(val).lower() for val in item.values())]
+    return {"code": 200, "msg": "success", "data": data}

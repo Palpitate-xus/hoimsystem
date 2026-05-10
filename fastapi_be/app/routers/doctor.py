@@ -331,6 +331,7 @@ def get_prescription_list(current_user: User = Depends(get_current_user), keywor
         phas = []
         for j in item.pre_phas:
             phas.append({"name": j.pharmaceutical.name if j.pharmaceutical else "", "number": j.number})
+        charge_obj = db.query(Charge).filter(Charge.prescription_id == item.prescription_id).first()
         data.append({
             "uuid": str(item.prescription_id),
             "doctor_id": item.doctor.doctor_id if item.doctor else None,
@@ -340,6 +341,8 @@ def get_prescription_list(current_user: User = Depends(get_current_user), keywor
             "phas": phas,
             "status": item.status,
             "create_time": str(item.create_time),
+            "charge_id": str(charge_obj.charge_id) if charge_obj else "",
+            "amount": round(charge_obj.amount, 2) if charge_obj else 0,
         })
     if keyword:
         kw = keyword.lower()

@@ -29,8 +29,10 @@
             <div v-for="(p, i) in row.phas" :key="i">{{ p.name }} x{{ p.number }}</div>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="120">
+        <el-table-column prop="amount" label="金额" width="80" />
+        <el-table-column label="操作" width="200">
           <template #default="{row}">
+            <el-button v-if="row.status===0 && row.charge_id" size="small" type="primary" @click="deskCharge(row)">诊间收费</el-button>
             <el-button size="small" type="danger" @click="cancel(row)">取消</el-button>
           </template>
         </el-table-column>
@@ -76,6 +78,7 @@
 import { ref, onMounted, computed } from "vue";
 import { ElMessage } from "element-plus";
 import { getPrescriptionList, createPrescription, cancelPrescription } from "@/api/doctor";
+import { commitCharge } from "@/api/charge";
 import { getPharmaceuticalList } from "@/api/pharmacy";
 import { getPatientList } from "@/api/admin";
 
@@ -128,6 +131,16 @@ const submit = async () => {
     fetchList();
   } catch (e) {
     ElMessage.error(e.msg || "开方失败");
+  }
+};
+
+const deskCharge = async (row) => {
+  try {
+    await commitCharge({ id: row.charge_id });
+    ElMessage.success("诊间收费成功");
+    fetchList();
+  } catch (e) {
+    ElMessage.error(e.msg || "收费失败");
   }
 };
 

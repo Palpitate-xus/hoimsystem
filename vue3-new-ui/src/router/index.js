@@ -97,6 +97,12 @@ export const asyncRoutes = [
     meta: { title: "患者服务", icon: "first-aid-kit", permissions: ["patient"] },
     children: [
       {
+        path: "triage",
+        name: "Triage",
+        component: () => import("@/views/patient/triage.vue"),
+        meta: { title: "智能导诊", permissions: ["patient"] },
+      },
+      {
         path: "appointment",
         name: "Appointment",
         component: () => import("@/views/patient/appointment.vue"),

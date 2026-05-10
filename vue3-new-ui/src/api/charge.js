@@ -23,3 +23,15 @@ export function createInvoice(data) {
 export function printInvoice(data) {
   return request({ url: "invoice/print", method: "post", data });
 }
+
+export function windowRegistration(data) {
+  return request({ url: "windowRegistration/create", method: "post", data });
+}
+
+export function windowCancelRegistration(data) {
+  return request({ url: "windowRegistration/cancel", method: "post", data });
+}
+
+export function dailySettlement(data) {
+  return request({ url: "dailySettlement/report", method: "post", data });
+}

@@ -128,3 +128,81 @@ def print_invoice(req: InvoicePrintRequest, db: Session = Depends(get_db)):
     if not invoice:
         return {"code": 500, "msg": "发票不存在"}
     return {"code": 200, "msg": "success", "data": {"pdf_url": f"/api/invoice/pdf/{invoice.invoice_id}"}}
+
+
+@router.post("/windowRegistration/create")
+def window_registration(req: dict, db: Session = Depends(get_db)):
+    """窗口挂号：收费员代病人现场挂号"""
+    from app.models import Patient, Registration, DoctorSchedule
+    identity = req.get("identity")
+    patient = db.query(Patient).filter(Patient.identity == identity).first()
+    if not patient:
+        return {"code": 500, "msg": "病人信息不存在，请先注册"}
+    schedule_id = req.get("schedule_id")
+    doctor_id = req.get("doctor_id")
+    department_id = req.get("department_id")
+    specialist = req.get("specialist", 0)
+    reg_obj = db.query(DoctorSchedule).filter(DoctorSchedule.schedule_id == schedule_id).first()
+    if reg_obj and reg_obj.number <= 0:
+        return {"code": 500, "msg": "该时段号源已满"}
+    try:
+        if reg_obj:
+            reg_obj.number -= 1
+            db.add(reg_obj)
+        registration = Registration(
+            registration_id=1,
+            patient_id=patient.patient_id,
+            doctor_id=doctor_id,
+            specialist=specialist,
+            department_id=department_id,
+            time=datetime.datetime.now(),
+            status=0,
+        )
+        db.add(registration)
+        db.commit()
+        return {"code": 200, "msg": "success"}
+    except Exception:
+        db.rollback()
+        traceback.print_exc()
+        return {"code": 500, "msg": "挂号失败"}
+
+
+@router.post("/windowRegistration/cancel")
+def window_cancel_registration(req: dict, db: Session = Depends(get_db)):
+    """窗口退号"""
+    from app.models import Registration
+    reg = db.query(Registration).filter(Registration.registration_uuid == req.get("uuid")).first()
+    if not reg:
+        return {"code": 500, "msg": "挂号记录不存在"}
+    reg.status = 3
+    db.add(reg)
+    db.commit()
+    return {"code": 200, "msg": "success"}
+
+
+@router.post("/dailySettlement/report")
+def daily_settlement(req: dict, db: Session = Depends(get_db)):
+    """日结对账"""
+    from sqlalchemy import func
+    from app.models import Charge
+    date = req.get("date")
+    if not date:
+        date = str(datetime.datetime.now().date())
+    query = db.query(Charge).filter(func.date(Charge.charge_time) == date)
+    charges = query.all()
+    total_income = sum(c.amount for c in charges if c.status == 1)
+    total_refund = sum(c.amount for c in charges if c.status == 2)
+    total_pending = sum(c.amount for c in charges if c.status == 0)
+    count_paid = len([c for c in charges if c.status == 1])
+    count_refund = len([c for c in charges if c.status == 2])
+    count_pending = len([c for c in charges if c.status == 0])
+    return {"code": 200, "msg": "success", "data": {
+        "date": date,
+        "total_income": round(total_income, 2),
+        "total_refund": round(total_refund, 2),
+        "total_pending": round(total_pending, 2),
+        "count_paid": count_paid,
+        "count_refund": count_refund,
+        "count_pending": count_pending,
+        "record_count": len(charges),
+    }}

@@ -243,6 +243,18 @@ export const asyncRoutes = [
         component: () => import("@/views/charge/invoice.vue"),
         meta: { title: "发票管理", permissions: ["admin"] },
       },
+      {
+        path: "windowRegistration",
+        name: "WindowRegistration",
+        component: () => import("@/views/charge/windowRegistration.vue"),
+        meta: { title: "窗口挂号", permissions: ["admin"] },
+      },
+      {
+        path: "dailySettlement",
+        name: "DailySettlement",
+        component: () => import("@/views/charge/dailySettlement.vue"),
+        meta: { title: "日结对账", permissions: ["admin"] },
+      },
     ],
   },
 

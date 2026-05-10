@@ -463,3 +463,18 @@ class TriageRecord(Base):
     patient = relationship("Patient")
     nurse = relationship("User")
     department = relationship("Department")
+
+
+class Consumable(Base):
+    __tablename__ = "hoimsystem_consumable"
+
+    consumable_id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String(50))
+    category = Column(String(20))  # 耗材分类：注射类、敷料类、检验类、手术类等
+    stock = Column(Integer, default=0)
+    unit = Column(String(10))  # 单位：个、包、支、套
+    price = Column(Float)
+    supplier = Column(String(50))
+    remark = Column(String(200))
+    status = Column(Integer, default=0)  # 0=正常 1=停用
+    create_time = Column(DateTime)

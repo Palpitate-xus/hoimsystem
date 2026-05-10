@@ -226,6 +226,12 @@ export const asyncRoutes = [
         component: () => import("@/views/pharmacy/prescriptionReview.vue"),
         meta: { title: "处方点评", permissions: ["admin", "doctor", "director"] },
       },
+      {
+        path: "consumable",
+        name: "Consumable",
+        component: () => import("@/views/pharmacy/consumable.vue"),
+        meta: { title: "耗材管理", permissions: ["admin", "director"] },
+      },
     ],
   },
 

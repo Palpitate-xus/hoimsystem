@@ -441,3 +441,25 @@ class Payment(Base):
     create_time = Column(DateTime)
 
     charge = relationship("Charge")
+
+
+class TriageRecord(Base):
+    __tablename__ = "hoimsystem_triage_record"
+
+    triage_record_id = Column(Integer, primary_key=True, autoincrement=True)
+    patient_id = Column(Integer, ForeignKey("hoimsystem_patient.patient_id"))
+    nurse_id = Column(Integer, ForeignKey("hoimsystem_users.user_id"))
+    symptom = Column(String(500))
+    level = Column(Integer, default=3)  # 1=危急(红) 2=急症(橙) 3=普通(黄) 4=非急(绿)
+    department_id = Column(Integer, ForeignKey("hoimsystem_department.department_id"), nullable=True)
+    temperature = Column(Float, nullable=True)
+    blood_pressure_systolic = Column(Integer, nullable=True)
+    blood_pressure_diastolic = Column(Integer, nullable=True)
+    pulse = Column(Integer, nullable=True)
+    status = Column(Integer, default=0)  # 0=待就诊 1=已就诊 2=已转诊 3=已取消
+    note = Column(String(200), nullable=True)
+    create_time = Column(DateTime)
+
+    patient = relationship("Patient")
+    nurse = relationship("User")
+    department = relationship("Department")

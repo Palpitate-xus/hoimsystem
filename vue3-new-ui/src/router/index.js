@@ -273,6 +273,12 @@ export const asyncRoutes = [
     meta: { title: "排队叫号", icon: "bell-filled", permissions: ["admin", "doctor", "director"] },
     children: [
       {
+        path: "triageDesk",
+        name: "TriageDesk",
+        component: () => import("@/views/queue/triageDesk.vue"),
+        meta: { title: "分诊台管理", permissions: ["admin", "doctor", "director"] },
+      },
+      {
         path: "queueList",
         name: "QueueList",
         component: () => import("@/views/queue/queueList.vue"),

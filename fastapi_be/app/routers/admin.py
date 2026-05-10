@@ -86,6 +86,7 @@ def get_patient_list(keyword: Optional[str] = None, page: Optional[int] = None, 
             "permission": item.permission,
             "address": item.address,
             "identity": item.identity,
+            "allergy_history": item.allergy_history or "",
         })
     if keyword:
         kw = keyword.lower()
@@ -105,6 +106,8 @@ def update_patient(req: PatientUpdateRequest, db: Session = Depends(get_db)):
     patient.sex = req.sex
     patient.phone = req.phone
     patient.address = req.address
+    if req.allergy_history is not None:
+        patient.allergy_history = req.allergy_history
     db.add(patient)
     db.commit()
     return {"code": 200, "msg": "success"}

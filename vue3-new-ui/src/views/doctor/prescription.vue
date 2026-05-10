@@ -3,7 +3,7 @@
     <vab-page-header title="处方管理" />
     <el-card>
       <el-button type="primary" @click="handleAdd">开处方</el-button>
-      
+
       <el-input
         v-model="searchQuery"
         placeholder="搜索..."
@@ -51,10 +51,17 @@
     <el-dialog v-model="dialogVisible" title="开处方" width="700px">
       <el-form :model="form" label-width="100px">
         <el-form-item label="患者">
-          <el-select v-model="form.patient" placeholder="请选择患者" style="width:100%" filterable>
+          <el-select v-model="form.patient" placeholder="请选择患者" style="width:100%" filterable @change="onPatientChange">
             <el-option v-for="p in patientOptions" :key="p.id" :label="p.name" :value="p.id" />
           </el-select>
         </el-form-item>
+        <el-alert
+          v-if="selectedPatientAllergy"
+          :title="'过敏史：' + selectedPatientAllergy"
+          type="warning"
+          :closable="false"
+          style="margin-bottom: 15px; margin-left: 100px;"
+        />
         <el-form-item label="药品">
           <div v-for="(item, i) in form.phas" :key="i" style="margin-bottom:10px">
             <el-select v-model="item.id" placeholder="选择药品" style="width:200px;margin-right:10px" filterable>
@@ -99,6 +106,7 @@ const patientOptions = ref([]);
 const loading = ref(false);
 const dialogVisible = ref(false);
 const form = ref({ patient: null, phas: [] });
+const selectedPatientAllergy = ref("");
 
 const fetchList = async () => {
   loading.value = true;
@@ -114,7 +122,13 @@ const handleAdd = async () => {
   const pRes = await getPatientList(searchQuery.value);
   patientOptions.value = pRes.data || [];
   form.value = { patient: null, phas: [{ id: null, number: 1 }] };
+  selectedPatientAllergy.value = "";
   dialogVisible.value = true;
+};
+
+const onPatientChange = (pid) => {
+  const p = patientOptions.value.find((x) => x.id === pid);
+  selectedPatientAllergy.value = p && p.allergy_history ? p.allergy_history : "";
 };
 
 const addPharmaceutical = () => {
@@ -131,13 +145,11 @@ const getAntibioticLevel = (id) => {
 };
 
 const submit = async () => {
-  const restricted = form.value.phas.filter((item) => getAntibioticLevel(item.id) === 2);
   const special = form.value.phas.filter((item) => getAntibioticLevel(item.id) === 3);
   if (special.length > 0) {
     ElMessage.warning("特殊使用级抗菌药需抗菌药物管理组审批后方可开具");
     return;
   }
-  try {
   try {
     await createPrescription(form.value);
     ElMessage.success("开方成功");

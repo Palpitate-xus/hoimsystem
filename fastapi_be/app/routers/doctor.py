@@ -283,6 +283,30 @@ def prescription_register(req: PrescriptionCreateRequest, current_user: User = D
         if special_phas and current_user.user_role != "admin":
             db.rollback()
             return {"code": 500, "msg": f"特殊使用级抗菌药 [{', '.join(special_phas)}] 需抗菌药物管理组审批后方可开具"}
+
+        # ===== 处方前置审核 =====
+        # 1. 过敏史冲突检查
+        allergy_history = patient_obj.allergy_history or ""
+        if allergy_history:
+            allergy_keywords = [a.strip() for a in allergy_history.split(",") if a.strip()]
+            for item in req.phas:
+                pha = db.query(Pharmaceutical).filter(Pharmaceutical.pharmaceutical_id == item["id"]).first()
+                if pha:
+                    for kw in allergy_keywords:
+                        if kw in pha.name or (pha.remark and kw in pha.remark):
+                            db.rollback()
+                            return {"code": 500, "msg": f"过敏史冲突：病人对 [{kw}] 过敏，处方包含 [{pha.name}]"}
+
+        # 2. 配伍禁忌检查（硬编码常见禁忌组合）
+        pha_ids = {item["id"] for item in req.phas}
+        INCOMPATIBILITY = {
+            # (药品A_id, 药品B_id): "禁忌原因"
+        }
+        for (a, b), reason in INCOMPATIBILITY.items():
+            if a in pha_ids and b in pha_ids:
+                db.rollback()
+                return {"code": 500, "msg": f"配伍禁忌：{reason}"}
+
         pre = Prescription(
             patient_id=patient_obj.patient_id,
             doctor_id=doctor_obj.doctor_id,

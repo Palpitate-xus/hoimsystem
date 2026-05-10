@@ -192,6 +192,7 @@ class PatientUpdateRequest(BaseModel):
     sex: int
     phone: str
     address: str
+    allergy_history: Optional[str] = None
 
 
 class DepartmentUpdateRequest(BaseModel):

@@ -29,6 +29,7 @@ class Patient(Base):
     address = Column(String(100))
     permission = Column(String(10))
     allergy_history = Column(String(200))
+    prepaid_balance = Column(Float, default=0)  # 预交金余额
 
     registrations = relationship("Registration", back_populates="patient")
     appointments = relationship("Appointment", back_populates="patient")
@@ -511,3 +512,82 @@ class PurchaseOrderItem(Base):
     total_price = Column(Float)
 
     order = relationship("PurchaseOrder", back_populates="items")
+
+
+class AdverseReaction(Base):
+    __tablename__ = "hoimsystem_adverse_reaction"
+
+    reaction_id = Column(Integer, primary_key=True, autoincrement=True)
+    patient_id = Column(Integer, ForeignKey("hoimsystem_patient.patient_id"))
+    pharmaceutical_id = Column(Integer, ForeignKey("hoimsystem_pharmaceutical.pharmaceutical_id"))
+    symptom = Column(String(500))
+    severity = Column(Integer, default=1)  # 1=轻度 2=中度 3=重度
+    report_time = Column(DateTime)
+    reporter_id = Column(Integer, ForeignKey("hoimsystem_users.user_id"))
+    status = Column(Integer, default=0)  # 0=待审核 1=已确认 2=已处理
+    note = Column(String(200))
+
+    patient = relationship("Patient")
+    pharmaceutical = relationship("Pharmaceutical")
+    reporter = relationship("User")
+
+
+class AdverseEvent(Base):
+    __tablename__ = "hoimsystem_adverse_event"
+
+    event_id = Column(Integer, primary_key=True, autoincrement=True)
+    event_type = Column(String(50))  # 用药错误/跌倒/压疮/其他
+    patient_id = Column(Integer, ForeignKey("hoimsystem_patient.patient_id"), nullable=True)
+    description = Column(String(500))
+    severity = Column(Integer, default=1)  # 1=轻度 2=中度 3=重度
+    reporter_id = Column(Integer, ForeignKey("hoimsystem_users.user_id"))
+    report_time = Column(DateTime)
+    status = Column(Integer, default=0)  # 0=待处理 1=处理中 2=已闭环
+    handle_result = Column(String(500))
+
+    patient = relationship("Patient")
+    reporter = relationship("User")
+
+
+class Referral(Base):
+    __tablename__ = "hoimsystem_referral"
+
+    referral_id = Column(Integer, primary_key=True, autoincrement=True)
+    patient_id = Column(Integer, ForeignKey("hoimsystem_patient.patient_id"))
+    from_department_id = Column(Integer, ForeignKey("hoimsystem_department.department_id"))
+    to_department_id = Column(Integer, ForeignKey("hoimsystem_department.department_id"))
+    referral_type = Column(String(10))  # up=上转 down=下转
+    reason = Column(String(200))
+    status = Column(Integer, default=0)  # 0=待接收 1=已接收 2=已退回
+    create_time = Column(DateTime)
+
+    patient = relationship("Patient")
+    from_department = relationship("Department", foreign_keys=[from_department_id])
+    to_department = relationship("Department", foreign_keys=[to_department_id])
+
+
+class MdtCase(Base):
+    __tablename__ = "hoimsystem_mdt_case"
+
+    mdt_id = Column(Integer, primary_key=True, autoincrement=True)
+    patient_id = Column(Integer, ForeignKey("hoimsystem_patient.patient_id"))
+    diagnosis = Column(String(200))
+    department_ids = Column(String(100))  # 逗号分隔的科室ID
+    status = Column(Integer, default=0)  # 0=待会诊 1=会诊中 2=已完成
+    result = Column(String(500))
+    create_time = Column(DateTime)
+
+    patient = relationship("Patient")
+
+
+class ClinicalPathway(Base):
+    __tablename__ = "hoimsystem_clinical_pathway"
+
+    pathway_id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String(100))
+    disease_code = Column(String(20))
+    disease_name = Column(String(50))
+    steps = Column(String(1000))  # JSON格式的步骤
+    expected_days = Column(Integer)
+    status = Column(Integer, default=0)  # 0=启用 1=停用
+    create_time = Column(DateTime)

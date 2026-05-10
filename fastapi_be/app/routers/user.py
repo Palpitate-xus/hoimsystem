@@ -196,3 +196,41 @@ def delete_user(req: dict, db: Session = Depends(get_db), current_user: User = D
     db.delete(user)
     db.commit()
     return {"code": 200, "msg": "success"}
+
+
+@router.get("/prepaid/getBalance")
+def get_prepaid_balance(identity: str, db: Session = Depends(get_db)):
+    """查询预交金余额"""
+    patient = db.query(Patient).filter(Patient.identity == identity).first()
+    if not patient:
+        return {"code": 500, "msg": "病人不存在"}
+    return {"code": 200, "msg": "success", "data": {"balance": patient.prepaid_balance or 0}}
+
+
+@router.post("/prepaid/recharge")
+def prepaid_recharge(req: dict, db: Session = Depends(get_db)):
+    """预交金充值"""
+    patient = db.query(Patient).filter(Patient.identity == req.get("identity")).first()
+    if not patient:
+        return {"code": 500, "msg": "病人不存在"}
+    amount = float(req.get("amount", 0))
+    if amount <= 0:
+        return {"code": 500, "msg": "充值金额必须大于0"}
+    patient.prepaid_balance = (patient.prepaid_balance or 0) + amount
+    db.commit()
+    return {"code": 200, "msg": "success", "data": {"balance": patient.prepaid_balance}}
+
+
+@router.post("/prepaid/deduct")
+def prepaid_deduct(req: dict, db: Session = Depends(get_db)):
+    """预交金扣款"""
+    patient = db.query(Patient).filter(Patient.identity == req.get("identity")).first()
+    if not patient:
+        return {"code": 500, "msg": "病人不存在"}
+    amount = float(req.get("amount", 0))
+    current = patient.prepaid_balance or 0
+    if current < amount:
+        return {"code": 500, "msg": "预交金余额不足"}
+    patient.prepaid_balance = current - amount
+    db.commit()
+    return {"code": 200, "msg": "success", "data": {"balance": patient.prepaid_balance}}

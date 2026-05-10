@@ -1,6 +1,11 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routers import user, patient, admin, doctor, pharmacy, charge, queue, checkin, vitalsign, lab, followup, report, system, upload, triage, backup, triage_desk, consumable, purchase
+from app.routers import (
+    user, patient, admin, doctor, pharmacy, charge, queue, checkin,
+    vitalsign, lab, followup, report, system, upload, triage, backup,
+    triage_desk, consumable, purchase, adverse_reaction, adverse_event,
+    digital_signature, referral, mdt, clinical_pathway
+)
 
 app = FastAPI(title="HOIM System FastAPI")
 
@@ -42,6 +47,12 @@ app.include_router(backup.router, prefix="/api")
 app.include_router(triage_desk.router, prefix="/api")
 app.include_router(consumable.router, prefix="/api")
 app.include_router(purchase.router, prefix="/api")
+app.include_router(adverse_reaction.router, prefix="/api")
+app.include_router(adverse_event.router, prefix="/api")
+app.include_router(digital_signature.router, prefix="/api")
+app.include_router(referral.router, prefix="/api")
+app.include_router(mdt.router, prefix="/api")
+app.include_router(clinical_pathway.router, prefix="/api")
 
 from fastapi.staticfiles import StaticFiles
 import os

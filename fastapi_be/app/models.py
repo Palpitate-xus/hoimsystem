@@ -697,6 +697,98 @@ class MedicalRecordQuality(Base):
     checker = relationship("User")
 
 
+# ===== 手术麻醉管理模块 =====
+
+
+class SurgeryApplication(Base):
+    __tablename__ = "hoimsystem_surgery_application"
+
+    application_id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    admission_id = Column(String(36), ForeignKey("hoimsystem_admission.admission_id"))
+    patient_id = Column(Integer, ForeignKey("hoimsystem_patient.patient_id"))
+    doctor_id = Column(Integer, ForeignKey("hoimsystem_doctor.doctor_id"))
+    surgery_name = Column(String(100))  # 手术名称
+    surgery_code = Column(String(20), nullable=True)  # 手术编码
+    surgery_level = Column(Integer, default=1)  # 1=一级 2=二级 3=三级 4=四级
+    anesthesia_type = Column(String(20), default="局部麻醉")  # 全麻/椎管内/局部/神经阻滞
+    scheduled_date = Column(Date, nullable=True)  # 计划手术日期
+    preop_diagnosis = Column(String(200), nullable=True)  # 术前诊断
+    surgery_indication = Column(String(500), nullable=True)  # 手术指征
+    contraindication = Column(String(300), nullable=True)  # 禁忌症
+    status = Column(Integer, default=0)  # 0=待审批 1=已批准 2=已排台 3=已完成 4=已取消
+    approver_id = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=True)
+    approve_time = Column(DateTime, nullable=True)
+    create_time = Column(DateTime)
+
+    patient = relationship("Patient")
+    doctor = relationship("Doctor")
+    approver = relationship("User")
+
+
+class SurgerySchedule(Base):
+    __tablename__ = "hoimsystem_surgery_schedule"
+
+    schedule_id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    application_id = Column(String(36), ForeignKey("hoimsystem_surgery_application.application_id"))
+    patient_id = Column(Integer, ForeignKey("hoimsystem_patient.patient_id"))
+    operating_room = Column(String(20))  # 手术室号
+    surgery_date = Column(Date)
+    start_time = Column(DateTime, nullable=True)
+    end_time = Column(DateTime, nullable=True)
+    surgeon_id = Column(Integer, ForeignKey("hoimsystem_doctor.doctor_id"))  # 主刀医生
+    assistant_ids = Column(String(100), nullable=True)  # 助手医生ID，逗号分隔
+    anesthesiologist_id = Column(Integer, ForeignKey("hoimsystem_doctor.doctor_id"), nullable=True)  # 麻醉医生
+    scrub_nurse_id = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=True)  # 器械护士
+    circulating_nurse_id = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=True)  # 巡回护士
+    status = Column(Integer, default=0)  # 0=待手术 1=手术中 2=已完成 3=已取消
+    create_time = Column(DateTime)
+
+    application = relationship("SurgeryApplication")
+    patient = relationship("Patient")
+    surgeon = relationship("Doctor", foreign_keys=[surgeon_id])
+    anesthesiologist = relationship("Doctor", foreign_keys=[anesthesiologist_id])
+
+
+class AnesthesiaRecord(Base):
+    __tablename__ = "hoimsystem_anesthesia_record"
+
+    record_id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    schedule_id = Column(String(36), ForeignKey("hoimsystem_surgery_schedule.schedule_id"))
+    patient_id = Column(Integer, ForeignKey("hoimsystem_patient.patient_id"))
+    anesthesiologist_id = Column(Integer, ForeignKey("hoimsystem_doctor.doctor_id"))
+
+    # 入室情况
+    enter_time = Column(DateTime, nullable=True)
+    consciousness = Column(String(10), nullable=True)
+    preop_bp = Column(String(20), nullable=True)  # 术前血压
+    preop_hr = Column(Integer, nullable=True)  # 术前心率
+    preop_spo2 = Column(Float, nullable=True)
+
+    # 麻醉过程
+    anesthesia_method = Column(String(50), nullable=True)
+    induction_drugs = Column(String(200), nullable=True)  # 诱导用药
+    maintenance_drugs = Column(String(200), nullable=True)  # 维持用药
+
+    # 术中监测
+    intraop_bp = Column(String(100), nullable=True)  # 术中血压变化
+    intraop_hr = Column(String(100), nullable=True)
+    blood_loss = Column(Float, default=0)  # 出血量(ml)
+    urine_output = Column(Float, default=0)  # 尿量(ml)
+    fluid_input = Column(Float, default=0)  # 输液量(ml)
+
+    # 出室情况
+    extubation_time = Column(DateTime, nullable=True)
+    leave_time = Column(DateTime, nullable=True)
+    postop_consciousness = Column(String(10), nullable=True)
+    complications = Column(String(200), nullable=True)  # 并发症
+
+    create_time = Column(DateTime)
+
+    schedule = relationship("SurgerySchedule")
+    patient = relationship("Patient")
+    anesthesiologist = relationship("Doctor")
+
+
 # ===== 住院管理模块 =====
 
 

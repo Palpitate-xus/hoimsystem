@@ -27,6 +27,7 @@ from app.routers import (
     queue,
     referral,
     report,
+    surgery,
     system,
     triage,
     triage_desk,
@@ -89,6 +90,7 @@ app.include_router(nursing.router, prefix="/api")
 app.include_router(inpatient_charge.router, prefix="/api")
 app.include_router(discharge.router, prefix="/api")
 app.include_router(emr.router, prefix="/api")
+app.include_router(surgery.router, prefix="/api")
 
 import os
 

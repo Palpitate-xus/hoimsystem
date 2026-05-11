@@ -399,3 +399,153 @@ class PaymentMockNotifyRequest(BaseModel):
 
 class TestRequest(BaseModel):
     data: str | None = None
+
+
+# ===== 住院管理 Schemas =====
+
+
+class WardCreateRequest(BaseModel):
+    name: str = Field(..., min_length=1, max_length=50)
+    department_id: int
+    bed_count: int = Field(default=0, ge=0)
+    nurse_station_phone: str | None = Field(default=None, max_length=11)
+    location: str | None = Field(default=None, max_length=50)
+
+
+class WardUpdateRequest(BaseModel):
+    ward_id: int
+    name: str | None = Field(default=None, min_length=1, max_length=50)
+    department_id: int | None = None
+    bed_count: int | None = Field(default=None, ge=0)
+    nurse_station_phone: str | None = Field(default=None, max_length=11)
+    location: str | None = Field(default=None, max_length=50)
+    status: int | None = Field(default=None, ge=0, le=1)
+
+
+class BedCreateRequest(BaseModel):
+    ward_id: int
+    bed_no: str = Field(..., min_length=1, max_length=10)
+    room_no: str | None = Field(default=None, max_length=10)
+    bed_type: str = Field(default="普通", max_length=10)
+    price_per_day: float = Field(default=0, ge=0)
+
+
+class BedUpdateRequest(BaseModel):
+    bed_id: int
+    bed_no: str | None = Field(default=None, min_length=1, max_length=10)
+    room_no: str | None = Field(default=None, max_length=10)
+    bed_type: str | None = Field(default=None, max_length=10)
+    price_per_day: float | None = Field(default=None, ge=0)
+    status: int | None = Field(default=None, ge=0, le=3)
+
+
+class AdmissionCreateRequest(BaseModel):
+    patient_id: int
+    doctor_id: int
+    department_id: int
+    ward_id: int
+    bed_id: int
+    admission_type: int = Field(default=0, ge=0, le=3)
+    admission_diagnosis: str | None = Field(default=None, max_length=200)
+    chief_complaint: str | None = Field(default=None, max_length=200)
+    present_illness: str | None = Field(default=None, max_length=500)
+    past_history: str | None = Field(default=None, max_length=300)
+    deposit_amount: float = Field(default=0, ge=0)
+
+
+class AdmissionUpdateRequest(BaseModel):
+    admission_id: str
+    bed_id: int | None = None
+    admission_diagnosis: str | None = Field(default=None, max_length=200)
+    status: int | None = Field(default=None, ge=0, le=3)
+
+
+class InpatientOrderCreateRequest(BaseModel):
+    admission_id: str
+    patient_id: int
+    doctor_id: int
+    order_type: int = Field(..., ge=0, le=1)  # 0=长期 1=临时
+    category: str = Field(..., max_length=10)
+    priority: int = Field(default=0, ge=0, le=2)
+    note: str | None = Field(default=None, max_length=200)
+    items: list[dict] = Field(default_factory=list)
+
+
+class InpatientOrderStopRequest(BaseModel):
+    order_id: str
+
+
+class InpatientOrderItemCreateRequest(BaseModel):
+    order_id: str
+    item_name: str = Field(..., max_length=50)
+    item_type: str = Field(default="drug", max_length=10)
+    item_id_ref: int | None = None
+    dose: str | None = Field(default=None, max_length=20)
+    unit: str | None = Field(default=None, max_length=10)
+    frequency: str | None = Field(default=None, max_length=20)
+    route: str | None = Field(default=None, max_length=20)
+    days: int = Field(default=1, ge=1)
+    quantity: int = Field(default=1, ge=1)
+    unit_price: float = Field(default=0, ge=0)
+
+
+class OrderExecutionRequest(BaseModel):
+    order_id: str
+    status: int = Field(..., ge=0, le=3)
+    note: str | None = Field(default=None, max_length=200)
+
+
+class NursingRecordCreateRequest(BaseModel):
+    admission_id: str
+    patient_id: int
+    record_time: str
+    consciousness: str | None = Field(default=None, max_length=10)
+    temperature: float | None = Field(default=None, ge=30, le=45)
+    pulse: int | None = Field(default=None, ge=0, le=300)
+    respiration: int | None = Field(default=None, ge=0, le=100)
+    blood_pressure: str | None = Field(default=None, max_length=20)
+    spo2: float | None = Field(default=None, ge=0, le=100)
+    intake: str | None = Field(default=None, max_length=50)
+    output: str | None = Field(default=None, max_length=50)
+    skin_condition: str | None = Field(default=None, max_length=50)
+    drainage: str | None = Field(default=None, max_length=50)
+    note: str | None = Field(default=None, max_length=500)
+
+
+class TemperatureRecordCreateRequest(BaseModel):
+    admission_id: str
+    patient_id: int
+    record_date: str
+    time_point: str = Field(default="06:00", max_length=5)
+    temperature: float | None = Field(default=None, ge=30, le=45)
+    pulse: int | None = Field(default=None, ge=0, le=300)
+    respiration: int | None = Field(default=None, ge=0, le=100)
+    blood_pressure: str | None = Field(default=None, max_length=20)
+    stool_count: int | None = Field(default=None, ge=0)
+    weight: float | None = Field(default=None, ge=0)
+    intake: float | None = Field(default=None, ge=0)
+    output: float | None = Field(default=None, ge=0)
+    note: str | None = Field(default=None, max_length=100)
+
+
+class InpatientChargeCreateRequest(BaseModel):
+    admission_id: str
+    patient_id: int
+    item_name: str = Field(..., max_length=50)
+    item_type: str = Field(..., max_length=10)
+    quantity: float = Field(default=1, ge=0)
+    unit_price: float = Field(..., ge=0)
+    charge_date: str
+    related_order_id: str | None = None
+
+
+class DischargeSummaryCreateRequest(BaseModel):
+    admission_id: str
+    patient_id: int
+    doctor_id: int
+    discharge_diagnosis: str | None = Field(default=None, max_length=200)
+    treatment_summary: str | None = Field(default=None, max_length=1000)
+    discharge_status: int = Field(default=0, ge=0, le=4)
+    discharge_instruction: str | None = Field(default=None, max_length=500)
+    follow_up_plan: str | None = Field(default=None, max_length=200)
+    note: str | None = Field(default=None, max_length=300)

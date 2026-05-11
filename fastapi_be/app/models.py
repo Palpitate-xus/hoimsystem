@@ -590,3 +590,219 @@ class ClinicalPathway(Base):
     expected_days = Column(Integer)
     status = Column(Integer, default=0)  # 0=启用 1=停用
     create_time = Column(DateTime)
+
+
+# ===== 住院管理模块 =====
+
+
+class Ward(Base):
+    __tablename__ = "hoimsystem_ward"
+
+    ward_id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String(50))  # 病区名称：内科一病区、外科二病区
+    department_id = Column(Integer, ForeignKey("hoimsystem_department.department_id"))
+    bed_count = Column(Integer, default=0)
+    nurse_station_phone = Column(String(11), nullable=True)
+    location = Column(String(50), nullable=True)
+    status = Column(Integer, default=0)  # 0=启用 1=停用
+
+    department = relationship("Department")
+    beds = relationship("Bed", back_populates="ward", cascade="all, delete-orphan")
+
+
+class Bed(Base):
+    __tablename__ = "hoimsystem_bed"
+
+    bed_id = Column(Integer, primary_key=True, autoincrement=True)
+    ward_id = Column(Integer, ForeignKey("hoimsystem_ward.ward_id"))
+    bed_no = Column(String(10))  # 床位号：01、02
+    room_no = Column(String(10))  # 房间号：101、102
+    bed_type = Column(String(10), default="普通")  # 普通/监护/抢救/单人/双人
+    price_per_day = Column(Float, default=0)  # 每日床位费
+    status = Column(Integer, default=0)  # 0=空闲 1=占用 2=禁用 3=预订
+
+    ward = relationship("Ward", back_populates="beds")
+
+
+class Admission(Base):
+    __tablename__ = "hoimsystem_admission"
+
+    admission_id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    admission_no = Column(String(20), unique=True)  # 住院号：ZY20260511001
+    patient_id = Column(Integer, ForeignKey("hoimsystem_patient.patient_id"))
+    doctor_id = Column(Integer, ForeignKey("hoimsystem_doctor.doctor_id"))
+    department_id = Column(Integer, ForeignKey("hoimsystem_department.department_id"))
+    ward_id = Column(Integer, ForeignKey("hoimsystem_ward.ward_id"))
+    bed_id = Column(Integer, ForeignKey("hoimsystem_bed.bed_id"))
+    admission_type = Column(Integer, default=0)  # 0=门诊入院 1=急诊入院 2=转诊入院 3=预约入院
+    admission_time = Column(DateTime)
+    admission_diagnosis = Column(String(200), nullable=True)  # 入院诊断
+    chief_complaint = Column(String(200), nullable=True)  # 主诉
+    present_illness = Column(String(500), nullable=True)  # 现病史
+    past_history = Column(String(300), nullable=True)  # 既往史
+    deposit_amount = Column(Float, default=0)  # 入院押金
+    discharge_time = Column(DateTime, nullable=True)
+    discharge_diagnosis = Column(String(200), nullable=True)
+    status = Column(Integer, default=0)  # 0=待入院 1=在院 2=已出院 3=已退院
+    create_time = Column(DateTime)
+
+    patient = relationship("Patient")
+    doctor = relationship("Doctor")
+    department = relationship("Department")
+    ward = relationship("Ward")
+    bed = relationship("Bed")
+    orders = relationship("InpatientOrder", back_populates="admission", cascade="all, delete-orphan")
+    nursing_records = relationship("NursingRecord", back_populates="admission", cascade="all, delete-orphan")
+    temperature_records = relationship("TemperatureRecord", back_populates="admission", cascade="all, delete-orphan")
+    charges = relationship("InpatientCharge", back_populates="admission", cascade="all, delete-orphan")
+    discharge_summary = relationship("DischargeSummary", back_populates="admission", uselist=False)
+
+
+class InpatientOrder(Base):
+    __tablename__ = "hoimsystem_inpatient_order"
+
+    order_id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    admission_id = Column(String(36), ForeignKey("hoimsystem_admission.admission_id"))
+    patient_id = Column(Integer, ForeignKey("hoimsystem_patient.patient_id"))
+    doctor_id = Column(Integer, ForeignKey("hoimsystem_doctor.doctor_id"))
+    order_type = Column(Integer, default=0)  # 0=长期医嘱 1=临时医嘱
+    category = Column(String(10))  # drug=药品 treatment=治疗 exam=检查 diet=饮食 nursing=护理 other=其他
+    start_time = Column(DateTime)
+    stop_time = Column(DateTime, nullable=True)
+    status = Column(Integer, default=0)  # 0=新开 1=已审核 2=执行中 3=已停止 4=已撤销
+    priority = Column(Integer, default=0)  # 0=常规 1=紧急 2=抢救
+    note = Column(String(200), nullable=True)
+    create_time = Column(DateTime)
+
+    admission = relationship("Admission", back_populates="orders")
+    patient = relationship("Patient")
+    doctor = relationship("Doctor")
+    items = relationship("InpatientOrderItem", back_populates="order", cascade="all, delete-orphan")
+    executions = relationship("OrderExecution", back_populates="order", cascade="all, delete-orphan")
+
+
+class InpatientOrderItem(Base):
+    __tablename__ = "hoimsystem_inpatient_order_item"
+
+    item_id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    order_id = Column(String(36), ForeignKey("hoimsystem_inpatient_order.order_id"))
+    item_name = Column(String(50))  # 药品名或项目名称
+    item_type = Column(String(10))  # drug=药品 consumable=耗材 service=服务项目
+    item_id_ref = Column(Integer, nullable=True)  # 关联药品ID或耗材ID
+    dose = Column(String(20), nullable=True)  # 剂量：如 "10mg"
+    unit = Column(String(10), nullable=True)  # 单位
+    frequency = Column(String(20), nullable=True)  # 频次：如 "qd"(每日一次)、"bid"(每日两次)
+    route = Column(String(20), nullable=True)  # 给药途径：口服、静脉滴注、皮下注射
+    days = Column(Integer, default=1)  # 用药天数
+    quantity = Column(Integer, default=1)  # 数量
+    unit_price = Column(Float, default=0)  # 单价
+    total_price = Column(Float, default=0)  # 总价
+    note = Column(String(100), nullable=True)
+
+    order = relationship("InpatientOrder", back_populates="items")
+
+
+class OrderExecution(Base):
+    __tablename__ = "hoimsystem_order_execution"
+
+    execution_id = Column(Integer, primary_key=True, autoincrement=True)
+    order_id = Column(String(36), ForeignKey("hoimsystem_inpatient_order.order_id"))
+    nurse_id = Column(Integer, ForeignKey("hoimsystem_users.user_id"))
+    planned_time = Column(DateTime)  # 计划执行时间
+    execution_time = Column(DateTime, nullable=True)  # 实际执行时间
+    status = Column(Integer, default=0)  # 0=待执行 1=已执行 2=已跳过 3=已停止
+    note = Column(String(200), nullable=True)
+
+    order = relationship("InpatientOrder", back_populates="executions")
+    nurse = relationship("User")
+
+
+class NursingRecord(Base):
+    __tablename__ = "hoimsystem_nursing_record"
+
+    record_id = Column(Integer, primary_key=True, autoincrement=True)
+    admission_id = Column(String(36), ForeignKey("hoimsystem_admission.admission_id"))
+    patient_id = Column(Integer, ForeignKey("hoimsystem_patient.patient_id"))
+    nurse_id = Column(Integer, ForeignKey("hoimsystem_users.user_id"))
+    record_time = Column(DateTime)
+    consciousness = Column(String(10), nullable=True)  # 意识：清醒、嗜睡、昏迷
+    temperature = Column(Float, nullable=True)
+    pulse = Column(Integer, nullable=True)
+    respiration = Column(Integer, nullable=True)
+    blood_pressure = Column(String(20), nullable=True)
+    spo2 = Column(Float, nullable=True)  # 血氧饱和度
+    intake = Column(String(50), nullable=True)  # 入量
+    output = Column(String(50), nullable=True)  # 出量
+    skin_condition = Column(String(50), nullable=True)  # 皮肤情况
+    drainage = Column(String(50), nullable=True)  # 引流情况
+    note = Column(String(500), nullable=True)
+    create_time = Column(DateTime)
+
+    admission = relationship("Admission", back_populates="nursing_records")
+    patient = relationship("Patient")
+    nurse = relationship("User")
+
+
+class TemperatureRecord(Base):
+    __tablename__ = "hoimsystem_temperature_record"
+
+    temp_id = Column(Integer, primary_key=True, autoincrement=True)
+    admission_id = Column(String(36), ForeignKey("hoimsystem_admission.admission_id"))
+    patient_id = Column(Integer, ForeignKey("hoimsystem_patient.patient_id"))
+    record_date = Column(Date)
+    time_point = Column(String(5), default="06:00")  # 时间点：02:00 06:00 10:00 14:00 18:00 22:00
+    temperature = Column(Float, nullable=True)
+    pulse = Column(Integer, nullable=True)
+    respiration = Column(Integer, nullable=True)
+    blood_pressure = Column(String(20), nullable=True)
+    stool_count = Column(Integer, nullable=True)  # 大便次数
+    weight = Column(Float, nullable=True)
+    intake = Column(Float, nullable=True)  # 入量(ml)
+    output = Column(Float, nullable=True)  # 出量(ml)
+    note = Column(String(100), nullable=True)
+
+    admission = relationship("Admission", back_populates="temperature_records")
+    patient = relationship("Patient")
+
+
+class InpatientCharge(Base):
+    __tablename__ = "hoimsystem_inpatient_charge"
+
+    charge_id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    admission_id = Column(String(36), ForeignKey("hoimsystem_admission.admission_id"))
+    patient_id = Column(Integer, ForeignKey("hoimsystem_patient.patient_id"))
+    item_name = Column(String(50))  # 项目名称
+    item_type = Column(String(10))  # drug=药品 consumable=耗材 bed=床位 service=服务 exam=检查
+    quantity = Column(Float, default=1)
+    unit_price = Column(Float, default=0)
+    total_amount = Column(Float, default=0)
+    charge_date = Column(Date)  # 费用所属日期
+    related_order_id = Column(String(36), nullable=True)  # 关联医嘱ID
+    status = Column(Integer, default=0)  # 0=未结算 1=已结算 2=已退费
+    create_time = Column(DateTime)
+
+    admission = relationship("Admission", back_populates="charges")
+    patient = relationship("Patient")
+
+
+class DischargeSummary(Base):
+    __tablename__ = "hoimsystem_discharge_summary"
+
+    summary_id = Column(Integer, primary_key=True, autoincrement=True)
+    admission_id = Column(String(36), ForeignKey("hoimsystem_admission.admission_id"), unique=True)
+    patient_id = Column(Integer, ForeignKey("hoimsystem_patient.patient_id"))
+    doctor_id = Column(Integer, ForeignKey("hoimsystem_doctor.doctor_id"))
+    discharge_time = Column(DateTime)
+    hospital_days = Column(Integer, default=0)  # 住院天数
+    admission_diagnosis = Column(String(200), nullable=True)
+    discharge_diagnosis = Column(String(200), nullable=True)
+    treatment_summary = Column(String(1000), nullable=True)  # 诊疗经过
+    discharge_status = Column(Integer, default=0)  # 0=治愈 1=好转 2=未愈 3=死亡 4=转院
+    discharge_instruction = Column(String(500), nullable=True)  # 出院医嘱
+    follow_up_plan = Column(String(200), nullable=True)  # 随访计划
+    note = Column(String(300), nullable=True)
+    create_time = Column(DateTime)
+
+    admission = relationship("Admission", back_populates="discharge_summary")
+    patient = relationship("Patient")
+    doctor = relationship("Doctor")

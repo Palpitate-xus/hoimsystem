@@ -492,6 +492,53 @@ export const asyncRoutes = [
   },
 
   {
+    path: "/inpatient",
+    component: Layout,
+    redirect: "noRedirect",
+    name: "Inpatient",
+    alwaysShow: true,
+    meta: { title: "住院管理", icon: "office-building", permissions: ["admin", "doctor", "director"] },
+    children: [
+      {
+        path: "wardManagement",
+        name: "WardManagement",
+        component: () => import("@/views/inpatient/wardManagement.vue"),
+        meta: { title: "病区床位", permissions: ["admin"] },
+      },
+      {
+        path: "admission",
+        name: "Admission",
+        component: () => import("@/views/inpatient/admission.vue"),
+        meta: { title: "入院登记", permissions: ["admin", "doctor", "director"] },
+      },
+      {
+        path: "inpatientOrder",
+        name: "InpatientOrderPage",
+        component: () => import("@/views/inpatient/inpatientOrder.vue"),
+        meta: { title: "住院医嘱", permissions: ["admin", "doctor", "director"] },
+      },
+      {
+        path: "nursingStation",
+        name: "NursingStation",
+        component: () => import("@/views/inpatient/nursingStation.vue"),
+        meta: { title: "护士工作站", permissions: ["admin", "doctor", "director"] },
+      },
+      {
+        path: "inpatientCharge",
+        name: "InpatientChargePage",
+        component: () => import("@/views/inpatient/inpatientCharge.vue"),
+        meta: { title: "住院费用", permissions: ["admin"] },
+      },
+      {
+        path: "discharge",
+        name: "DischargePage",
+        component: () => import("@/views/inpatient/discharge.vue"),
+        meta: { title: "出院结算", permissions: ["admin", "doctor", "director"] },
+      },
+    ],
+  },
+
+  {
     path: "/error",
     component: EmptyLayout,
     redirect: "noRedirect",

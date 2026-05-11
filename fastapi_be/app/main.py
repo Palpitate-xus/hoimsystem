@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.routers import (
     admin,
+    admission,
     adverse_event,
     adverse_reaction,
     backup,
@@ -11,10 +12,14 @@ from app.routers import (
     clinical_pathway,
     consumable,
     digital_signature,
+    discharge,
     doctor,
     followup,
+    inpatient_charge,
+    inpatient_order,
     lab,
     mdt,
+    nursing,
     patient,
     pharmacy,
     purchase,
@@ -27,6 +32,7 @@ from app.routers import (
     upload,
     user,
     vitalsign,
+    ward,
 )
 
 app = FastAPI(title="HOIM System FastAPI")
@@ -75,6 +81,12 @@ app.include_router(digital_signature.router, prefix="/api")
 app.include_router(referral.router, prefix="/api")
 app.include_router(mdt.router, prefix="/api")
 app.include_router(clinical_pathway.router, prefix="/api")
+app.include_router(ward.router, prefix="/api")
+app.include_router(admission.router, prefix="/api")
+app.include_router(inpatient_order.router, prefix="/api")
+app.include_router(nursing.router, prefix="/api")
+app.include_router(inpatient_charge.router, prefix="/api")
+app.include_router(discharge.router, prefix="/api")
 
 import os
 
@@ -83,6 +95,11 @@ from fastapi.staticfiles import StaticFiles
 upload_dir = os.path.join(os.path.dirname(__file__), "..", "uploads")
 os.makedirs(upload_dir, exist_ok=True)
 app.mount("/uploads", StaticFiles(directory=upload_dir), name="uploads")
+
+# 自动创建数据库表（所有模型导入完成后）
+from app.database import Base, engine
+
+Base.metadata.create_all(bind=engine)
 
 
 @app.get("/")

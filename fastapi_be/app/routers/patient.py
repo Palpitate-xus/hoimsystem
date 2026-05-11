@@ -56,7 +56,7 @@ def get_appointment_list(current_user: User = Depends(get_current_user), keyword
 @router.get("/appointmentManagement/appointmentList")
 def appointment_list(keyword: str | None = None, db: Session = Depends(get_db)):
     schedules = db.query(DoctorSchedule).all()
-    weekdays = ["星期一", "星期二", "星期三", "星期四", "星期五", "星期六", "星期天"]
+    weekdays = ["周一", "周二", "周三", "周四", "周五", "周六", "周日"]
     date_map = {}
     begin = datetime.datetime.now()
     for i in range(7):
@@ -171,7 +171,7 @@ def get_registration_list(current_user: User = Depends(get_current_user), keywor
 @router.get("/registrationManagement/registrationList")
 def registration_list(current_user: User = Depends(get_current_user), keyword: str | None = None, db: Session = Depends(get_db)):
     today_weeky = datetime.datetime.now().weekday()
-    weekdays = ["星期一", "星期二", "星期三", "星期四", "星期五"]
+    weekdays = ["周一", "周二", "周三", "周四", "周五"]
     if today_weeky > 4:
         return {"code": 200, "msg": "success", "data": "今天为休息日"}
     data = []

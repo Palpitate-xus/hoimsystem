@@ -549,3 +549,80 @@ class DischargeSummaryCreateRequest(BaseModel):
     discharge_instruction: str | None = Field(default=None, max_length=500)
     follow_up_plan: str | None = Field(default=None, max_length=200)
     note: str | None = Field(default=None, max_length=300)
+
+
+# ===== 结构化电子病历 Schemas =====
+
+
+class MedicalRecordTemplateCreateRequest(BaseModel):
+    name: str = Field(..., min_length=1, max_length=50)
+    category: str = Field(..., max_length=20)
+    content: str = Field(default="")
+    department_id: int | None = None
+    is_default: int = Field(default=0, ge=0, le=1)
+
+
+class MedicalRecordTemplateUpdateRequest(BaseModel):
+    template_id: int
+    name: str | None = Field(default=None, min_length=1, max_length=50)
+    category: str | None = Field(default=None, max_length=20)
+    content: str | None = None
+    department_id: int | None = None
+    is_default: int | None = Field(default=None, ge=0, le=1)
+    status: int | None = Field(default=None, ge=0, le=1)
+
+
+class StructuredMedicalRecordCreateRequest(BaseModel):
+    admission_id: str | None = None
+    patient_id: int
+    doctor_id: int
+    record_type: int = Field(default=0, ge=0, le=3)
+    chief_complaint: str | None = Field(default=None, max_length=300)
+    present_illness: str | None = None
+    past_history: str | None = Field(default=None, max_length=500)
+    personal_history: str | None = Field(default=None, max_length=300)
+    family_history: str | None = Field(default=None, max_length=300)
+    physical_exam: str | None = None
+    auxiliary_exam: str | None = None
+    diagnosis: str | None = Field(default=None, max_length=300)
+    treatment_plan: str | None = None
+
+
+class StructuredMedicalRecordUpdateRequest(BaseModel):
+    record_id: str
+    chief_complaint: str | None = Field(default=None, max_length=300)
+    present_illness: str | None = None
+    past_history: str | None = Field(default=None, max_length=500)
+    personal_history: str | None = Field(default=None, max_length=300)
+    family_history: str | None = Field(default=None, max_length=300)
+    physical_exam: str | None = None
+    auxiliary_exam: str | None = None
+    diagnosis: str | None = Field(default=None, max_length=300)
+    treatment_plan: str | None = None
+    status: int | None = Field(default=None, ge=0, le=2)
+
+
+class ProgressNoteCreateRequest(BaseModel):
+    admission_id: str
+    patient_id: int
+    doctor_id: int
+    note_date: str
+    content: str = Field(..., min_length=1)
+
+
+class WardRoundCreateRequest(BaseModel):
+    admission_id: str
+    patient_id: int
+    doctor_id: int
+    round_type: int = Field(default=2, ge=0, le=2)
+    content: str = Field(..., min_length=1)
+    round_time: str | None = None
+
+
+class MedicalRecordQualityCheckRequest(BaseModel):
+    admission_id: str
+    record_id: str | None = None
+    check_item: str = Field(..., max_length=50)
+    check_result: int = Field(default=0, ge=0, le=2)
+    issue: str | None = Field(default=None, max_length=200)
+    score: int = Field(default=100, ge=0, le=100)

@@ -535,6 +535,12 @@ export const asyncRoutes = [
         component: () => import("@/views/inpatient/discharge.vue"),
         meta: { title: "出院结算", permissions: ["admin", "doctor", "director"] },
       },
+      {
+        path: "emr",
+        name: "Emr",
+        component: () => import("@/views/inpatient/emr.vue"),
+        meta: { title: "电子病历", permissions: ["admin", "doctor", "director"] },
+      },
     ],
   },
 

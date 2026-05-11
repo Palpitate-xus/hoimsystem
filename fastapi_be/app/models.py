@@ -592,6 +592,111 @@ class ClinicalPathway(Base):
     create_time = Column(DateTime)
 
 
+# ===== 结构化电子病历模块 =====
+
+
+class MedicalRecordTemplate(Base):
+    __tablename__ = "hoimsystem_medical_record_template"
+
+    template_id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String(50))
+    category = Column(String(20))  # admission=入院记录 progress=病程记录 discharge=出院记录
+    content = Column(Text)  # JSON格式模板内容
+    department_id = Column(Integer, ForeignKey("hoimsystem_department.department_id"), nullable=True)
+    is_default = Column(Integer, default=0)  # 0=否 1=是
+    status = Column(Integer, default=0)  # 0=启用 1=停用
+    create_time = Column(DateTime)
+
+    department = relationship("Department")
+
+
+class StructuredMedicalRecord(Base):
+    __tablename__ = "hoimsystem_structured_medical_record"
+
+    record_id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    admission_id = Column(String(36), ForeignKey("hoimsystem_admission.admission_id"), nullable=True)
+    patient_id = Column(Integer, ForeignKey("hoimsystem_patient.patient_id"))
+    doctor_id = Column(Integer, ForeignKey("hoimsystem_doctor.doctor_id"))
+    record_type = Column(Integer, default=0)  # 0=入院记录 1=首次病程 2=日常病程 3=出院记录
+
+    # 主诉与病史
+    chief_complaint = Column(String(300), nullable=True)  # 主诉
+    present_illness = Column(Text, nullable=True)  # 现病史
+    past_history = Column(String(500), nullable=True)  # 既往史
+    personal_history = Column(String(300), nullable=True)  # 个人史
+    family_history = Column(String(300), nullable=True)  # 家族史
+
+    # 体格检查
+    physical_exam = Column(Text, nullable=True)  # 体格检查（JSON）
+
+    # 辅助检查
+    auxiliary_exam = Column(Text, nullable=True)  # 辅助检查
+
+    # 诊断与计划
+    diagnosis = Column(String(300), nullable=True)  # 初步诊断
+    treatment_plan = Column(Text, nullable=True)  # 诊疗计划
+
+    # 病历状态
+    status = Column(Integer, default=0)  # 0=草稿 1=已完成 2=已归档
+    sign_time = Column(DateTime, nullable=True)  # 医生签名时间
+    create_time = Column(DateTime)
+    update_time = Column(DateTime, nullable=True)
+
+    patient = relationship("Patient")
+    doctor = relationship("Doctor")
+    admission = relationship("Admission")
+
+
+class ProgressNote(Base):
+    __tablename__ = "hoimsystem_progress_note"
+
+    note_id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    admission_id = Column(String(36), ForeignKey("hoimsystem_admission.admission_id"))
+    patient_id = Column(Integer, ForeignKey("hoimsystem_patient.patient_id"))
+    doctor_id = Column(Integer, ForeignKey("hoimsystem_doctor.doctor_id"))
+    note_date = Column(Date)  # 病程日期
+    content = Column(Text)  # 病程内容
+    record_time = Column(DateTime)
+    create_time = Column(DateTime)
+
+    patient = relationship("Patient")
+    doctor = relationship("Doctor")
+    admission = relationship("Admission")
+
+
+class WardRound(Base):
+    __tablename__ = "hoimsystem_ward_round"
+
+    round_id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    admission_id = Column(String(36), ForeignKey("hoimsystem_admission.admission_id"))
+    patient_id = Column(Integer, ForeignKey("hoimsystem_patient.patient_id"))
+    doctor_id = Column(Integer, ForeignKey("hoimsystem_doctor.doctor_id"))  # 查房医生
+    round_type = Column(Integer, default=2)  # 0=主任医师 1=副主任医师 2=主治医师
+    content = Column(Text)
+    round_time = Column(DateTime)
+    create_time = Column(DateTime)
+
+    patient = relationship("Patient")
+    doctor = relationship("Doctor")
+    admission = relationship("Admission")
+
+
+class MedicalRecordQuality(Base):
+    __tablename__ = "hoimsystem_medical_record_quality"
+
+    quality_id = Column(Integer, primary_key=True, autoincrement=True)
+    admission_id = Column(String(36), ForeignKey("hoimsystem_admission.admission_id"))
+    record_id = Column(String(36), ForeignKey("hoimsystem_structured_medical_record.record_id"))
+    check_item = Column(String(50))  # 检查项：时限/完整性/规范
+    check_result = Column(Integer, default=0)  # 0=通过 1=警告 2=错误
+    issue = Column(String(200), nullable=True)  # 问题描述
+    score = Column(Integer, default=100)  # 得分
+    checker_id = Column(Integer, ForeignKey("hoimsystem_users.user_id"))
+    check_time = Column(DateTime)
+
+    checker = relationship("User")
+
+
 # ===== 住院管理模块 =====
 
 

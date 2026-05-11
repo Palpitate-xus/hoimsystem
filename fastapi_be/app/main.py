@@ -14,6 +14,7 @@ from app.routers import (
     digital_signature,
     discharge,
     doctor,
+    emr,
     followup,
     inpatient_charge,
     inpatient_order,
@@ -87,6 +88,7 @@ app.include_router(inpatient_order.router, prefix="/api")
 app.include_router(nursing.router, prefix="/api")
 app.include_router(inpatient_charge.router, prefix="/api")
 app.include_router(discharge.router, prefix="/api")
+app.include_router(emr.router, prefix="/api")
 
 import os
 

@@ -12,7 +12,6 @@
 如果您发现了安全漏洞，请不要公开提交 Issue。请通过以下方式报告：
 
 - GitHub Security Advisories: [New Advisory](https://github.com/Palpitate-xus/hoimsystem/security/advisories/new)
-- 邮件: security@hoimsystem.local
 
 我们会在 48 小时内确认收到报告，并在 7 个工作日内提供修复计划。
 

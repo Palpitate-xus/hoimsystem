@@ -1,5 +1,71 @@
 # 医院信息管理系统（HIS-OP）待办事项
 
+> 本文件记录系统所有功能模块的开发状态。状态标记：✅ 已完成 | 🚧 进行中 | ⬜ 待开发
+
+---
+
+## 〇、业务领域开发状态总览
+
+按业务领域分组的全景视图，便于快速定位模块。
+
+### 1. 门诊管理 ✅
+- 患者服务：智能导诊、预约挂号、现场挂号、缴费、病历/处方查询、健康档案、评价、预交金、转诊
+- 医生工作站：排班、病历、处方、检查检验申请、考勤、MDT会诊、临床路径
+- 药房管理：药品/耗材管理、发药、库存预警/盘点、处方点评、采购、ADR监测
+- 收费管理：费用管理、发票、窗口挂号、日结对账
+- 排队叫号：分诊台、候诊队列、候诊巡视
+- 报到签到：预约报到、违约记录
+- 护士预检、检验科结果录入、复诊随访
+
+### 2. 住院管理 ✅
+- 病区床位、入院登记、住院医嘱、护士工作站、住院费用、出院结算
+- 手术麻醉（申请/排程/麻醉记录）
+- 电子病历入口
+
+### 3. 电子病历(EMR) ✅
+- 病历模板、结构化病历、病程记录、查房记录、病历质控
+
+### 4. 体检系统 ✅
+- 体检套餐、项目、预约、记录、结果、报告
+
+### 5. 系统管理 ✅
+- 用户权限、操作日志、数据字典、系统参数、消息中心、数据备份、不良事件上报、CA数字签名
+
+### 6. 病案管理 ⬜
+- 病案首页（ICD-10编码）、归档、借阅、封存
+
+### 7. 急诊管理 ⬜
+- 急诊分诊（4级）、抢救记录、留观管理、绿色通道、急诊病历
+
+### 8. 护理文书 ⬜
+- 入院护理评估、护理计划、交接班记录、危重护理记录
+
+### 9. 门诊输液 ⬜
+- 输液医嘱、配药核对、输液执行、皮试管理
+
+### 10. PACS/RIS ⬜
+- 检查申请、影像报告书写、影像调阅、报告审核
+
+### 11. 检验科 LIS 扩展 ⬜
+- 检验标本管理、仪器对接、检验审核、危急值管理
+
+### 12. 抗菌药物管理 ⬜
+- 分级目录、越级审批、DDDs统计、送检率统计
+
+### 13. 院感管理 ⬜
+- 院感监测、暴发预警、消毒监测、职业暴露、院感上报
+
+### 14. 物资设备管理 ⬜
+- 设备台账、维修、保养、高值耗材追溯、资产盘点
+
+### 15. 血库管理 ⬜
+- 用血申请、血型复核、交叉配血、发血、输血反应
+
+### 16. 医保管理 ⬜
+- 目录对照、医保结算、慢病管理、DRG/DIP、医保控费
+
+---
+
 ## 一、已完成
 
 - [x] 数据库关系模型建模（15 张核心表）
@@ -14,6 +80,10 @@
 - [x] 医生模块（医生注册、排班管理、处方开具/查询）
 - [x] 药品管理模块（药品入库、查询、库存查询）
 - [x] vue3-new-ui 前端页面联调（主分支）
+- [x] **住院管理模块**（病区床位/入院登记/医嘱/护理/费用/出院）
+- [x] **手术麻醉模块**（手术申请/排程/麻醉记录）
+- [x] **结构化电子病历模块**（模板/病程记录/查房/质控）
+- [x] **体检系统模块**（套餐/项目/预约/记录/报告）
 
 > **已弃用保留项**：vue-ui（Vue 2.x 前端）、django_be（Django 后端）
 
@@ -67,7 +137,7 @@
 
 - [x] 转诊申请 API（转科/转院，含原因、目标科室、接收医生）
 - [x] 会诊申请 API（邀请多科室医生会诊）
-- [ ] 医嘱管理 API（长期/临时医嘱开具/停止/查询/撤销）
+- [x] 医嘱管理 API（长期/临时医嘱开具/停止/查询/撤销） *（住院医嘱已实现）*
 - [ ] 处方模板 API（创建/查询/应用/删除个人常用处方）
 - [ ] 诊断模板 API（ICD-10 编码查询/常用诊断模板）
 - [x] 今日候诊病人列表 API（按医生过滤的候诊队列，含预检信息）
@@ -81,8 +151,8 @@
 - [ ] 输液管理 API（开具/执行/巡视/结束，含滴速、药物批次）
 - [ ] 注射管理 API（肌注/皮下/皮内注射记录）
 - [ ] 皮试管理 API（皮试药物、观察时间、结果判定）
-- [ ] 护理记录 API（创建/查询，含病情观察、护理措施、效果评价）
-- [ ] 医嘱执行确认 API（护士核对并确认执行医嘱）
+- [x] 护理记录 API（创建/查询，含病情观察、护理措施、效果评价） *（住院护理记录已实现）*
+- [x] 医嘱执行确认 API（护士核对并确认执行医嘱） *（住院医嘱执行已实现）*
 - [ ] 交接班记录 API（交班内容、交接时间、交接人签名）
 - [ ] 病人过敏标识管理 API（新增/修改过敏标识，同步提醒医生）
 - [x] 候诊区巡视记录 API（特殊病人状态记录、急诊绿色通道标记）
@@ -145,6 +215,119 @@
 - [ ] 数据导入导出 API（批量导入医生/病人/药品 Excel）
 - [ ] 系统监控 API（在线人数、接口性能、错误率）
 
+### 2.13 住院管理 API ✅
+
+> **场景**：住院从入院到出院的完整业务流程。
+
+- [x] 病区床位管理 API（病区/床位/床位图）
+- [x] 入院登记 API（登记+押金缴纳）
+- [x] 住院医嘱 API（长期/临时医嘱+执行记录）
+- [x] 护士工作站 API（医嘱执行/护理记录/体温单）
+- [x] 住院费用 API（一日清单/费用录入）
+- [x] 出院结算 API（出院结算+清单打印）
+
+### 2.14 手术麻醉 API ✅
+
+- [x] 手术申请 API（申请单填写/审批）
+- [x] 手术排程 API（手术室/台次安排）
+- [x] 麻醉记录 API（术中麻醉单）
+
+### 2.15 结构化电子病历 API ✅
+
+- [x] 病历模板 API
+- [x] 结构化病历 API（入院记录/首次病程等）
+- [x] 病程记录 API
+- [x] 查房记录 API
+- [x] 病历质控 API
+
+### 2.16 体检系统 API ✅
+
+- [x] 体检套餐 API
+- [x] 体检项目 API
+- [x] 体检预约 API
+- [x] 体检记录 API
+- [x] 体检结果 API
+- [x] 体检报告 API
+
+### 2.17 急诊管理 API ⬜
+
+- [ ] 急诊分诊 API（分级分诊 1~4 级）
+- [ ] 抢救记录 API（抢救时间轴/用药/操作）
+- [ ] 留观管理 API（留观登记/医嘱/费用）
+- [ ] 绿色通道 API（先救治后付费流程）
+- [ ] 急诊病历 API（急诊专用病历模板）
+
+### 2.18 病案管理 API ⬜
+
+- [ ] 病案首页 API（出院病案首页填写）
+- [ ] ICD-10 编码 API（诊断/手术编码查询）
+- [ ] 病案归档 API（归档/借阅/封存）
+- [ ] 病案质控 API（病案首页质控）
+
+### 2.19 护理文书 API ⬜
+
+- [ ] 入院护理评估 API（ADL/压疮/跌倒风险评估）
+- [ ] 护理计划 API（护理诊断+措施+目标）
+- [ ] 交接班记录 API（书面交接班报告）
+- [ ] 危重护理记录 API（ICU级护理记录）
+- [ ] 手术护理记录 API（术前/术中/术后护理）
+
+### 2.20 门诊输液 API ⬜
+
+- [ ] 输液医嘱 API
+- [ ] 配药核对 API（药房配药+护士核对）
+- [ ] 输液执行 API（穿刺/滴速/巡视）
+- [ ] 皮试管理 API
+- [ ] 输液结束 API（拔针/不良反应记录）
+
+### 2.21 PACS/RIS API ⬜
+
+- [ ] 检查申请 API（放射/超声/内镜申请）
+- [ ] 影像报告书写 API（诊断报告模板+书写）
+- [ ] 影像调阅 API（DICOM Viewer集成）
+- [ ] 报告审核 API（初诊/审核双签名）
+- [ ] 胶片管理 API（打印/云胶片）
+
+### 2.22 抗菌药物管理 API ⬜
+
+- [ ] 分级目录 API（非限制/限制/特殊级）
+- [ ] 越级审批 API
+- [ ] DDDs 统计 API（使用强度）
+- [ ] 送检率统计 API
+- [ ] 围术期预防用药 API
+
+### 2.23 院感管理 API ⬜
+
+- [ ] 院感监测 API（感染病例监测）
+- [ ] 暴发预警 API（同种同源预警）
+- [ ] 消毒监测 API（环境监测记录）
+- [ ] 职业暴露 API（针刺伤等上报）
+- [ ] 院感上报 API（报表生成）
+
+### 2.24 物资设备管理 API ⬜
+
+- [ ] 设备台账 API（设备档案/卡片）
+- [ ] 设备维修 API（报修/维修记录）
+- [ ] 设备保养 API（定期保养计划）
+- [ ] 高值耗材追溯 API（一物一码追溯）
+- [ ] 资产盘点 API
+
+### 2.25 血库管理 API ⬜
+
+- [ ] 用血申请 API
+- [ ] 血型复核 API
+- [ ] 交叉配血 API
+- [ ] 发血管理 API
+- [ ] 输血反应上报 API
+
+### 2.26 医保管理 API ⬜
+
+- [ ] 医保目录对照 API
+- [ ] 医保结算 API（实时结算/对账）
+- [ ] 慢病管理 API（慢特病登记/限额）
+- [ ] DRG/DIP API（分组预测/盈亏分析）
+- [ ] 医保控费 API（费用预警/超标提醒）
+
 ---
 
 ## 三、待实现（系统支撑）
@@ -205,7 +388,7 @@
 - [x] 处方修改/取消页面
 - [ ] 排班查看优化
 - [x] 转诊/会诊申请页面（发起转诊/会诊，查看审批状态）
-- [ ] 医嘱管理页面（长期/临时医嘱开具、停止、查询）
+- [x] 医嘱管理页面（住院医嘱已实现，门诊医嘱待补） *（住院已实现）*
 - [x] 处方模板管理页面（创建/编辑/应用常用处方模板）
 - [ ] 诊断模板/ICD 编码页面（常用诊断、ICD-10 编码搜索）
 - [x] 今日候诊列表页面（本医生今日候诊病人，含预检信息）
@@ -244,8 +427,8 @@
 
 - [ ] 输液管理页面（开具/执行/巡视/结束）
 - [ ] 注射/皮试管理页面
-- [ ] 护理记录页面（病情观察、护理措施、效果评价）
-- [ ] 医嘱执行确认页面（核对并执行医生医嘱）
+- [x] 护理记录页面（病情观察、护理措施、效果评价） *（住院护理记录已实现）*
+- [x] 医嘱执行确认页面（核对并执行医生医嘱） *（住院已实现）*
 - [ ] 交接班记录页面
 
 ### 4.8 检验科端页面
@@ -274,6 +457,79 @@
 - [ ] 窗口预约确认/取消页面
 - [ ] 就诊卡办理页面
 
+### 4.11 住院管理端页面 ✅
+
+- [x] 病区床位管理页面
+- [x] 入院登记页面
+- [x] 住院医嘱页面
+- [x] 护士工作站页面（医嘱执行/护理记录）
+- [x] 住院费用页面
+- [x] 出院结算页面
+- [x] 电子病历页面（住院）
+
+### 4.12 手术麻醉端页面 ✅
+
+- [x] 手术管理页面（申请/排程/麻醉记录）
+
+### 4.13 体检管理端页面 ✅
+
+- [x] 体检综合管理页面（套餐/项目/预约/记录/结果）
+
+### 4.14 急诊管理端页面 ⬜
+
+- [ ] 急诊分诊页面
+- [ ] 抢救记录页面
+- [ ] 留观管理页面
+- [ ] 急诊病历页面
+
+### 4.15 病案管理端页面 ⬜
+
+- [ ] 病案首页填写页面
+- [ ] 病案归档/借阅页面
+- [ ] ICD-10 编码搜索页面
+
+### 4.16 门诊输液端页面 ⬜
+
+- [ ] 输液医嘱页面
+- [ ] 配药核对页面
+- [ ] 输液执行/巡视页面
+
+### 4.17 PACS/RIS 端页面 ⬜
+
+- [ ] 检查申请页面（医生）
+- [ ] 影像报告书写页面（放射科）
+- [ ] 影像调阅页面（DICOM）
+
+### 4.18 抗菌药物管理页面 ⬜
+
+- [ ] 抗菌药物分级目录页面
+- [ ] 越级审批页面
+- [ ] 使用强度统计页面
+
+### 4.19 院感管理页面 ⬜
+
+- [ ] 院感监测页面
+- [ ] 暴发预警页面
+- [ ] 院感上报页面
+
+### 4.20 物资设备管理页面 ⬜
+
+- [ ] 设备台账页面
+- [ ] 设备维修/保养页面
+- [ ] 高值耗材追溯页面
+
+### 4.21 血库管理页面 ⬜
+
+- [ ] 用血申请页面
+- [ ] 配血/发血页面
+- [ ] 输血反应上报页面
+
+### 4.22 医保管理页面 ⬜
+
+- [ ] 医保目录对照页面
+- [ ] 医保结算页面
+- [ ] DRG/DIP 分析页面
+
 ---
 
 ## 五、数据库待建表
@@ -295,48 +551,144 @@
 
 ### 6.1 病人就诊闭环
 
-- [ ] hoimsystem_message（消息通知中心：收件人、标题、内容、类型、已读状态、发送时间）
+- [x] hoimsystem_message（消息通知中心：收件人、标题、内容、类型、已读状态、发送时间）
 - [ ] hoimsystem_family_member（家庭成员：病人 ID、成员姓名、关系、身份证号、手机号）
 - [ ] hoimsystem_patient_queue_status（病人排队实时状态：病人 ID、医生 ID、排队序号、当前状态、预计等待时间）
 
 ### 6.2 医生诊疗深度
 
-- [ ] hoimsystem_referral（转诊记录：转出医生、转入科室/医生、病人 ID、转诊原因、状态、时间）
-- [ ] hoimsystem_consultation（会诊记录：申请医生、会诊科室、病人 ID、会诊原因、会诊意见、状态）
-- [ ] hoimsystem_medical_order（医嘱：医生 ID、病人 ID、医嘱类型（长期/临时）、内容、频次、开始时间、停止时间、状态）
-- [ ] hoimsystem_prescription_template（处方模板：医生 ID、模板名称、药品列表、适用病症）
-- [ ] hoimsystem_diagnosis_template（诊断模板：医生 ID、模板名称、ICD-10 编码、诊断名称）
+- [x] hoimsystem_referral（转诊记录）
+- [x] hoimsystem_consultation（会诊记录）
+- [x] hoimsystem_medical_order（住院医嘱：inpatient_order）
+- [ ] hoimsystem_prescription_template（处方模板）
+- [ ] hoimsystem_diagnosis_template（诊断模板：ICD-10 编码）
 
 ### 6.3 护士护理闭环
 
-- [ ] hoimsystem_infusion（输液记录：病人 ID、护士 ID、药品、滴速、开始时间、结束时间、巡视记录）
-- [ ] hoimsystem_injection（注射记录：病人 ID、护士 ID、注射类型、药品、部位、时间）
-- [ ] hoimsystem_skin_test（皮试记录：病人 ID、护士 ID、皮试药物、注射时间、观察时间、结果）
-- [ ] hoimsystem_nursing_record（护理记录：病人 ID、护士 ID、记录类型、内容、时间）
-- [ ] hoimsystem_shift_handover（交接班记录：交班护士、接班护士、交班内容、病人状态、交接时间）
+- [ ] hoimsystem_infusion（输液记录）
+- [ ] hoimsystem_injection（注射记录）
+- [ ] hoimsystem_skin_test（皮试记录）
+- [x] hoimsystem_nursing_record（护理记录） *（住院）*
+- [ ] hoimsystem_shift_handover（交接班记录）
 
 ### 6.4 药房库存精细管理
 
-- [ ] hoimsystem_stock_check（库存盘点单：盘点日期、盘点人、状态、备注）
-- [ ] hoimsystem_stock_check_item（盘点明细：盘点单 ID、药品 ID、系统库存、实盘库存、盈亏数量）
-- [ ] hoimsystem_drug_damage（药品报损记录：药品 ID、报损数量、原因、报损人、审批状态）
-- [ ] hoimsystem_special_drug（特殊药品管理：药品 ID、类型（毒/麻/精/放）、登记人、双人签名、库存）
+- [x] hoimsystem_stock_check（库存盘点单）
+- [x] hoimsystem_stock_check_item（盘点明细）
+- [ ] hoimsystem_drug_damage（药品报损记录）
+- [ ] hoimsystem_special_drug（特殊药品管理：毒麻精放）
 
 ### 6.5 收费窗口业务
 
-- [ ] hoimsystem_daily_settlement（收费员日结：收费员 ID、日期、应收金额、实收金额、退费金额、状态）
-- [ ] hoimsystem_prepayment（预交金记录：病人 ID、充值金额、余额、充值时间、用途）
+- [x] hoimsystem_daily_settlement（收费员日结）
+- [x] hoimsystem_prepayment（预交金记录）
 
 ### 6.6 检验科样本管理
 
-- [ ] hoimsystem_sample（样本记录：样本编号、申请单 ID、病人 ID、样本类型、采集时间、接收时间、状态）
-- [ ] hoimsystem_sample_tracking（样本流转记录：样本编号、环节、操作人、时间、备注）
-- [ ] hoimsystem_qc_record（质控记录：质控品名称、批次、测定值、靶值、标准差、时间）
+- [x] hoimsystem_sample（样本记录）
+- [ ] hoimsystem_sample_tracking（样本流转记录）
+- [ ] hoimsystem_qc_record（质控记录）
 
 ### 6.7 系统权限支撑
 
-- [ ] hoimsystem_user_role_permission（用户角色权限关联：用户 ID、角色编码、菜单权限数组、数据权限范围）
-- [ ] hoimsystem_menu_permission（菜单权限：菜单编码、菜单名称、父级、权限标识、排序）
+- [x] hoimsystem_user_role_permission（用户角色权限关联）
+- [x] hoimsystem_menu_permission（菜单权限）
+
+### 6.8 住院管理（已建） ✅
+
+- [x] hoimsystem_ward（病区）
+- [x] hoimsystem_bed（床位）
+- [x] hoimsystem_admission（入院登记）
+- [x] hoimsystem_inpatient_order（住院医嘱）
+- [x] hoimsystem_inpatient_order_item（医嘱明细）
+- [x] hoimsystem_order_execution（医嘱执行）
+- [x] hoimsystem_nursing_record（护理记录）
+- [x] hoimsystem_temperature_record（体温单）
+- [x] hoimsystem_inpatient_charge（住院费用）
+- [x] hoimsystem_discharge_summary（出院小结）
+
+### 6.9 结构化EMR（已建） ✅
+
+- [x] hoimsystem_medical_record_template（病历模板）
+- [x] hoimsystem_structured_medical_record（结构化病历）
+- [x] hoimsystem_progress_note（病程记录）
+- [x] hoimsystem_ward_round（查房记录）
+- [x] hoimsystem_medical_record_quality（病历质控）
+
+### 6.10 手术麻醉（已建） ✅
+
+- [x] hoimsystem_surgery_application（手术申请）
+- [x] hoimsystem_surgery_schedule（手术排程）
+- [x] hoimsystem_anesthesia_record（麻醉记录）
+
+### 6.11 体检系统（已建） ✅
+
+- [x] hoimsystem_exam_package（体检套餐）
+- [x] hoimsystem_exam_item（体检项目）
+- [x] hoimsystem_exam_appointment（体检预约）
+- [x] hoimsystem_exam_record（体检记录）
+- [x] hoimsystem_exam_result（体检结果）
+
+### 6.12 急诊管理 ⬜ 待建
+
+- [ ] hoimsystem_emergency_triage（急诊分诊：分级、症状、生命体征、分诊护士）
+- [ ] hoimsystem_emergency_rescue（抢救记录：抢救时间、用药、操作、参与人员）
+- [ ] hoimsystem_emergency_observation（留观记录：留观开始、结束时间、病情）
+
+### 6.13 病案管理 ⬜ 待建
+
+- [ ] hoimsystem_medical_record_home（病案首页：基本信息、诊断、手术、费用汇总）
+- [ ] hoimsystem_icd10_diagnosis（ICD-10诊断编码库）
+- [ ] hoimsystem_icd10_operation（ICD-9-CM-3手术操作编码库）
+- [ ] hoimsystem_medical_record_archive（病案归档：归档号、位置、状态、借阅记录）
+
+### 6.14 护理文书 ⬜ 待建
+
+- [ ] hoimsystem_nursing_assessment（入院护理评估）
+- [ ] hoimsystem_nursing_plan（护理计划）
+- [ ] hoimsystem_critical_care_record（危重护理记录）
+
+### 6.15 门诊输液 ⬜ 待建
+
+- [ ] hoimsystem_infusion_order（输液医嘱）
+- [ ] hoimsystem_infusion_execution（输液执行记录）
+
+### 6.16 PACS/RIS ⬜ 待建
+
+- [ ] hoimsystem_imaging_order（影像检查申请）
+- [ ] hoimsystem_imaging_report（影像报告）
+- [ ] hoimsystem_imaging_template（影像报告模板）
+
+### 6.17 抗菌药物管理 ⬜ 待建
+
+- [ ] hoimsystem_antibiotic_grade（抗菌药物分级）
+- [ ] hoimsystem_antibiotic_approval（越级使用审批）
+
+### 6.18 院感管理 ⬜ 待建
+
+- [ ] hoimsystem_infection_case（院感病例）
+- [ ] hoimsystem_disinfection_monitor（消毒监测）
+- [ ] hoimsystem_occupational_exposure（职业暴露）
+
+### 6.19 物资设备管理 ⬜ 待建
+
+- [ ] hoimsystem_equipment（设备台账）
+- [ ] hoimsystem_equipment_maintenance（设备维修）
+- [ ] hoimsystem_equipment_inspection（设备保养）
+- [ ] hoimsystem_consumable_trace（高值耗材追溯）
+
+### 6.20 血库管理 ⬜ 待建
+
+- [ ] hoimsystem_blood_request（用血申请）
+- [ ] hoimsystem_blood_cross_match（交叉配血）
+- [ ] hoimsystem_blood_issue（发血记录）
+- [ ] hoimsystem_transfusion_reaction（输血反应）
+
+### 6.21 医保管理 ⬜ 待建
+
+- [ ] hoimsystem_insurance_catalog（医保目录对照）
+- [ ] hoimsystem_insurance_settlement（医保结算）
+- [ ] hoimsystem_drg_grouping（DRG分组结果）
 
 ---
 
@@ -392,10 +744,37 @@
 
 ## 十一、长期规划
 
-- [ ] 住院管理模块
-- [ ] 手术室管理模块
-- [ ] 体检中心模块
+- [x] 住院管理模块
+- [x] 手术室管理模块
+- [x] 体检中心模块
 - [ ] 多院区/多科室管理
 - [ ] 移动端 App/小程序
 - [ ] AI 辅助诊断（症状推荐科室）
-- [ ] 电子签名（处方、病历医生签名）
+- [x] 电子签名（处方、病历医生签名）
+
+---
+
+## 十二、未来开发优先级建议
+
+### 第一阶段：补核心闭环
+1. 病案首页 + 病案归档（住院闭环）
+2. 护理文书（护理闭环）
+3. 检验标本管理 + 危急值（检验闭环）
+
+### 第二阶段：扩展业务线
+4. 急诊管理
+5. 门诊输液
+6. PACS/RIS 影像报告
+
+### 第三阶段：合规与管理
+7. 抗菌药物管理
+8. 院感管理
+9. 物资设备管理
+
+### 第四阶段：对外对接
+10. 医保管理（各地差异大，需现场定制）
+11. 血库管理
+
+---
+
+*最后更新：2026-05-11*

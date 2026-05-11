@@ -50,7 +50,7 @@
             </el-form-item>
             <el-form-item label="推荐科室">
               <el-select v-model="form.department_id" placeholder="选择科室" clearable style="width: 100%;">
-                <el-option v-for="d in departments" :key="d.department_id" :label="d.name" :value="d.department_id" />
+                <el-option v-for="d in departments" :key="d.id" :label="d.name" :value="d.id" />
               </el-select>
             </el-form-item>
             <el-form-item label="备注">

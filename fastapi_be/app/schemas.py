@@ -626,3 +626,67 @@ class MedicalRecordQualityCheckRequest(BaseModel):
     check_result: int = Field(default=0, ge=0, le=2)
     issue: str | None = Field(default=None, max_length=200)
     score: int = Field(default=100, ge=0, le=100)
+
+
+# ===== 体检系统 Schemas =====
+
+
+class ExamPackageCreateRequest(BaseModel):
+    name: str = Field(..., min_length=1, max_length=50)
+    category: str = Field(..., max_length=20)
+    price: float = Field(default=0, ge=0)
+    items: str = Field(default="")
+    description: str | None = Field(default=None, max_length=200)
+
+
+class ExamPackageUpdateRequest(BaseModel):
+    package_id: int
+    name: str | None = Field(default=None, min_length=1, max_length=50)
+    category: str | None = Field(default=None, max_length=20)
+    price: float | None = Field(default=None, ge=0)
+    items: str | None = None
+    description: str | None = Field(default=None, max_length=200)
+    status: int | None = Field(default=None, ge=0, le=1)
+
+
+class ExamItemCreateRequest(BaseModel):
+    name: str = Field(..., min_length=1, max_length=50)
+    category: str = Field(..., max_length=20)
+    unit: str | None = Field(default=None, max_length=10)
+    reference_range: str | None = Field(default=None, max_length=50)
+    price: float = Field(default=0, ge=0)
+
+
+class ExamItemUpdateRequest(BaseModel):
+    item_id: int
+    name: str | None = Field(default=None, min_length=1, max_length=50)
+    category: str | None = Field(default=None, max_length=20)
+    unit: str | None = Field(default=None, max_length=10)
+    reference_range: str | None = Field(default=None, max_length=50)
+    price: float | None = Field(default=None, ge=0)
+    status: int | None = Field(default=None, ge=0, le=1)
+
+
+class ExamAppointmentCreateRequest(BaseModel):
+    patient_id: int
+    package_id: int
+    exam_date: str
+    note: str | None = Field(default=None, max_length=200)
+
+
+class ExamRecordUpdateRequest(BaseModel):
+    record_id: str
+    overall_result: str | None = Field(default=None, max_length=20)
+    overall_advice: str | None = Field(default=None, max_length=500)
+    doctor_id: int | None = None
+    status: int | None = Field(default=None, ge=0, le=3)
+
+
+class ExamResultCreateRequest(BaseModel):
+    record_id: str
+    item_id: int
+    result_value: str | None = Field(default=None, max_length=100)
+    unit: str | None = Field(default=None, max_length=10)
+    reference_range: str | None = Field(default=None, max_length=50)
+    abnormal_flag: int = Field(default=0, ge=0, le=3)
+    note: str | None = Field(default=None, max_length=200)

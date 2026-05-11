@@ -1002,4 +1002,85 @@ class DischargeSummary(Base):
 
     admission = relationship("Admission", back_populates="discharge_summary")
     patient = relationship("Patient")
+
+
+# ===== 体检系统模块 =====
+
+
+class ExamPackage(Base):
+    __tablename__ = "hoimsystem_exam_package"
+
+    package_id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String(50))
+    category = Column(String(20))  # general=常规入职=入职 premarital=婚检 elderly=老年
+    price = Column(Float, default=0)
+    items = Column(String(500))  # 包含项目ID，逗号分隔
+    description = Column(String(200), nullable=True)
+    status = Column(Integer, default=0)  # 0=启用 1=停用
+    create_time = Column(DateTime)
+
+
+class ExamItem(Base):
+    __tablename__ = "hoimsystem_exam_item"
+
+    item_id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String(50))  # 项目名称
+    category = Column(String(20))  # blood=血常规 urine=尿常规 ecg=心电图 ultrasound=超声 xray=放射
+    unit = Column(String(10), nullable=True)  # 单位
+    reference_range = Column(String(50), nullable=True)  # 参考范围
+    price = Column(Float, default=0)
+    status = Column(Integer, default=0)
+    create_time = Column(DateTime)
+
+
+class ExamAppointment(Base):
+    __tablename__ = "hoimsystem_exam_appointment"
+
+    appointment_id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    patient_id = Column(Integer, ForeignKey("hoimsystem_patient.patient_id"))
+    package_id = Column(Integer, ForeignKey("hoimsystem_exam_package.package_id"))
+    exam_date = Column(Date)
+    status = Column(Integer, default=0)  # 0=待体检 1=已报到 2=进行中 3=已完成 4=已取消
+    note = Column(String(200), nullable=True)
+    create_time = Column(DateTime)
+
+    patient = relationship("Patient")
+    package = relationship("ExamPackage")
+
+
+class ExamRecord(Base):
+    __tablename__ = "hoimsystem_exam_record"
+
+    record_id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    appointment_id = Column(String(36), ForeignKey("hoimsystem_exam_appointment.appointment_id"))
+    patient_id = Column(Integer, ForeignKey("hoimsystem_patient.patient_id"))
+    package_id = Column(Integer, ForeignKey("hoimsystem_exam_package.package_id"))
+    doctor_id = Column(Integer, ForeignKey("hoimsystem_doctor.doctor_id"), nullable=True)
+    overall_result = Column(String(20), nullable=True)  # 正常/异常/复查
+    overall_advice = Column(String(500), nullable=True)  # 总检建议
+    exam_time = Column(DateTime, nullable=True)
+    report_time = Column(DateTime, nullable=True)
+    status = Column(Integer, default=0)  # 0=待录入 1=录入中 2=待总检 3=已完成
+    create_time = Column(DateTime)
+
+    patient = relationship("Patient")
+    package = relationship("ExamPackage")
     doctor = relationship("Doctor")
+
+
+class ExamResult(Base):
+    __tablename__ = "hoimsystem_exam_result"
+
+    result_id = Column(Integer, primary_key=True, autoincrement=True)
+    record_id = Column(String(36), ForeignKey("hoimsystem_exam_record.record_id"))
+    item_id = Column(Integer, ForeignKey("hoimsystem_exam_item.item_id"))
+    item_name = Column(String(50))
+    result_value = Column(String(100), nullable=True)  # 检查结果值
+    unit = Column(String(10), nullable=True)
+    reference_range = Column(String(50), nullable=True)
+    abnormal_flag = Column(Integer, default=0)  # 0=正常 1=偏高 2=偏低 3=异常
+    note = Column(String(200), nullable=True)
+    create_time = Column(DateTime)
+
+    record = relationship("ExamRecord")
+    item = relationship("ExamItem")

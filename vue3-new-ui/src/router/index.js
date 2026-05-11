@@ -551,6 +551,23 @@ export const asyncRoutes = [
   },
 
   {
+    path: "/exam",
+    component: Layout,
+    redirect: "noRedirect",
+    name: "Exam",
+    alwaysShow: true,
+    meta: { title: "体检管理", icon: "first-aid-kit", permissions: ["admin", "doctor", "director"] },
+    children: [
+      {
+        path: "examManagement",
+        name: "ExamManagement",
+        component: () => import("@/views/exam/exam.vue"),
+        meta: { title: "体检管理", permissions: ["admin", "doctor", "director"] },
+      },
+    ],
+  },
+
+  {
     path: "/error",
     component: EmptyLayout,
     redirect: "noRedirect",

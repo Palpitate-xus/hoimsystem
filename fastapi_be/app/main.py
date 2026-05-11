@@ -15,6 +15,7 @@ from app.routers import (
     discharge,
     doctor,
     emr,
+    exam,
     followup,
     inpatient_charge,
     inpatient_order,
@@ -91,6 +92,7 @@ app.include_router(inpatient_charge.router, prefix="/api")
 app.include_router(discharge.router, prefix="/api")
 app.include_router(emr.router, prefix="/api")
 app.include_router(surgery.router, prefix="/api")
+app.include_router(exam.router, prefix="/api")
 
 import os
 

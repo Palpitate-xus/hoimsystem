@@ -115,7 +115,9 @@ def doctor_schedule_getlist(current_user: User = Depends(get_current_user), keyw
             number = 0
             specialist = 0
             for j in schedule_list:
-                schedule.append(j.week[2] + j.time[0])
+                week_code = j.week[2] if len(j.week) >= 3 else j.week
+                time_code = j.time[0] if len(j.time) >= 1 else j.time
+                schedule.append(week_code + time_code)
                 number = j.number
                 specialist = j.specialist
             data.append(
@@ -133,7 +135,9 @@ def doctor_schedule_getlist(current_user: User = Depends(get_current_user), keyw
             schedule_list = db.query(DoctorSchedule).filter(DoctorSchedule.doctor_id == doctor_obj.doctor_id).all()
             schedule = []
             for i in schedule_list:
-                schedule.append(i.week[2] + i.time[0])
+                week_code = i.week[2] if len(i.week) >= 3 else i.week
+                time_code = i.time[0] if len(i.time) >= 1 else i.time
+                schedule.append(week_code + time_code)
             data.append(
                 {
                     "id": doctor_obj.doctor_id,

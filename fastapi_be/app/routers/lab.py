@@ -82,7 +82,7 @@ def sample_tracking(lab_order_id: str, db: Session = Depends(get_db)):
         return {"code": 500, "msg": "检查申请单不存在"}
     status_map = {0: "待接收", 1: "已接收", 2: "已拒收"}
     tracking = [
-        {"time": str(lab_order.create_time), "stage": "申请创建", "operator": lab_order.doctor.name if lab_order.doctor else ""},
+        {"time": (lab_order.create_time.strftime("%Y-%m-%d %H:%M:%S") if lab_order.create_time else None), "stage": "申请创建", "operator": lab_order.doctor.name if lab_order.doctor else ""},
     ]
     if lab_order.sample_status >= 1:
         tracking.append({"time": "", "stage": status_map.get(lab_order.sample_status, ""), "operator": "检验科"})
@@ -143,7 +143,7 @@ def get_pending_lab_orders(keyword: str | None = None, db: Session = Depends(get
                 "patient_name": item.patient.name if item.patient else "",
                 "check_type": item.check_type,
                 "status": item.status,
-                "create_time": str(item.create_time),
+                "create_time": (item.create_time.strftime("%Y-%m-%d %H:%M:%S") if item.create_time else None),
             }
         )
     if keyword:
@@ -161,7 +161,7 @@ def get_lab_result_list(keyword: str | None = None, db: Session = Depends(get_db
             {
                 "id": str(item.lab_result_id),
                 "check_name": item.lab_order.check_type if item.lab_order else "",
-                "check_time": str(item.report_time),
+                "check_time": (item.report_time.strftime("%Y-%m-%d %H:%M:%S") if item.report_time else None),
                 "result": item.result,
                 "abnormal_flag": item.abnormal_flag,
                 "technician_name": item.technician.username if item.technician else "",
@@ -181,7 +181,7 @@ def get_lab_result_detail(req: LabResultAuditRequest, db: Session = Depends(get_
     data = {
         "id": str(result.lab_result_id),
         "check_name": result.lab_order.check_type if result.lab_order else "",
-        "check_time": str(result.report_time),
+        "check_time": (result.report_time.strftime("%Y-%m-%d %H:%M:%S") if result.report_time else None),
         "result": result.result,
         "abnormal_flag": result.abnormal_flag,
         "technician_name": result.technician.username if result.technician else "",

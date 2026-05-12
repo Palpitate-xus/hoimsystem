@@ -44,7 +44,7 @@ def get_exam_package_list(
                 "items": item.items,
                 "description": item.description,
                 "status": item.status,
-                "create_time": str(item.create_time) if item.create_time else None,
+                "create_time": (item.create_time.strftime("%Y-%m-%d %H:%M:%S") if item.create_time else None) if item.create_time else None,
             }
         )
     if keyword:
@@ -151,7 +151,7 @@ def get_exam_item_list(
                 "reference_range": item.reference_range,
                 "price": item.price,
                 "status": item.status,
-                "create_time": str(item.create_time) if item.create_time else None,
+                "create_time": (item.create_time.strftime("%Y-%m-%d %H:%M:%S") if item.create_time else None) if item.create_time else None,
             }
         )
     if keyword:
@@ -261,7 +261,7 @@ def get_exam_appointment_list(
                 "status": item.status,
                 "status_text": status_map.get(item.status, ""),
                 "note": item.note,
-                "create_time": str(item.create_time) if item.create_time else None,
+                "create_time": (item.create_time.strftime("%Y-%m-%d %H:%M:%S") if item.create_time else None) if item.create_time else None,
             }
         )
     if keyword:
@@ -341,11 +341,11 @@ def get_exam_record_list(
                 "doctor_name": item.doctor.name if item.doctor else "",
                 "overall_result": item.overall_result,
                 "overall_advice": item.overall_advice,
-                "exam_time": str(item.exam_time) if item.exam_time else "",
-                "report_time": str(item.report_time) if item.report_time else "",
+                "exam_time": (item.exam_time.strftime("%Y-%m-%d %H:%M:%S") if item.exam_time else None) if item.exam_time else "",
+                "report_time": (item.report_time.strftime("%Y-%m-%d %H:%M:%S") if item.report_time else None) if item.report_time else "",
                 "status": item.status,
                 "status_text": status_map.get(item.status, ""),
-                "create_time": str(item.create_time) if item.create_time else None,
+                "create_time": (item.create_time.strftime("%Y-%m-%d %H:%M:%S") if item.create_time else None) if item.create_time else None,
             }
         )
     if keyword:
@@ -457,7 +457,7 @@ def get_exam_result_list(
                 "reference_range": item.reference_range,
                 "abnormal_flag": item.abnormal_flag,
                 "note": item.note,
-                "create_time": str(item.create_time) if item.create_time else None,
+                "create_time": (item.create_time.strftime("%Y-%m-%d %H:%M:%S") if item.create_time else None) if item.create_time else None,
             }
         )
     return {"code": 200, "msg": "success", "data": data}
@@ -540,7 +540,7 @@ def get_exam_report_detail(
                 "reference_range": item.reference_range,
                 "abnormal_flag": item.abnormal_flag,
                 "note": item.note,
-                "create_time": str(item.create_time) if item.create_time else None,
+                "create_time": (item.create_time.strftime("%Y-%m-%d %H:%M:%S") if item.create_time else None) if item.create_time else None,
             }
         )
 
@@ -556,8 +556,8 @@ def get_exam_report_detail(
         "doctor_name": record.doctor.name if record.doctor else "",
         "overall_result": record.overall_result,
         "overall_advice": record.overall_advice,
-        "exam_time": str(record.exam_time) if record.exam_time else "",
-        "report_time": str(record.report_time) if record.report_time else "",
+        "exam_time": (record.exam_time.strftime("%Y-%m-%d %H:%M:%S") if record.exam_time else None) if record.exam_time else "",
+        "report_time": (record.report_time.strftime("%Y-%m-%d %H:%M:%S") if record.report_time else None) if record.report_time else "",
         "status": record.status,
         "status_text": status_map.get(record.status, ""),
         "results": result_list,

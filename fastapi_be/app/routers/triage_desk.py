@@ -66,7 +66,7 @@ def get_triage_list(level: int | None = None, status: int | None = None, db: Ses
                 "status": item.status,
                 "status_text": {0: "待就诊", 1: "已就诊", 2: "已转诊", 3: "已取消"}.get(item.status, ""),
                 "note": item.note,
-                "create_time": str(item.create_time),
+                "create_time": (item.create_time.strftime("%Y-%m-%d %H:%M:%S") if item.create_time else None),
             }
         )
     return {"code": 200, "msg": "success", "data": data}

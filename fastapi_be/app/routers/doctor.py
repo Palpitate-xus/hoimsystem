@@ -188,7 +188,7 @@ def get_pharmaceutical_list(keyword: str | None = None, db: Session = Depends(ge
                 "stock": item.stock,
                 "price": item.price,
                 "expireddate": str(item.expireddate),
-                "purchasing_time": str(item.purchasing_time),
+                "purchasing_time": (item.purchasing_time.strftime("%Y-%m-%d %H:%M:%S") if item.purchasing_time else None),
                 "supplier": item.supplier,
                 "remark": item.remark,
                 "antibiotic_level": item.antibiotic_level,
@@ -412,7 +412,7 @@ def get_prescription_list(current_user: User = Depends(get_current_user), keywor
                 "patient_name": item.patient.name if item.patient else "",
                 "phas": phas,
                 "status": item.status,
-                "create_time": str(item.create_time),
+                "create_time": (item.create_time.strftime("%Y-%m-%d %H:%M:%S") if item.create_time else None),
                 "charge_id": str(charge_obj.charge_id) if charge_obj else "",
                 "amount": round(charge_obj.amount, 2) if charge_obj else 0,
             }
@@ -499,7 +499,7 @@ def get_lab_order_list(current_user: User = Depends(get_current_user), keyword: 
                 "patient_name": item.patient.name if item.patient else "",
                 "check_type": item.check_type,
                 "status": item.status,
-                "create_time": str(item.create_time),
+                "create_time": (item.create_time.strftime("%Y-%m-%d %H:%M:%S") if item.create_time else None),
             }
         )
     if keyword:
@@ -575,8 +575,8 @@ def get_attendance_list(doctor_id: int | None = None, start_date: str | None = N
                 "doctor_id": item.doctor_id,
                 "doctor_name": item.doctor.name if item.doctor else "",
                 "date": str(item.date),
-                "check_in_time": str(item.check_in_time) if item.check_in_time else "",
-                "check_out_time": str(item.check_out_time) if item.check_out_time else "",
+                "check_in_time": (item.check_in_time.strftime("%Y-%m-%d %H:%M:%S") if item.check_in_time else None) if item.check_in_time else "",
+                "check_out_time": (item.check_out_time.strftime("%Y-%m-%d %H:%M:%S") if item.check_out_time else None) if item.check_out_time else "",
                 "status": status_map.get(item.status, "未知"),
                 "status_code": item.status,
             }

@@ -126,7 +126,7 @@ def get_patrol_list(keyword: str | None = None, db: Session = Depends(get_db)):
                 "patient_name": item.patient.name if item.patient else "",
                 "content": item.content,
                 "status": item.status,
-                "create_time": str(item.create_time),
+                "create_time": (item.create_time.strftime("%Y-%m-%d %H:%M:%S") if item.create_time else None),
             }
         )
     if keyword:

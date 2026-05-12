@@ -17,7 +17,7 @@ const setting = {
   //开发环境端口号
   devPort: "8091",
   //copyright
-  copyright: "zxwk1998",
+  copyright: "Palpitate-xus",
   //是否显示页面底部自定义版权信息
   footerCopyright: true,
   //是否显示顶部进度条

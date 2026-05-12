@@ -43,7 +43,7 @@ def get_appointment_list(current_user: User = Depends(get_current_user), keyword
                 "department": item.department.name if item.department else "",
                 "time": str(item.time),
                 "prefer_time": item.prefer_time,
-                "appointment_time": str(item.appointment_time)[0:10] if item.appointment_time else "",
+                "appointment_time": (item.appointment_time.strftime("%Y-%m-%d %H:%M:%S") if item.appointment_time else None)[0:10] if item.appointment_time else "",
                 "status": status_map[item.status] if item.status is not None and item.status < len(status_map) else "",
             }
         )
@@ -276,7 +276,7 @@ def get_medical_record_list(current_user: User = Depends(get_current_user), keyw
             data.append(
                 {
                     "uuid": str(item.medical_record_id),
-                    "consultation_time": str(item.consultation_time),
+                    "consultation_time": (item.consultation_time.strftime("%Y-%m-%d %H:%M:%S") if item.consultation_time else None),
                     "doctor_name": item.doctor.name if item.doctor else "",
                     "symptom": item.symptom,
                     "result": item.result,
@@ -292,7 +292,7 @@ def get_medical_record_list(current_user: User = Depends(get_current_user), keyw
             data.append(
                 {
                     "uuid": str(item.medical_record_id),
-                    "consultation_time": str(item.consultation_time),
+                    "consultation_time": (item.consultation_time.strftime("%Y-%m-%d %H:%M:%S") if item.consultation_time else None),
                     "patient_id": item.patient_id,
                     "patient_name": item.patient.name if item.patient else "",
                     "symptom": item.symptom,
@@ -317,7 +317,7 @@ def get_medical_record_detail(req: MedicalRecordDetailRequest, db: Session = Dep
         return {"code": 500, "msg": "病历不存在"}
     data = {
         "uuid": str(record.medical_record_id),
-        "consultation_time": str(record.consultation_time),
+        "consultation_time": (record.consultation_time.strftime("%Y-%m-%d %H:%M:%S") if record.consultation_time else None),
         "doctor_id": record.doctor_id,
         "doctor_name": record.doctor.name if record.doctor else "",
         "patient_id": record.patient_id,
@@ -339,7 +339,7 @@ def get_health_profile(current_user: User = Depends(get_current_user), db: Sessi
         "name": patient_obj.name,
         "sex": sex,
         "identity": patient_obj.identity,
-        "birthday": str(patient_obj.birthday),
+        "birthday": (patient_obj.birthday.strftime("%Y-%m-%d %H:%M:%S") if patient_obj.birthday else None),
         "phone": patient_obj.phone,
         "address": patient_obj.address,
         "allergy_history": patient_obj.allergy_history or "",
@@ -358,7 +358,7 @@ def get_visit_records(current_user: User = Depends(get_current_user), keyword: s
         data.append(
             {
                 "medical_record_id": item.medical_record_id,
-                "visit_time": str(item.consultation_time),
+                "visit_time": (item.consultation_time.strftime("%Y-%m-%d %H:%M:%S") if item.consultation_time else None),
                 "doctor_name": item.doctor.name if item.doctor else "",
                 "department": item.doctor.department.name if item.doctor and item.doctor.department else "",
                 "diagnosis": item.result,

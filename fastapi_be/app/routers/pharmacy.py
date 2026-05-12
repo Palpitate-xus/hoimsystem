@@ -34,7 +34,7 @@ def get_dispense_list(keyword: str | None = None, page: int | None = None, page_
                 "doctor_name": item.doctor.name if item.doctor else "",
                 "phas": phas,
                 "status": item.status,
-                "create_time": str(item.create_time),
+                "create_time": (item.create_time.strftime("%Y-%m-%d %H:%M:%S") if item.create_time else None),
             }
         )
     if keyword:
@@ -158,7 +158,7 @@ def get_review_list(keyword: str | None = None, db: Session = Depends(get_db)):
                 "phas": phas,
                 "review_score": item.review_score,
                 "review_comment": item.review_comment or "",
-                "review_time": str(item.review_time) if item.review_time else "",
+                "review_time": (item.review_time.strftime("%Y-%m-%d %H:%M:%S") if item.review_time else None) if item.review_time else "",
             }
         )
     if keyword:

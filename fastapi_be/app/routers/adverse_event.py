@@ -41,7 +41,7 @@ def get_event_list(db: Session = Depends(get_db)):
                 "severity_text": {1: "轻度", 2: "中度", 3: "重度"}.get(it.severity, ""),
                 "status": it.status,
                 "status_text": {0: "待处理", 1: "处理中", 2: "已闭环"}.get(it.status, ""),
-                "report_time": str(it.report_time) if it.report_time else "",
+                "report_time": (it.report_time.strftime("%Y-%m-%d %H:%M:%S") if it.report_time else None) if it.report_time else "",
                 "handle_result": it.handle_result,
             }
         )

@@ -32,7 +32,7 @@ def get_charge_list(current_user: User = Depends(get_current_user), keyword: str
             data.append(
                 {
                     "id": str(item.charge_id),
-                    "charge_time": str(item.charge_time),
+                    "charge_time": (item.charge_time.strftime("%Y-%m-%d %H:%M:%S") if item.charge_time else None),
                     "time": str(item.time),
                     "pre_id": str(item.prescription.prescription_id) if item.prescription else "",
                     "amount": round(item.amount, 2) if item.amount else 0,
@@ -49,7 +49,7 @@ def get_charge_list(current_user: User = Depends(get_current_user), keyword: str
                     data.append(
                         {
                             "id": str(item.charge_id),
-                            "charge_time": str(item.charge_time),
+                            "charge_time": (item.charge_time.strftime("%Y-%m-%d %H:%M:%S") if item.charge_time else None),
                             "time": str(item.time),
                             "pre_id": str(item.prescription.prescription_id) if item.prescription else "",
                             "amount": round(item.amount, 2) if item.amount else 0,
@@ -100,7 +100,7 @@ def get_invoice_list(keyword: str | None = None, db: Session = Depends(get_db)):
                 "invoice_no": item.invoice_no,
                 "charge_id": str(item.charge_id),
                 "amount": round(item.amount, 2) if item.amount else 0,
-                "invoice_time": str(item.invoice_time),
+                "invoice_time": (item.invoice_time.strftime("%Y-%m-%d %H:%M:%S") if item.invoice_time else None),
             }
         )
     if keyword:
@@ -282,8 +282,8 @@ def query_payment(payment_no: str, db: Session = Depends(get_db)):
             "channel": payment.channel,
             "amount": payment.amount,
             "status": payment.status,
-            "paid_time": str(payment.paid_time) if payment.paid_time else None,
-            "create_time": str(payment.create_time),
+            "paid_time": (payment.paid_time.strftime("%Y-%m-%d %H:%M:%S") if payment.paid_time else None) if payment.paid_time else None,
+            "create_time": (payment.create_time.strftime("%Y-%m-%d %H:%M:%S") if payment.create_time else None),
         },
     }
 
@@ -332,8 +332,8 @@ def get_payment_list(keyword: str | None = None, db: Session = Depends(get_db)):
                 "channel": item.channel,
                 "amount": round(item.amount, 2) if item.amount else 0,
                 "status": item.status,
-                "paid_time": str(item.paid_time) if item.paid_time else "",
-                "create_time": str(item.create_time),
+                "paid_time": (item.paid_time.strftime("%Y-%m-%d %H:%M:%S") if item.paid_time else None) if item.paid_time else "",
+                "create_time": (item.create_time.strftime("%Y-%m-%d %H:%M:%S") if item.create_time else None),
             }
         )
     if keyword:

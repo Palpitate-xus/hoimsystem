@@ -40,7 +40,7 @@ def get_referral_list(db: Session = Depends(get_db)):
                 "reason": it.reason,
                 "status": it.status,
                 "status_text": {0: "待接收", 1: "已接收", 2: "已退回"}.get(it.status, ""),
-                "create_time": str(it.create_time) if it.create_time else "",
+                "create_time": (it.create_time.strftime("%Y-%m-%d %H:%M:%S") if it.create_time else None) if it.create_time else "",
             }
         )
     return {"code": 200, "msg": "success", "data": data}

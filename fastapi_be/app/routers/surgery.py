@@ -53,8 +53,8 @@ def get_surgery_application_list(
                 "status": item.status,
                 "status_text": status_map[item.status] if item.status is not None and item.status < len(status_map) else "",
                 "approver_name": item.approver.name if item.approver else "",
-                "approve_time": str(item.approve_time) if item.approve_time else "",
-                "create_time": str(item.create_time) if item.create_time else "",
+                "approve_time": (item.approve_time.strftime("%Y-%m-%d %H:%M:%S") if item.approve_time else None) if item.approve_time else "",
+                "create_time": (item.create_time.strftime("%Y-%m-%d %H:%M:%S") if item.create_time else None) if item.create_time else "",
             }
         )
     if keyword:
@@ -150,7 +150,7 @@ def get_surgery_schedule_list(
                 "surgery_name": item.application.surgery_name if item.application else "",
                 "operating_room": item.operating_room,
                 "surgery_date": str(item.surgery_date) if item.surgery_date else "",
-                "start_time": str(item.start_time) if item.start_time else "",
+                "start_time": (item.start_time.strftime("%Y-%m-%d %H:%M:%S") if item.start_time else None) if item.start_time else "",
                 "end_time": str(item.end_time) if item.end_time else "",
                 "surgeon_name": item.surgeon.name if item.surgeon else "",
                 "anesthesiologist_name": item.anesthesiologist.name if item.anesthesiologist else "",
@@ -235,14 +235,14 @@ def get_anesthesia_record_list(schedule_id: str | None = None, db: Session = Dep
                 "patient_id": item.patient_id,
                 "patient_name": item.patient.name if item.patient else "",
                 "anesthesiologist_name": item.anesthesiologist.name if item.anesthesiologist else "",
-                "enter_time": str(item.enter_time) if item.enter_time else "",
+                "enter_time": (item.enter_time.strftime("%Y-%m-%d %H:%M:%S") if item.enter_time else None) if item.enter_time else "",
                 "anesthesia_method": item.anesthesia_method or "",
                 "blood_loss": item.blood_loss,
                 "urine_output": item.urine_output,
                 "fluid_input": item.fluid_input,
-                "leave_time": str(item.leave_time) if item.leave_time else "",
+                "leave_time": (item.leave_time.strftime("%Y-%m-%d %H:%M:%S") if item.leave_time else None) if item.leave_time else "",
                 "complications": item.complications or "",
-                "create_time": str(item.create_time) if item.create_time else "",
+                "create_time": (item.create_time.strftime("%Y-%m-%d %H:%M:%S") if item.create_time else None) if item.create_time else "",
             }
         )
     return {"code": 200, "msg": "success", "data": data}

@@ -62,7 +62,7 @@ def get_purchase_list(status: int | None = None, db: Session = Depends(get_db)):
                 "status": o.status,
                 "status_text": {0: "待审批", 1: "已审批", 2: "已入库", 3: "已取消"}.get(o.status, ""),
                 "create_by": o.creator.username if o.creator else "",
-                "create_time": str(o.create_time) if o.create_time else "",
+                "create_time": (o.create_time.strftime("%Y-%m-%d %H:%M:%S") if o.create_time else None) if o.create_time else "",
                 "items": [{"item_name": i.item_name, "quantity": i.quantity, "unit_price": i.unit_price} for i in o.items],
             }
         )

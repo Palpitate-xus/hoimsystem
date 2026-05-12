@@ -42,7 +42,7 @@ def get_log_list(req: LogListRequest, keyword: str | None = None, db: Session = 
                 "target": item.target,
                 "result": item.result,
                 "ip": item.ip,
-                "create_time": str(item.create_time),
+                "create_time": (item.create_time.strftime("%Y-%m-%d %H:%M:%S") if item.create_time else None),
             }
         )
     return {"code": 200, "msg": "success", "data": {"list": data, "total": total}}
@@ -168,7 +168,7 @@ def get_message_list(current_user=Depends(get_current_user), keyword: str | None
                 "content": item.content,
                 "msg_type": item.msg_type,
                 "is_read": item.is_read,
-                "create_time": str(item.create_time),
+                "create_time": (item.create_time.strftime("%Y-%m-%d %H:%M:%S") if item.create_time else None),
             }
         )
     if keyword:

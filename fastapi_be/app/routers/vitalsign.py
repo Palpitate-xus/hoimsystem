@@ -44,7 +44,7 @@ def get_vital_sign_list(keyword: str | None = None, db: Session = Depends(get_db
                 "blood_pressure": f"{item.blood_pressure_systolic}/{item.blood_pressure_diastolic}",
                 "pulse": item.pulse,
                 "weight": item.weight,
-                "check_time": str(item.check_time),
+                "check_time": (item.check_time.strftime("%Y-%m-%d %H:%M:%S") if item.check_time else None),
             }
         )
     if keyword:

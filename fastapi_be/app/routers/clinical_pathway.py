@@ -40,7 +40,7 @@ def get_pathway_list(db: Session = Depends(get_db)):
                 "expected_days": it.expected_days,
                 "status": it.status,
                 "status_text": "启用" if it.status == 0 else "停用",
-                "create_time": str(it.create_time) if it.create_time else "",
+                "create_time": (it.create_time.strftime("%Y-%m-%d %H:%M:%S") if it.create_time else None) if it.create_time else "",
             }
         )
     return {"code": 200, "msg": "success", "data": data}

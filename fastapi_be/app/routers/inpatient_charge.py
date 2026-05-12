@@ -52,7 +52,7 @@ def get_inpatient_charge_list(
                 "charge_date": str(item.charge_date) if item.charge_date else "",
                 "status": item.status,
                 "status_text": status_map[item.status] if item.status is not None and item.status < len(status_map) else "",
-                "create_time": str(item.create_time) if item.create_time else "",
+                "create_time": (item.create_time.strftime("%Y-%m-%d %H:%M:%S") if item.create_time else None) if item.create_time else "",
             }
         )
     return {"code": 200, "msg": "success", "data": data}

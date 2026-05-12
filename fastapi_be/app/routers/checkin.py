@@ -81,7 +81,7 @@ def get_breach_list(patient_id: int | None = None, db: Session = Depends(get_db)
             {
                 "breach_id": breach.breach_id,
                 "registration_id": breach.registration_id,
-                "breach_time": str(breach.breach_time),
+                "breach_time": (breach.breach_time.strftime("%Y-%m-%d %H:%M:%S") if breach.breach_time else None),
                 "breach_type": breach.breach_type,
                 "patient_name": pat.name if pat else "",
                 "patient_id": pat.patient_id if pat else None,

@@ -6,9 +6,9 @@
       </keep-alive>
     </transition>
     <footer v-show="footerCopyright" class="footer-copyright">
-      Copyright
-      <el-icon><CopyDocument /></el-icon>
-      vue3-admin-better 开源免费版 {{ fullYear }}
+      <a href="https://github.com/Palpitate-xus" target="_blank" style="color: rgba(0,0,0,0.45); text-decoration: none;">
+        Copyright <el-icon><CopyDocument /></el-icon> Palpitate-xus {{ fullYear }}
+      </a>
     </footer>
   </div>
 </template>

@@ -42,7 +42,7 @@ def get_adr_list(db: Session = Depends(get_db)):
                 "severity_text": {1: "轻度", 2: "中度", 3: "重度"}.get(it.severity, ""),
                 "status": it.status,
                 "status_text": {0: "待审核", 1: "已确认", 2: "已处理"}.get(it.status, ""),
-                "report_time": str(it.report_time) if it.report_time else "",
+                "report_time": (it.report_time.strftime("%Y-%m-%d %H:%M:%S") if it.report_time else None) if it.report_time else "",
                 "note": it.note,
             }
         )

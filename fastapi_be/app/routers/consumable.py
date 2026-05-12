@@ -27,7 +27,7 @@ def get_consumable_list(keyword: str | None = None, page: int | None = None, pag
                 "supplier": item.supplier,
                 "remark": item.remark,
                 "status": item.status,
-                "create_time": str(item.create_time) if item.create_time else "",
+                "create_time": (item.create_time.strftime("%Y-%m-%d %H:%M:%S") if item.create_time else None) if item.create_time else "",
             }
         )
     if keyword:

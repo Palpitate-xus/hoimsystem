@@ -82,7 +82,7 @@ def register(req: RegisterRequest, db: Session = Depends(get_db)):
             address=req.address,
             sex=req.sex,
             phone=req.phone,
-            birthday=parse_date_str(req.birthday),
+            birthday=parse_date_(req.birthday.strftime("%Y-%m-%d %H:%M:%S") if req.birthday else None),
             permission="allow",
         )
         db.add(patient)

@@ -39,7 +39,7 @@ def get_nursing_record_list(
                 "patient_name": item.patient.name if item.patient else "",
                 "nurse_id": item.nurse_id,
                 "nurse_name": item.nurse.name if item.nurse else "",
-                "record_time": str(item.record_time) if item.record_time else "",
+                "record_time": (item.record_time.strftime("%Y-%m-%d %H:%M:%S") if item.record_time else None) if item.record_time else "",
                 "consciousness": item.consciousness or "",
                 "temperature": item.temperature,
                 "pulse": item.pulse,

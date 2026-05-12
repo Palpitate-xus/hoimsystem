@@ -1,5 +1,29 @@
+import datetime
+import re
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.responses import Response
+
+
+MICROSECOND_PATTERN = re.compile(rb'(\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}:\d{2})\.\d+')
+
+
+class StripMicrosecondMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request, call_next):
+        response = await call_next(request)
+        if response.headers.get("content-type", "").startswith("application/json"):
+            body = b""
+            async for chunk in response.body_iterator:
+                body += chunk
+            body = MICROSECOND_PATTERN.sub(rb'\1', body)
+            return Response(content=body, status_code=response.status_code, headers=dict(response.headers), media_type=response.media_type)
+        return response
+
+
+app = FastAPI(title="HOIM System FastAPI")
+app.add_middleware(StripMicrosecondMiddleware)
 
 from app.routers import (
     admin,

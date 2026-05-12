@@ -50,7 +50,7 @@ def get_template_list(category: str | None = None, department_id: int | None = N
                 "department_name": item.department.name if item.department else "通用",
                 "is_default": item.is_default,
                 "status": item.status,
-                "create_time": str(item.create_time) if item.create_time else "",
+                "create_time": (item.create_time.strftime("%Y-%m-%d %H:%M:%S") if item.create_time else None) if item.create_time else "",
             }
         )
     return {"code": 200, "msg": "success", "data": data}
@@ -139,8 +139,8 @@ def get_structured_record_list(admission_id: str | None = None, patient_id: int 
                 "diagnosis": item.diagnosis or "",
                 "status": item.status,
                 "status_text": status_map[item.status] if item.status is not None and item.status < len(status_map) else "",
-                "sign_time": str(item.sign_time) if item.sign_time else "",
-                "create_time": str(item.create_time) if item.create_time else "",
+                "sign_time": (item.sign_time.strftime("%Y-%m-%d %H:%M:%S") if item.sign_time else None) if item.sign_time else "",
+                "create_time": (item.create_time.strftime("%Y-%m-%d %H:%M:%S") if item.create_time else None) if item.create_time else "",
             }
         )
     return {"code": 200, "msg": "success", "data": data}
@@ -197,9 +197,9 @@ def get_structured_record_detail(record_id: str, db: Session = Depends(get_db)):
         "treatment_plan": item.treatment_plan or "",
         "status": item.status,
         "status_text": status_map[item.status] if item.status is not None and item.status < len(status_map) else "",
-        "sign_time": str(item.sign_time) if item.sign_time else "",
-        "create_time": str(item.create_time) if item.create_time else "",
-        "update_time": str(item.update_time) if item.update_time else "",
+        "sign_time": (item.sign_time.strftime("%Y-%m-%d %H:%M:%S") if item.sign_time else None) if item.sign_time else "",
+        "create_time": (item.create_time.strftime("%Y-%m-%d %H:%M:%S") if item.create_time else None) if item.create_time else "",
+        "update_time": (item.update_time.strftime("%Y-%m-%d %H:%M:%S") if item.update_time else None) if item.update_time else "",
     }
     return {"code": 200, "msg": "success", "data": data}
 
@@ -272,7 +272,7 @@ def get_progress_note_list(admission_id: str, db: Session = Depends(get_db)):
                 "doctor_name": item.doctor.name if item.doctor else "",
                 "note_date": str(item.note_date) if item.note_date else "",
                 "content": item.content,
-                "record_time": str(item.record_time) if item.record_time else "",
+                "record_time": (item.record_time.strftime("%Y-%m-%d %H:%M:%S") if item.record_time else None) if item.record_time else "",
             }
         )
     return {"code": 200, "msg": "success", "data": data}
@@ -325,7 +325,7 @@ def get_ward_round_list(admission_id: str, db: Session = Depends(get_db)):
                 "round_type": item.round_type,
                 "round_type_text": type_map[item.round_type] if item.round_type is not None and item.round_type < len(type_map) else "",
                 "content": item.content,
-                "round_time": str(item.round_time) if item.round_time else "",
+                "round_time": (item.round_time.strftime("%Y-%m-%d %H:%M:%S") if item.round_time else None) if item.round_time else "",
             }
         )
     return {"code": 200, "msg": "success", "data": data}
@@ -383,7 +383,7 @@ def get_quality_list(admission_id: str | None = None, db: Session = Depends(get_
                 "issue": item.issue or "",
                 "score": item.score,
                 "checker_name": item.checker.name if item.checker else "",
-                "check_time": str(item.check_time) if item.check_time else "",
+                "check_time": (item.check_time.strftime("%Y-%m-%d %H:%M:%S") if item.check_time else None) if item.check_time else "",
             }
         )
     return {"code": 200, "msg": "success", "data": data}

@@ -40,9 +40,11 @@
               v-for="(notice, index) in notices"
               :key="index"
               :type="notice.isemergency ? 'danger' : 'primary'"
-              :timestamp="notice.sendtime"
+              :timestamp="formatTimestamp(notice.sendtime)"
             >
-              {{ notice.title }}
+              <el-link type="primary" @click="showNoticeDetail(notice)">
+                {{ notice.title }}
+              </el-link>
             </el-timeline-item>
           </el-timeline>
         </el-card>
@@ -66,6 +68,15 @@
         </el-card>
       </el-col>
     </el-row>
+
+    <el-dialog v-model="noticeDialogVisible" title="公告详情" width="500px">
+      <h3>{{ currentNotice.title }}</h3>
+      <p style="color: #999; font-size: 12px; margin: 8px 0;">
+        发布时间: {{ formatTimestamp(currentNotice.sendtime) }}
+      </p>
+      <el-divider />
+      <p style="white-space: pre-wrap;">{{ currentNotice.content }}</p>
+    </el-dialog>
   </div>
 </template>
 
@@ -105,9 +116,22 @@ const todayStats = ref({
 });
 
 const notices = ref([]);
+const noticeDialogVisible = ref(false);
+const currentNotice = ref({});
 
 const goTo = (path) => {
   router.push(path);
+};
+
+const formatTimestamp = (time) => {
+  if (!time) return "";
+  // 去掉微秒部分，只保留到秒
+  return String(time).replace(/\.\d+$/, "").replace("T", " ");
+};
+
+const showNoticeDetail = (notice) => {
+  currentNotice.value = notice;
+  noticeDialogVisible.value = true;
 };
 
 onMounted(async () => {

@@ -37,6 +37,41 @@ def get_breach_count(db, patient_id, days=30):
     )
 
 
+from app.models import Doctor
+
+
+@router.get("/checkIn/getAppointments")
+def get_appointments_for_checkin(identity: str, db: Session = Depends(get_db)):
+    """根据身份证号查询可报到的预约列表"""
+    patient = db.query(Patient).filter(Patient.identity == identity).first()
+    if not patient:
+        return {"code": 500, "msg": "病人信息不存在"}
+    today = datetime.date.today()
+    appointments = (
+        db.query(Appointment)
+        .filter(Appointment.patient_id == patient.patient_id, Appointment.status == 0, Appointment.time == today)
+        .order_by(Appointment.appointment_time.asc())
+        .all()
+    )
+    data = []
+    for appt in appointments:
+        doc = db.query(Doctor).filter(Doctor.doctor_id == appt.doctor_id).first()
+        dept_name = ""
+        if doc and doc.department_id:
+            from app.models import Department
+            dept = db.query(Department).filter(Department.department_id == doc.department_id).first()
+            dept_name = dept.name if dept else ""
+        data.append({
+            "uuid": appt.registration_uuid,
+            "doctor_name": doc.name if doc else "",
+            "department_name": dept_name,
+            "time": str(appt.time) if appt.time else "",
+            "appointment_time": str(appt.appointment_time) if appt.appointment_time else "",
+            "specialist": "专家号" if appt.specialist == 1 else "普通号",
+        })
+    return {"code": 200, "msg": "success", "data": data}
+
+
 @router.post("/checkIn/checkIn")
 def check_in(req: CheckInRequest, db: Session = Depends(get_db)):
     appointment = db.query(Appointment).filter(Appointment.registration_uuid == req.appointment_uuid).first()

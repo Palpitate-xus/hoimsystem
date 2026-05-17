@@ -16,8 +16,7 @@
         </el-form>
         <el-alert v-if="lowStockList.length > 0" :title="`发现 ${lowStockList.length} 种药品库存不足`" type="warning" :closable="false" show-icon />
         <el-alert v-else title="所有药品库存充足" type="success" :closable="false" show-icon />
-        <el-table :data="lowStockList" empty-text="暂无记录">
-          <el-table-column prop="id" label="ID" width="60" />
+        <el-table :data="lowStockList" v-loading="loading" empty-text="暂无记录">
           <el-table-column prop="name" label="药品名称" />
           <el-table-column prop="stock" label="当前库存" sortable>
             <template #default="scope">
@@ -47,8 +46,7 @@
         </el-form>
         <el-alert v-if="nearExpiryList.length > 0" :title="`发现 ${nearExpiryList.length} 种药品即将过期`" type="warning" :closable="false" show-icon />
         <el-alert v-else title="暂无即将过期的药品" type="success" :closable="false" show-icon />
-        <el-table :data="nearExpiryList" empty-text="暂无记录">
-          <el-table-column prop="id" label="ID" width="60" />
+        <el-table :data="nearExpiryList" v-loading="loading" empty-text="暂无记录">
           <el-table-column prop="name" label="药品名称" />
           <el-table-column prop="stock" label="库存" />
           <el-table-column prop="expireddate" label="过期日期" sortable>
@@ -77,22 +75,29 @@ const keyword1 = ref("");
 const keyword2 = ref("");
 const lowStockList = ref([]);
 const nearExpiryList = ref([]);
+const loading = ref(false);
 
 const queryLowStock = async () => {
+  loading.value = true;
   try {
     const res = await getLowStockDrugs(threshold.value, keyword1.value);
     lowStockList.value = res.data || [];
   } catch (e) {
     ElMessage.error(e.msg || "查询失败");
+  } finally {
+    loading.value = false;
   }
 };
 
 const queryNearExpiry = async () => {
+  loading.value = true;
   try {
     const res = await getNearExpiryDrugs(days.value, keyword2.value);
     nearExpiryList.value = res.data || [];
   } catch (e) {
     ElMessage.error(e.msg || "查询失败");
+  } finally {
+    loading.value = false;
   }
 };
 

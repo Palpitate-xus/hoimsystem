@@ -2,7 +2,7 @@
   <div class="app-container">
     <vab-page-header title="消息中心" description="查看和管理系统消息通知" />
     <el-card>
-      <el-table :data="messageList" empty-text="暂无记录">
+      <el-table :data="messageList" v-loading="loading" empty-text="暂无记录">
         <el-table-column prop="title" label="标题" />
         <el-table-column prop="content" label="内容" />
         <el-table-column prop="msg_type" label="类型" width="80">
@@ -34,13 +34,17 @@ import { getMessageList, readMessage } from "@/api/system";
 import { ElMessage } from "element-plus";
 
 const messageList = ref([]);
+const loading = ref(false);
 
 const loadData = async () => {
+  loading.value = true;
   try {
     const res = await getMessageList();
     messageList.value = res.data || [];
   } catch (e) {
     ElMessage.error(e.msg || "查询失败");
+  } finally {
+    loading.value = false;
   }
 };
 

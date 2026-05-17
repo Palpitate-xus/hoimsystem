@@ -10,7 +10,7 @@
               <el-input v-model="patientKeyword" placeholder="搜索" clearable size="small" style="width: 120px;" />
             </div>
           </template>
-          <el-table :data="filteredInpatients" size="small" highlight-current-row @current-change="onPatientSelect" empty-text="暂无在院患者">
+          <el-table :data="filteredInpatients" v-loading="loading" size="small" highlight-current-row @current-change="onPatientSelect" empty-text="暂无在院患者">
             <el-table-column prop="bed_no" label="床号" width="60" />
             <el-table-column prop="patient_name" label="姓名" width="80" />
             <el-table-column prop="admission_diagnosis" label="诊断" show-overflow-tooltip />
@@ -95,6 +95,7 @@ const currentPatient = ref(null);
 const dailyBill = ref({ total_amount: 0, deposit_amount: 0, refund: 0 });
 const dischargeDialogVisible = ref(false);
 const dischargeForm = ref({ discharge_status: 0 });
+const loading = ref(false);
 
 const filteredInpatients = computed(() => {
   if (!patientKeyword.value) return inpatients.value;
@@ -103,8 +104,13 @@ const filteredInpatients = computed(() => {
 });
 
 const loadInpatients = async () => {
-  const res = await getInpatientList({});
-  inpatients.value = res.data || [];
+  loading.value = true;
+  try {
+    const res = await getInpatientList({});
+    inpatients.value = res.data || [];
+  } finally {
+    loading.value = false;
+  }
 };
 
 const onPatientSelect = async (row) => {

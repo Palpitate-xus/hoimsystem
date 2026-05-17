@@ -26,7 +26,7 @@
         <el-descriptions title="统计结果" :column="1" border v-if="outpatientResult.total_visits !== undefined">
           <el-descriptions-item label="总就诊人次">{{ outpatientResult.total_visits }}</el-descriptions-item>
         </el-descriptions>
-        <el-table :data="paginatedOutpatientDetails" empty-text="暂无数据">
+        <el-table :data="paginatedOutpatientDetails" v-loading="loading" empty-text="暂无数据">
           <el-table-column prop="label" label="分组"  sortable />
           <el-table-column prop="value" label="人次" />
         </el-table>
@@ -73,7 +73,7 @@
             <el-button type="primary" @click="queryPharma">查询</el-button>
           </el-form-item>
         </el-form>
-        <el-table :data="paginatedPharmaResult" empty-text="暂无数据">
+        <el-table :data="paginatedPharmaResult" v-loading="loading" empty-text="暂无数据">
           <el-table-column prop="name" label="药品名称"  sortable />
           <el-table-column prop="total_number" label="消耗数量"  sortable />
         </el-table>
@@ -105,7 +105,7 @@
             <el-button type="primary" @click="queryWorkload">查询</el-button>
           </el-form-item>
         </el-form>
-        <el-table :data="paginatedWorkloadResult" empty-text="暂无数据">
+        <el-table :data="paginatedWorkloadResult" v-loading="loading" empty-text="暂无数据">
           <el-table-column prop="doctor_name" label="医生"  sortable />
           <el-table-column prop="visit_count" label="接诊人数" />
           <el-table-column prop="prescription_count" label="处方数" />
@@ -149,6 +149,7 @@ const searchQuery3 = ref("");
 
 const currentPage = ref(1);
 const pageSize = ref(10);
+const loading = ref(false);
 
 const paginatedOutpatientDetails = computed(() => {
   const start = (currentPage.value - 1) * pageSize.value;
@@ -166,41 +167,53 @@ const paginatedWorkloadResult = computed(() => {
 });
 
 const queryOutpatient = async () => {
+  loading.value = true;
   try {
     currentPage.value = 1;
     const res = await reportOutpatientVolume(outpatientForm.value, searchQuery1.value);
     outpatientResult.value = res.data || { total_visits: 0, details: [] };
   } catch (e) {
     ElMessage.error(e.msg || "查询失败");
+  } finally {
+    loading.value = false;
   }
 };
 
 const queryFinance = async () => {
+  loading.value = true;
   try {
     const res = await reportFinance(financeForm.value);
     financeResult.value = res.data || {};
   } catch (e) {
     ElMessage.error(e.msg || "查询失败");
+  } finally {
+    loading.value = false;
   }
 };
 
 const queryPharma = async () => {
+  loading.value = true;
   try {
     currentPage.value = 1;
     const res = await reportPharmaceutical(pharmaForm.value, searchQuery2.value);
     pharmaResult.value = res.data || [];
   } catch (e) {
     ElMessage.error(e.msg || "查询失败");
+  } finally {
+    loading.value = false;
   }
 };
 
 const queryWorkload = async () => {
+  loading.value = true;
   try {
     currentPage.value = 1;
     const res = await reportDoctorWorkload(workloadForm.value, searchQuery3.value);
     workloadResult.value = res.data || [];
   } catch (e) {
     ElMessage.error(e.msg || "查询失败");
+  } finally {
+    loading.value = false;
   }
 };
 

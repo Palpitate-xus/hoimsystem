@@ -48,7 +48,7 @@
           <el-button type="primary" @click="loadRecords">查询</el-button>
         </el-form-item>
       </el-form>
-      <el-table :data="attendanceList" empty-text="暂无记录">
+      <el-table :data="attendanceList" v-loading="loading" empty-text="暂无记录">
         <el-table-column prop="date" label="日期" sortable />
         <el-table-column prop="check_in_time" label="签到时间" />
         <el-table-column prop="check_out_time" label="签退时间" />
@@ -69,6 +69,7 @@ import { ElMessage } from "element-plus";
 
 const attendanceList = ref([]);
 const searchForm = ref({ start_date: "", end_date: "" });
+const loading = ref(false);
 
 const todayRecord = computed(() => {
   const today = new Date().toISOString().split("T")[0];
@@ -95,11 +96,14 @@ const statusTagType = (code) => {
 };
 
 const loadRecords = async () => {
+  loading.value = true;
   try {
     const res = await getAttendanceList(searchForm.value);
     attendanceList.value = res.data || [];
   } catch (e) {
     ElMessage.error(e.msg || "查询失败");
+  } finally {
+    loading.value = false;
   }
 };
 

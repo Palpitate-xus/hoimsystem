@@ -5,15 +5,14 @@
       <div class="page-toolbar">
         <el-input
           v-model="searchQuery"
-          placeholder="搜索..."
+          placeholder="搜索患者姓名或医生姓名"
           clearable
           class="page-search-input"
         ></el-input>
         <el-button type="primary" @click="fetchList">搜索</el-button>
       </div>
-      <el-table :data="paginatedList" v-loading="loading">
-        <el-table-column prop="queue_id" label="队列ID" />
-        <el-table-column prop="queue_number" label="排队序号" />
+      <el-table :data="paginatedList" v-loading="loading" border empty-text="暂无候诊患者">
+        <el-table-column prop="queue_number" label="排队序号" width="100" align="center" />
         <el-table-column prop="patient_name" label="患者"  sortable />
         <el-table-column prop="doctor_name" label="医生"  sortable />
         <el-table-column prop="type" label="类型">

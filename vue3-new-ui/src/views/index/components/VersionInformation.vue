@@ -25,26 +25,10 @@
             <td>{{ dependencies["axios"] }}</td>
           </tr>
           <tr>
-            <td>授权渠道</td>
+            <td>系统版本</td>
             <td colspan="3">
-              <a href="https://vuejs-core.cn/authorization" target="_blank">
-                <el-button style="margin-left: 10px" type="primary"
-                  >PRO付费版本 购买源码 ￥699</el-button
-                >
-              </a>
-              <a href="https://vuejs-core.cn/authorization" target="_blank">
-                <el-button style="margin-left: 10px" type="primary"
-                  >Plus付费版本 购买源码 ￥799</el-button
-                >
-              </a>
-              <a
-                href="https://github.com/zxwk1998/vue-admin-better/"
-                target="_blank"
-              >
-                <el-button style="margin-left: 10px" type="warning"
-                  >开源免费版</el-button
-                >
-              </a>
+              <el-tag type="success">v1.0.0</el-tag>
+              <span style="margin-left: 10px; color: #666;">医院门诊信息管理系统</span>
             </td>
           </tr>
         </tbody>

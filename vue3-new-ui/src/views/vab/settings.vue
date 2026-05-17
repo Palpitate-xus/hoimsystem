@@ -154,8 +154,8 @@ export default {
     return {
       activeTab: "basic",
       basicForm: {
-        siteName: "Vue Admin Better",
-        description: "一个基于Vue 3和Element Plus的后台管理系统",
+        siteName: "医院门诊信息管理系统",
+        description: "智慧医疗服务平台，提供便捷的门诊就医体验",
         logo: "",
         maintenanceMode: false
       },

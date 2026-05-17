@@ -1,8 +1,9 @@
 <template>
   <a
-    aria-label="View source on Github"
+    aria-label="医院门诊信息管理系统"
     class="github-corner"
-    href="https://github.com/zxwk1998/vue-admin-better"
+    href="javascript:;"
+    style="pointer-events: none;"
     target="_blank"
   >
     <svg

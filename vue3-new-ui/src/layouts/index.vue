@@ -1,5 +1,5 @@
 <template>
-  <div :class="classObj" class="vue-admin-better-wrapper">
+  <div :class="classObj" class="hoim-wrapper">
     <div
       v-if="'horizontal' === layout"
       :class="{
@@ -186,7 +186,7 @@ nextTick(() => {
   overflow: hidden;
 }
 
-.vue-admin-better-wrapper {
+.hoim-wrapper {
   position: relative;
   width: 100%;
   height: 100%;

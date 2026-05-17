@@ -1,25 +1,23 @@
 <template>
   <div class="donate-container">
     <div class="donate-header">
-      <h1>感谢您的支持</h1>
-      <p>您的捐赠将帮助我们持续改进和维护这个开源项目</p>
-      <p>每一份支持都是对我们最大的鼓励 💖</p>
+      <h1>系统更新日志</h1>
+      <p>持续优化医疗服务体验</p>
+      <p>为智慧医疗建设贡献力量 💖</p>
     </div>
 
     <div class="donate-content">
       <div class="payment-method">
-        <h3>支付宝捐赠</h3>
-        <div class="qr-code-container">
-          <img src="@/assets/zfb_kf.jpg" alt="支付宝收款码" class="qr-code" />
+        <h3>系统版本信息</h3>
+        <div style="text-align: left; padding: 20px;">
+          <p><strong>当前版本：</strong>v1.0.0</p>
+          <p><strong>系统名称：</strong>医院门诊信息管理系统</p>
+          <p><strong>技术栈：</strong>Vue 3 + Element Plus + FastAPI</p>
+          <p><strong>更新日期：</strong>2025年</p>
+          <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #e8e8e8;">
+            <p style="color: #666; font-size: 13px;">本系统专注于提供高效、便捷、安全的医疗服务</p>
+          </div>
         </div>
-        <p class="instruction">请扫描上方二维码进行捐赠</p>
-
-        <div>
-          请我们喝杯咖啡，打赏后请联系 QQ 783963206
-          邀请您进入讨论群（不管您请还是不请，您都可以享受到开源的代码，感谢您的支持和信任，群内提供 vue-admin-better
-          基础版本、开发工具自动配置教程及项目开发文档。
-        </div>
-        <div>当前项目禁止用于黄赌毒等危害国家安全与稳定的网站</div>
       </div>
       <div></div>
     </div>

@@ -287,8 +287,8 @@ export default {
         },
         {
           id: 4,
-          name: "内部管理系统",
-          description: "升级公司内部管理系统，提高办公效率",
+          name: "医院信息管理系统",
+          description: "升级医院信息管理系统，提高医疗服务效率",
           progress: 100,
           manager: "赵六",
           status: "completed",

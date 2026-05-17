@@ -1,4 +1,6 @@
 /**
+ * @description 医院门诊信息管理系统全局样式
+ */
  * @author https://github.com/zxwk1998/vue-admin-better （不想保留author可删除）
  * @description 全局样式
  */
@@ -142,7 +144,7 @@ html {
       }
     }
 
-    .vue-admin-better-wrapper {
+    .hoim-wrapper {
       .app-main-container {
         @include base-scrollbar;
 

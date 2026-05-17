@@ -5,29 +5,33 @@
       <div class="page-toolbar">
         <el-button type="primary" @click="dialogVisible = true">新增巡视记录</el-button>
       </div>
-      <el-table :data="patrolList">
-        <el-table-column prop="patrol_id" label="ID" width="60" />
-        <el-table-column prop="nurse_name" label="护士" />
-        <el-table-column prop="patient_name" label="病人" />
-        <el-table-column prop="content" label="巡视内容" />
-        <el-table-column prop="status" label="状态">
+      <el-table :data="patrolList" v-loading="loading" border empty-text="暂无巡视记录">
+        <el-table-column prop="nurse_name" label="护士" width="100" />
+        <el-table-column prop="patient_name" label="病人" width="100">
+          <template #default="{row}">
+            <el-tag v-if="row.patient_name" type="info" effect="plain">{{ row.patient_name }}</el-tag>
+            <span v-else style="color:#999">-</span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="content" label="巡视内容" min-width="200" />
+        <el-table-column prop="status" label="状态" width="120">
           <template #default="{row}">
             <el-tag v-if="row.status === 0" type="success">正常</el-tag>
             <el-tag v-else-if="row.status === 1" type="warning">需关注</el-tag>
             <el-tag v-else type="danger">急诊绿色通道</el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="create_time" label="记录时间" sortable />
+        <el-table-column prop="create_time" label="记录时间" sortable width="180" />
       </el-table>
     </el-card>
 
     <el-dialog v-model="dialogVisible" title="新增巡视记录" width="500px">
       <el-form :model="form" label-width="80px">
-        <el-form-item label="病人ID">
-          <el-input-number v-model="form.patient_id" :min="1" />
+        <el-form-item label="患者">
+          <el-input v-model="form.patient_id" placeholder="输入患者ID" />
         </el-form-item>
         <el-form-item label="巡视内容">
-          <el-input v-model="form.content" type="textarea" rows="3" />
+          <el-input v-model="form.content" type="textarea" rows="3" placeholder="描述巡视情况..." />
         </el-form-item>
         <el-form-item label="状态">
           <el-select v-model="form.status">
@@ -51,16 +55,19 @@ import { getPatrolList, createPatrolRecord } from "@/api/queue";
 import { ElMessage } from "element-plus";
 
 const patrolList = ref([]);
+const loading = ref(false);
 const dialogVisible = ref(false);
-const form = ref({ patient_id: null, content: "", status: 0 });
+const form = ref({ patient_id: "", content: "", status: 0 });
 
 const loadData = async () => {
+  loading.value = true;
   try {
     const res = await getPatrolList();
     patrolList.value = res.data || [];
   } catch (e) {
     ElMessage.error(e.msg || "查询失败");
   }
+  loading.value = false;
 };
 
 const submit = async () => {
@@ -68,7 +75,7 @@ const submit = async () => {
     await createPatrolRecord(form.value);
     ElMessage.success("记录成功");
     dialogVisible.value = false;
-    form.value = { patient_id: null, content: "", status: 0 };
+    form.value = { patient_id: "", content: "", status: 0 };
     loadData();
   } catch (e) {
     ElMessage.error(e.msg || "提交失败");

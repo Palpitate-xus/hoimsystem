@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.dependencies import get_current_user
-from app.models import Charge, Invoice, Patient, Prescription, User
+from app.models import Charge, Doctor, Invoice, Patient, Prescription, User
 from app.pagination import paginate
 from app.schemas import (
     ChargeCommitRequest,
@@ -23,22 +23,35 @@ router = APIRouter()
 
 @router.get("/chargeManagement/getList")
 def get_charge_list(current_user: User = Depends(get_current_user), keyword: str | None = None, page: int | None = None, page_size: int | None = None, db: Session = Depends(get_db)):
+    def _enrich(item):
+        patient_name = ""
+        doctor_name = ""
+        if item.prescription:
+            pat = db.query(Patient).filter(Patient.patient_id == item.prescription.patient_id).first()
+            if pat:
+                patient_name = pat.name
+            doc = db.query(Doctor).filter(Doctor.doctor_id == item.prescription.doctor_id).first()
+            if doc:
+                doctor_name = doc.name
+        return {
+            "id": str(item.charge_id),
+            "charge_time": (item.charge_time.strftime("%Y-%m-%d %H:%M:%S") if item.charge_time else None),
+            "time": (item.time.strftime("%Y-%m-%d %H:%M:%S") if item.time and item.time.year > 1970 else ""),
+            "pre_id": str(item.prescription.prescription_id) if item.prescription else "",
+            "patient_name": patient_name,
+            "doctor_name": doctor_name,
+            "amount": round(item.amount, 2) if item.amount else 0,
+            "status": item.status,
+            "status_text": {0: "未缴费", 1: "已缴费", 2: "已退费"}.get(item.status, ""),
+        }
+
     data = []
     total = 0
     if current_user.user_role == "admin" or current_user.user_role not in ("admin", "patient"):
         query = db.query(Charge)
         charge_list, total = paginate(query, page, page_size)
         for item in charge_list:
-            data.append(
-                {
-                    "id": str(item.charge_id),
-                    "charge_time": (item.charge_time.strftime("%Y-%m-%d %H:%M:%S") if item.charge_time else None),
-                    "time": str(item.time),
-                    "pre_id": str(item.prescription.prescription_id) if item.prescription else "",
-                    "amount": round(item.amount, 2) if item.amount else 0,
-                    "status": item.status,
-                }
-            )
+            data.append(_enrich(item))
     elif current_user.user_role == "patient":
         patient_obj = db.query(Patient).filter(Patient.identity == current_user.username).first()
         if patient_obj:
@@ -46,16 +59,7 @@ def get_charge_list(current_user: User = Depends(get_current_user), keyword: str
             for pre in pres:
                 item = db.query(Charge).filter(Charge.prescription_id == pre.prescription_id).first()
                 if item:
-                    data.append(
-                        {
-                            "id": str(item.charge_id),
-                            "charge_time": (item.charge_time.strftime("%Y-%m-%d %H:%M:%S") if item.charge_time else None),
-                            "time": str(item.time),
-                            "pre_id": str(item.prescription.prescription_id) if item.prescription else "",
-                            "amount": round(item.amount, 2) if item.amount else 0,
-                            "status": item.status,
-                        }
-                    )
+                    data.append(_enrich(item))
     if keyword:
         kw = keyword.lower()
         data = [item for item in data if any(kw in str(val).lower() for val in item.values())]

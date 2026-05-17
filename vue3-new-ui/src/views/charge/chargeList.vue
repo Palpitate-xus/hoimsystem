@@ -12,23 +12,43 @@
         ></el-input>
         <el-button type="primary" @click="fetchList">搜索</el-button>
       </div>
-      <el-table :data="paginatedList" v-loading="loading">
-        <el-table-column prop="id" label="ID"  sortable />
-        <el-table-column prop="charge_time" label="创建时间"  sortable />
-        <el-table-column prop="time" label="缴费时间"  sortable />
-        <el-table-column prop="pre_id" label="处方ID" />
-        <el-table-column prop="amount" label="金额"  sortable />
-        <el-table-column prop="status" label="状态">
+      <el-table :data="paginatedList" v-loading="loading" border empty-text="暂无数据">
+        <el-table-column prop="patient_name" label="患者姓名" min-width="100">
+          <template #default="{row}">
+            <el-tag v-if="row.patient_name" type="info" effect="plain">{{ row.patient_name }}</el-tag>
+            <span v-else style="color:#999">-</span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="doctor_name" label="开方医生" min-width="100">
+          <template #default="{row}">
+            <span v-if="row.doctor_name">{{ row.doctor_name }}</span>
+            <span v-else style="color:#999">-</span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="amount" label="金额" sortable width="120">
+          <template #default="{row}">
+            <span style="color: #f56c6c; font-weight: bold;">¥{{ row.amount }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="status" label="状态" width="100">
           <template #default="{row}">
             <el-tag v-if="row.status===0" type="warning">未缴费</el-tag>
             <el-tag v-else-if="row.status===1" type="success">已缴费</el-tag>
             <el-tag v-else type="danger">已退费</el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="200">
+        <el-table-column prop="charge_time" label="生成时间" sortable width="180" />
+        <el-table-column prop="time" label="缴费时间" sortable width="180">
+          <template #default="{row}">
+            <span v-if="row.time">{{ row.time }}</span>
+            <span v-else style="color:#999">-</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" width="200" fixed="right">
           <template #default="{row}">
             <el-button v-if="row.status===0" size="small" type="primary" @click="openPayDialog(row)">收费</el-button>
             <el-button v-if="row.status===1" size="small" type="danger" @click="refund(row)">退费</el-button>
+            <el-button size="small" link type="primary" @click="showDetail(row)">详情</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -89,6 +109,28 @@
         <el-button type="success" style="margin-top: 15px;" @click="mockPaySuccess">模拟支付成功</el-button>
       </div>
     </el-dialog>
+    <el-dialog v-model="detailVisible" title="费用记录详情" width="500px">
+      <el-descriptions :column="1" border>
+        <el-descriptions-item label="患者姓名">{{ currentDetail.patient_name || "-" }}</el-descriptions-item>
+        <el-descriptions-item label="开方医生">{{ currentDetail.doctor_name || "-" }}</el-descriptions-item>
+        <el-descriptions-item label="金额">
+          <span style="color: #f56c6c; font-weight: bold;">¥{{ currentDetail.amount }}</span>
+        </el-descriptions-item>
+        <el-descriptions-item label="状态">
+          <el-tag v-if="currentDetail.status===0" type="warning">未缴费</el-tag>
+          <el-tag v-else-if="currentDetail.status===1" type="success">已缴费</el-tag>
+          <el-tag v-else type="danger">已退费</el-tag>
+        </el-descriptions-item>
+        <el-descriptions-item label="生成时间">{{ currentDetail.charge_time }}</el-descriptions-item>
+        <el-descriptions-item label="缴费时间">{{ currentDetail.time || "-" }}</el-descriptions-item>
+        <el-descriptions-item label="费用记录编号">
+          <span style="font-family: monospace; font-size: 12px; color: #999;">{{ currentDetail.id }}</span>
+        </el-descriptions-item>
+        <el-descriptions-item label="关联处方编号">
+          <span style="font-family: monospace; font-size: 12px; color: #999;">{{ currentDetail.pre_id || "-" }}</span>
+        </el-descriptions-item>
+      </el-descriptions>
+    </el-dialog>
   </div>
 </template>
 
@@ -111,7 +153,14 @@ const paginatedList = computed(() => {
 const loading = ref(false);
 const refundVisible = ref(false);
 const refundForm = ref({});
+const detailVisible = ref(false);
+const currentDetail = ref({});
 const payChannelVisible = ref(false);
+
+const showDetail = (row) => {
+  currentDetail.value = row;
+  detailVisible.value = true;
+};
 const qrVisible = ref(false);
 const payForm = ref({ charge_id: "", amount: 0, channel: "wechat" });
 const paymentNo = ref("");

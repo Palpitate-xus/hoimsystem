@@ -257,8 +257,19 @@ module.exports = {
     },
     client: {
       overlay: {
-        errors: true,
+        errors: (error) => {
+          const msg = error?.message || error?.toString() || "";
+          // 过滤掉 ResizeObserver 相关的无害警告
+          if (msg.includes("ResizeObserver")) return false;
+          return true;
+        },
         warnings: false,
+        runtimeErrors: (error) => {
+          const msg = error?.message || error?.toString() || "";
+          // 过滤掉 ResizeObserver 相关的无害运行时错误
+          if (msg.includes("ResizeObserver")) return false;
+          return true;
+        },
       },
     },
     open: {

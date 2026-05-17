@@ -26,7 +26,7 @@
                 </el-select>
                 <el-button type="primary" size="small" @click="loadExecutions">查询</el-button>
               </div>
-              <el-table :data="filteredExecutions" size="small" v-loading="executionLoading">
+              <el-table :data="filteredExecutions" size="small" v-loading="executionLoading" empty-text="暂无医嘱执行">
                 <el-table-column prop="patient_name" label="患者" width="80" />
                 <el-table-column prop="item_names" label="医嘱内容" show-overflow-tooltip />
                 <el-table-column prop="order_type_text" label="类型" width="60" />
@@ -50,7 +50,7 @@
               <div class="page-toolbar">
                 <el-button type="primary" size="small" @click="openNursingDialog()">新增护理记录</el-button>
               </div>
-              <el-table :data="nursingRecords" size="small" v-loading="nursingLoading">
+              <el-table :data="nursingRecords" size="small" v-loading="nursingLoading" empty-text="暂无护理记录">
                 <el-table-column prop="record_time" label="记录时间" width="140" />
                 <el-table-column prop="consciousness" label="意识" width="70" />
                 <el-table-column prop="temperature" label="体温" width="70" />
@@ -73,7 +73,7 @@
                 <el-date-picker v-model="tempDate" type="date" placeholder="选择日期" size="small" value-format="YYYY-MM-DD" />
                 <el-button type="primary" size="small" @click="openTempDialog()">录入体温</el-button>
               </div>
-              <el-table :data="temperatureRecords" size="small" v-loading="tempLoading">
+              <el-table :data="temperatureRecords" size="small" v-loading="tempLoading" empty-text="暂无体温记录">
                 <el-table-column prop="time_point" label="时间点" width="80" />
                 <el-table-column prop="temperature" label="体温" width="70" />
                 <el-table-column prop="pulse" label="脉搏" width="60" />

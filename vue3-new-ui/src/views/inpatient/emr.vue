@@ -27,7 +27,7 @@
           </template>
           <el-tabs v-model="activeTab">
             <el-tab-pane label="病历列表" name="records">
-              <el-table :data="recordList" size="small" v-loading="recordLoading">
+              <el-table :data="recordList" size="small" v-loading="recordLoading" empty-text="暂无病历">
                 <el-table-column prop="record_type_text" label="类型" width="80" />
                 <el-table-column prop="chief_complaint" label="主诉" show-overflow-tooltip />
                 <el-table-column prop="diagnosis" label="诊断" show-overflow-tooltip />
@@ -49,7 +49,7 @@
               </el-table>
             </el-tab-pane>
             <el-tab-pane label="病程记录" name="progress">
-              <el-table :data="progressNotes" size="small">
+              <el-table :data="progressNotes" size="small" empty-text="暂无病程记录">
                 <el-table-column prop="note_date" label="日期" width="100" />
                 <el-table-column prop="content" label="内容" show-overflow-tooltip />
                 <el-table-column prop="doctor_name" label="医生" width="80" />
@@ -62,7 +62,7 @@
               </el-table>
             </el-tab-pane>
             <el-tab-pane label="查房记录" name="round">
-              <el-table :data="wardRounds" size="small">
+              <el-table :data="wardRounds" size="small" empty-text="暂无查房记录">
                 <el-table-column prop="round_type_text" label="类型" width="100" />
                 <el-table-column prop="content" label="查房意见" show-overflow-tooltip />
                 <el-table-column prop="doctor_name" label="查房医生" width="80" />

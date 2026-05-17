@@ -40,7 +40,7 @@
           </div>
           <el-tabs>
             <el-tab-pane label="费用明细">
-              <el-table :data="chargeList" size="small" v-loading="chargeLoading">
+              <el-table :data="chargeList" size="small" v-loading="chargeLoading" empty-text="暂无费用明细">
                 <el-table-column prop="item_name" label="项目名称" />
                 <el-table-column prop="item_type" label="类型" width="80" />
                 <el-table-column prop="quantity" label="数量" width="70" />
@@ -62,7 +62,7 @@
               </el-table>
             </el-tab-pane>
             <el-tab-pane label="日清单">
-              <el-table :data="dailyBill.daily_list" size="small">
+              <el-table :data="dailyBill.daily_list" size="small" empty-text="暂无日清单">
                 <el-table-column prop="charge_date" label="日期" />
                 <el-table-column prop="amount" label="金额"><template #default="{row}">¥{{ row.amount }}</template></el-table-column>
               </el-table>

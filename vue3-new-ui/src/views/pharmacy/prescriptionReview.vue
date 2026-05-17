@@ -25,7 +25,7 @@
 
     <el-card v-if="reviewedList.length > 0" style="margin-top: 15px;">
       <template #header>已点评记录</template>
-      <el-table :data="reviewedList">
+      <el-table :data="reviewedList" empty-text="暂无已点评记录">
         <el-table-column prop="patient_name" label="病人" />
         <el-table-column prop="doctor_name" label="医生" />
         <el-table-column prop="review_score" label="评分" sortable />

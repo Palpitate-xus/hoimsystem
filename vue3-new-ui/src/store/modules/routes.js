@@ -1,5 +1,5 @@
 /**
- * @author https://github.com/zxwk1998/vue-admin-better （不想保留author可删除）
+
  * @description 路由拦截状态管理，目前两种模式：all模式与intelligence模式
  */
 import { asyncRoutes, constantRoutes } from '@/router'
@@ -24,7 +24,7 @@ const mutations = {
 }
 const actions = {
   /**
-   * @author https://github.com/zxwk1998/vue-admin-better （不想保留author可删除）
+  
    * @description intelligence模式设置路由
    * @param {*} { commit }
    * @param {*} permissions
@@ -37,7 +37,7 @@ const actions = {
     return accessedRoutes
   },
   /**
-   * @author https://github.com/zxwk1998/vue-admin-better （不想保留author可删除）
+  
    * @description all模式设置路由
    * @param {*} { commit }
    * @returns

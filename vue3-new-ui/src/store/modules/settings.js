@@ -1,6 +1,5 @@
 /**
- * @author https://github.com/zxwk1998/vue-admin-better （不想保留author可删除）
- * @description 所有全局配置的状态管理，如无必要请勿修改
+ * @description 所有全局配置的状态管理
  */
 
 import defaultSettings from '@/config'

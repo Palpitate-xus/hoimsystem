@@ -1,5 +1,5 @@
 /**
- * @author https://github.com/zxwk1998/vue-admin-better （不想保留author可删除）
+
  * @description 导入所有 vuex 模块，自动加入namespaced:true，用于解决vuex命名冲突，请勿修改。
  * @description 这是一个兼容层，允许项目逐步从Vuex迁移到Pinia
  */

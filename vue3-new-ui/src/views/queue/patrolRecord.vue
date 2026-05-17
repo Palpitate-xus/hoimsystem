@@ -28,7 +28,9 @@
     <el-dialog v-model="dialogVisible" title="新增巡视记录" width="500px">
       <el-form :model="form" label-width="80px">
         <el-form-item label="患者">
-          <el-input v-model="form.patient_id" placeholder="输入患者ID" />
+          <el-select v-model="form.patient_id" placeholder="选择患者" filterable style="width: 100%">
+            <el-option v-for="p in patients" :key="p.patient_id" :label="p.name" :value="p.patient_id" />
+          </el-select>
         </el-form-item>
         <el-form-item label="巡视内容">
           <el-input v-model="form.content" type="textarea" rows="3" placeholder="描述巡视情况..." />
@@ -52,12 +54,14 @@
 <script setup>
 import { ref, onMounted } from "vue";
 import { getPatrolList, createPatrolRecord } from "@/api/queue";
+import { getPatientList } from "@/api/admin";
 import { ElMessage } from "element-plus";
 
 const patrolList = ref([]);
 const loading = ref(false);
 const dialogVisible = ref(false);
 const form = ref({ patient_id: "", content: "", status: 0 });
+const patients = ref([]);
 
 const loadData = async () => {
   loading.value = true;
@@ -68,6 +72,15 @@ const loadData = async () => {
     ElMessage.error(e.msg || "查询失败");
   }
   loading.value = false;
+};
+
+const loadPatients = async () => {
+  try {
+    const res = await getPatientList();
+    patients.value = res.data || [];
+  } catch (e) {
+    console.error("获取患者失败", e);
+  }
 };
 
 const submit = async () => {
@@ -82,5 +95,8 @@ const submit = async () => {
   }
 };
 
-onMounted(loadData);
+onMounted(() => {
+  loadData();
+  loadPatients();
+});
 </script>

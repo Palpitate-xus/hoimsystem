@@ -22,8 +22,16 @@
     </el-card>
     <el-dialog v-model="dialogVisible" title="上报ADR" width="500px">
       <el-form :model="form" label-width="80px" class="dialog-form">
-        <el-form-item label="患者"><el-input v-model="form.patient_id" placeholder="输入患者姓名或身份证号" /></el-form-item>
-        <el-form-item label="药品"><el-input v-model="form.pharmaceutical_id" placeholder="输入药品名称或ID" /></el-form-item>
+        <el-form-item label="患者">
+          <el-select v-model="form.patient_id" placeholder="选择患者" filterable class="form-full-width">
+            <el-option v-for="p in patients" :key="p.patient_id" :label="p.name" :value="p.patient_id" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="药品">
+          <el-select v-model="form.pharmaceutical_id" placeholder="选择药品" filterable class="form-full-width">
+            <el-option v-for="d in pharmaceuticals" :key="d.pharmaceutical_id" :label="d.name" :value="d.pharmaceutical_id" />
+          </el-select>
+        </el-form-item>
         <el-form-item label="症状"><el-input v-model="form.symptom" type="textarea" :rows="3" /></el-form-item>
         <el-form-item label="严重程度">
           <el-radio-group v-model="form.severity">
@@ -39,10 +47,54 @@
 import { ref, onMounted } from "vue";
 import { ElMessage } from "element-plus";
 import { createAdverseReaction, getAdverseReactionList, updateAdrStatus } from "@/api/adverseReaction";
-const list=ref([]), loading=ref(false), dialogVisible=ref(false), form=ref({severity:1});
-const fetchList=async()=>{loading.value=true;const res=await getAdverseReactionList();list.value=res.data||[];loading.value=false;};
-const handleAdd=()=>{form.value={severity:1};dialogVisible.value=true;};
-const submit=async()=>{try{await createAdverseReaction(form.value);ElMessage.success("上报成功");dialogVisible.value=false;fetchList();}catch(e){ElMessage.error(e.msg||"上报失败");}};
-const updateStatus=async(row,status)=>{try{await updateAdrStatus({reaction_id:row.reaction_id,status});ElMessage.success("状态更新成功");fetchList();}catch(e){ElMessage.error(e.msg||"更新失败");}};
-onMounted(fetchList);
+import { getPatientList } from "@/api/admin";
+import { getPharmaceuticalList } from "@/api/pharmacy";
+
+const list = ref([]), loading = ref(false), dialogVisible = ref(false), form = ref({severity: 1});
+const patients = ref([]);
+const pharmaceuticals = ref([]);
+
+const fetchList = async () => {
+  loading.value = true;
+  const res = await getAdverseReactionList();
+  list.value = res.data || [];
+  loading.value = false;
+};
+
+const loadPatients = async () => {
+  try {
+    const res = await getPatientList();
+    patients.value = res.data || [];
+  } catch (e) { console.error("获取患者失败", e); }
+};
+
+const loadPharmaceuticals = async () => {
+  try {
+    const res = await getPharmaceuticalList();
+    pharmaceuticals.value = res.data || [];
+  } catch (e) { console.error("获取药品失败", e); }
+};
+
+const handleAdd = () => { form.value = { severity: 1 }; dialogVisible.value = true; };
+const submit = async () => {
+  try {
+    await createAdverseReaction(form.value);
+    ElMessage.success("上报成功");
+    dialogVisible.value = false;
+    fetchList();
+  } catch (e) { ElMessage.error(e.msg || "上报失败"); }
+};
+const updateStatus = async (row, status) => {
+  try {
+    await updateAdrStatus({ reaction_id: row.reaction_id, status });
+    ElMessage.success("状态更新成功");
+    fetchList();
+  } catch (e) { ElMessage.error(e.msg || "更新失败"); }
+};
+
+onMounted(() => {
+  fetchList();
+  loadPatients();
+  loadPharmaceuticals();
+});
 </script>

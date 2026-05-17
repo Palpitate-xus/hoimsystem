@@ -49,8 +49,10 @@
 
     <el-dialog v-model="dialogVisible" title="新增会诊" width="540px">
       <el-form :model="form" label-width="100px" class="dialog-form">
-        <el-form-item label="患者ID">
-          <el-input v-model="form.patient_id" placeholder="请输入患者ID" />
+        <el-form-item label="患者">
+          <el-select v-model="form.patient_id" placeholder="请选择患者" filterable class="form-full-width">
+            <el-option v-for="p in patients" :key="p.patient_id" :label="p.name" :value="p.patient_id" />
+          </el-select>
         </el-form-item>
         <el-form-item label="初步诊断">
           <el-input v-model="form.diagnosis" type="textarea" :rows="3" placeholder="请输入初步诊断" />
@@ -97,13 +99,14 @@
 import { ref, onMounted } from "vue";
 import { ElMessage } from "element-plus";
 import { createMdt, getMdtList, updateMdt } from "@/api/mdt";
-import { getDepartmentList } from "@/api/admin";
+import { getDepartmentList, getPatientList } from "@/api/admin";
 
 const tableData = ref([]);
 const loading = ref(false);
 const dialogVisible = ref(false);
 const resultDialogVisible = ref(false);
 const departments = ref([]);
+const patients = ref([]);
 
 const form = ref({
   patient_id: "",
@@ -132,6 +135,15 @@ const fetchDepartments = async () => {
     departments.value = res.data || res || [];
   } catch (e) {
     console.error("获取科室失败", e);
+  }
+};
+
+const fetchPatients = async () => {
+  try {
+    const res = await getPatientList();
+    patients.value = res.data || [];
+  } catch (e) {
+    console.error("获取患者失败", e);
   }
 };
 
@@ -175,5 +187,6 @@ const submitResult = async () => {
 onMounted(() => {
   fetchList();
   fetchDepartments();
+  fetchPatients();
 });
 </script>

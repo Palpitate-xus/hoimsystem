@@ -42,7 +42,7 @@
     </el-card>
 
     <el-dialog v-model="dialogVisible" title="选择号源" width="900px">
-      <el-table :data="schedules" v-loading="schedLoading">
+      <el-table :data="schedules" v-loading="schedLoading" empty-text="今日暂无可挂号号源">
         <el-table-column prop="doctor" label="医生" />
         <el-table-column prop="time" label="时段"  sortable />
         <el-table-column prop="stock" label="剩余号源"  sortable />

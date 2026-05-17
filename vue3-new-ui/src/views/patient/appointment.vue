@@ -48,7 +48,7 @@
     </el-card>
 
     <el-dialog v-model="dialogVisible" title="选择号源" width="900px">
-      <el-table :data="schedules" v-loading="schedLoading">
+      <el-table :data="schedules" v-loading="schedLoading" empty-text="暂无可预约号源">
         <el-table-column prop="doctor" label="医生" />
         <el-table-column prop="date" label="日期"  sortable />
         <el-table-column prop="time" label="时段"  sortable />

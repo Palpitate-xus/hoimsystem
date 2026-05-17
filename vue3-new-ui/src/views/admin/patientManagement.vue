@@ -19,7 +19,9 @@
         <el-table-column prop="birthday" label="生日"  sortable />
         <el-table-column prop="phone" label="手机号"  sortable />
         <el-table-column prop="address" label="地址"  sortable />
-        <el-table-column prop="identity" label="身份证号"  sortable />
+        <el-table-column prop="identity" label="身份证号" sortable>
+          <template #default="{row}">{{ maskIdentity(row.identity) }}</template>
+        </el-table-column>
         <el-table-column label="操作" width="120">
           <template #default="{row}">
             <el-button size="small" @click="handleEdit(row)">编辑</el-button>
@@ -67,6 +69,11 @@
 import { ref, onMounted, computed } from "vue";
 import { ElMessage } from "element-plus";
 import { getPatientList, updatePatient } from "@/api/admin";
+
+const maskIdentity = (id) => {
+  if (!id || id.length < 10) return id;
+  return id.slice(0, 6) + "********" + id.slice(-4);
+};
 
 const list = ref([]);
 const searchQuery = ref("");

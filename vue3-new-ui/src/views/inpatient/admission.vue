@@ -20,7 +20,9 @@
             <el-table-column prop="admission_no" label="住院号" width="130" />
             <el-table-column prop="patient_name" label="患者" width="80" />
             <el-table-column prop="patient_sex" label="性别" width="50" />
-            <el-table-column prop="patient_identity" label="身份证号" width="160" />
+            <el-table-column label="身份证号" width="160">
+          <template #default="{row}">{{ maskIdentity(row.patient_identity) }}</template>
+        </el-table-column>
             <el-table-column prop="department_name" label="科室" width="80" />
             <el-table-column prop="ward_name" label="病区" width="100" />
             <el-table-column prop="bed_no" label="床位" width="70" />
@@ -72,7 +74,7 @@
       <el-form :model="admissionForm" label-width="100px">
         <el-form-item label="患者" required>
           <el-select v-model="admissionForm.patient_id" placeholder="选择患者" filterable class="form-full-width" @change="onPatientChange">
-            <el-option v-for="p in patients" :key="p.patient_id" :label="p.name + ' (' + p.identity + ')'" :value="p.patient_id" />
+            <el-option v-for="p in patients" :key="p.patient_id" :label="p.name + ' (' + maskIdentity(p.identity) + ')'" :value="p.patient_id" />
           </el-select>
         </el-form-item>
         <el-form-item label="入院类型">
@@ -136,7 +138,7 @@
         </el-descriptions-item>
         <el-descriptions-item label="患者">{{ currentDetail.patient_name }}</el-descriptions-item>
         <el-descriptions-item label="性别">{{ currentDetail.patient_sex }}</el-descriptions-item>
-        <el-descriptions-item label="身份证号">{{ currentDetail.patient_identity }}</el-descriptions-item>
+        <el-descriptions-item label="身份证号">{{ maskIdentity(currentDetail.patient_identity) }}</el-descriptions-item>
         <el-descriptions-item label="电话">{{ currentDetail.patient_phone }}</el-descriptions-item>
         <el-descriptions-item label="主管医生">{{ currentDetail.doctor_name }}</el-descriptions-item>
         <el-descriptions-item label="科室">{{ currentDetail.department_name }}</el-descriptions-item>
@@ -177,6 +179,11 @@ import { ref, onMounted, watch } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { getAdmissionList, createAdmission, getAdmissionDetail, updateAdmission, getInpatientList, getAvailableBeds } from "@/api/admission";
 import { getPatientList, getDoctorList, getDepartmentList } from "@/api/admin";
+
+const maskIdentity = (id) => {
+  if (!id || id.length < 10) return id;
+  return id.slice(0, 6) + "********" + id.slice(-4);
+};
 import { getWardList } from "@/api/ward";
 import { doDischarge as apiDoDischarge } from "@/api/discharge";
 

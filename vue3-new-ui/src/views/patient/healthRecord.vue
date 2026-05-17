@@ -5,7 +5,7 @@
       <el-descriptions title="基本信息" :column="2" border>
         <el-descriptions-item label="姓名">{{ profile.name }}</el-descriptions-item>
         <el-descriptions-item label="性别">{{ profile.sex }}</el-descriptions-item>
-        <el-descriptions-item label="身份证号">{{ profile.identity }}</el-descriptions-item>
+        <el-descriptions-item label="身份证号">{{ maskIdentity(profile.identity) }}</el-descriptions-item>
         <el-descriptions-item label="生日">{{ profile.birthday }}</el-descriptions-item>
         <el-descriptions-item label="手机号">{{ profile.phone }}</el-descriptions-item>
         <el-descriptions-item label="地址">{{ profile.address }}</el-descriptions-item>
@@ -46,6 +46,11 @@
 <script setup>
 import { ref, onMounted, computed } from "vue";
 import { getHealthProfile, getVisitRecords } from "@/api/patient";
+
+const maskIdentity = (id) => {
+  if (!id || id.length < 10) return id;
+  return id.slice(0, 6) + "********" + id.slice(-4);
+};
 
 const profile = ref({});
 const visits = ref([]);

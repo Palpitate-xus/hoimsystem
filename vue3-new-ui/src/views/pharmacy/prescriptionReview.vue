@@ -35,7 +35,6 @@
     </el-card>
 
     <el-dialog v-model="dialogVisible" title="处方点评" width="500px">
-      <p>处方ID: {{ currentRow.uuid }}</p>
       <p>病人: {{ currentRow.patient_name }}</p>
       <p>医生: {{ currentRow.doctor_name }}</p>
       <el-form :model="form" label-width="80px" class="dialog-form">

@@ -57,7 +57,6 @@
 
     <el-dialog v-model="detailVisible" title="病历详情" width="600px">
       <el-descriptions :column="1" border>
-        <el-descriptions-item label="病历ID">{{ detail.uuid }}</el-descriptions-item>
         <el-descriptions-item label="就诊时间">{{ detail.consultation_time }}</el-descriptions-item>
         <el-descriptions-item label="医生">{{ detail.doctor_name }}</el-descriptions-item>
         <el-descriptions-item label="患者">{{ detail.patient_name }}</el-descriptions-item>

@@ -13,7 +13,6 @@
         <el-button type="primary" @click="fetchList">搜索</el-button>
       </div>
       <el-table :data="paginatedList" v-loading="loading" empty-text="暂无记录">
-        <el-table-column prop="id" label="ID"  sortable />
         <el-table-column prop="name" label="药品名称"  sortable />
         <el-table-column prop="stock" label="库存"  sortable />
         <el-table-column prop="price" label="单价"  sortable />

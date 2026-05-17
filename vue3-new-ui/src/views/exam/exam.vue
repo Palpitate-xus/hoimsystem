@@ -15,7 +15,6 @@
           <el-button type="primary" @click="fetchPackages">搜索</el-button>
         </div>
         <el-table :data="paginatedPackages" v-loading="packageLoading" empty-text="暂无记录">
-          <el-table-column prop="id" label="ID" sortable />
           <el-table-column prop="name" label="套餐名称" sortable />
           <el-table-column prop="description" label="描述" show-overflow-tooltip />
           <el-table-column prop="price" label="价格" sortable>
@@ -59,7 +58,6 @@
           <el-button type="primary" @click="fetchItems">搜索</el-button>
         </div>
         <el-table :data="paginatedItems" v-loading="itemLoading" empty-text="暂无记录">
-          <el-table-column prop="id" label="ID" sortable />
           <el-table-column prop="name" label="项目名称" sortable />
           <el-table-column prop="category" label="分类" sortable />
           <el-table-column prop="unit" label="单位" />
@@ -111,7 +109,6 @@
           <el-button type="primary" @click="fetchAppointments">搜索</el-button>
         </div>
         <el-table :data="paginatedAppointments" v-loading="appointmentLoading" empty-text="暂无记录">
-          <el-table-column prop="id" label="预约ID" sortable />
           <el-table-column prop="patient_name" label="患者姓名" sortable />
           <el-table-column prop="package_name" label="体检套餐" sortable />
           <el-table-column prop="appointment_date" label="预约日期" sortable />
@@ -155,7 +152,6 @@
           <el-button type="primary" @click="fetchRecords">搜索</el-button>
         </div>
         <el-table :data="paginatedRecords" v-loading="recordLoading" empty-text="暂无记录">
-          <el-table-column prop="id" label="记录ID" sortable />
           <el-table-column prop="patient_name" label="患者姓名" sortable />
           <el-table-column prop="package_name" label="体检套餐" sortable />
           <el-table-column prop="exam_date" label="体检日期" sortable />

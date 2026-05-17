@@ -65,7 +65,7 @@ npm install --legacy-peer-deps
 npm run serve:rspack
 ```
 
-前端将运行在 http://localhost:8091，通过代理自动访问后端 API。
+前端将运行在 http://localhost:8091。默认情况下前端通过 hash 路由直接访问后端 API（`http://localhost:8000/api`），请确保后端服务已启动。若需跨域代理，可在 `vue3-new-ui/config/proxy.js` 中配置。
 
 ---
 

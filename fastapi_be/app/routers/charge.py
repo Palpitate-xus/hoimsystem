@@ -98,11 +98,17 @@ def get_invoice_list(keyword: str | None = None, db: Session = Depends(get_db)):
     invoices = db.query(Invoice).all()
     data = []
     for item in invoices:
+        charge = db.query(Charge).filter(Charge.charge_id == item.charge_id).first()
+        patient_name = ""
+        if charge and charge.prescription:
+            pat = db.query(Patient).filter(Patient.patient_id == charge.prescription.patient_id).first()
+            patient_name = pat.name if pat else ""
         data.append(
             {
                 "id": str(item.invoice_id),
                 "invoice_no": item.invoice_no,
                 "charge_id": str(item.charge_id),
+                "patient_name": patient_name,
                 "amount": round(item.amount, 2) if item.amount else 0,
                 "invoice_time": (item.invoice_time.strftime("%Y-%m-%d %H:%M:%S") if item.invoice_time else None),
             }

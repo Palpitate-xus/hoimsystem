@@ -11,13 +11,15 @@
         ></el-input>
         <el-button type="primary" @click="fetchList">搜索</el-button>
       </div>
-      <el-table :data="paginatedList" v-loading="loading">
-        <el-table-column prop="id" label="ID"  sortable />
-        <el-table-column prop="invoice_no" label="发票号码" />
-        <el-table-column prop="charge_id" label="收费记录ID" />
-        <el-table-column prop="amount" label="金额"  sortable />
-        <el-table-column prop="invoice_time" label="开票时间" />
-        <el-table-column label="操作" width="200">
+      <el-table :data="paginatedList" v-loading="loading" border empty-text="暂无发票记录">
+        <el-table-column prop="invoice_no" label="发票号码" sortable min-width="180"
+          ><template #default="{row}"><code style="font-size:13px">{{ row.invoice_no }}</code></template></el-table-column>
+        <el-table-column prop="patient_name" label="患者姓名" width="120"
+          ><template #default="{row}"><el-tag v-if="row.patient_name" type="info" effect="plain">{{ row.patient_name }}</el-tag><span v-else style="color:#999">-</span></template></el-table-column>
+        <el-table-column prop="amount" label="金额" sortable width="120"
+          ><template #default="{row}"><span style="color:#f56c6c;font-weight:bold">¥{{ row.amount }}</span></template></el-table-column>
+        <el-table-column prop="invoice_time" label="开票时间" sortable width="180" />
+        <el-table-column label="操作" width="100" fixed="right">
           <template #default="{row}">
             <el-button size="small" type="primary" @click="print(row)">打印</el-button>
           </template>

@@ -91,7 +91,7 @@ def get_patient_list(keyword: str | None = None, page: int | None = None, page_s
                 "id": item.patient_id,
                 "name": item.name,
                 "sex": sex,
-                "birthday": (item.birthday.strftime("%Y-%m-%d %H:%M:%S") if item.birthday else None),
+                "birthday": (item.birthday.strftime("%Y-%m-%d") if item.birthday else None),
                 "phone": item.phone,
                 "permission": item.permission,
                 "address": item.address,

@@ -339,7 +339,7 @@ def get_health_profile(current_user: User = Depends(get_current_user), db: Sessi
         "name": patient_obj.name,
         "sex": sex,
         "identity": patient_obj.identity,
-        "birthday": (patient_obj.birthday.strftime("%Y-%m-%d %H:%M:%S") if patient_obj.birthday else None),
+        "birthday": (patient_obj.birthday.strftime("%Y-%m-%d") if patient_obj.birthday else None),
         "phone": patient_obj.phone,
         "address": patient_obj.address,
         "allergy_history": patient_obj.allergy_history or "",

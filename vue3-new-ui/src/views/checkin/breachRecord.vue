@@ -3,8 +3,8 @@
     <vab-page-header title="违约记录" description="查看患者预约挂号违约记录和处理情况" />
     <el-card>
       <el-form :inline="true" class="page-toolbar">
-        <el-form-item label="患者姓名/ID">
-          <el-input v-model="searchKeyword" placeholder="输入患者姓名或ID筛选" clearable style="width:200px" @keyup.enter="loadData" />
+        <el-form-item label="患者姓名">
+          <el-input v-model="searchKeyword" placeholder="输入患者姓名筛选" clearable style="width:200px" @keyup.enter="loadData" />
         </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="loadData">查询</el-button>
@@ -52,17 +52,10 @@
     <el-dialog v-model="detailVisible" title="违约记录详情" width="500px">
       <el-descriptions :column="1" border>
         <el-descriptions-item label="患者姓名">{{ currentRow.patient_name }}</el-descriptions-item>
-        <el-descriptions-item label="患者ID">{{ currentRow.patient_id }}</el-descriptions-item>
         <el-descriptions-item label="违约类型">
           <el-tag type="danger">{{ currentRow.breach_type }}</el-tag>
         </el-descriptions-item>
         <el-descriptions-item label="违约时间">{{ currentRow.breach_time }}</el-descriptions-item>
-        <el-descriptions-item label="违约记录编号">
-          <span style="font-family: monospace; font-size: 12px; color: #999;">{{ currentRow.breach_id }}</span>
-        </el-descriptions-item>
-        <el-descriptions-item label="关联预约编号">
-          <span style="font-family: monospace; font-size: 12px; color: #999;">{{ currentRow.registration_id }}</span>
-        </el-descriptions-item>
       </el-descriptions>
     </el-dialog>
   </div>

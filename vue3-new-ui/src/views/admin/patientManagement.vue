@@ -13,7 +13,6 @@
         <el-button type="primary" @click="fetchList">搜索</el-button>
       </div>
       <el-table :data="paginatedList" v-loading="loading" empty-text="暂无记录">
-        <el-table-column prop="id" label="ID" width="60"  sortable />
         <el-table-column prop="name" label="姓名"  sortable />
         <el-table-column prop="sex" label="性别"  sortable />
         <el-table-column prop="birthday" label="生日"  sortable />

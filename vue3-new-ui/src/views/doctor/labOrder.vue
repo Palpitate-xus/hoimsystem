@@ -13,7 +13,6 @@
         <el-button type="primary" @click="fetchList">搜索</el-button>
       </div>
       <el-table :data="paginatedList" v-loading="loading" empty-text="暂无记录">
-        <el-table-column prop="id" label="申请单ID"  sortable />
         <el-table-column prop="patient_name" label="患者"  sortable />
         <el-table-column prop="check_type" label="检查类型"  sortable />
         <el-table-column prop="status" label="状态">

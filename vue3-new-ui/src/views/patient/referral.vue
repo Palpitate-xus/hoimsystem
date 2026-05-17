@@ -32,14 +32,18 @@
 
     <el-dialog v-model="dialogVisible" title="新增转诊" width="500px">
       <el-form :model="form" label-width="120px" class="dialog-form">
-        <el-form-item label="患者ID">
-          <el-input v-model="form.patient_id" />
+        <el-form-item label="患者">
+          <el-input v-model="form.patient_id" placeholder="输入患者姓名或身份证号" />
         </el-form-item>
-        <el-form-item label="转出科室ID">
-          <el-input v-model="form.from_department_id" />
+        <el-form-item label="转出科室">
+          <el-select v-model="form.from_department_id" placeholder="请选择转出科室">
+            <el-option v-for="item in departmentList" :key="item.department_id" :label="item.department_name" :value="item.department_id" />
+          </el-select>
         </el-form-item>
-        <el-form-item label="转入科室ID">
-          <el-input v-model="form.to_department_id" />
+        <el-form-item label="转入科室">
+          <el-select v-model="form.to_department_id" placeholder="请选择转入科室">
+            <el-option v-for="item in departmentList" :key="item.department_id" :label="item.department_name" :value="item.department_id" />
+          </el-select>
         </el-form-item>
         <el-form-item label="转诊类型">
           <el-radio-group v-model="form.referral_type">
@@ -64,10 +68,12 @@
 import { ref, onMounted } from "vue";
 import { ElMessage } from "element-plus";
 import { createReferral, getReferralList, updateReferralStatus } from "@/api/referral";
+import { getDepartmentList } from "@/api/admin";
 
 const tableData = ref([]);
 const loading = ref(false);
 const dialogVisible = ref(false);
+const departmentList = ref([]);
 const form = ref({
   patient_id: "",
   from_department_id: "",
@@ -113,7 +119,17 @@ const handleUpdateStatus = async (id, status) => {
   }
 };
 
+const fetchDepartmentList = async () => {
+  try {
+    const res = await getDepartmentList();
+    departmentList.value = res.data || res || [];
+  } catch (error) {
+    ElMessage.error("获取科室列表失败");
+  }
+};
+
 onMounted(() => {
   fetchList();
+  fetchDepartmentList();
 });
 </script>

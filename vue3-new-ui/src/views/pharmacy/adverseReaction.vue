@@ -22,8 +22,8 @@
     </el-card>
     <el-dialog v-model="dialogVisible" title="上报ADR" width="500px">
       <el-form :model="form" label-width="80px" class="dialog-form">
-        <el-form-item label="患者ID"><el-input v-model="form.patient_id" /></el-form-item>
-        <el-form-item label="药品ID"><el-input v-model="form.pharmaceutical_id" /></el-form-item>
+        <el-form-item label="患者"><el-input v-model="form.patient_id" placeholder="输入患者姓名或身份证号" /></el-form-item>
+        <el-form-item label="药品"><el-input v-model="form.pharmaceutical_id" placeholder="输入药品名称或ID" /></el-form-item>
         <el-form-item label="症状"><el-input v-model="form.symptom" type="textarea" :rows="3" /></el-form-item>
         <el-form-item label="严重程度">
           <el-radio-group v-model="form.severity">

@@ -12,11 +12,9 @@
         ></el-input>
         <el-button type="primary" @click="fetchList">搜索</el-button>
       </div>
-      <el-table :data="paginatedList" v-loading="loading">
-        <el-table-column prop="id" label="ID"  sortable />
+      <el-table :data="paginatedList" v-loading="loading" border empty-text="暂无缴费记录">
         <el-table-column prop="charge_time" label="创建时间"  sortable />
         <el-table-column prop="time" label="缴费时间"  sortable />
-        <el-table-column prop="pre_id" label="处方ID" />
         <el-table-column prop="amount" label="金额"  sortable />
         <el-table-column prop="status" label="状态">
           <template #default="{row}">

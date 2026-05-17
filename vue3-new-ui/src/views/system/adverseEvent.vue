@@ -42,8 +42,8 @@
             <el-option label="其他" value="其他" />
           </el-select>
         </el-form-item>
-        <el-form-item label="患者ID">
-          <el-input v-model="form.patient_id" />
+        <el-form-item label="患者">
+          <el-input v-model="form.patient_id" placeholder="输入患者姓名或身份证号" />
         </el-form-item>
         <el-form-item label="描述">
           <el-input v-model="form.description" type="textarea" :rows="3" />

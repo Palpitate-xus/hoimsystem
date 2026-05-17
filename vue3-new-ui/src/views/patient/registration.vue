@@ -17,7 +17,13 @@
         <el-table-column prop="doctor" label="医生" />
         <el-table-column prop="department" label="科室"  sortable />
         <el-table-column prop="time" label="挂号时间"  sortable />
-        <el-table-column prop="status" label="状态"  sortable />
+        <el-table-column label="状态" sortable>
+          <template #default="{row}">
+            <el-tag v-if="row.status==='未就诊'" type="warning" size="small">{{ row.status }}</el-tag>
+            <el-tag v-else-if="row.status==='已就诊'" type="success" size="small">{{ row.status }}</el-tag>
+            <el-tag v-else type="info" size="small">{{ row.status }}</el-tag>
+          </template>
+        </el-table-column>
         <el-table-column label="操作" width="120">
           <template #default="{row}">
             <el-button size="small" type="danger" @click="cancel(row)">取消</el-button>

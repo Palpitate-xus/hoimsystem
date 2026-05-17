@@ -28,7 +28,7 @@
     <el-dialog v-model="dialogVisible" title="新增巡视记录" width="500px">
       <el-form :model="form" label-width="80px">
         <el-form-item label="患者">
-          <el-select v-model="form.patient_id" placeholder="选择患者" filterable style="width: 100%">
+          <el-select v-model="form.patient_id" placeholder="选择患者" filterable class="form-full-width">
             <el-option v-for="p in patients" :key="p.patient_id" :label="p.name" :value="p.patient_id" />
           </el-select>
         </el-form-item>

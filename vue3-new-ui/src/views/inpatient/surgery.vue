@@ -12,7 +12,7 @@
             <el-option label="已排台" :value="2" />
             <el-option label="已完成" :value="3" />
           </el-select>
-          <el-input v-model="keyword" placeholder="搜索手术/患者" clearable size="small" style="width: 200px;" />
+          <el-input v-model="keyword" placeholder="搜索手术/患者" clearable size="small" class="page-search-input" />
           <el-button type="primary" size="small" @click="loadApplications">查询</el-button>
         </div>
       </template>

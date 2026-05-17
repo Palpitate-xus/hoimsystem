@@ -5,7 +5,7 @@
       <template #header>
         <div class="page-toolbar">
           <el-button type="primary" @click="openAdmissionDialog()">办理入院</el-button>
-          <el-input v-model="keyword" placeholder="搜索患者/住院号" clearable style="width: 200px;" />
+          <el-input v-model="keyword" placeholder="搜索患者/住院号" clearable class="page-search-input" />
           <el-select v-model="filterStatus" placeholder="状态" clearable style="width: 120px;">
             <el-option label="在院" :value="1" />
             <el-option label="已出院" :value="2" />

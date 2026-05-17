@@ -80,7 +80,7 @@
 import { ref, onMounted } from "vue";
 import { ElMessage } from "element-plus";
 import { windowRegistration } from "@/api/charge";
-import { getScheduleList } from "@/api/doctor";
+import { getDoctorScheduleList } from "@/api/doctor";
 
 const step = ref(0);
 const form = ref({ identity: "" });
@@ -97,7 +97,7 @@ const verifyPatient = async () => {
   }
   loading.value = true;
   try {
-    const res = await getScheduleList();
+    const res = await getDoctorScheduleList();
     if (res.code === 200) {
       schedules.value = (res.data || []).filter(s => s.number > 0);
       patientName.value = "患者";

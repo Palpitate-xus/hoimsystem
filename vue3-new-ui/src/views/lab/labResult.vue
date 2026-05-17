@@ -13,7 +13,6 @@
           <el-button type="primary" @click="fetchPending">搜索</el-button>
         </div>
         <el-table :data="paginatedPendingList" v-loading="loading" empty-text="暂无记录">
-          <el-table-column prop="id" label="申请单ID"  sortable />
           <el-table-column prop="patient_name" label="患者"  sortable />
           <el-table-column prop="check_type" label="检查类型"  sortable />
           <el-table-column prop="create_time" label="申请时间"  sortable />
@@ -47,7 +46,6 @@
           <el-button type="primary" @click="fetchResults">搜索</el-button>
         </div>
         <el-table :data="paginatedResultList" v-loading="loading2" empty-text="暂无记录">
-          <el-table-column prop="id" label="结果ID"  sortable />
           <el-table-column prop="check_name" label="检查名称"  sortable />
           <el-table-column prop="check_time" label="检查时间"  sortable />
           <el-table-column prop="result" label="结果"  sortable />

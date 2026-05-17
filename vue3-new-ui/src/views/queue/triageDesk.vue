@@ -85,7 +85,7 @@
               </div>
             </div>
           </template>
-          <el-table :data="list" v-loading="loading" size="small">
+          <el-table :data="list" v-loading="loading" size="small" empty-text="暂无记录">
             <el-table-column label="级别" width="70">
               <template #default="{row}">
                 <el-tag v-if="row.level===1" type="danger" effect="dark">危急</el-tag>

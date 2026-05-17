@@ -5,7 +5,7 @@
       <div class="page-toolbar">
         <el-button type="primary" @click="handleAdd">新增会诊</el-button>
       </div>
-      <el-table :data="tableData" v-loading="loading" border>
+      <el-table :data="tableData" v-loading="loading" border empty-text="暂无记录">
         <el-table-column prop="patient_name" label="患者姓名" width="120" />
         <el-table-column prop="diagnosis" label="初步诊断" show-overflow-tooltip />
         <el-table-column label="参与科室" min-width="220">

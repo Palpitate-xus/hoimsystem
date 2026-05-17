@@ -2,7 +2,7 @@
   <div class="app-container">
     <vab-page-header title="消息中心" description="查看和管理系统消息通知" />
     <el-card>
-      <el-table :data="messageList">
+      <el-table :data="messageList" empty-text="暂无记录">
         <el-table-column prop="title" label="标题" />
         <el-table-column prop="content" label="内容" />
         <el-table-column prop="msg_type" label="类型" width="80">

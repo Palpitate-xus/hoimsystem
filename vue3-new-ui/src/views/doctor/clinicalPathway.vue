@@ -5,7 +5,7 @@
       <div class="page-toolbar">
         <el-button type="primary" @click="handleAdd">新增路径</el-button>
       </div>
-      <el-table :data="tableData" v-loading="loading" border>
+      <el-table :data="tableData" v-loading="loading" border empty-text="暂无记录">
         <el-table-column prop="name" label="路径名称" />
         <el-table-column prop="disease_code" label="疾病编码" />
         <el-table-column prop="disease_name" label="疾病名称" />

@@ -14,7 +14,7 @@
         </el-form-item>
       </el-form>
 
-      <el-table :data="list" v-loading="loading">
+      <el-table :data="list" v-loading="loading" empty-text="暂无记录">
         <el-table-column prop="log_id" label="日志ID" />
         <el-table-column prop="user_name" label="用户" />
         <el-table-column prop="action" label="操作"  sortable />

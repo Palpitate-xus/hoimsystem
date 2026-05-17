@@ -11,7 +11,7 @@
             </div>
           </template>
           <el-input v-model="wardKeyword" placeholder="搜索病区" clearable prefix-icon="Search" style="margin-bottom: 15px;" />
-          <el-table :data="filteredWards" size="small" highlight-current-row @current-change="onWardSelect">
+          <el-table :data="filteredWards" size="small" highlight-current-row @current-change="onWardSelect" empty-text="暂无记录">
             <el-table-column prop="name" label="病区名称" show-overflow-tooltip />
             <el-table-column label="床位" width="80">
               <template #default="{row}">
@@ -46,7 +46,7 @@
               <el-tag type="danger">占用: {{ currentWard.bed_used }}</el-tag>
               <el-tag type="warning">禁用: {{ bedList.filter(b=>b.status===2).length }}</el-tag>
             </div>
-            <el-table :data="bedList" size="small" v-loading="bedLoading">
+            <el-table :data="bedList" size="small" v-loading="bedLoading" empty-text="暂无记录">
               <el-table-column prop="bed_no" label="床位号" width="80" />
               <el-table-column prop="room_no" label="房间号" width="80" />
               <el-table-column prop="bed_type" label="类型" width="80" />

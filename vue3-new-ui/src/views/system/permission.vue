@@ -14,7 +14,7 @@
         <el-button @click="roleFilter = ''; fetchList()">重置</el-button>
       </div>
 
-      <el-table :data="list" v-loading="loading">
+      <el-table :data="list" v-loading="loading" empty-text="暂无记录">
         <el-table-column prop="user_id" label="用户ID" width="80" />
         <el-table-column prop="username" label="用户名" />
         <el-table-column prop="user_role" label="当前角色" width="120">

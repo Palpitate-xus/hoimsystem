@@ -5,7 +5,7 @@
       <div class="page-toolbar">
         <el-button type="primary" @click="handleAdd">新增不良事件</el-button>
       </div>
-      <el-table :data="tableData" v-loading="loading" border>
+      <el-table :data="tableData" v-loading="loading" border empty-text="暂无记录">
         <el-table-column prop="event_type" label="事件类型" />
         <el-table-column prop="patient_name" label="患者姓名" />
         <el-table-column prop="description" label="描述" show-overflow-tooltip />

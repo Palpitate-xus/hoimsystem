@@ -16,7 +16,7 @@
           <el-button type="primary" size="small" @click="loadApplications">查询</el-button>
         </div>
       </template>
-      <el-table :data="applications" size="small" v-loading="loading">
+      <el-table :data="applications" size="small" v-loading="loading" empty-text="暂无记录">
         <el-table-column prop="patient_name" label="患者" width="80" />
         <el-table-column prop="surgery_name" label="手术名称" />
         <el-table-column prop="surgery_level_text" label="级别" width="70" />
@@ -44,7 +44,7 @@
 
     <el-card style="margin-top: 20px;">
       <template #header><span>手术排台列表</span></template>
-      <el-table :data="schedules" size="small">
+      <el-table :data="schedules" size="small" empty-text="暂无记录">
         <el-table-column prop="patient_name" label="患者" width="80" />
         <el-table-column prop="surgery_name" label="手术名称" />
         <el-table-column prop="operating_room" label="手术室" width="80" />

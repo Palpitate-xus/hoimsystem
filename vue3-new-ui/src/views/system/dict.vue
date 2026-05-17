@@ -20,7 +20,7 @@
         ></el-input>
         <el-button type="primary" @click="fetchList">搜索</el-button>
       </div>
-      <el-table :data="paginatedList" v-loading="loading">
+      <el-table :data="paginatedList" v-loading="loading" empty-text="暂无记录">
         <el-table-column prop="dict_id" label="ID" />
         <el-table-column prop="dict_type" label="类型" />
         <el-table-column prop="dict_code" label="编码" />

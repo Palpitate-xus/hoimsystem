@@ -5,7 +5,7 @@
       <div class="page-toolbar">
         <el-button type="primary" @click="handleAdd">新增转诊</el-button>
       </div>
-      <el-table :data="tableData" v-loading="loading" border>
+      <el-table :data="tableData" v-loading="loading" border empty-text="暂无记录">
         <el-table-column prop="patient_name" label="患者姓名" />
         <el-table-column prop="from_department" label="转出科室" />
         <el-table-column prop="to_department" label="转入科室" />

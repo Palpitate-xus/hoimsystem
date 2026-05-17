@@ -8,7 +8,7 @@
         <el-button type="primary" @click="fetchList">搜索</el-button>
       </div>
 
-      <el-table :data="list" v-loading="loading">
+      <el-table :data="list" v-loading="loading" empty-text="暂无记录">
         <el-table-column prop="consumable_id" label="ID" width="60" />
         <el-table-column prop="name" label="名称" />
         <el-table-column prop="category" label="分类" width="100" />

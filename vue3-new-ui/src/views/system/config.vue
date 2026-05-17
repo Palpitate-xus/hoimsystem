@@ -11,7 +11,7 @@
         ></el-input>
         <el-button type="primary" @click="fetchList">搜索</el-button>
       </div>
-      <el-table :data="paginatedList" v-loading="loading">
+      <el-table :data="paginatedList" v-loading="loading" empty-text="暂无记录">
         <el-table-column prop="config_key" label="参数键" />
         <el-table-column prop="config_value" label="参数值" />
         <el-table-column prop="description" label="说明" />

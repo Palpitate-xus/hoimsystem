@@ -18,7 +18,7 @@
         <el-button @click="fetchList">刷新列表</el-button>
       </div>
 
-      <el-table :data="list" v-loading="loading">
+      <el-table :data="list" v-loading="loading" empty-text="暂无记录">
         <el-table-column prop="filename" label="文件名" />
         <el-table-column prop="size_human" label="大小" width="120" />
         <el-table-column

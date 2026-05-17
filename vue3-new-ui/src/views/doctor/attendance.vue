@@ -48,7 +48,7 @@
           <el-button type="primary" @click="loadRecords">查询</el-button>
         </el-form-item>
       </el-form>
-      <el-table :data="attendanceList">
+      <el-table :data="attendanceList" empty-text="暂无记录">
         <el-table-column prop="date" label="日期" sortable />
         <el-table-column prop="check_in_time" label="签到时间" />
         <el-table-column prop="check_out_time" label="签退时间" />

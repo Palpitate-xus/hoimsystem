@@ -2,7 +2,7 @@
   <div class="app-container">
     <vab-page-header title="号源池管理" description="查看各科室号源分布和使用情况" />
     <el-card>
-      <el-table :data="list" v-loading="loading">
+      <el-table :data="list" v-loading="loading" empty-text="暂无记录">
         <el-table-column prop="department_name" label="科室" />
         <el-table-column prop="doctor_count" label="出诊医生数" width="120" />
         <el-table-column prop="schedules_count" label="排班时段数" width="120" />

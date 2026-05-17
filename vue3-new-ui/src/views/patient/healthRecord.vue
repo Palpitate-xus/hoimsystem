@@ -24,7 +24,7 @@
         ></el-input>
         <el-button type="primary" @click="fetchVisits">搜索</el-button>
       </div>
-      <el-table :data="paginatedVisits" v-loading="loading">
+      <el-table :data="paginatedVisits" v-loading="loading" empty-text="暂无记录">
         <el-table-column prop="visit_time" label="就诊时间"  sortable />
         <el-table-column prop="doctor_name" label="医生"  sortable />
         <el-table-column prop="department" label="科室"  sortable />

@@ -13,7 +13,7 @@
         <el-button @click="fetchList">刷新</el-button>
       </div>
 
-      <el-table :data="list" v-loading="loading">
+      <el-table :data="list" v-loading="loading" empty-text="暂无记录">
         <el-table-column prop="order_no" label="采购单号" />
         <el-table-column prop="supplier" label="供应商" />
         <el-table-column prop="total_amount" label="总金额" />

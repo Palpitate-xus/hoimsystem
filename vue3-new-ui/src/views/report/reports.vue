@@ -26,7 +26,7 @@
         <el-descriptions title="统计结果" :column="1" border v-if="outpatientResult.total_visits !== undefined">
           <el-descriptions-item label="总就诊人次">{{ outpatientResult.total_visits }}</el-descriptions-item>
         </el-descriptions>
-        <el-table :data="paginatedOutpatientDetails">
+        <el-table :data="paginatedOutpatientDetails" empty-text="暂无数据">
           <el-table-column prop="label" label="分组"  sortable />
           <el-table-column prop="value" label="人次" />
         </el-table>
@@ -73,7 +73,7 @@
             <el-button type="primary" @click="queryPharma">查询</el-button>
           </el-form-item>
         </el-form>
-        <el-table :data="paginatedPharmaResult">
+        <el-table :data="paginatedPharmaResult" empty-text="暂无数据">
           <el-table-column prop="name" label="药品名称"  sortable />
           <el-table-column prop="total_number" label="消耗数量"  sortable />
         </el-table>
@@ -105,7 +105,7 @@
             <el-button type="primary" @click="queryWorkload">查询</el-button>
           </el-form-item>
         </el-form>
-        <el-table :data="paginatedWorkloadResult">
+        <el-table :data="paginatedWorkloadResult" empty-text="暂无数据">
           <el-table-column prop="doctor_name" label="医生"  sortable />
           <el-table-column prop="visit_count" label="接诊人数" />
           <el-table-column prop="prescription_count" label="处方数" />

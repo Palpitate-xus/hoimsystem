@@ -16,7 +16,7 @@
       </template>
       <el-tabs v-model="activeTab">
         <el-tab-pane label="在院患者" name="inpatient">
-          <el-table :data="inpatientList" size="small" v-loading="loading">
+          <el-table :data="inpatientList" size="small" v-loading="loading" empty-text="暂无记录">
             <el-table-column prop="admission_no" label="住院号" width="130" />
             <el-table-column prop="patient_name" label="患者" width="80" />
             <el-table-column prop="patient_sex" label="性别" width="50" />
@@ -42,7 +42,7 @@
           </el-table>
         </el-tab-pane>
         <el-tab-pane label="全部记录" name="all">
-          <el-table :data="admissionList" size="small" v-loading="loading">
+          <el-table :data="admissionList" size="small" v-loading="loading" empty-text="暂无记录">
             <el-table-column prop="admission_no" label="住院号" width="130" />
             <el-table-column prop="patient_name" label="患者" width="80" />
             <el-table-column prop="patient_sex" label="性别" width="50" />

@@ -5,7 +5,7 @@
       <div class="page-toolbar">
         <el-button type="primary" @click="handleAdd">上报ADR</el-button>
       </div>
-      <el-table :data="list" v-loading="loading">
+      <el-table :data="list" v-loading="loading" empty-text="暂无记录">
         <el-table-column prop="patient_name" label="患者" />
         <el-table-column prop="pharmaceutical_name" label="药品" />
         <el-table-column prop="symptom" label="症状" show-overflow-tooltip />

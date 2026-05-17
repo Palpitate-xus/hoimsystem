@@ -7,8 +7,7 @@
         <el-button type="primary" @click="loadData">搜索</el-button>
       </div>
 
-      <el-table :data="list">
-        <el-table-column prop="uuid" label="处方ID" width="280" />
+      <el-table :data="list" v-loading="loading" border empty-text="暂无数据">
         <el-table-column prop="patient_name" label="病人" />
         <el-table-column prop="doctor_name" label="医生" />
         <el-table-column prop="phas" label="药品">

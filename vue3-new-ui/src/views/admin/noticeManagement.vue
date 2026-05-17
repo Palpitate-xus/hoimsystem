@@ -12,8 +12,7 @@
         ></el-input>
         <el-button type="primary" @click="fetchList">搜索</el-button>
       </div>
-      <el-table :data="paginatedList" v-loading="loading">
-        <el-table-column prop="uuid" label="ID" width="80"  sortable />
+      <el-table :data="paginatedList" v-loading="loading" border empty-text="暂无数据">
         <el-table-column prop="title" label="标题"  sortable />
         <el-table-column prop="content" label="内容" show-overflow-tooltip />
         <el-table-column prop="isemergency" label="紧急" width="80" :formatter="(row)=>row.isemergency?'是':'否'" sortable />

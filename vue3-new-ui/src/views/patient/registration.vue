@@ -12,8 +12,7 @@
         ></el-input>
         <el-button type="primary" @click="fetchList">搜索</el-button>
       </div>
-      <el-table :data="paginatedList" v-loading="loading">
-        <el-table-column prop="uuid" label="挂号ID"  sortable />
+      <el-table :data="paginatedList" v-loading="loading" border empty-text="暂无数据">
         <el-table-column prop="order" label="序号"  sortable />
         <el-table-column prop="doctor" label="医生" />
         <el-table-column prop="department" label="科室"  sortable />

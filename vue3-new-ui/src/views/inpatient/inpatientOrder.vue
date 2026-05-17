@@ -108,10 +108,39 @@
         <el-form-item label="医嘱项目">
           <div v-for="(item, idx) in orderItems" :key="idx" style="display: flex; gap: 5px; margin-bottom: 8px; align-items: center;">
             <el-input v-model="item.item_name" placeholder="名称" style="width: 120px;" />
-            <el-input v-model="item.dose" placeholder="剂量" style="width: 80px;" />
-            <el-input v-model="item.unit" placeholder="单位" style="width: 60px;" />
-            <el-input v-model="item.frequency" placeholder="频次" style="width: 80px;" />
-            <el-input v-model="item.route" placeholder="途径" style="width: 80px;" />
+            <el-input v-model="item.dose" placeholder="剂量" style="width: 70px;" />
+            <el-select v-model="item.unit" placeholder="单位" style="width: 80px;">
+              <el-option label="片" value="片" />
+              <el-option label="支" value="支" />
+              <el-option label="瓶" value="瓶" />
+              <el-option label="袋" value="袋" />
+              <el-option label="粒" value="粒" />
+              <el-option label="mg" value="mg" />
+              <el-option label="g" value="g" />
+              <el-option label="ml" value="ml" />
+              <el-option label="IU" value="IU" />
+            </el-select>
+            <el-select v-model="item.frequency" placeholder="频次" style="width: 100px;">
+              <el-option label="qd 每日一次" value="qd" />
+              <el-option label="bid 每日两次" value="bid" />
+              <el-option label="tid 每日三次" value="tid" />
+              <el-option label="qid 每日四次" value="qid" />
+              <el-option label="qn 每晚一次" value="qn" />
+              <el-option label="q12h 每12小时" value="q12h" />
+              <el-option label="q8h 每8小时" value="q8h" />
+              <el-option label="q6h 每6小时" value="q6h" />
+              <el-option label="prn 必要时" value="prn" />
+            </el-select>
+            <el-select v-model="item.route" placeholder="途径" style="width: 110px;">
+              <el-option label="口服" value="口服" />
+              <el-option label="静脉滴注" value="静脉滴注" />
+              <el-option label="肌肉注射" value="肌肉注射" />
+              <el-option label="皮下注射" value="皮下注射" />
+              <el-option label="外用" value="外用" />
+              <el-option label="吸入" value="吸入" />
+              <el-option label="含服" value="含服" />
+              <el-option label="直肠给药" value="直肠给药" />
+            </el-select>
             <el-input-number v-model="item.days" :min="1" style="width: 70px;" />
             <el-input-number v-model="item.quantity" :min="1" style="width: 70px;" />
             <el-input-number v-model="item.unit_price" :min="0" :precision="2" style="width: 80px;" />

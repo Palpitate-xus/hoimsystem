@@ -6,7 +6,7 @@
         <el-button type="primary" @click="handleAdd">录入体征</el-button>
         <el-input
           v-model="searchQuery"
-          placeholder="搜索..."
+          placeholder="搜索体征"
           clearable
           class="page-search-input"
         ></el-input>

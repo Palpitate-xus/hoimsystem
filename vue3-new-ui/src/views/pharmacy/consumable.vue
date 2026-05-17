@@ -4,7 +4,7 @@
     <el-card>
       <div class="page-toolbar">
         <el-button type="primary" @click="handleAdd">新增耗材</el-button>
-        <el-input v-model="searchQuery" placeholder="搜索..." clearable class="page-search-input" />
+        <el-input v-model="searchQuery" placeholder="搜索耗材" clearable class="page-search-input" />
         <el-button type="primary" @click="fetchList">搜索</el-button>
       </div>
 

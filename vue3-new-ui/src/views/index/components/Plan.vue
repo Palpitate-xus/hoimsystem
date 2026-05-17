@@ -8,7 +8,7 @@
 
       <el-input
         v-model="searchQuery"
-        placeholder="搜索..."
+        placeholder="搜索计划"
         clearable
         style="width: 200px; margin-bottom: 10px;"
       ></el-input>

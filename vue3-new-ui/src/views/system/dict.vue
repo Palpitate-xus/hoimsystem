@@ -14,7 +14,7 @@
         <el-button type="primary" @click="handleAdd">新增字典项</el-button>
         <el-input
           v-model="searchQuery"
-          placeholder="搜索..."
+          placeholder="搜索关键词"
           clearable
           class="page-search-input"
         ></el-input>

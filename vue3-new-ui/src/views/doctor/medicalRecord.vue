@@ -6,7 +6,7 @@
         <el-button type="primary" @click="handleAdd">新增病历</el-button>
         <el-input
           v-model="searchQuery"
-          placeholder="搜索..."
+          placeholder="搜索患者姓名"
           clearable
           class="page-search-input"
         ></el-input>

@@ -6,7 +6,7 @@
         <el-button type="primary" @click="handleAdd">新增申请</el-button>
         <el-input
           v-model="searchQuery"
-          placeholder="搜索..."
+          placeholder="搜索检查申请"
           clearable
           class="page-search-input"
         ></el-input>

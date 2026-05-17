@@ -6,7 +6,7 @@
         <div class="page-toolbar">
           <el-input
             v-model="searchQuery1"
-            placeholder="搜索..."
+            placeholder="搜索待处理申请"
             clearable
             class="page-search-input"
           ></el-input>
@@ -39,7 +39,7 @@
         <div class="page-toolbar">
           <el-input
             v-model="searchQuery2"
-            placeholder="搜索..."
+            placeholder="搜索检查结果"
             clearable
             class="page-search-input"
           ></el-input>

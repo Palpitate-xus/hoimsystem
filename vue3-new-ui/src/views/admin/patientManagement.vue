@@ -6,7 +6,7 @@
       <div class="page-toolbar">
         <el-input
           v-model="searchQuery"
-          placeholder="搜索..."
+          placeholder="搜索患者"
           clearable
           class="page-search-input"
         ></el-input>

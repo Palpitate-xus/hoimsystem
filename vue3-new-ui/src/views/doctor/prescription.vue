@@ -6,7 +6,7 @@
         <el-button type="primary" @click="handleAdd">开处方</el-button>
         <el-input
           v-model="searchQuery"
-          placeholder="搜索..."
+          placeholder="搜索处方"
           clearable
           class="page-search-input"
         ></el-input>

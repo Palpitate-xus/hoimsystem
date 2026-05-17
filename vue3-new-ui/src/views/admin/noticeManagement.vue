@@ -6,7 +6,7 @@
         <el-button type="primary" @click="handleAdd">发布公告</el-button>
         <el-input
           v-model="searchQuery"
-          placeholder="搜索..."
+          placeholder="搜索公告"
           clearable
           class="page-search-input"
         ></el-input>

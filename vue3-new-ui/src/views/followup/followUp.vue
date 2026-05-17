@@ -6,7 +6,7 @@
         <el-button type="primary" @click="handleAdd">新增随访计划</el-button>
         <el-input
           v-model="searchQuery"
-          placeholder="搜索..."
+          placeholder="搜索随访"
           clearable
           class="page-search-input"
         ></el-input>

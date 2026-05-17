@@ -6,7 +6,7 @@
         <el-button type="primary" @click="handleAdd">设置排班</el-button>
         <el-input
           v-model="searchQuery"
-          placeholder="搜索..."
+          placeholder="搜索姓名"
           clearable
           class="page-search-input"
         ></el-input>

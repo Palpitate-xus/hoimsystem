@@ -6,7 +6,7 @@
         <el-button type="primary" @click="openDialog">预约挂号</el-button>
         <el-input
           v-model="searchQuery"
-          placeholder="搜索..."
+          placeholder="搜索预约"
           clearable
           class="page-search-input"
         ></el-input>

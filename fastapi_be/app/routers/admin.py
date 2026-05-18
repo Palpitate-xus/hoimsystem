@@ -197,11 +197,14 @@ def get_notice_list(current_user: User = Depends(get_current_user), keyword: str
     notices, total = paginate(query, page, page_size)
     data = []
     for item in notices:
-        if current_user.user_role == "director" and "科室主任" not in item.towho:
+        towho = item.towho or []
+        # "all" 表示对所有角色可见；admin 始终可见所有公告
+        is_for_all = "all" in towho
+        if current_user.user_role == "director" and not is_for_all and "科室主任" not in towho:
             continue
-        if current_user.user_role == "doctor" and "医生" not in item.towho:
+        if current_user.user_role == "doctor" and not is_for_all and "医生" not in towho:
             continue
-        if current_user.user_role == "patient" and "病人" not in item.towho:
+        if current_user.user_role == "patient" and not is_for_all and "病人" not in towho:
             continue
         data.append(
             {

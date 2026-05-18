@@ -51,6 +51,7 @@
         </el-form-item>
         <el-form-item label="目标人群">
           <el-checkbox-group v-model="form.towhoArr">
+            <el-checkbox label="all">所有人</el-checkbox>
             <el-checkbox label="医生" />
             <el-checkbox label="病人" />
             <el-checkbox label="科室主任" />

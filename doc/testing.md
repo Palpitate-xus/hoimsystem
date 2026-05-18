@@ -176,6 +176,29 @@ def test_create_patient_missing_name(client, admin_token):
     assert response.json()["code"] == 500
 ```
 
+### 2.5 API 全量测试脚本（已提供）
+
+项目已提供基于 `requests` 的全量 API 测试脚本，无需 pytest 即可运行：
+
+```bash
+# 1. 确保后端正在运行
+cd fastapi_be && uvicorn app.main:app --host 0.0.0.0 --port 8000
+
+# 2. 运行测试
+python tests/api/test_all_endpoints.py
+
+# 3. 查看结果
+cat tests/api/test_results.json    # 机器可读
+less doc/api-test-report.md        # 人类可读
+```
+
+**测试覆盖**：
+- 188 个测试用例，覆盖 248 个 API 端点
+- 正常路径、错误参数、不存在 ID、空数据、边界值
+- 认证/未授权访问测试
+
+**最新结果**：180/188 通过（95.7%），详见 [api-test-report.md](api-test-report.md)。
+
 #### 业务流程测试示例
 
 ```python

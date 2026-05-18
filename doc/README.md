@@ -26,6 +26,7 @@
 
 1. **[编码规范](coding-standards.md)** — Python/Vue/数据库/Git 全规范
 2. **[API 文档](apiDoc.md)** — 247 个接口的入参、响应、错误码
+   - **[API 测试报告](api-test-report.md)** — 188 个用例，95.7% 通过率
 3. **[数据库文档](databaseDoc.md)** — 61 张表的字段、索引、ER 关系
 4. **[数据字典](data-dictionary.md)** — 状态码、枚举值统一定义
 5. **[架构文档](architecture.md)** — 中间件、依赖、安全机制

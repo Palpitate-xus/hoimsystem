@@ -2,234 +2,225 @@
 
 [中文](README.md) | **English**
 
-A hospital outpatient information management system based on Vue 3 + FastAPI, covering the full outpatient workflow including registration, diagnosis, billing, and pharmacy.
+A comprehensive hospital information management system for small and medium-sized hospitals, built with **Vue 3 + FastAPI**, covering core business flows including **outpatient, inpatient, pharmacy, lab, physical examination, and billing**.
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Vue](https://img.shields.io/badge/Vue-3.x-4FC08D)](https://vuejs.org/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.111+-009688)](https://fastapi.tiangolo.com/)
+[![Python](https://img.shields.io/badge/Python-3.10+-blue)](https://www.python.org/)
 
 ---
 
-## Features
+## 📊 Project Scale
 
-### Implemented Modules
+| Metric | Count |
+|:------:|:-----:|
+| Business Modules | **34** backend routers |
+| API Endpoints | **247** RESTful APIs |
+| Database Tables | **61** business tables |
+| Frontend Pages | **69** Vue pages |
+| User Roles | **8** (admin/director/doctor/nurse/cashier/pharmacist/guide/patient) |
 
-| Module | Description | Status |
-|:------:|:-----------|:------:|
-| Authentication | User registration/login, RSA password encryption, role-based access control | ✅ |
-| Patient Management | Patient registration, profile query, registration/appointment | ✅ |
-| Doctor Management | Doctor registration, profile query, schedule management | ✅ |
-| Department Management | Department creation, query, director assignment | ✅ |
-| Registration & Appointment | Walk-in registration, online appointment, cancellation, history | ✅ |
-| Prescription Management | Doctor prescription, auto stock deduction, prescription query | ✅ |
-| Billing Management | Fee calculation, online payment, billing records | ✅ |
-| Pharmacy Management | Drug entry, stock query, stock alert | ✅ |
-| Notice & Announcement | Role-targeted push, emergency notification | ✅ |
+---
+
+## 🌟 Features
+
+### Implemented Core Business (9 Domains / 40+ Modules)
+
+- **Outpatient Management** — Smart Triage, Appointment, Walk-in Registration, Check-in, Queue Management, Triage Desk, Patrol Records, Breach Records, Billing, Invoice, Daily Settlement
+- **Doctor Workstation** — Scheduling, EMR, Prescription, Lab Orders, Attendance, MDT Consultation, Clinical Pathway
+- **Pharmacy** — Drug Management, Consumables, Audit & Dispense, Stock Alert, Stock Check, Purchase, Prescription Review, ADR Monitoring
+- **Inpatient Management** — Ward & Bed, Admission, Inpatient Orders, Nursing Station, Inpatient Charges, Discharge Settlement
+- **Electronic Medical Record (EMR)** — Templates, Structured Records, Progress Notes, Ward Rounds, Quality Control, CA Digital Signature
+- **Lab & Physical Exam** — Lab Orders, Results, Exam Packages, Appointments, Records, Reports
+- **Surgery** — Surgery Application, Scheduling, Anesthesia Records
+- **Patient Services** — Health Records, EMR Query, Prescription Query, Prepaid Account, Two-way Referral, Follow-up, Satisfaction Survey
+- **System Platform** — User & Permissions, Operation Logs (auto-recorded by middleware), Dictionary, Parameters, Messages, Notices, Backup, Adverse Events, Slot Pool, Reports
 
 ### Planned Modules
 
-| Module | Description | Status |
-|:------:|:-----------|:------:|
-| Medical Record | Electronic medical record creation, query | ✅ |
-| Lab & Examination | Lab request, result entry, report viewing | ✅ |
-| Queue & Calling | Waiting queue, voice calling, pass handling | ✅ |
-| Pharmacy Dispensing | Prescription audit, dispensing confirmation, return handling | ✅ |
-| Nurse Triage | Vital signs entry, allergy history marking | ✅ |
-| Reports & Statistics | Outpatient volume, finance, pharmacy, workload stats | ✅ |
-| Follow-up Management | Follow-up plans, revisit reminders | ✅ |
-| Satisfaction Review | Post-visit review, rating statistics | ✅ |
+| Module | Description |
+|:------:|:------------|
+| Medical Insurance | Real-time settlement, e-credentials |
+| PACS/RIS | Medical imaging storage, viewing, reports |
+| Closed-loop Orders | Order → Dispense → Execute → Bill loop |
+| CDSS | Medication safety, drug interactions |
+| DRG/DIP | Disease-based payment, case homepage |
+| Internet Hospital | Online consultation, follow-up prescription |
+
+> See [doc/todos.md](doc/todos.md) for the full roadmap and [doc/architecture.md](doc/architecture.md) for gap analysis.
 
 ---
 
-## Architecture
+## 🏗 Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                      Frontend Layer                          │
-│                   vue3-new-ui                                │
-│              Vue 3 + Element-Plus                            │
+│                  Frontend (Browser)                          │
+│        Vue 3 · Element Plus · Vuex · Vue Router · Rspack    │
 ├─────────────────────────────────────────────────────────────┤
-│                      Backend Layer                           │
-│                   fastapi_be                                 │
-│            FastAPI + SQLAlchemy                              │
+│                  Application (FastAPI)                       │
+│   34 routers · 247 APIs · JWT Auth · Operation Log MW        │
 ├─────────────────────────────────────────────────────────────┤
-│                      Data Layer                              │
-│                   MySQL / SQLite                             │
+│                  Data Layer                                  │
+│             SQLite (dev) / PostgreSQL (prod)                 │
+│                   SQLAlchemy ORM · Alembic                   │
 └─────────────────────────────────────────────────────────────┘
 ```
 
 ### Tech Stack
 
-| Layer | Technology |
-|:-----:|:-----------|
-| Frontend | Vue 3, Element-Plus, Axios, Pinia |
-| Backend | FastAPI, SQLAlchemy, Pydantic |
-| Database | MySQL 8.0, SQLite (development) |
-| Security | RSA password encryption, accessToken session auth |
+| Layer | Technologies |
+|:-----:|:-------------|
+| Frontend | Vue 3.4+ / Element Plus 2.x / Vuex 4 / Vue Router 4 / Axios / Rspack |
+| Backend | FastAPI 0.111+ / SQLAlchemy 2.x / Pydantic 2.x / Alembic |
+| Database | SQLite (dev) / PostgreSQL (prod recommended) |
+| Containerization | Docker / Docker Compose |
+| Code Quality | ruff (Python) / Prettier (JavaScript) |
+| Testing | pytest (backend API testing) |
+| Security | bcrypt password hashing, JWT sessions, operation log auditing |
 
 ---
 
-## Project Structure
+## 🚀 Quick Start
 
-```
-hoimsystem/
-├── vue3-new-ui/          # Vue 3 frontend (current main branch)
-│   ├── src/
-│   │   ├── views/        # Page components
-│   │   ├── api/          # API wrappers
-│   │   ├── router/       # Router config
-│   │   └── store/        # Pinia state management
-│   └── package.json
-│
-├── fastapi_be/           # FastAPI backend (current main branch)
-│   ├── app/
-│   │   ├── routers/      # Route modules
-│   │   │   ├── user.py        # Authentication
-│   │   │   ├── admin.py       # Admin
-│   │   │   ├── patient.py     # Patient
-│   │   │   ├── doctor.py      # Doctor
-│   │   │   ├── pharmacy.py    # Pharmacy
-│   │   │   ├── charge.py      # Billing
-│   │   │   ├── queue.py       # Queue & Calling
-│   │   │   ├── checkin.py     # Check-in
-│   │   │   ├── vitalsign.py   # Nurse Triage
-│   │   │   ├── lab.py         # Lab & Examination
-│   │   │   ├── followup.py    # Follow-up
-│   │   │   ├── report.py      # Reports
-│   │   │   └── system.py      # System Management
-│   │   ├── models.py     # Database models
-│   │   ├── schemas.py    # Pydantic models
-│   │   └── main.py       # Application entry
-│   └── requirements.txt
-│
-├── doc/                  # Project documents
-│   ├── demandDoc.md      # Requirements document
-│   ├── apiDoc.md         # API document (82 endpoints)
-│   ├── databaseDoc.md    # Database document (25 tables)
-│   └── todos.md          # TODO list
-│
-├── doc_assets/           # Doc resources (screenshots, diagrams, SQL)
-│
-├── vue-ui/               # Vue 2.x frontend (deprecated, kept for reference)
-├── django_be/            # Django backend (deprecated, kept for reference)
-│
-└── README.md             # This file
-```
+### Requirements
 
----
+| Component | Version |
+|:---------:|:-------:|
+| Node.js | ≥ 16 |
+| Python | ≥ 3.10 |
+| Database | SQLite included (no install needed) |
 
-## Quick Start
-
-### Prerequisites
-
-- Node.js >= 16
-- Python >= 3.8
-- MySQL >= 8.0 (or SQLite)
-
-### 1. Clone the project
+### 1. Clone
 
 ```bash
 git clone https://github.com/Palpitate-xus/hoimsystem.git
 cd hoimsystem
 ```
 
-### 2. Start the database
-
-```bash
-# Create MySQL database (or use SQLite)
-mysql -u root -p -e "CREATE DATABASE hoimsystem CHARACTER SET utf8mb4;"
-```
-
-> No need to manually import table schema. SQLAlchemy will auto-create tables on the first FastAPI backend startup.
-
-### 3. Start the backend (FastAPI)
+### 2. Start Backend
 
 ```bash
 cd fastapi_be
 
-# Create virtual environment (recommended)
+# Create virtualenv
 python -m venv venv
-source venv/bin/activate  # Linux/Mac
-# or venv\Scripts\activate  # Windows
+source venv/bin/activate    # Linux/Mac
+# venv\Scripts\activate     # Windows
 
 # Install dependencies
 pip install -r requirements.txt
 
-# Run (auto-creates tables)
+# Run (auto-creates tables on first launch)
 python -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
-### 4. Start the frontend (Vue 3)
+Visit http://localhost:8000/docs for the auto-generated Swagger UI.
+
+### 3. Start Frontend
 
 ```bash
 cd vue3-new-ui
 
 # Install dependencies
-npm install
+npm install --legacy-peer-deps
 
-# Development mode
-npm run serve
+# Dev mode (port 8091)
+npm run serve:rspack
 
 # Production build
 npm run build
 ```
 
-### 5. Access the system
+### 4. Access
 
-- Frontend: http://localhost:8080
+- Frontend: http://localhost:8091
 - Backend API: http://localhost:8000/api
-- API Docs: http://localhost:8000/docs (Auto-generated Swagger UI by FastAPI)
+- API Docs: http://localhost:8000/docs
+
+### 5. Docker (recommended for production)
+
+```bash
+docker-compose up -d
+```
+
+See [doc/deployDoc.md](doc/deployDoc.md) for detailed deployment instructions (Nginx, HTTPS, Systemd).
 
 ---
 
-## User Roles
+## 🔑 Default Accounts
 
-The system supports four roles with cascading permissions:
+| Role | Username | Password | Note |
+|:----:|:--------:|:--------:|:----:|
+| Admin | `admin` | `admin123` | Full permissions |
+| Doctor | `doctor1` | `doctor123` | Regular doctor |
+| Patient | `patient1` | `patient123` | Patient self-service |
 
-| Role | Permission Scope |
-|:----:|:----------------|
-| Admin | Global management: doctors, patients, departments, drugs, notices, billing |
-| Director | Department management: schedule, doctors in department, notices |
-| Doctor | Clinical work: medical records, prescriptions, schedule viewing |
-| Patient | Self-service: registration/appointment, payment, record viewing |
+> ⚠️ **Production deployment**: change default passwords and set a strong random `SECRET_KEY` in `.env` (use `openssl rand -base64 32`).
 
 ---
 
-## Documentation
+## 👥 Roles
+
+| Role | Permissions |
+|:----:|:------------|
+| **Admin** | Full system management |
+| **Director** | Department management, scheduling, prescription review |
+| **Doctor** | EMR writing, prescription, lab orders |
+| **Nurse** | Triage, vital signs, nursing, follow-up |
+| **Cashier** | Walk-in registration, billing, daily settlement |
+| **Pharmacist** | Prescription audit, dispense, inventory |
+| **Guide** | Triage desk, smart triage, queue |
+| **Patient** | Self-service: appointments, billing, records |
+
+---
+
+## 📚 Documentation
 
 | Document | Description |
-|:--------:|:-----------|
-| [Requirements](doc/demandDoc.md) | Functional requirements, business flow, data needs, non-functional requirements |
-| [API Document](doc/apiDoc.md) | All 82 API endpoints (76 implemented + 6 planned) |
-| [Database Document](doc/databaseDoc.md) | 25 table definitions and ER diagram |
-| [TODO](doc/todos.md) | Project todo list (categorized by priority) |
+|:--------:|:------------|
+| [Doc Index](doc/README.md) | Navigation for all docs |
+| [Architecture](doc/architecture.md) | System architecture & design decisions |
+| [Requirements](doc/demandDoc.md) | Functional & non-functional requirements |
+| [API Doc](doc/apiDoc.md) | 247 RESTful API definitions |
+| [Database Doc](doc/databaseDoc.md) | 61 tables and ER relationships |
+| [Deployment](doc/deployDoc.md) | Dev/prod/Docker deployment guide |
+| [User Manual](doc/user-manual.md) | Role-based operation guide |
+| [Roadmap](doc/todos.md) | Completed & planned modules |
+| [Security](SECURITY.md) | Security policy |
+| [Contributing](CONTRIBUTING.md) | Code style & PR workflow |
+| [Changelog](CHANGELOG.md) | Version history |
 
 ---
 
-## Screenshots
+## ✨ Highlights
 
-![Patient Visit Flow](doc_assets/PatientAccessFlow.png)
-
-More screenshots in [doc_assets/](doc_assets/) directory.
-
----
-
-## Development Roadmap
-
-See [doc/todos.md](doc/todos.md) for details.
-
-Near-term priorities:
-1. Password hashing with bcrypt
-2. JWT token replacing plain string accessToken
-3. API permission validation refinement
-4. Frontend page completion (CRUD, reports)
+- **Broad coverage**: Outpatient + Inpatient + Pharmacy + Lab + Exam + Surgery, 9 domains 40+ modules
+- **Clean code**: 247 APIs organized by module, frontend/backend separation, component reuse
+- **Great DX**: FastAPI auto docs, hot reload, zero-config SQLite startup
+- **Observable**: Operation log middleware auto-records, datetime precision to seconds
+- **Secure**: JWT auth, bcrypt passwords, ID masking, operation auditing
+- **Good UX**: Element Plus components, unified style utilities, full empty/loading states
 
 ---
 
-## License
+## 📷 Screenshots
+
+![Patient Access Flow](doc_assets/PatientAccessFlow.png)
+
+More screenshots in [doc_assets/](doc_assets/).
+
+---
+
+## 📄 License
 
 [MIT](LICENSE)
 
 ---
 
-## Contributing
+## 🤝 Contributing
 
-Issues and Pull Requests are welcome.
+Issues and Pull Requests are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) for details.
 
-For questions, contact: palpitate.xus@outlook.com
+**Contact**: palpitate.xus@outlook.com

@@ -17,21 +17,9 @@
     </el-row>
 
     <el-row :gutter="20" style="margin-top: 20px">
-      <el-col :lg="16" :md="24" :sm="24" :xl="16" :xs="24">
-        <el-card shadow="never">
-          <template #header>
-            <span>今日门诊概览</span>
-          </template>
-          <el-descriptions :column="2" border>
-            <el-descriptions-item label="今日挂号数">{{ todayStats.registrations }}</el-descriptions-item>
-            <el-descriptions-item label="今日预约数">{{ todayStats.appointments }}</el-descriptions-item>
-            <el-descriptions-item label="今日收费">¥{{ todayStats.charges }}</el-descriptions-item>
-            <el-descriptions-item label="待处理处方">{{ todayStats.pendingPrescriptions }}</el-descriptions-item>
-          </el-descriptions>
-        </el-card>
-      </el-col>
+      <!-- 左侧：通知公告 -->
       <el-col :lg="8" :md="24" :sm="24" :xl="8" :xs="24">
-        <el-card shadow="never">
+        <el-card shadow="never" class="notice-card">
           <template #header>
             <span>系统公告</span>
           </template>
@@ -49,11 +37,20 @@
           </el-timeline>
         </el-card>
       </el-col>
-    </el-row>
-
-    <el-row :gutter="20" style="margin-top: 20px">
-      <el-col :lg="24" :md="24" :sm="24" :xl="24" :xs="24">
+      <!-- 右侧：今日门诊概览 + 快捷入口 -->
+      <el-col :lg="16" :md="24" :sm="24" :xl="16" :xs="24">
         <el-card shadow="never">
+          <template #header>
+            <span>今日门诊概览</span>
+          </template>
+          <el-descriptions :column="2" border>
+            <el-descriptions-item label="今日挂号数">{{ todayStats.registrations }}</el-descriptions-item>
+            <el-descriptions-item label="今日预约数">{{ todayStats.appointments }}</el-descriptions-item>
+            <el-descriptions-item label="今日收费">¥{{ todayStats.charges }}</el-descriptions-item>
+            <el-descriptions-item label="待处理处方">{{ todayStats.pendingPrescriptions }}</el-descriptions-item>
+          </el-descriptions>
+        </el-card>
+        <el-card shadow="never" style="margin-top: 20px">
           <template #header>
             <span>快捷入口</span>
           </template>

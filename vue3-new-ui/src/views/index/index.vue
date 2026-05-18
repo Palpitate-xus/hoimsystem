@@ -2,7 +2,7 @@
   <div class="index-container">
     <el-row :gutter="20">
       <el-col :lg="6" :md="12" :sm="24" :xl="6" :xs="24" v-for="(item, index) in statCards" :key="index">
-        <el-card shadow="hover" class="stat-card">
+        <el-card shadow="hover" class="stat-card" :class="{ 'is-link': item.path }" @click="item.path && goTo(item.path)">
           <div class="stat-content">
             <div class="stat-icon" :style="{ background: item.color }">
               <el-icon :size="28"><component :is="item.icon" /></el-icon>
@@ -99,10 +99,10 @@ const hasPermission = (required) => {
 };
 
 const statCards = ref([
-  { label: "今日患者", value: 0, icon: "User", color: "#409EFF" },
-  { label: "待处理处方", value: 0, icon: "Document", color: "#67C23A" },
-  { label: "今日收费", value: "¥0", icon: "Money", color: "#E6A23C" },
-  { label: "通知公告", value: 0, icon: "Bell", color: "#F56C6C" },
+  { label: "今日患者", value: 0, icon: "User", color: "#409EFF", path: "/patient/healthRecord" },
+  { label: "待处理处方", value: 0, icon: "Document", color: "#67C23A", path: "/doctor/prescription" },
+  { label: "今日收费", value: "¥0", icon: "Money", color: "#E6A23C", path: "/charge/chargeList" },
+  { label: "通知公告", value: 0, icon: "Bell", color: "#F56C6C", path: "/admin/noticeManagement" },
 ]);
 
 const todayStats = ref({
@@ -173,6 +173,16 @@ onMounted(async () => {
 
 .stat-card {
   margin-bottom: 15px;
+
+  &.is-link {
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+
+    &:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    }
+  }
 
   .stat-content {
     display: flex;

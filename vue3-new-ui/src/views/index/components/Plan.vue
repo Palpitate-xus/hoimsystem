@@ -12,7 +12,7 @@
         clearable
         style="width: 200px; margin-bottom: 10px;"
       ></el-input>
-    <el-table :data="filteredTableData" height="283px" row-key="title">
+    <el-table :data="filteredTableData" height="283px" row-key="title" empty-text="暂无计划">
       <el-table-column align="center" label="拖拽" width="50px">
         <template #default="{}">
           <vab-icon :icon="['fas', 'arrows-alt']" style="cursor: pointer" />

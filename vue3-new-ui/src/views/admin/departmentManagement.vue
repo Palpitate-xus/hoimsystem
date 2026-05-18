@@ -128,7 +128,7 @@ const handleDelete = (row) => {
     await deleteDepartment({ department_id: row.id });
     ElMessage.success("删除成功");
     fetchList();
-  });
+  }).catch(() => {});
 };
 
 onMounted(fetchList);

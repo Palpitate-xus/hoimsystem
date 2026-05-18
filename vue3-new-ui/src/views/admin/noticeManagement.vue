@@ -130,7 +130,7 @@ const handleDelete = (row) => {
     await deleteNotice({ notice_id: row.uuid });
     ElMessage.success("删除成功");
     fetchList();
-  });
+  }).catch(() => {});
 };
 
 onMounted(fetchList);

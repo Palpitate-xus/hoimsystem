@@ -1,0 +1,4823 @@
+[
+  {
+    "file": "/vue3-new-ui/src/views/401.vue",
+    "messages": [],
+    "consoleStatements": [],
+    "suspiciousEnglish": [
+      {
+        "word": "error",
+        "line": 2,
+        "context": "<div class=\"error-container\">"
+      },
+      {
+        "word": "error",
+        "line": 3,
+        "context": "<div class=\"error-content\">"
+      },
+      {
+        "word": "error",
+        "line": 6,
+        "context": "<div class=\"pic-error\">"
+      }
+    ],
+    "emptyTextMissing": false,
+    "errorHandlingMissing": false
+  },
+  {
+    "file": "/vue3-new-ui/src/views/404.vue",
+    "messages": [],
+    "consoleStatements": [],
+    "suspiciousEnglish": [
+      {
+        "word": "error",
+        "line": 2,
+        "context": "<div class=\"error-container\">"
+      },
+      {
+        "word": "error",
+        "line": 3,
+        "context": "<div class=\"error-content\">"
+      },
+      {
+        "word": "error",
+        "line": 6,
+        "context": "<div class=\"pic-error\">"
+      }
+    ],
+    "emptyTextMissing": false,
+    "errorHandlingMissing": false
+  },
+  {
+    "file": "/vue3-new-ui/src/views/admin/chargeRecords.vue",
+    "messages": [],
+    "consoleStatements": [],
+    "suspiciousEnglish": [
+      {
+        "word": "success",
+        "line": 23,
+        "context": "<el-tag v-else-if=\"row.status===1\" type=\"success\">已缴费</el-tag>"
+      },
+      {
+        "word": "loading",
+        "line": 14,
+        "context": "<el-table :data=\"paginatedList\" v-loading=\"loading\" border empty-text=\"暂无收费记录\">"
+      },
+      {
+        "word": "loading",
+        "line": 14,
+        "context": "<el-table :data=\"paginatedList\" v-loading=\"loading\" border empty-text=\"暂无收费记录\">"
+      },
+      {
+        "word": "click",
+        "line": 12,
+        "context": "<el-button type=\"primary\" @click=\"fetchList\">搜索</el-button>"
+      }
+    ],
+    "emptyTextMissing": false,
+    "errorHandlingMissing": false
+  },
+  {
+    "file": "/vue3-new-ui/src/views/admin/departmentManagement.vue",
+    "messages": [],
+    "consoleStatements": [],
+    "suspiciousEnglish": [
+      {
+        "word": "loading",
+        "line": 15,
+        "context": "<el-table :data=\"paginatedList\" v-loading=\"loading\" empty-text=\"暂无记录\">"
+      },
+      {
+        "word": "loading",
+        "line": 15,
+        "context": "<el-table :data=\"paginatedList\" v-loading=\"loading\" empty-text=\"暂无记录\">"
+      },
+      {
+        "word": "click",
+        "line": 6,
+        "context": "<el-button type=\"primary\" @click=\"handleAdd\">新增科室</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 13,
+        "context": "<el-button type=\"primary\" @click=\"fetchList\">搜索</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 22,
+        "context": "<el-button size=\"small\" @click=\"handleEdit(row)\">编辑</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 23,
+        "context": "<el-button size=\"small\" type=\"danger\" @click=\"handleDelete(row)\">删除</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 56,
+        "context": "<el-button @click=\"dialogVisible=false\">取消</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 57,
+        "context": "<el-button type=\"primary\" @click=\"submit\">确定</el-button>"
+      },
+      {
+        "word": "submit",
+        "line": 57,
+        "context": "<el-button type=\"primary\" @click=\"submit\">确定</el-button>"
+      },
+      {
+        "word": "submit",
+        "line": 111,
+        "context": "const submit = async () => {"
+      },
+      {
+        "word": "confirm",
+        "line": 127,
+        "context": "ElMessageBox.confirm(\"确认删除该科室？\", \"提示\", { type: \"warning\" }).then(async () => {"
+      }
+    ],
+    "emptyTextMissing": false,
+    "errorHandlingMissing": true
+  },
+  {
+    "file": "/vue3-new-ui/src/views/admin/doctorManagement.vue",
+    "messages": [],
+    "consoleStatements": [],
+    "suspiciousEnglish": [
+      {
+        "word": "loading",
+        "line": 15,
+        "context": "<el-table :data=\"paginatedList\" v-loading=\"loading\" empty-text=\"暂无记录\">"
+      },
+      {
+        "word": "loading",
+        "line": 15,
+        "context": "<el-table :data=\"paginatedList\" v-loading=\"loading\" empty-text=\"暂无记录\">"
+      },
+      {
+        "word": "click",
+        "line": 6,
+        "context": "<el-button type=\"primary\" @click=\"handleAdd\">新增医生</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 13,
+        "context": "<el-button type=\"primary\" @click=\"fetchList\">搜索</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 24,
+        "context": "<el-button size=\"small\" @click=\"handleEdit(row)\">编辑</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 25,
+        "context": "<el-button size=\"small\" type=\"danger\" @click=\"handleDelete(row)\">删除</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 79,
+        "context": "<el-button @click=\"dialogVisible=false\">取消</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 80,
+        "context": "<el-button type=\"primary\" @click=\"submit\">确定</el-button>"
+      },
+      {
+        "word": "submit",
+        "line": 80,
+        "context": "<el-button type=\"primary\" @click=\"submit\">确定</el-button>"
+      },
+      {
+        "word": "submit",
+        "line": 134,
+        "context": "const submit = async () => {"
+      },
+      {
+        "word": "confirm",
+        "line": 150,
+        "context": "ElMessageBox.confirm(\"确认删除该医生？\", \"提示\", { type: \"warning\" }).then(async () => {"
+      }
+    ],
+    "emptyTextMissing": false,
+    "errorHandlingMissing": true
+  },
+  {
+    "file": "/vue3-new-ui/src/views/admin/noticeManagement.vue",
+    "messages": [],
+    "consoleStatements": [],
+    "suspiciousEnglish": [
+      {
+        "word": "loading",
+        "line": 15,
+        "context": "<el-table :data=\"paginatedList\" v-loading=\"loading\" border empty-text=\"暂无数据\">"
+      },
+      {
+        "word": "loading",
+        "line": 15,
+        "context": "<el-table :data=\"paginatedList\" v-loading=\"loading\" border empty-text=\"暂无数据\">"
+      },
+      {
+        "word": "click",
+        "line": 6,
+        "context": "<el-button type=\"primary\" @click=\"handleAdd\">发布公告</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 13,
+        "context": "<el-button type=\"primary\" @click=\"fetchList\">搜索</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 25,
+        "context": "<el-button size=\"small\" @click=\"handleEdit(row)\">编辑</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 26,
+        "context": "<el-button size=\"small\" type=\"danger\" @click=\"handleDelete(row)\">删除</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 64,
+        "context": "<el-button @click=\"dialogVisible=false\">取消</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 65,
+        "context": "<el-button type=\"primary\" @click=\"submit\">确定</el-button>"
+      },
+      {
+        "word": "submit",
+        "line": 65,
+        "context": "<el-button type=\"primary\" @click=\"submit\">确定</el-button>"
+      },
+      {
+        "word": "submit",
+        "line": 112,
+        "context": "const submit = async () => {"
+      },
+      {
+        "word": "confirm",
+        "line": 129,
+        "context": "ElMessageBox.confirm(\"确认删除该通知？\", \"提示\", { type: \"warning\" }).then(async () => {"
+      }
+    ],
+    "emptyTextMissing": false,
+    "errorHandlingMissing": true
+  },
+  {
+    "file": "/vue3-new-ui/src/views/admin/patientManagement.vue",
+    "messages": [],
+    "consoleStatements": [],
+    "suspiciousEnglish": [
+      {
+        "word": "loading",
+        "line": 15,
+        "context": "<el-table :data=\"paginatedList\" v-loading=\"loading\" empty-text=\"暂无记录\">"
+      },
+      {
+        "word": "loading",
+        "line": 15,
+        "context": "<el-table :data=\"paginatedList\" v-loading=\"loading\" empty-text=\"暂无记录\">"
+      },
+      {
+        "word": "click",
+        "line": 13,
+        "context": "<el-button type=\"primary\" @click=\"fetchList\">搜索</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 26,
+        "context": "<el-button size=\"small\" @click=\"handleEdit(row)\">编辑</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 60,
+        "context": "<el-button @click=\"dialogVisible=false\">取消</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 61,
+        "context": "<el-button type=\"primary\" @click=\"submit\">确定</el-button>"
+      },
+      {
+        "word": "submit",
+        "line": 61,
+        "context": "<el-button type=\"primary\" @click=\"submit\">确定</el-button>"
+      },
+      {
+        "word": "submit",
+        "line": 104,
+        "context": "const submit = async () => {"
+      }
+    ],
+    "emptyTextMissing": false,
+    "errorHandlingMissing": false
+  },
+  {
+    "file": "/vue3-new-ui/src/views/admin/slotPool.vue",
+    "messages": [],
+    "consoleStatements": [],
+    "suspiciousEnglish": [
+      {
+        "word": "loading",
+        "line": 5,
+        "context": "<el-table :data=\"list\" v-loading=\"loading\" empty-text=\"暂无记录\">"
+      },
+      {
+        "word": "loading",
+        "line": 5,
+        "context": "<el-table :data=\"list\" v-loading=\"loading\" empty-text=\"暂无记录\">"
+      },
+      {
+        "word": "loading.",
+        "line": 24,
+        "context": "const fetchList = async () => { loading.value = true; const res = await getSlotPoolList(); list.value = res.data || []; loading.value = false; };"
+      },
+      {
+        "word": "loading.",
+        "line": 24,
+        "context": "const fetchList = async () => { loading.value = true; const res = await getSlotPoolList(); list.value = res.data || []; loading.value = false; };"
+      },
+      {
+        "word": "click",
+        "line": 12,
+        "context": "<el-button size=\"small\" @click=\"viewDetail(row)\">详情</el-button>"
+      },
+      {
+        "word": "list",
+        "line": 5,
+        "context": "<el-table :data=\"list\" v-loading=\"loading\" empty-text=\"暂无记录\">"
+      },
+      {
+        "word": "list",
+        "line": 24,
+        "context": "const fetchList = async () => { loading.value = true; const res = await getSlotPoolList(); list.value = res.data || []; loading.value = false; };"
+      }
+    ],
+    "emptyTextMissing": false,
+    "errorHandlingMissing": false
+  },
+  {
+    "file": "/vue3-new-ui/src/views/charge/chargeList.vue",
+    "messages": [],
+    "consoleStatements": [],
+    "suspiciousEnglish": [
+      {
+        "word": "success",
+        "line": 36,
+        "context": "<el-tag v-else-if=\"row.status===1\" type=\"success\">已缴费</el-tag>"
+      },
+      {
+        "word": "success",
+        "line": 109,
+        "context": "<el-button type=\"success\" style=\"margin-top: 15px;\" @click=\"mockPaySuccess\">模拟支付成功</el-button>"
+      },
+      {
+        "word": "success",
+        "line": 121,
+        "context": "<el-tag v-else-if=\"currentDetail.status===1\" type=\"success\">已缴费</el-tag>"
+      },
+      {
+        "word": "loading",
+        "line": 15,
+        "context": "<el-table :data=\"paginatedList\" v-loading=\"loading\" border empty-text=\"暂无数据\">"
+      },
+      {
+        "word": "loading",
+        "line": 15,
+        "context": "<el-table :data=\"paginatedList\" v-loading=\"loading\" border empty-text=\"暂无数据\">"
+      },
+      {
+        "word": "click",
+        "line": 13,
+        "context": "<el-button type=\"primary\" @click=\"fetchList\">搜索</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 49,
+        "context": "<el-button v-if=\"row.status===0\" size=\"small\" type=\"primary\" @click=\"openPayDialog(row)\">收费</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 50,
+        "context": "<el-button v-if=\"row.status===1\" size=\"small\" type=\"danger\" @click=\"refund(row)\">退费</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 51,
+        "context": "<el-button size=\"small\" link type=\"primary\" @click=\"showDetail(row)\">详情</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 73,
+        "context": "<el-button @click=\"refundVisible=false\">取消</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 74,
+        "context": "<el-button type=\"primary\" @click=\"submitRefund\">确定</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 93,
+        "context": "<el-button @click=\"payChannelVisible=false\">取消</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 94,
+        "context": "<el-button type=\"primary\" @click=\"confirmPay\">确认支付</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 99,
+        "context": "<el-dialog v-model=\"qrVisible\" title=\"扫码支付\" width=\"360px\" :close-on-click-modal=\"false\" @close=\"stopQuery\">"
+      },
+      {
+        "word": "click",
+        "line": 109,
+        "context": "<el-button type=\"success\" style=\"margin-top: 15px;\" @click=\"mockPaySuccess\">模拟支付成功</el-button>"
+      },
+      {
+        "word": "close",
+        "line": 99,
+        "context": "<el-dialog v-model=\"qrVisible\" title=\"扫码支付\" width=\"360px\" :close-on-click-modal=\"false\" @close=\"stopQuery\">"
+      },
+      {
+        "word": "close",
+        "line": 99,
+        "context": "<el-dialog v-model=\"qrVisible\" title=\"扫码支付\" width=\"360px\" :close-on-click-modal=\"false\" @close=\"stopQuery\">"
+      }
+    ],
+    "emptyTextMissing": false,
+    "errorHandlingMissing": false
+  },
+  {
+    "file": "/vue3-new-ui/src/views/charge/dailySettlement.vue",
+    "messages": [],
+    "consoleStatements": [],
+    "suspiciousEnglish": [
+      {
+        "word": "click",
+        "line": 10,
+        "context": "<el-button type=\"primary\" @click=\"query\">查询</el-button>"
+      },
+      {
+        "word": "query",
+        "line": 10,
+        "context": "<el-button type=\"primary\" @click=\"query\">查询</el-button>"
+      },
+      {
+        "word": "query",
+        "line": 36,
+        "context": "const query = async () => {"
+      }
+    ],
+    "emptyTextMissing": false,
+    "errorHandlingMissing": false
+  },
+  {
+    "file": "/vue3-new-ui/src/views/charge/invoice.vue",
+    "messages": [],
+    "consoleStatements": [],
+    "suspiciousEnglish": [
+      {
+        "word": "loading",
+        "line": 14,
+        "context": "<el-table :data=\"paginatedList\" v-loading=\"loading\" border empty-text=\"暂无发票记录\">"
+      },
+      {
+        "word": "loading",
+        "line": 14,
+        "context": "<el-table :data=\"paginatedList\" v-loading=\"loading\" border empty-text=\"暂无发票记录\">"
+      },
+      {
+        "word": "click",
+        "line": 12,
+        "context": "<el-button type=\"primary\" @click=\"fetchList\">搜索</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 24,
+        "context": "<el-button size=\"small\" type=\"primary\" @click=\"print(row)\">打印</el-button>"
+      }
+    ],
+    "emptyTextMissing": false,
+    "errorHandlingMissing": false
+  },
+  {
+    "file": "/vue3-new-ui/src/views/charge/windowRegistration.vue",
+    "messages": [],
+    "consoleStatements": [],
+    "suspiciousEnglish": [
+      {
+        "word": "success",
+        "line": 5,
+        "context": "<el-steps :active=\"step\" finish-status=\"success\" simple style=\"margin-bottom: 20px;\">"
+      },
+      {
+        "word": "success",
+        "line": 66,
+        "context": "<el-result icon=\"success\" title=\"挂号成功\">"
+      },
+      {
+        "word": "loading",
+        "line": 20,
+        "context": "<el-button type=\"primary\" size=\"large\" style=\"margin-top: 16px; width: 100%;\" @click=\"verifyPatient\" :loading=\"loading\">"
+      },
+      {
+        "word": "loading",
+        "line": 20,
+        "context": "<el-button type=\"primary\" size=\"large\" style=\"margin-top: 16px; width: 100%;\" @click=\"verifyPatient\" :loading=\"loading\">"
+      },
+      {
+        "word": "loading",
+        "line": 58,
+        "context": "<el-button type=\"primary\" size=\"large\" @click=\"submit\" :disabled=\"!selectedSchedule\" :loading=\"submitting\">"
+      },
+      {
+        "word": "click",
+        "line": 20,
+        "context": "<el-button type=\"primary\" size=\"large\" style=\"margin-top: 16px; width: 100%;\" @click=\"verifyPatient\" :loading=\"loading\">"
+      },
+      {
+        "word": "click",
+        "line": 29,
+        "context": "<el-button link type=\"primary\" @click=\"step = 0\">重新输入</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 58,
+        "context": "<el-button type=\"primary\" size=\"large\" @click=\"submit\" :disabled=\"!selectedSchedule\" :loading=\"submitting\">"
+      },
+      {
+        "word": "click",
+        "line": 71,
+        "context": "<el-button type=\"primary\" @click=\"reset\">继续挂号</el-button>"
+      },
+      {
+        "word": "submit",
+        "line": 58,
+        "context": "<el-button type=\"primary\" size=\"large\" @click=\"submit\" :disabled=\"!selectedSchedule\" :loading=\"submitting\">"
+      },
+      {
+        "word": "submit",
+        "line": 113,
+        "context": "const submit = async () => {"
+      },
+      {
+        "word": "reset",
+        "line": 71,
+        "context": "<el-button type=\"primary\" @click=\"reset\">继续挂号</el-button>"
+      },
+      {
+        "word": "reset",
+        "line": 141,
+        "context": "const reset = () => {"
+      }
+    ],
+    "emptyTextMissing": false,
+    "errorHandlingMissing": false
+  },
+  {
+    "file": "/vue3-new-ui/src/views/checkin/breachRecord.vue",
+    "messages": [],
+    "consoleStatements": [],
+    "suspiciousEnglish": [
+      {
+        "word": "loading",
+        "line": 32,
+        "context": "<el-table :data=\"filteredList\" v-loading=\"loading\" border empty-text=\"暂无数据\">"
+      },
+      {
+        "word": "loading",
+        "line": 32,
+        "context": "<el-table :data=\"filteredList\" v-loading=\"loading\" border empty-text=\"暂无数据\">"
+      },
+      {
+        "word": "click",
+        "line": 10,
+        "context": "<el-button type=\"primary\" @click=\"loadData\">查询</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 11,
+        "context": "<el-button @click=\"resetSearch\">重置</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 46,
+        "context": "<el-button size=\"small\" link type=\"primary\" @click=\"showDetail(scope.row)\">详情</el-button>"
+      }
+    ],
+    "emptyTextMissing": false,
+    "errorHandlingMissing": false
+  },
+  {
+    "file": "/vue3-new-ui/src/views/checkin/checkIn.vue",
+    "messages": [],
+    "consoleStatements": [],
+    "suspiciousEnglish": [
+      {
+        "word": "success",
+        "line": 6,
+        "context": "<el-steps :active=\"step\" finish-status=\"success\" simple>"
+      },
+      {
+        "word": "success",
+        "line": 76,
+        "context": "<el-result icon=\"success\" title=\"报到成功\">"
+      },
+      {
+        "word": "loading",
+        "line": 30,
+        "context": "<el-button type=\"primary\" size=\"large\" style=\"width: 100%\" @click=\"queryAppointments\" :loading=\"loading\">"
+      },
+      {
+        "word": "loading",
+        "line": 30,
+        "context": "<el-button type=\"primary\" size=\"large\" style=\"width: 100%\" @click=\"queryAppointments\" :loading=\"loading\">"
+      },
+      {
+        "word": "loading",
+        "line": 68,
+        "context": "<el-button type=\"primary\" size=\"large\" @click=\"submitCheckIn\" :disabled=\"!selectedUuid\" :loading=\"submitting\">"
+      },
+      {
+        "word": "click",
+        "line": 30,
+        "context": "<el-button type=\"primary\" size=\"large\" style=\"width: 100%\" @click=\"queryAppointments\" :loading=\"loading\">"
+      },
+      {
+        "word": "click",
+        "line": 41,
+        "context": "<el-button link type=\"primary\" @click=\"step = 0\">返回重填</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 68,
+        "context": "<el-button type=\"primary\" size=\"large\" @click=\"submitCheckIn\" :disabled=\"!selectedUuid\" :loading=\"submitting\">"
+      },
+      {
+        "word": "click",
+        "line": 82,
+        "context": "<el-button type=\"primary\" @click=\"reset\">继续报到</el-button>"
+      },
+      {
+        "word": "reset",
+        "line": 82,
+        "context": "<el-button type=\"primary\" @click=\"reset\">继续报到</el-button>"
+      },
+      {
+        "word": "reset",
+        "line": 146,
+        "context": "const reset = () => {"
+      }
+    ],
+    "emptyTextMissing": false,
+    "errorHandlingMissing": false
+  },
+  {
+    "file": "/vue3-new-ui/src/views/doctor/attendance.vue",
+    "messages": [],
+    "consoleStatements": [],
+    "suspiciousEnglish": [
+      {
+        "word": "success",
+        "line": 12,
+        "context": "<el-button type=\"success\" size=\"large\" @click=\"handleCheckOut\" :disabled=\"!checkedIn || checkedOut\">签退</el-button>"
+      },
+      {
+        "word": "loading",
+        "line": 51,
+        "context": "<el-table :data=\"attendanceList\" v-loading=\"loading\" empty-text=\"暂无记录\">"
+      },
+      {
+        "word": "loading",
+        "line": 51,
+        "context": "<el-table :data=\"attendanceList\" v-loading=\"loading\" empty-text=\"暂无记录\">"
+      },
+      {
+        "word": "click",
+        "line": 11,
+        "context": "<el-button type=\"primary\" size=\"large\" @click=\"handleCheckIn\" :disabled=\"checkedIn\">签到</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 12,
+        "context": "<el-button type=\"success\" size=\"large\" @click=\"handleCheckOut\" :disabled=\"!checkedIn || checkedOut\">签退</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 48,
+        "context": "<el-button type=\"primary\" @click=\"loadRecords\">查询</el-button>"
+      }
+    ],
+    "emptyTextMissing": false,
+    "errorHandlingMissing": false
+  },
+  {
+    "file": "/vue3-new-ui/src/views/doctor/clinicalPathway.vue",
+    "messages": [],
+    "consoleStatements": [],
+    "suspiciousEnglish": [
+      {
+        "word": "loading",
+        "line": 8,
+        "context": "<el-table :data=\"tableData\" v-loading=\"loading\" border empty-text=\"暂无记录\">"
+      },
+      {
+        "word": "loading",
+        "line": 8,
+        "context": "<el-table :data=\"tableData\" v-loading=\"loading\" border empty-text=\"暂无记录\">"
+      },
+      {
+        "word": "click",
+        "line": 6,
+        "context": "<el-button type=\"primary\" @click=\"handleAdd\">新增路径</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 16,
+        "context": "<el-button size=\"small\" type=\"primary\" @click=\"handleEdit(scope.row)\">编辑</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 17,
+        "context": "<el-button size=\"small\" type=\"danger\" @click=\"handleDelete(scope.row.id)\">删除</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 45,
+        "context": "<el-button @click=\"dialogVisible = false\">取消</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 46,
+        "context": "<el-button type=\"primary\" @click=\"submitForm\">确定</el-button>"
+      }
+    ],
+    "emptyTextMissing": false,
+    "errorHandlingMissing": false
+  },
+  {
+    "file": "/vue3-new-ui/src/views/doctor/labOrder.vue",
+    "messages": [],
+    "consoleStatements": [],
+    "suspiciousEnglish": [
+      {
+        "word": "success",
+        "line": 22,
+        "context": "<el-tag v-else type=\"success\">已完成</el-tag>"
+      },
+      {
+        "word": "loading",
+        "line": 15,
+        "context": "<el-table :data=\"paginatedList\" v-loading=\"loading\" empty-text=\"暂无记录\">"
+      },
+      {
+        "word": "loading",
+        "line": 15,
+        "context": "<el-table :data=\"paginatedList\" v-loading=\"loading\" empty-text=\"暂无记录\">"
+      },
+      {
+        "word": "click",
+        "line": 6,
+        "context": "<el-button type=\"primary\" @click=\"handleAdd\">新增申请</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 13,
+        "context": "<el-button type=\"primary\" @click=\"fetchList\">搜索</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 56,
+        "context": "<el-button @click=\"dialogVisible=false\">取消</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 57,
+        "context": "<el-button type=\"primary\" @click=\"submit\">确定</el-button>"
+      },
+      {
+        "word": "submit",
+        "line": 57,
+        "context": "<el-button type=\"primary\" @click=\"submit\">确定</el-button>"
+      },
+      {
+        "word": "submit",
+        "line": 102,
+        "context": "const submit = async () => {"
+      }
+    ],
+    "emptyTextMissing": false,
+    "errorHandlingMissing": false
+  },
+  {
+    "file": "/vue3-new-ui/src/views/doctor/mdt.vue",
+    "messages": [],
+    "consoleStatements": [
+      {
+        "type": "console输出",
+        "line": 137,
+        "content": "console.error(\"获取科室失败\", e);"
+      },
+      {
+        "type": "console输出",
+        "line": 146,
+        "content": "console.error(\"获取患者失败\", e);"
+      }
+    ],
+    "suspiciousEnglish": [
+      {
+        "word": "loading",
+        "line": 8,
+        "context": "<el-table :data=\"tableData\" v-loading=\"loading\" border empty-text=\"暂无记录\">"
+      },
+      {
+        "word": "loading",
+        "line": 8,
+        "context": "<el-table :data=\"tableData\" v-loading=\"loading\" border empty-text=\"暂无记录\">"
+      },
+      {
+        "word": "click",
+        "line": 6,
+        "context": "<el-button type=\"primary\" @click=\"handleAdd\">新增会诊</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 79,
+        "context": "<el-button @click=\"dialogVisible = false\">取消</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 80,
+        "context": "<el-button type=\"primary\" @click=\"submitForm\">确定</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 91,
+        "context": "<el-button @click=\"resultDialogVisible = false\">取消</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 92,
+        "context": "<el-button type=\"primary\" @click=\"submitResult\">确定</el-button>"
+      }
+    ],
+    "emptyTextMissing": false,
+    "errorHandlingMissing": false
+  },
+  {
+    "file": "/vue3-new-ui/src/views/doctor/medicalRecord.vue",
+    "messages": [],
+    "consoleStatements": [],
+    "suspiciousEnglish": [
+      {
+        "word": "loading",
+        "line": 15,
+        "context": "<el-table :data=\"paginatedList\" v-loading=\"loading\" border empty-text=\"暂无数据\">"
+      },
+      {
+        "word": "loading",
+        "line": 15,
+        "context": "<el-table :data=\"paginatedList\" v-loading=\"loading\" border empty-text=\"暂无数据\">"
+      },
+      {
+        "word": "click",
+        "line": 6,
+        "context": "<el-button type=\"primary\" @click=\"handleAdd\">新增病历</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 13,
+        "context": "<el-button type=\"primary\" @click=\"fetchList\">搜索</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 22,
+        "context": "<el-button size=\"small\" @click=\"handleEdit(row)\">编辑</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 23,
+        "context": "<el-button size=\"small\" @click=\"viewDetail(row)\">详情</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 53,
+        "context": "<el-button @click=\"dialogVisible=false\">取消</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 54,
+        "context": "<el-button type=\"primary\" @click=\"submit\">确定</el-button>"
+      },
+      {
+        "word": "submit",
+        "line": 54,
+        "context": "<el-button type=\"primary\" @click=\"submit\">确定</el-button>"
+      },
+      {
+        "word": "submit",
+        "line": 114,
+        "context": "const submit = async () => {"
+      },
+      {
+        "word": "detail",
+        "line": 60,
+        "context": "<el-descriptions-item label=\"就诊时间\">{{ detail.consultation_time }}</el-descriptions-item>"
+      },
+      {
+        "word": "detail",
+        "line": 61,
+        "context": "<el-descriptions-item label=\"医生\">{{ detail.doctor_name }}</el-descriptions-item>"
+      },
+      {
+        "word": "detail",
+        "line": 62,
+        "context": "<el-descriptions-item label=\"患者\">{{ detail.patient_name }}</el-descriptions-item>"
+      },
+      {
+        "word": "detail",
+        "line": 63,
+        "context": "<el-descriptions-item label=\"症状\">{{ detail.symptom }}</el-descriptions-item>"
+      },
+      {
+        "word": "detail",
+        "line": 64,
+        "context": "<el-descriptions-item label=\"诊断结果\">{{ detail.result }}</el-descriptions-item>"
+      }
+    ],
+    "emptyTextMissing": false,
+    "errorHandlingMissing": false
+  },
+  {
+    "file": "/vue3-new-ui/src/views/doctor/prescription.vue",
+    "messages": [],
+    "consoleStatements": [],
+    "suspiciousEnglish": [
+      {
+        "word": "success",
+        "line": 22,
+        "context": "<el-tag v-else-if=\"row.status===2\" type=\"success\">已发药</el-tag>"
+      },
+      {
+        "word": "loading",
+        "line": 15,
+        "context": "<el-table :data=\"paginatedList\" v-loading=\"loading\" border empty-text=\"暂无数据\">"
+      },
+      {
+        "word": "loading",
+        "line": 15,
+        "context": "<el-table :data=\"paginatedList\" v-loading=\"loading\" border empty-text=\"暂无数据\">"
+      },
+      {
+        "word": "click",
+        "line": 6,
+        "context": "<el-button type=\"primary\" @click=\"handleAdd\">开处方</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 13,
+        "context": "<el-button type=\"primary\" @click=\"fetchList\">搜索</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 35,
+        "context": "<el-button v-if=\"row.status===0 && row.charge_id\" size=\"small\" type=\"primary\" @click=\"deskCharge(row)\">诊间收费</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 36,
+        "context": "<el-button size=\"small\" type=\"danger\" @click=\"cancel(row)\">取消</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 71,
+        "context": "<el-button type=\"danger\" size=\"small\" @click=\"removePharmaceutical(i)\">删除</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 75,
+        "context": "<el-button type=\"primary\" size=\"small\" @click=\"addPharmaceutical\">添加药品</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 79,
+        "context": "<el-button @click=\"dialogVisible=false\">取消</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 80,
+        "context": "<el-button type=\"primary\" @click=\"submit\">确定</el-button>"
+      },
+      {
+        "word": "submit",
+        "line": 80,
+        "context": "<el-button type=\"primary\" @click=\"submit\">确定</el-button>"
+      },
+      {
+        "word": "submit",
+        "line": 147,
+        "context": "const submit = async () => {"
+      },
+      {
+        "word": "cancel",
+        "line": 36,
+        "context": "<el-button size=\"small\" type=\"danger\" @click=\"cancel(row)\">取消</el-button>"
+      },
+      {
+        "word": "cancel",
+        "line": 173,
+        "context": "const cancel = async (row) => {"
+      }
+    ],
+    "emptyTextMissing": false,
+    "errorHandlingMissing": false
+  },
+  {
+    "file": "/vue3-new-ui/src/views/doctor/schedule.vue",
+    "messages": [],
+    "consoleStatements": [],
+    "suspiciousEnglish": [
+      {
+        "word": "loading",
+        "line": 15,
+        "context": "<el-table :data=\"paginatedList\" v-loading=\"loading\" empty-text=\"暂无记录\">"
+      },
+      {
+        "word": "loading",
+        "line": 15,
+        "context": "<el-table :data=\"paginatedList\" v-loading=\"loading\" empty-text=\"暂无记录\">"
+      },
+      {
+        "word": "click",
+        "line": 6,
+        "context": "<el-button type=\"primary\" @click=\"handleAdd\">设置排班</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 13,
+        "context": "<el-button type=\"primary\" @click=\"fetchList\">搜索</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 70,
+        "context": "<el-button @click=\"dialogVisible=false\">取消</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 71,
+        "context": "<el-button type=\"primary\" @click=\"submit\">确定</el-button>"
+      },
+      {
+        "word": "submit",
+        "line": 71,
+        "context": "<el-button type=\"primary\" @click=\"submit\">确定</el-button>"
+      },
+      {
+        "word": "submit",
+        "line": 113,
+        "context": "const submit = async () => {"
+      }
+    ],
+    "emptyTextMissing": false,
+    "errorHandlingMissing": false
+  },
+  {
+    "file": "/vue3-new-ui/src/views/donate/index.vue",
+    "messages": [],
+    "consoleStatements": [],
+    "suspiciousEnglish": [],
+    "emptyTextMissing": false,
+    "errorHandlingMissing": false
+  },
+  {
+    "file": "/vue3-new-ui/src/views/exam/exam.vue",
+    "messages": [],
+    "consoleStatements": [],
+    "suspiciousEnglish": [
+      {
+        "word": "success",
+        "line": 27,
+        "context": "<el-tag v-if=\"row.status === 1\" type=\"success\">启用</el-tag>"
+      },
+      {
+        "word": "success",
+        "line": 72,
+        "context": "<el-tag v-if=\"row.status === 1\" type=\"success\">启用</el-tag>"
+      },
+      {
+        "word": "success",
+        "line": 119,
+        "context": "<el-tag v-else-if=\"row.status === 1\" type=\"success\">已确认</el-tag>"
+      },
+      {
+        "word": "success",
+        "line": 126,
+        "context": "<el-button v-if=\"row.status === 0\" size=\"small\" type=\"success\" @click=\"updateStatus(row, 1)\">确认</el-button>"
+      },
+      {
+        "word": "success",
+        "line": 162,
+        "context": "<el-tag v-else-if=\"row.status === 1\" type=\"success\">已完成</el-tag>"
+      },
+      {
+        "word": "success",
+        "line": 169,
+        "context": "<el-button v-if=\"row.status === 0\" size=\"small\" type=\"success\" @click=\"openResultDialog(row)\">录入结果</el-button>"
+      },
+      {
+        "word": "success",
+        "line": 360,
+        "context": "<el-tag v-else type=\"success\">正常</el-tag>"
+      },
+      {
+        "word": "loading",
+        "line": 17,
+        "context": "<el-table :data=\"paginatedPackages\" v-loading=\"packageLoading\" empty-text=\"暂无记录\">"
+      },
+      {
+        "word": "loading",
+        "line": 60,
+        "context": "<el-table :data=\"paginatedItems\" v-loading=\"itemLoading\" empty-text=\"暂无记录\">"
+      },
+      {
+        "word": "loading",
+        "line": 111,
+        "context": "<el-table :data=\"paginatedAppointments\" v-loading=\"appointmentLoading\" empty-text=\"暂无记录\">"
+      },
+      {
+        "word": "loading",
+        "line": 154,
+        "context": "<el-table :data=\"paginatedRecords\" v-loading=\"recordLoading\" empty-text=\"暂无记录\">"
+      },
+      {
+        "word": "click",
+        "line": 8,
+        "context": "<el-button type=\"primary\" @click=\"openPackageDialog()\">新增套餐</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 15,
+        "context": "<el-button type=\"primary\" @click=\"fetchPackages\">搜索</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 33,
+        "context": "<el-button size=\"small\" type=\"primary\" @click=\"openPackageDialog(row)\">编辑</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 34,
+        "context": "<el-button size=\"small\" type=\"danger\" @click=\"deletePackage(row)\">删除</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 51,
+        "context": "<el-button type=\"primary\" @click=\"openItemDialog()\">新增项目</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 58,
+        "context": "<el-button type=\"primary\" @click=\"fetchItems\">搜索</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 78,
+        "context": "<el-button size=\"small\" type=\"primary\" @click=\"openItemDialog(row)\">编辑</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 79,
+        "context": "<el-button size=\"small\" type=\"danger\" @click=\"deleteItem(row)\">删除</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 96,
+        "context": "<el-button type=\"primary\" @click=\"openAppointmentDialog()\">新增预约</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 109,
+        "context": "<el-button type=\"primary\" @click=\"fetchAppointments\">搜索</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 126,
+        "context": "<el-button v-if=\"row.status === 0\" size=\"small\" type=\"success\" @click=\"updateStatus(row, 1)\">确认</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 127,
+        "context": "<el-button v-if=\"row.status === 1\" size=\"small\" type=\"primary\" @click=\"updateStatus(row, 2)\">完成</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 128,
+        "context": "<el-button v-if=\"row.status === 0 || row.status === 1\" size=\"small\" type=\"danger\" @click=\"updateStatus(row, 3)\">取消</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 145,
+        "context": "<el-button type=\"primary\" @click=\"openRecordDialog()\">登记体检</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 152,
+        "context": "<el-button type=\"primary\" @click=\"fetchRecords\">搜索</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 168,
+        "context": "<el-button size=\"small\" type=\"primary\" @click=\"viewReport(row)\">查看报告</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 169,
+        "context": "<el-button v-if=\"row.status === 0\" size=\"small\" type=\"success\" @click=\"openResultDialog(row)\">录入结果</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 170,
+        "context": "<el-button v-if=\"row.status === 0\" size=\"small\" @click=\"completeRecord(row)\">完成</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 207,
+        "context": "<el-button @click=\"packageDialogVisible = false\">取消</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 208,
+        "context": "<el-button type=\"primary\" @click=\"submitPackage\">确定</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 246,
+        "context": "<el-button @click=\"itemDialogVisible = false\">取消</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 247,
+        "context": "<el-button type=\"primary\" @click=\"submitItem\">确定</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 276,
+        "context": "<el-button @click=\"appointmentDialogVisible = false\">取消</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 277,
+        "context": "<el-button type=\"primary\" @click=\"submitAppointment\">确定</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 303,
+        "context": "<el-button @click=\"recordDialogVisible = false\">取消</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 304,
+        "context": "<el-button type=\"primary\" @click=\"submitRecord\">确定</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 336,
+        "context": "<el-button @click=\"resultDialogVisible = false\">取消</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 337,
+        "context": "<el-button type=\"primary\" @click=\"submitResults\">保存结果</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 369,
+        "context": "<el-button @click=\"reportDialogVisible = false\">关闭</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 370,
+        "context": "<el-button type=\"primary\" @click=\"saveReportAdvice\">保存建议</el-button>"
+      },
+      {
+        "word": "detail",
+        "line": 343,
+        "context": "<div v-if=\"reportDetail\" class=\"report-detail\">"
+      }
+    ],
+    "emptyTextMissing": false,
+    "errorHandlingMissing": false
+  },
+  {
+    "file": "/vue3-new-ui/src/views/followup/followUp.vue",
+    "messages": [],
+    "consoleStatements": [],
+    "suspiciousEnglish": [
+      {
+        "word": "success",
+        "line": 22,
+        "context": "<el-tag v-else type=\"success\">已完成</el-tag>"
+      },
+      {
+        "word": "success",
+        "line": 70,
+        "context": "<el-tag v-else type=\"success\">已完成</el-tag>"
+      },
+      {
+        "word": "loading",
+        "line": 15,
+        "context": "<el-table :data=\"paginatedList\" v-loading=\"loading\" empty-text=\"暂无记录\">"
+      },
+      {
+        "word": "loading",
+        "line": 15,
+        "context": "<el-table :data=\"paginatedList\" v-loading=\"loading\" empty-text=\"暂无记录\">"
+      },
+      {
+        "word": "click",
+        "line": 6,
+        "context": "<el-button type=\"primary\" @click=\"handleAdd\">新增随访计划</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 13,
+        "context": "<el-button type=\"primary\" @click=\"fetchList\">搜索</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 27,
+        "context": "<el-button size=\"small\" @click=\"handleView(row)\">查看</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 28,
+        "context": "<el-button v-if=\"row.status===0\" size=\"small\" type=\"primary\" @click=\"handleRecord(row)\">记录</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 58,
+        "context": "<el-button @click=\"dialogVisible=false\">取消</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 59,
+        "context": "<el-button type=\"primary\" @click=\"submit\">确定</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 87,
+        "context": "<el-button @click=\"recordVisible=false\">取消</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 88,
+        "context": "<el-button type=\"primary\" @click=\"submitRecord\">确定</el-button>"
+      },
+      {
+        "word": "submit",
+        "line": 59,
+        "context": "<el-button type=\"primary\" @click=\"submit\">确定</el-button>"
+      },
+      {
+        "word": "submit",
+        "line": 142,
+        "context": "const submit = async () => {"
+      },
+      {
+        "word": "detail",
+        "line": 65,
+        "context": "<el-descriptions-item label=\"患者\">{{ detail.patient_name }}</el-descriptions-item>"
+      },
+      {
+        "word": "detail",
+        "line": 66,
+        "context": "<el-descriptions-item label=\"计划日期\">{{ detail.plan_date }}</el-descriptions-item>"
+      },
+      {
+        "word": "detail",
+        "line": 67,
+        "context": "<el-descriptions-item label=\"随访内容\">{{ detail.content }}</el-descriptions-item>"
+      },
+      {
+        "word": "detail",
+        "line": 69,
+        "context": "<el-tag v-if=\"detail.status===0\" type=\"warning\">待随访</el-tag>"
+      },
+      {
+        "word": "detail",
+        "line": 72,
+        "context": "<el-descriptions-item label=\"随访结果\">{{ detail.result || \"—\" }}</el-descriptions-item>"
+      },
+      {
+        "word": "detail",
+        "line": 73,
+        "context": "<el-descriptions-item label=\"患者反馈\">{{ detail.patient_feedback || \"—\" }}</el-descriptions-item>"
+      }
+    ],
+    "emptyTextMissing": false,
+    "errorHandlingMissing": false
+  },
+  {
+    "file": "/vue3-new-ui/src/views/index/components/Plan.vue",
+    "messages": [],
+    "consoleStatements": [],
+    "suspiciousEnglish": [
+      {
+        "word": "success",
+        "line": 6,
+        "context": "<el-tag class=\"card-header-tag\" type=\"success\">今日计划</el-tag>"
+      }
+    ],
+    "emptyTextMissing": true,
+    "errorHandlingMissing": false
+  },
+  {
+    "file": "/vue3-new-ui/src/views/index/components/VersionInformation.vue",
+    "messages": [],
+    "consoleStatements": [],
+    "suspiciousEnglish": [
+      {
+        "word": "success",
+        "line": 30,
+        "context": "<el-tag type=\"success\">v1.0.0</el-tag>"
+      }
+    ],
+    "emptyTextMissing": false,
+    "errorHandlingMissing": false
+  },
+  {
+    "file": "/vue3-new-ui/src/views/index/index.vue",
+    "messages": [],
+    "consoleStatements": [
+      {
+        "type": "console输出",
+        "line": 166,
+        "content": "console.error(\"加载首页数据失败\", e);"
+      }
+    ],
+    "suspiciousEnglish": [
+      {
+        "word": "success",
+        "line": 62,
+        "context": "<el-button v-if=\"hasPermission(['patient'])\" type=\"success\" size=\"large\" @click=\"goTo('/patient/registration')\">现场挂号</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 45,
+        "context": "<el-link type=\"primary\" @click=\"showNoticeDetail(notice)\">"
+      },
+      {
+        "word": "click",
+        "line": 61,
+        "context": "<el-button v-if=\"hasPermission(['patient'])\" type=\"primary\" size=\"large\" @click=\"goTo('/patient/appointment')\">预约挂号</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 62,
+        "context": "<el-button v-if=\"hasPermission(['patient'])\" type=\"success\" size=\"large\" @click=\"goTo('/patient/registration')\">现场挂号</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 63,
+        "context": "<el-button v-if=\"hasPermission(['patient'])\" type=\"warning\" size=\"large\" @click=\"goTo('/patient/charge')\">缴费</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 64,
+        "context": "<el-button v-if=\"hasPermission(['doctor', 'director'])\" type=\"info\" size=\"large\" @click=\"goTo('/doctor/medicalRecord')\">写病历</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 65,
+        "context": "<el-button v-if=\"hasPermission(['doctor', 'director'])\" type=\"danger\" size=\"large\" @click=\"goTo('/doctor/prescription')\">开处方</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 66,
+        "context": "<el-button v-if=\"hasPermission(['admin', 'doctor', 'director'])\" type=\"primary\" size=\"large\" plain @click=\"goTo('/pharmacy/dispense')\">处方审核</el-button"
+      }
+    ],
+    "emptyTextMissing": false,
+    "errorHandlingMissing": false
+  },
+  {
+    "file": "/vue3-new-ui/src/views/inpatient/admission.vue",
+    "messages": [
+      {
+        "type": "标签",
+        "text": "p.name + ' (' + maskIdentity(p.identity) + ')'",
+        "line": 77
+      },
+      {
+        "type": "标签",
+        "text": "b.bed_no + ' (' + b.room_no + ' ' + b.bed_type + ')'",
+        "line": 105
+      },
+      {
+        "type": "标签",
+        "text": "b.bed_no + ' (' + b.room_no + ' ' + b.bed_type + ')'",
+        "line": 165
+      },
+      {
+        "type": "表格列标签",
+        "text": "p.name + ' (' + maskIdentity(p.identity) + ')'",
+        "line": 77
+      },
+      {
+        "type": "表格列标签",
+        "text": "b.bed_no + ' (' + b.room_no + ' ' + b.bed_type + ')'",
+        "line": 105
+      },
+      {
+        "type": "表格列标签",
+        "text": "b.bed_no + ' (' + b.room_no + ' ' + b.bed_type + ')'",
+        "line": 165
+      },
+      {
+        "type": "选项标签",
+        "text": "p.name + ' (' + maskIdentity(p.identity) + ')'",
+        "line": 77
+      },
+      {
+        "type": "选项标签",
+        "text": "b.bed_no + ' (' + b.room_no + ' ' + b.bed_type + ')'",
+        "line": 105
+      },
+      {
+        "type": "选项标签",
+        "text": "b.bed_no + ' (' + b.room_no + ' ' + b.bed_type + ')'",
+        "line": 165
+      }
+    ],
+    "consoleStatements": [],
+    "suspiciousEnglish": [
+      {
+        "word": "success",
+        "line": 53,
+        "context": "<el-tag v-if=\"row.status===1\" type=\"success\" size=\"small\">{{ row.status_text }}</el-tag>"
+      },
+      {
+        "word": "success",
+        "line": 135,
+        "context": "<el-tag v-if=\"currentDetail.status===1\" type=\"success\">{{ currentDetail.status_text }}</el-tag>"
+      },
+      {
+        "word": "loading",
+        "line": 19,
+        "context": "<el-table :data=\"inpatientList\" size=\"small\" v-loading=\"loading\" empty-text=\"暂无记录\">"
+      },
+      {
+        "word": "loading",
+        "line": 19,
+        "context": "<el-table :data=\"inpatientList\" size=\"small\" v-loading=\"loading\" empty-text=\"暂无记录\">"
+      },
+      {
+        "word": "loading",
+        "line": 47,
+        "context": "<el-table :data=\"admissionList\" size=\"small\" v-loading=\"loading\" empty-text=\"暂无记录\">"
+      },
+      {
+        "word": "loading",
+        "line": 47,
+        "context": "<el-table :data=\"admissionList\" size=\"small\" v-loading=\"loading\" empty-text=\"暂无记录\">"
+      },
+      {
+        "word": "click",
+        "line": 7,
+        "context": "<el-button type=\"primary\" @click=\"openAdmissionDialog()\">办理入院</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 14,
+        "context": "<el-button type=\"primary\" @click=\"loadAdmissions\">查询</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 39,
+        "context": "<el-button size=\"small\" @click=\"showDetail(row)\">详情</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 40,
+        "context": "<el-button size=\"small\" type=\"primary\" @click=\"openTransferBed(row)\">换床</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 41,
+        "context": "<el-button size=\"small\" type=\"danger\" @click=\"doDischarge(row)\">出院</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 64,
+        "context": "<el-button size=\"small\" @click=\"showDetail(row)\">详情</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 125,
+        "context": "<el-button @click=\"admissionDialogVisible = false\">取消</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 126,
+        "context": "<el-button type=\"primary\" @click=\"submitAdmission\">确定</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 170,
+        "context": "<el-button @click=\"transferDialogVisible = false\">取消</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 171,
+        "context": "<el-button type=\"primary\" @click=\"submitTransfer\">确定</el-button>"
+      },
+      {
+        "word": "search",
+        "line": 8,
+        "context": "<el-input v-model=\"keyword\" placeholder=\"搜索患者/住院号\" clearable class=\"page-search-input\" />"
+      }
+    ],
+    "emptyTextMissing": false,
+    "errorHandlingMissing": false
+  },
+  {
+    "file": "/vue3-new-ui/src/views/inpatient/discharge.vue",
+    "messages": [],
+    "consoleStatements": [],
+    "suspiciousEnglish": [
+      {
+        "word": "loading",
+        "line": 13,
+        "context": "<el-table :data=\"filteredInpatients\" v-loading=\"loading\" size=\"small\" highlight-current-row @current-change=\"onPatientSelect\" empty-text=\"暂无在院患者\">"
+      },
+      {
+        "word": "loading",
+        "line": 13,
+        "context": "<el-table :data=\"filteredInpatients\" v-loading=\"loading\" size=\"small\" highlight-current-row @current-change=\"onPatientSelect\" empty-text=\"暂无在院患者\">"
+      },
+      {
+        "word": "click",
+        "line": 26,
+        "context": "<el-button type=\"danger\" @click=\"openDischargeDialog\">办理出院</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 78,
+        "context": "<el-button @click=\"dischargeDialogVisible = false\">取消</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 79,
+        "context": "<el-button type=\"danger\" @click=\"submitDischarge\">确认出院</el-button>"
+      }
+    ],
+    "emptyTextMissing": false,
+    "errorHandlingMissing": false
+  },
+  {
+    "file": "/vue3-new-ui/src/views/inpatient/emr.vue",
+    "messages": [],
+    "consoleStatements": [],
+    "suspiciousEnglish": [
+      {
+        "word": "success",
+        "line": 23,
+        "context": "<el-button type=\"success\" size=\"small\" @click=\"openProgressDialog()\">病程记录</el-button>"
+      },
+      {
+        "word": "success",
+        "line": 37,
+        "context": "<el-tag v-else-if=\"row.status===1\" type=\"success\" size=\"small\">{{ row.status_text }}</el-tag>"
+      },
+      {
+        "word": "success",
+        "line": 138,
+        "context": "<el-tag v-else-if=\"currentRecordDetail.status===1\" type=\"success\" size=\"small\">{{ currentRecordDetail.status_text }}</el-tag>"
+      },
+      {
+        "word": "loading",
+        "line": 30,
+        "context": "<el-table :data=\"recordList\" size=\"small\" v-loading=\"recordLoading\" empty-text=\"暂无病历\">"
+      },
+      {
+        "word": "click",
+        "line": 22,
+        "context": "<el-button type=\"primary\" size=\"small\" @click=\"openRecordDialog()\">书写病历</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 23,
+        "context": "<el-button type=\"success\" size=\"small\" @click=\"openProgressDialog()\">病程记录</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 24,
+        "context": "<el-button type=\"warning\" size=\"small\" @click=\"openRoundDialog()\">查房记录</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 45,
+        "context": "<el-button size=\"small\" @click=\"showRecordDetail(row)\">查看</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 46,
+        "context": "<el-button v-if=\"row.status===0\" size=\"small\" type=\"primary\" @click=\"signRecord(row)\">签名</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 59,
+        "context": "<el-button size=\"small\" type=\"danger\" @click=\"deleteProgress(row)\">删除</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 72,
+        "context": "<el-button size=\"small\" type=\"danger\" @click=\"deleteRound(row)\">删除</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 125,
+        "context": "<el-button @click=\"recordDialogVisible = false\">取消</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 126,
+        "context": "<el-button type=\"primary\" @click=\"submitRecord\">保存</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 164,
+        "context": "<el-button @click=\"progressDialogVisible = false\">取消</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 165,
+        "context": "<el-button type=\"primary\" @click=\"submitProgress\">保存</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 184,
+        "context": "<el-button @click=\"roundDialogVisible = false\">取消</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 185,
+        "context": "<el-button type=\"primary\" @click=\"submitRound\">保存</el-button>"
+      }
+    ],
+    "emptyTextMissing": false,
+    "errorHandlingMissing": false
+  },
+  {
+    "file": "/vue3-new-ui/src/views/inpatient/inpatientCharge.vue",
+    "messages": [],
+    "consoleStatements": [],
+    "suspiciousEnglish": [
+      {
+        "word": "success",
+        "line": 39,
+        "context": "<el-button type=\"success\" size=\"small\" @click=\"settleAll\" :disabled=\"dailyBill.unsettled_amount <= 0\">全部结算</el-button>"
+      },
+      {
+        "word": "success",
+        "line": 53,
+        "context": "<el-tag v-else-if=\"row.status===1\" size=\"small\" type=\"success\">{{ row.status_text }}</el-tag>"
+      },
+      {
+        "word": "loading",
+        "line": 43,
+        "context": "<el-table :data=\"chargeList\" size=\"small\" v-loading=\"chargeLoading\" empty-text=\"暂无费用明细\">"
+      },
+      {
+        "word": "click",
+        "line": 21,
+        "context": "<el-button type=\"primary\" size=\"small\" @click=\"loadDailyBill\">刷新日清单</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 39,
+        "context": "<el-button type=\"success\" size=\"small\" @click=\"settleAll\" :disabled=\"dailyBill.unsettled_amount <= 0\">全部结算</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 59,
+        "context": "<el-button v-if=\"row.status===0\" size=\"small\" type=\"danger\" @click=\"refundCharge(row)\">退费</el-button>"
+      }
+    ],
+    "emptyTextMissing": false,
+    "errorHandlingMissing": false
+  },
+  {
+    "file": "/vue3-new-ui/src/views/inpatient/inpatientOrder.vue",
+    "messages": [],
+    "consoleStatements": [],
+    "suspiciousEnglish": [
+      {
+        "word": "success",
+        "line": 50,
+        "context": "<el-tag v-if=\"row.order_type===0\" type=\"success\" size=\"small\">长期</el-tag>"
+      },
+      {
+        "word": "success",
+        "line": 62,
+        "context": "<el-tag v-else-if=\"row.status===2\" type=\"success\" size=\"small\">{{ row.status_text }}</el-tag>"
+      },
+      {
+        "word": "loading",
+        "line": 33,
+        "context": "<el-table :data=\"filteredOrders\" size=\"small\" v-loading=\"orderLoading\">"
+      },
+      {
+        "word": "click",
+        "line": 29,
+        "context": "<el-button type=\"primary\" size=\"small\" @click=\"openOrderDialog()\">开立医嘱</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 69,
+        "context": "<el-button v-if=\"row.status===0\" size=\"small\" type=\"primary\" @click=\"auditOrder(row)\">审核</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 70,
+        "context": "<el-button v-if=\"row.status===1 || row.status===2\" size=\"small\" @click=\"stopOrder(row)\">停止</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 71,
+        "context": "<el-button v-if=\"row.status===0 || row.status===1\" size=\"small\" type=\"danger\" @click=\"cancelOrder(row)\">撤销</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 147,
+        "context": "<el-button type=\"danger\" size=\"small\" @click=\"removeItem(idx)\">删除</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 149,
+        "context": "<el-button type=\"primary\" size=\"small\" @click=\"addItem\">+ 添加项目</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 156,
+        "context": "<el-button @click=\"orderDialogVisible = false\">取消</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 157,
+        "context": "<el-button type=\"primary\" @click=\"submitOrder\">确定</el-button>"
+      }
+    ],
+    "emptyTextMissing": false,
+    "errorHandlingMissing": false
+  },
+  {
+    "file": "/vue3-new-ui/src/views/inpatient/nursingStation.vue",
+    "messages": [],
+    "consoleStatements": [],
+    "suspiciousEnglish": [
+      {
+        "word": "success",
+        "line": 38,
+        "context": "<el-tag v-else-if=\"row.status===1\" size=\"small\" type=\"success\">{{ row.status_text }}</el-tag>"
+      },
+      {
+        "word": "success",
+        "line": 44,
+        "context": "<el-button v-if=\"row.status===0\" size=\"small\" type=\"success\" @click=\"executeItem(row)\">执行</el-button>"
+      },
+      {
+        "word": "loading",
+        "line": 29,
+        "context": "<el-table :data=\"filteredExecutions\" size=\"small\" v-loading=\"executionLoading\" empty-text=\"暂无医嘱执行\">"
+      },
+      {
+        "word": "loading",
+        "line": 53,
+        "context": "<el-table :data=\"nursingRecords\" size=\"small\" v-loading=\"nursingLoading\" empty-text=\"暂无护理记录\">"
+      },
+      {
+        "word": "loading",
+        "line": 76,
+        "context": "<el-table :data=\"temperatureRecords\" size=\"small\" v-loading=\"tempLoading\" empty-text=\"暂无体温记录\">"
+      },
+      {
+        "word": "click",
+        "line": 27,
+        "context": "<el-button type=\"primary\" size=\"small\" @click=\"loadExecutions\">查询</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 44,
+        "context": "<el-button v-if=\"row.status===0\" size=\"small\" type=\"success\" @click=\"executeItem(row)\">执行</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 51,
+        "context": "<el-button type=\"primary\" size=\"small\" @click=\"openNursingDialog()\">新增护理记录</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 66,
+        "context": "<el-button size=\"small\" type=\"danger\" @click=\"deleteNursingRecord(row)\">删除</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 74,
+        "context": "<el-button type=\"primary\" size=\"small\" @click=\"openTempDialog()\">录入体温</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 89,
+        "context": "<el-button size=\"small\" type=\"danger\" @click=\"deleteTempRecord(row)\">删除</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 160,
+        "context": "<el-button @click=\"nursingDialogVisible = false\">取消</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 161,
+        "context": "<el-button type=\"primary\" @click=\"submitNursing\">确定</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 234,
+        "context": "<el-button @click=\"tempDialogVisible = false\">取消</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 235,
+        "context": "<el-button type=\"primary\" @click=\"submitTemp\">确定</el-button>"
+      }
+    ],
+    "emptyTextMissing": false,
+    "errorHandlingMissing": false
+  },
+  {
+    "file": "/vue3-new-ui/src/views/inpatient/surgery.vue",
+    "messages": [
+      {
+        "type": "标签",
+        "text": "a.patient_name + ' - ' + a.surgery_name",
+        "line": 113
+      },
+      {
+        "type": "表格列标签",
+        "text": "a.patient_name + ' - ' + a.surgery_name",
+        "line": 113
+      },
+      {
+        "type": "选项标签",
+        "text": "a.patient_name + ' - ' + a.surgery_name",
+        "line": 113
+      }
+    ],
+    "consoleStatements": [],
+    "suspiciousEnglish": [
+      {
+        "word": "success",
+        "line": 8,
+        "context": "<el-button type=\"success\" @click=\"openScheduleDialog()\">手术排台</el-button>"
+      },
+      {
+        "word": "success",
+        "line": 29,
+        "context": "<el-tag v-else-if=\"row.status===1\" type=\"success\" size=\"small\">{{ row.status_text }}</el-tag>"
+      },
+      {
+        "word": "success",
+        "line": 38,
+        "context": "<el-button v-if=\"row.status===2\" size=\"small\" type=\"success\" @click=\"openAnesthesiaDialog(row)\">麻醉</el-button>"
+      },
+      {
+        "word": "success",
+        "line": 58,
+        "context": "<el-tag v-else type=\"success\" size=\"small\">{{ row.status_text }}</el-tag>"
+      },
+      {
+        "word": "success",
+        "line": 64,
+        "context": "<el-button v-if=\"row.status===1\" size=\"small\" type=\"success\" @click=\"completeSurgeryFn(row)\">完成</el-button>"
+      },
+      {
+        "word": "loading",
+        "line": 19,
+        "context": "<el-table :data=\"applications\" size=\"small\" v-loading=\"loading\" empty-text=\"暂无记录\">"
+      },
+      {
+        "word": "loading",
+        "line": 19,
+        "context": "<el-table :data=\"applications\" size=\"small\" v-loading=\"loading\" empty-text=\"暂无记录\">"
+      },
+      {
+        "word": "click",
+        "line": 7,
+        "context": "<el-button type=\"primary\" @click=\"openApplyDialog()\">手术申请</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 8,
+        "context": "<el-button type=\"success\" @click=\"openScheduleDialog()\">手术排台</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 16,
+        "context": "<el-button type=\"primary\" size=\"small\" @click=\"loadApplications\">查询</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 36,
+        "context": "<el-button v-if=\"row.status===0\" size=\"small\" type=\"primary\" @click=\"approveApp(row)\">审批</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 37,
+        "context": "<el-button v-if=\"row.status===1\" size=\"small\" @click=\"openScheduleDialog(row)\">排台</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 38,
+        "context": "<el-button v-if=\"row.status===2\" size=\"small\" type=\"success\" @click=\"openAnesthesiaDialog(row)\">麻醉</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 39,
+        "context": "<el-button size=\"small\" type=\"danger\" @click=\"cancelApp(row)\">取消</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 63,
+        "context": "<el-button v-if=\"row.status===0\" size=\"small\" type=\"primary\" @click=\"startSurgeryFn(row)\">开始</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 64,
+        "context": "<el-button v-if=\"row.status===1\" size=\"small\" type=\"success\" @click=\"completeSurgeryFn(row)\">完成</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 104,
+        "context": "<el-button @click=\"applyDialogVisible = false\">取消</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 105,
+        "context": "<el-button type=\"primary\" @click=\"submitApply\">提交</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 134,
+        "context": "<el-button @click=\"scheduleDialogVisible = false\">取消</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 135,
+        "context": "<el-button type=\"primary\" @click=\"submitSchedule\">确定</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 164,
+        "context": "<el-button @click=\"anesthesiaDialogVisible = false\">取消</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 165,
+        "context": "<el-button type=\"primary\" @click=\"submitAnesthesia\">保存</el-button>"
+      },
+      {
+        "word": "search",
+        "line": 15,
+        "context": "<el-input v-model=\"keyword\" placeholder=\"搜索手术/患者\" clearable size=\"small\" class=\"page-search-input\" />"
+      }
+    ],
+    "emptyTextMissing": false,
+    "errorHandlingMissing": false
+  },
+  {
+    "file": "/vue3-new-ui/src/views/inpatient/wardManagement.vue",
+    "messages": [],
+    "consoleStatements": [],
+    "suspiciousEnglish": [
+      {
+        "word": "success",
+        "line": 18,
+        "context": "<el-tag size=\"small\" type=\"success\">{{ row.bed_used }}/{{ row.bed_total }}</el-tag>"
+      },
+      {
+        "word": "success",
+        "line": 45,
+        "context": "<el-tag type=\"success\">空闲: {{ currentWard.bed_free }}</el-tag>"
+      },
+      {
+        "word": "success",
+        "line": 58,
+        "context": "<el-tag v-if=\"row.status===0\" type=\"success\" size=\"small\">空闲</el-tag>"
+      },
+      {
+        "word": "loading",
+        "line": 49,
+        "context": "<el-table :data=\"bedList\" size=\"small\" v-loading=\"bedLoading\" empty-text=\"暂无记录\">"
+      },
+      {
+        "word": "click",
+        "line": 10,
+        "context": "<el-button type=\"primary\" size=\"small\" @click=\"openWardDialog()\">新增病区</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 23,
+        "context": "<el-button size=\"small\" type=\"primary\" link @click.stop=\"openWardDialog(row)\">编辑</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 24,
+        "context": "<el-button size=\"small\" type=\"danger\" link @click.stop=\"deleteWard(row)\">停用</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 35,
+        "context": "<el-button v-if=\"currentWard\" type=\"primary\" size=\"small\" @click=\"openBedDialog()\">新增床位</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 66,
+        "context": "<el-button size=\"small\" type=\"primary\" link @click=\"openBedDialog(row)\">编辑</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 67,
+        "context": "<el-button size=\"small\" type=\"danger\" link @click=\"deleteBed(row)\">禁用</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 98,
+        "context": "<el-button @click=\"wardDialogVisible = false\">取消</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 99,
+        "context": "<el-button type=\"primary\" @click=\"submitWard\">确定</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 126,
+        "context": "<el-button @click=\"bedDialogVisible = false\">取消</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 127,
+        "context": "<el-button type=\"primary\" @click=\"submitBed\">确定</el-button>"
+      }
+    ],
+    "emptyTextMissing": false,
+    "errorHandlingMissing": false
+  },
+  {
+    "file": "/vue3-new-ui/src/views/lab/labResult.vue",
+    "messages": [],
+    "consoleStatements": [],
+    "suspiciousEnglish": [
+      {
+        "word": "success",
+        "line": 22,
+        "context": "<el-button size=\"small\" type=\"success\" @click=\"receiveSample(row)\">接收</el-button>"
+      },
+      {
+        "word": "success",
+        "line": 55,
+        "context": "<el-tag v-else type=\"success\">正常</el-tag>"
+      },
+      {
+        "word": "loading",
+        "line": 15,
+        "context": "<el-table :data=\"paginatedPendingList\" v-loading=\"loading\" empty-text=\"暂无记录\">"
+      },
+      {
+        "word": "loading",
+        "line": 15,
+        "context": "<el-table :data=\"paginatedPendingList\" v-loading=\"loading\" empty-text=\"暂无记录\">"
+      },
+      {
+        "word": "loading",
+        "line": 48,
+        "context": "<el-table :data=\"paginatedResultList\" v-loading=\"loading2\" empty-text=\"暂无记录\">"
+      },
+      {
+        "word": "click",
+        "line": 13,
+        "context": "<el-button type=\"primary\" @click=\"fetchPending\">搜索</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 21,
+        "context": "<el-button size=\"small\" type=\"primary\" @click=\"handleResult(row)\">录入结果</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 22,
+        "context": "<el-button size=\"small\" type=\"success\" @click=\"receiveSample(row)\">接收</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 23,
+        "context": "<el-button size=\"small\" type=\"danger\" @click=\"rejectSample(row)\">拒收</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 24,
+        "context": "<el-button size=\"small\" @click=\"viewTracking(row)\">流转</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 46,
+        "context": "<el-button type=\"primary\" @click=\"fetchResults\">搜索</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 88,
+        "context": "<el-button @click=\"dialogVisible=false\">取消</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 89,
+        "context": "<el-button type=\"primary\" @click=\"submit\">确定</el-button>"
+      },
+      {
+        "word": "submit",
+        "line": 89,
+        "context": "<el-button type=\"primary\" @click=\"submit\">确定</el-button>"
+      },
+      {
+        "word": "submit",
+        "line": 151,
+        "context": "const submit = async () => {"
+      }
+    ],
+    "emptyTextMissing": false,
+    "errorHandlingMissing": false
+  },
+  {
+    "file": "/vue3-new-ui/src/views/login/index.vue",
+    "messages": [],
+    "consoleStatements": [
+      {
+        "type": "console输出",
+        "line": 177,
+        "content": "console.error(\"登录失败:\", error);"
+      }
+    ],
+    "suspiciousEnglish": [
+      {
+        "word": "click",
+        "line": 43,
+        "context": "<span class=\"show-pwd\" @click=\"showPwd\">"
+      },
+      {
+        "word": "create",
+        "line": 69,
+        "context": "<router-link to=\"/register\" class=\"create-account\">"
+      },
+      {
+        "word": "query",
+        "line": 133,
+        "context": "return Object.keys(router.currentRoute.value.query).reduce((acc, cur) => {"
+      }
+    ],
+    "emptyTextMissing": false,
+    "errorHandlingMissing": false
+  },
+  {
+    "file": "/vue3-new-ui/src/views/patient/appointment.vue",
+    "messages": [],
+    "consoleStatements": [],
+    "suspiciousEnglish": [
+      {
+        "word": "success",
+        "line": 29,
+        "context": "<el-tag v-else-if=\"row.status==='已就诊'\" type=\"success\" size=\"small\">{{ row.status }}</el-tag>"
+      },
+      {
+        "word": "loading",
+        "line": 15,
+        "context": "<el-table :data=\"paginatedList\" v-loading=\"loading\" border empty-text=\"暂无数据\">"
+      },
+      {
+        "word": "loading",
+        "line": 15,
+        "context": "<el-table :data=\"paginatedList\" v-loading=\"loading\" border empty-text=\"暂无数据\">"
+      },
+      {
+        "word": "loading",
+        "line": 51,
+        "context": "<el-table :data=\"schedules\" v-loading=\"schedLoading\" empty-text=\"暂无可预约号源\">"
+      },
+      {
+        "word": "click",
+        "line": 6,
+        "context": "<el-button type=\"primary\" @click=\"openDialog\">预约挂号</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 13,
+        "context": "<el-button type=\"primary\" @click=\"fetchList\">搜索</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 35,
+        "context": "<el-button size=\"small\" type=\"danger\" @click=\"cancel(row)\">取消</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 64,
+        "context": "<el-button size=\"small\" type=\"primary\" @click=\"book(row)\">预约</el-button>"
+      },
+      {
+        "word": "cancel",
+        "line": 35,
+        "context": "<el-button size=\"small\" type=\"danger\" @click=\"cancel(row)\">取消</el-button>"
+      },
+      {
+        "word": "cancel",
+        "line": 126,
+        "context": "const cancel = async (row) => {"
+      }
+    ],
+    "emptyTextMissing": false,
+    "errorHandlingMissing": false
+  },
+  {
+    "file": "/vue3-new-ui/src/views/patient/charge.vue",
+    "messages": [],
+    "consoleStatements": [],
+    "suspiciousEnglish": [
+      {
+        "word": "success",
+        "line": 22,
+        "context": "<el-tag v-else-if=\"row.status===1\" type=\"success\">已缴费</el-tag>"
+      },
+      {
+        "word": "success",
+        "line": 74,
+        "context": "<el-button type=\"success\" style=\"margin-top: 15px;\" @click=\"mockPaySuccess\">模拟支付成功</el-button>"
+      },
+      {
+        "word": "loading",
+        "line": 15,
+        "context": "<el-table :data=\"paginatedList\" v-loading=\"loading\" border empty-text=\"暂无缴费记录\">"
+      },
+      {
+        "word": "loading",
+        "line": 15,
+        "context": "<el-table :data=\"paginatedList\" v-loading=\"loading\" border empty-text=\"暂无缴费记录\">"
+      },
+      {
+        "word": "click",
+        "line": 13,
+        "context": "<el-button type=\"primary\" @click=\"fetchList\">搜索</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 28,
+        "context": "<el-button v-if=\"row.status===0\" size=\"small\" type=\"primary\" @click=\"openPayDialog(row)\">缴费</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 58,
+        "context": "<el-button @click=\"payChannelVisible=false\">取消</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 59,
+        "context": "<el-button type=\"primary\" @click=\"confirmPay\">确认支付</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 64,
+        "context": "<el-dialog v-model=\"qrVisible\" title=\"扫码支付\" width=\"360px\" :close-on-click-modal=\"false\" @close=\"stopQuery\">"
+      },
+      {
+        "word": "click",
+        "line": 74,
+        "context": "<el-button type=\"success\" style=\"margin-top: 15px;\" @click=\"mockPaySuccess\">模拟支付成功</el-button>"
+      },
+      {
+        "word": "close",
+        "line": 64,
+        "context": "<el-dialog v-model=\"qrVisible\" title=\"扫码支付\" width=\"360px\" :close-on-click-modal=\"false\" @close=\"stopQuery\">"
+      },
+      {
+        "word": "close",
+        "line": 64,
+        "context": "<el-dialog v-model=\"qrVisible\" title=\"扫码支付\" width=\"360px\" :close-on-click-modal=\"false\" @close=\"stopQuery\">"
+      }
+    ],
+    "emptyTextMissing": false,
+    "errorHandlingMissing": false
+  },
+  {
+    "file": "/vue3-new-ui/src/views/patient/healthRecord.vue",
+    "messages": [],
+    "consoleStatements": [],
+    "suspiciousEnglish": [
+      {
+        "word": "loading",
+        "line": 27,
+        "context": "<el-table :data=\"paginatedVisits\" v-loading=\"loading\" empty-text=\"暂无记录\">"
+      },
+      {
+        "word": "loading",
+        "line": 27,
+        "context": "<el-table :data=\"paginatedVisits\" v-loading=\"loading\" empty-text=\"暂无记录\">"
+      },
+      {
+        "word": "click",
+        "line": 25,
+        "context": "<el-button type=\"primary\" @click=\"fetchVisits\">搜索</el-button>"
+      }
+    ],
+    "emptyTextMissing": false,
+    "errorHandlingMissing": false
+  },
+  {
+    "file": "/vue3-new-ui/src/views/patient/medicalRecord.vue",
+    "messages": [],
+    "consoleStatements": [],
+    "suspiciousEnglish": [
+      {
+        "word": "loading",
+        "line": 15,
+        "context": "<el-table :data=\"paginatedList\" v-loading=\"loading\" border empty-text=\"暂无数据\">"
+      },
+      {
+        "word": "loading",
+        "line": 15,
+        "context": "<el-table :data=\"paginatedList\" v-loading=\"loading\" border empty-text=\"暂无数据\">"
+      },
+      {
+        "word": "click",
+        "line": 13,
+        "context": "<el-button type=\"primary\" @click=\"fetchList\">搜索</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 22,
+        "context": "<el-button size=\"small\" @click=\"viewDetail(row)\">查看</el-button>"
+      },
+      {
+        "word": "detail",
+        "line": 39,
+        "context": "<el-descriptions-item label=\"就诊时间\">{{ detail.consultation_time }}</el-descriptions-item>"
+      },
+      {
+        "word": "detail",
+        "line": 40,
+        "context": "<el-descriptions-item label=\"医生\">{{ detail.doctor_name }}</el-descriptions-item>"
+      },
+      {
+        "word": "detail",
+        "line": 41,
+        "context": "<el-descriptions-item label=\"患者\">{{ detail.patient_name }}</el-descriptions-item>"
+      },
+      {
+        "word": "detail",
+        "line": 42,
+        "context": "<el-descriptions-item label=\"症状\">{{ detail.symptom }}</el-descriptions-item>"
+      },
+      {
+        "word": "detail",
+        "line": 43,
+        "context": "<el-descriptions-item label=\"诊断结果\">{{ detail.result }}</el-descriptions-item>"
+      }
+    ],
+    "emptyTextMissing": false,
+    "errorHandlingMissing": false
+  },
+  {
+    "file": "/vue3-new-ui/src/views/patient/prepaid.vue",
+    "messages": [],
+    "consoleStatements": [],
+    "suspiciousEnglish": [
+      {
+        "word": "click",
+        "line": 10,
+        "context": "<el-button type=\"primary\" @click=\"handleQuery\">查询余额</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 36,
+        "context": "<el-button type=\"primary\" @click=\"handleRecharge\">充值</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 51,
+        "context": "<el-button type=\"danger\" @click=\"handleDeduct\">扣费</el-button>"
+      }
+    ],
+    "emptyTextMissing": false,
+    "errorHandlingMissing": false
+  },
+  {
+    "file": "/vue3-new-ui/src/views/patient/prescription.vue",
+    "messages": [],
+    "consoleStatements": [],
+    "suspiciousEnglish": [
+      {
+        "word": "success",
+        "line": 22,
+        "context": "<el-tag v-else-if=\"row.status===2\" type=\"success\">已发药</el-tag>"
+      },
+      {
+        "word": "loading",
+        "line": 15,
+        "context": "<el-table :data=\"paginatedList\" v-loading=\"loading\" border empty-text=\"暂无数据\">"
+      },
+      {
+        "word": "loading",
+        "line": 15,
+        "context": "<el-table :data=\"paginatedList\" v-loading=\"loading\" border empty-text=\"暂无数据\">"
+      },
+      {
+        "word": "click",
+        "line": 13,
+        "context": "<el-button type=\"primary\" @click=\"fetchList\">搜索</el-button>"
+      }
+    ],
+    "emptyTextMissing": false,
+    "errorHandlingMissing": false
+  },
+  {
+    "file": "/vue3-new-ui/src/views/patient/referral.vue",
+    "messages": [],
+    "consoleStatements": [],
+    "suspiciousEnglish": [
+      {
+        "word": "loading",
+        "line": 8,
+        "context": "<el-table :data=\"tableData\" v-loading=\"loading\" border empty-text=\"暂无记录\">"
+      },
+      {
+        "word": "loading",
+        "line": 8,
+        "context": "<el-table :data=\"tableData\" v-loading=\"loading\" border empty-text=\"暂无记录\">"
+      },
+      {
+        "word": "click",
+        "line": 6,
+        "context": "<el-button type=\"primary\" @click=\"handleAdd\">新增转诊</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 60,
+        "context": "<el-button @click=\"dialogVisible = false\">取消</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 61,
+        "context": "<el-button type=\"primary\" @click=\"submitForm\">确定</el-button>"
+      }
+    ],
+    "emptyTextMissing": false,
+    "errorHandlingMissing": false
+  },
+  {
+    "file": "/vue3-new-ui/src/views/patient/registration.vue",
+    "messages": [],
+    "consoleStatements": [],
+    "suspiciousEnglish": [
+      {
+        "word": "success",
+        "line": 23,
+        "context": "<el-tag v-else-if=\"row.status==='已就诊'\" type=\"success\" size=\"small\">{{ row.status }}</el-tag>"
+      },
+      {
+        "word": "loading",
+        "line": 15,
+        "context": "<el-table :data=\"paginatedList\" v-loading=\"loading\" border empty-text=\"暂无数据\">"
+      },
+      {
+        "word": "loading",
+        "line": 15,
+        "context": "<el-table :data=\"paginatedList\" v-loading=\"loading\" border empty-text=\"暂无数据\">"
+      },
+      {
+        "word": "loading",
+        "line": 45,
+        "context": "<el-table :data=\"schedules\" v-loading=\"schedLoading\" empty-text=\"今日暂无可挂号号源\">"
+      },
+      {
+        "word": "click",
+        "line": 6,
+        "context": "<el-button type=\"primary\" @click=\"openDialog\">现场挂号</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 13,
+        "context": "<el-button type=\"primary\" @click=\"fetchList\">搜索</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 29,
+        "context": "<el-button size=\"small\" type=\"danger\" @click=\"cancel(row)\">取消</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 57,
+        "context": "<el-button size=\"small\" type=\"primary\" @click=\"register(row)\">挂号</el-button>"
+      },
+      {
+        "word": "cancel",
+        "line": 29,
+        "context": "<el-button size=\"small\" type=\"danger\" @click=\"cancel(row)\">取消</el-button>"
+      },
+      {
+        "word": "cancel",
+        "line": 122,
+        "context": "const cancel = async (row) => {"
+      }
+    ],
+    "emptyTextMissing": false,
+    "errorHandlingMissing": false
+  },
+  {
+    "file": "/vue3-new-ui/src/views/patient/review.vue",
+    "messages": [
+      {
+        "type": "标签",
+        "text": "v.visit_time + ' - ' + v.doctor_name + ' - ' + v.diagnosis",
+        "line": 13
+      },
+      {
+        "type": "表格列标签",
+        "text": "v.visit_time + ' - ' + v.doctor_name + ' - ' + v.diagnosis",
+        "line": 13
+      },
+      {
+        "type": "选项标签",
+        "text": "v.visit_time + ' - ' + v.doctor_name + ' - ' + v.diagnosis",
+        "line": 13
+      }
+    ],
+    "consoleStatements": [],
+    "suspiciousEnglish": [
+      {
+        "word": "click",
+        "line": 23,
+        "context": "<el-button type=\"primary\" @click=\"submit\">提交评价</el-button>"
+      },
+      {
+        "word": "submit",
+        "line": 23,
+        "context": "<el-button type=\"primary\" @click=\"submit\">提交评价</el-button>"
+      },
+      {
+        "word": "submit",
+        "line": 40,
+        "context": "const submit = async () => {"
+      }
+    ],
+    "emptyTextMissing": false,
+    "errorHandlingMissing": false
+  },
+  {
+    "file": "/vue3-new-ui/src/views/patient/triage.vue",
+    "messages": [],
+    "consoleStatements": [],
+    "suspiciousEnglish": [
+      {
+        "word": "success",
+        "line": 40,
+        "context": "<el-tag v-for=\"kw in item.matched_keywords\" :key=\"kw\" size=\"small\" type=\"success\" style=\"margin-right: 5px;\">{{ kw }}</el-tag>"
+      },
+      {
+        "word": "loading",
+        "line": 18,
+        "context": "<el-button type=\"primary\" size=\"large\" @click=\"submitTriage\" :loading=\"loading\">"
+      },
+      {
+        "word": "loading",
+        "line": 18,
+        "context": "<el-button type=\"primary\" size=\"large\" @click=\"submitTriage\" :loading=\"loading\">"
+      },
+      {
+        "word": "click",
+        "line": 18,
+        "context": "<el-button type=\"primary\" size=\"large\" @click=\"submitTriage\" :loading=\"loading\">"
+      },
+      {
+        "word": "click",
+        "line": 21,
+        "context": "<el-button size=\"large\" @click=\"symptomText = ''\">清空</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 73,
+        "context": "<el-link v-if=\"keywords.length > 30\" type=\"primary\" @click=\"showAllKeywords = !showAllKeywords\" style=\"margin-left: 10px;\">"
+      }
+    ],
+    "emptyTextMissing": false,
+    "errorHandlingMissing": false
+  },
+  {
+    "file": "/vue3-new-ui/src/views/pharmacy/adverseReaction.vue",
+    "messages": [],
+    "consoleStatements": [
+      {
+        "type": "console输出",
+        "line": 68,
+        "content": "} catch (e) { console.error(\"获取患者失败\", e); }"
+      },
+      {
+        "type": "console输出",
+        "line": 75,
+        "content": "} catch (e) { console.error(\"获取药品失败\", e); }"
+      }
+    ],
+    "suspiciousEnglish": [
+      {
+        "word": "success",
+        "line": 18,
+        "context": "<el-button v-if=\"row.status===1\" size=\"small\" type=\"success\" @click=\"updateStatus(row,2)\">处理</el-button>"
+      },
+      {
+        "word": "loading",
+        "line": 8,
+        "context": "<el-table :data=\"list\" v-loading=\"loading\" empty-text=\"暂无记录\">"
+      },
+      {
+        "word": "loading",
+        "line": 8,
+        "context": "<el-table :data=\"list\" v-loading=\"loading\" empty-text=\"暂无记录\">"
+      },
+      {
+        "word": "click",
+        "line": 6,
+        "context": "<el-button type=\"primary\" @click=\"handleAdd\">上报ADR</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 17,
+        "context": "<el-button v-if=\"row.status===0\" size=\"small\" type=\"primary\" @click=\"updateStatus(row,1)\">确认</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 18,
+        "context": "<el-button v-if=\"row.status===1\" size=\"small\" type=\"success\" @click=\"updateStatus(row,2)\">处理</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 42,
+        "context": "<template #footer><el-button @click=\"dialogVisible=false\">取消</el-button><el-button type=\"primary\" @click=\"submit\">确定</el-button></template>"
+      },
+      {
+        "word": "click",
+        "line": 42,
+        "context": "<template #footer><el-button @click=\"dialogVisible=false\">取消</el-button><el-button type=\"primary\" @click=\"submit\">确定</el-button></template>"
+      },
+      {
+        "word": "submit",
+        "line": 42,
+        "context": "<template #footer><el-button @click=\"dialogVisible=false\">取消</el-button><el-button type=\"primary\" @click=\"submit\">确定</el-button></template>"
+      },
+      {
+        "word": "submit",
+        "line": 79,
+        "context": "const submit = async () => {"
+      },
+      {
+        "word": "list",
+        "line": 8,
+        "context": "<el-table :data=\"list\" v-loading=\"loading\" empty-text=\"暂无记录\">"
+      }
+    ],
+    "emptyTextMissing": false,
+    "errorHandlingMissing": false
+  },
+  {
+    "file": "/vue3-new-ui/src/views/pharmacy/consumable.vue",
+    "messages": [],
+    "consoleStatements": [],
+    "suspiciousEnglish": [
+      {
+        "word": "success",
+        "line": 21,
+        "context": "<el-tag v-if=\"row.status===0\" type=\"success\">正常</el-tag>"
+      },
+      {
+        "word": "loading",
+        "line": 11,
+        "context": "<el-table :data=\"list\" v-loading=\"loading\" empty-text=\"暂无记录\">"
+      },
+      {
+        "word": "loading",
+        "line": 11,
+        "context": "<el-table :data=\"list\" v-loading=\"loading\" empty-text=\"暂无记录\">"
+      },
+      {
+        "word": "click",
+        "line": 6,
+        "context": "<el-button type=\"primary\" @click=\"handleAdd\">新增耗材</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 8,
+        "context": "<el-button type=\"primary\" @click=\"fetchList\">搜索</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 27,
+        "context": "<el-button size=\"small\" @click=\"handleEdit(row)\">编辑</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 28,
+        "context": "<el-button size=\"small\" type=\"danger\" @click=\"handleDelete(row)\">删除</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 71,
+        "context": "<el-button @click=\"dialogVisible = false\">取消</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 72,
+        "context": "<el-button type=\"primary\" @click=\"submit\">确定</el-button>"
+      },
+      {
+        "word": "submit",
+        "line": 72,
+        "context": "<el-button type=\"primary\" @click=\"submit\">确定</el-button>"
+      },
+      {
+        "word": "submit",
+        "line": 109,
+        "context": "const submit = async () => {"
+      },
+      {
+        "word": "search",
+        "line": 7,
+        "context": "<el-input v-model=\"searchQuery\" placeholder=\"搜索耗材\" clearable class=\"page-search-input\" />"
+      },
+      {
+        "word": "list",
+        "line": 11,
+        "context": "<el-table :data=\"list\" v-loading=\"loading\" empty-text=\"暂无记录\">"
+      }
+    ],
+    "emptyTextMissing": false,
+    "errorHandlingMissing": false
+  },
+  {
+    "file": "/vue3-new-ui/src/views/pharmacy/dispense.vue",
+    "messages": [],
+    "consoleStatements": [],
+    "suspiciousEnglish": [
+      {
+        "word": "success",
+        "line": 21,
+        "context": "<el-tag v-else-if=\"row.status===2\" type=\"success\">已发药</el-tag>"
+      },
+      {
+        "word": "success",
+        "line": 33,
+        "context": "<el-button v-if=\"row.status===1\" size=\"small\" type=\"success\" @click=\"dispense(row)\">发药</el-button>"
+      },
+      {
+        "word": "loading",
+        "line": 14,
+        "context": "<el-table :data=\"paginatedList\" v-loading=\"loading\" border empty-text=\"暂无数据\">"
+      },
+      {
+        "word": "loading",
+        "line": 14,
+        "context": "<el-table :data=\"paginatedList\" v-loading=\"loading\" border empty-text=\"暂无数据\">"
+      },
+      {
+        "word": "click",
+        "line": 12,
+        "context": "<el-button type=\"primary\" @click=\"fetchList\">搜索</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 32,
+        "context": "<el-button v-if=\"row.status===0\" size=\"small\" type=\"primary\" @click=\"audit(row)\">审核</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 33,
+        "context": "<el-button v-if=\"row.status===1\" size=\"small\" type=\"success\" @click=\"dispense(row)\">发药</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 34,
+        "context": "<el-button size=\"small\" @click=\"handleReturn(row)\">退药</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 64,
+        "context": "<el-button @click=\"returnVisible=false\">取消</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 65,
+        "context": "<el-button type=\"primary\" @click=\"submitReturn\">确定</el-button>"
+      }
+    ],
+    "emptyTextMissing": false,
+    "errorHandlingMissing": false
+  },
+  {
+    "file": "/vue3-new-ui/src/views/pharmacy/pharmaceutical.vue",
+    "messages": [],
+    "consoleStatements": [],
+    "suspiciousEnglish": [
+      {
+        "word": "success",
+        "line": 24,
+        "context": "<el-tag v-else-if=\"row.antibiotic_level===1\" type=\"success\">非限制</el-tag>"
+      },
+      {
+        "word": "loading",
+        "line": 15,
+        "context": "<el-table :data=\"paginatedList\" v-loading=\"loading\" empty-text=\"暂无记录\">"
+      },
+      {
+        "word": "loading",
+        "line": 15,
+        "context": "<el-table :data=\"paginatedList\" v-loading=\"loading\" empty-text=\"暂无记录\">"
+      },
+      {
+        "word": "click",
+        "line": 6,
+        "context": "<el-button type=\"primary\" @click=\"handleAdd\">新增药品</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 13,
+        "context": "<el-button type=\"primary\" @click=\"fetchList\">搜索</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 32,
+        "context": "<el-button size=\"small\" @click=\"handleEdit(row)\">编辑</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 33,
+        "context": "<el-button size=\"small\" type=\"danger\" @click=\"handleDelete(row)\">删除</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 78,
+        "context": "<el-button @click=\"dialogVisible=false\">取消</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 79,
+        "context": "<el-button type=\"primary\" @click=\"submit\">确定</el-button>"
+      },
+      {
+        "word": "submit",
+        "line": 79,
+        "context": "<el-button type=\"primary\" @click=\"submit\">确定</el-button>"
+      },
+      {
+        "word": "submit",
+        "line": 125,
+        "context": "const submit = async () => {"
+      },
+      {
+        "word": "confirm",
+        "line": 141,
+        "context": "ElMessageBox.confirm(\"确认删除该药品？\", \"提示\", { type: \"warning\" }).then(async () => {"
+      }
+    ],
+    "emptyTextMissing": false,
+    "errorHandlingMissing": true
+  },
+  {
+    "file": "/vue3-new-ui/src/views/pharmacy/prescriptionReview.vue",
+    "messages": [],
+    "consoleStatements": [],
+    "suspiciousEnglish": [
+      {
+        "word": "loading",
+        "line": 10,
+        "context": "<el-table :data=\"list\" v-loading=\"loading\" border empty-text=\"暂无数据\">"
+      },
+      {
+        "word": "loading",
+        "line": 10,
+        "context": "<el-table :data=\"list\" v-loading=\"loading\" border empty-text=\"暂无数据\">"
+      },
+      {
+        "word": "click",
+        "line": 7,
+        "context": "<el-button type=\"primary\" @click=\"loadData\">搜索</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 20,
+        "context": "<el-button size=\"small\" type=\"primary\" @click=\"openReview(row)\">点评</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 49,
+        "context": "<el-button @click=\"dialogVisible = false\">取消</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 50,
+        "context": "<el-button type=\"primary\" @click=\"submitReview\">提交</el-button>"
+      },
+      {
+        "word": "search",
+        "line": 6,
+        "context": "<el-input v-model=\"keyword\" placeholder=\"搜索处方\" clearable class=\"page-search-input\" />"
+      },
+      {
+        "word": "list",
+        "line": 10,
+        "context": "<el-table :data=\"list\" v-loading=\"loading\" border empty-text=\"暂无数据\">"
+      }
+    ],
+    "emptyTextMissing": false,
+    "errorHandlingMissing": false
+  },
+  {
+    "file": "/vue3-new-ui/src/views/pharmacy/purchase.vue",
+    "messages": [],
+    "consoleStatements": [],
+    "suspiciousEnglish": [
+      {
+        "word": "success",
+        "line": 24,
+        "context": "<el-tag v-else-if=\"row.status===2\" type=\"success\">{{ row.status_text }}</el-tag>"
+      },
+      {
+        "word": "success",
+        "line": 38,
+        "context": "<el-button v-if=\"row.status===1\" size=\"small\" type=\"success\" @click=\"storage(row)\">入库</el-button>"
+      },
+      {
+        "word": "loading",
+        "line": 16,
+        "context": "<el-table :data=\"list\" v-loading=\"loading\" empty-text=\"暂无记录\">"
+      },
+      {
+        "word": "loading",
+        "line": 16,
+        "context": "<el-table :data=\"list\" v-loading=\"loading\" empty-text=\"暂无记录\">"
+      },
+      {
+        "word": "click",
+        "line": 6,
+        "context": "<el-button type=\"primary\" @click=\"handleAdd\">新建采购单</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 13,
+        "context": "<el-button @click=\"fetchList\">刷新</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 37,
+        "context": "<el-button v-if=\"row.status===0\" size=\"small\" type=\"primary\" @click=\"approve(row)\">审批</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 38,
+        "context": "<el-button v-if=\"row.status===1\" size=\"small\" type=\"success\" @click=\"storage(row)\">入库</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 39,
+        "context": "<el-button v-if=\"row.status!==2 && row.status!==3\" size=\"small\" type=\"danger\" @click=\"cancel(row)\">取消</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 59,
+        "context": "<el-button type=\"danger\" size=\"small\" @click=\"removeItem(i)\">删除</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 61,
+        "context": "<el-button type=\"primary\" size=\"small\" @click=\"addItem\">添加明细</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 65,
+        "context": "<el-button @click=\"dialogVisible=false\">取消</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 66,
+        "context": "<el-button type=\"primary\" @click=\"submit\">确定</el-button>"
+      },
+      {
+        "word": "submit",
+        "line": 66,
+        "context": "<el-button type=\"primary\" @click=\"submit\">确定</el-button>"
+      },
+      {
+        "word": "submit",
+        "line": 105,
+        "context": "const submit = async () => {"
+      },
+      {
+        "word": "cancel",
+        "line": 39,
+        "context": "<el-button v-if=\"row.status!==2 && row.status!==3\" size=\"small\" type=\"danger\" @click=\"cancel(row)\">取消</el-button>"
+      },
+      {
+        "word": "cancel",
+        "line": 138,
+        "context": "const cancel = async (row) => {"
+      },
+      {
+        "word": "search",
+        "line": 7,
+        "context": "<el-select v-model=\"filterStatus\" placeholder=\"筛选状态\" clearable class=\"page-search-input\" @change=\"fetchList\">"
+      },
+      {
+        "word": "list",
+        "line": 16,
+        "context": "<el-table :data=\"list\" v-loading=\"loading\" empty-text=\"暂无记录\">"
+      }
+    ],
+    "emptyTextMissing": false,
+    "errorHandlingMissing": false
+  },
+  {
+    "file": "/vue3-new-ui/src/views/pharmacy/stockAlert.vue",
+    "messages": [],
+    "consoleStatements": [],
+    "suspiciousEnglish": [
+      {
+        "word": "success",
+        "line": 18,
+        "context": "<el-alert v-else title=\"所有药品库存充足\" type=\"success\" :closable=\"false\" show-icon />"
+      },
+      {
+        "word": "success",
+        "line": 48,
+        "context": "<el-alert v-else title=\"暂无即将过期的药品\" type=\"success\" :closable=\"false\" show-icon />"
+      },
+      {
+        "word": "loading",
+        "line": 19,
+        "context": "<el-table :data=\"lowStockList\" v-loading=\"loading\" empty-text=\"暂无记录\">"
+      },
+      {
+        "word": "loading",
+        "line": 19,
+        "context": "<el-table :data=\"lowStockList\" v-loading=\"loading\" empty-text=\"暂无记录\">"
+      },
+      {
+        "word": "loading",
+        "line": 49,
+        "context": "<el-table :data=\"nearExpiryList\" v-loading=\"loading\" empty-text=\"暂无记录\">"
+      },
+      {
+        "word": "loading",
+        "line": 49,
+        "context": "<el-table :data=\"nearExpiryList\" v-loading=\"loading\" empty-text=\"暂无记录\">"
+      },
+      {
+        "word": "click",
+        "line": 14,
+        "context": "<el-button type=\"primary\" @click=\"queryLowStock\">查询</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 44,
+        "context": "<el-button type=\"primary\" @click=\"queryNearExpiry\">查询</el-button>"
+      }
+    ],
+    "emptyTextMissing": false,
+    "errorHandlingMissing": false
+  },
+  {
+    "file": "/vue3-new-ui/src/views/pharmacy/stockCheck.vue",
+    "messages": [],
+    "consoleStatements": [],
+    "suspiciousEnglish": [
+      {
+        "word": "success",
+        "line": 28,
+        "context": "<el-tag v-if=\"row.diff > 0\" type=\"success\">+{{ row.diff }}</el-tag>"
+      },
+      {
+        "word": "loading",
+        "line": 6,
+        "context": "<el-table :data=\"drugList\" v-loading=\"loading\" empty-text=\"暂无记录\">"
+      },
+      {
+        "word": "loading",
+        "line": 6,
+        "context": "<el-table :data=\"drugList\" v-loading=\"loading\" empty-text=\"暂无记录\">"
+      },
+      {
+        "word": "click",
+        "line": 16,
+        "context": "<el-button type=\"primary\" @click=\"submitCheck\">提交盘点</el-button>"
+      }
+    ],
+    "emptyTextMissing": false,
+    "errorHandlingMissing": false
+  },
+  {
+    "file": "/vue3-new-ui/src/views/queue/patrolRecord.vue",
+    "messages": [],
+    "consoleStatements": [
+      {
+        "type": "console输出",
+        "line": 82,
+        "content": "console.error(\"获取患者失败\", e);"
+      }
+    ],
+    "suspiciousEnglish": [
+      {
+        "word": "success",
+        "line": 19,
+        "context": "<el-tag v-if=\"row.status === 0\" type=\"success\">正常</el-tag>"
+      },
+      {
+        "word": "loading",
+        "line": 8,
+        "context": "<el-table :data=\"patrolList\" v-loading=\"loading\" border empty-text=\"暂无巡视记录\">"
+      },
+      {
+        "word": "loading",
+        "line": 8,
+        "context": "<el-table :data=\"patrolList\" v-loading=\"loading\" border empty-text=\"暂无巡视记录\">"
+      },
+      {
+        "word": "click",
+        "line": 6,
+        "context": "<el-button type=\"primary\" @click=\"dialogVisible = true\">新增巡视记录</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 47,
+        "context": "<el-button @click=\"dialogVisible = false\">取消</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 48,
+        "context": "<el-button type=\"primary\" @click=\"submit\">提交</el-button>"
+      },
+      {
+        "word": "submit",
+        "line": 48,
+        "context": "<el-button type=\"primary\" @click=\"submit\">提交</el-button>"
+      },
+      {
+        "word": "submit",
+        "line": 86,
+        "context": "const submit = async () => {"
+      }
+    ],
+    "emptyTextMissing": false,
+    "errorHandlingMissing": false
+  },
+  {
+    "file": "/vue3-new-ui/src/views/queue/queueList.vue",
+    "messages": [],
+    "consoleStatements": [],
+    "suspiciousEnglish": [
+      {
+        "word": "success",
+        "line": 21,
+        "context": "<el-tag v-else type=\"success\">预约</el-tag>"
+      },
+      {
+        "word": "success",
+        "line": 29,
+        "context": "<el-tag v-else type=\"success\">已就诊</el-tag>"
+      },
+      {
+        "word": "loading",
+        "line": 14,
+        "context": "<el-table :data=\"paginatedList\" v-loading=\"loading\" border empty-text=\"暂无候诊患者\">"
+      },
+      {
+        "word": "loading",
+        "line": 14,
+        "context": "<el-table :data=\"paginatedList\" v-loading=\"loading\" border empty-text=\"暂无候诊患者\">"
+      },
+      {
+        "word": "click",
+        "line": 12,
+        "context": "<el-button type=\"primary\" @click=\"fetchList\">搜索</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 34,
+        "context": "<el-button size=\"small\" type=\"primary\" @click=\"callNext(row)\">叫号</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 35,
+        "context": "<el-button size=\"small\" @click=\"pass(row)\">过号</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 36,
+        "context": "<el-button size=\"small\" @click=\"skip(row)\">跳过</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 37,
+        "context": "<el-button size=\"small\" type=\"danger\" @click=\"emergency(row)\">急诊优先</el-button>"
+      }
+    ],
+    "emptyTextMissing": false,
+    "errorHandlingMissing": false
+  },
+  {
+    "file": "/vue3-new-ui/src/views/queue/triageDesk.vue",
+    "messages": [],
+    "consoleStatements": [],
+    "suspiciousEnglish": [
+      {
+        "word": "success",
+        "line": 47,
+        "context": "<el-tag type=\"success\">非急</el-tag>"
+      },
+      {
+        "word": "success",
+        "line": 94,
+        "context": "<el-tag v-else type=\"success\">非急</el-tag>"
+      },
+      {
+        "word": "success",
+        "line": 109,
+        "context": "<el-tag v-else-if=\"row.status===1\" type=\"success\">{{ row.status_text }}</el-tag>"
+      },
+      {
+        "word": "success",
+        "line": 116,
+        "context": "<el-button v-if=\"row.status===0\" size=\"small\" type=\"success\" @click=\"updateStatus(row, 1)\">接诊</el-button>"
+      },
+      {
+        "word": "loading",
+        "line": 88,
+        "context": "<el-table :data=\"list\" v-loading=\"loading\" size=\"small\" empty-text=\"暂无记录\">"
+      },
+      {
+        "word": "loading",
+        "line": 88,
+        "context": "<el-table :data=\"list\" v-loading=\"loading\" size=\"small\" empty-text=\"暂无记录\">"
+      },
+      {
+        "word": "click",
+        "line": 60,
+        "context": "<el-button type=\"primary\" @click=\"submitCreate\">提交分诊</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 61,
+        "context": "<el-button @click=\"resetForm\">重置</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 84,
+        "context": "<el-button type=\"primary\" size=\"small\" @click=\"fetchList\">查询</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 116,
+        "context": "<el-button v-if=\"row.status===0\" size=\"small\" type=\"success\" @click=\"updateStatus(row, 1)\">接诊</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 117,
+        "context": "<el-button v-if=\"row.status===0\" size=\"small\" @click=\"updateStatus(row, 2)\">转诊</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 118,
+        "context": "<el-button size=\"small\" type=\"danger\" @click=\"updateStatus(row, 3)\">取消</el-button>"
+      },
+      {
+        "word": "list",
+        "line": 88,
+        "context": "<el-table :data=\"list\" v-loading=\"loading\" size=\"small\" empty-text=\"暂无记录\">"
+      }
+    ],
+    "emptyTextMissing": false,
+    "errorHandlingMissing": false
+  },
+  {
+    "file": "/vue3-new-ui/src/views/register/index.vue",
+    "messages": [],
+    "consoleStatements": [],
+    "suspiciousEnglish": [],
+    "emptyTextMissing": false,
+    "errorHandlingMissing": false
+  },
+  {
+    "file": "/vue3-new-ui/src/views/report/reports.vue",
+    "messages": [],
+    "consoleStatements": [],
+    "suspiciousEnglish": [
+      {
+        "word": "loading",
+        "line": 29,
+        "context": "<el-table :data=\"paginatedOutpatientDetails\" v-loading=\"loading\" empty-text=\"暂无数据\">"
+      },
+      {
+        "word": "loading",
+        "line": 29,
+        "context": "<el-table :data=\"paginatedOutpatientDetails\" v-loading=\"loading\" empty-text=\"暂无数据\">"
+      },
+      {
+        "word": "loading",
+        "line": 76,
+        "context": "<el-table :data=\"paginatedPharmaResult\" v-loading=\"loading\" empty-text=\"暂无数据\">"
+      },
+      {
+        "word": "loading",
+        "line": 76,
+        "context": "<el-table :data=\"paginatedPharmaResult\" v-loading=\"loading\" empty-text=\"暂无数据\">"
+      },
+      {
+        "word": "loading",
+        "line": 108,
+        "context": "<el-table :data=\"paginatedWorkloadResult\" v-loading=\"loading\" empty-text=\"暂无数据\">"
+      },
+      {
+        "word": "loading",
+        "line": 108,
+        "context": "<el-table :data=\"paginatedWorkloadResult\" v-loading=\"loading\" empty-text=\"暂无数据\">"
+      },
+      {
+        "word": "click",
+        "line": 23,
+        "context": "<el-button type=\"primary\" @click=\"queryOutpatient\">查询</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 53,
+        "context": "<el-button type=\"primary\" @click=\"queryFinance\">查询</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 73,
+        "context": "<el-button type=\"primary\" @click=\"queryPharma\">查询</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 105,
+        "context": "<el-button type=\"primary\" @click=\"queryWorkload\">查询</el-button>"
+      }
+    ],
+    "emptyTextMissing": false,
+    "errorHandlingMissing": false
+  },
+  {
+    "file": "/vue3-new-ui/src/views/system/adverseEvent.vue",
+    "messages": [],
+    "consoleStatements": [],
+    "suspiciousEnglish": [
+      {
+        "word": "loading",
+        "line": 8,
+        "context": "<el-table :data=\"tableData\" v-loading=\"loading\" border empty-text=\"暂无记录\">"
+      },
+      {
+        "word": "loading",
+        "line": 8,
+        "context": "<el-table :data=\"tableData\" v-loading=\"loading\" border empty-text=\"暂无记录\">"
+      },
+      {
+        "word": "click",
+        "line": 6,
+        "context": "<el-button type=\"primary\" @click=\"handleAdd\">新增不良事件</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 60,
+        "context": "<el-button @click=\"dialogVisible = false\">取消</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 61,
+        "context": "<el-button type=\"primary\" @click=\"submitForm\">确定</el-button>"
+      }
+    ],
+    "emptyTextMissing": false,
+    "errorHandlingMissing": false
+  },
+  {
+    "file": "/vue3-new-ui/src/views/system/backup.vue",
+    "messages": [],
+    "consoleStatements": [],
+    "suspiciousEnglish": [
+      {
+        "word": "loading",
+        "line": 21,
+        "context": "<el-table :data=\"list\" v-loading=\"loading\" empty-text=\"暂无记录\">"
+      },
+      {
+        "word": "loading",
+        "line": 21,
+        "context": "<el-table :data=\"list\" v-loading=\"loading\" empty-text=\"暂无记录\">"
+      },
+      {
+        "word": "click",
+        "line": 18,
+        "context": "<el-button @click=\"fetchList\">刷新列表</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 32,
+        "context": "<el-button size=\"small\" @click=\"downloadBackup(row)\">"
+      },
+      {
+        "word": "list",
+        "line": 21,
+        "context": "<el-table :data=\"list\" v-loading=\"loading\" empty-text=\"暂无记录\">"
+      }
+    ],
+    "emptyTextMissing": false,
+    "errorHandlingMissing": false
+  },
+  {
+    "file": "/vue3-new-ui/src/views/system/config.vue",
+    "messages": [],
+    "consoleStatements": [],
+    "suspiciousEnglish": [
+      {
+        "word": "loading",
+        "line": 14,
+        "context": "<el-table :data=\"paginatedList\" v-loading=\"loading\" empty-text=\"暂无记录\">"
+      },
+      {
+        "word": "loading",
+        "line": 14,
+        "context": "<el-table :data=\"paginatedList\" v-loading=\"loading\" empty-text=\"暂无记录\">"
+      },
+      {
+        "word": "click",
+        "line": 12,
+        "context": "<el-button type=\"primary\" @click=\"fetchList\">搜索</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 20,
+        "context": "<el-button size=\"small\" @click=\"handleEdit(row)\">编辑</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 45,
+        "context": "<el-button @click=\"dialogVisible=false\">取消</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 46,
+        "context": "<el-button type=\"primary\" @click=\"submit\">确定</el-button>"
+      },
+      {
+        "word": "submit",
+        "line": 46,
+        "context": "<el-button type=\"primary\" @click=\"submit\">确定</el-button>"
+      },
+      {
+        "word": "submit",
+        "line": 84,
+        "context": "const submit = async () => {"
+      }
+    ],
+    "emptyTextMissing": false,
+    "errorHandlingMissing": false
+  },
+  {
+    "file": "/vue3-new-ui/src/views/system/dict.vue",
+    "messages": [],
+    "consoleStatements": [],
+    "suspiciousEnglish": [
+      {
+        "word": "loading",
+        "line": 23,
+        "context": "<el-table :data=\"paginatedList\" v-loading=\"loading\" empty-text=\"暂无记录\">"
+      },
+      {
+        "word": "loading",
+        "line": 23,
+        "context": "<el-table :data=\"paginatedList\" v-loading=\"loading\" empty-text=\"暂无记录\">"
+      },
+      {
+        "word": "click",
+        "line": 10,
+        "context": "<el-button type=\"primary\" @click=\"fetchList\">查询</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 14,
+        "context": "<el-button type=\"primary\" @click=\"handleAdd\">新增字典项</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 21,
+        "context": "<el-button type=\"primary\" @click=\"fetchList\">搜索</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 31,
+        "context": "<el-button size=\"small\" @click=\"handleEdit(row)\">编辑</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 32,
+        "context": "<el-button size=\"small\" type=\"danger\" @click=\"handleDelete(row)\">删除</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 63,
+        "context": "<el-button @click=\"dialogVisible=false\">取消</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 64,
+        "context": "<el-button type=\"primary\" @click=\"submit\">确定</el-button>"
+      },
+      {
+        "word": "submit",
+        "line": 64,
+        "context": "<el-button type=\"primary\" @click=\"submit\">确定</el-button>"
+      },
+      {
+        "word": "submit",
+        "line": 111,
+        "context": "const submit = async () => {"
+      },
+      {
+        "word": "confirm",
+        "line": 127,
+        "context": "ElMessageBox.confirm(\"确认删除？\", \"提示\", { type: \"warning\" }).then(async () => {"
+      }
+    ],
+    "emptyTextMissing": false,
+    "errorHandlingMissing": true
+  },
+  {
+    "file": "/vue3-new-ui/src/views/system/digitalSignature.vue",
+    "messages": [],
+    "consoleStatements": [],
+    "suspiciousEnglish": [
+      {
+        "word": "success",
+        "line": 16,
+        "context": "<el-button type=\"success\" @click=\"handleVerify\" :disabled=\"!signResult\">验证</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 15,
+        "context": "<el-button type=\"primary\" @click=\"handleSign\">签名</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 16,
+        "context": "<el-button type=\"success\" @click=\"handleVerify\" :disabled=\"!signResult\">验证</el-button>"
+      }
+    ],
+    "emptyTextMissing": false,
+    "errorHandlingMissing": false
+  },
+  {
+    "file": "/vue3-new-ui/src/views/system/logs.vue",
+    "messages": [],
+    "consoleStatements": [],
+    "suspiciousEnglish": [
+      {
+        "word": "success",
+        "line": 30,
+        "context": "<el-tag v-if=\"row.result === '成功'\" type=\"success\" size=\"small\">成功</el-tag>"
+      },
+      {
+        "word": "loading",
+        "line": 15,
+        "context": "<el-table :data=\"list\" v-loading=\"loading\" empty-text=\"暂无操作日志\" border>"
+      },
+      {
+        "word": "loading",
+        "line": 15,
+        "context": "<el-table :data=\"list\" v-loading=\"loading\" empty-text=\"暂无操作日志\" border>"
+      },
+      {
+        "word": "click",
+        "line": 10,
+        "context": "<el-button type=\"primary\" @click=\"fetchList\">查询</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 11,
+        "context": "<el-button @click=\"resetSearch\">重置</el-button>"
+      },
+      {
+        "word": "list",
+        "line": 15,
+        "context": "<el-table :data=\"list\" v-loading=\"loading\" empty-text=\"暂无操作日志\" border>"
+      }
+    ],
+    "emptyTextMissing": false,
+    "errorHandlingMissing": false
+  },
+  {
+    "file": "/vue3-new-ui/src/views/system/messageCenter.vue",
+    "messages": [],
+    "consoleStatements": [],
+    "suspiciousEnglish": [
+      {
+        "word": "success",
+        "line": 11,
+        "context": "<el-tag v-else type=\"success\">站内信</el-tag>"
+      },
+      {
+        "word": "loading",
+        "line": 5,
+        "context": "<el-table :data=\"messageList\" v-loading=\"loading\" empty-text=\"暂无记录\">"
+      },
+      {
+        "word": "loading",
+        "line": 5,
+        "context": "<el-table :data=\"messageList\" v-loading=\"loading\" empty-text=\"暂无记录\">"
+      },
+      {
+        "word": "click",
+        "line": 23,
+        "context": "<el-button v-if=\"!row.is_read\" size=\"small\" @click=\"markRead(row)\">标为已读</el-button>"
+      }
+    ],
+    "emptyTextMissing": false,
+    "errorHandlingMissing": false
+  },
+  {
+    "file": "/vue3-new-ui/src/views/system/permission.vue",
+    "messages": [],
+    "consoleStatements": [],
+    "suspiciousEnglish": [
+      {
+        "word": "success",
+        "line": 25,
+        "context": "<el-tag v-else-if=\"row.user_role === 'patient'\" type=\"success\">患者</el-tag>"
+      },
+      {
+        "word": "success",
+        "line": 49,
+        "context": "<el-tag v-else-if=\"currentRow.user_role === 'patient'\" type=\"success\">患者</el-tag>"
+      },
+      {
+        "word": "loading",
+        "line": 17,
+        "context": "<el-table :data=\"list\" v-loading=\"loading\" empty-text=\"暂无记录\">"
+      },
+      {
+        "word": "loading",
+        "line": 17,
+        "context": "<el-table :data=\"list\" v-loading=\"loading\" empty-text=\"暂无记录\">"
+      },
+      {
+        "word": "click",
+        "line": 13,
+        "context": "<el-button type=\"primary\" @click=\"fetchList\">查询</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 14,
+        "context": "<el-button @click=\"roleFilter = ''; fetchList()\">重置</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 31,
+        "context": "<el-button size=\"small\" type=\"primary\" @click=\"openRoleDialog(row)\">修改角色</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 32,
+        "context": "<el-button size=\"small\" type=\"warning\" @click=\"resetPassword(row)\">重置密码</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 33,
+        "context": "<el-button v-if=\"row.user_role !== 'admin'\" size=\"small\" type=\"danger\" @click=\"deleteUser(row)\">删除</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 61,
+        "context": "<el-button @click=\"roleVisible = false\">取消</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 62,
+        "context": "<el-button type=\"primary\" @click=\"submitRoleChange\">确定</el-button>"
+      },
+      {
+        "word": "list",
+        "line": 17,
+        "context": "<el-table :data=\"list\" v-loading=\"loading\" empty-text=\"暂无记录\">"
+      }
+    ],
+    "emptyTextMissing": false,
+    "errorHandlingMissing": false
+  },
+  {
+    "file": "/vue3-new-ui/src/views/vab/calendar.vue",
+    "messages": [],
+    "consoleStatements": [],
+    "suspiciousEnglish": [
+      {
+        "word": "click",
+        "line": 8,
+        "context": "<el-button @click=\"prevMonth\">上个月</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 9,
+        "context": "<el-button @click=\"nextMonth\">下个月</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 10,
+        "context": "<el-button type=\"primary\" @click=\"goToToday\">今天</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 79,
+        "context": "<el-button type=\"text\" @click=\"editEvent(row)\">编辑</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 80,
+        "context": "<el-button type=\"text\" @click=\"deleteEvent(row)\">删除</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 86,
+        "context": "<el-button type=\"primary\" @click=\"showAddEventDialog\">添加事件</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 92,
+        "context": "<el-button type=\"primary\" @click=\"showAddEventDialog\" :disabled=\"!selectedDate\">"
+      },
+      {
+        "word": "click",
+        "line": 150,
+        "context": "<el-button @click=\"eventDialogVisible = false\">取消</el-button>"
+      },
+      {
+        "word": "confirm",
+        "line": 346,
+        "context": "this.$confirm(`确定要删除事件\"${event.title}\"吗？`, '提示', {"
+      }
+    ],
+    "emptyTextMissing": true,
+    "errorHandlingMissing": false
+  },
+  {
+    "file": "/vue3-new-ui/src/views/vab/campaign.vue",
+    "messages": [],
+    "consoleStatements": [],
+    "suspiciousEnglish": [
+      {
+        "word": "click",
+        "line": 18,
+        "context": "<el-button type=\"primary\" @click=\"showAddCampaignDialog\">创建活动</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 72,
+        "context": "<el-button type=\"text\" @click=\"viewCampaign(row)\">查看</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 73,
+        "context": "<el-button type=\"text\" @click=\"editCampaign(row)\">编辑</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 133,
+        "context": "<el-button type=\"text\" @click=\"viewCampaign(row)\">查看</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 134,
+        "context": "<el-button type=\"text\" @click=\"stopCampaign(row)\">停止</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 180,
+        "context": "<el-button type=\"text\" @click=\"viewCampaign(row)\">查看</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 359,
+        "context": "<el-button @click=\"campaignDialogVisible = false\">取消</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 465,
+        "context": "<el-button @click=\"detailDialogVisible = false\">关闭</el-button>"
+      },
+      {
+        "word": "detail",
+        "line": 400,
+        "context": "<div class=\"campaign-icon-detail\" :style=\"{ backgroundColor: getCampaignColor(detailCampaign.type) }\">"
+      }
+    ],
+    "emptyTextMissing": true,
+    "errorHandlingMissing": false
+  },
+  {
+    "file": "/vue3-new-ui/src/views/vab/chart.vue",
+    "messages": [],
+    "consoleStatements": [],
+    "suspiciousEnglish": [],
+    "emptyTextMissing": false,
+    "errorHandlingMissing": false
+  },
+  {
+    "file": "/vue3-new-ui/src/views/vab/customer.vue",
+    "messages": [],
+    "consoleStatements": [],
+    "suspiciousEnglish": [
+      {
+        "word": "click",
+        "line": 18,
+        "context": "<el-button type=\"primary\" @click=\"showAddCustomerDialog\">添加客户</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 53,
+        "context": "<el-button type=\"text\" @click=\"viewCustomer(row)\">查看</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 54,
+        "context": "<el-button type=\"text\" @click=\"editCustomer(row)\">编辑</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 55,
+        "context": "<el-button type=\"text\" @click=\"deleteCustomer(row)\">删除</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 135,
+        "context": "<el-button @click=\"customerDialogVisible = false\">取消</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 205,
+        "context": "<el-button type=\"primary\" @click=\"showAddContactDialog\">添加联系记录</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 212,
+        "context": "<el-button @click=\"detailDialogVisible = false\">关闭</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 213,
+        "context": "<el-button type=\"primary\" @click=\"editCustomer(detailCustomer)\">编辑</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 254,
+        "context": "<el-button @click=\"contactDialogVisible = false\">取消</el-button>"
+      },
+      {
+        "word": "detail",
+        "line": 170,
+        "context": "<div class=\"customer-avatar-detail\" :style=\"{ backgroundColor: getAvatarColor(detailCustomer.name) }\">"
+      }
+    ],
+    "emptyTextMissing": true,
+    "errorHandlingMissing": false
+  },
+  {
+    "file": "/vue3-new-ui/src/views/vab/editor.vue",
+    "messages": [],
+    "consoleStatements": [
+      {
+        "type": "console输出",
+        "line": 43,
+        "content": "console.log(\"保存的内容：\", this.content);"
+      }
+    ],
+    "suspiciousEnglish": [
+      {
+        "word": "click",
+        "line": 19,
+        "context": "<el-button type=\"primary\" @click=\"saveContent\">保存</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 20,
+        "context": "<el-button @click=\"clearContent\">清空</el-button>"
+      }
+    ],
+    "emptyTextMissing": false,
+    "errorHandlingMissing": false
+  },
+  {
+    "file": "/vue3-new-ui/src/views/vab/form.vue",
+    "messages": [],
+    "consoleStatements": [
+      {
+        "type": "console输出",
+        "line": 124,
+        "content": "console.log(\"form:\", this.form);"
+      }
+    ],
+    "suspiciousEnglish": [
+      {
+        "word": "click",
+        "line": 57,
+        "context": "<el-button type=\"primary\" @click=\"onSubmit\">立即创建</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 58,
+        "context": "<el-button @click=\"onCancel\">取消</el-button>"
+      }
+    ],
+    "emptyTextMissing": false,
+    "errorHandlingMissing": false
+  },
+  {
+    "file": "/vue3-new-ui/src/views/vab/help.vue",
+    "messages": [],
+    "consoleStatements": [],
+    "suspiciousEnglish": [
+      {
+        "word": "click",
+        "line": 218,
+        "context": "<el-button type=\"primary\" size=\"small\" @click=\"downloadResource(row)\">"
+      },
+      {
+        "word": "click",
+        "line": 266,
+        "context": "<el-button type=\"primary\" @click=\"submitFeedback\">提交反馈</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 267,
+        "context": "<el-button @click=\"resetFeedbackForm\">重置</el-button>"
+      }
+    ],
+    "emptyTextMissing": true,
+    "errorHandlingMissing": false
+  },
+  {
+    "file": "/vue3-new-ui/src/views/vab/icon.vue",
+    "messages": [],
+    "consoleStatements": [
+      {
+        "type": "console输出",
+        "line": 67,
+        "content": "console.error(\"获取图标列表失败:\", error);"
+      }
+    ],
+    "suspiciousEnglish": [
+      {
+        "word": "search",
+        "line": 4,
+        "context": "<div class=\"search-box\">"
+      }
+    ],
+    "emptyTextMissing": false,
+    "errorHandlingMissing": false
+  },
+  {
+    "file": "/vue3-new-ui/src/views/vab/knowledge.vue",
+    "messages": [],
+    "consoleStatements": [],
+    "suspiciousEnglish": [
+      {
+        "word": "click",
+        "line": 9,
+        "context": "<el-button type=\"primary\" icon=\"Plus\" circle size=\"small\" @click=\"showAddCategoryDialog\" />"
+      },
+      {
+        "word": "click",
+        "line": 66,
+        "context": "<el-button type=\"primary\" @click=\"showAddKnowledgeDialog\">添加知识</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 185,
+        "context": "<el-button @click=\"categoryDialogVisible = false\">取消</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 273,
+        "context": "<el-button @click=\"knowledgeDialogVisible = false\">取消</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 327,
+        "context": "<el-button @click=\"detailDialogVisible = false\">关闭</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 328,
+        "context": "<el-button type=\"primary\" @click=\"editKnowledge(detailKnowledge)\">编辑</el-button>"
+      },
+      {
+        "word": "list",
+        "line": 71,
+        "context": "<div class=\"knowledge-list\">"
+      },
+      {
+        "word": "detail",
+        "line": 290,
+        "context": "<div class=\"knowledge-detail\">"
+      },
+      {
+        "word": "detail",
+        "line": 291,
+        "context": "<div class=\"detail-meta\">"
+      },
+      {
+        "word": "detail",
+        "line": 309,
+        "context": "<div class=\"detail-content\">"
+      },
+      {
+        "word": "detail",
+        "line": 313,
+        "context": "<div class=\"detail-tags\" v-if=\"detailKnowledge.tags && detailKnowledge.tags.length > 0\">"
+      }
+    ],
+    "emptyTextMissing": false,
+    "errorHandlingMissing": false
+  },
+  {
+    "file": "/vue3-new-ui/src/views/vab/nested/menu1/menu2/menu3.vue",
+    "messages": [],
+    "consoleStatements": [],
+    "suspiciousEnglish": [
+      {
+        "word": "click",
+        "line": 11,
+        "context": "<el-button type=\"primary\" @click=\"$router.push('/vab/nested')\">"
+      }
+    ],
+    "emptyTextMissing": false,
+    "errorHandlingMissing": false
+  },
+  {
+    "file": "/vue3-new-ui/src/views/vab/nested/menu1/menu2.vue",
+    "messages": [],
+    "consoleStatements": [],
+    "suspiciousEnglish": [
+      {
+        "word": "click",
+        "line": 11,
+        "context": "<el-button type=\"primary\" @click=\"$router.push('/vab/nested/menu1/menu2/menu3')\">"
+      }
+    ],
+    "emptyTextMissing": false,
+    "errorHandlingMissing": false
+  },
+  {
+    "file": "/vue3-new-ui/src/views/vab/nested/menu1.vue",
+    "messages": [],
+    "consoleStatements": [],
+    "suspiciousEnglish": [
+      {
+        "word": "click",
+        "line": 11,
+        "context": "<el-button type=\"primary\" @click=\"$router.push('/vab/nested/menu1/menu2')\">"
+      }
+    ],
+    "emptyTextMissing": false,
+    "errorHandlingMissing": false
+  },
+  {
+    "file": "/vue3-new-ui/src/views/vab/nested.vue",
+    "messages": [],
+    "consoleStatements": [],
+    "suspiciousEnglish": [
+      {
+        "word": "click",
+        "line": 18,
+        "context": "<el-button type=\"primary\" @click=\"$router.push('/vab/nested/menu1')\">"
+      },
+      {
+        "word": "click",
+        "line": 31,
+        "context": "<el-button type=\"primary\" @click=\"$router.push('/vab/nested/menu1/menu2')\">"
+      },
+      {
+        "word": "click",
+        "line": 44,
+        "context": "<el-button type=\"primary\" @click=\"$router.push('/vab/nested/menu1/menu2/menu3')\">"
+      }
+    ],
+    "emptyTextMissing": false,
+    "errorHandlingMissing": false
+  },
+  {
+    "file": "/vue3-new-ui/src/views/vab/notification.vue",
+    "messages": [],
+    "consoleStatements": [],
+    "suspiciousEnglish": [
+      {
+        "word": "click",
+        "line": 212,
+        "context": "<el-button @click=\"dialogVisible = false\">取消</el-button>"
+      },
+      {
+        "word": "confirm",
+        "line": 346,
+        "context": "this.$confirm(`确定要删除通知\"${notification.title}\"吗？`, \"提示\", {"
+      }
+    ],
+    "emptyTextMissing": true,
+    "errorHandlingMissing": false
+  },
+  {
+    "file": "/vue3-new-ui/src/views/vab/order.vue",
+    "messages": [],
+    "consoleStatements": [],
+    "suspiciousEnglish": [
+      {
+        "word": "success",
+        "line": 175,
+        "context": "<el-steps :active=\"getLogisticsStep(detailOrder.status)\" finish-status=\"success\" simple>"
+      },
+      {
+        "word": "click",
+        "line": 30,
+        "context": "<el-button type=\"primary\" @click=\"exportOrders\">导出订单</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 79,
+        "context": "<el-button type=\"text\" @click=\"viewOrder(row)\">查看</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 184,
+        "context": "<el-button @click=\"detailDialogVisible = false\">关闭</el-button>"
+      }
+    ],
+    "emptyTextMissing": true,
+    "errorHandlingMissing": false
+  },
+  {
+    "file": "/vue3-new-ui/src/views/vab/permissions.vue",
+    "messages": [],
+    "consoleStatements": [],
+    "suspiciousEnglish": [
+      {
+        "word": "click",
+        "line": 28,
+        "context": "<el-button type=\"text\" @click=\"editRole(row)\">编辑</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 29,
+        "context": "<el-button type=\"text\" @click=\"deleteRole(row)\">删除</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 51,
+        "context": "<el-button type=\"text\" @click=\"editUser(row)\">编辑</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 52,
+        "context": "<el-button type=\"text\" @click=\"deleteUser(row)\">删除</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 80,
+        "context": "<el-button @click=\"roleDialogVisible = false\">取消</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 81,
+        "context": "<el-button type=\"primary\" @click=\"saveRole\">保存</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 109,
+        "context": "<el-button @click=\"userDialogVisible = false\">取消</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 110,
+        "context": "<el-button type=\"primary\" @click=\"saveUser\">保存</el-button>"
+      }
+    ],
+    "emptyTextMissing": true,
+    "errorHandlingMissing": false
+  },
+  {
+    "file": "/vue3-new-ui/src/views/vab/product.vue",
+    "messages": [],
+    "consoleStatements": [],
+    "suspiciousEnglish": [
+      {
+        "word": "click",
+        "line": 18,
+        "context": "<el-button type=\"primary\" @click=\"showAddProductDialog\">添加产品</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 67,
+        "context": "<el-button type=\"text\" @click=\"viewProduct(row)\">查看</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 68,
+        "context": "<el-button type=\"text\" @click=\"editProduct(row)\">编辑</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 69,
+        "context": "<el-button type=\"text\" @click=\"deleteProduct(row)\">删除</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 109,
+        "context": "<el-button type=\"text\" @click=\"viewProduct(row)\">查看</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 110,
+        "context": "<el-button type=\"text\" @click=\"editProduct(row)\">编辑</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 150,
+        "context": "<el-button type=\"text\" @click=\"editProduct(row)\">补货</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 264,
+        "context": "<el-button @click=\"productDialogVisible = false\">取消</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 356,
+        "context": "<el-button @click=\"detailDialogVisible = false\">关闭</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 357,
+        "context": "<el-button type=\"primary\" @click=\"editProduct(detailProduct)\">编辑</el-button>"
+      },
+      {
+        "word": "detail",
+        "line": 283,
+        "context": "<div class=\"product-image-detail\">"
+      }
+    ],
+    "emptyTextMissing": true,
+    "errorHandlingMissing": false
+  },
+  {
+    "file": "/vue3-new-ui/src/views/vab/project.vue",
+    "messages": [],
+    "consoleStatements": [],
+    "suspiciousEnglish": [
+      {
+        "word": "click",
+        "line": 18,
+        "context": "<el-button type=\"primary\" @click=\"showAddProjectDialog\">添加项目</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 64,
+        "context": "<el-button type=\"text\" @click=\"viewProject(row)\">查看</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 65,
+        "context": "<el-button type=\"text\" @click=\"editProject(row)\">编辑</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 66,
+        "context": "<el-button type=\"text\" @click=\"deleteProject(row)\">删除</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 157,
+        "context": "<el-button @click=\"projectDialogVisible = false\">取消</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 228,
+        "context": "<el-button @click=\"detailDialogVisible = false\">关闭</el-button>"
+      },
+      {
+        "word": "detail",
+        "line": 196,
+        "context": "<div class=\"project-avatar-detail\" :style=\"{ backgroundColor: detailProject.color }\">"
+      }
+    ],
+    "emptyTextMissing": true,
+    "errorHandlingMissing": false
+  },
+  {
+    "file": "/vue3-new-ui/src/views/vab/settings.vue",
+    "messages": [],
+    "consoleStatements": [],
+    "suspiciousEnglish": [
+      {
+        "word": "click",
+        "line": 48,
+        "context": "<el-button type=\"primary\" @click=\"saveBasicSettings\">保存设置</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 49,
+        "context": "<el-button @click=\"resetBasicForm\">重置</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 91,
+        "context": "<el-button type=\"primary\" @click=\"saveSecuritySettings\">保存设置</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 92,
+        "context": "<el-button @click=\"resetSecurityForm\">重置</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 134,
+        "context": "<el-button type=\"primary\" @click=\"saveEmailSettings\">保存设置</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 135,
+        "context": "<el-button @click=\"resetEmailForm\">重置</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 136,
+        "context": "<el-button @click=\"testEmailConnection\">测试连接</el-button>"
+      }
+    ],
+    "emptyTextMissing": false,
+    "errorHandlingMissing": false
+  },
+  {
+    "file": "/vue3-new-ui/src/views/vab/statistics.vue",
+    "messages": [],
+    "consoleStatements": [],
+    "suspiciousEnglish": [
+      {
+        "word": "click",
+        "line": 19,
+        "context": "<el-button type=\"primary\" @click=\"refreshData\">刷新数据</el-button>"
+      }
+    ],
+    "emptyTextMissing": true,
+    "errorHandlingMissing": false
+  },
+  {
+    "file": "/vue3-new-ui/src/views/vab/table.vue",
+    "messages": [],
+    "consoleStatements": [],
+    "suspiciousEnglish": [
+      {
+        "word": "loading",
+        "line": 11,
+        "context": "<el-table v-loading=\"listLoading\" :data=\"filteredList\" style=\"width: 100%\">"
+      },
+      {
+        "word": "click",
+        "line": 31,
+        "context": "<el-button type=\"text\" @click=\"handleEdit(row)\">编辑</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 32,
+        "context": "<el-button type=\"text\" @click=\"handleDelete(row)\">删除</el-button>"
+      },
+      {
+        "word": "list",
+        "line": 87,
+        "context": "return this.list.filter(item =>"
+      }
+    ],
+    "emptyTextMissing": true,
+    "errorHandlingMissing": false
+  },
+  {
+    "file": "/vue3-new-ui/src/views/vab/task.vue",
+    "messages": [],
+    "consoleStatements": [],
+    "suspiciousEnglish": [
+      {
+        "word": "click",
+        "line": 28,
+        "context": "<el-button type=\"primary\" @click=\"showAddTaskDialog\">添加任务</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 80,
+        "context": "<el-button type=\"text\" @click=\"editTask(row)\">编辑</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 81,
+        "context": "<el-button type=\"text\" @click=\"viewTask(row)\">查看</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 82,
+        "context": "<el-button type=\"text\" @click=\"deleteTask(row)\">删除</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 117,
+        "context": "<el-button type=\"text\" @click=\"editTask(row)\">编辑</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 118,
+        "context": "<el-button type=\"text\" @click=\"startTask(row)\">开始</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 144,
+        "context": "<el-button type=\"text\" @click=\"editTask(row)\">编辑</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 145,
+        "context": "<el-button type=\"text\" @click=\"completeTask(row)\">完成</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 163,
+        "context": "<el-button type=\"text\" @click=\"viewTask(row)\">查看</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 248,
+        "context": "<el-button @click=\"taskDialogVisible = false\">取消</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 287,
+        "context": "<el-button @click=\"detailDialogVisible = false\">关闭</el-button>"
+      },
+      {
+        "word": "confirm",
+        "line": 499,
+        "context": "this.$confirm(`确定要删除任务\"${task.title}\"吗？`, \"提示\", {"
+      }
+    ],
+    "emptyTextMissing": true,
+    "errorHandlingMissing": false
+  },
+  {
+    "file": "/vue3-new-ui/src/views/vab/team.vue",
+    "messages": [],
+    "consoleStatements": [],
+    "suspiciousEnglish": [
+      {
+        "word": "click",
+        "line": 18,
+        "context": "<el-button type=\"primary\" @click=\"showAddMemberDialog\">添加成员</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 99,
+        "context": "<el-button type=\"text\" @click=\"viewDepartment(department)\">查看详情</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 183,
+        "context": "<el-button @click=\"memberDialogVisible = false\">取消</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 252,
+        "context": "<el-button @click=\"detailDialogVisible = false\">关闭</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 253,
+        "context": "<el-button type=\"primary\" @click=\"editMember(detailMember)\">编辑</el-button>"
+      },
+      {
+        "word": "detail",
+        "line": 202,
+        "context": "<div class=\"detail-avatar\">"
+      }
+    ],
+    "emptyTextMissing": true,
+    "errorHandlingMissing": false
+  },
+  {
+    "file": "/vue3-new-ui/src/views/vab/tree.vue",
+    "messages": [],
+    "consoleStatements": [],
+    "suspiciousEnglish": [],
+    "emptyTextMissing": false,
+    "errorHandlingMissing": false
+  },
+  {
+    "file": "/vue3-new-ui/src/views/vab/upload.vue",
+    "messages": [],
+    "consoleStatements": [
+      {
+        "type": "console输出",
+        "line": 123,
+        "content": "console.log(\"上传成功:\", response, file, fileList);"
+      },
+      {
+        "type": "console输出",
+        "line": 127,
+        "content": "console.error(\"上传失败:\", error, file, fileList);"
+      },
+      {
+        "type": "console输出",
+        "line": 141,
+        "content": "console.log(\"图片上传成功:\", response, uploadFile);"
+      }
+    ],
+    "suspiciousEnglish": [],
+    "emptyTextMissing": false,
+    "errorHandlingMissing": false
+  },
+  {
+    "file": "/vue3-new-ui/src/views/vab/vue3Demo/index.vue",
+    "messages": [],
+    "consoleStatements": [],
+    "suspiciousEnglish": [
+      {
+        "word": "click",
+        "line": 11,
+        "context": "<el-button type=\"primary\" @click=\"increment\"> 增加 </el-button>"
+      },
+      {
+        "word": "click",
+        "line": 12,
+        "context": "<el-button type=\"danger\" @click=\"decrement\"> 减少 </el-button>"
+      }
+    ],
+    "emptyTextMissing": false,
+    "errorHandlingMissing": false
+  },
+  {
+    "file": "/vue3-new-ui/src/views/vab/workflow.vue",
+    "messages": [],
+    "consoleStatements": [],
+    "suspiciousEnglish": [
+      {
+        "word": "click",
+        "line": 18,
+        "context": "<el-button type=\"primary\" @click=\"showAddWorkflowDialog\">创建工作流</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 55,
+        "context": "<el-button type=\"text\" @click=\"viewWorkflow(row)\">查看</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 56,
+        "context": "<el-button type=\"text\" @click=\"editWorkflow(row)\">编辑</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 57,
+        "context": "<el-button type=\"text\" @click=\"startWorkflow(row)\">启动</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 58,
+        "context": "<el-button type=\"text\" @click=\"deleteWorkflow(row)\">删除</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 89,
+        "context": "<el-button type=\"text\" @click=\"viewWorkflow(row)\">查看</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 90,
+        "context": "<el-button type=\"text\" @click=\"editWorkflow(row)\">编辑</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 91,
+        "context": "<el-button type=\"text\" @click=\"startWorkflow(row)\">启动</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 127,
+        "context": "<el-button type=\"text\" @click=\"viewWorkflow(row)\">查看</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 128,
+        "context": "<el-button type=\"text\" @click=\"processWorkflow(row)\">处理</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 274,
+        "context": "<el-button type=\"primary\" @click=\"addNode\">添加节点</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 281,
+        "context": "<el-button @click=\"workflowDialogVisible = false\">取消</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 364,
+        "context": "<el-button type=\"text\" @click=\"viewInstance(row)\">查看</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 373,
+        "context": "<el-button @click=\"detailDialogVisible = false\">关闭</el-button>"
+      },
+      {
+        "word": "list",
+        "line": 204,
+        "context": "<div class=\"node-list\">"
+      },
+      {
+        "word": "detail",
+        "line": 313,
+        "context": "<div class=\"workflow-icon-detail\" :style=\"{ color: detailWorkflow.color }\">"
+      }
+    ],
+    "emptyTextMissing": true,
+    "errorHandlingMissing": false
+  },
+  {
+    "file": "/vue3-new-ui/src/views/vitalsign/vitalSign.vue",
+    "messages": [],
+    "consoleStatements": [],
+    "suspiciousEnglish": [
+      {
+        "word": "loading",
+        "line": 15,
+        "context": "<el-table :data=\"paginatedList\" v-loading=\"loading\" empty-text=\"暂无记录\">"
+      },
+      {
+        "word": "loading",
+        "line": 15,
+        "context": "<el-table :data=\"paginatedList\" v-loading=\"loading\" empty-text=\"暂无记录\">"
+      },
+      {
+        "word": "click",
+        "line": 6,
+        "context": "<el-button type=\"primary\" @click=\"handleAdd\">录入体征</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 13,
+        "context": "<el-button type=\"primary\" @click=\"fetchList\">搜索</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 58,
+        "context": "<el-button @click=\"dialogVisible=false\">取消</el-button>"
+      },
+      {
+        "word": "click",
+        "line": 59,
+        "context": "<el-button type=\"primary\" @click=\"submit\">确定</el-button>"
+      },
+      {
+        "word": "submit",
+        "line": 59,
+        "context": "<el-button type=\"primary\" @click=\"submit\">确定</el-button>"
+      },
+      {
+        "word": "submit",
+        "line": 99,
+        "context": "const submit = async () => {"
+      }
+    ],
+    "emptyTextMissing": false,
+    "errorHandlingMissing": false
+  }
+]

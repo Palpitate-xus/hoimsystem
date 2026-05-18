@@ -151,7 +151,7 @@ const handleDelete = (row) => {
     await deleteDoctor({ doctor_id: row.id });
     ElMessage.success("删除成功");
     fetchList();
-  });
+  }).catch(() => {});
 };
 
 onMounted(fetchList);

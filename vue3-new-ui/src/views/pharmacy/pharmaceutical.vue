@@ -142,7 +142,7 @@ const handleDelete = (row) => {
     await deletePharmaceutical({ pharmaceutical_id: row.id });
     ElMessage.success("删除成功");
     fetchList();
-  });
+  }).catch(() => {});
 };
 
 onMounted(fetchList);

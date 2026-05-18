@@ -128,7 +128,7 @@ const handleDelete = (row) => {
     await deleteDict({ dict_id: row.dict_id });
     ElMessage.success("删除成功");
     fetchList();
-  });
+  }).catch(() => {});
 };
 
 onMounted(fetchList);

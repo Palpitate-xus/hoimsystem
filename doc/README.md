@@ -39,6 +39,7 @@
 3. **[用户操作手册](user-manual.md)** — 各页面的业务流程
 4. **[架构文档](architecture.md)** — 前端目录约定与组件复用
 5. **[测试指南](testing.md)** — Vitest / Playwright 测试
+   - **[前端页面测试报告](frontend-test-report.md)** — 96 个页面审查，中文可读性达标
 
 ### 🚀 运维 / DevOps
 

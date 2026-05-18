@@ -98,23 +98,53 @@ const hasPermission = (required) => {
   return required.some((p) => perms.includes(p));
 };
 
-const statCards = ref([
-  { label: "今日患者", value: 0, icon: "User", color: "#409EFF", path: "/patient/healthRecord" },
-  { label: "待处理处方", value: 0, icon: "Document", color: "#67C23A", path: "/doctor/prescription" },
-  { label: "今日收费", value: "¥0", icon: "Money", color: "#E6A23C", path: "/charge/chargeList" },
-  { label: "通知公告", value: 0, icon: "Bell", color: "#F56C6C", path: "/admin/noticeManagement" },
-]);
-
 const todayStats = ref({
   registrations: 0,
   appointments: 0,
-  charges: 0,
+  charges: "0.00",
   pendingPrescriptions: 0,
 });
 
+const noticeCount = ref(0);
 const notices = ref([]);
 const noticeDialogVisible = ref(false);
 const currentNotice = ref({});
+
+// 按角色映射跳转目标，无对应映射时 path 为空（卡片不可点击）
+const cardPathMap = {
+  todayPatients: {
+    admin: "/admin/patientManagement",
+    patient: "/patient/healthRecord",
+  },
+  pendingPrescriptions: {
+    doctor: "/doctor/prescription",
+    director: "/doctor/prescription",
+    patient: "/patient/prescription",
+    admin: "/pharmacy/prescriptionReview",
+  },
+  todayCharges: {
+    admin: "/admin/chargeRecords",
+    patient: "/patient/charge",
+  },
+  notices: {
+    admin: "/admin/noticeManagement",
+  },
+};
+
+const pickPath = (key) => {
+  const map = cardPathMap[key] || {};
+  for (const role of permissions.value) {
+    if (map[role]) return map[role];
+  }
+  return null;
+};
+
+const statCards = computed(() => [
+  { key: "todayPatients", label: "今日患者", value: todayStats.value.appointments + todayStats.value.registrations, icon: "User", color: "#409EFF", path: pickPath("todayPatients") },
+  { key: "pendingPrescriptions", label: "待处理处方", value: todayStats.value.pendingPrescriptions, icon: "Document", color: "#67C23A", path: pickPath("pendingPrescriptions") },
+  { key: "todayCharges", label: "今日收费", value: `¥${todayStats.value.charges}`, icon: "Money", color: "#E6A23C", path: pickPath("todayCharges") },
+  { key: "notices", label: "通知公告", value: noticeCount.value, icon: "Bell", color: "#F56C6C", path: pickPath("notices") },
+]);
 
 const goTo = (path) => {
   router.push(path);
@@ -142,23 +172,20 @@ onMounted(async () => {
     ]);
 
     notices.value = (noticeRes.data || []).slice(0, 5);
-    statCards.value[3].value = (noticeRes.data || []).length;
+    noticeCount.value = (noticeRes.data || []).length;
 
     const charges = chargeRes.data || [];
     const todayCharge = charges
       .filter((c) => c.status === 1)
       .reduce((sum, c) => sum + (parseFloat(c.amount) || 0), 0);
-    statCards.value[2].value = `¥${todayCharge.toFixed(2)}`;
     todayStats.value.charges = todayCharge.toFixed(2);
 
     const prescriptions = preRes.data || [];
     const pending = prescriptions.filter((p) => p.status === 0).length;
-    statCards.value[1].value = pending;
     todayStats.value.pendingPrescriptions = pending;
 
     todayStats.value.appointments = (apptRes.data || []).length;
     todayStats.value.registrations = (regRes.data || []).length;
-    statCards.value[0].value = todayStats.value.appointments + todayStats.value.registrations;
   } catch (e) {
     console.error("加载首页数据失败", e);
   }

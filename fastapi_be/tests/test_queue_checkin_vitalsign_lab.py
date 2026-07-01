@@ -4,13 +4,14 @@ import datetime
 
 @pytest.mark.asyncio
 class TestQueue:
-    async def test_get_list(self, async_client, seed_data):
-        r = await async_client.get("/api/queue/getList")
+    async def test_get_list(self, async_client, seed_data, auth_headers):
+        r = await async_client.get("/api/queue/getList", headers=auth_headers(seed_data["admin_user"].username))
         assert r.status_code == 200
         assert r.json()["code"] == 200
 
-    async def test_call_next_no_patient(self, async_client, seed_data):
-        r = await async_client.post("/api/queue/callNext", json={"doctor_id": seed_data["doctor"].doctor_id})
+    async def test_call_next_no_patient(self, async_client, seed_data, auth_headers):
+        headers = auth_headers(seed_data["admin_user"].username)
+        r = await async_client.post("/api/queue/callNext", headers=headers, json={"doctor_id": seed_data["doctor"].doctor_id})
         # No queue items, should return 500 or success with no data
         assert r.status_code == 200
 
@@ -36,8 +37,8 @@ class TestVitalSign:
         assert r.status_code == 200
         assert r.json()["code"] == 200
 
-    async def test_get_list(self, async_client, seed_data):
-        r = await async_client.get("/api/vitalSign/getList")
+    async def test_get_list(self, async_client, seed_data, auth_headers):
+        r = await async_client.get("/api/vitalSign/getList", headers=auth_headers(seed_data["admin_user"].username))
         assert r.status_code == 200
         body = r.json()
         assert body["code"] == 200

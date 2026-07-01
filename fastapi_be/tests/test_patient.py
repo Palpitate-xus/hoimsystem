@@ -3,8 +3,8 @@ import pytest
 
 @pytest.mark.asyncio
 class TestPatientAppointment:
-    async def test_appointment_list(self, async_client, seed_data):
-        r = await async_client.get("/api/appointmentManagement/appointmentList")
+    async def test_appointment_list(self, async_client, seed_data, auth_headers):
+        r = await async_client.get("/api/appointmentManagement/appointmentList", headers=auth_headers(seed_data["patient_user"].username))
         assert r.status_code == 200
         assert r.json()["code"] == 200
 

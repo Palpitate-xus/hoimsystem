@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.dependencies import get_current_user
+from app.dependencies import get_current_user, User, User, require_roles, CLINICAL_ROLES
 from app.models import Appointment, Doctor, FollowUp
 from app.schemas import (
     FollowUpAppointmentCreateRequest,
@@ -25,7 +25,8 @@ def parse_date_str(val):
 
 
 @router.post("/followUpAppointment/create")
-def create_follow_up_appointment(req: FollowUpAppointmentCreateRequest, db: Session = Depends(get_db)):
+def create_follow_up_appointment(req: FollowUpAppointmentCreateRequest, current_user: User = Depends(require_roles(*CLINICAL_ROLES)),
+    db: Session = Depends(get_db)):
     appointment = Appointment(
         patient_id=req.patient_id,
         doctor_id=req.doctor_id,
@@ -84,7 +85,8 @@ def get_follow_up_list(current_user=Depends(get_current_user), keyword: str | No
 
 
 @router.post("/followUp/record")
-def record_follow_up(req: FollowUpRecordRequest, db: Session = Depends(get_db)):
+def record_follow_up(req: FollowUpRecordRequest, current_user: User = Depends(require_roles(*CLINICAL_ROLES)),
+    db: Session = Depends(get_db)):
     follow_up = db.query(FollowUp).filter(FollowUp.follow_up_id == req.follow_up_id).first()
     if not follow_up:
         return {"code": 500, "msg": "随访计划不存在"}

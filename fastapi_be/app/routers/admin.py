@@ -4,8 +4,8 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.dependencies import ADMIN_ROLES, get_current_user, require_roles
-from app.models import Department, Doctor, Notice, Patient, User
+from app.dependencies import ADMIN_ROLES, User, get_current_user, require_roles
+from app.models import Department, Doctor, Notice, Patient
 from app.pagination import paginate
 from app.schemas import (
     DepartmentCreateRequest,
@@ -23,7 +23,8 @@ router = APIRouter()
 
 
 @router.get("/doctorManagement/getList")
-def get_doctor_list(keyword: str | None = None, page: int | None = None, page_size: int | None = None, db: Session = Depends(get_db)):
+def get_doctor_list(keyword: str | None = None, page: int | None = None, page_size: int | None = None, current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)):
     query = db.query(Doctor)
     doctors, total = paginate(query, page, page_size)
     data = []
@@ -80,7 +81,8 @@ def delete_doctor(req: DoctorDeleteRequest, current_user: User = Depends(require
 
 
 @router.get("/patientManagement/getList")
-def get_patient_list(keyword: str | None = None, page: int | None = None, page_size: int | None = None, db: Session = Depends(get_db)):
+def get_patient_list(keyword: str | None = None, page: int | None = None, page_size: int | None = None, current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)):
     query = db.query(Patient)
     patient_data, total = paginate(query, page, page_size)
     data = []
@@ -125,7 +127,8 @@ def update_patient(req: PatientUpdateRequest, current_user: User = Depends(requi
 
 
 @router.get("/departmentManagement/getList")
-def get_department_list(keyword: str | None = None, page: int | None = None, page_size: int | None = None, db: Session = Depends(get_db)):
+def get_department_list(keyword: str | None = None, page: int | None = None, page_size: int | None = None, current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)):
     query = db.query(Department)
     departments, total = paginate(query, page, page_size)
     data = []

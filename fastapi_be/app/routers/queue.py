@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.dependencies import get_current_user
+from app.dependencies import get_current_user, User, User, require_roles, CLINICAL_ROLES
 from app.models import PatrolRecord, Queue
 from app.schemas import QueueCallNextRequest, QueuePassRequest, QueueSkipRequest
 
@@ -12,7 +12,8 @@ router = APIRouter()
 
 
 @router.post("/queue/emergency")
-def mark_emergency(req: QueueSkipRequest, db: Session = Depends(get_db)):
+def mark_emergency(req: QueueSkipRequest, current_user: User = Depends(require_roles(*CLINICAL_ROLES)),
+    db: Session = Depends(get_db)):
     """护士将队列记录标记为急诊优先"""
     queue_item = db.query(Queue).filter(Queue.queue_id == req.queue_id).first()
     if not queue_item:
@@ -24,7 +25,8 @@ def mark_emergency(req: QueueSkipRequest, db: Session = Depends(get_db)):
 
 
 @router.post("/queue/reorder")
-def reorder_queue(req: dict, db: Session = Depends(get_db)):
+def reorder_queue(req: dict, current_user: User = Depends(require_roles(*CLINICAL_ROLES)),
+    db: Session = Depends(get_db)):
     """护士调整队列顺序（将指定记录移到最前面）"""
     queue_id = req.get("queue_id")
     queue_item = db.query(Queue).filter(Queue.queue_id == queue_id).first()
@@ -40,7 +42,8 @@ def reorder_queue(req: dict, db: Session = Depends(get_db)):
 
 
 @router.get("/queue/getList")
-def get_queue_list(keyword: str | None = None, db: Session = Depends(get_db)):
+def get_queue_list(keyword: str | None = None, current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)):
     queues = db.query(Queue).order_by(Queue.queue_number).all()
     data = []
     for item in queues:
@@ -61,7 +64,8 @@ def get_queue_list(keyword: str | None = None, db: Session = Depends(get_db)):
 
 
 @router.post("/queue/callNext")
-def call_next(req: QueueCallNextRequest, db: Session = Depends(get_db)):
+def call_next(req: QueueCallNextRequest, current_user: User = Depends(require_roles(*CLINICAL_ROLES)),
+    db: Session = Depends(get_db)):
     queue_item = db.query(Queue).filter(Queue.doctor_id == req.doctor_id, Queue.status == 0).order_by(Queue.queue_number).first()
     if not queue_item:
         return {"code": 500, "msg": "暂无候诊患者"}
@@ -79,7 +83,8 @@ def call_next(req: QueueCallNextRequest, db: Session = Depends(get_db)):
 
 
 @router.post("/queue/pass")
-def pass_queue(req: QueuePassRequest, db: Session = Depends(get_db)):
+def pass_queue(req: QueuePassRequest, current_user: User = Depends(require_roles(*CLINICAL_ROLES)),
+    db: Session = Depends(get_db)):
     queue_item = db.query(Queue).filter(Queue.queue_id == req.queue_id).first()
     if not queue_item:
         return {"code": 500, "msg": "队列记录不存在"}
@@ -90,7 +95,8 @@ def pass_queue(req: QueuePassRequest, db: Session = Depends(get_db)):
 
 
 @router.post("/queue/skip")
-def skip_queue(req: QueueSkipRequest, db: Session = Depends(get_db)):
+def skip_queue(req: QueueSkipRequest, current_user: User = Depends(require_roles(*CLINICAL_ROLES)),
+    db: Session = Depends(get_db)):
     queue_item = db.query(Queue).filter(Queue.queue_id == req.queue_id).first()
     if not queue_item:
         return {"code": 500, "msg": "队列记录不存在"}
@@ -115,7 +121,8 @@ def create_patrol_record(req: dict, current_user=Depends(get_current_user), db: 
 
 
 @router.get("/patrol/getList")
-def get_patrol_list(keyword: str | None = None, db: Session = Depends(get_db)):
+def get_patrol_list(keyword: str | None = None, current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)):
     records = db.query(PatrolRecord).order_by(PatrolRecord.create_time.desc()).all()
     data = []
     for item in records:

@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.dependencies import get_current_user
+from app.dependencies import get_current_user, User, User, require_roles, CLINICAL_ROLES
 from app.models import (
     Admission,
     Doctor,
@@ -129,7 +129,8 @@ def get_inpatient_order_list(
 
 
 @router.post("/inpatientOrder/create")
-def create_inpatient_order(req: InpatientOrderCreateRequest, db: Session = Depends(get_db)):
+def create_inpatient_order(req: InpatientOrderCreateRequest, current_user: User = Depends(require_roles(*CLINICAL_ROLES)),
+    db: Session = Depends(get_db)):
     admission = db.query(Admission).filter(Admission.admission_id == req.admission_id).first()
     if not admission:
         return {"code": 500, "msg": "入院记录不存在"}
@@ -209,7 +210,8 @@ def create_inpatient_order(req: InpatientOrderCreateRequest, db: Session = Depen
 
 
 @router.post("/inpatientOrder/audit")
-def audit_inpatient_order(req: dict, db: Session = Depends(get_db)):
+def audit_inpatient_order(req: dict, current_user: User = Depends(require_roles(*CLINICAL_ROLES)),
+    db: Session = Depends(get_db)):
     order = db.query(InpatientOrder).filter(InpatientOrder.order_id == req.get("order_id")).first()
     if not order:
         return {"code": 500, "msg": "医嘱不存在"}
@@ -222,7 +224,8 @@ def audit_inpatient_order(req: dict, db: Session = Depends(get_db)):
 
 
 @router.post("/inpatientOrder/stop")
-def stop_inpatient_order(req: InpatientOrderStopRequest, db: Session = Depends(get_db)):
+def stop_inpatient_order(req: InpatientOrderStopRequest, current_user: User = Depends(require_roles(*CLINICAL_ROLES)),
+    db: Session = Depends(get_db)):
     order = db.query(InpatientOrder).filter(InpatientOrder.order_id == req.order_id).first()
     if not order:
         return {"code": 500, "msg": "医嘱不存在"}
@@ -247,7 +250,8 @@ def stop_inpatient_order(req: InpatientOrderStopRequest, db: Session = Depends(g
 
 
 @router.post("/inpatientOrder/cancel")
-def cancel_inpatient_order(req: dict, db: Session = Depends(get_db)):
+def cancel_inpatient_order(req: dict, current_user: User = Depends(require_roles(*CLINICAL_ROLES)),
+    db: Session = Depends(get_db)):
     order = db.query(InpatientOrder).filter(InpatientOrder.order_id == req.get("order_id")).first()
     if not order:
         return {"code": 500, "msg": "医嘱不存在"}
@@ -288,7 +292,8 @@ def cancel_inpatient_order(req: dict, db: Session = Depends(get_db)):
 
 
 @router.get("/inpatientOrder/getExecutionList")
-def get_execution_list(order_id: str | None = None, nurse_id: int | None = None, status: int | None = None, db: Session = Depends(get_db)):
+def get_execution_list(order_id: str | None = None, nurse_id: int | None = None, status: int | None = None, current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)):
     query = db.query(OrderExecution).order_by(OrderExecution.planned_time)
     if order_id:
         query = query.filter(OrderExecution.order_id == order_id)

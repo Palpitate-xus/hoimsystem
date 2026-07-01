@@ -4,14 +4,14 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.dependencies import get_current_user
+from app.dependencies import ADMIN_ROLES, User, get_current_user, require_roles
 from app.models import AdverseEvent
 
 router = APIRouter()
 
 
 @router.post("/adverseEvent/create")
-def create_event(req: dict, db: Session = Depends(get_db), current_user=Depends(get_current_user)):
+def create_event(req: dict, current_user: User = Depends(require_roles(*ADMIN_ROLES)), db: Session = Depends(get_db)):
     ev = AdverseEvent(
         event_type=req.get("event_type", ""),
         patient_id=req.get("patient_id"),
@@ -27,7 +27,7 @@ def create_event(req: dict, db: Session = Depends(get_db), current_user=Depends(
 
 
 @router.get("/adverseEvent/getList")
-def get_event_list(db: Session = Depends(get_db)):
+def get_event_list(current_user: User = Depends(require_roles(*ADMIN_ROLES)), db: Session = Depends(get_db)):
     items = db.query(AdverseEvent).order_by(AdverseEvent.report_time.desc()).all()
     data = []
     for it in items:
@@ -49,7 +49,7 @@ def get_event_list(db: Session = Depends(get_db)):
 
 
 @router.post("/adverseEvent/updateStatus")
-def update_event_status(req: dict, db: Session = Depends(get_db)):
+def update_event_status(req: dict, current_user: User = Depends(require_roles(*ADMIN_ROLES)), db: Session = Depends(get_db)):
     ev = db.query(AdverseEvent).filter(AdverseEvent.event_id == req.get("event_id")).first()
     if not ev:
         return {"code": 500, "msg": "记录不存在"}

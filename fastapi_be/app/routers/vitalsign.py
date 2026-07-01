@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.dependencies import get_current_user
+from app.dependencies import get_current_user, User, User, require_roles, NURSING_ROLES
 from app.models import Patient, VitalSign
 from app.schemas import VitalSignCreateRequest
 
@@ -32,7 +32,8 @@ def create_vital_sign(req: VitalSignCreateRequest, current_user=Depends(get_curr
 
 
 @router.get("/vitalSign/getList")
-def get_vital_sign_list(keyword: str | None = None, db: Session = Depends(get_db)):
+def get_vital_sign_list(keyword: str | None = None, current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)):
     vitals = db.query(VitalSign).order_by(VitalSign.check_time.desc()).all()
     data = []
     for item in vitals:

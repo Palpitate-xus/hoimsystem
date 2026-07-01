@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.dependencies import get_current_user
+from app.dependencies import get_current_user, User, User, require_roles, GUIDE_ROLES
 from app.models import Patient, TriageRecord, User
 
 router = APIRouter()
@@ -73,7 +73,8 @@ def get_triage_list(level: int | None = None, status: int | None = None, db: Ses
 
 
 @router.post("/triageDesk/updateStatus")
-def update_triage_status(req: dict, db: Session = Depends(get_db)):
+def update_triage_status(req: dict, current_user: User = Depends(require_roles(*GUIDE_ROLES)),
+    db: Session = Depends(get_db)):
     """更新分诊状态"""
     record = db.query(TriageRecord).filter(TriageRecord.triage_record_id == req.get("triage_record_id")).first()
     if not record:
@@ -84,7 +85,8 @@ def update_triage_status(req: dict, db: Session = Depends(get_db)):
 
 
 @router.post("/triageDesk/update")
-def update_triage_record(req: dict, db: Session = Depends(get_db)):
+def update_triage_record(req: dict, current_user: User = Depends(require_roles(*GUIDE_ROLES)),
+    db: Session = Depends(get_db)):
     """修改分诊记录"""
     record = db.query(TriageRecord).filter(TriageRecord.triage_record_id == req.get("triage_record_id")).first()
     if not record:

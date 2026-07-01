@@ -4,14 +4,14 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.dependencies import get_current_user
+from app.dependencies import ADMIN_ROLES, User, get_current_user, require_roles
 from app.models import AdverseReaction
 
 router = APIRouter()
 
 
 @router.post("/adverseReaction/create")
-def create_adr(req: dict, db: Session = Depends(get_db), current_user=Depends(get_current_user)):
+def create_adr(req: dict, current_user: User = Depends(require_roles(*ADMIN_ROLES)), db: Session = Depends(get_db)):
     ar = AdverseReaction(
         patient_id=req.get("patient_id"),
         pharmaceutical_id=req.get("pharmaceutical_id"),
@@ -28,7 +28,7 @@ def create_adr(req: dict, db: Session = Depends(get_db), current_user=Depends(ge
 
 
 @router.get("/adverseReaction/getList")
-def get_adr_list(db: Session = Depends(get_db)):
+def get_adr_list(current_user: User = Depends(require_roles(*ADMIN_ROLES)), db: Session = Depends(get_db)):
     items = db.query(AdverseReaction).order_by(AdverseReaction.report_time.desc()).all()
     data = []
     for it in items:
@@ -50,7 +50,7 @@ def get_adr_list(db: Session = Depends(get_db)):
 
 
 @router.post("/adverseReaction/updateStatus")
-def update_adr_status(req: dict, db: Session = Depends(get_db)):
+def update_adr_status(req: dict, current_user: User = Depends(require_roles(*ADMIN_ROLES)), db: Session = Depends(get_db)):
     ar = db.query(AdverseReaction).filter(AdverseReaction.reaction_id == req.get("reaction_id")).first()
     if not ar:
         return {"code": 500, "msg": "记录不存在"}

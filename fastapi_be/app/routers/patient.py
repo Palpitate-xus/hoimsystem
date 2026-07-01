@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.dependencies import get_current_user
+from app.dependencies import get_current_user, User, User, require_roles, CLINICAL_ROLES
 from app.models import (
     Appointment,
     Doctor,
@@ -72,7 +72,8 @@ def get_appointment_list(current_user: User = Depends(get_current_user), keyword
 
 
 @router.get("/appointmentManagement/appointmentList")
-def appointment_list(keyword: str | None = None, db: Session = Depends(get_db)):
+def appointment_list(keyword: str | None = None, current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)):
     schedules = db.query(DoctorSchedule).all()
     weekdays = ["周一", "周二", "周三", "周四", "周五", "周六", "周日"]
     date_map = {}

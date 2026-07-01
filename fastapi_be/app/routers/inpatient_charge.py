@@ -5,7 +5,7 @@ from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.dependencies import get_current_user
+from app.dependencies import get_current_user, User, User, require_roles, CASHIER_ROLES
 from app.models import Admission, InpatientCharge, Patient
 
 router = APIRouter()
@@ -59,7 +59,8 @@ def get_inpatient_charge_list(
 
 
 @router.get("/inpatientCharge/getDailyBill")
-def get_daily_bill(admission_id: str, db: Session = Depends(get_db)):
+def get_daily_bill(admission_id: str, current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)):
     admission = db.query(Admission).filter(Admission.admission_id == admission_id).first()
     if not admission:
         return {"code": 500, "msg": "入院记录不存在"}
@@ -107,7 +108,8 @@ def get_daily_bill(admission_id: str, db: Session = Depends(get_db)):
 
 
 @router.post("/inpatientCharge/settle")
-def settle_charges(req: dict, db: Session = Depends(get_db)):
+def settle_charges(req: dict, current_user: User = Depends(require_roles(*CASHIER_ROLES)),
+    db: Session = Depends(get_db)):
     admission_id = req.get("admission_id")
     admission = db.query(Admission).filter(Admission.admission_id == admission_id).first()
     if not admission:
@@ -127,7 +129,8 @@ def settle_charges(req: dict, db: Session = Depends(get_db)):
 
 
 @router.post("/inpatientCharge/refund")
-def refund_charge(req: dict, db: Session = Depends(get_db)):
+def refund_charge(req: dict, current_user: User = Depends(require_roles(*CASHIER_ROLES)),
+    db: Session = Depends(get_db)):
     charge_id = req.get("charge_id")
     charge = db.query(InpatientCharge).filter(InpatientCharge.charge_id == charge_id).first()
     if not charge:
@@ -141,7 +144,8 @@ def refund_charge(req: dict, db: Session = Depends(get_db)):
 
 
 @router.get("/inpatientCharge/getSummary")
-def get_charge_summary(db: Session = Depends(get_db)):
+def get_charge_summary(current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)):
     today = datetime.datetime.now().date()
 
     today_income = (

@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.database import get_db
+from app.dependencies import User, get_current_user, require_roles, CLINICAL_ROLES
 from app.models import Department, MdtCase
 
 router = APIRouter()
@@ -23,7 +24,8 @@ def _resolve_dept_names(department_ids_str, db):
 
 
 @router.post("/mdt/create")
-def create_mdt(req: dict, db: Session = Depends(get_db)):
+def create_mdt(req: dict, current_user: User = Depends(require_roles(*CLINICAL_ROLES)),
+    db: Session = Depends(get_db)):
     m = MdtCase(
         patient_id=req.get("patient_id"),
         diagnosis=req.get("diagnosis", ""),
@@ -37,7 +39,8 @@ def create_mdt(req: dict, db: Session = Depends(get_db)):
 
 
 @router.get("/mdt/getList")
-def get_mdt_list(db: Session = Depends(get_db)):
+def get_mdt_list(current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)):
     items = db.query(MdtCase).order_by(MdtCase.create_time.desc()).all()
     data = []
     for it in items:
@@ -58,7 +61,8 @@ def get_mdt_list(db: Session = Depends(get_db)):
 
 
 @router.post("/mdt/update")
-def update_mdt(req: dict, db: Session = Depends(get_db)):
+def update_mdt(req: dict, current_user: User = Depends(require_roles(*CLINICAL_ROLES)),
+    db: Session = Depends(get_db)):
     m = db.query(MdtCase).filter(MdtCase.mdt_id == req.get("mdt_id")).first()
     if not m:
         return {"code": 500, "msg": "记录不存在"}

@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.dependencies import get_current_user
+from app.dependencies import get_current_user, User, User, require_roles, ADMIN_ROLES
 from app.models import Consumable, Pharmaceutical, PurchaseOrder, PurchaseOrderItem
 
 router = APIRouter()
@@ -46,7 +46,8 @@ def create_purchase(req: dict, db: Session = Depends(get_db), current_user=Depen
 
 
 @router.get("/purchase/getList")
-def get_purchase_list(status: int | None = None, db: Session = Depends(get_db)):
+def get_purchase_list(status: int | None = None, current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)):
     query = db.query(PurchaseOrder)
     if status is not None:
         query = query.filter(PurchaseOrder.status == status)
@@ -70,7 +71,8 @@ def get_purchase_list(status: int | None = None, db: Session = Depends(get_db)):
 
 
 @router.post("/purchase/approve")
-def approve_purchase(req: dict, db: Session = Depends(get_db)):
+def approve_purchase(req: dict, current_user: User = Depends(require_roles(*ADMIN_ROLES)),
+    db: Session = Depends(get_db)):
     order = db.query(PurchaseOrder).filter(PurchaseOrder.purchase_id == req.get("purchase_id")).first()
     if not order:
         return {"code": 500, "msg": "采购单不存在"}
@@ -83,7 +85,8 @@ def approve_purchase(req: dict, db: Session = Depends(get_db)):
 
 
 @router.post("/purchase/storage")
-def storage_purchase(req: dict, db: Session = Depends(get_db)):
+def storage_purchase(req: dict, current_user: User = Depends(require_roles(*ADMIN_ROLES)),
+    db: Session = Depends(get_db)):
     order = db.query(PurchaseOrder).filter(PurchaseOrder.purchase_id == req.get("purchase_id")).first()
     if not order:
         return {"code": 500, "msg": "采购单不存在"}
@@ -107,7 +110,8 @@ def storage_purchase(req: dict, db: Session = Depends(get_db)):
 
 
 @router.post("/purchase/cancel")
-def cancel_purchase(req: dict, db: Session = Depends(get_db)):
+def cancel_purchase(req: dict, current_user: User = Depends(require_roles(*ADMIN_ROLES)),
+    db: Session = Depends(get_db)):
     order = db.query(PurchaseOrder).filter(PurchaseOrder.purchase_id == req.get("purchase_id")).first()
     if not order:
         return {"code": 500, "msg": "采购单不存在"}

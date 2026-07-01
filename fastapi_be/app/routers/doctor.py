@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.dependencies import ADMIN_ROLES, CLINICAL_ROLES, PHARMACY_ROLES, get_current_user, require_roles
+from app.dependencies import ADMIN_ROLES,  CLINICAL_ROLES,  PHARMACY_ROLES,  get_current_user,  require_roles, User, User
 from app.models import (
     Attendance,
     Charge,
@@ -585,7 +585,8 @@ def get_attendance_list(doctor_id: int | None = None, start_date: str | None = N
 
 
 @router.get("/slotPool/getList")
-def get_slot_pool(db: Session = Depends(get_db)):
+def get_slot_pool(current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)):
     """号源池：按科室统计各时段号源总数"""
 
     depts = db.query(Department).all()

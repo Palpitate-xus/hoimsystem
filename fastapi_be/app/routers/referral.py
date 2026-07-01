@@ -4,13 +4,15 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.database import get_db
+from app.dependencies import User, get_current_user, require_roles, CLINICAL_ROLES
 from app.models import Referral
 
 router = APIRouter()
 
 
 @router.post("/referral/create")
-def create_referral(req: dict, db: Session = Depends(get_db)):
+def create_referral(req: dict, current_user: User = Depends(require_roles(*CLINICAL_ROLES)),
+    db: Session = Depends(get_db)):
     r = Referral(
         patient_id=req.get("patient_id"),
         from_department_id=req.get("from_department_id"),
@@ -26,7 +28,8 @@ def create_referral(req: dict, db: Session = Depends(get_db)):
 
 
 @router.get("/referral/getList")
-def get_referral_list(db: Session = Depends(get_db)):
+def get_referral_list(current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)):
     items = db.query(Referral).order_by(Referral.create_time.desc()).all()
     data = []
     for it in items:
@@ -47,7 +50,8 @@ def get_referral_list(db: Session = Depends(get_db)):
 
 
 @router.post("/referral/updateStatus")
-def update_referral_status(req: dict, db: Session = Depends(get_db)):
+def update_referral_status(req: dict, current_user: User = Depends(require_roles(*CLINICAL_ROLES)),
+    db: Session = Depends(get_db)):
     r = db.query(Referral).filter(Referral.referral_id == req.get("referral_id")).first()
     if not r:
         return {"code": 500, "msg": "记录不存在"}

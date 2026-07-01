@@ -4,13 +4,14 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.database import get_db
+from app.dependencies import CLINICAL_ROLES, User, require_roles
 from app.models import ClinicalPathway
 
 router = APIRouter()
 
 
 @router.post("/clinicalPathway/create")
-def create_pathway(req: dict, db: Session = Depends(get_db)):
+def create_pathway(req: dict, current_user: User = Depends(require_roles(*CLINICAL_ROLES)), db: Session = Depends(get_db)):
     p = ClinicalPathway(
         name=req.get("name", ""),
         disease_code=req.get("disease_code", ""),
@@ -26,7 +27,7 @@ def create_pathway(req: dict, db: Session = Depends(get_db)):
 
 
 @router.get("/clinicalPathway/getList")
-def get_pathway_list(db: Session = Depends(get_db)):
+def get_pathway_list(current_user: User = Depends(require_roles(*CLINICAL_ROLES)), db: Session = Depends(get_db)):
     items = db.query(ClinicalPathway).order_by(ClinicalPathway.create_time.desc()).all()
     data = []
     for it in items:
@@ -47,7 +48,7 @@ def get_pathway_list(db: Session = Depends(get_db)):
 
 
 @router.post("/clinicalPathway/update")
-def update_pathway(req: dict, db: Session = Depends(get_db)):
+def update_pathway(req: dict, current_user: User = Depends(require_roles(*CLINICAL_ROLES)), db: Session = Depends(get_db)):
     p = db.query(ClinicalPathway).filter(ClinicalPathway.pathway_id == req.get("pathway_id")).first()
     if not p:
         return {"code": 500, "msg": "记录不存在"}
@@ -59,7 +60,7 @@ def update_pathway(req: dict, db: Session = Depends(get_db)):
 
 
 @router.post("/clinicalPathway/delete")
-def delete_pathway(req: dict, db: Session = Depends(get_db)):
+def delete_pathway(req: dict, current_user: User = Depends(require_roles(*CLINICAL_ROLES)), db: Session = Depends(get_db)):
     p = db.query(ClinicalPathway).filter(ClinicalPathway.pathway_id == req.get("pathway_id")).first()
     if not p:
         return {"code": 500, "msg": "记录不存在"}

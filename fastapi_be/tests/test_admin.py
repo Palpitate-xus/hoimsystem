@@ -3,8 +3,8 @@ import pytest
 
 @pytest.mark.asyncio
 class TestAdminDoctor:
-    async def test_get_doctor_list(self, async_client, seed_data):
-        r = await async_client.get("/api/doctorManagement/getList")
+    async def test_get_doctor_list(self, async_client, seed_data, auth_headers):
+        r = await async_client.get("/api/doctorManagement/getList", headers=auth_headers(seed_data["admin_user"].username))
         assert r.status_code == 200
         body = r.json()
         assert body["code"] == 200
@@ -62,7 +62,7 @@ class TestAdminDoctor:
             "department": dept.department_id, "permission": "doctor", "education": "本科"
         })
         assert r.json()["code"] == 200
-        r = await async_client.get("/api/doctorManagement/getList")
+        r = await async_client.get("/api/doctorManagement/getList", headers=headers)
         docs = r.json()["data"]
         target = [d for d in docs if d["name"] == "临时医生"][0]
 
@@ -73,8 +73,8 @@ class TestAdminDoctor:
 
 @pytest.mark.asyncio
 class TestAdminPatient:
-    async def test_get_patient_list(self, async_client, seed_data):
-        r = await async_client.get("/api/patientManagement/getList")
+    async def test_get_patient_list(self, async_client, seed_data, auth_headers):
+        r = await async_client.get("/api/patientManagement/getList", headers=auth_headers(seed_data["admin_user"].username))
         assert r.status_code == 200
         body = r.json()
         assert body["code"] == 200
@@ -93,8 +93,8 @@ class TestAdminPatient:
 
 @pytest.mark.asyncio
 class TestAdminDepartment:
-    async def test_get_department_list(self, async_client, seed_data):
-        r = await async_client.get("/api/departmentManagement/getList")
+    async def test_get_department_list(self, async_client, seed_data, auth_headers):
+        r = await async_client.get("/api/departmentManagement/getList", headers=auth_headers(seed_data["admin_user"].username))
         assert r.status_code == 200
         body = r.json()
         assert body["code"] == 200
@@ -121,12 +121,12 @@ class TestAdminDepartment:
     async def test_delete_department(self, async_client, seed_data, auth_headers):
         headers = auth_headers(seed_data["admin_user"].username)
         r = await async_client.post("/api/departmentManagement/create", headers=headers, json={
-            "name": "临时科室", "phone": "01000000000", "director": 1, "location": "临时楼"
+            "name": "临时科室删", "phone": "01000000000", "director": 1, "location": "临时楼"
         })
         assert r.json()["code"] == 200
-        r = await async_client.get("/api/departmentManagement/getList")
+        r = await async_client.get("/api/departmentManagement/getList", headers=headers)
         depts = r.json()["data"]
-        target = [d for d in depts if d["name"] == "临时科室"][0]
+        target = [d for d in depts if d["name"] == "临时科室删"][0]
 
         r = await async_client.post("/api/departmentManagement/delete", headers=headers, json={"department_id": target["id"]})
         assert r.status_code == 200

@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.dependencies import get_current_user
+from app.dependencies import ADMIN_ROLES, get_current_user, require_roles
 from app.models import Department, Doctor, Notice, Patient, User
 from app.pagination import paginate
 from app.schemas import (
@@ -49,7 +49,7 @@ def get_doctor_list(keyword: str | None = None, page: int | None = None, page_si
 
 
 @router.post("/doctorManagement/update")
-def update_doctor(req: DoctorUpdateRequest, db: Session = Depends(get_db)):
+def update_doctor(req: DoctorUpdateRequest, current_user: User = Depends(require_roles(*ADMIN_ROLES)), db: Session = Depends(get_db)):
     doctor = db.query(Doctor).filter(Doctor.doctor_id == req.doctor_id).first()
     if not doctor:
         return {"code": 500, "msg": "医生不存在"}
@@ -66,7 +66,7 @@ def update_doctor(req: DoctorUpdateRequest, db: Session = Depends(get_db)):
 
 
 @router.post("/doctorManagement/delete")
-def delete_doctor(req: DoctorDeleteRequest, db: Session = Depends(get_db)):
+def delete_doctor(req: DoctorDeleteRequest, current_user: User = Depends(require_roles(*ADMIN_ROLES)), db: Session = Depends(get_db)):
     doctor = db.query(Doctor).filter(Doctor.doctor_id == req.doctor_id).first()
     if not doctor:
         return {"code": 500, "msg": "医生不存在"}
@@ -109,7 +109,7 @@ def get_patient_list(keyword: str | None = None, page: int | None = None, page_s
 
 
 @router.post("/patientManagement/update")
-def update_patient(req: PatientUpdateRequest, db: Session = Depends(get_db)):
+def update_patient(req: PatientUpdateRequest, current_user: User = Depends(require_roles(*ADMIN_ROLES)), db: Session = Depends(get_db)):
     patient = db.query(Patient).filter(Patient.patient_id == req.patient_id).first()
     if not patient:
         return {"code": 500, "msg": "病人不存在"}
@@ -151,7 +151,7 @@ def get_department_list(keyword: str | None = None, page: int | None = None, pag
 
 
 @router.post("/departmentManagement/create")
-def department_register(req: DepartmentCreateRequest, db: Session = Depends(get_db)):
+def department_register(req: DepartmentCreateRequest, current_user: User = Depends(require_roles(*ADMIN_ROLES)), db: Session = Depends(get_db)):
     try:
         dept = Department(
             name=req.name,
@@ -168,7 +168,7 @@ def department_register(req: DepartmentCreateRequest, db: Session = Depends(get_
 
 
 @router.post("/departmentManagement/update")
-def update_department(req: DepartmentUpdateRequest, db: Session = Depends(get_db)):
+def update_department(req: DepartmentUpdateRequest, current_user: User = Depends(require_roles(*ADMIN_ROLES)), db: Session = Depends(get_db)):
     dept = db.query(Department).filter(Department.department_id == req.department_id).first()
     if not dept:
         return {"code": 500, "msg": "科室不存在"}
@@ -182,7 +182,7 @@ def update_department(req: DepartmentUpdateRequest, db: Session = Depends(get_db
 
 
 @router.post("/departmentManagement/delete")
-def delete_department(req: DepartmentDeleteRequest, db: Session = Depends(get_db)):
+def delete_department(req: DepartmentDeleteRequest, current_user: User = Depends(require_roles(*ADMIN_ROLES)), db: Session = Depends(get_db)):
     dept = db.query(Department).filter(Department.department_id == req.department_id).first()
     if not dept:
         return {"code": 500, "msg": "科室不存在"}
@@ -252,7 +252,7 @@ def notice_register(req: NoticeCreateRequest, current_user: User = Depends(get_c
 
 
 @router.post("/notice/update")
-def update_notice(req: NoticeUpdateRequest, db: Session = Depends(get_db)):
+def update_notice(req: NoticeUpdateRequest, current_user: User = Depends(require_roles(*ADMIN_ROLES)), db: Session = Depends(get_db)):
     notice = db.query(Notice).filter(Notice.notice_id == req.notice_id).first()
     if not notice:
         return {"code": 500, "msg": "通知不存在"}
@@ -271,7 +271,7 @@ def update_notice(req: NoticeUpdateRequest, db: Session = Depends(get_db)):
 
 
 @router.post("/notice/delete")
-def delete_notice(req: NoticeDeleteRequest, db: Session = Depends(get_db)):
+def delete_notice(req: NoticeDeleteRequest, current_user: User = Depends(require_roles(*ADMIN_ROLES)), db: Session = Depends(get_db)):
     notice = db.query(Notice).filter(Notice.notice_id == req.notice_id).first()
     if not notice:
         return {"code": 500, "msg": "通知不存在"}

@@ -4,8 +4,8 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.dependencies import get_current_user
-from app.models import Config, Dict, OperationLog
+from app.dependencies import ADMIN_ROLES, get_current_user, require_roles
+from app.models import Config, Dict, OperationLog, User
 from app.schemas import (
     ConfigUpdateRequest,
     DictCreateRequest,
@@ -19,7 +19,7 @@ router = APIRouter()
 
 
 @router.post("/log/getList")
-def get_log_list(req: LogListRequest, keyword: str | None = None, db: Session = Depends(get_db)):
+def get_log_list(req: LogListRequest, keyword: str | None = None, current_user: User = Depends(require_roles(*ADMIN_ROLES)), db: Session = Depends(get_db)):
     query = db.query(OperationLog)
     if req.user_id:
         query = query.filter(OperationLog.user_id == req.user_id)
@@ -49,7 +49,7 @@ def get_log_list(req: LogListRequest, keyword: str | None = None, db: Session = 
 
 
 @router.post("/dict/getList")
-def get_dict_list(req: DictListRequest, keyword: str | None = None, db: Session = Depends(get_db)):
+def get_dict_list(req: DictListRequest, keyword: str | None = None, current_user: User = Depends(require_roles(*ADMIN_ROLES)), db: Session = Depends(get_db)):
     dicts = db.query(Dict).filter(Dict.dict_type == req.dict_type).order_by(Dict.sort_order).all()
     data = []
     for item in dicts:
@@ -70,7 +70,7 @@ def get_dict_list(req: DictListRequest, keyword: str | None = None, db: Session 
 
 
 @router.post("/dict/create")
-def create_dict(req: DictCreateRequest, db: Session = Depends(get_db)):
+def create_dict(req: DictCreateRequest, current_user: User = Depends(require_roles(*ADMIN_ROLES)), db: Session = Depends(get_db)):
     d = Dict(
         dict_type=req.dict_type,
         dict_code=req.dict_code,
@@ -84,7 +84,7 @@ def create_dict(req: DictCreateRequest, db: Session = Depends(get_db)):
 
 
 @router.post("/dict/update")
-def update_dict(req: DictUpdateRequest, db: Session = Depends(get_db)):
+def update_dict(req: DictUpdateRequest, current_user: User = Depends(require_roles(*ADMIN_ROLES)), db: Session = Depends(get_db)):
     d = db.query(Dict).filter(Dict.dict_id == req.dict_id).first()
     if not d:
         return {"code": 500, "msg": "字典项不存在"}
@@ -97,7 +97,7 @@ def update_dict(req: DictUpdateRequest, db: Session = Depends(get_db)):
 
 
 @router.post("/dict/delete")
-def delete_dict(req: DictDeleteRequest, db: Session = Depends(get_db)):
+def delete_dict(req: DictDeleteRequest, current_user: User = Depends(require_roles(*ADMIN_ROLES)), db: Session = Depends(get_db)):
     d = db.query(Dict).filter(Dict.dict_id == req.dict_id).first()
     if not d:
         return {"code": 500, "msg": "字典项不存在"}
@@ -107,7 +107,7 @@ def delete_dict(req: DictDeleteRequest, db: Session = Depends(get_db)):
 
 
 @router.get("/config/getList")
-def get_config_list(keyword: str | None = None, db: Session = Depends(get_db)):
+def get_config_list(keyword: str | None = None, current_user: User = Depends(require_roles(*ADMIN_ROLES)), db: Session = Depends(get_db)):
     configs = db.query(Config).all()
     data = []
     for item in configs:
@@ -125,7 +125,7 @@ def get_config_list(keyword: str | None = None, db: Session = Depends(get_db)):
 
 
 @router.post("/config/update")
-def update_config(req: ConfigUpdateRequest, db: Session = Depends(get_db)):
+def update_config(req: ConfigUpdateRequest, current_user: User = Depends(require_roles(*ADMIN_ROLES)), db: Session = Depends(get_db)):
     config = db.query(Config).filter(Config.config_key == req.config_key).first()
     if not config:
         return {"code": 500, "msg": "配置项不存在"}
@@ -136,7 +136,7 @@ def update_config(req: ConfigUpdateRequest, db: Session = Depends(get_db)):
 
 
 @router.post("/message/send")
-def send_message(req: dict, db: Session = Depends(get_db)):
+def send_message(req: dict, current_user: User = Depends(require_roles(*ADMIN_ROLES)), db: Session = Depends(get_db)):
     """发送消息（模拟短信/站内信）"""
     from app.models import Message
 
@@ -154,7 +154,7 @@ def send_message(req: dict, db: Session = Depends(get_db)):
 
 
 @router.get("/message/getList")
-def get_message_list(current_user=Depends(get_current_user), keyword: str | None = None, db: Session = Depends(get_db)):
+def get_message_list(current_user: User = Depends(get_current_user), keyword: str | None = None, db: Session = Depends(get_db)):
     from app.models import Message
 
     query = db.query(Message).filter(Message.recipient_id == current_user.user_id).order_by(Message.create_time.desc())
@@ -178,10 +178,10 @@ def get_message_list(current_user=Depends(get_current_user), keyword: str | None
 
 
 @router.post("/message/read")
-def read_message(req: dict, db: Session = Depends(get_db)):
+def read_message(req: dict, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     from app.models import Message
 
-    msg = db.query(Message).filter(Message.message_id == req.get("message_id")).first()
+    msg = db.query(Message).filter(Message.message_id == req.get("message_id"), Message.recipient_id == current_user.user_id).first()
     if msg:
         msg.is_read = 1
         db.add(msg)

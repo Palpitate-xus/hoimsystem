@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.dependencies import get_current_user
+from app.dependencies import ADMIN_ROLES, CLINICAL_ROLES, PHARMACY_ROLES, get_current_user, require_roles
 from app.models import (
     Attendance,
     Charge,
@@ -39,7 +39,7 @@ router = APIRouter()
 
 
 @router.post("/doctorManagement/register")
-def add_doctor(req: DoctorCreateRequest, db: Session = Depends(get_db)):
+def add_doctor(req: DoctorCreateRequest, current_user: User = Depends(require_roles(*ADMIN_ROLES)), db: Session = Depends(get_db)):
     if db.query(User).filter(User.username == req.username).first():
         return {"code": 500, "msg": "已存在相同用户"}
     password = hash_password(req.password)
@@ -76,7 +76,7 @@ def add_doctor(req: DoctorCreateRequest, db: Session = Depends(get_db)):
 
 
 @router.post("/doctorScheduleManagement/register")
-def doctor_schedule_register(req: DoctorScheduleCreateRequest, db: Session = Depends(get_db)):
+def doctor_schedule_register(req: DoctorScheduleCreateRequest, current_user: User = Depends(require_roles(*ADMIN_ROLES)), db: Session = Depends(get_db)):
     try:
         db.query(Doctor).filter(Doctor.doctor_id == req.doctor).first()
         for i in req.schedule:
@@ -161,7 +161,7 @@ def parse_date_str(val):
 
 
 @router.post("/pharmaceuticalManagement/create")
-def pharmaceutical_register(req: PharmaceuticalCreateRequest, db: Session = Depends(get_db)):
+def pharmaceutical_register(req: PharmaceuticalCreateRequest, current_user: User = Depends(require_roles(*PHARMACY_ROLES)), db: Session = Depends(get_db)):
     pha = Pharmaceutical(
         name=req.name,
         stock=req.stock,
@@ -177,7 +177,7 @@ def pharmaceutical_register(req: PharmaceuticalCreateRequest, db: Session = Depe
 
 
 @router.get("/pharmaceuticalManagement/getList")
-def get_pharmaceutical_list(keyword: str | None = None, db: Session = Depends(get_db)):
+def get_pharmaceutical_list(keyword: str | None = None, current_user: User = Depends(require_roles(*PHARMACY_ROLES)), db: Session = Depends(get_db)):
     pharmaceutical_list = db.query(Pharmaceutical).all()
     data = []
     for item in pharmaceutical_list:
@@ -201,7 +201,7 @@ def get_pharmaceutical_list(keyword: str | None = None, db: Session = Depends(ge
 
 
 @router.post("/pharmaceuticalManagement/update")
-def update_pharmaceutical(req: PharmaceuticalUpdateRequest, db: Session = Depends(get_db)):
+def update_pharmaceutical(req: PharmaceuticalUpdateRequest, current_user: User = Depends(require_roles(*PHARMACY_ROLES)), db: Session = Depends(get_db)):
     pha = db.query(Pharmaceutical).filter(Pharmaceutical.pharmaceutical_id == req.pharmaceutical_id).first()
     if not pha:
         return {"code": 500, "msg": "药品不存在"}
@@ -219,7 +219,7 @@ def update_pharmaceutical(req: PharmaceuticalUpdateRequest, db: Session = Depend
 
 
 @router.post("/pharmaceuticalManagement/delete")
-def delete_pharmaceutical(req: PharmaceuticalDeleteRequest, db: Session = Depends(get_db)):
+def delete_pharmaceutical(req: PharmaceuticalDeleteRequest, current_user: User = Depends(require_roles(*PHARMACY_ROLES)), db: Session = Depends(get_db)):
     pha = db.query(Pharmaceutical).filter(Pharmaceutical.pharmaceutical_id == req.pharmaceutical_id).first()
     if not pha:
         return {"code": 500, "msg": "药品不存在"}
@@ -229,7 +229,7 @@ def delete_pharmaceutical(req: PharmaceuticalDeleteRequest, db: Session = Depend
 
 
 @router.post("/pharmaceuticalManagement/stock_query")
-def pharmaceutical_stock_query(req: PharmaceuticalStockQueryRequest, db: Session = Depends(get_db)):
+def pharmaceutical_stock_query(req: PharmaceuticalStockQueryRequest, current_user: User = Depends(require_roles(*PHARMACY_ROLES)), db: Session = Depends(get_db)):
     pha = db.query(Pharmaceutical).filter(Pharmaceutical.pharmaceutical_id == req.id).first()
     if pha:
         return {"code": 200, "msg": "success", "data": {"stock": pha.stock}}
@@ -237,7 +237,7 @@ def pharmaceutical_stock_query(req: PharmaceuticalStockQueryRequest, db: Session
 
 
 @router.get("/pharmaceuticalManagement/lowStock")
-def get_low_stock_drugs(threshold: int = 10, keyword: str | None = None, db: Session = Depends(get_db)):
+def get_low_stock_drugs(threshold: int = 10, keyword: str | None = None, current_user: User = Depends(require_roles(*PHARMACY_ROLES)), db: Session = Depends(get_db)):
     drugs = db.query(Pharmaceutical).filter(Pharmaceutical.stock <= threshold).order_by(Pharmaceutical.stock.asc()).all()
     data = []
     for item in drugs:
@@ -259,7 +259,7 @@ def get_low_stock_drugs(threshold: int = 10, keyword: str | None = None, db: Ses
 
 
 @router.get("/pharmaceuticalManagement/nearExpiry")
-def get_near_expiry_drugs(days: int = 30, keyword: str | None = None, db: Session = Depends(get_db)):
+def get_near_expiry_drugs(days: int = 30, keyword: str | None = None, current_user: User = Depends(require_roles(*PHARMACY_ROLES)), db: Session = Depends(get_db)):
     from datetime import date, timedelta
 
     cutoff = date.today() + timedelta(days=days)
@@ -427,7 +427,7 @@ def get_prescription_list(current_user: User = Depends(get_current_user), keywor
 
 
 @router.post("/prescriptionManagement/cancel")
-def cancel_prescription(req: PrescriptionCancelRequest, db: Session = Depends(get_db)):
+def cancel_prescription(req: PrescriptionCancelRequest, current_user: User = Depends(require_roles(*CLINICAL_ROLES)), db: Session = Depends(get_db)):
     pre = db.query(Prescription).filter(Prescription.prescription_id == req.prescription_id).first()
     if not pre:
         return {"code": 500, "msg": "处方不存在"}
@@ -455,7 +455,7 @@ def create_medical_record(req: MedicalRecordCreateRequest, current_user: User = 
 
 
 @router.post("/medicalRecord/update")
-def update_medical_record(req: MedicalRecordUpdateRequest, db: Session = Depends(get_db)):
+def update_medical_record(req: MedicalRecordUpdateRequest, current_user: User = Depends(require_roles(*CLINICAL_ROLES)), db: Session = Depends(get_db)):
     record = db.query(MedicalRecord).filter(MedicalRecord.medical_record_id == req.medical_record_id).first()
     if not record:
         return {"code": 500, "msg": "病历不存在"}
@@ -557,7 +557,7 @@ def attendance_check_out(current_user: User = Depends(get_current_user), db: Ses
 
 
 @router.get("/attendance/getList")
-def get_attendance_list(doctor_id: int | None = None, start_date: str | None = None, end_date: str | None = None, db: Session = Depends(get_db)):
+def get_attendance_list(doctor_id: int | None = None, start_date: str | None = None, end_date: str | None = None, current_user: User = Depends(require_roles(*CLINICAL_ROLES)), db: Session = Depends(get_db)):
     query = db.query(Attendance).order_by(Attendance.date.desc())
     if doctor_id:
         query = query.filter(Attendance.doctor_id == doctor_id)
@@ -606,7 +606,7 @@ def get_slot_pool(db: Session = Depends(get_db)):
 
 
 @router.post("/slotPool/adjust")
-def adjust_slot(req: dict, db: Session = Depends(get_db)):
+def adjust_slot(req: dict, current_user: User = Depends(require_roles(*ADMIN_ROLES)), db: Session = Depends(get_db)):
     """调整号源数量"""
     schedule = db.query(DoctorSchedule).filter(DoctorSchedule.schedule_id == req.get("schedule_id")).first()
     if not schedule:

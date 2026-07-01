@@ -154,7 +154,7 @@ def patient_appointment(req: AppointmentCreateRequest, current_user: User = Depe
 
 
 @router.post("/appointmentManagement/cancel")
-def patient_appointment_cancel(req: UuidRequest, db: Session = Depends(get_db)):
+def patient_appointment_cancel(req: UuidRequest, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     app = db.query(Appointment).filter(Appointment.registration_uuid == req.uuid).first()
     if app:
         app.status = 2
@@ -273,7 +273,7 @@ def patient_registration(req: RegistrationCreateRequest, current_user: User = De
 
 
 @router.post("/registrationManagement/cancel")
-def patient_registration_cancel(req: UuidRequest, db: Session = Depends(get_db)):
+def patient_registration_cancel(req: UuidRequest, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     reg = db.query(Registration).filter(Registration.registration_uuid == req.uuid).first()
     if reg:
         reg.status = 3
@@ -333,7 +333,7 @@ def get_medical_record_list(current_user: User = Depends(get_current_user), keyw
 
 
 @router.post("/medicalRecord/detail")
-def get_medical_record_detail(req: MedicalRecordDetailRequest, db: Session = Depends(get_db)):
+def get_medical_record_detail(req: MedicalRecordDetailRequest, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     record = db.query(MedicalRecord).filter(MedicalRecord.medical_record_id == req.medical_record_id).first()
     if not record:
         return {"code": 500, "msg": "病历不存在"}

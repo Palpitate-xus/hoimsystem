@@ -1,8 +1,11 @@
 import os
 import uuid
 
-from fastapi import APIRouter, File, HTTPException, UploadFile
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 from fastapi.responses import FileResponse
+
+from app.dependencies import get_current_user
+from app.models import User
 
 router = APIRouter()
 
@@ -35,14 +38,14 @@ def _save_file(upload_dir: str, file: UploadFile, allowed_types: set, max_size: 
 
 
 @router.post("/upload/avatar")
-def upload_avatar(file: UploadFile = File(...)):
+def upload_avatar(file: UploadFile = File(...), current_user: User = Depends(get_current_user)):
     os.makedirs(AVATAR_DIR, exist_ok=True)
     result = _save_file(AVATAR_DIR, file, ALLOWED_IMAGE_TYPES, MAX_AVATAR_SIZE)
     return {"code": 200, "msg": "success", "data": result}
 
 
 @router.post("/upload/report")
-def upload_report(file: UploadFile = File(...)):
+def upload_report(file: UploadFile = File(...), current_user: User = Depends(get_current_user)):
     os.makedirs(REPORT_DIR, exist_ok=True)
     result = _save_file(REPORT_DIR, file, ALLOWED_DOC_TYPES, MAX_REPORT_SIZE)
     return {"code": 200, "msg": "success", "data": result}

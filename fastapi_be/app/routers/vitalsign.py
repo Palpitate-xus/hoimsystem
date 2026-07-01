@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.dependencies import get_current_user, User, User, require_roles, NURSING_ROLES
+from app.dependencies import get_current_user, User, require_roles, NURSING_ROLES
 from app.models import Patient, VitalSign
 from app.schemas import VitalSignCreateRequest
 
@@ -12,7 +12,7 @@ router = APIRouter()
 
 
 @router.post("/vitalSign/create")
-def create_vital_sign(req: VitalSignCreateRequest, current_user=Depends(get_current_user), db: Session = Depends(get_db)):
+def create_vital_sign(req: VitalSignCreateRequest, current_user: User = Depends(require_roles(*NURSING_ROLES)), db: Session = Depends(get_db)):
     patient = db.query(Patient).filter(Patient.patient_id == req.patient_id).first()
     if not patient:
         return {"code": 500, "msg": "病人不存在"}

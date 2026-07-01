@@ -5,14 +5,14 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.dependencies import get_current_user, User, User, require_roles, ADMIN_ROLES
+from app.dependencies import User, get_current_user, require_roles, ADMIN_ROLES
 from app.models import Consumable, Pharmaceutical, PurchaseOrder, PurchaseOrderItem
 
 router = APIRouter()
 
 
 @router.post("/purchase/create")
-def create_purchase(req: dict, db: Session = Depends(get_db), current_user=Depends(get_current_user)):
+def create_purchase(req: dict, current_user: User = Depends(require_roles(*ADMIN_ROLES)), db: Session = Depends(get_db)):
     items = req.get("items", [])
     if not items:
         return {"code": 500, "msg": "采购明细不能为空"}

@@ -93,9 +93,41 @@ def seed_data(db_session: Session):
     sess.add(pharmacist_user)
     sess.flush()
 
+    super_admin_user = User(username="super01", password=hash_password("123456"), user_role="super_admin")
+    sess.add(super_admin_user)
+    sess.flush()
+
+    director_user = User(username="director01", password=hash_password("123456"), user_role="director")
+    sess.add(director_user)
+    sess.flush()
+
+    nurse_user = User(username="nurse01", password=hash_password("123456"), user_role="nurse")
+    sess.add(nurse_user)
+    sess.flush()
+
+    guide_user = User(username="guide01", password=hash_password("123456"), user_role="guide")
+    sess.add(guide_user)
+    sess.flush()
+
+    lab_tech_user = User(username="lab01", password=hash_password("123456"), user_role="lab_technician")
+    sess.add(lab_tech_user)
+    sess.flush()
+
+    registrar_user = User(username="registrar01", password=hash_password("123456"), user_role="registrar")
+    sess.add(registrar_user)
+    sess.flush()
+
     # Department
     dept = Department(name="内科", phone="01012345678", location="1号楼", director=None)
     sess.add(dept)
+    sess.flush()
+
+    director_doctor = Doctor(
+        name="李主任", sex=1, department_id=dept.department_id,
+        title="科室主任", education="博士", phone="13900139001",
+        permission="director", user_id=director_user.user_id,
+    )
+    sess.add(director_doctor)
     sess.flush()
 
     # Doctor user + doctor
@@ -188,10 +220,17 @@ def seed_data(db_session: Session):
 
     data = {
         "admin_user": admin_user,
+        "super_admin_user": super_admin_user,
+        "director_user": director_user,
+        "doctor_user": doc_user,
+        "nurse_user": nurse_user,
         "cashier_user": cashier_user,
         "pharmacist_user": pharmacist_user,
-        "doctor_user": doc_user,
+        "guide_user": guide_user,
+        "lab_tech_user": lab_tech_user,
+        "registrar_user": registrar_user,
         "doctor": doctor,
+        "director_doctor": director_doctor,
         "patient_user": pat_user,
         "patient": patient,
         "patient2_user": pat_user2,

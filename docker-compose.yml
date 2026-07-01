@@ -24,8 +24,10 @@ services:
     container_name: hoimsystem_backend
     restart: unless-stopped
     environment:
+      ENVIRONMENT: ${ENVIRONMENT:-production}
       DATABASE_URL: postgresql://hoimsystem:hoimsystem_password@db:5432/hoimsystem
-      SECRET_KEY: ${SECRET_KEY:-change-me-in-production}
+      SECRET_KEY: ${SECRET_KEY:?SECRET_KEY must be set before starting production compose}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost}
     volumes:
       - ./fastapi_be/app/uploads:/app/app/uploads
     ports:

@@ -1,7 +1,7 @@
+import datetime
 import os
 import sys
-import datetime
-import uuid as uuid_module
+
 import pytest
 import pytest_asyncio
 
@@ -10,18 +10,25 @@ os.environ["DATABASE_URL"] = "sqlite:///:memory:"
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
+from httpx import ASGITransport, AsyncClient
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, Session
+from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy.pool import StaticPool
-from httpx import AsyncClient, ASGITransport
 
-from app.main import app
 from app.database import Base, get_db
+from app.main import app
 from app.models import (
-    User, Patient, Doctor, Department, Notice, DoctorSchedule,
-    Pharmaceutical, Prescription, PrePha, Charge, MedicalRecord,
-    Registration, Appointment, Queue, VitalSign, LabOrder, LabResult,
-    Invoice, FollowUp, Review, OperationLog, Dict, Config,
+    Charge,
+    Department,
+    Doctor,
+    DoctorSchedule,
+    MedicalRecord,
+    Notice,
+    Patient,
+    Pharmaceutical,
+    PrePha,
+    Prescription,
+    User,
 )
 
 engine = create_engine(
@@ -76,6 +83,10 @@ def seed_data(db_session: Session):
     # Admin user
     admin_user = User(username="admin", password=hash_password("admin123"), user_role="admin")
     sess.add(admin_user)
+    sess.flush()
+
+    cashier_user = User(username="cashier01", password=hash_password("123456"), user_role="cashier")
+    sess.add(cashier_user)
     sess.flush()
 
     # Department
@@ -173,6 +184,7 @@ def seed_data(db_session: Session):
 
     data = {
         "admin_user": admin_user,
+        "cashier_user": cashier_user,
         "doctor_user": doc_user,
         "doctor": doctor,
         "patient_user": pat_user,
@@ -187,3 +199,13 @@ def seed_data(db_session: Session):
         "notice": notice,
     }
     return data
+
+
+@pytest.fixture
+def auth_headers():
+    from app.routers.user import create_access_token
+
+    def _auth_headers(username: str) -> dict[str, str]:
+        return {"accesstoken": create_access_token(username)}
+
+    return _auth_headers

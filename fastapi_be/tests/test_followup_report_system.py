@@ -12,29 +12,30 @@ class TestFollowUp:
         assert r.status_code == 200
         assert r.json()["code"] == 200
 
-    async def test_create_plan(self, async_client, seed_data):
-        r = await async_client.post("/api/followUp/createPlan", headers={"accesstoken": seed_data["doctor_user"].username}, json={
+    async def test_create_plan(self, async_client, seed_data, auth_headers):
+        r = await async_client.post("/api/followUp/createPlan", headers=auth_headers(seed_data["doctor_user"].username), json={
             "patient_id": seed_data["patient"].patient_id,
             "plan_date": "2026-05-15", "content": "复查血常规"
         })
         assert r.status_code == 200
         assert r.json()["code"] == 200
 
-    async def test_get_list(self, async_client, seed_data):
-        r = await async_client.get("/api/followUp/getList", headers={"accesstoken": seed_data["doctor_user"].username})
+    async def test_get_list(self, async_client, seed_data, auth_headers):
+        r = await async_client.get("/api/followUp/getList", headers=auth_headers(seed_data["doctor_user"].username))
         assert r.status_code == 200
         body = r.json()
         assert body["code"] == 200
 
-    async def test_record(self, async_client, seed_data):
+    async def test_record(self, async_client, seed_data, auth_headers):
         # create a plan first
-        r = await async_client.post("/api/followUp/createPlan", headers={"accesstoken": seed_data["doctor_user"].username}, json={
+        headers = auth_headers(seed_data["doctor_user"].username)
+        r = await async_client.post("/api/followUp/createPlan", headers=headers, json={
             "patient_id": seed_data["patient"].patient_id,
             "plan_date": "2026-05-20", "content": "电话随访"
         })
         assert r.json()["code"] == 200
 
-        r = await async_client.get("/api/followUp/getList", headers={"accesstoken": seed_data["doctor_user"].username})
+        r = await async_client.get("/api/followUp/getList", headers=headers)
         plans = r.json()["data"]
         if plans:
             plan_id = plans[0]["id"]

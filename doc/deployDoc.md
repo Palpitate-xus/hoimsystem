@@ -85,11 +85,17 @@ cp .env.example .env
 编辑 `.env` 文件：
 
 ```ini
+# 生产环境标识：启用后后端会拒绝默认/空 SECRET_KEY
+ENVIRONMENT=production
+
 # 生产环境使用 PostgreSQL
 DATABASE_URL=postgresql://user:password@localhost:5432/hoimsystem
 
 # JWT 密钥（必须修改为随机强密钥！）
 SECRET_KEY=your-random-secret-key-min-32-chars
+
+# 允许访问后端 API 的前端域名，多个域名用英文逗号分隔
+ALLOWED_ORIGINS=https://his.example.com
 ```
 
 **重要**：`SECRET_KEY` 必须使用 `openssl rand -base64 32` 或类似命令生成随机密钥，切勿使用默认值。
@@ -273,8 +279,10 @@ chmod 755 fastapi_be/app/uploads
 
 | 变量名 | 默认值 | 说明 |
 |--------|--------|------|
+| `ENVIRONMENT` | `development` | 运行环境。设为 `production` 时会强制检查生产安全配置 |
 | `DATABASE_URL` | `sqlite:///./test.db` | 数据库连接字符串 |
 | `SECRET_KEY` | 自动生成 | JWT 签名密钥，生产环境必须手动设置 |
+| `ALLOWED_ORIGINS` | 本地开发地址 | CORS 允许来源白名单，多个来源用英文逗号分隔 |
 | `DB_USER` | - | PostgreSQL 用户名（使用分项配置时） |
 | `DB_PASSWORD` | - | PostgreSQL 密码（使用分项配置时） |
 | `DB_HOST` | `localhost` | 数据库主机 |

@@ -4,10 +4,13 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.models import Appointment, BreachRecord, Patient, Queue
+from app.dependencies import NURSING_ROLES, ROLE_PATIENT, get_current_user, require_roles
+from app.models import Appointment, BreachRecord, Patient, Queue, User
 from app.schemas import CheckInRequest
 
 router = APIRouter()
+
+_STAFF_ROLES = {*NURSING_ROLES}
 
 
 def is_breach(appointment):
@@ -41,8 +44,10 @@ from app.models import Doctor
 
 
 @router.get("/checkIn/getAppointments")
-def get_appointments_for_checkin(identity: str, db: Session = Depends(get_db)):
-    """根据身份证号查询可报到的预约列表"""
+def get_appointments_for_checkin(identity: str, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    """根据身份证号查询可报到的预约列表（患者只能查自己的；护士可查他人）"""
+    if current_user.user_role == ROLE_PATIENT and current_user.username != identity:
+        return {"code": 403, "msg": "无权查询其他患者预约"}
     patient = db.query(Patient).filter(Patient.identity == identity).first()
     if not patient:
         return {"code": 500, "msg": "病人信息不存在"}
@@ -73,7 +78,9 @@ def get_appointments_for_checkin(identity: str, db: Session = Depends(get_db)):
 
 
 @router.post("/checkIn/checkIn")
-def check_in(req: CheckInRequest, db: Session = Depends(get_db)):
+def check_in(req: CheckInRequest, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    if current_user.user_role == ROLE_PATIENT and current_user.username != req.identity:
+        return {"code": 403, "msg": "无权替他人报到"}
     appointment = db.query(Appointment).filter(Appointment.registration_uuid == req.appointment_uuid).first()
     if not appointment:
         return {"code": 500, "msg": "预约记录不存在"}
@@ -105,7 +112,7 @@ def check_in(req: CheckInRequest, db: Session = Depends(get_db)):
 
 
 @router.get("/breach/getList")
-def get_breach_list(patient_id: int | None = None, db: Session = Depends(get_db)):
+def get_breach_list(patient_id: int | None = None, current_user: User = Depends(require_roles(*_STAFF_ROLES)), db: Session = Depends(get_db)):
     query = db.query(BreachRecord, Appointment, Patient).join(Appointment, BreachRecord.registration_id == Appointment.registration_uuid).join(Patient, Appointment.patient_id == Patient.patient_id)
     if patient_id:
         query = query.filter(Appointment.patient_id == patient_id)
@@ -126,7 +133,7 @@ def get_breach_list(patient_id: int | None = None, db: Session = Depends(get_db)
 
 
 @router.get("/breach/checkSuspend")
-def check_suspend(patient_id: int, db: Session = Depends(get_db)):
+def check_suspend(patient_id: int, current_user: User = Depends(require_roles(*_STAFF_ROLES)), db: Session = Depends(get_db)):
     """检查病人是否处于暂停预约状态：30天内违约3次则暂停30天"""
     count = get_breach_count(db, patient_id, days=30)
     suspended = count >= 3

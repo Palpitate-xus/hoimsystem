@@ -1,18 +1,19 @@
-import datetime
-
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.dependencies import get_current_user
+from app.dependencies import NURSING_ROLES, User, require_roles
 from app.models import Bed, Department, Ward
 from app.schemas import BedCreateRequest, BedUpdateRequest, WardCreateRequest, WardUpdateRequest
 
 router = APIRouter()
 
+WARD_READ_ROLES = {*NURSING_ROLES}
+WARD_WRITE_ROLES = {*NURSING_ROLES}
+
 
 @router.get("/ward/getList")
-def get_ward_list(keyword: str | None = None, db: Session = Depends(get_db)):
+def get_ward_list(keyword: str | None = None, current_user: User = Depends(require_roles(*WARD_READ_ROLES)), db: Session = Depends(get_db)):
     wards = db.query(Ward).filter(Ward.status == 0).all()
     data = []
     for item in wards:
@@ -39,7 +40,7 @@ def get_ward_list(keyword: str | None = None, db: Session = Depends(get_db)):
 
 
 @router.post("/ward/create")
-def create_ward(req: WardCreateRequest, db: Session = Depends(get_db)):
+def create_ward(req: WardCreateRequest, current_user: User = Depends(require_roles(*WARD_WRITE_ROLES)), db: Session = Depends(get_db)):
     ward = Ward(
         name=req.name,
         department_id=req.department_id,
@@ -54,7 +55,7 @@ def create_ward(req: WardCreateRequest, db: Session = Depends(get_db)):
 
 
 @router.post("/ward/update")
-def update_ward(req: WardUpdateRequest, db: Session = Depends(get_db)):
+def update_ward(req: WardUpdateRequest, current_user: User = Depends(require_roles(*WARD_WRITE_ROLES)), db: Session = Depends(get_db)):
     ward = db.query(Ward).filter(Ward.ward_id == req.ward_id).first()
     if not ward:
         return {"code": 500, "msg": "病区不存在"}
@@ -76,7 +77,7 @@ def update_ward(req: WardUpdateRequest, db: Session = Depends(get_db)):
 
 
 @router.post("/ward/delete")
-def delete_ward(req: dict, db: Session = Depends(get_db)):
+def delete_ward(req: dict, current_user: User = Depends(require_roles(*WARD_WRITE_ROLES)), db: Session = Depends(get_db)):
     ward = db.query(Ward).filter(Ward.ward_id == req.get("ward_id")).first()
     if not ward:
         return {"code": 500, "msg": "病区不存在"}
@@ -87,7 +88,7 @@ def delete_ward(req: dict, db: Session = Depends(get_db)):
 
 
 @router.get("/bed/getList")
-def get_bed_list(ward_id: int | None = None, keyword: str | None = None, db: Session = Depends(get_db)):
+def get_bed_list(ward_id: int | None = None, keyword: str | None = None, current_user: User = Depends(require_roles(*WARD_READ_ROLES)), db: Session = Depends(get_db)):
     query = db.query(Bed)
     if ward_id:
         query = query.filter(Bed.ward_id == ward_id)
@@ -116,7 +117,7 @@ def get_bed_list(ward_id: int | None = None, keyword: str | None = None, db: Ses
 
 
 @router.post("/bed/create")
-def create_bed(req: BedCreateRequest, db: Session = Depends(get_db)):
+def create_bed(req: BedCreateRequest, current_user: User = Depends(require_roles(*WARD_WRITE_ROLES)), db: Session = Depends(get_db)):
     bed = Bed(
         ward_id=req.ward_id,
         bed_no=req.bed_no,
@@ -131,7 +132,7 @@ def create_bed(req: BedCreateRequest, db: Session = Depends(get_db)):
 
 
 @router.post("/bed/update")
-def update_bed(req: BedUpdateRequest, db: Session = Depends(get_db)):
+def update_bed(req: BedUpdateRequest, current_user: User = Depends(require_roles(*WARD_WRITE_ROLES)), db: Session = Depends(get_db)):
     bed = db.query(Bed).filter(Bed.bed_id == req.bed_id).first()
     if not bed:
         return {"code": 500, "msg": "床位不存在"}
@@ -151,7 +152,7 @@ def update_bed(req: BedUpdateRequest, db: Session = Depends(get_db)):
 
 
 @router.post("/bed/delete")
-def delete_bed(req: dict, db: Session = Depends(get_db)):
+def delete_bed(req: dict, current_user: User = Depends(require_roles(*WARD_WRITE_ROLES)), db: Session = Depends(get_db)):
     bed = db.query(Bed).filter(Bed.bed_id == req.get("bed_id")).first()
     if not bed:
         return {"code": 500, "msg": "床位不存在"}

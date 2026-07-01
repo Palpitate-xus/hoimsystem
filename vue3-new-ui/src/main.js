@@ -9,8 +9,6 @@ import { registerLayoutComponents } from "@/layouts/export";
 import eventBus from "@/utils/eventBus";
 // 导入配置
 import { title } from "@/config";
-// 导入mock
-import { mockXHR } from "@/utils/static";
 
 /**
  * @description 医院门诊信息管理系统前端入口
@@ -74,11 +72,5 @@ console.error = function (...args) {
   originalConsoleError.apply(console, args);
 };
 
-// 检测环境变量，生产环境启用mock
-if (process.env.NODE_ENV === "production") {
-  // 生产环境初始化mock
-  mockXHR();
-  console.log("生产环境已启用Mock拦截，所有接口请求将被Mock拦截");
-}
 // 挂载应用
 app.mount("#hoim");

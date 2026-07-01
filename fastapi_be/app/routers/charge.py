@@ -5,8 +5,9 @@ import traceback
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
+from app.config import settings
 from app.database import get_db
-from app.dependencies import get_current_user
+from app.dependencies import ADMIN_ROLES, ROLE_CASHIER, ROLE_PATIENT, get_current_user, require_roles
 from app.models import Charge, Doctor, Invoice, Patient, Prescription, User
 from app.pagination import paginate
 from app.schemas import (
@@ -19,6 +20,19 @@ from app.schemas import (
 )
 
 router = APIRouter()
+
+
+CASHIER_ROLES = {ROLE_CASHIER, *ADMIN_ROLES}
+
+
+def _is_cashier_role(user: User) -> bool:
+    return user.user_role in CASHIER_ROLES
+
+
+def _owns_charge(user: User, charge: Charge | None) -> bool:
+    if not charge or user.user_role != ROLE_PATIENT:
+        return False
+    return bool(charge.prescription and charge.prescription.patient and charge.prescription.patient.identity == user.username)
 
 
 @router.get("/chargeManagement/getList")
@@ -47,12 +61,12 @@ def get_charge_list(current_user: User = Depends(get_current_user), keyword: str
 
     data = []
     total = 0
-    if current_user.user_role == "admin" or current_user.user_role not in ("admin", "patient"):
+    if _is_cashier_role(current_user):
         query = db.query(Charge)
         charge_list, total = paginate(query, page, page_size)
         for item in charge_list:
             data.append(_enrich(item))
-    elif current_user.user_role == "patient":
+    elif current_user.user_role == ROLE_PATIENT:
         patient_obj = db.query(Patient).filter(Patient.identity == current_user.username).first()
         if patient_obj:
             pres = db.query(Prescription).filter(Prescription.patient_id == patient_obj.patient_id).all()
@@ -60,6 +74,8 @@ def get_charge_list(current_user: User = Depends(get_current_user), keyword: str
                 item = db.query(Charge).filter(Charge.prescription_id == pre.prescription_id).first()
                 if item:
                     data.append(_enrich(item))
+    else:
+        return {"code": 403, "msg": "无权访问", "data": []}
     if keyword:
         kw = keyword.lower()
         data = [item for item in data if any(kw in str(val).lower() for val in item.values())]
@@ -70,7 +86,7 @@ def get_charge_list(current_user: User = Depends(get_current_user), keyword: str
 
 
 @router.post("/chargeManagement/charge")
-def charge_commit(req: ChargeCommitRequest, db: Session = Depends(get_db)):
+def charge_commit(req: ChargeCommitRequest, db: Session = Depends(get_db), current_user: User = Depends(require_roles(ROLE_CASHIER, *ADMIN_ROLES))):
     charge_obj = db.query(Charge).filter(Charge.charge_id == req.id).first()
     if charge_obj:
         charge_obj.status = 1
@@ -81,7 +97,7 @@ def charge_commit(req: ChargeCommitRequest, db: Session = Depends(get_db)):
 
 
 @router.post("/chargeManagement/refund")
-def charge_refund(req: ChargeRefundRequest, db: Session = Depends(get_db)):
+def charge_refund(req: ChargeRefundRequest, db: Session = Depends(get_db), current_user: User = Depends(require_roles(ROLE_CASHIER, *ADMIN_ROLES))):
     charge_obj = db.query(Charge).filter(Charge.charge_id == req.charge_id).first()
     if not charge_obj:
         return {"code": 500, "msg": "收费记录不存在"}
@@ -94,7 +110,7 @@ def charge_refund(req: ChargeRefundRequest, db: Session = Depends(get_db)):
 
 
 @router.get("/invoice/getList")
-def get_invoice_list(keyword: str | None = None, db: Session = Depends(get_db)):
+def get_invoice_list(keyword: str | None = None, db: Session = Depends(get_db), current_user: User = Depends(require_roles(ROLE_CASHIER, *ADMIN_ROLES))):
     invoices = db.query(Invoice).all()
     data = []
     for item in invoices:
@@ -120,7 +136,7 @@ def get_invoice_list(keyword: str | None = None, db: Session = Depends(get_db)):
 
 
 @router.post("/invoice/create")
-def create_invoice(req: InvoiceCreateRequest, db: Session = Depends(get_db)):
+def create_invoice(req: InvoiceCreateRequest, db: Session = Depends(get_db), current_user: User = Depends(require_roles(ROLE_CASHIER, *ADMIN_ROLES))):
     charge = db.query(Charge).filter(Charge.charge_id == req.charge_id).first()
     if not charge:
         return {"code": 500, "msg": "收费记录不存在"}
@@ -144,7 +160,7 @@ def create_invoice(req: InvoiceCreateRequest, db: Session = Depends(get_db)):
 
 
 @router.post("/invoice/print")
-def print_invoice(req: InvoicePrintRequest, db: Session = Depends(get_db)):
+def print_invoice(req: InvoicePrintRequest, db: Session = Depends(get_db), current_user: User = Depends(require_roles(ROLE_CASHIER, *ADMIN_ROLES))):
     invoice = db.query(Invoice).filter(Invoice.invoice_id == req.invoice_id).first()
     if not invoice:
         return {"code": 500, "msg": "发票不存在"}
@@ -152,7 +168,7 @@ def print_invoice(req: InvoicePrintRequest, db: Session = Depends(get_db)):
 
 
 @router.post("/windowRegistration/create")
-def window_registration(req: dict, db: Session = Depends(get_db)):
+def window_registration(req: dict, db: Session = Depends(get_db), current_user: User = Depends(require_roles(ROLE_CASHIER, *ADMIN_ROLES))):
     """窗口挂号：收费员代病人现场挂号"""
     from app.models import DoctorSchedule, Patient, Registration
 
@@ -190,7 +206,7 @@ def window_registration(req: dict, db: Session = Depends(get_db)):
 
 
 @router.post("/windowRegistration/cancel")
-def window_cancel_registration(req: dict, db: Session = Depends(get_db)):
+def window_cancel_registration(req: dict, db: Session = Depends(get_db), current_user: User = Depends(require_roles(ROLE_CASHIER, *ADMIN_ROLES))):
     """窗口退号"""
     from app.models import Registration
 
@@ -204,7 +220,7 @@ def window_cancel_registration(req: dict, db: Session = Depends(get_db)):
 
 
 @router.post("/dailySettlement/report")
-def daily_settlement(req: dict, db: Session = Depends(get_db)):
+def daily_settlement(req: dict, db: Session = Depends(get_db), current_user: User = Depends(require_roles(ROLE_CASHIER, *ADMIN_ROLES))):
     """日结对账"""
     from sqlalchemy import func
 
@@ -241,13 +257,15 @@ def daily_settlement(req: dict, db: Session = Depends(get_db)):
 
 
 @router.post("/payment/create")
-def create_payment(req: PaymentCreateRequest, db: Session = Depends(get_db)):
+def create_payment(req: PaymentCreateRequest, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     """创建支付订单"""
     from app.models import Payment
 
     charge = db.query(Charge).filter(Charge.charge_id == req.charge_id).first()
     if not charge:
         return {"code": 500, "msg": "收费记录不存在"}
+    if not (_is_cashier_role(current_user) or _owns_charge(current_user, charge)):
+        return {"code": 403, "msg": "无权访问该收费记录"}
     if charge.status == 1:
         return {"code": 500, "msg": "该订单已缴费"}
     payment_no = "PAY" + datetime.datetime.now().strftime("%Y%m%d%H%M%S") + str(random.randint(1000, 9999))
@@ -276,13 +294,15 @@ def create_payment(req: PaymentCreateRequest, db: Session = Depends(get_db)):
 
 
 @router.get("/payment/query/{payment_no}")
-def query_payment(payment_no: str, db: Session = Depends(get_db)):
+def query_payment(payment_no: str, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     """查询支付状态"""
     from app.models import Payment
 
     payment = db.query(Payment).filter(Payment.payment_no == payment_no).first()
     if not payment:
         return {"code": 500, "msg": "支付单不存在"}
+    if not (_is_cashier_role(current_user) or _owns_charge(current_user, payment.charge)):
+        return {"code": 403, "msg": "无权访问该支付单"}
     return {
         "code": 200,
         "msg": "success",
@@ -299,8 +319,10 @@ def query_payment(payment_no: str, db: Session = Depends(get_db)):
 
 
 @router.post("/payment/mockNotify")
-def mock_payment_notify(req: PaymentMockNotifyRequest, db: Session = Depends(get_db)):
+def mock_payment_notify(req: PaymentMockNotifyRequest, db: Session = Depends(get_db), current_user: User = Depends(require_roles(ROLE_CASHIER, *ADMIN_ROLES))):
     """Mock 支付回调（模拟微信/支付宝异步通知）"""
+    if settings.is_production:
+        return {"code": 403, "msg": "生产环境禁止使用模拟支付回调"}
     from app.models import Payment
 
     payment = db.query(Payment).filter(Payment.payment_no == req.payment_no).first()
@@ -327,7 +349,7 @@ def mock_payment_notify(req: PaymentMockNotifyRequest, db: Session = Depends(get
 
 
 @router.get("/payment/getList")
-def get_payment_list(keyword: str | None = None, db: Session = Depends(get_db)):
+def get_payment_list(keyword: str | None = None, db: Session = Depends(get_db), current_user: User = Depends(require_roles(ROLE_CASHIER, *ADMIN_ROLES))):
     """支付流水列表"""
     from app.models import Payment
 

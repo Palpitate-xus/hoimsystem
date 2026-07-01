@@ -26,6 +26,24 @@ from app.schemas import (
 router = APIRouter()
 
 
+WEEKDAY_ALIASES = {
+    "星期一": "周一",
+    "星期二": "周二",
+    "星期三": "周三",
+    "星期四": "周四",
+    "星期五": "周五",
+    "星期六": "周六",
+    "星期日": "周日",
+    "星期天": "周日",
+}
+
+
+def normalize_weekday(value: str | None) -> str | None:
+    if not value:
+        return value
+    return WEEKDAY_ALIASES.get(value, value)
+
+
 @router.get("/appointmentManagement/getList")
 def get_appointment_list(current_user: User = Depends(get_current_user), keyword: str | None = None, db: Session = Depends(get_db)):
     patient_obj = db.query(Patient).filter(Patient.identity == current_user.username).first()
@@ -63,14 +81,17 @@ def appointment_list(keyword: str | None = None, db: Session = Depends(get_db)):
         date_map[weekdays[(begin + datetime.timedelta(days=i)).weekday()]] = str(begin + datetime.timedelta(days=i))[0:10]
     data = []
     for item in schedules:
-        if date_map[item.week] == str(begin)[0:10]:
+        normalized_week = normalize_weekday(item.week)
+        if normalized_week not in date_map:
+            continue
+        if date_map[normalized_week] == str(begin)[0:10]:
             continue
         data.append(
             {
                 "id": item.schedule_id,
                 "time": item.time,
                 "specialist": item.specialist,
-                "date": date_map[item.week],
+                "date": date_map[normalized_week],
                 "doctor": item.doctor.name if item.doctor else "",
                 "doctor_id": item.doctor.doctor_id if item.doctor else None,
                 "department_id": item.doctor.department.department_id if item.doctor and item.doctor.department else None,
@@ -175,7 +196,8 @@ def registration_list(current_user: User = Depends(get_current_user), keyword: s
     if today_weeky > 4:
         return {"code": 200, "msg": "success", "data": "今天为休息日"}
     data = []
-    schedules = db.query(DoctorSchedule).filter(DoctorSchedule.week == weekdays[today_weeky]).all()
+    target_week = weekdays[today_weeky]
+    schedules = [item for item in db.query(DoctorSchedule).all() if normalize_weekday(item.week) == target_week]
     patient_obj = db.query(Patient).filter(Patient.identity == current_user.username).first()
     for item in schedules:
         if (

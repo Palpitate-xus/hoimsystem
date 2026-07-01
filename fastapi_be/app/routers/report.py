@@ -3,13 +3,16 @@ from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from app.database import get_db
+from app.dependencies import CLINICAL_ROLES, CASHIER_ROLES, User, require_roles
 from app.models import Charge, Doctor, LabOrder, MedicalRecord, PrePha, Prescription
 
 router = APIRouter()
 
+_REPORT_ROLES = {*CLINICAL_ROLES, *CASHIER_ROLES}
+
 
 @router.post("/report/outpatientVolume")
-def report_outpatient_volume(req: dict, keyword: str | None = None, db: Session = Depends(get_db)):
+def report_outpatient_volume(req: dict, keyword: str | None = None, current_user: User = Depends(require_roles(*_REPORT_ROLES)), db: Session = Depends(get_db)):
     start_date = req.get("start_date")
     end_date = req.get("end_date")
     group_by = req.get("group_by", "day")
@@ -68,7 +71,7 @@ def report_outpatient_volume(req: dict, keyword: str | None = None, db: Session 
 
 
 @router.post("/report/finance")
-def report_finance(req: dict, db: Session = Depends(get_db)):
+def report_finance(req: dict, current_user: User = Depends(require_roles(*_REPORT_ROLES)), db: Session = Depends(get_db)):
     start_date = req.get("start_date")
     end_date = req.get("end_date")
 
@@ -97,7 +100,7 @@ def report_finance(req: dict, db: Session = Depends(get_db)):
 
 
 @router.post("/report/pharmaceutical")
-def report_pharmaceutical(req: dict, keyword: str | None = None, db: Session = Depends(get_db)):
+def report_pharmaceutical(req: dict, keyword: str | None = None, current_user: User = Depends(require_roles(*_REPORT_ROLES)), db: Session = Depends(get_db)):
     start_date = req.get("start_date")
     end_date = req.get("end_date")
 
@@ -123,7 +126,7 @@ def report_pharmaceutical(req: dict, keyword: str | None = None, db: Session = D
 
 
 @router.post("/report/doctorWorkload")
-def report_doctor_workload(req: dict, keyword: str | None = None, db: Session = Depends(get_db)):
+def report_doctor_workload(req: dict, keyword: str | None = None, current_user: User = Depends(require_roles(*_REPORT_ROLES)), db: Session = Depends(get_db)):
     start_date = req.get("start_date")
     end_date = req.get("end_date")
     doctor_id = req.get("doctor_id")

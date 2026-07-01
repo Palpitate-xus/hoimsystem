@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.dependencies import get_current_user
+from app.dependencies import NURSING_ROLES, User, require_roles
 from app.models import (
     Admission,
     Bed,
@@ -12,7 +12,6 @@ from app.models import (
     Doctor,
     InpatientCharge,
     Patient,
-    User,
     Ward,
 )
 from app.schemas import AdmissionCreateRequest, AdmissionUpdateRequest
@@ -33,6 +32,7 @@ def get_admission_list(
     keyword: str | None = None,
     page: int | None = None,
     page_size: int | None = None,
+    current_user: User = Depends(require_roles(*NURSING_ROLES)),
     db: Session = Depends(get_db),
 ):
     from app.pagination import paginate
@@ -87,7 +87,7 @@ def get_admission_list(
 
 
 @router.post("/admission/create")
-def create_admission(req: AdmissionCreateRequest, db: Session = Depends(get_db)):
+def create_admission(req: AdmissionCreateRequest, current_user: User = Depends(require_roles(*NURSING_ROLES)), db: Session = Depends(get_db)):
     patient = db.query(Patient).filter(Patient.patient_id == req.patient_id).first()
     if not patient:
         return {"code": 500, "msg": "病人不存在"}
@@ -153,7 +153,7 @@ def create_admission(req: AdmissionCreateRequest, db: Session = Depends(get_db))
 
 
 @router.get("/admission/detail")
-def get_admission_detail(admission_id: str, db: Session = Depends(get_db)):
+def get_admission_detail(admission_id: str, current_user: User = Depends(require_roles(*NURSING_ROLES)), db: Session = Depends(get_db)):
     item = db.query(Admission).filter(Admission.admission_id == admission_id).first()
     if not item:
         return {"code": 500, "msg": "入院记录不存在"}
@@ -196,7 +196,7 @@ def get_admission_detail(admission_id: str, db: Session = Depends(get_db)):
 
 
 @router.post("/admission/update")
-def update_admission(req: AdmissionUpdateRequest, db: Session = Depends(get_db)):
+def update_admission(req: AdmissionUpdateRequest, current_user: User = Depends(require_roles(*NURSING_ROLES)), db: Session = Depends(get_db)):
     admission = db.query(Admission).filter(Admission.admission_id == req.admission_id).first()
     if not admission:
         return {"code": 500, "msg": "入院记录不存在"}
@@ -235,7 +235,7 @@ def update_admission(req: AdmissionUpdateRequest, db: Session = Depends(get_db))
 
 
 @router.get("/admission/getAvailableBeds")
-def get_available_beds(ward_id: int | None = None, db: Session = Depends(get_db)):
+def get_available_beds(ward_id: int | None = None, current_user: User = Depends(require_roles(*NURSING_ROLES)), db: Session = Depends(get_db)):
     query = db.query(Bed).filter(Bed.status == 0)
     if ward_id:
         query = query.filter(Bed.ward_id == ward_id)
@@ -258,7 +258,7 @@ def get_available_beds(ward_id: int | None = None, db: Session = Depends(get_db)
 
 
 @router.get("/admission/getInpatientList")
-def get_inpatient_list(ward_id: int | None = None, doctor_id: int | None = None, db: Session = Depends(get_db)):
+def get_inpatient_list(ward_id: int | None = None, doctor_id: int | None = None, current_user: User = Depends(require_roles(*NURSING_ROLES)), db: Session = Depends(get_db)):
     query = db.query(Admission).filter(Admission.status == 1)
     if ward_id:
         query = query.filter(Admission.ward_id == ward_id)

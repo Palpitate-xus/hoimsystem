@@ -4,7 +4,7 @@ import shutil
 
 from fastapi import APIRouter, Depends
 
-from app.dependencies import get_current_user
+from app.dependencies import ADMIN_ROLES, require_roles
 
 router = APIRouter()
 
@@ -32,7 +32,7 @@ def _get_backup_list():
 
 
 @router.post("/backup/create")
-def create_backup(current_user=Depends(get_current_user)):
+def create_backup(current_user=Depends(require_roles(*ADMIN_ROLES))):
     """创建数据库备份"""
     if not os.path.exists(DB_PATH):
         return {"code": 500, "msg": "数据库文件不存在"}
@@ -47,13 +47,13 @@ def create_backup(current_user=Depends(get_current_user)):
 
 
 @router.get("/backup/getList")
-def get_backup_list(current_user=Depends(get_current_user)):
+def get_backup_list(current_user=Depends(require_roles(*ADMIN_ROLES))):
     """获取备份列表"""
     return {"code": 200, "msg": "success", "data": _get_backup_list()}
 
 
 @router.post("/backup/delete")
-def delete_backup(req: dict, current_user=Depends(get_current_user)):
+def delete_backup(req: dict, current_user=Depends(require_roles(*ADMIN_ROLES))):
     """删除备份文件"""
     filename = req.get("filename", "")
     if not filename or ".." in filename or "/" in filename:
@@ -69,7 +69,7 @@ def delete_backup(req: dict, current_user=Depends(get_current_user)):
 
 
 @router.post("/backup/restore")
-def restore_backup(req: dict, current_user=Depends(get_current_user)):
+def restore_backup(req: dict, current_user=Depends(require_roles(*ADMIN_ROLES))):
     """恢复数据库备份"""
     filename = req.get("filename", "")
     if not filename or ".." in filename or "/" in filename:
@@ -97,7 +97,7 @@ def restore_backup(req: dict, current_user=Depends(get_current_user)):
 
 
 @router.get("/backup/download/{filename}")
-def download_backup(filename: str, current_user=Depends(get_current_user)):
+def download_backup(filename: str, current_user=Depends(require_roles(*ADMIN_ROLES))):
     """下载备份文件"""
     from fastapi.responses import FileResponse
 

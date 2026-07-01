@@ -4,8 +4,8 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.dependencies import get_current_user
-from app.models import LabOrder, LabResult
+from app.dependencies import LAB_ROLES, get_current_user, require_roles
+from app.models import LabOrder, LabResult, User
 from app.schemas import LabResultAuditRequest, LabResultCreateRequest
 
 router = APIRouter()
@@ -51,7 +51,7 @@ def check_critical_value(check_type: str, result_text: str) -> bool:
 
 
 @router.post("/lab/sampleReceive")
-def sample_receive(req: dict, db: Session = Depends(get_db)):
+def sample_receive(req: dict, current_user: User = Depends(require_roles(*LAB_ROLES)), db: Session = Depends(get_db)):
     """样本接收"""
     lab_order = db.query(LabOrder).filter(LabOrder.lab_order_id == req.get("lab_order_id")).first()
     if not lab_order:
@@ -63,7 +63,7 @@ def sample_receive(req: dict, db: Session = Depends(get_db)):
 
 
 @router.post("/lab/sampleReject")
-def sample_reject(req: dict, db: Session = Depends(get_db)):
+def sample_reject(req: dict, current_user: User = Depends(require_roles(*LAB_ROLES)), db: Session = Depends(get_db)):
     """样本拒收"""
     lab_order = db.query(LabOrder).filter(LabOrder.lab_order_id == req.get("lab_order_id")).first()
     if not lab_order:
@@ -75,7 +75,7 @@ def sample_reject(req: dict, db: Session = Depends(get_db)):
 
 
 @router.get("/lab/sampleTracking")
-def sample_tracking(lab_order_id: str, db: Session = Depends(get_db)):
+def sample_tracking(lab_order_id: str, current_user: User = Depends(require_roles(*LAB_ROLES)), db: Session = Depends(get_db)):
     """样本流转跟踪"""
     lab_order = db.query(LabOrder).filter(LabOrder.lab_order_id == lab_order_id).first()
     if not lab_order:
@@ -94,7 +94,7 @@ def sample_tracking(lab_order_id: str, db: Session = Depends(get_db)):
 
 
 @router.post("/labResult/create")
-def create_lab_result(req: LabResultCreateRequest, current_user=Depends(get_current_user), db: Session = Depends(get_db)):
+def create_lab_result(req: LabResultCreateRequest, current_user=Depends(require_roles(*LAB_ROLES)), db: Session = Depends(get_db)):
     lab_order = db.query(LabOrder).filter(LabOrder.lab_order_id == req.lab_order_id).first()
     if not lab_order:
         return {"code": 500, "msg": "检查申请单不存在"}
@@ -119,7 +119,7 @@ def create_lab_result(req: LabResultCreateRequest, current_user=Depends(get_curr
 
 
 @router.post("/labResult/audit")
-def audit_lab_result(req: LabResultAuditRequest, db: Session = Depends(get_db)):
+def audit_lab_result(req: LabResultAuditRequest, current_user: User = Depends(require_roles(*LAB_ROLES)), db: Session = Depends(get_db)):
     result = db.query(LabResult).filter(LabResult.lab_result_id == req.lab_result_id).first()
     if not result:
         return {"code": 500, "msg": "检查结果不存在"}
@@ -133,7 +133,7 @@ def audit_lab_result(req: LabResultAuditRequest, db: Session = Depends(get_db)):
 
 
 @router.get("/labResult/getPending")
-def get_pending_lab_orders(keyword: str | None = None, db: Session = Depends(get_db)):
+def get_pending_lab_orders(keyword: str | None = None, current_user: User = Depends(require_roles(*LAB_ROLES)), db: Session = Depends(get_db)):
     orders = db.query(LabOrder).filter(LabOrder.status == 0).order_by(LabOrder.create_time.desc()).all()
     data = []
     for item in orders:
@@ -153,7 +153,7 @@ def get_pending_lab_orders(keyword: str | None = None, db: Session = Depends(get
 
 
 @router.get("/labResult/getList")
-def get_lab_result_list(keyword: str | None = None, db: Session = Depends(get_db)):
+def get_lab_result_list(keyword: str | None = None, current_user: User = Depends(require_roles(*LAB_ROLES)), db: Session = Depends(get_db)):
     results = db.query(LabResult).order_by(LabResult.report_time.desc()).all()
     data = []
     for item in results:
@@ -174,7 +174,7 @@ def get_lab_result_list(keyword: str | None = None, db: Session = Depends(get_db
 
 
 @router.post("/labResult/detail")
-def get_lab_result_detail(req: LabResultAuditRequest, db: Session = Depends(get_db)):
+def get_lab_result_detail(req: LabResultAuditRequest, current_user: User = Depends(require_roles(*LAB_ROLES)), db: Session = Depends(get_db)):
     result = db.query(LabResult).filter(LabResult.lab_result_id == req.lab_result_id).first()
     if not result:
         return {"code": 500, "msg": "检查结果不存在"}

@@ -7,7 +7,15 @@ from sqlalchemy.orm import Session
 
 from app.config import settings
 from app.database import get_db
-from app.dependencies import get_current_user
+from app.dependencies import (
+    ADMIN_ROLES,
+    ROLE_CASHIER,
+    ROLE_PATIENT,
+    VALID_USER_ROLES,
+    get_current_user,
+    is_admin,
+    require_roles,
+)
 from app.models import Patient, User
 from app.schemas import LoginRequest, RegisterRequest, UserInfoRequest
 from app.security import hash_password, is_bcrypt_hash, verify_password
@@ -82,7 +90,7 @@ def register(req: RegisterRequest, db: Session = Depends(get_db)):
             address=req.address,
             sex=req.sex,
             phone=req.phone,
-            birthday=parse_date_(req.birthday.strftime("%Y-%m-%d %H:%M:%S") if req.birthday else None),
+            birthday=parse_date_str(req.birthday) if req.birthday else None,
             permission="allow",
         )
         db.add(patient)
@@ -104,14 +112,14 @@ def get_user_info(req: UserInfoRequest, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.username == username).first()
     if not user:
         raise HTTPException(status_code=401, detail="用户不存在")
-    if user.user_role == "admin":
+    if user.user_role == "super_admin":
+        permissions = ["super_admin", "admin"]
+    elif user.user_role == "admin":
         permissions = ["admin"]
-    elif user.user_role == "doctor":
-        permissions = ["doctor"]
     elif user.user_role == "director":
         permissions = ["director", "doctor"]
-    elif user.user_role == "patient":
-        permissions = ["patient"]
+    elif user.user_role in VALID_USER_ROLES:
+        permissions = [user.user_role]
     else:
         permissions = []
     avatar_url = "https://gimg2.baidu.com/image_search/src=http%3A%2F%2Fc-ssl.duitang.com%2Fuploads%2Fitem%2F202006%2F07%2F20200607000651_vopye.jpg&refer=http%3A%2F%2Fc-ssl.duitang.com&app=2002&size=f9999,10000&q=a80&n=0&g=0n&fmt=auto?sec=1672814873&t=b4388830c9cf3005e51d64f282b07abc"
@@ -130,7 +138,7 @@ def logout():
 @router.get("/user/getList")
 def get_user_list(role: str | None = None, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     """获取用户列表（管理员权限）"""
-    if current_user.user_role != "admin":
+    if not is_admin(current_user):
         return {"code": 403, "msg": "无权访问"}
     query = db.query(User)
     if role:
@@ -151,13 +159,13 @@ def get_user_list(role: str | None = None, db: Session = Depends(get_db), curren
 @router.post("/user/updateRole")
 def update_user_role(req: dict, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     """修改用户角色"""
-    if current_user.user_role != "admin":
+    if not is_admin(current_user):
         return {"code": 403, "msg": "无权访问"}
     user_id = req.get("user_id")
     new_role = req.get("user_role")
     if not user_id or not new_role:
         return {"code": 500, "msg": "参数错误"}
-    if new_role not in ("admin", "doctor", "director", "patient"):
+    if new_role not in VALID_USER_ROLES:
         return {"code": 500, "msg": "无效的角色"}
     user = db.query(User).filter(User.user_id == user_id).first()
     if not user:
@@ -170,7 +178,7 @@ def update_user_role(req: dict, db: Session = Depends(get_db), current_user: Use
 @router.post("/user/resetPassword")
 def reset_user_password(req: dict, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     """重置用户密码"""
-    if current_user.user_role != "admin":
+    if not is_admin(current_user):
         return {"code": 403, "msg": "无权访问"}
     user_id = req.get("user_id")
     new_password = req.get("new_password", "123456")
@@ -187,7 +195,7 @@ def reset_user_password(req: dict, db: Session = Depends(get_db), current_user: 
 @router.post("/user/delete")
 def delete_user(req: dict, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     """删除用户"""
-    if current_user.user_role != "admin":
+    if not is_admin(current_user):
         return {"code": 403, "msg": "无权访问"}
     user_id = req.get("user_id")
     if not user_id:
@@ -203,8 +211,12 @@ def delete_user(req: dict, db: Session = Depends(get_db), current_user: User = D
 
 
 @router.get("/prepaid/getBalance")
-def get_prepaid_balance(identity: str, db: Session = Depends(get_db)):
+def get_prepaid_balance(identity: str, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     """查询预交金余额"""
+    if current_user.user_role == ROLE_PATIENT and current_user.username != identity:
+        return {"code": 403, "msg": "无权访问其他患者账户"}
+    if current_user.user_role not in {ROLE_PATIENT, ROLE_CASHIER, *ADMIN_ROLES}:
+        return {"code": 403, "msg": "无权访问"}
     patient = db.query(Patient).filter(Patient.identity == identity).first()
     if not patient:
         return {"code": 500, "msg": "病人不存在"}
@@ -212,7 +224,7 @@ def get_prepaid_balance(identity: str, db: Session = Depends(get_db)):
 
 
 @router.post("/prepaid/recharge")
-def prepaid_recharge(req: dict, db: Session = Depends(get_db)):
+def prepaid_recharge(req: dict, db: Session = Depends(get_db), current_user: User = Depends(require_roles(ROLE_CASHIER, *ADMIN_ROLES))):
     """预交金充值"""
     patient = db.query(Patient).filter(Patient.identity == req.get("identity")).first()
     if not patient:
@@ -226,7 +238,7 @@ def prepaid_recharge(req: dict, db: Session = Depends(get_db)):
 
 
 @router.post("/prepaid/deduct")
-def prepaid_deduct(req: dict, db: Session = Depends(get_db)):
+def prepaid_deduct(req: dict, db: Session = Depends(get_db), current_user: User = Depends(require_roles(ROLE_CASHIER, *ADMIN_ROLES))):
     """预交金扣款"""
     patient = db.query(Patient).filter(Patient.identity == req.get("identity")).first()
     if not patient:

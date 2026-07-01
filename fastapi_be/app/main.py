@@ -6,6 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import Response
 
+from app.config import settings
 
 MICROSECOND_PATTERN = re.compile(rb'(\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}:\d{2})\.\d+')
 
@@ -162,8 +163,8 @@ class OperationLogMiddleware(BaseHTTPMiddleware):
         access_token = request.headers.get("accesstoken")
         if access_token:
             try:
-                from app.dependencies import decode_access_token
                 from app.database import SessionLocal
+                from app.dependencies import decode_access_token
                 from app.models import User
 
                 username = decode_access_token(access_token)
@@ -255,7 +256,7 @@ from app.routers import (
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=settings.cors_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=[

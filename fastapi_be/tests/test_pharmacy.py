@@ -67,17 +67,18 @@ class TestPharmacy:
         assert r.status_code == 200
         assert r.json()["code"] == 200
 
-    async def test_dispense(self, async_client, seed_data):
+    async def test_dispense(self, async_client, seed_data, auth_headers):
         # ensure prescription is audited first
         pre = seed_data["prescription"]
         # create a new prescription for this test
-        r = await async_client.post("/api/prescriptionManagement/create", headers={"accesstoken": seed_data["doctor_user"].username}, json={
+        headers = auth_headers(seed_data["doctor_user"].username)
+        r = await async_client.post("/api/prescriptionManagement/create", headers=headers, json={
             "patient": seed_data["patient2"].patient_id,
             "phas": [{"id": seed_data["pharmaceutical"].pharmaceutical_id, "number": 1}]
         })
         assert r.json()["code"] == 200
         # find the new prescription
-        r = await async_client.get("/api/prescriptionManagement/getList", headers={"accesstoken": seed_data["doctor_user"].username})
+        r = await async_client.get("/api/prescriptionManagement/getList", headers=headers)
         pres = r.json()["data"]
         target = [p for p in pres if p["status"] == 0][0]
 

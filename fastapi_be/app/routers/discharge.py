@@ -5,7 +5,7 @@ from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.dependencies import get_current_user
+from app.dependencies import NURSING_ROLES, User, require_roles
 from app.models import (
     Admission,
     Bed,
@@ -20,7 +20,7 @@ router = APIRouter()
 
 
 @router.post("/discharge/doDischarge")
-def do_discharge(req: dict, db: Session = Depends(get_db)):
+def do_discharge(req: dict, current_user: User = Depends(require_roles(*NURSING_ROLES)), db: Session = Depends(get_db)):
     admission_id = req.get("admission_id")
     admission = db.query(Admission).filter(Admission.admission_id == admission_id).first()
     if not admission:
@@ -93,7 +93,7 @@ def do_discharge(req: dict, db: Session = Depends(get_db)):
 
 
 @router.get("/discharge/getSummary")
-def get_discharge_summary(admission_id: str, db: Session = Depends(get_db)):
+def get_discharge_summary(admission_id: str, current_user: User = Depends(require_roles(*NURSING_ROLES)), db: Session = Depends(get_db)):
     summary = db.query(DischargeSummary).filter(DischargeSummary.admission_id == admission_id).first()
     if not summary:
         return {"code": 500, "msg": "出院小结不存在"}
@@ -126,7 +126,7 @@ def get_discharge_summary(admission_id: str, db: Session = Depends(get_db)):
 
 
 @router.post("/discharge/updateSummary")
-def update_discharge_summary(req: DischargeSummaryCreateRequest, db: Session = Depends(get_db)):
+def update_discharge_summary(req: DischargeSummaryCreateRequest, current_user: User = Depends(require_roles(*NURSING_ROLES)), db: Session = Depends(get_db)):
     summary = db.query(DischargeSummary).filter(DischargeSummary.admission_id == req.admission_id).first()
     if not summary:
         return {"code": 500, "msg": "出院小结不存在"}
@@ -152,6 +152,7 @@ def get_discharged_list(
     start_date: str | None = None,
     end_date: str | None = None,
     keyword: str | None = None,
+    current_user: User = Depends(require_roles(*NURSING_ROLES)),
     db: Session = Depends(get_db),
 ):
     query = db.query(Admission).filter(Admission.status == 2).order_by(Admission.discharge_time.desc())

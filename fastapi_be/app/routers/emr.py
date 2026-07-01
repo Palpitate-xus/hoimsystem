@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.dependencies import get_current_user
+from app.dependencies import CLINICAL_ROLES, get_current_user, require_roles
 from app.models import (
     Admission,
     Department,
@@ -31,7 +31,7 @@ router = APIRouter()
 
 
 @router.get("/emrTemplate/getList")
-def get_template_list(category: str | None = None, department_id: int | None = None, db: Session = Depends(get_db)):
+def get_template_list(category: str | None = None, department_id: int | None = None, current_user: User = Depends(require_roles(*CLINICAL_ROLES)), db: Session = Depends(get_db)):
     query = db.query(MedicalRecordTemplate).filter(MedicalRecordTemplate.status == 0)
     if category:
         query = query.filter(MedicalRecordTemplate.category == category)
@@ -57,7 +57,7 @@ def get_template_list(category: str | None = None, department_id: int | None = N
 
 
 @router.post("/emrTemplate/create")
-def create_template(req: MedicalRecordTemplateCreateRequest, db: Session = Depends(get_db)):
+def create_template(req: MedicalRecordTemplateCreateRequest, current_user: User = Depends(require_roles(*CLINICAL_ROLES)), db: Session = Depends(get_db)):
     template = MedicalRecordTemplate(
         name=req.name,
         category=req.category,
@@ -73,7 +73,7 @@ def create_template(req: MedicalRecordTemplateCreateRequest, db: Session = Depen
 
 
 @router.post("/emrTemplate/update")
-def update_template(req: MedicalRecordTemplateUpdateRequest, db: Session = Depends(get_db)):
+def update_template(req: MedicalRecordTemplateUpdateRequest, current_user: User = Depends(require_roles(*CLINICAL_ROLES)), db: Session = Depends(get_db)):
     template = db.query(MedicalRecordTemplate).filter(MedicalRecordTemplate.template_id == req.template_id).first()
     if not template:
         return {"code": 500, "msg": "模板不存在"}
@@ -95,7 +95,7 @@ def update_template(req: MedicalRecordTemplateUpdateRequest, db: Session = Depen
 
 
 @router.post("/emrTemplate/delete")
-def delete_template(req: dict, db: Session = Depends(get_db)):
+def delete_template(req: dict, current_user: User = Depends(require_roles(*CLINICAL_ROLES)), db: Session = Depends(get_db)):
     template = db.query(MedicalRecordTemplate).filter(MedicalRecordTemplate.template_id == req.get("template_id")).first()
     if not template:
         return {"code": 500, "msg": "模板不存在"}
@@ -106,7 +106,7 @@ def delete_template(req: dict, db: Session = Depends(get_db)):
 
 
 @router.get("/emrTemplate/detail")
-def get_template_detail(template_id: int, db: Session = Depends(get_db)):
+def get_template_detail(template_id: int, current_user: User = Depends(require_roles(*CLINICAL_ROLES)), db: Session = Depends(get_db)):
     template = db.query(MedicalRecordTemplate).filter(MedicalRecordTemplate.template_id == template_id).first()
     if not template:
         return {"code": 500, "msg": "模板不存在"}
@@ -114,7 +114,7 @@ def get_template_detail(template_id: int, db: Session = Depends(get_db)):
 
 
 @router.get("/structuredMedicalRecord/getList")
-def get_structured_record_list(admission_id: str | None = None, patient_id: int | None = None, db: Session = Depends(get_db)):
+def get_structured_record_list(admission_id: str | None = None, patient_id: int | None = None, current_user: User = Depends(require_roles(*CLINICAL_ROLES)), db: Session = Depends(get_db)):
     query = db.query(StructuredMedicalRecord).order_by(StructuredMedicalRecord.create_time.desc())
     if admission_id:
         query = query.filter(StructuredMedicalRecord.admission_id == admission_id)
@@ -147,11 +147,12 @@ def get_structured_record_list(admission_id: str | None = None, patient_id: int 
 
 
 @router.post("/structuredMedicalRecord/create")
-def create_structured_record(req: StructuredMedicalRecordCreateRequest, db: Session = Depends(get_db)):
+def create_structured_record(req: StructuredMedicalRecordCreateRequest, current_user: User = Depends(require_roles(*CLINICAL_ROLES)), db: Session = Depends(get_db)):
+    doctor_obj = db.query(Doctor).filter(Doctor.user_id == current_user.user_id).first()
     record = StructuredMedicalRecord(
         admission_id=req.admission_id,
         patient_id=req.patient_id,
-        doctor_id=req.doctor_id,
+        doctor_id=doctor_obj.doctor_id if doctor_obj else req.doctor_id,
         record_type=req.record_type,
         chief_complaint=req.chief_complaint,
         present_illness=req.present_illness,
@@ -171,7 +172,7 @@ def create_structured_record(req: StructuredMedicalRecordCreateRequest, db: Sess
 
 
 @router.get("/structuredMedicalRecord/detail")
-def get_structured_record_detail(record_id: str, db: Session = Depends(get_db)):
+def get_structured_record_detail(record_id: str, current_user: User = Depends(require_roles(*CLINICAL_ROLES)), db: Session = Depends(get_db)):
     item = db.query(StructuredMedicalRecord).filter(StructuredMedicalRecord.record_id == record_id).first()
     if not item:
         return {"code": 500, "msg": "病历不存在"}
@@ -205,7 +206,7 @@ def get_structured_record_detail(record_id: str, db: Session = Depends(get_db)):
 
 
 @router.post("/structuredMedicalRecord/update")
-def update_structured_record(req: StructuredMedicalRecordUpdateRequest, db: Session = Depends(get_db)):
+def update_structured_record(req: StructuredMedicalRecordUpdateRequest, current_user: User = Depends(require_roles(*CLINICAL_ROLES)), db: Session = Depends(get_db)):
     record = db.query(StructuredMedicalRecord).filter(StructuredMedicalRecord.record_id == req.record_id).first()
     if not record:
         return {"code": 500, "msg": "病历不存在"}
@@ -236,7 +237,7 @@ def update_structured_record(req: StructuredMedicalRecordUpdateRequest, db: Sess
 
 
 @router.post("/structuredMedicalRecord/sign")
-def sign_medical_record(req: dict, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+def sign_medical_record(req: dict, current_user: User = Depends(require_roles(*CLINICAL_ROLES)), db: Session = Depends(get_db)):
     record = db.query(StructuredMedicalRecord).filter(StructuredMedicalRecord.record_id == req.get("record_id")).first()
     if not record:
         return {"code": 500, "msg": "病历不存在"}
@@ -248,7 +249,7 @@ def sign_medical_record(req: dict, current_user: User = Depends(get_current_user
 
 
 @router.post("/structuredMedicalRecord/delete")
-def delete_structured_record(req: dict, db: Session = Depends(get_db)):
+def delete_structured_record(req: dict, current_user: User = Depends(require_roles(*CLINICAL_ROLES)), db: Session = Depends(get_db)):
     record = db.query(StructuredMedicalRecord).filter(StructuredMedicalRecord.record_id == req.get("record_id")).first()
     if not record:
         return {"code": 500, "msg": "病历不存在"}
@@ -258,7 +259,7 @@ def delete_structured_record(req: dict, db: Session = Depends(get_db)):
 
 
 @router.get("/progressNote/getList")
-def get_progress_note_list(admission_id: str, db: Session = Depends(get_db)):
+def get_progress_note_list(admission_id: str, current_user: User = Depends(require_roles(*CLINICAL_ROLES)), db: Session = Depends(get_db)):
     notes = db.query(ProgressNote).filter(ProgressNote.admission_id == admission_id).order_by(ProgressNote.note_date.desc()).all()
     data = []
     for item in notes:
@@ -279,7 +280,7 @@ def get_progress_note_list(admission_id: str, db: Session = Depends(get_db)):
 
 
 @router.post("/progressNote/create")
-def create_progress_note(req: ProgressNoteCreateRequest, db: Session = Depends(get_db)):
+def create_progress_note(req: ProgressNoteCreateRequest, current_user: User = Depends(require_roles(*CLINICAL_ROLES)), db: Session = Depends(get_db)):
     try:
         note_date = datetime.datetime.strptime(req.note_date, "%Y-%m-%d").date()
     except ValueError:
@@ -299,7 +300,7 @@ def create_progress_note(req: ProgressNoteCreateRequest, db: Session = Depends(g
 
 
 @router.post("/progressNote/delete")
-def delete_progress_note(req: dict, db: Session = Depends(get_db)):
+def delete_progress_note(req: dict, current_user: User = Depends(require_roles(*CLINICAL_ROLES)), db: Session = Depends(get_db)):
     note = db.query(ProgressNote).filter(ProgressNote.note_id == req.get("note_id")).first()
     if not note:
         return {"code": 500, "msg": "记录不存在"}
@@ -309,7 +310,7 @@ def delete_progress_note(req: dict, db: Session = Depends(get_db)):
 
 
 @router.get("/wardRound/getList")
-def get_ward_round_list(admission_id: str, db: Session = Depends(get_db)):
+def get_ward_round_list(admission_id: str, current_user: User = Depends(require_roles(*CLINICAL_ROLES)), db: Session = Depends(get_db)):
     rounds = db.query(WardRound).filter(WardRound.admission_id == admission_id).order_by(WardRound.round_time.desc()).all()
     type_map = ["主任医师查房", "副主任医师查房", "主治医师查房"]
     data = []
@@ -332,7 +333,7 @@ def get_ward_round_list(admission_id: str, db: Session = Depends(get_db)):
 
 
 @router.post("/wardRound/create")
-def create_ward_round(req: WardRoundCreateRequest, db: Session = Depends(get_db)):
+def create_ward_round(req: WardRoundCreateRequest, current_user: User = Depends(require_roles(*CLINICAL_ROLES)), db: Session = Depends(get_db)):
     round_time = datetime.datetime.now()
     if req.round_time:
         try:
@@ -354,7 +355,7 @@ def create_ward_round(req: WardRoundCreateRequest, db: Session = Depends(get_db)
 
 
 @router.post("/wardRound/delete")
-def delete_ward_round(req: dict, db: Session = Depends(get_db)):
+def delete_ward_round(req: dict, current_user: User = Depends(require_roles(*CLINICAL_ROLES)), db: Session = Depends(get_db)):
     ward_round = db.query(WardRound).filter(WardRound.round_id == req.get("round_id")).first()
     if not ward_round:
         return {"code": 500, "msg": "记录不存在"}
@@ -364,7 +365,7 @@ def delete_ward_round(req: dict, db: Session = Depends(get_db)):
 
 
 @router.get("/medicalRecordQuality/getList")
-def get_quality_list(admission_id: str | None = None, db: Session = Depends(get_db)):
+def get_quality_list(admission_id: str | None = None, current_user: User = Depends(require_roles(*CLINICAL_ROLES)), db: Session = Depends(get_db)):
     query = db.query(MedicalRecordQuality).order_by(MedicalRecordQuality.check_time.desc())
     if admission_id:
         query = query.filter(MedicalRecordQuality.admission_id == admission_id)
@@ -390,7 +391,7 @@ def get_quality_list(admission_id: str | None = None, db: Session = Depends(get_
 
 
 @router.post("/medicalRecordQuality/check")
-def quality_check(req: MedicalRecordQualityCheckRequest, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+def quality_check(req: MedicalRecordQualityCheckRequest, current_user: User = Depends(require_roles(*CLINICAL_ROLES)), db: Session = Depends(get_db)):
     check = MedicalRecordQuality(
         admission_id=req.admission_id,
         record_id=req.record_id,
@@ -407,7 +408,7 @@ def quality_check(req: MedicalRecordQualityCheckRequest, current_user: User = De
 
 
 @router.get("/medicalRecordQuality/summary")
-def get_quality_summary(db: Session = Depends(get_db)):
+def get_quality_summary(current_user: User = Depends(require_roles(*CLINICAL_ROLES)), db: Session = Depends(get_db)):
     total = db.query(StructuredMedicalRecord).count()
     signed = db.query(StructuredMedicalRecord).filter(StructuredMedicalRecord.status == 1).count()
     archived = db.query(StructuredMedicalRecord).filter(StructuredMedicalRecord.status == 2).count()

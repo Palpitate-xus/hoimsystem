@@ -120,15 +120,15 @@ class TestAdminDepartment:
 
 @pytest.mark.asyncio
 class TestAdminNotice:
-    async def test_get_notice_list(self, async_client, seed_data):
-        r = await async_client.get("/api/notice/getList", headers={"accesstoken": seed_data["patient_user"].username})
+    async def test_get_notice_list(self, async_client, seed_data, auth_headers):
+        r = await async_client.get("/api/notice/getList", headers=auth_headers(seed_data["patient_user"].username))
         assert r.status_code == 200
         body = r.json()
         assert body["code"] == 200
         assert len(body["data"]) >= 1
 
-    async def test_create_notice(self, async_client, seed_data):
-        r = await async_client.post("/api/notice/create", headers={"accesstoken": seed_data["admin_user"].username}, json={
+    async def test_create_notice(self, async_client, seed_data, auth_headers):
+        r = await async_client.post("/api/notice/create", headers=auth_headers(seed_data["admin_user"].username), json={
             "title": "新通知", "content": "通知内容", "isemergency": 0,
             "towho": ["医生"], "expiredtime": "2026-12-31"
         })
@@ -144,14 +144,15 @@ class TestAdminNotice:
         assert r.status_code == 200
         assert r.json()["code"] == 200
 
-    async def test_delete_notice(self, async_client, seed_data):
+    async def test_delete_notice(self, async_client, seed_data, auth_headers):
         # create a notice to delete
-        r = await async_client.post("/api/notice/create", headers={"accesstoken": seed_data["admin_user"].username}, json={
+        headers = auth_headers(seed_data["admin_user"].username)
+        r = await async_client.post("/api/notice/create", headers=headers, json={
             "title": "待删除", "content": "内容", "isemergency": 0,
             "towho": ["医生"], "expiredtime": "2026-12-31"
         })
         assert r.json()["code"] == 200
-        r = await async_client.get("/api/notice/getList", headers={"accesstoken": seed_data["admin_user"].username})
+        r = await async_client.get("/api/notice/getList", headers=headers)
         notices = r.json()["data"]
         target = [n for n in notices if n["title"] == "待删除"][0]
 

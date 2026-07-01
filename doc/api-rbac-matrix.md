@@ -50,9 +50,9 @@
 | POST | `/api/departmentManagement/update` | ✓ | ✓ |  |  |  |  |  |  |  |  |  | |
 | POST | `/api/departmentManagement/delete` | ✓ | ✓ |  |  |  |  |  |  |  |  |  | |
 | GET | `/api/notice/getList` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | |
-| POST | `/api/notice/create` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | |
-| POST | `/api/notice/update` | ✓ | ✓ |  |  |  |  |  |  |  |  |  | |
-| POST | `/api/notice/delete` | ✓ | ✓ |  |  |  |  |  |  |  |  |  | |
+| POST | `/api/notice/create` |  |  |  |  |  |  |  |  |  |  |  | |
+| POST | `/api/notice/update` |  |  |  |  |  |  |  |  |  |  |  | |
+| POST | `/api/notice/delete` |  |  |  |  |  |  |  |  |  |  |  | |
 
 ### 入院登记 (`admission.py`)
 
@@ -232,8 +232,8 @@
 | 方法 | 路径 | admin | super_admin | director | doctor | nurse | cashier | pharmacist | guide | patient | lab_technician | registrar | PUBLIC |
 |------|------|---|---|---|---|---|---|---|---|---|---|---|------|
 | POST | `/api/followUpAppointment/create` | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  | |
-| POST | `/api/followUp/createPlan` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | |
-| GET | `/api/followUp/getList` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | |
+| POST | `/api/followUp/createPlan` | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  | |
+| GET | `/api/followUp/getList` | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  | |
 | POST | `/api/followUp/record` | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  | |
 
 ### 住院费用 (`inpatient_charge.py`)
@@ -256,7 +256,7 @@
 | POST | `/api/inpatientOrder/stop` | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  | |
 | POST | `/api/inpatientOrder/cancel` | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  | |
 | GET | `/api/inpatientOrder/getExecutionList` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | |
-| POST | `/api/inpatientOrder/execute` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | |
+| POST | `/api/inpatientOrder/execute` | ✓ | ✓ |  |  | ✓ |  |  |  |  |  |  | |
 
 ### 检验科 (`lab.py`)
 
@@ -324,7 +324,7 @@
 
 | 方法 | 路径 | admin | super_admin | director | doctor | nurse | cashier | pharmacist | guide | patient | lab_technician | registrar | PUBLIC |
 |------|------|---|---|---|---|---|---|---|---|---|---|---|------|
-| POST | `/api/purchase/create` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | |
+| POST | `/api/purchase/create` | ✓ | ✓ |  |  |  |  |  |  |  |  |  | |
 | GET | `/api/purchase/getList` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | |
 | POST | `/api/purchase/approve` | ✓ | ✓ |  |  |  |  |  |  |  |  |  | |
 | POST | `/api/purchase/storage` | ✓ | ✓ |  |  |  |  |  |  |  |  |  | |
@@ -437,7 +437,7 @@
 
 | 方法 | 路径 | admin | super_admin | director | doctor | nurse | cashier | pharmacist | guide | patient | lab_technician | registrar | PUBLIC |
 |------|------|---|---|---|---|---|---|---|---|---|---|---|------|
-| POST | `/api/vitalSign/create` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | |
+| POST | `/api/vitalSign/create` | ✓ | ✓ |  |  | ✓ |  |  |  |  |  |  | |
 | GET | `/api/vitalSign/getList` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | |
 
 ### 病区床位 (`ward.py`)

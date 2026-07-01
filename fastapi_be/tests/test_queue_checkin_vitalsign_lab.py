@@ -64,14 +64,14 @@ class TestLab:
         assert r.status_code == 200
         assert r.json()["code"] == 200
 
-    async def test_get_pending(self, async_client, seed_data):
-        r = await async_client.get("/api/labResult/getPending")
+    async def test_get_pending(self, async_client, seed_data, auth_headers):
+        r = await async_client.get("/api/labResult/getPending", headers=auth_headers(seed_data["admin_user"].username))
         assert r.status_code == 200
         body = r.json()
         assert body["code"] == 200
 
-    async def test_get_lab_result_list(self, async_client, seed_data):
-        r = await async_client.get("/api/labResult/getList")
+    async def test_get_lab_result_list(self, async_client, seed_data, auth_headers):
+        r = await async_client.get("/api/labResult/getList", headers=auth_headers(seed_data["admin_user"].username))
         assert r.status_code == 200
         body = r.json()
         assert body["code"] == 200
@@ -92,18 +92,19 @@ class TestLab:
         })
 
         # get result id
-        r = await async_client.get("/api/labResult/getList")
+        r = await async_client.get("/api/labResult/getList", headers=admin_headers)
         results = r.json()["data"]
         target = [x for x in results if x["check_name"] == "心电图"][0]
 
-        r = await async_client.post("/api/labResult/audit", json={"lab_result_id": target["id"]})
+        r = await async_client.post("/api/labResult/audit", headers=admin_headers, json={"lab_result_id": target["id"]})
         assert r.status_code == 200
         assert r.json()["code"] == 200
 
-    async def test_lab_result_detail(self, async_client, seed_data):
-        r = await async_client.get("/api/labResult/getList")
+    async def test_lab_result_detail(self, async_client, seed_data, auth_headers):
+        admin_headers = auth_headers(seed_data["admin_user"].username)
+        r = await async_client.get("/api/labResult/getList", headers=admin_headers)
         results = r.json()["data"]
         if results:
-            r = await async_client.post("/api/labResult/detail", json={"lab_result_id": results[0]["id"]})
+            r = await async_client.post("/api/labResult/detail", headers=admin_headers, json={"lab_result_id": results[0]["id"]})
             assert r.status_code == 200
             assert r.json()["code"] == 200

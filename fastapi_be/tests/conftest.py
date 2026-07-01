@@ -89,6 +89,10 @@ def seed_data(db_session: Session):
     sess.add(cashier_user)
     sess.flush()
 
+    pharmacist_user = User(username="pharmacist01", password=hash_password("123456"), user_role="pharmacist")
+    sess.add(pharmacist_user)
+    sess.flush()
+
     # Department
     dept = Department(name="内科", phone="01012345678", location="1号楼", director=None)
     sess.add(dept)
@@ -185,6 +189,7 @@ def seed_data(db_session: Session):
     data = {
         "admin_user": admin_user,
         "cashier_user": cashier_user,
+        "pharmacist_user": pharmacist_user,
         "doctor_user": doc_user,
         "doctor": doctor,
         "patient_user": pat_user,

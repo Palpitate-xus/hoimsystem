@@ -5,7 +5,7 @@ import pytest
 class TestDoctorSchedule:
     async def test_register_schedule(self, async_client, seed_data, auth_headers):
         doctor = seed_data["doctor"]
-        r = await async_client.post("/api/doctorScheduleManagement/register", headers=auth_headers(seed_data["doctor_user"].username), json={
+        r = await async_client.post("/api/doctorScheduleManagement/register", headers=auth_headers(seed_data["admin_user"].username), json={
             "schedule": ["星期三01", "星期三02"], "specialist": 1, "number": 15, "doctor": doctor.doctor_id
         })
         assert r.status_code == 200
@@ -36,9 +36,9 @@ class TestDoctorMedicalRecord:
         assert len(body["data"]) >= 1
         assert "patient_name" in body["data"][0]
 
-    async def test_update_medical_record(self, async_client, seed_data):
+    async def test_update_medical_record(self, async_client, seed_data, auth_headers):
         mr = seed_data["medical_record"]
-        r = await async_client.post("/api/medicalRecord/update", json={
+        r = await async_client.post("/api/medicalRecord/update", headers=auth_headers(seed_data["doctor_user"].username), json={
             "medical_record_id": str(mr.medical_record_id), "symptom": "头痛发热改", "result": "感冒"
         })
         assert r.status_code == 200
@@ -61,9 +61,9 @@ class TestDoctorPrescription:
         assert body["code"] == 200
         assert len(body["data"]) >= 1
 
-    async def test_cancel_prescription(self, async_client, seed_data):
+    async def test_cancel_prescription(self, async_client, seed_data, auth_headers):
         pre = seed_data["prescription"]
-        r = await async_client.post("/api/prescriptionManagement/cancel", json={"prescription_id": str(pre.prescription_id)})
+        r = await async_client.post("/api/prescriptionManagement/cancel", headers=auth_headers(seed_data["doctor_user"].username), json={"prescription_id": str(pre.prescription_id)})
         assert r.status_code == 200
         assert r.json()["code"] == 200
 

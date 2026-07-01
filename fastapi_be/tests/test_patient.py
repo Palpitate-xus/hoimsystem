@@ -28,7 +28,7 @@ class TestPatientAppointment:
         appt_uuid = body["data"][0]["uuid"]
 
         # cancel
-        r = await async_client.post("/api/appointmentManagement/cancel", json={"uuid": appt_uuid})
+        r = await async_client.post("/api/appointmentManagement/cancel", headers=headers, json={"uuid": appt_uuid})
         assert r.status_code == 200
         assert r.json()["code"] == 200
 
@@ -62,7 +62,7 @@ class TestPatientRegistration:
         reg_uuid = body["data"][0]["uuid"]
 
         # cancel
-        r = await async_client.post("/api/registrationManagement/cancel", json={"uuid": reg_uuid})
+        r = await async_client.post("/api/registrationManagement/cancel", headers=headers, json={"uuid": reg_uuid})
         assert r.status_code == 200
         assert r.json()["code"] == 200
 
@@ -99,9 +99,9 @@ class TestPatientMedicalRecord:
         assert len(body["data"]) >= 1
         assert "doctor_name" in body["data"][0]
 
-    async def test_get_medical_record_detail(self, async_client, seed_data):
+    async def test_get_medical_record_detail(self, async_client, seed_data, auth_headers):
         mr = seed_data["medical_record"]
-        r = await async_client.post("/api/medicalRecord/detail", json={"medical_record_id": str(mr.medical_record_id)})
+        r = await async_client.post("/api/medicalRecord/detail", headers=auth_headers(seed_data["patient_user"].username), json={"medical_record_id": str(mr.medical_record_id)})
         assert r.status_code == 200
         body = r.json()
         assert body["code"] == 200

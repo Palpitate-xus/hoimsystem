@@ -3,8 +3,9 @@ import pytest
 
 @pytest.mark.asyncio
 class TestFollowUp:
-    async def test_create_follow_up_appointment(self, async_client, seed_data):
-        r = await async_client.post("/api/followUpAppointment/create", json={
+    async def test_create_follow_up_appointment(self, async_client, seed_data, auth_headers):
+        headers = auth_headers(seed_data["doctor_user"].username)
+        r = await async_client.post("/api/followUpAppointment/create", headers=headers, json={
             "patient_id": seed_data["patient"].patient_id,
             "doctor_id": seed_data["doctor"].doctor_id,
             "date": "2026-06-01", "time": "上午"
@@ -39,7 +40,7 @@ class TestFollowUp:
         plans = r.json()["data"]
         if plans:
             plan_id = plans[0]["id"]
-            r = await async_client.post("/api/followUp/record", json={
+            r = await async_client.post("/api/followUp/record", headers=headers, json={
                 "follow_up_id": plan_id, "result": "已接通", "patient_feedback": "感觉良好"
             })
             assert r.status_code == 200
@@ -48,8 +49,9 @@ class TestFollowUp:
 
 @pytest.mark.asyncio
 class TestReport:
-    async def test_outpatient_volume(self, async_client, seed_data):
-        r = await async_client.post("/api/report/outpatientVolume", json={
+    async def test_outpatient_volume(self, async_client, seed_data, auth_headers):
+        headers = auth_headers(seed_data["admin_user"].username)
+        r = await async_client.post("/api/report/outpatientVolume", headers=headers, json={
             "start_date": "2020-01-01", "end_date": "2030-12-31", "group_by": "day"
         })
         assert r.status_code == 200
@@ -57,8 +59,9 @@ class TestReport:
         assert body["code"] == 200
         assert "total_visits" in body["data"]
 
-    async def test_finance(self, async_client, seed_data):
-        r = await async_client.post("/api/report/finance", json={
+    async def test_finance(self, async_client, seed_data, auth_headers):
+        headers = auth_headers(seed_data["cashier_user"].username)
+        r = await async_client.post("/api/report/finance", headers=headers, json={
             "start_date": "2020-01-01", "end_date": "2030-12-31"
         })
         assert r.status_code == 200
@@ -66,16 +69,18 @@ class TestReport:
         assert body["code"] == 200
         assert "total_income" in body["data"]
 
-    async def test_pharmaceutical(self, async_client, seed_data):
-        r = await async_client.post("/api/report/pharmaceutical", json={
+    async def test_pharmaceutical(self, async_client, seed_data, auth_headers):
+        headers = auth_headers(seed_data["admin_user"].username)
+        r = await async_client.post("/api/report/pharmaceutical", headers=headers, json={
             "start_date": "2020-01-01", "end_date": "2030-12-31"
         })
         assert r.status_code == 200
         body = r.json()
         assert body["code"] == 200
 
-    async def test_doctor_workload(self, async_client, seed_data):
-        r = await async_client.post("/api/report/doctorWorkload", json={
+    async def test_doctor_workload(self, async_client, seed_data, auth_headers):
+        headers = auth_headers(seed_data["admin_user"].username)
+        r = await async_client.post("/api/report/doctorWorkload", headers=headers, json={
             "start_date": "2020-01-01", "end_date": "2030-12-31"
         })
         assert r.status_code == 200
@@ -86,52 +91,48 @@ class TestReport:
 
 @pytest.mark.asyncio
 class TestSystem:
-    async def test_log_list(self, async_client, seed_data):
-        r = await async_client.post("/api/log/getList", json={"page": 1, "page_size": 10})
+    async def test_log_list(self, async_client, seed_data, auth_headers):
+        headers = auth_headers(seed_data["admin_user"].username)
+        r = await async_client.post("/api/log/getList", headers=headers, json={"page": 1, "page_size": 10})
         assert r.status_code == 200
         body = r.json()
         assert body["code"] == 200
         assert "list" in body["data"]
         assert "total" in body["data"]
 
-    async def test_dict_crud(self, async_client):
-        # create
-        r = await async_client.post("/api/dict/create", json={
+    async def test_dict_crud(self, async_client, seed_data, auth_headers):
+        headers = auth_headers(seed_data["admin_user"].username)
+        r = await async_client.post("/api/dict/create", headers=headers, json={
             "dict_type": "gender", "dict_code": "male", "dict_value": "男", "sort_order": 1
         })
         assert r.status_code == 200
         assert r.json()["code"] == 200
 
-        # list
-        r = await async_client.post("/api/dict/getList", json={"dict_type": "gender"})
+        r = await async_client.post("/api/dict/getList", headers=headers, json={"dict_type": "gender"})
         assert r.status_code == 200
         body = r.json()
         assert body["code"] == 200
         assert len(body["data"]) >= 1
         dict_id = body["data"][0]["dict_id"]
 
-        # update
-        r = await async_client.post("/api/dict/update", json={
+        r = await async_client.post("/api/dict/update", headers=headers, json={
             "dict_id": dict_id, "dict_code": "male", "dict_value": "男性", "sort_order": 2
         })
         assert r.status_code == 200
         assert r.json()["code"] == 200
 
-        # delete
-        r = await async_client.post("/api/dict/delete", json={"dict_id": dict_id})
+        r = await async_client.post("/api/dict/delete", headers=headers, json={"dict_id": dict_id})
         assert r.status_code == 200
         assert r.json()["code"] == 200
 
-    async def test_config(self, async_client, seed_data):
-        # list
-        r = await async_client.get("/api/config/getList")
+    async def test_config(self, async_client, seed_data, auth_headers):
+        headers = auth_headers(seed_data["admin_user"].username)
+        r = await async_client.get("/api/config/getList", headers=headers)
         assert r.status_code == 200
         body = r.json()
         assert body["code"] == 200
 
-        # update
-        r = await async_client.post("/api/config/update", json={
+        r = await async_client.post("/api/config/update", headers=headers, json={
             "config_key": "site_name", "config_value": "测试医院"
         })
-        # may fail if key doesn't exist, that's ok for test coverage
         assert r.status_code == 200

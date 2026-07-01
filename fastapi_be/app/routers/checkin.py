@@ -4,8 +4,8 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.dependencies import NURSING_ROLES, ROLE_PATIENT, get_current_user, require_roles
-from app.models import Appointment, BreachRecord, Patient, Queue, User
+from app.dependencies import NURSING_ROLES, User, require_roles
+from app.models import Appointment, BreachRecord, Patient, Queue
 from app.schemas import CheckInRequest
 
 router = APIRouter()
@@ -44,10 +44,8 @@ from app.models import Doctor
 
 
 @router.get("/checkIn/getAppointments")
-def get_appointments_for_checkin(identity: str, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    """根据身份证号查询可报到的预约列表（患者只能查自己的；护士可查他人）"""
-    if current_user.user_role == ROLE_PATIENT and current_user.username != identity:
-        return {"code": 403, "msg": "无权查询其他患者预约"}
+def get_appointments_for_checkin(identity: str, db: Session = Depends(get_db)):
+    """根据身份证号查询可报到的预约列表(患者自助 kiosk 模式,凭身份证查询)"""
     patient = db.query(Patient).filter(Patient.identity == identity).first()
     if not patient:
         return {"code": 500, "msg": "病人信息不存在"}
@@ -78,9 +76,8 @@ def get_appointments_for_checkin(identity: str, current_user: User = Depends(get
 
 
 @router.post("/checkIn/checkIn")
-def check_in(req: CheckInRequest, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    if current_user.user_role == ROLE_PATIENT and current_user.username != req.identity:
-        return {"code": 403, "msg": "无权替他人报到"}
+def check_in(req: CheckInRequest, db: Session = Depends(get_db)):
+    """患者自助报到(凭身份证+预约UUID,无需登录)"""
     appointment = db.query(Appointment).filter(Appointment.registration_uuid == req.appointment_uuid).first()
     if not appointment:
         return {"code": 500, "msg": "预约记录不存在"}

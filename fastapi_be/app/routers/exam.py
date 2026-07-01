@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.dependencies import get_current_user
+from app.dependencies import CLINICAL_ROLES, User, get_current_user, require_roles
 from app.models import (
     Doctor,
     ExamAppointment,
@@ -56,7 +56,7 @@ def get_exam_package_list(
 @router.post("/examPackage/create")
 def create_exam_package(
     req: dict,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_roles(*CLINICAL_ROLES)),
     db: Session = Depends(get_db),
 ):
     try:
@@ -81,7 +81,7 @@ def create_exam_package(
 @router.post("/examPackage/update")
 def update_exam_package(
     req: dict,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_roles(*CLINICAL_ROLES)),
     db: Session = Depends(get_db),
 ):
     package = db.query(ExamPackage).filter(ExamPackage.package_id == req.get("package_id")).first()
@@ -110,7 +110,7 @@ def update_exam_package(
 @router.post("/examPackage/delete")
 def delete_exam_package(
     req: dict,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_roles(*CLINICAL_ROLES)),
     db: Session = Depends(get_db),
 ):
     package = db.query(ExamPackage).filter(ExamPackage.package_id == req.get("package_id")).first()
@@ -163,7 +163,7 @@ def get_exam_item_list(
 @router.post("/examItem/create")
 def create_exam_item(
     req: dict,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_roles(*CLINICAL_ROLES)),
     db: Session = Depends(get_db),
 ):
     try:
@@ -188,7 +188,7 @@ def create_exam_item(
 @router.post("/examItem/update")
 def update_exam_item(
     req: dict,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_roles(*CLINICAL_ROLES)),
     db: Session = Depends(get_db),
 ):
     item = db.query(ExamItem).filter(ExamItem.item_id == req.get("item_id")).first()
@@ -217,7 +217,7 @@ def update_exam_item(
 @router.post("/examItem/delete")
 def delete_exam_item(
     req: dict,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_roles(*CLINICAL_ROLES)),
     db: Session = Depends(get_db),
 ):
     item = db.query(ExamItem).filter(ExamItem.item_id == req.get("item_id")).first()
@@ -273,7 +273,7 @@ def get_exam_appointment_list(
 @router.post("/examAppointment/create")
 def create_exam_appointment(
     req: dict,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_roles(*CLINICAL_ROLES)),
     db: Session = Depends(get_db),
 ):
     try:
@@ -300,7 +300,7 @@ def create_exam_appointment(
 @router.post("/examAppointment/updateStatus")
 def update_exam_appointment_status(
     req: dict,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_roles(*CLINICAL_ROLES)),
     db: Session = Depends(get_db),
 ):
     appointment = db.query(ExamAppointment).filter(ExamAppointment.appointment_id == req.get("appointment_id")).first()
@@ -357,7 +357,7 @@ def get_exam_record_list(
 @router.post("/examRecord/create")
 def create_exam_record(
     req: dict,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_roles(*CLINICAL_ROLES)),
     db: Session = Depends(get_db),
 ):
     appointment = db.query(ExamAppointment).filter(
@@ -385,7 +385,7 @@ def create_exam_record(
 @router.post("/examRecord/update")
 def update_exam_record(
     req: dict,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_roles(*CLINICAL_ROLES)),
     db: Session = Depends(get_db),
 ):
     record = db.query(ExamRecord).filter(ExamRecord.record_id == req.get("record_id")).first()
@@ -412,7 +412,7 @@ def update_exam_record(
 @router.post("/examRecord/complete")
 def complete_exam_record(
     req: dict,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_roles(*CLINICAL_ROLES)),
     db: Session = Depends(get_db),
 ):
     record = db.query(ExamRecord).filter(ExamRecord.record_id == req.get("record_id")).first()
@@ -466,7 +466,7 @@ def get_exam_result_list(
 @router.post("/examResult/create")
 def create_exam_result(
     req: dict,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_roles(*CLINICAL_ROLES)),
     db: Session = Depends(get_db),
 ):
     try:

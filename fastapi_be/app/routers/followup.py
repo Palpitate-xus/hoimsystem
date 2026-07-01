@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.dependencies import get_current_user, User, User, require_roles, CLINICAL_ROLES
+from app.dependencies import get_current_user, User, require_roles, CLINICAL_ROLES
 from app.models import Appointment, Doctor, FollowUp
 from app.schemas import (
     FollowUpAppointmentCreateRequest,
@@ -43,7 +43,7 @@ def create_follow_up_appointment(req: FollowUpAppointmentCreateRequest, current_
 
 
 @router.post("/followUp/createPlan")
-def create_follow_up_plan(req: FollowUpCreatePlanRequest, current_user=Depends(get_current_user), db: Session = Depends(get_db)):
+def create_follow_up_plan(req: FollowUpCreatePlanRequest, current_user: User = Depends(require_roles(*CLINICAL_ROLES)), db: Session = Depends(get_db)):
     doctor_obj = db.query(Doctor).filter(Doctor.user_id == current_user.user_id).first()
     follow_up = FollowUp(
         patient_id=req.patient_id,
@@ -59,7 +59,7 @@ def create_follow_up_plan(req: FollowUpCreatePlanRequest, current_user=Depends(g
 
 
 @router.get("/followUp/getList")
-def get_follow_up_list(current_user=Depends(get_current_user), keyword: str | None = None, db: Session = Depends(get_db)):
+def get_follow_up_list(current_user: User = Depends(require_roles(*CLINICAL_ROLES)), keyword: str | None = None, db: Session = Depends(get_db)):
     doctor_obj = db.query(Doctor).filter(Doctor.user_id == current_user.user_id).first()
     if doctor_obj:
         follow_ups = db.query(FollowUp).filter(FollowUp.doctor_id == doctor_obj.doctor_id).order_by(FollowUp.plan_date.desc()).all()

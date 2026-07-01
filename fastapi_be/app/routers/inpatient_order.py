@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.dependencies import get_current_user, User, User, require_roles, CLINICAL_ROLES
+from app.dependencies import NURSING_ROLES, get_current_user, User, require_roles, CLINICAL_ROLES
 from app.models import (
     Admission,
     Doctor,
@@ -326,7 +326,7 @@ def get_execution_list(order_id: str | None = None, nurse_id: int | None = None,
 
 
 @router.post("/inpatientOrder/execute")
-def execute_order(req: OrderExecutionRequest, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+def execute_order(req: OrderExecutionRequest, current_user: User = Depends(require_roles(*NURSING_ROLES)), db: Session = Depends(get_db)):
     execution = db.query(OrderExecution).filter(OrderExecution.order_id == req.order_id, OrderExecution.status == 0).first()
     if not execution:
         return {"code": 500, "msg": "无可执行记录"}

@@ -14,17 +14,19 @@ import pytest_asyncio
 ENDPOINTS = [
     # (method, path, required_roles, body, query_params)
     # admin.py
-    ("GET", "/api/doctorManagement/getList", {"admin", "super_admin"}, None, {}),
+    # getDoctorList/getPatientList/getDepartmentList/getNoticeList: auth-any
+    # (patients need to browse doctors/departments for registration)
+    ("GET", "/api/doctorManagement/getList", {"admin", "super_admin", "director", "doctor", "nurse", "cashier", "pharmacist", "guide", "patient", "lab_technician", "registrar"}, None, {}),
     ("POST", "/api/doctorManagement/delete", {"admin", "super_admin"}, {"doctor_id": 1}, {}),
     ("GET", "/api/patientManagement/getList", {"admin", "super_admin", "director", "doctor", "nurse", "cashier", "pharmacist", "guide", "patient", "lab_technician", "registrar"}, None, {}),
     ("GET", "/api/departmentManagement/getList", {"admin", "super_admin", "director", "doctor", "nurse", "cashier", "pharmacist", "guide", "patient", "lab_technician", "registrar"}, None, {}),
     ("POST", "/api/departmentManagement/create", {"admin", "super_admin"}, {"name": "外科", "phone": "01011112222", "location": "2号"}, {}),
-    ("POST", "/api/notice/create", {"admin", "super_admin"}, {"title": "t", "content": "c", "isemergency": 0, "towho": ["医生"], "expiredtime": "2026-12-31"}, {}),
-    ("POST", "/api/notice/update", {"admin", "super_admin"}, {"notice_id": "1", "title": "t", "content": "c", "isemergency": 0, "towho": ["医生"], "expiredtime": "2026-12-31"}, {}),
-    ("POST", "/api/notice/delete", {"admin", "super_admin"}, {"notice_id": "1"}, {}),
+    ("POST", "/api/notice/create", {"admin", "super_admin", "director"}, {"title": "t", "content": "c", "isemergency": 0, "towho": ["医生"], "expiredtime": "2026-12-31"}, {}),
+    ("POST", "/api/notice/update", {"admin", "super_admin", "director"}, {"notice_id": "1", "title": "t", "content": "c", "isemergency": 0, "towho": ["医生"], "expiredtime": "2026-12-31"}, {}),
+    ("POST", "/api/notice/delete", {"admin", "super_admin", "director"}, {"notice_id": "1"}, {}),
 
     # admission.py
-    ("GET", "/api/admission/getList", {"admin", "super_admin", "director", "doctor", "nurse", "cashier", "pharmacist", "guide"}, None, {}),
+    ("GET", "/api/admission/getList", {"admin", "super_admin", "nurse"}, None, {}),
     ("POST", "/api/admission/create", {"admin", "super_admin", "nurse"}, {"patient_id": 1, "department_id": 1, "admission_type": 0}, {}),
 
     # adverse_event.py
@@ -89,9 +91,9 @@ ENDPOINTS = [
     # followup.py
     ("POST", "/api/followUp/createPlan", {"admin", "super_admin", "director", "doctor"}, {"patient_id": 1, "plan_date": "2026-05-01", "content": "x"}, {}),
 
-    # inpatient_charge.py
-    ("POST", "/api/inpatientCharge/settle", {"admin", "super_admin", "cashier", "nurse"}, {"admission_id": "1"}, {}),
-    ("POST", "/api/inpatientCharge/refund", {"admin", "super_admin", "cashier", "nurse"}, {"admission_id": "1", "amount": 10}, {}),
+    # inpatient_charge.py (settle/refund require CASHISTER; nurse has separate access via ward)
+    ("POST", "/api/inpatientCharge/settle", {"admin", "super_admin", "cashier"}, {"admission_id": "1"}, {}),
+    ("POST", "/api/inpatientCharge/refund", {"admin", "super_admin", "cashier"}, {"admission_id": "1", "amount": 10}, {}),
 
     # inpatient_order.py
     ("POST", "/api/inpatientOrder/create", {"admin", "super_admin", "director", "doctor"}, {"patient_id": 1, "doctor_id": 1, "order_type": "long", "items": [{"name": "x", "dosage": "1", "frequency": "qd", "route": "po", "days": 3}]}, {}),

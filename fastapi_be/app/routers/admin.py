@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.dependencies import ADMIN_ROLES, User, get_current_user, require_roles
+from app.dependencies import ADMIN_ROLES, NOTICE_ROLES, User, get_current_user, require_roles
 from app.models import Department, Doctor, Notice, Patient
 from app.pagination import paginate
 from app.schemas import (
@@ -232,7 +232,7 @@ def get_notice_list(current_user: User = Depends(get_current_user), keyword: str
 
 
 @router.post("/notice/create")
-def notice_register(req: NoticeCreateRequest, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+def notice_register(req: NoticeCreateRequest, current_user: User = Depends(require_roles(*NOTICE_ROLES)), db: Session = Depends(get_db)):
     expired = None
     if req.expiredtime:
         try:
@@ -255,7 +255,7 @@ def notice_register(req: NoticeCreateRequest, current_user: User = Depends(get_c
 
 
 @router.post("/notice/update")
-def update_notice(req: NoticeUpdateRequest, current_user: User = Depends(require_roles(*ADMIN_ROLES)), db: Session = Depends(get_db)):
+def update_notice(req: NoticeUpdateRequest, current_user: User = Depends(require_roles(*NOTICE_ROLES)), db: Session = Depends(get_db)):
     notice = db.query(Notice).filter(Notice.notice_id == req.notice_id).first()
     if not notice:
         return {"code": 500, "msg": "通知不存在"}
@@ -274,7 +274,7 @@ def update_notice(req: NoticeUpdateRequest, current_user: User = Depends(require
 
 
 @router.post("/notice/delete")
-def delete_notice(req: NoticeDeleteRequest, current_user: User = Depends(require_roles(*ADMIN_ROLES)), db: Session = Depends(get_db)):
+def delete_notice(req: NoticeDeleteRequest, current_user: User = Depends(require_roles(*NOTICE_ROLES)), db: Session = Depends(get_db)):
     notice = db.query(Notice).filter(Notice.notice_id == req.notice_id).first()
     if not notice:
         return {"code": 500, "msg": "通知不存在"}

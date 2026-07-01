@@ -39,14 +39,20 @@ env/
 
 # Database
 *.db
+*.db-journal
 *.sqlite
 *.sqlite3
+package-lock.json
 
 # Backend runtime
 fastapi_be/backend.log
 fastapi_be/test.db
+fastapi_be/hoimsystem.db
 fastapi_be/migrate_passwords.py
 fastapi_be/test_*.py
+fastapi_be/.ruff_cache/
+fastapi_be/.pytest_cache/
+fastapi_be/.env
 
 # Frontend runtime
 vue3-new-ui/frontend.log

@@ -5,6 +5,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.database import get_db
+from app.dependencies import PHARMACY_ROLES, User, require_roles
 from app.models import Pharmaceutical, PrePha, Prescription
 from app.pagination import paginate
 from app.schemas import PharmacyAuditRequest, PharmacyDispenseRequest, PharmacyReturnRequest
@@ -13,7 +14,7 @@ router = APIRouter()
 
 
 @router.get("/pharmacy/dispenseList")
-def get_dispense_list(keyword: str | None = None, page: int | None = None, page_size: int | None = None, db: Session = Depends(get_db)):
+def get_dispense_list(keyword: str | None = None, page: int | None = None, page_size: int | None = None, current_user: User = Depends(require_roles(*PHARMACY_ROLES)), db: Session = Depends(get_db)):
     query = db.query(Prescription).filter(Prescription.status.in_([0, 1]))
     prescriptions, total = paginate(query, page, page_size)
     data = []
@@ -47,7 +48,7 @@ def get_dispense_list(keyword: str | None = None, page: int | None = None, page_
 
 
 @router.post("/pharmacy/audit")
-def audit_prescription(req: PharmacyAuditRequest, db: Session = Depends(get_db)):
+def audit_prescription(req: PharmacyAuditRequest, current_user: User = Depends(require_roles(*PHARMACY_ROLES)), db: Session = Depends(get_db)):
     pre = db.query(Prescription).filter(Prescription.prescription_id == req.prescription_id).first()
     if not pre:
         return {"code": 500, "msg": "处方不存在"}
@@ -60,7 +61,7 @@ def audit_prescription(req: PharmacyAuditRequest, db: Session = Depends(get_db))
 
 
 @router.post("/pharmacy/dispense")
-def dispense_prescription(req: PharmacyDispenseRequest, db: Session = Depends(get_db)):
+def dispense_prescription(req: PharmacyDispenseRequest, current_user: User = Depends(require_roles(*PHARMACY_ROLES)), db: Session = Depends(get_db)):
     pre = db.query(Prescription).filter(Prescription.prescription_id == req.prescription_id).first()
     if not pre:
         return {"code": 500, "msg": "处方不存在"}
@@ -73,7 +74,7 @@ def dispense_prescription(req: PharmacyDispenseRequest, db: Session = Depends(ge
 
 
 @router.post("/pharmacy/return")
-def return_medicine(req: PharmacyReturnRequest, db: Session = Depends(get_db)):
+def return_medicine(req: PharmacyReturnRequest, current_user: User = Depends(require_roles(*PHARMACY_ROLES)), db: Session = Depends(get_db)):
     pre = db.query(Prescription).filter(Prescription.prescription_id == req.prescription_id).first()
     if not pre:
         return {"code": 500, "msg": "处方不存在"}
@@ -101,7 +102,7 @@ def return_medicine(req: PharmacyReturnRequest, db: Session = Depends(get_db)):
 
 
 @router.post("/pharmacy/stockCheck")
-def stock_check(req: dict, db: Session = Depends(get_db)):
+def stock_check(req: dict, current_user: User = Depends(require_roles(*PHARMACY_ROLES)), db: Session = Depends(get_db)):
     """库存盘点：传入 {items: [{pharmaceutical_id, actual_stock}]}，返回盈亏"""
     items = req.get("items", [])
     result = []
@@ -128,7 +129,7 @@ def stock_check(req: dict, db: Session = Depends(get_db)):
 
 
 @router.post("/pharmacy/review")
-def review_prescription(req: dict, db: Session = Depends(get_db)):
+def review_prescription(req: dict, current_user: User = Depends(require_roles(*PHARMACY_ROLES)), db: Session = Depends(get_db)):
     """处方点评"""
     pre = db.query(Prescription).filter(Prescription.prescription_id == req.get("prescription_id")).first()
     if not pre:
@@ -142,7 +143,7 @@ def review_prescription(req: dict, db: Session = Depends(get_db)):
 
 
 @router.get("/pharmacy/reviewList")
-def get_review_list(keyword: str | None = None, db: Session = Depends(get_db)):
+def get_review_list(keyword: str | None = None, current_user: User = Depends(require_roles(*PHARMACY_ROLES)), db: Session = Depends(get_db)):
     """已点评处方列表"""
     prescriptions = db.query(Prescription).filter(Prescription.review_score.isnot(None)).order_by(Prescription.review_time.desc()).all()
     data = []

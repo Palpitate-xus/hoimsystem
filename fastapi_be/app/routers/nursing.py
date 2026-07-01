@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.dependencies import get_current_user
+from app.dependencies import NURSING_ROLES, get_current_user, require_roles
 from app.models import (
     Admission,
     NursingRecord,
@@ -21,6 +21,7 @@ router = APIRouter()
 def get_nursing_record_list(
     admission_id: str | None = None,
     patient_id: int | None = None,
+    current_user: User = Depends(require_roles(*NURSING_ROLES)),
     db: Session = Depends(get_db),
 ):
     query = db.query(NursingRecord).order_by(NursingRecord.record_time.desc())
@@ -59,7 +60,7 @@ def get_nursing_record_list(
 @router.post("/nursingRecord/create")
 def create_nursing_record(
     req: NursingRecordCreateRequest,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_roles(*NURSING_ROLES)),
     db: Session = Depends(get_db),
 ):
     admission = db.query(Admission).filter(Admission.admission_id == req.admission_id).first()
@@ -94,7 +95,7 @@ def create_nursing_record(
 
 
 @router.post("/nursingRecord/delete")
-def delete_nursing_record(req: dict, db: Session = Depends(get_db)):
+def delete_nursing_record(req: dict, current_user: User = Depends(require_roles(*NURSING_ROLES)), db: Session = Depends(get_db)):
     record = db.query(NursingRecord).filter(NursingRecord.record_id == req.get("record_id")).first()
     if not record:
         return {"code": 500, "msg": "记录不存在"}
@@ -107,6 +108,7 @@ def delete_nursing_record(req: dict, db: Session = Depends(get_db)):
 def get_temperature_record_list(
     admission_id: str | None = None,
     record_date: str | None = None,
+    current_user: User = Depends(require_roles(*NURSING_ROLES)),
     db: Session = Depends(get_db),
 ):
     query = db.query(TemperatureRecord).order_by(TemperatureRecord.record_date.desc(), TemperatureRecord.time_point)
@@ -148,6 +150,7 @@ def get_temperature_record_list(
 @router.post("/temperatureRecord/create")
 def create_temperature_record(
     req: TemperatureRecordCreateRequest,
+    current_user: User = Depends(require_roles(*NURSING_ROLES)),
     db: Session = Depends(get_db),
 ):
     admission = db.query(Admission).filter(Admission.admission_id == req.admission_id).first()
@@ -204,7 +207,7 @@ def create_temperature_record(
 
 
 @router.post("/temperatureRecord/delete")
-def delete_temperature_record(req: dict, db: Session = Depends(get_db)):
+def delete_temperature_record(req: dict, current_user: User = Depends(require_roles(*NURSING_ROLES)), db: Session = Depends(get_db)):
     record = db.query(TemperatureRecord).filter(TemperatureRecord.temp_id == req.get("temp_id")).first()
     if not record:
         return {"code": 500, "msg": "记录不存在"}

@@ -12,6 +12,7 @@ from app.models import (
     DischargeSummary,
     Doctor,
     InpatientCharge,
+    InpatientOrder,
     Patient,
 )
 from app.schemas import DischargeSummaryCreateRequest
@@ -46,6 +47,17 @@ def do_discharge(req: dict, current_user: User = Depends(require_roles(*NURSING_
         db.add(c)
 
     # 更新入院记录
+    # 停止所有新开/已审核的医嘱(状态 0/1),防止出院后仍被检查和执行
+    active_orders = (
+        db.query(InpatientOrder)
+        .filter(InpatientOrder.admission_id == admission_id, InpatientOrder.status.in_([0, 1]))
+        .all()
+    )
+    for order in active_orders:
+        order.status = 3  # 已停止
+        order.stop_time = datetime.datetime.now()
+        db.add(order)
+
     admission.status = 2
     admission.discharge_time = datetime.datetime.now()
     admission.discharge_diagnosis = req.get("discharge_diagnosis", admission.admission_diagnosis)

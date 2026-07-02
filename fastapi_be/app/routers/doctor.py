@@ -310,17 +310,29 @@ def prescription_register(req: PrescriptionCreateRequest, current_user: User = D
             return {"code": 500, "msg": f"特殊使用级抗菌药 [{', '.join(special_phas)}] 需抗菌药物管理组审批后方可开具"}
 
         # ===== 处方前置审核 =====
-        # 1. 过敏史冲突检查
-        allergy_history = patient_obj.allergy_history or ""
+        # 1. 过敏史冲突检查(精确匹配 + 通用名匹配,避免 partial match 误判)
+        allergy_history = (patient_obj.allergy_history or "").strip()
         if allergy_history:
-            allergy_keywords = [a.strip() for a in allergy_history.split(",") if a.strip()]
+            allergy_keywords = [a.strip().lower() for a in allergy_history.split(",") if a.strip()]
             for item in req.phas:
                 pha = db.query(Pharmaceutical).filter(Pharmaceutical.pharmaceutical_id == item["id"]).first()
-                if pha:
-                    for kw in allergy_keywords:
-                        if kw in pha.name or (pha.remark and kw in pha.remark):
+                if not pha:
+                    continue
+                pha_name_lower = (pha.name or "").lower()
+                pha_remark_lower = (pha.remark or "").lower()
+                for kw in allergy_keywords:
+                    # 精确匹配: 过敏史关键词等于药品名,或药品名包含完整关键词(词边界)
+                    if kw == pha_name_lower:
+                        db.rollback()
+                        return {"code": 500, "msg": f"过敏史冲突：病人对 [{kw}] 过敏，处方包含 [{pha.name}]"}
+                    # 关键词长度 >= 2 且药品名以该关键词开头/结尾/被分隔符包围
+                    if len(kw) >= 2:
+                        if pha_name_lower.startswith(kw + " ") or pha_name_lower.endswith(" " + kw) or f" {kw} " in f" {pha_name_lower} ":
                             db.rollback()
                             return {"code": 500, "msg": f"过敏史冲突：病人对 [{kw}] 过敏，处方包含 [{pha.name}]"}
+                        if pha_remark_lower and (kw in pha_remark_lower.split() or kw + "," in pha_remark_lower):
+                            db.rollback()
+                            return {"code": 500, "msg": f"过敏史冲突：病人对 [{kw}] 过敏，处方备注 [{pha.remark}]"}
 
         # 2. 配伍禁忌检查（硬编码常见禁忌组合）
         pha_ids = {item["id"] for item in req.phas}
@@ -431,6 +443,20 @@ def cancel_prescription(req: PrescriptionCancelRequest, current_user: User = Dep
     pre = db.query(Prescription).filter(Prescription.prescription_id == req.prescription_id).first()
     if not pre:
         return {"code": 500, "msg": "处方不存在"}
+    if pre.status == 3:
+        return {"code": 500, "msg": "处方已取消,无需重复操作"}
+    if pre.status == 2:
+        return {"code": 500, "msg": "已发药的处方不能直接取消,请走退药流程"}
+    doctor_obj = db.query(Doctor).filter(Doctor.user_id == current_user.user_id).first()
+    if not doctor_obj or pre.doctor_id != doctor_obj.doctor_id:
+        return {"code": 403, "msg": "无权取消他人处方"}
+    # 释放锁定的库存
+    pre_phas = db.query(PrePha).filter(PrePha.prescription_id == pre.prescription_id).all()
+    for pp in pre_phas:
+        pha = db.query(Pharmaceutical).filter(Pharmaceutical.pharmaceutical_id == pp.pharmaceutical_id).first()
+        if pha:
+            pha.stock += pp.number
+            db.add(pha)
     pre.status = 3
     db.add(pre)
     db.commit()
@@ -438,7 +464,9 @@ def cancel_prescription(req: PrescriptionCancelRequest, current_user: User = Dep
 
 
 @router.post("/medicalRecord/create")
-def create_medical_record(req: MedicalRecordCreateRequest, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+def create_medical_record(req: MedicalRecordCreateRequest, current_user: User = Depends(require_roles(*CLINICAL_ROLES)), db: Session = Depends(get_db)):
+    if current_user.user_role == "patient":
+        return {"code": 403, "msg": "无权创建病历"}
     doctor_obj = db.query(Doctor).filter(Doctor.user_id == current_user.user_id).first()
     if not doctor_obj:
         return {"code": 500, "msg": "医生信息不存在"}
@@ -459,6 +487,9 @@ def update_medical_record(req: MedicalRecordUpdateRequest, current_user: User = 
     record = db.query(MedicalRecord).filter(MedicalRecord.medical_record_id == req.medical_record_id).first()
     if not record:
         return {"code": 500, "msg": "病历不存在"}
+    doctor_obj = db.query(Doctor).filter(Doctor.user_id == current_user.user_id).first()
+    if not doctor_obj or record.doctor_id != doctor_obj.doctor_id:
+        return {"code": 403, "msg": "无权修改他人病历"}
     record.symptom = req.symptom
     record.result = req.result
     db.add(record)

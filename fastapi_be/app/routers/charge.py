@@ -188,7 +188,6 @@ def window_registration(req: dict, db: Session = Depends(get_db), current_user: 
             reg_obj.number -= 1
             db.add(reg_obj)
         registration = Registration(
-            registration_id=1,
             patient_id=patient.patient_id,
             doctor_id=doctor_id,
             specialist=specialist,
@@ -208,13 +207,23 @@ def window_registration(req: dict, db: Session = Depends(get_db), current_user: 
 @router.post("/windowRegistration/cancel")
 def window_cancel_registration(req: dict, db: Session = Depends(get_db), current_user: User = Depends(require_roles(ROLE_CASHIER, *ADMIN_ROLES))):
     """窗口退号"""
-    from app.models import Registration
+    from app.models import Registration, DoctorSchedule
 
     reg = db.query(Registration).filter(Registration.registration_uuid == req.get("uuid")).first()
     if not reg:
         return {"code": 500, "msg": "挂号记录不存在"}
+    if reg.status == 3:
+        return {"code": 500, "msg": "该挂号已退号"}
     reg.status = 3
     db.add(reg)
+    schedule = (
+        db.query(DoctorSchedule)
+        .filter(DoctorSchedule.doctor_id == reg.doctor_id, DoctorSchedule.specialist == reg.specialist)
+        .first()
+    )
+    if schedule:
+        schedule.number += 1
+        db.add(schedule)
     db.commit()
     return {"code": 200, "msg": "success"}
 

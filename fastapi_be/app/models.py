@@ -122,7 +122,7 @@ class Registration(Base):
     __tablename__ = "hoimsystem_registration"
 
     registration_uuid = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
-    registration_id = Column(Integer)
+    registration_id = Column(Integer, autoincrement=True)
     patient_id = Column(Integer, ForeignKey("hoimsystem_patient.patient_id"))
     doctor_id = Column(Integer, ForeignKey("hoimsystem_doctor.doctor_id"))
     specialist = Column(Integer)

@@ -157,10 +157,22 @@ def patient_appointment(req: AppointmentCreateRequest, current_user: User = Depe
 @router.post("/appointmentManagement/cancel")
 def patient_appointment_cancel(req: UuidRequest, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     app = db.query(Appointment).filter(Appointment.registration_uuid == req.uuid).first()
-    if app:
-        app.status = 2
-        db.add(app)
-        db.commit()
+    if not app:
+        return {"code": 500, "msg": "预约记录不存在"}
+    if app.status == 2:
+        return {"code": 500, "msg": "预约已取消,无需重复操作"}
+    patient_obj = db.query(Patient).filter(Patient.identity == current_user.username).first()
+    if not patient_obj or app.patient_id != patient_obj.patient_id:
+        return {"code": 403, "msg": "无权取消他人预约"}
+    app.status = 2
+    db.add(app)
+    schedule = db.query(DoctorSchedule).filter(DoctorSchedule.doctor_id == app.doctor_id).filter(
+        DoctorSchedule.specialist == app.specialist
+    ).first()
+    if schedule:
+        schedule.number += 1
+        db.add(schedule)
+    db.commit()
     return {"code": 200, "msg": "success"}
 
 
@@ -254,7 +266,6 @@ def patient_registration(req: RegistrationCreateRequest, current_user: User = De
             reg_obj.number -= 1
             db.add(reg_obj)
         registration = Registration(
-            registration_id=1,
             patient_id=patient_obj.patient_id,
             doctor_id=req.doctor_id,
             specialist=req.specialist,
@@ -276,10 +287,26 @@ def patient_registration(req: RegistrationCreateRequest, current_user: User = De
 @router.post("/registrationManagement/cancel")
 def patient_registration_cancel(req: UuidRequest, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     reg = db.query(Registration).filter(Registration.registration_uuid == req.uuid).first()
-    if reg:
-        reg.status = 3
-        db.add(reg)
-        db.commit()
+    if not reg:
+        return {"code": 500, "msg": "挂号记录不存在"}
+    if reg.status == 3:
+        return {"code": 500, "msg": "挂号已取消,无需重复操作"}
+    patient_obj = db.query(Patient).filter(Patient.identity == current_user.username).first()
+    if not patient_obj or reg.patient_id != patient_obj.patient_id:
+        return {"code": 403, "msg": "无权取消他人挂号"}
+    reg.status = 3
+    db.add(reg)
+    schedule = db.query(DoctorSchedule).filter(DoctorSchedule.schedule_id == req.schedule_id).first()
+    if not schedule:
+        schedule = (
+            db.query(DoctorSchedule)
+            .filter(DoctorSchedule.doctor_id == reg.doctor_id, DoctorSchedule.specialist == reg.specialist)
+            .first()
+        )
+    if schedule:
+        schedule.number += 1
+        db.add(schedule)
+    db.commit()
     return {"code": 200, "msg": "success"}
 
 

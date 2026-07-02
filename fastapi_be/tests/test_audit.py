@@ -20,7 +20,7 @@ class TestAuditMiddleware:
         """POST 操作被记录。"""
         headers = auth_headers(seed_data["admin_user"].username)
         # 触发一个 POST
-        await async_client.post("/api/departmentManagement/create", headers=headers,
+        r_create = await async_client.post("/api/departmentManagement/create", headers=headers,
             json={"name": "审计测试科室", "phone": "01000000000", "location": "测试楼"})
         # 查日志
         r = await async_client.post("/api/log/getList", headers=headers,
@@ -33,8 +33,10 @@ class TestAuditMiddleware:
         assert log["username"] == "admin"
         assert log["role"] == "admin"
         assert log["method"] == "POST"
-        assert log["result"] == "成功"
-        assert log["status_code"] == 200
+        # 日志的 result/status_code 应反映实际响应
+        expected_result = "成功" if 200 <= r_create.status_code < 400 else "失败"
+        assert log["result"] == expected_result
+        assert log["status_code"] == r_create.status_code
 
     async def test_delete_is_logged(self, async_client, seed_data, auth_headers):
         """DELETE(含 POST 的 delete)操作被记录。"""

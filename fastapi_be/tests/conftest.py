@@ -49,6 +49,10 @@ def override_get_db():
 
 app.dependency_overrides[get_db] = override_get_db
 
+# 让中间件内的 SessionLocal() 也指向同一个内存数据库
+from app import database as _app_database
+_app_database.SessionLocal = TestingSessionLocal
+
 
 @pytest.fixture(scope="session", autouse=True)
 def setup_database():

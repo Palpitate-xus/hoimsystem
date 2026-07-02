@@ -358,10 +358,16 @@ class OperationLog(Base):
 
     log_id = Column(Integer, primary_key=True, autoincrement=True)
     user_id = Column(Integer, ForeignKey("hoimsystem_users.user_id"))
+    username = Column(String(50))
+    role = Column(String(20))
     action = Column(String(50))
     target = Column(String(100))
+    detail = Column(String(500))
     result = Column(String(20))
+    status_code = Column(Integer)
     ip = Column(String(40))
+    method = Column(String(10))
+    path = Column(String(200))
     create_time = Column(DateTime)
 
     user = relationship("User", back_populates="operation_logs")

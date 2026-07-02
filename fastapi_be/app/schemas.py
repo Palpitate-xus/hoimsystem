@@ -328,7 +328,13 @@ class PharmacyReturnRequest(BaseModel):
 
 class LogListRequest(BaseModel):
     user_id: int | None = None
+    username: str | None = None
+    role: str | None = None
     action: str | None = None
+    target: str | None = None
+    result: str | None = None
+    method: str | None = None
+    ip: str | None = None
     start_time: str | None = None
     end_time: str | None = None
     page: int

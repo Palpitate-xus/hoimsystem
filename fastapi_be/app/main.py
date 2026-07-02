@@ -139,27 +139,68 @@ class StripMicrosecondMiddleware(BaseHTTPMiddleware):
 
 
 class OperationLogMiddleware(BaseHTTPMiddleware):
-    """自动记录用户操作日志中间件"""
+    """全量操作审计中间件。
 
-    # 只记录这些方法的请求
-    LOG_METHODS = {"POST", "PUT", "DELETE"}
-    # 不记录的路径关键词
-    SKIP_PATHS = {"/log/", "/getList", "/getDetail", "/getPending"}
+    记录维度:
+    - 谁(username + role)
+    - 什么时候(create_time)
+    - 从哪里(ip + x-forwarded-for)
+    - 做了什么(method + path + action + target)
+    - 涉及什么对象(detail: 患者ID/处方ID等)
+    - 结果如何(result + status_code)
+
+    审计策略:
+    - 所有 POST/PUT/DELETE 全量记录
+    - GET 仅记录敏感路径(查看病历/处方/患者详情/导出/打印)
+    - 排除静态资源、健康检查、token 心跳
+    """
+
+    # 始终跳过的路径(无业务含义)
+    SKIP_PATHS = {
+        "/docs", "/openapi.json", "/favicon.ico",
+        "/api/login", "/api/logout", "/api/register",
+        "/api/test", "/api/publicKey",
+    }
+    # GET 也记录的敏感路径(医疗合规:谁看了什么)
+    SENSITIVE_GET_PATHS = {
+        "/api/medicalRecord/detail",
+        "/api/prescriptionManagement/getList",
+        "/api/chargeManagement/getList",
+        "/api/patientManagement/getList",
+        "/api/medicalRecord/getList",
+        "/api/labResult/detail",
+        "/api/examReport/getDetail",
+        "/api/research/export",
+        "/api/invoice/print",
+        "/api/backup/download",
+    }
 
     async def dispatch(self, request, call_next):
         response = await call_next(request)
-
-        # 只记录指定方法的请求
-        if request.method not in self.LOG_METHODS:
-            return response
-
         path = request.url.path
-        # 跳过日志查询、列表查询等GET-like POST操作
-        if any(skip in path for skip in self.SKIP_PATHS):
+        method = request.method
+
+        # 跳过静态资源
+        if any(path.startswith(p) for p in self.SKIP_PATHS):
+            return response
+        if path.startswith("/uploads/"):
             return response
 
-        # 解析用户ID
+        # 判断是否需要记录
+        should_log = False
+        if method in ("POST", "PUT", "DELETE"):
+            should_log = True
+        elif method == "GET":
+            # GET 仅记录敏感路径
+            if any(path.startswith(p) for p in self.SENSITIVE_GET_PATHS):
+                should_log = True
+        if not should_log:
+            return response
+
+        # 解析用户
         user_id = None
+        username = ""
+        role = ""
         access_token = request.headers.get("accesstoken")
         if access_token:
             try:
@@ -167,14 +208,17 @@ class OperationLogMiddleware(BaseHTTPMiddleware):
                 from app.dependencies import decode_access_token
                 from app.models import User
 
-                username = decode_access_token(access_token)
-                db = SessionLocal()
-                try:
-                    user = db.query(User).filter(User.username == username).first()
-                    if user:
-                        user_id = user.user_id
-                finally:
-                    db.close()
+                uname = decode_access_token(access_token)
+                if uname:
+                    db = SessionLocal()
+                    try:
+                        user = db.query(User).filter(User.username == uname).first()
+                        if user:
+                            user_id = user.user_id
+                            username = user.username
+                            role = user.user_role
+                    finally:
+                        db.close()
             except Exception:
                 pass
 
@@ -187,10 +231,20 @@ class OperationLogMiddleware(BaseHTTPMiddleware):
         # 解析操作和对象
         action, target = parse_action_target(path)
 
-        # 记录结果
-        result = "成功" if 200 <= response.status_code < 400 else "失败"
+        # 提取 detail: 从 query params 取 id 类参数
+        detail_parts = []
+        for k in ("id", "uuid", "patient_id", "prescription_id", "charge_id",
+                  "admission_id", "medical_record_id", "schedule_id"):
+            v = request.query_params.get(k)
+            if v:
+                detail_parts.append(f"{k}={v}")
+        detail = ",".join(detail_parts)[:500]
 
-        # 写入数据库
+        # 结果
+        status_code = response.status_code
+        result = "成功" if 200 <= status_code < 400 else "失败"
+
+        # 写入数据库(失败时打印但不影响主请求)
         try:
             from app.database import SessionLocal
             from app.models import OperationLog
@@ -199,18 +253,27 @@ class OperationLogMiddleware(BaseHTTPMiddleware):
             try:
                 log = OperationLog(
                     user_id=user_id,
+                    username=username or "anonymous",
+                    role=role or "unknown",
                     action=action,
                     target=target,
+                    detail=detail,
                     result=result,
+                    status_code=status_code,
                     ip=client_ip,
+                    method=method,
+                    path=path,
                     create_time=datetime.datetime.now(),
                 )
                 db.add(log)
                 db.commit()
+            except Exception:
+                db.rollback()
             finally:
                 db.close()
         except Exception:
-            pass
+            import logging
+            logging.getLogger("audit").warning("写入审计日志失败", exc_info=True)
 
         return response
 

@@ -27,6 +27,7 @@ router = APIRouter()
 def get_exam_package_list(
     category: str | None = None,
     keyword: str | None = None,
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     query = db.query(ExamPackage).filter(ExamPackage.status == 0)
@@ -134,6 +135,7 @@ def delete_exam_package(
 def get_exam_item_list(
     category: str | None = None,
     keyword: str | None = None,
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     query = db.query(ExamItem).filter(ExamItem.status == 0)
@@ -241,6 +243,7 @@ def delete_exam_item(
 def get_exam_appointment_list(
     status: int | None = None,
     keyword: str | None = None,
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     query = db.query(ExamAppointment)
@@ -280,8 +283,13 @@ def create_exam_appointment(
         exam_date = req.get("exam_date")
         if isinstance(exam_date, str):
             exam_date = datetime.datetime.strptime(exam_date, "%Y-%m-%d").date()
+        patient_id = req.get("patient_id")
+        if current_user.user_role == "patient":
+            patient_obj = db.query(Patient).filter(Patient.identity == current_user.username).first()
+            if patient_obj:
+                patient_id = patient_obj.patient_id
         appointment = ExamAppointment(
-            patient_id=req.get("patient_id"),
+            patient_id=patient_id,
             package_id=req.get("package_id"),
             exam_date=exam_date,
             status=0,
@@ -323,6 +331,7 @@ def update_exam_appointment_status(
 @router.get("/examRecord/getList")
 def get_exam_record_list(
     keyword: str | None = None,
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     records = db.query(ExamRecord).order_by(ExamRecord.create_time.desc()).all()
@@ -436,6 +445,7 @@ def complete_exam_record(
 @router.get("/examResult/getList")
 def get_exam_result_list(
     record_id: str,
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     results = (
@@ -515,6 +525,7 @@ def create_exam_result(
 @router.get("/examReport/getDetail")
 def get_exam_report_detail(
     record_id: str,
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     record = db.query(ExamRecord).filter(ExamRecord.record_id == record_id).first()

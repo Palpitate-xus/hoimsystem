@@ -53,6 +53,7 @@ class TestResearchExport:
         if rows:
             assert "drug_name" in rows[0]
             assert "number" in rows[0]
+            assert "antibiotic_level" in rows[0]
 
     async def test_export_lab_results(self, async_client, seed_data, auth_headers):
         """导出检验结果。"""

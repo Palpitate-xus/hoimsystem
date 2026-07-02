@@ -244,6 +244,7 @@ from app.routers import (
     queue,
     referral,
     report,
+    research,
     surgery,
     system,
     triage,

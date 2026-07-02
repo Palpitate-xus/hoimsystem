@@ -120,23 +120,36 @@ def _export_prescriptions(db, from_date, to_date, anonymize):
         q = q.filter(Prescription.create_time >= from_date)
     if to_date:
         q = q.filter(Prescription.create_time <= to_date)
+    all_pre = q.all()
+    pre_ids = [p.prescription_id for p in all_pre]
+    pp_map = {}
+    if pre_ids:
+        all_pp = db.query(PrePha).filter(PrePha.prescription_id.in_(pre_ids)).all()
+        for pp in all_pp:
+            pp_map.setdefault(str(pp.prescription_id), []).append(pp)
+    pha_ids = {pp.pharmaceutical_id for pps in pp_map.values() for pp in pps}
+    pha_map = {}
+    if pha_ids:
+        for pha in db.query(Pharmaceutical).filter(Pharmaceutical.pharmaceutical_id.in_(pha_ids)).all():
+            pha_map[pha.pharmaceutical_id] = pha
     rows = []
-    for pre in q.all():
-        for pp in pre.pre_phas:
-            pha = db.query(Pharmaceutical).filter(Pharmaceutical.pharmaceutical_id == pp.pharmaceutical_id).first()
+    for pre in all_pre:
+        pps = pp_map.get(str(pre.prescription_id), [])
+        for pp in pps:
+            pha = pha_map.get(pp.pharmaceutical_id)
             rows.append({
                 "prescription_id": str(pre.prescription_id),
                 "patient_id": pre.patient_id,
                 "doctor_id": pre.doctor_id,
                 "pharmaceutical_id": pp.pharmaceutical_id,
                 "drug_name": pha.name if pha else "",
-                "drug_category": pha.category if pha else "",
+                "antibiotic_level": pha.antibiotic_level if pha else 0,
                 "number": pp.number,
                 "prescription_status": pre.status,
                 "create_time": str(pre.create_time) if pre.create_time else "",
             })
     return ["prescription_id", "patient_id", "doctor_id", "pharmaceutical_id",
-            "drug_name", "drug_category", "number", "prescription_status", "create_time"], rows
+            "drug_name", "antibiotic_level", "number", "prescription_status", "create_time"], rows
 
 
 def _export_charges(db, from_date, to_date, anonymize):
@@ -294,7 +307,9 @@ def export_research_data(
     try:
         fieldnames, rows = _EXPORTERS[table](db, from_date, to_date, anonymize)
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"查询失败: {e}")
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"查询失败: {type(e).__name__}: {e}")
     _audit(current_user.user_id, table, len(rows), anonymize)
     payload = _write_csv(fieldnames, rows)
     ts = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -334,7 +349,7 @@ def export_package(
             zf.writestr(arcname, payload)
             manifest_lines.append(f"{table},{arcname},{len(rows)},{anonymize}")
             _audit(current_user.user_id, table, len(rows), anonymize)
-    zf._fh.close()
+        zf.writestr("manifest.csv", "\n".join(manifest_lines))
     zip_buf.seek(0)
     ts = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
     return StreamingResponse(

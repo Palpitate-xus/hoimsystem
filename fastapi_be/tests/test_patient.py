@@ -47,8 +47,10 @@ class TestPatientRegistration:
     async def test_create_and_get_registration(self, async_client, seed_data, auth_headers):
         patient_user = seed_data["patient_user"]
         headers = auth_headers(patient_user.username)
+        # 先通过不同的 doctor2(director)挂号,避免与同 class 的 appointment 测试冲突
+        doctor2 = seed_data["director_doctor"]
         r = await async_client.post("/api/registrationManagement/create", headers=headers, json={
-            "id": 1, "doctor_id": seed_data["doctor"].doctor_id,
+            "id": 2, "doctor_id": doctor2.doctor_id,
             "department_id": seed_data["department"].department_id, "specialist": 1
         })
         assert r.status_code == 200
@@ -58,11 +60,15 @@ class TestPatientRegistration:
         assert r.status_code == 200
         body = r.json()
         assert body["code"] == 200
-        assert len(body["data"]) >= 1
-        reg_uuid = body["data"][0]["uuid"]
+        # 找到刚创建的挂号(匹配 director_doctor)
+        target_regs = [reg for reg in body["data"] if reg.get("doctor") == "李主任"]
+        if not target_regs:
+            target_regs = body["data"]
+        reg_uuid = target_regs[0]["uuid"]
 
         # cancel
-        r = await async_client.post("/api/registrationManagement/cancel", headers=headers, json={"uuid": reg_uuid})
+        r = await async_client.post("/api/registrationManagement/cancel", headers=headers,
+            json={"uuid": reg_uuid, "schedule_id": 2})
         assert r.status_code == 200
         assert r.json()["code"] == 200
 

@@ -44,6 +44,14 @@ class TestDoctorMedicalRecord:
         assert r.status_code == 200
         assert r.json()["code"] == 200
 
+    async def test_update_medical_record_rejects_other(self, async_client, seed_data, auth_headers):
+        mr = seed_data["medical_record"]
+        r = await async_client.post("/api/medicalRecord/update", headers=auth_headers(seed_data["director_user"].username), json={
+            "medical_record_id": str(mr.medical_record_id), "symptom": "hack", "result": "hack"
+        })
+        assert r.status_code == 200
+        assert r.json()["code"] == 403
+
 
 @pytest.mark.asyncio
 class TestDoctorPrescription:
@@ -62,10 +70,43 @@ class TestDoctorPrescription:
         assert len(body["data"]) >= 1
 
     async def test_cancel_prescription(self, async_client, seed_data, auth_headers):
-        pre = seed_data["prescription"]
-        r = await async_client.post("/api/prescriptionManagement/cancel", headers=auth_headers(seed_data["doctor_user"].username), json={"prescription_id": str(pre.prescription_id)})
+        doctor_headers = auth_headers(seed_data["doctor_user"].username)
+        # 开一个新处方,避免被前面的 test_dispense 把原始处方 status 改成 2
+        r = await async_client.post("/api/prescriptionManagement/create", headers=doctor_headers, json={
+            "patient": seed_data["patient2"].patient_id,
+            "phas": [{"id": seed_data["pharmaceutical"].pharmaceutical_id, "number": 1}]
+        })
+        assert r.json()["code"] == 200, f"prepare prescription failed: {r.text}"
+        new_pre_id = r.json()["data"]["uuid"]
+        # doctor 取消自己开立的新处方 — 成功
+        r = await async_client.post("/api/prescriptionManagement/cancel", headers=doctor_headers, json={"prescription_id": new_pre_id})
         assert r.status_code == 200
         assert r.json()["code"] == 200
+
+    async def test_cancel_prescription_rejects_dispensed(self, async_client, seed_data, auth_headers):
+        pre = seed_data["prescription"]
+        # 原始处方在 test_dispense 之前 status=0,但 test_dispense 会把 status 改成 2
+        # 直接验证:医生不能取消已发药的处方
+        # 先发药:pharmacist audit → dispense
+        phar_headers = auth_headers(seed_data["pharmacist_user"].username)
+        # 确保原始处方是 status=0(可能已经被 audit 或 dispense 过)
+        # 直接用一个 fresh 的 prescription 走 dispense 路径然后 cancel
+        # 这里只是验证 cancel 会拒绝已发药处方
+        doctor_headers = auth_headers(seed_data["doctor_user"].username)
+        # 开立新处方
+        r = await async_client.post("/api/prescriptionManagement/create", headers=doctor_headers, json={
+            "patient": seed_data["patient2"].patient_id,
+            "phas": [{"id": seed_data["pharmaceutical"].pharmaceutical_id, "number": 1}]
+        })
+        pre_id = r.json()["data"]["uuid"]
+        # 审核
+        r = await async_client.post("/api/pharmacy/audit", headers=phar_headers, json={"prescription_id": pre_id})
+        # 发药
+        r = await async_client.post("/api/pharmacy/dispense", headers=phar_headers, json={"prescription_id": pre_id})
+        # 取消 — 期望失败
+        r = await async_client.post("/api/prescriptionManagement/cancel", headers=doctor_headers, json={"prescription_id": pre_id})
+        assert r.status_code == 200
+        assert r.json()["code"] == 500
 
 
 @pytest.mark.asyncio

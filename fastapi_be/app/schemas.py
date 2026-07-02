@@ -48,6 +48,7 @@ class IdRequest(BaseModel):
 
 class UuidRequest(BaseModel):
     uuid: str
+    schedule_id: int | None = None
 
 
 class AppointmentCreateRequest(BaseModel):

@@ -377,7 +377,7 @@ def prescription_register(req: PrescriptionCreateRequest, current_user: User = D
         )
         db.add(charge)
         db.commit()
-        return {"code": 200, "msg": "success"}
+        return {"code": 200, "msg": "success", "data": {"uuid": str(pre.prescription_id)}}
     except Exception:
         db.rollback()
         traceback.print_exc()

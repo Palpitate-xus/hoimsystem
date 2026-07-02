@@ -88,33 +88,29 @@ class TestPatientOutpatientJourney:
         assert r.json()["code"] == 500
 
     async def test_journey_charge_flow(self, async_client, auth_headers, seed_data):
-        """处方 → Charge → 缴费 → 退费 状态流转。"""
-        patient_headers = auth_headers(seed_data["patient_user"].username)
+        """处方 → Charge → 缴费 → 退费 状态流转。
+
+        使用 cashier 角色的 chargeList(全量)验证状态,避免患者可见性跨测试污染。
+        """
         cashier_headers = auth_headers(seed_data["cashier_user"].username)
         doctor_headers = auth_headers(seed_data["doctor_user"].username)
         pha = seed_data["pharmaceutical"]
-        # 开立一个新处方,产生一个独立的 charge
+        # 为 patient2 开立一个新处方(patient2 在 seed 中无历史 charge)
         r = await async_client.post("/api/prescriptionManagement/create", headers=doctor_headers, json={
             "patient": seed_data["patient2"].patient_id,
             "phas": [{"id": pha.pharmaceutical_id, "number": 1}],
         })
         assert r.json()["code"] == 200
+        # 从响应中直接拿到新处方 uuid
+        new_pre_uuid = r.json().get("data", {}).get("uuid", "")
+        assert new_pre_uuid, "处方创建响应缺少 uuid"
         r = await async_client.get("/api/prescriptionManagement/getList", headers=doctor_headers)
-        pre = next((p for p in r.json()["data"] if p.get("patient_id") == seed_data["patient2"].patient_id and p["status"] == 0), None)
-        assert pre is not None
-        charge_id = pre["charge_id"]
-        # 用 charge_id
-        charge = type("CP", (), {"charge_id": int(charge_id) if charge_id.isdigit() else 0, "prescription_id": pre["uuid"]})
-        cid = pre["charge_id"]
-        if not cid or cid == "":
-            # 直接从 charge_management 列表取最新的
-            r = await async_client.get("/api/chargeManagement/getList", headers=patient_headers)
-            data = r.json()["data"]
-            if not data:
-                pytest.skip("无 charge 数据")
-            cid = data[0]["id"]
-        # 未缴费 → 患者可见
-        r = await async_client.get("/api/chargeManagement/getList", headers=patient_headers)
+        pre = next((p for p in r.json()["data"] if p.get("uuid") == new_pre_uuid), None)
+        assert pre is not None, f"找不到新处方 {new_pre_uuid}"
+        cid = pre["charge_id"]  # charge_id 是 UUID 字符串
+        assert cid, "处方缺少 charge_id"
+        # 未缴费 → 通过 cashier 全量列表可见
+        r = await async_client.get("/api/chargeManagement/getList", headers=cashier_headers)
         data = r.json()["data"]
         target = next((c for c in data if c["id"] == cid), None)
         assert target is not None, f"找不到 charge {cid} in {[c['id'] for c in data]}"
@@ -124,7 +120,7 @@ class TestPatientOutpatientJourney:
             json={"id": cid})
         assert r.json()["code"] == 200, f"缴费失败: {r.text}"
         # 已缴费
-        r = await async_client.get("/api/chargeManagement/getList", headers=patient_headers)
+        r = await async_client.get("/api/chargeManagement/getList", headers=cashier_headers)
         data = r.json()["data"]
         target = next((c for c in data if c["id"] == cid), None)
         assert target["status"] == 1
@@ -133,7 +129,7 @@ class TestPatientOutpatientJourney:
             json={"charge_id": cid, "reason": "重复收费"})
         assert r.json()["code"] == 200
         # 已退费
-        r = await async_client.get("/api/chargeManagement/getList", headers=patient_headers)
+        r = await async_client.get("/api/chargeManagement/getList", headers=cashier_headers)
         data = r.json()["data"]
         target = next((c for c in data if c["id"] == cid), None)
         assert target["status"] == 2

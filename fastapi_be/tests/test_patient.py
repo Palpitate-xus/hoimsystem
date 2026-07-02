@@ -60,10 +60,13 @@ class TestPatientRegistration:
         assert r.status_code == 200
         body = r.json()
         assert body["code"] == 200
-        # 找到刚创建的挂号(匹配 director_doctor)
-        target_regs = [reg for reg in body["data"] if reg.get("doctor") == "李主任"]
+        # 找到刚创建的挂号(匹配 director_doctor,排除已取消的)
+        # 注意:API 返回的 status 是字符串("未就诊"/"已就诊"/"已取消")
+        target_regs = [reg for reg in body["data"] if reg.get("doctor") == "李主任" and reg.get("status") != "已取消"]
         if not target_regs:
-            target_regs = body["data"]
+            target_regs = [reg for reg in body["data"] if reg.get("status") != "已取消"]
+        if not target_regs:
+            pytest.skip("无有效挂号")
         reg_uuid = target_regs[0]["uuid"]
 
         # cancel

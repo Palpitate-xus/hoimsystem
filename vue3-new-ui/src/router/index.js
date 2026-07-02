@@ -483,6 +483,12 @@ export const asyncRoutes = [
         meta: { title: "不良事件上报", permissions: ["admin"] },
       },
       {
+        path: "research",
+        name: "Research",
+        component: () => import("@/views/system/research.vue"),
+        meta: { title: "科研数据导出", permissions: ["admin", "doctor", "director"] },
+      },
+      {
         path: "digitalSignature",
         name: "DigitalSignature",
         component: () => import("@/views/system/digitalSignature.vue"),

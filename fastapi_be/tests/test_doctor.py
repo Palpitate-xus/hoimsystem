@@ -37,9 +37,19 @@ class TestDoctorMedicalRecord:
         assert "patient_name" in body["data"][0]
 
     async def test_update_medical_record(self, async_client, seed_data, auth_headers):
-        mr = seed_data["medical_record"]
-        r = await async_client.post("/api/medicalRecord/update", headers=auth_headers(seed_data["doctor_user"].username), json={
-            "medical_record_id": str(mr.medical_record_id), "symptom": "头痛发热改", "result": "感冒"
+        doctor_headers = auth_headers(seed_data["doctor_user"].username)
+        # 新开一份病历,避免受 seed_data 原有记录的 doctor 归属干扰
+        r = await async_client.post("/api/medicalRecord/create", headers=doctor_headers, json={
+            "patient_id": seed_data["patient2"].patient_id, "symptom": "测试病历", "result": "初始诊断"
+        })
+        assert r.json()["code"] == 200
+        r = await async_client.get("/api/medicalRecord/getList", headers=doctor_headers)
+        mine = [m for m in r.json()["data"] if m.get("symptom") == "测试病历"]
+        assert len(mine) >= 1
+        my_mr_id = mine[0]["uuid"]
+        # 更新自己的 — 成功
+        r = await async_client.post("/api/medicalRecord/update", headers=doctor_headers, json={
+            "medical_record_id": my_mr_id, "symptom": "头痛发热改", "result": "感冒"
         })
         assert r.status_code == 200
         assert r.json()["code"] == 200

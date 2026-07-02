@@ -284,7 +284,7 @@ def get_near_expiry_drugs(days: int = 30, keyword: str | None = None, current_us
 
 
 @router.post("/prescriptionManagement/create")
-def prescription_register(req: PrescriptionCreateRequest, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+def prescription_register(req: PrescriptionCreateRequest, current_user: User = Depends(require_roles(*CLINICAL_ROLES)), db: Session = Depends(get_db)):
     doctor_obj = db.query(Doctor).filter(Doctor.user_id == current_user.user_id).first()
     patient_obj = db.query(Patient).filter(Patient.patient_id == req.patient).first()
     if not doctor_obj or not patient_obj:

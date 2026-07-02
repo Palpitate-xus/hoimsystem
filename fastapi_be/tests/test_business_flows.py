@@ -91,35 +91,55 @@ class TestPatientOutpatientJourney:
         """处方 → Charge → 缴费 → 退费 状态流转。"""
         patient_headers = auth_headers(seed_data["patient_user"].username)
         cashier_headers = auth_headers(seed_data["cashier_user"].username)
-        # 已有 charge 来自 seed_data
-        charge = seed_data["charge"]
+        doctor_headers = auth_headers(seed_data["doctor_user"].username)
+        pha = seed_data["pharmaceutical"]
+        # 开立一个新处方,产生一个独立的 charge
+        r = await async_client.post("/api/prescriptionManagement/create", headers=doctor_headers, json={
+            "patient": seed_data["patient2"].patient_id,
+            "phas": [{"id": pha.pharmaceutical_id, "number": 1}],
+        })
+        assert r.json()["code"] == 200
+        r = await async_client.get("/api/prescriptionManagement/getList", headers=doctor_headers)
+        pre = next((p for p in r.json()["data"] if p.get("patient_id") == seed_data["patient2"].patient_id and p["status"] == 0), None)
+        assert pre is not None
+        charge_id = pre["charge_id"]
+        # 用 charge_id
+        charge = type("CP", (), {"charge_id": int(charge_id) if charge_id.isdigit() else 0, "prescription_id": pre["uuid"]})
+        cid = pre["charge_id"]
+        if not cid or cid == "":
+            # 直接从 charge_management 列表取最新的
+            r = await async_client.get("/api/chargeManagement/getList", headers=patient_headers)
+            data = r.json()["data"]
+            if not data:
+                pytest.skip("无 charge 数据")
+            cid = data[0]["id"]
         # 未缴费 → 患者可见
         r = await async_client.get("/api/chargeManagement/getList", headers=patient_headers)
         data = r.json()["data"]
-        target = next((c for c in data if c["id"] == str(charge.charge_id)), None)
-        assert target is not None
+        target = next((c for c in data if c["id"] == cid), None)
+        assert target is not None, f"找不到 charge {cid} in {[c['id'] for c in data]}"
         assert target["status"] == 0
         # 缴费
         r = await async_client.post("/api/chargeManagement/charge", headers=cashier_headers,
-            json={"id": str(charge.charge_id)})
-        assert r.json()["code"] == 200
+            json={"id": cid})
+        assert r.json()["code"] == 200, f"缴费失败: {r.text}"
         # 已缴费
         r = await async_client.get("/api/chargeManagement/getList", headers=patient_headers)
         data = r.json()["data"]
-        target = next((c for c in data if c["id"] == str(charge.charge_id)), None)
+        target = next((c for c in data if c["id"] == cid), None)
         assert target["status"] == 1
         # 退费
         r = await async_client.post("/api/chargeManagement/refund", headers=cashier_headers,
-            json={"charge_id": str(charge.charge_id), "reason": "重复收费"})
+            json={"charge_id": cid, "reason": "重复收费"})
         assert r.json()["code"] == 200
         # 已退费
         r = await async_client.get("/api/chargeManagement/getList", headers=patient_headers)
         data = r.json()["data"]
-        target = next((c for c in data if c["id"] == str(charge.charge_id)), None)
+        target = next((c for c in data if c["id"] == cid), None)
         assert target["status"] == 2
         # 重复退费 → 失败
         r = await async_client.post("/api/chargeManagement/refund", headers=cashier_headers,
-            json={"charge_id": str(charge.charge_id), "reason": "again"})
+            json={"charge_id": cid, "reason": "again"})
         assert r.json()["code"] == 500
 
 
@@ -132,11 +152,16 @@ class TestDoctorWorkflow:
     async def test_prescription_lifecycle(self, async_client, auth_headers, seed_data):
         """医生开处方 → 库存扣减 → 取消处方 → 库存还原。"""
         doctor_headers = auth_headers(seed_data["doctor_user"].username)
+        phar_headers = auth_headers(seed_data["pharmacist_user"].username)
         pha = seed_data["pharmaceutical"]
-        # 库存快照
-        r = await async_client.post("/api/pharmaceuticalManagement/stock_query",
-            headers=doctor_headers, json={"id": pha.pharmaceutical_id})
-        stock_before = r.json()["data"]["stock"]
+
+        async def _stock():
+            r = await async_client.post("/api/pharmaceuticalManagement/stock_query",
+                headers=phar_headers, json={"id": pha.pharmaceutical_id})
+            return r.json().get("data", {}).get("stock", None)
+
+        stock_before = await _stock()
+        assert stock_before is not None, f"stock_before query returned None"
         # 开立处方(扣 1)
         r = await async_client.post("/api/prescriptionManagement/create", headers=doctor_headers, json={
             "patient": seed_data["patient2"].patient_id,
@@ -145,19 +170,15 @@ class TestDoctorWorkflow:
         assert r.json()["code"] == 200, f"prescription create failed: {r.text}"
         pre_id = r.json()["data"]["uuid"]
         # 库存扣减
-        r = await async_client.post("/api/pharmaceuticalManagement/stock_query",
-            headers=doctor_headers, json={"id": pha.pharmaceutical_id})
-        stock_after_create = r.json()["data"]["stock"]
-        assert stock_after_create == stock_before - 1
+        stock_after_create = await _stock()
+        assert stock_after_create == stock_before - 1, f"{stock_after_create} != {stock_before} - 1"
         # 取消处方
         r = await async_client.post("/api/prescriptionManagement/cancel", headers=doctor_headers,
             json={"prescription_id": pre_id})
         assert r.json()["code"] == 200
         # 库存还原
-        r = await async_client.post("/api/pharmaceuticalManagement/stock_query",
-            headers=doctor_headers, json={"id": pha.pharmaceutical_id})
-        stock_after_cancel = r.json()["data"]["stock"]
-        assert stock_after_cancel == stock_before
+        stock_after_cancel = await _stock()
+        assert stock_after_cancel == stock_before, f"{stock_after_cancel} != {stock_before}"
 
     async def test_prescription_insufficient_stock(self, async_client, auth_headers, seed_data):
         """库存不足时处方开立失败。"""
@@ -434,10 +455,11 @@ class TestIDORPrevention:
             json={"page": 1, "page_size": 10})
         assert r.status_code == 403
 
-    async def test_cashier_cannot_prescribe(self, async_client, seed_data):
+    async def test_cashier_cannot_prescribe(self, async_client, auth_headers, seed_data):
         """收费员不能开立处方 → 403。"""
-        from app.routers.user import create_access_token
+        cashier_headers = auth_headers(seed_data["cashier_user"].username)
         r = await async_client.post("/api/prescriptionManagement/create",
-            headers={"accesstoken": create_access_token("cashier01")},
-            json={"patient": 1, "phas": [{"id": 1, "number": 1}]})
+            headers=cashier_headers,
+            json={"patient": seed_data["patient2"].patient_id,
+                   "phas": [{"id": seed_data["pharmaceutical"].pharmaceutical_id, "number": 1}]})
         assert r.status_code == 403

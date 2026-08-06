@@ -108,6 +108,11 @@ class TestLab:
         assert r.json()["code"] == 200
         lab_order_id = r.json()["data"]["lab_order_id"]
 
+        r = await async_client.post("/api/lab/sampleReceive", headers=admin_headers, json={
+            "lab_order_id": lab_order_id
+        })
+        assert r.json()["code"] == 200
+
         # create result
         r = await async_client.post("/api/labResult/create", headers=admin_headers, json={
             "lab_order_id": lab_order_id, "sample_id": "S001",
@@ -138,6 +143,9 @@ class TestLab:
         })
         lab_order_id = r.json()["data"]["lab_order_id"]
 
+        r = await async_client.post("/api/lab/sampleReceive", headers=admin_headers, json={
+            "lab_order_id": lab_order_id
+        })
         r = await async_client.post("/api/labResult/create", headers=admin_headers, json={
             "lab_order_id": lab_order_id, "sample_id": "S002",
             "result": "窦性心律", "abnormal_flag": 0
@@ -151,6 +159,65 @@ class TestLab:
         r = await async_client.post("/api/labResult/audit", headers=admin_headers, json={"lab_result_id": target["id"]})
         assert r.status_code == 200
         assert r.json()["code"] == 200
+
+    async def test_lab_state_transitions_reject_invalid_steps(self, async_client, seed_data, auth_headers):
+        doctor_headers = auth_headers(seed_data["doctor_user"].username)
+        lab_headers = auth_headers(seed_data["admin_user"].username)
+        r = await async_client.post("/api/labOrder/create", headers=doctor_headers, json={
+            "patient_id": seed_data["patient"].patient_id, "check_type": "血常规",
+            "check_items": ["白细胞"], "urgent": 0
+        })
+        lab_order_id = r.json()["data"]["lab_order_id"]
+
+        r = await async_client.post("/api/labResult/create", headers=lab_headers, json={
+            "lab_order_id": lab_order_id, "sample_id": "S003",
+            "result": "正常", "abnormal_flag": 0
+        })
+        assert r.json()["code"] == 500
+
+        r = await async_client.post("/api/lab/sampleReject", headers=lab_headers, json={
+            "lab_order_id": lab_order_id
+        })
+        assert r.json()["code"] == 200
+
+        r = await async_client.post("/api/lab/sampleReceive", headers=lab_headers, json={
+            "lab_order_id": lab_order_id
+        })
+        assert r.json()["code"] == 500
+
+        r = await async_client.post("/api/labResult/create", headers=lab_headers, json={
+            "lab_order_id": lab_order_id, "sample_id": "S003",
+            "result": "正常", "abnormal_flag": 0
+        })
+        assert r.json()["code"] == 500
+
+    async def test_lab_result_cannot_be_created_or_audited_twice(self, async_client, seed_data, auth_headers):
+        doctor_headers = auth_headers(seed_data["doctor_user"].username)
+        lab_headers = auth_headers(seed_data["admin_user"].username)
+        r = await async_client.post("/api/labOrder/create", headers=doctor_headers, json={
+            "patient_id": seed_data["patient2"].patient_id, "check_type": "肝功能",
+            "check_items": ["谷丙转氨酶"], "urgent": 0
+        })
+        lab_order_id = r.json()["data"]["lab_order_id"]
+        await async_client.post("/api/lab/sampleReceive", headers=lab_headers, json={
+            "lab_order_id": lab_order_id
+        })
+
+        payload = {
+            "lab_order_id": lab_order_id, "sample_id": "S004",
+            "result": "正常", "abnormal_flag": 0
+        }
+        r = await async_client.post("/api/labResult/create", headers=lab_headers, json=payload)
+        assert r.json()["code"] == 200
+        r = await async_client.post("/api/labResult/create", headers=lab_headers, json=payload)
+        assert r.json()["code"] == 500
+
+        results = (await async_client.get("/api/labResult/getList", headers=lab_headers)).json()["data"]
+        result_id = [item["id"] for item in results if item["check_name"] == "肝功能"][0]
+        r = await async_client.post("/api/labResult/audit", headers=lab_headers, json={"lab_result_id": result_id})
+        assert r.json()["code"] == 200
+        r = await async_client.post("/api/labResult/audit", headers=lab_headers, json={"lab_result_id": result_id})
+        assert r.json()["code"] == 500
 
     async def test_lab_result_detail(self, async_client, seed_data, auth_headers):
         admin_headers = auth_headers(seed_data["admin_user"].username)

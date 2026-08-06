@@ -56,6 +56,8 @@ def sample_receive(req: dict, current_user: User = Depends(require_roles(*LAB_RO
     lab_order = db.query(LabOrder).filter(LabOrder.lab_order_id == req.get("lab_order_id")).first()
     if not lab_order:
         return {"code": 500, "msg": "检查申请单不存在"}
+    if lab_order.status != 0 or lab_order.sample_status != 0:
+        return {"code": 500, "msg": "当前检查申请单不允许接收样本"}
     lab_order.sample_status = 1
     db.add(lab_order)
     db.commit()
@@ -68,6 +70,8 @@ def sample_reject(req: dict, current_user: User = Depends(require_roles(*LAB_ROL
     lab_order = db.query(LabOrder).filter(LabOrder.lab_order_id == req.get("lab_order_id")).first()
     if not lab_order:
         return {"code": 500, "msg": "检查申请单不存在"}
+    if lab_order.status != 0 or lab_order.sample_status not in (0, 1):
+        return {"code": 500, "msg": "当前检查申请单不允许拒收样本"}
     lab_order.sample_status = 2
     db.add(lab_order)
     db.commit()
@@ -98,6 +102,10 @@ def create_lab_result(req: LabResultCreateRequest, current_user=Depends(require_
     lab_order = db.query(LabOrder).filter(LabOrder.lab_order_id == req.lab_order_id).first()
     if not lab_order:
         return {"code": 500, "msg": "检查申请单不存在"}
+    if lab_order.sample_status != 1:
+        return {"code": 500, "msg": "样本尚未接收，不能录入结果"}
+    if lab_order.status != 0 or lab_order.lab_results:
+        return {"code": 500, "msg": "当前检查申请单已录入结果"}
     is_critical = check_critical_value(lab_order.check_type or "", req.result or "")
     result = LabResult(
         lab_order_id=req.lab_order_id,
@@ -123,6 +131,8 @@ def audit_lab_result(req: LabResultAuditRequest, current_user: User = Depends(re
     result = db.query(LabResult).filter(LabResult.lab_result_id == req.lab_result_id).first()
     if not result:
         return {"code": 500, "msg": "检查结果不存在"}
+    if result.audit_status != 0 or not result.lab_order or result.lab_order.status != 1:
+        return {"code": 500, "msg": "当前检查结果不允许审核"}
     result.audit_status = 1
     if result.lab_order:
         result.lab_order.status = 2

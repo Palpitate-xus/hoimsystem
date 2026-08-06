@@ -440,6 +440,14 @@ test.describe("业务页面渲染", () => {
     await expect(page.locator(".el-table")).toBeVisible({ timeout: 5000 });
   });
 
+  test("lab technician 访问质控管理页面显示趋势图", async ({ page }, testInfo) => {
+    skipIfUserUnavailable(testInfo, "lab_technician");
+    await login(page, "lab01", "123456");
+    await page.goto(`${BASE}/#/lab/labQc`, { waitUntil: "networkidle" });
+    await expect(page.getByText("质控趋势图")).toBeVisible({ timeout: 5000 });
+    await expect(page.getByText("录入质控品")).toBeVisible({ timeout: 5000 });
+  });
+
   test("doctor 访问停诊加号申请页面", async ({ page }, testInfo) => {
     skipIfUserUnavailable(testInfo, "doctor");
     await login(page, "doctor1", "doctor123");

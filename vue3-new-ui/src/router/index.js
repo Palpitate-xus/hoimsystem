@@ -515,6 +515,12 @@ export const asyncRoutes = [
         component: () => import("@/views/lab/labPackage.vue"),
         meta: { title: "检验套餐维护", permissions: ["admin", "doctor", "lab_technician"] },
       },
+      {
+        path: "labQc",
+        name: "LabQc",
+        component: () => import("@/views/lab/labQc.vue"),
+        meta: { title: "质控管理", permissions: ["admin", "lab_technician"] },
+      },
     ],
   },
 

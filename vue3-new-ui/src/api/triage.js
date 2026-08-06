@@ -11,3 +11,7 @@ export function getTriageKeywords() {
 export function getNavigationDepartments(keyword = "") {
   return request({ url: "navigation/departments", method: "get", params: { keyword } });
 }
+
+export function getNavigationFaq(keyword = "") {
+  return request({ url: "navigation/faq", method: "get", params: { keyword } });
+}

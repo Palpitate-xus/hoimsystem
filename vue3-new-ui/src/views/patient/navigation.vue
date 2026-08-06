@@ -24,17 +24,27 @@
       </el-row>
       <el-empty v-if="!loading && !departments.length" description="暂无匹配科室" />
     </el-card>
+    <el-card class="faq-card">
+      <template #header><div class="faq-header"><span>常见问题</span><div><el-input v-model="faqKeyword" placeholder="搜索问题" clearable size="small" style="width: 200px" @keyup.enter="fetchFaq" /><el-button size="small" type="primary" @click="fetchFaq">查询</el-button></div></div></template>
+      <el-collapse v-if="faqs.length" v-model="activeFaq">
+        <el-collapse-item v-for="faq in faqs" :key="faq.faq_id" :name="String(faq.faq_id)" :title="faq.question"><div class="faq-answer">{{ faq.answer }}</div></el-collapse-item>
+      </el-collapse>
+      <el-empty v-else description="暂无常见问题" :image-size="60" />
+    </el-card>
   </div>
 </template>
 
 <script setup>
 import { onMounted, ref } from "vue";
 import { ElMessage } from "element-plus";
-import { getNavigationDepartments } from "@/api/triage";
+import { getNavigationDepartments, getNavigationFaq } from "@/api/triage";
 
 const keyword = ref("");
 const departments = ref([]);
 const loading = ref(false);
+const faqKeyword = ref("");
+const faqs = ref([]);
+const activeFaq = ref("");
 
 const fetchDepartments = async () => {
   loading.value = true;
@@ -49,10 +59,22 @@ const fetchDepartments = async () => {
 };
 
 onMounted(fetchDepartments);
+const fetchFaq = async () => {
+  try {
+    const res = await getNavigationFaq(faqKeyword.value.trim());
+    faqs.value = res.data || [];
+  } catch (error) {
+    ElMessage.error(error?.msg || "常见问题加载失败");
+  }
+};
+onMounted(fetchFaq);
 </script>
 
 <style scoped>
 .department-title { font-size: 18px; font-weight: 600; }
 .department-card p { color: #606266; margin: 10px 0; }
 .doctor-list { display: flex; flex-wrap: wrap; gap: 8px; }
+.faq-card { margin-top: 16px; }
+.faq-header { display: flex; align-items: center; justify-content: space-between; }
+.faq-answer { color: #606266; line-height: 1.8; white-space: pre-wrap; }
 </style>

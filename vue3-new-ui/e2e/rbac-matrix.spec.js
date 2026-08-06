@@ -302,6 +302,7 @@ test.describe("业务页面渲染", () => {
     await page.waitForTimeout(1000);
     await expect(page.getByText("就诊导航").first()).toBeVisible({ timeout: 5000 });
     await expect(page.locator(".department-card").first()).toBeVisible({ timeout: 5000 });
+    await expect(page.getByText("常见问题", { exact: true })).toBeVisible({ timeout: 5000 });
   });
 
   test("pharmacist 访问发药列表页面", async ({ page }, testInfo) => {

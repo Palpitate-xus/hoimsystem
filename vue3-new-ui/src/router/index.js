@@ -716,6 +716,12 @@ export const asyncRoutes = [
         meta: { title: "ICD-10 编码", permissions: ["admin", "doctor", "director"] },
       },
       {
+        path: "medicalRecordHomeQuality",
+        name: "MedicalRecordHomeQuality",
+        component: () => import("@/views/inpatient/medicalRecordHomeQuality.vue"),
+        meta: { title: "病案首页质控", permissions: ["admin", "doctor", "director"] },
+      },
+      {
         path: "surgery",
         name: "Surgery",
         component: () => import("@/views/inpatient/surgery.vue"),

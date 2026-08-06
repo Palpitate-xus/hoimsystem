@@ -256,6 +256,15 @@ test.describe("业务页面渲染", () => {
     await expect(page.locator(".el-table").first()).toBeVisible({ timeout: 5000 });
   });
 
+  test("doctor 访问病案首页质控页面显示统计卡片", async ({ page }) => {
+    await login(page, "doctor1", "doctor123");
+    await page.goto(`${BASE}/#/inpatient/medicalRecordHomeQuality`, { waitUntil: "networkidle" });
+    await page.waitForTimeout(1000);
+    await expect(page.getByText("病案首页质控").first()).toBeVisible({ timeout: 5000 });
+    await expect(page.getByText("新增质控检查")).toBeVisible({ timeout: 5000 });
+    await expect(page.getByText("检查总数")).toBeVisible({ timeout: 5000 });
+  });
+
   test("doctor 访问处方模板页面显示模板表格", async ({ page }) => {
     await login(page, "doctor1", "doctor123");
     await page.goto(`${BASE}/#/doctor/prescriptionTemplate`, { waitUntil: "networkidle" });

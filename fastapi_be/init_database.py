@@ -79,6 +79,10 @@ def main():
     print(f"[INFO] Database target: postgresql://{settings.DB_USER}:*****@{settings.DB_HOST}:{settings.DB_PORT}/{settings.DB_NAME}")
     create_database()
     create_tables()
+    from seed_default_accounts import seed_default_accounts
+
+    seed_default_accounts()
+    print("[OK] Default accounts and minimum profiles ensured.")
     print("[DONE] Database initialization complete.")
 
 

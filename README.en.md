@@ -154,7 +154,15 @@ See [doc/deployDoc.md](doc/deployDoc.md) for detailed deployment instructions (N
 | Role | Username | Password | Note |
 |:----:|:--------:|:--------:|:----:|
 | Admin | `admin` | `admin123` | Full permissions |
+| Super Admin | `super01` | `123456` | Highest permissions |
+| Director | `director01` | `123456` | Department management |
 | Doctor | `doctor1` | `doctor123` | Regular doctor |
+| Nurse | `nurse01` | `123456` | Nursing work |
+| Cashier | `cashier01` | `123456` | Cashier desk |
+| Pharmacist | `pharmacist01` | `123456` | Pharmacy work |
+| Guide | `guide01` | `123456` | Guidance desk |
+| Lab Technician | `lab01` | `123456` | Laboratory work |
+| Registrar | `registrar01` | `123456` | Registration service |
 | Patient | `patient1` | `123456` | Patient self-service |
 
 > ⚠️ **Production deployment**: change default passwords and set a strong random `SECRET_KEY` in `.env` (use `openssl rand -base64 32`).

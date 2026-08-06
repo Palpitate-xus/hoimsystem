@@ -67,7 +67,7 @@ HOIM(Hospital Outpatient Information Management)医院信息管理系统,覆盖 
 |:--|:--|:--|:--|
 | 管理员 | `admin` | `admin123` | 全部权限 |
 | 科室主任 | `director01` | `123456` | 管理 + 本科室 |
-| 医生 | `doc01` | `123456` | 诊疗工作 |
+| 医生 | `doctor1` | `doctor123` | 诊疗工作 |
 | 药师 | `pharmacist01` | `123456` | 药房工作 |
 | 收费员 | `cashier01` | `123456` | 收费窗口 |
 | 护士 | `nurse01` | `123456` | 护理工作 |

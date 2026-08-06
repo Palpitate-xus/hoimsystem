@@ -906,6 +906,14 @@ class MedicalRecordArchiveActionRequest(BaseModel):
     reason: str = Field(default="", max_length=300)
 
 
+class MedicalRecordHomeQualityCheckRequest(BaseModel):
+    home_id: str
+    check_item: str = Field(..., min_length=1, max_length=100)
+    check_result: int = Field(default=0, ge=0, le=2)
+    issue: str = Field(default="", max_length=500)
+    score: int = Field(default=100, ge=0, le=100)
+
+
 class Icd10CreateRequest(BaseModel):
     code: str = Field(..., min_length=1, max_length=20)
     name: str = Field(..., min_length=1, max_length=200)

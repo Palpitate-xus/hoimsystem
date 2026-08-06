@@ -1517,6 +1517,22 @@ class MedicalRecordArchive(Base):
     archivist = relationship("User", foreign_keys=[archived_by])
 
 
+class MedicalRecordHomeQuality(Base):
+    __tablename__ = "hoimsystem_medical_record_home_quality"
+
+    quality_id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    home_id = Column(String(36), ForeignKey("hoimsystem_medical_record_home.home_id"), nullable=False)
+    check_item = Column(String(100), nullable=False)
+    check_result = Column(Integer, nullable=False, default=0)
+    issue = Column(String(500), nullable=True)
+    score = Column(Integer, nullable=False, default=100)
+    checker_id = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=False)
+    check_time = Column(DateTime, nullable=False)
+
+    home = relationship("MedicalRecordHome")
+    checker = relationship("User")
+
+
 class Icd10Diagnosis(Base):
     __tablename__ = "hoimsystem_icd10_diagnosis"
 

@@ -1517,6 +1517,30 @@ class MedicalRecordArchive(Base):
     archivist = relationship("User", foreign_keys=[archived_by])
 
 
+class Icd10Diagnosis(Base):
+    __tablename__ = "hoimsystem_icd10_diagnosis"
+
+    diagnosis_id = Column(Integer, primary_key=True, autoincrement=True)
+    code = Column(String(20), nullable=False, unique=True)
+    name = Column(String(200), nullable=False)
+    category = Column(String(100), nullable=True)
+    status = Column(Integer, nullable=False, default=1)
+    create_time = Column(DateTime, nullable=False)
+    update_time = Column(DateTime, nullable=False)
+
+
+class Icd10Operation(Base):
+    __tablename__ = "hoimsystem_icd10_operation"
+
+    operation_id = Column(Integer, primary_key=True, autoincrement=True)
+    code = Column(String(20), nullable=False, unique=True)
+    name = Column(String(200), nullable=False)
+    category = Column(String(100), nullable=True)
+    status = Column(Integer, nullable=False, default=1)
+    create_time = Column(DateTime, nullable=False)
+    update_time = Column(DateTime, nullable=False)
+
+
 # ===== 体检系统模块 =====
 
 

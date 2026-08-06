@@ -225,6 +225,12 @@ ENDPOINTS = [
     ("POST", "/api/medicalRecordArchive/borrow", {"admin", "super_admin", "director", "doctor"}, {"archive_id": "x"}, {}),
     ("POST", "/api/medicalRecordArchive/return", {"admin", "super_admin", "director", "doctor"}, {"archive_id": "x"}, {}),
     ("POST", "/api/medicalRecordArchive/seal", {"admin", "super_admin", "director"}, {"archive_id": "x"}, {}),
+    ("GET", "/api/icd10/diagnosis/list", {"admin", "super_admin", "director", "doctor"}, None, {}),
+    ("POST", "/api/icd10/diagnosis/create", {"admin", "super_admin", "director"}, {"code": "I10", "name": "高血压"}, {}),
+    ("PUT", "/api/icd10/diagnosis/update", {"admin", "super_admin", "director"}, {"id": 1, "name": "高血压"}, {}),
+    ("GET", "/api/icd10/operation/list", {"admin", "super_admin", "director", "doctor"}, None, {}),
+    ("POST", "/api/icd10/operation/create", {"admin", "super_admin", "director"}, {"code": "00.1", "name": "操作"}, {}),
+    ("PUT", "/api/icd10/operation/update", {"admin", "super_admin", "director"}, {"id": 1, "name": "操作"}, {}),
 
     # purchase.py (getList is auth-only, not admin-only — pharmacist/cashier may view)
     ("GET", "/api/purchase/getList", {"admin", "super_admin", "director", "doctor", "nurse", "cashier", "pharmacist", "guide", "patient", "lab_technician", "registrar"}, None, {"status": 0}),

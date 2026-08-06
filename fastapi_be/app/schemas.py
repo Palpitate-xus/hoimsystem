@@ -906,6 +906,20 @@ class MedicalRecordArchiveActionRequest(BaseModel):
     reason: str = Field(default="", max_length=300)
 
 
+class Icd10CreateRequest(BaseModel):
+    code: str = Field(..., min_length=1, max_length=20)
+    name: str = Field(..., min_length=1, max_length=200)
+    category: str = Field(default="", max_length=100)
+
+
+class Icd10UpdateRequest(BaseModel):
+    id: int
+    code: str | None = Field(default=None, min_length=1, max_length=20)
+    name: str | None = Field(default=None, min_length=1, max_length=200)
+    category: str | None = Field(default=None, max_length=100)
+    status: int | None = Field(default=None, ge=0, le=1)
+
+
 # ===== 结构化电子病历 Schemas =====
 
 

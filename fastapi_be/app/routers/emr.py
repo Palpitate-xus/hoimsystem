@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.dependencies import CLINICAL_ROLES, get_current_user, require_roles
+from app.dependencies import ADMIN_ROLES, CLINICAL_ROLES, get_current_user, require_roles
 from app.models import (
     Admission,
     Department,
@@ -28,6 +28,14 @@ from app.schemas import (
 )
 
 router = APIRouter()
+
+
+def _owns_structured_record(record: StructuredMedicalRecord, current_user: User, db: Session) -> bool:
+    """管理员可审阅全部病历，临床人员只能访问自己负责的病历。"""
+    if current_user.user_role in ADMIN_ROLES:
+        return True
+    doctor_ids = [item.doctor_id for item in db.query(Doctor).filter(Doctor.user_id == current_user.user_id).all()]
+    return bool(doctor_ids) and record.doctor_id in doctor_ids
 
 
 @router.get("/emrTemplate/getList")
@@ -116,6 +124,9 @@ def get_template_detail(template_id: int, current_user: User = Depends(require_r
 @router.get("/structuredMedicalRecord/getList")
 def get_structured_record_list(admission_id: str | None = None, patient_id: int | None = None, current_user: User = Depends(require_roles(*CLINICAL_ROLES)), db: Session = Depends(get_db)):
     query = db.query(StructuredMedicalRecord).order_by(StructuredMedicalRecord.create_time.desc())
+    if current_user.user_role not in ADMIN_ROLES:
+        doctor_ids = [item.doctor_id for item in db.query(Doctor).filter(Doctor.user_id == current_user.user_id).all()]
+        query = query.filter(StructuredMedicalRecord.doctor_id.in_(doctor_ids or [-1]))
     if admission_id:
         query = query.filter(StructuredMedicalRecord.admission_id == admission_id)
     if patient_id:
@@ -176,6 +187,8 @@ def get_structured_record_detail(record_id: str, current_user: User = Depends(re
     item = db.query(StructuredMedicalRecord).filter(StructuredMedicalRecord.record_id == record_id).first()
     if not item:
         return {"code": 500, "msg": "病历不存在"}
+    if not _owns_structured_record(item, current_user, db):
+        return {"code": 403, "msg": "无权访问该病历"}
     type_map = ["入院记录", "首次病程", "日常病程", "出院记录"]
     status_map = ["草稿", "已完成", "已归档"]
     data = {
@@ -210,6 +223,8 @@ def update_structured_record(req: StructuredMedicalRecordUpdateRequest, current_
     record = db.query(StructuredMedicalRecord).filter(StructuredMedicalRecord.record_id == req.record_id).first()
     if not record:
         return {"code": 500, "msg": "病历不存在"}
+    if not _owns_structured_record(record, current_user, db):
+        return {"code": 403, "msg": "无权修改该病历"}
     if record.status != 0:
         return {"code": 403, "msg": "已签名或已归档病历不可修改"}
     if req.status not in (None, 0):
@@ -245,6 +260,8 @@ def sign_medical_record(req: dict, current_user: User = Depends(require_roles(*C
     record = db.query(StructuredMedicalRecord).filter(StructuredMedicalRecord.record_id == req.get("record_id")).first()
     if not record:
         return {"code": 500, "msg": "病历不存在"}
+    if not _owns_structured_record(record, current_user, db):
+        return {"code": 403, "msg": "无权签名该病历"}
     if record.status != 0:
         return {"code": 500, "msg": "病历已签名或已归档"}
     record.status = 1
@@ -259,6 +276,8 @@ def delete_structured_record(req: dict, current_user: User = Depends(require_rol
     record = db.query(StructuredMedicalRecord).filter(StructuredMedicalRecord.record_id == req.get("record_id")).first()
     if not record:
         return {"code": 500, "msg": "病历不存在"}
+    if not _owns_structured_record(record, current_user, db):
+        return {"code": 403, "msg": "无权删除该病历"}
     if record.status != 0:
         return {"code": 403, "msg": "已签名或已归档病历不可删除"}
     db.delete(record)

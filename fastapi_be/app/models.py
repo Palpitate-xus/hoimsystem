@@ -1698,3 +1698,60 @@ class ExamResult(Base):
 
     record = relationship("ExamRecord")
     item = relationship("ExamItem")
+
+
+class ImagingOrder(Base):
+    __tablename__ = "hoimsystem_imaging_order"
+
+    imaging_order_id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    patient_id = Column(Integer, ForeignKey("hoimsystem_patient.patient_id"), nullable=False)
+    doctor_id = Column(Integer, ForeignKey("hoimsystem_doctor.doctor_id"), nullable=False)
+    modality = Column(String(30), nullable=False)
+    body_part = Column(String(100), nullable=False)
+    clinical_diagnosis = Column(String(300), nullable=True)
+    priority = Column(Integer, nullable=False, default=0)  # 0=常规 1=急诊
+    status = Column(Integer, nullable=False, default=0)  # 0=申请 1=检查中 2=待报告 3=已报告 4=已审核 5=取消
+    accession_no = Column(String(40), nullable=True, unique=True)
+    viewer_url = Column(String(500), nullable=True)
+    create_time = Column(DateTime, nullable=False)
+    schedule_time = Column(DateTime, nullable=True)
+
+    patient = relationship("Patient")
+    doctor = relationship("Doctor")
+    report = relationship("ImagingReport", back_populates="order", uselist=False)
+
+
+class ImagingTemplate(Base):
+    __tablename__ = "hoimsystem_imaging_template"
+
+    template_id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String(100), nullable=False)
+    modality = Column(String(30), nullable=False)
+    content = Column(Text, nullable=False)
+    creator_id = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=False)
+    status = Column(Integer, nullable=False, default=1)
+    create_time = Column(DateTime, nullable=False)
+    update_time = Column(DateTime, nullable=False)
+
+    creator = relationship("User")
+
+
+class ImagingReport(Base):
+    __tablename__ = "hoimsystem_imaging_report"
+
+    report_id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    imaging_order_id = Column(String(36), ForeignKey("hoimsystem_imaging_order.imaging_order_id"), nullable=False, unique=True)
+    template_id = Column(Integer, ForeignKey("hoimsystem_imaging_template.template_id"), nullable=True)
+    findings = Column(Text, nullable=False, default="")
+    impression = Column(Text, nullable=False, default="")
+    author_id = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=False)
+    reviewer_id = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=True)
+    status = Column(Integer, nullable=False, default=0)  # 0=草稿 1=待审核 2=已审核 3=退回
+    report_time = Column(DateTime, nullable=True)
+    review_time = Column(DateTime, nullable=True)
+    review_note = Column(String(300), nullable=True)
+
+    order = relationship("ImagingOrder", back_populates="report")
+    template = relationship("ImagingTemplate")
+    author = relationship("User", foreign_keys=[author_id])
+    reviewer = relationship("User", foreign_keys=[reviewer_id])

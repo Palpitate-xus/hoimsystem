@@ -308,6 +308,7 @@ from app.routers import (
     family_member,
     inpatient_charge,
     inpatient_order,
+    imaging,
     inventory_adjustment,
     infusion,
     injection,
@@ -402,6 +403,7 @@ app.include_router(clinical_pathway.router, prefix="/api")
 app.include_router(ward.router, prefix="/api")
 app.include_router(admission.router, prefix="/api")
 app.include_router(inpatient_order.router, prefix="/api")
+app.include_router(imaging.router, prefix="/api")
 app.include_router(inventory_adjustment.router, prefix="/api")
 app.include_router(infusion.router, prefix="/api")
 app.include_router(injection.router, prefix="/api")

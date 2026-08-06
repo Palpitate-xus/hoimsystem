@@ -33,7 +33,11 @@ export function deleteExamItem(data) {
 }
 
 export function getExamAppointmentList(keyword = "", status = "") {
-  return request({ url: "examAppointment/getList", method: "get", params: { keyword, status } });
+  const params = { keyword };
+  if (status !== "" && status !== null && status !== undefined) {
+    params.status = status;
+  }
+  return request({ url: "examAppointment/getList", method: "get", params });
 }
 
 export function createExamAppointment(data) {

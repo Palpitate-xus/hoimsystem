@@ -4,6 +4,10 @@ export function getQueueList(keyword = "") {
   return request({ url: "queue/getList", method: "get", params: { keyword } });
 }
 
+export function getQueueProgress() {
+  return request({ url: "queue/progress", method: "get" });
+}
+
 export function callNext(data) {
   return request({ url: "queue/callNext", method: "post", data });
 }

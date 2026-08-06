@@ -163,6 +163,12 @@ export const asyncRoutes = [
         meta: { title: "健康档案", permissions: ["patient"] },
       },
       {
+        path: "queueProgress",
+        name: "QueueProgress",
+        component: () => import("@/views/patient/queueProgress.vue"),
+        meta: { title: "排队进度", permissions: ["patient"] },
+      },
+      {
         path: "review",
         name: "Review",
         component: () => import("@/views/patient/review.vue"),

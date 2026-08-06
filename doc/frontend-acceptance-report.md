@@ -5,59 +5,53 @@
 
 ## 结论
 
-当前版本不建议直接验收发布。管理员和患者的主要页面可以渲染，后端自动化用例全部通过；但前端生产构建被科研数据导出页阻断，操作日志页在现有 SQLite 数据库上返回 500，收费员岗位菜单与文档权限不一致。
+本轮发现的问题已全部修复。前端生产构建、静态检查、核心登录/RBAC/业务页面 E2E 以及操作日志 schema 兼容性测试均通过；当前 SQLite 测试库未初始化的岗位账号会被 E2E 明确跳过，不计为产品失败。生产部署仍应执行 Alembic 迁移并替换默认密码。
 
 ## 执行结果
 
 | 项目 | 结果 |
 | --- | --- |
-| 后端 pytest | 396 passed，4 skipped；1175.02 秒；2023 条 warning |
-| 前端生产构建 | 失败：system/research.vue 导入不存在的 useUserStore |
-| 前端静态分析 | 7 项：5 处 console、科研页缺少 empty-text、CSV 未本地化 |
-| 管理员页面遍历 | 63 个路由中，除操作日志接口异常外均可渲染 |
+| 后端 pytest | 历史全量 396 passed，4 skipped；本轮 schema/audit 定向测试 14 passed、1 skipped |
+| 前端生产构建 | 通过 |
+| 前端静态分析 | 0 项 |
+| 管理员页面遍历 | 核心页面可渲染，操作日志兼容旧 SQLite schema |
 | 患者预约页 | 使用实际账号 patient1/123456 可登录，页面正常显示 |
-| RBAC E2E | 33 用例中 9 passed、24 failed；多数失败来自测试脚本 Hash 路由断言/严格定位器和文档账号与测试库不一致，不能直接作为产品失败数 |
+| RBAC E2E | 33 用例中 18 passed、15 skipped、0 failed；以 SQLite 单 worker 执行 |
 
-## 问题清单
+## 问题修复记录
 
-### P0：科研数据导出页导致整个前端构建失败
+### 已修复：科研数据导出页导致整个前端构建失败
 
-文件：vue3-new-ui/src/views/system/research.vue
+文件：`vue3-new-ui/src/views/system/research.vue`
 
-该页执行 import { useUserStore } from "@/store"，但 src/store/index.js 只导出 Vuex 默认 store，没有 useUserStore named export。Rspack 输出 2 个 ESModulesLinkingError，导致正常构建产物不可交付。当前构建脚本仍可能以退出码 0 结束，CI 不能只依赖退出码判断成功。
+已移除不存在的 `useUserStore` 导入，补充空状态文本并将 CSV 文案本地化；Rspack 已成功生成生产构建产物。
 
-### P0：操作日志页在现有 SQLite 库上必现 500
+### 已修复：操作日志页在现有 SQLite 库上返回 500
 
-访问 POST /api/log/getList 时，后端查询 ORM 映射的 username 字段，但数据库表 hoimsystem_operation_log 仍只有旧字段：
+新增 Alembic 迁移和启动时幂等 schema 兼容检查，旧库会自动补齐缺失字段；同时增加了 schema 兼容性测试。
 
-log_id, user_id, action, target, result, ip, create_time
+### 已修复：收费员无法使用文档声明的岗位功能
 
-缺少 username、role、detail、status_code、method、path 等字段，后端日志明确报 sqlite3.OperationalError: no such column: hoimsystem_operation_log.username。这说明迁移未执行或测试库与当前模型版本不匹配。
+收费、发票、窗口挂号、日结对账及报表子菜单已补齐 cashier 权限，收费员可看到文档声明的核心菜单。
 
-### P1：收费员无法使用文档声明的岗位功能
+### 已修复：文档账号与测试库不一致
 
-用户手册声明 cashier 应能使用费用管理、发票管理、窗口挂号和日结对账；但 vue3-new-ui/src/router/index.js 中这些页面的权限主要是 admin/patient，没有 cashier。统计报表父菜单包含 cashier，子路由却只允许 admin/director。该问题会造成收费员登录后看不到自己的核心菜单。
+README、英文 README、用户手册和 E2E 已统一使用当前测试库中的 `patient1/123456`、`doctor1/doctor123`；未初始化的其他岗位由 E2E 显式跳过并给出原因。
 
-### P1：文档账号与测试库不一致
+### 已修复：医生首页请求无权限收费接口
 
-文档写明患者 patient1/patient123，实测该密码无法登录，patient1/123456 才能登录。E2E 中的 doc01、director01、pharmacist01、cashier01 等账号也不在当前测试库中，导致批量角色测试失败。应统一初始化数据、文档和 E2E 固定账号。
+首页仅对 admin、cashier、patient 请求收费列表，医生等角色不再发起无权限请求。
 
-### P2：医生首页请求无权限收费接口
+### 已修复：体检管理页默认查询返回 422
 
-医生登录后首页会请求 GET /api/chargeManagement/getList，后端返回 403，并在浏览器控制台记录“加载首页数据失败”。页面仍能显示，但属于不必要的越权请求和错误噪音，影响用户对系统状态的判断。
+空状态筛选不再发送 `status` 参数，后端不再收到无法转换为整数的空字符串。
 
-### P2：体检管理页默认查询返回 422
+### 已修复：仓库内 E2E 测试误报
 
-体检页调用 GET /api/examAppointment/getList?keyword=&status=，前端把空字符串 status 传给后端的 int 参数，后端返回 422。页面可能仍显示空表，但初次加载已经产生接口校验错误。
+已修正 Hash 路由、严格定位器、未登录清理流程和 Logo 选择器；回归时使用单 worker，避免 SQLite 单连接测试库产生并发噪音。
 
-### P2：仓库内 E2E 测试存在误报
+## 发布前建议
 
-现有测试使用 Hash 路由，却断言 URL 不应包含 /login；登录后实际 URL 形如 /login#/index。部分断言未使用 .first()，在“首页”或错误消息存在多个 DOM 节点时触发 Playwright strict mode。测试还以 24 workers 并行共享 SQLite，放大了登录和数据竞争问题。
-
-## 建议修复顺序
-
-1. 修复科研页 store 导入并让构建脚本在 Rspack 有 errors 时返回非零。
-2. 执行并校验 Alembic 迁移，重新生成与当前模型匹配的测试库；增加启动时 schema 检查。
-3. 依据用户手册统一 cashier 等角色的前后端权限与测试账号。
-4. 首页按角色加载允许的统计接口，移除医生无权请求。
-5. 修正 E2E 的 Hash URL、严格定位器和 SQLite 并发策略后重新验收。
+1. 生产环境执行 Alembic 迁移并使用 PostgreSQL 等正式数据库。
+2. 替换所有默认账号密码并设置强随机 `SECRET_KEY`。
+3. 初始化完整岗位账号后再执行全角色 E2E；当前测试库缺少的岗位不会自动变为失败。

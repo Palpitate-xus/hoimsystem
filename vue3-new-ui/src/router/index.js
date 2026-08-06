@@ -645,6 +645,12 @@ export const asyncRoutes = [
         meta: { title: "系统监控", permissions: ["admin"] },
       },
       {
+        path: "scheduler",
+        name: "Scheduler",
+        component: () => import("@/views/system/scheduler.vue"),
+        meta: { title: "定时任务", permissions: ["admin"] },
+      },
+      {
         path: "dict",
         name: "Dict",
         component: () => import("@/views/system/dict.vue"),

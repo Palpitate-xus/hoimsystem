@@ -55,7 +55,7 @@ const ROLE_USERS = [
     name: "pharmacist",
     username: "pharmacist01",
     password: "123456",
-    menu: ["药品管理", "处方审核与发药", "库存预警", "库存盘点", "库存调整", "发药统计", "处方点评",
+    menu: ["药品管理", "处方审核与发药", "库存预警", "库存盘点", "库存调整", "发药统计", "特殊药品", "处方点评",
       "耗材管理", "药品采购", "ADR监测"],
   },
   {
@@ -367,6 +367,15 @@ test.describe("业务页面渲染", () => {
     await login(page, "nurse01", "123456");
     await page.goto(`${BASE}/#/inpatient/dispenseVerification`, { waitUntil: "networkidle" });
     await expect(page.getByText("配药核对").first()).toBeVisible({ timeout: 5000 });
+    await expect(page.locator(".el-table")).toBeVisible({ timeout: 5000 });
+  });
+
+  test("pharmacist 访问特殊药品页面", async ({ page }, testInfo) => {
+    skipIfUserUnavailable(testInfo, "pharmacist");
+    await login(page, "pharmacist01", "123456");
+    await page.goto(`${BASE}/#/pharmacy/specialDrug`, { waitUntil: "networkidle" });
+    await expect(page.getByText("特殊药品").first()).toBeVisible({ timeout: 5000 });
+    await expect(page.getByText("提交登记")).toBeVisible({ timeout: 5000 });
     await expect(page.locator(".el-table")).toBeVisible({ timeout: 5000 });
   });
 });

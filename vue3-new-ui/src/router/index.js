@@ -287,6 +287,12 @@ export const asyncRoutes = [
         meta: { title: "发药统计", permissions: ["admin", "pharmacist"] },
       },
       {
+        path: "specialDrug",
+        name: "SpecialDrug",
+        component: () => import("@/views/pharmacy/specialDrug.vue"),
+        meta: { title: "特殊药品", permissions: ["admin", "pharmacist"] },
+      },
+      {
         path: "prescriptionReview",
         name: "PrescriptionReview",
         component: () => import("@/views/pharmacy/prescriptionReview.vue"),

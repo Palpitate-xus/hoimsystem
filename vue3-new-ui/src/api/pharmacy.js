@@ -78,3 +78,7 @@ export function rejectInventoryAdjustment(data) {
 
 export function getDispenseVerificationList() { return request({ url: "pharmacy/verificationList", method: "get" }); }
 export function verifyDispense(data) { return request({ url: "pharmacy/verify", method: "post", data }); }
+export function getSpecialDrugList() { return request({ url: "specialDrug/list", method: "get" }); }
+export function createSpecialDrug(data) { return request({ url: "specialDrug/create", method: "post", data }); }
+export function approveSpecialDrug(data) { return request({ url: "specialDrug/approve", method: "post", data }); }
+export function rejectSpecialDrug(data) { return request({ url: "specialDrug/reject", method: "post", data }); }

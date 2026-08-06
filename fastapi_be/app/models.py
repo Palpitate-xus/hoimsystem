@@ -17,6 +17,7 @@ class User(Base):
     notices = relationship("Notice", back_populates="writer")
     doctors = relationship("Doctor", back_populates="user")
     operation_logs = relationship("OperationLog", back_populates="user")
+    prepaid_transactions = relationship("PrepaidTransaction", back_populates="operator", foreign_keys="PrepaidTransaction.operator_id")
 
 
 class Patient(Base):
@@ -42,6 +43,23 @@ class Patient(Base):
     lab_orders = relationship("LabOrder", back_populates="patient")
     follow_ups = relationship("FollowUp", back_populates="patient")
     reviews = relationship("Review", back_populates="patient")
+    prepaid_transactions = relationship("PrepaidTransaction", back_populates="patient", cascade="all, delete-orphan")
+
+
+class PrepaidTransaction(Base):
+    __tablename__ = "hoimsystem_prepaid_transaction"
+
+    transaction_id = Column(Integer, primary_key=True, autoincrement=True)
+    patient_id = Column(Integer, ForeignKey("hoimsystem_patient.patient_id"), nullable=False)
+    operator_id = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=False)
+    transaction_type = Column(String(20), nullable=False)  # recharge / deduct
+    amount = Column(Float, nullable=False)
+    balance_after = Column(Float, nullable=False)
+    note = Column(String(200), nullable=True)
+    create_time = Column(DateTime, nullable=False)
+
+    patient = relationship("Patient", back_populates="prepaid_transactions")
+    operator = relationship("User", back_populates="prepaid_transactions", foreign_keys=[operator_id])
 
 
 class Doctor(Base):

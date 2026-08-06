@@ -164,6 +164,41 @@ class TestPrepaidPermissions:
                 assert r.status_code == 200
                 assert r.json()["code"] == 500
 
+    async def test_prepaid_transactions_record_and_isolate_accounts(self, async_client, seed_data, auth_headers):
+        headers = auth_headers(seed_data["cashier_user"].username)
+        before = await async_client.get(
+            "/api/prepaid/getBalance",
+            headers=auth_headers(seed_data["patient_user"].username),
+            params={"identity": seed_data["patient"].identity},
+        )
+        initial_balance = before.json()["data"]["balance"]
+        await async_client.post(
+            "/api/prepaid/recharge",
+            headers=headers,
+            json={"identity": seed_data["patient"].identity, "amount": 100},
+        )
+        await async_client.post(
+            "/api/prepaid/deduct",
+            headers=headers,
+            json={"identity": seed_data["patient"].identity, "amount": 30},
+        )
+        own = await async_client.get(
+            "/api/prepaid/getTransactions",
+            headers=auth_headers(seed_data["patient_user"].username),
+            params={"identity": seed_data["patient"].identity},
+        )
+        assert own.status_code == 200
+        assert [item["type"] for item in own.json()["data"][:2]] == ["deduct", "recharge"]
+        assert own.json()["data"][0]["balance_after"] == initial_balance + 70
+
+        other = await async_client.get(
+            "/api/prepaid/getTransactions",
+            headers=auth_headers(seed_data["patient_user"].username),
+            params={"identity": seed_data["patient2"].identity},
+        )
+        assert other.status_code == 200
+        assert other.json()["code"] == 403
+
 
 @pytest.mark.asyncio
 class TestUserRoleSecurity:

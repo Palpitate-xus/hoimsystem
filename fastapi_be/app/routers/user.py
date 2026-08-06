@@ -19,7 +19,7 @@ from app.dependencies import (
     is_admin,
     require_roles,
 )
-from app.models import Patient, User
+from app.models import Patient, PrepaidTransaction, User
 from app.schemas import LoginRequest, RegisterRequest, UserInfoRequest
 from app.security import hash_password, is_bcrypt_hash, verify_password
 
@@ -254,8 +254,16 @@ def prepaid_recharge(req: dict, db: Session = Depends(get_db), current_user: Use
         {Patient.prepaid_balance: func.coalesce(Patient.prepaid_balance, 0) + amount},
         synchronize_session=False,
     )
-    db.commit()
     db.refresh(patient)
+    db.add(PrepaidTransaction(
+        patient_id=patient.patient_id,
+        operator_id=current_user.user_id,
+        transaction_type="recharge",
+        amount=amount,
+        balance_after=patient.prepaid_balance,
+        create_time=datetime.datetime.now(),
+    ))
+    db.commit()
     return {"code": 200, "msg": "success", "data": {"balance": patient.prepaid_balance}}
 
 
@@ -280,6 +288,49 @@ def prepaid_deduct(req: dict, db: Session = Depends(get_db), current_user: User 
     )
     if updated != 1:
         return {"code": 500, "msg": "预交金余额不足"}
-    db.commit()
     db.refresh(patient)
+    db.add(PrepaidTransaction(
+        patient_id=patient.patient_id,
+        operator_id=current_user.user_id,
+        transaction_type="deduct",
+        amount=amount,
+        balance_after=patient.prepaid_balance,
+        create_time=datetime.datetime.now(),
+    ))
+    db.commit()
     return {"code": 200, "msg": "success", "data": {"balance": patient.prepaid_balance}}
+
+
+@router.get("/prepaid/getTransactions")
+def get_prepaid_transactions(
+    identity: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """查询预交金流水，仅允许患者本人或收费/管理人员查看。"""
+    if current_user.user_role == ROLE_PATIENT and current_user.username != identity:
+        return {"code": 403, "msg": "无权访问其他患者账户"}
+    if current_user.user_role not in {ROLE_PATIENT, ROLE_CASHIER, *ADMIN_ROLES}:
+        return {"code": 403, "msg": "无权访问"}
+    patient = db.query(Patient).filter(Patient.identity == identity).first()
+    if not patient:
+        return {"code": 500, "msg": "病人不存在"}
+    transactions = db.query(PrepaidTransaction).filter(
+        PrepaidTransaction.patient_id == patient.patient_id,
+    ).order_by(PrepaidTransaction.transaction_id.desc()).all()
+    return {
+        "code": 200,
+        "msg": "success",
+        "data": [
+            {
+                "transaction_id": item.transaction_id,
+                "type": item.transaction_type,
+                "amount": item.amount,
+                "balance_after": item.balance_after,
+                "operator_id": item.operator_id,
+                "create_time": item.create_time,
+                "note": item.note or "",
+            }
+            for item in transactions
+        ],
+    }

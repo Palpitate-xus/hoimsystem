@@ -160,6 +160,38 @@ def get_invoice_list(keyword: str | None = None, db: Session = Depends(get_db), 
     return {"code": 200, "msg": "success", "data": data}
 
 
+@router.get("/windowRegistration/schedules")
+def get_window_registration_schedules(
+    keyword: str | None = None,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_roles(ROLE_CASHIER, ROLE_REGISTRAR, *ADMIN_ROLES)),
+):
+    """获取窗口挂号可选的逐条排班号源。"""
+    from app.models import DoctorSchedule
+
+    schedules = db.query(DoctorSchedule).all()
+    data = []
+    for item in schedules:
+        doctor = item.doctor
+        department = doctor.department if doctor else None
+        row = {
+            "schedule_id": item.schedule_id,
+            "doctor_id": item.doctor_id,
+            "doctor_name": doctor.name if doctor else "",
+            "department_id": department.department_id if department else None,
+            "department_name": department.name if department else "",
+            "specialist": item.specialist,
+            "week": item.week,
+            "time": item.time,
+            "number": item.number or 0,
+        }
+        data.append(row)
+    if keyword:
+        kw = keyword.lower()
+        data = [row for row in data if any(kw in str(value).lower() for value in row.values())]
+    return {"code": 200, "msg": "success", "data": data}
+
+
 @router.post("/invoice/create")
 def create_invoice(req: InvoiceCreateRequest, db: Session = Depends(get_db), current_user: User = Depends(require_roles(ROLE_CASHIER, *ADMIN_ROLES))):
     charge = db.query(Charge).filter(Charge.charge_id == req.charge_id).first()

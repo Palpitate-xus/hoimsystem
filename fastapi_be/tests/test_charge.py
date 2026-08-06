@@ -5,6 +5,17 @@ from app.models import Charge, Registration
 
 @pytest.mark.asyncio
 class TestChargeManagement:
+    async def test_window_registration_schedules_return_individual_slots(self, async_client, seed_data, auth_headers):
+        r = await async_client.get(
+            "/api/windowRegistration/schedules",
+            headers=auth_headers(seed_data["cashier_user"].username),
+        )
+        assert r.status_code == 200
+        body = r.json()
+        assert body["code"] == 200
+        assert body["data"]
+        assert {"schedule_id", "doctor_id", "department_id", "specialist", "number"}.issubset(body["data"][0])
+
     async def test_get_list_admin(self, async_client, seed_data, auth_headers):
         r = await async_client.get("/api/chargeManagement/getList", headers=auth_headers(seed_data["admin_user"].username))
         assert r.status_code == 200

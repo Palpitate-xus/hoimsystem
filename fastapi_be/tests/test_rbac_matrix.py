@@ -234,6 +234,7 @@ ENDPOINTS = [
     ("GET", "/api/windowRegistration/appointments", {"admin", "super_admin", "cashier", "registrar"}, None, {}),
     ("POST", "/api/windowRegistration/appointmentConfirm", {"admin", "super_admin", "cashier", "registrar"}, {"uuid": "x"}, {}),
     ("POST", "/api/windowRegistration/appointmentCancel", {"admin", "super_admin", "cashier", "registrar"}, {"uuid": "x"}, {}),
+    ("GET", "/api/monitor/summary", {"admin", "super_admin"}, None, {}),
     ("GET", "/api/medicalRecordArchive/list", {"admin", "super_admin", "director", "doctor"}, None, {}),
     ("POST", "/api/medicalRecordArchive/create", {"admin", "super_admin", "director", "doctor"}, {"home_id": "x"}, {}),
     ("POST", "/api/medicalRecordArchive/archive", {"admin", "super_admin", "director"}, {"archive_id": "x"}, {}),

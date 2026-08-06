@@ -1,5 +1,6 @@
 import datetime
 import re
+import time
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -128,7 +129,9 @@ def parse_action_target(path: str) -> tuple[str, str]:
 
 class StripMicrosecondMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request, call_next):
+        started_at = time.perf_counter()
         response = await call_next(request)
+        response_time_ms = round((time.perf_counter() - started_at) * 1000, 2)
         if response.headers.get("content-type", "").startswith("application/json"):
             body = b""
             async for chunk in response.body_iterator:
@@ -260,6 +263,7 @@ class OperationLogMiddleware(BaseHTTPMiddleware):
                     detail=detail,
                     result=result,
                     status_code=status_code,
+                    response_time_ms=response_time_ms,
                     ip=client_ip,
                     method=method,
                     path=path,
@@ -314,6 +318,7 @@ from app.routers import (
     lab_package,
     lab_qc,
     mdt,
+    monitor,
     medical_record_home,
     medical_record_home_quality,
     medical_record_archive,
@@ -390,6 +395,7 @@ app.include_router(adverse_event.router, prefix="/api")
 app.include_router(digital_signature.router, prefix="/api")
 app.include_router(referral.router, prefix="/api")
 app.include_router(mdt.router, prefix="/api")
+app.include_router(monitor.router, prefix="/api")
 app.include_router(clinical_pathway.router, prefix="/api")
 app.include_router(ward.router, prefix="/api")
 app.include_router(admission.router, prefix="/api")

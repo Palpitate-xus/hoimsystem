@@ -663,6 +663,7 @@ class OperationLog(Base):
     detail = Column(String(500))
     result = Column(String(20))
     status_code = Column(Integer)
+    response_time_ms = Column(Float, nullable=True)
     ip = Column(String(40))
     method = Column(String(10))
     path = Column(String(200))

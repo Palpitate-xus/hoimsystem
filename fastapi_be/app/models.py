@@ -1757,6 +1757,23 @@ class ImagingReport(Base):
     reviewer = relationship("User", foreign_keys=[reviewer_id])
 
 
+class ImagingFilm(Base):
+    __tablename__ = "hoimsystem_imaging_film"
+
+    film_id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    imaging_order_id = Column(String(36), ForeignKey("hoimsystem_imaging_order.imaging_order_id"), nullable=False)
+    delivery_type = Column(String(10), nullable=False, default="print")  # print / cloud
+    copies = Column(Integer, nullable=False, default=1)
+    status = Column(Integer, nullable=False, default=0)  # 0=申请 1=已完成 2=取消
+    cloud_url = Column(String(500), nullable=True)
+    requester_id = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=False)
+    create_time = Column(DateTime, nullable=False)
+    complete_time = Column(DateTime, nullable=True)
+
+    order = relationship("ImagingOrder")
+    requester = relationship("User")
+
+
 class AntibioticApproval(Base):
     __tablename__ = "hoimsystem_antibiotic_approval"
 

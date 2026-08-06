@@ -38,6 +38,24 @@ class TestImaging:
         )
         assert patient_view.json()["data"]["integration_status"] == "not_configured"
 
+        film = await async_client.post(
+            "/api/imaging/film/create",
+            headers=auth_headers(seed_data["patient_user"].username),
+            json={"imaging_order_id": order_id, "delivery_type": "cloud", "copies": 2},
+        )
+        assert film.json()["code"] == 200
+        film_id = film.json()["data"]["film_id"]
+        films = await async_client.get(
+            "/api/imaging/film/list", headers=auth_headers(seed_data["patient_user"].username)
+        )
+        assert films.json()["data"][0]["delivery_type"] == "cloud"
+        completed = await async_client.post(
+            "/api/imaging/film/status",
+            headers=auth_headers(seed_data["lab_tech_user"].username),
+            json={"film_id": film_id, "status": 1, "cloud_url": "https://pacs.example/cloud/abc"},
+        )
+        assert completed.json()["data"]["cloud_url"].endswith("/abc")
+
     async def test_patient_cannot_create_imaging_order(self, async_client, seed_data, auth_headers):
         response = await async_client.post(
             "/api/imaging/order/create",

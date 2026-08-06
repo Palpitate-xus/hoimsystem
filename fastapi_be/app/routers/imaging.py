@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.dependencies import ADMIN_ROLES, CLINICAL_ROLES, LAB_ROLES, ROLE_DIRECTOR, ROLE_PATIENT, User, get_current_user, require_roles
-from app.models import Doctor, ImagingOrder, ImagingReport, ImagingTemplate, Patient
+from app.models import Doctor, ImagingFilm, ImagingOrder, ImagingReport, ImagingTemplate, Patient
 
 router = APIRouter()
 IMAGING_ROLES = {*CLINICAL_ROLES, *LAB_ROLES}
@@ -45,6 +45,24 @@ def _order_data(item: ImagingOrder):
             "status_text": {0: "草稿", 1: "待审核", 2: "已审核", 3: "已退回"}.get(item.report.status, ""),
             "review_note": item.report.review_note or "",
         } if item.report else None,
+    }
+
+
+def _film_data(item: ImagingFilm):
+    return {
+        "film_id": item.film_id,
+        "imaging_order_id": item.imaging_order_id,
+        "accession_no": item.order.accession_no if item.order else "",
+        "patient_id": item.order.patient_id if item.order else None,
+        "patient_name": item.order.patient.name if item.order and item.order.patient else "",
+        "delivery_type": item.delivery_type,
+        "delivery_type_text": "云胶片" if item.delivery_type == "cloud" else "实体胶片",
+        "copies": item.copies,
+        "status": item.status,
+        "status_text": {0: "待处理", 1: "已完成", 2: "已取消"}.get(item.status, ""),
+        "cloud_url": item.cloud_url or "",
+        "create_time": item.create_time.strftime("%Y-%m-%d %H:%M:%S") if item.create_time else "",
+        "complete_time": item.complete_time.strftime("%Y-%m-%d %H:%M:%S") if item.complete_time else "",
     }
 
 
@@ -193,3 +211,57 @@ def get_imaging_viewer(imaging_order_id: str, current_user: User = Depends(get_c
         if not patient or order.patient_id != patient.patient_id:
             return {"code": 403, "msg": "无权查看该影像"}
     return {"code": 200, "msg": "success", "data": {"viewer_url": order.viewer_url, "integration_status": "configured" if order.viewer_url else "not_configured"}}
+
+
+@router.get("/imaging/film/list")
+def get_imaging_film_list(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    query = db.query(ImagingFilm).join(ImagingOrder)
+    if current_user.user_role == ROLE_PATIENT:
+        patient = db.query(Patient).filter(Patient.identity == current_user.username).first()
+        query = query.filter(ImagingOrder.patient_id == patient.patient_id if patient else -1)
+    items = query.order_by(ImagingFilm.create_time.desc()).all()
+    return {"code": 200, "msg": "success", "data": [_film_data(item) for item in items]}
+
+
+@router.post("/imaging/film/create")
+def create_imaging_film(req: dict, current_user: User = Depends(require_roles(*{*IMAGING_ROLES, ROLE_PATIENT})), db: Session = Depends(get_db)):
+    order = db.query(ImagingOrder).filter(ImagingOrder.imaging_order_id == req.get("imaging_order_id")).first()
+    if not order:
+        return {"code": 404, "msg": "影像申请不存在"}
+    if current_user.user_role == ROLE_PATIENT:
+        patient = db.query(Patient).filter(Patient.identity == current_user.username).first()
+        if not patient or order.patient_id != patient.patient_id:
+            return {"code": 403, "msg": "无权申请该影像胶片"}
+    delivery_type = req.get("delivery_type", "print")
+    if delivery_type not in ("print", "cloud"):
+        return {"code": 400, "msg": "胶片交付类型不合法"}
+    try:
+        copies = max(1, min(int(req.get("copies", 1)), 10))
+    except (TypeError, ValueError):
+        return {"code": 400, "msg": "胶片份数不合法"}
+    item = ImagingFilm(
+        imaging_order_id=order.imaging_order_id,
+        delivery_type=delivery_type,
+        copies=copies,
+        requester_id=current_user.user_id,
+        create_time=datetime.datetime.now(),
+    )
+    db.add(item)
+    db.commit()
+    return {"code": 200, "msg": "胶片申请已提交", "data": _film_data(item)}
+
+
+@router.post("/imaging/film/status")
+def update_imaging_film_status(req: dict, current_user: User = Depends(require_roles(*IMAGING_ROLES)), db: Session = Depends(get_db)):
+    item = db.query(ImagingFilm).filter(ImagingFilm.film_id == req.get("film_id")).first()
+    if not item:
+        return {"code": 404, "msg": "胶片申请不存在"}
+    status = req.get("status")
+    if status not in (1, 2):
+        return {"code": 400, "msg": "胶片状态不合法"}
+    item.status = status
+    item.complete_time = datetime.datetime.now() if status == 1 else None
+    if item.delivery_type == "cloud" and req.get("cloud_url"):
+        item.cloud_url = str(req["cloud_url"]).strip()[:500]
+    db.commit()
+    return {"code": 200, "msg": "胶片状态已更新", "data": _film_data(item)}

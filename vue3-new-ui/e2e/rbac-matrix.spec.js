@@ -43,7 +43,7 @@ const ROLE_USERS = [
     username: "patient1",
     password: "123456",
     menu: ["智能导诊", "预约挂号", "现场挂号", "缴费管理", "病历查询",
-      "处方查询", "健康档案", "就诊评价", "预交金管理", "双向转诊"],
+      "处方查询", "健康档案", "家庭成员", "就诊评价", "预交金管理", "双向转诊"],
   },
   {
     name: "cashier",
@@ -234,6 +234,14 @@ test.describe("业务页面渲染", () => {
     await page.goto(`${BASE}/#/patient/appointment`, { waitUntil: "networkidle" });
     await page.waitForTimeout(1500);
     await expect(page.locator(".el-card, .el-table").first()).toBeVisible({ timeout: 5000 });
+  });
+
+  test("patient 访问家庭成员页面显示维护表格", async ({ page }) => {
+    await login(page, "patient1", "123456");
+    await page.goto(`${BASE}/#/patient/familyMember`, { waitUntil: "networkidle" });
+    await page.waitForTimeout(1000);
+    await expect(page.getByText("添加家庭成员")).toBeVisible({ timeout: 5000 });
+    await expect(page.locator(".el-table")).toBeVisible({ timeout: 5000 });
   });
 
   test("pharmacist 访问发药列表页面", async ({ page }, testInfo) => {

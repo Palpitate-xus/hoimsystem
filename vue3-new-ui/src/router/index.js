@@ -109,6 +109,12 @@ export const asyncRoutes = [
         meta: { title: "智能导诊", permissions: ["patient", "guide"] },
       },
       {
+        path: "navigation",
+        name: "Navigation",
+        component: () => import("@/views/patient/navigation.vue"),
+        meta: { title: "就诊导航", permissions: ["patient"] },
+      },
+      {
         path: "appointment",
         name: "Appointment",
         component: () => import("@/views/patient/appointment.vue"),

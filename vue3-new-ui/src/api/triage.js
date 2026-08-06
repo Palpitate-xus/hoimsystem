@@ -7,3 +7,7 @@ export function triageSuggest(data) {
 export function getTriageKeywords() {
   return request({ url: "triage/keywords", method: "get" });
 }
+
+export function getNavigationDepartments(keyword = "") {
+  return request({ url: "navigation/departments", method: "get", params: { keyword } });
+}

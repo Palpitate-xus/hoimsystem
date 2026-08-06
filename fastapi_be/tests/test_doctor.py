@@ -82,6 +82,22 @@ class TestDoctorPrescription:
         assert r.status_code == 200
         assert r.json()["code"] == 200
 
+    async def test_create_prescription_rejects_invalid_medication_lines(self, async_client, seed_data, auth_headers):
+        headers = auth_headers(seed_data["doctor_user"].username)
+        base = {"patient": seed_data["patient"].patient_id}
+        for phas, message in [
+            ([], "处方至少需要一项药品"),
+            ([{"id": seed_data["pharmaceutical"].pharmaceutical_id, "number": 0}], "药品数量必须大于0"),
+            ([{"id": 999999, "number": 1}], "药品不存在"),
+        ]:
+            r = await async_client.post(
+                "/api/prescriptionManagement/create",
+                headers=headers,
+                json={**base, "phas": phas},
+            )
+            assert r.status_code == 200
+            assert r.json() == {"code": 500, "msg": message}
+
     async def test_get_prescription_list_doctor(self, async_client, seed_data, auth_headers):
         r = await async_client.get("/api/prescriptionManagement/getList", headers=auth_headers(seed_data["doctor_user"].username))
         assert r.status_code == 200

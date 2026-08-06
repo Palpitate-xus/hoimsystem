@@ -290,10 +290,32 @@ def prescription_register(req: PrescriptionCreateRequest, current_user: User = D
     if not doctor_obj or not patient_obj:
         return {"code": 500, "msg": "医生或病人信息不存在"}
     try:
+        if not req.phas:
+            return {"code": 500, "msg": "处方至少需要一项药品"}
+        normalized_phas = []
+        seen_pharmaceuticals = set()
+        for raw_item in req.phas:
+            if not isinstance(raw_item, dict):
+                return {"code": 500, "msg": "处方药品明细格式错误"}
+            try:
+                pharmaceutical_id = int(raw_item.get("id"))
+                quantity = int(raw_item.get("number"))
+            except (TypeError, ValueError, OverflowError):
+                return {"code": 500, "msg": "处方药品明细格式错误"}
+            if quantity <= 0:
+                return {"code": 500, "msg": "药品数量必须大于0"}
+            if pharmaceutical_id in seen_pharmaceuticals:
+                return {"code": 500, "msg": "同一药品不能重复开立"}
+            pha = db.query(Pharmaceutical).filter(Pharmaceutical.pharmaceutical_id == pharmaceutical_id).first()
+            if not pha:
+                return {"code": 500, "msg": "药品不存在"}
+            seen_pharmaceuticals.add(pharmaceutical_id)
+            normalized_phas.append({"id": pharmaceutical_id, "number": quantity})
+
         # 抗菌药物分级审核
         restricted_phas = []  # 限制级
         special_phas = []  # 特殊使用级
-        for item in req.phas:
+        for item in normalized_phas:
             pha = db.query(Pharmaceutical).filter(Pharmaceutical.pharmaceutical_id == item["id"]).first()
             if pha:
                 if pha.antibiotic_level == 2:
@@ -314,7 +336,7 @@ def prescription_register(req: PrescriptionCreateRequest, current_user: User = D
         allergy_history = (patient_obj.allergy_history or "").strip()
         if allergy_history:
             allergy_keywords = [a.strip().lower() for a in allergy_history.split(",") if a.strip()]
-            for item in req.phas:
+            for item in normalized_phas:
                 pha = db.query(Pharmaceutical).filter(Pharmaceutical.pharmaceutical_id == item["id"]).first()
                 if not pha:
                     continue
@@ -353,7 +375,7 @@ def prescription_register(req: PrescriptionCreateRequest, current_user: User = D
         db.add(pre)
         db.flush()
         amount = 0
-        for item in req.phas:
+        for item in normalized_phas:
             pha = db.query(Pharmaceutical).filter(Pharmaceutical.pharmaceutical_id == item["id"]).first()
             if pha:
                 if pha.stock < int(item["number"]):

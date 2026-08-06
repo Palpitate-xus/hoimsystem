@@ -91,6 +91,12 @@ export const asyncRoutes = [
         component: () => import("@/views/admin/slotPool.vue"),
         meta: { title: "号源池管理", permissions: ["admin"] },
       },
+      {
+        path: "dataImportExport",
+        name: "DataImportExport",
+        component: () => import("@/views/admin/dataImportExport.vue"),
+        meta: { title: "数据导入导出", permissions: ["admin"] },
+      },
     ],
   },
 

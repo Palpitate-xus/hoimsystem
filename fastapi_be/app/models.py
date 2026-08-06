@@ -674,6 +674,21 @@ class EmergencyTriage(Base):
     nurse = relationship("User", foreign_keys=[nurse_id])
 
 
+class EmergencyRescueEvent(Base):
+    __tablename__ = "hoimsystem_emergency_rescue_event"
+
+    event_id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    triage_id = Column(String(36), ForeignKey("hoimsystem_emergency_triage.triage_id"), nullable=False)
+    event_type = Column(String(30), nullable=False)
+    description = Column(String(500), nullable=False)
+    medication = Column(String(300), nullable=True)
+    event_time = Column(DateTime, nullable=False)
+    operator_id = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=False)
+
+    triage = relationship("EmergencyTriage")
+    operator = relationship("User", foreign_keys=[operator_id])
+
+
 class PatrolRecord(Base):
     __tablename__ = "hoimsystem_patrol_record"
 

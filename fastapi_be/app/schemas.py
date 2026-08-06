@@ -145,6 +145,14 @@ class EmergencyTriageUpdateRequest(BaseModel):
     status: int | None = Field(default=None, ge=0, le=3)
 
 
+class EmergencyRescueEventCreateRequest(BaseModel):
+    triage_id: str
+    event_type: str = Field(..., min_length=1, max_length=30)
+    description: str = Field(..., min_length=1, max_length=500)
+    medication: str = Field(default="", max_length=300)
+    event_time: str | None = None
+
+
 class PharmaceuticalCreateRequest(BaseModel):
     name: str = Field(..., min_length=1, max_length=24)
     stock: int = Field(..., ge=0)

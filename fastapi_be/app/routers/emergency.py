@@ -5,8 +5,8 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.dependencies import CLINICAL_ROLES, NURSING_ROLES, User, require_roles
-from app.models import EmergencyTriage, Patient
-from app.schemas import EmergencyTriageCreateRequest, EmergencyTriageUpdateRequest
+from app.models import EmergencyRescueEvent, EmergencyTriage, Patient
+from app.schemas import EmergencyRescueEventCreateRequest, EmergencyTriageCreateRequest, EmergencyTriageUpdateRequest
 
 router = APIRouter()
 
@@ -61,3 +61,32 @@ def update_triage(req: EmergencyTriageUpdateRequest, current_user: User = Depend
     item.update_time = datetime.datetime.now()
     db.commit()
     return {"code": 200, "msg": "success", "data": _serialize(item)}
+
+
+@router.post("/emergency/rescue/create")
+def create_rescue_event(req: EmergencyRescueEventCreateRequest, current_user: User = Depends(require_roles(*NURSING_ROLES)), db: Session = Depends(get_db)):
+    triage = db.query(EmergencyTriage).filter(EmergencyTriage.triage_id == req.triage_id, EmergencyTriage.status != 3).first()
+    if not triage:
+        return {"code": 500, "msg": "有效分诊记录不存在"}
+    try:
+        event_time = datetime.datetime.strptime(req.event_time, "%Y-%m-%d %H:%M:%S") if req.event_time else datetime.datetime.now()
+    except ValueError:
+        return {"code": 500, "msg": "时间格式必须为 YYYY-MM-DD HH:MM:SS"}
+    item = EmergencyRescueEvent(triage_id=req.triage_id, event_type=req.event_type.strip(), description=req.description.strip(), medication=req.medication.strip(), event_time=event_time, operator_id=current_user.user_id)
+    db.add(item)
+    if triage.status == 0:
+        triage.status = 1
+        triage.update_time = datetime.datetime.now()
+    db.commit()
+    return {"code": 200, "msg": "success", "data": {"event_id": item.event_id}}
+
+
+@router.get("/emergency/rescue/list")
+def list_rescue_events(triage_id: str | None = None, current_user: User = Depends(require_roles(*(NURSING_ROLES | CLINICAL_ROLES))), db: Session = Depends(get_db)):
+    query = db.query(EmergencyRescueEvent).order_by(EmergencyRescueEvent.event_time.asc())
+    if triage_id:
+        query = query.filter(EmergencyRescueEvent.triage_id == triage_id)
+    data = []
+    for item in query.all():
+        data.append({"event_id": item.event_id, "triage_id": item.triage_id, "patient_name": item.triage.patient.name if item.triage and item.triage.patient else "", "event_type": item.event_type, "description": item.description, "medication": item.medication or "", "event_time": item.event_time, "operator_name": item.operator.username if item.operator else ""})
+    return {"code": 200, "msg": "success", "data": data}

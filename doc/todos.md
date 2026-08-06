@@ -274,11 +274,11 @@
 
 ### 2.20 门诊输液 API ⬜
 
-- [ ] 输液医嘱 API
+- [x] 输液医嘱 API
 - [ ] 配药核对 API（药房配药+护士核对）
-- [ ] 输液执行 API（穿刺/滴速/巡视）
-- [ ] 皮试管理 API
-- [ ] 输液结束 API（拔针/不良反应记录）
+- [x] 输液执行 API（穿刺/滴速/巡视）
+- [x] 皮试管理 API
+- [x] 输液结束 API（拔针/不良反应记录）
 
 ### 2.21 PACS/RIS API ⬜
 
@@ -565,9 +565,9 @@
 
 ### 6.3 护士护理闭环
 
-- [ ] hoimsystem_infusion（输液记录）
-- [ ] hoimsystem_injection（注射记录）
-- [ ] hoimsystem_skin_test（皮试记录）
+- [x] hoimsystem_infusion（输液记录）
+- [x] hoimsystem_injection（注射记录）
+- [x] hoimsystem_skin_test（皮试记录）
 - [x] hoimsystem_nursing_record（护理记录） *（住院）*
 - [x] hoimsystem_shift_handover（交接班记录）
 

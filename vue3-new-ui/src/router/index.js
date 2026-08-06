@@ -579,6 +579,12 @@ export const asyncRoutes = [
         meta: { title: "操作日志", permissions: ["admin"] },
       },
       {
+        path: "monitor",
+        name: "Monitor",
+        component: () => import("@/views/system/monitor.vue"),
+        meta: { title: "系统监控", permissions: ["admin"] },
+      },
+      {
         path: "dict",
         name: "Dict",
         component: () => import("@/views/system/dict.vue"),

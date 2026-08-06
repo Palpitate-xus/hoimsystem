@@ -222,6 +222,15 @@ test.describe("业务页面渲染", () => {
     await expect(page.locator(".el-table")).toBeVisible({ timeout: 5000 });
   });
 
+  test("admin 访问系统监控页面显示指标", async ({ page }) => {
+    await login(page, "admin", "admin123");
+    await page.goto(`${BASE}/#/system/monitor`, { waitUntil: "networkidle" });
+    await page.waitForTimeout(1000);
+    await expect(page.getByText("系统监控").first()).toBeVisible({ timeout: 5000 });
+    await expect(page.getByText("近24小时请求")).toBeVisible({ timeout: 5000 });
+    await expect(page.getByText("热点接口")).toBeVisible({ timeout: 5000 });
+  });
+
   test("doctor 访问排班页面显示排班表", async ({ page }) => {
     await login(page, "doctor1", "doctor123");
     await page.goto(`${BASE}/#/doctor/schedule`, { waitUntil: "networkidle" });

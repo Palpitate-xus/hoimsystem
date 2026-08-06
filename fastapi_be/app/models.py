@@ -1362,6 +1362,28 @@ class NursingPlan(Base):
     nurse = relationship("User")
 
 
+class CriticalCareRecord(Base):
+    __tablename__ = "hoimsystem_critical_care_record"
+
+    record_id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    admission_id = Column(String(36), ForeignKey("hoimsystem_admission.admission_id"), nullable=False)
+    patient_id = Column(Integer, ForeignKey("hoimsystem_patient.patient_id"), nullable=False)
+    nurse_id = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=False)
+    record_time = Column(DateTime, nullable=False)
+    consciousness = Column(Integer, nullable=False, default=0)
+    gcs_score = Column(Integer, nullable=True)
+    oxygen_support = Column(String(200), nullable=True)
+    blood_pressure = Column(String(30), nullable=True)
+    pulse = Column(Integer, nullable=True)
+    spo2 = Column(Float, nullable=True)
+    urine_output = Column(String(100), nullable=True)
+    note = Column(String(1000), nullable=True)
+
+    admission = relationship("Admission")
+    patient = relationship("Patient")
+    nurse = relationship("User")
+
+
 class TemperatureRecord(Base):
     __tablename__ = "hoimsystem_temperature_record"
 

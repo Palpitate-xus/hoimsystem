@@ -7,6 +7,7 @@ from app.database import get_db
 from app.dependencies import NURSING_ROLES, get_current_user, require_roles
 from app.models import (
     Admission,
+    CriticalCareRecord,
     NursingAssessment,
     NursingPlan,
     NursingRecord,
@@ -14,7 +15,7 @@ from app.models import (
     TemperatureRecord,
     User,
 )
-from app.schemas import NursingAssessmentCreateRequest, NursingAssessmentUpdateRequest, NursingPlanCreateRequest, NursingPlanUpdateRequest, NursingRecordCreateRequest, TemperatureRecordCreateRequest
+from app.schemas import CriticalCareRecordCreateRequest, NursingAssessmentCreateRequest, NursingAssessmentUpdateRequest, NursingPlanCreateRequest, NursingPlanUpdateRequest, NursingRecordCreateRequest, TemperatureRecordCreateRequest
 
 router = APIRouter()
 
@@ -121,6 +122,33 @@ def update_nursing_plan(req: NursingPlanUpdateRequest, current_user: User = Depe
     item.update_time = datetime.datetime.now()
     db.commit()
     return {"code": 200, "msg": "success", "data": _serialize_plan(item)}
+
+
+def _serialize_critical(item: CriticalCareRecord):
+    return {"record_id": item.record_id, "admission_id": item.admission_id, "patient_id": item.patient_id, "patient_name": item.patient.name if item.patient else "", "record_time": item.record_time, "consciousness": item.consciousness, "gcs_score": item.gcs_score, "oxygen_support": item.oxygen_support or "", "blood_pressure": item.blood_pressure or "", "pulse": item.pulse, "spo2": item.spo2, "urine_output": item.urine_output or "", "note": item.note or "", "nurse_name": item.nurse.username if item.nurse else ""}
+
+
+@router.get("/criticalCareRecord/list")
+def list_critical_records(admission_id: str | None = None, current_user: User = Depends(require_roles(*NURSING_ROLES)), db: Session = Depends(get_db)):
+    query = db.query(CriticalCareRecord).order_by(CriticalCareRecord.record_time.desc())
+    if admission_id:
+        query = query.filter(CriticalCareRecord.admission_id == admission_id)
+    return {"code": 200, "msg": "success", "data": [_serialize_critical(item) for item in query.all()]}
+
+
+@router.post("/criticalCareRecord/create")
+def create_critical_record(req: CriticalCareRecordCreateRequest, current_user: User = Depends(require_roles(*NURSING_ROLES)), db: Session = Depends(get_db)):
+    admission = db.query(Admission).filter(Admission.admission_id == req.admission_id, Admission.patient_id == req.patient_id).first()
+    if not admission:
+        return {"code": 500, "msg": "在院记录不存在或患者不匹配"}
+    try:
+        record_time = datetime.datetime.strptime(req.record_time, "%Y-%m-%d %H:%M:%S") if req.record_time else datetime.datetime.now()
+    except ValueError:
+        return {"code": 500, "msg": "时间格式必须为 YYYY-MM-DD HH:MM:SS"}
+    item = CriticalCareRecord(admission_id=req.admission_id, patient_id=req.patient_id, nurse_id=current_user.user_id, record_time=record_time, consciousness=req.consciousness, gcs_score=req.gcs_score, oxygen_support=req.oxygen_support.strip(), blood_pressure=req.blood_pressure.strip(), pulse=req.pulse, spo2=req.spo2, urine_output=req.urine_output.strip(), note=req.note.strip())
+    db.add(item)
+    db.commit()
+    return {"code": 200, "msg": "success", "data": _serialize_critical(item)}
 
 
 @router.get("/nursingRecord/getList")

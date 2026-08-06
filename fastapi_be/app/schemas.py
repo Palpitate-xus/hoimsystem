@@ -811,6 +811,20 @@ class NursingPlanUpdateRequest(BaseModel):
     status: int | None = Field(default=None, ge=0, le=2)
 
 
+class CriticalCareRecordCreateRequest(BaseModel):
+    admission_id: str
+    patient_id: int
+    record_time: str | None = None
+    consciousness: int = Field(default=0, ge=0, le=3)
+    gcs_score: int | None = Field(default=None, ge=3, le=15)
+    oxygen_support: str = Field(default="", max_length=200)
+    blood_pressure: str = Field(default="", max_length=30)
+    pulse: int | None = Field(default=None, ge=0, le=300)
+    spo2: float | None = Field(default=None, ge=0, le=100)
+    urine_output: str = Field(default="", max_length=100)
+    note: str = Field(default="", max_length=1000)
+
+
 class TemperatureRecordCreateRequest(BaseModel):
     admission_id: str
     patient_id: int

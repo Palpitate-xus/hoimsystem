@@ -1,6 +1,6 @@
 import pytest
 
-from app.models import Charge
+from app.models import Charge, Registration
 
 
 @pytest.mark.asyncio
@@ -118,6 +118,62 @@ class TestChargeManagement:
         second = await async_client.post("/api/chargeManagement/refund", headers=headers, json=payload)
         assert second.status_code == 200
         assert second.json() == {"code": 500, "msg": "未缴费或已退费，无法退费"}
+
+    async def test_window_registration_rejects_invalid_schedule(self, async_client, seed_data, auth_headers):
+        r = await async_client.post(
+            "/api/windowRegistration/create",
+            headers=auth_headers(seed_data["cashier_user"].username),
+            json={
+                "identity": seed_data["patient"].identity,
+                "schedule_id": 999999,
+                "doctor_id": seed_data["doctor"].doctor_id,
+                "department_id": seed_data["department"].department_id,
+                "specialist": 1,
+            },
+        )
+        assert r.status_code == 200
+        assert r.json() == {"code": 500, "msg": "排班不存在"}
+
+    async def test_window_registration_rejects_mismatched_schedule_and_duplicate(self, async_client, seed_data, auth_headers, db_session):
+        schedule = db_session.query(type(seed_data["doctor"].schedules[0])).filter_by(doctor_id=seed_data["doctor"].doctor_id).first()
+        headers = auth_headers(seed_data["cashier_user"].username)
+        mismatch = await async_client.post(
+            "/api/windowRegistration/create",
+            headers=headers,
+            json={
+                "identity": seed_data["patient"].identity,
+                "schedule_id": schedule.schedule_id,
+                "doctor_id": seed_data["director_doctor"].doctor_id,
+                "department_id": seed_data["department"].department_id,
+                "specialist": schedule.specialist,
+            },
+        )
+        assert mismatch.json() == {"code": 500, "msg": "预约医生与排班不匹配"}
+
+        first = await async_client.post(
+            "/api/windowRegistration/create",
+            headers=headers,
+            json={
+                "identity": seed_data["patient"].identity,
+                "schedule_id": schedule.schedule_id,
+                "doctor_id": schedule.doctor_id,
+                "department_id": seed_data["department"].department_id,
+                "specialist": schedule.specialist,
+            },
+        )
+        assert first.json()["code"] == 200
+        second = await async_client.post(
+            "/api/windowRegistration/create",
+            headers=headers,
+            json={
+                "identity": seed_data["patient"].identity,
+                "schedule_id": schedule.schedule_id,
+                "doctor_id": schedule.doctor_id,
+                "department_id": seed_data["department"].department_id,
+                "specialist": schedule.specialist,
+            },
+        )
+        assert second.json() == {"code": 500, "msg": "该患者已存在同一医生的有效挂号"}
 
 
 @pytest.mark.asyncio

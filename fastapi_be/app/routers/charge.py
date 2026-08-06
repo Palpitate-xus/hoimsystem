@@ -208,19 +208,38 @@ def window_registration(req: dict, db: Session = Depends(get_db), current_user: 
     schedule_id = req.get("schedule_id")
     doctor_id = req.get("doctor_id")
     department_id = req.get("department_id")
-    specialist = req.get("specialist", 0)
+    specialist = req.get("specialist")
     reg_obj = db.query(DoctorSchedule).filter(DoctorSchedule.schedule_id == schedule_id).first()
-    if reg_obj and reg_obj.number <= 0:
+    if not reg_obj:
+        return {"code": 500, "msg": "排班不存在"}
+    if doctor_id is not None and reg_obj.doctor_id != doctor_id:
+        return {"code": 500, "msg": "预约医生与排班不匹配"}
+    if specialist is not None and reg_obj.specialist != specialist:
+        return {"code": 500, "msg": "预约号类与排班不匹配"}
+    if department_id is not None and reg_obj.doctor and reg_obj.doctor.department_id != department_id:
+        return {"code": 500, "msg": "预约科室与排班不匹配"}
+    if db.query(Registration).filter(
+        Registration.patient_id == patient.patient_id,
+        Registration.doctor_id == reg_obj.doctor_id,
+        Registration.specialist == reg_obj.specialist,
+        Registration.status == 0,
+    ).first():
+        return {"code": 500, "msg": "该患者已存在同一医生的有效挂号"}
+    if reg_obj.number is None or reg_obj.number <= 0:
         return {"code": 500, "msg": "该时段号源已满"}
     try:
-        if reg_obj:
-            reg_obj.number -= 1
-            db.add(reg_obj)
+        updated = db.query(DoctorSchedule).filter(
+            DoctorSchedule.schedule_id == reg_obj.schedule_id,
+            DoctorSchedule.number > 0,
+        ).update({DoctorSchedule.number: DoctorSchedule.number - 1}, synchronize_session=False)
+        if updated != 1:
+            db.rollback()
+            return {"code": 500, "msg": "该时段号源已满"}
         registration = Registration(
             patient_id=patient.patient_id,
-            doctor_id=doctor_id,
-            specialist=specialist,
-            department_id=department_id,
+            doctor_id=reg_obj.doctor_id,
+            specialist=reg_obj.specialist,
+            department_id=reg_obj.doctor.department_id if reg_obj.doctor else department_id,
             time=datetime.datetime.now(),
             status=0,
         )

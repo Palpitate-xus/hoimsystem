@@ -36,6 +36,26 @@ export function cancelPrescription(data) {
   return request({ url: "prescriptionManagement/cancel", method: "post", data });
 }
 
+export function getPrescriptionTemplates() {
+  return request({ url: "prescriptionTemplate/list", method: "get" });
+}
+
+export function createPrescriptionTemplate(data) {
+  return request({ url: "prescriptionTemplate/create", method: "post", data });
+}
+
+export function updatePrescriptionTemplate(data) {
+  return request({ url: "prescriptionTemplate/update", method: "put", data });
+}
+
+export function deletePrescriptionTemplate(data) {
+  return request({ url: "prescriptionTemplate/delete", method: "post", data });
+}
+
+export function applyPrescriptionTemplate(data) {
+  return request({ url: "prescriptionTemplate/apply", method: "post", data });
+}
+
 export function createLabOrder(data) {
   return request({ url: "labOrder/create", method: "post", data });
 }

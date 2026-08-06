@@ -55,6 +55,11 @@
             <el-option v-for="p in patientOptions" :key="p.id" :label="p.name" :value="p.id" />
           </el-select>
         </el-form-item>
+        <el-form-item label="常用模板">
+          <el-select v-model="selectedTemplateId" clearable placeholder="选择模板自动带入药品" class="form-full-width" @change="applyTemplate">
+            <el-option v-for="template in templates" :key="template.template_id" :label="template.name" :value="template.template_id" />
+          </el-select>
+        </el-form-item>
         <el-alert
           v-if="selectedPatientAllergy"
           :title="'过敏史：' + selectedPatientAllergy"
@@ -86,7 +91,7 @@
 <script setup>
 import { ref, onMounted, computed } from "vue";
 import { ElMessage } from "element-plus";
-import { getPrescriptionList, createPrescription, cancelPrescription } from "@/api/doctor";
+import { getPrescriptionList, createPrescription, cancelPrescription, getPrescriptionTemplates, applyPrescriptionTemplate } from "@/api/doctor";
 import { commitCharge } from "@/api/charge";
 import { getPharmaceuticalList } from "@/api/pharmacy";
 import { getPatientList } from "@/api/admin";
@@ -107,6 +112,8 @@ const loading = ref(false);
 const dialogVisible = ref(false);
 const form = ref({ patient: null, phas: [] });
 const selectedPatientAllergy = ref("");
+const templates = ref([]);
+const selectedTemplateId = ref(null);
 
 const fetchList = async () => {
   loading.value = true;
@@ -121,9 +128,23 @@ const handleAdd = async () => {
   pharmaceuticals.value = phRes.data || [];
   const pRes = await getPatientList(searchQuery.value);
   patientOptions.value = pRes.data || [];
+  const templateRes = await getPrescriptionTemplates();
+  templates.value = templateRes.data || [];
   form.value = { patient: null, phas: [{ id: null, number: 1 }] };
   selectedPatientAllergy.value = "";
+  selectedTemplateId.value = null;
   dialogVisible.value = true;
+};
+
+const applyTemplate = async (templateId) => {
+  if (!templateId) return;
+  try {
+    const res = await applyPrescriptionTemplate({ template_id: templateId });
+    form.value.phas = (res.data || []).map((item) => ({ id: item.id, number: item.number }));
+    ElMessage.success("模板已带入处方");
+  } catch (e) {
+    ElMessage.error(e.msg || "模板应用失败");
+  }
 };
 
 const onPatientChange = (pid) => {

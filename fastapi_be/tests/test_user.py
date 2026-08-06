@@ -141,6 +141,17 @@ class TestPrepaidPermissions:
         )
         assert r.status_code == 403
 
+    async def test_cashier_rejects_non_positive_deduction(self, async_client, seed_data, auth_headers):
+        headers = auth_headers(seed_data["cashier_user"].username)
+        for amount in (0, -10):
+            r = await async_client.post(
+                "/api/prepaid/deduct",
+                headers=headers,
+                json={"identity": seed_data["patient"].identity, "amount": amount},
+            )
+            assert r.status_code == 200
+            assert r.json()["code"] == 500
+
 
 @pytest.mark.asyncio
 class TestUserRoleSecurity:

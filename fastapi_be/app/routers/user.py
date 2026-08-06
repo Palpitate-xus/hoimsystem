@@ -255,6 +255,8 @@ def prepaid_deduct(req: dict, db: Session = Depends(get_db), current_user: User 
     if not patient:
         return {"code": 500, "msg": "病人不存在"}
     amount = float(req.get("amount", 0))
+    if amount <= 0:
+        return {"code": 500, "msg": "扣款金额必须大于0"}
     current = patient.prepaid_balance or 0
     if current < amount:
         return {"code": 500, "msg": "预交金余额不足"}

@@ -1,5 +1,7 @@
 import pytest
 
+from app.models import Charge
+
 
 @pytest.mark.asyncio
 class TestChargeManagement:
@@ -68,6 +70,54 @@ class TestChargeManagement:
         r = await async_client.post("/api/chargeManagement/charge", headers=headers, json={"id": str(charge.charge_id)})
         assert r.status_code == 200
         assert r.json() == {"code": 500, "msg": "该收费记录状态不允许收费"}
+
+    async def test_refund_rejects_unpaid_charge(self, async_client, seed_data, auth_headers):
+        headers = auth_headers(seed_data["cashier_user"].username)
+        r = await async_client.post(
+            "/api/chargeManagement/refund",
+            headers=headers,
+            json={"charge_id": str(seed_data["charge"].charge_id), "reason": "误操作"},
+        )
+        assert r.status_code == 200
+        assert r.json() == {"code": 500, "msg": "未缴费或已退费，无法退费"}
+
+    async def test_refund_rejects_invalid_charge_amount(self, async_client, seed_data, auth_headers, db_session):
+        headers = auth_headers(seed_data["cashier_user"].username)
+        invalid_charge = Charge(
+            charge_time=seed_data["charge"].charge_time,
+            prescription_id=seed_data["prescription"].prescription_id,
+            amount=0,
+            status=1,
+        )
+        db_session.add(invalid_charge)
+        db_session.commit()
+
+        r = await async_client.post(
+            "/api/chargeManagement/refund",
+            headers=headers,
+            json={"charge_id": str(invalid_charge.charge_id), "reason": "金额异常"},
+        )
+        assert r.status_code == 200
+        assert r.json() == {"code": 500, "msg": "收费金额非法，无法退费"}
+        db_session.refresh(invalid_charge)
+        assert invalid_charge.status == 1
+
+    async def test_refund_rejects_duplicate_refund(self, async_client, seed_data, auth_headers):
+        headers = auth_headers(seed_data["cashier_user"].username)
+        payload = {"charge_id": str(seed_data["charge"].charge_id), "reason": "重复收费"}
+
+        await async_client.post(
+            "/api/chargeManagement/charge",
+            headers=headers,
+            json={"id": str(seed_data["charge"].charge_id)},
+        )
+        first = await async_client.post("/api/chargeManagement/refund", headers=headers, json=payload)
+        assert first.status_code == 200
+        assert first.json() == {"code": 200, "msg": "success"}
+
+        second = await async_client.post("/api/chargeManagement/refund", headers=headers, json=payload)
+        assert second.status_code == 200
+        assert second.json() == {"code": 500, "msg": "未缴费或已退费，无法退费"}
 
 
 @pytest.mark.asyncio

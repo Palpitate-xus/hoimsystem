@@ -1,8 +1,10 @@
 import datetime
+import math
 import random
 import traceback
 
 from fastapi import APIRouter, Depends
+from sqlalchemy import update
 from sqlalchemy.orm import Session
 
 from app.config import settings
@@ -108,8 +110,26 @@ def charge_refund(req: ChargeRefundRequest, db: Session = Depends(get_db), curre
         return {"code": 500, "msg": "收费记录不存在"}
     if charge_obj.status != 1:
         return {"code": 500, "msg": "未缴费或已退费，无法退费"}
-    charge_obj.status = 2
-    db.add(charge_obj)
+
+    # 当前接口是整笔退款，退款金额取自收费记录本身。拒绝异常金额，避免
+    # 脏数据导致财务报表出现负数、NaN/Infinity 或无法追溯的退款金额。
+    try:
+        charge_amount = float(charge_obj.amount)
+    except (TypeError, ValueError, OverflowError):
+        charge_amount = 0.0
+    if not math.isfinite(charge_amount) or charge_amount <= 0:
+        return {"code": 500, "msg": "收费金额非法，无法退费"}
+
+    # 状态条件放进 UPDATE，避免两个并发退款请求都先读到 status=1，
+    # 从而将同一笔收费记录重复退费。
+    result = db.execute(
+        update(Charge)
+        .where(Charge.charge_id == req.charge_id, Charge.status == 1)
+        .values(status=2)
+    )
+    if result.rowcount != 1:
+        db.rollback()
+        return {"code": 500, "msg": "未缴费或已退费，无法退费"}
     db.commit()
     return {"code": 200, "msg": "success"}
 

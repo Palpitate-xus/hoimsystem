@@ -1,4 +1,5 @@
 import datetime
+import math
 import traceback
 
 from fastapi import APIRouter, Depends
@@ -153,10 +154,25 @@ def return_medicine(req: PharmacyReturnRequest, current_user: User = Depends(req
 def stock_check(req: dict, current_user: User = Depends(require_roles(*PHARMACY_ROLES)), db: Session = Depends(get_db)):
     """库存盘点：传入 {items: [{pharmaceutical_id, actual_stock}]}，返回盈亏"""
     items = req.get("items", [])
+    if not isinstance(items, list):
+        return {"code": 500, "msg": "盘点明细格式错误"}
+    seen_ids = set()
+    for item in items:
+        pha_id = item.get("pharmaceutical_id") if isinstance(item, dict) else None
+        actual = item.get("actual_stock") if isinstance(item, dict) else None
+        if pha_id in seen_ids:
+            return {"code": 500, "msg": "同一药品不能重复盘点"}
+        seen_ids.add(pha_id)
+        try:
+            actual_value = float(actual)
+        except (TypeError, ValueError, OverflowError):
+            return {"code": 500, "msg": "实盘库存必须是非负整数"}
+        if not math.isfinite(actual_value) or actual_value < 0 or not actual_value.is_integer():
+            return {"code": 500, "msg": "实盘库存必须是非负整数"}
     result = []
     for item in items:
         pha_id = item.get("pharmaceutical_id")
-        actual = item.get("actual_stock")
+        actual = int(item.get("actual_stock"))
         pha = db.query(Pharmaceutical).filter(Pharmaceutical.pharmaceutical_id == pha_id).first()
         if pha:
             diff = actual - pha.stock

@@ -53,6 +53,28 @@ class TestPharmaceuticalManagement:
         assert body["code"] == 200
         assert "stock" in body["data"]
 
+    async def test_stock_check_rejects_invalid_inventory_counts(self, async_client, seed_data, auth_headers):
+        headers = auth_headers(seed_data["pharmacist_user"].username)
+        payload = {"items": [{"pharmaceutical_id": seed_data["pharmaceutical"].pharmaceutical_id, "actual_stock": -1}]}
+        r = await async_client.post("/api/pharmacy/stockCheck", headers=headers, json=payload)
+        assert r.status_code == 200
+        assert r.json()["code"] == 500
+
+        payload["items"][0]["actual_stock"] = 10.5
+        r = await async_client.post("/api/pharmacy/stockCheck", headers=headers, json=payload)
+        assert r.status_code == 200
+        assert r.json()["code"] == 500
+
+        duplicate = {
+            "items": [
+                {"pharmaceutical_id": seed_data["pharmaceutical"].pharmaceutical_id, "actual_stock": 10},
+                {"pharmaceutical_id": seed_data["pharmaceutical"].pharmaceutical_id, "actual_stock": 11},
+            ]
+        }
+        r = await async_client.post("/api/pharmacy/stockCheck", headers=headers, json=duplicate)
+        assert r.status_code == 200
+        assert r.json()["code"] == 500
+
 
 @pytest.mark.asyncio
 class TestPharmacy:

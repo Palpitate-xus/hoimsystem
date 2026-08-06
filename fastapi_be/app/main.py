@@ -385,8 +385,10 @@ app.mount("/uploads", StaticFiles(directory=upload_dir), name="uploads")
 
 # 自动创建数据库表（所有模型导入完成后）
 from app.database import Base, engine
+from app.schema_compat import ensure_operation_log_schema
 
 Base.metadata.create_all(bind=engine)
+ensure_operation_log_schema(engine)
 
 
 @app.get("/")

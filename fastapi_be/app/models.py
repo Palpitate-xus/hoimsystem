@@ -1978,3 +1978,63 @@ class TransfusionReaction(Base):
 
     request = relationship("BloodRequest")
     reporter = relationship("User")
+
+
+class InsuranceCatalog(Base):
+    __tablename__ = "hoimsystem_insurance_catalog"
+
+    catalog_id = Column(Integer, primary_key=True, autoincrement=True)
+    code = Column(String(40), nullable=False, unique=True)
+    name = Column(String(100), nullable=False)
+    category = Column(String(50), nullable=True)
+    reimbursement_ratio = Column(Float, nullable=False, default=0)
+    status = Column(Integer, nullable=False, default=1)
+    update_time = Column(DateTime, nullable=False)
+
+
+class InsuranceSettlement(Base):
+    __tablename__ = "hoimsystem_insurance_settlement"
+
+    settlement_id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    patient_id = Column(Integer, ForeignKey("hoimsystem_patient.patient_id"), nullable=False)
+    insurance_no = Column(String(50), nullable=False)
+    total_amount = Column(Float, nullable=False)
+    covered_amount = Column(Float, nullable=False)
+    self_amount = Column(Float, nullable=False)
+    status = Column(Integer, nullable=False, default=0)  # 0=处理中 1=成功 2=失败
+    operator_id = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=False)
+    settlement_time = Column(DateTime, nullable=False)
+
+    patient = relationship("Patient")
+    operator = relationship("User")
+
+
+class ChronicDiseaseRegistration(Base):
+    __tablename__ = "hoimsystem_chronic_disease_registration"
+
+    registration_id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    patient_id = Column(Integer, ForeignKey("hoimsystem_patient.patient_id"), nullable=False)
+    disease_name = Column(String(100), nullable=False)
+    card_no = Column(String(50), nullable=True)
+    limit_amount = Column(Float, nullable=True)
+    status = Column(Integer, nullable=False, default=1)
+    doctor_id = Column(Integer, ForeignKey("hoimsystem_doctor.doctor_id"), nullable=True)
+    create_time = Column(DateTime, nullable=False)
+
+    patient = relationship("Patient")
+    doctor = relationship("Doctor")
+
+
+class DrgGrouping(Base):
+    __tablename__ = "hoimsystem_drg_grouping"
+
+    grouping_id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    patient_id = Column(Integer, ForeignKey("hoimsystem_patient.patient_id"), nullable=False)
+    group_code = Column(String(30), nullable=False)
+    diagnosis = Column(String(300), nullable=False)
+    expected_amount = Column(Float, nullable=False, default=0)
+    actual_amount = Column(Float, nullable=False, default=0)
+    profit = Column(Float, nullable=False, default=0)
+    create_time = Column(DateTime, nullable=False)
+
+    patient = relationship("Patient")

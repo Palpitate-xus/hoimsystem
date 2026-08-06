@@ -72,7 +72,7 @@ const ROLE_USERS = [
     name: "nurse",
     username: "nurse01",
     password: "123456",
-    menu: ["生命体征录入", "分诊台管理", "候诊巡视", "预约报到", "病区床位", "输液管理", "注射管理", "皮试管理", "过敏标识", "交接班记录",
+    menu: ["生命体征录入", "分诊台管理", "候诊巡视", "预约报到", "病区床位", "输液管理", "注射管理", "皮试管理", "过敏标识", "交接班记录", "配药核对",
       "入院登记", "护士工作站", "住院费用", "出院结算", "消息中心"],
   },
   {
@@ -359,6 +359,14 @@ test.describe("业务页面渲染", () => {
     await page.goto(`${BASE}/#/inpatient/shiftHandover`, { waitUntil: "networkidle" });
     await expect(page.getByText("交接班记录").first()).toBeVisible({ timeout: 5000 });
     await expect(page.getByText("提交交班")).toBeVisible({ timeout: 5000 });
+    await expect(page.locator(".el-table")).toBeVisible({ timeout: 5000 });
+  });
+
+  test("nurse 访问配药核对页面", async ({ page }, testInfo) => {
+    skipIfUserUnavailable(testInfo, "nurse");
+    await login(page, "nurse01", "123456");
+    await page.goto(`${BASE}/#/inpatient/dispenseVerification`, { waitUntil: "networkidle" });
+    await expect(page.getByText("配药核对").first()).toBeVisible({ timeout: 5000 });
     await expect(page.locator(".el-table")).toBeVisible({ timeout: 5000 });
   });
 });

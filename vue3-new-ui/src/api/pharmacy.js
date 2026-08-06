@@ -75,3 +75,6 @@ export function approveInventoryAdjustment(data) {
 export function rejectInventoryAdjustment(data) {
   return request({ url: "pharmacy/inventoryAdjustment/reject", method: "post", data });
 }
+
+export function getDispenseVerificationList() { return request({ url: "pharmacy/verificationList", method: "get" }); }
+export function verifyDispense(data) { return request({ url: "pharmacy/verify", method: "post", data }); }

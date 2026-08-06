@@ -602,6 +602,12 @@ export const asyncRoutes = [
         meta: { title: "交接班记录", permissions: ["admin", "nurse"] },
       },
       {
+        path: "dispenseVerification",
+        name: "DispenseVerification",
+        component: () => import("@/views/inpatient/dispenseVerification.vue"),
+        meta: { title: "配药核对", permissions: ["admin", "nurse", "pharmacist"] },
+      },
+      {
         path: "inpatientCharge",
         name: "InpatientChargePage",
         component: () => import("@/views/inpatient/inpatientCharge.vue"),

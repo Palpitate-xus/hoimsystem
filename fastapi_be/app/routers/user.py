@@ -229,9 +229,9 @@ def delete_user(req: dict, db: Session = Depends(get_db), current_user: User = D
 def get_prepaid_balance(identity: str, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     """查询预交金余额"""
     if current_user.user_role == ROLE_PATIENT and current_user.username != identity:
-        return {"code": 403, "msg": "无权访问其他患者账户"}
+        raise HTTPException(status_code=403, detail="无权访问其他患者账户")
     if current_user.user_role not in {ROLE_PATIENT, ROLE_CASHIER, *ADMIN_ROLES}:
-        return {"code": 403, "msg": "无权访问"}
+        raise HTTPException(status_code=403, detail="无权访问")
     patient = db.query(Patient).filter(Patient.identity == identity).first()
     if not patient:
         return {"code": 500, "msg": "病人不存在"}

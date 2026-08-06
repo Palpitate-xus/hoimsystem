@@ -111,8 +111,7 @@ class TestPrepaidPermissions:
             params={"identity": seed_data["patient2"].identity},
             headers=auth_headers(seed_data["patient_user"].username),
         )
-        assert r.status_code == 200
-        assert r.json()["code"] == 403
+        assert r.status_code == 403
 
     async def test_cashier_can_recharge_and_deduct(self, async_client, seed_data, auth_headers):
         headers = auth_headers(seed_data["cashier_user"].username)

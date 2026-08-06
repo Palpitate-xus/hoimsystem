@@ -47,3 +47,10 @@ export function deleteTemperatureRecord(data) {
     data,
   });
 }
+
+export function getInfusionList() { return request({ url: "/infusion/list", method: "get" }); }
+export function createInfusion(data) { return request({ url: "/infusion/create", method: "post", data }); }
+export function executeInfusion(data) { return request({ url: "/infusion/execute", method: "post", data }); }
+export function observeInfusion(data) { return request({ url: "/infusion/observe", method: "post", data }); }
+export function completeInfusion(data) { return request({ url: "/infusion/complete", method: "post", data }); }
+export function cancelInfusion(data) { return request({ url: "/infusion/cancel", method: "post", data }); }

@@ -795,6 +795,22 @@ class NursingAssessmentUpdateRequest(BaseModel):
     note: str | None = Field(default=None, max_length=1000)
 
 
+class NursingPlanCreateRequest(BaseModel):
+    admission_id: str
+    patient_id: int
+    nursing_diagnosis: str = Field(..., min_length=1, max_length=500)
+    goal: str = Field(..., min_length=1, max_length=500)
+    measures: str = Field(..., min_length=1, max_length=1000)
+
+
+class NursingPlanUpdateRequest(BaseModel):
+    plan_id: str
+    nursing_diagnosis: str | None = Field(default=None, min_length=1, max_length=500)
+    goal: str | None = Field(default=None, min_length=1, max_length=500)
+    measures: str | None = Field(default=None, min_length=1, max_length=1000)
+    status: int | None = Field(default=None, ge=0, le=2)
+
+
 class TemperatureRecordCreateRequest(BaseModel):
     admission_id: str
     patient_id: int

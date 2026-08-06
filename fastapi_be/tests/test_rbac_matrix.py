@@ -207,6 +207,9 @@ ENDPOINTS = [
     ("POST", "/api/nursingAssessment/create", {"admin", "super_admin", "nurse"}, {"admission_id": "x", "patient_id": 1, "adl_score": 50}, {}),
     ("PUT", "/api/nursingAssessment/update", {"admin", "super_admin", "nurse"}, {"assessment_id": "x", "adl_score": 50}, {}),
     ("POST", "/api/nursingAssessment/complete", {"admin", "super_admin", "nurse"}, {"assessment_id": "x"}, {}),
+    ("GET", "/api/nursingPlan/list", {"admin", "super_admin", "nurse"}, None, {}),
+    ("POST", "/api/nursingPlan/create", {"admin", "super_admin", "nurse"}, {"admission_id": "x", "patient_id": 1, "nursing_diagnosis": "x", "goal": "x", "measures": "x"}, {}),
+    ("PUT", "/api/nursingPlan/update", {"admin", "super_admin", "nurse"}, {"plan_id": "x", "status": 1}, {}),
 
     # purchase.py (getList is auth-only, not admin-only — pharmacist/cashier may view)
     ("GET", "/api/purchase/getList", {"admin", "super_admin", "director", "doctor", "nurse", "cashier", "pharmacist", "guide", "patient", "lab_technician", "registrar"}, None, {"status": 0}),

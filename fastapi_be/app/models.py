@@ -1343,6 +1343,25 @@ class NursingAssessment(Base):
     nurse = relationship("User")
 
 
+class NursingPlan(Base):
+    __tablename__ = "hoimsystem_nursing_plan"
+
+    plan_id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    admission_id = Column(String(36), ForeignKey("hoimsystem_admission.admission_id"), nullable=False)
+    patient_id = Column(Integer, ForeignKey("hoimsystem_patient.patient_id"), nullable=False)
+    nurse_id = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=False)
+    nursing_diagnosis = Column(String(500), nullable=False)
+    goal = Column(String(500), nullable=False)
+    measures = Column(String(1000), nullable=False)
+    status = Column(Integer, nullable=False, default=0)  # 0=进行中 1=已完成 2=已取消
+    create_time = Column(DateTime, nullable=False)
+    update_time = Column(DateTime, nullable=False)
+
+    admission = relationship("Admission")
+    patient = relationship("Patient")
+    nurse = relationship("User")
+
+
 class TemperatureRecord(Base):
     __tablename__ = "hoimsystem_temperature_record"
 

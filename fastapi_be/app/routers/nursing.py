@@ -8,12 +8,13 @@ from app.dependencies import NURSING_ROLES, get_current_user, require_roles
 from app.models import (
     Admission,
     NursingAssessment,
+    NursingPlan,
     NursingRecord,
     Patient,
     TemperatureRecord,
     User,
 )
-from app.schemas import NursingAssessmentCreateRequest, NursingAssessmentUpdateRequest, NursingRecordCreateRequest, TemperatureRecordCreateRequest
+from app.schemas import NursingAssessmentCreateRequest, NursingAssessmentUpdateRequest, NursingPlanCreateRequest, NursingPlanUpdateRequest, NursingRecordCreateRequest, TemperatureRecordCreateRequest
 
 router = APIRouter()
 
@@ -76,6 +77,50 @@ def complete_nursing_assessment(req: NursingAssessmentUpdateRequest, current_use
     item.update_time = datetime.datetime.now()
     db.commit()
     return {"code": 200, "msg": "success", "data": _serialize_assessment(item)}
+
+
+def _serialize_plan(item: NursingPlan):
+    return {"plan_id": item.plan_id, "admission_id": item.admission_id, "patient_id": item.patient_id, "patient_name": item.patient.name if item.patient else "", "nursing_diagnosis": item.nursing_diagnosis, "goal": item.goal, "measures": item.measures, "status": item.status, "status_text": {0: "进行中", 1: "已完成", 2: "已取消"}.get(item.status, "未知"), "nurse_name": item.nurse.username if item.nurse else "", "create_time": item.create_time, "update_time": item.update_time}
+
+
+@router.get("/nursingPlan/list")
+def list_nursing_plans(admission_id: str | None = None, current_user: User = Depends(require_roles(*NURSING_ROLES)), db: Session = Depends(get_db)):
+    query = db.query(NursingPlan).order_by(NursingPlan.status.asc(), NursingPlan.create_time.desc())
+    if admission_id:
+        query = query.filter(NursingPlan.admission_id == admission_id)
+    return {"code": 200, "msg": "success", "data": [_serialize_plan(item) for item in query.all()]}
+
+
+@router.post("/nursingPlan/create")
+def create_nursing_plan(req: NursingPlanCreateRequest, current_user: User = Depends(require_roles(*NURSING_ROLES)), db: Session = Depends(get_db)):
+    admission = db.query(Admission).filter(Admission.admission_id == req.admission_id, Admission.patient_id == req.patient_id).first()
+    if not admission:
+        return {"code": 500, "msg": "在院记录不存在或患者不匹配"}
+    now = datetime.datetime.now()
+    item = NursingPlan(admission_id=req.admission_id, patient_id=req.patient_id, nurse_id=current_user.user_id, nursing_diagnosis=req.nursing_diagnosis.strip(), goal=req.goal.strip(), measures=req.measures.strip(), status=0, create_time=now, update_time=now)
+    db.add(item)
+    db.commit()
+    return {"code": 200, "msg": "success", "data": _serialize_plan(item)}
+
+
+@router.put("/nursingPlan/update")
+def update_nursing_plan(req: NursingPlanUpdateRequest, current_user: User = Depends(require_roles(*NURSING_ROLES)), db: Session = Depends(get_db)):
+    item = db.query(NursingPlan).filter(NursingPlan.plan_id == req.plan_id).first()
+    if not item:
+        return {"code": 500, "msg": "护理计划不存在"}
+    if current_user.user_role not in {"admin", "super_admin"} and item.nurse_id != current_user.user_id:
+        return {"code": 403, "msg": "无权修改他人的护理计划"}
+    if req.status is not None and item.status != 0:
+        return {"code": 500, "msg": "已结束护理计划不能再次变更状态"}
+    for field in ("nursing_diagnosis", "goal", "measures"):
+        value = getattr(req, field)
+        if value is not None:
+            setattr(item, field, value.strip())
+    if req.status is not None:
+        item.status = req.status
+    item.update_time = datetime.datetime.now()
+    db.commit()
+    return {"code": 200, "msg": "success", "data": _serialize_plan(item)}
 
 
 @router.get("/nursingRecord/getList")

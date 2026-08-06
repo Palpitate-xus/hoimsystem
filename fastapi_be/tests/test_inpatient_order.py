@@ -22,7 +22,7 @@ class TestInpatientOrderSafety:
         )
         db_session.add(admission)
         db_session.commit()
-        headers = auth_headers(seed_data["doctor_user"].username)
+        headers = auth_headers(seed_data["admin_user"].username)
         base = {
             "admission_id": admission.admission_id,
             "patient_id": seed_data["patient2"].patient_id,

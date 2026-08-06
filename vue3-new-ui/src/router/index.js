@@ -526,6 +526,18 @@ export const asyncRoutes = [
   },
 
   {
+    path: "/equipment",
+    component: Layout,
+    redirect: "noRedirect",
+    name: "Equipment",
+    alwaysShow: true,
+    meta: { title: "物资设备", icon: "office-building", permissions: ["admin", "director", "nurse", "pharmacist"] },
+    children: [
+      { path: "index", name: "EquipmentIndex", component: () => import("@/views/equipment/index.vue"), meta: { title: "设备与耗材", permissions: ["admin", "director", "nurse", "pharmacist"] } },
+    ],
+  },
+
+  {
     path: "/lab",
     component: Layout,
     redirect: "noRedirect",

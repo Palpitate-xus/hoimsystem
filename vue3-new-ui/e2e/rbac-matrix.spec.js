@@ -152,10 +152,11 @@ test.describe("登录认证", () => {
   });
 
   test("未登录访问首页被重定向到登录页", async ({ page }) => {
+    await page.goto(`${BASE}/#/index`, { waitUntil: "networkidle" });
     await page.evaluate(() => localStorage.clear());
-    await page.goto(`${BASE}/admin/doctorManagement`, { waitUntil: "networkidle" });
+    await page.goto(`${BASE}/#/admin/doctorManagement`, { waitUntil: "networkidle" });
     await page.waitForTimeout(1500);
-    expect(page.url()).toContain("/login");
+    await expect(page).toHaveURL(/#\/login(?:\?|$)/);
   });
 });
 
@@ -264,7 +265,7 @@ test.describe("UI 布局完整性", () => {
   test("admin 登录后侧栏 logo 显示", async ({ page }) => {
     await login(page, "admin", "admin123");
     await page.waitForTimeout(2000);
-    await expect(page.locator(".sidebar-logo-container, .logo-container, .hoim-logo").or(page.locator("text=HIS")).first()).toBeVisible({ timeout: 5000 });
+    await expect(page.getByRole("link", { name: "医院门诊信息管理系统" })).toBeVisible({ timeout: 5000 });
   });
 
   test("admin 登录后顶部导航有用户信息", async ({ page }) => {

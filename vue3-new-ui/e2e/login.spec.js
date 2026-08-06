@@ -31,7 +31,7 @@ test.describe("挂号流程", () => {
     await page.waitForURL("**/index", { timeout: 10000 });
 
     // 进入预约挂号页面
-    await page.locator("text=预约挂号").first().click();
+    await page.getByRole("button", { name: "预约挂号", exact: true }).click();
     await page.waitForURL("**/appointment", { timeout: 5000 });
     await page.waitForTimeout(1000);
     await expect(page.locator(".el-card, .el-table").first()).toBeVisible({ timeout: 5000 });

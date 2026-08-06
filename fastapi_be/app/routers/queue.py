@@ -4,8 +4,8 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.dependencies import get_current_user, User, User, require_roles, CLINICAL_ROLES
-from app.models import PatrolRecord, Queue
+from app.dependencies import ADMIN_ROLES, CLINICAL_ROLES, ROLE_PATIENT, get_current_user, User, require_roles
+from app.models import Doctor, Patient, PatrolRecord, Queue
 from app.schemas import QueueCallNextRequest, QueuePassRequest, QueueSkipRequest
 
 router = APIRouter()
@@ -18,6 +18,8 @@ def mark_emergency(req: QueueSkipRequest, current_user: User = Depends(require_r
     queue_item = db.query(Queue).filter(Queue.queue_id == req.queue_id).first()
     if not queue_item:
         return {"code": 500, "msg": "队列记录不存在"}
+    if queue_item.status != 0:
+        return {"code": 500, "msg": "当前队列状态不允许标记急诊"}
     queue_item.type = 2  # 2 = 急诊优先
     db.add(queue_item)
     db.commit()
@@ -32,6 +34,8 @@ def reorder_queue(req: dict, current_user: User = Depends(require_roles(*CLINICA
     queue_item = db.query(Queue).filter(Queue.queue_id == queue_id).first()
     if not queue_item:
         return {"code": 500, "msg": "队列记录不存在"}
+    if queue_item.status != 0:
+        return {"code": 500, "msg": "只有候诊队列可以调整顺序"}
     # 将该记录设为最小序号（优先）
     min_queue = db.query(Queue).filter(Queue.doctor_id == queue_item.doctor_id, Queue.status == 0).order_by(Queue.queue_number).first()
     if min_queue and min_queue.queue_id != queue_id:
@@ -44,7 +48,16 @@ def reorder_queue(req: dict, current_user: User = Depends(require_roles(*CLINICA
 @router.get("/queue/getList")
 def get_queue_list(keyword: str | None = None, current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)):
-    queues = db.query(Queue).order_by(Queue.queue_number).all()
+    query = db.query(Queue)
+    if current_user.user_role == ROLE_PATIENT:
+        patient_ids = [item.patient_id for item in db.query(Patient).filter(Patient.identity == current_user.username).all()]
+        query = query.filter(Queue.patient_id.in_(patient_ids or [-1]))
+    elif current_user.user_role == "doctor":
+        doctor_ids = [item.doctor_id for item in db.query(Doctor).filter(Doctor.user_id == current_user.user_id).all()]
+        query = query.filter(Queue.doctor_id.in_(doctor_ids or [-1]))
+    elif current_user.user_role not in ADMIN_ROLES and current_user.user_role not in {"director", "nurse"}:
+        query = query.filter(Queue.queue_id == -1)
+    queues = query.order_by(Queue.queue_number).all()
     data = []
     for item in queues:
         data.append(
@@ -66,6 +79,10 @@ def get_queue_list(keyword: str | None = None, current_user: User = Depends(get_
 @router.post("/queue/callNext")
 def call_next(req: QueueCallNextRequest, current_user: User = Depends(require_roles(*CLINICAL_ROLES)),
     db: Session = Depends(get_db)):
+    if current_user.user_role == "doctor":
+        doctor_ids = [item.doctor_id for item in db.query(Doctor).filter(Doctor.user_id == current_user.user_id).all()]
+        if req.doctor_id not in doctor_ids:
+            return {"code": 403, "msg": "不能操作其他医生的候诊队列"}
     queue_item = db.query(Queue).filter(Queue.doctor_id == req.doctor_id, Queue.status == 0).order_by(Queue.queue_number).first()
     if not queue_item:
         return {"code": 500, "msg": "暂无候诊患者"}
@@ -88,6 +105,8 @@ def pass_queue(req: QueuePassRequest, current_user: User = Depends(require_roles
     queue_item = db.query(Queue).filter(Queue.queue_id == req.queue_id).first()
     if not queue_item:
         return {"code": 500, "msg": "队列记录不存在"}
+    if queue_item.status != 1:
+        return {"code": 500, "msg": "只有已叫号队列可以过号"}
     queue_item.status = 2
     db.add(queue_item)
     db.commit()
@@ -100,6 +119,8 @@ def skip_queue(req: QueueSkipRequest, current_user: User = Depends(require_roles
     queue_item = db.query(Queue).filter(Queue.queue_id == req.queue_id).first()
     if not queue_item:
         return {"code": 500, "msg": "队列记录不存在"}
+    if queue_item.status not in (0, 1):
+        return {"code": 500, "msg": "当前队列状态不允许跳过"}
     queue_item.status = 2
     db.add(queue_item)
     db.commit()

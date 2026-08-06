@@ -1,6 +1,8 @@
 import pytest
 import datetime
 
+from app.models import Queue
+
 
 @pytest.mark.asyncio
 class TestQueue:
@@ -14,6 +16,35 @@ class TestQueue:
         r = await async_client.post("/api/queue/callNext", headers=headers, json={"doctor_id": seed_data["doctor"].doctor_id})
         # No queue items, should return 500 or success with no data
         assert r.status_code == 200
+
+    async def test_queue_state_and_patient_visibility(self, async_client, seed_data, auth_headers, db_session):
+        completed = Queue(
+            patient_id=seed_data["patient2"].patient_id,
+            doctor_id=seed_data["doctor"].doctor_id,
+            queue_number=999,
+            type=0,
+            status=2,
+            create_time=datetime.datetime.now(),
+        )
+        db_session.add(completed)
+        db_session.commit()
+
+        patient_list = await async_client.get(
+            "/api/queue/getList", headers=auth_headers(seed_data["patient_user"].username)
+        )
+        assert patient_list.json()["code"] == 200
+        assert all(item["queue_id"] != completed.queue_id for item in patient_list.json()["data"])
+
+        admin_headers = auth_headers(seed_data["admin_user"].username)
+        emergency = await async_client.post(
+            "/api/queue/emergency", headers=admin_headers, json={"queue_id": completed.queue_id}
+        )
+        assert emergency.json()["code"] == 500
+
+        passed = await async_client.post(
+            "/api/queue/pass", headers=admin_headers, json={"queue_id": completed.queue_id}
+        )
+        assert passed.json()["code"] == 500
 
 
 @pytest.mark.asyncio

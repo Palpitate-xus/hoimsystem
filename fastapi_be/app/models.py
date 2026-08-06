@@ -235,6 +235,24 @@ class Prescription(Base):
     doctor = relationship("Doctor", back_populates="prescriptions")
     charges = relationship("Charge", back_populates="prescription")
     pre_phas = relationship("PrePha", back_populates="prescription", primaryjoin="PrePha.prescription_id == Prescription.prescription_id", foreign_keys="PrePha.prescription_id")
+    dispense_verification = relationship("DispenseVerification", back_populates="prescription", uselist=False, cascade="all, delete-orphan")
+
+
+class DispenseVerification(Base):
+    __tablename__ = "hoimsystem_dispense_verification"
+
+    verification_id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    prescription_id = Column(String(36), ForeignKey("hoimsystem_prescription.prescription_id"), nullable=False, unique=True)
+    pharmacist_id = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=False)
+    verifier_id = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=True)
+    status = Column(Integer, nullable=False, default=0)  # 0=待核对 1=已核对 2=异常
+    note = Column(String(200), nullable=True)
+    create_time = Column(DateTime, nullable=False)
+    verify_time = Column(DateTime, nullable=True)
+
+    prescription = relationship("Prescription", back_populates="dispense_verification")
+    pharmacist = relationship("User", foreign_keys=[pharmacist_id])
+    verifier = relationship("User", foreign_keys=[verifier_id])
 
 
 class PrescriptionTemplate(Base):

@@ -172,6 +172,11 @@ class PrescriptionCancelRequest(BaseModel):
     prescription_id: str
 
 
+class PharmacyVerificationRequest(BaseModel):
+    verification_id: str
+    note: str = Field(default="", max_length=200)
+
+
 class PrescriptionTemplateCreateRequest(BaseModel):
     name: str = Field(..., min_length=1, max_length=50)
     items: list[dict]

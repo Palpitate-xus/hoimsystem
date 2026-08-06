@@ -178,6 +178,20 @@ class TestInventoryAdjustment:
         assert r.status_code == 200
         assert r.json()["code"] == 500
 
+    async def test_dispense_requires_nurse_verification(self, async_client, seed_data, auth_headers):
+        pharmacist_headers = auth_headers(seed_data["pharmacist_user"].username)
+        doctor_headers = auth_headers(seed_data["doctor_user"].username)
+        nurse_headers = auth_headers(seed_data["nurse_user"].username)
+        created = await async_client.post("/api/prescriptionManagement/create", headers=doctor_headers, json={"patient": seed_data["patient2"].patient_id, "phas": [{"id": seed_data["pharmaceutical"].pharmaceutical_id, "number": 1}]})
+        prescription_id = created.json()["data"]["uuid"]
+        assert (await async_client.post("/api/pharmacy/audit", headers=pharmacist_headers, json={"prescription_id": prescription_id})).json()["code"] == 200
+        assert (await async_client.post("/api/pharmacy/dispense", headers=pharmacist_headers, json={"prescription_id": prescription_id})).json()["code"] == 200
+        listed = await async_client.get("/api/pharmacy/verificationList", headers=nurse_headers)
+        item = next(row for row in listed.json()["data"] if row["prescription_id"] == prescription_id)
+        assert item["status"] == 0
+        assert (await async_client.post("/api/pharmacy/verify", headers=nurse_headers, json={"verification_id": item["verification_id"], "note": "药品、剂量与处方一致"})).json()["code"] == 200
+        assert (await async_client.post("/api/pharmacy/verify", headers=nurse_headers, json={"verification_id": item["verification_id"]})).json()["code"] == 500
+
     async def test_return_rejects_unreviewed_prescription(self, async_client, seed_data, auth_headers):
         r = await async_client.post("/api/pharmacy/return", headers=auth_headers(seed_data["pharmacist_user"].username), json={
             "prescription_id": str(seed_data["prescription"].prescription_id),

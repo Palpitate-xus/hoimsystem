@@ -6,10 +6,10 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.dependencies import PHARMACY_ROLES, User, require_roles
-from app.models import Pharmaceutical, PrePha, Prescription
+from app.dependencies import NURSING_ROLES, PHARMACY_ROLES, User, require_roles
+from app.models import DispenseVerification, Pharmaceutical, PrePha, Prescription
 from app.pagination import paginate
-from app.schemas import PharmacyAuditRequest, PharmacyDispenseRequest, PharmacyReturnRequest
+from app.schemas import PharmacyAuditRequest, PharmacyDispenseRequest, PharmacyReturnRequest, PharmacyVerificationRequest
 
 router = APIRouter()
 
@@ -88,6 +88,39 @@ def dispense_prescription(req: PharmacyDispenseRequest, current_user: User = Dep
     if updated != 1:
         db.rollback()
         return {"code": 500, "msg": "处方未审核或已发药"}
+    if not db.query(DispenseVerification).filter(DispenseVerification.prescription_id == req.prescription_id).first():
+        db.add(DispenseVerification(prescription_id=req.prescription_id, pharmacist_id=current_user.user_id, status=0, create_time=datetime.datetime.now()))
+    db.commit()
+    return {"code": 200, "msg": "success"}
+
+
+@router.get("/pharmacy/verificationList")
+def get_verification_list(current_user: User = Depends(require_roles(*(PHARMACY_ROLES | NURSING_ROLES))), db: Session = Depends(get_db)):
+    items = db.query(DispenseVerification).join(Prescription).order_by(DispenseVerification.create_time.desc()).all()
+    data = []
+    for item in items:
+        data.append({
+            "verification_id": item.verification_id,
+            "prescription_id": item.prescription_id,
+            "patient_name": item.prescription.patient.name if item.prescription and item.prescription.patient else "",
+            "doctor_name": item.prescription.doctor.name if item.prescription and item.prescription.doctor else "",
+            "pharmaceuticals": [{"name": line.pharmaceutical.name if line.pharmaceutical else "", "number": line.number} for line in item.prescription.pre_phas] if item.prescription else [],
+            "status": item.status,
+            "status_text": {0: "待护士核对", 1: "已核对", 2: "核对异常"}.get(item.status, "未知"),
+            "note": item.note or "",
+            "pharmacist_name": item.pharmacist.username if item.pharmacist else "",
+            "verifier_name": item.verifier.username if item.verifier else "",
+            "create_time": item.create_time,
+            "verify_time": item.verify_time,
+        })
+    return {"code": 200, "msg": "success", "data": data}
+
+
+@router.post("/pharmacy/verify")
+def verify_dispense(req: PharmacyVerificationRequest, current_user: User = Depends(require_roles(*NURSING_ROLES)), db: Session = Depends(get_db)):
+    updated = db.query(DispenseVerification).filter(DispenseVerification.verification_id == req.verification_id, DispenseVerification.status == 0).update({DispenseVerification.status: 1, DispenseVerification.verifier_id: current_user.user_id, DispenseVerification.note: req.note.strip(), DispenseVerification.verify_time: datetime.datetime.now()}, synchronize_session=False)
+    if updated != 1:
+        return {"code": 500, "msg": "核对记录不存在或已处理"}
     db.commit()
     return {"code": 200, "msg": "success"}
 

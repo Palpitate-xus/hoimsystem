@@ -96,9 +96,14 @@ def charge_commit(req: ChargeCommitRequest, db: Session = Depends(get_db), curre
         return {"code": 500, "msg": "该收费记录已缴费，不能重复收费"}
     if charge_obj.status != 0:
         return {"code": 500, "msg": "该收费记录状态不允许收费"}
-    charge_obj.status = 1
-    charge_obj.time = datetime.datetime.now()
-    db.add(charge_obj)
+    paid_time = datetime.datetime.now()
+    updated = db.query(Charge).filter(
+        Charge.charge_id == charge_obj.charge_id,
+        Charge.status == 0,
+    ).update({Charge.status: 1, Charge.time: paid_time}, synchronize_session=False)
+    if updated != 1:
+        db.rollback()
+        return {"code": 500, "msg": "该收费记录已缴费，不能重复收费"}
     db.commit()
     return {"code": 200, "msg": "success"}
 

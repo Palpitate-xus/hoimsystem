@@ -112,13 +112,13 @@ const submitRoleChange = async () => {
 const resetPassword = async (row) => {
   try {
     await ElMessageBox.confirm(
-      `确定重置用户 "${row.username}" 的密码吗？重置后密码为 123456`,
+      `确定重置用户 "${row.username}" 的密码吗？重置后请通过安全渠道告知用户临时密码。`,
       "重置密码确认",
       { type: "warning" }
     );
     const res = await resetUserPassword({ user_id: row.user_id });
     if (res.code === 200) {
-      ElMessage.success(`密码已重置为: ${res.data.new_password}`);
+      ElMessage.success("密码重置成功，请通过安全渠道告知用户临时密码");
     } else {
       ElMessage.error(res.msg || "重置失败");
     }

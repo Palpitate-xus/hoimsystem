@@ -31,7 +31,7 @@
           <template #default="{row}">
             <el-button v-if="row.status===0" size="small" type="primary" @click="audit(row)">审核</el-button>
             <el-button v-if="row.status===1" size="small" type="success" @click="dispense(row)">发药</el-button>
-            <el-button size="small" @click="handleReturn(row)">退药</el-button>
+            <el-button v-if="row.status===2" size="small" @click="handleReturn(row)">退药</el-button>
           </template>
         </el-table-column>
       </el-table>

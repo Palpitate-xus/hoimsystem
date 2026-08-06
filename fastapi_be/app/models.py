@@ -1777,3 +1777,58 @@ class AntibioticApproval(Base):
     prescription = relationship("Prescription")
     applicant = relationship("User", foreign_keys=[applicant_id])
     reviewer = relationship("User", foreign_keys=[reviewer_id])
+
+
+class InfectionCase(Base):
+    __tablename__ = "hoimsystem_infection_case"
+
+    case_id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    patient_id = Column(Integer, ForeignKey("hoimsystem_patient.patient_id"), nullable=False)
+    department_id = Column(Integer, ForeignKey("hoimsystem_department.department_id"), nullable=True)
+    infection_type = Column(String(100), nullable=False)
+    pathogen = Column(String(100), nullable=True)
+    onset_date = Column(Date, nullable=False)
+    severity = Column(Integer, nullable=False, default=1)
+    status = Column(Integer, nullable=False, default=0)  # 0=报告 1=调查中 2=已闭环
+    description = Column(String(500), nullable=True)
+    reporter_id = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=False)
+    create_time = Column(DateTime, nullable=False)
+    update_time = Column(DateTime, nullable=False)
+
+    patient = relationship("Patient")
+    department = relationship("Department")
+    reporter = relationship("User")
+
+
+class DisinfectionMonitor(Base):
+    __tablename__ = "hoimsystem_disinfection_monitor"
+
+    monitor_id = Column(Integer, primary_key=True, autoincrement=True)
+    area = Column(String(100), nullable=False)
+    item = Column(String(100), nullable=False)
+    result = Column(String(100), nullable=False)
+    standard = Column(String(100), nullable=True)
+    pass_flag = Column(Integer, nullable=False, default=1)
+    remark = Column(String(300), nullable=True)
+    operator_id = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=False)
+    monitor_time = Column(DateTime, nullable=False)
+
+    operator = relationship("User")
+
+
+class OccupationalExposure(Base):
+    __tablename__ = "hoimsystem_occupational_exposure"
+
+    exposure_id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    exposure_type = Column(String(100), nullable=False)
+    source_patient_id = Column(Integer, ForeignKey("hoimsystem_patient.patient_id"), nullable=True)
+    body_site = Column(String(100), nullable=False)
+    description = Column(String(500), nullable=False)
+    action_taken = Column(String(500), nullable=True)
+    status = Column(Integer, nullable=False, default=0)  # 0=待处理 1=处理中 2=已结案
+    reporter_id = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=False)
+    exposure_time = Column(DateTime, nullable=False)
+    create_time = Column(DateTime, nullable=False)
+
+    source_patient = relationship("Patient")
+    reporter = relationship("User")

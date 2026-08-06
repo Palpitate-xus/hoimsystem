@@ -876,6 +876,26 @@ class DischargeSummaryCreateRequest(BaseModel):
     note: str | None = Field(default=None, max_length=300)
 
 
+class MedicalRecordHomeCreateRequest(BaseModel):
+    admission_id: str
+    admission_diagnosis: str = Field(..., min_length=1, max_length=500)
+    discharge_diagnosis: str = Field(default="", max_length=500)
+    other_diagnosis: str = Field(default="", max_length=1000)
+    operation_summary: str = Field(default="", max_length=1000)
+    complication: str = Field(default="", max_length=1000)
+    discharge_status: int = Field(default=0, ge=0, le=4)
+
+
+class MedicalRecordHomeUpdateRequest(BaseModel):
+    home_id: str
+    admission_diagnosis: str | None = Field(default=None, min_length=1, max_length=500)
+    discharge_diagnosis: str | None = Field(default=None, max_length=500)
+    other_diagnosis: str | None = Field(default=None, max_length=1000)
+    operation_summary: str | None = Field(default=None, max_length=1000)
+    complication: str | None = Field(default=None, max_length=1000)
+    discharge_status: int | None = Field(default=None, ge=0, le=4)
+
+
 # ===== 结构化电子病历 Schemas =====
 
 

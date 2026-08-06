@@ -1468,6 +1468,32 @@ class DischargeSummary(Base):
     patient = relationship("Patient")
 
 
+class MedicalRecordHome(Base):
+    __tablename__ = "hoimsystem_medical_record_home"
+
+    home_id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    admission_id = Column(String(36), ForeignKey("hoimsystem_admission.admission_id"), nullable=False, unique=True)
+    patient_id = Column(Integer, ForeignKey("hoimsystem_patient.patient_id"), nullable=False)
+    doctor_id = Column(Integer, ForeignKey("hoimsystem_doctor.doctor_id"), nullable=True)
+    admission_diagnosis = Column(String(500), nullable=False)
+    discharge_diagnosis = Column(String(500), nullable=True)
+    other_diagnosis = Column(String(1000), nullable=True)
+    operation_summary = Column(String(1000), nullable=True)
+    complication = Column(String(1000), nullable=True)
+    discharge_status = Column(Integer, nullable=False, default=0)  # 0=治愈 1=好转 2=未愈 3=死亡 4=转院
+    total_fee = Column(Float, nullable=False, default=0)
+    status = Column(Integer, nullable=False, default=0)  # 0=草稿 1=已提交 2=已归档
+    creator_id = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=False)
+    create_time = Column(DateTime, nullable=False)
+    update_time = Column(DateTime, nullable=False)
+    submit_time = Column(DateTime, nullable=True)
+
+    admission = relationship("Admission")
+    patient = relationship("Patient")
+    doctor = relationship("Doctor")
+    creator = relationship("User")
+
+
 # ===== 体检系统模块 =====
 
 

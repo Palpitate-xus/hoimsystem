@@ -4,7 +4,15 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.dependencies import get_current_user, User, User, require_roles, CLINICAL_ROLES
+from app.dependencies import (
+    ADMIN_ROLES,
+    CLINICAL_ROLES,
+    ROLE_DIRECTOR,
+    ROLE_DOCTOR,
+    ROLE_PATIENT,
+    get_current_user,
+    require_roles,
+)
 from app.models import (
     Appointment,
     Doctor,
@@ -365,6 +373,22 @@ def get_medical_record_detail(req: MedicalRecordDetailRequest, current_user: Use
     record = db.query(MedicalRecord).filter(MedicalRecord.medical_record_id == req.medical_record_id).first()
     if not record:
         return {"code": 500, "msg": "病历不存在"}
+    if current_user.user_role in ADMIN_ROLES:
+        can_view = True
+    elif current_user.user_role == ROLE_PATIENT:
+        can_view = db.query(Patient).filter(
+            Patient.identity == current_user.username,
+            Patient.patient_id == record.patient_id,
+        ).first() is not None
+    elif current_user.user_role in {ROLE_DOCTOR, ROLE_DIRECTOR}:
+        can_view = db.query(Doctor).filter(
+            Doctor.user_id == current_user.user_id,
+            Doctor.doctor_id == record.doctor_id,
+        ).first() is not None
+    else:
+        can_view = False
+    if not can_view:
+        return {"code": 403, "msg": "无权查看该病历"}
     data = {
         "uuid": str(record.medical_record_id),
         "consultation_time": (record.consultation_time.strftime("%Y-%m-%d %H:%M:%S") if record.consultation_time else None),

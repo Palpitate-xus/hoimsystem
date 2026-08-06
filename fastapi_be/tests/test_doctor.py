@@ -62,6 +62,16 @@ class TestDoctorMedicalRecord:
         assert r.status_code == 200
         assert r.json()["code"] == 403
 
+    async def test_doctor_cannot_view_other_doctor_medical_record(self, async_client, seed_data, auth_headers):
+        mr = seed_data["medical_record"]
+        r = await async_client.post(
+            "/api/medicalRecord/detail",
+            headers=auth_headers(seed_data["doctor_user"].username),
+            json={"medical_record_id": str(mr.medical_record_id)},
+        )
+        assert r.status_code == 200
+        assert r.json()["code"] == 403
+
 
 @pytest.mark.asyncio
 class TestDoctorPrescription:

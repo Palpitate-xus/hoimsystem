@@ -72,3 +72,5 @@ export function createNursingPlan(data) { return request({ url: "/nursingPlan/cr
 export function updateNursingPlan(data) { return request({ url: "/nursingPlan/update", method: "put", data }); }
 export function getCriticalCareRecordList(params) { return request({ url: "/criticalCareRecord/list", method: "get", params }); }
 export function createCriticalCareRecord(data) { return request({ url: "/criticalCareRecord/create", method: "post", data }); }
+export function getSurgeryNursingRecordList(params) { return request({ url: "/surgeryNursingRecord/list", method: "get", params }); }
+export function createSurgeryNursingRecord(data) { return request({ url: "/surgeryNursingRecord/create", method: "post", data }); }

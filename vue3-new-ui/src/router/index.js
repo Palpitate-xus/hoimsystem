@@ -301,7 +301,7 @@ export const asyncRoutes = [
         path: "windowRegistration",
         name: "WindowRegistration",
         component: () => import("@/views/charge/windowRegistration.vue"),
-        meta: { title: "窗口挂号", permissions: ["admin", "cashier"] },
+        meta: { title: "窗口挂号", permissions: ["admin", "cashier", "registrar"] },
       },
       {
         path: "registrarService",

@@ -28,6 +28,10 @@ export function windowRegistration(data) {
   return request({ url: "windowRegistration/create", method: "post", data });
 }
 
+export function getWindowRegistrationSchedules(keyword = "") {
+  return request({ url: "windowRegistration/schedules", method: "get", params: { keyword } });
+}
+
 export function windowCancelRegistration(data) {
   return request({ url: "windowRegistration/cancel", method: "post", data });
 }

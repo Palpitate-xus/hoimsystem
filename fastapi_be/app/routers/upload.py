@@ -60,7 +60,9 @@ def get_avatar(filename: str):
 
 
 @router.get("/uploads/reports/{filename}")
-def get_report(filename: str):
+def get_report(filename: str, current_user: User = Depends(get_current_user)):
+    if filename != os.path.basename(filename) or filename in {"", ".", ".."}:
+        raise HTTPException(status_code=400, detail="非法文件名")
     filepath = os.path.join(REPORT_DIR, filename)
     if not os.path.exists(filepath):
         raise HTTPException(status_code=404, detail="文件不存在")

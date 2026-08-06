@@ -55,3 +55,19 @@ export function getVisitRecords(keyword = "") {
 export function createReview(data) {
   return request({ url: "review/create", method: "post", data });
 }
+
+export function getFamilyMembers() {
+  return request({ url: "familyMember/list", method: "get" });
+}
+
+export function createFamilyMember(data) {
+  return request({ url: "familyMember/create", method: "post", data });
+}
+
+export function updateFamilyMember(data) {
+  return request({ url: "familyMember/update", method: "put", data });
+}
+
+export function deleteFamilyMember(id) {
+  return request({ url: "familyMember/delete", method: "delete", data: { id } });
+}

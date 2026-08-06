@@ -121,6 +121,12 @@ export const asyncRoutes = [
         meta: { title: "现场挂号", permissions: ["patient"] },
       },
       {
+        path: "familyMember",
+        name: "FamilyMember",
+        component: () => import("@/views/patient/familyMember.vue"),
+        meta: { title: "家庭成员", permissions: ["patient"] },
+      },
+      {
         path: "charge",
         name: "PatientCharge",
         component: () => import("@/views/patient/charge.vue"),

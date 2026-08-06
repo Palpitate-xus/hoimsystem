@@ -184,6 +184,24 @@ def get_lab_result_list(keyword: str | None = None, current_user: User = Depends
     return {"code": 200, "msg": "success", "data": data}
 
 
+@router.get("/labResult/getCritical")
+def get_critical_lab_results(current_user: User = Depends(require_roles(*LAB_ROLES)), db: Session = Depends(get_db)):
+    results = db.query(LabResult).filter(LabResult.abnormal_flag == 1).order_by(LabResult.report_time.desc()).all()
+    data = []
+    for item in results:
+        data.append({
+            "id": str(item.lab_result_id),
+            "patient_name": item.lab_order.patient.name if item.lab_order and item.lab_order.patient else "",
+            "check_name": item.lab_order.check_type if item.lab_order else "",
+            "check_time": (item.report_time.strftime("%Y-%m-%d %H:%M:%S") if item.report_time else None),
+            "result": item.result,
+            "audit_status": item.audit_status,
+            "audit_status_text": "已审核" if item.audit_status else "待审核",
+            "technician_name": item.technician.username if item.technician else "",
+        })
+    return {"code": 200, "msg": "success", "data": data}
+
+
 @router.post("/labResult/detail")
 def get_lab_result_detail(req: LabResultAuditRequest, current_user: User = Depends(require_roles(*LAB_ROLES)), db: Session = Depends(get_db)):
     result = db.query(LabResult).filter(LabResult.lab_result_id == req.lab_result_id).first()

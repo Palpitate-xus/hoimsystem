@@ -72,7 +72,7 @@ const ROLE_USERS = [
     name: "nurse",
     username: "nurse01",
     password: "123456",
-    menu: ["生命体征录入", "分诊台管理", "候诊巡视", "预约报到", "病区床位", "输液管理", "注射管理",
+    menu: ["生命体征录入", "分诊台管理", "候诊巡视", "预约报到", "病区床位", "输液管理", "注射管理", "皮试管理",
       "入院登记", "护士工作站", "住院费用", "出院结算", "消息中心"],
   },
   {
@@ -333,6 +333,14 @@ test.describe("业务页面渲染", () => {
     await page.goto(`${BASE}/#/inpatient/injection`, { waitUntil: "networkidle" });
     await page.waitForTimeout(1000);
     await expect(page.getByText("注射管理").first()).toBeVisible({ timeout: 5000 });
+    await expect(page.locator(".el-table")).toBeVisible({ timeout: 5000 });
+  });
+
+  test("nurse 访问皮试管理页面", async ({ page }, testInfo) => {
+    skipIfUserUnavailable(testInfo, "nurse");
+    await login(page, "nurse01", "123456");
+    await page.goto(`${BASE}/#/inpatient/skinTest`, { waitUntil: "networkidle" });
+    await expect(page.getByText("皮试管理").first()).toBeVisible({ timeout: 5000 });
     await expect(page.locator(".el-table")).toBeVisible({ timeout: 5000 });
   });
 });

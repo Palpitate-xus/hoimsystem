@@ -57,3 +57,6 @@ export function cancelInfusion(data) { return request({ url: "/infusion/cancel",
 export function getInjectionList() { return request({ url: "/injection/list", method: "get" }); }
 export function executeInjection(data) { return request({ url: "/injection/execute", method: "post", data }); }
 export function completeInjection(data) { return request({ url: "/injection/complete", method: "post", data }); }
+export function getSkinTestList() { return request({ url: "/skinTest/list", method: "get" }); }
+export function administerSkinTest(data) { return request({ url: "/skinTest/administer", method: "post", data }); }
+export function assessSkinTest(data) { return request({ url: "/skinTest/assess", method: "post", data }); }

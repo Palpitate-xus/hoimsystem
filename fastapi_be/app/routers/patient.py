@@ -131,16 +131,32 @@ def patient_appointment(req: AppointmentCreateRequest, current_user: User = Depe
     if breach_count >= 3:
         return {"code": 500, "msg": "您30天内违约3次，预约资格已暂停30天"}
     reg_obj = db.query(DoctorSchedule).filter(DoctorSchedule.schedule_id == req.id).first()
-    if reg_obj and reg_obj.number <= 0:
+    if not reg_obj:
+        return {"code": 500, "msg": "预约排班不存在"}
+    if reg_obj.doctor_id != req.doctor_id or reg_obj.specialist != req.specialist:
+        return {"code": 500, "msg": "预约医生或号类与排班不匹配"}
+    try:
+        appt_date = datetime.datetime.strptime(req.date, "%Y-%m-%d").date()
+    except (TypeError, ValueError):
+        return {"code": 500, "msg": "预约日期格式错误"}
+    if db.query(Appointment).filter(
+        Appointment.patient_id == patient_obj.patient_id,
+        Appointment.doctor_id == req.doctor_id,
+        Appointment.specialist == req.specialist,
+        Appointment.time == appt_date,
+        Appointment.status == 0,
+    ).first():
+        return {"code": 500, "msg": "同一患者不能重复预约同一医生同一日期"}
+    if reg_obj.number <= 0:
         return {"code": 500, "msg": "该时段号源已满"}
     try:
-        if reg_obj:
-            reg_obj.number -= 1
-            db.add(reg_obj)
-        try:
-            appt_date = datetime.datetime.strptime(req.date, "%Y-%m-%d").date()
-        except ValueError:
-            appt_date = req.date
+        updated = db.query(DoctorSchedule).filter(
+            DoctorSchedule.schedule_id == req.id,
+            DoctorSchedule.number > 0,
+        ).update({DoctorSchedule.number: DoctorSchedule.number - 1}, synchronize_session=False)
+        if updated != 1:
+            db.rollback()
+            return {"code": 500, "msg": "该时段号源已满"}
         appointment = Appointment(
             patient_id=patient_obj.patient_id,
             doctor_id=req.doctor_id,

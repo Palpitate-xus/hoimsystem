@@ -1,19 +1,25 @@
 import pytest
 
+from app.models import DoctorSchedule
+
 
 @pytest.mark.asyncio
 class TestPatientAppointment:
     async def test_appointment_list(self, async_client, seed_data, auth_headers):
         r = await async_client.get("/api/appointmentManagement/appointmentList", headers=auth_headers(seed_data["patient_user"].username))
         assert r.status_code == 200
-        assert r.json()["code"] == 200
+        assert r.json()["code"] == 200, r.text
 
-    async def test_create_and_get_appointment(self, async_client, seed_data, auth_headers):
+    async def test_create_and_get_appointment(self, async_client, seed_data, auth_headers, db_session):
         patient_user = seed_data["patient_user"]
         headers = auth_headers(patient_user.username)
-        # create appointment using first schedule
+        schedule = db_session.query(DoctorSchedule).filter(
+            DoctorSchedule.doctor_id == seed_data["doctor"].doctor_id,
+            DoctorSchedule.specialist == 1,
+        ).first()
+        # create appointment using the current fixture's schedule
         r = await async_client.post("/api/appointmentManagement/create", headers=headers, json={
-            "id": 1, "date": "2026-05-01", "department_id": seed_data["department"].department_id,
+            "id": schedule.schedule_id, "date": "2026-05-01", "department_id": seed_data["department"].department_id,
             "doctor_id": seed_data["doctor"].doctor_id, "time": "上午", "specialist": 1
         })
         assert r.status_code == 200
@@ -35,6 +41,22 @@ class TestPatientAppointment:
         # verify cancelled
         r = await async_client.get("/api/appointmentManagement/getList", headers=headers)
         assert r.json()["data"][0]["status"] == "已取消"
+
+    async def test_appointment_rejects_invalid_schedule_and_mismatched_doctor(self, async_client, seed_data, auth_headers):
+        headers = auth_headers(seed_data["patient_user"].username)
+        invalid = await async_client.post("/api/appointmentManagement/create", headers=headers, json={
+            "id": 999999, "date": "2026-12-01", "department_id": seed_data["department"].department_id,
+            "doctor_id": seed_data["doctor"].doctor_id, "time": "上午", "specialist": 1
+        })
+        assert invalid.status_code == 200
+        assert invalid.json()["code"] == 500
+
+        mismatched = await async_client.post("/api/appointmentManagement/create", headers=headers, json={
+            "id": 1, "date": "2026-12-01", "department_id": seed_data["department"].department_id,
+            "doctor_id": seed_data["director_doctor"].doctor_id, "time": "上午", "specialist": 1
+        })
+        assert mismatched.status_code == 200
+        assert mismatched.json()["code"] == 500
 
 
 @pytest.mark.asyncio

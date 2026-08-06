@@ -292,6 +292,25 @@ class Pharmaceutical(Base):
     antibiotic_level = Column(Integer, default=0)  # 0=非抗菌药 1=非限制级 2=限制级 3=特殊使用级
 
 
+class InventoryAdjustment(Base):
+    __tablename__ = "hoimsystem_inventory_adjustment"
+
+    adjustment_id = Column(Integer, primary_key=True, autoincrement=True)
+    pharmaceutical_id = Column(Integer, ForeignKey("hoimsystem_pharmaceutical.pharmaceutical_id"), nullable=False)
+    adjustment_type = Column(String(10), nullable=False)  # loss / gain
+    quantity = Column(Integer, nullable=False)
+    reason = Column(String(200), nullable=False)
+    status = Column(Integer, default=0, nullable=False)  # 0=pending, 1=approved, 2=rejected
+    applicant_id = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=False)
+    approver_id = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=True)
+    create_time = Column(DateTime, nullable=False)
+    approve_time = Column(DateTime, nullable=True)
+
+    pharmaceutical = relationship("Pharmaceutical")
+    applicant = relationship("User", foreign_keys=[applicant_id])
+    approver = relationship("User", foreign_keys=[approver_id])
+
+
 # ===== 新增表 =====
 
 

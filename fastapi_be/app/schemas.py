@@ -185,6 +185,17 @@ class PrescriptionTemplateIdRequest(BaseModel):
     template_id: int
 
 
+class InventoryAdjustmentCreateRequest(BaseModel):
+    pharmaceutical_id: int
+    adjustment_type: str
+    quantity: int = Field(..., gt=0)
+    reason: str = Field(..., min_length=1, max_length=200)
+
+
+class InventoryAdjustmentActionRequest(BaseModel):
+    adjustment_id: int
+
+
 class MedicalRecordCreateRequest(BaseModel):
     patient_id: int
     symptom: str

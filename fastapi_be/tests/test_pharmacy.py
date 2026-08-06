@@ -97,6 +97,57 @@ class TestPharmacy:
         assert r.status_code == 200
         assert r.json()["code"] == 500
 
+
+@pytest.mark.asyncio
+class TestInventoryAdjustment:
+    async def test_loss_requires_approval_and_updates_stock_atomically(self, async_client, seed_data, auth_headers, db_session):
+        pharmacist_headers = auth_headers(seed_data["pharmacist_user"].username)
+        admin_headers = auth_headers(seed_data["admin_user"].username)
+        pha = seed_data["pharmaceutical"]
+        initial_stock = pha.stock
+        created = await async_client.post(
+            "/api/pharmacy/inventoryAdjustment/create",
+            headers=pharmacist_headers,
+            json={"pharmaceutical_id": pha.pharmaceutical_id, "adjustment_type": "loss", "quantity": 3, "reason": "破损"},
+        )
+        assert created.status_code == 200
+        adjustment_id = created.json()["data"]["adjustment_id"]
+        db_session.refresh(pha)
+        assert pha.stock == initial_stock
+
+        approved = await async_client.post("/api/pharmacy/inventoryAdjustment/approve", headers=admin_headers, json={"adjustment_id": adjustment_id})
+        assert approved.status_code == 200
+        assert approved.json()["code"] == 200
+        db_session.expire(pha)
+        assert db_session.get(type(pha), pha.pharmaceutical_id).stock == initial_stock - 3
+
+        duplicate = await async_client.post("/api/pharmacy/inventoryAdjustment/approve", headers=admin_headers, json={"adjustment_id": adjustment_id})
+        assert duplicate.status_code == 200
+        assert duplicate.json()["code"] == 500
+
+    async def test_reject_keeps_stock_and_invalid_loss_is_blocked(self, async_client, seed_data, auth_headers, db_session):
+        pharmacist_headers = auth_headers(seed_data["pharmacist_user"].username)
+        admin_headers = auth_headers(seed_data["admin_user"].username)
+        pha = seed_data["pharmaceutical"]
+        initial_stock = pha.stock
+        invalid = await async_client.post(
+            "/api/pharmacy/inventoryAdjustment/create",
+            headers=pharmacist_headers,
+            json={"pharmaceutical_id": pha.pharmaceutical_id, "adjustment_type": "loss", "quantity": initial_stock + 1, "reason": "数量错误"},
+        )
+        adjustment_id = invalid.json()["data"]["adjustment_id"]
+        rejected = await async_client.post("/api/pharmacy/inventoryAdjustment/reject", headers=admin_headers, json={"adjustment_id": adjustment_id})
+        assert rejected.status_code == 200
+        db_session.expire(pha)
+        assert db_session.get(type(pha), pha.pharmaceutical_id).stock == initial_stock
+
+        bad_type = await async_client.post(
+            "/api/pharmacy/inventoryAdjustment/create",
+            headers=pharmacist_headers,
+            json={"pharmaceutical_id": pha.pharmaceutical_id, "adjustment_type": "unknown", "quantity": 1, "reason": "错误类型"},
+        )
+        assert bad_type.json()["code"] == 500
+
     async def test_dispense(self, async_client, seed_data, auth_headers):
         pharmacist_headers = auth_headers(seed_data["pharmacist_user"].username)
         doctor_headers = auth_headers(seed_data["doctor_user"].username)

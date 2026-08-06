@@ -1,0 +1,121 @@
+import datetime
+
+from fastapi import APIRouter, Depends
+from sqlalchemy.orm import Session
+
+from app.database import get_db
+from app.dependencies import ADMIN_ROLES, PHARMACY_ROLES, User, require_roles
+from app.models import InventoryAdjustment, Pharmaceutical
+from app.schemas import InventoryAdjustmentActionRequest, InventoryAdjustmentCreateRequest
+
+router = APIRouter()
+
+
+def _serialize(item: InventoryAdjustment):
+    return {
+        "id": item.adjustment_id,
+        "adjustment_id": item.adjustment_id,
+        "pharmaceutical_id": item.pharmaceutical_id,
+        "pharmaceutical_name": item.pharmaceutical.name if item.pharmaceutical else "",
+        "adjustment_type": item.adjustment_type,
+        "quantity": item.quantity,
+        "reason": item.reason,
+        "status": item.status,
+        "applicant": item.applicant.username if item.applicant else "",
+        "approver": item.approver.username if item.approver else "",
+        "create_time": item.create_time,
+        "approve_time": item.approve_time,
+    }
+
+
+@router.get("/pharmacy/inventoryAdjustment/list")
+def list_inventory_adjustments(
+    status: int | None = None,
+    current_user: User = Depends(require_roles(*PHARMACY_ROLES)),
+    db: Session = Depends(get_db),
+):
+    query = db.query(InventoryAdjustment).order_by(InventoryAdjustment.adjustment_id.desc())
+    if status is not None:
+        query = query.filter(InventoryAdjustment.status == status)
+    return {"code": 200, "msg": "success", "data": [_serialize(item) for item in query.all()]}
+
+
+@router.post("/pharmacy/inventoryAdjustment/create")
+def create_inventory_adjustment(
+    req: InventoryAdjustmentCreateRequest,
+    current_user: User = Depends(require_roles(*PHARMACY_ROLES)),
+    db: Session = Depends(get_db),
+):
+    if req.adjustment_type not in {"loss", "gain"}:
+        return {"code": 500, "msg": "调整类型必须为报损或报溢"}
+    pharmaceutical = db.query(Pharmaceutical).filter(Pharmaceutical.pharmaceutical_id == req.pharmaceutical_id).first()
+    if not pharmaceutical:
+        return {"code": 500, "msg": "药品不存在"}
+    item = InventoryAdjustment(
+        pharmaceutical_id=req.pharmaceutical_id,
+        adjustment_type=req.adjustment_type,
+        quantity=req.quantity,
+        reason=req.reason.strip(),
+        status=0,
+        applicant_id=current_user.user_id,
+        create_time=datetime.datetime.now(),
+    )
+    db.add(item)
+    db.commit()
+    return {"code": 200, "msg": "success", "data": _serialize(item)}
+
+
+@router.post("/pharmacy/inventoryAdjustment/approve")
+def approve_inventory_adjustment(
+    req: InventoryAdjustmentActionRequest,
+    current_user: User = Depends(require_roles(*ADMIN_ROLES)),
+    db: Session = Depends(get_db),
+):
+    item = db.query(InventoryAdjustment).filter(InventoryAdjustment.adjustment_id == req.adjustment_id).first()
+    if not item:
+        return {"code": 404, "msg": "库存调整单不存在"}
+    if item.status != 0:
+        return {"code": 500, "msg": "库存调整单已处理"}
+    pharmaceutical = db.query(Pharmaceutical).filter(Pharmaceutical.pharmaceutical_id == item.pharmaceutical_id).first()
+    if not pharmaceutical:
+        return {"code": 500, "msg": "药品不存在"}
+    updated_adjustment = db.query(InventoryAdjustment).filter(InventoryAdjustment.adjustment_id == item.adjustment_id, InventoryAdjustment.status == 0).update(
+        {InventoryAdjustment.status: 1, InventoryAdjustment.approver_id: current_user.user_id, InventoryAdjustment.approve_time: datetime.datetime.now()},
+        synchronize_session=False,
+    )
+    if updated_adjustment != 1:
+        db.rollback()
+        return {"code": 500, "msg": "库存调整单已处理"}
+    if item.adjustment_type == "loss":
+        updated = db.query(Pharmaceutical).filter(Pharmaceutical.pharmaceutical_id == item.pharmaceutical_id, Pharmaceutical.stock >= item.quantity).update(
+            {Pharmaceutical.stock: Pharmaceutical.stock - item.quantity}, synchronize_session=False
+        )
+    else:
+        updated = db.query(Pharmaceutical).filter(Pharmaceutical.pharmaceutical_id == item.pharmaceutical_id).update(
+            {Pharmaceutical.stock: Pharmaceutical.stock + item.quantity}, synchronize_session=False
+        )
+    if updated != 1:
+        db.rollback()
+        return {"code": 500, "msg": "报损数量超过当前库存"}
+    db.commit()
+    return {"code": 200, "msg": "success"}
+
+
+@router.post("/pharmacy/inventoryAdjustment/reject")
+def reject_inventory_adjustment(
+    req: InventoryAdjustmentActionRequest,
+    current_user: User = Depends(require_roles(*ADMIN_ROLES)),
+    db: Session = Depends(get_db),
+):
+    item = db.query(InventoryAdjustment).filter(InventoryAdjustment.adjustment_id == req.adjustment_id).first()
+    if not item:
+        return {"code": 404, "msg": "库存调整单不存在"}
+    updated = db.query(InventoryAdjustment).filter(InventoryAdjustment.adjustment_id == item.adjustment_id, InventoryAdjustment.status == 0).update(
+        {InventoryAdjustment.status: 2, InventoryAdjustment.approver_id: current_user.user_id, InventoryAdjustment.approve_time: datetime.datetime.now()},
+        synchronize_session=False,
+    )
+    if updated != 1:
+        db.rollback()
+        return {"code": 500, "msg": "库存调整单已处理"}
+    db.commit()
+    return {"code": 200, "msg": "success"}

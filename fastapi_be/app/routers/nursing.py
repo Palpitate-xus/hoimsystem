@@ -10,12 +10,14 @@ from app.models import (
     CriticalCareRecord,
     NursingAssessment,
     NursingPlan,
+    SurgeryNursingRecord,
+    SurgerySchedule,
     NursingRecord,
     Patient,
     TemperatureRecord,
     User,
 )
-from app.schemas import CriticalCareRecordCreateRequest, NursingAssessmentCreateRequest, NursingAssessmentUpdateRequest, NursingPlanCreateRequest, NursingPlanUpdateRequest, NursingRecordCreateRequest, TemperatureRecordCreateRequest
+from app.schemas import CriticalCareRecordCreateRequest, NursingAssessmentCreateRequest, NursingAssessmentUpdateRequest, NursingPlanCreateRequest, NursingPlanUpdateRequest, NursingRecordCreateRequest, SurgeryNursingRecordCreateRequest, TemperatureRecordCreateRequest
 
 router = APIRouter()
 
@@ -149,6 +151,33 @@ def create_critical_record(req: CriticalCareRecordCreateRequest, current_user: U
     db.add(item)
     db.commit()
     return {"code": 200, "msg": "success", "data": _serialize_critical(item)}
+
+
+def _serialize_surgery_nursing(item: SurgeryNursingRecord):
+    return {"record_id": item.record_id, "schedule_id": item.schedule_id, "patient_id": item.patient_id, "patient_name": item.patient.name if item.patient else "", "surgery_name": item.schedule.application.surgery_name if item.schedule and item.schedule.application else "", "phase": item.phase, "phase_text": ["术前", "术中", "术后"][item.phase], "checklist": item.checklist, "instrument_count": item.instrument_count or "", "specimen": item.specimen or "", "wound_condition": item.wound_condition or "", "note": item.note or "", "record_time": item.record_time, "nurse_name": item.nurse.username if item.nurse else ""}
+
+
+@router.get("/surgeryNursingRecord/list")
+def list_surgery_nursing_records(schedule_id: str | None = None, current_user: User = Depends(require_roles(*NURSING_ROLES)), db: Session = Depends(get_db)):
+    query = db.query(SurgeryNursingRecord).order_by(SurgeryNursingRecord.record_time.desc())
+    if schedule_id:
+        query = query.filter(SurgeryNursingRecord.schedule_id == schedule_id)
+    return {"code": 200, "msg": "success", "data": [_serialize_surgery_nursing(item) for item in query.all()]}
+
+
+@router.post("/surgeryNursingRecord/create")
+def create_surgery_nursing_record(req: SurgeryNursingRecordCreateRequest, current_user: User = Depends(require_roles(*NURSING_ROLES)), db: Session = Depends(get_db)):
+    schedule = db.query(SurgerySchedule).filter(SurgerySchedule.schedule_id == req.schedule_id, SurgerySchedule.patient_id == req.patient_id).first()
+    if not schedule:
+        return {"code": 500, "msg": "手术排台记录不存在或患者不匹配"}
+    try:
+        record_time = datetime.datetime.strptime(req.record_time, "%Y-%m-%d %H:%M:%S") if req.record_time else datetime.datetime.now()
+    except ValueError:
+        return {"code": 500, "msg": "时间格式必须为 YYYY-MM-DD HH:MM:SS"}
+    item = SurgeryNursingRecord(schedule_id=req.schedule_id, patient_id=req.patient_id, nurse_id=current_user.user_id, phase=req.phase, checklist=req.checklist.strip(), instrument_count=req.instrument_count.strip(), specimen=req.specimen.strip(), wound_condition=req.wound_condition.strip(), note=req.note.strip(), record_time=record_time)
+    db.add(item)
+    db.commit()
+    return {"code": 200, "msg": "success", "data": _serialize_surgery_nursing(item)}
 
 
 @router.get("/nursingRecord/getList")

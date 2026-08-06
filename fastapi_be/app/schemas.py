@@ -825,6 +825,18 @@ class CriticalCareRecordCreateRequest(BaseModel):
     note: str = Field(default="", max_length=1000)
 
 
+class SurgeryNursingRecordCreateRequest(BaseModel):
+    schedule_id: str
+    patient_id: int
+    phase: int = Field(..., ge=0, le=2)
+    checklist: str = Field(..., min_length=1, max_length=1000)
+    instrument_count: str = Field(default="", max_length=300)
+    specimen: str = Field(default="", max_length=500)
+    wound_condition: str = Field(default="", max_length=500)
+    note: str = Field(default="", max_length=1000)
+    record_time: str | None = None
+
+
 class TemperatureRecordCreateRequest(BaseModel):
     admission_id: str
     patient_id: int

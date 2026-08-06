@@ -1384,6 +1384,26 @@ class CriticalCareRecord(Base):
     nurse = relationship("User")
 
 
+class SurgeryNursingRecord(Base):
+    __tablename__ = "hoimsystem_surgery_nursing_record"
+
+    record_id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    schedule_id = Column(String(36), ForeignKey("hoimsystem_surgery_schedule.schedule_id"), nullable=False)
+    patient_id = Column(Integer, ForeignKey("hoimsystem_patient.patient_id"), nullable=False)
+    nurse_id = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=False)
+    phase = Column(Integer, nullable=False)  # 0=术前 1=术中 2=术后
+    checklist = Column(String(1000), nullable=False)
+    instrument_count = Column(String(300), nullable=True)
+    specimen = Column(String(500), nullable=True)
+    wound_condition = Column(String(500), nullable=True)
+    note = Column(String(1000), nullable=True)
+    record_time = Column(DateTime, nullable=False)
+
+    schedule = relationship("SurgerySchedule")
+    patient = relationship("Patient")
+    nurse = relationship("User")
+
+
 class TemperatureRecord(Base):
     __tablename__ = "hoimsystem_temperature_record"
 

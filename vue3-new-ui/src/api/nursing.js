@@ -67,3 +67,6 @@ export function getNursingAssessmentList(params) { return request({ url: "/nursi
 export function createNursingAssessment(data) { return request({ url: "/nursingAssessment/create", method: "post", data }); }
 export function updateNursingAssessment(data) { return request({ url: "/nursingAssessment/update", method: "put", data }); }
 export function completeNursingAssessment(data) { return request({ url: "/nursingAssessment/complete", method: "post", data }); }
+export function getNursingPlanList(params) { return request({ url: "/nursingPlan/list", method: "get", params }); }
+export function createNursingPlan(data) { return request({ url: "/nursingPlan/create", method: "post", data }); }
+export function updateNursingPlan(data) { return request({ url: "/nursingPlan/update", method: "put", data }); }

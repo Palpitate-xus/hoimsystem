@@ -292,6 +292,7 @@ from app.routers import (
     allergy,
     antibiotic,
     backup,
+    blood,
     charge,
     charge_item,
     checkin,
@@ -392,6 +393,7 @@ app.include_router(system.router, prefix="/api")
 app.include_router(upload.router, prefix="/api")
 app.include_router(triage.router, prefix="/api")
 app.include_router(backup.router, prefix="/api")
+app.include_router(blood.router, prefix="/api")
 app.include_router(triage_desk.router, prefix="/api")
 app.include_router(consumable.router, prefix="/api")
 app.include_router(purchase.router, prefix="/api")

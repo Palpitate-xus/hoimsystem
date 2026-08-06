@@ -1909,3 +1909,72 @@ class ConsumableTrace(Base):
     consumable = relationship("Consumable")
     patient = relationship("Patient")
     operator = relationship("User")
+
+
+class BloodRequest(Base):
+    __tablename__ = "hoimsystem_blood_request"
+
+    request_id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    patient_id = Column(Integer, ForeignKey("hoimsystem_patient.patient_id"), nullable=False)
+    doctor_id = Column(Integer, ForeignKey("hoimsystem_doctor.doctor_id"), nullable=True)
+    blood_type = Column(String(20), nullable=False)
+    component = Column(String(50), nullable=False)
+    volume = Column(Integer, nullable=False)
+    reason = Column(String(300), nullable=False)
+    blood_type_verified = Column(Integer, nullable=False, default=0)
+    status = Column(Integer, nullable=False, default=0)  # 0=待审批 1=已批准 2=退回 3=已发血
+    applicant_id = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=False)
+    reviewer_id = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=True)
+    create_time = Column(DateTime, nullable=False)
+    review_time = Column(DateTime, nullable=True)
+
+    patient = relationship("Patient")
+    doctor = relationship("Doctor")
+    applicant = relationship("User", foreign_keys=[applicant_id])
+    reviewer = relationship("User", foreign_keys=[reviewer_id])
+
+
+class BloodCrossMatch(Base):
+    __tablename__ = "hoimsystem_blood_cross_match"
+
+    cross_match_id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    request_id = Column(String(36), ForeignKey("hoimsystem_blood_request.request_id"), nullable=False)
+    donor_blood_type = Column(String(20), nullable=False)
+    result = Column(String(100), nullable=False)
+    pass_flag = Column(Integer, nullable=False, default=0)
+    operator_id = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=False)
+    match_time = Column(DateTime, nullable=False)
+
+    request = relationship("BloodRequest")
+    operator = relationship("User")
+
+
+class BloodIssue(Base):
+    __tablename__ = "hoimsystem_blood_issue"
+
+    issue_id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    request_id = Column(String(36), ForeignKey("hoimsystem_blood_request.request_id"), nullable=False)
+    unit_no = Column(String(50), nullable=False)
+    component = Column(String(50), nullable=False)
+    volume = Column(Integer, nullable=False)
+    issuer_id = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=False)
+    issue_time = Column(DateTime, nullable=False)
+
+    request = relationship("BloodRequest")
+    issuer = relationship("User")
+
+
+class TransfusionReaction(Base):
+    __tablename__ = "hoimsystem_transfusion_reaction"
+
+    reaction_id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    request_id = Column(String(36), ForeignKey("hoimsystem_blood_request.request_id"), nullable=False)
+    symptoms = Column(String(500), nullable=False)
+    severity = Column(Integer, nullable=False, default=1)
+    action_taken = Column(String(500), nullable=False)
+    reporter_id = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=False)
+    report_time = Column(DateTime, nullable=False)
+    status = Column(Integer, nullable=False, default=0)
+
+    request = relationship("BloodRequest")
+    reporter = relationship("User")

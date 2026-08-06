@@ -70,3 +70,5 @@ export function completeNursingAssessment(data) { return request({ url: "/nursin
 export function getNursingPlanList(params) { return request({ url: "/nursingPlan/list", method: "get", params }); }
 export function createNursingPlan(data) { return request({ url: "/nursingPlan/create", method: "post", data }); }
 export function updateNursingPlan(data) { return request({ url: "/nursingPlan/update", method: "put", data }); }
+export function getCriticalCareRecordList(params) { return request({ url: "/criticalCareRecord/list", method: "get", params }); }
+export function createCriticalCareRecord(data) { return request({ url: "/criticalCareRecord/create", method: "post", data }); }

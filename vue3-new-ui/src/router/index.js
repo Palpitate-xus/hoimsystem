@@ -480,6 +480,12 @@ export const asyncRoutes = [
         component: () => import("@/views/vitalsign/nursingPlan.vue"),
         meta: { title: "护理计划", permissions: ["admin", "nurse"] },
       },
+      {
+        path: "criticalCareRecord",
+        name: "CriticalCareRecord",
+        component: () => import("@/views/vitalsign/criticalCareRecord.vue"),
+        meta: { title: "危重护理记录", permissions: ["admin", "nurse"] },
+      },
     ],
   },
 

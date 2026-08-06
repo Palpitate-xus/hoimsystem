@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.dependencies import CLINICAL_ROLES, User, get_current_user, require_roles
+from app.dependencies import CLINICAL_ROLES, ROLE_PATIENT, User, get_current_user, require_roles
 from app.models import (
     Doctor,
     ExamAppointment,
@@ -247,6 +247,12 @@ def get_exam_appointment_list(
     db: Session = Depends(get_db),
 ):
     query = db.query(ExamAppointment)
+    if current_user.user_role == ROLE_PATIENT:
+        query = query.filter(
+            ExamAppointment.patient_id.in_(
+                db.query(Patient.patient_id).filter(Patient.identity == current_user.username)
+            )
+        )
     if status is not None:
         query = query.filter(ExamAppointment.status == status)
     appointments = query.order_by(ExamAppointment.create_time.desc()).all()
@@ -276,7 +282,7 @@ def get_exam_appointment_list(
 @router.post("/examAppointment/create")
 def create_exam_appointment(
     req: dict,
-    current_user: User = Depends(require_roles(*CLINICAL_ROLES)),
+    current_user: User = Depends(require_roles(*CLINICAL_ROLES, ROLE_PATIENT)),
     db: Session = Depends(get_db),
 ):
     try:
@@ -284,10 +290,13 @@ def create_exam_appointment(
         if isinstance(exam_date, str):
             exam_date = datetime.datetime.strptime(exam_date, "%Y-%m-%d").date()
         patient_id = req.get("patient_id")
-        if current_user.user_role == "patient":
+        if current_user.user_role == ROLE_PATIENT:
             patient_obj = db.query(Patient).filter(Patient.identity == current_user.username).first()
-            if patient_obj:
-                patient_id = patient_obj.patient_id
+            if not patient_obj:
+                return {"code": 500, "msg": "病人信息不存在"}
+            patient_id = patient_obj.patient_id
+        elif not patient_id:
+            return {"code": 500, "msg": "病人信息不能为空"}
         appointment = ExamAppointment(
             patient_id=patient_id,
             package_id=req.get("package_id"),
@@ -308,12 +317,19 @@ def create_exam_appointment(
 @router.post("/examAppointment/updateStatus")
 def update_exam_appointment_status(
     req: dict,
-    current_user: User = Depends(require_roles(*CLINICAL_ROLES)),
+    current_user: User = Depends(require_roles(*CLINICAL_ROLES, ROLE_PATIENT)),
     db: Session = Depends(get_db),
 ):
     appointment = db.query(ExamAppointment).filter(ExamAppointment.appointment_id == req.get("appointment_id")).first()
     if not appointment:
         return {"code": 500, "msg": "体检预约不存在"}
+    if current_user.user_role == ROLE_PATIENT:
+        is_owner = db.query(Patient).filter(
+            Patient.identity == current_user.username,
+            Patient.patient_id == appointment.patient_id,
+        ).first() is not None
+        if not is_owner or req.get("status") != 4:
+            return {"code": 403, "msg": "无权更新该体检预约"}
     try:
         appointment.status = req.get("status")
         db.add(appointment)

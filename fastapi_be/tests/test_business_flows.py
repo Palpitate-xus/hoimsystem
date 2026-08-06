@@ -334,6 +334,41 @@ class TestExamJourney:
         # 可能为空,不 fail
         assert r.json()["code"] == 200
 
+    async def test_patient_can_create_and_only_manage_own_exam_appointments(self, async_client, auth_headers, seed_data):
+        patient_headers = auth_headers(seed_data["patient_user"].username)
+        doctor_headers = auth_headers(seed_data["doctor_user"].username)
+
+        r = await async_client.post(
+            "/api/examAppointment/create",
+            headers=patient_headers,
+            json={"exam_date": "2026-12-01", "note": "本人预约"},
+        )
+        assert r.status_code == 200
+        assert r.json()["code"] == 200
+
+        r = await async_client.post(
+            "/api/examAppointment/create",
+            headers=doctor_headers,
+            json={"patient_id": seed_data["patient2"].patient_id, "exam_date": "2026-12-02"},
+        )
+        assert r.status_code == 200
+        assert r.json()["code"] == 200
+
+        r = await async_client.get("/api/examAppointment/getList", headers=patient_headers)
+        assert r.status_code == 200
+        assert r.json()["code"] == 200
+        assert all(item["patient_id"] != seed_data["patient2"].patient_id for item in r.json()["data"])
+
+        r = await async_client.get("/api/examAppointment/getList", headers=doctor_headers)
+        other = next(item for item in r.json()["data"] if item["patient_id"] == seed_data["patient2"].patient_id)
+        r = await async_client.post(
+            "/api/examAppointment/updateStatus",
+            headers=patient_headers,
+            json={"appointment_id": other["appointment_id"], "status": 4},
+        )
+        assert r.status_code == 200
+        assert r.json()["code"] == 403
+
 
 # ===== 7. 手术闭环 =====
 

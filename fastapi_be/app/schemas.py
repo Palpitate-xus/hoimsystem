@@ -185,6 +185,19 @@ class PrescriptionTemplateIdRequest(BaseModel):
     template_id: int
 
 
+class DiagnosisTemplateCreateRequest(BaseModel):
+    code: str = Field(..., min_length=1, max_length=20)
+    name: str = Field(..., min_length=1, max_length=100)
+
+
+class DiagnosisTemplateUpdateRequest(DiagnosisTemplateCreateRequest):
+    template_id: int
+
+
+class DiagnosisTemplateIdRequest(BaseModel):
+    template_id: int
+
+
 class InventoryAdjustmentCreateRequest(BaseModel):
     pharmaceutical_id: int
     adjustment_type: str

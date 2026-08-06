@@ -250,6 +250,19 @@ class PrescriptionTemplate(Base):
     doctor = relationship("Doctor")
 
 
+class DiagnosisTemplate(Base):
+    __tablename__ = "hoimsystem_diagnosis_template"
+
+    template_id = Column(Integer, primary_key=True, autoincrement=True)
+    doctor_id = Column(Integer, ForeignKey("hoimsystem_doctor.doctor_id"), nullable=False)
+    code = Column(String(20), nullable=False)
+    name = Column(String(100), nullable=False)
+    create_time = Column(DateTime, nullable=False)
+    update_time = Column(DateTime, nullable=False)
+
+    doctor = relationship("Doctor")
+
+
 class PrePha(Base):
     __tablename__ = "hoimsystem_pre_pha"
 

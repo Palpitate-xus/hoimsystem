@@ -293,6 +293,7 @@ from app.routers import (
     digital_signature,
     discharge,
     doctor,
+    diagnosis_template,
     emr,
     exam,
     followup,
@@ -346,6 +347,7 @@ app.include_router(user.router, prefix="/api")
 app.include_router(patient.router, prefix="/api")
 app.include_router(admin.router, prefix="/api")
 app.include_router(doctor.router, prefix="/api")
+app.include_router(diagnosis_template.router, prefix="/api")
 app.include_router(pharmacy.router, prefix="/api")
 app.include_router(prescription_template.router, prefix="/api")
 app.include_router(charge.router, prefix="/api")

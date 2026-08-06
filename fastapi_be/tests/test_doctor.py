@@ -79,6 +79,32 @@ class TestPrescriptionTemplate:
 
 
 @pytest.mark.asyncio
+class TestDiagnosisTemplate:
+    async def test_doctor_can_create_apply_update_and_delete_diagnosis_template(self, async_client, seed_data, auth_headers):
+        headers = auth_headers(seed_data["doctor_user"].username)
+        created = await async_client.post("/api/diagnosisTemplate/create", headers=headers, json={"code": "i10", "name": "原发性高血压"})
+        assert created.status_code == 200
+        template_id = created.json()["data"]["template_id"]
+        assert created.json()["data"]["code"] == "I10"
+        listed = await async_client.get("/api/diagnosisTemplate/list", headers=headers)
+        assert any(item["template_id"] == template_id for item in listed.json()["data"])
+        applied = await async_client.post("/api/diagnosisTemplate/apply", headers=headers, json={"template_id": template_id})
+        assert applied.json()["data"] == {"code": "I10", "name": "原发性高血压"}
+        updated = await async_client.put("/api/diagnosisTemplate/update", headers=headers, json={"template_id": template_id, "code": "J06.9", "name": "急性上呼吸道感染"})
+        assert updated.json()["data"]["code"] == "J06.9"
+        deleted = await async_client.post("/api/diagnosisTemplate/delete", headers=headers, json={"template_id": template_id})
+        assert deleted.json()["code"] == 200
+
+    async def test_diagnosis_template_isolated_between_doctors(self, async_client, seed_data, auth_headers):
+        doctor_headers = auth_headers(seed_data["doctor_user"].username)
+        created = await async_client.post("/api/diagnosisTemplate/create", headers=doctor_headers, json={"code": "R51", "name": "头痛"})
+        template_id = created.json()["data"]["template_id"]
+        other = await async_client.post("/api/diagnosisTemplate/apply", headers=auth_headers(seed_data["director_user"].username), json={"template_id": template_id})
+        assert other.status_code == 200
+        assert other.json()["code"] == 404
+
+
+@pytest.mark.asyncio
 class TestDoctorMedicalRecord:
     async def test_create_medical_record(self, async_client, seed_data, auth_headers):
         r = await async_client.post("/api/medicalRecord/create", headers=auth_headers(seed_data["doctor_user"].username), json={

@@ -311,8 +311,15 @@ def window_cancel_registration(req: dict, db: Session = Depends(get_db), current
         return {"code": 500, "msg": "挂号记录不存在"}
     if reg.status == 3:
         return {"code": 500, "msg": "该挂号已退号"}
-    reg.status = 3
-    db.add(reg)
+    if reg.status != 0:
+        return {"code": 500, "msg": "该挂号已就诊，不能退号"}
+    updated = db.query(Registration).filter(
+        Registration.registration_uuid == reg.registration_uuid,
+        Registration.status == 0,
+    ).update({Registration.status: 3}, synchronize_session=False)
+    if updated != 1:
+        db.rollback()
+        return {"code": 500, "msg": "该挂号已就诊，不能退号"}
     schedule = (
         db.query(DoctorSchedule)
         .filter(DoctorSchedule.doctor_id == reg.doctor_id, DoctorSchedule.specialist == reg.specialist)
@@ -320,7 +327,6 @@ def window_cancel_registration(req: dict, db: Session = Depends(get_db), current
     )
     if schedule:
         schedule.number += 1
-        db.add(schedule)
     db.commit()
     return {"code": 200, "msg": "success"}
 

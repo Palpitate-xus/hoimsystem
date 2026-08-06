@@ -204,6 +204,25 @@ class TestChargeManagement:
         )
         assert second.json() == {"code": 500, "msg": "该患者已存在同一医生的有效挂号"}
 
+    async def test_window_cancel_rejects_visited_registration(self, async_client, seed_data, auth_headers, db_session):
+        registration = Registration(
+            patient_id=seed_data["patient"].patient_id,
+            doctor_id=seed_data["doctor"].doctor_id,
+            specialist=1,
+            department_id=seed_data["department"].department_id,
+            time=seed_data["charge"].charge_time,
+            status=1,
+        )
+        db_session.add(registration)
+        db_session.commit()
+        r = await async_client.post(
+            "/api/windowRegistration/cancel",
+            headers=auth_headers(seed_data["cashier_user"].username),
+            json={"uuid": registration.registration_uuid},
+        )
+        assert r.status_code == 200
+        assert r.json() == {"code": 500, "msg": "该挂号已就诊，不能退号"}
+
 
 @pytest.mark.asyncio
 class TestInvoice:

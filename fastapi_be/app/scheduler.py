@@ -56,4 +56,5 @@ def stop_scheduler():
 
 
 def status():
-    return {"running": _task is not None and not _task.done(), "interval_seconds": 3600, "jobs": _state}
+    jobs = [{"name": name, **details} for name, details in sorted(_state.items())]
+    return {"running": _task is not None and not _task.done(), "interval_seconds": 3600, "jobs": jobs}

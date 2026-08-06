@@ -24,6 +24,10 @@ export function printInvoice(data) {
   return request({ url: "invoice/print", method: "post", data });
 }
 
+export function downloadInvoicePdf(invoiceId) {
+  return request({ url: `invoice/pdf/${invoiceId}`, method: "get", responseType: "blob" });
+}
+
 export function windowRegistration(data) {
   return request({ url: "windowRegistration/create", method: "post", data });
 }

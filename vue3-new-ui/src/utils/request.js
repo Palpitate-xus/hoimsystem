@@ -95,6 +95,10 @@ instance.interceptors.response.use(
 
     const { data, config } = response;
 
+    if (config.responseType === "blob" || config.responseType === "arraybuffer") {
+      return data;
+    }
+
     // 判断data是否为undefined或null
     if (data === undefined || data === null) {
       ElMessage.error("后端接口返回数据为空");

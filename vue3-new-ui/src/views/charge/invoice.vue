@@ -41,7 +41,7 @@
 <script setup>
 import { ref, onMounted, computed } from "vue";
 import { ElMessage } from "element-plus";
-import { getInvoiceList, printInvoice } from "@/api/charge";
+import { downloadInvoicePdf, getInvoiceList } from "@/api/charge";
 
 const list = ref([]);
 const searchQuery = ref("");
@@ -65,8 +65,11 @@ const fetchList = async () => {
 
 const print = async (row) => {
   try {
-    const res = await printInvoice({ invoice_id: row.id });
-    ElMessage.success("打印请求已提交: " + (res.data?.pdf_url || ""));
+    const blob = await downloadInvoicePdf(row.id);
+    const url = URL.createObjectURL(blob);
+    window.open(url, "_blank", "noopener,noreferrer");
+    setTimeout(() => URL.revokeObjectURL(url), 60_000);
+    ElMessage.success("电子票据已打开");
   } catch (e) {
     ElMessage.error(e.msg || "打印失败");
   }

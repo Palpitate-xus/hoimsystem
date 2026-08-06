@@ -303,6 +303,7 @@ from app.routers import (
     doctor,
     diagnosis_template,
     emergency,
+    equipment,
     emr,
     exam,
     followup,
@@ -373,6 +374,7 @@ app.include_router(admin.router, prefix="/api")
 app.include_router(doctor.router, prefix="/api")
 app.include_router(diagnosis_template.router, prefix="/api")
 app.include_router(emergency.router, prefix="/api")
+app.include_router(equipment.router, prefix="/api")
 app.include_router(pharmacy.router, prefix="/api")
 app.include_router(prescription_template.router, prefix="/api")
 app.include_router(charge.router, prefix="/api")

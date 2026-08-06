@@ -1832,3 +1832,80 @@ class OccupationalExposure(Base):
 
     source_patient = relationship("Patient")
     reporter = relationship("User")
+
+
+class Equipment(Base):
+    __tablename__ = "hoimsystem_equipment"
+
+    equipment_id = Column(Integer, primary_key=True, autoincrement=True)
+    asset_no = Column(String(40), nullable=False, unique=True)
+    name = Column(String(100), nullable=False)
+    category = Column(String(50), nullable=True)
+    model = Column(String(100), nullable=True)
+    manufacturer = Column(String(100), nullable=True)
+    department_id = Column(Integer, ForeignKey("hoimsystem_department.department_id"), nullable=True)
+    location = Column(String(100), nullable=True)
+    purchase_date = Column(Date, nullable=True)
+    expiry_date = Column(Date, nullable=True)
+    status = Column(Integer, nullable=False, default=0)  # 0=在用 1=维修 2=报废
+    responsible_id = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=True)
+    last_inventory_time = Column(DateTime, nullable=True)
+    inventory_status = Column(Integer, nullable=False, default=0)  # 0=未盘点 1=已盘点 2=异常
+    inventory_note = Column(String(300), nullable=True)
+    create_time = Column(DateTime, nullable=False)
+
+    department = relationship("Department")
+    responsible = relationship("User")
+    maintenance_records = relationship("EquipmentMaintenance", back_populates="equipment")
+    inspection_records = relationship("EquipmentInspection", back_populates="equipment")
+
+
+class EquipmentMaintenance(Base):
+    __tablename__ = "hoimsystem_equipment_maintenance"
+
+    maintenance_id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    equipment_id = Column(Integer, ForeignKey("hoimsystem_equipment.equipment_id"), nullable=False)
+    maintenance_type = Column(String(50), nullable=False)
+    description = Column(String(500), nullable=False)
+    cost = Column(Float, nullable=False, default=0)
+    status = Column(Integer, nullable=False, default=0)  # 0=报修 1=处理中 2=完成
+    operator_id = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=False)
+    report_time = Column(DateTime, nullable=False)
+    complete_time = Column(DateTime, nullable=True)
+
+    equipment = relationship("Equipment", back_populates="maintenance_records")
+    operator = relationship("User")
+
+
+class EquipmentInspection(Base):
+    __tablename__ = "hoimsystem_equipment_inspection"
+
+    inspection_id = Column(Integer, primary_key=True, autoincrement=True)
+    equipment_id = Column(Integer, ForeignKey("hoimsystem_equipment.equipment_id"), nullable=False)
+    result = Column(String(300), nullable=False)
+    pass_flag = Column(Integer, nullable=False, default=1)
+    inspector_id = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=False)
+    inspection_time = Column(DateTime, nullable=False)
+    next_date = Column(Date, nullable=True)
+
+    equipment = relationship("Equipment", back_populates="inspection_records")
+    inspector = relationship("User")
+
+
+class ConsumableTrace(Base):
+    __tablename__ = "hoimsystem_consumable_trace"
+
+    trace_id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    consumable_id = Column(Integer, ForeignKey("hoimsystem_consumable.consumable_id"), nullable=False)
+    batch_no = Column(String(50), nullable=False)
+    serial_no = Column(String(80), nullable=True)
+    action = Column(String(30), nullable=False)  # in / out / use / return / destroy
+    quantity = Column(Integer, nullable=False)
+    patient_id = Column(Integer, ForeignKey("hoimsystem_patient.patient_id"), nullable=True)
+    operator_id = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=False)
+    action_time = Column(DateTime, nullable=False)
+    remark = Column(String(300), nullable=True)
+
+    consumable = relationship("Consumable")
+    patient = relationship("Patient")
+    operator = relationship("User")

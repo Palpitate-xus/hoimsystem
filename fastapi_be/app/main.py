@@ -296,6 +296,7 @@ from app.routers import (
     emr,
     exam,
     followup,
+    family_member,
     inpatient_charge,
     inpatient_order,
     lab,
@@ -350,6 +351,7 @@ app.include_router(checkin.router, prefix="/api")
 app.include_router(vitalsign.router, prefix="/api")
 app.include_router(lab.router, prefix="/api")
 app.include_router(followup.router, prefix="/api")
+app.include_router(family_member.router, prefix="/api")
 app.include_router(report.router, prefix="/api")
 app.include_router(system.router, prefix="/api")
 app.include_router(upload.router, prefix="/api")

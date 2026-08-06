@@ -195,6 +195,35 @@ class PatientUpdateRequest(BaseModel):
     allergy_history: str | None = None
 
 
+class FamilyMemberCreateRequest(BaseModel):
+    name: str = Field(..., min_length=1, max_length=24)
+    identity: str = Field(..., min_length=15, max_length=18)
+    relation: str = Field(..., min_length=1, max_length=20)
+    sex: int = Field(..., ge=0, le=1)
+    birthday: str | None = None
+    phone: str = Field(default="", max_length=11)
+    address: str = Field(default="", max_length=100)
+    allergy_history: str = Field(default="", max_length=200)
+
+    @field_validator("identity")
+    @classmethod
+    def validate_identity(cls, v):
+        if not re.match(r"(^\d{15}$)|(^\d{17}([0-9]|X)$)", v, re.I):
+            raise ValueError("身份证号格式不正确")
+        return v.upper()
+
+    @field_validator("phone")
+    @classmethod
+    def validate_phone(cls, v):
+        if v and not re.match(r"^1[3-9]\d{9}$", v):
+            raise ValueError("手机号格式不正确")
+        return v
+
+
+class FamilyMemberUpdateRequest(FamilyMemberCreateRequest):
+    family_member_id: int
+
+
 class DepartmentUpdateRequest(BaseModel):
     department_id: int
     name: str

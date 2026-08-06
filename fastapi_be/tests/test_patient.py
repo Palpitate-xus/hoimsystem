@@ -141,6 +141,83 @@ class TestPatientRegistration:
 
 
 @pytest.mark.asyncio
+class TestFamilyMember:
+    async def test_patient_can_create_list_update_and_delete_family_member(self, async_client, seed_data, auth_headers):
+        headers = auth_headers(seed_data["patient_user"].username)
+        created = await async_client.post(
+            "/api/familyMember/create",
+            headers=headers,
+            json={
+                "name": "张小三",
+                "identity": "110101201001011234",
+                "relation": "子女",
+                "sex": 0,
+                "birthday": "2010-01-01",
+                "phone": "13900139002",
+                "address": "北京朝阳",
+            },
+        )
+        assert created.status_code == 200, created.text
+        body = created.json()
+        assert body["code"] == 200
+        member_id = body["data"]["family_member_id"]
+        assert body["data"]["identity"] == "110101201001011234"
+
+        listed = await async_client.get("/api/familyMember/list", headers=headers)
+        assert listed.status_code == 200
+        assert [item["family_member_id"] for item in listed.json()["data"]] == [member_id]
+
+        updated = await async_client.put(
+            "/api/familyMember/update",
+            headers=headers,
+            json={
+                "family_member_id": member_id,
+                "name": "张小三",
+                "identity": "110101201001011234",
+                "relation": "女儿",
+                "sex": 0,
+                "birthday": "2010-01-01",
+                "phone": "13900139003",
+                "address": "北京海淀",
+                "allergy_history": "青霉素",
+            },
+        )
+        assert updated.status_code == 200
+        assert updated.json()["data"]["relation"] == "女儿"
+        assert updated.json()["data"]["allergy_history"] == "青霉素"
+
+        deleted = await async_client.request("DELETE", "/api/familyMember/delete", headers=headers, json={"id": member_id})
+        assert deleted.status_code == 200
+        assert deleted.json()["code"] == 200
+        assert (await async_client.get("/api/familyMember/list", headers=headers)).json()["data"] == []
+
+    async def test_family_member_isolation_and_validation(self, async_client, seed_data, auth_headers):
+        patient_headers = auth_headers(seed_data["patient_user"].username)
+        other_headers = auth_headers(seed_data["patient2_user"].username)
+        invalid = await async_client.post(
+            "/api/familyMember/create",
+            headers=patient_headers,
+            json={"name": "无效", "identity": "bad", "relation": "亲属", "sex": 1},
+        )
+        assert invalid.status_code == 422
+
+        created = await async_client.post(
+            "/api/familyMember/create",
+            headers=patient_headers,
+            json={"name": "张小三", "identity": "110101201001011234", "relation": "子女", "sex": 0},
+        )
+        member_id = created.json()["data"]["family_member_id"]
+        forbidden_list = await async_client.get("/api/familyMember/list", headers=auth_headers(seed_data["admin_user"].username))
+        assert forbidden_list.status_code == 403
+        forbidden_update = await async_client.put(
+            "/api/familyMember/update",
+            headers=other_headers,
+            json={"family_member_id": member_id, "name": "越权", "identity": "110101201001011234", "relation": "亲属", "sex": 0},
+        )
+        assert forbidden_update.status_code == 404
+
+
+@pytest.mark.asyncio
 class TestPatientCharge:
     async def test_charge_list_patient(self, async_client, seed_data, auth_headers):
         r = await async_client.get("/api/chargeManagement/getList", headers=auth_headers(seed_data["patient_user"].username))

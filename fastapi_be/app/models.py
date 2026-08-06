@@ -44,6 +44,31 @@ class Patient(Base):
     follow_ups = relationship("FollowUp", back_populates="patient")
     reviews = relationship("Review", back_populates="patient")
     prepaid_transactions = relationship("PrepaidTransaction", back_populates="patient", cascade="all, delete-orphan")
+    family_members = relationship(
+        "FamilyMember",
+        foreign_keys="FamilyMember.owner_patient_id",
+        back_populates="owner_patient",
+        cascade="all, delete-orphan",
+    )
+    family_member_links = relationship(
+        "FamilyMember",
+        foreign_keys="FamilyMember.member_patient_id",
+        back_populates="member_patient",
+    )
+
+
+class FamilyMember(Base):
+    __tablename__ = "hoimsystem_family_member"
+
+    family_member_id = Column(Integer, primary_key=True, autoincrement=True)
+    owner_patient_id = Column(Integer, ForeignKey("hoimsystem_patient.patient_id"), nullable=False)
+    member_patient_id = Column(Integer, ForeignKey("hoimsystem_patient.patient_id"), nullable=False)
+    relation = Column(String(20), nullable=False)
+    create_time = Column(DateTime, nullable=False)
+    update_time = Column(DateTime, nullable=False)
+
+    owner_patient = relationship("Patient", foreign_keys=[owner_patient_id], back_populates="family_members")
+    member_patient = relationship("Patient", foreign_keys=[member_patient_id], back_populates="family_member_links")
 
 
 class PrepaidTransaction(Base):

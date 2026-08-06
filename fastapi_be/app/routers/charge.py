@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 
 from app.config import settings
 from app.database import get_db
-from app.dependencies import ADMIN_ROLES, ROLE_CASHIER, ROLE_PATIENT, get_current_user, require_roles
+from app.dependencies import ADMIN_ROLES, ROLE_CASHIER, ROLE_PATIENT, ROLE_REGISTRAR, get_current_user, require_roles
 from app.models import Charge, Doctor, Invoice, Patient, Prescription, User
 from app.pagination import paginate
 from app.schemas import (
@@ -168,7 +168,7 @@ def print_invoice(req: InvoicePrintRequest, db: Session = Depends(get_db), curre
 
 
 @router.post("/windowRegistration/create")
-def window_registration(req: dict, db: Session = Depends(get_db), current_user: User = Depends(require_roles(ROLE_CASHIER, *ADMIN_ROLES))):
+def window_registration(req: dict, db: Session = Depends(get_db), current_user: User = Depends(require_roles(ROLE_CASHIER, ROLE_REGISTRAR, *ADMIN_ROLES))):
     """窗口挂号：收费员代病人现场挂号"""
     from app.models import DoctorSchedule, Patient, Registration
 
@@ -205,7 +205,7 @@ def window_registration(req: dict, db: Session = Depends(get_db), current_user: 
 
 
 @router.post("/windowRegistration/cancel")
-def window_cancel_registration(req: dict, db: Session = Depends(get_db), current_user: User = Depends(require_roles(ROLE_CASHIER, *ADMIN_ROLES))):
+def window_cancel_registration(req: dict, db: Session = Depends(get_db), current_user: User = Depends(require_roles(ROLE_CASHIER, ROLE_REGISTRAR, *ADMIN_ROLES))):
     """窗口退号"""
     from app.models import Registration, DoctorSchedule
 

@@ -252,6 +252,14 @@ test.describe("业务页面渲染", () => {
     await expect(page.locator(".el-table, .el-card").first()).toBeVisible({ timeout: 5000 });
   });
 
+  test("registrar 访问挂号员服务页面", async ({ page }, testInfo) => {
+    skipIfUserUnavailable(testInfo, "registrar");
+    await login(page, "registrar01", "123456");
+    await page.goto(`${BASE}/#/charge/registrarService`, { waitUntil: "networkidle" });
+    await page.waitForTimeout(1500);
+    await expect(page.locator(".el-card, .el-form").first()).toBeVisible({ timeout: 5000 });
+  });
+
   test("nurse 访问生命体征录入页面", async ({ page }, testInfo) => {
     skipIfUserUnavailable(testInfo, "nurse");
     await login(page, "nurse01", "123456");

@@ -283,7 +283,7 @@ export const asyncRoutes = [
     redirect: "noRedirect",
     name: "Charge",
     alwaysShow: true,
-    meta: { title: "收费管理", icon: "money", permissions: ["admin", "cashier", "patient"] },
+    meta: { title: "收费管理", icon: "money", permissions: ["admin", "cashier", "patient", "registrar"] },
     children: [
       {
         path: "chargeList",
@@ -302,6 +302,12 @@ export const asyncRoutes = [
         name: "WindowRegistration",
         component: () => import("@/views/charge/windowRegistration.vue"),
         meta: { title: "窗口挂号", permissions: ["admin", "cashier"] },
+      },
+      {
+        path: "registrarService",
+        name: "RegistrarService",
+        component: () => import("@/views/charge/windowRegistration.vue"),
+        meta: { title: "挂号员服务", permissions: ["admin", "registrar"] },
       },
       {
         path: "dailySettlement",

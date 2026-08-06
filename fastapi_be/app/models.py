@@ -1167,6 +1167,27 @@ class SurgeryApplication(Base):
     approver = relationship("User")
 
 
+class PerioperativeAntibiotic(Base):
+    __tablename__ = "hoimsystem_perioperative_antibiotic"
+
+    perioperative_id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    application_id = Column(String(36), ForeignKey("hoimsystem_surgery_application.application_id"), nullable=False)
+    patient_id = Column(Integer, ForeignKey("hoimsystem_patient.patient_id"), nullable=False)
+    pharmaceutical_id = Column(Integer, ForeignKey("hoimsystem_pharmaceutical.pharmaceutical_id"), nullable=False)
+    prescriber_id = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=False)
+    dose = Column(String(100), nullable=False)
+    timing_minutes = Column(Integer, nullable=False, default=30)  # 术前给药提前分钟数
+    indication = Column(String(300), nullable=True)
+    status = Column(Integer, nullable=False, default=0)  # 0=计划 1=已执行 2=取消
+    administered_time = Column(DateTime, nullable=True)
+    create_time = Column(DateTime, nullable=False)
+
+    application = relationship("SurgeryApplication")
+    patient = relationship("Patient")
+    pharmaceutical = relationship("Pharmaceutical")
+    prescriber = relationship("User")
+
+
 class SurgerySchedule(Base):
     __tablename__ = "hoimsystem_surgery_schedule"
 

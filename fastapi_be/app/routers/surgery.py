@@ -11,12 +11,91 @@ from app.models import (
     Doctor,
     InpatientCharge,
     Patient,
+    PerioperativeAntibiotic,
+    Pharmaceutical,
     SurgeryApplication,
     SurgerySchedule,
     User,
 )
 
 router = APIRouter()
+
+
+def _perioperative_data(item: PerioperativeAntibiotic):
+    return {
+        "perioperative_id": item.perioperative_id,
+        "application_id": item.application_id,
+        "patient_id": item.patient_id,
+        "patient_name": item.patient.name if item.patient else "",
+        "surgery_name": item.application.surgery_name if item.application else "",
+        "pharmaceutical_id": item.pharmaceutical_id,
+        "pharmaceutical_name": item.pharmaceutical.name if item.pharmaceutical else "",
+        "dose": item.dose,
+        "timing_minutes": item.timing_minutes,
+        "indication": item.indication or "",
+        "status": item.status,
+        "status_text": {0: "计划用药", 1: "已执行", 2: "已取消"}.get(item.status, ""),
+        "administered_time": item.administered_time.strftime("%Y-%m-%d %H:%M:%S") if item.administered_time else "",
+        "create_time": item.create_time.strftime("%Y-%m-%d %H:%M:%S") if item.create_time else "",
+    }
+
+
+@router.get("/surgery/perioperative/list")
+def get_perioperative_antibiotic_list(application_id: str | None = None, current_user: User = Depends(require_roles(*CLINICAL_ROLES)), db: Session = Depends(get_db)):
+    query = db.query(PerioperativeAntibiotic)
+    if application_id:
+        query = query.filter(PerioperativeAntibiotic.application_id == application_id)
+    items = query.order_by(PerioperativeAntibiotic.create_time.desc()).all()
+    return {"code": 200, "msg": "success", "data": [_perioperative_data(item) for item in items]}
+
+
+@router.post("/surgery/perioperative/create")
+def create_perioperative_antibiotic(req: dict, current_user: User = Depends(require_roles(*CLINICAL_ROLES)), db: Session = Depends(get_db)):
+    application = db.query(SurgeryApplication).filter(SurgeryApplication.application_id == req.get("application_id")).first()
+    if not application:
+        return {"code": 404, "msg": "手术申请不存在"}
+    if application.status not in (1, 2):
+        return {"code": 400, "msg": "手术申请未批准或已取消"}
+    pharmaceutical = db.query(Pharmaceutical).filter(Pharmaceutical.pharmaceutical_id == req.get("pharmaceutical_id"), Pharmaceutical.status == 0).first()
+    if not pharmaceutical:
+        return {"code": 404, "msg": "抗菌药品不存在或已停用"}
+    if not pharmaceutical.antibiotic_level:
+        return {"code": 400, "msg": "该药品不是抗菌药，不能用于围术期预防用药"}
+    try:
+        timing_minutes = int(req.get("timing_minutes", 30))
+    except (TypeError, ValueError):
+        return {"code": 400, "msg": "给药提前时间不合法"}
+    if timing_minutes < 0 or timing_minutes > 240:
+        return {"code": 400, "msg": "给药提前时间应在0至240分钟之间"}
+    item = PerioperativeAntibiotic(
+        application_id=application.application_id,
+        patient_id=application.patient_id,
+        pharmaceutical_id=pharmaceutical.pharmaceutical_id,
+        prescriber_id=current_user.user_id,
+        dose=str(req.get("dose", "")).strip(),
+        timing_minutes=timing_minutes,
+        indication=str(req.get("indication", "")).strip()[:300],
+        create_time=datetime.datetime.now(),
+    )
+    if not item.dose:
+        return {"code": 400, "msg": "用药剂量不能为空"}
+    db.add(item)
+    db.commit()
+    return {"code": 200, "msg": "围术期预防用药已创建", "data": _perioperative_data(item)}
+
+
+@router.post("/surgery/perioperative/status")
+def update_perioperative_antibiotic_status(req: dict, current_user: User = Depends(require_roles(*CLINICAL_ROLES)), db: Session = Depends(get_db)):
+    item = db.query(PerioperativeAntibiotic).filter(PerioperativeAntibiotic.perioperative_id == req.get("perioperative_id")).first()
+    if not item:
+        return {"code": 404, "msg": "围术期用药记录不存在"}
+    status = req.get("status")
+    if status not in (1, 2) or (item.status == 1 and status == 2):
+        return {"code": 400, "msg": "用药状态不合法"}
+    item.status = status
+    item.administered_time = datetime.datetime.now() if status == 1 else None
+    db.commit()
+    return {"code": 200, "msg": "围术期用药状态已更新", "data": _perioperative_data(item)}
 
 
 @router.get("/surgeryApplication/getList")

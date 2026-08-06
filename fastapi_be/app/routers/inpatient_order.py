@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.dependencies import NURSING_ROLES, get_current_user, User, require_roles, CLINICAL_ROLES
+from app.dependencies import ADMIN_ROLES, NURSING_ROLES, get_current_user, User, require_roles, CLINICAL_ROLES
 from app.models import (
     Admission,
     Doctor,
@@ -19,6 +19,8 @@ from app.models import (
 from app.schemas import InpatientOrderCreateRequest, InpatientOrderStopRequest, OrderExecutionRequest
 
 router = APIRouter()
+
+_INPATIENT_ROLES = CLINICAL_ROLES | NURSING_ROLES
 
 
 def _create_order_executions(db: Session, order: InpatientOrder):
@@ -66,6 +68,7 @@ def get_inpatient_order_list(
     status: int | None = None,
     order_type: int | None = None,
     db: Session = Depends(get_db),
+    current_user: User = Depends(require_roles(*_INPATIENT_ROLES)),
 ):
     query = db.query(InpatientOrder).order_by(InpatientOrder.create_time.desc())
     if admission_id:
@@ -76,6 +79,9 @@ def get_inpatient_order_list(
         query = query.filter(InpatientOrder.status == status)
     if order_type is not None:
         query = query.filter(InpatientOrder.order_type == order_type)
+    if current_user.user_role not in ADMIN_ROLES and current_user.user_role not in NURSING_ROLES:
+        doctor_ids = [item.doctor_id for item in db.query(Doctor).filter(Doctor.user_id == current_user.user_id).all()]
+        query = query.filter(InpatientOrder.doctor_id.in_(doctor_ids or [-1]))
     orders = query.all()
 
     type_text = ["长期医嘱", "临时医嘱"]
@@ -136,6 +142,33 @@ def create_inpatient_order(req: InpatientOrderCreateRequest, current_user: User 
         return {"code": 500, "msg": "入院记录不存在"}
     if admission.status != 1:
         return {"code": 500, "msg": "病人不在院状态，无法开立医嘱"}
+    if admission.patient_id != req.patient_id:
+        return {"code": 500, "msg": "医嘱患者与入院记录不匹配"}
+    doctor_ids = [item.doctor_id for item in db.query(Doctor).filter(Doctor.user_id == current_user.user_id).all()]
+    if current_user.user_role not in ADMIN_ROLES and req.doctor_id not in doctor_ids:
+        return {"code": 403, "msg": "不能以其他医生身份开立医嘱"}
+    if not req.items:
+        return {"code": 500, "msg": "医嘱明细不能为空"}
+
+    validated_items = []
+    for it in req.items:
+        if not isinstance(it, dict) or not str(it.get("item_name", "")).strip():
+            return {"code": 500, "msg": "医嘱明细名称不能为空"}
+        try:
+            quantity = int(it.get("quantity", 1))
+            days = int(it.get("days", 1))
+            unit_price = float(it.get("unit_price", 0))
+        except (TypeError, ValueError, OverflowError):
+            return {"code": 500, "msg": "医嘱数量、天数或价格格式错误"}
+        if quantity <= 0 or days <= 0 or unit_price < 0:
+            return {"code": 500, "msg": "医嘱数量、天数和价格必须合法"}
+        if it.get("item_type") == "drug" and it.get("item_id_ref"):
+            pha = db.query(Pharmaceutical).filter(Pharmaceutical.pharmaceutical_id == it.get("item_id_ref")).first()
+            if not pha:
+                return {"code": 500, "msg": "医嘱药品不存在"}
+            if pha.stock < quantity * days:
+                return {"code": 500, "msg": f"药品 {pha.name} 库存不足"}
+        validated_items.append((it, quantity, days, unit_price))
 
     order = InpatientOrder(
         admission_id=req.admission_id,
@@ -153,10 +186,7 @@ def create_inpatient_order(req: InpatientOrderCreateRequest, current_user: User 
     db.flush()  # 获取 order_id
 
     total_amount = 0
-    for it in req.items:
-        unit_price = it.get("unit_price", 0)
-        quantity = it.get("quantity", 1)
-        days = it.get("days", 1)
+    for it, quantity, days, unit_price in validated_items:
         item_total = unit_price * quantity * days
         total_amount += item_total
 
@@ -217,8 +247,13 @@ def audit_inpatient_order(req: dict, current_user: User = Depends(require_roles(
         return {"code": 500, "msg": "医嘱不存在"}
     if order.status != 0:
         return {"code": 500, "msg": "医嘱状态不正确，无法审核"}
-    order.status = 1
-    db.add(order)
+    updated = db.query(InpatientOrder).filter(
+        InpatientOrder.order_id == order.order_id,
+        InpatientOrder.status == 0,
+    ).update({InpatientOrder.status: 1}, synchronize_session=False)
+    if updated != 1:
+        db.rollback()
+        return {"code": 500, "msg": "医嘱状态不正确，无法审核"}
     db.commit()
     return {"code": 200, "msg": "success"}
 
@@ -327,6 +362,11 @@ def get_execution_list(order_id: str | None = None, nurse_id: int | None = None,
 
 @router.post("/inpatientOrder/execute")
 def execute_order(req: OrderExecutionRequest, current_user: User = Depends(require_roles(*NURSING_ROLES)), db: Session = Depends(get_db)):
+    if req.status not in (1, 2):
+        return {"code": 500, "msg": "执行结果只能是已执行或已跳过"}
+    order = db.query(InpatientOrder).filter(InpatientOrder.order_id == req.order_id).first()
+    if not order or order.status not in (1, 2):
+        return {"code": 500, "msg": "医嘱当前状态不允许执行"}
     execution = db.query(OrderExecution).filter(OrderExecution.order_id == req.order_id, OrderExecution.status == 0).first()
     if not execution:
         return {"code": 500, "msg": "无可执行记录"}
@@ -337,8 +377,7 @@ def execute_order(req: OrderExecutionRequest, current_user: User = Depends(requi
     db.add(execution)
 
     # 更新医嘱状态为执行中
-    order = db.query(InpatientOrder).filter(InpatientOrder.order_id == req.order_id).first()
-    if order and order.status == 1:
+    if order.status == 1:
         order.status = 2
         db.add(order)
 

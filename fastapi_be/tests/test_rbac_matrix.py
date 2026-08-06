@@ -49,6 +49,8 @@ ENDPOINTS = [
     ("GET", "/api/invoice/getList", {"admin", "super_admin", "cashier"}, None, {}),
     ("POST", "/api/invoice/create", {"admin", "super_admin", "cashier"}, {"charge_id": "1"}, {}),
     ("POST", "/api/windowRegistration/create", {"admin", "super_admin", "cashier", "registrar"}, {}, {}),
+    ("GET", "/api/windowRegistration/schedules", {"admin", "super_admin", "cashier", "registrar"}, None, {}),
+    ("GET", "/api/windowRegistration/patient", {"admin", "super_admin", "cashier", "registrar"}, None, {"identity": "370101199001011234"}),
     ("GET", "/api/prepaid/getTransactions", {"admin", "super_admin", "cashier", "patient"}, None, {"identity": "370101199001011234"}),
     ("POST", "/api/dailySettlement/report", {"admin", "super_admin", "cashier"}, {}, {}),
     ("POST", "/api/payment/mockNotify", {"admin", "super_admin", "cashier"}, {"payment_no": "PAY01"}, {}),

@@ -70,6 +70,11 @@ class TestPharmacy:
         assert r.status_code == 200
         assert r.json()["code"] == 200
 
+        # 审核是 0 -> 1 的单向状态迁移，重复审核必须失败。
+        r = await async_client.post("/api/pharmacy/audit", headers=headers, json={"prescription_id": str(pre.prescription_id)})
+        assert r.status_code == 200
+        assert r.json()["code"] == 500
+
     async def test_dispense(self, async_client, seed_data, auth_headers):
         pharmacist_headers = auth_headers(seed_data["pharmacist_user"].username)
         doctor_headers = auth_headers(seed_data["doctor_user"].username)
@@ -89,11 +94,56 @@ class TestPharmacy:
         assert r.status_code == 200
         assert r.json()["code"] == 200
 
-    async def test_return(self, async_client, seed_data, auth_headers):
+        # 发药是 1 -> 2 的单向状态迁移，重复发药必须失败。
+        r = await async_client.post("/api/pharmacy/dispense", headers=pharmacist_headers, json={"prescription_id": target["uuid"]})
+        assert r.status_code == 200
+        assert r.json()["code"] == 500
+
+    async def test_return_rejects_unreviewed_prescription(self, async_client, seed_data, auth_headers):
         r = await async_client.post("/api/pharmacy/return", headers=auth_headers(seed_data["pharmacist_user"].username), json={
             "prescription_id": str(seed_data["prescription"].prescription_id),
             "pha_id": seed_data["pharmaceutical"].pharmaceutical_id,
             "number": 1, "reason": "过敏"
         })
         assert r.status_code == 200
+        assert r.json()["code"] == 500
+
+    async def test_return_rejects_audited_but_not_dispensed(self, async_client, seed_data, auth_headers):
+        headers = auth_headers(seed_data["pharmacist_user"].username)
+        pre_id = str(seed_data["prescription"].prescription_id)
+        r = await async_client.post("/api/pharmacy/audit", headers=headers, json={"prescription_id": pre_id})
         assert r.json()["code"] == 200
+
+        r = await async_client.post("/api/pharmacy/return", headers=headers, json={
+            "prescription_id": pre_id,
+            "pha_id": seed_data["pharmaceutical"].pharmaceutical_id,
+            "number": 1, "reason": "过敏"
+        })
+        assert r.status_code == 200
+        assert r.json()["code"] == 500
+
+    async def test_return_and_reject_duplicate_return(self, async_client, seed_data, auth_headers):
+        headers = auth_headers(seed_data["pharmacist_user"].username)
+        pre_id = str(seed_data["prescription"].prescription_id)
+        pha_id = seed_data["pharmaceutical"].pharmaceutical_id
+
+        for endpoint in ("audit", "dispense"):
+            r = await async_client.post(f"/api/pharmacy/{endpoint}", headers=headers, json={"prescription_id": pre_id})
+            assert r.json()["code"] == 200
+
+        r = await async_client.post("/api/pharmacy/return", headers=auth_headers(seed_data["pharmacist_user"].username), json={
+            "prescription_id": pre_id,
+            "pha_id": pha_id,
+            "number": 2, "reason": "过敏"
+        })
+        assert r.status_code == 200
+        assert r.json()["code"] == 200
+
+        # 全量退药后处方进入已退药状态，不能再次退药。
+        r = await async_client.post("/api/pharmacy/return", headers=headers, json={
+            "prescription_id": pre_id,
+            "pha_id": pha_id,
+            "number": 1, "reason": "重复申请"
+        })
+        assert r.status_code == 200
+        assert r.json()["code"] == 500

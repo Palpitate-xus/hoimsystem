@@ -54,8 +54,17 @@ def audit_prescription(req: PharmacyAuditRequest, current_user: User = Depends(r
         return {"code": 500, "msg": "处方不存在"}
     if pre.status != 0:
         return {"code": 500, "msg": "处方状态不正确"}
-    pre.status = 1
-    db.add(pre)
+
+    # Use a conditional update so two concurrent audit requests cannot both
+    # observe status=0 and report success.
+    updated = (
+        db.query(Prescription)
+        .filter(Prescription.prescription_id == req.prescription_id, Prescription.status == 0)
+        .update({Prescription.status: 1}, synchronize_session=False)
+    )
+    if updated != 1:
+        db.rollback()
+        return {"code": 500, "msg": "处方状态不正确"}
     db.commit()
     return {"code": 200, "msg": "success"}
 
@@ -67,8 +76,17 @@ def dispense_prescription(req: PharmacyDispenseRequest, current_user: User = Dep
         return {"code": 500, "msg": "处方不存在"}
     if pre.status != 1:
         return {"code": 500, "msg": "处方未审核或已发药"}
-    pre.status = 2
-    db.add(pre)
+
+    # Only the audited state may transition to dispensed.  Keeping the state
+    # predicate in the UPDATE closes the duplicate-dispense race window.
+    updated = (
+        db.query(Prescription)
+        .filter(Prescription.prescription_id == req.prescription_id, Prescription.status == 1)
+        .update({Prescription.status: 2}, synchronize_session=False)
+    )
+    if updated != 1:
+        db.rollback()
+        return {"code": 500, "msg": "处方未审核或已发药"}
     db.commit()
     return {"code": 200, "msg": "success"}
 
@@ -78,21 +96,51 @@ def return_medicine(req: PharmacyReturnRequest, current_user: User = Depends(req
     pre = db.query(Prescription).filter(Prescription.prescription_id == req.prescription_id).first()
     if not pre:
         return {"code": 500, "msg": "处方不存在"}
+    if pre.status != 2:
+        return {"code": 500, "msg": "处方未发药或已退药"}
+    if req.number <= 0:
+        return {"code": 500, "msg": "退药数量必须大于0"}
+
     pp = db.query(PrePha).filter(PrePha.prescription_id == req.prescription_id, PrePha.pharmaceutical_id == req.pha_id).first()
     if not pp:
         return {"code": 500, "msg": "药品记录不存在"}
-    if pp.number < req.number:
+
+    # Make the quantity check part of the update so concurrent return
+    # requests cannot both consume the same remaining prescription quantity.
+    updated = (
+        db.query(PrePha)
+        .filter(
+            PrePha.prescription_id == req.prescription_id,
+            PrePha.pharmaceutical_id == req.pha_id,
+            PrePha.number >= req.number,
+        )
+        .update({PrePha.number: PrePha.number - req.number}, synchronize_session=False)
+    )
+    if updated != 1:
+        db.rollback()
         return {"code": 500, "msg": "退药数量超过处方数量"}
+
+    db.expire_all()
+    pp = db.query(PrePha).filter(PrePha.prescription_id == req.prescription_id, PrePha.pharmaceutical_id == req.pha_id).first()
+    if not pp:
+        db.rollback()
+        return {"code": 500, "msg": "药品记录不存在"}
+    if pp.number <= 0:
+        db.delete(pp)
+
     try:
         pha = db.query(Pharmaceutical).filter(Pharmaceutical.pharmaceutical_id == req.pha_id).first()
         if pha:
             pha.stock += req.number
             db.add(pha)
-        pp.number -= req.number
-        if pp.number <= 0:
-            db.delete(pp)
-        else:
-            db.add(pp)
+
+        # Status 4 is the documented fully-returned state.  Partial returns
+        # keep status=2 so the remaining dispensed medicines can be returned.
+        remaining = db.query(PrePha).filter(PrePha.prescription_id == req.prescription_id, PrePha.number > 0).count()
+        if remaining == 0:
+            pre.status = 4
+            db.add(pre)
+
         db.commit()
         return {"code": 200, "msg": "success"}
     except Exception:

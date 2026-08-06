@@ -1494,6 +1494,29 @@ class MedicalRecordHome(Base):
     creator = relationship("User")
 
 
+class MedicalRecordArchive(Base):
+    __tablename__ = "hoimsystem_medical_record_archive"
+
+    archive_id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    home_id = Column(String(36), ForeignKey("hoimsystem_medical_record_home.home_id"), nullable=False, unique=True)
+    archive_no = Column(String(40), nullable=False, unique=True)
+    location = Column(String(100), nullable=True)
+    status = Column(Integer, nullable=False, default=0)  # 0待归档 1已归档 2借阅中 3封存
+    borrower_id = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=True)
+    borrow_reason = Column(String(300), nullable=True)
+    borrow_time = Column(DateTime, nullable=True)
+    return_time = Column(DateTime, nullable=True)
+    archived_by = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=True)
+    archive_time = Column(DateTime, nullable=True)
+    seal_reason = Column(String(300), nullable=True)
+    create_time = Column(DateTime, nullable=False)
+    update_time = Column(DateTime, nullable=False)
+
+    home = relationship("MedicalRecordHome")
+    borrower = relationship("User", foreign_keys=[borrower_id])
+    archivist = relationship("User", foreign_keys=[archived_by])
+
+
 # ===== 体检系统模块 =====
 
 

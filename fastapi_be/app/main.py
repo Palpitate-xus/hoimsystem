@@ -313,6 +313,7 @@ from app.routers import (
     lab,
     mdt,
     medical_record_home,
+    medical_record_archive,
     nursing,
     patient,
     pharmacy,
@@ -399,6 +400,7 @@ app.include_router(inpatient_charge.router, prefix="/api")
 app.include_router(discharge.router, prefix="/api")
 app.include_router(emr.router, prefix="/api")
 app.include_router(medical_record_home.router, prefix="/api")
+app.include_router(medical_record_archive.router, prefix="/api")
 app.include_router(surgery.router, prefix="/api")
 app.include_router(exam.router, prefix="/api")
 app.include_router(research.router, prefix="/api")

@@ -219,6 +219,12 @@ ENDPOINTS = [
     ("POST", "/api/medicalRecordHome/create", {"admin", "super_admin", "director", "doctor"}, {"admission_id": "x", "admission_diagnosis": "x"}, {}),
     ("PUT", "/api/medicalRecordHome/update", {"admin", "super_admin", "director", "doctor"}, {"home_id": "x", "discharge_diagnosis": "x"}, {}),
     ("POST", "/api/medicalRecordHome/submit", {"admin", "super_admin", "director", "doctor"}, {"home_id": "x"}, {}),
+    ("GET", "/api/medicalRecordArchive/list", {"admin", "super_admin", "director", "doctor"}, None, {}),
+    ("POST", "/api/medicalRecordArchive/create", {"admin", "super_admin", "director", "doctor"}, {"home_id": "x"}, {}),
+    ("POST", "/api/medicalRecordArchive/archive", {"admin", "super_admin", "director"}, {"archive_id": "x"}, {}),
+    ("POST", "/api/medicalRecordArchive/borrow", {"admin", "super_admin", "director", "doctor"}, {"archive_id": "x"}, {}),
+    ("POST", "/api/medicalRecordArchive/return", {"admin", "super_admin", "director", "doctor"}, {"archive_id": "x"}, {}),
+    ("POST", "/api/medicalRecordArchive/seal", {"admin", "super_admin", "director"}, {"archive_id": "x"}, {}),
 
     # purchase.py (getList is auth-only, not admin-only — pharmacist/cashier may view)
     ("GET", "/api/purchase/getList", {"admin", "super_admin", "director", "doctor", "nurse", "cashier", "pharmacist", "guide", "patient", "lab_technician", "registrar"}, None, {"status": 0}),

@@ -896,6 +896,16 @@ class MedicalRecordHomeUpdateRequest(BaseModel):
     discharge_status: int | None = Field(default=None, ge=0, le=4)
 
 
+class MedicalRecordArchiveCreateRequest(BaseModel):
+    home_id: str
+    location: str = Field(default="", max_length=100)
+
+
+class MedicalRecordArchiveActionRequest(BaseModel):
+    archive_id: str
+    reason: str = Field(default="", max_length=300)
+
+
 # ===== 结构化电子病历 Schemas =====
 
 

@@ -15,12 +15,13 @@
         <el-table :data="paginatedPendingList" v-loading="loading" empty-text="暂无记录">
           <el-table-column prop="patient_name" label="患者"  sortable />
           <el-table-column prop="check_type" label="检查类型"  sortable />
-          <el-table-column prop="create_time" label="申请时间"  sortable />
-          <el-table-column label="操作" width="280">
-            <template #default="{row}">
-              <el-button size="small" type="primary" @click="handleResult(row)">录入结果</el-button>
-              <el-button size="small" type="success" @click="receiveSample(row)">接收</el-button>
-              <el-button size="small" type="danger" @click="rejectSample(row)">拒收</el-button>
+            <el-table-column prop="create_time" label="申请时间"  sortable />
+            <el-table-column label="操作" width="280">
+              <template #default="{row}">
+              <el-button v-if="row.sample_status === 1" size="small" type="primary" @click="handleResult(row)">录入结果</el-button>
+              <el-button v-if="row.sample_status === 0" size="small" type="success" @click="receiveSample(row)">接收</el-button>
+              <el-button v-if="row.sample_status === 0 || row.sample_status === 1" size="small" type="danger" @click="rejectSample(row)">拒收</el-button>
+              <el-tag v-if="row.sample_status === 2" type="info" size="small">已拒收</el-tag>
               <el-button size="small" @click="viewTracking(row)">流转</el-button>
             </template>
           </el-table-column>

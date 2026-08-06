@@ -153,6 +153,7 @@ def get_pending_lab_orders(keyword: str | None = None, current_user: User = Depe
                 "patient_name": item.patient.name if item.patient else "",
                 "check_type": item.check_type,
                 "status": item.status,
+                "sample_status": item.sample_status,
                 "create_time": (item.create_time.strftime("%Y-%m-%d %H:%M:%S") if item.create_time else None),
             }
         )

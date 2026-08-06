@@ -173,6 +173,9 @@ class TestLab:
             "lab_order_id": lab_order_id
         })
         assert r.json()["code"] == 200
+        pending = await async_client.get("/api/labResult/getPending", headers=admin_headers)
+        pending_row = next(row for row in pending.json()["data"] if row["id"] == str(lab_order_id))
+        assert pending_row["sample_status"] == 1
 
         # create result
         r = await async_client.post("/api/labResult/create", headers=admin_headers, json={

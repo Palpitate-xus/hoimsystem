@@ -164,3 +164,32 @@ class TestPatientReview:
         })
         assert r.status_code == 200
         assert r.json()["code"] == 200
+
+    async def test_create_review_rejects_other_patient_visit(self, async_client, seed_data, auth_headers):
+        r = await async_client.post(
+            "/api/review/create",
+            headers=auth_headers(seed_data["patient2_user"].username),
+            json={
+                "doctor_id": seed_data["doctor"].doctor_id,
+                "visit_id": str(seed_data["medical_record"].medical_record_id),
+                "score": 5,
+                "comment": "越权评价",
+            },
+        )
+        assert r.status_code == 200
+        assert r.json()["code"] == 403
+
+    async def test_create_review_rejects_duplicate_visit_review(self, async_client, seed_data, auth_headers):
+        headers = auth_headers(seed_data["patient_user"].username)
+        payload = {
+            "doctor_id": seed_data["doctor"].doctor_id,
+            "visit_id": str(seed_data["medical_record"].medical_record_id),
+            "score": 5,
+            "comment": "重复评价测试",
+        }
+        first = await async_client.post("/api/review/create", headers=headers, json=payload)
+        assert first.status_code == 200
+        assert first.json()["code"] == 200
+        second = await async_client.post("/api/review/create", headers=headers, json=payload)
+        assert second.status_code == 200
+        assert second.json()["code"] == 500

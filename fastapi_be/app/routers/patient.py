@@ -447,11 +447,21 @@ def get_visit_records(current_user: User = Depends(get_current_user), keyword: s
 
 @router.post("/review/create")
 def create_review(req: ReviewCreateRequest, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    patient_obj = db.query(Patient).filter(Patient.identity == current_user.username).first()
-    if not patient_obj:
+    patient_ids = [item[0] for item in db.query(Patient.patient_id).filter(Patient.identity == current_user.username).all()]
+    if not patient_ids:
         return {"code": 500, "msg": "病人信息不存在"}
+    visit = db.query(MedicalRecord).filter(MedicalRecord.medical_record_id == req.visit_id).first()
+    if not visit:
+        return {"code": 500, "msg": "就诊记录不存在"}
+    if visit.patient_id not in patient_ids or visit.doctor_id != req.doctor_id:
+        return {"code": 403, "msg": "只能评价本人本次就诊的医生"}
+    if db.query(Review).filter(
+        Review.patient_id == visit.patient_id,
+        Review.visit_id == req.visit_id,
+    ).first():
+        return {"code": 500, "msg": "该就诊已评价"}
     review = Review(
-        patient_id=patient_obj.patient_id,
+        patient_id=visit.patient_id,
         doctor_id=req.doctor_id,
         visit_id=req.visit_id,
         score=req.score,

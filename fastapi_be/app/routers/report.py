@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.dependencies import CLINICAL_ROLES, CASHIER_ROLES, User, require_roles
-from app.models import Charge, Doctor, LabOrder, MedicalRecord, PrePha, Prescription
+from app.models import Charge, Department, Doctor, LabOrder, MedicalRecord, PrePha, Prescription, Review
 
 router = APIRouter()
 
@@ -165,3 +165,103 @@ def report_doctor_workload(req: dict, keyword: str | None = None, current_user: 
         data = [item for item in data if any(kw in str(val).lower() for val in item.values())]
 
     return {"code": 200, "msg": "success", "data": data}
+
+
+@router.post("/report/departmentStats")
+def report_department_stats(req: dict, keyword: str | None = None, current_user: User = Depends(require_roles(*_REPORT_ROLES)), db: Session = Depends(get_db)):
+    """汇总科室工作量、已收收入和患者满意度，供管理人员按日期查看。"""
+    start_date = req.get("start_date")
+    end_date = req.get("end_date")
+    department_id = req.get("department_id")
+
+    departments_query = db.query(Department)
+    if department_id:
+        departments_query = departments_query.filter(Department.department_id == department_id)
+    departments = departments_query.order_by(Department.department_id).all()
+
+    doctors = db.query(Doctor).all()
+    department_by_doctor = {doctor.doctor_id: doctor.department_id for doctor in doctors}
+
+    def in_date_range(column):
+        filters = []
+        if start_date:
+            filters.append(func.date(column) >= start_date)
+        if end_date:
+            filters.append(func.date(column) <= end_date)
+        return filters
+
+    metrics = {
+        department.department_id: {
+            "department_id": department.department_id,
+            "department_name": department.name or "未命名科室",
+            "visit_count": 0,
+            "prescription_count": 0,
+            "lab_order_count": 0,
+            "income": 0.0,
+            "satisfaction_score": None,
+            "review_count": 0,
+        }
+        for department in departments
+    }
+
+    records_query = db.query(MedicalRecord)
+    for record in records_query.filter(*in_date_range(MedicalRecord.consultation_time)).all():
+        dept_id = department_by_doctor.get(record.doctor_id)
+        if dept_id in metrics:
+            metrics[dept_id]["visit_count"] += 1
+
+    prescriptions_query = db.query(Prescription)
+    for prescription in prescriptions_query.filter(*in_date_range(Prescription.create_time)).all():
+        dept_id = department_by_doctor.get(prescription.doctor_id)
+        if dept_id in metrics:
+            metrics[dept_id]["prescription_count"] += 1
+
+    lab_orders_query = db.query(LabOrder)
+    for order in lab_orders_query.filter(*in_date_range(LabOrder.create_time)).all():
+        dept_id = department_by_doctor.get(order.doctor_id)
+        if dept_id in metrics:
+            metrics[dept_id]["lab_order_count"] += 1
+
+    charges_query = db.query(Charge).filter(Charge.status == 1)
+    for charge in charges_query.filter(*in_date_range(Charge.charge_time)).all():
+        prescription = charge.prescription
+        dept_id = department_by_doctor.get(prescription.doctor_id) if prescription else None
+        if dept_id in metrics:
+            metrics[dept_id]["income"] += float(charge.amount or 0)
+
+    reviews_query = db.query(Review)
+    review_totals = {}
+    for review in reviews_query.filter(*in_date_range(Review.review_time)).all():
+        dept_id = department_by_doctor.get(review.doctor_id)
+        if dept_id in metrics and review.score is not None:
+            review_totals.setdefault(dept_id, []).append(review.score)
+
+    for dept_id, scores in review_totals.items():
+        metrics[dept_id]["review_count"] = len(scores)
+        metrics[dept_id]["satisfaction_score"] = round(sum(scores) / len(scores), 2)
+
+    data = list(metrics.values())
+    if keyword:
+        kw = keyword.lower()
+        data = [item for item in data if kw in str(item["department_name"]).lower()]
+
+    totals = {
+        "visit_count": sum(item["visit_count"] for item in data),
+        "prescription_count": sum(item["prescription_count"] for item in data),
+        "lab_order_count": sum(item["lab_order_count"] for item in data),
+        "income": round(sum(item["income"] for item in data), 2),
+        "review_count": sum(item["review_count"] for item in data),
+    }
+    visible_department_ids = {item["department_id"] for item in data}
+    all_scores = [
+        score
+        for dept_id, scores in review_totals.items()
+        if dept_id in visible_department_ids
+        for score in scores
+    ]
+    if all_scores:
+        totals["satisfaction_score"] = round(sum(all_scores) / len(all_scores), 2)
+    else:
+        totals["satisfaction_score"] = None
+
+    return {"code": 200, "msg": "success", "data": {"items": data, "totals": totals}}

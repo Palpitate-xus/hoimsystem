@@ -468,6 +468,12 @@ export const asyncRoutes = [
         component: () => import("@/views/vitalsign/vitalSign.vue"),
         meta: { title: "生命体征录入", permissions: ["admin", "nurse"] },
       },
+      {
+        path: "nursingAssessment",
+        name: "NursingAssessment",
+        component: () => import("@/views/vitalsign/nursingAssessment.vue"),
+        meta: { title: "入院护理评估", permissions: ["admin", "nurse"] },
+      },
     ],
   },
 

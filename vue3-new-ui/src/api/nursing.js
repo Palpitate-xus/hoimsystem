@@ -63,3 +63,7 @@ export function assessSkinTest(data) { return request({ url: "/skinTest/assess",
 export function getShiftHandoverList() { return request({ url: "/shiftHandover/list", method: "get" }); }
 export function createShiftHandover(data) { return request({ url: "/shiftHandover/create", method: "post", data }); }
 export function receiveShiftHandover(data) { return request({ url: "/shiftHandover/receive", method: "post", data }); }
+export function getNursingAssessmentList(params) { return request({ url: "/nursingAssessment/list", method: "get", params }); }
+export function createNursingAssessment(data) { return request({ url: "/nursingAssessment/create", method: "post", data }); }
+export function updateNursingAssessment(data) { return request({ url: "/nursingAssessment/update", method: "put", data }); }
+export function completeNursingAssessment(data) { return request({ url: "/nursingAssessment/complete", method: "post", data }); }

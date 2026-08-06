@@ -264,6 +264,15 @@ class PatientAllergyIdRequest(BaseModel):
     allergy_id: int
 
 
+class ShiftHandoverCreateRequest(BaseModel):
+    shift_type: str = Field(..., min_length=1, max_length=20)
+    content: str = Field(..., min_length=1, max_length=2000)
+
+
+class ShiftHandoverIdRequest(BaseModel):
+    handover_id: str
+
+
 class InventoryAdjustmentCreateRequest(BaseModel):
     pharmaceutical_id: int
     adjustment_type: str

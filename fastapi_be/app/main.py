@@ -305,6 +305,7 @@ from app.routers import (
     infusion,
     injection,
     skin_test,
+    shift_handover,
     lab,
     mdt,
     nursing,
@@ -383,6 +384,7 @@ app.include_router(inventory_adjustment.router, prefix="/api")
 app.include_router(infusion.router, prefix="/api")
 app.include_router(injection.router, prefix="/api")
 app.include_router(skin_test.router, prefix="/api")
+app.include_router(shift_handover.router, prefix="/api")
 app.include_router(nursing.router, prefix="/api")
 app.include_router(inpatient_charge.router, prefix="/api")
 app.include_router(discharge.router, prefix="/api")

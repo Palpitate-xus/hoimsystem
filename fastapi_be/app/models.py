@@ -724,7 +724,22 @@ class PatientAllergy(Base):
 
     patient = relationship("Patient")
     reporter = relationship("User")
-    reporter = relationship("User")
+
+
+class ShiftHandover(Base):
+    __tablename__ = "hoimsystem_shift_handover"
+
+    handover_id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    shift_type = Column(String(20), nullable=False)
+    content = Column(String(2000), nullable=False)
+    status = Column(Integer, nullable=False, default=0)  # 0=待接班 1=已确认
+    handover_user_id = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=False)
+    receiver_user_id = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=True)
+    create_time = Column(DateTime, nullable=False)
+    receive_time = Column(DateTime, nullable=True)
+
+    handover_user = relationship("User", foreign_keys=[handover_user_id])
+    receiver_user = relationship("User", foreign_keys=[receiver_user_id])
 
 
 class AdverseEvent(Base):

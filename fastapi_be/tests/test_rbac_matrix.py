@@ -43,6 +43,11 @@ ENDPOINTS = [
     ("PUT", "/api/allergy/update", {"admin", "super_admin", "director", "doctor", "nurse"}, {"allergy_id": 1, "patient_id": 1, "allergen": "青霉素", "reaction": "皮疹", "severity": 2}, {}),
     ("POST", "/api/allergy/disable", {"admin", "super_admin", "director", "doctor", "nurse"}, {"allergy_id": 1}, {}),
 
+    # shift_handover.py
+    ("POST", "/api/shiftHandover/create", {"admin", "super_admin", "nurse"}, {"shift_type": "白班", "content": "患者情况正常"}, {}),
+    ("GET", "/api/shiftHandover/list", {"admin", "super_admin", "nurse"}, None, {}),
+    ("POST", "/api/shiftHandover/receive", {"admin", "super_admin", "nurse"}, {"handover_id": "x"}, {}),
+
     # backup.py
     ("POST", "/api/backup/create", {"admin", "super_admin"}, {}, {}),
     ("GET", "/api/backup/getList", {"admin", "super_admin"}, None, {}),

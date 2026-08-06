@@ -596,6 +596,12 @@ export const asyncRoutes = [
         meta: { title: "过敏标识", permissions: ["admin", "doctor", "director", "nurse"] },
       },
       {
+        path: "shiftHandover",
+        name: "ShiftHandover",
+        component: () => import("@/views/inpatient/shiftHandover.vue"),
+        meta: { title: "交接班记录", permissions: ["admin", "nurse"] },
+      },
+      {
         path: "inpatientCharge",
         name: "InpatientChargePage",
         component: () => import("@/views/inpatient/inpatientCharge.vue"),

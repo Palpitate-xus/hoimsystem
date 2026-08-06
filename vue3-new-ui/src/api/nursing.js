@@ -60,3 +60,6 @@ export function completeInjection(data) { return request({ url: "/injection/comp
 export function getSkinTestList() { return request({ url: "/skinTest/list", method: "get" }); }
 export function administerSkinTest(data) { return request({ url: "/skinTest/administer", method: "post", data }); }
 export function assessSkinTest(data) { return request({ url: "/skinTest/assess", method: "post", data }); }
+export function getShiftHandoverList() { return request({ url: "/shiftHandover/list", method: "get" }); }
+export function createShiftHandover(data) { return request({ url: "/shiftHandover/create", method: "post", data }); }
+export function receiveShiftHandover(data) { return request({ url: "/shiftHandover/receive", method: "post", data }); }

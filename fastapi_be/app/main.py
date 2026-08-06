@@ -288,6 +288,7 @@ from app.routers import (
     allergy,
     backup,
     charge,
+    charge_item,
     checkin,
     clinical_pathway,
     consumable,
@@ -357,6 +358,7 @@ app.include_router(diagnosis_template.router, prefix="/api")
 app.include_router(pharmacy.router, prefix="/api")
 app.include_router(prescription_template.router, prefix="/api")
 app.include_router(charge.router, prefix="/api")
+app.include_router(charge_item.router, prefix="/api")
 app.include_router(queue.router, prefix="/api")
 app.include_router(checkin.router, prefix="/api")
 app.include_router(vitalsign.router, prefix="/api")

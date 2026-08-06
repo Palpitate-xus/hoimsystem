@@ -219,6 +219,23 @@ class Charge(Base):
     invoices = relationship("Invoice", back_populates="charge")
 
 
+class ChargeItem(Base):
+    __tablename__ = "hoimsystem_charge_item"
+
+    item_id = Column(Integer, primary_key=True, autoincrement=True)
+    code = Column(String(30), nullable=False, unique=True)
+    name = Column(String(100), nullable=False)
+    category = Column(String(30), nullable=False)
+    price = Column(Float, nullable=False)
+    status = Column(Integer, nullable=False, default=1)
+    note = Column(String(200), nullable=True)
+    creator_id = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=False)
+    create_time = Column(DateTime, nullable=False)
+    update_time = Column(DateTime, nullable=False)
+
+    creator = relationship("User")
+
+
 class Prescription(Base):
     __tablename__ = "hoimsystem_prescription"
 

@@ -393,6 +393,22 @@ class ChargeRefundRequest(BaseModel):
     reason: str
 
 
+class ChargeItemCreateRequest(BaseModel):
+    code: str = Field(..., min_length=1, max_length=30)
+    name: str = Field(..., min_length=1, max_length=100)
+    category: str = Field(..., min_length=1, max_length=30)
+    price: float = Field(..., ge=0)
+    note: str = Field(default="", max_length=200)
+
+
+class ChargeItemUpdateRequest(ChargeItemCreateRequest):
+    item_id: int
+
+
+class ChargeItemIdRequest(BaseModel):
+    item_id: int
+
+
 class InvoiceCreateRequest(BaseModel):
     charge_id: str
 

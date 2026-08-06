@@ -774,6 +774,27 @@ class NursingRecordCreateRequest(BaseModel):
     note: str | None = Field(default=None, max_length=500)
 
 
+class NursingAssessmentCreateRequest(BaseModel):
+    admission_id: str
+    patient_id: int
+    adl_score: int = Field(..., ge=0, le=100)
+    pressure_ulcer_risk: int = Field(default=0, ge=0, le=3)
+    fall_risk: int = Field(default=0, ge=0, le=3)
+    consciousness: int = Field(default=0, ge=0, le=3)
+    nutrition_risk: int = Field(default=0, ge=0, le=3)
+    note: str = Field(default="", max_length=1000)
+
+
+class NursingAssessmentUpdateRequest(BaseModel):
+    assessment_id: str
+    adl_score: int | None = Field(default=None, ge=0, le=100)
+    pressure_ulcer_risk: int | None = Field(default=None, ge=0, le=3)
+    fall_risk: int | None = Field(default=None, ge=0, le=3)
+    consciousness: int | None = Field(default=None, ge=0, le=3)
+    nutrition_risk: int | None = Field(default=None, ge=0, le=3)
+    note: str | None = Field(default=None, max_length=1000)
+
+
 class TemperatureRecordCreateRequest(BaseModel):
     admission_id: str
     patient_id: int

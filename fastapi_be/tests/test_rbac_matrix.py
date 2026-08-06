@@ -203,6 +203,10 @@ ENDPOINTS = [
     ("GET", "/api/emergency/medicalRecord/list", {"admin", "super_admin", "director", "doctor"}, None, {}),
     ("PUT", "/api/emergency/medicalRecord/update", {"admin", "super_admin", "director", "doctor"}, {"record_id": "x", "diagnosis": "修改"}, {}),
     ("POST", "/api/emergency/medicalRecord/sign", {"admin", "super_admin", "director", "doctor"}, {"record_id": "x"}, {}),
+    ("GET", "/api/nursingAssessment/list", {"admin", "super_admin", "nurse"}, None, {}),
+    ("POST", "/api/nursingAssessment/create", {"admin", "super_admin", "nurse"}, {"admission_id": "x", "patient_id": 1, "adl_score": 50}, {}),
+    ("PUT", "/api/nursingAssessment/update", {"admin", "super_admin", "nurse"}, {"assessment_id": "x", "adl_score": 50}, {}),
+    ("POST", "/api/nursingAssessment/complete", {"admin", "super_admin", "nurse"}, {"assessment_id": "x"}, {}),
 
     # purchase.py (getList is auth-only, not admin-only — pharmacist/cashier may view)
     ("GET", "/api/purchase/getList", {"admin", "super_admin", "director", "doctor", "nurse", "cashier", "pharmacist", "guide", "patient", "lab_technician", "registrar"}, None, {"status": 0}),

@@ -522,6 +522,12 @@ export const asyncRoutes = [
         component: () => import("@/views/vitalsign/infection.vue"),
         meta: { title: "院感监测", permissions: ["admin", "nurse", "doctor", "director"] },
       },
+      {
+        path: "blood",
+        name: "Blood",
+        component: () => import("@/views/vitalsign/blood.vue"),
+        meta: { title: "血库管理", permissions: ["admin", "nurse", "doctor", "director"] },
+      },
     ],
   },
 

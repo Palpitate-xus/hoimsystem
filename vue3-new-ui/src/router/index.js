@@ -404,6 +404,12 @@ export const asyncRoutes = [
         component: () => import("@/views/queue/emergencyTriage.vue"),
         meta: { title: "急诊分诊", permissions: ["admin", "doctor", "director", "nurse"] },
       },
+      {
+        path: "emergencyRescue",
+        name: "EmergencyRescue",
+        component: () => import("@/views/queue/emergencyRescue.vue"),
+        meta: { title: "抢救记录", permissions: ["admin", "doctor", "director", "nurse"] },
+      },
     ],
   },
 

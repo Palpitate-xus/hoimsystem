@@ -192,6 +192,23 @@ def get_window_registration_schedules(
     return {"code": 200, "msg": "success", "data": data}
 
 
+@router.get("/windowRegistration/patient")
+def get_window_registration_patient(
+    identity: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_roles(ROLE_CASHIER, ROLE_REGISTRAR, *ADMIN_ROLES)),
+):
+    """窗口挂号前核验患者身份并返回最小必要信息。"""
+    patient = db.query(Patient).filter(Patient.identity == identity).first()
+    if not patient:
+        return {"code": 500, "msg": "病人信息不存在，请先注册"}
+    return {
+        "code": 200,
+        "msg": "success",
+        "data": {"patient_id": patient.patient_id, "identity": patient.identity, "name": patient.name, "phone": patient.phone},
+    }
+
+
 @router.post("/invoice/create")
 def create_invoice(req: InvoiceCreateRequest, db: Session = Depends(get_db), current_user: User = Depends(require_roles(ROLE_CASHIER, *ADMIN_ROLES))):
     charge = db.query(Charge).filter(Charge.charge_id == req.charge_id).first()

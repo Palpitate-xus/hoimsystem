@@ -5,6 +5,24 @@ from app.models import Charge, Registration
 
 @pytest.mark.asyncio
 class TestChargeManagement:
+    async def test_window_registration_patient_lookup(self, async_client, seed_data, auth_headers):
+        headers = auth_headers(seed_data["cashier_user"].username)
+        found = await async_client.get(
+            "/api/windowRegistration/patient",
+            headers=headers,
+            params={"identity": seed_data["patient"].identity},
+        )
+        assert found.status_code == 200
+        assert found.json()["data"]["name"] == seed_data["patient"].name
+
+        missing = await async_client.get(
+            "/api/windowRegistration/patient",
+            headers=headers,
+            params={"identity": "110101200001010000"},
+        )
+        assert missing.status_code == 200
+        assert missing.json() == {"code": 500, "msg": "病人信息不存在，请先注册"}
+
     async def test_window_registration_schedules_return_individual_slots(self, async_client, seed_data, auth_headers):
         r = await async_client.get(
             "/api/windowRegistration/schedules",

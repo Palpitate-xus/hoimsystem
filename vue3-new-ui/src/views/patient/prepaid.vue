@@ -54,6 +54,25 @@
           </el-card>
         </el-col>
       </el-row>
+
+      <el-divider />
+      <el-card shadow="never" v-if="transactions.length">
+        <template #header>
+          <span>账户流水</span>
+        </template>
+        <el-table :data="transactions" stripe>
+          <el-table-column label="类型" width="100">
+            <template #default="{ row }">{{ row.type === "recharge" ? "充值" : "扣费" }}</template>
+          </el-table-column>
+          <el-table-column label="金额" width="120">
+            <template #default="{ row }">{{ Number(row.amount).toFixed(2) }} 元</template>
+          </el-table-column>
+          <el-table-column label="余额" width="120">
+            <template #default="{ row }">{{ Number(row.balance_after).toFixed(2) }} 元</template>
+          </el-table-column>
+          <el-table-column prop="create_time" label="时间" />
+        </el-table>
+      </el-card>
     </el-card>
   </div>
 </template>
@@ -61,10 +80,11 @@
 <script setup>
 import { ref } from "vue";
 import { ElMessage } from "element-plus";
-import { getPrepaidBalance, prepaidRecharge, prepaidDeduct } from "@/api/prepaid";
+import { getPrepaidBalance, getPrepaidTransactions, prepaidRecharge, prepaidDeduct } from "@/api/prepaid";
 
 const identity = ref("");
 const balance = ref(null);
+const transactions = ref([]);
 const rechargeAmount = ref(100);
 const deductAmount = ref(0);
 
@@ -74,8 +94,12 @@ const handleQuery = async () => {
     return;
   }
   try {
-    const res = await getPrepaidBalance({ identity: identity.value });
-    balance.value = res.data !== undefined ? res.data : res;
+    const [balanceRes, transactionRes] = await Promise.all([
+      getPrepaidBalance(identity.value),
+      getPrepaidTransactions(identity.value),
+    ]);
+    balance.value = balanceRes.data?.balance ?? balanceRes.balance ?? null;
+    transactions.value = transactionRes.data || [];
   } catch (error) {
     ElMessage.error("查询余额失败");
   }

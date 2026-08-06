@@ -3,6 +3,9 @@ import request from "@/utils/request";
 export function getPrepaidBalance(identity) {
   return request({ url: "prepaid/getBalance", method: "get", params: { identity } });
 }
+export function getPrepaidTransactions(identity) {
+  return request({ url: "prepaid/getTransactions", method: "get", params: { identity } });
+}
 export function prepaidRecharge(data) {
   return request({ url: "prepaid/recharge", method: "post", data });
 }

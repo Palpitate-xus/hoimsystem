@@ -37,6 +37,57 @@ class TestVitalSign:
         assert r.status_code == 200
         assert r.json()["code"] == 200
 
+    @pytest.mark.parametrize(
+        "field,value",
+        [
+            ("temperature", -1),
+            ("temperature", 50),
+            ("blood_pressure_systolic", -1),
+            ("blood_pressure_systolic", 301),
+            ("blood_pressure_diastolic", -1),
+            ("blood_pressure_diastolic", 201),
+            ("pulse", -1),
+            ("pulse", 301),
+            ("weight", -1),
+            ("weight", 501),
+        ],
+    )
+    async def test_rejects_invalid_vital_sign_ranges(self, async_client, seed_data, auth_headers, field, value):
+        payload = {
+            "patient_id": seed_data["patient"].patient_id,
+            "temperature": 36.5,
+            "blood_pressure_systolic": 120,
+            "blood_pressure_diastolic": 80,
+            "pulse": 75,
+            "weight": 70.0,
+        }
+        payload[field] = value
+
+        r = await async_client.post(
+            "/api/vitalSign/create",
+            headers=auth_headers(seed_data["admin_user"].username),
+            json=payload,
+        )
+
+        assert r.status_code == 422
+
+    async def test_rejects_invalid_blood_pressure_relationship(self, async_client, seed_data, auth_headers):
+        r = await async_client.post(
+            "/api/vitalSign/create",
+            headers=auth_headers(seed_data["admin_user"].username),
+            json={
+                "patient_id": seed_data["patient"].patient_id,
+                "temperature": 36.5,
+                "blood_pressure_systolic": 80,
+                "blood_pressure_diastolic": 120,
+                "pulse": 75,
+                "weight": 70.0,
+            },
+        )
+
+        assert r.status_code == 200
+        assert r.json() == {"code": 400, "msg": "收缩压必须高于舒张压"}
+
     async def test_get_list(self, async_client, seed_data, auth_headers):
         r = await async_client.get("/api/vitalSign/getList", headers=auth_headers(seed_data["admin_user"].username))
         assert r.status_code == 200

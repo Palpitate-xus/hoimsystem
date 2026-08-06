@@ -100,13 +100,13 @@ export const asyncRoutes = [
     redirect: "noRedirect",
     name: "Patient",
     alwaysShow: true,
-    meta: { title: "患者服务", icon: "first-aid-kit", permissions: ["patient"] },
+    meta: { title: "患者服务", icon: "first-aid-kit", permissions: ["patient", "guide"] },
     children: [
       {
         path: "triage",
         name: "Triage",
         component: () => import("@/views/patient/triage.vue"),
-        meta: { title: "智能导诊", permissions: ["patient"] },
+        meta: { title: "智能导诊", permissions: ["patient", "guide"] },
       },
       {
         path: "appointment",
@@ -318,25 +318,25 @@ export const asyncRoutes = [
     redirect: "noRedirect",
     name: "Queue",
     alwaysShow: true,
-    meta: { title: "排队叫号", icon: "bell-filled", permissions: ["admin", "doctor", "director"] },
+    meta: { title: "排队叫号", icon: "bell-filled", permissions: ["admin", "doctor", "director", "guide"] },
     children: [
       {
         path: "triageDesk",
         name: "TriageDesk",
         component: () => import("@/views/queue/triageDesk.vue"),
-        meta: { title: "分诊台管理", permissions: ["admin", "doctor", "director"] },
+        meta: { title: "分诊台管理", permissions: ["admin", "doctor", "director", "guide"] },
       },
       {
         path: "queueList",
         name: "QueueList",
         component: () => import("@/views/queue/queueList.vue"),
-        meta: { title: "候诊队列", permissions: ["admin", "doctor", "director"] },
+        meta: { title: "候诊队列", permissions: ["admin", "doctor", "director", "guide"] },
       },
       {
         path: "patrolRecord",
         name: "PatrolRecord",
         component: () => import("@/views/queue/patrolRecord.vue"),
-        meta: { title: "候诊巡视", permissions: ["admin", "doctor", "director"] },
+        meta: { title: "候诊巡视", permissions: ["admin", "doctor", "director", "guide"] },
       },
     ],
   },

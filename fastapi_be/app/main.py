@@ -297,6 +297,7 @@ from app.routers import (
     clinical_pathway,
     consumable,
     digital_signature,
+    data_import_export,
     discharge,
     doctor,
     diagnosis_template,
@@ -393,6 +394,7 @@ app.include_router(adverse_reaction.router, prefix="/api")
 app.include_router(allergy.router, prefix="/api")
 app.include_router(adverse_event.router, prefix="/api")
 app.include_router(digital_signature.router, prefix="/api")
+app.include_router(data_import_export.router, prefix="/api")
 app.include_router(referral.router, prefix="/api")
 app.include_router(mdt.router, prefix="/api")
 app.include_router(monitor.router, prefix="/api")

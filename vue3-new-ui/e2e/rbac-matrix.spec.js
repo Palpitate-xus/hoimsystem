@@ -247,6 +247,15 @@ test.describe("业务页面渲染", () => {
     await expect(page.locator(".el-table")).toBeVisible({ timeout: 5000 });
   });
 
+  test("doctor 访问 ICD-10 编码页面显示查询表格", async ({ page }) => {
+    await login(page, "doctor1", "doctor123");
+    await page.goto(`${BASE}/#/inpatient/icd10`, { waitUntil: "networkidle" });
+    await page.waitForTimeout(1000);
+    await expect(page.getByText("ICD-10 编码").first()).toBeVisible({ timeout: 5000 });
+    await expect(page.getByRole("tab", { name: "诊断编码" })).toBeVisible({ timeout: 5000 });
+    await expect(page.locator(".el-table").first()).toBeVisible({ timeout: 5000 });
+  });
+
   test("doctor 访问处方模板页面显示模板表格", async ({ page }) => {
     await login(page, "doctor1", "doctor123");
     await page.goto(`${BASE}/#/doctor/prescriptionTemplate`, { waitUntil: "networkidle" });

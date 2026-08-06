@@ -710,6 +710,12 @@ export const asyncRoutes = [
         meta: { title: "病案归档/借阅", permissions: ["admin", "doctor", "director"] },
       },
       {
+        path: "icd10",
+        name: "Icd10",
+        component: () => import("@/views/inpatient/icd10.vue"),
+        meta: { title: "ICD-10 编码", permissions: ["admin", "doctor", "director"] },
+      },
+      {
         path: "surgery",
         name: "Surgery",
         component: () => import("@/views/inpatient/surgery.vue"),

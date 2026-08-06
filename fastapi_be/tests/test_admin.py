@@ -80,6 +80,16 @@ class TestAdminPatient:
         assert body["code"] == 200
         assert len(body["data"]) >= 2
 
+    async def test_patient_list_is_limited_to_current_patient(self, async_client, seed_data, auth_headers):
+        r = await async_client.get(
+            "/api/patientManagement/getList",
+            headers=auth_headers(seed_data["patient_user"].username),
+        )
+        assert r.status_code == 200
+        data = r.json()["data"]
+        assert data
+        assert {item["identity"] for item in data} == {seed_data["patient"].identity}
+
     async def test_update_patient(self, async_client, seed_data, auth_headers):
         patient = seed_data["patient"]
         headers = auth_headers(seed_data["admin_user"].username)

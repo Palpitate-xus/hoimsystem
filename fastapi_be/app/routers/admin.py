@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.dependencies import ADMIN_ROLES, NOTICE_ROLES, User, get_current_user, require_roles
+from app.dependencies import ADMIN_ROLES, NOTICE_ROLES, ROLE_PATIENT, User, get_current_user, require_roles
 from app.models import Department, Doctor, Notice, Patient
 from app.pagination import paginate
 from app.schemas import (
@@ -84,6 +84,8 @@ def delete_doctor(req: DoctorDeleteRequest, current_user: User = Depends(require
 def get_patient_list(keyword: str | None = None, page: int | None = None, page_size: int | None = None, current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)):
     query = db.query(Patient)
+    if current_user.user_role == ROLE_PATIENT:
+        query = query.filter(Patient.identity == current_user.username)
     patient_data, total = paginate(query, page, page_size)
     data = []
     for item in patient_data:

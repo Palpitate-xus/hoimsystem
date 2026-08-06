@@ -8,6 +8,11 @@ export function registerDoctorSchedule(data) {
   return request({ url: "doctorScheduleManagement/register", method: "post", data });
 }
 
+export function getScheduleChangeList() { return request({ url: "scheduleChange/list", method: "get" }); }
+export function createScheduleChange(data) { return request({ url: "scheduleChange/create", method: "post", data }); }
+export function approveScheduleChange(data) { return request({ url: "scheduleChange/approve", method: "post", data }); }
+export function rejectScheduleChange(data) { return request({ url: "scheduleChange/reject", method: "post", data }); }
+
 export function createMedicalRecord(data) {
   return request({ url: "medicalRecord/create", method: "post", data });
 }

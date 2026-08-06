@@ -32,7 +32,7 @@ const ROLE_USERS = [
     name: "doctor",
     username: "doctor1",
     password: "doctor123",
-    menu: ["医生排班", "病历管理", "处方管理", "处方模板", "诊断模板", "检查检验申请", "考勤签到",
+    menu: ["医生排班", "停诊/加号申请", "病历管理", "处方管理", "处方模板", "诊断模板", "检查检验申请", "考勤签到",
       "多学科会诊", "临床路径", "处方审核与发药", "库存预警", "处方点评",
       "分诊台管理", "候诊队列", "候诊巡视", "生命体征录入", "检查结果录入",
       "随访管理", "入院登记", "住院医嘱", "护士工作站", "出院结算", "电子病历",
@@ -393,6 +393,15 @@ test.describe("业务页面渲染", () => {
     await page.goto(`${BASE}/#/lab/labResult`, { waitUntil: "networkidle" });
     await expect(page.getByRole("tab", { name: "危急值报告" })).toBeVisible({ timeout: 5000 });
     await expect(page.locator(".el-tabs").last()).toBeVisible({ timeout: 5000 });
+  });
+
+  test("doctor 访问停诊加号申请页面", async ({ page }, testInfo) => {
+    skipIfUserUnavailable(testInfo, "doctor");
+    await login(page, "doctor1", "doctor123");
+    await page.goto(`${BASE}/#/doctor/scheduleChange`, { waitUntil: "networkidle" });
+    await expect(page.getByText("停诊/加号申请").first()).toBeVisible({ timeout: 5000 });
+    await expect(page.getByText("提交申请")).toBeVisible({ timeout: 5000 });
+    await expect(page.locator(".el-table")).toBeVisible({ timeout: 5000 });
   });
 });
 

@@ -192,6 +192,12 @@ export const asyncRoutes = [
         meta: { title: "医生排班", permissions: ["admin", "doctor", "director"] },
       },
       {
+        path: "scheduleChange",
+        name: "ScheduleChange",
+        component: () => import("@/views/doctor/scheduleChange.vue"),
+        meta: { title: "停诊/加号申请", permissions: ["admin", "doctor", "director"] },
+      },
+      {
         path: "medicalRecord",
         name: "DoctorMedicalRecord",
         component: () => import("@/views/doctor/medicalRecord.vue"),

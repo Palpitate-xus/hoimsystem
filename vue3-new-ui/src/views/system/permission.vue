@@ -111,12 +111,18 @@ const submitRoleChange = async () => {
 
 const resetPassword = async (row) => {
   try {
-    await ElMessageBox.confirm(
-      `确定重置用户 "${row.username}" 的密码吗？重置后请通过安全渠道告知用户临时密码。`,
-      "重置密码确认",
-      { type: "warning" }
+    const { value: newPassword } = await ElMessageBox.prompt(
+      `请输入用户 "${row.username}" 的临时密码（至少6位），并通过安全渠道告知用户。`,
+      "重置密码",
+      {
+        inputType: "password",
+        inputPattern: /^.{6,128}$/,
+        inputErrorMessage: "密码长度必须为6至128位",
+        confirmButtonText: "确认重置",
+        cancelButtonText: "取消",
+      }
     );
-    const res = await resetUserPassword({ user_id: row.user_id });
+    const res = await resetUserPassword({ user_id: row.user_id, new_password: newPassword });
     if (res.code === 200) {
       ElMessage.success("密码重置成功，请通过安全渠道告知用户临时密码");
     } else {

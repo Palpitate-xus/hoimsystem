@@ -79,7 +79,7 @@
 <script setup>
 import { ref, onMounted } from "vue";
 import { ElMessage } from "element-plus";
-import { getWindowRegistrationSchedules, windowRegistration } from "@/api/charge";
+import { getWindowRegistrationPatient, getWindowRegistrationSchedules, windowRegistration } from "@/api/charge";
 
 const step = ref(0);
 const form = ref({ identity: "" });
@@ -96,10 +96,15 @@ const verifyPatient = async () => {
   }
   loading.value = true;
   try {
-    const res = await getWindowRegistrationSchedules();
-    if (res.code === 200) {
-      schedules.value = (res.data || []).filter(s => s.number > 0);
-      patientName.value = "患者";
+    const patientRes = await getWindowRegistrationPatient(form.value.identity.trim());
+    if (patientRes.code !== 200) {
+      ElMessage.error(patientRes.msg || "患者不存在");
+      return;
+    }
+    const scheduleRes = await getWindowRegistrationSchedules();
+    if (scheduleRes.code === 200) {
+      schedules.value = (scheduleRes.data || []).filter(s => s.number > 0);
+      patientName.value = patientRes.data.name;
       step.value = 1;
       selectedSchedule.value = null;
     }

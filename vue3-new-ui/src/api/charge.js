@@ -32,6 +32,10 @@ export function getWindowRegistrationSchedules(keyword = "") {
   return request({ url: "windowRegistration/schedules", method: "get", params: { keyword } });
 }
 
+export function getWindowRegistrationPatient(identity) {
+  return request({ url: "windowRegistration/patient", method: "get", params: { identity } });
+}
+
 export function windowCancelRegistration(data) {
   return request({ url: "windowRegistration/cancel", method: "post", data });
 }

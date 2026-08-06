@@ -73,9 +73,12 @@ const handleVerify = async () => {
     const res = await verifySign({
       content: content.value,
       sign_hash: signResult.value.sign_hash,
+      signer: signResult.value.signer,
+      sign_time: signResult.value.sign_time,
       cert_sn: signResult.value.cert_sn,
     });
-    verifyResult.value = res.data === true || res.data === 1 || res.data === "success";
+    const result = res.data || res;
+    verifyResult.value = result.valid === true;
     ElMessage.success("验证完成");
   } catch (error) {
     verifyResult.value = false;

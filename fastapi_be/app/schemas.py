@@ -153,6 +153,22 @@ class EmergencyRescueEventCreateRequest(BaseModel):
     event_time: str | None = None
 
 
+class EmergencyObservationCreateRequest(BaseModel):
+    triage_id: str
+    condition: str = Field(..., min_length=1, max_length=500)
+    medical_advice: str = Field(default="", max_length=500)
+    fee_amount: float = Field(default=0, ge=0, le=1000000)
+
+
+class EmergencyObservationUpdateRequest(BaseModel):
+    observation_id: str
+    condition: str | None = Field(default=None, min_length=1, max_length=500)
+    medical_advice: str | None = Field(default=None, max_length=500)
+    fee_amount: float | None = Field(default=None, ge=0, le=1000000)
+    fee_status: int | None = Field(default=None, ge=0, le=1)
+    status: int | None = Field(default=None, ge=1, le=3)
+
+
 class PharmaceuticalCreateRequest(BaseModel):
     name: str = Field(..., min_length=1, max_length=24)
     stock: int = Field(..., ge=0)

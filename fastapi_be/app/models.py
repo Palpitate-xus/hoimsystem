@@ -689,6 +689,25 @@ class EmergencyRescueEvent(Base):
     operator = relationship("User", foreign_keys=[operator_id])
 
 
+class EmergencyObservation(Base):
+    __tablename__ = "hoimsystem_emergency_observation"
+
+    observation_id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    triage_id = Column(String(36), ForeignKey("hoimsystem_emergency_triage.triage_id"), nullable=False)
+    start_time = Column(DateTime, nullable=False)
+    end_time = Column(DateTime, nullable=True)
+    condition = Column(String(500), nullable=False)
+    medical_advice = Column(String(500), nullable=True)
+    fee_amount = Column(Float, nullable=False, default=0)
+    fee_status = Column(Integer, nullable=False, default=0)  # 0=待计费 1=已计费
+    status = Column(Integer, nullable=False, default=1)  # 1=留观中 2=已结束 3=已取消
+    operator_id = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=False)
+    update_time = Column(DateTime, nullable=False)
+
+    triage = relationship("EmergencyTriage")
+    operator = relationship("User", foreign_keys=[operator_id])
+
+
 class PatrolRecord(Base):
     __tablename__ = "hoimsystem_patrol_record"
 

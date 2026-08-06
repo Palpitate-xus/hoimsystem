@@ -192,6 +192,9 @@ ENDPOINTS = [
     ("PUT", "/api/emergency/triage/update", {"admin", "super_admin", "nurse"}, {"triage_id": "x", "status": 1}, {}),
     ("POST", "/api/emergency/rescue/create", {"admin", "super_admin", "nurse"}, {"triage_id": "x", "event_type": "用药", "description": "给予急救药物"}, {}),
     ("GET", "/api/emergency/rescue/list", {"admin", "super_admin", "director", "doctor", "nurse"}, None, {}),
+    ("POST", "/api/emergency/observation/create", {"admin", "super_admin", "nurse"}, {"triage_id": "x", "condition": "观察中"}, {}),
+    ("GET", "/api/emergency/observation/list", {"admin", "super_admin", "director", "doctor", "nurse"}, None, {}),
+    ("PUT", "/api/emergency/observation/update", {"admin", "super_admin", "director", "doctor", "nurse"}, {"observation_id": "x", "status": 2}, {}),
 
     # purchase.py (getList is auth-only, not admin-only — pharmacist/cashier may view)
     ("GET", "/api/purchase/getList", {"admin", "super_admin", "director", "doctor", "nurse", "cashier", "pharmacist", "guide", "patient", "lab_technician", "registrar"}, None, {"status": 0}),

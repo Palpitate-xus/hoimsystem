@@ -185,17 +185,25 @@ def patient_appointment_cancel(req: UuidRequest, current_user: User = Depends(ge
         return {"code": 500, "msg": "预约记录不存在"}
     if app.status == 2:
         return {"code": 500, "msg": "预约已取消,无需重复操作"}
+    if app.status != 0:
+        return {"code": 500, "msg": "预约已报到或已就诊，不能取消"}
     patient_obj = db.query(Patient).filter(Patient.identity == current_user.username).first()
     if not patient_obj or app.patient_id != patient_obj.patient_id:
         return {"code": 403, "msg": "无权取消他人预约"}
-    app.status = 2
-    db.add(app)
-    schedule = db.query(DoctorSchedule).filter(DoctorSchedule.doctor_id == app.doctor_id).filter(
-        DoctorSchedule.specialist == app.specialist
+    updated = db.query(Appointment).filter(
+        Appointment.registration_uuid == req.uuid,
+        Appointment.patient_id == patient_obj.patient_id,
+        Appointment.status == 0,
+    ).update({Appointment.status: 2}, synchronize_session=False)
+    if updated != 1:
+        db.rollback()
+        return {"code": 500, "msg": "预约已报到或已就诊，不能取消"}
+    schedule = db.query(DoctorSchedule).filter(
+        DoctorSchedule.doctor_id == app.doctor_id,
+        DoctorSchedule.specialist == app.specialist,
     ).first()
     if schedule:
         schedule.number += 1
-        db.add(schedule)
     db.commit()
     return {"code": 200, "msg": "success"}
 

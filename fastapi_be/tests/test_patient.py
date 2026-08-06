@@ -1,6 +1,8 @@
+import datetime
+
 import pytest
 
-from app.models import DoctorSchedule
+from app.models import Appointment, DoctorSchedule
 
 
 @pytest.mark.asyncio
@@ -57,6 +59,27 @@ class TestPatientAppointment:
         })
         assert mismatched.status_code == 200
         assert mismatched.json()["code"] == 500
+
+    async def test_checked_in_appointment_cannot_be_cancelled(self, async_client, seed_data, auth_headers, db_session):
+        appointment = Appointment(
+            patient_id=seed_data["patient"].patient_id,
+            doctor_id=seed_data["doctor"].doctor_id,
+            specialist=1,
+            department_id=seed_data["department"].department_id,
+            prefer_time="上午",
+            appointment_time=datetime.datetime.now(),
+            time=datetime.date.today(),
+            status=1,
+        )
+        db_session.add(appointment)
+        db_session.commit()
+        r = await async_client.post(
+            "/api/appointmentManagement/cancel",
+            headers=auth_headers(seed_data["patient_user"].username),
+            json={"uuid": appointment.registration_uuid},
+        )
+        assert r.status_code == 200
+        assert r.json() == {"code": 500, "msg": "预约已报到或已就诊，不能取消"}
 
 
 @pytest.mark.asyncio

@@ -255,7 +255,7 @@
 - [x] 抢救记录 API（抢救时间轴/用药/操作）
 - [x] 留观管理 API（留观登记/医嘱/费用）
 - [x] 绿色通道 API（先救治后付费流程）
-- [ ] 急诊病历 API（急诊专用病历模板）
+- [x] 急诊病历 API（急诊专用病历模板）
 
 ### 2.18 病案管理 API ⬜
 
@@ -482,7 +482,7 @@
 - [x] 急诊分诊页面
 - [x] 抢救记录页面
 - [x] 留观管理页面
-- [ ] 急诊病历页面
+- [x] 急诊病历页面
 
 ### 4.15 病案管理端页面 ⬜
 
@@ -637,6 +637,7 @@
 - [x] hoimsystem_emergency_rescue（抢救记录：抢救时间、用药、操作、参与人员）
 - [x] hoimsystem_emergency_observation（留观记录：留观开始、结束时间、病情）
 - [x] hoimsystem_emergency_green_channel（绿色通道：申请、审批、关闭、先救治后付费）
+- [x] hoimsystem_emergency_medical_record（急诊病历：草稿、修改、签名）
 
 ### 6.13 病案管理 ⬜ 待建
 

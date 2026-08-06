@@ -312,6 +312,7 @@ from app.routers import (
     special_drug,
     lab,
     lab_package,
+    lab_qc,
     mdt,
     medical_record_home,
     medical_record_home_quality,
@@ -372,6 +373,7 @@ app.include_router(checkin.router, prefix="/api")
 app.include_router(vitalsign.router, prefix="/api")
 app.include_router(lab.router, prefix="/api")
 app.include_router(lab_package.router, prefix="/api")
+app.include_router(lab_qc.router, prefix="/api")
 app.include_router(followup.router, prefix="/api")
 app.include_router(family_member.router, prefix="/api")
 app.include_router(report.router, prefix="/api")

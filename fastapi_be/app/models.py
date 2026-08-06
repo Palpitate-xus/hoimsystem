@@ -555,6 +555,23 @@ class LabPackage(Base):
     update_time = Column(DateTime, nullable=False)
 
 
+class LabQcRecord(Base):
+    __tablename__ = "hoimsystem_lab_qc_record"
+
+    qc_id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    qc_name = Column(String(100), nullable=False)
+    level = Column(String(30), nullable=False)
+    target_value = Column(Float, nullable=False)
+    measured_value = Column(Float, nullable=False)
+    unit = Column(String(20), nullable=True)
+    pass_flag = Column(Integer, nullable=False, default=1)
+    remark = Column(String(300), nullable=True)
+    operator_id = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=False)
+    qc_time = Column(DateTime, nullable=False)
+
+    operator = relationship("User")
+
+
 class LabResult(Base):
     __tablename__ = "hoimsystem_lab_result"
 

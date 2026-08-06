@@ -558,6 +558,15 @@ class LabPackageUpdateRequest(BaseModel):
     status: int | None = Field(default=None, ge=0, le=1)
 
 
+class LabQcRecordCreateRequest(BaseModel):
+    qc_name: str = Field(..., min_length=1, max_length=100)
+    level: str = Field(..., min_length=1, max_length=30)
+    target_value: float
+    measured_value: float
+    unit: str = Field(default="", max_length=20)
+    remark: str = Field(default="", max_length=300)
+
+
 class FollowUpCreatePlanRequest(BaseModel):
     patient_id: int
     plan_date: str

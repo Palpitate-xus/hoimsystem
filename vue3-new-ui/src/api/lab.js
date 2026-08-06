@@ -8,6 +8,8 @@ export function getLabResultList(keyword = "") {
   return request({ url: "labResult/getList", method: "get", params: { keyword } });
 }
 
+export function getCriticalLabResults() { return request({ url: "labResult/getCritical", method: "get" }); }
+
 export function getLabResultDetail(data) {
   return request({ url: "labResult/detail", method: "post", data });
 }

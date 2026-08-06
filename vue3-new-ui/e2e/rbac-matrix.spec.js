@@ -386,6 +386,14 @@ test.describe("业务页面渲染", () => {
     await expect(page.getByText("收费项目").first()).toBeVisible({ timeout: 5000 });
     await expect(page.locator(".el-table")).toBeVisible({ timeout: 5000 });
   });
+
+  test("lab technician 访问危急值报告", async ({ page }, testInfo) => {
+    skipIfUserUnavailable(testInfo, "lab_technician");
+    await login(page, "lab01", "123456");
+    await page.goto(`${BASE}/#/lab/labResult`, { waitUntil: "networkidle" });
+    await expect(page.getByRole("tab", { name: "危急值报告" })).toBeVisible({ timeout: 5000 });
+    await expect(page.locator(".el-tabs").last()).toBeVisible({ timeout: 5000 });
+  });
 });
 
 test.describe("UI 布局完整性", () => {

@@ -36,6 +36,12 @@
       />
 
       </el-tab-pane>
+      <el-tab-pane label="危急值报告" name="critical">
+        <div class="page-toolbar"><el-button @click="fetchCritical">刷新</el-button></div>
+        <el-table :data="criticalList" v-loading="loadingCritical" border empty-text="暂无危急值报告">
+          <el-table-column prop="patient_name" label="患者" width="120" /><el-table-column prop="check_name" label="检查项目" width="140" /><el-table-column prop="result" label="危急结果" min-width="220" /><el-table-column prop="check_time" label="报告时间" width="180" /><el-table-column prop="technician_name" label="技师" width="120" /><el-table-column label="审核状态" width="100"><template #default="{ row }"><el-tag :type="row.audit_status ? 'success' : 'danger'">{{ row.audit_status_text }}</el-tag></template></el-table-column>
+        </el-table>
+      </el-tab-pane>
       <el-tab-pane label="检查结果" name="results">
         <div class="page-toolbar">
           <el-input
@@ -104,7 +110,7 @@
 <script setup>
 import { ref, onMounted, computed } from "vue";
 import { ElMessage } from "element-plus";
-import { getPendingLabOrders, getLabResultList, createLabResult, sampleReceive, sampleReject, sampleTracking } from "@/api/lab";
+import { getPendingLabOrders, getLabResultList, getCriticalLabResults, createLabResult, sampleReceive, sampleReject, sampleTracking } from "@/api/lab";
 
 const activeTab = ref("pending");
 const pendingList = ref([]);
@@ -113,6 +119,8 @@ const searchQuery1 = ref("");
 const searchQuery2 = ref("");
 const loading = ref(false);
 const loading2 = ref(false);
+const loadingCritical = ref(false);
+const criticalList = ref([]);
 const dialogVisible = ref(false);
 const trackingVisible = ref(false);
 const trackingList = ref([]);
@@ -143,6 +151,8 @@ const fetchResults = async () => {
   resultList.value = res.data || [];
   loading2.value = false;
 };
+
+const fetchCritical = async () => { loadingCritical.value = true; try { const res = await getCriticalLabResults(); criticalList.value = res.data || []; } finally { loadingCritical.value = false; } };
 
 const handleResult = (row) => {
   form.value = { lab_order_id: row.id, sample_id: "", result: "", abnormal_flag: 0 };
@@ -194,5 +204,6 @@ const viewTracking = async (row) => {
 onMounted(() => {
   fetchPending();
   fetchResults();
+  fetchCritical();
 });
 </script>

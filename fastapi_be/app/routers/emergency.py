@@ -4,9 +4,9 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.dependencies import CLINICAL_ROLES, NURSING_ROLES, User, require_roles
-from app.models import EmergencyObservation, EmergencyRescueEvent, EmergencyTriage, Patient
-from app.schemas import EmergencyObservationCreateRequest, EmergencyObservationUpdateRequest, EmergencyRescueEventCreateRequest, EmergencyTriageCreateRequest, EmergencyTriageUpdateRequest
+from app.dependencies import ADMIN_ROLES, CLINICAL_ROLES, NURSING_ROLES, ROLE_DIRECTOR, User, require_roles
+from app.models import EmergencyGreenChannel, EmergencyObservation, EmergencyRescueEvent, EmergencyTriage, Patient
+from app.schemas import EmergencyGreenChannelActionRequest, EmergencyGreenChannelCreateRequest, EmergencyObservationCreateRequest, EmergencyObservationUpdateRequest, EmergencyRescueEventCreateRequest, EmergencyTriageCreateRequest, EmergencyTriageUpdateRequest
 
 router = APIRouter()
 
@@ -164,3 +164,70 @@ def update_observation(req: EmergencyObservationUpdateRequest, current_user: Use
     item.update_time = datetime.datetime.now()
     db.commit()
     return {"code": 200, "msg": "success", "data": _serialize_observation(item)}
+
+
+def _serialize_green_channel(item: EmergencyGreenChannel):
+    return {
+        "channel_id": item.channel_id,
+        "triage_id": item.triage_id,
+        "patient_name": item.triage.patient.name if item.triage and item.triage.patient else "",
+        "reason": item.reason,
+        "status": item.status,
+        "status_text": {0: "待审批", 1: "已批准", 2: "已关闭", 3: "已拒绝"}.get(item.status, "未知"),
+        "applicant_name": item.applicant.username if item.applicant else "",
+        "approver_name": item.approver.username if item.approver else "",
+        "create_time": item.create_time,
+        "action_time": item.action_time,
+        "note": item.note or "",
+    }
+
+
+@router.post("/emergency/greenChannel/create")
+def create_green_channel(req: EmergencyGreenChannelCreateRequest, current_user: User = Depends(require_roles(*(NURSING_ROLES | CLINICAL_ROLES))), db: Session = Depends(get_db)):
+    triage = db.query(EmergencyTriage).filter(EmergencyTriage.triage_id == req.triage_id, EmergencyTriage.status != 3).first()
+    if not triage:
+        return {"code": 500, "msg": "有效分诊记录不存在"}
+    if not triage.green_channel:
+        return {"code": 500, "msg": "该分诊记录未标记绿色通道"}
+    active = db.query(EmergencyGreenChannel).filter(EmergencyGreenChannel.triage_id == req.triage_id, EmergencyGreenChannel.status.in_([0, 1])).first()
+    if active:
+        return {"code": 500, "msg": "该患者已有进行中的绿色通道申请"}
+    item = EmergencyGreenChannel(triage_id=req.triage_id, reason=req.reason.strip(), status=0, applicant_id=current_user.user_id, create_time=datetime.datetime.now())
+    db.add(item)
+    db.commit()
+    return {"code": 200, "msg": "success", "data": _serialize_green_channel(item)}
+
+
+@router.get("/emergency/greenChannel/list")
+def list_green_channels(current_user: User = Depends(require_roles(*(NURSING_ROLES | CLINICAL_ROLES))), db: Session = Depends(get_db)):
+    items = db.query(EmergencyGreenChannel).order_by(EmergencyGreenChannel.status.asc(), EmergencyGreenChannel.create_time.desc()).all()
+    return {"code": 200, "msg": "success", "data": [_serialize_green_channel(item) for item in items]}
+
+
+@router.post("/emergency/greenChannel/approve")
+def approve_green_channel(req: EmergencyGreenChannelActionRequest, current_user: User = Depends(require_roles(*(ADMIN_ROLES | {ROLE_DIRECTOR}))), db: Session = Depends(get_db)):
+    item = db.query(EmergencyGreenChannel).filter(EmergencyGreenChannel.channel_id == req.channel_id).first()
+    if not item:
+        return {"code": 500, "msg": "绿色通道申请不存在"}
+    if item.status != 0:
+        return {"code": 500, "msg": "当前申请状态不能审批"}
+    item.status = 1
+    item.approver_id = current_user.user_id
+    item.action_time = datetime.datetime.now()
+    item.note = req.note.strip()
+    db.commit()
+    return {"code": 200, "msg": "success", "data": _serialize_green_channel(item)}
+
+
+@router.post("/emergency/greenChannel/close")
+def close_green_channel(req: EmergencyGreenChannelActionRequest, current_user: User = Depends(require_roles(*(NURSING_ROLES | CLINICAL_ROLES))), db: Session = Depends(get_db)):
+    item = db.query(EmergencyGreenChannel).filter(EmergencyGreenChannel.channel_id == req.channel_id).first()
+    if not item:
+        return {"code": 500, "msg": "绿色通道申请不存在"}
+    if item.status != 1:
+        return {"code": 500, "msg": "只有已批准的绿色通道可以关闭"}
+    item.status = 2
+    item.action_time = datetime.datetime.now()
+    item.note = req.note.strip()
+    db.commit()
+    return {"code": 200, "msg": "success", "data": _serialize_green_channel(item)}

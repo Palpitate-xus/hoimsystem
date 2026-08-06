@@ -708,6 +708,24 @@ class EmergencyObservation(Base):
     operator = relationship("User", foreign_keys=[operator_id])
 
 
+class EmergencyGreenChannel(Base):
+    __tablename__ = "hoimsystem_emergency_green_channel"
+
+    channel_id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    triage_id = Column(String(36), ForeignKey("hoimsystem_emergency_triage.triage_id"), nullable=False)
+    reason = Column(String(500), nullable=False)
+    status = Column(Integer, nullable=False, default=0)  # 0=待审批 1=已批准 2=已关闭 3=已拒绝
+    applicant_id = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=False)
+    approver_id = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=True)
+    create_time = Column(DateTime, nullable=False)
+    action_time = Column(DateTime, nullable=True)
+    note = Column(String(500), nullable=True)
+
+    triage = relationship("EmergencyTriage")
+    applicant = relationship("User", foreign_keys=[applicant_id])
+    approver = relationship("User", foreign_keys=[approver_id])
+
+
 class PatrolRecord(Base):
     __tablename__ = "hoimsystem_patrol_record"
 

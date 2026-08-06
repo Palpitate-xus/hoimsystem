@@ -169,6 +169,16 @@ class EmergencyObservationUpdateRequest(BaseModel):
     status: int | None = Field(default=None, ge=1, le=3)
 
 
+class EmergencyGreenChannelCreateRequest(BaseModel):
+    triage_id: str
+    reason: str = Field(..., min_length=1, max_length=500)
+
+
+class EmergencyGreenChannelActionRequest(BaseModel):
+    channel_id: str
+    note: str = Field(default="", max_length=500)
+
+
 class PharmaceuticalCreateRequest(BaseModel):
     name: str = Field(..., min_length=1, max_length=24)
     stock: int = Field(..., ge=0)

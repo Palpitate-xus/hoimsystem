@@ -195,6 +195,10 @@ ENDPOINTS = [
     ("POST", "/api/emergency/observation/create", {"admin", "super_admin", "nurse"}, {"triage_id": "x", "condition": "观察中"}, {}),
     ("GET", "/api/emergency/observation/list", {"admin", "super_admin", "director", "doctor", "nurse"}, None, {}),
     ("PUT", "/api/emergency/observation/update", {"admin", "super_admin", "director", "doctor", "nurse"}, {"observation_id": "x", "status": 2}, {}),
+    ("POST", "/api/emergency/greenChannel/create", {"admin", "super_admin", "director", "doctor", "nurse"}, {"triage_id": "x", "reason": "先救治后付费"}, {}),
+    ("GET", "/api/emergency/greenChannel/list", {"admin", "super_admin", "director", "doctor", "nurse"}, None, {}),
+    ("POST", "/api/emergency/greenChannel/approve", {"admin", "super_admin", "director"}, {"channel_id": "x"}, {}),
+    ("POST", "/api/emergency/greenChannel/close", {"admin", "super_admin", "director", "doctor", "nurse"}, {"channel_id": "x"}, {}),
 
     # purchase.py (getList is auth-only, not admin-only — pharmacist/cashier may view)
     ("GET", "/api/purchase/getList", {"admin", "super_admin", "director", "doctor", "nurse", "cashier", "pharmacist", "guide", "patient", "lab_technician", "registrar"}, None, {"status": 0}),

@@ -53,6 +53,16 @@ class TestPatientOutpatientJourney:
         assert r.json()["code"] == 200
         assert len(r.json()["data"]) >= 1
 
+    async def test_journey_browse_department_navigation(self, async_client, auth_headers, seed_data):
+        """患者可查看科室位置、电话和医生信息。"""
+        headers = auth_headers(seed_data["patient_user"].username)
+        r = await async_client.get("/api/navigation/departments", headers=headers, params={"keyword": "内科"})
+        assert r.status_code == 200
+        assert r.json()["code"] == 200
+        assert r.json()["data"][0]["name"] == "内科"
+        assert r.json()["data"][0]["location"] == "1号楼"
+        assert r.json()["data"][0]["doctors"]
+
     async def test_journey_browse_schedule(self, async_client, auth_headers, seed_data):
         """查看医生排班。"""
         headers = auth_headers(seed_data["patient_user"].username)

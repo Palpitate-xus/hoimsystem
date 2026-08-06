@@ -225,6 +225,38 @@ def _match_symptoms(text: str):
     return matched
 
 
+@router.get("/navigation/departments")
+def navigation_departments(
+    keyword: str | None = None,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """提供患者可读的院内科室位置、电话和医生专长信息。"""
+    query = db.query(Department).order_by(Department.department_id)
+    if keyword:
+        query = query.filter(Department.name.ilike(f"%{keyword.strip()}%"))
+    data = []
+    for department in query.all():
+        data.append(
+            {
+                "department_id": department.department_id,
+                "name": department.name,
+                "location": department.location or "",
+                "phone": department.phone or "",
+                "doctors": [
+                    {
+                        "doctor_id": doctor.doctor_id,
+                        "name": doctor.name,
+                        "title": doctor.title or "",
+                        "education": doctor.education or "",
+                    }
+                    for doctor in department.doctors
+                ],
+            }
+        )
+    return {"code": 200, "msg": "success", "data": data}
+
+
 @router.post("/triage/suggest")
 def triage_suggest(req: dict, db: Session = Depends(get_db)):
     """智能导诊：根据症状描述推荐科室"""

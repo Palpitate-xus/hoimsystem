@@ -56,6 +56,22 @@ export function applyPrescriptionTemplate(data) {
   return request({ url: "prescriptionTemplate/apply", method: "post", data });
 }
 
+export function getDiagnosisTemplates() {
+  return request({ url: "diagnosisTemplate/list", method: "get" });
+}
+
+export function createDiagnosisTemplate(data) {
+  return request({ url: "diagnosisTemplate/create", method: "post", data });
+}
+
+export function updateDiagnosisTemplate(data) {
+  return request({ url: "diagnosisTemplate/update", method: "put", data });
+}
+
+export function deleteDiagnosisTemplate(data) {
+  return request({ url: "diagnosisTemplate/delete", method: "post", data });
+}
+
 export function createLabOrder(data) {
   return request({ url: "labOrder/create", method: "post", data });
 }

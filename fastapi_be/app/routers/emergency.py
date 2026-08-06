@@ -5,8 +5,8 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.dependencies import ADMIN_ROLES, CLINICAL_ROLES, NURSING_ROLES, ROLE_DIRECTOR, User, require_roles
-from app.models import EmergencyGreenChannel, EmergencyObservation, EmergencyRescueEvent, EmergencyTriage, Patient
-from app.schemas import EmergencyGreenChannelActionRequest, EmergencyGreenChannelCreateRequest, EmergencyObservationCreateRequest, EmergencyObservationUpdateRequest, EmergencyRescueEventCreateRequest, EmergencyTriageCreateRequest, EmergencyTriageUpdateRequest
+from app.models import Doctor, EmergencyGreenChannel, EmergencyMedicalRecord, EmergencyObservation, EmergencyRescueEvent, EmergencyTriage, Patient
+from app.schemas import EmergencyGreenChannelActionRequest, EmergencyGreenChannelCreateRequest, EmergencyMedicalRecordCreateRequest, EmergencyMedicalRecordUpdateRequest, EmergencyObservationCreateRequest, EmergencyObservationUpdateRequest, EmergencyRescueEventCreateRequest, EmergencyTriageCreateRequest, EmergencyTriageUpdateRequest
 
 router = APIRouter()
 
@@ -231,3 +231,65 @@ def close_green_channel(req: EmergencyGreenChannelActionRequest, current_user: U
     item.note = req.note.strip()
     db.commit()
     return {"code": 200, "msg": "success", "data": _serialize_green_channel(item)}
+
+
+def _serialize_emergency_record(item: EmergencyMedicalRecord):
+    return {"record_id": item.record_id, "triage_id": item.triage_id, "patient_id": item.patient_id, "patient_name": item.patient.name if item.patient else "", "doctor_name": item.doctor.name if item.doctor else "", "chief_complaint": item.chief_complaint, "present_illness": item.present_illness or "", "physical_exam": item.physical_exam or "", "diagnosis": item.diagnosis or "", "treatment_plan": item.treatment_plan or "", "status": item.status, "status_text": "已签名" if item.status else "草稿", "create_time": item.create_time, "update_time": item.update_time, "sign_time": item.sign_time}
+
+
+@router.post("/emergency/medicalRecord/create")
+def create_emergency_record(req: EmergencyMedicalRecordCreateRequest, current_user: User = Depends(require_roles(*CLINICAL_ROLES)), db: Session = Depends(get_db)):
+    triage = db.query(EmergencyTriage).filter(EmergencyTriage.triage_id == req.triage_id, EmergencyTriage.status != 3).first()
+    if not triage:
+        return {"code": 500, "msg": "有效分诊记录不存在"}
+    doctor = db.query(Doctor).filter(Doctor.user_id == current_user.user_id).first()
+    item = EmergencyMedicalRecord(triage_id=req.triage_id, patient_id=triage.patient_id, doctor_id=doctor.doctor_id if doctor else None, chief_complaint=req.chief_complaint.strip(), present_illness=req.present_illness.strip(), physical_exam=req.physical_exam.strip(), diagnosis=req.diagnosis.strip(), treatment_plan=req.treatment_plan.strip(), status=0, create_time=datetime.datetime.now(), update_time=datetime.datetime.now())
+    db.add(item)
+    db.commit()
+    return {"code": 200, "msg": "success", "data": _serialize_emergency_record(item)}
+
+
+@router.get("/emergency/medicalRecord/list")
+def list_emergency_records(triage_id: str | None = None, current_user: User = Depends(require_roles(*CLINICAL_ROLES)), db: Session = Depends(get_db)):
+    query = db.query(EmergencyMedicalRecord).order_by(EmergencyMedicalRecord.create_time.desc())
+    if triage_id:
+        query = query.filter(EmergencyMedicalRecord.triage_id == triage_id)
+    return {"code": 200, "msg": "success", "data": [_serialize_emergency_record(item) for item in query.all()]}
+
+
+@router.put("/emergency/medicalRecord/update")
+def update_emergency_record(req: EmergencyMedicalRecordUpdateRequest, current_user: User = Depends(require_roles(*CLINICAL_ROLES)), db: Session = Depends(get_db)):
+    item = db.query(EmergencyMedicalRecord).filter(EmergencyMedicalRecord.record_id == req.record_id).first()
+    if not item:
+        return {"code": 500, "msg": "急诊病历不存在"}
+    doctor = db.query(Doctor).filter(Doctor.user_id == current_user.user_id).first()
+    if current_user.user_role not in ADMIN_ROLES and (not doctor or item.doctor_id != doctor.doctor_id):
+        return {"code": 403, "msg": "无权修改他人急诊病历"}
+    if item.status:
+        return {"code": 403, "msg": "已签名急诊病历不可修改"}
+    for field in ("chief_complaint", "present_illness", "physical_exam", "diagnosis", "treatment_plan"):
+        value = getattr(req, field)
+        if value is not None:
+            setattr(item, field, value.strip())
+    item.update_time = datetime.datetime.now()
+    db.commit()
+    return {"code": 200, "msg": "success", "data": _serialize_emergency_record(item)}
+
+
+@router.post("/emergency/medicalRecord/sign")
+def sign_emergency_record(req: EmergencyMedicalRecordUpdateRequest, current_user: User = Depends(require_roles(*CLINICAL_ROLES)), db: Session = Depends(get_db)):
+    item = db.query(EmergencyMedicalRecord).filter(EmergencyMedicalRecord.record_id == req.record_id).first()
+    if not item:
+        return {"code": 500, "msg": "急诊病历不存在"}
+    doctor = db.query(Doctor).filter(Doctor.user_id == current_user.user_id).first()
+    if current_user.user_role not in ADMIN_ROLES and (not doctor or item.doctor_id != doctor.doctor_id):
+        return {"code": 403, "msg": "无权签名他人急诊病历"}
+    if item.status:
+        return {"code": 500, "msg": "急诊病历已签名"}
+    if not item.diagnosis.strip() or not item.treatment_plan.strip():
+        return {"code": 500, "msg": "请先填写诊断和处理计划"}
+    item.status = 1
+    item.sign_time = datetime.datetime.now()
+    item.update_time = item.sign_time
+    db.commit()
+    return {"code": 200, "msg": "success", "data": _serialize_emergency_record(item)}

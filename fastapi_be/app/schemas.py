@@ -179,6 +179,24 @@ class EmergencyGreenChannelActionRequest(BaseModel):
     note: str = Field(default="", max_length=500)
 
 
+class EmergencyMedicalRecordCreateRequest(BaseModel):
+    triage_id: str
+    chief_complaint: str = Field(..., min_length=1, max_length=500)
+    present_illness: str = Field(default="", max_length=1000)
+    physical_exam: str = Field(default="", max_length=1000)
+    diagnosis: str = Field(default="", max_length=500)
+    treatment_plan: str = Field(default="", max_length=1000)
+
+
+class EmergencyMedicalRecordUpdateRequest(BaseModel):
+    record_id: str
+    chief_complaint: str | None = Field(default=None, min_length=1, max_length=500)
+    present_illness: str | None = Field(default=None, max_length=1000)
+    physical_exam: str | None = Field(default=None, max_length=1000)
+    diagnosis: str | None = Field(default=None, max_length=500)
+    treatment_plan: str | None = Field(default=None, max_length=1000)
+
+
 class PharmaceuticalCreateRequest(BaseModel):
     name: str = Field(..., min_length=1, max_length=24)
     stock: int = Field(..., ge=0)

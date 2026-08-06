@@ -726,6 +726,28 @@ class EmergencyGreenChannel(Base):
     approver = relationship("User", foreign_keys=[approver_id])
 
 
+class EmergencyMedicalRecord(Base):
+    __tablename__ = "hoimsystem_emergency_medical_record"
+
+    record_id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    triage_id = Column(String(36), ForeignKey("hoimsystem_emergency_triage.triage_id"), nullable=False)
+    patient_id = Column(Integer, ForeignKey("hoimsystem_patient.patient_id"), nullable=False)
+    doctor_id = Column(Integer, ForeignKey("hoimsystem_doctor.doctor_id"), nullable=True)
+    chief_complaint = Column(String(500), nullable=False)
+    present_illness = Column(String(1000), nullable=True)
+    physical_exam = Column(String(1000), nullable=True)
+    diagnosis = Column(String(500), nullable=True)
+    treatment_plan = Column(String(1000), nullable=True)
+    status = Column(Integer, nullable=False, default=0)  # 0=草稿 1=已签名
+    create_time = Column(DateTime, nullable=False)
+    update_time = Column(DateTime, nullable=False)
+    sign_time = Column(DateTime, nullable=True)
+
+    triage = relationship("EmergencyTriage")
+    patient = relationship("Patient")
+    doctor = relationship("Doctor")
+
+
 class PatrolRecord(Base):
     __tablename__ = "hoimsystem_patrol_record"
 

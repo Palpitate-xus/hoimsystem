@@ -706,6 +706,24 @@ class AdverseReaction(Base):
 
     patient = relationship("Patient")
     pharmaceutical = relationship("Pharmaceutical")
+
+
+class PatientAllergy(Base):
+    __tablename__ = "hoimsystem_patient_allergy"
+
+    allergy_id = Column(Integer, primary_key=True, autoincrement=True)
+    patient_id = Column(Integer, ForeignKey("hoimsystem_patient.patient_id"), nullable=False)
+    allergen = Column(String(100), nullable=False)
+    reaction = Column(String(200), nullable=False)
+    severity = Column(Integer, nullable=False, default=1)  # 1=轻度 2=中度 3=重度
+    note = Column(String(200), nullable=True)
+    status = Column(Integer, nullable=False, default=1)  # 1=有效 0=已停用
+    reporter_id = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=False)
+    create_time = Column(DateTime, nullable=False)
+    update_time = Column(DateTime, nullable=False)
+
+    patient = relationship("Patient")
+    reporter = relationship("User")
     reporter = relationship("User")
 
 

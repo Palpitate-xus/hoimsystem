@@ -37,6 +37,12 @@ ENDPOINTS = [
     ("POST", "/api/adverseReaction/create", {"admin", "super_admin"}, {"patient_id": 1, "pharmaceutical_id": 1, "symptom": "x", "severity": 1}, {}),
     ("POST", "/api/adverseReaction/updateStatus", {"admin", "super_admin"}, {"reaction_id": 1, "status": 1}, {}),
 
+    # allergy.py
+    ("GET", "/api/allergy/list", {"admin", "super_admin", "director", "doctor", "nurse"}, None, {}),
+    ("POST", "/api/allergy/create", {"admin", "super_admin", "director", "doctor", "nurse"}, {"patient_id": 1, "allergen": "青霉素", "reaction": "皮疹", "severity": 2}, {}),
+    ("PUT", "/api/allergy/update", {"admin", "super_admin", "director", "doctor", "nurse"}, {"allergy_id": 1, "patient_id": 1, "allergen": "青霉素", "reaction": "皮疹", "severity": 2}, {}),
+    ("POST", "/api/allergy/disable", {"admin", "super_admin", "director", "doctor", "nurse"}, {"allergy_id": 1}, {}),
+
     # backup.py
     ("POST", "/api/backup/create", {"admin", "super_admin"}, {}, {}),
     ("GET", "/api/backup/getList", {"admin", "super_admin"}, None, {}),

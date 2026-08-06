@@ -248,6 +248,22 @@ class SkinTestAssessRequest(BaseModel):
     note: str = Field(default="", max_length=200)
 
 
+class PatientAllergyCreateRequest(BaseModel):
+    patient_id: int
+    allergen: str = Field(..., min_length=1, max_length=100)
+    reaction: str = Field(..., min_length=1, max_length=200)
+    severity: int = Field(default=1, ge=1, le=3)
+    note: str = Field(default="", max_length=200)
+
+
+class PatientAllergyUpdateRequest(PatientAllergyCreateRequest):
+    allergy_id: int
+
+
+class PatientAllergyIdRequest(BaseModel):
+    allergy_id: int
+
+
 class InventoryAdjustmentCreateRequest(BaseModel):
     pharmaceutical_id: int
     adjustment_type: str

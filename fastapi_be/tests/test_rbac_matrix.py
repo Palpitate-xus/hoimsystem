@@ -187,6 +187,9 @@ ENDPOINTS = [
     ("GET", "/api/scheduleChange/list", {"admin", "super_admin", "director", "doctor"}, None, {}),
     ("POST", "/api/scheduleChange/approve", {"admin", "super_admin", "director"}, {"request_id": "x"}, {}),
     ("POST", "/api/scheduleChange/reject", {"admin", "super_admin", "director"}, {"request_id": "x"}, {}),
+    ("POST", "/api/emergency/triage/create", {"admin", "super_admin", "nurse"}, {"patient_id": 1, "triage_level": 2, "chief_complaint": "胸痛", "vital_signs": "BP 150/90", "green_channel": 1}, {}),
+    ("GET", "/api/emergency/triage/list", {"admin", "super_admin", "director", "doctor", "nurse"}, None, {}),
+    ("PUT", "/api/emergency/triage/update", {"admin", "super_admin", "nurse"}, {"triage_id": "x", "status": 1}, {}),
 
     # purchase.py (getList is auth-only, not admin-only — pharmacist/cashier may view)
     ("GET", "/api/purchase/getList", {"admin", "super_admin", "director", "doctor", "nurse", "cashier", "pharmacist", "guide", "patient", "lab_technician", "registrar"}, None, {"status": 0}),

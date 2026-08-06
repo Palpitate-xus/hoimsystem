@@ -130,6 +130,21 @@ class ScheduleChangeActionRequest(BaseModel):
     request_id: str
 
 
+class EmergencyTriageCreateRequest(BaseModel):
+    patient_id: int
+    triage_level: int = Field(..., ge=1, le=4)
+    chief_complaint: str = Field(..., min_length=1, max_length=500)
+    vital_signs: str = Field(default="", max_length=500)
+    green_channel: int = Field(default=0, ge=0, le=1)
+
+
+class EmergencyTriageUpdateRequest(BaseModel):
+    triage_id: str
+    triage_level: int | None = Field(default=None, ge=1, le=4)
+    green_channel: int | None = Field(default=None, ge=0, le=1)
+    status: int | None = Field(default=None, ge=0, le=3)
+
+
 class PharmaceuticalCreateRequest(BaseModel):
     name: str = Field(..., min_length=1, max_length=24)
     stock: int = Field(..., ge=0)

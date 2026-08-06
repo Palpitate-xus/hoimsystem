@@ -656,6 +656,24 @@ class Attendance(Base):
     doctor = relationship("Doctor")
 
 
+class EmergencyTriage(Base):
+    __tablename__ = "hoimsystem_emergency_triage"
+
+    triage_id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    patient_id = Column(Integer, ForeignKey("hoimsystem_patient.patient_id"), nullable=False)
+    triage_level = Column(Integer, nullable=False)  # 1=立即 2=紧急 3=一般 4=非急
+    chief_complaint = Column(String(500), nullable=False)
+    vital_signs = Column(String(500), nullable=True)
+    green_channel = Column(Integer, nullable=False, default=0)
+    status = Column(Integer, nullable=False, default=0)  # 0=待分诊 1=处理中 2=已完成 3=已取消
+    nurse_id = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=False)
+    create_time = Column(DateTime, nullable=False)
+    update_time = Column(DateTime, nullable=False)
+
+    patient = relationship("Patient")
+    nurse = relationship("User", foreign_keys=[nurse_id])
+
+
 class PatrolRecord(Base):
     __tablename__ = "hoimsystem_patrol_record"
 

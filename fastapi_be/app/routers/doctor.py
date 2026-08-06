@@ -177,7 +177,7 @@ def pharmaceutical_register(req: PharmaceuticalCreateRequest, current_user: User
 
 
 @router.get("/pharmaceuticalManagement/getList")
-def get_pharmaceutical_list(keyword: str | None = None, current_user: User = Depends(require_roles(*PHARMACY_ROLES)), db: Session = Depends(get_db)):
+def get_pharmaceutical_list(keyword: str | None = None, current_user: User = Depends(require_roles(*(PHARMACY_ROLES | CLINICAL_ROLES))), db: Session = Depends(get_db)):
     pharmaceutical_list = db.query(Pharmaceutical).all()
     data = []
     for item in pharmaceutical_list:

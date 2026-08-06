@@ -82,6 +82,7 @@ ENDPOINTS = [
     ("POST", "/api/doctorManagement/register", {"admin", "super_admin"}, {"username": "x1", "password": "p", "name": "n", "title": "t", "sex": "男", "phone": "1", "department": 1, "permission": "doctor", "education": "b"}, {}),
     ("POST", "/api/doctorScheduleManagement/register", {"admin", "super_admin"}, {"schedule": ["星期一01"], "specialist": 1, "number": 10, "doctor": 1}, {}),
     ("POST", "/api/pharmaceuticalManagement/create", {"admin", "super_admin", "pharmacist"}, {"name": "药", "stock": 10, "price": "1", "expireddate": "2028-01-01", "supplier": "s", "remark": "r"}, {}),
+    ("GET", "/api/pharmaceuticalManagement/getList", {"admin", "super_admin", "director", "doctor", "pharmacist"}, None, {}),
     ("POST", "/api/pharmaceuticalManagement/update", {"admin", "super_admin", "pharmacist"}, {"pharmaceutical_id": 1, "name": "药"}, {}),
     ("POST", "/api/pharmaceuticalManagement/delete", {"admin", "super_admin", "pharmacist"}, {"pharmaceutical_id": 1}, {}),
     ("POST", "/api/pharmaceuticalManagement/stock_query", {"admin", "super_admin", "pharmacist"}, {"id": 1}, {}),

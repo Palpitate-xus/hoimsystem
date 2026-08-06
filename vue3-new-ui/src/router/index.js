@@ -416,6 +416,12 @@ export const asyncRoutes = [
         component: () => import("@/views/queue/emergencyObservation.vue"),
         meta: { title: "留观管理", permissions: ["admin", "doctor", "director", "nurse"] },
       },
+      {
+        path: "emergencyGreenChannel",
+        name: "EmergencyGreenChannel",
+        component: () => import("@/views/queue/emergencyGreenChannel.vue"),
+        meta: { title: "绿色通道", permissions: ["admin", "doctor", "director", "nurse"] },
+      },
     ],
   },
 

@@ -72,7 +72,7 @@ const ROLE_USERS = [
     name: "nurse",
     username: "nurse01",
     password: "123456",
-    menu: ["生命体征录入", "分诊台管理", "候诊巡视", "急诊分诊", "抢救记录", "留观管理", "预约报到", "病区床位", "输液管理", "注射管理", "皮试管理", "过敏标识", "交接班记录", "配药核对",
+    menu: ["生命体征录入", "分诊台管理", "候诊巡视", "急诊分诊", "抢救记录", "留观管理", "绿色通道", "预约报到", "病区床位", "输液管理", "注射管理", "皮试管理", "过敏标识", "交接班记录", "配药核对",
       "入院登记", "护士工作站", "住院费用", "出院结算", "消息中心"],
   },
   {
@@ -428,6 +428,15 @@ test.describe("业务页面渲染", () => {
     await page.goto(`${BASE}/#/queue/emergencyObservation`, { waitUntil: "networkidle" });
     await expect(page.getByText("留观管理").first()).toBeVisible({ timeout: 5000 });
     await expect(page.getByText("登记留观")).toBeVisible({ timeout: 5000 });
+    await expect(page.locator(".el-table")).toBeVisible({ timeout: 5000 });
+  });
+
+  test("nurse 访问绿色通道页面", async ({ page }, testInfo) => {
+    skipIfUserUnavailable(testInfo, "nurse");
+    await login(page, "nurse01", "123456");
+    await page.goto(`${BASE}/#/queue/emergencyGreenChannel`, { waitUntil: "networkidle" });
+    await expect(page.getByText("绿色通道").first()).toBeVisible({ timeout: 5000 });
+    await expect(page.getByText("提交绿色通道申请")).toBeVisible({ timeout: 5000 });
     await expect(page.locator(".el-table")).toBeVisible({ timeout: 5000 });
   });
 });

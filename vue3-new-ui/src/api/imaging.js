@@ -35,3 +35,15 @@ export function saveImagingTemplate(data) {
 export function getImagingViewer(orderId) {
   return request({ url: `imaging/viewer/${orderId}`, method: "get" });
 }
+
+export function getImagingFilms() {
+  return request({ url: "imaging/film/list", method: "get" });
+}
+
+export function createImagingFilm(data) {
+  return request({ url: "imaging/film/create", method: "post", data });
+}
+
+export function updateImagingFilmStatus(data) {
+  return request({ url: "imaging/film/status", method: "post", data });
+}

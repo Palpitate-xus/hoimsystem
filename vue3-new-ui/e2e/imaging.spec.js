@@ -15,5 +15,6 @@ test("admin can view imaging workflow tabs", async ({ page }) => {
   await expect(page.getByRole("tab", { name: "检查申请" })).toBeVisible();
   await expect(page.getByRole("tab", { name: "报告书写" })).toBeVisible();
   await expect(page.getByRole("tab", { name: "报告模板" })).toBeVisible();
+  await expect(page.getByRole("tab", { name: "胶片管理" })).toBeVisible();
   await expect(page.getByRole("button", { name: "新建影像申请" })).toBeVisible();
 });

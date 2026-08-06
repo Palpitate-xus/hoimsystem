@@ -259,7 +259,7 @@
 
 ### 2.18 病案管理 API ⬜
 
-- [ ] 病案首页 API（出院病案首页填写）
+- [x] 病案首页 API（出院病案首页填写）
 - [ ] ICD-10 编码 API（诊断/手术编码查询）
 - [ ] 病案归档 API（归档/借阅/封存）
 - [ ] 病案质控 API（病案首页质控）
@@ -490,7 +490,7 @@
 
 ### 4.15 病案管理端页面 ⬜
 
-- [ ] 病案首页填写页面
+- [x] 病案首页填写页面
 - [ ] 病案归档/借阅页面
 - [ ] ICD-10 编码搜索页面
 
@@ -646,7 +646,7 @@
 
 ### 6.13 病案管理 ⬜ 待建
 
-- [ ] hoimsystem_medical_record_home（病案首页：基本信息、诊断、手术、费用汇总）
+- [x] hoimsystem_medical_record_home（病案首页：基本信息、诊断、手术、费用汇总）
 - [ ] hoimsystem_icd10_diagnosis（ICD-10诊断编码库）
 - [ ] hoimsystem_icd10_operation（ICD-9-CM-3手术操作编码库）
 - [ ] hoimsystem_medical_record_archive（病案归档：归档号、位置、状态、借阅记录）

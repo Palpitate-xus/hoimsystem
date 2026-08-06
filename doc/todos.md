@@ -262,7 +262,7 @@
 - [x] 病案首页 API（出院病案首页填写）
 - [x] ICD-10 编码 API（诊断/手术编码查询）
 - [x] 病案归档 API（归档/借阅/封存）
-- [ ] 病案质控 API（病案首页质控）
+- [x] 病案质控 API（病案首页质控）
 
 ### 2.19 护理文书 API ⬜
 
@@ -493,6 +493,7 @@
 - [x] 病案首页填写页面
 - [x] 病案归档/借阅页面
 - [x] ICD-10 编码搜索页面
+- [x] 病案首页质控页面
 
 ### 4.16 门诊输液端页面 ⬜
 
@@ -650,6 +651,7 @@
 - [x] hoimsystem_icd10_diagnosis（ICD-10诊断编码库）
 - [x] hoimsystem_icd10_operation（ICD-9-CM-3手术操作编码库）
 - [x] hoimsystem_medical_record_archive（病案归档：归档号、位置、状态、借阅记录）
+- [x] hoimsystem_medical_record_home_quality（病案首页质控：检查项、结果、问题、评分）
 
 ### 6.14 护理文书 ⬜ 待建
 

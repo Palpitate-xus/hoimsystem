@@ -198,6 +198,26 @@ class DiagnosisTemplateIdRequest(BaseModel):
     template_id: int
 
 
+class InfusionCreateRequest(BaseModel):
+    patient_id: int
+    pharmaceutical_id: int
+    dose: str = Field(..., min_length=1, max_length=50)
+    batch_no: str = Field(..., min_length=1, max_length=50)
+    drip_rate: int | None = Field(default=None, ge=1, le=300)
+    note: str = Field(default="", max_length=200)
+
+
+class InfusionIdRequest(BaseModel):
+    infusion_id: str
+
+
+class InfusionObservationRequest(BaseModel):
+    infusion_id: str
+    drip_rate: int = Field(..., ge=1, le=300)
+    volume: int | None = Field(default=None, ge=0)
+    condition: str = Field(..., min_length=1, max_length=200)
+
+
 class InventoryAdjustmentCreateRequest(BaseModel):
     pharmaceutical_id: int
     adjustment_type: str

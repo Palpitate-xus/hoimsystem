@@ -266,7 +266,7 @@
 
 ### 2.19 护理文书 API ⬜
 
-- [ ] 入院护理评估 API（ADL/压疮/跌倒风险评估）
+- [x] 入院护理评估 API（ADL/压疮/跌倒风险评估）
 - [ ] 护理计划 API（护理诊断+措施+目标）
 - [x] 交接班记录 API（书面交接班报告）
 - [ ] 危重护理记录 API（ICU级护理记录）
@@ -465,6 +465,7 @@
 - [x] 入院登记页面
 - [x] 住院医嘱页面
 - [x] 护士工作站页面（医嘱执行/护理记录）
+- [x] 入院护理评估页面（ADL/压疮/跌倒/营养风险）
 - [x] 住院费用页面
 - [x] 出院结算页面
 - [x] 电子病历页面（住院）
@@ -605,6 +606,7 @@
 - [x] hoimsystem_inpatient_order_item（医嘱明细）
 - [x] hoimsystem_order_execution（医嘱执行）
 - [x] hoimsystem_nursing_record（护理记录）
+- [x] hoimsystem_nursing_assessment（入院护理评估：ADL、压疮、跌倒、意识、营养风险）
 - [x] hoimsystem_temperature_record（体温单）
 - [x] hoimsystem_inpatient_charge（住院费用）
 - [x] hoimsystem_discharge_summary（出院小结）
@@ -648,7 +650,7 @@
 
 ### 6.14 护理文书 ⬜ 待建
 
-- [ ] hoimsystem_nursing_assessment（入院护理评估）
+- [x] hoimsystem_nursing_assessment（入院护理评估）
 - [ ] hoimsystem_nursing_plan（护理计划）
 - [ ] hoimsystem_critical_care_record（危重护理记录）
 

@@ -11,6 +11,7 @@ from app.dependencies import (
     ADMIN_ROLES,
     ROLE_CASHIER,
     ROLE_PATIENT,
+    ROLE_SUPER_ADMIN,
     VALID_USER_ROLES,
     get_current_user,
     is_admin,
@@ -174,6 +175,12 @@ def update_user_role(req: dict, db: Session = Depends(get_db), current_user: Use
     user = db.query(User).filter(User.user_id == user_id).first()
     if not user:
         return {"code": 500, "msg": "用户不存在"}
+    if user.user_id == current_user.user_id or user.username == current_user.username:
+        return {"code": 500, "msg": "不能修改当前登录用户角色"}
+    if current_user.user_role != ROLE_SUPER_ADMIN and (
+        new_role == ROLE_SUPER_ADMIN or user.user_role == ROLE_SUPER_ADMIN
+    ):
+        return {"code": 403, "msg": "只有超级管理员可以管理超级管理员角色"}
     user.user_role = new_role
     db.commit()
     return {"code": 200, "msg": "success"}

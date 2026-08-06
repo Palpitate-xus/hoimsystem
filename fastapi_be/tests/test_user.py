@@ -140,3 +140,33 @@ class TestPrepaidPermissions:
             json={"identity": seed_data["patient"].identity, "amount": 100},
         )
         assert r.status_code == 403
+
+
+@pytest.mark.asyncio
+class TestUserRoleSecurity:
+    async def test_admin_cannot_grant_super_admin(self, async_client, seed_data, auth_headers):
+        r = await async_client.post(
+            "/api/user/updateRole",
+            headers=auth_headers(seed_data["admin_user"].username),
+            json={"user_id": seed_data["patient2_user"].user_id, "user_role": "super_admin"},
+        )
+        assert r.status_code == 200
+        assert r.json()["code"] == 403
+
+    async def test_admin_cannot_modify_super_admin(self, async_client, seed_data, auth_headers):
+        r = await async_client.post(
+            "/api/user/updateRole",
+            headers=auth_headers(seed_data["admin_user"].username),
+            json={"user_id": seed_data["super_admin_user"].user_id, "user_role": "doctor"},
+        )
+        assert r.status_code == 200
+        assert r.json()["code"] == 403
+
+    async def test_admin_cannot_change_own_role(self, async_client, seed_data, auth_headers):
+        r = await async_client.post(
+            "/api/user/updateRole",
+            headers=auth_headers(seed_data["admin_user"].username),
+            json={"user_id": seed_data["admin_user"].user_id, "user_role": "patient"},
+        )
+        assert r.status_code == 200
+        assert r.json()["code"] == 500

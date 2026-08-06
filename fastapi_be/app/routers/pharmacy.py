@@ -230,3 +230,47 @@ def get_review_list(keyword: str | None = None, current_user: User = Depends(req
         kw = keyword.lower()
         data = [item for item in data if any(kw in str(val).lower() for val in item.values())]
     return {"code": 200, "msg": "success", "data": data}
+
+
+@router.get("/pharmacy/dispenseStats")
+def dispense_statistics(
+    start_date: str | None = None,
+    end_date: str | None = None,
+    current_user: User = Depends(require_roles(*PHARMACY_ROLES)),
+    db: Session = Depends(get_db),
+):
+    """统计已发药/已退药处方的发药量，日期口径为处方创建时间。"""
+    query = db.query(Prescription).filter(Prescription.status.in_([2, 4]))
+    try:
+        if start_date:
+            query = query.filter(Prescription.create_time >= datetime.datetime.strptime(start_date, "%Y-%m-%d"))
+        if end_date:
+            query = query.filter(Prescription.create_time < datetime.datetime.strptime(end_date, "%Y-%m-%d") + datetime.timedelta(days=1))
+    except ValueError:
+        return {"code": 500, "msg": "日期格式必须为 YYYY-MM-DD"}
+    prescriptions = query.order_by(Prescription.create_time).all()
+    by_date = {}
+    by_drug = {}
+    for prescription in prescriptions:
+        date_key = prescription.create_time.strftime("%Y-%m-%d") if prescription.create_time else "未知日期"
+        date_item = by_date.setdefault(date_key, {"date": date_key, "prescription_count": 0, "item_count": 0})
+        date_item["prescription_count"] += 1
+        for line in prescription.pre_phas:
+            drug_key = line.pharmaceutical_id
+            quantity = int(line.number or 0)
+            date_item["item_count"] += quantity
+            drug_item = by_drug.setdefault(
+                drug_key,
+                {"pharmaceutical_id": drug_key, "name": line.pharmaceutical.name if line.pharmaceutical else "", "quantity": 0, "prescription_count": 0},
+            )
+            drug_item["quantity"] += quantity
+            drug_item["prescription_count"] += 1
+    return {
+        "code": 200,
+        "msg": "success",
+        "data": {
+            "summary": {"prescription_count": len(prescriptions), "item_count": sum(item["item_count"] for item in by_date.values())},
+            "by_date": list(by_date.values()),
+            "by_drug": list(by_drug.values()),
+        },
+    }

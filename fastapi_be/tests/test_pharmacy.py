@@ -226,3 +226,26 @@ class TestInventoryAdjustment:
         })
         assert r.status_code == 200
         assert r.json()["code"] == 500
+
+    async def test_dispense_statistics_reports_dispensed_quantity(self, async_client, seed_data, auth_headers):
+        doctor_headers = auth_headers(seed_data["doctor_user"].username)
+        pharmacist_headers = auth_headers(seed_data["pharmacist_user"].username)
+        created = await async_client.post(
+            "/api/prescriptionManagement/create",
+            headers=doctor_headers,
+            json={"patient": seed_data["patient2"].patient_id, "phas": [{"id": seed_data["pharmaceutical"].pharmaceutical_id, "number": 2}]},
+        )
+        prescription_id = created.json()["data"]["uuid"]
+        await async_client.post("/api/pharmacy/audit", headers=pharmacist_headers, json={"prescription_id": prescription_id})
+        await async_client.post("/api/pharmacy/dispense", headers=pharmacist_headers, json={"prescription_id": prescription_id})
+        stats = await async_client.get("/api/pharmacy/dispenseStats", headers=pharmacist_headers)
+        assert stats.status_code == 200
+        body = stats.json()
+        assert body["code"] == 200
+        drug_stats = [item for item in body["data"]["by_drug"] if item["pharmaceutical_id"] == seed_data["pharmaceutical"].pharmaceutical_id]
+        assert drug_stats and drug_stats[0]["quantity"] >= 2
+
+    async def test_dispense_statistics_rejects_invalid_date(self, async_client, seed_data, auth_headers):
+        response = await async_client.get("/api/pharmacy/dispenseStats", headers=auth_headers(seed_data["pharmacist_user"].username), params={"start_date": "bad"})
+        assert response.status_code == 200
+        assert response.json() == {"code": 500, "msg": "日期格式必须为 YYYY-MM-DD"}

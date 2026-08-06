@@ -135,6 +135,7 @@ ENDPOINTS = [
     ("POST", "/api/pharmacy/review", {"admin", "super_admin", "pharmacist"}, {"prescription_id": "1", "score": 90, "comment": "ok"}, {}),
     ("GET", "/api/pharmacy/dispenseList", {"admin", "super_admin", "pharmacist"}, None, {}),
     ("GET", "/api/pharmacy/reviewList", {"admin", "super_admin", "pharmacist"}, None, {}),
+    ("GET", "/api/pharmacy/dispenseStats", {"admin", "super_admin", "pharmacist"}, None, {}),
     ("GET", "/api/pharmacy/inventoryAdjustment/list", {"admin", "super_admin", "pharmacist"}, None, {}),
     ("POST", "/api/pharmacy/inventoryAdjustment/create", {"admin", "super_admin", "pharmacist"}, {"pharmaceutical_id": 1, "adjustment_type": "loss", "quantity": 1, "reason": "x"}, {}),
     ("POST", "/api/pharmacy/inventoryAdjustment/approve", {"admin", "super_admin"}, {"adjustment_id": 1}, {}),

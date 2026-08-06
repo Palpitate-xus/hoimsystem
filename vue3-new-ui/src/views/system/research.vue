@@ -50,7 +50,7 @@
         </el-form-item>
         <el-form-item label="导出格式">
           <el-radio-group v-model="form.format">
-            <el-radio label="csv">CSV</el-radio>
+            <el-radio label="csv">CSV 格式</el-radio>
           </el-radio-group>
         </el-form-item>
         <el-form-item>
@@ -66,7 +66,7 @@
       <el-divider />
 
       <h4>可导出的数据表</h4>
-      <el-table :data="tables" stripe border>
+      <el-table :data="tables" stripe border empty-text="暂无可导出的数据表">
         <el-table-column prop="label" label="表名" />
         <el-table-column prop="table" label="代码" />
         <el-table-column label="说明">
@@ -83,10 +83,8 @@
 import { ref, reactive, onMounted } from "vue"
 import { Download, Folder } from "@element-plus/icons-vue"
 import { ElMessage } from "element-plus"
-import { useUserStore } from "@/store"
 import request from "@/utils/request"
 
-const userStore = useUserStore()
 const loading = ref(false)
 const dateRange = ref(null)
 const tables = ref([])

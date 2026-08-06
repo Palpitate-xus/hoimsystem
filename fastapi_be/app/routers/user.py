@@ -195,12 +195,14 @@ def reset_user_password(req: dict, db: Session = Depends(get_db), current_user: 
     new_password = req.get("new_password", "123456")
     if not user_id:
         return {"code": 500, "msg": "参数错误"}
+    if not isinstance(new_password, str) or not 6 <= len(new_password) <= 128:
+        return {"code": 500, "msg": "密码长度必须为6至128位"}
     user = db.query(User).filter(User.user_id == user_id).first()
     if not user:
         return {"code": 500, "msg": "用户不存在"}
     user.password = hash_password(new_password)
     db.commit()
-    return {"code": 200, "msg": "success", "data": {"new_password": new_password}}
+    return {"code": 200, "msg": "success"}
 
 
 @router.post("/user/delete")

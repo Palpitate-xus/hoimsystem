@@ -181,3 +181,50 @@ class TestUserRoleSecurity:
         )
         assert r.status_code == 200
         assert r.json()["code"] == 500
+
+    async def test_password_reset_does_not_return_plaintext(self, async_client, seed_data, auth_headers):
+        identity = "110101200001019999"
+        register = await async_client.post(
+            "/api/register",
+            json={
+                "username": "密码重置测试用户",
+                "password": "123456",
+                "identity": identity,
+                "address": "测试地址",
+                "sex": 1,
+                "phone": "13800139999",
+                "birthday": "2000-01-01",
+            },
+        )
+        assert register.json()["code"] == 200
+        users = await async_client.get(
+            "/api/user/getList",
+            headers=auth_headers(seed_data["admin_user"].username),
+        )
+        target = next(item for item in users.json()["data"] if item["username"] == identity)
+        r = await async_client.post(
+            "/api/user/resetPassword",
+            headers=auth_headers(seed_data["admin_user"].username),
+            json={"user_id": target["user_id"], "new_password": "newpass123"},
+        )
+        assert r.status_code == 200
+        body = r.json()
+        assert body["code"] == 200
+        assert "data" not in body
+        assert "newpass123" not in r.text
+
+        login = await async_client.post(
+            "/api/login",
+            json={"username": identity, "password": "newpass123"},
+        )
+        assert login.status_code == 200
+        assert login.json()["code"] == 200
+
+    async def test_password_reset_rejects_invalid_length(self, async_client, seed_data, auth_headers):
+        r = await async_client.post(
+            "/api/user/resetPassword",
+            headers=auth_headers(seed_data["admin_user"].username),
+            json={"user_id": seed_data["patient2_user"].user_id, "new_password": "short"},
+        )
+        assert r.status_code == 200
+        assert r.json()["code"] == 500

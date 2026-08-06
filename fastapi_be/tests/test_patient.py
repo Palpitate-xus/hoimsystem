@@ -2,7 +2,7 @@ import datetime
 
 import pytest
 
-from app.models import Appointment, DoctorSchedule
+from app.models import Appointment, DoctorSchedule, Registration
 
 
 @pytest.mark.asyncio
@@ -119,6 +119,25 @@ class TestPatientRegistration:
             json={"uuid": reg_uuid, "schedule_id": 2})
         assert r.status_code == 200
         assert r.json()["code"] == 200
+
+    async def test_visited_registration_cannot_be_cancelled(self, async_client, seed_data, auth_headers, db_session):
+        registration = Registration(
+            patient_id=seed_data["patient"].patient_id,
+            doctor_id=seed_data["doctor"].doctor_id,
+            specialist=1,
+            department_id=seed_data["department"].department_id,
+            time=datetime.datetime.now(),
+            status=1,
+        )
+        db_session.add(registration)
+        db_session.commit()
+        r = await async_client.post(
+            "/api/registrationManagement/cancel",
+            headers=auth_headers(seed_data["patient_user"].username),
+            json={"uuid": registration.registration_uuid, "schedule_id": 1},
+        )
+        assert r.status_code == 200
+        assert r.json() == {"code": 500, "msg": "挂号已就诊，不能退号"}
 
 
 @pytest.mark.asyncio

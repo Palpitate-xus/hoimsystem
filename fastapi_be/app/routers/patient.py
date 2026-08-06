@@ -323,21 +323,28 @@ def patient_registration_cancel(req: UuidRequest, current_user: User = Depends(g
         return {"code": 500, "msg": "挂号记录不存在"}
     if reg.status == 3:
         return {"code": 500, "msg": "挂号已取消,无需重复操作"}
+    if reg.status != 0:
+        return {"code": 500, "msg": "挂号已就诊，不能退号"}
     patient_obj = db.query(Patient).filter(Patient.identity == current_user.username).first()
     if not patient_obj or reg.patient_id != patient_obj.patient_id:
         return {"code": 403, "msg": "无权取消他人挂号"}
-    reg.status = 3
-    db.add(reg)
+    updated = db.query(Registration).filter(
+        Registration.registration_uuid == req.uuid,
+        Registration.patient_id == patient_obj.patient_id,
+        Registration.status == 0,
+    ).update({Registration.status: 3}, synchronize_session=False)
+    if updated != 1:
+        db.rollback()
+        return {"code": 500, "msg": "挂号已就诊，不能退号"}
     schedule = db.query(DoctorSchedule).filter(DoctorSchedule.schedule_id == req.schedule_id).first()
     if not schedule:
         schedule = (
             db.query(DoctorSchedule)
             .filter(DoctorSchedule.doctor_id == reg.doctor_id, DoctorSchedule.specialist == reg.specialist)
             .first()
-        )
+    )
     if schedule:
         schedule.number += 1
-        db.add(schedule)
     db.commit()
     return {"code": 200, "msg": "success"}
 

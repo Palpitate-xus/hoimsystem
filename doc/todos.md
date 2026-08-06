@@ -390,7 +390,7 @@
 - [x] 转诊/会诊申请页面（发起转诊/会诊，查看审批状态）
 - [x] 医嘱管理页面（住院医嘱已实现，门诊医嘱待补） *（住院已实现）*
 - [x] 处方模板管理页面（创建/编辑/应用常用处方模板）
-- [ ] 诊断模板/ICD 编码页面（常用诊断、ICD-10 编码搜索）
+- [x] 诊断模板/ICD 编码页面（常用诊断、ICD-10 编码搜索）
 - [x] 今日候诊列表页面（本医生今日候诊病人，含预检信息）
 - [x] 病人检验结果查看页面（查看自己病人的检验报告）
 - [x] 停诊/加号申请页面（向主任申请调休或额外加号）
@@ -569,7 +569,7 @@
 - [x] hoimsystem_consultation（会诊记录）
 - [x] hoimsystem_medical_order（住院医嘱：inpatient_order）
 - [ ] hoimsystem_prescription_template（处方模板）
-- [ ] hoimsystem_diagnosis_template（诊断模板：ICD-10 编码）
+- [x] hoimsystem_diagnosis_template（诊断模板：ICD-10 编码）
 
 ### 6.3 护士护理闭环
 

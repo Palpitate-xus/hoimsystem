@@ -275,6 +275,12 @@ export const asyncRoutes = [
         meta: { title: "药品管理", permissions: ["admin", "pharmacist", "director"] },
       },
       {
+        path: "antibiotic",
+        name: "Antibiotic",
+        component: () => import("@/views/pharmacy/antibiotic.vue"),
+        meta: { title: "抗菌药物管理", permissions: ["admin", "pharmacist", "director"] },
+      },
+      {
         path: "dispense",
         name: "Dispense",
         component: () => import("@/views/pharmacy/dispense.vue"),

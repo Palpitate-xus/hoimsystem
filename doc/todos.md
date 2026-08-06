@@ -268,7 +268,7 @@
 
 - [ ] 入院护理评估 API（ADL/压疮/跌倒风险评估）
 - [ ] 护理计划 API（护理诊断+措施+目标）
-- [ ] 交接班记录 API（书面交接班报告）
+- [x] 交接班记录 API（书面交接班报告）
 - [ ] 危重护理记录 API（ICU级护理记录）
 - [ ] 手术护理记录 API（术前/术中/术后护理）
 
@@ -569,7 +569,7 @@
 - [ ] hoimsystem_injection（注射记录）
 - [ ] hoimsystem_skin_test（皮试记录）
 - [x] hoimsystem_nursing_record（护理记录） *（住院）*
-- [ ] hoimsystem_shift_handover（交接班记录）
+- [x] hoimsystem_shift_handover（交接班记录）
 
 ### 6.4 药房库存精细管理
 

@@ -210,6 +210,10 @@ def update_structured_record(req: StructuredMedicalRecordUpdateRequest, current_
     record = db.query(StructuredMedicalRecord).filter(StructuredMedicalRecord.record_id == req.record_id).first()
     if not record:
         return {"code": 500, "msg": "病历不存在"}
+    if record.status != 0:
+        return {"code": 403, "msg": "已签名或已归档病历不可修改"}
+    if req.status not in (None, 0):
+        return {"code": 403, "msg": "请通过签名流程完成病历"}
     if req.chief_complaint is not None:
         record.chief_complaint = req.chief_complaint
     if req.present_illness is not None:
@@ -241,6 +245,8 @@ def sign_medical_record(req: dict, current_user: User = Depends(require_roles(*C
     record = db.query(StructuredMedicalRecord).filter(StructuredMedicalRecord.record_id == req.get("record_id")).first()
     if not record:
         return {"code": 500, "msg": "病历不存在"}
+    if record.status != 0:
+        return {"code": 500, "msg": "病历已签名或已归档"}
     record.status = 1
     record.sign_time = datetime.datetime.now()
     db.add(record)
@@ -253,6 +259,8 @@ def delete_structured_record(req: dict, current_user: User = Depends(require_rol
     record = db.query(StructuredMedicalRecord).filter(StructuredMedicalRecord.record_id == req.get("record_id")).first()
     if not record:
         return {"code": 500, "msg": "病历不存在"}
+    if record.status != 0:
+        return {"code": 403, "msg": "已签名或已归档病历不可删除"}
     db.delete(record)
     db.commit()
     return {"code": 200, "msg": "success"}

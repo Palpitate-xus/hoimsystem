@@ -298,11 +298,11 @@
 
 ### 2.23 院感管理 API ⬜
 
-- [ ] 院感监测 API（感染病例监测）
-- [ ] 暴发预警 API（同种同源预警）
-- [ ] 消毒监测 API（环境监测记录）
-- [ ] 职业暴露 API（针刺伤等上报）
-- [ ] 院感上报 API（报表生成）
+- [x] 院感监测 API（感染病例监测）
+- [x] 暴发预警 API（同种同源预警）
+- [x] 消毒监测 API（环境监测记录）
+- [x] 职业暴露 API（针刺伤等上报）
+- [x] 院感上报 API（报表生成）
 
 ### 2.24 物资设备管理 API ⬜
 
@@ -516,9 +516,9 @@
 
 ### 4.19 院感管理页面 ⬜
 
-- [ ] 院感监测页面
-- [ ] 暴发预警页面
-- [ ] 院感上报页面
+- [x] 院感监测页面
+- [x] 暴发预警页面
+- [x] 院感上报页面
 
 ### 4.20 物资设备管理页面 ⬜
 
@@ -680,9 +680,9 @@
 
 ### 6.18 院感管理 ⬜ 待建
 
-- [ ] hoimsystem_infection_case（院感病例）
-- [ ] hoimsystem_disinfection_monitor（消毒监测）
-- [ ] hoimsystem_occupational_exposure（职业暴露）
+- [x] hoimsystem_infection_case（院感病例）
+- [x] hoimsystem_disinfection_monitor（消毒监测）
+- [x] hoimsystem_occupational_exposure（职业暴露）
 
 ### 6.19 物资设备管理 ⬜ 待建
 

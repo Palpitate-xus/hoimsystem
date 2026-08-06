@@ -216,6 +216,50 @@ class TestFamilyMember:
         )
         assert forbidden_update.status_code == 404
 
+    async def test_patient_can_book_for_linked_family_member(self, async_client, seed_data, auth_headers, db_session):
+        headers = auth_headers(seed_data["patient_user"].username)
+        created = await async_client.post(
+            "/api/familyMember/create",
+            headers=headers,
+            json={"name": "张小四", "identity": "110101201001021234", "relation": "子女", "sex": 1},
+        )
+        member_id = created.json()["data"]["patient_id"]
+        schedule = db_session.query(DoctorSchedule).filter(DoctorSchedule.number > 0).first()
+
+        appointment = await async_client.post(
+            "/api/appointmentManagement/create",
+            headers=headers,
+            json={
+                "id": schedule.schedule_id,
+                "date": "2026-12-01",
+                "department_id": seed_data["department"].department_id,
+                "doctor_id": schedule.doctor_id,
+                "time": schedule.time,
+                "specialist": schedule.specialist,
+                "patient_id": member_id,
+            },
+        )
+        assert appointment.status_code == 200
+        assert appointment.json()["code"] == 200
+        appointment_list = await async_client.get("/api/appointmentManagement/getList", headers=headers)
+        assert any(item["patient_id"] == member_id and item["patient_name"] == "张小四" for item in appointment_list.json()["data"])
+
+        registration = await async_client.post(
+            "/api/registrationManagement/create",
+            headers=headers,
+            json={
+                "id": schedule.schedule_id,
+                "doctor_id": schedule.doctor_id,
+                "department_id": seed_data["department"].department_id,
+                "specialist": schedule.specialist,
+                "patient_id": member_id,
+            },
+        )
+        assert registration.status_code == 200
+        assert registration.json()["code"] == 200
+        registration_list = await async_client.get("/api/registrationManagement/getList", headers=headers)
+        assert any(item["patient_id"] == member_id and item["patient_name"] == "张小四" for item in registration_list.json()["data"])
+
 
 @pytest.mark.asyncio
 class TestPatientCharge:

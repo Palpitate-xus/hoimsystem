@@ -17,6 +17,7 @@ from app.models import (
     Appointment,
     Doctor,
     DoctorSchedule,
+    FamilyMember,
     MedicalRecord,
     Patient,
     Registration,
@@ -52,12 +53,31 @@ def normalize_weekday(value: str | None) -> str | None:
     return WEEKDAY_ALIASES.get(value, value)
 
 
+def _patient_scope(current_user: User, db: Session):
+    """Return the logged-in patient's own record and linked family records."""
+    owner = db.query(Patient).filter(Patient.identity == current_user.username).first()
+    if not owner:
+        return None, []
+    ids = [owner.patient_id] + [item.member_patient_id for item in db.query(FamilyMember).filter(FamilyMember.owner_patient_id == owner.patient_id).all()]
+    return owner, ids
+
+
+def _target_patient(current_user: User, requested_patient_id: int | None, db: Session):
+    owner, ids = _patient_scope(current_user, db)
+    if not owner:
+        return None, owner
+    target_id = requested_patient_id or owner.patient_id
+    if target_id not in ids:
+        return None, owner
+    return db.query(Patient).filter(Patient.patient_id == target_id).first(), owner
+
+
 @router.get("/appointmentManagement/getList")
 def get_appointment_list(current_user: User = Depends(get_current_user), keyword: str | None = None, db: Session = Depends(get_db)):
-    patient_obj = db.query(Patient).filter(Patient.identity == current_user.username).first()
+    patient_obj, patient_ids = _patient_scope(current_user, db)
     if not patient_obj:
         return {"code": 200, "msg": "success", "data": []}
-    appointment_list = db.query(Appointment).filter(Appointment.patient_id == patient_obj.patient_id).all()
+    appointment_list = db.query(Appointment).filter(Appointment.patient_id.in_(patient_ids)).all()
     data = []
     status_map = ["未就诊", "已就诊", "已取消"]
     for item in appointment_list:
@@ -71,6 +91,8 @@ def get_appointment_list(current_user: User = Depends(get_current_user), keyword
                 "prefer_time": item.prefer_time,
                 "appointment_time": (item.appointment_time.strftime("%Y-%m-%d %H:%M:%S") if item.appointment_time else None)[0:10] if item.appointment_time else "",
                 "status": status_map[item.status] if item.status is not None and item.status < len(status_map) else "",
+                "patient_id": item.patient_id,
+                "patient_name": item.patient.name if item.patient else "",
             }
         )
     if keyword:
@@ -115,9 +137,11 @@ def appointment_list(keyword: str | None = None, current_user: User = Depends(ge
 
 @router.post("/appointmentManagement/create")
 def patient_appointment(req: AppointmentCreateRequest, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    patient_obj = db.query(Patient).filter(Patient.identity == current_user.username).first()
-    if not patient_obj:
+    patient_obj, owner = _target_patient(current_user, req.patient_id, db)
+    if not owner:
         return {"code": 500, "msg": "病人信息不存在"}
+    if not patient_obj:
+        return {"code": 403, "msg": "无权为该家庭成员预约"}
     # 检查是否处于暂停预约状态
     from app.models import BreachRecord
 
@@ -187,12 +211,12 @@ def patient_appointment_cancel(req: UuidRequest, current_user: User = Depends(ge
         return {"code": 500, "msg": "预约已取消,无需重复操作"}
     if app.status != 0:
         return {"code": 500, "msg": "预约已报到或已就诊，不能取消"}
-    patient_obj = db.query(Patient).filter(Patient.identity == current_user.username).first()
-    if not patient_obj or app.patient_id != patient_obj.patient_id:
+    owner, patient_ids = _patient_scope(current_user, db)
+    if not owner or app.patient_id not in patient_ids:
         return {"code": 403, "msg": "无权取消他人预约"}
     updated = db.query(Appointment).filter(
         Appointment.registration_uuid == req.uuid,
-        Appointment.patient_id == patient_obj.patient_id,
+        Appointment.patient_id == app.patient_id,
         Appointment.status == 0,
     ).update({Appointment.status: 2}, synchronize_session=False)
     if updated != 1:
@@ -210,10 +234,10 @@ def patient_appointment_cancel(req: UuidRequest, current_user: User = Depends(ge
 
 @router.get("/registrationManagement/getList")
 def get_registration_list(current_user: User = Depends(get_current_user), keyword: str | None = None, db: Session = Depends(get_db)):
-    patient_obj = db.query(Patient).filter(Patient.identity == current_user.username).first()
+    patient_obj, patient_ids = _patient_scope(current_user, db)
     if not patient_obj:
         return {"code": 200, "msg": "success", "data": []}
-    registration_list = db.query(Registration).filter(Registration.patient_id == patient_obj.patient_id).all()
+    registration_list = db.query(Registration).filter(Registration.patient_id.in_(patient_ids)).all()
     data = []
     status_map = ["未就诊", "已就诊", "", "已取消"]
     for item in registration_list:
@@ -226,6 +250,8 @@ def get_registration_list(current_user: User = Depends(get_current_user), keywor
                 "department": item.department.name if item.department else "",
                 "time": str(item.time)[0:10] if item.time else "",
                 "status": status_map[item.status] if item.status is not None and item.status < len(status_map) else "",
+                "patient_id": item.patient_id,
+                "patient_name": item.patient.name if item.patient else "",
             }
         )
     if keyword:
@@ -243,12 +269,12 @@ def registration_list(current_user: User = Depends(get_current_user), keyword: s
     data = []
     target_week = weekdays[today_weeky]
     schedules = [item for item in db.query(DoctorSchedule).all() if normalize_weekday(item.week) == target_week]
-    patient_obj = db.query(Patient).filter(Patient.identity == current_user.username).first()
+    patient_obj, patient_ids = _patient_scope(current_user, db)
     for item in schedules:
         if (
             patient_obj
             and db.query(Registration)
-            .filter(Registration.patient_id == patient_obj.patient_id, Registration.doctor_id == item.doctor_id, Registration.specialist == item.specialist, Registration.status == 0)
+            .filter(Registration.patient_id.in_(patient_ids), Registration.doctor_id == item.doctor_id, Registration.specialist == item.specialist, Registration.status == 0)
             .first()
         ):
             status = 1
@@ -274,9 +300,11 @@ def registration_list(current_user: User = Depends(get_current_user), keyword: s
 
 @router.post("/registrationManagement/create")
 def patient_registration(req: RegistrationCreateRequest, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    patient_obj = db.query(Patient).filter(Patient.identity == current_user.username).first()
-    if not patient_obj:
+    patient_obj, owner = _target_patient(current_user, req.patient_id, db)
+    if not owner:
         return {"code": 500, "msg": "病人信息不存在"}
+    if not patient_obj:
+        return {"code": 403, "msg": "无权为该家庭成员挂号"}
     reg_obj = db.query(DoctorSchedule).filter(DoctorSchedule.schedule_id == req.id).first()
     if reg_obj and reg_obj.number <= 0:
         return {"code": 500, "msg": "该时段号源已满"}
@@ -325,12 +353,12 @@ def patient_registration_cancel(req: UuidRequest, current_user: User = Depends(g
         return {"code": 500, "msg": "挂号已取消,无需重复操作"}
     if reg.status != 0:
         return {"code": 500, "msg": "挂号已就诊，不能退号"}
-    patient_obj = db.query(Patient).filter(Patient.identity == current_user.username).first()
-    if not patient_obj or reg.patient_id != patient_obj.patient_id:
+    owner, patient_ids = _patient_scope(current_user, db)
+    if not owner or reg.patient_id not in patient_ids:
         return {"code": 403, "msg": "无权取消他人挂号"}
     updated = db.query(Registration).filter(
         Registration.registration_uuid == req.uuid,
-        Registration.patient_id == patient_obj.patient_id,
+        Registration.patient_id == reg.patient_id,
         Registration.status == 0,
     ).update({Registration.status: 3}, synchronize_session=False)
     if updated != 1:

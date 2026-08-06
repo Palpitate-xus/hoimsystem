@@ -13,6 +13,7 @@
         <el-button type="primary" @click="fetchList">搜索</el-button>
       </div>
       <el-table :data="paginatedList" v-loading="loading" border empty-text="暂无数据">
+        <el-table-column prop="patient_name" label="就诊人" width="120" />
         <el-table-column prop="order" label="序号"  sortable />
         <el-table-column prop="doctor" label="医生" />
         <el-table-column prop="department" label="科室"  sortable />
@@ -42,6 +43,14 @@
     </el-card>
 
     <el-dialog v-model="dialogVisible" title="选择号源" width="900px">
+      <el-form inline style="margin-bottom: 12px;">
+        <el-form-item label="就诊人">
+          <el-select v-model="selectedPatientId" style="width: 220px;">
+            <el-option :value="null" label="本人" />
+            <el-option v-for="member in familyMembers" :key="member.patient_id" :value="member.patient_id" :label="`${member.name}（${member.relation}）`" />
+          </el-select>
+        </el-form-item>
+      </el-form>
       <el-table :data="schedules" v-loading="schedLoading" empty-text="今日暂无可挂号号源">
         <el-table-column prop="doctor" label="医生" />
         <el-table-column prop="time" label="时段"  sortable />
@@ -65,7 +74,7 @@
 <script setup>
 import { ref, onMounted, computed } from "vue";
 import { ElMessage } from "element-plus";
-import { getRegistrationList, getRegistrationSchedules, createRegistration, cancelRegistration } from "@/api/patient";
+import { getRegistrationList, getRegistrationSchedules, createRegistration, cancelRegistration, getFamilyMembers } from "@/api/patient";
 
 const list = ref([]);
 const searchQuery = ref("");
@@ -81,6 +90,8 @@ const schedules = ref([]);
 const loading = ref(false);
 const schedLoading = ref(false);
 const dialogVisible = ref(false);
+const familyMembers = ref([]);
+const selectedPatientId = ref(null);
 
 const fetchList = async () => {
   loading.value = true;
@@ -92,8 +103,10 @@ const fetchList = async () => {
 
 const openDialog = async () => {
   dialogVisible.value = true;
+  selectedPatientId.value = null;
   schedLoading.value = true;
-  const res = await getRegistrationSchedules();
+  const [res, memberRes] = await Promise.all([getRegistrationSchedules(), getFamilyMembers()]);
+  familyMembers.value = memberRes.data || [];
   if (typeof res.data === "string") {
     ElMessage.warning(res.data);
     schedules.value = [];
@@ -110,6 +123,7 @@ const register = async (row) => {
       doctor_id: row.doctor_id,
       department_id: row.department_id,
       specialist: row.specialist,
+      ...(selectedPatientId.value ? { patient_id: selectedPatientId.value } : {}),
     });
     ElMessage.success("挂号成功");
     dialogVisible.value = false;

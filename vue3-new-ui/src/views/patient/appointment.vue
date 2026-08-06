@@ -13,6 +13,7 @@
         <el-button type="primary" @click="fetchList">搜索</el-button>
       </div>
       <el-table :data="paginatedList" v-loading="loading" border empty-text="暂无数据">
+        <el-table-column prop="patient_name" label="就诊人" width="120" />
         <el-table-column prop="doctor" label="医生" />
         <el-table-column prop="department" label="科室"  sortable />
         <el-table-column prop="time" label="预约日期"  sortable />
@@ -48,6 +49,14 @@
     </el-card>
 
     <el-dialog v-model="dialogVisible" title="选择号源" width="900px">
+      <el-form inline style="margin-bottom: 12px;">
+        <el-form-item label="就诊人">
+          <el-select v-model="selectedPatientId" style="width: 220px;" :disabled="submitting">
+            <el-option :value="null" label="本人" />
+            <el-option v-for="member in familyMembers" :key="member.patient_id" :value="member.patient_id" :label="`${member.name}（${member.relation}）`" />
+          </el-select>
+        </el-form-item>
+      </el-form>
       <el-table :data="schedules" v-loading="schedLoading" empty-text="暂无可预约号源">
         <el-table-column prop="doctor" label="医生" />
         <el-table-column prop="date" label="日期"  sortable />
@@ -80,7 +89,7 @@
 <script setup>
 import { ref, onMounted, computed } from "vue";
 import { ElMessage } from "element-plus";
-import { getAppointmentList, getAppointmentSchedules, createAppointment, cancelAppointment } from "@/api/patient";
+import { getAppointmentList, getAppointmentSchedules, createAppointment, cancelAppointment, getFamilyMembers } from "@/api/patient";
 
 const list = ref([]);
 const searchQuery = ref("");
@@ -98,6 +107,8 @@ const schedLoading = ref(false);
 const dialogVisible = ref(false);
 const submitting = ref(false);
 const submittingScheduleId = ref(null);
+const familyMembers = ref([]);
+const selectedPatientId = ref(null);
 
 const getErrorMessage = (error, fallback) => {
   const message = error?.response?.data?.msg || error?.msg;
@@ -131,10 +142,12 @@ const fetchList = async () => {
 const openDialog = async () => {
   if (schedLoading.value || submitting.value) return;
   dialogVisible.value = true;
+  selectedPatientId.value = null;
   schedLoading.value = true;
   try {
-    const res = await getAppointmentSchedules();
-    schedules.value = res.data || [];
+    const [scheduleRes, memberRes] = await Promise.all([getAppointmentSchedules(), getFamilyMembers()]);
+    schedules.value = scheduleRes.data || [];
+    familyMembers.value = memberRes.data || [];
   } catch (e) {
     schedules.value = [];
     ElMessage.error(getErrorMessage(e, "号源加载失败，请稍后重试"));
@@ -160,6 +173,7 @@ const book = async (row) => {
       doctor_id: row.doctor_id,
       time: row.time,
       specialist: row.specialist,
+      ...(selectedPatientId.value ? { patient_id: selectedPatientId.value } : {}),
     });
     ElMessage.success("预约成功");
     dialogVisible.value = false;

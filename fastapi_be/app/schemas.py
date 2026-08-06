@@ -58,6 +58,7 @@ class AppointmentCreateRequest(BaseModel):
     doctor_id: int
     time: str
     specialist: int
+    patient_id: int | None = None
 
 
 class RegistrationCreateRequest(BaseModel):
@@ -65,6 +66,7 @@ class RegistrationCreateRequest(BaseModel):
     doctor_id: int
     department_id: int
     specialist: int
+    patient_id: int | None = None
 
 
 class ChargeCommitRequest(BaseModel):

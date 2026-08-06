@@ -82,6 +82,7 @@ import { ref, onMounted, computed } from "vue";
 import { useRouter } from "vue-router";
 import { useStore } from "vuex";
 import { User, FirstAidKit, Money, Document, Bell, Box, Calendar } from "@element-plus/icons-vue";
+import { ElMessage } from "element-plus";
 import { getNoticeList } from "@/api/admin";
 import { getChargeList } from "@/api/charge";
 import { getPrescriptionList } from "@/api/doctor";
@@ -190,7 +191,7 @@ onMounted(async () => {
     todayStats.value.appointments = (apptRes.data || []).length;
     todayStats.value.registrations = (regRes.data || []).length;
   } catch (e) {
-    console.error("加载首页数据失败", e);
+    ElMessage.error("加载首页数据失败");
   }
 });
 </script>

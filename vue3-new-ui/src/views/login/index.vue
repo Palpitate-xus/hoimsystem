@@ -174,7 +174,6 @@ const handleLogin = () => {
 
         // 不再手动处理后续逻辑，让导航守卫处理
       } catch (error) {
-        console.error("登录失败:", error);
         ElMessage.error(error.message || "登录失败，请检查用户名和密码");
         state.loading = false;
       }

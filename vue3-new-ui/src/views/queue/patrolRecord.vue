@@ -79,7 +79,7 @@ const loadPatients = async () => {
     const res = await getPatientList();
     patients.value = res.data || [];
   } catch (e) {
-    console.error("获取患者失败", e);
+    ElMessage.error("获取患者失败");
   }
 };
 

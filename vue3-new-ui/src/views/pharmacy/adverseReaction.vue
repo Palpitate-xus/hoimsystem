@@ -65,14 +65,14 @@ const loadPatients = async () => {
   try {
     const res = await getPatientList();
     patients.value = res.data || [];
-  } catch (e) { console.error("获取患者失败", e); }
+  } catch (e) { ElMessage.error("获取患者失败"); }
 };
 
 const loadPharmaceuticals = async () => {
   try {
     const res = await getPharmaceuticalList();
     pharmaceuticals.value = res.data || [];
-  } catch (e) { console.error("获取药品失败", e); }
+  } catch (e) { ElMessage.error("获取药品失败"); }
 };
 
 const handleAdd = () => { form.value = { severity: 1 }; dialogVisible.value = true; };

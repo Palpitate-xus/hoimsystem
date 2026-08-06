@@ -302,6 +302,7 @@ from app.routers import (
     inpatient_order,
     inventory_adjustment,
     infusion,
+    injection,
     lab,
     mdt,
     nursing,
@@ -377,6 +378,7 @@ app.include_router(admission.router, prefix="/api")
 app.include_router(inpatient_order.router, prefix="/api")
 app.include_router(inventory_adjustment.router, prefix="/api")
 app.include_router(infusion.router, prefix="/api")
+app.include_router(injection.router, prefix="/api")
 app.include_router(nursing.router, prefix="/api")
 app.include_router(inpatient_charge.router, prefix="/api")
 app.include_router(discharge.router, prefix="/api")

@@ -218,6 +218,18 @@ class InfusionObservationRequest(BaseModel):
     condition: str = Field(..., min_length=1, max_length=200)
 
 
+class InjectionCreateRequest(BaseModel):
+    patient_id: int
+    pharmaceutical_id: int
+    route: str
+    dose: str = Field(..., min_length=1, max_length=50)
+    note: str = Field(default="", max_length=200)
+
+
+class InjectionIdRequest(BaseModel):
+    injection_id: str
+
+
 class InventoryAdjustmentCreateRequest(BaseModel):
     pharmaceutical_id: int
     adjustment_type: str

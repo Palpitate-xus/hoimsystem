@@ -302,6 +302,28 @@ class InfusionObservation(Base):
     nurse = relationship("User", foreign_keys=[nurse_id])
 
 
+class InjectionOrder(Base):
+    __tablename__ = "hoimsystem_injection_order"
+
+    injection_id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    patient_id = Column(Integer, ForeignKey("hoimsystem_patient.patient_id"), nullable=False)
+    doctor_id = Column(Integer, ForeignKey("hoimsystem_doctor.doctor_id"), nullable=False)
+    nurse_id = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=True)
+    pharmaceutical_id = Column(Integer, ForeignKey("hoimsystem_pharmaceutical.pharmaceutical_id"), nullable=False)
+    route = Column(String(10), nullable=False)  # im / sc / id
+    dose = Column(String(50), nullable=False)
+    status = Column(Integer, default=0, nullable=False)  # 0=医嘱 1=已执行 2=已完成 3=已取消
+    note = Column(String(200), nullable=True)
+    create_time = Column(DateTime, nullable=False)
+    execute_time = Column(DateTime, nullable=True)
+    complete_time = Column(DateTime, nullable=True)
+
+    patient = relationship("Patient")
+    doctor = relationship("Doctor")
+    nurse = relationship("User", foreign_keys=[nurse_id])
+    pharmaceutical = relationship("Pharmaceutical")
+
+
 class PrePha(Base):
     __tablename__ = "hoimsystem_pre_pha"
 

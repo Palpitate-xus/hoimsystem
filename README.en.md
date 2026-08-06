@@ -155,7 +155,7 @@ See [doc/deployDoc.md](doc/deployDoc.md) for detailed deployment instructions (N
 |:----:|:--------:|:--------:|:----:|
 | Admin | `admin` | `admin123` | Full permissions |
 | Doctor | `doctor1` | `doctor123` | Regular doctor |
-| Patient | `patient1` | `patient123` | Patient self-service |
+| Patient | `patient1` | `123456` | Patient self-service |
 
 > ⚠️ **Production deployment**: change default passwords and set a strong random `SECRET_KEY` in `.env` (use `openssl rand -base64 32`).
 

@@ -345,7 +345,7 @@ docker-compose up -d
 |:----:|:------:|:----:|:----:|
 | 管理员 | `admin` | `admin123` | 全部权限 |
 | 医生 | `doctor1` | `doctor123` | 普通医生 |
-| 患者 | `patient1` | `patient123` | 患者自助 |
+| 患者 | `patient1` | `123456` | 患者自助 |
 
 > ⚠️ 生产环境部署前**必须**修改默认密码，并在 `.env` 中设置 `SECRET_KEY` 为随机强密钥（使用 `openssl rand -base64 32` 生成）。
 

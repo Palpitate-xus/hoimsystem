@@ -84,6 +84,10 @@ def parse_date_str(val):
 @router.post("/register")
 def register(req: RegisterRequest, db: Session = Depends(get_db)):
     try:
+        if db.query(Patient).filter(Patient.identity == req.identity).first():
+            return {"code": 500, "msg": "身份证号已注册"}
+        if db.query(User).filter(User.username == req.identity).first():
+            return {"code": 500, "msg": "用户已注册"}
         patient = Patient(
             name=req.username,
             identity=req.identity,

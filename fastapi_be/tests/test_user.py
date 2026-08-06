@@ -30,6 +30,24 @@ class TestUserAuth:
         assert "accesstoken" in body["data"]
         assert len(body["data"]["accesstoken"]) > 20
 
+    async def test_register_rejects_duplicate_identity(self, async_client):
+        payload = {
+            "username": "重复患者",
+            "password": "123456",
+            "identity": "110101200001011112",
+            "address": "测试地址",
+            "sex": 1,
+            "phone": "13800138002",
+            "birthday": "2000-01-01",
+        }
+        first = await async_client.post("/api/register", json=payload)
+        assert first.status_code == 200
+        assert first.json()["code"] == 200
+        second = await async_client.post("/api/register", json=payload)
+        assert second.status_code == 200
+        assert second.json()["code"] == 500
+        assert "已注册" in second.json()["msg"]
+
     async def test_login_fail(self, async_client):
         r = await async_client.post("/api/login", json={
             "username": "nonexistent", "password": "wrong"

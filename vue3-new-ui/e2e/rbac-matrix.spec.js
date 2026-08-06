@@ -49,7 +49,7 @@ const ROLE_USERS = [
     name: "cashier",
     username: "cashier01",
     password: "123456",
-    menu: ["费用管理", "发票管理", "窗口挂号", "日结对账"],
+    menu: ["费用管理", "收费项目", "发票管理", "窗口挂号", "日结对账"],
   },
   {
     name: "pharmacist",
@@ -376,6 +376,14 @@ test.describe("业务页面渲染", () => {
     await page.goto(`${BASE}/#/pharmacy/specialDrug`, { waitUntil: "networkidle" });
     await expect(page.getByText("特殊药品").first()).toBeVisible({ timeout: 5000 });
     await expect(page.getByText("提交登记")).toBeVisible({ timeout: 5000 });
+    await expect(page.locator(".el-table")).toBeVisible({ timeout: 5000 });
+  });
+
+  test("cashier 访问收费项目页面", async ({ page }, testInfo) => {
+    skipIfUserUnavailable(testInfo, "cashier");
+    await login(page, "cashier01", "123456");
+    await page.goto(`${BASE}/#/charge/chargeItem`, { waitUntil: "networkidle" });
+    await expect(page.getByText("收费项目").first()).toBeVisible({ timeout: 5000 });
     await expect(page.locator(".el-table")).toBeVisible({ timeout: 5000 });
   });
 });

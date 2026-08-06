@@ -334,6 +334,12 @@ export const asyncRoutes = [
         meta: { title: "费用管理", permissions: ["admin", "cashier", "patient"] },
       },
       {
+        path: "chargeItem",
+        name: "ChargeItem",
+        component: () => import("@/views/charge/chargeItem.vue"),
+        meta: { title: "收费项目", permissions: ["admin", "cashier"] },
+      },
+      {
         path: "invoice",
         name: "Invoice",
         component: () => import("@/views/charge/invoice.vue"),

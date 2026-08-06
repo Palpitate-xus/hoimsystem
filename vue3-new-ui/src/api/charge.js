@@ -40,6 +40,11 @@ export function getWindowRegistrationPatient(identity) {
   return request({ url: "windowRegistration/patient", method: "get", params: { identity } });
 }
 
+export function getChargeItemList() { return request({ url: "chargeItem/list", method: "get" }); }
+export function createChargeItem(data) { return request({ url: "chargeItem/create", method: "post", data }); }
+export function updateChargeItem(data) { return request({ url: "chargeItem/update", method: "put", data }); }
+export function toggleChargeItem(data) { return request({ url: "chargeItem/toggle", method: "post", data }); }
+
 export function windowCancelRegistration(data) {
   return request({ url: "windowRegistration/cancel", method: "post", data });
 }

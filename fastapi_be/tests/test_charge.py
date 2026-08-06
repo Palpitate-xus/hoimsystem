@@ -279,3 +279,28 @@ class TestInvoice:
             body = r.json()
             assert body["code"] == 200
             assert "pdf_url" in body["data"]
+
+    async def test_download_invoice_pdf(self, async_client, seed_data, auth_headers):
+        headers = auth_headers(seed_data["cashier_user"].username)
+        await async_client.post(
+            "/api/chargeManagement/charge",
+            headers=headers,
+            json={"id": str(seed_data["charge"].charge_id)},
+        )
+        created = await async_client.post(
+            "/api/invoice/create",
+            headers=headers,
+            json={"charge_id": str(seed_data["charge"].charge_id)},
+        )
+        assert created.json()["code"] == 200
+        invoices = await async_client.get("/api/invoice/getList", headers=headers)
+        invoice_id = next(item["id"] for item in invoices.json()["data"] if item["charge_id"] == str(seed_data["charge"].charge_id))
+        pdf = await async_client.get(f"/api/invoice/pdf/{invoice_id}", headers=headers)
+        assert pdf.status_code == 200
+        assert pdf.headers["content-type"].startswith("application/pdf")
+        assert pdf.content.startswith(b"%PDF-1.4")
+        forbidden = await async_client.get(
+            f"/api/invoice/pdf/{invoice_id}",
+            headers=auth_headers(seed_data["patient2_user"].username),
+        )
+        assert forbidden.status_code == 403

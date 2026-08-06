@@ -3,7 +3,8 @@ import math
 import random
 import traceback
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
+from fastapi.responses import Response
 from sqlalchemy import update
 from sqlalchemy.orm import Session
 
@@ -248,6 +249,56 @@ def print_invoice(req: InvoicePrintRequest, db: Session = Depends(get_db), curre
     if not invoice:
         return {"code": 500, "msg": "发票不存在"}
     return {"code": 200, "msg": "success", "data": {"pdf_url": f"/api/invoice/pdf/{invoice.invoice_id}"}}
+
+
+@router.get("/invoice/pdf/{invoice_id}")
+def download_invoice_pdf(invoice_id: str, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    """下载电子票据 PDF（当前为本地生成的可归档票据）。"""
+    invoice = db.query(Invoice).filter(Invoice.invoice_id == invoice_id).first()
+    if not invoice:
+        return {"code": 500, "msg": "发票不存在"}
+    if not _is_cashier_role(current_user) and not _owns_charge(current_user, invoice.charge):
+        raise HTTPException(status_code=403, detail="无权访问该发票")
+
+    charge = invoice.charge
+    patient_name = charge.prescription.patient.name if charge and charge.prescription and charge.prescription.patient else ""
+    lines = [
+        "HOIM MEDICAL INVOICE",
+        f"Invoice No: {invoice.invoice_no or ''}",
+        f"Patient: {patient_name}",
+        f"Amount: {float(invoice.amount or 0):.2f}",
+        f"Time: {invoice.invoice_time.strftime('%Y-%m-%d %H:%M:%S') if invoice.invoice_time else ''}",
+    ]
+    def pdf_escape(value: str) -> str:
+        return value.replace("\\", "\\\\").replace("(", "\\(").replace(")", "\\)")
+
+    text_lines = "BT /F1 12 Tf 50 760 Td " + " ".join(
+        f"({pdf_escape(line)}) Tj 0 -24 Td" for line in lines
+    ) + " ET"
+    stream = text_lines.encode("ascii", errors="replace")
+    objects = [
+        b"1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj\n",
+        b"2 0 obj<</Type/Pages/Count 1/Kids[3 0 R]>>endobj\n",
+        b"3 0 obj<</Type/Page/Parent 2 0 R/MediaBox[0 0 612 792]/Resources<</Font<</F1 4 0 R>>>>/Contents 5 0 R>>endobj\n",
+        b"4 0 obj<</Type/Font/Subtype/Type1/BaseFont/Helvetica>>endobj\n",
+        b"5 0 obj<</Length " + str(len(stream)).encode() + b">>stream\n" + stream + b"\nendstream\nendobj\n",
+    ]
+    pdf = bytearray(b"%PDF-1.4\n")
+    offsets = [0]
+    for obj in objects:
+        offsets.append(len(pdf))
+        pdf.extend(obj)
+    xref_offset = len(pdf)
+    pdf.extend(f"xref\n0 {len(objects) + 1}\n".encode())
+    pdf.extend(b"0000000000 65535 f \n")
+    for offset in offsets[1:]:
+        pdf.extend(f"{offset:010d} 00000 n \n".encode())
+    pdf.extend(f"trailer<</Size {len(objects) + 1}/Root 1 0 R>>\nstartxref\n{xref_offset}\n%%EOF".encode())
+    return Response(
+        content=bytes(pdf),
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'attachment; filename="invoice-{invoice.invoice_no or invoice.invoice_id}.pdf"'},
+    )
 
 
 @router.post("/windowRegistration/create")

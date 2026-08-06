@@ -196,8 +196,7 @@ class TestPrepaidPermissions:
             headers=auth_headers(seed_data["patient_user"].username),
             params={"identity": seed_data["patient2"].identity},
         )
-        assert other.status_code == 200
-        assert other.json()["code"] == 403
+        assert other.status_code == 403
 
 
 @pytest.mark.asyncio

@@ -282,10 +282,10 @@
 
 ### 2.21 PACS/RIS API ⬜
 
-- [ ] 检查申请 API（放射/超声/内镜申请）
-- [ ] 影像报告书写 API（诊断报告模板+书写）
-- [ ] 影像调阅 API（DICOM Viewer集成）
-- [ ] 报告审核 API（初诊/审核双签名）
+- [x] 检查申请 API（放射/超声/内镜申请）
+- [x] 影像报告书写 API（诊断报告模板+书写）
+- [x] 影像调阅 API（支持配置外部 DICOM Viewer 地址）
+- [x] 报告审核 API（初诊/审核双签名）
 - [ ] 胶片管理 API（打印/云胶片）
 
 ### 2.22 抗菌药物管理 API ⬜
@@ -505,8 +505,8 @@
 ### 4.17 PACS/RIS 端页面 ⬜
 
 - [ ] 检查申请页面（医生）
-- [ ] 影像报告书写页面（放射科）
-- [ ] 影像调阅页面（DICOM）
+- [x] 影像报告书写页面（放射科）
+- [x] 影像调阅页面（DICOM Viewer 地址配置/调阅入口）
 
 ### 4.18 抗菌药物管理页面 ⬜
 
@@ -669,9 +669,9 @@
 
 ### 6.16 PACS/RIS ⬜ 待建
 
-- [ ] hoimsystem_imaging_order（影像检查申请）
-- [ ] hoimsystem_imaging_report（影像报告）
-- [ ] hoimsystem_imaging_template（影像报告模板）
+- [x] hoimsystem_imaging_order（影像检查申请）
+- [x] hoimsystem_imaging_report（影像报告）
+- [x] hoimsystem_imaging_template（影像报告模板）
 
 ### 6.17 抗菌药物管理 ⬜ 待建
 

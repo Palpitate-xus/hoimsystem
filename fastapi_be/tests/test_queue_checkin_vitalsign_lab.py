@@ -1,7 +1,7 @@
 import pytest
 import datetime
 
-from app.models import Queue
+from app.models import Appointment, Patient, Queue
 
 
 @pytest.mark.asyncio
@@ -55,6 +55,36 @@ class TestCheckIn:
         })
         assert r.status_code == 200
         assert r.json()["code"] == 500
+
+    async def test_check_in_is_one_time_and_updates_appointment(self, async_client, seed_data, db_session):
+        patient = Patient(name="报到测试", identity="110101199001019999", sex=1)
+        db_session.add(patient)
+        db_session.flush()
+        appointment = Appointment(
+            patient_id=patient.patient_id,
+            doctor_id=seed_data["doctor"].doctor_id,
+            specialist=0,
+            department_id=seed_data["department"].department_id,
+            appointment_time=datetime.datetime.now(),
+            time=datetime.date.today(),
+            status=0,
+        )
+        db_session.add(appointment)
+        db_session.commit()
+        appointment_uuid = appointment.registration_uuid
+
+        payload = {"appointment_uuid": appointment_uuid, "identity": patient.identity}
+        first = await async_client.post("/api/checkIn/checkIn", json=payload)
+        assert first.status_code == 200
+        assert first.json()["code"] == 200
+
+        second = await async_client.post("/api/checkIn/checkIn", json=payload)
+        assert second.status_code == 200
+        assert second.json()["code"] == 500
+
+        db_session.refresh(appointment)
+        assert appointment.status == 1
+        assert db_session.query(Queue).filter(Queue.registration_uuid == appointment_uuid).count() == 1
 
 
 @pytest.mark.asyncio

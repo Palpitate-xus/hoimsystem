@@ -81,6 +81,10 @@ def check_in(req: CheckInRequest, db: Session = Depends(get_db)):
     appointment = db.query(Appointment).filter(Appointment.registration_uuid == req.appointment_uuid).first()
     if not appointment:
         return {"code": 500, "msg": "预约记录不存在"}
+    if appointment.status != 0:
+        return {"code": 500, "msg": "该预约已报到、就诊或取消，不能重复报到"}
+    if appointment.time != datetime.date.today():
+        return {"code": 500, "msg": "只能在预约当天报到"}
     patient = db.query(Patient).filter(Patient.identity == req.identity).first()
     if not patient:
         return {"code": 500, "msg": "病人信息不存在"}
@@ -104,6 +108,8 @@ def check_in(req: CheckInRequest, db: Session = Depends(get_db)):
         create_time=datetime.datetime.now(),
     )
     db.add(queue)
+    appointment.status = 1
+    db.add(appointment)
     db.commit()
     return {"code": 200, "msg": "success", "data": {"queue_number": queue_number}}
 

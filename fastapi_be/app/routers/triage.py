@@ -1,11 +1,52 @@
+import datetime
+
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.dependencies import User, get_current_user
-from app.models import Department
+from app.dependencies import ADMIN_ROLES, User, get_current_user, require_roles
+from app.models import Department, GuideFaq
 
 router = APIRouter()
+
+
+def _faq_data(item: GuideFaq):
+    return {"faq_id": item.faq_id, "question": item.question, "answer": item.answer, "category": item.category or "", "sort_order": item.sort_order, "status": item.status}
+
+
+@router.get("/navigation/faq")
+def navigation_faq(keyword: str | None = None, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    query = db.query(GuideFaq).filter(GuideFaq.status == 1).order_by(GuideFaq.sort_order, GuideFaq.faq_id)
+    if keyword:
+        like = f"%{keyword.strip()}%"
+        query = query.filter((GuideFaq.question.like(like)) | (GuideFaq.answer.like(like)) | (GuideFaq.category.like(like)))
+    return {"code": 200, "msg": "success", "data": [_faq_data(item) for item in query.all()]}
+
+
+@router.post("/navigation/faq/create")
+def create_navigation_faq(req: dict, current_user: User = Depends(require_roles(*ADMIN_ROLES)), db: Session = Depends(get_db)):
+    question = str(req.get("question", "")).strip()
+    answer = str(req.get("answer", "")).strip()
+    if not question or not answer:
+        return {"code": 500, "msg": "问题和答案不能为空"}
+    now = datetime.datetime.now()
+    item = GuideFaq(question=question, answer=answer, category=str(req.get("category", "")).strip(), sort_order=int(req.get("sort_order", 0)), status=1, create_time=now, update_time=now)
+    db.add(item)
+    db.commit()
+    return {"code": 200, "msg": "success", "data": _faq_data(item)}
+
+
+@router.put("/navigation/faq/update")
+def update_navigation_faq(req: dict, current_user: User = Depends(require_roles(*ADMIN_ROLES)), db: Session = Depends(get_db)):
+    item = db.query(GuideFaq).filter(GuideFaq.faq_id == req.get("faq_id")).first()
+    if not item:
+        return {"code": 500, "msg": "FAQ不存在"}
+    for field in ("question", "answer", "category", "sort_order", "status"):
+        if req.get(field) is not None:
+            setattr(item, field, str(req[field]).strip() if field in ("question", "answer", "category") else req[field])
+    item.update_time = datetime.datetime.now()
+    db.commit()
+    return {"code": 200, "msg": "success", "data": _faq_data(item)}
 
 # 症状关键词 -> 科室名称 映射
 TRIAGE_MAP = {

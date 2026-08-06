@@ -125,6 +125,19 @@ class Department(Base):
     doctors = relationship("Doctor", back_populates="department")
 
 
+class GuideFaq(Base):
+    __tablename__ = "hoimsystem_guide_faq"
+
+    faq_id = Column(Integer, primary_key=True, autoincrement=True)
+    question = Column(String(200), nullable=False)
+    answer = Column(Text, nullable=False)
+    category = Column(String(50), nullable=True)
+    sort_order = Column(Integer, nullable=False, default=0)
+    status = Column(Integer, nullable=False, default=1)
+    create_time = Column(DateTime, nullable=False)
+    update_time = Column(DateTime, nullable=False)
+
+
 class Timeslot(Base):
     __tablename__ = "hoimsystem_timeslot"
 

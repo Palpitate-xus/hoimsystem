@@ -1755,3 +1755,25 @@ class ImagingReport(Base):
     template = relationship("ImagingTemplate")
     author = relationship("User", foreign_keys=[author_id])
     reviewer = relationship("User", foreign_keys=[reviewer_id])
+
+
+class AntibioticApproval(Base):
+    __tablename__ = "hoimsystem_antibiotic_approval"
+
+    approval_id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    pharmaceutical_id = Column(Integer, ForeignKey("hoimsystem_pharmaceutical.pharmaceutical_id"), nullable=False)
+    patient_id = Column(Integer, ForeignKey("hoimsystem_patient.patient_id"), nullable=True)
+    prescription_id = Column(String(36), ForeignKey("hoimsystem_prescription.prescription_id"), nullable=True)
+    applicant_id = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=False)
+    reason = Column(String(300), nullable=False)
+    status = Column(Integer, nullable=False, default=0)  # 0=待审批 1=通过 2=退回
+    reviewer_id = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=True)
+    review_note = Column(String(300), nullable=True)
+    create_time = Column(DateTime, nullable=False)
+    review_time = Column(DateTime, nullable=True)
+
+    pharmaceutical = relationship("Pharmaceutical")
+    patient = relationship("Patient")
+    prescription = relationship("Prescription")
+    applicant = relationship("User", foreign_keys=[applicant_id])
+    reviewer = relationship("User", foreign_keys=[reviewer_id])

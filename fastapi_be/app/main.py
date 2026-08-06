@@ -290,6 +290,7 @@ from app.routers import (
     adverse_event,
     adverse_reaction,
     allergy,
+    antibiotic,
     backup,
     charge,
     charge_item,
@@ -393,6 +394,7 @@ app.include_router(consumable.router, prefix="/api")
 app.include_router(purchase.router, prefix="/api")
 app.include_router(adverse_reaction.router, prefix="/api")
 app.include_router(allergy.router, prefix="/api")
+app.include_router(antibiotic.router, prefix="/api")
 app.include_router(adverse_event.router, prefix="/api")
 app.include_router(digital_signature.router, prefix="/api")
 app.include_router(data_import_export.router, prefix="/api")

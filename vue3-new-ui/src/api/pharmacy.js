@@ -56,6 +56,10 @@ export function getReviewList(keyword = "") {
   return request({ url: "pharmacy/reviewList", method: "get", params: { keyword } });
 }
 
+export function getDispenseStats(params = {}) {
+  return request({ url: "pharmacy/dispenseStats", method: "get", params });
+}
+
 export function getInventoryAdjustments(status) {
   return request({ url: "pharmacy/inventoryAdjustment/list", method: "get", params: status === undefined ? {} : { status } });
 }

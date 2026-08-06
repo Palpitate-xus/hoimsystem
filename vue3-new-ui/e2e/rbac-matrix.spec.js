@@ -55,7 +55,7 @@ const ROLE_USERS = [
     name: "pharmacist",
     username: "pharmacist01",
     password: "123456",
-    menu: ["药品管理", "处方审核与发药", "库存预警", "库存盘点", "库存调整", "处方点评",
+    menu: ["药品管理", "处方审核与发药", "库存预警", "库存盘点", "库存调整", "发药统计", "处方点评",
       "耗材管理", "药品采购", "ADR监测"],
   },
   {
@@ -275,6 +275,15 @@ test.describe("业务页面渲染", () => {
     await page.waitForTimeout(1000);
     await expect(page.getByText("提交调整单")).toBeVisible({ timeout: 5000 });
     await expect(page.locator(".el-table")).toBeVisible({ timeout: 5000 });
+  });
+
+  test("pharmacist 访问发药统计页面", async ({ page }, testInfo) => {
+    skipIfUserUnavailable(testInfo, "pharmacist");
+    await login(page, "pharmacist01", "123456");
+    await page.goto(`${BASE}/#/pharmacy/dispenseStats`, { waitUntil: "networkidle" });
+    await page.waitForTimeout(1000);
+    await expect(page.getByText("发药统计").first()).toBeVisible({ timeout: 5000 });
+    await expect(page.locator(".el-table").first()).toBeVisible({ timeout: 5000 });
   });
 
   test("cashier 访问收费管理页面", async ({ page }, testInfo) => {

@@ -19,7 +19,9 @@ def upgrade() -> None:
     if "confirmed_time" not in columns:
         op.add_column("hoimsystem_appointment", sa.Column("confirmed_time", sa.DateTime(), nullable=True))
     if "confirmed_by" not in columns:
-        op.add_column("hoimsystem_appointment", sa.Column("confirmed_by", sa.Integer(), sa.ForeignKey("hoimsystem_users.user_id"), nullable=True))
+        with op.batch_alter_table("hoimsystem_appointment") as batch:
+            batch.add_column(sa.Column("confirmed_by", sa.Integer(), nullable=True))
+            batch.create_foreign_key("fk_appointment_confirmed_by_user", "hoimsystem_users", ["confirmed_by"], ["user_id"])
 
 
 def downgrade() -> None:

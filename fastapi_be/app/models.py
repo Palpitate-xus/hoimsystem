@@ -989,10 +989,16 @@ class Referral(Base):
     reason = Column(String(200))
     status = Column(Integer, default=0)  # 0=待接收 1=已接收 2=已退回
     create_time = Column(DateTime)
+    applicant_id = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=True)
+    reviewer_id = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=True)
+    review_time = Column(DateTime, nullable=True)
+    review_note = Column(String(200), nullable=True)
 
     patient = relationship("Patient")
     from_department = relationship("Department", foreign_keys=[from_department_id])
     to_department = relationship("Department", foreign_keys=[to_department_id])
+    applicant = relationship("User", foreign_keys=[applicant_id])
+    reviewer = relationship("User", foreign_keys=[reviewer_id])
 
 
 class MdtCase(Base):
@@ -1005,8 +1011,14 @@ class MdtCase(Base):
     status = Column(Integer, default=0)  # 0=待会诊 1=会诊中 2=已完成
     result = Column(String(500))
     create_time = Column(DateTime)
+    applicant_id = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=True)
+    reviewer_id = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=True)
+    review_time = Column(DateTime, nullable=True)
+    review_note = Column(String(200), nullable=True)
 
     patient = relationship("Patient")
+    applicant = relationship("User", foreign_keys=[applicant_id])
+    reviewer = relationship("User", foreign_keys=[reviewer_id])
 
 
 class ClinicalPathway(Base):

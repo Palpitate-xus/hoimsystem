@@ -194,7 +194,7 @@ def reset_user_password(req: dict, db: Session = Depends(get_db), current_user: 
     if not is_admin(current_user):
         return {"code": 403, "msg": "无权访问"}
     user_id = req.get("user_id")
-    new_password = req.get("new_password", "123456")
+    new_password = req.get("new_password")
     if not user_id:
         return {"code": 500, "msg": "参数错误"}
     if not isinstance(new_password, str) or not 6 <= len(new_password) <= 128:

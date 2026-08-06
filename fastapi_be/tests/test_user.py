@@ -240,3 +240,12 @@ class TestUserRoleSecurity:
         )
         assert r.status_code == 200
         assert r.json()["code"] == 500
+
+    async def test_password_reset_requires_explicit_password(self, async_client, seed_data, auth_headers):
+        r = await async_client.post(
+            "/api/user/resetPassword",
+            headers=auth_headers(seed_data["admin_user"].username),
+            json={"user_id": seed_data["patient2_user"].user_id},
+        )
+        assert r.status_code == 200
+        assert r.json()["code"] == 500

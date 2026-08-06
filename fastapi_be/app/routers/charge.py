@@ -380,6 +380,17 @@ def create_payment(req: PaymentCreateRequest, db: Session = Depends(get_db), cur
         return {"code": 403, "msg": "无权访问该收费记录"}
     if charge.status == 1:
         return {"code": 500, "msg": "该订单已缴费"}
+    if charge.status != 0:
+        return {"code": 500, "msg": "该收费记录状态不允许支付"}
+    if req.channel not in {"wechat", "alipay", "cash"}:
+        return {"code": 500, "msg": "不支持的支付渠道"}
+    if not math.isfinite(req.amount) or req.amount <= 0:
+        return {"code": 500, "msg": "支付金额必须大于0"}
+    if not math.isclose(req.amount, float(charge.amount or 0), rel_tol=0, abs_tol=0.01):
+        return {"code": 500, "msg": "支付金额与收费金额不一致"}
+    pending = db.query(Payment).filter(Payment.charge_id == charge.charge_id, Payment.status == 0).first()
+    if pending:
+        return {"code": 500, "msg": "该收费记录已有待支付订单"}
     payment_no = "PAY" + datetime.datetime.now().strftime("%Y%m%d%H%M%S") + str(random.randint(1000, 9999))
     qr_data = f"mock://payment?no={payment_no}&amount={req.amount}&channel={req.channel}"
     payment = Payment(
@@ -442,16 +453,22 @@ def mock_payment_notify(req: PaymentMockNotifyRequest, db: Session = Depends(get
         return {"code": 500, "msg": "支付单不存在"}
     if payment.status != 0:
         return {"code": 500, "msg": "支付单状态异常"}
+    charge = db.query(Charge).filter(Charge.charge_id == payment.charge_id).first()
+    if not charge or charge.status != 0:
+        return {"code": 500, "msg": "收费记录状态异常"}
     try:
-        payment.status = 1
-        payment.paid_time = datetime.datetime.now()
-        db.add(payment)
-        # 更新收费记录状态为已缴费
-        charge = db.query(Charge).filter(Charge.charge_id == payment.charge_id).first()
-        if charge:
-            charge.status = 1
-            charge.time = datetime.datetime.now()
-            db.add(charge)
+        paid_time = datetime.datetime.now()
+        payment_updated = db.query(Payment).filter(
+            Payment.payment_no == payment.payment_no,
+            Payment.status == 0,
+        ).update({Payment.status: 1, Payment.paid_time: paid_time}, synchronize_session=False)
+        charge_updated = db.query(Charge).filter(
+            Charge.charge_id == charge.charge_id,
+            Charge.status == 0,
+        ).update({Charge.status: 1, Charge.time: paid_time}, synchronize_session=False)
+        if payment_updated != 1 or charge_updated != 1:
+            db.rollback()
+            return {"code": 500, "msg": "支付单状态异常"}
         db.commit()
         return {"code": 200, "msg": "支付成功"}
     except Exception:

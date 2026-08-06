@@ -388,6 +388,12 @@ export const asyncRoutes = [
         meta: { title: "窗口预约处理", permissions: ["admin", "cashier", "registrar"] },
       },
       {
+        path: "insurance",
+        name: "Insurance",
+        component: () => import("@/views/charge/insurance.vue"),
+        meta: { title: "医保与费用控制", permissions: ["admin", "cashier", "director"] },
+      },
+      {
         path: "dailySettlement",
         name: "DailySettlement",
         component: () => import("@/views/charge/dailySettlement.vue"),

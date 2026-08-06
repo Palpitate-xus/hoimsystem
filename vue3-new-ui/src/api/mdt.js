@@ -9,3 +9,9 @@ export function getMdtList() {
 export function updateMdt(data) {
   return request({ url: "mdt/update", method: "post", data });
 }
+export function getMdtApprovalList() {
+  return request({ url: "mdt/approvalList", method: "get" });
+}
+export function approveMdt(data) {
+  return request({ url: "mdt/approval", method: "post", data });
+}

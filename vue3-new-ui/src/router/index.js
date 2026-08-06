@@ -240,6 +240,12 @@ export const asyncRoutes = [
         meta: { title: "多学科会诊", permissions: ["admin", "doctor", "director"] },
       },
       {
+        path: "referralApproval",
+        name: "ReferralApproval",
+        component: () => import("@/views/doctor/referralApproval.vue"),
+        meta: { title: "转诊/会诊审批", permissions: ["admin", "director"] },
+      },
+      {
         path: "clinicalPathway",
         name: "ClinicalPathway",
         component: () => import("@/views/doctor/clinicalPathway.vue"),

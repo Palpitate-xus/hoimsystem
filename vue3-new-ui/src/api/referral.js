@@ -9,3 +9,9 @@ export function getReferralList() {
 export function updateReferralStatus(data) {
   return request({ url: "referral/updateStatus", method: "post", data });
 }
+export function getReferralApprovalList() {
+  return request({ url: "referral/approvalList", method: "get" });
+}
+export function approveReferral(data) {
+  return request({ url: "referral/approval", method: "post", data });
+}

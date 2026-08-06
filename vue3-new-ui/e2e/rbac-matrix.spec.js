@@ -439,6 +439,15 @@ test.describe("业务页面渲染", () => {
     await expect(page.getByText("提交绿色通道申请")).toBeVisible({ timeout: 5000 });
     await expect(page.locator(".el-table")).toBeVisible({ timeout: 5000 });
   });
+
+  test("doctor 访问急诊病历页面", async ({ page }, testInfo) => {
+    skipIfUserUnavailable(testInfo, "doctor");
+    await login(page, "doctor1", "doctor123");
+    await page.goto(`${BASE}/#/queue/emergencyMedicalRecord`, { waitUntil: "networkidle" });
+    await expect(page.getByText("急诊病历").first()).toBeVisible({ timeout: 5000 });
+    await expect(page.getByText("保存急诊病历")).toBeVisible({ timeout: 5000 });
+    await expect(page.locator(".el-table")).toBeVisible({ timeout: 5000 });
+  });
 });
 
 test.describe("UI 布局完整性", () => {

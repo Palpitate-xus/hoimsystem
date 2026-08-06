@@ -12,3 +12,7 @@ export function getEmergencyGreenChannelList() { return request({ url: "emergenc
 export function createEmergencyGreenChannel(data) { return request({ url: "emergency/greenChannel/create", method: "post", data }); }
 export function approveEmergencyGreenChannel(data) { return request({ url: "emergency/greenChannel/approve", method: "post", data }); }
 export function closeEmergencyGreenChannel(data) { return request({ url: "emergency/greenChannel/close", method: "post", data }); }
+export function getEmergencyMedicalRecordList(triageId) { return request({ url: "emergency/medicalRecord/list", method: "get", params: triageId ? { triage_id: triageId } : {} }); }
+export function createEmergencyMedicalRecord(data) { return request({ url: "emergency/medicalRecord/create", method: "post", data }); }
+export function updateEmergencyMedicalRecord(data) { return request({ url: "emergency/medicalRecord/update", method: "put", data }); }
+export function signEmergencyMedicalRecord(data) { return request({ url: "emergency/medicalRecord/sign", method: "post", data }); }

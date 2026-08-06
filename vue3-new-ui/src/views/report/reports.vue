@@ -1,6 +1,6 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="报表统计" description="统计分析门诊量、财务、药品和医生工作量" />
+    <vab-page-header title="报表统计" description="统计分析门诊量、财务、药品、医生和科室工作量" />
     <el-tabs v-model="activeTab">
       <el-tab-pane label="门诊量统计" name="outpatient">
         <el-form :inline="true" :model="outpatientForm" class="page-toolbar">
@@ -121,6 +121,38 @@
       />
 
       </el-tab-pane>
+
+      <el-tab-pane label="科室统计" name="department">
+        <el-form :inline="true" :model="departmentForm" class="page-toolbar">
+          <el-form-item label="开始日期">
+            <el-date-picker v-model="departmentForm.start_date" type="date" value-format="YYYY-MM-DD" />
+          </el-form-item>
+          <el-form-item label="结束日期">
+            <el-date-picker v-model="departmentForm.end_date" type="date" value-format="YYYY-MM-DD" />
+          </el-form-item>
+          <el-form-item>
+            <el-button type="primary" @click="queryDepartmentStats">查询</el-button>
+          </el-form-item>
+        </el-form>
+        <el-descriptions :column="3" border v-if="departmentResult.totals">
+          <el-descriptions-item label="接诊人数">{{ departmentResult.totals.visit_count }}</el-descriptions-item>
+          <el-descriptions-item label="处方数">{{ departmentResult.totals.prescription_count }}</el-descriptions-item>
+          <el-descriptions-item label="检查申请数">{{ departmentResult.totals.lab_order_count }}</el-descriptions-item>
+          <el-descriptions-item label="已收收入">{{ departmentResult.totals.income }}</el-descriptions-item>
+          <el-descriptions-item label="评价数">{{ departmentResult.totals.review_count }}</el-descriptions-item>
+          <el-descriptions-item label="平均满意度">{{ departmentResult.totals.satisfaction_score ?? "暂无评价" }}</el-descriptions-item>
+        </el-descriptions>
+        <el-table :data="departmentResult.items" v-loading="loading" empty-text="暂无数据">
+          <el-table-column prop="department_name" label="科室" sortable />
+          <el-table-column prop="visit_count" label="接诊人数" sortable />
+          <el-table-column prop="prescription_count" label="处方数" sortable />
+          <el-table-column prop="lab_order_count" label="检查申请数" sortable />
+          <el-table-column prop="income" label="已收收入" sortable />
+          <el-table-column prop="satisfaction_score" label="满意度" sortable>
+            <template #default="{ row }">{{ row.satisfaction_score ?? "暂无评价" }}</template>
+          </el-table-column>
+        </el-table>
+      </el-tab-pane>
     </el-tabs>
   </div>
 </template>
@@ -128,7 +160,7 @@
 <script setup>
 import { ref, onMounted, computed } from "vue";
 import { ElMessage } from "element-plus";
-import { reportOutpatientVolume, reportFinance, reportPharmaceutical, reportDoctorWorkload } from "@/api/report";
+import { reportOutpatientVolume, reportFinance, reportPharmaceutical, reportDoctorWorkload, reportDepartmentStats } from "@/api/report";
 import { getDoctorList } from "@/api/admin";
 
 const activeTab = ref("outpatient");
@@ -137,11 +169,13 @@ const outpatientForm = ref({ start_date: "", end_date: "", group_by: "day" });
 const financeForm = ref({ start_date: "", end_date: "" });
 const pharmaForm = ref({ start_date: "", end_date: "" });
 const workloadForm = ref({ start_date: "", end_date: "", doctor_id: null });
+const departmentForm = ref({ start_date: "", end_date: "" });
 
 const outpatientResult = ref({ total_visits: undefined, details: [] });
 const financeResult = ref({});
 const pharmaResult = ref([]);
 const workloadResult = ref([]);
+const departmentResult = ref({ items: [], totals: null });
 
 const searchQuery1 = ref("");
 const searchQuery2 = ref("");
@@ -210,6 +244,18 @@ const queryWorkload = async () => {
     currentPage.value = 1;
     const res = await reportDoctorWorkload(workloadForm.value, searchQuery3.value);
     workloadResult.value = res.data || [];
+  } catch (e) {
+    ElMessage.error(e.msg || "查询失败");
+  } finally {
+    loading.value = false;
+  }
+};
+
+const queryDepartmentStats = async () => {
+  loading.value = true;
+  try {
+    const res = await reportDepartmentStats(departmentForm.value);
+    departmentResult.value = res.data || { items: [], totals: null };
   } catch (e) {
     ElMessage.error(e.msg || "查询失败");
   } finally {

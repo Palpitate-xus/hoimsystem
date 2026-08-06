@@ -15,3 +15,7 @@ export function reportPharmaceutical(data, keyword = "") {
 export function reportDoctorWorkload(data, keyword = "") {
   return request({ url: "report/doctorWorkload", method: "post", data, params: { keyword } });
 }
+
+export function reportDepartmentStats(data, keyword = "") {
+  return request({ url: "report/departmentStats", method: "post", data, params: { keyword } });
+}

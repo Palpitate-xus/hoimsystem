@@ -306,11 +306,11 @@
 
 ### 2.24 物资设备管理 API ⬜
 
-- [ ] 设备台账 API（设备档案/卡片）
-- [ ] 设备维修 API（报修/维修记录）
-- [ ] 设备保养 API（定期保养计划）
-- [ ] 高值耗材追溯 API（一物一码追溯）
-- [ ] 资产盘点 API
+- [x] 设备台账 API（设备档案/卡片）
+- [x] 设备维修 API（报修/维修记录）
+- [x] 设备保养 API（定期保养计划）
+- [x] 高值耗材追溯 API（一物一码追溯）
+- [x] 资产盘点 API
 
 ### 2.25 血库管理 API ⬜
 
@@ -522,9 +522,9 @@
 
 ### 4.20 物资设备管理页面 ⬜
 
-- [ ] 设备台账页面
-- [ ] 设备维修/保养页面
-- [ ] 高值耗材追溯页面
+- [x] 设备台账页面
+- [x] 设备维修/保养页面
+- [x] 高值耗材追溯页面
 
 ### 4.21 血库管理页面 ⬜
 
@@ -686,10 +686,10 @@
 
 ### 6.19 物资设备管理 ⬜ 待建
 
-- [ ] hoimsystem_equipment（设备台账）
-- [ ] hoimsystem_equipment_maintenance（设备维修）
-- [ ] hoimsystem_equipment_inspection（设备保养）
-- [ ] hoimsystem_consumable_trace（高值耗材追溯）
+- [x] hoimsystem_equipment（设备台账）
+- [x] hoimsystem_equipment_maintenance（设备维修）
+- [x] hoimsystem_equipment_inspection（设备保养）
+- [x] hoimsystem_consumable_trace（高值耗材追溯）
 
 ### 6.20 血库管理 ⬜ 待建
 

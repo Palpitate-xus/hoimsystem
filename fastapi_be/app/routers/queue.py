@@ -76,6 +76,19 @@ def get_queue_list(keyword: str | None = None, current_user: User = Depends(get_
     return {"code": 200, "msg": "success", "data": data}
 
 
+@router.get("/queue/progress")
+def get_queue_progress(current_user: User = Depends(require_roles(ROLE_PATIENT)), db: Session = Depends(get_db)):
+    patient = db.query(Patient).filter(Patient.identity == current_user.username).first()
+    if not patient:
+        return {"code": 200, "msg": "success", "data": []}
+    current_items = db.query(Queue).filter(Queue.patient_id == patient.patient_id, Queue.status.in_((0, 1))).order_by(Queue.create_time.desc()).all()
+    data = []
+    for item in current_items:
+        ahead = db.query(Queue).filter(Queue.doctor_id == item.doctor_id, Queue.status == 0, Queue.queue_number < item.queue_number).count()
+        data.append({"queue_id": item.queue_id, "queue_number": item.queue_number, "doctor_name": item.doctor.name if item.doctor else "", "status": item.status, "status_text": {0: "候诊中", 1: "已叫号"}.get(item.status, ""), "ahead_count": ahead, "estimated_wait_minutes": ahead * 10})
+    return {"code": 200, "msg": "success", "data": data}
+
+
 @router.post("/queue/callNext")
 def call_next(req: QueueCallNextRequest, current_user: User = Depends(require_roles(*CLINICAL_ROLES)),
     db: Session = Depends(get_db)):

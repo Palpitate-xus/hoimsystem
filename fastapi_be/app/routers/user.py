@@ -1,8 +1,10 @@
 import datetime
 import json
+import math
 
 import jwt
 from fastapi import APIRouter, Depends, HTTPException, Request
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from app.config import settings
@@ -242,11 +244,18 @@ def prepaid_recharge(req: dict, db: Session = Depends(get_db), current_user: Use
     patient = db.query(Patient).filter(Patient.identity == req.get("identity")).first()
     if not patient:
         return {"code": 500, "msg": "病人不存在"}
-    amount = float(req.get("amount", 0))
-    if amount <= 0:
+    try:
+        amount = float(req.get("amount", 0))
+    except (TypeError, ValueError):
+        return {"code": 500, "msg": "充值金额必须为有效数字"}
+    if not math.isfinite(amount) or amount <= 0:
         return {"code": 500, "msg": "充值金额必须大于0"}
-    patient.prepaid_balance = (patient.prepaid_balance or 0) + amount
+    db.query(Patient).filter(Patient.patient_id == patient.patient_id).update(
+        {Patient.prepaid_balance: func.coalesce(Patient.prepaid_balance, 0) + amount},
+        synchronize_session=False,
+    )
     db.commit()
+    db.refresh(patient)
     return {"code": 200, "msg": "success", "data": {"balance": patient.prepaid_balance}}
 
 
@@ -256,12 +265,21 @@ def prepaid_deduct(req: dict, db: Session = Depends(get_db), current_user: User 
     patient = db.query(Patient).filter(Patient.identity == req.get("identity")).first()
     if not patient:
         return {"code": 500, "msg": "病人不存在"}
-    amount = float(req.get("amount", 0))
-    if amount <= 0:
+    try:
+        amount = float(req.get("amount", 0))
+    except (TypeError, ValueError):
+        return {"code": 500, "msg": "扣款金额必须为有效数字"}
+    if not math.isfinite(amount) or amount <= 0:
         return {"code": 500, "msg": "扣款金额必须大于0"}
-    current = patient.prepaid_balance or 0
-    if current < amount:
+    updated = db.query(Patient).filter(
+        Patient.patient_id == patient.patient_id,
+        func.coalesce(Patient.prepaid_balance, 0) >= amount,
+    ).update(
+        {Patient.prepaid_balance: func.coalesce(Patient.prepaid_balance, 0) - amount},
+        synchronize_session=False,
+    )
+    if updated != 1:
         return {"code": 500, "msg": "预交金余额不足"}
-    patient.prepaid_balance = current - amount
     db.commit()
+    db.refresh(patient)
     return {"code": 200, "msg": "success", "data": {"balance": patient.prepaid_balance}}

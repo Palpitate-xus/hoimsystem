@@ -152,6 +152,18 @@ class TestPrepaidPermissions:
             assert r.status_code == 200
             assert r.json()["code"] == 500
 
+    async def test_cashier_rejects_non_finite_or_invalid_amounts(self, async_client, seed_data, auth_headers):
+        headers = auth_headers(seed_data["cashier_user"].username)
+        for endpoint in ("/api/prepaid/recharge", "/api/prepaid/deduct"):
+            for amount in ("nan", "inf", "-inf", "not-a-number"):
+                r = await async_client.post(
+                    endpoint,
+                    headers=headers,
+                    json={"identity": seed_data["patient"].identity, "amount": amount},
+                )
+                assert r.status_code == 200
+                assert r.json()["code"] == 500
+
 
 @pytest.mark.asyncio
 class TestUserRoleSecurity:

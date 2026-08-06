@@ -67,6 +67,14 @@
       </el-table>
     </el-card>
 
+    <el-card style="margin-top: 20px;">
+      <template #header><div class="page-toolbar"><span>围术期预防用药</span><el-button type="primary" size="small" @click="openPerioperativeDialog">新增预防用药</el-button></div></template>
+      <el-table :data="perioperativeAntibiotics" size="small" empty-text="暂无围术期预防用药">
+        <el-table-column prop="patient_name" label="患者" width="90" /><el-table-column prop="surgery_name" label="手术" /><el-table-column prop="pharmaceutical_name" label="抗菌药" width="130" /><el-table-column prop="dose" label="剂量" width="100" /><el-table-column prop="timing_minutes" label="术前分钟" width="90" /><el-table-column prop="status_text" label="状态" width="90" />
+        <el-table-column label="操作" width="100"><template #default="{ row }"><el-button v-if="row.status === 0" size="small" type="success" @click="administerPerioperative(row)">执行</el-button></template></el-table-column>
+      </el-table>
+    </el-card>
+
     <el-dialog v-model="applyDialogVisible" title="手术申请" width="500px">
       <el-form :model="applyForm" label-width="100px">
         <el-form-item label="患者" required>
@@ -165,15 +173,26 @@
         <el-button type="primary" @click="submitAnesthesia">保存</el-button>
       </template>
     </el-dialog>
+    <el-dialog v-model="perioperativeDialogVisible" title="新增围术期预防用药" width="520px">
+      <el-form :model="perioperativeForm" label-width="100px">
+        <el-form-item label="手术申请" required><el-select v-model="perioperativeForm.application_id" class="form-full-width"><el-option v-for="item in approvedApps" :key="item.application_id" :label="`${item.patient_name} - ${item.surgery_name}`" :value="item.application_id" /></el-select></el-form-item>
+        <el-form-item label="抗菌药物" required><el-select v-model="perioperativeForm.pharmaceutical_id" class="form-full-width"><el-option v-for="item in antibioticDrugs" :key="item.id" :label="item.name" :value="item.id" /></el-select></el-form-item>
+        <el-form-item label="剂量" required><el-input v-model="perioperativeForm.dose" placeholder="如 1g" /></el-form-item>
+        <el-form-item label="术前分钟"><el-input-number v-model="perioperativeForm.timing_minutes" :min="0" :max="240" /></el-form-item>
+        <el-form-item label="用药指征"><el-input v-model="perioperativeForm.indication" type="textarea" /></el-form-item>
+      </el-form>
+      <template #footer><el-button @click="perioperativeDialogVisible = false">取消</el-button><el-button type="primary" @click="submitPerioperative">保存</el-button></template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
-import { getSurgeryApplicationList, createSurgeryApplication, approveSurgeryApplication, cancelSurgeryApplication, getSurgeryScheduleList, createSurgerySchedule, startSurgery, completeSurgery, createAnesthesiaRecord } from "@/api/surgery";
+import { getSurgeryApplicationList, createSurgeryApplication, approveSurgeryApplication, cancelSurgeryApplication, getSurgeryScheduleList, createSurgerySchedule, startSurgery, completeSurgery, createAnesthesiaRecord, getPerioperativeAntibiotics, createPerioperativeAntibiotic, updatePerioperativeAntibioticStatus } from "@/api/surgery";
 import { getInpatientList } from "@/api/admission";
 import { getDoctorList } from "@/api/admin";
+import { getPharmaceuticalList } from "@/api/pharmacy";
 
 const applications = ref([]);
 const schedules = ref([]);
@@ -190,6 +209,10 @@ const scheduleDialogVisible = ref(false);
 const scheduleForm = ref({});
 const anesthesiaDialogVisible = ref(false);
 const anesthesiaForm = ref({});
+const perioperativeAntibiotics = ref([]);
+const antibioticDrugs = ref([]);
+const perioperativeDialogVisible = ref(false);
+const perioperativeForm = ref({ application_id: "", pharmaceutical_id: null, dose: "", timing_minutes: 30, indication: "" });
 
 const approvedApps = computed(() => applications.value.filter(a => a.status === 1));
 
@@ -207,6 +230,9 @@ const loadSchedules = async () => {
   const res = await getSurgeryScheduleList({});
   schedules.value = res.data || [];
 };
+
+const loadPerioperative = async () => { const res = await getPerioperativeAntibiotics(); perioperativeAntibiotics.value = res.data || []; };
+const loadAntibioticDrugs = async () => { const res = await getPharmaceuticalList(); antibioticDrugs.value = (res.data || []).filter(item => item.antibiotic_level > 0); };
 
 const loadInpatients = async () => {
   const res = await getInpatientList({});
@@ -231,6 +257,10 @@ const openApplyDialog = () => {
   applyForm.value = { surgery_level: 1, anesthesia_type: "局部麻醉" };
   applyDialogVisible.value = true;
 };
+
+const openPerioperativeDialog = async () => { await loadAntibioticDrugs(); perioperativeForm.value = { application_id: approvedApps.value[0]?.application_id || "", pharmaceutical_id: antibioticDrugs.value[0]?.id || null, dose: "", timing_minutes: 30, indication: "" }; perioperativeDialogVisible.value = true; };
+const submitPerioperative = async () => { if (!perioperativeForm.value.application_id || !perioperativeForm.value.pharmaceutical_id || !perioperativeForm.value.dose.trim()) return ElMessage.warning("请填写手术、药品和剂量"); try { await createPerioperativeAntibiotic(perioperativeForm.value); ElMessage.success("预防用药已保存"); perioperativeDialogVisible.value = false; await loadPerioperative(); } catch (e) { ElMessage.error(e.msg || "保存失败"); } };
+const administerPerioperative = async row => { try { await updatePerioperativeAntibioticStatus({ perioperative_id: row.perioperative_id, status: 1 }); ElMessage.success("已记录执行"); await loadPerioperative(); } catch (e) { ElMessage.error(e.msg || "执行失败"); } };
 
 const submitApply = async () => {
   if (!applyForm.value.patient_id || !applyForm.value.surgery_name) {
@@ -332,5 +362,6 @@ onMounted(() => {
   loadSchedules();
   loadInpatients();
   loadDoctors();
+  loadPerioperative();
 });
 </script>

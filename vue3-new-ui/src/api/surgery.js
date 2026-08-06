@@ -32,3 +32,13 @@ export function getAnesthesiaRecordList(params) {
 export function createAnesthesiaRecord(data) {
   return request({ url: "/anesthesiaRecord/create", method: "post", data });
 }
+
+export function getPerioperativeAntibiotics(params) {
+  return request({ url: "/surgery/perioperative/list", method: "get", params });
+}
+export function createPerioperativeAntibiotic(data) {
+  return request({ url: "/surgery/perioperative/create", method: "post", data });
+}
+export function updatePerioperativeAntibioticStatus(data) {
+  return request({ url: "/surgery/perioperative/status", method: "post", data });
+}

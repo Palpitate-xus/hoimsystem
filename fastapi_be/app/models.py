@@ -426,6 +426,27 @@ class InventoryAdjustment(Base):
     approver = relationship("User", foreign_keys=[approver_id])
 
 
+class SpecialDrugRegister(Base):
+    __tablename__ = "hoimsystem_special_drug_register"
+
+    register_id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    pharmaceutical_id = Column(Integer, ForeignKey("hoimsystem_pharmaceutical.pharmaceutical_id"), nullable=False)
+    patient_id = Column(Integer, ForeignKey("hoimsystem_patient.patient_id"), nullable=True)
+    action = Column(String(10), nullable=False)  # in / out / return / destroy
+    quantity = Column(Integer, nullable=False)
+    reason = Column(String(200), nullable=False)
+    status = Column(Integer, nullable=False, default=0)  # 0=pending 1=confirmed 2=rejected
+    applicant_id = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=False)
+    checker_id = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=True)
+    create_time = Column(DateTime, nullable=False)
+    check_time = Column(DateTime, nullable=True)
+
+    pharmaceutical = relationship("Pharmaceutical")
+    patient = relationship("Patient")
+    applicant = relationship("User", foreign_keys=[applicant_id])
+    checker = relationship("User", foreign_keys=[checker_id])
+
+
 # ===== 新增表 =====
 
 

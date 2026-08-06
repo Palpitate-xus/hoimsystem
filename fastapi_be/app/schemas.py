@@ -289,6 +289,18 @@ class InventoryAdjustmentActionRequest(BaseModel):
     adjustment_id: int
 
 
+class SpecialDrugRegisterCreateRequest(BaseModel):
+    pharmaceutical_id: int
+    patient_id: int | None = None
+    action: str
+    quantity: int = Field(..., gt=0)
+    reason: str = Field(..., min_length=1, max_length=200)
+
+
+class SpecialDrugRegisterActionRequest(BaseModel):
+    register_id: str
+
+
 class MedicalRecordCreateRequest(BaseModel):
     patient_id: int
     symptom: str

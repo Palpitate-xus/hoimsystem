@@ -541,6 +541,20 @@ class LabOrder(Base):
     lab_results = relationship("LabResult", back_populates="lab_order")
 
 
+class LabPackage(Base):
+    __tablename__ = "hoimsystem_lab_package"
+
+    package_id = Column(Integer, primary_key=True, autoincrement=True)
+    code = Column(String(30), nullable=False, unique=True)
+    name = Column(String(100), nullable=False)
+    category = Column(String(50), nullable=True)
+    items = Column(String(1000), nullable=False, default="")
+    price = Column(Float, nullable=False, default=0)
+    status = Column(Integer, nullable=False, default=1)
+    create_time = Column(DateTime, nullable=False)
+    update_time = Column(DateTime, nullable=False)
+
+
 class LabResult(Base):
     __tablename__ = "hoimsystem_lab_result"
 

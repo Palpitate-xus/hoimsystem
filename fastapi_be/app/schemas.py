@@ -540,6 +540,24 @@ class LabResultAuditRequest(BaseModel):
     lab_result_id: str
 
 
+class LabPackageCreateRequest(BaseModel):
+    code: str = Field(..., min_length=1, max_length=30)
+    name: str = Field(..., min_length=1, max_length=100)
+    category: str = Field(default="", max_length=50)
+    items: str = Field(default="", max_length=1000)
+    price: float = Field(default=0, ge=0)
+
+
+class LabPackageUpdateRequest(BaseModel):
+    package_id: int
+    code: str | None = Field(default=None, min_length=1, max_length=30)
+    name: str | None = Field(default=None, min_length=1, max_length=100)
+    category: str | None = Field(default=None, max_length=50)
+    items: str | None = Field(default=None, max_length=1000)
+    price: float | None = Field(default=None, ge=0)
+    status: int | None = Field(default=None, ge=0, le=1)
+
+
 class FollowUpCreatePlanRequest(BaseModel):
     patient_id: int
     plan_date: str

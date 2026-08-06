@@ -61,7 +61,15 @@
         </el-table-column>
         <el-table-column label="操作" width="120">
           <template #default="{row}">
-            <el-button size="small" type="primary" @click="book(row)">预约</el-button>
+            <el-button
+              size="small"
+              type="primary"
+              :loading="submitting && submittingScheduleId === row.id"
+              :disabled="submitting || isOutOfStock(row)"
+              @click="book(row)"
+            >
+              {{ isOutOfStock(row) ? "无号源" : "预约" }}
+            </el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -88,24 +96,62 @@ const schedules = ref([]);
 const loading = ref(false);
 const schedLoading = ref(false);
 const dialogVisible = ref(false);
+const submitting = ref(false);
+const submittingScheduleId = ref(null);
+
+const getErrorMessage = (error, fallback) => {
+  const message = error?.response?.data?.msg || error?.msg;
+  if (message) return message;
+
+  if (typeof error === "string") {
+    const backendMessage = error.match(/"msg":"([^"]+)"/)?.[1];
+    if (backendMessage) return backendMessage;
+  }
+
+  if (error?.message === "Network Error") return "网络连接异常，请检查网络后重试";
+  if (error?.message?.includes("timeout")) return "请求超时，请稍后重试";
+  return fallback;
+};
+
+const isOutOfStock = (row) => Number(row?.stock) <= 0;
 
 const fetchList = async () => {
   loading.value = true;
-  const res = await getAppointmentList(searchQuery.value);
-  list.value = res.data || [];
-  total.value = list.value.length;
-  loading.value = false;
+  try {
+    const res = await getAppointmentList(searchQuery.value);
+    list.value = res.data || [];
+    total.value = list.value.length;
+  } catch (e) {
+    ElMessage.error(getErrorMessage(e, "预约记录加载失败，请稍后重试"));
+  } finally {
+    loading.value = false;
+  }
 };
 
 const openDialog = async () => {
+  if (schedLoading.value || submitting.value) return;
   dialogVisible.value = true;
   schedLoading.value = true;
-  const res = await getAppointmentSchedules();
-  schedules.value = res.data || [];
-  schedLoading.value = false;
+  try {
+    const res = await getAppointmentSchedules();
+    schedules.value = res.data || [];
+  } catch (e) {
+    schedules.value = [];
+    ElMessage.error(getErrorMessage(e, "号源加载失败，请稍后重试"));
+  } finally {
+    schedLoading.value = false;
+  }
 };
 
 const book = async (row) => {
+  if (submitting.value) return;
+  if (isOutOfStock(row)) {
+    ElMessage.warning("该时段号源已满，请选择其他时段");
+    return;
+  }
+
+  submitting.value = true;
+  submittingScheduleId.value = row.id;
   try {
     await createAppointment({
       id: row.id,
@@ -119,7 +165,10 @@ const book = async (row) => {
     dialogVisible.value = false;
     fetchList();
   } catch (e) {
-    ElMessage.error(e.msg || "预约失败");
+    ElMessage.error(getErrorMessage(e, "预约失败，请稍后重试"));
+  } finally {
+    submitting.value = false;
+    submittingScheduleId.value = null;
   }
 };
 

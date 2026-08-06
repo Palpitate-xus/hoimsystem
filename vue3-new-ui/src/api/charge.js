@@ -49,6 +49,18 @@ export function windowCancelRegistration(data) {
   return request({ url: "windowRegistration/cancel", method: "post", data });
 }
 
+export function getWindowAppointments(identity = "") {
+  return request({ url: "windowRegistration/appointments", method: "get", params: { identity } });
+}
+
+export function confirmWindowAppointment(data) {
+  return request({ url: "windowRegistration/appointmentConfirm", method: "post", data });
+}
+
+export function cancelWindowAppointment(data) {
+  return request({ url: "windowRegistration/appointmentCancel", method: "post", data });
+}
+
 export function dailySettlement(data) {
   return request({ url: "dailySettlement/report", method: "post", data });
 }

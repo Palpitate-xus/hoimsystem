@@ -424,6 +424,15 @@ test.describe("业务页面渲染", () => {
     await expect(page.locator(".el-table")).toBeVisible({ timeout: 5000 });
   });
 
+  test("registrar 访问窗口预约处理页面", async ({ page }, testInfo) => {
+    skipIfUserUnavailable(testInfo, "registrar");
+    await login(page, "registrar01", "123456");
+    await page.goto(`${BASE}/#/charge/windowAppointment`, { waitUntil: "networkidle" });
+    await expect(page.getByText("窗口预约处理").first()).toBeVisible({ timeout: 5000 });
+    await expect(page.getByText("查看全部")).toBeVisible({ timeout: 5000 });
+    await expect(page.locator(".el-table")).toBeVisible({ timeout: 5000 });
+  });
+
   test("lab technician 访问危急值报告", async ({ page }, testInfo) => {
     skipIfUserUnavailable(testInfo, "lab_technician");
     await login(page, "lab01", "123456");

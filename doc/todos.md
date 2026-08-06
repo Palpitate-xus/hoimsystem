@@ -322,11 +322,11 @@
 
 ### 2.26 医保管理 API ⬜
 
-- [ ] 医保目录对照 API
-- [ ] 医保结算 API（实时结算/对账）
-- [ ] 慢病管理 API（慢特病登记/限额）
-- [ ] DRG/DIP API（分组预测/盈亏分析）
-- [ ] 医保控费 API（费用预警/超标提醒）
+- [x] 医保目录对照 API
+- [x] 医保结算 API（本地结算记录/对账）
+- [x] 慢病管理 API（慢特病登记/限额）
+- [x] DRG/DIP API（分组盈亏分析）
+- [x] 医保控费 API（费用预警/超标提醒）
 
 ---
 
@@ -534,9 +534,9 @@
 
 ### 4.22 医保管理页面 ⬜
 
-- [ ] 医保目录对照页面
-- [ ] 医保结算页面
-- [ ] DRG/DIP 分析页面
+- [x] 医保目录对照页面
+- [x] 医保结算页面
+- [x] DRG/DIP 分析页面
 
 ---
 
@@ -700,9 +700,9 @@
 
 ### 6.21 医保管理 ⬜ 待建
 
-- [ ] hoimsystem_insurance_catalog（医保目录对照）
-- [ ] hoimsystem_insurance_settlement（医保结算）
-- [ ] hoimsystem_drg_grouping（DRG分组结果）
+- [x] hoimsystem_insurance_catalog（医保目录对照）
+- [x] hoimsystem_insurance_settlement（医保结算）
+- [x] hoimsystem_drg_grouping（DRG分组结果）
 
 ---
 

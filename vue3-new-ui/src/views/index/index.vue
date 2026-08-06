@@ -163,9 +163,12 @@ const showNoticeDetail = (notice) => {
 
 onMounted(async () => {
   try {
+    const chargeRequest = hasPermission(["admin", "cashier", "patient"])
+      ? getChargeList()
+      : Promise.resolve({ data: [] });
     const [noticeRes, chargeRes, preRes, apptRes, regRes] = await Promise.all([
       getNoticeList(),
-      getChargeList(),
+      chargeRequest,
       getPrescriptionList(),
       getAppointmentList(),
       getRegistrationList(),

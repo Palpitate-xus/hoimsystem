@@ -215,6 +215,58 @@ def get_window_registration_patient(
     }
 
 
+@router.get("/windowRegistration/appointments")
+def get_window_appointments(identity: str | None = None, db: Session = Depends(get_db), current_user: User = Depends(require_roles(ROLE_CASHIER, ROLE_REGISTRAR, *ADMIN_ROLES))):
+    from app.models import Appointment, Patient
+
+    query = db.query(Appointment).order_by(Appointment.appointment_time.desc())
+    if identity:
+        patient = db.query(Patient).filter(Patient.identity == identity.strip()).first()
+        if not patient:
+            return {"code": 200, "msg": "success", "data": []}
+        query = query.filter(Appointment.patient_id == patient.patient_id)
+    data = []
+    status_map = {0: "待确认", 1: "已报到/就诊", 2: "已取消"}
+    for item in query.all():
+        data.append({"uuid": item.registration_uuid, "patient_name": item.patient.name if item.patient else "", "identity": item.patient.identity if item.patient else "", "doctor_name": item.doctor.name if item.doctor else "", "department_name": item.department.name if item.department else "", "time": str(item.time) if item.time else "", "prefer_time": item.prefer_time or "", "status": item.status, "status_text": status_map.get(item.status, "未知"), "confirmed": item.confirmed, "confirmed_text": "已确认" if item.confirmed else "未确认"})
+    return {"code": 200, "msg": "success", "data": data}
+
+
+@router.post("/windowRegistration/appointmentConfirm")
+def confirm_window_appointment(req: dict, db: Session = Depends(get_db), current_user: User = Depends(require_roles(ROLE_CASHIER, ROLE_REGISTRAR, *ADMIN_ROLES))):
+    from app.models import Appointment
+
+    item = db.query(Appointment).filter(Appointment.registration_uuid == req.get("uuid")).first()
+    if not item:
+        return {"code": 500, "msg": "预约记录不存在"}
+    if item.status == 2:
+        return {"code": 500, "msg": "预约已取消，不能确认"}
+    item.confirmed = 1
+    item.confirmed_time = datetime.datetime.now()
+    item.confirmed_by = current_user.user_id
+    db.commit()
+    return {"code": 200, "msg": "success"}
+
+
+@router.post("/windowRegistration/appointmentCancel")
+def cancel_window_appointment(req: dict, db: Session = Depends(get_db), current_user: User = Depends(require_roles(ROLE_CASHIER, ROLE_REGISTRAR, *ADMIN_ROLES))):
+    from app.models import Appointment, DoctorSchedule
+
+    item = db.query(Appointment).filter(Appointment.registration_uuid == req.get("uuid")).first()
+    if not item:
+        return {"code": 500, "msg": "预约记录不存在"}
+    if item.status == 2:
+        return {"code": 500, "msg": "预约已取消，无需重复操作"}
+    if item.status == 1:
+        return {"code": 500, "msg": "预约已报到/就诊，不能取消"}
+    item.status = 2
+    schedule = db.query(DoctorSchedule).filter(DoctorSchedule.doctor_id == item.doctor_id, DoctorSchedule.specialist == item.specialist).first()
+    if schedule:
+        schedule.number = (schedule.number or 0) + 1
+    db.commit()
+    return {"code": 200, "msg": "success"}
+
+
 @router.post("/invoice/create")
 def create_invoice(req: InvoiceCreateRequest, db: Session = Depends(get_db), current_user: User = Depends(require_roles(ROLE_CASHIER, *ADMIN_ROLES))):
     charge = db.query(Charge).filter(Charge.charge_id == req.charge_id).first()

@@ -225,10 +225,14 @@ class Appointment(Base):
     appointment_time = Column(DateTime)
     time = Column(Date)
     status = Column(Integer)
+    confirmed = Column(Integer, nullable=False, default=0)
+    confirmed_time = Column(DateTime, nullable=True)
+    confirmed_by = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=True)
 
     patient = relationship("Patient", back_populates="appointments")
     doctor = relationship("Doctor", back_populates="appointments")
     department = relationship("Department")
+    confirmer = relationship("User", foreign_keys=[confirmed_by])
 
 
 class BreachRecord(Base):

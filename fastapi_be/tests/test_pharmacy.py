@@ -116,6 +116,12 @@ class TestPharmacy:
         assert r.status_code == 200
         assert r.json()["code"] == 200
 
+        listed = await async_client.get(
+            "/api/pharmacy/dispenseList",
+            headers=auth_headers(seed_data["pharmacist_user"].username),
+        )
+        assert any(item["uuid"] == target["uuid"] and item["status"] == 2 for item in listed.json()["data"])
+
         # 发药是 1 -> 2 的单向状态迁移，重复发药必须失败。
         r = await async_client.post("/api/pharmacy/dispense", headers=pharmacist_headers, json={"prescription_id": target["uuid"]})
         assert r.status_code == 200

@@ -16,7 +16,7 @@ router = APIRouter()
 
 @router.get("/pharmacy/dispenseList")
 def get_dispense_list(keyword: str | None = None, page: int | None = None, page_size: int | None = None, current_user: User = Depends(require_roles(*PHARMACY_ROLES)), db: Session = Depends(get_db)):
-    query = db.query(Prescription).filter(Prescription.status.in_([0, 1]))
+    query = db.query(Prescription).filter(Prescription.status.in_([0, 1, 2]))
     prescriptions, total = paginate(query, page, page_size)
     data = []
     for item in prescriptions:

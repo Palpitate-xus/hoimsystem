@@ -304,6 +304,7 @@ from app.routers import (
     nursing,
     patient,
     pharmacy,
+    prescription_template,
     purchase,
     queue,
     referral,
@@ -345,6 +346,7 @@ app.include_router(patient.router, prefix="/api")
 app.include_router(admin.router, prefix="/api")
 app.include_router(doctor.router, prefix="/api")
 app.include_router(pharmacy.router, prefix="/api")
+app.include_router(prescription_template.router, prefix="/api")
 app.include_router(charge.router, prefix="/api")
 app.include_router(queue.router, prefix="/api")
 app.include_router(checkin.router, prefix="/api")

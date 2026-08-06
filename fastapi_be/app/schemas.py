@@ -172,6 +172,19 @@ class PrescriptionCancelRequest(BaseModel):
     prescription_id: str
 
 
+class PrescriptionTemplateCreateRequest(BaseModel):
+    name: str = Field(..., min_length=1, max_length=50)
+    items: list[dict]
+
+
+class PrescriptionTemplateUpdateRequest(PrescriptionTemplateCreateRequest):
+    template_id: int
+
+
+class PrescriptionTemplateIdRequest(BaseModel):
+    template_id: int
+
+
 class MedicalRecordCreateRequest(BaseModel):
     patient_id: int
     symptom: str

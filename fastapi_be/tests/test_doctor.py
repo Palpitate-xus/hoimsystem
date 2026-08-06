@@ -20,6 +20,65 @@ class TestDoctorSchedule:
 
 
 @pytest.mark.asyncio
+class TestPrescriptionTemplate:
+    async def test_doctor_can_create_apply_update_and_delete_template(self, async_client, seed_data, auth_headers):
+        headers = auth_headers(seed_data["doctor_user"].username)
+        created = await async_client.post(
+            "/api/prescriptionTemplate/create",
+            headers=headers,
+            json={"name": "感冒常用方", "items": [{"id": seed_data["pharmaceutical"].pharmaceutical_id, "number": 2}]},
+        )
+        assert created.status_code == 200, created.text
+        assert created.json()["code"] == 200
+        template = created.json()["data"]
+        template_id = template["template_id"]
+        assert template["items"][0]["name"] == "阿司匹林"
+
+        listed = await async_client.get("/api/prescriptionTemplate/list", headers=headers)
+        assert listed.status_code == 200
+        assert any(item["template_id"] == template_id for item in listed.json()["data"])
+        applied = await async_client.post("/api/prescriptionTemplate/apply", headers=headers, json={"template_id": template_id})
+        assert applied.status_code == 200
+        assert applied.json()["data"][0]["number"] == 2
+
+        updated = await async_client.put(
+            "/api/prescriptionTemplate/update",
+            headers=headers,
+            json={"template_id": template_id, "name": "感冒备用方", "items": [{"id": seed_data["pharmaceutical"].pharmaceutical_id, "number": 3}]},
+        )
+        assert updated.status_code == 200
+        assert updated.json()["data"]["name"] == "感冒备用方"
+
+        deleted = await async_client.post("/api/prescriptionTemplate/delete", headers=headers, json={"template_id": template_id})
+        assert deleted.status_code == 200
+        assert deleted.json()["code"] == 200
+
+    async def test_template_validates_items_and_isolates_doctors(self, async_client, seed_data, auth_headers):
+        doctor_headers = auth_headers(seed_data["doctor_user"].username)
+        invalid = await async_client.post(
+            "/api/prescriptionTemplate/create",
+            headers=doctor_headers,
+            json={"name": "无效模板", "items": [{"id": 999999, "number": 1}]},
+        )
+        assert invalid.status_code == 200
+        assert invalid.json()["code"] == 500
+
+        created = await async_client.post(
+            "/api/prescriptionTemplate/create",
+            headers=doctor_headers,
+            json={"name": "隔离模板", "items": [{"id": seed_data["pharmaceutical"].pharmaceutical_id, "number": 1}]},
+        )
+        template_id = created.json()["data"]["template_id"]
+        other_doctor = await async_client.post(
+            "/api/prescriptionTemplate/apply",
+            headers=auth_headers(seed_data["director_user"].username),
+            json={"template_id": template_id},
+        )
+        assert other_doctor.status_code == 200
+        assert other_doctor.json()["code"] == 404
+
+
+@pytest.mark.asyncio
 class TestDoctorMedicalRecord:
     async def test_create_medical_record(self, async_client, seed_data, auth_headers):
         r = await async_client.post("/api/medicalRecord/create", headers=auth_headers(seed_data["doctor_user"].username), json={

@@ -237,6 +237,19 @@ class Prescription(Base):
     pre_phas = relationship("PrePha", back_populates="prescription", primaryjoin="PrePha.prescription_id == Prescription.prescription_id", foreign_keys="PrePha.prescription_id")
 
 
+class PrescriptionTemplate(Base):
+    __tablename__ = "hoimsystem_prescription_template"
+
+    template_id = Column(Integer, primary_key=True, autoincrement=True)
+    doctor_id = Column(Integer, ForeignKey("hoimsystem_doctor.doctor_id"), nullable=False)
+    name = Column(String(50), nullable=False)
+    items = Column(Text, nullable=False)
+    create_time = Column(DateTime, nullable=False)
+    update_time = Column(DateTime, nullable=False)
+
+    doctor = relationship("Doctor")
+
+
 class PrePha(Base):
     __tablename__ = "hoimsystem_pre_pha"
 

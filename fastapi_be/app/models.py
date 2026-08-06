@@ -161,6 +161,28 @@ class DoctorSchedule(Base):
     doctor = relationship("Doctor", back_populates="schedules")
 
 
+class ScheduleChangeRequest(Base):
+    __tablename__ = "hoimsystem_schedule_change_request"
+
+    request_id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    doctor_id = Column(Integer, ForeignKey("hoimsystem_doctor.doctor_id"), nullable=False)
+    schedule_id = Column(Integer, ForeignKey("hoimsystem_doctor_schedule.schedule_id"), nullable=True)
+    request_type = Column(String(10), nullable=False)  # stop / add
+    target_date = Column(Date, nullable=False)
+    extra_slots = Column(Integer, nullable=False, default=0)
+    reason = Column(String(200), nullable=False)
+    status = Column(Integer, nullable=False, default=0)  # 0=pending 1=approved 2=rejected
+    applicant_id = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=False)
+    approver_id = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=True)
+    create_time = Column(DateTime, nullable=False)
+    approve_time = Column(DateTime, nullable=True)
+
+    doctor = relationship("Doctor")
+    schedule = relationship("DoctorSchedule")
+    applicant = relationship("User", foreign_keys=[applicant_id])
+    approver = relationship("User", foreign_keys=[approver_id])
+
+
 class Registration(Base):
     __tablename__ = "hoimsystem_registration"
 

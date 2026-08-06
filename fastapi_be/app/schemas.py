@@ -118,6 +118,18 @@ class DoctorScheduleCreateRequest(BaseModel):
     doctor: int
 
 
+class ScheduleChangeCreateRequest(BaseModel):
+    request_type: str
+    target_date: str
+    schedule_id: int | None = None
+    extra_slots: int = Field(default=0, ge=0, le=100)
+    reason: str = Field(..., min_length=1, max_length=200)
+
+
+class ScheduleChangeActionRequest(BaseModel):
+    request_id: str
+
+
 class PharmaceuticalCreateRequest(BaseModel):
     name: str = Field(..., min_length=1, max_length=24)
     stock: int = Field(..., ge=0)

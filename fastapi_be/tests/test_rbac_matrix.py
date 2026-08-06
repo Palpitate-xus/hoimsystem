@@ -183,6 +183,10 @@ ENDPOINTS = [
     ("PUT", "/api/chargeItem/update", {"admin", "super_admin"}, {"item_id": 1, "code": "REG", "name": "挂号费", "category": "挂号", "price": 10}, {}),
     ("POST", "/api/chargeItem/toggle", {"admin", "super_admin"}, {"item_id": 1}, {}),
     ("GET", "/api/labResult/getCritical", {"admin", "super_admin", "lab_technician"}, None, {}),
+    ("POST", "/api/scheduleChange/create", {"admin", "super_admin", "director", "doctor"}, {"request_type": "stop", "target_date": "2026-09-01", "reason": "外出培训"}, {}),
+    ("GET", "/api/scheduleChange/list", {"admin", "super_admin", "director", "doctor"}, None, {}),
+    ("POST", "/api/scheduleChange/approve", {"admin", "super_admin", "director"}, {"request_id": "x"}, {}),
+    ("POST", "/api/scheduleChange/reject", {"admin", "super_admin", "director"}, {"request_id": "x"}, {}),
 
     # purchase.py (getList is auth-only, not admin-only — pharmacist/cashier may view)
     ("GET", "/api/purchase/getList", {"admin", "super_admin", "director", "doctor", "nurse", "cashier", "pharmacist", "guide", "patient", "lab_technician", "registrar"}, None, {"status": 0}),

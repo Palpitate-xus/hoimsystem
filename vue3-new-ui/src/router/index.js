@@ -378,7 +378,7 @@ export const asyncRoutes = [
     redirect: "noRedirect",
     name: "Queue",
     alwaysShow: true,
-    meta: { title: "排队叫号", icon: "bell-filled", permissions: ["admin", "doctor", "director", "guide"] },
+    meta: { title: "排队叫号", icon: "bell-filled", permissions: ["admin", "doctor", "director", "guide", "nurse"] },
     children: [
       {
         path: "triageDesk",
@@ -397,6 +397,12 @@ export const asyncRoutes = [
         name: "PatrolRecord",
         component: () => import("@/views/queue/patrolRecord.vue"),
         meta: { title: "候诊巡视", permissions: ["admin", "doctor", "director", "guide"] },
+      },
+      {
+        path: "emergencyTriage",
+        name: "EmergencyTriage",
+        component: () => import("@/views/queue/emergencyTriage.vue"),
+        meta: { title: "急诊分诊", permissions: ["admin", "doctor", "director", "nurse"] },
       },
     ],
   },

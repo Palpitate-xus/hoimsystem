@@ -314,11 +314,11 @@
 
 ### 2.25 血库管理 API ⬜
 
-- [ ] 用血申请 API
-- [ ] 血型复核 API
-- [ ] 交叉配血 API
-- [ ] 发血管理 API
-- [ ] 输血反应上报 API
+- [x] 用血申请 API
+- [x] 血型复核 API
+- [x] 交叉配血 API
+- [x] 发血管理 API
+- [x] 输血反应上报 API
 
 ### 2.26 医保管理 API ⬜
 
@@ -528,9 +528,9 @@
 
 ### 4.21 血库管理页面 ⬜
 
-- [ ] 用血申请页面
-- [ ] 配血/发血页面
-- [ ] 输血反应上报页面
+- [x] 用血申请页面
+- [x] 配血/发血页面
+- [x] 输血反应上报页面
 
 ### 4.22 医保管理页面 ⬜
 
@@ -693,10 +693,10 @@
 
 ### 6.20 血库管理 ⬜ 待建
 
-- [ ] hoimsystem_blood_request（用血申请）
-- [ ] hoimsystem_blood_cross_match（交叉配血）
-- [ ] hoimsystem_blood_issue（发血记录）
-- [ ] hoimsystem_transfusion_reaction（输血反应）
+- [x] hoimsystem_blood_request（用血申请）
+- [x] hoimsystem_blood_cross_match（交叉配血）
+- [x] hoimsystem_blood_issue（发血记录）
+- [x] hoimsystem_transfusion_reaction（输血反应）
 
 ### 6.21 医保管理 ⬜ 待建
 

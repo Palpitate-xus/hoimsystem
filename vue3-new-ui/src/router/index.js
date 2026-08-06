@@ -269,6 +269,12 @@ export const asyncRoutes = [
         meta: { title: "库存盘点", permissions: ["admin", "pharmacist"] },
       },
       {
+        path: "inventoryAdjustment",
+        name: "InventoryAdjustment",
+        component: () => import("@/views/pharmacy/inventoryAdjustment.vue"),
+        meta: { title: "库存调整", permissions: ["admin", "pharmacist"] },
+      },
+      {
         path: "prescriptionReview",
         name: "PrescriptionReview",
         component: () => import("@/views/pharmacy/prescriptionReview.vue"),

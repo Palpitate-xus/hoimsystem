@@ -55,3 +55,19 @@ export function reviewPrescription(data) {
 export function getReviewList(keyword = "") {
   return request({ url: "pharmacy/reviewList", method: "get", params: { keyword } });
 }
+
+export function getInventoryAdjustments(status) {
+  return request({ url: "pharmacy/inventoryAdjustment/list", method: "get", params: status === undefined ? {} : { status } });
+}
+
+export function createInventoryAdjustment(data) {
+  return request({ url: "pharmacy/inventoryAdjustment/create", method: "post", data });
+}
+
+export function approveInventoryAdjustment(data) {
+  return request({ url: "pharmacy/inventoryAdjustment/approve", method: "post", data });
+}
+
+export function rejectInventoryAdjustment(data) {
+  return request({ url: "pharmacy/inventoryAdjustment/reject", method: "post", data });
+}

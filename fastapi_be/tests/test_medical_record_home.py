@@ -12,6 +12,9 @@ class TestMedicalRecordHome:
         db_session.add(admission)
         db_session.commit()
         headers = auth_headers(seed_data["doctor_user"].username)
+        admissions = await async_client.get("/api/medicalRecordHome/admissions", headers=headers)
+        assert admissions.json()["code"] == 200
+        assert admissions.json()["data"][0]["admission_id"] == admission.admission_id
         created = await async_client.post("/api/medicalRecordHome/create", headers=headers, json={"admission_id": admission.admission_id, "admission_diagnosis": "肺炎"})
         assert created.json()["code"] == 200
         home_id = created.json()["data"]["home_id"]

@@ -48,6 +48,30 @@ def _owns(item: MedicalRecordHome, current_user: User, db: Session) -> bool:
     return doctor is not None
 
 
+@router.get("/medicalRecordHome/admissions")
+def list_medical_record_admissions(current_user: User = Depends(require_roles(*CLINICAL_ROLES)), db: Session = Depends(get_db)):
+    query = db.query(Admission).filter(Admission.status.in_([1, 2])).order_by(Admission.create_time.desc())
+    if current_user.user_role not in ADMIN_ROLES:
+        doctor = db.query(Doctor).filter(Doctor.user_id == current_user.user_id).first()
+        query = query.filter(Admission.doctor_id == (doctor.doctor_id if doctor else -1))
+    data = []
+    for item in query.all():
+        existing = db.query(MedicalRecordHome).filter(MedicalRecordHome.admission_id == item.admission_id).first()
+        data.append({
+            "admission_id": item.admission_id,
+            "admission_no": item.admission_no,
+            "patient_id": item.patient_id,
+            "patient_name": item.patient.name if item.patient else "",
+            "doctor_name": item.doctor.name if item.doctor else "",
+            "admission_diagnosis": item.admission_diagnosis or "",
+            "status": item.status,
+            "status_text": "在院" if item.status == 1 else "已出院",
+            "home_id": existing.home_id if existing else None,
+            "home_status": existing.status if existing else None,
+        })
+    return {"code": 200, "msg": "success", "data": data}
+
+
 @router.get("/medicalRecordHome/list")
 def list_medical_record_homes(admission_id: str | None = None, status: int | None = None, current_user: User = Depends(require_roles(*CLINICAL_ROLES)), db: Session = Depends(get_db)):
     query = db.query(MedicalRecordHome).order_by(MedicalRecordHome.update_time.desc())

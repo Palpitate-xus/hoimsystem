@@ -215,6 +215,7 @@ ENDPOINTS = [
     ("GET", "/api/surgeryNursingRecord/list", {"admin", "super_admin", "nurse"}, None, {}),
     ("POST", "/api/surgeryNursingRecord/create", {"admin", "super_admin", "nurse"}, {"schedule_id": "x", "patient_id": 1, "phase": 0, "checklist": "x"}, {}),
     ("GET", "/api/medicalRecordHome/list", {"admin", "super_admin", "director", "doctor"}, None, {}),
+    ("GET", "/api/medicalRecordHome/admissions", {"admin", "super_admin", "director", "doctor"}, None, {}),
     ("POST", "/api/medicalRecordHome/create", {"admin", "super_admin", "director", "doctor"}, {"admission_id": "x", "admission_diagnosis": "x"}, {}),
     ("PUT", "/api/medicalRecordHome/update", {"admin", "super_admin", "director", "doctor"}, {"home_id": "x", "discharge_diagnosis": "x"}, {}),
     ("POST", "/api/medicalRecordHome/submit", {"admin", "super_admin", "director", "doctor"}, {"home_id": "x"}, {}),

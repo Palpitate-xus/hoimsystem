@@ -578,6 +578,12 @@ export const asyncRoutes = [
         meta: { title: "输液管理", permissions: ["admin", "doctor", "director", "nurse"] },
       },
       {
+        path: "injection",
+        name: "Injection",
+        component: () => import("@/views/inpatient/injection.vue"),
+        meta: { title: "注射管理", permissions: ["admin", "doctor", "director", "nurse"] },
+      },
+      {
         path: "inpatientCharge",
         name: "InpatientChargePage",
         component: () => import("@/views/inpatient/inpatientCharge.vue"),

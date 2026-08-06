@@ -54,3 +54,6 @@ export function executeInfusion(data) { return request({ url: "/infusion/execute
 export function observeInfusion(data) { return request({ url: "/infusion/observe", method: "post", data }); }
 export function completeInfusion(data) { return request({ url: "/infusion/complete", method: "post", data }); }
 export function cancelInfusion(data) { return request({ url: "/infusion/cancel", method: "post", data }); }
+export function getInjectionList() { return request({ url: "/injection/list", method: "get" }); }
+export function executeInjection(data) { return request({ url: "/injection/execute", method: "post", data }); }
+export function completeInjection(data) { return request({ url: "/injection/complete", method: "post", data }); }

@@ -320,6 +320,7 @@ from app.routers import (
     skin_test,
     shift_handover,
     schedule_change,
+    scheduler,
     special_drug,
     lab,
     lab_package,
@@ -420,6 +421,7 @@ app.include_router(injection.router, prefix="/api")
 app.include_router(skin_test.router, prefix="/api")
 app.include_router(shift_handover.router, prefix="/api")
 app.include_router(schedule_change.router, prefix="/api")
+app.include_router(scheduler.router, prefix="/api")
 app.include_router(special_drug.router, prefix="/api")
 app.include_router(nursing.router, prefix="/api")
 app.include_router(inpatient_charge.router, prefix="/api")
@@ -440,6 +442,18 @@ from fastapi.staticfiles import StaticFiles
 upload_dir = os.path.join(os.path.dirname(__file__), "..", "uploads")
 os.makedirs(upload_dir, exist_ok=True)
 app.mount("/uploads", StaticFiles(directory=upload_dir), name="uploads")
+
+
+@app.on_event("startup")
+async def start_background_scheduler():
+    from app.scheduler import start_scheduler
+    start_scheduler()
+
+
+@app.on_event("shutdown")
+async def stop_background_scheduler():
+    from app.scheduler import stop_scheduler
+    stop_scheduler()
 
 # 自动创建数据库表（所有模型导入完成后）
 from app.database import Base, engine

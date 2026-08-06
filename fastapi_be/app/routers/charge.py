@@ -88,11 +88,16 @@ def get_charge_list(current_user: User = Depends(get_current_user), keyword: str
 @router.post("/chargeManagement/charge")
 def charge_commit(req: ChargeCommitRequest, db: Session = Depends(get_db), current_user: User = Depends(require_roles(ROLE_CASHIER, *ADMIN_ROLES))):
     charge_obj = db.query(Charge).filter(Charge.charge_id == req.id).first()
-    if charge_obj:
-        charge_obj.status = 1
-        charge_obj.time = datetime.datetime.now()
-        db.add(charge_obj)
-        db.commit()
+    if not charge_obj:
+        return {"code": 500, "msg": "收费记录不存在"}
+    if charge_obj.status == 1:
+        return {"code": 500, "msg": "该收费记录已缴费，不能重复收费"}
+    if charge_obj.status != 0:
+        return {"code": 500, "msg": "该收费记录状态不允许收费"}
+    charge_obj.status = 1
+    charge_obj.time = datetime.datetime.now()
+    db.add(charge_obj)
+    db.commit()
     return {"code": 200, "msg": "success"}
 
 
@@ -140,6 +145,10 @@ def create_invoice(req: InvoiceCreateRequest, db: Session = Depends(get_db), cur
     charge = db.query(Charge).filter(Charge.charge_id == req.charge_id).first()
     if not charge:
         return {"code": 500, "msg": "收费记录不存在"}
+    if charge.status != 1:
+        return {"code": 500, "msg": "收费记录未缴费，无法开具发票"}
+    if db.query(Invoice).filter(Invoice.charge_id == charge.charge_id).first():
+        return {"code": 500, "msg": "该收费记录已开具发票，不能重复开票"}
     try:
         invoice_no = "INV" + datetime.datetime.now().strftime("%Y%m%d%H%M%S") + str(random.randint(1000, 9999))
         invoice = Invoice(

@@ -26,6 +26,27 @@ class TestChargeManagement:
         assert r.status_code == 200
         assert r.json()["code"] == 200
 
+    async def test_charge_commit_rejects_duplicate(self, async_client, seed_data, auth_headers):
+        charge = seed_data["charge"]
+        headers = auth_headers(seed_data["cashier_user"].username)
+        payload = {"id": str(charge.charge_id)}
+
+        first = await async_client.post("/api/chargeManagement/charge", headers=headers, json=payload)
+        assert first.json()["code"] == 200
+
+        second = await async_client.post("/api/chargeManagement/charge", headers=headers, json=payload)
+        assert second.status_code == 200
+        assert second.json() == {"code": 500, "msg": "该收费记录已缴费，不能重复收费"}
+
+    async def test_charge_commit_rejects_missing_record(self, async_client, seed_data, auth_headers):
+        r = await async_client.post(
+            "/api/chargeManagement/charge",
+            headers=auth_headers(seed_data["cashier_user"].username),
+            json={"id": "missing-charge"},
+        )
+        assert r.status_code == 200
+        assert r.json() == {"code": 500, "msg": "收费记录不存在"}
+
     async def test_charge_commit_rejects_patient(self, async_client, seed_data, auth_headers):
         charge = seed_data["charge"]
         r = await async_client.post("/api/chargeManagement/charge", headers=auth_headers(seed_data["patient_user"].username), json={"id": str(charge.charge_id)})
@@ -44,6 +65,10 @@ class TestChargeManagement:
         assert r.status_code == 200
         assert r.json()["code"] == 200
 
+        r = await async_client.post("/api/chargeManagement/charge", headers=headers, json={"id": str(charge.charge_id)})
+        assert r.status_code == 200
+        assert r.json() == {"code": 500, "msg": "该收费记录状态不允许收费"}
+
 
 @pytest.mark.asyncio
 class TestInvoice:
@@ -54,16 +79,39 @@ class TestInvoice:
 
     async def test_create_invoice(self, async_client, seed_data, auth_headers):
         charge = seed_data["charge"]
-        r = await async_client.post("/api/invoice/create", headers=auth_headers(seed_data["cashier_user"].username), json={"charge_id": str(charge.charge_id)})
+        headers = auth_headers(seed_data["cashier_user"].username)
+        r = await async_client.post("/api/invoice/create", headers=headers, json={"charge_id": str(charge.charge_id)})
+        assert r.status_code == 200
+        assert r.json() == {"code": 500, "msg": "收费记录未缴费，无法开具发票"}
+
+        r = await async_client.post("/api/chargeManagement/charge", headers=headers, json={"id": str(charge.charge_id)})
+        assert r.json()["code"] == 200
+        r = await async_client.post("/api/invoice/create", headers=headers, json={"charge_id": str(charge.charge_id)})
         assert r.status_code == 200
         body = r.json()
         assert body["code"] == 200
         assert "invoice_no" in body["data"]
 
+    async def test_create_invoice_rejects_duplicate(self, async_client, seed_data, auth_headers):
+        charge = seed_data["charge"]
+        headers = auth_headers(seed_data["cashier_user"].username)
+        payload = {"charge_id": str(charge.charge_id)}
+
+        paid = await async_client.post("/api/chargeManagement/charge", headers=headers, json={"id": str(charge.charge_id)})
+        assert paid.json()["code"] == 200
+        first = await async_client.post("/api/invoice/create", headers=headers, json=payload)
+        assert first.json()["code"] == 200
+
+        second = await async_client.post("/api/invoice/create", headers=headers, json=payload)
+        assert second.status_code == 200
+        assert second.json() == {"code": 500, "msg": "该收费记录已开具发票，不能重复开票"}
+
     async def test_print_invoice(self, async_client, seed_data, auth_headers):
         # create invoice first
         charge = seed_data["charge"]
         headers = auth_headers(seed_data["cashier_user"].username)
+        r = await async_client.post("/api/chargeManagement/charge", headers=headers, json={"id": str(charge.charge_id)})
+        assert r.json()["code"] == 200
         r = await async_client.post("/api/invoice/create", headers=headers, json={"charge_id": str(charge.charge_id)})
         invoice_id = None
         r = await async_client.get("/api/invoice/getList", headers=headers)

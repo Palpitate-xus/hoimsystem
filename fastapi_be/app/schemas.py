@@ -230,6 +230,24 @@ class InjectionIdRequest(BaseModel):
     injection_id: str
 
 
+class SkinTestCreateRequest(BaseModel):
+    patient_id: int
+    pharmaceutical_id: int
+    dose: str = Field(..., min_length=1, max_length=50)
+    site: str = Field(..., min_length=1, max_length=30)
+    observe_minutes: int = Field(default=15, ge=5, le=120)
+
+
+class SkinTestIdRequest(BaseModel):
+    skin_test_id: str
+
+
+class SkinTestAssessRequest(BaseModel):
+    skin_test_id: str
+    result: str
+    note: str = Field(default="", max_length=200)
+
+
 class InventoryAdjustmentCreateRequest(BaseModel):
     pharmaceutical_id: int
     adjustment_type: str

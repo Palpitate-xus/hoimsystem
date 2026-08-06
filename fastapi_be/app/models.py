@@ -324,6 +324,29 @@ class InjectionOrder(Base):
     pharmaceutical = relationship("Pharmaceutical")
 
 
+class SkinTestOrder(Base):
+    __tablename__ = "hoimsystem_skin_test_order"
+
+    skin_test_id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    patient_id = Column(Integer, ForeignKey("hoimsystem_patient.patient_id"), nullable=False)
+    doctor_id = Column(Integer, ForeignKey("hoimsystem_doctor.doctor_id"), nullable=False)
+    nurse_id = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=True)
+    pharmaceutical_id = Column(Integer, ForeignKey("hoimsystem_pharmaceutical.pharmaceutical_id"), nullable=False)
+    dose = Column(String(50), nullable=False)
+    site = Column(String(30), nullable=False)
+    observe_minutes = Column(Integer, nullable=False)
+    status = Column(Integer, default=0, nullable=False)  # 0=医嘱 1=待判定 2=阴性 3=阳性 4=无效 5=已取消
+    result_note = Column(String(200), nullable=True)
+    create_time = Column(DateTime, nullable=False)
+    administer_time = Column(DateTime, nullable=True)
+    observe_time = Column(DateTime, nullable=True)
+
+    patient = relationship("Patient")
+    doctor = relationship("Doctor")
+    nurse = relationship("User", foreign_keys=[nurse_id])
+    pharmaceutical = relationship("Pharmaceutical")
+
+
 class PrePha(Base):
     __tablename__ = "hoimsystem_pre_pha"
 

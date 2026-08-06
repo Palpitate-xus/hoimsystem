@@ -698,6 +698,12 @@ export const asyncRoutes = [
         meta: { title: "电子病历", permissions: ["admin", "doctor", "director"] },
       },
       {
+        path: "medicalRecordHome",
+        name: "MedicalRecordHome",
+        component: () => import("@/views/inpatient/medicalRecordHome.vue"),
+        meta: { title: "病案首页", permissions: ["admin", "doctor", "director"] },
+      },
+      {
         path: "surgery",
         name: "Surgery",
         component: () => import("@/views/inpatient/surgery.vue"),

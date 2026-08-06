@@ -229,6 +229,15 @@ test.describe("业务页面渲染", () => {
     await expect(page.locator(".el-table, .el-card").first()).toBeVisible({ timeout: 5000 });
   });
 
+  test("doctor 访问病案首页页面显示填写入口", async ({ page }) => {
+    await login(page, "doctor1", "doctor123");
+    await page.goto(`${BASE}/#/inpatient/medicalRecordHome`, { waitUntil: "networkidle" });
+    await page.waitForTimeout(1000);
+    await expect(page.getByText("病案首页").first()).toBeVisible({ timeout: 5000 });
+    await expect(page.getByText("填写病案首页")).toBeVisible({ timeout: 5000 });
+    await expect(page.locator(".el-table")).toBeVisible({ timeout: 5000 });
+  });
+
   test("doctor 访问处方模板页面显示模板表格", async ({ page }) => {
     await login(page, "doctor1", "doctor123");
     await page.goto(`${BASE}/#/doctor/prescriptionTemplate`, { waitUntil: "networkidle" });

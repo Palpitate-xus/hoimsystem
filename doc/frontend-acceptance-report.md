@@ -11,12 +11,12 @@
 
 | 项目 | 结果 |
 | --- | --- |
-| 后端 pytest | 历史全量 396 passed，4 skipped；本轮 schema/audit 定向测试 14 passed、1 skipped |
+| 后端 pytest | 全量 397 passed，4 skipped；2023 条 warning |
 | 前端生产构建 | 通过 |
 | 前端静态分析 | 0 项 |
 | 管理员页面遍历 | 核心页面可渲染，操作日志兼容旧 SQLite schema |
 | 患者预约页 | 使用实际账号 patient1/123456 可登录，页面正常显示 |
-| RBAC E2E | 33 用例中 18 passed、15 skipped、0 failed；以 SQLite 单 worker 执行 |
+| RBAC E2E | 34 passed、0 failed；SQLite 单 worker，覆盖全部 11 个角色 |
 
 ## 问题修复记录
 
@@ -49,6 +49,10 @@ README、英文 README、用户手册和 E2E 已统一使用当前测试库中�
 ### 已修复：仓库内 E2E 测试误报
 
 已修正 Hash 路由、严格定位器、未登录清理流程和 Logo 选择器；回归时使用单 worker，避免 SQLite 单连接测试库产生并发噪音。
+
+### 已修复：初始账号与岗位菜单不完整
+
+新增幂等的 `fastapi_be/seed_default_accounts.py`，数据库初始化时确保 11 个文档账号和医生/患者最小关联资料存在。全量 E2E 进一步发现并修复了导诊员菜单和挂号员服务；当前所有角色均可登录并通过菜单、越权和核心页面测试。
 
 ## 发布前建议
 

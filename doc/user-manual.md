@@ -73,6 +73,7 @@ HOIM(Hospital Outpatient Information Management)医院信息管理系统,覆盖 
 | 护士 | `nurse01` | `123456` | 护理工作 |
 | 导诊员 | `guide01` | `123456` | 导诊台 |
 | 检验技师 | `lab01` | `123456` | 检验科 |
+| 挂号员 | `registrar01` | `123456` | 挂号服务 |
 | 患者 | `patient1` | `123456` | 自助服务 |
 | 超级管理员 | `super01` | `123456` | 全部权限(最高) |
 

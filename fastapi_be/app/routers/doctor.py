@@ -1,6 +1,7 @@
 import datetime
 import re
 import traceback
+from decimal import Decimal
 
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
@@ -409,22 +410,26 @@ def prescription_register(req: PrescriptionCreateRequest, current_user: User = D
         )
         db.add(pre)
         db.flush()
-        amount = 0
+        amount = Decimal("0.00")
         for item in normalized_phas:
             pha = db.query(Pharmaceutical).filter(Pharmaceutical.pharmaceutical_id == item["id"]).first()
             if pha:
-                if pha.stock < int(item["number"]):
+                quantity = int(item["number"])
+                updated = db.query(Pharmaceutical).filter(
+                    Pharmaceutical.pharmaceutical_id == pha.pharmaceutical_id,
+                    Pharmaceutical.status == 0,
+                    Pharmaceutical.stock >= quantity,
+                ).update({Pharmaceutical.stock: Pharmaceutical.stock - quantity}, synchronize_session=False)
+                if updated != 1:
                     db.rollback()
                     return {"code": 500, "msg": f"药品 {pha.name} 库存不足"}
-                pha.stock -= int(item["number"])
-                db.add(pha)
                 pp = PrePha(
                     prescription_id=str(pre.prescription_id),
                     pharmaceutical_id=pha.pharmaceutical_id,
                     number=item["number"],
                 )
                 db.add(pp)
-                amount += float(pha.price) * int(item["number"])
+                amount += Decimal(str(pha.price)) * quantity
         charge = Charge(
             charge_time=datetime.datetime.now(),
             time=datetime.datetime(1970, 1, 1),
@@ -507,15 +512,19 @@ def cancel_prescription(req: PrescriptionCancelRequest, current_user: User = Dep
     doctor_obj = db.query(Doctor).filter(Doctor.user_id == current_user.user_id).first()
     if not doctor_obj or pre.doctor_id != doctor_obj.doctor_id:
         return {"code": 403, "msg": "无权取消他人处方"}
+    updated = db.query(Prescription).filter(
+        Prescription.prescription_id == pre.prescription_id,
+        Prescription.status.in_((0, 1)),
+    ).update({Prescription.status: 3}, synchronize_session=False)
+    if updated != 1:
+        db.rollback()
+        return {"code": 500, "msg": "处方已取消,无需重复操作"}
     # 释放锁定的库存
     pre_phas = db.query(PrePha).filter(PrePha.prescription_id == pre.prescription_id).all()
     for pp in pre_phas:
-        pha = db.query(Pharmaceutical).filter(Pharmaceutical.pharmaceutical_id == pp.pharmaceutical_id).first()
-        if pha:
-            pha.stock += pp.number
-            db.add(pha)
-    pre.status = 3
-    db.add(pre)
+        db.query(Pharmaceutical).filter(Pharmaceutical.pharmaceutical_id == pp.pharmaceutical_id).update(
+            {Pharmaceutical.stock: Pharmaceutical.stock + pp.number}, synchronize_session=False
+        )
     db.commit()
     return {"code": 200, "msg": "success"}
 

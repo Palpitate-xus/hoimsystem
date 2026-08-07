@@ -204,6 +204,8 @@ class TestDoctorPrescription:
         r = await async_client.post("/api/prescriptionManagement/cancel", headers=doctor_headers, json={"prescription_id": new_pre_id})
         assert r.status_code == 200
         assert r.json()["code"] == 200
+        repeated = await async_client.post("/api/prescriptionManagement/cancel", headers=doctor_headers, json={"prescription_id": new_pre_id})
+        assert repeated.json()["code"] == 500
 
     async def test_cancel_prescription_rejects_dispensed(self, async_client, seed_data, auth_headers):
         pre = seed_data["prescription"]

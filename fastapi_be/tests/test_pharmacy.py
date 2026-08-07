@@ -49,6 +49,17 @@ class TestPharmaceuticalManagement:
         r = await async_client.post("/api/pharmaceuticalManagement/delete", headers=headers, json={"pharmaceutical_id": target["id"]})
         assert r.status_code == 200
         assert r.json()["code"] == 200
+        listed = await async_client.get("/api/pharmaceuticalManagement/getList", headers=headers)
+        deleted = next(item for item in listed.json()["data"] if item["id"] == target["id"])
+        assert deleted["status"] == 1
+        assert deleted["status_text"] == "已停用"
+        repeated = await async_client.post("/api/pharmaceuticalManagement/delete", headers=headers, json={"pharmaceutical_id": target["id"]})
+        assert repeated.json()["data"]["idempotent"] is True
+        restored = await async_client.post("/api/pharmaceuticalManagement/restore", headers=headers, json={"pharmaceutical_id": target["id"]})
+        assert restored.json()["code"] == 200
+        restored_list = await async_client.get("/api/pharmaceuticalManagement/getList", headers=headers)
+        restored_item = next(item for item in restored_list.json()["data"] if item["id"] == target["id"])
+        assert restored_item["status"] == 0
 
     async def test_stock_query(self, async_client, seed_data, auth_headers):
         r = await async_client.post("/api/pharmaceuticalManagement/stock_query", headers=auth_headers(seed_data["pharmacist_user"].username), json={"id": seed_data["pharmaceutical"].pharmaceutical_id})

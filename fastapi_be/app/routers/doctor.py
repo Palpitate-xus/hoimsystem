@@ -198,6 +198,8 @@ def get_pharmaceutical_list(keyword: str | None = None, current_user: User = Dep
                 "supplier": item.supplier,
                 "remark": item.remark,
                 "antibiotic_level": item.antibiotic_level,
+                "status": item.status,
+                "status_text": "启用" if item.status == 0 else "已停用",
             }
         )
     if keyword:
@@ -229,9 +231,25 @@ def delete_pharmaceutical(req: PharmaceuticalDeleteRequest, current_user: User =
     pha = db.query(Pharmaceutical).filter(Pharmaceutical.pharmaceutical_id == req.pharmaceutical_id).first()
     if not pha:
         return {"code": 500, "msg": "药品不存在"}
-    db.delete(pha)
+    if pha.status == 1:
+        return {"code": 200, "msg": "药品已停用", "data": {"idempotent": True}}
+    pha.status = 1
+    db.add(pha)
     db.commit()
-    return {"code": 200, "msg": "success"}
+    return {"code": 200, "msg": "药品已停用"}
+
+
+@router.post("/pharmaceuticalManagement/restore")
+def restore_pharmaceutical(req: PharmaceuticalDeleteRequest, current_user: User = Depends(require_roles(*PHARMACY_ROLES)), db: Session = Depends(get_db)):
+    pha = db.query(Pharmaceutical).filter(Pharmaceutical.pharmaceutical_id == req.pharmaceutical_id).first()
+    if not pha:
+        return {"code": 500, "msg": "药品不存在"}
+    if pha.status == 0:
+        return {"code": 200, "msg": "药品已启用", "data": {"idempotent": True}}
+    pha.status = 0
+    db.add(pha)
+    db.commit()
+    return {"code": 200, "msg": "药品已启用"}
 
 
 @router.post("/pharmaceuticalManagement/stock_query")

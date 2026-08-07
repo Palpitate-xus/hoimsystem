@@ -203,7 +203,7 @@ baseURL：`/api`
 | ✅ | /appointmentManagement/create | POST | `{ id, date, department_id, doctor_id, time, specialist }` | `{ code, msg }` |
 | ✅ | /appointmentManagement/cancel | POST | `{ uuid }` | `{ code, msg }` |
 
-预约创建会校验排班存在，且医生、科室、号类必须与排班一致；号源不足时不会创建预约。
+预约创建会校验排班存在，且医生、科室、号类必须与排班一致；号源不足时不会创建预约。预约记录会保存来源排班，取消预约时精确返还原时段号源。
 
 **字段说明：**
 

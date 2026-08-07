@@ -433,6 +433,20 @@
 | invoice_time | DATETIME | - | - | 开票时间 |
 | status | INT | - | - | 状态（0=正常，1=已作废） |
 
+### hoimsystem_payment（支付流水表）✅
+
+支付流水除记录院内支付状态外，保留外部支付平台的关联和最近一次同步信息。
+
+| 字段名 | 类型 | 长度 | 约束 | 说明 |
+|:------:|:----:|:----:|:----:|:----:|
+| payment_no | VARCHAR | 36 | PK | 院内支付单号 |
+| charge_id | VARCHAR | 36 | FK | 关联收费记录 |
+| amount | DECIMAL | 12,2 | - | 支付金额 |
+| status | INT | - | - | 支付状态（0=待支付，1=已支付，2=失败） |
+| external_payment_id | VARCHAR | 100 | IDX | 外部支付平台流水号 |
+| integration_status | VARCHAR | 20 | - | 对接状态（local/pending/synced/failed） |
+| last_sync_time | DATETIME | - | - | 最近一次外部回调同步时间 |
+
 ---
 
 ### 21. hoimsystem_follow_up（随访计划表）✅

@@ -885,6 +885,9 @@ baseURL：`/api`
 | ✅ | /payment/query/{payment_no} | GET | - | `{ code, msg, data: Payment }` |
 | ✅ | /payment/mockNotify | POST | `{ payment_no }` | `{ code, msg }` |
 | ✅ | /payment/getList | GET | - | `{ code, msg, data: Payment[] }` |
+| ✅ | /integration/payment/notify | POST | `{ payment_no, external_payment_id?, status, amount, failure_reason? }` | `{ code, msg, data: { payment_no, idempotent, status } }` |
+
+`/integration/payment/notify` 用于微信/支付宝等支付平台的异步回调。接口不使用患者 JWT，必须通过部署环境变量 `PAYMENT_INTEGRATION_KEY` 配置的 `X-Integration-Key` 鉴权；未配置密钥返回 `503`，密钥错误返回 `401`。服务端会校验回调金额与本地支付单金额一致，金额不一致返回 `400`；外部支付单号重新绑定或本地支付状态已变化返回 `409`。成功回调会原子更新支付单和收费单，重复回调返回 `idempotent: true`。`status` 为 `1` 表示支付成功，`2` 表示支付失败。
 
 ### 14.2 智能导诊
 

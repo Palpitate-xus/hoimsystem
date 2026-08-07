@@ -1,6 +1,6 @@
 import uuid
 
-from sqlalchemy import Column, Date, DateTime, Float, ForeignKey, Integer, String, Text
+from sqlalchemy import Column, Date, DateTime, Float, ForeignKey, Integer, Numeric, String, Text
 from sqlalchemy.orm import relationship
 
 from app.database import Base
@@ -32,7 +32,7 @@ class Patient(Base):
     address = Column(String(100))
     permission = Column(String(10))
     allergy_history = Column(String(200))
-    prepaid_balance = Column(Float, default=0)  # 预交金余额
+    prepaid_balance = Column(Numeric(12, 2), default=0)  # 预交金余额
 
     registrations = relationship("Registration", back_populates="patient")
     appointments = relationship("Appointment", back_populates="patient")
@@ -94,8 +94,8 @@ class PrepaidTransaction(Base):
     patient_id = Column(Integer, ForeignKey("hoimsystem_patient.patient_id"), nullable=False)
     operator_id = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=False)
     transaction_type = Column(String(20), nullable=False)  # recharge / deduct
-    amount = Column(Float, nullable=False)
-    balance_after = Column(Float, nullable=False)
+    amount = Column(Numeric(12, 2), nullable=False)
+    balance_after = Column(Numeric(12, 2), nullable=False)
     note = Column(String(200), nullable=True)
     create_time = Column(DateTime, nullable=False)
 
@@ -332,7 +332,7 @@ class Charge(Base):
     charge_time = Column(DateTime)
     time = Column(DateTime)
     prescription_id = Column(String(36), ForeignKey("hoimsystem_prescription.prescription_id"))
-    amount = Column(Float)
+    amount = Column(Numeric(12, 2))
     status = Column(Integer)
 
     prescription = relationship("Prescription", back_populates="charges")
@@ -346,7 +346,7 @@ class ChargeItem(Base):
     code = Column(String(30), nullable=False, unique=True)
     name = Column(String(100), nullable=False)
     category = Column(String(30), nullable=False)
-    price = Column(Float, nullable=False)
+    price = Column(Numeric(12, 2), nullable=False)
     status = Column(Integer, nullable=False, default=1)
     note = Column(String(200), nullable=True)
     creator_id = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=False)
@@ -535,7 +535,7 @@ class Pharmaceutical(Base):
     pharmaceutical_id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(24))
     stock = Column(Integer)
-    price = Column(Float)
+    price = Column(Numeric(12, 2))
     expireddate = Column(Date)
     purchasing_time = Column(DateTime)
     supplier = Column(String(24))
@@ -684,7 +684,7 @@ class LabPackage(Base):
     name = Column(String(100), nullable=False)
     category = Column(String(50), nullable=True)
     items = Column(String(1000), nullable=False, default="")
-    price = Column(Float, nullable=False, default=0)
+    price = Column(Numeric(12, 2), nullable=False, default=0)
     status = Column(Integer, nullable=False, default=1)
     create_time = Column(DateTime, nullable=False)
     update_time = Column(DateTime, nullable=False)
@@ -729,8 +729,8 @@ class Invoice(Base):
     invoice_id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     charge_id = Column(String(36), ForeignKey("hoimsystem_charge.charge_id"))
     invoice_no = Column(String(24))
-    amount = Column(Float)
-    tax = Column(Float)
+    amount = Column(Numeric(12, 2))
+    tax = Column(Numeric(12, 2))
     invoice_time = Column(DateTime)
     status = Column(Integer, default=0)
 
@@ -865,7 +865,7 @@ class EmergencyObservation(Base):
     end_time = Column(DateTime, nullable=True)
     condition = Column(String(500), nullable=False)
     medical_advice = Column(String(500), nullable=True)
-    fee_amount = Column(Float, nullable=False, default=0)
+    fee_amount = Column(Numeric(12, 2), nullable=False, default=0)
     fee_status = Column(Integer, nullable=False, default=0)  # 0=待计费 1=已计费
     status = Column(Integer, nullable=False, default=1)  # 1=留观中 2=已结束 3=已取消
     operator_id = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=False)
@@ -950,7 +950,7 @@ class Payment(Base):
     payment_no = Column(String(32), unique=True)
     charge_id = Column(String(36), ForeignKey("hoimsystem_charge.charge_id"))
     channel = Column(String(10))  # wechat, alipay, cash
-    amount = Column(Float)
+    amount = Column(Numeric(12, 2))
     status = Column(Integer, default=0)  # 0=待支付, 1=支付成功, 2=支付失败, 3=已退款
     qr_code_data = Column(String(200))
     paid_time = Column(DateTime, nullable=True)
@@ -989,7 +989,7 @@ class Consumable(Base):
     category = Column(String(20))  # 耗材分类：注射类、敷料类、检验类、手术类等
     stock = Column(Integer, default=0)
     unit = Column(String(10))  # 单位：个、包、支、套
-    price = Column(Float)
+    price = Column(Numeric(12, 2))
     supplier = Column(String(50))
     remark = Column(String(200))
     status = Column(Integer, default=0)  # 0=正常 1=停用
@@ -1002,7 +1002,7 @@ class PurchaseOrder(Base):
     purchase_id = Column(Integer, primary_key=True, autoincrement=True)
     order_no = Column(String(32), unique=True)
     supplier = Column(String(50))
-    total_amount = Column(Float, default=0)
+    total_amount = Column(Numeric(12, 2), default=0)
     status = Column(Integer, default=0)  # 0=待审批 1=已审批 2=已入库 3=已取消
     create_by = Column(Integer, ForeignKey("hoimsystem_users.user_id"))
     create_time = Column(DateTime)
@@ -1022,8 +1022,8 @@ class PurchaseOrderItem(Base):
     item_id_ref = Column(Integer)  # 药品ID或耗材ID
     item_name = Column(String(50))
     quantity = Column(Integer)
-    unit_price = Column(Float)
-    total_price = Column(Float)
+    unit_price = Column(Numeric(12, 2))
+    total_price = Column(Numeric(12, 2))
 
     order = relationship("PurchaseOrder", back_populates="items")
 
@@ -1396,7 +1396,7 @@ class Bed(Base):
     bed_no = Column(String(10))  # 床位号：01、02
     room_no = Column(String(10))  # 房间号：101、102
     bed_type = Column(String(10), default="普通")  # 普通/监护/抢救/单人/双人
-    price_per_day = Column(Float, default=0)  # 每日床位费
+    price_per_day = Column(Numeric(12, 2), default=0)  # 每日床位费
     status = Column(Integer, default=0)  # 0=空闲 1=占用 2=禁用 3=预订
 
     ward = relationship("Ward", back_populates="beds")
@@ -1418,7 +1418,7 @@ class Admission(Base):
     chief_complaint = Column(String(200), nullable=True)  # 主诉
     present_illness = Column(String(500), nullable=True)  # 现病史
     past_history = Column(String(300), nullable=True)  # 既往史
-    deposit_amount = Column(Float, default=0)  # 入院押金
+    deposit_amount = Column(Numeric(12, 2), default=0)  # 入院押金
     discharge_time = Column(DateTime, nullable=True)
     discharge_diagnosis = Column(String(200), nullable=True)
     status = Column(Integer, default=0)  # 0=待入院 1=在院 2=已出院 3=已退院
@@ -1473,8 +1473,8 @@ class InpatientOrderItem(Base):
     route = Column(String(20), nullable=True)  # 给药途径：口服、静脉滴注、皮下注射
     days = Column(Integer, default=1)  # 用药天数
     quantity = Column(Integer, default=1)  # 数量
-    unit_price = Column(Float, default=0)  # 单价
-    total_price = Column(Float, default=0)  # 总价
+    unit_price = Column(Numeric(12, 2), default=0)  # 单价
+    total_price = Column(Numeric(12, 2), default=0)  # 总价
     note = Column(String(100), nullable=True)
 
     order = relationship("InpatientOrder", back_populates="items")
@@ -1635,8 +1635,8 @@ class InpatientCharge(Base):
     item_name = Column(String(50))  # 项目名称
     item_type = Column(String(10))  # drug=药品 consumable=耗材 bed=床位 service=服务 exam=检查
     quantity = Column(Float, default=1)
-    unit_price = Column(Float, default=0)
-    total_amount = Column(Float, default=0)
+    unit_price = Column(Numeric(12, 2), default=0)
+    total_amount = Column(Numeric(12, 2), default=0)
     charge_date = Column(Date)  # 费用所属日期
     related_order_id = Column(String(36), nullable=True)  # 关联医嘱ID
     status = Column(Integer, default=0)  # 0=未结算 1=已结算 2=已退费
@@ -1681,7 +1681,7 @@ class MedicalRecordHome(Base):
     operation_summary = Column(String(1000), nullable=True)
     complication = Column(String(1000), nullable=True)
     discharge_status = Column(Integer, nullable=False, default=0)  # 0=治愈 1=好转 2=未愈 3=死亡 4=转院
-    total_fee = Column(Float, nullable=False, default=0)
+    total_fee = Column(Numeric(12, 2), nullable=False, default=0)
     status = Column(Integer, nullable=False, default=0)  # 0=草稿 1=已提交 2=已归档
     creator_id = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=False)
     create_time = Column(DateTime, nullable=False)
@@ -1766,7 +1766,7 @@ class ExamPackage(Base):
     package_id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(50))
     category = Column(String(20))  # general=常规入职=入职 premarital=婚检 elderly=老年
-    price = Column(Float, default=0)
+    price = Column(Numeric(12, 2), default=0)
     items = Column(String(500))  # 包含项目ID，逗号分隔
     description = Column(String(200), nullable=True)
     status = Column(Integer, default=0)  # 0=启用 1=停用
@@ -1781,7 +1781,7 @@ class ExamItem(Base):
     category = Column(String(20))  # blood=血常规 urine=尿常规 ecg=心电图 ultrasound=超声 xray=放射
     unit = Column(String(10), nullable=True)  # 单位
     reference_range = Column(String(50), nullable=True)  # 参考范围
-    price = Column(Float, default=0)
+    price = Column(Numeric(12, 2), default=0)
     status = Column(Integer, default=0)
     create_time = Column(DateTime)
 
@@ -2026,7 +2026,7 @@ class EquipmentMaintenance(Base):
     equipment_id = Column(Integer, ForeignKey("hoimsystem_equipment.equipment_id"), nullable=False)
     maintenance_type = Column(String(50), nullable=False)
     description = Column(String(500), nullable=False)
-    cost = Column(Float, nullable=False, default=0)
+    cost = Column(Numeric(12, 2), nullable=False, default=0)
     status = Column(Integer, nullable=False, default=0)  # 0=报修 1=处理中 2=完成
     operator_id = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=False)
     report_time = Column(DateTime, nullable=False)
@@ -2146,7 +2146,7 @@ class InsuranceCatalog(Base):
     code = Column(String(40), nullable=False, unique=True)
     name = Column(String(100), nullable=False)
     category = Column(String(50), nullable=True)
-    reimbursement_ratio = Column(Float, nullable=False, default=0)
+    reimbursement_ratio = Column(Numeric(5, 4), nullable=False, default=0)
     status = Column(Integer, nullable=False, default=1)
     update_time = Column(DateTime, nullable=False)
 
@@ -2157,9 +2157,9 @@ class InsuranceSettlement(Base):
     settlement_id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     patient_id = Column(Integer, ForeignKey("hoimsystem_patient.patient_id"), nullable=False)
     insurance_no = Column(String(50), nullable=False)
-    total_amount = Column(Float, nullable=False)
-    covered_amount = Column(Float, nullable=False)
-    self_amount = Column(Float, nullable=False)
+    total_amount = Column(Numeric(12, 2), nullable=False)
+    covered_amount = Column(Numeric(12, 2), nullable=False)
+    self_amount = Column(Numeric(12, 2), nullable=False)
     status = Column(Integer, nullable=False, default=0)  # 0=处理中 1=成功 2=失败
     operator_id = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=False)
     settlement_time = Column(DateTime, nullable=False)
@@ -2178,7 +2178,7 @@ class ChronicDiseaseRegistration(Base):
     patient_id = Column(Integer, ForeignKey("hoimsystem_patient.patient_id"), nullable=False)
     disease_name = Column(String(100), nullable=False)
     card_no = Column(String(50), nullable=True)
-    limit_amount = Column(Float, nullable=True)
+    limit_amount = Column(Numeric(12, 2), nullable=True)
     status = Column(Integer, nullable=False, default=1)
     doctor_id = Column(Integer, ForeignKey("hoimsystem_doctor.doctor_id"), nullable=True)
     create_time = Column(DateTime, nullable=False)
@@ -2194,9 +2194,9 @@ class DrgGrouping(Base):
     patient_id = Column(Integer, ForeignKey("hoimsystem_patient.patient_id"), nullable=False)
     group_code = Column(String(30), nullable=False)
     diagnosis = Column(String(300), nullable=False)
-    expected_amount = Column(Float, nullable=False, default=0)
-    actual_amount = Column(Float, nullable=False, default=0)
-    profit = Column(Float, nullable=False, default=0)
+    expected_amount = Column(Numeric(12, 2), nullable=False, default=0)
+    actual_amount = Column(Numeric(12, 2), nullable=False, default=0)
+    profit = Column(Numeric(12, 2), nullable=False, default=0)
     create_time = Column(DateTime, nullable=False)
 
     patient = relationship("Patient")

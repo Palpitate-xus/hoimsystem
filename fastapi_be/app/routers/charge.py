@@ -2,6 +2,7 @@ import datetime
 import math
 import random
 import traceback
+from decimal import Decimal
 
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import Response
@@ -10,10 +11,10 @@ from sqlalchemy.orm import Session
 
 from app.config import settings
 from app.database import get_db
-from app.registration import allocate_registration_id
 from app.dependencies import ADMIN_ROLES, ROLE_CASHIER, ROLE_PATIENT, ROLE_REGISTRAR, get_current_user, require_roles
 from app.models import Charge, Doctor, Invoice, Patient, Prescription, User
 from app.pagination import paginate
+from app.registration import allocate_registration_id
 from app.schemas import (
     ChargeCommitRequest,
     ChargeRefundRequest,
@@ -283,7 +284,7 @@ def create_invoice(req: InvoiceCreateRequest, db: Session = Depends(get_db), cur
             charge_id=req.charge_id,
             invoice_no=invoice_no,
             amount=charge.amount,
-            tax=round(charge.amount * 0.06, 2) if charge.amount else 0,
+            tax=round(charge.amount * Decimal("0.06"), 2) if charge.amount else 0,
             invoice_time=datetime.datetime.now(),
             status=0,
         )
@@ -422,7 +423,7 @@ def window_registration(req: dict, db: Session = Depends(get_db), current_user: 
 @router.post("/windowRegistration/cancel")
 def window_cancel_registration(req: dict, db: Session = Depends(get_db), current_user: User = Depends(require_roles(ROLE_CASHIER, ROLE_REGISTRAR, *ADMIN_ROLES))):
     """窗口退号"""
-    from app.models import Registration, DoctorSchedule
+    from app.models import DoctorSchedule, Registration
 
     reg = db.query(Registration).filter(Registration.registration_uuid == req.get("uuid")).first()
     if not reg:

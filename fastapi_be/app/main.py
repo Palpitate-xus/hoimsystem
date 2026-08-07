@@ -179,7 +179,9 @@ class OperationLogMiddleware(BaseHTTPMiddleware):
     }
 
     async def dispatch(self, request, call_next):
+        started_at = time.perf_counter()
         response = await call_next(request)
+        response_time_ms = round((time.perf_counter() - started_at) * 1000, 2)
         path = request.url.path
         method = request.method
 

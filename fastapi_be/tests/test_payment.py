@@ -12,6 +12,15 @@ class TestPaymentFlow:
         assert r.status_code == 200
         assert r.json() == {"code": 500, "msg": "支付金额与收费金额不一致"}
 
+    async def test_payment_rejects_fractional_cent(self, async_client, seed_data, auth_headers):
+        r = await async_client.post(
+            "/api/payment/create",
+            headers=auth_headers(seed_data["patient_user"].username),
+            json={"charge_id": str(seed_data["charge"].charge_id), "channel": "wechat", "amount": 31.001},
+        )
+        assert r.status_code == 200
+        assert r.json() == {"code": 500, "msg": "支付金额最多保留两位小数"}
+
     async def test_payment_rejects_duplicate_pending_order(self, async_client, seed_data, auth_headers):
         headers = auth_headers(seed_data["patient_user"].username)
         payload = {"charge_id": str(seed_data["charge"].charge_id), "channel": "wechat", "amount": 31}

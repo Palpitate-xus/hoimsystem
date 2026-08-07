@@ -2,7 +2,7 @@ import datetime
 import math
 import random
 import traceback
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import Response
@@ -503,20 +503,29 @@ def create_payment(req: PaymentCreateRequest, db: Session = Depends(get_db), cur
         return {"code": 500, "msg": "该收费记录状态不允许支付"}
     if req.channel not in {"wechat", "alipay", "cash"}:
         return {"code": 500, "msg": "不支持的支付渠道"}
-    if not math.isfinite(req.amount) or req.amount <= 0:
+    try:
+        requested_amount = Decimal(str(req.amount))
+        charge_amount = Decimal(str(charge.amount or 0))
+    except (InvalidOperation, TypeError, ValueError):
+        requested_amount = None
+        charge_amount = None
+    if requested_amount is None or not requested_amount.is_finite() or requested_amount <= 0:
         return {"code": 500, "msg": "支付金额必须大于0"}
-    if not math.isclose(req.amount, float(charge.amount or 0), rel_tol=0, abs_tol=0.01):
+    if requested_amount != requested_amount.quantize(Decimal("0.01")):
+        return {"code": 500, "msg": "支付金额最多保留两位小数"}
+    if charge_amount is None or requested_amount.quantize(Decimal("0.01")) != charge_amount.quantize(Decimal("0.01")):
         return {"code": 500, "msg": "支付金额与收费金额不一致"}
     pending = db.query(Payment).filter(Payment.charge_id == charge.charge_id, Payment.status == 0).first()
     if pending:
         return {"code": 500, "msg": "该收费记录已有待支付订单"}
     payment_no = "PAY" + datetime.datetime.now().strftime("%Y%m%d%H%M%S") + str(random.randint(1000, 9999))
-    qr_data = f"mock://payment?no={payment_no}&amount={req.amount}&channel={req.channel}"
+    normalized_amount = requested_amount.quantize(Decimal("0.01"))
+    qr_data = f"mock://payment?no={payment_no}&amount={normalized_amount}&channel={req.channel}"
     payment = Payment(
         payment_no=payment_no,
         charge_id=req.charge_id,
         channel=req.channel,
-        amount=req.amount,
+        amount=normalized_amount,
         status=0,
         qr_code_data=qr_data,
         create_time=datetime.datetime.now(),

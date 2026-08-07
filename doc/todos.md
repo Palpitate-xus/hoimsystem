@@ -504,7 +504,7 @@
 
 ### 4.17 PACS/RIS 端页面 ⬜
 
-- [ ] 检查申请页面（医生）
+- [x] 检查申请页面（医生）
 - [x] 影像报告书写页面（放射科）
 - [x] 影像调阅页面（DICOM Viewer 地址配置/调阅入口）
 
@@ -664,8 +664,8 @@
 
 ### 6.15 门诊输液 ⬜ 待建
 
-- [ ] hoimsystem_infusion_order（输液医嘱）
-- [ ] hoimsystem_infusion_execution（输液执行记录）
+- [x] hoimsystem_infusion_order（输液医嘱）
+- [x] hoimsystem_infusion_execution（输液执行/巡视记录，复用 infusion_observation）
 
 ### 6.16 PACS/RIS ⬜ 待建
 

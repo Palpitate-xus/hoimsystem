@@ -105,6 +105,19 @@ class TestPharmaceuticalManagement:
         assert response.json()["code"] == 500
         assert "过期" in response.json()["msg"]
 
+    async def test_prescription_cannot_use_inactive_drug(self, async_client, seed_data, auth_headers, db_session):
+        inactive = Pharmaceutical(name="停用药", stock=10, price=1, expireddate=datetime.date.today() + datetime.timedelta(days=30), status=1)
+        db_session.add(inactive)
+        db_session.commit()
+        response = await async_client.post(
+            "/api/prescriptionManagement/create",
+            headers=auth_headers(seed_data["doctor_user"].username),
+            json={"patient": seed_data["patient2"].patient_id, "phas": [{"id": inactive.pharmaceutical_id, "number": 1}]},
+        )
+        assert response.status_code == 200
+        assert response.json()["code"] == 500
+        assert "停用" in response.json()["msg"]
+
 
 @pytest.mark.asyncio
 class TestPharmacy:

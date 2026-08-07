@@ -318,6 +318,8 @@ def prescription_register(req: PrescriptionCreateRequest, current_user: User = D
             pha = db.query(Pharmaceutical).filter(Pharmaceutical.pharmaceutical_id == pharmaceutical_id).first()
             if not pha:
                 return {"code": 500, "msg": "药品不存在"}
+            if pha.status != 0:
+                return {"code": 500, "msg": f"药品 {pha.name} 已停用，不能开立"}
             if pha.expireddate and pha.expireddate < datetime.date.today():
                 return {"code": 500, "msg": f"药品 {pha.name} 已过期，不能开立"}
             seen_pharmaceuticals.add(pharmaceutical_id)

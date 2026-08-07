@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.dependencies import ADMIN_ROLES, NURSING_ROLES, get_current_user, User, require_roles, CLINICAL_ROLES
+from app.dependencies import ADMIN_ROLES, CLINICAL_ROLES, NURSING_ROLES, get_current_user, require_roles
 from app.models import (
     Admission,
     Doctor,
@@ -12,7 +12,6 @@ from app.models import (
     InpatientOrder,
     InpatientOrderItem,
     OrderExecution,
-    Patient,
     Pharmaceutical,
     User,
 )
@@ -21,6 +20,13 @@ from app.schemas import InpatientOrderCreateRequest, InpatientOrderStopRequest, 
 router = APIRouter()
 
 _INPATIENT_ROLES = CLINICAL_ROLES | NURSING_ROLES
+
+
+def _can_manage_order(order: InpatientOrder, current_user: User, db: Session) -> bool:
+    if current_user.user_role in ADMIN_ROLES or current_user.user_role == "director":
+        return True
+    doctor_ids = [item.doctor_id for item in db.query(Doctor).filter(Doctor.user_id == current_user.user_id).all()]
+    return order.doctor_id in doctor_ids
 
 
 def _create_order_executions(db: Session, order: InpatientOrder):
@@ -245,6 +251,8 @@ def audit_inpatient_order(req: dict, current_user: User = Depends(require_roles(
     order = db.query(InpatientOrder).filter(InpatientOrder.order_id == req.get("order_id")).first()
     if not order:
         return {"code": 500, "msg": "医嘱不存在"}
+    if not _can_manage_order(order, current_user, db):
+        return {"code": 403, "msg": "无权审核其他医生的医嘱"}
     if order.status != 0:
         return {"code": 500, "msg": "医嘱状态不正确，无法审核"}
     updated = db.query(InpatientOrder).filter(
@@ -264,11 +272,18 @@ def stop_inpatient_order(req: InpatientOrderStopRequest, current_user: User = De
     order = db.query(InpatientOrder).filter(InpatientOrder.order_id == req.order_id).first()
     if not order:
         return {"code": 500, "msg": "医嘱不存在"}
+    if not _can_manage_order(order, current_user, db):
+        return {"code": 403, "msg": "无权停止其他医生的医嘱"}
     if order.status not in (1, 2):
         return {"code": 500, "msg": "医嘱状态不正确，无法停止"}
-    order.status = 3
-    order.stop_time = datetime.datetime.now()
-    db.add(order)
+    now = datetime.datetime.now()
+    updated = db.query(InpatientOrder).filter(
+        InpatientOrder.order_id == req.order_id,
+        InpatientOrder.status.in_((1, 2)),
+    ).update({InpatientOrder.status: 3, InpatientOrder.stop_time: now}, synchronize_session=False)
+    if updated != 1:
+        db.rollback()
+        return {"code": 500, "msg": "医嘱状态不正确，无法停止"}
 
     # 取消未执行的执行计划
     executions = (
@@ -290,10 +305,17 @@ def cancel_inpatient_order(req: dict, current_user: User = Depends(require_roles
     order = db.query(InpatientOrder).filter(InpatientOrder.order_id == req.get("order_id")).first()
     if not order:
         return {"code": 500, "msg": "医嘱不存在"}
+    if not _can_manage_order(order, current_user, db):
+        return {"code": 403, "msg": "无权撤销其他医生的医嘱"}
     if order.status not in (0, 1):
         return {"code": 500, "msg": "医嘱已执行，无法撤销"}
-    order.status = 4
-    db.add(order)
+    updated = db.query(InpatientOrder).filter(
+        InpatientOrder.order_id == order.order_id,
+        InpatientOrder.status.in_((0, 1)),
+    ).update({InpatientOrder.status: 4}, synchronize_session=False)
+    if updated != 1:
+        db.rollback()
+        return {"code": 500, "msg": "医嘱已执行，无法撤销"}
 
     # 取消未执行的执行计划
     executions = (
@@ -370,11 +392,18 @@ def execute_order(req: OrderExecutionRequest, current_user: User = Depends(requi
     execution = db.query(OrderExecution).filter(OrderExecution.order_id == req.order_id, OrderExecution.status == 0).first()
     if not execution:
         return {"code": 500, "msg": "无可执行记录"}
-    execution.status = req.status
-    execution.nurse_id = current_user.user_id
-    execution.execution_time = datetime.datetime.now()
-    execution.note = req.note
-    db.add(execution)
+    updated = db.query(OrderExecution).filter(
+        OrderExecution.execution_id == execution.execution_id,
+        OrderExecution.status == 0,
+    ).update({
+        OrderExecution.status: req.status,
+        OrderExecution.nurse_id: current_user.user_id,
+        OrderExecution.execution_time: datetime.datetime.now(),
+        OrderExecution.note: req.note,
+    }, synchronize_session=False)
+    if updated != 1:
+        db.rollback()
+        return {"code": 500, "msg": "执行记录已被其他护士处理"}
 
     # 更新医嘱状态为执行中
     if order.status == 1:

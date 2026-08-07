@@ -67,3 +67,28 @@ class TestInpatientOrderSafety:
         await async_client.post("/api/inpatientOrder/audit", headers=admin_headers, json={"order_id": order_id})
         valid = await async_client.post("/api/inpatientOrder/execute", headers=nurse_headers, json={"order_id": order_id, "status": 1})
         assert valid.json()["code"] == 200
+
+    async def test_doctor_cannot_manage_another_doctors_order(self, async_client, seed_data, auth_headers, db_session):
+        admission = Admission(
+            patient_id=seed_data["patient"].patient_id,
+            doctor_id=seed_data["director_doctor"].doctor_id,
+            department_id=seed_data["department"].department_id,
+            status=1,
+            admission_time=datetime.datetime.now(),
+            create_time=datetime.datetime.now(),
+        )
+        db_session.add(admission)
+        db_session.commit()
+        admin_headers = auth_headers(seed_data["admin_user"].username)
+        created = await async_client.post("/api/inpatientOrder/create", headers=admin_headers, json={
+            "admission_id": admission.admission_id,
+            "patient_id": seed_data["patient"].patient_id,
+            "doctor_id": seed_data["director_doctor"].doctor_id,
+            "order_type": 1,
+            "category": "treatment",
+            "items": [{"item_name": "会诊", "item_type": "service", "quantity": 1, "days": 1, "unit_price": 0}],
+        })
+        order_id = created.json()["data"]["order_id"]
+        doctor_headers = auth_headers(seed_data["doctor_user"].username)
+        cancelled = await async_client.post("/api/inpatientOrder/cancel", headers=doctor_headers, json={"order_id": order_id})
+        assert cancelled.json() == {"code": 403, "msg": "无权撤销其他医生的医嘱"}

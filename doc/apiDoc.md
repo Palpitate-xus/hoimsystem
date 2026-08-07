@@ -513,6 +513,7 @@ baseURL：`/api`
 | ✅ | /pharmaceuticalManagement/update | POST | `{ pharmaceutical_id, name, stock, price, expireddate, supplier, remark }` | `{ code, msg }` |
 | ✅ | /pharmaceuticalManagement/delete | POST | `{ pharmaceutical_id }` | `{ code, msg }` |
 | ✅ | /pharmaceuticalManagement/stock_query | POST | `{ id }` | `{ code, msg, data: { stock } }` |
+| ✅ | /pharmaceuticalManagement/nearExpiry | GET | `?days=30&keyword=` | `{ code, msg, data: Pharmaceutical[] }` |
 
 **字段说明：**
 
@@ -536,6 +537,8 @@ baseURL：`/api`
 
 - `stock_query` payload
   - `id`: 药品 ID
+
+- `nearExpiry` 只返回有有效期且在查询截止日期前的药品；已过期药品会被标记为负数剩余天数。`days` 必须为 `0` 至 `3650`，缺少有效期的药品不会参与效期预警。
 
 ### 5.2 处方审核与发药
 

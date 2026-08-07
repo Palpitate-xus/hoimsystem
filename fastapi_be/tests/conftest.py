@@ -61,6 +61,14 @@ def setup_database():
     Base.metadata.drop_all(bind=engine)
 
 
+@pytest.fixture(scope="module", autouse=True)
+def isolate_module_database():
+    """Keep workflow order inside a module while isolating modules from each other."""
+    Base.metadata.drop_all(bind=engine)
+    Base.metadata.create_all(bind=engine)
+    yield
+
+
 @pytest.fixture
 def db_session() -> Session:
     session = TestingSessionLocal()
@@ -81,13 +89,6 @@ async def async_client():
 def seed_data(db_session: Session):
     """Create a consistent baseline dataset for tests."""
     sess = db_session
-
-    # Each test gets a clean baseline. Without this, identity-based lookups can
-    # resolve a duplicate patient/user created by an earlier test in SQLite.
-    sess.rollback()
-    for table in reversed(Base.metadata.sorted_tables):
-        sess.execute(table.delete())
-    sess.commit()
 
     from app.security import hash_password
 

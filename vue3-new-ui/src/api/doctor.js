@@ -21,6 +21,10 @@ export function updateMedicalRecord(data) {
   return request({ url: "medicalRecord/update", method: "post", data });
 }
 
+export function signMedicalRecord(data) {
+  return request({ url: "medicalRecord/sign", method: "post", data });
+}
+
 export function getMedicalRecordList(keyword = "") {
   return request({ url: "medicalRecord/getList", method: "get", params: { keyword } });
 }

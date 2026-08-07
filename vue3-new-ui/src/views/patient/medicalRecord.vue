@@ -17,6 +17,11 @@
         <el-table-column prop="doctor_name" label="医生"  sortable />
         <el-table-column prop="symptom" label="症状" show-overflow-tooltip  sortable />
         <el-table-column prop="result" label="诊断结果" show-overflow-tooltip  sortable />
+        <el-table-column label="状态" width="100">
+          <template #default="{row}">
+            <el-tag :type="row.status ? 'success' : 'warning'">{{ row.status_text || (row.status ? '已签名' : '草稿') }}</el-tag>
+          </template>
+        </el-table-column>
         <el-table-column label="操作" width="120">
           <template #default="{row}">
             <el-button size="small" @click="viewDetail(row)">查看</el-button>
@@ -41,6 +46,10 @@
         <el-descriptions-item label="患者">{{ detail.patient_name }}</el-descriptions-item>
         <el-descriptions-item label="症状">{{ detail.symptom }}</el-descriptions-item>
         <el-descriptions-item label="诊断结果">{{ detail.result }}</el-descriptions-item>
+        <el-descriptions-item label="状态">
+          <el-tag :type="detail.status ? 'success' : 'warning'">{{ detail.status_text || (detail.status ? '已签名' : '草稿') }}</el-tag>
+        </el-descriptions-item>
+        <el-descriptions-item label="签名时间">{{ detail.sign_time || "未签名" }}</el-descriptions-item>
       </el-descriptions>
     </el-dialog>
   </div>

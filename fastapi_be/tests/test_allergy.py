@@ -24,3 +24,19 @@ class TestPatientAllergy:
     async def test_allergy_rejects_unknown_patient(self, async_client, seed_data, auth_headers):
         response = await async_client.post("/api/allergy/create", headers=auth_headers(seed_data["nurse_user"].username), json={"patient_id": 999999, "allergen": "药物", "reaction": "皮疹", "severity": 1})
         assert response.json()["code"] == 500
+
+    async def test_structured_allergy_blocks_matching_prescription(self, async_client, seed_data, auth_headers):
+        doctor_headers = auth_headers(seed_data["doctor_user"].username)
+        allergy = await async_client.post(
+            "/api/allergy/create",
+            headers=doctor_headers,
+            json={"patient_id": seed_data["patient2"].patient_id, "allergen": "阿司匹林", "reaction": "皮疹", "severity": 2},
+        )
+        assert allergy.json()["code"] == 200
+        prescription = await async_client.post(
+            "/api/prescriptionManagement/create",
+            headers=doctor_headers,
+            json={"patient": seed_data["patient2"].patient_id, "phas": [{"id": seed_data["pharmaceutical"].pharmaceutical_id, "number": 1}]},
+        )
+        assert prescription.json()["code"] == 500
+        assert "过敏史冲突" in prescription.json()["msg"]

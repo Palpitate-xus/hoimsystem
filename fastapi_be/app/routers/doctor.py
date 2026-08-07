@@ -1,4 +1,5 @@
 import datetime
+import re
 import traceback
 
 from fastapi import APIRouter, Depends
@@ -345,7 +346,11 @@ def prescription_register(req: PrescriptionCreateRequest, current_user: User = D
         # 1. 过敏史冲突检查(精确匹配 + 通用名匹配,避免 partial match 误判)
         allergy_history = (patient_obj.allergy_history or "").strip()
         if allergy_history:
-            allergy_keywords = [a.strip().lower() for a in allergy_history.split(",") if a.strip()]
+            allergy_keywords = []
+            for entry in re.split(r"[,，;；]", allergy_history):
+                allergen = re.split(r"[:：]", entry, maxsplit=1)[0].strip().lower()
+                if allergen:
+                    allergy_keywords.append(allergen)
             for item in normalized_phas:
                 pha = db.query(Pharmaceutical).filter(Pharmaceutical.pharmaceutical_id == item["id"]).first()
                 if not pha:

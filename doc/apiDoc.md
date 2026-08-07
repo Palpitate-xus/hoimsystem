@@ -968,6 +968,7 @@ baseURL：`/api`
 | ✅ | /prepaid/getBalance | GET | `?identity=` | `{ code, msg, data: { balance } }` |
 | ✅ | /prepaid/recharge | POST | `{ identity, amount }` | `{ code, msg, data: { balance } }` |
 | ✅ | /prepaid/deduct | POST | `{ identity, amount }` | `{ code, msg, data: { balance } }` |
+| ✅ | /prepaid/refund | POST | `{ identity, amount, reason? }` | `{ code, msg, data: { balance } }` |
 | ✅ | /prepaid/getTransactions | GET | `?identity=` | `{ code, msg, data: PrepaidTransaction[] }` |
 
 `amount` 和 `balance` 使用两位小数定点金额，服务端以 Decimal 按“分”进行计算；超过两位小数的输入按四舍五入处理，舍入后不大于 0 的金额会被拒绝。患者只能查询本人账户，充值和扣款仅限收费员及管理员角色。

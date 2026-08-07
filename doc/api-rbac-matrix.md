@@ -269,6 +269,10 @@
 | POST | `/api/labResult/audit` | ✓ | ✓ |  |  |  |  |  |  |  | ✓ |  | |
 | GET | `/api/labResult/getPending` | ✓ | ✓ |  |  |  |  |  |  |  | ✓ |  | |
 | GET | `/api/labResult/getList` | ✓ | ✓ |  |  |  |  |  |  |  | ✓ |  | |
+| GET | `/api/labResult/getCritical` | ✓ | ✓ |  |  |  |  |  |  |  | ✓ |  | |
+| POST | `/api/labResult/critical/notify` | ✓ | ✓ |  |  |  |  |  |  |  | ✓ |  | |
+| POST | `/api/labResult/critical/acknowledge` | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  | |
+| POST | `/api/labResult/critical/handle` | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  | |
 | POST | `/api/labResult/detail` | ✓ | ✓ |  |  |  |  |  |  |  | ✓ |  | |
 
 ### 多学科会诊 (`mdt.py`)

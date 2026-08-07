@@ -30,6 +30,10 @@ MEDICAL_INSURANCE_INTEGRATION_KEY=replace-with-a-random-secret
 
 首次回调会将样本标记为已接收、生成待审核检验结果并记录同步时间；同一申请单再次回调会返回原结果并设置 `idempotent=true`，不会重复生成结果。危急值仍按本地规则识别。
 
+### 危急值本地闭环
+
+危急值结果创建后进入“待通知”状态。检验人员调用 `POST /api/labResult/critical/notify` 向开单医生发送院内消息；医生随后调用 `POST /api/labResult/critical/acknowledge` 确认接收，最后调用 `POST /api/labResult/critical/handle` 提交处理记录。三个操作均具备幂等保护，且会写入样本流转记录。处理状态只代表院内记录完成，不替代电话、短信或院内临床应急制度。
+
 ## PACS 报告回调
 
 `POST /api/integration/pacs/report`

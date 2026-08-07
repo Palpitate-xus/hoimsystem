@@ -436,6 +436,7 @@ baseURL：`/api`
 | ✅ | /medicalRecord/getList | GET | - | `{ code, msg, data: MedicalRecord[] }` |
 | ✅ | /medicalRecord/detail | POST | `{ medical_record_id }` | `{ code, msg, data: MedicalRecord }` |
 | ✅ | /medicalRecord/update | POST | `{ medical_record_id, symptom, result }` | `{ code, msg }` |
+| ✅ | /medicalRecord/sign | POST | `{ medical_record_id }` | `{ code, msg }` |
 
 **字段说明：**
 
@@ -451,6 +452,8 @@ baseURL：`/api`
   - `patient_name`: 病人姓名
   - `symptom`: 症状描述
   - `result`: 诊断结果
+  - `status`: 病历状态，`0` 草稿、`1` 已签名
+  - `status_text`: 病历状态文本
 
 - `detail` response `data`
   - `uuid`: 病历 ID
@@ -461,6 +464,14 @@ baseURL：`/api`
   - `patient_name`: 病人姓名
   - `symptom`: 症状描述
   - `result`: 诊断结果
+  - `status`: 病历状态，`0` 草稿、`1` 已签名
+  - `status_text`: 病历状态文本
+  - `sign_time`: 签名时间，未签名时为空
+
+- `sign` payload
+  - `medical_record_id`: 病历 ID
+
+`/medicalRecord/update` 仅允许修改本人创建且状态为草稿的病历；`/medicalRecord/sign` 仅允许本人对草稿病历签名，重复签名会被拒绝。
 
 ### 4.3 处方管理
 

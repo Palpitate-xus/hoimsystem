@@ -986,8 +986,9 @@ baseURL：`/api`
 |:----:|:--------------------------:|:------:|:-------:|:--------:|
 | ✅ | /integration/lis/result | POST | `{ lab_order_id, external_order_id?, sample_id, result, abnormal_flag }` | `{ code, msg, data: { lab_result_id, idempotent } }` |
 | ✅ | /integration/pacs/report | POST | `{ imaging_order_id, external_order_id?, findings, impression, viewer_url? }` | `{ code, msg, data: { report_id, idempotent } }` |
+| ✅ | /integration/insurance/settlement | POST | `{ settlement_id, external_settlement_id?, status, total_amount, covered_amount, self_amount? }` | `{ code, msg, data: { settlement_id, idempotent, status } }` |
 
-**环境变量：** `LIS_INTEGRATION_KEY`、`PACS_INTEGRATION_KEY`。未配置密钥时接口返回 `503`；密钥错误返回 `401`；已进入院内审核的报告不会被外部回调覆盖。
+**环境变量：** `LIS_INTEGRATION_KEY`、`PACS_INTEGRATION_KEY`、`MEDICAL_INSURANCE_INTEGRATION_KEY`。未配置密钥时接口返回 `503`；密钥错误返回 `401`；已进入院内审核的报告不会被外部回调覆盖，医保金额必须满足报销额不超过总额。
 
 ---
 

@@ -9,6 +9,7 @@
 ```dotenv
 LIS_INTEGRATION_KEY=replace-with-a-random-secret
 PACS_INTEGRATION_KEY=replace-with-a-random-secret
+MEDICAL_INSURANCE_INTEGRATION_KEY=replace-with-a-random-secret
 ```
 
 调用时使用 `X-Integration-Key` 请求头。未配置密钥时接口返回 `503`，密钥不匹配返回 `401`。密钥不能写入前端代码、日志或版本库。
@@ -44,6 +45,23 @@ PACS_INTEGRATION_KEY=replace-with-a-random-secret
 ```
 
 首次回调会生成或更新草稿报告，将影像申请置为“待审核”；重复回调幂等返回。已进入院内审核的报告不会被覆盖，避免外部重试造成医疗记录变更。
+
+## 医保结算回调
+
+收费端先调用 `/api/insurance/settlement/create`，并传入 `integration_mode: "external"` 创建“处理中”的本地记录；医保平台完成结算后调用 `POST /api/integration/insurance/settlement`：
+
+```json
+{
+  "settlement_id": "本地结算记录 UUID",
+  "external_settlement_id": "医保平台结算号",
+  "status": 1,
+  "total_amount": 1000,
+  "covered_amount": 800,
+  "self_amount": 200
+}
+```
+
+系统会校验金额关系、绑定外部结算号并幂等更新状态；`status=1` 表示成功，`status=2` 表示失败。真实医保平台的目录编码、交易报文、签名证书和撤销/冲正规则仍需按平台规范联调。
 
 ## 厂商联调前检查
 

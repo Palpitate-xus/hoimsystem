@@ -82,6 +82,13 @@ def seed_data(db_session: Session):
     """Create a consistent baseline dataset for tests."""
     sess = db_session
 
+    # Each test gets a clean baseline. Without this, identity-based lookups can
+    # resolve a duplicate patient/user created by an earlier test in SQLite.
+    sess.rollback()
+    for table in reversed(Base.metadata.sorted_tables):
+        sess.execute(table.delete())
+    sess.commit()
+
     from app.security import hash_password
 
     # Admin user

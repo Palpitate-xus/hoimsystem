@@ -297,3 +297,52 @@ class TestLab:
             r = await async_client.post("/api/labResult/detail", headers=admin_headers, json={"lab_result_id": results[0]["id"]})
             assert r.status_code == 200
             assert r.json()["code"] == 200
+
+    async def test_critical_value_notification_acknowledgement_and_handling(self, async_client, seed_data, auth_headers):
+        doctor_headers = auth_headers(seed_data["doctor_user"].username)
+        lab_headers = auth_headers(seed_data["lab_tech_user"].username)
+        r = await async_client.post("/api/labOrder/create", headers=doctor_headers, json={
+            "patient_id": seed_data["patient"].patient_id, "check_type": "血糖",
+            "check_items": ["血糖"], "urgent": 1,
+        })
+        lab_order_id = r.json()["data"]["lab_order_id"]
+        await async_client.post("/api/lab/sampleReceive", headers=lab_headers, json={"lab_order_id": lab_order_id})
+        r = await async_client.post("/api/labResult/create", headers=lab_headers, json={
+            "lab_order_id": lab_order_id, "sample_id": "CRITICAL-001", "result": "血糖 20.0 mmol/L", "abnormal_flag": 0,
+        })
+        assert r.json()["data"]["critical"] is True
+        result_id = (await async_client.get("/api/labResult/getList", headers=lab_headers)).json()["data"][0]["id"]
+
+        critical = await async_client.get("/api/labResult/getCritical", headers=lab_headers)
+        item = next(row for row in critical.json()["data"] if row["id"] == result_id)
+        assert item["critical_status"] == 1
+        assert item["critical_status_text"] == "待通知"
+
+        r = await async_client.post("/api/labResult/critical/acknowledge", headers=doctor_headers, json={"lab_result_id": result_id})
+        assert r.json()["code"] == 500
+        r = await async_client.post("/api/labResult/critical/notify", headers=lab_headers, json={"lab_result_id": result_id})
+        assert r.json()["data"]["idempotent"] is False
+        r = await async_client.post("/api/labResult/critical/notify", headers=lab_headers, json={"lab_result_id": result_id})
+        assert r.json()["data"]["idempotent"] is True
+
+        messages = await async_client.get("/api/message/getList", headers=doctor_headers)
+        assert any(message["title"] == "检验危急值提醒" for message in messages.json()["data"])
+        r = await async_client.post("/api/labResult/critical/acknowledge", headers=doctor_headers, json={
+            "lab_result_id": result_id, "note": "已电话通知患者并安排复测",
+        })
+        assert r.json()["code"] == 200
+        r = await async_client.post("/api/labResult/critical/handle", headers=doctor_headers, json={"lab_result_id": result_id})
+        assert r.json()["code"] == 400
+        r = await async_client.post("/api/labResult/critical/handle", headers=doctor_headers, json={
+            "lab_result_id": result_id, "note": "已处理：调整治疗并安排复测",
+        })
+        assert r.json()["code"] == 200
+        r = await async_client.post("/api/labResult/critical/handle", headers=doctor_headers, json={
+            "lab_result_id": result_id, "note": "重复提交",
+        })
+        assert r.json()["data"]["idempotent"] is True
+
+        tracking = await async_client.get(
+            "/api/lab/sampleTracking", headers=lab_headers, params={"lab_order_id": lab_order_id}
+        )
+        assert [item["stage"] for item in tracking.json()["data"]][-3:] == ["危急值已通知", "危急值已确认", "危急值已处理"]

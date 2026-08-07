@@ -722,9 +722,17 @@ class LabResult(Base):
     technician_id = Column(Integer, ForeignKey("hoimsystem_users.user_id"))
     report_time = Column(DateTime)
     audit_status = Column(Integer, default=0)
+    critical_status = Column(Integer, nullable=False, default=0)  # 0=非危急 1=待通知 2=已通知 3=已确认 4=已处理
+    critical_notified_by = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=True)
+    critical_notified_time = Column(DateTime, nullable=True)
+    critical_acknowledged_by = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=True)
+    critical_acknowledged_time = Column(DateTime, nullable=True)
+    critical_handled_by = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=True)
+    critical_handled_time = Column(DateTime, nullable=True)
+    critical_handling_note = Column(String(500), nullable=True)
 
     lab_order = relationship("LabOrder", back_populates="lab_results")
-    technician = relationship("User")
+    technician = relationship("User", foreign_keys=[technician_id])
 
 
 class Invoice(Base):

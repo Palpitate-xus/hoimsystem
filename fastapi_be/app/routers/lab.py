@@ -4,9 +4,9 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.dependencies import LAB_ROLES, get_current_user, require_roles
-from app.models import LabOrder, LabResult, SampleTracking, User
-from app.schemas import LabResultAuditRequest, LabResultCreateRequest
+from app.dependencies import CLINICAL_ROLES, LAB_ROLES, require_roles
+from app.models import LabOrder, LabResult, Message, SampleTracking, User
+from app.schemas import LabCriticalActionRequest, LabResultAuditRequest, LabResultCreateRequest
 
 router = APIRouter()
 
@@ -92,7 +92,15 @@ def sample_tracking(lab_order_id: str, current_user: User = Depends(require_role
         return {"code": 500, "msg": "检查申请单不存在"}
     events = db.query(SampleTracking).filter(SampleTracking.lab_order_id == lab_order_id).order_by(SampleTracking.event_time.asc()).all()
     tracking = [{"time": (lab_order.create_time.strftime("%Y-%m-%d %H:%M:%S") if lab_order.create_time else None), "stage": "申请创建", "operator": lab_order.doctor.name if lab_order.doctor else ""}]
-    tracking.extend({"time": item.event_time.strftime("%Y-%m-%d %H:%M:%S"), "stage": item.stage, "operator": item.operator.username if item.operator else "", "note": item.note or ""} for item in events)
+    tracking.extend(
+        {
+            "time": item.event_time.strftime("%Y-%m-%d %H:%M:%S"),
+            "stage": item.stage,
+            "operator": item.operator.username if item.operator else "",
+            "note": item.note or "",
+        }
+        for item in events
+    )
     return {"code": 200, "msg": "success", "data": tracking}
 
 
@@ -114,6 +122,7 @@ def create_lab_result(req: LabResultCreateRequest, current_user=Depends(require_
         technician_id=current_user.user_id,
         report_time=datetime.datetime.now(),
         audit_status=0,
+        critical_status=1 if is_critical else 0,
     )
     db.add(result)
     _record_tracking(db, lab_order.lab_order_id, "结果已录入", current_user)
@@ -198,9 +207,120 @@ def get_critical_lab_results(current_user: User = Depends(require_roles(*LAB_ROL
             "result": item.result,
             "audit_status": item.audit_status,
             "audit_status_text": "已审核" if item.audit_status else "待审核",
+            "critical_status": item.critical_status,
+            "critical_status_text": {
+                1: "待通知", 2: "已通知", 3: "已确认", 4: "已处理"
+            }.get(item.critical_status, "非危急"),
+            "critical_notified_time": item.critical_notified_time,
+            "critical_acknowledged_time": item.critical_acknowledged_time,
+            "critical_handled_time": item.critical_handled_time,
+            "critical_handling_note": item.critical_handling_note,
             "technician_name": item.technician.username if item.technician else "",
         })
     return {"code": 200, "msg": "success", "data": data}
+
+
+def _critical_result(db: Session, lab_result_id: str):
+    return db.query(LabResult).filter(LabResult.lab_result_id == lab_result_id).first()
+
+
+def _assigned_clinician_or_admin(result: LabResult, current_user: User) -> bool:
+    return current_user.user_role in {"admin", "super_admin"} or (
+        result.lab_order and result.lab_order.doctor and result.lab_order.doctor.user_id == current_user.user_id
+    )
+
+
+@router.post("/labResult/critical/notify")
+def notify_critical_lab_result(req: LabCriticalActionRequest, current_user: User = Depends(require_roles(*LAB_ROLES)), db: Session = Depends(get_db)):
+    result = _critical_result(db, req.lab_result_id)
+    if not result:
+        return {"code": 500, "msg": "检查结果不存在"}
+    if result.critical_status == 0:
+        return {"code": 500, "msg": "该结果不是危急值"}
+    if result.critical_status >= 2:
+        return {"code": 200, "msg": "危急值已通知", "data": {"idempotent": True}}
+    doctor = result.lab_order.doctor if result.lab_order else None
+    if not doctor or not doctor.user_id:
+        return {"code": 500, "msg": "该检验结果没有关联临床医生"}
+    now = datetime.datetime.now()
+    updated = db.query(LabResult).filter(
+        LabResult.lab_result_id == req.lab_result_id,
+        LabResult.critical_status == 1,
+    ).update({
+        LabResult.critical_status: 2,
+        LabResult.critical_notified_by: current_user.user_id,
+        LabResult.critical_notified_time: now,
+    }, synchronize_session=False)
+    if not updated:
+        return {"code": 200, "msg": "危急值已通知", "data": {"idempotent": True}}
+    db.add(Message(
+        recipient_id=doctor.user_id,
+        title="检验危急值提醒",
+        content=f"患者{result.lab_order.patient.name if result.lab_order.patient else ''}的{result.lab_order.check_type}结果为：{result.result}，请及时确认并处理。",
+        msg_type="app",
+        is_read=0,
+        create_time=now,
+    ))
+    _record_tracking(db, result.lab_order_id, "危急值已通知", current_user, "已发送院内消息")
+    db.commit()
+    return {"code": 200, "msg": "危急值已通知", "data": {"idempotent": False}}
+
+
+@router.post("/labResult/critical/acknowledge")
+def acknowledge_critical_lab_result(req: LabCriticalActionRequest, current_user: User = Depends(require_roles(*CLINICAL_ROLES)), db: Session = Depends(get_db)):
+    result = _critical_result(db, req.lab_result_id)
+    if not result:
+        return {"code": 500, "msg": "检查结果不存在"}
+    if not _assigned_clinician_or_admin(result, current_user):
+        return {"code": 403, "msg": "只有开单医生可以确认该危急值"}
+    if result.critical_status < 2:
+        return {"code": 500, "msg": "危急值尚未通知，不能确认"}
+    if result.critical_status >= 3:
+        return {"code": 200, "msg": "危急值已确认", "data": {"idempotent": True}}
+    now = datetime.datetime.now()
+    updated = db.query(LabResult).filter(
+        LabResult.lab_result_id == req.lab_result_id,
+        LabResult.critical_status == 2,
+    ).update({
+        LabResult.critical_status: 3,
+        LabResult.critical_acknowledged_by: current_user.user_id,
+        LabResult.critical_acknowledged_time: now,
+    }, synchronize_session=False)
+    if not updated:
+        return {"code": 200, "msg": "危急值已确认", "data": {"idempotent": True}}
+    _record_tracking(db, result.lab_order_id, "危急值已确认", current_user, req.note)
+    db.commit()
+    return {"code": 200, "msg": "危急值已确认", "data": {"idempotent": False}}
+
+
+@router.post("/labResult/critical/handle")
+def handle_critical_lab_result(req: LabCriticalActionRequest, current_user: User = Depends(require_roles(*CLINICAL_ROLES)), db: Session = Depends(get_db)):
+    result = _critical_result(db, req.lab_result_id)
+    if not result:
+        return {"code": 500, "msg": "检查结果不存在"}
+    if not _assigned_clinician_or_admin(result, current_user):
+        return {"code": 403, "msg": "只有开单医生可以处理该危急值"}
+    if result.critical_status < 3:
+        return {"code": 500, "msg": "请先确认危急值"}
+    if result.critical_status >= 4:
+        return {"code": 200, "msg": "危急值已处理", "data": {"idempotent": True}}
+    if not req.note.strip():
+        return {"code": 400, "msg": "请填写危急值处理记录"}
+    now = datetime.datetime.now()
+    updated = db.query(LabResult).filter(
+        LabResult.lab_result_id == req.lab_result_id,
+        LabResult.critical_status == 3,
+    ).update({
+        LabResult.critical_status: 4,
+        LabResult.critical_handled_by: current_user.user_id,
+        LabResult.critical_handled_time: now,
+        LabResult.critical_handling_note: req.note.strip(),
+    }, synchronize_session=False)
+    if not updated:
+        return {"code": 200, "msg": "危急值已处理", "data": {"idempotent": True}}
+    _record_tracking(db, result.lab_order_id, "危急值已处理", current_user, req.note.strip())
+    db.commit()
+    return {"code": 200, "msg": "危急值已处理", "data": {"idempotent": False}}
 
 
 @router.post("/labResult/detail")

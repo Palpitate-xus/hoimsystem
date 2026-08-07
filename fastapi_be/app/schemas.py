@@ -595,6 +595,11 @@ class LabResultAuditRequest(BaseModel):
     lab_result_id: str
 
 
+class LabCriticalActionRequest(BaseModel):
+    lab_result_id: str
+    note: str = Field(default="", max_length=500)
+
+
 class LabResultIntegrationRequest(BaseModel):
     lab_order_id: str = Field(..., min_length=1, max_length=36)
     external_order_id: str | None = Field(default=None, max_length=100)

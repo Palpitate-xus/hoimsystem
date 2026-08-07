@@ -5,10 +5,29 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.dependencies import ADMIN_ROLES, CLINICAL_ROLES, NURSING_ROLES, ROLE_DIRECTOR, User, require_roles
-from app.models import Doctor, EmergencyGreenChannel, EmergencyMedicalRecord, EmergencyObservation, EmergencyRescueEvent, EmergencyTriage, Patient
-from app.schemas import EmergencyGreenChannelActionRequest, EmergencyGreenChannelCreateRequest, EmergencyMedicalRecordCreateRequest, EmergencyMedicalRecordUpdateRequest, EmergencyObservationCreateRequest, EmergencyObservationUpdateRequest, EmergencyRescueEventCreateRequest, EmergencyTriageCreateRequest, EmergencyTriageUpdateRequest
+from app.models import (
+    Doctor,
+    EmergencyGreenChannel,
+    EmergencyMedicalRecord,
+    EmergencyObservation,
+    EmergencyRescueEvent,
+    EmergencyTriage,
+    Patient,
+)
+from app.schemas import (
+    EmergencyGreenChannelActionRequest,
+    EmergencyGreenChannelCreateRequest,
+    EmergencyMedicalRecordCreateRequest,
+    EmergencyMedicalRecordUpdateRequest,
+    EmergencyObservationCreateRequest,
+    EmergencyObservationUpdateRequest,
+    EmergencyRescueEventCreateRequest,
+    EmergencyTriageCreateRequest,
+    EmergencyTriageUpdateRequest,
+)
 
 router = APIRouter()
+TRIAGE_TRANSITIONS = {0: {1, 3}, 1: {2, 3}, 2: set(), 3: set()}
 
 
 def _serialize(item: EmergencyTriage):
@@ -52,6 +71,8 @@ def update_triage(req: EmergencyTriageUpdateRequest, current_user: User = Depend
     item = db.query(EmergencyTriage).filter(EmergencyTriage.triage_id == req.triage_id).first()
     if not item:
         return {"code": 500, "msg": "分诊记录不存在"}
+    if req.status is not None and req.status != item.status and req.status not in TRIAGE_TRANSITIONS.get(item.status, set()):
+        return {"code": 500, "msg": "分诊状态流转不合法"}
     if req.triage_level is not None:
         item.triage_level = req.triage_level
     if req.green_channel is not None:
@@ -65,7 +86,7 @@ def update_triage(req: EmergencyTriageUpdateRequest, current_user: User = Depend
 
 @router.post("/emergency/rescue/create")
 def create_rescue_event(req: EmergencyRescueEventCreateRequest, current_user: User = Depends(require_roles(*NURSING_ROLES)), db: Session = Depends(get_db)):
-    triage = db.query(EmergencyTriage).filter(EmergencyTriage.triage_id == req.triage_id, EmergencyTriage.status != 3).first()
+    triage = db.query(EmergencyTriage).filter(EmergencyTriage.triage_id == req.triage_id, EmergencyTriage.status.in_([0, 1])).first()
     if not triage:
         return {"code": 500, "msg": "有效分诊记录不存在"}
     try:
@@ -114,7 +135,7 @@ def _serialize_observation(item: EmergencyObservation):
 
 @router.post("/emergency/observation/create")
 def create_observation(req: EmergencyObservationCreateRequest, current_user: User = Depends(require_roles(*NURSING_ROLES)), db: Session = Depends(get_db)):
-    triage = db.query(EmergencyTriage).filter(EmergencyTriage.triage_id == req.triage_id, EmergencyTriage.status != 3).first()
+    triage = db.query(EmergencyTriage).filter(EmergencyTriage.triage_id == req.triage_id, EmergencyTriage.status.in_([0, 1])).first()
     if not triage:
         return {"code": 500, "msg": "有效分诊记录不存在"}
     active = db.query(EmergencyObservation).filter(EmergencyObservation.triage_id == req.triage_id, EmergencyObservation.status == 1).first()
@@ -184,15 +205,18 @@ def _serialize_green_channel(item: EmergencyGreenChannel):
 
 @router.post("/emergency/greenChannel/create")
 def create_green_channel(req: EmergencyGreenChannelCreateRequest, current_user: User = Depends(require_roles(*(NURSING_ROLES | CLINICAL_ROLES))), db: Session = Depends(get_db)):
-    triage = db.query(EmergencyTriage).filter(EmergencyTriage.triage_id == req.triage_id, EmergencyTriage.status != 3).first()
+    triage = db.query(EmergencyTriage).filter(EmergencyTriage.triage_id == req.triage_id, EmergencyTriage.status.in_([0, 1])).first()
     if not triage:
         return {"code": 500, "msg": "有效分诊记录不存在"}
     if not triage.green_channel:
         return {"code": 500, "msg": "该分诊记录未标记绿色通道"}
+    reason = req.reason.strip()
+    if not reason:
+        return {"code": 500, "msg": "绿色通道申请事由不能为空"}
     active = db.query(EmergencyGreenChannel).filter(EmergencyGreenChannel.triage_id == req.triage_id, EmergencyGreenChannel.status.in_([0, 1])).first()
     if active:
         return {"code": 500, "msg": "该患者已有进行中的绿色通道申请"}
-    item = EmergencyGreenChannel(triage_id=req.triage_id, reason=req.reason.strip(), status=0, applicant_id=current_user.user_id, create_time=datetime.datetime.now())
+    item = EmergencyGreenChannel(triage_id=req.triage_id, reason=reason, status=0, applicant_id=current_user.user_id, create_time=datetime.datetime.now())
     db.add(item)
     db.commit()
     return {"code": 200, "msg": "success", "data": _serialize_green_channel(item)}
@@ -239,8 +263,13 @@ def _serialize_emergency_record(item: EmergencyMedicalRecord):
 
 @router.post("/emergency/medicalRecord/create")
 def create_emergency_record(req: EmergencyMedicalRecordCreateRequest, current_user: User = Depends(require_roles(*CLINICAL_ROLES)), db: Session = Depends(get_db)):
-    triage = db.query(EmergencyTriage).filter(EmergencyTriage.triage_id == req.triage_id, EmergencyTriage.status != 3).first()
+    triage = db.query(EmergencyTriage).filter(EmergencyTriage.triage_id == req.triage_id).first()
     if not triage:
+        return {"code": 500, "msg": "有效分诊记录不存在"}
+    existing = db.query(EmergencyMedicalRecord).filter(EmergencyMedicalRecord.triage_id == req.triage_id).first()
+    if existing:
+        return {"code": 500, "msg": "该分诊记录已有急诊病历"}
+    if triage.status not in (0, 1):
         return {"code": 500, "msg": "有效分诊记录不存在"}
     doctor = db.query(Doctor).filter(Doctor.user_id == current_user.user_id).first()
     item = EmergencyMedicalRecord(triage_id=req.triage_id, patient_id=triage.patient_id, doctor_id=doctor.doctor_id if doctor else None, chief_complaint=req.chief_complaint.strip(), present_illness=req.present_illness.strip(), physical_exam=req.physical_exam.strip(), diagnosis=req.diagnosis.strip(), treatment_plan=req.treatment_plan.strip(), status=0, create_time=datetime.datetime.now(), update_time=datetime.datetime.now())
@@ -291,5 +320,9 @@ def sign_emergency_record(req: EmergencyMedicalRecordUpdateRequest, current_user
     item.status = 1
     item.sign_time = datetime.datetime.now()
     item.update_time = item.sign_time
+    triage = db.query(EmergencyTriage).filter(EmergencyTriage.triage_id == item.triage_id).first()
+    if triage and triage.status in (0, 1):
+        triage.status = 2
+        triage.update_time = item.sign_time
     db.commit()
     return {"code": 200, "msg": "success", "data": _serialize_emergency_record(item)}

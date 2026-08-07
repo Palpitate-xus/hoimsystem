@@ -14,5 +14,9 @@ class TestEmergencyMedicalRecord:
         assert updated.json()["code"] == 200
         signed = await async_client.post("/api/emergency/medicalRecord/sign", headers=doctor_headers, json={"record_id": record_id})
         assert signed.json()["data"]["status_text"] == "已签名"
+        triage_list = await async_client.get("/api/emergency/triage/list", headers=doctor_headers)
+        assert next(item for item in triage_list.json()["data"] if item["triage_id"] == triage.json()["data"]["triage_id"])["status"] == 2
+        duplicate = await async_client.post("/api/emergency/medicalRecord/create", headers=doctor_headers, json={"triage_id": triage.json()["data"]["triage_id"], "chief_complaint": "重复病历"})
+        assert duplicate.json() == {"code": 500, "msg": "该分诊记录已有急诊病历"}
         blocked = await async_client.put("/api/emergency/medicalRecord/update", headers=doctor_headers, json={"record_id": record_id, "diagnosis": "修改"})
         assert blocked.json()["code"] == 403

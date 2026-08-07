@@ -22,3 +22,10 @@ class TestEmergencyTriage:
         assert unknown.json()["code"] == 500
         invalid = await async_client.post("/api/emergency/triage/create", headers=headers, json={"patient_id": seed_data["patient"].patient_id, "triage_level": 5, "chief_complaint": "胸痛"})
         assert invalid.status_code == 422
+
+    async def test_triage_rejects_invalid_state_transition(self, async_client, seed_data, auth_headers):
+        headers = auth_headers(seed_data["nurse_user"].username)
+        created = await async_client.post("/api/emergency/triage/create", headers=headers, json={"patient_id": seed_data["patient"].patient_id, "triage_level": 3, "chief_complaint": "腹痛"})
+        triage_id = created.json()["data"]["triage_id"]
+        rejected = await async_client.put("/api/emergency/triage/update", headers=headers, json={"triage_id": triage_id, "status": 2})
+        assert rejected.json() == {"code": 500, "msg": "分诊状态流转不合法"}

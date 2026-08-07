@@ -34,6 +34,7 @@
 7. **[LIS/PACS/医保对接指南](integration-guide.md)** — 入站鉴权、幂等回调和厂商联调边界
 8. **[院内导航配置指南](navigation-guide.md)** — 节点、路线连线与患者端最短路径
 9. **[等保安全基线自评](security-baseline-checklist.md)** — 本地安全证据与测评前置事项
+10. **[移动 Web 使用说明](mobile-web-guide.md)** — PWA 安装、缓存边界和原生端规划
 
 ### 🎨 前端开发
 

@@ -6,6 +6,16 @@
         <el-input v-model="keyword" placeholder="搜索科室名称" clearable class="page-search-input" @keyup.enter="fetchDepartments" />
         <el-button type="primary" :loading="loading" @click="fetchDepartments">查询</el-button>
       </div>
+      <el-card shadow="never" class="route-card">
+        <template #header><span>院内路线指引</span></template>
+        <div class="route-toolbar">
+          <el-select v-model="routeStart" placeholder="选择起点" clearable filterable><el-option v-for="item in departments" :key="`start-${item.department_id}`" :label="item.name" :value="item.department_id" /></el-select>
+          <span class="route-arrow">→</span>
+          <el-select v-model="routeEnd" placeholder="选择终点" clearable filterable><el-option v-for="item in departments" :key="`end-${item.department_id}`" :label="item.name" :value="item.department_id" /></el-select>
+          <el-button type="success" @click="buildRoute">生成路线</el-button>
+        </div>
+        <el-alert v-if="routeResult" :title="routeResult.title" :description="routeResult.description" type="info" show-icon :closable="false" />
+      </el-card>
       <el-row v-loading="loading" :gutter="16">
         <el-col v-for="department in departments" :key="department.department_id" :xs="24" :sm="12" :lg="8" style="margin-bottom: 16px;">
           <el-card shadow="hover" class="department-card">
@@ -45,6 +55,9 @@ const loading = ref(false);
 const faqKeyword = ref("");
 const faqs = ref([]);
 const activeFaq = ref("");
+const routeStart = ref(null);
+const routeEnd = ref(null);
+const routeResult = ref(null);
 
 const fetchDepartments = async () => {
   loading.value = true;
@@ -59,6 +72,16 @@ const fetchDepartments = async () => {
 };
 
 onMounted(fetchDepartments);
+const buildRoute = () => {
+  if (!routeStart.value || !routeEnd.value) return ElMessage.warning("请选择起点和终点");
+  if (routeStart.value === routeEnd.value) return ElMessage.warning("起点和终点不能相同");
+  const start = departments.value.find(item => item.department_id === routeStart.value);
+  const end = departments.value.find(item => item.department_id === routeEnd.value);
+  routeResult.value = {
+    title: `${start.name} → ${end.name}`,
+    description: `从${start.location || "起点科室"}出发，沿院内主通道前往${end.location || "终点科室"}。请根据现场指示牌确认楼栋和楼层。`,
+  };
+};
 const fetchFaq = async () => {
   try {
     const res = await getNavigationFaq(faqKeyword.value.trim());
@@ -77,4 +100,5 @@ onMounted(fetchFaq);
 .faq-card { margin-top: 16px; }
 .faq-header { display: flex; align-items: center; justify-content: space-between; }
 .faq-answer { color: #606266; line-height: 1.8; white-space: pre-wrap; }
+.route-card { margin-bottom: 16px; }.route-toolbar { display: flex; align-items: center; gap: 10px; }.route-toolbar .el-select { width: 220px; }.route-arrow { color: #909399; font-size: 20px; }
 </style>

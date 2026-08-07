@@ -5,10 +5,13 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.dependencies import ADMIN_ROLES, NOTICE_ROLES, ROLE_PATIENT, User, get_current_user, require_roles
-from app.models import Department, Doctor, Notice, Patient
+from app.models import Department, Doctor, HospitalCampus, Notice, Patient
 from app.pagination import paginate
 from app.privacy import can_view_full_patient_identity, mask_identity, mask_phone
 from app.schemas import (
+    CampusCreateRequest,
+    CampusDeleteRequest,
+    CampusUpdateRequest,
     DepartmentCreateRequest,
     DepartmentDeleteRequest,
     DepartmentUpdateRequest,
@@ -21,6 +24,74 @@ from app.schemas import (
 )
 
 router = APIRouter()
+
+
+def _campus_data(item: HospitalCampus):
+    return {
+        "id": item.campus_id,
+        "code": item.code,
+        "name": item.name,
+        "address": item.address or "",
+        "phone": item.phone or "",
+        "status": item.status,
+        "sort_order": item.sort_order,
+        "department_count": len(item.departments),
+    }
+
+
+@router.get("/campusManagement/getList")
+def get_campus_list(keyword: str | None = None, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    query = db.query(HospitalCampus).order_by(HospitalCampus.sort_order, HospitalCampus.campus_id)
+    if keyword and keyword.strip():
+        like = f"%{keyword.strip()}%"
+        query = query.filter((HospitalCampus.code.ilike(like)) | (HospitalCampus.name.ilike(like)))
+    return {"code": 200, "msg": "success", "data": [_campus_data(item) for item in query.all()]}
+
+
+@router.post("/campusManagement/create")
+def create_campus(req: CampusCreateRequest, current_user: User = Depends(require_roles(*ADMIN_ROLES)), db: Session = Depends(get_db)):
+    if db.query(HospitalCampus).filter(HospitalCampus.code == req.code.strip()).first():
+        return {"code": 500, "msg": "院区编码已存在"}
+    now = datetime.datetime.now()
+    campus = HospitalCampus(
+        code=req.code.strip(), name=req.name.strip(), address=req.address.strip(), phone=req.phone.strip(),
+        status=req.status, sort_order=req.sort_order, create_time=now, update_time=now,
+    )
+    db.add(campus)
+    db.commit()
+    db.refresh(campus)
+    return {"code": 200, "msg": "success", "data": _campus_data(campus)}
+
+
+@router.post("/campusManagement/update")
+def update_campus(req: CampusUpdateRequest, current_user: User = Depends(require_roles(*ADMIN_ROLES)), db: Session = Depends(get_db)):
+    campus = db.query(HospitalCampus).filter(HospitalCampus.campus_id == req.campus_id).first()
+    if not campus:
+        return {"code": 500, "msg": "院区不存在"}
+    duplicate = db.query(HospitalCampus).filter(HospitalCampus.code == req.code.strip(), HospitalCampus.campus_id != req.campus_id).first()
+    if duplicate:
+        return {"code": 500, "msg": "院区编码已存在"}
+    campus.code = req.code.strip()
+    campus.name = req.name.strip()
+    campus.address = req.address.strip()
+    campus.phone = req.phone.strip()
+    campus.status = req.status
+    campus.sort_order = req.sort_order
+    campus.update_time = datetime.datetime.now()
+    db.commit()
+    return {"code": 200, "msg": "success", "data": _campus_data(campus)}
+
+
+@router.post("/campusManagement/delete")
+def delete_campus(req: CampusDeleteRequest, current_user: User = Depends(require_roles(*ADMIN_ROLES)), db: Session = Depends(get_db)):
+    campus = db.query(HospitalCampus).filter(HospitalCampus.campus_id == req.campus_id).first()
+    if not campus:
+        return {"code": 500, "msg": "院区不存在"}
+    if db.query(Department).filter(Department.campus_id == req.campus_id).first():
+        return {"code": 500, "msg": "院区下仍有科室，不能删除"}
+    db.delete(campus)
+    db.commit()
+    return {"code": 200, "msg": "success"}
 
 
 @router.get("/doctorManagement/getList")
@@ -131,9 +202,11 @@ def update_patient(req: PatientUpdateRequest, current_user: User = Depends(requi
 
 
 @router.get("/departmentManagement/getList")
-def get_department_list(keyword: str | None = None, page: int | None = None, page_size: int | None = None, current_user: User = Depends(get_current_user),
+def get_department_list(keyword: str | None = None, campus_id: int | None = None, page: int | None = None, page_size: int | None = None, current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)):
     query = db.query(Department)
+    if campus_id is not None:
+        query = query.filter(Department.campus_id == campus_id)
     departments, total = paginate(query, page, page_size)
     data = []
     for item in departments:
@@ -146,6 +219,8 @@ def get_department_list(keyword: str | None = None, page: int | None = None, pag
                 "phone": item.phone,
                 "location": item.location,
                 "director": director_name,
+                "campus_id": item.campus_id,
+                "campus_name": item.campus.name if item.campus else "",
             }
         )
     if keyword:
@@ -165,6 +240,7 @@ def department_register(req: DepartmentCreateRequest, current_user: User = Depen
             phone=req.phone,
             location=req.location,
             director=req.director,
+            campus_id=req.campus_id,
         )
         db.add(dept)
         db.commit()
@@ -183,6 +259,7 @@ def update_department(req: DepartmentUpdateRequest, current_user: User = Depends
     dept.phone = req.phone
     dept.location = req.location
     dept.director = req.director
+    dept.campus_id = req.campus_id
     db.add(dept)
     db.commit()
     return {"code": 200, "msg": "success"}

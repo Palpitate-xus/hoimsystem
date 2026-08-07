@@ -129,6 +129,22 @@ class Doctor(Base):
     reviews = relationship("Review", back_populates="doctor")
 
 
+class HospitalCampus(Base):
+    __tablename__ = "hoimsystem_hospital_campus"
+
+    campus_id = Column(Integer, primary_key=True, autoincrement=True)
+    code = Column(String(30), nullable=False, unique=True)
+    name = Column(String(50), nullable=False)
+    address = Column(String(200), nullable=False, default="")
+    phone = Column(String(20), nullable=False, default="")
+    status = Column(Integer, nullable=False, default=1)  # 1=启用 0=停用
+    sort_order = Column(Integer, nullable=False, default=0)
+    create_time = Column(DateTime, nullable=False)
+    update_time = Column(DateTime, nullable=False)
+
+    departments = relationship("Department", back_populates="campus")
+
+
 class Department(Base):
     __tablename__ = "hoimsystem_department"
 
@@ -137,8 +153,10 @@ class Department(Base):
     phone = Column(String(11))
     location = Column(String(24))
     director = Column(Integer)
+    campus_id = Column(Integer, ForeignKey("hoimsystem_hospital_campus.campus_id"), nullable=True)
 
     doctors = relationship("Doctor", back_populates="department")
+    campus = relationship("HospitalCampus", back_populates="departments")
 
 
 class GuideFaq(Base):

@@ -269,11 +269,14 @@ def _match_symptoms(text: str):
 @router.get("/navigation/departments")
 def navigation_departments(
     keyword: str | None = None,
+    campus_id: int | None = None,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     """提供患者可读的院内科室位置、电话和医生专长信息。"""
     query = db.query(Department).order_by(Department.department_id)
+    if campus_id is not None:
+        query = query.filter(Department.campus_id == campus_id)
     if keyword:
         query = query.filter(Department.name.ilike(f"%{keyword.strip()}%"))
     data = []
@@ -284,6 +287,8 @@ def navigation_departments(
                 "name": department.name,
                 "location": department.location or "",
                 "phone": department.phone or "",
+                "campus_id": department.campus_id,
+                "campus_name": department.campus.name if department.campus else "",
                 "doctors": [
                     {
                         "doctor_id": doctor.doctor_id,

@@ -74,10 +74,28 @@ class ChargeCommitRequest(BaseModel):
 
 
 class DepartmentCreateRequest(BaseModel):
-    name: str
-    phone: str
-    director: int
-    location: str
+    name: str = Field(..., min_length=1, max_length=24)
+    phone: str = Field(default="", max_length=11)
+    director: int | None = None
+    location: str = Field(default="", max_length=24)
+    campus_id: int | None = None
+
+
+class CampusCreateRequest(BaseModel):
+    code: str = Field(..., min_length=1, max_length=30)
+    name: str = Field(..., min_length=1, max_length=50)
+    address: str = Field(default="", max_length=200)
+    phone: str = Field(default="", max_length=20)
+    status: int = Field(default=1, ge=0, le=1)
+    sort_order: int = Field(default=0, ge=0, le=9999)
+
+
+class CampusUpdateRequest(CampusCreateRequest):
+    campus_id: int
+
+
+class CampusDeleteRequest(BaseModel):
+    campus_id: int
 
 
 class NoticeCreateRequest(BaseModel):
@@ -436,10 +454,11 @@ class FamilyMemberUpdateRequest(FamilyMemberCreateRequest):
 
 class DepartmentUpdateRequest(BaseModel):
     department_id: int
-    name: str
-    phone: str
-    director: int
-    location: str
+    name: str = Field(..., min_length=1, max_length=24)
+    phone: str = Field(default="", max_length=11)
+    director: int | None = None
+    location: str = Field(default="", max_length=24)
+    campus_id: int | None = None
 
 
 class NoticeUpdateRequest(BaseModel):

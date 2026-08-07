@@ -31,6 +31,7 @@
 4. **[数据字典](data-dictionary.md)** — 状态码、枚举值统一定义
 5. **[架构文档](architecture.md)** — 中间件、依赖、安全机制
 6. **[测试指南](testing.md)** — pytest 测试编写与运行
+7. **[LIS/PACS 对接指南](integration-guide.md)** — 入站鉴权、幂等回调和厂商联调边界
 
 ### 🎨 前端开发
 

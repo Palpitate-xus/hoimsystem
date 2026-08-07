@@ -978,6 +978,17 @@ baseURL：`/api`
 | ✅ | /attendance/checkOut | POST | - | `{ code, msg, data: { status } }` |
 | ✅ | /attendance/getList | GET | `?doctor_id=&start_date=&end_date=` | `{ code, msg, data: Attendance[] }` |
 
+### 14.15 LIS/PACS 入站对接桥接
+
+对接接口不使用患者 JWT，必须通过部署环境变量配置的专用密钥鉴权，并使用 `X-Integration-Key` 请求头。接口按本地申请单 ID 幂等处理，接收结果/报告后仍保留院内审核流程。
+
+| 状态 | url | method | payload | response |
+|:----:|:--------------------------:|:------:|:-------:|:--------:|
+| ✅ | /integration/lis/result | POST | `{ lab_order_id, external_order_id?, sample_id, result, abnormal_flag }` | `{ code, msg, data: { lab_result_id, idempotent } }` |
+| ✅ | /integration/pacs/report | POST | `{ imaging_order_id, external_order_id?, findings, impression, viewer_url? }` | `{ code, msg, data: { report_id, idempotent } }` |
+
+**环境变量：** `LIS_INTEGRATION_KEY`、`PACS_INTEGRATION_KEY`。未配置密钥时接口返回 `503`；密钥错误返回 `401`；已进入院内审核的报告不会被外部回调覆盖。
+
 ---
 
 ## 十五、接口状态汇总

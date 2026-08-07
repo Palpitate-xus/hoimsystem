@@ -387,6 +387,9 @@
 | urgent | INT | - | - | 是否紧急（0=否，1=是） |
 | status | INT | - | - | 状态（0=待缴费，1=待检查，2=已完成） |
 | create_time | DATETIME | - | - | 申请时间 |
+| external_order_id | VARCHAR | 100 | - | LIS 外部申请单号 |
+| integration_status | VARCHAR | 20 | - | 对接状态（pending/synced/failed） |
+| last_sync_time | DATETIME | - | - | 最近同步时间 |
 
 ---
 

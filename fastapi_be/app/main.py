@@ -333,6 +333,7 @@ from app.routers import (
     icd10,
     nursing,
     patient,
+    patient_card,
     pharmacy,
     prescription_template,
     purchase,
@@ -373,6 +374,7 @@ app.add_middleware(OperationLogMiddleware)
 
 app.include_router(user.router, prefix="/api")
 app.include_router(patient.router, prefix="/api")
+app.include_router(patient_card.router, prefix="/api")
 app.include_router(admin.router, prefix="/api")
 app.include_router(doctor.router, prefix="/api")
 app.include_router(diagnosis_template.router, prefix="/api")

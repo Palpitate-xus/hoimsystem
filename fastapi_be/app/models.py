@@ -57,6 +57,22 @@ class Patient(Base):
     )
 
 
+class PatientCard(Base):
+    __tablename__ = "hoimsystem_patient_card"
+
+    card_id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    card_no = Column(String(24), nullable=False, unique=True)
+    patient_id = Column(Integer, ForeignKey("hoimsystem_patient.patient_id"), nullable=False)
+    status = Column(Integer, nullable=False, default=0)  # 0=有效 1=挂失 2=注销
+    issue_time = Column(DateTime, nullable=False)
+    lost_time = Column(DateTime, nullable=True)
+    cancel_time = Column(DateTime, nullable=True)
+    issuer_id = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=False)
+
+    patient = relationship("Patient")
+    issuer = relationship("User")
+
+
 class FamilyMember(Base):
     __tablename__ = "hoimsystem_family_member"
 

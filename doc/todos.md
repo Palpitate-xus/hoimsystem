@@ -749,7 +749,7 @@
 - [x] 需求文档（demandDoc.md）
 - [x] API 文档（apiDoc.md）
 - [x] 数据库文档（databaseDoc.md）
-- [ ] 部署文档（deployDoc.md）
+- [x] 部署文档（deployDoc.md，含开发/生产/Docker、HTTPS、Systemd和迁移说明）
 - [ ] 前端组件文档
 - [ ] 测试用例文档
 - [ ] 用户操作手册

@@ -33,7 +33,7 @@ from app.schemas import (
     PrescriptionCancelRequest,
     PrescriptionCreateRequest,
 )
-from app.security import hash_password
+from app.security import decrypt_transport_password, hash_password
 
 router = APIRouter()
 
@@ -42,7 +42,10 @@ router = APIRouter()
 def add_doctor(req: DoctorCreateRequest, current_user: User = Depends(require_roles(*ADMIN_ROLES)), db: Session = Depends(get_db)):
     if db.query(User).filter(User.username == req.username).first():
         return {"code": 500, "msg": "已存在相同用户"}
-    password = hash_password(req.password)
+    password_value = decrypt_transport_password(req.password)
+    if not password_value or not 6 <= len(password_value) <= 128:
+        return {"code": 500, "msg": "密码长度必须为6至128位"}
+    password = hash_password(password_value)
     name = req.name
     title = req.title
     sex = 0 if req.sex == "女" else 1

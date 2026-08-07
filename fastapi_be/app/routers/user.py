@@ -23,7 +23,7 @@ from app.dependencies import (
 )
 from app.models import Patient, PrepaidTransaction, User
 from app.schemas import LoginRequest, RegisterRequest, UserInfoRequest
-from app.security import hash_password, is_bcrypt_hash, verify_password
+from app.security import decrypt_transport_password, hash_password, is_bcrypt_hash, public_key_base64, verify_password
 
 router = APIRouter()
 _LOGIN_FAILURES: dict[str, list[float]] = {}
@@ -76,7 +76,7 @@ def get_public_key():
         "code": 200,
         "msg": "success",
         "data": {
-            "publicKey": "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDBT2vr+dhZElF73FJ6xiP181txKWUSNLPQQlid6DUJhGAOZblluafIdLmnUyKE8mMHhT3R+Ib3ssZcJku6Hn72yHYj/qPkCGFv0eFo7G+GJfDIUeDyalBN0QsuiE/XzPHJBuJDfRArOiWvH0BXOv5kpeXSXM8yTt5Na1jAYSiQ/wIDAQAB",
+            "publicKey": public_key_base64(),
             "mockServer": "False",
         },
     }
@@ -87,8 +87,9 @@ def login(req: LoginRequest, request: Request, db: Session = Depends(get_db)):
     key = _login_key(request, req.username)
     if _too_many_login_failures(key):
         return JSONResponse(status_code=429, content={"code": 429, "msg": "登录失败次数过多，请5分钟后重试"})
+    password = decrypt_transport_password(req.password)
     user = db.query(User).filter(User.username == req.username).first()
-    if not user or not verify_password(req.password, user.password):
+    if not password or not user or not verify_password(password, user.password):
         _record_login_failure(key)
         return {"code": 500, "msg": "账户或密码不正确"}
     _LOGIN_FAILURES.pop(key, None)
@@ -113,6 +114,9 @@ def parse_date_str(val):
 @router.post("/register")
 def register(req: RegisterRequest, db: Session = Depends(get_db)):
     try:
+        password = decrypt_transport_password(req.password)
+        if not password or not 6 <= len(password) <= 20:
+            return {"code": 500, "msg": "密码长度必须为6至20位"}
         if db.query(Patient).filter(Patient.identity == req.identity).first():
             return {"code": 500, "msg": "身份证号已注册"}
         if db.query(User).filter(User.username == req.identity).first():
@@ -128,7 +132,7 @@ def register(req: RegisterRequest, db: Session = Depends(get_db)):
         )
         db.add(patient)
         db.flush()
-        user = User(username=req.identity, password=hash_password(req.password), user_role="patient")
+        user = User(username=req.identity, password=hash_password(password), user_role="patient")
         db.add(user)
         db.commit()
         return {"code": 200, "msg": "success"}
@@ -220,7 +224,7 @@ def reset_user_password(req: dict, db: Session = Depends(get_db), current_user: 
     if not is_admin(current_user):
         return {"code": 403, "msg": "无权访问"}
     user_id = req.get("user_id")
-    new_password = req.get("new_password")
+    new_password = decrypt_transport_password(req.get("new_password"))
     if not user_id:
         return {"code": 500, "msg": "参数错误"}
     if not isinstance(new_password, str) or not 6 <= len(new_password) <= 128:

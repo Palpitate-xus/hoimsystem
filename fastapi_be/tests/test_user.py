@@ -1,4 +1,8 @@
 import pytest
+from base64 import b64decode, b64encode
+
+from cryptography.hazmat.primitives import hashes, serialization
+from cryptography.hazmat.primitives.asymmetric import padding
 
 
 @pytest.mark.asyncio
@@ -29,6 +33,25 @@ class TestUserAuth:
         assert body["code"] == 200
         assert "accesstoken" in body["data"]
         assert len(body["data"]["accesstoken"]) > 20
+
+    async def test_encrypted_password_transport(self, async_client):
+        key_response = await async_client.get("/api/publicKey")
+        public_key = serialization.load_der_public_key(b64decode(key_response.json()["data"]["publicKey"]))
+
+        def encrypted(value):
+            ciphertext = public_key.encrypt(value.encode(), padding.PKCS1v15())
+            return "RSA1:" + b64encode(ciphertext).decode()
+
+        r = await async_client.post("/api/register", json={
+            "username": "加密患者", "password": encrypted("123456"),
+            "identity": "110101200001011119", "address": "测试地址",
+            "sex": 1, "phone": "13800138009", "birthday": "2000-01-01"
+        })
+        assert r.json()["code"] == 200
+        r = await async_client.post("/api/login", json={
+            "username": "110101200001011119", "password": encrypted("123456")
+        })
+        assert r.json()["code"] == 200
 
     async def test_register_rejects_duplicate_identity(self, async_client):
         payload = {

@@ -11,12 +11,12 @@ class ResponseModel(BaseModel):
 
 class LoginRequest(BaseModel):
     username: str = Field(..., min_length=1, max_length=50)
-    password: str = Field(..., min_length=1, max_length=50)
+    password: str = Field(..., min_length=1, max_length=512)
 
 
 class RegisterRequest(BaseModel):
     username: str = Field(..., min_length=1, max_length=24)
-    password: str = Field(..., min_length=6, max_length=20)
+    password: str = Field(..., min_length=6, max_length=512)
     identity: str = Field(..., min_length=15, max_length=18)
     address: str = Field(default="", max_length=100)
     sex: int = Field(..., ge=0, le=1)

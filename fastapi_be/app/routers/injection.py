@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.dependencies import CLINICAL_ROLES, NURSING_ROLES, User, require_roles
 from app.models import Doctor, InjectionOrder, Patient
-from app.pharmacy_safety import get_usable_pharmaceutical
+from app.pharmacy_safety import get_patient_safe_pharmaceutical
 from app.schemas import InjectionCreateRequest, InjectionIdRequest
 
 router = APIRouter()
@@ -42,7 +42,7 @@ def create_injection(req: InjectionCreateRequest, current_user: User = Depends(r
         return {"code": 500, "msg": "注射途径必须为肌注、皮下或皮内"}
     if not db.query(Patient).filter(Patient.patient_id == req.patient_id).first():
         return {"code": 500, "msg": "患者不存在"}
-    pharmaceutical, medication_error = get_usable_pharmaceutical(db, req.pharmaceutical_id)
+    pharmaceutical, medication_error = get_patient_safe_pharmaceutical(db, req.pharmaceutical_id, req.patient_id)
     if medication_error:
         return {"code": 500, "msg": medication_error}
     item = InjectionOrder(

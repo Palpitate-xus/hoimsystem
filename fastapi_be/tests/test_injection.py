@@ -36,3 +36,15 @@ class TestInjection:
         })
         assert response.json()["code"] == 500
         assert "过期" in response.json()["msg"]
+
+    async def test_injection_rejects_patient_allergy(self, async_client, seed_data, auth_headers, db_session):
+        seed_data["patient"].allergy_history = "阿司匹林"
+        db_session.commit()
+        response = await async_client.post("/api/injection/create", headers=auth_headers(seed_data["doctor_user"].username), json={
+            "patient_id": seed_data["patient"].patient_id,
+            "pharmaceutical_id": seed_data["pharmaceutical"].pharmaceutical_id,
+            "route": "im",
+            "dose": "2ml",
+        })
+        assert response.json()["code"] == 500
+        assert "过敏史冲突" in response.json()["msg"]

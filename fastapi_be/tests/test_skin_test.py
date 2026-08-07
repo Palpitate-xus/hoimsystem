@@ -51,3 +51,15 @@ class TestSkinTest:
         })
         assert response.json()["code"] == 500
         assert "停用" in response.json()["msg"]
+
+    async def test_skin_test_rejects_patient_allergy(self, async_client, seed_data, auth_headers, db_session):
+        seed_data["patient"].allergy_history = "阿司匹林"
+        db_session.commit()
+        response = await async_client.post("/api/skinTest/create", headers=auth_headers(seed_data["doctor_user"].username), json={
+            "patient_id": seed_data["patient"].patient_id,
+            "pharmaceutical_id": seed_data["pharmaceutical"].pharmaceutical_id,
+            "dose": "0.1ml",
+            "site": "左前臂",
+        })
+        assert response.json()["code"] == 500
+        assert "过敏史冲突" in response.json()["msg"]

@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.dependencies import ADMIN_ROLES,  CLINICAL_ROLES,  PHARMACY_ROLES,  get_current_user,  require_roles, User, User
+from app.dependencies import ADMIN_ROLES, CLINICAL_ROLES, PHARMACY_ROLES, get_current_user, require_roles
 from app.models import (
     Attendance,
     Charge,
@@ -615,7 +615,13 @@ def attendance_check_out(current_user: User = Depends(get_current_user), db: Ses
 
 
 @router.get("/attendance/getList")
-def get_attendance_list(doctor_id: int | None = None, start_date: str | None = None, end_date: str | None = None, current_user: User = Depends(require_roles(*CLINICAL_ROLES)), db: Session = Depends(get_db)):
+def get_attendance_list(
+    doctor_id: int | None = None,
+    start_date: str | None = None,
+    end_date: str | None = None,
+    current_user: User = Depends(require_roles(*CLINICAL_ROLES)),
+    db: Session = Depends(get_db),
+):
     query = db.query(Attendance).order_by(Attendance.date.desc())
     if doctor_id:
         query = query.filter(Attendance.doctor_id == doctor_id)

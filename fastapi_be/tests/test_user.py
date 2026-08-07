@@ -1,7 +1,7 @@
-import pytest
 from base64 import b64decode, b64encode
 
-from cryptography.hazmat.primitives import hashes, serialization
+import pytest
+from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import padding
 
 

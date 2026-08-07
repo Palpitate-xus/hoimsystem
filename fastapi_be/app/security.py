@@ -1,7 +1,7 @@
 import base64
 
 import bcrypt
-from cryptography.hazmat.primitives import hashes, serialization
+from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import padding, rsa
 
 _BCRYPT_PREFIXES = ("$2a$", "$2b$", "$2y$")

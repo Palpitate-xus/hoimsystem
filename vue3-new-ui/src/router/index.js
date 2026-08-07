@@ -710,6 +710,13 @@ export const asyncRoutes = [
         component: () => import("@/views/system/digitalSignature.vue"),
         meta: { title: "CA数字签名", permissions: ["admin", "doctor", "director"] },
       },
+      {
+        path: "editor",
+        name: "HtmlEditor",
+        hidden: true,
+        component: () => import("@/views/vab/editor.vue"),
+        meta: { title: "内容编辑器", permissions: ["admin"] },
+      },
     ],
   },
 

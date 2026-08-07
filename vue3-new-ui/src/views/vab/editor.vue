@@ -22,7 +22,7 @@
         
         <div class="content-preview">
           <h3>内容预览：</h3>
-          <div class="preview-content" v-html="content"></div>
+        <div class="preview-content" v-html="safeContent"></div>
         </div>
       </div>
     </el-card>
@@ -30,12 +30,19 @@
 </template>
 
 <script>
+import { sanitizeHtml } from "@/utils/sanitizeHtml";
+
 export default {
   name: "Editor",
   data() {
     return {
       content: "<h1>欢迎使用富文本编辑器</h1><p>这是一个简单的富文本编辑器示例。</p><ul><li>您可以在这里编辑文本</li><li>支持HTML格式</li><li>可以预览编辑效果</li></ul>",
     };
+  },
+  computed: {
+    safeContent() {
+      return sanitizeHtml(this.content);
+    },
   },
   methods: {
     saveContent() {

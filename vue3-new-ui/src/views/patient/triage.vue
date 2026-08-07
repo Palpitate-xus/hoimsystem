@@ -20,6 +20,23 @@
           </el-button>
           <el-button size="large" @click="symptomText = ''">清空</el-button>
         </div>
+        <el-alert
+          title="导诊仅用于分流参考，不构成医疗诊断"
+          description="如出现胸痛、呼吸困难、意识不清、大出血等情况，请立即前往急诊或拨打急救电话。"
+          type="warning"
+          show-icon
+          :closable="false"
+          style="margin-top: 16px;"
+        />
+        <el-alert
+          v-if="emergency"
+          title="可能存在急症风险"
+          :description="emergencyMessage"
+          type="error"
+          show-icon
+          :closable="false"
+          style="margin-top: 12px;"
+        />
 
         <!-- 推荐科室 -->
         <div v-if="suggestions.length > 0" style="margin-top: 30px;">
@@ -92,6 +109,8 @@ const loading = ref(false);
 const suggestions = ref([]);
 const keywords = ref([]);
 const showAllKeywords = ref(false);
+const emergency = ref(false);
+const emergencyMessage = ref("");
 
 const displayedKeywords = computed(() => {
   if (showAllKeywords.value) return keywords.value;
@@ -108,6 +127,8 @@ const submitTriage = async () => {
     const res = await triageSuggest({ symptom: symptomText.value.trim() });
     if (res.code === 200) {
       suggestions.value = res.data.suggestions || [];
+      emergency.value = Boolean(res.data.emergency);
+      emergencyMessage.value = res.data.emergency_message || "";
       if (suggestions.value.length === 0) {
         ElMessage.info("未找到匹配科室，建议前往综合门诊或急诊科");
       }

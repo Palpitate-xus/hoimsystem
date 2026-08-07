@@ -21,6 +21,7 @@ class Settings(BaseSettings):
     ALLOWED_ORIGINS: str = "http://localhost:8091,http://127.0.0.1:8091,http://localhost:8080,http://127.0.0.1:8080"
     LIS_INTEGRATION_KEY: str = ""
     PACS_INTEGRATION_KEY: str = ""
+    MEDICAL_INSURANCE_INTEGRATION_KEY: str = ""
 
     class Config:
         env_file = ".env"

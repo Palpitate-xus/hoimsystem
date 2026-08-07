@@ -382,6 +382,8 @@ baseURL：`/api`
   - `diagnosis`: 诊断结果
   - `prescription_id`: 处方 ID
 
+结构化过敏史接口：`/allergy/create`、`/allergy/update`、`/allergy/disable`、`/allergy/list`。有效过敏记录会同步到患者档案，并在处方开立时按逗号、分号和中英文冒号解析过敏原，命中药品名称或备注时禁止开方。
+
 ### 3.8 就诊评价
 
 | 状态 | url | method | payload | response |

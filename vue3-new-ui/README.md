@@ -59,6 +59,8 @@ npm run serve:rspack
 
 ```
 
+开发服务器默认代理真实 FastAPI 后端（`http://localhost:8000`），不会启用 Mock。仅在没有后端时显式执行 `VUE_APP_MOCK_ENABLE=true npm run serve:rspack` 使用 Mock；生产构建始终默认关闭 Mock。
+
 ## 🌱 Vue 3.x (Element Plus) [点击切换仓库](https://github.com/zxwk1998/vue3-admin-better)
 
 ```

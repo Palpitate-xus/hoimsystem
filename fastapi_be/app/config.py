@@ -22,6 +22,7 @@ class Settings(BaseSettings):
     LIS_INTEGRATION_KEY: str = ""
     PACS_INTEGRATION_KEY: str = ""
     MEDICAL_INSURANCE_INTEGRATION_KEY: str = ""
+    PAYMENT_INTEGRATION_KEY: str = ""
 
     class Config:
         env_file = ".env"

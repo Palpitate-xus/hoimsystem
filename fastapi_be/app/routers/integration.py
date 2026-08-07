@@ -1,14 +1,15 @@
 import datetime
 import secrets
+from decimal import Decimal
 
 from fastapi import APIRouter, Depends, Header, HTTPException
 from sqlalchemy.orm import Session
 
 from app.config import settings
 from app.database import get_db
-from app.models import ImagingOrder, ImagingReport, LabOrder, LabResult, User
+from app.models import Charge, ImagingOrder, ImagingReport, LabOrder, LabResult, Payment, User
 from app.routers.lab import check_critical_value
-from app.schemas import ImagingReportIntegrationRequest, LabResultIntegrationRequest
+from app.schemas import ImagingReportIntegrationRequest, LabResultIntegrationRequest, PaymentIntegrationRequest
 
 router = APIRouter()
 
@@ -102,3 +103,48 @@ def receive_pacs_report(
     db.commit()
     db.refresh(report)
     return {"code": 200, "msg": "PACS报告已接收，等待审核", "data": {"report_id": report.report_id, "idempotent": False}}
+
+
+@router.post("/integration/payment/notify")
+def receive_payment_notification(
+    req: PaymentIntegrationRequest,
+    x_integration_key: str | None = Header(default=None),
+    db: Session = Depends(get_db),
+):
+    """接收支付平台异步通知，校验金额并原子更新支付单和收费单。"""
+    _check_key(x_integration_key, settings.PAYMENT_INTEGRATION_KEY, "支付")
+    payment = db.query(Payment).filter(Payment.payment_no == req.payment_no).first()
+    if not payment:
+        raise HTTPException(status_code=404, detail="支付单不存在")
+    external_id = req.external_payment_id.strip() if req.external_payment_id else None
+    if payment.external_payment_id and external_id and payment.external_payment_id != external_id:
+        raise HTTPException(status_code=409, detail="外部支付单号与本地记录绑定不一致")
+    external_id = external_id or payment.external_payment_id
+    if payment.integration_status == "synced":
+        return {"code": 200, "msg": "支付结果已同步，重复回调已忽略", "data": {"payment_no": payment.payment_no, "idempotent": True}}
+    if req.status not in (1, 2):
+        raise HTTPException(status_code=400, detail="支付回调状态不支持")
+    expected_amount = Decimal(str(payment.amount or 0)).quantize(Decimal("0.01"))
+    received_amount = Decimal(str(req.amount)).quantize(Decimal("0.01"))
+    if received_amount != expected_amount:
+        raise HTTPException(status_code=400, detail="支付回调金额与订单金额不一致")
+    if payment.status != 0:
+        raise HTTPException(status_code=409, detail="支付单状态已发生变化")
+    now = datetime.datetime.now()
+    payment.external_payment_id = external_id
+    payment.last_sync_time = now
+    payment.integration_status = "synced"
+    payment.status = req.status
+    if req.status == 1:
+        charge = db.query(Charge).filter(Charge.charge_id == payment.charge_id, Charge.status == 0).first()
+        if not charge:
+            raise HTTPException(status_code=409, detail="关联收费记录状态已发生变化")
+        payment.paid_time = now
+        charge.status = 1
+        charge.time = now
+    db.commit()
+    return {
+        "code": 200,
+        "msg": "支付结果已同步",
+        "data": {"payment_no": payment.payment_no, "idempotent": False, "status": payment.status},
+    }

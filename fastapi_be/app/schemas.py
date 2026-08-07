@@ -766,6 +766,14 @@ class PaymentMockNotifyRequest(BaseModel):
     payment_no: str
 
 
+class PaymentIntegrationRequest(BaseModel):
+    payment_no: str
+    external_payment_id: str | None = None
+    status: int  # 1=支付成功，2=支付失败
+    amount: float
+    failure_reason: str | None = None
+
+
 class TestRequest(BaseModel):
     data: str | None = None
 

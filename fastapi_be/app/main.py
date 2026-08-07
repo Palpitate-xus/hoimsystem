@@ -341,6 +341,7 @@ from app.routers import (
     medical_record_home,
     medical_record_home_quality,
     monitor,
+    navigation,
     nursing,
     patient,
     patient_card,
@@ -428,6 +429,7 @@ app.include_router(data_import_export.router, prefix="/api")
 app.include_router(referral.router, prefix="/api")
 app.include_router(mdt.router, prefix="/api")
 app.include_router(monitor.router, prefix="/api")
+app.include_router(navigation.router, prefix="/api")
 app.include_router(clinical_pathway.router, prefix="/api")
 app.include_router(ward.router, prefix="/api")
 app.include_router(admission.router, prefix="/api")

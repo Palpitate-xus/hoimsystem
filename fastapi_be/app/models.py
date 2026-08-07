@@ -143,6 +143,7 @@ class HospitalCampus(Base):
     update_time = Column(DateTime, nullable=False)
 
     departments = relationship("Department", back_populates="campus")
+    navigation_nodes = relationship("NavigationNode", back_populates="campus")
 
 
 class Department(Base):
@@ -157,6 +158,45 @@ class Department(Base):
 
     doctors = relationship("Doctor", back_populates="department")
     campus = relationship("HospitalCampus", back_populates="departments")
+    navigation_nodes = relationship("NavigationNode", back_populates="department")
+
+
+class NavigationNode(Base):
+    __tablename__ = "hoimsystem_navigation_node"
+
+    node_id = Column(Integer, primary_key=True, autoincrement=True)
+    code = Column(String(40), nullable=False, unique=True)
+    name = Column(String(80), nullable=False)
+    node_type = Column(String(20), nullable=False, default="waypoint")  # entrance / waypoint / department
+    floor = Column(String(20), nullable=False, default="")
+    location = Column(String(200), nullable=False, default="")
+    campus_id = Column(Integer, ForeignKey("hoimsystem_hospital_campus.campus_id"), nullable=True)
+    department_id = Column(Integer, ForeignKey("hoimsystem_department.department_id"), nullable=True)
+    status = Column(Integer, nullable=False, default=1)
+    create_time = Column(DateTime, nullable=False)
+    update_time = Column(DateTime, nullable=False)
+
+    campus = relationship("HospitalCampus", back_populates="navigation_nodes")
+    department = relationship("Department", back_populates="navigation_nodes")
+    outgoing_edges = relationship("NavigationEdge", foreign_keys="NavigationEdge.from_node_id", back_populates="from_node")
+    incoming_edges = relationship("NavigationEdge", foreign_keys="NavigationEdge.to_node_id", back_populates="to_node")
+
+
+class NavigationEdge(Base):
+    __tablename__ = "hoimsystem_navigation_edge"
+
+    edge_id = Column(Integer, primary_key=True, autoincrement=True)
+    from_node_id = Column(Integer, ForeignKey("hoimsystem_navigation_node.node_id"), nullable=False)
+    to_node_id = Column(Integer, ForeignKey("hoimsystem_navigation_node.node_id"), nullable=False)
+    distance = Column(Float, nullable=False, default=1)
+    instruction = Column(String(200), nullable=False, default="")
+    bidirectional = Column(Integer, nullable=False, default=1)
+    status = Column(Integer, nullable=False, default=1)
+    create_time = Column(DateTime, nullable=False)
+    update_time = Column(DateTime, nullable=False)
+
+    from_node = relationship("NavigationNode", foreign_keys=[from_node_id], back_populates="outgoing_edges")
+    to_node = relationship("NavigationNode", foreign_keys=[to_node_id], back_populates="incoming_edges")
 
 
 class GuideFaq(Base):
@@ -2116,6 +2156,9 @@ class InsuranceSettlement(Base):
     status = Column(Integer, nullable=False, default=0)  # 0=处理中 1=成功 2=失败
     operator_id = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=False)
     settlement_time = Column(DateTime, nullable=False)
+    external_settlement_id = Column(String(100), nullable=True, index=True)
+    integration_status = Column(String(20), nullable=False, default="pending")  # local / pending / synced / failed
+    last_sync_time = Column(DateTime, nullable=True)
 
     patient = relationship("Patient")
     operator = relationship("User")

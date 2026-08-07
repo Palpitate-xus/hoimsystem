@@ -98,6 +98,42 @@ class CampusDeleteRequest(BaseModel):
     campus_id: int
 
 
+class NavigationNodeCreateRequest(BaseModel):
+    code: str = Field(..., min_length=1, max_length=40)
+    name: str = Field(..., min_length=1, max_length=80)
+    node_type: str = Field(default="waypoint", max_length=20)
+    floor: str = Field(default="", max_length=20)
+    location: str = Field(default="", max_length=200)
+    campus_id: int | None = None
+    department_id: int | None = None
+    status: int = Field(default=1, ge=0, le=1)
+
+
+class NavigationNodeUpdateRequest(NavigationNodeCreateRequest):
+    node_id: int
+
+
+class NavigationNodeDeleteRequest(BaseModel):
+    node_id: int
+
+
+class NavigationEdgeCreateRequest(BaseModel):
+    from_node_id: int
+    to_node_id: int
+    distance: float = Field(..., gt=0, le=100000)
+    instruction: str = Field(default="", max_length=200)
+    bidirectional: int = Field(default=1, ge=0, le=1)
+    status: int = Field(default=1, ge=0, le=1)
+
+
+class NavigationEdgeUpdateRequest(NavigationEdgeCreateRequest):
+    edge_id: int
+
+
+class NavigationEdgeDeleteRequest(BaseModel):
+    edge_id: int
+
+
 class NoticeCreateRequest(BaseModel):
     title: str
     content: str
@@ -573,6 +609,15 @@ class ImagingReportIntegrationRequest(BaseModel):
     findings: str = Field(default="", max_length=20000)
     impression: str = Field(default="", max_length=10000)
     viewer_url: str | None = Field(default=None, max_length=500)
+
+
+class InsuranceSettlementIntegrationRequest(BaseModel):
+    settlement_id: str = Field(..., min_length=1, max_length=36)
+    external_settlement_id: str | None = Field(default=None, max_length=100)
+    status: int = Field(..., ge=1, le=2)
+    total_amount: float = Field(..., gt=0)
+    covered_amount: float = Field(..., ge=0)
+    self_amount: float | None = Field(default=None, ge=0)
 
 
 class LabPackageCreateRequest(BaseModel):

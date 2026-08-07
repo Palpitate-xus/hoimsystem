@@ -1,4 +1,8 @@
+import datetime
+
 import pytest
+
+from app.models import Pharmaceutical
 
 
 @pytest.mark.asyncio
@@ -19,3 +23,16 @@ class TestInjection:
         doctor_headers = auth_headers(seed_data["doctor_user"].username)
         invalid = await async_client.post("/api/injection/create", headers=doctor_headers, json={"patient_id": seed_data["patient"].patient_id, "pharmaceutical_id": seed_data["pharmaceutical"].pharmaceutical_id, "route": "iv", "dose": "2ml"})
         assert invalid.json()["code"] == 500
+
+    async def test_injection_rejects_expired_medication(self, async_client, seed_data, auth_headers, db_session):
+        expired = Pharmaceutical(name="注射过期药", stock=10, price=1, expireddate=datetime.date.today() - datetime.timedelta(days=1), status=0)
+        db_session.add(expired)
+        db_session.commit()
+        response = await async_client.post("/api/injection/create", headers=auth_headers(seed_data["doctor_user"].username), json={
+            "patient_id": seed_data["patient"].patient_id,
+            "pharmaceutical_id": expired.pharmaceutical_id,
+            "route": "im",
+            "dose": "2ml",
+        })
+        assert response.json()["code"] == 500
+        assert "过期" in response.json()["msg"]

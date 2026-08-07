@@ -5,7 +5,8 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.dependencies import CLINICAL_ROLES, NURSING_ROLES, User, require_roles
-from app.models import Doctor, Patient, Pharmaceutical, SkinTestOrder
+from app.models import Doctor, Patient, SkinTestOrder
+from app.pharmacy_safety import get_usable_pharmaceutical
 from app.schemas import SkinTestAssessRequest, SkinTestCreateRequest, SkinTestIdRequest
 
 router = APIRouter()
@@ -41,8 +42,9 @@ def create_skin_test(req: SkinTestCreateRequest, current_user: User = Depends(re
         return {"code": 500, "msg": "医生信息不存在"}
     if not db.query(Patient).filter(Patient.patient_id == req.patient_id).first():
         return {"code": 500, "msg": "患者不存在"}
-    if not db.query(Pharmaceutical).filter(Pharmaceutical.pharmaceutical_id == req.pharmaceutical_id).first():
-        return {"code": 500, "msg": "药品不存在"}
+    pharmaceutical, medication_error = get_usable_pharmaceutical(db, req.pharmaceutical_id)
+    if medication_error:
+        return {"code": 500, "msg": medication_error}
     item = SkinTestOrder(
         patient_id=req.patient_id,
         doctor_id=doctor.doctor_id,
@@ -66,7 +68,11 @@ def list_skin_tests(current_user: User = Depends(require_roles(*(CLINICAL_ROLES 
 
 @router.post("/skinTest/administer")
 def administer_skin_test(req: SkinTestIdRequest, current_user: User = Depends(require_roles(*NURSING_ROLES)), db: Session = Depends(get_db)):
-    updated = db.query(SkinTestOrder).filter(SkinTestOrder.skin_test_id == req.skin_test_id, SkinTestOrder.status == 0).update({SkinTestOrder.status: 1, SkinTestOrder.nurse_id: current_user.user_id, SkinTestOrder.administer_time: datetime.datetime.now()}, synchronize_session=False)
+    updated = (
+        db.query(SkinTestOrder)
+        .filter(SkinTestOrder.skin_test_id == req.skin_test_id, SkinTestOrder.status == 0)
+        .update({SkinTestOrder.status: 1, SkinTestOrder.nurse_id: current_user.user_id, SkinTestOrder.administer_time: datetime.datetime.now()}, synchronize_session=False)
+    )
     if updated != 1:
         return {"code": 500, "msg": "皮试医嘱状态不允许执行"}
     db.commit()
@@ -77,7 +83,11 @@ def administer_skin_test(req: SkinTestIdRequest, current_user: User = Depends(re
 def assess_skin_test(req: SkinTestAssessRequest, current_user: User = Depends(require_roles(*NURSING_ROLES)), db: Session = Depends(get_db)):
     if req.result not in VALID_RESULTS:
         return {"code": 500, "msg": "皮试结果必须为阴性、阳性或无效"}
-    updated = db.query(SkinTestOrder).filter(SkinTestOrder.skin_test_id == req.skin_test_id, SkinTestOrder.status == 1, SkinTestOrder.nurse_id == current_user.user_id).update({SkinTestOrder.status: RESULT_STATUS[req.result], SkinTestOrder.result_note: req.note.strip(), SkinTestOrder.observe_time: datetime.datetime.now()}, synchronize_session=False)
+    updated = (
+        db.query(SkinTestOrder)
+        .filter(SkinTestOrder.skin_test_id == req.skin_test_id, SkinTestOrder.status == 1, SkinTestOrder.nurse_id == current_user.user_id)
+        .update({SkinTestOrder.status: RESULT_STATUS[req.result], SkinTestOrder.result_note: req.note.strip(), SkinTestOrder.observe_time: datetime.datetime.now()}, synchronize_session=False)
+    )
     if updated != 1:
         return {"code": 500, "msg": "只有执行该皮试的护士可以判定结果"}
     db.commit()
@@ -86,7 +96,11 @@ def assess_skin_test(req: SkinTestAssessRequest, current_user: User = Depends(re
 
 @router.post("/skinTest/cancel")
 def cancel_skin_test(req: SkinTestIdRequest, current_user: User = Depends(require_roles(*CLINICAL_ROLES)), db: Session = Depends(get_db)):
-    updated = db.query(SkinTestOrder).filter(SkinTestOrder.skin_test_id == req.skin_test_id, SkinTestOrder.status == 0).update({SkinTestOrder.status: 5, SkinTestOrder.observe_time: datetime.datetime.now()}, synchronize_session=False)
+    updated = (
+        db.query(SkinTestOrder)
+        .filter(SkinTestOrder.skin_test_id == req.skin_test_id, SkinTestOrder.status == 0)
+        .update({SkinTestOrder.status: 5, SkinTestOrder.observe_time: datetime.datetime.now()}, synchronize_session=False)
+    )
     if updated != 1:
         return {"code": 500, "msg": "只有未执行的皮试医嘱可以取消"}
     db.commit()

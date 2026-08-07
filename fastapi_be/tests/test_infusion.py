@@ -1,4 +1,8 @@
+import datetime
+
 import pytest
+
+from app.models import Pharmaceutical
 
 
 @pytest.mark.asyncio
@@ -41,3 +45,19 @@ class TestInfusion:
         assert cancelled.json()["code"] == 200
         execute_cancelled = await async_client.post("/api/infusion/execute", headers=nurse_headers, json={"infusion_id": infusion_id})
         assert execute_cancelled.json()["code"] == 500
+
+    async def test_infusion_rejects_expired_or_inactive_medication(self, async_client, seed_data, auth_headers, db_session):
+        headers = auth_headers(seed_data["doctor_user"].username)
+        expired = Pharmaceutical(name="输液过期药", stock=10, price=1, expireddate=datetime.date.today() - datetime.timedelta(days=1), status=0)
+        inactive = Pharmaceutical(name="输液停用药", stock=10, price=1, expireddate=datetime.date.today() + datetime.timedelta(days=30), status=1)
+        db_session.add_all([expired, inactive])
+        db_session.commit()
+        for pharmaceutical_id, expected in ((expired.pharmaceutical_id, "过期"), (inactive.pharmaceutical_id, "停用")):
+            response = await async_client.post("/api/infusion/create", headers=headers, json={
+                "patient_id": seed_data["patient"].patient_id,
+                "pharmaceutical_id": pharmaceutical_id,
+                "dose": "100ml",
+                "batch_no": "SAFE-001",
+            })
+            assert response.json()["code"] == 500
+            assert expected in response.json()["msg"]

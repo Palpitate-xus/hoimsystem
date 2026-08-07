@@ -5,10 +5,11 @@ from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.dependencies import get_current_user, User, User, require_roles, CASHIER_ROLES
-from app.models import Admission, InpatientCharge, Patient
+from app.dependencies import CASHIER_ROLES, NURSING_ROLES, User, require_roles
+from app.models import Admission, InpatientCharge
 
 router = APIRouter()
+INPATIENT_FINANCE_ROLES = CASHIER_ROLES | NURSING_ROLES
 
 
 @router.get("/inpatientCharge/getList")
@@ -17,6 +18,7 @@ def get_inpatient_charge_list(
     patient_id: int | None = None,
     charge_date: str | None = None,
     status: int | None = None,
+    current_user: User = Depends(require_roles(*INPATIENT_FINANCE_ROLES)),
     db: Session = Depends(get_db),
 ):
     query = db.query(InpatientCharge).order_by(InpatientCharge.charge_date.desc(), InpatientCharge.create_time.desc())
@@ -59,7 +61,7 @@ def get_inpatient_charge_list(
 
 
 @router.get("/inpatientCharge/getDailyBill")
-def get_daily_bill(admission_id: str, current_user: User = Depends(get_current_user),
+def get_daily_bill(admission_id: str, current_user: User = Depends(require_roles(*INPATIENT_FINANCE_ROLES)),
     db: Session = Depends(get_db)):
     admission = db.query(Admission).filter(Admission.admission_id == admission_id).first()
     if not admission:
@@ -115,17 +117,20 @@ def settle_charges(req: dict, current_user: User = Depends(require_roles(*CASHIE
     if not admission:
         return {"code": 500, "msg": "入院记录不存在"}
 
-    # 结算所有未结算的费用
+    # 结算所有未结算的费用，并记录实际操作人和时间；重复结算保持幂等。
     charges = db.query(InpatientCharge).filter(
         InpatientCharge.admission_id == admission_id,
         InpatientCharge.status == 0,
     ).all()
+    settled_time = datetime.datetime.now()
     for c in charges:
         c.status = 1
+        c.settled_by = current_user.user_id
+        c.settled_time = settled_time
         db.add(c)
 
     db.commit()
-    return {"code": 200, "msg": "success"}
+    return {"code": 200, "msg": "success", "data": {"settled_count": len(charges)}}
 
 
 @router.post("/inpatientCharge/refund")
@@ -137,14 +142,32 @@ def refund_charge(req: dict, current_user: User = Depends(require_roles(*CASHIER
         return {"code": 500, "msg": "费用记录不存在"}
     if charge.status == 2:
         return {"code": 500, "msg": "该费用已退费"}
-    charge.status = 2
-    db.add(charge)
+    if charge.status != 1:
+        return {"code": 500, "msg": "未结算费用不可退费"}
+    reason = str(req.get("reason") or "").strip()
+    if not reason:
+        return {"code": 500, "msg": "退费原因不能为空"}
+    updated = db.query(InpatientCharge).filter(
+        InpatientCharge.charge_id == charge_id,
+        InpatientCharge.status == 1,
+    ).update(
+        {
+            InpatientCharge.status: 2,
+            InpatientCharge.refunded_by: current_user.user_id,
+            InpatientCharge.refunded_time: datetime.datetime.now(),
+            InpatientCharge.refund_reason: reason[:200],
+        },
+        synchronize_session=False,
+    )
+    if updated != 1:
+        db.rollback()
+        return {"code": 500, "msg": "费用状态已变化，无法退费"}
     db.commit()
     return {"code": 200, "msg": "success"}
 
 
 @router.get("/inpatientCharge/getSummary")
-def get_charge_summary(current_user: User = Depends(get_current_user),
+def get_charge_summary(current_user: User = Depends(require_roles(*INPATIENT_FINANCE_ROLES)),
     db: Session = Depends(get_db)):
     today = datetime.datetime.now().date()
 

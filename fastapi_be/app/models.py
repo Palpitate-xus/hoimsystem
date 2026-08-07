@@ -1702,9 +1702,16 @@ class InpatientCharge(Base):
     related_order_id = Column(String(36), nullable=True)  # 关联医嘱ID
     status = Column(Integer, default=0)  # 0=未结算 1=已结算 2=已退费
     create_time = Column(DateTime)
+    settled_by = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=True)
+    settled_time = Column(DateTime, nullable=True)
+    refunded_by = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=True)
+    refunded_time = Column(DateTime, nullable=True)
+    refund_reason = Column(String(200), nullable=True)
 
     admission = relationship("Admission", back_populates="charges")
     patient = relationship("Patient")
+    settler = relationship("User", foreign_keys=[settled_by])
+    refunder = relationship("User", foreign_keys=[refunded_by])
 
 
 class DischargeSummary(Base):

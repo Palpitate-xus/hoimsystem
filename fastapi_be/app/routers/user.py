@@ -1,9 +1,11 @@
 import datetime
 import json
 import math
+import time
 
 import jwt
 from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi.responses import JSONResponse
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
@@ -24,6 +26,25 @@ from app.schemas import LoginRequest, RegisterRequest, UserInfoRequest
 from app.security import hash_password, is_bcrypt_hash, verify_password
 
 router = APIRouter()
+_LOGIN_FAILURES: dict[str, list[float]] = {}
+_LOGIN_FAILURE_WINDOW_SECONDS = 300
+_LOGIN_FAILURE_LIMIT = 5
+
+
+def _login_key(request: Request, username: str) -> str:
+    client = request.client.host if request.client else "unknown"
+    return f"{client}:{username.strip().lower()}"
+
+
+def _too_many_login_failures(key: str) -> bool:
+    now = time.monotonic()
+    failures = [value for value in _LOGIN_FAILURES.get(key, []) if now - value < _LOGIN_FAILURE_WINDOW_SECONDS]
+    _LOGIN_FAILURES[key] = failures
+    return len(failures) >= _LOGIN_FAILURE_LIMIT
+
+
+def _record_login_failure(key: str):
+    _LOGIN_FAILURES.setdefault(key, []).append(time.monotonic())
 
 
 def create_access_token(username: str) -> str:
@@ -62,10 +83,15 @@ def get_public_key():
 
 
 @router.post("/login")
-def login(req: LoginRequest, db: Session = Depends(get_db)):
+def login(req: LoginRequest, request: Request, db: Session = Depends(get_db)):
+    key = _login_key(request, req.username)
+    if _too_many_login_failures(key):
+        return JSONResponse(status_code=429, content={"code": 429, "msg": "登录失败次数过多，请5分钟后重试"})
     user = db.query(User).filter(User.username == req.username).first()
     if not user or not verify_password(req.password, user.password):
+        _record_login_failure(key)
         return {"code": 500, "msg": "账户或密码不正确"}
+    _LOGIN_FAILURES.pop(key, None)
     if not is_bcrypt_hash(user.password):
         user.password = hash_password(req.password)
         db.commit()

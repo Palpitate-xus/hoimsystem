@@ -7,11 +7,88 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.dependencies import NURSING_ROLES, PHARMACY_ROLES, User, require_roles
-from app.models import DispenseVerification, Pharmaceutical, PrePha, Prescription
+from app.models import (
+    DispenseVerification,
+    Pharmaceutical,
+    PharmaceuticalBatch,
+    PharmaceuticalStockLedger,
+    PrePha,
+    Prescription,
+)
 from app.pagination import paginate
 from app.schemas import PharmacyAuditRequest, PharmacyDispenseRequest, PharmacyReturnRequest, PharmacyVerificationRequest
 
 router = APIRouter()
+
+
+@router.get("/pharmacy/batch/list")
+def get_batch_list(
+    pharmaceutical_id: int | None = None,
+    status: int | None = None,
+    current_user: User = Depends(require_roles(*PHARMACY_ROLES)),
+    db: Session = Depends(get_db),
+):
+    query = db.query(PharmaceuticalBatch).join(Pharmaceutical)
+    if pharmaceutical_id is not None:
+        query = query.filter(PharmaceuticalBatch.pharmaceutical_id == pharmaceutical_id)
+    if status is not None:
+        query = query.filter(PharmaceuticalBatch.status == status)
+    batches = query.order_by(PharmaceuticalBatch.expiry_date.is_(None), PharmaceuticalBatch.expiry_date.asc(), PharmaceuticalBatch.batch_id.asc()).all()
+    return {
+        "code": 200,
+        "msg": "success",
+        "data": [
+            {
+                "batch_id": batch.batch_id,
+                "pharmaceutical_id": batch.pharmaceutical_id,
+                "pharmaceutical_name": batch.pharmaceutical.name if batch.pharmaceutical else "",
+                "batch_no": batch.batch_no,
+                "expiry_date": batch.expiry_date,
+                "stock": batch.stock,
+                "location": batch.location,
+                "status": batch.status,
+                "status_text": "在用" if batch.status == 0 else "冻结",
+            }
+            for batch in batches
+        ],
+    }
+
+
+@router.get("/pharmacy/batch/ledger")
+def get_batch_ledger(
+    batch_id: int | None = None,
+    pharmaceutical_id: int | None = None,
+    current_user: User = Depends(require_roles(*PHARMACY_ROLES)),
+    db: Session = Depends(get_db),
+):
+    query = db.query(PharmaceuticalStockLedger).join(PharmaceuticalBatch).join(Pharmaceutical)
+    if batch_id is not None:
+        query = query.filter(PharmaceuticalStockLedger.batch_id == batch_id)
+    if pharmaceutical_id is not None:
+        query = query.filter(PharmaceuticalStockLedger.pharmaceutical_id == pharmaceutical_id)
+    entries = query.order_by(PharmaceuticalStockLedger.ledger_id.desc()).all()
+    return {
+        "code": 200,
+        "msg": "success",
+        "data": [
+            {
+                "ledger_id": entry.ledger_id,
+                "batch_id": entry.batch_id,
+                "pharmaceutical_id": entry.pharmaceutical_id,
+                "batch_no": entry.batch.batch_no if entry.batch else "",
+                "transaction_type": entry.transaction_type,
+                "quantity": entry.quantity,
+                "before_stock": entry.before_stock,
+                "after_stock": entry.after_stock,
+                "reference_type": entry.reference_type,
+                "reference_id": entry.reference_id,
+                "operator_name": entry.operator.username if entry.operator else "",
+                "reason": entry.reason,
+                "create_time": entry.create_time,
+            }
+            for entry in entries
+        ],
+    }
 
 
 @router.get("/pharmacy/dispenseList")

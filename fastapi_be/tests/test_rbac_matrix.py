@@ -168,6 +168,8 @@ ENDPOINTS = [
     ("GET", "/api/pharmacy/dispenseList", {"admin", "super_admin", "pharmacist"}, None, {}),
     ("GET", "/api/pharmacy/reviewList", {"admin", "super_admin", "pharmacist"}, None, {}),
     ("GET", "/api/pharmacy/dispenseStats", {"admin", "super_admin", "pharmacist"}, None, {}),
+    ("GET", "/api/pharmacy/batch/list", {"admin", "super_admin", "pharmacist"}, None, {}),
+    ("GET", "/api/pharmacy/batch/ledger", {"admin", "super_admin", "pharmacist"}, None, {}),
     ("GET", "/api/pharmacy/verificationList", {"admin", "super_admin", "pharmacist", "nurse"}, None, {}),
     ("POST", "/api/pharmacy/verify", {"admin", "super_admin", "nurse"}, {"verification_id": "x"}, {}),
     ("GET", "/api/pharmacy/inventoryAdjustment/list", {"admin", "super_admin", "pharmacist"}, None, {}),

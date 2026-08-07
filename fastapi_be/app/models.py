@@ -1,6 +1,6 @@
 import uuid
 
-from sqlalchemy import Column, Date, DateTime, Float, ForeignKey, Integer, Numeric, String, Text
+from sqlalchemy import Column, Date, DateTime, Float, ForeignKey, Integer, Numeric, String, Text, UniqueConstraint
 from sqlalchemy.orm import relationship
 
 from app.database import Base
@@ -549,6 +549,46 @@ class Pharmaceutical(Base):
     status = Column(Integer, default=0)
     antibiotic_level = Column(Integer, default=0)  # 0=非抗菌药 1=非限制级 2=限制级 3=特殊使用级
 
+    batches = relationship("PharmaceuticalBatch", back_populates="pharmaceutical", cascade="all, delete-orphan")
+
+
+class PharmaceuticalBatch(Base):
+    __tablename__ = "hoimsystem_pharmaceutical_batch"
+    __table_args__ = (UniqueConstraint("pharmaceutical_id", "batch_no", name="uq_pharmaceutical_batch_no"),)
+
+    batch_id = Column(Integer, primary_key=True, autoincrement=True)
+    pharmaceutical_id = Column(Integer, ForeignKey("hoimsystem_pharmaceutical.pharmaceutical_id"), nullable=False)
+    batch_no = Column(String(60), nullable=False)
+    expiry_date = Column(Date, nullable=True)
+    stock = Column(Integer, nullable=False, default=0)
+    location = Column(String(100), nullable=False, default="")
+    status = Column(Integer, nullable=False, default=0)  # 0=在用 1=冻结
+    create_time = Column(DateTime, nullable=False)
+    update_time = Column(DateTime, nullable=False)
+
+    pharmaceutical = relationship("Pharmaceutical", back_populates="batches")
+
+
+class PharmaceuticalStockLedger(Base):
+    __tablename__ = "hoimsystem_pharmaceutical_stock_ledger"
+
+    ledger_id = Column(Integer, primary_key=True, autoincrement=True)
+    batch_id = Column(Integer, ForeignKey("hoimsystem_pharmaceutical_batch.batch_id"), nullable=False)
+    pharmaceutical_id = Column(Integer, ForeignKey("hoimsystem_pharmaceutical.pharmaceutical_id"), nullable=False)
+    transaction_type = Column(String(20), nullable=False)  # inbound / outbound / return / adjustment
+    quantity = Column(Integer, nullable=False)
+    before_stock = Column(Integer, nullable=False)
+    after_stock = Column(Integer, nullable=False)
+    reference_type = Column(String(30), nullable=True)
+    reference_id = Column(String(60), nullable=True)
+    operator_id = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=False)
+    reason = Column(String(200), nullable=False, default="")
+    create_time = Column(DateTime, nullable=False)
+
+    batch = relationship("PharmaceuticalBatch")
+    pharmaceutical = relationship("Pharmaceutical")
+    operator = relationship("User")
+
 
 class InventoryAdjustment(Base):
     __tablename__ = "hoimsystem_inventory_adjustment"
@@ -1042,6 +1082,9 @@ class PurchaseOrderItem(Base):
     quantity = Column(Integer)
     unit_price = Column(Numeric(12, 2))
     total_price = Column(Numeric(12, 2))
+    batch_no = Column(String(60), nullable=True)
+    expiry_date = Column(Date, nullable=True)
+    location = Column(String(100), nullable=True)
 
     order = relationship("PurchaseOrder", back_populates="items")
 

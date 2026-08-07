@@ -272,10 +272,12 @@ baseURL：`/api`
   - `id`: 排班 ID
   - `doctor_id`: 医生 ID
   - `department_id`: 科室 ID
-  - `specialist`: 是否专家号
+- `specialist`: 是否专家号
 
 - `cancel` payload
   - `uuid`: 挂号 ID
+
+`create` 会校验排班存在，且医生、科室、号类必须与排班一致；号源使用条件更新扣减，避免无效排班挂号和并发超卖。
 
 ### 3.3 缴费管理
 

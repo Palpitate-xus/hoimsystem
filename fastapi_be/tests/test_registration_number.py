@@ -9,11 +9,15 @@ from app.registration import allocate_registration_id
 
 @pytest.fixture(autouse=True)
 def isolate_registration_database(db_session):
-    bind = db_session.get_bind()
-    Base.metadata.drop_all(bind=bind)
-    Base.metadata.create_all(bind=bind)
+    def clear_rows():
+        db_session.rollback()
+        for table in reversed(Base.metadata.sorted_tables):
+            db_session.execute(table.delete())
+        db_session.commit()
+
+    clear_rows()
     yield
-    Base.metadata.drop_all(bind=bind)
+    clear_rows()
 
 
 def test_registration_number_increments_per_day(db_session):

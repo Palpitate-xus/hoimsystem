@@ -56,6 +56,11 @@ export function getReviewList(keyword = "") {
   return request({ url: "pharmacy/reviewList", method: "get", params: { keyword } });
 }
 
+export function getDrugDamageList(status) { return request({ url: "pharmacy/drugDamage/list", method: "get", params: status === undefined ? {} : { status } }); }
+export function createDrugDamage(data) { return request({ url: "pharmacy/drugDamage/create", method: "post", data }); }
+export function approveDrugDamage(data) { return request({ url: "pharmacy/drugDamage/approve", method: "post", data }); }
+export function rejectDrugDamage(data) { return request({ url: "pharmacy/drugDamage/reject", method: "post", data }); }
+
 export function getDispenseStats(params = {}) {
   return request({ url: "pharmacy/dispenseStats", method: "get", params });
 }

@@ -93,7 +93,7 @@ class PrepaidTransaction(Base):
     transaction_id = Column(Integer, primary_key=True, autoincrement=True)
     patient_id = Column(Integer, ForeignKey("hoimsystem_patient.patient_id"), nullable=False)
     operator_id = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=False)
-    transaction_type = Column(String(20), nullable=False)  # recharge / deduct
+    transaction_type = Column(String(20), nullable=False)  # recharge / deduct / refund
     amount = Column(Numeric(12, 2), nullable=False)
     balance_after = Column(Numeric(12, 2), nullable=False)
     note = Column(String(200), nullable=True)

@@ -337,6 +337,38 @@ def prepaid_deduct(req: dict, db: Session = Depends(get_db), current_user: User 
     return {"code": 200, "msg": "success", "data": {"balance": patient.prepaid_balance}}
 
 
+@router.post("/prepaid/refund")
+def prepaid_refund(req: dict, db: Session = Depends(get_db), current_user: User = Depends(require_roles(ROLE_CASHIER, *ADMIN_ROLES))):
+    """预交金退款，退款金额不得超过当前余额。"""
+    patient = db.query(Patient).filter(Patient.identity == req.get("identity")).first()
+    if not patient:
+        return {"code": 500, "msg": "病人不存在"}
+    amount = _parse_prepaid_amount(req.get("amount", 0))
+    if amount is None:
+        return {"code": 500, "msg": "退款金额必须大于0"}
+    updated = db.query(Patient).filter(
+        Patient.patient_id == patient.patient_id,
+        func.coalesce(Patient.prepaid_balance, 0) >= amount,
+    ).update(
+        {Patient.prepaid_balance: func.coalesce(Patient.prepaid_balance, 0) - amount},
+        synchronize_session=False,
+    )
+    if updated != 1:
+        return {"code": 500, "msg": "预交金余额不足，无法退款"}
+    db.refresh(patient)
+    db.add(PrepaidTransaction(
+        patient_id=patient.patient_id,
+        operator_id=current_user.user_id,
+        transaction_type="refund",
+        amount=amount,
+        balance_after=patient.prepaid_balance,
+        note=str(req.get("reason") or "").strip()[:200] or None,
+        create_time=datetime.datetime.now(),
+    ))
+    db.commit()
+    return {"code": 200, "msg": "success", "data": {"balance": patient.prepaid_balance}}
+
+
 @router.get("/prepaid/getTransactions")
 def get_prepaid_transactions(
     identity: str,

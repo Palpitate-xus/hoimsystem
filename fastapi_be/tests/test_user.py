@@ -215,6 +215,43 @@ class TestPrepaidPermissions:
         )
         assert too_small.json()["code"] == 500
 
+    async def test_cashier_can_refund_prepaid_balance_and_record_reason(self, async_client, seed_data, auth_headers):
+        headers = auth_headers(seed_data["cashier_user"].username)
+        before = await async_client.get(
+            "/api/prepaid/getBalance",
+            headers=auth_headers(seed_data["patient_user"].username),
+            params={"identity": seed_data["patient"].identity},
+        )
+        initial_balance = before.json()["data"]["balance"]
+        recharge = await async_client.post(
+            "/api/prepaid/recharge",
+            headers=headers,
+            json={"identity": seed_data["patient"].identity, "amount": "1.00"},
+        )
+        assert recharge.json()["code"] == 200
+        refund = await async_client.post(
+            "/api/prepaid/refund",
+            headers=headers,
+            json={"identity": seed_data["patient"].identity, "amount": "0.30", "reason": "患者申请退款"},
+        )
+        assert refund.json()["code"] == 200
+        assert refund.json()["data"]["balance"] == initial_balance + 0.70
+        transactions = await async_client.get(
+            "/api/prepaid/getTransactions",
+            headers=auth_headers(seed_data["patient_user"].username),
+            params={"identity": seed_data["patient"].identity},
+        )
+        assert transactions.json()["data"][0]["type"] == "refund"
+        assert transactions.json()["data"][0]["note"] == "患者申请退款"
+
+    async def test_cashier_cannot_refund_more_than_prepaid_balance(self, async_client, seed_data, auth_headers):
+        response = await async_client.post(
+            "/api/prepaid/refund",
+            headers=auth_headers(seed_data["cashier_user"].username),
+            json={"identity": seed_data["patient"].identity, "amount": "999999.00"},
+        )
+        assert response.json() == {"code": 500, "msg": "预交金余额不足，无法退款"}
+
     async def test_prepaid_transactions_record_and_isolate_accounts(self, async_client, seed_data, auth_headers):
         headers = auth_headers(seed_data["cashier_user"].username)
         before = await async_client.get(

@@ -3,6 +3,8 @@ import warnings
 
 from pydantic_settings import BaseSettings
 
+DEFAULT_ALLOWED_ORIGINS = "http://localhost:8091,http://127.0.0.1:8091,http://localhost:8080,http://127.0.0.1:8080"
+
 
 class Settings(BaseSettings):
     ENVIRONMENT: str = "development"
@@ -18,7 +20,7 @@ class Settings(BaseSettings):
 
     # JWT 密钥（生产环境必须通过环境变量设置！）
     SECRET_KEY: str = ""
-    ALLOWED_ORIGINS: str = "http://localhost:8091,http://127.0.0.1:8091,http://localhost:8080,http://127.0.0.1:8080"
+    ALLOWED_ORIGINS: str = DEFAULT_ALLOWED_ORIGINS
     LIS_INTEGRATION_KEY: str = ""
     PACS_INTEGRATION_KEY: str = ""
     MEDICAL_INSURANCE_INTEGRATION_KEY: str = ""
@@ -49,6 +51,11 @@ class Settings(BaseSettings):
         default_secret = self.SECRET_KEY == "change-me-in-production"
         if self.is_production and (not self.SECRET_KEY or default_secret):
             raise ValueError("生产环境必须通过 SECRET_KEY 设置强随机密钥，不能为空或使用默认值")
+
+        if self.is_production:
+            configured_origins = [origin.strip() for origin in self.ALLOWED_ORIGINS.split(",") if origin.strip()]
+            if not configured_origins or self.ALLOWED_ORIGINS.strip() == DEFAULT_ALLOWED_ORIGINS or "*" in configured_origins:
+                raise ValueError("生产环境必须显式配置 ALLOWED_ORIGINS，且不能使用 * 或开发环境默认地址")
 
         # 如果 SECRET_KEY 为空，生成一个随机密钥（仅用于开发）
         if not self.SECRET_KEY:

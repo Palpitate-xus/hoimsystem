@@ -1,0 +1,19 @@
+{
+  "name": "医院门诊信息管理系统",
+  "short_name": "HOIM",
+  "lang": "zh-CN",
+  "start_url": "./#/login",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f5f7fa",
+  "theme_color": "#409eff",
+  "description": "患者与医务人员移动 Web 入口",
+  "icons": [
+    {
+      "src": "medical-cross.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

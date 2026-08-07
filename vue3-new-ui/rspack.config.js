@@ -1,5 +1,5 @@
 const path = require("path");
-const { Configuration, DefinePlugin } = require("@rspack/core");
+const { Configuration, CopyRspackPlugin, DefinePlugin } = require("@rspack/core");
 const HtmlRspackPlugin = require("html-rspack-plugin");
 const { VueLoaderPlugin } = require("vue-loader");
 const {
@@ -188,6 +188,13 @@ module.exports = {
               removeScriptTypeAttributes: true,
             }
           : false,
+    }),
+    new CopyRspackPlugin({
+      patterns: [
+        { from: "public/manifest.webmanifest", to: "manifest.webmanifest" },
+        { from: "public/sw.js", to: "sw.js" },
+        { from: "public/medical-cross.svg", to: "medical-cross.svg" },
+      ],
     }),
   ],
   optimization: {

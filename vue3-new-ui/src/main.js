@@ -38,6 +38,16 @@ app.config.globalProperties.$baseTitle = title;
 window.$eventBus = eventBus;
 window.$baseTitle = title;
 
+// 生产环境提供可安装的移动 Web 体验；API 和医疗动态数据不由 Service Worker 缓存。
+if (process.env.NODE_ENV === "production" && "serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    const serviceWorkerUrl = new URL("sw.js", document.baseURI);
+    navigator.serviceWorker.register(serviceWorkerUrl).catch((error) => {
+      console.warn("移动端离线壳注册失败", error);
+    });
+  });
+}
+
 // 抑制 ResizeObserver loop 运行时警告（Element Plus 组件常见，不影响功能）
 const resizeObserverLoopErr = "ResizeObserver loop completed with undelivered notifications";
 const isResizeObserverErr = (msg) =>

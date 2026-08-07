@@ -1,7 +1,7 @@
 import datetime
 import json
-import math
 import time
+from decimal import ROUND_HALF_UP, Decimal, InvalidOperation
 
 import jwt
 from fastapi import APIRouter, Depends, HTTPException, Request
@@ -26,6 +26,18 @@ from app.schemas import LoginRequest, RegisterRequest, UserInfoRequest
 from app.security import decrypt_transport_password, hash_password, is_bcrypt_hash, public_key_base64, verify_password
 
 router = APIRouter()
+
+MONEY_QUANTUM = Decimal("0.01")
+
+
+def _parse_prepaid_amount(value):
+    try:
+        amount = Decimal(str(value)).quantize(MONEY_QUANTUM, rounding=ROUND_HALF_UP)
+    except (InvalidOperation, TypeError, ValueError):
+        return None
+    if not amount.is_finite() or amount <= 0:
+        return None
+    return amount
 _LOGIN_FAILURES: dict[str, list[float]] = {}
 _LOGIN_FAILURE_WINDOW_SECONDS = 300
 _LOGIN_FAILURE_LIMIT = 5
@@ -274,11 +286,8 @@ def prepaid_recharge(req: dict, db: Session = Depends(get_db), current_user: Use
     patient = db.query(Patient).filter(Patient.identity == req.get("identity")).first()
     if not patient:
         return {"code": 500, "msg": "病人不存在"}
-    try:
-        amount = float(req.get("amount", 0))
-    except (TypeError, ValueError):
-        return {"code": 500, "msg": "充值金额必须为有效数字"}
-    if not math.isfinite(amount) or amount <= 0:
+    amount = _parse_prepaid_amount(req.get("amount", 0))
+    if amount is None:
         return {"code": 500, "msg": "充值金额必须大于0"}
     db.query(Patient).filter(Patient.patient_id == patient.patient_id).update(
         {Patient.prepaid_balance: func.coalesce(Patient.prepaid_balance, 0) + amount},
@@ -303,11 +312,8 @@ def prepaid_deduct(req: dict, db: Session = Depends(get_db), current_user: User 
     patient = db.query(Patient).filter(Patient.identity == req.get("identity")).first()
     if not patient:
         return {"code": 500, "msg": "病人不存在"}
-    try:
-        amount = float(req.get("amount", 0))
-    except (TypeError, ValueError):
-        return {"code": 500, "msg": "扣款金额必须为有效数字"}
-    if not math.isfinite(amount) or amount <= 0:
+    amount = _parse_prepaid_amount(req.get("amount", 0))
+    if amount is None:
         return {"code": 500, "msg": "扣款金额必须大于0"}
     updated = db.query(Patient).filter(
         Patient.patient_id == patient.patient_id,

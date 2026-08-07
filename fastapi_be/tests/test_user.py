@@ -186,6 +186,35 @@ class TestPrepaidPermissions:
                 assert r.status_code == 200
                 assert r.json()["code"] == 500
 
+    async def test_cashier_keeps_prepaid_amounts_at_cent_precision(self, async_client, seed_data, auth_headers):
+        headers = auth_headers(seed_data["cashier_user"].username)
+        before = await async_client.get(
+            "/api/prepaid/getBalance",
+            headers=auth_headers(seed_data["patient_user"].username),
+            params={"identity": seed_data["patient"].identity},
+        )
+        initial_balance = before.json()["data"]["balance"]
+        for amount in ("0.10", "0.20"):
+            response = await async_client.post(
+                "/api/prepaid/recharge",
+                headers=headers,
+                json={"identity": seed_data["patient"].identity, "amount": amount},
+            )
+            assert response.json()["code"] == 200
+        balance = await async_client.get(
+            "/api/prepaid/getBalance",
+            headers=auth_headers(seed_data["patient_user"].username),
+            params={"identity": seed_data["patient"].identity},
+        )
+        assert balance.json()["data"]["balance"] == initial_balance + 0.30
+
+        too_small = await async_client.post(
+            "/api/prepaid/recharge",
+            headers=headers,
+            json={"identity": seed_data["patient"].identity, "amount": "0.001"},
+        )
+        assert too_small.json()["code"] == 500
+
     async def test_prepaid_transactions_record_and_isolate_accounts(self, async_client, seed_data, auth_headers):
         headers = auth_headers(seed_data["cashier_user"].username)
         before = await async_client.get(

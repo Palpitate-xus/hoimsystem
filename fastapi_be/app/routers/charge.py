@@ -261,7 +261,13 @@ def cancel_window_appointment(req: dict, db: Session = Depends(get_db), current_
         return {"code": 500, "msg": "预约已取消，无需重复操作"}
     if item.status == 1:
         return {"code": 500, "msg": "预约已报到/就诊，不能取消"}
-    item.status = 2
+    updated = db.query(Appointment).filter(
+        Appointment.registration_uuid == item.registration_uuid,
+        Appointment.status == 0,
+    ).update({Appointment.status: 2}, synchronize_session=False)
+    if updated != 1:
+        db.rollback()
+        return {"code": 500, "msg": "预约已取消，无需重复操作"}
     schedule = db.query(DoctorSchedule).filter(DoctorSchedule.schedule_id == item.schedule_id).first() if item.schedule_id else None
     if not schedule:
         schedule = db.query(DoctorSchedule).filter(DoctorSchedule.doctor_id == item.doctor_id, DoctorSchedule.specialist == item.specialist).first()

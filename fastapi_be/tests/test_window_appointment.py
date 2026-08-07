@@ -18,6 +18,8 @@ class TestWindowAppointment:
         assert confirmed.json()["code"] == 200
         cancelled = await async_client.post("/api/windowRegistration/appointmentCancel", headers=headers, json={"uuid": appointment.registration_uuid})
         assert cancelled.json()["code"] == 200
+        repeated = await async_client.post("/api/windowRegistration/appointmentCancel", headers=headers, json={"uuid": appointment.registration_uuid})
+        assert repeated.json() == {"code": 500, "msg": "预约已取消，无需重复操作"}
 
     async def test_window_appointment_cancel_returns_source_schedule(self, async_client, seed_data, auth_headers, db_session):
         source = DoctorSchedule(week="星期一", time="03", number=0, specialist=0, doctor_id=seed_data["doctor"].doctor_id)

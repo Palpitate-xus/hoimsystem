@@ -251,6 +251,19 @@ TRIAGE_MAP = {
     "体检中心": ["体检", "健康检查", "入职体检", "年度体检", "婚前检查", "孕前检查", "防癌筛查", "慢病筛查", "B超", "CT", "核磁", "血常规", "尿常规", "肝功能", "肾功能", "血脂", "血糖"],
 }
 
+EMERGENCY_KEYWORDS = (
+    "胸痛",
+    "呼吸困难",
+    "意识不清",
+    "昏迷",
+    "大出血",
+    "抽搐",
+    "突发偏瘫",
+    "言语不清",
+    "严重烧伤",
+    "中毒",
+)
+
 
 def _match_symptoms(text: str):
     text = text.lower()
@@ -305,10 +318,18 @@ def navigation_departments(
 
 @router.post("/triage/suggest")
 def triage_suggest(req: dict, db: Session = Depends(get_db)):
-    """智能导诊：根据症状描述推荐科室"""
+    """规则导诊：根据症状描述推荐科室，不替代医生诊断。"""
     symptom = req.get("symptom", "")
     if not symptom or len(symptom.strip()) < 2:
         return {"code": 500, "msg": "请输入症状描述（至少2个字）"}
+    emergency_keywords = [keyword for keyword in EMERGENCY_KEYWORDS if keyword in symptom]
+    safety = {
+        "mode": "rule_based",
+        "disclaimer": "导诊结果仅用于就诊分流参考，不构成医疗诊断或治疗建议。",
+        "emergency": bool(emergency_keywords),
+        "emergency_keywords": emergency_keywords,
+        "emergency_message": "检测到可能的急症描述，请立即拨打急救电话或前往急诊，不要等待线上推荐。" if emergency_keywords else "",
+    }
     matched = _match_symptoms(symptom)
     if not matched:
         # 无匹配时返回所有科室
@@ -319,6 +340,7 @@ def triage_suggest(req: dict, db: Session = Depends(get_db)):
             "data": {
                 "suggestions": [{"department": d.name, "score": 0, "matched_keywords": []} for d in depts],
                 "matched_count": 0,
+                **safety,
             },
         }
     # 查询科室详细信息
@@ -341,6 +363,7 @@ def triage_suggest(req: dict, db: Session = Depends(get_db)):
         "data": {
             "suggestions": suggestions,
             "matched_count": len(matched),
+            **safety,
         },
     }
 

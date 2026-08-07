@@ -4,7 +4,6 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.registration import allocate_registration_id
 from app.dependencies import (
     ADMIN_ROLES,
     CLINICAL_ROLES,
@@ -25,6 +24,7 @@ from app.models import (
     Review,
     User,
 )
+from app.registration import allocate_registration_id
 from app.schemas import (
     AppointmentCreateRequest,
     MedicalRecordDetailRequest,
@@ -307,7 +307,15 @@ def patient_registration(req: RegistrationCreateRequest, current_user: User = De
     if not patient_obj:
         return {"code": 403, "msg": "无权为该家庭成员挂号"}
     reg_obj = db.query(DoctorSchedule).filter(DoctorSchedule.schedule_id == req.id).first()
-    if reg_obj and reg_obj.number <= 0:
+    if not reg_obj:
+        return {"code": 500, "msg": "排班不存在"}
+    if reg_obj.doctor_id != req.doctor_id:
+        return {"code": 500, "msg": "挂号医生与排班不匹配"}
+    if reg_obj.specialist != req.specialist:
+        return {"code": 500, "msg": "挂号号类与排班不匹配"}
+    if reg_obj.doctor and reg_obj.doctor.department_id != req.department_id:
+        return {"code": 500, "msg": "挂号科室与排班不匹配"}
+    if reg_obj.number is None or reg_obj.number <= 0:
         return {"code": 500, "msg": "该时段号源已满"}
     exists = (
         db.query(Registration)
@@ -324,9 +332,13 @@ def patient_registration(req: RegistrationCreateRequest, current_user: User = De
         return {"code": 500, "msg": "您的挂号次数被限制"}
     try:
         registration_time = datetime.datetime.now()
-        if reg_obj:
-            reg_obj.number -= 1
-            db.add(reg_obj)
+        updated = db.query(DoctorSchedule).filter(
+            DoctorSchedule.schedule_id == reg_obj.schedule_id,
+            DoctorSchedule.number > 0,
+        ).update({DoctorSchedule.number: DoctorSchedule.number - 1}, synchronize_session=False)
+        if updated != 1:
+            db.rollback()
+            return {"code": 500, "msg": "该时段号源已满"}
         registration = Registration(
             registration_id=allocate_registration_id(db, registration_time),
             patient_id=patient_obj.patient_id,

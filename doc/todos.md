@@ -568,7 +568,7 @@
 - [x] hoimsystem_referral（转诊记录）
 - [x] hoimsystem_consultation（会诊记录）
 - [x] hoimsystem_medical_order（住院医嘱：inpatient_order）
-- [ ] hoimsystem_prescription_template（处方模板）
+- [x] hoimsystem_prescription_template（处方模板）
 - [x] hoimsystem_diagnosis_template（诊断模板：ICD-10 编码）
 
 ### 6.3 护士护理闭环

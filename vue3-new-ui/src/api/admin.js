@@ -1,11 +1,13 @@
 import request from "@/utils/request";
+import { encryptPassword } from "@/api/user";
 
 export function getDoctorList(keyword = "") {
   return request({ url: "doctorManagement/getList", method: "get", params: { keyword } });
 }
 
-export function registerDoctor(data) {
-  return request({ url: "doctorManagement/register", method: "post", data });
+export async function registerDoctor(data) {
+  const password = await encryptPassword(data.password);
+  return request({ url: "doctorManagement/register", method: "post", data: { ...data, password } });
 }
 
 export function updateDoctor(data) {

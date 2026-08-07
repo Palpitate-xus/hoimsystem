@@ -354,6 +354,7 @@
 
 ### 4.1 管理员端
 
+- [x] 院区管理页面（院区 CRUD、科室归属与院区筛选）
 - [x] 医生信息修改/删除页面
 - [x] 病人信息修改页面
 - [x] 科室信息修改/删除页面
@@ -714,6 +715,7 @@
 - [x] hoimsystem_pharmaceutical：status（状态：正常/停用）
 - [x] hoimsystem_charge：status 扩展值（2=已退费）
 - [x] hoimsystem_breach_record：breach_time（违约时间）、breach_type（违约类型）
+- [x] hoimsystem_department：campus_id（所属院区）
 
 ---
 
@@ -761,7 +763,7 @@
 - [x] 住院管理模块
 - [x] 手术室管理模块
 - [x] 体检中心模块
-- [ ] 多院区/多科室管理
+- [x] 多院区/多科室管理（院区主数据、科室归属、管理端与患者导航筛选）
 - [ ] 移动端 App/小程序
 - [ ] AI 辅助诊断（症状推荐科室）
 - [x] 电子签名（处方、病历医生签名）

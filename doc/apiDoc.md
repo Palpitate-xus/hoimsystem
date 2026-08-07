@@ -110,10 +110,19 @@ baseURL：`/api`
 
 | 状态 | url | method | payload | response |
 |:----:|:-------------------------------:|:------:|:-------:|:--------:|
-| ✅ | /departmentManagement/getList | GET | - | `{ code, msg, data: Department[] }` |
-| ✅ | /departmentManagement/create | POST | `{ name, phone, director, location }` | `{ code, msg }` |
-| ✅ | /departmentManagement/update | POST | `{ department_id, name, phone, director, location }` | `{ code, msg }` |
+| ✅ | /departmentManagement/getList | GET | `campus_id?` | `{ code, msg, data: Department[] }` |
+| ✅ | /departmentManagement/create | POST | `{ name, phone, director?, location, campus_id? }` | `{ code, msg }` |
+| ✅ | /departmentManagement/update | POST | `{ department_id, name, phone, director?, location, campus_id? }` | `{ code, msg }` |
 | ✅ | /departmentManagement/delete | POST | `{ department_id }` | `{ code, msg }` |
+
+### 2.3.1 院区管理
+
+| 状态 | url | method | payload | response |
+|:----:|:-------------------------------:|:------:|:-------:|:-------:|
+| ✅ | /campusManagement/getList | GET | `keyword?` | `{ code, msg, data: Campus[] }` |
+| ✅ | /campusManagement/create | POST | `{ code, name, address?, phone?, status?, sort_order? }` | `{ code, msg, data }` |
+| ✅ | /campusManagement/update | POST | `{ campus_id, code, name, address?, phone?, status?, sort_order? }` | `{ code, msg, data }` |
+| ✅ | /campusManagement/delete | POST | `{ campus_id }` | `{ code, msg }`（有所属科室时拒绝删除） |
 
 **字段说明：**
 
@@ -123,6 +132,10 @@ baseURL：`/api`
   - `phone`: 电话
   - `location`: 位置
   - `director`: 主任姓名
+  - `campus_id`: 所属院区 ID
+  - `campus_name`: 所属院区名称
+
+**院区字段：** `id`、`code`、`name`、`address`、`phone`、`status`、`sort_order`、`department_count`。
 
 - `create` payload
   - `name`: 科室名称

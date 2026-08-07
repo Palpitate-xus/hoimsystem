@@ -96,9 +96,30 @@
 | phone | VARCHAR | 11 | - | 科室电话 |
 | location | VARCHAR | 24 | - | 科室位置 |
 | director | INT | - | - | 主任医生 ID |
+| campus_id | INT | - | FK | 所属院区 ID（历史科室默认回填主院区） |
 
 **关联关系：**
 - 一对多 → `hoimsystem_doctor`（department_id）
+- 多对一 → `hoimsystem_hospital_campus`（campus_id）
+
+### 4.1 hoimsystem_hospital_campus（院区表）✅
+
+存储多院区基础信息；迁移会创建 `main/主院区` 作为历史科室的默认归属。
+
+| 字段名 | 类型 | 长度 | 约束 | 说明 |
+|:------:|:----:|:----:|:----:|:----:|
+| campus_id | INT | - | PK, AI | 院区 ID |
+| code | VARCHAR | 30 | UK | 院区编码 |
+| name | VARCHAR | 50 | - | 院区名称 |
+| address | VARCHAR | 200 | - | 地址 |
+| phone | VARCHAR | 20 | - | 联系电话 |
+| status | INT | - | - | 1 启用，0 停用 |
+| sort_order | INT | - | - | 显示排序 |
+| create_time | DATETIME | - | - | 创建时间 |
+| update_time | DATETIME | - | - | 更新时间 |
+
+**关联关系：**
+- 一对多 → `hoimsystem_department`（campus_id）
 
 ---
 
@@ -572,6 +593,7 @@
 | 2 | hoimsystem_patient | 病人表 | ✅ | 新增 allergy_history |
 | 3 | hoimsystem_doctor | 医生表 | ✅ | |
 | 4 | hoimsystem_department | 科室表 | ✅ | |
+| 4.1 | hoimsystem_hospital_campus | 院区表 | ✅ | 多院区主数据 |
 | 5 | hoimsystem_timeslot | 时段表 | ✅ | |
 | 6 | hoimsystem_notice | 通知公告表 | ✅ | |
 | 7 | hoimsystem_doctor_schedule | 医生排班表 | ✅ | |

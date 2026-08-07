@@ -1,9 +1,12 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="科室管理" description="维护医院科室信息，配置科室主任" />
+    <vab-page-header title="科室管理" description="维护医院科室信息，配置科室主任和所属院区" />
     <el-card>
       <div class="page-toolbar">
         <el-button type="primary" @click="handleAdd">新增科室</el-button>
+        <el-select v-model="selectedCampus" placeholder="全部院区" clearable class="campus-filter" @change="fetchList">
+          <el-option v-for="campus in campusOptions" :key="campus.id" :label="campus.name" :value="campus.id" />
+        </el-select>
         <el-input
           v-model="searchQuery"
           placeholder="搜索科室"
@@ -16,6 +19,7 @@
         <el-table-column prop="name" label="科室名称"  sortable />
         <el-table-column prop="phone" label="电话"  sortable />
         <el-table-column prop="location" label="位置" />
+        <el-table-column prop="campus_name" label="所属院区" />
         <el-table-column prop="director" label="主任" />
         <el-table-column label="操作" width="180">
           <template #default="{row}">
@@ -46,6 +50,11 @@
         <el-form-item label="位置">
           <el-input v-model="form.location" />
         </el-form-item>
+        <el-form-item label="所属院区">
+          <el-select v-model="form.campus_id" placeholder="请选择院区" clearable class="form-full-width">
+            <el-option v-for="campus in campusOptions" :key="campus.id" :label="campus.name" :value="campus.id" />
+          </el-select>
+        </el-form-item>
         <el-form-item label="主任医生">
           <el-select v-model="form.director" placeholder="请选择主任医生" clearable class="form-full-width" filterable>
             <el-option v-for="d in doctorOptions" :key="d.id" :label="d.name" :value="d.id" />
@@ -63,13 +72,15 @@
 <script setup>
 import { ref, onMounted, computed } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
-import { getDepartmentList, createDepartment, updateDepartment, deleteDepartment, getDoctorList } from "@/api/admin";
+import { getCampusList, getDepartmentList, createDepartment, updateDepartment, deleteDepartment, getDoctorList } from "@/api/admin";
 
 const list = ref([]);
 const searchQuery = ref("");
 const currentPage = ref(1);
 const pageSize = ref(10);
 const total = ref(0);
+const selectedCampus = ref(null);
+const campusOptions = ref([]);
 const paginatedList = computed(() => {
   const start = (currentPage.value - 1) * pageSize.value;
   return list.value.slice(start, start + pageSize.value);
@@ -88,10 +99,15 @@ const loadDoctors = async () => {
 
 const fetchList = async () => {
   loading.value = true;
-  const res = await getDepartmentList(searchQuery.value);
+  const res = await getDepartmentList(searchQuery.value, selectedCampus.value);
   list.value = res.data || [];
   total.value = list.value.length;
   loading.value = false;
+};
+
+const loadCampuses = async () => {
+  const res = await getCampusList();
+  campusOptions.value = res.data || [];
 };
 
 const handleAdd = () => {
@@ -131,5 +147,15 @@ const handleDelete = (row) => {
   }).catch(() => {});
 };
 
-onMounted(fetchList);
+onMounted(async () => {
+  await loadCampuses();
+  await fetchList();
+});
 </script>
+
+<style scoped>
+.campus-filter {
+  width: 180px;
+  margin-left: 12px;
+}
+</style>

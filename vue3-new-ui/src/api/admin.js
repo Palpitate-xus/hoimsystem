@@ -26,8 +26,8 @@ export function updatePatient(data) {
   return request({ url: "patientManagement/update", method: "post", data });
 }
 
-export function getDepartmentList(keyword = "") {
-  return request({ url: "departmentManagement/getList", method: "get", params: { keyword } });
+export function getDepartmentList(keyword = "", campus_id = undefined) {
+  return request({ url: "departmentManagement/getList", method: "get", params: { keyword, campus_id } });
 }
 
 export function createDepartment(data) {
@@ -40,6 +40,22 @@ export function updateDepartment(data) {
 
 export function deleteDepartment(data) {
   return request({ url: "departmentManagement/delete", method: "post", data });
+}
+
+export function getCampusList(keyword = "") {
+  return request({ url: "campusManagement/getList", method: "get", params: { keyword } });
+}
+
+export function createCampus(data) {
+  return request({ url: "campusManagement/create", method: "post", data });
+}
+
+export function updateCampus(data) {
+  return request({ url: "campusManagement/update", method: "post", data });
+}
+
+export function deleteCampus(data) {
+  return request({ url: "campusManagement/delete", method: "post", data });
 }
 
 export function getNoticeList(keyword = "") {

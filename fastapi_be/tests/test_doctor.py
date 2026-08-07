@@ -17,6 +17,7 @@ class TestDoctorSchedule:
         body = r.json()
         assert body["code"] == 200
         assert len(body["data"]) >= 1
+        assert "一1" in body["data"][0]["schedule"]
 
 
 @pytest.mark.asyncio

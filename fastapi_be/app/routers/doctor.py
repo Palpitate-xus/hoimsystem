@@ -116,7 +116,8 @@ def doctor_schedule_getlist(current_user: User = Depends(get_current_user), keyw
             specialist = 0
             for j in schedule_list:
                 week_code = j.week[2] if len(j.week) >= 3 else j.week
-                time_code = j.time[0] if len(j.time) >= 1 else j.time
+                time_value = j.time or ""
+                time_code = {"上午": "1", "下午": "2"}.get(time_value, time_value[-1:] or "")
                 schedule.append(week_code + time_code)
                 number = j.number
                 specialist = j.specialist
@@ -136,7 +137,8 @@ def doctor_schedule_getlist(current_user: User = Depends(get_current_user), keyw
             schedule = []
             for i in schedule_list:
                 week_code = i.week[2] if len(i.week) >= 3 else i.week
-                time_code = i.time[0] if len(i.time) >= 1 else i.time
+                time_value = i.time or ""
+                time_code = {"上午": "1", "下午": "2"}.get(time_value, time_value[-1:] or "")
                 schedule.append(week_code + time_code)
             data.append(
                 {

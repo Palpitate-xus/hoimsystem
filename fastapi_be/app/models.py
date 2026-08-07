@@ -528,6 +528,8 @@ class MedicalRecord(Base):
     symptom = Column(String(100))
     result = Column(String(100))
     registration_uuid = Column(String(36), ForeignKey("hoimsystem_registration.registration_uuid"))
+    status = Column(Integer, nullable=False, default=0)  # 0=草稿 1=已签名
+    sign_time = Column(DateTime, nullable=True)
 
     doctor = relationship("Doctor", back_populates="medical_records")
     patient = relationship("Patient", back_populates="medical_records")

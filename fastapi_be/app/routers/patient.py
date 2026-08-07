@@ -418,6 +418,8 @@ def get_medical_record_list(current_user: User = Depends(get_current_user), keyw
                     "doctor_name": item.doctor.name if item.doctor else "",
                     "symptom": item.symptom,
                     "result": item.result,
+                    "status": item.status,
+                    "status_text": "已签名" if item.status else "草稿",
                 }
             )
     elif current_user.user_role in ("doctor", "director"):
@@ -435,6 +437,8 @@ def get_medical_record_list(current_user: User = Depends(get_current_user), keyw
                     "patient_name": item.patient.name if item.patient else "",
                     "symptom": item.symptom,
                     "result": item.result,
+                    "status": item.status,
+                    "status_text": "已签名" if item.status else "草稿",
                 }
             )
     else:
@@ -478,6 +482,9 @@ def get_medical_record_detail(req: MedicalRecordDetailRequest, current_user: Use
         "patient_name": record.patient.name if record.patient else "",
         "symptom": record.symptom,
         "result": record.result,
+        "status": record.status,
+        "status_text": "已签名" if record.status else "草稿",
+        "sign_time": record.sign_time,
     }
     return {"code": 200, "msg": "success", "data": data}
 

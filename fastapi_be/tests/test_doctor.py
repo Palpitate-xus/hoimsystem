@@ -148,6 +148,24 @@ class TestDoctorMedicalRecord:
         assert r.status_code == 200
         assert r.json()["code"] == 403
 
+    async def test_signed_outpatient_record_cannot_be_updated(self, async_client, seed_data, auth_headers):
+        headers = auth_headers(seed_data["doctor_user"].username)
+        created = await async_client.post("/api/medicalRecord/create", headers=headers, json={
+            "patient_id": seed_data["patient2"].patient_id, "symptom": "签名门诊病历", "result": "初步诊断",
+        })
+        assert created.json()["code"] == 200
+        record_id = created.json()["data"]["medical_record_id"]
+        signed = await async_client.post("/api/medicalRecord/sign", headers=headers, json={"medical_record_id": record_id})
+        assert signed.json()["code"] == 200
+        blocked = await async_client.post("/api/medicalRecord/update", headers=headers, json={
+            "medical_record_id": record_id, "symptom": "篡改", "result": "篡改",
+        })
+        assert blocked.json() == {"code": 403, "msg": "已签名病历不可修改"}
+        repeated = await async_client.post("/api/medicalRecord/sign", headers=headers, json={"medical_record_id": record_id})
+        assert repeated.json()["code"] == 500
+        detail = await async_client.post("/api/medicalRecord/detail", headers=headers, json={"medical_record_id": record_id})
+        assert detail.json()["data"]["status_text"] == "已签名"
+
     async def test_doctor_cannot_view_other_doctor_medical_record(self, async_client, seed_data, auth_headers):
         mr = seed_data["medical_record"]
         r = await async_client.post(

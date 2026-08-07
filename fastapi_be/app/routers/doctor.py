@@ -28,6 +28,7 @@ from app.schemas import (
     DoctorScheduleCreateRequest,
     LabOrderCreateRequest,
     MedicalRecordCreateRequest,
+    MedicalRecordSignRequest,
     MedicalRecordUpdateRequest,
     PharmaceuticalCreateRequest,
     PharmaceuticalDeleteRequest,
@@ -562,10 +563,11 @@ def create_medical_record(req: MedicalRecordCreateRequest, current_user: User = 
         patient_id=req.patient_id,
         symptom=req.symptom,
         result=req.result,
+        status=0,
     )
     db.add(record)
     db.commit()
-    return {"code": 200, "msg": "success"}
+    return {"code": 200, "msg": "success", "data": {"medical_record_id": record.medical_record_id}}
 
 
 @router.post("/medicalRecord/update")
@@ -576,9 +578,33 @@ def update_medical_record(req: MedicalRecordUpdateRequest, current_user: User = 
     doctor_obj = db.query(Doctor).filter(Doctor.user_id == current_user.user_id).first()
     if not doctor_obj or record.doctor_id != doctor_obj.doctor_id:
         return {"code": 403, "msg": "无权修改他人病历"}
+    if record.status != 0:
+        return {"code": 403, "msg": "已签名病历不可修改"}
     record.symptom = req.symptom
     record.result = req.result
     db.add(record)
+    db.commit()
+    return {"code": 200, "msg": "success"}
+
+
+@router.post("/medicalRecord/sign")
+def sign_medical_record(req: MedicalRecordSignRequest, current_user: User = Depends(require_roles(*CLINICAL_ROLES)), db: Session = Depends(get_db)):
+    record = db.query(MedicalRecord).filter(MedicalRecord.medical_record_id == req.medical_record_id).first()
+    if not record:
+        return {"code": 500, "msg": "病历不存在"}
+    doctor_obj = db.query(Doctor).filter(Doctor.user_id == current_user.user_id).first()
+    if not doctor_obj or record.doctor_id != doctor_obj.doctor_id:
+        return {"code": 403, "msg": "无权签名他人病历"}
+    if record.status != 0:
+        return {"code": 500, "msg": "病历已签名"}
+    now = datetime.datetime.now()
+    updated = db.query(MedicalRecord).filter(
+        MedicalRecord.medical_record_id == record.medical_record_id,
+        MedicalRecord.status == 0,
+    ).update({MedicalRecord.status: 1, MedicalRecord.sign_time: now}, synchronize_session=False)
+    if updated != 1:
+        db.rollback()
+        return {"code": 500, "msg": "病历已签名"}
     db.commit()
     return {"code": 200, "msg": "success"}
 

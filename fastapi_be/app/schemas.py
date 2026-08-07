@@ -451,6 +451,10 @@ class MedicalRecordDetailRequest(BaseModel):
     medical_record_id: str
 
 
+class MedicalRecordSignRequest(BaseModel):
+    medical_record_id: str
+
+
 class PatientUpdateRequest(BaseModel):
     patient_id: int
     name: str

@@ -1,6 +1,8 @@
+import datetime
+
 import pytest
 
-from app.models import Charge, DoctorSchedule, Registration
+from app.models import Charge, DoctorSchedule, Payment, Registration
 
 
 @pytest.mark.asyncio
@@ -147,6 +149,21 @@ class TestChargeManagement:
         second = await async_client.post("/api/chargeManagement/refund", headers=headers, json=payload)
         assert second.status_code == 200
         assert second.json() == {"code": 500, "msg": "未缴费或已退费，无法退费"}
+
+    async def test_refund_marks_successful_payment_as_refunded(self, async_client, seed_data, auth_headers, db_session):
+        charge = seed_data["charge"]
+        charge.status = 1
+        payment = Payment(payment_no="PAY-REFUND-001", charge_id=charge.charge_id, channel="wechat", amount=charge.amount, status=1, paid_time=datetime.datetime.now(), create_time=datetime.datetime.now())
+        db_session.add(payment)
+        db_session.commit()
+        response = await async_client.post(
+            "/api/chargeManagement/refund",
+            headers=auth_headers(seed_data["cashier_user"].username),
+            json={"charge_id": str(charge.charge_id), "reason": "重复收费"},
+        )
+        assert response.json()["code"] == 200
+        db_session.expire_all()
+        assert db_session.get(Payment, payment.payment_id).status == 3
 
     async def test_window_registration_rejects_invalid_schedule(self, async_client, seed_data, auth_headers):
         r = await async_client.post(

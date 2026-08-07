@@ -12,7 +12,7 @@ from sqlalchemy.orm import Session
 from app.config import settings
 from app.database import get_db
 from app.dependencies import ADMIN_ROLES, ROLE_CASHIER, ROLE_PATIENT, ROLE_REGISTRAR, get_current_user, require_roles
-from app.models import Charge, Doctor, Invoice, Patient, Prescription, User
+from app.models import Charge, Doctor, Invoice, Patient, Payment, Prescription, User
 from app.pagination import paginate
 from app.registration import allocate_registration_id
 from app.schemas import (
@@ -138,6 +138,10 @@ def charge_refund(req: ChargeRefundRequest, db: Session = Depends(get_db), curre
     if result.rowcount != 1:
         db.rollback()
         return {"code": 500, "msg": "未缴费或已退费，无法退费"}
+    db.query(Payment).filter(
+        Payment.charge_id == req.charge_id,
+        Payment.status == 1,
+    ).update({Payment.status: 3}, synchronize_session=False)
     db.commit()
     return {"code": 200, "msg": "success"}
 

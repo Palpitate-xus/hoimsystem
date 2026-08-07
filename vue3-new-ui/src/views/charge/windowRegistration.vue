@@ -66,6 +66,7 @@
         <el-result icon="success" title="挂号成功">
           <template #sub-title>
             <p>患者 {{ patientName }} 挂号成功</p>
+            <p v-if="registrationId">本次挂号序号：{{ registrationId }}</p>
           </template>
           <template #extra>
             <el-button type="primary" @click="reset">继续挂号</el-button>
@@ -88,6 +89,7 @@ const schedules = ref([]);
 const selectedSchedule = ref(null);
 const loading = ref(false);
 const submitting = ref(false);
+const registrationId = ref(null);
 
 const verifyPatient = async () => {
   if (!form.value.identity.trim()) {
@@ -131,6 +133,7 @@ const submit = async () => {
       specialist: s.specialist,
     });
     if (res.code === 200) {
+      registrationId.value = res.data?.registration_id || null;
       step.value = 2;
       ElMessage.success("挂号成功");
     } else {
@@ -148,6 +151,7 @@ const reset = () => {
   patientName.value = "";
   schedules.value = [];
   selectedSchedule.value = null;
+  registrationId.value = null;
 };
 
 onMounted(() => {});

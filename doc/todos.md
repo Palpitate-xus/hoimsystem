@@ -752,7 +752,7 @@
 - [x] 部署文档（deployDoc.md，含开发/生产/Docker、HTTPS、Systemd和迁移说明）
 - [x] 前端组件文档（architecture.md、coding-standards.md）
 - [x] 测试用例文档（testing.md、api-test-report.md、frontend-test-report.md）
-- [ ] 用户操作手册
+- [x] 用户操作手册（user-manual.md，覆盖患者、医生、护士、药师、收费/挂号员和管理员）
 
 ---
 

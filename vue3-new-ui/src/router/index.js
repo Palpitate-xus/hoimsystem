@@ -80,6 +80,12 @@ export const asyncRoutes = [
         meta: { title: "院区管理", permissions: ["admin"] },
       },
       {
+        path: "navigationManagement",
+        name: "NavigationManagement",
+        component: () => import("@/views/admin/navigationManagement.vue"),
+        meta: { title: "院内路线管理", permissions: ["admin"] },
+      },
+      {
         path: "noticeManagement",
         name: "NoticeManagement",
         component: () => import("@/views/admin/noticeManagement.vue"),

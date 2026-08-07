@@ -15,6 +15,11 @@
           <el-button type="success" @click="buildRoute">生成路线</el-button>
         </div>
         <el-alert v-if="routeResult" :title="routeResult.title" :description="routeResult.description" type="info" show-icon :closable="false" />
+        <el-timeline v-if="routeResult?.steps?.length" class="route-steps">
+          <el-timeline-item v-for="(step, index) in routeResult.steps" :key="`${step.from_node_id}-${step.to_node_id}`">
+            {{ index + 1 }}. {{ step.instruction }}（{{ step.distance }} 米）
+          </el-timeline-item>
+        </el-timeline>
       </el-card>
       <el-row v-loading="loading" :gutter="16">
         <el-col v-for="department in departments" :key="department.department_id" :xs="24" :sm="12" :lg="8" style="margin-bottom: 16px;">
@@ -47,7 +52,7 @@
 <script setup>
 import { onMounted, ref } from "vue";
 import { ElMessage } from "element-plus";
-import { getNavigationDepartments, getNavigationFaq } from "@/api/triage";
+import { getNavigationDepartments, getNavigationFaq, getNavigationRoute } from "@/api/triage";
 
 const keyword = ref("");
 const departments = ref([]);
@@ -72,15 +77,25 @@ const fetchDepartments = async () => {
 };
 
 onMounted(fetchDepartments);
-const buildRoute = () => {
+const buildRoute = async () => {
   if (!routeStart.value || !routeEnd.value) return ElMessage.warning("请选择起点和终点");
   if (routeStart.value === routeEnd.value) return ElMessage.warning("起点和终点不能相同");
   const start = departments.value.find(item => item.department_id === routeStart.value);
   const end = departments.value.find(item => item.department_id === routeEnd.value);
-  routeResult.value = {
-    title: `${start.name} → ${end.name}`,
-    description: `从${start.location || "起点科室"}出发，沿院内主通道前往${end.location || "终点科室"}。请根据现场指示牌确认楼栋和楼层。`,
-  };
+  try {
+    const res = await getNavigationRoute(routeStart.value, routeEnd.value);
+    routeResult.value = {
+      title: `${start.name} → ${end.name}`,
+      description: `最短路线约 ${res.data.total_distance} 米，请按以下步骤行走。`,
+      steps: res.data.steps || [],
+    };
+  } catch (error) {
+    routeResult.value = {
+      title: `${start.name} → ${end.name}`,
+      description: "该院区尚未配置完整路线图，请根据现场指示牌确认楼栋和楼层，或联系导诊台。",
+      steps: [],
+    };
+  }
 };
 const fetchFaq = async () => {
   try {
@@ -100,5 +115,5 @@ onMounted(fetchFaq);
 .faq-card { margin-top: 16px; }
 .faq-header { display: flex; align-items: center; justify-content: space-between; }
 .faq-answer { color: #606266; line-height: 1.8; white-space: pre-wrap; }
-.route-card { margin-bottom: 16px; }.route-toolbar { display: flex; align-items: center; gap: 10px; }.route-toolbar .el-select { width: 220px; }.route-arrow { color: #909399; font-size: 20px; }
+.route-card { margin-bottom: 16px; }.route-toolbar { display: flex; align-items: center; gap: 10px; }.route-toolbar .el-select { width: 220px; }.route-arrow { color: #909399; font-size: 20px; }.route-steps { margin: 16px 8px 0; }
 </style>

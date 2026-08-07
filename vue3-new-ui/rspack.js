@@ -12,8 +12,6 @@ const { donationConsole } = require("./layouts");
 // 在命令行控制台打印信息
 donationConsole();
 
-const configPath = path.resolve(__dirname, "rspack.config.js");
-const config = require(configPath);
 const mode = process.argv[2] === "build" ? "production" : "development";
 
 // 增强环境变量设置，确保所有编译阶段都使用相同的NODE_ENV值
@@ -21,13 +19,16 @@ process.env.NODE_ENV = mode;
 // 设置webpack特定的环境变量，以避免冲突
 process.env.WEBPACK_ENV = mode;
 process.env.BABEL_ENV = mode;
-// 确保mock始终被启用，即使在生产环境
-process.env.VUE_APP_MOCK_ENABLE = "true";
+// Mock 仅供开发调试，生产构建默认关闭；需要时显式传入 true。
+process.env.VUE_APP_MOCK_ENABLE = process.env.VUE_APP_MOCK_ENABLE || "false";
 console.log("设置环境变量 NODE_ENV =", process.env.NODE_ENV);
 console.log(
   "设置环境变量 VUE_APP_MOCK_ENABLE =",
   process.env.VUE_APP_MOCK_ENABLE
 );
+
+const configPath = path.resolve(__dirname, "rspack.config.js");
+const config = require(configPath);
 
 // 读取配置
 config.mode = mode;
@@ -85,15 +86,17 @@ if (mode === "production") {
     // 使用rspack.config.js中的所有devServer配置
     const devServerOptions = config.devServer || {};
 
-    // 设置mock服务器，不再检查环境变量，始终启用mock
+    // 仅在显式开启时挂载 mock 服务器
     if (!devServerOptions.setupMiddlewares) {
       devServerOptions.setupMiddlewares = (middlewares, devServer) => {
         if (!devServer) {
           throw new Error("dev-server is not defined");
         }
 
-        const mockServer = require("./mock/index");
-        mockServer(devServer.app);
+        if (process.env.VUE_APP_MOCK_ENABLE === "true") {
+          const mockServer = require("./mock/index");
+          mockServer(devServer.app);
+        }
 
         return middlewares;
       };
@@ -124,14 +127,16 @@ if (mode === "production") {
       const compiler = webpack(webpackConfig);
       const devServerOptions = config.devServer || {};
 
-      // 不再检查环境变量，始终启用mock
+      // 仅在显式开启时挂载 mock 服务器
       const originalBefore = devServerOptions.before;
       devServerOptions.before = (app, server) => {
         if (originalBefore) {
           originalBefore(app, server);
         }
-        const mockServer = require("./mock/index");
-        mockServer(app);
+        if (process.env.VUE_APP_MOCK_ENABLE === "true") {
+          const mockServer = require("./mock/index");
+          mockServer(app);
+        }
       };
 
       const server = new WebpackDevServer(devServerOptions, compiler);

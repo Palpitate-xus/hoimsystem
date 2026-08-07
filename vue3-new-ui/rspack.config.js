@@ -18,7 +18,6 @@ process.env.VUE_APP_UPDATE_TIME = time;
 process.env.BASE_URL = publicPath;
 // 删除这一行，避免覆盖rspack.js中设置的值
 // process.env.NODE_ENV = process.env.NODE_ENV || 'development'
-process.env.VUE_APP_MOCK_ENABLE = "true"; // 始终启用mock
 process.env.VUE_APP_AUTHOR = "vue-admin-better"; // 设置作者
 
 const resolve = (dir) => path.join(__dirname, dir);
@@ -162,7 +161,7 @@ module.exports = {
       "process.env.NODE_ENV": JSON.stringify(mode),
       "process.env.BASE_URL": JSON.stringify(process.env.BASE_URL),
       "process.env.VUE_APP_TITLE": JSON.stringify(process.env.VUE_APP_TITLE),
-      "process.env.VUE_APP_MOCK_ENABLE": JSON.stringify("true"), // 确保在所有环境中mock都为true
+      "process.env.VUE_APP_MOCK_ENABLE": JSON.stringify(process.env.VUE_APP_MOCK_ENABLE === "true"),
       "process.env.VUE_APP_AUTHOR": JSON.stringify(process.env.VUE_APP_AUTHOR),
       "process.env.VUE_APP_UPDATE_TIME": JSON.stringify(
         process.env.VUE_APP_UPDATE_TIME
@@ -294,9 +293,10 @@ module.exports = {
         throw new Error("dev-server is not defined");
       }
 
-      // 后端服务已运行，禁用mock服务器
-      // const mockServer = require("./mock");
-      // mockServer(devServer.app);
+      if (process.env.VUE_APP_MOCK_ENABLE === "true") {
+        const mockServer = require("./mock/index");
+        mockServer(devServer.app);
+      }
 
       return middlewares;
     },

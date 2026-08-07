@@ -4,20 +4,28 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.dependencies import NURSING_ROLES, get_current_user, require_roles
+from app.dependencies import NURSING_ROLES, require_roles
 from app.models import (
     Admission,
     CriticalCareRecord,
     NursingAssessment,
     NursingPlan,
+    NursingRecord,
     SurgeryNursingRecord,
     SurgerySchedule,
-    NursingRecord,
-    Patient,
     TemperatureRecord,
     User,
 )
-from app.schemas import CriticalCareRecordCreateRequest, NursingAssessmentCreateRequest, NursingAssessmentUpdateRequest, NursingPlanCreateRequest, NursingPlanUpdateRequest, NursingRecordCreateRequest, SurgeryNursingRecordCreateRequest, TemperatureRecordCreateRequest
+from app.schemas import (
+    CriticalCareRecordCreateRequest,
+    NursingAssessmentCreateRequest,
+    NursingAssessmentUpdateRequest,
+    NursingPlanCreateRequest,
+    NursingPlanUpdateRequest,
+    NursingRecordCreateRequest,
+    SurgeryNursingRecordCreateRequest,
+    TemperatureRecordCreateRequest,
+)
 
 router = APIRouter()
 
@@ -226,9 +234,12 @@ def create_nursing_record(
     current_user: User = Depends(require_roles(*NURSING_ROLES)),
     db: Session = Depends(get_db),
 ):
-    admission = db.query(Admission).filter(Admission.admission_id == req.admission_id).first()
+    admission = db.query(Admission).filter(
+        Admission.admission_id == req.admission_id,
+        Admission.patient_id == req.patient_id,
+    ).first()
     if not admission:
-        return {"code": 500, "msg": "入院记录不存在"}
+        return {"code": 500, "msg": "入院记录不存在或患者不匹配"}
     try:
         record_time = datetime.datetime.strptime(req.record_time, "%Y-%m-%d %H:%M:%S")
     except ValueError:
@@ -259,12 +270,7 @@ def create_nursing_record(
 
 @router.post("/nursingRecord/delete")
 def delete_nursing_record(req: dict, current_user: User = Depends(require_roles(*NURSING_ROLES)), db: Session = Depends(get_db)):
-    record = db.query(NursingRecord).filter(NursingRecord.record_id == req.get("record_id")).first()
-    if not record:
-        return {"code": 500, "msg": "记录不存在"}
-    db.delete(record)
-    db.commit()
-    return {"code": 200, "msg": "success"}
+    return {"code": 403, "msg": "护理文书不可删除，请通过更正记录补录"}
 
 
 @router.get("/temperatureRecord/getList")
@@ -316,9 +322,12 @@ def create_temperature_record(
     current_user: User = Depends(require_roles(*NURSING_ROLES)),
     db: Session = Depends(get_db),
 ):
-    admission = db.query(Admission).filter(Admission.admission_id == req.admission_id).first()
+    admission = db.query(Admission).filter(
+        Admission.admission_id == req.admission_id,
+        Admission.patient_id == req.patient_id,
+    ).first()
     if not admission:
-        return {"code": 500, "msg": "入院记录不存在"}
+        return {"code": 500, "msg": "入院记录不存在或患者不匹配"}
     try:
         from datetime import date as dt_date
 
@@ -371,9 +380,4 @@ def create_temperature_record(
 
 @router.post("/temperatureRecord/delete")
 def delete_temperature_record(req: dict, current_user: User = Depends(require_roles(*NURSING_ROLES)), db: Session = Depends(get_db)):
-    record = db.query(TemperatureRecord).filter(TemperatureRecord.temp_id == req.get("temp_id")).first()
-    if not record:
-        return {"code": 500, "msg": "记录不存在"}
-    db.delete(record)
-    db.commit()
-    return {"code": 200, "msg": "success"}
+    return {"code": 403, "msg": "体温单记录不可删除，请通过更正记录补录"}

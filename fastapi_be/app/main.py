@@ -331,6 +331,7 @@ from app.routers import (
     inpatient_charge,
     inpatient_order,
     insurance,
+    integration,
     inventory_adjustment,
     lab,
     lab_package,
@@ -434,6 +435,7 @@ app.include_router(inpatient_order.router, prefix="/api")
 app.include_router(imaging.router, prefix="/api")
 app.include_router(inventory_adjustment.router, prefix="/api")
 app.include_router(infusion.router, prefix="/api")
+app.include_router(integration.router, prefix="/api")
 app.include_router(insurance.router, prefix="/api")
 app.include_router(infection.router, prefix="/api")
 app.include_router(injection.router, prefix="/api")

@@ -606,6 +606,9 @@ class LabOrder(Base):
     status = Column(Integer, default=0)
     sample_status = Column(Integer, default=0)  # 0=待接收, 1=已接收, 2=已拒收
     create_time = Column(DateTime)
+    external_order_id = Column(String(100), nullable=True, index=True)
+    integration_status = Column(String(20), nullable=False, default="pending")  # pending / synced / failed
+    last_sync_time = Column(DateTime, nullable=True)
 
     patient = relationship("Patient", back_populates="lab_orders")
     doctor = relationship("Doctor", back_populates="lab_orders")
@@ -1804,6 +1807,9 @@ class ImagingOrder(Base):
     viewer_url = Column(String(500), nullable=True)
     create_time = Column(DateTime, nullable=False)
     schedule_time = Column(DateTime, nullable=True)
+    external_order_id = Column(String(100), nullable=True, index=True)
+    integration_status = Column(String(20), nullable=False, default="pending")  # pending / synced / failed
+    last_sync_time = Column(DateTime, nullable=True)
 
     patient = relationship("Patient")
     doctor = relationship("Doctor")

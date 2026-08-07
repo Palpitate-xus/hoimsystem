@@ -19,6 +19,8 @@ class Settings(BaseSettings):
     # JWT 密钥（生产环境必须通过环境变量设置！）
     SECRET_KEY: str = ""
     ALLOWED_ORIGINS: str = "http://localhost:8091,http://127.0.0.1:8091,http://localhost:8080,http://127.0.0.1:8080"
+    LIS_INTEGRATION_KEY: str = ""
+    PACS_INTEGRATION_KEY: str = ""
 
     class Config:
         env_file = ".env"

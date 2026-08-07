@@ -35,6 +35,7 @@ def _order_data(item: ImagingOrder):
         "status_text": {0: "待检查", 1: "检查中", 2: "待报告", 3: "待审核", 4: "已审核", 5: "已取消"}.get(item.status, ""),
         "accession_no": item.accession_no or "",
         "viewer_url": item.viewer_url or "",
+        "integration_status": item.integration_status or "pending",
         "create_time": item.create_time.strftime("%Y-%m-%d %H:%M:%S") if item.create_time else "",
         "schedule_time": item.schedule_time.strftime("%Y-%m-%d %H:%M:%S") if item.schedule_time else "",
         "report": {
@@ -182,7 +183,14 @@ def get_imaging_template_list(modality: str | None = None, current_user: User = 
     query = db.query(ImagingTemplate).filter(ImagingTemplate.status == 1)
     if modality:
         query = query.filter(ImagingTemplate.modality == modality)
-    return {"code": 200, "msg": "success", "data": [{"template_id": item.template_id, "name": item.name, "modality": item.modality, "content": item.content} for item in query.order_by(ImagingTemplate.template_id.desc()).all()]}
+    return {
+        "code": 200,
+        "msg": "success",
+        "data": [
+            {"template_id": item.template_id, "name": item.name, "modality": item.modality, "content": item.content}
+            for item in query.order_by(ImagingTemplate.template_id.desc()).all()
+        ],
+    }
 
 
 @router.post("/imaging/template/save")
@@ -190,7 +198,10 @@ def save_imaging_template(req: dict, current_user: User = Depends(require_roles(
     item = db.query(ImagingTemplate).filter(ImagingTemplate.template_id == req.get("template_id")).first() if req.get("template_id") else None
     now = datetime.datetime.now()
     if not item:
-        item = ImagingTemplate(name=req.get("name", ""), modality=req.get("modality", "DR"), content=req.get("content", ""), creator_id=current_user.user_id, status=1, create_time=now, update_time=now)
+        item = ImagingTemplate(
+            name=req.get("name", ""), modality=req.get("modality", "DR"), content=req.get("content", ""),
+            creator_id=current_user.user_id, status=1, create_time=now, update_time=now,
+        )
         db.add(item)
     else:
         item.name = req.get("name", item.name)
@@ -210,7 +221,15 @@ def get_imaging_viewer(imaging_order_id: str, current_user: User = Depends(get_c
         patient = db.query(Patient).filter(Patient.identity == current_user.username).first()
         if not patient or order.patient_id != patient.patient_id:
             return {"code": 403, "msg": "无权查看该影像"}
-    return {"code": 200, "msg": "success", "data": {"viewer_url": order.viewer_url, "integration_status": "configured" if order.viewer_url else "not_configured"}}
+    return {
+        "code": 200,
+        "msg": "success",
+        "data": {
+            "viewer_url": order.viewer_url,
+            "integration_status": "configured" if order.viewer_url else "not_configured",
+            "sync_status": order.integration_status or "pending",
+        },
+    }
 
 
 @router.get("/imaging/film/list")

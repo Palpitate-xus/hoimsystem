@@ -6,7 +6,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 from starlette.middleware.base import BaseHTTPMiddleware
-from starlette.responses import Response
+from starlette.responses import JSONResponse, Response
 
 from app.config import settings
 
@@ -138,6 +138,18 @@ class StripMicrosecondMiddleware(BaseHTTPMiddleware):
             body = MICROSECOND_PATTERN.sub(rb'\1', body)
             return Response(content=body, status_code=response.status_code, headers=dict(response.headers), media_type=response.media_type)
         return response
+
+
+class OriginValidationMiddleware(BaseHTTPMiddleware):
+    """Reject cross-site state changes before they reach business handlers."""
+
+    STATE_CHANGING_METHODS = {"POST", "PUT", "PATCH", "DELETE"}
+
+    async def dispatch(self, request, call_next):
+        origin = request.headers.get("origin")
+        if request.method in self.STATE_CHANGING_METHODS and origin and origin not in settings.cors_origins:
+            return JSONResponse(status_code=403, content={"code": 403, "msg": "请求来源不受信任"})
+        return await call_next(request)
 
 
 class OperationLogMiddleware(BaseHTTPMiddleware):
@@ -372,6 +384,7 @@ app.add_middleware(
     ],
 )
 app.add_middleware(GZipMiddleware, minimum_size=1000)
+app.add_middleware(OriginValidationMiddleware)
 app.add_middleware(StripMicrosecondMiddleware)
 app.add_middleware(OperationLogMiddleware)
 

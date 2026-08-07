@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.dependencies import ADMIN_ROLES, CLINICAL_ROLES, PHARMACY_ROLES, get_current_user, require_roles
 from app.models import (
+    AntibioticApproval,
     Attendance,
     Charge,
     Department,
@@ -354,14 +355,29 @@ def prescription_register(req: PrescriptionCreateRequest, current_user: User = D
                     restricted_phas.append(pha.name)
                 elif pha.antibiotic_level == 3:
                     special_phas.append(pha.name)
-        # 限制级抗菌药：需要科室主任权限
-        if restricted_phas and current_user.user_role not in ("director", "admin"):
-            db.rollback()
-            return {"code": 500, "msg": f"限制级抗菌药 [{', '.join(restricted_phas)}] 需科室主任审批后方可开具"}
-        # 特殊使用级抗菌药：需要更高权限
-        if special_phas and current_user.user_role != "admin":
-            db.rollback()
-            return {"code": 500, "msg": f"特殊使用级抗菌药 [{', '.join(special_phas)}] 需抗菌药物管理组审批后方可开具"}
+        # 限制级/特殊使用级抗菌药：医生必须携带本人、患者、药品匹配的已通过审批
+        elevated_roles = ADMIN_ROLES | {"director"}
+        approved = []
+        approval_required_ids = {
+            item["id"] for item in normalized_phas
+            if db.query(Pharmaceutical).filter(
+                Pharmaceutical.pharmaceutical_id == item["id"],
+                Pharmaceutical.antibiotic_level >= 2,
+            ).first()
+        }
+        if approval_required_ids and current_user.user_role not in elevated_roles:
+            approved = db.query(AntibioticApproval).filter(
+                AntibioticApproval.approval_id.in_(req.antibiotic_approval_ids or ["__missing__"]),
+                AntibioticApproval.patient_id == patient_obj.patient_id,
+                AntibioticApproval.applicant_id == current_user.user_id,
+                AntibioticApproval.status == 1,
+                AntibioticApproval.prescription_id.is_(None),
+            ).all()
+            approved_drug_ids = {item.pharmaceutical_id for item in approved}
+            if not approval_required_ids.issubset(approved_drug_ids):
+                db.rollback()
+                names = restricted_phas + special_phas
+                return {"code": 500, "msg": f"抗菌药 [{', '.join(names)}] 需先提交并通过审批"}
 
         # ===== 处方前置审核 =====
         # 1. 过敏史冲突检查(精确匹配 + 通用名匹配,避免 partial match 误判)
@@ -438,6 +454,10 @@ def prescription_register(req: PrescriptionCreateRequest, current_user: User = D
             status=0,
         )
         db.add(charge)
+        if current_user.user_role not in elevated_roles:
+            for approval in approved:
+                approval.prescription_id = pre.prescription_id
+                db.add(approval)
         db.commit()
         return {"code": 200, "msg": "success", "data": {"uuid": str(pre.prescription_id)}}
     except Exception:

@@ -299,6 +299,7 @@ class PharmaceuticalStockQueryRequest(BaseModel):
 class PrescriptionCreateRequest(BaseModel):
     patient: int
     phas: list[dict]
+    antibiotic_approval_ids: list[str] = Field(default_factory=list, max_length=20)
 
 
 class PrescriptionCancelRequest(BaseModel):

@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.dependencies import ADMIN_ROLES, CLINICAL_ROLES, PHARMACY_ROLES, ROLE_DIRECTOR, User, get_current_user, require_roles
-from app.models import AntibioticApproval, LabOrder, Pharmaceutical, PrePha, Prescription
+from app.models import AntibioticApproval, LabOrder, Patient, Pharmaceutical, PrePha, Prescription
 
 router = APIRouter()
 ANTIBIOTIC_ROLES = {*CLINICAL_ROLES, *PHARMACY_ROLES}
@@ -15,8 +15,22 @@ REVIEW_ROLES = {*ADMIN_ROLES, ROLE_DIRECTOR}
 
 @router.get("/antibiotic/grade/list")
 def get_antibiotic_grade_list(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    items = db.query(Pharmaceutical).filter(Pharmaceutical.antibiotic_level > 0).order_by(Pharmaceutical.antibiotic_level.desc(), Pharmaceutical.name).all()
-    return {"code": 200, "msg": "success", "data": [{"pharmaceutical_id": item.pharmaceutical_id, "name": item.name, "level": item.antibiotic_level, "level_text": {1: "非限制级", 2: "限制级", 3: "特殊使用级"}.get(item.antibiotic_level, "未知")} for item in items]}
+    items = (
+        db.query(Pharmaceutical)
+        .filter(Pharmaceutical.antibiotic_level > 0)
+        .order_by(Pharmaceutical.antibiotic_level.desc(), Pharmaceutical.name)
+        .all()
+    )
+    data = [
+        {
+            "pharmaceutical_id": item.pharmaceutical_id,
+            "name": item.name,
+            "level": item.antibiotic_level,
+            "level_text": {1: "非限制级", 2: "限制级", 3: "特殊使用级"}.get(item.antibiotic_level, "未知"),
+        }
+        for item in items
+    ]
+    return {"code": 200, "msg": "success", "data": data}
 
 
 @router.post("/antibiotic/grade/save")
@@ -37,39 +51,67 @@ def create_antibiotic_approval(req: dict, current_user: User = Depends(require_r
     drug = db.query(Pharmaceutical).filter(Pharmaceutical.pharmaceutical_id == req.get("pharmaceutical_id")).first()
     if not drug or drug.antibiotic_level < 2:
         return {"code": 400, "msg": "仅限制级或特殊使用级药品需要越级审批"}
+    patient_id = req.get("patient_id")
+    if not patient_id or not db.query(Patient).filter(Patient.patient_id == patient_id).first():
+        return {"code": 400, "msg": "患者不存在"}
+    reason = (req.get("reason") or "").strip()
+    if not reason:
+        return {"code": 400, "msg": "审批理由不能为空"}
+    existing = db.query(AntibioticApproval).filter(
+        AntibioticApproval.pharmaceutical_id == drug.pharmaceutical_id,
+        AntibioticApproval.patient_id == patient_id,
+        AntibioticApproval.applicant_id == current_user.user_id,
+        AntibioticApproval.prescription_id.is_(None),
+        AntibioticApproval.status.in_((0, 1)),
+    ).order_by(AntibioticApproval.create_time.desc()).first()
+    if existing:
+        return {"code": 200, "msg": "审批申请已存在", "data": {"approval_id": existing.approval_id, "idempotent": True}}
     approval = AntibioticApproval(
         pharmaceutical_id=drug.pharmaceutical_id,
-        patient_id=req.get("patient_id"),
+        patient_id=patient_id,
         prescription_id=req.get("prescription_id"),
         applicant_id=current_user.user_id,
-        reason=req.get("reason", "").strip(),
+        reason=reason,
         status=0,
         create_time=datetime.datetime.now(),
     )
-    if not approval.reason:
-        return {"code": 400, "msg": "审批理由不能为空"}
     db.add(approval)
     db.commit()
     return {"code": 200, "msg": "success", "data": {"approval_id": approval.approval_id}}
 
 
 def _approval_data(item: AntibioticApproval):
-    return {"approval_id": item.approval_id, "drug_name": item.pharmaceutical.name if item.pharmaceutical else "", "patient_name": item.patient.name if item.patient else "", "reason": item.reason, "status": item.status, "status_text": {0: "待审批", 1: "已通过", 2: "已退回"}.get(item.status, ""), "applicant_name": item.applicant.username if item.applicant else "", "review_note": item.review_note or "", "create_time": item.create_time.strftime("%Y-%m-%d %H:%M:%S") if item.create_time else ""}
+    return {
+        "approval_id": item.approval_id,
+        "drug_name": item.pharmaceutical.name if item.pharmaceutical else "",
+        "patient_name": item.patient.name if item.patient else "",
+        "reason": item.reason,
+        "status": item.status,
+        "status_text": {0: "待审批", 1: "已通过", 2: "已退回"}.get(item.status, ""),
+        "applicant_name": item.applicant.username if item.applicant else "",
+        "review_note": item.review_note or "",
+        "create_time": item.create_time.strftime("%Y-%m-%d %H:%M:%S") if item.create_time else "",
+    }
 
 
 @router.get("/antibiotic/approval/list")
 def get_antibiotic_approval_list(current_user: User = Depends(require_roles(*ANTIBIOTIC_ROLES)), db: Session = Depends(get_db)):
-    return {"code": 200, "msg": "success", "data": [_approval_data(item) for item in db.query(AntibioticApproval).order_by(AntibioticApproval.create_time.desc()).all()]}
+    items = db.query(AntibioticApproval).order_by(AntibioticApproval.create_time.desc()).all()
+    return {"code": 200, "msg": "success", "data": [_approval_data(item) for item in items]}
 
 
 @router.post("/antibiotic/approval/review")
 def review_antibiotic_approval(req: dict, current_user: User = Depends(require_roles(*REVIEW_ROLES)), db: Session = Depends(get_db)):
-    item = db.query(AntibioticApproval).filter(AntibioticApproval.approval_id == req.get("approval_id"), AntibioticApproval.status == 0).first()
+    item = db.query(AntibioticApproval).filter(AntibioticApproval.approval_id == req.get("approval_id")).first()
     if not item:
         return {"code": 404, "msg": "待审批记录不存在"}
     status = req.get("status")
     if status not in (1, 2):
         return {"code": 400, "msg": "审批状态必须为1(通过)或2(退回)"}
+    if item.status != 0:
+        if item.status == status:
+            return {"code": 200, "msg": "审批结果已记录", "data": {"idempotent": True}}
+        return {"code": 400, "msg": "审批记录已完成，不可修改"}
     item.status = status
     item.reviewer_id = current_user.user_id
     item.review_note = req.get("note", "")
@@ -80,7 +122,12 @@ def review_antibiotic_approval(req: dict, current_user: User = Depends(require_r
 
 @router.get("/antibiotic/ddds")
 def antibiotic_ddds(start_date: str | None = None, end_date: str | None = None, current_user: User = Depends(require_roles(*ANTIBIOTIC_ROLES)), db: Session = Depends(get_db)):
-    query = db.query(PrePha, Prescription).join(Prescription, PrePha.prescription_id == Prescription.prescription_id).join(Pharmaceutical, PrePha.pharmaceutical_id == Pharmaceutical.pharmaceutical_id).filter(Pharmaceutical.antibiotic_level > 0)
+    query = (
+        db.query(PrePha, Prescription)
+        .join(Prescription, PrePha.prescription_id == Prescription.prescription_id)
+        .join(Pharmaceutical, PrePha.pharmaceutical_id == Pharmaceutical.pharmaceutical_id)
+        .filter(Pharmaceutical.antibiotic_level > 0)
+    )
     if start_date:
         query = query.filter(func.date(Prescription.create_time) >= start_date)
     if end_date:
@@ -98,7 +145,12 @@ def antibiotic_ddds(start_date: str | None = None, end_date: str | None = None, 
 
 @router.get("/antibiotic/submissionRate")
 def antibiotic_submission_rate(start_date: str | None = None, end_date: str | None = None, current_user: User = Depends(require_roles(*ANTIBIOTIC_ROLES)), db: Session = Depends(get_db)):
-    query = db.query(PrePha, Prescription).join(Prescription, PrePha.prescription_id == Prescription.prescription_id).join(Pharmaceutical, PrePha.pharmaceutical_id == Pharmaceutical.pharmaceutical_id).filter(Pharmaceutical.antibiotic_level > 0)
+    query = (
+        db.query(PrePha, Prescription)
+        .join(Prescription, PrePha.prescription_id == Prescription.prescription_id)
+        .join(Pharmaceutical, PrePha.pharmaceutical_id == Pharmaceutical.pharmaceutical_id)
+        .filter(Pharmaceutical.antibiotic_level > 0)
+    )
     if start_date:
         query = query.filter(func.date(Prescription.create_time) >= start_date)
     if end_date:

@@ -54,7 +54,7 @@ class TestAuditMiddleware:
             json={"department_id": target["id"]})
         # 查日志
         r = await async_client.post("/api/log/getList", headers=headers,
-            json={"page": 1, "page_size:": 10})
+            json={"page": 1, "page_size": 10})
         logs = r.json()["data"]["list"]
         matched = [l for l in logs if l["action"] == "删除" and "科室" in l.get("target", "")]
         assert len(matched) >= 1

@@ -240,7 +240,7 @@ baseURL：`/api`
 |:----:|:---------------------------------------:|:------:|:-------:|:--------:|
 | ✅ | /registrationManagement/getList | GET | - | `{ code, msg, data: Registration[] }` |
 | ✅ | /registrationManagement/registrationList | GET | - | `{ code, msg, data: Schedule[] \| string }` |
-| ✅ | /registrationManagement/create | POST | `{ id, doctor_id, department_id, specialist }` | `{ code, msg }` |
+| ✅ | /registrationManagement/create | POST | `{ id, doctor_id, department_id, specialist }` | `{ code, msg, data: { registration_uuid, registration_id } }` |
 | ✅ | /registrationManagement/cancel | POST | `{ uuid }` | `{ code, msg }` |
 
 **字段说明：**
@@ -258,6 +258,8 @@ baseURL：`/api`
   - `id`: 排班 ID
   - `time`: 时段
   - `specialist`: 是否专家号
+
+> `registration_id` 为当天门诊挂号序号，按自然日从 1 开始递增；`registration_uuid` 为挂号记录唯一标识。
   - `doctor`: 医生姓名
   - `doctor_id`: 医生 ID
   - `department_id`: 科室 ID
@@ -602,6 +604,15 @@ baseURL：`/api`
   - `charge_id`: 收费记录 ID
   - `amount`: 金额
   - `invoice_time`: 开票时间
+
+### 6.4 窗口挂号
+
+| 状态 | url | method | payload | response |
+|:----:|:----------------------------:|:------:|:------------------------------------------------------------------:|:-------------------------------------------------------------:|
+| ✅ | /windowRegistration/create | POST | `{ identity, schedule_id, doctor_id, department_id, specialist }` | `{ code, msg, data: { registration_uuid, registration_id } }` |
+| ✅ | /windowRegistration/cancel | POST | `{ uuid }` | `{ code, msg }` |
+
+窗口挂号成功后扣减对应号源，并返回当天门诊挂号序号；取消挂号会按现有业务规则返还号源。
 
 ---
 

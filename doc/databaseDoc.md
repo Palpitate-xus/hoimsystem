@@ -180,7 +180,7 @@
 | 字段名 | 类型 | 长度 | 约束 | 说明 |
 |:------:|:----:|:----:|:----:|:----:|
 | registration_uuid | VARCHAR | 36 | PK | 挂号 UUID |
-| registration_id | INT | - | - | 挂号序号 |
+| registration_id | INT | - | - | 当天门诊挂号序号（按自然日从 1 递增） |
 | patient_id | INT | - | FK | 病人 ID |
 | doctor_id | INT | - | FK | 医生 ID |
 | specialist | INT | - | - | 是否专家号 |
@@ -190,6 +190,15 @@
 
 **关联关系：**
 - 多对一 → `hoimsystem_patient`（patient_id）
+
+### 8.1 hoimsystem_registration_counter（挂号序号计数器）✅
+
+按自然日保存下一位门诊挂号序号，确保患者端和窗口端使用同一计数规则。
+
+| 字段名 | 类型 | 约束 | 说明 |
+|:------:|:----:|:----:|:----:|
+| counter_date | DATE | PK | 计数日期 |
+| next_number | INT | NOT NULL | 下一位可分配序号 |
 - 多对一 → `hoimsystem_doctor`（doctor_id）
 - 多对一 → `hoimsystem_department`（department_id）
 

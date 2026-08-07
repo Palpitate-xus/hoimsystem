@@ -473,6 +473,8 @@ baseURL：`/api`
 
 `/medicalRecord/update` 仅允许修改本人创建且状态为草稿的病历；`/medicalRecord/sign` 仅允许本人对草稿病历签名，重复签名会被拒绝。
 
+患者查询病历时仅返回已签名记录；患者请求未签名病历详情会被拒绝。
+
 ### 4.3 处方管理
 
 | 状态 | url | method | payload | response |

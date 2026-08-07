@@ -73,13 +73,20 @@ class TestPatientOutpatientJourney:
         )
         assert r.json()["code"] == 200
 
-    async def test_journey_register_and_cancel(self, async_client, auth_headers, seed_data):
+    async def test_journey_register_and_cancel(self, async_client, auth_headers, seed_data, db_session):
         """挂号 → 取消 → 号源返还 + 状态正确。"""
         headers = auth_headers(seed_data["patient_user"].username)
+        from app.models import DoctorSchedule
+
+        schedule = db_session.query(DoctorSchedule).filter(
+            DoctorSchedule.doctor_id == seed_data["doctor"].doctor_id,
+            DoctorSchedule.specialist == 1,
+            DoctorSchedule.number > 0,
+        ).first()
         # 挂号
         r = await async_client.post("/api/registrationManagement/create", headers=headers, json={
-            "id": 3,  # schedule_id
-            "doctor_id": seed_data["director_doctor"].doctor_id,
+            "id": schedule.schedule_id,
+            "doctor_id": seed_data["doctor"].doctor_id,
             "department_id": seed_data["department"].department_id,
             "specialist": 1,
         })
@@ -90,11 +97,11 @@ class TestPatientOutpatientJourney:
         reg_uuid = regs[0]["uuid"]
         # 取消
         r = await async_client.post("/api/registrationManagement/cancel", headers=headers,
-            json={"uuid": reg_uuid, "schedule_id": 3})
+            json={"uuid": reg_uuid, "schedule_id": schedule.schedule_id})
         assert r.json()["code"] == 200
         # 再次取消 → 500(已退号)
         r = await async_client.post("/api/registrationManagement/cancel", headers=headers,
-            json={"uuid": reg_uuid, "schedule_id": 3})
+            json={"uuid": reg_uuid, "schedule_id": schedule.schedule_id})
         assert r.json()["code"] == 500
 
     async def test_journey_charge_flow(self, async_client, auth_headers, seed_data):

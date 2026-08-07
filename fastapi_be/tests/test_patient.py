@@ -291,7 +291,11 @@ class TestFamilyMember:
             json={"name": "张小四", "identity": "110101201001021234", "relation": "子女", "sex": 1},
         )
         member_id = created.json()["data"]["patient_id"]
-        schedule = db_session.query(DoctorSchedule).filter(DoctorSchedule.number > 0).first()
+        schedule = db_session.query(DoctorSchedule).filter(
+            DoctorSchedule.doctor_id == seed_data["doctor"].doctor_id,
+            DoctorSchedule.specialist == 1,
+            DoctorSchedule.number > 0,
+        ).first()
 
         appointment = await async_client.post(
             "/api/appointmentManagement/create",

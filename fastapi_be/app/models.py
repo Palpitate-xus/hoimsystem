@@ -300,6 +300,7 @@ class Appointment(Base):
     __tablename__ = "hoimsystem_appointment"
 
     registration_uuid = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    schedule_id = Column(Integer, ForeignKey("hoimsystem_doctor_schedule.schedule_id"), nullable=True, index=True)
     patient_id = Column(Integer, ForeignKey("hoimsystem_patient.patient_id"))
     doctor_id = Column(Integer, ForeignKey("hoimsystem_doctor.doctor_id"))
     specialist = Column(Integer)
@@ -315,6 +316,7 @@ class Appointment(Base):
     patient = relationship("Patient", back_populates="appointments")
     doctor = relationship("Doctor", back_populates="appointments")
     department = relationship("Department")
+    schedule = relationship("DoctorSchedule")
     confirmer = relationship("User", foreign_keys=[confirmed_by])
 
 

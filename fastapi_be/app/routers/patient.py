@@ -185,6 +185,7 @@ def patient_appointment(req: AppointmentCreateRequest, current_user: User = Depe
             db.rollback()
             return {"code": 500, "msg": "该时段号源已满"}
         appointment = Appointment(
+            schedule_id=reg_obj.schedule_id,
             patient_id=patient_obj.patient_id,
             doctor_id=req.doctor_id,
             specialist=req.specialist,
@@ -225,10 +226,12 @@ def patient_appointment_cancel(req: UuidRequest, current_user: User = Depends(ge
     if updated != 1:
         db.rollback()
         return {"code": 500, "msg": "预约已报到或已就诊，不能取消"}
-    schedule = db.query(DoctorSchedule).filter(
-        DoctorSchedule.doctor_id == app.doctor_id,
-        DoctorSchedule.specialist == app.specialist,
-    ).first()
+    schedule = db.query(DoctorSchedule).filter(DoctorSchedule.schedule_id == app.schedule_id).first() if app.schedule_id else None
+    if not schedule:
+        schedule = db.query(DoctorSchedule).filter(
+            DoctorSchedule.doctor_id == app.doctor_id,
+            DoctorSchedule.specialist == app.specialist,
+        ).first()
     if schedule:
         schedule.number += 1
     db.commit()

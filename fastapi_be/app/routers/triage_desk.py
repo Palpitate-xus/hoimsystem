@@ -4,8 +4,9 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.dependencies import get_current_user, User, User, require_roles, GUIDE_ROLES
+from app.dependencies import GUIDE_ROLES, get_current_user, require_roles
 from app.models import Patient, TriageRecord, User
+from app.privacy import can_view_full_patient_identity, mask_identity
 
 router = APIRouter()
 
@@ -53,7 +54,11 @@ def get_triage_list(level: int | None = None, status: int | None = None, db: Ses
                 "triage_record_id": item.triage_record_id,
                 "patient_id": item.patient_id,
                 "patient_name": item.patient.name if item.patient else "",
-                "patient_identity": item.patient.identity if item.patient else "",
+                "patient_identity": (
+                    item.patient.identity
+                    if item.patient and can_view_full_patient_identity(current_user.user_role)
+                    else mask_identity(item.patient.identity if item.patient else "")
+                ),
                 "nurse_name": item.nurse.username if item.nurse else "",
                 "symptom": item.symptom,
                 "level": item.level,

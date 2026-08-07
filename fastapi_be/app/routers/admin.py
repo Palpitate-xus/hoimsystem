@@ -7,6 +7,7 @@ from app.database import get_db
 from app.dependencies import ADMIN_ROLES, NOTICE_ROLES, ROLE_PATIENT, User, get_current_user, require_roles
 from app.models import Department, Doctor, Notice, Patient
 from app.pagination import paginate
+from app.privacy import can_view_full_patient_identity, mask_identity, mask_phone
 from app.schemas import (
     DepartmentCreateRequest,
     DepartmentDeleteRequest,
@@ -86,7 +87,11 @@ def get_patient_list(keyword: str | None = None, page: int | None = None, page_s
     query = db.query(Patient)
     if current_user.user_role == ROLE_PATIENT:
         query = query.filter(Patient.identity == current_user.username)
+    if keyword:
+        like = f"%{keyword.strip()}%"
+        query = query.filter((Patient.name.ilike(like)) | Patient.identity.ilike(like) | Patient.phone.ilike(like))
     patient_data, total = paginate(query, page, page_size)
+    reveal_sensitive = current_user.user_role == ROLE_PATIENT or can_view_full_patient_identity(current_user.user_role)
     data = []
     for item in patient_data:
         sex = "女" if item.sex == 0 else "男"
@@ -96,16 +101,13 @@ def get_patient_list(keyword: str | None = None, page: int | None = None, page_s
                 "name": item.name,
                 "sex": sex,
                 "birthday": (item.birthday.strftime("%Y-%m-%d") if item.birthday else None),
-                "phone": item.phone,
+                "phone": item.phone if reveal_sensitive else mask_phone(item.phone),
                 "permission": item.permission,
                 "address": item.address,
-                "identity": item.identity,
+                "identity": item.identity if reveal_sensitive else mask_identity(item.identity),
                 "allergy_history": item.allergy_history or "",
             }
         )
-    if keyword:
-        kw = keyword.lower()
-        data = [item for item in data if any(kw in str(val).lower() for val in item.values())]
     result = {"code": 200, "msg": "success", "data": data}
     if page and page_size:
         result["total"] = total

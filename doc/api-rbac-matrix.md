@@ -163,6 +163,7 @@
 | GET | `/api/pharmaceuticalManagement/getList` | ✓ | ✓ |  |  |  |  | ✓ |  |  |  |  | |
 | POST | `/api/pharmaceuticalManagement/update` | ✓ | ✓ |  |  |  |  | ✓ |  |  |  |  | |
 | POST | `/api/pharmaceuticalManagement/delete` | ✓ | ✓ |  |  |  |  | ✓ |  |  |  |  | |
+| POST | `/api/pharmaceuticalManagement/restore` | ✓ | ✓ |  |  |  |  | ✓ |  |  |  |  | |
 | POST | `/api/pharmaceuticalManagement/stock_query` | ✓ | ✓ |  |  |  |  | ✓ |  |  |  |  | |
 | GET | `/api/pharmaceuticalManagement/lowStock` | ✓ | ✓ |  |  |  |  | ✓ |  |  |  |  | |
 | GET | `/api/pharmaceuticalManagement/nearExpiry` | ✓ | ✓ |  |  |  |  | ✓ |  |  |  |  | |

@@ -15,6 +15,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy.pool import StaticPool
 
+from app import database as _app_database
 from app.database import Base, get_db
 from app.main import app
 from app.models import (
@@ -50,7 +51,6 @@ def override_get_db():
 app.dependency_overrides[get_db] = override_get_db
 
 # 让中间件内的 SessionLocal() 也指向同一个内存数据库
-from app import database as _app_database
 _app_database.SessionLocal = TestingSessionLocal
 
 

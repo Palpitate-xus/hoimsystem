@@ -27,7 +27,7 @@ class TestAuditMiddleware:
             json={"page": 1, "page_size": 10})
         logs = r.json()["data"]["list"]
         # 找到刚才的操作
-        matched = [l for l in logs if l["action"] == "新增" and "科室" in l.get("target", "")]
+        matched = [entry for entry in logs if entry["action"] == "新增" and "科室" in entry.get("target", "")]
         assert len(matched) >= 1, f"POST 未被记录,最近日志: {logs[:3]}"
         log = matched[0]
         assert log["username"] == "admin"
@@ -56,7 +56,7 @@ class TestAuditMiddleware:
         r = await async_client.post("/api/log/getList", headers=headers,
             json={"page": 1, "page_size": 10})
         logs = r.json()["data"]["list"]
-        matched = [l for l in logs if l["action"] == "删除" and "科室" in l.get("target", "")]
+        matched = [entry for entry in logs if entry["action"] == "删除" and "科室" in entry.get("target", "")]
         assert len(matched) >= 1
 
     async def test_failed_operation_is_logged(self, async_client, seed_data, auth_headers):
@@ -82,9 +82,9 @@ class TestAuditMiddleware:
         r = await async_client.post("/api/log/getList", headers=headers,
             json={"page": 1, "page_size": 10, "method": "POST"})
         logs = r.json()["data"]["list"]
-        matched = [l for l in logs if "病历" in l.get("target", "") and l.get("action") in ("访问", "查询")]
+        matched = [entry for entry in logs if "病历" in entry.get("target", "") and entry.get("action") in ("访问", "查询")]
         # 至少 medicalRecord/detail 被记录
-        assert len(matched) >= 1 or any("medicalRecord" in l.get("path", "") for l in logs), \
+        assert len(matched) >= 1 or any("medicalRecord" in entry.get("path", "") for entry in logs), \
             f"敏感操作未被记录,最近: {logs[:3]}"
 
     async def test_login_not_logged(self, async_client, seed_data):
@@ -108,8 +108,8 @@ class TestAuditMiddleware:
         r = await async_client.post("/api/log/getList", headers=headers,
             json={"page": 1, "page_size": 5})
         logs = r.json()["data"]["list"]
-        for l in logs:
-            assert not l.get("path", "").startswith("/uploads/"), "静态资源不应被记录"
+        for entry in logs:
+            assert not entry.get("path", "").startswith("/uploads/"), "静态资源不应被记录"
 
     async def test_log_filter_by_username(self, async_client, seed_data, auth_headers):
         """按用户名筛选日志。"""
@@ -118,8 +118,8 @@ class TestAuditMiddleware:
             json={"page": 1, "page_size": 10, "username": "admin"})
         assert r.json()["code"] == 200
         logs = r.json()["data"]["list"]
-        for l in logs:
-            assert "admin" in l.get("username", "")
+        for entry in logs:
+            assert "admin" in entry.get("username", "")
 
     async def test_log_filter_by_role(self, async_client, seed_data, auth_headers):
         """按角色筛选日志。"""
@@ -127,8 +127,8 @@ class TestAuditMiddleware:
         r = await async_client.post("/api/log/getList", headers=headers,
             json={"page": 1, "page_size": 10, "role": "admin"})
         logs = r.json()["data"]["list"]
-        for l in logs:
-            assert l.get("role") == "admin"
+        for entry in logs:
+            assert entry.get("role") == "admin"
 
     async def test_log_filter_by_action(self, async_client, seed_data, auth_headers):
         """按操作类型筛选。"""
@@ -136,8 +136,8 @@ class TestAuditMiddleware:
         r = await async_client.post("/api/log/getList", headers=headers,
             json={"page": 1, "page_size": 10, "action": "新增"})
         logs = r.json()["data"]["list"]
-        for l in logs:
-            assert "新增" in l.get("action", "")
+        for entry in logs:
+            assert "新增" in entry.get("action", "")
 
     async def test_log_filter_by_ip(self, async_client, seed_data, auth_headers):
         """按 IP 筛选。"""
@@ -167,8 +167,8 @@ class TestAuditMiddleware:
         r = await async_client.post("/api/log/getList", headers=headers,
             json={"page": 1, "page_size": 5})
         logs = r.json()["data"]["list"]
-        assert any("departmentManagement" in l.get("path", "") for l in logs), \
-            f"路径未被记录: {[l.get('path') for l in logs[:3]]}"
+        assert any("departmentManagement" in entry.get("path", "") for entry in logs), \
+            f"路径未被记录: {[entry.get('path') for entry in logs[:3]]}"
 
     async def test_non_admin_cannot_view_logs(self, async_client, seed_data, auth_headers):
         """非 admin 不能查看审计日志。"""

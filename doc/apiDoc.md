@@ -272,7 +272,7 @@ baseURL：`/api`
   - `id`: 排班 ID
   - `doctor_id`: 医生 ID
   - `department_id`: 科室 ID
-- `specialist`: 是否专家号
+  - `specialist`: 是否专家号
 
 - `cancel` payload
   - `uuid`: 挂号 ID

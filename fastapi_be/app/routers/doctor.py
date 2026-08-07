@@ -267,8 +267,11 @@ def get_low_stock_drugs(threshold: int = 10, keyword: str | None = None, current
 def get_near_expiry_drugs(days: int = 30, keyword: str | None = None, current_user: User = Depends(require_roles(*PHARMACY_ROLES)), db: Session = Depends(get_db)):
     from datetime import date, timedelta
 
+    if days < 0 or days > 3650:
+        return {"code": 400, "msg": "效期查询天数必须在0至3650之间"}
+
     cutoff = date.today() + timedelta(days=days)
-    drugs = db.query(Pharmaceutical).filter(Pharmaceutical.expireddate <= cutoff).order_by(Pharmaceutical.expireddate.asc()).all()
+    drugs = db.query(Pharmaceutical).filter(Pharmaceutical.expireddate.isnot(None), Pharmaceutical.expireddate <= cutoff).order_by(Pharmaceutical.expireddate.asc()).all()
     data = []
     for item in drugs:
         days_left = (item.expireddate - date.today()).days
@@ -314,6 +317,8 @@ def prescription_register(req: PrescriptionCreateRequest, current_user: User = D
             pha = db.query(Pharmaceutical).filter(Pharmaceutical.pharmaceutical_id == pharmaceutical_id).first()
             if not pha:
                 return {"code": 500, "msg": "药品不存在"}
+            if pha.expireddate and pha.expireddate < datetime.date.today():
+                return {"code": 500, "msg": f"药品 {pha.name} 已过期，不能开立"}
             seen_pharmaceuticals.add(pharmaceutical_id)
             normalized_phas.append({"id": pharmaceutical_id, "number": quantity})
 

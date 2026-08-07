@@ -1,4 +1,8 @@
+import datetime
+
 import pytest
+
+from app.models import Pharmaceutical
 
 
 @pytest.mark.asyncio
@@ -74,6 +78,32 @@ class TestPharmaceuticalManagement:
         r = await async_client.post("/api/pharmacy/stockCheck", headers=headers, json=duplicate)
         assert r.status_code == 200
         assert r.json()["code"] == 500
+
+    async def test_near_expiry_ignores_missing_dates_and_validates_range(self, async_client, seed_data, auth_headers, db_session):
+        seed_data["pharmaceutical"].expireddate = None
+        db_session.commit()
+        headers = auth_headers(seed_data["pharmacist_user"].username)
+        response = await async_client.get("/api/pharmaceuticalManagement/nearExpiry", headers=headers)
+        assert response.status_code == 200
+        assert response.json()["code"] == 200
+        assert all(item["id"] != seed_data["pharmaceutical"].pharmaceutical_id for item in response.json()["data"])
+
+        invalid = await async_client.get("/api/pharmaceuticalManagement/nearExpiry", headers=headers, params={"days": -1})
+        assert invalid.status_code == 200
+        assert invalid.json() == {"code": 400, "msg": "效期查询天数必须在0至3650之间"}
+
+    async def test_prescription_cannot_use_expired_drug(self, async_client, seed_data, auth_headers, db_session):
+        expired = Pharmaceutical(name="过期药", stock=10, price=1, expireddate=datetime.date.today() - datetime.timedelta(days=1), status=0)
+        db_session.add(expired)
+        db_session.commit()
+        response = await async_client.post(
+            "/api/prescriptionManagement/create",
+            headers=auth_headers(seed_data["doctor_user"].username),
+            json={"patient": seed_data["patient2"].patient_id, "phas": [{"id": expired.pharmaceutical_id, "number": 1}]},
+        )
+        assert response.status_code == 200
+        assert response.json()["code"] == 500
+        assert "过期" in response.json()["msg"]
 
 
 @pytest.mark.asyncio
@@ -191,6 +221,24 @@ class TestInventoryAdjustment:
         assert item["status"] == 0
         assert (await async_client.post("/api/pharmacy/verify", headers=nurse_headers, json={"verification_id": item["verification_id"], "note": "药品、剂量与处方一致"})).json()["code"] == 200
         assert (await async_client.post("/api/pharmacy/verify", headers=nurse_headers, json={"verification_id": item["verification_id"]})).json()["code"] == 500
+
+    async def test_dispense_blocks_drug_that_expired_after_prescription(self, async_client, seed_data, auth_headers, db_session):
+        doctor_headers = auth_headers(seed_data["doctor_user"].username)
+        pharmacist_headers = auth_headers(seed_data["pharmacist_user"].username)
+        created = await async_client.post(
+            "/api/prescriptionManagement/create",
+            headers=doctor_headers,
+            json={"patient": seed_data["patient2"].patient_id, "phas": [{"id": seed_data["pharmaceutical"].pharmaceutical_id, "number": 1}]},
+        )
+        assert created.json()["code"] == 200
+        prescription_id = created.json()["data"]["uuid"]
+        seed_data["pharmaceutical"].expireddate = datetime.date.today() - datetime.timedelta(days=1)
+        db_session.commit()
+        assert (await async_client.post("/api/pharmacy/audit", headers=pharmacist_headers, json={"prescription_id": prescription_id})).json()["code"] == 200
+        response = await async_client.post("/api/pharmacy/dispense", headers=pharmacist_headers, json={"prescription_id": prescription_id})
+        assert response.status_code == 200
+        assert response.json()["code"] == 400
+        assert "过期" in response.json()["msg"]
 
     async def test_return_rejects_unreviewed_prescription(self, async_client, seed_data, auth_headers):
         r = await async_client.post("/api/pharmacy/return", headers=auth_headers(seed_data["pharmacist_user"].username), json={

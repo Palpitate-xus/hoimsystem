@@ -77,6 +77,13 @@ def dispense_prescription(req: PharmacyDispenseRequest, current_user: User = Dep
         return {"code": 500, "msg": "处方不存在"}
     if pre.status != 1:
         return {"code": 500, "msg": "处方未审核或已发药"}
+    expired_names = [
+        line.pharmaceutical.name
+        for line in pre.pre_phas
+        if line.pharmaceutical and line.pharmaceutical.expireddate and line.pharmaceutical.expireddate < datetime.date.today() and line.number > 0
+    ]
+    if expired_names:
+        return {"code": 400, "msg": f"药品已过期，禁止发药：{', '.join(expired_names)}"}
 
     # Only the audited state may transition to dispensed.  Keeping the state
     # predicate in the UPDATE closes the duplicate-dispense race window.

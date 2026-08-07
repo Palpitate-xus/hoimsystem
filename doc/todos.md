@@ -751,7 +751,7 @@
 - [x] 数据库文档（databaseDoc.md）
 - [x] 部署文档（deployDoc.md，含开发/生产/Docker、HTTPS、Systemd和迁移说明）
 - [x] 前端组件文档（architecture.md、coding-standards.md）
-- [ ] 测试用例文档
+- [x] 测试用例文档（testing.md、api-test-report.md、frontend-test-report.md）
 - [ ] 用户操作手册
 
 ---

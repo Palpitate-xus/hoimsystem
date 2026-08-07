@@ -203,6 +203,8 @@ baseURL：`/api`
 | ✅ | /appointmentManagement/create | POST | `{ id, date, department_id, doctor_id, time, specialist }` | `{ code, msg }` |
 | ✅ | /appointmentManagement/cancel | POST | `{ uuid }` | `{ code, msg }` |
 
+预约创建会校验排班存在，且医生、科室、号类必须与排班一致；号源不足时不会创建预约。
+
 **字段说明：**
 
 - `getList` response `data` 数组项

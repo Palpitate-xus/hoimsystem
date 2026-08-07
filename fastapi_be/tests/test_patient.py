@@ -111,6 +111,20 @@ class TestPatientRegistration:
         assert r.status_code == 200
         assert r.json()["code"] == 200
 
+        r = await async_client.get("/api/registrationManagement/getList", headers=headers)
+        assert r.status_code == 200
+        body = r.json()
+        assert body["code"] == 200
+        target_regs = [reg for reg in body["data"] if reg.get("doctor") == "李主任" and reg.get("status") != "已取消"]
+        if not target_regs:
+            target_regs = [reg for reg in body["data"] if reg.get("status") != "已取消"]
+        if not target_regs:
+            pytest.skip("无有效挂号")
+        reg_uuid = target_regs[0]["uuid"]
+        r = await async_client.post("/api/registrationManagement/cancel", headers=headers, json={"uuid": reg_uuid, "schedule_id": schedule.schedule_id})
+        assert r.status_code == 200
+        assert r.json()["code"] == 200
+
     async def test_registration_requires_matching_schedule(self, async_client, seed_data, auth_headers):
         headers = auth_headers(seed_data["patient_user"].username)
         invalid = await async_client.post(
@@ -129,24 +143,28 @@ class TestPatientRegistration:
         assert mismatch.status_code == 200
         assert mismatch.json() == {"code": 500, "msg": "挂号医生与排班不匹配"}
 
-        r = await async_client.get("/api/registrationManagement/getList", headers=headers)
-        assert r.status_code == 200
-        body = r.json()
-        assert body["code"] == 200
-        # 找到刚创建的挂号(匹配 director_doctor,排除已取消的)
-        # 注意:API 返回的 status 是字符串("未就诊"/"已就诊"/"已取消")
-        target_regs = [reg for reg in body["data"] if reg.get("doctor") == "李主任" and reg.get("status") != "已取消"]
-        if not target_regs:
-            target_regs = [reg for reg in body["data"] if reg.get("status") != "已取消"]
-        if not target_regs:
-            pytest.skip("无有效挂号")
-        reg_uuid = target_regs[0]["uuid"]
-
-        # cancel
-        r = await async_client.post("/api/registrationManagement/cancel", headers=headers,
-            json={"uuid": reg_uuid, "schedule_id": 2})
-        assert r.status_code == 200
-        assert r.json()["code"] == 200
+    async def test_registration_cancel_returns_source_schedule(self, async_client, seed_data, auth_headers, db_session):
+        doctor = seed_data["director_doctor"]
+        source = DoctorSchedule(week="星期四", time="01", number=1, specialist=1, doctor_id=doctor.doctor_id)
+        other = DoctorSchedule(week="星期五", time="01", number=7, specialist=1, doctor_id=doctor.doctor_id)
+        db_session.add_all([source, other])
+        db_session.commit()
+        response = await async_client.post(
+            "/api/registrationManagement/create",
+            headers=auth_headers(seed_data["patient_user"].username),
+            json={"id": source.schedule_id, "doctor_id": doctor.doctor_id, "department_id": seed_data["department"].department_id, "specialist": 1},
+        )
+        assert response.json()["code"] == 200
+        registration_uuid = response.json()["data"]["registration_uuid"]
+        cancelled = await async_client.post(
+            "/api/registrationManagement/cancel",
+            headers=auth_headers(seed_data["patient_user"].username),
+            json={"uuid": registration_uuid},
+        )
+        assert cancelled.json()["code"] == 200
+        db_session.expire_all()
+        assert db_session.get(DoctorSchedule, source.schedule_id).number == 1
+        assert db_session.get(DoctorSchedule, other.schedule_id).number == 7
 
     async def test_visited_registration_cannot_be_cancelled(self, async_client, seed_data, auth_headers, db_session):
         registration = Registration(

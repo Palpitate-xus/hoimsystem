@@ -1,6 +1,6 @@
 import pytest
 
-from app.models import Charge, Registration
+from app.models import Charge, DoctorSchedule, Registration
 
 
 @pytest.mark.asyncio
@@ -222,6 +222,29 @@ class TestChargeManagement:
         )
         assert r.status_code == 200
         assert r.json() == {"code": 500, "msg": "该挂号已就诊，不能退号"}
+
+    async def test_window_cancel_returns_source_schedule(self, async_client, seed_data, auth_headers, db_session):
+        doctor = seed_data["director_doctor"]
+        source = DoctorSchedule(week="星期四", time="02", number=1, specialist=1, doctor_id=doctor.doctor_id)
+        other = DoctorSchedule(week="星期五", time="02", number=7, specialist=1, doctor_id=doctor.doctor_id)
+        db_session.add_all([source, other])
+        db_session.commit()
+        headers = auth_headers(seed_data["cashier_user"].username)
+        created = await async_client.post(
+            "/api/windowRegistration/create",
+            headers=headers,
+            json={"identity": seed_data["patient"].identity, "schedule_id": source.schedule_id, "doctor_id": doctor.doctor_id, "department_id": seed_data["department"].department_id, "specialist": 1},
+        )
+        assert created.json()["code"] == 200
+        cancelled = await async_client.post(
+            "/api/windowRegistration/cancel",
+            headers=headers,
+            json={"uuid": created.json()["data"]["registration_uuid"]},
+        )
+        assert cancelled.json()["code"] == 200
+        db_session.expire_all()
+        assert db_session.get(DoctorSchedule, source.schedule_id).number == 1
+        assert db_session.get(DoctorSchedule, other.schedule_id).number == 7
 
 
 @pytest.mark.asyncio

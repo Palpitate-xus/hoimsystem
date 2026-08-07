@@ -400,6 +400,7 @@ def window_registration(req: dict, db: Session = Depends(get_db), current_user: 
             doctor_id=reg_obj.doctor_id,
             specialist=reg_obj.specialist,
             department_id=reg_obj.doctor.department_id if reg_obj.doctor else department_id,
+            schedule_id=reg_obj.schedule_id,
             registration_id=allocate_registration_id(db, registration_time),
             time=registration_time,
             status=0,
@@ -439,11 +440,13 @@ def window_cancel_registration(req: dict, db: Session = Depends(get_db), current
     if updated != 1:
         db.rollback()
         return {"code": 500, "msg": "该挂号已就诊，不能退号"}
-    schedule = (
-        db.query(DoctorSchedule)
-        .filter(DoctorSchedule.doctor_id == reg.doctor_id, DoctorSchedule.specialist == reg.specialist)
-        .first()
-    )
+    schedule = db.query(DoctorSchedule).filter(DoctorSchedule.schedule_id == reg.schedule_id).first() if reg.schedule_id else None
+    if not schedule:
+        schedule = (
+            db.query(DoctorSchedule)
+            .filter(DoctorSchedule.doctor_id == reg.doctor_id, DoctorSchedule.specialist == reg.specialist)
+            .first()
+        )
     if schedule:
         schedule.number += 1
     db.commit()

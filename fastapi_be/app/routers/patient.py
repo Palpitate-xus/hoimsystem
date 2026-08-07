@@ -343,6 +343,7 @@ def patient_registration(req: RegistrationCreateRequest, current_user: User = De
             return {"code": 500, "msg": "该时段号源已满"}
         registration = Registration(
             registration_id=allocate_registration_id(db, registration_time),
+            schedule_id=reg_obj.schedule_id,
             patient_id=patient_obj.patient_id,
             doctor_id=req.doctor_id,
             specialist=req.specialist,
@@ -381,13 +382,13 @@ def patient_registration_cancel(req: UuidRequest, current_user: User = Depends(g
     if updated != 1:
         db.rollback()
         return {"code": 500, "msg": "挂号已就诊，不能退号"}
-    schedule = db.query(DoctorSchedule).filter(DoctorSchedule.schedule_id == req.schedule_id).first()
+    schedule = db.query(DoctorSchedule).filter(DoctorSchedule.schedule_id == reg.schedule_id).first() if reg.schedule_id else None
     if not schedule:
         schedule = (
             db.query(DoctorSchedule)
             .filter(DoctorSchedule.doctor_id == reg.doctor_id, DoctorSchedule.specialist == reg.specialist)
             .first()
-    )
+        )
     if schedule:
         schedule.number += 1
     db.commit()

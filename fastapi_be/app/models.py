@@ -275,6 +275,7 @@ class Registration(Base):
 
     registration_uuid = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     registration_id = Column(Integer, autoincrement=True)
+    schedule_id = Column(Integer, ForeignKey("hoimsystem_doctor_schedule.schedule_id"), nullable=True, index=True)
     patient_id = Column(Integer, ForeignKey("hoimsystem_patient.patient_id"))
     doctor_id = Column(Integer, ForeignKey("hoimsystem_doctor.doctor_id"))
     specialist = Column(Integer)
@@ -285,6 +286,7 @@ class Registration(Base):
     patient = relationship("Patient", back_populates="registrations")
     doctor = relationship("Doctor", back_populates="registrations")
     department = relationship("Department")
+    schedule = relationship("DoctorSchedule")
 
 
 class RegistrationCounter(Base):

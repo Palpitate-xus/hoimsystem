@@ -45,7 +45,7 @@
 | address | VARCHAR | 100 | - | 地址 |
 | permission | VARCHAR | 10 | - | 权限状态 |
 | allergy_history | VARCHAR | 200 | - | 过敏史 |
-| prepaid_balance | FLOAT | - | - | 预交金余额 |
+| prepaid_balance | DECIMAL | 12,2 | - | 预交金余额 |
 
 **关联关系：**
 - 一对多 → `hoimsystem_registration`（patient_id）
@@ -250,7 +250,7 @@
 | charge_time | DATETIME | - | - | 收费创建时间 |
 | time | DATETIME | - | - | 实际缴费时间 |
 | prescription_id | VARCHAR | 36 | FK | 处方 ID |
-| amount | FLOAT | - | - | 收费金额 |
+| amount | DECIMAL | 12,2 | - | 收费金额 |
 | status | INT | - | - | 状态（0=未缴费，1=已缴费，2=已退费） |
 
 **关联关系：**
@@ -330,7 +330,7 @@
 | pharmaceutical_id | INT | - | PK, AI | 药品 ID |
 | name | VARCHAR | 24 | - | 药品名称 |
 | stock | INT | - | - | 库存数量 |
-| price | FLOAT | - | - | 单价 |
+| price | DECIMAL | 12,2 | - | 单价 |
 | expireddate | DATE | - | - | 过期日期 |
 | purchasing_time | DATETIME | - | - | 采购时间 |
 | supplier | VARCHAR | 24 | - | 供应商 |
@@ -428,8 +428,8 @@
 | invoice_id | VARCHAR | 36 | PK | 发票 UUID |
 | charge_id | VARCHAR | 36 | FK | 收费记录 ID |
 | invoice_no | VARCHAR | 24 | - | 发票号码 |
-| amount | FLOAT | - | - | 金额 |
-| tax | FLOAT | - | - | 税额 |
+| amount | DECIMAL | 12,2 | - | 金额 |
+| tax | DECIMAL | 12,2 | - | 税额 |
 | invoice_time | DATETIME | - | - | 开票时间 |
 | status | INT | - | - | 状态（0=正常，1=已作废） |
 

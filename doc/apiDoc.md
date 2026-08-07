@@ -188,6 +188,8 @@ baseURL：`/api`
   - `amount`: 金额
   - `status`: 状态（0=未缴费，1=已缴费）
 
+> 收费、支付、预交金和医保金额统一按两位小数定点精度处理；客户端应传入金额数值，服务端按分进行存储和计算。
+
 ---
 
 ## 三、病人模块
@@ -948,6 +950,8 @@ baseURL：`/api`
 | ✅ | /prepaid/getBalance | GET | `?identity=` | `{ code, msg, data: { balance } }` |
 | ✅ | /prepaid/recharge | POST | `{ identity, amount }` | `{ code, msg, data: { balance } }` |
 | ✅ | /prepaid/deduct | POST | `{ identity, amount }` | `{ code, msg, data: { balance } }` |
+
+`amount` 和 `balance` 使用两位小数定点金额，避免浮点误差。
 
 ### 14.10 双向转诊
 

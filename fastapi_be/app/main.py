@@ -1,4 +1,5 @@
 import datetime
+import json
 import re
 import time
 
@@ -259,6 +260,23 @@ class OperationLogMiddleware(BaseHTTPMiddleware):
         # 结果
         status_code = response.status_code
         result = "成功" if 200 <= status_code < 400 else "失败"
+        if result == "成功":
+            content_type = response.headers.get("content-type", "")
+            if content_type.startswith("application/json") and hasattr(response, "body_iterator"):
+                chunks = [chunk async for chunk in response.body_iterator]
+                response_body = b"".join(chunk.encode() if isinstance(chunk, str) else chunk for chunk in chunks)
+                response = Response(
+                    content=response_body,
+                    status_code=response.status_code,
+                    headers=dict(response.headers),
+                    background=response.background,
+                )
+                try:
+                    body_data = json.loads(response_body) if response_body else {}
+                    if isinstance(body_data, dict) and body_data.get("code", 200) >= 400:
+                        result = "失败"
+                except (TypeError, ValueError):
+                    pass
 
         # 写入数据库(失败时打印但不影响主请求)
         try:

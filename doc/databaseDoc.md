@@ -445,6 +445,7 @@
 | status | INT | - | - | 支付状态（0=待支付，1=已支付，2=失败） |
 | external_payment_id | VARCHAR | 100 | IDX | 外部支付平台流水号 |
 | integration_status | VARCHAR | 20 | - | 对接状态（local/pending/synced/failed） |
+| failure_reason | VARCHAR | 200 | - | 外部支付失败原因 |
 | last_sync_time | DATETIME | - | - | 最近一次外部回调同步时间 |
 
 ---

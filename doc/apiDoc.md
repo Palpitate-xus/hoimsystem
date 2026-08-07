@@ -877,7 +877,7 @@ baseURL：`/api`
 
 | 状态 | url | method | payload | response |
 |:----:|:--------------------:|:------:|:-------:|:--------:|
-| ✅ | /triage/suggest | POST | `{ symptom }` | `{ code, msg, data: { suggestions } }` |
+| ✅ | /triage/suggest | POST | `{ symptom }` | `{ code, msg, data: { suggestions, mode, disclaimer, emergency, emergency_keywords, emergency_message } }` |
 | ✅ | /triage/keywords | GET | - | `{ code, msg, data: string[] }` |
 
 ### 14.3 分诊台管理

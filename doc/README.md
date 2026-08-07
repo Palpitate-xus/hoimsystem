@@ -32,6 +32,7 @@
 5. **[架构文档](architecture.md)** — 中间件、依赖、安全机制
 6. **[测试指南](testing.md)** — pytest 测试编写与运行
 7. **[LIS/PACS/医保对接指南](integration-guide.md)** — 入站鉴权、幂等回调和厂商联调边界
+8. **[院内导航配置指南](navigation-guide.md)** — 节点、路线连线与患者端最短路径
 
 ### 🎨 前端开发
 

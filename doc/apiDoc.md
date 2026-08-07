@@ -990,6 +990,18 @@ baseURL：`/api`
 
 **环境变量：** `LIS_INTEGRATION_KEY`、`PACS_INTEGRATION_KEY`、`MEDICAL_INSURANCE_INTEGRATION_KEY`。未配置密钥时接口返回 `503`；密钥错误返回 `401`；已进入院内审核的报告不会被外部回调覆盖，医保金额必须满足报销额不超过总额。
 
+### 14.16 院内导航路线图
+
+| 状态 | url | method | payload | response |
+|:----:|:-------------------------------:|:------:|:-------:|:--------:|
+| ✅ | /navigation/nodes | GET | `campus_id?` | `{ code, msg, data: NavigationNode[] }` |
+| ✅ | /navigation/route | GET | `start_node_id, end_node_id` | `{ code, msg, data: { total_distance, nodes, steps } }` |
+| ✅ | /navigation/route/departments | GET | `start_department_id, end_department_id` | `{ code, msg, data: Route }` |
+| ✅ | /navigation/admin/nodes | GET/POST/PUT/DELETE | 管理员节点数据 | 节点列表或操作结果 |
+| ✅ | /navigation/admin/edges | GET/POST/PUT/DELETE | 管理员路线数据 | 路线列表或操作结果 |
+
+路线使用同一院区的启用节点和路线连线，通过 Dijkstra 算法返回最短距离及逐段指引；未配置路线时返回明确错误，患者端提示联系导诊台，不会显示虚构路线。
+
 ---
 
 ## 十五、接口状态汇总

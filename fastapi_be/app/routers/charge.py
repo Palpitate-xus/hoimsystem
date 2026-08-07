@@ -10,6 +10,7 @@ from sqlalchemy.orm import Session
 
 from app.config import settings
 from app.database import get_db
+from app.registration import allocate_registration_id
 from app.dependencies import ADMIN_ROLES, ROLE_CASHIER, ROLE_PATIENT, ROLE_REGISTRAR, get_current_user, require_roles
 from app.models import Charge, Doctor, Invoice, Patient, Prescription, User
 from app.pagination import paginate
@@ -385,6 +386,7 @@ def window_registration(req: dict, db: Session = Depends(get_db), current_user: 
     if reg_obj.number is None or reg_obj.number <= 0:
         return {"code": 500, "msg": "该时段号源已满"}
     try:
+        registration_time = datetime.datetime.now()
         updated = db.query(DoctorSchedule).filter(
             DoctorSchedule.schedule_id == reg_obj.schedule_id,
             DoctorSchedule.number > 0,
@@ -397,12 +399,20 @@ def window_registration(req: dict, db: Session = Depends(get_db), current_user: 
             doctor_id=reg_obj.doctor_id,
             specialist=reg_obj.specialist,
             department_id=reg_obj.doctor.department_id if reg_obj.doctor else department_id,
-            time=datetime.datetime.now(),
+            registration_id=allocate_registration_id(db, registration_time),
+            time=registration_time,
             status=0,
         )
         db.add(registration)
         db.commit()
-        return {"code": 200, "msg": "success"}
+        return {
+            "code": 200,
+            "msg": "success",
+            "data": {
+                "registration_uuid": registration.registration_uuid,
+                "registration_id": registration.registration_id,
+            },
+        }
     except Exception:
         db.rollback()
         traceback.print_exc()

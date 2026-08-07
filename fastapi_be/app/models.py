@@ -287,6 +287,13 @@ class Registration(Base):
     department = relationship("Department")
 
 
+class RegistrationCounter(Base):
+    __tablename__ = "hoimsystem_registration_counter"
+
+    counter_date = Column(Date, primary_key=True)
+    next_number = Column(Integer, nullable=False, default=1)
+
+
 class Appointment(Base):
     __tablename__ = "hoimsystem_appointment"
 

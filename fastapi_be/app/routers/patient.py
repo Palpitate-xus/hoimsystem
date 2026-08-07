@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.database import get_db
+from app.registration import allocate_registration_id
 from app.dependencies import (
     ADMIN_ROLES,
     CLINICAL_ROLES,
@@ -322,20 +323,22 @@ def patient_registration(req: RegistrationCreateRequest, current_user: User = De
     if exists:
         return {"code": 500, "msg": "您的挂号次数被限制"}
     try:
+        registration_time = datetime.datetime.now()
         if reg_obj:
             reg_obj.number -= 1
             db.add(reg_obj)
         registration = Registration(
+            registration_id=allocate_registration_id(db, registration_time),
             patient_id=patient_obj.patient_id,
             doctor_id=req.doctor_id,
             specialist=req.specialist,
             department_id=req.department_id,
-            time=datetime.datetime.now(),
+            time=registration_time,
             status=0,
         )
         db.add(registration)
         db.commit()
-        return {"code": 200, "msg": "success"}
+        return {"code": 200, "msg": "success", "data": {"registration_uuid": registration.registration_uuid, "registration_id": registration.registration_id}}
     except Exception:
         db.rollback()
         import traceback

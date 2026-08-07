@@ -33,8 +33,7 @@ def _serialize(item: PatientAllergy):
 def _sync_patient_history(patient: Patient, db: Session):
     active = db.query(PatientAllergy).filter(PatientAllergy.patient_id == patient.patient_id, PatientAllergy.status == 1).order_by(PatientAllergy.allergy_id).all()
     structured = [f"{item.allergen}: {item.reaction}" for item in active]
-    if structured:
-        patient.allergy_history = "；".join(structured)[:200]
+    patient.allergy_history = "；".join(structured)[:200]
 
 
 @router.get("/allergy/list")
@@ -83,6 +82,7 @@ def disable_allergy(req: PatientAllergyIdRequest, current_user: User = Depends(r
         return {"code": 500, "msg": "有效过敏标识不存在"}
     item.status = 0
     item.update_time = datetime.datetime.now()
+    db.flush()
     _sync_patient_history(item.patient, db)
     db.commit()
     return {"code": 200, "msg": "success"}

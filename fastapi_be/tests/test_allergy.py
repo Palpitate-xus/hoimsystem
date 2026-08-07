@@ -19,6 +19,9 @@ class TestPatientAllergy:
         listed = await async_client.get("/api/allergy/list", headers=doctor_headers, params={"patient_id": patient_id})
         assert listed.json()["data"][0]["allergen"] == "头孢"
         assert (await async_client.post("/api/allergy/disable", headers=doctor_headers, json={"allergy_id": allergy_id})).json()["code"] == 200
+        patients = await async_client.get("/api/patientManagement/getList", headers=doctor_headers)
+        patient_row = next(row for row in patients.json()["data"] if row.get("id") == patient_id)
+        assert patient_row["allergy_history"] == ""
         assert (await async_client.post("/api/allergy/disable", headers=doctor_headers, json={"allergy_id": allergy_id})).json()["code"] == 500
 
     async def test_allergy_rejects_unknown_patient(self, async_client, seed_data, auth_headers):

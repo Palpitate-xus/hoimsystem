@@ -4,6 +4,7 @@ import time
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import Response
 
@@ -372,6 +373,7 @@ app.add_middleware(
         "accesstoken",
     ],
 )
+app.add_middleware(GZipMiddleware, minimum_size=1000)
 app.add_middleware(StripMicrosecondMiddleware)
 app.add_middleware(OperationLogMiddleware)
 

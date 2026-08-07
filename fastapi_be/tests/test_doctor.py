@@ -107,6 +107,14 @@ class TestDiagnosisTemplate:
 
 @pytest.mark.asyncio
 class TestDoctorMedicalRecord:
+    async def test_create_medical_record_requires_existing_patient(self, async_client, seed_data, auth_headers):
+        response = await async_client.post(
+            "/api/medicalRecord/create",
+            headers=auth_headers(seed_data["doctor_user"].username),
+            json={"patient_id": 999999, "symptom": "无效患者", "result": "不应创建"},
+        )
+        assert response.json() == {"code": 500, "msg": "病人信息不存在"}
+
     async def test_create_medical_record(self, async_client, seed_data, auth_headers):
         r = await async_client.post("/api/medicalRecord/create", headers=auth_headers(seed_data["doctor_user"].username), json={
             "patient_id": seed_data["patient2"].patient_id, "symptom": "咳嗽", "result": "支气管炎"

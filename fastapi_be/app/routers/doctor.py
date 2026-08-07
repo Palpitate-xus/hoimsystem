@@ -557,6 +557,8 @@ def create_medical_record(req: MedicalRecordCreateRequest, current_user: User = 
     doctor_obj = db.query(Doctor).filter(Doctor.user_id == current_user.user_id).first()
     if not doctor_obj:
         return {"code": 500, "msg": "医生信息不存在"}
+    if not db.query(Patient).filter(Patient.patient_id == req.patient_id).first():
+        return {"code": 500, "msg": "病人信息不存在"}
     record = MedicalRecord(
         consultation_time=datetime.datetime.now(),
         doctor_id=doctor_obj.doctor_id,

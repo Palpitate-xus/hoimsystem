@@ -262,7 +262,9 @@ def cancel_window_appointment(req: dict, db: Session = Depends(get_db), current_
     if item.status == 1:
         return {"code": 500, "msg": "预约已报到/就诊，不能取消"}
     item.status = 2
-    schedule = db.query(DoctorSchedule).filter(DoctorSchedule.doctor_id == item.doctor_id, DoctorSchedule.specialist == item.specialist).first()
+    schedule = db.query(DoctorSchedule).filter(DoctorSchedule.schedule_id == item.schedule_id).first() if item.schedule_id else None
+    if not schedule:
+        schedule = db.query(DoctorSchedule).filter(DoctorSchedule.doctor_id == item.doctor_id, DoctorSchedule.specialist == item.specialist).first()
     if schedule:
         schedule.number = (schedule.number or 0) + 1
     db.commit()

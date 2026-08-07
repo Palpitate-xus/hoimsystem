@@ -6,12 +6,10 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.dependencies import (
     ADMIN_ROLES,
-    CLINICAL_ROLES,
     ROLE_DIRECTOR,
     ROLE_DOCTOR,
     ROLE_PATIENT,
     get_current_user,
-    require_roles,
 )
 from app.models import (
     Appointment,
@@ -408,7 +406,10 @@ def get_medical_record_list(current_user: User = Depends(get_current_user), keyw
         patient_obj = db.query(Patient).filter(Patient.identity == current_user.username).first()
         if not patient_obj:
             return {"code": 200, "msg": "success", "data": []}
-        query = db.query(MedicalRecord).filter(MedicalRecord.patient_id == patient_obj.patient_id).order_by(MedicalRecord.consultation_time.desc())
+        query = db.query(MedicalRecord).filter(
+            MedicalRecord.patient_id == patient_obj.patient_id,
+            MedicalRecord.status == 1,
+        ).order_by(MedicalRecord.consultation_time.desc())
         records, total = paginate(query, page, page_size)
         for item in records:
             data.append(
@@ -464,6 +465,8 @@ def get_medical_record_detail(req: MedicalRecordDetailRequest, current_user: Use
             Patient.identity == current_user.username,
             Patient.patient_id == record.patient_id,
         ).first() is not None
+        if can_view and record.status != 1:
+            return {"code": 403, "msg": "病历尚未签名"}
     elif current_user.user_role in {ROLE_DOCTOR, ROLE_DIRECTOR}:
         can_view = db.query(Doctor).filter(
             Doctor.user_id == current_user.user_id,

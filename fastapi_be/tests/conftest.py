@@ -217,6 +217,7 @@ def seed_data(db_session: Session):
         consultation_time=datetime.datetime.now(),
         doctor_id=doctor.doctor_id, patient_id=patient.patient_id,
         symptom="头痛发热", result="上呼吸道感染",
+        status=1,
     )
     sess.add(mr)
 

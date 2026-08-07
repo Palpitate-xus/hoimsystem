@@ -2,7 +2,7 @@ import datetime
 
 import pytest
 
-from app.models import Appointment, DoctorSchedule, Registration
+from app.models import Appointment, DoctorSchedule, MedicalRecord, Registration
 
 
 @pytest.mark.asyncio
@@ -381,6 +381,27 @@ class TestPatientMedicalRecord:
         )
         assert r.status_code == 200
         assert r.json()["code"] == 403
+
+    async def test_patient_cannot_view_unsigned_medical_record(self, async_client, seed_data, auth_headers, db_session):
+        draft = MedicalRecord(
+            consultation_time=datetime.datetime.now(),
+            doctor_id=seed_data["doctor"].doctor_id,
+            patient_id=seed_data["patient"].patient_id,
+            symptom="待签名病历",
+            result="待确认",
+            status=0,
+        )
+        db_session.add(draft)
+        db_session.commit()
+        patient_headers = auth_headers(seed_data["patient_user"].username)
+        listed = await async_client.get("/api/medicalRecord/getList", headers=patient_headers)
+        assert all(item["uuid"] != str(draft.medical_record_id) for item in listed.json()["data"])
+        detail = await async_client.post(
+            "/api/medicalRecord/detail",
+            headers=patient_headers,
+            json={"medical_record_id": str(draft.medical_record_id)},
+        )
+        assert detail.json() == {"code": 403, "msg": "病历尚未签名"}
 
 
 @pytest.mark.asyncio

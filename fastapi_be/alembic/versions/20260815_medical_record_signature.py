@@ -20,7 +20,8 @@ def upgrade() -> None:
     columns = {column["name"] for column in inspector.get_columns("hoimsystem_medical_record")}
     with op.batch_alter_table("hoimsystem_medical_record") as batch_op:
         if "status" not in columns:
-            batch_op.add_column(sa.Column("status", sa.Integer(), nullable=False, server_default="0"))
+            # Existing records predate the draft/signature workflow and are treated as finalized.
+            batch_op.add_column(sa.Column("status", sa.Integer(), nullable=False, server_default="1"))
         if "sign_time" not in columns:
             batch_op.add_column(sa.Column("sign_time", sa.DateTime(), nullable=True))
 

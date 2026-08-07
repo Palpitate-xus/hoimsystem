@@ -595,7 +595,7 @@
 
 - [x] hoimsystem_lab_package（检验套餐：项目组合、价格、启停）
 - [x] hoimsystem_sample（样本记录）
-- [ ] hoimsystem_sample_tracking（样本流转记录）
+- [x] hoimsystem_sample_tracking（样本流转记录）
 - [x] hoimsystem_qc_record（质控记录）
 
 ### 6.7 系统权限支撑

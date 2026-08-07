@@ -44,7 +44,7 @@ class TestPatientAppointment:
         r = await async_client.get("/api/appointmentManagement/getList", headers=headers)
         assert r.json()["data"][0]["status"] == "已取消"
 
-    async def test_appointment_rejects_invalid_schedule_and_mismatched_doctor(self, async_client, seed_data, auth_headers):
+    async def test_appointment_rejects_invalid_schedule_and_mismatched_doctor(self, async_client, seed_data, auth_headers, db_session):
         headers = auth_headers(seed_data["patient_user"].username)
         invalid = await async_client.post("/api/appointmentManagement/create", headers=headers, json={
             "id": 999999, "date": "2026-12-01", "department_id": seed_data["department"].department_id,
@@ -59,6 +59,14 @@ class TestPatientAppointment:
         })
         assert mismatched.status_code == 200
         assert mismatched.json()["code"] == 500
+
+        schedule = db_session.query(DoctorSchedule).filter(DoctorSchedule.doctor_id == seed_data["doctor"].doctor_id).first()
+        wrong_department = await async_client.post("/api/appointmentManagement/create", headers=headers, json={
+            "id": schedule.schedule_id, "date": "2026-12-01", "department_id": 999999,
+            "doctor_id": seed_data["doctor"].doctor_id, "time": "上午", "specialist": 1
+        })
+        assert wrong_department.status_code == 200
+        assert wrong_department.json() == {"code": 500, "msg": "预约科室与排班不匹配"}
 
     async def test_checked_in_appointment_cannot_be_cancelled(self, async_client, seed_data, auth_headers, db_session):
         appointment = Appointment(

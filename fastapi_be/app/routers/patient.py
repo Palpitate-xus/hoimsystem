@@ -160,6 +160,8 @@ def patient_appointment(req: AppointmentCreateRequest, current_user: User = Depe
         return {"code": 500, "msg": "预约排班不存在"}
     if reg_obj.doctor_id != req.doctor_id or reg_obj.specialist != req.specialist:
         return {"code": 500, "msg": "预约医生或号类与排班不匹配"}
+    if reg_obj.doctor and reg_obj.doctor.department_id != req.department_id:
+        return {"code": 500, "msg": "预约科室与排班不匹配"}
     try:
         appt_date = datetime.datetime.strptime(req.date, "%Y-%m-%d").date()
     except (TypeError, ValueError):

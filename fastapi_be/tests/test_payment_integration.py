@@ -63,3 +63,24 @@ class TestPaymentIntegration:
         )
         assert response.status_code == 400
         assert "金额" in response.json()["detail"]
+
+    async def test_payment_failure_callback_keeps_charge_unpaid_and_records_reason(self, async_client, seed_data, auth_headers, db_session, monkeypatch):
+        monkeypatch.setattr(settings, "PAYMENT_INTEGRATION_KEY", "payment-secret")
+        created = await async_client.post(
+            "/api/payment/create",
+            headers=auth_headers(seed_data["patient_user"].username),
+            json={"charge_id": str(seed_data["charge"].charge_id), "channel": "wechat", "amount": 31},
+        )
+        payment_no = created.json()["data"]["payment_no"]
+        response = await async_client.post(
+            "/api/integration/payment/notify",
+            headers={"X-Integration-Key": "payment-secret"},
+            json={"payment_no": payment_no, "status": 2, "amount": 31, "failure_reason": "用户取消支付"},
+        )
+        assert response.status_code == 200
+        db_session.expire_all()
+        payment = db_session.query(Payment).filter(Payment.payment_no == payment_no).one()
+        charge = db_session.query(Charge).filter(Charge.charge_id == seed_data["charge"].charge_id).one()
+        assert payment.status == 2
+        assert payment.failure_reason == "用户取消支付"
+        assert charge.status == 0

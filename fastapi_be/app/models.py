@@ -957,6 +957,7 @@ class Payment(Base):
     create_time = Column(DateTime)
     external_payment_id = Column(String(100), nullable=True, index=True)
     integration_status = Column(String(20), nullable=False, default="local")  # local / pending / synced / failed
+    failure_reason = Column(String(200), nullable=True)
     last_sync_time = Column(DateTime, nullable=True)
 
     charge = relationship("Charge")

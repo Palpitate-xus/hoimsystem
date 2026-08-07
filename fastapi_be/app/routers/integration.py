@@ -135,6 +135,7 @@ def receive_payment_notification(
     payment.last_sync_time = now
     payment.integration_status = "synced"
     payment.status = req.status
+    payment.failure_reason = req.failure_reason.strip()[:200] if req.failure_reason else None
     if req.status == 1:
         charge = db.query(Charge).filter(Charge.charge_id == payment.charge_id, Charge.status == 0).first()
         if not charge:

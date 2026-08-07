@@ -61,11 +61,6 @@
                 <el-table-column prop="intake" label="入量" width="80" />
                 <el-table-column prop="output" label="出量" width="80" />
                 <el-table-column prop="note" label="备注" show-overflow-tooltip />
-                <el-table-column label="操作" width="80">
-                  <template #default="{row}">
-                    <el-button size="small" type="danger" @click="deleteNursingRecord(row)">删除</el-button>
-                  </template>
-                </el-table-column>
               </el-table>
             </el-tab-pane>
             <el-tab-pane label="体温单" name="temperature">
@@ -84,11 +79,6 @@
                 <el-table-column prop="intake" label="入量" width="60" />
                 <el-table-column prop="output" label="出量" width="60" />
                 <el-table-column prop="note" label="备注" show-overflow-tooltip />
-                <el-table-column label="操作" width="80">
-                  <template #default="{row}">
-                    <el-button size="small" type="danger" @click="deleteTempRecord(row)">删除</el-button>
-                  </template>
-                </el-table-column>
               </el-table>
             </el-tab-pane>
           </el-tabs>
@@ -243,8 +233,8 @@ import { ref, computed, onMounted, watch } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { getInpatientList } from "@/api/admission";
 import { getExecutionList, executeOrder } from "@/api/inpatientOrder";
-import { getNursingRecordList, createNursingRecord, deleteNursingRecord as apiDeleteNursing } from "@/api/nursing";
-import { getTemperatureRecordList, createTemperatureRecord, deleteTemperatureRecord as apiDeleteTemp } from "@/api/nursing";
+import { getNursingRecordList, createNursingRecord } from "@/api/nursing";
+import { getTemperatureRecordList, createTemperatureRecord } from "@/api/nursing";
 
 const inpatients = ref([]);
 const patientKeyword = ref("");
@@ -345,17 +335,6 @@ const submitNursing = async () => {
   }
 };
 
-const deleteNursingRecord = async (row) => {
-  try {
-    await ElMessageBox.confirm("确定删除该护理记录？", "提示", { type: "warning" });
-    await apiDeleteNursing({ record_id: row.record_id });
-    ElMessage.success("删除成功");
-    loadNursingRecords();
-  } catch (e) {
-    if (e !== "cancel") ElMessage.error(e.msg || "操作失败");
-  }
-};
-
 const openTempDialog = () => {
   tempForm.value = { time_point: "06:00", record_date: new Date().toISOString().slice(0, 10) };
   tempDialogVisible.value = true;
@@ -370,17 +349,6 @@ const submitTemp = async () => {
     loadTemperatureRecords();
   } catch (e) {
     ElMessage.error(e.msg || "操作失败");
-  }
-};
-
-const deleteTempRecord = async (row) => {
-  try {
-    await ElMessageBox.confirm("确定删除该体温记录？", "提示", { type: "warning" });
-    await apiDeleteTemp({ temp_id: row.temp_id });
-    ElMessage.success("删除成功");
-    loadTemperatureRecords();
-  } catch (e) {
-    if (e !== "cancel") ElMessage.error(e.msg || "操作失败");
   }
 };
 

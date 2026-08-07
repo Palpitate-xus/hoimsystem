@@ -16,7 +16,7 @@
         <el-table-column prop="name" label="医生姓名"  sortable />
         <el-table-column prop="schedule" label="排班">
           <template #default="{row}">
-            <el-tag v-for="(s,i) in row.schedule" :key="i" style="margin-right:5px">{{ s }}</el-tag>
+            <el-tag v-for="(s,i) in row.schedule" :key="i" style="margin-right:5px">{{ scheduleLabel(s) }}</el-tag>
           </template>
         </el-table-column>
         <el-table-column prop="number" label="号源数"  sortable />
@@ -94,6 +94,14 @@ const doctors = ref([]);
 const loading = ref(false);
 const dialogVisible = ref(false);
 const form = ref({ scheduleArr: [], number: 10, specialist: 0 });
+const scheduleLabel = (value) => {
+  const normalized = String(value || "").replace(/^周/, "");
+  const day = normalized[0];
+  const period = normalized.slice(1);
+  if (["一", "二", "三", "四", "五"].includes(day) && period === "1") return `周${day}上午`;
+  if (["一", "二", "三", "四", "五"].includes(day) && period === "2") return `周${day}下午`;
+  return value;
+};
 
 const fetchList = async () => {
   loading.value = true;

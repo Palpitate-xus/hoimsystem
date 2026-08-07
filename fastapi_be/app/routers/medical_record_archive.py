@@ -46,6 +46,9 @@ def list_archives(current_user: User = Depends(require_roles(*CLINICAL_ROLES)), 
 
 @router.post("/medicalRecordArchive/create")
 def create_archive(req: MedicalRecordArchiveCreateRequest, current_user: User = Depends(require_roles(*CLINICAL_ROLES)), db: Session = Depends(get_db)):
+    location = req.location.strip()
+    if not location:
+        return {"code": 500, "msg": "归档位置不能为空"}
     home = db.query(MedicalRecordHome).filter(MedicalRecordHome.home_id == req.home_id).first()
     if not home:
         return {"code": 500, "msg": "病案首页不存在"}
@@ -54,7 +57,7 @@ def create_archive(req: MedicalRecordArchiveCreateRequest, current_user: User = 
     if db.query(MedicalRecordArchive).filter(MedicalRecordArchive.home_id == req.home_id).first():
         return {"code": 500, "msg": "该病案首页已建立归档记录"}
     now = datetime.datetime.now()
-    item = MedicalRecordArchive(home_id=req.home_id, archive_no=_next_archive_no(db), location=req.location.strip(), status=0, create_time=now, update_time=now)
+    item = MedicalRecordArchive(home_id=req.home_id, archive_no=_next_archive_no(db), location=location, status=0, create_time=now, update_time=now)
     db.add(item)
     db.commit()
     return {"code": 200, "msg": "success", "data": _serialize(item)}
@@ -84,9 +87,12 @@ def borrow_record(req: MedicalRecordArchiveActionRequest, current_user: User = D
         return {"code": 500, "msg": "归档记录不存在"}
     if item.status != 1:
         return {"code": 500, "msg": "只有已归档病案可以借阅"}
+    reason = req.reason.strip()
+    if not reason:
+        return {"code": 500, "msg": "借阅事由不能为空"}
     item.status = 2
     item.borrower_id = current_user.user_id
-    item.borrow_reason = req.reason.strip()
+    item.borrow_reason = reason
     item.borrow_time = datetime.datetime.now()
     item.update_time = datetime.datetime.now()
     db.commit()
@@ -114,8 +120,11 @@ def seal_record(req: MedicalRecordArchiveActionRequest, current_user: User = Dep
         return {"code": 500, "msg": "归档记录不存在"}
     if item.status not in (1, 2):
         return {"code": 500, "msg": "当前状态不可封存"}
+    reason = req.reason.strip()
+    if not reason:
+        return {"code": 500, "msg": "封存原因不能为空"}
     item.status = 3
-    item.seal_reason = req.reason.strip()
+    item.seal_reason = reason
     item.update_time = datetime.datetime.now()
     db.commit()
     return {"code": 200, "msg": "success", "data": _serialize(item)}

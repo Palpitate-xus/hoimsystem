@@ -594,6 +594,20 @@ class LabOrder(Base):
     lab_results = relationship("LabResult", back_populates="lab_order")
 
 
+class SampleTracking(Base):
+    __tablename__ = "hoimsystem_sample_tracking"
+
+    tracking_id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    lab_order_id = Column(String(36), ForeignKey("hoimsystem_lab_order.lab_order_id"), nullable=False)
+    stage = Column(String(40), nullable=False)
+    operator_id = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=False)
+    event_time = Column(DateTime, nullable=False)
+    note = Column(String(300), nullable=True)
+
+    lab_order = relationship("LabOrder")
+    operator = relationship("User")
+
+
 class LabPackage(Base):
     __tablename__ = "hoimsystem_lab_package"
 

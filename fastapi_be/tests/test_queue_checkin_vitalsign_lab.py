@@ -10,6 +10,8 @@ class TestQueue:
         r = await async_client.get("/api/queue/getList", headers=auth_headers(seed_data["admin_user"].username))
         assert r.status_code == 200
         assert r.json()["code"] == 200
+        tracking = await async_client.get("/api/lab/sampleTracking", headers=admin_headers, params={"lab_order_id": lab_order_id})
+        assert [item["stage"] for item in tracking.json()["data"]] == ["申请创建", "样本已接收", "结果已录入"]
 
     async def test_call_next_no_patient(self, async_client, seed_data, auth_headers):
         headers = auth_headers(seed_data["admin_user"].username)

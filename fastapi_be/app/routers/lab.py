@@ -5,10 +5,14 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.dependencies import LAB_ROLES, get_current_user, require_roles
-from app.models import LabOrder, LabResult, User
+from app.models import LabOrder, LabResult, SampleTracking, User
 from app.schemas import LabResultAuditRequest, LabResultCreateRequest
 
 router = APIRouter()
+
+
+def _record_tracking(db: Session, lab_order_id: str, stage: str, current_user: User, note: str = ""):
+    db.add(SampleTracking(lab_order_id=lab_order_id, stage=stage, operator_id=current_user.user_id, event_time=datetime.datetime.now(), note=note))
 
 
 def check_critical_value(check_type: str, result_text: str) -> bool:
@@ -59,6 +63,7 @@ def sample_receive(req: dict, current_user: User = Depends(require_roles(*LAB_RO
     if lab_order.status != 0 or lab_order.sample_status != 0:
         return {"code": 500, "msg": "当前检查申请单不允许接收样本"}
     lab_order.sample_status = 1
+    _record_tracking(db, lab_order.lab_order_id, "样本已接收", current_user)
     db.add(lab_order)
     db.commit()
     return {"code": 200, "msg": "success"}
@@ -73,6 +78,7 @@ def sample_reject(req: dict, current_user: User = Depends(require_roles(*LAB_ROL
     if lab_order.status != 0 or lab_order.sample_status not in (0, 1):
         return {"code": 500, "msg": "当前检查申请单不允许拒收样本"}
     lab_order.sample_status = 2
+    _record_tracking(db, lab_order.lab_order_id, "样本已拒收", current_user, req.get("reason", ""))
     db.add(lab_order)
     db.commit()
     return {"code": 200, "msg": "success"}
@@ -84,16 +90,9 @@ def sample_tracking(lab_order_id: str, current_user: User = Depends(require_role
     lab_order = db.query(LabOrder).filter(LabOrder.lab_order_id == lab_order_id).first()
     if not lab_order:
         return {"code": 500, "msg": "检查申请单不存在"}
-    status_map = {0: "待接收", 1: "已接收", 2: "已拒收"}
-    tracking = [
-        {"time": (lab_order.create_time.strftime("%Y-%m-%d %H:%M:%S") if lab_order.create_time else None), "stage": "申请创建", "operator": lab_order.doctor.name if lab_order.doctor else ""},
-    ]
-    if lab_order.sample_status >= 1:
-        tracking.append({"time": "", "stage": status_map.get(lab_order.sample_status, ""), "operator": "检验科"})
-    if lab_order.status >= 1:
-        tracking.append({"time": "", "stage": "结果已录入", "operator": "检验科技师"})
-    if lab_order.status >= 2:
-        tracking.append({"time": "", "stage": "结果已审核", "operator": "审核医生"})
+    events = db.query(SampleTracking).filter(SampleTracking.lab_order_id == lab_order_id).order_by(SampleTracking.event_time.asc()).all()
+    tracking = [{"time": (lab_order.create_time.strftime("%Y-%m-%d %H:%M:%S") if lab_order.create_time else None), "stage": "申请创建", "operator": lab_order.doctor.name if lab_order.doctor else ""}]
+    tracking.extend({"time": item.event_time.strftime("%Y-%m-%d %H:%M:%S"), "stage": item.stage, "operator": item.operator.username if item.operator else "", "note": item.note or ""} for item in events)
     return {"code": 200, "msg": "success", "data": tracking}
 
 
@@ -117,6 +116,7 @@ def create_lab_result(req: LabResultCreateRequest, current_user=Depends(require_
         audit_status=0,
     )
     db.add(result)
+    _record_tracking(db, lab_order.lab_order_id, "结果已录入", current_user)
     lab_order.status = 1
     db.add(lab_order)
     db.commit()
@@ -138,6 +138,7 @@ def audit_lab_result(req: LabResultAuditRequest, current_user: User = Depends(re
         result.lab_order.status = 2
         db.add(result.lab_order)
     db.add(result)
+    _record_tracking(db, result.lab_order.lab_order_id, "结果已审核", current_user)
     db.commit()
     return {"code": 200, "msg": "success"}
 

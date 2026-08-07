@@ -498,6 +498,26 @@ class InventoryAdjustment(Base):
     approver = relationship("User", foreign_keys=[approver_id])
 
 
+class DrugDamage(Base):
+    __tablename__ = "hoimsystem_drug_damage"
+
+    damage_id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    pharmaceutical_id = Column(Integer, ForeignKey("hoimsystem_pharmaceutical.pharmaceutical_id"), nullable=False)
+    quantity = Column(Integer, nullable=False)
+    damage_type = Column(String(20), nullable=False)  # expired / broken / contaminated / other
+    batch_no = Column(String(60), nullable=True)
+    reason = Column(String(300), nullable=False)
+    status = Column(Integer, nullable=False, default=0)  # 0=待审批 1=已通过 2=已驳回
+    applicant_id = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=False)
+    approver_id = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=True)
+    create_time = Column(DateTime, nullable=False)
+    approve_time = Column(DateTime, nullable=True)
+
+    pharmaceutical = relationship("Pharmaceutical")
+    applicant = relationship("User", foreign_keys=[applicant_id])
+    approver = relationship("User", foreign_keys=[approver_id])
+
+
 class SpecialDrugRegister(Base):
     __tablename__ = "hoimsystem_special_drug_register"
 

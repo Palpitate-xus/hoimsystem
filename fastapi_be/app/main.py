@@ -302,6 +302,7 @@ from app.routers import (
     data_import_export,
     discharge,
     doctor,
+    drug_damage,
     diagnosis_template,
     emergency,
     equipment,
@@ -377,6 +378,7 @@ app.include_router(patient.router, prefix="/api")
 app.include_router(patient_card.router, prefix="/api")
 app.include_router(admin.router, prefix="/api")
 app.include_router(doctor.router, prefix="/api")
+app.include_router(drug_damage.router, prefix="/api")
 app.include_router(diagnosis_template.router, prefix="/api")
 app.include_router(emergency.router, prefix="/api")
 app.include_router(equipment.router, prefix="/api")

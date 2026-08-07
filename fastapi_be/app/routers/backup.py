@@ -4,6 +4,7 @@ import shutil
 
 from fastapi import APIRouter, Depends
 
+from app.config import settings
 from app.dependencies import ADMIN_ROLES, require_roles
 
 router = APIRouter()
@@ -12,6 +13,17 @@ BACKUP_DIR = os.path.join(os.path.dirname(__file__), "..", "..", "backups")
 os.makedirs(BACKUP_DIR, exist_ok=True)
 
 DB_PATH = os.path.join(os.path.dirname(__file__), "..", "..", "test.db")
+
+
+def _is_sqlite_file_database() -> bool:
+    database_url = settings.DATABASE_URL.lower()
+    return database_url.startswith("sqlite:") and ":memory:" not in database_url
+
+
+def _backup_path(filename: str):
+    if not filename or os.path.basename(filename) != filename or not filename.endswith(".db"):
+        return None
+    return os.path.join(BACKUP_DIR, filename)
 
 
 def _get_backup_list():
@@ -34,6 +46,8 @@ def _get_backup_list():
 @router.post("/backup/create")
 def create_backup(current_user=Depends(require_roles(*ADMIN_ROLES))):
     """创建数据库备份"""
+    if not _is_sqlite_file_database():
+        return {"code": 501, "msg": "当前数据库不是 SQLite 文件库，请使用数据库原生备份工具"}
     if not os.path.exists(DB_PATH):
         return {"code": 500, "msg": "数据库文件不存在"}
     timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -56,10 +70,10 @@ def get_backup_list(current_user=Depends(require_roles(*ADMIN_ROLES))):
 def delete_backup(req: dict, current_user=Depends(require_roles(*ADMIN_ROLES))):
     """删除备份文件"""
     filename = req.get("filename", "")
-    if not filename or ".." in filename or "/" in filename:
+    fpath = _backup_path(filename)
+    if not fpath:
         return {"code": 500, "msg": "非法文件名"}
-    fpath = os.path.join(BACKUP_DIR, filename)
-    if not os.path.exists(fpath):
+    if not os.path.isfile(fpath):
         return {"code": 500, "msg": "备份文件不存在"}
     try:
         os.remove(fpath)
@@ -71,11 +85,13 @@ def delete_backup(req: dict, current_user=Depends(require_roles(*ADMIN_ROLES))):
 @router.post("/backup/restore")
 def restore_backup(req: dict, current_user=Depends(require_roles(*ADMIN_ROLES))):
     """恢复数据库备份"""
+    if not _is_sqlite_file_database():
+        return {"code": 501, "msg": "当前数据库不是 SQLite 文件库，请使用数据库原生恢复工具"}
     filename = req.get("filename", "")
-    if not filename or ".." in filename or "/" in filename:
+    backup_path = _backup_path(filename)
+    if not backup_path:
         return {"code": 500, "msg": "非法文件名"}
-    backup_path = os.path.join(BACKUP_DIR, filename)
-    if not os.path.exists(backup_path):
+    if not os.path.isfile(backup_path):
         return {"code": 500, "msg": "备份文件不存在"}
     # 先备份当前数据库
     timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -101,9 +117,9 @@ def download_backup(filename: str, current_user=Depends(require_roles(*ADMIN_ROL
     """下载备份文件"""
     from fastapi.responses import FileResponse
 
-    if ".." in filename or "/" in filename:
+    fpath = _backup_path(filename)
+    if not fpath:
         return {"code": 500, "msg": "非法文件名"}
-    fpath = os.path.join(BACKUP_DIR, filename)
-    if not os.path.exists(fpath):
+    if not os.path.isfile(fpath):
         return {"code": 500, "msg": "备份文件不存在"}
     return FileResponse(fpath, filename=filename, media_type="application/octet-stream")

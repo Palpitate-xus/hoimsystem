@@ -118,14 +118,15 @@ const openDialog = async () => {
 
 const register = async (row) => {
   try {
-    await createRegistration({
+    const res = await createRegistration({
       id: row.id,
       doctor_id: row.doctor_id,
       department_id: row.department_id,
       specialist: row.specialist,
       ...(selectedPatientId.value ? { patient_id: selectedPatientId.value } : {}),
     });
-    ElMessage.success("挂号成功");
+    const registrationId = res.data?.registration_id;
+    ElMessage.success(registrationId ? `挂号成功，序号：${registrationId}` : "挂号成功");
     dialogVisible.value = false;
     fetchList();
   } catch (e) {

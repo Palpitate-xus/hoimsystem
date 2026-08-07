@@ -583,7 +583,7 @@
 
 - [x] hoimsystem_stock_check（库存盘点单）
 - [x] hoimsystem_stock_check_item（盘点明细）
-- [ ] hoimsystem_drug_damage（药品报损记录）
+- [x] hoimsystem_drug_damage（药品报损记录）
 - [x] hoimsystem_special_drug（特殊药品管理：毒麻精放）
 
 ### 6.5 收费窗口业务

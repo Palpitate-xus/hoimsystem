@@ -607,6 +607,30 @@ def sign_medical_record(req: MedicalRecordSignRequest, current_user: User = Depe
     if updated != 1:
         db.rollback()
         return {"code": 500, "msg": "病历已签名"}
+
+    # 病历签名 = 就诊完成：联动收尾挂号/预约/队列状态
+    # （原缺陷：报到后预约永远停在 status=1，"已就诊"状态不可达）
+    from app.models import Queue, Registration
+
+    if record.registration_uuid:
+        db.query(Registration).filter(
+            Registration.registration_uuid == record.registration_uuid,
+            Registration.status == 0,
+        ).update({Registration.status: 1}, synchronize_session=False)
+    # 收尾当日该患者的候诊队列（过号/就诊完成语义：status=2）
+    queue_items = (
+        db.query(Queue)
+        .filter(
+            Queue.patient_id == record.patient_id,
+            Queue.doctor_id == record.doctor_id,
+            Queue.status.in_((0, 1)),
+        )
+        .all()
+        if record.patient_id and record.doctor_id else []
+    )
+    for queue_item in queue_items:
+        queue_item.status = 2
+        db.add(queue_item)
     db.commit()
     return {"code": 200, "msg": "success"}
 

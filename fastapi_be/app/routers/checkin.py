@@ -44,11 +44,17 @@ from app.models import Doctor
 
 
 @router.get("/checkIn/getAppointments")
-def get_appointments_for_checkin(identity: str, db: Session = Depends(get_db)):
-    """根据身份证号查询可报到的预约列表(患者自助 kiosk 模式,凭身份证查询)"""
+def get_appointments_for_checkin(identity: str, phone: str = "", db: Session = Depends(get_db)):
+    """根据身份证号+预留手机号后4位查询可报到的预约列表(kiosk 模式双因子)。
+
+    仅凭身份证号即可枚举他人预约属于身份探测漏洞；增加手机号后4位校验后，
+    攻击者需同时知道两项信息才能看到预约详情。
+    """
     patient = db.query(Patient).filter(Patient.identity == identity).first()
     if not patient:
         return {"code": 500, "msg": "病人信息不存在"}
+    if not phone or not (patient.phone or "").endswith(phone[-4:]):
+        return {"code": 500, "msg": "身份证号与预留手机号不匹配"}
     today = datetime.date.today()
     appointments = (
         db.query(Appointment)
@@ -77,7 +83,7 @@ def get_appointments_for_checkin(identity: str, db: Session = Depends(get_db)):
 
 @router.post("/checkIn/checkIn")
 def check_in(req: CheckInRequest, db: Session = Depends(get_db)):
-    """患者自助报到(凭身份证+预约UUID,无需登录)"""
+    """患者自助报到(凭身份证+预约UUID+手机号后4位,无需登录)"""
     appointment = db.query(Appointment).filter(Appointment.registration_uuid == req.appointment_uuid).first()
     if not appointment:
         return {"code": 500, "msg": "预约记录不存在"}
@@ -90,6 +96,8 @@ def check_in(req: CheckInRequest, db: Session = Depends(get_db)):
         return {"code": 500, "msg": "病人信息不存在"}
     if appointment.patient_id != patient.patient_id:
         return {"code": 500, "msg": "身份证号与预约信息不匹配"}
+    if not req.phone_tail or not (patient.phone or "").endswith(req.phone_tail):
+        return {"code": 500, "msg": "身份证号与预留手机号不匹配"}
 
     # 检查是否违约（预约日期已过）
     if is_breach(appointment):

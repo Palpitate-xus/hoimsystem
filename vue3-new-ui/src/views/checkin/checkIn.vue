@@ -9,7 +9,7 @@
         <el-step title="报到成功" />
       </el-steps>
 
-      <!-- Step 1: 输入身份证号 -->
+      <!-- Step 1: 输入身份证号+手机号后4位（双因子防枚举） -->
       <div v-if="step === 0" style="margin-top: 20px; text-align: center; max-width: 500px; margin-left: auto; margin-right: auto;">
         <el-form :model="form" label-width="0">
           <el-form-item>
@@ -25,6 +25,17 @@
                 <el-icon><User /></el-icon>
               </template>
             </el-input>
+          </el-form-item>
+          <el-form-item>
+            <el-input
+              v-model="form.phoneTail"
+              placeholder="请输入预留手机号后4位"
+              size="large"
+              maxlength="4"
+              clearable
+              style="width: 100%"
+              @keyup.enter="queryAppointments"
+            />
           </el-form-item>
           <el-form-item>
             <el-button type="primary" size="large" style="width: 100%" @click="queryAppointments" :loading="loading">
@@ -94,7 +105,7 @@ import { User } from "@element-plus/icons-vue";
 import { checkIn, getAppointmentsForCheckin } from "@/api/checkin";
 
 const step = ref(0);
-const form = ref({ identity: "" });
+const form = ref({ identity: "", phoneTail: "" });
 const appointments = ref([]);
 const selectedUuid = ref("");
 const queueNumber = ref(0);
@@ -106,9 +117,13 @@ const queryAppointments = async () => {
     ElMessage.warning("请输入身份证号");
     return;
   }
+  if (!/^\d{4}$/.test(form.value.phoneTail.trim())) {
+    ElMessage.warning("请输入预留手机号后4位数字");
+    return;
+  }
   loading.value = true;
   try {
-    const res = await getAppointmentsForCheckin(form.value.identity.trim());
+    const res = await getAppointmentsForCheckin(form.value.identity.trim(), form.value.phoneTail.trim());
     if (res.code === 200) {
       appointments.value = res.data || [];
       step.value = 1;
@@ -129,7 +144,11 @@ const submitCheckIn = async () => {
   }
   submitting.value = true;
   try {
-    const res = await checkIn({ appointment_uuid: selectedUuid.value, identity: form.value.identity.trim() });
+    const res = await checkIn({
+      appointment_uuid: selectedUuid.value,
+      identity: form.value.identity.trim(),
+      phone_tail: form.value.phoneTail.trim(),
+    });
     if (res.code === 200) {
       queueNumber.value = res.data?.queue_number || 0;
       step.value = 2;

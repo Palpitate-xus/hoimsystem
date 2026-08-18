@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.dependencies import ADMIN_ROLES, CLINICAL_ROLES, NURSING_ROLES, get_current_user, require_roles
+from app.dependencies import ADMIN_ROLES, CLINICAL_ROLES, NURSING_ROLES, require_roles
 from app.models import (
     Admission,
     Doctor,
@@ -349,7 +349,7 @@ def cancel_inpatient_order(req: dict, current_user: User = Depends(require_roles
 
 
 @router.get("/inpatientOrder/getExecutionList")
-def get_execution_list(order_id: str | None = None, nurse_id: int | None = None, status: int | None = None, current_user: User = Depends(get_current_user),
+def get_execution_list(order_id: str | None = None, nurse_id: int | None = None, status: int | None = None, current_user: User = Depends(require_roles(*NURSING_ROLES, *CLINICAL_ROLES)),
     db: Session = Depends(get_db)):
     query = db.query(OrderExecution).order_by(OrderExecution.planned_time)
     if order_id:

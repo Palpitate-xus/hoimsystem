@@ -45,7 +45,8 @@ REGISTRAR_ROLES = {ROLE_ADMIN, ROLE_SUPER_ADMIN, ROLE_REGISTRAR}
 
 def decode_access_token(token: str) -> str:
     try:
-        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
+        # 强制要求 exp 与 sub 声明：无 exp 的令牌直接拒绝（防止伪造缺失声明的绕过）
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"], options={"require": ["exp", "sub"]})
         return payload.get("sub")
     except jwt.ExpiredSignatureError:
         return None

@@ -58,7 +58,7 @@ class TestCheckIn:
         assert r.json()["code"] == 500
 
     async def test_check_in_is_one_time_and_updates_appointment(self, async_client, seed_data, db_session):
-        patient = Patient(name="报到测试", identity="110101199001019999", sex=1)
+        patient = Patient(name="报到测试", identity="110101199001019999", sex=1, phone="13800001234")
         db_session.add(patient)
         db_session.flush()
         appointment = Appointment(
@@ -74,7 +74,7 @@ class TestCheckIn:
         db_session.commit()
         appointment_uuid = appointment.registration_uuid
 
-        payload = {"appointment_uuid": appointment_uuid, "identity": patient.identity}
+        payload = {"appointment_uuid": appointment_uuid, "identity": patient.identity, "phone_tail": "1234"}
         first = await async_client.post("/api/checkIn/checkIn", json=payload)
         assert first.status_code == 200
         assert first.json()["code"] == 200

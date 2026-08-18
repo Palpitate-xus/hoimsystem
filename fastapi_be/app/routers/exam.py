@@ -471,6 +471,12 @@ def get_exam_result_list(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
+    # patient 角色仅能查看本人体检记录的结果
+    if current_user.user_role == ROLE_PATIENT:
+        record = db.query(ExamRecord).filter(ExamRecord.record_id == record_id).first()
+        own_ids = [pid for pid in db.query(Patient.patient_id).filter(Patient.identity == current_user.username)]
+        if not record or record.patient_id not in own_ids:
+            raise HTTPException(status_code=403, detail="无权查看他人体检结果")
     results = (
         db.query(ExamResult)
         .filter(ExamResult.record_id == record_id)

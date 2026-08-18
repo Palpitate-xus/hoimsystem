@@ -571,6 +571,7 @@ class QueueSkipRequest(BaseModel):
 class CheckInRequest(BaseModel):
     appointment_uuid: str
     identity: str
+    phone_tail: str = ""
 
 
 class VitalSignCreateRequest(BaseModel):

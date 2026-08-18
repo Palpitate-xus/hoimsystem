@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.dependencies import get_current_user, User, User, require_roles, CLINICAL_ROLES
+from app.dependencies import get_current_user, User, User, require_roles, CLINICAL_ROLES, NURSING_ROLES
 from app.models import (
     Admission,
     AnesthesiaRecord,
@@ -307,7 +307,7 @@ def complete_surgery(req: dict, current_user: User = Depends(require_roles(*CLIN
 
 
 @router.get("/anesthesiaRecord/getList")
-def get_anesthesia_record_list(schedule_id: str | None = None, current_user: User = Depends(get_current_user),
+def get_anesthesia_record_list(schedule_id: str | None = None, current_user: User = Depends(require_roles(*CLINICAL_ROLES, *NURSING_ROLES)),
     db: Session = Depends(get_db)):
     query = db.query(AnesthesiaRecord).order_by(AnesthesiaRecord.create_time.desc())
     if schedule_id:

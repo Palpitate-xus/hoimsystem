@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.dependencies import ADMIN_ROLES, CLINICAL_ROLES, ROLE_PATIENT, get_current_user, User, require_roles
+from app.dependencies import ADMIN_ROLES, CLINICAL_ROLES, NURSING_ROLES, ROLE_PATIENT, User, get_current_user, require_roles
 from app.models import Doctor, Patient, PatrolRecord, Queue
 from app.schemas import QueueCallNextRequest, QueuePassRequest, QueueSkipRequest
 
@@ -155,7 +155,7 @@ def create_patrol_record(req: dict, current_user=Depends(get_current_user), db: 
 
 
 @router.get("/patrol/getList")
-def get_patrol_list(keyword: str | None = None, current_user: User = Depends(get_current_user),
+def get_patrol_list(keyword: str | None = None, current_user: User = Depends(require_roles(*NURSING_ROLES, *CLINICAL_ROLES)),
     db: Session = Depends(get_db)):
     records = db.query(PatrolRecord).order_by(PatrolRecord.create_time.desc()).all()
     data = []

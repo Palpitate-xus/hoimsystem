@@ -12,6 +12,6 @@ export function checkSuspend(patient_id) {
   return request({ url: "breach/checkSuspend", method: "get", params: { patient_id } });
 }
 
-export function getAppointmentsForCheckin(identity) {
-  return request({ url: "checkIn/getAppointments", method: "get", params: { identity } });
+export function getAppointmentsForCheckin(identity, phone) {
+  return request({ url: "checkIn/getAppointments", method: "get", params: { identity, phone } });
 }

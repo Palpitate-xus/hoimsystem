@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.dependencies import GUIDE_ROLES, get_current_user, require_roles
+from app.dependencies import GUIDE_ROLES, NURSING_ROLES, get_current_user, require_roles
 from app.models import Patient, TriageRecord, User
 from app.privacy import can_view_full_patient_identity, mask_identity
 
@@ -12,8 +12,8 @@ router = APIRouter()
 
 
 @router.post("/triageDesk/create")
-def create_triage_record(req: dict, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    """创建分诊记录"""
+def create_triage_record(req: dict, db: Session = Depends(get_db), current_user: User = Depends(require_roles(*GUIDE_ROLES, *NURSING_ROLES))):
+    """创建分诊记录（仅导诊/护理角色，防止任意账号注入临床数据）"""
     identity = req.get("identity")
     patient = db.query(Patient).filter(Patient.identity == identity).first()
     if not patient:

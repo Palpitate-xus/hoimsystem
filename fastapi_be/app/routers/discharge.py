@@ -10,11 +10,9 @@ from app.models import (
     Admission,
     Bed,
     DischargeSummary,
-    Doctor,
     InpatientCharge,
     InpatientOrder,
     OrderExecution,
-    Patient,
 )
 from app.schemas import DischargeSummaryCreateRequest
 
@@ -30,7 +28,34 @@ def do_discharge(req: dict, current_user: User = Depends(require_roles(*NURSING_
     if admission.status != 1:
         return {"code": 500, "msg": "病人不在院状态，无法办理出院"}
 
-    # 计算费用
+    # 床位费按住院天数补差（入院只收首日；出院按实际天数补足）
+    bed = db.query(Bed).filter(Bed.bed_id == admission.bed_id).first()
+    if bed and bed.price_per_day and admission.admission_time:
+        days = (datetime.datetime.now() - admission.admission_time).days + 1
+        if days < 1:
+            days = 1
+        charged_days = (
+            db.query(func.coalesce(func.sum(InpatientCharge.quantity), 0))
+            .filter(InpatientCharge.admission_id == admission_id, InpatientCharge.item_type == "bed", InpatientCharge.status != 2)
+            .scalar()
+        ) or 0
+        remaining_days = days - charged_days
+        if remaining_days > 0:
+            db.add(InpatientCharge(
+                admission_id=admission_id,
+                patient_id=admission.patient_id,
+                item_name=f"床位费({bed.bed_type})住院补记",
+                item_type="bed",
+                quantity=remaining_days,
+                unit_price=bed.price_per_day,
+                total_amount=bed.price_per_day * int(remaining_days),
+                charge_date=datetime.datetime.now().date(),
+                status=0,
+                create_time=datetime.datetime.now(),
+            ))
+            db.flush()
+
+    # 计算费用（含补记床位费）
     total_amount = (
         db.query(func.sum(InpatientCharge.total_amount))
         .filter(InpatientCharge.admission_id == admission_id, InpatientCharge.status != 2)

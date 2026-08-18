@@ -780,6 +780,8 @@ class LabResult(Base):
     critical_status = Column(Integer, nullable=False, default=0)  # 0=非危急 1=待通知 2=已通知 3=已确认 4=已处理
     critical_notified_by = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=True)
     critical_notified_time = Column(DateTime, nullable=True)
+    auditor_id = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=True)  # 审核技师（双人复核留痕）
+    audit_time = Column(DateTime, nullable=True)
     critical_acknowledged_by = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=True)
     critical_acknowledged_time = Column(DateTime, nullable=True)
     critical_handled_by = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=True)
@@ -1098,6 +1100,7 @@ class PurchaseOrderItem(Base):
     batch_no = Column(String(60), nullable=True)
     expiry_date = Column(Date, nullable=True)
     location = Column(String(100), nullable=True)
+    received_quantity = Column(Integer, nullable=True)  # 入库实收数量（缺货为 0）
 
     order = relationship("PurchaseOrder", back_populates="items")
 
@@ -2281,3 +2284,28 @@ class DrgGrouping(Base):
     create_time = Column(DateTime, nullable=False)
 
     patient = relationship("Patient")
+
+
+class DigitalSignatureRecord(Base):
+    __tablename__ = "hoimsystem_digital_signature_record"
+
+    signature_id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    signer_id = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=False)
+    doc_type = Column(String(30), nullable=False, default="generic")
+    reference_id = Column(String(60), nullable=True)
+    content_hash = Column(String(64), nullable=False)
+    sign_hash = Column(String(64), nullable=False)
+    sign_time = Column(DateTime, nullable=False)
+
+    signer = relationship("User", foreign_keys=[signer_id])
+
+
+class ResearchExportAudit(Base):
+    __tablename__ = "hoimsystem_research_export_audit"
+
+    audit_id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=False)
+    table_name = Column(String(50), nullable=False)
+    row_count = Column(Integer, nullable=False)
+    anonymize = Column(Integer, nullable=False, default=1)
+    create_time = Column(DateTime, nullable=False)

@@ -28,9 +28,23 @@ def get_patient_safe_pharmaceutical(db: Session, pharmaceutical_id: int, patient
     allergy_history = (patient.allergy_history or "").strip()
     if not allergy_history:
         return pharmaceutical, None
+
+    # 与门诊处方一致的词边界匹配（doctor.py 同款逻辑），避免 partial match 误判：
+    # 过敏原等于药品名，或作为完整词出现在药品名/备注中
     drug_name = (pharmaceutical.name or "").strip().lower()
+    remark = (pharmaceutical.remark or "").strip().lower()
     for entry in re.split(r"[,，;；]", allergy_history):
         allergen = re.split(r"[:：]", entry, maxsplit=1)[0].strip().lower()
-        if allergen and (allergen == drug_name or drug_name.startswith(allergen)):
+        if not allergen:
+            continue
+        if allergen == drug_name:
             return None, f"过敏史冲突：病人对 [{allergen}] 过敏，不能使用 [{pharmaceutical.name}]"
+        # 中文药名无空格分词：过敏原是药品名前缀即视为含该成分（青霉素→青霉素钠注射液）
+        if len(allergen) >= 2 and drug_name.startswith(allergen):
+            return None, f"过敏史冲突：病人对 [{allergen}] 过敏，不能使用 [{pharmaceutical.name}]"
+        if len(allergen) >= 2:
+            if drug_name.startswith(allergen + " ") or drug_name.endswith(" " + allergen) or f" {allergen} " in f" {drug_name} ":
+                return None, f"过敏史冲突：病人对 [{allergen}] 过敏，不能使用 [{pharmaceutical.name}]"
+            if remark and (allergen in remark.split() or allergen + "," in remark):
+                return None, f"过敏史冲突：病人对 [{allergen}] 过敏（药品备注含该成分） [{pharmaceutical.name}]"
     return pharmaceutical, None

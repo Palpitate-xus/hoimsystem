@@ -3,6 +3,7 @@ import math
 import traceback
 
 from fastapi import APIRouter, Depends
+from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
 from app.database import get_db
@@ -147,6 +148,110 @@ def audit_prescription(req: PharmacyAuditRequest, current_user: User = Depends(r
     return {"code": 200, "msg": "success"}
 
 
+def _deduct_batches_fefo(db: Session, pharmaceutical_id: int, quantity: int, operator_id: int, reference_id: str) -> str | None:
+    """按 FEFO（先过期先出）从批次扣减库存并写台账；库存不足返回错误信息。
+
+    未启用批次管理（无在用批次）的药品跳过批次扣减——其总量库存
+    已在开方时预留扣减（doctor.py），批次账仅对有批次的药品生效。
+    """
+    now = datetime.datetime.now()
+    has_batches = (
+        db.query(PharmaceuticalBatch)
+        .filter(PharmaceuticalBatch.pharmaceutical_id == pharmaceutical_id, PharmaceuticalBatch.status == 0)
+        .count()
+        > 0
+    )
+    if not has_batches:
+        return None
+    remaining = quantity
+    batches = (
+        db.query(PharmaceuticalBatch)
+        .filter(
+            PharmaceuticalBatch.pharmaceutical_id == pharmaceutical_id,
+            PharmaceuticalBatch.status == 0,
+            PharmaceuticalBatch.stock > 0,
+        )
+        .order_by(
+            PharmaceuticalBatch.expiry_date.is_(None),
+            PharmaceuticalBatch.expiry_date.asc(),
+            PharmaceuticalBatch.batch_id.asc(),
+        )
+        .with_for_update()
+        .all()
+    )
+    for batch in batches:
+        if remaining <= 0:
+            break
+        take = min(batch.stock, remaining)
+        before = batch.stock
+        batch.stock = before - take
+        batch.update_time = now
+        db.add(batch)
+        db.add(PharmaceuticalStockLedger(
+            batch_id=batch.batch_id,
+            pharmaceutical_id=pharmaceutical_id,
+            transaction_type="outbound",
+            quantity=take,
+            before_stock=before,
+            after_stock=batch.stock,
+            reference_type="prescription",
+            reference_id=str(reference_id),
+            operator_id=operator_id,
+            reason="发药出库",
+            create_time=now,
+        ))
+        remaining -= take
+    if remaining > 0:
+        return f"批次库存不足，尚缺 {remaining}"
+    return None
+
+
+def _return_to_batches(db: Session, pharmaceutical_id: int, quantity: int, operator_id: int, reference_id: str) -> str | None:
+    """退药回冲：优先回到最近出库的未过期批次，其次最早未过期批次；写台账。"""
+    now = datetime.datetime.now()
+    batch = (
+        db.query(PharmaceuticalBatch)
+        .filter(
+            PharmaceuticalBatch.pharmaceutical_id == pharmaceutical_id,
+            PharmaceuticalBatch.status == 0,
+            or_(PharmaceuticalBatch.expiry_date.is_(None), PharmaceuticalBatch.expiry_date >= datetime.date.today()),
+        )
+        .order_by(PharmaceuticalBatch.update_time.desc())
+        .first()
+    )
+    if not batch:
+        # 没有可用批次时退回到"默认批次"（首次退药自动建）
+        batch = PharmaceuticalBatch(
+            pharmaceutical_id=pharmaceutical_id,
+            batch_no=f"RET-{str(reference_id)[:12]}",
+            expiry_date=None,
+            stock=0,
+            status=0,
+            create_time=now,
+            update_time=now,
+        )
+        db.add(batch)
+        db.flush()
+    before = batch.stock
+    batch.stock = before + quantity
+    batch.update_time = now
+    db.add(batch)
+    db.add(PharmaceuticalStockLedger(
+        batch_id=batch.batch_id,
+        pharmaceutical_id=pharmaceutical_id,
+        transaction_type="return",
+        quantity=quantity,
+        before_stock=before,
+        after_stock=batch.stock,
+        reference_type="prescription_return",
+        reference_id=str(reference_id),
+        operator_id=operator_id,
+        reason="退药回冲",
+        create_time=now,
+    ))
+    return None
+
+
 @router.post("/pharmacy/dispense")
 def dispense_prescription(req: PharmacyDispenseRequest, current_user: User = Depends(require_roles(*PHARMACY_ROLES)), db: Session = Depends(get_db)):
     pre = db.query(Prescription).filter(Prescription.prescription_id == req.prescription_id).first()
@@ -161,6 +266,66 @@ def dispense_prescription(req: PharmacyDispenseRequest, current_user: User = Dep
     ]
     if expired_names:
         return {"code": 400, "msg": f"药品已过期，禁止发药：{', '.join(expired_names)}"}
+
+    # 皮试闭环校验：该患者对该药有皮试医嘱时，阳性(3)禁止发药；
+    # 未完成（0 医嘱/1 待判定）也禁止——皮试结果未出不能发药
+    from app.models import SkinTestOrder
+
+    for line in pre.pre_phas:
+        if not line.pharmaceutical or line.number <= 0:
+            continue
+        st = (
+            db.query(SkinTestOrder)
+            .filter(
+                SkinTestOrder.patient_id == pre.patient_id,
+                SkinTestOrder.pharmaceutical_id == line.pharmaceutical_id,
+                SkinTestOrder.status.in_((0, 1, 3)),
+            )
+            .order_by(SkinTestOrder.skin_test_id.desc())
+            .first()
+        )
+        if st and st.status == 3:
+            return {"code": 400, "msg": f"皮试阳性，禁止发药：{line.pharmaceutical.name}"}
+        if st and st.status in (0, 1):
+            return {"code": 400, "msg": f"皮试尚未完成，禁止发药：{line.pharmaceutical.name}"}
+
+    # 抗菌药审批闭环校验：限制级/特殊使用级(antibiotic_level>=2)必须有已批准
+    # 且绑定本处方的审批单（原缺陷：只在开方端校验，直发已审处方可绕过）
+    from app.models import AntibioticApproval
+
+    for line in pre.pre_phas:
+        if not line.pharmaceutical or line.number <= 0:
+            continue
+        if line.pharmaceutical.antibiotic_level and line.pharmaceutical.antibiotic_level >= 2:
+            bound = (
+                db.query(AntibioticApproval)
+                .filter(
+                    AntibioticApproval.prescription_id == str(req.prescription_id),
+                    AntibioticApproval.pharmaceutical_id == line.pharmaceutical_id,
+                    AntibioticApproval.status == 1,
+                )
+                .first()
+            )
+            if not bound:
+                return {"code": 400, "msg": f"抗菌药 [{line.pharmaceutical.name}] 无有效审批，禁止发药"}
+
+    # 发药时按批次 FEFO 扣减库存并写台账（库存不足则整单拒绝回滚）
+    for line in pre.pre_phas:
+        if not line.pharmaceutical or line.number <= 0:
+            continue
+        error = _deduct_batches_fefo(db, line.pharmaceutical_id, line.number, current_user.user_id, req.prescription_id)
+        if error:
+            db.rollback()
+            return {"code": 500, "msg": f"{line.pharmaceutical.name}：{error}"}
+        # 总量库存同步扣减（处方开立时是预留语义；未走处方开立入口的数据以此为准）
+        updated_total = (
+            db.query(Pharmaceutical)
+            .filter(Pharmaceutical.pharmaceutical_id == line.pharmaceutical_id, Pharmaceutical.stock >= line.number)
+            .update({Pharmaceutical.stock: Pharmaceutical.stock - line.number}, synchronize_session=False)
+        )
+        if updated_total != 1:
+            db.rollback()
+            return {"code": 500, "msg": f"{line.pharmaceutical.name}：总量库存不足"}
 
     # Only the audited state may transition to dispensed.  Keeping the state
     # predicate in the UPDATE closes the duplicate-dispense race window.
@@ -251,6 +416,8 @@ def return_medicine(req: PharmacyReturnRequest, current_user: User = Depends(req
         if pha:
             pha.stock += req.number
             db.add(pha)
+        # 回冲到批次并写台账（原先只加总库存不动批次，批次账与总量账永久背离）
+        _return_to_batches(db, req.pha_id, req.number, current_user.user_id, req.prescription_id)
 
         # Status 4 is the documented fully-returned state.  Partial returns
         # keep status=2 so the remaining dispensed medicines can be returned.

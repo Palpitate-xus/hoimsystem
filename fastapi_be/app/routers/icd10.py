@@ -38,7 +38,12 @@ def _update(model, req: Icd10UpdateRequest, db: Session):
     for field in ("code", "name", "category", "status"):
         value = getattr(req, field)
         if value is not None:
-            setattr(item, field, value.strip().upper() if field == "code" else value.strip() if isinstance(value, str) else value)
+            new_val = value.strip().upper() if field == "code" else value.strip() if isinstance(value, str) else value
+            if field == "code" and new_val != item.code:
+                dup = db.query(model).filter(model.code == new_val).first()
+                if dup:
+                    return {"code": 500, "msg": f"编码 {new_val} 已存在"}
+            setattr(item, field, new_val)
     item.update_time = datetime.datetime.now()
     db.commit()
     return {"code": 200, "msg": "success"}

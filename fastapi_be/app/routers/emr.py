@@ -326,11 +326,26 @@ def create_progress_note(req: ProgressNoteCreateRequest, current_user: User = De
     return {"code": 200, "msg": "success"}
 
 
+def _doctor_owns(db, current_user, record_doctor_id) -> bool:
+    """记录属主 = 当前登录医生（按 user_id 关联 Doctor），管理员放行。"""
+    from app.dependencies import ADMIN_ROLES
+    from app.models import Doctor
+
+    if current_user.user_role in ADMIN_ROLES:
+        return True
+    if record_doctor_id is None:
+        return False
+    return db.query(Doctor).filter(Doctor.doctor_id == record_doctor_id, Doctor.user_id == current_user.user_id).first() is not None
+
+
 @router.post("/progressNote/delete")
 def delete_progress_note(req: dict, current_user: User = Depends(require_roles(*CLINICAL_ROLES)), db: Session = Depends(get_db)):
     note = db.query(ProgressNote).filter(ProgressNote.note_id == req.get("note_id")).first()
     if not note:
         return {"code": 500, "msg": "记录不存在"}
+    # 属主校验：仅书写医生本人或管理员可删除（防病历被他人删除破坏证据链）
+    if not _doctor_owns(db, current_user, note.doctor_id):
+        return {"code": 403, "msg": "只能删除本人书写的病程记录"}
     db.delete(note)
     db.commit()
     return {"code": 200, "msg": "success"}
@@ -386,6 +401,8 @@ def delete_ward_round(req: dict, current_user: User = Depends(require_roles(*CLI
     ward_round = db.query(WardRound).filter(WardRound.round_id == req.get("round_id")).first()
     if not ward_round:
         return {"code": 500, "msg": "记录不存在"}
+    if not _doctor_owns(db, current_user, ward_round.doctor_id):
+        return {"code": 403, "msg": "只能删除本人书写的查房记录"}
     db.delete(ward_round)
     db.commit()
     return {"code": 200, "msg": "success"}

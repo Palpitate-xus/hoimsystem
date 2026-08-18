@@ -15,6 +15,7 @@ from app.models import (
     Pharmaceutical,
     User,
 )
+from app.pharmacy_safety import get_patient_safe_pharmaceutical
 from app.schemas import InpatientOrderCreateRequest, InpatientOrderStopRequest, OrderExecutionRequest
 
 router = APIRouter()
@@ -52,19 +53,22 @@ def _create_order_executions(db: Session, order: InpatientOrder):
                 days = item.days
                 break
 
-        # 简化处理：每天按频次生成执行记录
+        # 以医嘱为单位按"天数 × 最高频次"生成执行记录（一次执行同时覆盖全部明细）。
+        # 原实现对每个明细各生成一整套，导致 N 个明细的医嘱执行计划放大 N 倍。
+        max_freq = 1
+        for item in order.items:
+            max_freq = max(max_freq, freq_map.get(item.frequency, 1))
+
         for d in range(days):
             base_time = datetime.datetime.now() + datetime.timedelta(days=d)
-            for item in order.items:
-                freq_count = freq_map.get(item.frequency, 1)
-                for i in range(freq_count):
-                    planned = base_time.replace(hour=8 + i * (16 // max(freq_count, 1)), minute=0, second=0)
-                    execution = OrderExecution(
-                        order_id=order.order_id,
-                        planned_time=planned,
-                        status=0,
-                    )
-                    db.add(execution)
+            for i in range(max_freq):
+                planned = base_time.replace(hour=8 + i * (16 // max(max_freq, 1)), minute=0, second=0)
+                execution = OrderExecution(
+                    order_id=order.order_id,
+                    planned_time=planned,
+                    status=0,
+                )
+                db.add(execution)
 
 
 @router.get("/inpatientOrder/getList")
@@ -169,9 +173,9 @@ def create_inpatient_order(req: InpatientOrderCreateRequest, current_user: User 
         if quantity <= 0 or days <= 0 or unit_price < 0:
             return {"code": 500, "msg": "医嘱数量、天数和价格必须合法"}
         if it.get("item_type") == "drug" and it.get("item_id_ref"):
-            pha = db.query(Pharmaceutical).filter(Pharmaceutical.pharmaceutical_id == it.get("item_id_ref")).first()
+            pha, safety_error = get_patient_safe_pharmaceutical(db, it.get("item_id_ref"), req.patient_id)
             if not pha:
-                return {"code": 500, "msg": "医嘱药品不存在"}
+                return {"code": 500, "msg": safety_error}
             if pha.stock < quantity * days:
                 return {"code": 500, "msg": f"药品 {pha.name} 库存不足"}
         validated_items.append((it, quantity, days, unit_price))
@@ -389,7 +393,12 @@ def execute_order(req: OrderExecutionRequest, current_user: User = Depends(requi
     order = db.query(InpatientOrder).filter(InpatientOrder.order_id == req.order_id).first()
     if not order or order.status not in (1, 2):
         return {"code": 500, "msg": "医嘱当前状态不允许执行"}
-    execution = db.query(OrderExecution).filter(OrderExecution.order_id == req.order_id, OrderExecution.status == 0).first()
+    execution = (
+        db.query(OrderExecution)
+        .filter(OrderExecution.order_id == req.order_id, OrderExecution.status == 0)
+        .order_by(OrderExecution.planned_time.asc())
+        .first()
+    )
     if not execution:
         return {"code": 500, "msg": "无可执行记录"}
     updated = db.query(OrderExecution).filter(

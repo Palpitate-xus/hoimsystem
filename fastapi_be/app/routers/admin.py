@@ -140,9 +140,22 @@ def update_doctor(req: DoctorUpdateRequest, current_user: User = Depends(require
 
 @router.post("/doctorManagement/delete")
 def delete_doctor(req: DoctorDeleteRequest, current_user: User = Depends(require_roles(*ADMIN_ROLES)), db: Session = Depends(get_db)):
+    from app.models import Appointment, DoctorSchedule, Registration
+
     doctor = db.query(Doctor).filter(Doctor.doctor_id == req.doctor_id).first()
     if not doctor:
         return {"code": 500, "msg": "医生不存在"}
+    # 在职校验：仍有排班/未来预约/挂号记录的医生不可删（防统计与审计链断裂）
+    future = datetime.date.today()
+    schedule_cnt = db.query(DoctorSchedule).filter(DoctorSchedule.doctor_id == req.doctor_id).count()
+    if schedule_cnt:
+        return {"code": 500, "msg": f"该医生仍有 {schedule_cnt} 条排班记录，请先清理排班再删除"}
+    appt_cnt = db.query(Appointment).filter(Appointment.doctor_id == req.doctor_id, Appointment.time >= future).count()
+    if appt_cnt:
+        return {"code": 500, "msg": f"该医生仍有 {appt_cnt} 条未完成预约，请先处理预约再删除"}
+    reg_cnt = db.query(Registration).filter(Registration.doctor_id == req.doctor_id).count()
+    if reg_cnt:
+        return {"code": 500, "msg": f"该医生存在 {reg_cnt} 条历史挂号记录，不允许物理删除（会破坏审计链）"}
     if doctor.user_id:
         user = db.query(User).filter(User.user_id == doctor.user_id).first()
         if user:

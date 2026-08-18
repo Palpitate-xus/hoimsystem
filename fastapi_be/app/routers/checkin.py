@@ -53,7 +53,7 @@ def get_appointments_for_checkin(identity: str, phone: str = "", db: Session = D
     patient = db.query(Patient).filter(Patient.identity == identity).first()
     if not patient:
         return {"code": 500, "msg": "病人信息不存在"}
-    if not phone or not (patient.phone or "").endswith(phone[-4:]):
+    if not phone or len(str(phone).strip()) != 4 or not (patient.phone or "").endswith(str(phone).strip()):
         return {"code": 500, "msg": "身份证号与预留手机号不匹配"}
     today = datetime.date.today()
     appointments = (
@@ -96,15 +96,46 @@ def check_in(req: CheckInRequest, db: Session = Depends(get_db)):
         return {"code": 500, "msg": "病人信息不存在"}
     if appointment.patient_id != patient.patient_id:
         return {"code": 500, "msg": "身份证号与预约信息不匹配"}
-    if not req.phone_tail or not (patient.phone or "").endswith(req.phone_tail):
+    if not req.phone_tail or len(str(req.phone_tail).strip()) != 4 or not (patient.phone or "").endswith(str(req.phone_tail).strip()):
         return {"code": 500, "msg": "身份证号与预留手机号不匹配"}
 
     # 检查是否违约（预约日期已过）
     if is_breach(appointment):
         record_breach(db, appointment, "超时未报到")
 
-    max_queue = db.query(Queue).order_by(Queue.queue_number.desc()).first()
-    queue_number = (max_queue.queue_number + 1) if max_queue else 1
+    # 预约状态 0→1 用条件 UPDATE 原子迁移：并发双报到只有一个成功
+    updated = (
+        db.query(Appointment)
+        .filter(Appointment.registration_uuid == appointment.registration_uuid, Appointment.status == 0)
+        .update({Appointment.status: 1}, synchronize_session=False)
+    )
+    if updated != 1:
+        db.rollback()
+        return {"code": 500, "msg": "该预约已报到，不能重复报到"}
+
+    # 当日队列号：按当日最大号+1 分配，冲突时重试（跨日从 1 重新编号）
+    now = datetime.datetime.now()
+    for _ in range(5):
+        max_queue = (
+            db.query(Queue)
+            .filter(Queue.create_time >= datetime.datetime.combine(datetime.date.today(), datetime.time.min))
+            .order_by(Queue.queue_number.desc())
+            .first()
+        )
+        queue_number = (max_queue.queue_number + 1) if max_queue else 1
+        dup = (
+            db.query(Queue)
+            .filter(
+                Queue.create_time >= datetime.datetime.combine(datetime.date.today(), datetime.time.min),
+                Queue.queue_number == queue_number,
+            )
+            .first()
+        )
+        if not dup:
+            break
+    else:
+        db.rollback()
+        return {"code": 500, "msg": "队列号分配冲突，请重试"}
 
     queue = Queue(
         queue_number=queue_number,
@@ -113,11 +144,9 @@ def check_in(req: CheckInRequest, db: Session = Depends(get_db)):
         doctor_id=appointment.doctor_id,
         type=1,
         status=0,
-        create_time=datetime.datetime.now(),
+        create_time=now,
     )
     db.add(queue)
-    appointment.status = 1
-    db.add(appointment)
     db.commit()
     return {"code": 200, "msg": "success", "data": {"queue_number": queue_number}}
 

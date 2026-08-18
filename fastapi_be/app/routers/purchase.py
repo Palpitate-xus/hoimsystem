@@ -155,12 +155,30 @@ def storage_purchase(req: dict, current_user: User = Depends(require_roles(*ADMI
     if order.status != 1:
         return {"code": 500, "msg": "只有已审批的采购单可以入库"}
     now = datetime.datetime.now()
+    # 实收数量核对：允许按实际到货量入库（缺货/多货场景），缺货为 0、不得超出采购量
+    actual_quantities = req.get("actual_quantities") or {}
+    if not isinstance(actual_quantities, dict):
+        return {"code": 500, "msg": "实收数量格式错误"}
     batch_inputs = []
     for item in order.items:
         if item.quantity <= 0:
             db.rollback()
             return {"code": 500, "msg": "采购数量必须大于0"}
+        received = actual_quantities.get(str(item.item_id))
+        if received is None:
+            received = item.quantity
+        try:
+            received = int(received)
+        except (TypeError, ValueError):
+            return {"code": 500, "msg": f"明细 {item.item_id} 实收数量格式错误"}
+        if received < 0 or received > item.quantity:
+            return {"code": 500, "msg": f"明细 {item.item_id} 实收数量必须在 0 与采购数量之间（采购 {item.quantity}，实收 {received}）"}
         if item.item_type != "drug":
+            if item.item_type == "consumable":
+                con = db.query(Consumable).filter(Consumable.consumable_id == item.item_id_ref).first()
+                if not con:
+                    # 耗材档案缺失时明确拒绝（原缺陷：静默丢失不入账）
+                    return {"code": 500, "msg": f"耗材不存在，请先维护耗材档案：{item.item_id_ref}"}
             continue
         pha = db.query(Pharmaceutical).filter(Pharmaceutical.pharmaceutical_id == item.item_id_ref).first()
         if not pha:
@@ -181,11 +199,15 @@ def storage_purchase(req: dict, current_user: User = Depends(require_roles(*ADMI
         if batch and batch.expiry_date and expiry_date and batch.expiry_date != expiry_date:
             db.rollback()
             return {"code": 500, "msg": f"药品 {pha.name} 批次效期不一致"}
-        batch_inputs.append((item, pha, batch, batch_no, expiry_date))
+        batch_inputs.append((item, pha, batch, batch_no, expiry_date, received))
 
     for item in order.items:
         if item.item_type == "drug":
-            _, pha, batch, batch_no, expiry_date = next(entry for entry in batch_inputs if entry[0] is item)
+            _, pha, batch, batch_no, expiry_date, received = next(entry for entry in batch_inputs if entry[0] is item)
+            if received <= 0:
+                # 实收为 0：仅登记批次信息，不产生库存/台账
+                item.received_quantity = 0
+                continue
             if batch is None:
                 batch = PharmaceuticalBatch(
                     pharmaceutical_id=pha.pharmaceutical_id,
@@ -201,17 +223,18 @@ def storage_purchase(req: dict, current_user: User = Depends(require_roles(*ADMI
                 db.flush()
             item.batch_no = batch_no
             item.expiry_date = expiry_date
+            item.received_quantity = received
             before_stock = batch.stock or 0
-            batch.stock = before_stock + item.quantity
+            batch.stock = before_stock + received
             batch.update_time = now
-            pha.stock = (pha.stock or 0) + item.quantity
+            pha.stock = (pha.stock or 0) + received
             if expiry_date and (not pha.expireddate or expiry_date < pha.expireddate):
                 pha.expireddate = expiry_date
             db.add(PharmaceuticalStockLedger(
                 batch_id=batch.batch_id,
                 pharmaceutical_id=pha.pharmaceutical_id,
                 transaction_type="inbound",
-                quantity=item.quantity,
+                quantity=received,
                 before_stock=before_stock,
                 after_stock=batch.stock,
                 reference_type="purchase",
@@ -223,8 +246,12 @@ def storage_purchase(req: dict, current_user: User = Depends(require_roles(*ADMI
         elif item.item_type == "consumable":
             con = db.query(Consumable).filter(Consumable.consumable_id == item.item_id_ref).first()
             if con:
-                con.stock += item.quantity
-                db.add(con)
+                received = actual_quantities.get(str(item.item_id))
+                received = item.quantity if received is None else int(received)
+                if received > 0:
+                    con.stock += received
+                    item.received_quantity = received
+                    db.add(con)
     order.status = 2
     order.storage_time = datetime.datetime.now()
     db.commit()

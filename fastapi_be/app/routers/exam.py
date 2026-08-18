@@ -330,8 +330,14 @@ def update_exam_appointment_status(
         ).first() is not None
         if not is_owner or req.get("status") != 4:
             return {"code": 403, "msg": "无权更新该体检预约"}
+    status = req.get("status")
+    if status not in (0, 1, 2, 3, 4):
+        return {"code": 400, "msg": "状态值不合法"}
+    allowed = {0: {1, 4}, 1: {2, 4}, 2: {3}, 3: set(), 4: set()}
+    if status not in allowed.get(appointment.status, set()):
+        return {"code": 400, "msg": f"状态迁移不合法：当前 {appointment.status} → 目标 {status}"}
     try:
-        appointment.status = req.get("status")
+        appointment.status = status
         db.add(appointment)
         db.commit()
         return {"code": 200, "msg": "success"}
@@ -397,6 +403,11 @@ def create_exam_record(
     ).first()
     if not appointment:
         return {"code": 500, "msg": "体检预约不存在"}
+    if appointment.status not in (1, 2):
+        return {"code": 500, "msg": "预约未报到或已完成/取消，不能创建体检记录"}
+    existing = db.query(ExamRecord).filter(ExamRecord.appointment_id == appointment.appointment_id).first()
+    if existing:
+        return {"code": 500, "msg": "该预约已有体检记录，不能重复创建"}
     try:
         record = ExamRecord(
             appointment_id=appointment.appointment_id,
@@ -406,6 +417,9 @@ def create_exam_record(
             create_time=datetime.datetime.now(),
         )
         db.add(record)
+        if appointment.status == 1:
+            appointment.status = 2  # 联动推进到检查中
+            db.add(appointment)
         db.commit()
         return {"code": 200, "msg": "success", "data": {"record_id": record.record_id}}
     except Exception:
@@ -450,10 +464,17 @@ def complete_exam_record(
     record = db.query(ExamRecord).filter(ExamRecord.record_id == req.get("record_id")).first()
     if not record:
         return {"code": 500, "msg": "体检记录不存在"}
+    if record.status == 3:
+        return {"code": 500, "msg": "该体检记录已完成"}
+    if not (record.overall_result or "").strip():
+        return {"code": 500, "msg": "总检结论未填写，不能完成体检（需先完成总检）"}
     try:
         record.status = 3
         record.report_time = datetime.datetime.now()
         db.add(record)
+        if record.appointment and record.appointment.status != 3:
+            record.appointment.status = 3
+            db.add(record.appointment)
         db.commit()
         return {"code": 200, "msg": "success"}
     except Exception:
@@ -474,7 +495,7 @@ def get_exam_result_list(
     # patient 角色仅能查看本人体检记录的结果
     if current_user.user_role == ROLE_PATIENT:
         record = db.query(ExamRecord).filter(ExamRecord.record_id == record_id).first()
-        own_ids = [pid for pid in db.query(Patient.patient_id).filter(Patient.identity == current_user.username)]
+        own_ids = [pid for (pid,) in db.query(Patient.patient_id).filter(Patient.identity == current_user.username)]
         if not record or record.patient_id not in own_ids:
             raise HTTPException(status_code=403, detail="无权查看他人体检结果")
     results = (
@@ -561,8 +582,8 @@ def get_exam_report_detail(
     if not record:
         return {"code": 500, "msg": "体检记录不存在"}
     if current_user.user_role == ROLE_PATIENT:
-        own_ids = db.query(Patient.patient_id).filter(Patient.identity == current_user.username)
-        if record.patient_id not in [pid for pid in own_ids]:
+        own_ids = [pid for (pid,) in db.query(Patient.patient_id).filter(Patient.identity == current_user.username)]
+        if record.patient_id not in own_ids:
             raise HTTPException(status_code=403, detail="无权查看他人体检报告")
 
     results = (

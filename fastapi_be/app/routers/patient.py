@@ -224,14 +224,11 @@ def patient_appointment_cancel(req: UuidRequest, current_user: User = Depends(ge
     if updated != 1:
         db.rollback()
         return {"code": 500, "msg": "预约已报到或已就诊，不能取消"}
-    schedule = db.query(DoctorSchedule).filter(DoctorSchedule.schedule_id == app.schedule_id).first() if app.schedule_id else None
-    if not schedule:
-        schedule = db.query(DoctorSchedule).filter(
-            DoctorSchedule.doctor_id == app.doctor_id,
-            DoctorSchedule.specialist == app.specialist,
-        ).first()
-    if schedule:
-        schedule.number += 1
+    # 同窗口退号：仅实际扣减过号源（有 schedule_id）的预约回补原排班
+    if app.schedule_id:
+        schedule = db.query(DoctorSchedule).filter(DoctorSchedule.schedule_id == app.schedule_id).first()
+        if schedule:
+            schedule.number = (schedule.number or 0) + 1
     db.commit()
     return {"code": 200, "msg": "success"}
 

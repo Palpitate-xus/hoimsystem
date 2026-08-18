@@ -123,7 +123,7 @@ def login(req: LoginRequest, request: Request, db: Session = Depends(get_db)):
     if _too_many_login_failures(key, db):
         return JSONResponse(status_code=429, content={"code": 429, "msg": "登录失败次数过多，请5分钟后重试"})
     password = decrypt_transport_password(req.password)
-    user = db.query(User).filter(User.username == req.username).first()
+    user = db.query(User).filter(User.username == req.username).order_by(User.user_id.desc()).first()
     if not password or not user or not verify_password(password, user.password):
         _record_login_failure(key, db)
         return {"code": 500, "msg": "账户或密码不正确"}
@@ -182,7 +182,7 @@ def get_user_info(req: UserInfoRequest, db: Session = Depends(get_db)):
     username = decode_access_token(req.accesstoken)
     if not username:
         raise HTTPException(status_code=401, detail="token无效或已过期")
-    user = db.query(User).filter(User.username == username).first()
+    user = db.query(User).filter(User.username == username).order_by(User.user_id.desc()).first()
     if not user:
         raise HTTPException(status_code=401, detail="用户不存在")
     # 吊销检查与标准鉴权路径保持一致（token-in-body 是历史兼容入口）

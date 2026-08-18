@@ -107,6 +107,18 @@ def charge_commit(req: ChargeCommitRequest, db: Session = Depends(get_db), curre
     if updated != 1:
         db.rollback()
         return {"code": 500, "msg": "该收费记录已缴费，不能重复收费"}
+    # 现金收款同事务补写支付流水（原缺陷：现金收费无 Payment，支付域与收费域账目永久不平）
+    import uuid as _uuid
+
+    db.add(Payment(
+        payment_no=f"CASH-{paid_time.strftime('%Y%m%d%H%M%S')}-{str(_uuid.uuid4())[:8]}",
+        charge_id=charge_obj.charge_id,
+        channel="cash",
+        amount=charge_obj.amount,
+        status=1,
+        paid_time=paid_time,
+        create_time=paid_time,
+    ))
     db.commit()
     return {"code": 200, "msg": "success"}
 
@@ -142,6 +154,11 @@ def charge_refund(req: ChargeRefundRequest, db: Session = Depends(get_db), curre
         Payment.charge_id == req.charge_id,
         Payment.status == 1,
     ).update({Payment.status: 3}, synchronize_session=False)
+    # 已开发票随退费作废（原缺陷：资金已退票据仍有效，可用于报销）
+    db.query(Invoice).filter(
+        Invoice.charge_id == req.charge_id,
+        Invoice.status != 2,
+    ).update({Invoice.status: 2}, synchronize_session=False)
     db.commit()
     return {"code": 200, "msg": "success"}
 
@@ -272,11 +289,12 @@ def cancel_window_appointment(req: dict, db: Session = Depends(get_db), current_
     if updated != 1:
         db.rollback()
         return {"code": 500, "msg": "预约已取消，无需重复操作"}
-    schedule = db.query(DoctorSchedule).filter(DoctorSchedule.schedule_id == item.schedule_id).first() if item.schedule_id else None
-    if not schedule:
-        schedule = db.query(DoctorSchedule).filter(DoctorSchedule.doctor_id == item.doctor_id, DoctorSchedule.specialist == item.specialist).first()
-    if schedule:
-        schedule.number = (schedule.number or 0) + 1
+    # 号源回补：仅预约时实际扣减过号源（有 schedule_id）的才回补原排班。
+    # 无 schedule_id 的预约（如随访生成）创建时未扣号源，回补会造成号源凭空虚增。
+    if item.schedule_id:
+        schedule = db.query(DoctorSchedule).filter(DoctorSchedule.schedule_id == item.schedule_id).first()
+        if schedule:
+            schedule.number = (schedule.number or 0) + 1
     db.commit()
     return {"code": 200, "msg": "success"}
 
@@ -323,6 +341,8 @@ def download_invoice_pdf(invoice_id: str, db: Session = Depends(get_db), current
     invoice = db.query(Invoice).filter(Invoice.invoice_id == invoice_id).first()
     if not invoice:
         return {"code": 500, "msg": "发票不存在"}
+    if invoice.status == 2:
+        return {"code": 500, "msg": "该发票已随退费作废，不能下载"}
     if not _is_cashier_role(current_user) and not _owns_charge(current_user, invoice.charge):
         raise HTTPException(status_code=403, detail="无权访问该发票")
 
@@ -452,15 +472,11 @@ def window_cancel_registration(req: dict, db: Session = Depends(get_db), current
     if updated != 1:
         db.rollback()
         return {"code": 500, "msg": "该挂号已就诊，不能退号"}
-    schedule = db.query(DoctorSchedule).filter(DoctorSchedule.schedule_id == reg.schedule_id).first() if reg.schedule_id else None
-    if not schedule:
-        schedule = (
-            db.query(DoctorSchedule)
-            .filter(DoctorSchedule.doctor_id == reg.doctor_id, DoctorSchedule.specialist == reg.specialist)
-            .first()
-        )
-    if schedule:
-        schedule.number += 1
+    # 仅挂号时扣减过号源（有 schedule_id）的回补原排班
+    if reg.schedule_id:
+        schedule = db.query(DoctorSchedule).filter(DoctorSchedule.schedule_id == reg.schedule_id).first()
+        if schedule:
+            schedule.number = (schedule.number or 0) + 1
     db.commit()
     return {"code": 200, "msg": "success"}
 

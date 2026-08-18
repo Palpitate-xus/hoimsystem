@@ -16,41 +16,51 @@ def _record_tracking(db: Session, lab_order_id: str, stage: str, current_user: U
 
 
 def check_critical_value(check_type: str, result_text: str) -> bool:
-    """简单危急值判断逻辑"""
+    """危急值判定：优先取带小数/单位的检测数值，避免抓到项目名里的数字（HbA1c→1）。
+
+    提取顺序：带小数点的数值优先（如 25.0），其次纯整数但排除紧贴字母的数字
+    （如 HbA1c 中的 1）；血压取 mmHg 前的收缩/舒张对。
+    """
+    import re
+
     result_lower = result_text.lower()
-    # 血压危急值
-    if "血压" in check_type or "blood pressure" in result_lower:
-        try:
-            import re
+    combined = f"{check_type} {result_text}"
 
-            nums = re.findall(r"\d+", result_text)
-            if len(nums) >= 2:
-                sbp, dbp = int(nums[0]), int(nums[1])
-                return sbp >= 180 or sbp <= 90 or dbp >= 110 or dbp <= 60
-        except Exception:
-            pass
-    # 血糖危急值
-    if "血糖" in check_type or "glucose" in result_lower:
-        try:
-            import re
+    def _measured_values(text: str) -> list[float]:
+        # 数值后必须跟单位/空白/结尾，且前一个字符不能是字母/数字（排除 HbA1c、VitD3 等）
+        return [float(m.group(1)) for m in re.finditer(r"(?<![A-Za-z0-9.])(\d+\.\d+|\d+)(?=$|[\s,，;；/a-zA-Z%])", text)]
 
-            nums = re.findall(r"\d+\.?\d*", result_text)
-            if nums:
-                val = float(nums[0])
-                return val >= 16.7 or val <= 2.8
-        except Exception:
-            pass
-    # 心率危急值
-    if "心率" in check_type or "heart rate" in result_lower:
-        try:
-            import re
-
-            nums = re.findall(r"\d+", result_text)
-            if nums:
-                val = int(nums[0])
-                return val >= 120 or val <= 50
-        except Exception:
-            pass
+    # 血糖（mmol/L）
+    if "血糖" in combined or "glucose" in result_lower or "血糖" in result_lower:
+        for val in _measured_values(result_text):
+            if 2.0 <= val <= 40 and (val >= 16.7 or val <= 2.8):  # 任一数值落入危急域
+                return True
+    # 血钾（mmol/L）
+    if "血钾" in combined or "钾" in check_type or "potassium" in result_lower:
+        for val in _measured_values(result_text):
+            if 1.0 <= val <= 12 and (val >= 6.2 or val <= 2.5):
+                return True
+    # 血钠（mmol/L）
+    if "血钠" in combined or "钠" in check_type or "sodium" in result_lower:
+        for val in _measured_values(result_text):
+            if 100 <= val <= 180 and (val >= 160 or val <= 115):
+                return True
+    # 血钙（mmol/L）
+    if "血钙" in combined or "钙" in check_type or "calcium" in result_lower:
+        for val in _measured_values(result_text):
+            if 0.5 <= val <= 6 and (val >= 3.5 or val <= 1.75):
+                return True
+    # 血压（mmHg，收缩/舒张对）
+    if "血压" in combined or "blood pressure" in result_lower:
+        bp = re.search(r"(?<![A-Za-z0-9])(\d{2,3})\s*/\s*(\d{2,3})", result_text)
+        if bp:
+            sbp, dbp = int(bp.group(1)), int(bp.group(2))
+            return sbp >= 180 or sbp <= 90 or dbp >= 110 or dbp <= 60
+    # 心率（次/分）
+    if "心率" in combined or "heart rate" in result_lower:
+        for val in _measured_values(result_text):
+            if 20 <= val <= 250 and (val >= 120 or val <= 50):
+                return True
     return False
 
 
@@ -142,7 +152,12 @@ def audit_lab_result(req: LabResultAuditRequest, current_user: User = Depends(re
         return {"code": 500, "msg": "检查结果不存在"}
     if result.audit_status != 0 or not result.lab_order or result.lab_order.status != 1:
         return {"code": 500, "msg": "当前检查结果不允许审核"}
+    # 双人复核：录入技师不能审核自己录入的报告（LIS 自动结果 technician 为空可审）
+    if result.technician_id is not None and result.technician_id == current_user.user_id:
+        return {"code": 500, "msg": "检测者与审核者须为不同技师（双人复核），不能审核自己录入的结果"}
     result.audit_status = 1
+    result.auditor_id = current_user.user_id
+    result.audit_time = datetime.datetime.now()
     if result.lab_order:
         result.lab_order.status = 2
         db.add(result.lab_order)
@@ -196,7 +211,7 @@ def get_lab_result_list(keyword: str | None = None, current_user: User = Depends
 
 @router.get("/labResult/getCritical")
 def get_critical_lab_results(current_user: User = Depends(require_roles(*LAB_ROLES)), db: Session = Depends(get_db)):
-    results = db.query(LabResult).filter(LabResult.abnormal_flag == 1).order_by(LabResult.report_time.desc()).all()
+    results = db.query(LabResult).filter(LabResult.critical_status > 0).order_by(LabResult.report_time.desc()).all()
     data = []
     for item in results:
         data.append({

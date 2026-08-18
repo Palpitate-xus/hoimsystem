@@ -44,6 +44,10 @@ def receive_lis_result(
     _bind_external_order(order, req.external_order_id)
     existing = order.lab_results[0] if order.lab_results else None
     if existing:
+        # 幂等回调也要提交外部单号绑定与同步状态（原缺陷：提前 return 导致绑定回滚丢失）
+        order.integration_status = "synced"
+        order.last_sync_time = datetime.datetime.now()
+        db.commit()
         return {"code": 200, "msg": "结果已同步，重复回调已忽略", "data": {"lab_result_id": existing.lab_result_id, "idempotent": True}}
     if order.sample_status == 2:
         raise HTTPException(status_code=409, detail="样本已拒收，不能同步结果")
@@ -52,11 +56,13 @@ def receive_lis_result(
     order.status = 1
     order.integration_status = "synced"
     order.last_sync_time = now
+    is_critical = check_critical_value(order.check_type or "", req.result)
     result = LabResult(
         lab_order_id=order.lab_order_id,
         sample_id=req.sample_id,
         result=req.result,
-        abnormal_flag=1 if check_critical_value(order.check_type or "", req.result) else req.abnormal_flag,
+        abnormal_flag=1 if is_critical else req.abnormal_flag,
+        critical_status=1 if is_critical else 0,
         technician_id=None,
         report_time=now,
         audit_status=0,
@@ -78,15 +84,16 @@ def receive_pacs_report(
     order = db.query(ImagingOrder).filter(ImagingOrder.imaging_order_id == req.imaging_order_id).first()
     if not order:
         raise HTTPException(status_code=404, detail="影像申请不存在")
+    if order.status == 5:
+        raise HTTPException(status_code=409, detail="影像申请已取消，不能接收报告")
     _bind_external_order(order, req.external_order_id)
     if order.report and order.integration_status == "synced":
         return {"code": 200, "msg": "影像报告已同步，重复回调已忽略", "data": {"report_id": order.report.report_id, "idempotent": True}}
     if order.report and order.report.status in (1, 2):
         raise HTTPException(status_code=409, detail="影像报告已进入院内审核流程，不能覆盖")
-    author_id = order.doctor.user_id if order.doctor and order.doctor.user_id else None
-    if not author_id:
-        author = db.query(User).filter(User.user_role.in_(["admin", "super_admin"])).order_by(User.user_id).first()
-        author_id = author.user_id if author else None
+    # 外部报告署名固定为系统管理员账户（集成署名），不得记为开单临床医生
+    author = db.query(User).filter(User.user_role.in_(["admin", "super_admin"])).order_by(User.user_id).first()
+    author_id = author.user_id if author else None
     if not author_id:
         raise HTTPException(status_code=503, detail="未找到可记录对接报告的院内操作用户")
     now = datetime.datetime.now()

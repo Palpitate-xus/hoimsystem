@@ -226,7 +226,9 @@ class TestLab:
         results = r.json()["data"]
         target = [x for x in results if x["check_name"] == "心电图"][0]
 
-        r = await async_client.post("/api/labResult/audit", headers=admin_headers, json={"lab_result_id": target["id"]})
+        # 双人复核：录入者(admin)不能自审，改由 lab01 审核
+        lab_headers = auth_headers("lab01")
+        r = await async_client.post("/api/labResult/audit", headers=lab_headers, json={"lab_result_id": target["id"]})
         assert r.status_code == 200
         assert r.json()["code"] == 200
 
@@ -284,9 +286,11 @@ class TestLab:
 
         results = (await async_client.get("/api/labResult/getList", headers=lab_headers)).json()["data"]
         result_id = [item["id"] for item in results if item["check_name"] == "肝功能"][0]
-        r = await async_client.post("/api/labResult/audit", headers=lab_headers, json={"lab_result_id": result_id})
+        # 双人复核：录入者(lab_headers=admin)不能自审，由 lab01 审核
+        reviewer_headers = auth_headers("lab01")
+        r = await async_client.post("/api/labResult/audit", headers=reviewer_headers, json={"lab_result_id": result_id})
         assert r.json()["code"] == 200
-        r = await async_client.post("/api/labResult/audit", headers=lab_headers, json={"lab_result_id": result_id})
+        r = await async_client.post("/api/labResult/audit", headers=reviewer_headers, json={"lab_result_id": result_id})
         assert r.json()["code"] == 500
 
     async def test_lab_result_detail(self, async_client, seed_data, auth_headers):

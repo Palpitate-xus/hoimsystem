@@ -143,22 +143,61 @@ def get_surgery_application_list(
     return {"code": 200, "msg": "success", "data": data}
 
 
+def _parse_date(value):
+    """JSON 无原生 date：把 ISO 字符串安全转为 date，非法输入返回 None（附错误标记）。"""
+    if value is None or isinstance(value, datetime.date) and not isinstance(value, datetime.datetime):
+        return value
+    if isinstance(value, datetime.datetime):
+        return value.date()
+    if isinstance(value, str):
+        s = value.strip()
+        for fmt in ("%Y-%m-%d", "%Y/%m/%d"):
+            try:
+                return datetime.datetime.strptime(s, fmt).date()
+            except ValueError:
+                continue
+    return None
+
+
+def _parse_datetime(value):
+    """把 ISO/常见格式字符串安全转为 datetime。"""
+    if value is None or isinstance(value, datetime.datetime):
+        return value
+    if isinstance(value, datetime.date):
+        return datetime.datetime.combine(value, datetime.time())
+    if isinstance(value, str):
+        s = value.strip().replace("T", " ")
+        for fmt in ("%Y-%m-%d %H:%M:%S", "%Y-%m-%d %H:%M", "%Y-%m-%d", "%Y/%m/%d %H:%M:%S", "%Y/%m/%d"):
+            try:
+                return datetime.datetime.strptime(s, fmt)
+            except ValueError:
+                continue
+    return None
+
+
 @router.post("/surgeryApplication/create")
 def create_surgery_application(req: dict, current_user: User = Depends(require_roles(*CLINICAL_ROLES)),
     db: Session = Depends(get_db)):
     admission = db.query(Admission).filter(Admission.admission_id == req.get("admission_id")).first()
     if not admission:
         return {"code": 500, "msg": "入院记录不存在"}
+    if admission.status != 1:
+        return {"code": 500, "msg": "病人不在院状态，无法申请手术"}
+    if req.get("patient_id") is not None and req["patient_id"] != admission.patient_id:
+        return {"code": 500, "msg": "患者与入院记录不一致"}
+    scheduled_date = _parse_date(req.get("scheduled_date"))
+    if req.get("scheduled_date") is not None and scheduled_date is None:
+        return {"code": 500, "msg": "预手术日期格式错误，应为 YYYY-MM-DD"}
 
     application = SurgeryApplication(
         admission_id=req.get("admission_id"),
-        patient_id=req.get("patient_id"),
+        patient_id=admission.patient_id,
         doctor_id=req.get("doctor_id"),
         surgery_name=req.get("surgery_name", ""),
         surgery_code=req.get("surgery_code"),
         surgery_level=req.get("surgery_level", 1),
         anesthesia_type=req.get("anesthesia_type", "局部麻醉"),
-        scheduled_date=req.get("scheduled_date"),
+        scheduled_date=scheduled_date,
         preop_diagnosis=req.get("preop_diagnosis"),
         surgery_indication=req.get("surgery_indication"),
         contraindication=req.get("contraindication"),
@@ -177,6 +216,9 @@ def approve_surgery_application(req: dict, current_user: User = Depends(require_
         return {"code": 500, "msg": "申请不存在"}
     if application.status != 0:
         return {"code": 500, "msg": "申请状态不正确"}
+    # 审批人与申请人不能是同一人（防自审自批）
+    if application.doctor and application.doctor.user_id == current_user.user_id:
+        return {"code": 500, "msg": "审批人不能是手术申请人本人"}
     application.status = 1
     application.approver_id = current_user.user_id
     application.approve_time = datetime.datetime.now()
@@ -191,11 +233,16 @@ def cancel_surgery_application(req: dict, current_user: User = Depends(require_r
     application = db.query(SurgeryApplication).filter(SurgeryApplication.application_id == req.get("application_id")).first()
     if not application:
         return {"code": 500, "msg": "申请不存在"}
+    # 已完成的手术不能取消（会造成术后记录与病历矛盾）；已取消的幂等拒绝
+    if application.status == 3:
+        return {"code": 500, "msg": "手术已完成，不能取消"}
+    if application.status == 4:
+        return {"code": 500, "msg": "申请已取消，无需重复操作"}
     application.status = 4
     db.add(application)
-    # 取消已排台的手术
+    # 取消已排台的手术（仅待手术/手术中的排台可取消）
     schedule = db.query(SurgerySchedule).filter(SurgerySchedule.application_id == req.get("application_id")).first()
-    if schedule:
+    if schedule and schedule.status in (0, 1):
         schedule.status = 3
         db.add(schedule)
     db.commit()
@@ -252,12 +299,15 @@ def create_surgery_schedule(req: dict, current_user: User = Depends(require_role
         return {"code": 500, "msg": "手术申请不存在"}
     if application.status != 1:
         return {"code": 500, "msg": "申请未批准，无法排台"}
+    surgery_date = _parse_date(req.get("surgery_date"))
+    if req.get("surgery_date") is not None and surgery_date is None:
+        return {"code": 500, "msg": "手术日期格式错误，应为 YYYY-MM-DD"}
 
     schedule = SurgerySchedule(
         application_id=req.get("application_id"),
         patient_id=application.patient_id,
         operating_room=req.get("operating_room", ""),
-        surgery_date=req.get("surgery_date"),
+        surgery_date=surgery_date,
         surgeon_id=req.get("surgeon_id"),
         assistant_ids=req.get("assistant_ids"),
         anesthesiologist_id=req.get("anesthesiologist_id"),
@@ -280,6 +330,9 @@ def start_surgery(req: dict, current_user: User = Depends(require_roles(*CLINICA
     schedule = db.query(SurgerySchedule).filter(SurgerySchedule.schedule_id == req.get("schedule_id")).first()
     if not schedule:
         return {"code": 500, "msg": "排台记录不存在"}
+    # 只有待手术(0)的排台可以开始；已取消/已完成的拒绝
+    if schedule.status != 0:
+        return {"code": 500, "msg": "排台状态不允许开始手术"}
     schedule.status = 1
     schedule.start_time = datetime.datetime.now()
     db.add(schedule)
@@ -293,6 +346,9 @@ def complete_surgery(req: dict, current_user: User = Depends(require_roles(*CLIN
     schedule = db.query(SurgerySchedule).filter(SurgerySchedule.schedule_id == req.get("schedule_id")).first()
     if not schedule:
         return {"code": 500, "msg": "排台记录不存在"}
+    # 只有手术中(1)的排台可以完成；待手术应先 start，已取消/已完成的拒绝
+    if schedule.status != 1:
+        return {"code": 500, "msg": "排台状态不允许完成手术（需先开始手术）"}
     schedule.status = 2
     schedule.end_time = datetime.datetime.now()
     db.add(schedule)
@@ -346,7 +402,7 @@ def create_anesthesia_record(req: dict, current_user: User = Depends(require_rol
         schedule_id=req.get("schedule_id"),
         patient_id=schedule.patient_id,
         anesthesiologist_id=req.get("anesthesiologist_id"),
-        enter_time=req.get("enter_time"),
+        enter_time=_parse_datetime(req.get("enter_time")),
         consciousness=req.get("consciousness"),
         preop_bp=req.get("preop_bp"),
         preop_hr=req.get("preop_hr"),
@@ -359,8 +415,8 @@ def create_anesthesia_record(req: dict, current_user: User = Depends(require_rol
         blood_loss=req.get("blood_loss", 0),
         urine_output=req.get("urine_output", 0),
         fluid_input=req.get("fluid_input", 0),
-        extubation_time=req.get("extubation_time"),
-        leave_time=req.get("leave_time"),
+        extubation_time=_parse_datetime(req.get("extubation_time")),
+        leave_time=_parse_datetime(req.get("leave_time")),
         postop_consciousness=req.get("postop_consciousness"),
         complications=req.get("complications"),
         create_time=datetime.datetime.now(),

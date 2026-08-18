@@ -111,6 +111,14 @@ def update_imaging_order_status(req: dict, current_user: User = Depends(require_
     status = req.get("status")
     if status not in (1, 2, 5):
         return {"code": 400, "msg": "状态不合法"}
+    # 状态机校验：已进入报告/审核流程（3/4）的单禁止用本接口改状态；5 取消后不可再改
+    allowed = {
+        0: {1, 5},      # 待检查 → 检查中 / 取消
+        1: {2, 5},      # 检查中 → 退回 / 取消
+        2: {1},         # 退回 → 检查中
+    }
+    if status not in allowed.get(order.status, set()):
+        return {"code": 400, "msg": f"状态迁移不合法：当前 {order.status} → 目标 {status}（报告流程状态请走报告接口）"}
     order.status = status
     db.commit()
     return {"code": 200, "msg": "success"}
@@ -143,6 +151,8 @@ def save_imaging_report(req: dict, current_user: User = Depends(require_roles(*I
     if not order:
         return {"code": 404, "msg": "影像申请不存在"}
     report = order.report
+    if report and report.status == 2:
+        return {"code": 400, "msg": "报告已审核发布，不能直接修改（需退回后重新提交审核）"}
     if not report:
         report = ImagingReport(imaging_order_id=order.imaging_order_id, author_id=current_user.user_id, findings="", impression="", status=0)
         db.add(report)
@@ -158,6 +168,8 @@ def submit_imaging_report(req: dict, current_user: User = Depends(require_roles(
     report = db.query(ImagingReport).filter(ImagingReport.report_id == req.get("report_id")).first()
     if not report:
         return {"code": 404, "msg": "影像报告不存在"}
+    if report.status not in (0, 3):
+        return {"code": 400, "msg": "仅草稿或退回状态的报告可提交审核"}
     report.status = 1
     report.report_time = datetime.datetime.now()
     report.order.status = 3
@@ -173,6 +185,10 @@ def review_imaging_report(req: dict, current_user: User = Depends(require_roles(
     status = req.get("status")
     if status not in (2, 3):
         return {"code": 400, "msg": "审核状态必须为2(通过)或3(退回)"}
+    if report.status not in (1,):
+        return {"code": 400, "msg": "仅待审核状态的报告可审核"}
+    if report.author_id and report.author_id == current_user.user_id:
+        return {"code": 400, "msg": "报告书写者不能审核自己的报告"}
     report.status = status
     report.reviewer_id = current_user.user_id
     report.review_time = datetime.datetime.now()
@@ -241,7 +257,7 @@ def get_imaging_film_list(current_user: User = Depends(get_current_user), db: Se
     query = db.query(ImagingFilm).join(ImagingOrder)
     if current_user.user_role == ROLE_PATIENT:
         patient = db.query(Patient).filter(Patient.identity == current_user.username).first()
-        query = query.filter(ImagingOrder.patient_id == patient.patient_id if patient else -1)
+        query = query.filter(ImagingOrder.patient_id == (patient.patient_id if patient else -1))
     items = query.order_by(ImagingFilm.create_time.desc()).all()
     return {"code": 200, "msg": "success", "data": [_film_data(item) for item in items]}
 
@@ -285,6 +301,9 @@ def update_imaging_film_status(req: dict, current_user: User = Depends(require_r
     item.status = status
     item.complete_time = datetime.datetime.now() if status == 1 else None
     if item.delivery_type == "cloud" and req.get("cloud_url"):
-        item.cloud_url = str(req["cloud_url"]).strip()[:500]
+        url = str(req["cloud_url"]).strip()[:500]
+        if not url.startswith("https://"):
+            return {"code": 400, "msg": "云胶片链接必须为 https:// 地址"}
+        item.cloud_url = url
     db.commit()
     return {"code": 200, "msg": "胶片状态已更新", "data": _film_data(item)}

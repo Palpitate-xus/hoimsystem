@@ -145,6 +145,10 @@ def update_bed(req: BedUpdateRequest, current_user: User = Depends(require_roles
     if req.price_per_day is not None:
         bed.price_per_day = req.price_per_day
     if req.status is not None:
+        # 占用中的床位不允许直接改状态：会造成"床位空闲但入院记录仍指向它"的脏数据，
+        # 进而被再次入院形成双占。释放床位必须走出院/退院流程或换床。
+        if bed.status == 1 and req.status != 1:
+            return {"code": 500, "msg": "床位占用中，不能直接修改状态，请先办理出院/退院或换床"}
         bed.status = req.status
     db.add(bed)
     db.commit()

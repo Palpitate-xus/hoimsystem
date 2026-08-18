@@ -43,6 +43,10 @@ def update_infection_case_status(req: dict, current_user: User = Depends(require
     item = db.query(InfectionCase).filter(InfectionCase.case_id == req.get("case_id")).first()
     if not item or req.get("status") not in (0, 1, 2):
         return {"code": 400, "msg": "记录或状态不合法"}
+    # 状态机：已报告(0)→调查中(1)→已闭环(2)，只能前进不能回退/跳转
+    allowed = {0: {1}, 1: {2}, 2: set()}
+    if req["status"] not in allowed.get(item.status, set()):
+        return {"code": 400, "msg": f"状态迁移不合法：{item.status} → {req['status']}"}
     item.status = req["status"]
     item.update_time = datetime.datetime.now()
     db.commit()
@@ -96,5 +100,26 @@ def create_exposure(req: dict, current_user: User = Depends(require_roles(*NURSI
     if not item.exposure_type or not item.body_site or not item.description:
         return {"code": 400, "msg": "暴露类型、暴露部位和经过不能为空"}
     db.add(item)
+    db.commit()
+    return {"code": 200, "msg": "success"}
+
+
+@router.post("/infection/exposure/handle")
+def handle_exposure(req: dict, current_user: User = Depends(require_roles(*OPERATE_ROLES)), db: Session = Depends(get_db)):
+    """职业暴露处置：登记处置措施并推进状态（0→1→2）。"""
+    item = db.query(OccupationalExposure).filter(OccupationalExposure.exposure_id == req.get("exposure_id")).first()
+    if not item:
+        return {"code": 500, "msg": "暴露记录不存在"}
+    action = str(req.get("action_taken", "")).strip()
+    if not action:
+        return {"code": 400, "msg": "处置措施不能为空"}
+    target = req.get("status")
+    if target not in (1, 2):
+        return {"code": 400, "msg": "目标状态必须为1(处理中)或2(已结案)"}
+    allowed = {0: {1, 2}, 1: {2}, 2: set()}
+    if target not in allowed.get(item.status, set()):
+        return {"code": 400, "msg": f"状态迁移不合法：{item.status} → {target}"}
+    item.action_taken = ((item.action_taken or "") + ("；" if item.action_taken else "") + action)[:500]
+    item.status = target
     db.commit()
     return {"code": 200, "msg": "success"}

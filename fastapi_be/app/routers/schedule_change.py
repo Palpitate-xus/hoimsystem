@@ -83,8 +83,38 @@ def approve_schedule_change(req: ScheduleChangeActionRequest, current_user: User
     item, error = _act(req.request_id, current_user, db, 1)
     if error:
         return error
+    # 审批必须落地生效（原缺陷：只改申请单状态，号源与已约预约完全不动）
+    from app.models import Appointment, DoctorSchedule
+
+    if item.request_type == "add" and item.schedule_id:
+        # 加号：目标排班号源池增加 extra_slots
+        updated = (
+            db.query(DoctorSchedule)
+            .filter(DoctorSchedule.schedule_id == item.schedule_id)
+            .update({DoctorSchedule.number: DoctorSchedule.number + (item.extra_slots or 0)}, synchronize_session=False)
+        )
+        if updated != 1:
+            db.rollback()
+            return {"code": 500, "msg": "目标排班不存在，无法加号"}
+    elif item.request_type == "stop":
+        # 停诊：目标日期该医生的全部待就诊预约批量取消（条件 UPDATE 防并发）
+        cancelled = (
+            db.query(Appointment)
+            .filter(
+                Appointment.doctor_id == item.doctor_id,
+                Appointment.time == item.target_date,
+                Appointment.status == 0,
+            )
+            .update({Appointment.status: 2}, synchronize_session=False)
+        )
+        # 已扣的号源回补到目标排班（有 schedule_id 的逐单回补）
+        if item.schedule_id:
+            schedule = db.query(DoctorSchedule).filter(DoctorSchedule.schedule_id == item.schedule_id).first()
+            if schedule:
+                schedule.number += cancelled
+                db.add(schedule)
     db.commit()
-    return {"code": 200, "msg": "success"}
+    return {"code": 200, "msg": "success", "data": {"affected_appointments": cancelled if item.request_type == "stop" else None}}
 
 
 @router.post("/scheduleChange/reject")

@@ -256,15 +256,47 @@ EXPORT_METADATA = {
     "exams": {"label": "体检结果", "filename": "exams"},
 }
 
-_audit_log = []
+_audit_log = []  # 兼容旧引用；真实审计已持久化到 ResearchExportAudit 表
 
 
-def _audit(user_id, table, row_count, anonymize):
-    _audit_log.append({
+def _audit(user_id, table, row_count, anonymize, db=None):
+    entry = {
         "user_id": user_id, "table": table,
         "row_count": row_count, "anonymize": anonymize,
         "time": datetime.datetime.now(),
-    })
+    }
+    _audit_log.append(entry)
+    if db is not None:
+        from app.models import ResearchExportAudit
+
+        db.add(ResearchExportAudit(
+            user_id=user_id,
+            table_name=table,
+            row_count=row_count,
+            anonymize=1 if anonymize else 0,
+            create_time=entry["time"],
+        ))
+        db.commit()
+
+
+_RESEARCH_EXPORT_LIMIT = 100
+_RESEARCH_WINDOW_DAYS = 30
+
+
+def _check_rate_limit(current_user, db):
+    """30 天窗口内每用户导出次数限 100（文档承诺，原先未实现）。"""
+    from datetime import timedelta
+
+    from app.models import ResearchExportAudit
+
+    since = datetime.datetime.now() - timedelta(days=_RESEARCH_WINDOW_DAYS)
+    count = (
+        db.query(ResearchExportAudit)
+        .filter(ResearchExportAudit.user_id == current_user.user_id, ResearchExportAudit.create_time >= since)
+        .count()
+    )
+    if count >= _RESEARCH_EXPORT_LIMIT:
+        raise HTTPException(status_code=429, detail=f"近 {_RESEARCH_WINDOW_DAYS} 天导出已达 {_RESEARCH_EXPORT_LIMIT} 次上限，请联系管理员")
 
 
 def _sanitize_formula(value):
@@ -311,6 +343,7 @@ def export_research_data(
     if not anonymize and current_user.user_role not in ADMIN_ROLES:
         # 普通医生/科室主任只能拿到脱敏数据，防止批量明文 PHI 外流
         raise HTTPException(status_code=403, detail="未脱敏导出仅限管理员")
+    _check_rate_limit(current_user, db)
     fmt = req.get("format", "csv")
     if fmt != "csv":
         raise HTTPException(status_code=400, detail="当前只支持 csv 格式")
@@ -322,7 +355,7 @@ def export_research_data(
         import traceback
         traceback.print_exc()
         raise HTTPException(status_code=500, detail="查询失败，请稍后重试")
-    _audit(current_user.user_id, table, len(rows), anonymize)
+    _audit(current_user.user_id, table, len(rows), anonymize, db=db)
     payload = _write_csv(fieldnames, rows)
     ts = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
     meta = EXPORT_METADATA[table]
@@ -375,17 +408,20 @@ def export_package(
 
 @router.get("/research/export/audit")
 def research_audit_log(current_user: User = Depends(require_roles(*ADMIN_ROLES)), db: Session = Depends(get_db)):
-    """导出审计日志(仅 admin)。"""
+    """导出审计日志(仅 admin)。读持久化表，重启不丢。"""
+    from app.models import ResearchExportAudit
+
+    rows = db.query(ResearchExportAudit).order_by(ResearchExportAudit.create_time.desc()).limit(500).all()
     return {
         "code": 200, "msg": "success",
         "data": [
             {
-                "user_id": x["user_id"],
-                "table": x["table"],
-                "row_count": x["row_count"],
-                "anonymize": x["anonymize"],
-                "time": str(x["time"]),
+                "user_id": x.user_id,
+                "table": x.table_name,
+                "row_count": x.row_count,
+                "anonymize": bool(x.anonymize),
+                "time": str(x.create_time),
             }
-            for x in _audit_log[-100:]
+            for x in rows
         ],
     }

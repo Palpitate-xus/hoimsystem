@@ -174,12 +174,25 @@ class TestDoctorMedicalRecord:
         detail = await async_client.post("/api/medicalRecord/detail", headers=headers, json={"medical_record_id": record_id})
         assert detail.json()["data"]["status_text"] == "已签名"
 
-    async def test_doctor_cannot_view_other_doctor_medical_record(self, async_client, seed_data, auth_headers):
-        mr = seed_data["medical_record"]
+    async def test_doctor_cannot_view_other_doctor_medical_record(self, async_client, seed_data, auth_headers, db_session):
+        # 真正的"他人病历"：挂在 director_doctor 名下，doc01 查看必须 403
+        import datetime as _dt
+
+        from app.models import MedicalRecord as MedicalRecordModel
+
+        other_mr = MedicalRecordModel(
+            consultation_time=_dt.datetime.now(),
+            doctor_id=seed_data["director_doctor"].doctor_id,
+            patient_id=seed_data["patient2"].patient_id,
+            symptom="他人病历", result="他人诊断",
+            status=1,
+        )
+        db_session.add(other_mr)
+        db_session.commit()
         r = await async_client.post(
             "/api/medicalRecord/detail",
             headers=auth_headers(seed_data["doctor_user"].username),
-            json={"medical_record_id": str(mr.medical_record_id)},
+            json={"medical_record_id": str(other_mr.medical_record_id)},
         )
         assert r.status_code == 200
         assert r.json()["code"] == 403

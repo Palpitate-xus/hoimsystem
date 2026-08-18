@@ -127,12 +127,15 @@ def create_admission(req: AdmissionCreateRequest, current_user: User = Depends(r
         create_time=datetime.datetime.now(),
     )
     db.add(admission)
+    # 必须 flush 生成主键（admission_id 为 Python 端 uuid default），
+    # 否则下方床位费的 admission_id 为 NULL，成为孤儿费用记录、住院账单漏计
+    db.flush()
 
     # 占用床位
     bed.status = 1
     db.add(bed)
 
-    # 创建床位费记录
+    # 创建床位费记录（首日；后续每日由出院结算按住院天数补差）
     if bed.price_per_day > 0:
         charge = InpatientCharge(
             admission_id=admission.admission_id,
@@ -217,18 +220,11 @@ def update_admission(req: AdmissionUpdateRequest, current_user: User = Depends(r
     if req.admission_diagnosis is not None:
         admission.admission_diagnosis = req.admission_diagnosis
     if req.status is not None:
+        # 出院/退院不允许走本接口：会绕过 doDischarge 的费用结算、医嘱停止
+        # 与出院小结生成。请使用 /discharge/doDischarge。
+        if req.status in (2, 3):
+            return {"code": 500, "msg": "出院/退院请使用出院结算接口办理，不能直接修改状态"}
         admission.status = req.status
-        if req.status == 2:  # 已出院
-            admission.discharge_time = datetime.datetime.now()
-            bed = db.query(Bed).filter(Bed.bed_id == admission.bed_id).first()
-            if bed:
-                bed.status = 0
-                db.add(bed)
-        elif req.status == 3:  # 已退院
-            bed = db.query(Bed).filter(Bed.bed_id == admission.bed_id).first()
-            if bed:
-                bed.status = 0
-                db.add(bed)
     db.add(admission)
     db.commit()
     return {"code": 200, "msg": "success"}

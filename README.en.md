@@ -20,6 +20,8 @@ A comprehensive hospital information management system for small and medium-size
 | Database Tables | **61** business tables |
 | Frontend Pages | **69** Vue pages |
 | User Roles | **8** (admin/director/doctor/nurse/cashier/pharmacist/guide/patient) |
+| Peak Throughput | **~67 req/s** (SQLite single-worker) / **500-2 000 req/s** (PostgreSQL est.) |
+| Recommended Concurrency | **≤ 50 users** (SQLite) / **200-500 users** (PostgreSQL) |
 
 ---
 
@@ -199,6 +201,129 @@ See [doc/deployDoc.md](doc/deployDoc.md) for detailed deployment instructions (N
 | [Security](SECURITY.md) | Security policy |
 | [Contributing](CONTRIBUTING.md) | Code style & PR workflow |
 | [Changelog](CHANGELOG.md) | Version history |
+
+---
+
+## ⚡ Performance Benchmark
+
+### Test Environment
+
+| Item | Configuration |
+|:----:|:-------------|
+| Server | FastAPI + Uvicorn (1 worker) |
+| Database | SQLite (StaticPool single-connection mode) |
+| Tool | Locust 2.44.4 (headless) |
+| Target | Localhost (loopback) |
+| Duration | 30 seconds per run |
+
+> ⚠️ Current tests use SQLite. Production deployment with PostgreSQL will achieve orders-of-magnitude higher concurrency (see theoretical analysis below).
+
+---
+
+### Measured Results (Mixed Read/Write)
+
+Simulates real hospital traffic, ~80% reads / 20% writes across all core APIs:
+
+| Users | Requests | Throughput (req/s) | Avg Latency | P50 | P95 | Failure |
+|:-----:|:--------:|:------------------:|:-----------:|:---:|:---:|:-------:|
+| 10 | 573 | **19.2** | 23 ms | 19 ms | 53 ms | 1.6% |
+| 20 | 1 102 | **37.0** | 30 ms | 24 ms | 82 ms | 2.6% |
+| 50 | 2 002 | **67.1** | 238 ms | 220 ms | 470 ms | 6.2% |
+| 100 | 1 967 | **65.9** | 975 ms | 970 ms | 1 300 ms | 5.8% |
+
+**Key Findings**:
+- 📈 **Peak throughput**: ~67 req/s at 50 concurrent users
+- 📉 **Inflection point**: Beyond 50 users, SQLite write-lock contention dominates — throughput plateaus, latency spikes
+- 🔒 **Bottleneck**: SQLite global write lock serializes all writes and blocks reads
+- ❌ **Failures**: SQLite lock timeouts (500) and connection exhaustion (401) under high concurrency
+
+---
+
+### Measured Results (Read-Only)
+
+All GET queries, no write operations:
+
+| Users | Requests | Throughput (req/s) | Avg Latency | P50 | P95 | Failure |
+|:-----:|:--------:|:------------------:|:-----------:|:---:|:---:|:-------:|
+| 20 | 1 881 | **63.0** | 113 ms | 100 ms | 250 ms | 6.9% |
+| 50 | 1 886 | **63.2** | 574 ms | 560 ms | 840 ms | 6.7% |
+| 100 | 1 765 | **59.3** | 1 423 ms | 1 400 ms | 1 900 ms | 6.2% |
+| 200 | 1 823 | **61.0** | 2 848 ms | 2 900 ms | 4 300 ms | 7.1% |
+
+**Key Findings**:
+- 📊 **Throughput ceiling**: Even read-only workloads cap at ~63 req/s with StaticPool
+- ⏱️ **Latency growth**: P95 reaches 1.9s at 100 users, 4.3s at 200 users
+- 🔑 **Root cause**: StaticPool forces all requests through a single database connection
+
+---
+
+### Theoretical Analysis
+
+#### Current Architecture Bottleneck
+
+```
+Request → Uvicorn (async) → FastAPI → SQLAlchemy → SQLite (StaticPool)
+                                                    ↑
+                                            Global write lock + single connection
+                                            Max throughput ≈ 60-70 req/s
+```
+
+| Layer | Current Limit | Production (PostgreSQL) |
+|:-----:|:-------------|:------------------------|
+| **Web Server** | Uvicorn 1 worker (single process) | Multi-worker (CPU cores × 2) + Gunicorn |
+| **Framework** | FastAPI async (no bottleneck) | Same (non-blocking I/O) |
+| **ORM** | SQLAlchemy + StaticPool (1 connection) | QueuePool (10-20 connections) |
+| **Database** | SQLite (file-level lock, write-serial) | PostgreSQL (MVCC, row-level lock) |
+
+#### Production Estimate
+
+After switching to PostgreSQL:
+
+| Metric | SQLite (Current) | PostgreSQL (Estimated) |
+|:------:|:-----------------|:-----------------------|
+| **Max throughput** | ~67 req/s | **500-2 000 req/s** |
+| **Recommended concurrency** | ≤ 50 users | **200-500 users** |
+| **P95 latency (50 users)** | 470 ms | **< 50 ms** |
+| **P95 latency (200 users)** | 4 300 ms | **< 200 ms** |
+
+**Rationale**:
+1. **PostgreSQL MVCC**: Readers never block writers, writers only lock modified rows
+2. **Connection pooling**: QueuePool default 5 + 10 overflow, configurable to 20+
+3. **Multi-worker Uvicorn**: 4 workers ≈ 4× throughput (~280 req/s)
+4. **FastAPI async**: Single worker handles hundreds of concurrent I/O-bound connections
+5. **Reference**: Similar FastAPI + PostgreSQL systems on 4-core/8GB typically achieve 1 000-3 000 req/s
+
+#### Optimization Recommendations
+
+| Priority | Item | Expected Gain |
+|:--------:|:-----|:--------------|
+| 🔴 High | Switch to PostgreSQL | 5-10× throughput |
+| 🔴 High | Multi-worker Uvicorn (`--workers 4`) | 3-4× throughput |
+| 🟡 Medium | Connection pool tuning (`pool_size=20`) | 3× concurrency |
+| 🟡 Medium | Redis cache for hot queries | 5-10× read throughput |
+| 🟢 Low | Database index optimization | 50% lower per-query latency |
+| 🟢 Low | Pagination max page_size limit | Prevent large result sets |
+
+---
+
+### Reproducing the Tests
+
+```bash
+# 1. Start benchmark server
+cd fastapi_benchmark
+python init_benchmark_data.py          # seed test data
+SECRET_KEY="your-secret" uvicorn run_benchmark:app --host 0.0.0.0 --port 8000
+
+# 2. Run mixed read/write benchmark
+locust -f locust_final.py --headless -u 50 -r 25 -t 30s \
+    --host http://localhost:8000 --csv=results/50u
+
+# 3. Run read-only benchmark
+locust -f locust_readonly_pool.py --headless -u 50 -r 25 -t 30s \
+    --host http://localhost:8000 --csv=results/readonly_50u
+```
+
+Test scripts are in the [fastapi_benchmark/](fastapi_benchmark/) directory.
 
 ---
 

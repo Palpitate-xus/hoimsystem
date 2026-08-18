@@ -180,6 +180,8 @@ def import_data(entity: str, file: UploadFile = File(...), current_user: User = 
         raise HTTPException(status_code=400, detail=f"缺少列: {', '.join(missing)}")
     imported = 0
     errors = []
+    from sqlalchemy.exc import IntegrityError
+
     try:
         for index, row in enumerate(rows, start=2):
             try:
@@ -192,6 +194,15 @@ def import_data(entity: str, file: UploadFile = File(...), current_user: User = 
                 imported += 1
             except ValueError as exc:
                 errors.append(str(exc))
+            except IntegrityError as exc:
+                # 唯一约束/非空冲突转行级错误（原缺陷：IntegrityError 不被捕获，整批 500 且丢行级信息）
+                detail = str(getattr(exc, "orig", exc) or exc)
+                hint = ""
+                for key in ("UNIQUE", "唯一"):
+                    if key in detail:
+                        hint = "（唯一字段重复）"
+                        break
+                errors.append(f"第 {index} 行写入失败{hint}：{detail.split(chr(10))[0][:120]}")
         if errors:
             db.rollback()
         else:

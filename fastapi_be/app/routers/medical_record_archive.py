@@ -25,6 +25,7 @@ def _serialize(item: MedicalRecordArchive):
         "status": item.status,
         "status_text": {0: "待归档", 1: "已归档", 2: "借阅中", 3: "已封存"}.get(item.status, "未知"),
         "borrow_reason": item.borrow_reason or "",
+        "borrower_name": item.borrower.username if item.borrower else "",
         "seal_reason": item.seal_reason or "",
         "archive_time": item.archive_time,
         "borrow_time": item.borrow_time,
@@ -106,6 +107,11 @@ def return_record(req: MedicalRecordArchiveActionRequest, current_user: User = D
         return {"code": 500, "msg": "归档记录不存在"}
     if item.status != 2:
         return {"code": 500, "msg": "当前病案不在借阅中"}
+    # 归还人校验：借阅人本人或病案管理员（防他人伪造归还时间线）
+    from app.dependencies import ADMIN_ROLES
+
+    if current_user.user_role not in ADMIN_ROLES and item.borrower_id != current_user.user_id:
+        return {"code": 403, "msg": "仅借阅人本人或管理员可归还病案"}
     item.status = 1
     item.return_time = datetime.datetime.now()
     item.update_time = datetime.datetime.now()

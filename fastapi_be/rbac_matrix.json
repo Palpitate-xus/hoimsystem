@@ -2204,6 +2204,13 @@
   "path": "/api/infection/exposure/create"
  },
  {
+  "auth": "ANY",
+  "function": "handle_exposure",
+  "method": "POST",
+  "module": "infection.py",
+  "path": "/api/infection/exposure/handle"
+ },
+ {
   "auth": [
    "admin",
    "director",

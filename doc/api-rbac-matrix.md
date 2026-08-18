@@ -3,7 +3,7 @@
 > 由 `fastapi_be/scripts/generate_rbac_matrix.py` 从源码自动生成，请勿手改。
 > `✓`=可访问 | `PUBLIC`=无需登录 | 留空=不可访问
 
-共 **481** 个接口（PUBLIC 14 个 / 需登录 467 个）。
+共 **482** 个接口（PUBLIC 14 个 / 需登录 468 个）。
 
 
 ### `admin.py`
@@ -377,6 +377,7 @@
 | POST | `/api/infection/disinfection/create` | ✓ | ✓ |  |  | ✓ |  |  |  |  |  |  |  |
 | GET | `/api/infection/exposure/list` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
 | POST | `/api/infection/exposure/create` | ✓ | ✓ |  |  | ✓ |  |  |  |  |  |  |  |
+| POST | `/api/infection/exposure/handle` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
 
 ### `infusion.py`
 

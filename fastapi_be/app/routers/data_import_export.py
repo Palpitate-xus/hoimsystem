@@ -1,5 +1,7 @@
 import datetime
 import io
+import secrets
+import string
 
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 from fastapi.responses import StreamingResponse
@@ -8,12 +10,24 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.dependencies import ADMIN_ROLES, User, require_roles
-from app.models import Department, Doctor, Patient, Pharmaceutical, User as UserModel
+from app.models import Department, Doctor, Patient, Pharmaceutical
+from app.models import User as UserModel
 from app.security import hash_password
 
 router = APIRouter()
 
 MAX_IMPORT_SIZE = 10 * 1024 * 1024
+
+
+def _generate_initial_password(seed: str) -> str:
+    """导入账号的随机初始口令：绝不使用 123456 这类可猜测默认值。
+
+    口令派生自账号种子 + 系统级随机数，导入结果通过导入回执一次性返回，
+    由管理员线下分发给本人并要求首登修改。
+    """
+    alphabet = string.ascii_letters + string.digits
+    rnd = "".join(secrets.choice(alphabet) for _ in range(10))
+    return f"Ho{secrets.token_hex(2)}-{rnd[:8]}"
 ENTITY_HEADERS = {
     "doctors": ["name", "sex", "title", "education", "phone", "department_id", "permission", "username", "password"],
     "patients": ["name", "sex", "identity", "birthday", "phone", "address", "permission", "allergy_history"],
@@ -80,7 +94,7 @@ def _create_doctor(row, row_number, db: Session):
     username = str(row.get("username") or f"doctor_{row.get('phone') or row_number}").strip()
     if db.query(UserModel).filter(UserModel.username == username).first():
         raise ValueError(f"第{row_number}行账号{username}已存在")
-    user = UserModel(username=username, password=hash_password(str(row.get("password") or "123456")), user_role="doctor")
+    user = UserModel(username=username, password=hash_password(str(row.get("password") or _generate_initial_password(username))), user_role="doctor")
     db.add(user)
     db.flush()
     doctor = Doctor(
@@ -114,7 +128,7 @@ def _create_patient(row, row_number, db: Session):
     )
     db.add(patient)
     if not db.query(UserModel).filter(UserModel.username == identity).first():
-        db.add(UserModel(username=identity, password=hash_password("123456"), user_role="patient"))
+        db.add(UserModel(username=identity, password=hash_password(_generate_initial_password(identity)), user_role="patient"))
 
 
 def _create_pharmaceutical(row, row_number, db: Session):

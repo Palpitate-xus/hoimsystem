@@ -11,8 +11,7 @@
     "print-info": "node -e \"require('./layouts').donationConsole()\"",
     "clear": "rimraf node_modules&&npm install  --registry=--registry=https://registry.npmmirror.com",
     "update": "ncu -u --reject chalk,sass,sass-loader --registry=https://registry.npmmirror.com&&pnpm i --no-frozen-lockfile",
-    "module:update": "ncu -u --reject chalk,sass,sass-loader --registry=https://registry.npmmirror.com&&pnpm i --no-frozen-lockfile",
-    "push": "start ./push.sh"
+    "module:update": "ncu -u --reject chalk,sass,sass-loader --registry=https://registry.npmmirror.com&&pnpm i --no-frozen-lockfile"
   },
   "repository": {
     "type": "git",

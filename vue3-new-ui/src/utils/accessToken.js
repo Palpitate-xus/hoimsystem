@@ -49,7 +49,7 @@ export function removeAccessToken() {
     if ('localStorage' === storage) {
       return localStorage.removeItem(tokenTableName)
     } else if ('sessionStorage' === storage) {
-      return sessionStorage.clear()
+      return sessionStorage.removeItem(tokenTableName)
     } else {
       return localStorage.removeItem(tokenTableName)
     }

@@ -4,10 +4,10 @@ FROM node:20-alpine AS builder
 WORKDIR /app
 
 # 复制 package 文件
-COPY package*.json ./
+COPY package.json package-lock.json ./
 
-# 安装依赖
-RUN npm install --legacy-peer-deps
+# 安装依赖（npm ci 按 lockfile 精确安装，供应链更可控）
+RUN npm ci --legacy-peer-deps
 
 # 复制源码并构建
 COPY . .

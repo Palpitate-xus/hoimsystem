@@ -33,7 +33,7 @@ HOIM（Hospital Information Management System）医院信息管理系统是一�
 | 版本 | v1.0 |
 | 用户规模 | 11 种角色，支持多院区 |
 | 接口规模 | 481 个 API（14 个公开接口 + 467 个认证接口） |
-| 数据规模 | 61 张业务表 |
+| 数据规模 | 126 张业务表 |
 | 前端页面 | 约 100 个业务页面（15 个业务模块） |
 
 ### 1.2 软件著作权特性
@@ -346,9 +346,10 @@ flowchart TD
 
 ### 7.1 数据库概览
 
-- **61 张业务表**，命名前缀 `hoimsystem_`，完整结构见 `doc/databaseDoc.md`
+- **126 张业务表**，命名前缀 `hoimsystem_`，完整结构见 `doc/databaseDoc.md`
 - 状态码/枚举字典见 `doc/data-dictionary.md`
-- 数据库迁移：Alembic（`fastapi_be/alembic/`），当前 head `20260818_merge_user_role_fork`
+- 数据库迁移：Alembic（`fastapi_be/alembic/`），当前 head `20260819_research_audit`
+- 2026-08 第二轮业务审计新增：`purchase_order_item.received_quantity`（实收数量）、`lab_result.auditor_id/audit_time`（双人复核留痕）、`digital_signature_record`（电子签名存证）、`research_export_audit`（科研导出审计/限流）
 
 ### 7.2 核心数据实体关系
 
@@ -378,6 +379,9 @@ erDiagram
     Doctor ||--o{ ImagingOrder : "影像申请"
     ImagingOrder ||--o| ImagingReport : "影像报告"
     Charge ||--o{ Payment : "支付"
+    Charge ||--o| Invoice : "发票（退费作废）"
+    User ||--o{ DigitalSignatureRecord : "电子签名"
+    User ||--o{ ResearchExportAudit : "科研导出审计"
     Charge ||--o| Invoice : "发票"
     Admission ||--o| DischargeSummary : "出院小结"
 ```

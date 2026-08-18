@@ -175,8 +175,16 @@ def update_observation(req: EmergencyObservationUpdateRequest, current_user: Use
     if req.medical_advice is not None:
         item.medical_advice = req.medical_advice.strip()
     if req.fee_amount is not None:
+        if req.fee_amount < 0:
+            return {"code": 500, "msg": "留观费用不能为负"}
+        if item.fee_status == 1 and req.fee_amount != item.fee_amount:
+            return {"code": 500, "msg": "费用已计费，不能修改金额（需先冲正）"}
         item.fee_amount = req.fee_amount
     if req.fee_status is not None:
+        if item.fee_status == 1 and req.fee_status == 0:
+            return {"code": 500, "msg": "已计费状态不能回退为待计费"}
+        if req.fee_status == 1 and (item.fee_amount or 0) <= 0:
+            return {"code": 500, "msg": "计费金额必须大于 0 才能标记已计费"}
         item.fee_status = req.fee_status
     if req.status is not None:
         item.status = req.status

@@ -269,7 +269,7 @@ def _audit(user_id, table, row_count, anonymize):
 
 def _sanitize_formula(value):
     """防 CSV 公式注入：以 = + - @ 开头的单元格前置单引号，避免被 Excel/WPS 当公式执行。"""
-    if isinstance(value, str) and value[:1] in ("=", "+", "-", "@"):
+    if isinstance(value, str) and value[:1] in ("=", "+", "-", "@", "\t", "\r"):
         return f"'{value}"
     return value
 

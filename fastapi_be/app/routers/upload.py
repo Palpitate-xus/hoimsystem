@@ -42,6 +42,12 @@ def _sniff_ext(contents: bytes) -> str | None:
 
 def _normalized_ext(filename: str | None) -> str:
     ext = os.path.splitext(filename or "")[1].lower()
+    # splitext 对 ".png" 这类无主名点文件返回空扩展，此处直接取点后缀
+    if not ext and filename:
+        base = filename.lower()
+        i = base.rfind(".")
+        if i == 0:
+            ext = base
     return ".jpg" if ext == ".jpeg" else ext
 
 
@@ -58,8 +64,7 @@ def _save_file(upload_dir: str, file: UploadFile, allowed_exts: dict, max_size: 
 
     # 内容魔数必须与扩展名声明的类型一致（.png 必须真是 PNG……）
     sniffed = _sniff_ext(contents)
-    expected = _normalized_ext(sniffed if sniffed else "x")
-    if expected != ext:
+    if sniffed is None or _normalized_ext(sniffed) != ext:
         raise HTTPException(status_code=400, detail="文件内容与扩展名不符")
 
     filename = f"{uuid.uuid4().hex}{ext}"

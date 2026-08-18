@@ -96,7 +96,11 @@ def receive_pacs_report(
     report.report_time = now
     report.status = 0
     order.status = 3
-    order.viewer_url = req.viewer_url.strip()[:500] if req.viewer_url and req.viewer_url.strip() else order.viewer_url
+    new_viewer_url = req.viewer_url.strip()[:500] if req.viewer_url and req.viewer_url.strip() else order.viewer_url
+    # 外部回调传入的 viewer_url 仅接受 https，防止 javascript:/data: 注入到前端 window.open
+    if new_viewer_url and not new_viewer_url.lower().startswith("https://"):
+        raise HTTPException(status_code=400, detail="viewer_url 仅支持 https:// 协议")
+    order.viewer_url = new_viewer_url
     order.integration_status = "synced"
     order.last_sync_time = now
     db.add(report)

@@ -121,7 +121,11 @@ def update_imaging_viewer(req: dict, current_user: User = Depends(require_roles(
     order = db.query(ImagingOrder).filter(ImagingOrder.imaging_order_id == req.get("imaging_order_id")).first()
     if not order:
         return {"code": 404, "msg": "影像申请不存在"}
-    order.viewer_url = (req.get("viewer_url") or "").strip()[:500] or None
+    url = (req.get("viewer_url") or "").strip()[:500] or None
+    # 仅允许 https（院外 PACS 云胶片查看器），阻断 javascript:/data: 等危险协议
+    if url and not url.lower().startswith("https://"):
+        return {"code": 400, "msg": "viewer 地址仅支持 https://"}
+    order.viewer_url = url
     db.commit()
     return {"code": 200, "msg": "success"}
 

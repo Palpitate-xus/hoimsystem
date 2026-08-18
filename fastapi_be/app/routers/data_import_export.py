@@ -212,7 +212,7 @@ def _export_rows(entity: str, db: Session):
 
 def _sanitize_cell(value):
     """防 Excel 公式注入：以 = + - @ 开头的文本前置单引号（openpyxl 写入 data_type='s'）。"""
-    if isinstance(value, str) and value[:1] in ("=", "+", "-", "@"):
+    if isinstance(value, str) and value[:1] in ("=", "+", "-", "@", "\t", "\r"):
         return f"'{value}"
     return value
 

@@ -1,3 +1,5 @@
+import datetime
+
 import jwt
 from fastapi import Depends, Header, HTTPException
 from sqlalchemy.orm import Session
@@ -63,6 +65,24 @@ def get_current_user(access_token: str = Header(None, alias="accesstoken"), db: 
     user = db.query(User).filter(User.username == username).first()
     if not user:
         raise HTTPException(status_code=401, detail="Invalid accesstoken")
+    # 吊销检查：token 签发时间早于 token_invalid_before 则拒绝（logout/改密后生效）
+    if user.token_invalid_before:
+        try:
+            import jwt as pyjwt
+
+            payload = pyjwt.decode(
+                access_token,
+                settings.SECRET_KEY,
+                algorithms=["HS256"],
+                options={"verify_exp": False, "require": ["iat", "sub"]},
+            )
+            issued_at = payload.get("iat")
+            if issued_at is not None:
+                issued_dt = datetime.datetime.utcfromtimestamp(issued_at)
+                if issued_dt < user.token_invalid_before:
+                    raise HTTPException(status_code=401, detail="Token 已被吊销，请重新登录")
+        except pyjwt.InvalidTokenError:
+            raise HTTPException(status_code=401, detail="Invalid accesstoken")
     return user
 
 

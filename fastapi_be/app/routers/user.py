@@ -1,5 +1,4 @@
 import datetime
-import time
 from decimal import ROUND_HALF_UP, Decimal, InvalidOperation
 
 import jwt
@@ -37,25 +36,51 @@ def _parse_prepaid_amount(value):
     if not amount.is_finite() or amount <= 0:
         return None
     return amount
-_LOGIN_FAILURES: dict[str, list[float]] = {}
 _LOGIN_FAILURE_WINDOW_SECONDS = 300
 _LOGIN_FAILURE_LIMIT = 5
+_LOCKOUT_DURATION_SECONDS = 300
 
 
 def _login_key(request: Request, username: str) -> str:
     client = request.client.host if request.client else "unknown"
-    return f"{client}:{username.strip().lower()}"
+    return f"{client}:{username.strip().lower()}"[:120]
 
 
-def _too_many_login_failures(key: str) -> bool:
-    now = time.monotonic()
-    failures = [value for value in _LOGIN_FAILURES.get(key, []) if now - value < _LOGIN_FAILURE_WINDOW_SECONDS]
-    _LOGIN_FAILURES[key] = failures
-    return len(failures) >= _LOGIN_FAILURE_LIMIT
+def _too_many_login_failures(key: str, db: Session) -> bool:
+    """数据库持久化锁定：多 worker 共享，重启不清零。"""
+    from app.models import LoginLockout
+
+    row = db.query(LoginLockout).filter(LoginLockout.lock_key == key).first()
+    if not row or not row.locked_until:
+        return False
+    if datetime.datetime.now() >= row.locked_until:
+        db.delete(row)
+        db.commit()
+        return False
+    return True
 
 
-def _record_login_failure(key: str):
-    _LOGIN_FAILURES.setdefault(key, []).append(time.monotonic())
+def _record_login_failure(key: str, db: Session):
+    from app.models import LoginLockout
+
+    now = datetime.datetime.now()
+    row = db.query(LoginLockout).filter(LoginLockout.lock_key == key).first()
+    if not row:
+        row = LoginLockout(lock_key=key, fail_count=0, update_time=now)
+        db.add(row)
+    row.fail_count += 1
+    row.update_time = now
+    if row.fail_count >= _LOGIN_FAILURE_LIMIT:
+        row.locked_until = now + datetime.timedelta(seconds=_LOCKOUT_DURATION_SECONDS)
+        row.fail_count = 0  # 锁定期满后重新计数
+    db.commit()
+
+
+def _clear_login_failures(key: str, db: Session):
+    from app.models import LoginLockout
+
+    db.query(LoginLockout).filter(LoginLockout.lock_key == key).delete()
+    db.commit()
 
 
 def create_access_token(username: str) -> str:
@@ -95,14 +120,14 @@ def get_public_key():
 @router.post("/login")
 def login(req: LoginRequest, request: Request, db: Session = Depends(get_db)):
     key = _login_key(request, req.username)
-    if _too_many_login_failures(key):
+    if _too_many_login_failures(key, db):
         return JSONResponse(status_code=429, content={"code": 429, "msg": "登录失败次数过多，请5分钟后重试"})
     password = decrypt_transport_password(req.password)
     user = db.query(User).filter(User.username == req.username).first()
     if not password or not user or not verify_password(password, user.password):
-        _record_login_failure(key)
+        _record_login_failure(key, db)
         return {"code": 500, "msg": "账户或密码不正确"}
-    _LOGIN_FAILURES.pop(key, None)
+    _clear_login_failures(key, db)
     if not is_bcrypt_hash(user.password):
         user.password = hash_password(req.password)
         db.commit()
@@ -160,6 +185,20 @@ def get_user_info(req: UserInfoRequest, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.username == username).first()
     if not user:
         raise HTTPException(status_code=401, detail="用户不存在")
+    # 吊销检查与标准鉴权路径保持一致（token-in-body 是历史兼容入口）
+    if user.token_invalid_before:
+        try:
+            payload = jwt.decode(
+                req.accesstoken,
+                settings.SECRET_KEY,
+                algorithms=["HS256"],
+                options={"verify_exp": False, "require": ["iat", "sub"]},
+            )
+            issued_at = payload.get("iat")
+            if issued_at is not None and datetime.datetime.utcfromtimestamp(issued_at) < user.token_invalid_before:
+                raise HTTPException(status_code=401, detail="Token 已被吊销，请重新登录")
+        except jwt.InvalidTokenError:
+            raise HTTPException(status_code=401, detail="token无效或已过期")
     if user.user_role == "super_admin":
         permissions = ["super_admin", "admin"]
     elif user.user_role == "admin":
@@ -179,7 +218,10 @@ def get_user_info(req: UserInfoRequest, db: Session = Depends(get_db)):
 
 
 @router.post("/logout")
-def logout():
+def logout(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    """登出：吊销该用户当前时间之前的所有 token（服务端可撤销）。"""
+    current_user.token_invalid_before = datetime.datetime.now()
+    db.commit()
     return {"code": 200, "msg": "success"}
 
 
@@ -244,6 +286,8 @@ def reset_user_password(req: dict, db: Session = Depends(get_db), current_user: 
     if not user:
         return {"code": 500, "msg": "用户不存在"}
     user.password = hash_password(new_password)
+    # 改密后吊销该用户全部旧 token
+    user.token_invalid_before = datetime.datetime.now()
     db.commit()
     return {"code": 200, "msg": "success"}
 

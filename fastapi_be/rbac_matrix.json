@@ -1,0 +1,4620 @@
+[
+ {
+  "auth": "ANY",
+  "function": "get_campus_list",
+  "method": "GET",
+  "module": "admin.py",
+  "path": "/api/campusManagement/getList"
+ },
+ {
+  "auth": [
+   "admin",
+   "super_admin"
+  ],
+  "function": "create_campus",
+  "method": "POST",
+  "module": "admin.py",
+  "path": "/api/campusManagement/create"
+ },
+ {
+  "auth": [
+   "admin",
+   "super_admin"
+  ],
+  "function": "update_campus",
+  "method": "POST",
+  "module": "admin.py",
+  "path": "/api/campusManagement/update"
+ },
+ {
+  "auth": [
+   "admin",
+   "super_admin"
+  ],
+  "function": "delete_campus",
+  "method": "POST",
+  "module": "admin.py",
+  "path": "/api/campusManagement/delete"
+ },
+ {
+  "auth": "ANY",
+  "function": "get_doctor_list",
+  "method": "GET",
+  "module": "admin.py",
+  "path": "/api/doctorManagement/getList"
+ },
+ {
+  "auth": [
+   "admin",
+   "super_admin"
+  ],
+  "function": "update_doctor",
+  "method": "POST",
+  "module": "admin.py",
+  "path": "/api/doctorManagement/update"
+ },
+ {
+  "auth": [
+   "admin",
+   "super_admin"
+  ],
+  "function": "delete_doctor",
+  "method": "POST",
+  "module": "admin.py",
+  "path": "/api/doctorManagement/delete"
+ },
+ {
+  "auth": "ANY",
+  "function": "get_patient_list",
+  "method": "GET",
+  "module": "admin.py",
+  "path": "/api/patientManagement/getList"
+ },
+ {
+  "auth": [
+   "admin",
+   "super_admin"
+  ],
+  "function": "update_patient",
+  "method": "POST",
+  "module": "admin.py",
+  "path": "/api/patientManagement/update"
+ },
+ {
+  "auth": "ANY",
+  "function": "get_department_list",
+  "method": "GET",
+  "module": "admin.py",
+  "path": "/api/departmentManagement/getList"
+ },
+ {
+  "auth": [
+   "admin",
+   "super_admin"
+  ],
+  "function": "department_register",
+  "method": "POST",
+  "module": "admin.py",
+  "path": "/api/departmentManagement/create"
+ },
+ {
+  "auth": [
+   "admin",
+   "super_admin"
+  ],
+  "function": "update_department",
+  "method": "POST",
+  "module": "admin.py",
+  "path": "/api/departmentManagement/update"
+ },
+ {
+  "auth": [
+   "admin",
+   "super_admin"
+  ],
+  "function": "delete_department",
+  "method": "POST",
+  "module": "admin.py",
+  "path": "/api/departmentManagement/delete"
+ },
+ {
+  "auth": "ANY",
+  "function": "get_notice_list",
+  "method": "GET",
+  "module": "admin.py",
+  "path": "/api/notice/getList"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "super_admin"
+  ],
+  "function": "notice_register",
+  "method": "POST",
+  "module": "admin.py",
+  "path": "/api/notice/create"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "super_admin"
+  ],
+  "function": "update_notice",
+  "method": "POST",
+  "module": "admin.py",
+  "path": "/api/notice/update"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "super_admin"
+  ],
+  "function": "delete_notice",
+  "method": "POST",
+  "module": "admin.py",
+  "path": "/api/notice/delete"
+ },
+ {
+  "auth": [
+   "admin",
+   "nurse",
+   "super_admin"
+  ],
+  "function": "get_admission_list",
+  "method": "GET",
+  "module": "admission.py",
+  "path": "/api/admission/getList"
+ },
+ {
+  "auth": [
+   "admin",
+   "nurse",
+   "super_admin"
+  ],
+  "function": "create_admission",
+  "method": "POST",
+  "module": "admission.py",
+  "path": "/api/admission/create"
+ },
+ {
+  "auth": [
+   "admin",
+   "nurse",
+   "super_admin"
+  ],
+  "function": "get_admission_detail",
+  "method": "GET",
+  "module": "admission.py",
+  "path": "/api/admission/detail"
+ },
+ {
+  "auth": [
+   "admin",
+   "nurse",
+   "super_admin"
+  ],
+  "function": "update_admission",
+  "method": "POST",
+  "module": "admission.py",
+  "path": "/api/admission/update"
+ },
+ {
+  "auth": [
+   "admin",
+   "nurse",
+   "super_admin"
+  ],
+  "function": "get_available_beds",
+  "method": "GET",
+  "module": "admission.py",
+  "path": "/api/admission/getAvailableBeds"
+ },
+ {
+  "auth": [
+   "admin",
+   "nurse",
+   "super_admin"
+  ],
+  "function": "get_inpatient_list",
+  "method": "GET",
+  "module": "admission.py",
+  "path": "/api/admission/getInpatientList"
+ },
+ {
+  "auth": [
+   "admin",
+   "super_admin"
+  ],
+  "function": "create_event",
+  "method": "POST",
+  "module": "adverse_event.py",
+  "path": "/api/adverseEvent/create"
+ },
+ {
+  "auth": [
+   "admin",
+   "super_admin"
+  ],
+  "function": "get_event_list",
+  "method": "GET",
+  "module": "adverse_event.py",
+  "path": "/api/adverseEvent/getList"
+ },
+ {
+  "auth": [
+   "admin",
+   "super_admin"
+  ],
+  "function": "update_event_status",
+  "method": "POST",
+  "module": "adverse_event.py",
+  "path": "/api/adverseEvent/updateStatus"
+ },
+ {
+  "auth": [
+   "admin",
+   "super_admin"
+  ],
+  "function": "create_adr",
+  "method": "POST",
+  "module": "adverse_reaction.py",
+  "path": "/api/adverseReaction/create"
+ },
+ {
+  "auth": [
+   "admin",
+   "super_admin"
+  ],
+  "function": "get_adr_list",
+  "method": "GET",
+  "module": "adverse_reaction.py",
+  "path": "/api/adverseReaction/getList"
+ },
+ {
+  "auth": [
+   "admin",
+   "super_admin"
+  ],
+  "function": "update_adr_status",
+  "method": "POST",
+  "module": "adverse_reaction.py",
+  "path": "/api/adverseReaction/updateStatus"
+ },
+ {
+  "auth": "ANY",
+  "function": "list_allergies",
+  "method": "GET",
+  "module": "allergy.py",
+  "path": "/api/allergy/list"
+ },
+ {
+  "auth": "ANY",
+  "function": "create_allergy",
+  "method": "POST",
+  "module": "allergy.py",
+  "path": "/api/allergy/create"
+ },
+ {
+  "auth": "ANY",
+  "function": "update_allergy",
+  "method": "PUT",
+  "module": "allergy.py",
+  "path": "/api/allergy/update"
+ },
+ {
+  "auth": "ANY",
+  "function": "disable_allergy",
+  "method": "POST",
+  "module": "allergy.py",
+  "path": "/api/allergy/disable"
+ },
+ {
+  "auth": "ANY",
+  "function": "get_antibiotic_grade_list",
+  "method": "GET",
+  "module": "antibiotic.py",
+  "path": "/api/antibiotic/grade/list"
+ },
+ {
+  "auth": [
+   "admin",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "save_antibiotic_grade",
+  "method": "POST",
+  "module": "antibiotic.py",
+  "path": "/api/antibiotic/grade/save"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "create_antibiotic_approval",
+  "method": "POST",
+  "module": "antibiotic.py",
+  "path": "/api/antibiotic/approval/create"
+ },
+ {
+  "auth": "ANY",
+  "function": "get_antibiotic_approval_list",
+  "method": "GET",
+  "module": "antibiotic.py",
+  "path": "/api/antibiotic/approval/list"
+ },
+ {
+  "auth": "ANY",
+  "function": "review_antibiotic_approval",
+  "method": "POST",
+  "module": "antibiotic.py",
+  "path": "/api/antibiotic/approval/review"
+ },
+ {
+  "auth": "ANY",
+  "function": "antibiotic_ddds",
+  "method": "GET",
+  "module": "antibiotic.py",
+  "path": "/api/antibiotic/ddds"
+ },
+ {
+  "auth": "ANY",
+  "function": "antibiotic_submission_rate",
+  "method": "GET",
+  "module": "antibiotic.py",
+  "path": "/api/antibiotic/submissionRate"
+ },
+ {
+  "auth": [
+   "admin",
+   "super_admin"
+  ],
+  "function": "create_backup",
+  "method": "POST",
+  "module": "backup.py",
+  "path": "/api/backup/create"
+ },
+ {
+  "auth": [
+   "admin",
+   "super_admin"
+  ],
+  "function": "get_backup_list",
+  "method": "GET",
+  "module": "backup.py",
+  "path": "/api/backup/getList"
+ },
+ {
+  "auth": [
+   "admin",
+   "super_admin"
+  ],
+  "function": "delete_backup",
+  "method": "POST",
+  "module": "backup.py",
+  "path": "/api/backup/delete"
+ },
+ {
+  "auth": [
+   "admin",
+   "super_admin"
+  ],
+  "function": "restore_backup",
+  "method": "POST",
+  "module": "backup.py",
+  "path": "/api/backup/restore"
+ },
+ {
+  "auth": [
+   "admin",
+   "super_admin"
+  ],
+  "function": "download_backup",
+  "method": "GET",
+  "module": "backup.py",
+  "path": "/api/backup/download/{filename}"
+ },
+ {
+  "auth": "ANY",
+  "function": "list_blood_requests",
+  "method": "GET",
+  "module": "blood.py",
+  "path": "/api/blood/request/list"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "create_blood_request",
+  "method": "POST",
+  "module": "blood.py",
+  "path": "/api/blood/request/create"
+ },
+ {
+  "auth": "ANY",
+  "function": "review_blood_request",
+  "method": "POST",
+  "module": "blood.py",
+  "path": "/api/blood/request/review"
+ },
+ {
+  "auth": "ANY",
+  "function": "recheck_blood_type",
+  "method": "POST",
+  "module": "blood.py",
+  "path": "/api/blood/recheck"
+ },
+ {
+  "auth": "ANY",
+  "function": "cross_match",
+  "method": "POST",
+  "module": "blood.py",
+  "path": "/api/blood/crossMatch"
+ },
+ {
+  "auth": "ANY",
+  "function": "issue_blood",
+  "method": "POST",
+  "module": "blood.py",
+  "path": "/api/blood/issue"
+ },
+ {
+  "auth": "ANY",
+  "function": "list_reactions",
+  "method": "GET",
+  "module": "blood.py",
+  "path": "/api/blood/reaction/list"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "nurse",
+   "super_admin"
+  ],
+  "function": "create_reaction",
+  "method": "POST",
+  "module": "blood.py",
+  "path": "/api/blood/reaction/create"
+ },
+ {
+  "auth": "ANY",
+  "function": "get_charge_list",
+  "method": "GET",
+  "module": "charge.py",
+  "path": "/api/chargeManagement/getList"
+ },
+ {
+  "auth": [
+   "admin",
+   "super_admin"
+  ],
+  "function": "charge_commit",
+  "method": "POST",
+  "module": "charge.py",
+  "path": "/api/chargeManagement/charge"
+ },
+ {
+  "auth": [
+   "admin",
+   "super_admin"
+  ],
+  "function": "charge_refund",
+  "method": "POST",
+  "module": "charge.py",
+  "path": "/api/chargeManagement/refund"
+ },
+ {
+  "auth": [
+   "admin",
+   "super_admin"
+  ],
+  "function": "get_invoice_list",
+  "method": "GET",
+  "module": "charge.py",
+  "path": "/api/invoice/getList"
+ },
+ {
+  "auth": [
+   "admin",
+   "super_admin"
+  ],
+  "function": "get_window_registration_schedules",
+  "method": "GET",
+  "module": "charge.py",
+  "path": "/api/windowRegistration/schedules"
+ },
+ {
+  "auth": [
+   "admin",
+   "super_admin"
+  ],
+  "function": "get_window_registration_patient",
+  "method": "GET",
+  "module": "charge.py",
+  "path": "/api/windowRegistration/patient"
+ },
+ {
+  "auth": [
+   "admin",
+   "super_admin"
+  ],
+  "function": "get_window_appointments",
+  "method": "GET",
+  "module": "charge.py",
+  "path": "/api/windowRegistration/appointments"
+ },
+ {
+  "auth": [
+   "admin",
+   "super_admin"
+  ],
+  "function": "confirm_window_appointment",
+  "method": "POST",
+  "module": "charge.py",
+  "path": "/api/windowRegistration/appointmentConfirm"
+ },
+ {
+  "auth": [
+   "admin",
+   "super_admin"
+  ],
+  "function": "cancel_window_appointment",
+  "method": "POST",
+  "module": "charge.py",
+  "path": "/api/windowRegistration/appointmentCancel"
+ },
+ {
+  "auth": [
+   "admin",
+   "super_admin"
+  ],
+  "function": "create_invoice",
+  "method": "POST",
+  "module": "charge.py",
+  "path": "/api/invoice/create"
+ },
+ {
+  "auth": [
+   "admin",
+   "super_admin"
+  ],
+  "function": "print_invoice",
+  "method": "POST",
+  "module": "charge.py",
+  "path": "/api/invoice/print"
+ },
+ {
+  "auth": "ANY",
+  "function": "download_invoice_pdf",
+  "method": "GET",
+  "module": "charge.py",
+  "path": "/api/invoice/pdf/{invoice_id}"
+ },
+ {
+  "auth": [
+   "admin",
+   "super_admin"
+  ],
+  "function": "window_registration",
+  "method": "POST",
+  "module": "charge.py",
+  "path": "/api/windowRegistration/create"
+ },
+ {
+  "auth": [
+   "admin",
+   "super_admin"
+  ],
+  "function": "window_cancel_registration",
+  "method": "POST",
+  "module": "charge.py",
+  "path": "/api/windowRegistration/cancel"
+ },
+ {
+  "auth": [
+   "admin",
+   "super_admin"
+  ],
+  "function": "daily_settlement",
+  "method": "POST",
+  "module": "charge.py",
+  "path": "/api/dailySettlement/report"
+ },
+ {
+  "auth": "ANY",
+  "function": "create_payment",
+  "method": "POST",
+  "module": "charge.py",
+  "path": "/api/payment/create"
+ },
+ {
+  "auth": "ANY",
+  "function": "query_payment",
+  "method": "GET",
+  "module": "charge.py",
+  "path": "/api/payment/query/{payment_no}"
+ },
+ {
+  "auth": [
+   "admin",
+   "super_admin"
+  ],
+  "function": "mock_payment_notify",
+  "method": "POST",
+  "module": "charge.py",
+  "path": "/api/payment/mockNotify"
+ },
+ {
+  "auth": [
+   "admin",
+   "super_admin"
+  ],
+  "function": "get_payment_list",
+  "method": "GET",
+  "module": "charge.py",
+  "path": "/api/payment/getList"
+ },
+ {
+  "auth": [
+   "admin",
+   "cashier",
+   "super_admin"
+  ],
+  "function": "list_charge_items",
+  "method": "GET",
+  "module": "charge_item.py",
+  "path": "/api/chargeItem/list"
+ },
+ {
+  "auth": [
+   "admin",
+   "super_admin"
+  ],
+  "function": "create_charge_item",
+  "method": "POST",
+  "module": "charge_item.py",
+  "path": "/api/chargeItem/create"
+ },
+ {
+  "auth": [
+   "admin",
+   "super_admin"
+  ],
+  "function": "update_charge_item",
+  "method": "PUT",
+  "module": "charge_item.py",
+  "path": "/api/chargeItem/update"
+ },
+ {
+  "auth": [
+   "admin",
+   "super_admin"
+  ],
+  "function": "toggle_charge_item",
+  "method": "POST",
+  "module": "charge_item.py",
+  "path": "/api/chargeItem/toggle"
+ },
+ {
+  "auth": "PUBLIC",
+  "function": "get_appointments_for_checkin",
+  "method": "GET",
+  "module": "checkin.py",
+  "path": "/api/checkIn/getAppointments"
+ },
+ {
+  "auth": "PUBLIC",
+  "function": "check_in",
+  "method": "POST",
+  "module": "checkin.py",
+  "path": "/api/checkIn/checkIn"
+ },
+ {
+  "auth": "ANY",
+  "function": "get_breach_list",
+  "method": "GET",
+  "module": "checkin.py",
+  "path": "/api/breach/getList"
+ },
+ {
+  "auth": "ANY",
+  "function": "check_suspend",
+  "method": "GET",
+  "module": "checkin.py",
+  "path": "/api/breach/checkSuspend"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "create_pathway",
+  "method": "POST",
+  "module": "clinical_pathway.py",
+  "path": "/api/clinicalPathway/create"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "get_pathway_list",
+  "method": "GET",
+  "module": "clinical_pathway.py",
+  "path": "/api/clinicalPathway/getList"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "update_pathway",
+  "method": "POST",
+  "module": "clinical_pathway.py",
+  "path": "/api/clinicalPathway/update"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "delete_pathway",
+  "method": "POST",
+  "module": "clinical_pathway.py",
+  "path": "/api/clinicalPathway/delete"
+ },
+ {
+  "auth": [
+   "admin",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "get_consumable_list",
+  "method": "GET",
+  "module": "consumable.py",
+  "path": "/api/consumable/getList"
+ },
+ {
+  "auth": [
+   "admin",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "create_consumable",
+  "method": "POST",
+  "module": "consumable.py",
+  "path": "/api/consumable/create"
+ },
+ {
+  "auth": [
+   "admin",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "update_consumable",
+  "method": "POST",
+  "module": "consumable.py",
+  "path": "/api/consumable/update"
+ },
+ {
+  "auth": [
+   "admin",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "delete_consumable",
+  "method": "POST",
+  "module": "consumable.py",
+  "path": "/api/consumable/delete"
+ },
+ {
+  "auth": [
+   "admin",
+   "super_admin"
+  ],
+  "function": "download_template",
+  "method": "GET",
+  "module": "data_import_export.py",
+  "path": "/api/dataImportExport/template/{entity}"
+ },
+ {
+  "auth": [
+   "admin",
+   "super_admin"
+  ],
+  "function": "import_data",
+  "method": "POST",
+  "module": "data_import_export.py",
+  "path": "/api/dataImportExport/import/{entity}"
+ },
+ {
+  "auth": [
+   "admin",
+   "super_admin"
+  ],
+  "function": "export_data",
+  "method": "GET",
+  "module": "data_import_export.py",
+  "path": "/api/dataImportExport/export/{entity}"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "list_diagnosis_templates",
+  "method": "GET",
+  "module": "diagnosis_template.py",
+  "path": "/api/diagnosisTemplate/list"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "create_diagnosis_template",
+  "method": "POST",
+  "module": "diagnosis_template.py",
+  "path": "/api/diagnosisTemplate/create"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "update_diagnosis_template",
+  "method": "PUT",
+  "module": "diagnosis_template.py",
+  "path": "/api/diagnosisTemplate/update"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "delete_diagnosis_template",
+  "method": "POST",
+  "module": "diagnosis_template.py",
+  "path": "/api/diagnosisTemplate/delete"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "apply_diagnosis_template",
+  "method": "POST",
+  "module": "diagnosis_template.py",
+  "path": "/api/diagnosisTemplate/apply"
+ },
+ {
+  "auth": "ANY",
+  "function": "digital_sign",
+  "method": "POST",
+  "module": "digital_signature.py",
+  "path": "/api/digitalSignature/sign"
+ },
+ {
+  "auth": "ANY",
+  "function": "verify_sign",
+  "method": "POST",
+  "module": "digital_signature.py",
+  "path": "/api/digitalSignature/verify"
+ },
+ {
+  "auth": [
+   "admin",
+   "nurse",
+   "super_admin"
+  ],
+  "function": "do_discharge",
+  "method": "POST",
+  "module": "discharge.py",
+  "path": "/api/discharge/doDischarge"
+ },
+ {
+  "auth": [
+   "admin",
+   "nurse",
+   "super_admin"
+  ],
+  "function": "get_discharge_summary",
+  "method": "GET",
+  "module": "discharge.py",
+  "path": "/api/discharge/getSummary"
+ },
+ {
+  "auth": [
+   "admin",
+   "nurse",
+   "super_admin"
+  ],
+  "function": "update_discharge_summary",
+  "method": "POST",
+  "module": "discharge.py",
+  "path": "/api/discharge/updateSummary"
+ },
+ {
+  "auth": [
+   "admin",
+   "nurse",
+   "super_admin"
+  ],
+  "function": "get_discharged_list",
+  "method": "GET",
+  "module": "discharge.py",
+  "path": "/api/discharge/getDischargedList"
+ },
+ {
+  "auth": [
+   "admin",
+   "super_admin"
+  ],
+  "function": "add_doctor",
+  "method": "POST",
+  "module": "doctor.py",
+  "path": "/api/doctorManagement/register"
+ },
+ {
+  "auth": [
+   "admin",
+   "super_admin"
+  ],
+  "function": "doctor_schedule_register",
+  "method": "POST",
+  "module": "doctor.py",
+  "path": "/api/doctorScheduleManagement/register"
+ },
+ {
+  "auth": "ANY",
+  "function": "doctor_schedule_getlist",
+  "method": "GET",
+  "module": "doctor.py",
+  "path": "/api/doctorScheduleManagement/getList"
+ },
+ {
+  "auth": [
+   "admin",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "pharmaceutical_register",
+  "method": "POST",
+  "module": "doctor.py",
+  "path": "/api/pharmaceuticalManagement/create"
+ },
+ {
+  "auth": "ANY",
+  "function": "get_pharmaceutical_list",
+  "method": "GET",
+  "module": "doctor.py",
+  "path": "/api/pharmaceuticalManagement/getList"
+ },
+ {
+  "auth": [
+   "admin",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "update_pharmaceutical",
+  "method": "POST",
+  "module": "doctor.py",
+  "path": "/api/pharmaceuticalManagement/update"
+ },
+ {
+  "auth": [
+   "admin",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "delete_pharmaceutical",
+  "method": "POST",
+  "module": "doctor.py",
+  "path": "/api/pharmaceuticalManagement/delete"
+ },
+ {
+  "auth": [
+   "admin",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "restore_pharmaceutical",
+  "method": "POST",
+  "module": "doctor.py",
+  "path": "/api/pharmaceuticalManagement/restore"
+ },
+ {
+  "auth": [
+   "admin",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "pharmaceutical_stock_query",
+  "method": "POST",
+  "module": "doctor.py",
+  "path": "/api/pharmaceuticalManagement/stock_query"
+ },
+ {
+  "auth": [
+   "admin",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "get_low_stock_drugs",
+  "method": "GET",
+  "module": "doctor.py",
+  "path": "/api/pharmaceuticalManagement/lowStock"
+ },
+ {
+  "auth": [
+   "admin",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "get_near_expiry_drugs",
+  "method": "GET",
+  "module": "doctor.py",
+  "path": "/api/pharmaceuticalManagement/nearExpiry"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "prescription_register",
+  "method": "POST",
+  "module": "doctor.py",
+  "path": "/api/prescriptionManagement/create"
+ },
+ {
+  "auth": "ANY",
+  "function": "get_prescription_list",
+  "method": "GET",
+  "module": "doctor.py",
+  "path": "/api/prescriptionManagement/getList"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "cancel_prescription",
+  "method": "POST",
+  "module": "doctor.py",
+  "path": "/api/prescriptionManagement/cancel"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "create_medical_record",
+  "method": "POST",
+  "module": "doctor.py",
+  "path": "/api/medicalRecord/create"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "update_medical_record",
+  "method": "POST",
+  "module": "doctor.py",
+  "path": "/api/medicalRecord/update"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "sign_medical_record",
+  "method": "POST",
+  "module": "doctor.py",
+  "path": "/api/medicalRecord/sign"
+ },
+ {
+  "auth": "ANY",
+  "function": "create_lab_order",
+  "method": "POST",
+  "module": "doctor.py",
+  "path": "/api/labOrder/create"
+ },
+ {
+  "auth": "ANY",
+  "function": "get_lab_order_list",
+  "method": "GET",
+  "module": "doctor.py",
+  "path": "/api/labOrder/getList"
+ },
+ {
+  "auth": "ANY",
+  "function": "attendance_check_in",
+  "method": "POST",
+  "module": "doctor.py",
+  "path": "/api/attendance/checkIn"
+ },
+ {
+  "auth": "ANY",
+  "function": "attendance_check_out",
+  "method": "POST",
+  "module": "doctor.py",
+  "path": "/api/attendance/checkOut"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "get_attendance_list",
+  "method": "GET",
+  "module": "doctor.py",
+  "path": "/api/attendance/getList"
+ },
+ {
+  "auth": "ANY",
+  "function": "get_slot_pool",
+  "method": "GET",
+  "module": "doctor.py",
+  "path": "/api/slotPool/getList"
+ },
+ {
+  "auth": [
+   "admin",
+   "super_admin"
+  ],
+  "function": "adjust_slot",
+  "method": "POST",
+  "module": "doctor.py",
+  "path": "/api/slotPool/adjust"
+ },
+ {
+  "auth": [
+   "admin",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "list_drug_damage",
+  "method": "GET",
+  "module": "drug_damage.py",
+  "path": "/api/pharmacy/drugDamage/list"
+ },
+ {
+  "auth": [
+   "admin",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "create_drug_damage",
+  "method": "POST",
+  "module": "drug_damage.py",
+  "path": "/api/pharmacy/drugDamage/create"
+ },
+ {
+  "auth": [
+   "admin",
+   "super_admin"
+  ],
+  "function": "approve_drug_damage",
+  "method": "POST",
+  "module": "drug_damage.py",
+  "path": "/api/pharmacy/drugDamage/approve"
+ },
+ {
+  "auth": [
+   "admin",
+   "super_admin"
+  ],
+  "function": "reject_drug_damage",
+  "method": "POST",
+  "module": "drug_damage.py",
+  "path": "/api/pharmacy/drugDamage/reject"
+ },
+ {
+  "auth": [
+   "admin",
+   "nurse",
+   "super_admin"
+  ],
+  "function": "create_triage",
+  "method": "POST",
+  "module": "emergency.py",
+  "path": "/api/emergency/triage/create"
+ },
+ {
+  "auth": "ANY",
+  "function": "list_triage",
+  "method": "GET",
+  "module": "emergency.py",
+  "path": "/api/emergency/triage/list"
+ },
+ {
+  "auth": [
+   "admin",
+   "nurse",
+   "super_admin"
+  ],
+  "function": "update_triage",
+  "method": "PUT",
+  "module": "emergency.py",
+  "path": "/api/emergency/triage/update"
+ },
+ {
+  "auth": [
+   "admin",
+   "nurse",
+   "super_admin"
+  ],
+  "function": "create_rescue_event",
+  "method": "POST",
+  "module": "emergency.py",
+  "path": "/api/emergency/rescue/create"
+ },
+ {
+  "auth": "ANY",
+  "function": "list_rescue_events",
+  "method": "GET",
+  "module": "emergency.py",
+  "path": "/api/emergency/rescue/list"
+ },
+ {
+  "auth": [
+   "admin",
+   "nurse",
+   "super_admin"
+  ],
+  "function": "create_observation",
+  "method": "POST",
+  "module": "emergency.py",
+  "path": "/api/emergency/observation/create"
+ },
+ {
+  "auth": "ANY",
+  "function": "list_observations",
+  "method": "GET",
+  "module": "emergency.py",
+  "path": "/api/emergency/observation/list"
+ },
+ {
+  "auth": "ANY",
+  "function": "update_observation",
+  "method": "PUT",
+  "module": "emergency.py",
+  "path": "/api/emergency/observation/update"
+ },
+ {
+  "auth": "ANY",
+  "function": "create_green_channel",
+  "method": "POST",
+  "module": "emergency.py",
+  "path": "/api/emergency/greenChannel/create"
+ },
+ {
+  "auth": "ANY",
+  "function": "list_green_channels",
+  "method": "GET",
+  "module": "emergency.py",
+  "path": "/api/emergency/greenChannel/list"
+ },
+ {
+  "auth": "ANY",
+  "function": "approve_green_channel",
+  "method": "POST",
+  "module": "emergency.py",
+  "path": "/api/emergency/greenChannel/approve"
+ },
+ {
+  "auth": "ANY",
+  "function": "close_green_channel",
+  "method": "POST",
+  "module": "emergency.py",
+  "path": "/api/emergency/greenChannel/close"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "create_emergency_record",
+  "method": "POST",
+  "module": "emergency.py",
+  "path": "/api/emergency/medicalRecord/create"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "list_emergency_records",
+  "method": "GET",
+  "module": "emergency.py",
+  "path": "/api/emergency/medicalRecord/list"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "update_emergency_record",
+  "method": "PUT",
+  "module": "emergency.py",
+  "path": "/api/emergency/medicalRecord/update"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "sign_emergency_record",
+  "method": "POST",
+  "module": "emergency.py",
+  "path": "/api/emergency/medicalRecord/sign"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "get_template_list",
+  "method": "GET",
+  "module": "emr.py",
+  "path": "/api/emrTemplate/getList"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "create_template",
+  "method": "POST",
+  "module": "emr.py",
+  "path": "/api/emrTemplate/create"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "update_template",
+  "method": "POST",
+  "module": "emr.py",
+  "path": "/api/emrTemplate/update"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "delete_template",
+  "method": "POST",
+  "module": "emr.py",
+  "path": "/api/emrTemplate/delete"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "get_template_detail",
+  "method": "GET",
+  "module": "emr.py",
+  "path": "/api/emrTemplate/detail"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "get_structured_record_list",
+  "method": "GET",
+  "module": "emr.py",
+  "path": "/api/structuredMedicalRecord/getList"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "create_structured_record",
+  "method": "POST",
+  "module": "emr.py",
+  "path": "/api/structuredMedicalRecord/create"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "get_structured_record_detail",
+  "method": "GET",
+  "module": "emr.py",
+  "path": "/api/structuredMedicalRecord/detail"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "update_structured_record",
+  "method": "POST",
+  "module": "emr.py",
+  "path": "/api/structuredMedicalRecord/update"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "sign_medical_record",
+  "method": "POST",
+  "module": "emr.py",
+  "path": "/api/structuredMedicalRecord/sign"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "delete_structured_record",
+  "method": "POST",
+  "module": "emr.py",
+  "path": "/api/structuredMedicalRecord/delete"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "get_progress_note_list",
+  "method": "GET",
+  "module": "emr.py",
+  "path": "/api/progressNote/getList"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "create_progress_note",
+  "method": "POST",
+  "module": "emr.py",
+  "path": "/api/progressNote/create"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "delete_progress_note",
+  "method": "POST",
+  "module": "emr.py",
+  "path": "/api/progressNote/delete"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "get_ward_round_list",
+  "method": "GET",
+  "module": "emr.py",
+  "path": "/api/wardRound/getList"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "create_ward_round",
+  "method": "POST",
+  "module": "emr.py",
+  "path": "/api/wardRound/create"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "delete_ward_round",
+  "method": "POST",
+  "module": "emr.py",
+  "path": "/api/wardRound/delete"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "get_quality_list",
+  "method": "GET",
+  "module": "emr.py",
+  "path": "/api/medicalRecordQuality/getList"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "quality_check",
+  "method": "POST",
+  "module": "emr.py",
+  "path": "/api/medicalRecordQuality/check"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "get_quality_summary",
+  "method": "GET",
+  "module": "emr.py",
+  "path": "/api/medicalRecordQuality/summary"
+ },
+ {
+  "auth": "ANY",
+  "function": "list_equipment",
+  "method": "GET",
+  "module": "equipment.py",
+  "path": "/api/equipment/list"
+ },
+ {
+  "auth": "ANY",
+  "function": "create_equipment",
+  "method": "POST",
+  "module": "equipment.py",
+  "path": "/api/equipment/create"
+ },
+ {
+  "auth": "ANY",
+  "function": "update_equipment_status",
+  "method": "POST",
+  "module": "equipment.py",
+  "path": "/api/equipment/status"
+ },
+ {
+  "auth": "ANY",
+  "function": "list_maintenance",
+  "method": "GET",
+  "module": "equipment.py",
+  "path": "/api/equipment/maintenance/list"
+ },
+ {
+  "auth": "ANY",
+  "function": "create_maintenance",
+  "method": "POST",
+  "module": "equipment.py",
+  "path": "/api/equipment/maintenance/create"
+ },
+ {
+  "auth": "ANY",
+  "function": "update_maintenance_status",
+  "method": "POST",
+  "module": "equipment.py",
+  "path": "/api/equipment/maintenance/status"
+ },
+ {
+  "auth": "ANY",
+  "function": "list_inspection",
+  "method": "GET",
+  "module": "equipment.py",
+  "path": "/api/equipment/inspection/list"
+ },
+ {
+  "auth": "ANY",
+  "function": "create_inspection",
+  "method": "POST",
+  "module": "equipment.py",
+  "path": "/api/equipment/inspection/create"
+ },
+ {
+  "auth": "ANY",
+  "function": "list_consumable_trace",
+  "method": "GET",
+  "module": "equipment.py",
+  "path": "/api/equipment/trace/list"
+ },
+ {
+  "auth": "ANY",
+  "function": "create_consumable_trace",
+  "method": "POST",
+  "module": "equipment.py",
+  "path": "/api/equipment/trace/create"
+ },
+ {
+  "auth": "ANY",
+  "function": "inventory_check",
+  "method": "POST",
+  "module": "equipment.py",
+  "path": "/api/equipment/inventory/check"
+ },
+ {
+  "auth": "ANY",
+  "function": "get_exam_package_list",
+  "method": "GET",
+  "module": "exam.py",
+  "path": "/api/examPackage/getList"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "create_exam_package",
+  "method": "POST",
+  "module": "exam.py",
+  "path": "/api/examPackage/create"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "update_exam_package",
+  "method": "POST",
+  "module": "exam.py",
+  "path": "/api/examPackage/update"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "delete_exam_package",
+  "method": "POST",
+  "module": "exam.py",
+  "path": "/api/examPackage/delete"
+ },
+ {
+  "auth": "ANY",
+  "function": "get_exam_item_list",
+  "method": "GET",
+  "module": "exam.py",
+  "path": "/api/examItem/getList"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "create_exam_item",
+  "method": "POST",
+  "module": "exam.py",
+  "path": "/api/examItem/create"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "update_exam_item",
+  "method": "POST",
+  "module": "exam.py",
+  "path": "/api/examItem/update"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "delete_exam_item",
+  "method": "POST",
+  "module": "exam.py",
+  "path": "/api/examItem/delete"
+ },
+ {
+  "auth": "ANY",
+  "function": "get_exam_appointment_list",
+  "method": "GET",
+  "module": "exam.py",
+  "path": "/api/examAppointment/getList"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "create_exam_appointment",
+  "method": "POST",
+  "module": "exam.py",
+  "path": "/api/examAppointment/create"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "update_exam_appointment_status",
+  "method": "POST",
+  "module": "exam.py",
+  "path": "/api/examAppointment/updateStatus"
+ },
+ {
+  "auth": "ANY",
+  "function": "get_exam_record_list",
+  "method": "GET",
+  "module": "exam.py",
+  "path": "/api/examRecord/getList"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "create_exam_record",
+  "method": "POST",
+  "module": "exam.py",
+  "path": "/api/examRecord/create"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "update_exam_record",
+  "method": "POST",
+  "module": "exam.py",
+  "path": "/api/examRecord/update"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "complete_exam_record",
+  "method": "POST",
+  "module": "exam.py",
+  "path": "/api/examRecord/complete"
+ },
+ {
+  "auth": "ANY",
+  "function": "get_exam_result_list",
+  "method": "GET",
+  "module": "exam.py",
+  "path": "/api/examResult/getList"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "create_exam_result",
+  "method": "POST",
+  "module": "exam.py",
+  "path": "/api/examResult/create"
+ },
+ {
+  "auth": "ANY",
+  "function": "get_exam_report_detail",
+  "method": "GET",
+  "module": "exam.py",
+  "path": "/api/examReport/getDetail"
+ },
+ {
+  "auth": "ANY",
+  "function": "list_family_members",
+  "method": "GET",
+  "module": "family_member.py",
+  "path": "/api/familyMember/list"
+ },
+ {
+  "auth": "ANY",
+  "function": "create_family_member",
+  "method": "POST",
+  "module": "family_member.py",
+  "path": "/api/familyMember/create"
+ },
+ {
+  "auth": "ANY",
+  "function": "update_family_member",
+  "method": "PUT",
+  "module": "family_member.py",
+  "path": "/api/familyMember/update"
+ },
+ {
+  "auth": "ANY",
+  "function": "delete_family_member",
+  "method": "DELETE",
+  "module": "family_member.py",
+  "path": "/api/familyMember/delete"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "create_follow_up_appointment",
+  "method": "POST",
+  "module": "followup.py",
+  "path": "/api/followUpAppointment/create"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "create_follow_up_plan",
+  "method": "POST",
+  "module": "followup.py",
+  "path": "/api/followUp/createPlan"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "get_follow_up_list",
+  "method": "GET",
+  "module": "followup.py",
+  "path": "/api/followUp/getList"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "record_follow_up",
+  "method": "POST",
+  "module": "followup.py",
+  "path": "/api/followUp/record"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "list_diagnosis",
+  "method": "GET",
+  "module": "icd10.py",
+  "path": "/api/icd10/diagnosis/list"
+ },
+ {
+  "auth": "ANY",
+  "function": "create_diagnosis",
+  "method": "POST",
+  "module": "icd10.py",
+  "path": "/api/icd10/diagnosis/create"
+ },
+ {
+  "auth": "ANY",
+  "function": "update_diagnosis",
+  "method": "PUT",
+  "module": "icd10.py",
+  "path": "/api/icd10/diagnosis/update"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "list_operation",
+  "method": "GET",
+  "module": "icd10.py",
+  "path": "/api/icd10/operation/list"
+ },
+ {
+  "auth": "ANY",
+  "function": "create_operation",
+  "method": "POST",
+  "module": "icd10.py",
+  "path": "/api/icd10/operation/create"
+ },
+ {
+  "auth": "ANY",
+  "function": "update_operation",
+  "method": "PUT",
+  "module": "icd10.py",
+  "path": "/api/icd10/operation/update"
+ },
+ {
+  "auth": "ANY",
+  "function": "get_imaging_order_list",
+  "method": "GET",
+  "module": "imaging.py",
+  "path": "/api/imaging/order/list"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "create_imaging_order",
+  "method": "POST",
+  "module": "imaging.py",
+  "path": "/api/imaging/order/create"
+ },
+ {
+  "auth": "ANY",
+  "function": "update_imaging_order_status",
+  "method": "POST",
+  "module": "imaging.py",
+  "path": "/api/imaging/order/status"
+ },
+ {
+  "auth": "ANY",
+  "function": "update_imaging_viewer",
+  "method": "POST",
+  "module": "imaging.py",
+  "path": "/api/imaging/order/viewer"
+ },
+ {
+  "auth": "ANY",
+  "function": "get_imaging_report_list",
+  "method": "GET",
+  "module": "imaging.py",
+  "path": "/api/imaging/report/list"
+ },
+ {
+  "auth": "ANY",
+  "function": "save_imaging_report",
+  "method": "POST",
+  "module": "imaging.py",
+  "path": "/api/imaging/report/save"
+ },
+ {
+  "auth": "ANY",
+  "function": "submit_imaging_report",
+  "method": "POST",
+  "module": "imaging.py",
+  "path": "/api/imaging/report/submit"
+ },
+ {
+  "auth": "ANY",
+  "function": "review_imaging_report",
+  "method": "POST",
+  "module": "imaging.py",
+  "path": "/api/imaging/report/review"
+ },
+ {
+  "auth": "ANY",
+  "function": "get_imaging_template_list",
+  "method": "GET",
+  "module": "imaging.py",
+  "path": "/api/imaging/template/list"
+ },
+ {
+  "auth": "ANY",
+  "function": "save_imaging_template",
+  "method": "POST",
+  "module": "imaging.py",
+  "path": "/api/imaging/template/save"
+ },
+ {
+  "auth": "ANY",
+  "function": "get_imaging_viewer",
+  "method": "GET",
+  "module": "imaging.py",
+  "path": "/api/imaging/viewer/{imaging_order_id}"
+ },
+ {
+  "auth": "ANY",
+  "function": "get_imaging_film_list",
+  "method": "GET",
+  "module": "imaging.py",
+  "path": "/api/imaging/film/list"
+ },
+ {
+  "auth": "ANY",
+  "function": "create_imaging_film",
+  "method": "POST",
+  "module": "imaging.py",
+  "path": "/api/imaging/film/create"
+ },
+ {
+  "auth": "ANY",
+  "function": "update_imaging_film_status",
+  "method": "POST",
+  "module": "imaging.py",
+  "path": "/api/imaging/film/status"
+ },
+ {
+  "auth": "ANY",
+  "function": "list_infection_cases",
+  "method": "GET",
+  "module": "infection.py",
+  "path": "/api/infection/case/list"
+ },
+ {
+  "auth": "ANY",
+  "function": "create_infection_case",
+  "method": "POST",
+  "module": "infection.py",
+  "path": "/api/infection/case/create"
+ },
+ {
+  "auth": "ANY",
+  "function": "update_infection_case_status",
+  "method": "POST",
+  "module": "infection.py",
+  "path": "/api/infection/case/status"
+ },
+ {
+  "auth": "ANY",
+  "function": "infection_outbreak_alert",
+  "method": "GET",
+  "module": "infection.py",
+  "path": "/api/infection/outbreakAlert"
+ },
+ {
+  "auth": "ANY",
+  "function": "infection_report",
+  "method": "GET",
+  "module": "infection.py",
+  "path": "/api/infection/report"
+ },
+ {
+  "auth": "ANY",
+  "function": "list_disinfection",
+  "method": "GET",
+  "module": "infection.py",
+  "path": "/api/infection/disinfection/list"
+ },
+ {
+  "auth": [
+   "admin",
+   "nurse",
+   "super_admin"
+  ],
+  "function": "create_disinfection",
+  "method": "POST",
+  "module": "infection.py",
+  "path": "/api/infection/disinfection/create"
+ },
+ {
+  "auth": "ANY",
+  "function": "list_exposure",
+  "method": "GET",
+  "module": "infection.py",
+  "path": "/api/infection/exposure/list"
+ },
+ {
+  "auth": [
+   "admin",
+   "nurse",
+   "super_admin"
+  ],
+  "function": "create_exposure",
+  "method": "POST",
+  "module": "infection.py",
+  "path": "/api/infection/exposure/create"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "create_infusion",
+  "method": "POST",
+  "module": "infusion.py",
+  "path": "/api/infusion/create"
+ },
+ {
+  "auth": "ANY",
+  "function": "list_infusions",
+  "method": "GET",
+  "module": "infusion.py",
+  "path": "/api/infusion/list"
+ },
+ {
+  "auth": [
+   "admin",
+   "nurse",
+   "super_admin"
+  ],
+  "function": "execute_infusion",
+  "method": "POST",
+  "module": "infusion.py",
+  "path": "/api/infusion/execute"
+ },
+ {
+  "auth": [
+   "admin",
+   "nurse",
+   "super_admin"
+  ],
+  "function": "observe_infusion",
+  "method": "POST",
+  "module": "infusion.py",
+  "path": "/api/infusion/observe"
+ },
+ {
+  "auth": [
+   "admin",
+   "nurse",
+   "super_admin"
+  ],
+  "function": "complete_infusion",
+  "method": "POST",
+  "module": "infusion.py",
+  "path": "/api/infusion/complete"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "cancel_infusion",
+  "method": "POST",
+  "module": "infusion.py",
+  "path": "/api/infusion/cancel"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "create_injection",
+  "method": "POST",
+  "module": "injection.py",
+  "path": "/api/injection/create"
+ },
+ {
+  "auth": "ANY",
+  "function": "list_injections",
+  "method": "GET",
+  "module": "injection.py",
+  "path": "/api/injection/list"
+ },
+ {
+  "auth": [
+   "admin",
+   "nurse",
+   "super_admin"
+  ],
+  "function": "execute_injection",
+  "method": "POST",
+  "module": "injection.py",
+  "path": "/api/injection/execute"
+ },
+ {
+  "auth": [
+   "admin",
+   "nurse",
+   "super_admin"
+  ],
+  "function": "complete_injection",
+  "method": "POST",
+  "module": "injection.py",
+  "path": "/api/injection/complete"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "cancel_injection",
+  "method": "POST",
+  "module": "injection.py",
+  "path": "/api/injection/cancel"
+ },
+ {
+  "auth": "ANY",
+  "function": "get_inpatient_charge_list",
+  "method": "GET",
+  "module": "inpatient_charge.py",
+  "path": "/api/inpatientCharge/getList"
+ },
+ {
+  "auth": "ANY",
+  "function": "get_daily_bill",
+  "method": "GET",
+  "module": "inpatient_charge.py",
+  "path": "/api/inpatientCharge/getDailyBill"
+ },
+ {
+  "auth": [
+   "admin",
+   "cashier",
+   "super_admin"
+  ],
+  "function": "settle_charges",
+  "method": "POST",
+  "module": "inpatient_charge.py",
+  "path": "/api/inpatientCharge/settle"
+ },
+ {
+  "auth": [
+   "admin",
+   "cashier",
+   "super_admin"
+  ],
+  "function": "refund_charge",
+  "method": "POST",
+  "module": "inpatient_charge.py",
+  "path": "/api/inpatientCharge/refund"
+ },
+ {
+  "auth": "ANY",
+  "function": "get_charge_summary",
+  "method": "GET",
+  "module": "inpatient_charge.py",
+  "path": "/api/inpatientCharge/getSummary"
+ },
+ {
+  "auth": "ANY",
+  "function": "get_inpatient_order_list",
+  "method": "GET",
+  "module": "inpatient_order.py",
+  "path": "/api/inpatientOrder/getList"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "create_inpatient_order",
+  "method": "POST",
+  "module": "inpatient_order.py",
+  "path": "/api/inpatientOrder/create"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "audit_inpatient_order",
+  "method": "POST",
+  "module": "inpatient_order.py",
+  "path": "/api/inpatientOrder/audit"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "stop_inpatient_order",
+  "method": "POST",
+  "module": "inpatient_order.py",
+  "path": "/api/inpatientOrder/stop"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "cancel_inpatient_order",
+  "method": "POST",
+  "module": "inpatient_order.py",
+  "path": "/api/inpatientOrder/cancel"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "nurse",
+   "super_admin"
+  ],
+  "function": "get_execution_list",
+  "method": "GET",
+  "module": "inpatient_order.py",
+  "path": "/api/inpatientOrder/getExecutionList"
+ },
+ {
+  "auth": [
+   "admin",
+   "nurse",
+   "super_admin"
+  ],
+  "function": "execute_order",
+  "method": "POST",
+  "module": "inpatient_order.py",
+  "path": "/api/inpatientOrder/execute"
+ },
+ {
+  "auth": "ANY",
+  "function": "list_insurance_catalog",
+  "method": "GET",
+  "module": "insurance.py",
+  "path": "/api/insurance/catalog/list"
+ },
+ {
+  "auth": "ANY",
+  "function": "save_insurance_catalog",
+  "method": "POST",
+  "module": "insurance.py",
+  "path": "/api/insurance/catalog/save"
+ },
+ {
+  "auth": "ANY",
+  "function": "list_insurance_settlement",
+  "method": "GET",
+  "module": "insurance.py",
+  "path": "/api/insurance/settlement/list"
+ },
+ {
+  "auth": [
+   "admin",
+   "cashier",
+   "super_admin"
+  ],
+  "function": "create_insurance_settlement",
+  "method": "POST",
+  "module": "insurance.py",
+  "path": "/api/insurance/settlement/create"
+ },
+ {
+  "auth": "PUBLIC",
+  "function": "receive_insurance_settlement",
+  "method": "POST",
+  "module": "insurance.py",
+  "path": "/api/integration/insurance/settlement"
+ },
+ {
+  "auth": "ANY",
+  "function": "list_chronic",
+  "method": "GET",
+  "module": "insurance.py",
+  "path": "/api/insurance/chronic/list"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "create_chronic",
+  "method": "POST",
+  "module": "insurance.py",
+  "path": "/api/insurance/chronic/create"
+ },
+ {
+  "auth": "ANY",
+  "function": "create_drg_group",
+  "method": "POST",
+  "module": "insurance.py",
+  "path": "/api/insurance/drg/group"
+ },
+ {
+  "auth": "ANY",
+  "function": "drg_analysis",
+  "method": "GET",
+  "module": "insurance.py",
+  "path": "/api/insurance/drg/analysis"
+ },
+ {
+  "auth": "ANY",
+  "function": "insurance_cost_warnings",
+  "method": "GET",
+  "module": "insurance.py",
+  "path": "/api/insurance/control/warnings"
+ },
+ {
+  "auth": "PUBLIC",
+  "function": "receive_lis_result",
+  "method": "POST",
+  "module": "integration.py",
+  "path": "/api/integration/lis/result"
+ },
+ {
+  "auth": "PUBLIC",
+  "function": "receive_pacs_report",
+  "method": "POST",
+  "module": "integration.py",
+  "path": "/api/integration/pacs/report"
+ },
+ {
+  "auth": "PUBLIC",
+  "function": "receive_payment_notification",
+  "method": "POST",
+  "module": "integration.py",
+  "path": "/api/integration/payment/notify"
+ },
+ {
+  "auth": [
+   "admin",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "list_inventory_adjustments",
+  "method": "GET",
+  "module": "inventory_adjustment.py",
+  "path": "/api/pharmacy/inventoryAdjustment/list"
+ },
+ {
+  "auth": [
+   "admin",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "create_inventory_adjustment",
+  "method": "POST",
+  "module": "inventory_adjustment.py",
+  "path": "/api/pharmacy/inventoryAdjustment/create"
+ },
+ {
+  "auth": [
+   "admin",
+   "super_admin"
+  ],
+  "function": "approve_inventory_adjustment",
+  "method": "POST",
+  "module": "inventory_adjustment.py",
+  "path": "/api/pharmacy/inventoryAdjustment/approve"
+ },
+ {
+  "auth": [
+   "admin",
+   "super_admin"
+  ],
+  "function": "reject_inventory_adjustment",
+  "method": "POST",
+  "module": "inventory_adjustment.py",
+  "path": "/api/pharmacy/inventoryAdjustment/reject"
+ },
+ {
+  "auth": [
+   "admin",
+   "lab_technician",
+   "super_admin"
+  ],
+  "function": "sample_receive",
+  "method": "POST",
+  "module": "lab.py",
+  "path": "/api/lab/sampleReceive"
+ },
+ {
+  "auth": [
+   "admin",
+   "lab_technician",
+   "super_admin"
+  ],
+  "function": "sample_reject",
+  "method": "POST",
+  "module": "lab.py",
+  "path": "/api/lab/sampleReject"
+ },
+ {
+  "auth": [
+   "admin",
+   "lab_technician",
+   "super_admin"
+  ],
+  "function": "sample_tracking",
+  "method": "GET",
+  "module": "lab.py",
+  "path": "/api/lab/sampleTracking"
+ },
+ {
+  "auth": [
+   "admin",
+   "lab_technician",
+   "super_admin"
+  ],
+  "function": "create_lab_result",
+  "method": "POST",
+  "module": "lab.py",
+  "path": "/api/labResult/create"
+ },
+ {
+  "auth": [
+   "admin",
+   "lab_technician",
+   "super_admin"
+  ],
+  "function": "audit_lab_result",
+  "method": "POST",
+  "module": "lab.py",
+  "path": "/api/labResult/audit"
+ },
+ {
+  "auth": [
+   "admin",
+   "lab_technician",
+   "super_admin"
+  ],
+  "function": "get_pending_lab_orders",
+  "method": "GET",
+  "module": "lab.py",
+  "path": "/api/labResult/getPending"
+ },
+ {
+  "auth": [
+   "admin",
+   "lab_technician",
+   "super_admin"
+  ],
+  "function": "get_lab_result_list",
+  "method": "GET",
+  "module": "lab.py",
+  "path": "/api/labResult/getList"
+ },
+ {
+  "auth": [
+   "admin",
+   "lab_technician",
+   "super_admin"
+  ],
+  "function": "get_critical_lab_results",
+  "method": "GET",
+  "module": "lab.py",
+  "path": "/api/labResult/getCritical"
+ },
+ {
+  "auth": [
+   "admin",
+   "lab_technician",
+   "super_admin"
+  ],
+  "function": "notify_critical_lab_result",
+  "method": "POST",
+  "module": "lab.py",
+  "path": "/api/labResult/critical/notify"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "acknowledge_critical_lab_result",
+  "method": "POST",
+  "module": "lab.py",
+  "path": "/api/labResult/critical/acknowledge"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "handle_critical_lab_result",
+  "method": "POST",
+  "module": "lab.py",
+  "path": "/api/labResult/critical/handle"
+ },
+ {
+  "auth": [
+   "admin",
+   "lab_technician",
+   "super_admin"
+  ],
+  "function": "get_lab_result_detail",
+  "method": "POST",
+  "module": "lab.py",
+  "path": "/api/labResult/detail"
+ },
+ {
+  "auth": "ANY",
+  "function": "list_packages",
+  "method": "GET",
+  "module": "lab_package.py",
+  "path": "/api/labPackage/list"
+ },
+ {
+  "auth": "ANY",
+  "function": "create_package",
+  "method": "POST",
+  "module": "lab_package.py",
+  "path": "/api/labPackage/create"
+ },
+ {
+  "auth": "ANY",
+  "function": "update_package",
+  "method": "PUT",
+  "module": "lab_package.py",
+  "path": "/api/labPackage/update"
+ },
+ {
+  "auth": [
+   "admin",
+   "lab_technician",
+   "super_admin"
+  ],
+  "function": "list_qc",
+  "method": "GET",
+  "module": "lab_qc.py",
+  "path": "/api/labQc/list"
+ },
+ {
+  "auth": [
+   "admin",
+   "lab_technician",
+   "super_admin"
+  ],
+  "function": "create_qc",
+  "method": "POST",
+  "module": "lab_qc.py",
+  "path": "/api/labQc/create"
+ },
+ {
+  "auth": [
+   "admin",
+   "lab_technician",
+   "super_admin"
+  ],
+  "function": "qc_summary",
+  "method": "GET",
+  "module": "lab_qc.py",
+  "path": "/api/labQc/summary"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "create_mdt",
+  "method": "POST",
+  "module": "mdt.py",
+  "path": "/api/mdt/create"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "get_mdt_list",
+  "method": "GET",
+  "module": "mdt.py",
+  "path": "/api/mdt/getList"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "update_mdt",
+  "method": "POST",
+  "module": "mdt.py",
+  "path": "/api/mdt/update"
+ },
+ {
+  "auth": [
+   "admin",
+   "super_admin"
+  ],
+  "function": "get_mdt_approval_list",
+  "method": "GET",
+  "module": "mdt.py",
+  "path": "/api/mdt/approvalList"
+ },
+ {
+  "auth": [
+   "admin",
+   "super_admin"
+  ],
+  "function": "approve_mdt",
+  "method": "POST",
+  "module": "mdt.py",
+  "path": "/api/mdt/approval"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "list_archives",
+  "method": "GET",
+  "module": "medical_record_archive.py",
+  "path": "/api/medicalRecordArchive/list"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "create_archive",
+  "method": "POST",
+  "module": "medical_record_archive.py",
+  "path": "/api/medicalRecordArchive/create"
+ },
+ {
+  "auth": "ANY",
+  "function": "archive_record",
+  "method": "POST",
+  "module": "medical_record_archive.py",
+  "path": "/api/medicalRecordArchive/archive"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "borrow_record",
+  "method": "POST",
+  "module": "medical_record_archive.py",
+  "path": "/api/medicalRecordArchive/borrow"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "return_record",
+  "method": "POST",
+  "module": "medical_record_archive.py",
+  "path": "/api/medicalRecordArchive/return"
+ },
+ {
+  "auth": "ANY",
+  "function": "seal_record",
+  "method": "POST",
+  "module": "medical_record_archive.py",
+  "path": "/api/medicalRecordArchive/seal"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "list_medical_record_admissions",
+  "method": "GET",
+  "module": "medical_record_home.py",
+  "path": "/api/medicalRecordHome/admissions"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "list_medical_record_homes",
+  "method": "GET",
+  "module": "medical_record_home.py",
+  "path": "/api/medicalRecordHome/list"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "create_medical_record_home",
+  "method": "POST",
+  "module": "medical_record_home.py",
+  "path": "/api/medicalRecordHome/create"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "update_medical_record_home",
+  "method": "PUT",
+  "module": "medical_record_home.py",
+  "path": "/api/medicalRecordHome/update"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "submit_medical_record_home",
+  "method": "POST",
+  "module": "medical_record_home.py",
+  "path": "/api/medicalRecordHome/submit"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "list_quality",
+  "method": "GET",
+  "module": "medical_record_home_quality.py",
+  "path": "/api/medicalRecordHomeQuality/list"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "check_quality",
+  "method": "POST",
+  "module": "medical_record_home_quality.py",
+  "path": "/api/medicalRecordHomeQuality/check"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "quality_summary",
+  "method": "GET",
+  "module": "medical_record_home_quality.py",
+  "path": "/api/medicalRecordHomeQuality/summary"
+ },
+ {
+  "auth": [
+   "admin",
+   "super_admin"
+  ],
+  "function": "monitor_summary",
+  "method": "GET",
+  "module": "monitor.py",
+  "path": "/api/monitor/summary"
+ },
+ {
+  "auth": "ANY",
+  "function": "list_navigation_nodes",
+  "method": "GET",
+  "module": "navigation.py",
+  "path": "/api/navigation/nodes"
+ },
+ {
+  "auth": "ANY",
+  "function": "find_navigation_route",
+  "method": "GET",
+  "module": "navigation.py",
+  "path": "/api/navigation/route"
+ },
+ {
+  "auth": "ANY",
+  "function": "find_department_route",
+  "method": "GET",
+  "module": "navigation.py",
+  "path": "/api/navigation/route/departments"
+ },
+ {
+  "auth": [
+   "admin",
+   "super_admin"
+  ],
+  "function": "admin_list_navigation_nodes",
+  "method": "GET",
+  "module": "navigation.py",
+  "path": "/api/navigation/admin/nodes"
+ },
+ {
+  "auth": [
+   "admin",
+   "super_admin"
+  ],
+  "function": "admin_create_navigation_node",
+  "method": "POST",
+  "module": "navigation.py",
+  "path": "/api/navigation/admin/nodes"
+ },
+ {
+  "auth": [
+   "admin",
+   "super_admin"
+  ],
+  "function": "admin_update_navigation_node",
+  "method": "PUT",
+  "module": "navigation.py",
+  "path": "/api/navigation/admin/nodes"
+ },
+ {
+  "auth": [
+   "admin",
+   "super_admin"
+  ],
+  "function": "admin_delete_navigation_node",
+  "method": "DELETE",
+  "module": "navigation.py",
+  "path": "/api/navigation/admin/nodes"
+ },
+ {
+  "auth": [
+   "admin",
+   "super_admin"
+  ],
+  "function": "admin_list_navigation_edges",
+  "method": "GET",
+  "module": "navigation.py",
+  "path": "/api/navigation/admin/edges"
+ },
+ {
+  "auth": [
+   "admin",
+   "super_admin"
+  ],
+  "function": "admin_create_navigation_edge",
+  "method": "POST",
+  "module": "navigation.py",
+  "path": "/api/navigation/admin/edges"
+ },
+ {
+  "auth": [
+   "admin",
+   "super_admin"
+  ],
+  "function": "admin_update_navigation_edge",
+  "method": "PUT",
+  "module": "navigation.py",
+  "path": "/api/navigation/admin/edges"
+ },
+ {
+  "auth": [
+   "admin",
+   "super_admin"
+  ],
+  "function": "admin_delete_navigation_edge",
+  "method": "DELETE",
+  "module": "navigation.py",
+  "path": "/api/navigation/admin/edges"
+ },
+ {
+  "auth": [
+   "admin",
+   "nurse",
+   "super_admin"
+  ],
+  "function": "list_nursing_assessments",
+  "method": "GET",
+  "module": "nursing.py",
+  "path": "/api/nursingAssessment/list"
+ },
+ {
+  "auth": [
+   "admin",
+   "nurse",
+   "super_admin"
+  ],
+  "function": "create_nursing_assessment",
+  "method": "POST",
+  "module": "nursing.py",
+  "path": "/api/nursingAssessment/create"
+ },
+ {
+  "auth": [
+   "admin",
+   "nurse",
+   "super_admin"
+  ],
+  "function": "update_nursing_assessment",
+  "method": "PUT",
+  "module": "nursing.py",
+  "path": "/api/nursingAssessment/update"
+ },
+ {
+  "auth": [
+   "admin",
+   "nurse",
+   "super_admin"
+  ],
+  "function": "complete_nursing_assessment",
+  "method": "POST",
+  "module": "nursing.py",
+  "path": "/api/nursingAssessment/complete"
+ },
+ {
+  "auth": [
+   "admin",
+   "nurse",
+   "super_admin"
+  ],
+  "function": "list_nursing_plans",
+  "method": "GET",
+  "module": "nursing.py",
+  "path": "/api/nursingPlan/list"
+ },
+ {
+  "auth": [
+   "admin",
+   "nurse",
+   "super_admin"
+  ],
+  "function": "create_nursing_plan",
+  "method": "POST",
+  "module": "nursing.py",
+  "path": "/api/nursingPlan/create"
+ },
+ {
+  "auth": [
+   "admin",
+   "nurse",
+   "super_admin"
+  ],
+  "function": "update_nursing_plan",
+  "method": "PUT",
+  "module": "nursing.py",
+  "path": "/api/nursingPlan/update"
+ },
+ {
+  "auth": [
+   "admin",
+   "nurse",
+   "super_admin"
+  ],
+  "function": "list_critical_records",
+  "method": "GET",
+  "module": "nursing.py",
+  "path": "/api/criticalCareRecord/list"
+ },
+ {
+  "auth": [
+   "admin",
+   "nurse",
+   "super_admin"
+  ],
+  "function": "create_critical_record",
+  "method": "POST",
+  "module": "nursing.py",
+  "path": "/api/criticalCareRecord/create"
+ },
+ {
+  "auth": [
+   "admin",
+   "nurse",
+   "super_admin"
+  ],
+  "function": "list_surgery_nursing_records",
+  "method": "GET",
+  "module": "nursing.py",
+  "path": "/api/surgeryNursingRecord/list"
+ },
+ {
+  "auth": [
+   "admin",
+   "nurse",
+   "super_admin"
+  ],
+  "function": "create_surgery_nursing_record",
+  "method": "POST",
+  "module": "nursing.py",
+  "path": "/api/surgeryNursingRecord/create"
+ },
+ {
+  "auth": [
+   "admin",
+   "nurse",
+   "super_admin"
+  ],
+  "function": "get_nursing_record_list",
+  "method": "GET",
+  "module": "nursing.py",
+  "path": "/api/nursingRecord/getList"
+ },
+ {
+  "auth": [
+   "admin",
+   "nurse",
+   "super_admin"
+  ],
+  "function": "create_nursing_record",
+  "method": "POST",
+  "module": "nursing.py",
+  "path": "/api/nursingRecord/create"
+ },
+ {
+  "auth": [
+   "admin",
+   "nurse",
+   "super_admin"
+  ],
+  "function": "delete_nursing_record",
+  "method": "POST",
+  "module": "nursing.py",
+  "path": "/api/nursingRecord/delete"
+ },
+ {
+  "auth": [
+   "admin",
+   "nurse",
+   "super_admin"
+  ],
+  "function": "get_temperature_record_list",
+  "method": "GET",
+  "module": "nursing.py",
+  "path": "/api/temperatureRecord/getList"
+ },
+ {
+  "auth": [
+   "admin",
+   "nurse",
+   "super_admin"
+  ],
+  "function": "create_temperature_record",
+  "method": "POST",
+  "module": "nursing.py",
+  "path": "/api/temperatureRecord/create"
+ },
+ {
+  "auth": [
+   "admin",
+   "nurse",
+   "super_admin"
+  ],
+  "function": "delete_temperature_record",
+  "method": "POST",
+  "module": "nursing.py",
+  "path": "/api/temperatureRecord/delete"
+ },
+ {
+  "auth": "ANY",
+  "function": "get_appointment_list",
+  "method": "GET",
+  "module": "patient.py",
+  "path": "/api/appointmentManagement/getList"
+ },
+ {
+  "auth": "ANY",
+  "function": "appointment_list",
+  "method": "GET",
+  "module": "patient.py",
+  "path": "/api/appointmentManagement/appointmentList"
+ },
+ {
+  "auth": "ANY",
+  "function": "patient_appointment",
+  "method": "POST",
+  "module": "patient.py",
+  "path": "/api/appointmentManagement/create"
+ },
+ {
+  "auth": "ANY",
+  "function": "patient_appointment_cancel",
+  "method": "POST",
+  "module": "patient.py",
+  "path": "/api/appointmentManagement/cancel"
+ },
+ {
+  "auth": "ANY",
+  "function": "get_registration_list",
+  "method": "GET",
+  "module": "patient.py",
+  "path": "/api/registrationManagement/getList"
+ },
+ {
+  "auth": "ANY",
+  "function": "registration_list",
+  "method": "GET",
+  "module": "patient.py",
+  "path": "/api/registrationManagement/registrationList"
+ },
+ {
+  "auth": "ANY",
+  "function": "patient_registration",
+  "method": "POST",
+  "module": "patient.py",
+  "path": "/api/registrationManagement/create"
+ },
+ {
+  "auth": "ANY",
+  "function": "patient_registration_cancel",
+  "method": "POST",
+  "module": "patient.py",
+  "path": "/api/registrationManagement/cancel"
+ },
+ {
+  "auth": "ANY",
+  "function": "get_medical_record_list",
+  "method": "GET",
+  "module": "patient.py",
+  "path": "/api/medicalRecord/getList"
+ },
+ {
+  "auth": "ANY",
+  "function": "get_medical_record_detail",
+  "method": "POST",
+  "module": "patient.py",
+  "path": "/api/medicalRecord/detail"
+ },
+ {
+  "auth": "ANY",
+  "function": "get_health_profile",
+  "method": "GET",
+  "module": "patient.py",
+  "path": "/api/healthRecord/getProfile"
+ },
+ {
+  "auth": "ANY",
+  "function": "get_visit_records",
+  "method": "GET",
+  "module": "patient.py",
+  "path": "/api/healthRecord/getVisits"
+ },
+ {
+  "auth": "ANY",
+  "function": "create_review",
+  "method": "POST",
+  "module": "patient.py",
+  "path": "/api/review/create"
+ },
+ {
+  "auth": "ANY",
+  "function": "list_patient_cards",
+  "method": "GET",
+  "module": "patient_card.py",
+  "path": "/api/patientCard/list"
+ },
+ {
+  "auth": [
+   "admin",
+   "registrar",
+   "super_admin"
+  ],
+  "function": "issue_patient_card",
+  "method": "POST",
+  "module": "patient_card.py",
+  "path": "/api/patientCard/issue"
+ },
+ {
+  "auth": "ANY",
+  "function": "report_patient_card_lost",
+  "method": "POST",
+  "module": "patient_card.py",
+  "path": "/api/patientCard/lost"
+ },
+ {
+  "auth": [
+   "admin",
+   "registrar",
+   "super_admin"
+  ],
+  "function": "cancel_patient_card",
+  "method": "POST",
+  "module": "patient_card.py",
+  "path": "/api/patientCard/cancel"
+ },
+ {
+  "auth": [
+   "admin",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "get_batch_list",
+  "method": "GET",
+  "module": "pharmacy.py",
+  "path": "/api/pharmacy/batch/list"
+ },
+ {
+  "auth": [
+   "admin",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "get_batch_ledger",
+  "method": "GET",
+  "module": "pharmacy.py",
+  "path": "/api/pharmacy/batch/ledger"
+ },
+ {
+  "auth": [
+   "admin",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "get_dispense_list",
+  "method": "GET",
+  "module": "pharmacy.py",
+  "path": "/api/pharmacy/dispenseList"
+ },
+ {
+  "auth": [
+   "admin",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "audit_prescription",
+  "method": "POST",
+  "module": "pharmacy.py",
+  "path": "/api/pharmacy/audit"
+ },
+ {
+  "auth": [
+   "admin",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "dispense_prescription",
+  "method": "POST",
+  "module": "pharmacy.py",
+  "path": "/api/pharmacy/dispense"
+ },
+ {
+  "auth": "ANY",
+  "function": "get_verification_list",
+  "method": "GET",
+  "module": "pharmacy.py",
+  "path": "/api/pharmacy/verificationList"
+ },
+ {
+  "auth": [
+   "admin",
+   "nurse",
+   "super_admin"
+  ],
+  "function": "verify_dispense",
+  "method": "POST",
+  "module": "pharmacy.py",
+  "path": "/api/pharmacy/verify"
+ },
+ {
+  "auth": [
+   "admin",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "return_medicine",
+  "method": "POST",
+  "module": "pharmacy.py",
+  "path": "/api/pharmacy/return"
+ },
+ {
+  "auth": [
+   "admin",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "stock_check",
+  "method": "POST",
+  "module": "pharmacy.py",
+  "path": "/api/pharmacy/stockCheck"
+ },
+ {
+  "auth": [
+   "admin",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "review_prescription",
+  "method": "POST",
+  "module": "pharmacy.py",
+  "path": "/api/pharmacy/review"
+ },
+ {
+  "auth": [
+   "admin",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "get_review_list",
+  "method": "GET",
+  "module": "pharmacy.py",
+  "path": "/api/pharmacy/reviewList"
+ },
+ {
+  "auth": [
+   "admin",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "dispense_statistics",
+  "method": "GET",
+  "module": "pharmacy.py",
+  "path": "/api/pharmacy/dispenseStats"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "list_prescription_templates",
+  "method": "GET",
+  "module": "prescription_template.py",
+  "path": "/api/prescriptionTemplate/list"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "create_prescription_template",
+  "method": "POST",
+  "module": "prescription_template.py",
+  "path": "/api/prescriptionTemplate/create"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "update_prescription_template",
+  "method": "PUT",
+  "module": "prescription_template.py",
+  "path": "/api/prescriptionTemplate/update"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "delete_prescription_template",
+  "method": "POST",
+  "module": "prescription_template.py",
+  "path": "/api/prescriptionTemplate/delete"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "apply_prescription_template",
+  "method": "POST",
+  "module": "prescription_template.py",
+  "path": "/api/prescriptionTemplate/apply"
+ },
+ {
+  "auth": [
+   "admin",
+   "super_admin"
+  ],
+  "function": "create_purchase",
+  "method": "POST",
+  "module": "purchase.py",
+  "path": "/api/purchase/create"
+ },
+ {
+  "auth": [
+   "admin",
+   "super_admin"
+  ],
+  "function": "get_purchase_list",
+  "method": "GET",
+  "module": "purchase.py",
+  "path": "/api/purchase/getList"
+ },
+ {
+  "auth": [
+   "admin",
+   "super_admin"
+  ],
+  "function": "approve_purchase",
+  "method": "POST",
+  "module": "purchase.py",
+  "path": "/api/purchase/approve"
+ },
+ {
+  "auth": [
+   "admin",
+   "super_admin"
+  ],
+  "function": "storage_purchase",
+  "method": "POST",
+  "module": "purchase.py",
+  "path": "/api/purchase/storage"
+ },
+ {
+  "auth": [
+   "admin",
+   "super_admin"
+  ],
+  "function": "cancel_purchase",
+  "method": "POST",
+  "module": "purchase.py",
+  "path": "/api/purchase/cancel"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "mark_emergency",
+  "method": "POST",
+  "module": "queue.py",
+  "path": "/api/queue/emergency"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "reorder_queue",
+  "method": "POST",
+  "module": "queue.py",
+  "path": "/api/queue/reorder"
+ },
+ {
+  "auth": "ANY",
+  "function": "get_queue_list",
+  "method": "GET",
+  "module": "queue.py",
+  "path": "/api/queue/getList"
+ },
+ {
+  "auth": "ANY",
+  "function": "get_queue_progress",
+  "method": "GET",
+  "module": "queue.py",
+  "path": "/api/queue/progress"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "call_next",
+  "method": "POST",
+  "module": "queue.py",
+  "path": "/api/queue/callNext"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "pass_queue",
+  "method": "POST",
+  "module": "queue.py",
+  "path": "/api/queue/pass"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "skip_queue",
+  "method": "POST",
+  "module": "queue.py",
+  "path": "/api/queue/skip"
+ },
+ {
+  "auth": "ANY",
+  "function": "create_patrol_record",
+  "method": "POST",
+  "module": "queue.py",
+  "path": "/api/patrol/create"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "nurse",
+   "super_admin"
+  ],
+  "function": "get_patrol_list",
+  "method": "GET",
+  "module": "queue.py",
+  "path": "/api/patrol/getList"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "create_referral",
+  "method": "POST",
+  "module": "referral.py",
+  "path": "/api/referral/create"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "get_referral_list",
+  "method": "GET",
+  "module": "referral.py",
+  "path": "/api/referral/getList"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "update_referral_status",
+  "method": "POST",
+  "module": "referral.py",
+  "path": "/api/referral/updateStatus"
+ },
+ {
+  "auth": [
+   "admin",
+   "super_admin"
+  ],
+  "function": "get_referral_approval_list",
+  "method": "GET",
+  "module": "referral.py",
+  "path": "/api/referral/approvalList"
+ },
+ {
+  "auth": [
+   "admin",
+   "super_admin"
+  ],
+  "function": "approve_referral",
+  "method": "POST",
+  "module": "referral.py",
+  "path": "/api/referral/approval"
+ },
+ {
+  "auth": "ANY",
+  "function": "report_outpatient_volume",
+  "method": "POST",
+  "module": "report.py",
+  "path": "/api/report/outpatientVolume"
+ },
+ {
+  "auth": "ANY",
+  "function": "report_finance",
+  "method": "POST",
+  "module": "report.py",
+  "path": "/api/report/finance"
+ },
+ {
+  "auth": "ANY",
+  "function": "report_pharmaceutical",
+  "method": "POST",
+  "module": "report.py",
+  "path": "/api/report/pharmaceutical"
+ },
+ {
+  "auth": "ANY",
+  "function": "report_doctor_workload",
+  "method": "POST",
+  "module": "report.py",
+  "path": "/api/report/doctorWorkload"
+ },
+ {
+  "auth": "ANY",
+  "function": "report_department_stats",
+  "method": "POST",
+  "module": "report.py",
+  "path": "/api/report/departmentStats"
+ },
+ {
+  "auth": "ANY",
+  "function": "list_tables",
+  "method": "GET",
+  "module": "research.py",
+  "path": "/api/research/export/tables"
+ },
+ {
+  "auth": "ANY",
+  "function": "export_research_data",
+  "method": "POST",
+  "module": "research.py",
+  "path": "/api/research/export"
+ },
+ {
+  "auth": "ANY",
+  "function": "export_package",
+  "method": "POST",
+  "module": "research.py",
+  "path": "/api/research/export/package"
+ },
+ {
+  "auth": [
+   "admin",
+   "super_admin"
+  ],
+  "function": "research_audit_log",
+  "method": "GET",
+  "module": "research.py",
+  "path": "/api/research/export/audit"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "create_schedule_change",
+  "method": "POST",
+  "module": "schedule_change.py",
+  "path": "/api/scheduleChange/create"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "list_schedule_changes",
+  "method": "GET",
+  "module": "schedule_change.py",
+  "path": "/api/scheduleChange/list"
+ },
+ {
+  "auth": "ANY",
+  "function": "approve_schedule_change",
+  "method": "POST",
+  "module": "schedule_change.py",
+  "path": "/api/scheduleChange/approve"
+ },
+ {
+  "auth": "ANY",
+  "function": "reject_schedule_change",
+  "method": "POST",
+  "module": "schedule_change.py",
+  "path": "/api/scheduleChange/reject"
+ },
+ {
+  "auth": [
+   "admin",
+   "super_admin"
+  ],
+  "function": "scheduler_status",
+  "method": "GET",
+  "module": "scheduler.py",
+  "path": "/api/scheduler/status"
+ },
+ {
+  "auth": [
+   "admin",
+   "super_admin"
+  ],
+  "function": "scheduler_run",
+  "method": "POST",
+  "module": "scheduler.py",
+  "path": "/api/scheduler/run/{job_name}"
+ },
+ {
+  "auth": [
+   "admin",
+   "nurse",
+   "super_admin"
+  ],
+  "function": "create_handover",
+  "method": "POST",
+  "module": "shift_handover.py",
+  "path": "/api/shiftHandover/create"
+ },
+ {
+  "auth": "ANY",
+  "function": "list_handovers",
+  "method": "GET",
+  "module": "shift_handover.py",
+  "path": "/api/shiftHandover/list"
+ },
+ {
+  "auth": [
+   "admin",
+   "nurse",
+   "super_admin"
+  ],
+  "function": "receive_handover",
+  "method": "POST",
+  "module": "shift_handover.py",
+  "path": "/api/shiftHandover/receive"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "create_skin_test",
+  "method": "POST",
+  "module": "skin_test.py",
+  "path": "/api/skinTest/create"
+ },
+ {
+  "auth": "ANY",
+  "function": "list_skin_tests",
+  "method": "GET",
+  "module": "skin_test.py",
+  "path": "/api/skinTest/list"
+ },
+ {
+  "auth": [
+   "admin",
+   "nurse",
+   "super_admin"
+  ],
+  "function": "administer_skin_test",
+  "method": "POST",
+  "module": "skin_test.py",
+  "path": "/api/skinTest/administer"
+ },
+ {
+  "auth": [
+   "admin",
+   "nurse",
+   "super_admin"
+  ],
+  "function": "assess_skin_test",
+  "method": "POST",
+  "module": "skin_test.py",
+  "path": "/api/skinTest/assess"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "cancel_skin_test",
+  "method": "POST",
+  "module": "skin_test.py",
+  "path": "/api/skinTest/cancel"
+ },
+ {
+  "auth": [
+   "admin",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "create_special_drug",
+  "method": "POST",
+  "module": "special_drug.py",
+  "path": "/api/specialDrug/create"
+ },
+ {
+  "auth": "ANY",
+  "function": "list_special_drugs",
+  "method": "GET",
+  "module": "special_drug.py",
+  "path": "/api/specialDrug/list"
+ },
+ {
+  "auth": [
+   "admin",
+   "super_admin"
+  ],
+  "function": "approve_special_drug",
+  "method": "POST",
+  "module": "special_drug.py",
+  "path": "/api/specialDrug/approve"
+ },
+ {
+  "auth": [
+   "admin",
+   "super_admin"
+  ],
+  "function": "reject_special_drug",
+  "method": "POST",
+  "module": "special_drug.py",
+  "path": "/api/specialDrug/reject"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "get_perioperative_antibiotic_list",
+  "method": "GET",
+  "module": "surgery.py",
+  "path": "/api/surgery/perioperative/list"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "create_perioperative_antibiotic",
+  "method": "POST",
+  "module": "surgery.py",
+  "path": "/api/surgery/perioperative/create"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "update_perioperative_antibiotic_status",
+  "method": "POST",
+  "module": "surgery.py",
+  "path": "/api/surgery/perioperative/status"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "get_surgery_application_list",
+  "method": "GET",
+  "module": "surgery.py",
+  "path": "/api/surgeryApplication/getList"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "create_surgery_application",
+  "method": "POST",
+  "module": "surgery.py",
+  "path": "/api/surgeryApplication/create"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "approve_surgery_application",
+  "method": "POST",
+  "module": "surgery.py",
+  "path": "/api/surgeryApplication/approve"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "cancel_surgery_application",
+  "method": "POST",
+  "module": "surgery.py",
+  "path": "/api/surgeryApplication/cancel"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "get_surgery_schedule_list",
+  "method": "GET",
+  "module": "surgery.py",
+  "path": "/api/surgerySchedule/getList"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "create_surgery_schedule",
+  "method": "POST",
+  "module": "surgery.py",
+  "path": "/api/surgerySchedule/create"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "start_surgery",
+  "method": "POST",
+  "module": "surgery.py",
+  "path": "/api/surgerySchedule/start"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "complete_surgery",
+  "method": "POST",
+  "module": "surgery.py",
+  "path": "/api/surgerySchedule/complete"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "nurse",
+   "super_admin"
+  ],
+  "function": "get_anesthesia_record_list",
+  "method": "GET",
+  "module": "surgery.py",
+  "path": "/api/anesthesiaRecord/getList"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "create_anesthesia_record",
+  "method": "POST",
+  "module": "surgery.py",
+  "path": "/api/anesthesiaRecord/create"
+ },
+ {
+  "auth": [
+   "admin",
+   "super_admin"
+  ],
+  "function": "get_log_list",
+  "method": "POST",
+  "module": "system.py",
+  "path": "/api/log/getList"
+ },
+ {
+  "auth": [
+   "admin",
+   "super_admin"
+  ],
+  "function": "get_log_stats",
+  "method": "GET",
+  "module": "system.py",
+  "path": "/api/log/stats"
+ },
+ {
+  "auth": [
+   "admin",
+   "super_admin"
+  ],
+  "function": "get_dict_list",
+  "method": "POST",
+  "module": "system.py",
+  "path": "/api/dict/getList"
+ },
+ {
+  "auth": [
+   "admin",
+   "super_admin"
+  ],
+  "function": "create_dict",
+  "method": "POST",
+  "module": "system.py",
+  "path": "/api/dict/create"
+ },
+ {
+  "auth": [
+   "admin",
+   "super_admin"
+  ],
+  "function": "update_dict",
+  "method": "POST",
+  "module": "system.py",
+  "path": "/api/dict/update"
+ },
+ {
+  "auth": [
+   "admin",
+   "super_admin"
+  ],
+  "function": "delete_dict",
+  "method": "POST",
+  "module": "system.py",
+  "path": "/api/dict/delete"
+ },
+ {
+  "auth": [
+   "admin",
+   "super_admin"
+  ],
+  "function": "get_config_list",
+  "method": "GET",
+  "module": "system.py",
+  "path": "/api/config/getList"
+ },
+ {
+  "auth": [
+   "admin",
+   "super_admin"
+  ],
+  "function": "update_config",
+  "method": "POST",
+  "module": "system.py",
+  "path": "/api/config/update"
+ },
+ {
+  "auth": [
+   "admin",
+   "super_admin"
+  ],
+  "function": "send_message",
+  "method": "POST",
+  "module": "system.py",
+  "path": "/api/message/send"
+ },
+ {
+  "auth": "ANY",
+  "function": "get_message_list",
+  "method": "GET",
+  "module": "system.py",
+  "path": "/api/message/getList"
+ },
+ {
+  "auth": "ANY",
+  "function": "read_message",
+  "method": "POST",
+  "module": "system.py",
+  "path": "/api/message/read"
+ },
+ {
+  "auth": "ANY",
+  "function": "navigation_faq",
+  "method": "GET",
+  "module": "triage.py",
+  "path": "/api/navigation/faq"
+ },
+ {
+  "auth": [
+   "admin",
+   "super_admin"
+  ],
+  "function": "create_navigation_faq",
+  "method": "POST",
+  "module": "triage.py",
+  "path": "/api/navigation/faq/create"
+ },
+ {
+  "auth": [
+   "admin",
+   "super_admin"
+  ],
+  "function": "update_navigation_faq",
+  "method": "PUT",
+  "module": "triage.py",
+  "path": "/api/navigation/faq/update"
+ },
+ {
+  "auth": "ANY",
+  "function": "navigation_departments",
+  "method": "GET",
+  "module": "triage.py",
+  "path": "/api/navigation/departments"
+ },
+ {
+  "auth": "PUBLIC",
+  "function": "triage_suggest",
+  "method": "POST",
+  "module": "triage.py",
+  "path": "/api/triage/suggest"
+ },
+ {
+  "auth": "PUBLIC",
+  "function": "triage_keywords",
+  "method": "GET",
+  "module": "triage.py",
+  "path": "/api/triage/keywords"
+ },
+ {
+  "auth": [
+   "admin",
+   "guide",
+   "nurse",
+   "super_admin"
+  ],
+  "function": "create_triage_record",
+  "method": "POST",
+  "module": "triage_desk.py",
+  "path": "/api/triageDesk/create"
+ },
+ {
+  "auth": [
+   "admin",
+   "guide",
+   "super_admin"
+  ],
+  "function": "get_triage_list",
+  "method": "GET",
+  "module": "triage_desk.py",
+  "path": "/api/triageDesk/getList"
+ },
+ {
+  "auth": [
+   "admin",
+   "guide",
+   "super_admin"
+  ],
+  "function": "update_triage_status",
+  "method": "POST",
+  "module": "triage_desk.py",
+  "path": "/api/triageDesk/updateStatus"
+ },
+ {
+  "auth": [
+   "admin",
+   "guide",
+   "super_admin"
+  ],
+  "function": "update_triage_record",
+  "method": "POST",
+  "module": "triage_desk.py",
+  "path": "/api/triageDesk/update"
+ },
+ {
+  "auth": "ANY",
+  "function": "upload_avatar",
+  "method": "POST",
+  "module": "upload.py",
+  "path": "/api/upload/avatar"
+ },
+ {
+  "auth": "ANY",
+  "function": "upload_report",
+  "method": "POST",
+  "module": "upload.py",
+  "path": "/api/upload/report"
+ },
+ {
+  "auth": "PUBLIC",
+  "function": "get_avatar",
+  "method": "GET",
+  "module": "upload.py",
+  "path": "/api/uploads/avatars/{filename}"
+ },
+ {
+  "auth": "ANY",
+  "function": "get_report",
+  "method": "GET",
+  "module": "upload.py",
+  "path": "/api/uploads/reports/{filename}"
+ },
+ {
+  "auth": "PUBLIC",
+  "function": "test",
+  "method": "POST",
+  "module": "user.py",
+  "path": "/api/test"
+ },
+ {
+  "auth": "PUBLIC",
+  "function": "get_public_key",
+  "method": "GET",
+  "module": "user.py",
+  "path": "/api/publicKey"
+ },
+ {
+  "auth": "PUBLIC",
+  "function": "login",
+  "method": "POST",
+  "module": "user.py",
+  "path": "/api/login"
+ },
+ {
+  "auth": "PUBLIC",
+  "function": "register",
+  "method": "POST",
+  "module": "user.py",
+  "path": "/api/register"
+ },
+ {
+  "auth": "PUBLIC",
+  "function": "get_user_info",
+  "method": "POST",
+  "module": "user.py",
+  "path": "/api/userInfo"
+ },
+ {
+  "auth": "ANY",
+  "function": "logout",
+  "method": "POST",
+  "module": "user.py",
+  "path": "/api/logout"
+ },
+ {
+  "auth": "ANY",
+  "function": "get_user_list",
+  "method": "GET",
+  "module": "user.py",
+  "path": "/api/user/getList"
+ },
+ {
+  "auth": "ANY",
+  "function": "update_user_role",
+  "method": "POST",
+  "module": "user.py",
+  "path": "/api/user/updateRole"
+ },
+ {
+  "auth": "ANY",
+  "function": "reset_user_password",
+  "method": "POST",
+  "module": "user.py",
+  "path": "/api/user/resetPassword"
+ },
+ {
+  "auth": "ANY",
+  "function": "delete_user",
+  "method": "POST",
+  "module": "user.py",
+  "path": "/api/user/delete"
+ },
+ {
+  "auth": "ANY",
+  "function": "get_prepaid_balance",
+  "method": "GET",
+  "module": "user.py",
+  "path": "/api/prepaid/getBalance"
+ },
+ {
+  "auth": [
+   "admin",
+   "super_admin"
+  ],
+  "function": "prepaid_recharge",
+  "method": "POST",
+  "module": "user.py",
+  "path": "/api/prepaid/recharge"
+ },
+ {
+  "auth": [
+   "admin",
+   "super_admin"
+  ],
+  "function": "prepaid_deduct",
+  "method": "POST",
+  "module": "user.py",
+  "path": "/api/prepaid/deduct"
+ },
+ {
+  "auth": [
+   "admin",
+   "super_admin"
+  ],
+  "function": "prepaid_refund",
+  "method": "POST",
+  "module": "user.py",
+  "path": "/api/prepaid/refund"
+ },
+ {
+  "auth": "ANY",
+  "function": "get_prepaid_transactions",
+  "method": "GET",
+  "module": "user.py",
+  "path": "/api/prepaid/getTransactions"
+ },
+ {
+  "auth": [
+   "admin",
+   "nurse",
+   "super_admin"
+  ],
+  "function": "create_vital_sign",
+  "method": "POST",
+  "module": "vitalsign.py",
+  "path": "/api/vitalSign/create"
+ },
+ {
+  "auth": [
+   "admin",
+   "nurse",
+   "super_admin"
+  ],
+  "function": "get_vital_sign_list",
+  "method": "GET",
+  "module": "vitalsign.py",
+  "path": "/api/vitalSign/getList"
+ },
+ {
+  "auth": "ANY",
+  "function": "get_ward_list",
+  "method": "GET",
+  "module": "ward.py",
+  "path": "/api/ward/getList"
+ },
+ {
+  "auth": "ANY",
+  "function": "create_ward",
+  "method": "POST",
+  "module": "ward.py",
+  "path": "/api/ward/create"
+ },
+ {
+  "auth": "ANY",
+  "function": "update_ward",
+  "method": "POST",
+  "module": "ward.py",
+  "path": "/api/ward/update"
+ },
+ {
+  "auth": "ANY",
+  "function": "delete_ward",
+  "method": "POST",
+  "module": "ward.py",
+  "path": "/api/ward/delete"
+ },
+ {
+  "auth": "ANY",
+  "function": "get_bed_list",
+  "method": "GET",
+  "module": "ward.py",
+  "path": "/api/bed/getList"
+ },
+ {
+  "auth": "ANY",
+  "function": "create_bed",
+  "method": "POST",
+  "module": "ward.py",
+  "path": "/api/bed/create"
+ },
+ {
+  "auth": "ANY",
+  "function": "update_bed",
+  "method": "POST",
+  "module": "ward.py",
+  "path": "/api/bed/update"
+ },
+ {
+  "auth": "ANY",
+  "function": "delete_bed",
+  "method": "POST",
+  "module": "ward.py",
+  "path": "/api/bed/delete"
+ }
+]

@@ -13,6 +13,8 @@ class User(Base):
     username = Column(String(20))
     password = Column(String(128))
     user_role = Column(String(20))
+    # 早于该时间签发的 token 一律拒绝（logout/改密后吊销旧 token）
+    token_invalid_before = Column(DateTime, nullable=True)
 
     notices = relationship("Notice", back_populates="writer")
     doctors = relationship("Doctor", back_populates="user")
@@ -85,6 +87,17 @@ class FamilyMember(Base):
 
     owner_patient = relationship("Patient", foreign_keys=[owner_patient_id], back_populates="family_members")
     member_patient = relationship("Patient", foreign_keys=[member_patient_id], back_populates="family_member_links")
+
+
+class LoginLockout(Base):
+    """登录失败锁定（数据库持久化，多 worker 共享）。"""
+
+    __tablename__ = "hoimsystem_login_lockouts"
+
+    lock_key = Column(String(120), primary_key=True)
+    fail_count = Column(Integer, nullable=False, default=0)
+    locked_until = Column(DateTime, nullable=True)
+    update_time = Column(DateTime, nullable=False)
 
 
 class PrepaidTransaction(Base):

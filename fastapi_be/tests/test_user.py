@@ -105,10 +105,14 @@ class TestUserAuth:
         assert body["code"] == 200
         assert body["data"]["permissions"] == ["cashier"]
 
-    async def test_logout(self, async_client):
-        r = await async_client.post("/api/logout")
+    async def test_logout_revokes_token(self, async_client, auth_headers, seed_data):
+        headers = auth_headers(seed_data["admin_user"].username)
+        r = await async_client.post("/api/logout", headers=headers)
         assert r.status_code == 200
         assert r.json()["code"] == 200
+        # 登出后旧 token 应被服务端吊销
+        r2 = await async_client.get("/api/doctorManagement/getList", headers=headers)
+        assert r2.status_code == 401
 
     async def test_health_probe(self, async_client):
         r = await async_client.post("/api/test", json={"data": "hello"})

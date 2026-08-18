@@ -7,6 +7,14 @@
 
 ## 📚 文档导航
 
+### 📘 软件交付文档（v1.0 交付新增）
+
+1. **[软件说明书](software-manual.md)** — 软件概述/运行环境/功能结构/角色权限/数据与安全总览
+2. **[安装部署手册](installation-guide.md)** — 生产部署步骤/备份策略/升级发布/故障排查
+3. **[业务流程图](flowcharts/README.md)** — 8 组 59 张 Mermaid 流程图覆盖全部业务域
+4. **[业务逻辑测试报告](business-test-report.md)** — 990 用例结果 + 审计发现修复清单
+5. **[安全上线清单](security-launch-checklist.md)** — 31 项已修复 + 上线人工阻断项
+
 ### 🆕 新人快速上手
 
 1. **[项目主 README](../README.md)** — 项目概览、技术栈、快速启动

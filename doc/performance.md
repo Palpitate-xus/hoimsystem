@@ -566,7 +566,18 @@ locust -f locustfile.py --host http://localhost:8000
 
 ---
 
-## 九、参考资料
+## 九、性能基准测试
+
+详细的 Locust 压测结果（实测数据 + 理论分析）已写入项目 README：
+
+- [中文 README § 性能测试](../README.md#⚡-性能测试)
+- [English README § Performance Benchmark](../README.en.md#⚡-performance-benchmark)
+
+包含 SQLite 与 PostgreSQL 的对比数据、瓶颈定位、生产环境预估及优化建议。
+
+---
+
+## 十、参考资料
 
 - [FastAPI Performance](https://fastapi.tiangolo.com/deployment/concepts/)
 - [SQLAlchemy Performance](https://docs.sqlalchemy.org/en/20/faq/performance.html)

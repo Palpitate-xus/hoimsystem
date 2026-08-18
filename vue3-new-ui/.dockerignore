@@ -1,0 +1,9 @@
+# 构建上下文瘦身 + 防敏感产物进入镜像
+node_modules/
+dist/
+playwright-report/
+test-results/
+e2e/
+mock/
+.git/
+*.log

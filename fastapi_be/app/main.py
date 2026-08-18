@@ -6,6 +6,7 @@ import time
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
+from starlette.background import BackgroundTasks
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import JSONResponse, Response
 
@@ -173,9 +174,11 @@ class OperationLogMiddleware(BaseHTTPMiddleware):
     # 始终跳过的路径(无业务含义)
     SKIP_PATHS = {
         "/docs", "/openapi.json", "/favicon.ico",
-        "/api/login", "/api/logout", "/api/register",
-        "/api/test", "/api/publicKey",
+        "/api/logout", "/api/test", "/api/publicKey",
     }
+    # 登录/注册本身需要审计：记录成功与失败（含 401/403），否则暴力破解不留痕迹。
+    # 用户名从请求体提取，密码绝不落日志。
+    AUTH_BODY_PATHS = {"/api/login", "/api/register"}
     # GET 也记录的敏感路径(医疗合规:谁看了什么)
     SENSITIVE_GET_PATHS = {
         "/api/medicalRecord/detail",
@@ -192,6 +195,17 @@ class OperationLogMiddleware(BaseHTTPMiddleware):
 
     async def dispatch(self, request, call_next):
         started_at = time.perf_counter()
+        # 登录/注册请求体需在 call_next 之前缓存（之后流已被消费），
+        # 用于审计用户名；密码绝不落日志。
+        auth_attempted_username = ""
+        if request.url.path in self.AUTH_BODY_PATHS:
+            try:
+                raw = await request.body()
+                parsed = json.loads(raw) if raw else {}
+                if isinstance(parsed, dict):
+                    auth_attempted_username = str(parsed.get("username") or parsed.get("identity") or "")[:64]
+            except Exception:
+                auth_attempted_username = ""
         response = await call_next(request)
         response_time_ms = round((time.perf_counter() - started_at) * 1000, 2)
         path = request.url.path
@@ -239,6 +253,10 @@ class OperationLogMiddleware(BaseHTTPMiddleware):
             except Exception:
                 pass
 
+        # 登录/注册请求：使用进入中间件前缓存的用户名（密码绝不落日志）
+        if path in self.AUTH_BODY_PATHS and not username and auth_attempted_username:
+            username = f"{auth_attempted_username}(attempt)"
+
         # 解析IP
         client_ip = request.client.host if request.client else ""
         forwarded_for = request.headers.get("x-forwarded-for")
@@ -263,53 +281,69 @@ class OperationLogMiddleware(BaseHTTPMiddleware):
         if result == "成功":
             content_type = response.headers.get("content-type", "")
             if content_type.startswith("application/json") and hasattr(response, "body_iterator"):
-                chunks = [chunk async for chunk in response.body_iterator]
-                response_body = b"".join(chunk.encode() if isinstance(chunk, str) else chunk for chunk in chunks)
-                response = Response(
-                    content=response_body,
-                    status_code=response.status_code,
-                    headers=dict(response.headers),
-                    background=response.background,
-                )
+                # 防御性读取响应体：任何异常都不能中断审计写入（改为跳过 code 细判）
                 try:
-                    body_data = json.loads(response_body) if response_body else {}
-                    if isinstance(body_data, dict) and body_data.get("code", 200) >= 400:
-                        result = "失败"
-                except (TypeError, ValueError):
-                    pass
+                    chunks = [chunk async for chunk in response.body_iterator]
+                    response_body = b"".join(chunk.encode() if isinstance(chunk, str) else chunk for chunk in chunks)
+                    response = Response(
+                        content=response_body,
+                        status_code=response.status_code,
+                        headers=dict(response.headers),
+                        background=response.background,
+                    )
+                    try:
+                        body_data = json.loads(response_body) if response_body else {}
+                        if isinstance(body_data, dict) and body_data.get("code", 200) >= 400:
+                            result = "失败"
+                    except (TypeError, ValueError):
+                        pass
+                except Exception:
+                    import logging
+                    logging.getLogger("audit").warning("读取响应体失败，跳过业务码判定", exc_info=True)
 
-        # 写入数据库(失败时打印但不影响主请求)
-        try:
-            from app.database import SessionLocal
-            from app.models import OperationLog
-
-            db = SessionLocal()
+        # 写入数据库（挂到响应后台任务：响应发送完毕、请求级依赖均已释放后再写，
+        # 避免与处理器会话争用同一连接导致审计丢失；失败只记日志不影响主请求）
+        def _write_audit_log() -> None:
             try:
-                log = OperationLog(
-                    user_id=user_id,
-                    username=username or "anonymous",
-                    role=role or "unknown",
-                    action=action,
-                    target=target,
-                    detail=detail,
-                    result=result,
-                    status_code=status_code,
-                    response_time_ms=response_time_ms,
-                    ip=client_ip,
-                    method=method,
-                    path=path,
-                    create_time=datetime.datetime.now(),
-                )
-                db.add(log)
-                db.commit()
-            except Exception:
-                db.rollback()
-            finally:
-                db.close()
-        except Exception:
-            import logging
-            logging.getLogger("audit").warning("写入审计日志失败", exc_info=True)
+                from app.database import SessionLocal
+                from app.models import OperationLog
 
+                db = SessionLocal()
+                try:
+                    log = OperationLog(
+                        user_id=user_id,
+                        username=username or "anonymous",
+                        role=role or "unknown",
+                        action=action,
+                        target=target,
+                        detail=detail,
+                        result=result,
+                        status_code=status_code,
+                        response_time_ms=response_time_ms,
+                        ip=client_ip,
+                        method=method,
+                        path=path,
+                        create_time=datetime.datetime.now(),
+                    )
+                    db.add(log)
+                    db.commit()
+                except Exception:
+                    db.rollback()
+                finally:
+                    db.close()
+            except Exception:
+                import logging
+                logging.getLogger("audit").warning("写入审计日志失败", exc_info=True)
+
+        # 合并已有 background（如依赖注入的清理任务），保证不互相覆盖
+        existing_background = getattr(response, "background", None)
+        tasks = BackgroundTasks()
+        if isinstance(existing_background, BackgroundTasks):
+            tasks = existing_background
+        elif existing_background is not None:
+            tasks.add_task(existing_background.run)
+        tasks.add_task(_write_audit_log)
+        response.background = tasks
         return response
 
 
@@ -478,11 +512,12 @@ app.include_router(research.router, prefix="/api")
 
 import os
 
-from fastapi.staticfiles import StaticFiles
-
+# 上传文件不再通过无鉴权的 StaticFiles 目录对外暴露。
+# 统一走 /api/uploads/... 路由：报告下载需登录，且返回带 nosniff + attachment 头，
+# 防止上传 HTML/SVG 造成存储型 XSS 以及未授权读取上传文件。
 upload_dir = os.path.join(os.path.dirname(__file__), "..", "uploads")
-os.makedirs(upload_dir, exist_ok=True)
-app.mount("/uploads", StaticFiles(directory=upload_dir), name="uploads")
+os.makedirs(os.path.join(upload_dir, "avatars"), exist_ok=True)
+os.makedirs(os.path.join(upload_dir, "reports"), exist_ok=True)
 
 
 @app.on_event("startup")

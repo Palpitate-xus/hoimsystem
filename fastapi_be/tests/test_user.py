@@ -69,7 +69,8 @@ class TestUserAuth:
         second = await async_client.post("/api/register", json=payload)
         assert second.status_code == 200
         assert second.json()["code"] == 500
-        assert "已注册" in second.json()["msg"]
+        # 注册失败提示统一模糊，不泄露"该身份证号已注册"（防枚举）
+        assert "注册失败" in second.json()["msg"]
 
     async def test_login_fail(self, async_client):
         r = await async_client.post("/api/login", json={
@@ -109,10 +110,10 @@ class TestUserAuth:
         assert r.status_code == 200
         assert r.json()["code"] == 200
 
-    async def test_echo(self, async_client):
+    async def test_health_probe(self, async_client):
         r = await async_client.post("/api/test", json={"data": "hello"})
         assert r.status_code == 200
-        assert r.json()["data"] == "hello"
+        assert r.json()["data"] == "ok"
 
 
 @pytest.mark.asyncio

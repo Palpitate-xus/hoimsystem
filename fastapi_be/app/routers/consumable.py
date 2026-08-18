@@ -12,7 +12,7 @@ router = APIRouter()
 
 
 @router.get("/consumable/getList")
-def get_consumable_list(keyword: str | None = None, page: int | None = None, page_size: int | None = None, db: Session = Depends(get_db)):
+def get_consumable_list(keyword: str | None = None, page: int | None = None, page_size: int | None = None, db: Session = Depends(get_db), current_user: User = Depends(require_roles(*PHARMACY_ROLES))):
     query = db.query(Consumable)
     items, total = paginate(query, page, page_size)
     data = []

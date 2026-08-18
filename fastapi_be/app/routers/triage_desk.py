@@ -39,7 +39,7 @@ def create_triage_record(req: dict, db: Session = Depends(get_db), current_user:
 
 
 @router.get("/triageDesk/getList")
-def get_triage_list(level: int | None = None, status: int | None = None, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+def get_triage_list(level: int | None = None, status: int | None = None, db: Session = Depends(get_db), current_user: User = Depends(require_roles(*GUIDE_ROLES))):
     """分诊记录列表，按级别排序（危急优先）"""
     query = db.query(TriageRecord)
     if level:

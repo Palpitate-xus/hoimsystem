@@ -196,6 +196,13 @@ def _export_rows(entity: str, db: Session):
     return [[item.name, item.stock, item.price, item.expireddate, item.supplier, item.remark, item.antibiotic_level, item.status] for item in db.query(Pharmaceutical).order_by(Pharmaceutical.pharmaceutical_id).all()]
 
 
+def _sanitize_cell(value):
+    """防 Excel 公式注入：以 = + - @ 开头的文本前置单引号（openpyxl 写入 data_type='s'）。"""
+    if isinstance(value, str) and value[:1] in ("=", "+", "-", "@"):
+        return f"'{value}"
+    return value
+
+
 @router.get("/dataImportExport/export/{entity}")
 def export_data(entity: str, current_user: User = Depends(require_roles(*ADMIN_ROLES)), db: Session = Depends(get_db)):
     entity = _validate_entity(entity)
@@ -204,7 +211,7 @@ def export_data(entity: str, current_user: User = Depends(require_roles(*ADMIN_R
     sheet.title = entity
     sheet.append(ENTITY_HEADERS[entity])
     for row in _export_rows(entity, db):
-        sheet.append(row)
+        sheet.append([_sanitize_cell(v) for v in row])
     output = io.BytesIO()
     workbook.save(output)
     output.seek(0)

@@ -1,7 +1,7 @@
 import datetime
 import traceback
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app.database import get_db
@@ -350,7 +350,14 @@ def get_exam_record_list(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    records = db.query(ExamRecord).order_by(ExamRecord.create_time.desc()).all()
+    query = db.query(ExamRecord).order_by(ExamRecord.create_time.desc())
+    if current_user.user_role == ROLE_PATIENT:
+        query = query.filter(
+            ExamRecord.patient_id.in_(
+                db.query(Patient.patient_id).filter(Patient.identity == current_user.username)
+            )
+        )
+    records = query.all()
     data = []
     status_map = {0: "待录入", 1: "录入中", 2: "待总检", 3: "已完成"}
     for item in records:
@@ -547,6 +554,10 @@ def get_exam_report_detail(
     record = db.query(ExamRecord).filter(ExamRecord.record_id == record_id).first()
     if not record:
         return {"code": 500, "msg": "体检记录不存在"}
+    if current_user.user_role == ROLE_PATIENT:
+        own_ids = db.query(Patient.patient_id).filter(Patient.identity == current_user.username)
+        if record.patient_id not in [pid for pid in own_ids]:
+            raise HTTPException(status_code=403, detail="无权查看他人体检报告")
 
     results = (
         db.query(ExamResult)

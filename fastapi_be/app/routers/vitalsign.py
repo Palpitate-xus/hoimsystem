@@ -59,7 +59,7 @@ def create_vital_sign(req: VitalSignCreateRequest, current_user: User = Depends(
 
 
 @router.get("/vitalSign/getList")
-def get_vital_sign_list(keyword: str | None = None, current_user: User = Depends(get_current_user),
+def get_vital_sign_list(keyword: str | None = None, current_user: User = Depends(require_roles(*NURSING_ROLES)),
     db: Session = Depends(get_db)):
     vitals = db.query(VitalSign).order_by(VitalSign.check_time.desc()).all()
     data = []

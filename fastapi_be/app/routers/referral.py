@@ -29,7 +29,7 @@ def create_referral(req: dict, current_user: User = Depends(require_roles(*CLINI
 
 
 @router.get("/referral/getList")
-def get_referral_list(current_user: User = Depends(get_current_user),
+def get_referral_list(current_user: User = Depends(require_roles(*CLINICAL_ROLES)),
     db: Session = Depends(get_db)):
     items = db.query(Referral).order_by(Referral.create_time.desc()).all()
     data = []

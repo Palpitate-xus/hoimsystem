@@ -103,6 +103,7 @@ def get_surgery_application_list(
     status: int | None = None,
     keyword: str | None = None,
     db: Session = Depends(get_db),
+    current_user: User = Depends(require_roles(*CLINICAL_ROLES)),
 ):
     query = db.query(SurgeryApplication).order_by(SurgeryApplication.create_time.desc())
     if status is not None:
@@ -170,7 +171,7 @@ def create_surgery_application(req: dict, current_user: User = Depends(require_r
 
 
 @router.post("/surgeryApplication/approve")
-def approve_surgery_application(req: dict, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+def approve_surgery_application(req: dict, current_user: User = Depends(require_roles(*CLINICAL_ROLES)), db: Session = Depends(get_db)):
     application = db.query(SurgeryApplication).filter(SurgeryApplication.application_id == req.get("application_id")).first()
     if not application:
         return {"code": 500, "msg": "申请不存在"}
@@ -206,6 +207,7 @@ def get_surgery_schedule_list(
     surgery_date: str | None = None,
     status: int | None = None,
     db: Session = Depends(get_db),
+    current_user: User = Depends(require_roles(*CLINICAL_ROLES)),
 ):
     query = db.query(SurgerySchedule).order_by(SurgerySchedule.surgery_date.desc())
     if surgery_date:

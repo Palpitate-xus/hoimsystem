@@ -41,7 +41,7 @@ def create_mdt(req: dict, current_user: User = Depends(require_roles(*CLINICAL_R
 
 
 @router.get("/mdt/getList")
-def get_mdt_list(current_user: User = Depends(get_current_user),
+def get_mdt_list(current_user: User = Depends(require_roles(*CLINICAL_ROLES)),
     db: Session = Depends(get_db)):
     items = db.query(MdtCase).order_by(MdtCase.create_time.desc()).all()
     data = []

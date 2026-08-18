@@ -70,6 +70,10 @@ def create_family_member(
     existing_patient = db.query(Patient).filter(Patient.identity == req.identity).first()
     if existing_patient and db.query(FamilyMember).filter(FamilyMember.member_patient_id == existing_patient.patient_id).first():
         return {"code": 500, "msg": "该患者已被其他家庭账号绑定"}
+    if existing_patient and existing_patient.permission == "allow":
+        # 已独立注册/就诊的患者档案不允许他人凭身份证号直接绑定，
+        # 防止通过已知身份证号读取他人联系方式与过敏史（PHI 越权）。
+        return {"code": 500, "msg": "该患者已注册，不能被添加为家庭成员"}
     member_patient = existing_patient or Patient(
         name=req.name,
         sex=req.sex,

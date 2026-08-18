@@ -7,12 +7,13 @@ services:
     restart: unless-stopped
     environment:
       POSTGRES_USER: hoimsystem
-      POSTGRES_PASSWORD: hoimsystem_password
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set}
       POSTGRES_DB: hoimsystem
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
+    # 数据库不对外暴露端口：仅容器网络内访问，减少攻击面
+    expose:
+      - "5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U hoimsystem -d hoimsystem"]
       interval: 5s
@@ -25,13 +26,18 @@ services:
     restart: unless-stopped
     environment:
       ENVIRONMENT: ${ENVIRONMENT:-production}
-      DATABASE_URL: postgresql://hoimsystem:hoimsystem_password@db:5432/hoimsystem
+      DATABASE_URL: postgresql://hoimsystem:${POSTGRES_PASSWORD}@db:5432/hoimsystem
       SECRET_KEY: ${SECRET_KEY:?SECRET_KEY must be set before starting production compose}
-      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:?ALLOWED_ORIGINS must be set (no wildcards)}
+      # 外部系统集成密钥（LIS/PACS/医保/支付回调），未配置时对应回调返回 503
+      LIS_INTEGRATION_KEY: ${LIS_INTEGRATION_KEY:-}
+      PACS_INTEGRATION_KEY: ${PACS_INTEGRATION_KEY:-}
+      MEDICAL_INSURANCE_INTEGRATION_KEY: ${MEDICAL_INSURANCE_INTEGRATION_KEY:-}
+      PAYMENT_INTEGRATION_KEY: ${PAYMENT_INTEGRATION_KEY:-}
     volumes:
       - ./fastapi_be/app/uploads:/app/app/uploads
     ports:
-      - "8000:8000"
+      - "127.0.0.1:8000:8000"
     depends_on:
       db:
         condition: service_healthy

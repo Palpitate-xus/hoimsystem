@@ -1,5 +1,4 @@
 import datetime
-import json
 import time
 from decimal import ROUND_HALF_UP, Decimal, InvalidOperation
 
@@ -77,9 +76,8 @@ def decode_access_token(token: str) -> str:
 
 @router.post("/test")
 async def test(request: Request, db: Session = Depends(get_db)):
-    body = json.loads(await request.body())
-    temp = body.get("data")
-    return {"code": 200, "msg": "success", "data": temp}
+    """健康探测端点：仅返回固定回显，不转发任意请求体（原样回显已被移除）。"""
+    return {"code": 200, "msg": "success", "data": "ok"}
 
 
 @router.get("/publicKey")
@@ -130,9 +128,10 @@ def register(req: RegisterRequest, db: Session = Depends(get_db)):
         if not password or not 6 <= len(password) <= 20:
             return {"code": 500, "msg": "密码长度必须为6至20位"}
         if db.query(Patient).filter(Patient.identity == req.identity).first():
-            return {"code": 500, "msg": "身份证号已注册"}
+            # 统一模糊提示：避免成为"该身份证号是否已注册"的枚举探测点
+            return {"code": 500, "msg": "注册失败，请核对信息或联系医院"}
         if db.query(User).filter(User.username == req.identity).first():
-            return {"code": 500, "msg": "用户已注册"}
+            return {"code": 500, "msg": "注册失败，请核对信息或联系医院"}
         patient = Patient(
             name=req.username,
             identity=req.identity,

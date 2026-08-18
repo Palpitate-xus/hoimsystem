@@ -98,7 +98,7 @@ def create_purchase(req: dict, current_user: User = Depends(require_roles(*ADMIN
 
 
 @router.get("/purchase/getList")
-def get_purchase_list(status: int | None = None, current_user: User = Depends(get_current_user),
+def get_purchase_list(status: int | None = None, current_user: User = Depends(require_roles(*ADMIN_ROLES)),
     db: Session = Depends(get_db)):
     query = db.query(PurchaseOrder)
     if status is not None:

@@ -87,20 +87,26 @@ class TestAuditMiddleware:
         assert len(matched) >= 1 or any("medicalRecord" in entry.get("path", "") for entry in logs), \
             f"敏感操作未被记录,最近: {logs[:3]}"
 
-    async def test_login_not_logged(self, async_client, seed_data):
-        """登录操作不记录(避免日志膨胀)。"""
+    async def test_login_attempt_audited_without_credentials(self, async_client, seed_data):
+        """登录尝试必须留审计痕迹（防暴力破解无迹可寻），且密码绝不落日志。"""
         r = await async_client.post("/api/login", json={"username": "admin", "password": "admin123"})
         if r.json()["code"] != 200:
             pytest.skip("登录失败")
+        # 审计写入在响应后异步完成，稍作等待确保落库
+        import asyncio as _asyncio
+        await _asyncio.sleep(0.2)
         # 用 admin token 查日志
         from app.routers.user import create_access_token
         headers = {"accesstoken": create_access_token("admin")}
         r = await async_client.post("/api/log/getList", headers=headers,
-            json={"page": 1, "page_size": 5})
+            json={"page": 1, "page_size": 200})
         logs = r.json()["data"]["list"]
-        # 最新一条不应是 login
-        if logs:
-            assert "login" not in logs[0].get("path", "").lower(), "登录不应被记录"
+        login_entries = [e for e in logs if "login" in e.get("path", "").lower()]
+        assert login_entries, "登录尝试应被审计记录"
+        for entry in login_entries:
+            detail = str(entry.get("detail") or "")
+            assert "admin123" not in detail, "日志中不得出现密码"
+            assert "password" not in detail.lower()
 
     async def test_static_resource_not_logged(self, async_client, seed_data, auth_headers):
         """静态资源不记录。"""
@@ -182,3 +188,4 @@ class TestAuditMiddleware:
         headers = auth_headers(seed_data["patient_user"].username)
         r = await async_client.get("/api/log/stats", headers=headers)
         assert r.status_code == 403
+

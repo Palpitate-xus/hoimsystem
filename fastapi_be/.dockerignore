@@ -1,0 +1,23 @@
+# 防止开发数据库/备份（含真实 PHI、密码哈希）与敏感文件进入生产镜像
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+backups/
+benchmark.db
+test.db
+hoimsystem.db
+uploads/
+.env
+.env.*
+!.env.example
+venv/
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+tests/
+SECURITY_AUDIT.md
+backend.log
+migrate_passwords.py

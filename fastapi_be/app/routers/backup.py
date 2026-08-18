@@ -56,8 +56,8 @@ def create_backup(current_user=Depends(require_roles(*ADMIN_ROLES))):
     try:
         shutil.copy2(DB_PATH, backup_path)
         return {"code": 200, "msg": "success", "data": {"filename": backup_name}}
-    except Exception as e:
-        return {"code": 500, "msg": f"备份失败: {str(e)}"}
+    except Exception:
+        return {"code": 500, "msg": "备份失败，请稍后重试"}
 
 
 @router.get("/backup/getList")
@@ -78,8 +78,8 @@ def delete_backup(req: dict, current_user=Depends(require_roles(*ADMIN_ROLES))):
     try:
         os.remove(fpath)
         return {"code": 200, "msg": "success"}
-    except Exception as e:
-        return {"code": 500, "msg": f"删除失败: {str(e)}"}
+    except Exception:
+        return {"code": 500, "msg": "删除失败，请稍后重试"}
 
 
 @router.post("/backup/restore")
@@ -108,8 +108,8 @@ def restore_backup(req: dict, current_user=Depends(require_roles(*ADMIN_ROLES)))
                 "note": "数据库已恢复，请重启后端服务以生效",
             },
         }
-    except Exception as e:
-        return {"code": 500, "msg": f"恢复失败: {str(e)}"}
+    except Exception:
+        return {"code": 500, "msg": "恢复失败，请稍后重试"}
 
 
 @router.get("/backup/download/{filename}")

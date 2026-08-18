@@ -267,12 +267,19 @@ def _audit(user_id, table, row_count, anonymize):
     })
 
 
+def _sanitize_formula(value):
+    """防 CSV 公式注入：以 = + - @ 开头的单元格前置单引号，避免被 Excel/WPS 当公式执行。"""
+    if isinstance(value, str) and value[:1] in ("=", "+", "-", "@"):
+        return f"'{value}"
+    return value
+
+
 def _write_csv(fieldnames, rows):
     buf = io.StringIO()
     writer = csv.DictWriter(buf, fieldnames=fieldnames)
     writer.writeheader()
     for r in rows:
-        writer.writerow(r)
+        writer.writerow({k: _sanitize_formula(v) for k, v in r.items()})
     return buf.getvalue().encode("utf-8-sig")
 
 
@@ -294,22 +301,27 @@ def export_research_data(
     current_user: User = Depends(require_roles(*_RESEARCH_ROLES)),
     db: Session = Depends(get_db),
 ):
-    """导出单一科研表数据(CSV 格式)。"""
+    """导出单一科研表数据(CSV 格式)。仅管理员可导出未脱敏数据。"""
     table = req.get("table", "")
     if table not in _EXPORTERS:
         raise HTTPException(status_code=400, detail=f"不支持的表: {table},可选: {list(_EXPORTERS)}")
     from_date = req.get("from")
     to_date = req.get("to")
     anonymize = bool(req.get("anonymize", True))
+    if not anonymize and current_user.user_role not in ADMIN_ROLES:
+        # 普通医生/科室主任只能拿到脱敏数据，防止批量明文 PHI 外流
+        raise HTTPException(status_code=403, detail="未脱敏导出仅限管理员")
     fmt = req.get("format", "csv")
     if fmt != "csv":
         raise HTTPException(status_code=400, detail="当前只支持 csv 格式")
     try:
         fieldnames, rows = _EXPORTERS[table](db, from_date, to_date, anonymize)
-    except Exception as e:
+    except HTTPException:
+        raise
+    except Exception:
         import traceback
         traceback.print_exc()
-        raise HTTPException(status_code=500, detail=f"查询失败: {type(e).__name__}: {e}")
+        raise HTTPException(status_code=500, detail="查询失败，请稍后重试")
     _audit(current_user.user_id, table, len(rows), anonymize)
     payload = _write_csv(fieldnames, rows)
     ts = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -329,12 +341,14 @@ def export_package(
     current_user: User = Depends(require_roles(*_RESEARCH_ROLES)),
     db: Session = Depends(get_db),
 ):
-    """导出综合数据包(多表 ZIP)。"""
+    """导出综合数据包(多表 ZIP)。仅管理员可导出未脱敏数据。"""
     import zipfile
     tables = req.get("tables", list(_EXPORTERS.keys()))
     from_date = req.get("from")
     to_date = req.get("to")
     anonymize = bool(req.get("anonymize", True))
+    if not anonymize and current_user.user_role not in ADMIN_ROLES:
+        raise HTTPException(status_code=403, detail="未脱敏导出仅限管理员")
     zip_buf = io.BytesIO()
     manifest_lines = ["table,filename,rows,anonymize"]
     with zipfile.ZipFile(zip_buf, "w", zipfile.ZIP_DEFLATED) as zf:

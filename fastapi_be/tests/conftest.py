@@ -258,6 +258,22 @@ def seed_data(db_session: Session):
     return data
 
 
+def settle_prescription_charges(prescription_id) -> None:
+    """测试辅助：模拟缴费（把处方关联收费 status=0 置 1）。发药缴费校验的前置。"""
+    import datetime
+
+    from app.models import Charge
+
+    session = TestingSessionLocal()
+    try:
+        session.query(Charge).filter(
+            Charge.prescription_id == str(prescription_id), Charge.status == 0
+        ).update({Charge.status: 1, Charge.time: datetime.datetime.now()}, synchronize_session=False)
+        session.commit()
+    finally:
+        session.close()
+
+
 @pytest.fixture
 def auth_headers():
     from app.routers.user import create_access_token

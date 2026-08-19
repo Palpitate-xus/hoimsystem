@@ -3,6 +3,7 @@ import datetime
 import pytest
 
 from app.models import Pharmaceutical
+from tests.conftest import settle_prescription_charges as _settle_prescription_charges
 
 
 @pytest.mark.asyncio
@@ -217,6 +218,8 @@ class TestInventoryAdjustment:
         r = await async_client.post("/api/pharmacy/audit", headers=pharmacist_headers, json={"prescription_id": target["uuid"]})
         assert r.json()["code"] == 200
 
+        # 缴费校验：先结清处方费用再发药
+        _settle_prescription_charges(target["uuid"])
         r = await async_client.post("/api/pharmacy/dispense", headers=pharmacist_headers, json={"prescription_id": target["uuid"]})
         assert r.status_code == 200
         assert r.json()["code"] == 200
@@ -239,6 +242,7 @@ class TestInventoryAdjustment:
         created = await async_client.post("/api/prescriptionManagement/create", headers=doctor_headers, json={"patient": seed_data["patient2"].patient_id, "phas": [{"id": seed_data["pharmaceutical"].pharmaceutical_id, "number": 1}]})
         prescription_id = created.json()["data"]["uuid"]
         assert (await async_client.post("/api/pharmacy/audit", headers=pharmacist_headers, json={"prescription_id": prescription_id})).json()["code"] == 200
+        _settle_prescription_charges(prescription_id)
         assert (await async_client.post("/api/pharmacy/dispense", headers=pharmacist_headers, json={"prescription_id": prescription_id})).json()["code"] == 200
         listed = await async_client.get("/api/pharmacy/verificationList", headers=nurse_headers)
         item = next(row for row in listed.json()["data"] if row["prescription_id"] == prescription_id)
@@ -292,9 +296,11 @@ class TestInventoryAdjustment:
         pre_id = str(seed_data["prescription"].prescription_id)
         pha_id = seed_data["pharmaceutical"].pharmaceutical_id
 
-        for endpoint in ("audit", "dispense"):
-            r = await async_client.post(f"/api/pharmacy/{endpoint}", headers=headers, json={"prescription_id": pre_id})
-            assert r.json()["code"] == 200
+        r = await async_client.post("/api/pharmacy/audit", headers=headers, json={"prescription_id": pre_id})
+        assert r.json()["code"] == 200
+        _settle_prescription_charges(pre_id)
+        r = await async_client.post("/api/pharmacy/dispense", headers=headers, json={"prescription_id": pre_id})
+        assert r.json()["code"] == 200
 
         r = await async_client.post("/api/pharmacy/return", headers=auth_headers(seed_data["pharmacist_user"].username), json={
             "prescription_id": pre_id,
@@ -323,6 +329,7 @@ class TestInventoryAdjustment:
         )
         prescription_id = created.json()["data"]["uuid"]
         await async_client.post("/api/pharmacy/audit", headers=pharmacist_headers, json={"prescription_id": prescription_id})
+        _settle_prescription_charges(prescription_id)
         await async_client.post("/api/pharmacy/dispense", headers=pharmacist_headers, json={"prescription_id": prescription_id})
         stats = await async_client.get("/api/pharmacy/dispenseStats", headers=pharmacist_headers)
         assert stats.status_code == 200

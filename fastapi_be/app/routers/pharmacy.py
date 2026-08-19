@@ -267,6 +267,17 @@ def dispense_prescription(req: PharmacyDispenseRequest, current_user: User = Dep
     if expired_names:
         return {"code": 400, "msg": f"药品已过期，禁止发药：{', '.join(expired_names)}"}
 
+    # 缴费校验：处方关联收费未结清禁止发药（原缺陷：未缴费即可发药形成漏费通道）
+    from app.models import Charge
+
+    unpaid = (
+        db.query(Charge)
+        .filter(Charge.prescription_id == str(req.prescription_id), Charge.status == 0)
+        .count()
+    )
+    if unpaid:
+        return {"code": 400, "msg": "该处方存在未缴费收费记录，请先缴费再发药"}
+
     # 皮试闭环校验：该患者对该药有皮试医嘱时，阳性(3)禁止发药；
     # 未完成（0 医嘱/1 待判定）也禁止——皮试结果未出不能发药
     from app.models import SkinTestOrder

@@ -222,6 +222,10 @@ class TestDoctorWorkflow:
         # 审核
         r = await async_client.post("/api/pharmacy/audit", headers=phar_headers,
             json={"prescription_id": pre_id})
+        # 缴费（发药前置校验）
+        from tests.conftest import settle_prescription_charges
+
+        settle_prescription_charges(pre_id)
         # 发药
         r = await async_client.post("/api/pharmacy/dispense", headers=phar_headers,
             json={"prescription_id": pre_id})
@@ -254,6 +258,9 @@ class TestPharmacistWorkflow:
         if r.json()["code"] == 500:
             # 可能已经审核过,继续
             pass
+        from tests.conftest import settle_prescription_charges
+
+        settle_prescription_charges(pre_id)
         # 发药
         r = await async_client.post("/api/pharmacy/dispense", headers=phar_headers,
             json={"prescription_id": pre_id})

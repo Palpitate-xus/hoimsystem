@@ -138,6 +138,8 @@ ENDPOINTS = [
 
     # inpatient_charge.py (settle/refund require CASHISTER; nurse has separate access via ward)
     ("POST", "/api/inpatientCharge/settle", {"admin", "super_admin", "cashier"}, {"admission_id": "1"}, {}),
+    ("POST", "/api/inpatientCharge/depositRecharge", {"admin", "super_admin", "cashier", "nurse"}, {"admission_id": "1", "amount": 100}, {}),
+    ("GET", "/api/inpatientCharge/depositBalance", {"admin", "super_admin", "cashier", "nurse"}, None, {"admission_id": "1"}),
     ("POST", "/api/inpatientCharge/refund", {"admin", "super_admin", "cashier"}, {"admission_id": "1", "amount": 10}, {}),
 
     # inpatient_order.py

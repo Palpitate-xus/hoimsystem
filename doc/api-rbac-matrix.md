@@ -3,7 +3,7 @@
 > 由 `fastapi_be/scripts/generate_rbac_matrix.py` 从源码自动生成，请勿手改。
 > `✓`=可访问 | `PUBLIC`=无需登录 | 留空=不可访问
 
-共 **482** 个接口（PUBLIC 14 个 / 需登录 468 个）。
+共 **484** 个接口（PUBLIC 14 个 / 需登录 470 个）。
 
 
 ### `admin.py`
@@ -409,6 +409,8 @@
 | POST | `/api/inpatientCharge/settle` | ✓ | ✓ |  |  |  | ✓ |  |  |  |  |  |  |
 | POST | `/api/inpatientCharge/refund` | ✓ | ✓ |  |  |  | ✓ |  |  |  |  |  |  |
 | GET | `/api/inpatientCharge/getSummary` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
+| POST | `/api/inpatientCharge/depositRecharge` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
+| GET | `/api/inpatientCharge/depositBalance` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
 
 ### `inpatient_order.py`
 

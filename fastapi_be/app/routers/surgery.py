@@ -387,6 +387,38 @@ def complete_surgery(req: dict, current_user: User = Depends(require_roles(*CLIN
         application.status = 3
         db.add(application)
 
+    # 手术费自动计费（原缺陷：手术全程不产生任何住院费用，出院结算漏计）
+    # 费用 = 基础起价 × 等级系数^(级别-1)，参数管理员可配置（config 表）
+    if application:
+        from decimal import Decimal
+
+        from app.config_service import get_config_float
+        from app.models import Admission, InpatientCharge
+
+        admission = (
+            db.query(Admission)
+            .filter(Admission.patient_id == application.patient_id, Admission.status == 1)
+            .order_by(Admission.admission_time.desc())
+            .first()
+        )
+        if admission:
+            base = Decimal(str(get_config_float(db, "surgery_fee_base", 500.0)))
+            multiplier = Decimal(str(get_config_float(db, "surgery_fee_level_multiplier", 1.5)))
+            level = application.surgery_level or 1
+            amount = base * (multiplier ** max(level - 1, 0))
+            db.add(InpatientCharge(
+                admission_id=admission.admission_id,
+                patient_id=application.patient_id,
+                item_name=f"手术费({application.surgery_name or '手术'}·{level}级)",
+                item_type="surgery",
+                quantity=1,
+                unit_price=amount,
+                total_amount=amount,
+                charge_date=datetime.date.today(),
+                status=0,
+                create_time=datetime.datetime.now(),
+            ))
+
     db.commit()
     return {"code": 200, "msg": "success"}
 
@@ -451,5 +483,34 @@ def create_anesthesia_record(req: dict, current_user: User = Depends(require_rol
         create_time=datetime.datetime.now(),
     )
     db.add(record)
+
+    # 麻醉费自动计费（基础起价可配置；原缺陷：麻醉不产生任何住院费用）
+    from decimal import Decimal
+
+    from app.config_service import get_config_float
+    from app.models import Admission, InpatientCharge
+
+    admission = (
+        db.query(Admission)
+        .filter(Admission.patient_id == schedule.patient_id, Admission.status == 1)
+        .order_by(Admission.admission_time.desc())
+        .first()
+    )
+    if admission:
+        amount = Decimal(str(get_config_float(db, "anesthesia_fee_base", 300.0)))
+        method = req.get("anesthesia_method") or "麻醉"
+        db.add(InpatientCharge(
+            admission_id=admission.admission_id,
+            patient_id=schedule.patient_id,
+            item_name=f"麻醉费({method})",
+            item_type="anesthesia",
+            quantity=1,
+            unit_price=amount,
+            total_amount=amount,
+            charge_date=datetime.date.today(),
+            status=0,
+            create_time=datetime.datetime.now(),
+        ))
+
     db.commit()
     return {"code": 200, "msg": "success", "data": {"record_id": record.record_id}}

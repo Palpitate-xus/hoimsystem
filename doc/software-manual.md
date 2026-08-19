@@ -348,7 +348,13 @@ flowchart TD
 
 - **126 张业务表**，命名前缀 `hoimsystem_`，完整结构见 `doc/databaseDoc.md`
 - 状态码/枚举字典见 `doc/data-dictionary.md`
-- 数据库迁移：Alembic（`fastapi_be/alembic/`），当前 head `20260819_research_audit`
+- 数据库迁移：Alembic（`fastapi_be/alembic/`），当前 head `20260820_charge_registration`
+- 业务收费标准（管理员可配，`系统配置` 模块或 `/api/config/*` 维护）：
+  - `registration_fee_common` 普通门诊挂号费（默认 10 元）
+  - `registration_fee_specialist` 专家门诊挂号费（默认 30 元）
+  - `surgery_fee_base` / `surgery_fee_level_multiplier` 手术费基础价与等级系数（默认 500 / 1.5，费用 = 基础 × 系数^(级别-1)）
+  - `anesthesia_fee_base` 麻醉费基础价（默认 300 元）
+  - `deposit_warning_ratio` 预缴金预警线（默认 0.3）
 - 2026-08 第二轮业务审计新增：`purchase_order_item.received_quantity`（实收数量）、`lab_result.auditor_id/audit_time`（双人复核留痕）、`digital_signature_record`（电子签名存证）、`research_export_audit`（科研导出审计/限流）
 
 ### 7.2 核心数据实体关系

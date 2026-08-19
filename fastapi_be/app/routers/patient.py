@@ -350,6 +350,23 @@ def patient_registration(req: RegistrationCreateRequest, current_user: User = De
             status=0,
         )
         db.add(registration)
+        # 挂号费计费（收费标准管理员可配置；原缺陷：挂号收入从未计费，日结缺失）
+        from app.config_service import get_config_float
+        from decimal import Decimal
+
+        fee_key = "registration_fee_specialist" if req.specialist == 1 else "registration_fee_common"
+        fee = Decimal(str(get_config_float(db, fee_key, 10.0)))
+        if fee > 0:
+            from app.models import Charge as _Charge
+
+            db.add(_Charge(
+                charge_time=registration_time,
+                time=datetime.datetime(1970, 1, 1),
+                registration_uuid=registration.registration_uuid,
+                charge_type="registration",
+                amount=fee,
+                status=0,
+            ))
         db.commit()
         return {"code": 200, "msg": "success", "data": {"registration_uuid": registration.registration_uuid, "registration_id": registration.registration_id}}
     except Exception:

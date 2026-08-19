@@ -196,3 +196,81 @@ def get_charge_summary(current_user: User = Depends(require_roles(*INPATIENT_FIN
             "total_deposit": round(total_deposit, 2),
         },
     }
+
+
+@router.post("/inpatientCharge/depositRecharge")
+def deposit_recharge(req: dict, current_user: User = Depends(require_roles(*INPATIENT_FINANCE_ROLES)),
+    db: Session = Depends(get_db)):
+    """预缴金充值/补缴。
+
+    amount 必须为正数；充值成功返回最新余额（已缴-已计费）。
+    原缺陷：预缴金仅入院时写入一次，无充值/余额接口。
+    """
+    admission = db.query(Admission).filter(Admission.admission_id == req.get("admission_id")).first()
+    if not admission:
+        return {"code": 500, "msg": "住院记录不存在"}
+    if admission.status != 1:
+        return {"code": 500, "msg": "患者已出院，不能充值预缴金"}
+    try:
+        amount = float(req.get("amount", 0))
+    except (TypeError, ValueError):
+        return {"code": 400, "msg": "充值金额格式错误"}
+    if amount <= 0:
+        return {"code": 400, "msg": "充值金额必须大于0"}
+
+    charged = (
+        db.query(func.sum(InpatientCharge.total_amount))
+        .filter(InpatientCharge.admission_id == admission.admission_id, InpatientCharge.status != 2)
+        .scalar()
+        or 0
+    )
+    from decimal import Decimal
+
+    admission.deposit_amount = Decimal(str(admission.deposit_amount or 0)) + Decimal(str(amount))
+    db.add(admission)
+    db.commit()
+    balance = float(admission.deposit_amount) - float(charged)
+    return {
+        "code": 200,
+        "msg": "success",
+        "data": {
+            "admission_id": admission.admission_id,
+            "deposit_amount": float(admission.deposit_amount),
+            "charged_amount": round(float(charged), 2),
+            "balance": round(balance, 2),
+        },
+    }
+
+
+@router.get("/inpatientCharge/depositBalance")
+def deposit_balance(admission_id: str, current_user: User = Depends(require_roles(*INPATIENT_FINANCE_ROLES)),
+    db: Session = Depends(get_db)):
+    """预缴金余额查询（已缴、已计费、余额、是否低于预警线）。"""
+    admission = db.query(Admission).filter(Admission.admission_id == admission_id).first()
+    if not admission:
+        return {"code": 500, "msg": "住院记录不存在"}
+    charged = (
+        db.query(func.sum(InpatientCharge.total_amount))
+        .filter(InpatientCharge.admission_id == admission.admission_id, InpatientCharge.status != 2)
+        .scalar()
+        or 0
+    )
+    deposit = float(admission.deposit_amount or 0)
+    balance = deposit - float(charged)
+    from app.config_service import get_config_float
+
+    warn_ratio = get_config_float(db, "deposit_warning_ratio", 0.3)
+    # 预警：余额为负，或剩余比例（余额/已缴）低于预警线且已缴>0
+    low = balance < 0 or (deposit > 0 and balance / deposit < warn_ratio)
+    return {
+        "code": 200,
+        "msg": "success",
+        "data": {
+            "admission_id": admission.admission_id,
+            "patient_name": admission.patient.name if admission.patient else "",
+            "deposit_amount": deposit,
+            "charged_amount": round(float(charged), 2),
+            "balance": round(balance, 2),
+            "low_balance_warning": bool(low),
+        },
+    }

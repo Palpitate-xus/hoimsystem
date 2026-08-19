@@ -1,6 +1,7 @@
 import datetime
 
 from fastapi import APIRouter, Depends
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from app.database import get_db
@@ -246,7 +247,23 @@ def create_inpatient_order(req: InpatientOrderCreateRequest, current_user: User 
     _create_order_executions(db, order)
 
     db.commit()
-    return {"code": 200, "msg": "success", "data": {"order_id": order.order_id, "total_amount": total_amount}}
+    # 预缴金余额预警（不阻断开嘱，返回提示供前端弹窗）
+    from app.config_service import get_config_float
+
+    admission = db.query(Admission).filter(Admission.admission_id == req.admission_id).first()
+    warning = None
+    if admission and admission.deposit_amount:
+        charged = (
+            db.query(func.sum(InpatientCharge.total_amount))
+            .filter(InpatientCharge.admission_id == admission.admission_id, InpatientCharge.status != 2)
+            .scalar()
+            or 0
+        )
+        balance = float(admission.deposit_amount) - float(charged)
+        warn_ratio = get_config_float(db, "deposit_warning_ratio", 0.3)
+        if balance < 0 or (admission.deposit_amount > 0 and balance / float(admission.deposit_amount) < warn_ratio):
+            warning = f"预缴金余额不足（当前余额 {balance:.2f} 元），请通知患者补缴"
+    return {"code": 200, "msg": "success", "data": {"order_id": order.order_id, "total_amount": total_amount, "deposit_warning": warning}}
 
 
 @router.post("/inpatientOrder/audit")

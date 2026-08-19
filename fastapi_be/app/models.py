@@ -349,6 +349,8 @@ class Charge(Base):
     charge_time = Column(DateTime)
     time = Column(DateTime)
     prescription_id = Column(String(36), ForeignKey("hoimsystem_prescription.prescription_id"))
+    registration_uuid = Column(String(36))
+    charge_type = Column(String(20))  # prescription=处方费 registration=挂号费
     amount = Column(Numeric(12, 2))
     status = Column(Integer)
 

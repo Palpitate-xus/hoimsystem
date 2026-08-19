@@ -2366,6 +2366,20 @@
  },
  {
   "auth": "ANY",
+  "function": "deposit_recharge",
+  "method": "POST",
+  "module": "inpatient_charge.py",
+  "path": "/api/inpatientCharge/depositRecharge"
+ },
+ {
+  "auth": "ANY",
+  "function": "deposit_balance",
+  "method": "GET",
+  "module": "inpatient_charge.py",
+  "path": "/api/inpatientCharge/depositBalance"
+ },
+ {
+  "auth": "ANY",
   "function": "get_inpatient_order_list",
   "method": "GET",
   "module": "inpatient_order.py",

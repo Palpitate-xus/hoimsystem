@@ -35,9 +35,24 @@ def create_handover(req: ShiftHandoverCreateRequest, current_user: User = Depend
 
 
 @router.get("/shiftHandover/list")
-def list_handovers(current_user: User = Depends(require_roles(*(NURSING_ROLES | ADMIN_ROLES))), db: Session = Depends(get_db)):
-    items = db.query(ShiftHandover).order_by(ShiftHandover.create_time.desc()).limit(100).all()
-    return {"code": 200, "msg": "success", "data": [_serialize(item) for item in items]}
+def list_handovers(
+    status: int | None = None,
+    page: int | None = None,
+    page_size: int | None = None,
+    current_user: User = Depends(require_roles(*(NURSING_ROLES | ADMIN_ROLES))),
+    db: Session = Depends(get_db),
+):
+    from app.pagination import paginate
+
+    query = db.query(ShiftHandover)
+    if status is not None:
+        query = query.filter(ShiftHandover.status == status)
+    query = query.order_by(ShiftHandover.create_time.desc())
+    items, total = paginate(query, page, page_size)
+    result = {"code": 200, "msg": "success", "data": [_serialize(item) for item in items]}
+    if page and page_size:
+        result["total"] = total
+    return result
 
 
 @router.post("/shiftHandover/receive")

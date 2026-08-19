@@ -90,6 +90,13 @@ def record_follow_up(req: FollowUpRecordRequest, current_user: User = Depends(re
     follow_up = db.query(FollowUp).filter(FollowUp.follow_up_id == req.follow_up_id).first()
     if not follow_up:
         return {"code": 500, "msg": "随访计划不存在"}
+    if follow_up.status == 1:
+        return {"code": 500, "msg": "该随访已完成，不能重复记录"}
+    # 归属校验：仅计划医生本人或 admin 可记录
+    if current_user.user_role not in ("admin", "super_admin"):
+        doctor = db.query(Doctor).filter(Doctor.user_id == current_user.user_id).first()
+        if not doctor or doctor.doctor_id != follow_up.doctor_id:
+            return {"code": 500, "msg": "仅随访计划负责医生本人可记录随访结果"}
     follow_up.result = req.result
     follow_up.patient_feedback = req.patient_feedback
     follow_up.status = 1

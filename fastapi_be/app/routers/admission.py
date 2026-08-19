@@ -22,7 +22,14 @@ router = APIRouter()
 def _generate_admission_no(db: Session) -> str:
     today = datetime.datetime.now().strftime("%Y%m%d")
     count = db.query(Admission).filter(Admission.admission_no.like(f"ZY{today}%")).count()
-    return f"ZY{today}{count + 1:03d}"
+    candidate = f"ZY{today}{count + 1:03d}"
+    # 并发防护：候选号已被占用时（count+1 撞号）改用序号+微秒后缀保证唯一
+    exists = db.query(Admission).filter(Admission.admission_no == candidate).first()
+    if exists:
+        us = datetime.datetime.now().strftime("%f")
+        candidate = f"ZY{today}{count + 1:03d}{us}"
+    return candidate
+
 
 
 @router.get("/admission/getList")
@@ -160,7 +167,15 @@ def create_admission(req: AdmissionCreateRequest, current_user: User = Depends(r
         )
         db.add(charge)
 
-    db.commit()
+    # 并发重号防护：冲突时住院号追加当日序时后缀重试（rollback 会丢床位/床位费写入，
+    # 因此采用"重算唯一号 + 全量重建"策略——重建由调用方 create 重入完成，此处仅拒绝并提示）
+    from sqlalchemy.exc import IntegrityError
+
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        return {"code": 500, "msg": "住院号生成冲突（并发入院），请重试登记"}
     return {"code": 200, "msg": "success", "data": {"admission_id": admission.admission_id, "admission_no": admission_no}}
 
 

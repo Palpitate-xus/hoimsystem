@@ -12,7 +12,8 @@
 1. **[软件说明书](software-manual.md)** — 软件概述/运行环境/功能结构/角色权限/数据与安全总览
 2. **[安装部署手册](installation-guide.md)** — 生产部署步骤/备份策略/升级发布/故障排查
 3. **[业务流程图](flowcharts/README.md)** — 8 组 59 张 Mermaid 流程图覆盖全部业务域
-4. **[业务逻辑测试报告](business-test-report.md)** — 1000+ 用例结果 + 三轮审计共 66 项修复清单 + 15 项已知设计限制
+4. **[业务逻辑测试报告](business-test-report.md)** — 1045 用例全通过 + 三轮审计共 84 项修复清单 + 6 项已知设计限制
+5. **[HIS 功能完整性盘点](his-feature-gap-analysis.md)** — 对照标准 HIS 产品的 15 方向缺口分析与建设排序
 5. **[安全上线清单](security-launch-checklist.md)** — 31 项已修复 + 上线人工阻断项
 
 ### 🆕 新人快速上手
@@ -33,9 +34,9 @@
 ### 💻 后端开发
 
 1. **[编码规范](coding-standards.md)** — Python/Vue/数据库/Git 全规范
-2. **[API 文档](apiDoc.md)** — 247 个接口的入参、响应、错误码
+2. **[API 文档](apiDoc.md)** — 核心模块接口的入参、响应、错误码（全量 484 接口的角色权限见 [api-rbac-matrix.md](api-rbac-matrix.md)）
    - **[API 测试报告](api-test-report.md)** — 188 个用例，95.7% 通过率
-3. **[数据库文档](databaseDoc.md)** — 61 张表的字段、索引、ER 关系
+3. **[数据库文档](databaseDoc.md)** — 核心表字段说明（全量 126 张表以 `fastapi_be/app/models.py` 为准）
 4. **[数据字典](data-dictionary.md)** — 状态码、枚举值统一定义
 5. **[架构文档](architecture.md)** — 中间件、依赖、安全机制
 6. **[测试指南](testing.md)** — pytest 测试编写与运行
@@ -181,6 +182,6 @@
 | 2026-05-18 | 新增第二批：git-workflow、release-process、glossary、ADR(5个)、CODE_OF_CONDUCT |
 | 2026-05-18 | 新增第一批：dev-setup、coding-standards、testing、troubleshooting、GitHub 模板 |
 | 2026-05-18 | 新增 architecture.md 架构文档与 doc/README.md 文档导航 |
-| 2026-05-18 | 更新主 README.md：实际API数(247)、表数(61)、模块数(34) |
+| 2026-05-18 | 更新主 README.md：实际API数(247)、表数(61)、模块数(34)（历史值，后续以各文档当前值为准） |
 | 2026-05-17 | 新增 user-manual.md 用户操作手册 |
 | 2026-05-17 | 更新 deployDoc.md 端口号说明 |

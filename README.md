@@ -16,7 +16,7 @@
 | 维度 | 数量 |
 |:----:|:----:|
 | 业务模块 | **34** 个后端路由模块 |
-| API 接口 | **247** 个 RESTful 接口 |
+| API 接口 | **484** 个 RESTful 接口 |
 | 数据库表 | **61** 张业务表 |
 | 前端页面 | **69** 个 Vue 页面 |
 | 用户角色 | **8** 种（admin/director/doctor/nurse/cashier/pharmacist/guide/patient） |
@@ -154,7 +154,7 @@
 │        Vue 3 · Element Plus · Vuex · Vue Router · Rspack      │
 ├─────────────────────────────────────────────────────────────┤
 │                         应用层 (FastAPI)                       │
-│   34 个路由模块 · 247 个 API · JWT 认证 · 操作日志中间件         │
+│   67 个路由模块 · 484 个 API · JWT 认证 · 操作日志中间件         │
 ├─────────────────────────────────────────────────────────────┤
 │                         数据层                                 │
 │              SQLite (开发) / PostgreSQL (生产)                 │
@@ -240,7 +240,7 @@ hoimsystem/
 │   │   │   ├── system.py          # 操作日志/字典/配置
 │   │   │   ├── backup.py          # 数据备份
 │   │   │   └── upload.py          # 文件上传
-│   │   ├── models.py           # 61 张表的 SQLAlchemy 模型
+│   │   ├── models.py           # 126 张表的 SQLAlchemy 模型
 │   │   ├── schemas.py          # Pydantic 请求/响应模型
 │   │   ├── dependencies.py     # JWT 解析、权限校验
 │   │   ├── database.py         # 数据库连接
@@ -385,7 +385,7 @@ docker-compose up -d
 | [文档总览](doc/README.md) | 所有文档的导航索引 |
 | [架构文档](doc/architecture.md) | 系统架构、技术选型、设计原则 |
 | [需求文档](doc/demandDoc.md) | 功能需求、业务流程、非功能需求 |
-| [API 文档](doc/apiDoc.md) | 247 个 RESTful 接口定义 |
+| [API 文档](doc/apiDoc.md) | 核心接口定义（全量 484 见 RBAC 矩阵） |
 | [数据库文档](doc/databaseDoc.md) | 61 张表结构定义及 ER 关系 |
 | [部署文档](doc/deployDoc.md) | 开发/生产/Docker 部署指南 |
 | [用户手册](doc/user-manual.md) | 按角色分组的用户操作指南 |

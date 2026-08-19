@@ -32,7 +32,7 @@ HOIM（Hospital Information Management System）医院信息管理系统是一�
 | 软件类型 | B/S 架构医院信息管理系统（HIS） |
 | 版本 | v1.0 |
 | 用户规模 | 11 种角色，支持多院区 |
-| 接口规模 | 481 个 API（14 个公开接口 + 467 个认证接口） |
+| 接口规模 | 484 个 API（14 个公开接口 + 470 个认证接口） |
 | 数据规模 | 126 张业务表 |
 | 前端页面 | 约 100 个业务页面（15 个业务模块） |
 
@@ -346,7 +346,7 @@ flowchart TD
 
 ### 7.1 数据库概览
 
-- **126 张业务表**，命名前缀 `hoimsystem_`，完整结构见 `doc/databaseDoc.md`
+- **126 张业务表**，命名前缀 `hoimsystem_`；核心表说明见 `doc/databaseDoc.md`，全量以 `app/models.py` 为准
 - 状态码/枚举字典见 `doc/data-dictionary.md`
 - 数据库迁移：Alembic（`fastapi_be/alembic/`），当前 head `20260820_charge_registration`
 - 业务收费标准（管理员可配，`系统配置` 模块或 `/api/config/*` 维护）：

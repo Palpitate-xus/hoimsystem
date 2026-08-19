@@ -1,5 +1,7 @@
 # 医院门诊信息管理系统 API 文档
 
+> **范围说明**：本文档覆盖核心模块接口的入参/响应/错误码详解。全量 **484** 个接口清单与角色权限矩阵见 [api-rbac-matrix.md](api-rbac-matrix.md)（由 `fastapi_be/scripts/generate_rbac_matrix.py` 自动生成）。两文档冲突时以 RBAC 矩阵与代码为准。
+
 baseURL：`/api`
 
 通用响应格式：

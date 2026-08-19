@@ -47,6 +47,8 @@ def create_nursing_assessment(req: NursingAssessmentCreateRequest, current_user:
     admission = db.query(Admission).filter(Admission.admission_id == req.admission_id, Admission.patient_id == req.patient_id).first()
     if not admission:
         return {"code": 500, "msg": "在院记录不存在或患者不匹配"}
+    if admission.status != 1:
+        return {"code": 500, "msg": "患者已出院，不能书写在院护理文书（补录需走病案补录流程）"}
     active = db.query(NursingAssessment).filter(NursingAssessment.admission_id == req.admission_id, NursingAssessment.status == 0).first()
     if active:
         return {"code": 500, "msg": "该住院患者已有未完成的护理评估"}
@@ -107,6 +109,8 @@ def create_nursing_plan(req: NursingPlanCreateRequest, current_user: User = Depe
     admission = db.query(Admission).filter(Admission.admission_id == req.admission_id, Admission.patient_id == req.patient_id).first()
     if not admission:
         return {"code": 500, "msg": "在院记录不存在或患者不匹配"}
+    if admission.status != 1:
+        return {"code": 500, "msg": "患者已出院，不能书写在院护理文书（补录需走病案补录流程）"}
     now = datetime.datetime.now()
     item = NursingPlan(admission_id=req.admission_id, patient_id=req.patient_id, nurse_id=current_user.user_id, nursing_diagnosis=req.nursing_diagnosis.strip(), goal=req.goal.strip(), measures=req.measures.strip(), status=0, create_time=now, update_time=now)
     db.add(item)
@@ -151,6 +155,8 @@ def create_critical_record(req: CriticalCareRecordCreateRequest, current_user: U
     admission = db.query(Admission).filter(Admission.admission_id == req.admission_id, Admission.patient_id == req.patient_id).first()
     if not admission:
         return {"code": 500, "msg": "在院记录不存在或患者不匹配"}
+    if admission.status != 1:
+        return {"code": 500, "msg": "患者已出院，不能书写在院护理文书（补录需走病案补录流程）"}
     try:
         record_time = datetime.datetime.strptime(req.record_time, "%Y-%m-%d %H:%M:%S") if req.record_time else datetime.datetime.now()
     except ValueError:
@@ -240,6 +246,8 @@ def create_nursing_record(
     ).first()
     if not admission:
         return {"code": 500, "msg": "入院记录不存在或患者不匹配"}
+    if admission.status != 1:
+        return {"code": 500, "msg": "患者已出院，不能书写在院护理文书（补录需走病案补录流程）"}
     try:
         record_time = datetime.datetime.strptime(req.record_time, "%Y-%m-%d %H:%M:%S")
     except ValueError:
@@ -328,6 +336,8 @@ def create_temperature_record(
     ).first()
     if not admission:
         return {"code": 500, "msg": "入院记录不存在或患者不匹配"}
+    if admission.status != 1:
+        return {"code": 500, "msg": "患者已出院，不能书写在院护理文书（补录需走病案补录流程）"}
     try:
         from datetime import date as dt_date
 

@@ -303,6 +303,35 @@ def create_surgery_schedule(req: dict, current_user: User = Depends(require_role
     if req.get("surgery_date") is not None and surgery_date is None:
         return {"code": 500, "msg": "手术日期格式错误，应为 YYYY-MM-DD"}
 
+    # 冲突检测：同手术室同日已有未取消（0/1/2）排台时拒绝
+    operating_room = (req.get("operating_room") or "").strip()
+    if operating_room and surgery_date:
+        conflict = (
+            db.query(SurgerySchedule)
+            .filter(
+                SurgerySchedule.operating_room == operating_room,
+                SurgerySchedule.surgery_date == surgery_date,
+                SurgerySchedule.status.in_((0, 1, 2)),
+            )
+            .first()
+        )
+        if conflict:
+            return {"code": 500, "msg": f"手术室 {operating_room} 在 {surgery_date} 已有排台（申请单 {conflict.application_id}），请更换手术室或日期"}
+    # 主刀医生同日冲突（同一医生同日只能有一台未完成排台）
+    surgeon_id = req.get("surgeon_id")
+    if surgeon_id and surgery_date:
+        doc_conflict = (
+            db.query(SurgerySchedule)
+            .filter(
+                SurgerySchedule.surgeon_id == surgeon_id,
+                SurgerySchedule.surgery_date == surgery_date,
+                SurgerySchedule.status.in_((0, 1, 2)),
+            )
+            .first()
+        )
+        if doc_conflict:
+            return {"code": 500, "msg": f"主刀医生同日已有排台（申请单 {doc_conflict.application_id}），请更换医生或日期"}
+
     schedule = SurgerySchedule(
         application_id=req.get("application_id"),
         patient_id=application.patient_id,

@@ -10,6 +10,7 @@ from app.models import (
     Admission,
     Bed,
     DischargeSummary,
+    FollowUp,
     InpatientCharge,
     InpatientOrder,
     OrderExecution,
@@ -123,6 +124,35 @@ def do_discharge(req: dict, current_user: User = Depends(require_roles(*NURSING_
             create_time=datetime.datetime.now(),
         )
         db.add(summary)
+
+    # 出院随访计划自动生成：follow_up_plan 文本落库的同时创建 FollowUp 记录
+    # （原缺陷：随访计划仅存死文本，医生端随访清单不出现该患者，随访流失）
+    plan_text = (req.get("follow_up_plan") or "").strip()
+    if plan_text:
+        plan_date = datetime.date.today() + datetime.timedelta(days=7)  # 默认出院一周后
+        # 文本中含明确天数（如"2周后""30天"）时按其解析
+        import re as _re
+
+        m = _re.search(r"(\d+)\s*(周|天|日|月)", plan_text)
+        if m:
+            n = int(m.group(1))
+            unit = m.group(2)
+            days = n * 30 if unit == "月" else n * 7 if unit == "周" else n
+            plan_date = datetime.date.today() + datetime.timedelta(days=days)
+        dup = db.query(FollowUp).filter(
+            FollowUp.patient_id == admission.patient_id,
+            FollowUp.plan_date == plan_date,
+            FollowUp.content == plan_text,
+        ).first()
+        if not dup:
+            db.add(FollowUp(
+                patient_id=admission.patient_id,
+                doctor_id=admission.doctor_id,
+                plan_date=plan_date,
+                content=plan_text,
+                status=0,
+                create_time=datetime.datetime.now(),
+            ))
 
     db.commit()
     return {

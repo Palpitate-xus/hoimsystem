@@ -351,8 +351,9 @@ def patient_registration(req: RegistrationCreateRequest, current_user: User = De
         )
         db.add(registration)
         # 挂号费计费（收费标准管理员可配置；原缺陷：挂号收入从未计费，日结缺失）
-        from app.config_service import get_config_float
         from decimal import Decimal
+
+        from app.config_service import get_config_float
 
         fee_key = "registration_fee_specialist" if req.specialist == 1 else "registration_fee_common"
         fee = Decimal(str(get_config_float(db, fee_key, 10.0)))

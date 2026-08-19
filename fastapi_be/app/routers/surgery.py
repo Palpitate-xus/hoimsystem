@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.dependencies import get_current_user, User, User, require_roles, CLINICAL_ROLES, NURSING_ROLES
+from app.dependencies import CLINICAL_ROLES, NURSING_ROLES, User, get_current_user, require_roles
 from app.models import (
     Admission,
     AnesthesiaRecord,
@@ -488,7 +488,7 @@ def create_anesthesia_record(req: dict, current_user: User = Depends(require_rol
     from decimal import Decimal
 
     from app.config_service import get_config_float
-    from app.models import Admission, InpatientCharge
+    from app.models import Admission
 
     admission = (
         db.query(Admission)

@@ -42,6 +42,18 @@ def get_admission_list(
         query = query.filter(Admission.status == status)
     if ward_id is not None:
         query = query.filter(Admission.ward_id == ward_id)
+    if keyword:
+        from app.models import Patient as _Patient
+
+        kw = f"%{keyword}%"
+        query = query.outerjoin(_Patient, Admission.patient_id == _Patient.patient_id).filter(
+            db.query(_Patient).filter(
+                _Patient.patient_id == Admission.patient_id,
+                (_Patient.name.like(kw)) | (_Patient.identity.like(kw)) | (_Patient.phone.like(kw)),
+            ).exists()
+            | Admission.admission_no.like(kw)
+            | Admission.admission_diagnosis.like(kw)
+        )
     query = query.order_by(Admission.create_time.desc())
     records, total = paginate(query, page, page_size)
 
@@ -77,9 +89,6 @@ def get_admission_list(
                 "status_text": status_map[item.status] if item.status is not None and item.status < len(status_map) else "",
             }
         )
-    if keyword:
-        kw = keyword.lower()
-        data = [item for item in data if any(kw in str(val).lower() for val in item.values())]
     result = {"code": 200, "msg": "success", "data": data}
     if page and page_size:
         result["total"] = total

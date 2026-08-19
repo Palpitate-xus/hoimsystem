@@ -98,6 +98,9 @@ def delete_campus(req: CampusDeleteRequest, current_user: User = Depends(require
 def get_doctor_list(keyword: str | None = None, page: int | None = None, page_size: int | None = None, current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)):
     query = db.query(Doctor)
+    if keyword:
+        kw = f"%{keyword}%"
+        query = query.filter(Doctor.name.like(kw) | Doctor.title.like(kw) | Doctor.education.like(kw))
     doctors, total = paginate(query, page, page_size)
     data = []
     for item in doctors:
@@ -291,18 +294,20 @@ def delete_department(req: DepartmentDeleteRequest, current_user: User = Depends
 @router.get("/notice/getList")
 def get_notice_list(current_user: User = Depends(get_current_user), keyword: str | None = None, page: int | None = None, page_size: int | None = None, db: Session = Depends(get_db)):
     query = db.query(Notice)
+    # 角色可见性：admin 全可见；其余按 towho（中文角色名列表）匹配
+    role_name_map = {"director": "科室主任", "doctor": "医生", "patient": "病人", "nurse": "护士", "pharmacist": "药剂师", "registration": "挂号", "cashier": "收费", "technician": "医技"}
+    role_cn = role_name_map.get(current_user.user_role)
+    if current_user.user_role not in ("admin", "super_admin"):
+        if role_cn:
+            query = query.filter(Notice.towho.like("%all%") | Notice.towho.like(f"%{role_cn}%"))
+        else:
+            query = query.filter(Notice.towho.like("%all%"))
+    if keyword:
+        kw = f"%{keyword}%"
+        query = query.filter(Notice.title.like(kw) | Notice.content.like(kw))
     notices, total = paginate(query, page, page_size)
     data = []
     for item in notices:
-        towho = item.towho or []
-        # "all" 表示对所有角色可见；admin 始终可见所有公告
-        is_for_all = "all" in towho
-        if current_user.user_role == "director" and not is_for_all and "科室主任" not in towho:
-            continue
-        if current_user.user_role == "doctor" and not is_for_all and "医生" not in towho:
-            continue
-        if current_user.user_role == "patient" and not is_for_all and "病人" not in towho:
-            continue
         data.append(
             {
                 "uuid": str(item.notice_id),
@@ -316,9 +321,6 @@ def get_notice_list(current_user: User = Depends(get_current_user), keyword: str
                 "writer": item.writer.username if item.writer else "",
             }
         )
-    if keyword:
-        kw = keyword.lower()
-        data = [item for item in data if any(kw in str(val).lower() for val in item.values())]
     result = {"code": 200, "msg": "success", "data": data}
     if page and page_size:
         result["total"] = total

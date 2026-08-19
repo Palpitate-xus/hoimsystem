@@ -33,7 +33,11 @@ def _serialize(item: PatientAllergy):
 def _sync_patient_history(patient: Patient, db: Session):
     active = db.query(PatientAllergy).filter(PatientAllergy.patient_id == patient.patient_id, PatientAllergy.status == 1).order_by(PatientAllergy.allergy_id).all()
     structured = [f"{item.allergen}: {item.reaction}" for item in active]
-    patient.allergy_history = "；".join(structured)[:200]
+    text = "；".join(structured)
+    if len(text) > 200:
+        # 超长时退化为纯过敏原列表（保拦截能力，弃反应描述），仍超长则截断前 200
+        text = "；".join(item.allergen for item in active)
+    patient.allergy_history = text[:200]
 
 
 @router.get("/allergy/list")

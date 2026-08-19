@@ -31,8 +31,11 @@ def create_infection_case(req: dict, current_user: User = Depends(require_roles(
         onset_date = datetime.datetime.strptime(req.get("onset_date"), "%Y-%m-%d").date()
     except (TypeError, ValueError):
         return {"code": 400, "msg": "发病日期格式必须为YYYY-MM-DD"}
+    severity = int(req.get("severity", 1))
+    if not 1 <= severity <= 5:
+        return {"code": 400, "msg": "严重度必须为1-5"}
     now = datetime.datetime.now()
-    item = InfectionCase(patient_id=patient.patient_id, department_id=req.get("department_id"), infection_type=req["infection_type"], pathogen=req.get("pathogen"), onset_date=onset_date, severity=int(req.get("severity", 1)), description=req.get("description", ""), reporter_id=current_user.user_id, create_time=now, update_time=now)
+    item = InfectionCase(patient_id=patient.patient_id, department_id=req.get("department_id"), infection_type=req["infection_type"], pathogen=req.get("pathogen"), onset_date=onset_date, severity=severity, description=req.get("description", ""), reporter_id=current_user.user_id, create_time=now, update_time=now)
     db.add(item)
     db.commit()
     return {"code": 200, "msg": "success", "data": {"case_id": item.case_id}}

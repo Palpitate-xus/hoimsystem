@@ -224,10 +224,7 @@
   "path": "/api/admission/getInpatientList"
  },
  {
-  "auth": [
-   "admin",
-   "super_admin"
-  ],
+  "auth": "ANY",
   "function": "create_event",
   "method": "POST",
   "module": "adverse_event.py",
@@ -254,10 +251,7 @@
   "path": "/api/adverseEvent/updateStatus"
  },
  {
-  "auth": [
-   "admin",
-   "super_admin"
-  ],
+  "auth": "ANY",
   "function": "create_adr",
   "method": "POST",
   "module": "adverse_reaction.py",

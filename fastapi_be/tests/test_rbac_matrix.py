@@ -30,11 +30,11 @@ ENDPOINTS = [
     ("POST", "/api/admission/create", {"admin", "super_admin", "nurse"}, {"patient_id": 1, "department_id": 1, "admission_type": 0}, {}),
 
     # adverse_event.py
-    ("POST", "/api/adverseEvent/create", {"admin", "super_admin"}, {"event_type": "跌倒", "patient_id": 1, "description": "x", "severity": 1}, {}),
+    ("POST", "/api/adverseEvent/create", {"admin", "super_admin", "director", "doctor", "nurse"}, {"event_type": "跌倒", "patient_id": 1, "description": "x", "severity": 1}, {}),
     ("POST", "/api/adverseEvent/updateStatus", {"admin", "super_admin"}, {"event_id": 1, "status": 1}, {}),
 
     # adverse_reaction.py
-    ("POST", "/api/adverseReaction/create", {"admin", "super_admin"}, {"patient_id": 1, "pharmaceutical_id": 1, "symptom": "x", "severity": 1}, {}),
+    ("POST", "/api/adverseReaction/create", {"admin", "super_admin", "director", "doctor", "nurse"}, {"patient_id": 1, "pharmaceutical_id": 1, "symptom": "x", "severity": 1}, {}),
     ("POST", "/api/adverseReaction/updateStatus", {"admin", "super_admin"}, {"reaction_id": 1, "status": 1}, {}),
 
     # allergy.py

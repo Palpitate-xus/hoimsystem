@@ -4,14 +4,14 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.dependencies import ADMIN_ROLES, User, get_current_user, require_roles
+from app.dependencies import ADMIN_ROLES, CLINICAL_ROLES, NURSING_ROLES, User, get_current_user, require_roles
 from app.models import AdverseEvent
 
 router = APIRouter()
 
 
 @router.post("/adverseEvent/create")
-def create_event(req: dict, current_user: User = Depends(require_roles(*ADMIN_ROLES)), db: Session = Depends(get_db)):
+def create_event(req: dict, current_user: User = Depends(require_roles(*{*CLINICAL_ROLES, *NURSING_ROLES, *ADMIN_ROLES})), db: Session = Depends(get_db)):
     ev = AdverseEvent(
         event_type=req.get("event_type", ""),
         patient_id=req.get("patient_id"),
@@ -53,7 +53,15 @@ def update_event_status(req: dict, current_user: User = Depends(require_roles(*A
     ev = db.query(AdverseEvent).filter(AdverseEvent.event_id == req.get("event_id")).first()
     if not ev:
         return {"code": 500, "msg": "记录不存在"}
-    ev.status = req.get("status")
+    status = req.get("status")
+    if status not in (0, 1, 2):
+        return {"code": 400, "msg": "状态值不合法（0待处理 1处理中 2已闭环）"}
+    allowed = {0: {1, 2}, 1: {2}, 2: set()}
+    if status not in allowed.get(ev.status, set()):
+        return {"code": 400, "msg": f"状态迁移不合法：{ev.status} → {status}"}
+    if status == 2 and not (req.get("handle_result") or "").strip():
+        return {"code": 400, "msg": "闭环必须填写处理结论"}
+    ev.status = status
     if req.get("handle_result"):
         ev.handle_result = req.get("handle_result")
     db.commit()

@@ -1994,6 +1994,48 @@
   "path": "/api/followUp/record"
  },
  {
+  "auth": "ANY",
+  "function": "list_bindings",
+  "method": "GET",
+  "module": "home_icd.py",
+  "path": "/api/homeIcd/getList"
+ },
+ {
+  "auth": "ANY",
+  "function": "list_uncoded",
+  "method": "GET",
+  "module": "home_icd.py",
+  "path": "/api/homeIcd/uncoded"
+ },
+ {
+  "auth": "ANY",
+  "function": "bind_icd",
+  "method": "POST",
+  "module": "home_icd.py",
+  "path": "/api/homeIcd/bind"
+ },
+ {
+  "auth": "ANY",
+  "function": "unbind_icd",
+  "method": "POST",
+  "module": "home_icd.py",
+  "path": "/api/homeIcd/unbind"
+ },
+ {
+  "auth": "ANY",
+  "function": "set_primary",
+  "method": "POST",
+  "module": "home_icd.py",
+  "path": "/api/homeIcd/setPrimary"
+ },
+ {
+  "auth": "ANY",
+  "function": "icd_statistics",
+  "method": "GET",
+  "module": "home_icd.py",
+  "path": "/api/homeIcd/statistics"
+ },
+ {
   "auth": [
    "admin",
    "director",
@@ -4660,6 +4702,13 @@
   "method": "POST",
   "module": "surgery.py",
   "path": "/api/anesthesiaRecord/create"
+ },
+ {
+  "auth": "ANY",
+  "function": "antibiotic_compliance_statistics",
+  "method": "GET",
+  "module": "surgery.py",
+  "path": "/api/surgery/antibioticCompliance"
  },
  {
   "auth": [

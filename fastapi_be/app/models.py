@@ -2575,3 +2575,22 @@ class DepartmentPerformance(Base):
     department = relationship("Department")
     creator = relationship("User", foreign_keys=[creator_id])
     auditor = relationship("User", foreign_keys=[auditor_id])
+
+
+class HomeIcdBinding(Base):
+    """病案首页 ICD 编码绑定（编码工作台：文本诊断→ICD 码，主诊断标记）。"""
+
+    __tablename__ = "hoimsystem_home_icd_binding"
+
+    binding_id = Column(Integer, primary_key=True, autoincrement=True)
+    home_id = Column(String(36), ForeignKey("hoimsystem_medical_record_home.home_id"), nullable=False, index=True)
+    kind = Column(String(10), nullable=False)  # diagnosis=诊断编码 operation=手术编码
+    icd_code = Column(String(20), nullable=False)
+    icd_name = Column(String(200), nullable=False)
+    is_primary = Column(Integer, nullable=False, default=0)  # 1=主要诊断/主要手术
+    coder_id = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=False)
+    code_time = Column(DateTime, nullable=False)
+    remark = Column(String(300), nullable=True)
+
+    home = relationship("MedicalRecordHome")
+    coder = relationship("User")

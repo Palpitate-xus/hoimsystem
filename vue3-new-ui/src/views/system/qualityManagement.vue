@@ -52,6 +52,35 @@
           </el-table-column>
         </el-table>
       </el-tab-pane>
+
+      <el-tab-pane label="围术期抗菌药依从" name="antibiotic">
+        <div class="page-toolbar">
+          <el-date-picker v-model="abQuery.start_date" type="date" value-format="YYYY-MM-DD" placeholder="开始日期" />
+          <el-date-picker v-model="abQuery.end_date" type="date" value-format="YYYY-MM-DD" placeholder="结束日期" />
+          <el-button type="primary" @click="loadAntibiotic">统计</el-button>
+        </div>
+        <template v-if="abStats">
+          <el-alert type="info" :closable="false" :title="abStats.rule" style="margin-bottom: 12px" />
+          <el-descriptions :column="4" border>
+            <el-descriptions-item label="已执行给药">{{ abStats.total_executed }}</el-descriptions-item>
+            <el-descriptions-item label="依从例数">{{ abStats.compliant }}</el-descriptions-item>
+            <el-descriptions-item label="依从率">
+              <span :style="{ color: (abStats.compliance_rate ?? 0) < 90 ? 'var(--el-color-danger)' : 'var(--el-color-success)' }">{{ abStats.compliance_rate ?? "-" }}%</span>
+            </el-descriptions-item>
+            <el-descriptions-item label="过早(>2h)/过晚(<0.5h)">{{ abStats.too_early_gt120min }} / {{ abStats.too_late_lt30min }}</el-descriptions-item>
+          </el-descriptions>
+          <el-table v-if="abStats.by_level.length" :data="abStats.by_level" border style="margin-top: 12px">
+            <el-table-column prop="level" label="手术级别" width="100">
+              <template #default="{ row }">{{ { 1: "一级", 2: "二级", 3: "三级", 4: "四级" }[row.level] || "未分级" }}</template>
+            </el-table-column>
+            <el-table-column prop="total" label="例数" width="90" />
+            <el-table-column prop="compliant" label="依从" width="90" />
+            <el-table-column prop="rate" label="依从率">
+              <template #default="{ row }">{{ row.rate ?? "-" }}%</template>
+            </el-table-column>
+          </el-table>
+        </template>
+      </el-tab-pane>
     </el-tabs>
 
     <el-dialog v-model="rcaDialogVisible" title="发起 RCA 分析" width="560px">
@@ -132,6 +161,7 @@
 
 <script>
 import { getRcaList, createRca, advanceRca, getHqmsList, createHqms, importHqms, submitHqms } from "@/api/hisModules";
+import { getAntibioticCompliance } from "@/api/homeIcd";
 import { ElMessage, ElMessageBox } from "element-plus";
 
 export default {
@@ -151,11 +181,14 @@ export default {
       hqmsImportVisible: false,
       hqmsImportText: "",
       selectedHqms: [],
+      abQuery: { start_date: "", end_date: "" },
+      abStats: null,
     };
   },
   created() {
     this.loadRca();
     this.loadHqms();
+    this.loadAntibiotic();
   },
   methods: {
     async loadRca() {
@@ -229,6 +262,14 @@ export default {
         ElMessage.success(`已上报 ${res.data.updated} 项`);
         this.loadHqms();
       } else ElMessage.error(res.msg);
+    },
+    async loadAntibiotic() {
+      const params = {};
+      if (this.abQuery.start_date) params.start_date = this.abQuery.start_date;
+      if (this.abQuery.end_date) params.end_date = this.abQuery.end_date;
+      const res = await getAntibioticCompliance(params);
+      if (res.code === 200) this.abStats = res.data;
+      else ElMessage.error(res.msg);
     },
   },
 };

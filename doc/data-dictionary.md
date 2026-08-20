@@ -392,6 +392,8 @@
 | 医保对照 local_item_type | `drug`~`registration` | 药品/耗材/检验/检查/床位/手术/麻醉/挂号 |
 | 绩效核算 status | 0 / 1 / 2 | 草稿/已提交/已审核发放 |
 | 病案借阅 borrow_status | 0 / 1 / 2 / 3 | 无申请/待审批/已批准借出/已驳回 |
+| ICD 绑定 kind | `diagnosis` / `operation` | 诊断编码/手术编码 |
+| ICD 绑定 is_primary | 0 / 1 | 普通/主要诊断（同首页同类型唯一） |
 
 ---
 

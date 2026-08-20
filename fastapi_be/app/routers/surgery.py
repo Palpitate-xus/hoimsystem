@@ -4,18 +4,15 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.dependencies import CLINICAL_ROLES, NURSING_ROLES, User, get_current_user, require_roles
+from app.dependencies import CLINICAL_ROLES, NURSING_ROLES, User, require_roles
 from app.models import (
     Admission,
     AnesthesiaRecord,
-    Doctor,
     InpatientCharge,
-    Patient,
     PerioperativeAntibiotic,
     Pharmaceutical,
     SurgeryApplication,
     SurgerySchedule,
-    User,
 )
 
 router = APIRouter()
@@ -514,3 +511,73 @@ def create_anesthesia_record(req: dict, current_user: User = Depends(require_rol
 
     db.commit()
     return {"code": 200, "msg": "success", "data": {"record_id": record.record_id}}
+
+
+@router.get("/surgery/antibioticCompliance")
+def antibiotic_compliance_statistics(
+    start_date: str | None = None,
+    end_date: str | None = None,
+    current_user: User = Depends(require_roles(*(CLINICAL_ROLES | NURSING_ROLES))),
+    db: Session = Depends(get_db),
+):
+    """围术期预防用药时限依从统计。
+
+    判定规则（以手术开始时间为基准）：
+    - 依从：术前 30-120 分钟内给药（切皮前 0.5-2h，国家抗菌药临床应用指导原则）
+    - 过早：> 120 分钟；过晚/未给：< 30 分钟或未执行
+    汇总：总体依从率、按时给药率、按手术级别人群分布。
+    """
+
+    from app.models import PerioperativeAntibiotic, SurgerySchedule
+
+    query = (
+        db.query(PerioperativeAntibiotic, SurgerySchedule)
+        .join(SurgerySchedule, SurgerySchedule.application_id == PerioperativeAntibiotic.application_id)
+        .filter(PerioperativeAntibiotic.status == 1)
+        .filter(SurgerySchedule.start_time.isnot(None))
+        .filter(PerioperativeAntibiotic.administered_time.isnot(None))
+    )
+    try:
+        if start_date:
+            query = query.filter(SurgerySchedule.start_time >= datetime.datetime.strptime(start_date, "%Y-%m-%d"))
+        if end_date:
+            query = query.filter(SurgerySchedule.start_time < datetime.datetime.strptime(end_date, "%Y-%m-%d") + datetime.timedelta(days=1))
+    except ValueError:
+        return {"code": 400, "msg": "日期格式必须为 YYYY-MM-DD"}
+    rows = query.all()
+    from app.models import SurgeryApplication
+
+    app_ids = {pa.application_id for pa, _ in rows}
+    levels = {a.application_id: a.surgery_level for a in db.query(SurgeryApplication).filter(SurgeryApplication.application_id.in_(app_ids)).all()} if app_ids else {}
+    total = compliant = on_time_or_early = late_or_missing = 0
+    by_level: dict[int, dict] = {}
+    for pa, sch in rows:
+        total += 1
+        delta_min = (sch.start_time - pa.administered_time).total_seconds() / 60
+        is_ok = 30 <= delta_min <= 120
+        if is_ok:
+            compliant += 1
+        lv = levels.get(pa.application_id) or 0
+        bucket = by_level.setdefault(lv, {"level": lv, "total": 0, "compliant": 0})
+        bucket["total"] += 1
+        if is_ok:
+            bucket["compliant"] += 1
+        if delta_min > 120:
+            on_time_or_early += 1
+        elif delta_min < 30:
+            late_or_missing += 1
+    for bucket in by_level.values():
+        bucket["rate"] = round(bucket["compliant"] / bucket["total"] * 100, 1) if bucket["total"] else None
+    return {
+        "code": 200,
+        "msg": "success",
+        "data": {
+            "total_executed": total,
+            "compliant": compliant,
+            "compliance_rate": round(compliant / total * 100, 1) if total else None,
+            "too_early_gt120min": on_time_or_early,
+            "too_late_lt30min": late_or_missing,
+            "by_level": [by_level[k] for k in sorted(by_level)],
+            "rule": "切皮前 30-120 分钟给药为依从（0.5-2h）",
+        },
+    }

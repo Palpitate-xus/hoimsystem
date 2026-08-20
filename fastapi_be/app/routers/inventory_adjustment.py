@@ -97,8 +97,58 @@ def approve_inventory_adjustment(
     if updated != 1:
         db.rollback()
         return {"code": 500, "msg": "报损数量超过当前库存"}
+    # 批次台账联动（§3.6 #6）：启用批次管理的药品，报损按 FEFO 冲减批次并写台账
+    batch_note = ""
+    if item.adjustment_type == "loss":
+        from app.models import PharmaceuticalBatch, PharmaceuticalStockLedger
+
+        remaining = item.quantity
+        batches = (
+            db.query(PharmaceuticalBatch)
+            .filter(
+                PharmaceuticalBatch.pharmaceutical_id == item.pharmaceutical_id,
+                PharmaceuticalBatch.status == 0,
+                PharmaceuticalBatch.stock > 0,
+            )
+            .order_by(
+                PharmaceuticalBatch.expiry_date.is_(None),
+                PharmaceuticalBatch.expiry_date.asc(),
+                PharmaceuticalBatch.batch_id.asc(),
+            )
+            .with_for_update()
+            .all()
+        )
+        batch_stock = sum(b.stock for b in batches)
+        if batch_stock:
+            if batch_stock < remaining:
+                db.rollback()
+                return {"code": 500, "msg": f"批次库存不足：批次合计 {batch_stock} < 报损 {remaining}"}
+            deducted_batches = []
+            for b in batches:
+                if remaining <= 0:
+                    break
+                cut = min(b.stock, remaining)
+                before = b.stock
+                b.stock -= cut
+                remaining -= cut
+                db.add(b)
+                db.add(PharmaceuticalStockLedger(
+                    pharmaceutical_id=item.pharmaceutical_id,
+                    batch_id=b.batch_id,
+                    transaction_type="adjustment",
+                    quantity=-cut,
+                    before_stock=before,
+                    after_stock=b.stock,
+                    reference_type="inventory_adjustment",
+                    reference_id=str(item.adjustment_id),
+                    operator_id=current_user.user_id,
+                    reason=f"报损审批冲减批次 {b.batch_no}",
+                    create_time=datetime.datetime.now(),
+                ))
+                deducted_batches.append(f"{b.batch_no}×{cut}")
+            batch_note = f"；批次冲减：{'、'.join(deducted_batches)}"
     db.commit()
-    return {"code": 200, "msg": "success"}
+    return {"code": 200, "msg": "success", "msg_detail": batch_note.lstrip("；") if batch_note else None}
 
 
 @router.post("/pharmacy/inventoryAdjustment/reject")

@@ -3,7 +3,7 @@
 > 由 `fastapi_be/scripts/generate_rbac_matrix.py` 从源码自动生成，请勿手改。
 > `✓`=可访问 | `PUBLIC`=无需登录 | 留空=不可访问
 
-共 **533** 个接口（PUBLIC 14 个 / 需登录 519 个）。
+共 **540** 个接口（PUBLIC 14 个 / 需登录 526 个）。
 
 
 ### `admin.py`
@@ -334,6 +334,17 @@
 | POST | `/api/followUp/createPlan` | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |
 | GET | `/api/followUp/getList` | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |
 | POST | `/api/followUp/record` | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |
+
+### `home_icd.py`
+
+| 方法 | 路径 | admin | super_admin | director | doctor | nurse | cashier | pharmacist | guide | patient | lab_technician | registrar | PUBLIC |
+|------|------|------|------|------|------|------|------|------|------|------|------|------|------|
+| GET | `/api/homeIcd/getList` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
+| GET | `/api/homeIcd/uncoded` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
+| POST | `/api/homeIcd/bind` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
+| POST | `/api/homeIcd/unbind` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
+| POST | `/api/homeIcd/setPrimary` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
+| GET | `/api/homeIcd/statistics` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
 
 ### `icd10.py`
 
@@ -818,6 +829,7 @@
 | POST | `/api/surgerySchedule/complete` | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |
 | GET | `/api/anesthesiaRecord/getList` | ✓ | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |
 | POST | `/api/anesthesiaRecord/create` | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |
+| GET | `/api/surgery/antibioticCompliance` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
 
 ### `system.py`
 

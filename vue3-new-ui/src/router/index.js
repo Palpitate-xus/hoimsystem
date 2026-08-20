@@ -783,6 +783,12 @@ export const asyncRoutes = [
         meta: { title: "运营扩展(CSSD/PIVAS/评分/路径)", permissions: ["admin", "doctor", "director", "nurse", "pharmacist"] },
       },
       {
+        path: "homeIcdWorkbench",
+        name: "HomeIcdWorkbench",
+        component: () => import("@/views/inpatient/homeIcdWorkbench.vue"),
+        meta: { title: "ICD编码工作台", permissions: ["admin", "doctor", "director"] },
+      },
+      {
         path: "wardManagement",
         name: "WardManagement",
         component: () => import("@/views/inpatient/wardManagement.vue"),

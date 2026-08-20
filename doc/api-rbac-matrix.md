@@ -3,7 +3,7 @@
 > 由 `fastapi_be/scripts/generate_rbac_matrix.py` 从源码自动生成，请勿手改。
 > `✓`=可访问 | `PUBLIC`=无需登录 | 留空=不可访问
 
-共 **540** 个接口（PUBLIC 14 个 / 需登录 526 个）。
+共 **541** 个接口（PUBLIC 15 个 / 需登录 526 个）。
 
 
 ### `admin.py`
@@ -895,6 +895,12 @@
 | POST | `/api/prepaid/deduct` | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |
 | POST | `/api/prepaid/refund` | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |
 | GET | `/api/prepaid/getTransactions` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
+
+### `version.py`
+
+| 方法 | 路径 | admin | super_admin | director | doctor | nurse | cashier | pharmacist | guide | patient | lab_technician | registrar | PUBLIC |
+|------|------|------|------|------|------|------|------|------|------|------|------|------|------|
+| GET | `/api/version` |  |  |  |  |  |  |  |  |  |  |  | PUBLIC |
 
 ### `vitalsign.py`
 

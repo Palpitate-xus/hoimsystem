@@ -16,7 +16,7 @@ A comprehensive hospital information management system for small and medium-size
 | Metric | Count |
 |:------:|:-----:|
 | Business Modules | **75** backend routers |
-| API Endpoints | **540** RESTful APIs |
+| API Endpoints | **541** RESTful APIs |
 | Database Tables | **139** business tables |
 | Frontend Pages | **143** Vue pages |
 | User Roles | **8** (admin/director/doctor/nurse/cashier/pharmacist/guide/patient) |
@@ -207,7 +207,7 @@ See [doc/deployDoc.md](doc/deployDoc.md) for detailed deployment instructions (N
 | [Doc Index](doc/README.md) | Navigation for all docs |
 | [Architecture](doc/architecture.md) | System architecture & design decisions |
 | [Requirements](doc/demandDoc.md) | Functional & non-functional requirements |
-| [API Doc](doc/apiDoc.md) | core API definitions (540 total in RBAC matrix) |
+| [API Doc](doc/apiDoc.md) | core API definitions (541 total in RBAC matrix) |
 | [Database Doc](doc/databaseDoc.md) | 61 tables and ER relationships |
 | [Deployment](doc/deployDoc.md) | Dev/prod/Docker deployment guide |
 | [User Manual](doc/user-manual.md) | Role-based operation guide |

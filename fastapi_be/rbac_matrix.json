@@ -5050,6 +5050,13 @@
   "path": "/api/prepaid/getTransactions"
  },
  {
+  "auth": "PUBLIC",
+  "function": "get_version",
+  "method": "GET",
+  "module": "version.py",
+  "path": "/api/version"
+ },
+ {
   "auth": [
    "admin",
    "nurse",

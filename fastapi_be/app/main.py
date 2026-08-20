@@ -424,6 +424,7 @@ from app.routers import (
     ops_extension,
     performance,
     home_icd,
+    version,
 )
 
 app.add_middleware(
@@ -451,6 +452,7 @@ app.add_middleware(OperationLogMiddleware)
 
 app.include_router(performance.router, prefix="/api")
 app.include_router(home_icd.router, prefix="/api")
+app.include_router(version.router, prefix="/api")
 app.include_router(rx_review_rule.router, prefix="/api")
 app.include_router(insurance_catalog.router, prefix="/api")
 app.include_router(infection_control.router, prefix="/api")
@@ -552,7 +554,9 @@ from app.schema_compat import ensure_operation_log_schema
 Base.metadata.create_all(bind=engine)
 ensure_operation_log_schema(engine)
 
+from app.routers.version import APP_VERSION  # noqa: E402
+
 
 @app.get("/")
 def root():
-    return {"message": "HOIM System FastAPI"}
+    return {"message": "HOIM System FastAPI", "version": APP_VERSION}

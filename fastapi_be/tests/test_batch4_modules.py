@@ -165,3 +165,14 @@ class TestScrapBatchLedger:
         r = await async_client.post("/api/pharmacy/inventoryAdjustment/approve", headers=admin_headers, json={"adjustment_id": aid2})
         assert r.json()["code"] == 500
         assert "批次库存不足" in r.json()["msg"]
+
+
+@pytest.mark.asyncio
+class TestVersionEndpoint:
+    async def test_public_version(self, async_client):
+        """版本端点公开可访问，返回语义化版本与环境。"""
+        r = await async_client.get("/api/version")
+        assert r.status_code == 200
+        data = r.json()["data"]
+        assert data["version"] == "2.0.0"
+        assert "environment" in data

@@ -54,6 +54,20 @@ fastapi_be/.ruff_cache/
 fastapi_be/.pytest_cache/
 fastapi_be/.env
 
+# 用户上传的运行时文件（头像等）不入库
+fastapi_be/app/uploads/avatars/
+fastapi_be/app/uploads/reports/
+fastapi_be/app/uploads/*.xlsx
+fastapi_be/app/uploads/*.csv
+
+# 测试/压测产物
+fastapi_benchmark/benchmark/
+fastapi_benchmark/locust_*.csv
+vue3-new-ui/test-results/
+.pytest_cache/
+.coverage
+htmlcov/
+
 # Frontend runtime
 vue3-new-ui/frontend.log
 

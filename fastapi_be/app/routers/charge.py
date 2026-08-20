@@ -438,6 +438,23 @@ def window_registration(req: dict, db: Session = Depends(get_db), current_user: 
             status=0,
         )
         db.add(registration)
+        # 挂号费计费（与患者端挂号一致；收费标准 config 可配）
+        from decimal import Decimal
+
+        from app.config_service import get_config_float
+        from app.models import Charge
+
+        fee_key = "registration_fee_specialist" if reg_obj.specialist == 1 else "registration_fee_common"
+        fee = Decimal(str(get_config_float(db, fee_key, 10.0)))
+        if fee > 0:
+            db.add(Charge(
+                charge_time=registration_time,
+                time=datetime.datetime(1970, 1, 1),
+                registration_uuid=registration.registration_uuid,
+                charge_type="registration",
+                amount=fee,
+                status=0,
+            ))
         db.commit()
         return {
             "code": 200,

@@ -102,7 +102,7 @@ docker compose exec backend python seed_default_accounts.py
 
 ```bash
 # 健康检查
-curl -s http://127.0.0.1:8000/api/test | grep -o '"code": *200'
+curl -s -X POST http://127.0.0.1:8000/api/test | grep -o '"code": *200'
 
 # 前端可访问
 curl -sI http://<服务器IP>/ | head -1

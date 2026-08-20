@@ -29,7 +29,7 @@
 
 - 测试框架：pytest + httpx ASGI 内存库（StaticPool）
 - 第一轮基线：990 passed / 3 skipped（全量 52 分钟）；最终认证：1045 passed / 3 skipped
-- 第二轮修复后全量回归：1013+ passed / 3 skipped（新增 24+ 回归用例，见 §3.4）
+- 第二轮修复后全量回归：1013 passed / 3 skipped（新增 24+ 回归用例，见 §3.4）；最终认证：1045 passed / 3 skipped
 - 受影响域套件（pharmacy/blood/charge/checkin/lab/imaging/exam/admin/doctor 等 19 个文件）全绿
 - Lint：ruff 195 errors 与基线持平（无新增）
 
@@ -47,7 +47,7 @@
 | test_rbac_matrix.py | 越权矩阵 | 11 角色 × 关键接口 |
 | test_security_*.py | 安全专项 | 注入/上传/公式/吊销 |
 
-（78 个测试文件，完整清单见 fastapi_be/tests/）
+（88 个测试文件，完整清单见 fastapi_be/tests/）
 
 ### 跳过的 3 个用例
 

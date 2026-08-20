@@ -327,7 +327,7 @@ flowchart TD
 
 ## 六、核心业务流程索引
 
-全部 59 张流程图见 [flowcharts/](flowcharts/README.md)，按业务域分 8 组：
+全部 58 张流程图见 [flowcharts/](flowcharts/README.md)，按业务域分 8 组：
 
 | 流程组 | 文档 | 代表流程 |
 |--------|------|---------|
@@ -388,7 +388,6 @@ erDiagram
     Charge ||--o| Invoice : "发票（退费作废）"
     User ||--o{ DigitalSignatureRecord : "电子签名"
     User ||--o{ ResearchExportAudit : "科研导出审计"
-    Charge ||--o| Invoice : "发票"
     Admission ||--o| DischargeSummary : "出院小结"
 ```
 
@@ -413,7 +412,7 @@ erDiagram
 
 ### 8.2 访问控制
 
-- RBAC 11 角色 × 9 个角色组常量，481 接口全部声明鉴权依赖
+- RBAC 11 角色 × 9 个角色组常量，484 接口全部声明鉴权依赖
 - 矩阵文档由脚本自动生成 + CI 漂移检测（`tests/test_rbac_drift.py`）
 - 患者数据强制本人过滤（IDOR 防护）
 

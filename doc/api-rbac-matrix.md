@@ -43,7 +43,7 @@
 
 | 方法 | 路径 | admin | super_admin | director | doctor | nurse | cashier | pharmacist | guide | patient | lab_technician | registrar | PUBLIC |
 |------|------|------|------|------|------|------|------|------|------|------|------|------|------|
-| POST | `/api/adverseEvent/create` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
+| POST | `/api/adverseEvent/create` | ✓ | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |
 | GET | `/api/adverseEvent/getList` | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |
 | POST | `/api/adverseEvent/updateStatus` | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |
 
@@ -51,7 +51,7 @@
 
 | 方法 | 路径 | admin | super_admin | director | doctor | nurse | cashier | pharmacist | guide | patient | lab_technician | registrar | PUBLIC |
 |------|------|------|------|------|------|------|------|------|------|------|------|------|------|
-| POST | `/api/adverseReaction/create` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
+| POST | `/api/adverseReaction/create` | ✓ | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |
 | GET | `/api/adverseReaction/getList` | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |
 | POST | `/api/adverseReaction/updateStatus` | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |
 
@@ -368,16 +368,16 @@
 
 | 方法 | 路径 | admin | super_admin | director | doctor | nurse | cashier | pharmacist | guide | patient | lab_technician | registrar | PUBLIC |
 |------|------|------|------|------|------|------|------|------|------|------|------|------|------|
-| GET | `/api/infection/case/list` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| POST | `/api/infection/case/create` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
+| GET | `/api/infection/case/list` | ✓ | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |
+| POST | `/api/infection/case/create` | ✓ | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |
 | POST | `/api/infection/case/status` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
 | GET | `/api/infection/outbreakAlert` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
 | GET | `/api/infection/report` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| GET | `/api/infection/disinfection/list` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
+| GET | `/api/infection/disinfection/list` | ✓ | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |
 | POST | `/api/infection/disinfection/create` | ✓ | ✓ |  |  | ✓ |  |  |  |  |  |  |  |
-| GET | `/api/infection/exposure/list` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
+| GET | `/api/infection/exposure/list` | ✓ | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |
 | POST | `/api/infection/exposure/create` | ✓ | ✓ |  |  | ✓ |  |  |  |  |  |  |  |
-| POST | `/api/infection/exposure/handle` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
+| POST | `/api/infection/exposure/handle` | ✓ | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |
 
 ### `infusion.py`
 
@@ -404,13 +404,13 @@
 
 | 方法 | 路径 | admin | super_admin | director | doctor | nurse | cashier | pharmacist | guide | patient | lab_technician | registrar | PUBLIC |
 |------|------|------|------|------|------|------|------|------|------|------|------|------|------|
-| GET | `/api/inpatientCharge/getList` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| GET | `/api/inpatientCharge/getDailyBill` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
+| GET | `/api/inpatientCharge/getList` | ✓ | ✓ |  |  | ✓ | ✓ |  |  |  |  |  |  |
+| GET | `/api/inpatientCharge/getDailyBill` | ✓ | ✓ |  |  | ✓ | ✓ |  |  |  |  |  |  |
 | POST | `/api/inpatientCharge/settle` | ✓ | ✓ |  |  |  | ✓ |  |  |  |  |  |  |
 | POST | `/api/inpatientCharge/refund` | ✓ | ✓ |  |  |  | ✓ |  |  |  |  |  |  |
-| GET | `/api/inpatientCharge/getSummary` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| POST | `/api/inpatientCharge/depositRecharge` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| GET | `/api/inpatientCharge/depositBalance` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
+| GET | `/api/inpatientCharge/getSummary` | ✓ | ✓ |  |  | ✓ | ✓ |  |  |  |  |  |  |
+| POST | `/api/inpatientCharge/depositRecharge` | ✓ | ✓ |  |  | ✓ | ✓ |  |  |  |  |  |  |
+| GET | `/api/inpatientCharge/depositBalance` | ✓ | ✓ |  |  | ✓ | ✓ |  |  |  |  |  |  |
 
 ### `inpatient_order.py`
 

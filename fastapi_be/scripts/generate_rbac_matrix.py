@@ -42,18 +42,30 @@ ROLE_GROUPS = {
     "GUIDE_ROLES": set(GUIDE_ROLES),
     "LAB_ROLES": set(LAB_ROLES),
     "REGISTRAR_ROLES": set(REGISTRAR_ROLES),
+    "INPATIENT_FINANCE_ROLES": set(CASHIER_ROLES) | set(NURSING_ROLES),
+    "OPERATE_ROLES": set(CLINICAL_ROLES) | set(NURSING_ROLES),
 }
 
 
 def _resolve_decorator_roles(call: ast.Call) -> set[str] | None:
     """把 require_roles(*A, *B, 'x') 的参数解析为具体角色集合。"""
     roles: set[str] = set()
+    def _absorb(node_obj) -> bool:
+        """递归解析角色引用：Name 常量或 {*A, *B} set 字面量。"""
+        if isinstance(node_obj, ast.Name) and node_obj.id in ROLE_GROUPS:
+            roles.update(ROLE_GROUPS[node_obj.id])
+            return True
+        if isinstance(node_obj, ast.Set):
+            ok = True
+            for elt in node_obj.elts:
+                item = elt.value if isinstance(elt, ast.Starred) else elt
+                ok = _absorb(item) and ok
+            return ok
+        return False
+
     for arg in call.args:
         if isinstance(arg, ast.Starred):
-            name = arg.value.id if isinstance(arg.value, ast.Name) else None
-            if name in ROLE_GROUPS:
-                roles |= ROLE_GROUPS[name]
-            else:
+            if not _absorb(arg.value):
                 return None  # 未知角色组，按 any-authenticated 处理
         elif isinstance(arg, ast.Constant) and isinstance(arg.value, str):
             roles.add(arg.value)

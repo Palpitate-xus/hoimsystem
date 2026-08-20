@@ -224,7 +224,13 @@
   "path": "/api/admission/getInpatientList"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "nurse",
+   "super_admin"
+  ],
   "function": "create_event",
   "method": "POST",
   "module": "adverse_event.py",
@@ -251,7 +257,13 @@
   "path": "/api/adverseEvent/updateStatus"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "nurse",
+   "super_admin"
+  ],
   "function": "create_adr",
   "method": "POST",
   "module": "adverse_reaction.py",
@@ -2127,14 +2139,26 @@
   "path": "/api/imaging/film/status"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "nurse",
+   "super_admin"
+  ],
   "function": "list_infection_cases",
   "method": "GET",
   "module": "infection.py",
   "path": "/api/infection/case/list"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "nurse",
+   "super_admin"
+  ],
   "function": "create_infection_case",
   "method": "POST",
   "module": "infection.py",
@@ -2162,7 +2186,13 @@
   "path": "/api/infection/report"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "nurse",
+   "super_admin"
+  ],
   "function": "list_disinfection",
   "method": "GET",
   "module": "infection.py",
@@ -2180,7 +2210,13 @@
   "path": "/api/infection/disinfection/create"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "nurse",
+   "super_admin"
+  ],
   "function": "list_exposure",
   "method": "GET",
   "module": "infection.py",
@@ -2198,7 +2234,13 @@
   "path": "/api/infection/exposure/create"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "nurse",
+   "super_admin"
+  ],
   "function": "handle_exposure",
   "method": "POST",
   "module": "infection.py",
@@ -2322,14 +2364,24 @@
   "path": "/api/injection/cancel"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "cashier",
+   "nurse",
+   "super_admin"
+  ],
   "function": "get_inpatient_charge_list",
   "method": "GET",
   "module": "inpatient_charge.py",
   "path": "/api/inpatientCharge/getList"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "cashier",
+   "nurse",
+   "super_admin"
+  ],
   "function": "get_daily_bill",
   "method": "GET",
   "module": "inpatient_charge.py",
@@ -2358,21 +2410,36 @@
   "path": "/api/inpatientCharge/refund"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "cashier",
+   "nurse",
+   "super_admin"
+  ],
   "function": "get_charge_summary",
   "method": "GET",
   "module": "inpatient_charge.py",
   "path": "/api/inpatientCharge/getSummary"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "cashier",
+   "nurse",
+   "super_admin"
+  ],
   "function": "deposit_recharge",
   "method": "POST",
   "module": "inpatient_charge.py",
   "path": "/api/inpatientCharge/depositRecharge"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "cashier",
+   "nurse",
+   "super_admin"
+  ],
   "function": "deposit_balance",
   "method": "GET",
   "module": "inpatient_charge.py",

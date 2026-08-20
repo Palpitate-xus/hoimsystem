@@ -11,8 +11,8 @@
 
 1. **[软件说明书](software-manual.md)** — 软件概述/运行环境/功能结构/角色权限/数据与安全总览
 2. **[安装部署手册](installation-guide.md)** — 生产部署步骤/备份策略/升级发布/故障排查
-3. **[业务流程图](flowcharts/README.md)** — 8 组 59 张 Mermaid 流程图覆盖全部业务域
-4. **[业务逻辑测试报告](business-test-report.md)** — 1045 用例全通过 + 三轮审计共 84 项修复清单 + 6 项已知设计限制
+3. **[业务流程图](flowcharts/README.md)** — 8 组 58 张 Mermaid 流程图覆盖全部业务域
+4. **[业务逻辑测试报告](business-test-report.md)** — 1045 用例全通过 + 61 项业务修复清单（另有安全修复 31 项）+ 6 项已知设计限制
 5. **[HIS 功能完整性盘点](his-feature-gap-analysis.md)** — 对照标准 HIS 产品的 15 方向缺口分析与建设排序
 5. **[安全上线清单](security-launch-checklist.md)** — 31 项已修复 + 上线人工阻断项
 

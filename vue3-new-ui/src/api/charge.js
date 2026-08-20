@@ -80,3 +80,7 @@ export function mockPaymentNotify(data) {
 export function getPaymentList(keyword = "") {
   return request({ url: "payment/getList", method: "get", params: { keyword } });
 }
+
+export function dailySettlementByPayDate(data) {
+  return request({ url: "dailySettlement/byPayDate", method: "post", data });
+}

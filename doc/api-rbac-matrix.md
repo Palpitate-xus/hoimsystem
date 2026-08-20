@@ -3,7 +3,7 @@
 > 由 `fastapi_be/scripts/generate_rbac_matrix.py` 从源码自动生成，请勿手改。
 > `✓`=可访问 | `PUBLIC`=无需登录 | 留空=不可访问
 
-共 **525** 个接口（PUBLIC 14 个 / 需登录 511 个）。
+共 **526** 个接口（PUBLIC 14 个 / 需登录 512 个）。
 
 
 ### `admin.py`
@@ -118,6 +118,7 @@
 | POST | `/api/windowRegistration/create` | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |
 | POST | `/api/windowRegistration/cancel` | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |
 | POST | `/api/dailySettlement/report` | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |
+| POST | `/api/dailySettlement/byPayDate` | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |
 | POST | `/api/payment/create` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
 | GET | `/api/payment/query/{payment_no}` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
 | POST | `/api/payment/mockNotify` | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |

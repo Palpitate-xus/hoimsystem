@@ -532,6 +532,47 @@ def daily_settlement(req: dict, db: Session = Depends(get_db), current_user: Use
     }
 
 
+@router.post("/dailySettlement/byPayDate")
+def daily_settlement_by_pay_date(req: dict, db: Session = Depends(get_db), current_user: User = Depends(require_roles(ROLE_CASHIER, *ADMIN_ROLES))):
+    """日结对账（缴费/退款日口径）。
+
+    以 Payment.paid_time 实际资金发生日统计（收付实现制），解决开单日与
+    缴费日跨日时按 charge_time 统计的口径偏差（业务缺口 §3.6 #3）。
+    """
+    from sqlalchemy import func
+
+    from app.models import Payment
+
+    date = req.get("date")
+    if not date:
+        date = str(datetime.datetime.now().date())
+    payments = db.query(Payment).filter(func.date(Payment.paid_time) == date).all()
+    income_by_channel: dict[str, float] = {}
+    refund_by_channel: dict[str, float] = {}
+    for p in payments:
+        channel = p.channel or "unknown"
+        if p.status == 1:
+            income_by_channel[channel] = income_by_channel.get(channel, 0) + float(p.amount or 0)
+        elif p.status == 3:
+            refund_by_channel[channel] = refund_by_channel.get(channel, 0) + float(p.amount or 0)
+    return {
+        "code": 200,
+        "msg": "success",
+        "data": {
+            "date": date,
+            "basis": "paid_time",
+            "total_income": round(sum(income_by_channel.values()), 2),
+            "total_refund": round(sum(refund_by_channel.values()), 2),
+            "net_income": round(sum(income_by_channel.values()) - sum(refund_by_channel.values()), 2),
+            "income_by_channel": {k: round(v, 2) for k, v in income_by_channel.items()},
+            "refund_by_channel": {k: round(v, 2) for k, v in refund_by_channel.items()},
+            "count_paid": len([p for p in payments if p.status == 1]),
+            "count_refund": len([p for p in payments if p.status == 3]),
+            "record_count": len(payments),
+        },
+    }
+
+
 # ===== 支付接口（微信/支付宝 Mock）=====
 
 

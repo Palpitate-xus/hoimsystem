@@ -261,8 +261,33 @@ def close_green_channel(req: EmergencyGreenChannelActionRequest, current_user: U
     item.status = 2
     item.action_time = datetime.datetime.now()
     item.note = req.note.strip()
+    # 绿色通道计费闭环：关闭时对该分诊下「待计费且有金额」的留观记录生成 Charge（急诊补记）
+    from decimal import Decimal
+
+    from app.models import Charge
+
+    now = datetime.datetime.now()
+    pending = db.query(EmergencyObservation).filter(
+        EmergencyObservation.triage_id == item.triage_id,
+        EmergencyObservation.fee_status == 0,
+    ).all()
+    settled = 0
+    for obs in pending:
+        if (obs.fee_amount or 0) <= 0:
+            continue
+        db.add(Charge(
+            charge_time=now,
+            time=now,
+            charge_type="emergency_observation",
+            amount=Decimal(str(obs.fee_amount)),
+            status=1,  # 绿色通道先救治后收费：关闭时即视为应收已确认
+        ))
+        obs.fee_status = 1
+        settled += 1
     db.commit()
-    return {"code": 200, "msg": "success", "data": _serialize_green_channel(item)}
+    result = _serialize_green_channel(item)
+    result["settled_charges"] = settled
+    return {"code": 200, "msg": "success", "data": result}
 
 
 def _serialize_emergency_record(item: EmergencyMedicalRecord):

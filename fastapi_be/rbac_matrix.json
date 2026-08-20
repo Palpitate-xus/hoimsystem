@@ -637,6 +637,16 @@
   "path": "/api/dailySettlement/report"
  },
  {
+  "auth": [
+   "admin",
+   "super_admin"
+  ],
+  "function": "daily_settlement_by_pay_date",
+  "method": "POST",
+  "module": "charge.py",
+  "path": "/api/dailySettlement/byPayDate"
+ },
+ {
   "auth": "ANY",
   "function": "create_payment",
   "method": "POST",

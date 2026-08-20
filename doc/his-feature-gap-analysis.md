@@ -81,4 +81,8 @@
 
 **测试**：`tests/test_his_modules.py` 13 项（CRUD+状态机+规则阻断+RBAC），全量回归见 business-test-report。
 
-**仍未覆盖**（依赖外部系统或专科选配，见 §二）：血透、营养膳食、病案 ICD 工作台、区域互联互通、DRG 自动分组、4611 费用上传网关、摆药机/网直/HQMS 物理传输、急诊绿色通道计费闭环、日结缴费日口径。
+**第二批小缺口（同日交付）**：
+- **急诊绿色通道计费闭环**（表外#5）：`/emergency/greenChannel/close` 关闭时自动将该分诊下「待计费且有金额」的留观记录生成 `Charge`（charge_type=emergency_observation, status=1）并回写 `fee_status=1`，落实"先救治后收费"；返回 `settled_charges` 计数。测试 `test_emergency_green_channel.py::test_green_channel_close_settles_observation_charges`。
+- **日结缴费日口径**（表外#4）：新增 `/dailySettlement/byPayDate` 以 `Payment.paid_time` 收付实现制统计（总收入/总退费/净收入/按渠道拆分），前端日结页新增口径切换。测试 `test_business_flows.py::test_daily_settlement_by_pay_date`。
+
+**仍未覆盖**（依赖外部系统或专科选配，见 §二）：血透、营养膳食、病案 ICD 工作台、区域互联互通、DRG 自动分组、4611 费用上传网关、摆药机/网直/HQMS 物理传输。

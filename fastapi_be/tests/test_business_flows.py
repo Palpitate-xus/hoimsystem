@@ -438,6 +438,15 @@ class TestCashierWorkflow:
         assert r.json()["code"] == 200
         assert "total_income" in r.json()["data"]
 
+    async def test_daily_settlement_by_pay_date(self, async_client, auth_headers, seed_data):
+        """日结对账（缴费日口径）：以 Payment.paid_time 统计并按渠道拆分。"""
+        cashier_headers = auth_headers(seed_data["cashier_user"].username)
+        r = await async_client.post("/api/dailySettlement/byPayDate", headers=cashier_headers, json={})
+        assert r.json()["code"] == 200
+        data = r.json()["data"]
+        assert data["basis"] == "paid_time"
+        assert "income_by_channel" in data and "net_income" in data
+
 
 # ===== 9. 管理员 RBAC 操作 =====
 

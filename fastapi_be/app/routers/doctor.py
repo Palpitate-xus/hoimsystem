@@ -419,6 +419,27 @@ def prescription_register(req: PrescriptionCreateRequest, current_user: User = D
                 db.rollback()
                 return {"code": 500, "msg": f"配伍禁忌：{reason}"}
 
+        # 3. 审方规则引擎检查（规则由药师维护，未配置规则时不影响开方）
+        try:
+            from app.rx_review_engine import check_prescription
+
+            engine_items = []
+            for item in normalized_phas:
+                pha_obj = db.query(Pharmaceutical).filter(Pharmaceutical.pharmaceutical_id == item["id"]).first()
+                engine_items.append({
+                    "name": pha_obj.name if pha_obj else "",
+                    "dosage": item.get("dosage"),
+                    "frequency": item.get("frequency"),
+                    "number": item.get("number"),
+                })
+            findings = check_prescription(db, engine_items, allergy_history=(patient_obj.allergy_history or ""))
+            if findings and any(f.get("severity") == 3 for f in findings):
+                db.rollback()
+                blocked_msgs = [f["message"] for f in findings if f.get("severity") == 3]
+                return {"code": 500, "msg": f"审方规则禁止：{'；'.join(blocked_msgs)}"}
+        except Exception:
+            traceback.print_exc()  # 引擎异常不阻断开方主流程
+
         pre = Prescription(
             patient_id=patient_obj.patient_id,
             doctor_id=doctor_obj.doctor_id,

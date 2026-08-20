@@ -655,3 +655,14 @@
 | 36 | hoimsystem_referral | 转诊记录表 | ✅ | 新增 |
 | 37 | hoimsystem_mdt_case | MDT会诊表 | ✅ | 新增 |
 | 38 | hoimsystem_clinical_pathway | 临床路径表 | ✅ | 新增 |
+| 39 | hoimsystem_rx_review_rule | 审方规则表 | ✅ | 2026-08-21 新增（5 类规则×3 级严重度） |
+| 40 | hoimsystem_insurance_catalog_mapping | 医保目录对照表 | ✅ | 2026-08-21 新增（本院项目↔医保目录） |
+| 41 | hoimsystem_mdro_isolation | MDRO 隔离表 | ✅ | 2026-08-21 新增（耐药菌隔离闭环） |
+| 42 | hoimsystem_hand_hygiene_observation | 手卫生观察表 | ✅ | 2026-08-21 新增（五时刻依从性） |
+| 43 | hoimsystem_notifiable_disease_report | 传染病报告卡表 | ✅ | 2026-08-21 新增（网直上报状态机） |
+| 44 | hoimsystem_adverse_event_rca | 不良事件 RCA 表 | ✅ | 2026-08-21 新增（PDCA 闭环） |
+| 45 | hoimsystem_hqms_indicator | HQMS 指标表 | ✅ | 2026-08-21 新增（质量指标上报） |
+| 46 | hoimsystem_cssd_instrument | CSSD 器械包表 | ✅ | 2026-08-21 新增（消毒供应状态机） |
+| 47 | hoimsystem_pivas_batch | PIVAS 批次表 | ✅ | 2026-08-21 新增（静配双人复核） |
+| 48 | hoimsystem_icu_score_record | ICU/PACU 评分表 | ✅ | 2026-08-21 新增（APACHE2/SOFA/GCS/Aldrete/Steward） |
+| 49 | hoimsystem_pathway_enrollment | 临床路径入组表 | ✅ | 2026-08-21 新增（入组/变异/出径） |

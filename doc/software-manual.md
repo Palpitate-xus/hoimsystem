@@ -32,8 +32,8 @@ HOIM（Hospital Information Management System）医院信息管理系统是一�
 | 软件类型 | B/S 架构医院信息管理系统（HIS） |
 | 版本 | v1.0 |
 | 用户规模 | 11 种角色，支持多院区 |
-| 接口规模 | 484 个 API（14 个公开接口 + 470 个认证接口） |
-| 数据规模 | 126 张业务表 |
+| 接口规模 | 525 个 API（14 个公开接口 + 511 个认证接口） |
+| 数据规模 | 137 张业务表（含 2026-08 新增 11 张 HIS 补齐表） |
 | 前端页面 | 约 100 个业务页面（15 个业务模块） |
 
 ### 1.2 软件著作权特性
@@ -269,9 +269,11 @@ flowchart TD
 | 检验科 | 4 | 结果录入/检验套餐/质控/影像检查 | admin、doctor、lab_technician |
 | 复诊随访 | 1 | 随访管理 | admin、doctor、director |
 | 报表统计 | 1 | 统计报表 | admin、director、cashier |
-| 系统管理 | 11 | 日志/监控/定时任务/字典/参数/消息/备份/权限/不良事件/科研导出/CA 签名 | admin（部分放宽） |
-| 住院管理 | 18 | 病区床位/入院/医嘱/护士站/输液/注射/皮试/过敏/交接班/配药核对/住院费用/出院/EMR/病案首页/归档/ICD/质控/手术 | admin、doctor、nurse、director |
+| 系统管理 | 14 | 日志/监控/定时任务/字典/参数/消息/备份/权限/不良事件/科研导出/CA 签名/**MDRO隔离/传染病报告卡/RCA与HQMS** | admin（MDRO 放宽 doctor/nurse；报卡放宽 doctor/lab；RCA/HQMS 放宽 director/doctor） |
+| 住院管理 | 19 | 病区床位/入院/医嘱/护士站/输液/注射/皮试/过敏/交接班/配药核对/住院费用/出院/EMR/病案首页/归档/ICD/质控/手术/**运营扩展(CSSD/PIVAS/评分/路径)** | admin、doctor、nurse、director、pharmacist |
 | 体检管理 | 1 | 体检管理 | admin、doctor、director |
+| 药房管理（新增页） | — | **审方规则引擎**：药师维护配伍/禁忌/剂量/重复/过敏 5 类规则 + 处方预检 | admin、pharmacist、director、doctor |
+| 收费管理（新增页） | — | **医保目录对照**：本院项目↔医保目录映射，模板下载 + 粘贴批量导入 | admin、cashier |
 
 ---
 
@@ -339,6 +341,7 @@ flowchart TD
 | 病历 | [06-病历文书](flowcharts/06-病历文书.md) | 结构化病历→CA 签名→首页→归档借阅 |
 | 系统安全 | [07-系统管理安全](flowcharts/07-系统管理安全.md) | 认证/锁定/吊销/审计/备份/导入导出 |
 | 患者服务 | [08-患者服务](flowcharts/08-患者服务.md) | 注册→家庭成员→支付→转诊/MDT |
+| HIS 补齐模块 | [09-HIS补齐模块](flowcharts/09-HIS补齐模块.md) | 审方规则引擎→开方/审方双向阻断；CSSD/PIVAS 状态机；报卡 PDCA 闭环 |
 
 ---
 
@@ -346,9 +349,9 @@ flowchart TD
 
 ### 7.1 数据库概览
 
-- **126 张业务表**，命名前缀 `hoimsystem_`；核心表说明见 `doc/databaseDoc.md`，全量以 `app/models.py` 为准
+- **137 张业务表**，命名前缀 `hoimsystem_`；核心表说明见 `doc/databaseDoc.md`，全量以 `app/models.py` 为准
 - 状态码/枚举字典见 `doc/data-dictionary.md`
-- 数据库迁移：Alembic（`fastapi_be/alembic/`），当前 head `20260820_charge_registration`
+- 数据库迁移：Alembic（`fastapi_be/alembic/`），当前 head `20260821_his_modules`（新增审方规则/医保对照/MDRO/传染病报卡/RCA/HQMS/CSSD/PIVAS/ICU评分/路径入组/手卫生 11 表）
 - 业务收费标准（管理员可配，`系统配置` 模块或 `/api/config/*` 维护）：
   - `registration_fee_common` 普通门诊挂号费（默认 10 元）
   - `registration_fee_specialist` 专家门诊挂号费（默认 30 元）
@@ -412,7 +415,7 @@ erDiagram
 
 ### 8.2 访问控制
 
-- RBAC 11 角色 × 9 个角色组常量，484 接口全部声明鉴权依赖
+- RBAC 11 角色 × 11 个角色组常量，525 接口全部声明鉴权依赖
 - 矩阵文档由脚本自动生成 + CI 漂移检测（`tests/test_rbac_drift.py`）
 - 患者数据强制本人过滤（IDOR 防护）
 

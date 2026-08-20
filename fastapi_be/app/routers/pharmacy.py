@@ -10,6 +10,7 @@ from app.database import get_db
 from app.dependencies import NURSING_ROLES, PHARMACY_ROLES, User, require_roles
 from app.models import (
     DispenseVerification,
+    Patient,
     Pharmaceutical,
     PharmaceuticalBatch,
     PharmaceuticalStockLedger,
@@ -133,6 +134,26 @@ def audit_prescription(req: PharmacyAuditRequest, current_user: User = Depends(r
         return {"code": 500, "msg": "处方不存在"}
     if pre.status != 0:
         return {"code": 500, "msg": "处方状态不正确"}
+
+    # 审方规则引擎：禁止级规则命中 → 拒绝发药，医生需修改处方
+    try:
+        from app.rx_review_engine import check_prescription
+
+        pre_items = []
+        for pp in db.query(PrePha).filter(PrePha.prescription_id == str(pre.prescription_id)).all():
+            pha = db.query(Pharmaceutical).filter(Pharmaceutical.pharmaceutical_id == pp.pharmaceutical_id).first()
+            if pha:
+                pre_items.append({"name": pha.name, "number": pp.number})
+        patient = db.query(Patient).filter(Patient.patient_id == pre.patient_id).first()
+        findings = check_prescription(db, pre_items, allergy_history=(patient.allergy_history or "") if patient else "")
+        if findings and any(f.get("severity") == 3 for f in findings):
+            db.rollback()
+            blocked_msgs = [f["message"] for f in findings if f.get("severity") == 3]
+            return {"code": 500, "msg": f"审方规则禁止发药：{'；'.join(blocked_msgs)}"}
+    except Exception:
+        import traceback as _tb
+
+        _tb.print_exc()  # 引擎异常不阻断审核主流程
 
     # Use a conditional update so two concurrent audit requests cannot both
     # observe status=0 and report success.

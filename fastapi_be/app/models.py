@@ -2311,3 +2311,236 @@ class ResearchExportAudit(Base):
     row_count = Column(Integer, nullable=False)
     anonymize = Column(Integer, nullable=False, default=1)
     create_time = Column(DateTime, nullable=False)
+
+
+# ---------------------------------------------------------------------------
+# HIS 功能补齐（2026-08 第二期）：审方规则 / 医保目录对照 / MDRO / RCA /
+# 传染病直报 / HQMS 指标 / CSSD / PIVAS / PACU-ICU 评分 / 临床路径执行
+# ---------------------------------------------------------------------------
+
+
+class PrescriptionReviewRule(Base):
+    """审方规则（药师维护，开方/审方时自动执行）。"""
+
+    __tablename__ = "hoimsystem_rx_review_rule"
+
+    rule_id = Column(Integer, primary_key=True, autoincrement=True)
+    rule_type = Column(String(30), nullable=False)  # interaction 配伍/contraindication 禁忌/dose 剂量/duplicate 重复/allergy_key 过敏关键词
+    drug_a = Column(String(100))  # 药品A名称/关键词（dose 规则可为空）
+    drug_b = Column(String(100))  # 药品B名称/关键词
+    min_dose = Column(Numeric(12, 2))  # 剂量下限（每次）
+    max_dose = Column(Numeric(12, 2))  # 剂量上限（每次）
+    max_daily_dose = Column(Numeric(12, 2))  # 每日上限
+    severity = Column(Integer, nullable=False, default=1)  # 1 提示 2 警告 3 禁止
+    message = Column(String(300), nullable=False)
+    status = Column(Integer, nullable=False, default=1)  # 1 启用 0 停用
+    create_time = Column(DateTime, nullable=False)
+
+
+class InsuranceCatalogMapping(Base):
+    """本院收费项目 ↔ 医保目录对照（管理员/医保办维护，可 Excel 导入）。"""
+
+    __tablename__ = "hoimsystem_insurance_catalog_mapping"
+
+    mapping_id = Column(Integer, primary_key=True, autoincrement=True)
+    local_item_type = Column(String(20), nullable=False)  # drug 药品 / consumable 耗材 / lab 检验 / exam 检查 / bed 床位 / surgery 手术 / anesthesia 麻醉 / registration 挂号
+    local_item_id = Column(Integer)  # 本院项目 id（可空=按名称对照）
+    local_item_name = Column(String(200), nullable=False)
+    insurance_code = Column(String(50), nullable=False)  # 医保目录编码
+    insurance_name = Column(String(200), nullable=False)
+    insurance_category = Column(String(30))  # 甲类/乙类/丙类/自费
+    self_pay_ratio = Column(Numeric(5, 2), default=0)  # 自付比例 0-1
+    unit_price_limit = Column(Numeric(12, 2))  # 医保支付限价（超限自付）
+    status = Column(Integer, nullable=False, default=1)
+    create_time = Column(DateTime, nullable=False)
+
+
+class MdroIsolation(Base):
+    """MDRO 多重耐药菌隔离登记（院感科维护；阳性结果触发隔离提醒）。"""
+
+    __tablename__ = "hoimsystem_mdro_isolation"
+
+    mdro_id = Column(Integer, primary_key=True, autoincrement=True)
+    patient_id = Column(Integer, ForeignKey("hoimsystem_patient.patient_id"), nullable=False)
+    pathogen = Column(String(100), nullable=False)  # 耐药菌种（如 MRSA/CRKP/CRE）
+    specimen = Column(String(50))  # 标本类型
+    isolation_type = Column(String(30), nullable=False, default="接触隔离")  # 接触隔离/飞沫隔离/空气隔离
+    start_date = Column(Date, nullable=False)
+    end_date = Column(Date)  # 解除日期
+    bed_label = Column(Integer, default=1)  # 床头隔离标识 1 有 0 无
+    status = Column(Integer, nullable=False, default=1)  # 1 隔离中 0 已解除
+    remark = Column(String(300))
+    reporter_id = Column(Integer, ForeignKey("hoimsystem_users.user_id"))
+    create_time = Column(DateTime, nullable=False)
+
+    patient = relationship("Patient")
+
+
+class AdverseEventRca(Base):
+    """不良事件 RCA 根因分析（质量管理部门）。"""
+
+    __tablename__ = "hoimsystem_adverse_event_rca"
+
+    rca_id = Column(Integer, primary_key=True, autoincrement=True)
+    event_id = Column(Integer, ForeignKey("hoimsystem_adverse_event.event_id"), nullable=False)
+    event_summary = Column(String(500), nullable=False)  # 事件概述
+    timeline = Column(Text)  # 时间线还原
+    root_cause = Column(Text, nullable=False)  # 根因分析（人/机/料/法/环）
+    corrective_actions = Column(Text, nullable=False)  # 改进措施
+    pdca_cycle = Column(String(10), default="P")  # P/D/C/A 阶段
+    responsible_dept = Column(String(100))  # 责任科室
+    due_date = Column(Date)  # 整改期限
+    completed_date = Column(Date)  # 完成日期
+    effect_evaluation = Column(Text)  # 效果评价
+    analyst_id = Column(Integer, ForeignKey("hoimsystem_users.user_id"))
+    create_time = Column(DateTime, nullable=False)
+    update_time = Column(DateTime)
+
+
+class NotifiableDiseaseReport(Base):
+    """传染病报告卡（院内登记 + 上报状态跟踪，对接网络直报由外部网关完成）。"""
+
+    __tablename__ = "hoimsystem_notifiable_disease_report"
+
+    report_id = Column(Integer, primary_key=True, autoincrement=True)
+    patient_id = Column(Integer, ForeignKey("hoimsystem_patient.patient_id"), nullable=False)
+    disease_name = Column(String(100), nullable=False)  # 病种（法定传染病分类）
+    disease_class = Column(String(10))  # 甲/乙/丙类
+    onset_date = Column(Date)  # 发病日期
+    diagnosis_date = Column(Date, nullable=False)  # 确诊日期
+    death_date = Column(Date)
+    case_classification = Column(String(30))  # 疑似/临床诊断/实验室确诊/病原携带者
+    report_status = Column(Integer, nullable=False, default=0)  # 0 待上报 1 已上报网直 2 已审核 3 订正
+    report_card_no = Column(String(30))  # 网直报卡编号（回填）
+    reporter_id = Column(Integer, ForeignKey("hoimsystem_users.user_id"))
+    report_time = Column(DateTime, nullable=False)
+    audit_time = Column(DateTime)
+    auditor_id = Column(Integer, ForeignKey("hoimsystem_users.user_id"))
+    remark = Column(String(300))
+    create_time = Column(DateTime, nullable=False)
+
+    patient = relationship("Patient")
+
+
+class HqmsIndicator(Base):
+    """HQMS 医疗质量指标（手工录入/Excel 导入，上报状态跟踪）。"""
+
+    __tablename__ = "hoimsystem_hqms_indicator"
+
+    indicator_id = Column(Integer, primary_key=True, autoincrement=True)
+    period = Column(String(10), nullable=False)  # 统计期 yyyy-MM（月报）或 yyyy（年报）
+    indicator_code = Column(String(50), nullable=False)  # 指标编码
+    indicator_name = Column(String(200), nullable=False)
+    indicator_value = Column(Numeric(14, 4))  # 指标值
+    numerator = Column(Numeric(14, 4))  # 分子
+    denominator = Column(Numeric(14, 4))  # 分母
+    unit = Column(String(20))  # %、‰、天、例
+    department = Column(String(100))  # 全院或科室名
+    report_status = Column(Integer, nullable=False, default=0)  # 0 待上报 1 已上报
+    reporter_id = Column(Integer, ForeignKey("hoimsystem_users.user_id"))
+    remark = Column(String(300))
+    create_time = Column(DateTime, nullable=False)
+
+
+class CssdInstrument(Base):
+    """CSSD 器械包登记（消毒供应中心）。"""
+
+    __tablename__ = "hoimsystem_cssd_instrument"
+
+    instrument_id = Column(Integer, primary_key=True, autoincrement=True)
+    package_name = Column(String(100), nullable=False)  # 器械包名
+    package_code = Column(String(50), unique=True)  # 包内卡编号
+    contents = Column(String(500))  # 包内器械清单
+    sterilize_method = Column(String(30), default="压力蒸汽")  # 灭菌方式
+    status = Column(Integer, nullable=False, default=0)
+    # 0 待回收 1 清洗中 2 检查打包 3 灭菌中 4 无菌可用 5 发放使用中 6 报损
+    expire_date = Column(Date)  # 无菌效期
+    sterilize_date = Column(Date)
+    bd_test = Column(Integer)  # BD 试验 1 通过 0 失败
+    biological_monitor = Column(Integer)  # 生物监测 1 通过 0 失败
+    current_location = Column(String(100))  # 当前位置（CSSD/手术室/科室）
+    create_time = Column(DateTime, nullable=False)
+    update_time = Column(DateTime)
+
+
+class PivasBatch(Base):
+    """PIVAS 静脉用药调配中心：批次/排药与配送交接。"""
+
+    __tablename__ = "hoimsystem_pivas_batch"
+
+    batch_id = Column(Integer, primary_key=True, autoincrement=True)
+    batch_no = Column(String(30), nullable=False)  # 批次号（如 0801-A）
+    plan_date = Column(Date, nullable=False)  # 调配日期
+    ward_id = Column(Integer, ForeignKey("hoimsystem_ward.ward_id"))
+    status = Column(Integer, nullable=False, default=0)
+    # 0 待排药 1 已排药贴签 2 配置中 3 成品核对 4 已配送 5 病区签收
+    label_count = Column(Integer, default=0)  # 贴签数
+    cytotoxic = Column(Integer, default=0)  # 含细胞毒药品 1 是
+    tpn = Column(Integer, default=0)  # 含肠外营养 1 是
+    dispenser_id = Column(Integer, ForeignKey("hoimsystem_users.user_id"))  # 调配人
+    checker_id = Column(Integer, ForeignKey("hoimsystem_users.user_id"))  # 核对人
+    courier_id = Column(Integer, ForeignKey("hoimsystem_users.user_id"))  # 配送人
+    receive_time = Column(DateTime)  # 病区签收时间
+    remark = Column(String(300))
+    create_time = Column(DateTime, nullable=False)
+
+
+class IcuScoreRecord(Base):
+    """ICU/PACU 专科评分（APACHE II / SOFA / GCS / Aldrete / Steward）。"""
+
+    __tablename__ = "hoimsystem_icu_score"
+
+    score_id = Column(Integer, primary_key=True, autoincrement=True)
+    patient_id = Column(Integer, ForeignKey("hoimsystem_patient.patient_id"), nullable=False)
+    admission_id = Column(String(36))  # 关联住院（可空：PACU 门诊手术场景）
+    score_type = Column(String(20), nullable=False)  # apache2 / sofa / gcs / aldrete / steward
+    scene = Column(String(10), default="icu")  # icu / pacu
+    total_score = Column(Integer, nullable=False)
+    detail_json = Column(Text)  # 分项得分 JSON（年龄/APS 各项等）
+    interpretation = Column(String(200))  # 评分结论（如 死亡风险/转出标准达标）
+    assessor_id = Column(Integer, ForeignKey("hoimsystem_users.user_id"))
+    assess_time = Column(DateTime, nullable=False)
+    create_time = Column(DateTime, nullable=False)
+
+    patient = relationship("Patient")
+
+
+class PathwayEnrollment(Base):
+    """临床路径入组/变异/出径执行记录。"""
+
+    __tablename__ = "hoimsystem_pathway_enrollment"
+
+    enrollment_id = Column(Integer, primary_key=True, autoincrement=True)
+    pathway_id = Column(Integer, ForeignKey("hoimsystem_clinical_pathway.pathway_id"), nullable=False)
+    patient_id = Column(Integer, ForeignKey("hoimsystem_patient.patient_id"), nullable=False)
+    admission_id = Column(String(36))
+    doctor_id = Column(Integer, ForeignKey("hoimsystem_doctor.doctor_id"))
+    status = Column(Integer, nullable=False, default=1)  # 1 在径 2 变异 3 完成出径 4 退出
+    enroll_date = Column(Date, nullable=False)
+    exit_date = Column(Date)
+    variation_reason = Column(String(300))  # 变异原因
+    variation_type = Column(String(20))  # 病情变异/医方变异/患方变异/系统变异
+    exit_reason = Column(String(300))  # 出径/退出原因
+    completed_items = Column(Integer, default=0)  # 已完成节点数
+    total_items = Column(Integer, default=0)  # 应完成节点数
+    create_time = Column(DateTime, nullable=False)
+    update_time = Column(DateTime)
+
+    patient = relationship("Patient")
+    pathway = relationship("ClinicalPathway")
+
+
+class HandHygieneObservation(Base):
+    """手卫生依从性观察记录（院感科）。"""
+
+    __tablename__ = "hoimsystem_hand_hygiene_observation"
+
+    observation_id = Column(Integer, primary_key=True, autoincrement=True)
+    observe_date = Column(Date, nullable=False)
+    department = Column(String(100), nullable=False)
+    moment = Column(String(50))  # 五个时刻（接触患者前/无菌操作前…）
+    opportunities = Column(Integer, nullable=False, default=0)  # 应执行次数
+    actions = Column(Integer, nullable=False, default=0)  # 实际执行次数
+    observer_id = Column(Integer, ForeignKey("hoimsystem_users.user_id"))
+    remark = Column(String(300))
+    create_time = Column(DateTime, nullable=False)

@@ -368,6 +368,29 @@
 | `cash` | 现金 |
 | `card` | 银行卡 |
 
+### 3.19 HIS 补齐模块状态（2026-08-21 新增）
+
+| 实体 | 编码/取值 | 中文 |
+|:----|:----:|:----:|
+| 审方规则 rule_type | `interaction` | 配伍禁忌 |
+| | `contraindication` | 禁忌 |
+| | `dose` | 剂量范围 |
+| | `duplicate` | 重复用药 |
+| | `allergy_key` | 过敏关键词 |
+| 审方规则 severity | 1 / 2 / 3 | 提示 / 警告 / **禁止**（阻断开方与发药） |
+| CSSD status | 0-6 | 待回收/清洗中/检查打包/灭菌中/无菌可用/发放使用中/报损 |
+| PIVAS status | 0-5 | 待排药/已排药贴签/配置中/成品核对/已配送/病区签收 |
+| 传染病报卡 report_status | 0 / 1 / 2 / 3 | 待上报/已上报网直/已审核/订正 |
+| 传染病 disease_class | 甲/乙/丙 | 法定分类（服务端按病种词典自动判定） |
+| RCA pdca_cycle | P/D/C/A | 计划/执行/检查/处置（只允许顺序推进） |
+| HQMS report_status | 0 / 1 | 待上报/已上报 |
+| 路径入组 status | 1 / 2 / 3 / 4 | 在径/变异/完成出径/退出 |
+| 路径变异 variation_type | - | 病情变异/医方变异/患方变异/系统变异 |
+| MDRO status | 1 / 0 | 隔离中/已解除 |
+| ICU 评分 score_type | `apache2`/`sofa`/`gcs`/`aldrete`/`steward` | APACHE II/SOFA/GCS/Aldrete/Steward |
+| 医保对照 insurance_category | 甲/乙/丙/自费 | 甲类/乙类/丙类/自费 |
+| 医保对照 local_item_type | `drug`~`registration` | 药品/耗材/检验/检查/床位/手术/麻醉/挂号 |
+
 ---
 
 ## 四、科室与号别

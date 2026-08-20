@@ -299,6 +299,12 @@ export const asyncRoutes = [
         meta: { title: "抗菌药物管理", permissions: ["admin", "pharmacist", "director"] },
       },
       {
+        path: "rxReviewRule",
+        name: "RxReviewRule",
+        component: () => import("@/views/pharmacy/rxReviewRule.vue"),
+        meta: { title: "审方规则引擎", permissions: ["admin", "pharmacist", "director", "doctor"] },
+      },
+      {
         path: "dispense",
         name: "Dispense",
         component: () => import("@/views/pharmacy/dispense.vue"),
@@ -386,6 +392,12 @@ export const asyncRoutes = [
         name: "ChargeItem",
         component: () => import("@/views/charge/chargeItem.vue"),
         meta: { title: "收费项目", permissions: ["admin", "cashier"] },
+      },
+      {
+        path: "insuranceCatalog",
+        name: "InsuranceCatalog",
+        component: () => import("@/views/charge/insuranceCatalog.vue"),
+        meta: { title: "医保目录对照", permissions: ["admin", "cashier"] },
       },
       {
         path: "invoice",
@@ -711,6 +723,24 @@ export const asyncRoutes = [
         meta: { title: "不良事件上报", permissions: ["admin"] },
       },
       {
+        path: "mdroIsolation",
+        name: "MdroIsolation",
+        component: () => import("@/views/system/mdroIsolation.vue"),
+        meta: { title: "MDRO隔离管理", permissions: ["admin", "doctor", "director", "nurse"] },
+      },
+      {
+        path: "notifiableDisease",
+        name: "NotifiableDisease",
+        component: () => import("@/views/system/notifiableDisease.vue"),
+        meta: { title: "传染病报告卡", permissions: ["admin", "doctor", "director", "lab_technician"] },
+      },
+      {
+        path: "qualityManagement",
+        name: "QualityManagement",
+        component: () => import("@/views/system/qualityManagement.vue"),
+        meta: { title: "RCA与HQMS指标", permissions: ["admin", "doctor", "director"] },
+      },
+      {
         path: "research",
         name: "Research",
         component: () => import("@/views/system/research.vue"),
@@ -740,6 +770,12 @@ export const asyncRoutes = [
     alwaysShow: true,
     meta: { title: "住院管理", icon: "office-building", permissions: ["admin", "doctor", "nurse", "director"] },
     children: [
+      {
+        path: "opsExtension",
+        name: "OpsExtension",
+        component: () => import("@/views/inpatient/opsExtension.vue"),
+        meta: { title: "运营扩展(CSSD/PIVAS/评分/路径)", permissions: ["admin", "doctor", "director", "nurse", "pharmacist"] },
+      },
       {
         path: "wardManagement",
         name: "WardManagement",

@@ -2247,6 +2247,79 @@
   "path": "/api/infection/exposure/handle"
  },
  {
+  "auth": "ANY",
+  "function": "list_mdro",
+  "method": "GET",
+  "module": "infection_control.py",
+  "path": "/api/mdro/getList"
+ },
+ {
+  "auth": "ANY",
+  "function": "create_mdro",
+  "method": "POST",
+  "module": "infection_control.py",
+  "path": "/api/mdro/create"
+ },
+ {
+  "auth": "ANY",
+  "function": "release_mdro",
+  "method": "POST",
+  "module": "infection_control.py",
+  "path": "/api/mdro/release"
+ },
+ {
+  "auth": "ANY",
+  "function": "list_hand_hygiene",
+  "method": "GET",
+  "module": "infection_control.py",
+  "path": "/api/handHygiene/getList"
+ },
+ {
+  "auth": "ANY",
+  "function": "create_hand_hygiene",
+  "method": "POST",
+  "module": "infection_control.py",
+  "path": "/api/handHygiene/create"
+ },
+ {
+  "auth": "ANY",
+  "function": "list_reports",
+  "method": "GET",
+  "module": "infection_control.py",
+  "path": "/api/notifiableDisease/getList"
+ },
+ {
+  "auth": "ANY",
+  "function": "create_report",
+  "method": "POST",
+  "module": "infection_control.py",
+  "path": "/api/notifiableDisease/create"
+ },
+ {
+  "auth": "ANY",
+  "function": "submit_report",
+  "method": "POST",
+  "module": "infection_control.py",
+  "path": "/api/notifiableDisease/submit"
+ },
+ {
+  "auth": [
+   "admin",
+   "super_admin"
+  ],
+  "function": "audit_report",
+  "method": "POST",
+  "module": "infection_control.py",
+  "path": "/api/notifiableDisease/audit"
+ },
+ {
+  "auth": "ANY",
+  "function": "correct_report",
+  "method": "POST",
+  "module": "infection_control.py",
+  "path": "/api/notifiableDisease/correct"
+ },
+ {
   "auth": [
    "admin",
    "director",
@@ -2602,6 +2675,48 @@
   "method": "GET",
   "module": "insurance.py",
   "path": "/api/insurance/control/warnings"
+ },
+ {
+  "auth": "ANY",
+  "function": "list_mappings",
+  "method": "GET",
+  "module": "insurance_catalog.py",
+  "path": "/api/insuranceCatalog/getList"
+ },
+ {
+  "auth": "ANY",
+  "function": "create_mapping",
+  "method": "POST",
+  "module": "insurance_catalog.py",
+  "path": "/api/insuranceCatalog/create"
+ },
+ {
+  "auth": "ANY",
+  "function": "update_mapping",
+  "method": "POST",
+  "module": "insurance_catalog.py",
+  "path": "/api/insuranceCatalog/update"
+ },
+ {
+  "auth": "ANY",
+  "function": "delete_mapping",
+  "method": "POST",
+  "module": "insurance_catalog.py",
+  "path": "/api/insuranceCatalog/delete"
+ },
+ {
+  "auth": "ANY",
+  "function": "import_mappings",
+  "method": "POST",
+  "module": "insurance_catalog.py",
+  "path": "/api/insuranceCatalog/import"
+ },
+ {
+  "auth": "ANY",
+  "function": "download_template",
+  "method": "GET",
+  "module": "insurance_catalog.py",
+  "path": "/api/insuranceCatalog/template"
  },
  {
   "auth": "PUBLIC",
@@ -3368,6 +3483,97 @@
  },
  {
   "auth": "ANY",
+  "function": "list_cssd",
+  "method": "GET",
+  "module": "ops_extension.py",
+  "path": "/api/cssd/getList"
+ },
+ {
+  "auth": "ANY",
+  "function": "create_cssd",
+  "method": "POST",
+  "module": "ops_extension.py",
+  "path": "/api/cssd/create"
+ },
+ {
+  "auth": "ANY",
+  "function": "transition_cssd",
+  "method": "POST",
+  "module": "ops_extension.py",
+  "path": "/api/cssd/transition"
+ },
+ {
+  "auth": "ANY",
+  "function": "list_pivas",
+  "method": "GET",
+  "module": "ops_extension.py",
+  "path": "/api/pivas/getList"
+ },
+ {
+  "auth": "ANY",
+  "function": "create_pivas",
+  "method": "POST",
+  "module": "ops_extension.py",
+  "path": "/api/pivas/create"
+ },
+ {
+  "auth": "ANY",
+  "function": "transition_pivas",
+  "method": "POST",
+  "module": "ops_extension.py",
+  "path": "/api/pivas/transition"
+ },
+ {
+  "auth": "ANY",
+  "function": "list_scores",
+  "method": "GET",
+  "module": "ops_extension.py",
+  "path": "/api/icuScore/getList"
+ },
+ {
+  "auth": "ANY",
+  "function": "create_score",
+  "method": "POST",
+  "module": "ops_extension.py",
+  "path": "/api/icuScore/create"
+ },
+ {
+  "auth": "ANY",
+  "function": "list_enrollments",
+  "method": "GET",
+  "module": "ops_extension.py",
+  "path": "/api/pathwayEnrollment/getList"
+ },
+ {
+  "auth": "ANY",
+  "function": "enroll_pathway",
+  "method": "POST",
+  "module": "ops_extension.py",
+  "path": "/api/pathwayEnrollment/enroll"
+ },
+ {
+  "auth": "ANY",
+  "function": "record_progress",
+  "method": "POST",
+  "module": "ops_extension.py",
+  "path": "/api/pathwayEnrollment/record"
+ },
+ {
+  "auth": "ANY",
+  "function": "record_variation",
+  "method": "POST",
+  "module": "ops_extension.py",
+  "path": "/api/pathwayEnrollment/variation"
+ },
+ {
+  "auth": "ANY",
+  "function": "exit_pathway",
+  "method": "POST",
+  "module": "ops_extension.py",
+  "path": "/api/pathwayEnrollment/exit"
+ },
+ {
+  "auth": "ANY",
   "function": "get_appointment_list",
   "method": "GET",
   "module": "patient.py",
@@ -3732,6 +3938,58 @@
   "path": "/api/purchase/cancel"
  },
  {
+  "auth": "ANY",
+  "function": "list_rca",
+  "method": "GET",
+  "module": "quality_management.py",
+  "path": "/api/rca/getList"
+ },
+ {
+  "auth": "ANY",
+  "function": "create_rca",
+  "method": "POST",
+  "module": "quality_management.py",
+  "path": "/api/rca/create"
+ },
+ {
+  "auth": "ANY",
+  "function": "advance_rca",
+  "method": "POST",
+  "module": "quality_management.py",
+  "path": "/api/rca/advance"
+ },
+ {
+  "auth": "ANY",
+  "function": "list_hqms",
+  "method": "GET",
+  "module": "quality_management.py",
+  "path": "/api/hqms/getList"
+ },
+ {
+  "auth": "ANY",
+  "function": "create_hqms",
+  "method": "POST",
+  "module": "quality_management.py",
+  "path": "/api/hqms/create"
+ },
+ {
+  "auth": "ANY",
+  "function": "import_hqms",
+  "method": "POST",
+  "module": "quality_management.py",
+  "path": "/api/hqms/batchImport"
+ },
+ {
+  "auth": [
+   "admin",
+   "super_admin"
+  ],
+  "function": "submit_hqms",
+  "method": "POST",
+  "module": "quality_management.py",
+  "path": "/api/hqms/submit"
+ },
+ {
   "auth": [
    "admin",
    "director",
@@ -3946,6 +4204,65 @@
   "method": "GET",
   "module": "research.py",
   "path": "/api/research/export/audit"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "list_rules",
+  "method": "GET",
+  "module": "rx_review_rule.py",
+  "path": "/api/rxReviewRule/getList"
+ },
+ {
+  "auth": [
+   "admin",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "create_rule",
+  "method": "POST",
+  "module": "rx_review_rule.py",
+  "path": "/api/rxReviewRule/create"
+ },
+ {
+  "auth": [
+   "admin",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "update_rule",
+  "method": "POST",
+  "module": "rx_review_rule.py",
+  "path": "/api/rxReviewRule/update"
+ },
+ {
+  "auth": [
+   "admin",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "delete_rule",
+  "method": "POST",
+  "module": "rx_review_rule.py",
+  "path": "/api/rxReviewRule/delete"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "run_check",
+  "method": "POST",
+  "module": "rx_review_rule.py",
+  "path": "/api/rxReviewRule/check"
  },
  {
   "auth": [

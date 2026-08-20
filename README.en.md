@@ -15,10 +15,10 @@ A comprehensive hospital information management system for small and medium-size
 
 | Metric | Count |
 |:------:|:-----:|
-| Business Modules | **34** backend routers |
-| API Endpoints | **247** RESTful APIs |
-| Database Tables | **61** business tables |
-| Frontend Pages | **69** Vue pages |
+| Business Modules | **75** backend routers |
+| API Endpoints | **540** RESTful APIs |
+| Database Tables | **139** business tables |
+| Frontend Pages | **143** Vue pages |
 | User Roles | **8** (admin/director/doctor/nurse/cashier/pharmacist/guide/patient) |
 | Peak Throughput | **~67 req/s** (SQLite single-worker) / **500-2 000 req/s** (PostgreSQL est.) |
 | Recommended Concurrency | **≤ 50 users** (SQLite) / **200-500 users** (PostgreSQL) |
@@ -37,20 +37,34 @@ A comprehensive hospital information management system for small and medium-size
 - **Lab & Physical Exam** — Lab Orders, Results, Exam Packages, Appointments, Records, Reports
 - **Surgery** — Surgery Application, Scheduling, Anesthesia Records
 - **Patient Services** — Health Records, EMR Query, Prescription Query, Prepaid Account, Two-way Referral, Follow-up, Satisfaction Survey
-- **System Platform** — User & Permissions, Operation Logs (auto-recorded by middleware), Dictionary, Parameters, Messages, Notices, Backup, Adverse Events, Slot Pool, Reports
+- **System Platform** — User & Permissions, Operation Logs (auto-recorded by middleware), Dictionary, Parameters, Messages, Notices, Backup, Adverse Events (with RCA root-cause analysis), Slot Pool, Reports, Department Performance
+
+### HIS Completion Modules (4 batches delivered 2026-08, zero seed data — all user-entered)
+
+- **Prescription Review Rule Engine** — 5 rule types (interaction / contraindication / dose / duplicate / allergy-keyword); severity-3 rules **block both prescribing and dispensing**
+- **Insurance Catalog Mapping** — local items ↔ insurance codes with category/self-pay ratio/price limit; template download + batch import
+- **CSSD** — full instrument-pack state machine (0-6) with BD-test and biological-monitor gates
+- **PIVAS** — batch flow with mandatory **dual-person check** (dispenser cannot verify own batch)
+- **ICU/PACU Scoring** — server-side APACHE II / SOFA / GCS / Aldrete / Steward with discharge criteria
+- **Clinical Pathway Enrollment** — enroll / progress / 4-type variation / completion-gated exit
+- **MDRO Isolation / Hand Hygiene / Notifiable Disease Reporting / HQMS Indicators** — infection-control suite with auto disease-class inference and report state machine
+- **Archive Borrow Approval** — request → approve/reject → return-and-reset workflow with approval desk
+- **ICD Coding Workbench** — dictionary-validated binding of diagnoses/operations, single primary code, coverage stats
+- **Department Performance** — (workload − cost) × coefficient computed server-side; draft → submit → audit
+- **Perioperative Antibiotic Compliance / Green-channel Billing Closure / Pay-date Settlement / Scrap Batch Ledger**
 
 ### Planned Modules
 
 | Module | Description |
 |:------:|:------------|
-| Medical Insurance | Real-time settlement, e-credentials |
+| Medical Insurance Gateway | Real-time settlement uplink, e-credentials (catalog mapping already delivered) |
 | PACS/RIS | Medical imaging storage, viewing, reports |
 | Closed-loop Orders | Order → Dispense → Execute → Bill loop |
-| CDSS | Medication safety, drug interactions |
-| DRG/DIP | Disease-based payment, case homepage |
+| CDSS Deep Integration | Rule engine delivered; plan expert knowledge base + renal dose adjustment |
+| DRG/DIP Auto-grouper | Manual grouping & profit analysis delivered; plan CHS-DRG grouper |
 | Internet Hospital | Online consultation, follow-up prescription |
 
-> See [doc/todos.md](doc/todos.md) for the full roadmap and [doc/architecture.md](doc/architecture.md) for gap analysis.
+> See [doc/todos.md](doc/todos.md) for the full roadmap and [doc/his-feature-gap-analysis.md](doc/his-feature-gap-analysis.md) for the HIS gap analysis and delivery record.
 
 ---
 
@@ -193,7 +207,7 @@ See [doc/deployDoc.md](doc/deployDoc.md) for detailed deployment instructions (N
 | [Doc Index](doc/README.md) | Navigation for all docs |
 | [Architecture](doc/architecture.md) | System architecture & design decisions |
 | [Requirements](doc/demandDoc.md) | Functional & non-functional requirements |
-| [API Doc](doc/apiDoc.md) | 247 RESTful API definitions |
+| [API Doc](doc/apiDoc.md) | core API definitions (540 total in RBAC matrix) |
 | [Database Doc](doc/databaseDoc.md) | 61 tables and ER relationships |
 | [Deployment](doc/deployDoc.md) | Dev/prod/Docker deployment guide |
 | [User Manual](doc/user-manual.md) | Role-based operation guide |

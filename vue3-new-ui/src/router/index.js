@@ -657,6 +657,12 @@ export const asyncRoutes = [
         component: () => import("@/views/report/reports.vue"),
         meta: { title: "统计报表", permissions: ["admin", "director", "cashier"] },
       },
+      {
+        path: "departmentPerformance",
+        name: "DepartmentPerformance",
+        component: () => import("@/views/report/departmentPerformance.vue"),
+        meta: { title: "科室绩效核算", permissions: ["admin", "super_admin"] },
+      },
     ],
   },
 

@@ -131,3 +131,23 @@
 - 代码位置：`fastapi_be/app/routers/{rx_review_rule,insurance_catalog,infection_control,quality_management,ops_extension}.py`、`fastapi_be/app/rx_review_engine.py`
 - 测试：`fastapi_be/tests/test_his_modules.py`（13 项：CRUD + 状态机 + 规则阻断 + RBAC）
 - 迁移：`alembic/versions/20260821_his_modules.py`（11 张表，head）
+
+## 12. 病案借阅审批流（2026-08-22）
+
+```
+医生申请(status=1 待审批, 病案仍在库)
+  ├─ 重复申请拒绝；审批中不可封存冲突由状态机保证
+  ├─ 病案管理员(admin/director) 批准 → status=2 借阅中 + borrow_status=2 + borrow_time
+  └─ 驳回(必填原因) → borrow_status=3, 病案保持已归档
+归还 → status=1 已归档 + borrow_status=0 重置（可再次申请）
+```
+
+## 13. 科室绩效核算（2026-08-22）
+
+```
+录入明细（全部手工）：workload_items[{项目,数量,单价|小计}] + cost_items[{科目,金额}]
+  ──服务端求和──▶ total_workload / total_cost
+  ──公式──▶ performance_amount = (工作量 − 成本) × coefficient   （负值如实保留=亏损）
+状态机：0 草稿(可改) ──submit──▶ 1 已提交(锁定) ──audit approve──▶ 2 已审核发放
+                                      └──audit reject──▶ 退回 0 草稿
+```

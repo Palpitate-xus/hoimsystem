@@ -3079,6 +3079,20 @@
   "path": "/api/medicalRecordArchive/borrow"
  },
  {
+  "auth": "ANY",
+  "function": "list_borrow_requests",
+  "method": "GET",
+  "module": "medical_record_archive.py",
+  "path": "/api/medicalRecordArchive/borrowRequests"
+ },
+ {
+  "auth": "ANY",
+  "function": "approve_borrow",
+  "method": "POST",
+  "module": "medical_record_archive.py",
+  "path": "/api/medicalRecordArchive/borrowApprove"
+ },
+ {
   "auth": [
    "admin",
    "director",
@@ -3708,6 +3722,44 @@
   "method": "POST",
   "module": "patient_card.py",
   "path": "/api/patientCard/cancel"
+ },
+ {
+  "auth": "ANY",
+  "function": "list_performances",
+  "method": "GET",
+  "module": "performance.py",
+  "path": "/api/performance/getList"
+ },
+ {
+  "auth": "ANY",
+  "function": "create_performance",
+  "method": "POST",
+  "module": "performance.py",
+  "path": "/api/performance/create"
+ },
+ {
+  "auth": "ANY",
+  "function": "update_performance",
+  "method": "POST",
+  "module": "performance.py",
+  "path": "/api/performance/update"
+ },
+ {
+  "auth": "ANY",
+  "function": "submit_performance",
+  "method": "POST",
+  "module": "performance.py",
+  "path": "/api/performance/submit"
+ },
+ {
+  "auth": [
+   "admin",
+   "super_admin"
+  ],
+  "function": "audit_performance",
+  "method": "POST",
+  "module": "performance.py",
+  "path": "/api/performance/audit"
  },
  {
   "auth": [

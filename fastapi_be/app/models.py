@@ -1792,6 +1792,10 @@ class MedicalRecordArchive(Base):
     borrow_reason = Column(String(300), nullable=True)
     borrow_time = Column(DateTime, nullable=True)
     return_time = Column(DateTime, nullable=True)
+    borrow_status = Column(Integer, nullable=False, default=0)  # 借阅审批流：0无申请 1待审批 2已批准借出 3已驳回
+    approver_id = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=True)
+    approve_time = Column(DateTime, nullable=True)
+    reject_reason = Column(String(300), nullable=True)
     archived_by = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=True)
     archive_time = Column(DateTime, nullable=True)
     seal_reason = Column(String(300), nullable=True)
@@ -1801,6 +1805,7 @@ class MedicalRecordArchive(Base):
     home = relationship("MedicalRecordHome")
     borrower = relationship("User", foreign_keys=[borrower_id])
     archivist = relationship("User", foreign_keys=[archived_by])
+    approver = relationship("User", foreign_keys=[approver_id])
 
 
 class MedicalRecordHomeQuality(Base):
@@ -2544,3 +2549,29 @@ class HandHygieneObservation(Base):
     observer_id = Column(Integer, ForeignKey("hoimsystem_users.user_id"))
     remark = Column(String(300))
     create_time = Column(DateTime, nullable=False)
+
+
+class DepartmentPerformance(Base):
+    """科室月度绩效核算（工作量×系数，用户手工录入核算项）。"""
+
+    __tablename__ = "hoimsystem_department_performance"
+
+    performance_id = Column(Integer, primary_key=True, autoincrement=True)
+    period = Column(String(10), nullable=False, index=True)  # 统计期 2026-08
+    department_id = Column(Integer, ForeignKey("hoimsystem_department.department_id"), nullable=False)
+    workload_items = Column(Text)  # 工作量明细 JSON [{项目,数量,单价(系数),小计}]
+    total_workload = Column(Numeric(14, 2), default=0)  # 工作量总分
+    cost_items = Column(Text)  # 成本分摊明细 JSON [{科目,金额,分摊规则}]
+    total_cost = Column(Numeric(14, 2), default=0)  # 总成本
+    coefficient = Column(Numeric(6, 3), default=1.000)  # 科室绩效系数
+    performance_amount = Column(Numeric(14, 2), default=0)  # 绩效总额=(工作量-成本)×系数
+    status = Column(Integer, nullable=False, default=0)  # 0草稿 1已提交 2已审核发放
+    creator_id = Column(Integer, ForeignKey("hoimsystem_users.user_id"))
+    auditor_id = Column(Integer, ForeignKey("hoimsystem_users.user_id"))
+    create_time = Column(DateTime, nullable=False)
+    update_time = Column(DateTime)
+    remark = Column(String(300))
+
+    department = relationship("Department")
+    creator = relationship("User", foreign_keys=[creator_id])
+    auditor = relationship("User", foreign_keys=[auditor_id])

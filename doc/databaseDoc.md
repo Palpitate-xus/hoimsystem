@@ -666,3 +666,4 @@
 | 47 | hoimsystem_pivas_batch | PIVAS 批次表 | ✅ | 2026-08-21 新增（静配双人复核） |
 | 48 | hoimsystem_icu_score_record | ICU/PACU 评分表 | ✅ | 2026-08-21 新增（APACHE2/SOFA/GCS/Aldrete/Steward） |
 | 49 | hoimsystem_pathway_enrollment | 临床路径入组表 | ✅ | 2026-08-21 新增（入组/变异/出径） |
+| 50 | hoimsystem_department_performance | 科室绩效核算表 | ✅ | 2026-08-22 新增（工作量×系数−成本，0草稿/1已提交/2已发放） |

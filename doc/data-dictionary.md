@@ -390,6 +390,8 @@
 | ICU 评分 score_type | `apache2`/`sofa`/`gcs`/`aldrete`/`steward` | APACHE II/SOFA/GCS/Aldrete/Steward |
 | 医保对照 insurance_category | 甲/乙/丙/自费 | 甲类/乙类/丙类/自费 |
 | 医保对照 local_item_type | `drug`~`registration` | 药品/耗材/检验/检查/床位/手术/麻醉/挂号 |
+| 绩效核算 status | 0 / 1 / 2 | 草稿/已提交/已审核发放 |
+| 病案借阅 borrow_status | 0 / 1 / 2 / 3 | 无申请/待审批/已批准借出/已驳回 |
 
 ---
 

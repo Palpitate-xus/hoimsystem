@@ -422,6 +422,7 @@ from app.routers import (
     infection_control,
     quality_management,
     ops_extension,
+    performance,
 )
 
 app.add_middleware(
@@ -447,6 +448,7 @@ app.add_middleware(OriginValidationMiddleware)
 app.add_middleware(StripMicrosecondMiddleware)
 app.add_middleware(OperationLogMiddleware)
 
+app.include_router(performance.router, prefix="/api")
 app.include_router(rx_review_rule.router, prefix="/api")
 app.include_router(insurance_catalog.router, prefix="/api")
 app.include_router(infection_control.router, prefix="/api")

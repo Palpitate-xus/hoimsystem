@@ -1030,6 +1030,7 @@ class MedicalRecordArchiveCreateRequest(BaseModel):
 class MedicalRecordArchiveActionRequest(BaseModel):
     archive_id: str
     reason: str = Field(default="", max_length=300)
+    approve: bool | None = None  # 借阅审批：True 批准借出 / False 驳回
 
 
 class MedicalRecordHomeQualityCheckRequest(BaseModel):

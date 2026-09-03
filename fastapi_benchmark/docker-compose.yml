@@ -1,0 +1,60 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: benchmark
+      POSTGRES_PASSWORD: benchmark-local-only
+      POSTGRES_DB: hoimsystem_benchmark
+    tmpfs:
+      - /var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U benchmark -d hoimsystem_benchmark"]
+      interval: 2s
+      timeout: 3s
+      retries: 20
+
+  init:
+    build: ../fastapi_be
+    working_dir: /app/fastapi_benchmark
+    command: ["python", "init_benchmark_data.py", "--profile", "${BENCHMARK_PROFILE:-small}"]
+    environment: &benchmark-environment
+      BENCHMARK_DATABASE_URL: postgresql://benchmark:benchmark-local-only@db:5432/hoimsystem_benchmark
+      BENCHMARK_RESET_CONFIRM: hoimsystem_benchmark
+      BENCHMARK_MODE: load
+      BENCHMARK_PROFILE: ${BENCHMARK_PROFILE:-small}
+      SECRET_KEY: benchmark-only-local-secret-at-least-32-bytes
+      AUTO_CREATE_SCHEMA: "true"
+      SCHEDULER_ENABLED: "false"
+    volumes:
+      - .:/app/fastapi_benchmark:ro
+    depends_on:
+      db:
+        condition: service_healthy
+
+  api:
+    build: ../fastapi_be
+    working_dir: /app/fastapi_benchmark
+    command:
+      - gunicorn
+      - run_benchmark:app
+      - --workers
+      - ${BENCHMARK_WORKERS:-4}
+      - --worker-class
+      - uvicorn.workers.UvicornWorker
+      - --bind
+      - 0.0.0.0:8000
+      - --access-logfile
+      - "-"
+    environment: *benchmark-environment
+    volumes:
+      - .:/app/fastapi_benchmark:ro
+    ports:
+      - "127.0.0.1:${BENCHMARK_PORT:-18000}:8000"
+    depends_on:
+      init:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health/ready', timeout=3)"]
+      interval: 3s
+      timeout: 3s
+      retries: 20

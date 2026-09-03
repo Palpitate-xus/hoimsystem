@@ -15,6 +15,7 @@ def test_initializer_pins_and_guards_benchmark_database(tmp_path):
 import json
 from sqlalchemy import create_engine
 import init_benchmark_data as target
+import benchmark_database
 
 unsafe_engine = create_engine(__UNSAFE_URL__)
 try:
@@ -59,6 +60,7 @@ import json
 from pathlib import Path
 from sqlalchemy import create_engine, inspect
 from sqlalchemy.orm import sessionmaker
+import benchmark_database
 import init_benchmark_data as target
 
 database_path = Path(__DATABASE_PATH__)
@@ -70,6 +72,7 @@ with replacement_engine.begin() as connection:
     )
 
 target.BENCHMARK_DB = database_path
+benchmark_database.BENCHMARK_DB = database_path
 target.engine = replacement_engine
 target.SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=replacement_engine)
 target.init()

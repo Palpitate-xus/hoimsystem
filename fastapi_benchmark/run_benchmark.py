@@ -1,29 +1,18 @@
-"""HOIM System 性能基准测试运行器。
+"""HOIM System isolated benchmark ASGI entry point."""
 
-使用 SQLAlchemy 的文件型 SQLite QueuePool，为并发请求提供独立连接。
-"""
-
-import os
 import sys
-from pathlib import Path
 
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
-BACKEND_DIR = (PROJECT_ROOT / "fastapi_be").resolve()
-BENCHMARK_DB = BACKEND_DIR / "benchmark.db"
-BENCHMARK_DATABASE_URL = f"sqlite:///{BENCHMARK_DB.as_posix()}"
+from benchmark_database import BACKEND_DIR, configure_application_environment, require_concurrency_safe_database
 
-# Never inherit an ambient application database for an isolated benchmark run.
-os.environ["DATABASE_URL"] = BENCHMARK_DATABASE_URL
 sys.path.insert(0, str(BACKEND_DIR))
 
-from app.config import settings
-from app.database import Base
-from app.database import engine as bench_engine
-from app.main import app as app
+BENCHMARK_DATABASE_URL = configure_application_environment()
+require_concurrency_safe_database(BENCHMARK_DATABASE_URL)
 
-# 确保表存在
-Base.metadata.create_all(bind=bench_engine)
+from app.database import engine as bench_engine  # noqa: E402
+from app.main import app as app  # noqa: E402
 
 print("Server ready: HOIM System Benchmark")
-print(f"Database: {settings.DATABASE_URL}")
-print(f"Pool: {type(bench_engine.pool).__name__} (independent pooled connections)")
+print(f"Database: {bench_engine.url.render_as_string(hide_password=True)}")
+print(f"Mode: {__import__('os').getenv('BENCHMARK_MODE', 'smoke')}")
+print(f"Pool: {type(bench_engine.pool).__name__}")

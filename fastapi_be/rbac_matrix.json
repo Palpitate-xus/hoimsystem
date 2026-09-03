@@ -1795,14 +1795,14 @@
   "path": "/api/equipment/inventory/check"
  },
  {
-  "auth": "PUBLIC",
+  "auth": "ANY",
   "function": "get_recent_events",
   "method": "GET",
   "module": "events.py",
   "path": "/api/events/recent"
  },
  {
-  "auth": "PUBLIC",
+  "auth": "ANY",
   "function": "event_stream",
   "method": "GET",
   "module": "events.py",

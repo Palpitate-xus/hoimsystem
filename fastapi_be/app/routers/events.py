@@ -2,7 +2,7 @@
 
 import json
 
-from fastapi import APIRouter, Header, Request
+from fastapi import APIRouter, Depends, Header, Request
 from starlette.responses import StreamingResponse
 
 from app import database
@@ -12,7 +12,11 @@ from app.event_bus import listen_events, recent_events
 router = APIRouter()
 
 
-def _event_identity(request: Request, access_token: str | None) -> tuple[int, str, str]:
+def get_event_identity(
+    request: Request,
+    access_token: str | None = Header(None, alias="accesstoken"),
+) -> tuple[int, str, str]:
+    """Authenticate an event stream without holding a request-scoped DB session."""
     with database.SessionLocal() as db:
         user = resolve_access_token(access_token, db)
         identity = (user.user_id, user.username, user.user_role)
@@ -27,11 +31,9 @@ def _encode_event(event: dict) -> str:
 
 @router.get("/events/recent")
 async def get_recent_events(
-    request: Request,
     limit: int = 50,
-    access_token: str | None = Header(None, alias="accesstoken"),
+    identity: tuple[int, str, str] = Depends(get_event_identity),
 ):
-    identity = _event_identity(request, access_token)
     return {"code": 200, "msg": "success", "data": await recent_events(identity, limit)}
 
 
@@ -39,10 +41,8 @@ async def get_recent_events(
 async def event_stream(
     request: Request,
     last_event_id: str | None = Header(None, alias="Last-Event-ID"),
-    access_token: str | None = Header(None, alias="accesstoken"),
+    identity: tuple[int, str, str] = Depends(get_event_identity),
 ):
-    identity = _event_identity(request, access_token)
-
     async def generate():
         if last_event_id:
             history = await recent_events(identity, 100)

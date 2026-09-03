@@ -31,6 +31,7 @@ from app.dependencies import (  # noqa: E402
 )
 
 ALL_ROLES = ["admin", "super_admin", "director", "doctor", "nurse", "cashier", "pharmacist", "guide", "patient", "lab_technician", "registrar"]
+AUTH_DEPENDENCIES = {"get_current_user", "get_event_identity"}
 
 ROLE_GROUPS = {
     "ADMIN_ROLES": set(ADMIN_ROLES),
@@ -92,7 +93,7 @@ def analyze_router(path: str) -> list[dict]:
         for default in node.args.defaults + [d for d in node.args.kw_defaults if d]:
             found = None
             for sub in ast.walk(default):
-                if isinstance(sub, ast.Name) and sub.id == "get_current_user":
+                if isinstance(sub, ast.Name) and sub.id in AUTH_DEPENDENCIES:
                     found = "ANY"
                 elif isinstance(sub, ast.Call) and isinstance(sub.func, ast.Name) and sub.func.id == "require_roles":
                     roles = _resolve_decorator_roles(sub)

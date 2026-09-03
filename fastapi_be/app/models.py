@@ -1,6 +1,6 @@
 import uuid
 
-from sqlalchemy import Column, Date, DateTime, Float, ForeignKey, Integer, Numeric, String, Text, UniqueConstraint
+from sqlalchemy import Column, Date, DateTime, Float, ForeignKey, Index, Integer, Numeric, String, Text, UniqueConstraint
 from sqlalchemy.orm import relationship
 
 from app.database import Base
@@ -8,6 +8,7 @@ from app.database import Base
 
 class User(Base):
     __tablename__ = "hoimsystem_users"
+    __table_args__ = (Index("idx_users_username", "username"), Index("idx_users_role", "user_role"))
 
     user_id = Column(Integer, primary_key=True, autoincrement=True)
     username = Column(String(20))
@@ -24,6 +25,7 @@ class User(Base):
 
 class Patient(Base):
     __tablename__ = "hoimsystem_patient"
+    __table_args__ = (Index("idx_patient_identity", "identity"), Index("idx_patient_phone", "phone"))
 
     patient_id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(24))
@@ -285,6 +287,11 @@ class ScheduleChangeRequest(Base):
 
 class Registration(Base):
     __tablename__ = "hoimsystem_registration"
+    __table_args__ = (
+        Index("idx_registration_patient_status_time", "patient_id", "status", "time"),
+        Index("idx_registration_doctor_status_time", "doctor_id", "status", "time"),
+        Index("idx_registration_department_time_status", "department_id", "time", "status"),
+    )
 
     registration_uuid = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     registration_id = Column(Integer, autoincrement=True)
@@ -311,6 +318,11 @@ class RegistrationCounter(Base):
 
 class Appointment(Base):
     __tablename__ = "hoimsystem_appointment"
+    __table_args__ = (
+        Index("idx_appointment_patient_status", "patient_id", "status"),
+        Index("idx_appointment_doctor_date", "doctor_id", "time"),
+        Index("idx_appointment_status_time", "status", "time"),
+    )
 
     registration_uuid = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     schedule_id = Column(Integer, ForeignKey("hoimsystem_doctor_schedule.schedule_id"), nullable=True, index=True)
@@ -344,6 +356,11 @@ class BreachRecord(Base):
 
 class Charge(Base):
     __tablename__ = "hoimsystem_charge"
+    __table_args__ = (
+        Index("idx_charge_status_time", "status", "charge_time"),
+        Index("idx_charge_prescription", "prescription_id"),
+        Index("idx_charge_registration", "registration_uuid"),
+    )
 
     charge_id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     charge_time = Column(DateTime)
@@ -377,6 +394,10 @@ class ChargeItem(Base):
 
 class Prescription(Base):
     __tablename__ = "hoimsystem_prescription"
+    __table_args__ = (
+        Index("idx_prescription_patient_status", "patient_id", "status"),
+        Index("idx_prescription_doctor_status_time", "doctor_id", "status", "create_time"),
+    )
 
     prescription_id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     patient_id = Column(Integer, ForeignKey("hoimsystem_patient.patient_id"))
@@ -523,6 +544,7 @@ class SkinTestOrder(Base):
 
 class PrePha(Base):
     __tablename__ = "hoimsystem_pre_pha"
+    __table_args__ = (Index("idx_pre_pha_prescription", "prescription_id"),)
 
     pre_pha_id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     prescription_id = Column(String(50))
@@ -535,6 +557,11 @@ class PrePha(Base):
 
 class MedicalRecord(Base):
     __tablename__ = "hoimsystem_medical_record"
+    __table_args__ = (
+        Index("idx_medical_record_patient_time", "patient_id", "consultation_time"),
+        Index("idx_medical_record_doctor_time", "doctor_id", "consultation_time"),
+        Index("idx_medical_record_registration", "registration_uuid"),
+    )
 
     medical_record_id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     consultation_time = Column(DateTime)
@@ -704,6 +731,12 @@ class VitalSign(Base):
 
 class LabOrder(Base):
     __tablename__ = "hoimsystem_lab_order"
+    __table_args__ = (
+        Index("idx_lab_order_patient_status", "patient_id", "status"),
+        Index("idx_lab_order_sample_status", "sample_status", "status"),
+        Index("idx_lab_order_doctor_status_time", "doctor_id", "status", "create_time"),
+        Index("idx_lab_order_status_time", "status", "create_time"),
+    )
 
     lab_order_id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     patient_id = Column(Integer, ForeignKey("hoimsystem_patient.patient_id"))
@@ -770,6 +803,11 @@ class LabQcRecord(Base):
 
 class LabResult(Base):
     __tablename__ = "hoimsystem_lab_result"
+    __table_args__ = (
+        Index("idx_lab_result_critical_time", "critical_status", "report_time"),
+        Index("idx_lab_result_audit_time", "audit_status", "report_time"),
+        Index("idx_lab_result_order", "lab_order_id"),
+    )
 
     lab_result_id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     lab_order_id = Column(String(36), ForeignKey("hoimsystem_lab_order.lab_order_id"))
@@ -842,6 +880,12 @@ class Review(Base):
 
 class OperationLog(Base):
     __tablename__ = "hoimsystem_operation_log"
+    __table_args__ = (
+        Index("idx_operation_log_time", "create_time"),
+        Index("idx_operation_log_user_time", "user_id", "create_time"),
+        Index("idx_operation_log_path", "path"),
+        Index("idx_operation_log_result_time", "result", "create_time"),
+    )
 
     log_id = Column(Integer, primary_key=True, autoincrement=True)
     user_id = Column(Integer, ForeignKey("hoimsystem_users.user_id"))
@@ -1483,6 +1527,11 @@ class Bed(Base):
 
 class Admission(Base):
     __tablename__ = "hoimsystem_admission"
+    __table_args__ = (
+        Index("idx_admission_patient_status", "patient_id", "status"),
+        Index("idx_admission_department_status", "department_id", "status"),
+        Index("idx_admission_bed_status", "bed_id", "status"),
+    )
 
     admission_id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     admission_no = Column(String(20), unique=True)  # 住院号：ZY20260511001
@@ -1517,6 +1566,10 @@ class Admission(Base):
 
 class InpatientOrder(Base):
     __tablename__ = "hoimsystem_inpatient_order"
+    __table_args__ = (
+        Index("idx_inpatient_order_admission_status_time", "admission_id", "status", "create_time"),
+        Index("idx_inpatient_order_patient_status", "patient_id", "status"),
+    )
 
     order_id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     admission_id = Column(String(36), ForeignKey("hoimsystem_admission.admission_id"))
@@ -1561,6 +1614,10 @@ class InpatientOrderItem(Base):
 
 class OrderExecution(Base):
     __tablename__ = "hoimsystem_order_execution"
+    __table_args__ = (
+        Index("idx_order_execution_status_planned", "status", "planned_time"),
+        Index("idx_order_execution_order_status", "order_id", "status"),
+    )
 
     execution_id = Column(Integer, primary_key=True, autoincrement=True)
     order_id = Column(String(36), ForeignKey("hoimsystem_inpatient_order.order_id"))
@@ -1707,6 +1764,10 @@ class TemperatureRecord(Base):
 
 class InpatientCharge(Base):
     __tablename__ = "hoimsystem_inpatient_charge"
+    __table_args__ = (
+        Index("idx_inpatient_charge_admission_status_date", "admission_id", "status", "charge_date"),
+        Index("idx_inpatient_charge_patient_status_date", "patient_id", "status", "charge_date"),
+    )
 
     charge_id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     admission_id = Column(String(36), ForeignKey("hoimsystem_admission.admission_id"))
@@ -1932,6 +1993,10 @@ class ExamResult(Base):
 
 class ImagingOrder(Base):
     __tablename__ = "hoimsystem_imaging_order"
+    __table_args__ = (
+        Index("idx_imaging_order_patient_status_time", "patient_id", "status", "create_time"),
+        Index("idx_imaging_order_status_time", "status", "create_time"),
+    )
 
     imaging_order_id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     patient_id = Column(Integer, ForeignKey("hoimsystem_patient.patient_id"), nullable=False)
@@ -2244,6 +2309,10 @@ class InsuranceCatalog(Base):
 
 class InsuranceSettlement(Base):
     __tablename__ = "hoimsystem_insurance_settlement"
+    __table_args__ = (
+        Index("idx_insurance_settlement_patient_time", "patient_id", "settlement_time"),
+        Index("idx_insurance_settlement_status_time", "status", "settlement_time"),
+    )
 
     settlement_id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     patient_id = Column(Integer, ForeignKey("hoimsystem_patient.patient_id"), nullable=False)
@@ -2600,6 +2669,7 @@ class SchedulerJobState(Base):
     """跨进程可见的定时任务执行状态。"""
 
     __tablename__ = "hoimsystem_scheduler_job_state"
+    __table_args__ = (Index("idx_scheduler_job_status_finished", "status", "last_finished_at"),)
 
     job_name = Column(String(64), primary_key=True)
     status = Column(String(16), nullable=False, default="idle")

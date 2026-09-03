@@ -2,6 +2,8 @@ const path = require("path");
 const { Configuration, CopyRspackPlugin, DefinePlugin } = require("@rspack/core");
 const HtmlRspackPlugin = require("html-rspack-plugin");
 const { VueLoaderPlugin } = require("vue-loader");
+const Components = require("unplugin-vue-components/rspack");
+const { ElementPlusResolver } = require("unplugin-vue-components/resolvers");
 const {
   publicPath,
   assetsDir,
@@ -153,6 +155,10 @@ module.exports = {
   },
   plugins: [
     new VueLoaderPlugin(),
+    Components({
+      dts: false,
+      resolvers: [ElementPlusResolver({ importStyle: "css" })],
+    }),
     new DefinePlugin({
       // Vue 3需要的全局常量
       __VUE_OPTIONS_API__: JSON.stringify(true),

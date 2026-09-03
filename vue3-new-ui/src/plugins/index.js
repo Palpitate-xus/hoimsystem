@@ -5,10 +5,8 @@ import "@/config/permission";
 // 不再导入vab-icon
 import VabPermissions from "layouts/Permissions";
 import Vab from "@/utils/vab";
-import ElementPlus from "element-plus";
-import "element-plus/dist/index.css";
+import { provideGlobalConfig } from "element-plus";
 import zhCn from "element-plus/dist/locale/zh-cn.mjs";
-import * as ElementPlusIconsVue from "@element-plus/icons-vue";
 import { faToElIcon } from "@/utils/vab";
 import { h } from "vue";
 
@@ -23,20 +21,15 @@ const VabIcon = {
   },
   setup(props) {
     return () => {
-      const iconName = faToElIcon(props.icon);
-      return h("el-icon", {}, [h(iconName)]);
+      const iconComponent = faToElIcon(props.icon);
+      return h("el-icon", {}, [h(iconComponent)]);
     };
   },
 };
 
 export default (app) => {
-  // 注册Element Plus（中文语言包）
-  app.use(ElementPlus, { locale: zhCn });
-
-  // 注册所有Element Plus图标
-  for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
-    app.component(key, component);
-  }
+  // 按需组件仍共享中文语言包，避免 app.use(ElementPlus) 注册整个组件库。
+  provideGlobalConfig({ locale: zhCn }, app, true);
 
   // 注册VabIcon组件，替代之前的vab-icon
   app.component("VabIcon", VabIcon);

@@ -1,5 +1,74 @@
 import { loadingText, messageDuration, title } from "@/config";
-import * as lodash from "lodash";
+import {
+  ArrowDown,
+  ArrowLeft,
+  ArrowRight,
+  ArrowUp,
+  Bell,
+  Box,
+  Brush,
+  Calendar,
+  Cellphone,
+  ChatDotRound,
+  ChatLineRound,
+  Check,
+  CircleCloseFilled,
+  Close,
+  Coffee,
+  Collection,
+  Connection,
+  CreditCard,
+  Document,
+  Download,
+  Edit,
+  ElementPlus,
+  Filter,
+  Folder,
+  FolderAdd,
+  FolderOpened,
+  FullScreen,
+  Grid,
+  Headset,
+  Histogram,
+  HomeFilled,
+  InfoFilled,
+  List,
+  Location,
+  Lock,
+  Menu,
+  Message,
+  Minus,
+  Money,
+  Monitor,
+  More,
+  Picture,
+  PictureFilled,
+  PieChart,
+  Platform,
+  Plus,
+  Pointer,
+  Promotion,
+  QuestionFilled,
+  Refresh,
+  RefreshLeft,
+  ScaleToOriginal,
+  Search,
+  Setting,
+  Share,
+  Shop,
+  ShoppingCart,
+  Sort,
+  Star,
+  SuccessFilled,
+  SwitchButton,
+  Tools,
+  TrendCharts,
+  Trophy,
+  Unlock,
+  User,
+  VideoPlay,
+  Warning,
+} from "@element-plus/icons-vue";
 import {
   ElLoading,
   ElMessage,
@@ -11,7 +80,7 @@ import { getAccessToken } from "@/utils/accessToken";
 /**
  * 将FontAwesome图标名转换为Element Plus图标组件名
  * @param {Array|String} icon FontAwesome图标配置，例如['fas', 'user']或直接的图标名称
- * @returns {String} Element Plus图标组件名
+ * @returns {Object} Element Plus图标组件
  */
 export const faToElIcon = (icon) => {
   // 如果是数组，获取第二个元素（图标名）
@@ -34,7 +103,7 @@ export const faToElIcon = (icon) => {
     gem: "Trophy",
     palette: "Brush",
     "info-circle": "InfoFilled",
-    crown: "Crown",
+    crown: "Trophy",
     edit: "Edit",
     "exchange-alt": "Sort",
     "sync-alt": "Refresh",
@@ -69,7 +138,7 @@ export const faToElIcon = (icon) => {
     cogs: "Tools",
     tools: "Tools",
     wrench: "Tools",
-    code: "Terminal",
+    code: "Monitor",
     "file-code": "Document",
     "file-alt": "Document",
     "folder-open": "Folder",
@@ -94,7 +163,7 @@ export const faToElIcon = (icon) => {
     mobile: "Cellphone",
     tablet: "Cellphone",
     lock: "Lock",
-    shield: "Shield",
+    shield: "Lock",
     "exclamation-triangle": "Warning",
     "exclamation-circle": "Warning",
     "question-circle": "QuestionFilled",
@@ -129,22 +198,19 @@ export const faToElIcon = (icon) => {
     default: "More",
   };
 
-  // 先查映射表
-  if (iconMap[iconName]) {
-    return iconMap[iconName];
-  }
-
-  // 如果没有映射，尝试将 kebab-case 转为 PascalCase（Element Plus 图标命名规则）
-  const pascal = iconName
-    .split("-")
-    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-    .join("");
-
-  if (pascal) {
-    return pascal;
-  }
-
-  return iconMap["default"];
+  const iconComponents = {
+    ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Bell, Box, Brush, Calendar,
+    Cellphone, ChatDotRound, ChatLineRound, Check, CircleCloseFilled, Close,
+    Coffee, Collection, Connection, CreditCard, Document, Download, Edit,
+    ElementPlus, Filter, Folder, FolderAdd, FolderOpened, FullScreen, Grid,
+    Headset, Histogram, HomeFilled, InfoFilled, List, Location, Lock, Menu,
+    Message, Minus, Money, Monitor, More, Picture, PictureFilled, PieChart,
+    Platform, Plus, Pointer, Promotion, QuestionFilled, Refresh, RefreshLeft,
+    ScaleToOriginal, Search, Setting, Share, Shop, ShoppingCart, Sort, Star,
+    SuccessFilled, SwitchButton, Tools, TrendCharts, Trophy, Unlock, User,
+    VideoPlay, Warning,
+  };
+  return iconComponents[iconMap[iconName]] || More;
 };
 
 const install = (app) => {
@@ -220,8 +286,6 @@ const install = (app) => {
         });
       }
     },
-    /* Lodash */
-    lodash,
   };
 
   app.config.globalProperties.$vab = vab;

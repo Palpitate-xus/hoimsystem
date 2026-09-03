@@ -15,7 +15,7 @@ import qs from "qs";
 import router from "@/router";
 import { isArray } from "@/utils/validate";
 import { ElLoading, ElMessage } from "element-plus";
-import { pickBy, identity } from "lodash-es";
+import { pickBy } from "lodash-es";
 
 let loadingInstance;
 

@@ -7,6 +7,10 @@
   "scripts": {
     "serve:rspack": "node --no-deprecation rspack.js serve",
     "build": "rimraf dist && node --no-deprecation rspack.js build",
+    "audit": "npm audit --audit-level=low",
+    "check:bundle": "node scripts/check-bundle-size.cjs",
+    "test:e2e": "playwright test",
+    "verify": "npm run audit && npm run build && npm run check:bundle",
     "build:zip": "rimraf dist && node --no-deprecation rspack.js build && node build-zip.cjs",
     "print-info": "node -e \"require('./layouts').donationConsole()\"",
     "clear": "rimraf node_modules&&npm install  --registry=--registry=https://registry.npmmirror.com",
@@ -36,7 +40,6 @@
     "element-plus": "^2.13.7",
     "jsencrypt": "^3.5.4",
     "layouts": "file:layouts",
-    "lodash": "^4.18.1",
     "lodash-es": "^4.18.1",
     "mitt": "^3.0.1",
     "nprogress": "^0.2.0",
@@ -69,6 +72,7 @@
     "sass": "1.71.1",
     "sass-loader": "^17.0.1",
     "style-loader": "^4.0.0",
+    "unplugin-vue-components": "^32.1.0",
     "vue-loader": "^17.4.2",
     "webpack": "^5.106.2"
   },

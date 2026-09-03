@@ -65,6 +65,30 @@ class Patient(Base):
         foreign_keys="FamilyMember.member_patient_id",
         back_populates="member_patient",
     )
+    clinical_profile = relationship(
+        "PatientClinicalProfile",
+        back_populates="patient",
+        uselist=False,
+        cascade="all, delete-orphan",
+    )
+
+
+class PatientClinicalProfile(Base):
+    """Structured clinical context used by medication decision support."""
+
+    __tablename__ = "hoimsystem_patient_clinical_profile"
+
+    patient_id = Column(Integer, ForeignKey("hoimsystem_patient.patient_id"), primary_key=True)
+    pregnant = Column(Integer)  # NULL=未知, 0=否, 1=是
+    egfr = Column(Numeric(8, 2))
+    hepatic_impairment = Column(Integer, nullable=False, default=0)  # 0无 1轻 2中 3重
+    diagnoses_json = Column(Text, nullable=False, default="[]")
+    labs_json = Column(Text, nullable=False, default="{}")
+    updated_by = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=False)
+    update_time = Column(DateTime, nullable=False)
+
+    patient = relationship("Patient", back_populates="clinical_profile")
+    updater = relationship("User")
 
 
 class PatientCard(Base):
@@ -2446,10 +2470,17 @@ class PrescriptionReviewRule(Base):
     min_dose = Column(Numeric(12, 2))  # 剂量下限（每次）
     max_dose = Column(Numeric(12, 2))  # 剂量上限（每次）
     max_daily_dose = Column(Numeric(12, 2))  # 每日上限
+    condition_json = Column(Text)  # context 规则的结构化患者条件
+    source = Column(String(100))
+    version = Column(String(30))
+    effective_from = Column(Date)
+    effective_to = Column(Date)
     severity = Column(Integer, nullable=False, default=1)  # 1 提示 2 警告 3 禁止
     message = Column(String(300), nullable=False)
     status = Column(Integer, nullable=False, default=1)  # 1 启用 0 停用
     create_time = Column(DateTime, nullable=False)
+    update_time = Column(DateTime)
+    updated_by = Column(Integer, ForeignKey("hoimsystem_users.user_id"))
 
 
 class InsuranceCatalogMapping(Base):

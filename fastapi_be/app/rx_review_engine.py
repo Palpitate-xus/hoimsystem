@@ -8,11 +8,13 @@
 - duplicate     重复用药（同成分 drug_a 关键词的两药同开）
 - allergy_key   过敏拦截补充关键词（与 patient.allergy_history 匹配）
 """
+import datetime
+import json
 import re
 
 from sqlalchemy.orm import Session
 
-from app.models import PrescriptionReviewRule
+from app.models import MedicalRecord, PrescriptionReviewRule, VitalSign
 
 
 def _match_drug(name: str, keyword: str | None) -> bool:
@@ -22,7 +24,93 @@ def _match_drug(name: str, keyword: str | None) -> bool:
     return keyword.strip().lower() in (name or "").lower()
 
 
-def check_prescription(db: Session, items: list[dict], allergy_history: str | None = None) -> list[dict]:
+def build_patient_context(db: Session, patient) -> dict:
+    age = None
+    if patient and patient.birthday:
+        today = datetime.date.today()
+        age = today.year - patient.birthday.year - ((today.month, today.day) < (patient.birthday.month, patient.birthday.day))
+    profile = patient.clinical_profile if patient else None
+    latest_vital = (
+        db.query(VitalSign)
+        .filter(VitalSign.patient_id == patient.patient_id)
+        .order_by(VitalSign.check_time.desc())
+        .first()
+        if patient
+        else None
+    )
+    record_diagnoses = (
+        db.query(MedicalRecord.result)
+        .filter(MedicalRecord.patient_id == patient.patient_id, MedicalRecord.result.isnot(None))
+        .order_by(MedicalRecord.consultation_time.desc())
+        .limit(20)
+        .all()
+        if patient
+        else []
+    )
+    diagnoses = [row[0] for row in record_diagnoses if row[0]]
+    labs = {}
+    if profile:
+        try:
+            diagnoses.extend(json.loads(profile.diagnoses_json or "[]"))
+        except (TypeError, ValueError):
+            pass
+        try:
+            labs = json.loads(profile.labs_json or "{}")
+        except (TypeError, ValueError):
+            pass
+    return {
+        "age": age,
+        "sex": patient.sex if patient else None,
+        "weight": float(latest_vital.weight) if latest_vital and latest_vital.weight is not None else None,
+        "pregnant": bool(profile.pregnant) if profile and profile.pregnant is not None else None,
+        "egfr": float(profile.egfr) if profile and profile.egfr is not None else None,
+        "hepatic_impairment": profile.hepatic_impairment if profile else 0,
+        "diagnoses": diagnoses,
+        "labs": labs,
+    }
+
+
+def _context_matches(condition: dict, context: dict) -> bool:
+    try:
+        checks = []
+        for key in ("min_age", "max_age", "min_weight", "max_weight", "min_egfr", "max_egfr", "hepatic_min"):
+            if key not in condition:
+                continue
+            context_key = "hepatic_impairment" if key == "hepatic_min" else key.split("_", 1)[1]
+            value = context.get(context_key)
+            if value is None:
+                checks.append(False)
+            elif key.startswith("min_") or key == "hepatic_min":
+                checks.append(float(value) >= float(condition[key]))
+            else:
+                checks.append(float(value) <= float(condition[key]))
+        if "pregnant" in condition:
+            checks.append(context.get("pregnant") is condition["pregnant"])
+        if condition.get("sex") is not None:
+            checks.append(context.get("sex") == condition["sex"])
+        if condition.get("diagnosis_keywords"):
+            diagnosis_text = " ".join(context.get("diagnoses") or []).lower()
+            checks.append(any(str(keyword).lower() in diagnosis_text for keyword in condition["diagnosis_keywords"]))
+        for lab_name, bounds in (condition.get("labs") or {}).items():
+            value = (context.get("labs") or {}).get(lab_name)
+            if value is None:
+                checks.append(False)
+                continue
+            if "min" in bounds:
+                checks.append(float(value) >= float(bounds["min"]))
+            if "max" in bounds:
+                checks.append(float(value) <= float(bounds["max"]))
+        return bool(checks) and all(checks)
+    except (AttributeError, TypeError, ValueError):
+        return False
+
+
+def check_prescription(
+    db: Session,
+    items: list[dict],
+    allergy_history: str | None = None,
+    patient_context: dict | None = None,
+) -> list[dict]:
     """对一组处方明细执行全部启用规则。
 
     items: [{"name": 药品名, "dosage": 每次剂量(float), "frequency": 频次中文, "number": 数量}, ...]
@@ -42,6 +130,11 @@ def check_prescription(db: Session, items: list[dict], allergy_history: str | No
         return float(it.get("dosage") or 0) * per_day
 
     for rule in rules:
+        today = datetime.date.today()
+        if rule.effective_from and today < rule.effective_from:
+            continue
+        if rule.effective_to and today > rule.effective_to:
+            continue
         hit = False
         if rule.rule_type == "interaction":
             names = [it.get("name", "") for it in items]
@@ -69,6 +162,15 @@ def check_prescription(db: Session, items: list[dict], allergy_history: str | No
             history = (allergy_history or "").strip()
             if history and rule.drug_a:
                 hit = _match_drug(history, rule.drug_a) and any(_match_drug(it.get("name", ""), rule.drug_a) for it in items)
+        elif rule.rule_type == "context" and patient_context:
+            try:
+                condition = json.loads(rule.condition_json or "{}")
+            except (TypeError, ValueError):
+                condition = {}
+            hit = (
+                any(_match_drug(it.get("name", ""), rule.drug_a) for it in items)
+                and _context_matches(condition, patient_context)
+            )
 
         if hit:
             findings.append({
@@ -76,6 +178,8 @@ def check_prescription(db: Session, items: list[dict], allergy_history: str | No
                 "rule_id": rule.rule_id,
                 "type": rule.rule_type,
                 "message": rule.message,
+                "source": rule.source,
+                "version": rule.version,
             })
 
     # severity 排序：禁止(3) 在前

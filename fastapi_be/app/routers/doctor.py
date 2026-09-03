@@ -356,7 +356,12 @@ def prescription_register(
             if pha.expireddate and pha.expireddate < datetime.date.today():
                 return {"code": 500, "msg": f"药品 {pha.name} 已过期，不能开立"}
             seen_pharmaceuticals.add(pharmaceutical_id)
-            normalized_phas.append({"id": pharmaceutical_id, "number": quantity})
+            normalized_phas.append({
+                "id": pharmaceutical_id,
+                "number": quantity,
+                "dosage": raw_item.get("dosage"),
+                "frequency": raw_item.get("frequency"),
+            })
 
         # 抗菌药物分级审核
         restricted_phas = []  # 限制级
@@ -433,7 +438,7 @@ def prescription_register(
 
         # 3. 审方规则引擎检查（规则由药师维护，未配置规则时不影响开方）
         try:
-            from app.rx_review_engine import check_prescription
+            from app.rx_review_engine import build_patient_context, check_prescription
 
             engine_items = []
             for item in normalized_phas:
@@ -444,13 +449,20 @@ def prescription_register(
                     "frequency": item.get("frequency"),
                     "number": item.get("number"),
                 })
-            findings = check_prescription(db, engine_items, allergy_history=(patient_obj.allergy_history or ""))
+            findings = check_prescription(
+                db,
+                engine_items,
+                allergy_history=(patient_obj.allergy_history or ""),
+                patient_context=build_patient_context(db, patient_obj),
+            )
             if findings and any(f.get("severity") == 3 for f in findings):
                 db.rollback()
                 blocked_msgs = [f["message"] for f in findings if f.get("severity") == 3]
                 return {"code": 500, "msg": f"审方规则禁止：{'；'.join(blocked_msgs)}"}
         except Exception:
-            traceback.print_exc()  # 引擎异常不阻断开方主流程
+            traceback.print_exc()
+            db.rollback()
+            return {"code": 500, "msg": "审方安全检查暂不可用，请稍后重试或联系药师"}
 
         pre = Prescription(
             patient_id=patient_obj.patient_id,

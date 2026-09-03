@@ -227,7 +227,26 @@ def get_clinical_profile(
     patient = db.get(Patient, patient_id)
     if not patient:
         return {"code": 404, "msg": "患者不存在"}
-    return {"code": 200, "msg": "success", "data": build_patient_context(db, patient)}
+    context = build_patient_context(db, patient)
+    profile = patient.clinical_profile
+    try:
+        recorded_diagnoses = json.loads(profile.diagnoses_json or "[]") if profile else []
+    except (TypeError, ValueError):
+        recorded_diagnoses = []
+    try:
+        recorded_labs = json.loads(profile.labs_json or "{}") if profile else {}
+    except (TypeError, ValueError):
+        recorded_labs = {}
+    context["recorded"] = {
+        "pregnant": bool(profile.pregnant) if profile and profile.pregnant is not None else None,
+        "egfr": float(profile.egfr) if profile and profile.egfr is not None else None,
+        "hepatic_impairment": profile.hepatic_impairment if profile else 0,
+        "diagnoses": recorded_diagnoses,
+        "labs": recorded_labs,
+        "updated_by": profile.updated_by if profile else None,
+        "update_time": profile.update_time if profile else None,
+    }
+    return {"code": 200, "msg": "success", "data": context}
 
 
 @router.post("/clinicalProfile/{patient_id}")

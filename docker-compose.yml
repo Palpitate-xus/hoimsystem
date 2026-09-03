@@ -41,6 +41,7 @@ services:
       DATABASE_URL: postgresql://hoimsystem:${POSTGRES_PASSWORD}@db:5432/hoimsystem
       SECRET_KEY: ${SECRET_KEY:?SECRET_KEY must be set before starting production compose}
       ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:?ALLOWED_ORIGINS must be set (no wildcards)}
+      TRANSPORT_RSA_PRIVATE_KEY_PEM: ${TRANSPORT_RSA_PRIVATE_KEY_PEM:-}
       # 外部系统集成密钥（LIS/PACS/医保/支付回调），未配置时对应回调返回 503
       LIS_INTEGRATION_KEY: ${LIS_INTEGRATION_KEY:-}
       PACS_INTEGRATION_KEY: ${PACS_INTEGRATION_KEY:-}

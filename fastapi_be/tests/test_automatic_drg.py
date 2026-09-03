@@ -57,3 +57,25 @@ async def test_automatic_grouping_uses_primary_icd_and_highest_priority_rule(asy
     assert response.status_code == 200
     assert response.json()["data"]["group_code"] == "DRG-J15"
     assert float(response.json()["data"]["profit"]) == 2000.0
+
+
+@pytest.mark.asyncio
+async def test_drg_rule_without_procedure_prefix_is_unique(async_client, seed_data, auth_headers):
+    payload = {
+        "payment_method": "DRG",
+        "group_code": "DRG-I10",
+        "group_name": "高血压组",
+        "diagnosis_prefix": "I10",
+        "procedure_prefix": "",
+        "expected_amount": 10000,
+        "priority": 10,
+        "version": "2026",
+    }
+    headers = auth_headers(seed_data["admin_user"].username)
+
+    first = await async_client.post("/api/insurance/drg/rule", headers=headers, json=payload)
+    duplicate = await async_client.post("/api/insurance/drg/rule", headers=headers, json=payload)
+
+    assert first.status_code == 200
+    assert duplicate.status_code == 409
+    assert duplicate.json()["code"] == 409

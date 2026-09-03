@@ -2461,7 +2461,10 @@ class DrgRule(Base):
     group_code = Column(String(30), nullable=False)
     group_name = Column(String(200), nullable=False)
     diagnosis_prefix = Column(String(20), nullable=False)
-    procedure_prefix = Column(String(20))
+    # Empty string represents a rule without a procedure requirement. Keeping
+    # this non-null makes the composite uniqueness constraint effective on
+    # PostgreSQL, where multiple NULL values are otherwise considered distinct.
+    procedure_prefix = Column(String(20), nullable=False, default="")
     expected_amount = Column(Numeric(12, 2), nullable=False)
     priority = Column(Integer, nullable=False, default=0)
     version = Column(String(30), nullable=False)

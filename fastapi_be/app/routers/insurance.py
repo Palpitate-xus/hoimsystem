@@ -3,6 +3,7 @@ from decimal import Decimal, InvalidOperation
 
 from fastapi import APIRouter, Depends, Header, HTTPException
 from sqlalchemy import case, func
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, joinedload
 
 from app.config import settings
@@ -218,7 +219,7 @@ def save_drg_rule(req: dict, current_user: User = Depends(require_roles(*ADMIN_R
     rule.group_code = str(req["group_code"]).strip().upper()[:30]
     rule.group_name = str(req["group_name"]).strip()[:200]
     rule.diagnosis_prefix = diagnosis_prefix[:20]
-    rule.procedure_prefix = str(req.get("procedure_prefix") or "").strip().upper()[:20] or None
+    rule.procedure_prefix = str(req.get("procedure_prefix") or "").strip().upper()[:20]
     rule.expected_amount = expected
     rule.priority = max(-1000, min(int(req.get("priority", 0)), 1000))
     rule.version = str(req["version"]).strip()[:30]
@@ -227,7 +228,11 @@ def save_drg_rule(req: dict, current_user: User = Depends(require_roles(*ADMIN_R
     rule.status = int(req.get("status", 1))
     rule.update_time = datetime.datetime.now()
     db.add(rule)
-    db.commit()
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        return {"code": 409, "msg": "相同支付方式、组编码、诊断/手术前缀和版本的规则已存在"}
     return {"code": 200, "msg": "success", "data": {"rule_id": rule.rule_id}}
 
 

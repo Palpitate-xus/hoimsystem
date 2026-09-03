@@ -1,4 +1,4 @@
-"""HOIM System 最终性能测试。"""
+"""HOIM System administrator benchmark scenario."""
 
 import os
 import random
@@ -7,43 +7,36 @@ from benchmark_auth import load_tokens_or_stop
 from benchmark_http import mark_business_result
 from locust import HttpUser, between, events, task
 
-BENCHMARK_CREDENTIALS = {
+ADMIN_CREDENTIALS = {
     "admin": ((os.getenv("BENCHMARK_ADMIN_USERNAME", "admin"), os.getenv("BENCHMARK_ADMIN_PASSWORD", "admin123")),),
-    "doctor": ((os.getenv("BENCHMARK_DOCTOR_USERNAME", "doc01"), os.getenv("BENCHMARK_DOCTOR_PASSWORD", "123456")),),
-    "patient": (
-        (
-            os.getenv("BENCHMARK_PATIENT_USERNAME", "370101199001011234"),
-            os.getenv("BENCHMARK_PATIENT_PASSWORD", "123456"),
-        ),
-    ),
 }
 TOKEN_POOLS: dict[str, tuple[str, ...]] = {}
 
 
 @events.test_start.add_listener
 def prepare_runtime_tokens(environment, **_kwargs):
-    """Refresh tokens at the beginning of every local or worker test run."""
+    """Refresh the administrator token for every test run."""
     TOKEN_POOLS.clear()
-    TOKEN_POOLS.update(load_tokens_or_stop(environment, BENCHMARK_CREDENTIALS))
+    TOKEN_POOLS.update(load_tokens_or_stop(environment, ADMIN_CREDENTIALS))
 
 
-class HOIMUser(HttpUser):
-    """混合读写操作性能测试。"""
+class HOIMAdminUser(HttpUser):
+    """Simulate administrator reads and department creation."""
 
-    wait_time = between(0.2, 0.8)
+    wait_time = between(0.5, 1.5)
 
-    def _headers(self, role="admin"):
-        return {"accesstoken": random.choice(TOKEN_POOLS[role])}
+    def _headers(self):
+        return {"accesstoken": random.choice(TOKEN_POOLS["admin"])}
 
-    @task(20)
+    @task(15)
     def get_department_list(self):
         self.client.get("/api/departmentManagement/getList", headers=self._headers())
 
-    @task(15)
+    @task(12)
     def get_doctor_list(self):
         self.client.get("/api/doctorManagement/getList", headers=self._headers())
 
-    @task(12)
+    @task(10)
     def get_patient_list(self):
         self.client.get("/api/patientManagement/getList", headers=self._headers())
 
@@ -67,31 +60,15 @@ class HOIMUser(HttpUser):
     def get_log_stats(self):
         self.client.get("/api/log/stats", headers=self._headers())
 
-    @task(2)
-    def create_appointment(self):
-        with self.client.post(
-            "/api/appointmentManagement/create",
-            headers=self._headers("patient"),
-            json={
-                "id": random.randint(1, 12),
-                "date": "2026-07-15",
-                "department_id": 1,
-                "doctor_id": 1,
-                "time": "上午",
-                "specialist": 1,
-            },
-            catch_response=True,
-        ) as response:
-            mark_business_result(response)
-
     @task(1)
-    def create_prescription(self):
+    def create_department(self):
         with self.client.post(
-            "/api/prescriptionManagement/create",
-            headers=self._headers("doctor"),
+            "/api/departmentManagement/create",
+            headers=self._headers(),
             json={
-                "patient": 1,
-                "phas": [{"id": 1, "number": 1}],
+                "name": f"BenchDept{random.randint(1, 99999)}",
+                "phone": f"010{random.randint(10000000, 99999999)}",
+                "location": "Bench",
             },
             catch_response=True,
         ) as response:

@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from app.config import settings
 from app.database import get_db
 from app.dependencies import ADMIN_ROLES, CASHIER_ROLES, CLINICAL_ROLES, ROLE_DIRECTOR, ROLE_PATIENT, User, get_current_user, require_roles
+from app.integration_outbox import enqueue_integration_event
 from app.models import ChronicDiseaseRegistration, DrgGrouping, InsuranceCatalog, InsuranceSettlement, Patient
 from app.routers.integration import _check_key
 from app.schemas import InsuranceSettlementIntegrationRequest
@@ -77,6 +78,24 @@ def create_insurance_settlement(req: dict, current_user: User = Depends(require_
         operator_id=current_user.user_id, settlement_time=datetime.datetime.now(),
     )
     db.add(item)
+    db.flush()
+    if integration_mode == "external":
+        enqueue_integration_event(
+            db,
+            destination="insurance",
+            event_type="insurance.settlement.created",
+            aggregate_type="insurance_settlement",
+            aggregate_id=item.settlement_id,
+            payload={
+                "settlement_id": item.settlement_id,
+                "patient_id": item.patient_id,
+                "insurance_no": item.insurance_no,
+                "total_amount": item.total_amount,
+                "covered_amount": item.covered_amount,
+                "self_amount": item.self_amount,
+                "settlement_time": item.settlement_time,
+            },
+        )
     db.commit()
     return {"code": 200, "msg": "已提交医保平台" if integration_mode == "external" else "结算成功", "data": {"settlement_id": item.settlement_id, "self_amount": item.self_amount, "status": item.status}}
 

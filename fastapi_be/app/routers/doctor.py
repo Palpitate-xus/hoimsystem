@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session, selectinload
 from app.database import get_db
 from app.dependencies import ADMIN_ROLES, CLINICAL_ROLES, PHARMACY_ROLES, get_current_user, require_roles
 from app.event_bus import publish_event
+from app.integration_outbox import enqueue_integration_event
 from app.models import (
     AntibioticApproval,
     Attendance,
@@ -688,6 +689,23 @@ def create_lab_order(req: LabOrderCreateRequest, current_user: User = Depends(ge
         create_time=datetime.datetime.now(),
     )
     db.add(lab_order)
+    db.flush()
+    enqueue_integration_event(
+        db,
+        destination="lis",
+        event_type="lab.order.created",
+        aggregate_type="lab_order",
+        aggregate_id=lab_order.lab_order_id,
+        payload={
+            "lab_order_id": lab_order.lab_order_id,
+            "patient_id": lab_order.patient_id,
+            "doctor_id": lab_order.doctor_id,
+            "check_type": lab_order.check_type,
+            "check_items": req.check_items,
+            "urgent": lab_order.urgent,
+            "created_at": lab_order.create_time,
+        },
+    )
     db.commit()
     return {"code": 200, "msg": "success", "data": {"lab_order_id": str(lab_order.lab_order_id)}}
 

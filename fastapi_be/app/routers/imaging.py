@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.dependencies import ADMIN_ROLES, CLINICAL_ROLES, LAB_ROLES, ROLE_DIRECTOR, ROLE_PATIENT, User, get_current_user, require_roles
+from app.integration_outbox import enqueue_integration_event
 from app.models import Doctor, ImagingFilm, ImagingOrder, ImagingReport, ImagingTemplate, Patient
 
 router = APIRouter()
@@ -99,6 +100,24 @@ def create_imaging_order(req: dict, current_user: User = Depends(require_roles(*
     if not order.body_part:
         return {"code": 400, "msg": "检查部位不能为空"}
     db.add(order)
+    db.flush()
+    enqueue_integration_event(
+        db,
+        destination="pacs",
+        event_type="imaging.order.created",
+        aggregate_type="imaging_order",
+        aggregate_id=order.imaging_order_id,
+        payload={
+            "imaging_order_id": order.imaging_order_id,
+            "accession_no": order.accession_no,
+            "patient_id": order.patient_id,
+            "doctor_id": order.doctor_id,
+            "modality": order.modality,
+            "body_part": order.body_part,
+            "priority": order.priority,
+            "created_at": order.create_time,
+        },
+    )
     db.commit()
     return {"code": 200, "msg": "success", "data": {"imaging_order_id": order.imaging_order_id, "accession_no": order.accession_no}}
 

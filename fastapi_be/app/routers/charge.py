@@ -12,6 +12,7 @@ from sqlalchemy.orm import Session, joinedload
 from app.config import settings
 from app.database import get_db
 from app.dependencies import ADMIN_ROLES, ROLE_CASHIER, ROLE_PATIENT, ROLE_REGISTRAR, get_current_user, require_roles
+from app.integration_outbox import enqueue_integration_event
 from app.models import Charge, Invoice, Patient, Payment, Prescription, User
 from app.pagination import paginate
 from app.registration import allocate_registration_id
@@ -635,9 +636,26 @@ def create_payment(req: PaymentCreateRequest, db: Session = Depends(get_db), cur
         amount=normalized_amount,
         status=0,
         qr_code_data=qr_data,
+        integration_status="pending" if req.channel != "cash" else "local",
         create_time=datetime.datetime.now(),
     )
     db.add(payment)
+    db.flush()
+    if req.channel != "cash":
+        enqueue_integration_event(
+            db,
+            destination="payment",
+            event_type="payment.order.created",
+            aggregate_type="payment",
+            aggregate_id=payment.payment_no,
+            payload={
+                "payment_no": payment.payment_no,
+                "charge_id": payment.charge_id,
+                "channel": payment.channel,
+                "amount": payment.amount,
+                "created_at": payment.create_time,
+            },
+        )
     db.commit()
     return {
         "code": 200,

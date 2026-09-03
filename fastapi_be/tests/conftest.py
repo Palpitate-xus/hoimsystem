@@ -20,6 +20,7 @@ from app.database import Base, get_db
 from app.main import app
 from app.models import (
     Charge,
+    Config,
     Department,
     Doctor,
     DoctorSchedule,
@@ -218,6 +219,15 @@ def seed_data(db_session: Session):
         expiredtime=datetime.datetime(2026, 12, 31), readnum=0, writer_id=admin_user.user_id,
     )
     sess.add(notice)
+
+    # Core deployments seed this key. Keep the reusable test baseline aligned
+    # so config-update tests do not depend on execution order in another test.
+    site_name_config = sess.query(Config).filter(Config.config_key == "site_name").one_or_none()
+    if site_name_config is None:
+        site_name_config = Config(config_key="site_name")
+        sess.add(site_name_config)
+    site_name_config.config_value = "HOIM 医院信息管理系统"
+    site_name_config.description = "系统名称"
 
     sess.commit()
 

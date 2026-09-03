@@ -11,11 +11,11 @@ import datetime
 
 from sqlalchemy.orm import Session
 
+from app.config import settings
 from app.database import Base, engine
 from app.models import Department, Doctor, Patient, User
 from app.schema_compat import ensure_operation_log_schema
 from app.security import hash_password, is_bcrypt_hash, verify_password
-
 
 DEFAULT_ACCOUNTS = (
     ("admin", "admin123", "admin"),
@@ -96,6 +96,8 @@ def _ensure_profiles(db: Session, users: dict[str, User]) -> None:
 
 def seed_default_accounts(reset_passwords: bool = False) -> list[str]:
     """Seed documented accounts and return the usernames that were ensured."""
+    if settings.is_production:
+        raise RuntimeError("生产环境禁止写入演示账号；请通过受控账号开通流程初始化管理员")
     Base.metadata.create_all(bind=engine)
     ensure_operation_log_schema(engine)
     with Session(engine) as db:

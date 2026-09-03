@@ -66,9 +66,7 @@ def get_current_user(
     username = decode_access_token(access_token)
     if not username:
         raise HTTPException(status_code=401, detail="Invalid or expired accesstoken")
-    # username 无唯一约束的历史库可能存在重名行：取 user_id 最大（最新）的一行，
-    # 保证行为确定（旧行多为测试/历史遗留，登录与吊销检查必须作用在同一行）
-    user = db.query(User).filter(User.username == username).order_by(User.user_id.desc()).first()
+    user = db.query(User).filter(User.username == username).first()
     if not user:
         raise HTTPException(status_code=401, detail="Invalid accesstoken")
     # 吊销检查：token 签发时间早于 token_invalid_before 则拒绝（logout/改密后生效）
@@ -90,6 +88,8 @@ def get_current_user(
         except pyjwt.InvalidTokenError:
             raise HTTPException(status_code=401, detail="Invalid accesstoken")
     request.state.current_user = user
+    # 中间件在请求级 Session 关闭后仍会运行，只保存不可变标量供审计与指标读取。
+    request.state.auth_identity = (user.user_id, user.username, user.user_role)
     return user
 
 

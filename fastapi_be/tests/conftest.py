@@ -92,42 +92,42 @@ def seed_data(db_session: Session):
 
     from app.security import hash_password
 
+    def baseline_user(username: str, password: str, role: str) -> User:
+        user = sess.query(User).filter(User.username == username).one_or_none()
+        if user is None:
+            user = User(username=username)
+            sess.add(user)
+        user.password = hash_password(password)
+        user.user_role = role
+        user.token_invalid_before = None
+        sess.flush()
+        return user
+
+    def baseline_patient(*, name: str, sex: int, identity: str, birthday, phone: str, address: str) -> Patient:
+        patient = sess.query(Patient).filter(Patient.identity == identity).one_or_none()
+        if patient is None:
+            patient = Patient(identity=identity)
+            sess.add(patient)
+        patient.name = name
+        patient.sex = sex
+        patient.birthday = birthday
+        patient.phone = phone
+        patient.address = address
+        patient.permission = "allow"
+        patient.prepaid_balance = 0
+        sess.flush()
+        return patient
+
     # Admin user
-    admin_user = User(username="admin", password=hash_password("admin123"), user_role="admin")
-    sess.add(admin_user)
-    sess.flush()
-
-    cashier_user = User(username="cashier01", password=hash_password("123456"), user_role="cashier")
-    sess.add(cashier_user)
-    sess.flush()
-
-    pharmacist_user = User(username="pharmacist01", password=hash_password("123456"), user_role="pharmacist")
-    sess.add(pharmacist_user)
-    sess.flush()
-
-    super_admin_user = User(username="super01", password=hash_password("123456"), user_role="super_admin")
-    sess.add(super_admin_user)
-    sess.flush()
-
-    director_user = User(username="director01", password=hash_password("123456"), user_role="director")
-    sess.add(director_user)
-    sess.flush()
-
-    nurse_user = User(username="nurse01", password=hash_password("123456"), user_role="nurse")
-    sess.add(nurse_user)
-    sess.flush()
-
-    guide_user = User(username="guide01", password=hash_password("123456"), user_role="guide")
-    sess.add(guide_user)
-    sess.flush()
-
-    lab_tech_user = User(username="lab01", password=hash_password("123456"), user_role="lab_technician")
-    sess.add(lab_tech_user)
-    sess.flush()
-
-    registrar_user = User(username="registrar01", password=hash_password("123456"), user_role="registrar")
-    sess.add(registrar_user)
-    sess.flush()
+    admin_user = baseline_user("admin", "admin123", "admin")
+    cashier_user = baseline_user("cashier01", "123456", "cashier")
+    pharmacist_user = baseline_user("pharmacist01", "123456", "pharmacist")
+    super_admin_user = baseline_user("super01", "123456", "super_admin")
+    director_user = baseline_user("director01", "123456", "director")
+    nurse_user = baseline_user("nurse01", "123456", "nurse")
+    guide_user = baseline_user("guide01", "123456", "guide")
+    lab_tech_user = baseline_user("lab01", "123456", "lab_technician")
+    registrar_user = baseline_user("registrar01", "123456", "registrar")
 
     # Department
     dept = Department(name="内科", phone="01012345678", location="1号楼", director=None)
@@ -143,9 +143,7 @@ def seed_data(db_session: Session):
     sess.flush()
 
     # Doctor user + doctor
-    doc_user = User(username="doc01", password=hash_password("123456"), user_role="doctor")
-    sess.add(doc_user)
-    sess.flush()
+    doc_user = baseline_user("doc01", "123456", "doctor")
     doctor = Doctor(
         name="王医生", sex=1, department_id=dept.department_id,
         title="主任医师", education="博士", phone="13900139000",
@@ -163,28 +161,20 @@ def seed_data(db_session: Session):
     sess.flush()
 
     # Patient user + patient
-    pat_user = User(username="370101199001011234", password=hash_password("123456"), user_role="patient")
-    sess.add(pat_user)
-    sess.flush()
-    patient = Patient(
+    pat_user = baseline_user("370101199001011234", "123456", "patient")
+    patient = baseline_patient(
         name="张三", sex=1, identity="370101199001011234",
         birthday=datetime.date(1990, 1, 1), phone="13800138000",
-        address="北京", permission="allow",
+        address="北京",
     )
-    sess.add(patient)
-    sess.flush()
 
     # Second patient
-    pat_user2 = User(username="370101199001015678", password=hash_password("123456"), user_role="patient")
-    sess.add(pat_user2)
-    sess.flush()
-    patient2 = Patient(
+    pat_user2 = baseline_user("370101199001015678", "123456", "patient")
+    patient2 = baseline_patient(
         name="李四", sex=0, identity="370101199001015678",
         birthday=datetime.date(1992, 2, 2), phone="13700137000",
-        address="上海", permission="allow",
+        address="上海",
     )
-    sess.add(patient2)
-    sess.flush()
 
     # Pharmaceutical
     pha = Pharmaceutical(
@@ -282,4 +272,3 @@ def auth_headers():
         return {"accesstoken": create_access_token(username)}
 
     return _auth_headers
-

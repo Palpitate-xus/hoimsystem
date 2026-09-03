@@ -8,7 +8,10 @@ from app.database import Base
 
 class User(Base):
     __tablename__ = "hoimsystem_users"
-    __table_args__ = (Index("idx_users_username", "username"), Index("idx_users_role", "user_role"))
+    __table_args__ = (
+        Index("uq_users_username", "username", unique=True),
+        Index("idx_users_role", "user_role"),
+    )
 
     user_id = Column(Integer, primary_key=True, autoincrement=True)
     username = Column(String(20))
@@ -25,7 +28,10 @@ class User(Base):
 
 class Patient(Base):
     __tablename__ = "hoimsystem_patient"
-    __table_args__ = (Index("idx_patient_identity", "identity"), Index("idx_patient_phone", "phone"))
+    __table_args__ = (
+        Index("uq_patient_identity", "identity", unique=True),
+        Index("idx_patient_phone", "phone"),
+    )
 
     patient_id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(24))

@@ -249,11 +249,9 @@ class OperationLogMiddleware(BaseHTTPMiddleware):
         user_id = None
         username = ""
         role = ""
-        current_user = getattr(request.state, "current_user", None)
-        if current_user is not None:
-            user_id = current_user.user_id
-            username = current_user.username
-            role = current_user.user_role
+        auth_identity = getattr(request.state, "auth_identity", None)
+        if auth_identity is not None:
+            user_id, username, role = auth_identity
 
         # 登录/注册请求：使用进入中间件前缓存的用户名（密码绝不落日志）
         if path in self.AUTH_BODY_PATHS and not username and auth_attempted_username:

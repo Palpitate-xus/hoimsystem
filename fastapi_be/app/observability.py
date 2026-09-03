@@ -99,7 +99,8 @@ class ObservabilityMiddleware:
         finally:
             duration = time.perf_counter() - started_at
             route = getattr(scope.get("route"), "path", "unmatched")
-            username = getattr(scope.get("state", {}).get("current_user"), "username", None)
+            auth_identity = scope.get("state", {}).get("auth_identity")
+            username = auth_identity[1] if auth_identity else None
             REQUESTS.labels(method, route, str(status_code)).inc()
             LATENCY.labels(method, route).observe(duration)
             IN_PROGRESS.labels(method).dec()

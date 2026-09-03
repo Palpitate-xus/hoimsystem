@@ -46,7 +46,7 @@
     "qrcode.vue": "^3.9.0",
     "qs": "^6.16.0",
     "screenfull": "^6.0.2",
-    "vue": "^3.5.33",
+    "vue": "^3.5.42",
     "vue-router": "^5.0.6",
     "vuedraggable": "^2.24.3",
     "vuex": "^4.1.0"

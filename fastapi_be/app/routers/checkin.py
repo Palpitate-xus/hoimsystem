@@ -1,7 +1,7 @@
 import datetime
 
 from fastapi import APIRouter, Depends
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from app.database import get_db
 from app.dependencies import NURSING_ROLES, User, require_roles
@@ -58,22 +58,18 @@ def get_appointments_for_checkin(identity: str, phone: str = "", db: Session = D
     today = datetime.date.today()
     appointments = (
         db.query(Appointment)
+        .options(joinedload(Appointment.doctor).joinedload(Doctor.department))
         .filter(Appointment.patient_id == patient.patient_id, Appointment.status == 0, Appointment.time == today)
         .order_by(Appointment.appointment_time.asc())
         .all()
     )
     data = []
     for appt in appointments:
-        doc = db.query(Doctor).filter(Doctor.doctor_id == appt.doctor_id).first()
-        dept_name = ""
-        if doc and doc.department_id:
-            from app.models import Department
-            dept = db.query(Department).filter(Department.department_id == doc.department_id).first()
-            dept_name = dept.name if dept else ""
+        doc = appt.doctor
         data.append({
             "uuid": appt.registration_uuid,
             "doctor_name": doc.name if doc else "",
-            "department_name": dept_name,
+            "department_name": doc.department.name if doc and doc.department else "",
             "time": str(appt.time) if appt.time else "",
             "appointment_time": str(appt.appointment_time) if appt.appointment_time else "",
             "specialist": "专家号" if appt.specialist == 1 else "普通号",

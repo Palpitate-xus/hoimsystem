@@ -1,7 +1,7 @@
 import datetime
 
 from fastapi import APIRouter, Depends
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from app.database import get_db
 from app.dependencies import NURSING_ROLES, User, require_roles
@@ -10,7 +10,6 @@ from app.models import (
     Bed,
     InpatientCharge,
     Patient,
-    Ward,
 )
 from app.schemas import AdmissionCreateRequest, AdmissionUpdateRequest
 
@@ -42,7 +41,13 @@ def get_admission_list(
 ):
     from app.pagination import paginate
 
-    query = db.query(Admission)
+    query = db.query(Admission).options(
+        joinedload(Admission.patient),
+        joinedload(Admission.doctor),
+        joinedload(Admission.department),
+        joinedload(Admission.ward),
+        joinedload(Admission.bed),
+    )
     if status is not None:
         query = query.filter(Admission.status == status)
     if ward_id is not None:
@@ -179,7 +184,18 @@ def create_admission(req: AdmissionCreateRequest, current_user: User = Depends(r
 
 @router.get("/admission/detail")
 def get_admission_detail(admission_id: str, current_user: User = Depends(require_roles(*NURSING_ROLES)), db: Session = Depends(get_db)):
-    item = db.query(Admission).filter(Admission.admission_id == admission_id).first()
+    item = (
+        db.query(Admission)
+        .options(
+            joinedload(Admission.patient),
+            joinedload(Admission.doctor),
+            joinedload(Admission.department),
+            joinedload(Admission.ward),
+            joinedload(Admission.bed),
+        )
+        .filter(Admission.admission_id == admission_id)
+        .first()
+    )
     if not item:
         return {"code": 500, "msg": "入院记录不存在"}
     status_map = ["待入院", "在院", "已出院", "已退院"]
@@ -254,13 +270,12 @@ def update_admission(req: AdmissionUpdateRequest, current_user: User = Depends(r
 
 @router.get("/admission/getAvailableBeds")
 def get_available_beds(ward_id: int | None = None, current_user: User = Depends(require_roles(*NURSING_ROLES)), db: Session = Depends(get_db)):
-    query = db.query(Bed).filter(Bed.status == 0)
+    query = db.query(Bed).options(joinedload(Bed.ward)).filter(Bed.status == 0)
     if ward_id:
         query = query.filter(Bed.ward_id == ward_id)
     beds = query.all()
     data = []
     for item in beds:
-        ward = db.query(Ward).filter(Ward.ward_id == item.ward_id).first()
         data.append(
             {
                 "bed_id": item.bed_id,
@@ -269,7 +284,7 @@ def get_available_beds(ward_id: int | None = None, current_user: User = Depends(
                 "bed_type": item.bed_type,
                 "price_per_day": item.price_per_day,
                 "ward_id": item.ward_id,
-                "ward_name": ward.name if ward else "",
+                "ward_name": item.ward.name if item.ward else "",
             }
         )
     return {"code": 200, "msg": "success", "data": data}
@@ -277,7 +292,13 @@ def get_available_beds(ward_id: int | None = None, current_user: User = Depends(
 
 @router.get("/admission/getInpatientList")
 def get_inpatient_list(ward_id: int | None = None, doctor_id: int | None = None, current_user: User = Depends(require_roles(*NURSING_ROLES)), db: Session = Depends(get_db)):
-    query = db.query(Admission).filter(Admission.status == 1)
+    query = db.query(Admission).options(
+        joinedload(Admission.patient),
+        joinedload(Admission.doctor),
+        joinedload(Admission.department),
+        joinedload(Admission.ward),
+        joinedload(Admission.bed),
+    ).filter(Admission.status == 1)
     if ward_id:
         query = query.filter(Admission.ward_id == ward_id)
     if doctor_id:

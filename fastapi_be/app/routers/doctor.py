@@ -4,6 +4,7 @@ import traceback
 from decimal import Decimal
 
 from fastapi import APIRouter, BackgroundTasks, Depends
+from sqlalchemy import func
 from sqlalchemy.orm import Session, joinedload, selectinload
 
 from app.database import get_db
@@ -807,7 +808,7 @@ def get_attendance_list(
     current_user: User = Depends(require_roles(*CLINICAL_ROLES)),
     db: Session = Depends(get_db),
 ):
-    query = db.query(Attendance).order_by(Attendance.date.desc())
+    query = db.query(Attendance).options(joinedload(Attendance.doctor)).order_by(Attendance.date.desc())
     if doctor_id:
         query = query.filter(Attendance.doctor_id == doctor_id)
     if start_date:
@@ -838,20 +839,30 @@ def get_slot_pool(current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)):
     """号源池：按科室统计各时段号源总数"""
 
-    depts = db.query(Department).all()
-    data = []
-    for d in depts:
-        schedules = db.query(DoctorSchedule).filter(DoctorSchedule.doctor_id.in_(db.query(Doctor.doctor_id).filter(Doctor.department_id == d.department_id))).all()
-        total_slots = sum(s.number for s in schedules)
-        data.append(
-            {
-                "department_id": d.department_id,
-                "department_name": d.name,
-                "doctor_count": len(set(s.doctor_id for s in schedules)),
-                "total_slots": total_slots,
-                "schedules_count": len(schedules),
-            }
+    rows = (
+        db.query(
+            Department.department_id,
+            Department.name,
+            func.count(func.distinct(DoctorSchedule.doctor_id)).label("doctor_count"),
+            func.coalesce(func.sum(DoctorSchedule.number), 0).label("total_slots"),
+            func.count(DoctorSchedule.schedule_id).label("schedules_count"),
         )
+        .outerjoin(Doctor, Doctor.department_id == Department.department_id)
+        .outerjoin(DoctorSchedule, DoctorSchedule.doctor_id == Doctor.doctor_id)
+        .group_by(Department.department_id, Department.name)
+        .order_by(Department.department_id)
+        .all()
+    )
+    data = [
+        {
+            "department_id": row.department_id,
+            "department_name": row.name,
+            "doctor_count": row.doctor_count,
+            "total_slots": row.total_slots,
+            "schedules_count": row.schedules_count,
+        }
+        for row in rows
+    ]
     return {"code": 200, "msg": "success", "data": data}
 
 

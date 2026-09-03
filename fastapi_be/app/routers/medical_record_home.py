@@ -2,7 +2,7 @@ import datetime
 
 from fastapi import APIRouter, Depends
 from sqlalchemy import func
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from app.database import get_db
 from app.dependencies import ADMIN_ROLES, CLINICAL_ROLES, User, require_roles
@@ -50,13 +50,18 @@ def _owns(item: MedicalRecordHome, current_user: User, db: Session) -> bool:
 
 @router.get("/medicalRecordHome/admissions")
 def list_medical_record_admissions(current_user: User = Depends(require_roles(*CLINICAL_ROLES)), db: Session = Depends(get_db)):
-    query = db.query(Admission).filter(Admission.status.in_([1, 2])).order_by(Admission.create_time.desc())
+    query = (
+        db.query(Admission, MedicalRecordHome)
+        .outerjoin(MedicalRecordHome, MedicalRecordHome.admission_id == Admission.admission_id)
+        .options(joinedload(Admission.patient), joinedload(Admission.doctor))
+        .filter(Admission.status.in_([1, 2]))
+        .order_by(Admission.create_time.desc())
+    )
     if current_user.user_role not in ADMIN_ROLES:
         doctor = db.query(Doctor).filter(Doctor.user_id == current_user.user_id).first()
         query = query.filter(Admission.doctor_id == (doctor.doctor_id if doctor else -1))
     data = []
-    for item in query.all():
-        existing = db.query(MedicalRecordHome).filter(MedicalRecordHome.admission_id == item.admission_id).first()
+    for item, existing in query.all():
         data.append({
             "admission_id": item.admission_id,
             "admission_no": item.admission_no,
@@ -74,7 +79,11 @@ def list_medical_record_admissions(current_user: User = Depends(require_roles(*C
 
 @router.get("/medicalRecordHome/list")
 def list_medical_record_homes(admission_id: str | None = None, status: int | None = None, current_user: User = Depends(require_roles(*CLINICAL_ROLES)), db: Session = Depends(get_db)):
-    query = db.query(MedicalRecordHome).order_by(MedicalRecordHome.update_time.desc())
+    query = db.query(MedicalRecordHome).options(
+        joinedload(MedicalRecordHome.admission),
+        joinedload(MedicalRecordHome.patient),
+        joinedload(MedicalRecordHome.doctor),
+    ).order_by(MedicalRecordHome.update_time.desc())
     if admission_id:
         query = query.filter(MedicalRecordHome.admission_id == admission_id)
     if status is not None:

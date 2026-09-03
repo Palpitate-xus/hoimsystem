@@ -13,7 +13,7 @@ from app.config import settings
 from app.database import get_db
 from app.dependencies import ADMIN_ROLES, ROLE_CASHIER, ROLE_PATIENT, ROLE_REGISTRAR, get_current_user, require_roles
 from app.integration_outbox import enqueue_integration_event
-from app.models import Charge, Invoice, Patient, Payment, Prescription, User
+from app.models import Charge, Doctor, Invoice, Patient, Payment, Prescription, User
 from app.pagination import paginate
 from app.registration import allocate_registration_id
 from app.schemas import (
@@ -171,20 +171,25 @@ def charge_refund(req: ChargeRefundRequest, db: Session = Depends(get_db), curre
 
 @router.get("/invoice/getList")
 def get_invoice_list(keyword: str | None = None, db: Session = Depends(get_db), current_user: User = Depends(require_roles(ROLE_CASHIER, *ADMIN_ROLES))):
-    invoices = db.query(Invoice).all()
+    invoices = (
+        db.query(Invoice)
+        .options(
+            joinedload(Invoice.charge)
+            .joinedload(Charge.prescription)
+            .joinedload(Prescription.patient)
+        )
+        .all()
+    )
     data = []
     for item in invoices:
-        charge = db.query(Charge).filter(Charge.charge_id == item.charge_id).first()
-        patient_name = ""
-        if charge and charge.prescription:
-            pat = db.query(Patient).filter(Patient.patient_id == charge.prescription.patient_id).first()
-            patient_name = pat.name if pat else ""
+        charge = item.charge
+        patient = charge.prescription.patient if charge and charge.prescription else None
         data.append(
             {
                 "id": str(item.invoice_id),
                 "invoice_no": item.invoice_no,
                 "charge_id": str(item.charge_id),
-                "patient_name": patient_name,
+                "patient_name": patient.name if patient else "",
                 "amount": round(item.amount, 2) if item.amount else 0,
                 "invoice_time": (item.invoice_time.strftime("%Y-%m-%d %H:%M:%S") if item.invoice_time else None),
             }
@@ -204,7 +209,11 @@ def get_window_registration_schedules(
     """获取窗口挂号可选的逐条排班号源。"""
     from app.models import DoctorSchedule
 
-    schedules = db.query(DoctorSchedule).all()
+    schedules = (
+        db.query(DoctorSchedule)
+        .options(joinedload(DoctorSchedule.doctor).joinedload(Doctor.department))
+        .all()
+    )
     data = []
     for item in schedules:
         doctor = item.doctor

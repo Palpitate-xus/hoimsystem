@@ -34,25 +34,17 @@ import csv
 import datetime
 import hashlib
 import io
-import os
-from collections import defaultdict
 
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import StreamingResponse
-from sqlalchemy import func
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.orm import Session
 
-from app.config import settings
 from app.database import get_db
-from app.dependencies import ADMIN_ROLES, CLINICAL_ROLES, User, get_current_user, require_roles
+from app.dependencies import ADMIN_ROLES, CLINICAL_ROLES, User, require_roles
 from app.models import (
-    Admission,
     Charge,
-    Department,
-    Doctor,
     ExamRecord,
     ExamResult,
-    LabOrder,
     LabResult,
     MedicalRecord,
     Patient,
@@ -60,8 +52,6 @@ from app.models import (
     PrePha,
     Prescription,
     SurgeryApplication,
-    SurgerySchedule,
-    User as UserModel,
 )
 
 router = APIRouter()

@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.dependencies import get_current_user, User, require_roles, NURSING_ROLES
+from app.dependencies import NURSING_ROLES, User, require_roles
 from app.models import Patient, VitalSign
 from app.schemas import VitalSignCreateRequest
 

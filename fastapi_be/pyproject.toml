@@ -13,6 +13,7 @@ select = [
 ]
 ignore = [
     "E402",  # module-import-not-at-top-of-file (models need to be imported after Base init)
+    "E501",  # legacy route payloads are intentionally compact; formatter migration is separate
 ]
 
 [tool.ruff.lint.per-file-ignores]

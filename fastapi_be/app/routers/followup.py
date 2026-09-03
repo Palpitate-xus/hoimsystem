@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.dependencies import get_current_user, User, require_roles, CLINICAL_ROLES
+from app.dependencies import CLINICAL_ROLES, User, require_roles
 from app.models import Appointment, Doctor, FollowUp
 from app.schemas import (
     FollowUpAppointmentCreateRequest,

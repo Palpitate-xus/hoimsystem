@@ -4,14 +4,11 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.dependencies import ADMIN_ROLES, CLINICAL_ROLES, get_current_user, require_roles
+from app.dependencies import ADMIN_ROLES, CLINICAL_ROLES, require_roles
 from app.models import (
-    Admission,
-    Department,
     Doctor,
     MedicalRecordQuality,
     MedicalRecordTemplate,
-    Patient,
     ProgressNote,
     StructuredMedicalRecord,
     User,

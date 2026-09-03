@@ -9,7 +9,6 @@ We don't assert 200 because the endpoint may return 500 due to business logic
 depending on state; we only verify that the auth layer lets them through.
 """
 import pytest
-import pytest_asyncio
 
 ENDPOINTS = [
     # (method, path, required_roles, body, query_params)

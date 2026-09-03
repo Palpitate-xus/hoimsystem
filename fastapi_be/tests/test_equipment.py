@@ -1,6 +1,6 @@
 import pytest
 
-from app.models import Consumable, Equipment
+from app.models import Equipment
 
 
 @pytest.mark.asyncio

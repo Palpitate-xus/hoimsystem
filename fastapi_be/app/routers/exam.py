@@ -7,14 +7,12 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.dependencies import CLINICAL_ROLES, ROLE_PATIENT, User, get_current_user, require_roles
 from app.models import (
-    Doctor,
     ExamAppointment,
     ExamItem,
     ExamPackage,
     ExamRecord,
     ExamResult,
     Patient,
-    User,
 )
 
 router = APIRouter()

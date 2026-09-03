@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.dependencies import ADMIN_ROLES, CLINICAL_ROLES, NURSING_ROLES, User, get_current_user, require_roles
+from app.dependencies import ADMIN_ROLES, CLINICAL_ROLES, NURSING_ROLES, User, require_roles
 from app.models import AdverseReaction
 
 router = APIRouter()

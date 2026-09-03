@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.dependencies import ROLE_PATIENT, get_current_user, require_roles
+from app.dependencies import ROLE_PATIENT, require_roles
 from app.models import FamilyMember, Patient, User
 from app.schemas import FamilyMemberCreateRequest, FamilyMemberUpdateRequest, IdRequest
 

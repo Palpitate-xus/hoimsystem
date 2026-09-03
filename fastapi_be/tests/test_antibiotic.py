@@ -1,8 +1,7 @@
-import datetime
 
 import pytest
 
-from app.models import AntibioticApproval, Pharmaceutical
+from app.models import AntibioticApproval
 
 
 @pytest.mark.asyncio

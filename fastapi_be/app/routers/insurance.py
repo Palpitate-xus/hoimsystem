@@ -31,7 +31,10 @@ def save_insurance_catalog(req: dict, current_user: User = Depends(require_roles
         item = InsuranceCatalog(code=req["code"], name=req["name"], category=req.get("category"), reimbursement_ratio=float(req.get("reimbursement_ratio", 0)), update_time=datetime.datetime.now())
         db.add(item)
     else:
-        item.name = req.get("name", item.name); item.category = req.get("category", item.category); item.reimbursement_ratio = float(req.get("reimbursement_ratio", item.reimbursement_ratio)); item.update_time = datetime.datetime.now()
+        item.name = req.get("name", item.name)
+        item.category = req.get("category", item.category)
+        item.reimbursement_ratio = float(req.get("reimbursement_ratio", item.reimbursement_ratio))
+        item.update_time = datetime.datetime.now()
     db.commit()
     return {"code": 200, "msg": "success"}
 
@@ -59,7 +62,8 @@ def create_insurance_settlement(req: dict, current_user: User = Depends(require_
     patient = db.query(Patient).filter(Patient.patient_id == req.get("patient_id")).first()
     if not patient or not req.get("insurance_no"):
         return {"code": 400, "msg": "患者和医保号不能为空"}
-    total = float(req.get("total_amount", 0)); covered = float(req.get("covered_amount", 0))
+    total = float(req.get("total_amount", 0))
+    covered = float(req.get("covered_amount", 0))
     if total <= 0 or covered < 0 or covered > total:
         return {"code": 400, "msg": "结算金额不合法"}
     integration_mode = req.get("integration_mode", "local")
@@ -72,7 +76,8 @@ def create_insurance_settlement(req: dict, current_user: User = Depends(require_
         integration_status="pending" if integration_mode == "external" else "local",
         operator_id=current_user.user_id, settlement_time=datetime.datetime.now(),
     )
-    db.add(item); db.commit()
+    db.add(item)
+    db.commit()
     return {"code": 200, "msg": "已提交医保平台" if integration_mode == "external" else "结算成功", "data": {"settlement_id": item.settlement_id, "self_amount": item.self_amount, "status": item.status}}
 
 
@@ -124,7 +129,8 @@ def create_chronic(req: dict, current_user: User = Depends(require_roles(*CLINIC
     if not req.get("patient_id") or not req.get("disease_name"):
         return {"code": 400, "msg": "患者和慢病名称不能为空"}
     item = ChronicDiseaseRegistration(patient_id=req["patient_id"], disease_name=req["disease_name"], card_no=req.get("card_no"), limit_amount=req.get("limit_amount"), doctor_id=None, create_time=datetime.datetime.now())
-    db.add(item); db.commit()
+    db.add(item)
+    db.commit()
     return {"code": 200, "msg": "success"}
 
 
@@ -133,9 +139,11 @@ def create_drg_group(req: dict, current_user: User = Depends(require_roles(*MANA
     patient = db.query(Patient).filter(Patient.patient_id == req.get("patient_id")).first()
     if not patient or not req.get("group_code") or not req.get("diagnosis"):
         return {"code": 400, "msg": "患者、分组编码和诊断不能为空"}
-    expected = float(req.get("expected_amount", 0)); actual = float(req.get("actual_amount", 0))
+    expected = float(req.get("expected_amount", 0))
+    actual = float(req.get("actual_amount", 0))
     item = DrgGrouping(patient_id=patient.patient_id, group_code=req["group_code"], diagnosis=req["diagnosis"], expected_amount=expected, actual_amount=actual, profit=round(expected - actual, 2), create_time=datetime.datetime.now())
-    db.add(item); db.commit()
+    db.add(item)
+    db.commit()
     return {"code": 200, "msg": "success", "data": {"grouping_id": item.grouping_id, "profit": item.profit}}
 
 

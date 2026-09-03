@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.dependencies import GUIDE_ROLES, NURSING_ROLES, get_current_user, require_roles
+from app.dependencies import GUIDE_ROLES, NURSING_ROLES, require_roles
 from app.models import Patient, TriageRecord, User
 from app.privacy import can_view_full_patient_identity, mask_identity
 

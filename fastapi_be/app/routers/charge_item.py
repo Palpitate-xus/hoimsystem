@@ -40,7 +40,12 @@ def update_charge_item(req: ChargeItemUpdateRequest, current_user: User = Depend
     duplicate = db.query(ChargeItem).filter(ChargeItem.code == req.code.strip(), ChargeItem.item_id != req.item_id).first()
     if duplicate:
         return {"code": 500, "msg": "收费项目编码已存在"}
-    item.code = req.code.strip(); item.name = req.name.strip(); item.category = req.category.strip(); item.price = req.price; item.note = req.note.strip(); item.update_time = datetime.datetime.now()
+    item.code = req.code.strip()
+    item.name = req.name.strip()
+    item.category = req.category.strip()
+    item.price = req.price
+    item.note = req.note.strip()
+    item.update_time = datetime.datetime.now()
     db.commit()
     return {"code": 200, "msg": "success", "data": _serialize(item)}
 

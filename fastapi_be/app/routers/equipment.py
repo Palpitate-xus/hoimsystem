@@ -4,8 +4,8 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.dependencies import ADMIN_ROLES, NURSING_ROLES, PHARMACY_ROLES, ROLE_DIRECTOR, User, get_current_user, require_roles
-from app.models import Consumable, ConsumableTrace, Equipment, EquipmentInspection, EquipmentMaintenance, Patient
+from app.dependencies import ADMIN_ROLES, NURSING_ROLES, PHARMACY_ROLES, ROLE_DIRECTOR, User, require_roles
+from app.models import Consumable, ConsumableTrace, Equipment, EquipmentInspection, EquipmentMaintenance
 
 router = APIRouter()
 EQUIPMENT_ROLES = {*ADMIN_ROLES, ROLE_DIRECTOR, *NURSING_ROLES, *PHARMACY_ROLES}
@@ -27,7 +27,8 @@ def create_equipment(req: dict, current_user: User = Depends(require_roles(*MANA
         return {"code": 400, "msg": "资产编号和设备名称不能为空"}
     if db.query(Equipment).filter(Equipment.asset_no == req["asset_no"]).first():
         return {"code": 409, "msg": "资产编号已存在"}
-    parse_date = lambda value: datetime.datetime.strptime(value, "%Y-%m-%d").date() if value else None
+    def parse_date(value):
+        return datetime.datetime.strptime(value, "%Y-%m-%d").date() if value else None
     item = Equipment(asset_no=req["asset_no"], name=req["name"], category=req.get("category"), model=req.get("model"), manufacturer=req.get("manufacturer"), department_id=req.get("department_id"), location=req.get("location"), purchase_date=parse_date(req.get("purchase_date")), expiry_date=parse_date(req.get("expiry_date")), responsible_id=req.get("responsible_id"), create_time=datetime.datetime.now())
     db.add(item)
     db.commit()

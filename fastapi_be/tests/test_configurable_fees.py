@@ -7,15 +7,15 @@ import datetime
 
 import pytest
 
-from app.models import Admission, Charge, Registration, SurgeryApplication, SurgerySchedule
+from app.models import Admission, Charge, SurgeryApplication, SurgerySchedule
 
 
 @pytest.mark.asyncio
 class TestRegistrationFee:
     async def test_registration_creates_charge(self, async_client, seed_data, auth_headers, db_session):
         """挂号成功自动产生挂号费 Charge（普通号默认 10 元）。"""
-        from tests.conftest import TestingSessionLocal
         from app.models import DoctorSchedule
+        from tests.conftest import TestingSessionLocal
 
         doctor = seed_data["doctor"]
         schedule = DoctorSchedule(

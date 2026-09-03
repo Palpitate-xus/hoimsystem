@@ -8,8 +8,6 @@ from app.dependencies import NURSING_ROLES, User, require_roles
 from app.models import (
     Admission,
     Bed,
-    Department,
-    Doctor,
     InpatientCharge,
     Patient,
     Ward,

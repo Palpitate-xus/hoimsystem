@@ -3,7 +3,7 @@ from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.dependencies import CLINICAL_ROLES, CASHIER_ROLES, User, require_roles
+from app.dependencies import CASHIER_ROLES, CLINICAL_ROLES, User, require_roles
 from app.models import Charge, Department, Doctor, LabOrder, MedicalRecord, PrePha, Prescription, Review
 
 router = APIRouter()

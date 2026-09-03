@@ -2,7 +2,6 @@
 
 from sqlalchemy import Engine, inspect, text
 
-
 OPERATION_LOG_COLUMNS = {
     "username": "VARCHAR(50)",
     "role": "VARCHAR(20)",

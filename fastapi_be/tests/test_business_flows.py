@@ -22,7 +22,6 @@ patient/cashier/pharmacist/super_admin/director/nurse/guide/lab_technician/regis
 """
 import pytest
 
-
 # ===== 1. 患者门诊主流程 =====
 
 @pytest.mark.asyncio
@@ -31,7 +30,6 @@ class TestPatientOutpatientJourney:
 
     async def test_journey_register_login(self, async_client, auth_headers):
         """注册患者 → 登录拿到 token。"""
-        from app.routers.user import create_access_token
         r = await async_client.post("/api/register", json={
             "username": "370101199901011234", "password": "123456",
             "name": "测试患者", "identity": "370101199901011234",
@@ -174,7 +172,7 @@ class TestDoctorWorkflow:
             return r.json().get("data", {}).get("stock", None)
 
         stock_before = await _stock()
-        assert stock_before is not None, f"stock_before query returned None"
+        assert stock_before is not None, "stock_before query returned None"
         # 开立处方(扣 1)
         r = await async_client.post("/api/prescriptionManagement/create", headers=doctor_headers, json={
             "patient": seed_data["patient2"].patient_id,
@@ -213,7 +211,6 @@ class TestDoctorWorkflow:
             "patient": seed_data["patient2"].patient_id,
             "phas": [{"id": pha.pharmaceutical_id, "number": 1}],
         })
-        pre = r.json()
         # 找到 id
         r = await async_client.get("/api/prescriptionManagement/getList", headers=doctor_headers)
         target = next((p for p in r.json()["data"]
@@ -286,7 +283,6 @@ class TestInpatientJourney:
     async def test_admission_to_discharge(self, async_client, auth_headers, seed_data):
         """完整住院闭环。"""
         nurse_headers = auth_headers(seed_data["nurse_user"].username)
-        doctor_headers = auth_headers(seed_data["doctor_user"].username)
         patient = seed_data["patient"]
         # 需要先有床位
         r = await async_client.get("/api/bed/getList", headers=nurse_headers)
@@ -351,8 +347,6 @@ class TestExamJourney:
     async def test_exam_flow(self, async_client, auth_headers, seed_data):
         """basic exam flow."""
         doctor_headers = auth_headers(seed_data["doctor_user"].username)
-        patient = seed_data["patient"]
-        pha = seed_data["pharmaceutical"]
         # 体检套餐列表(已登录)
         r = await async_client.get("/api/examPackage/getList", headers=doctor_headers)
         # 可能为空,不 fail

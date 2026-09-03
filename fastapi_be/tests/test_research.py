@@ -1,6 +1,7 @@
 """科研数据导出测试。"""
-import io
 import csv
+import io
+
 import pytest
 
 

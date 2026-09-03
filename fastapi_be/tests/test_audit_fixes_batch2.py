@@ -280,9 +280,7 @@ class TestImagingTamperGuard:
 class TestExamPatientView:
     async def test_patient_can_view_own_exam_result(self, async_client, seed_data, auth_headers, db_session):
         """患者查看本人体检结果不再恒 403（Row 元组修复）。"""
-        from app.models import ExamRecord
-
-        from app.models import ExamAppointment
+        from app.models import ExamAppointment, ExamRecord
 
         appt = ExamAppointment(
             patient_id=seed_data["patient"].patient_id,

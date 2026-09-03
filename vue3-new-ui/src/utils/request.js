@@ -47,7 +47,29 @@ const handleCode = (code, msg) => {
 // 请求重试配置
 const retryConfig = {
   retry: 3, // 重试次数
-  retryDelay: 1000, // 重试间隔时间
+  retryDelay: 500, // 指数退避基准时间
+};
+
+const IDEMPOTENT_METHODS = new Set(["get", "head", "options"]);
+const RETRYABLE_STATUS = new Set([408, 425, 429, 500, 502, 503, 504]);
+
+const canRetry = (error) => {
+  const config = error?.config;
+  if (!config || !config.retry || error.code === "ERR_CANCELED") return false;
+
+  const method = (config.method || "get").toLowerCase();
+  // 写操作只有在调用方明确提供幂等键时才允许自动重试，防止重复挂号、收费或开药。
+  if (!IDEMPOTENT_METHODS.has(method) && !config.headers?.["Idempotency-Key"]) return false;
+
+  const status = error.response?.status;
+  return status === undefined || RETRYABLE_STATUS.has(status);
+};
+
+const retryDelay = (error, attempt) => {
+  const retryAfter = Number(error.response?.headers?.["retry-after"]);
+  if (Number.isFinite(retryAfter) && retryAfter >= 0) return retryAfter * 1000;
+  const base = error.config.retryDelay || retryConfig.retryDelay;
+  return base * 2 ** (attempt - 1) + Math.floor(Math.random() * 200);
 };
 
 // 创建axios实例
@@ -133,7 +155,7 @@ instance.interceptors.response.use(
 
     // 处理请求重试
     const { config } = error;
-    if (config && config.retry) {
+    if (canRetry(error)) {
       // 设置当前重试次数
       config.__retryCount = config.__retryCount || 0;
 
@@ -144,12 +166,13 @@ instance.interceptors.response.use(
 
         // 创建新的Promise进行重试
         const backoff = new Promise((resolve) => {
+          const delay = retryDelay(error, config.__retryCount);
           setTimeout(() => {
             console.log(
               `重试请求: ${config.url}, 尝试次数: ${config.__retryCount}`
             );
             resolve();
-          }, config.retryDelay || 1000);
+          }, delay);
         });
 
         // 重新发起请求

@@ -2,7 +2,6 @@ const chokidar = require('chokidar')
 const bodyParser = require('body-parser')
 const chalk = require('chalk')
 const path = require('path')
-const { mock } = require('mockjs')
 const { baseURL } = require('../src/config')
 const mockDir = path.join(process.cwd(), 'mock')
 const { handleMockArray } = require('./utils')
@@ -56,7 +55,7 @@ const responseFake = (url, type, respond) => {
       } else {
         console.log(chalk.green(`> 请求地址：${req.path}\n`))
       }
-      res.json(mock(respond instanceof Function ? respond(req, res) : respond))
+      res.json(respond instanceof Function ? respond(req, res) : respond)
     },
   }
 }

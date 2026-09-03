@@ -53,18 +53,19 @@ module.exports = [
         permissions = ["admin", "editor"];
         username = "test";
       }
+      const avatars = [
+        "https://gcore.jsdelivr.net/gh/zxwk1998/image/avatar/avatar_1.png",
+        "https://gcore.jsdelivr.net/gh/zxwk1998/image/avatar/avatar_2.png",
+        "https://gcore.jsdelivr.net/gh/zxwk1998/image/avatar/avatar_3.png",
+        "https://gcore.jsdelivr.net/gh/zxwk1998/image/avatar/avatar_4.png",
+      ];
       return {
         code: 200,
         msg: "success",
         data: {
           permissions,
           username,
-          "avatar|1": [
-            "https://gcore.jsdelivr.net/gh/zxwk1998/image/avatar/avatar_1.png",
-            "https://gcore.jsdelivr.net/gh/zxwk1998/image/avatar/avatar_2.png",
-            "https://gcore.jsdelivr.net/gh/zxwk1998/image/avatar/avatar_3.png",
-            "https://gcore.jsdelivr.net/gh/zxwk1998/image/avatar/avatar_4.png",
-          ],
+          avatar: avatars[Math.floor(Math.random() * avatars.length)],
         },
       };
     },

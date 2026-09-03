@@ -1,4 +1,4 @@
-const { Random } = require('mockjs')
+const { randomUUID } = require('node:crypto')
 const { join } = require('path')
 const fs = require('fs')
 
@@ -10,7 +10,7 @@ const fs = require('fs')
  * @returns {string}
  */
 function handleRandomImage(width = 50, height = 50) {
-  return `https://picsum.photos/${width}/${height}?random=${Random.guid()}`
+  return `https://picsum.photos/${width}/${height}?random=${randomUUID()}`
 }
 
 /**

@@ -2,9 +2,11 @@
 
 import os
 import random
+from collections import deque
 
 from benchmark_auth import load_tokens_or_stop
 from benchmark_http import mark_business_result
+from benchmark_setup import load_write_targets_or_stop
 from locust import HttpUser, between, events, task
 
 BENCHMARK_CREDENTIALS = {
@@ -18,13 +20,29 @@ BENCHMARK_CREDENTIALS = {
     ),
 }
 TOKEN_POOLS: dict[str, tuple[str, ...]] = {}
+APPOINTMENT_TARGETS: deque[dict] = deque()
+PRESCRIPTION_PATIENT_IDS: tuple[int, ...] = ()
+PRESCRIPTION_PHARMACEUTICAL_IDS: tuple[int, ...] = ()
 
 
 @events.test_start.add_listener
 def prepare_runtime_tokens(environment, **_kwargs):
     """Refresh tokens at the beginning of every local or worker test run."""
+    global PRESCRIPTION_PATIENT_IDS, PRESCRIPTION_PHARMACEUTICAL_IDS
+
     TOKEN_POOLS.clear()
     TOKEN_POOLS.update(load_tokens_or_stop(environment, BENCHMARK_CREDENTIALS))
+    APPOINTMENT_TARGETS.clear()
+    PRESCRIPTION_PATIENT_IDS = ()
+    PRESCRIPTION_PHARMACEUTICAL_IDS = ()
+    if not TOKEN_POOLS:  # Distributed master; workers discover their own targets.
+        return
+    targets = load_write_targets_or_stop(environment, TOKEN_POOLS)
+    appointment_payloads = list(targets.appointment_payloads)
+    random.shuffle(appointment_payloads)
+    APPOINTMENT_TARGETS.extend(appointment_payloads)
+    PRESCRIPTION_PATIENT_IDS = targets.patient_ids
+    PRESCRIPTION_PHARMACEUTICAL_IDS = targets.pharmaceutical_ids
 
 
 class HOIMUser(HttpUser):
@@ -69,17 +87,14 @@ class HOIMUser(HttpUser):
 
     @task(2)
     def create_appointment(self):
+        try:
+            payload = APPOINTMENT_TARGETS.popleft()
+        except IndexError:
+            return
         with self.client.post(
             "/api/appointmentManagement/create",
             headers=self._headers("patient"),
-            json={
-                "id": random.randint(1, 12),
-                "date": "2026-07-15",
-                "department_id": 1,
-                "doctor_id": 1,
-                "time": "上午",
-                "specialist": 1,
-            },
+            json=payload,
             catch_response=True,
         ) as response:
             mark_business_result(response)
@@ -90,8 +105,8 @@ class HOIMUser(HttpUser):
             "/api/prescriptionManagement/create",
             headers=self._headers("doctor"),
             json={
-                "patient": 1,
-                "phas": [{"id": 1, "number": 1}],
+                "patient": random.choice(PRESCRIPTION_PATIENT_IDS),
+                "phas": [{"id": random.choice(PRESCRIPTION_PHARMACEUTICAL_IDS), "number": 1}],
             },
             catch_response=True,
         ) as response:

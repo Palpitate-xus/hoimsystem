@@ -1,4 +1,5 @@
 import sys
+from collections import deque
 from pathlib import Path
 
 import pytest
@@ -86,6 +87,18 @@ def test_write_tasks_use_role_valid_tokens(monkeypatch):
             "patient": ("patient-token",),
         },
     )
+    appointment_payload = {
+        "id": 17,
+        "date": "2026-09-07",
+        "department_id": 3,
+        "doctor_id": 5,
+        "time": "01",
+        "specialist": 1,
+        "patient_id": 11,
+    }
+    monkeypatch.setattr(locust_final, "APPOINTMENT_TARGETS", deque([appointment_payload]))
+    monkeypatch.setattr(locust_final, "PRESCRIPTION_PATIENT_IDS", (11,))
+    monkeypatch.setattr(locust_final, "PRESCRIPTION_PHARMACEUTICAL_IDS", (23,))
     appointment_response = FakeLocustResponse()
     prescription_response = FakeLocustResponse()
     user = FakeUser([appointment_response, prescription_response])
@@ -97,7 +110,9 @@ def test_write_tasks_use_role_valid_tokens(monkeypatch):
     prescription = user.client.posts[1]
     assert appointment[0] == "/api/appointmentManagement/create"
     assert appointment[1]["headers"] == {"accesstoken": "patient-token"}
+    assert appointment[1]["json"] == appointment_payload
     assert appointment[1]["catch_response"] is True
     assert prescription[0] == "/api/prescriptionManagement/create"
     assert prescription[1]["headers"] == {"accesstoken": "doctor-token"}
+    assert prescription[1]["json"] == {"patient": 11, "phas": [{"id": 23, "number": 1}]}
     assert prescription[1]["catch_response"] is True

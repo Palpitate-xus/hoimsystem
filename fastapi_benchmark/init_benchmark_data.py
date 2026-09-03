@@ -16,7 +16,7 @@ os.environ["DATABASE_URL"] = BENCHMARK_DATABASE_URL
 sys.path.insert(0, str(BACKEND_DIR))
 
 from app.database import Base, SessionLocal, engine
-from app.models import Department, Doctor, DoctorSchedule, Patient, Pharmaceutical, User
+from app.models import Department, Doctor, DoctorSchedule, FamilyMember, Patient, Pharmaceutical, User
 from app.security import hash_password
 
 
@@ -100,16 +100,46 @@ def init():
         db.add(patient)
         db.flush()
 
+        # 一个患者账号可合法为多个家庭成员预约，用于构造
+        # 不重复的并发预约目标，无需为压测创建大量登录账号。
+        family_patients = [
+            Patient(
+                name=f"压测患者{index:03d}",
+                sex=index % 2,
+                identity=f"99000020000101{index:04d}",
+                birthday=datetime.date(2000, 1, 1),
+                phone=f"139{index:08d}",
+                address="基准测试",
+                permission="family",
+            )
+            for index in range(1, 100)
+        ]
+        db.add_all(family_patients)
+        db.flush()
+        now = datetime.datetime.now()
+        db.add_all(
+            FamilyMember(
+                owner_patient_id=patient.patient_id,
+                member_patient_id=member.patient_id,
+                relation="其他",
+                create_time=now,
+                update_time=now,
+            )
+            for member in family_patients
+        )
+        db.flush()
+
         # 药品
+        benchmark_expiry = datetime.date.today() + datetime.timedelta(days=3650)
         phas = [
-            Pharmaceutical(name="阿司匹林", stock=1000, price=15.5, expireddate=datetime.date(2027, 6, 1), purchasing_time=datetime.datetime.now(), supplier="华北制药", remark="常用药"),
-            Pharmaceutical(name="布洛芬", stock=800, price=22.0, expireddate=datetime.date(2027, 8, 1), purchasing_time=datetime.datetime.now(), supplier="新华制药", remark="止痛药"),
+            Pharmaceutical(name="阿司匹林", stock=1000, price=15.5, expireddate=benchmark_expiry, purchasing_time=datetime.datetime.now(), supplier="华北制药", remark="常用药"),
+            Pharmaceutical(name="布洛芬", stock=800, price=22.0, expireddate=benchmark_expiry, purchasing_time=datetime.datetime.now(), supplier="新华制药", remark="止痛药"),
         ]
         db.add_all(phas)
         db.flush()
 
         db.commit()
-        print(f"Initialized: {len(depts)} departments, {len(doctors)} doctors, {len(schedules)} schedules, {len(phas)} pharmaceuticals")
+        print(f"Initialized: {len(depts)} departments, {len(doctors)} doctors, {len(schedules)} schedules, {len(family_patients) + 1} patients, {len(phas)} pharmaceuticals")
     except Exception:
         db.rollback()
         raise

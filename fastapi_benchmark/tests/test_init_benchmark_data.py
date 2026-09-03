@@ -77,7 +77,12 @@ target.init()
 columns = {column["name"] for column in inspect(replacement_engine).get_columns("hoimsystem_department")}
 with target.SessionLocal() as session:
     user_count = session.query(target.User).count()
-print("PROBE=" + json.dumps({"columns": sorted(columns), "user_count": user_count}))
+    family_count = session.query(target.FamilyMember).count()
+print("PROBE=" + json.dumps({
+    "columns": sorted(columns),
+    "family_count": family_count,
+    "user_count": user_count,
+}))
 """.replace("__DATABASE_PATH__", repr(benchmark_db.as_posix()))
 
     env = os.environ.copy()
@@ -94,4 +99,5 @@ print("PROBE=" + json.dumps({"columns": sorted(columns), "user_count": user_coun
     payload = json.loads(payload_line.removeprefix("PROBE="))
 
     assert "campus_id" in payload["columns"]
+    assert payload["family_count"] == 99
     assert payload["user_count"] == 7

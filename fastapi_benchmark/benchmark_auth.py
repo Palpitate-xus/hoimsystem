@@ -5,8 +5,6 @@ from collections.abc import Mapping, Sequence
 
 import jwt
 import requests
-from locust.exception import StopTest
-from locust.runners import MasterRunner
 
 Credential = tuple[str, str]
 CredentialPools = Mapping[str, Sequence[Credential]]
@@ -110,6 +108,9 @@ def request_runtime_tokens(
 
 def load_tokens_or_stop(environment, credential_pools: CredentialPools) -> TokenPools:
     """Load fresh tokens on workers and stop Locust immediately on failure."""
+    from locust.exception import StopTest
+    from locust.runners import MasterRunner
+
     if isinstance(environment.runner, MasterRunner):
         return {}
     try:

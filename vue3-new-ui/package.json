@@ -73,7 +73,7 @@
     "style-loader": "^4.0.0",
     "unplugin-vue-components": "^32.1.0",
     "vue-loader": "^17.4.2",
-    "webpack": "^5.106.2"
+    "webpack": "^5.110.2"
   },
   "keywords": [
     "vue",

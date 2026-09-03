@@ -64,11 +64,17 @@ class Settings(BaseSettings):
             else:
                 self.DATABASE_URL = "sqlite:///./test.db"
 
-        default_secret = self.SECRET_KEY == "change-me-in-production"
-        if self.is_production and (not self.SECRET_KEY or default_secret):
-            raise ValueError("生产环境必须通过 SECRET_KEY 设置强随机密钥，不能为空或使用默认值")
-
         if self.is_production:
+            normalized_database_url = self.DATABASE_URL.lower().strip()
+            if not normalized_database_url.startswith(("postgresql://", "postgresql+")):
+                raise ValueError("生产环境 DATABASE_URL 必须使用 PostgreSQL")
+            placeholder_secrets = {
+                "change-me-in-production",
+                "development-only-change-me",
+                "your-secret-key-here-change-in-production",
+            }
+            if len(self.SECRET_KEY) < 32 or self.SECRET_KEY.lower() in placeholder_secrets:
+                raise ValueError("生产环境 SECRET_KEY 必须是至少 32 字符的独立强随机密钥")
             if self.AUTO_CREATE_SCHEMA:
                 raise ValueError("生产环境必须设置 AUTO_CREATE_SCHEMA=false，并使用 Alembic 迁移数据库")
             configured_origins = [origin.strip() for origin in self.ALLOWED_ORIGINS.split(",") if origin.strip()]

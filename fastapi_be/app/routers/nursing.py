@@ -278,7 +278,7 @@ def create_nursing_record(
 
 @router.post("/nursingRecord/delete")
 def delete_nursing_record(req: dict, current_user: User = Depends(require_roles(*NURSING_ROLES)), db: Session = Depends(get_db)):
-    return {"code": 403, "msg": "护理文书不可删除，请通过更正记录补录"}
+    return {"code": 409, "msg": "护理文书不可删除，请通过更正记录补录"}
 
 
 @router.get("/temperatureRecord/getList")
@@ -390,4 +390,4 @@ def create_temperature_record(
 
 @router.post("/temperatureRecord/delete")
 def delete_temperature_record(req: dict, current_user: User = Depends(require_roles(*NURSING_ROLES)), db: Session = Depends(get_db)):
-    return {"code": 403, "msg": "体温单记录不可删除，请通过更正记录补录"}
+    return {"code": 409, "msg": "体温单记录不可删除，请通过更正记录补录"}

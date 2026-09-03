@@ -34,7 +34,8 @@ class TestNursingRecordIntegrity:
         )
         assert created.json()["code"] == 200
         deleted = await async_client.post("/api/nursingRecord/delete", headers=headers, json={"record_id": 1})
-        assert deleted.json() == {"code": 403, "msg": "护理文书不可删除，请通过更正记录补录"}
+        assert deleted.status_code == 409
+        assert deleted.json() == {"code": 409, "msg": "护理文书不可删除，请通过更正记录补录"}
 
     async def test_temperature_records_match_patient_and_are_immutable(self, async_client, seed_data, auth_headers, db_session):
         admission = Admission(
@@ -63,4 +64,5 @@ class TestNursingRecordIntegrity:
         )
         assert created.json()["code"] == 200
         deleted = await async_client.post("/api/temperatureRecord/delete", headers=headers, json={"temp_id": 1})
-        assert deleted.json() == {"code": 403, "msg": "体温单记录不可删除，请通过更正记录补录"}
+        assert deleted.status_code == 409
+        assert deleted.json() == {"code": 409, "msg": "体温单记录不可删除，请通过更正记录补录"}

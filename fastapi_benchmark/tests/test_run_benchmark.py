@@ -24,6 +24,7 @@ try:
         "database_url": str(target.bench_engine.url),
         "pool_class": type(target.bench_engine.pool).__name__,
         "connections_are_distinct": first_connection is not second_connection,
+        "exports_asgi_app": callable(target.app),
     }))
 finally:
     second.close()
@@ -48,4 +49,5 @@ finally:
     assert payload["database_url"] == f"sqlite:///{expected_db.as_posix()}"
     assert payload["pool_class"] == "QueuePool"
     assert payload["connections_are_distinct"] is True
+    assert payload["exports_asgi_app"] is True
     assert not unsafe_db.exists()

@@ -19,6 +19,7 @@ sys.path.insert(0, str(BACKEND_DIR))
 from app.config import settings
 from app.database import Base
 from app.database import engine as bench_engine
+from app.main import app as app
 
 # 确保表存在
 Base.metadata.create_all(bind=bench_engine)

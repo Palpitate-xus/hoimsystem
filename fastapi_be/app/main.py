@@ -12,6 +12,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import JSONResponse
 
 from app.config import settings
+from app.observability import ObservabilityMiddleware
 
 MICROSECOND_PATTERN = re.compile(rb'(\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}:\d{2})\.\d+')
 
@@ -427,6 +428,9 @@ from app.routers import (
     vitalsign,
     ward,
 )
+from app.routers import (
+    observability as observability_routes,
+)
 
 app.add_middleware(
     CORSMiddleware,
@@ -445,11 +449,14 @@ app.add_middleware(
         "x-requested-with",
         "accesstoken",
     ],
+    expose_headers=["x-request-id"],
 )
 app.add_middleware(GZipMiddleware, minimum_size=1000)
 app.add_middleware(OriginValidationMiddleware)
 app.add_middleware(OperationLogMiddleware)
+app.add_middleware(ObservabilityMiddleware)
 
+app.include_router(observability_routes.router)
 app.include_router(performance.router, prefix="/api")
 app.include_router(home_icd.router, prefix="/api")
 app.include_router(version.router, prefix="/api")

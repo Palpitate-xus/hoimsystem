@@ -18,10 +18,10 @@ RUN pip install --no-cache-dir -r requirements.txt gunicorn
 COPY . .
 
 # 创建上传目录
-RUN mkdir -p app/uploads && chmod 755 app/uploads
+RUN mkdir -p app/uploads /tmp/prometheus && chmod 755 app/uploads /tmp/prometheus
 
 # 暴露端口
 EXPOSE 8000
 
 # 启动命令
-CMD ["gunicorn", "app.main:app", "-w", "4", "-k", "uvicorn.workers.UvicornWorker", "--bind", "0.0.0.0:8000", "--access-logfile", "-", "--error-logfile", "-"]
+CMD ["gunicorn", "app.main:app", "-c", "gunicorn.conf.py", "-w", "4", "-k", "uvicorn.workers.UvicornWorker", "--bind", "0.0.0.0:8000", "--access-logfile", "-", "--error-logfile", "-"]

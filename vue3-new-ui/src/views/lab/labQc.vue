@@ -13,7 +13,7 @@
 
 <script setup>
 import { nextTick, onBeforeUnmount, onMounted, ref } from "vue";
-import * as echarts from "echarts";
+import * as echarts from "@/utils/echarts";
 import { ElMessage } from "element-plus";
 import { getLabQcList, createLabQc, getLabQcSummary } from "@/api/labQc";
 

@@ -28,7 +28,7 @@
 </template>
 
 <script>
-import * as echarts from "echarts";
+import * as echarts from "@/utils/echarts";
 
 export default {
   name: "Chart",

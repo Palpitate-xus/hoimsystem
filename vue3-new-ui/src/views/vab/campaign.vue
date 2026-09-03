@@ -485,7 +485,7 @@
 
 <script>
 import { Search, Discount, Coin, Present, Lightning } from "@element-plus/icons-vue";
-import * as echarts from "echarts";
+import * as echarts from "@/utils/echarts";
 
 export default {
   name: "Campaign",

@@ -52,7 +52,7 @@ Status: Accepted
 **优点：**
 - 原生类型注解，IDE 提示强
 - 自动生成 OpenAPI/Swagger 文档（医疗系统接口多，这点非常重要）
-- 性能接近 Go（基于 Starlette + Uvicorn 异步）
+- 基于 Starlette + Uvicorn，具备原生 ASGI 异步能力
 - Pydantic 数据校验强大
 - 文档质量高，学习曲线友好
 
@@ -66,7 +66,7 @@ Status: Accepted
 ### Positive（好处）
 - 接口文档自动生成，节省至少 30% 的文档维护时间
 - 类型注解提升代码质量，IDE 重构能力增强
-- 性能足够支撑业务，单实例 ~3000 QPS
+- 框架性能满足当前业务开发需求；实际容量以可复现的同版本基准测试结果为准
 - 异步能力为后续 WebSocket、SSE 等留下空间
 
 ### Negative（坏处）

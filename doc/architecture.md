@@ -59,7 +59,7 @@
 | Vue Router | 4.x | 与 Vue 3 配套；Hash 路由部署无需后端配合 |
 | Vuex | 4.x | 比 Pinia 成熟稳定；满足用户/权限/标签页等全局状态 |
 | Axios | 1.x | 拦截器机制方便统一加 token、错误处理 |
-| Rspack | 1.x | 基于 Rust 的构建工具，启动/HMR 速度比 Webpack 快 10x+ |
+| Rspack | 1.x | 基于 Rust 的构建工具，支持快速开发构建和 HMR |
 | SCSS | - | 模板自带；支持 mixin/嵌套，比 CSS 高效 |
 
 **为什么不选 React/Angular？**
@@ -71,7 +71,7 @@
 
 | 技术 | 版本 | 选型理由 |
 |:----:|:----:|:--------|
-| FastAPI | 0.111+ | 类型注解、自动文档、性能接近 Go，开发效率最高 |
+| FastAPI | 0.111+ | 类型注解和自动文档完善，适合 API 服务开发 |
 | SQLAlchemy | 2.x | Python 最成熟的 ORM，2.x 全面拥抱类型注解 |
 | Pydantic | 2.x | 与 FastAPI 配套；高性能数据校验 |
 | Uvicorn/Gunicorn | latest | ASGI 服务器，生产用 Gunicorn + uvicorn worker |
@@ -296,9 +296,9 @@ vue3-new-ui/src/
 
 ### 7.1 当前性能
 
-- **数据库**：SQLite 单进程 < 1000 并发够用；PostgreSQL 可支持万级并发
-- **API 响应**：90% 接口 < 50ms（SQLite 本地查询）
-- **前端首屏**：未压缩约 2-3 MB，gzip 后 < 800KB
+- 当前没有经过修复后基准工具链验证的可发布性能基线，详见 [README 性能测试](../README.md#performance-benchmark)
+- SQLite 仅用于开发和本地基准；`QueuePool` 可为并发 Session 提供独立连接，但文件级写锁仍会限制写入并发
+- PostgreSQL 的吞吐、延迟与并发容量必须在固定提交、硬件、数据规模和负载下独立实测，不能由 SQLite 外推
 
 ### 7.2 优化空间
 

@@ -8,6 +8,8 @@
 
 ### 1.1 关键指标
 
+> 下列数值是待部署验证的工程目标，不是当前实测基线，也不构成 SLA。
+
 | 维度 | 指标 | 目标 |
 |:----:|:----|:----:|
 | 后端 API | P50 响应时间 | < 50ms |
@@ -512,44 +514,25 @@ wrk -t12 -c400 -d30s http://localhost:8000/
 
 ### 6.2 使用 Locust
 
-```python
-# locustfile.py
-from locust import HttpUser, task, between
+项目基准测试应使用维护中的 `fastapi_benchmark/locust_final.py` 和
+`fastapi_benchmark/locust_readonly_pool.py`。脚本会在开测前实时登录，
+不得使用仓库中的固定 token 文件。混合场景分别使用管理员、医生和患者身份，
+预约与处方写入同时校验 HTTP 状态和业务 `code`。
 
-class APIUser(HttpUser):
-    wait_time = between(1, 3)
-
-    def on_start(self):
-        response = self.client.post("/api/login",
-            json={"username": "admin", "password": "admin123"})
-        self.token = response.json()["data"]["accesstoken"]
-
-    @task
-    def list_patients(self):
-        self.client.get("/api/patientManagement/getList",
-            headers={"accesstoken": self.token})
-```
-
-```bash
-pip install locust
-locust -f locustfile.py --host http://localhost:8000
-# 访问 http://localhost:8089 配置测试
-```
+完整初始化、启动和执行命令见
+[README 性能测试](../README.md#performance-benchmark)。
 
 ---
 
 ## 七、当前性能基线
 
-> 在 SQLite + 本地开发机器测试（CPU: i7, 内存 16GB）
+截至 2026-09-03，当前实现暂无可发布的有效性能基线。README 中旧的
+`~67 req/s`、延迟和并发建议基于 `StaticPool` 旧配置；本指南此前记录的
+`~3000 QPS` 缺少可复现的同版本、硬件和负载证据，现一并撤回。
 
-| 指标 | 数值 |
-|:----:|:----:|
-| 简单 CRUD API（如 /patientManagement/getList） | P50 < 20ms |
-| 复杂关联查询（如 /charge/getList） | P50 50-100ms |
-| 报表统计 | P50 200-500ms |
-| 单实例吞吐 | ~3000 QPS |
-
-> 生产环境（PostgreSQL）性能会显著高于此。
+重新发布基线时必须记录提交 SHA、CPU/内存、Python 与依赖版本、数据库及连接池、
+数据规模、用户数、spawn rate、预热和持续时间、角色与任务权重、成功/失败请求数，
+以及 P50/P95/P99。PostgreSQL 数值必须来自独立实测，不得由 SQLite 结果外推。
 
 ---
 
@@ -568,12 +551,12 @@ locust -f locustfile.py --host http://localhost:8000
 
 ## 九、性能基准测试
 
-详细的 Locust 压测结果（实测数据 + 理论分析）已写入项目 README：
+当前基准配置、有效性说明和复现命令见：
 
-- [中文 README § 性能测试](../README.md#⚡-性能测试)
-- [English README § Performance Benchmark](../README.en.md#⚡-performance-benchmark)
+- [中文 README § 性能测试](../README.md#performance-benchmark)
+- [English README § Performance Benchmark](../README.en.md#performance-benchmark)
 
-包含 SQLite 与 PostgreSQL 的对比数据、瓶颈定位、生产环境预估及优化建议。
+旧基准结果已失效；修复后的 SQLite 数据和独立的 PostgreSQL 数据将在完成重测后同步更新。
 
 ---
 

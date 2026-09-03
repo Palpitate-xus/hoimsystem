@@ -20,8 +20,6 @@
 | 数据库表 | **139** 张业务表 |
 | 前端页面 | **143** 个 Vue 页面 |
 | 用户角色 | **8** 种（admin/director/doctor/nurse/cashier/pharmacist/guide/patient） |
-| 峰值吞吐 | **~67 req/s**（SQLite 单工）/ **500-2 000 req/s**（PostgreSQL 预估） |
-| 推荐并发 | **≤ 50 用户**（SQLite）/ **200-500 用户**（PostgreSQL） |
 
 ---
 
@@ -428,127 +426,57 @@ docker-compose up -d
 
 ---
 
+<a id="performance-benchmark"></a>
+
 ## ⚡ 性能测试
 
-### 测试环境
+### 当前状态
+
+> **基线待重测（2026-09-03）**：此前发布的吞吐、延迟、失败率和并发建议来自旧基准。旧服务器通过 `StaticPool` 共享单个 SQLite 连接；旧混合场景又用预生成的 `admin` token 执行仅允许患者或医生执行的写操作，并且只按 HTTP 状态统计，会把响应体 `code != 200` 的业务失败计为成功。旧数据与当前实现不可比，不作为当前性能基线、容量建议或 SLA 依据。旧结果中的 HTTP 401 表示认证失败，不是“连接池耗尽”。
+
+### 修复后的基准配置
 
 | 项目 | 配置 |
 |:----:|:-----|
-| 服务器 | FastAPI + Uvicorn (1 worker) |
-| 数据库 | SQLite (StaticPool 单连接模式) |
-| 测试工具 | Locust 2.44.4 (headless 模式) |
-| 测试主机 | 本地回环 (localhost) |
-| 预热时间 | 无（直接加压） |
-| 测试时长 | 每轮 30 秒 |
+| 服务器 | FastAPI + Uvicorn，1 worker |
+| 数据库 | 专用 SQLite 文件 `fastapi_be/benchmark.db` |
+| 数据初始化 | 仅重建专用基准库并写入基准账号与业务数据；不继承外部 `DATABASE_URL` |
+| 连接方式 | SQLAlchemy `QueuePool`；重叠 Session 使用独立 DBAPI 连接 |
+| 认证 | 开测前调用 `/api/login` 获取 token，并校验 `sub` / `iat` / `exp`；失败时终止测试 |
+| 角色 | 查询使用管理员；预约使用患者；处方使用医生 |
+| 写入目标 | 开测时读取实际排班、患者和可用药品，构造字段一致且不重复的预约请求 |
+| 混合场景 | 按任务权重约 96.2% 查询、3.8% 写入；8 个查询和 2 个写入场景 |
+| 成功判定 | 预约和处方同时要求 HTTP 2xx 与响应体 `code == 200` |
+| 工具 | Locust 2.44.4，单进程 headless 模式 |
+| 时长 | 每轮 30 秒，无显式预热 |
 
-> ⚠️ 当前测试基于 SQLite 开发数据库。生产环境使用 PostgreSQL 后，并发能力将有数量级提升（详见下方理论分析）。
-
----
-
-### 实测结果（混合读写场景）
-
-模拟真实门诊流量，读写比例约 8:2，覆盖全部核心业务接口：
-
-| 并发用户 | 总请求 | 吞吐量 (req/s) | 平均延迟 | P50 延迟 | P95 延迟 | 失败率 |
-|:--------:|:------:|:--------------:|:--------:|:--------:|:--------:|:------:|
-| 10 | 573 | **19.2** | 23 ms | 19 ms | 53 ms | 1.6% |
-| 20 | 1 102 | **37.0** | 30 ms | 24 ms | 82 ms | 2.6% |
-| 50 | 2 002 | **67.1** | 238 ms | 220 ms | 470 ms | 6.2% |
-| 100 | 1 967 | **65.9** | 975 ms | 970 ms | 1 300 ms | 5.8% |
-
-**关键发现**：
-- 📈 **峰值吞吐**：50 并发时达到 **~67 req/s**，为当前配置的最优点
-- 📉 **拐点**：超过 50 并发后，SQLite 写锁竞争加剧，吞吐不再增长，延迟急剧上升
-- 🔒 **瓶颈**：SQLite 全局写锁导致并发写入串行化，读操作也被阻塞
-- ❌ **失败原因**：高并发下 SQLite 锁超时（500）和连接池耗尽（401）
-
----
-
-### 实测结果（只读场景）
-
-所有请求均为 GET 查询，无写入操作：
-
-| 并发用户 | 总请求 | 吞吐量 (req/s) | 平均延迟 | P50 延迟 | P95 延迟 | 失败率 |
-|:--------:|:------:|:--------------:|:--------:|:--------:|:--------:|:------:|
-| 20 | 1 881 | **63.0** | 113 ms | 100 ms | 250 ms | 6.9% |
-| 50 | 1 886 | **63.2** | 574 ms | 560 ms | 840 ms | 6.7% |
-| 100 | 1 765 | **59.3** | 1 423 ms | 1 400 ms | 1 900 ms | 6.2% |
-| 200 | 1 823 | **61.0** | 2 848 ms | 2 900 ms | 4 300 ms | 7.1% |
-
-**关键发现**：
-- 📊 **吞吐天花板**：即使纯读，SQLite + StaticPool 也限制在 **~63 req/s**
-- ⏱️ **延迟增长**：100 并发时 P95 已达 1.9 秒，200 并发时 P95 达 4.3 秒
-- 🔑 **根因**：StaticPool 强制所有请求共享单一数据库连接，形成串行瓶颈
-
----
-
-### 理论性能分析
-
-#### 架构瓶颈定位
-
-```
-请求 → Uvicorn (async) → FastAPI → SQLAlchemy → SQLite (StaticPool)
-                                                    ↑
-                                            全局写锁 + 单连接
-                                            最大吞吐 ≈ 60-70 req/s
-```
-
-| 层级 | 当前限制 | 生产环境（PostgreSQL） |
-|:----:|:--------|:----------------------|
-| **Web 服务器** | Uvicorn 1 worker（单进程） | 多 worker（CPU 核数 × 2）+ Gunicorn |
-| **应用框架** | FastAPI async（无瓶颈） | 同左（异步 I/O 无阻塞） |
-| **ORM** | SQLAlchemy + StaticPool（单连接） | QueuePool（10-20 连接） |
-| **数据库** | SQLite（文件锁，写串行） | PostgreSQL（MVCC，行级锁） |
-
-#### 生产环境预估
-
-切换到 PostgreSQL 后，各层瓶颈解除：
-
-| 指标 | SQLite（当前） | PostgreSQL（预估） |
-|:----:|:-------------:|:-----------------:|
-| **最大吞吐** | ~67 req/s | **500-2 000 req/s** |
-| **推荐并发** | ≤ 50 用户 | **200-500 用户** |
-| **P95 延迟（50 并发）** | 470 ms | **< 50 ms** |
-| **P95 延迟（200 并发）** | 4 300 ms | **< 200 ms** |
-
-**预估依据**：
-1. **PostgreSQL MVCC**：读写不阻塞，写操作仅锁定修改行而非整个数据库
-2. **连接池**：QueuePool 默认 5 连接 + 10 overflow，可配置至 20+ 连接
-3. **Uvicorn 多 worker**：4 worker 即可将吞吐提升 4 倍（约 280 req/s）
-4. **FastAPI 异步**：I/O 密集型场景下，单 worker 即可处理数百并发连接
-5. **参考基准**：同类 FastAPI + PostgreSQL 系统在 4 核 8G 机器上通常可达 1 000-3 000 req/s
-
-#### 性能优化建议
-
-| 优先级 | 优化项 | 预期收益 |
-|:------:|:-------|:---------|
-| 🔴 高 | 切换 PostgreSQL | 吞吐提升 5-10 倍 |
-| 🔴 高 | Uvicorn 多 worker（--workers 4） | 吞吐提升 3-4 倍 |
-| 🟡 中 | 连接池调优（pool_size=20, max_overflow=10） | 并发能力提升 3 倍 |
-| 🟡 中 | 热点查询加缓存（Redis） | 读吞吐提升 5-10 倍 |
-| 🟢 低 | 数据库索引优化 | 单查询延迟降低 50% |
-| 🟢 低 | 分页查询限制 max page_size | 防止大结果集拖慢响应 |
-
----
+`locust_readonly_pool.py` 不修改业务数据，但并非全部使用 GET：它还使用 `POST /api/log/getList` 执行查询。当前 SQLite 基准允许多个数据库连接，但 SQLite 的文件级写竞争仍然存在。PostgreSQL 尚未在同一提交、硬件、数据规模和负载模型下实测，不应从 SQLite 结果外推具体吞吐、延迟或并发上限。
 
 ### 测试方法复现
 
+`init_benchmark_data.py` 会清空并重建仓库内的 `fastapi_be/benchmark.db`，不会使用环境中的其他数据库。每轮测试前都应重新初始化。
+
 ```bash
-# 1. 启动基准测试服务器
+# 终端 1：初始化并启动基准服务
 cd fastapi_benchmark
-python init_benchmark_data.py          # 初始化测试数据
-SECRET_KEY="your-secret" uvicorn run_benchmark:app --host 0.0.0.0 --port 8000
+export SECRET_KEY="benchmark-only-local-secret-at-least-32-bytes"
+python init_benchmark_data.py
+uvicorn run_benchmark:app --host 0.0.0.0 --port 8000
 
-# 2. 运行 Locust 压测（混合读写）
+# 终端 2：选择一个场景运行（如配置了 HTTP 代理，请将 localhost 加入 NO_PROXY）
+cd fastapi_benchmark
+mkdir -p benchmark_results
 locust -f locust_final.py --headless -u 50 -r 25 -t 30s \
-    --host http://localhost:8000 --csv=results/50u
+    --host http://localhost:8000 --csv=benchmark_results/mixed_50u \
+    --exit-code-on-error 1
 
-# 3. 运行 Locust 压测（只读）
+# 如需改测只读场景：先停止终端 1，重新初始化并启动服务，再执行下列命令
 locust -f locust_readonly_pool.py --headless -u 50 -r 25 -t 30s \
-    --host http://localhost:8000 --csv=results/readonly_50u
+    --host http://localhost:8000 --csv=benchmark_results/readonly_50u \
+    --exit-code-on-error 1
 ```
 
-测试脚本位于 [fastapi_benchmark/](fastapi_benchmark/) 目录。
+初始化脚本会创建与 Locust 默认配置一致的管理员、医生和患者基准身份。Locust 会在每轮开始时实时登录，不使用固定的 `tokens.json`。修复后的实测结果将在重新执行完整基准后补充。
 
 ---
 

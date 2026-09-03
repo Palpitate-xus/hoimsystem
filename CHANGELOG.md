@@ -2,6 +2,19 @@
 
 本项目遵循 [语义化版本](https://semver.org/lang/zh-CN/) 规范。
 
+## [未发布]
+
+### 修复 — 性能基准
+
+- 将初始化器和基准服务器固定到仓库内专用的 `fastapi_be/benchmark.db`，忽略外部 `DATABASE_URL`；初始化时重建 schema，避免误清理其他数据库及旧 schema 残留
+- SQLite 基准改用 `QueuePool` 为并发会话提供独立连接，并确保 `run_benchmark:app` 可由 Uvicorn 正常加载
+- Locust 在每轮测试开始前通过 `/api/login` 获取并检查新 token；认证失败、token 过期或剩余有效期不足时立即终止测试
+- 混合场景使用 `admin`、`doctor`、`patient` 分角色身份，读取实际业务对象构造写入目标；预约和处方同时检查 HTTP 状态与响应体 `code == 200`
+
+### 文档
+
+- 撤回旧 `StaticPool`、预生成 token 和错误业务成功判定下生成的基准结果；修复后的性能基线待重新测量
+
 ## [2.0.0] - 2026-08-23
 
 > 本版本为重大更新（MAJOR）：系统规模从 61 表/247 接口跃升至 **139 表/540 接口**，新增 17 个 HIS 业务模块；

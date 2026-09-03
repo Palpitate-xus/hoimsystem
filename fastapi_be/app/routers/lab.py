@@ -1,10 +1,11 @@
 import datetime
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, BackgroundTasks, Depends
 from sqlalchemy.orm import Session, joinedload
 
 from app.database import get_db
 from app.dependencies import CLINICAL_ROLES, LAB_ROLES, require_roles
+from app.event_bus import patient_user_ids, publish_event
 from app.models import LabOrder, LabResult, Message, Patient, SampleTracking, User
 from app.pagination import paginate
 from app.schemas import LabCriticalActionRequest, LabResultAuditRequest, LabResultCreateRequest
@@ -116,7 +117,12 @@ def sample_tracking(lab_order_id: str, current_user: User = Depends(require_role
 
 
 @router.post("/labResult/create")
-def create_lab_result(req: LabResultCreateRequest, current_user=Depends(require_roles(*LAB_ROLES)), db: Session = Depends(get_db)):
+def create_lab_result(
+    req: LabResultCreateRequest,
+    background_tasks: BackgroundTasks,
+    current_user=Depends(require_roles(*LAB_ROLES)),
+    db: Session = Depends(get_db),
+):
     lab_order = db.query(LabOrder).filter(LabOrder.lab_order_id == req.lab_order_id).first()
     if not lab_order:
         return {"code": 500, "msg": "检查申请单不存在"}
@@ -143,11 +149,29 @@ def create_lab_result(req: LabResultCreateRequest, current_user=Depends(require_
     msg = "success"
     if is_critical:
         msg = "结果已录入，检测到危急值！"
+        clinician_ids = [lab_order.doctor.user_id] if lab_order.doctor and lab_order.doctor.user_id else []
+        background_tasks.add_task(
+            publish_event,
+            "lab.critical",
+            {
+                "lab_result_id": result.lab_result_id,
+                "lab_order_id": lab_order.lab_order_id,
+                "patient_id": lab_order.patient_id,
+                "check_type": lab_order.check_type,
+            },
+            audience_roles=sorted(LAB_ROLES | {"admin", "super_admin", "director"}),
+            audience_user_ids=clinician_ids,
+        )
     return {"code": 200, "msg": msg, "data": {"critical": is_critical}}
 
 
 @router.post("/labResult/audit")
-def audit_lab_result(req: LabResultAuditRequest, current_user: User = Depends(require_roles(*LAB_ROLES)), db: Session = Depends(get_db)):
+def audit_lab_result(
+    req: LabResultAuditRequest,
+    background_tasks: BackgroundTasks,
+    current_user: User = Depends(require_roles(*LAB_ROLES)),
+    db: Session = Depends(get_db),
+):
     result = db.query(LabResult).filter(LabResult.lab_result_id == req.lab_result_id).first()
     if not result:
         return {"code": 500, "msg": "检查结果不存在"}
@@ -165,6 +189,21 @@ def audit_lab_result(req: LabResultAuditRequest, current_user: User = Depends(re
     db.add(result)
     _record_tracking(db, result.lab_order.lab_order_id, "结果已审核", current_user)
     db.commit()
+    audience_user_ids = patient_user_ids(db, result.lab_order.patient)
+    if result.lab_order.doctor and result.lab_order.doctor.user_id:
+        audience_user_ids.append(result.lab_order.doctor.user_id)
+    background_tasks.add_task(
+        publish_event,
+        "lab.result_available",
+        {
+            "lab_result_id": result.lab_result_id,
+            "lab_order_id": result.lab_order_id,
+            "patient_id": result.lab_order.patient_id,
+            "critical": result.critical_status > 0,
+        },
+        audience_roles=sorted(LAB_ROLES | {"admin", "super_admin", "director"}),
+        audience_user_ids=audience_user_ids,
+    )
     return {"code": 200, "msg": "success"}
 
 

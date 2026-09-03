@@ -1,4 +1,18 @@
 services:
+  redis:
+    image: redis:8-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes", "--maxmemory-policy", "noeviction"]
+    volumes:
+      - redis_data:/data
+    expose:
+      - "6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
   db:
     image: postgres:16-alpine
     container_name: hoimsystem_db
@@ -39,6 +53,7 @@ services:
       DB_POOL_TIMEOUT_SECONDS: ${DB_POOL_TIMEOUT_SECONDS:-30}
       DB_POOL_RECYCLE_SECONDS: ${DB_POOL_RECYCLE_SECONDS:-1800}
       DB_STATEMENT_TIMEOUT_MS: ${DB_STATEMENT_TIMEOUT_MS:-15000}
+      REDIS_URL: redis://redis:6379/0
       PROMETHEUS_MULTIPROC_DIR: /tmp/prometheus
     volumes:
       - ./fastapi_be/app/uploads:/app/app/uploads
@@ -52,6 +67,8 @@ services:
     depends_on:
       migrate:
         condition: service_completed_successfully
+      redis:
+        condition: service_healthy
 
   migrate:
     build: ./fastapi_be
@@ -81,6 +98,7 @@ services:
       AUTO_CREATE_SCHEMA: "false"
       SCHEDULER_ENABLED: "true"
       SCHEDULER_INTERVAL_SECONDS: ${SCHEDULER_INTERVAL_SECONDS:-3600}
+      REDIS_URL: redis://redis:6379/0
     depends_on:
       migrate:
         condition: service_completed_successfully
@@ -96,3 +114,4 @@ services:
 
 volumes:
   postgres_data:
+  redis_data:

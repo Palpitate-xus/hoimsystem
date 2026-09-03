@@ -1,10 +1,11 @@
 import datetime
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, BackgroundTasks, Depends
 from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.dependencies import ADMIN_ROLES, CLINICAL_ROLES, NURSING_ROLES, ROLE_PATIENT, User, get_current_user, require_roles
+from app.event_bus import patient_user_ids, publish_event
 from app.models import Doctor, Patient, PatrolRecord, Queue
 from app.schemas import QueueCallNextRequest, QueuePassRequest, QueueSkipRequest
 
@@ -90,8 +91,12 @@ def get_queue_progress(current_user: User = Depends(require_roles(ROLE_PATIENT))
 
 
 @router.post("/queue/callNext")
-def call_next(req: QueueCallNextRequest, current_user: User = Depends(require_roles(*CLINICAL_ROLES)),
-    db: Session = Depends(get_db)):
+def call_next(
+    req: QueueCallNextRequest,
+    background_tasks: BackgroundTasks,
+    current_user: User = Depends(require_roles(*CLINICAL_ROLES)),
+    db: Session = Depends(get_db),
+):
     if current_user.user_role == "doctor":
         doctor_ids = [item.doctor_id for item in db.query(Doctor).filter(Doctor.user_id == current_user.user_id).all()]
         if req.doctor_id not in doctor_ids:
@@ -109,6 +114,13 @@ def call_next(req: QueueCallNextRequest, current_user: User = Depends(require_ro
         "patient_name": queue_item.patient.name if queue_item.patient else "",
         "registration_uuid": queue_item.registration_uuid,
     }
+    background_tasks.add_task(
+        publish_event,
+        "queue.called",
+        {"queue_id": queue_item.queue_id, "queue_number": queue_item.queue_number, "doctor_id": req.doctor_id},
+        audience_roles=sorted(CLINICAL_ROLES | NURSING_ROLES),
+        audience_user_ids=patient_user_ids(db, queue_item.patient),
+    )
     return {"code": 200, "msg": "success", "data": data}
 
 

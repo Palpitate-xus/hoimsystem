@@ -35,6 +35,14 @@ def readiness():
                 expected = set(ScriptDirectory.from_config(config).get_heads())
                 if current != expected:
                     return JSONResponse(status_code=503, content={"status": "unavailable", "message": "database migration is not current"})
+        if settings.REDIS_URL:
+            from redis import Redis
+
+            client = Redis.from_url(settings.REDIS_URL, socket_connect_timeout=1, socket_timeout=1)
+            try:
+                client.ping()
+            finally:
+                client.close()
         return {"status": "ready"}
     except Exception:
         return JSONResponse(status_code=503, content={"status": "unavailable", "message": "database is unavailable"})

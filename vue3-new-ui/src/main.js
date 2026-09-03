@@ -7,6 +7,7 @@ import plugins from "./plugins";
 import { registerLayoutComponents } from "@/layouts/export";
 // 导入事件总线
 import eventBus from "@/utils/eventBus";
+import { clinicalEventStream } from "@/utils/clinicalEvents";
 // 导入配置
 import { title } from "@/config";
 
@@ -37,6 +38,13 @@ app.config.globalProperties.$baseTitle = title;
 // 使全局属性在window上也可用
 window.$eventBus = eventBus;
 window.$baseTitle = title;
+
+// 登录态变化时建立/关闭带请求头鉴权的 SSE，令牌不会进入 URL 或访问日志。
+store.watch(
+  (state) => state.user.accessToken,
+  (accessToken) => (accessToken ? clinicalEventStream.start(accessToken) : clinicalEventStream.stop()),
+  { immediate: true }
+);
 
 // 生产环境提供可安装的移动 Web 体验；API 和医疗动态数据不由 Service Worker 缓存。
 if (process.env.NODE_ENV === "production" && "serviceWorker" in navigator) {

@@ -2,11 +2,12 @@ import datetime
 import secrets
 from decimal import Decimal
 
-from fastapi import APIRouter, Depends, Header, HTTPException
+from fastapi import APIRouter, BackgroundTasks, Depends, Header, HTTPException
 from sqlalchemy.orm import Session
 
 from app.config import settings
 from app.database import get_db
+from app.event_bus import patient_user_ids, publish_event
 from app.models import Charge, ImagingOrder, ImagingReport, LabOrder, LabResult, Payment, User
 from app.routers.lab import check_critical_value
 from app.schemas import ImagingReportIntegrationRequest, LabResultIntegrationRequest, PaymentIntegrationRequest
@@ -33,6 +34,7 @@ def _bind_external_order(order, external_order_id: str | None):
 @router.post("/integration/lis/result")
 def receive_lis_result(
     req: LabResultIntegrationRequest,
+    background_tasks: BackgroundTasks,
     x_integration_key: str | None = Header(default=None),
     db: Session = Depends(get_db),
 ):
@@ -70,12 +72,21 @@ def receive_lis_result(
     db.add(result)
     db.commit()
     db.refresh(result)
+    clinician_ids = [order.doctor.user_id] if order.doctor and order.doctor.user_id else []
+    background_tasks.add_task(
+        publish_event,
+        "lab.critical" if is_critical else "lab.result_received",
+        {"lab_result_id": result.lab_result_id, "lab_order_id": order.lab_order_id, "patient_id": order.patient_id},
+        audience_roles=["lab_technician", "admin", "super_admin", "director"],
+        audience_user_ids=clinician_ids,
+    )
     return {"code": 200, "msg": "LIS结果已接收，等待审核", "data": {"lab_result_id": result.lab_result_id, "idempotent": False}}
 
 
 @router.post("/integration/pacs/report")
 def receive_pacs_report(
     req: ImagingReportIntegrationRequest,
+    background_tasks: BackgroundTasks,
     x_integration_key: str | None = Header(default=None),
     db: Session = Depends(get_db),
 ):
@@ -113,12 +124,21 @@ def receive_pacs_report(
     db.add(report)
     db.commit()
     db.refresh(report)
+    clinician_ids = [order.doctor.user_id] if order.doctor and order.doctor.user_id else []
+    background_tasks.add_task(
+        publish_event,
+        "imaging.report_received",
+        {"report_id": report.report_id, "imaging_order_id": order.imaging_order_id, "patient_id": order.patient_id},
+        audience_roles=["doctor", "director", "lab_technician", "admin", "super_admin"],
+        audience_user_ids=clinician_ids,
+    )
     return {"code": 200, "msg": "PACS报告已接收，等待审核", "data": {"report_id": report.report_id, "idempotent": False}}
 
 
 @router.post("/integration/payment/notify")
 def receive_payment_notification(
     req: PaymentIntegrationRequest,
+    background_tasks: BackgroundTasks,
     x_integration_key: str | None = Header(default=None),
     db: Session = Depends(get_db),
 ):
@@ -155,6 +175,14 @@ def receive_payment_notification(
         charge.status = 1
         charge.time = now
     db.commit()
+    patient = payment.charge.prescription.patient if payment.charge and payment.charge.prescription else None
+    background_tasks.add_task(
+        publish_event,
+        "payment.succeeded" if payment.status == 1 else "payment.failed",
+        {"payment_no": payment.payment_no, "charge_id": payment.charge_id, "status": payment.status},
+        audience_roles=["cashier", "admin", "super_admin"],
+        audience_user_ids=patient_user_ids(db, patient),
+    )
     return {
         "code": 200,
         "msg": "支付结果已同步",

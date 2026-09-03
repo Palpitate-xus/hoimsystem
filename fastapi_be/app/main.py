@@ -372,6 +372,7 @@ from app.routers import (
     emergency,
     emr,
     equipment,
+    events,
     exam,
     family_member,
     followup,
@@ -463,6 +464,7 @@ app.include_router(insurance_catalog.router, prefix="/api")
 app.include_router(infection_control.router, prefix="/api")
 app.include_router(quality_management.router, prefix="/api")
 app.include_router(ops_extension.router, prefix="/api")
+app.include_router(events.router, prefix="/api")
 app.include_router(user.router, prefix="/api")
 app.include_router(patient.router, prefix="/api")
 app.include_router(patient_card.router, prefix="/api")

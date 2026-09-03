@@ -15,6 +15,7 @@ python-dotenv>=1.2.2
 pygments>=2.20.0
 alembic>=1.18.0
 prometheus-client>=0.26.0,<1.0.0
+redis>=7.4.1,<9.0.0
 
 # test dependencies
 pytest>=8.0.0

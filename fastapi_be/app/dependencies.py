@@ -56,11 +56,7 @@ def decode_access_token(token: str) -> str:
         return None
 
 
-def get_current_user(
-    request: Request,
-    access_token: str = Header(None, alias="accesstoken"),
-    db: Session = Depends(get_db),
-) -> User:
+def resolve_access_token(access_token: str | None, db: Session) -> User:
     if not access_token:
         raise HTTPException(status_code=401, detail="Missing accesstoken")
     username = decode_access_token(access_token)
@@ -87,6 +83,15 @@ def get_current_user(
                     raise HTTPException(status_code=401, detail="Token 已被吊销，请重新登录")
         except pyjwt.InvalidTokenError:
             raise HTTPException(status_code=401, detail="Invalid accesstoken")
+    return user
+
+
+def get_current_user(
+    request: Request,
+    access_token: str = Header(None, alias="accesstoken"),
+    db: Session = Depends(get_db),
+) -> User:
+    user = resolve_access_token(access_token, db)
     request.state.current_user = user
     # 中间件在请求级 Session 关闭后仍会运行，只保存不可变标量供审计与指标读取。
     request.state.auth_identity = (user.user_id, user.username, user.user_role)

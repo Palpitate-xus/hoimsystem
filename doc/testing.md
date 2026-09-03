@@ -442,56 +442,46 @@ rm fastapi_be/test.db
 
 ---
 
-## 五、CI/CD 测试
+## 五、提交前本地检查
 
-### 5.1 GitHub Actions 配置
+仓库不启用 GitHub Actions。提交 PR 或发布前，由提交者在本地执行以下检查并在评审中记录结果。
 
-`.github/workflows/test.yml`：
+### 5.1 后端、权限和依赖
 
-```yaml
-name: Tests
+```bash
+cd fastapi_be
+pip-audit -r requirements.txt --progress-spinner off
+ruff check app tests scripts bootstrap_admin.py seed_default_accounts.py gunicorn.conf.py
+python -m compileall -q app tests scripts bootstrap_admin.py seed_default_accounts.py gunicorn.conf.py
+python scripts/generate_rbac_matrix.py --check
+pytest -q
+```
 
-on:
-  push:
-    branches: [master, develop]
-  pull_request:
-    branches: [master]
+### 5.2 基准工具安全性
 
-jobs:
-  backend-test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.10"
-      - name: Install dependencies
-        run: |
-          cd fastapi_be
-          pip install -r requirements.txt
-          pip install pytest pytest-cov
-      - name: Run tests
-        run: |
-          cd fastapi_be
-          pytest --cov=app --cov-report=xml
-      - name: Upload coverage
-        uses: codecov/codecov-action@v3
+```bash
+cd <仓库根目录>
+PYTHONPATH=fastapi_be pytest -q fastapi_benchmark/tests
+```
 
-  frontend-build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-      - name: Install dependencies
-        run: |
-          cd vue3-new-ui
-          npm install --legacy-peer-deps
-      - name: Build
-        run: |
-          cd vue3-new-ui
-          npm run build
+### 5.3 前端依赖、构建和资源预算
+
+```bash
+cd vue3-new-ui
+npm ci
+npm run verify
+```
+
+### 5.4 Compose 配置
+
+```bash
+cd <仓库根目录>
+POSTGRES_PASSWORD=validation-db-password \
+SECRET_KEY=validation-secret-key-with-more-than-32-characters \
+ALLOWED_ORIGINS=https://validation.example.com \
+docker compose config --quiet
+
+docker compose -f fastapi_benchmark/docker-compose.yml config --quiet
 ```
 
 ---

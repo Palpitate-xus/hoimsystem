@@ -36,8 +36,8 @@
 ### 部署与质量
 
 - 生产迁移、API 和调度器拆分为独立 Compose 服务；调度任务使用 PostgreSQL advisory lock 和持久化状态
-- CI 增加 Python/npm 依赖审计、后端与基准测试、ruff、前端构建、bundle 预算、RBAC 漂移和 Compose 校验
-- Dependabot 覆盖 pip、npm、Docker 和 GitHub Actions
+- 本地发布检查覆盖 Python/npm 依赖审计、后端与基准测试、ruff、前端构建、bundle 预算、RBAC 漂移和 Compose 校验
+- Dependabot 覆盖 pip、npm 和 Docker；按仓库维护策略移除 GitHub Actions 工作流
 - 同步 README、部署、监控、性能、集成、用户手册、路线图及 560 接口 RBAC 矩阵
 
 ## [2.0.0] - 2026-08-23

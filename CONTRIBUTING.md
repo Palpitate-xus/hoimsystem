@@ -138,7 +138,7 @@ refactor/<描述>              # 重构
    git rebase upstream/master
    ```
 
-4. **确保 CI 通过**：推送后确认 GitHub Actions 全部通过
+4. **执行本地检查**：按 `doc/testing.md` 的提交前命令完成后端、前端和依赖验证
 
 5. **提交 PR**：
    - 标题简洁描述变更内容
@@ -171,14 +171,14 @@ refactor/<描述>              # 重构
 
 ## 七、常见问题
 
-### Q: 提交 PR 后 CI 失败怎么办？
+### Q: 提交 PR 前如何验证？
 
-查看 GitHub Actions 日志，修复对应问题后重新推送：
+先按 `doc/testing.md` 执行本地发布检查，修复问题后再提交：
 
 ```bash
 git add .
-git commit --amend --no-edit
-git push -f origin your-branch
+git commit -m "fix(scope): 修复本地检查发现的问题"
+git push origin your-branch
 ```
 
 ### Q: 如何添加新的 API 接口？

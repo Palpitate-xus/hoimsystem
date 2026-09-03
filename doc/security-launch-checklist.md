@@ -37,7 +37,7 @@
 | 28 | viewer_url 可注入 javascript: 协议进前端 window.open | 两处入口强制 https:// | `imaging.py` / `integration.py` |
 | 29 | logout 不吊销 token（24h 窗口内被窃取无法止损） | token_invalid_before 服务端吊销，logout/改密/管理员重置均触发 | `user.py` / `dependencies.py` |
 | 30 | 登录失败锁定为进程内存态（4 worker 各自计数，重启清零） | 数据库持久化锁定表（LoginLockout） | `user.py` + 迁移 20260818 |
-| 31 | RBAC 矩阵文档严重过期误导开发 | 脚本自动生成 560 个路由方法 + CI 漂移检测测试 | `scripts/generate_rbac_matrix.py` |
+| 31 | RBAC 矩阵文档严重过期误导开发 | 脚本自动生成 560 个路由方法 + 本地漂移检测测试 | `scripts/generate_rbac_matrix.py` |
 | 32 | 生产可写入公开的演示弱口令账号 | 生产环境阻止演示脚本，使用交互式强口令首管理员初始化 | `seed_default_accounts.py` / `bootstrap_admin.py` |
 | 33 | Nginx 反代剥离 `/api` 且静态规则抢占 API 文件路径 | 保留 `/api` 前缀并让 API 前缀优先 | `vue3-new-ui/nginx.conf` |
 
@@ -51,7 +51,7 @@
 - [ ] **多 worker 部署**：设置 `TRANSPORT_RSA_PRIVATE_KEY_PEM` 或确保 4 个 worker 共享密钥文件可写路径
 - [ ] **HTTPS**：在 nginx 前配置 TLS 证书（443 + 80 跳转），JWT/密码否则明文传输
 - [ ] **生产库禁用 SQLite**：`DATABASE_URL` 指向 PostgreSQL；SQLite 备份/恢复接口在生产自动返回 501
-- [ ] **删除/隔离开发数据**：确认镜像内无 test.db/backups（已由 .dockerignore 处理，需在 CI 验证）
+- [ ] **删除/隔离开发数据**：确认镜像内无 test.db/backups（已由 .dockerignore 处理，构建镜像后人工验证）
 
 ### 🟡 强烈建议（上线一周内完成）
 

@@ -20,11 +20,11 @@
 
 ### 1. 依赖安全扫描
 
-本项目使用以下工具持续监控依赖安全：
+本项目使用以下工具检查依赖安全：
 
-- **npm audit**：前端生产与开发依赖，CI 以 low 级别阻断
-- **pip-audit**：后端 `requirements.txt`，CI 阻断已知漏洞
-- **GitHub Dependabot**：每周检查 npm、pip、Docker 和 GitHub Actions
+- **npm audit**：前端生产与开发依赖，发布前在本地以 low 级别检查
+- **pip-audit**：后端 `requirements.txt`，发布前在本地检查已知漏洞
+- **GitHub Dependabot**：每周检查 npm、pip 和 Docker 依赖；它不执行 GitHub Actions
 
 2026-09-03 已彻底移除无修复版本的 `mockjs` 运行时，用本地确定性数据生成器保留开发 mock 功能；同时更新 `qs` 及 `browserslist`、`nanoid`、`postcss-selector-parser` 等传递依赖。当前 lockfile 的 `npm audit` 为 0 告警。GitHub 默认分支上的旧 Dependabot 告警会在修复提交推送并由 GitHub 重新扫描后关闭。
 
@@ -50,4 +50,4 @@
 | 2026-05-10 | CVE-2026-28684 (python-dotenv) | v1.0.0+ | 升级至 >=1.2.2 |
 | 2026-05-10 | CVE-2026-4539 (pygments) | v1.0.0+ | 升级至 >=2.20.0 |
 | 2026-05-10 | npm 间接依赖 (minimatch, picomatch, serialize-javascript, immutable) | v1.0.0+ | npm overrides 强制升级 |
-| 2026-09-03 | MockJS 原型污染及 npm 直接/传递依赖告警 | 未发布版 | 移除 MockJS，更新/覆盖到已修复版本，CI 强制 `npm audit` |
+| 2026-09-03 | MockJS 原型污染及 npm 直接/传递依赖告警 | 未发布版 | 移除 MockJS，更新/覆盖到已修复版本，发布前执行 `npm audit` |

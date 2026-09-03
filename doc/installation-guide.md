@@ -201,6 +201,6 @@ curl -fsS http://127.0.0.1:8000/metrics | head
 4. [ ] DATABASE_URL 指向 PostgreSQL（禁 SQLite）
 5. [ ] 集成密钥已配置（若启用 LIS/PACS/医保/支付）
 6. [ ] TRANSPORT_RSA_PRIVATE_KEY_PEM 已配置（多 worker）
-7. [ ] 镜像内无 *.db / backups（.dockerignore 已处理，CI 验证）
+7. [ ] 镜像内无 *.db / backups（.dockerignore 已处理，构建镜像后人工验证）
 
 完整清单：`doc/security-launch-checklist.md`

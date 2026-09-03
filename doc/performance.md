@@ -547,7 +547,7 @@ PostgreSQL、4 个 Gunicorn worker 和一次性初始化器，再运行
 - [x] 高频临床/收费/审计组合索引与 Alembic 迁移
 - [x] 高增长核心列表分页，处方、收费、入院、病案、签到、报表等 N+1 回归测试
 - [x] 日运营指标预聚合，避免仪表盘反复扫描交易表
-- [x] 路由懒加载、Element Plus 与 ECharts 按需引入、CI bundle 预算
+- [x] 路由懒加载、Element Plus 与 ECharts 按需引入、本地 bundle 预算检查
 - [x] GZip、流式导出、单次 JSON 序列化和请求时延指标
 - [x] 隔离 PostgreSQL 基准、分级数据规模、运行时认证和业务成功断言
 

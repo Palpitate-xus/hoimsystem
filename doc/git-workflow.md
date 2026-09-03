@@ -25,7 +25,7 @@
 
 | 分支 | 用途 | 谁能 push | 保护规则 |
 |:----:|:----|:---------|:--------|
-| `master` | 生产分支，对应正式发布 | **任何人都不能直接 push**，只接受 PR | 必须 PR + Review + CI 通过 |
+| `master` | 生产分支，对应正式发布 | **任何人都不能直接 push**，只接受 PR | 必须 PR + Review；合并者核对本地检查结果 |
 | `develop` | 开发主干，合并所有特性 | 维护者可直接 push 小改动 | PR 推荐，但允许直接 push 文档级修改 |
 
 ### 1.2 临时分支
@@ -144,7 +144,7 @@ git commit -m "feat(scope): 描述"
 git push -u origin feature/your-feature
 
 # 5. 在 GitHub 创建 PR：feature/your-feature -> develop
-# 6. CI 通过 + 至少 1 个 Review 通过后，合并
+# 6. 本地发布检查通过 + 至少 1 个 Review 通过后，合并
 # 7. 合并后删除本地和远程分支
 git checkout develop
 git pull

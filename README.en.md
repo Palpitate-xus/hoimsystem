@@ -252,7 +252,7 @@ Every Locust request validates both the HTTP status and response-body `code == 2
 ## ✨ Highlights
 
 - **Broad coverage**: Outpatient + Inpatient + Pharmacy + Lab + Exam + Surgery, 9 domains 40+ modules
-- **Clean code**: 560 route methods organized by module, frontend/backend separation, and CI-enforced lint, tests, audits, and bundle budgets
+- **Clean code**: 560 route methods organized by module, frontend/backend separation, with local lint, test, audit, and bundle-budget checks
 - **Great DX**: FastAPI auto docs, hot reload, zero-config SQLite startup
 - **Observable**: Liveness/readiness probes, Prometheus metrics, request IDs, operation auditing, and daily operational aggregates
 - **Secure**: JWT auth, bcrypt passwords, ID masking, operation auditing

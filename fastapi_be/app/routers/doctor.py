@@ -4,7 +4,7 @@ import traceback
 from decimal import Decimal
 
 from fastapi import APIRouter, Depends
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 
 from app.database import get_db
 from app.dependencies import ADMIN_ROLES, CLINICAL_ROLES, PHARMACY_ROLES, get_current_user, require_roles
@@ -115,9 +115,9 @@ def doctor_schedule_register(req: DoctorScheduleCreateRequest, current_user: Use
 def doctor_schedule_getlist(current_user: User = Depends(get_current_user), keyword: str | None = None, db: Session = Depends(get_db)):
     data = []
     if current_user.user_role in ("admin", "patient"):
-        doctor_list = db.query(Doctor).all()
+        doctor_list = db.query(Doctor).options(selectinload(Doctor.schedules)).all()
         for i in doctor_list:
-            schedule_list = db.query(DoctorSchedule).filter(DoctorSchedule.doctor_id == i.doctor_id).all()
+            schedule_list = i.schedules
             schedule = []
             number = 0
             specialist = 0
@@ -138,9 +138,14 @@ def doctor_schedule_getlist(current_user: User = Depends(get_current_user), keyw
                 }
             )
     elif current_user.user_role in ("doctor", "director"):
-        doctor_obj = db.query(Doctor).filter(Doctor.user_id == current_user.user_id).first()
+        doctor_obj = (
+            db.query(Doctor)
+            .options(selectinload(Doctor.schedules))
+            .filter(Doctor.user_id == current_user.user_id)
+            .first()
+        )
         if doctor_obj:
-            schedule_list = db.query(DoctorSchedule).filter(DoctorSchedule.doctor_id == doctor_obj.doctor_id).all()
+            schedule_list = doctor_obj.schedules
             schedule = []
             for i in schedule_list:
                 week_code = i.week[2] if len(i.week) >= 3 else i.week

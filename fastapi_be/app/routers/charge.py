@@ -7,12 +7,12 @@ from decimal import Decimal, InvalidOperation
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import Response
 from sqlalchemy import update
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from app.config import settings
 from app.database import get_db
 from app.dependencies import ADMIN_ROLES, ROLE_CASHIER, ROLE_PATIENT, ROLE_REGISTRAR, get_current_user, require_roles
-from app.models import Charge, Doctor, Invoice, Patient, Payment, Prescription, User
+from app.models import Charge, Invoice, Patient, Payment, Prescription, User
 from app.pagination import paginate
 from app.registration import allocate_registration_id
 from app.schemas import (
@@ -43,15 +43,8 @@ def _owns_charge(user: User, charge: Charge | None) -> bool:
 @router.get("/chargeManagement/getList")
 def get_charge_list(current_user: User = Depends(get_current_user), keyword: str | None = None, page: int | None = None, page_size: int | None = None, db: Session = Depends(get_db)):
     def _enrich(item):
-        patient_name = ""
-        doctor_name = ""
-        if item.prescription:
-            pat = db.query(Patient).filter(Patient.patient_id == item.prescription.patient_id).first()
-            if pat:
-                patient_name = pat.name
-            doc = db.query(Doctor).filter(Doctor.doctor_id == item.prescription.doctor_id).first()
-            if doc:
-                doctor_name = doc.name
+        patient_name = item.prescription.patient.name if item.prescription and item.prescription.patient else ""
+        doctor_name = item.prescription.doctor.name if item.prescription and item.prescription.doctor else ""
         return {
             "id": str(item.charge_id),
             "charge_time": (item.charge_time.strftime("%Y-%m-%d %H:%M:%S") if item.charge_time else None),
@@ -67,18 +60,27 @@ def get_charge_list(current_user: User = Depends(get_current_user), keyword: str
     data = []
     total = 0
     if _is_cashier_role(current_user):
-        query = db.query(Charge)
+        query = db.query(Charge).options(
+            joinedload(Charge.prescription).joinedload(Prescription.patient),
+            joinedload(Charge.prescription).joinedload(Prescription.doctor),
+        )
         charge_list, total = paginate(query, page, page_size)
         for item in charge_list:
             data.append(_enrich(item))
     elif current_user.user_role == ROLE_PATIENT:
         patient_obj = db.query(Patient).filter(Patient.identity == current_user.username).first()
         if patient_obj:
-            pres = db.query(Prescription).filter(Prescription.patient_id == patient_obj.patient_id).all()
-            for pre in pres:
-                item = db.query(Charge).filter(Charge.prescription_id == pre.prescription_id).first()
-                if item:
-                    data.append(_enrich(item))
+            query = (
+                db.query(Charge)
+                .join(Charge.prescription)
+                .options(
+                    joinedload(Charge.prescription).joinedload(Prescription.patient),
+                    joinedload(Charge.prescription).joinedload(Prescription.doctor),
+                )
+                .filter(Prescription.patient_id == patient_obj.patient_id)
+            )
+            charge_list, total = paginate(query, page, page_size)
+            data.extend(_enrich(item) for item in charge_list)
     else:
         return {"code": 403, "msg": "无权访问", "data": []}
     if keyword:
@@ -242,7 +244,11 @@ def get_window_registration_patient(
 def get_window_appointments(identity: str | None = None, db: Session = Depends(get_db), current_user: User = Depends(require_roles(ROLE_CASHIER, ROLE_REGISTRAR, *ADMIN_ROLES))):
     from app.models import Appointment, Patient
 
-    query = db.query(Appointment).order_by(Appointment.appointment_time.desc())
+    query = db.query(Appointment).options(
+        joinedload(Appointment.patient),
+        joinedload(Appointment.doctor),
+        joinedload(Appointment.department),
+    ).order_by(Appointment.appointment_time.desc())
     if identity:
         patient = db.query(Patient).filter(Patient.identity == identity.strip()).first()
         if not patient:
@@ -251,7 +257,19 @@ def get_window_appointments(identity: str | None = None, db: Session = Depends(g
     data = []
     status_map = {0: "待确认", 1: "已报到/就诊", 2: "已取消"}
     for item in query.all():
-        data.append({"uuid": item.registration_uuid, "patient_name": item.patient.name if item.patient else "", "identity": item.patient.identity if item.patient else "", "doctor_name": item.doctor.name if item.doctor else "", "department_name": item.department.name if item.department else "", "time": str(item.time) if item.time else "", "prefer_time": item.prefer_time or "", "status": item.status, "status_text": status_map.get(item.status, "未知"), "confirmed": item.confirmed, "confirmed_text": "已确认" if item.confirmed else "未确认"})
+        data.append({
+            "uuid": item.registration_uuid,
+            "patient_name": item.patient.name if item.patient else "",
+            "identity": item.patient.identity if item.patient else "",
+            "doctor_name": item.doctor.name if item.doctor else "",
+            "department_name": item.department.name if item.department else "",
+            "time": str(item.time) if item.time else "",
+            "prefer_time": item.prefer_time or "",
+            "status": item.status,
+            "status_text": status_map.get(item.status, "未知"),
+            "confirmed": item.confirmed,
+            "confirmed_text": "已确认" if item.confirmed else "未确认",
+        })
     return {"code": 200, "msg": "success", "data": data}
 
 

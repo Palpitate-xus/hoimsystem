@@ -1,7 +1,7 @@
 import datetime
 
 from fastapi import APIRouter, Depends
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from app.database import get_db
 from app.dependencies import (
@@ -238,7 +238,12 @@ def get_registration_list(current_user: User = Depends(get_current_user), keywor
     patient_obj, patient_ids = _patient_scope(current_user, db)
     if not patient_obj:
         return {"code": 200, "msg": "success", "data": []}
-    registration_list = db.query(Registration).filter(Registration.patient_id.in_(patient_ids)).all()
+    registration_list = (
+        db.query(Registration)
+        .options(joinedload(Registration.doctor), joinedload(Registration.department), joinedload(Registration.patient))
+        .filter(Registration.patient_id.in_(patient_ids))
+        .all()
+    )
     data = []
     status_map = ["未就诊", "已就诊", "", "已取消"]
     for item in registration_list:
@@ -269,18 +274,23 @@ def registration_list(current_user: User = Depends(get_current_user), keyword: s
         return {"code": 200, "msg": "success", "data": "今天为休息日"}
     data = []
     target_week = weekdays[today_weeky]
-    schedules = [item for item in db.query(DoctorSchedule).all() if normalize_weekday(item.week) == target_week]
+    schedules = [
+        item
+        for item in db.query(DoctorSchedule)
+        .options(joinedload(DoctorSchedule.doctor).joinedload(Doctor.department))
+        .all()
+        if normalize_weekday(item.week) == target_week
+    ]
     patient_obj, patient_ids = _patient_scope(current_user, db)
+    active_registrations = set()
+    if patient_obj:
+        active_registrations = set(
+            db.query(Registration.doctor_id, Registration.specialist)
+            .filter(Registration.patient_id.in_(patient_ids), Registration.status == 0)
+            .all()
+        )
     for item in schedules:
-        if (
-            patient_obj
-            and db.query(Registration)
-            .filter(Registration.patient_id.in_(patient_ids), Registration.doctor_id == item.doctor_id, Registration.specialist == item.specialist, Registration.status == 0)
-            .first()
-        ):
-            status = 1
-        else:
-            status = 0
+        status = int((item.doctor_id, item.specialist) in active_registrations)
         data.append(
             {
                 "id": item.schedule_id,

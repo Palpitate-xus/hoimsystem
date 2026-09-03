@@ -2,11 +2,14 @@ import datetime
 import io
 import secrets
 import string
+import tempfile
+from pathlib import Path
 
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
-from fastapi.responses import StreamingResponse
+from fastapi.responses import FileResponse, StreamingResponse
 from openpyxl import Workbook, load_workbook
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
+from starlette.background import BackgroundTask
 
 from app.database import get_db
 from app.dependencies import ADMIN_ROLES, User, require_roles
@@ -210,15 +213,30 @@ def import_data(entity: str, file: UploadFile = File(...), current_user: User = 
     except Exception as exc:
         db.rollback()
         raise HTTPException(status_code=500, detail="导入失败，请检查数据后重试") from exc
-    return {"code": 200 if not errors else 422, "msg": "导入完成" if not errors else "存在错误，未写入任何数据", "data": {"entity": entity, "total": len(rows), "imported": imported if not errors else 0, "errors": errors}}
+    return {
+        "code": 200 if not errors else 422,
+        "msg": "导入完成" if not errors else "存在错误，未写入任何数据",
+        "data": {
+            "entity": entity,
+            "total": len(rows),
+            "imported": imported if not errors else 0,
+            "errors": errors,
+        },
+    }
 
 
 def _export_rows(entity: str, db: Session):
     if entity == "doctors":
-        return [[item.name, item.sex, item.title, item.education, item.phone, item.department_id, item.permission, item.user.username if item.user else ""] for item in db.query(Doctor).order_by(Doctor.doctor_id).all()]
+        query = db.query(Doctor).options(joinedload(Doctor.user)).order_by(Doctor.doctor_id)
+        for item in query.yield_per(500):
+            yield [item.name, item.sex, item.title, item.education, item.phone, item.department_id, item.permission, item.user.username if item.user else ""]
+        return
     if entity == "patients":
-        return [[item.name, item.sex, item.identity, item.birthday, item.phone, item.address, item.permission, item.allergy_history] for item in db.query(Patient).order_by(Patient.patient_id).all()]
-    return [[item.name, item.stock, item.price, item.expireddate, item.supplier, item.remark, item.antibiotic_level, item.status] for item in db.query(Pharmaceutical).order_by(Pharmaceutical.pharmaceutical_id).all()]
+        for item in db.query(Patient).order_by(Patient.patient_id).yield_per(500):
+            yield [item.name, item.sex, item.identity, item.birthday, item.phone, item.address, item.permission, item.allergy_history]
+        return
+    for item in db.query(Pharmaceutical).order_by(Pharmaceutical.pharmaceutical_id).yield_per(500):
+        yield [item.name, item.stock, item.price, item.expireddate, item.supplier, item.remark, item.antibiotic_level, item.status]
 
 
 def _sanitize_cell(value):
@@ -231,17 +249,17 @@ def _sanitize_cell(value):
 @router.get("/dataImportExport/export/{entity}")
 def export_data(entity: str, current_user: User = Depends(require_roles(*ADMIN_ROLES)), db: Session = Depends(get_db)):
     entity = _validate_entity(entity)
-    workbook = Workbook()
-    sheet = workbook.active
-    sheet.title = entity
+    workbook = Workbook(write_only=True)
+    sheet = workbook.create_sheet(entity)
     sheet.append(ENTITY_HEADERS[entity])
     for row in _export_rows(entity, db):
         sheet.append([_sanitize_cell(v) for v in row])
-    output = io.BytesIO()
-    workbook.save(output)
-    output.seek(0)
-    return StreamingResponse(
-        output,
+    with tempfile.NamedTemporaryFile(prefix=f"hoimsystem-{entity}-", suffix=".xlsx", delete=False) as output:
+        export_path = Path(output.name)
+    workbook.save(export_path)
+    return FileResponse(
+        export_path,
         media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        headers={"Content-Disposition": f'attachment; filename="{entity}.xlsx"'},
+        filename=f"{entity}.xlsx",
+        background=BackgroundTask(export_path.unlink, missing_ok=True),
     )

@@ -11,6 +11,7 @@ const EVENT_MESSAGES = {
   "payment.succeeded": () => "支付已成功到账",
   "payment.failed": () => "支付失败，请核对原因",
   "prescription.created": () => "收到新的待审核处方",
+  "medication.administered": () => "住院患者用药已完成并记录",
 };
 
 class ClinicalEventStream {

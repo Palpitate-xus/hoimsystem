@@ -585,6 +585,7 @@ class MedicalRecord(Base):
 
 class Pharmaceutical(Base):
     __tablename__ = "hoimsystem_pharmaceutical"
+    __table_args__ = (Index("uq_pharmaceutical_barcode", "barcode", unique=True),)
 
     pharmaceutical_id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(24))
@@ -596,6 +597,7 @@ class Pharmaceutical(Base):
     remark = Column(String(100))
     status = Column(Integer, default=0)
     antibiotic_level = Column(Integer, default=0)  # 0=非抗菌药 1=非限制级 2=限制级 3=特殊使用级
+    barcode = Column(String(64), nullable=True)
 
     batches = relationship("PharmaceuticalBatch", back_populates="pharmaceutical", cascade="all, delete-orphan")
 
@@ -1634,6 +1636,39 @@ class OrderExecution(Base):
     note = Column(String(200), nullable=True)
 
     order = relationship("InpatientOrder", back_populates="executions")
+    nurse = relationship("User")
+    medication_administration = relationship(
+        "MedicationAdministration",
+        back_populates="execution",
+        uselist=False,
+        cascade="all, delete-orphan",
+    )
+
+
+class MedicationAdministration(Base):
+    """Electronic medication administration record created by two-barcode verification."""
+
+    __tablename__ = "hoimsystem_medication_administration"
+    __table_args__ = (
+        UniqueConstraint("execution_id", name="uq_medication_administration_execution"),
+        Index("idx_medication_administration_patient_time", "patient_id", "administration_time"),
+    )
+
+    administration_id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    execution_id = Column(Integer, ForeignKey("hoimsystem_order_execution.execution_id"), nullable=False)
+    order_id = Column(String(36), ForeignKey("hoimsystem_inpatient_order.order_id"), nullable=False)
+    patient_id = Column(Integer, ForeignKey("hoimsystem_patient.patient_id"), nullable=False)
+    nurse_id = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=False)
+    patient_barcode = Column(String(64), nullable=False)
+    medication_barcodes_json = Column(Text, nullable=False)
+    status = Column(Integer, nullable=False, default=1)  # 1=核对通过 2=已给药 3=取消
+    verified_at = Column(DateTime, nullable=False)
+    administration_time = Column(DateTime)
+    note = Column(String(300))
+
+    execution = relationship("OrderExecution", back_populates="medication_administration")
+    order = relationship("InpatientOrder")
+    patient = relationship("Patient")
     nurse = relationship("User")
 
 

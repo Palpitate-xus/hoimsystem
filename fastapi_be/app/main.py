@@ -369,6 +369,7 @@ from app.routers import (
     discharge,
     doctor,
     drug_damage,
+    emar,
     emergency,
     emr,
     equipment,
@@ -474,6 +475,7 @@ app.include_router(doctor.router, prefix="/api")
 app.include_router(drug_damage.router, prefix="/api")
 app.include_router(diagnosis_template.router, prefix="/api")
 app.include_router(emergency.router, prefix="/api")
+app.include_router(emar.router, prefix="/api")
 app.include_router(equipment.router, prefix="/api")
 app.include_router(pharmacy.router, prefix="/api")
 app.include_router(prescription_template.router, prefix="/api")

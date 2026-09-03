@@ -442,6 +442,8 @@ def execute_order(req: OrderExecutionRequest, current_user: User = Depends(requi
     )
     if not execution:
         return {"code": 500, "msg": "无可执行记录"}
+    if req.status == 1 and any(item.item_type == "drug" for item in order.items):
+        return {"code": 409, "msg": "药品医嘱必须通过 eMAR 扫描患者与药品条码后执行"}
     updated = db.query(OrderExecution).filter(
         OrderExecution.execution_id == execution.execution_id,
         OrderExecution.status == 0,

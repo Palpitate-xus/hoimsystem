@@ -6,8 +6,15 @@ import random
 from benchmark_auth import load_tokens_or_stop
 from locust import HttpUser, between, events, task
 
-ADMIN_CREDENTIALS = {
+BENCHMARK_CREDENTIALS = {
     "admin": ((os.getenv("BENCHMARK_ADMIN_USERNAME", "admin"), os.getenv("BENCHMARK_ADMIN_PASSWORD", "admin123")),),
+    "doctor": ((os.getenv("BENCHMARK_DOCTOR_USERNAME", "doc01"), os.getenv("BENCHMARK_DOCTOR_PASSWORD", "123456")),),
+    "patient": (
+        (
+            os.getenv("BENCHMARK_PATIENT_USERNAME", "370101199001011234"),
+            os.getenv("BENCHMARK_PATIENT_PASSWORD", "123456"),
+        ),
+    ),
 }
 TOKEN_POOLS: dict[str, tuple[str, ...]] = {}
 
@@ -16,7 +23,25 @@ TOKEN_POOLS: dict[str, tuple[str, ...]] = {}
 def prepare_runtime_tokens(environment, **_kwargs):
     """Refresh tokens at the beginning of every local or worker test run."""
     TOKEN_POOLS.clear()
-    TOKEN_POOLS.update(load_tokens_or_stop(environment, ADMIN_CREDENTIALS))
+    TOKEN_POOLS.update(load_tokens_or_stop(environment, BENCHMARK_CREDENTIALS))
+
+
+def mark_business_result(response) -> bool:
+    """Count only successful HTTP responses with the API's success code."""
+    if not 200 <= response.status_code < 300:
+        response.failure(f"HTTP {response.status_code}")
+        return False
+    try:
+        body = response.json()
+    except (TypeError, ValueError):
+        response.failure("non-JSON response")
+        return False
+    if not isinstance(body, dict) or body.get("code") != 200:
+        code = body.get("code") if isinstance(body, dict) else "invalid"
+        response.failure(f"business code {code}")
+        return False
+    response.success()
+    return True
 
 
 class HOIMUser(HttpUser):
@@ -24,8 +49,8 @@ class HOIMUser(HttpUser):
 
     wait_time = between(0.2, 0.8)
 
-    def _headers(self):
-        return {"accesstoken": random.choice(TOKEN_POOLS["admin"])}
+    def _headers(self, role="admin"):
+        return {"accesstoken": random.choice(TOKEN_POOLS[role])}
 
     @task(20)
     def get_department_list(self):
@@ -61,9 +86,9 @@ class HOIMUser(HttpUser):
 
     @task(2)
     def create_appointment(self):
-        self.client.post(
+        with self.client.post(
             "/api/appointmentManagement/create",
-            headers=self._headers(),
+            headers=self._headers("patient"),
             json={
                 "id": random.randint(1, 12),
                 "date": "2026-07-15",
@@ -72,15 +97,19 @@ class HOIMUser(HttpUser):
                 "time": "上午",
                 "specialist": 1,
             },
-        )
+            catch_response=True,
+        ) as response:
+            mark_business_result(response)
 
     @task(1)
     def create_prescription(self):
-        self.client.post(
+        with self.client.post(
             "/api/prescriptionManagement/create",
-            headers=self._headers(),
+            headers=self._headers("doctor"),
             json={
                 "patient": 1,
                 "phas": [{"id": 1, "number": 1}],
             },
-        )
+            catch_response=True,
+        ) as response:
+            mark_business_result(response)

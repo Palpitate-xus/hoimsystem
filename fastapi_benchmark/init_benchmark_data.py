@@ -20,8 +20,9 @@ from app.models import Department, Doctor, DoctorSchedule, Patient, Pharmaceutic
 from app.security import hash_password
 
 
-def _assert_benchmark_engine(candidate_engine=engine):
+def _assert_benchmark_engine(candidate_engine=None):
     """Refuse destructive initialization unless the pinned benchmark DB is active."""
+    candidate_engine = candidate_engine or engine
     database = candidate_engine.url.database
     if candidate_engine.url.get_backend_name() != "sqlite" or not database:
         raise RuntimeError("Benchmark initialization requires the pinned SQLite database")
@@ -33,13 +34,12 @@ def _assert_benchmark_engine(candidate_engine=engine):
 
 def init():
     _assert_benchmark_engine()
+    # The benchmark database is disposable. Recreate it so model changes cannot
+    # leave an old SQLite schema that create_all() would silently preserve.
+    Base.metadata.drop_all(bind=engine)
     Base.metadata.create_all(bind=engine)
     db = SessionLocal()
     try:
-        # 清空旧数据(避免重复)
-        for table in reversed(Base.metadata.sorted_tables):
-            db.execute(table.delete())
-
         # 部门
         depts = [
             Department(name="内科", phone="01012345678", location="1号楼", director=None),

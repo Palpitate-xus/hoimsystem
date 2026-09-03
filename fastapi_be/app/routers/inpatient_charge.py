@@ -2,11 +2,12 @@ import datetime
 
 from fastapi import APIRouter, Depends
 from sqlalchemy import func
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from app.database import get_db
 from app.dependencies import CASHIER_ROLES, NURSING_ROLES, User, require_roles
 from app.models import Admission, InpatientCharge
+from app.pagination import paginate
 
 router = APIRouter()
 INPATIENT_FINANCE_ROLES = CASHIER_ROLES | NURSING_ROLES
@@ -18,10 +19,12 @@ def get_inpatient_charge_list(
     patient_id: int | None = None,
     charge_date: str | None = None,
     status: int | None = None,
+    page: int | None = None,
+    page_size: int | None = None,
     current_user: User = Depends(require_roles(*INPATIENT_FINANCE_ROLES)),
     db: Session = Depends(get_db),
 ):
-    query = db.query(InpatientCharge).order_by(InpatientCharge.charge_date.desc(), InpatientCharge.create_time.desc())
+    query = db.query(InpatientCharge).options(joinedload(InpatientCharge.patient)).order_by(InpatientCharge.charge_date.desc(), InpatientCharge.create_time.desc())
     if admission_id:
         query = query.filter(InpatientCharge.admission_id == admission_id)
     if patient_id:
@@ -35,7 +38,7 @@ def get_inpatient_charge_list(
             pass
     if status is not None:
         query = query.filter(InpatientCharge.status == status)
-    charges = query.all()
+    charges, total = paginate(query, page, page_size)
 
     status_map = ["未结算", "已结算", "已退费"]
     data = []
@@ -57,7 +60,10 @@ def get_inpatient_charge_list(
                 "create_time": (item.create_time.strftime("%Y-%m-%d %H:%M:%S") if item.create_time else None) if item.create_time else "",
             }
         )
-    return {"code": 200, "msg": "success", "data": data}
+    result = {"code": 200, "msg": "success", "data": data}
+    if page is not None or page_size is not None:
+        result["total"] = total
+    return result
 
 
 @router.get("/inpatientCharge/getDailyBill")

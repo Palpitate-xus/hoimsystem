@@ -1,11 +1,12 @@
 import datetime
 
 from fastapi import APIRouter, Depends
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from app.database import get_db
 from app.dependencies import CLINICAL_ROLES, LAB_ROLES, require_roles
-from app.models import LabOrder, LabResult, Message, SampleTracking, User
+from app.models import LabOrder, LabResult, Message, Patient, SampleTracking, User
+from app.pagination import paginate
 from app.schemas import LabCriticalActionRequest, LabResultAuditRequest, LabResultCreateRequest
 
 router = APIRouter()
@@ -168,8 +169,18 @@ def audit_lab_result(req: LabResultAuditRequest, current_user: User = Depends(re
 
 
 @router.get("/labResult/getPending")
-def get_pending_lab_orders(keyword: str | None = None, current_user: User = Depends(require_roles(*LAB_ROLES)), db: Session = Depends(get_db)):
-    orders = db.query(LabOrder).filter(LabOrder.status == 0).order_by(LabOrder.create_time.desc()).all()
+def get_pending_lab_orders(
+    keyword: str | None = None,
+    page: int | None = None,
+    page_size: int | None = None,
+    current_user: User = Depends(require_roles(*LAB_ROLES)),
+    db: Session = Depends(get_db),
+):
+    query = db.query(LabOrder).options(joinedload(LabOrder.patient)).filter(LabOrder.status == 0)
+    if keyword and keyword.strip():
+        like = f"%{keyword.strip()}%"
+        query = query.outerjoin(Patient).filter((Patient.name.ilike(like)) | (LabOrder.check_type.ilike(like)))
+    orders, total = paginate(query.order_by(LabOrder.create_time.desc()), page, page_size)
     data = []
     for item in orders:
         data.append(
@@ -182,15 +193,25 @@ def get_pending_lab_orders(keyword: str | None = None, current_user: User = Depe
                 "create_time": (item.create_time.strftime("%Y-%m-%d %H:%M:%S") if item.create_time else None),
             }
         )
-    if keyword:
-        kw = keyword.lower()
-        data = [item for item in data if any(kw in str(val).lower() for val in item.values())]
-    return {"code": 200, "msg": "success", "data": data}
+    result = {"code": 200, "msg": "success", "data": data}
+    if page is not None or page_size is not None:
+        result["total"] = total
+    return result
 
 
 @router.get("/labResult/getList")
-def get_lab_result_list(keyword: str | None = None, current_user: User = Depends(require_roles(*LAB_ROLES)), db: Session = Depends(get_db)):
-    results = db.query(LabResult).order_by(LabResult.report_time.desc()).all()
+def get_lab_result_list(
+    keyword: str | None = None,
+    page: int | None = None,
+    page_size: int | None = None,
+    current_user: User = Depends(require_roles(*LAB_ROLES)),
+    db: Session = Depends(get_db),
+):
+    query = db.query(LabResult).options(joinedload(LabResult.lab_order), joinedload(LabResult.technician))
+    if keyword and keyword.strip():
+        like = f"%{keyword.strip()}%"
+        query = query.outerjoin(LabOrder).filter((LabOrder.check_type.ilike(like)) | (LabResult.result.ilike(like)))
+    results, total = paginate(query.order_by(LabResult.report_time.desc()), page, page_size)
     data = []
     for item in results:
         data.append(
@@ -203,15 +224,26 @@ def get_lab_result_list(keyword: str | None = None, current_user: User = Depends
                 "technician_name": item.technician.username if item.technician else "",
             }
         )
-    if keyword:
-        kw = keyword.lower()
-        data = [item for item in data if any(kw in str(val).lower() for val in item.values())]
-    return {"code": 200, "msg": "success", "data": data}
+    result = {"code": 200, "msg": "success", "data": data}
+    if page is not None or page_size is not None:
+        result["total"] = total
+    return result
 
 
 @router.get("/labResult/getCritical")
-def get_critical_lab_results(current_user: User = Depends(require_roles(*LAB_ROLES)), db: Session = Depends(get_db)):
-    results = db.query(LabResult).filter(LabResult.critical_status > 0).order_by(LabResult.report_time.desc()).all()
+def get_critical_lab_results(
+    page: int | None = None,
+    page_size: int | None = None,
+    current_user: User = Depends(require_roles(*LAB_ROLES)),
+    db: Session = Depends(get_db),
+):
+    query = (
+        db.query(LabResult)
+        .options(joinedload(LabResult.lab_order).joinedload(LabOrder.patient), joinedload(LabResult.technician))
+        .filter(LabResult.critical_status > 0)
+        .order_by(LabResult.report_time.desc())
+    )
+    results, total = paginate(query, page, page_size)
     data = []
     for item in results:
         data.append({
@@ -232,7 +264,10 @@ def get_critical_lab_results(current_user: User = Depends(require_roles(*LAB_ROL
             "critical_handling_note": item.critical_handling_note,
             "technician_name": item.technician.username if item.technician else "",
         })
-    return {"code": 200, "msg": "success", "data": data}
+    result = {"code": 200, "msg": "success", "data": data}
+    if page is not None or page_size is not None:
+        result["total"] = total
+    return result
 
 
 def _critical_result(db: Session, lab_result_id: str):

@@ -20,6 +20,7 @@ from app.dependencies import (
     require_roles,
 )
 from app.models import Patient, PrepaidTransaction, User
+from app.pagination import paginate
 from app.schemas import LoginRequest, RegisterRequest, UserInfoRequest
 from app.security import decrypt_transport_password, hash_password, is_bcrypt_hash, public_key_base64, verify_password
 
@@ -226,14 +227,20 @@ def logout(db: Session = Depends(get_db), current_user: User = Depends(get_curre
 
 
 @router.get("/user/getList")
-def get_user_list(role: str | None = None, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+def get_user_list(
+    role: str | None = None,
+    page: int | None = None,
+    page_size: int | None = None,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
     """获取用户列表（管理员权限）"""
     if not is_admin(current_user):
         return {"code": 403, "msg": "无权访问"}
     query = db.query(User)
     if role:
         query = query.filter(User.user_role == role)
-    users = query.order_by(User.user_id).all()
+    users, total = paginate(query.order_by(User.user_id), page, page_size)
     data = []
     for item in users:
         data.append(
@@ -243,7 +250,10 @@ def get_user_list(role: str | None = None, db: Session = Depends(get_db), curren
                 "user_role": item.user_role,
             }
         )
-    return {"code": 200, "msg": "success", "data": data}
+    result = {"code": 200, "msg": "success", "data": data}
+    if page is not None or page_size is not None:
+        result["total"] = total
+    return result
 
 
 @router.post("/user/updateRole")

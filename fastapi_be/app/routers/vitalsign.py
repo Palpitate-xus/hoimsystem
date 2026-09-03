@@ -2,11 +2,12 @@ import datetime
 import math
 
 from fastapi import APIRouter, Depends
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from app.database import get_db
 from app.dependencies import NURSING_ROLES, User, require_roles
 from app.models import Patient, VitalSign
+from app.pagination import paginate
 from app.schemas import VitalSignCreateRequest
 
 router = APIRouter()
@@ -59,9 +60,17 @@ def create_vital_sign(req: VitalSignCreateRequest, current_user: User = Depends(
 
 
 @router.get("/vitalSign/getList")
-def get_vital_sign_list(keyword: str | None = None, current_user: User = Depends(require_roles(*NURSING_ROLES)),
-    db: Session = Depends(get_db)):
-    vitals = db.query(VitalSign).order_by(VitalSign.check_time.desc()).all()
+def get_vital_sign_list(
+    keyword: str | None = None,
+    page: int | None = None,
+    page_size: int | None = None,
+    current_user: User = Depends(require_roles(*NURSING_ROLES)),
+    db: Session = Depends(get_db),
+):
+    query = db.query(VitalSign).options(joinedload(VitalSign.patient)).order_by(VitalSign.check_time.desc())
+    if keyword and keyword.strip():
+        query = query.join(Patient).filter(Patient.name.ilike(f"%{keyword.strip()}%"))
+    vitals, total = paginate(query, page, page_size)
     data = []
     for item in vitals:
         data.append(
@@ -75,7 +84,7 @@ def get_vital_sign_list(keyword: str | None = None, current_user: User = Depends
                 "check_time": (item.check_time.strftime("%Y-%m-%d %H:%M:%S") if item.check_time else None),
             }
         )
-    if keyword:
-        kw = keyword.lower()
-        data = [item for item in data if any(kw in str(val).lower() for val in item.values())]
-    return {"code": 200, "msg": "success", "data": data}
+    result = {"code": 200, "msg": "success", "data": data}
+    if page is not None or page_size is not None:
+        result["total"] = total
+    return result

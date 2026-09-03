@@ -2,7 +2,7 @@ import datetime
 
 from fastapi import APIRouter, Depends
 from sqlalchemy import func
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload, selectinload
 
 from app.database import get_db
 from app.dependencies import ADMIN_ROLES, CLINICAL_ROLES, NURSING_ROLES, require_roles
@@ -16,6 +16,7 @@ from app.models import (
     Pharmaceutical,
     User,
 )
+from app.pagination import paginate
 from app.pharmacy_safety import get_patient_safe_pharmaceutical
 from app.schemas import InpatientOrderCreateRequest, InpatientOrderStopRequest, OrderExecutionRequest
 
@@ -78,10 +79,16 @@ def get_inpatient_order_list(
     patient_id: int | None = None,
     status: int | None = None,
     order_type: int | None = None,
+    page: int | None = None,
+    page_size: int | None = None,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_roles(*_INPATIENT_ROLES)),
 ):
-    query = db.query(InpatientOrder).order_by(InpatientOrder.create_time.desc())
+    query = db.query(InpatientOrder).options(
+        joinedload(InpatientOrder.patient),
+        joinedload(InpatientOrder.doctor),
+        selectinload(InpatientOrder.items),
+    ).order_by(InpatientOrder.create_time.desc())
     if admission_id:
         query = query.filter(InpatientOrder.admission_id == admission_id)
     if patient_id:
@@ -93,7 +100,7 @@ def get_inpatient_order_list(
     if current_user.user_role not in ADMIN_ROLES and current_user.user_role not in NURSING_ROLES:
         doctor_ids = [item.doctor_id for item in db.query(Doctor).filter(Doctor.user_id == current_user.user_id).all()]
         query = query.filter(InpatientOrder.doctor_id.in_(doctor_ids or [-1]))
-    orders = query.all()
+    orders, total = paginate(query, page, page_size)
 
     type_text = ["长期医嘱", "临时医嘱"]
     category_map = {"drug": "药品", "treatment": "治疗", "exam": "检查", "diet": "饮食", "nursing": "护理", "other": "其他"}
@@ -142,7 +149,10 @@ def get_inpatient_order_list(
                 "create_time": (item.create_time.strftime("%Y-%m-%d %H:%M:%S") if item.create_time else None) if item.create_time else "",
             }
         )
-    return {"code": 200, "msg": "success", "data": data}
+    result = {"code": 200, "msg": "success", "data": data}
+    if page is not None or page_size is not None:
+        result["total"] = total
+    return result
 
 
 @router.post("/inpatientOrder/create")
@@ -370,21 +380,32 @@ def cancel_inpatient_order(req: dict, current_user: User = Depends(require_roles
 
 
 @router.get("/inpatientOrder/getExecutionList")
-def get_execution_list(order_id: str | None = None, nurse_id: int | None = None, status: int | None = None, current_user: User = Depends(require_roles(*NURSING_ROLES, *CLINICAL_ROLES)),
-    db: Session = Depends(get_db)):
-    query = db.query(OrderExecution).order_by(OrderExecution.planned_time)
+def get_execution_list(
+    order_id: str | None = None,
+    nurse_id: int | None = None,
+    status: int | None = None,
+    page: int | None = None,
+    page_size: int | None = None,
+    current_user: User = Depends(require_roles(*NURSING_ROLES, *CLINICAL_ROLES)),
+    db: Session = Depends(get_db),
+):
+    query = db.query(OrderExecution).options(
+        joinedload(OrderExecution.nurse),
+        joinedload(OrderExecution.order).joinedload(InpatientOrder.patient),
+        joinedload(OrderExecution.order).selectinload(InpatientOrder.items),
+    ).order_by(OrderExecution.planned_time)
     if order_id:
         query = query.filter(OrderExecution.order_id == order_id)
     if nurse_id:
         query = query.filter(OrderExecution.nurse_id == nurse_id)
     if status is not None:
         query = query.filter(OrderExecution.status == status)
-    executions = query.all()
+    executions, total = paginate(query, page, page_size)
 
     status_map = ["待执行", "已执行", "已跳过", "已停止"]
     data = []
     for item in executions:
-        order = db.query(InpatientOrder).filter(InpatientOrder.order_id == item.order_id).first()
+        order = item.order
         data.append(
             {
                 "execution_id": item.execution_id,
@@ -400,7 +421,10 @@ def get_execution_list(order_id: str | None = None, nurse_id: int | None = None,
                 "note": item.note or "",
             }
         )
-    return {"code": 200, "msg": "success", "data": data}
+    result = {"code": 200, "msg": "success", "data": data}
+    if page is not None or page_size is not None:
+        result["total"] = total
+    return result
 
 
 @router.post("/inpatientOrder/execute")

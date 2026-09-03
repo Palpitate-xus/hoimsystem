@@ -15,8 +15,8 @@ class TestQueue:
     async def test_call_next_no_patient(self, async_client, seed_data, auth_headers):
         headers = auth_headers(seed_data["admin_user"].username)
         r = await async_client.post("/api/queue/callNext", headers=headers, json={"doctor_id": seed_data["doctor"].doctor_id})
-        # No queue items, should return 500 or success with no data
-        assert r.status_code == 200
+        # No queue items is a business rejection, exposed as HTTP 400.
+        assert r.status_code == 400
 
     async def test_queue_state_and_patient_visibility(self, async_client, seed_data, auth_headers, db_session):
         completed = Queue(
@@ -54,7 +54,7 @@ class TestCheckIn:
         r = await async_client.post("/api/checkIn/checkIn", json={
             "appointment_uuid": "nonexistent-uuid", "identity": "wrong-id"
         })
-        assert r.status_code == 200
+        assert r.status_code == 400
         assert r.json()["code"] == 500
 
     async def test_check_in_is_one_time_and_updates_appointment(self, async_client, seed_data, db_session):
@@ -80,7 +80,7 @@ class TestCheckIn:
         assert first.json()["code"] == 200
 
         second = await async_client.post("/api/checkIn/checkIn", json=payload)
-        assert second.status_code == 200
+        assert second.status_code == 400
         assert second.json()["code"] == 500
 
         db_session.refresh(appointment)
@@ -147,7 +147,7 @@ class TestVitalSign:
             },
         )
 
-        assert r.status_code == 200
+        assert r.status_code == 400
         assert r.json() == {"code": 400, "msg": "收缩压必须高于舒张压"}
 
     async def test_get_list(self, async_client, seed_data, auth_headers):

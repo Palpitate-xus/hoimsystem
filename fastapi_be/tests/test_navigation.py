@@ -69,7 +69,7 @@ class TestNavigation:
             headers=headers,
             params={"start_department_id": seed_data["department"].department_id, "end_department_id": 999999},
         )
-        assert missing.status_code == 200
+        assert missing.status_code == 404
         assert missing.json()["code"] == 404
 
         node = await async_client.post("/api/navigation/admin/nodes", headers=headers, json={"code": "delete-me", "name": "待删节点"})

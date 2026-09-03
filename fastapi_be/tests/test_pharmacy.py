@@ -73,12 +73,12 @@ class TestPharmaceuticalManagement:
         headers = auth_headers(seed_data["pharmacist_user"].username)
         payload = {"items": [{"pharmaceutical_id": seed_data["pharmaceutical"].pharmaceutical_id, "actual_stock": -1}]}
         r = await async_client.post("/api/pharmacy/stockCheck", headers=headers, json=payload)
-        assert r.status_code == 200
+        assert r.status_code == 400
         assert r.json()["code"] == 500
 
         payload["items"][0]["actual_stock"] = 10.5
         r = await async_client.post("/api/pharmacy/stockCheck", headers=headers, json=payload)
-        assert r.status_code == 200
+        assert r.status_code == 400
         assert r.json()["code"] == 500
 
         duplicate = {
@@ -88,7 +88,7 @@ class TestPharmaceuticalManagement:
             ]
         }
         r = await async_client.post("/api/pharmacy/stockCheck", headers=headers, json=duplicate)
-        assert r.status_code == 200
+        assert r.status_code == 400
         assert r.json()["code"] == 500
 
     async def test_near_expiry_ignores_missing_dates_and_validates_range(self, async_client, seed_data, auth_headers, db_session):
@@ -101,7 +101,7 @@ class TestPharmaceuticalManagement:
         assert all(item["id"] != seed_data["pharmaceutical"].pharmaceutical_id for item in response.json()["data"])
 
         invalid = await async_client.get("/api/pharmaceuticalManagement/nearExpiry", headers=headers, params={"days": -1})
-        assert invalid.status_code == 200
+        assert invalid.status_code == 400
         assert invalid.json() == {"code": 400, "msg": "效期查询天数必须在0至3650之间"}
 
     async def test_prescription_cannot_use_expired_drug(self, async_client, seed_data, auth_headers, db_session):
@@ -113,7 +113,7 @@ class TestPharmaceuticalManagement:
             headers=auth_headers(seed_data["doctor_user"].username),
             json={"patient": seed_data["patient2"].patient_id, "phas": [{"id": expired.pharmaceutical_id, "number": 1}]},
         )
-        assert response.status_code == 200
+        assert response.status_code == 400
         assert response.json()["code"] == 500
         assert "过期" in response.json()["msg"]
 
@@ -126,7 +126,7 @@ class TestPharmaceuticalManagement:
             headers=auth_headers(seed_data["doctor_user"].username),
             json={"patient": seed_data["patient2"].patient_id, "phas": [{"id": inactive.pharmaceutical_id, "number": 1}]},
         )
-        assert response.status_code == 200
+        assert response.status_code == 400
         assert response.json()["code"] == 500
         assert "停用" in response.json()["msg"]
 
@@ -149,7 +149,7 @@ class TestPharmacy:
 
         # 审核是 0 -> 1 的单向状态迁移，重复审核必须失败。
         r = await async_client.post("/api/pharmacy/audit", headers=headers, json={"prescription_id": str(pre.prescription_id)})
-        assert r.status_code == 200
+        assert r.status_code == 400
         assert r.json()["code"] == 500
 
 
@@ -177,7 +177,7 @@ class TestInventoryAdjustment:
         assert db_session.get(type(pha), pha.pharmaceutical_id).stock == initial_stock - 3
 
         duplicate = await async_client.post("/api/pharmacy/inventoryAdjustment/approve", headers=admin_headers, json={"adjustment_id": adjustment_id})
-        assert duplicate.status_code == 200
+        assert duplicate.status_code == 400
         assert duplicate.json()["code"] == 500
 
     async def test_reject_keeps_stock_and_invalid_loss_is_blocked(self, async_client, seed_data, auth_headers, db_session):
@@ -232,7 +232,7 @@ class TestInventoryAdjustment:
 
         # 发药是 1 -> 2 的单向状态迁移，重复发药必须失败。
         r = await async_client.post("/api/pharmacy/dispense", headers=pharmacist_headers, json={"prescription_id": target["uuid"]})
-        assert r.status_code == 200
+        assert r.status_code == 400
         assert r.json()["code"] == 500
 
     async def test_dispense_requires_nurse_verification(self, async_client, seed_data, auth_headers):
@@ -264,7 +264,7 @@ class TestInventoryAdjustment:
         db_session.commit()
         assert (await async_client.post("/api/pharmacy/audit", headers=pharmacist_headers, json={"prescription_id": prescription_id})).json()["code"] == 200
         response = await async_client.post("/api/pharmacy/dispense", headers=pharmacist_headers, json={"prescription_id": prescription_id})
-        assert response.status_code == 200
+        assert response.status_code == 400
         assert response.json()["code"] == 400
         assert "过期" in response.json()["msg"]
 
@@ -274,7 +274,7 @@ class TestInventoryAdjustment:
             "pha_id": seed_data["pharmaceutical"].pharmaceutical_id,
             "number": 1, "reason": "过敏"
         })
-        assert r.status_code == 200
+        assert r.status_code == 400
         assert r.json()["code"] == 500
 
     async def test_return_rejects_audited_but_not_dispensed(self, async_client, seed_data, auth_headers):
@@ -288,7 +288,7 @@ class TestInventoryAdjustment:
             "pha_id": seed_data["pharmaceutical"].pharmaceutical_id,
             "number": 1, "reason": "过敏"
         })
-        assert r.status_code == 200
+        assert r.status_code == 400
         assert r.json()["code"] == 500
 
     async def test_return_and_reject_duplicate_return(self, async_client, seed_data, auth_headers):
@@ -316,7 +316,7 @@ class TestInventoryAdjustment:
             "pha_id": pha_id,
             "number": 1, "reason": "重复申请"
         })
-        assert r.status_code == 200
+        assert r.status_code == 400
         assert r.json()["code"] == 500
 
     async def test_dispense_statistics_reports_dispensed_quantity(self, async_client, seed_data, auth_headers):
@@ -340,5 +340,5 @@ class TestInventoryAdjustment:
 
     async def test_dispense_statistics_rejects_invalid_date(self, async_client, seed_data, auth_headers):
         response = await async_client.get("/api/pharmacy/dispenseStats", headers=auth_headers(seed_data["pharmacist_user"].username), params={"start_date": "bad"})
-        assert response.status_code == 200
+        assert response.status_code == 400
         assert response.json() == {"code": 500, "msg": "日期格式必须为 YYYY-MM-DD"}

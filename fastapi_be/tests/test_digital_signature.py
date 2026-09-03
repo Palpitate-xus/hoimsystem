@@ -30,7 +30,7 @@ class TestDigitalSignature:
     async def test_signature_requires_content_and_verify_authentication(self, async_client, seed_data, auth_headers):
         headers = auth_headers(seed_data["admin_user"].username)
         signed = await async_client.post("/api/digitalSignature/sign", headers=headers, json={"content": "  "})
-        assert signed.status_code == 200
+        assert signed.status_code == 400
         assert signed.json()["code"] == 500
 
         verified = await async_client.post(

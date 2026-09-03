@@ -22,7 +22,7 @@ class TestChargeManagement:
             headers=headers,
             params={"identity": "110101200001010000"},
         )
-        assert missing.status_code == 200
+        assert missing.status_code == 400
         assert missing.json() == {"code": 500, "msg": "病人信息不存在，请先注册"}
 
     async def test_window_registration_schedules_return_individual_slots(self, async_client, seed_data, auth_headers):
@@ -68,7 +68,7 @@ class TestChargeManagement:
         assert first.json()["code"] == 200
 
         second = await async_client.post("/api/chargeManagement/charge", headers=headers, json=payload)
-        assert second.status_code == 200
+        assert second.status_code == 400
         assert second.json() == {"code": 500, "msg": "该收费记录已缴费，不能重复收费"}
 
     async def test_charge_commit_rejects_missing_record(self, async_client, seed_data, auth_headers):
@@ -77,7 +77,7 @@ class TestChargeManagement:
             headers=auth_headers(seed_data["cashier_user"].username),
             json={"id": "missing-charge"},
         )
-        assert r.status_code == 200
+        assert r.status_code == 400
         assert r.json() == {"code": 500, "msg": "收费记录不存在"}
 
     async def test_charge_commit_rejects_patient(self, async_client, seed_data, auth_headers):
@@ -99,7 +99,7 @@ class TestChargeManagement:
         assert r.json()["code"] == 200
 
         r = await async_client.post("/api/chargeManagement/charge", headers=headers, json={"id": str(charge.charge_id)})
-        assert r.status_code == 200
+        assert r.status_code == 400
         assert r.json() == {"code": 500, "msg": "该收费记录状态不允许收费"}
 
     async def test_refund_rejects_unpaid_charge(self, async_client, seed_data, auth_headers):
@@ -109,7 +109,7 @@ class TestChargeManagement:
             headers=headers,
             json={"charge_id": str(seed_data["charge"].charge_id), "reason": "误操作"},
         )
-        assert r.status_code == 200
+        assert r.status_code == 400
         assert r.json() == {"code": 500, "msg": "未缴费或已退费，无法退费"}
 
     async def test_refund_rejects_invalid_charge_amount(self, async_client, seed_data, auth_headers, db_session):
@@ -128,7 +128,7 @@ class TestChargeManagement:
             headers=headers,
             json={"charge_id": str(invalid_charge.charge_id), "reason": "金额异常"},
         )
-        assert r.status_code == 200
+        assert r.status_code == 400
         assert r.json() == {"code": 500, "msg": "收费金额非法，无法退费"}
         db_session.refresh(invalid_charge)
         assert invalid_charge.status == 1
@@ -147,7 +147,7 @@ class TestChargeManagement:
         assert first.json() == {"code": 200, "msg": "success"}
 
         second = await async_client.post("/api/chargeManagement/refund", headers=headers, json=payload)
-        assert second.status_code == 200
+        assert second.status_code == 400
         assert second.json() == {"code": 500, "msg": "未缴费或已退费，无法退费"}
 
     async def test_refund_marks_successful_payment_as_refunded(self, async_client, seed_data, auth_headers, db_session):
@@ -177,7 +177,7 @@ class TestChargeManagement:
                 "specialist": 1,
             },
         )
-        assert r.status_code == 200
+        assert r.status_code == 400
         assert r.json() == {"code": 500, "msg": "排班不存在"}
 
     async def test_window_registration_rejects_mismatched_schedule_and_duplicate(self, async_client, seed_data, auth_headers, db_session):
@@ -237,7 +237,7 @@ class TestChargeManagement:
             headers=auth_headers(seed_data["cashier_user"].username),
             json={"uuid": registration.registration_uuid},
         )
-        assert r.status_code == 200
+        assert r.status_code == 400
         assert r.json() == {"code": 500, "msg": "该挂号已就诊，不能退号"}
 
     async def test_window_cancel_returns_source_schedule(self, async_client, seed_data, auth_headers, db_session):
@@ -275,7 +275,7 @@ class TestInvoice:
         charge = seed_data["charge"]
         headers = auth_headers(seed_data["cashier_user"].username)
         r = await async_client.post("/api/invoice/create", headers=headers, json={"charge_id": str(charge.charge_id)})
-        assert r.status_code == 200
+        assert r.status_code == 400
         assert r.json() == {"code": 500, "msg": "收费记录未缴费，无法开具发票"}
 
         r = await async_client.post("/api/chargeManagement/charge", headers=headers, json={"id": str(charge.charge_id)})
@@ -297,7 +297,7 @@ class TestInvoice:
         assert first.json()["code"] == 200
 
         second = await async_client.post("/api/invoice/create", headers=headers, json=payload)
-        assert second.status_code == 200
+        assert second.status_code == 400
         assert second.json() == {"code": 500, "msg": "该收费记录已开具发票，不能重复开票"}
 
     async def test_print_invoice(self, async_client, seed_data, auth_headers):

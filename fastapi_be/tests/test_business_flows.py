@@ -390,7 +390,7 @@ class TestExamJourney:
             headers=patient_headers,
             json={"appointment_id": other["appointment_id"], "status": 4},
         )
-        assert r.status_code == 200
+        assert r.status_code == 403
         assert r.json()["code"] == 403
 
 
@@ -504,7 +504,7 @@ class TestIDORPrevention:
         # 当前 patient 尝试取消 patient2 的挂号 → 403
         r = await async_client.post("/api/registrationManagement/cancel", headers=patient_headers,
             json={"uuid": reg["uuid"], "schedule_id": schedule_data[0]["id"]})
-        assert r.status_code == 200
+        assert r.status_code == 403
         assert r.json()["code"] == 403, f"越权漏洞! 患者取消他人挂号返回 {r.json()}"
 
     async def test_unauthenticated_blocked(self, async_client):

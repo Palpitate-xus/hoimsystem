@@ -32,7 +32,7 @@ class TestStructuredMedicalRecordIntegrity:
             headers=headers,
             json={"record_id": record_id, "diagnosis": "不应被修改"},
         )
-        assert update.status_code == 200
+        assert update.status_code == 403
         assert update.json()["code"] == 403
 
         repeat_sign = await async_client.post(
@@ -40,7 +40,7 @@ class TestStructuredMedicalRecordIntegrity:
             headers=headers,
             json={"record_id": record_id},
         )
-        assert repeat_sign.status_code == 200
+        assert repeat_sign.status_code == 400
         assert repeat_sign.json()["code"] == 500
 
         delete = await async_client.post(
@@ -48,7 +48,7 @@ class TestStructuredMedicalRecordIntegrity:
             headers=headers,
             json={"record_id": record_id},
         )
-        assert delete.status_code == 200
+        assert delete.status_code == 403
         assert delete.json()["code"] == 403
 
     async def test_doctor_can_only_access_owned_structured_records(self, async_client, seed_data, auth_headers):
@@ -72,7 +72,7 @@ class TestStructuredMedicalRecordIntegrity:
             headers=director_headers,
             params={"record_id": record_id},
         )
-        assert detail.status_code == 200
+        assert detail.status_code == 403
         assert detail.json()["code"] == 403
 
         records = await async_client.get("/api/structuredMedicalRecord/getList", headers=director_headers)

@@ -9,7 +9,7 @@ class TestPaymentFlow:
             headers=auth_headers(seed_data["patient_user"].username),
             json={"charge_id": str(seed_data["charge"].charge_id), "channel": "wechat", "amount": 1},
         )
-        assert r.status_code == 200
+        assert r.status_code == 400
         assert r.json() == {"code": 500, "msg": "支付金额与收费金额不一致"}
 
     async def test_payment_rejects_fractional_cent(self, async_client, seed_data, auth_headers):
@@ -18,7 +18,7 @@ class TestPaymentFlow:
             headers=auth_headers(seed_data["patient_user"].username),
             json={"charge_id": str(seed_data["charge"].charge_id), "channel": "wechat", "amount": 31.001},
         )
-        assert r.status_code == 200
+        assert r.status_code == 400
         assert r.json() == {"code": 500, "msg": "支付金额最多保留两位小数"}
 
     async def test_payment_rejects_duplicate_pending_order(self, async_client, seed_data, auth_headers):
@@ -28,7 +28,7 @@ class TestPaymentFlow:
         assert first.status_code == 200
         assert first.json()["code"] == 200
         second = await async_client.post("/api/payment/create", headers=headers, json=payload)
-        assert second.status_code == 200
+        assert second.status_code == 400
         assert second.json() == {"code": 500, "msg": "该收费记录已有待支付订单"}
 
     async def test_mock_payment_notify_pays_charge_once(self, async_client, seed_data, auth_headers):
@@ -52,5 +52,5 @@ class TestPaymentFlow:
             headers=cashier_headers,
             json={"payment_no": payment_no},
         )
-        assert repeated.status_code == 200
+        assert repeated.status_code == 400
         assert repeated.json() == {"code": 500, "msg": "支付单状态异常"}

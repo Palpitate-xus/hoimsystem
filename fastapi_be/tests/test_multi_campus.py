@@ -89,7 +89,7 @@ class TestMultiCampus:
             headers=headers,
             json={"campus_id": campus_id},
         )
-        assert deleted.status_code == 200
+        assert deleted.status_code == 400
         assert deleted.json()["code"] == 500
         assert "仍有科室" in deleted.json()["msg"]
 

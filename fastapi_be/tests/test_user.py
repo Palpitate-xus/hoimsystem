@@ -67,7 +67,7 @@ class TestUserAuth:
         assert first.status_code == 200
         assert first.json()["code"] == 200
         second = await async_client.post("/api/register", json=payload)
-        assert second.status_code == 200
+        assert second.status_code == 400
         assert second.json()["code"] == 500
         # 注册失败提示统一模糊，不泄露"该身份证号已注册"（防枚举）
         assert "注册失败" in second.json()["msg"]
@@ -76,7 +76,7 @@ class TestUserAuth:
         r = await async_client.post("/api/login", json={
             "username": "nonexistent", "password": "wrong"
         })
-        assert r.status_code == 200
+        assert r.status_code == 400
         assert r.json()["code"] == 500
 
     async def test_user_info(self, async_client, seed_data):
@@ -176,7 +176,7 @@ class TestPrepaidPermissions:
                 headers=headers,
                 json={"identity": seed_data["patient"].identity, "amount": amount},
             )
-            assert r.status_code == 200
+            assert r.status_code == 400
             assert r.json()["code"] == 500
 
     async def test_cashier_rejects_non_finite_or_invalid_amounts(self, async_client, seed_data, auth_headers):
@@ -188,7 +188,7 @@ class TestPrepaidPermissions:
                     headers=headers,
                     json={"identity": seed_data["patient"].identity, "amount": amount},
                 )
-                assert r.status_code == 200
+                assert r.status_code == 400
                 assert r.json()["code"] == 500
 
     async def test_cashier_keeps_prepaid_amounts_at_cent_precision(self, async_client, seed_data, auth_headers):
@@ -300,7 +300,7 @@ class TestUserRoleSecurity:
             headers=auth_headers(seed_data["admin_user"].username),
             json={"user_id": seed_data["patient2_user"].user_id, "user_role": "super_admin"},
         )
-        assert r.status_code == 200
+        assert r.status_code == 403
         assert r.json()["code"] == 403
 
     async def test_admin_cannot_modify_super_admin(self, async_client, seed_data, auth_headers):
@@ -309,7 +309,7 @@ class TestUserRoleSecurity:
             headers=auth_headers(seed_data["admin_user"].username),
             json={"user_id": seed_data["super_admin_user"].user_id, "user_role": "doctor"},
         )
-        assert r.status_code == 200
+        assert r.status_code == 403
         assert r.json()["code"] == 403
 
     async def test_admin_cannot_change_own_role(self, async_client, seed_data, auth_headers):
@@ -318,7 +318,7 @@ class TestUserRoleSecurity:
             headers=auth_headers(seed_data["admin_user"].username),
             json={"user_id": seed_data["admin_user"].user_id, "user_role": "patient"},
         )
-        assert r.status_code == 200
+        assert r.status_code == 400
         assert r.json()["code"] == 500
 
     async def test_password_reset_does_not_return_plaintext(self, async_client, seed_data, auth_headers):
@@ -365,7 +365,7 @@ class TestUserRoleSecurity:
             headers=auth_headers(seed_data["admin_user"].username),
             json={"user_id": seed_data["patient2_user"].user_id, "new_password": "short"},
         )
-        assert r.status_code == 200
+        assert r.status_code == 400
         assert r.json()["code"] == 500
 
     async def test_password_reset_requires_explicit_password(self, async_client, seed_data, auth_headers):
@@ -374,5 +374,5 @@ class TestUserRoleSecurity:
             headers=auth_headers(seed_data["admin_user"].username),
             json={"user_id": seed_data["patient2_user"].user_id},
         )
-        assert r.status_code == 200
+        assert r.status_code == 400
         assert r.json()["code"] == 500

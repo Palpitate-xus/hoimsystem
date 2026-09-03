@@ -29,7 +29,7 @@ class TestAdminDoctor:
             "title": "副主任医师", "sex": "女", "phone": "13900139002",
             "department": dept.department_id, "permission": "doctor", "education": "硕士"
         })
-        assert r.status_code == 200
+        assert r.status_code == 400
         assert r.json()["code"] == 500
 
     async def test_register_doctor_requires_admin(self, async_client, seed_data, auth_headers):

@@ -4,7 +4,7 @@ import traceback
 from decimal import Decimal
 
 from fastapi import APIRouter, BackgroundTasks, Depends
-from sqlalchemy.orm import Session, selectinload
+from sqlalchemy.orm import Session, joinedload, selectinload
 
 from app.database import get_db
 from app.dependencies import ADMIN_ROLES, CLINICAL_ROLES, PHARMACY_ROLES, get_current_user, require_roles
@@ -349,13 +349,6 @@ def prescription_register(
                 return {"code": 500, "msg": "药品数量必须大于0"}
             if pharmaceutical_id in seen_pharmaceuticals:
                 return {"code": 500, "msg": "同一药品不能重复开立"}
-            pha = db.query(Pharmaceutical).filter(Pharmaceutical.pharmaceutical_id == pharmaceutical_id).first()
-            if not pha:
-                return {"code": 500, "msg": "药品不存在"}
-            if pha.status != 0:
-                return {"code": 500, "msg": f"药品 {pha.name} 已停用，不能开立"}
-            if pha.expireddate and pha.expireddate < datetime.date.today():
-                return {"code": 500, "msg": f"药品 {pha.name} 已过期，不能开立"}
             seen_pharmaceuticals.add(pharmaceutical_id)
             normalized_phas.append({
                 "id": pharmaceutical_id,
@@ -364,25 +357,35 @@ def prescription_register(
                 "frequency": raw_item.get("frequency"),
             })
 
+        pharmaceuticals = db.query(Pharmaceutical).filter(
+            Pharmaceutical.pharmaceutical_id.in_(seen_pharmaceuticals)
+        ).all()
+        pharmaceutical_by_id = {item.pharmaceutical_id: item for item in pharmaceuticals}
+        if len(pharmaceutical_by_id) != len(seen_pharmaceuticals):
+            return {"code": 500, "msg": "药品不存在"}
+        for item in normalized_phas:
+            pha = pharmaceutical_by_id[item["id"]]
+            if pha.status != 0:
+                return {"code": 500, "msg": f"药品 {pha.name} 已停用，不能开立"}
+            if pha.expireddate and pha.expireddate < datetime.date.today():
+                return {"code": 500, "msg": f"药品 {pha.name} 已过期，不能开立"}
+
         # 抗菌药物分级审核
         restricted_phas = []  # 限制级
         special_phas = []  # 特殊使用级
         for item in normalized_phas:
-            pha = db.query(Pharmaceutical).filter(Pharmaceutical.pharmaceutical_id == item["id"]).first()
-            if pha:
-                if pha.antibiotic_level == 2:
-                    restricted_phas.append(pha.name)
-                elif pha.antibiotic_level == 3:
-                    special_phas.append(pha.name)
+            pha = pharmaceutical_by_id[item["id"]]
+            if pha.antibiotic_level == 2:
+                restricted_phas.append(pha.name)
+            elif pha.antibiotic_level == 3:
+                special_phas.append(pha.name)
         # 限制级/特殊使用级抗菌药：医生必须携带本人、患者、药品匹配的已通过审批
         elevated_roles = ADMIN_ROLES | {"director"}
         approved = []
         approval_required_ids = {
-            item["id"] for item in normalized_phas
-            if db.query(Pharmaceutical).filter(
-                Pharmaceutical.pharmaceutical_id == item["id"],
-                Pharmaceutical.antibiotic_level >= 2,
-            ).first()
+            item["id"]
+            for item in normalized_phas
+            if (pharmaceutical_by_id[item["id"]].antibiotic_level or 0) >= 2
         }
         if approval_required_ids and current_user.user_role not in elevated_roles:
             approved = db.query(AntibioticApproval).filter(
@@ -408,9 +411,7 @@ def prescription_register(
                 if allergen:
                     allergy_keywords.append(allergen)
             for item in normalized_phas:
-                pha = db.query(Pharmaceutical).filter(Pharmaceutical.pharmaceutical_id == item["id"]).first()
-                if not pha:
-                    continue
+                pha = pharmaceutical_by_id[item["id"]]
                 pha_name_lower = (pha.name or "").lower()
                 pha_remark_lower = (pha.remark or "").lower()
                 for kw in allergy_keywords:
@@ -428,7 +429,7 @@ def prescription_register(
                             return {"code": 500, "msg": f"过敏史冲突：病人对 [{kw}] 过敏，处方备注 [{pha.remark}]"}
 
         # 2. 配伍禁忌检查（硬编码常见禁忌组合）
-        pha_ids = {item["id"] for item in req.phas}
+        pha_ids = {item["id"] for item in normalized_phas}
         incompatibility = {
             # (药品A_id, 药品B_id): "禁忌原因"
         }
@@ -443,9 +444,9 @@ def prescription_register(
 
             engine_items = []
             for item in normalized_phas:
-                pha_obj = db.query(Pharmaceutical).filter(Pharmaceutical.pharmaceutical_id == item["id"]).first()
+                pha_obj = pharmaceutical_by_id[item["id"]]
                 engine_items.append({
-                    "name": pha_obj.name if pha_obj else "",
+                    "name": pha_obj.name,
                     "dosage": item.get("dosage"),
                     "frequency": item.get("frequency"),
                     "number": item.get("number"),
@@ -475,24 +476,23 @@ def prescription_register(
         db.flush()
         amount = Decimal("0.00")
         for item in normalized_phas:
-            pha = db.query(Pharmaceutical).filter(Pharmaceutical.pharmaceutical_id == item["id"]).first()
-            if pha:
-                quantity = int(item["number"])
-                updated = db.query(Pharmaceutical).filter(
-                    Pharmaceutical.pharmaceutical_id == pha.pharmaceutical_id,
-                    Pharmaceutical.status == 0,
-                    Pharmaceutical.stock >= quantity,
-                ).update({Pharmaceutical.stock: Pharmaceutical.stock - quantity}, synchronize_session=False)
-                if updated != 1:
-                    db.rollback()
-                    return {"code": 500, "msg": f"药品 {pha.name} 库存不足"}
-                pp = PrePha(
-                    prescription_id=str(pre.prescription_id),
-                    pharmaceutical_id=pha.pharmaceutical_id,
-                    number=item["number"],
-                )
-                db.add(pp)
-                amount += Decimal(str(pha.price)) * quantity
+            pha = pharmaceutical_by_id[item["id"]]
+            quantity = int(item["number"])
+            updated = db.query(Pharmaceutical).filter(
+                Pharmaceutical.pharmaceutical_id == pha.pharmaceutical_id,
+                Pharmaceutical.status == 0,
+                Pharmaceutical.stock >= quantity,
+            ).update({Pharmaceutical.stock: Pharmaceutical.stock - quantity}, synchronize_session=False)
+            if updated != 1:
+                db.rollback()
+                return {"code": 500, "msg": f"药品 {pha.name} 库存不足"}
+            pp = PrePha(
+                prescription_id=str(pre.prescription_id),
+                pharmaceutical_id=pha.pharmaceutical_id,
+                number=item["number"],
+            )
+            db.add(pp)
+            amount += Decimal(str(pha.price)) * quantity
         charge = Charge(
             charge_time=datetime.datetime.now(),
             time=datetime.datetime(1970, 1, 1),
@@ -526,7 +526,12 @@ from app.pagination import paginate
 def get_prescription_list(current_user: User = Depends(get_current_user), keyword: str | None = None, page: int | None = None, page_size: int | None = None, db: Session = Depends(get_db)):
     data = []
     total = 0
-    query = db.query(Prescription)
+    query = db.query(Prescription).options(
+        joinedload(Prescription.doctor),
+        joinedload(Prescription.patient),
+        selectinload(Prescription.pre_phas).joinedload(PrePha.pharmaceutical),
+        selectinload(Prescription.charges),
+    )
     if current_user.user_role == "admin":
         pass
     elif current_user.user_role in ("doctor", "director"):
@@ -549,7 +554,7 @@ def get_prescription_list(current_user: User = Depends(get_current_user), keywor
         phas = []
         for j in item.pre_phas:
             phas.append({"name": j.pharmaceutical.name if j.pharmaceutical else "", "number": j.number})
-        charge_obj = db.query(Charge).filter(Charge.prescription_id == item.prescription_id).first()
+        charge_obj = item.charges[0] if item.charges else None
         data.append(
             {
                 "uuid": str(item.prescription_id),

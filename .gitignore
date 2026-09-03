@@ -62,7 +62,8 @@ fastapi_be/app/uploads/*.csv
 
 # 测试/压测产物
 fastapi_benchmark/benchmark/
-fastapi_benchmark/locust_*.csv
+fastapi_benchmark/benchmark_results/
+fastapi_benchmark/*.csv
 fastapi_benchmark/tokens.json
 vue3-new-ui/test-results/
 .pytest_cache/

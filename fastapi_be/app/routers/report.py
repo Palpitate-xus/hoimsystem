@@ -1,14 +1,34 @@
+import datetime
+
 from fastapi import APIRouter, Depends
-from sqlalchemy import func
+from fastapi.exceptions import HTTPException
+from sqlalchemy import String, case, cast, func
 from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.dependencies import CASHIER_ROLES, CLINICAL_ROLES, User, require_roles
-from app.models import Charge, Department, Doctor, LabOrder, MedicalRecord, PrePha, Prescription, Review
+from app.models import Charge, Department, Doctor, LabOrder, MedicalRecord, Pharmaceutical, PrePha, Prescription, Review
 
 router = APIRouter()
 
 _REPORT_ROLES = {*CLINICAL_ROLES, *CASHIER_ROLES}
+
+
+def _date_range_filters(column, start_date, end_date):
+    """Build sargable half-open timestamp bounds instead of wrapping columns."""
+    try:
+        start = datetime.date.fromisoformat(str(start_date)) if start_date else None
+        end = datetime.date.fromisoformat(str(end_date)) if end_date else None
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail="日期必须为 YYYY-MM-DD") from exc
+    if start and end and start > end:
+        raise HTTPException(status_code=422, detail="开始日期不能晚于结束日期")
+    filters = []
+    if start:
+        filters.append(column >= datetime.datetime.combine(start, datetime.time.min))
+    if end:
+        filters.append(column < datetime.datetime.combine(end + datetime.timedelta(days=1), datetime.time.min))
+    return filters
 
 
 @router.post("/report/outpatientVolume")
@@ -16,52 +36,60 @@ def report_outpatient_volume(req: dict, keyword: str | None = None, current_user
     start_date = req.get("start_date")
     end_date = req.get("end_date")
     group_by = req.get("group_by", "day")
+    if group_by not in {"day", "week", "month", "department", "doctor"}:
+        raise HTTPException(status_code=422, detail="group_by 必须为 day/week/month/department/doctor")
 
-    query = db.query(MedicalRecord)
-    if start_date:
-        query = query.filter(func.date(MedicalRecord.consultation_time) >= start_date)
-    if end_date:
-        query = query.filter(func.date(MedicalRecord.consultation_time) <= end_date)
-
-    records = query.all()
-    total_visits = len(records)
+    filters = _date_range_filters(MedicalRecord.consultation_time, start_date, end_date)
     details = []
 
-    if group_by == "day":
-        groups = {}
-        for r in records:
-            key = str(r.consultation_time.date()) if r.consultation_time else ""
-            groups[key] = groups.get(key, 0) + 1
-        for k, v in sorted(groups.items()):
-            details.append({"label": k, "value": v})
+    if group_by in {"day", "month"}:
+        date_text = cast(MedicalRecord.consultation_time, String)
+        label = func.substr(date_text, 1, 10 if group_by == "day" else 7)
+        rows = (
+            db.query(label.label("label"), func.count(MedicalRecord.medical_record_id).label("value"))
+            .filter(*filters, MedicalRecord.consultation_time.isnot(None))
+            .group_by(label)
+            .order_by(label)
+            .all()
+        )
+        details = [{"label": row.label, "value": row.value} for row in rows]
     elif group_by == "week":
+        # ISO week formatting differs across supported databases. Stream only
+        # the timestamp scalar here, avoiding full ORM rows and relationships.
         groups = {}
-        for r in records:
-            key = str(r.consultation_time.date().isocalendar()[1]) if r.consultation_time else ""
+        timestamps = (
+            db.query(MedicalRecord.consultation_time)
+            .filter(*filters, MedicalRecord.consultation_time.isnot(None))
+            .yield_per(1000)
+        )
+        for (consultation_time,) in timestamps:
+            key = str(consultation_time.date().isocalendar()[1])
             groups[key] = groups.get(key, 0) + 1
         for k, v in sorted(groups.items()):
             details.append({"label": f"第{k}周", "value": v})
-    elif group_by == "month":
-        groups = {}
-        for r in records:
-            key = str(r.consultation_time.date())[:7] if r.consultation_time else ""
-            groups[key] = groups.get(key, 0) + 1
-        for k, v in sorted(groups.items()):
-            details.append({"label": k, "value": v})
     elif group_by == "department":
-        groups = {}
-        for r in records:
-            key = r.doctor.department.name if r.doctor and r.doctor.department else "未知科室"
-            groups[key] = groups.get(key, 0) + 1
-        for k, v in groups.items():
-            details.append({"label": k, "value": v})
+        label = func.coalesce(Department.name, "未知科室")
+        rows = (
+            db.query(label.label("label"), func.count(MedicalRecord.medical_record_id).label("value"))
+            .outerjoin(Doctor, MedicalRecord.doctor_id == Doctor.doctor_id)
+            .outerjoin(Department, Doctor.department_id == Department.department_id)
+            .filter(*filters)
+            .group_by(label)
+            .all()
+        )
+        details = [{"label": row.label, "value": row.value} for row in rows]
     elif group_by == "doctor":
-        groups = {}
-        for r in records:
-            key = r.doctor.name if r.doctor else "未知医生"
-            groups[key] = groups.get(key, 0) + 1
-        for k, v in groups.items():
-            details.append({"label": k, "value": v})
+        label = func.coalesce(Doctor.name, "未知医生")
+        rows = (
+            db.query(label.label("label"), func.count(MedicalRecord.medical_record_id).label("value"))
+            .outerjoin(Doctor, MedicalRecord.doctor_id == Doctor.doctor_id)
+            .filter(*filters)
+            .group_by(label)
+            .all()
+        )
+        details = [{"label": row.label, "value": row.value} for row in rows]
+
+    total_visits = sum(item["value"] for item in details)
 
     if keyword:
         kw = keyword.lower()
@@ -75,16 +103,15 @@ def report_finance(req: dict, current_user: User = Depends(require_roles(*_REPOR
     start_date = req.get("start_date")
     end_date = req.get("end_date")
 
-    query = db.query(Charge)
-    if start_date:
-        query = query.filter(func.date(Charge.charge_time) >= start_date)
-    if end_date:
-        query = query.filter(func.date(Charge.charge_time) <= end_date)
-
-    charges = query.all()
-    total_income = sum(c.amount for c in charges if c.status == 1)
-    total_refund = sum(c.amount for c in charges if c.status == 2)
-    prescription_income = sum(c.amount for c in charges if c.status == 1 and c.prescription_id)
+    filters = _date_range_filters(Charge.charge_time, start_date, end_date)
+    total_income, total_refund, prescription_income = db.query(
+        func.coalesce(func.sum(case((Charge.status == 1, Charge.amount), else_=0)), 0),
+        func.coalesce(func.sum(case((Charge.status == 2, Charge.amount), else_=0)), 0),
+        func.coalesce(
+            func.sum(case(((Charge.status == 1) & Charge.prescription_id.isnot(None), Charge.amount), else_=0)),
+            0,
+        ),
+    ).filter(*filters).one()
     lab_income = 0
 
     return {
@@ -104,20 +131,17 @@ def report_pharmaceutical(req: dict, keyword: str | None = None, current_user: U
     start_date = req.get("start_date")
     end_date = req.get("end_date")
 
-    query = db.query(PrePha, Prescription).join(Prescription, PrePha.prescription_id == Prescription.prescription_id)
-    if start_date:
-        query = query.filter(func.date(Prescription.create_time) >= start_date)
-    if end_date:
-        query = query.filter(func.date(Prescription.create_time) <= end_date)
-
-    results = query.all()
-    groups = {}
-    for pp, pre in results:
-        name = pp.pharmaceutical.name if pp.pharmaceutical else "未知药品"
-        groups[name] = groups.get(name, {"name": name, "total_number": 0})
-        groups[name]["total_number"] += pp.number
-
-    data = list(groups.values())
+    filters = _date_range_filters(Prescription.create_time, start_date, end_date)
+    name = func.coalesce(Pharmaceutical.name, "未知药品")
+    rows = (
+        db.query(name.label("name"), func.coalesce(func.sum(PrePha.number), 0).label("total_number"))
+        .join(Prescription, PrePha.prescription_id == Prescription.prescription_id)
+        .outerjoin(Pharmaceutical, PrePha.pharmaceutical_id == Pharmaceutical.pharmaceutical_id)
+        .filter(*filters)
+        .group_by(name)
+        .all()
+    )
+    data = [{"name": row.name, "total_number": row.total_number} for row in rows]
     if keyword:
         kw = keyword.lower()
         data = [item for item in data if any(kw in str(val).lower() for val in item.values())]
@@ -131,34 +155,57 @@ def report_doctor_workload(req: dict, keyword: str | None = None, current_user: 
     end_date = req.get("end_date")
     doctor_id = req.get("doctor_id")
 
-    doctors = db.query(Doctor)
+    mr_counts = (
+        db.query(
+            MedicalRecord.doctor_id.label("doctor_id"),
+            func.count(MedicalRecord.medical_record_id).label("visit_count"),
+        )
+        .filter(*_date_range_filters(MedicalRecord.consultation_time, start_date, end_date))
+        .group_by(MedicalRecord.doctor_id)
+        .subquery()
+    )
+    prescription_counts = (
+        db.query(
+            Prescription.doctor_id.label("doctor_id"),
+            func.count(Prescription.prescription_id).label("prescription_count"),
+        )
+        .filter(*_date_range_filters(Prescription.create_time, start_date, end_date))
+        .group_by(Prescription.doctor_id)
+        .subquery()
+    )
+    lab_counts = (
+        db.query(
+            LabOrder.doctor_id.label("doctor_id"),
+            func.count(LabOrder.lab_order_id).label("lab_order_count"),
+        )
+        .filter(*_date_range_filters(LabOrder.create_time, start_date, end_date))
+        .group_by(LabOrder.doctor_id)
+        .subquery()
+    )
+    doctors = (
+        db.query(
+            Doctor.doctor_id,
+            Doctor.name,
+            func.coalesce(mr_counts.c.visit_count, 0),
+            func.coalesce(prescription_counts.c.prescription_count, 0),
+            func.coalesce(lab_counts.c.lab_order_count, 0),
+        )
+        .outerjoin(mr_counts, mr_counts.c.doctor_id == Doctor.doctor_id)
+        .outerjoin(prescription_counts, prescription_counts.c.doctor_id == Doctor.doctor_id)
+        .outerjoin(lab_counts, lab_counts.c.doctor_id == Doctor.doctor_id)
+    )
     if doctor_id:
         doctors = doctors.filter(Doctor.doctor_id == doctor_id)
-    doctors = doctors.all()
-
-    data = []
-    for doc in doctors:
-        mr_query = db.query(MedicalRecord).filter(MedicalRecord.doctor_id == doc.doctor_id)
-        pre_query = db.query(Prescription).filter(Prescription.doctor_id == doc.doctor_id)
-        lab_query = db.query(LabOrder).filter(LabOrder.doctor_id == doc.doctor_id)
-        if start_date:
-            mr_query = mr_query.filter(func.date(MedicalRecord.consultation_time) >= start_date)
-            pre_query = pre_query.filter(func.date(Prescription.create_time) >= start_date)
-            lab_query = lab_query.filter(func.date(LabOrder.create_time) >= start_date)
-        if end_date:
-            mr_query = mr_query.filter(func.date(MedicalRecord.consultation_time) <= end_date)
-            pre_query = pre_query.filter(func.date(Prescription.create_time) <= end_date)
-            lab_query = lab_query.filter(func.date(LabOrder.create_time) <= end_date)
-
-        data.append(
-            {
-                "doctor_id": doc.doctor_id,
-                "doctor_name": doc.name,
-                "visit_count": mr_query.count(),
-                "prescription_count": pre_query.count(),
-                "lab_order_count": lab_query.count(),
-            }
-        )
+    data = [
+        {
+            "doctor_id": row[0],
+            "doctor_name": row[1],
+            "visit_count": row[2],
+            "prescription_count": row[3],
+            "lab_order_count": row[4],
+        }
+        for row in doctors.order_by(Doctor.doctor_id).all()
+    ]
 
     if keyword:
         kw = keyword.lower()
@@ -174,73 +221,97 @@ def report_department_stats(req: dict, keyword: str | None = None, current_user:
     end_date = req.get("end_date")
     department_id = req.get("department_id")
 
-    departments_query = db.query(Department)
+    visit_counts = (
+        db.query(
+            Doctor.department_id.label("department_id"),
+            func.count(MedicalRecord.medical_record_id).label("visit_count"),
+        )
+        .join(MedicalRecord, MedicalRecord.doctor_id == Doctor.doctor_id)
+        .filter(*_date_range_filters(MedicalRecord.consultation_time, start_date, end_date))
+        .group_by(Doctor.department_id)
+        .subquery()
+    )
+    prescription_counts = (
+        db.query(
+            Doctor.department_id.label("department_id"),
+            func.count(Prescription.prescription_id).label("prescription_count"),
+        )
+        .join(Prescription, Prescription.doctor_id == Doctor.doctor_id)
+        .filter(*_date_range_filters(Prescription.create_time, start_date, end_date))
+        .group_by(Doctor.department_id)
+        .subquery()
+    )
+    lab_counts = (
+        db.query(
+            Doctor.department_id.label("department_id"),
+            func.count(LabOrder.lab_order_id).label("lab_order_count"),
+        )
+        .join(LabOrder, LabOrder.doctor_id == Doctor.doctor_id)
+        .filter(*_date_range_filters(LabOrder.create_time, start_date, end_date))
+        .group_by(Doctor.department_id)
+        .subquery()
+    )
+    income_totals = (
+        db.query(
+            Doctor.department_id.label("department_id"),
+            func.coalesce(func.sum(Charge.amount), 0).label("income"),
+        )
+        .join(Prescription, Charge.prescription_id == Prescription.prescription_id)
+        .join(Doctor, Prescription.doctor_id == Doctor.doctor_id)
+        .filter(
+            Charge.status == 1,
+            *_date_range_filters(Charge.charge_time, start_date, end_date),
+        )
+        .group_by(Doctor.department_id)
+        .subquery()
+    )
+    review_totals = (
+        db.query(
+            Doctor.department_id.label("department_id"),
+            func.count(Review.review_id).label("review_count"),
+            func.avg(Review.score).label("satisfaction_score"),
+        )
+        .join(Review, Review.doctor_id == Doctor.doctor_id)
+        .filter(
+            Review.score.isnot(None),
+            *_date_range_filters(Review.review_time, start_date, end_date),
+        )
+        .group_by(Doctor.department_id)
+        .subquery()
+    )
+    departments_query = (
+        db.query(
+            Department.department_id,
+            Department.name,
+            func.coalesce(visit_counts.c.visit_count, 0),
+            func.coalesce(prescription_counts.c.prescription_count, 0),
+            func.coalesce(lab_counts.c.lab_order_count, 0),
+            func.coalesce(income_totals.c.income, 0),
+            func.coalesce(review_totals.c.review_count, 0),
+            review_totals.c.satisfaction_score,
+        )
+        .outerjoin(visit_counts, visit_counts.c.department_id == Department.department_id)
+        .outerjoin(prescription_counts, prescription_counts.c.department_id == Department.department_id)
+        .outerjoin(lab_counts, lab_counts.c.department_id == Department.department_id)
+        .outerjoin(income_totals, income_totals.c.department_id == Department.department_id)
+        .outerjoin(review_totals, review_totals.c.department_id == Department.department_id)
+    )
     if department_id:
         departments_query = departments_query.filter(Department.department_id == department_id)
-    departments = departments_query.order_by(Department.department_id).all()
-
-    doctors = db.query(Doctor).all()
-    department_by_doctor = {doctor.doctor_id: doctor.department_id for doctor in doctors}
-
-    def in_date_range(column):
-        filters = []
-        if start_date:
-            filters.append(func.date(column) >= start_date)
-        if end_date:
-            filters.append(func.date(column) <= end_date)
-        return filters
-
-    metrics = {
-        department.department_id: {
-            "department_id": department.department_id,
-            "department_name": department.name or "未命名科室",
-            "visit_count": 0,
-            "prescription_count": 0,
-            "lab_order_count": 0,
-            "income": 0.0,
-            "satisfaction_score": None,
-            "review_count": 0,
+    rows = departments_query.order_by(Department.department_id).all()
+    data = [
+        {
+            "department_id": row[0],
+            "department_name": row[1] or "未命名科室",
+            "visit_count": row[2],
+            "prescription_count": row[3],
+            "lab_order_count": row[4],
+            "income": round(float(row[5]), 2),
+            "review_count": row[6],
+            "satisfaction_score": round(float(row[7]), 2) if row[7] is not None else None,
         }
-        for department in departments
-    }
-
-    records_query = db.query(MedicalRecord)
-    for record in records_query.filter(*in_date_range(MedicalRecord.consultation_time)).all():
-        dept_id = department_by_doctor.get(record.doctor_id)
-        if dept_id in metrics:
-            metrics[dept_id]["visit_count"] += 1
-
-    prescriptions_query = db.query(Prescription)
-    for prescription in prescriptions_query.filter(*in_date_range(Prescription.create_time)).all():
-        dept_id = department_by_doctor.get(prescription.doctor_id)
-        if dept_id in metrics:
-            metrics[dept_id]["prescription_count"] += 1
-
-    lab_orders_query = db.query(LabOrder)
-    for order in lab_orders_query.filter(*in_date_range(LabOrder.create_time)).all():
-        dept_id = department_by_doctor.get(order.doctor_id)
-        if dept_id in metrics:
-            metrics[dept_id]["lab_order_count"] += 1
-
-    charges_query = db.query(Charge).filter(Charge.status == 1)
-    for charge in charges_query.filter(*in_date_range(Charge.charge_time)).all():
-        prescription = charge.prescription
-        dept_id = department_by_doctor.get(prescription.doctor_id) if prescription else None
-        if dept_id in metrics:
-            metrics[dept_id]["income"] += float(charge.amount or 0)
-
-    reviews_query = db.query(Review)
-    review_totals = {}
-    for review in reviews_query.filter(*in_date_range(Review.review_time)).all():
-        dept_id = department_by_doctor.get(review.doctor_id)
-        if dept_id in metrics and review.score is not None:
-            review_totals.setdefault(dept_id, []).append(review.score)
-
-    for dept_id, scores in review_totals.items():
-        metrics[dept_id]["review_count"] = len(scores)
-        metrics[dept_id]["satisfaction_score"] = round(sum(scores) / len(scores), 2)
-
-    data = list(metrics.values())
+        for row in rows
+    ]
     if keyword:
         kw = keyword.lower()
         data = [item for item in data if kw in str(item["department_name"]).lower()]
@@ -252,15 +323,13 @@ def report_department_stats(req: dict, keyword: str | None = None, current_user:
         "income": round(sum(item["income"] for item in data), 2),
         "review_count": sum(item["review_count"] for item in data),
     }
-    visible_department_ids = {item["department_id"] for item in data}
-    all_scores = [
-        score
-        for dept_id, scores in review_totals.items()
-        if dept_id in visible_department_ids
-        for score in scores
-    ]
-    if all_scores:
-        totals["satisfaction_score"] = round(sum(all_scores) / len(all_scores), 2)
+    weighted_score_total = sum(
+        item["satisfaction_score"] * item["review_count"]
+        for item in data
+        if item["satisfaction_score"] is not None
+    )
+    if totals["review_count"]:
+        totals["satisfaction_score"] = round(weighted_score_total / totals["review_count"], 2)
     else:
         totals["satisfaction_score"] = None
 

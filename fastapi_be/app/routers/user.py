@@ -85,8 +85,9 @@ def _clear_login_failures(key: str, db: Session):
 
 
 def create_access_token(username: str) -> str:
-    expire = datetime.datetime.utcnow() + datetime.timedelta(hours=24)
-    payload = {"sub": username, "exp": expire, "iat": datetime.datetime.utcnow()}
+    issued_at = datetime.datetime.now(datetime.UTC)
+    expire = issued_at + datetime.timedelta(hours=24)
+    payload = {"sub": username, "exp": expire, "iat": issued_at}
     return jwt.encode(payload, settings.SECRET_KEY, algorithm="HS256")
 
 
@@ -196,7 +197,12 @@ def get_user_info(req: UserInfoRequest, db: Session = Depends(get_db)):
                 options={"verify_exp": False, "require": ["iat", "sub"]},
             )
             issued_at = payload.get("iat")
-            if issued_at is not None and datetime.datetime.utcfromtimestamp(issued_at) < user.token_invalid_before:
+            issued_dt = (
+                datetime.datetime.fromtimestamp(issued_at, datetime.UTC).replace(tzinfo=None)
+                if issued_at is not None
+                else None
+            )
+            if issued_dt is not None and issued_dt < user.token_invalid_before:
                 raise HTTPException(status_code=401, detail="Token 已被吊销，请重新登录")
         except jwt.InvalidTokenError:
             raise HTTPException(status_code=401, detail="token无效或已过期")
@@ -221,7 +227,7 @@ def get_user_info(req: UserInfoRequest, db: Session = Depends(get_db)):
 @router.post("/logout")
 def logout(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     """登出：吊销该用户当前时间之前的所有 token（服务端可撤销）。"""
-    current_user.token_invalid_before = datetime.datetime.now()
+    current_user.token_invalid_before = datetime.datetime.now(datetime.UTC).replace(tzinfo=None)
     db.commit()
     return {"code": 200, "msg": "success"}
 
@@ -297,7 +303,7 @@ def reset_user_password(req: dict, db: Session = Depends(get_db), current_user: 
         return {"code": 500, "msg": "用户不存在"}
     user.password = hash_password(new_password)
     # 改密后吊销该用户全部旧 token
-    user.token_invalid_before = datetime.datetime.now()
+    user.token_invalid_before = datetime.datetime.now(datetime.UTC).replace(tzinfo=None)
     db.commit()
     return {"code": 200, "msg": "success"}
 

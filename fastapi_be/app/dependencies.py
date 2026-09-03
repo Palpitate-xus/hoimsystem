@@ -78,7 +78,7 @@ def resolve_access_token(access_token: str | None, db: Session) -> User:
             )
             issued_at = payload.get("iat")
             if issued_at is not None:
-                issued_dt = datetime.datetime.utcfromtimestamp(issued_at)
+                issued_dt = datetime.datetime.fromtimestamp(issued_at, datetime.UTC).replace(tzinfo=None)
                 if issued_dt < user.token_invalid_before:
                     raise HTTPException(status_code=401, detail="Token 已被吊销，请重新登录")
         except pyjwt.InvalidTokenError:

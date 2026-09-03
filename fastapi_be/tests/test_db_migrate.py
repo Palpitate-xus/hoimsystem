@@ -18,6 +18,7 @@ def test_migrate_bootstraps_fresh_database(tmp_path):
         assert "hoimsystem_medication_administration" in tables
         assert "hoimsystem_patient_clinical_profile" in tables
         assert "hoimsystem_drg_rule" in tables
+        assert "hoimsystem_daily_operational_metric" in tables
         user_indexes = {item["name"] for item in inspect(engine).get_indexes("hoimsystem_users")}
         order_indexes = {item["name"] for item in inspect(engine).get_indexes("hoimsystem_inpatient_order")}
         assert "uq_users_username" in user_indexes

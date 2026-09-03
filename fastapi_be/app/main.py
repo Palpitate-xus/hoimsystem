@@ -355,6 +355,7 @@ from app.routers import (
     adverse_event,
     adverse_reaction,
     allergy,
+    analytics,
     antibiotic,
     backup,
     blood,
@@ -458,6 +459,7 @@ app.add_middleware(OperationLogMiddleware)
 app.add_middleware(ObservabilityMiddleware)
 
 app.include_router(observability_routes.router)
+app.include_router(analytics.router, prefix="/api")
 app.include_router(performance.router, prefix="/api")
 app.include_router(home_icd.router, prefix="/api")
 app.include_router(version.router, prefix="/api")

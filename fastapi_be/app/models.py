@@ -1101,6 +1101,7 @@ class Payment(Base):
     status = Column(Integer, default=0)  # 0=待支付, 1=支付成功, 2=支付失败, 3=已退款
     qr_code_data = Column(String(200))
     paid_time = Column(DateTime, nullable=True)
+    refunded_time = Column(DateTime, nullable=True)
     create_time = Column(DateTime)
     external_payment_id = Column(String(100), nullable=True, index=True)
     integration_status = Column(String(20), nullable=False, default="local")  # local / pending / synced / failed
@@ -2822,3 +2823,25 @@ class IntegrationOutbox(Base):
     last_http_status = Column(Integer)
     last_error = Column(String(1000))
     created_at = Column(DateTime, nullable=False)
+
+
+class DailyOperationalMetric(Base):
+    """Pre-aggregated hospital-wide facts for dashboards and trend reports."""
+
+    __tablename__ = "hoimsystem_daily_operational_metric"
+
+    metric_date = Column(Date, primary_key=True)
+    outpatient_visits = Column(Integer, nullable=False, default=0)
+    emergency_visits = Column(Integer, nullable=False, default=0)
+    admissions = Column(Integer, nullable=False, default=0)
+    discharges = Column(Integer, nullable=False, default=0)
+    active_inpatients = Column(Integer, nullable=False, default=0)
+    prescriptions = Column(Integer, nullable=False, default=0)
+    lab_orders = Column(Integer, nullable=False, default=0)
+    imaging_orders = Column(Integer, nullable=False, default=0)
+    critical_labs = Column(Integer, nullable=False, default=0)
+    successful_payments = Column(Integer, nullable=False, default=0)
+    revenue = Column(Numeric(14, 2), nullable=False, default=0)
+    refunds = Column(Numeric(14, 2), nullable=False, default=0)
+    average_queue_wait_minutes = Column(Numeric(10, 2))
+    updated_at = Column(DateTime, nullable=False)

@@ -156,7 +156,10 @@ def charge_refund(req: ChargeRefundRequest, db: Session = Depends(get_db), curre
     db.query(Payment).filter(
         Payment.charge_id == req.charge_id,
         Payment.status == 1,
-    ).update({Payment.status: 3}, synchronize_session=False)
+    ).update(
+        {Payment.status: 3, Payment.refunded_time: datetime.datetime.now()},
+        synchronize_session=False,
+    )
     # 已开发票随退费作废（原缺陷：资金已退票据仍有效，可用于报销）
     db.query(Invoice).filter(
         Invoice.charge_id == req.charge_id,

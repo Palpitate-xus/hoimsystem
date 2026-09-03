@@ -13,6 +13,7 @@ class TestScheduler:
             "breach_scan",
             "backup",
             "integration_outbox",
+            "daily_analytics",
         }
         result = await async_client.post("/api/scheduler/run/inventory_alert", headers=headers)
         assert result.json()["code"] == 200

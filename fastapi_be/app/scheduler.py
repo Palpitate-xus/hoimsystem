@@ -13,7 +13,7 @@ from sqlalchemy import text
 from app.config import settings
 from app.models import Appointment, BreachRecord, DoctorSchedule, Pharmaceutical, SchedulerJobState
 
-JOB_NAMES = {"inventory_alert", "breach_statistics", "breach_scan", "backup", "integration_outbox"}
+JOB_NAMES = {"inventory_alert", "breach_statistics", "breach_scan", "backup", "integration_outbox", "daily_analytics"}
 STANDARD_JOB_NAMES = JOB_NAMES - {"integration_outbox"}
 _state = {name: {"last_run": None, "last_result": None} for name in JOB_NAMES}
 _task = None
@@ -141,6 +141,10 @@ def run_job(job_name: str):
                     from app.integration_outbox import process_integration_outbox
 
                     result = process_integration_outbox(db)
+                elif job_name == "daily_analytics":
+                    from app.analytics import aggregate_daily_metrics
+
+                    result = aggregate_daily_metrics(db)
                 else:
                     # 备份由现有 backup API 执行；调度器只登记触发状态，避免后台任务覆盖用户数据。
                     result = {"status": "delegated_to_backup_service"}

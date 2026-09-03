@@ -2414,17 +2414,64 @@ class ChronicDiseaseRegistration(Base):
 
 class DrgGrouping(Base):
     __tablename__ = "hoimsystem_drg_grouping"
+    __table_args__ = (
+        Index("uq_drg_grouping_home", "home_id", unique=True),
+        Index("idx_drg_grouping_code_time", "group_code", "create_time"),
+    )
 
     grouping_id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     patient_id = Column(Integer, ForeignKey("hoimsystem_patient.patient_id"), nullable=False)
+    home_id = Column(String(36), ForeignKey("hoimsystem_medical_record_home.home_id"))
+    rule_id = Column(Integer, ForeignKey("hoimsystem_drg_rule.rule_id"))
     group_code = Column(String(30), nullable=False)
+    payment_method = Column(String(10), nullable=False, default="DRG")
     diagnosis = Column(String(300), nullable=False)
+    diagnosis_codes = Column(String(500))
+    procedure_codes = Column(String(500))
+    grouping_method = Column(String(20), nullable=False, default="manual")
     expected_amount = Column(Numeric(12, 2), nullable=False, default=0)
     actual_amount = Column(Numeric(12, 2), nullable=False, default=0)
     profit = Column(Numeric(12, 2), nullable=False, default=0)
     create_time = Column(DateTime, nullable=False)
 
     patient = relationship("Patient")
+    home = relationship("MedicalRecordHome")
+    rule = relationship("DrgRule")
+
+
+class DrgRule(Base):
+    """Versioned deterministic DRG/DIP grouping rule."""
+
+    __tablename__ = "hoimsystem_drg_rule"
+    __table_args__ = (
+        Index("idx_drg_rule_match", "status", "diagnosis_prefix", "priority"),
+        UniqueConstraint(
+            "payment_method",
+            "group_code",
+            "diagnosis_prefix",
+            "procedure_prefix",
+            "version",
+            name="uq_drg_rule_version",
+        ),
+    )
+
+    rule_id = Column(Integer, primary_key=True, autoincrement=True)
+    payment_method = Column(String(10), nullable=False, default="DRG")
+    group_code = Column(String(30), nullable=False)
+    group_name = Column(String(200), nullable=False)
+    diagnosis_prefix = Column(String(20), nullable=False)
+    procedure_prefix = Column(String(20))
+    expected_amount = Column(Numeric(12, 2), nullable=False)
+    priority = Column(Integer, nullable=False, default=0)
+    version = Column(String(30), nullable=False)
+    effective_from = Column(Date)
+    effective_to = Column(Date)
+    status = Column(Integer, nullable=False, default=1)
+    creator_id = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=False)
+    create_time = Column(DateTime, nullable=False)
+    update_time = Column(DateTime, nullable=False)
+
+    creator = relationship("User")
 
 
 class DigitalSignatureRecord(Base):

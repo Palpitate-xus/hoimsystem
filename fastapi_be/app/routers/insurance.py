@@ -1,18 +1,44 @@
 import datetime
+from decimal import Decimal, InvalidOperation
 
 from fastapi import APIRouter, Depends, Header, HTTPException
-from sqlalchemy.orm import Session
+from sqlalchemy import case, func
+from sqlalchemy.orm import Session, joinedload
 
 from app.config import settings
 from app.database import get_db
 from app.dependencies import ADMIN_ROLES, CASHIER_ROLES, CLINICAL_ROLES, ROLE_DIRECTOR, ROLE_PATIENT, User, get_current_user, require_roles
 from app.integration_outbox import enqueue_integration_event
-from app.models import ChronicDiseaseRegistration, DrgGrouping, InsuranceCatalog, InsuranceSettlement, Patient
+from app.models import (
+    ChronicDiseaseRegistration,
+    DrgGrouping,
+    DrgRule,
+    HomeIcdBinding,
+    InsuranceCatalog,
+    InsuranceSettlement,
+    MedicalRecordHome,
+    Patient,
+)
+from app.pagination import paginate
 from app.routers.integration import _check_key
 from app.schemas import InsuranceSettlementIntegrationRequest
 
 router = APIRouter()
 MANAGE_ROLES = {*ADMIN_ROLES, ROLE_DIRECTOR, *CASHIER_ROLES}
+
+
+def _money(value) -> Decimal | None:
+    try:
+        parsed = Decimal(str(value)).quantize(Decimal("0.01"))
+        return parsed if parsed.is_finite() and parsed >= 0 else None
+    except (InvalidOperation, TypeError, ValueError):
+        return None
+
+
+def _date(value):
+    if not value:
+        return None
+    return value if isinstance(value, datetime.date) else datetime.date.fromisoformat(str(value))
 
 
 @router.get("/insurance/catalog/list")
@@ -166,10 +192,129 @@ def create_drg_group(req: dict, current_user: User = Depends(require_roles(*MANA
     return {"code": 200, "msg": "success", "data": {"grouping_id": item.grouping_id, "profit": item.profit}}
 
 
+@router.post("/insurance/drg/rule")
+def save_drg_rule(req: dict, current_user: User = Depends(require_roles(*ADMIN_ROLES, ROLE_DIRECTOR)), db: Session = Depends(get_db)):
+    method = str(req.get("payment_method") or "DRG").upper()
+    if method not in ("DRG", "DIP"):
+        return {"code": 400, "msg": "支付方式必须为 DRG 或 DIP"}
+    expected = _money(req.get("expected_amount"))
+    diagnosis_prefix = str(req.get("diagnosis_prefix") or "").strip().upper()
+    if not all((req.get("group_code"), req.get("group_name"), diagnosis_prefix, req.get("version"))) or expected is None:
+        return {"code": 400, "msg": "组编码、名称、诊断前缀、版本和标准支付额不能为空"}
+    try:
+        effective_from = _date(req.get("effective_from"))
+        effective_to = _date(req.get("effective_to"))
+    except ValueError:
+        return {"code": 400, "msg": "规则生效期必须为 YYYY-MM-DD"}
+    if effective_from and effective_to and effective_from > effective_to:
+        return {"code": 400, "msg": "失效日期不能早于生效日期"}
+    rule = db.get(DrgRule, req.get("rule_id")) if req.get("rule_id") else DrgRule(
+        creator_id=current_user.user_id,
+        create_time=datetime.datetime.now(),
+    )
+    if not rule:
+        return {"code": 404, "msg": "分组规则不存在"}
+    rule.payment_method = method
+    rule.group_code = str(req["group_code"]).strip().upper()[:30]
+    rule.group_name = str(req["group_name"]).strip()[:200]
+    rule.diagnosis_prefix = diagnosis_prefix[:20]
+    rule.procedure_prefix = str(req.get("procedure_prefix") or "").strip().upper()[:20] or None
+    rule.expected_amount = expected
+    rule.priority = max(-1000, min(int(req.get("priority", 0)), 1000))
+    rule.version = str(req["version"]).strip()[:30]
+    rule.effective_from = effective_from
+    rule.effective_to = effective_to
+    rule.status = int(req.get("status", 1))
+    rule.update_time = datetime.datetime.now()
+    db.add(rule)
+    db.commit()
+    return {"code": 200, "msg": "success", "data": {"rule_id": rule.rule_id}}
+
+
+@router.get("/insurance/drg/rules")
+def list_drg_rules(
+    payment_method: str | None = None,
+    page: int = 1,
+    page_size: int = 20,
+    current_user: User = Depends(require_roles(*MANAGE_ROLES)),
+    db: Session = Depends(get_db),
+):
+    query = db.query(DrgRule)
+    if payment_method:
+        query = query.filter(DrgRule.payment_method == payment_method.upper())
+    rows, total = paginate(query.order_by(DrgRule.priority.desc(), DrgRule.rule_id.desc()), page, page_size)
+    return {"code": 200, "msg": "success", "data": [{
+        "rule_id": row.rule_id, "payment_method": row.payment_method, "group_code": row.group_code,
+        "group_name": row.group_name, "diagnosis_prefix": row.diagnosis_prefix,
+        "procedure_prefix": row.procedure_prefix or "", "expected_amount": row.expected_amount,
+        "priority": row.priority, "version": row.version, "effective_from": row.effective_from,
+        "effective_to": row.effective_to, "status": row.status,
+    } for row in rows], "total": total}
+
+
+@router.post("/insurance/drg/autoGroup")
+def automatic_drg_group(req: dict, current_user: User = Depends(require_roles(*MANAGE_ROLES)), db: Session = Depends(get_db)):
+    home = db.query(MedicalRecordHome).options(joinedload(MedicalRecordHome.patient)).filter(
+        MedicalRecordHome.home_id == req.get("home_id")
+    ).first()
+    if not home or home.status not in (1, 2):
+        return {"code": 400, "msg": "仅已提交或已归档的病案首页可自动分组"}
+    existing = db.query(DrgGrouping).filter(DrgGrouping.home_id == home.home_id).first()
+    if existing and not req.get("force"):
+        return {"code": 200, "msg": "该病案已完成分组", "data": {"grouping_id": existing.grouping_id, "group_code": existing.group_code, "idempotent": True}}
+    bindings = db.query(HomeIcdBinding).filter(HomeIcdBinding.home_id == home.home_id).all()
+    diagnosis_codes = [row.icd_code.upper() for row in bindings if row.kind == "diagnosis"]
+    procedure_codes = [row.icd_code.upper() for row in bindings if row.kind == "operation"]
+    primary = next((row.icd_code.upper() for row in bindings if row.kind == "diagnosis" and row.is_primary == 1), None)
+    if not primary:
+        return {"code": 400, "msg": "病案首页尚未设置主要诊断 ICD 编码"}
+    today = datetime.date.today()
+    rules = db.query(DrgRule).filter(
+        DrgRule.status == 1,
+        (DrgRule.effective_from.is_(None)) | (DrgRule.effective_from <= today),
+        (DrgRule.effective_to.is_(None)) | (DrgRule.effective_to >= today),
+    ).all()
+    matched = [rule for rule in rules if primary.startswith(rule.diagnosis_prefix.upper()) and (
+        not rule.procedure_prefix or any(code.startswith(rule.procedure_prefix.upper()) for code in procedure_codes)
+    )]
+    if not matched:
+        return {"code": 404, "msg": f"主要诊断 {primary} 未匹配到有效 DRG/DIP 规则"}
+    rule = max(matched, key=lambda item: (item.priority, len(item.diagnosis_prefix), len(item.procedure_prefix or ""), item.rule_id))
+    actual = _money(req.get("actual_amount", home.total_fee))
+    if actual is None:
+        return {"code": 400, "msg": "实际费用不合法"}
+    grouping = existing or DrgGrouping(home_id=home.home_id, patient_id=home.patient_id)
+    grouping.rule_id = rule.rule_id
+    grouping.group_code = rule.group_code
+    grouping.payment_method = rule.payment_method
+    grouping.diagnosis = home.discharge_diagnosis or home.admission_diagnosis
+    grouping.diagnosis_codes = ",".join(diagnosis_codes)
+    grouping.procedure_codes = ",".join(procedure_codes)
+    grouping.grouping_method = "automatic"
+    grouping.expected_amount = rule.expected_amount
+    grouping.actual_amount = actual
+    grouping.profit = rule.expected_amount - actual
+    grouping.create_time = datetime.datetime.now()
+    db.add(grouping)
+    db.commit()
+    return {"code": 200, "msg": "自动分组完成", "data": {
+        "grouping_id": grouping.grouping_id, "payment_method": grouping.payment_method,
+        "group_code": grouping.group_code, "group_name": rule.group_name,
+        "expected_amount": grouping.expected_amount, "actual_amount": grouping.actual_amount,
+        "profit": grouping.profit, "rule_version": rule.version, "idempotent": False,
+    }}
+
+
 @router.get("/insurance/drg/analysis")
 def drg_analysis(current_user: User = Depends(require_roles(*MANAGE_ROLES)), db: Session = Depends(get_db)):
-    items = db.query(DrgGrouping).all()
-    return {"code": 200, "msg": "success", "data": {"case_count": len(items), "expected_amount": round(sum(item.expected_amount for item in items), 2), "actual_amount": round(sum(item.actual_amount for item in items), 2), "profit": round(sum(item.profit for item in items), 2), "loss_cases": sum(item.profit < 0 for item in items)}}
+    row = db.query(
+        func.count(DrgGrouping.grouping_id),
+        func.coalesce(func.sum(DrgGrouping.expected_amount), 0),
+        func.coalesce(func.sum(DrgGrouping.actual_amount), 0),
+        func.coalesce(func.sum(DrgGrouping.profit), 0),
+        func.coalesce(func.sum(case((DrgGrouping.profit < 0, 1), else_=0)), 0),
+    ).one()
+    return {"code": 200, "msg": "success", "data": {"case_count": row[0], "expected_amount": row[1], "actual_amount": row[2], "profit": row[3], "loss_cases": row[4]}}
 
 
 @router.get("/insurance/control/warnings")

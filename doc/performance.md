@@ -132,7 +132,7 @@ result = db.execute(
 
 #### 分页参数
 
-所有列表接口都应支持分页：
+高增长业务列表应支持服务端分页，低基数主数据可保留全量选择器：
 ```python
 @router.get("/list")
 def list_xxx(page: int = 1, page_size: int = 20, db: Session = Depends(get_db)):
@@ -160,7 +160,7 @@ def get_today_count_cached():
     pass
 ```
 
-更复杂的缓存用 Redis（项目目前未引入）。
+跨实例缓存可复用生产 Compose 中的 Redis，但必须先定义失效策略；当前 Redis 主要承担临床事件广播与短期回放，不缓存患者临床记录。
 
 ### 2.4 异步与并发
 
@@ -451,15 +451,17 @@ DELETE FROM hoimsystem_appointment WHERE create_time < '2025-01-01';
 
 ## 五、缓存策略
 
-### 5.1 何时引入 Redis
+### 5.1 当前 Redis 使用边界
 
-当前项目**未引入** Redis，但以下场景值得考虑：
+生产 Compose 已引入 Redis，用于跨 worker/副本的临床事件发布订阅、最近 500 条事件回放和就绪探针。Redis 不是真实业务记录的主存储；服务不可用时事件降级为当前 worker 内存广播，业务事务仍以 PostgreSQL 为准。
+
+以下读缓存场景可在测量后考虑：
 
 - 接口 QPS > 100 但数据变化少（如字典、配置）
 - 复杂计算结果（如报表）
-- 分布式 session（如多实例部署）
+- 低敏感度、允许短暂陈旧的参考数据
 
-### 5.2 缓存示例（未实现）
+### 5.2 缓存示例（规划）
 
 ```python
 import redis
@@ -514,10 +516,11 @@ wrk -t12 -c400 -d30s http://localhost:8000/
 
 ### 6.2 使用 Locust
 
-项目基准测试应使用维护中的 `fastapi_benchmark/locust_final.py` 和
-`fastapi_benchmark/locust_readonly_pool.py`。脚本会在开测前实时登录，
+项目基准测试应使用 `fastapi_benchmark/docker-compose.yml` 启动隔离的
+PostgreSQL、4 个 Gunicorn worker 和一次性初始化器，再运行
+`locust_final.py` 或 `locust_readonly_pool.py`。脚本会在开测前实时登录，
 不得使用仓库中的固定 token 文件。混合场景分别使用管理员、医生和患者身份，
-预约与处方写入同时校验 HTTP 状态和业务 `code`。
+所有请求同时校验 HTTP 状态和业务 `code`。
 
 完整初始化、启动和执行命令见
 [README 性能测试](../README.md#performance-benchmark)。
@@ -526,7 +529,7 @@ wrk -t12 -c400 -d30s http://localhost:8000/
 
 ## 七、当前性能基线
 
-截至 2026-09-03，当前实现暂无可发布的有效性能基线。README 中旧的
+截至 2026-09-03，项目已有可复现的 PostgreSQL 基准环境，但尚无在目标硬件上可发布的容量基线。README 中旧的
 `~67 req/s`、延迟和并发建议基于 `StaticPool` 旧配置；本指南此前记录的
 `~3000 QPS` 缺少可复现的同版本、硬件和负载证据，现一并撤回。
 
@@ -538,14 +541,22 @@ wrk -t12 -c400 -d30s http://localhost:8000/
 
 ## 八、性能优化清单
 
-发现性能问题时按顺序排查：
+当前已落地：
 
-- [ ] **测量**：先用 profiling 工具定位瓶颈，不要瞎猜
-- [ ] **数据库**：是否有慢查询？索引是否合理？是否 N+1？
-- [ ] **接口**：是否分页？是否只查需要的字段？
-- [ ] **缓存**：高频查询是否可缓存？
-- [ ] **前端**：bundle 是否过大？是否懒加载？
-- [ ] **网络**：是否启用 gzip？资源是否走 CDN？
+- [x] PostgreSQL 有界连接池、连接回收、预检查和语句超时
+- [x] 高频临床/收费/审计组合索引与 Alembic 迁移
+- [x] 高增长核心列表分页，处方、收费、入院、病案、签到、报表等 N+1 回归测试
+- [x] 日运营指标预聚合，避免仪表盘反复扫描交易表
+- [x] 路由懒加载、Element Plus 与 ECharts 按需引入、CI bundle 预算
+- [x] GZip、流式导出、单次 JSON 序列化和请求时延指标
+- [x] 隔离 PostgreSQL 基准、分级数据规模、运行时认证和业务成功断言
+
+持续检查项：
+
+- [ ] 在目标硬件定期记录慢查询、P95/P99、连接池等待和数据库锁竞争
+- [ ] 根据真实查询计划调整索引，避免无数据依据地继续加索引
+- [ ] 对仍会增长的业务列表补齐前端分页交互
+- [ ] 只对可容忍陈旧的数据引入缓存并演练失效
 
 ---
 
@@ -556,7 +567,7 @@ wrk -t12 -c400 -d30s http://localhost:8000/
 - [中文 README § 性能测试](../README.md#performance-benchmark)
 - [English README § Performance Benchmark](../README.en.md#performance-benchmark)
 
-旧基准结果已失效；修复后的 SQLite 数据和独立的 PostgreSQL 数据将在完成重测后同步更新。
+旧基准结果已失效；新的 PostgreSQL 数据需在记录硬件、提交 SHA 和数据配置后再发布。
 
 ---
 

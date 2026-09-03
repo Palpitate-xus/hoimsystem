@@ -34,9 +34,9 @@
 ### 💻 后端开发
 
 1. **[编码规范](coding-standards.md)** — Python/Vue/数据库/Git 全规范
-2. **[API 文档](apiDoc.md)** — 核心模块接口的入参、响应、错误码（全量 484 接口的角色权限见 [api-rbac-matrix.md](api-rbac-matrix.md)）
+2. **[API 文档](apiDoc.md)** — 核心模块接口的入参、响应、错误码（全量 560 个路由方法的角色权限见 [api-rbac-matrix.md](api-rbac-matrix.md)）
    - **[API 测试报告](api-test-report.md)** — 188 个用例，95.7% 通过率
-3. **[数据库文档](databaseDoc.md)** — 核心表字段说明（全量 126 张表以 `fastapi_be/app/models.py` 为准）
+3. **[数据库文档](databaseDoc.md)** — 核心表字段说明（全量 145 张表以 `fastapi_be/app/models.py` 为准）
 4. **[数据字典](data-dictionary.md)** — 状态码、枚举值统一定义
 5. **[架构文档](architecture.md)** — 中间件、依赖、安全机制
 6. **[测试指南](testing.md)** — pytest 测试编写与运行
@@ -44,6 +44,7 @@
 8. **[院内导航配置指南](navigation-guide.md)** — 节点、路线连线与患者端最短路径
 9. **[等保安全基线自评](security-baseline-checklist.md)** — 本地安全证据与测评前置事项
 10. **[移动 Web 使用说明](mobile-web-guide.md)** — PWA 安装、缓存边界和原生端规划
+11. **[监控与运维](monitoring.md)** — 存活/就绪探针、Prometheus 指标、调度与故障处置
 
 ### 🎨 前端开发
 
@@ -178,6 +179,7 @@
 
 | 日期 | 内容 |
 |:----:|:-----|
+| 2026-09-03 | 同步 560 个路由方法、145 张表及可观测性、实时事件、集成发件箱、eMAR、CDSS、DRG/DIP 和 PostgreSQL 基准文档 |
 | 2026-05-18 | 新增第三批：performance、monitoring、data-dictionary |
 | 2026-05-18 | 新增第二批：git-workflow、release-process、glossary、ADR(5个)、CODE_OF_CONDUCT |
 | 2026-05-18 | 新增第一批：dev-setup、coding-standards、testing、troubleshooting、GitHub 模板 |

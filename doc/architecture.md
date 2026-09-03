@@ -25,24 +25,29 @@
              ▼                                ▼
 ┌──────────────────────────┐    ┌───────────────────────────────────┐
 │   前端 Vue 3 SPA          │    │     后端 FastAPI                   │
-│   - Vue Router (Hash)    │    │   - 34 个路由模块                   │
+│   - Vue Router (Hash)    │    │   - 80 个路由模块                   │
 │   - Vuex 状态管理         │    │   - 中间件链：                       │
 │   - Element Plus 组件库   │    │     CORS / 日志 / 时间脱敏            │
 │   - Axios 请求拦截         │    │   - JWT 鉴权                       │
-│   - 69 个业务页面          │    │   - SQLAlchemy ORM                 │
-└──────────────────────────┘    └────────────┬──────────────────────┘
-                                              │
-                                              ▼
-                              ┌─────────────────────────────────────┐
-                              │     数据库（SQLite/PostgreSQL）        │
-                              │     61 张业务表，统一 hoimsystem_ 前缀  │
-                              └─────────────────────────────────────┘
+│   - 154 个页面组件         │    │   - SQLAlchemy ORM                 │
+└──────────────────────────┘    └───────┬─────────────────┬─────────┘
+                                        │                 │
+                                        ▼                 ▼
+                       ┌────────────────────────┐  ┌─────────────────┐
+                       │ SQLite(开发)/PostgreSQL │  │ Redis 事件总线    │
+                       │ 145 张 hoimsystem_ 表   │  │ 跨 worker + 回放  │
+                       └───────────┬────────────┘  └─────────────────┘
+                                   ▲
+                                   │ advisory lock / outbox
+                         ┌─────────┴──────────┐
+                         │ 独立 scheduler 进程 │
+                         └────────────────────┘
 ```
 
 ### 1.2 架构特点
 
 - **前后端完全分离**：前端 SPA + 后端 REST API，独立部署、独立扩展
-- **单体后端 + 模块化路由**：FastAPI 单进程承载 34 个业务模块，避免微服务的运维成本
+- **模块化单体 + 独立后台进程**：FastAPI 的 80 个路由模块共享事务模型，迁移和调度从 API worker 分离
 - **数据库前缀隔离**：所有业务表统一以 `hoimsystem_` 为前缀，便于多系统共库部署
 - **API 标准化**：所有接口走 `/api/` 前缀，统一鉴权头 `accesstoken`，统一响应结构 `{code, msg, data}`
 
@@ -56,10 +61,10 @@
 |:----:|:----:|:--------|
 | Vue 3 | 3.4+ | Composition API 更适合复杂业务；性能优于 Vue 2 |
 | Element Plus | 2.x | 企业级中后台 UI 组件库，与医疗管理系统形态高度匹配 |
-| Vue Router | 4.x | 与 Vue 3 配套；Hash 路由部署无需后端配合 |
+| Vue Router | 5.x | 与 Vue 3 配套；Hash 路由部署无需后端配合 |
 | Vuex | 4.x | 比 Pinia 成熟稳定；满足用户/权限/标签页等全局状态 |
 | Axios | 1.x | 拦截器机制方便统一加 token、错误处理 |
-| Rspack | 1.x | 基于 Rust 的构建工具，支持快速开发构建和 HMR |
+| Rspack | 2.x | 基于 Rust 的构建工具，支持快速开发构建和 HMR |
 | SCSS | - | 模板自带；支持 mixin/嵌套，比 CSS 高效 |
 
 **为什么不选 React/Angular？**
@@ -105,13 +110,17 @@
 
 ```
 fastapi_be/app/
-├── routers/             # 34 个路由模块，按业务域划分
-├── models.py            # 61 张表的统一 SQLAlchemy 模型
+├── routers/             # 80 个路由模块，按业务域划分
+├── models.py            # 145 张表的统一 SQLAlchemy 模型
 ├── schemas.py           # Pydantic 请求/响应模型
 ├── dependencies.py      # 依赖注入（JWT 解析、当前用户）
 ├── database.py          # 数据库连接、会话管理
 ├── config.py            # 配置加载（环境变量、.env）
 ├── pagination.py        # 分页工具
+├── observability.py     # 请求指标与请求 ID
+├── event_bus.py         # Redis/本地实时事件总线
+├── integration_outbox.py # 对外系统可靠投递
+├── scheduler_runner.py  # 独立调度进程入口
 └── main.py              # 应用入口（中间件、CORS、路由注册）
 ```
 
@@ -125,7 +134,7 @@ fastapi_be/app/
 
 ```
 vue3-new-ui/src/
-├── views/             # 69 个页面，按业务域分子目录
+├── views/             # 154 个页面组件，按业务域分子目录
 │   ├── admin/         # 管理员（医生/病人/科室/通知/收费记录/号源池）
 │   ├── patient/       # 患者（挂号/缴费/病历/处方/健康档案/...）
 │   ├── doctor/        # 医生（排班/病历/处方/检查申请/考勤/MDT/路径）
@@ -297,16 +306,16 @@ vue3-new-ui/src/
 ### 7.1 当前性能
 
 - 当前没有经过修复后基准工具链验证的可发布性能基线，详见 [README 性能测试](../README.md#performance-benchmark)
-- SQLite 仅用于开发和本地基准；`QueuePool` 可为并发 Session 提供独立连接，但文件级写锁仍会限制写入并发
-- PostgreSQL 的吞吐、延迟与并发容量必须在固定提交、硬件、数据规模和负载下独立实测，不能由 SQLite 外推
+- SQLite 仅用于开发和单元测试；生产及可发布性能基准使用 PostgreSQL
+- 隔离基准环境提供 4 个 Gunicorn worker 和 4 档数据规模；容量结论仍必须记录提交、硬件和负载参数
 
 ### 7.2 优化空间
 
 | 短板 | 优化方向 |
 |:----:|:--------|
 | 列表查询无分页 | 患者/医生/药品列表已加，少数列表待补 |
-| 报表实时查询 | 可加缓存层（Redis）+ 离线计算 |
-| 前端 bundle 大 | 路由懒加载（已加），可进一步拆 vendor |
+| 报表扫描交易表 | 每日指标已预聚合；复杂临时报表继续用 SQL 聚合与只读副本评估 |
+| 前端 bundle 大 | 路由、Element Plus、ECharts 已按需加载；CI 继续执行 bundle 预算 |
 | 操作日志增长快 | 可加分区表 / 定期归档 |
 
 ---

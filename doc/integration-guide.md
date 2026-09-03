@@ -10,6 +10,13 @@
 LIS_INTEGRATION_KEY=replace-with-a-random-secret
 PACS_INTEGRATION_KEY=replace-with-a-random-secret
 MEDICAL_INSURANCE_INTEGRATION_KEY=replace-with-a-random-secret
+PAYMENT_INTEGRATION_KEY=replace-with-a-random-secret
+
+# 需要向外部系统主动推送时配置；生产环境只允许 HTTPS
+LIS_OUTBOUND_URL=https://lis.example.com/hoims/events
+PACS_OUTBOUND_URL=https://pacs.example.com/hoims/events
+MEDICAL_INSURANCE_OUTBOUND_URL=https://insurance.example.com/hoims/events
+PAYMENT_OUTBOUND_URL=https://payment.example.com/hoims/events
 ```
 
 调用时使用 `X-Integration-Key` 请求头。未配置密钥时接口返回 `503`，密钥不匹配返回 `401`。密钥不能写入前端代码、日志或版本库。
@@ -67,10 +74,28 @@ MEDICAL_INSURANCE_INTEGRATION_KEY=replace-with-a-random-secret
 
 系统会校验金额关系、绑定外部结算号并幂等更新状态；`status=1` 表示成功，`status=2` 表示失败。真实医保平台的目录编码、交易报文、签名证书和撤销/冲正规则仍需按平台规范联调。
 
+## 出站事务发件箱
+
+处方、检验申请、影像申请、收费/退款、发票、医保结算等关键业务会在同一个数据库事务中写入 `hoimsystem_integration_outbox`。业务提交成功而外部系统暂时不可用时，事件不会丢失；独立 `scheduler` 进程按批次投递：
+
+- HTTP 成功后标记 `delivered`。
+- 网络错误或非 2xx 响应按 30 秒起步的指数退避进入 `retry`，最长等待 1 小时。
+- 达到 `INTEGRATION_MAX_ATTEMPTS` 后进入 `dead`，不再自动重试。
+- 未配置对应出站 URL 时每 10 分钟延后，不影响本地业务事务。
+
+出站请求包含 `Idempotency-Key`、`X-HOIM-Event-ID` 和 `X-HOIM-Event-Type`，并在配置密钥时使用 `Authorization: Bearer ...`。接收方必须按事件 ID 幂等处理，不能假设“只投递一次”。
+
+管理员可在“系统管理 → 集成发件箱”查看状态、错误和最近 HTTP 状态，通过 `/api/integration/reconciliation` 对账，并对非成功事件执行人工重放。重放前应先确认外部系统是否已经处理，避免缺少幂等实现的接收方产生重复业务。
+
+## 实时院内事件
+
+浏览器通过 `GET /api/events/stream` 建立 SSE 长连接，`accesstoken` 放在请求头中，不放入查询字符串。事件包含受众角色/用户 ID，服务端在发送前再次过滤；Redis 用于跨 worker 广播并保留最近 500 条供断线续传。Nginx 必须关闭该路径的代理缓冲，配置见 [部署文档](deployDoc.md)。实时事件只用于界面刷新提示，不能替代数据库事务或外部系统发件箱。
+
 ## 厂商联调前检查
 
 - 确认厂商能够稳定提供本地申请单 ID 或完成外部单号映射。
 - 明确 HL7、FHIR、厂商 REST 或消息队列的字段/编码转换规则。
 - 在网关或防火墙配置来源 IP 白名单、TLS 和密钥轮换方案。
 - 用重复消息、乱序消息、超时重试、错误单号和危急值样本完成验收。
+- 接收方按 `X-HOIM-Event-ID` 验证幂等；演练自动重试、死信、人工重放和业务对账。
 - 由检验科/影像科确认外部结果进入院内审核，不得直接绕过审核对患者发布。

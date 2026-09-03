@@ -4,16 +4,41 @@
 
 ## [未发布]
 
-### 修复 — 性能基准
+### 新增 — 临床与运营能力
 
-- 将初始化器和基准服务器固定到仓库内专用的 `fastapi_be/benchmark.db`，忽略外部 `DATABASE_URL`；初始化时重建 schema，避免误清理其他数据库及旧 schema 残留
-- SQLite 基准改用 `QueuePool` 为并发会话提供独立连接，并确保 `run_benchmark:app` 可由 Uvicorn 正常加载
-- Locust 在每轮测试开始前通过 `/api/login` 获取并检查新 token；认证失败、token 过期或剩余有效期不足时立即终止测试
-- 混合场景使用 `admin`、`doctor`、`patient` 分角色身份，读取实际业务对象构造写入目标；预约和处方同时检查 HTTP 状态与响应体 `code == 200`
+- eMAR 条码给药：患者与药品双扫码核验、原子执行、重复给药保护和药品条码维护
+- 上下文感知 CDSS：结构化过敏、诊断、肝肾功能、妊娠/哺乳档案，区分人工记录与病历推导来源
+- 版本化 DRG/DIP 自动分组规则，按主要诊断、手术和费用区间匹配并保留命中版本
+- 每日运营指标预聚合及前端分析看板
+- Redis 跨 worker 临床事件流、短期回放和按角色/用户过滤，token 保留在请求头
+- LIS/PACS/医保/支付事务发件箱：指数退避、死信、人工重放和对账工作台
 
-### 文档
+### 修复 — 安全与正确性
 
-- 撤回旧 `StaticPool`、预生成 token 和错误业务成功判定下生成的基准结果；修复后的性能基线待重新测量
+- 移除前端运行时 `mockjs`，更新直接/传递依赖并将 `npm audit` 恢复为零告警
+- 统一业务错误的 HTTP 语义，限制 Axios 仅自动重试幂等请求
+- 用户名和患者证件号加入数据库唯一约束；DRG 规则使用 NULL 安全的唯一约束并拒绝静默清理冲突数据
+- JWT 时间统一为 UTC，护理记录不可变更冲突返回 HTTP 409
+- SSE 鉴权依赖纳入自动生成的 RBAC 矩阵
+- 修复生产 Nginx 丢弃 `/api` 前缀、静态资源正则抢占 API 上传路径的问题
+- 生产环境禁止演示账号脚本，新增交互式首管理员强口令初始化并防并发创建
+- 生产启动强制使用 PostgreSQL、至少 32 字符的非占位 JWT 密钥和显式 CORS 来源
+
+### 性能与可观测性
+
+- PostgreSQL 有界连接池、连接回收/预检查、语句超时和高增长工作流组合索引
+- 核心列表分页；处方、收费、入院、签到、病案首页、考勤与号源统计消除 N+1，报表改为数据库聚合
+- 流式导出、响应单次序列化、前端 Element Plus/ECharts 按需加载和 bundle 预算
+- 存活/就绪探针、Prometheus 请求量/时延/在途指标、请求 ID；Gunicorn 启动时清理陈旧多进程指标文件
+- 基准环境迁移到隔离 PostgreSQL + Gunicorn，提供 `smoke/small/medium/large` 数据配置；破坏性初始化校验专用数据库名和显式确认
+- Locust 使用运行时 token、角色合法写入身份，并对所有请求同时校验 HTTP 和业务成功状态
+
+### 部署与质量
+
+- 生产迁移、API 和调度器拆分为独立 Compose 服务；调度任务使用 PostgreSQL advisory lock 和持久化状态
+- CI 增加 Python/npm 依赖审计、后端与基准测试、ruff、前端构建、bundle 预算、RBAC 漂移和 Compose 校验
+- Dependabot 覆盖 pip、npm、Docker 和 GitHub Actions
+- 同步 README、部署、监控、性能、集成、用户手册、路线图及 560 接口 RBAC 矩阵
 
 ## [2.0.0] - 2026-08-23
 

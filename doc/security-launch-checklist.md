@@ -37,14 +37,16 @@
 | 28 | viewer_url 可注入 javascript: 协议进前端 window.open | 两处入口强制 https:// | `imaging.py` / `integration.py` |
 | 29 | logout 不吊销 token（24h 窗口内被窃取无法止损） | token_invalid_before 服务端吊销，logout/改密/管理员重置均触发 | `user.py` / `dependencies.py` |
 | 30 | 登录失败锁定为进程内存态（4 worker 各自计数，重启清零） | 数据库持久化锁定表（LoginLockout） | `user.py` + 迁移 20260818 |
-| 31 | RBAC 矩阵文档严重过期（247/481）误导开发 | 脚本自动重生成（481 接口）+ CI 漂移检测测试 | `scripts/generate_rbac_matrix.py` |
+| 31 | RBAC 矩阵文档严重过期误导开发 | 脚本自动生成 560 个路由方法 + CI 漂移检测测试 | `scripts/generate_rbac_matrix.py` |
+| 32 | 生产可写入公开的演示弱口令账号 | 生产环境阻止演示脚本，使用交互式强口令首管理员初始化 | `seed_default_accounts.py` / `bootstrap_admin.py` |
+| 33 | Nginx 反代剥离 `/api` 且静态规则抢占 API 文件路径 | 保留 `/api` 前缀并让 API 前缀优先 | `vue3-new-ui/nginx.conf` |
 
 ## 二、上线前必须人工完成（无法代码代办）
 
 ### 🔴 阻断项（不完成不得上线）
 
-- [ ] **修改所有默认账号密码**：`seed_default_accounts.py` 的 admin/admin123、super01/123456 等 11 个账号，生产库逐一改强口令或直接删除
-- [ ] **设置环境变量**：`SECRET_KEY`（`openssl rand -base64 32`）、`ALLOWED_ORIGINS`（精确域名，禁 `*`）、`POSTGRES_PASSWORD`
+- [ ] **安全初始化管理员**：确认生产未执行 `seed_default_accounts.py`；仅用 `bootstrap_admin.py` 交互创建首个强口令管理员
+- [ ] **设置环境变量**：`SECRET_KEY`（`openssl rand -base64 48`）、`ALLOWED_ORIGINS`（精确域名，禁 `*`）、`POSTGRES_PASSWORD`
 - [ ] **配置集成密钥**：`LIS/PACS/MEDICAL_INSURANCE/PAYMENT_INTEGRATION_KEY`（若启用对应回调）
 - [ ] **多 worker 部署**：设置 `TRANSPORT_RSA_PRIVATE_KEY_PEM` 或确保 4 个 worker 共享密钥文件可写路径
 - [ ] **HTTPS**：在 nginx 前配置 TLS 证书（443 + 80 跳转），JWT/密码否则明文传输
@@ -57,7 +59,7 @@
 - [ ] 登录失败锁定策略接入 IP 级（当前 用户名+IP 5 次/5 分钟，已持久化跨 worker；如需纯 IP 封禁需在网关做）
 - [ ] JWT 有效期从 24h 收紧至 2-4h（`user.py create_access_token`）；吊销机制已上线，短期化后体验损失更小
 - [ ] 集成回调升级为 HMAC 请求签名（时间戳+nonce 防重放），密钥版本化支持轮换（需与 LIS/PACS 厂商协商）
-- [ ] 慢查询/大表监控：report.py 部分报表全表加载（O(n) 内存），数据量大后需改 SQL 聚合
+- [ ] 慢查询/大表监控：核心报表已改 SQL 聚合，仍需在生产启用 `pg_stat_statements` 并按真实计划持续优化
 - [ ] 密码策略升级：最短 6 位→8 位+复杂度；移除 legacy 明文哈希兼容（迁移完成后删 `verify_password` 的 fallback 分支）
 
 ### 🟢 已知可接受风险（记录在案）

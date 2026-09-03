@@ -1,6 +1,6 @@
 # HOIM 系统安装部署手册
 
-> **版本**：v1.0（2026-08）　**适用对象**：系统实施/运维人员
+> **版本**：未发布版（2026-09-03）　**适用对象**：系统实施/运维人员
 > 配套文档：软件说明书（software-manual.md）· 安全上线清单（security-launch-checklist.md）
 
 ---
@@ -10,14 +10,19 @@
 ```mermaid
 flowchart LR
     U[浏览器] -->|HTTPS 443| NG[Nginx 容器<br/>前端静态资源]
-    NG -->|/api 反代 127.0.0.1:8000| BE[backend 容器<br/>gunicorn 4 worker]
+    NG -->|/api 经容器内网反代| BE[backend 容器<br/>gunicorn 4 worker]
     BE -->|内网 5432| PG[(PostgreSQL 16)]
-    BE -.可选.- EXT[LIS / PACS / 医保 / 支付]
+    BE -->|发布临床事件| RD[(Redis)]
+    SC[scheduler 容器] -->|advisory lock / 状态| PG
+    SC -->|可靠投递| EXT[LIS / PACS / 医保 / 支付]
 ```
 
-三容器固定编排在 `docker-compose.yml`：
+六服务固定编排在 `docker-compose.yml`：
+- **redis**：跨 worker 临床事件广播与最近事件回放，AOF 持久化
 - **db**：postgres:16-alpine，仅 `expose 5432`（不映射宿主机端口），带健康检查
+- **migrate**：一次性迁移服务，成功后 API 和调度器才启动
 - **backend**：python:3.12-slim + gunicorn（4 worker × UvicornWorker），绑定 `127.0.0.1:8000`
+- **scheduler**：库存/违约/运营聚合和集成发件箱独立调度进程
 - **frontend**：Nginx，80 对外（生产建议前置 TLS 或直接配 443）
 
 ---
@@ -54,16 +59,16 @@ cd /opt/hoimsystem
 ### 3.2 配置环境变量
 
 ```bash
-cp fastapi_be/.env.example fastapi_be/.env
+cp fastapi_be/.env.example .env
 ```
 
-编辑 `fastapi_be/.env`：
+编辑仓库根目录 `.env`（Compose 变量插值读取此文件）：
 
 ```ini
 # 必填（生产）
-DATABASE_URL=postgresql://hoim:<强密码>@db:5432/hoim
-SECRET_KEY=<openssl rand -base64 32 生成>
-POSTGRES_PASSWORD=<同上强密码>
+ENVIRONMENT=production
+POSTGRES_PASSWORD=<数据库强密码>
+SECRET_KEY=<openssl rand -base64 48 生成>
 ALLOWED_ORIGINS=https://his.your-hospital.cn
 
 # 可选（启用集成时）
@@ -71,6 +76,8 @@ LIS_INTEGRATION_KEY=...
 PACS_INTEGRATION_KEY=...
 MEDICAL_INSURANCE_INTEGRATION_KEY=...
 PAYMENT_INTEGRATION_KEY=...
+LIS_OUTBOUND_URL=https://...
+PACS_OUTBOUND_URL=https://...
 
 # 可选（多 worker RSA 传输密钥共享，建议显式配置）
 # TRANSPORT_RSA_PRIVATE_KEY_PEM=<PEM 内容单行转义>
@@ -83,35 +90,37 @@ PAYMENT_INTEGRATION_KEY=...
 ```bash
 docker compose build
 docker compose up -d
-docker compose ps        # 三服务均 healthy/running
+docker compose ps        # migrate 成功退出，其余五个服务 healthy/running
 ```
 
 ### 3.4 数据库初始化
 
 ```bash
-# 迁移到最新 schema
-docker compose exec backend alembic upgrade head
+# migrate 服务已自动升级到最新 schema；检查迁移状态
+docker compose logs migrate
 
-# 首次部署：初始化默认账号
-docker compose exec backend python seed_default_accounts.py
+# 仅在系统尚无管理员时交互式创建首个强口令超级管理员
+docker compose exec backend python bootstrap_admin.py --username <管理员工号>
 ```
 
-默认账号（`admin/admin123` 等 11 个）**仅用于首次登录，上线前必须全部改密**。
+生产环境会拒绝运行 `seed_default_accounts.py`，不得写入 `admin/admin123` 等演示账号。首个管理员创建后，其他员工账号通过系统权限管理和医院身份开通流程创建。
 
 ### 3.5 验证
 
 ```bash
-# 健康检查
-curl -s -X POST http://127.0.0.1:8000/api/test | grep -o '"code": *200'
+# 存活与就绪检查
+curl -fsS http://127.0.0.1:8000/health/live
+curl -fsS http://127.0.0.1:8000/health/ready
 
 # 前端可访问
 curl -sI http://<服务器IP>/ | head -1
 
-# 迁移版本
+# 迁移版本与指标
 docker compose exec backend alembic current
+curl -fsS http://127.0.0.1:8000/metrics | head
 ```
 
-功能冒烟：浏览器打开 `http://<服务器IP>`，用 admin 登录，依次点开"医生管理/挂号/报表"确认无 500。
+功能冒烟：浏览器打开 `http://<服务器IP>`，用刚创建的管理员登录，依次点开“医生管理/挂号/报表”确认无 500。
 
 ---
 
@@ -149,9 +158,9 @@ docker compose exec backend alembic current
 1. 备份数据库（见上）
 2. `git pull` 拉取新版本
 3. `docker compose build && docker compose up -d`
-4. `docker compose exec backend alembic upgrade head`（有新迁移时）
+4. 确认一次性 `migrate` 服务成功退出，`/health/ready` 返回 200
 5. 冒烟验证（登录/挂号/收费各走一遍）
-6. 回滚预案：`git checkout <旧tag>` 重建 + 恢复备份
+6. 回滚预案：切回旧 tag；若迁移不可向后兼容则按发布方案恢复备份
 
 详细流程见 `doc/release-process.md`。
 
@@ -186,7 +195,7 @@ docker compose exec backend alembic current
 
 ## 九、安全加固清单（上线阻断项）
 
-1. [ ] 全部默认账号改强口令
+1. [ ] 未运行演示账号脚本；首个管理员通过 `bootstrap_admin.py` 使用独立强口令创建
 2. [ ] SECRET_KEY / POSTGRES_PASSWORD / ALLOWED_ORIGINS 已配置
 3. [ ] HTTPS 已启用
 4. [ ] DATABASE_URL 指向 PostgreSQL（禁 SQLite）

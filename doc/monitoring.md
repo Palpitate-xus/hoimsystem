@@ -31,39 +31,25 @@
 
 ### 2.1 后端健康检查端点
 
-```python
-# 在 app/main.py 中添加（可选实现）
-@app.get("/health")
-async def health_check(db: Session = Depends(get_db)):
-    try:
-        db.execute(text("SELECT 1"))
-        return {"status": "healthy", "timestamp": datetime.now().isoformat()}
-    except Exception as e:
-        raise HTTPException(503, detail=str(e))
+| 端点 | 用途 | 成功响应 | 失败响应 |
+|:-----|:-----|:---------|:---------|
+| `GET /health/live` | 进程存活；不访问外部依赖 | HTTP 200 `{"status":"ok"}` | 进程不可达 |
+| `GET /health/ready` | 接流量前检查数据库、生产迁移版本和已配置 Redis | HTTP 200 `{"status":"ready"}` | HTTP 503，返回不含内部异常的通用原因 |
+| `GET /metrics` | Prometheus 文本指标 | HTTP 200 | 进程不可达 |
 
-
-@app.get("/health/detailed")
-async def detailed_health(db: Session = Depends(get_db)):
-    return {
-        "status": "healthy",
-        "version": "1.1.0",
-        "uptime_seconds": int(time.time() - START_TIME),
-        "database": {
-            "connected": True,
-            "user_count": db.query(User).count(),
-        },
-        "memory_mb": psutil.Process().memory_info().rss / 1024 / 1024,
-    }
-```
+生产就绪探针会确认 `alembic_version` 等于代码当前 head，防止旧 schema 接收新版本流量。Redis 已配置时也会执行短超时 `PING`。
 
 ### 2.2 用 curl 检查
 
 ```bash
-# 简单检查
-curl -f http://localhost:8000/health || echo "DOWN"
+# 存活检查
+curl -f http://localhost:8000/health/live || echo "DOWN"
 
-# 详细检查
-curl -s http://localhost:8000/health/detailed | python -m json.tool
+# 就绪检查
+curl -f http://localhost:8000/health/ready | python -m json.tool
+
+# 指标检查
+curl -fsS http://localhost:8000/metrics | head
 ```
 
 ### 2.3 Systemd 自动重启
@@ -246,18 +232,17 @@ async def global_exception_handler(request, exc):
 
 ### 6.1 Prometheus + Grafana（推荐）
 
-#### 暴露指标
+#### 已暴露指标
 
-```bash
-pip install prometheus-fastapi-instrumentator
-```
+应用自带低开销 ASGI 采集器，不缓存响应体：
 
-```python
-from prometheus_fastapi_instrumentator import Instrumentator
+| 指标 | 类型 | 标签 |
+|:-----|:-----|:-----|
+| `hoimsystem_http_requests_total` | Counter | `method`, `route`, `status` |
+| `hoimsystem_http_request_duration_seconds` | Histogram | `method`, `route` |
+| `hoimsystem_http_requests_in_progress` | Gauge | `method` |
 
-Instrumentator().instrument(app).expose(app)
-# 自动暴露 /metrics
-```
+每个 HTTP 响应还包含 `X-Request-ID`。合法的上游请求 ID 会继续传递，否则应用生成新 ID，便于关联访问日志和业务审计。Gunicorn 多 worker 部署需设置 `PROMETHEUS_MULTIPROC_DIR`；Compose 已设置为 `/tmp/prometheus`，Gunicorn 主进程启动钩子会清理其中遗留的指标文件。
 
 #### Prometheus 配置
 
@@ -380,8 +365,8 @@ groups:
     rules:
       - alert: HighErrorRate
         expr: |
-          sum(rate(http_requests_total{status=~"5.."}[5m]))
-          / sum(rate(http_requests_total[5m])) > 0.05
+          sum(rate(hoimsystem_http_requests_total{status=~"5.."}[5m]))
+          / sum(rate(hoimsystem_http_requests_total[5m])) > 0.05
         for: 5m
         annotations:
           summary: "API 错误率超过 5%"
@@ -389,7 +374,7 @@ groups:
       - alert: HighLatency
         expr: |
           histogram_quantile(0.95,
-            sum(rate(http_request_duration_seconds_bucket[5m])) by (le)
+            sum(rate(hoimsystem_http_request_duration_seconds_bucket[5m])) by (le)
           ) > 1
         for: 5m
         annotations:
@@ -481,16 +466,14 @@ psql -c "VACUUM FULL hoimsystem_operation_log;"  # 谨慎，会锁表
 
 ## 十、当前监控现状
 
-> ⚠️ 项目当前**未集成完整监控体系**，建议生产部署前补齐：
-
-- [ ] 健康检查端点
-- [ ] 应用日志规范化（结构化日志）
-- [ ] Sentry 错误监控
-- [ ] Prometheus 性能指标
-- [ ] Grafana 监控看板
-- [ ] 告警规则与通知渠道
-- [ ] 备份与归档策略
-- [ ] Runbook 文档
+- [x] 进程存活、数据库/迁移/Redis 就绪检查
+- [x] Prometheus 请求量、延迟和在途请求指标
+- [x] 请求 ID 与操作审计
+- [x] 管理端请求摘要和每日运营指标预聚合
+- [x] 持久化调度任务状态、集成发件箱重试/死信状态
+- [ ] 部署侧接入 Prometheus/Grafana 并验证告警通知链路
+- [ ] 接入集中式结构化日志和错误追踪平台
+- [ ] 建立备份恢复演练、指标留存和容量趋势报告
 
 ---
 

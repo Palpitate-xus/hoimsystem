@@ -1,6 +1,6 @@
 # HOIM 医院信息管理系统 · 软件说明书
 
-> **版本**：v1.0（2026-08）　**文档定位**：软件总体说明（概述 / 运行环境 / 安装部署 / 功能结构 / 操作指南索引 / 数据与安全）
+> **版本**：未发布版（2026-09-03）　**文档定位**：软件总体说明（概述 / 运行环境 / 安装部署 / 功能结构 / 操作指南索引 / 数据与安全）
 > 操作指南详见《用户操作手册》（user-manual.md），业务流程详见《业务流程图》（flowcharts/）。
 
 ---
@@ -32,9 +32,9 @@ HOIM（Hospital Information Management System）医院信息管理系统是一�
 | 软件类型 | B/S 架构医院信息管理系统（HIS） |
 | 版本 | v1.0 |
 | 用户规模 | 11 种角色，支持多院区 |
-| 接口规模 | 541 个 API（15 个公开接口 + 526 个认证接口） |
-| 数据规模 | 139 张业务表（含 2026-08 新增 13 张 HIS 补齐表） |
-| 前端页面 | 约 100 个业务页面（15 个业务模块） |
+| 接口规模 | 560 个路由方法（全量权限以自动生成 RBAC 矩阵为准） |
+| 数据规模 | 145 张业务表 |
+| 前端页面 | 154 个 Vue 页面 |
 
 ### 1.2 软件著作权特性
 
@@ -77,10 +77,11 @@ HOIM（Hospital Information Management System）医院信息管理系统是一�
 | 组件 | 版本要求 | 用途 |
 |------|---------|------|
 | Python | ≥ 3.12 | 后端运行时 |
-| Node.js | ≥ 18 | 前端构建（仅构建期需要） |
+| Node.js | 20.19+ 或 22.12+ | 前端构建（Rspack 2 要求，仅构建期需要） |
 | PostgreSQL | 16 | 生产数据库（生产环境强制） |
 | SQLite | 3.x | 开发/测试数据库（仅开发） |
 | Nginx | 1.24+ | 前端静态资源 + 反向代理 |
+| Redis | 7+ | 跨实例临床事件和短期回放 |
 
 ### 2.3 客户端要求
 
@@ -97,6 +98,7 @@ HOIM（Hospital Information Management System）医院信息管理系统是一�
 | 80/443 | Nginx（前端+API 入口） | 对外 |
 | 8000 | 后端 API | 仅绑定 127.0.0.1（经 Nginx 代理） |
 | 5432 | PostgreSQL | 仅内网 expose，不对外 |
+| 6379 | Redis | 仅 Compose 内网 expose，不对外 |
 
 ---
 
@@ -109,29 +111,26 @@ HOIM（Hospital Information Management System）医院信息管理系统是一�
 git clone <仓库地址> hoimsystem && cd hoimsystem
 
 # 2. 配置环境变量（必须，缺失无法启动）
-cp fastapi_be/.env.example fastapi_be/.env
-vim fastapi_be/.env   # 按下表填写
+cp fastapi_be/.env.example .env
+vim .env   # Compose 从仓库根目录读取变量
 
 # 3. 启动全部服务
 docker compose up -d
 
-# 4. 执行数据库迁移
-docker compose exec backend alembic upgrade head
-
-# 5. 初始化默认账号（首次部署）
-docker compose exec backend python seed_default_accounts.py
+# 4. migrate 服务成功后，交互式创建首个生产管理员
+docker compose exec backend python bootstrap_admin.py --username <管理员工号>
 ```
 
-> 默认账号口令仅用于首次登录，上线前必须全部修改（见安全清单）。
+> 生产环境禁止运行演示账号初始化脚本；其他账号由首个管理员通过受控流程创建。
 
 ### 3.2 必填环境变量
 
 | 变量 | 说明 | 生成方式 |
 |------|------|---------|
-| `SECRET_KEY` | JWT 签名密钥 | `openssl rand -base64 32` |
+| `SECRET_KEY` | JWT 签名密钥 | `openssl rand -base64 48` |
 | `POSTGRES_PASSWORD` | 数据库密码 | 自定强口令 |
 | `ALLOWED_ORIGINS` | CORS 白名单（精确域名） | 如 `https://his.hospital.cn` |
-| `DATABASE_URL` | 生产库连接串 | `postgresql://hoim:<密码>@db:5432/hoim` |
+| `ENVIRONMENT` | 启用生产安全校验 | 固定为 `production` |
 
 可选变量（启用对应集成时配置）：
 
@@ -161,7 +160,7 @@ npm run serve:rspack   # http://localhost:8091，自动代理 /api → 8000
 
 ### 3.4 上线前检查
 
-按 `doc/security-launch-checklist.md` 逐项确认（默认账号改密、HTTPS 证书、生产 PostgreSQL、集成密钥等 7 项阻断项）。
+按 `doc/security-launch-checklist.md` 逐项确认（安全初始化管理员、HTTPS 证书、生产 PostgreSQL、集成密钥等阻断项）。
 
 ---
 
@@ -349,9 +348,9 @@ flowchart TD
 
 ### 7.1 数据库概览
 
-- **139 张业务表**，命名前缀 `hoimsystem_`；核心表说明见 `doc/databaseDoc.md`，全量以 `app/models.py` 为准
+- **145 张业务表**，命名前缀 `hoimsystem_`；核心表说明见 `doc/databaseDoc.md`，全量以 `app/models.py` 为准
 - 状态码/枚举字典见 `doc/data-dictionary.md`
-- 数据库迁移：Alembic（`fastapi_be/alembic/`），当前 head `20260823_home_icd`（病案首页 ICD 编码绑定表）
+- 数据库迁移：Alembic（`fastapi_be/alembic/`）；当前 head 以 `alembic heads` 输出为准，就绪探针会拒绝落后版本
 - 业务收费标准（管理员可配，`系统配置` 模块或 `/api/config/*` 维护）：
   - `registration_fee_common` 普通门诊挂号费（默认 10 元）
   - `registration_fee_specialist` 专家门诊挂号费（默认 30 元）
@@ -415,7 +414,7 @@ erDiagram
 
 ### 8.2 访问控制
 
-- RBAC 11 角色 × 11 个角色组常量，541 接口全部声明鉴权依赖
+- RBAC 11 角色 × 角色组常量，560 个路由方法由生成脚本维护权限矩阵并在 CI 检查漂移
 - 矩阵文档由脚本自动生成 + CI 漂移检测（`tests/test_rbac_drift.py`）
 - 患者数据强制本人过滤（IDOR 防护）
 

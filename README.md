@@ -1,4 +1,4 @@
-# 医院门诊信息管理系统（HIS-OP）
+# HOIM 医院信息管理系统
 
 [English](README.en.md) | **中文**
 
@@ -15,11 +15,11 @@
 
 | 维度 | 数量 |
 |:----:|:----:|
-| 业务模块 | **75** 个后端路由模块 |
-| API 接口 | **541** 个 RESTful 接口 |
-| 数据库表 | **139** 张业务表 |
-| 前端页面 | **143** 个 Vue 页面 |
-| 用户角色 | **8** 种（admin/director/doctor/nurse/cashier/pharmacist/guide/patient） |
+| 业务模块 | **80** 个后端路由模块 |
+| API 接口 | **560** 个路由方法（以自动生成的 RBAC 矩阵为准） |
+| 数据库表 | **145** 张业务表 |
+| 前端页面 | **154** 个 Vue 页面 |
+| 用户角色 | **11** 种（含超级管理员、检验技师和挂号员） |
 
 ---
 
@@ -48,7 +48,7 @@
 |:----:|:--------|
 | 排班管理 | 医生周排班、号源数量、专家标记 |
 | 电子病历 | 主诉/现病史/既往史/诊断/治疗，模板复用 |
-| 处方开立 | 药品搜索、剂量频次途径、库存校验 |
+| 处方开立 | 药品搜索、剂量频次途径、库存校验，结合结构化临床档案执行 CDSS 规则 |
 | 检查检验申请 | 检查类型、项目、紧急标记 |
 | 考勤签到 | 每日签到/签退、出勤统计 |
 | 多学科会诊 | MDT 申请、参与科室、结果录入 |
@@ -73,7 +73,7 @@
 | 病区床位 | 病区维护、床位状态、空床查询 |
 | 入院登记 | 4 种入院类型、床位分配、押金登记 |
 | 住院医嘱 | 长期/临时医嘱、审核、停止、撤销 |
-| 护士工作站 | 医嘱执行、护理记录、体温录入 |
+| 护士工作站 | 医嘱执行、护理记录、体温录入，eMAR 条码双核验后给药 |
 | 住院费用 | 费用明细、每日清单、押金扣减 |
 | 出院结算 | 总费用计算、押金退还 |
 
@@ -131,6 +131,10 @@
 | MDRO 隔离 | 耐药菌隔离登记/解除、床头标识 |
 | 传染病报告卡 | 法定病种自动判类、网直上报状态机（待报→上报→审核→订正） |
 | HQMS 指标 | 质量指标录入/导入/批量上报 |
+| CDSS 临床上下文 | 结构化维护过敏、诊断、肝肾功能、妊娠/哺乳信息；处方规则显示命中依据与数据来源 |
+| DRG/DIP 自动分组 | 版本化规则维护，按主要诊断/手术和费用区间自动匹配并保留规则版本 |
+| 对外集成发件箱 | 业务提交与 LIS/PACS/医保/支付事件同事务落库，独立调度器重试、死信和人工重放 |
+| 运营分析 | 每日预聚合门诊、住院、收入、处方及床位指标，支持管理员手工刷新 |
 
 #### 🔟 HIS 补齐模块（2026-08 四批交付，零预置数据、全手工录入/批量导入）
 | 模块 | 功能说明 |
@@ -154,11 +158,9 @@
 
 | 模块 | 功能说明 |
 |:----:|:--------|
-| 医保接口 | 医保实时结算、电子凭证 |
-| PACS/RIS | 医学影像存储、阅片、报告 |
-| 闭环医嘱 | 医嘱→摆药→执行→计费完整闭环 |
-| CDSS 深度集成 | 审方规则引擎已上线（5 类规则）；规划接入专业知识库/肾功能剂量校正 |
-| DRG/DIP 自动分组 | 手工分组与盈亏分析已上线；规划 CHS-DRG 分组器自动入组 |
+| 国家医保平台适配 | 当前已有目录、结算回调和版本化 DRG/DIP 规则；仍需按当地平台规范联调签名、电子凭证和国家分组版本 |
+| 专业知识库 CDSS | 当前已有结构化上下文和本院规则引擎；规划接入经临床验证的知识库、检验趋势与肾功能剂量算法 |
+| DICOM/影像归档 | 当前已有检查、报告、外部 Viewer 和 PACS 回调；规划接入真实 DICOM 存储、路由和工作列表 |
 | 互联网医院 | 在线问诊、复诊配药 |
 
 > 完整 Roadmap 见 [doc/todos.md](doc/todos.md)，HIS 功能差距分析与交付记录见 [doc/his-feature-gap-analysis.md](doc/his-feature-gap-analysis.md)。
@@ -173,7 +175,7 @@
 │        Vue 3 · Element Plus · Vuex · Vue Router · Rspack      │
 ├─────────────────────────────────────────────────────────────┤
 │                         应用层 (FastAPI)                       │
-│   75 个路由模块 · 541 个 API · JWT 认证 · 操作日志中间件         │
+│    80 个路由模块 · 560 个路由方法 · JWT/RBAC · 指标/审计          │
 ├─────────────────────────────────────────────────────────────┤
 │                         数据层                                 │
 │              SQLite (开发) / PostgreSQL (生产)                 │
@@ -185,9 +187,9 @@
 
 | 层级 | 技术 |
 |:----:|:-----|
-| 前端 | Vue 3.4+ / Element Plus 2.x / Vuex 4 / Vue Router 4 / Axios / Rspack |
+| 前端 | Vue 3.5+ / Element Plus 2.x / Vuex 4 / Vue Router 5 / Axios / Rspack 2 |
 | 后端 | FastAPI 0.111+ / SQLAlchemy 2.x / Pydantic 2.x / Alembic |
-| 数据库 | SQLite（开发）/ PostgreSQL（生产推荐） |
+| 数据库 | SQLite（仅开发）/ PostgreSQL（生产强制） |
 | 容器化 | Docker / Docker Compose |
 | 代码质量 | ruff (Python) / Prettier (JavaScript) |
 | 测试 | pytest（后端 API 测试） |
@@ -201,7 +203,7 @@
 hoimsystem/
 ├── vue3-new-ui/                # Vue 3 前端
 │   ├── src/
-│   │   ├── views/              # 143 个页面组件，按模块分目录
+│   │   ├── views/              # 154 个页面组件，按模块分目录
 │   │   │   ├── admin/          # 管理员模块
 │   │   │   ├── patient/        # 患者服务
 │   │   │   ├── doctor/         # 医生工作站
@@ -259,7 +261,7 @@ hoimsystem/
 │   │   │   ├── system.py          # 操作日志/字典/配置
 │   │   │   ├── backup.py          # 数据备份
 │   │   │   └── upload.py          # 文件上传
-│   │   ├── models.py           # 139 张表的 SQLAlchemy 模型
+│   │   ├── models.py           # 145 张表的 SQLAlchemy 模型
 │   │   ├── schemas.py          # Pydantic 请求/响应模型
 │   │   ├── dependencies.py     # JWT 解析、权限校验
 │   │   ├── database.py         # 数据库连接
@@ -297,7 +299,7 @@ hoimsystem/
 
 | 组件 | 版本 |
 |:----:|:----:|
-| Node.js | ≥ 16 |
+| Node.js | 20.19+ 或 22.12+ |
 | Python | ≥ 3.10 |
 | 数据库 | 内置 SQLite，无需安装 |
 
@@ -351,7 +353,10 @@ npm run build
 ### 5. Docker 一键启动（生产推荐）
 
 ```bash
-docker-compose up -d
+export POSTGRES_PASSWORD='请替换为数据库强密码'
+export SECRET_KEY="$(openssl rand -base64 48)"
+export ALLOWED_ORIGINS='https://his.example.com'
+docker compose up -d
 ```
 
 详细部署配置（Nginx、HTTPS、Systemd）见 [doc/deployDoc.md](doc/deployDoc.md)。
@@ -360,7 +365,7 @@ docker-compose up -d
 
 ## 🔑 默认账号
 
-系统初始化时自动创建以下测试账号（首次启动后端时建表，账号通过 API 或 SQL 注入）：
+以下账号只会由开发初始化脚本 `fastapi_be/init_database.py` 写入测试数据库，普通后端启动和生产迁移不会自动创建：
 
 | 角色 | 用户名 | 密码 | 备注 |
 |:----:|:------:|:----:|:----:|
@@ -376,23 +381,26 @@ docker-compose up -d
 | 挂号员 | `registrar01` | `123456` | 挂号服务 |
 | 患者 | `patient1` | `123456` | 患者自助 |
 
-> ⚠️ 生产环境部署前**必须**修改默认密码，并在 `.env` 中设置 `SECRET_KEY` 为随机强密钥（使用 `openssl rand -base64 32` 生成）。
+> ⚠️ 不要在生产数据库运行演示初始化脚本。生产账号应通过受控流程创建，并为 `SECRET_KEY` 配置独立强随机值。
 
 ---
 
 ## 👥 系统角色
 
-系统支持 8 种角色，覆盖门诊全岗位：
+系统支持 11 种角色，覆盖医院核心岗位：
 
 | 角色 | 主要权限 |
 |:----:|:--------|
 | **管理员** (admin) | 全局管理：用户、医生、病人、科室、药品、通知、收费、系统配置 |
+| **超级管理员** (super_admin) | 与管理员同属全局治理角色，用于最高权限账号隔离 |
 | **科室主任** (director) | 科室管理：本科室排班、医生管理、发布通知、处方点评 |
 | **医生** (doctor) | 诊疗工作：病历书写、处方开立、检查申请、排班查看 |
 | **护士** (nurse) | 护理工作：预检分诊、生命体征录入、住院护理、随访 |
 | **收费员** (cashier) | 收费窗口：现场挂号/退号、费用结算、日结对账 |
 | **药师** (pharmacist) | 药房管理：处方审核、发药确认、退药处理、库存管理 |
 | **导诊员** (guide) | 导诊服务：分诊台管理、智能导诊、候诊队列 |
+| **检验技师** (lab_technician) | 样本接收、结果录入/审核、危急值闭环、质控 |
+| **挂号员** (registrar) | 窗口预约确认、取消和患者建卡服务 |
 | **患者** (patient) | 自助服务：挂号/预约、缴费、查报告、健康档案、评价 |
 
 ---
@@ -404,8 +412,8 @@ docker-compose up -d
 | [文档总览](doc/README.md) | 所有文档的导航索引 |
 | [架构文档](doc/architecture.md) | 系统架构、技术选型、设计原则 |
 | [需求文档](doc/demandDoc.md) | 功能需求、业务流程、非功能需求 |
-| [API 文档](doc/apiDoc.md) | 核心接口定义（全量 541 见 RBAC 矩阵） |
-| [数据库文档](doc/databaseDoc.md) | 139 张表结构定义及 ER 关系 |
+| [API 文档](doc/apiDoc.md) | 核心接口定义（全量 560 见 RBAC 矩阵） |
+| [数据库文档](doc/databaseDoc.md) | 核心表结构说明；全量 145 张表以模型为准 |
 | [部署文档](doc/deployDoc.md) | 开发/生产/Docker 部署指南 |
 | [用户手册](doc/user-manual.md) | 按角色分组的用户操作指南 |
 | [路线图](doc/todos.md) | 已完成功能与待开发模块 |
@@ -418,9 +426,9 @@ docker-compose up -d
 ## ✨ 项目亮点
 
 - **业务覆盖广**：门诊 + 住院 + 药房 + 检验 + 体检 + 手术，9 大领域 40+ 模块
-- **代码质量高**：247 个 API 按模块清晰组织，前后端分离，组件复用
+- **代码质量高**：560 个路由方法按模块组织，前后端分离，CI 强制 lint、测试、依赖审计和 bundle 预算
 - **开发体验好**：FastAPI 自动文档、热重载、SQLite 零配置启动
-- **可观测性强**：操作日志中间件自动记录、操作时间精确到秒
+- **可观测性强**：存活/就绪探针、Prometheus 指标、请求 ID、操作审计和每日运营聚合
 - **安全可控**：JWT 认证、bcrypt 密码、身份证号脱敏显示、操作审计
 - **UI 体验佳**：Element Plus 组件库、全局样式工具类、空状态/加载状态全覆盖
 
@@ -430,53 +438,26 @@ docker-compose up -d
 
 ## ⚡ 性能测试
 
-### 当前状态
+### 可复现的 PostgreSQL 基准
 
-> **基线待重测（2026-09-03）**：此前发布的吞吐、延迟、失败率和并发建议来自旧基准。旧服务器通过 `StaticPool` 共享单个 SQLite 连接；旧混合场景又用预生成的 `admin` token 执行仅允许患者或医生执行的写操作，并且只按 HTTP 状态统计，会把响应体 `code != 200` 的业务失败计为成功。旧数据与当前实现不可比，不作为当前性能基线、容量建议或 SLA 依据。旧结果中的 HTTP 401 表示认证失败，不是“连接池耗尽”。
-
-### 修复后的基准配置
-
-| 项目 | 配置 |
-|:----:|:-----|
-| 服务器 | FastAPI + Uvicorn，1 worker |
-| 数据库 | 专用 SQLite 文件 `fastapi_be/benchmark.db` |
-| 数据初始化 | 仅重建专用基准库并写入基准账号与业务数据；不继承外部 `DATABASE_URL` |
-| 连接方式 | SQLAlchemy `QueuePool`；重叠 Session 使用独立 DBAPI 连接 |
-| 认证 | 开测前调用 `/api/login` 获取 token，并校验 `sub` / `iat` / `exp`；失败时终止测试 |
-| 角色 | 查询使用管理员；预约使用患者；处方使用医生 |
-| 写入目标 | 开测时读取实际排班、患者和可用药品，构造字段一致且不重复的预约请求 |
-| 混合场景 | 按任务权重约 96.2% 查询、3.8% 写入；8 个查询和 2 个写入场景 |
-| 成功判定 | 预约和处方同时要求 HTTP 2xx 与响应体 `code == 200` |
-| 工具 | Locust 2.44.4，单进程 headless 模式 |
-| 时长 | 每轮 30 秒，无显式预热 |
-
-`locust_readonly_pool.py` 不修改业务数据，但并非全部使用 GET：它还使用 `POST /api/log/getList` 执行查询。当前 SQLite 基准允许多个数据库连接，但 SQLite 的文件级写竞争仍然存在。PostgreSQL 尚未在同一提交、硬件、数据规模和负载模型下实测，不应从 SQLite 结果外推具体吞吐、延迟或并发上限。
-
-### 测试方法复现
-
-`init_benchmark_data.py` 会清空并重建仓库内的 `fastapi_be/benchmark.db`，不会使用环境中的其他数据库。每轮测试前都应重新初始化。
+基准环境使用独立的 PostgreSQL 容器、4 个 Gunicorn worker 和临时数据卷，不复用开发或生产数据库。破坏性初始化只接受名为 `hoimsystem_benchmark` 的目标，并要求 `BENCHMARK_RESET_CONFIRM` 与数据库名一致。数据配置包括 `smoke`、`small`、`medium`、`large`，最大可生成 10 万患者和 50 万条历史记录。
 
 ```bash
-# 终端 1：初始化并启动基准服务
 cd fastapi_benchmark
-export SECRET_KEY="benchmark-only-local-secret-at-least-32-bytes"
-python init_benchmark_data.py
-uvicorn run_benchmark:app --host 0.0.0.0 --port 8000
 
-# 终端 2：选择一个场景运行（如配置了 HTTP 代理，请将 localhost 加入 NO_PROXY）
-cd fastapi_benchmark
-mkdir -p benchmark_results
-locust -f locust_final.py --headless -u 50 -r 25 -t 30s \
-    --host http://localhost:8000 --csv=benchmark_results/mixed_50u \
-    --exit-code-on-error 1
+# small 为默认配置；也可改为 smoke / medium / large
+BENCHMARK_PROFILE=small docker compose up --build -d
 
-# 如需改测只读场景：先停止终端 1，重新初始化并启动服务，再执行下列命令
-locust -f locust_readonly_pool.py --headless -u 50 -r 25 -t 30s \
-    --host http://localhost:8000 --csv=benchmark_results/readonly_50u \
-    --exit-code-on-error 1
+# 混合读写场景。token 在开测时登录生成，写请求使用合法的患者/医生身份
+locust -f locust_final.py --headless -u 50 -r 10 -t 5m \
+  --host http://localhost:18000 --csv=benchmark_results/mixed_50u \
+  --exit-code-on-error 1
+
+# 结束后删除临时数据库容器
+docker compose down -v
 ```
 
-初始化脚本会创建与 Locust 默认配置一致的管理员、医生和患者基准身份。Locust 会在每轮开始时实时登录，不使用固定的 `tokens.json`。修复后的实测结果将在重新执行完整基准后补充。
+所有 Locust 请求同时检查 HTTP 状态和响应体 `code == 200`；运行元数据记录代码版本、数据配置、并发参数和脱敏后的数据库目标。历史 CSV 来自旧环境，不能作为当前容量或 SLA 结论；应在目标硬件上重新测量 P95/P99、错误率、连接池等待和 PostgreSQL 慢查询。
 
 ---
 

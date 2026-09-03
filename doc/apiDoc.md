@@ -1,6 +1,6 @@
 # 医院门诊信息管理系统 API 文档
 
-> **范围说明**：本文档覆盖核心模块接口的入参/响应/错误码详解。全量 **484** 个接口清单与角色权限矩阵见 [api-rbac-matrix.md](api-rbac-matrix.md)（由 `fastapi_be/scripts/generate_rbac_matrix.py` 自动生成）。两文档冲突时以 RBAC 矩阵与代码为准。
+> **范围说明**：本文档覆盖核心模块接口的入参/响应/错误码详解。全量 **560** 个路由方法及角色权限矩阵见 [api-rbac-matrix.md](api-rbac-matrix.md)（由 `fastapi_be/scripts/generate_rbac_matrix.py` 自动生成）。两文档冲突时以 RBAC 矩阵与代码为准。
 
 baseURL：`/api`
 
@@ -14,9 +14,11 @@ baseURL：`/api`
 }
 ```
 
-- `code = 200` 表示业务成功，`code = 500` 表示业务错误
+- `code = 200` 表示业务成功；历史接口中的 `code = 500` 表示可预期的参数/状态错误
 - `msg` 为提示信息
 - `data` 为具体返回数据（可能为空或省略）
+
+传输层不再把业务失败伪装成 HTTP 200：认证/授权/未找到/冲突分别返回 401/403/404/409，历史 `code = 500` 默认映射为 HTTP 400；未处理异常才返回 HTTP 500。客户端必须同时检查 HTTP 状态与响应体 `code`，写请求不得因超时自动重试，除非接口明确支持 `Idempotency-Key`。
 
 > **状态标识说明**：
 > - ✅ **已实现** — 代码已开发完成

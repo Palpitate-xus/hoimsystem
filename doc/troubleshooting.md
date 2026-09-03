@@ -228,23 +228,30 @@ sqlite3 fastapi_be/test.db "SELECT username, password FROM hoimsystem_users WHER
 # 正常的 password 应该是以 $2b$ 开头的 60 字符 bcrypt 哈希
 ```
 
-**重置 admin 密码**：
+**已有其他管理员时**：请由另一管理员在“权限分配”中重置密码，该操作会吊销旧 token 并写入审计日志。
+
+**唯一管理员无法登录时的受控恢复**：由 DBA 在维护窗口执行下列交互式脚本；密码不会出现在 shell 历史或进程参数中。执行后记录变更工单。
+
 ```python
 # 在 fastapi_be/ 下运行
 python -c "
-import bcrypt
+import datetime, getpass
 from app.database import SessionLocal
 from app.models import User
+from app.security import hash_password
 
-pwd = bcrypt.hashpw('admin123'.encode(), bcrypt.gensalt()).decode()
+pwd = getpass.getpass('New strong password: ')
+assert len(pwd) >= 12, 'password must be at least 12 characters'
 db = SessionLocal()
 admin = db.query(User).filter(User.username == 'admin').first()
 if admin:
-    admin.password = pwd
+    admin.password = hash_password(pwd)
+    admin.token_invalid_before = datetime.datetime.now(datetime.UTC).replace(tzinfo=None)
     db.commit()
-    print('Reset admin password to admin123')
+    print('Reset administrator password and revoked old tokens')
 else:
     print('admin user not found')
+db.close()
 "
 ```
 
@@ -411,13 +418,7 @@ gzip_min_length 1024;
 
 ### Q25: 如何禁用默认账号？
 
-```bash
-# 删除默认账号
-sqlite3 fastapi_be/test.db "DELETE FROM hoimsystem_users WHERE username IN ('admin', 'doctor1', 'patient1');"
-
-# 或修改密码
-python -c "..."  # 参考 Q15
-```
+生产环境会拒绝运行 `seed_default_accounts.py`，正常情况下不存在默认账号。开发数据库可直接重建；若历史生产库曾写入演示账号，请在维护窗口由管理员逐一改为独立强口令或通过受审计流程停用/删除，并确认关联医生、患者和审计记录的保留要求，不要直接执行无条件 SQL 删除。
 
 ---
 
@@ -425,10 +426,10 @@ python -c "..."  # 参考 Q15
 
 ```bash
 # 生成一个强随机密钥
-openssl rand -base64 32
+openssl rand -base64 48
 
 # 写入 .env
-echo "SECRET_KEY=$(openssl rand -base64 32)" >> .env
+echo "SECRET_KEY=$(openssl rand -base64 48)" >> .env
 ```
 
 > ⚠️ 修改 SECRET_KEY 后所有已签发的 token 都会失效，用户需要重新登录。
@@ -488,7 +489,7 @@ sqlite> .quit
 # 登录获取 token
 TOKEN=$(curl -s -X POST http://localhost:8000/api/login \
   -H "Content-Type: application/json" \
-  -d '{"username":"admin","password":"admin123"}' \
+  -d '{"username":"<管理员工号>","password":"<密码>"}' \
   | python3 -c "import sys,json; print(json.load(sys.stdin)['data']['accesstoken'])")
 
 # 调用需要鉴权的接口

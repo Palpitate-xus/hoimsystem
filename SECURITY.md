@@ -4,8 +4,9 @@
 
 | 版本 | 支持状态 |
 |------|----------|
-| v1.0.x | ✅ 积极维护 |
-| < v1.0.0 | ❌ 不再维护 |
+| 当前 `master` / 未发布版 | ✅ 积极维护 |
+| v2.0.x | ✅ 接收高危与严重漏洞修复 |
+| < v2.0.0 | ❌ 不再维护 |
 
 ## 报告漏洞
 
@@ -17,29 +18,17 @@
 
 ## 已知安全注意事项
 
-### 1. MockJS 原型污染（GHSA-mh8j-9jvh-gjf6）
-
-**状态**: 上游无可用修复版本
-**影响**: 低（仅在演示/开发环境使用）
-**详情**:
-- MockJS 库存在原型污染漏洞
-- 本项目仅在生产构建时启用 Mock 拦截（`main.js` 中 `process.env.NODE_ENV === 'production'` 条件）
-- Mock 数据由项目自身定义，不可被外部用户操控
-- 替代方案: 使用 MSW (Mock Service Worker) 替代 MockJS（规划中）
-
-**缓解措施**:
-- 生产部署时确保使用真实后端 API（FastAPI），不依赖 Mock 数据
-- 定期关注 MockJS 上游修复进展
-
-### 2. 依赖安全扫描
+### 1. 依赖安全扫描
 
 本项目使用以下工具持续监控依赖安全：
 
-- **npm audit**: 前端依赖扫描（每次 CI 构建时运行）
-- **pip-audit**: Python 依赖扫描
-- **GitHub Dependabot**: 自动安全更新
+- **npm audit**：前端生产与开发依赖，CI 以 low 级别阻断
+- **pip-audit**：后端 `requirements.txt`，CI 阻断已知漏洞
+- **GitHub Dependabot**：每周检查 npm、pip、Docker 和 GitHub Actions
 
-### 3. 安全配置检查清单
+2026-09-03 已彻底移除无修复版本的 `mockjs` 运行时，用本地确定性数据生成器保留开发 mock 功能；同时更新 `qs` 及 `browserslist`、`nanoid`、`postcss-selector-parser` 等传递依赖。当前 lockfile 的 `npm audit` 为 0 告警。GitHub 默认分支上的旧 Dependabot 告警会在修复提交推送并由 GitHub 重新扫描后关闭。
+
+### 2. 安全配置检查清单
 
 部署前请确保：
 
@@ -49,6 +38,7 @@
 - [ ] 生产环境使用 HTTPS
 - [ ] CORS `allow_origins` 已限制为实际域名（不是 `*`）
 - [ ] 文件上传目录有适当的权限控制
+- [ ] 生产未运行演示账号脚本；首个管理员通过 `bootstrap_admin.py` 交互创建
 
 ## 安全更新历史
 
@@ -60,3 +50,4 @@
 | 2026-05-10 | CVE-2026-28684 (python-dotenv) | v1.0.0+ | 升级至 >=1.2.2 |
 | 2026-05-10 | CVE-2026-4539 (pygments) | v1.0.0+ | 升级至 >=2.20.0 |
 | 2026-05-10 | npm 间接依赖 (minimatch, picomatch, serialize-javascript, immutable) | v1.0.0+ | npm overrides 强制升级 |
+| 2026-09-03 | MockJS 原型污染及 npm 直接/传递依赖告警 | 未发布版 | 移除 MockJS，更新/覆盖到已修复版本，CI 强制 `npm audit` |

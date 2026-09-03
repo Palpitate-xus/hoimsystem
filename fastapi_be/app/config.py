@@ -1,6 +1,7 @@
 import secrets
 import warnings
 
+from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 DEFAULT_ALLOWED_ORIGINS = "http://localhost:8091,http://127.0.0.1:8091,http://localhost:8080,http://127.0.0.1:8080"
@@ -17,6 +18,11 @@ class Settings(BaseSettings):
     DB_HOST: str = "localhost"
     DB_PORT: str = "5432"
     DB_NAME: str = "hoimsystem"
+    DB_POOL_SIZE: int = Field(default=10, ge=1, le=100)
+    DB_MAX_OVERFLOW: int = Field(default=10, ge=0, le=200)
+    DB_POOL_TIMEOUT_SECONDS: int = Field(default=30, ge=1, le=300)
+    DB_POOL_RECYCLE_SECONDS: int = Field(default=1800, ge=60, le=86400)
+    DB_STATEMENT_TIMEOUT_MS: int = Field(default=15000, ge=1000, le=300000)
 
     DATABASE_URL: str = ""
 

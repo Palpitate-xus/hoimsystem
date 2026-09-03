@@ -208,6 +208,7 @@ def get_pharmaceutical_list(keyword: str | None = None, current_user: User = Dep
                 "supplier": item.supplier,
                 "remark": item.remark,
                 "antibiotic_level": item.antibiotic_level,
+                "barcode": item.barcode or "",
                 "status": item.status,
                 "status_text": "启用" if item.status == 0 else "已停用",
             }

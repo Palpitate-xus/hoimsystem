@@ -18,6 +18,9 @@
         <el-table-column prop="price" label="单价"  sortable />
         <el-table-column prop="expireddate" label="过期日期" />
         <el-table-column prop="supplier" label="供应商" />
+        <el-table-column prop="barcode" label="药品条码" min-width="150">
+          <template #default="{ row }">{{ row.barcode || "未配置" }}</template>
+        </el-table-column>
         <el-table-column prop="antibiotic_level" label="抗菌级别" width="100">
           <template #default="{row}">
             <el-tag v-if="row.antibiotic_level===0" type="info">非抗菌</el-tag>
@@ -27,9 +30,10 @@
           </template>
         </el-table-column>
         <el-table-column prop="remark" label="备注" />
-        <el-table-column label="操作" width="180">
+        <el-table-column label="操作" width="250">
           <template #default="{row}">
             <el-button size="small" @click="handleEdit(row)">编辑</el-button>
+            <el-button size="small" type="primary" link @click="bindBarcode(row)">绑定条码</el-button>
             <el-button size="small" type="danger" @click="handleDelete(row)">删除</el-button>
           </template>
         </el-table-column>
@@ -85,7 +89,7 @@
 <script setup>
 import { ref, onMounted, computed } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
-import { getPharmaceuticalList, createPharmaceutical, updatePharmaceutical, deletePharmaceutical } from "@/api/pharmacy";
+import { getPharmaceuticalList, createPharmaceutical, updatePharmaceutical, deletePharmaceutical, setMedicationBarcode } from "@/api/pharmacy";
 
 const list = ref([]);
 const searchQuery = ref("");
@@ -143,6 +147,16 @@ const handleDelete = (row) => {
     ElMessage.success("删除成功");
     fetchList();
   }).catch(() => {});
+};
+
+const bindBarcode = async (row) => {
+  const { value } = await ElMessageBox.prompt(`请输入或扫描 ${row.name} 的药品条码`, "绑定药品条码", {
+    inputValue: row.barcode || "",
+    inputValidator: (barcode) => Boolean(barcode?.trim()) || "条码不能为空",
+  });
+  await setMedicationBarcode({ pharmaceutical_id: row.id, barcode: value.trim() });
+  ElMessage.success("药品条码已绑定");
+  await fetchList();
 };
 
 onMounted(fetchList);

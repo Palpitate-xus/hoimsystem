@@ -16,6 +16,8 @@ export function deletePharmaceutical(data) {
   return request({ url: "pharmaceuticalManagement/delete", method: "post", data });
 }
 
+export { setMedicationBarcode } from "@/api/emar";
+
 export function stockQuery(data) {
   return request({ url: "pharmaceuticalManagement/stock_query", method: "post", data });
 }

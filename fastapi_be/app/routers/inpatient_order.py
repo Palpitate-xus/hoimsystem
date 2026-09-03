@@ -384,6 +384,7 @@ def get_execution_list(
     order_id: str | None = None,
     nurse_id: int | None = None,
     status: int | None = None,
+    medication_only: bool = False,
     page: int | None = None,
     page_size: int | None = None,
     current_user: User = Depends(require_roles(*NURSING_ROLES, *CLINICAL_ROLES)),
@@ -400,6 +401,12 @@ def get_execution_list(
         query = query.filter(OrderExecution.nurse_id == nurse_id)
     if status is not None:
         query = query.filter(OrderExecution.status == status)
+    if medication_only:
+        query = query.filter(
+            OrderExecution.order.has(
+                InpatientOrder.items.any(InpatientOrderItem.item_type == "drug")
+            )
+        )
     executions, total = paginate(query, page, page_size)
 
     status_map = ["待执行", "已执行", "已跳过", "已停止"]
@@ -410,8 +417,10 @@ def get_execution_list(
             {
                 "execution_id": item.execution_id,
                 "order_id": item.order_id,
+                "patient_id": order.patient_id if order else None,
                 "patient_name": order.patient.name if order and order.patient else "",
                 "item_names": ", ".join([it.item_name for it in order.items]) if order else "",
+                "requires_barcode": any(it.item_type == "drug" for it in order.items) if order else False,
                 "order_type_text": "长期" if order and order.order_type == 0 else "临时" if order else "",
                 "planned_time": (item.planned_time.strftime("%Y-%m-%d %H:%M:%S") if item.planned_time else None) if item.planned_time else "",
                 "execution_time": (item.execution_time.strftime("%Y-%m-%d %H:%M:%S") if item.execution_time else None) if item.execution_time else "",

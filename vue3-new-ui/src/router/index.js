@@ -663,6 +663,12 @@ export const asyncRoutes = [
         component: () => import("@/views/report/departmentPerformance.vue"),
         meta: { title: "科室绩效核算", permissions: ["admin", "super_admin"] },
       },
+      {
+        path: "operations",
+        name: "OperationalAnalytics",
+        component: () => import("@/views/report/operations.vue"),
+        meta: { title: "运营趋势", permissions: ["admin", "director"] },
+      },
     ],
   },
 
@@ -691,6 +697,12 @@ export const asyncRoutes = [
         name: "Scheduler",
         component: () => import("@/views/system/scheduler.vue"),
         meta: { title: "定时任务", permissions: ["admin"] },
+      },
+      {
+        path: "integrationOutbox",
+        name: "IntegrationOutbox",
+        component: () => import("@/views/system/integrationOutbox.vue"),
+        meta: { title: "集成可靠性", permissions: ["admin"] },
       },
       {
         path: "dict",
@@ -811,6 +823,12 @@ export const asyncRoutes = [
         name: "NursingStation",
         component: () => import("@/views/inpatient/nursingStation.vue"),
         meta: { title: "护士工作站", permissions: ["admin", "nurse"] },
+      },
+      {
+        path: "emar",
+        name: "Emar",
+        component: () => import("@/views/inpatient/emar.vue"),
+        meta: { title: "eMAR 扫码给药", permissions: ["admin", "nurse"] },
       },
       {
         path: "infusion",

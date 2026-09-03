@@ -2684,3 +2684,28 @@ class SchedulerJobState(Base):
     last_finished_at = Column(DateTime)
     last_result_json = Column(Text)
     last_error = Column(String(1000))
+
+
+class IntegrationOutbox(Base):
+    """Transactional outbound event with retry and dead-letter state."""
+
+    __tablename__ = "hoimsystem_integration_outbox"
+    __table_args__ = (
+        Index("idx_integration_outbox_due", "status", "next_attempt_at"),
+        Index("idx_integration_outbox_aggregate", "aggregate_type", "aggregate_id"),
+    )
+
+    event_id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    destination = Column(String(30), nullable=False)
+    event_type = Column(String(80), nullable=False)
+    aggregate_type = Column(String(50), nullable=False)
+    aggregate_id = Column(String(100), nullable=False)
+    payload_json = Column(Text, nullable=False)
+    status = Column(String(16), nullable=False, default="pending")  # pending / retry / delivered / dead
+    attempts = Column(Integer, nullable=False, default=0)
+    next_attempt_at = Column(DateTime, nullable=False)
+    last_attempt_at = Column(DateTime)
+    delivered_at = Column(DateTime)
+    last_http_status = Column(Integer)
+    last_error = Column(String(1000))
+    created_at = Column(DateTime, nullable=False)

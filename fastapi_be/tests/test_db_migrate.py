@@ -14,6 +14,7 @@ def test_migrate_bootstraps_fresh_database(tmp_path):
         assert "alembic_version" in tables
         assert "hoimsystem_users" in tables
         assert "hoimsystem_scheduler_job_state" in tables
+        assert "hoimsystem_integration_outbox" in tables
         user_indexes = {item["name"] for item in inspect(engine).get_indexes("hoimsystem_users")}
         order_indexes = {item["name"] for item in inspect(engine).get_indexes("hoimsystem_inpatient_order")}
         assert "uq_users_username" in user_indexes

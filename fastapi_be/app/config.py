@@ -34,6 +34,13 @@ class Settings(BaseSettings):
     PACS_INTEGRATION_KEY: str = ""
     MEDICAL_INSURANCE_INTEGRATION_KEY: str = ""
     PAYMENT_INTEGRATION_KEY: str = ""
+    LIS_OUTBOUND_URL: str = ""
+    PACS_OUTBOUND_URL: str = ""
+    MEDICAL_INSURANCE_OUTBOUND_URL: str = ""
+    PAYMENT_OUTBOUND_URL: str = ""
+    INTEGRATION_HTTP_TIMEOUT_SECONDS: int = Field(default=10, ge=1, le=120)
+    INTEGRATION_MAX_ATTEMPTS: int = Field(default=8, ge=1, le=30)
+    INTEGRATION_OUTBOX_INTERVAL_SECONDS: int = Field(default=10, ge=1, le=300)
     AUTO_CREATE_SCHEMA: bool = True
     SCHEDULER_ENABLED: bool = True
     SCHEDULER_INTERVAL_SECONDS: int = 3600
@@ -67,6 +74,14 @@ class Settings(BaseSettings):
             configured_origins = [origin.strip() for origin in self.ALLOWED_ORIGINS.split(",") if origin.strip()]
             if not configured_origins or self.ALLOWED_ORIGINS.strip() == DEFAULT_ALLOWED_ORIGINS or "*" in configured_origins:
                 raise ValueError("生产环境必须显式配置 ALLOWED_ORIGINS，且不能使用 * 或开发环境默认地址")
+            outbound_urls = (
+                self.LIS_OUTBOUND_URL,
+                self.PACS_OUTBOUND_URL,
+                self.MEDICAL_INSURANCE_OUTBOUND_URL,
+                self.PAYMENT_OUTBOUND_URL,
+            )
+            if any(url and not url.lower().startswith("https://") for url in outbound_urls):
+                raise ValueError("生产环境的外部系统回调地址必须使用 https://")
 
         # 如果 SECRET_KEY 为空，生成一个随机密钥（仅用于开发）
         if not self.SECRET_KEY:

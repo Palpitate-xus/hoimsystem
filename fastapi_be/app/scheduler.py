@@ -13,7 +13,8 @@ from sqlalchemy import text
 from app.config import settings
 from app.models import Appointment, BreachRecord, DoctorSchedule, Pharmaceutical, SchedulerJobState
 
-JOB_NAMES = {"inventory_alert", "breach_statistics", "breach_scan", "backup"}
+JOB_NAMES = {"inventory_alert", "breach_statistics", "breach_scan", "backup", "integration_outbox"}
+STANDARD_JOB_NAMES = JOB_NAMES - {"integration_outbox"}
 _state = {name: {"last_run": None, "last_result": None} for name in JOB_NAMES}
 _task = None
 _local_locks = {name: threading.Lock() for name in JOB_NAMES}
@@ -136,6 +137,10 @@ def run_job(job_name: str):
                     result = {"last_24h_count": db.query(BreachRecord).filter(BreachRecord.breach_time >= since).count()}
                 elif job_name == "breach_scan":
                     result = _run_breach_scan(db)
+                elif job_name == "integration_outbox":
+                    from app.integration_outbox import process_integration_outbox
+
+                    result = process_integration_outbox(db)
                 else:
                     # 备份由现有 backup API 执行；调度器只登记触发状态，避免后台任务覆盖用户数据。
                     result = {"status": "delegated_to_backup_service"}
@@ -161,15 +166,21 @@ def run_job(job_name: str):
 
 async def scheduler_loop(run_immediately: bool = False):
     if not run_immediately:
-        await asyncio.sleep(settings.SCHEDULER_INTERVAL_SECONDS)
+        await asyncio.sleep(min(settings.SCHEDULER_INTERVAL_SECONDS, settings.INTEGRATION_OUTBOX_INTERVAL_SECONDS))
+    next_standard_run = 0.0
     while True:
-        for job_name in JOB_NAMES:
+        loop_time = asyncio.get_running_loop().time()
+        due_jobs = {"integration_outbox"}
+        if loop_time >= next_standard_run:
+            due_jobs.update(STANDARD_JOB_NAMES)
+            next_standard_run = loop_time + settings.SCHEDULER_INTERVAL_SECONDS
+        for job_name in due_jobs:
             try:
                 await asyncio.to_thread(run_job, job_name)
             except Exception:
                 # 单个任务失败不影响其他任务和主服务。
                 continue
-        await asyncio.sleep(settings.SCHEDULER_INTERVAL_SECONDS)
+        await asyncio.sleep(settings.INTEGRATION_OUTBOX_INTERVAL_SECONDS)
 
 
 def start_scheduler():

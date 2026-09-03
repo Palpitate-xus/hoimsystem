@@ -8,11 +8,38 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 from starlette.background import BackgroundTasks
 from starlette.middleware.base import BaseHTTPMiddleware
-from starlette.responses import JSONResponse, Response
+from starlette.responses import JSONResponse
 
 from app.config import settings
 
 MICROSECOND_PATTERN = re.compile(rb'(\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}:\d{2})\.\d+')
+
+# 旧接口把业务错误放在 JSON ``code`` 中但仍返回 HTTP 200。统一响应类在不改变
+# 响应体契约的前提下修正传输层状态码；旧的 code=500 多为参数/状态冲突，而不是
+# 服务崩溃，因此映射为 400，真正的未处理异常仍由 FastAPI 返回 HTTP 500。
+LEGACY_BUSINESS_HTTP_STATUS = {
+    400: 400,
+    401: 401,
+    403: 403,
+    404: 404,
+    409: 409,
+    422: 422,
+    429: 429,
+    500: 400,
+    501: 501,
+}
+
+
+class APIJSONResponse(JSONResponse):
+    """Serialize API JSON once and preserve meaningful HTTP semantics."""
+
+    def __init__(self, content, status_code=200, *args, **kwargs):
+        if status_code == 200 and isinstance(content, dict):
+            status_code = LEGACY_BUSINESS_HTTP_STATUS.get(content.get("code"), status_code)
+        super().__init__(content=content, status_code=status_code, *args, **kwargs)
+
+    def render(self, content) -> bytes:
+        return MICROSECOND_PATTERN.sub(rb'\1', super().render(content))
 
 
 # 操作日志：路径到中文操作名的映射
@@ -130,18 +157,6 @@ def parse_action_target(path: str) -> tuple[str, str]:
     return (action, target)
 
 
-class StripMicrosecondMiddleware(BaseHTTPMiddleware):
-    async def dispatch(self, request, call_next):
-        response = await call_next(request)
-        if response.headers.get("content-type", "").startswith("application/json"):
-            body = b""
-            async for chunk in response.body_iterator:
-                body += chunk
-            body = MICROSECOND_PATTERN.sub(rb'\1', body)
-            return Response(content=body, status_code=response.status_code, headers=dict(response.headers), media_type=response.media_type)
-        return response
-
-
 class OriginValidationMiddleware(BaseHTTPMiddleware):
     """Reject cross-site state changes before they reach business handlers."""
 
@@ -219,7 +234,7 @@ class OperationLogMiddleware(BaseHTTPMiddleware):
 
         # 判断是否需要记录
         should_log = False
-        if method in ("POST", "PUT", "DELETE"):
+        if method in ("POST", "PUT", "PATCH", "DELETE"):
             should_log = True
         elif method == "GET":
             # GET 仅记录敏感路径
@@ -232,26 +247,11 @@ class OperationLogMiddleware(BaseHTTPMiddleware):
         user_id = None
         username = ""
         role = ""
-        access_token = request.headers.get("accesstoken")
-        if access_token:
-            try:
-                from app.database import SessionLocal
-                from app.dependencies import decode_access_token
-                from app.models import User
-
-                uname = decode_access_token(access_token)
-                if uname:
-                    db = SessionLocal()
-                    try:
-                        user = db.query(User).filter(User.username == uname).first()
-                        if user:
-                            user_id = user.user_id
-                            username = user.username
-                            role = user.user_role
-                    finally:
-                        db.close()
-            except Exception:
-                pass
+        current_user = getattr(request.state, "current_user", None)
+        if current_user is not None:
+            user_id = current_user.user_id
+            username = current_user.username
+            role = current_user.user_role
 
         # 登录/注册请求：使用进入中间件前缓存的用户名（密码绝不落日志）
         if path in self.AUTH_BODY_PATHS and not username and auth_attempted_username:
@@ -278,28 +278,6 @@ class OperationLogMiddleware(BaseHTTPMiddleware):
         # 结果
         status_code = response.status_code
         result = "成功" if 200 <= status_code < 400 else "失败"
-        if result == "成功":
-            content_type = response.headers.get("content-type", "")
-            if content_type.startswith("application/json") and hasattr(response, "body_iterator"):
-                # 防御性读取响应体：任何异常都不能中断审计写入（改为跳过 code 细判）
-                try:
-                    chunks = [chunk async for chunk in response.body_iterator]
-                    response_body = b"".join(chunk.encode() if isinstance(chunk, str) else chunk for chunk in chunks)
-                    response = Response(
-                        content=response_body,
-                        status_code=response.status_code,
-                        headers=dict(response.headers),
-                        background=response.background,
-                    )
-                    try:
-                        body_data = json.loads(response_body) if response_body else {}
-                        if isinstance(body_data, dict) and body_data.get("code", 200) >= 400:
-                            result = "失败"
-                    except (TypeError, ValueError):
-                        pass
-                except Exception:
-                    import logging
-                    logging.getLogger("audit").warning("读取响应体失败，跳过业务码判定", exc_info=True)
 
         # 写入数据库（挂到响应后台任务：响应发送完毕、请求级依赖均已释放后再写，
         # 避免与处理器会话争用同一连接导致审计丢失；失败只记日志不影响主请求）
@@ -347,7 +325,7 @@ class OperationLogMiddleware(BaseHTTPMiddleware):
         return response
 
 
-app = FastAPI(title="HOIM System FastAPI")
+app = FastAPI(title="HOIM System FastAPI", default_response_class=APIJSONResponse)
 
 from app.routers import (
     admin,
@@ -375,14 +353,17 @@ from app.routers import (
     exam,
     family_member,
     followup,
+    home_icd,
     icd10,
     imaging,
     infection,
+    infection_control,
     infusion,
     injection,
     inpatient_charge,
     inpatient_order,
     insurance,
+    insurance_catalog,
     integration,
     inventory_adjustment,
     lab,
@@ -395,15 +376,19 @@ from app.routers import (
     monitor,
     navigation,
     nursing,
+    ops_extension,
     patient,
     patient_card,
+    performance,
     pharmacy,
     prescription_template,
     purchase,
+    quality_management,
     queue,
     referral,
     report,
     research,
+    rx_review_rule,
     schedule_change,
     scheduler,
     shift_handover,
@@ -415,16 +400,9 @@ from app.routers import (
     triage_desk,
     upload,
     user,
+    version,
     vitalsign,
     ward,
-    rx_review_rule,
-    insurance_catalog,
-    infection_control,
-    quality_management,
-    ops_extension,
-    performance,
-    home_icd,
-    version,
 )
 
 app.add_middleware(
@@ -447,7 +425,6 @@ app.add_middleware(
 )
 app.add_middleware(GZipMiddleware, minimum_size=1000)
 app.add_middleware(OriginValidationMiddleware)
-app.add_middleware(StripMicrosecondMiddleware)
 app.add_middleware(OperationLogMiddleware)
 
 app.include_router(performance.router, prefix="/api")

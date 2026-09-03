@@ -1,7 +1,7 @@
 import datetime
 
 import jwt
-from fastapi import Depends, Header, HTTPException
+from fastapi import Depends, Header, HTTPException, Request
 from sqlalchemy.orm import Session
 
 from app.config import settings
@@ -56,7 +56,11 @@ def decode_access_token(token: str) -> str:
         return None
 
 
-def get_current_user(access_token: str = Header(None, alias="accesstoken"), db: Session = Depends(get_db)) -> User:
+def get_current_user(
+    request: Request,
+    access_token: str = Header(None, alias="accesstoken"),
+    db: Session = Depends(get_db),
+) -> User:
     if not access_token:
         raise HTTPException(status_code=401, detail="Missing accesstoken")
     username = decode_access_token(access_token)
@@ -85,6 +89,7 @@ def get_current_user(access_token: str = Header(None, alias="accesstoken"), db: 
                     raise HTTPException(status_code=401, detail="Token 已被吊销，请重新登录")
         except pyjwt.InvalidTokenError:
             raise HTTPException(status_code=401, detail="Invalid accesstoken")
+    request.state.current_user = user
     return user
 
 

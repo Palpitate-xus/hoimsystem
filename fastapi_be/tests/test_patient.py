@@ -50,14 +50,14 @@ class TestPatientAppointment:
             "id": 999999, "date": "2026-12-01", "department_id": seed_data["department"].department_id,
             "doctor_id": seed_data["doctor"].doctor_id, "time": "上午", "specialist": 1
         })
-        assert invalid.status_code == 200
+        assert invalid.status_code == 400
         assert invalid.json()["code"] == 500
 
         mismatched = await async_client.post("/api/appointmentManagement/create", headers=headers, json={
             "id": 1, "date": "2026-12-01", "department_id": seed_data["department"].department_id,
             "doctor_id": seed_data["director_doctor"].doctor_id, "time": "上午", "specialist": 1
         })
-        assert mismatched.status_code == 200
+        assert mismatched.status_code == 400
         assert mismatched.json()["code"] == 500
 
         schedule = db_session.query(DoctorSchedule).filter(DoctorSchedule.doctor_id == seed_data["doctor"].doctor_id).first()
@@ -65,7 +65,7 @@ class TestPatientAppointment:
             "id": schedule.schedule_id, "date": "2026-12-01", "department_id": 999999,
             "doctor_id": seed_data["doctor"].doctor_id, "time": "上午", "specialist": 1
         })
-        assert wrong_department.status_code == 200
+        assert wrong_department.status_code == 400
         assert wrong_department.json() == {"code": 500, "msg": "预约科室与排班不匹配"}
 
     async def test_checked_in_appointment_cannot_be_cancelled(self, async_client, seed_data, auth_headers, db_session):
@@ -86,7 +86,7 @@ class TestPatientAppointment:
             headers=auth_headers(seed_data["patient_user"].username),
             json={"uuid": appointment.registration_uuid},
         )
-        assert r.status_code == 200
+        assert r.status_code == 400
         assert r.json() == {"code": 500, "msg": "预约已报到或已就诊，不能取消"}
 
     async def test_appointment_cancel_returns_source_schedule(self, async_client, seed_data, auth_headers, db_session):
@@ -153,7 +153,7 @@ class TestPatientRegistration:
             headers=headers,
             json={"id": 999999, "doctor_id": seed_data["doctor"].doctor_id, "department_id": seed_data["department"].department_id, "specialist": 1},
         )
-        assert invalid.status_code == 200
+        assert invalid.status_code == 400
         assert invalid.json() == {"code": 500, "msg": "排班不存在"}
 
         mismatch = await async_client.post(
@@ -161,7 +161,7 @@ class TestPatientRegistration:
             headers=headers,
             json={"id": 1, "doctor_id": seed_data["director_doctor"].doctor_id, "department_id": seed_data["department"].department_id, "specialist": 1},
         )
-        assert mismatch.status_code == 200
+        assert mismatch.status_code == 400
         assert mismatch.json() == {"code": 500, "msg": "挂号医生与排班不匹配"}
 
     async def test_registration_cancel_returns_source_schedule(self, async_client, seed_data, auth_headers, db_session):
@@ -203,7 +203,7 @@ class TestPatientRegistration:
             headers=auth_headers(seed_data["patient_user"].username),
             json={"uuid": registration.registration_uuid, "schedule_id": 1},
         )
-        assert r.status_code == 200
+        assert r.status_code == 400
         assert r.json() == {"code": 500, "msg": "挂号已就诊，不能退号"}
 
 
@@ -379,7 +379,7 @@ class TestPatientMedicalRecord:
             headers=auth_headers(seed_data["patient2_user"].username),
             json={"medical_record_id": str(mr.medical_record_id)},
         )
-        assert r.status_code == 200
+        assert r.status_code == 403
         assert r.json()["code"] == 403
 
     async def test_patient_cannot_view_unsigned_medical_record(self, async_client, seed_data, auth_headers, db_session):
@@ -453,7 +453,7 @@ class TestPatientReview:
                 "comment": "越权评价",
             },
         )
-        assert r.status_code == 200
+        assert r.status_code == 403
         assert r.json()["code"] == 403
 
     async def test_create_review_rejects_duplicate_visit_review(self, async_client, seed_data, auth_headers):
@@ -468,5 +468,5 @@ class TestPatientReview:
         assert first.status_code == 200
         assert first.json()["code"] == 200
         second = await async_client.post("/api/review/create", headers=headers, json=payload)
-        assert second.status_code == 200
+        assert second.status_code == 400
         assert second.json()["code"] == 500

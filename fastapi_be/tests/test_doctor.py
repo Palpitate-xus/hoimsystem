@@ -61,7 +61,7 @@ class TestPrescriptionTemplate:
             headers=doctor_headers,
             json={"name": "无效模板", "items": [{"id": 999999, "number": 1}]},
         )
-        assert invalid.status_code == 200
+        assert invalid.status_code == 400
         assert invalid.json()["code"] == 500
 
         created = await async_client.post(
@@ -75,7 +75,7 @@ class TestPrescriptionTemplate:
             headers=auth_headers(seed_data["director_user"].username),
             json={"template_id": template_id},
         )
-        assert other_doctor.status_code == 200
+        assert other_doctor.status_code == 404
         assert other_doctor.json()["code"] == 404
 
 
@@ -101,7 +101,7 @@ class TestDiagnosisTemplate:
         created = await async_client.post("/api/diagnosisTemplate/create", headers=doctor_headers, json={"code": "R51", "name": "头痛"})
         template_id = created.json()["data"]["template_id"]
         other = await async_client.post("/api/diagnosisTemplate/apply", headers=auth_headers(seed_data["director_user"].username), json={"template_id": template_id})
-        assert other.status_code == 200
+        assert other.status_code == 404
         assert other.json()["code"] == 404
 
 
@@ -153,7 +153,7 @@ class TestDoctorMedicalRecord:
         r = await async_client.post("/api/medicalRecord/update", headers=auth_headers(seed_data["director_user"].username), json={
             "medical_record_id": str(mr.medical_record_id), "symptom": "hack", "result": "hack"
         })
-        assert r.status_code == 200
+        assert r.status_code == 403
         assert r.json()["code"] == 403
 
     async def test_signed_outpatient_record_cannot_be_updated(self, async_client, seed_data, auth_headers):
@@ -194,7 +194,7 @@ class TestDoctorMedicalRecord:
             headers=auth_headers(seed_data["doctor_user"].username),
             json={"medical_record_id": str(other_mr.medical_record_id)},
         )
-        assert r.status_code == 200
+        assert r.status_code == 403
         assert r.json()["code"] == 403
 
 
@@ -220,7 +220,7 @@ class TestDoctorPrescription:
                 headers=headers,
                 json={**base, "phas": phas},
             )
-            assert r.status_code == 200
+            assert r.status_code == 400
             assert r.json() == {"code": 500, "msg": message}
 
     async def test_get_prescription_list_doctor(self, async_client, seed_data, auth_headers):
@@ -247,7 +247,6 @@ class TestDoctorPrescription:
         assert repeated.json()["code"] == 500
 
     async def test_cancel_prescription_rejects_dispensed(self, async_client, seed_data, auth_headers):
-        pre = seed_data["prescription"]
         # 原始处方在 test_dispense 之前 status=0,但 test_dispense 会把 status 改成 2
         # 直接验证:医生不能取消已发药的处方
         # 先发药:pharmacist audit → dispense
@@ -271,7 +270,7 @@ class TestDoctorPrescription:
         r = await async_client.post("/api/pharmacy/dispense", headers=phar_headers, json={"prescription_id": pre_id})
         # 取消 — 期望失败
         r = await async_client.post("/api/prescriptionManagement/cancel", headers=doctor_headers, json={"prescription_id": pre_id})
-        assert r.status_code == 200
+        assert r.status_code == 400
         assert r.json()["code"] == 500
 
 

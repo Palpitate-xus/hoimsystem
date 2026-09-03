@@ -1,12 +1,12 @@
+import os
+
+# 加载项目配置
+import sys
 from logging.config import fileConfig
 
 from sqlalchemy import engine_from_config, pool
 
 from alembic import context
-
-# 加载项目配置
-import sys
-import os
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
@@ -23,8 +23,9 @@ if config.config_file_name is not None:
 # 使用项目模型的 MetaData
 target_metadata = Base.metadata
 
-# 从项目配置读取数据库 URL
-config.set_main_option("sqlalchemy.url", settings.DATABASE_URL)
+# CLI/部署脚本可以显式注入目标 URL；普通 ``alembic`` 命令仍读取应用配置。
+if not config.get_main_option("sqlalchemy.url"):
+    config.set_main_option("sqlalchemy.url", settings.DATABASE_URL.replace("%", "%%"))
 
 
 def run_migrations_offline() -> None:

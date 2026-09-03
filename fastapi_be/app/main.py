@@ -2,6 +2,7 @@ import datetime
 import json
 import re
 import time
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -325,7 +326,29 @@ class OperationLogMiddleware(BaseHTTPMiddleware):
         return response
 
 
-app = FastAPI(title="HOIM System FastAPI", default_response_class=APIJSONResponse)
+@asynccontextmanager
+async def lifespan(_app: FastAPI):
+    if settings.AUTO_CREATE_SCHEMA:
+        from app.database import Base, engine
+        from app.schema_compat import ensure_operation_log_schema
+
+        Base.metadata.create_all(bind=engine)
+        ensure_operation_log_schema(engine)
+
+    if settings.SCHEDULER_ENABLED:
+        from app.scheduler import start_scheduler
+
+        start_scheduler()
+    try:
+        yield
+    finally:
+        if settings.SCHEDULER_ENABLED:
+            from app.scheduler import stop_scheduler
+
+            stop_scheduler()
+
+
+app = FastAPI(title="HOIM System FastAPI", default_response_class=APIJSONResponse, lifespan=lifespan)
 
 from app.routers import (
     admin,
@@ -512,24 +535,6 @@ upload_dir = os.path.join(os.path.dirname(__file__), "..", "uploads")
 os.makedirs(os.path.join(upload_dir, "avatars"), exist_ok=True)
 os.makedirs(os.path.join(upload_dir, "reports"), exist_ok=True)
 
-
-@app.on_event("startup")
-async def start_background_scheduler():
-    from app.scheduler import start_scheduler
-    start_scheduler()
-
-
-@app.on_event("shutdown")
-async def stop_background_scheduler():
-    from app.scheduler import stop_scheduler
-    stop_scheduler()
-
-# 自动创建数据库表（所有模型导入完成后）
-from app.database import Base, engine
-from app.schema_compat import ensure_operation_log_schema
-
-Base.metadata.create_all(bind=engine)
-ensure_operation_log_schema(engine)
 
 from app.routers.version import APP_VERSION  # noqa: E402
 

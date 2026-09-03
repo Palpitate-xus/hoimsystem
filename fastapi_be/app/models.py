@@ -2594,3 +2594,17 @@ class HomeIcdBinding(Base):
 
     home = relationship("MedicalRecordHome")
     coder = relationship("User")
+
+
+class SchedulerJobState(Base):
+    """跨进程可见的定时任务执行状态。"""
+
+    __tablename__ = "hoimsystem_scheduler_job_state"
+
+    job_name = Column(String(64), primary_key=True)
+    status = Column(String(16), nullable=False, default="idle")
+    owner = Column(String(128))
+    last_started_at = Column(DateTime)
+    last_finished_at = Column(DateTime)
+    last_result_json = Column(Text)
+    last_error = Column(String(1000))

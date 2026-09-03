@@ -1,12 +1,14 @@
 import secrets
 import warnings
 
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 DEFAULT_ALLOWED_ORIGINS = "http://localhost:8091,http://127.0.0.1:8091,http://localhost:8080,http://127.0.0.1:8080"
 
 
 class Settings(BaseSettings):
+    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
+
     ENVIRONMENT: str = "development"
 
     # 数据库配置（优先使用 DATABASE_URL，否则使用分项配置）
@@ -25,9 +27,9 @@ class Settings(BaseSettings):
     PACS_INTEGRATION_KEY: str = ""
     MEDICAL_INSURANCE_INTEGRATION_KEY: str = ""
     PAYMENT_INTEGRATION_KEY: str = ""
-
-    class Config:
-        env_file = ".env"
+    AUTO_CREATE_SCHEMA: bool = True
+    SCHEDULER_ENABLED: bool = True
+    SCHEDULER_INTERVAL_SECONDS: int = 3600
 
     @property
     def is_production(self) -> bool:
@@ -53,6 +55,8 @@ class Settings(BaseSettings):
             raise ValueError("生产环境必须通过 SECRET_KEY 设置强随机密钥，不能为空或使用默认值")
 
         if self.is_production:
+            if self.AUTO_CREATE_SCHEMA:
+                raise ValueError("生产环境必须设置 AUTO_CREATE_SCHEMA=false，并使用 Alembic 迁移数据库")
             configured_origins = [origin.strip() for origin in self.ALLOWED_ORIGINS.split(",") if origin.strip()]
             if not configured_origins or self.ALLOWED_ORIGINS.strip() == DEFAULT_ALLOWED_ORIGINS or "*" in configured_origins:
                 raise ValueError("生产环境必须显式配置 ALLOWED_ORIGINS，且不能使用 * 或开发环境默认地址")

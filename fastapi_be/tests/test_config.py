@@ -9,6 +9,7 @@ def test_production_rejects_default_secret_key():
             ENVIRONMENT="production",
             DATABASE_URL="sqlite:///test.db",
             SECRET_KEY="change-me-in-production",
+            AUTO_CREATE_SCHEMA=False,
         )
 
 

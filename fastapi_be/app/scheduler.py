@@ -1,11 +1,66 @@
 import asyncio
 import datetime
+import json
+import os
+import socket
+import tempfile
+import threading
+from contextlib import contextmanager
+from pathlib import Path
 
-from app.models import Appointment, BreachRecord, DoctorSchedule, Pharmaceutical
+from sqlalchemy import text
+
+from app.config import settings
+from app.models import Appointment, BreachRecord, DoctorSchedule, Pharmaceutical, SchedulerJobState
 
 JOB_NAMES = {"inventory_alert", "breach_statistics", "breach_scan", "backup"}
 _state = {name: {"last_run": None, "last_result": None} for name in JOB_NAMES}
 _task = None
+_local_locks = {name: threading.Lock() for name in JOB_NAMES}
+
+
+@contextmanager
+def _job_lock(db, job_name: str):
+    """Use a connection-owned PostgreSQL lock, with a cross-process file-lock fallback."""
+
+    if db.bind.dialect.name == "postgresql":
+        acquired = bool(
+            db.execute(
+                text("SELECT pg_try_advisory_lock(hashtext(:lock_name))"),
+                {"lock_name": f"hoimsystem.scheduler.{job_name}"},
+            ).scalar()
+        )
+        try:
+            yield acquired
+        finally:
+            if acquired:
+                db.execute(
+                    text("SELECT pg_advisory_unlock(hashtext(:lock_name))"),
+                    {"lock_name": f"hoimsystem.scheduler.{job_name}"},
+                )
+        return
+
+    # SQLite/local development: flock also coordinates separate Gunicorn processes.
+    try:
+        import fcntl
+
+        lock_path = Path(tempfile.gettempdir()) / f"hoimsystem-scheduler-{job_name}.lock"
+        lock_file = lock_path.open("a+")
+        try:
+            fcntl.flock(lock_file.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+            yield True
+        except BlockingIOError:
+            yield False
+        finally:
+            lock_file.close()
+    except (ImportError, OSError):
+        lock = _local_locks[job_name]
+        acquired = lock.acquire(blocking=False)
+        try:
+            yield acquired
+        finally:
+            if acquired:
+                lock.release()
 
 
 def _run_breach_scan(db) -> dict:
@@ -59,32 +114,62 @@ def run_job(job_name: str):
 
     db = SessionLocal()
     try:
-        if job_name == "inventory_alert":
-            low_stock = db.query(Pharmaceutical).filter(Pharmaceutical.stock <= 0, Pharmaceutical.status == 0).count()
-            result = {"low_stock_count": low_stock}
-        elif job_name == "breach_statistics":
-            since = datetime.datetime.now() - datetime.timedelta(days=1)
-            result = {"last_24h_count": db.query(BreachRecord).filter(BreachRecord.breach_time >= since).count()}
-        elif job_name == "breach_scan":
-            result = _run_breach_scan(db)
-        else:
-            # 备份由现有 backup API 执行；调度器只登记触发状态，避免后台任务覆盖用户数据。
-            result = {"status": "delegated_to_backup_service"}
-        _state[job_name] = {"last_run": datetime.datetime.now(), "last_result": result}
-        return result
+        with _job_lock(db, job_name) as acquired:
+            if not acquired:
+                return {"status": "skipped", "reason": "already_running"}
+
+            now = datetime.datetime.now()
+            state = db.get(SchedulerJobState, job_name) or SchedulerJobState(job_name=job_name)
+            state.status = "running"
+            state.owner = f"{socket.gethostname()}:{os.getpid()}"
+            state.last_started_at = now
+            state.last_error = None
+            db.add(state)
+            db.commit()
+
+            try:
+                if job_name == "inventory_alert":
+                    low_stock = db.query(Pharmaceutical).filter(Pharmaceutical.stock <= 0, Pharmaceutical.status == 0).count()
+                    result = {"low_stock_count": low_stock}
+                elif job_name == "breach_statistics":
+                    since = datetime.datetime.now() - datetime.timedelta(days=1)
+                    result = {"last_24h_count": db.query(BreachRecord).filter(BreachRecord.breach_time >= since).count()}
+                elif job_name == "breach_scan":
+                    result = _run_breach_scan(db)
+                else:
+                    # 备份由现有 backup API 执行；调度器只登记触发状态，避免后台任务覆盖用户数据。
+                    result = {"status": "delegated_to_backup_service"}
+                state = db.get(SchedulerJobState, job_name)
+                state.status = "success"
+                state.last_finished_at = datetime.datetime.now()
+                state.last_result_json = json.dumps(result, ensure_ascii=False, default=str)
+                db.commit()
+                _state[job_name] = {"last_run": state.last_finished_at, "last_result": result}
+                return result
+            except Exception as exc:
+                db.rollback()
+                state = db.get(SchedulerJobState, job_name) or SchedulerJobState(job_name=job_name)
+                state.status = "failed"
+                state.last_finished_at = datetime.datetime.now()
+                state.last_error = str(exc)[:1000]
+                db.add(state)
+                db.commit()
+                raise
     finally:
         db.close()
 
 
-async def scheduler_loop():
+async def scheduler_loop(run_immediately: bool = False):
+    if not run_immediately:
+        await asyncio.sleep(settings.SCHEDULER_INTERVAL_SECONDS)
     while True:
-        await asyncio.sleep(3600)
         for job_name in JOB_NAMES:
             try:
                 await asyncio.to_thread(run_job, job_name)
             except Exception:
                 # 单个任务失败不影响其他任务和主服务。
                 continue
+        await asyncio.sleep(settings.SCHEDULER_INTERVAL_SECONDS)
 
 
 def start_scheduler():
@@ -100,6 +185,28 @@ def stop_scheduler():
     _task = None
 
 
-def status():
-    jobs = [{"name": name, **details} for name, details in sorted(_state.items())]
-    return {"running": _task is not None and not _task.done(), "interval_seconds": 3600, "jobs": jobs}
+def status(db):
+    persisted = {row.job_name: row for row in db.query(SchedulerJobState).all()}
+    jobs = []
+    for name in sorted(JOB_NAMES):
+        row = persisted.get(name)
+        result = None
+        if row and row.last_result_json:
+            try:
+                result = json.loads(row.last_result_json)
+            except ValueError:
+                result = None
+        jobs.append({
+            "name": name,
+            "status": row.status if row else "never_run",
+            "owner": row.owner if row else None,
+            "last_run": row.last_finished_at if row else None,
+            "last_result": result,
+            "last_error": row.last_error if row else None,
+        })
+    return {
+        "running": settings.SCHEDULER_ENABLED and _task is not None and not _task.done(),
+        "mode": "embedded" if settings.SCHEDULER_ENABLED else "external",
+        "interval_seconds": settings.SCHEDULER_INTERVAL_SECONDS,
+        "jobs": jobs,
+    }

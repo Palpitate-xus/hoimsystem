@@ -5,13 +5,10 @@
 """
 import datetime
 
-import pytest
-
 from app.models import Appointment, BreachRecord, DoctorSchedule
 from app.scheduler import run_job
 
 
-@pytest.mark.asyncio
 class TestBreachScan:
     def test_breach_scan_records_and_releases(self, seed_data, db_session):
         import app.database as _db

@@ -16,6 +16,12 @@ export function deleteRxRule(data) {
 export function rxCheck(data) {
   return request({ url: "rxReviewRule/check", method: "post", data });
 }
+export function getClinicalProfile(patientId) {
+  return request({ url: `clinicalProfile/${patientId}`, method: "get" });
+}
+export function saveClinicalProfile(patientId, data) {
+  return request({ url: `clinicalProfile/${patientId}`, method: "post", data });
+}
 
 // 医保目录对照
 export function getInsuranceCatalogList(params) {

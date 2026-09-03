@@ -3,7 +3,7 @@
 > 由 `fastapi_be/scripts/generate_rbac_matrix.py` 从源码自动生成，请勿手改。
 > `✓`=可访问 | `PUBLIC`=无需登录 | 留空=不可访问
 
-共 **541** 个接口（PUBLIC 15 个 / 需登录 526 个）。
+共 **560** 个接口（PUBLIC 20 个 / 需登录 540 个）。
 
 
 ### `admin.py`
@@ -63,6 +63,13 @@
 | POST | `/api/allergy/create` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
 | PUT | `/api/allergy/update` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
 | POST | `/api/allergy/disable` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
+
+### `analytics.py`
+
+| 方法 | 路径 | admin | super_admin | director | doctor | nurse | cashier | pharmacist | guide | patient | lab_technician | registrar | PUBLIC |
+|------|------|------|------|------|------|------|------|------|------|------|------|------|------|
+| GET | `/api/analytics/operations` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
+| POST | `/api/analytics/refresh` | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |
 
 ### `antibiotic.py`
 
@@ -232,6 +239,15 @@
 | POST | `/api/pharmacy/drugDamage/approve` | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |
 | POST | `/api/pharmacy/drugDamage/reject` | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |
 
+### `emar.py`
+
+| 方法 | 路径 | admin | super_admin | director | doctor | nurse | cashier | pharmacist | guide | patient | lab_technician | registrar | PUBLIC |
+|------|------|------|------|------|------|------|------|------|------|------|------|------|------|
+| POST | `/api/emar/verify` | ✓ | ✓ |  |  | ✓ |  |  |  |  |  |  |  |
+| POST | `/api/emar/administer` | ✓ | ✓ |  |  | ✓ |  |  |  |  |  |  |  |
+| GET | `/api/emar/list` | ✓ | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |
+| POST | `/api/emar/medication/barcode` | ✓ | ✓ |  |  |  |  | ✓ |  |  |  |  |  |
+
 ### `emergency.py`
 
 | 方法 | 路径 | admin | super_admin | director | doctor | nurse | cashier | pharmacist | guide | patient | lab_technician | registrar | PUBLIC |
@@ -293,6 +309,13 @@
 | GET | `/api/equipment/trace/list` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
 | POST | `/api/equipment/trace/create` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
 | POST | `/api/equipment/inventory/check` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
+
+### `events.py`
+
+| 方法 | 路径 | admin | super_admin | director | doctor | nurse | cashier | pharmacist | guide | patient | lab_technician | registrar | PUBLIC |
+|------|------|------|------|------|------|------|------|------|------|------|------|------|------|
+| GET | `/api/events/recent` |  |  |  |  |  |  |  |  |  |  |  | PUBLIC |
+| GET | `/api/events/stream` |  |  |  |  |  |  |  |  |  |  |  | PUBLIC |
 
 ### `exam.py`
 
@@ -463,6 +486,9 @@
 | GET | `/api/insurance/chronic/list` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
 | POST | `/api/insurance/chronic/create` | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |
 | POST | `/api/insurance/drg/group` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
+| POST | `/api/insurance/drg/rule` | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |
+| GET | `/api/insurance/drg/rules` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
+| POST | `/api/insurance/drg/autoGroup` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
 | GET | `/api/insurance/drg/analysis` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
 | GET | `/api/insurance/control/warnings` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
 
@@ -484,6 +510,14 @@
 | POST | `/api/integration/lis/result` |  |  |  |  |  |  |  |  |  |  |  | PUBLIC |
 | POST | `/api/integration/pacs/report` |  |  |  |  |  |  |  |  |  |  |  | PUBLIC |
 | POST | `/api/integration/payment/notify` |  |  |  |  |  |  |  |  |  |  |  | PUBLIC |
+
+### `integration_outbox.py`
+
+| 方法 | 路径 | admin | super_admin | director | doctor | nurse | cashier | pharmacist | guide | patient | lab_technician | registrar | PUBLIC |
+|------|------|------|------|------|------|------|------|------|------|------|------|------|------|
+| GET | `/api/integration/outbox` | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |
+| POST | `/api/integration/outbox/{event_id}/retry` | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |
+| GET | `/api/integration/reconciliation` | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |
 
 ### `inventory_adjustment.py`
 
@@ -611,6 +645,14 @@
 | GET | `/api/temperatureRecord/getList` | ✓ | ✓ |  |  | ✓ |  |  |  |  |  |  |  |
 | POST | `/api/temperatureRecord/create` | ✓ | ✓ |  |  | ✓ |  |  |  |  |  |  |  |
 | POST | `/api/temperatureRecord/delete` | ✓ | ✓ |  |  | ✓ |  |  |  |  |  |  |  |
+
+### `observability.py`
+
+| 方法 | 路径 | admin | super_admin | director | doctor | nurse | cashier | pharmacist | guide | patient | lab_technician | registrar | PUBLIC |
+|------|------|------|------|------|------|------|------|------|------|------|------|------|------|
+| GET | `/api/health/live` |  |  |  |  |  |  |  |  |  |  |  | PUBLIC |
+| GET | `/api/health/ready` |  |  |  |  |  |  |  |  |  |  |  | PUBLIC |
+| GET | `/api/metrics` |  |  |  |  |  |  |  |  |  |  |  | PUBLIC |
 
 ### `ops_extension.py`
 
@@ -768,6 +810,8 @@
 | POST | `/api/rxReviewRule/update` | ✓ | ✓ |  |  |  |  | ✓ |  |  |  |  |  |
 | POST | `/api/rxReviewRule/delete` | ✓ | ✓ |  |  |  |  | ✓ |  |  |  |  |  |
 | POST | `/api/rxReviewRule/check` | ✓ | ✓ | ✓ | ✓ |  |  | ✓ |  |  |  |  |  |
+| GET | `/api/clinicalProfile/{patient_id}` | ✓ | ✓ | ✓ | ✓ |  |  | ✓ |  |  |  |  |  |
+| POST | `/api/clinicalProfile/{patient_id}` | ✓ | ✓ | ✓ | ✓ |  |  | ✓ |  |  |  |  |  |
 
 ### `schedule_change.py`
 

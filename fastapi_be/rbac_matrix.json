@@ -319,6 +319,23 @@
  },
  {
   "auth": "ANY",
+  "function": "operational_trend",
+  "method": "GET",
+  "module": "analytics.py",
+  "path": "/api/analytics/operations"
+ },
+ {
+  "auth": [
+   "admin",
+   "super_admin"
+  ],
+  "function": "refresh_operational_metric",
+  "method": "POST",
+  "module": "analytics.py",
+  "path": "/api/analytics/refresh"
+ },
+ {
+  "auth": "ANY",
   "function": "get_antibiotic_grade_list",
   "method": "GET",
   "module": "antibiotic.py",
@@ -1272,6 +1289,52 @@
    "nurse",
    "super_admin"
   ],
+  "function": "verify_medication",
+  "method": "POST",
+  "module": "emar.py",
+  "path": "/api/emar/verify"
+ },
+ {
+  "auth": [
+   "admin",
+   "nurse",
+   "super_admin"
+  ],
+  "function": "administer_medication",
+  "method": "POST",
+  "module": "emar.py",
+  "path": "/api/emar/administer"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "nurse",
+   "super_admin"
+  ],
+  "function": "list_medication_administrations",
+  "method": "GET",
+  "module": "emar.py",
+  "path": "/api/emar/list"
+ },
+ {
+  "auth": [
+   "admin",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "set_medication_barcode",
+  "method": "POST",
+  "module": "emar.py",
+  "path": "/api/emar/medication/barcode"
+ },
+ {
+  "auth": [
+   "admin",
+   "nurse",
+   "super_admin"
+  ],
   "function": "create_triage",
   "method": "POST",
   "module": "emergency.py",
@@ -1730,6 +1793,20 @@
   "method": "POST",
   "module": "equipment.py",
   "path": "/api/equipment/inventory/check"
+ },
+ {
+  "auth": "PUBLIC",
+  "function": "get_recent_events",
+  "method": "GET",
+  "module": "events.py",
+  "path": "/api/events/recent"
+ },
+ {
+  "auth": "PUBLIC",
+  "function": "event_stream",
+  "method": "GET",
+  "module": "events.py",
+  "path": "/api/events/stream"
  },
  {
   "auth": "ANY",
@@ -2715,6 +2792,30 @@
   "path": "/api/insurance/drg/group"
  },
  {
+  "auth": [
+   "admin",
+   "super_admin"
+  ],
+  "function": "save_drg_rule",
+  "method": "POST",
+  "module": "insurance.py",
+  "path": "/api/insurance/drg/rule"
+ },
+ {
+  "auth": "ANY",
+  "function": "list_drg_rules",
+  "method": "GET",
+  "module": "insurance.py",
+  "path": "/api/insurance/drg/rules"
+ },
+ {
+  "auth": "ANY",
+  "function": "automatic_drg_group",
+  "method": "POST",
+  "module": "insurance.py",
+  "path": "/api/insurance/drg/autoGroup"
+ },
+ {
   "auth": "ANY",
   "function": "drg_analysis",
   "method": "GET",
@@ -2790,6 +2891,36 @@
   "method": "POST",
   "module": "integration.py",
   "path": "/api/integration/payment/notify"
+ },
+ {
+  "auth": [
+   "admin",
+   "super_admin"
+  ],
+  "function": "list_outbox",
+  "method": "GET",
+  "module": "integration_outbox.py",
+  "path": "/api/integration/outbox"
+ },
+ {
+  "auth": [
+   "admin",
+   "super_admin"
+  ],
+  "function": "retry_outbox_event",
+  "method": "POST",
+  "module": "integration_outbox.py",
+  "path": "/api/integration/outbox/{event_id}/retry"
+ },
+ {
+  "auth": [
+   "admin",
+   "super_admin"
+  ],
+  "function": "integration_reconciliation",
+  "method": "GET",
+  "module": "integration_outbox.py",
+  "path": "/api/integration/reconciliation"
  },
  {
   "auth": [
@@ -3546,6 +3677,27 @@
   "method": "POST",
   "module": "nursing.py",
   "path": "/api/temperatureRecord/delete"
+ },
+ {
+  "auth": "PUBLIC",
+  "function": "liveness",
+  "method": "GET",
+  "module": "observability.py",
+  "path": "/api/health/live"
+ },
+ {
+  "auth": "PUBLIC",
+  "function": "readiness",
+  "method": "GET",
+  "module": "observability.py",
+  "path": "/api/health/ready"
+ },
+ {
+  "auth": "PUBLIC",
+  "function": "metrics",
+  "method": "GET",
+  "module": "observability.py",
+  "path": "/api/metrics"
  },
  {
   "auth": "ANY",
@@ -4367,6 +4519,32 @@
   "method": "POST",
   "module": "rx_review_rule.py",
   "path": "/api/rxReviewRule/check"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "get_clinical_profile",
+  "method": "GET",
+  "module": "rx_review_rule.py",
+  "path": "/api/clinicalProfile/{patient_id}"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "save_clinical_profile",
+  "method": "POST",
+  "module": "rx_review_rule.py",
+  "path": "/api/clinicalProfile/{patient_id}"
  },
  {
   "auth": [

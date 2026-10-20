@@ -8,6 +8,7 @@ import uuid
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
+from app.ai.adr_sources import ADR_SOURCE_FEATURES
 from app.ai.catalog import CATALOG_VERSION, COMMON_SYSTEM_PROMPT, FeatureSpec
 from app.ai.context import ContextBundle, authorize_patient, context_metadata, minimize_identifiers, patient_snapshot
 from app.ai.gateway import AIExecutionError, generate
@@ -205,6 +206,9 @@ def describe_run(run: AIRun, include_result: bool = True) -> dict:
         if spec.number in {1, 5, 7, 9}:
             context = json.loads(run.input_json).get("payload", {}).get("context", {})
             data["consultation_findings"] = context.get("consultation_sources")
+        if spec.number in ADR_SOURCE_FEATURES:
+            context = json.loads(run.input_json).get("payload", {}).get("context", {})
+            data["adr_findings"] = context.get("adr_sources")
         if spec.number in {61, 62, 63, 64, 65, 66, 67, 70}:
             context = json.loads(run.input_json).get("payload", {}).get("context", {})
             keys = (

@@ -1253,7 +1253,7 @@ class AdverseReaction(Base):
     severity = Column(Integer, default=1)  # 1=轻度 2=中度 3=重度
     report_time = Column(DateTime)
     reporter_id = Column(Integer, ForeignKey("hoimsystem_users.user_id"))
-    status = Column(Integer, default=0)  # 0=待审核 1=已确认 2=已处理
+    status = Column(Integer, default=0)  # 0=待评估 1=确认标记 2=处理/排除；以status_resolution区分，NULL不推断历史含义
     note = Column(String(200))
     status_resolution = Column(String(24), nullable=True)  # confirmed / processed / excluded; NULL保留历史歧义
     resolution_note = Column(String(1000), nullable=True)

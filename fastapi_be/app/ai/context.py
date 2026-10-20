@@ -9,6 +9,7 @@ from fastapi import HTTPException
 from sqlalchemy import case, or_, select
 from sqlalchemy.orm import Session, selectinload
 
+from app.ai.adr_sources import attach_adr_sources
 from app.ai.billing_sources import attach_billing_sources
 from app.ai.care import surgical_patient_ids
 from app.ai.catalog import FeatureSpec
@@ -503,6 +504,7 @@ def patient_snapshot(db: Session, user: User, spec: FeatureSpec, patient_id: int
     attach_procedural_sources(db, user, spec, patient, encounter, bundle, add, selected, bounded)
     attach_coding_sources(db, user, spec, patient, encounter, bundle, add, selected, bounded, authorize_patient)
     attach_consultation_sources(db, user, spec, patient, encounter, bundle, add, selected, bounded)
+    attach_adr_sources(db, user, spec, patient, bundle, add, selected, bounded)
     if not bundle.data["current_confirmed_diagnoses"]:
         bundle.data["missing_data"].append("未取得本次就诊的已确认诊断")
     bundle.data = minimize_identifiers(bundle.data, patient)

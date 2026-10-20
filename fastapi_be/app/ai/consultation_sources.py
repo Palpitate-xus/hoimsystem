@@ -48,7 +48,7 @@ def attach_consultation_sources(db, user, spec, patient, encounter, bundle, add,
         return {"department_id": identifier, "name": row.name if row else None, "exists_in_current_directory": row is not None}
 
     envelope = {
-        "scope_note": "仅本患者的有限转诊/MDT历史及明确所选记录；原表无就诊外键，不按日期归属本次门诊或住院。原申请诊断、结果和审批意见不是本次已确认诊断；科室名称取当前目录，不推断人员资质、可用时段或已实际接诊",
+        "scope_note": "仅本患者的有限转诊/MDT历史及明确所选记录；原记录未注明对应就诊，不按日期归属本次门诊或住院。原申请诊断、结果和审批意见不是本次已确认诊断；科室名称取当前目录，不推断人员资质、可用时段或已实际接诊",
         "encounter_assignment": "not_recorded",
         "referrals": [],
         "mdt_cases": [],

@@ -17,6 +17,18 @@ def business_tools(db: Session, spec: FeatureSpec, user: User, patient_id: int |
     """Return explicit tool results and evidence without accepting instructions to execute code."""
     tools: dict = {}
     evidence: list[dict] = []
+    if spec.number in {41, 42, 43}:
+        window = context.data.get("observation_window", {})
+        return {
+            "observation_window_input": {
+                "source_id": window.get("source_id"),
+                "lab_input_status": window.get("lab_input_status", "not_provided"),
+                "model_input_validation": window.get("model_input_validation", "not_provided"),
+                "clinical_score_calculated": False,
+                "urine_volume_or_rate_calculated": False,
+                "scope_note": "仅所选原住院冻结窗；未加载的检验不能解释为危急值0条或无异常，未运行患者级趋势或工作流工具",
+            }
+        }, []
     if spec.number == 59:
         tools["appointment_candidates"], sources = appointment_candidates(db, task_input)
         evidence.extend(sources)
@@ -32,9 +44,9 @@ def business_tools(db: Session, spec: FeatureSpec, user: User, patient_id: int |
         tools["perioperative_timing"] = perioperative_timing(context.data)
         rule = tools["perioperative_timing"]["rule"]
         evidence.append({"source_id": f"rule:{rule['rule_id']}:{rule['version']}", "kind": "rule", "title": "既有围术期统计时窗口径", "content": encode_json(rule)})
-    if patient_id and spec.number in {8, 19, 31, 32, 33, 41, 42, 43, 56}:
+    if patient_id and spec.number in {8, 19, 31, 32, 33, 56}:
         tools["laboratory_trends"] = laboratory_trends(context.data)
-    if patient_id and spec.number in {1, 31, 33, 41, 42, 43, 47, 50}:
+    if patient_id and spec.number in {1, 31, 33, 47, 50}:
         tools["critical_value_workflow"] = critical_value_workflow(context.data)
     if spec.number in {5, 6, 11, 12, 13, 14, 15, 16, 17, 18, 20}:
         rows = db.query(Pharmaceutical).filter(Pharmaceutical.status == 0).order_by(Pharmaceutical.pharmaceutical_id).limit(200).all()

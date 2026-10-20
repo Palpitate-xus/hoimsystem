@@ -161,6 +161,8 @@ def active_prompt(db: Session, spec: FeatureSpec, config: AIFeatureConfig | None
 def provider_feature_issues(spec: FeatureSpec, provider: AIProvider) -> list[dict]:
     """Share protocol and data-purpose checks between activation, execution and setup inspection."""
     issues = []
+    if provider.model.startswith("surgery:") and (spec.number != 65 or provider.kind != "specialist"):
+        issues.append({"code": "SURGERY_SCOPE_MISMATCH", "message": "本地手术服务仅用于受审完整病例与共享资源声明场景的固定约束候选，不执行预订或临床处置"})
     if provider.model.startswith("roster:") and (spec.number != 63 or provider.kind != "specialist"):
         issues.append({"code": "ROSTER_SCOPE_MISMATCH", "message": "本地排班服务仅用于受审运营场景的固定约束与优化证明"})
     if provider.model.startswith("bed:") and (spec.number != 64 or provider.kind != "specialist"):

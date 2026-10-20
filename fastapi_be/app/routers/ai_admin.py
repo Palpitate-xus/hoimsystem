@@ -632,6 +632,58 @@ async def check_bed_provider(provider_id: int, req: ProviderCheck, db: Session =
     }
 
 
+@router.post("/ai/admin/providers/{provider_id}/surgery-capabilities")
+async def check_surgery_provider(provider_id: int, req: ProviderCheck, db: Session = Depends(get_db), user: User = Depends(require_roles("super_admin"))) -> dict:
+    """Inspect schema12 metadata without cases, resource facts or scheduling."""
+    from app.ai.surgery_probe import inspect_surgery_capabilities
+
+    provider = db.get(AIProvider, provider_id)
+    if provider is None:
+        raise HTTPException(404, "模型配置不存在")
+    ensure_revision(provider.revision, req.expected_revision)
+    if provider.kind != "specialist" or "surgery_scheduling" not in json.loads(provider.supported_features_json):
+        raise HTTPException(422, "请选择已登记手术排程的独立阶段资源优化服务")
+    actor_id, revision, configured_model, timeout = user.user_id, provider.revision, provider.model, provider.timeout_seconds
+    db.expunge(provider)
+    db.commit()
+    error = None
+    try:
+        capabilities = await inspect_surgery_capabilities(provider)
+    except AIExecutionError as exc:
+        error = exc
+    db.expire_all()
+    actor, current = db.get(User, actor_id), db.get(AIProvider, provider_id)
+    if actor is None or actor.user_role != "super_admin":
+        raise HTTPException(403, "当前用户不再具备AI管理权限")
+    if current is None:
+        raise HTTPException(409, "模型配置已删除，请刷新后重试")
+    ensure_revision(current.revision, revision)
+    if error:
+        audit(db, actor_id, "provider.surgery_check_failed", str(provider_id), {"revision": revision, "error_code": error.code})
+        _commit(db)
+        raise HTTPException(502, error.message)
+    issues = []
+    if capabilities["model_version"] != configured_model:
+        issues.append("登记模型与服务实际固定约束、配方及运行版本不同，请核对并保存后重新评审")
+    if timeout <= capabilities["timeout_seconds"]:
+        issues.append("模型请求超时应大于手术优化处理时限，保留传输和回执时间")
+    audit(db, actor_id, "provider.surgery_check", str(provider_id), {"revision": revision, "compatible": not issues, "actual_model": capabilities["model_version"]})
+    _commit(db)
+    return {
+        "code": 200,
+        "msg": "success",
+        "data": {
+            "provider_id": provider_id,
+            "provider_revision": revision,
+            "configured_model": configured_model,
+            "compatible": not issues,
+            "capabilities": capabilities,
+            "issues": issues,
+            "scope_note": "只核对声明阶段资源、两种目标、固定输入政策、四个核心文件及实际运行版本；不发送病例或资源原件，不执行排程或预订，不证明临床及运营效果，不改变功能启停与验证状态。",
+        },
+    }
+
+
 @router.get("/ai/admin/runs")
 def list_global_runs(
     feature_key: str | None = None,

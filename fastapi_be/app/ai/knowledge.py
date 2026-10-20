@@ -1,6 +1,7 @@
 """Deterministic paragraph retrieval over reviewed, applicable knowledge versions."""
 
 import datetime
+import json
 import re
 
 from sqlalchemy import or_
@@ -9,7 +10,9 @@ from sqlalchemy.orm import Session
 from app.ai.catalog import FeatureSpec
 from app.ai.governance import digest
 from app.ai.models import AIKnowledgeDocument, utcnow
+from app.ai.pathway_knowledge import eligible_pathway_documents, source_is_current
 from app.ai.references import SOURCE_REFERENCE_KEYS
+from app.models import ClinicalPathway
 
 
 def retrieval_query(spec: FeatureSpec, task_input: dict, context: dict, tools: dict | None = None) -> str:
@@ -70,7 +73,7 @@ def _chunks(text: str, size: int = 1000) -> list[str]:
     return [text[index : index + size] for index in range(0, len(text), size - 150)]
 
 
-def retrieve_evidence(db: Session, spec: FeatureSpec, query: str, department_ids: set[int], limit: int = 6) -> list[dict]:
+def retrieve_evidence(db: Session, spec: FeatureSpec, query: str, department_ids: set[int], limit: int = 6, preferred_pathway_ids: set[int] | None = None) -> list[dict]:
     """Search only current published versions explicitly assigned to this capability."""
     now = utcnow()
     documents = (
@@ -78,6 +81,7 @@ def retrieve_evidence(db: Session, spec: FeatureSpec, query: str, department_ids
         .filter(
             AIKnowledgeDocument.status == "published",
             AIKnowledgeDocument.reviewed_by.isnot(None),
+            AIKnowledgeDocument.reviewed_at.isnot(None),
             AIKnowledgeDocument.feature_keys_json.like('%"' + spec.key + '"%'),
             or_(AIKnowledgeDocument.effective_from.is_(None), AIKnowledgeDocument.effective_from <= now),
             or_(AIKnowledgeDocument.effective_to.is_(None), AIKnowledgeDocument.effective_to > now),
@@ -87,13 +91,27 @@ def retrieve_evidence(db: Session, spec: FeatureSpec, query: str, department_ids
         .limit(200)
         .all()
     )
+    preferred = []
+    seen_pathways = set()
+    if preferred_pathway_ids:
+        for document in eligible_pathway_documents(db, preferred_pathway_ids, spec.key, department_ids):
+            if document.source_reference_id not in seen_pathways:
+                preferred.append(document)
+                seen_pathways.add(document.source_reference_id)
+    preferred_ids = {document.document_id for document in preferred}
+    documents = list({document.document_id: document for document in [*preferred, *documents]}.values())
+    source_ids = {document.source_reference_id for document in documents if document.source_kind == "clinical_pathway"}
+    sources = {row.pathway_id: row for row in db.query(ClinicalPathway).filter(ClinicalPathway.pathway_id.in_(source_ids)).all()} if source_ids else {}
     query_terms = _terms(query)
     ranked = []
     for document in documents:
+        if spec.key not in json.loads(document.feature_keys_json) or not source_is_current(db, document, sources) or digest(document.content) != document.content_hash:
+            continue
+        is_preferred = document.document_id in preferred_ids
         for index, content in enumerate(_chunks(document.content)):
             terms = _terms(document.title + " " + content)
             overlap = len(query_terms.intersection(terms))
-            if not overlap:
+            if not overlap and not is_preferred:
                 continue
             score = overlap / max(1, len(query_terms))
             evidence = {
@@ -108,9 +126,11 @@ def retrieve_evidence(db: Session, spec: FeatureSpec, query: str, department_ids
                 "reviewed_at": str(document.reviewed_at),
                 "content": content,
             }
-            ranked.append((score, document.document_id, index, evidence))
-    ranked.sort(key=lambda item: (-item[0], item[1], item[2]))
-    return [item[3] for item in ranked[:limit]]
+            if document.source_kind is not None:
+                evidence.update({"source_kind": document.source_kind, "source_reference_id": document.source_reference_id, "source_snapshot_hash": document.source_snapshot_hash})
+            ranked.append((0 if is_preferred else 1, 0 if is_preferred else -score, document.document_id, index, evidence))
+    ranked.sort(key=lambda item: item[:4])
+    return [item[4] for item in ranked[:limit]]
 
 
 def evidence_is_current(db: Session, evidence: list[dict], at: datetime.datetime | None = None) -> bool:
@@ -121,6 +141,12 @@ def evidence_is_current(db: Session, evidence: list[dict], at: datetime.datetime
             continue
         document = db.get(AIKnowledgeDocument, item["document_id"])
         if not document or document.status != "published" or document.content_hash != item["content_hash"]:
+            return False
+        if not document.reviewed_by or not document.reviewed_at or not source_is_current(db, document) or digest(document.content) != document.content_hash:
+            return False
+        if document.source_kind is not None and (
+            item.get("source_kind") != document.source_kind or item.get("source_reference_id") != document.source_reference_id or item.get("source_snapshot_hash") != document.source_snapshot_hash
+        ):
             return False
         if (document.effective_from and document.effective_from > now) or (document.effective_to and document.effective_to <= now):
             return False

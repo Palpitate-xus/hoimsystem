@@ -511,6 +511,24 @@
   "auth": [
    "super_admin"
   ],
+  "function": "list_pathway_sources",
+  "method": "GET",
+  "module": "ai_admin.py",
+  "path": "/api/ai/admin/pathway-sources"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "import_pathway_knowledge",
+  "method": "POST",
+  "module": "ai_admin.py",
+  "path": "/api/ai/admin/pathway-sources/{pathway_id}/import"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
   "function": "list_grants",
   "method": "GET",
   "module": "ai_admin.py",

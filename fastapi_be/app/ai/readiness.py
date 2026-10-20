@@ -4,10 +4,13 @@ import json
 
 from fastapi import HTTPException
 from sqlalchemy import or_
+from sqlalchemy.orm import defer
 
 from app.ai.catalog import FEATURES
 from app.ai.governance import provider_credential, provider_feature_issues, validate_endpoint
 from app.ai.models import AIKnowledgeDocument, AIProvider, utcnow
+from app.ai.pathway_knowledge import source_is_current
+from app.models import ClinicalPathway
 
 
 def setup_reports(db, configs: dict) -> dict:
@@ -16,7 +19,8 @@ def setup_reports(db, configs: dict) -> dict:
     providers = {item.provider_id: item for item in db.query(AIProvider).all()}
     published = set()
     documents = (
-        db.query(AIKnowledgeDocument.feature_keys_json)
+        db.query(AIKnowledgeDocument)
+        .options(defer(AIKnowledgeDocument.content))
         .filter(
             AIKnowledgeDocument.status == "published",
             AIKnowledgeDocument.reviewed_by.isnot(None),
@@ -26,8 +30,11 @@ def setup_reports(db, configs: dict) -> dict:
         )
         .all()
     )
+    source_ids = {row.source_reference_id for row in documents if row.source_kind == "clinical_pathway"}
+    sources = {row.pathway_id: row for row in db.query(ClinicalPathway).filter(ClinicalPathway.pathway_id.in_(source_ids)).all()} if source_ids else {}
     for row in documents:
-        published.update(json.loads(row[0]))
+        if source_is_current(db, row, sources):
+            published.update(json.loads(row.feature_keys_json))
     provider_checks = {}
     for provider in providers.values():
         issues = []

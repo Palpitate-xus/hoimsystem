@@ -101,6 +101,13 @@ class KnowledgeWrite(StrictRequest):
     effective_from: datetime.datetime | None = None
     effective_to: datetime.datetime | None = None
 
+    @field_validator("source_uri")
+    @classmethod
+    def reserve_bound_pathway_sources(cls, value: str) -> str:
+        if value.lower().startswith("hoim://clinical-pathway/"):
+            raise ValueError("院内路径来源须通过路径快照导入，不能手工填写来源地址")
+        return value
+
     @field_validator("effective_from", "effective_to")
     @classmethod
     def normalize_utc(cls, value: datetime.datetime | None) -> datetime.datetime | None:
@@ -115,6 +122,21 @@ class KnowledgeReview(StrictRequest):
 
     content_hash: str = Field(min_length=64, max_length=64)
     status: Literal["published", "retired"]
+
+
+class PathwayKnowledgeImport(StrictRequest):
+    expected_source_hash: str = Field(pattern=r"^[a-f0-9]{64}$")
+    feature_keys: list[str] = Field(default_factory=lambda: ["treatment_pathway", "response_review"], min_length=1, max_length=80)
+    department_id: int | None = Field(default=None, ge=1, strict=True)
+    effective_from: datetime.datetime | None = None
+    effective_to: datetime.datetime | None = None
+
+    @field_validator("effective_from", "effective_to")
+    @classmethod
+    def normalize_utc(cls, value: datetime.datetime | None):
+        if value and value.tzinfo:
+            return value.astimezone(datetime.UTC).replace(tzinfo=None)
+        return value
 
 
 class PatientGrantWrite(StrictRequest):

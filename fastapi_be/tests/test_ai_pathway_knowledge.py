@@ -10,8 +10,10 @@ from fastapi import HTTPException
 from sqlalchemy import create_engine, inspect, text
 
 from alembic import command
+from app.ai.catalog import FEATURE_BY_KEY
 from app.ai.governance import digest
-from app.ai.models import AIKnowledgeDocument, utcnow
+from app.ai.knowledge import evidence_is_current, retrieve_evidence
+from app.ai.models import AIKnowledgeDocument, AIRun, utcnow
 from app.ai.pathway_knowledge import PATHWAY_URI_PREFIX, eligible_pathway_documents, import_content, parse_pathway_steps, pathway_hash, source_state
 from app.models import ClinicalPathway
 
@@ -125,3 +127,99 @@ def test_migration_preserves_unlinked_knowledge_and_has_reversible_columns(tmp_p
     with engine.connect() as conn:
         assert conn.scalar(text("SELECT content FROM hoimsystem_ai_knowledge_document")) == "原审核内容"
     engine.dispose()
+
+
+def test_decoded_numeric_text_preserves_precision_and_explicit_zero():
+    data = parse_pathway_steps('[{"value":0.123456789123456789,"day":0,"required":false,"unknown":null}]')
+    assert data == [{"value": "0.123456789123456789", "day": "0", "required": False, "unknown": None}]
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("role", ["admin", "director", "doctor", "nurse", "pharmacist", "cashier", "guide", "lab_tech", "registrar", "patient"])
+async def test_only_super_admin_can_list_or_import_pathway_sources(role, seed_data, async_client, auth_headers):
+    headers = auth_headers(seed_data[role + "_user"].username)
+    response = await async_client.get("/api/ai/admin/pathway-sources", headers=headers)
+    assert response.status_code == 403
+    response = await async_client.post("/api/ai/admin/pathway-sources/1/import", headers=headers, json={"expected_source_hash": "0" * 64})
+    assert response.status_code == 403
+
+
+async def import_source(async_client, auth_headers, row):
+    return await async_client.post(f"/api/ai/admin/pathway-sources/{row.pathway_id}/import", headers=auth_headers("super01"), json={"expected_source_hash": pathway_hash(row)})
+
+
+@pytest.mark.asyncio
+async def test_import_freezes_draft_then_explicit_review_enables_scoped_retrieval(seed_data, db_session, pathway_case, async_client, auth_headers):
+    headers = auth_headers("super01")
+    listed = await async_client.get("/api/ai/admin/pathway-sources", headers=headers)
+    source = next(item for item in listed.json()["data"]["items"] if item["pathway_id"] == pathway_case.pathway_id)
+    assert source["importable"] is True and "steps" not in source
+    original = pathway_case.steps
+    imported = await import_source(async_client, auth_headers, pathway_case)
+    assert imported.status_code == 200, imported.text
+    data = imported.json()["data"]
+    assert data["status"] == "draft"
+    endpoint = "/api/ai/admin/knowledge/" + data["document_id"]
+    detail = await async_client.get(endpoint, headers=headers)
+    assert detail.json()["data"]["source_state"] == "current"
+    assert "原排除条件必须保留" in detail.json()["data"]["content"]
+    assert retrieve_evidence(db_session, FEATURE_BY_KEY["treatment_pathway"], "院内测试路径", set(), preferred_pathway_ids={pathway_case.pathway_id}) == []
+    approved = await async_client.post(endpoint + "/review", headers=headers, json={"status": "published", "content_hash": data["content_hash"]})
+    assert approved.status_code == 200, approved.text
+    db_session.expire_all()
+    evidence = retrieve_evidence(db_session, FEATURE_BY_KEY["treatment_pathway"], "完全不同检索词", set(), preferred_pathway_ids={pathway_case.pathway_id})
+    assert evidence and all(item["source_reference_id"] == pathway_case.pathway_id for item in evidence)
+    assert evidence_is_current(db_session, evidence) is True
+    assert db_session.get(ClinicalPathway, pathway_case.pathway_id).steps == original
+    assert db_session.query(AIRun).count() == 0
+
+
+@pytest.mark.asyncio
+async def test_changed_template_cannot_publish_stale_draft_and_retired_version_cannot_reactivate(seed_data, db_session, pathway_case, async_client, auth_headers):
+    headers = auth_headers("super01")
+    old_hash = pathway_hash(pathway_case)
+    imported = (await import_source(async_client, auth_headers, pathway_case)).json()["data"]
+    pathway_case.expected_days = 9
+    db_session.commit()
+    stale_import = await async_client.post(f"/api/ai/admin/pathway-sources/{pathway_case.pathway_id}/import", headers=headers, json={"expected_source_hash": old_hash})
+    assert stale_import.status_code == 409
+    endpoint = "/api/ai/admin/knowledge/" + imported["document_id"] + "/review"
+    assert (await async_client.post(endpoint, headers=headers, json={"status": "published", "content_hash": imported["content_hash"]})).status_code == 409
+    fresh = (await import_source(async_client, auth_headers, pathway_case)).json()["data"]
+    assert fresh["version"] != imported["version"]
+    endpoint = "/api/ai/admin/knowledge/" + fresh["document_id"] + "/review"
+    assert (await async_client.post(endpoint, headers=headers, json={"status": "published", "content_hash": fresh["content_hash"]})).status_code == 200
+    assert (await async_client.post(endpoint, headers=headers, json={"status": "retired", "content_hash": fresh["content_hash"]})).status_code == 200
+    assert (await async_client.post(endpoint, headers=headers, json={"status": "published", "content_hash": fresh["content_hash"]})).status_code == 409
+
+
+@pytest.mark.asyncio
+async def test_source_edit_invalidates_inference_evidence_and_setup_knowledge_dependency(seed_data, db_session, pathway_case, async_client, auth_headers):
+    headers = auth_headers("super01")
+    data = (await import_source(async_client, auth_headers, pathway_case)).json()["data"]
+    await async_client.post("/api/ai/admin/knowledge/" + data["document_id"] + "/review", headers=headers, json={"status": "published", "content_hash": data["content_hash"]})
+    db_session.expire_all()
+    evidence = retrieve_evidence(db_session, FEATURE_BY_KEY["treatment_pathway"], "测试", set(), preferred_pathway_ids={pathway_case.pathway_id})
+    assert evidence
+    pathway_case.steps = '["新的未审核步骤"]'
+    db_session.commit()
+    assert evidence_is_current(db_session, evidence) is False
+    assert retrieve_evidence(db_session, FEATURE_BY_KEY["treatment_pathway"], "测试", set(), preferred_pathway_ids={pathway_case.pathway_id}) == []
+    response = await async_client.get("/api/ai/admin/features", headers=headers)
+    setup = next(item for item in response.json()["data"] if item["key"] == "treatment_pathway")["setup_check"]
+    assert "KNOWLEDGE_NOT_PUBLISHED" in {item["code"] for item in setup["issues"]}
+
+
+@pytest.mark.asyncio
+async def test_internal_source_uri_cannot_be_forged_through_generic_knowledge_creation(seed_data, db_session, pathway_case, async_client, auth_headers):
+    body = {
+        "title": "手工伪装路径",
+        "version": "v1",
+        "source_uri": PATHWAY_URI_PREFIX + str(pathway_case.pathway_id),
+        "category": "clinical",
+        "content": "没有绑定真实路径快照的手工文字内容，需要明确拒绝",
+        "feature_keys": ["treatment_pathway"],
+    }
+    response = await async_client.post("/api/ai/admin/knowledge", headers=auth_headers("super01"), json=body)
+    assert response.status_code == 422
+    assert db_session.query(AIKnowledgeDocument).count() == 0

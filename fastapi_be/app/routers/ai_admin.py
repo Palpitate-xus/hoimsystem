@@ -26,12 +26,13 @@ from app.ai.governance import (
     validate_endpoint,
 )
 from app.ai.models import AIAuditEvent, AIFeatureConfig, AIFeedback, AIKnowledgeDocument, AIPatientGrant, AIPromptVersion, AIProvider, AIRun, utcnow
+from app.ai.pathway_knowledge import PATHWAY_SOURCE_KIND, PATHWAY_URI_PREFIX, import_content, pathway_hash, source_is_current, source_state
 from app.ai.readiness import setup_reports
 from app.ai.runtime import describe_run
-from app.ai.schemas import FeatureWrite, KnowledgeReview, KnowledgeWrite, PatientGrantWrite, PromptActivate, PromptWrite, ProviderWrite
+from app.ai.schemas import FeatureWrite, KnowledgeReview, KnowledgeWrite, PathwayKnowledgeImport, PatientGrantWrite, PromptActivate, PromptWrite, ProviderWrite
 from app.database import get_db
 from app.dependencies import require_roles
-from app.models import Department, Patient, User
+from app.models import ClinicalPathway, Department, Patient, User
 
 router = APIRouter(tags=["AI 超级管理员"])
 
@@ -270,7 +271,16 @@ def list_knowledge(db: Session = Depends(get_db), user: User = Depends(require_r
     """List version metadata; full text is retrieved only when explicitly inspected."""
     items = db.query(AIKnowledgeDocument).order_by(AIKnowledgeDocument.create_time.desc()).limit(limit).all()
     names = ("document_id", "title", "version", "source_uri", "category", "status", "content_hash", "department_id", "effective_from", "effective_to", "reviewed_by", "reviewed_at", "create_time")
-    data = [{**{name: getattr(item, name) for name in names}, "feature_keys": json.loads(item.feature_keys_json)} for item in items]
+    data = [
+        {
+            **{name: getattr(item, name) for name in names},
+            "feature_keys": json.loads(item.feature_keys_json),
+            "source_kind": item.source_kind,
+            "source_reference_id": item.source_reference_id,
+            "source_state": source_state(db, item),
+        }
+        for item in items
+    ]
     return {"code": 200, "msg": "success", "data": data}
 
 
@@ -283,7 +293,18 @@ def knowledge_detail(document_id: str, db: Session = Depends(get_db), user: User
     return {
         "code": 200,
         "msg": "success",
-        "data": {"document_id": item.document_id, "title": item.title, "version": item.version, "content": item.content, "content_hash": item.content_hash, "status": item.status},
+        "data": {
+            "document_id": item.document_id,
+            "title": item.title,
+            "version": item.version,
+            "content": item.content,
+            "content_hash": item.content_hash,
+            "status": item.status,
+            "source_kind": item.source_kind,
+            "source_reference_id": item.source_reference_id,
+            "source_snapshot_hash": item.source_snapshot_hash,
+            "source_state": source_state(db, item),
+        },
     }
 
 
@@ -312,12 +333,89 @@ def review_knowledge(document_id: str, req: KnowledgeReview, db: Session = Depen
         raise HTTPException(404, "知识文档不存在")
     if item.content_hash != req.content_hash:
         raise HTTPException(409, "知识内容与审核版本不一致")
+    if req.status == "published" and (item.source_kind is not None or item.source_uri.lower().startswith(PATHWAY_URI_PREFIX)):
+        if item.status != "draft":
+            raise HTTPException(409, "路径快照只能从待审核发布；停用后须重新导入新版本")
+        if not source_is_current(db, item) or digest(item.content) != item.content_hash:
+            raise HTTPException(409, "路径来源或快照内容已变化，请重新导入当前版本后审核")
     item.status = req.status
     item.reviewed_by = user.user_id
     item.reviewed_at = utcnow()
     audit(db, user.user_id, "knowledge.review", document_id, {"status": req.status, "content_hash": item.content_hash})
     _commit(db)
     return {"code": 200, "msg": "success", "data": {"document_id": item.document_id, "status": item.status}}
+
+
+@router.get("/ai/admin/pathway-sources")
+def list_pathway_sources(db: Session = Depends(get_db), user: User = Depends(require_roles("super_admin")), limit: int = Query(100, ge=1, le=300)) -> dict:
+    """Offer source metadata without treating an active business template as reviewed knowledge."""
+    rows = db.query(ClinicalPathway).order_by(ClinicalPathway.pathway_id.desc()).limit(limit + 1).all()
+    items = []
+    for row in rows[:limit]:
+        issues = []
+        try:
+            import_content(row)
+        except HTTPException as exc:
+            issues.append(str(exc.detail))
+        items.append(
+            {
+                "pathway_id": row.pathway_id,
+                "name": row.name,
+                "disease_code": row.disease_code,
+                "disease_name": row.disease_name,
+                "status": row.status,
+                "expected_days": row.expected_days,
+                "source_hash": pathway_hash(row),
+                "importable": not issues,
+                "issues": issues,
+            }
+        )
+    return {"code": 200, "msg": "success", "data": {"items": items, "truncated": len(rows) > limit}}
+
+
+@router.post("/ai/admin/pathway-sources/{pathway_id}/import")
+def import_pathway_knowledge(pathway_id: int, req: PathwayKnowledgeImport, db: Session = Depends(get_db), user: User = Depends(require_roles("super_admin"))) -> dict:
+    """Freeze the exact hospital template; publication remains a separate review action."""
+    row = db.query(ClinicalPathway).filter_by(pathway_id=pathway_id).with_for_update().populate_existing().first()
+    if row is None:
+        raise HTTPException(404, "临床路径不存在")
+    source_hash = pathway_hash(row)
+    if source_hash != req.expected_source_hash:
+        raise HTTPException(409, "路径来源已变化，请重新加载后导入")
+    for key in req.feature_keys:
+        get_spec(key)
+    if req.effective_from and req.effective_to and req.effective_from >= req.effective_to:
+        raise HTTPException(422, "知识生效时间必须早于失效时间")
+    if req.department_id and db.get(Department, req.department_id) is None:
+        raise HTTPException(404, "科室不存在")
+    content = import_content(row)
+    title = f"院内路径 #{row.pathway_id}：{row.name}"
+    versions = {item[0] for item in db.query(AIKnowledgeDocument.version).filter_by(title=title).all()}
+    ordinal = 1
+    while f"v{ordinal}" in versions:
+        ordinal += 1
+    item = AIKnowledgeDocument(
+        title=title,
+        version=f"v{ordinal}",
+        source_uri=PATHWAY_URI_PREFIX + str(row.pathway_id),
+        source_kind=PATHWAY_SOURCE_KIND,
+        source_reference_id=row.pathway_id,
+        source_snapshot_hash=source_hash,
+        category="clinical",
+        content=content,
+        content_hash=digest(content),
+        feature_keys_json=encode_json(sorted(set(req.feature_keys))),
+        department_id=req.department_id,
+        effective_from=req.effective_from,
+        effective_to=req.effective_to,
+        status="draft",
+        created_by=user.user_id,
+    )
+    db.add(item)
+    flush_or_conflict(db)
+    audit(db, user.user_id, "knowledge.pathway_import", item.document_id, {"pathway_id": pathway_id, "source_hash": source_hash, "content_hash": item.content_hash, "version": item.version})
+    _commit(db)
+    return {"code": 200, "msg": "success", "data": {"document_id": item.document_id, "status": item.status, "content_hash": item.content_hash, "version": item.version}}
 
 
 @router.get("/ai/admin/grants")

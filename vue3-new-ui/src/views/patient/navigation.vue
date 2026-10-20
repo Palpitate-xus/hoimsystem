@@ -5,6 +5,7 @@
       <div class="page-toolbar">
         <el-input v-model="keyword" placeholder="搜索科室名称" clearable class="page-search-input" @keyup.enter="fetchDepartments" />
         <el-button type="primary" :loading="loading" @click="fetchDepartments">查询</el-button>
+        <ai-action label="AI 办事与导航" title="AI 院内办事与路线解释" :feature-keys="['hospital_navigation']" initial-feature="hospital_navigation" />
       </div>
       <el-card shadow="never" class="route-card">
         <template #header><span>院内路线指引</span></template>
@@ -53,6 +54,7 @@
 import { onMounted, ref } from "vue";
 import { ElMessage } from "element-plus";
 import { getNavigationDepartments, getNavigationFaq, getNavigationRoute } from "@/api/triage";
+import AiAction from "@/components/AIAction/index.vue";
 
 const keyword = ref("");
 const departments = ref([]);

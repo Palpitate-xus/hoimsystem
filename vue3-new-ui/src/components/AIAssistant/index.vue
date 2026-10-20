@@ -23,6 +23,16 @@
           <el-select v-model="prescriptionId" clearable placeholder="选择实际处方" style="width: 100%"><el-option v-for="item in prescriptions" :key="item.prescription_id" :label="item.label" :value="item.prescription_id" /></el-select>
         </el-form-item>
         <el-form-item v-if="needsCoding" label="编码检索词"><el-input v-model="codingQuery" maxlength="500" placeholder="已记录诊断、手术名称或已有编码；多个词用逗号分隔" /></el-form-item>
+        <template v-if="needsAppointment">
+          <el-form-item label="预约科室"><el-select v-model="serviceDepartment" clearable filterable :disabled="!!props.initialInput.schedule_id" placeholder="可选：限定科室"><el-option v-for="item in serviceOptions.departments || []" :key="item.department_id" :value="item.department_id" :label="item.name" /></el-select></el-form-item>
+          <el-form-item label="预约医生"><el-select v-model="serviceDoctor" clearable filterable :disabled="!!props.initialInput.schedule_id" placeholder="可选：限定医生"><el-option v-for="item in serviceDoctors" :key="item.doctor_id" :value="item.doctor_id" :label="item.name" /></el-select></el-form-item>
+          <el-form-item label="预约日期"><el-date-picker v-model="serviceDate" type="date" value-format="YYYY-MM-DD" :disabled="!!props.initialInput.schedule_id" placeholder="默认查询明日至第6日" /></el-form-item>
+        </template>
+        <template v-if="needsNavigation">
+          <el-form-item label="导航起点"><el-select v-model="navigationStart" clearable filterable placeholder="选择已配置起点"><el-option v-for="item in serviceOptions.navigation_nodes || []" :key="item.node_id" :value="item.node_id" :label="[item.name, item.floor, item.location].filter(Boolean).join(' · ')" /></el-select></el-form-item>
+          <el-form-item label="导航终点"><el-select v-model="navigationEnd" clearable filterable placeholder="选择已配置终点"><el-option v-for="item in serviceOptions.navigation_nodes || []" :key="item.node_id" :value="item.node_id" :label="[item.name, item.floor, item.location].filter(Boolean).join(' · ')" /></el-select></el-form-item>
+        </template>
+        <p v-if="(needsNavigation || needsAppointment) && serviceOptions.truncated">当前选项为有限列表；可从具体业务记录进入，或补充更明确的办理需求。</p>
         <el-form-item label="补充资料或问题"><el-input v-model="question" type="textarea" :rows="5" maxlength="12000" show-word-limit :placeholder="'请提供与' + selected.name + '相关的信息，明确哪些是已确认事实'" /></el-form-item>
         <el-collapse v-if="canPreview" class="spaced">
           <el-collapse-item title="联调与预览选项">
@@ -44,6 +54,7 @@
       <template #header><div class="result-header"><strong>{{ run.feature_name }}</strong><el-tag>{{ statuses[run.status] || run.status }}</el-tag><el-tag v-if="run.patient_id" type="info">患者 #{{ run.patient_id }}</el-tag><el-tag v-if="run.preview" type="warning">评估预览</el-tag><el-button v-if="busy" link @click="refreshRun">刷新状态</el-button></div></template>
       <el-alert v-if="busy" type="info" :closable="false" title="任务已保存，正在等待处理或生成结果。" />
       <el-alert v-if="run.status === 'failed'" type="error" :closable="false" :title="run.error_message || '生成失败，请联系管理员检查服务状态'" />
+      <ai-service-findings :findings="run.tool_findings" @inspect="inspectEvidence" />
       <div v-if="run.tool_findings?.billing_reconciliation" class="spaced">
         <h4>原始账目与执行关联核对</h4><p>{{ run.tool_findings.billing_reconciliation.scope_note }}</p>
         <el-table v-if="run.tool_findings.billing_reconciliation.scope?.kind === 'inpatient'" :data="run.tool_findings.billing_reconciliation.checks" max-height="320" empty-text="本次范围暂无可核对住院费用">
@@ -104,7 +115,8 @@
 import { computed, onActivated, onBeforeUnmount, onDeactivated, onMounted, ref, watch } from "vue";
 import { useStore } from "vuex";
 import { ElMessage } from "element-plus";
-import { cancelAIRun, createAIRun, getAIClinicalContext, getAIEncounters, getAIFeatures, getAIPatients, getAIPrescriptions, getAIRun, getAIRuns, reviewAIRun } from "@/api/ai";
+import { cancelAIRun, createAIRun, getAIClinicalContext, getAIEncounters, getAIFeatures, getAIPatients, getAIPrescriptions, getAIServiceOptions, getAIRun, getAIRuns, reviewAIRun } from "@/api/ai";
+import AiServiceFindings from "@/components/AIServiceFindings/index.vue";
 
 const props = defineProps({ featureKeys: { type: Array, default: () => [] }, initialFeature: { type: String, default: "" }, patientId: { type: Number, default: null }, encounterRef: { type: String, default: "" }, initialInput: { type: Object, default: () => ({}) } });
 const store = useStore();
@@ -117,6 +129,9 @@ const contextDialog = ref(false), contextData = ref(null), evidenceDialog = ref(
 const selected = computed(() => features.value.find(item => item.key === featureKey.value));
 const needsPrescription = computed(() => ["interaction_review", "allergy_review", "dose_review", "antimicrobial_review"].includes(featureKey.value));
 const needsCoding = computed(() => ["icd_candidates", "drg_evidence_review"].includes(featureKey.value));
+const needsAppointment = computed(() => featureKey.value === "appointment_assistant"), needsNavigation = computed(() => featureKey.value === "hospital_navigation");
+const serviceOptions = ref({}), serviceDepartment = ref(null), serviceDoctor = ref(null), serviceDate = ref(""), navigationStart = ref(null), navigationEnd = ref(null);
+const serviceDoctors = computed(() => (serviceOptions.value.doctors || []).filter(item => !serviceDepartment.value || item.department_id === serviceDepartment.value));
 const busy = computed(() => ["queued", "running"].includes(run.value?.status));
 let timer = null, pollVersion = 0, formVersion = 0, historyVersion = 0, historyOpen = false;
 
@@ -147,7 +162,10 @@ watch(featureKey, async () => {
   formVersion += 1; stopPolling(); run.value = null; contextData.value = null;
   patientId.value = null; encounters.value = []; prescriptions.value = []; encounterRef.value = ""; prescriptionId.value = null;
   question.value = props.initialInput.question || ""; codingQuery.value = props.initialInput.icd_query || ""; extraInput.value = "";
+  serviceOptions.value = {}; serviceDepartment.value = props.initialInput.department_id || null; serviceDoctor.value = props.initialInput.doctor_id || null; serviceDate.value = props.initialInput.appointment_date || "";
+  navigationStart.value = props.initialInput.start_node_id || null; navigationEnd.value = props.initialInput.end_node_id || null;
   if (selected.value?.scope === "patient") { await searchPatients(); patientId.value = props.patientId || (patients.value.length === 1 ? patients.value[0].patient_id : null); }
+  if (needsNavigation.value || needsAppointment.value) { const version = formVersion; const response = await getAIServiceOptions({ feature_key: featureKey.value }); if (version === formVersion) serviceOptions.value = response.data || {}; }
 });
 watch(patientId, async id => {
   stopPolling(); run.value = null;
@@ -164,6 +182,8 @@ watch(patientId, async id => {
 });
 watch(encounterRef, () => { stopPolling(); run.value = null; contextData.value = null; });
 watch(prescriptionId, () => { stopPolling(); run.value = null; });
+watch([serviceDepartment, serviceDoctor, serviceDate, navigationStart, navigationEnd], () => { stopPolling(); run.value = null; });
+watch(serviceDepartment, id => { const doctor = serviceOptions.value.doctors?.find(item => item.doctor_id === serviceDoctor.value); if (id && doctor && doctor.department_id !== id) serviceDoctor.value = null; });
 watch([featureKey, patientId, encounterRef], () => { historyVersion += 1; history.value = []; if (historyOpen) loadHistory(); });
 watch(() => props.initialFeature, key => { if (features.value.some(item => item.key === key)) featureKey.value = key; });
 watch(() => props.patientId, id => { formVersion += 1; patientId.value = id; });
@@ -184,6 +204,8 @@ async function submit() {
   try {
     const input = { ...props.initialInput, ...extra, question: question.value };
     if (needsCoding.value && codingQuery.value.trim()) input.icd_query = codingQuery.value.trim();
+    if (needsAppointment.value) { for (const [key, value] of [["department_id", serviceDepartment.value], ["doctor_id", serviceDoctor.value], ["appointment_date", serviceDate.value]]) { if (value) input[key] = value; else delete input[key]; } }
+    if (needsNavigation.value) { for (const [key, value] of [["start_node_id", navigationStart.value], ["end_node_id", navigationEnd.value]]) { if (value) input[key] = value; else delete input[key]; } }
     if (prescriptionId.value) input.prescription_id = prescriptionId.value;
     const response = await createAIRun({ feature_key: featureKey.value, patient_id: selected.value.scope === "patient" ? patientId.value : null, encounter_ref: selected.value.scope === "patient" ? encounterRef.value || null : null, input, preview: canPreview.value && preview.value });
     run.value = response.data; startPolling();

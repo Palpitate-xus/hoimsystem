@@ -4,6 +4,7 @@
     <el-card>
       <div class="page-toolbar">
         <el-button type="primary" @click="openDialog">预约挂号</el-button>
+        <ai-action label="AI 预约助手" title="AI 当前号源候选与办理说明" :feature-keys="['appointment_assistant']" initial-feature="appointment_assistant" />
         <el-input
           v-model="searchQuery"
           placeholder="搜索预约"
@@ -68,7 +69,7 @@
             <el-tag v-else type="info">否</el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="120">
+        <el-table-column label="操作" width="230">
           <template #default="{row}">
             <el-button
               size="small"
@@ -79,6 +80,7 @@
             >
               {{ isOutOfStock(row) ? "无号源" : "预约" }}
             </el-button>
+            <ai-action label="AI 号源说明" title="AI 所选号源核对" :feature-keys="['appointment_assistant']" initial-feature="appointment_assistant" :initial-input="{ schedule_id: row.id, doctor_id: row.doctor_id, department_id: row.department_id, appointment_date: row.date }" />
           </template>
         </el-table-column>
       </el-table>
@@ -90,6 +92,7 @@
 import { ref, onMounted, computed } from "vue";
 import { ElMessage } from "element-plus";
 import { getAppointmentList, getAppointmentSchedules, createAppointment, cancelAppointment, getFamilyMembers } from "@/api/patient";
+import AiAction from "@/components/AIAction/index.vue";
 
 const list = ref([]);
 const searchQuery = ref("");

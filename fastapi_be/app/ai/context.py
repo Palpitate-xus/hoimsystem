@@ -316,6 +316,12 @@ def _selected_records(db: Session, user: User, patient_id: int, references: dict
 
 def patient_snapshot(db: Session, user: User, spec: FeatureSpec, patient_id: int, encounter_ref: str | None = None, source_refs: dict | None = None) -> ContextBundle:
     """Build a bounded snapshot without mixing historical diagnoses into confirmed current ones."""
+    if (source_refs or {}).get("news2_assessment_id") not in (None, ""):
+        if spec.number != 41:
+            raise HTTPException(422, "NEWS2评估仅供病情恶化预警的独立评分使用")
+        from app.ai.news2_context import news2_context
+
+        return news2_context(db, user, patient_id, encounter_ref, source_refs)
     if spec.number in {41, 42, 43}:
         from app.ai.observation_windows import observation_context
 

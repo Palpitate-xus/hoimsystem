@@ -23,6 +23,7 @@ from app.ai.image_assets import authorize_image_patient, authorize_image_snapsho
 from app.ai.image_files import open_verified_image
 from app.ai.knowledge import evidence_is_current, retrieval_query, retrieve_evidence
 from app.ai.models import AIAudioAsset, AIECGAsset, AIFeatureConfig, AIImageAsset, AIProvider, AIRun, utcnow
+from app.ai.news2_context import authorize_news2_snapshot
 from app.ai.nursing_sources import authorize_nursing_snapshot, has_frozen_nursing_sources
 from app.ai.observation_windows import RISK_FEATURES, authorize_window_snapshot
 from app.ai.operational_sources import authorize_operational_snapshot, operational_context
@@ -99,6 +100,12 @@ def create_run(db: Session, user: User, req: RunRequest) -> AIRun:
     else:
         departments = {item[0] for item in db.query(Doctor.department_id).filter_by(user_id=user.user_id).all() if item[0]}
         bundle = ContextBundle(data={"scope": "task_input", "missing_data": []}, department_ids=departments)
+    if spec.number == 41:
+        news2_mode = provider.model.startswith("news2:")
+        if news2_mode and not bundle.data.get("news2_source"):
+            raise HTTPException(422, "当前NEWS2服务需要同时选择原住院窗口和明确的点测/适用性评估来源")
+        if bundle.data.get("news2_source") and not news2_mode:
+            raise HTTPException(422, "当前服务不是NEWS2规则适配器，请重新核对模型配置和输入方式")
     if spec.key == "treatment_pathway" and not bundle.data.get("current_confirmed_diagnoses"):
         raise HTTPException(409, "治疗路径推荐需要指定本次就诊，并提供该次就诊已确认的诊断")
     if spec.number in {66, 67} and not bundle.data.get("supply_inventory"):
@@ -190,6 +197,8 @@ def authorize_run(db: Session, user: User, run: AIRun) -> None:
         nursing_frozen = has_frozen_nursing_sources(frozen_context)
         if spec.number in RISK_FEATURES:
             authorize_window_snapshot(db, user, frozen_context, run.patient_id, run.encounter_ref)
+            if spec.number == 41:
+                authorize_news2_snapshot(db, user, frozen_context, run.patient_id, run.encounter_ref)
         elif spec.number == 36:
             # Frozen super-admin audit does not reconstitute deleted clinical
             # links. Execution still rebuilds and authorizes the current source.
@@ -251,6 +260,10 @@ def describe_run(run: AIRun, include_result: bool = True) -> dict:
         data["result"] = json.loads(run.result_json)
         if spec.number in RISK_FEATURES:
             data["observation_findings"] = json.loads(run.input_json).get("payload", {}).get("context", {}).get("observation_window")
+        if spec.number == 41:
+            context = json.loads(run.input_json).get("payload", {}).get("context", {})
+            if context.get("news2_source"):
+                data["news2_findings"] = {key: context[key] for key in ("news2_source", "news2_assessment")}
         data["evidence"] = json.loads(run.evidence_json)
         tools = json.loads(run.input_json).get("payload", {}).get("tools", {})
         data["tool_findings"] = {

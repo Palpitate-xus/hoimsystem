@@ -151,11 +151,19 @@ async def check_speech_provider(provider_id: int, req: ProviderCheck, db: Sessio
         issues.append("模型请求超时应大于语音服务处理时限，保留传输和回执时间")
     audit(db, actor_id, "provider.speech_check", str(provider_id), {"revision": revision, "compatible": not issues, "actual_model": capabilities["model_version"]})
     _commit(db)
-    return {"code": 200, "msg": "success", "data": {
-        "provider_id": provider_id, "provider_revision": revision, "configured_model": configured_model, "compatible": not issues,
-        "capabilities": capabilities, "issues": issues,
-        "scope_note": "仅读取服务声明与登记配置的匹配情况，不发送患者资料、不执行识别，不证明医疗质量或完成临床验证。",
-    }}
+    return {
+        "code": 200,
+        "msg": "success",
+        "data": {
+            "provider_id": provider_id,
+            "provider_revision": revision,
+            "configured_model": configured_model,
+            "compatible": not issues,
+            "capabilities": capabilities,
+            "issues": issues,
+            "scope_note": "仅读取服务声明与登记配置的匹配情况，不发送患者资料、不执行识别，不证明医疗质量或完成临床验证。",
+        },
+    }
 
 
 @router.post("/ai/admin/providers/{provider_id}/ecg-capabilities")
@@ -193,11 +201,19 @@ async def check_ecg_provider(provider_id: int, req: ProviderCheck, db: Session =
         issues.append("模型请求超时应大于心电服务处理时限，保留传输和回执时间")
     audit(db, actor_id, "provider.ecg_check", str(provider_id), {"revision": revision, "compatible": not issues, "actual_model": capabilities["model_version"]})
     _commit(db)
-    return {"code": 200, "msg": "success", "data": {
-        "provider_id": provider_id, "provider_revision": revision, "configured_model": configured_model, "compatible": not issues,
-        "capabilities": capabilities, "issues": issues,
-        "scope_note": "仅读取心电服务声明与登记配置的匹配情况，不发送患者资料、不执行分类，不证明临床适用性、识别质量或完成临床验证。",
-    }}
+    return {
+        "code": 200,
+        "msg": "success",
+        "data": {
+            "provider_id": provider_id,
+            "provider_revision": revision,
+            "configured_model": configured_model,
+            "compatible": not issues,
+            "capabilities": capabilities,
+            "issues": issues,
+            "scope_note": "仅读取心电服务声明与登记配置的匹配情况，不发送患者资料、不执行分类，不证明临床适用性、识别质量或完成临床验证。",
+        },
+    }
 
 
 @router.post("/ai/admin/providers/{provider_id}/image-capabilities")
@@ -235,11 +251,19 @@ async def check_image_provider(provider_id: int, req: ProviderCheck, db: Session
         issues.append("模型请求超时应大于影像服务处理时限，保留传输和回执时间")
     audit(db, actor_id, "provider.image_check", str(provider_id), {"revision": revision, "compatible": not issues, "actual_model": capabilities["model_version"]})
     _commit(db)
-    return {"code": 200, "msg": "success", "data": {
-        "provider_id": provider_id, "provider_revision": revision, "configured_model": configured_model, "compatible": not issues,
-        "capabilities": capabilities, "issues": issues,
-        "scope_note": "仅读取影像服务声明与登记配置的匹配情况，不发送患者资料或像素、不执行识别；不证明输入与训练预处理等价、临床适用性、诊断质量或完成临床验证。",
-    }}
+    return {
+        "code": 200,
+        "msg": "success",
+        "data": {
+            "provider_id": provider_id,
+            "provider_revision": revision,
+            "configured_model": configured_model,
+            "compatible": not issues,
+            "capabilities": capabilities,
+            "issues": issues,
+            "scope_note": "仅读取影像服务声明与登记配置的匹配情况，不发送患者资料或像素、不执行识别；不证明输入与训练预处理等价、临床适用性、诊断质量或完成临床验证。",
+        },
+    }
 
 
 @router.get("/ai/admin/runs")

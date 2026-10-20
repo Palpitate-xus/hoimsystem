@@ -9,3 +9,12 @@ Browser tests mock HTTP transport and cannot establish backend authorization or
 clinical validation. The structural contract examples in `sofa-contract-fixtures.cjs`
 come from actual Pydantic validation; they are not ORM assessment fixtures or a
 scoring oracle. Numerical analyses will use actual typed pure model output.
+
+The `seven-*` fixtures contain all seven original member kinds and the actual
+continuous NE prefix, NT GCS and zero pump/weight links. The `paged-*` exports
+contain 38 service-created original members, including 25 additional original MAP
+records; pagination changes DOM rendering only. `change-cross-admission.json` is
+an actual authorized change assessment whose observed baseline belongs to the
+same patient and a different original admission. Its IDs and hashes are unchanged.
+The profile states are actual same-ID HTTP governance receipts for the final
+recipe and input policy; no clinical thresholds or governance hashes were edited.

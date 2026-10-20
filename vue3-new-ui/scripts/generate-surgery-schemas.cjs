@@ -22,11 +22,12 @@ governance=types.ModuleType('app.ai.governance');governance.provider_credential=
 gateway=types.ModuleType('app.ai.gateway');gateway.AIExecutionError=RuntimeError;sys.modules['app.ai.gateway']=gateway
 from app.ai import surgery_facts
 from app.ai.surgery_probe import SurgeryCapabilities
+from app.ai.surgery_collection import SafeResourceOriginalWrapper
 from app.ai.surgery_contract import SurgeryRuntime, RECIPE, INPUT_POLICY, hash_content
 from app.ai.surgery_config import runtime_descriptor
 names=('SourceCreate','RegistryCreate','SourceReview','SourceRevoke','ProtectedCapsuleCreate','SourceWrapper','SourceParentBinding','RegistryParentBinding','SafeBusyCapsuleWrapper')
 runtime=runtime_descriptor()
-result={'source':{name:getattr(surgery_facts,name).model_json_schema() for name in names},'provider':{'SurgeryCapabilities':SurgeryCapabilities.model_json_schema()},'fixed':{'recipe':RECIPE,'input_policy':INPUT_POLICY,'recipe_digest':hash_content(RECIPE),'input_policy_digest':hash_content(INPUT_POLICY),'core_sha256':runtime['core_sha256'],'runtime_fields':list(SurgeryRuntime.model_fields)}}
+result={'source':{**{name:getattr(surgery_facts,name).model_json_schema() for name in names},'SafeResourceOriginalWrapper':SafeResourceOriginalWrapper.model_json_schema()},'provider':{'SurgeryCapabilities':SurgeryCapabilities.model_json_schema()},'fixed':{'recipe':RECIPE,'input_policy':INPUT_POLICY,'recipe_digest':hash_content(RECIPE),'input_policy_digest':hash_content(INPUT_POLICY),'core_sha256':runtime['core_sha256'],'runtime_fields':list(SurgeryRuntime.model_fields)}}
 print(json.dumps(result,ensure_ascii=False,sort_keys=True,separators=(',',':')))
 `;
 const allowed = new Set(['$defs','$ref','additionalProperties','anyOf','const','discriminator','enum','items','maxItems','minItems','maxProperties','minProperties','maxLength','maximum','minLength','minimum','oneOf','pattern','properties','propertyNames','required','type']);

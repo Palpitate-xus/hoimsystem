@@ -1,4 +1,4 @@
-const sources=require('./surgery-synthetic/sources.json'),providers=require('./surgery-synthetic/providers.json');
+const sources=require('./surgery-synthetic/sources-eight-kind.json'),providers=require('./surgery-synthetic/providers-eight-kind.json');
 async function openSurgery(page,harness,config={}){
  const state={writes:[],errors:[],releases:{},completed:[],role:'super_admin',response:providers.cases.compatible.response,...config};
  page.on('pageerror',error=>state.errors.push(error.message));

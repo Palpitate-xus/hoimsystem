@@ -4,10 +4,11 @@ import {decodeGeneratedSchemas,generatedSchemaMatches} from '../sofaSchema';
 import {supportCanonical,supportDigest,supportHash,supportId,supportUtc} from '../inpatientSupport';
 
 const schemas=decodeGeneratedSchemas(registry);
-export const surgerySourceKinds=Object.freeze({case_requirements:'病例明确需求',duration_observation:'原实际时长观测',case_duration_estimate:'病例审核阶段时长',operating_room_identity_capability:'手术室身份与能力',person_identity_qualification:'自然人身份与岗位资格',resource_availability_busy:'资源可用/职责/安全忙时',resource_occupation_policy:'资源占用与工时政策'});
+export const surgerySourceKinds=Object.freeze({case_requirements:'病例明确需求',duration_observation:'原实际时长观测',case_duration_estimate:'病例审核阶段时长',operating_room_identity_capability:'手术室身份与能力',person_identity_qualification:'自然人身份与岗位资格',resource_availability_busy:'资源可用/职责/安全忙时',resource_occupation_policy:'资源占用与工时政策',equipment_identity_capability:'具体设备身份与能力'});
 export const surgeryRegistryKinds=Object.freeze({pool:'资源池',resource:'全局物理资源',person_account:'自然人账号关联',room_alias:'明确手术室别名',pool_membership:'资源池成员声明'});
 export const surgerySourceStates=Object.freeze({draft:'待审核草稿',published:'已审核发布',rejected:'审核拒绝',revoked:'已撤销'});
 export const surgerySchemaMatches=(name,value,definition=null)=>generatedSchemaMatches(schemas,name,value,definition);
+export function surgeryFormSchema(name){return ['SourceCreate','RegistryCreate','SourceReview','SourceRevoke'].includes(name)?JSON.parse(JSON.stringify(schemas[name])):null;}
 export const surgeryPositive=value=>Number.isSafeInteger(value)&&value>0&&value<=2147483647;
 export const surgeryClock=value=>{try{return typeof value==='string'&&Number(value.slice(0,4))>=1000&&supportUtc(value)===value;}catch{return false;}};
 export const surgeryBasis=value=>typeof value==='string'&&Array.from(value).length<=4000&&Array.from(value).filter(c=>!/[\s\u0085\u001c-\u001f]/u.test(c)).length>=20&&new TextEncoder().encode(value).length<=4000;
@@ -103,8 +104,8 @@ export async function verifySurgerySource(row,type=null,poolId=null,{auditOnly=f
    const legacy=row.source_kind==='duration_observation'?row.payload.legacy_schedule_id:null;
    if(legacy===null?p.legacy_clock!==null:p.legacy_clock?.schedule_id!==legacy)return false;
   }else{
-   const required=row.source_kind==='operating_room_identity_capability'?'room':row.source_kind==='person_identity_qualification'||row.payload.record_type==='duty'||row.payload.policy_type==='work'?'person':null;
-   if(required!==null&&p.resource.resource_kind!==required||p.legacy_clock!==null||p.resource.resource_kind!=='equipment'&&p.physical_condition!==null)return false;
+   const required=row.source_kind==='operating_room_identity_capability'?'room':row.source_kind==='equipment_identity_capability'?'equipment':row.source_kind==='person_identity_qualification'||row.payload.record_type==='duty'||row.payload.policy_type==='work'?'person':null;
+   if(required!==null&&p.resource.resource_kind!==required||p.legacy_clock!==null||(p.resource.resource_kind==='equipment'?!p.physical_condition||Number(p.physical_condition.equipment_id!==null)+Number(p.physical_condition.cssd_instrument_id!==null)!==1:p.physical_condition!==null))return false;
    if(row.source_kind==='person_identity_qualification'){
     if(!supportHash(p.person_account_hash)||(row.payload.doctor_id===null?p.qualification_doctor!==null:!p.qualification_doctor||p.qualification_doctor.doctor_id!==row.payload.doctor_id||p.qualification_doctor.user_id!==row.payload.user_id))return false;
    }else if(p.qualification_doctor!==null||p.person_account_hash!==null)return false;
@@ -148,6 +149,30 @@ export async function verifySurgeryBusyCapsule(row,resourceId=null,sourceRecordI
   // source_content_hash authenticates an undisclosed server-side original. It
   // is deliberately never equated with this separate complete safe-envelope SHA.
   return bytes(capsule)<=8388608&&await supportDigest(capsule)===capsule_hash;
+ }catch{return false;}
+}
+export async function projectSurgerySafeResourcePayload(payload){
+ if(!payload||['case_requirements','duration_observation','case_duration_estimate'].includes(payload.kind)||!Object.hasOwn(surgerySourceKinds,payload.kind))throw new Error('病例专业原件不转换为跨范围资源胶囊');
+ async function project(value){
+  if(Array.isArray(value))return Promise.all(value.map(project));if(!object(value))return value;
+  const result={};for(const[key,item]of Object.entries(value)){
+   if(['user_id','doctor_id'].includes(key))continue;
+   if(key.endsWith('_note'))result[key.slice(0,-5)+'_hash']=await supportDigest(item);
+   else if(key==='capability_keys')result.capability_hashes=await Promise.all(item.map(supportDigest));
+   else if(['transition_class_key','from_class_key','to_class_key'].includes(key))result[key.slice(0,-4)+'_hash']=item===null?null:await supportDigest(item);
+   else if(key==='policy_reference')result.policy_reference_hash=await supportDigest(item);
+   else result[key]=await project(item);
+  }return result;
+ }return project(payload);
+}
+export async function verifySurgerySafeResourceOriginal(row,expectedOriginal=null,{resourceId=null,sourceRecordId=null,asOf=null}={}){
+ try{
+  if(!surgerySchemaMatches('SafeResourceOriginalWrapper',row)||resourceId!==null&&row.resource_id!==resourceId||sourceRecordId!==null&&row.source_record_id!==sourceRecordId||!surgeryClock(row.recorded_at)||row.reviewed_at!==null&&(!surgeryClock(row.reviewed_at)||row.reviewed_at<row.recorded_at)||row.published_at!==null&&(row.published_at!==row.reviewed_at)||row.redacted!==(row.payload===null)||row.redacted===row.eligible_for_new_use||row.eligible_for_new_use!==(row.exclusion_reasons.length===0)||!unique(row.exclusion_reasons)||row.exclusion_reasons.some(x=>!reasons.includes(x))||(row.status!=='published')!==row.exclusion_reasons.includes('source_not_published'))return false;
+  if(row.status==='draft'&&(row.revision!==1||row.reviewed_at!==null||row.published_at!==null)||row.status==='published'&&(row.revision!==2||row.published_at===null)||row.status==='rejected'&&(row.revision!==2||row.reviewed_at===null||row.published_at!==null)||row.status==='revoked'&&(row.revision!==(row.reviewed_at===null?2:3)||row.published_at!==row.reviewed_at))return false;
+  if(asOf!==null&&(!surgeryClock(asOf)||row.eligible_for_new_use&&(row.recorded_at>asOf||row.published_at>asOf)))return false;
+  if(row.payload!==null){const p=row.payload;if(p.kind!==row.source_kind||!semantics(p)||p.record_type==='duty'&&p.accounting.breaks.some(b=>b.start_at<p.start_at||b.end_at>p.end_at)||p.record_type==='busy_capsule'&&((p.end_at===null)!==(p.end_absent_reason!==null)||(p.transition_class_hash===null)!==(p.transition_class_absent_reason!==null)||p.verified_until_at!==null&&(p.verified_until_at<p.start_at||p.end_at!==null&&p.verified_until_at>p.end_at)||(p.basis_code==='protected_legacy_witness')!==(p.protected_witness_hash!==null))||p.policy_type==='transition'&&!unique(p.pairs.map(x=>x.from_class_hash+'\0'+x.to_class_hash)))return false;}
+  if(expectedOriginal!==null){const e=expectedOriginal;if(!await verifySurgerySource(e)||['source_record_id','source_kind','resource_id','recorded_at','status','revision','reviewed_at'].some(k=>row[k]!==e[k])||row.source_content_hash!==e.content_hash||row.source_governance_hash!==e.governance_hash||row.payload!==null&&!same(row.payload,await projectSurgerySafeResourcePayload(e.payload)))return false;}
+  const {capsule_hash,...body}=row;return bytes(body)<=8388608&&await supportDigest(body)===capsule_hash;
  }catch{return false;}
 }
 export async function verifySurgeryTransition(row,original,action,body,{registryKind=null}={}){

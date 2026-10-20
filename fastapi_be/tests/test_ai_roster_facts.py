@@ -170,6 +170,14 @@ def test_constraint_value_never_coerces_or_fills_zero(value, reason):
         facts.ConstraintValue.model_validate({"value": value, "absent_reason": reason})
 
 
+def test_minutes_preserve_exact_cross_runtime_microsecond_bound():
+    maximum = facts.ConstraintValue(value=facts.MAX_CONSTRAINT_MINUTES, absent_reason=None)
+    assert maximum.value * 60000000 <= 9007199254740991
+    assert (maximum.value + 1) * 60000000 > 9007199254740991
+    with pytest.raises(ValidationError):
+        facts.ConstraintValue(value=maximum.value + 1, absent_reason=None)
+
+
 @pytest.mark.parametrize("change", ["outside", "overlap", "reverse", "not_complete", "unknown_break", "naive_clock"])
 def test_duty_true_intervals_complete_breaks_and_accounting_are_explicit(change):
     data = payload("duty_interval")
@@ -270,9 +278,11 @@ def test_transferred_subject_redacts_ordinary_but_super_frozen_and_revoke_preser
     db_session.commit()
     ordinary = facts.source_current(db_session, case["director"], "qualification", row.source_record_id)
     assert ordinary["payload"] is ordinary["parent_binding"] is None
+    assert ordinary["review_basis_note"] is ordinary["revoke_reason"] is None
     assert ordinary["can_record"] is ordinary["can_revoke"] is ordinary["eligible"] is False
     frozen = facts.source_current(db_session, case["super"], "qualification", row.source_record_id, audit_only=True)
     assert frozen["payload"] is not None and frozen["parent_current"] is False and frozen["can_revoke"] is True
+    assert frozen["review_basis_note"] == NOTE and frozen["revoke_reason"] == ""
     with pytest.raises(HTTPException, match="409"):
         facts.review_source(
             db_session, case["super"], "qualification", row.source_record_id, {"expected_revision": 1, "expected_content_hash": row.content_hash, "decision": "publish", "review_basis_note": NOTE}

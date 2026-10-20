@@ -24,6 +24,8 @@ PREFIXES = {"qualification": "roster_qualification", "duty_interval": "roster_du
 SCHEMA_VERSION = "roster_fact_v1"
 MAX_PAYLOAD_BYTES = 262144
 MAX_PARENT_BYTES = 32768
+# Public proof arithmetic uses exact integer microseconds in JavaScript too.
+MAX_CONSTRAINT_MINUTES = 9007199254740991 // 60000000
 IDENTITY_FIELDS = ("source_record_id", "source_kind", "department_id", "doctor_id", "schema_version", "recorded_at", "created_by")
 GOVERNANCE_FIELDS = ("status", "revision", "reviewed_by", "reviewed_at", "review_basis_note", "revoked_by", "revoked_at", "revoke_reason")
 
@@ -167,7 +169,7 @@ class AvailabilityPayload(WithEvidence):
 
 
 class ConstraintValue(StrictInput):
-    value: int | None = Field(ge=0, le=2147483647)
+    value: int | None = Field(ge=0, le=MAX_CONSTRAINT_MINUTES)
     absent_reason: Literal["unknown", "not_applicable"] | None
 
     @model_validator(mode="after")
@@ -443,7 +445,7 @@ def source_current(db, user, kind, source_record_id, *, audit_only=False, requir
     if require_published and reasons:
         raise HTTPException(409, "原来源、原人员科室或发布状态已变化，不能用于新计划")
     visible = audit_only or not parent_reasons and row.status in {"draft", "published"}
-    return {
+    data = {
         **metadata(row),
         "payload": payload if visible else None,
         "parent_binding": parent if visible else None,
@@ -456,6 +458,10 @@ def source_current(db, user, kind, source_record_id, *, audit_only=False, requir
         "audit_only": audit_only,
         "eligibility_basis": "published_governance_and_current_parent_not_staff_qualification_or_roster_feasibility",
     }
+    if not visible:
+        data["review_basis_note"] = None
+        data["revoke_reason"] = None
+    return data
 
 
 def create_source(db, user, kind, values):

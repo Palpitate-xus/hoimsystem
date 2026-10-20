@@ -42,6 +42,7 @@ async def test_real_mounted_four_kinds_draft_publish_list_and_cas_revoke(async_c
     revoked = await async_client.post(url + "/revoke", headers=ordinary, json={"expected_revision": 2, "reason": "本人原资料主动停止新计划使用"})
     assert revoked.status_code == 200 and revoked.json()["data"]["revision"] == 3
     assert revoked.json()["data"]["payload"] is None
+    assert revoked.json()["data"]["review_basis_note"] is revoked.json()["data"]["revoke_reason"] is None
     duplicate = await async_client.post(url + "/revoke", headers=ordinary, json={"expected_revision": 2, "reason": "相同版本不能重放"})
     assert duplicate.status_code == 409
     frozen = await async_client.get("/api/ai/admin/roster-sources/" + data["source_record_id"], headers=headers)

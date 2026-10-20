@@ -1,5 +1,8 @@
 import uuid
 
+# Register AI tables in the same metadata for create_all and Alembic migrations.
+from app.ai import models as _ai_models  # noqa: F401
+
 from sqlalchemy import Column, Date, DateTime, Float, ForeignKey, Index, Integer, Numeric, String, Text, UniqueConstraint
 from sqlalchemy.orm import relationship
 

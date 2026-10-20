@@ -60,7 +60,15 @@ async function selected(page) { await select(page, "待计算NEWS2评估来源",
 async function positiveSelections(page) { return page.evaluate(() => window.__news2Probe.events.filter(item => item.type === "selection" && item.value)); }
 function noModel(state) { expect(state.modelCalls).toEqual([]); expect(state.forbidden).toEqual([]); }
 async function admin(page) { await page.evaluate(() => { const p = window.__news2Probe; p.store.commit("user/permissions", ["super_admin"]); p.scope.mode = "management"; }); await expect(page.getByLabel("NEWS2规则与评估来源治理", { exact: true })).toBeVisible(); }
-async function findings(page, source, analysis, sourceScope = null) { await page.evaluate(({ source, analysis, sourceScope }) => Object.assign(window.__news2Probe.scope, { mode: "findings", source, analysis, sourceScope }), { source, analysis, sourceScope }); return page.getByLabel("NEWS2确定性计算复核", { exact: true }); }
+function findingsWrapper(source) {
+  const row = assessment({ age_at_observation_years: source.age_at_observation_years, pregnancy_status: source.pregnancy_status, spo2_scale: source.spo2_scale });
+  row.specialist_source = clone(source);
+  row.snapshot.point.payload.measurements = clone(source.measurements);
+  row.snapshot.point.payload.supplemental_oxygen = source.supplemental_oxygen;
+  row.snapshot.point.payload.consciousness = clone(source.consciousness);
+  return row;
+}
+async function findings(page, source, analysis, sourceScope = null) { sourceScope = sourceScope ?? findingsWrapper(source); await page.evaluate(({ source, analysis, sourceScope }) => Object.assign(window.__news2Probe.scope, { mode: "findings", source, analysis, sourceScope }), { source, analysis, sourceScope }); return page.getByLabel("NEWS2确定性计算复核", { exact: true }); }
 
 test("原单点与适用性不预填，登记只提交引用摘要及显式声明，不自动选中或计算", async ({ page }) => {
   const state = await session(page); await draft(page); await expect(page.getByRole("textbox", { name: "NEWS2原观察时年龄", exact: true })).toHaveValue(""); for (const name of ["NEWS2妊娠状态", "NEWS2血氧评分规则"]) await expect(page.getByRole("combobox", { name, exact: true })).toHaveValue(""); await expect(page.getByRole("button", { name: "仅登记NEWS2评估来源", exact: true })).toBeDisabled(); await attest(page); await page.getByRole("button", { name: "仅登记NEWS2评估来源", exact: true }).click(); await expect.poll(() => state.writes.length).toBe(1);
@@ -114,6 +122,17 @@ for (const [scope, pregnancy] of [["unknown", "unknown"], ["outside_scope", "pre
 test("Findings拒绝外层住院串源及analysis另一原点评估绑定", async ({ page }) => {
   const state = await session(page), source = assessment().specialist_source, value = analysisFor(source); const view = await findings(page, source, value, { patient_id: 11, admission_id: "wrong-admission", window_id: windowId }); await expect(view.getByRole("alert")).toContainText("来源与原患者"); await expect(view.getByLabel("NEWS2七项原值与分值", { exact: true })).toHaveCount(0); value.source_binding.point_id = "99999999-9999-4999-8999-999999999999"; await findings(page, source, value); await expect(view.getByRole("alert")).toContainText("计算结果已拒绝展示"); noModel(state);
 });
+
+for (const [name, mutate] of [
+  ["缺失冻结正文", row => { row.snapshot = null; }],
+  ["原点患者串源", row => { row.snapshot.point.patient_id = 22; }],
+  ["原脉搏与专用投影不一致", row => { row.snapshot.point.payload.measurements.pulse_rate.value = "123"; }],
+]) {
+  test(`Findings${name}拒绝分值和原测量展示`, async ({ page }) => {
+    const state = await session(page), source = assessment().specialist_source, wrapper = findingsWrapper(source); mutate(wrapper);
+    const view = await findings(page, source, analysisFor(source), wrapper); await expect(view.getByRole("alert")).toContainText("来源与原患者"); await expect(view.getByLabel("NEWS2完整总分", { exact: true })).toHaveCount(0); await expect(view.getByLabel("NEWS2七项原值与分值", { exact: true })).toHaveCount(0); await expect(view.getByLabel("NEWS2原点测量只读资料", { exact: true })).toHaveCount(0); noModel(state);
+  });
+}
 
 test("Super固定规则草稿不自动发布，发布带固定recipe摘要与显式审核依据", async ({ page }) => {
   const state = await session(page); await admin(page); await page.getByRole("button", { name: "新建NEWS2规则审核草稿", exact: true }).click(); let dialog = page.getByRole("dialog", { name: "新建固定NEWS2规则审核草稿", exact: true }); await expect(dialog.getByRole("combobox", { name: "NEWS2固定规则选项", exact: true })).toHaveValue(""); await select(page, "NEWS2固定规则选项", "news2_2017", dialog); await dialog.getByRole("textbox", { name: "NEWS2规则审核名称", exact: true }).fill("合成审核新版本"); await dialog.getByRole("textbox", { name: "NEWS2规则依据标识", exact: true }).fill("synthetic-reference"); await dialog.getByRole("textbox", { name: "NEWS2规则审核依据", exact: true }).fill(note); await dialog.getByRole("button", { name: "仅保存规则审核草稿", exact: true }).click(); await expect.poll(() => state.writes.length).toBe(1); expect(state.writes[0].body).toMatchObject({ rule_id: "news2_2017", expected_recipe_digest: hashes.recipe, name: "合成审核新版本" }); await expect(dialog).not.toBeVisible(); await page.getByRole("row").filter({ hasText: "合成审核新版本" }).getByRole("button", { name: "核对规则审核版本", exact: true }).click(); dialog = page.getByRole("dialog", { name: "NEWS2固定规则审核", exact: true }); await expect(dialog.getByRole("button", { name: "审核并发布固定规则版本", exact: true })).toBeDisabled(); await dialog.getByText("我已核对固定规则版本、实现条款和输入策略", { exact: true }).click(); await dialog.getByRole("textbox", { name: "NEWS2规则发布依据标识", exact: true }).fill("synthetic-review-reference"); await dialog.getByRole("textbox", { name: "NEWS2规则发布审核说明", exact: true }).fill(note); await dialog.getByRole("button", { name: "审核并发布固定规则版本", exact: true }).click(); await expect.poll(() => state.writes.length).toBe(2); expect(state.writes[1].body).toEqual({ expected_revision: 1, expected_recipe_digest: hashes.recipe, implementation_terms_confirmed: true, review_note: note, review_evidence_reference: "synthetic-review-reference" }); await expect(dialog).toContainText("已发布 · v2"); await dialog.getByRole("textbox", { name: "NEWS2治理撤销依据", exact: true }).fill("合成审查新证据后撤销规则版本"); await dialog.getByRole("button", { name: "撤销此规则版本", exact: true }).click(); await expect.poll(() => state.writes.length).toBe(3); expect(state.writes[2].body).toEqual({ expected_revision: 2, reason: "合成审查新证据后撤销规则版本" }); await expect(dialog).toContainText("已撤销 · v3"); noModel(state);

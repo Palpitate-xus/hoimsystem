@@ -27,7 +27,7 @@ import Findings from ${JSON.stringify(path.join(root, "src/components/AINews2Fin
 import * as api from ${JSON.stringify(path.join(root, "src/api/aiNews2.js"))};
 const scope=reactive({patientId:11,admissionId:"11111111-1111-4111-8111-111111111111",windowId:"22222222-2222-4222-8222-222222222222",active:true,mode:"input",source:null,analysis:null,sourceScope:null});
 const events=[]; window.__news2Probe={scope,store,events,api};
-createApp({render:()=>scope.mode==="management"?h(Management):scope.mode==="findings"?h(Findings,{source:scope.source,analysis:scope.analysis,expectedPatientId:scope.patientId,expectedAdmissionId:scope.admissionId,scope:scope.sourceScope||{patient_id:scope.patientId,admission_id:scope.admissionId,window_id:scope.windowId}}):h(Panel,{patientId:scope.patientId,admissionId:scope.admissionId,windowId:scope.windowId,active:scope.active,onSelection:value=>events.push({type:"selection",value}),onAvailability:value=>events.push({type:"availability",value})})}).use(store).use(ElementPlus).mount("#app");
+createApp({render:()=>scope.mode==="management"?h(Management):scope.mode==="findings"?h(Findings,{source:scope.source,analysis:scope.analysis,expectedPatientId:scope.patientId,expectedAdmissionId:scope.admissionId,scope:scope.sourceScope}):h(Panel,{patientId:scope.patientId,admissionId:scope.admissionId,windowId:scope.windowId,active:scope.active,onSelection:value=>events.push({type:"selection",value}),onAvailability:value=>events.push({type:"availability",value})})}).use(store).use(ElementPlus).mount("#app");
 `);
     compiler = rspack({
       context: root, mode: "development", target: "web", devtool: false,

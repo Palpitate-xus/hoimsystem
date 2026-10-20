@@ -25,7 +25,7 @@
 </template>
 <script setup>
 import { computed } from "vue";
-import { news2Canonical } from "@/api/aiNews2";
+import { news2AssessmentMatches, news2Canonical } from "@/api/aiNews2";
 const props = defineProps({ source: { type: Object, default: null }, analysis: { type: Object, default: null }, scope: { type: Object, default: null }, expectedPatientId: { type: Number, required: true }, expectedAdmissionId: { type: String, required: true } });
 defineEmits(["inspect"]);
 const keys = ["respiratory_rate", "spo2", "systolic_bp", "pulse_rate", "temperature", "supplemental_oxygen", "consciousness"];
@@ -38,7 +38,10 @@ const sourceRows = computed(() => keys.map(key => {
 }));
 const calculationLabels = { computed: "完整计算", insufficient_data: "资料不足", outside_scope: "超出声明适用范围" }, scopeLabels = { within_declared_scope: "在声明范围内，未独立核实", unknown: "未知", outside_scope: "超出范围" }, pregnancyLabels = { not_pregnant: "已声明未妊娠", pregnant: "妊娠", not_applicable: "明确不适用妊娠条件", unknown: "未知" };
 const classificationLabels = { zero: "0分组", low: "低分组（非无风险）", single_red: "单项3分红项", medium: "中等级", high: "高等级" }, componentLabels = { scored: "已评分", missing: "缺项", conflict: "原值冲突", outside_precision: "原精度无法直接评分", requires_review: "须核实", outside_scope: "超出范围" };
-const scoped = computed(() => props.source && props.scope?.patient_id === props.expectedPatientId && props.scope.admission_id === props.expectedAdmissionId && props.scope.window_id === props.source.window_id && (!props.scope.assessment_id || props.scope.assessment_id === props.source.assessment_id) && (!props.scope.content_hash || props.scope.content_hash === props.source.content_hash) && ["point_id", "window_content_hash", "rule_profile_id", "rule_profile_content_hash", "recipe_digest"].every(key => !(key in props.scope) || props.scope[key] === props.source[key]));
+// Displayed scores must bind to the full frozen hospital wrapper, including its
+// original point and applicability declaration. A typed no-PII projection alone
+// cannot establish the patient/admission or the original values it represents.
+const scoped = computed(() => !!props.source && !!props.scope && news2AssessmentMatches({ ...props.scope, specialist_source: props.source }, props.expectedPatientId, props.expectedAdmissionId, props.source.window_id, true));
 const band = (subtotal, red, partial) => subtotal >= 7 ? "high" : subtotal >= 5 ? "medium" : red.length ? "single_red" : subtotal === 0 ? (partial ? null : "zero") : "low";
 const bound = computed(() => {
   const value = props.analysis, source = props.source;

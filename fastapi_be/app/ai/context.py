@@ -14,6 +14,7 @@ from app.ai.care import surgical_patient_ids
 from app.ai.catalog import FeatureSpec
 from app.ai.coding_sources import attach_coding_sources
 from app.ai.governance import digest, encode_json
+from app.ai.incident_sources import attach_incident_sources
 from app.ai.models import AIPatientGrant, utcnow
 from app.ai.outpatient_billing import resolve_outpatient_charge
 from app.ai.patient_sources import attach_patient_sources
@@ -23,6 +24,7 @@ from app.config import settings
 from app.diagnosis_review import latest_reviews, review_state
 from app.models import (
     Admission,
+    AdverseEvent,
     Doctor,
     ImagingOrder,
     ImagingReport,
@@ -180,6 +182,16 @@ def authorize_patient(db: Session, user: User, patient_id: int, category: str, e
 def _selected_records(db: Session, user: User, patient_id: int, references: dict) -> dict:
     """Resolve explicit row selections inside this patient's scope before bounded history queries."""
     selected = {}
+    if references.get("adverse_event_id") not in (None, ""):
+        reference = references["adverse_event_id"]
+        if not isinstance(reference, str) or len(reference) > 10 or not reference.isascii() or not reference.isdigit() or not 0 < int(reference) <= 2147483647 or str(int(reference)) != reference:
+            raise HTTPException(422, "事件标识须为规范的正整数字符串")
+        if user.user_role == "patient":
+            raise HTTPException(403, "患者端不提供内部不良事件调查资料")
+        row = db.query(AdverseEvent).filter_by(event_id=int(reference), patient_id=patient_id).first()
+        if row is None:
+            raise HTTPException(404, "所选事件不存在或不属于该患者")
+        selected["adverse_event_id"] = row
     if references.get("outpatient_charge_id") not in (None, ""):
         selected["outpatient_charge_id"] = resolve_outpatient_charge(db, patient_id, references["outpatient_charge_id"])
     sources = [
@@ -215,6 +227,8 @@ def _selected_records(db: Session, user: User, patient_id: int, references: dict
 
 def patient_snapshot(db: Session, user: User, spec: FeatureSpec, patient_id: int, encounter_ref: str | None = None, source_refs: dict | None = None) -> ContextBundle:
     """Build a bounded snapshot without mixing historical diagnoses into confirmed current ones."""
+    if spec.number == 77 and encounter_ref:
+        raise HTTPException(422, "不良事件没有就诊关联字段，请清除本次就诊选择，不能按日期推定事件归属")
     patient = authorize_patient(db, user, patient_id, spec.category, encounter_ref)
     encounter = get_encounter(db, patient_id, encounter_ref)
     selected = _selected_records(db, user, patient_id, source_refs or {})
@@ -261,14 +275,18 @@ def patient_snapshot(db: Session, user: User, spec: FeatureSpec, patient_id: int
         bundle.evidence.append({"source_id": source_id, "kind": kind, "title": title, "observed_at": str(observed_at) if observed_at else None, "content": encode_json(clean)})
         return {"source_id": source_id, **clean}
 
-    if spec.number == 69:
-        # Billing only needs the selected financial/execution links, not unrelated clinical history.
+    if spec.number in {69, 77}:
+        # These tasks need selected source links rather than unrelated clinical history.
         for key in ("age", "sex", "current_confirmed_diagnoses", "diagnosis_reviews"):
             bundle.data.pop(key, None)
-        attach_billing_sources(db, user, spec, patient, encounter, bundle, add, selected, bounded, authorize_patient)
+        if spec.number == 69:
+            attach_billing_sources(db, user, spec, patient, encounter, bundle, add, selected, bounded, authorize_patient)
+        else:
+            bundle.data["missing_data"] = []
+            attach_incident_sources(db, selected, bundle, add)
         bundle.data = minimize_identifiers(bundle.data, patient)
         if len(encode_json(bundle.data)) > settings.AI_MAX_CONTEXT_CHARS:
-            raise HTTPException(422, "账务资料超过上下文限制，请选择具体费用记录缩小范围")
+            raise HTTPException(422, "所选专项资料超过上下文限制，请缩小资料范围")
         return bundle
 
     def attach_diagnosis_review(record, reviews: dict) -> str:

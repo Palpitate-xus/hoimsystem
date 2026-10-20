@@ -88,6 +88,8 @@ def create_run(db: Session, user: User, req: RunRequest) -> AIRun:
         raise HTTPException(409, "治疗路径推荐需要指定本次就诊，并提供该次就诊已确认的诊断")
     if spec.number in {66, 67} and not bundle.data.get("supply_inventory"):
         raise HTTPException(409, "库存预测或优化需要授权范围内的明确品种资料，请先选择真实目录品种并核实库存范围")
+    if spec.number == 77 and not bundle.data.get("incident_record"):
+        raise HTTPException(409, "RCA辅助分析需要明确选择当前已授权患者的不良事件记录")
     patient = db.get(Patient, req.patient_id) if req.patient_id else None
     clean_input = minimize_identifiers(req.input, patient)
     tools, tool_evidence = business_tools(db, spec, user, req.patient_id, clean_input, bundle)
@@ -191,6 +193,11 @@ def describe_run(run: AIRun, include_result: bool = True) -> dict:
         data["tool_findings"] = {
             key: tools[key] for key in ("icd_candidates", "perioperative_timing", "prescription_review", "billing_reconciliation", "appointment_candidates", "hospital_navigation") if key in tools
         }
+        if spec.number == 77:
+            context = json.loads(run.input_json).get("payload", {}).get("context", {})
+            data["incident_findings"] = {
+                key: context[key] for key in ("scope_note", "snapshot_time", "missing_data", "truncated_sources", "incident_source_scope", "incident_record", "incident_rca_records") if key in context
+            }
         if spec.number in {61, 62, 63, 64, 65, 66, 67, 70}:
             context = json.loads(run.input_json).get("payload", {}).get("context", {})
             keys = (

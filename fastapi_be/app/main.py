@@ -382,7 +382,9 @@ from app.routers import (
     ai_forecast,
     ai_images,
     ai_lab_mappings,
+    ai_news2,
     ai_observation_windows,
+    ai_risk_rules,
     allergy,
     analytics,
     antibiotic,
@@ -500,6 +502,8 @@ app.include_router(ai_forecast.router, prefix="/api")
 app.include_router(ai_observation_windows.router, prefix="/api")
 app.include_router(inpatient_observations.router, prefix="/api")
 app.include_router(inpatient_laboratory.router, prefix="/api")
+app.include_router(ai_risk_rules.router, prefix="/api")
+app.include_router(ai_news2.router, prefix="/api")
 app.include_router(ai.router, prefix="/api")
 app.include_router(analytics.router, prefix="/api")
 app.include_router(performance.router, prefix="/api")

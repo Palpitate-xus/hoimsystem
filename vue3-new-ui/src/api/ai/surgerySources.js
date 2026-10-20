@@ -21,6 +21,7 @@ export function surgeryFormSchema(name,type=null){
 export const surgeryPositive=value=>Number.isSafeInteger(value)&&value>0&&value<=2147483647;
 export const surgeryClock=value=>{try{return typeof value==='string'&&Number(value.slice(0,4))>=1000&&supportUtc(value)===value;}catch{return false;}};
 export const surgeryBasis=value=>typeof value==='string'&&Array.from(value).length<=4000&&Array.from(value).filter(c=>!/[\s\u0085\u001c-\u001f]/u.test(c)).length>=20&&new TextEncoder().encode(value).length<=4000;
+export const surgeryRevokeBasis=value=>surgeryBasis(value)&&Array.from(value).length<=1000;
 const object=v=>v!==null&&typeof v==='object'&&!Array.isArray(v),same=(a,b)=>supportCanonical(a)===supportCanonical(b),pick=(v,names)=>Object.fromEntries(names.map(k=>[k,v[k]])),keys=(v,names)=>object(v)&&same(Object.keys(v).sort(),[...names].sort()),bytes=v=>new TextEncoder().encode(supportCanonical(v)).length,unique=v=>new Set(v).size===v.length;
 const segment=id=>{if(!supportId(id))throw new Error('手术原件标识须为规范小写UUID');return id;},kind=(v,values)=>{if(typeof v!=='string'||!Object.hasOwn(values,v))throw new Error('手术来源或登记类型无效');return v;};
 const read=(url,params)=>request({url,method:'get',params,retry:0}),write=(url,data,model)=>{if(model&&!surgeryRequestValid(model,data))throw new Error('手术原件请求与明确类型、原量、UTC或缺项声明不一致');return request({url,method:'post',data:JSON.stringify(data),headers:{'Content-Type':'application/json'},retry:0});};
@@ -97,6 +98,7 @@ function registryPayloadValid(v){
 }
 export function surgeryRequestValid(model,v){
  try{
+  if(model==='SourceRevoke'&&!surgeryRevokeBasis(v?.basis_note))return false;
   if(!surgerySchemaMatches(model,v)||bytes(v)>(model==='RegistryCreate'?262144:8388608)||!semantics(v))return false;
   if(model==='SourceCreate'){
    const clinical=['case_requirements','duration_observation','case_duration_estimate'].includes(v.payload.kind),a=v.professional_attestation;

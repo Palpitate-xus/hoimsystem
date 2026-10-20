@@ -118,11 +118,18 @@ def create_supply_app(config):
             if request.headers.get("content-type", "").split(";", 1)[0].strip().lower() != "application/json":
                 raise HTTPException(422, "An application/json supply statistics task is required")
             chunks, size = [], 0
-            async for chunk in request.stream():
-                size += len(chunk)
-                if size > config.max_request_bytes:
-                    raise HTTPException(413, "Complete task exceeds deployment UTF-8 bound")
-                chunks.append(chunk)
+            try:
+                # A single whole-upload deadline prevents an authenticated slow
+                # sender from reserving the only slot indefinitely. The compute
+                # phase below has its own deadline; it is never reset per chunk.
+                async with asyncio.timeout(config.timeout_seconds):
+                    async for chunk in request.stream():
+                        size += len(chunk)
+                        if size > config.max_request_bytes:
+                            raise HTTPException(413, "Complete task exceeds deployment UTF-8 bound")
+                        chunks.append(chunk)
+            except TimeoutError as exc:
+                raise HTTPException(408, "Supply task upload exceeded its independent deployment deadline") from exc
             try:
                 task = SupplyTask.model_validate(json.loads(b"".join(chunks).decode("utf-8"), object_pairs_hook=_unique_object, parse_constant=_reject_constant))
                 if task.model != descriptor["model_version"]:

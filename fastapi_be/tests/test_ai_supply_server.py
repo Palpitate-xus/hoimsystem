@@ -216,3 +216,41 @@ async def test_response_bound_is_checked_without_partial_result(monkeypatch):
     async with client_for(create_supply_app(config())) as client:
         response = await client.post("/tasks", headers=HEADERS, content=canonical_json(task(descriptor)))
         assert response.status_code == 422 and "supply_analysis" not in response.json()
+
+
+@pytest.mark.asyncio
+async def test_slow_upload_has_whole_phase_deadline_and_releases_reserved_slot():
+    entered = asyncio.Event()
+    never = asyncio.Event()
+
+    async def slow_body():
+        entered.set()
+        yield b"{"
+        await never.wait()
+        yield b"}"
+
+    async with client_for(create_supply_app(config(timeout_seconds=1))) as client:
+        pending = asyncio.create_task(client.post("/tasks", headers=HEADERS, content=slow_body()))
+        await asyncio.wait_for(entered.wait(), 2)
+        assert not pending.done()
+        assert (await client.post("/tasks", headers=HEADERS, content=b"{}")).status_code == 429
+        response = await asyncio.wait_for(pending, 3)
+        assert response.status_code == 408 and "upload" in response.json()["detail"]
+        # Invalid JSON-schema task now reaches validation: the upload slot was released.
+        assert (await client.post("/tasks", headers=HEADERS, content=b"{}")).status_code == 422
+
+
+@pytest.mark.asyncio
+async def test_upload_deadline_is_not_restarted_after_each_received_chunk():
+    sent = []
+
+    async def trickling_body():
+        for index in range(10):
+            sent.append(index)
+            yield b" "
+            await asyncio.sleep(0.4)
+
+    async with client_for(create_supply_app(config(timeout_seconds=1))) as client:
+        response = await asyncio.wait_for(client.post("/tasks", headers=HEADERS, content=trickling_body()), 3)
+        assert response.status_code == 408 and len(sent) < 10
+        assert (await client.post("/tasks", headers=HEADERS, content=b"{}")).status_code == 422

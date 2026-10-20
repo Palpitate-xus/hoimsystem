@@ -40,10 +40,12 @@
                 </el-table-column>
                 <el-table-column prop="doctor_name" label="医生" width="80" />
                 <el-table-column prop="create_time" label="时间" width="140" />
-                <el-table-column label="操作" width="150">
+                <el-table-column label="操作" width="320">
                   <template #default="{row}">
                     <el-button size="small" @click="showRecordDetail(row)">查看</el-button>
                     <el-button v-if="row.status===0" size="small" type="primary" @click="signRecord(row)">签名</el-button>
+                    <diagnosis-review v-if="row.status" source-kind="structured" :source-id="row.record_id" />
+                    <ai-action title="AI 住院病历辅助" :patient-id="row.patient_id" :encounter-ref="row.admission_id || ''" :initial-input="{ structured_record_id: row.record_id }" :feature-keys="['patient_summary', 'admission_note', 'progress_note', 'discharge_summary', 'record_quality', 'treatment_pathway', 'clinical_consistency']" initial-feature="record_quality" />
                   </template>
                 </el-table-column>
               </el-table>
@@ -191,6 +193,8 @@
 <script setup>
 import { ref, computed, onMounted } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
+import DiagnosisReview from "@/components/DiagnosisReview/index.vue";
+import AiAction from "@/components/AIAction/index.vue";
 import { getInpatientList } from "@/api/admission";
 import { getStructuredRecordList, createStructuredRecord, getStructuredRecordDetail, signMedicalRecord, getProgressNoteList, createProgressNote, deleteProgressNote, getWardRoundList, createWardRound, deleteWardRound } from "@/api/emr";
 

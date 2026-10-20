@@ -1,5 +1,8 @@
 import request from "@/utils/request";
 
+export const getDiagnosisReview = (params) => request({ url: "clinicalDiagnosis/review", method: "get", params });
+export const saveDiagnosisReview = (data) => request({ url: "clinicalDiagnosis/review", method: "post", data });
+
 export function getDoctorScheduleList(keyword = "") {
   return request({ url: "doctorScheduleManagement/getList", method: "get", params: { keyword } });
 }

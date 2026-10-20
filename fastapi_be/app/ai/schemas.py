@@ -1,6 +1,7 @@
 """Strict request and result contracts for AI management and execution."""
 
 import datetime
+import re
 from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
@@ -30,6 +31,14 @@ class ProviderWrite(StrictRequest):
     supported_features: list[str] = Field(default_factory=list, max_length=80)
     validation_report: str = Field(default="", max_length=5000)
     expected_revision: int = Field(default=0, ge=0)
+
+    @field_validator("api_key_env")
+    @classmethod
+    def designated_credential_variable(cls, value: str) -> str:
+        """Model configuration must not exfiltrate unrelated deployment secrets."""
+        if value and value != "OPENAI_API_KEY" and not re.fullmatch(r"AI_(?:MODEL|PROVIDER_[A-Z0-9_]+)_API_KEY", value):
+            raise ValueError("仅允许引用 AI_MODEL_API_KEY、AI_PROVIDER_<名称>_API_KEY 或 OPENAI_API_KEY")
+        return value
 
 
 class FeatureWrite(StrictRequest):

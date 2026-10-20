@@ -4,10 +4,12 @@ import json
 
 import httpx
 import pytest
+from pydantic import ValidationError
 
 from app.ai.catalog import FEATURE_BY_KEY
 from app.ai.gateway import AIExecutionError, generate
 from app.ai.models import AIProvider
+from app.ai.schemas import ProviderWrite
 
 
 def provider(kind="chat"):
@@ -16,6 +18,14 @@ def provider(kind="chat"):
 
 def output(source_id="known-source"):
     return {"summary": "隔离测试结果", "sections": [{"title": "测试章节", "content": "仅用于协议验证。", "source_ids": [source_id]}], "warnings": [], "missing_data": []}
+
+
+def test_model_credentials_cannot_reference_other_deployment_secrets():
+    base = {"name": "test", "api_base": "http://localhost/v1", "model": "test"}
+    for name in ["SECRET_KEY", "DB_PASSWORD", "AI_CREDENTIAL_KEY"]:
+        with pytest.raises(ValidationError):
+            ProviderWrite(**base, api_key_env=name)
+    assert ProviderWrite(**base, api_key_env="AI_PROVIDER_LOCAL_API_KEY").api_key_env == "AI_PROVIDER_LOCAL_API_KEY"
 
 
 @pytest.mark.asyncio

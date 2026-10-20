@@ -22,11 +22,13 @@ export function convertRouter(asyncRoutes) {
           route.component = () => import('@/layouts/EmptyLayout')
         } else {
           try {
-            const index = route.component.indexOf('views')
-            const path = index > 0 ? route.component.slice(index) : `views/${route.component}`
+            const index = route.component.indexOf('views/')
+            const path = index >= 0 ? route.component.slice(index + 6) : route.component
+            // Route entries are pages. Keep APIs, contracts and shared components
+            // out of this dynamic import context.
             route.component = () =>
-              import(`@/${path}`).catch((err) => {
-                console.error(`路由组件加载失败: @/${path}`, err)
+              import(`@/views/${path}`).catch((err) => {
+                console.error(`路由组件加载失败: @/views/${path}`, err)
                 return import('@/views/404')
               })
           } catch (err) {

@@ -146,7 +146,7 @@ def expand_context(db, context, *, user=None, current=False, execution=True):
             **context,
             "supply_source": source,
             "supply_series": {
-                **metadata(row),
+                **metadata(row, include_private_governance=True),
                 "snapshot": snapshot,
                 "public_source": source,
                 "frozen_task_view": True,

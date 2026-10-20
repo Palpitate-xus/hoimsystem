@@ -91,6 +91,8 @@ ROLE_GROUPS = read_role_groups(
 )
 ROLE_GROUPS.update(read_role_groups(BACKEND / "app/inpatient_observations.py", ("OBSERVATION_ROLES",)))
 ROLE_GROUPS.update(read_role_groups(BACKEND / "app/ai/observation_windows.py", ("WINDOW_ROLES",)))
+ROLE_GROUPS.update(read_role_groups(BACKEND / "app/inpatient_laboratory.py", ("LAB_SOURCE_ROLES", "LAB_READ_ROLES")))
+ROLE_GROUPS.update(read_role_groups(BACKEND / "app/ai/lab_mappings.py", ("MAPPING_ROLES",)))
 # Preserve the existing matrix's two combined role groups.
 ROLE_GROUPS["INPATIENT_FINANCE_ROLES"] = ROLE_GROUPS["CASHIER_ROLES"] | ROLE_GROUPS["NURSING_ROLES"]
 ROLE_GROUPS["OPERATE_ROLES"] = ROLE_GROUPS["CLINICAL_ROLES"] | ROLE_GROUPS["NURSING_ROLES"]

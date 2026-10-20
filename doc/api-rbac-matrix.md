@@ -3,7 +3,7 @@
 > 由 `fastapi_be/scripts/generate_rbac_matrix.py` 从源码自动生成，请勿手改。
 > `✓`=可访问 | `PUBLIC`=无需登录 | 留空=不可访问
 
-共 **654** 个接口（PUBLIC 18 个 / 需登录 636 个）。
+共 **667** 个接口（PUBLIC 18 个 / 需登录 649 个）。
 
 
 ### `admin.py`
@@ -167,6 +167,17 @@
 | POST | `/api/ai/image-assets/{asset_id}/withdraw` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
 | GET | `/api/ai/admin/image-assets` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
 | POST | `/api/ai/admin/image-assets/{asset_id}/purge` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+
+### `ai_lab_mappings.py`
+
+| 方法 | 路径 | admin | super_admin | director | doctor | nurse | cashier | pharmacist | guide | patient | lab_technician | registrar | PUBLIC |
+|------|------|------|------|------|------|------|------|------|------|------|------|------|------|
+| GET | `/api/ai/admin/lab-mappings/options` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/admin/lab-mappings` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/admin/lab-mappings` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/admin/lab-mappings/{mapping_id}` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/admin/lab-mappings/{mapping_id}/publish` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/admin/lab-mappings/{mapping_id}/revoke` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
 
 ### `ai_observation_windows.py`
 
@@ -587,6 +598,18 @@
 | GET | `/api/inpatientCharge/getSummary` | ✓ | ✓ |  |  | ✓ | ✓ |  |  |  |  |  |  |
 | POST | `/api/inpatientCharge/depositRecharge` | ✓ | ✓ |  |  | ✓ | ✓ |  |  |  |  |  |  |
 | GET | `/api/inpatientCharge/depositBalance` | ✓ | ✓ |  |  | ✓ | ✓ |  |  |  |  |  |  |
+
+### `inpatient_laboratory.py`
+
+| 方法 | 路径 | admin | super_admin | director | doctor | nurse | cashier | pharmacist | guide | patient | lab_technician | registrar | PUBLIC |
+|------|------|------|------|------|------|------|------|------|------|------|------|------|------|
+| GET | `/api/inpatient-laboratory/candidates` | ✓ | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |
+| GET | `/api/inpatient-laboratory/sources` | ✓ | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |
+| POST | `/api/inpatient-laboratory/sources` | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |
+| GET | `/api/inpatient-laboratory/sources/{lab_source_id}` | ✓ | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |
+| POST | `/api/inpatient-laboratory/sources/{lab_source_id}/revoke` | ✓ | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |
+| GET | `/api/ai/admin/lab-sources` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/admin/lab-sources/{lab_source_id}` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
 
 ### `inpatient_observations.py`
 

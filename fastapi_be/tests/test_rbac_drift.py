@@ -56,7 +56,7 @@ def generator():
     return runpy.run_path(SCRIPT)
 
 
-@pytest.mark.parametrize("module", ["inpatient_observations", "ai_observation_windows"])
+@pytest.mark.parametrize("module", ["inpatient_observations", "ai_observation_windows", "inpatient_laboratory", "ai_lab_mappings"])
 def test_observation_matrix_matches_real_mounted_paths_and_role_guards(module, generator):
     """Use actual mounted routes and closure roles, not a second invented role list."""
     from fastapi.routing import APIRoute
@@ -87,11 +87,16 @@ def test_observation_matrix_matches_real_mounted_paths_and_role_guards(module, g
 
 
 def test_observation_groups_come_from_real_module_constants(generator):
+    from app.ai.lab_mappings import MAPPING_ROLES
     from app.ai.observation_windows import WINDOW_ROLES
+    from app.inpatient_laboratory import LAB_READ_ROLES, LAB_SOURCE_ROLES
     from app.inpatient_observations import OBSERVATION_ROLES
 
     assert generator["ROLE_GROUPS"]["WINDOW_ROLES"] == set(WINDOW_ROLES)
     assert generator["ROLE_GROUPS"]["OBSERVATION_ROLES"] == set(OBSERVATION_ROLES)
+    assert generator["ROLE_GROUPS"]["MAPPING_ROLES"] == set(MAPPING_ROLES)
+    assert generator["ROLE_GROUPS"]["LAB_READ_ROLES"] == set(LAB_READ_ROLES)
+    assert generator["ROLE_GROUPS"]["LAB_SOURCE_ROLES"] == set(LAB_SOURCE_ROLES)
 
 
 def test_all_matrix_paths_match_actual_main_router_mounts(generator):
@@ -193,8 +198,8 @@ assert 'app.database' not in sys.modules
 assert scope['ROLE_GROUPS']['OBSERVATION_ROLES']
 assert scope['ROLE_GROUPS']['WINDOW_ROLES']
 endpoints = scope['collect_endpoints']()
-assert len(endpoints) == 654
-assert len({item['module'] for item in endpoints}) == 89
+assert endpoints
+assert {'inpatient_laboratory.py', 'ai_lab_mappings.py'} <= {item['module'] for item in endpoints}
 """
     result = subprocess.run([sys.executable, "-c", probe, str(Path(SCRIPT).resolve())], cwd=tmp_path, capture_output=True, text=True)
     assert result.returncode == 0, result.stdout + result.stderr

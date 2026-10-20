@@ -922,6 +922,60 @@
  },
  {
   "auth": [
+   "super_admin"
+  ],
+  "function": "options",
+  "method": "GET",
+  "module": "ai_lab_mappings.py",
+  "path": "/api/ai/admin/lab-mappings/options"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "list_mappings",
+  "method": "GET",
+  "module": "ai_lab_mappings.py",
+  "path": "/api/ai/admin/lab-mappings"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "post_mapping",
+  "method": "POST",
+  "module": "ai_lab_mappings.py",
+  "path": "/api/ai/admin/lab-mappings"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "get_mapping",
+  "method": "GET",
+  "module": "ai_lab_mappings.py",
+  "path": "/api/ai/admin/lab-mappings/{mapping_id}"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "publish_mapping",
+  "method": "POST",
+  "module": "ai_lab_mappings.py",
+  "path": "/api/ai/admin/lab-mappings/{mapping_id}/publish"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "revoke_mapping",
+  "method": "POST",
+  "module": "ai_lab_mappings.py",
+  "path": "/api/ai/admin/lab-mappings/{mapping_id}/revoke"
+ },
+ {
+  "auth": [
    "admin",
    "director",
    "doctor",
@@ -3367,6 +3421,88 @@
   "method": "GET",
   "module": "inpatient_charge.py",
   "path": "/api/inpatientCharge/depositBalance"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "nurse",
+   "super_admin"
+  ],
+  "function": "candidates",
+  "method": "GET",
+  "module": "inpatient_laboratory.py",
+  "path": "/api/inpatient-laboratory/candidates"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "nurse",
+   "super_admin"
+  ],
+  "function": "list_sources",
+  "method": "GET",
+  "module": "inpatient_laboratory.py",
+  "path": "/api/inpatient-laboratory/sources"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "post_source",
+  "method": "POST",
+  "module": "inpatient_laboratory.py",
+  "path": "/api/inpatient-laboratory/sources"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "nurse",
+   "super_admin"
+  ],
+  "function": "get_source",
+  "method": "GET",
+  "module": "inpatient_laboratory.py",
+  "path": "/api/inpatient-laboratory/sources/{lab_source_id}"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "nurse",
+   "super_admin"
+  ],
+  "function": "revoke_source",
+  "method": "POST",
+  "module": "inpatient_laboratory.py",
+  "path": "/api/inpatient-laboratory/sources/{lab_source_id}/revoke"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "admin_sources",
+  "method": "GET",
+  "module": "inpatient_laboratory.py",
+  "path": "/api/ai/admin/lab-sources"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "admin_source",
+  "method": "GET",
+  "module": "inpatient_laboratory.py",
+  "path": "/api/ai/admin/lab-sources/{lab_source_id}"
  },
  {
   "auth": [

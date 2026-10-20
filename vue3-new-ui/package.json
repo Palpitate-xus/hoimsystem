@@ -70,7 +70,7 @@
     "html-rspack-plugin": "^6.1.8",
     "path-browserify": "^1.0.1",
     "rimraf": "^6.1.3",
-    "sass": "1.71.1",
+    "sass": "1.79.0",
     "sass-loader": "^17.0.1",
     "style-loader": "^4.0.0",
     "unplugin-vue-components": "^32.1.0",

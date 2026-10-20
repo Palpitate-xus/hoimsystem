@@ -356,27 +356,14 @@ async def test_unrelated_roles_cannot_read_or_govern_internal_images(role, seed_
     assert (await async_client.post("/api/ai/admin/image-assets/unknown/purge", headers=headers, json={"expected_revision": 1, "reason": "非超级管理员不能清除原图"})).status_code == 403
 
 
-def test_order_state_and_source_version_invalidate_frozen_non_admin_results(image_case, seed_data, db_session):
+@pytest.mark.asyncio
+async def test_order_state_and_source_version_invalidate_frozen_non_admin_results(image_case, seed_data, db_session, async_client, auth_headers):
     from fastapi import HTTPException
 
     order = image_case[3]
-    asset = AIImageAsset(
-        patient_id=order.patient_id,
-        imaging_order_id=order.imaging_order_id,
-        encounter_ref=image_case[2].registration_uuid,
-        content_hash="a" * 64,
-        original_hash="b" * 64,
-        pixel_hash="c" * 64,
-        byte_size=100,
-        original_byte_size=76,
-        pixel_byte_size=24,
-        metadata_json='{"format":"dicom_i32le_v1","rows":2,"columns":3}',
-        authorization_note="合成来源核对说明",
-        authorized_at=utcnow(),
-        created_by=seed_data["doctor_user"].user_id,
-    )
-    db_session.add(asset)
-    db_session.commit()
+    response = await upload_image(async_client, auth_headers, seed_data, image_case)
+    assert response.status_code == 200, response.text
+    asset = db_session.get(AIImageAsset, response.json()["data"]["asset_id"])
     frozen = image_snapshot(asset, db=db_session)
     assert not {"patient_id", "authorization_note", "created_by", "create_time", "accession_no", "body_part"}.intersection(frozen)
     authorize_image_snapshot(db_session, seed_data["doctor_user"], {"image_source": frozen}, ai_images.authorize_patient)

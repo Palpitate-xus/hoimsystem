@@ -77,6 +77,17 @@ def provider_snapshot(provider: AIProvider) -> dict:
     return snapshot
 
 
+def _check_run_storage_json(serialized: dict[str, str]) -> None:
+    """MySQL TEXT stores at most 65535 bytes, including the full JSON envelope."""
+    for value in serialized.values():
+        try:
+            size = len(value.encode("utf-8"))
+        except UnicodeError as exc:
+            raise HTTPException(422, "完整任务审计资料含无效UTF-8文本，未入队或截断") from exc
+        if size > 65535:
+            raise HTTPException(422, "完整任务审计资料超过65535个UTF-8字节存储上限，请缩小资料范围；未入队或截断")
+
+
 def create_run(db: Session, user: User, req: RunRequest) -> AIRun:
     """Freeze an authorized, source-linked request before a durable worker processes it."""
     spec, config = authorized_feature(db, user, req.feature_key)
@@ -149,19 +160,8 @@ def create_run(db: Session, user: User, req: RunRequest) -> AIRun:
     payload = {"input": clean_input, "context": bundle.data, "tools": tools, "evidence": evidence}
     if len(encode_json(payload)) > settings.AI_MAX_CONTEXT_CHARS * 2:
         raise HTTPException(422, "组合后的资料超过任务上下文限制")
-    run = AIRun(
-        feature_key=spec.key,
-        provider_id=provider.provider_id,
-        provider_revision=provider.revision,
-        prompt_version=version,
-        prompt_hash=digest([COMMON_SYSTEM_PROMPT, prompt]),
-        context_digest=digest(bundle.data),
-        patient_id=req.patient_id,
-        encounter_ref=req.encounter_ref,
-        requested_by=user.user_id,
-        preview=int(req.preview),
-        status="queued",
-        input_json=encode_json(
+    serialized = {
+        "input_json": encode_json(
             {
                 "catalog_version": CATALOG_VERSION,
                 "system_prompt": COMMON_SYSTEM_PROMPT,
@@ -177,8 +177,23 @@ def create_run(db: Session, user: User, req: RunRequest) -> AIRun:
                 },
             }
         ),
-        evidence_json=encode_json(evidence),
-        context_metadata_json=encode_json({**context_metadata(bundle), "feature_revision": config.revision, "validation_status": config.validation_status, "tool_fingerprint": digest(tools)}),
+        "evidence_json": encode_json(evidence),
+        "context_metadata_json": encode_json({**context_metadata(bundle), "feature_revision": config.revision, "validation_status": config.validation_status, "tool_fingerprint": digest(tools)}),
+    }
+    _check_run_storage_json(serialized)
+    run = AIRun(
+        feature_key=spec.key,
+        provider_id=provider.provider_id,
+        provider_revision=provider.revision,
+        prompt_version=version,
+        prompt_hash=digest([COMMON_SYSTEM_PROMPT, prompt]),
+        context_digest=digest(bundle.data),
+        patient_id=req.patient_id,
+        encounter_ref=req.encounter_ref,
+        requested_by=user.user_id,
+        preview=int(req.preview),
+        status="queued",
+        **serialized,
     )
     db.add(run)
     db.flush()

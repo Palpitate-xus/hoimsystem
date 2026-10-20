@@ -130,6 +130,10 @@ test("AKI报告精确原差值或选段总量与冻结原量矛盾时拒绝展�
   const state = await session(page), row = makeAssessment(), report = analysisFor(row.specialist_source); report.criteria[0].evidence.absolute_change = "99.9"; const view = await render(page, row, report); await expect(view.getByRole("alert")).toContainText("计算结果已拒绝展示"); const complete = negativeAssessment(), negative = analysisFor(complete.specialist_source, "negative"); negative.criteria[3].evidence.total_volume_ml = "0"; await render(page, complete, negative); await expect(view.getByRole("alert")).toContainText("计算结果已拒绝展示"); noModel(state);
 });
 
+test("真实原肌酐下降的负差值可精确复核，不能将下降显示为阳性分期", async ({ page }) => {
+  const state = await session(page), row = makeAssessment(); row.snapshot.index_creatinine.snapshot.original.observation.value_num = row.specialist_source.index_creatinine.value = "0.70000000"; const report = analysisFor(row.specialist_source); Object.assign(report.criteria[0], { status: "not_met_in_selected_data", stage: null }); report.criteria[0].evidence.absolute_change = "-0.3"; Object.assign(report, { detection: "insufficient_data", minimum_stage: null, stage_is_lower_bound: false }); const view = await render(page, row, report); await expect(view.getByLabel("AKI八项标准与原依据", { exact: true })).toContainText("实际精确差值：-0.3"); await expect(view.getByLabel("AKI资料不足", { exact: true })).toBeVisible(); await expect(view.getByLabel("AKI最低达到分期", { exact: true })).toHaveCount(0); noModel(state);
+});
+
 test("尿量标准声称已满足却没有任何原区间证据链时拒绝分期", async ({ page }) => {
   const state = await session(page), row = makeAssessment(), report = analysisFor(row.specialist_source); report.criteria[3].status = "met"; report.criteria[3].stage = 1; const view = await render(page, row, report); await expect(view.getByRole("alert")).toContainText("计算结果已拒绝展示"); await expect(view.getByLabel("AKI最低达到分期", { exact: true })).toHaveCount(0); noModel(state);
 });

@@ -43,14 +43,20 @@ const evidenceLabels = { index_value: "原index值", reference_value: "原比较
 const evidenceRows = evidence => Object.entries(evidence || {}).filter(([, value]) => value !== null && value !== undefined && (!Array.isArray(value) || value.length)).map(([key, value]) => [evidenceLabels[key] || key, Array.isArray(value) ? value.join("；") : value]);
 const creatinineRows = computed(() => [["明确index", "index_creatinine"], ["明确48小时比较", "comparison_48h"], ["明确基线", "baseline_creatinine"]].filter(([, role]) => props.source?.[role]).map(([label, role]) => ({ label, item: props.source[role], originalAdmission: props.scope?.snapshot?.[role]?.admission_id })));
 const scoped = computed(() => !!props.source && !!props.scope && akiAssessmentMatches({ ...props.scope, specialist_source: props.source }, props.expectedPatientId, props.expectedAdmissionId, props.source.window_id, true));
-const decimalScale = value => typeof value === "string" && /^-?(?:0|[1-9]\d*)(?:\.\d{1,8})?$/.test(value) ? BigInt(value.replace(".", "").replace(/^-/, "")) * 10n ** BigInt(8 - (value.split(".")[1] || "").length) * (value.startsWith("-") ? -1n : 1n) : null;
+const decimalScale = (value, allowNegative = false) => {
+  if (typeof value !== "string" || !/^-?(?:0|[1-9]\d*)(?:\.\d{1,8})?$/.test(value) || (value.startsWith("-") && !allowNegative)) return null;
+  // Babel's existing preset lowers exponentiation to Math.pow, which cannot
+  // accept BigInt. Append the eight fixed decimal places before parsing once.
+  const pieces = value.replace(/^-/, "").split(".");
+  return BigInt(pieces[0] + (pieces[1] || "").padEnd(8, "0")) * (value.startsWith("-") ? -1n : 1n);
+};
 function evidenceMatches(row, source) {
   const evidence = row.evidence;
   if (!Array.isArray(evidence.coverage_issues || []) || (evidence.coverage_issues || []).some(issue => !(issue in issueLabels))) return false;
   if (row.key.startsWith("creatinine")) {
     const index = source.index_creatinine, reference = row.key === "creatinine_48h" ? source.comparison_48h : row.key === "creatinine_ratio_7d" ? source.baseline_creatinine : null;
     for (const [key, expected] of [["index_value", index?.value], ["index_at", index?.collected_at_utc], ["unit", index?.unit], ["reference_value", reference?.value], ["reference_at", reference?.collected_at_utc]]) if (evidence[key] != null && evidence[key] !== expected) return false;
-    if (evidence.absolute_change != null && (decimalScale(evidence.absolute_change) === null || decimalScale(index?.value) === null || decimalScale(reference?.value) === null || decimalScale(evidence.absolute_change) !== decimalScale(index.value) - decimalScale(reference.value))) return false;
+    if (evidence.absolute_change != null && (decimalScale(evidence.absolute_change, true) === null || decimalScale(index?.value) === null || decimalScale(reference?.value) === null || decimalScale(evidence.absolute_change, true) !== decimalScale(index.value) - decimalScale(reference.value))) return false;
     if (evidence.elapsed_microseconds != null) { try { if (!Number.isSafeInteger(evidence.elapsed_microseconds) || !index || !reference || BigInt(evidence.elapsed_microseconds) !== observationTime(index.collected_at_utc).microseconds - observationTime(reference.collected_at_utc).microseconds) return false; } catch { return false; } }
   }
   if (row.key === "acute_rrt" && evidence.index_at != null && evidence.index_at !== source.rrt.started_at) return false;

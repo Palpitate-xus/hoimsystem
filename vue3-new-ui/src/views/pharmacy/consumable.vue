@@ -22,6 +22,7 @@
             <el-tag v-else type="danger">停用</el-tag>
           </template>
         </el-table-column>
+        <el-table-column v-if="canUseSupplyAI" label="AI 原量预测" width="160"><template #default="{ row }"><ai-action :key="supplyAuth" v-if="Number.isSafeInteger(row.consumable_id)&&row.consumable_id>0" label="核对原量与预测" title="受审物资原量预测" :feature-keys="['supply_forecast']" initial-feature="supply_forecast" :initial-input="{ item_kind: 'consumable', item_id: row.consumable_id }" /></template></el-table-column>
         <el-table-column label="操作" width="150">
           <template #default="{row}">
             <el-button size="small" @click="handleEdit(row)">编辑</el-button>
@@ -76,10 +77,16 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, onActivated, onDeactivated, computed } from "vue";
+import { useStore } from "vuex";
+import AiAction from "@/components/AIAction/index.vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { getConsumableList, createConsumable, updateConsumable, deleteConsumable } from "@/api/consumable";
 
+const supplyStore=useStore(),supplyViewActive=ref(true);
+const canUseSupplyAI=computed(()=>supplyViewActive.value&&!!supplyStore.state.user.accessToken&&(supplyStore.getters['user/permissions']||[]).some(role=>['super_admin','admin','director','pharmacist'].includes(role)));
+const supplyAuth=computed(()=>JSON.stringify([supplyStore.state.user.username,supplyStore.state.user.accessToken,supplyStore.getters['user/permissions']]));
+onDeactivated(()=>{supplyViewActive.value=false;});onActivated(()=>{supplyViewActive.value=true;});
 const list = ref([]);
 const loading = ref(false);
 const searchQuery = ref("");

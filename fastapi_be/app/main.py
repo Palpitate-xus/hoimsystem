@@ -381,6 +381,7 @@ from app.routers import (
     ai_feedback_admin,
     ai_forecast,
     ai_images,
+    ai_observation_windows,
     allergy,
     analytics,
     antibiotic,
@@ -413,6 +414,7 @@ from app.routers import (
     infusion,
     injection,
     inpatient_charge,
+    inpatient_observations,
     inpatient_order,
     insurance,
     insurance_catalog,
@@ -492,6 +494,8 @@ app.include_router(ai_ecg.router, prefix="/api")
 app.include_router(ai_images.router, prefix="/api")
 app.include_router(ai_feedback_admin.router, prefix="/api")
 app.include_router(ai_forecast.router, prefix="/api")
+app.include_router(ai_observation_windows.router, prefix="/api")
+app.include_router(inpatient_observations.router, prefix="/api")
 app.include_router(ai.router, prefix="/api")
 app.include_router(analytics.router, prefix="/api")
 app.include_router(performance.router, prefix="/api")

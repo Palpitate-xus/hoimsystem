@@ -48,7 +48,10 @@ class PeriodSelection(StrictModel):
 
     @model_validator(mode="after")
     def complete_local_period(self):
-        period_for(self)
+        try:
+            period_for(self)
+        except OverflowError as exc:
+            raise ValueError("Planning dates exceed representable calendar boundaries") from exc
         return self
 
 

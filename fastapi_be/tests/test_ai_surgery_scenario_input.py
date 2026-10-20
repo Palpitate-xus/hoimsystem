@@ -110,6 +110,18 @@ def test_real_dst_business_days_have_actual_duration(day, hours):
 
 
 @pytest.mark.parametrize(
+    "body",
+    [
+        {"business_timezone": "Etc/UTC", "date_from": "9999-12-31", "date_to": "9999-12-31", "as_of": "9999-12-31T00:00:00.000000Z"},
+        {"business_timezone": "Pacific/Apia", "date_from": "2011-12-30", "date_to": "2011-12-30", "as_of": "2011-12-01T00:00:00.000000Z"},
+    ],
+)
+def test_calendar_overflow_and_actual_nonexistent_midnight_are_validation_errors(body):
+    with pytest.raises(ValidationError):
+        PeriodSelection.model_validate(body)
+
+
+@pytest.mark.parametrize(
     "patch",
     [
         {"business_timezone": "Imaginary/Unknown"},

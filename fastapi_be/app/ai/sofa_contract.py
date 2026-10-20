@@ -38,6 +38,7 @@ def _decimal(value):
     return value
 
 
+LIS_NATIVE_UNITS = ("10^9/L", "10^3/uL", "mg/dL", "umol/L", "mm[Hg]", "kPa")
 RULE_ID = "sofa1_native_observed_v1"
 HTTP_SCHEMA_VERSION = "9"
 MODEL_PREFIX = "sofa1:"
@@ -80,6 +81,7 @@ ReasonCode = Literal[
     "gcs_anchor_invalid",
     "pair_not_confirmed",
     "support_qualification_unknown",
+    "qualifying_support_conflicts_with_original",
     "continuous_iv_not_confirmed",
     "continuity_not_confirmed",
     "weight_missing",
@@ -246,7 +248,8 @@ SignedDecimalText = Annotated[str, Field(strict=True, pattern=r"^-?(?:0|[1-9]\d{
 
 class SofaLabQuantity(StrictModel):
     value: SignedDecimalText | None
-    unit: Annotated[str, Field(strict=True, min_length=1, max_length=64)]
+    unit: Literal["10^9/L", "10^3/uL", "mg/dL", "umol/L", "mm[Hg]", "kPa", "unsupported", "unknown"]
+    original_unit_hash: SHA256
     absent_reason: AbsentReason | None
     value_kind: Literal["numeric", "qualitative"]
 
@@ -254,6 +257,10 @@ class SofaLabQuantity(StrictModel):
     def exclusive_presence(self):
         if (self.value is None) == (self.absent_reason is None) or (self.value_kind == "qualitative" and self.value is not None):
             raise ValueError("检验原量/定性类型/未测原因不一致")
+        if self.unit in LIS_NATIVE_UNITS and self.original_unit_hash != hash_content(self.unit):
+            raise ValueError("检验native原单位摘要不一致")
+        if self.unit == "unknown" and self.original_unit_hash != hash_content(None):
+            raise ValueError("原单位null标记须绑定真实null摘要")
         return self
 
 
@@ -570,8 +577,12 @@ class SofaSource(StrictModel):
         ):
             raise ValueError("呼吸候选/冲突组技术标识不可重复")
         ids = set(seen)
-        root_prefixes = {"inpatient_lab", "map_observation", "gcs_observation", "urine_interval", "respiratory_support", "arterial_pair", "vasoactive_interval"}
-        if sum(source_id.split(":", 1)[0] in root_prefixes for source_id in ids) > MAX_MEMBERS:
+        root_ids = {item.source_id for item in roots if isinstance(item, OriginalBinding)}
+        for item in self.respiratory_observations:
+            root_ids.add(item.pao2.source_id)
+            if item.pair is not None:
+                root_ids.add(item.pair.source_id)
+        if len(root_ids) > MAX_MEMBERS:
             raise ValueError("SOFA唯一原成员超过4096，不能截断")
         for issue in self.member_issues:
             if not set(issue.source_ids) <= ids:
@@ -905,9 +916,32 @@ RECIPE = {
     },
 }
 INPUT_POLICY = RECIPE["input_policy"]
+INPUT_POLICY["input_precision"]["numbers"] = "exact_original_decimal_strings_LIS_signed_preserved_negative_unsupported_value_unknown_other_quantities_nonnegative"
+INPUT_POLICY["facts"] = {
+    "numbers": INPUT_POLICY["input_precision"]["numbers"],
+    "laboratory_units": "closed_exact_native_units_or_unsupported_or_original_null_unknown_marker_with_full_original_unit_hash_no_free_text_outbound_no_conversion",
+    "laboratory_native_units": list(LIS_NATIVE_UNITS),
+    "laboratory_qualitative": "value_null_type_preserved_original_text_private_only_full_hash_bound",
+}
 INPUT_POLICY["gcs_confounding"] = (
     "complete_measured_EVM_interpretable_confirmed_and_current_doctor_sedation_and_other_confounding_effects_both_explicitly_excluded_no_drug_presence_inference_or_virtual_pre_sedation_score"
 )
+RECIPE["respiratory"]["qualification_consistency_policy"] = (
+    "doctor_yes_requires_original_mode_not_explicit_none_v1_unknown_mode_may_remain_unknown_with_current_explicit_qualification_yes_no_inference"
+)
+INPUT_POLICY["respiratory_qualification"] = {
+    "original_none_and_new_yes": "incompatible_keep_exact_pf_proven_lower_bound_and_support_unknown_upper_never_award_high_tier_pure_math_hospital_new_signature_rejected",
+    "original_unknown_and_new_yes": "allowed_current_doctor_qualification_with_independent_basis_original_mode_remains_unknown",
+    "other_modes": "doctor_explicit_yes_no_unknown_no_invasive_only_narrowing_or_device_inference",
+}
+RECIPE["cardiovascular"]["overlap_policy"] = "actual_same_stream_piecewise_overlap_unknown_v1_nonoverlap_completed_hour_preserved_cross_drug_same_physical_key_overlap_blocked_no_cross_agent_time_join"
+INPUT_POLICY["vasoactive_overlap"] = {
+    "policy": "actual_same_stream_piecewise_overlap_unknown_v1",
+    "identity": "only_actual_sha_namespace_and_external_stream_id_no_note_or_drug_name_inference",
+    "unresolved_same_stream_overlap": "only_actual_intersection_unknown_retain_independent_nonoverlap_completed_tier_witness",
+    "cross_drug": "same_actual_physical_stream_key_concurrent_intersection_unknown_never_concatenate_agents",
+    "other_conflicts": "original_identity_lab_pao2_gcs_and_other_unresolved_groups_remain_dependent_candidate_unknown",
+}
 INPUT_POLICY["change"] = {
     "baseline_modes": ["observed", "conditional_zero", "unknown"],
     "observed": "same_rule_recipe_policy_independent_current_authorized_day_ends_before_current_day_and_known_infection_onset",

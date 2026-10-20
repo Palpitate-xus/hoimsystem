@@ -7,7 +7,7 @@ import uuid
 import pytest
 from pydantic import ValidationError
 
-from app.ai.sofa_contract import AXES, ExactRational, GcsComponents, Quantity, SofaSource, canonical_json, policy_digest, recipe_digest
+from app.ai.sofa_contract import AXES, ExactRational, GcsComponents, Quantity, SofaSource, canonical_json, hash_content, policy_digest, recipe_digest
 
 
 def sha(value):
@@ -79,7 +79,7 @@ def lab(analyte="creatinine", value="0", unit="mg/dL", name=None):
         "mapping_governance_hash": sha(name + "mapping-governance"),
         "identity_hash": sha(name + "identity"),
         "analyte": analyte,
-        "quantity": {**quantity(value, unit), "value_kind": "numeric"},
+        "quantity": {**quantity(value, unit), "value_kind": "numeric", "original_unit_hash": hash_content(unit)},
         "review": review(),
     }
 
@@ -171,3 +171,25 @@ def test_member_issue_cannot_point_to_an_unprojected_source():
     data["member_issues"] = [{"axis": "renal", "code": "unresolved_conflict", "source_ids": ["unprojected"]}]
     with pytest.raises(ValidationError):
         SofaSource.model_validate(data)
+
+
+def test_lis_arbitrary_original_unit_cannot_be_sent_in_public_packet():
+    data = empty_source()
+    item = lab()
+    item["quantity"].update(unit="synthetic-private-name-question-as-unit", original_unit_hash=hash_content("synthetic-private-name-question-as-unit"))
+    data["lab_observations"] = [item]
+    with pytest.raises(ValidationError):
+        SofaSource.model_validate(data)
+    item["quantity"]["unit"] = "unsupported"
+    source = SofaSource.model_validate(data)
+    assert "synthetic-private-name-question-as-unit" not in canonical_json(source.model_dump())
+    assert source.lab_observations[0].quantity.original_unit_hash == hash_content("synthetic-private-name-question-as-unit")
+
+
+@pytest.mark.parametrize("unit,original", [("unknown", None), ("unsupported", ""), ("unsupported", "mg / dL")])
+def test_lis_null_or_unsupported_unit_keeps_full_original_hash(unit, original):
+    data = empty_source()
+    item = lab()
+    item["quantity"].update(unit=unit, original_unit_hash=hash_content(original))
+    data["lab_observations"] = [item]
+    assert SofaSource.model_validate(data).lab_observations[0].quantity.original_unit_hash == hash_content(original)

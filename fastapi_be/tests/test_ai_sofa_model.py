@@ -478,3 +478,70 @@ def test_shared_weight_original_allows_distinct_current_review_basis_hashes():
         item.update(weight=weight(), weight_applicability_confirmed=True, weight_use_confirmed=True, dose_input={"mode": "absolute", "rate": quantity("6", "ug/min")})
     two["weight"]["review"]["basis_hash"] = sha("separate current dose context")
     assert domain(with_vaso([one, two]), "cardiovascular")["lower_bound"] == 3
+
+
+def overlap_group(intervals):
+    return {
+        "group_id": "actual_same_stream_overlap",
+        "axis": "cardiovascular",
+        "group_digest": sha("full actual overlapping membership"),
+        "member_source_ids": [item["source_id"] for item in intervals],
+        "status": "unresolved",
+        "accepted_source_ids": [],
+        "excluded_source_ids": [],
+        "basis_hash": sha("unresolved explicit clinician review"),
+    }
+
+
+def test_actual_unresolved_overlap_group_retains_complete_unambiguous_earlier_hour():
+    one = vaso("1", name="before-overlap", end="2026-10-19T02:00:00.000000Z")
+    two = vaso("0.06", name="overlap", start="2026-10-19T01:30:00.000000Z", end=one["verified_until_at"])
+    source = with_vaso([one, two])
+    source["conflict_groups"] = [overlap_group([one, two])]
+    actual = domain(source, "cardiovascular")
+    assert actual["lower_bound"] == actual["upper_bound"] == 4 and not actual["protocol_complete"]
+    assert any(proof["kind"] == "continuous_tier" and proof["tier"] == 4 and proof["end_at"] == two["start_at"] and proof["meets_minimum"] for proof in actual["candidates"][0]["calculations"])
+
+
+def test_same_physical_stream_cross_drug_overlap_not_two_independent_positive_infusions():
+    one = vaso("1", drug="norepinephrine", name="ne", stream="physical-one")
+    two = vaso("20", drug="dopamine", name="dop", stream="physical-one")
+    source = with_vaso([one])
+    source["vasoactive_groups"].append(vaso_group([two]))
+    source["conflict_groups"] = [overlap_group([one, two])]
+    actual = domain(source, "cardiovascular")
+    assert (actual["lower_bound"], actual["upper_bound"]) == (0, 4) and not actual["protocol_complete"]
+
+
+def test_pair_endpoint_only_support_is_dependency_not_an_extra_manifest_root(monkeypatch):
+    from app.ai import sofa_contract
+
+    original = respiratory("99")
+    original["pao2"]["collected_at_utc"] = "2026-10-19T00:00:00.000000Z"
+    original["support"].update(start_at="2026-10-18T12:00:00.000000Z", verified_until_at="2026-10-19T00:00:00.000000Z", ended_at=None)
+    original["fio2"]["observed_at"] = "2026-10-18T23:50:00.000000Z"
+    source = source_with(respiratory_observations=[original])
+    monkeypatch.setattr(sofa_contract, "MAX_MEMBERS", 2)
+    assert domain(source, "respiratory")["lower_bound"] == 4  # roots PaO2 + pair; support/FiO2 dependencies only.
+
+
+@pytest.mark.parametrize("pao2,bounds", [("99", (2, 4)), ("150", (2, 3)), ("250", (2, 2)), ("400", (0, 0))])
+def test_original_explicit_no_support_not_overwritten_by_current_qualification_yes(pao2, bounds):
+    original = respiratory(pao2, qualifying="yes")
+    original["support"]["delivery_mode"] = "none"
+    actual = domain(source_with(respiratory_observations=[original]), "respiratory")
+    assert (actual["lower_bound"], actual["upper_bound"]) == bounds and not actual["protocol_complete"]
+    assert "qualifying_support_conflicts_with_original" in actual["coverage_issues"]
+
+
+def test_unknown_original_device_mode_can_have_current_explicit_qualification_yes():
+    original = respiratory("99", qualifying="yes")
+    original["support"]["delivery_mode"] = "unknown"
+    actual = domain(source_with(respiratory_observations=[original]), "respiratory")
+    assert actual["observed_max_score"] == 4 and actual["protocol_complete"]
+
+
+@pytest.mark.parametrize("value,score", [("70", 0), ("69.99999999", 1), ("0.00000000", 1), (None, None)])
+def test_original_map_threshold_zero_and_null_distinct(value, score):
+    actual = domain(source_with(map_observations=[map_point(value)]), "cardiovascular")
+    assert next(item for item in actual["candidates"] if item["branch_id"] == "map")["score"] == score

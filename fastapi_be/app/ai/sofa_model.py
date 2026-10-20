@@ -64,13 +64,27 @@ def _excluded(cid, ids, branch):
     return _candidate(cid, ids, branch, lower=0, upper=0, reasons=["review_excluded"], status="excluded")
 
 
-def _state(source, item, extra_ids=()):
+def _is_vaso_overlap_group(source, group):
+    if group.axis != "cardiovascular" or len(group.member_source_ids) < 2:
+        return False
+    intervals = {item.source_id: item for drug_group in source.vasoactive_groups for item in drug_group.intervals}
+    if not set(group.member_source_ids) <= intervals.keys():
+        return False
+    members = [intervals[key] for key in group.member_source_ids]
+    return len({item.stream_key for item in members}) == 1 and any(
+        one.start_at < two.verified_until_at and two.start_at < one.verified_until_at for index, one in enumerate(members) for two in members[index + 1 :]
+    )
+
+
+def _state(source, item, extra_ids=(), *, piecewise_vaso_overlap=False):
     ids = {item.source_id, *extra_ids}
     if item.review.status == "excluded":
         return "excluded"
     for group in source.conflict_groups:
         if ids & set(group.member_source_ids):
             if group.status == "unresolved":
+                if piecewise_vaso_overlap and _is_vaso_overlap_group(source, group):
+                    continue
                 return "unresolved_conflict"
             if ids & set(group.excluded_source_ids):
                 return "excluded"
@@ -204,6 +218,16 @@ def _resp_candidate(source, item):
         "exact": _rational(ratio, pao2.unit),
         "qualifying_respiratory_support": item.qualifying_respiratory_support,
     }
+    if item.qualifying_respiratory_support == "yes" and support.delivery_mode == "none":
+        if ratio >= thresholds[0]:
+            lower, upper = 0, 0
+        elif ratio >= thresholds[1]:
+            lower, upper = 1, 1
+        elif ratio >= thresholds[2]:
+            lower, upper = 2, 2
+        else:
+            lower, upper = 2, 3 if ratio >= thresholds[3] else 4
+        return _candidate(cid, ids, branch, lower=lower, upper=upper, reasons=["qualifying_support_conflicts_with_original"], calculations=[calc])
     if ratio >= thresholds[0]:
         return _candidate(cid, ids, branch, score=0, calculations=[calc])
     if ratio >= thresholds[1]:
@@ -218,7 +242,7 @@ def _resp_candidate(source, item):
 
 def _normalized_rate(source, item):
     """Return exact rate or reason, never infer native quantities/route/mass semantics."""
-    state = _state(source, item)
+    state = _state(source, item, piecewise_vaso_overlap=True)
     if state:
         return None, state
     if item.continuous_iv != "confirmed":
@@ -306,7 +330,16 @@ def _vaso_candidate(source, group):
     if group.relation == "single_stream" and len({fact[2] for fact in facts}) != 1:
         relation_valid = False
         reasons.append("stream_relation_unresolved")
-    boundaries = sorted({point for fact in facts for point in fact[:2]})
+    own_ids = {fact[3] for fact in facts}
+    foreign = [item for other in source.vasoactive_groups for item in other.intervals if item.source_id not in own_ids and _state(source, item) != "excluded"]
+    boundaries = {point for fact in facts for point in fact[:2]}
+    for item in foreign:
+        for left, right, stream_key, _, _ in facts:
+            if item.stream_key == stream_key:
+                overlap_start, overlap_end = max(left, _time(item.start_at)), min(right, _time(item.verified_until_at))
+                if overlap_start < overlap_end:
+                    boundaries.update((overlap_start, overlap_end))
+    boundaries = sorted(boundaries)
     pieces = []
     unknown = not relation_valid or group.drug_key == "other"
     if group.drug_key == "other":
@@ -317,7 +350,9 @@ def _vaso_candidate(source, group):
             pieces.append((left, right, None, []))
             continue
         member_ids = sorted({fact[3] for fact in active})
-        same_stream_overlap = len({fact[2] for fact in active}) != len(active)
+        same_stream_overlap = len({fact[2] for fact in active}) != len(active) or any(
+            item.stream_key in {fact[2] for fact in active} and _time(item.start_at) <= left < _time(item.verified_until_at) for item in foreign
+        )
         bad_total = group.relation == "agent_total" and len(active) != 1
         bad_parallel = len(active) > 1 and group.relation != "distinct_parallel_streams"
         invalid = not relation_valid or same_stream_overlap or bad_total or bad_parallel or any(fact[4] is None for fact in active) or group.drug_key == "other"

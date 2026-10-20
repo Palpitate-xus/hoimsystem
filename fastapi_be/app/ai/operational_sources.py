@@ -10,6 +10,8 @@ from app.ai.catalog import FeatureSpec
 from app.ai.context import ContextBundle
 from app.ai.governance import digest, encode_json
 from app.ai.inventory_sources import attach_inventory_sources
+from app.ai.models import utcnow
+from app.ai.roster_sources import attach_hourly_demand, attach_roster_sources, planning_window
 from app.models import Admission, Bed, Consumable, DailyOperationalMetric, Department, Doctor, Pharmaceutical, Registration, User, Ward
 
 
@@ -74,6 +76,8 @@ def operational_options(db, user: User, spec: FeatureSpec) -> dict:
     departments = operational_scope(db, user, spec, {})
     start, end = operational_window({})
     data = {"default_window": [str(start), str(end)], "allow_hospital_scope": departments is None, "departments": [], "truncated": False}
+    if spec.number == 63:
+        data["default_planning_window"] = [str(date) for date in planning_window({})]
     if spec.number in {66, 67}:
         data["inventory_scope_available"] = departments is None
         data["scope_note"] = "库存尚未按科室归属切分；科室范围不提供全院库存。单次最多选择20个真实品种。"
@@ -101,9 +105,11 @@ def operational_context(db, user: User, spec: FeatureSpec, values: dict) -> Cont
         "scope": "hospital" if departments is None else "department",
         "source_domain": "inventory" if spec.number in {66, 67} else "operations",
         "department_ids": sorted(departments) if departments is not None else None,
+        "department_names": [row[0] for row in db.query(Department.name).filter(Department.department_id.in_(departments)).order_by(Department.department_id).all()] if departments is not None else [],
         "since": str(start),
         "until": str(end),
         "business_date": str(datetime.date.today()),
+        "snapshot_time": utcnow().replace(tzinfo=datetime.UTC).isoformat(),
         "missing_data": [],
         "truncated_sources": [],
         "scope_note": "仅授权范围内的原始记录汇总和已保存统计；未核实外部数据导入完整性，未记录日不等于已验证零业务量，当前记录状态不回推为历史状态",
@@ -111,9 +117,12 @@ def operational_context(db, user: User, spec: FeatureSpec, values: dict) -> Cont
 
     def add(key: str, title: str, fields: dict):
         clean = json.loads(encode_json(fields))
-        source_id = "operations:" + key + ":" + digest(clean)[:20]
+        provenance = {name: bundle.data[name] for name in ("scope", "source_domain", "department_ids", "since", "until")}
+        source_id = "operations:" + key + ":" + digest([provenance, clean])[:20]
         bundle.data[key] = {"source_id": source_id, **clean}
-        bundle.evidence.append({"source_id": source_id, "kind": "operational_record", "title": title, "content": encode_json(clean)})
+        bundle.evidence.append(
+            {"source_id": source_id, "kind": "operational_record", "title": title, "observed_at": bundle.data["snapshot_time"], "content": encode_json({**provenance, "record": clean})}
+        )
 
     if spec.number in {66, 67}:
         attach_inventory_sources(db, departments, start, end, bundle, add, values)
@@ -183,6 +192,10 @@ def operational_context(db, user: User, spec: FeatureSpec, values: dict) -> Cont
 
     if spec.number in {61, 62, 63}:
         events("recorded_registrations", Registration, Registration.time, "授权范围挂号记录日汇总")
+    if spec.number in {62, 63}:
+        attach_hourly_demand(db, departments, start, end, bundle, add)
+    if spec.number == 63:
+        attach_roster_sources(db, departments, values, bundle, add)
     if spec.number in {61, 64}:
         events("recorded_admissions", Admission, Admission.admission_time, "授权范围入院记录日汇总")
         events("recorded_discharges", Admission, Admission.discharge_time, "授权范围出院时间日汇总")

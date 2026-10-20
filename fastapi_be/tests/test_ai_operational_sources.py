@@ -13,9 +13,10 @@ from app.ai.catalog import FEATURE_BY_KEY
 from app.ai.governance import encode_json
 from app.ai.models import AIFeatureConfig, AIFeedback, AIProvider, AIRun
 from app.ai.operational_sources import operational_context, operational_window
+from app.ai.roster_sources import planning_window
 from app.ai.runtime import authorize_run, claim_next_run, create_run, describe_run, execute_claimed
 from app.ai.schemas import RunRequest
-from app.models import Admission, Bed, DailyOperationalMetric, Department, Doctor, Registration, Ward
+from app.models import Admission, Bed, DailyOperationalMetric, Department, Doctor, DoctorSchedule, Registration, ScheduleChangeRequest, Ward
 
 
 @pytest.fixture(autouse=True)
@@ -111,6 +112,24 @@ def test_preaggregated_gaps_null_wait_and_future_dates_remain_explicit(seed_data
     assert bundle.evidence and all(item["kind"] == "operational_record" for item in bundle.evidence)
 
 
+def test_equal_counts_in_different_departments_have_distinct_scoped_evidence(seed_data, db_session, operational_case):
+    department = operational_case[4]
+    db_session.add(
+        Admission(patient_id=seed_data["patient2"].patient_id, doctor_id=seed_data["doctor"].doctor_id, department_id=department.department_id, admission_time=datetime.datetime.now(), status=1)
+    )
+    db_session.commit()
+    bundles = [
+        operational_context(db_session, seed_data["super_admin_user"], FEATURE_BY_KEY["operations_qa"], values_for(operational_case, department_id=department_id))
+        for department_id in (seed_data["department"].department_id, department.department_id)
+    ]
+    left, right = [bundle.data["current_active_admissions"] for bundle in bundles]
+    assert left["record_count"] == right["record_count"] == 1
+    assert left["source_id"] != right["source_id"]
+    evidence = next(item for item in bundles[0].evidence if item["source_id"] == left["source_id"])
+    assert json.loads(evidence["content"])["department_ids"] == [seed_data["department"].department_id]
+    assert evidence["observed_at"] == bundles[0].data["snapshot_time"]
+
+
 def test_invalid_windows_and_unscoped_roles_cannot_load_operational_data(seed_data, db_session):
     today = datetime.date.today()
     for values in (
@@ -126,6 +145,85 @@ def test_invalid_windows_and_unscoped_roles_cannot_load_operational_data(seed_da
     with pytest.raises(HTTPException) as denied:
         operational_context(db_session, seed_data["doctor_user"], FEATURE_BY_KEY["operations_qa"], {})
     assert denied.value.status_code == 403
+
+
+def test_hourly_series_retains_original_clock_and_status_without_zero_filling(seed_data, db_session, operational_case):
+    yesterday = operational_case[1]
+    db_session.add(
+        Registration(
+            patient_id=seed_data["patient"].patient_id,
+            doctor_id=seed_data["doctor"].doctor_id,
+            department_id=seed_data["department"].department_id,
+            time=datetime.datetime.combine(yesterday, datetime.time(11, 10)),
+            status=1,
+        )
+    )
+    db_session.commit()
+    bundle = operational_context(db_session, seed_data["director_user"], FEATURE_BY_KEY["visit_forecast"], values_for(operational_case, department_id=seed_data["department"].department_id))
+    source = bundle.data["recorded_hourly_registrations"]
+    assert source["rows"] == [[str(yesterday), 10, 0, 1], [str(yesterday), 11, 1, 1]]
+    assert source["truncated"] is False
+    assert seed_data["patient"].identity not in encode_json(bundle.data)
+
+
+def test_roster_retains_scoped_raw_periods_and_planning_changes_without_invented_credentials(seed_data, db_session, operational_case):
+    today, _, _, _, foreign_department = operational_case
+    foreign_doctor = Doctor(name="外科医生不应加载", department_id=foreign_department.department_id)
+    db_session.add(foreign_doctor)
+    db_session.flush()
+    own = DoctorSchedule(doctor_id=seed_data["doctor"].doctor_id, week="星期三", time="原始编码", specialist=1, number=None)
+    foreign = DoctorSchedule(doctor_id=foreign_doctor.doctor_id, week="星期三", time="02", specialist=1, number=10)
+    db_session.add_all([own, foreign])
+    db_session.flush()
+    requests = []
+    for doctor_id, schedule_id, kind, status in (
+        (own.doctor_id, own.schedule_id, "stop", 1),
+        (own.doctor_id, own.schedule_id, "add", 0),
+        (own.doctor_id, foreign.schedule_id, "stop", 1),
+        (foreign.doctor_id, foreign.schedule_id, "stop", 1),
+    ):
+        row = ScheduleChangeRequest(
+            doctor_id=doctor_id,
+            schedule_id=schedule_id,
+            request_type=kind,
+            status=status,
+            extra_slots=5 if kind == "add" else 0,
+            target_date=today + datetime.timedelta(days=1),
+            reason="sensitive-staff-reason-" + seed_data["patient"].identity,
+            applicant_id=seed_data["doctor_user"].user_id,
+            create_time=datetime.datetime.now(),
+        )
+        requests.append(row)
+        db_session.add(row)
+    db_session.commit()
+    values = values_for(operational_case, department_id=seed_data["department"].department_id, planning_date_from=str(today), planning_date_to=str(today + datetime.timedelta(days=3)))
+    bundle = operational_context(db_session, seed_data["director_user"], FEATURE_BY_KEY["roster_optimization"], values)
+    schedule_data = bundle.data["recorded_schedules"]
+    row = next(dict(zip(schedule_data["columns"], row)) for row in schedule_data["rows"] if row[0] == own.schedule_id)
+    assert row["recorded_period"] == "原始编码"
+    assert row["current_shared_stock"] is None
+    assert schedule_data["planning_window"] == [str(today), str(today + datetime.timedelta(days=3))]
+    assert all(row[0] != foreign.schedule_id for row in schedule_data["rows"])
+    changes = bundle.data["recorded_schedule_changes"]
+    assert {row[0] for row in changes["rows"]} == {row.request_id for row in requests[:2]}
+    assert changes["excluded_inconsistent_links"] == 1
+    assert any("不得宣称候选排班已满足全部约束" in note for note in bundle.data["missing_data"])
+    assert "sensitive-staff-reason" not in encode_json(bundle.data)
+    db_session.refresh(own)
+    assert own.number is None
+
+
+def test_planning_window_rejects_past_oversized_and_untyped_dates():
+    today = datetime.date.today()
+    for values in (
+        {"planning_date_from": str(today - datetime.timedelta(days=1))},
+        {"planning_date_to": str(today + datetime.timedelta(days=31))},
+        {"planning_date_to": str(today + datetime.timedelta(days=400))},
+        {"planning_date_from": False},
+    ):
+        with pytest.raises(HTTPException) as invalid:
+            planning_window(values)
+        assert invalid.value.status_code == 422
 
 
 @pytest.mark.asyncio

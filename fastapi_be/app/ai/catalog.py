@@ -186,6 +186,7 @@ FEATURE_BY_KEY = {spec.key: spec for spec in FEATURES}
 
 def describe_feature(spec: FeatureSpec) -> dict:
     """Return non-secret metadata suitable for the management and business UI."""
+    source_keys = ({"observation_window_id"} if spec.number in {41, 42, 43} else SOURCE_REFERENCE_KEYS - {"observation_window_id"}) if spec.scope == "patient" else set()
     return {
         "number": spec.number,
         "key": spec.key,
@@ -194,7 +195,7 @@ def describe_feature(spec: FeatureSpec) -> dict:
         "priority": spec.priority,
         "engine": spec.engine,
         "scope": spec.scope,
-        "source_reference_keys": sorted(SOURCE_REFERENCE_KEYS) if spec.scope == "patient" else [],
+        "source_reference_keys": sorted(source_keys),
         "inputs": list(spec.inputs),
         "deliverables": list(spec.deliverables),
         "requires_knowledge": spec.requires_knowledge,

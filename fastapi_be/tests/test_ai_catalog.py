@@ -1,6 +1,6 @@
 """Contract checks for the user-approved capability set and packaged prompts."""
 
-from app.ai.catalog import COMMON_SYSTEM_PROMPT, FEATURE_BY_KEY, FEATURES
+from app.ai.catalog import COMMON_SYSTEM_PROMPT, FEATURE_BY_KEY, FEATURES, describe_feature
 from app.dependencies import VALID_USER_ROLES
 
 
@@ -35,3 +35,11 @@ def test_hospital_scope_does_not_advertise_access_to_unscoped_business_roles():
     assert FEATURE_BY_KEY["feedback_analysis"].requires_patient_data_permission
     assert FEATURE_BY_KEY["research_cohort"].requires_patient_data_permission
     assert not FEATURE_BY_KEY["operations_qa"].requires_patient_data_permission
+
+
+def test_risk_metadata_advertises_only_the_required_window_reference():
+    for key in ("deterioration_risk", "sepsis_risk", "aki_risk"):
+        assert describe_feature(FEATURE_BY_KEY[key])["source_reference_keys"] == ["observation_window_id"]
+    for spec in FEATURES:
+        if spec.number not in {41, 42, 43}:
+            assert "observation_window_id" not in describe_feature(spec)["source_reference_keys"]

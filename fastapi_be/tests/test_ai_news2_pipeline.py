@@ -159,7 +159,13 @@ async def test_actual_news2_queue_uses_frozen_explicit_source_and_fixed_arithmet
     assert analysis["calculation_status"] == "computed" and analysis["classification"] == "medium"
     assert [item["score"] for item in analysis["components"]] == [2, 1, 1, 1, 1, 0, 0]
     assert analysis["source_binding"] == supplied and analysis["clinical_validation"] == "not_provided"
-    assert data["news2_findings"]["news2_assessment"]["patient_id"] == case["patient_id"]
+    frozen = data["news2_findings"]["news2_assessment"]
+    assert frozen["patient_id"] == case["patient_id"]
+    for key in ("assessment_id", "window_id", "window_content_hash", "point_id", "rule_profile_id", "rule_profile_content_hash", "recipe_digest", "observed_at", "source_id", "content_hash"):
+        assert frozen[key] == supplied[key]
+    assert frozen["point_content_hash"] == case["point"].content_hash
+    assert frozen["governance_hash"] == supplied["source_governance_hash"]
+    assert frozen["snapshot"]["point"]["payload"]["measurements"]["pulse_rate"] == supplied["measurements"]["pulse_rate"]
     assert data["news2_findings"]["news2_source"] == supplied
     assert before == {model.__tablename__: db_session.query(model).count() for model in (Admission, MedicalRecord, Prescription)}
 

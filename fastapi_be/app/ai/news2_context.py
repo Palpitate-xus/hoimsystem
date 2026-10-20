@@ -10,7 +10,28 @@ from app.ai.observation_windows import canonical_json, observation_context
 def _frozen_assessment(current, patient):
     from app.ai.context import minimize_identifiers
 
-    frozen = {key: current[key] for key in ("assessment_id", "patient_id", "admission_id", "window_id", "status", "revision", "source_id", "content_hash", "snapshot")}
+    frozen = {
+        key: current[key]
+        for key in (
+            "assessment_id",
+            "patient_id",
+            "admission_id",
+            "window_id",
+            "window_content_hash",
+            "point_id",
+            "point_content_hash",
+            "rule_profile_id",
+            "rule_profile_content_hash",
+            "recipe_digest",
+            "observed_at",
+            "status",
+            "revision",
+            "source_id",
+            "content_hash",
+            "governance_hash",
+            "snapshot",
+        )
+    }
     frozen = copy.deepcopy(frozen)
     # Only explicitly free text is minimized. Quantities, units, timestamps,
     # UUIDs and original/governance hashes remain the server-owned originals.

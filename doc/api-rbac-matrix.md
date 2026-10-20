@@ -3,7 +3,7 @@
 > 由 `fastapi_be/scripts/generate_rbac_matrix.py` 从源码自动生成，请勿手改。
 > `✓`=可访问 | `PUBLIC`=无需登录 | 留空=不可访问
 
-共 **640** 个接口（PUBLIC 18 个 / 需登录 622 个）。
+共 **654** 个接口（PUBLIC 18 个 / 需登录 636 个）。
 
 
 ### `admin.py`
@@ -167,6 +167,17 @@
 | POST | `/api/ai/image-assets/{asset_id}/withdraw` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
 | GET | `/api/ai/admin/image-assets` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
 | POST | `/api/ai/admin/image-assets/{asset_id}/purge` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+
+### `ai_observation_windows.py`
+
+| 方法 | 路径 | admin | super_admin | director | doctor | nurse | cashier | pharmacist | guide | patient | lab_technician | registrar | PUBLIC |
+|------|------|------|------|------|------|------|------|------|------|------|------|------|------|
+| POST | `/api/ai/observation-windows` | ✓ | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |
+| GET | `/api/ai/observation-windows` | ✓ | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |
+| GET | `/api/ai/observation-windows/{window_id}` | ✓ | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |
+| POST | `/api/ai/observation-windows/{window_id}/revoke` | ✓ | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |
+| GET | `/api/ai/admin/observation-windows` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/admin/observation-windows/{window_id}` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
 
 ### `allergy.py`
 
@@ -576,6 +587,19 @@
 | GET | `/api/inpatientCharge/getSummary` | ✓ | ✓ |  |  | ✓ | ✓ |  |  |  |  |  |  |
 | POST | `/api/inpatientCharge/depositRecharge` | ✓ | ✓ |  |  | ✓ | ✓ |  |  |  |  |  |  |
 | GET | `/api/inpatientCharge/depositBalance` | ✓ | ✓ |  |  | ✓ | ✓ |  |  |  |  |  |  |
+
+### `inpatient_observations.py`
+
+| 方法 | 路径 | admin | super_admin | director | doctor | nurse | cashier | pharmacist | guide | patient | lab_technician | registrar | PUBLIC |
+|------|------|------|------|------|------|------|------|------|------|------|------|------|------|
+| GET | `/api/inpatient-observations/points` | ✓ | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |
+| POST | `/api/inpatient-observations/points` | ✓ | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |
+| GET | `/api/inpatient-observations/points/{observation_id}` | ✓ | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |
+| POST | `/api/inpatient-observations/points/{observation_id}/revoke` | ✓ | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |
+| GET | `/api/inpatient-observations/urine-intervals` | ✓ | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |
+| POST | `/api/inpatient-observations/urine-intervals` | ✓ | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |
+| GET | `/api/inpatient-observations/urine-intervals/{interval_id}` | ✓ | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |
+| POST | `/api/inpatient-observations/urine-intervals/{interval_id}/revoke` | ✓ | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |
 
 ### `inpatient_order.py`
 

@@ -921,6 +921,76 @@
   "path": "/api/ai/admin/image-assets/{asset_id}/purge"
  },
  {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "nurse",
+   "super_admin"
+  ],
+  "function": "post_window",
+  "method": "POST",
+  "module": "ai_observation_windows.py",
+  "path": "/api/ai/observation-windows"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "nurse",
+   "super_admin"
+  ],
+  "function": "list_windows",
+  "method": "GET",
+  "module": "ai_observation_windows.py",
+  "path": "/api/ai/observation-windows"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "nurse",
+   "super_admin"
+  ],
+  "function": "get_window",
+  "method": "GET",
+  "module": "ai_observation_windows.py",
+  "path": "/api/ai/observation-windows/{window_id}"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "nurse",
+   "super_admin"
+  ],
+  "function": "revoke_window",
+  "method": "POST",
+  "module": "ai_observation_windows.py",
+  "path": "/api/ai/observation-windows/{window_id}/revoke"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "admin_windows",
+  "method": "GET",
+  "module": "ai_observation_windows.py",
+  "path": "/api/ai/admin/observation-windows"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "admin_window",
+  "method": "GET",
+  "module": "ai_observation_windows.py",
+  "path": "/api/ai/admin/observation-windows/{window_id}"
+ },
+ {
   "auth": "ANY",
   "function": "list_allergies",
   "method": "GET",
@@ -3297,6 +3367,110 @@
   "method": "GET",
   "module": "inpatient_charge.py",
   "path": "/api/inpatientCharge/depositBalance"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "nurse",
+   "super_admin"
+  ],
+  "function": "list_points",
+  "method": "GET",
+  "module": "inpatient_observations.py",
+  "path": "/api/inpatient-observations/points"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "nurse",
+   "super_admin"
+  ],
+  "function": "create_point",
+  "method": "POST",
+  "module": "inpatient_observations.py",
+  "path": "/api/inpatient-observations/points"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "nurse",
+   "super_admin"
+  ],
+  "function": "detail_point",
+  "method": "GET",
+  "module": "inpatient_observations.py",
+  "path": "/api/inpatient-observations/points/{observation_id}"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "nurse",
+   "super_admin"
+  ],
+  "function": "revoke_point",
+  "method": "POST",
+  "module": "inpatient_observations.py",
+  "path": "/api/inpatient-observations/points/{observation_id}/revoke"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "nurse",
+   "super_admin"
+  ],
+  "function": "list_urine_intervals",
+  "method": "GET",
+  "module": "inpatient_observations.py",
+  "path": "/api/inpatient-observations/urine-intervals"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "nurse",
+   "super_admin"
+  ],
+  "function": "create_urine_interval",
+  "method": "POST",
+  "module": "inpatient_observations.py",
+  "path": "/api/inpatient-observations/urine-intervals"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "nurse",
+   "super_admin"
+  ],
+  "function": "detail_urine_interval",
+  "method": "GET",
+  "module": "inpatient_observations.py",
+  "path": "/api/inpatient-observations/urine-intervals/{interval_id}"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "nurse",
+   "super_admin"
+  ],
+  "function": "revoke_urine_interval",
+  "method": "POST",
+  "module": "inpatient_observations.py",
+  "path": "/api/inpatient-observations/urine-intervals/{interval_id}/revoke"
  },
  {
   "auth": "ANY",

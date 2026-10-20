@@ -58,6 +58,10 @@ services:
       AI_ECG_MAX_BYTES: ${AI_ECG_MAX_BYTES:-33554432}
       AI_ECG_MAX_DURATION_SECONDS: ${AI_ECG_MAX_DURATION_SECONDS:-300}
       AI_ECG_USER_QUOTA_BYTES: ${AI_ECG_USER_QUOTA_BYTES:-536870912}
+      AI_IMAGE_STORAGE_DIR: /app/private/ai-images
+      AI_IMAGE_MAX_BYTES: ${AI_IMAGE_MAX_BYTES:-67108864}
+      AI_IMAGE_MAX_PIXELS: ${AI_IMAGE_MAX_PIXELS:-16777216}
+      AI_IMAGE_USER_QUOTA_BYTES: ${AI_IMAGE_USER_QUOTA_BYTES:-1073741824}
       # 外部系统集成密钥（LIS/PACS/医保/支付回调），未配置时对应回调返回 503
       LIS_INTEGRATION_KEY: ${LIS_INTEGRATION_KEY:-}
       PACS_INTEGRATION_KEY: ${PACS_INTEGRATION_KEY:-}
@@ -80,6 +84,7 @@ services:
       - ./fastapi_be/app/uploads:/app/app/uploads
       - ai_audio_private:/app/private/ai-audio
       - ai_ecg_private:/app/private/ai-ecg
+      - ai_image_private:/app/private/ai-images
     ports:
       - "127.0.0.1:8000:8000"
     healthcheck:
@@ -164,9 +169,14 @@ services:
       AI_ECG_MAX_BYTES: ${AI_ECG_MAX_BYTES:-33554432}
       AI_ECG_MAX_DURATION_SECONDS: ${AI_ECG_MAX_DURATION_SECONDS:-300}
       AI_ECG_USER_QUOTA_BYTES: ${AI_ECG_USER_QUOTA_BYTES:-536870912}
+      AI_IMAGE_STORAGE_DIR: /app/private/ai-images
+      AI_IMAGE_MAX_BYTES: ${AI_IMAGE_MAX_BYTES:-67108864}
+      AI_IMAGE_MAX_PIXELS: ${AI_IMAGE_MAX_PIXELS:-16777216}
+      AI_IMAGE_USER_QUOTA_BYTES: ${AI_IMAGE_USER_QUOTA_BYTES:-1073741824}
     volumes:
       - ai_audio_private:/app/private/ai-audio
       - ai_ecg_private:/app/private/ai-ecg
+      - ai_image_private:/app/private/ai-images
     depends_on:
       migrate:
         condition: service_completed_successfully
@@ -184,4 +194,5 @@ volumes:
   postgres_data:
   redis_data:
   ai_audio_private:
+  ai_image_private:
   ai_ecg_private:

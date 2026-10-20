@@ -39,6 +39,7 @@ from app.ai.speech_probe import inspect_speech_capabilities
 from app.database import get_db
 from app.dependencies import require_roles
 from app.models import ClinicalPathway, Department, Patient, User
+from app.routers.inpatient_support import QueryPositiveInteger
 
 router = APIRouter(tags=["AI 超级管理员"], default_response_class=JSONResponse)
 
@@ -691,6 +692,9 @@ def list_global_runs(
     outcome: Literal["accepted", "rejected", "modified"] | None = None,
     requested_by: int | None = Query(None, ge=1),
     patient_id: int | None = Query(None, ge=1),
+    department_id: QueryPositiveInteger | None = Query(None, ge=1, le=2147483647),
+    surgery_pool_id: str | None = Query(None, max_length=36),
+    surgery_scenario_id: str | None = Query(None, max_length=36),
     page: int = Query(1, ge=1, le=100000),
     page_size: int = Query(30, ge=1, le=100),
     db: Session = Depends(get_db),
@@ -698,6 +702,15 @@ def list_global_runs(
 ) -> dict:
     """Inspect all users' task metadata and feedback counts without loading clinical payloads."""
     query = db.query(AIRun)
+    if department_id is not None or surgery_pool_id is not None or surgery_scenario_id is not None:
+        if feature_key != "surgery_scheduling" or patient_id is not None:
+            raise HTTPException(422, "手术管理历史筛选仅用于手术科室、资源池或原场景")
+        from app.ai.surgery_history import filter_history
+
+        actor = db.query(User).filter_by(user_id=user.user_id).populate_existing().one_or_none()
+        if actor is None or actor.user_role != "super_admin":
+            raise HTTPException(403, "当前身份已无超级管理员历史审计权限")
+        query = filter_history(db, actor, query, department_id=department_id, surgery_pool_id=surgery_pool_id, surgery_scenario_id=surgery_scenario_id)
     if feature_key:
         get_spec(feature_key)
         query = query.filter(AIRun.feature_key == feature_key)
@@ -729,6 +742,17 @@ def inspect_run_trace(run_id: str, db: Session = Depends(get_db), user: User = D
     if run is None:
         raise HTTPException(404, "AI 任务不存在")
     snapshot = json.loads(run.input_json)
+    if run.feature_key == "surgery_scheduling":
+        from app.ai.runtime import authorize_run
+        from app.ai.surgery_context import expand_context
+        from app.ai.surgery_storage import is_surgery_snapshot
+
+        if is_surgery_snapshot(snapshot):
+            actor = db.query(User).filter_by(user_id=user.user_id).populate_existing().one_or_none()
+            if actor is None or actor.user_role != "super_admin":
+                raise HTTPException(403, "当前身份已无超级管理员完整手术审计权限")
+            authorize_run(db, actor, run)
+            snapshot["payload"]["context"] = expand_context(db, snapshot["payload"]["context"])
     if snapshot.get("payload", {}).get("context", {}).get("roster_binding"):
         from app.ai.roster_context import authorize_roster_snapshot, expand_context
 

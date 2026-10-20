@@ -94,6 +94,15 @@ def _check_run_storage_json(serialized: dict[str, str]) -> None:
 
 def create_run(db: Session, user: User, req: RunRequest) -> AIRun:
     """Freeze an authorized, source-linked request before a durable worker processes it."""
+    if req.feature_key == "surgery_scheduling":
+        from app.ai import surgery_facts as facts
+
+        with db.no_autoflush:
+            facts.lock_write_gate(db)
+        user = facts.current_actor(db, user, locking=True)
+        config = db.query(AIFeatureConfig).filter_by(feature_key=req.feature_key).populate_existing().with_for_update().one_or_none()
+        if config is not None and config.provider_id is not None:
+            db.query(AIProvider).filter_by(provider_id=config.provider_id).populate_existing().with_for_update().one_or_none()
     spec, config = authorized_feature(db, user, req.feature_key)
     if len(encode_json(req.input)) > settings.AI_MAX_INPUT_CHARS:
         raise HTTPException(422, "任务输入超过允许长度")
@@ -127,6 +136,16 @@ def create_run(db: Session, user: User, req: RunRequest) -> AIRun:
             raise HTTPException(422, "本地床位预测服务须选择已审核完整序列，其他适配器不能接收该原件")
         if bed_mode and req.encounter_ref is not None:
             raise HTTPException(422, "病区床位序列不接受个体就诊引用")
+    if spec.number == 65:
+        surgery_mode = provider.model.startswith("surgery:")
+        if surgery_mode != bool(bundle.data.get("surgery_binding")):
+            raise HTTPException(422, "本地手术服务须明确选择已审核完整场景，外部适配器不能接收该原件")
+        if surgery_mode:
+            from app.ai.surgery_context import selection
+
+            selection(req.input)
+            if req.encounter_ref is not None:
+                raise HTTPException(422, "完整手术资源场景不接受额外个体就诊引用")
     if spec.number == 41:
         news2_mode = provider.model.startswith("news2:")
         if news2_mode and not bundle.data.get("news2_source"):
@@ -171,12 +190,15 @@ def create_run(db: Session, user: User, req: RunRequest) -> AIRun:
             raise HTTPException(409, "原心电没有可用采样，只能查看原记录，不能创建候选判读任务")
     patient = db.get(Patient, req.patient_id) if req.patient_id else None
     clean_input = minimize_identifiers(req.input, patient)
-    tools, tool_evidence = business_tools(db, spec, user, req.patient_id, clean_input, bundle)
+    fixed_surgery = bool(bundle.data.get("surgery_binding"))
+    tools, tool_evidence = ({}, []) if fixed_surgery else business_tools(db, spec, user, req.patient_id, clean_input, bundle)
     query = retrieval_query(spec, clean_input, bundle.data, tools)
     pathway_ids = selected_pathway_ids(bundle.data)
     # The fixed optimizer accepts only the reviewed complete scenario. Retrieved
     # prose cannot add constraints or become an extra source for its proof.
-    knowledge = [] if bundle.data.get("roster_binding") or bundle.data.get("bed_binding") else retrieve_evidence(db, spec, query, bundle.department_ids, preferred_pathway_ids=pathway_ids)
+    knowledge = (
+        [] if fixed_surgery or bundle.data.get("roster_binding") or bundle.data.get("bed_binding") else retrieve_evidence(db, spec, query, bundle.department_ids, preferred_pathway_ids=pathway_ids)
+    )
     if spec.key == "treatment_pathway" and pathway_ids and not any(item.get("source_kind") == "clinical_pathway" and item.get("source_reference_id") in pathway_ids for item in knowledge):
         raise HTTPException(409, "所选临床路径缺少当前匹配的已审核知识版本，请由超级管理员导入并审核后再比选")
     if spec.requires_knowledge and not knowledge:
@@ -248,6 +270,16 @@ def create_run(db: Session, user: User, req: RunRequest) -> AIRun:
         except Exception:
             db.rollback()
             raise
+    if bundle.data.get("surgery_binding"):
+        from app.ai.surgery_scenarios import authorize_scenario
+        from app.ai.surgery_storage import run_binding
+
+        try:
+            bound = run_binding(run)
+            authorize_scenario(db, user, bound["scenario_id"], binding=bound, locking=True)
+        except Exception:
+            db.rollback()
+            raise
     audit(db, user.user_id, "run.create", run.run_id, {"feature_key": spec.key, "preview": req.preview})
     db.commit()
     return run
@@ -255,6 +287,23 @@ def create_run(db: Session, user: User, req: RunRequest) -> AIRun:
 
 def authorize_run(db: Session, user: User, run: AIRun) -> None:
     """Re-check current permissions, including revoked care access, on every result read."""
+    if run.feature_key == "surgery_scheduling":
+        from app.ai import surgery_facts as facts
+        from app.ai.surgery_context import authorize_surgery_snapshot
+        from app.ai.surgery_storage import is_surgery_snapshot, load_snapshot
+
+        try:
+            surgery_snapshot = json.loads(run.input_json)
+        except (ValueError, TypeError, RecursionError) as exc:
+            raise HTTPException(409, "手术历史任务缺少有效完整JSON") from exc
+        if is_surgery_snapshot(surgery_snapshot):
+            user = facts.current_actor(db, user)
+            if user.user_role != "super_admin" and run.requested_by != user.user_id:
+                raise HTTPException(403, "不能访问其他用户的 AI 任务")
+            authorized_feature(db, user, run.feature_key)
+            snapshot, _, _, _ = load_snapshot(run)
+            authorize_surgery_snapshot(db, user, snapshot["payload"]["context"])
+            return
     if user.user_role != "super_admin" and run.requested_by != user.user_id:
         raise HTTPException(403, "不能访问其他用户的 AI 任务")
     spec, _ = authorized_feature(db, user, run.feature_key)
@@ -333,6 +382,12 @@ def describe_run(run: AIRun, include_result: bool = True) -> dict:
     """Expose the user-facing result, not system instructions or provider secrets."""
     from app.ai.roster_storage import is_roster_snapshot
 
+    if run.feature_key == "surgery_scheduling":
+        from app.ai.surgery_storage import is_surgery_snapshot, run_binding
+
+        if is_surgery_snapshot(json.loads(run.input_json)):
+            run_binding(run)
+
     if is_roster_snapshot(json.loads(run.input_json)):
         from app.ai.roster_storage import run_binding
 
@@ -373,6 +428,21 @@ def describe_run(run: AIRun, include_result: bool = True) -> dict:
     if include_result:
         context = json.loads(run.input_json).get("payload", {}).get("context", {})
         result = json.loads(run.result_json)
+        if context.get("surgery_binding"):
+            from sqlalchemy.orm import object_session
+
+            from app.ai.surgery_context import expand_context
+            from app.ai.surgery_storage import expand_result
+
+            db = object_session(run)
+            if db is None:
+                raise HTTPException(409, "完整手术任务须在授权数据库会话内展开")
+            expanded = expand_context(db, context)
+            if run.status == "succeeded" or result.get("schema_version") == "surgery_result_ref_v1":
+                result = expand_result(db, run)
+            data["surgery_findings"] = {key: expanded[key] for key in ("surgery_source", "surgery_scenario", "surgery_binding")}
+        elif result.get("schema_version") == "surgery_result_ref_v1":
+            raise HTTPException(409, "完整手术结果引用不能由其他模式读取")
         if context.get("roster_binding"):
             from sqlalchemy.orm import object_session
 

@@ -15,6 +15,8 @@ from app.ai import models as _ai_models  # noqa: F401
 from app.ai import roster_models as _roster_models  # noqa: F401
 from app.ai import roster_plan_models as _roster_plan_models  # noqa: F401
 from app.ai import sofa_models as _sofa_models  # noqa: F401
+from app.ai import supply_series_models as _supply_series_models  # noqa: F401
+from app.ai import supply_source_models as _supply_source_models  # noqa: F401
 from app.ai import surgery_models as _surgery_models  # noqa: F401
 from app.ai import surgery_scenario_models as _surgery_scenario_models  # noqa: F401
 from app.clinical_observations import ObservationDecimal

@@ -1,0 +1,131 @@
+import request from '@/utils/request';
+import registry from './bedSeriesSchemas.json';
+import {decodeGeneratedSchemas,generatedSchemaMatches} from './sofaSchema';
+import {supportCanonical,supportDigest,supportHash,supportId} from './inpatientSupport';
+import {bedBasisValid,bedClock,bedDate,bedMetadataValid,bedPositive,bedReviewBasisValid,bedSourceKinds,bedSourceStates,verifyBedSource} from './bedSources';
+
+const schemas=decodeGeneratedSchemas(registry),base='ai/bed-series';
+const read=(url,params)=>request({url,method:'get',params,retry:0}),write=(url,data)=>request({url,method:'post',data:JSON.stringify(data),headers:{'Content-Type':'application/json'},retry:0});
+const segment=id=>{if(!supportId(id))throw new Error('床位序列标识须为规范UUID');return id;};
+export const previewBedSeries=data=>write(`${base}/preview`,data);
+export const getBedSeries=params=>read(base,params);
+export const getBedSeriesDetail=id=>read(`${base}/${segment(id)}`);
+export const createBedSeries=data=>write(base,data);
+export const reviewBedSeries=(id,data)=>write(`${base}/${segment(id)}/review`,data);
+export const revokeBedSeries=(id,data)=>write(`${base}/${segment(id)}/revoke`,data);
+export const getAdminBedSeries=params=>read('ai/admin/bed-series',params);
+export const getAdminBedSeriesDetail=id=>read(`ai/admin/bed-series/${segment(id)}`);
+export const bedSeriesSchemaMatches=(name,value)=>generatedSchemaMatches(schemas,name,value);
+export const bedTargets=Object.freeze({occupied_physical_bed_census:'原物理占床日界数',physical_admission_events:'原物理入病区事件',physical_discharge_events:'原物理出院离开事件',physical_transfer_in_events:'原物理转入病区事件',physical_transfer_out_events:'原物理转出病区事件'});
+export const bedTargetDefinition=target=>target==='occupied_physical_bed_census'?'occupied_physical_beds_at_boundary_v1':'ward_physical_day_events_v1';
+const object=v=>v!==null&&typeof v==='object'&&!Array.isArray(v),same=(a,b)=>supportCanonical(a)===supportCanonical(b),keys=(v,k)=>object(v)&&same(Object.keys(v).sort(),[...k].sort()),pick=(v,k)=>Object.fromEntries(k.map(key=>[key,v[key]])),bytes=v=>new TextEncoder().encode(supportCanonical(v)).length;
+const dateAdd=(day,n)=>new Date(Date.parse(`${day}T00:00:00.000Z`)+n*86400000).toISOString().slice(0,10),unique=list=>new Set(list).size===list.length;
+const bounded=(list,max)=>Array.isArray(list)&&list.length<=max;
+const governance=['status','revision','reviewed_by','reviewed_at','review_basis_note','revoked_by','revoked_at','revoke_reason'];
+const immutable=['series_id','department_id','ward_id','schema_version','as_of','created_at','created_by','content_hash','collection_digest','projection_hash','source_id'];
+const flags=['source_current','eligible','exclusion_reasons','can_record','can_review','can_revoke','audit_only','forecast_purpose'];
+const summary=[...immutable,...governance.filter(k=>!['review_basis_note','revoke_reason'].includes(k)),'governance_hash',...flags],full=[...summary,'snapshot','public_source','review_basis_note','revoke_reason'];
+const manifestFields=['kind','source_record_id','source_id','content_hash','governance_hash','department_id','ward_id','status','revision','recorded_at','reviewed_at','revoked_at','parent_current','eligible','exclusion_reasons','locator_hash'];
+const snapshotFields=['schema_version','series_id','ward_id','department_id','created_by','as_of','captured_at','capture_mode','request','collection_digest','historical_collection_digest','current_membership_digest','future_scenario_collection_digest','ward_binding','bed_cohort','ward_capture_evidence','facts','fact_manifest','day_groups','period','manifest_digest','scope_binding_hash','algorithm'];
+const previewFields=['ward_binding','ward_capture_evidence','bed_cohort','fact_manifest','day_groups','period','historical_collection_digest','current_membership_digest','future_scenario_collection_digest','collection_digest','capture_mode','capacity_basis'];
+function midnight(clock,zone,day){if(!bedClock(clock)||!clock.endsWith('.000000Z'))return false;const p=Object.fromEntries(new Intl.DateTimeFormat('en-GB',{timeZone:zone,year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hourCycle:'h23'}).formatToParts(new Date(clock)).filter(x=>x.type!=='literal').map(x=>[x.type,x.value]));return `${p.year}-${p.month}-${p.day}`===day&&p.hour==='00'&&p.minute==='00'&&p.second==='00';}
+export function bedSeriesPeriodValid(value){try{return bedSeriesSchemaMatches('SeriesPeriodRequest',value)&&bedPositive(value.ward_id)&&bedDate(value.date_from)&&bedDate(value.date_to)&&dateAdd(value.date_from,111)<=value.date_to&&dateAdd(value.date_from,365)>=value.date_to&&bedDate(dateAdd(value.date_to,15))&&!!new Intl.DateTimeFormat('en',{timeZone:value.business_timezone});}catch{return false;}}
+function periodValid(period,input){
+  if(!keys(period,['business_dates','history_start_at','history_end_at','future_start_at','future_end_at','future_days'])||!bounded(period.business_dates,366)||period.business_dates.length<112||period.business_dates.at(-1)!==input.date_to||period.business_dates.some((d,i)=>d!==dateAdd(input.date_from,i))||!bounded(period.future_days,14)||period.future_days.length!==14)return false;
+  const zone=input.business_timezone;
+  return midnight(period.history_start_at,zone,input.date_from)&&midnight(period.history_end_at,zone,dateAdd(input.date_to,1))&&period.future_start_at===period.history_end_at&&period.future_days.every((d,i)=>keys(d,['business_date','start_at','end_at'])&&d.business_date===dateAdd(input.date_to,i+1)&&midnight(d.start_at,zone,d.business_date)&&midnight(d.end_at,zone,dateAdd(d.business_date,1)))&&period.future_start_at===period.future_days[0].start_at&&period.future_end_at===period.future_days.at(-1).end_at;
+}
+const memberRef=s=>({kind:s.source_kind,...pick(s,['source_record_id','source_id','content_hash','governance_hash'])});
+const manifestItem=r=>({kind:r.source.source_kind,...pick(r.source,manifestFields.filter(k=>!['kind','locator_hash'].includes(k))),locator_hash:r.locator_hash});
+function manifestValid(m,ward){return keys(m,manifestFields)&&Object.hasOwn(bedSourceKinds,m.kind)&&supportId(m.source_record_id)&&bedPositive(m.department_id)&&m.ward_id===ward&&supportHash(m.content_hash)&&supportHash(m.governance_hash)&&supportHash(m.locator_hash)&&m.source_id===`${bedSourceKinds[m.kind].prefix}:${m.source_record_id}:${m.content_hash.slice(0,12)}`&&Object.hasOwn(bedSourceStates,m.status)&&Number.isSafeInteger(m.revision)&&m.revision>=1&&m.revision<=3&&bedClock(m.recorded_at)&&(m.reviewed_at===null||bedClock(m.reviewed_at)&&m.reviewed_at>=m.recorded_at)&&(m.revoked_at===null||bedClock(m.revoked_at)&&m.revoked_at>=(m.reviewed_at||m.recorded_at))&&typeof m.parent_current==='boolean'&&typeof m.eligible==='boolean'&&m.eligible===(m.status==='published'&&m.parent_current)&&Array.isArray(m.exclusion_reasons)&&unique(m.exclusion_reasons)&&m.exclusion_reasons.every(x=>typeof x==='string');}
+async function collectionValid(v,input){
+  if(!bedSeriesPeriodValid(input)||!keys(v.ward_binding,['ward_id','department_id'])||v.ward_binding.ward_id!==input.ward_id||!bedPositive(v.ward_binding.department_id)||!periodValid(v.period,input)||!bounded(v.bed_cohort,200000)||!unique(v.bed_cohort.map(x=>x.bed_id))||v.bed_cohort.some((x,i)=>!keys(x,['bed_id','ward_id'])||!bedPositive(x.bed_id)||x.ward_id!==input.ward_id||i>0&&x.bed_id<=v.bed_cohort[i-1].bed_id)||!keys(v.ward_capture_evidence,['status','configured_bed_count'])||Object.values(v.ward_capture_evidence).some(x=>x!==null&&!Number.isSafeInteger(x))||!bounded(v.fact_manifest,4096)||!unique(v.fact_manifest.map(x=>x.source_record_id))||v.fact_manifest.some((x,i)=>!manifestValid(x,input.ward_id)||i>0&&x.source_record_id<=v.fact_manifest[i-1].source_record_id)||!bounded(v.day_groups,366)||v.day_groups.length!==v.period.business_dates.length)return false;
+  const members=new Map(v.fact_manifest.map(m=>[m.source_record_id,m]));
+  for(const[gIndex,g]of v.day_groups.entries()){
+    if(!keys(g,['business_date','day_start_at','day_end_at','census_candidates','census_group_digest','flow_candidates','flow_group_digest'])||g.business_date!==v.period.business_dates[gIndex]||!midnight(g.day_start_at,input.business_timezone,g.business_date)||!midnight(g.day_end_at,input.business_timezone,dateAdd(g.business_date,1)))return false;
+    for(const [prefix,kind]of [['census','census'],['flow','flow_day']]){
+      const list=g[prefix+'_candidates'];if(!bounded(list,4096)||!unique(list.map(x=>x.source_record_id)))return false;
+      for(const c of list){const m=members.get(c.source_record_id);if(!keys(c,['source_record_id','content_hash','governance_hash','eligible','compatible','exclusion_reasons'])||!m||m.kind!==kind||['content_hash','governance_hash','eligible'].some(k=>c[k]!==m[k])||typeof c.compatible!=='boolean'||!Array.isArray(c.exclusion_reasons)||!unique(c.exclusion_reasons)||!m.exclusion_reasons.every(x=>c.exclusion_reasons.includes(x))||c.exclusion_reasons.some(x=>typeof x!=='string'))return false;}
+      if(await supportDigest({business_date:g.business_date,kind,candidates:list})!==g[prefix+'_group_digest'])return false;
+    }
+  }
+  return ['historical_collection_digest','current_membership_digest','future_scenario_collection_digest','collection_digest'].every(k=>supportHash(v[k]))&&await supportDigest({ward_binding:v.ward_binding,bed_cohort:v.bed_cohort})===v.current_membership_digest&&await supportDigest(pick(v,['ward_binding','historical_collection_digest','current_membership_digest','future_scenario_collection_digest']))===v.collection_digest;
+}
+export async function verifyBedSeriesPreview(value,input,departmentId=null){try{return keys(value,previewFields)&&value.capture_mode==='current_capture'&&value.capacity_basis==='physical_historical_census_flows_separate_total_capacity_and_reviewed_future_scenarios_not_bookable_slots'&&(departmentId===null||value.ward_binding.department_id===departmentId)&&await collectionValid(value,input);}catch{return false;}}
+export function bedSeriesRequestValid(value,collection=null){
+  try{
+    const period=pick(value,['ward_id','business_timezone','date_from','date_to']);if(!bedSeriesPeriodValid(period)||!bedSeriesSchemaMatches('SeriesRequest',value)||value.days.length!==(Date.parse(value.date_to)-Date.parse(value.date_from))/86400000+1||value.days.some((d,i)=>d.business_date!==dateAdd(value.date_from,i)||!bedBasisValid(d.selection_basis_note)||['census','flow'].some(p=>(d[p+'_source_record_id']!==null)!==(d[p+'_selection_reason']==='confirmed')))||!same(value.target_coverage.map(x=>x.target),Object.keys(bedTargets))||value.target_coverage.some(x=>x.definition!==bedTargetDefinition(x.target)||!bedBasisValid(x.basis_note))||!unique(value.member_reviews.map(x=>x.source_record_id))||value.member_reviews.some(x=>!bedBasisValid(x.basis_note)))return false;
+    if(!collection)return true;
+    if(!same(period,{ward_id:collection.ward_binding.ward_id,business_timezone:period.business_timezone,date_from:collection.period.business_dates[0],date_to:collection.period.business_dates.at(-1)})||value.member_reviews.length!==collection.fact_manifest.length)return false;
+    const review=new Map(value.member_reviews.map(x=>[x.source_record_id,x])),selected=new Set(),compatible=new Set();
+    for(const m of collection.fact_manifest){const r=review.get(m.source_record_id);if(!r||r.kind!==m.kind||r.expected_content_hash!==m.content_hash||r.expected_governance_hash!==m.governance_hash||r.selection==='confirmed'&&!m.eligible)return false;}
+    for(const[i,d]of value.days.entries())for(const p of ['census','flow']){const g=collection.day_groups[i];if(!g||d[p+'_group_digest']!==g[p+'_group_digest'])return false;for(const c of g[p+'_candidates'])if(c.compatible)compatible.add(c.source_record_id);const id=d[p+'_source_record_id'];if(id===null)continue;const c=g[p+'_candidates'].find(x=>x.source_record_id===id);if(!c?.eligible||!c.compatible||review.get(id)?.selection!=='confirmed'||selected.has(id))return false;selected.add(id);}
+    return value.member_reviews.every(r=>r.kind==='capacity_interval'||(r.selection==='confirmed')===selected.has(r.source_record_id))&&collection.fact_manifest.every(m=>m.kind==='capacity_interval'||compatible.has(m.source_record_id)||review.get(m.source_record_id).selection==='excluded');
+  }catch{return false;}
+}
+function locatorValid(loc,source){
+  const kind=source.source_kind;if(loc.kind!==kind)return false;
+  if(kind==='capacity_interval')return keys(loc,['kind','start_at','end_at','basis_kind','observed_at'])&&bedClock(loc.start_at)&&bedClock(loc.end_at)&&loc.start_at<loc.end_at&&(loc.basis_kind==='reviewed_future_scenario'?loc.observed_at===null:loc.basis_kind==='observed_operational_capacity'&&bedClock(loc.observed_at)&&loc.observed_at>=loc.end_at&&loc.observed_at<=source.recorded_at);
+  const fields=kind==='census'?['kind','business_date','business_timezone','census_at','observed_at']:['kind','business_date','business_timezone','day_start_at','day_end_at','observed_at'];
+  return keys(loc,fields)&&bedDate(loc.business_date)&&bedClock(loc.observed_at)&&loc.observed_at<=source.recorded_at&&(kind==='census'?midnight(loc.census_at,loc.business_timezone,dateAdd(loc.business_date,1))&&loc.observed_at>=loc.census_at:midnight(loc.day_start_at,loc.business_timezone,loc.business_date)&&midnight(loc.day_end_at,loc.business_timezone,dateAdd(loc.business_date,1))&&loc.observed_at>=loc.day_end_at);
+}
+export async function verifyBedCapturedSource(record){
+  try{if(!keys(record,['source','locator','locator_hash'])||!bedMetadataValid(record.source)||record.source.audit_only!==false||!locatorValid(record.locator,record.source)||await supportDigest(record.locator)!==record.locator_hash)return false;const s=record.source;if(!s.eligible)return ['payload','parent_binding','review_basis_note','revoke_reason'].every(k=>Object.hasOwn(s,k)&&s[k]===null);return await verifyBedSource(s)&&same(record.locator,{kind:s.source_kind,...pick(s.payload,Object.keys(record.locator).filter(k=>k!=='kind'))});}catch{return false;}
+}
+const overlaps=(a,b,c,d)=>a<d&&b>c;
+async function originalGroups(s){
+  const groups=[];
+  for(const day of s.day_groups){const g=pick(day,['business_date','day_start_at','day_end_at']);for(const[prefix,kind]of [['census','census'],['flow','flow_day']]){const list=[];for(const r of s.facts){const l=r.locator,o=r.source;if(l.kind!==kind||!(l.business_date===day.business_date||(kind==='census'?day.day_start_at<l.census_at&&l.census_at<=day.day_end_at:overlaps(l.day_start_at,l.day_end_at,day.day_start_at,day.day_end_at))))continue;const reasons=[];if(l.business_timezone!==s.request.business_timezone)reasons.push('different_original_business_timezone');if(l.business_date!==day.business_date)reasons.push('different_original_business_date');if(kind==='census'?l.census_at!==day.day_end_at:l.day_start_at!==day.day_start_at||l.day_end_at!==day.day_end_at)reasons.push('different_original_physical_boundary');list.push({...pick(o,['source_record_id','content_hash','governance_hash','eligible']),compatible:reasons.length===0,exclusion_reasons:[...o.exclusion_reasons,...reasons]});}g[prefix+'_candidates']=list;g[prefix+'_group_digest']=await supportDigest({business_date:g.business_date,kind,candidates:list});}groups.push(g);}return groups;
+}
+function relevant(r,s){const l=r.locator,p=s.period;if(l.kind==='capacity_interval'){const[left,right]=l.basis_kind==='reviewed_future_scenario'?[p.future_start_at,p.future_end_at]:[p.history_start_at,p.history_end_at];return overlaps(l.start_at,l.end_at,left,right)||l.start_at<=right&&right<l.end_at;}if(s.request.date_from<=l.business_date&&l.business_date<=s.request.date_to)return true;return l.kind==='census'?p.history_start_at<l.census_at&&l.census_at<=p.history_end_at:overlaps(l.day_start_at,l.day_end_at,p.history_start_at,p.history_end_at);}
+export async function verifyBedSeriesSnapshot(s){
+  try{
+    if(!keys(s,snapshotFields)||s.schema_version!=='bed_series_private_v1'||s.capture_mode!=='current_capture'||!supportId(s.series_id)||!bedPositive(s.created_by)||!bedClock(s.as_of)||!bedClock(s.captured_at)||s.as_of>s.captured_at||bytes(s)>8388608||!await collectionValid(s,pick(s.request,['ward_id','business_timezone','date_from','date_to']))||s.ward_id!==s.ward_binding.ward_id||s.department_id!==s.ward_binding.department_id||!bedSeriesRequestValid(s.request,s)||!bounded(s.facts,4096)||s.facts.length!==s.fact_manifest.length)return false;
+    for(const[i,r]of s.facts.entries())if(!await verifyBedCapturedSource(r)||!same(manifestItem(r),s.fact_manifest[i])||!relevant(r,s)||r.source.ward_id!==s.ward_id||r.source.eligible&&r.source.department_id!==s.department_id||['recorded_at','reviewed_at','revoked_at'].some(k=>r.source[k]!==null&&r.source[k]>s.as_of))return false;
+    const parts=Object.fromEntries(new Intl.DateTimeFormat('en-GB',{timeZone:s.request.business_timezone,year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date(s.as_of)).filter(x=>x.type!=='literal').map(x=>[x.type,x.value]));
+    if(s.request.date_to!==dateAdd(`${parts.year}-${parts.month}-${parts.day}`,-1)||!same(await originalGroups(s),s.day_groups))return false;
+    const historical=[],future=[];
+    for(const r of s.facts)(r.locator.kind==='capacity_interval'&&r.locator.basis_kind==='reviewed_future_scenario'?future:historical).push(manifestItem(r));
+    const a=s.algorithm;
+    return await supportDigest(s.fact_manifest)===s.manifest_digest&&await supportDigest(s.ward_binding)===s.scope_binding_hash&&await supportDigest({start_at:s.period.history_start_at,end_at:s.period.history_end_at,manifest:historical})===s.historical_collection_digest&&await supportDigest({start_at:s.period.future_start_at,end_at:s.period.future_end_at,manifest:future})===s.future_scenario_collection_digest&&keys(a,['rule_id','recipe','recipe_digest','input_policy','input_policy_digest'])&&a.rule_id==='bed_physical_daily_v1'&&await supportDigest(a.recipe)===a.recipe_digest&&await supportDigest(a.input_policy)===a.input_policy_digest&&same(a.recipe.input_policy,a.input_policy);
+  }catch{return false;}
+}
+async function publicOriginal(s){
+  const p=s.payload,value={ref:memberRef(s),recorded_at:s.recorded_at,published_at:s.reviewed_at,observed_at:p.observed_at,original_scope_hash:await supportDigest(s.parent_binding),coverage:p.coverage};
+  if(s.source_kind==='capacity_interval')return{...value,...pick(p,['start_at','end_at','basis_kind','operational_total_beds','staff_readiness','equipment_readiness','isolation_applicability','capacity_definition']),capacity_basis_hash:await supportDigest(p.capacity_basis_note)};
+  return{...value,business_date:p.business_date,method:p.method,coverage_basis_hash:await supportDigest(p.coverage_basis_note),external_record_key_hash:p.external_record_key===null?null:await supportDigest(p.external_record_key),definition:p.definition,...pick(p,s.source_kind==='census'?['census_at','boundary_state_confirmed','occupied_beds']:['day_start_at','day_end_at','admission_events','discharge_events','transfer_in_events','transfer_out_events'])};
+}
+export async function projectBedSeriesSource(s,governanceHash){
+  const reviews=new Map(s.request.member_reviews.map(r=>[r.source_record_id,r])),originals=new Map(s.facts.map(r=>[r.source.source_record_id,r.source])),manifest=[];
+  for(const {source}of s.facts){const r=reviews.get(source.source_record_id);manifest.push({...memberRef(source),status:source.status,eligible:source.eligible,selection:r.selection,selection_basis_hash:await supportDigest(r.basis_note)});}
+  const coverage=[];for(const r of s.request.target_coverage)coverage.push({...pick(r,['target','definition','same_scope_confirmed','same_definition_confirmed','same_method_confirmed']),basis_hash:await supportDigest(r.basis_note)});
+  const days=[];for(const[i,d]of s.request.days.entries()){const g=s.day_groups[i];days.push({date:d.business_date,day_start_at:g.day_start_at,day_end_at:g.day_end_at,census_at:g.day_end_at,census_source_id:d.census_source_record_id===null?null:originals.get(d.census_source_record_id).source_id,census_selection_reason:d.census_selection_reason,flow_source_id:d.flow_source_record_id===null?null:originals.get(d.flow_source_record_id).source_id,flow_selection_reason:d.flow_selection_reason,selection_basis_hash:await supportDigest(d.selection_basis_note)});}
+  const selected={census:[],flow_day:[],capacity_interval:[]};for(const {source}of s.facts)if(reviews.get(source.source_record_id).selection==='confirmed')selected[source.source_kind].push(await publicOriginal(source));
+  const digest=await supportDigest(s);
+  return{schema_version:'bed_source_v1',series_id:s.series_id,source_id:`bed_series:${s.series_id}:${digest.slice(0,12)}`,content_hash:digest,governance_hash:governanceHash,rule_id:s.algorithm.rule_id,recipe_digest:s.algorithm.recipe_digest,input_policy_digest:s.algorithm.input_policy_digest,scope:'single_ward',scope_token:s.scope_binding_hash,timezone:s.request.business_timezone,target_definitions_digest:await supportDigest(coverage.map(r=>pick(r,['target','definition']))),date_from:s.request.date_from,date_to:s.request.date_to,as_of:s.as_of,captured_at:s.captured_at,...pick(s,['historical_collection_digest','current_membership_digest','future_scenario_collection_digest']),member_manifest_hash:await supportDigest(manifest),target_coverage:coverage,days,member_manifest:manifest,census_observations:selected.census,flow_observations:selected.flow_day,capacity_intervals:selected.capacity_interval};
+}
+export function bedSeriesMetadataValid(r,departmentId=null,wardId=null){
+  try{
+    if(!(keys(r,summary)||keys(r,full))||!supportId(r.series_id)||r.schema_version!=='bed_series_private_v1'||!bedPositive(r.department_id)||!bedPositive(r.ward_id)||departmentId!==null&&r.department_id!==departmentId||wardId!==null&&r.ward_id!==wardId||!bedPositive(r.created_by)||!bedClock(r.as_of)||!bedClock(r.created_at)||r.as_of>r.created_at||!supportHash(r.content_hash)||!supportHash(r.collection_digest)||!supportHash(r.governance_hash)||r.source_id!==`bed_series:${r.series_id}:${r.content_hash.slice(0,12)}`||!Object.hasOwn(bedSourceStates,r.status)||[r.source_current,r.eligible,r.can_record,r.can_review,r.can_revoke,r.audit_only].some(x=>typeof x!=='boolean')||!Array.isArray(r.exclusion_reasons)||!unique(r.exclusion_reasons)||r.exclusion_reasons.some(x=>!['original_collection_changed','series_draft','series_rejected','series_revoked','series_period_or_algorithm_changed'].includes(x))||r.eligible!==(r.exclusion_reasons.length===0)||r.source_current===r.exclusion_reasons.includes('original_collection_changed')||r.can_record!==r.source_current||r.status!=='published'&&!r.exclusion_reasons.includes(`series_${r.status}`)||r.status==='published'&&r.exclusion_reasons.some(x=>x.startsWith('series_')&&x!=='series_period_or_algorithm_changed')||r.can_review&&(!r.source_current||r.status!=='draft')||r.can_revoke&&!['draft','published'].includes(r.status)||r.forecast_purpose!=='frozen_observed_physical_counts_and_explicit_capacity_scenario_not_unmet_demand_or_admittable_slots')return false;
+    const reviewed=r.reviewed_at!==null;if(reviewed?!bedPositive(r.reviewed_by)||!bedClock(r.reviewed_at)||r.reviewed_at<r.created_at:r.reviewed_by!==null)return false;
+    return(r.status==='draft'?r.revision===1&&!reviewed:['published','rejected'].includes(r.status)?r.revision===2&&reviewed:r.revision===(reviewed?3:2))&&(r.status==='revoked'?bedPositive(r.revoked_by)&&bedClock(r.revoked_at)&&r.revoked_at>=(r.reviewed_at||r.created_at):r.revoked_at===null&&r.revoked_by===null)&&((r.status==='published'||r.status==='revoked'&&reviewed)?supportHash(r.projection_hash):r.projection_hash===null);
+  }catch{return false;}
+}
+export async function verifyBedSeries(r,departmentId=null,wardId=null,{auditOnly=false}={}){
+  try{
+    if(!keys(r,full)||!bedSeriesMetadataValid(r,departmentId,wardId)||auditOnly&&!r.audit_only)return false;
+    const visible=r.audit_only||r.source_current&&['draft','published'].includes(r.status);
+    if(!visible)return !auditOnly&&['snapshot','public_source','review_basis_note','revoke_reason'].every(k=>r[k]===null);
+    if(!await verifyBedSeriesSnapshot(r.snapshot)||await supportDigest(r.snapshot)!==r.content_hash||['schema_version','series_id','department_id','ward_id','created_by','as_of','collection_digest'].some(k=>r[k]!==r.snapshot[k])||r.created_at!==r.snapshot.captured_at||r.reviewed_at!==null&&!bedReviewBasisValid(r.review_basis_note)||r.reviewed_at===null&&r.review_basis_note!==''||(r.status==='revoked'?!bedSeriesSchemaMatches('SeriesRevoke',{expected_revision:r.revision-1,reason:r.revoke_reason})||!r.revoke_reason.trim():r.revoke_reason!==''))return false;
+    if(await supportDigest(pick(r,governance))!==r.governance_hash)return false;
+    if(r.projection_hash===null)return r.public_source===null;
+    const pubGov={...pick(r,governance),status:'published',revision:2,revoked_by:null,revoked_at:null,revoke_reason:''};
+    return bedSeriesSchemaMatches('BedSource',r.public_source)&&await supportDigest(r.public_source)===r.projection_hash&&same(await projectBedSeriesSource(r.snapshot,await supportDigest(pubGov)),r.public_source);
+  }catch{return false;}
+}
+export async function verifyBedSeriesTransition(row,original,action,body){
+  try{if(!['publish','reject','revoke'].includes(action)||immutable.filter(k=>k!=='projection_hash').some(k=>row[k]!==original[k])||row.status!==(action==='revoke'?'revoked':action==='publish'?'published':'rejected')||row.revision!==original.revision+1||body.expected_revision!==original.revision)return false;
+    const g=action==='revoke'?{...pick(original,governance),status:'revoked',revision:row.revision,revoked_by:row.revoked_by,revoked_at:row.revoked_at,revoke_reason:body.reason}:{status:row.status,revision:row.revision,reviewed_by:row.reviewed_by,reviewed_at:row.reviewed_at,review_basis_note:body.review_basis_note,revoked_by:null,revoked_at:null,revoke_reason:''};
+    return(action==='revoke'?row.projection_hash===original.projection_hash:body.expected_content_hash===original.content_hash&&body.decision===action)&&await supportDigest(g)===row.governance_hash;
+  }catch{return false;}
+}

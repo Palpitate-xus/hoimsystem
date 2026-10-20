@@ -603,6 +603,12 @@ def _recheck_task(db: Session, run: AIRun) -> tuple[FeatureSpec, AIProvider, dic
     user = db.get(User, run.requested_by)
     if user is None:
         raise HTTPException(403, "任务用户已失效")
+    if run.feature_key == "surgery_scheduling":
+        from app.ai import surgery_facts as facts
+
+        user = facts.current_actor(db, user)
+        db.query(AIFeatureConfig).filter_by(feature_key=run.feature_key).populate_existing().one_or_none()
+        db.query(AIProvider).filter_by(provider_id=run.provider_id).populate_existing().one_or_none()
     authorize_run(db, user, run)
     spec, config = authorized_feature(db, user, run.feature_key)
     provider = check_configuration(db, user, spec, config, bool(run.preview))
@@ -639,7 +645,7 @@ def _recheck_task(db: Session, run: AIRun) -> tuple[FeatureSpec, AIProvider, dic
         current_bundle = ContextBundle(data=snapshot["payload"]["context"], department_ids=departments)
     if sorted(current_bundle.department_ids) != metadata.get("department_ids"):
         raise AIExecutionError("TASK_DEPARTMENT_SCOPE_CHANGED", "任务适用的科室范围已变化，请按当前就诊或医生资料重新准备依据")
-    current_tools, _ = business_tools(db, spec, user, run.patient_id, snapshot["payload"]["input"], current_bundle)
+    current_tools, _ = ({}, []) if snapshot["payload"]["context"].get("surgery_binding") else business_tools(db, spec, user, run.patient_id, snapshot["payload"]["input"], current_bundle)
     if digest(current_tools) != metadata.get("tool_fingerprint"):
         raise AIExecutionError("TASK_TOOLS_CHANGED", "相关审方规则、目录或业务状态已改变，请重新生成")
     return spec, provider, snapshot
@@ -659,6 +665,7 @@ async def execute_claimed(run_id: str, lease: str, *, transport=None) -> None:
     sofa_run = False
     roster_run = False
     bed_run = False
+    surgery_run = False
     try:
         with database.SessionLocal() as db:
             run = db.get(AIRun, run_id)
@@ -668,6 +675,11 @@ async def execute_claimed(run_id: str, lease: str, *, transport=None) -> None:
             sofa_run = spec.number == 42 and bool(snapshot["payload"]["context"].get("sofa_binding"))
             roster_run = spec.number == 63 and bool(snapshot["payload"]["context"].get("roster_binding"))
             bed_run = spec.number == 64 and bool(snapshot["payload"]["context"].get("bed_binding"))
+            surgery_run = spec.number == 65 and bool(snapshot["payload"]["context"].get("surgery_binding"))
+            if surgery_run:
+                from app.ai.surgery_context import expand_context
+
+                snapshot["payload"]["context"] = expand_context(db, snapshot["payload"]["context"], user=db.get(User, run.requested_by), current=True)
             if bed_run:
                 from app.ai.bed_context import expand_context
 
@@ -717,7 +729,11 @@ async def execute_claimed(run_id: str, lease: str, *, transport=None) -> None:
             result.warnings.insert(0, triage["emergency_message"])
         serialized_result = encode_json(result.model_dump())
         try:
-            if bed_run:
+            if surgery_run:
+                from app.ai.surgery_storage import bounded_result
+
+                bounded_result(result.model_dump(mode="json"))
+            elif bed_run:
                 from app.ai.bed_storage import bounded_result
 
                 bounded_result(result.model_dump(mode="json"))
@@ -751,6 +767,14 @@ async def execute_claimed(run_id: str, lease: str, *, transport=None) -> None:
             for stream in ecg_files:
                 stream.close()
     with database.SessionLocal() as db:
+        # Read only the feature discriminator before any AIRun/User row lock.
+        # Even an early rejected surgery task uses the same first-lock order.
+        surgery_feature = db.query(AIRun.feature_key).filter_by(run_id=run_id).scalar() == "surgery_scheduling"
+        if surgery_feature:
+            from app.ai.surgery_facts import lock_write_gate
+
+            with db.no_autoflush:
+                lock_write_gate(db)
         run = db.query(AIRun).filter(AIRun.run_id == run_id, AIRun.status.in_(["running", "cancelled"]), AIRun.lease_token == lease).with_for_update().first()
         if run is None:
             return
@@ -777,7 +801,11 @@ async def execute_claimed(run_id: str, lease: str, *, transport=None) -> None:
                 run.status = "failed"
                 run.error_code, run.error_message = error
             else:
-                if bed_run:
+                if surgery_run:
+                    from app.ai.surgery_storage import stage_result
+
+                    run.result_json = stage_result(db, run, lease, result.model_dump(mode="json"))
+                elif bed_run:
                     from app.ai.bed_storage import stage_result
 
                     run.result_json = stage_result(db, run, lease, result.model_dump(mode="json"))
@@ -792,18 +820,34 @@ async def execute_claimed(run_id: str, lease: str, *, transport=None) -> None:
                 else:
                     run.result_json = serialized_result
                 run.status = "succeeded"
+                if surgery_run:
+                    # Acceptance audit/blob SQL can itself expose a trigger or
+                    # same-transaction change. Recheck the current entire
+                    # source/config/care after their actual writes, still
+                    # holding Gate and the original lease/parent locks.
+                    db.flush()
+                    _recheck_task(db, run)
             db.commit()
         except Exception:
             db.rollback()
-            if not sofa_run and not roster_run and not bed_run:
+            if not sofa_run and not roster_run and not bed_run and not surgery_run:
                 raise
             # A rejected blob or audit transaction must never leave an accepted pointer.
+            if surgery_feature:
+                with db.no_autoflush:
+                    lock_write_gate(db)
             failed = db.query(AIRun).filter_by(run_id=run_id, status="running", lease_token=lease).with_for_update().one_or_none()
             if failed is not None:
                 failed.status = "failed"
                 failed.error_code = "RESULT_STORAGE_ERROR"
                 failed.error_message = (
-                    "完整床位结果与审计未能原子保存，结果未接收" if bed_run else "完整排班结果与审计未能原子保存，结果未接收" if roster_run else "完整SOFA结果与审计未能原子保存，结果未接收"
+                    "完整手术结果与审计未能原子保存，结果未接收"
+                    if surgery_run
+                    else "完整床位结果与审计未能原子保存，结果未接收"
+                    if bed_run
+                    else "完整排班结果与审计未能原子保存，结果未接收"
+                    if roster_run
+                    else "完整SOFA结果与审计未能原子保存，结果未接收"
                 )
                 failed.input_tokens, failed.output_tokens = inputs, outputs
                 failed.latency_ms = int((time.monotonic() - started) * 1000)

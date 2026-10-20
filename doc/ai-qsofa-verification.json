@@ -1,0 +1,1039 @@
+{
+  "recorded_at_utc": "2026-10-20T16:36:02.295136+00:00",
+  "baseline_commit": "9a8a6ea2210558ef0d79db4c957f60487f066a3d",
+  "platform_commit": "1fd688bf41bf2281353467864bc347e7dd71b8f3",
+  "recording_head_is_before_evidence_documentation_commit": true,
+  "goal_status": "active",
+  "version_management": {
+    "branch": "feature/ai-hospital-platform",
+    "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+    "commits_this_batch_before_evidence_commit": 23,
+    "commits_since_original_baseline_before_evidence_commit": 285,
+    "frequent_small_function_commits": true
+  },
+  "scope": "Independent original bedside qSOFA arithmetic, immutable general GCS originals and explicit same-exam anchors, doctor-signed current retrospective clinical review, dual-reference queue and complete result recomputation, Super-admin governance, actual isolated container and MySQL verification.",
+  "real_patient_data_used": false,
+  "existing_hospital_database_accessed": false,
+  "existing_hospital_backend_contacted": false,
+  "production_deployment_performed": false,
+  "clinical_validation_performed": false,
+  "stored_business_ai_configuration_changed": false,
+  "inventory": {
+    "business_router_routes": 703,
+    "all_main_app_api_routes": 704,
+    "router_modules": 96,
+    "orm_tables": 170,
+    "vue_view_files": 159,
+    "capabilities": 80,
+    "independent_default_prompts": 80,
+    "catalog_version": "2026.10.20.7",
+    "source_reference_keys": 29,
+    "alembic_heads": [
+      "20261020_qsofa_sources"
+    ],
+    "risk_feature_reference_keys": {
+      "41": [
+        "news2_assessment_id",
+        "observation_window_id"
+      ],
+      "42": [
+        "observation_window_id",
+        "qsofa_assessment_id"
+      ],
+      "43": [
+        "aki_assessment_id",
+        "observation_window_id"
+      ]
+    },
+    "isolated_final_inventory": {
+      "path": "/tmp/hoim-qsofa-platform-final-inventory.json",
+      "sha256": "04bfb745fb854068c98c9a84f1f9ce6b5630fd368bc8cc8bc7f83cba3ec34bb4"
+    },
+    "inventory_is_read_only_and_does_not_import_dotenv_or_connect_database": true,
+    "implementation_file_count": 57,
+    "generated_artifact_count": 4
+  },
+  "fixed_rule_contract": {
+    "schema_version": "8",
+    "model_prefix": "qsofa:",
+    "rule_id": "qsofa_sepsis3_2016",
+    "recipe_digest": "66291f7b644a51f71719e9bd007fdf341a16f965b350950a94dcc522900a23fe",
+    "adult_minimum_age": 18,
+    "population": "Explicit actual non-ICU with suspected or documented infection; unknown scope produces no score.",
+    "criteria": {
+      "mentation": {
+        "basis": "complete_measured_eye_verbal_motor_sum",
+        "comparison": "<",
+        "met_score": 1,
+        "not_met_score": 0,
+        "threshold": 15
+      },
+      "respiratory_rate": {
+        "comparison": ">=",
+        "met_score": 1,
+        "not_met_score": 0,
+        "threshold": "22",
+        "unit": "/min"
+      },
+      "systolic_bp": {
+        "comparison": "<=",
+        "met_score": 1,
+        "not_met_score": 0,
+        "threshold": "100",
+        "unit": "mm[Hg]"
+      }
+    },
+    "decimal_values": "Original strings, exact arithmetic, no rounding or unit conversion; zero is retained.",
+    "gcs": "Actual complete eye/verbal/motor originals with explicit same-exam point ID/full hash; NT is not 1 and does not produce a total. AVPU and old ICU clocks are not converted.",
+    "partial": "Total only with all three scorable; observed subtotal only with at least one scorable; known subtotal at least two retains positive threshold despite other missing information. Unknown/outside scope has no total or subtotal.",
+    "clinical_review": "Current doctor review recorded at server evaluation/creation time can be later than original as_of; clinical_scope_applies_to is original point observed_at, historical_prediction false. It is not information known at historical cutoff.",
+    "cutoff": "Original GCS and point observed within original window and recorded by as_of. Same-anchor GCS membership/governance is frozen including revoked records; later-recorded sources do not leak counts or existence.",
+    "diagnosis_provided": false,
+    "probability_provided": false,
+    "qsofa_is_not_sole_sepsis_screen": true,
+    "clinical_validation": "not_provided",
+    "human_attestation_is_not_independent_clinical_truth_validation": true
+  },
+  "super_admin_governance": {
+    "all_eighty_features_share_model_prompt_role_activation_knowledge_validation_and_audit_management": true,
+    "independent_third_risk_rule_with_own_publication_slot_and_versioned_irreversible_revocation": true,
+    "qsofa_and_gcs_independent_all_hospital_source_list_detail_and_cas_revocation": true,
+    "pure_super_governance_does_not_grant_clinical_recording_or_signature_qualification": true,
+    "actual_doctor_and_original_admission_care_required_for_super_clinical_signature": true,
+    "nurse_current_care_can_reuse_valid_doctor_signed_review_but_run_history_remains_owned": true,
+    "saved_revision_metadata_only_probe_does_not_send_patient_data_score_enable_validate_or_autosave_model": true,
+    "current_source_changes_invalidate_queued_inflight_and_ordinary_history_while_super_keeps_frozen_audit": true,
+    "source_creation_and_revocation_audit_are_atomic": true
+  },
+  "privacy_and_storage": {
+    "outbound": "Only typed qsofa_source and complete Prompt; store=false. No original patient/admission IDs, full window, free notes, human evidence notes or free question.",
+    "private_projection": "qsofa_review_v1 retains original values/clocks/IDs/full original and governance hashes, full same-anchor group and evidence-note hashes; full original records stored separately and revalidated.",
+    "evidence": "Only five fixed source-bound context_path indexes, matching source ID and original patient/admission; no arbitrary path execution.",
+    "complete_source_snapshot_max_utf8_bytes": 262144,
+    "inpatient_gcs_source_max_utf8_bytes": 32768,
+    "complete_task_text_columns_max_utf8_bytes": 65535,
+    "oversize_inputs_rejected_before_queue_without_truncation": true,
+    "fixed_response_and_all_original_bindings_recomputed_before_storage": true
+  },
+  "migration": {
+    "revision": "20261020_qsofa_sources",
+    "parent": "20261020_ai_aki_sources",
+    "new_tables_only": [
+      "hoimsystem_inpatient_gcs_observation",
+      "hoimsystem_ai_qsofa_assessment"
+    ],
+    "actual_six_new_datetime_columns": [
+      [
+        "hoimsystem_ai_qsofa_assessment",
+        "created_at",
+        6
+      ],
+      [
+        "hoimsystem_ai_qsofa_assessment",
+        "evaluation_at",
+        6
+      ],
+      [
+        "hoimsystem_ai_qsofa_assessment",
+        "revoked_at",
+        6
+      ],
+      [
+        "hoimsystem_inpatient_gcs_observation",
+        "observed_at",
+        6
+      ],
+      [
+        "hoimsystem_inpatient_gcs_observation",
+        "recorded_at",
+        6
+      ],
+      [
+        "hoimsystem_inpatient_gcs_observation",
+        "revoked_at",
+        6
+      ]
+    ],
+    "actual_six_utc6_roundtrip": {
+      "gcs_observed_at": "2026-10-20T09:31:45.654321Z",
+      "gcs_recorded_at": "2026-10-20T12:00:45.123456Z",
+      "gcs_revoked_at": "2026-10-20T12:30:46.654321Z",
+      "assessment_evaluation_at": "2026-10-20T12:30:45.123456Z",
+      "assessment_created_at": "2026-10-20T12:30:45.123456Z",
+      "assessment_revoked_at": "2026-10-20T12:30:46.654321Z"
+    },
+    "legacy_tables_original_rows_and_naive_clocks_unchanged": true,
+    "actual_up_down_up": true
+  },
+  "backend_verification": {
+    "final_full_pytest": {
+      "passed": 4005,
+      "skipped": 28,
+      "warnings": 2,
+      "seconds": 360.32,
+      "additional_default_passes_since_aki_batch": 463,
+      "log": {
+        "path": "/tmp/hoim-qsofa-full-frozen-pytest.log",
+        "sha256": "ad682f9c690d08ff6833e140a9bc61249f49c67b2d2395e1a3a61c6c29c396b4"
+      },
+      "scope_note": "Full backend regression uses existing test DB overrides; do not infer it forbids every dotenv read. Separate inventory/container/MySQL guarded processes establish their own isolation."
+    },
+    "final_specialist_and_independent_review": {
+      "passed": 291,
+      "seconds": 9.47,
+      "log": {
+        "path": "/tmp/hoim-qsofa-specialist-final-formatted-tests.log",
+        "sha256": "0e6623aaf7a706f84cfcf3325cd8e40646e27fd27597f17f61036562cb392275"
+      }
+    },
+    "earlier_root_targeted": {
+      "passed": 92,
+      "seconds": 22.52,
+      "log": {
+        "path": "/tmp/hoim-qsofa-root-targeted-second-tests.log",
+        "sha256": "aba31c11608dd4d5bfd9eb9ce36a19afaec4f46a6e776069093b6293f675e0b1"
+      },
+      "note": "Before formatting-only final core revision; full final suite above covers final bytes."
+    },
+    "python_lint_and_whole_file_format": {
+      "files": 38,
+      "passed": true,
+      "log": {
+        "path": "/tmp/hoim-qsofa-ruff-final.log",
+        "sha256": "1087c3f9eba0d49b86ba6bd4572bae1ec1c59407a55d92d6c5cbbbae5d313733"
+      }
+    },
+    "prompt_export_exact_check": {
+      "capabilities": 80,
+      "passed": true
+    },
+    "rbac_exact_actual_mounts": {
+      "business_routes": 703,
+      "passed": true
+    }
+  },
+  "frontend_verification": {
+    "npm_verify": {
+      "passed": true,
+      "audit_vulnerabilities": 0,
+      "build_seconds": 23.18,
+      "existing_scss_warnings": 5,
+      "bundle": {
+        "largestJavaScript": {
+          "file": "element-plus.1235714c.js",
+          "bytes": 647479
+        },
+        "totalJavaScript": 5905183,
+        "totalAssets": 6423429,
+        "limits": {
+          "largestJavaScript": 700000,
+          "totalJavaScript": 6000000,
+          "totalAssets": 7000000
+        }
+      },
+      "browser_targets_dependencies_and_budget_unchanged": true,
+      "log": {
+        "path": "/tmp/hoim-qsofa-frontend-verify.log",
+        "sha256": "402f5e55c25ff3314934a302123522fb6914bd8c87234d1f66599f7a5309f5c3"
+      }
+    },
+    "full_browser_regression": {
+      "passed": 314,
+      "log": {
+        "path": "/tmp/hoim-qsofa-browser-frozen-final-tests.log",
+        "sha256": "f49f7ec9b5bfcff7b7e1656f43e8e5cd934a28d7ae8a409b3e1200b1de6158ae"
+      },
+      "production_ui_synthetic_api_mocks": 148,
+      "isolated_ui_synthetic_api_mocks": 145,
+      "real_synthetic_loopback_http": 21,
+      "note": "Final full run after test-only correction of the original laboratory notification locator and strict typed qSOFA runtime fixture. Earlier full-run locator failure is retained separately; no product UI/build change was needed.",
+      "duration_as_reported": "7.3m",
+      "actual_category_counts": {
+        "path": "/tmp/hoim-qsofa-browser-frozen-final-category-counts.json",
+        "sha256": "352e34c0874a48ac5ddf0b46e20797e9503ff3a6da91d391453e65d2dce70850"
+      },
+      "strict_qsofa_entry_cases": 9,
+      "strict_qsofa_source_cases": 30,
+      "gcs_source_cases": 12
+    },
+    "strict_typed_qsofa_fixture": {
+      "fixture_validates_QsofaAnalysis_and_full_binding_before_returning_analysis": true
+    },
+    "actual_orm_full_and_compact_strict_typed_guard": {
+      "software_only": true,
+      "strict_QsofaAnalysis_and_full_binding_validated": true,
+      "source": "actual synthetic memory ORM source detail and Root compact projection",
+      "guards": {
+        "full": true,
+        "compact": true
+      },
+      "actual_runtime": {
+        "engine": "stdlib-qsofa-rules",
+        "rule_id": "qsofa_sepsis3_2016",
+        "recipe_digest": "66291f7b644a51f71719e9bd007fdf341a16f965b350950a94dcc522900a23fe",
+        "implementation": {
+          "qsofa_contract.py": "cc29d0256bf4c61213af15c7004ac1d93de437523952de01a828948ff3f07cd4",
+          "qsofa_model.py": "14356e975e20c15bf9329beb054f05e27034a0b02e2ef6342d635de8f3d825d9",
+          "qsofa_config.py": "84838569e18e73da1a509fb280c731e0bb565e2adabd1b54ee16627f73b537b1",
+          "qsofa_server.py": "a5d3a2c4c4406b499e16386058bd1013175a5544d09629265187ec038b646ed5"
+        },
+        "python_version": "3.13.12",
+        "engine_versions": {
+          "fastapi": "0.136.1",
+          "pydantic": "2.12.4"
+        },
+        "runtime_digest": "9deaf177860bc880405fd8753a001f8b196c2ddffbdc90bd977eff18e5b27e9a",
+        "model_version": "qsofa:9deaf177860bc880405fd8753a001f8b196c2ddffbdc90bd977eff18e5b27e9a",
+        "prompt_handling": "provenance_only",
+        "clinical_validation": "not_provided",
+        "population_applicability": "not_independently_verified",
+        "independent_implementation": true
+      },
+      "rendered_total": 2,
+      "distinct_original_exam_clocks": true,
+      "browser_errors": [],
+      "unhandled_requests": [],
+      "artifact": {
+        "path": "/tmp/hoim-qsofa-ui-real-typed-final-verification.json",
+        "sha256": "faa5a724e3f970db6796bc1e4bffd589d87df7e180e1b8f1d82792feae079cac"
+      }
+    },
+    "additional_default_browser_cases_since_aki_batch": 51
+  },
+  "actual_container_verification": {
+    "artifact": {
+      "path": "/tmp/hoim-qsofa-container-final-verification.json",
+      "sha256": "46ecf824aa6a2bc45eb146c4cfbe4600462f53dfd7bd7a9be43de20d758fe1c4"
+    },
+    "script": {
+      "path": "/tmp/hoim-qsofa-container-final-verifier.py",
+      "sha256": "42f8f27c172c0badb04aa40dd6bb27c2a17f2421908ea4970ba517aa0068ce12"
+    },
+    "image_id": "sha256:a137966afcba1032d5b38b6e1ea247a015deb3f1c6c8db711d9e8a0fd26983ad",
+    "seconds": 15.812,
+    "isolation": {
+      "bind_mounts": [],
+      "cap_drop": [
+        "ALL"
+      ],
+      "cpu_nanos": 1000000000,
+      "host_port_bindings": {},
+      "memory_bytes": 268435456,
+      "network_mode": "none",
+      "pids_limit": 64,
+      "read_only": true,
+      "security_opt": [
+        "no-new-privileges"
+      ],
+      "tmpfs": {
+        "/tmp": "rw,noexec,nosuid,size=16m"
+      }
+    },
+    "actual_uid": 10001,
+    "actual_gid": 10001,
+    "absent_hospital_paths": {
+      ".env": true,
+      "app/config.py": true,
+      "app/database.py": true,
+      "app/models.py": true,
+      "models": true,
+      "weights": true
+    },
+    "absent_packages": {
+      "numpy": true,
+      "redis": true,
+      "sqlalchemy": true,
+      "torch": true
+    },
+    "successful_task_responses": 27,
+    "task_responses": 31,
+    "all_http_responses": 34,
+    "http_attempts_including_startup_refusals": 44,
+    "rejected_tasks": {
+      "store_zero": 422,
+      "unauthenticated": 401,
+      "wrong_feature": 422,
+      "wrong_model": 409
+    },
+    "host_runtime": {
+      "clinical_validation": "not_provided",
+      "engine_versions": {
+        "fastapi": "0.136.1",
+        "pydantic": "2.12.4"
+      },
+      "implementation": {
+        "qsofa_config.py": "84838569e18e73da1a509fb280c731e0bb565e2adabd1b54ee16627f73b537b1",
+        "qsofa_contract.py": "cc29d0256bf4c61213af15c7004ac1d93de437523952de01a828948ff3f07cd4",
+        "qsofa_model.py": "14356e975e20c15bf9329beb054f05e27034a0b02e2ef6342d635de8f3d825d9",
+        "qsofa_server.py": "a5d3a2c4c4406b499e16386058bd1013175a5544d09629265187ec038b646ed5"
+      },
+      "independent_implementation": true,
+      "model_version": "qsofa:9deaf177860bc880405fd8753a001f8b196c2ddffbdc90bd977eff18e5b27e9a",
+      "prompt_handling": "provenance_only",
+      "python_version": "3.13.12",
+      "recipe_digest": "66291f7b644a51f71719e9bd007fdf341a16f965b350950a94dcc522900a23fe"
+    },
+    "container_runtime": {
+      "clinical_validation": "not_provided",
+      "engine_versions": {
+        "fastapi": "0.136.1",
+        "pydantic": "2.12.4"
+      },
+      "implementation": {
+        "qsofa_config.py": "84838569e18e73da1a509fb280c731e0bb565e2adabd1b54ee16627f73b537b1",
+        "qsofa_contract.py": "cc29d0256bf4c61213af15c7004ac1d93de437523952de01a828948ff3f07cd4",
+        "qsofa_model.py": "14356e975e20c15bf9329beb054f05e27034a0b02e2ef6342d635de8f3d825d9",
+        "qsofa_server.py": "a5d3a2c4c4406b499e16386058bd1013175a5544d09629265187ec038b646ed5"
+      },
+      "independent_implementation": true,
+      "model_version": "qsofa:73d547c4edf30b8564958830d72d14a7b02f9bfb0fdfddb2b37a024409d5f331",
+      "prompt_handling": "provenance_only",
+      "python_version": "3.12.13",
+      "recipe_digest": "66291f7b644a51f71719e9bd007fdf341a16f965b350950a94dcc522900a23fe"
+    },
+    "synthetic_cases": [
+      {
+        "fixed_result_equal": true,
+        "host_container_exact_analysis_equal_excluding_runtime": true,
+        "http_status": 200,
+        "name": "complete_zero_not_sepsis_exclusion",
+        "observed_subtotal": 0,
+        "scope_status": "confirmed",
+        "scored_count": 3,
+        "threshold_status": "below_two_in_complete_data",
+        "total_score": 0
+      },
+      {
+        "fixed_result_equal": true,
+        "host_container_exact_analysis_equal_excluding_runtime": true,
+        "http_status": 200,
+        "name": "respiratory_rate_21.99999999",
+        "observed_subtotal": 0,
+        "scope_status": "confirmed",
+        "scored_count": 3,
+        "threshold_status": "below_two_in_complete_data",
+        "total_score": 0
+      },
+      {
+        "fixed_result_equal": true,
+        "host_container_exact_analysis_equal_excluding_runtime": true,
+        "http_status": 200,
+        "name": "respiratory_rate_22",
+        "observed_subtotal": 1,
+        "scope_status": "confirmed",
+        "scored_count": 3,
+        "threshold_status": "below_two_in_complete_data",
+        "total_score": 1
+      },
+      {
+        "fixed_result_equal": true,
+        "host_container_exact_analysis_equal_excluding_runtime": true,
+        "http_status": 200,
+        "name": "respiratory_rate_22.00000001",
+        "observed_subtotal": 1,
+        "scope_status": "confirmed",
+        "scored_count": 3,
+        "threshold_status": "below_two_in_complete_data",
+        "total_score": 1
+      },
+      {
+        "fixed_result_equal": true,
+        "host_container_exact_analysis_equal_excluding_runtime": true,
+        "http_status": 200,
+        "name": "systolic_bp_99.99999999",
+        "observed_subtotal": 1,
+        "scope_status": "confirmed",
+        "scored_count": 3,
+        "threshold_status": "below_two_in_complete_data",
+        "total_score": 1
+      },
+      {
+        "fixed_result_equal": true,
+        "host_container_exact_analysis_equal_excluding_runtime": true,
+        "http_status": 200,
+        "name": "systolic_bp_100",
+        "observed_subtotal": 1,
+        "scope_status": "confirmed",
+        "scored_count": 3,
+        "threshold_status": "below_two_in_complete_data",
+        "total_score": 1
+      },
+      {
+        "fixed_result_equal": true,
+        "host_container_exact_analysis_equal_excluding_runtime": true,
+        "http_status": 200,
+        "name": "systolic_bp_100.00000001",
+        "observed_subtotal": 0,
+        "scope_status": "confirmed",
+        "scored_count": 3,
+        "threshold_status": "below_two_in_complete_data",
+        "total_score": 0
+      },
+      {
+        "fixed_result_equal": true,
+        "host_container_exact_analysis_equal_excluding_runtime": true,
+        "http_status": 200,
+        "name": "respiratory_rate_0.00000000",
+        "observed_subtotal": 0,
+        "scope_status": "confirmed",
+        "scored_count": 3,
+        "threshold_status": "below_two_in_complete_data",
+        "total_score": 0
+      },
+      {
+        "fixed_result_equal": true,
+        "host_container_exact_analysis_equal_excluding_runtime": true,
+        "http_status": 200,
+        "name": "systolic_bp_0.00000000",
+        "observed_subtotal": 1,
+        "scope_status": "confirmed",
+        "scored_count": 3,
+        "threshold_status": "below_two_in_complete_data",
+        "total_score": 1
+      },
+      {
+        "fixed_result_equal": true,
+        "host_container_exact_analysis_equal_excluding_runtime": true,
+        "http_status": 200,
+        "name": "final_gcs_14_is_positive",
+        "observed_subtotal": 1,
+        "scope_status": "confirmed",
+        "scored_count": 3,
+        "threshold_status": "below_two_in_complete_data",
+        "total_score": 1
+      },
+      {
+        "fixed_result_equal": true,
+        "host_container_exact_analysis_equal_excluding_runtime": true,
+        "http_status": 200,
+        "name": "final_gcs_13_is_positive",
+        "observed_subtotal": 1,
+        "scope_status": "confirmed",
+        "scored_count": 3,
+        "threshold_status": "below_two_in_complete_data",
+        "total_score": 1
+      },
+      {
+        "fixed_result_equal": true,
+        "host_container_exact_analysis_equal_excluding_runtime": true,
+        "http_status": 200,
+        "name": "known_two_with_gcs_none",
+        "observed_subtotal": 2,
+        "scope_status": "confirmed",
+        "scored_count": 2,
+        "threshold_status": "at_least_two",
+        "total_score": null
+      },
+      {
+        "fixed_result_equal": true,
+        "host_container_exact_analysis_equal_excluding_runtime": true,
+        "http_status": 200,
+        "name": "known_two_with_gcs_nt",
+        "observed_subtotal": 2,
+        "scope_status": "confirmed",
+        "scored_count": 2,
+        "threshold_status": "at_least_two",
+        "total_score": null
+      },
+      {
+        "fixed_result_equal": true,
+        "host_container_exact_analysis_equal_excluding_runtime": true,
+        "http_status": 200,
+        "name": "known_two_with_gcs_not_recorded",
+        "observed_subtotal": 2,
+        "scope_status": "confirmed",
+        "scored_count": 2,
+        "threshold_status": "at_least_two",
+        "total_score": null
+      },
+      {
+        "fixed_result_equal": true,
+        "host_container_exact_analysis_equal_excluding_runtime": true,
+        "http_status": 200,
+        "name": "known_two_with_gcs_limited",
+        "observed_subtotal": 2,
+        "scope_status": "confirmed",
+        "scored_count": 2,
+        "threshold_status": "at_least_two",
+        "total_score": null
+      },
+      {
+        "fixed_result_equal": true,
+        "host_container_exact_analysis_equal_excluding_runtime": true,
+        "http_status": 200,
+        "name": "known_two_with_gcs_conflict",
+        "observed_subtotal": 2,
+        "scope_status": "confirmed",
+        "scored_count": 2,
+        "threshold_status": "at_least_two",
+        "total_score": null
+      },
+      {
+        "fixed_result_equal": true,
+        "host_container_exact_analysis_equal_excluding_runtime": true,
+        "http_status": 200,
+        "name": "one_known_zero_not_negative_threshold",
+        "observed_subtotal": 0,
+        "scope_status": "confirmed",
+        "scored_count": 1,
+        "threshold_status": "unknown",
+        "total_score": null
+      },
+      {
+        "fixed_result_equal": true,
+        "host_container_exact_analysis_equal_excluding_runtime": true,
+        "http_status": 200,
+        "name": "none_known_no_false_zero",
+        "observed_subtotal": null,
+        "scope_status": "confirmed",
+        "scored_count": 0,
+        "threshold_status": "unknown",
+        "total_score": null
+      },
+      {
+        "fixed_result_equal": true,
+        "host_container_exact_analysis_equal_excluding_runtime": true,
+        "http_status": 200,
+        "name": "age_at_observation_years_unknown",
+        "observed_subtotal": null,
+        "scope_status": "unknown",
+        "scored_count": 0,
+        "threshold_status": "unknown",
+        "total_score": null
+      },
+      {
+        "fixed_result_equal": true,
+        "host_container_exact_analysis_equal_excluding_runtime": true,
+        "http_status": 200,
+        "name": "care_setting_unknown",
+        "observed_subtotal": null,
+        "scope_status": "unknown",
+        "scored_count": 0,
+        "threshold_status": "unknown",
+        "total_score": null
+      },
+      {
+        "fixed_result_equal": true,
+        "host_container_exact_analysis_equal_excluding_runtime": true,
+        "http_status": 200,
+        "name": "infection_status_unknown",
+        "observed_subtotal": null,
+        "scope_status": "unknown",
+        "scored_count": 0,
+        "threshold_status": "unknown",
+        "total_score": null
+      },
+      {
+        "fixed_result_equal": true,
+        "host_container_exact_analysis_equal_excluding_runtime": true,
+        "http_status": 200,
+        "name": "age_at_observation_years_outside",
+        "observed_subtotal": null,
+        "scope_status": "outside_scope",
+        "scored_count": 0,
+        "threshold_status": "unknown",
+        "total_score": null
+      },
+      {
+        "fixed_result_equal": true,
+        "host_container_exact_analysis_equal_excluding_runtime": true,
+        "http_status": 200,
+        "name": "care_setting_outside",
+        "observed_subtotal": null,
+        "scope_status": "outside_scope",
+        "scored_count": 0,
+        "threshold_status": "unknown",
+        "total_score": null
+      },
+      {
+        "fixed_result_equal": true,
+        "host_container_exact_analysis_equal_excluding_runtime": true,
+        "http_status": 200,
+        "name": "infection_status_outside",
+        "observed_subtotal": null,
+        "scope_status": "outside_scope",
+        "scored_count": 0,
+        "threshold_status": "unknown",
+        "total_score": null
+      },
+      {
+        "fixed_result_equal": true,
+        "host_container_exact_analysis_equal_excluding_runtime": true,
+        "http_status": 200,
+        "name": "explicit_same_exam_distinct_real_earlier_gcs_clock",
+        "observed_subtotal": 0,
+        "scope_status": "confirmed",
+        "scored_count": 3,
+        "threshold_status": "below_two_in_complete_data",
+        "total_score": 0
+      },
+      {
+        "fixed_result_equal": true,
+        "host_container_exact_analysis_equal_excluding_runtime": true,
+        "http_status": 200,
+        "name": "all_three_complete",
+        "observed_subtotal": 3,
+        "scope_status": "confirmed",
+        "scored_count": 3,
+        "threshold_status": "at_least_two",
+        "total_score": 3
+      }
+    ],
+    "prompt_changed_only_provenance": true,
+    "source_hashes_unchanged": true,
+    "cleanup_verified": true,
+    "old_preformat_record_preserved": {
+      "path": "/tmp/hoim-qsofa-container-verification.json",
+      "sha256": "ff744456fcd37a755084a593a823a4b6a102d1b41fc2e2e83879fcb20ef245eb"
+    }
+  },
+  "actual_mysql_verification": {
+    "artifact": {
+      "path": "/tmp/hoim-qsofa-mysql-final-verification.json",
+      "sha256": "fa5b6dd00ac19d3b6d07ff1f114cd5238415eea1198554e6356ac161e02c24e3"
+    },
+    "image": "mysql:8.0.39",
+    "container_name": "hoim-qsofa-mysql-final-69c94eaae612",
+    "synthetic_only": true,
+    "network": "none",
+    "host_ports": [],
+    "source_mounts": false,
+    "existing_database_accessed": false,
+    "project_env_file_read": false,
+    "scope": "Actual one qSOFA migration up/down/up, original GCS/profile/doctor-review/context/history helpers and real durable worker over private MySQL; actual qSOFA FastAPI ASGI service. Not hospital HTTP/bootstrap, clinical validation or deployment.",
+    "image_id": "sha256:01faea2cb286276923a223bdbf438b50468f3c4090f6b61e0b27aa871ca0dbac",
+    "isolation": {
+      "network_mode": "none",
+      "port_bindings": {},
+      "readonly_root": true,
+      "user": "999:999",
+      "cap_drop": [
+        "ALL"
+      ],
+      "tmpfs": {
+        "/tmp": "rw,nosuid,nodev,noexec,size=64m,uid=999,gid=999,mode=0700",
+        "/var/lib/mysql": "rw,nosuid,nodev,noexec,size=512m,uid=999,gid=999,mode=0700"
+      },
+      "mount_types": [
+        "bind"
+      ]
+    },
+    "waited_for_final_mysql_initialization": true,
+    "recipe_digest": "66291f7b644a51f71719e9bd007fdf341a16f965b350950a94dcc522900a23fe",
+    "dotenv_disabled_before_import": true,
+    "dotenv_open_guard_enabled": true,
+    "only_private_unix_socket_allowed": true,
+    "dns_resolution_guard_enabled": true,
+    "hospital_service_started": false,
+    "production_settings_or_storage_guards_replaced": false,
+    "limitations": [
+      "Synthetic engineering evidence only; no real patients, paid model calls or clinical actions.",
+      "Actual original UTC6 and current retrospective review clocks; legacy ICU/admission naive clocks kept unchanged and never interpreted as UTC.",
+      "Prerequisites use current ORM FK closure; only this new two-table migration upgraded/downgraded.",
+      "Sequential CAS/unique constraints and actual invalid audit DB rollback, not simultaneous threaded racing.",
+      "Full immutable source 262144-byte rejection has separate 41-member synthetic ORM pytest evidence."
+    ],
+    "server_version": "8.0.39",
+    "server_sql_mode": "ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION",
+    "server_session_timezone": "SYSTEM",
+    "migration_revision": "20261020_qsofa_sources",
+    "migration_parent": "20261020_ai_aki_sources",
+    "actual_six_new_datetime_columns": [
+      [
+        "hoimsystem_ai_qsofa_assessment",
+        "created_at",
+        6
+      ],
+      [
+        "hoimsystem_ai_qsofa_assessment",
+        "evaluation_at",
+        6
+      ],
+      [
+        "hoimsystem_ai_qsofa_assessment",
+        "revoked_at",
+        6
+      ],
+      [
+        "hoimsystem_inpatient_gcs_observation",
+        "observed_at",
+        6
+      ],
+      [
+        "hoimsystem_inpatient_gcs_observation",
+        "recorded_at",
+        6
+      ],
+      [
+        "hoimsystem_inpatient_gcs_observation",
+        "revoked_at",
+        6
+      ]
+    ],
+    "actual_gcs_nt_null_and_absence_reason_preserved": true,
+    "same_rule_unique_publication_slot": {
+      "status": 409,
+      "detail": "同规则已有发布实施版本，请先核对并撤销旧版本"
+    },
+    "actual_original_review_roundtrip": {
+      "snapshot_utf8_bytes": 15952,
+      "sql_sha256": "75e6685d90d8dcdcc76f19e9dfb333edfa6fe7da3ba97d4dd9f9f414f2ef80d5",
+      "original_rr": "22.00000000",
+      "original_sbp": "100.00000000",
+      "point_observed_at": "2026-10-20T09:30:45.123456Z",
+      "gcs_observed_at": "2026-10-20T09:31:45.654321Z",
+      "gcs_recorded_at": "2026-10-20T12:00:45.123456Z",
+      "clinical_statements_recorded_at": "2026-10-20T12:30:45.123456Z",
+      "original_as_of": "2026-10-20T12:00:45.123456Z",
+      "same_exam_distinct_real_clocks_retained": true,
+      "current_review_not_historical_prediction": true,
+      "chinese_private_notes_and_hashes_retained": true
+    },
+    "nonclinical_management_or_nurse_signature_denied": {
+      "nurse": {
+        "status": 403,
+        "detail": "qSOFA当前临床核实须有真实Doctor身份及原住院临床照护，管理权限不能代签"
+      },
+      "admin": {
+        "status": 403,
+        "detail": "qSOFA当前临床核实须有真实Doctor身份及原住院临床照护，管理权限不能代签"
+      },
+      "super_admin": {
+        "status": 403,
+        "detail": "qSOFA当前临床核实须有真实Doctor身份及原住院临床照护，管理权限不能代签"
+      }
+    },
+    "partial_two_known_retained_without_gcs_imputation": true,
+    "actual_host_qsofa_runtime": {
+      "schema_version": "8",
+      "model_version": "qsofa:9deaf177860bc880405fd8753a001f8b196c2ddffbdc90bd977eff18e5b27e9a",
+      "runtime_digest": "9deaf177860bc880405fd8753a001f8b196c2ddffbdc90bd977eff18e5b27e9a",
+      "python_version": "3.13.12",
+      "implementation": {
+        "qsofa_contract.py": "cc29d0256bf4c61213af15c7004ac1d93de437523952de01a828948ff3f07cd4",
+        "qsofa_model.py": "14356e975e20c15bf9329beb054f05e27034a0b02e2ef6342d635de8f3d825d9",
+        "qsofa_config.py": "84838569e18e73da1a509fb280c731e0bb565e2adabd1b54ee16627f73b537b1",
+        "qsofa_server.py": "a5d3a2c4c4406b499e16386058bd1013175a5544d09629265187ec038b646ed5"
+      },
+      "engine_versions": {
+        "fastapi": "0.136.1",
+        "pydantic": "2.12.4"
+      }
+    },
+    "cross_user_run_history_denied": {
+      "status": 403,
+      "detail": "不能访问其他用户的 AI 任务"
+    },
+    "actual_inference_did_not_write_any_legacy_original_point_gcs_or_assessment_row": true,
+    "actual_complete_input_evidence_context_result_sql_sha256": [
+      "97dae29c48f08b4c6271be26b531cb83271bb613111185e772ccccd1507cb0f9",
+      "3b69f1e13579bc3111f1f0dd7d0ea6ef69f1ba94e2f89f6ca3ff4dae91c411e8",
+      "316dc6ce9b8e482ccb49a4bf47dd4c515da6a65dd4ca65cd3a028bc1e22ea5b0",
+      "d5c8ed4050b9dd5aca43f7cd549e09cb558270b9954a5a7d66d937750319d536"
+    ],
+    "actual_durable_worker_mysql_task": {
+      "status": "succeeded",
+      "total_score": 2,
+      "input_utf8_bytes": 22574,
+      "evidence_utf8_bytes": 1112,
+      "context_metadata_utf8_bytes": 643,
+      "result_utf8_bytes": 9092,
+      "transport": "actual local qSOFA FastAPI ASGI app, no model socket",
+      "ordinary_current_history_authorized": true,
+      "original_input_evidence_and_result_not_truncated": true
+    },
+    "actual_complete_qsofa_prompt_envelope_text_boundaries": [
+      {
+        "complete_utf8_bytes": 65535,
+        "actual_sql_bytes": 65535,
+        "status": "queued_complete"
+      },
+      {
+        "complete_utf8_bytes": 65536,
+        "rejection": {
+          "status": 422,
+          "detail": "完整任务审计资料超过65535个UTF-8字节存储上限，请缩小资料范围；未入队或截断"
+        },
+        "run_and_audit_unchanged": true
+      }
+    ],
+    "signed_doctor_identity_reassignment_rejected": {
+      "status": 409,
+      "detail": "qSOFA原窗口、点测、GCS集合、临床签署或规则不再一致，不能执行"
+    },
+    "current_original_care_lost_rejected": {
+      "status": 403,
+      "detail": "未确认本次诊疗关系，请由超级管理员按用途授予限时访问权限"
+    },
+    "after_cutoff_gcs_not_counted_or_leaked": true,
+    "unselected_same_exam_governance_invalidates_old_review": {
+      "status": 409,
+      "detail": "qSOFA原窗口、点测、GCS集合、临床签署或规则不再一致，不能执行"
+    },
+    "ordinary_completed_history_after_source_change": {
+      "status": 403,
+      "detail": "原qSOFA评估、点测、GCS、同次关联、规则、签署身份或当前照护权限已变化，不能继续读取旧核对结果"
+    },
+    "super_frozen_review_and_run_audit_retained": true,
+    "mysql_bad_assessment_audit_rolls_back_create": {
+      "status": 409,
+      "detail": "qSOFA原资料或版本发生竞争，评估及审计均未覆盖"
+    },
+    "mysql_bad_assessment_audit_rolls_back_revoke": {
+      "status": 409,
+      "detail": "qSOFA原资料或版本发生竞争，评估及审计均未覆盖"
+    },
+    "mysql_bad_gcs_audit_rolls_back_create": {
+      "status": 409,
+      "detail": "GCS原资料或治理版本竞争，本次变更与审计均未覆盖"
+    },
+    "mysql_bad_gcs_audit_rolls_back_revoke": {
+      "status": 409,
+      "detail": "GCS原资料或治理版本竞争，本次变更与审计均未覆盖"
+    },
+    "gcs_changed_parent_not_current": {
+      "status": 409,
+      "detail": "GCS原住院不存在或归属变化"
+    },
+    "super_only_frozen_gcs_parent_audit_and_cas_revoke": true,
+    "duplicate_gcs_revoke_cas_rejected": {
+      "status": 409,
+      "detail": "GCS来源已改变或撤销，不重复撤销或恢复"
+    },
+    "assessment_wrong_revision_rejected": {
+      "status": 409,
+      "detail": "来源已撤销或版本改变，不可恢复"
+    },
+    "assessment_duplicate_revoke_cas_rejected": {
+      "status": 409,
+      "detail": "来源已撤销或版本改变，不可恢复"
+    },
+    "actual_six_utc6_roundtrip": {
+      "gcs_observed_at": "2026-10-20T09:31:45.654321Z",
+      "gcs_recorded_at": "2026-10-20T12:00:45.123456Z",
+      "gcs_revoked_at": "2026-10-20T12:30:46.654321Z",
+      "assessment_evaluation_at": "2026-10-20T12:30:45.123456Z",
+      "assessment_created_at": "2026-10-20T12:30:45.123456Z",
+      "assessment_revoked_at": "2026-10-20T12:30:46.654321Z"
+    },
+    "legacy_naive_clocks_default_gcs15_and_complete_clinical_rows_unchanged": true,
+    "legacy_original_row_sha256": "c22eb80258b21a4d6264dea50981cf095e9a8b7e13f9ffaa8edbebd52a055d10",
+    "actual_single_migration_up_down_up_only_two_new_tables": true,
+    "all_existing_prerequisite_ddl_and_complete_rows_unchanged": true,
+    "source_hashes_unchanged_during_execution": true,
+    "dotenv_open_attempts": 0,
+    "private_unix_socket_connection_count": 3,
+    "all_checks_passed": true,
+    "worker_seconds": 7.313,
+    "worker_exit_code": 0,
+    "own_container_absent_verified": true,
+    "own_container_and_volumes_removed": true,
+    "own_private_directory_removed": true,
+    "cleanup_verified": true,
+    "verification_scripts_retained_in_tmp": [
+      "/tmp/hoim-qsofa-mysql-runner.py",
+      "/tmp/hoim-qsofa-mysql-worker.py"
+    ],
+    "seconds": 15.03,
+    "completed_at_utc": "2026-10-20T16:20:50.167891+00:00",
+    "bound_source_file_count": 33,
+    "synthetic_prerequisite_table_count": 33
+  },
+  "historical_and_intermediate_evidence": "Two intentionally interrupted full backend runs and one interrupted browser run are retained as intermediate logs, not final passes. Earlier metadata CAS test and SQL verifier fixture failures were fixed without weakening product guards. Original container record is retained; final record binds formatted core bytes. One earlier full browser run found the old laboratory notification locator mismatch; test-only locator and typed-runtime corrections are covered by the final complete full run above.",
+  "source_bindings": {
+    "fastapi_be/Dockerfile.qsofa": "ab5803398eb4171f2b050145b6a0221381cbe4dacaa933e41e597792e1a9e16f",
+    "fastapi_be/alembic/versions/20261020_qsofa_sources.py": "6f709069a7ae520fd4e7b28c1394e7840220e4c6df845b7cd08fdc00b69a6f6c",
+    "fastapi_be/app/ai/catalog.py": "e6216e2fdbfd041248b749c25f66f39e4a3cc8029014cbecb1409401fc1333c5",
+    "fastapi_be/app/ai/context.py": "4793ca22f814519d6bb1d8df1c55e292690e75d34dbb537c10d5f02f3441b476",
+    "fastapi_be/app/ai/gateway.py": "3d47382807eea64963ed88ed53869f49eb8428910e16e5d35f1750628351d6f7",
+    "fastapi_be/app/ai/governance.py": "c934f4429d2e61d3b939c06e99a8881439a56ece4c95b76dc316f7a7fe536383",
+    "fastapi_be/app/ai/models.py": "b0ab84f20c2f6b74d89dade050350c1dab87b3b18aa3f4ad5f94a4f462dd5739",
+    "fastapi_be/app/ai/qsofa_config.py": "84838569e18e73da1a509fb280c731e0bb565e2adabd1b54ee16627f73b537b1",
+    "fastapi_be/app/ai/qsofa_context.py": "654962b30f43a1100ab399a1b52ae865dc9abcab66f0c66458418d274caa068f",
+    "fastapi_be/app/ai/qsofa_contract.py": "cc29d0256bf4c61213af15c7004ac1d93de437523952de01a828948ff3f07cd4",
+    "fastapi_be/app/ai/qsofa_model.py": "14356e975e20c15bf9329beb054f05e27034a0b02e2ef6342d635de8f3d825d9",
+    "fastapi_be/app/ai/qsofa_probe.py": "f2b2952e626f22a9cc4c6a70986df995a7a71583ad019b3554f7149ee977b51a",
+    "fastapi_be/app/ai/qsofa_server.py": "a5d3a2c4c4406b499e16386058bd1013175a5544d09629265187ec038b646ed5",
+    "fastapi_be/app/ai/qsofa_sources.py": "a3eaa0d35ec71c5920025ad7536ce07362e8999471bd23b66f267507e13a82f8",
+    "fastapi_be/app/ai/readiness.py": "9f26e02c49b924892c86bcd78bebcd9683c57865e774369cfa7cfa60798118f5",
+    "fastapi_be/app/ai/references.py": "524ebcb78725ebe65071c1ffba6d201cac61d77a65ffb40fa0ad45538cabfc85",
+    "fastapi_be/app/ai/risk_rule_profiles.py": "7e2d5434eb3016dac3893c64c404c3662ba1d4b0c0ab5f50a43701c921bf04c0",
+    "fastapi_be/app/ai/runtime.py": "35296be02ae00f5e57ec04bb1bedf96a23ab5bf5a602824d20f57804b3ee4166",
+    "fastapi_be/app/ai/schemas.py": "3e8a94ac012d1a9278a2a91c5e709a4ea33366eb5dcfe4a121cbdd0db57c0be0",
+    "fastapi_be/app/ai/tools.py": "0b3276019aa3c27628df05280466becbd92f098012bc1df4110bb8fdd62a6ae1",
+    "fastapi_be/app/inpatient_gcs.py": "adf656c4c27a81b627b6c626dd5b6b46d29e0e2da51c3801a01ddd8c52b5a0bb",
+    "fastapi_be/app/main.py": "4bc5f39cbc2745504f758ee6676cd908111d3e57991e7f8c413066ca2b9852f9",
+    "fastapi_be/app/models.py": "dc6d548ade4e1989ddd5975cfd11b3661766b56a63f8fec726df0f3d13051f38",
+    "fastapi_be/app/routers/ai_admin.py": "f28974ff15c66598898229a7c3fa25465c818567ba89c127d6149d9477538594",
+    "fastapi_be/app/routers/ai_qsofa.py": "2af3202f3e632ebad4bf7ef8e541eab7315c70951db2fb47933fa9efa9f0f475",
+    "fastapi_be/app/routers/inpatient_gcs.py": "e3b0b627dab58ae565ea09cd2edbbe40452b243c8bcb8cee36e1764916447521",
+    "fastapi_be/requirements-qsofa.txt": "2f47673beae2b21a32316aa9ec1d24fb5696a50e7768f8d08dfd3494cccfba5a",
+    "fastapi_be/scripts/generate_rbac_matrix.py": "f1eb39778062b972b5ec730ca1b4e3446e1d40113c49d1d00e600cca43d0264e",
+    "fastapi_be/tests/test_ai_catalog.py": "ad2798a9762d59796c6b4a8cb48a14f4b3868300bbd7a7776b8604fa9499dbdf",
+    "fastapi_be/tests/test_ai_qsofa_contract.py": "fe9ca53f5bda489161f01917f21c3650a34384fc4d6fb71c63190c5e30c09cd1",
+    "fastapi_be/tests/test_ai_qsofa_independent_review.py": "3c0937a6c2528f224445e738d661fe6802bd8c6fe8892814a7753347b36be9d1",
+    "fastapi_be/tests/test_ai_qsofa_model.py": "116c8d39b2e1c4efd12727c98c1d882cb3cffa427a0c2004a145c325c24ab9fe",
+    "fastapi_be/tests/test_ai_qsofa_pipeline.py": "abbfa82182f915d12a2859149beb2a16527dd65fd1ce290650a4f6a7a4146186",
+    "fastapi_be/tests/test_ai_qsofa_probe.py": "0fdac4ebdfcf4920bcec653877e7ce5aa2d4293947c2409b3b5038acd25d6e23",
+    "fastapi_be/tests/test_ai_qsofa_probe_admin.py": "a2aac5d74e9b9f70896715c28e0b25abc4b40d911a4af66254219b2415621ab4",
+    "fastapi_be/tests/test_ai_qsofa_server.py": "e8acac6593b35a09ee20c0438734f092594a871007205bdc0165683c798c46f2",
+    "fastapi_be/tests/test_ai_qsofa_sources.py": "fbf7b0378e12f0d8c0528524d5c52b4c1e9edd36f93e19ee3bffe02e3f59b1d2",
+    "fastapi_be/tests/test_ai_qsofa_sources_migration.py": "6c7d9d8b4e30563c23545603f62356f1c0b682003b2c2d130d60c670b4157ffa",
+    "fastapi_be/tests/test_inpatient_gcs.py": "19da9a1c086457cc58cf6440507c88dba1bdea06dd305a48f1c03801a0aed199",
+    "fastapi_be/tests/test_rbac_drift.py": "846afe29448b3cc1364ac1cef623c8b9a789ddec0b480e0902214d324014b317",
+    "vue3-new-ui/e2e/ai-gcs-source.spec.js": "ddad7d137a3be10d4ea0d7eafd001b8cba14ff6644676b1d53a0cdc6448a4973",
+    "vue3-new-ui/e2e/ai-laboratory-entry.spec.js": "62bfa7bcef0bca228e530ade03abc3bde67de70a151a606951db1b720388e7ad",
+    "vue3-new-ui/e2e/ai-qsofa-entry.spec.js": "a8f690202209baec2392b9ad39679b2f1a1cf14019daf0b6e32cc0e066f2b6e7",
+    "vue3-new-ui/e2e/ai-qsofa-source.spec.js": "52c3f277ebd9f48a35037fb3c447e7325f8a978198b19fca7e1f0c3e6bf27348",
+    "vue3-new-ui/e2e/fixtures/gcs-source-harness.cjs": "ff583d4abf1907a8774449f60878cf5b4f42aba1470493cd35b47d3299069255",
+    "vue3-new-ui/e2e/fixtures/qsofa-fixtures.cjs": "e770de806eb7514fd41532b7e87b60542d41f5a289f7a2e7f4f2c7052bcc4843",
+    "vue3-new-ui/e2e/fixtures/qsofa-source-harness.cjs": "2a8658ed2e2d151c9da3bade78a562db38685c5a4244a1819029be10264b3876",
+    "vue3-new-ui/src/api/aiQsofa.js": "08f1a9c15305b32d64815e99d0a83c590012de016fc0faa1c0154d1a19a0835a",
+    "vue3-new-ui/src/api/inpatientGcs.js": "8adec6d78bd1534ec8612ae50d4bf235552ef722df56ff5e48912042a81f323a",
+    "vue3-new-ui/src/components/AIAssistant/index.vue": "86b4d92b182d7754d804c967d37cad1641b88dce42c4fa4cd476ca5a6460fa2e",
+    "vue3-new-ui/src/components/AIObservationWindowInput/index.vue": "8a292d9f7478a31ace213916b4575f4eb1fb751f4ef6876efa9cc735fe9e5194",
+    "vue3-new-ui/src/components/AIQsofaFindings/index.vue": "e5be8261f1489648a655ce1a7647a0e0dbb7dbc1494fe54a6a993167e5802fe6",
+    "vue3-new-ui/src/components/AIQsofaInput/index.vue": "35c6f519c7ef9ebe147fdba7c43c8bc16a4cf25c2efcdbe88281022e9a7e201d",
+    "vue3-new-ui/src/components/AIQsofaProviderCheck/index.vue": "0ce975babd95b7db5fe6e77e52f47cc529422bf7124c85c36fee315c9ac1884b",
+    "vue3-new-ui/src/components/InpatientGcsSourcePanel/index.vue": "643d334f1d39a6ec5f3bffaf734b1f214c5e9c59032a3266aa4c1357bd736708",
+    "vue3-new-ui/src/views/system/AIRiskRuleManagement.vue": "f30f637a6b6944ffd66fab69f3cd2c79891af0eb6fad858f5fd8907825f492e2",
+    "vue3-new-ui/src/views/system/aiManagement.vue": "06f14c7b43767f6833614cc4172ac8e51c9136c80f5d21acdbec9018fa075e80",
+    "doc/ai-prompts.json": "7f6c4686cc24756258975d292b7477867455ee1ba029d056e9f005ceda7a5d4c",
+    "doc/ai-capabilities.md": "b102152ca15a0dadf68791655a9398b1bae2b461a1774cf2960213a9b6213a10",
+    "doc/api-rbac-matrix.md": "e086ef19e8c88aff3a76bfab144ff636b176e78a358eed11e76facaf55332cac",
+    "fastapi_be/rbac_matrix.json": "08643445dbfcffc00f3cc522cf81ffc1143338e029ea937d80970ad8e634fa47"
+  },
+  "twelve_historical_verification_records_unchanged": {
+    "doc/ai-aki-verification.json": "a2f8e928266ff16d46973db731329d4e96cbfe09e519ba9f5fcbc8ab384a897c",
+    "doc/ai-ecg-classifier-smoke.json": "838b0305249698617bc475f7158dfbfbb9e6e22e6d6e84e51974bfcfebb90c61",
+    "doc/ai-ecg-verification.json": "1eedfa9eb918cf6e6b1ee1f201b7413760eeec501c128f4a73401741f0427f94",
+    "doc/ai-forecast-verification.json": "9b5683bca58efcf7fc460410529fd5aeeed91e2646eb47be24b836cbadc20d63",
+    "doc/ai-frontend-dependencies-verification.json": "968757f4a75e921038133b3fa9a94947ab4d5607142dce8da964f2a13d00bb1d",
+    "doc/ai-imaging-classifier-smoke.json": "b2185a31ff66c4602c10136d5b15404199f50cf7d65ea4a8be4718778c6a9e89",
+    "doc/ai-imaging-verification.json": "63646b181dae4f531abe233708a24f9b9cc05037ef95d57e1e6f39c7f9880148",
+    "doc/ai-laboratory-verification.json": "646103e4874b4f895424987520c7adfb6fb8afdd9eb6e2c7104ed2095b72752f",
+    "doc/ai-news2-verification.json": "363be8c61e2f36705dccc4604631e7d0e84aaa6cc922196ed36e48e740ca6570",
+    "doc/ai-nursing-verification.json": "a04248f9de57ddd878c1b408da1833f53651cd3535d8385d2275874a7f6f9517",
+    "doc/ai-observation-verification.json": "b75ab8c7ff94704cb823be59d51539f06a16a24edf0020b0e87edfd6cf6e6bee",
+    "doc/ai-speech-smoke.json": "41ad522da4f04e2a6d75595660ecbc2549acdcd159450aa99602b495c8e690a0"
+  },
+  "primary_sources": [
+    {
+      "title": "Sepsis-3 original consensus",
+      "url": "https://jamanetwork.com/journals/jama/fullarticle/2492881"
+    },
+    {
+      "title": "Original qSOFA derivation context",
+      "url": "https://jamanetwork.com/journals/jama/fullarticle/2492875"
+    },
+    {
+      "title": "GCS original-author FAQ on NT and component information",
+      "url": "https://www.glasgowcomascale.org/faq/"
+    },
+    {
+      "title": "SSC 2026 official adult guideline",
+      "url": "https://www.sccm.org/survivingsepsiscampaign/guidelines-and-resources/surviving-sepsis-campaign-adult-guidelines"
+    }
+  ],
+  "remaining_work": "Continue active 80-feature goal: full SOFA/sepsis original features and clinical attribution, other specialist sources/models, actual authorized hospital integrations, independent clinical or operational validation. The qSOFA rule is neither a sole sepsis screen nor completion of all sepsis or all eighty specialist capabilities."
+}

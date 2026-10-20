@@ -1,6 +1,6 @@
 # 文档总览
 
-AI 平台新增：[开发与使用指南](ai-guide.md)、[80 项能力清单](ai-capabilities.md)、[完整默认 Prompt](ai-prompts.json)、[实施记录](ai-implementation-plan.md)。
+AI 平台新增：[开发与使用指南](ai-guide.md)、[80 项能力清单](ai-capabilities.md)、[完整默认 Prompt](ai-prompts.json)、[实施记录](ai-implementation-plan.md)、[qSOFA/GCS工程验证](ai-qsofa-verification.json)。
 
 > 本目录包含 HIS-OP 医院门诊信息管理系统的全部技术文档。
 > 不同角色可按下方导航直达对应文档。

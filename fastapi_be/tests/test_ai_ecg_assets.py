@@ -1,6 +1,8 @@
 """Actual synthetic waveform intake, current care-team sharing and source governance."""
 
 import datetime
+import io
+from zipfile import ZipFile
 
 import pytest
 from alembic.config import Config
@@ -64,6 +66,11 @@ async def test_metadata_actual_waveform_window_and_private_original_download_do_
     assert window.status_code == 200, window.text
     assert [row["value_mv"] for row in window.json()["data"]["leads"][0]["points"]] == [1.0, 2.0, None, -1.0]
     assert window.headers["cache-control"] == "private, no-store" and db_session.query(AIRun).count() == 0
+    exported = await async_client.get(url + "/content", params={"part": "pair"}, headers=headers)
+    assert exported.status_code == 200 and exported.headers["content-type"] == "application/zip"
+    with ZipFile(io.BytesIO(exported.content)) as archive:
+        assert set(archive.namelist()) == {"fixture.hea", "fixture.dat"}
+        assert archive.read("fixture.hea") == ecg_case[0] and archive.read("fixture.dat") == ecg_case[1]
     assert (await async_client.get(url + "/window")).status_code == 401
     events = db_session.query(AIAuditEvent).filter(AIAuditEvent.action.like("ecg.%")).all()
     assert {row.action for row in events} >= {"ecg.register", "ecg.content_read", "ecg.window_read"}
@@ -120,6 +127,7 @@ async def test_lab_registered_waveform_is_shared_with_current_doctor_but_withdra
     assert (await async_client.post(url + "/withdraw", headers=doctor, json={"expected_revision": 1, "reason": "非登记人不能撤回他人原记录"})).status_code == 403
     listing = await async_client.get("/api/ai/ecg-assets", headers=doctor, params={"patient_id": ecg_case[2].patient_id})
     assert [row["asset_id"] for row in listing.json()["data"]["items"]] == [asset_id]
+    assert listing.json()["data"]["items"][0]["can_withdraw"] is False
     grant.revoked = 1
     db_session.commit()
     assert (await async_client.get(url + "/window", headers=auth_headers(seed_data["lab_tech_user"].username))).status_code == 403

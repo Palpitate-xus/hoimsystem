@@ -4,8 +4,10 @@ import datetime
 import json
 import os
 import shutil
+import tempfile
 import uuid
 from typing import Literal
+from zipfile import ZIP_STORED, ZipFile
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, UploadFile
 from fastapi.responses import JSONResponse, StreamingResponse
@@ -14,7 +16,7 @@ from sqlalchemy.orm import Session
 
 from app.ai.context import authorize_patient
 from app.ai.ecg_assets import ECG_FEATURE, ECG_ROLES, authorize_ecg, authorize_ecg_patient, ecg_metadata
-from app.ai.ecg_files import LEADS, ecg_directory, open_verified_ecg, signal_window, stage_ecg
+from app.ai.ecg_files import LEADS, ecg_directory, ecg_root, open_verified_ecg, original_pair_names, signal_window, stage_ecg
 from app.ai.governance import audit, encode_json
 from app.ai.models import AIECGAsset, utcnow
 from app.ai.runtime import authorized_feature
@@ -111,7 +113,7 @@ def upload_ecg(
             asset.asset_id,
             {"patient_id": patient_id, "encounter_ref": encounter_ref, "revision": asset.revision, "content_hash": asset.content_hash, "byte_size": asset.byte_size},
         )
-        result = ecg_metadata(asset)
+        result = ecg_metadata(asset, user=actor)
         db.commit()
         installed = False
         return {"code": 200, "msg": "原心电已登记，尚未调用模型", "data": result}
@@ -141,7 +143,7 @@ def list_ecg(patient_id: int, encounter_ref: str | None = None, db: Session = De
             if exc.status_code in {403, 404}:
                 continue
             raise
-        items.append(ecg_metadata(asset))
+        items.append(ecg_metadata(asset, user=user))
     return {"code": 200, "msg": "success", "data": {"items": items, "truncated": len(rows) > 50}}
 
 
@@ -150,7 +152,7 @@ def inspect_ecg(asset_id: str, db: Session = Depends(get_db), user: User = Depen
     asset = authorize_ecg(db, user, db.get(AIECGAsset, asset_id), authorize_patient, allow_inactive=True)
     audit(db, user.user_id, "ecg.inspect", asset_id, {"revision": asset.revision, "status": asset.status})
     db.commit()
-    return {"code": 200, "msg": "success", "data": ecg_metadata(asset, detail=True)}
+    return {"code": 200, "msg": "success", "data": ecg_metadata(asset, detail=True, user=user)}
 
 
 @router.get("/ai/ecg-assets/{asset_id}/window")
@@ -169,7 +171,7 @@ def ecg_window(
     handles = open_verified_ecg(asset)
     try:
         data = signal_window(handles[1], json.loads(asset.metadata_json), start_sample, sample_count, max_points, lead)
-        data.update(asset_id=asset.asset_id, content_hash=asset.content_hash)
+        data.update(asset_id=asset.asset_id, content_hash=asset.content_hash, revision=asset.revision, status=asset.status)
         audit(db, user.user_id, "ecg.window_read", asset_id, {"revision": asset.revision, "start_sample": start_sample, "end_sample_exclusive": data["end_sample_exclusive"], "max_points": max_points})
         db.commit()
     finally:
@@ -179,18 +181,31 @@ def ecg_window(
 
 
 @router.get("/ai/ecg-assets/{asset_id}/content")
-def download_ecg(asset_id: str, part: Literal["header", "signal"], db: Session = Depends(get_db), user: User = Depends(require_roles(*ECG_ROLES))):
+def download_ecg(asset_id: str, part: Literal["header", "signal", "pair"], db: Session = Depends(get_db), user: User = Depends(require_roles(*ECG_ROLES))):
     asset = authorize_ecg(db, user, db.get(AIECGAsset, asset_id), authorize_patient, allow_inactive=user.user_role == "super_admin")
     if asset.status in {"purged", "purge_pending"}:
         raise HTTPException(410, "原心电文件已进入清除流程")
     handles = open_verified_ecg(asset)
-    selected = handles[0 if part == "header" else 1]
+    selected = None
     try:
+        if part == "pair":
+            names = original_pair_names(handles[0].read())
+            selected = tempfile.TemporaryFile(dir=ecg_root())
+            with ZipFile(selected, "w", compression=ZIP_STORED) as archive:
+                for name, stream in zip(names, handles, strict=True):
+                    stream.seek(0)
+                    with archive.open(name, "w", force_zip64=True) as output:
+                        shutil.copyfileobj(stream, output, length=65536)
+            selected.seek(0)
+        else:
+            selected = handles[0 if part == "header" else 1]
         audit(db, user.user_id, "ecg.content_read", asset_id, {"revision": asset.revision, "part": part, "content_hash": asset.content_hash})
         db.commit()
     except BaseException:
         for stream in handles:
             stream.close()
+        if selected is not None:
+            selected.close()
         raise
     for stream in handles:
         if stream is not selected:
@@ -203,10 +218,10 @@ def download_ecg(asset_id: str, part: Literal["header", "signal"], db: Session =
         finally:
             selected.close()
 
-    extension = ".hea" if part == "header" else ".dat"
+    extension = {"header": ".hea", "signal": ".dat", "pair": ".zip"}[part]
     return StreamingResponse(
         chunks(),
-        media_type="application/octet-stream",
+        media_type="application/zip" if part == "pair" else "application/octet-stream",
         headers={"Content-Disposition": f'attachment; filename="ecg-{asset.asset_id}{extension}"', "Cache-Control": "private, no-store", "X-Content-Type-Options": "nosniff"},
     )
 
@@ -244,7 +259,7 @@ def admin_ecg_list(
     if status:
         query = query.filter_by(status=status)
     rows = query.order_by(AIECGAsset.create_time.desc(), AIECGAsset.asset_id).limit(limit + 1).all()
-    return {"code": 200, "msg": "success", "data": {"items": [ecg_metadata(asset) for asset in rows[:limit]], "truncated": len(rows) > limit}}
+    return {"code": 200, "msg": "success", "data": {"items": [ecg_metadata(asset, user=user) for asset in rows[:limit]], "truncated": len(rows) > limit}}
 
 
 @router.post("/ai/admin/ecg-assets/{asset_id}/purge")

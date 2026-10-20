@@ -64,6 +64,18 @@ def _positive_decimal(value):
     return number
 
 
+def original_pair_names(raw):
+    """Only for an authorized original-pair export, never model metadata or disk paths."""
+    try:
+        lines = [line.strip() for line in raw.decode("utf-8-sig").splitlines() if line.strip() and not line.lstrip().startswith("#")]
+        record, signal = lines[0].split()[0], lines[1].split()[0]
+        if not re.fullmatch(r"[A-Za-z0-9_]{1,80}", record) or not re.fullmatch(r"[A-Za-z0-9_]{1,80}\.dat", signal):
+            raise ValueError()
+        return record + ".hea", signal
+    except (ValueError, IndexError, UnicodeError) as exc:
+        raise HTTPException(409, "原始成对文件的名称声明不可核实，不能导出") from exc
+
+
 def parse_header(raw, header_name, signal_name):
     """Require declared data, not WFDB's optional defaults for unknown calibration."""
     try:

@@ -43,7 +43,7 @@ def authorize_ecg(db, user, asset, authorize_patient, *, patient_id=None, encoun
     return asset
 
 
-def ecg_metadata(asset, *, detail=False):
+def ecg_metadata(asset, *, detail=False, user=None):
     names = (
         "asset_id",
         "patient_id",
@@ -67,6 +67,8 @@ def ecg_metadata(asset, *, detail=False):
     )
     data = {name: getattr(asset, name) for name in names}
     data["signal_metadata"] = json.loads(asset.metadata_json)
+    if user is not None:
+        data["can_withdraw"] = asset.status == "ready" and (user.user_role == "super_admin" or asset.created_by == user.user_id)
     if detail:
         data.update(authorization_note=asset.authorization_note, withdrawal_note=asset.withdrawal_note, purge_note=asset.purge_note)
     return data

@@ -19,6 +19,7 @@
               <el-button v-if="row.status === 0" size="small" @click="changeStatus(row, 1)">开始检查</el-button>
               <el-button v-if="row.status === 1" size="small" @click="changeStatus(row, 2)">完成检查</el-button>
               <el-button size="small" type="info" @click="openViewer(row)">调阅</el-button>
+              <el-button v-if="row.status !== 5" size="small" @click="openImageAI(row)">AI 原影像复核</el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -55,6 +56,7 @@
       </el-tab-pane>
     </el-tabs>
 
+    <el-dialog v-model="imageAIVisible" title="影像辅助识别与原像素复核" width="min(1100px, 96vw)" destroy-on-close><ai-assistant v-if="imageAIVisible && imageAIOrder" :key="imageAIOrder.imaging_order_id" :patient-id="imageAIOrder.patient_id" initial-feature="imaging_detection" :feature-keys="['imaging_detection']" :initial-input="{ imaging_order_id: imageAIOrder.imaging_order_id }" /></el-dialog>
     <el-dialog v-model="orderDialog" title="新建影像申请" width="520px">
       <el-form :model="orderForm" label-width="100px">
         <el-form-item label="患者" required><el-select v-model="orderForm.patient_id" filterable class="full-width"><el-option v-for="item in patients" :key="item.id" :label="`${item.name} (${item.identity || ''})`" :value="item.id" /></el-select></el-form-item>
@@ -92,7 +94,11 @@
 import { onMounted, ref } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { getPatientList } from "@/api/admin";
-import { createImagingFilm, createImagingOrder, getImagingFilms, getImagingOrders, getImagingReports, getImagingTemplates, saveImagingReport, saveImagingTemplate, submitImagingReport, updateImagingFilmStatus, updateImagingOrderStatus } from "@/api/imaging";
+import { createImagingFilm, createImagingOrder, getImagingFilms, getImagingViewer, getImagingOrders, getImagingReports, getImagingTemplates, saveImagingReport, saveImagingTemplate, submitImagingReport, updateImagingFilmStatus, updateImagingOrderStatus } from "@/api/imaging";
+
+import AiAssistant from "@/components/AIAssistant/index.vue";
+const imageAIVisible = ref(false), imageAIOrder = ref(null);
+function openImageAI(row) { imageAIOrder.value = { patient_id: row.patient_id, imaging_order_id: row.imaging_order_id }; imageAIVisible.value = true; }
 
 const modalities = ["DR", "CT", "MRI", "超声", "内镜"];
 const activeTab = ref("orders");

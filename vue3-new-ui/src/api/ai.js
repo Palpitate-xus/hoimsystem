@@ -24,6 +24,16 @@ export const uploadAIEcg = (data) => request({ url: "ai/ecg-assets", method: "po
 export const withdrawAIEcg = (id, data) => request({ url: `ai/ecg-assets/${id}/withdraw`, method: "post", data });
 export const getAIAdminEcgAssets = (params) => request({ url: `${admin}/ecg-assets`, method: "get", params });
 export const purgeAIEcg = (id, data) => request({ url: `${admin}/ecg-assets/${id}/purge`, method: "post", data });
+export const getAIImageOptions = () => request({ url: "ai/image-options", method: "get" });
+export const getAIImageOrders = (params) => request({ url: "ai/image-orders", method: "get", params });
+export const getAIImageAssets = (params) => request({ url: "ai/image-assets", method: "get", params });
+export const getAIImageAsset = (id) => request({ url: `ai/image-assets/${id}`, method: "get" });
+export const getAIImagePixels = (id) => request({ url: `ai/image-assets/${id}/pixels`, method: "get", responseType: "arraybuffer", timeout: 120000 });
+export const getAIImageContent = (id) => request({ url: `ai/image-assets/${id}/content`, method: "get", responseType: "blob", timeout: 120000 });
+export const uploadAIImage = (data) => request({ url: "ai/image-assets", method: "post", data, headers: { "Content-Type": undefined }, timeout: 180000 });
+export const withdrawAIImage = (id, data) => request({ url: `ai/image-assets/${id}/withdraw`, method: "post", data });
+export const getAIAdminImageAssets = (params) => request({ url: `${admin}/image-assets`, method: "get", params });
+export const purgeAIImage = (id, data) => request({ url: `${admin}/image-assets/${id}/purge`, method: "post", data });
 export const getAIServiceOptions = (params) => request({ url: "ai/service-options", method: "get", params });
 export const getAIOperationalContext = (data) => request({ url: "ai/operational-context", method: "post", data });
 export const getAIClinicalContext = ({ feature_key, patient_id, encounter_ref, ...source_refs }) => request({ url: "ai/context", method: "post", data: { feature_key, patient_id, encounter_ref, source_refs } });

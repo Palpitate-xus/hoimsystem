@@ -422,3 +422,40 @@ def test_same_clock_conflicts_only_block_dependent_rr_or_sbp_and_keep_other_priv
     source = qsofa_sources.assessment_current(db_session, row, user=case["doctor"])["specialist_source"]
     assert source["point_conflicts"] == (["respiratory_rate"] if relevant else [])
     assert source["measurements"]["systolic_bp"]["value"] == "100.00000000" and source["gcs"]["components"]["eye"]["score"] == 4
+
+
+def test_complete_immutable_same_exam_group_utf8_capacity_rejects_before_source_or_audit_insertion_without_truncation(db_session, case, monkeypatch):
+    monkeypatch.setattr(inpatient_gcs, "utcnow", lambda: case["as_of"])
+    selected_note = case["gcs"].payload_json
+    for _ in range(40):
+        data = gcs_payload(case, note="合" * 1000, same_exam_basis_note="同" * 1000)
+        row = inpatient_gcs.create_source(db_session, case["doctor"], {**scope(case), "observed_at": utc_text(case["start"] + datetime.timedelta(minutes=2)), "payload": data})
+        db_session.add(row)
+        db_session.flush()
+    db_session.commit()
+    monkeypatch.setattr(inpatient_gcs, "utcnow", lambda: case["now"])
+    group = qsofa_sources.gcs_group(db_session, case["point"].observation_id, case["as_of"])
+    assert len(group) == 41 and len(canonical_json(group).encode("utf-8")) > qsofa_sources.MAX_SNAPSHOT_BYTES
+    before = (db_session.query(AIQsofaAssessment).count(), db_session.query(AIAuditEvent).count(), db_session.query(InpatientGcsObservation).count())
+    with pytest.raises(HTTPException) as error:
+        create(db_session, case)
+    assert error.value.status_code == 422 and "262144" in str(error.value.detail)
+    assert (db_session.query(AIQsofaAssessment).count(), db_session.query(AIAuditEvent).count(), db_session.query(InpatientGcsObservation).count()) == before
+    assert case["gcs"].payload_json == selected_note and not db_session.new
+
+
+def test_super_can_sign_only_with_actual_doctor_entity_and_original_clinical_care(db_session, case):
+    supervisor = case["seed"]["super_admin_user"]
+    doctor = Doctor(user_id=supervisor.user_id, name="Synthetic actual clinical reviewer", department_id=case["seed"]["department"].department_id)
+    db_session.add(doctor)
+    db_session.commit()
+    with pytest.raises(HTTPException) as error:
+        qsofa_sources.create_assessment(db_session, supervisor, body(case))
+    assert error.value.status_code == 403
+    case["admission"].doctor_id = doctor.doctor_id
+    db_session.commit()
+    row = qsofa_sources.create_assessment(db_session, supervisor, body(case))
+    db_session.commit()
+    current = qsofa_sources.assessment_current(db_session, row, user=supervisor)
+    assert current["eligible"] and current["snapshot"]["author_qualification"]["doctor_id"] == doctor.doctor_id
+    assert current["snapshot"]["author_qualification"]["role_at_creation"] == "super_admin"

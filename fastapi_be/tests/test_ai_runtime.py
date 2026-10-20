@@ -142,6 +142,26 @@ async def test_patient_selector_is_scoped_to_real_care_relationships(async_clien
     assert seed_data["patient2"].patient_id not in {item["patient_id"] for item in doctors.json()["data"]}
 
 
+@pytest.mark.asyncio
+async def test_emergency_triage_does_not_wait_for_model_configuration(async_client, seed_data, auth_headers, db_session):
+    response = await async_client.post(
+        "/api/ai/runs", headers=auth_headers(seed_data["patient_user"].username), json={"feature_key": "conversational_triage", "input": {"question": "持续胸痛，呼吸困难"}}
+    )
+    assert response.status_code == 422
+    assert "不要等待 AI" in response.text
+    assert db_session.query(AIRun).count() == 0
+
+
+@pytest.mark.asyncio
+async def test_clinical_input_requires_explicit_provider_data_permission(async_client, seed_data, auth_headers, db_session):
+    provider, _ = configure(db_session, seed_data, "guideline_qa")
+    provider.allows_patient_data = 0
+    db_session.commit()
+    response = await async_client.post("/api/ai/runs", headers=auth_headers(seed_data["doctor_user"].username), json={"feature_key": "guideline_qa", "input": {"question": "说明诊疗资料缺口"}})
+    assert response.status_code == 409
+    assert "处理患者资料" in response.text
+
+
 def reviewed_knowledge(db, seed_data):
     content = "测试知识：问诊资料缺失时先核对临床记录，本文仅用于隔离测试，不提供实际诊疗建议。"
     row = AIKnowledgeDocument(

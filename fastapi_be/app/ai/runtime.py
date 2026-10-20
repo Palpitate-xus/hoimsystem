@@ -54,15 +54,20 @@ def check_configuration(db: Session, user: User, spec: FeatureSpec, config: AIFe
 def create_run(db: Session, user: User, req: RunRequest) -> AIRun:
     """Freeze an authorized, source-linked request before a durable worker processes it."""
     spec, config = authorized_feature(db, user, req.feature_key)
-    provider = check_configuration(db, user, spec, config, req.preview)
-    original_revision = config.revision
     if len(encode_json(req.input)) > settings.AI_MAX_INPUT_CHARS:
         raise HTTPException(422, "任务输入超过允许长度")
+    if spec.number in {51, 52}:
+        from app.routers.triage import EMERGENCY_KEYWORDS
+
+        if any(keyword in encode_json(req.input) for keyword in EMERGENCY_KEYWORDS):
+            raise HTTPException(422, "检测到可能的急症描述，请立即拨打急救电话或前往急诊，不要等待 AI 生成结果")
+    provider = check_configuration(db, user, spec, config, req.preview)
+    original_revision = config.revision
     if spec.scope == "patient" and req.patient_id is None:
         raise HTTPException(422, "该功能需要选择已授权患者")
     if req.patient_id is not None and spec.scope != "patient":
         raise HTTPException(422, "该任务不接受额外加载个体患者资料")
-    if req.patient_id is not None and not provider.allows_patient_data:
+    if (req.patient_id is not None or spec.clinical or spec.category == "patient" or spec.key == "deidentification") and not provider.allows_patient_data:
         raise HTTPException(409, "该模型服务尚未获准处理患者资料")
     if req.patient_id is not None:
         bundle = patient_snapshot(db, user, spec, req.patient_id, req.encounter_ref)

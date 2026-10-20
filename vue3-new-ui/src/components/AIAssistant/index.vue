@@ -132,7 +132,7 @@ watch(() => props.initialFeature, key => { if (features.value.some(item => item.
 watch(() => props.patientId, id => { formVersion += 1; patientId.value = id; });
 watch(() => props.encounterRef, value => { encounterRef.value = value; });
 async function inspectContext() {
-  const sourceKeys = ["record_id", "structured_record_id", "prescription_id", "lab_result_id", "imaging_report_id"];
+  const sourceKeys = selected.value?.source_reference_keys || ["record_id", "structured_record_id", "prescription_id", "lab_result_id", "imaging_report_id"];
   const references = Object.fromEntries(sourceKeys.filter(key => props.initialInput[key]).map(key => [key, props.initialInput[key]]));
   if (prescriptionId.value) references.prescription_id = prescriptionId.value;
   contextData.value = (await getAIClinicalContext({ ...references, feature_key: featureKey.value, patient_id: patientId.value, encounter_ref: encounterRef.value || undefined })).data; contextDialog.value = true;

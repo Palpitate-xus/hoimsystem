@@ -31,12 +31,13 @@
             <el-tag v-else type="info" size="small">{{ row.status_text }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="200">
+        <el-table-column label="操作" width="300">
           <template #default="{row}">
             <el-button v-if="row.status===0" size="small" type="primary" @click="approveApp(row)">审批</el-button>
             <el-button v-if="row.status===1" size="small" @click="openScheduleDialog(row)">排台</el-button>
             <el-button v-if="row.status===2" size="small" type="success" @click="openAnesthesiaDialog(row)">麻醉</el-button>
             <el-button size="small" type="danger" @click="cancelApp(row)">取消</el-button>
+            <ai-action title="AI 围术期评估与用药分析" :patient-id="row.patient_id" :encounter-ref="row.admission_id || ''" :initial-input="{ surgery_application_id: row.application_id }" :feature-keys="['perioperative_assessment', 'perioperative_antibiotics', 'patient_summary', 'clinical_consistency']" initial-feature="perioperative_assessment" />
           </template>
         </el-table-column>
       </el-table>
@@ -58,10 +59,11 @@
             <el-tag v-else type="success" size="small">{{ row.status_text }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="150">
+        <el-table-column label="操作" width="260">
           <template #default="{row}">
             <el-button v-if="row.status===0" size="small" type="primary" @click="startSurgeryFn(row)">开始</el-button>
             <el-button v-if="row.status===1" size="small" type="success" @click="completeSurgeryFn(row)">完成</el-button>
+            <ai-action label="AI 时机分析" title="AI 围术期时机分析" :patient-id="row.patient_id" :encounter-ref="row.admission_id || ''" :initial-input="{ surgery_application_id: row.application_id, surgery_schedule_id: row.schedule_id }" :feature-keys="['perioperative_antibiotics', 'perioperative_assessment']" initial-feature="perioperative_antibiotics" />
           </template>
         </el-table-column>
       </el-table>
@@ -71,7 +73,7 @@
       <template #header><div class="page-toolbar"><span>围术期预防用药</span><el-button type="primary" size="small" @click="openPerioperativeDialog">新增预防用药</el-button></div></template>
       <el-table :data="perioperativeAntibiotics" size="small" empty-text="暂无围术期预防用药">
         <el-table-column prop="patient_name" label="患者" width="90" /><el-table-column prop="surgery_name" label="手术" /><el-table-column prop="pharmaceutical_name" label="抗菌药" width="130" /><el-table-column prop="dose" label="剂量" width="100" /><el-table-column prop="timing_minutes" label="术前分钟" width="90" /><el-table-column prop="status_text" label="状态" width="90" />
-        <el-table-column label="操作" width="100"><template #default="{ row }"><el-button v-if="row.status === 0" size="small" type="success" @click="administerPerioperative(row)">执行</el-button></template></el-table-column>
+        <el-table-column label="操作" width="240"><template #default="{ row }"><el-button v-if="row.status === 0" size="small" type="success" @click="administerPerioperative(row)">执行</el-button><ai-action label="AI 用药分析" title="AI 围术期用药分析" :patient-id="row.patient_id" :encounter-ref="row.admission_id || ''" :initial-input="{ surgery_application_id: row.application_id, perioperative_id: row.perioperative_id }" :feature-keys="['perioperative_antibiotics']" initial-feature="perioperative_antibiotics" /></template></el-table-column>
       </el-table>
     </el-card>
 
@@ -189,6 +191,7 @@
 <script setup>
 import { ref, computed, onMounted } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
+import AiAction from "@/components/AIAction/index.vue";
 import { getSurgeryApplicationList, createSurgeryApplication, approveSurgeryApplication, cancelSurgeryApplication, getSurgeryScheduleList, createSurgerySchedule, startSurgery, completeSurgery, createAnesthesiaRecord, getPerioperativeAntibiotics, createPerioperativeAntibiotic, updatePerioperativeAntibioticStatus } from "@/api/surgery";
 import { getInpatientList } from "@/api/admission";
 import { getDoctorList } from "@/api/admin";

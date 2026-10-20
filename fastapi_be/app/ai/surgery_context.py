@@ -7,6 +7,12 @@ from pydantic import Field, model_validator
 
 from app.ai.surgery_contract import SHA256, UUID, StrictModel, SurgerySource, canonical_json, hash_content, identity
 
+SCOPE_NOTE = "仅在明确声明病例、有限开始时刻及共享阶段资源范围内核对候选；时长估计、资格、覆盖和政策保留原审核状态，不自动预订或改变手术执行"
+MISSING_DATA = (
+    SCOPE_NOTE,
+    "固定搜索证明仅适用于所选目标与明确声明域；未知资料、搜索预算及原始业务记录缺口单独保留，不等于临床或真实运营验证。",
+)
+
 
 class SurgeryContextBinding(StrictModel):
     schema_version: Literal["surgery_context_binding_v1"]

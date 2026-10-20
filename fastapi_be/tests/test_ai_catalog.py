@@ -30,7 +30,8 @@ def test_treatment_contract_requires_evidence_and_dedicated_models_stay_distinct
 def test_hospital_scope_does_not_advertise_access_to_unscoped_business_roles():
     for spec in FEATURES:
         if spec.scope == "hospital":
-            assert set(spec.default_roles) <= {"super_admin", "admin", "director"}
+            expected = {"super_admin", "admin", "director"} | ({"pharmacist"} if spec.number in {66, 67} else set())
+            assert set(spec.default_roles) <= expected
     assert FEATURE_BY_KEY["feedback_analysis"].requires_patient_data_permission
     assert FEATURE_BY_KEY["research_cohort"].requires_patient_data_permission
     assert not FEATURE_BY_KEY["operations_qa"].requires_patient_data_permission

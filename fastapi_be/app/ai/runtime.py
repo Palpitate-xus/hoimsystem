@@ -86,6 +86,8 @@ def create_run(db: Session, user: User, req: RunRequest) -> AIRun:
         bundle = ContextBundle(data={"scope": "task_input", "missing_data": []}, department_ids=departments)
     if spec.key == "treatment_pathway" and not bundle.data.get("current_confirmed_diagnoses"):
         raise HTTPException(409, "治疗路径推荐需要指定本次就诊，并提供该次就诊已确认的诊断")
+    if spec.number in {66, 67} and not bundle.data.get("supply_inventory"):
+        raise HTTPException(409, "库存预测或优化需要授权范围内的明确品种资料，请先选择真实目录品种并核实库存范围")
     patient = db.get(Patient, req.patient_id) if req.patient_id else None
     clean_input = minimize_identifiers(req.input, patient)
     tools, tool_evidence = business_tools(db, spec, user, req.patient_id, clean_input, bundle)

@@ -9,15 +9,16 @@ from sqlalchemy import case, func
 from app.ai.catalog import FeatureSpec
 from app.ai.context import ContextBundle
 from app.ai.governance import digest, encode_json
+from app.ai.inventory_sources import attach_inventory_sources
 from app.models import Admission, Bed, DailyOperationalMetric, Department, Doctor, Registration, User, Ward
 
 
-def operational_scope(db, user: User, values: dict) -> set[int] | None:
+def operational_scope(db, user: User, spec: FeatureSpec, values: dict) -> set[int] | None:
     """None denotes authorized hospital scope; a set always denotes specific departments."""
     requested = values.get("department_id")
     if requested is not None and (type(requested) is not int or requested < 1):
         raise HTTPException(422, "科室标识须为正整数")
-    if user.user_role in {"admin", "super_admin"}:
+    if user.user_role in {"admin", "super_admin"} or (user.user_role == "pharmacist" and spec.number in {66, 67}):
         departments = None
     elif user.user_role == "director":
         departments = {row[0] for row in db.query(Doctor.department_id).filter(Doctor.user_id == user.user_id, Doctor.department_id.is_not(None)).all()}
@@ -57,7 +58,7 @@ def operational_window(values: dict) -> tuple[datetime.date, datetime.date]:
 
 
 def operational_context(db, user: User, spec: FeatureSpec, values: dict) -> ContextBundle:
-    departments = operational_scope(db, user, values)
+    departments = operational_scope(db, user, spec, values)
     start, end = operational_window(values)
     bundle = ContextBundle(department_ids=departments or set())
     bundle.data = {
@@ -77,6 +78,9 @@ def operational_context(db, user: User, spec: FeatureSpec, values: dict) -> Cont
         bundle.data[key] = {"source_id": source_id, **clean}
         bundle.evidence.append({"source_id": source_id, "kind": "operational_record", "title": title, "content": encode_json(clean)})
 
+    if spec.number in {66, 67}:
+        attach_inventory_sources(db, departments, start, end, bundle, add, values)
+        return bundle
     if spec.number not in {61, 62, 63, 64}:
         bundle.data["missing_data"].append("本功能的专属运营来源尚需补充，不以无关全院财务指标代替")
         return bundle

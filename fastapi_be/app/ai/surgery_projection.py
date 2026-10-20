@@ -153,8 +153,24 @@ def project_case(domain, requirements, estimate, duty_originals, identities):
             duty = None
             if person:
                 if choice.duty_source is not None:
-                    raw = verified_original(duty_originals[choice.duty_source.source_record_id])
-                    check_reference(raw, choice.duty_source, "resource_availability_busy")
+                    value = duty_originals[choice.duty_source.source_record_id]
+                    if value.get("schema_version") == "surgery_safe_resource_original_v1":
+                        raw = verified_safe_resource(value)
+                        if (
+                            raw.source_kind != "resource_availability_busy"
+                            or raw.source_record_id != choice.duty_source.source_record_id
+                            or raw.source_content_hash != choice.duty_source.expected_content_hash
+                            or raw.source_governance_hash != choice.duty_source.expected_governance_hash
+                            or not raw.eligible_for_new_use
+                            or raw.redacted
+                            or raw.exclusion_reasons
+                            or raw.status != "published"
+                            or raw.payload is None
+                        ):
+                            raise ValueError("The selected safe duty must be its complete current original")
+                    else:
+                        raw = verified_original(value)
+                        check_reference(raw, choice.duty_source, "resource_availability_busy")
                     if raw.resource_id != choice.resource_id or raw.payload.record_type != "duty":
                         raise ValueError("Explicit duty membership belongs to a different actual person or record")
                 duty = {
@@ -404,7 +420,7 @@ def project_resource(*, resource_id, kind, original_identity_hash, declaration, 
         kind=kind,
         identity_hash=identities.prehashed_key("physical_identity", original_identity_hash),
         identity_status="verified" if all(item.payload.identity_status == "verified" for item in identity_originals) else "unknown",
-        ref_ids=[identities.uuid("fact", item.source_record_id) for item in identity_originals],
+        ref_ids=sorted(identities.uuid("fact", item.source_record_id) for item in identity_originals),
         capability_facts=[item.model_dump() for item in capabilities],
         availability=[item.model_dump() for item in availability],
         availability_coverage=coverage(declaration.availability_coverage),

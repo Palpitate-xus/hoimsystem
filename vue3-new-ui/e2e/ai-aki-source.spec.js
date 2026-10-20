@@ -67,6 +67,17 @@ test("已有临床核实评估可护士明确选择，只发评估ID与摘要且
   const state = await session(page, { sources: [makeAssessment()] }); await page.evaluate(() => window.__akiProbe.store.commit("user/permissions", ["nurse"])); await selected(page); await expect.poll(() => positiveSelections(page)).toEqual([{ type: "selection", value: { aki_assessment_id: assessmentId, content_hash: hashes.source } }]); await page.getByRole("button", { name: "核对所选成人AKI原来源", exact: true }).click(); const dialog = page.getByRole("dialog", { name: "成人AKI原评估来源复核", exact: true }); await expect(dialog).toContainText(stamp); await expect(dialog).toContainText("0.00000000 mL"); await expect(dialog).toContainText("原区间的平均量"); expect(state.writes).toEqual([]); noModel(state);
 });
 
+for (const mode of ["observed_within_7d", "presumed_within_7d"]) {
+  test(`${mode}按实际策略限定基线原住院，只有明确推定策略允许另一已授权原住院`, async ({ page }) => {
+    const row = makeAssessment({ baseline_mode: mode, baseline_rise_within_7d_confirmed: mode === "presumed_within_7d" ? true : null, baseline_review_note: mode === "presumed_within_7d" ? note : null });
+    row.snapshot.baseline_creatinine.admission_id = row.snapshot.baseline_creatinine.snapshot.admission_id = oldAdmission;
+    const state = await session(page, { sources: [row] });
+    if (mode === "presumed_within_7d") { await selected(page); await expect.poll(() => positiveSelections(page)).toHaveLength(1); const view = await render(page, row, analysisFor(row.specialist_source)); await expect(view.getByLabel("AKI最低达到分期", { exact: true })).toContainText("至少达到AKI 1期"); await expect(view.getByLabel("AKI所选肌酐原值", { exact: true })).toContainText(oldAdmission); }
+    else { await expect(page.getByRole("alert")).toContainText("目录与原患者、住院或窗口不一致"); expect(await positiveSelections(page)).toEqual([]); const view = await render(page, row, analysisFor(row.specialist_source)); await expect(view.getByRole("alert")).toContainText("冻结原资料不一致"); await expect(view.getByLabel("AKI最低达到分期", { exact: true })).toHaveCount(0); }
+    noModel(state);
+  });
+}
+
 for (const [name, mutate] of [
   ["缺冻结正文", row => { row.snapshot = null; }],
   ["原肌酐患者串源", row => { row.snapshot.index_creatinine.snapshot.original.order.patient_id = 22; }],

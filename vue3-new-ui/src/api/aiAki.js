@@ -33,7 +33,8 @@ export function akiAssessmentMatches(row, patientId, admissionId, windowId = nul
     const request = frozen.attestation;
     for (const role of ["index_creatinine", "comparison_48h", "baseline_creatinine"]) {
       const raw = frozen[role], reference = request[role];
-      if (raw == null ? reference !== null : !object(raw) || raw.assessment_projection !== "aki_lab_projection_v1" || !object(raw.snapshot) || !labSourceMatches(raw, patientId, role === "baseline_creatinine" ? raw.admission_id : admissionId) || raw.lab_source_id !== reference?.lab_source_id || raw.content_hash !== reference?.expected_content_hash) return false;
+      const mayUseOriginalAdmission = role === "baseline_creatinine" && request.baseline_mode === "presumed_within_7d";
+      if (raw == null ? reference !== null : !object(raw) || raw.assessment_projection !== "aki_lab_projection_v1" || !object(raw.snapshot) || !labSourceMatches(raw, patientId, mayUseOriginalAdmission ? raw.admission_id : admissionId) || raw.lab_source_id !== reference?.lab_source_id || raw.content_hash !== reference?.expected_content_hash) return false;
     }
     const point = frozen.weight_point;
     if (point == null ? request.weight_point !== null : point.patient_id !== patientId || point.admission_id !== admissionId || point.observation_id !== request.weight_point?.observation_id || point.content_hash !== request.weight_point?.expected_content_hash || !object(point.payload?.measurements?.body_weight)) return false;

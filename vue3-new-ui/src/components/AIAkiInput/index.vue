@@ -70,6 +70,7 @@ function payload() {
   if (!draft.rrt_status || !draft.baseline_mode) throw new Error("基线与RRT状态须明确选择，未知不能默认成未启动或已知基线");
   const refLab = (id, directory) => { if (!id) return null; const row = directory.find(item => item.lab_source_id === id); if (!row) throw new Error("所选原肌酐已不在当前核对目录"); return { lab_source_id: id, expected_content_hash: row.content_hash }; };
   const index = refLab(draft.indexId, creatinines.value), comparison = refLab(draft.comparisonId, creatinines.value), baseline = refLab(draft.baselineId, baselines.value), anyLab = !!(index || comparison || baseline);
+  if (baseline && draft.baseline_mode !== "presumed_within_7d" && baselines.value.find(row => row.lab_source_id === draft.baselineId).admission_id !== ticket.admissionId) throw new Error("仅明确较早基线及临床近期升高策略可引用另一原住院；观察基线须来自本次原住院窗口");
   if (anyLab && (!canSign.value || !draft.serum_creatinine_confirmed || draft.creatinine_review_note.trim().length < 20)) throw new Error("所选肌酐用途须由有实际资格的临床人员逐项确认，并填写至少20字依据");
   if (draft.baseline_mode === "presumed_within_7d" && (!canSign.value || !baseline || !draft.baseline_rise_within_7d_confirmed || draft.baseline_review_note.trim().length < 20)) throw new Error("较早原基线须明确选择并有近期急性升高的独立临床确认和依据");
   const weight = draft.weightId ? weights.value.find(row => row.observation_id === draft.weightId) : null;

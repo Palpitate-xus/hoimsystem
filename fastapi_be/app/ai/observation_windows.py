@@ -5,6 +5,7 @@ import hashlib
 import json
 import uuid
 from collections import defaultdict
+from decimal import Decimal
 
 from fastapi import HTTPException
 
@@ -17,7 +18,7 @@ RISK_FEATURES = {41, 42, 43}
 MEASUREMENTS = ("heart_rate", "pulse_rate", "respiratory_rate", "systolic_bp", "diastolic_bp", "temperature", "spo2", "body_weight", "oxygen_flow", "fio2")
 MAX_ROWS = 1000
 LEGACY_SCHEMA_VERSION = "inpatient_window_v1"
-SCHEMA_VERSION = LEGACY_SCHEMA_VERSION
+SCHEMA_VERSION = "inpatient_window_v2"
 SUPPORTED_SCHEMA_VERSIONS = {LEGACY_SCHEMA_VERSION, SCHEMA_VERSION}
 
 
@@ -243,6 +244,143 @@ def _build_v1_snapshot(db, *, window_id, patient_id, admission_id, created_by, c
     return snapshot
 
 
+def _laboratory_quality(rows):
+    groups = defaultdict(list)
+    excluded = []
+    numeric_count = qualitative_count = 0
+    for item in rows:
+        if item["eligible"] is not True:
+            excluded.append({"source_id": item["source_id"], "reasons": item["exclusion_reasons"]})
+            continue
+        mapping = item["snapshot"]["mapping"]
+        original = item["snapshot"]["original"]["observation"]
+        identity = {"source_namespace": mapping["source_namespace"], **mapping["signature"]}
+        identity_hash = hashlib.sha256(canonical_json(identity).encode()).hexdigest()
+        numeric = mapping["signature"]["value_kind"] == "numeric"
+        numeric_count += int(numeric)
+        qualitative_count += int(not numeric)
+        # Compare the exact stored numeric quantity without changing its display
+        # text. Qualitative text is never parsed as a numeric value.
+        value = ("numeric", Decimal(original["value_num"])) if numeric else ("qualitative", original["value_text"])
+        references = tuple(Decimal(original[key]) if original.get(key) is not None else None for key in ("reference_low", "reference_high"))
+        comparison = (value, references, original.get("reference_text"), original.get("flag"))
+        groups[(item["collected_at_utc"], mapping["analyte_key"], identity_hash)].append((item["source_id"], identity, comparison))
+    repeated = []
+    for (collected, analyte, identity_hash), members in sorted(groups.items()):
+        if len(members) > 1:
+            repeated.append(
+                {
+                    "collected_at_utc": collected,
+                    "analyte_key": analyte,
+                    "identity_hash": identity_hash,
+                    "identity": members[0][1],
+                    "source_ids": [item[0] for item in members],
+                    "state": "duplicate_same_value" if len({item[2] for item in members}) == 1 else "conflicting_values_or_reference",
+                }
+            )
+    return {
+        "member_count": len(rows),
+        "eligible_count": numeric_count + qualitative_count,
+        "eligible_numeric_count": numeric_count,
+        "eligible_qualitative_count": qualitative_count,
+        "excluded_sources": excluded,
+        "same_time_groups": repeated,
+        "grouping_basis": "same_analyte_exact_reviewed_identity_and_collected_time",
+        "not_all_labs_confirmed": True,
+        "query_truncated": False,
+        "unit_conversion_performed": False,
+        "clinical_scores_calculated": False,
+        "eligibility_basis": "source_and_mapping_governance_not_model_applicability",
+    }
+
+
+def _minimize_laboratory_text(item, patient):
+    from app.ai.context import minimize_identifiers
+
+    def fields(value, names):
+        for name in names:
+            if isinstance(value.get(name), str):
+                value[name] = minimize_identifiers(value[name], patient)
+
+    fields(item, ("revoke_reason",))
+    snapshot = item["snapshot"]
+    fields(snapshot, ("collection_time_basis_note", "admission_binding_note", "source_namespace_basis_note"))
+    original = snapshot["original"]
+    fields(original["observation"], ("display", "value_text", "reference_text", "method", "specimen_type"))
+    fields(original["report"], ("result",))
+    fields(original["order"], ("check_type", "check_items"))
+    mapping = snapshot["mapping"]
+    fields(mapping, ("analyte_label", "evidence_reference", "rationale", "review_note", "revoke_reason"))
+    fields(mapping["signature"], ("method", "specimen_type"))
+    fields(item["mapping_current"], ("revoke_reason",))
+
+
+def _extend_laboratory_snapshot(db, snapshot, *, patient_id, admission_id, start_at, end_at, as_of):
+    from app.ai.context import minimize_identifiers
+    from app.inpatient_laboratory import source_current
+    from app.models import InpatientLabSource
+
+    rows = (
+        db.query(InpatientLabSource)
+        .filter(
+            InpatientLabSource.patient_id == patient_id,
+            InpatientLabSource.admission_id == admission_id,
+            InpatientLabSource.collected_at_utc >= start_at,
+            InpatientLabSource.collected_at_utc <= end_at,
+            InpatientLabSource.registered_at <= as_of,
+            InpatientLabSource.available_at <= as_of,
+        )
+        .populate_existing()
+        .order_by(InpatientLabSource.collected_at_utc, InpatientLabSource.lab_source_id)
+        .limit(MAX_ROWS + 1)
+        .all()
+    )
+    if len(snapshot["points"]) + len(snapshot["urine_intervals"]) + len(rows) > MAX_ROWS:
+        raise HTTPException(422, "观测窗超过1000条点测、尿量与检验合计原记录（含撤销），请缩小窗口，不能截断")
+    laboratory = [source_current(db, item, allow_revoked=True) for item in rows]
+    quality = _laboratory_quality(laboratory)
+    patient = db.get(Patient, patient_id)
+    for item in laboratory:
+        item["governance_hash"] = hashlib.sha256(
+            canonical_json({key: item[key] for key in ("status", "revision", "revoked_at", "revoked_by", "revoke_reason", "mapping_current", "eligible", "exclusion_reasons")}).encode()
+        ).hexdigest()
+        # The verified source binds the complete original parent report. Only
+        # the registered observation and parent identity belong in risk input.
+        original = item["snapshot"]["original"]
+        original["report"].pop("result", None)
+        original["order"].pop("check_type", None)
+        original["order"].pop("check_items", None)
+        item["window_projection"] = "risk_lab_projection_v1"
+        _minimize_laboratory_text(item, patient)
+    for group in quality["same_time_groups"]:
+        for key in ("method", "specimen_type"):
+            group["identity"][key] = minimize_identifiers(group["identity"][key], patient)
+    snapshot["schema_version"] = SCHEMA_VERSION
+    snapshot["lab_observations"] = laboratory
+    snapshot["laboratory_projection"] = {
+        "schema_version": "risk_lab_projection_v1",
+        "omitted_parent_fields": ["original.report.result", "original.order.check_type", "original.order.check_items"],
+        "original_content_binding": "raw_original_hash_and_content_hash",
+        "attestation_notes": "provenance_only_not_measurement_facts",
+    }
+    snapshot["laboratory_interval_semantics"] = "[start,end]"
+    snapshot["quality"]["laboratory"] = quality
+    snapshot["lab_input_status"] = "governed_subset_available" if quality["eligible_count"] else "not_available_no_eligible_governed_sources"
+    snapshot["limitations"].extend(
+        [
+            "检验仅来自明确原住院、人工核实UTC采样时刻和来源命名空间、原审核及项目映射的受控登记，不证明全量检验齐全",
+            "检验available_at为服务器核实登记后可用时刻，不是历史LIS发布时间；旧原始无时区时钟不自动认作UTC",
+            "检验数量是数据库已存精确Decimal值，不能证明最初输入词法或小数尾零；定性结果保持原文字，不强转数字",
+            "未自动换算检验单位、选择冲突结果、计算NEWS2/KDIGO或风险概率；来源与映射审核不构成模型适用性或临床验证",
+        ]
+    )
+    snapshot["content_hash"] = content_hash(snapshot)
+    snapshot["source_id"] = f"observation_window:{snapshot['window_id']}:{snapshot['content_hash'][:12]}"
+    if len(canonical_json(snapshot).encode()) > settings.AI_MAX_CONTEXT_CHARS:
+        raise HTTPException(422, "原观测窗及质量说明超过AI上下文字节限制，请缩小窗口，不自动截断")
+    return snapshot
+
+
 def build_snapshot(db, *, window_id, patient_id, admission_id, created_by, created_at, start_at, end_at, as_of, schema_version=SCHEMA_VERSION):
     if schema_version not in SUPPORTED_SCHEMA_VERSIONS:
         raise HTTPException(422, "不支持的观测窗版本，不能自动升级历史冻结资料")
@@ -251,7 +389,7 @@ def build_snapshot(db, *, window_id, patient_id, admission_id, created_by, creat
     )
     if schema_version == LEGACY_SCHEMA_VERSION:
         return snapshot
-    raise HTTPException(422, "不支持的观测窗版本，不能自动升级历史冻结资料")
+    return _extend_laboratory_snapshot(db, snapshot, patient_id=patient_id, admission_id=admission_id, start_at=start_at, end_at=end_at, as_of=as_of)
 
 
 def create_window(db, user, values):
@@ -317,6 +455,21 @@ def observation_context(db, user, patient_id, admission_id, references):
         evidence.append(
             {"source_id": item["source_id"], "kind": "clinical_record", "title": "观测窗内原始记录与状态", "observed_at": item.get("observed_at", item.get("end_at")), "content": canonical_json(item)}
         )
+    mapping_sources = set()
+    for item in snapshot.get("lab_observations", []):
+        evidence.append({"source_id": item["source_id"], "kind": "clinical_record", "title": "观测窗内受控原检验及当前治理", "observed_at": item["collected_at_utc"], "content": canonical_json(item)})
+        mapping = item["snapshot"]["mapping"]
+        if mapping["source_id"] not in mapping_sources:
+            mapping_sources.add(mapping["source_id"])
+            evidence.append(
+                {
+                    "source_id": mapping["source_id"],
+                    "kind": "clinical_record",
+                    "title": "登记时冻结的项目映射，当前治理见原检验来源",
+                    "observed_at": mapping["published_at"],
+                    "content": canonical_json(mapping),
+                }
+            )
     return ContextBundle(
         data={
             "scope": "inpatient_observation_window",

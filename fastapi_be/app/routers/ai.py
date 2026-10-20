@@ -73,12 +73,24 @@ def prescription_options(feature_key: str, patient_id: int, db: Session = Depend
 
 
 @router.get("/ai/context")
-def inspect_context(feature_key: str, patient_id: int, encounter_ref: str | None = None, db: Session = Depends(get_db), user: User = Depends(get_current_user)) -> dict:
+def inspect_context(
+    feature_key: str,
+    patient_id: int,
+    encounter_ref: str | None = None,
+    record_id: str | None = Query(None, max_length=50),
+    structured_record_id: str | None = Query(None, max_length=50),
+    prescription_id: str | None = Query(None, max_length=50),
+    lab_result_id: str | None = Query(None, max_length=50),
+    imaging_report_id: str | None = Query(None, max_length=50),
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+) -> dict:
     """Inspect the patient's authorized facts and missing information before submission."""
     spec, _ = authorized_feature(db, user, feature_key)
     if spec.scope != "patient":
         raise HTTPException(422, "该能力无需加载患者临床资料")
-    bundle = patient_snapshot(db, user, spec, patient_id, encounter_ref)
+    references = {"record_id": record_id, "structured_record_id": structured_record_id, "prescription_id": prescription_id, "lab_result_id": lab_result_id, "imaging_report_id": imaging_report_id}
+    bundle = patient_snapshot(db, user, spec, patient_id, encounter_ref, references)
     return {"code": 200, "msg": "success", "data": {"context": bundle.data, "metadata": context_metadata(bundle)}}
 
 

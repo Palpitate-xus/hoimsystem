@@ -6,7 +6,7 @@ import re
 from dataclasses import dataclass, field
 
 from fastapi import HTTPException
-from sqlalchemy import or_, select
+from sqlalchemy import case, or_, select
 from sqlalchemy.orm import Session, selectinload
 
 from app.ai.catalog import FeatureSpec
@@ -158,14 +158,64 @@ def authorize_patient(db: Session, user: User, patient_id: int, category: str, e
     raise HTTPException(403, "未确认本次诊疗关系，请由超级管理员按用途授予限时访问权限")
 
 
-def patient_snapshot(db: Session, user: User, spec: FeatureSpec, patient_id: int, encounter_ref: str | None = None) -> ContextBundle:
+def _selected_records(db: Session, user: User, patient_id: int, references: dict) -> dict:
+    """Resolve explicit row selections inside this patient's scope before bounded history queries."""
+    selected = {}
+    sources = [
+        ("record_id", MedicalRecord, "medical_record_id", None),
+        ("structured_record_id", StructuredMedicalRecord, "record_id", None),
+        ("prescription_id", Prescription, "prescription_id", None),
+        ("lab_result_id", LabResult, "lab_result_id", LabOrder),
+        ("imaging_report_id", ImagingReport, "report_id", ImagingOrder),
+    ]
+    for key, model, primary_key, order in sources:
+        reference = references.get(key)
+        if reference is None or reference == "":
+            continue
+        if not isinstance(reference, str) or len(reference) > 50:
+            raise HTTPException(422, "所选资料标识格式不正确")
+        query = db.query(model).filter(getattr(model, primary_key) == reference)
+        query = query.join(order).filter(order.patient_id == patient_id) if order else query.filter(model.patient_id == patient_id)
+        row = query.first()
+        if not row:
+            raise HTTPException(404, "所选资料不存在或不属于该患者")
+        if (isinstance(row, LabResult) and row.audit_status != 1) or (isinstance(row, ImagingReport) and row.status != 2):
+            raise HTTPException(409, "所选检验或影像报告尚未审核，不能用于 AI 解读")
+        if user.user_role == "patient" and ((isinstance(row, MedicalRecord) and row.status != 1) or (isinstance(row, StructuredMedicalRecord) and (row.status not in {1, 2} or not row.sign_time))):
+            raise HTTPException(403, "该病历尚未完成签署，不能在患者端加载")
+        selected[key] = row
+    return selected
+
+
+def patient_snapshot(db: Session, user: User, spec: FeatureSpec, patient_id: int, encounter_ref: str | None = None, source_refs: dict | None = None) -> ContextBundle:
     """Build a bounded snapshot without mixing historical diagnoses into confirmed current ones."""
     patient = authorize_patient(db, user, patient_id, spec.category, encounter_ref)
     encounter = get_encounter(db, patient_id, encounter_ref)
+    selected = _selected_records(db, user, patient_id, source_refs or {})
     bundle = ContextBundle()
     today = datetime.date.today()
     age = today.year - patient.birthday.year - ((today.month, today.day) < (patient.birthday.month, patient.birthday.day)) if patient.birthday else None
-    bundle.data = {"snapshot_time": utcnow().isoformat(), "age": age, "sex": patient.sex, "encounter": None, "current_confirmed_diagnoses": [], "missing_data": []}
+    bundle.data = {
+        "snapshot_time": utcnow().isoformat(),
+        "age": age,
+        "sex": patient.sex,
+        "encounter": None,
+        "current_confirmed_diagnoses": [],
+        "missing_data": [],
+        "scope_note": "按近期记录和明确所选资料构建的有限快照，不代表完整病史；所选资料不等同于本次就诊资料",
+        "truncated_sources": [],
+        "selected_sources": {key: (source_refs or {})[key] for key in selected},
+    }
+
+    def bounded(query, limit: int, label: str, key: str | None = None, primary_key: str | None = None):
+        rows = query.limit(limit + 1).all()
+        chosen = selected.get(key)
+        if chosen:
+            rows = [chosen, *[item for item in rows if getattr(item, primary_key) != getattr(chosen, primary_key)]]
+        if len(rows) > limit:
+            bundle.data["truncated_sources"].append({"source": label, "limit": limit, "note": "其余记录未纳入，不能据此断言无其他结果"})
+        return rows[:limit]
+
     if encounter:
         bundle.data["encounter"] = {
             "kind": "outpatient" if isinstance(encounter, Registration) else "inpatient",
@@ -221,7 +271,15 @@ def patient_snapshot(db: Session, user: User, spec: FeatureSpec, patient_id: int
     if not allergies and not patient.allergy_history:
         bundle.data["missing_data"].append("未记录过敏信息，不能视为无过敏")
 
-    records = db.query(MedicalRecord).filter_by(patient_id=patient_id).order_by(MedicalRecord.consultation_time.desc()).limit(15).all()
+    record_query = db.query(MedicalRecord).filter_by(patient_id=patient_id)
+    if user.user_role == "patient":
+        record_query = record_query.filter(MedicalRecord.status == 1)
+    record_query = (
+        record_query.order_by(case((MedicalRecord.registration_uuid == encounter_ref, 0), else_=1), MedicalRecord.consultation_time.desc())
+        if encounter_ref
+        else record_query.order_by(MedicalRecord.consultation_time.desc())
+    )
+    records = bounded(record_query, 15, "门诊病历", "record_id", "medical_record_id")
     bundle.data["outpatient_records"] = []
     for item in records:
         current = isinstance(encounter, Registration) and item.registration_uuid == encounter.registration_uuid
@@ -234,7 +292,15 @@ def patient_snapshot(db: Session, user: User, spec: FeatureSpec, patient_id: int
         bundle.data["outpatient_records"].append(record)
         if current and item.status == 1 and item.result:
             bundle.data["current_confirmed_diagnoses"].append(item.result)
-    structured = db.query(StructuredMedicalRecord).filter_by(patient_id=patient_id).order_by(StructuredMedicalRecord.create_time.desc()).limit(8).all()
+    structured_query = db.query(StructuredMedicalRecord).filter_by(patient_id=patient_id)
+    if user.user_role == "patient":
+        structured_query = structured_query.filter(StructuredMedicalRecord.status.in_([1, 2]), StructuredMedicalRecord.sign_time.isnot(None))
+    structured_query = (
+        structured_query.order_by(case((StructuredMedicalRecord.admission_id == encounter_ref, 0), else_=1), StructuredMedicalRecord.create_time.desc())
+        if encounter_ref
+        else structured_query.order_by(StructuredMedicalRecord.create_time.desc())
+    )
+    structured = bounded(structured_query, 8, "结构化病历", "structured_record_id", "record_id")
     bundle.data["structured_records"] = []
     for item in structured:
         current = isinstance(encounter, Admission) and item.admission_id == encounter.admission_id
@@ -265,14 +331,10 @@ def patient_snapshot(db: Session, user: User, spec: FeatureSpec, patient_id: int
         if vital
         else None
     )
-    prescriptions = (
-        db.query(Prescription)
-        .options(selectinload(Prescription.pre_phas).selectinload(PrePha.pharmaceutical))
-        .filter_by(patient_id=patient_id)
-        .order_by(Prescription.create_time.desc())
-        .limit(12)
-        .all()
+    prescription_query = (
+        db.query(Prescription).options(selectinload(Prescription.pre_phas).selectinload(PrePha.pharmaceutical)).filter_by(patient_id=patient_id).order_by(Prescription.create_time.desc())
     )
+    prescriptions = bounded(prescription_query, 12, "处方", "prescription_id", "prescription_id")
     bundle.data["prescriptions"] = [
         add(
             "prescription:" + item.prescription_id,
@@ -299,32 +361,48 @@ def patient_snapshot(db: Session, user: User, spec: FeatureSpec, patient_id: int
         )
         for item in prescriptions
     ]
-    results = db.query(LabResult).join(LabOrder).filter(LabOrder.patient_id == patient_id, LabResult.audit_status == 1).order_by(LabResult.report_time.desc()).limit(15).all()
+    results = bounded(
+        db.query(LabResult).join(LabOrder).filter(LabOrder.patient_id == patient_id, LabResult.audit_status == 1).order_by(LabResult.report_time.desc()),
+        15,
+        "已审核检验",
+        "lab_result_id",
+        "lab_result_id",
+    )
     bundle.data["reviewed_lab_reports"] = [
         add(
             "lab:" + item.lab_result_id,
             "已审核检验报告",
-            {"result_text": item.result, "abnormal_flag": item.abnormal_flag, "critical_status": item.critical_status, "report_time": item.report_time, "audit_time": item.audit_time},
+            {
+                "result_text": item.result,
+                "abnormal_flag": item.abnormal_flag,
+                "critical_status": item.critical_status,
+                "report_time": item.report_time,
+                "audit_time": item.audit_time,
+                "critical_notified_time": item.critical_notified_time,
+                "critical_acknowledged_time": item.critical_acknowledged_time,
+                "critical_handled_time": item.critical_handled_time,
+                "critical_handling_note": item.critical_handling_note,
+            },
             item.report_time,
         )
         for item in results
     ]
-    observations = (
-        db.query(LabObservation)
-        .join(LabResult)
-        .join(LabOrder)
-        .filter(LabOrder.patient_id == patient_id, LabResult.audit_status == 1)
-        .order_by(LabObservation.collected_at.desc(), LabObservation.observation_id)
-        .limit(60)
-        .all()
-    )
+    observation_query = db.query(LabObservation).join(LabResult).join(LabOrder).filter(LabOrder.patient_id == patient_id, LabResult.audit_status == 1)
+    if selected.get("lab_result_id"):
+        observation_query = observation_query.order_by(case((LabObservation.lab_result_id == selected["lab_result_id"].lab_result_id, 0), else_=1))
+    observations = bounded(observation_query.order_by(LabObservation.collected_at.desc(), LabObservation.observation_id), 60, "结构化检验指标")
     bundle.data["reviewed_observations"] = [
-        add("observation:" + item.observation_id, "已审核结构化检验指标", {"lab_result_id": item.lab_result_id, **serialize_observation(item)}, item.collected_at)
-        for item in observations
+        add("observation:" + item.observation_id, "已审核结构化检验指标", {"lab_result_id": item.lab_result_id, **serialize_observation(item)}, item.collected_at) for item in observations
     ]
     if results and not observations:
         bundle.data["missing_data"].append("历史检验报告未提供结构化数值、原始单位和采样时间，不进行自动数值推断")
-    imaging = db.query(ImagingReport).join(ImagingOrder).filter(ImagingOrder.patient_id == patient_id, ImagingReport.status == 2).order_by(ImagingReport.report_time.desc()).limit(8).all()
+    imaging = bounded(
+        db.query(ImagingReport).join(ImagingOrder).filter(ImagingOrder.patient_id == patient_id, ImagingReport.status == 2).order_by(ImagingReport.report_time.desc()),
+        8,
+        "已审核影像",
+        "imaging_report_id",
+        "report_id",
+    )
     bundle.data["reviewed_imaging_reports"] = [
         add("imaging:" + item.report_id, "已审核影像报告", {"findings": item.findings, "impression": item.impression, "review_time": item.review_time}, item.report_time) for item in imaging
     ]

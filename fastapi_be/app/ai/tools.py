@@ -7,6 +7,7 @@ from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from app.ai.catalog import FeatureSpec
+from app.ai.clinical_tools import critical_value_workflow, laboratory_trends
 from app.ai.context import ContextBundle
 from app.ai.governance import encode_json
 from app.models import Admission, DailyOperationalMetric, Department, Doctor, Pharmaceutical, Prescription, User
@@ -36,10 +37,14 @@ def operational_context(db: Session, user: User) -> ContextBundle:
     return ContextBundle(data={"scope": "department", "active_inpatients": inpatients, "missing_data": ["全院预聚合指标未按科室拆分，不在科室范围提供"]}, department_ids=departments)
 
 
-def business_tools(db: Session, spec: FeatureSpec, user: User, patient_id: int | None, task_input: dict) -> tuple[dict, list[dict]]:
+def business_tools(db: Session, spec: FeatureSpec, user: User, patient_id: int | None, task_input: dict, context: ContextBundle) -> tuple[dict, list[dict]]:
     """Return explicit tool results and evidence without accepting instructions to execute code."""
     tools: dict = {}
     evidence: list[dict] = []
+    if patient_id and spec.number in {8, 19, 31, 32, 33, 41, 42, 43, 56}:
+        tools["laboratory_trends"] = laboratory_trends(context.data)
+    if patient_id and spec.number in {1, 31, 33, 41, 42, 43, 47, 50}:
+        tools["critical_value_workflow"] = critical_value_workflow(context.data)
     if spec.number in {5, 6, 11, 12, 13, 14, 15, 16, 17, 18, 20}:
         rows = db.query(Pharmaceutical).filter(Pharmaceutical.status == 0).order_by(Pharmaceutical.pharmaceutical_id).limit(200).all()
         tools["hospital_drug_catalog"] = [

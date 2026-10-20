@@ -70,7 +70,7 @@ def create_run(db: Session, user: User, req: RunRequest) -> AIRun:
     if (req.patient_id is not None or spec.clinical or spec.category == "patient" or spec.key == "deidentification") and not provider.allows_patient_data:
         raise HTTPException(409, "该模型服务尚未获准处理患者资料")
     if req.patient_id is not None:
-        bundle = patient_snapshot(db, user, spec, req.patient_id, req.encounter_ref)
+        bundle = patient_snapshot(db, user, spec, req.patient_id, req.encounter_ref, req.input)
     elif spec.scope == "hospital":
         bundle = operational_context(db, user)
     else:
@@ -80,7 +80,7 @@ def create_run(db: Session, user: User, req: RunRequest) -> AIRun:
         raise HTTPException(409, "治疗路径推荐需要指定本次就诊，并提供该次就诊已确认的诊断")
     patient = db.get(Patient, req.patient_id) if req.patient_id else None
     clean_input = minimize_identifiers(req.input, patient)
-    tools, tool_evidence = business_tools(db, spec, user, req.patient_id, clean_input)
+    tools, tool_evidence = business_tools(db, spec, user, req.patient_id, clean_input, bundle)
     query = encode_json(clean_input) + " " + " ".join(bundle.data.get("current_confirmed_diagnoses", []))
     knowledge = retrieve_evidence(db, spec, query, bundle.department_ids)
     if spec.requires_knowledge and not knowledge:

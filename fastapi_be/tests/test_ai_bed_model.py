@@ -267,3 +267,58 @@ def test_complete_analysis_is_larger_than_legacy_text_and_has_exact_no_phi_sourc
     assert analysis.source_binding.projection_hash == hash_content(BedSource.model_validate(value).model_dump())
     assert set(type(analysis.source_binding).model_fields) < set(value) | {"projection_hash"}
     assert [item.target for item in analysis.targets] == list(TARGETS)
+
+
+def make_max_source():
+    """4096 actual typed roots, including 2998 distinct adjacent capacity parts."""
+    values = [2147483647 - (i * 15485863) % 2147483647 for i in range(366)]
+    value = make_source(n=366, values=values)
+    for i, flow in enumerate(value["flow_observations"]):
+        for j, key in enumerate(("admission_events", "discharge_events", "transfer_in_events", "transfer_out_events")):
+            flow[key]["value"] = (i * 32452843 + (j + 1) * 49979687) % 2147483648
+    for item in value["capacity_intervals"]:
+        item["operational_total_beds"]["value"] = 2147483647
+    original = value["capacity_intervals"].pop(0)
+    value["member_manifest"] = [entry for entry in value["member_manifest"] if entry["source_id"] != original["ref"]["source_id"]]
+    start = datetime.fromisoformat(original["start_at"].replace("Z", "+00:00"))
+    parts = 2998
+    for i in range(parts):
+        item = copy.deepcopy(original)
+        left = start + timedelta(microseconds=(86400000000 * i) // parts)
+        right = start + timedelta(microseconds=(86400000000 * (i + 1)) // parts)
+        item["start_at"] = left.isoformat(timespec="microseconds").replace("+00:00", "Z")
+        item["end_at"] = right.isoformat(timespec="microseconds").replace("+00:00", "Z")
+        identifier = str(uuid.uuid5(uuid.NAMESPACE_URL, "bed-capacity-max-fragment:" + str(i)))
+        digest = hash_content(["fragment", i])
+        item["ref"] = {
+            **item["ref"],
+            "source_record_id": identifier,
+            "source_id": f"bed_capacity_interval:{identifier}:{digest[:12]}",
+            "content_hash": digest,
+            "governance_hash": hash_content(["fragment-governance", i]),
+        }
+        value["capacity_intervals"].append(item)
+        value["member_manifest"].append({**item["ref"], "status": "published", "eligible": True, "selection": "confirmed", "selection_basis_hash": hash_content("fragment-reviewed")})
+    return refresh_manifest(value)
+
+
+def test_full_maximum_source_and_all_7840_backtest_pairs_fit_without_truncation():
+    value = make_max_source()
+    source = BedSource.model_validate(value)
+    analysis = analyze(value, 14)
+    assert len(source.member_manifest) == 4096 and len(source.capacity_intervals) == 3364
+    assert sum(len(day.segments) for day in analysis.capacity_days) == 3363
+    assert sum(len(target.backtest.primary.pairs) + sum(len(baseline.pairs) for baseline in target.backtest.baselines) for target in analysis.targets) == 7840
+    assert 6000000 < len(canonical_json(source.model_dump()).encode()) < 8 * 1024 * 1024
+    assert 4000000 < len(canonical_json(analysis.model_dump()).encode()) < 8 * 1024 * 1024
+    assert analysis.summary_status == "all_targets_complete"
+
+
+def test_pathological_repeated_overlap_proof_rejects_before_oversize_allocation():
+    value = make_max_source()
+    for item in value["capacity_intervals"]:
+        if item["basis_kind"] == "observed_operational_capacity":
+            item["start_at"] = value["days"][0]["day_start_at"]
+            item["end_at"] = item["observed_at"] = item["recorded_at"] = item["published_at"] = value["days"][-1]["day_end_at"]
+    with pytest.raises(ValueError, match="Complete native proof exceeds"):
+        analyze(value, 14)

@@ -93,8 +93,8 @@ const generate = page => page.getByRole("button", { name: "生成辅助建议", 
 
 test("超管主应用实际挂载NEWS2固定审核与冻结评估审计，不自动计算或启用", async ({ page }) => {
   const state = await session(page, { role: "super_admin" }); await page.goto("/#/ai/manage"); await page.getByRole("tab", { name: "风险规则与NEWS2", exact: true }).click();
-  const panel = page.getByLabel("NEWS2规则与评估来源治理", { exact: true }); await expect(panel).toContainText("合成固定规则审核"); await panel.getByRole("button", { name: "核对规则审核版本", exact: true }).click();
-  const rule = page.getByRole("dialog", { name: "NEWS2固定规则审核", exact: true }); await expect(rule).toContainText(profileId); await expect(rule).toContainText(hashes.recipe); await rule.getByRole("button", { name: "关闭", exact: true }).click();
+  const panel = page.getByLabel("固定风险规则与评估来源治理", { exact: true }); await expect(panel).toContainText("合成固定规则审核"); await panel.getByRole("button", { name: "核对规则审核版本", exact: true }).click();
+  const rule = page.getByRole("dialog", { name: "固定风险规则审核", exact: true }); await expect(rule).toContainText(profileId); await expect(rule).toContainText(hashes.recipe); await rule.getByRole("button", { name: "关闭", exact: true }).click();
   await panel.getByRole("tab", { name: "NEWS2评估全院审计", exact: true }).click(); await panel.getByRole("button", { name: "核对冻结NEWS2评估", exact: true }).click(); const audit = page.getByRole("dialog", { name: "NEWS2冻结评估审计", exact: true }); await expect(audit).toContainText(assessmentId); await expect(audit).toContainText(stamp); await expect(audit).toContainText(note);
   for (const path of ["/api/ai/admin/risk-rule-profiles/options", "/api/ai/admin/risk-rule-profiles", "/api/ai/admin/news2-assessments"]) expect(state.reads.some(item => item.path === path)).toBe(true);
   expect(state.runs).toEqual([]); expect(state.writes).toEqual([]); expect(state.contexts).toEqual([]);

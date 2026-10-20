@@ -2,6 +2,7 @@
   <section aria-label="SOFA独立规则与冻结评估治理">
     <p v-if="!allowed">仅超级管理员可管理SOFA固定实施规则和全院冻结评估。</p>
     <template v-else>
+      <el-tabs v-model="tab"><el-tab-pane label="SOFA独立固定规则" name="profiles"><template v-if="tab==='profiles'">
       <p>SOFA-1原单位连续边界是本地明确实施政策。原单位分支分别审核，不能视为精确换算；发布规则不代表临床验证，不自动启用功能。</p>
       <el-button type="primary" :disabled="!option" @click="openCreate">新建SOFA固定规则草稿</el-button>
       <el-button :loading="loading" @click="load">刷新SOFA审核目录</el-button>
@@ -23,7 +24,7 @@
         </el-form>
         <template #footer><el-button @click="createOpen=false">取消</el-button><el-button type="primary" :disabled="!canCreate" :loading="creating" @click="create">仅保存SOFA规则草稿</el-button></template>
       </el-dialog>
-      <el-dialog v-model="detailOpen" title="SOFA固定实施规则审计" width="min(1100px,96vw)" @closed="clearDetail">
+      <el-dialog v-model="detailOpen" title="SOFA固定实施规则审计" width="min(1100px,96vw)" @closed="!detailOpen&&clearDetail()">
         <div v-if="allowed" v-loading="inspecting">
           <p v-if="detailError" role="alert">{{ detailError }}</p>
           <template v-if="detail">
@@ -43,21 +44,23 @@
           </template>
         </div>
       </el-dialog>
+      </template></el-tab-pane><el-tab-pane label="SOFA日评估全院审计" name="daily" lazy><assessment-audit v-if="tab==='daily'" /></el-tab-pane><el-tab-pane label="SOFA变化全院审计" name="change" lazy><assessment-audit v-if="tab==='change'" :change-mode="true" /></el-tab-pane></el-tabs>
     </template>
   </section>
 </template>
 <script setup>
-import { computed, onActivated, onBeforeUnmount, onDeactivated, ref, watch } from "vue";
+import { computed, defineAsyncComponent, onActivated, onBeforeUnmount, onDeactivated, ref, watch } from "vue";
 import { useStore } from "vuex";
 import { createRiskRuleProfile, getRiskRuleOptions, getRiskRuleProfile, getRiskRuleProfiles, publishRiskRuleProfile, revokeRiskRuleProfile } from "@/api/aiNews2";
 import { sofaRuleId, verifySofaProfile } from "@/api/aiSofa";
 import { supportDigest, supportHash } from "@/api/inpatientSupport";
 const store=useStore(),roles=computed(()=>store.getters["user/permissions"]||[]),allowed=computed(()=>!!store.state.user.accessToken&&roles.value.includes("super_admin"));
+const AssessmentAudit=defineAsyncComponent(()=>import("./AssessmentAudit.vue")),tab=ref("profiles");
 const labels={draft:"草稿",published:"已发布",revoked:"已撤销"},items=ref([]),total=ref(0),page=ref(1),option=ref(null),loading=ref(false),error=ref("");
 const blank=()=>({name:"",evidence_reference:"",rationale:""}),form=ref(blank()),createOpen=ref(false),creating=ref(false),createError=ref("");
 const detailOpen=ref(false),detail=ref(null),inspecting=ref(false),detailError=ref(""),termsConfirmed=ref(false),reviewNote=ref(""),reviewEvidence=ref(""),revokeReason=ref(""),acting=ref(false);
 let epoch=0,listSequence=0,detailSequence=0,createSequence=0,paused=false,alive=true;
-const identity=()=>JSON.stringify([store.state.user.accessToken,roles.value]),capture=()=>({epoch,identity:identity()}),current=ticket=>alive&&!paused&&allowed.value&&ticket.epoch===epoch&&ticket.identity===identity();
+const identity=()=>JSON.stringify([store.state.user.accessToken,roles.value]),capture=()=>({epoch,identity:identity()}),current=ticket=>alive&&!paused&&allowed.value&&tab.value==="profiles"&&ticket.epoch===epoch&&ticket.identity===identity();
 const canCreate=computed(()=>allowed.value&&!!option.value&&!creating.value&&form.value.name.trim().length>0&&form.value.evidence_reference.trim().length>=5&&form.value.rationale.trim().length>=20);
 const canPublish=computed(()=>allowed.value&&detail.value?.status==="draft"&&!acting.value&&termsConfirmed.value&&reviewEvidence.value.trim().length>=5&&reviewNote.value.trim().length>=20);
 function clearCreate(){createSequence++;createOpen.value=false;creating.value=false;createError.value="";form.value=blank();}
@@ -69,6 +72,7 @@ function openCreate(){if(!allowed.value||paused||!option.value)return;clearCreat
 async function create(){if(!canCreate.value)return;const ticket=capture(),seq=createSequence,payload={...form.value,rule_id:sofaRuleId,expected_recipe_digest:option.value.recipe_digest};creating.value=true;try{const response=await createRiskRuleProfile(payload),row=response.data;if(!current(ticket)||seq!==createSequence||!createOpen.value)return;if(!await verifySofaProfile(row)||row.status!=="draft"||row.revision!==1||row.name!==payload.name||row.recipe_digest!==payload.expected_recipe_digest)throw new Error("SOFA规则草稿回执与明确审核版本不一致");if(!current(ticket)||seq!==createSequence||!createOpen.value)return;clearCreate();await load();}catch(failure){if(current(ticket)&&seq===createSequence)createError.value=failure?.message||"SOFA规则草稿保存失败";}finally{if(current(ticket)&&seq===createSequence)creating.value=false;}}
 async function inspect(original){if(!allowed.value||paused)return;clearDetail();detailOpen.value=true;inspecting.value=true;const ticket=capture(),seq=detailSequence;try{const response=await getRiskRuleProfile(original.rule_profile_id),row=response.data;if(!current(ticket)||seq!==detailSequence||!detailOpen.value)return;if(!await verifySofaProfile(row)||row.rule_profile_id!==original.rule_profile_id||row.content_hash!==original.content_hash)throw new Error("SOFA规则原件与指定版本不一致");if(current(ticket)&&seq===detailSequence&&detailOpen.value)detail.value=row;}catch(failure){if(current(ticket)&&seq===detailSequence)detailError.value=failure?.message||"SOFA规则原件核对失败";}finally{if(current(ticket)&&seq===detailSequence)inspecting.value=false;}}
 async function act(action){if(!allowed.value||paused||acting.value||!detail.value||action==="publish"&&!canPublish.value||action==="revoke"&&(detail.value.status==="revoked"||revokeReason.value.trim().length<5))return;const ticket=capture(),seq=detailSequence,original=detail.value,payload=action==="publish"?{expected_revision:original.revision,expected_recipe_digest:original.recipe_digest,implementation_terms_confirmed:true,review_note:reviewNote.value.trim(),review_evidence_reference:reviewEvidence.value.trim()}:{expected_revision:original.revision,reason:revokeReason.value.trim()};acting.value=true;try{const response=await(action==="publish"?publishRiskRuleProfile(original.rule_profile_id,payload):revokeRiskRuleProfile(original.rule_profile_id,payload)),row=response.data;if(!current(ticket)||seq!==detailSequence||!detailOpen.value)return;if(!await verifySofaProfile(row)||row.rule_profile_id!==original.rule_profile_id||row.content_hash!==original.content_hash||row.status!==(action==="publish"?"published":"revoked")||row.revision!==original.revision+1)throw new Error("SOFA规则治理回执与原内容或CAS版本不一致");if(!current(ticket)||seq!==detailSequence||!detailOpen.value)return;detail.value=row;termsConfirmed.value=false;reviewNote.value=reviewEvidence.value=revokeReason.value="";await load();}catch(failure){if(current(ticket)&&seq===detailSequence)detailError.value=failure?.message||"SOFA规则治理失败，请重新核对版本";}finally{if(current(ticket)&&seq===detailSequence)acting.value=false;}}
+watch(tab,()=>{reset();loadOptions();load();},{flush:"sync"});
 watch(identity,()=>{reset();loadOptions();load();},{immediate:true,flush:"sync"});
 onDeactivated(()=>{paused=true;reset();});onActivated(()=>{if(paused){paused=false;reset();loadOptions();load();}});onBeforeUnmount(()=>{alive=false;reset();});
 </script>

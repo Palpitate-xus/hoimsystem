@@ -46,7 +46,7 @@
             <el-table-column label="状态"><template #default="{ row }">{{ row.enabled ? '已启用' : '关闭' }}</template></el-table-column>
             <el-table-column label="密钥"><template #default="{ row }">{{ row.has_api_key ? '已配置，不回显' : '未配置' }}</template></el-table-column>
             <el-table-column label="患者资料"><template #default="{ row }">{{ row.allows_patient_data ? '已授权传输' : '禁止传输' }}</template></el-table-column>
-            <el-table-column label="操作" width="230"><template #default="{ row }"><el-button size="small" @click="editProvider(row)">编辑</el-button><el-button v-if="row.kind === 'specialist' && row.supported_features?.includes('medical_transcription')" size="small" @click="openSpeechCheck(row)">检查本地语音服务</el-button><el-button v-if="row.kind === 'specialist' && row.supported_features?.includes('ecg_analysis')" size="small" @click="openEcgCheck(row)">检查本地心电服务</el-button></template></el-table-column>
+            <el-table-column label="操作" width="230"><template #default="{ row }"><el-button size="small" @click="editProvider(row)">编辑</el-button><el-button v-if="row.kind === 'specialist' && row.supported_features?.includes('medical_transcription')" size="small" @click="openSpeechCheck(row)">检查本地语音服务</el-button><el-button v-if="row.kind === 'specialist' && row.supported_features?.includes('ecg_analysis')" size="small" @click="openEcgCheck(row)">检查本地心电服务</el-button><el-button v-if="canCheckImage && row.kind === 'specialist' && row.supported_features?.includes('imaging_detection')" size="small" @click="openImageCheck(row)">检查本地影像服务</el-button></template></el-table-column>
           </el-table>
         </el-tab-pane>
 
@@ -181,6 +181,38 @@
       <template #footer><el-button @click="ecgCheckDialog = false">关闭</el-button><el-button v-if="ecgCheckResult && ecgCheckResult.configured_model !== ecgCheckResult.capabilities.model_version" @click="editActualEcgModel">填写实际模型，待保存</el-button></template>
     </el-dialog>
 
+    <el-dialog v-model="imageCheckDialog" title="本地影像服务核对" width="min(900px, 95vw)">
+      <div v-loading="imageCheckLoading">
+        <p>核对已保存服务：{{ imageCheckName }}。检查只读取服务能力声明，不发送患者资料或原始像素，不创建模型任务。</p>
+        <template v-if="imageCheckResult">
+          <el-alert :type="imageCheckResult.compatible ? 'success' : 'warning'" :closable="false" :title="imageCheckResult.compatible ? '服务声明与登记配置匹配；临床质量仍待验证' : '登记配置与服务声明存在差异'" />
+          <p v-for="issue in imageCheckResult.issues || []" :key="issue">{{ issue }}</p>
+          <el-descriptions :column="1" border>
+            <el-descriptions-item label="实际模型标识"><span class="prompt-text">{{ imageCheckResult.capabilities.model_version }}</span></el-descriptions-item>
+            <el-descriptions-item label="模型来源版本">{{ imageCheckResult.capabilities.model_repository }} · {{ imageCheckResult.capabilities.model_revision }}</el-descriptions-item>
+            <el-descriptions-item label="运行引擎">{{ imageCheckResult.capabilities.engine }}；<span v-for="(version, engine) in imageCheckResult.capabilities.engine_versions" :key="engine">{{ engine }} {{ version }} </span></el-descriptions-item>
+            <el-descriptions-item label="协议">v{{ imageCheckResult.capabilities.schema_version }} · {{ imageCheckResult.capabilities.feature_key }}</el-descriptions-item>
+            <el-descriptions-item label="研究预处理配置">{{ imageCheckResult.capabilities.profile }}</el-descriptions-item>
+            <el-descriptions-item label="模型原始标签">{{ imageCheckResult.capabilities.labels?.join('、') }}</el-descriptions-item>
+            <el-descriptions-item label="输入范围"><pre class="prompt-text">{{ JSON.stringify(imageCheckResult.capabilities.preprocessing?.input_profile || {}, null, 2) }}</pre></el-descriptions-item>
+            <el-descriptions-item label="实际预处理声明"><pre class="prompt-text">{{ JSON.stringify(imageCheckResult.capabilities.preprocessing || {}, null, 2) }}</pre></el-descriptions-item>
+            <el-descriptions-item label="Prompt 处理方式">{{ imageCheckResult.capabilities.prompt_handling }}：仅原始像素参与分类；Prompt 不改变固定分类算法，不补造影像或临床信息。</el-descriptions-item>
+            <el-descriptions-item label="请求限制">最大 {{ Math.floor(imageCheckResult.capabilities.max_bytes / 1048576) }} MiB；服务时限 {{ imageCheckResult.capabilities.timeout_seconds }} 秒，模型请求超时需另留传输时间。</el-descriptions-item>
+            <el-descriptions-item label="模型文件摘要"><span class="prompt-text">{{ imageCheckResult.capabilities.model_digest }}</span></el-descriptions-item>
+            <el-descriptions-item label="运行环境摘要"><span class="prompt-text">{{ imageCheckResult.capabilities.runtime_digest }}</span></el-descriptions-item>
+            <el-descriptions-item label="预处理摘要"><span class="prompt-text">{{ imageCheckResult.capabilities.preprocessing_digest }}</span></el-descriptions-item>
+            <el-descriptions-item label="人群适用性">{{ imageCheckResult.capabilities.population_applicability }}：未核实采集时人群与模型适用性。</el-descriptions-item>
+            <el-descriptions-item label="临床验证">{{ imageCheckResult.capabilities.clinical_validation }}：未提供临床验证。</el-descriptions-item>
+          </el-descriptions>
+          <p>研究配置按原 BitsStored 可表示范围归一化，MONOCHROME1 只反转一次，再按原作者中心方形裁剪并缩放为224×224（双线性、抗锯齿）。不应用DICOM VOI显示窗、不自动minmax或旋转；不声称与原训练数据预处理等价。</p>
+          <p>该流程与原图查看器的DICOM显示窗分别保留。模型只提供单图分类原始分数，不提供病灶框或完整序列判断；分数不是患病概率。</p>
+          <p>填写实际模型仅更新待保存表单；保存服务、启用功能及临床评审仍须分别明确操作。</p>
+          <p>{{ imageCheckResult.scope_note }}</p>
+        </template>
+      </div>
+      <template #footer><el-button @click="imageCheckDialog = false">关闭</el-button><el-button v-if="canCheckImage && imageCheckResult && imageCheckResult.configured_model !== imageCheckResult.capabilities.model_version" @click="editActualImageModel">填写实际模型，待保存</el-button></template>
+    </el-dialog>
+
     <el-dialog v-model="promptDialog" :title="selectedFeature?.name + '：Prompt 版本'" width="850px">
       <el-form label-width="110px">
         <el-form-item label="历史版本"><el-select v-model="promptSelection" @change="selectPrompt"><el-option v-for="item in promptVersions" :key="item.prompt_id || 'baseline'" :label="'v' + item.version + ' · ' + item.change_note" :value="item.prompt_id || 'baseline'" /></el-select><el-button class="field-hint" @click="activateSelectedPrompt" :loading="saving">启用所选版本</el-button></el-form-item>
@@ -247,6 +279,7 @@
 <script setup>
 import { computed, onMounted, onBeforeUnmount, onDeactivated, ref, watch } from "vue";
 import { ElMessage } from "element-plus";
+import store from "@/store";
 import AiRunHistory from "@/components/AIRunHistory/index.vue";
 import AiReviewCuration from "@/components/AIReviewCuration/index.vue";
 import AiAudioManagement from "@/components/AIAudioManagement/index.vue";
@@ -256,7 +289,7 @@ import {
   activateAIPrompt, createAIKnowledge, createAIPatientGrant, createAIPrompt,
   getAIAdminFeatures, getAIAudit, getAIKnowledge, getAIKnowledgeDetail, getAIPatientGrants, getAIPathwaySources, importAIPathway,
   getAIPrompts, getAIProviders, getAIUsage, reviewAIKnowledge, revokeAIPatientGrant,
-  saveAIFeature, saveAIProvider, checkAISpeechProvider, checkAIEcgProvider,
+  saveAIFeature, saveAIProvider, checkAISpeechProvider, checkAIEcgProvider, checkAIImageProvider,
 } from "@/api/ai";
 
 const categories = { cdss: "临床 CDSS", pharmacy: "用药与药房", records: "病历文书", diagnostics: "检验影像体检", inpatient: "住院护理急诊", patient: "患者服务", operations: "运营与收费", knowledge: "知识科研质控" };
@@ -289,6 +322,14 @@ watch(ecgCheckDialog, visible => { if (!visible) { ecgCheckRequest += 1; ecgChec
 function clearEcgCheck() { ecgCheckRequest += 1; ecgCheckDialog.value = false; ecgCheckResult.value = null; ecgCheckLoading.value = false; }
 onDeactivated(clearEcgCheck);
 onBeforeUnmount(clearEcgCheck);
+const canCheckImage = computed(() => !!store.state.user.accessToken && store.state.user.permissions.includes("super_admin"));
+const imageCheckDialog = ref(false), imageCheckLoading = ref(false), imageCheckResult = ref(null), imageCheckName = ref("");
+let imageCheckRequest = 0, imageCheckTarget = null;
+function clearImageCheck() { imageCheckRequest++; imageCheckTarget = null; imageCheckDialog.value = false; imageCheckResult.value = null; imageCheckLoading.value = false; }
+watch(imageCheckDialog, visible => { if (!visible) clearImageCheck(); });
+watch([() => store.state.user.accessToken, () => JSON.stringify(store.state.user.permissions)], clearImageCheck);
+onDeactivated(clearImageCheck);
+onBeforeUnmount(clearImageCheck);
 const promptDialog = ref(false), promptVersions = ref([]), promptSelection = ref("baseline"), taskPrompt = ref(""), systemPrompt = ref(""), promptChange = ref(""), activateNewPrompt = ref(false);
 const knowledgeDialog = ref(false), knowledgeForm = ref({}), reviewDialog = ref(false), reviewDocument = ref(null);
 const pathwayImportDialog = ref(false), pathwaySourcesLoading = ref(false), pathwaySources = ref({}), pathwayImportForm = ref({});
@@ -383,6 +424,36 @@ function editActualEcgModel() {
     ElMessage.warning("已保存配置版本已变化，请刷新后重新检查"); return;
   }
   ecgCheckDialog.value = false;
+  editProvider(row); providerForm.value.model = result.capabilities.model_version;
+  if (providerForm.value.timeout_seconds <= result.capabilities.timeout_seconds) providerForm.value.timeout_seconds = 120;
+}
+
+function currentImageTarget(target) {
+  if (!canCheckImage.value || !target || target.session !== store.state.user.accessToken) return null;
+  return providers.value.find(item => item.provider_id === target.provider_id && item.revision === target.revision && item.model === target.model && item.kind === "specialist" && item.supported_features?.includes("imaging_detection")) || null;
+}
+async function openImageCheck(row) {
+  const target = { provider_id: row.provider_id, revision: row.revision, model: row.model, session: store.state.user.accessToken };
+  if (!currentImageTarget(target)) { ElMessage.warning("当前影像服务配置或超级管理员权限已变化，请刷新后重新检查"); return; }
+  const version = ++imageCheckRequest;
+  imageCheckTarget = target; imageCheckName.value = row.name; imageCheckResult.value = null; imageCheckLoading.value = true; imageCheckDialog.value = true;
+  try {
+    const response = await checkAIImageProvider(target.provider_id, target.revision);
+    if (version !== imageCheckRequest || !imageCheckDialog.value || !currentImageTarget(target)) return;
+    const result = response.data;
+    if (result?.provider_id !== target.provider_id || result.provider_revision !== target.revision || result.configured_model !== target.model) {
+      ElMessage.warning("影像服务核对回执与已保存配置不一致，请刷新后重新检查"); return;
+    }
+    imageCheckResult.value = result;
+  } catch { /* The request layer reports configuration/connection errors. */ }
+  finally { if (version === imageCheckRequest) imageCheckLoading.value = false; }
+}
+function editActualImageModel() {
+  const result = imageCheckResult.value, row = currentImageTarget(imageCheckTarget);
+  if (!imageCheckDialog.value || !result || !row || row.provider_id !== result.provider_id || row.revision !== result.provider_revision || row.model !== result.configured_model) {
+    ElMessage.warning("已保存影像配置或超级管理员权限已变化，请刷新后重新检查"); return;
+  }
+  imageCheckDialog.value = false;
   editProvider(row); providerForm.value.model = result.capabilities.model_version;
   if (providerForm.value.timeout_seconds <= result.capabilities.timeout_seconds) providerForm.value.timeout_seconds = 120;
 }

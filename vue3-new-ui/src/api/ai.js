@@ -49,6 +49,7 @@ export const getAIProviders = () => request({ url: `${admin}/providers`, method:
 export const saveAIProvider = (id, data) => request({ url: id ? `${admin}/providers/${id}` : `${admin}/providers`, method: id ? "put" : "post", data });
 export const checkAISpeechProvider = (id, revision) => request({ url: `${admin}/providers/${id}/speech-capabilities`, method: "post", data: { expected_revision: revision }, timeout: 15000 });
 export const checkAIEcgProvider = (id, revision) => request({ url: `${admin}/providers/${id}/ecg-capabilities`, method: "post", data: { expected_revision: revision }, timeout: 15000 });
+export const checkAIImageProvider = (id, revision) => request({ url: `${admin}/providers/${id}/image-capabilities`, method: "post", data: { expected_revision: revision }, timeout: 15000 });
 export const getAIPrompts = (key) => request({ url: `${admin}/prompts/${key}`, method: "get" });
 export const createAIPrompt = (key, data) => request({ url: `${admin}/prompts/${key}`, method: "post", data });
 export const activateAIPrompt = (key, data) => request({ url: `${admin}/prompts/${key}/activate`, method: "post", data });

@@ -18,10 +18,7 @@ governance=types.ModuleType('app.ai.governance');governance.provider_credential=
 from app.ai.supply_contract import SupplySource,SupplyAnalysis,SupplyRuntime,RECIPE,INPUT_POLICY,recipe_digest,input_policy_digest
 from app.ai.supply_config import runtime_descriptor
 from app.ai.supply_probe import SupplyCapabilities
-from app.ai.supply_context import SupplyContextBinding
-from app.ai.supply_snapshot import PrivateSnapshot
-from app.ai.supply_source_input import SourceWrapper, FrozenIdentity, Governance, UnitPayload, DailyPayload
-from app.ai.supply_series_input import SeriesRequest,SeriesPeriodRequest
+from app.ai.supply_context import SupplyContextBinding,SCOPE_NOTE,MISSING_DATA
 def exact_integer_bounds(value):
  if isinstance(value,list):return [exact_integer_bounds(v) for v in value]
  if not isinstance(value,dict):return value
@@ -35,7 +32,7 @@ def exact_integer_bounds(value):
  return result
 r=runtime_descriptor()
 assert not any(n in sys.modules for n in ['app.config','app.database','app.models'])
-print(json.dumps({'models':{c.__name__:exact_integer_bounds(c.model_json_schema()) for c in [SupplySource,SupplyAnalysis,SupplyRuntime,SupplyCapabilities,SupplyContextBinding,PrivateSnapshot,SourceWrapper,FrozenIdentity,Governance,UnitPayload,DailyPayload,SeriesRequest,SeriesPeriodRequest]},'fixed':{'recipe':RECIPE,'input_policy':INPUT_POLICY,'recipe_digest':recipe_digest(),'input_policy_digest':input_policy_digest(),'core_sha256':r['core_sha256'],'runtime_fields':list(SupplyRuntime.model_fields)}},ensure_ascii=False,sort_keys=True,separators=(',',':')))
+print(json.dumps({'models':{c.__name__:exact_integer_bounds(c.model_json_schema()) for c in [SupplySource,SupplyAnalysis,SupplyRuntime,SupplyCapabilities,SupplyContextBinding]},'fixed':{'recipe':RECIPE,'input_policy':INPUT_POLICY,'recipe_digest':recipe_digest(),'input_policy_digest':input_policy_digest(),'core_sha256':r['core_sha256'],'runtime_fields':list(SupplyRuntime.model_fields),'scope_note':SCOPE_NOTE,'missing_data':list(MISSING_DATA)}},ensure_ascii=False,sort_keys=True,separators=(',',':')))
 `;
 const root=path.resolve(__dirname,'..'),check=process.argv.includes('--check');
 if(process.argv.slice(2).some(v=>v!=='--check'))throw new Error('Only --check accepted');

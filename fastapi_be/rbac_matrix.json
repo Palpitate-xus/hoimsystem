@@ -500,6 +500,15 @@
   "auth": [
    "super_admin"
   ],
+  "function": "check_bed_provider",
+  "method": "POST",
+  "module": "ai_admin.py",
+  "path": "/api/ai/admin/providers/{provider_id}/bed-capabilities"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
   "function": "list_global_runs",
   "method": "GET",
   "module": "ai_admin.py",
@@ -824,6 +833,170 @@
   "method": "POST",
   "module": "ai_audio.py",
   "path": "/api/ai/admin/audio-assets/{asset_id}/purge"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "super_admin"
+  ],
+  "function": "preview",
+  "method": "POST",
+  "module": "ai_bed_series.py",
+  "path": "/api/ai/bed-series/preview"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "super_admin"
+  ],
+  "function": "series_list",
+  "method": "GET",
+  "module": "ai_bed_series.py",
+  "path": "/api/ai/bed-series"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "super_admin"
+  ],
+  "function": "create",
+  "method": "POST",
+  "module": "ai_bed_series.py",
+  "path": "/api/ai/bed-series"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "super_admin"
+  ],
+  "function": "series_detail",
+  "method": "GET",
+  "module": "ai_bed_series.py",
+  "path": "/api/ai/bed-series/{series_id}"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "review",
+  "method": "POST",
+  "module": "ai_bed_series.py",
+  "path": "/api/ai/bed-series/{series_id}/review"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "super_admin"
+  ],
+  "function": "revoke",
+  "method": "POST",
+  "module": "ai_bed_series.py",
+  "path": "/api/ai/bed-series/{series_id}/revoke"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "admin_series",
+  "method": "GET",
+  "module": "ai_bed_series.py",
+  "path": "/api/ai/admin/bed-series"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "admin_series_detail",
+  "method": "GET",
+  "module": "ai_bed_series.py",
+  "path": "/api/ai/admin/bed-series/{series_id}"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "super_admin"
+  ],
+  "function": "options",
+  "method": "GET",
+  "module": "ai_bed_sources.py",
+  "path": "/api/ai/bed-sources/options"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "super_admin"
+  ],
+  "function": "sources",
+  "method": "GET",
+  "module": "ai_bed_sources.py",
+  "path": "/api/ai/bed-sources/{kind}"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "super_admin"
+  ],
+  "function": "create",
+  "method": "POST",
+  "module": "ai_bed_sources.py",
+  "path": "/api/ai/bed-sources/{kind}"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "super_admin"
+  ],
+  "function": "source",
+  "method": "GET",
+  "module": "ai_bed_sources.py",
+  "path": "/api/ai/bed-sources/{kind}/{source_record_id}"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "review",
+  "method": "POST",
+  "module": "ai_bed_sources.py",
+  "path": "/api/ai/bed-sources/{kind}/{source_record_id}/review"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "super_admin"
+  ],
+  "function": "revoke",
+  "method": "POST",
+  "module": "ai_bed_sources.py",
+  "path": "/api/ai/bed-sources/{kind}/{source_record_id}/revoke"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "admin_sources",
+  "method": "GET",
+  "module": "ai_bed_sources.py",
+  "path": "/api/ai/admin/bed-sources"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "admin_source",
+  "method": "GET",
+  "module": "ai_bed_sources.py",
+  "path": "/api/ai/admin/bed-sources/{source_record_id}"
  },
  {
   "auth": [

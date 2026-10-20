@@ -378,6 +378,8 @@ from app.routers import (
     ai_admin,
     ai_aki,
     ai_audio,
+    ai_bed_series,
+    ai_bed_sources,
     ai_ecg,
     ai_feedback_admin,
     ai_forecast,
@@ -519,6 +521,8 @@ app.include_router(ai_sofa.router, prefix="/api")
 app.include_router(ai_sofa_change.router, prefix="/api")
 app.include_router(ai_roster_sources.router, prefix="/api")
 app.include_router(ai_roster_plans.router, prefix="/api")
+app.include_router(ai_bed_sources.router, prefix="/api")
+app.include_router(ai_bed_series.router, prefix="/api")
 app.include_router(inpatient_gcs.router, prefix="/api")
 app.include_router(inpatient_support.router, prefix="/api")
 app.include_router(ai_vasoactive_mappings.router, prefix="/api")

@@ -3,7 +3,7 @@
 > 由 `fastapi_be/scripts/generate_rbac_matrix.py` 从源码自动生成，请勿手改。
 > `✓`=可访问 | `PUBLIC`=无需登录 | 留空=不可访问
 
-共 **751** 个接口（PUBLIC 18 个 / 需登录 733 个）。
+共 **768** 个接口（PUBLIC 18 个 / 需登录 750 个）。
 
 
 ### `admin.py`
@@ -90,6 +90,7 @@
 | POST | `/api/ai/admin/providers/{provider_id}/qsofa-capabilities` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
 | POST | `/api/ai/admin/providers/{provider_id}/sofa-capabilities` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
 | POST | `/api/ai/admin/providers/{provider_id}/roster-capabilities` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/admin/providers/{provider_id}/bed-capabilities` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
 | GET | `/api/ai/admin/runs` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
 | GET | `/api/ai/admin/runs/{run_id}` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
 | POST | `/api/ai/admin/providers` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
@@ -133,6 +134,32 @@
 | POST | `/api/ai/audio-assets/{asset_id}/withdraw` |  | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |
 | GET | `/api/ai/admin/audio-assets` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
 | POST | `/api/ai/admin/audio-assets/{asset_id}/purge` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+
+### `ai_bed_series.py`
+
+| 方法 | 路径 | admin | super_admin | director | doctor | nurse | cashier | pharmacist | guide | patient | lab_technician | registrar | PUBLIC |
+|------|------|------|------|------|------|------|------|------|------|------|------|------|------|
+| POST | `/api/ai/bed-series/preview` | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/bed-series` | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/bed-series` | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/bed-series/{series_id}` | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/bed-series/{series_id}/review` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/bed-series/{series_id}/revoke` | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/admin/bed-series` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/admin/bed-series/{series_id}` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+
+### `ai_bed_sources.py`
+
+| 方法 | 路径 | admin | super_admin | director | doctor | nurse | cashier | pharmacist | guide | patient | lab_technician | registrar | PUBLIC |
+|------|------|------|------|------|------|------|------|------|------|------|------|------|------|
+| GET | `/api/ai/bed-sources/options` | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/bed-sources/{kind}` | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/bed-sources/{kind}` | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/bed-sources/{kind}/{source_record_id}` | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/bed-sources/{kind}/{source_record_id}/review` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/bed-sources/{kind}/{source_record_id}/revoke` | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/admin/bed-sources` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/admin/bed-sources/{source_record_id}` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
 
 ### `ai_ecg.py`
 

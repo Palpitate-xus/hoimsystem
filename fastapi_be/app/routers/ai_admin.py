@@ -580,6 +580,58 @@ async def check_roster_provider(provider_id: int, req: ProviderCheck, db: Sessio
     }
 
 
+@router.post("/ai/admin/providers/{provider_id}/bed-capabilities")
+async def check_bed_provider(provider_id: int, req: ProviderCheck, db: Session = Depends(get_db), user: User = Depends(require_roles("super_admin"))) -> dict:
+    """Inspect schema11 metadata without Ward originals, capacity or forecasting."""
+    from app.ai.bed_probe import inspect_bed_capabilities
+
+    provider = db.get(AIProvider, provider_id)
+    if provider is None:
+        raise HTTPException(404, "模型配置不存在")
+    ensure_revision(provider.revision, req.expected_revision)
+    if provider.kind != "specialist" or "bed_forecast" not in json.loads(provider.supported_features_json):
+        raise HTTPException(422, "请选择已登记病区实占及流转事件预测的独立统计服务")
+    actor_id, revision, configured_model, timeout = user.user_id, provider.revision, provider.model, provider.timeout_seconds
+    db.expunge(provider)
+    db.commit()
+    error = None
+    try:
+        capabilities = await inspect_bed_capabilities(provider)
+    except AIExecutionError as exc:
+        error = exc
+    db.expire_all()
+    actor, current = db.get(User, actor_id), db.get(AIProvider, provider_id)
+    if actor is None or actor.user_role != "super_admin":
+        raise HTTPException(403, "当前用户不再具备AI管理权限")
+    if current is None:
+        raise HTTPException(409, "模型配置已删除，请刷新后重试")
+    ensure_revision(current.revision, revision)
+    if error:
+        audit(db, actor_id, "provider.bed_check_failed", str(provider_id), {"revision": revision, "error_code": error.code})
+        _commit(db)
+        raise HTTPException(502, error.message)
+    issues = []
+    if capabilities["model_version"] != configured_model:
+        issues.append("登记模型与服务实际规则实现及运行版本不同，请核对并保存后重新评审")
+    if timeout <= capabilities["timeout_seconds"]:
+        issues.append("模型请求超时应大于床位预测服务处理时限，保留传输和回执时间")
+    audit(db, actor_id, "provider.bed_check", str(provider_id), {"revision": revision, "compatible": not issues, "actual_model": capabilities["model_version"]})
+    _commit(db)
+    return {
+        "code": 200,
+        "msg": "success",
+        "data": {
+            "provider_id": provider_id,
+            "provider_revision": revision,
+            "configured_model": configured_model,
+            "compatible": not issues,
+            "capabilities": capabilities,
+            "issues": issues,
+            "scope_note": "只核对五项实占与流转目标、固定预测与回测政策、四个实际核心文件、时区数据库摘要及运行版本；不发送病区原件或容量，不执行预测，不证明业务效果，不改变功能启停与验证状态。",
+        },
+    }
+
+
 @router.get("/ai/admin/runs")
 def list_global_runs(
     feature_key: str | None = None,
@@ -629,6 +681,11 @@ def inspect_run_trace(run_id: str, db: Session = Depends(get_db), user: User = D
         from app.ai.roster_context import authorize_roster_snapshot, expand_context
 
         authorize_roster_snapshot(db, user, snapshot["payload"]["context"])
+        snapshot["payload"]["context"] = expand_context(db, snapshot["payload"]["context"])
+    if snapshot.get("payload", {}).get("context", {}).get("bed_binding"):
+        from app.ai.bed_context import authorize_bed_snapshot, expand_context
+
+        authorize_bed_snapshot(db, user, snapshot["payload"]["context"])
         snapshot["payload"]["context"] = expand_context(db, snapshot["payload"]["context"])
     if snapshot.get("payload", {}).get("context", {}).get("sofa_binding"):
         from app.ai.sofa_context import expand_context

@@ -1,0 +1,557 @@
+{
+  "recorded_at_utc": "2026-10-20T12:56:06.870090+00:00",
+  "baseline_commit": "2a94556ccb12e61cf02280d6bf1df29dae999435",
+  "platform_commit": "f70fe0db8c935bbe47557ade5945e986beccbbfa",
+  "scope": "Immutable admission-bound point observations and original urine intervals; explicit retrospective windows for features 41-43, independent prompts, source/queue/history guards, nursing/business UI, super-admin audit and revocation, and truthful RBAC inventory. No clinical risk model delivered in this batch.",
+  "goal_status": "active",
+  "real_patient_data_used": false,
+  "existing_hospital_database_accessed": false,
+  "existing_hospital_backend_contacted": false,
+  "production_deployment_performed": false,
+  "clinical_validation_performed": false,
+  "stored_business_ai_configuration_changed": false,
+  "inventory": {
+    "api_routes": 654,
+    "router_modules": 89,
+    "orm_tables": 163,
+    "vue_view_files": 157,
+    "catalog_version": "2026.10.20.3",
+    "capabilities": 80,
+    "global_source_reference_keys": 26,
+    "risk_feature_source_reference_keys": [
+      "observation_window_id"
+    ],
+    "alembic_heads": [
+      "20261020_ai_observation_windows"
+    ]
+  },
+  "source_contract": {
+    "point_schema": "inpatient_observation_v1",
+    "window_schema": "inpatient_window_v1",
+    "original_quantities": "Explicit decimal strings, at most 16 integer and 8 fractional digits; preserve zero, absent reasons and lexical trailing zeroes; fixed units without automatic conversion",
+    "timing": "Explicit ISO with seconds, offset/Z and at most six fractional digits; UTC microseconds; recorded_at is independent server time",
+    "scope": "Explicit patient and real admission; existing role-based authority, care relationship or scoped grant required; new source authorship cannot self-grant care access",
+    "immutability": "Content hashes plus independently bound governance; active revision 1 to revoked revision 2, no update/delete/restore",
+    "urine": "Original mL interval, completeness, patient-total scope and collection method; no prorating, summing or rate calculation",
+    "legacy": "No legacy VitalSign/CriticalCare/Lab/Admission data rewritten, assigned to admissions by dates, or assumed to have UTC availability times"
+  },
+  "window_contract": {
+    "time_order": "start_at < end_at <= as_of <= created_at <= now",
+    "point_selection": "observed_at in [start,end] AND recorded_at <= as_of",
+    "urine_selection": "overlaps [start,end) AND recorded_at <= as_of; preserve original boundaries",
+    "snapshot_basis": "current_snapshot_retrospective, not historical database as-of replay",
+    "engineering_limits": {
+      "max_hours": 168,
+      "max_combined_source_rows": 1000,
+      "row_limit_includes_revoked_members": true,
+      "directory_limit": 100,
+      "oversize_policy": "Reject, never silently truncate a frozen source window"
+    },
+    "quality": "Per-point omitted/unmeasured values, same-time duplicates/conflicts, observed gaps, urine connected-overlap groups, exclusion reasons and uncovered intervals; discrete observations do not prove monitoring completeness",
+    "privacy": "Only typed free-text fields minimized; strict quantities, units, dates and identifiers preserved. Original raw hashes and governance hashes continue to bind unminimized facts; not an anonymization guarantee",
+    "late_entry": "New rows recorded after as_of do not enter or invalidate the old window and their future existence/counts are not exposed; mutating an existing member timestamp still invalidates membership/content",
+    "staleness": "Changed/deleted/reassigned/revoked members or changed qualifying membership invalidate queued/inflight/ordinary historical results; super-admin frozen audit retained, actual execution still checks freshness",
+    "excluded_context": "No generic current diagnoses, latest patient vitals, old nursing scores or unbound/review-mapping-absent laboratory context; missing labs do not mean zero critical values",
+    "model_input_validation": "not_provided",
+    "clinical_risk_score_calculated": false,
+    "urine_total_or_rate_calculated": false
+  },
+  "super_admin": {
+    "window_directory_and_frozen_audit": true,
+    "cas_revocation": true,
+    "ordinary_admin_gets_global_ai_governance": false,
+    "source_management_calls_model": false,
+    "verification_or_enablement_changed_automatically": false,
+    "all_eighty_prompts_remain_independently_versionable": true
+  },
+  "rbac": {
+    "generator": "Pure AST; actual role constants plus literal router and application mount prefixes; dynamic/conditional/duplicate mounts rejected",
+    "mounted_router_method_path_multiset_checked": 654,
+    "new_endpoints": 14,
+    "historical_monitor_paths_corrected": [
+      "/health/live",
+      "/health/ready",
+      "/metrics"
+    ],
+    "business_permissions_changed_by_inventory_fix": false,
+    "targeted_tests": 20,
+    "targeted_log": {
+      "path": "/tmp/hoim-observation-rbac-mount-tests.log",
+      "sha256": "bc2b93c9c45f973e6a2441fde4dc7dd8fbee950f2560cfdb2e715c7f11ef4ca6"
+    }
+  },
+  "risk_session_fix": {
+    "scope": "Risk and visit-forecast session/role changes invalidate directory epochs, selections, drafts, previews, history and results; risk fresh directory does not auto-select a patient",
+    "baseline_build_commit": "195ec4f",
+    "baseline_four_scenarios_reproduced": true,
+    "baseline_log": {
+      "path": "/tmp/hoim-observation-directory-baseline.log",
+      "sha256": "fe1bd94109e88e4b2039b38be4863d9db07824132b05856df92c1ef9afb34413"
+    },
+    "baseline_note": "Native XHR observation, actual selected labels and stale options under held fresh requests; empty remote popup assertions were refined to focused/rendered-frame option checks for the final regression",
+    "fixed_four_scenarios_passed": 4,
+    "fixed_log": {
+      "path": "/tmp/hoim-observation-directory-fixed.log",
+      "sha256": "1b8257e07da379109ec9bc6e9a52127dfdb48f325d9f556ff7b0bb8243f040fd"
+    },
+    "fixed_patient_entry_limitation": "After session change, close and reopen a patient-bound business entry to re-confirm scope"
+  },
+  "final_verification": {
+    "backend": {
+      "command": "/home/xusheng/miniconda3/bin/python -m pytest -q",
+      "passed": 2726,
+      "skipped": 28,
+      "warnings": 2,
+      "seconds": 211.9,
+      "database": "SQLite memory test override, synthetic fixtures; optional real-model tests remain explicitly skipped",
+      "warning_note": "Existing temporary SECRET_KEY and deliberate invalid pydicom DS NaN fixture warnings",
+      "dotenv_read_not_asserted_for_full_pytest": true,
+      "log": {
+        "path": "/tmp/hoim-observation-backend-final.log",
+        "sha256": "f5205f7125f124551a29b0b8d73380a4b08cf7d101667e2741056a3474fe2a71"
+      }
+    },
+    "browser": {
+      "command": "E2E_BASE_URL=http://127.0.0.1:4180 npx playwright test e2e/ai-*.spec.js e2e/diagnosis-review.spec.js e2e/request-real-http.spec.js --workers=2 --reporter=list",
+      "passed": 154,
+      "reported_duration": "3.2m",
+      "production_ui_api_mocked_cases": 111,
+      "isolated_observation_component_api_mocked_cases": 22,
+      "real_loopback_http_cases": 21,
+      "total_api_mocked_cases": 133,
+      "new_observation_cases": 37,
+      "no_hospital_backend": true,
+      "no_risk_inference_or_clinical_validation": true,
+      "log": {
+        "path": "/tmp/hoim-observation-browser-final.log",
+        "sha256": "cd96e317295aad3f8ac777a52467429fb24abfc504c1a60569d0080462b56193"
+      }
+    },
+    "verify": {
+      "command": "npm run verify",
+      "exit_code": 0,
+      "audit_affected_packages": 0,
+      "build_seconds": 21.56,
+      "existing_scss_warning_count": 5,
+      "warning_note": "Existing vab.scss mixed-decls future-behavior warnings remain unsuppressed",
+      "bundle_passed": true,
+      "log": {
+        "path": "/tmp/hoim-observation-ui-build-final.log",
+        "sha256": "8aa0001577bcd481e11f9e92e2cd6fcd086cf867bfaa75e9973b882593f2341c"
+      }
+    },
+    "bundle": {
+      "largestJavaScript": {
+        "file": "element-plus.1235714c.js",
+        "bytes": 647479
+      },
+      "totalJavaScript": 5420002,
+      "totalAssets": 5938248,
+      "limits": {
+        "largestJavaScript": 700000,
+        "totalJavaScript": 6000000,
+        "totalAssets": 7000000
+      }
+    },
+    "bundle_limits_changed": false,
+    "browser_targets_changed": false,
+    "dependency_files_unchanged": true,
+    "all_product_frontend_sources_unchanged_since_build": true,
+    "pixel_node_tests_passed": 11,
+    "pixel_node_log": {
+      "path": "/tmp/hoim-observation-pixel-tests.log",
+      "sha256": "d580060e2837c802b8909e709c0f7b7cea95f5f23212d2dad00ede0d8171dc4e"
+    },
+    "prompt_export_check": {
+      "capabilities": 80,
+      "version": "2026.10.20.3",
+      "passed": true
+    },
+    "python_lint_and_format_log": {
+      "path": "/tmp/hoim-observation-ruff-final.log",
+      "sha256": "3070bc4c02f06210c2be6a1cf844b670ab495f72bff2698ad63d08ca8bc82114"
+    },
+    "python_files_checked": 21,
+    "ruff_passed": true,
+    "format_passed": true,
+    "format_only_pre_final_changes_ast_identical": {
+      "files": [
+        "app/inpatient_observations.py",
+        "scripts/generate_rbac_matrix.py",
+        "tests/test_inpatient_observations.py",
+        "tests/test_inpatient_observations_migration.py",
+        "tests/test_rbac_drift.py"
+      ],
+      "ast_identical_before_after": true,
+      "formatter_output": "5 files reformatted\n",
+      "ast_sha256": {
+        "app/inpatient_observations.py": "402ec6c654deae3d06b43defd1d21fd75811f1f7ae4b14a07796d8304932be56",
+        "scripts/generate_rbac_matrix.py": "91d487ea73ddceb22e1538ffc3d60abca750c7746d31cd9d067eecd1adb99a41",
+        "tests/test_inpatient_observations.py": "4b268c875cfa5301d2f1ecfffd0edd4b97e99921994feb149070da41c322e4ff",
+        "tests/test_inpatient_observations_migration.py": "ff6d8fcc0ebfb0279e9ec95a0181a20afefb8227266d6dad4e2b2a557ed8c82e",
+        "tests/test_rbac_drift.py": "222fd52d46703ff2b31cc8f8a5dd7985d9b94b06a0a9e6aa5932b084697b9979"
+      }
+    }
+  },
+  "actual_isolated_mysql_record_sha256": "7b13bcdcc758367f48f7a6afef71be2e1dcfc54f5bb6f09abc25039300f63b1a",
+  "actual_isolated_mysql": {
+    "image": "mysql:8.0.39",
+    "container_name": "hoim-observation-mysql-0653900bcb43",
+    "synthetic_only": true,
+    "network": "none",
+    "host_ports": [],
+    "source_mounts": false,
+    "existing_database_accessed": false,
+    "project_env_file_read": false,
+    "scope": "Actual original two Alembic revision functions, real SQLAlchemy/PyMySQL ORM, source/window/revocation/history-guard functions over synthetic prerequisite tables. Not HTTP, full hospital bootstrap, production deployment or clinical model validation.",
+    "image_id": "sha256:01faea2cb286276923a223bdbf438b50468f3c4090f6b61e0b27aa871ca0dbac",
+    "isolation": {
+      "network_mode": "none",
+      "port_bindings": {},
+      "readonly_root": true,
+      "user": "999:999",
+      "cap_drop": [
+        "ALL"
+      ],
+      "tmpfs": {
+        "/tmp": "rw,nosuid,nodev,noexec,size=64m,uid=999,gid=999,mode=0700",
+        "/var/lib/mysql": "rw,nosuid,nodev,noexec,size=512m,uid=999,gid=999,mode=0700"
+      },
+      "mount_types": [
+        "bind"
+      ]
+    },
+    "waited_for_final_mysql_initialization": true,
+    "dotenv_disabled_before_import": true,
+    "dotenv_open_guard_enabled": true,
+    "only_private_unix_socket_allowed": true,
+    "hospital_service_started": false,
+    "source_sha256": {
+      "app/models.py": "d95193af9b9d24213a0a6474db0cd1f3a1ac4def97a20e071f32f761c7eb536d",
+      "app/inpatient_observations.py": "e63c4d2fa4dcd9a7f840e2aa90f978c7dfd5b1270a4490a3d647ce724f64712c",
+      "app/routers/inpatient_observations.py": "b9eeae0fe878dfc5ee300793ca37e2c8e5f30160c74b0b52b0dc70471ebad8c6",
+      "alembic/versions/20261020_inpatient_observations.py": "e467e003288eb7d5f2eef6f6ebebb57842f518eac9a05bb01464ea3a6083f60b",
+      "app/ai/models.py": "b20d3e31738675645a0831508768f980c61395b7ee4d8938a33d70d11b1052a6",
+      "app/ai/observation_windows.py": "30ef99111bbb107f914e91bbad80bfb69906b630fbc983c7cfd65cd1bfedf4c4",
+      "app/routers/ai_observation_windows.py": "ac242ba5bdce4c13302a120bb9abdb0c6d4f415f93f1d0e03f24c5f9f0acaebe",
+      "alembic/versions/20261020_ai_observation_windows.py": "8bdbd899638fbe5a760341407fe17b6b930ff2189e7338e855cb085f95d210a3",
+      "app/ai/context.py": "be7bddc4e01618d96c01ac9396a8b691648d6497b001463c4a007ba3db1978d2",
+      "app/ai/governance.py": "d1f497895b59f9836350534e8799d8594262043bd88dc9046a88c0b3431d893f",
+      "app/dependencies.py": "2f0340337885f96d833635f00727cc4beb900e1d44ae38fdcd2fd3981c8092f2",
+      "app/config.py": "3fc4a8051ca93f8fbff9cb9de3dcd6f143cb2c4140b13958b6307b6ec6ef07bc",
+      "app/database.py": "74f053e5bc70a95bfafe750adba216079bc0023a24fc620849fe6b6d42acfa68",
+      "app/clinical_observations.py": "28fcd9838848e6946281b980a657937b79abd11fd8e38a5bc528cb628c5b7132"
+    },
+    "actual_source_functions": true,
+    "actual_window_functions": true,
+    "actual_migration_functions": true,
+    "server_version": "8.0.39",
+    "server_session_timezone": "SYSTEM",
+    "synthetic_prerequisite_tables": [
+      "hoimsystem_admission",
+      "hoimsystem_ai_audit_event",
+      "hoimsystem_ai_patient_grant",
+      "hoimsystem_bed",
+      "hoimsystem_critical_care_record",
+      "hoimsystem_department",
+      "hoimsystem_doctor",
+      "hoimsystem_doctor_schedule",
+      "hoimsystem_hospital_campus",
+      "hoimsystem_lab_observation",
+      "hoimsystem_lab_order",
+      "hoimsystem_lab_result",
+      "hoimsystem_patient",
+      "hoimsystem_registration",
+      "hoimsystem_users",
+      "hoimsystem_vital_sign",
+      "hoimsystem_ward"
+    ],
+    "initial_upgrade_order": [
+      "20261020_inpatient_observations",
+      "20261020_ai_observation_windows"
+    ],
+    "actual_new_datetime_precision": {
+      "hoimsystem_ai_observation_window": {
+        "as_of": 6,
+        "created_at": 6,
+        "end_at": 6,
+        "revoked_at": 6,
+        "start_at": 6
+      },
+      "hoimsystem_inpatient_observation": {
+        "observed_at": 6,
+        "recorded_at": 6,
+        "revoked_at": 6
+      },
+      "hoimsystem_inpatient_urine_interval": {
+        "end_at": 6,
+        "recorded_at": 6,
+        "revoked_at": 6,
+        "start_at": 6
+      }
+    },
+    "actual_point_and_urine_create_route_functions_executed": true,
+    "source_roundtrip": {
+      "point_observed_microseconds": [
+        123456,
+        654321
+      ],
+      "point_recorded_microsecond": 123456,
+      "urine_start_end_microseconds": [
+        123456,
+        654321
+      ],
+      "exact_decimal_string": "36.12345678",
+      "explicit_zero_and_null_preserved": true,
+      "chinese_notes_preserved": true,
+      "point_content_hash": "c1e07a8920328212f1bef1a3267aada0eed70494bdfb7a7f491fdae556f3f3cc",
+      "urine_content_hash": "39bc3cc5c83b86c8485655b1e5829fc94132600f4512ab642df3de4ef59e33ff"
+    },
+    "same_asof_initial_window_current": true,
+    "initial_window_content_hash": "519a5e21117d9177af0bdd06bb06c78475bd4416528c2b5e513e1d4dd74adaec",
+    "window_roundtrip_microseconds": {
+      "created_at": 123456,
+      "start_at": 123456,
+      "end_at": 654321,
+      "as_of": 123456
+    },
+    "point_revoke_invalidates_window": {
+      "status": 409,
+      "detail": "原观测窗内容、来源成员或时间归属已改变"
+    },
+    "ordinary_history_after_source_revoke": {
+      "status": 403,
+      "detail": "原观测窗、来源或当前住院权限已改变，不能继续读取旧风险结果"
+    },
+    "super_frozen_audit_retained_after_source_revoke": true,
+    "duplicate_point_revoke_rejected": {
+      "status": 409,
+      "detail": "来源已改变或撤销，不能重复撤销或恢复"
+    },
+    "same_asof_recreated_window_tracks_current_revocation_not_historical_replay": true,
+    "urine_revoke_invalidates_recreated_window": {
+      "status": 409,
+      "detail": "原观测窗内容、来源成员或时间归属已改变"
+    },
+    "actual_point_urine_window_cas_revoke_functions_executed": true,
+    "revocation_preserves_original_source_json_and_hash": true,
+    "all_new_revocation_microseconds": 654321,
+    "audit_actions": [
+      "inpatient_observation.create",
+      "inpatient_observation.create",
+      "urine_interval.create",
+      "urine_interval.create",
+      "inpatient_observation.revoke",
+      "urine_interval.revoke",
+      "observation_window.revoke"
+    ],
+    "legacy_before": {
+      "hoimsystem_admission": [
+        {
+          "admission_diagnosis": null,
+          "admission_id": "00000000-0000-4000-8000-000000091001",
+          "admission_no": "SYNTHMYSQL91001",
+          "admission_time": "2099-01-02 03:04:05",
+          "admission_type": 0,
+          "bed_id": null,
+          "chief_complaint": null,
+          "create_time": "2001-02-03 04:05:06",
+          "department_id": null,
+          "deposit_amount": "0.00",
+          "discharge_diagnosis": null,
+          "discharge_time": null,
+          "doctor_id": 91001,
+          "past_history": null,
+          "patient_id": 91001,
+          "present_illness": null,
+          "status": 1,
+          "ward_id": null
+        }
+      ],
+      "hoimsystem_critical_care_record": [
+        {
+          "admission_id": "00000000-0000-4000-8000-000000091001",
+          "blood_pressure": null,
+          "consciousness": 0,
+          "entry_version": "legacy_unverified",
+          "gcs_score": 15,
+          "note": "中文原文不能改写",
+          "nurse_id": 91001,
+          "oxygen_support": null,
+          "patient_id": 91001,
+          "pulse": null,
+          "record_id": "synthetic-legacy-critical",
+          "record_time": "2002-03-04 05:06:07.123456",
+          "spo2": null,
+          "time_basis": "unspecified",
+          "urine_output": "原尿量未知累计区间"
+        }
+      ],
+      "hoimsystem_lab_observation": [
+        {
+          "code": "creatinine",
+          "code_system": "local",
+          "collected_at": "2003-04-05 06:07:08",
+          "display": "合成旧肌酐",
+          "flag": "unknown",
+          "lab_result_id": "synthetic-legacy-lab-result",
+          "method": "原方法",
+          "observation_id": "synthetic-legacy-lab-observation",
+          "reference_high": null,
+          "reference_low": null,
+          "reference_text": null,
+          "specimen_type": "原标本",
+          "unit": "mg/dL",
+          "value_num": "1.23456789",
+          "value_text": null
+        }
+      ],
+      "hoimsystem_lab_order": [
+        {
+          "check_items": "原编码未按日期分配住院",
+          "check_type": "合成肌酐旧报告",
+          "create_time": "2003-04-05 06:07:08",
+          "doctor_id": 91001,
+          "external_order_id": null,
+          "integration_status": "pending",
+          "lab_order_id": "synthetic-legacy-lab-order",
+          "last_sync_time": null,
+          "patient_id": 91001,
+          "sample_status": 0,
+          "status": 2,
+          "urgent": null
+        }
+      ],
+      "hoimsystem_lab_result": [
+        {
+          "abnormal_flag": 0,
+          "audit_status": 1,
+          "audit_time": null,
+          "auditor_id": null,
+          "critical_acknowledged_by": null,
+          "critical_acknowledged_time": null,
+          "critical_handled_by": null,
+          "critical_handled_time": null,
+          "critical_handling_note": null,
+          "critical_notified_by": null,
+          "critical_notified_time": null,
+          "critical_status": 0,
+          "lab_order_id": "synthetic-legacy-lab-order",
+          "lab_result_id": "synthetic-legacy-lab-result",
+          "report_time": "2003-04-05 07:08:09",
+          "result": "旧报告原文保留；无独立住院关联",
+          "sample_id": null,
+          "technician_id": 91001
+        }
+      ],
+      "hoimsystem_vital_sign": [
+        {
+          "blood_pressure_diastolic": 80,
+          "blood_pressure_systolic": 120,
+          "check_time": "2002-03-04 05:06:07",
+          "nurse_id": 91001,
+          "patient_id": 91001,
+          "pulse": 0,
+          "temperature": 36.5,
+          "vital_id": 1,
+          "weight": 0.0
+        }
+      ]
+    },
+    "legacy_full_rows_unchanged_after_source_and_window_functions": true,
+    "prerequisite_ddl_unchanged_by_both_migration_roundtrips": true,
+    "actual_downgrade_upgrade_roundtrip_only_new_three_tables": true,
+    "legacy_full_rows_unchanged_after_downgrade_upgrade": true,
+    "source_hashes_unchanged_during_execution": true,
+    "dotenv_open_attempts": 0,
+    "private_unix_socket_connection_count": 2,
+    "all_checks_passed": true,
+    "worker_seconds": 3.507,
+    "worker_exit_code": 0,
+    "worker_stdout": "",
+    "worker_stderr": "",
+    "verification_script_sha256": {
+      "/tmp/hoim-observation-mysql-runner.py": "06fae7015729ca1854690359333ac8678c5f793e87ca86fcb90e2043139f6276",
+      "/tmp/hoim-observation-mysql-worker.py": "471223acacf61835433803665a2721f1531c7b722901fb3929a227f7ee27792c"
+    },
+    "own_container_absent_verified": true,
+    "own_container_and_volumes_removed": true,
+    "own_private_directory_removed": true,
+    "cleanup_verified": true,
+    "verification_scripts_retained_in_tmp": [
+      "/tmp/hoim-observation-mysql-runner.py",
+      "/tmp/hoim-observation-mysql-worker.py"
+    ],
+    "seconds": 10.714,
+    "completed_at_utc": "2026-10-20T12:46:23.706037+00:00"
+  },
+  "actual_inventory_record_sha256": "b9979b8711929a83580d2802948bee90c201ce9fedc71ec53192a65cc93a52f9",
+  "actual_inventory_validation": {
+    "route_matrix_exact_match": true,
+    "all_implementation_hashes_match_platform": true,
+    "ruff_check_and_format_passed": true,
+    "database_connections": 0,
+    "dotenv_reads": 0,
+    "repo_files_modified_by_inventory": false
+  },
+  "actual_inventory_isolation": {
+    "dotenv_sources_disabled": true,
+    "settings_env_file_none": true,
+    "forbidden_env_open_attempts": [],
+    "database_connections_blocked": true,
+    "database_connection_attempts": [],
+    "configured_database": "sqlite:///:memory:",
+    "lifespan_or_server_started": false
+  },
+  "implementation_sha256": {
+    "doc/ai-prompts.json": "8a8550b8a532c60a7e0f3de7581dbe89c65439ff221db36027988b4ad0b98320",
+    "doc/api-rbac-matrix.md": "390b7ea387dfd2acbc46a90ac9eff742737152d0538b2d3da7608a9a44712078",
+    "fastapi_be/alembic/versions/20261020_ai_observation_windows.py": "8bdbd899638fbe5a760341407fe17b6b930ff2189e7338e855cb085f95d210a3",
+    "fastapi_be/alembic/versions/20261020_inpatient_observations.py": "e467e003288eb7d5f2eef6f6ebebb57842f518eac9a05bb01464ea3a6083f60b",
+    "fastapi_be/app/ai/catalog.py": "c89756c6f2ffbf17f834e50b2f7dc61caa925df18b4f629b0a9459e997a2a63b",
+    "fastapi_be/app/ai/context.py": "be7bddc4e01618d96c01ac9396a8b691648d6497b001463c4a007ba3db1978d2",
+    "fastapi_be/app/ai/models.py": "b20d3e31738675645a0831508768f980c61395b7ee4d8938a33d70d11b1052a6",
+    "fastapi_be/app/ai/observation_windows.py": "30ef99111bbb107f914e91bbad80bfb69906b630fbc983c7cfd65cd1bfedf4c4",
+    "fastapi_be/app/ai/references.py": "cd55df72c8023789168989c88b69206ce35a0c0dca11ef846d82aa2a721cf7a0",
+    "fastapi_be/app/ai/runtime.py": "d780c06eb63bed273d8130dbf4c5c8f7bd4f4ad994bd947b4aff2a6eff91f705",
+    "fastapi_be/app/ai/tools.py": "469abbe14fb87b717bed4e417c34fcdea476e1dd5c119643265e091fdbcd712e",
+    "fastapi_be/app/inpatient_observations.py": "e63c4d2fa4dcd9a7f840e2aa90f978c7dfd5b1270a4490a3d647ce724f64712c",
+    "fastapi_be/app/main.py": "6b76ff7731d52012d4731c535c88fbc5add04eee5060609f202f7f2bae8258f6",
+    "fastapi_be/app/models.py": "d95193af9b9d24213a0a6474db0cd1f3a1ac4def97a20e071f32f761c7eb536d",
+    "fastapi_be/app/routers/ai_observation_windows.py": "ac242ba5bdce4c13302a120bb9abdb0c6d4f415f93f1d0e03f24c5f9f0acaebe",
+    "fastapi_be/app/routers/inpatient_observations.py": "b9eeae0fe878dfc5ee300793ca37e2c8e5f30160c74b0b52b0dc70471ebad8c6",
+    "fastapi_be/rbac_matrix.json": "519602598482dd958fa6a4e522e1d9bab8c0beaf9575bc04f154ed2516c03b08",
+    "fastapi_be/scripts/generate_rbac_matrix.py": "0b8621e8320747b2a170d83db0dfa51ee6aefee83231fc58148941c7ffc3e3a6",
+    "fastapi_be/tests/test_ai_catalog.py": "d18c958d4bef1ba203407e95797a88b6ba4dd2d18988c4b38d16db3702442c79",
+    "fastapi_be/tests/test_ai_observation_history.py": "312cebd08995ab97df96430f3b1621128a19e6c2588ee0e2943489c9f5b24b05",
+    "fastapi_be/tests/test_ai_observation_windows.py": "d1f6db5952b096d6e6d5e6337ff434fe49762537359acee15501525d5b484480",
+    "fastapi_be/tests/test_inpatient_observations.py": "68bfce5a3f909bd05a2f522a14d982e804de50ed63322f8f32475d4f9e72eb67",
+    "fastapi_be/tests/test_inpatient_observations_migration.py": "08873322c051ed862260944b60dd9522b6c9d6c88be4da0099f87265f1dd3f5d",
+    "fastapi_be/tests/test_rbac_drift.py": "99614f55801b8e3bd566f86da610a5e8127b4c1b2c2bb39840d75c221ff47b8f",
+    "vue3-new-ui/e2e/ai-observation-entry.spec.js": "3c7e2ce1539b8838b994464aebe6cd5028af484108934c36cd61deea8206dced",
+    "vue3-new-ui/e2e/ai-observation-source.spec.js": "e554b56d00f773092089a4ce93a9627f1e4b8e09b495db3934bf59b2c92d51b6",
+    "vue3-new-ui/e2e/fixtures/observation-source-harness.cjs": "f9753b2a59cbda267a5fc21d6e7c2f514617d674660161bfd3069cb9195f1f8d",
+    "vue3-new-ui/src/api/inpatientObservations.js": "721051e0cdc930c5823f85cd6b797ddb04113982e93f6a2a4649d4f51ee39251",
+    "vue3-new-ui/src/components/AIAssistant/index.vue": "c4f1343264daad97f94d1bf76ddfb2db633617c2211a4cd574b1d7a7053701ac",
+    "vue3-new-ui/src/components/AIObservationFindings/index.vue": "e6848348e867a6cd4ccd67af3f31d4df84c4c55399c4d120981625845709e611",
+    "vue3-new-ui/src/components/AIObservationWindowInput/index.vue": "67dd730a452ad51070d674279099fcb7ef747ad06c9c1cc47f190dc6b096b9c4",
+    "vue3-new-ui/src/components/InpatientObservationPanel/index.vue": "5206177569b18075f82220eaa79fabee08d00eb09545b9b13f14ace9ee9b5bca",
+    "vue3-new-ui/src/views/inpatient/nursingStation.vue": "e97aa53c15f5c35affb68a4a890e8ba0e48d40f7993e74ae8381f784c13ef9f7",
+    "vue3-new-ui/src/views/system/AIObservationWindowManagement.vue": "72fbe774315be7c9fda3277d0cce8c901c0b1d6a0352ce7ccbf72a2bbc01ec8f",
+    "vue3-new-ui/src/views/system/aiManagement.vue": "041537e23076a6a150655dcc3ae85ffb00d9899ec0668c8584b9ed5ade74e4ff"
+  },
+  "historical_records_unchanged_sha256": {
+    "doc/ai-forecast-verification.json": "9b5683bca58efcf7fc460410529fd5aeeed91e2646eb47be24b836cbadc20d63",
+    "doc/ai-frontend-dependencies-verification.json": "968757f4a75e921038133b3fa9a94947ab4d5607142dce8da964f2a13d00bb1d"
+  },
+  "primary_sources": [
+    "https://hl7.org/fhir/R4/observation-definitions.html",
+    "https://hl7.org/fhir/R4/vitalsigns.html",
+    "https://ucum.org/ucum"
+  ],
+  "remaining": [
+    "Actual continuous acquisition/completeness evidence; reviewed analyte mapping with explicit admission binding and trustworthy availability timestamps",
+    "Applicable risk-model implementation, population and outcome definitions, calibration and independent clinical validation",
+    "Other feature-specific sources, specialist models and real workflow validation in the active 80-feature goal"
+  ]
+}

@@ -482,6 +482,15 @@
   "auth": [
    "super_admin"
   ],
+  "function": "check_sofa_provider",
+  "method": "POST",
+  "module": "ai_admin.py",
+  "path": "/api/ai/admin/providers/{provider_id}/sofa-capabilities"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
   "function": "list_global_runs",
   "method": "GET",
   "module": "ai_admin.py",
@@ -1456,6 +1465,89 @@
   "method": "GET",
   "module": "ai_sofa.py",
   "path": "/api/ai/admin/sofa-assessments/{assessment_id}"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "nurse",
+   "super_admin"
+  ],
+  "function": "candidates",
+  "method": "POST",
+  "module": "ai_sofa_change.py",
+  "path": "/api/ai/sofa-change-assessments/candidates"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "nurse",
+   "super_admin"
+  ],
+  "function": "assessments",
+  "method": "GET",
+  "module": "ai_sofa_change.py",
+  "path": "/api/ai/sofa-change-assessments"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "nurse",
+   "super_admin"
+  ],
+  "function": "create",
+  "method": "POST",
+  "module": "ai_sofa_change.py",
+  "path": "/api/ai/sofa-change-assessments"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "nurse",
+   "super_admin"
+  ],
+  "function": "assessment",
+  "method": "GET",
+  "module": "ai_sofa_change.py",
+  "path": "/api/ai/sofa-change-assessments/{change_assessment_id}"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "nurse",
+   "super_admin"
+  ],
+  "function": "revoke",
+  "method": "POST",
+  "module": "ai_sofa_change.py",
+  "path": "/api/ai/sofa-change-assessments/{change_assessment_id}/revoke"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "admin_assessments",
+  "method": "GET",
+  "module": "ai_sofa_change.py",
+  "path": "/api/ai/admin/sofa-change-assessments"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "admin_assessment",
+  "method": "GET",
+  "module": "ai_sofa_change.py",
+  "path": "/api/ai/admin/sofa-change-assessments/{change_assessment_id}"
  },
  {
   "auth": [

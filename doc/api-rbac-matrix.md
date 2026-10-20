@@ -3,7 +3,7 @@
 > 由 `fastapi_be/scripts/generate_rbac_matrix.py` 从源码自动生成，请勿手改。
 > `✓`=可访问 | `PUBLIC`=无需登录 | 留空=不可访问
 
-共 **726** 个接口（PUBLIC 18 个 / 需登录 708 个）。
+共 **734** 个接口（PUBLIC 18 个 / 需登录 716 个）。
 
 
 ### `admin.py`
@@ -88,6 +88,7 @@
 | POST | `/api/ai/admin/providers/{provider_id}/news2-capabilities` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
 | POST | `/api/ai/admin/providers/{provider_id}/aki-capabilities` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
 | POST | `/api/ai/admin/providers/{provider_id}/qsofa-capabilities` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/admin/providers/{provider_id}/sofa-capabilities` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
 | GET | `/api/ai/admin/runs` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
 | GET | `/api/ai/admin/runs/{run_id}` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
 | POST | `/api/ai/admin/providers` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
@@ -251,6 +252,18 @@
 | POST | `/api/ai/sofa-assessments/{assessment_id}/revoke` | ✓ | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |
 | GET | `/api/ai/admin/sofa-assessments` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
 | GET | `/api/ai/admin/sofa-assessments/{assessment_id}` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+
+### `ai_sofa_change.py`
+
+| 方法 | 路径 | admin | super_admin | director | doctor | nurse | cashier | pharmacist | guide | patient | lab_technician | registrar | PUBLIC |
+|------|------|------|------|------|------|------|------|------|------|------|------|------|------|
+| POST | `/api/ai/sofa-change-assessments/candidates` | ✓ | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |
+| GET | `/api/ai/sofa-change-assessments` | ✓ | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |
+| POST | `/api/ai/sofa-change-assessments` | ✓ | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |
+| GET | `/api/ai/sofa-change-assessments/{change_assessment_id}` | ✓ | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |
+| POST | `/api/ai/sofa-change-assessments/{change_assessment_id}/revoke` | ✓ | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |
+| GET | `/api/ai/admin/sofa-change-assessments` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/admin/sofa-change-assessments/{change_assessment_id}` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
 
 ### `ai_vasoactive_mappings.py`
 

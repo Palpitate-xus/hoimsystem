@@ -388,6 +388,7 @@ from app.routers import (
     ai_qsofa,
     ai_risk_rules,
     ai_sofa,
+    ai_sofa_change,
     ai_vasoactive_mappings,
     allergy,
     analytics,
@@ -513,6 +514,7 @@ app.include_router(ai_news2.router, prefix="/api")
 app.include_router(ai_aki.router, prefix="/api")
 app.include_router(ai_qsofa.router, prefix="/api")
 app.include_router(ai_sofa.router, prefix="/api")
+app.include_router(ai_sofa_change.router, prefix="/api")
 app.include_router(inpatient_gcs.router, prefix="/api")
 app.include_router(inpatient_support.router, prefix="/api")
 app.include_router(ai_vasoactive_mappings.router, prefix="/api")

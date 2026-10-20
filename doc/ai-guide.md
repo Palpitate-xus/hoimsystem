@@ -138,7 +138,7 @@ worker 在执行前和保存结果前重新检查权限、配置、患者资料�
 
 运营历史默认近 30 天，可选不含未来且最多 367 天的正序区间。医院数据问答的区间若完全早于当前业务日，不加载当前病区或床位快照，也不因无关的当前床位变化使历史分析失效；床位需求预测则单独保留当前容量供核查。排班/手术排台计划与历史资料分开，默认计划为业务日起 14 天，单次最多 31 天且不晚于业务日后 366 天。大范围资料可能超过模型输入预算，需缩小日期、科室或品种；原始清单若截断会明确标记。
 
-手术页的“AI 排台分析”、运营页的评价分析，以及已关联患者的不良事件行“AI 事件复盘”，都能先查看资料再提交。事件行入口固定患者和事件，不展示就诊归属选择，结果同时展示冻结的原上报和原分析，并可检查引用。未绑定患者的组织事件仍待独立访问范围及数据连接，不强行归属某位患者。手术排台和反馈分析均受模型服务患者数据用途开关控制。当前默认目录及Prompt版本为 `2026.10.17`，旧队列不会沿用更新前的固定任务契约。
+手术页的“AI 排台分析”、运营页的评价分析，以及已关联患者的不良事件行“AI 事件复盘”，都能先查看资料再提交。事件行入口固定患者和事件，不展示就诊归属选择，结果同时展示冻结的原上报和原分析，并可检查引用。未绑定患者的组织事件仍待独立访问范围及数据连接，不强行归属某位患者。手术排台和反馈分析均受模型服务患者数据用途开关控制。当前默认目录及Prompt版本为 `2026.10.18`，旧队列不会沿用更新前的固定任务契约。
 
 临床路径模板页提供“AI 治疗方案比选”，固定所选路径后选择已授权患者和本次就诊。工作台也可选择当前科室及功能已有审核版本的路径；选择就诊后重新核对审核范围。路径执行行的“AI 路径复评”固定患者、所记住院、原入径和路径标识，补充JSON不能替换这些绑定引用。预览与生成使用相同标识，原模板元数据、原入径与变异、未知计数及引用独立展示，结果保存任务当时版本。新增、入径、变异、退出及用药仍走原人工业务流程。
 
@@ -169,6 +169,9 @@ ADR列表对管理员保留既有管理范围；药师只读现有处方业务�
 | `app/ai/adr_sources.py` / `app/adr_status.py` | ADR原报告、明确处理结果及历史歧义区分 |
 | `app/ai/audio_files.py` / `audio_assets.py` | 私有原音频、格式与解码校验、归属及撤回后的读取权限 |
 | `app/ai/ecg_files.py` / `ecg_assets.py` | 私有WFDB成对原文件、原导联校准与缺失采样、诊疗团队及来源版本校验 |
+| `app/ai/ecg_model.py` / `ecg_network.py` | 固定公开发布与许可核对、已审查的离线CNN、原训练归一化及纯safetensors加载 |
+| `app/ai/ecg_contract.py` / `ecg_config.py` / `ecg_server.py` / `ecg_worker.py` | 本地研究模型的严格原输入范围、真实运行标识、鉴权附件与隔离CPU分类 |
+| `app/ai/ecg_probe.py` | 超管无患者、无推理的本地心电服务能力核对 |
 | `app/ai/pathway_sources.py` / `pathway_knowledge.py` | 原路径入径资料、来源快照、审核匹配与所选路径知识核对 |
 | `app/pathway_progress.py` | 保留未知或矛盾计数的进度口径，供业务列表和AI资料共用 |
 | `app/ai/procedural_sources.py` / `care.py` | 手术申请/排台/围术期资料及手术团队关系 |
@@ -397,7 +400,40 @@ API与worker必须共享`AI_ECG_STORAGE_DIR`；Compose已配置独立`ai_ecg_pri
 
 该示例仅示意字段，标识、哈希、Prompt摘要、输入参数必须与实际请求一致。原采样计数和定位均为严格整数；`input_sample_rate_hz`保留原字符串，`input_leads`严格匹配原顺序，实际使用导联必须来自原输入。缺失样本必须报告`masked`及预处理说明，所用导联不能全部缺失。服务须报告完整原输入处理，不能把截短范围冒充全部；报告是服务声明，不是独立质量证明。定位使用原样本半开区间且不得越界，模型内部重采样后的索引必须还原。全记录候选用`location: "recording"`及空的起止值，不补写精确位置。最多100项，模型分数保留0和未提供的区别，不解释成患病概率。
 
-结果可按候选定位到指定原导联，核查冻结元数据与原始波形，复制带导联、原区间、来源和原分数的待复核草稿；没有自动改写诊断、心电报告或签署。当前未集成或评估真实心电分类模型；85项心电后端测试和5项浏览器测试只验证合成波形、权限、传输协议及复核行为，临床启用仍需适用模型、真实数据、模型验证报告和人工评审。
+结果可按候选定位到指定原导联，核查冻结元数据与原始波形，复制带导联、原区间、来源和原分数的待复核草稿；没有自动改写诊断、心电报告或签署。通用v3契约已在合成波形、权限、传输协议及复核行为测试中验证；另有下面的真实本地研究模型实现。临床启用仍需适用模型、真实数据、模型验证报告和人工评审。
+
+### 可选本地CPU心电研究模型
+
+已接入[Tumo505固定发布](https://huggingface.co/Tumo505/SSL-ECG-Classification-model-card/tree/6ec2ee1a1badd9508f9c1219fb07de38f3f6936b)的实际权重，代码与模型采用Apache-2.0。仓库保留完整许可与改动说明于`fastapi_be/third_party/ssl-ecg/`。本地实现参考[原始PyTorch架构](https://github.com/Tumo505/SSL-for-ECG-classification/blob/6b82956004c0ffa7ae6e983df7867eec1b450d85/src/ssrl_ecg/models/cnn.py)及[固定版本推理实现](https://huggingface.co/Tumo505/SSL-ECG-Classification-model-card/blob/6ec2ee1a1badd9508f9c1219fb07de38f3f6936b/inference.py)，移除Transformers及远程Python加载；运行时只加载已审查的本地代码和固定safetensors字节，不使用pickle权重。训练或性能数字属于发布者报告，本项目未将其作为本院临床验证。
+
+该模型严格使用原100Hz、每导联1000样本的完整10秒标准12导联：`I, II, III, aVR, aVL, aVF, V1–V6`。可按实际名称重排原导联，按原增益、基线和单位换算mV；缺失导联、实际缺失样本、其他采样率或长度均拒绝，不补值、生成导联、滤波、重采样、裁剪或填充。500Hz原记录仍可登记及查看，需要另行配置支持其原始输入的服务，不能声称该研究模型已验证重采样。模型的`applicable`仅报告此技术输入范围，采集时人群、设备及临床适用性仍需核实。
+
+预处理与原发布一致：先转NumPy float32，再逐记录逐导联减均值、除以总体标准差；标准差下限`1e-6`，不是相加epsilon或无偏标准差。实际网络为六组Conv1d/BatchNorm/ReLU、全局平均池化及五类输出，539,909个可训练参数、38个状态张量。固定返回`NORM、CD、HYP、MI、STTC`五个独立sigmoid原分数及整段级位置，不应用0.5诊断阈值，不把NORM解释为已确认正常或把其他低分作疾病排除，也不生成精确起止定位。
+
+```bash
+# fastapi_be：独立可选环境，主API无需安装PyTorch
+python -m venv .venv-ecg
+.venv-ecg/bin/pip install -r requirements.txt -r requirements-ecg.txt
+# 显式准备已固定公开发布，或加 --source-dir 使用同一发布的离线文件
+.venv-ecg/bin/python scripts/prepare_ecg_model.py --destination /srv/models/hoim-ecg
+export ECG_MODEL_DIR=/srv/models/hoim-ecg
+# 通过部署密钥机制设置至少32字符的 AI_PROVIDER_LOCAL_ECG_API_KEY
+.venv-ecg/bin/python -m app.ai.ecg_server --host 127.0.0.1 --port 8811
+```
+
+准备脚本只接受已审查仓库与40位固定提交，核对原配置、权重、许可、README与provenance的已知长度及SHA256，原子发布到新目录；不会下载或执行仓库Python。已有目录不覆盖。实际权重2,170,628字节，模型清单摘要为`7d1fbd2d9987337ad7167694a054c818c3c75dbf53dd67987a9f78285dbe0047`；权重与可选环境不进入Git。模型挂载目录须允许运行UID读取。
+
+服务设置使用独立`ECG_*`变量；`AI_ECG_*`仍是主API/worker的患者原文件存储与额度，二者不混用。可配置`ECG_CPU_THREADS`（默认4）、`ECG_MAX_BYTES`（默认1MiB）及`ECG_TIMEOUT_SECONDS`（默认30秒）。运行标识为`ssl-ecg:<实际摘要>`，包含权重清单、预处理、关键实现源码、Python/机器与三个实际依赖版本、CPU线程配置。服务就绪、能力读取和任务处理前核对当前文件，变更后拒绝沿用旧运行标识。任务进程再次核对权重与真实采样哈希，独立处理完整原输入，超时或取消会终止整个子进程组并清理临时原文件；不读取医院数据库或传入其凭据。
+
+超管“模型服务”的“检查本地心电服务”只对已保存地址执行鉴权`GET /capabilities`，主接口为`POST /api/ai/admin/providers/{id}/ecg-capabilities`，带`expected_revision`。检查前后核对当前管理角色及配置版本，不发送波形或患者信息，不执行分类。报告展示真实模型标识、来源、导联/采样/标签及预处理/运行摘要；“填写实际模型，待保存”仅填写表单，另行保存与评审。关闭、切换或失活后，迟到报告不能填入另一个服务。模型请求超时须大于服务处理时限并留传输余量；实际服务地址、患者资料用途与验证状态仍由超管管理。
+
+服务只把原始信号送入CNN，完整系统/任务Prompt摘要用于任务绑定，用户问题及病史不作为信号或类别标签。结果`processing.local_runtime`报告实际模型、预处理、运行依赖、`signal_only`、`population_applicability: not_verified`和`clinical_validation: not_provided`。网关要求本地前缀与该实际运行摘要匹配，并检查固定权重/预处理、原输入范围、完整五类分数和整段位置；缺失、错版或不合法结果拒收。外部v3适配器可继续使用原有契约，不冒称该本地模型运行记录。
+
+`scripts/verify_ecg_classifier.py`在显式提供已审查源码SHA的本地参考文件后，对固定随机、恒定、斜坡、周期和脉冲五组合成输入核对原预处理、logits及sigmoid；生产不加载该参考源码。`scripts/smoke_local_ecg.py`只生成固定非临床合成记录，通过真实隔离子进程验证等效校准/原导联排列、实际缺失标记拒绝及不支持输入，不接受真实患者文件。`tests/test_ai_local_ecg_real.py`须显式选择已准备模型，在隔离数据库与合成患者中验证原文件登记→超管未启用能力预览→真实CPU分类→冻结结果及权限，确认原业务记录未改。工程试跑记录单独保存在[本地心电模型验证](ai-ecg-classifier-smoke.json)；不构成诊断准确度、疾病概率、人群适用性或临床验证。
+
+可用`Dockerfile.ecg`单独构建非root运行镜像，权重通过外部只读目录提供，不打包进镜像；容器内默认8811端口。跨容器访问须配置对应受信任地址与TLS，加入既有`AI_PROVIDER_ALLOWED_HOSTS`；容器内127.0.0.1指自身。Compose没有默认启动或启用该服务。
+
+2026-10-20已实际构建该镜像，在禁用网络、只读根目录、UID10001、4CPU/1GiB及256MiB临时目录中通过上述4项检查；其中两份等效校准/排列的五类原分数误差0，实际缺失标记及500Hz输入分别被拒绝。162个应用Python源码文件与工作区逐项匹配，脚本及许可也已核对，镜像不含权重，推理没有导入医院数据库模块。宿主Python3.13与镜像Python3.12各自产生不同的实际运行标识，配置模型时应使用目标服务的能力报告，不复制另一环境的标识；详见[独立模型试跑记录](ai-ecg-classifier-smoke.json)。
 
 ## 验证命令
 
@@ -410,6 +446,10 @@ pytest -q tests/test_ai_speech_model.py tests/test_ai_speech_processing.py tests
 pytest -q tests/test_ai_ecg_files.py tests/test_ai_ecg_assets.py tests/test_ai_ecg_pipeline.py
 # 可选格式互操作验证，安装requirements-ecg-verification.txt后运行，不下载心电模型
 python scripts/verify_ecg_wfdb.py
+# 在独立可选CPU环境，显式选择已准备模型；只使用固定合成输入
+ECG_MODEL_DIR=/srv/models/hoim-ecg python scripts/smoke_local_ecg.py
+HOIM_ECG_REAL_MODEL_DIR=/srv/models/hoim-ecg pytest -q tests/test_ai_local_ecg_real.py
+python scripts/verify_ecg_classifier.py --model-dir /srv/models/hoim-ecg --reference-file /srv/reviewed-ecg-reference/cnn.py
 # 可选真实模型检查；在已安装requirements-speech.txt的隔离环境运行
 SPEECH_LANGUAGE=en python scripts/smoke_local_speech.py
 HOIM_SPEECH_REAL_MODEL_DIR="$SPEECH_MODEL_DIR" pytest -q tests/test_ai_local_speech_real.py

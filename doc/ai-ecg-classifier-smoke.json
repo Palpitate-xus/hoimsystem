@@ -1,0 +1,436 @@
+{
+  "recorded_at_utc": "2026-10-20T08:53:35.010373+00:00",
+  "platform_commit": "9f6677a5863a4b2c8dabf171f0acc749c266ea29",
+  "catalog_version": "2026.10.18",
+  "scope": "Actual pinned public ECG classifier and native-source workflow over fixed nonclinical synthetic signals; no disease accuracy, clinical calibration or population applicability evaluation",
+  "real_patient_data_used": false,
+  "clinical_validation_completed": false,
+  "default_clinical_features_enabled": false,
+  "model": {
+    "repository": "Tumo505/SSL-ECG-Classification-model-card",
+    "revision": "6ec2ee1a1badd9508f9c1219fb07de38f3f6936b",
+    "weights_bytes": 2170628,
+    "weights_sha256": "c2497259f7f672fee5568b1906e95272f256f057a6860f3aa60acf8f8d903db8",
+    "manifest_digest": "7d1fbd2d9987337ad7167694a054c818c3c75dbf53dd67987a9f78285dbe0047",
+    "license": "Apache-2.0",
+    "lead_order": [
+      "I",
+      "II",
+      "III",
+      "aVR",
+      "aVL",
+      "aVF",
+      "V1",
+      "V2",
+      "V3",
+      "V4",
+      "V5",
+      "V6"
+    ],
+    "label_order": [
+      "NORM",
+      "CD",
+      "HYP",
+      "MI",
+      "STTC"
+    ],
+    "original_sample_rate_hz": 100,
+    "original_samples_per_lead": 1000,
+    "missing_sample_policy": "reject",
+    "cropping": false,
+    "padding": false,
+    "resampling": false,
+    "diagnosis_threshold_applied": false
+  },
+  "reference_parity": {
+    "status": "passed",
+    "scope": "synthetic implementation parity only; no clinical accuracy or calibration evaluation",
+    "clinical_validation": "not_performed",
+    "reference_source_commit": "6b82956004c0ffa7ae6e983df7867eec1b450d85",
+    "reference_source_sha256": "bca3ca100c24ce68fefc1efb039012f84237e13812114e93a1b59ce1c9e4f8b0",
+    "model_repository": "Tumo505/SSL-ECG-Classification-model-card",
+    "model_revision": "6ec2ee1a1badd9508f9c1219fb07de38f3f6936b",
+    "weights_sha256": "c2497259f7f672fee5568b1906e95272f256f057a6860f3aa60acf8f8d903db8",
+    "config_sha256": "36c896f1d05b92f59a0e004ef034c69ba74ea0a77936859244bf0d94d57c66ce",
+    "lead_order": [
+      "I",
+      "II",
+      "III",
+      "aVR",
+      "aVL",
+      "aVF",
+      "V1",
+      "V2",
+      "V3",
+      "V4",
+      "V5",
+      "V6"
+    ],
+    "label_order": [
+      "NORM",
+      "CD",
+      "HYP",
+      "MI",
+      "STTC"
+    ],
+    "samples_per_lead": 1000,
+    "sample_rate_hz": 100,
+    "input_dtype": "float32",
+    "normalization": "per-record per-lead population SD, floor 1e-6",
+    "device": "cpu",
+    "cpu_threads": 4,
+    "parameter_count": 539909,
+    "state_tensor_count": 38,
+    "versions": {
+      "torch": "2.14.1+cpu",
+      "numpy": "2.4.4",
+      "safetensors": "0.8.0"
+    },
+    "cases": [
+      {
+        "fixture": "fixed_random_with_epsilon_floor",
+        "normalized_maximum_absolute_error": 0.0,
+        "logits_maximum_absolute_error": 0.0,
+        "scores_maximum_absolute_error": 0.0,
+        "model_scores": {
+          "NORM": 0.003314038272947073,
+          "CD": 0.44670695066452026,
+          "HYP": 2.2180322048370726e-05,
+          "MI": 0.6040709614753723,
+          "STTC": 0.9829447865486145
+        }
+      },
+      {
+        "fixture": "constant",
+        "normalized_maximum_absolute_error": 0.0,
+        "logits_maximum_absolute_error": 0.0,
+        "scores_maximum_absolute_error": 0.0,
+        "model_scores": {
+          "NORM": 0.014969850890338421,
+          "CD": 0.10527613759040833,
+          "HYP": 0.9649763703346252,
+          "MI": 0.04008971527218819,
+          "STTC": 0.8114548325538635
+        }
+      },
+      {
+        "fixture": "ramp",
+        "normalized_maximum_absolute_error": 0.0,
+        "logits_maximum_absolute_error": 0.0,
+        "scores_maximum_absolute_error": 0.0,
+        "model_scores": {
+          "NORM": 0.01876481994986534,
+          "CD": 0.1335768848657608,
+          "HYP": 0.4102453291416168,
+          "MI": 0.09347177296876907,
+          "STTC": 0.9750567078590393
+        }
+      },
+      {
+        "fixture": "periodic",
+        "normalized_maximum_absolute_error": 0.0,
+        "logits_maximum_absolute_error": 0.0,
+        "scores_maximum_absolute_error": 0.0,
+        "model_scores": {
+          "NORM": 0.003676199121400714,
+          "CD": 0.05015382915735245,
+          "HYP": 0.0024650662671774626,
+          "MI": 0.9929386973381042,
+          "STTC": 0.1663142591714859
+        }
+      },
+      {
+        "fixture": "pulse",
+        "normalized_maximum_absolute_error": 0.0,
+        "logits_maximum_absolute_error": 0.0,
+        "scores_maximum_absolute_error": 0.0,
+        "model_scores": {
+          "NORM": 0.08238140493631363,
+          "CD": 0.2206874042749405,
+          "HYP": 0.7742226719856262,
+          "MI": 0.20451290905475616,
+          "STTC": 0.599129855632782
+        }
+      }
+    ]
+  },
+  "local_cpu_smoke": {
+    "status": "passed",
+    "scope": "nonclinical synthetic calibration/lead-order and actual offline inference only; no accuracy or clinical validation",
+    "clinical_validation": "not_performed",
+    "runtime": {
+      "schema_version": "3",
+      "feature_key": "ecg_analysis",
+      "model_version": "ssl-ecg:f3744ba84da6efe8e195195f445b03f6b02125729d66bf16f3aa4258e5976339",
+      "engine": "ssl-ecg-cnn",
+      "engine_versions": {
+        "torch": "2.14.1+cpu",
+        "numpy": "2.4.4",
+        "safetensors": "0.8.0"
+      },
+      "model_repository": "Tumo505/SSL-ECG-Classification-model-card",
+      "model_revision": "6ec2ee1a1badd9508f9c1219fb07de38f3f6936b",
+      "model_digest": "7d1fbd2d9987337ad7167694a054c818c3c75dbf53dd67987a9f78285dbe0047",
+      "runtime_digest": "f3744ba84da6efe8e195195f445b03f6b02125729d66bf16f3aa4258e5976339",
+      "preprocessing_digest": "ced8bd62f67a7b538f05408ea18faf7834a11acece11dacac9e6d4bc5ab0166a",
+      "required_leads": [
+        "I",
+        "II",
+        "III",
+        "aVR",
+        "aVL",
+        "aVF",
+        "V1",
+        "V2",
+        "V3",
+        "V4",
+        "V5",
+        "V6"
+      ],
+      "sample_rate_hz": 100,
+      "samples_per_lead": 1000,
+      "labels": [
+        "NORM",
+        "CD",
+        "HYP",
+        "MI",
+        "STTC"
+      ],
+      "missing_sample_policy": "reject",
+      "prompt_handling": "signal_only",
+      "max_bytes": 1048576,
+      "timeout_seconds": 30,
+      "clinical_validation": "not_provided"
+    },
+    "python_version": "3.13.12",
+    "uid": 1001,
+    "database_module_loaded": false,
+    "actual_child_calls": 3,
+    "equivalent_calibration_scores_maximum_absolute_error": 0.0,
+    "cases": [
+      {
+        "fixture": "canonical_calibration",
+        "http_status": 200,
+        "check_passed": true,
+        "actual_child_invoked": true,
+        "source_header_sha256": "9b289862947a8b82dd6c0703c7f4ef134f3e1c84120edebc77eb3dd9032684bf",
+        "source_signal_sha256": "668eadf8e381ce32314f8dcfa367937cd35c2c8f5272af041a93f0f9d85744e6",
+        "source_content_sha256": "0187d71dc4b748e495f25489a8b53988533174918ad5a5eae1d202fa1e885738",
+        "model_scores": {
+          "NORM": 0.04752056300640106,
+          "CD": 0.18802908062934875,
+          "HYP": 0.0021065049804747105,
+          "MI": 0.7408665418624878,
+          "STTC": 0.4731822907924652
+        }
+      },
+      {
+        "fixture": "reordered_mixed_units_same_mv",
+        "http_status": 200,
+        "check_passed": true,
+        "actual_child_invoked": true,
+        "source_header_sha256": "0dcb12d23f4797fe5706b5aef8f7803dedc6d4e8931fb9aaf97c6a1a477d44a7",
+        "source_signal_sha256": "5556be8bef54401f8bb52315f4893e0d771718f64d74c1fe0755b792a9426345",
+        "source_content_sha256": "f904564ae4fe66054e3cc0444c2f4ddc5a6c3ed0c16b2cf176bca560dc64dc89",
+        "model_scores": {
+          "NORM": 0.04752056300640106,
+          "CD": 0.18802908062934875,
+          "HYP": 0.0021065049804747105,
+          "MI": 0.7408665418624878,
+          "STTC": 0.4731822907924652
+        }
+      },
+      {
+        "fixture": "actual_missing_sentinel_despite_zero_declared",
+        "http_status": 422,
+        "check_passed": true,
+        "actual_child_invoked": true,
+        "source_header_sha256": "d271612f76372c745503fa8c0d819aa14783004b1fe0f3411b70a72c8cb09b8b",
+        "source_signal_sha256": "3323053bd68952bb4843422c5c14eb556eef713eb9bf94100127f0e7c1e293c9",
+        "source_content_sha256": "1ef8d4231d4f87bc6d9f66816ee5a5a8d14ed09e986b7e071f1c27a47fdc06a6",
+        "error": "本地心电模型未生成完整可用结果，请核对原采样与实际适用范围"
+      },
+      {
+        "fixture": "unsupported_original_500_hz",
+        "http_status": 422,
+        "check_passed": true,
+        "actual_child_invoked": false,
+        "source_header_sha256": "10f4184d0d5e585527830e6c9894b2748f3c56ab629225783e7d20b9430ab7d1",
+        "source_signal_sha256": "668eadf8e381ce32314f8dcfa367937cd35c2c8f5272af041a93f0f9d85744e6",
+        "source_content_sha256": "b63bb1e7f2c88f8de5cfa9c80616c51d8fef2012a38fca4572bf4af6519cef8e",
+        "error": "心电任务、采样范围或校准资料无效"
+      }
+    ]
+  },
+  "container": {
+    "image_id": "sha256:4ef110d60f2d3e77007adfd172fb4c5d25130d69dd160b940d2781803beccdd8",
+    "image_size_bytes": 429095765,
+    "network_mode": "none",
+    "root_filesystem_read_only": true,
+    "uid": 10001,
+    "cpu_limit": 4,
+    "memory_limit_bytes": 1073741824,
+    "temporary_filesystem_bytes": 268435456,
+    "model_mount": "external read-only /models",
+    "packaged_files": {
+      "files": {
+        "scripts/smoke_local_ecg.py": "07ae5f1bbd0e2bd68854c8ef608e9b6fa53d11cae21b788d0cb5219d2ad2cc22",
+        "third_party/ssl-ecg/LICENSE": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+        "third_party/ssl-ecg/NOTICE": "3b1604085b18ddfda4fcd7f1dc6efed86f7be102d4695c156aaf5d60868badb6"
+      },
+      "weights_in_app": 0,
+      "unmounted_model_directory_exists": false
+    },
+    "source_consistency": {
+      "source_files_matched": 162,
+      "source_tree_sha256": "ed2d8d9e0e8a41957f03153c23e9675fe3c909cc90c63f12edebb56ef24aa6b4",
+      "image_id": "sha256:4ef110d60f2d3e77007adfd172fb4c5d25130d69dd160b940d2781803beccdd8"
+    },
+    "smoke": {
+      "status": "passed",
+      "scope": "nonclinical synthetic calibration/lead-order and actual offline inference only; no accuracy or clinical validation",
+      "clinical_validation": "not_performed",
+      "runtime": {
+        "schema_version": "3",
+        "feature_key": "ecg_analysis",
+        "model_version": "ssl-ecg:f5648cb92103d3da1c2b2fa5e7bcb84874fd5e9d0227784b14edb138b59ab8dc",
+        "engine": "ssl-ecg-cnn",
+        "engine_versions": {
+          "torch": "2.14.1+cpu",
+          "numpy": "2.4.4",
+          "safetensors": "0.8.0"
+        },
+        "model_repository": "Tumo505/SSL-ECG-Classification-model-card",
+        "model_revision": "6ec2ee1a1badd9508f9c1219fb07de38f3f6936b",
+        "model_digest": "7d1fbd2d9987337ad7167694a054c818c3c75dbf53dd67987a9f78285dbe0047",
+        "runtime_digest": "f5648cb92103d3da1c2b2fa5e7bcb84874fd5e9d0227784b14edb138b59ab8dc",
+        "preprocessing_digest": "ced8bd62f67a7b538f05408ea18faf7834a11acece11dacac9e6d4bc5ab0166a",
+        "required_leads": [
+          "I",
+          "II",
+          "III",
+          "aVR",
+          "aVL",
+          "aVF",
+          "V1",
+          "V2",
+          "V3",
+          "V4",
+          "V5",
+          "V6"
+        ],
+        "sample_rate_hz": 100,
+        "samples_per_lead": 1000,
+        "labels": [
+          "NORM",
+          "CD",
+          "HYP",
+          "MI",
+          "STTC"
+        ],
+        "missing_sample_policy": "reject",
+        "prompt_handling": "signal_only",
+        "max_bytes": 1048576,
+        "timeout_seconds": 30,
+        "clinical_validation": "not_provided"
+      },
+      "python_version": "3.12.13",
+      "uid": 10001,
+      "database_module_loaded": false,
+      "actual_child_calls": 3,
+      "equivalent_calibration_scores_maximum_absolute_error": 0.0,
+      "cases": [
+        {
+          "fixture": "canonical_calibration",
+          "http_status": 200,
+          "check_passed": true,
+          "actual_child_invoked": true,
+          "source_header_sha256": "9b289862947a8b82dd6c0703c7f4ef134f3e1c84120edebc77eb3dd9032684bf",
+          "source_signal_sha256": "668eadf8e381ce32314f8dcfa367937cd35c2c8f5272af041a93f0f9d85744e6",
+          "source_content_sha256": "0187d71dc4b748e495f25489a8b53988533174918ad5a5eae1d202fa1e885738",
+          "model_scores": {
+            "NORM": 0.04752056300640106,
+            "CD": 0.18802908062934875,
+            "HYP": 0.0021065049804747105,
+            "MI": 0.7408665418624878,
+            "STTC": 0.4731822907924652
+          }
+        },
+        {
+          "fixture": "reordered_mixed_units_same_mv",
+          "http_status": 200,
+          "check_passed": true,
+          "actual_child_invoked": true,
+          "source_header_sha256": "0dcb12d23f4797fe5706b5aef8f7803dedc6d4e8931fb9aaf97c6a1a477d44a7",
+          "source_signal_sha256": "5556be8bef54401f8bb52315f4893e0d771718f64d74c1fe0755b792a9426345",
+          "source_content_sha256": "f904564ae4fe66054e3cc0444c2f4ddc5a6c3ed0c16b2cf176bca560dc64dc89",
+          "model_scores": {
+            "NORM": 0.04752056300640106,
+            "CD": 0.18802908062934875,
+            "HYP": 0.0021065049804747105,
+            "MI": 0.7408665418624878,
+            "STTC": 0.4731822907924652
+          }
+        },
+        {
+          "fixture": "actual_missing_sentinel_despite_zero_declared",
+          "http_status": 422,
+          "check_passed": true,
+          "actual_child_invoked": true,
+          "source_header_sha256": "d271612f76372c745503fa8c0d819aa14783004b1fe0f3411b70a72c8cb09b8b",
+          "source_signal_sha256": "3323053bd68952bb4843422c5c14eb556eef713eb9bf94100127f0e7c1e293c9",
+          "source_content_sha256": "1ef8d4231d4f87bc6d9f66816ee5a5a8d14ed09e986b7e071f1c27a47fdc06a6",
+          "error": "本地心电模型未生成完整可用结果，请核对原采样与实际适用范围"
+        },
+        {
+          "fixture": "unsupported_original_500_hz",
+          "http_status": 422,
+          "check_passed": true,
+          "actual_child_invoked": false,
+          "source_header_sha256": "10f4184d0d5e585527830e6c9894b2748f3c56ab629225783e7d20b9430ab7d1",
+          "source_signal_sha256": "668eadf8e381ce32314f8dcfa367937cd35c2c8f5272af041a93f0f9d85744e6",
+          "source_content_sha256": "b63bb1e7f2c88f8de5cfa9c80616c51d8fef2012a38fca4572bf4af6519cef8e",
+          "error": "心电任务、采样范围或校准资料无效"
+        }
+      ]
+    }
+  },
+  "regression": {
+    "full_backend": {
+      "passed": 1787,
+      "skipped": 5,
+      "elapsed_seconds": 136.35,
+      "command": "python -m pytest -q --tb=short"
+    },
+    "optional_real_ecg_pipeline": {
+      "passed": 1,
+      "elapsed_seconds": 6.75,
+      "command": "HOIM_ECG_REAL_MODEL_DIR=/tmp/hoim-ecg-model python -m pytest -q tests/test_ai_local_ecg_real.py",
+      "scope": "Isolated database, synthetic patients and original waveform files; feature disabled/unreviewed Super preview; actual child inference, frozen source/Prompt/runtime and unchanged business records"
+    },
+    "ai_browser": {
+      "passed": 56,
+      "elapsed_reported": "1.5m",
+      "command": "E2E_BASE_URL=http://127.0.0.1:4180 npx playwright test e2e/ai-*.spec.js e2e/diagnosis-review.spec.js --workers=2 --reporter=list"
+    },
+    "frontend_build": {
+      "passed": true,
+      "javascript_bytes": 5877822,
+      "all_assets_bytes": 6396068,
+      "largest_javascript_bytes": 645575,
+      "javascript_budget_bytes": 6000000,
+      "all_assets_budget_bytes": 7000000,
+      "largest_javascript_budget_bytes": 700000
+    },
+    "rbac_endpoints_checked": 622,
+    "default_prompts_checked": 80,
+    "production_database_migrated": false,
+    "real_business_services_started": false
+  },
+  "remaining_work": [
+    "Independent ECG signal quality, clinical diagnosis and population evaluation on authorized real data",
+    "Actual capture age/population and device provenance",
+    "Additional waveform/device formats and models matching other original sample rates/durations",
+    "Other planned specialized AI models and clinical readiness work remain in the active 80-function goal"
+  ]
+}

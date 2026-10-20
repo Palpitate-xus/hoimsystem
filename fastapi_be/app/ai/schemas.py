@@ -11,6 +11,7 @@ from app.ai.forecast_contract import ForecastAnalysis
 from app.ai.news2_contract import News2Analysis
 from app.ai.qsofa_contract import QsofaAnalysis
 from app.ai.references import SOURCE_REFERENCE_KEYS
+from app.ai.roster_contract import RosterAnalysis
 from app.ai.sofa_contract import SofaAnalysis, SofaChangeAnalysis
 
 
@@ -208,6 +209,12 @@ class RunRequest(StrictRequest):
     encounter_ref: str | None = Field(default=None, max_length=64)
     input: dict[str, Any] = Field(default_factory=dict)
     preview: bool = False
+
+    @model_validator(mode="after")
+    def dedicated_roster_reference(self):
+        if "roster_plan_id" in self.input and self.feature_key != "roster_optimization":
+            raise ValueError("受审排班计划仅用于排班与号源优化")
+        return self
 
 
 class ResultSection(StrictRequest):
@@ -531,6 +538,10 @@ class SofaGenerationResult(GenerationResult):
 
 class SofaChangeGenerationResult(GenerationResult):
     sofa_change_analysis: SofaChangeAnalysis
+
+
+class RosterGenerationResult(GenerationResult):
+    roster_analysis: RosterAnalysis
 
 
 class FeedbackWrite(StrictRequest):

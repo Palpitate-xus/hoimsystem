@@ -35,5 +35,6 @@ SOURCE_REFERENCE_KEYS = frozenset(
         "sofa_change_assessment_id",
         "support_source_id",
         "support_source_kind",
+        "roster_plan_id",
     }
 )

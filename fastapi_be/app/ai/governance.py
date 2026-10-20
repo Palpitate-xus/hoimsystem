@@ -161,6 +161,8 @@ def active_prompt(db: Session, spec: FeatureSpec, config: AIFeatureConfig | None
 def provider_feature_issues(spec: FeatureSpec, provider: AIProvider) -> list[dict]:
     """Share protocol and data-purpose checks between activation, execution and setup inspection."""
     issues = []
+    if provider.model.startswith("roster:") and (spec.number != 63 or provider.kind != "specialist"):
+        issues.append({"code": "ROSTER_SCOPE_MISMATCH", "message": "本地排班服务仅用于受审运营场景的固定约束与优化证明"})
     if provider.model.startswith("sofa1:") and (spec.number != 42 or provider.kind != "specialist"):
         issues.append({"code": "SOFA_SCOPE_MISMATCH", "message": "本地SOFA-1固定实施仅用于完整原资料及独立变化核对，不用于自动诊断、风险概率或治疗"})
     if provider.model.startswith("news2:") and (spec.number != 41 or provider.kind != "specialist"):
@@ -181,6 +183,9 @@ def provider_feature_issues(spec: FeatureSpec, provider: AIProvider) -> list[dic
 def describe_config(db: Session, spec: FeatureSpec, config: AIFeatureConfig | None, management: bool = False) -> dict:
     """Keep configured, implementation and validation status independently visible."""
     data = describe_feature(spec)
+    if spec.number == 63:
+        provider = db.get(AIProvider, config.provider_id) if config and config.provider_id else None
+        data["input_mode"] = "roster" if provider and provider.kind == "specialist" and provider.model.startswith("roster:") else "external_optimizer"
     if spec.number in {41, 42, 43}:
         provider = db.get(AIProvider, config.provider_id) if config and config.provider_id else None
         mode = {41: "news2", 42: "qsofa", 43: "aki"}.get(spec.number)

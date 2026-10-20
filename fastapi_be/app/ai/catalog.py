@@ -156,7 +156,7 @@ _ROWS = """
 60|accessible_voice|多语言及适老语音服务|patient|P1|speech|input|授权语音或文本,目标语言,原始医疗措辞|提供忠实转写翻译与简明表达，保留药品剂量原文及不确定术语，不能改变诊疗含义|原文,转换文本,关键术语对照,不确定片段
 61|operations_qa|医院数据问答|operations|P1|llm|hospital|授权指标,时间范围,指标口径|只解释服务器提供的范围内聚合事实和口径，不生成SQL或反查患者；全院预聚合与科室原始记录汇总分别注明，未汇总日期和未知等待时间不补零，挂号记录不说成到诊人数，当前床位状态不回推为历史|指标回答,统计口径,时间范围,数据限制
 62|visit_forecast|就诊量预测|operations|P2|prediction|hospital|明确预测来源,超管确认的连续闭合历史与原钟点解释,专用统计预测服务及范围验证|本版固定预测每日挂号创建记录数registration_record_count，包含已取消记录，不是实际到诊人数或独立患者数。只使用forecast_source已确认窗口，不拼接旧日统计、截断小时资料或其他科室；原数据库无时区时间按来源声明解释，不称已独立核实。保留来源覆盖声明、无法分日的空时间记录和仍待核验的外部完整性。forecast_analysis中的固定算法、逐日点值、名义90%经验区间、真实滚动回测及完整分母是数值依据；完整Prompt仅作任务溯源，不声称改变固定算法。不能自行补零、改数值、选择更好看的回测子集或把重叠预测点说成独立样本；实际量为零的WAPE和零尺度MASE保持不可计算。服务能力核对、历史覆盖确认和合成工程测试均不证明未来效果或完成运营范围验证，不自动调整排班、号源或就诊安排|逐日挂号记录数预测,经验区间与实际覆盖,共享样本基线和完整误差分母,原历史及适用限制
-63|roster_optimization|排班与号源优化|operations|P2|optimizer|hospital|人员资质,工时约束,需求预测,优化适配器|仅对照 recorded_schedules 与计划区间变更解释适配器候选；职称不等于已核验资质，时段编码不换算工时，共享余量不当逐日容量，已批加号不重复叠加。缺少资质、可用性和工时上下限时明确未验证可行，不宣称满足全部约束或发布排班|候选方案,约束核对,资源冲突,待人工调整
+63|roster_optimization|排班与号源优化|operations|P2|optimizer|hospital|完整本科人员集合,受审资质和值班及可用性原来源,受审工时政策,明确日期会话与场景净容量,完整人员与班次配对约束,独立优化适配器及实际运营验证|配置roster:时仅接受roster_plan_id受审计划引用，不能与旧排班、原量或自由问题中的约束混用。只解释绑定完整原件SHA和Prompt摘要并经固定程序重算的roster_analysis；Prompt仅作溯源，不改变固定目标、分支限界、计时或证明。meet_targets_min_penalty在满足硬需求下最小化明确整数惩罚；max_slots_then_min_penalty先最大化计划净服务量，再最小化惩罚，不加任意权重。逐班展示人员、硬需求、场景容量上限、实际计划量与余裕；计划净容量是审核声明的场景能力，不是实时库存、可预约余号、预测到诊人数或已执行排班。人员包含本科无旧班表者；每名人员与每班必须有明确配对记录，不以遗漏人员或未知资格、可用性、偏好、容量、休息和外部值班证明最优或不可行。按全部适用已发布政策合取核对真实UTC全地点值班、完整休息及24小时和7日连续窗口、明确固定窗口与原休息计工；不以计划边界清零工时，不将休息段当再次派工或重置休息。部分效期或未知政策保留缺项，不把已知不适用套成违规。区分已证最优、已知可行但未证最优、已证不可行、未知可行性、资料不足，显示确定与显式松弛两图的真实界、间隙、节点和操作预算终止原因，禁止把启发式候选称最优。人员整班分配不证明每时刻连续服务人数，未实现连续在岗人数或连续本地工作日约束，不能泛称满足全部劳动法规。完整集合及来源治理变化须重新捕获审核；当前捕获与原as_of分别保留，不冒称旧截止前已知或历史回放。旧外部适配器仅对照recorded_schedules与计划变更解释其真实候选；职称不当资质，时段编码不换算工时，共享余量不当逐日容量，已批加号不重复叠加。来源审核、数值算例和服务能力核对均不代替实际运营效果验证；结果等待人工复核，不自动发布、预约或修改号源|原计划与完整约束来源,候选及逐班场景容量分配,已知违反与未知缺口,两目标和完整最优性证明,人工复核及实际范围限制
 64|bed_forecast|床位需求与周转预测|operations|P2|prediction|hospital|历史床位指标,出入院趋势,验证模型|仅解释适配器输出的需求与容量压力，注明时间窗和不确定性；配置床数、加载床行数、空闲状态和已确认可收治名额不能混用，不以当前状态重建历史占床或决定个体出院|需求预测,可用容量,压力时段,误差说明
 65|surgery_scheduling|手术排台优化|operations|P2|optimizer|hospital|手术申请与排台原记录,人员设备约束,验证时长估计|仅解释已验证适配器候选，对照 surgical_applications 状态、surgical_schedules 和 surgical_recorded_overlaps 原时间交叠。原起止不当作预约时段或切皮时间，助手和人员关联不证明资质，无交叠不代表可行；科室范围、截断、缺资源可用性和时长估计时逐项标记未核实，不发布排台|候选排台,原记录资源交叠,未核实约束,人工确认点
 66|supply_forecast|药品耗材需求预测|operations|P2|prediction|hospital|历史消耗,库存,采购周期,验证模型|仅针对 supply_inventory 明确品种解释已验证适配器预测及误差；保留出库原数量与库存差额的符号差别，不把耗材追溯当完整消耗账，不跨未知库存单位合计，不把无记录日补零，采购事件时间不等于承诺交期|品种需求,预测误差,采购周期影响,数据偏差
@@ -200,10 +200,12 @@ def describe_feature(spec: FeatureSpec) -> dict:
             else {"observation_window_id", "qsofa_assessment_id", "sofa_assessment_id", "sofa_change_assessment_id"}
             if spec.number == 42
             else SOURCE_REFERENCE_KEYS
-            - {"observation_window_id", "news2_assessment_id", "aki_assessment_id", "qsofa_assessment_id", "sofa_assessment_id", "sofa_change_assessment_id"}
+            - {"observation_window_id", "news2_assessment_id", "aki_assessment_id", "qsofa_assessment_id", "sofa_assessment_id", "sofa_change_assessment_id", "roster_plan_id"}
             - (set() if spec.number == 47 else {"support_source_id", "support_source_kind"})
         )
         if spec.scope == "patient"
+        else {"roster_plan_id"}
+        if spec.number == 63
         else set()
     )
     return {

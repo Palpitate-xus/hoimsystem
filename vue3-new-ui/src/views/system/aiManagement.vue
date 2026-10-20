@@ -51,11 +51,12 @@
         </el-tab-pane>
 
         <el-tab-pane label="知识审核" name="knowledge">
-          <div class="page-toolbar"><el-button type="primary" @click="openKnowledge">新增知识版本</el-button><span>新文档先保存草稿，审核发布后才参与检索。</span></div>
+          <div class="page-toolbar"><el-button type="primary" @click="openKnowledge">新增知识版本</el-button><el-button @click="openPathwayImport">从临床路径导入</el-button><span>新文档先保存草稿，审核发布后才参与检索。</span></div>
           <el-table :data="knowledge" empty-text="尚未录入知识">
             <el-table-column prop="title" label="标题" min-width="180" /><el-table-column prop="version" label="版本" width="100" />
             <el-table-column prop="source_uri" label="来源" min-width="180" show-overflow-tooltip />
             <el-table-column label="状态" width="90"><template #default="{ row }">{{ knowledgeStatuses[row.status] }}</template></el-table-column>
+            <el-table-column label="原路径核对" min-width="150"><template #default="{ row }">{{ row.source_kind ? pathwaySourceStates[row.source_state] || '来源待核对' : '独立知识文档' }}</template></el-table-column>
             <el-table-column label="操作" width="170"><template #default="{ row }"><el-button size="small" @click="inspectKnowledge(row)">查看与审核</el-button></template></el-table-column>
           </el-table>
         </el-tab-pane>
@@ -154,10 +155,28 @@
       <template #footer><el-button @click="knowledgeDialog = false">取消</el-button><el-button type="primary" :loading="saving" @click="submitKnowledge">保存草稿</el-button></template>
     </el-dialog>
 
-    <el-dialog v-model="reviewDialog" :title="reviewDocument?.title + '：知识审核'" width="800px">
+    <el-dialog v-model="pathwayImportDialog" title="导入临床路径待审核快照" width="760px">
+      <div v-loading="pathwaySourcesLoading">
+        <p>从原路径生成独立版本，保留适用条件、排除条件和完整步骤。保存后须检查全文并审核发布；原路径修改或停用后，旧快照不再用于生成。</p>
+        <el-form label-width="110px">
+          <el-form-item label="原临床路径"><el-select v-model="pathwayImportForm.pathway_id" filterable clearable placeholder="选择可导入的原路径" style="width: 100%" aria-label="待导入临床路径"><el-option v-for="item in pathwaySources.items || []" :key="item.pathway_id" :value="item.pathway_id" :disabled="!item.importable" :label="`${item.name} · #${item.pathway_id}${item.importable ? '' : ' · ' + item.issues.join('；')}`" /></el-select></el-form-item>
+          <p v-if="selectedPathwaySource">原病种：{{ selectedPathwaySource.disease_name || '未记录' }} · 原编码：{{ selectedPathwaySource.disease_code || '未记录' }} · 预计天数：{{ selectedPathwaySource.expected_days ?? '未记录' }}（不作个体出院目标）</p>
+          <el-form-item label="适用AI功能"><el-select v-model="pathwayImportForm.feature_keys" multiple filterable style="width: 100%" aria-label="路径知识适用功能"><el-option v-for="item in features" :key="item.key" :value="item.key" :label="item.name" /></el-select></el-form-item>
+          <el-form-item label="适用科室ID"><el-input-number v-model="pathwayImportForm.department_id" :min="1" /><span class="field-hint">可选；留空表示院内通用，仍须审核适用条件</span></el-form-item>
+          <el-form-item label="生效时间"><el-date-picker v-model="pathwayImportForm.effective_from" type="datetime" placeholder="可选" /></el-form-item>
+          <el-form-item label="失效时间"><el-date-picker v-model="pathwayImportForm.effective_to" type="datetime" placeholder="可选" /></el-form-item>
+        </el-form>
+        <p v-if="pathwaySources.truncated">仅显示最近300项原路径，当前目录已截断。</p>
+      </div>
+      <template #footer><el-button @click="pathwayImportDialog = false">取消</el-button><el-button :loading="pathwaySourcesLoading" @click="loadPathwaySources">刷新来源</el-button><el-button type="primary" :loading="saving" :disabled="pathwaySourcesLoading || !selectedPathwaySource?.importable || !pathwayImportForm.feature_keys?.length" @click="submitPathwayImport">保存待审核快照</el-button></template>
+    </el-dialog>
+
+    <el-dialog v-model="reviewDialog" :title="(reviewDocument?.title || '文档') + '：知识审核'" width="800px">
       <p>版本：{{ reviewDocument?.version }} · 状态：{{ knowledgeStatuses[reviewDocument?.status] }}</p>
+      <p v-if="reviewDocument?.source_kind">原路径 #{{ reviewDocument.source_reference_id }}：{{ pathwaySourceStates[reviewDocument.source_state] || '来源待核对' }}。审核时须核对完整纳入、排除条件和步骤依据。</p>
       <pre class="prompt-text knowledge-text">{{ reviewDocument?.content }}</pre>
-      <template #footer><el-button @click="reviewDialog = false">关闭</el-button><el-button v-if="reviewDocument?.status !== 'retired'" :loading="saving" @click="reviewDocumentAs('retired')">停用此版本</el-button><el-button v-if="reviewDocument?.status !== 'published'" type="primary" :loading="saving" @click="reviewDocumentAs('published')">确认审核并发布此版本</el-button></template>
+      <p v-if="reviewDocument?.source_kind && !canPublishDocument && reviewDocument.status !== 'published'">来源失效或版本已停用，须重新导入当前原路径后审核。</p>
+      <template #footer><el-button @click="reviewDialog = false">关闭</el-button><el-button v-if="reviewDocument?.status !== 'retired'" :loading="saving" @click="reviewDocumentAs('retired')">停用此版本</el-button><el-button v-if="reviewDocument?.status !== 'published'" type="primary" :disabled="!canPublishDocument" :loading="saving" @click="reviewDocumentAs('published')">确认审核并发布此版本</el-button></template>
     </el-dialog>
 
     <el-dialog v-model="grantDialog" title="新增限时患者访问授权" width="580px">
@@ -180,7 +199,7 @@ import AiRunHistory from "@/components/AIRunHistory/index.vue";
 import AiReviewCuration from "@/components/AIReviewCuration/index.vue";
 import {
   activateAIPrompt, createAIKnowledge, createAIPatientGrant, createAIPrompt,
-  getAIAdminFeatures, getAIAudit, getAIKnowledge, getAIKnowledgeDetail, getAIPatientGrants,
+  getAIAdminFeatures, getAIAudit, getAIKnowledge, getAIKnowledgeDetail, getAIPatientGrants, getAIPathwaySources, importAIPathway,
   getAIPrompts, getAIProviders, getAIUsage, reviewAIKnowledge, revokeAIPatientGrant,
   saveAIFeature, saveAIProvider,
 } from "@/api/ai";
@@ -188,6 +207,7 @@ import {
 const categories = { cdss: "临床 CDSS", pharmacy: "用药与药房", records: "病历文书", diagnostics: "检验影像体检", inpatient: "住院护理急诊", patient: "患者服务", operations: "运营与收费", knowledge: "知识科研质控" };
 const validations = { unreviewed: "未评审", pilot: "试点评估", validated: "已验证", suspended: "已暂停" };
 const knowledgeStatuses = { draft: "草稿", published: "已发布", retired: "已停用" };
+const pathwaySourceStates = { current: "与当前原路径一致", changed: "原路径已变更，须重新导入", disabled: "原路径已停用", missing: "原路径不存在", invalid_link: "来源关联异常" };
 const roles = { super_admin: "超级管理员", admin: "管理员", doctor: "医生", director: "科室主任", pharmacist: "药师", nurse: "护士", patient: "患者", guide: "导诊员", lab_technician: "检验技师", cashier: "收费员" };
 const loading = ref(false), saving = ref(false), tab = ref("features");
 const features = ref([]), providers = ref([]), knowledge = ref([]), grants = ref([]), auditEvents = ref([]), usage = ref([]);
@@ -206,6 +226,11 @@ const selectedFeature = ref(null), featureForm = ref({}), featureDialog = ref(fa
 const providerDialog = ref(false), providerId = ref(null), providerForm = ref({});
 const promptDialog = ref(false), promptVersions = ref([]), promptSelection = ref("baseline"), taskPrompt = ref(""), systemPrompt = ref(""), promptChange = ref(""), activateNewPrompt = ref(false);
 const knowledgeDialog = ref(false), knowledgeForm = ref({}), reviewDialog = ref(false), reviewDocument = ref(null);
+const pathwayImportDialog = ref(false), pathwaySourcesLoading = ref(false), pathwaySources = ref({}), pathwayImportForm = ref({});
+const selectedPathwaySource = computed(() => pathwaySources.value.items?.find(item => item.pathway_id === pathwayImportForm.value.pathway_id));
+const canPublishDocument = computed(() => !!reviewDocument.value && (!reviewDocument.value.source_kind || (reviewDocument.value.status === "draft" && reviewDocument.value.source_state === "current")));
+let pathwaySourceRequest = 0, knowledgeInspection = 0;
+watch(pathwayImportDialog, visible => { if (!visible) pathwaySourceRequest += 1; });
 const grantDialog = ref(false), grantForm = ref({});
 
 async function refresh() {
@@ -285,7 +310,26 @@ async function submitKnowledge() {
     knowledgeDialog.value = false; await refresh(); ElMessage.success("知识草稿已保存");
   } finally { saving.value = false; }
 }
-async function inspectKnowledge(row) { reviewDocument.value = (await getAIKnowledgeDetail(row.document_id)).data; reviewDialog.value = true; }
+async function loadPathwaySources() {
+  const version = ++pathwaySourceRequest;
+  pathwaySourcesLoading.value = true; pathwayImportForm.value.pathway_id = null;
+  try { const response = await getAIPathwaySources({ limit: 300 }); if (version === pathwaySourceRequest) pathwaySources.value = response.data || {}; }
+  finally { if (version === pathwaySourceRequest) pathwaySourcesLoading.value = false; }
+}
+function openPathwayImport() {
+  pathwayImportForm.value = { pathway_id: null, feature_keys: ["treatment_pathway", "response_review"], department_id: null, effective_from: null, effective_to: null };
+  pathwaySources.value = {}; pathwayImportDialog.value = true; loadPathwaySources();
+}
+async function submitPathwayImport() {
+  const source = selectedPathwaySource.value; if (!source?.importable) return;
+  saving.value = true;
+  try {
+    const form = pathwayImportForm.value;
+    const response = await importAIPathway(source.pathway_id, { expected_source_hash: source.source_hash, feature_keys: [...form.feature_keys], department_id: form.department_id || null, effective_from: isoOrNull(form.effective_from), effective_to: isoOrNull(form.effective_to) });
+    pathwayImportDialog.value = false; await refresh(); await inspectKnowledge(response.data); ElMessage.success("路径快照已保存，请核对全文后审核");
+  } finally { saving.value = false; }
+}
+async function inspectKnowledge(row) { const version = ++knowledgeInspection; const response = await getAIKnowledgeDetail(row.document_id); if (version === knowledgeInspection) { reviewDocument.value = response.data; reviewDialog.value = true; } }
 async function reviewDocumentAs(status) {
   saving.value = true;
   try { await reviewAIKnowledge(reviewDocument.value.document_id, { status, content_hash: reviewDocument.value.content_hash }); reviewDialog.value = false; await refresh(); ElMessage.success("知识状态已更新"); }

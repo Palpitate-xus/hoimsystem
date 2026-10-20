@@ -105,16 +105,18 @@
           <el-table-column prop="enroll_date" label="入组日期" width="105" />
           <el-table-column label="进度" width="140">
             <template #default="{ row }">
-              <el-progress :percentage="row.completion_rate || 0" :stroke-width="12" />
+              <el-progress v-if="row.counter_state === 'known' && typeof row.completion_rate === 'number'" :percentage="row.completion_rate" :stroke-width="12" />
+              <span v-else :title="row.counter_note">{{ row.counter_state === 'invalid' ? '原计数矛盾，待核对' : '进度未知' }}</span>
             </template>
           </el-table-column>
           <el-table-column prop="variation_reason" label="变异原因" min-width="120" show-overflow-tooltip />
-          <el-table-column label="操作" width="230">
+          <el-table-column label="操作" width="420">
             <template #default="{ row }">
               <el-button v-if="row.status === 1 || row.status === 2" size="small" @click="handleRecordProgress(row)">登记进度</el-button>
               <el-button v-if="row.status === 1" size="small" type="warning" @click="handleVariation(row)">变异</el-button>
               <el-button v-if="row.status === 1 || row.status === 2" size="small" type="success" @click="handleExit(row, 3)">出径</el-button>
               <el-button v-if="row.status === 1 || row.status === 2" size="small" type="danger" @click="handleExit(row, 4)">退出</el-button>
+              <ai-action v-if="canUsePathwayAI" label="AI 路径复评" title="AI 原入径记录与疗效复评" :patient-id="row.patient_id" :encounter-ref="row.admission_id || ''" :feature-keys="['response_review', 'treatment_pathway', 'patient_summary', 'progress_note', 'discharge_summary']" initial-feature="response_review" :initial-input="{ pathway_enrollment_id: String(row.enrollment_id), pathway_id: String(row.pathway_id) }" />
             </template>
           </el-table-column>
         </el-table>
@@ -262,9 +264,11 @@
 <script>
 import { getCssdList, createCssd, transitionCssd, getPivasList, createPivas, transitionPivas, getIcuScoreList, createIcuScore, getPathwayEnrollmentList, enrollPathway, recordPathwayProgress, recordPathwayVariation, exitPathway } from "@/api/hisModules";
 import { ElMessage, ElMessageBox } from "element-plus";
+import AiAction from "@/components/AIAction/index.vue";
 
 export default {
   name: "OpsExtension",
+  components: { AiAction },
   data() {
     return {
       tab: "cssd",
@@ -286,6 +290,7 @@ export default {
     };
   },
   computed: {
+    canUsePathwayAI() { return this.$store.getters["user/permissions"].some(role => ["super_admin", "doctor", "director"].includes(role)); },
     cssdNextStates() {
       if (!this.cssdCurrentItem) return [];
       return (this.cssdFlow[this.cssdCurrentItem.status] || []).map((s) => ({ value: s, label: this.cssdStatus[s] }));

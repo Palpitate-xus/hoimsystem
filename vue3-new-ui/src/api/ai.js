@@ -6,6 +6,7 @@ export const getAIFeatures = () => request({ url: "ai/features", method: "get" }
 export const getAIPatients = (params) => request({ url: "ai/patients", method: "get", params });
 export const getAIEncounters = (params) => request({ url: "ai/encounters", method: "get", params });
 export const getAIPrescriptions = (params) => request({ url: "ai/prescriptions", method: "get", params });
+export const getAIPathwayOptions = (params) => request({ url: "ai/pathway-options", method: "get", params });
 export const getAIServiceOptions = (params) => request({ url: "ai/service-options", method: "get", params });
 export const getAIOperationalContext = (data) => request({ url: "ai/operational-context", method: "post", data });
 export const getAIClinicalContext = ({ feature_key, patient_id, encounter_ref, ...source_refs }) => request({ url: "ai/context", method: "post", data: { feature_key, patient_id, encounter_ref, source_refs } });
@@ -26,6 +27,8 @@ export const getAIKnowledge = () => request({ url: `${admin}/knowledge`, method:
 export const getAIKnowledgeDetail = (id) => request({ url: `${admin}/knowledge/${id}`, method: "get" });
 export const createAIKnowledge = (data) => request({ url: `${admin}/knowledge`, method: "post", data });
 export const reviewAIKnowledge = (id, data) => request({ url: `${admin}/knowledge/${id}/review`, method: "post", data });
+export const getAIPathwaySources = (params) => request({ url: `${admin}/pathway-sources`, method: "get", params });
+export const importAIPathway = (id, data) => request({ url: `${admin}/pathway-sources/${id}/import`, method: "post", data });
 export const getAIPatientGrants = () => request({ url: `${admin}/grants`, method: "get" });
 export const createAIPatientGrant = (data) => request({ url: `${admin}/grants`, method: "post", data });
 export const revokeAIPatientGrant = (id) => request({ url: `${admin}/grants/${id}`, method: "delete" });

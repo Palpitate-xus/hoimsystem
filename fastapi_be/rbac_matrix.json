@@ -552,6 +552,60 @@
   "path": "/api/ai/admin/usage"
  },
  {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "list_sources",
+  "method": "GET",
+  "module": "ai_feedback_admin.py",
+  "path": "/api/ai/admin/review-sources"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "source_detail",
+  "method": "GET",
+  "module": "ai_feedback_admin.py",
+  "path": "/api/ai/admin/review-sources/{review_id}"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "list_excerpts",
+  "method": "GET",
+  "module": "ai_feedback_admin.py",
+  "path": "/api/ai/admin/review-excerpts"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "excerpt_detail",
+  "method": "GET",
+  "module": "ai_feedback_admin.py",
+  "path": "/api/ai/admin/review-excerpts/{excerpt_id}"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "create_draft",
+  "method": "POST",
+  "module": "ai_feedback_admin.py",
+  "path": "/api/ai/admin/review-excerpts"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "review_draft",
+  "method": "POST",
+  "module": "ai_feedback_admin.py",
+  "path": "/api/ai/admin/review-excerpts/{excerpt_id}/review"
+ },
+ {
   "auth": "ANY",
   "function": "list_allergies",
   "method": "GET",

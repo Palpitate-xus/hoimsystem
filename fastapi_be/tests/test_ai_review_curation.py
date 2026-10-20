@@ -11,7 +11,7 @@ from sqlalchemy import create_engine, inspect, text
 
 from alembic import command
 from app.ai.governance import encode_json
-from app.ai.models import AIAuditEvent, AIReviewExcerpt
+from app.ai.models import AIAuditEvent, AIReviewExcerpt, AIRun
 from app.ai.review_curation import create_excerpt, describe_excerpt, load_review_source, review_excerpt, source_state
 from app.ai.schemas import ReviewExcerptReview, ReviewExcerptWrite
 from app.models import Department, MedicalRecord, Registration, Review
@@ -179,3 +179,70 @@ def test_excerpt_migration_upgrade_rollback_preserves_source_review(tmp_path):
     with engine.connect() as conn:
         assert conn.scalar(text("SELECT review_id FROM hoimsystem_review")) == 7
     engine.dispose()
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("role", ["admin", "director", "doctor", "nurse", "cashier", "pharmacist", "guide", "lab_tech", "registrar", "patient"])
+async def test_all_curation_endpoints_reject_non_super_roles(role, seed_data, async_client, auth_headers):
+    headers = auth_headers(seed_data[role + "_user"].username)
+    paths = [
+        ("GET", "/api/ai/admin/review-sources", None),
+        ("GET", "/api/ai/admin/review-sources/1", None),
+        ("GET", "/api/ai/admin/review-excerpts", None),
+        ("GET", "/api/ai/admin/review-excerpts/example", None),
+        ("POST", "/api/ai/admin/review-excerpts", {"review_id": 1, "expected_source_hash": "0" * 64, "redacted_text": "脱敏片段", "change_note": "保存说明"}),
+        ("POST", "/api/ai/admin/review-excerpts/example/review", {"expected_revision": 1, "status": "published", "review_note": "审核说明"}),
+    ]
+    for method, path, payload in paths:
+        response = await async_client.request(method, path, headers=headers, json=payload)
+        assert response.status_code == 403, (method, path, response.text)
+
+
+@pytest.mark.asyncio
+async def test_super_admin_can_inspect_draft_and_review_without_inference(seed_data, db_session, source_case, async_client, auth_headers):
+    review, _, _ = source_case
+    headers = auth_headers(seed_data["super_admin_user"].username)
+    response = await async_client.get("/api/ai/admin/review-sources", headers=headers, params={"review_id": review.review_id})
+    assert response.status_code == 200
+    metadata = response.json()["data"]
+    assert metadata["total"] == 1 and metadata["items"][0]["has_comment"] is True
+    assert "raw_comment" not in encode_json(metadata) and review.comment not in encode_json(metadata)
+    response = await async_client.get(f"/api/ai/admin/review-sources/{review.review_id}", headers=headers)
+    source = response.json()["data"]
+    assert response.status_code == 200 and source["raw_comment"] == review.comment
+    assert "13800138000" not in source["suggested_redacted_text"]
+    events = db_session.query(AIAuditEvent).filter_by(action="review_source.read", target=str(review.review_id)).all()
+    assert len(events) == 1 and review.comment not in events[0].detail_json
+    payload = {"review_id": review.review_id, "expected_source_hash": source["source_hash"], "redacted_text": source["suggested_redacted_text"], "change_note": "人工检查脱敏稿"}
+    response = await async_client.post("/api/ai/admin/review-excerpts", headers=headers, json=payload)
+    assert response.status_code == 200, response.text
+    item = response.json()["data"]
+    assert item["status"] == "draft" and item["version"] == 1
+    endpoint = f"/api/ai/admin/review-excerpts/{item['excerpt_id']}"
+    detail = await async_client.get(endpoint, headers=headers)
+    assert detail.json()["data"]["source_state"] == "current"
+    request = {"expected_revision": item["revision"], "status": "published", "review_note": "逐条审核通过"}
+    denied = await async_client.post(endpoint + "/review", headers=headers, json=request)
+    assert denied.status_code == 422
+    approved = await async_client.post(endpoint + "/review", headers=headers, json={**request, "privacy_checked": True, "faithfulness_checked": True})
+    assert approved.status_code == 200, approved.text
+    assert approved.json()["data"]["status"] == "published"
+    stale = await async_client.post(endpoint + "/review", headers=headers, json={**request, "status": "retired"})
+    assert stale.status_code == 409
+    listed = await async_client.get("/api/ai/admin/review-excerpts", headers=headers, params={"review_id": review.review_id, "status": "published"})
+    assert listed.json()["data"]["total"] == 1 and "redacted_text" not in listed.json()["data"]["items"][0]
+    assert db_session.query(AIRun).count() == 0
+
+
+@pytest.mark.asyncio
+async def test_source_change_and_creation_status_override_cannot_bypass_review(seed_data, db_session, source_case, async_client, auth_headers):
+    review, _, _ = source_case
+    headers = auth_headers(seed_data["super_admin_user"].username)
+    response = await async_client.get(f"/api/ai/admin/review-sources/{review.review_id}", headers=headers)
+    payload = {"review_id": review.review_id, "expected_source_hash": response.json()["data"]["source_hash"], "redacted_text": "候诊原意保留", "change_note": "人工删除标识"}
+    override = await async_client.post("/api/ai/admin/review-excerpts", headers=headers, json={**payload, "status": "published"})
+    assert override.status_code == 422
+    review.comment += "新的评论"
+    db_session.commit()
+    stale = await async_client.post("/api/ai/admin/review-excerpts", headers=headers, json=payload)
+    assert stale.status_code == 409 and db_session.query(AIReviewExcerpt).count() == 0

@@ -215,6 +215,8 @@ class OperationLogMiddleware(BaseHTTPMiddleware):
         "/api/ai/prescriptions",
         "/api/ai/runs",
         "/api/ai/admin/runs",
+        "/api/ai/admin/review-sources",
+        "/api/ai/admin/review-excerpts",
         "/api/clinicalDiagnosis/review",
     }
 
@@ -364,6 +366,7 @@ from app.routers import (
     adverse_reaction,
     ai,
     ai_admin,
+    ai_feedback_admin,
     allergy,
     analytics,
     antibiotic,
@@ -470,6 +473,7 @@ app.add_middleware(ObservabilityMiddleware)
 
 app.include_router(observability_routes.router)
 app.include_router(ai_admin.router, prefix="/api")
+app.include_router(ai_feedback_admin.router, prefix="/api")
 app.include_router(ai.router, prefix="/api")
 app.include_router(analytics.router, prefix="/api")
 app.include_router(performance.router, prefix="/api")

@@ -15,6 +15,15 @@ export const uploadAIAudio = (data) => request({ url: "ai/audio-assets", method:
 export const withdrawAIAudio = (id, data) => request({ url: `ai/audio-assets/${id}/withdraw`, method: "post", data });
 export const getAIAdminAudioAssets = (params) => request({ url: `${admin}/audio-assets`, method: "get", params });
 export const purgeAIAudio = (id, data) => request({ url: `${admin}/audio-assets/${id}/purge`, method: "post", data });
+export const getAIEcgOptions = () => request({ url: "ai/ecg-options", method: "get" });
+export const getAIEcgAssets = (params) => request({ url: "ai/ecg-assets", method: "get", params });
+export const getAIEcgAsset = (id) => request({ url: `ai/ecg-assets/${id}`, method: "get" });
+export const getAIEcgWindow = (id, params) => request({ url: `ai/ecg-assets/${id}/window`, method: "get", params, timeout: 30000 });
+export const getAIEcgContent = (id, part) => request({ url: `ai/ecg-assets/${id}/content`, method: "get", params: { part }, responseType: "blob", timeout: 120000 });
+export const uploadAIEcg = (data) => request({ url: "ai/ecg-assets", method: "post", data, headers: { "Content-Type": undefined }, timeout: 180000 });
+export const withdrawAIEcg = (id, data) => request({ url: `ai/ecg-assets/${id}/withdraw`, method: "post", data });
+export const getAIAdminEcgAssets = (params) => request({ url: `${admin}/ecg-assets`, method: "get", params });
+export const purgeAIEcg = (id, data) => request({ url: `${admin}/ecg-assets/${id}/purge`, method: "post", data });
 export const getAIServiceOptions = (params) => request({ url: "ai/service-options", method: "get", params });
 export const getAIOperationalContext = (data) => request({ url: "ai/operational-context", method: "post", data });
 export const getAIClinicalContext = ({ feature_key, patient_id, encounter_ref, ...source_refs }) => request({ url: "ai/context", method: "post", data: { feature_key, patient_id, encounter_ref, source_refs } });

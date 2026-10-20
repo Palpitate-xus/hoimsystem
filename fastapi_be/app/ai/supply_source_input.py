@@ -151,3 +151,65 @@ class SourceRevoke(StrictModel):
     def meaningful(self):
         check_basis(self.basis_note)
         return self
+
+
+class FrozenIdentity(StrictModel):
+    record_kind: Literal["unit", "daily"]
+    source_kind: Literal["unit_definition", "daily_quantity"]
+    source_record_id: UUID
+    unit_definition_id: UUID | None
+    schema_version: Literal["supply_unit_private_v1", "supply_daily_private_v1"]
+    item_kind: ItemKind
+    item_id: Positive
+    scope: Scope
+    target: Target | None
+    date: DateText | None
+    day_start_at: UtcText | None
+    day_end_at: UtcText | None
+    observed_at: UtcText | None
+    recorded_at: UtcText
+    created_by: Positive
+
+
+class Governance(StrictModel):
+    status: Literal["draft", "published", "rejected", "revoked"]
+    revision: int = Field(strict=True, ge=1, le=3)
+    reviewed_by: Positive | None
+    reviewed_at: UtcText | None
+    review_basis_note: str = Field(max_length=4000)
+    revoked_by: Positive | None
+    revoked_at: UtcText | None
+    revoke_reason: str = Field(max_length=1000)
+
+
+class EligibilityBasis(StrictModel):
+    schema_version: Literal["supply_current_eligibility_v1"]
+    current_parent_state_hash: SHA256
+    not_professional_or_operational_validation: Literal[True]
+
+
+class SourceWrapper(FrozenIdentity, Governance):
+    review_basis_note: str | None = Field(max_length=4000)
+    revoke_reason: str | None = Field(max_length=1000)
+    content_hash: SHA256
+    source_id: str = Field(max_length=110)
+    governance_hash: SHA256
+    payload: UnitPayload | DailyPayload | None
+    parent_binding: dict[str, object] | None
+    professional_status: Literal["confirmed", "unknown"]
+    signer_user_id: Positive | None
+    signed_at: UtcText | None
+    parent_current: bool
+    eligible: bool
+    exclusion_reasons: list[
+        Literal["source_not_published", "original_sku_changed", "original_sku_unavailable", "professional_signature_changed", "unit_definition_changed", "audit_original_changed"]
+    ] = Field(max_length=6)
+    can_record: bool
+    can_review: bool
+    can_revoke: bool
+    audit_only: bool
+    eligibility_basis: EligibilityBasis
+
+
+class CaptureSourceWrapper(SourceWrapper):
+    capture_view: Literal[True]

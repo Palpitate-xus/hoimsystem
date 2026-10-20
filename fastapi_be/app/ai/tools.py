@@ -12,6 +12,7 @@ from app.ai.clinical_tools import critical_value_workflow, laboratory_trends, pe
 from app.ai.coding_sources import local_icd_candidates
 from app.ai.context import ContextBundle
 from app.ai.governance import encode_json
+from app.ai.service_sources import appointment_candidates, hospital_navigation
 from app.models import Admission, DailyOperationalMetric, Department, Doctor, Pharmaceutical, Prescription, User
 
 
@@ -43,6 +44,12 @@ def business_tools(db: Session, spec: FeatureSpec, user: User, patient_id: int |
     """Return explicit tool results and evidence without accepting instructions to execute code."""
     tools: dict = {}
     evidence: list[dict] = []
+    if spec.number == 59:
+        tools["appointment_candidates"], sources = appointment_candidates(db, task_input)
+        evidence.extend(sources)
+    if spec.number == 58:
+        tools["hospital_navigation"], sources = hospital_navigation(db, user, task_input)
+        evidence.extend(sources)
     if patient_id and spec.number == 69:
         tools["billing_reconciliation"] = billing_reconciliation(context.data)
     if patient_id and spec.number in {27, 68}:

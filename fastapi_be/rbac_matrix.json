@@ -305,6 +305,13 @@
  },
  {
   "auth": "ANY",
+  "function": "hospital_service_options",
+  "method": "GET",
+  "module": "ai.py",
+  "path": "/api/ai/service-options"
+ },
+ {
+  "auth": "ANY",
   "function": "encounter_options",
   "method": "GET",
   "module": "ai.py",

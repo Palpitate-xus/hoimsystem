@@ -9,6 +9,7 @@ from app.ai.governance import audit, describe_config
 from app.ai.models import AIFeatureConfig, AIFeedback, AIRun, utcnow
 from app.ai.runtime import authorize_run, authorized_feature, create_run, describe_run
 from app.ai.schemas import ClinicalContextRequest, FeedbackWrite, RunRequest
+from app.ai.service_sources import service_options
 from app.database import get_db
 from app.dependencies import get_current_user
 from app.models import Admission, Prescription, Registration, User
@@ -40,6 +41,13 @@ def patient_options(feature_key: str, keyword: str = Query("", max_length=100), 
         raise HTTPException(422, "该能力无需选择患者")
     items = accessible_patients(db, user, spec, keyword)
     return {"code": 200, "msg": "success", "data": [{"patient_id": item.patient_id, "label": f"{item.name} · #{item.patient_id}"} for item in items]}
+
+
+@router.get("/ai/service-options")
+def hospital_service_options(feature_key: str, db: Session = Depends(get_db), user: User = Depends(get_current_user)) -> dict:
+    """Offer public hospital places or clinicians for the authorized service capability."""
+    spec, _ = authorized_feature(db, user, feature_key)
+    return {"code": 200, "msg": "success", "data": service_options(db, spec.number)}
 
 
 @router.get("/ai/encounters")

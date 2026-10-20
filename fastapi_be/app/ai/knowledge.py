@@ -12,7 +12,7 @@ from app.ai.models import AIKnowledgeDocument, utcnow
 from app.ai.references import SOURCE_REFERENCE_KEYS
 
 
-def retrieval_query(spec: FeatureSpec, task_input: dict, context: dict) -> str:
+def retrieval_query(spec: FeatureSpec, task_input: dict, context: dict, tools: dict | None = None) -> str:
     """Use clinical terms, rather than opaque record IDs, for a contextual one-click request."""
     parts = [spec.name]
     parts.extend(value[:3000] for key, value in task_input.items() if key not in SOURCE_REFERENCE_KEYS and isinstance(value, str) and value.strip())
@@ -42,6 +42,11 @@ def retrieval_query(spec: FeatureSpec, task_input: dict, context: dict) -> str:
         if task_input.get("prescription_id") and prescription.get("source_id") != "prescription:" + task_input["prescription_id"]:
             continue
         parts.extend(item["drug_name"] for item in prescription.get("items", []) if item.get("drug_name"))
+    navigation = (tools or {}).get("hospital_navigation", {})
+    for node in (navigation.get("route") or {}).get("nodes", []):
+        parts.extend(str(node[field])[:100] for field in ("name", "department_name", "location") if node.get(field))
+    for faq in navigation.get("hospital_faq", []):
+        parts.append(faq["question"][:200])
     # Building retrieval terms does not change diagnostic certainty or any clinical record.
     return " ".join(dict.fromkeys(parts))[:8000]
 

@@ -88,7 +88,7 @@ def create_run(db: Session, user: User, req: RunRequest) -> AIRun:
     patient = db.get(Patient, req.patient_id) if req.patient_id else None
     clean_input = minimize_identifiers(req.input, patient)
     tools, tool_evidence = business_tools(db, spec, user, req.patient_id, clean_input, bundle)
-    query = retrieval_query(spec, clean_input, bundle.data)
+    query = retrieval_query(spec, clean_input, bundle.data, tools)
     knowledge = retrieve_evidence(db, spec, query, bundle.department_ids)
     if spec.requires_knowledge and not knowledge:
         raise HTTPException(409, "未检索到本任务可用的已审核知识，请先录入并审核相关资料")
@@ -183,7 +183,9 @@ def describe_run(run: AIRun, include_result: bool = True) -> dict:
         data["result"] = json.loads(run.result_json)
         data["evidence"] = json.loads(run.evidence_json)
         tools = json.loads(run.input_json).get("payload", {}).get("tools", {})
-        data["tool_findings"] = {key: tools[key] for key in ("icd_candidates", "perioperative_timing", "prescription_review", "billing_reconciliation") if key in tools}
+        data["tool_findings"] = {
+            key: tools[key] for key in ("icd_candidates", "perioperative_timing", "prescription_review", "billing_reconciliation", "appointment_candidates", "hospital_navigation") if key in tools
+        }
     return data
 
 

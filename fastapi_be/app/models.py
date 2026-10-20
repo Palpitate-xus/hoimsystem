@@ -1,10 +1,11 @@
 import uuid
 
-from sqlalchemy import Column, Date, DateTime, Float, ForeignKey, Index, Integer, Numeric, String, Text, UniqueConstraint
+from sqlalchemy import CheckConstraint, Column, Date, DateTime, Float, ForeignKey, Index, Integer, Numeric, String, Text, UniqueConstraint
 from sqlalchemy.orm import relationship
 
 # Register AI tables in the same metadata for create_all and Alembic migrations.
 from app.ai import models as _ai_models  # noqa: F401
+from app.clinical_observations import ObservationDecimal
 from app.database import Base
 
 
@@ -869,6 +870,34 @@ class LabResult(Base):
 
     lab_order = relationship("LabOrder", back_populates="lab_results")
     technician = relationship("User", foreign_keys=[technician_id])
+    observations = relationship("LabObservation", back_populates="lab_result", cascade="all, delete-orphan")
+
+
+class LabObservation(Base):
+    __tablename__ = "hoimsystem_lab_observation"
+    __table_args__ = (
+        UniqueConstraint("lab_result_id", "code_system", "code", "collected_at", "method", name="uq_lab_observation_source"),
+        CheckConstraint("(value_num IS NULL AND value_text IS NOT NULL) OR (value_num IS NOT NULL AND value_text IS NULL)", name="ck_lab_observation_value"),
+        CheckConstraint("value_num IS NULL OR (unit IS NOT NULL AND unit <> '')", name="ck_lab_observation_numeric_unit"),
+        Index("idx_lab_observation_code_time", "code_system", "code", "collected_at"),
+    )
+
+    observation_id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    lab_result_id = Column(String(36), ForeignKey("hoimsystem_lab_result.lab_result_id"), nullable=False, index=True)
+    code = Column(String(80), nullable=False)
+    code_system = Column(String(80), nullable=False, default="local")
+    display = Column(String(120), nullable=False)
+    value_num = Column(ObservationDecimal(), nullable=True)
+    value_text = Column(String(500), nullable=True)
+    unit = Column(String(40), nullable=True)
+    reference_low = Column(ObservationDecimal(), nullable=True)
+    reference_high = Column(ObservationDecimal(), nullable=True)
+    reference_text = Column(String(200), nullable=True)
+    collected_at = Column(DateTime, nullable=False)
+    method = Column(String(100), nullable=False, default="")
+    specimen_type = Column(String(80), nullable=False, default="")
+    flag = Column(String(16), nullable=False, default="unknown")
+    lab_result = relationship("LabResult", back_populates="observations")
 
 
 class Invoice(Base):

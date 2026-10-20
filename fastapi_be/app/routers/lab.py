@@ -1,8 +1,9 @@
 import datetime
 
 from fastapi import APIRouter, BackgroundTasks, Depends
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.orm import Session, joinedload, selectinload
 
+from app.clinical_observations import persist_observations, serialize_observation
 from app.database import get_db
 from app.dependencies import CLINICAL_ROLES, LAB_ROLES, require_roles
 from app.event_bus import patient_user_ids, publish_event
@@ -130,18 +131,20 @@ def create_lab_result(
         return {"code": 500, "msg": "样本尚未接收，不能录入结果"}
     if lab_order.status != 0 or lab_order.lab_results:
         return {"code": 500, "msg": "当前检查申请单已录入结果"}
-    is_critical = check_critical_value(lab_order.check_type or "", req.result or "")
+    is_critical = check_critical_value(lab_order.check_type or "", req.result or "") or any(item.flag == "critical" for item in req.observations)
+    has_abnormal = is_critical or any(item.flag in {"high", "low"} for item in req.observations)
     result = LabResult(
         lab_order_id=req.lab_order_id,
         sample_id=req.sample_id,
         result=req.result,
-        abnormal_flag=1 if is_critical else req.abnormal_flag,
+        abnormal_flag=1 if has_abnormal else req.abnormal_flag,
         technician_id=current_user.user_id,
         report_time=datetime.datetime.now(),
         audit_status=0,
         critical_status=1 if is_critical else 0,
     )
     db.add(result)
+    persist_observations(db, result, req.observations)
     _record_tracking(db, lab_order.lab_order_id, "结果已录入", current_user)
     lab_order.status = 1
     db.add(lab_order)
@@ -246,7 +249,7 @@ def get_lab_result_list(
     current_user: User = Depends(require_roles(*LAB_ROLES)),
     db: Session = Depends(get_db),
 ):
-    query = db.query(LabResult).options(joinedload(LabResult.lab_order), joinedload(LabResult.technician))
+    query = db.query(LabResult).options(joinedload(LabResult.lab_order), joinedload(LabResult.technician), selectinload(LabResult.observations))
     if keyword and keyword.strip():
         like = f"%{keyword.strip()}%"
         query = query.outerjoin(LabOrder).filter((LabOrder.check_type.ilike(like)) | (LabResult.result.ilike(like)))
@@ -261,6 +264,10 @@ def get_lab_result_list(
                 "result": item.result,
                 "abnormal_flag": item.abnormal_flag,
                 "technician_name": item.technician.username if item.technician else "",
+                "patient_id": item.lab_order.patient_id if item.lab_order else None,
+                "audit_status": item.audit_status,
+                "critical_status": item.critical_status,
+                "observations": [serialize_observation(value) for value in item.observations],
             }
         )
     result = {"code": 200, "msg": "success", "data": data}
@@ -424,5 +431,9 @@ def get_lab_result_detail(req: LabResultAuditRequest, current_user: User = Depen
         "result": result.result,
         "abnormal_flag": result.abnormal_flag,
         "technician_name": result.technician.username if result.technician else "",
+        "patient_id": result.lab_order.patient_id if result.lab_order else None,
+        "audit_status": result.audit_status,
+        "critical_status": result.critical_status,
+        "observations": [serialize_observation(value) for value in result.observations],
     }
     return {"code": 200, "msg": "success", "data": data}

@@ -5,6 +5,7 @@ from decimal import Decimal
 from fastapi import APIRouter, BackgroundTasks, Depends, Header, HTTPException
 from sqlalchemy.orm import Session
 
+from app.clinical_observations import persist_observations
 from app.config import settings
 from app.database import get_db
 from app.event_bus import patient_user_ids, publish_event
@@ -58,18 +59,20 @@ def receive_lis_result(
     order.status = 1
     order.integration_status = "synced"
     order.last_sync_time = now
-    is_critical = check_critical_value(order.check_type or "", req.result)
+    is_critical = check_critical_value(order.check_type or "", req.result) or any(item.flag == "critical" for item in req.observations)
+    has_abnormal = is_critical or any(item.flag in {"high", "low"} for item in req.observations)
     result = LabResult(
         lab_order_id=order.lab_order_id,
         sample_id=req.sample_id,
         result=req.result,
-        abnormal_flag=1 if is_critical else req.abnormal_flag,
+        abnormal_flag=1 if has_abnormal else req.abnormal_flag,
         critical_status=1 if is_critical else 0,
         technician_id=None,
         report_time=now,
         audit_status=0,
     )
     db.add(result)
+    persist_observations(db, result, req.observations)
     db.commit()
     db.refresh(result)
     clinician_ids = [order.doctor.user_id] if order.doctor and order.doctor.user_id else []

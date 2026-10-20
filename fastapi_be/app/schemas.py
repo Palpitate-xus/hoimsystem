@@ -2,6 +2,8 @@ import re
 
 from pydantic import BaseModel, Field, field_validator
 
+from app.clinical_observations import LabObservationInput
+
 
 class ResponseModel(BaseModel):
     code: int = 200
@@ -595,6 +597,7 @@ class LabResultCreateRequest(BaseModel):
     sample_id: str
     result: str
     abnormal_flag: int
+    observations: list[LabObservationInput] = Field(default_factory=list, max_length=300)
 
 
 class LabResultAuditRequest(BaseModel):
@@ -612,6 +615,7 @@ class LabResultIntegrationRequest(BaseModel):
     sample_id: str = Field(default="", max_length=20)
     result: str = Field(default="", max_length=10000)
     abnormal_flag: int = Field(default=0, ge=0, le=1)
+    observations: list[LabObservationInput] = Field(default_factory=list, max_length=300)
 
 
 class ImagingReportIntegrationRequest(BaseModel):

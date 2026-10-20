@@ -12,12 +12,14 @@ from sqlalchemy.orm import Session, selectinload
 from app.ai.catalog import FeatureSpec
 from app.ai.governance import digest, encode_json
 from app.ai.models import AIPatientGrant, utcnow
+from app.clinical_observations import serialize_observation
 from app.config import settings
 from app.models import (
     Admission,
     Doctor,
     ImagingOrder,
     ImagingReport,
+    LabObservation,
     LabOrder,
     LabResult,
     MedicalRecord,
@@ -307,6 +309,21 @@ def patient_snapshot(db: Session, user: User, spec: FeatureSpec, patient_id: int
         )
         for item in results
     ]
+    observations = (
+        db.query(LabObservation)
+        .join(LabResult)
+        .join(LabOrder)
+        .filter(LabOrder.patient_id == patient_id, LabResult.audit_status == 1)
+        .order_by(LabObservation.collected_at.desc(), LabObservation.observation_id)
+        .limit(60)
+        .all()
+    )
+    bundle.data["reviewed_observations"] = [
+        add("observation:" + item.observation_id, "已审核结构化检验指标", {"lab_result_id": item.lab_result_id, **serialize_observation(item)}, item.collected_at)
+        for item in observations
+    ]
+    if results and not observations:
+        bundle.data["missing_data"].append("历史检验报告未提供结构化数值、原始单位和采样时间，不进行自动数值推断")
     imaging = db.query(ImagingReport).join(ImagingOrder).filter(ImagingOrder.patient_id == patient_id, ImagingReport.status == 2).order_by(ImagingReport.report_time.desc()).limit(8).all()
     bundle.data["reviewed_imaging_reports"] = [
         add("imaging:" + item.report_id, "已审核影像报告", {"findings": item.findings, "impression": item.impression, "review_time": item.review_time}, item.report_time) for item in imaging

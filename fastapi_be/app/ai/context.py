@@ -12,6 +12,7 @@ from sqlalchemy.orm import Session, selectinload
 from app.ai.catalog import FeatureSpec
 from app.ai.governance import digest, encode_json
 from app.ai.models import AIPatientGrant, utcnow
+from app.ai.patient_sources import attach_patient_sources
 from app.clinical_observations import serialize_observation
 from app.config import settings
 from app.diagnosis_review import latest_reviews, review_state
@@ -435,6 +436,7 @@ def patient_snapshot(db: Session, user: User, spec: FeatureSpec, patient_id: int
     bundle.data["reviewed_imaging_reports"] = [
         add("imaging:" + item.report_id, "已审核影像报告", {"findings": item.findings, "impression": item.impression, "review_time": item.review_time}, item.report_time) for item in imaging
     ]
+    attach_patient_sources(db, user, spec, patient, encounter, bundle, add)
     if not bundle.data["current_confirmed_diagnoses"]:
         bundle.data["missing_data"].append("未取得本次就诊的已确认诊断")
     bundle.data = minimize_identifiers(bundle.data, patient)

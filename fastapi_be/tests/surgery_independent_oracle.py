@@ -75,6 +75,9 @@ def tiny_source(count=1, mode=MODES[0]):
     body["objective_mode"] = mode
     for rid, kind in ((uid(110), "room"), (uid(111), "person"), (uid(112), "equipment")):
         body["resources"].append(resource(rid, kind))
+    for item in body["resources"]:
+        if item["kind"] == "person":
+            item["capability_facts"] = [{"ref_ids": [uid(5)], "capability_hashes": [H], "status": "verified", "valid_from_at": START, "valid_until": {"kind": "known", "at": END}, "basis_hash": H}]
     body["duties"].append({"duty_id": uid(113), "person_id": uid(111), "start_at": START, "end_at": END, "accounting": accounting(), "ref_ids": [uid(7)], "basis_hash": H})
     template = copy.deepcopy(body["cases"][0])
     body["cases"] = []
@@ -83,6 +86,8 @@ def tiny_source(count=1, mode=MODES[0]):
         case.update(case_id=uid(200 + index), patient_conflict_token=uid(300 + index))
         case["starts"] = [{"start_at": clock(3 * index), "penalty": amount()}]
         case["timing"]["segments"][0]["end_offset_us"] = amount("2")
+        for role in case["roles"]:
+            role["capability_hashes"] = [H]
         body["cases"].append(case)
     return body
 
@@ -154,6 +159,8 @@ def evaluate(body, selected):
                 return None
             rid = selected_resource["resource_id"]
             res = resources[rid]
+            if res["kind"] == "person":
+                assert req["capability_hashes"], "Concrete oracle fixtures require explicit reviewed role authorization"
             penalty += literal(selected_resource["penalty"])
             for interval in intervals:
                 if case["release"]["kind"] == "known" and interval[0] < micros(case["release"]["at"]):
@@ -209,7 +216,14 @@ def evaluate(body, selected):
     for policy in body["transition_policies"]:
         pairs = {(p["from_class_hash"], p["to_class_hash"]): p for p in policy["pairs"]}
         for rid in policy["resource_ids"]:
-            timeline = sorted((x for x in used if x[0] == rid), key=lambda x: (x[3], x[1], x[2]))
+            events = [x for x in used if x[0] == rid]
+            # All declared resources count, including fixed busy on an otherwise
+            # unselected resource. Optional deferral must not erase baseline cost.
+            for busy in body["busy_intervals"]:
+                if busy["target"] == {"kind": "resource", "resource_id": rid} and busy["busy_status"] != "cancelled":
+                    assert busy["end_at"] is not None and busy["busy_status"] in {"committed", "completed"}
+                    events.append((rid, busy["interval_id"], "busy", (micros(busy["start_at"]), micros(busy["end_at"])), busy["transition_class_hash"]))
+            timeline = sorted(events, key=lambda x: (x[3], x[1], x[2]))
             for a, b in zip(timeline, timeline[1:]):
                 if a[1] == b[1]:
                     continue
@@ -355,3 +369,44 @@ def work_policy(body, **limits):
     body["resources"][1]["work_policy_review"]["status"] = "reviewed_policies"
     body["work_policies"] = [result]
     return result
+
+
+def fixed_busy_transition_source(mode=MODES[0]):
+    body = transition_source(mode, direct_cost=100, optional_middle=True)
+    fixed, body["cases"] = body["cases"][:2], body["cases"][2:]
+    body["cases"][0]["room"]["choices"].append(choice(uid(110)))
+    for index, case in enumerate(fixed):
+        start = case["starts"][0]["start_at"]
+        body["busy_intervals"].append(
+            {
+                "interval_id": uid(600 + index),
+                "target": {"kind": "resource", "resource_id": ROOM},
+                "ref_ids": [uid(6)],
+                "start_at": start,
+                "end_at": clock((0, 4)[index] + 1),
+                "end_absent_reason": None,
+                "verified_until_at": None,
+                "continuity_status": "confirmed",
+                "busy_status": "committed",
+                "transition_class_hash": case["room"]["occupation"]["transition_class_hash"],
+                "transition_class_absent_reason": None,
+                "accounting": accounting(),
+                "basis_hash": H,
+            }
+        )
+    return body
+
+
+def mandatory_cohort_work_source(mode=MODES[0]):
+    body = tiny_source(1, mode)
+    body["duties"][0].update(start_at=clock(0), end_at=clock(10))
+    body["duties"][0]["accounting"]["counted_as_work"] = False
+    case = body["cases"][0]
+    case.update(required=False, penalty_if_deferred=amount())
+    case["penalty_if_scheduled"] = amount("9")
+    case["roles"][0]["choices"].append(choice(uid(111), uid(113)))
+    policy = work_policy(body)
+    policy["fixed_windows"] = [
+        {"start_at": clock(0), "end_at": clock(10), "minimum_work": {"value": "2", "unit": "us", "absent_reason": None}, "maximum_work": {"value": "2", "unit": "us", "absent_reason": None}}
+    ]
+    return body

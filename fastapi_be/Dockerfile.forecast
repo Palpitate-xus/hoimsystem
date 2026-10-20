@@ -1,0 +1,24 @@
+FROM python:3.12-slim AS dependencies
+
+WORKDIR /app
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
+
+COPY requirements-forecast.txt ./
+RUN pip install --no-cache-dir -r requirements-forecast.txt \
+    && groupadd --gid 10001 forecast \
+    && useradd --uid 10001 --gid 10001 --create-home --shell /usr/sbin/nologin forecast
+
+FROM dependencies AS runtime
+
+COPY app/__init__.py ./app/__init__.py
+COPY app/ai/__init__.py ./app/ai/__init__.py
+COPY app/ai/forecast_contract.py \
+    app/ai/forecast_model.py \
+    app/ai/forecast_config.py \
+    app/ai/forecast_server.py ./app/ai/
+COPY scripts/smoke_local_forecast.py ./scripts/smoke_local_forecast.py
+
+USER 10001:10001
+EXPOSE 8813
+CMD ["python", "-m", "app.ai.forecast_server", "--host", "0.0.0.0"]

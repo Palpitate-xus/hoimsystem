@@ -9,6 +9,7 @@ import pytest
 from alembic.config import Config
 from alembic.migration import MigrationContext
 from alembic.operations import Operations
+from alembic.script import ScriptDirectory
 from sqlalchemy import column, create_engine, inspect, text
 from sqlalchemy.dialects import mysql
 
@@ -254,7 +255,7 @@ def test_nursing_migration_preserves_legacy_values_and_has_matching_new_schema(t
         score = connection.execute(text("SELECT * FROM hoimsystem_icu_score")).mappings().one()
         assert score["total_score"] == 0 and score["interpretation"] == "original legacy interpretation" and score["detail_json"] == "{}"
         assert score["calculation_version"] == "legacy_unverified" and score["assessed_at"] is None
-        assert connection.scalar(text("SELECT version_num FROM alembic_version")) == NEW_REVISION
+        assert connection.scalar(text("SELECT version_num FROM alembic_version")) == ScriptDirectory.from_config(config).get_current_head()
     columns = {item["name"]: item for item in inspect(engine).get_columns(NursingAssessment.__tablename__)}
     assert all(columns[name]["nullable"] and columns[name]["default"] is None for name in FIELDS)
     assert next(item for item in inspect(engine).get_columns(CriticalCareRecord.__tablename__) if item["name"] == "consciousness")["nullable"]

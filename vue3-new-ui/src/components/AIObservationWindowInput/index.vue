@@ -15,6 +15,7 @@
           <el-tabs v-if="sourceSections.includes('sources')" v-model="sourceTab">
             <el-tab-pane label="检验来源登记" name="laboratory" lazy><inpatient-lab-source-panel v-if="sourceTab === 'laboratory'" :patient-id="patientId" :admission-id="admissionId" :active="!disabled" @source-created="sourceChanged" @source-revoked="sourceChanged" /></el-tab-pane>
             <el-tab-pane label="GCS分项来源登记" name="gcs" lazy><inpatient-gcs-source-panel v-if="sourceTab === 'gcs'" :patient-id="patientId" :admission-id="admissionId" :active="!disabled" @source-created="sourceChanged" @source-revoked="sourceChanged" /></el-tab-pane>
+            <el-tab-pane label="SOFA独立24小时与变化" name="sofa" lazy><ai-sofa-source-hub v-if="sourceTab==='sofa'" :patient-id="patientId" :admission-id="admissionId" :disabled="disabled" /></el-tab-pane>
             <el-tab-pane label="器官支持原资料" name="organ_support" lazy><inpatient-support-source-panel v-if="sourceTab === 'organ_support'" :patient-id="patientId" :admission-id="admissionId" :active="!disabled" @source-created="sourceChanged" @source-revoked="sourceChanged" /></el-tab-pane>
             <el-tab-pane label="点测、尿量与新建窗口" name="observations" lazy><inpatient-observation-panel v-if="sourceTab === 'observations'" :patient-id="patientId" :admission-id="admissionId" :active="!disabled" @window-created="windowCreated" /></el-tab-pane>
           </el-tabs>
@@ -37,6 +38,7 @@ import { useStore } from "vuex";
 import { getObservationWindow, getObservationWindows, observationWindowMatches } from "@/api/inpatientObservations";
 
 const InpatientLabSourcePanel = defineAsyncComponent(() => import("@/components/InpatientLabSourcePanel/index.vue"));
+const AiSofaSourceHub=defineAsyncComponent(()=>import("@/components/AISofaSourceHub/index.vue"));
 const InpatientGcsSourcePanel = defineAsyncComponent(() => import("@/components/InpatientGcsSourcePanel/index.vue"));
 const InpatientSupportSourcePanel = defineAsyncComponent(() => import("@/components/InpatientSupportSourcePanel/index.vue"));
 const InpatientObservationPanel = defineAsyncComponent(() => import("@/components/InpatientObservationPanel/index.vue"));

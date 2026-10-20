@@ -11,7 +11,7 @@ from sqlalchemy.orm import Session
 from app.ai.catalog import COMMON_SYSTEM_PROMPT, FeatureSpec
 from app.ai.context import ContextBundle, authorize_patient, context_metadata, minimize_identifiers, patient_snapshot
 from app.ai.gateway import AIExecutionError, generate
-from app.ai.governance import active_prompt, audit, digest, encode_json, get_spec, provider_credential
+from app.ai.governance import active_prompt, audit, digest, encode_json, get_spec, provider_credential, provider_feature_issues
 from app.ai.knowledge import evidence_is_current, retrieve_evidence
 from app.ai.models import AIFeatureConfig, AIProvider, AIRun, utcnow
 from app.ai.schemas import RunRequest
@@ -43,10 +43,9 @@ def check_configuration(db: Session, user: User, spec: FeatureSpec, config: AIFe
     provider = db.get(AIProvider, config.provider_id)
     if provider is None or not provider.enabled:
         raise HTTPException(409, "模型服务未启用")
-    if spec.engine == "llm" and provider.kind not in {"chat", "responses"}:
-        raise HTTPException(409, "该能力需要文本模型接口")
-    if spec.engine != "llm" and (provider.kind != "specialist" or spec.key not in json.loads(provider.supported_features_json) or not provider.validation_report):
-        raise HTTPException(409, "专用模型适配器及验证报告尚未就绪")
+    issues = provider_feature_issues(spec, provider)
+    if issues:
+        raise HTTPException(409, issues[0]["message"])
     provider_credential(provider)
     return provider
 
@@ -67,8 +66,6 @@ def create_run(db: Session, user: User, req: RunRequest) -> AIRun:
         raise HTTPException(422, "该功能需要选择已授权患者")
     if req.patient_id is not None and spec.scope != "patient":
         raise HTTPException(422, "该任务不接受额外加载个体患者资料")
-    if (req.patient_id is not None or spec.clinical or spec.category == "patient" or spec.key == "deidentification") and not provider.allows_patient_data:
-        raise HTTPException(409, "该模型服务尚未获准处理患者资料")
     if req.patient_id is not None:
         bundle = patient_snapshot(db, user, spec, req.patient_id, req.encounter_ref, req.input)
     elif spec.scope == "hospital":

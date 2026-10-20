@@ -158,6 +158,18 @@ def active_prompt(db: Session, spec: FeatureSpec, config: AIFeatureConfig | None
     return spec.task_prompt, 0
 
 
+def provider_feature_issues(spec: FeatureSpec, provider: AIProvider) -> list[dict]:
+    """Share protocol and data-purpose checks between activation, execution and setup inspection."""
+    issues = []
+    if spec.engine == "llm" and provider.kind not in {"chat", "responses"}:
+        issues.append({"code": "PROTOCOL_MISMATCH", "message": "该能力需要文本模型接口"})
+    if spec.engine != "llm" and (provider.kind != "specialist" or spec.key not in json.loads(provider.supported_features_json) or not provider.validation_report):
+        issues.append({"code": "SPECIALIST_NOT_READY", "message": "专用模型适配器、功能声明及验证报告尚未就绪"})
+    if spec.requires_patient_data_permission and not provider.allows_patient_data:
+        issues.append({"code": "PATIENT_DATA_NOT_APPROVED", "message": "该模型服务尚未获准处理患者资料"})
+    return issues
+
+
 def describe_config(db: Session, spec: FeatureSpec, config: AIFeatureConfig | None, management: bool = False) -> dict:
     """Keep configured, implementation and validation status independently visible."""
     data = describe_feature(spec)

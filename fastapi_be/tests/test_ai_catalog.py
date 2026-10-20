@@ -25,3 +25,12 @@ def test_treatment_contract_requires_evidence_and_dedicated_models_stay_distinct
     assert FEATURE_BY_KEY["ecg_analysis"].engine == "signal"
     assert FEATURE_BY_KEY["sepsis_risk"].engine == "prediction"
     assert "不得把缺失信息补写成正常或阴性" in COMMON_SYSTEM_PROMPT
+
+
+def test_hospital_scope_does_not_advertise_access_to_unscoped_business_roles():
+    for spec in FEATURES:
+        if spec.scope == "hospital":
+            assert set(spec.default_roles) <= {"super_admin", "admin", "director"}
+    assert FEATURE_BY_KEY["feedback_analysis"].requires_patient_data_permission
+    assert FEATURE_BY_KEY["research_cohort"].requires_patient_data_permission
+    assert not FEATURE_BY_KEY["operations_qa"].requires_patient_data_permission

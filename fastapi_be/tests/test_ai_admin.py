@@ -55,7 +55,9 @@ async def test_feature_role_ceiling_revision_and_clinical_gate(async_client, see
     revision = response.json()["data"]["revision"]
     stale = await async_client.put(path, headers=headers, json={"expected_revision": 0, "daily_limit": 10})
     assert stale.status_code == 409
-    provider = await async_client.post("/api/ai/admin/providers", headers=headers, json={"name": "clinical-gate-test", "api_base": "http://localhost:11434/v1", "model": "test", "enabled": True})
+    provider = await async_client.post(
+        "/api/ai/admin/providers", headers=headers, json={"name": "clinical-gate-test", "api_base": "http://localhost:11434/v1", "model": "test", "enabled": True, "allows_patient_data": True}
+    )
     provider_id = provider.json()["data"]["provider_id"]
     denied = await async_client.put(path, headers=headers, json={"expected_revision": revision, "provider_id": provider_id, "enabled": True})
     assert denied.status_code == 422
@@ -66,6 +68,22 @@ async def test_feature_role_ceiling_revision_and_clinical_gate(async_client, see
     )
     assert good.status_code == 200, good.text
     assert good.json()["data"]["enabled"] is True
+
+
+@pytest.mark.asyncio
+async def test_feedback_analysis_cannot_enable_a_model_without_patient_data_permission(async_client, seed_data, auth_headers):
+    headers = auth_headers("super01")
+    body = {"name": "feedback-purpose-test", "api_base": "http://localhost:11434/v1", "model": "test", "enabled": True}
+    provider = (await async_client.post("/api/ai/admin/providers", headers=headers, json=body)).json()["data"]
+    path = "/api/ai/admin/features/feedback_analysis"
+    request = {"expected_revision": 0, "provider_id": provider["provider_id"], "enabled": True}
+    denied = await async_client.put(path, headers=headers, json=request)
+    assert denied.status_code == 422
+    assert "患者资料" in denied.json()["detail"]
+    updated = await async_client.put(f"/api/ai/admin/providers/{provider['provider_id']}", headers=headers, json={**body, "allows_patient_data": True, "expected_revision": provider["revision"]})
+    assert updated.status_code == 200, updated.text
+    allowed = await async_client.put(path, headers=headers, json=request)
+    assert allowed.status_code == 200, allowed.text
 
 
 @pytest.mark.asyncio

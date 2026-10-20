@@ -21,6 +21,7 @@ from app.ai.governance import (
     flush_or_conflict,
     get_spec,
     invalidate_feature,
+    provider_feature_issues,
     validate_endpoint,
 )
 from app.ai.models import AIAuditEvent, AIFeatureConfig, AIKnowledgeDocument, AIPatientGrant, AIPromptVersion, AIProvider, AIRun, utcnow
@@ -85,15 +86,13 @@ def update_feature(key: str, req: FeatureWrite, db: Session = Depends(get_db), u
         provider = db.get(AIProvider, config.provider_id) if config.provider_id else None
         if not provider or not provider.enabled:
             raise HTTPException(422, "启用前请选择已启用的模型")
+        issues = provider_feature_issues(spec, provider)
+        if issues:
+            raise HTTPException(422, issues[0]["message"])
         if spec.clinical and config.validation_status != "validated":
             raise HTTPException(422, "临床功能完成验证后才能面向业务启用；超级管理员可先进行预览")
         if config.validation_status == "suspended":
             raise HTTPException(422, "已暂停的功能不能启用")
-        expected_kind = "chat" if spec.engine == "llm" else "specialist"
-        if (spec.engine == "llm" and provider.kind not in {"chat", "responses"}) or (spec.engine != "llm" and provider.kind != "specialist"):
-            raise HTTPException(422, "该功能需要匹配的文本模型或专用适配器")
-        if expected_kind == "specialist" and (spec.key not in json.loads(provider.supported_features_json) or not provider.validation_report):
-            raise HTTPException(422, "专用适配器必须声明支持该功能并登记验证报告")
     config.revision += 1
     config.updated_by = user.user_id
     audit(db, user.user_id, "feature.update", key, {"revision": config.revision, "enabled": bool(config.enabled), "validation_status": config.validation_status, "provider_id": config.provider_id})

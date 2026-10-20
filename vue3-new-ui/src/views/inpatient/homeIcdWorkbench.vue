@@ -12,9 +12,10 @@
           <el-table-column prop="other_diagnosis" label="其他诊断" min-width="110" show-overflow-tooltip />
           <el-table-column prop="operation_summary" label="手术情况" min-width="110" show-overflow-tooltip />
           <el-table-column prop="status_text" label="首页状态" width="90" />
-          <el-table-column label="操作" width="90">
+          <el-table-column label="操作" width="200">
             <template #default="{ row }">
               <el-button size="small" type="primary" @click="openBind(row)">编码</el-button>
+              <ai-action v-if="row.patient_id" label="AI 编码辅助" title="AI 字典候选与编码证据" :patient-id="row.patient_id" :encounter-ref="row.admission_id || ''" :initial-input="{ home_id: row.home_id }" :feature-keys="['icd_candidates', 'record_home_review', 'drg_evidence_review']" initial-feature="icd_candidates" />
             </template>
           </el-table-column>
         </el-table>
@@ -92,9 +93,11 @@
 import { getHomeIcdBindings, getUncodedHomes, bindHomeIcd, unbindHomeIcd, setPrimaryIcd, getIcdStatistics } from "@/api/homeIcd";
 import request from "@/utils/request";
 import { ElMessage, ElMessageBox } from "element-plus";
+import AiAction from "@/components/AIAction/index.vue";
 
 export default {
   name: "HomeIcdWorkbench",
+  components: { AiAction },
   data() {
     return {
       tab: "todo",

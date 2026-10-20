@@ -24,10 +24,11 @@
             <el-tag :type="row.status === 0 ? 'warning' : row.status === 1 ? 'success' : 'info'" size="small">{{ row.status_text }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="150">
+        <el-table-column label="操作" width="250">
           <template #default="{ row }">
             <el-button size="small" @click="openEdit(row)">查看/编辑</el-button>
             <el-button v-if="row.status === 0" size="small" type="success" @click="submitRecord(row)">提交</el-button>
+            <ai-action title="AI 首页与编码证据核对" :patient-id="row.patient_id" :encounter-ref="row.admission_id" :initial-input="{ home_id: row.home_id }" :feature-keys="['record_home_review', 'icd_candidates', 'clinical_consistency', 'drg_evidence_review', 'charge_reconciliation']" initial-feature="record_home_review" />
           </template>
         </el-table-column>
       </el-table>
@@ -66,6 +67,7 @@
 <script setup>
 import { onMounted, ref } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
+import AiAction from "@/components/AIAction/index.vue";
 import { getMedicalRecordHomeAdmissions, getMedicalRecordHomeList, createMedicalRecordHome, updateMedicalRecordHome, submitMedicalRecordHome } from "@/api/medicalRecordHome";
 
 const loading = ref(false);

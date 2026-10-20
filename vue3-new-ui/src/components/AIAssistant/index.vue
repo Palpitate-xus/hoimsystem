@@ -22,6 +22,7 @@
         <el-form-item v-if="needsPrescription && patientId" label="待核查处方">
           <el-select v-model="prescriptionId" clearable placeholder="选择实际处方" style="width: 100%"><el-option v-for="item in prescriptions" :key="item.prescription_id" :label="item.label" :value="item.prescription_id" /></el-select>
         </el-form-item>
+        <el-form-item v-if="needsCoding" label="编码检索词"><el-input v-model="codingQuery" maxlength="500" placeholder="已记录诊断、手术名称或已有编码；多个词用逗号分隔" /></el-form-item>
         <el-form-item label="补充资料或问题"><el-input v-model="question" type="textarea" :rows="5" maxlength="12000" show-word-limit :placeholder="'请提供与' + selected.name + '相关的信息，明确哪些是已确认事实'" /></el-form-item>
         <el-collapse v-if="canPreview" class="spaced">
           <el-collapse-item title="联调与预览选项">
@@ -43,6 +44,15 @@
       <template #header><div class="result-header"><strong>{{ run.feature_name }}</strong><el-tag>{{ statuses[run.status] || run.status }}</el-tag><el-tag v-if="run.patient_id" type="info">患者 #{{ run.patient_id }}</el-tag><el-tag v-if="run.preview" type="warning">评估预览</el-tag><el-button v-if="busy" link @click="refreshRun">刷新状态</el-button></div></template>
       <el-alert v-if="busy" type="info" :closable="false" title="任务已保存，正在等待处理或生成结果。" />
       <el-alert v-if="run.status === 'failed'" type="error" :closable="false" :title="run.error_message || '生成失败，请联系管理员检查服务状态'" />
+      <div v-if="run.tool_findings?.icd_candidates" class="spaced">
+        <h4>院内字典文字匹配候选</h4><p>{{ run.tool_findings.icd_candidates.scope_note }}</p>
+        <el-table :data="run.tool_findings.icd_candidates.candidates" max-height="290" empty-text="当前检索词未匹配到有效条目，请补充已记录的诊断或手术检索词">
+          <el-table-column label="类型" width="90"><template #default="{ row }">{{ row.kind === 'diagnosis' ? '诊断' : '手术' }}</template></el-table-column>
+          <el-table-column prop="code" label="字典编码" width="120" /><el-table-column prop="name" label="当前标准名称" min-width="200" />
+          <el-table-column label="依据" width="130"><template #default="{ row }"><el-button link @click="inspectEvidence(row.source_id)">查看字典依据</el-button></template></el-table-column>
+        </el-table>
+        <p v-if="run.tool_findings.icd_candidates.truncated">候选较多，已限制展示范围，可补充更具体检索词。</p>
+      </div>
       <template v-if="run.status === 'succeeded'">
         <el-alert type="info" :closable="false" title="以下内容为辅助建议或草稿，请核对事实和引用依据后使用。" />
         <p class="plain-text">{{ run.result?.summary }}</p>
@@ -78,10 +88,11 @@ const canPreview = computed(() => store.getters["user/permissions"].includes("su
 const statuses = { queued: "已排队", running: "生成中", succeeded: "待复核", failed: "失败", cancelled: "已取消" };
 const loading = ref(false), submitting = ref(false), features = ref([]), featureKey = ref("");
 const patientId = ref(null), encounterRef = ref(""), prescriptionId = ref(null), patients = ref([]), encounters = ref([]), prescriptions = ref([]);
-const question = ref(""), extraInput = ref(""), preview = ref(false), run = ref(null), history = ref([]);
+const question = ref(""), codingQuery = ref(""), extraInput = ref(""), preview = ref(false), run = ref(null), history = ref([]);
 const contextDialog = ref(false), contextData = ref(null), evidenceDialog = ref(false), evidence = ref(null), feedbackDialog = ref(false), feedback = ref({ outcome: "accepted", comment: "" });
 const selected = computed(() => features.value.find(item => item.key === featureKey.value));
 const needsPrescription = computed(() => ["interaction_review", "allergy_review", "dose_review", "antimicrobial_review"].includes(featureKey.value));
+const needsCoding = computed(() => ["icd_candidates", "drg_evidence_review"].includes(featureKey.value));
 const busy = computed(() => ["queued", "running"].includes(run.value?.status));
 let timer = null, pollVersion = 0, formVersion = 0;
 
@@ -111,7 +122,7 @@ async function searchPatients(keyword = "") {
 watch(featureKey, async () => {
   formVersion += 1; stopPolling(); run.value = null; contextData.value = null;
   patientId.value = null; encounters.value = []; prescriptions.value = []; encounterRef.value = ""; prescriptionId.value = null;
-  question.value = props.initialInput.question || ""; extraInput.value = "";
+  question.value = props.initialInput.question || ""; codingQuery.value = props.initialInput.icd_query || ""; extraInput.value = "";
   if (selected.value?.scope === "patient") { await searchPatients(); patientId.value = props.patientId || (patients.value.length === 1 ? patients.value[0].patient_id : null); }
 });
 watch(patientId, async id => {
@@ -146,6 +157,7 @@ async function submit() {
   submitting.value = true;
   try {
     const input = { ...props.initialInput, ...extra, question: question.value };
+    if (needsCoding.value && codingQuery.value.trim()) input.icd_query = codingQuery.value.trim();
     if (prescriptionId.value) input.prescription_id = prescriptionId.value;
     const response = await createAIRun({ feature_key: featureKey.value, patient_id: selected.value.scope === "patient" ? patientId.value : null, encounter_ref: selected.value.scope === "patient" ? encounterRef.value || null : null, input, preview: canPreview.value && preview.value });
     run.value = response.data; startPolling();

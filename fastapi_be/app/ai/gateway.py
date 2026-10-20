@@ -3,6 +3,7 @@
 import copy
 import hashlib
 import json
+from decimal import Decimal, InvalidOperation
 from typing import BinaryIO
 
 import httpx
@@ -11,6 +12,7 @@ from pydantic import ValidationError
 
 from app.ai.audio_files import AUDIO_FORMATS
 from app.ai.catalog import COMMON_SYSTEM_PROMPT, FeatureSpec
+from app.ai.ecg_model import LABELS, LEADS, PREPROCESSING, RELEASE_FILES, ECGModelManifest, canonical_json
 from app.ai.governance import encode_json, provider_credential, validate_endpoint
 from app.ai.models import AIProvider
 from app.ai.schemas import AudioGenerationResult, ECGGenerationResult, GenerationResult
@@ -88,6 +90,21 @@ def validate_generation(value: object, evidence: list[dict], requires_knowledge:
             raise AIExecutionError("ECG_SOURCE_MISMATCH", "心电候选结果与所选原始波形不一致")
         if processing.input_sample_count != metadata["sample_count"] or processing.input_sample_rate_hz != metadata["sample_rate_hz"] or processing.input_leads != [lead["name"] for lead in metadata["leads"]] or (instructions_digest and processing.instructions_digest != instructions_digest):
             raise AIExecutionError("ECG_PROCESSING_MISMATCH", "心电输入采样、导联顺序或任务Prompt与实际任务不符")
+        local = processing.local_runtime
+        if local is not None or (model_version and model_version.startswith("ssl-ecg:")):
+            if local is None or model_version != "ssl-ecg:" + local.runtime_digest:
+                raise AIExecutionError("ECG_RUNTIME_MISMATCH", "本地心电结果缺少所登记实际运行版本，结果已拒收")
+            manifest = ECGModelManifest(files={name: {"size": size, "sha256": digest} for name, (size, digest) in RELEASE_FILES.items()})
+            if local.model_digest != manifest.digest or local.preprocessing_digest != hashlib.sha256(canonical_json(PREPROCESSING).encode()).hexdigest():
+                raise AIExecutionError("ECG_RUNTIME_MISMATCH", "本地心电权重发布或预处理与已审查模型不一致")
+            try:
+                in_scope = metadata["sample_count"] == 1000 and Decimal(metadata["sample_rate_hz"]) == 100 and set(processing.input_leads) == set(LEADS) and len(processing.input_leads) == 12
+            except InvalidOperation:
+                in_scope = False
+            if not in_scope or processing.used_leads != LEADS or processing.missing_sample_handling != "none_present" or any(lead["missing_samples"] for lead in metadata["leads"]):
+                raise AIExecutionError("ECG_LOCAL_SCOPE_MISMATCH", "本地研究模型输入超出原始12导联、100Hz、10秒无缺失范围")
+            if [finding.label for finding in analysis.findings] != LABELS or any(finding.location != "recording" or finding.leads != LEADS or finding.score is None or not 0 <= finding.score <= 1 for finding in analysis.findings):
+                raise AIExecutionError("ECG_LOCAL_SCORE_MISMATCH", "本地研究模型须保留完整五类整段原始分数，不能改作诊断阈值或局部定位")
         used = {lead["name"]: lead for lead in metadata["leads"] if lead["name"] in processing.used_leads}
         has_missing = any(lead["missing_samples"] for lead in metadata["leads"])
         if has_missing and (processing.missing_sample_handling != "masked" or not processing.preprocessing_notes):

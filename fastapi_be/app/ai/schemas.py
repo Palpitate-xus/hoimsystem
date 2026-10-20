@@ -292,6 +292,41 @@ class AudioGenerationResult(GenerationResult):
     transcription: AudioTranscript
 
 
+class LocalECGRuntime(StrictRequest):
+    """The fixed research classifier's actual runtime; no clinical validation inference."""
+
+    engine: Literal["ssl-ecg-cnn"]
+    engine_versions: dict[str, str] = Field(min_length=3, max_length=3)
+    model_repository: Literal["Tumo505/SSL-ECG-Classification-model-card"]
+    model_revision: Literal["6ec2ee1a1badd9508f9c1219fb07de38f3f6936b"]
+    model_digest: str = Field(pattern=r"^[a-f0-9]{64}$")
+    runtime_digest: str = Field(pattern=r"^[a-f0-9]{64}$")
+    preprocessing_digest: str = Field(pattern=r"^[a-f0-9]{64}$")
+    required_leads: list[str] = Field(min_length=12, max_length=12)
+    sample_rate_hz: int = Field(ge=100, le=100, strict=True)
+    samples_per_lead: int = Field(ge=1000, le=1000, strict=True)
+    labels: list[str] = Field(min_length=5, max_length=5)
+    missing_sample_policy: Literal["reject"]
+    prompt_handling: Literal["signal_only"]
+    clinical_validation: Literal["not_provided"]
+    population_applicability: Literal["not_verified"]
+
+    @model_validator(mode="after")
+    def reviewed_runtime_only(self):
+        from app.ai.ecg_model import LABELS, LEADS
+
+        if (
+            self.required_leads != LEADS
+            or self.labels != LABELS
+            or set(self.engine_versions) != {"torch", "numpy", "safetensors"}
+            or self.engine_versions.get("torch") != "2.14.1+cpu"
+            or self.engine_versions.get("safetensors") != "0.8.0"
+            or any(not re.fullmatch(r"[0-9A-Za-z.+_-]{1,40}", version) for version in self.engine_versions.values())
+        ):
+            raise ValueError("本地研究模型的原导联、标签或运行依赖不一致")
+        return self
+
+
 class ECGProcessing(StrictRequest):
     instructions_digest: str = Field(pattern=r"^[a-f0-9]{64}$")
     input_sample_count: int = Field(ge=1, strict=True)
@@ -302,10 +337,16 @@ class ECGProcessing(StrictRequest):
     complete_input: bool = Field(strict=True)
     missing_sample_handling: Literal["none_present", "masked"]
     preprocessing_notes: list[str] = Field(max_length=20)
+    local_runtime: LocalECGRuntime | None = None
 
     @model_validator(mode="after")
     def bounded_complete_input(self):
-        if not self.complete_input or self.processed_original_sample_count != self.input_sample_count or len(set(self.input_leads)) != len(self.input_leads) or len(set(self.used_leads)) != len(self.used_leads):
+        if (
+            not self.complete_input
+            or self.processed_original_sample_count != self.input_sample_count
+            or len(set(self.input_leads)) != len(self.input_leads)
+            or len(set(self.used_leads)) != len(self.used_leads)
+        ):
             raise ValueError("原始输入处理不完整或导联声明重复")
         if not set(self.used_leads) <= set(self.input_leads) or any(len(item) > 1000 for item in self.preprocessing_notes):
             raise ValueError("使用导联或预处理说明无效")

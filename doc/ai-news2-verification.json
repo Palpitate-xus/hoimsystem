@@ -1,0 +1,450 @@
+{
+  "recorded_at_utc": "2026-10-20T14:34:14.756065+00:00",
+  "baseline_commit": "cf5ab24fed92ac29f50705eae6d2dead7612d365",
+  "platform_commit": "6ef1f9b38156b2df2bbef58a46dc4df78a3e533e",
+  "recording_head_before_evidence_commit": "671fd66574fd7fa7083c8616f4d140a74338a839",
+  "scope": "Independent provenance-bound NEWS2 fixed arithmetic service, Super-admin fixed-rule review/publication/revocation and actual-runtime capability inspection, admission-bound original point and explicit human applicability source, shared clinical UI, queue/inflight/history guards, complete UTF-8 task storage limits. Synthetic engineering verification, not clinical validation.",
+  "goal_status": "active",
+  "real_patient_data_used": false,
+  "existing_hospital_database_accessed": false,
+  "existing_hospital_backend_contacted": false,
+  "production_deployment_performed": false,
+  "clinical_validation_performed": false,
+  "stored_business_ai_configuration_changed": false,
+  "inventory": {
+    "matrix_covered_router_api_routes": 681,
+    "all_main_app_api_routes": 682,
+    "matrix_scope": "Actual mounted app.routers.* method/path multiset; the original main GET / welcome entry is separately counted.",
+    "router_modules": 93,
+    "orm_tables": 167,
+    "vue_view_files": 159,
+    "capabilities": 80,
+    "catalog_version": "2026.10.20.5",
+    "global_source_reference_keys": 27,
+    "news2_feature_source_reference_keys": [
+      "news2_assessment_id",
+      "observation_window_id"
+    ],
+    "sepsis_and_aki_source_reference_keys": [
+      "observation_window_id"
+    ],
+    "alembic_heads": [
+      "20261020_ai_news2_sources"
+    ],
+    "isolated_inventory": {
+      "path": "/tmp/hoim-news2-inventory-verification.json",
+      "sha256": "b955772af4918bbec38738664d5ceef7500e4ed71caa8e22709759ca126a2283"
+    },
+    "isolated_inventory_seconds": 5.679,
+    "inventory_capture_is_not_final_code_freeze": true,
+    "files_changed_since_inventory": [
+      "fastapi_be/app/ai/runtime.py",
+      "vue3-new-ui/e2e/ai-news2-entry.spec.js"
+    ],
+    "inventory_differences_scope": "Complete run UTF-8 storage guard and browser test locator fixes; mounted routes/ORM/catalog/Prompt/migration/generated matrix files unchanged.",
+    "final_code_bindings_below_are_separate": true
+  },
+  "fixed_rule_contract": {
+    "rule_id": "news2_2017",
+    "recipe_digest": "6a1ff4077de55c368d48e4e7bee20f31caa3dad22cfdbdaf201a1cc46070db4b",
+    "six_physiological_parameters_plus_supplemental_oxygen": true,
+    "original_pulse_not_heart_rate": true,
+    "maximum_total_score": 20,
+    "measurement_selection": "One explicit original point in the same immutable window; no mixed-time latest-value merge, interpolation, averaging or unit conversion.",
+    "software_precision_policy": "Mathematical integers for respiratory rate, SpO2, systolic BP and pulse; exact 0.1 Cel for temperature; harmless trailing zeroes preserved. This is the explicit software admission policy, not an assertion that RCP prohibits higher-precision devices.",
+    "scope": "Explicit observation-age and pregnancy attestation. Age below 16 or pregnant outside this implementation scope; pregnancy unknown remains unknown. No inferred age/pregnancy.",
+    "scale2": "Blood-gas-confirmed hypercapnic respiratory failure and recorded competent clinical decision require separate explicit human attestations and reference hashes; actual Doctor identity and same-admission care required, including for Super-admin. Historical qualifying role is frozen; Doctor identity reassignment invalidates current use.",
+    "consciousness": "Original ACVPU used; AVPU alert alone cannot establish absence of new confusion. Missing, conflict, precision and review statuses remain explicit.",
+    "partial": "Complete total/classification null; retain known scored components, subtotal, known red components and a minimum classification lower bound. Unknown population/outside scope has no component score or subtotal.",
+    "not_delivered": [
+      "risk probability",
+      "sepsis diagnosis",
+      "automatic treatment or clinical escalation",
+      "AKI/KDIGO algorithm",
+      "clinical calibration or effectiveness validation"
+    ],
+    "attribution": "Independent numerical implementation with Royal College of Physicians attribution; no reproduction of original charts and no claim of RCP certification."
+  },
+  "super_admin": {
+    "fixed_rule_profile_draft_review_publish_irreversible_revoke": true,
+    "arbitrary_threshold_or_code_editing": false,
+    "one_published_profile_per_rule_id": true,
+    "frozen_assessment_directory_and_audit": true,
+    "source_author_is_not_patient_access_grant": true,
+    "ordinary_admin_global_ai_governance": false,
+    "capability_probe": "POST admin endpoint performs authenticated bounded GET /capabilities only, saved-revision and actual current role rechecked after await; no score, patient projection or auto-save/enable/validate.",
+    "actual_model_can_fill_unsaved_form_only": true,
+    "all_eighty_independent_prompts_versionable": true,
+    "automatic_enablement_or_clinical_validation_changes": false
+  },
+  "gateway_and_lifecycle": {
+    "protocol_schema_version": "6",
+    "envelope_handled_not_population_applicability": true,
+    "prompt_handling": "provenance_only",
+    "store": false,
+    "model_version": "news2:<SHA256 of actual four-core-file and Python/FastAPI/Pydantic runtime binding>",
+    "external_payload": "Verified typed NEWS2 projection and complete instructions only; no patient/admission ID, full window, raw note or free-text attestation references.",
+    "gateway_recomputes": "Entire original source, applicability, recipe, components, total/subtotal/lower-bound, runtime/instructions binding and exact fixed explanation. Added probabilities and modified free clinical claims rejected.",
+    "mode_compatibility": "Feature41 news2 specialist requires both source IDs; other feature41 specialist models retain the original window-only mode. Features42/43 reject NEWS2 assessment references.",
+    "queue_and_inflight": "Current source/point/window/profile/care and task fingerprints checked before external execution and before accepting result.",
+    "ordinary_history": "Changed, withdrawn, reassigned or inaccessible original sources deny old scores. Actual Super-admin retains frozen audit; new execution still requires current verified sources.",
+    "frontend": "Input and Findings require full frozen wrapper, original patient/admission/point/window/profile and projection match; missing snapshot or nested/raw-value mismatch rejects scores. Role/session/scope/withdrawal invalidate selection and late replies."
+  },
+  "migration_and_storage": {
+    "revision": "20261020_ai_news2_sources",
+    "parent": "20261020_inpatient_laboratory",
+    "new_tables": 2,
+    "old_schema_or_rows_changed": false,
+    "new_utc_datetime6_columns": 6,
+    "new_mediumtext_columns": 2,
+    "source_snapshot_max_utf8_bytes": 262144,
+    "complete_run_text_columns_max_utf8_bytes": 65535,
+    "run_columns": [
+      "input_json",
+      "evidence_json",
+      "context_metadata_json"
+    ],
+    "full_envelope_storage_check": "Exact strings serialized once, including Prompt/provider/validation/tools and duplicate sources, then individually checked before AIRun or audit writes. Original character/context limits retained; no truncation.",
+    "actual_mysql_final": {
+      "path": "/tmp/hoim-news2-mysql-final-verification.json",
+      "sha256": "c5be21b044e4f31d6a4622f289d645caed1877b6125a11c28944f5d3d6531779"
+    },
+    "actual_mysql_seconds": 15.389,
+    "actual_mysql_source_hashes_unchanged": true,
+    "actual_mysql_environment_guards": {
+      "dotenv_open_attempts": 0,
+      "private_unix_socket_connection_count": 2,
+      "cleanup_verified": true
+    },
+    "actual_mysql_storage_boundaries": [
+      {
+        "target_complete_input_utf8_bytes": 65535,
+        "status": "queued_offline",
+        "actual_sql_bytes": 65535,
+        "sql_sha256": "bb14d248005e95da70aaff895e4f3f69df8bc9035c419b5af92146722d84bc19",
+        "prompt_unchanged": true,
+        "real_run_insert_count": 1,
+        "audit_insert_count": 1
+      },
+      {
+        "target_complete_input_utf8_bytes": 65536,
+        "rejection": {
+          "status": 422,
+          "detail": "完整任务审计资料超过65535个UTF-8字节存储上限，请缩小资料范围；未入队或截断"
+        },
+        "run_and_audit_counts_unchanged": true,
+        "clinical_rows_unchanged": true
+      }
+    ],
+    "actual_mysql_legal_2000_chinese_note": {
+      "point_note_characters": 2000,
+      "point_note_utf8_bytes": 6000,
+      "window_snapshot_bytes": 12801,
+      "assessment_snapshot_bytes": 13345,
+      "full_serialized_run_column_bytes": {
+        "input_json": 75812,
+        "evidence_json": 37041,
+        "context_metadata_json": 1400
+      },
+      "rejection": {
+        "status": 422,
+        "detail": "完整任务审计资料超过65535个UTF-8字节存储上限，请缩小资料范围；未入队或截断"
+      },
+      "counts_before": {
+        "hoimsystem_ai_run": 1,
+        "hoimsystem_ai_audit_event": 10,
+        "hoimsystem_admission": 1,
+        "hoimsystem_vital_sign": 1,
+        "hoimsystem_critical_care_record": 1,
+        "hoimsystem_lab_order": 1,
+        "hoimsystem_lab_result": 1,
+        "hoimsystem_lab_observation": 1
+      },
+      "counts_after": {
+        "hoimsystem_ai_run": 1,
+        "hoimsystem_ai_audit_event": 10,
+        "hoimsystem_admission": 1,
+        "hoimsystem_vital_sign": 1,
+        "hoimsystem_critical_care_record": 1,
+        "hoimsystem_lab_order": 1,
+        "hoimsystem_lab_result": 1,
+        "hoimsystem_lab_observation": 1
+      },
+      "no_added_session_rows": true,
+      "point_window_assessment_complete_originals_unchanged": true,
+      "full_chinese_note_unchanged": true,
+      "guard_instrumentation": "Recorded lengths then delegated unchanged strings to the original runtime._check_run_storage_json; no alternate validation or forced failure."
+    },
+    "earlier_mysql_before_wrapper_and_utf8_fixes": {
+      "path": "/tmp/hoim-news2-mysql-verification.json",
+      "sha256": "85a88f28399ce6d0228e7ec6aed91dc6b39dcc0fe4c5cb36439fdbe9c05dce38"
+    }
+  },
+  "actual_independent_container": {
+    "record": {
+      "path": "/tmp/hoim-news2-container-verification.json",
+      "sha256": "0e9c5cb8e4f8ab2efba337cafc3ced1b7e8fb280c1520383d405a278e5084b95"
+    },
+    "runner": {
+      "path": "/tmp/hoim-news2-container-verifier.py",
+      "sha256": "388fed4f53a5c0c54c121de5422e576201fa8477ad903d75c7c868e239ba8e17"
+    },
+    "image_id": "sha256:672a2d848305c14bd249b2a74b075e6121e4aff8854e463fb0b440bce6fa4b56",
+    "minimal_build_context_files": 8,
+    "actual_internal_http_responses": 11,
+    "attempts_including_startup_connection_retries": 18,
+    "host_runtime": {
+      "engine": "stdlib-news2-rules",
+      "rule_id": "news2_2017",
+      "recipe_digest": "6a1ff4077de55c368d48e4e7bee20f31caa3dad22cfdbdaf201a1cc46070db4b",
+      "implementation": {
+        "news2_contract.py": "b0ff95850d371248da872e42734d0ea72ccc8903ffb6aa1436a77473af84837b",
+        "news2_model.py": "d87b78b66389e1d9d6dc03b3bcaa715423c7cf8e1c033080a2a2f5226ed8c436",
+        "news2_config.py": "38e53983f8c99345e5c4249d8d97c68be393d067c04eab9322ab57eb4779f296",
+        "news2_server.py": "26cb5fa035ada8a741af5739895f93a2f905c2199103ff6ee6a28bc77ae94891"
+      },
+      "python_version": "3.13.12",
+      "engine_versions": {
+        "fastapi": "0.136.1",
+        "pydantic": "2.12.4"
+      },
+      "runtime_digest": "fb3b9c017cf217c5e5f8818fd262baf054d8911df7030944aadb3fa6dd25197e",
+      "model_version": "news2:fb3b9c017cf217c5e5f8818fd262baf054d8911df7030944aadb3fa6dd25197e",
+      "prompt_handling": "provenance_only",
+      "clinical_validation": "not_provided",
+      "population_applicability": "not_independently_verified",
+      "independent_implementation": true
+    },
+    "container_runtime": {
+      "engine": "stdlib-news2-rules",
+      "rule_id": "news2_2017",
+      "recipe_digest": "6a1ff4077de55c368d48e4e7bee20f31caa3dad22cfdbdaf201a1cc46070db4b",
+      "implementation": {
+        "news2_contract.py": "b0ff95850d371248da872e42734d0ea72ccc8903ffb6aa1436a77473af84837b",
+        "news2_model.py": "d87b78b66389e1d9d6dc03b3bcaa715423c7cf8e1c033080a2a2f5226ed8c436",
+        "news2_config.py": "38e53983f8c99345e5c4249d8d97c68be393d067c04eab9322ab57eb4779f296",
+        "news2_server.py": "26cb5fa035ada8a741af5739895f93a2f905c2199103ff6ee6a28bc77ae94891"
+      },
+      "python_version": "3.12.13",
+      "engine_versions": {
+        "fastapi": "0.136.1",
+        "pydantic": "2.12.4"
+      },
+      "runtime_digest": "e8b02961f3a2068beb901aad3a39c197d0dca78b4154dff2d1e2cd2c0e5a3d37",
+      "model_version": "news2:e8b02961f3a2068beb901aad3a39c197d0dca78b4154dff2d1e2cd2c0e5a3d37",
+      "prompt_handling": "provenance_only",
+      "clinical_validation": "not_provided",
+      "population_applicability": "not_independently_verified",
+      "independent_implementation": true
+    },
+    "actual_host_and_container_model_versions_differ": true,
+    "cases": "Zero, medium6, identical Scale2 SpO2 in room air2 versus supplemental oxygen7, missing-temperature subtotal6 with null full total, pregnant outside scope; changed instructions preserve fixed scores and explanation.",
+    "isolation": {
+      "network_mode": "none",
+      "readonly_rootfs": true,
+      "cap_drop": [
+        "ALL"
+      ],
+      "security_options": [
+        "no-new-privileges"
+      ],
+      "nano_cpus": 1000000000,
+      "memory_bytes": 268435456,
+      "pids_limit": 64,
+      "tmpfs": {
+        "/tmp": "rw,noexec,nosuid,size=16m"
+      },
+      "configured_user": "10001:10001",
+      "published_ports": {},
+      "bind_mounts": null
+    },
+    "database_hospital_imports_weights_absent": true,
+    "cleanup_verified": true,
+    "seconds": 4.151,
+    "actual_independent_numerical_http_not_hospital_deployment": true
+  },
+  "final_verification": {
+    "backend": {
+      "command": "/home/xusheng/miniconda3/bin/python -m pytest -q",
+      "passed": 3225,
+      "skipped": 28,
+      "warnings": 2,
+      "seconds": 264.09,
+      "database": "SQLite memory override and synthetic fixtures; optional real-model checks remain explicitly skipped.",
+      "dotenv_read_not_asserted_for_full_pytest": true,
+      "new_unique_default_passing_cases": 361,
+      "new_case_breakdown": {
+        "news2_contract": 42,
+        "news2_arithmetic": 141,
+        "news2_server": 31,
+        "news2_metadata_probe": 16,
+        "source_governance": 60,
+        "migration": 2,
+        "task_pipeline": 31,
+        "admin_capability": 18,
+        "complete_utf8_storage": 18,
+        "additional_mounted_rbac_parameters": 2
+      },
+      "unique_collection": {
+        "path": "/tmp/hoim-news2-unique-collection.log",
+        "sha256": "0e71c99faef3435df175ea0e544beb3fa66edb7699e9610a9d5b27ec270783ab"
+      },
+      "log": {
+        "path": "/tmp/hoim-news2-backend-final.log",
+        "sha256": "dea6f81fe2189228e1ae43be61381eefd443bfe9a8511eedea492d98640b97f7"
+      }
+    },
+    "browser": {
+      "command": "E2E_BASE_URL=http://127.0.0.1:4180 npx playwright test e2e/ai-*.spec.js e2e/diagnosis-review.spec.js e2e/request-real-http.spec.js --workers=2 --reporter=list",
+      "passed": 222,
+      "reported_duration": "4.8m",
+      "production_ui_api_mocked_cases": 130,
+      "isolated_observation_component_api_mocked_cases": 22,
+      "isolated_laboratory_component_api_mocked_cases": 19,
+      "isolated_news2_component_api_mocked_cases": 30,
+      "real_loopback_http_cases": 21,
+      "total_api_mocked_cases": 201,
+      "new_news2_cases": 40,
+      "log": {
+        "path": "/tmp/hoim-news2-browser-final.log",
+        "sha256": "0c4a51cf6115680583b0faed1979c7bf7509e4a6e9051467fc3bed3be692931b"
+      },
+      "news2_real_http_is_separately_the_container_and_backend_asgi_checks": true
+    },
+    "frontend": {
+      "command": "npm run verify",
+      "audit_vulnerabilities": 0,
+      "build_seconds": 20.7,
+      "existing_scss_warnings": 5,
+      "largestJavaScript": {
+        "file": "element-plus.1235714c.js",
+        "bytes": 647479
+      },
+      "totalJavaScript": 5636353,
+      "totalAssets": 6154599,
+      "limits": {
+        "largestJavaScript": 700000,
+        "totalJavaScript": 6000000,
+        "totalAssets": 7000000
+      },
+      "dependencies_browser_targets_and_existing_limits_unchanged": true,
+      "log": {
+        "path": "/tmp/hoim-news2-ui-build-final.log",
+        "sha256": "960a42e697a225bbb21fc7c03b76254a67a49e4abba2a1e46cdc508b1ec01093"
+      }
+    },
+    "python_changed_files_ruff_and_full_format_check_passed": 34,
+    "prompt_export_check": 80,
+    "rbac_check": 681,
+    "storage_targeted": {
+      "path": "/tmp/hoim-ai-run-storage-tests.log",
+      "sha256": "3d10a139e618757ae06582dad3c213d2768b0bf2cf2f9dbde5ab3b12bd4e0b33"
+    },
+    "root_pipeline_catalog_capability_targeted": {
+      "path": "/tmp/hoim-news2-root-integration-followup.log",
+      "sha256": "a39c98b5590785e9e49aafa882432b79b37e165afffa096894ddf4df75c82c86"
+    },
+    "source_component_targeted": {
+      "path": "/tmp/hoim-news2-findings-source-browser-final.log",
+      "sha256": "ec5465b6d292471bccc67075b56b85dfe133f44442102f5906583571de8bd268"
+    },
+    "production_entry_targeted": {
+      "path": "/tmp/hoim-news2-entry-browser-final.log",
+      "sha256": "ccd7f6b104f17b7212b062cdc70b3adb65fc5433133a410c0807adb99850fe94"
+    }
+  },
+  "review_findings_fixed": {
+    "missing_frozen_snapshot_and_raw_point_scope": [
+      "/tmp/hoim-news2-findings-readonly-review.json",
+      "/tmp/hoim-news2-findings-readonly-final.json"
+    ],
+    "complete_utf8_task_envelope": [
+      "/tmp/hoim-news2-size-readonly-review.json",
+      "/tmp/hoim-ai-run-storage-tests.log"
+    ],
+    "evidence": [
+      {
+        "path": "/tmp/hoim-news2-findings-readonly-review.json",
+        "sha256": "b6310878fa7c616cb0f737391cbe1bd739da52e908cb3058fa16420d08822dc0"
+      },
+      {
+        "path": "/tmp/hoim-news2-findings-readonly-final.json",
+        "sha256": "eef20ef9c65c0cc7b52d7edccd23ac34b6078adaa9c3951e392412081234c24c"
+      },
+      {
+        "path": "/tmp/hoim-news2-size-readonly-review.json",
+        "sha256": "e5d353ba206e79a16490c37a2530f9dbfd5d58c51a6cbd7cc38220a3ed7173cc"
+      }
+    ]
+  },
+  "interrupted_pre_fix_full_backend_attempt": {
+    "log": {
+      "path": "/tmp/hoim-news2-backend-interrupted-before-fixes.log",
+      "sha256": "3707a2d9c07baf7c16e624499fb37d28c7a3344589003f5d1e092444c435709d"
+    },
+    "passed_before_intentional_interrupt": 727,
+    "warnings": 2,
+    "seconds": 53.52,
+    "completed_full_suite": false,
+    "reason": "Independent review found full UTF-8 task storage overflow and Findings frozen-wrapper omissions; run interrupted, fixes verified, then final whole suite rerun."
+  },
+  "official_sources": [
+    "https://www.rcp.ac.uk/resources/national-early-warning-score-news-2/",
+    "https://www.rcp.ac.uk/media/a4ibkkbf/news2-final-report_0_0.pdf",
+    "https://www.rcp.ac.uk/media/alxev00t/news2-chart-1_the-news-scoring-system_0_0.pdf",
+    "https://www.rcp.ac.uk/media/2acdezkd/news2-chart-2_news-thresholds-and-triggers_0.pdf",
+    "https://www.rcp.ac.uk/media/umzn4ntq/news2_additional-guidance-002-_0.pdf"
+  ],
+  "source_bindings": {
+    "fastapi_be/Dockerfile.news2": "f8c25db86721054e17abe6ee631d04322f693fe894f1cea82efcc51ca8017a04",
+    "fastapi_be/alembic/versions/20261020_ai_news2_sources.py": "01798897ffce853db426f114d7f01b564c117e5d58f856f162c804b26d61fbc7",
+    "fastapi_be/app/ai/catalog.py": "e97d3fdb9c90ab81976c8ef35d1294c5134afe14a0ad21ab7f01ee209f8a4ea7",
+    "fastapi_be/app/ai/context.py": "58caf6ccaaf709c49d1d00fbe882e8bb40acec5129cafd0bed41973ce4bee7ef",
+    "fastapi_be/app/ai/gateway.py": "056b6e82d8ab47d11ac120b3bd252251e34c8006926ba76e6f89fc9fafca12ea",
+    "fastapi_be/app/ai/governance.py": "64237ce33797016dda56d5f7d6d80569640dd460e8f2dcc91f939aa3da7cdfc7",
+    "fastapi_be/app/ai/models.py": "ade513ff80422343c24a1af700c6444417fbd03487ab2c78d1f107e20436e3f9",
+    "fastapi_be/app/ai/news2_config.py": "38e53983f8c99345e5c4249d8d97c68be393d067c04eab9322ab57eb4779f296",
+    "fastapi_be/app/ai/news2_context.py": "7699cbed19a9c99db149f1e4546392dcbd5ced8bb0536a183ec1862b3652ee50",
+    "fastapi_be/app/ai/news2_contract.py": "b0ff95850d371248da872e42734d0ea72ccc8903ffb6aa1436a77473af84837b",
+    "fastapi_be/app/ai/news2_model.py": "d87b78b66389e1d9d6dc03b3bcaa715423c7cf8e1c033080a2a2f5226ed8c436",
+    "fastapi_be/app/ai/news2_probe.py": "dc3e0deb1a486797461967d69ec45e4f1a5f167e75a474491dffab8128caacb7",
+    "fastapi_be/app/ai/news2_server.py": "26cb5fa035ada8a741af5739895f93a2f905c2199103ff6ee6a28bc77ae94891",
+    "fastapi_be/app/ai/news2_sources.py": "7fd085947a0b91bca9c9cf13602c0a2ea06c60a700187846daf0eecff3529f5f",
+    "fastapi_be/app/ai/readiness.py": "d19e1e02ed1a1766c4d118386fe28cdd1034128311cc357b52a4a534e34c6d0c",
+    "fastapi_be/app/ai/references.py": "41d6553d8d5f9d1fb9dcdf594ae419b487ad99430b3e73f55f9c423f8499e695",
+    "fastapi_be/app/ai/risk_rule_profiles.py": "5e63840b3f72d0c9e54ec2617b19c828ed11e8bf9eba8a9be63b4df469775463",
+    "fastapi_be/app/ai/runtime.py": "aa4ea5b49b0cf5722b07dc9cb7e3a5ffc3630affda93a2d3289ebbbc4ed857e7",
+    "fastapi_be/app/ai/schemas.py": "e026fd89eb255da91e1d899002aae47457afbc0e6f305b80e2c38ba21c52379d",
+    "fastapi_be/app/main.py": "108a5ad82f29734b035219e33940c4c6a56a8ec29fd72c3f1f40b84d670046b0",
+    "fastapi_be/app/routers/ai_admin.py": "9bce54aa4acc3751b23c32df570610793eb402443c5a4721395f6a66be344075",
+    "fastapi_be/app/routers/ai_news2.py": "20eecba6d137a303e817d0248dbf923b292c30eb7b84dc293ad901ef0cde3a9e",
+    "fastapi_be/app/routers/ai_risk_rules.py": "7d0e45522b7e5bcd1f64fe01807b850dd97cc723516df9e39f22fcadf1859e60",
+    "fastapi_be/requirements-news2.txt": "e5233ff902cefda33386166713cf92796937e2392558f1c64cca9c8441afe15a",
+    "fastapi_be/scripts/generate_rbac_matrix.py": "34d39aa6f726aa138d2da4420b6b95550784067247471a7b8cccb18f1d8cac03",
+    "vue3-new-ui/src/api/aiNews2.js": "446a25489ecede8b45b20d76f4b1bcc0db32d48dacf54e661416a421be639d42",
+    "vue3-new-ui/src/components/AIAssistant/index.vue": "1032634ae2d333432f1569855fb12c60a076a637907f243624ac127f3b3c116d",
+    "vue3-new-ui/src/components/AINews2Findings/index.vue": "28925d49b05f10e81d408c992143fcff877388bdfe0f1296a401b4c309cffe53",
+    "vue3-new-ui/src/components/AINews2Input/index.vue": "9e8d268a00d3b8ea297516bf0302788889ddfff6479a0f4e274b9170e23b79c8",
+    "vue3-new-ui/src/components/AINews2ProviderCheck/index.vue": "4ecdfcafa0a51e75e3dbfcb9cbdb0f0fa42c1db4c0db9794e617945652dcf13d",
+    "vue3-new-ui/src/views/system/AIRiskRuleManagement.vue": "0172b0b4abe1dcf5352621deaf77e1e88ee81168cbcf804b1f20c3a596fb7558",
+    "vue3-new-ui/src/views/system/aiManagement.vue": "422cbaa662665fcf76f90d731364bd750ff21057f90c0ec2775a3c566158110d",
+    "doc/ai-capabilities.md": "b102152ca15a0dadf68791655a9398b1bae2b461a1774cf2960213a9b6213a10",
+    "doc/ai-prompts.json": "6a8a51e6d222b413ca1922367dcf03d0ec52c4139d80960213af8c033943214f",
+    "doc/api-rbac-matrix.md": "563635b7d8499dd03654fdd4191d0f98f17d7883f5c285f7926be2de7c88a599",
+    "fastapi_be/rbac_matrix.json": "bce8ab0e42cefe4cf1bb8a807dc8290ff7a6b6c23f1a1a9463d27f3be6eca5c4"
+  },
+  "source_binding_count": 36,
+  "ten_historical_verification_records_unchanged": {
+    "doc/ai-ecg-classifier-smoke.json": "838b0305249698617bc475f7158dfbfbb9e6e22e6d6e84e51974bfcfebb90c61",
+    "doc/ai-ecg-verification.json": "1eedfa9eb918cf6e6b1ee1f201b7413760eeec501c128f4a73401741f0427f94",
+    "doc/ai-forecast-verification.json": "9b5683bca58efcf7fc460410529fd5aeeed91e2646eb47be24b836cbadc20d63",
+    "doc/ai-frontend-dependencies-verification.json": "968757f4a75e921038133b3fa9a94947ab4d5607142dce8da964f2a13d00bb1d",
+    "doc/ai-imaging-classifier-smoke.json": "b2185a31ff66c4602c10136d5b15404199f50cf7d65ea4a8be4718778c6a9e89",
+    "doc/ai-imaging-verification.json": "63646b181dae4f531abe233708a24f9b9cc05037ef95d57e1e6f39c7f9880148",
+    "doc/ai-laboratory-verification.json": "646103e4874b4f895424987520c7adfb6fb8afdd9eb6e2c7104ed2095b72752f",
+    "doc/ai-nursing-verification.json": "a04248f9de57ddd878c1b408da1833f53651cd3535d8385d2275874a7f6f9517",
+    "doc/ai-observation-verification.json": "b75ab8c7ff94704cb823be59d51539f06a16a24edf0020b0e87edfd6cf6e6bee",
+    "doc/ai-speech-smoke.json": "41ad522da4f04e2a6d75595660ecbc2549acdcd159450aa99602b495c8e690a0"
+  },
+  "remaining_work": "Continue the 80-feature goal; next independent AKI/KDIGO evidence-bound implementation, other specialist inputs/models, actual hospital data/service validation and clinical evaluation remain. No claim that all eighty are clinically ready."
+}

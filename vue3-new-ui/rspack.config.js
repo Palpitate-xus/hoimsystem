@@ -144,8 +144,8 @@ module.exports = {
     extensions: [".js", ".vue", ".json"],
     alias: {
       "@": resolve("src"),
-      // 更新为Vue 3的运行时版本
-      vue$: "vue/dist/vue.esm-bundler.js",
+      // SFC templates are compiled by vue-loader; omit the unused browser compiler.
+      vue$: "vue/dist/vue.runtime.esm-bundler.js",
       path: "path-browserify",
       fs: false,
     },

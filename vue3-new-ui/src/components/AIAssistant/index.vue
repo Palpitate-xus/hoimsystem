@@ -48,7 +48,9 @@
         <ai-forecast-input v-if="needsForecast" :initial-series-id="String(props.initialInput.forecast_series_id || '')" @selection="forecastSelection = $event" @availability="forecastReady = $event" />
         <ai-roster-input v-if="needsRoster" :key="rosterInputKey" :department-id="serviceDepartment" :initial-references="rosterInitialReferences" :active="viewActive" @department-change="serviceDepartment=$event" @selection="rosterSelection=$event" @availability="rosterReady=$event" @invalidate="invalidateRoster" />
         <p v-if="rosterWasBound&&!needsRoster" role="alert">此入口绑定受审排班原计划，须配置本地排班模式后再核对，不能混入旧外部优化输入。</p>
-        <template v-if="needsOperations && !needsForecast && !needsRoster && !rosterWasBound">
+        <ai-bed-input v-if="needsBed" :key="bedInputKey" :department-id="serviceDepartment" :ward-id="serviceWard" :initial-references="bedInitialReferences" :active="viewActive" @department-change="serviceDepartment=$event" @ward-change="serviceWard=$event" @selection="bedSelection=$event" @availability="bedReady=$event" @invalidate="invalidateBed" />
+        <p v-if="bedWasBound&&!needsBed" role="alert">此入口绑定受审床位序列及明确预测期，须配置本地床位模式后重新核对。</p>
+        <template v-if="needsOperations && !needsForecast && !needsRoster && !rosterWasBound && !needsBed && !bedWasBound">
           <el-form-item label="运营资料日期"><el-date-picker v-model="operationsRange" type="daterange" value-format="YYYY-MM-DD" start-placeholder="开始日期" end-placeholder="结束日期" /></el-form-item>
           <el-form-item v-if="needsPlanning" :label="featureKey === 'surgery_scheduling' ? '排台计划日期' : '排班计划日期'"><el-date-picker v-model="operationsPlanRange" type="daterange" value-format="YYYY-MM-DD" start-placeholder="计划开始日期" end-placeholder="计划结束日期" /></el-form-item>
           <el-form-item v-if="!needsInventory" label="运营科室范围"><el-select v-model="serviceDepartment" clearable filterable :placeholder="serviceOptions.allow_hospital_scope ? '默认全院范围' : '默认所属科室范围'"><el-option v-for="item in serviceOptions.departments || []" :key="item.department_id" :value="item.department_id" :label="item.name" /></el-select></el-form-item>
@@ -72,12 +74,13 @@
         <el-collapse v-if="canPreview" class="spaced">
           <el-collapse-item title="联调与预览选项">
             <el-checkbox v-model="preview">超级管理员预览（结果仅供评估）</el-checkbox>
-            <p v-if="needsRoster">此处JSON和补充问题不参与固定排班输入，不能覆盖受审计划、人员、约束、目标或场景容量；问题只留本地。</p><p v-if="needsSofa">此处JSON不参与SOFA输入，不能替换明确原评估、原住院、全部原清单或原基线。补充问题留在本地。</p><p v-if="needsSupport">补充JSON不参与单条原资料输入；原资料自由文字依据和补充问题留在本地核对。</p><p v-if="needsForecast">统计预测只使用所选冻结来源和7/14天跨度；此处JSON不参与计算，也不能改写来源、口径、时区或日计数。</p>
+            <p v-if="needsBed">此处JSON不参与固定床位计算，不能覆盖受审原件、原钟点、预测期或容量；补充问题只留本地。</p><p v-if="needsRoster">此处JSON和补充问题不参与固定排班输入，不能覆盖受审计划、人员、约束、目标或场景容量；问题只留本地。</p><p v-if="needsSofa">此处JSON不参与SOFA输入，不能替换明确原评估、原住院、全部原清单或原基线。补充问题留在本地。</p><p v-if="needsSupport">补充JSON不参与单条原资料输入；原资料自由文字依据和补充问题留在本地核对。</p><p v-if="needsForecast">统计预测只使用所选冻结来源和7/14天跨度；此处JSON不参与计算，也不能改写来源、口径、时区或日计数。</p>
             <p v-if="needsRiskWindow">此处JSON不参与风险观测输入，不能覆盖患者、原住院、窗口、截止时点或原数值。</p>
             <el-input v-model="extraInput" type="textarea" :rows="4" placeholder="可选：专用适配器的结构化输入 JSON，由服务契约规定" class="spaced" />
           </el-collapse-item>
         </el-collapse>
-        <el-alert v-if="needsRoster" type="info" :closable="false" title="固定优化程序核对受审完整场景，区分数学界、可行候选与最优性证明；候选不自动发布或修改号源。" class="spaced" />
+        <el-alert v-if="needsBed" type="info" :closable="false" title="五项实占与流转目标独立核对，未来容量为审核情景；预测不决定个体收治、调床或出院。" class="spaced" />
+        <el-alert v-else-if="needsRoster" type="info" :closable="false" title="固定优化程序核对受审完整场景，区分数学界、可行候选与最优性证明；候选不自动发布或修改号源。" class="spaced" />
         <el-alert v-else-if="needsForecast" type="info" :closable="false" title="本功能使用固定统计计算；Prompt仅用于来源审计，不由文本模型推测数值。" class="spaced" />
         <el-alert v-else-if="needsSofa" type="info" :closable="false" title="SOFA固定六轴计算保留原量、部分范围和完整协议总分的区别；变化数值不提供脓毒症确诊、排除、概率或自动治疗。" class="spaced" />
         <el-alert v-else-if="needsQsofa" type="info" :closable="false" title="qSOFA逐项核对原床旁数据及医生当前回顾声明；不作为单一脓毒症筛查，不提供确诊、排除、概率或自动治疗。" class="spaced" />
@@ -85,9 +88,9 @@
         <el-alert v-else-if="needsNews2" type="info" :closable="false" title="NEWS2使用固定规则计算；Prompt不改变分数。规则分类及小计下界不表示风险概率或自动处置。" class="spaced" />
         <el-alert v-else-if="selected.engine !== 'llm'" type="info" :closable="false" title="此能力通过专用模型处理，需要对应原始资料和已登记的适配服务。" class="spaced" />
         <div class="actions">
-          <el-button v-if="selected.scope === 'patient'" :disabled="((needsRoster||rosterWasBound)&&!rosterModeReady)||((needsSofa||sofaWasBound) && !sofaModeReady) || (needsSupport && !supportModeReady) || !patientId || patientLoading || pathwayOptionsLoading || (needsRiskWindow && !riskWindowReady) || (needsNews2 && !news2Ready) || (needsAki && !akiReady) || (needsQsofa && !qsofaReady) || (needsAudio && (!audioAssetId || !audioReady)) || (needsEcg && (!ecgAssetId || !ecgReady)) || (needsImage && (!imageAssetId || !imageOrderId || !imageReady))" @click="inspectContext">查看本次资料</el-button>
-          <el-button v-if="needsOperations" :disabled="((needsRoster||rosterWasBound)&&!rosterModeReady)||serviceOptionsLoading || (needsForecast && !forecastReady)" @click="inspectOperationalContext">查看本次运营资料</el-button>
-          <el-button type="primary" :loading="submitting" :disabled="((needsRoster||rosterWasBound)&&!rosterModeReady)||((needsSofa||sofaWasBound) && !sofaModeReady) || (needsSupport && !supportModeReady) || (needsRiskWindow && !riskWindowReady) || (needsNews2 && !news2Ready) || (needsAki && !akiReady) || (needsQsofa && !qsofaReady) || (needsForecast && !forecastReady) || busy || patientLoading || serviceOptionsLoading || pathwayOptionsLoading || (needsAudio && (!audioAssetId || !audioReady)) || (needsEcg && (!ecgAssetId || !ecgReady)) || (needsImage && (!imageAssetId || !imageOrderId || !imageReady)) || (!selected.enabled && !preview) || (selected.scope === 'patient' && !patientId) || (needsInventory && (!inventoryDrugs.length && !inventoryConsumables.length || serviceOptions.inventory_scope_available === false))" @click="submit">生成辅助建议</el-button>
+          <el-button v-if="selected.scope === 'patient'" :disabled="((needsBed||bedWasBound)&&!bedModeReady)||((needsRoster||rosterWasBound)&&!rosterModeReady)||((needsSofa||sofaWasBound) && !sofaModeReady) || (needsSupport && !supportModeReady) || !patientId || patientLoading || pathwayOptionsLoading || (needsRiskWindow && !riskWindowReady) || (needsNews2 && !news2Ready) || (needsAki && !akiReady) || (needsQsofa && !qsofaReady) || (needsAudio && (!audioAssetId || !audioReady)) || (needsEcg && (!ecgAssetId || !ecgReady)) || (needsImage && (!imageAssetId || !imageOrderId || !imageReady))" @click="inspectContext">查看本次资料</el-button>
+          <el-button v-if="needsOperations" :disabled="((needsBed||bedWasBound)&&!bedModeReady)||((needsRoster||rosterWasBound)&&!rosterModeReady)||serviceOptionsLoading || (needsForecast && !forecastReady)" @click="inspectOperationalContext">查看本次运营资料</el-button>
+          <el-button type="primary" :loading="submitting" :disabled="((needsBed||bedWasBound)&&!bedModeReady)||((needsRoster||rosterWasBound)&&!rosterModeReady)||((needsSofa||sofaWasBound) && !sofaModeReady) || (needsSupport && !supportModeReady) || (needsRiskWindow && !riskWindowReady) || (needsNews2 && !news2Ready) || (needsAki && !akiReady) || (needsQsofa && !qsofaReady) || (needsForecast && !forecastReady) || busy || patientLoading || serviceOptionsLoading || pathwayOptionsLoading || (needsAudio && (!audioAssetId || !audioReady)) || (needsEcg && (!ecgAssetId || !ecgReady)) || (needsImage && (!imageAssetId || !imageOrderId || !imageReady)) || (!selected.enabled && !preview) || (selected.scope === 'patient' && !patientId) || (needsInventory && (!inventoryDrugs.length && !inventoryConsumables.length || serviceOptions.inventory_scope_available === false))" @click="submit">生成辅助建议</el-button>
           <el-button v-if="busy" @click="cancel">取消接收结果</el-button>
         </div>
       </template>
@@ -111,6 +114,7 @@
       <ai-aki-findings v-if="run.aki_findings" :source="run.aki_findings.aki_source" :scope="run.aki_findings.aki_assessment" :analysis="run.result?.aki_analysis" :expected-patient-id="run.patient_id" :expected-admission-id="run.encounter_ref || encounterRef" @inspect="inspectEvidence" />
       <ai-support-findings v-if="run.support_findings" :findings="run.support_findings" :expected-patient-id="patientId" :expected-admission-id="encounterRef" :references="needsSupport ? supportReferences : null" :active="viewActive" @inspect="inspectEvidence" />
       <ai-roster-findings v-if="run.roster_findings" :findings="run.roster_findings" :analysis="run.result?.roster_analysis" :expected-department-id="serviceDepartment" :references="rosterInitialReferences||rosterSelection" :active="viewActive" @inspect="inspectEvidence" />
+      <ai-bed-findings v-if="run.bed_findings" :findings="run.bed_findings" :analysis="run.result?.bed_analysis" :expected-department-id="serviceDepartment" :expected-ward-id="serviceWard" :references="bedInitialReferences||bedSelection" :active="viewActive" @inspect="inspectEvidence" />
       <ai-sofa-findings v-if="run.sofa_findings || run.sofa_change_findings" :source="run.sofa_findings?.sofa_source || run.sofa_change_findings?.sofa_change_source" :scope="run.sofa_findings?.sofa_assessment || run.sofa_change_findings?.sofa_change_assessment" :analysis="run.result?.sofa_analysis || run.result?.sofa_change_analysis" :expected-patient-id="patientId" :expected-admission-id="encounterRef" :active="viewActive" @inspect="inspectEvidence" />
       <ai-qsofa-findings v-if="run.qsofa_findings" :source="run.qsofa_findings.qsofa_source" :scope="run.qsofa_findings.qsofa_assessment" :analysis="run.result?.qsofa_analysis" :expected-patient-id="run.patient_id" :expected-admission-id="run.encounter_ref || encounterRef" @inspect="inspectEvidence" />
       <ai-speech-findings :findings="run.audio_findings" :transcription="run.result?.transcription" :allow-copy="run.status === 'succeeded'" @inspect="inspectEvidence" @copy="copyDraft" />
@@ -168,7 +172,7 @@
     </el-collapse>
     <el-dialog v-model="contextDialog" :title="needsOperations ? '本次提供给 AI 的运营资料' : '本次提供给 AI 的患者资料'" width="min(1000px, 96vw)">
       <el-alert type="info" :closable="false" title="资料保留时间和状态，缺失信息会单独标记。" />
-      <ai-operational-findings v-if="needsOperations && !needsForecast && !needsRoster" :findings="contextData?.context" @inspect="inspectPreviewEvidence" />
+      <ai-operational-findings v-if="needsOperations && !needsForecast && !needsRoster && !needsBed" :findings="contextData?.context" @inspect="inspectPreviewEvidence" />
       <ai-forecast-findings v-if="needsForecast && contextDialog" :findings="contextData?.context" @inspect="inspectPreviewEvidence" />
       <ai-incident-findings v-if="needsIncident" :findings="contextData?.context" @inspect="inspectPreviewEvidence" />
       <ai-consultation-findings :findings="contextData?.context?.consultation_sources" @inspect="inspectPreviewEvidence" />
@@ -183,7 +187,8 @@
       <ai-speech-findings v-if="contextDialog" :findings="contextData?.context" @inspect="inspectPreviewEvidence" />
       <ai-image-findings v-if="contextDialog" :findings="contextData?.context" @inspect="inspectPreviewEvidence" />
       <ai-ecg-findings v-if="contextDialog" :findings="contextData?.context" @inspect="inspectPreviewEvidence" />
-      <template v-if="needsRoster"><ai-roster-findings :findings="contextData?.context" :expected-department-id="serviceDepartment" :references="rosterInitialReferences||rosterSelection" :active="contextDialog&&viewActive" @inspect="inspectPreviewEvidence" /><p>以下为专用优化服务接收的脱敏公开场景；原人员身份、证照/可用性原文、自由依据和补充问题留在本地。</p><pre class="plain-text" aria-label="排班优化公开输入">{{ JSON.stringify(rosterOutboundPreview,null,2) }}</pre></template>
+      <template v-if="needsBed"><ai-bed-findings :findings="contextData?.context" :expected-department-id="serviceDepartment" :expected-ward-id="serviceWard" :references="bedInitialReferences||bedSelection" :active="contextDialog&&viewActive" @inspect="inspectPreviewEvidence" /><p>以下为专用预测服务接收的公开原量及明确预测期；病区身份、原件自由文字、审核依据和补充问题留在本地。</p><pre class="plain-text" aria-label="床位预测公开输入">{{ JSON.stringify(bedOutboundPreview,null,2) }}</pre></template>
+      <template v-else-if="needsRoster"><ai-roster-findings :findings="contextData?.context" :expected-department-id="serviceDepartment" :references="rosterInitialReferences||rosterSelection" :active="contextDialog&&viewActive" @inspect="inspectPreviewEvidence" /><p>以下为专用优化服务接收的脱敏公开场景；原人员身份、证照/可用性原文、自由依据和补充问题留在本地。</p><pre class="plain-text" aria-label="排班优化公开输入">{{ JSON.stringify(rosterOutboundPreview,null,2) }}</pre></template>
       <template v-else-if="sofaOutboundPreview"><p>以下只展示本次专用服务接收的严格公开原量投影；完整冻结原件、原患者与住院标识、医生自由文字依据和补充问题留在本地，核对依据时另行展开。</p><pre class="plain-text" aria-label="SOFA模型公开输入">{{ JSON.stringify(sofaOutboundPreview,null,2) }}</pre><el-button v-for="item in contextData?.evidence||[]" :key="item.source_id" @click="inspectPreviewEvidence(item.source_id)">核对{{ item.title }}</el-button></template>
       <template v-else-if="needsSupport"><p>以下为本次提供给模型的公开原量与已审核知识；完整冻结原件、人工自由文字依据、患者/住院标识和补充问题留在本地，仅在核对依据时查看。</p><pre class="plain-text" aria-label="单条原资料模型公开输入">{{ JSON.stringify(supportOutboundPreview, null, 2) }}</pre></template>
       <el-collapse v-else-if="needsOperations"><el-collapse-item title="查看原始资料字段"><pre class="plain-text">{{ JSON.stringify(contextData, null, 2) }}</pre></el-collapse-item></el-collapse>
@@ -202,8 +207,9 @@ import { cancelAIRun, createAIRun, getAIClinicalContext, getAIOperationalContext
 import { resolveAkiEvidence } from "@/api/aiAki";
 import { resolveSupportEvidence, supportReferencesValid, verifySupportContext } from "@/api/aiSupportContext";
 import { resolveSofaEvidence, sofaReferencesValid, verifySofaAnalysis, verifySofaChangeAnalysis, verifySofaContext } from "@/api/aiSofa";
-import { supportCanonical } from "@/api/inpatientSupport";
+import { supportCanonical, supportHash, supportId } from "@/api/inpatientSupport";
 import {resolveRosterEvidence,rosterReferencesValid,verifyRosterAnalysis,verifyRosterContext} from "@/api/rosterPlans";
+import {bedReferencesValid,resolveBedEvidence,verifyBedAnalysis,verifyBedContext} from "@/api/bedForecast";
 import { resolveQsofaEvidence } from "@/api/aiQsofa";
 import AiServiceFindings from "@/components/AIServiceFindings/index.vue";
 import AiOperationalFindings from "@/components/AIOperationalFindings/index.vue";
@@ -221,6 +227,8 @@ import AiEcgFindings from "@/components/AIEcgFindings/index.vue";
 
 const AiRosterInput=defineAsyncComponent(()=>import("@/components/AIRosterInput/index.vue"));
 const AiRosterFindings=defineAsyncComponent(()=>import("@/components/AIRosterFindings/index.vue"));
+const AiBedInput=defineAsyncComponent(()=>import("@/components/AIBedInput/index.vue"));
+const AiBedFindings=defineAsyncComponent(()=>import("@/components/AIBedFindings/index.vue"));
 const AiForecastInput = defineAsyncComponent(() => import("@/components/AIForecastInput/index.vue"));
 const AiForecastFindings = defineAsyncComponent(() => import("@/components/AIForecastFindings/index.vue"));
 const AiObservationWindowInput = defineAsyncComponent(() => import("@/components/AIObservationWindowInput/index.vue"));
@@ -252,6 +260,14 @@ const rosterLifecycle=computed(()=>featureKey.value==='roster_optimization'||!!r
 const rosterAuthorized=computed(()=>viewActive.value&&!!store.state.user.accessToken&&(canPreview.value||(store.getters['user/permissions']||[]).some(role=>selected.value?.allowed_roles?.includes(role))));
 const rosterModeReady=computed(()=>needsRoster.value&&rosterReady.value&&rosterReferencesValid(rosterSelection.value)&&(!rosterWasBound.value||rosterReferencesValid(rosterInitialReferences.value)&&supportCanonical(rosterInitialReferences.value)===supportCanonical(rosterSelection.value))&&viewActive.value&&!!store.state.user.accessToken&&(canPreview.value||(store.getters['user/permissions']||[]).some(role=>selected.value?.allowed_roles?.includes(role))&&selected.value?.validation_status==='validated'));
 function invalidateRoster(){if(!rosterLifecycle.value)return;rosterSelection.value=null;rosterReady.value=false;selectionVersion++;historyVersion++;stopPolling();run.value=null;history.value=[];contextData.value=null;contextDialog.value=false;evidence.value=null;evidenceDialog.value=false;feedbackDialog.value=false;}
+const needsBed=computed(()=>featureKey.value==='bed_forecast'&&selected.value?.input_mode==='bed'),bedSelection=ref(null),bedReady=ref(false),bedWasBound=ref(false),bedInputKey=ref(0);
+const bedInitialReferences=computed(()=>props.initialInput.bed_series_id==null?null:{bed_series_id:props.initialInput.bed_series_id,horizon_days:props.initialInput.horizon_days});
+watch(bedInitialReferences,value=>{if(value)bedWasBound.value=true;},{immediate:true,flush:'sync'});
+const bedOutboundPreview=computed(()=>({context:{bed_source:contextData.value?.context?.bed_source},horizon_days:contextData.value?.context?.bed_binding?.horizon_days}));
+const bedLifecycle=computed(()=>featureKey.value==='bed_forecast'||!!run.value?.bed_findings||!!contextData.value?.context?.bed_source);
+const bedAuthorized=computed(()=>viewActive.value&&!!store.state.user.accessToken&&(canPreview.value||(store.getters['user/permissions']||[]).some(role=>selected.value?.allowed_roles?.includes(role))));
+const bedModeReady=computed(()=>needsBed.value&&bedReady.value&&bedReferencesValid(bedSelection.value)&&(!bedWasBound.value||bedReferencesValid(bedInitialReferences.value)&&supportCanonical(bedInitialReferences.value)===supportCanonical(bedSelection.value))&&bedAuthorized.value&&(canPreview.value||selected.value?.validation_status==='validated'));
+function invalidateBed(){if(!bedLifecycle.value)return;bedSelection.value=null;bedReady.value=false;selectionVersion++;historyVersion++;stopPolling();run.value=null;history.value=[];contextData.value=null;contextDialog.value=false;evidence.value=null;evidenceDialog.value=false;feedbackDialog.value=false;}
 const needsSofa = computed(() => featureKey.value === "sepsis_risk" && selected.value?.input_mode === "sofa1"), sofaSelection=ref(null), sofaReady=ref(false), sofaWasBound=ref(false);
 const sofaInitialReferences=computed(()=>Object.fromEntries(["sofa_assessment_id","sofa_change_assessment_id"].filter(key=>props.initialInput[key]!=null).map(key=>[key,props.initialInput[key]])));
 watch(()=>supportCanonical(sofaInitialReferences.value),()=>{if(Object.keys(sofaInitialReferences.value).length)sofaWasBound.value=true;},{immediate:true,flush:"sync"});
@@ -291,19 +307,27 @@ const boundClinicalReferences = computed(() => Object.entries(boundReferenceLabe
 const boundNursingLabels = { nursing_assessment_id: "原护理评估", nursing_plan_id: "原护理计划", critical_care_record_id: "原危重护理记录", icu_score_id: "原人工评分" };
 const boundNursingReferences = computed(() => Object.entries(boundNursingLabels).filter(([key]) => props.initialInput[key] != null).map(([key, label]) => `${label} #${props.initialInput[key]}`));
 const operationsRange = ref([]), operationsPlanRange = ref([]), inventoryDrugs = ref([]), inventoryConsumables = ref([]), serviceOptionsLoading = ref(false);
-const serviceOptions = ref({}), serviceDepartment = ref(null), serviceDoctor = ref(null), serviceDate = ref(""), navigationStart = ref(null), navigationEnd = ref(null);
+const serviceOptions = ref({}), serviceDepartment = ref(null), serviceWard = ref(null), serviceDoctor = ref(null), serviceDate = ref(""), navigationStart = ref(null), navigationEnd = ref(null);
 const serviceDoctors = computed(() => (serviceOptions.value.doctors || []).filter(item => !serviceDepartment.value || item.department_id === serviceDepartment.value));
 const busy = computed(() => ["queued", "running"].includes(run.value?.status));
 let timer = null, pollVersion = 0, formVersion = 0, patientLoadVersion = 0, historyVersion = 0, selectionVersion = 0, historyOpen = false, pathwayOptionsVersion = 0;
 
-function supportIdentity() { return JSON.stringify([featureKey.value, patientId.value, encounterRef.value, supportReferences.value, selected.value?.input_mode, sofaSelection.value, sofaInitialReferences.value, rosterSelection.value,rosterInitialReferences.value,serviceDepartment.value,rosterLifecycle.value?selected.value:null,store.state.user.username,store.state.user.accessToken, store.getters["user/permissions"]]); }
-function captureSupport(requireSofaSelection=false) { return {rosterMode:needsRoster.value,rosterBound:rosterWasBound.value,department:serviceDepartment.value,rosterReferences:rosterInitialReferences.value||rosterSelection.value?{...(rosterInitialReferences.value||rosterSelection.value)}:null, sofaMode:needsSofa.value, sofaBound:sofaWasBound.value, sofaReferences:sofaWasBound.value?{...sofaInitialReferences.value}:requireSofaSelection&&sofaSelection.value?{...sofaSelection.value}:null, key: supportIdentity(), version: selectionVersion, mode: needsSupport.value, patient: patientId.value, admission: encounterRef.value, references: needsSupport.value ? { ...supportReferences.value } : null }; }
+function supportIdentity() { return JSON.stringify([featureKey.value, patientId.value, encounterRef.value, supportReferences.value, selected.value?.input_mode, sofaSelection.value, sofaInitialReferences.value, rosterSelection.value,rosterInitialReferences.value,bedSelection.value,bedInitialReferences.value,serviceDepartment.value,serviceWard.value,(rosterLifecycle.value||bedLifecycle.value)?selected.value:null,store.state.user.username,store.state.user.accessToken, store.getters["user/permissions"]]); }
+function captureSupport(requireSofaSelection=false) { return {bedMode:needsBed.value,bedBound:bedWasBound.value,ward:serviceWard.value,bedReferences:bedInitialReferences.value||bedSelection.value?{...(bedInitialReferences.value||bedSelection.value)}:null,rosterMode:needsRoster.value,rosterBound:rosterWasBound.value,department:serviceDepartment.value,rosterReferences:rosterInitialReferences.value||rosterSelection.value?{...(rosterInitialReferences.value||rosterSelection.value)}:null, sofaMode:needsSofa.value, sofaBound:sofaWasBound.value, sofaReferences:sofaWasBound.value?{...sofaInitialReferences.value}:requireSofaSelection&&sofaSelection.value?{...sofaSelection.value}:null, key: supportIdentity(), version: selectionVersion, mode: needsSupport.value, patient: patientId.value, admission: encounterRef.value, references: needsSupport.value ? { ...supportReferences.value } : null }; }
 const supportCurrent = ticket => viewActive.value && ticket.version === selectionVersion && ticket.key === supportIdentity();
 async function acceptSupportRun(value, ticket) {
+  const hasBed=!!value?.bed_findings||!!value?.result?.bed_analysis;
+  if(ticket.bedMode||ticket.bedBound||hasBed){
+    if(!supportCurrent(ticket))return false;
+    let valid=bedAuthorized.value&&ticket.bedMode&&Object.hasOwn(statuses,value?.status)&&value?.feature_key==='bed_forecast'&&value.patient_id===null&&value.encounter_ref===null&&!!value.bed_findings?.bed_binding&&!['roster_findings','sofa_findings','sofa_change_findings','qsofa_findings','support_findings','aki_findings','news2_findings','observation_findings','audio_findings','image_findings','ecg_findings'].some(key=>value[key])&&!['roster_analysis','sofa_analysis','sofa_change_analysis','qsofa_analysis','aki_analysis','news2_analysis','image_analysis','ecg_analysis','transcription'].some(key=>value.result?.[key])&&await verifyBedContext(value.bed_findings,ticket.department,ticket.ward,ticket.bedReferences);
+    if(valid&&value.status==='succeeded')valid=!!value.result?.bed_analysis&&value.result.bed_analysis.horizon_days===value.bed_findings.bed_binding.horizon_days&&await verifyBedAnalysis(value.bed_findings.bed_source,value.result.bed_analysis,value.bed_findings.bed_series.projection_hash,value.bed_findings.bed_binding.horizon_days);
+    if(!supportCurrent(ticket))return false;
+    if(!valid){clearUnavailableSupport(ticket,'床位任务与当前病区、原序列、明确预测期或完整固定结果不一致，已拒绝展示。');return false;}
+  }
   const hasRoster=!!value?.roster_findings||!!value?.result?.roster_analysis;
   if(ticket.rosterMode||ticket.rosterBound||hasRoster){
     if(!supportCurrent(ticket))return false;
-    let valid=rosterAuthorized.value&&ticket.rosterMode&&Object.hasOwn(statuses,value?.status)&&value?.feature_key==='roster_optimization'&&!value.patient_id&&!value.encounter_ref&&!['sofa_findings','sofa_change_findings','qsofa_findings','support_findings','aki_findings','news2_findings','observation_findings','audio_findings','image_findings','ecg_findings'].some(key=>value[key])&&!['sofa_analysis','sofa_change_analysis','qsofa_analysis','aki_analysis','news2_analysis','image_analysis','ecg_analysis','transcription'].some(key=>value.result?.[key])&&await verifyRosterContext(value.roster_findings,ticket.department,ticket.rosterReferences);
+    let valid=rosterAuthorized.value&&ticket.rosterMode&&Object.hasOwn(statuses,value?.status)&&value?.feature_key==='roster_optimization'&&value.patient_id===null&&value.encounter_ref===null&&!['sofa_findings','sofa_change_findings','qsofa_findings','support_findings','aki_findings','news2_findings','observation_findings','audio_findings','image_findings','ecg_findings'].some(key=>value[key])&&!['sofa_analysis','sofa_change_analysis','qsofa_analysis','aki_analysis','news2_analysis','image_analysis','ecg_analysis','transcription'].some(key=>value.result?.[key])&&await verifyRosterContext(value.roster_findings,ticket.department,ticket.rosterReferences);
     if(valid&&value.status==='succeeded')valid=!!value.result?.roster_analysis&&await verifyRosterAnalysis(value.roster_findings.roster_source,value.result.roster_analysis,value.roster_findings.roster_plan.projection_hash);
     if(!supportCurrent(ticket))return false;if(!valid){clearUnavailableSupport(ticket,'排班任务与当前科室、受审原计划、完整投影或固定结果绑定不一致，已拒绝展示。');return false;}
   }
@@ -324,6 +348,7 @@ async function acceptSupportRun(value, ticket) {
   return true;
 }
 function clearUnavailableSupport(ticket,message="当前无法重新核对原资料或访问，暂不展示旧任务。") { if(!supportCurrent(ticket))return; run.value=null;contextData.value=null;contextDialog.value=false;evidence.value=null;evidenceDialog.value=false;feedbackDialog.value=false;supportFailure.value=message; }
+function requestedRunMatches(value,id,ticket){if(value?.run_id===id)return true;if(supportCurrent(ticket)){clearUnavailableSupport(ticket,'完整任务与本次读取的原任务标识不同，已清除旧原件。');stopPolling();}return false;}
 function stopPolling() { pollVersion += 1; clearTimeout(timer); timer = null; }
 function startPolling() {
   stopPolling();
@@ -333,10 +358,10 @@ function startPolling() {
     const supportTicket = captureSupport();
     try {
       const response = await getAIRun(id);
-      if (version !== pollVersion || !await acceptSupportRun(response.data, supportTicket) || version !== pollVersion) return;
+      if (version !== pollVersion || !requestedRunMatches(response.data,id,supportTicket) || !await acceptSupportRun(response.data, supportTicket) || version !== pollVersion) return;
       run.value = response.data;
       if (busy.value) timer = setTimeout(poll, 2000);
-    } catch { if (version === pollVersion) { if(supportLifecycle.value||sofaLifecycle.value||rosterLifecycle.value)clearUnavailableSupport(supportTicket); stopPolling(); } }
+    } catch { if (version === pollVersion) { if(supportLifecycle.value||sofaLifecycle.value||rosterLifecycle.value||bedLifecycle.value)clearUnavailableSupport(supportTicket); stopPolling(); } }
   };
   timer = setTimeout(poll, 1200);
 }
@@ -360,12 +385,12 @@ watch(featureKey, async () => {
   imageAssetId.value = props.initialInput.image_asset_id == null ? "" : String(props.initialInput.image_asset_id); imageOrderId.value = props.initialInput.imaging_order_id || ""; imageReady.value = false;
   forecastSelection.value = null; forecastReady.value = false;
   riskWindowSelection.value = null; riskWindowReady.value = false;
-  serviceOptions.value = {}; serviceDepartment.value = props.initialInput.department_id || null; serviceDoctor.value = props.initialInput.doctor_id || null; serviceDate.value = props.initialInput.appointment_date || "";
+  serviceOptions.value = {}; serviceDepartment.value = props.initialInput.department_id || null; serviceWard.value=props.initialInput.ward_id||null; serviceDoctor.value = props.initialInput.doctor_id || null; serviceDate.value = props.initialInput.appointment_date || "";
   navigationStart.value = props.initialInput.start_node_id || null; navigationEnd.value = props.initialInput.end_node_id || null;
   operationsRange.value = props.initialInput.date_from && props.initialInput.date_to ? [props.initialInput.date_from, props.initialInput.date_to] : []; inventoryDrugs.value = [...(props.initialInput.drug_ids || [])]; inventoryConsumables.value = [...(props.initialInput.consumable_ids || [])]; serviceOptionsLoading.value = false;
   operationsPlanRange.value = props.initialInput.planning_date_from && props.initialInput.planning_date_to ? [props.initialInput.planning_date_from, props.initialInput.planning_date_to] : [];
   if (selected.value?.scope === "patient") { await searchPatients(); if (featureVersion !== formVersion) return; patientId.value = props.patientId || (patients.value.length === 1 ? patients.value[0].patient_id : null); }
-  if (needsNavigation.value || needsAppointment.value || (needsOperations.value && !needsForecast.value && !needsRoster.value && !rosterWasBound.value)) {
+  if (needsNavigation.value || needsAppointment.value || (needsOperations.value && !needsForecast.value && !needsRoster.value && !rosterWasBound.value && !needsBed.value && !bedWasBound.value)) {
     const version = formVersion; serviceOptionsLoading.value = true;
     try { const response = await getAIServiceOptions({ feature_key: featureKey.value }); if (version === formVersion) { serviceOptions.value = response.data || {}; if (needsOperations.value && !operationsRange.value?.length) operationsRange.value = serviceOptions.value.default_window || []; if (needsPlanning.value && !operationsPlanRange.value?.length) operationsPlanRange.value = serviceOptions.value.default_planning_window || []; } }
     finally { if (version === formVersion) serviceOptionsLoading.value = false; }
@@ -398,15 +423,20 @@ watch(encounterRef, () => { sofaSelection.value=null;sofaReady.value=false;stopP
 watch(()=>selected.value?.input_mode,()=>{sofaSelection.value=null;sofaReady.value=false;},{flush:"sync"});
 watch(()=>selected.value?.input_mode,async(mode,previous)=>{if(previous!=='roster'||mode==='roster'||featureKey.value!=='roster_optimization'||rosterWasBound.value)return;const version=++formVersion;serviceOptionsLoading.value=true;try{const response=await getAIServiceOptions({feature_key:featureKey.value});if(version!==formVersion||needsRoster.value||!viewActive.value)return;serviceOptions.value=response.data||{};if(!operationsRange.value.length)operationsRange.value=serviceOptions.value.default_window||[];if(!operationsPlanRange.value.length)operationsPlanRange.value=serviceOptions.value.default_planning_window||[];}finally{if(version===formVersion)serviceOptionsLoading.value=false;}},{flush:'post'});
 watch(()=>[selected.value?.input_mode,selected.value?.revision,selected.value?.provider_id,selected.value?.provider_revision,selected.value?.validation_status,selected.value?.enabled,JSON.stringify(selected.value?.allowed_roles),serviceDepartment.value,supportCanonical(rosterInitialReferences.value)],()=>{if(rosterLifecycle.value){rosterInputKey.value++;invalidateRoster();}},{flush:'sync'});
+watch(()=>selected.value?.input_mode,async(mode,previous)=>{if(previous!=='bed'||mode==='bed'||featureKey.value!=='bed_forecast'||bedWasBound.value)return;const version=++formVersion;serviceOptionsLoading.value=true;try{const response=await getAIServiceOptions({feature_key:featureKey.value});if(version!==formVersion||needsBed.value||!viewActive.value)return;serviceOptions.value=response.data||{};if(!operationsRange.value.length)operationsRange.value=serviceOptions.value.default_window||[];}finally{if(version===formVersion)serviceOptionsLoading.value=false;}},{flush:'post'});
+watch(()=>[selected.value?.input_mode,selected.value?.revision,selected.value?.provider_id,selected.value?.provider_revision,selected.value?.validation_status,selected.value?.enabled,JSON.stringify(selected.value?.allowed_roles),supportCanonical(bedInitialReferences.value)],()=>{if(bedLifecycle.value){bedInputKey.value++;invalidateBed();}},{flush:'sync'});
+watch([serviceDepartment,serviceWard],()=>{if(bedLifecycle.value)invalidateBed();},{flush:'sync'});
+watch(()=>props.initialInput.department_id,value=>{if(bedLifecycle.value)serviceDepartment.value=value||null;},{flush:'sync'});
+watch(()=>props.initialInput.ward_id,value=>{if(bedLifecycle.value)serviceWard.value=value||null;},{flush:'sync'});
 watch([needsNews2, () => riskWindowSelection.value?.observation_window_id, () => riskWindowSelection.value?.content_hash, riskWindowReady], () => { news2Selection.value = null; news2Ready.value = false; });
 watch([needsAki, () => riskWindowSelection.value?.observation_window_id, () => riskWindowSelection.value?.content_hash, riskWindowReady], () => { akiSelection.value = null; akiReady.value = false; });
 watch([needsQsofa, () => riskWindowSelection.value?.observation_window_id, () => riskWindowSelection.value?.content_hash, riskWindowReady], () => { qsofaSelection.value = null; qsofaReady.value = false; });
-watch([needsRoster,()=>JSON.stringify(rosterSelection.value),rosterReady,()=>JSON.stringify(rosterInitialReferences.value),needsSofa, () => JSON.stringify(sofaSelection.value), sofaReady, () => selected.value?.input_mode, needsQsofa, () => JSON.stringify(qsofaSelection.value), qsofaReady, needsAki, () => JSON.stringify(akiSelection.value), akiReady, needsNews2, () => JSON.stringify(news2Selection.value), news2Ready, () => JSON.stringify(riskWindowSelection.value), riskWindowReady, () => JSON.stringify(forecastSelection.value), forecastReady, featureKey, patientId, encounterRef, prescriptionId, incidentId, pathwayId, audioAssetId, ecgAssetId, imageAssetId, imageOrderId, serviceDepartment, serviceDoctor, serviceDate, navigationStart, navigationEnd, operationsRange, operationsPlanRange, () => inventoryDrugs.value.join(','), () => inventoryConsumables.value.join(','), () => JSON.stringify(props.initialInput)], () => {
+watch([needsBed,()=>JSON.stringify(bedSelection.value),bedReady,()=>JSON.stringify(bedInitialReferences.value),serviceWard,needsRoster,()=>JSON.stringify(rosterSelection.value),rosterReady,()=>JSON.stringify(rosterInitialReferences.value),needsSofa, () => JSON.stringify(sofaSelection.value), sofaReady, () => selected.value?.input_mode, needsQsofa, () => JSON.stringify(qsofaSelection.value), qsofaReady, needsAki, () => JSON.stringify(akiSelection.value), akiReady, needsNews2, () => JSON.stringify(news2Selection.value), news2Ready, () => JSON.stringify(riskWindowSelection.value), riskWindowReady, () => JSON.stringify(forecastSelection.value), forecastReady, featureKey, patientId, encounterRef, prescriptionId, incidentId, pathwayId, audioAssetId, ecgAssetId, imageAssetId, imageOrderId, serviceDepartment, serviceDoctor, serviceDate, navigationStart, navigationEnd, operationsRange, operationsPlanRange, () => inventoryDrugs.value.join(','), () => inventoryConsumables.value.join(','), () => JSON.stringify(props.initialInput)], () => {
   selectionVersion += 1; supportFailure.value = ""; stopPolling(); run.value = null; contextData.value = null; contextDialog.value = false; evidence.value = null; evidenceDialog.value = false; feedbackDialog.value = false;
 });
 watch(() => run.value?.run_id, () => { evidence.value=null; evidenceDialog.value = false; feedbackDialog.value = false; feedback.value = { outcome: "accepted", comment: "" }; });
 watch(serviceDepartment, id => { const doctor = serviceOptions.value.doctors?.find(item => item.doctor_id === serviceDoctor.value); if (id && doctor && doctor.department_id !== id) serviceDoctor.value = null; });
-watch([featureKey, patientId, encounterRef,()=>rosterLifecycle.value?serviceDepartment.value:null,()=>rosterLifecycle.value?JSON.stringify(rosterSelection.value):'',()=>rosterLifecycle.value?JSON.stringify(selected.value):''], () => { historyVersion += 1; history.value = []; if (historyOpen) loadHistory(); });
+watch([featureKey, patientId, encounterRef,()=>(rosterLifecycle.value||bedLifecycle.value)?serviceDepartment.value:null,()=>bedLifecycle.value?serviceWard.value:null,()=>bedLifecycle.value?JSON.stringify(bedSelection.value):'',()=>rosterLifecycle.value?JSON.stringify(rosterSelection.value):'',()=>(rosterLifecycle.value||bedLifecycle.value)?JSON.stringify(selected.value):''], () => { historyVersion += 1; history.value = []; if (historyOpen) loadHistory(); });
 watch(() => props.initialFeature, key => { if (features.value.some(item => item.key === key)) featureKey.value = key; });
 watch(() => props.patientId, id => { formVersion += 1; patientId.value = id; });
 watch(() => props.encounterRef, value => { encounterRef.value = needsIncident.value ? "" : value; });
@@ -431,7 +461,7 @@ async function inspectContext() {
   const version = selectionVersion, supportTicket = captureSupport();
   const sourceKeys = needsSofa.value ? ["sofa_assessment_id","sofa_change_assessment_id"] : needsSupport.value ? ["support_source_id", "support_source_kind"] : needsRiskWindow.value ? ["observation_window_id", "news2_assessment_id", "aki_assessment_id", "qsofa_assessment_id"] : selected.value?.source_reference_keys || ["record_id", "structured_record_id", "prescription_id", "lab_result_id", "imaging_report_id"];
   const references = Object.fromEntries(sourceKeys.filter(key => input[key]).map(key => [key, input[key]]));
-  let response; try { response = await getAIClinicalContext({ ...references, feature_key: featureKey.value, patient_id: patientId.value, encounter_ref: encounterRef.value || undefined }); } catch(failure) { if(supportLifecycle.value||sofaLifecycle.value||rosterLifecycle.value){clearUnavailableSupport(supportTicket);return;} throw failure; }
+  let response; try { response = await getAIClinicalContext({ ...references, feature_key: featureKey.value, patient_id: patientId.value, encounter_ref: encounterRef.value || undefined }); } catch(failure) { if(supportLifecycle.value||sofaLifecycle.value||rosterLifecycle.value||bedLifecycle.value){clearUnavailableSupport(supportTicket);return;} throw failure; }
   if (version !== selectionVersion || !supportCurrent(supportTicket)) return;
   if(supportTicket.sofaMode||response.data?.context?.sofa_source||response.data?.context?.sofa_change_source){if(!supportTicket.sofaMode||!await verifySofaContext(response.data?.context,supportTicket.patient,supportTicket.admission,sofaSelection.value)){if(supportCurrent(supportTicket))clearUnavailableSupport(supportTicket,"SOFA完整原件、公开投影或明确引用不一致，不能预览。");return;}if(!supportCurrent(supportTicket))return;}
   if (supportTicket.mode || response.data?.context?.support_source) { if (!supportTicket.mode || !await verifySupportContext(response.data?.context, supportTicket.patient, supportTicket.admission, supportTicket.references)) { if (supportCurrent(supportTicket)) { contextData.value = null; contextDialog.value = false; supportFailure.value = "本次原资料、公开原量或完整摘要绑定不一致，不能预览。"; } return; } if (!supportCurrent(supportTicket)) return; }
@@ -440,12 +470,14 @@ async function inspectContext() {
 async function inspectOperationalContext() {
   const input = buildTaskInput(); if (!input) return;
   const version = selectionVersion,ticket=captureSupport();
-  let response;try{response=await getAIOperationalContext({feature_key:featureKey.value,input});}catch(failure){if(rosterLifecycle.value){clearUnavailableSupport(ticket);return;}throw failure;}
+  let response;try{response=await getAIOperationalContext({feature_key:featureKey.value,input});}catch(failure){if(rosterLifecycle.value||bedLifecycle.value){clearUnavailableSupport(ticket);return;}throw failure;}
   if (version !== selectionVersion||!supportCurrent(ticket)) return;
+  if(ticket.bedMode||response.data?.context?.bed_source){if(!ticket.bedMode||!response.data?.context?.bed_binding||!await verifyBedContext(response.data?.context,ticket.department,ticket.ward,ticket.bedReferences)){if(supportCurrent(ticket))clearUnavailableSupport(ticket,'床位完整原件、原病区、公开投影或明确预测期不一致，不能预览。');return;}if(!supportCurrent(ticket))return;}
   if(ticket.rosterMode||response.data?.context?.roster_source){if(!ticket.rosterMode||!await verifyRosterContext(response.data?.context,ticket.department,ticket.rosterReferences)){if(supportCurrent(ticket))clearUnavailableSupport(ticket,'排班完整原件、公开投影或明确引用不一致，不能预览。');return;}if(!supportCurrent(ticket))return;}
   contextData.value = response.data; contextDialog.value = true;
 }
 function buildTaskInput() {
+  if(needsBed.value||bedWasBound.value){if(!bedModeReady.value){ElMessage.warning('请在本地床位模式下选择并重核当前受审序列，明确7或14日预测期');return;}return{...bedSelection.value,question:question.value};}
   if(needsRoster.value||rosterWasBound.value){if(!rosterModeReady.value){ElMessage.warning('请在本地排班模式下明确选择并重核一件当前受审排班计划');return;}return{...rosterSelection.value,question:question.value};}
   if(needsSofa.value||sofaWasBound.value){if(!sofaModeReady.value){ElMessage.warning("请在已配置的SOFA模式下明确选择并重核一件原日评估或变化评估及本次住院");return;}return{...sofaSelection.value,question:question.value};}
   if (needsSupport.value) { if (!supportModeReady.value) { ElMessage.warning("请从原资料入口明确选择合法的原类型、原标识及本次住院，并核对当前权限"); return; } return { ...supportReferences.value, question: question.value }; }
@@ -475,6 +507,7 @@ function buildTaskInput() {
     catch { ElMessage.error("结构化资料应为有效 JSON 对象"); return; }
   }
   const input = { ...props.initialInput, ...extra, question: question.value };
+  if(Object.hasOwn(input,'bed_series_id')){ElMessage.warning('受审床位序列及预测期须由本地床位专用模式明确选择，不能混入外部适配器输入');return;}
   if(Object.hasOwn(input,'roster_plan_id')){ElMessage.warning('受审排班计划引用须由本地排班专用模式明确选择，不能混入旧外部适配器输入');return;}
   for (const key of [...Object.keys(boundReferenceLabels), ...Object.keys(boundPathwayLabels), ...Object.keys(boundNursingLabels), "audio_asset_id", "ecg_asset_id", "image_asset_id", "imaging_order_id"]) if (props.initialInput[key] != null) input[key] = String(props.initialInput[key]);
   if (needsAudio.value && !props.initialInput.audio_asset_id) { if (audioAssetId.value) input.audio_asset_id = audioAssetId.value; else delete input.audio_asset_id; }
@@ -494,51 +527,69 @@ function buildTaskInput() {
   }
   return input;
 }
+async function expandQueuedReply(value,request,ticket){
+  const protectedMode=ticket.bedMode||ticket.rosterMode||ticket.sofaMode||ticket.mode;
+  if(!protectedMode||value?.bed_findings||value?.roster_findings||value?.sofa_findings||value?.sofa_change_findings||value?.support_findings)return value;
+  if(!supportCurrent(ticket))return null;
+  if(!supportId(value?.run_id)||value.feature_key!==request.feature_key||!Object.hasOwn(statuses,value.status)||value.patient_id!==(request.patient_id??null)||value.encounter_ref!==(request.encounter_ref??null)||value.requires_human_review!==true||!supportHash(value.context_digest)){
+    clearUnavailableSupport(ticket,'排队回执的任务、范围或状态不一致，暂不展示。');return null;
+  }
+  const id=value.run_id,response=await getAIRun(id);
+  if(!supportCurrent(ticket))return null;
+  if(response.data?.run_id!==id||response.data?.context_digest!==value.context_digest||response.data?.feature_key!==value.feature_key||response.data?.patient_id!==value.patient_id||response.data?.encounter_ref!==value.encounter_ref){clearUnavailableSupport(ticket,'完整任务与原排队标识或资料摘要不同，已拒绝展示。');return null;}
+  return response.data;
+}
 async function submit() {
   const input = buildTaskInput(); if (!input) return;
   submitting.value = true;
   stopPolling(); const selection = selectionVersion, view = pollVersion, supportTicket = captureSupport(true);
   try {
-    const response = await createAIRun({ feature_key: featureKey.value, patient_id: selected.value.scope === "patient" ? patientId.value : null, encounter_ref: selected.value.scope === "patient" ? encounterRef.value || null : null, input, preview: canPreview.value && preview.value });
-    if (selection !== selectionVersion || view !== pollVersion || !await acceptSupportRun(response.data, supportTicket) || selection !== selectionVersion || view !== pollVersion) return;
-    run.value = response.data; startPolling();
+    const request={ feature_key: featureKey.value, patient_id: selected.value.scope === "patient" ? patientId.value : null, encounter_ref: selected.value.scope === "patient" ? encounterRef.value || null : null, input, preview: canPreview.value && preview.value };
+    const response = await createAIRun(request);
+    if(selection!==selectionVersion||view!==pollVersion||!supportCurrent(supportTicket))return;
+    const value=await expandQueuedReply(response.data,request,supportTicket);
+    if (!value||selection !== selectionVersion || view !== pollVersion || !await acceptSupportRun(value, supportTicket) || selection !== selectionVersion || view !== pollVersion) return;
+    run.value = value; startPolling();
+  } catch(failure){
+    if(supportLifecycle.value||sofaLifecycle.value||rosterLifecycle.value||bedLifecycle.value){if(selection===selectionVersion&&view===pollVersion){historyVersion++;history.value=[];clearUnavailableSupport(supportTicket);}return;}
+    throw failure;
   } finally { submitting.value = false; }
 }
 async function refreshRun() {
   if(!run.value)return;stopPolling();const id=run.value.run_id,selection=selectionVersion,view=pollVersion,supportTicket=captureSupport();
-  try{const response=await getAIRun(id);if(selection!==selectionVersion||view!==pollVersion||id!==run.value?.run_id||!await acceptSupportRun(response.data,supportTicket)||selection!==selectionVersion||view!==pollVersion)return;run.value=response.data;startPolling();}
-  catch(failure){if(supportLifecycle.value||sofaLifecycle.value||rosterLifecycle.value){clearUnavailableSupport(supportTicket);return;}throw failure;}
+  try{const response=await getAIRun(id);if(selection!==selectionVersion||view!==pollVersion||id!==run.value?.run_id||!requestedRunMatches(response.data,id,supportTicket)||!await acceptSupportRun(response.data,supportTicket)||selection!==selectionVersion||view!==pollVersion)return;run.value=response.data;startPolling();}
+  catch(failure){if(supportLifecycle.value||sofaLifecycle.value||rosterLifecycle.value||bedLifecycle.value){clearUnavailableSupport(supportTicket);return;}throw failure;}
 }
 async function openRun(id) {
-  if(rosterLifecycle.value&&!rosterAuthorized.value)return;
+  if(rosterLifecycle.value&&!rosterAuthorized.value||bedLifecycle.value&&!bedAuthorized.value)return;
   stopPolling();const selection=selectionVersion,view=pollVersion,supportTicket=captureSupport();
-  try{const response=await getAIRun(id);if(selection!==selectionVersion||view!==pollVersion||!await acceptSupportRun(response.data,supportTicket)||selection!==selectionVersion||view!==pollVersion)return;run.value=response.data;startPolling();}
-  catch(failure){if(supportLifecycle.value||sofaLifecycle.value||rosterLifecycle.value){clearUnavailableSupport(supportTicket);return;}throw failure;}
+  try{const response=await getAIRun(id);if(selection!==selectionVersion||view!==pollVersion||!requestedRunMatches(response.data,id,supportTicket)||!await acceptSupportRun(response.data,supportTicket)||selection!==selectionVersion||view!==pollVersion)return;run.value=response.data;startPolling();}
+  catch(failure){if(supportLifecycle.value||sofaLifecycle.value||rosterLifecycle.value||bedLifecycle.value){clearUnavailableSupport(supportTicket);return;}throw failure;}
 }
 async function cancel() { await cancelAIRun(run.value.run_id); await refreshRun(); }
 async function loadHistory(activeNames) {
   if (activeNames !== undefined) historyOpen = activeNames.length > 0;
-  if(rosterLifecycle.value&&!rosterAuthorized.value)return;
+  if(rosterLifecycle.value&&!rosterAuthorized.value||bedLifecycle.value&&!bedAuthorized.value)return;
   if (!historyOpen || !featureKey.value || (selected.value?.scope === "patient" && !patientId.value)) return;
   const version = ++historyVersion,ticket=captureSupport();
   try {
-    const response = await getAIRuns({...(rosterLifecycle.value?{department_id:serviceDepartment.value||undefined,roster_plan_id:(rosterInitialReferences.value||rosterSelection.value)?.roster_plan_id}:{}),feature_key: featureKey.value, patient_id: selected.value?.scope === "patient" ? patientId.value : undefined, encounter_ref: selected.value?.scope === "patient" ? encounterRef.value || undefined : undefined });
+    const response = await getAIRuns({...(bedLifecycle.value?{department_id:serviceDepartment.value||undefined,ward_id:serviceWard.value||undefined,bed_series_id:(bedInitialReferences.value||bedSelection.value)?.bed_series_id}:{}),...(rosterLifecycle.value?{department_id:serviceDepartment.value||undefined,roster_plan_id:(rosterInitialReferences.value||rosterSelection.value)?.roster_plan_id}:{}),feature_key: featureKey.value, patient_id: selected.value?.scope === "patient" ? patientId.value : undefined, encounter_ref: selected.value?.scope === "patient" ? encounterRef.value || undefined : undefined });
     if (version === historyVersion&&supportCurrent(ticket)) history.value = response.data || [];
   } catch(failure) {
-    if(supportLifecycle.value||sofaLifecycle.value||rosterLifecycle.value){if(version===historyVersion&&supportCurrent(ticket)){history.value=[];stopPolling();clearUnavailableSupport(ticket);}return;}
+    if(supportLifecycle.value||sofaLifecycle.value||rosterLifecycle.value||bedLifecycle.value){if(version===historyVersion&&supportCurrent(ticket)){history.value=[];stopPolling();clearUnavailableSupport(ticket);}return;}
     throw failure;
   }
 }
 watch([() => JSON.stringify(store.getters["user/permissions"]), () => store.state.user.accessToken,()=>store.state.user.username], () => {
-  if (!needsForecast.value && !needsRiskWindow.value && !supportLifecycle.value && !sofaLifecycle.value&&!rosterLifecycle.value) return;
-  rosterSelection.value=null;rosterReady.value=false;rosterInputKey.value++;if(rosterLifecycle.value)serviceDepartment.value=null;
+  if (!needsForecast.value && !needsRiskWindow.value && !supportLifecycle.value && !sofaLifecycle.value&&!rosterLifecycle.value&&!bedLifecycle.value) return;
+  rosterSelection.value=null;rosterReady.value=false;rosterInputKey.value++;bedSelection.value=null;bedReady.value=false;bedInputKey.value++;if(rosterLifecycle.value||bedLifecycle.value){serviceDepartment.value=null;serviceWard.value=null;}
   sofaSelection.value=null;sofaReady.value=false;formVersion++; patientLoadVersion++; patients.value = []; encounters.value = []; prescriptions.value = []; patientLoading.value = false; patientId.value = null; encounterRef.value = ""; prescriptionId.value = null; question.value = ""; extraInput.value = ""; preview.value = false;
   selectionVersion++; historyVersion++; supportFailure.value = ""; stopPolling(); run.value = null; contextData.value = null; contextDialog.value = false; evidence.value=null; evidenceDialog.value = false; feedbackDialog.value = false; history.value = []; forecastReady.value = false; forecastSelection.value = null; riskWindowReady.value = false; riskWindowSelection.value = null; news2Ready.value = false; news2Selection.value = null; akiReady.value = false; akiSelection.value = null; qsofaReady.value = false; qsofaSelection.value = null;
   if (needsRiskWindow.value && store.state.user.accessToken) searchPatients().catch(() => {});
 });
 const evidenceTitle = id => run.value?.evidence?.find(item => item.source_id === id)?.title || "来源";
-async function inspectEvidence(id) { const ticket=captureSupport(),currentRun=run.value;evidence.value=null;evidenceDialog.value=false;const packet=currentRun?.sofa_findings||currentRun?.sofa_change_findings;const value=currentRun?.roster_findings?await resolveRosterEvidence(currentRun.evidence?.find(item=>item.source_id===id),currentRun.roster_findings,ticket.department,ticket.rosterReferences):packet?await resolveSofaEvidence(currentRun.evidence?.find(item=>item.source_id===id),packet,patientId.value,encounterRef.value,ticket.sofaReferences):currentRun?.support_findings?await resolveSupportEvidence(currentRun.evidence?.find(item=>item.source_id===id),currentRun.support_findings,patientId.value,encounterRef.value,needsSupport.value?supportReferences.value:null):(currentRun?.qsofa_findings?resolveQsofaEvidence:resolveAkiEvidence)(currentRun?.evidence?.find(item=>item.source_id===id),currentRun?.qsofa_findings||currentRun?.aki_findings,currentRun?.patient_id,currentRun?.encounter_ref||encounterRef.value);if(currentRun!==run.value||(packet||currentRun?.support_findings||currentRun?.roster_findings)&&!supportCurrent(ticket))return;evidence.value=value;evidenceDialog.value=!!value; }
-async function inspectPreviewEvidence(id) {const ticket=captureSupport(),packet=contextData.value;evidence.value=null;evidenceDialog.value=false;const c=packet?.context,sofa=c?.sofa_source||c?.sofa_change_source;const value=c?.roster_source?await resolveRosterEvidence(packet.evidence?.find(item=>item.source_id===id),c,ticket.department,ticket.rosterReferences):sofa?await resolveSofaEvidence(packet.evidence?.find(item=>item.source_id===id),c,patientId.value,encounterRef.value,sofaSelection.value):c?.support_source?await resolveSupportEvidence(packet.evidence?.find(item=>item.source_id===id),c,patientId.value,encounterRef.value,supportReferences.value):(c?.qsofa_source?resolveQsofaEvidence:resolveAkiEvidence)(packet?.evidence?.find(item=>item.source_id===id),c,patientId.value,encounterRef.value);if(packet!==contextData.value||(sofa||c?.support_source||c?.roster_source)&&!supportCurrent(ticket))return;evidence.value=value;evidenceDialog.value=!!value;}
+async function inspectEvidence(id) { const ticket=captureSupport(),currentRun=run.value;evidence.value=null;evidenceDialog.value=false;const packet=currentRun?.sofa_findings||currentRun?.sofa_change_findings;const value=currentRun?.bed_findings?await resolveBedEvidence(currentRun.evidence?.find(item=>item.source_id===id),currentRun.bed_findings,ticket.department,ticket.ward,ticket.bedReferences):currentRun?.roster_findings?await resolveRosterEvidence(currentRun.evidence?.find(item=>item.source_id===id),currentRun.roster_findings,ticket.department,ticket.rosterReferences):packet?await resolveSofaEvidence(currentRun.evidence?.find(item=>item.source_id===id),packet,patientId.value,encounterRef.value,ticket.sofaReferences):currentRun?.support_findings?await resolveSupportEvidence(currentRun.evidence?.find(item=>item.source_id===id),currentRun.support_findings,patientId.value,encounterRef.value,needsSupport.value?supportReferences.value:null):(currentRun?.qsofa_findings?resolveQsofaEvidence:resolveAkiEvidence)(currentRun?.evidence?.find(item=>item.source_id===id),currentRun?.qsofa_findings||currentRun?.aki_findings,currentRun?.patient_id,currentRun?.encounter_ref||encounterRef.value);if(currentRun!==run.value||(packet||currentRun?.support_findings||currentRun?.roster_findings||currentRun?.bed_findings)&&!supportCurrent(ticket))return;evidence.value=value;evidenceDialog.value=!!value; }
+async function inspectPreviewEvidence(id) {const ticket=captureSupport(),packet=contextData.value;evidence.value=null;evidenceDialog.value=false;const c=packet?.context,sofa=c?.sofa_source||c?.sofa_change_source;const value=c?.bed_source?await resolveBedEvidence(packet.evidence?.find(item=>item.source_id===id),c,ticket.department,ticket.ward,ticket.bedReferences):c?.roster_source?await resolveRosterEvidence(packet.evidence?.find(item=>item.source_id===id),c,ticket.department,ticket.rosterReferences):sofa?await resolveSofaEvidence(packet.evidence?.find(item=>item.source_id===id),c,patientId.value,encounterRef.value,sofaSelection.value):c?.support_source?await resolveSupportEvidence(packet.evidence?.find(item=>item.source_id===id),c,patientId.value,encounterRef.value,supportReferences.value):(c?.qsofa_source?resolveQsofaEvidence:resolveAkiEvidence)(packet?.evidence?.find(item=>item.source_id===id),c,patientId.value,encounterRef.value);if(packet!==contextData.value||(sofa||c?.support_source||c?.roster_source||c?.bed_source)&&!supportCurrent(ticket))return;evidence.value=value;evidenceDialog.value=!!value;}
 async function copyDraft() {
   const transcript = run.value.result.transcription;
   const segments = transcript ? ["原录音转写草稿，待逐段听音与角色核对：", ...transcript.segments.map(item => `[${item.start_ms}–${item.end_ms}毫秒] ${item.speaker}（角色待核实）\n${item.text}${item.uncertain ? '\n不确定：' + item.uncertainty_note : ''}`)] : [];
@@ -552,7 +603,7 @@ async function copyDraft() {
 async function submitFeedback() {
   if(!run.value)return;const id=run.value.run_id,ticket=captureSupport();
   try{await reviewAIRun(id,feedback.value);if(!supportCurrent(ticket)||run.value?.run_id!==id)return;feedbackDialog.value=false;feedback.value={outcome:"accepted",comment:""};ElMessage.success("复核反馈已保存");}
-  catch(failure){if(supportLifecycle.value||sofaLifecycle.value||rosterLifecycle.value){if(supportCurrent(ticket)&&run.value?.run_id===id){historyVersion++;history.value=[];stopPolling();clearUnavailableSupport(ticket);}return;}throw failure;}
+  catch(failure){if(supportLifecycle.value||sofaLifecycle.value||rosterLifecycle.value||bedLifecycle.value){if(supportCurrent(ticket)&&run.value?.run_id===id){historyVersion++;history.value=[];stopPolling();clearUnavailableSupport(ticket);}return;}throw failure;}
 }
 onMounted(async () => {
   loading.value = true;
@@ -561,8 +612,8 @@ onMounted(async () => {
   finally { loading.value = false; }
 });
 onActivated(() => { viewActive.value = true; if (busy.value) startPolling(); });
-onDeactivated(() => { viewActive.value = false;rosterSelection.value=null;rosterReady.value=false;rosterInputKey.value++;sofaSelection.value=null;sofaReady.value=false; selectionVersion += 1; stopPolling(); if(supportLifecycle.value||sofaLifecycle.value||rosterLifecycle.value){historyVersion++;run.value=null;contextData.value=null;contextDialog.value=false;evidence.value=null;evidenceDialog.value=false;feedbackDialog.value=false;history.value=[];} });
-onBeforeUnmount(() => { viewActive.value = false;rosterSelection.value=null;rosterReady.value=false;rosterInputKey.value++;sofaSelection.value=null;sofaReady.value=false; selectionVersion += 1; historyVersion += 1; formVersion += 1; pathwayOptionsVersion += 1; stopPolling(); });
+onDeactivated(() => { viewActive.value = false;bedSelection.value=null;bedReady.value=false;bedInputKey.value++;rosterSelection.value=null;rosterReady.value=false;rosterInputKey.value++;sofaSelection.value=null;sofaReady.value=false; selectionVersion += 1; stopPolling(); if(supportLifecycle.value||sofaLifecycle.value||rosterLifecycle.value||bedLifecycle.value){historyVersion++;run.value=null;contextData.value=null;contextDialog.value=false;evidence.value=null;evidenceDialog.value=false;feedbackDialog.value=false;history.value=[];} });
+onBeforeUnmount(() => { viewActive.value = false;bedSelection.value=null;bedReady.value=false;bedInputKey.value++;rosterSelection.value=null;rosterReady.value=false;rosterInputKey.value++;sofaSelection.value=null;sofaReady.value=false; selectionVersion += 1; historyVersion += 1; formVersion += 1; pathwayOptionsVersion += 1; stopPolling(); });
 </script>
 
 <style scoped>

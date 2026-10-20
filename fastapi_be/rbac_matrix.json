@@ -742,42 +742,66 @@
   "path": "/api/ai/admin/aki-assessments/{assessment_id}"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "director",
+   "doctor",
+   "super_admin"
+  ],
   "function": "audio_options",
   "method": "GET",
   "module": "ai_audio.py",
   "path": "/api/ai/audio-options"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "director",
+   "doctor",
+   "super_admin"
+  ],
   "function": "upload_audio",
   "method": "POST",
   "module": "ai_audio.py",
   "path": "/api/ai/audio-assets"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "director",
+   "doctor",
+   "super_admin"
+  ],
   "function": "list_audio",
   "method": "GET",
   "module": "ai_audio.py",
   "path": "/api/ai/audio-assets"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "director",
+   "doctor",
+   "super_admin"
+  ],
   "function": "inspect_audio_asset",
   "method": "GET",
   "module": "ai_audio.py",
   "path": "/api/ai/audio-assets/{asset_id}"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "director",
+   "doctor",
+   "super_admin"
+  ],
   "function": "download_audio",
   "method": "GET",
   "module": "ai_audio.py",
   "path": "/api/ai/audio-assets/{asset_id}/content"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "director",
+   "doctor",
+   "super_admin"
+  ],
   "function": "withdraw_audio",
   "method": "POST",
   "module": "ai_audio.py",
@@ -802,49 +826,84 @@
   "path": "/api/ai/admin/audio-assets/{asset_id}/purge"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "director",
+   "doctor",
+   "lab_technician",
+   "super_admin"
+  ],
   "function": "ecg_options",
   "method": "GET",
   "module": "ai_ecg.py",
   "path": "/api/ai/ecg-options"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "director",
+   "doctor",
+   "lab_technician",
+   "super_admin"
+  ],
   "function": "upload_ecg",
   "method": "POST",
   "module": "ai_ecg.py",
   "path": "/api/ai/ecg-assets"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "director",
+   "doctor",
+   "lab_technician",
+   "super_admin"
+  ],
   "function": "list_ecg",
   "method": "GET",
   "module": "ai_ecg.py",
   "path": "/api/ai/ecg-assets"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "director",
+   "doctor",
+   "lab_technician",
+   "super_admin"
+  ],
   "function": "inspect_ecg",
   "method": "GET",
   "module": "ai_ecg.py",
   "path": "/api/ai/ecg-assets/{asset_id}"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "director",
+   "doctor",
+   "lab_technician",
+   "super_admin"
+  ],
   "function": "ecg_window",
   "method": "GET",
   "module": "ai_ecg.py",
   "path": "/api/ai/ecg-assets/{asset_id}/window"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "director",
+   "doctor",
+   "lab_technician",
+   "super_admin"
+  ],
   "function": "download_ecg",
   "method": "GET",
   "module": "ai_ecg.py",
   "path": "/api/ai/ecg-assets/{asset_id}/content"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "director",
+   "doctor",
+   "lab_technician",
+   "super_admin"
+  ],
   "function": "withdraw_ecg",
   "method": "POST",
   "module": "ai_ecg.py",
@@ -975,56 +1034,96 @@
   "path": "/api/ai/forecast-series"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "director",
+   "doctor",
+   "lab_technician",
+   "super_admin"
+  ],
   "function": "image_options",
   "method": "GET",
   "module": "ai_images.py",
   "path": "/api/ai/image-options"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "director",
+   "doctor",
+   "lab_technician",
+   "super_admin"
+  ],
   "function": "image_orders",
   "method": "GET",
   "module": "ai_images.py",
   "path": "/api/ai/image-orders"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "director",
+   "doctor",
+   "lab_technician",
+   "super_admin"
+  ],
   "function": "upload_image",
   "method": "POST",
   "module": "ai_images.py",
   "path": "/api/ai/image-assets"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "director",
+   "doctor",
+   "lab_technician",
+   "super_admin"
+  ],
   "function": "list_images",
   "method": "GET",
   "module": "ai_images.py",
   "path": "/api/ai/image-assets"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "director",
+   "doctor",
+   "lab_technician",
+   "super_admin"
+  ],
   "function": "inspect_image",
   "method": "GET",
   "module": "ai_images.py",
   "path": "/api/ai/image-assets/{asset_id}"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "director",
+   "doctor",
+   "lab_technician",
+   "super_admin"
+  ],
   "function": "image_pixels",
   "method": "GET",
   "module": "ai_images.py",
   "path": "/api/ai/image-assets/{asset_id}/pixels"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "director",
+   "doctor",
+   "lab_technician",
+   "super_admin"
+  ],
   "function": "image_content",
   "method": "GET",
   "module": "ai_images.py",
   "path": "/api/ai/image-assets/{asset_id}/content"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "director",
+   "doctor",
+   "lab_technician",
+   "super_admin"
+  ],
   "function": "withdraw_image",
   "method": "POST",
   "module": "ai_images.py",
@@ -1393,28 +1492,44 @@
   "path": "/api/ai/admin/risk-rule-profiles/{rule_profile_id}/revoke"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "director",
+   "super_admin"
+  ],
   "function": "preview",
   "method": "POST",
   "module": "ai_roster_plans.py",
   "path": "/api/ai/roster-plans/preview"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "director",
+   "super_admin"
+  ],
   "function": "plan_list",
   "method": "GET",
   "module": "ai_roster_plans.py",
   "path": "/api/ai/roster-plans"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "director",
+   "super_admin"
+  ],
   "function": "create",
   "method": "POST",
   "module": "ai_roster_plans.py",
   "path": "/api/ai/roster-plans"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "director",
+   "super_admin"
+  ],
   "function": "plan",
   "method": "GET",
   "module": "ai_roster_plans.py",
@@ -1430,7 +1545,11 @@
   "path": "/api/ai/roster-plans/{plan_id}/review"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "director",
+   "super_admin"
+  ],
   "function": "revoke",
   "method": "POST",
   "module": "ai_roster_plans.py",
@@ -1455,28 +1574,44 @@
   "path": "/api/ai/admin/roster-plans/{plan_id}"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "director",
+   "super_admin"
+  ],
   "function": "options",
   "method": "GET",
   "module": "ai_roster_sources.py",
   "path": "/api/ai/roster-sources/options"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "director",
+   "super_admin"
+  ],
   "function": "sources",
   "method": "GET",
   "module": "ai_roster_sources.py",
   "path": "/api/ai/roster-sources/{kind}"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "director",
+   "super_admin"
+  ],
   "function": "create",
   "method": "POST",
   "module": "ai_roster_sources.py",
   "path": "/api/ai/roster-sources/{kind}"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "director",
+   "super_admin"
+  ],
   "function": "source",
   "method": "GET",
   "module": "ai_roster_sources.py",
@@ -1492,7 +1627,11 @@
   "path": "/api/ai/roster-sources/{kind}/{source_record_id}/review"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "director",
+   "super_admin"
+  ],
   "function": "revoke",
   "method": "POST",
   "module": "ai_roster_sources.py",
@@ -1737,35 +1876,63 @@
   "path": "/api/ai/admin/vasoactive-drug-mappings/{mapping_id}/revoke"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "nurse",
+   "super_admin"
+  ],
   "function": "list_allergies",
   "method": "GET",
   "module": "allergy.py",
   "path": "/api/allergy/list"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "nurse",
+   "super_admin"
+  ],
   "function": "create_allergy",
   "method": "POST",
   "module": "allergy.py",
   "path": "/api/allergy/create"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "nurse",
+   "super_admin"
+  ],
   "function": "update_allergy",
   "method": "PUT",
   "module": "allergy.py",
   "path": "/api/allergy/update"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "nurse",
+   "super_admin"
+  ],
   "function": "disable_allergy",
   "method": "POST",
   "module": "allergy.py",
   "path": "/api/allergy/disable"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "director",
+   "super_admin"
+  ],
   "function": "operational_trend",
   "method": "GET",
   "module": "analytics.py",
@@ -1791,6 +1958,7 @@
  {
   "auth": [
    "admin",
+   "director",
    "pharmacist",
    "super_admin"
   ],
@@ -1812,28 +1980,50 @@
   "path": "/api/antibiotic/approval/create"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "pharmacist",
+   "super_admin"
+  ],
   "function": "get_antibiotic_approval_list",
   "method": "GET",
   "module": "antibiotic.py",
   "path": "/api/antibiotic/approval/list"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "director",
+   "super_admin"
+  ],
   "function": "review_antibiotic_approval",
   "method": "POST",
   "module": "antibiotic.py",
   "path": "/api/antibiotic/approval/review"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "pharmacist",
+   "super_admin"
+  ],
   "function": "antibiotic_ddds",
   "method": "GET",
   "module": "antibiotic.py",
   "path": "/api/antibiotic/ddds"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "pharmacist",
+   "super_admin"
+  ],
   "function": "antibiotic_submission_rate",
   "method": "GET",
   "module": "antibiotic.py",
@@ -1890,7 +2080,13 @@
   "path": "/api/backup/download/{filename}"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "nurse",
+   "super_admin"
+  ],
   "function": "list_blood_requests",
   "method": "GET",
   "module": "blood.py",
@@ -1909,35 +2105,63 @@
   "path": "/api/blood/request/create"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "director",
+   "super_admin"
+  ],
   "function": "review_blood_request",
   "method": "POST",
   "module": "blood.py",
   "path": "/api/blood/request/review"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "nurse",
+   "super_admin"
+  ],
   "function": "recheck_blood_type",
   "method": "POST",
   "module": "blood.py",
   "path": "/api/blood/recheck"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "nurse",
+   "super_admin"
+  ],
   "function": "cross_match",
   "method": "POST",
   "module": "blood.py",
   "path": "/api/blood/crossMatch"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "nurse",
+   "super_admin"
+  ],
   "function": "issue_blood",
   "method": "POST",
   "module": "blood.py",
   "path": "/api/blood/issue"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "nurse",
+   "super_admin"
+  ],
   "function": "list_reactions",
   "method": "GET",
   "module": "blood.py",
@@ -1966,6 +2190,7 @@
  {
   "auth": [
    "admin",
+   "cashier",
    "super_admin"
   ],
   "function": "charge_commit",
@@ -1976,6 +2201,7 @@
  {
   "auth": [
    "admin",
+   "cashier",
    "super_admin"
   ],
   "function": "charge_refund",
@@ -1986,6 +2212,7 @@
  {
   "auth": [
    "admin",
+   "cashier",
    "super_admin"
   ],
   "function": "get_invoice_list",
@@ -1996,6 +2223,8 @@
  {
   "auth": [
    "admin",
+   "cashier",
+   "registrar",
    "super_admin"
   ],
   "function": "get_window_registration_schedules",
@@ -2006,6 +2235,8 @@
  {
   "auth": [
    "admin",
+   "cashier",
+   "registrar",
    "super_admin"
   ],
   "function": "get_window_registration_patient",
@@ -2016,6 +2247,8 @@
  {
   "auth": [
    "admin",
+   "cashier",
+   "registrar",
    "super_admin"
   ],
   "function": "get_window_appointments",
@@ -2026,6 +2259,8 @@
  {
   "auth": [
    "admin",
+   "cashier",
+   "registrar",
    "super_admin"
   ],
   "function": "confirm_window_appointment",
@@ -2036,6 +2271,8 @@
  {
   "auth": [
    "admin",
+   "cashier",
+   "registrar",
    "super_admin"
   ],
   "function": "cancel_window_appointment",
@@ -2046,6 +2283,7 @@
  {
   "auth": [
    "admin",
+   "cashier",
    "super_admin"
   ],
   "function": "create_invoice",
@@ -2056,6 +2294,7 @@
  {
   "auth": [
    "admin",
+   "cashier",
    "super_admin"
   ],
   "function": "print_invoice",
@@ -2073,6 +2312,8 @@
  {
   "auth": [
    "admin",
+   "cashier",
+   "registrar",
    "super_admin"
   ],
   "function": "window_registration",
@@ -2083,6 +2324,8 @@
  {
   "auth": [
    "admin",
+   "cashier",
+   "registrar",
    "super_admin"
   ],
   "function": "window_cancel_registration",
@@ -2093,6 +2336,7 @@
  {
   "auth": [
    "admin",
+   "cashier",
    "super_admin"
   ],
   "function": "daily_settlement",
@@ -2103,6 +2347,7 @@
  {
   "auth": [
    "admin",
+   "cashier",
    "super_admin"
   ],
   "function": "daily_settlement_by_pay_date",
@@ -2127,6 +2372,7 @@
  {
   "auth": [
    "admin",
+   "cashier",
    "super_admin"
   ],
   "function": "mock_payment_notify",
@@ -2137,6 +2383,7 @@
  {
   "auth": [
    "admin",
+   "cashier",
    "super_admin"
   ],
   "function": "get_payment_list",
@@ -2200,14 +2447,22 @@
   "path": "/api/checkIn/checkIn"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "nurse",
+   "super_admin"
+  ],
   "function": "get_breach_list",
   "method": "GET",
   "module": "checkin.py",
   "path": "/api/breach/getList"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "nurse",
+   "super_admin"
+  ],
   "function": "check_suspend",
   "method": "GET",
   "module": "checkin.py",
@@ -2492,7 +2747,13 @@
   "path": "/api/pharmaceuticalManagement/create"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "pharmacist",
+   "super_admin"
+  ],
   "function": "get_pharmaceutical_list",
   "method": "GET",
   "module": "doctor.py",
@@ -2808,7 +3069,13 @@
   "path": "/api/emergency/triage/create"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "nurse",
+   "super_admin"
+  ],
   "function": "list_triage",
   "method": "GET",
   "module": "emergency.py",
@@ -2837,7 +3104,13 @@
   "path": "/api/emergency/rescue/create"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "nurse",
+   "super_admin"
+  ],
   "function": "list_rescue_events",
   "method": "GET",
   "module": "emergency.py",
@@ -2855,42 +3128,76 @@
   "path": "/api/emergency/observation/create"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "nurse",
+   "super_admin"
+  ],
   "function": "list_observations",
   "method": "GET",
   "module": "emergency.py",
   "path": "/api/emergency/observation/list"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "nurse",
+   "super_admin"
+  ],
   "function": "update_observation",
   "method": "PUT",
   "module": "emergency.py",
   "path": "/api/emergency/observation/update"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "nurse",
+   "super_admin"
+  ],
   "function": "create_green_channel",
   "method": "POST",
   "module": "emergency.py",
   "path": "/api/emergency/greenChannel/create"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "nurse",
+   "super_admin"
+  ],
   "function": "list_green_channels",
   "method": "GET",
   "module": "emergency.py",
   "path": "/api/emergency/greenChannel/list"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "director",
+   "super_admin"
+  ],
   "function": "approve_green_channel",
   "method": "POST",
   "module": "emergency.py",
   "path": "/api/emergency/greenChannel/approve"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "nurse",
+   "super_admin"
+  ],
   "function": "close_green_channel",
   "method": "POST",
   "module": "emergency.py",
@@ -3185,77 +3492,135 @@
   "path": "/api/medicalRecordQuality/summary"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "director",
+   "nurse",
+   "pharmacist",
+   "super_admin"
+  ],
   "function": "list_equipment",
   "method": "GET",
   "module": "equipment.py",
   "path": "/api/equipment/list"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "director",
+   "super_admin"
+  ],
   "function": "create_equipment",
   "method": "POST",
   "module": "equipment.py",
   "path": "/api/equipment/create"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "director",
+   "super_admin"
+  ],
   "function": "update_equipment_status",
   "method": "POST",
   "module": "equipment.py",
   "path": "/api/equipment/status"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "director",
+   "nurse",
+   "pharmacist",
+   "super_admin"
+  ],
   "function": "list_maintenance",
   "method": "GET",
   "module": "equipment.py",
   "path": "/api/equipment/maintenance/list"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "director",
+   "nurse",
+   "pharmacist",
+   "super_admin"
+  ],
   "function": "create_maintenance",
   "method": "POST",
   "module": "equipment.py",
   "path": "/api/equipment/maintenance/create"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "director",
+   "super_admin"
+  ],
   "function": "update_maintenance_status",
   "method": "POST",
   "module": "equipment.py",
   "path": "/api/equipment/maintenance/status"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "director",
+   "nurse",
+   "pharmacist",
+   "super_admin"
+  ],
   "function": "list_inspection",
   "method": "GET",
   "module": "equipment.py",
   "path": "/api/equipment/inspection/list"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "director",
+   "nurse",
+   "pharmacist",
+   "super_admin"
+  ],
   "function": "create_inspection",
   "method": "POST",
   "module": "equipment.py",
   "path": "/api/equipment/inspection/create"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "director",
+   "nurse",
+   "pharmacist",
+   "super_admin"
+  ],
   "function": "list_consumable_trace",
   "method": "GET",
   "module": "equipment.py",
   "path": "/api/equipment/trace/list"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "director",
+   "nurse",
+   "pharmacist",
+   "super_admin"
+  ],
   "function": "create_consumable_trace",
   "method": "POST",
   "module": "equipment.py",
   "path": "/api/equipment/trace/create"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "director",
+   "super_admin"
+  ],
   "function": "inventory_check",
   "method": "POST",
   "module": "equipment.py",
@@ -3373,6 +3738,7 @@
    "admin",
    "director",
    "doctor",
+   "patient",
    "super_admin"
   ],
   "function": "create_exam_appointment",
@@ -3385,6 +3751,7 @@
    "admin",
    "director",
    "doctor",
+   "patient",
    "super_admin"
   ],
   "function": "update_exam_appointment_status",
@@ -3462,28 +3829,36 @@
   "path": "/api/examReport/getDetail"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "patient"
+  ],
   "function": "list_family_members",
   "method": "GET",
   "module": "family_member.py",
   "path": "/api/familyMember/list"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "patient"
+  ],
   "function": "create_family_member",
   "method": "POST",
   "module": "family_member.py",
   "path": "/api/familyMember/create"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "patient"
+  ],
   "function": "update_family_member",
   "method": "PUT",
   "module": "family_member.py",
   "path": "/api/familyMember/update"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "patient"
+  ],
   "function": "delete_family_member",
   "method": "DELETE",
   "module": "family_member.py",
@@ -3538,42 +3913,72 @@
   "path": "/api/followUp/record"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
   "function": "list_bindings",
   "method": "GET",
   "module": "home_icd.py",
   "path": "/api/homeIcd/getList"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
   "function": "list_uncoded",
   "method": "GET",
   "module": "home_icd.py",
   "path": "/api/homeIcd/uncoded"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
   "function": "bind_icd",
   "method": "POST",
   "module": "home_icd.py",
   "path": "/api/homeIcd/bind"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
   "function": "unbind_icd",
   "method": "POST",
   "module": "home_icd.py",
   "path": "/api/homeIcd/unbind"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
   "function": "set_primary",
   "method": "POST",
   "module": "home_icd.py",
   "path": "/api/homeIcd/setPrimary"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
   "function": "icd_statistics",
   "method": "GET",
   "module": "home_icd.py",
@@ -3592,14 +3997,22 @@
   "path": "/api/icd10/diagnosis/list"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "director",
+   "super_admin"
+  ],
   "function": "create_diagnosis",
   "method": "POST",
   "module": "icd10.py",
   "path": "/api/icd10/diagnosis/create"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "director",
+   "super_admin"
+  ],
   "function": "update_diagnosis",
   "method": "PUT",
   "module": "icd10.py",
@@ -3618,14 +4031,22 @@
   "path": "/api/icd10/operation/list"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "director",
+   "super_admin"
+  ],
   "function": "create_operation",
   "method": "POST",
   "module": "icd10.py",
   "path": "/api/icd10/operation/create"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "director",
+   "super_admin"
+  ],
   "function": "update_operation",
   "method": "PUT",
   "module": "icd10.py",
@@ -3651,14 +4072,26 @@
   "path": "/api/imaging/order/create"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "lab_technician",
+   "super_admin"
+  ],
   "function": "update_imaging_order_status",
   "method": "POST",
   "module": "imaging.py",
   "path": "/api/imaging/order/status"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "lab_technician",
+   "super_admin"
+  ],
   "function": "update_imaging_viewer",
   "method": "POST",
   "module": "imaging.py",
@@ -3672,21 +4105,37 @@
   "path": "/api/imaging/report/list"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "lab_technician",
+   "super_admin"
+  ],
   "function": "save_imaging_report",
   "method": "POST",
   "module": "imaging.py",
   "path": "/api/imaging/report/save"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "lab_technician",
+   "super_admin"
+  ],
   "function": "submit_imaging_report",
   "method": "POST",
   "module": "imaging.py",
   "path": "/api/imaging/report/submit"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "director",
+   "super_admin"
+  ],
   "function": "review_imaging_report",
   "method": "POST",
   "module": "imaging.py",
@@ -3700,7 +4149,13 @@
   "path": "/api/imaging/template/list"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "lab_technician",
+   "super_admin"
+  ],
   "function": "save_imaging_template",
   "method": "POST",
   "module": "imaging.py",
@@ -3721,14 +4176,27 @@
   "path": "/api/imaging/film/list"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "lab_technician",
+   "patient",
+   "super_admin"
+  ],
   "function": "create_imaging_film",
   "method": "POST",
   "module": "imaging.py",
   "path": "/api/imaging/film/create"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "lab_technician",
+   "super_admin"
+  ],
   "function": "update_imaging_film_status",
   "method": "POST",
   "module": "imaging.py",
@@ -3761,21 +4229,33 @@
   "path": "/api/infection/case/create"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "director",
+   "super_admin"
+  ],
   "function": "update_infection_case_status",
   "method": "POST",
   "module": "infection.py",
   "path": "/api/infection/case/status"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "director",
+   "super_admin"
+  ],
   "function": "infection_outbreak_alert",
   "method": "GET",
   "module": "infection.py",
   "path": "/api/infection/outbreakAlert"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "director",
+   "super_admin"
+  ],
   "function": "infection_report",
   "method": "GET",
   "module": "infection.py",
@@ -3843,56 +4323,104 @@
   "path": "/api/infection/exposure/handle"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "nurse",
+   "super_admin"
+  ],
   "function": "list_mdro",
   "method": "GET",
   "module": "infection_control.py",
   "path": "/api/mdro/getList"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "nurse",
+   "super_admin"
+  ],
   "function": "create_mdro",
   "method": "POST",
   "module": "infection_control.py",
   "path": "/api/mdro/create"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "nurse",
+   "super_admin"
+  ],
   "function": "release_mdro",
   "method": "POST",
   "module": "infection_control.py",
   "path": "/api/mdro/release"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "nurse",
+   "super_admin"
+  ],
   "function": "list_hand_hygiene",
   "method": "GET",
   "module": "infection_control.py",
   "path": "/api/handHygiene/getList"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "nurse",
+   "super_admin"
+  ],
   "function": "create_hand_hygiene",
   "method": "POST",
   "module": "infection_control.py",
   "path": "/api/handHygiene/create"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "lab_technician",
+   "super_admin"
+  ],
   "function": "list_reports",
   "method": "GET",
   "module": "infection_control.py",
   "path": "/api/notifiableDisease/getList"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "lab_technician",
+   "super_admin"
+  ],
   "function": "create_report",
   "method": "POST",
   "module": "infection_control.py",
   "path": "/api/notifiableDisease/create"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "lab_technician",
+   "super_admin"
+  ],
   "function": "submit_report",
   "method": "POST",
   "module": "infection_control.py",
@@ -3909,7 +4437,13 @@
   "path": "/api/notifiableDisease/audit"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "lab_technician",
+   "super_admin"
+  ],
   "function": "correct_report",
   "method": "POST",
   "module": "infection_control.py",
@@ -3928,7 +4462,13 @@
   "path": "/api/infusion/create"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "nurse",
+   "super_admin"
+  ],
   "function": "list_infusions",
   "method": "GET",
   "module": "infusion.py",
@@ -3992,7 +4532,13 @@
   "path": "/api/injection/create"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "nurse",
+   "super_admin"
+  ],
   "function": "list_injections",
   "method": "GET",
   "module": "injection.py",
@@ -4371,7 +4917,13 @@
   "path": "/api/inpatient-observations/urine-intervals/{interval_id}/revoke"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "nurse",
+   "super_admin"
+  ],
   "function": "get_inpatient_order_list",
   "method": "GET",
   "module": "inpatient_order.py",
@@ -4579,14 +5131,24 @@
   "path": "/api/insurance/catalog/list"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "cashier",
+   "director",
+   "super_admin"
+  ],
   "function": "save_insurance_catalog",
   "method": "POST",
   "module": "insurance.py",
   "path": "/api/insurance/catalog/save"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "cashier",
+   "director",
+   "super_admin"
+  ],
   "function": "list_insurance_settlement",
   "method": "GET",
   "module": "insurance.py",
@@ -4630,7 +5192,12 @@
   "path": "/api/insurance/chronic/create"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "cashier",
+   "director",
+   "super_admin"
+  ],
   "function": "create_drg_group",
   "method": "POST",
   "module": "insurance.py",
@@ -4639,6 +5206,7 @@
  {
   "auth": [
    "admin",
+   "director",
    "super_admin"
   ],
   "function": "save_drg_rule",
@@ -4647,70 +5215,114 @@
   "path": "/api/insurance/drg/rule"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "cashier",
+   "director",
+   "super_admin"
+  ],
   "function": "list_drg_rules",
   "method": "GET",
   "module": "insurance.py",
   "path": "/api/insurance/drg/rules"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "cashier",
+   "director",
+   "super_admin"
+  ],
   "function": "automatic_drg_group",
   "method": "POST",
   "module": "insurance.py",
   "path": "/api/insurance/drg/autoGroup"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "cashier",
+   "director",
+   "super_admin"
+  ],
   "function": "drg_analysis",
   "method": "GET",
   "module": "insurance.py",
   "path": "/api/insurance/drg/analysis"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "cashier",
+   "director",
+   "super_admin"
+  ],
   "function": "insurance_cost_warnings",
   "method": "GET",
   "module": "insurance.py",
   "path": "/api/insurance/control/warnings"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "cashier",
+   "super_admin"
+  ],
   "function": "list_mappings",
   "method": "GET",
   "module": "insurance_catalog.py",
   "path": "/api/insuranceCatalog/getList"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "cashier",
+   "super_admin"
+  ],
   "function": "create_mapping",
   "method": "POST",
   "module": "insurance_catalog.py",
   "path": "/api/insuranceCatalog/create"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "cashier",
+   "super_admin"
+  ],
   "function": "update_mapping",
   "method": "POST",
   "module": "insurance_catalog.py",
   "path": "/api/insuranceCatalog/update"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "cashier",
+   "super_admin"
+  ],
   "function": "delete_mapping",
   "method": "POST",
   "module": "insurance_catalog.py",
   "path": "/api/insuranceCatalog/delete"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "cashier",
+   "super_admin"
+  ],
   "function": "import_mappings",
   "method": "POST",
   "module": "insurance_catalog.py",
   "path": "/api/insuranceCatalog/import"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "cashier",
+   "super_admin"
+  ],
   "function": "download_template",
   "method": "GET",
   "module": "insurance_catalog.py",
@@ -4944,21 +5556,35 @@
   "path": "/api/labResult/detail"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "lab_technician",
+   "super_admin"
+  ],
   "function": "list_packages",
   "method": "GET",
   "module": "lab_package.py",
   "path": "/api/labPackage/list"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "lab_technician",
+   "super_admin"
+  ],
   "function": "create_package",
   "method": "POST",
   "module": "lab_package.py",
   "path": "/api/labPackage/create"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "lab_technician",
+   "super_admin"
+  ],
   "function": "update_package",
   "method": "PUT",
   "module": "lab_package.py",
@@ -5036,6 +5662,7 @@
  {
   "auth": [
    "admin",
+   "director",
    "super_admin"
   ],
   "function": "get_mdt_approval_list",
@@ -5046,6 +5673,7 @@
  {
   "auth": [
    "admin",
+   "director",
    "super_admin"
   ],
   "function": "approve_mdt",
@@ -5078,7 +5706,11 @@
   "path": "/api/medicalRecordArchive/create"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "director",
+   "super_admin"
+  ],
   "function": "archive_record",
   "method": "POST",
   "module": "medical_record_archive.py",
@@ -5097,14 +5729,22 @@
   "path": "/api/medicalRecordArchive/borrow"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "director",
+   "super_admin"
+  ],
   "function": "list_borrow_requests",
   "method": "GET",
   "module": "medical_record_archive.py",
   "path": "/api/medicalRecordArchive/borrowRequests"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "director",
+   "super_admin"
+  ],
   "function": "approve_borrow",
   "method": "POST",
   "module": "medical_record_archive.py",
@@ -5123,7 +5763,11 @@
   "path": "/api/medicalRecordArchive/return"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "director",
+   "super_admin"
+  ],
   "function": "seal_record",
   "method": "POST",
   "module": "medical_record_archive.py",
@@ -5545,91 +6189,155 @@
   "path": "/metrics"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "nurse",
+   "super_admin"
+  ],
   "function": "list_cssd",
   "method": "GET",
   "module": "ops_extension.py",
   "path": "/api/cssd/getList"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "nurse",
+   "super_admin"
+  ],
   "function": "create_cssd",
   "method": "POST",
   "module": "ops_extension.py",
   "path": "/api/cssd/create"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "nurse",
+   "super_admin"
+  ],
   "function": "transition_cssd",
   "method": "POST",
   "module": "ops_extension.py",
   "path": "/api/cssd/transition"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "nurse",
+   "pharmacist",
+   "super_admin"
+  ],
   "function": "list_pivas",
   "method": "GET",
   "module": "ops_extension.py",
   "path": "/api/pivas/getList"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "nurse",
+   "pharmacist",
+   "super_admin"
+  ],
   "function": "create_pivas",
   "method": "POST",
   "module": "ops_extension.py",
   "path": "/api/pivas/create"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "nurse",
+   "pharmacist",
+   "super_admin"
+  ],
   "function": "transition_pivas",
   "method": "POST",
   "module": "ops_extension.py",
   "path": "/api/pivas/transition"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "nurse",
+   "super_admin"
+  ],
   "function": "list_scores",
   "method": "GET",
   "module": "ops_extension.py",
   "path": "/api/icuScore/getList"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "nurse",
+   "super_admin"
+  ],
   "function": "create_score",
   "method": "POST",
   "module": "ops_extension.py",
   "path": "/api/icuScore/create"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
   "function": "list_enrollments",
   "method": "GET",
   "module": "ops_extension.py",
   "path": "/api/pathwayEnrollment/getList"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
   "function": "enroll_pathway",
   "method": "POST",
   "module": "ops_extension.py",
   "path": "/api/pathwayEnrollment/enroll"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
   "function": "record_progress",
   "method": "POST",
   "module": "ops_extension.py",
   "path": "/api/pathwayEnrollment/record"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
   "function": "record_variation",
   "method": "POST",
   "module": "ops_extension.py",
   "path": "/api/pathwayEnrollment/variation"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
   "function": "exit_pathway",
   "method": "POST",
   "module": "ops_extension.py",
@@ -5727,7 +6435,12 @@
   "path": "/api/review/create"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "patient",
+   "registrar",
+   "super_admin"
+  ],
   "function": "list_patient_cards",
   "method": "GET",
   "module": "patient_card.py",
@@ -5745,7 +6458,12 @@
   "path": "/api/patientCard/issue"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "patient",
+   "registrar",
+   "super_admin"
+  ],
   "function": "report_patient_card_lost",
   "method": "POST",
   "module": "patient_card.py",
@@ -5763,28 +6481,40 @@
   "path": "/api/patientCard/cancel"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "super_admin"
+  ],
   "function": "list_performances",
   "method": "GET",
   "module": "performance.py",
   "path": "/api/performance/getList"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "super_admin"
+  ],
   "function": "create_performance",
   "method": "POST",
   "module": "performance.py",
   "path": "/api/performance/create"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "super_admin"
+  ],
   "function": "update_performance",
   "method": "POST",
   "module": "performance.py",
   "path": "/api/performance/update"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "super_admin"
+  ],
   "function": "submit_performance",
   "method": "POST",
   "module": "performance.py",
@@ -5856,7 +6586,12 @@
   "path": "/api/pharmacy/dispense"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "nurse",
+   "pharmacist",
+   "super_admin"
+  ],
   "function": "get_verification_list",
   "method": "GET",
   "module": "pharmacy.py",
@@ -6039,42 +6774,72 @@
   "path": "/api/purchase/cancel"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
   "function": "list_rca",
   "method": "GET",
   "module": "quality_management.py",
   "path": "/api/rca/getList"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
   "function": "create_rca",
   "method": "POST",
   "module": "quality_management.py",
   "path": "/api/rca/create"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
   "function": "advance_rca",
   "method": "POST",
   "module": "quality_management.py",
   "path": "/api/rca/advance"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
   "function": "list_hqms",
   "method": "GET",
   "module": "quality_management.py",
   "path": "/api/hqms/getList"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
   "function": "create_hqms",
   "method": "POST",
   "module": "quality_management.py",
   "path": "/api/hqms/create"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
   "function": "import_hqms",
   "method": "POST",
   "module": "quality_management.py",
@@ -6122,7 +6887,9 @@
   "path": "/api/queue/getList"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "patient"
+  ],
   "function": "get_queue_progress",
   "method": "GET",
   "module": "queue.py",
@@ -6223,6 +6990,7 @@
  {
   "auth": [
    "admin",
+   "director",
    "super_admin"
   ],
   "function": "get_referral_approval_list",
@@ -6233,6 +7001,7 @@
  {
   "auth": [
    "admin",
+   "director",
    "super_admin"
   ],
   "function": "approve_referral",
@@ -6241,56 +7010,101 @@
   "path": "/api/referral/approval"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "cashier",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
   "function": "report_outpatient_volume",
   "method": "POST",
   "module": "report.py",
   "path": "/api/report/outpatientVolume"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "cashier",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
   "function": "report_finance",
   "method": "POST",
   "module": "report.py",
   "path": "/api/report/finance"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "cashier",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
   "function": "report_pharmaceutical",
   "method": "POST",
   "module": "report.py",
   "path": "/api/report/pharmaceutical"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "cashier",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
   "function": "report_doctor_workload",
   "method": "POST",
   "module": "report.py",
   "path": "/api/report/doctorWorkload"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "cashier",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
   "function": "report_department_stats",
   "method": "POST",
   "module": "report.py",
   "path": "/api/report/departmentStats"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
   "function": "list_tables",
   "method": "GET",
   "module": "research.py",
   "path": "/api/research/export/tables"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
   "function": "export_research_data",
   "method": "POST",
   "module": "research.py",
   "path": "/api/research/export"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
   "function": "export_package",
   "method": "POST",
   "module": "research.py",
@@ -6416,14 +7230,22 @@
   "path": "/api/scheduleChange/list"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "director",
+   "super_admin"
+  ],
   "function": "approve_schedule_change",
   "method": "POST",
   "module": "schedule_change.py",
   "path": "/api/scheduleChange/approve"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "director",
+   "super_admin"
+  ],
   "function": "reject_schedule_change",
   "method": "POST",
   "module": "schedule_change.py",
@@ -6461,7 +7283,11 @@
   "path": "/api/shiftHandover/create"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "nurse",
+   "super_admin"
+  ],
   "function": "list_handovers",
   "method": "GET",
   "module": "shift_handover.py",
@@ -6491,7 +7317,13 @@
   "path": "/api/skinTest/create"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "nurse",
+   "super_admin"
+  ],
   "function": "list_skin_tests",
   "method": "GET",
   "module": "skin_test.py",
@@ -6543,7 +7375,11 @@
   "path": "/api/specialDrug/create"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "pharmacist",
+   "super_admin"
+  ],
   "function": "list_special_drugs",
   "method": "GET",
   "module": "special_drug.py",
@@ -6727,7 +7563,13 @@
   "path": "/api/anesthesiaRecord/create"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "nurse",
+   "super_admin"
+  ],
   "function": "antibiotic_compliance_statistics",
   "method": "GET",
   "module": "surgery.py",
@@ -7038,6 +7880,7 @@
  {
   "auth": [
    "admin",
+   "cashier",
    "super_admin"
   ],
   "function": "prepaid_recharge",
@@ -7048,6 +7891,7 @@
  {
   "auth": [
    "admin",
+   "cashier",
    "super_admin"
   ],
   "function": "prepaid_deduct",
@@ -7058,6 +7902,7 @@
  {
   "auth": [
    "admin",
+   "cashier",
    "super_admin"
   ],
   "function": "prepaid_refund",
@@ -7102,56 +7947,88 @@
   "path": "/api/vitalSign/getList"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "nurse",
+   "super_admin"
+  ],
   "function": "get_ward_list",
   "method": "GET",
   "module": "ward.py",
   "path": "/api/ward/getList"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "nurse",
+   "super_admin"
+  ],
   "function": "create_ward",
   "method": "POST",
   "module": "ward.py",
   "path": "/api/ward/create"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "nurse",
+   "super_admin"
+  ],
   "function": "update_ward",
   "method": "POST",
   "module": "ward.py",
   "path": "/api/ward/update"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "nurse",
+   "super_admin"
+  ],
   "function": "delete_ward",
   "method": "POST",
   "module": "ward.py",
   "path": "/api/ward/delete"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "nurse",
+   "super_admin"
+  ],
   "function": "get_bed_list",
   "method": "GET",
   "module": "ward.py",
   "path": "/api/bed/getList"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "nurse",
+   "super_admin"
+  ],
   "function": "create_bed",
   "method": "POST",
   "module": "ward.py",
   "path": "/api/bed/create"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "nurse",
+   "super_admin"
+  ],
   "function": "update_bed",
   "method": "POST",
   "module": "ward.py",
   "path": "/api/bed/update"
  },
  {
-  "auth": "ANY",
+  "auth": [
+   "admin",
+   "nurse",
+   "super_admin"
+  ],
   "function": "delete_bed",
   "method": "POST",
   "module": "ward.py",

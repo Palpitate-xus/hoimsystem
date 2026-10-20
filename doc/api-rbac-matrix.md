@@ -125,12 +125,12 @@
 
 | 方法 | 路径 | admin | super_admin | director | doctor | nurse | cashier | pharmacist | guide | patient | lab_technician | registrar | PUBLIC |
 |------|------|------|------|------|------|------|------|------|------|------|------|------|------|
-| GET | `/api/ai/audio-options` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| POST | `/api/ai/audio-assets` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| GET | `/api/ai/audio-assets` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| GET | `/api/ai/audio-assets/{asset_id}` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| GET | `/api/ai/audio-assets/{asset_id}/content` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| POST | `/api/ai/audio-assets/{asset_id}/withdraw` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
+| GET | `/api/ai/audio-options` |  | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/audio-assets` |  | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/audio-assets` |  | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/audio-assets/{asset_id}` |  | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/audio-assets/{asset_id}/content` |  | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/audio-assets/{asset_id}/withdraw` |  | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |
 | GET | `/api/ai/admin/audio-assets` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
 | POST | `/api/ai/admin/audio-assets/{asset_id}/purge` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
 
@@ -138,13 +138,13 @@
 
 | 方法 | 路径 | admin | super_admin | director | doctor | nurse | cashier | pharmacist | guide | patient | lab_technician | registrar | PUBLIC |
 |------|------|------|------|------|------|------|------|------|------|------|------|------|------|
-| GET | `/api/ai/ecg-options` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| POST | `/api/ai/ecg-assets` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| GET | `/api/ai/ecg-assets` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| GET | `/api/ai/ecg-assets/{asset_id}` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| GET | `/api/ai/ecg-assets/{asset_id}/window` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| GET | `/api/ai/ecg-assets/{asset_id}/content` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| POST | `/api/ai/ecg-assets/{asset_id}/withdraw` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
+| GET | `/api/ai/ecg-options` |  | ✓ | ✓ | ✓ |  |  |  |  |  | ✓ |  |  |
+| POST | `/api/ai/ecg-assets` |  | ✓ | ✓ | ✓ |  |  |  |  |  | ✓ |  |  |
+| GET | `/api/ai/ecg-assets` |  | ✓ | ✓ | ✓ |  |  |  |  |  | ✓ |  |  |
+| GET | `/api/ai/ecg-assets/{asset_id}` |  | ✓ | ✓ | ✓ |  |  |  |  |  | ✓ |  |  |
+| GET | `/api/ai/ecg-assets/{asset_id}/window` |  | ✓ | ✓ | ✓ |  |  |  |  |  | ✓ |  |  |
+| GET | `/api/ai/ecg-assets/{asset_id}/content` |  | ✓ | ✓ | ✓ |  |  |  |  |  | ✓ |  |  |
+| POST | `/api/ai/ecg-assets/{asset_id}/withdraw` |  | ✓ | ✓ | ✓ |  |  |  |  |  | ✓ |  |  |
 | GET | `/api/ai/admin/ecg-assets` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
 | POST | `/api/ai/admin/ecg-assets/{asset_id}/purge` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
 
@@ -174,14 +174,14 @@
 
 | 方法 | 路径 | admin | super_admin | director | doctor | nurse | cashier | pharmacist | guide | patient | lab_technician | registrar | PUBLIC |
 |------|------|------|------|------|------|------|------|------|------|------|------|------|------|
-| GET | `/api/ai/image-options` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| GET | `/api/ai/image-orders` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| POST | `/api/ai/image-assets` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| GET | `/api/ai/image-assets` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| GET | `/api/ai/image-assets/{asset_id}` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| GET | `/api/ai/image-assets/{asset_id}/pixels` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| GET | `/api/ai/image-assets/{asset_id}/content` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| POST | `/api/ai/image-assets/{asset_id}/withdraw` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
+| GET | `/api/ai/image-options` |  | ✓ | ✓ | ✓ |  |  |  |  |  | ✓ |  |  |
+| GET | `/api/ai/image-orders` |  | ✓ | ✓ | ✓ |  |  |  |  |  | ✓ |  |  |
+| POST | `/api/ai/image-assets` |  | ✓ | ✓ | ✓ |  |  |  |  |  | ✓ |  |  |
+| GET | `/api/ai/image-assets` |  | ✓ | ✓ | ✓ |  |  |  |  |  | ✓ |  |  |
+| GET | `/api/ai/image-assets/{asset_id}` |  | ✓ | ✓ | ✓ |  |  |  |  |  | ✓ |  |  |
+| GET | `/api/ai/image-assets/{asset_id}/pixels` |  | ✓ | ✓ | ✓ |  |  |  |  |  | ✓ |  |  |
+| GET | `/api/ai/image-assets/{asset_id}/content` |  | ✓ | ✓ | ✓ |  |  |  |  |  | ✓ |  |  |
+| POST | `/api/ai/image-assets/{asset_id}/withdraw` |  | ✓ | ✓ | ✓ |  |  |  |  |  | ✓ |  |  |
 | GET | `/api/ai/admin/image-assets` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
 | POST | `/api/ai/admin/image-assets/{asset_id}/purge` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
 
@@ -246,12 +246,12 @@
 
 | 方法 | 路径 | admin | super_admin | director | doctor | nurse | cashier | pharmacist | guide | patient | lab_technician | registrar | PUBLIC |
 |------|------|------|------|------|------|------|------|------|------|------|------|------|------|
-| POST | `/api/ai/roster-plans/preview` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| GET | `/api/ai/roster-plans` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| POST | `/api/ai/roster-plans` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| GET | `/api/ai/roster-plans/{plan_id}` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
+| POST | `/api/ai/roster-plans/preview` | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/roster-plans` | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/roster-plans` | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/roster-plans/{plan_id}` | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |
 | POST | `/api/ai/roster-plans/{plan_id}/review` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
-| POST | `/api/ai/roster-plans/{plan_id}/revoke` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
+| POST | `/api/ai/roster-plans/{plan_id}/revoke` | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |
 | GET | `/api/ai/admin/roster-plans` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
 | GET | `/api/ai/admin/roster-plans/{plan_id}` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
 
@@ -259,12 +259,12 @@
 
 | 方法 | 路径 | admin | super_admin | director | doctor | nurse | cashier | pharmacist | guide | patient | lab_technician | registrar | PUBLIC |
 |------|------|------|------|------|------|------|------|------|------|------|------|------|------|
-| GET | `/api/ai/roster-sources/options` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| GET | `/api/ai/roster-sources/{kind}` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| POST | `/api/ai/roster-sources/{kind}` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| GET | `/api/ai/roster-sources/{kind}/{source_record_id}` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
+| GET | `/api/ai/roster-sources/options` | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/roster-sources/{kind}` | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/roster-sources/{kind}` | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/roster-sources/{kind}/{source_record_id}` | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |
 | POST | `/api/ai/roster-sources/{kind}/{source_record_id}/review` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
-| POST | `/api/ai/roster-sources/{kind}/{source_record_id}/revoke` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
+| POST | `/api/ai/roster-sources/{kind}/{source_record_id}/revoke` | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |
 | GET | `/api/ai/admin/roster-sources` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
 | GET | `/api/ai/admin/roster-sources/{source_record_id}` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
 
@@ -307,16 +307,16 @@
 
 | 方法 | 路径 | admin | super_admin | director | doctor | nurse | cashier | pharmacist | guide | patient | lab_technician | registrar | PUBLIC |
 |------|------|------|------|------|------|------|------|------|------|------|------|------|------|
-| GET | `/api/allergy/list` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| POST | `/api/allergy/create` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| PUT | `/api/allergy/update` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| POST | `/api/allergy/disable` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
+| GET | `/api/allergy/list` | ✓ | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |
+| POST | `/api/allergy/create` | ✓ | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |
+| PUT | `/api/allergy/update` | ✓ | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |
+| POST | `/api/allergy/disable` | ✓ | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |
 
 ### `analytics.py`
 
 | 方法 | 路径 | admin | super_admin | director | doctor | nurse | cashier | pharmacist | guide | patient | lab_technician | registrar | PUBLIC |
 |------|------|------|------|------|------|------|------|------|------|------|------|------|------|
-| GET | `/api/analytics/operations` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
+| GET | `/api/analytics/operations` | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |
 | POST | `/api/analytics/refresh` | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |
 
 ### `antibiotic.py`
@@ -324,12 +324,12 @@
 | 方法 | 路径 | admin | super_admin | director | doctor | nurse | cashier | pharmacist | guide | patient | lab_technician | registrar | PUBLIC |
 |------|------|------|------|------|------|------|------|------|------|------|------|------|------|
 | GET | `/api/antibiotic/grade/list` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| POST | `/api/antibiotic/grade/save` | ✓ | ✓ |  |  |  |  | ✓ |  |  |  |  |  |
+| POST | `/api/antibiotic/grade/save` | ✓ | ✓ | ✓ |  |  |  | ✓ |  |  |  |  |  |
 | POST | `/api/antibiotic/approval/create` | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |
-| GET | `/api/antibiotic/approval/list` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| POST | `/api/antibiotic/approval/review` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| GET | `/api/antibiotic/ddds` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| GET | `/api/antibiotic/submissionRate` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
+| GET | `/api/antibiotic/approval/list` | ✓ | ✓ | ✓ | ✓ |  |  | ✓ |  |  |  |  |  |
+| POST | `/api/antibiotic/approval/review` | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |
+| GET | `/api/antibiotic/ddds` | ✓ | ✓ | ✓ | ✓ |  |  | ✓ |  |  |  |  |  |
+| GET | `/api/antibiotic/submissionRate` | ✓ | ✓ | ✓ | ✓ |  |  | ✓ |  |  |  |  |  |
 
 ### `backup.py`
 
@@ -345,13 +345,13 @@
 
 | 方法 | 路径 | admin | super_admin | director | doctor | nurse | cashier | pharmacist | guide | patient | lab_technician | registrar | PUBLIC |
 |------|------|------|------|------|------|------|------|------|------|------|------|------|------|
-| GET | `/api/blood/request/list` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
+| GET | `/api/blood/request/list` | ✓ | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |
 | POST | `/api/blood/request/create` | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |
-| POST | `/api/blood/request/review` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| POST | `/api/blood/recheck` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| POST | `/api/blood/crossMatch` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| POST | `/api/blood/issue` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| GET | `/api/blood/reaction/list` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
+| POST | `/api/blood/request/review` | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |
+| POST | `/api/blood/recheck` | ✓ | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |
+| POST | `/api/blood/crossMatch` | ✓ | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |
+| POST | `/api/blood/issue` | ✓ | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |
+| GET | `/api/blood/reaction/list` | ✓ | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |
 | POST | `/api/blood/reaction/create` | ✓ | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |
 
 ### `charge.py`
@@ -359,25 +359,25 @@
 | 方法 | 路径 | admin | super_admin | director | doctor | nurse | cashier | pharmacist | guide | patient | lab_technician | registrar | PUBLIC |
 |------|------|------|------|------|------|------|------|------|------|------|------|------|------|
 | GET | `/api/chargeManagement/getList` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| POST | `/api/chargeManagement/charge` | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |
-| POST | `/api/chargeManagement/refund` | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |
-| GET | `/api/invoice/getList` | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |
-| GET | `/api/windowRegistration/schedules` | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |
-| GET | `/api/windowRegistration/patient` | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |
-| GET | `/api/windowRegistration/appointments` | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |
-| POST | `/api/windowRegistration/appointmentConfirm` | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |
-| POST | `/api/windowRegistration/appointmentCancel` | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |
-| POST | `/api/invoice/create` | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |
-| POST | `/api/invoice/print` | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |
+| POST | `/api/chargeManagement/charge` | ✓ | ✓ |  |  |  | ✓ |  |  |  |  |  |  |
+| POST | `/api/chargeManagement/refund` | ✓ | ✓ |  |  |  | ✓ |  |  |  |  |  |  |
+| GET | `/api/invoice/getList` | ✓ | ✓ |  |  |  | ✓ |  |  |  |  |  |  |
+| GET | `/api/windowRegistration/schedules` | ✓ | ✓ |  |  |  | ✓ |  |  |  |  | ✓ |  |
+| GET | `/api/windowRegistration/patient` | ✓ | ✓ |  |  |  | ✓ |  |  |  |  | ✓ |  |
+| GET | `/api/windowRegistration/appointments` | ✓ | ✓ |  |  |  | ✓ |  |  |  |  | ✓ |  |
+| POST | `/api/windowRegistration/appointmentConfirm` | ✓ | ✓ |  |  |  | ✓ |  |  |  |  | ✓ |  |
+| POST | `/api/windowRegistration/appointmentCancel` | ✓ | ✓ |  |  |  | ✓ |  |  |  |  | ✓ |  |
+| POST | `/api/invoice/create` | ✓ | ✓ |  |  |  | ✓ |  |  |  |  |  |  |
+| POST | `/api/invoice/print` | ✓ | ✓ |  |  |  | ✓ |  |  |  |  |  |  |
 | GET | `/api/invoice/pdf/{invoice_id}` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| POST | `/api/windowRegistration/create` | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |
-| POST | `/api/windowRegistration/cancel` | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |
-| POST | `/api/dailySettlement/report` | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |
-| POST | `/api/dailySettlement/byPayDate` | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |
+| POST | `/api/windowRegistration/create` | ✓ | ✓ |  |  |  | ✓ |  |  |  |  | ✓ |  |
+| POST | `/api/windowRegistration/cancel` | ✓ | ✓ |  |  |  | ✓ |  |  |  |  | ✓ |  |
+| POST | `/api/dailySettlement/report` | ✓ | ✓ |  |  |  | ✓ |  |  |  |  |  |  |
+| POST | `/api/dailySettlement/byPayDate` | ✓ | ✓ |  |  |  | ✓ |  |  |  |  |  |  |
 | POST | `/api/payment/create` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
 | GET | `/api/payment/query/{payment_no}` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| POST | `/api/payment/mockNotify` | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |
-| GET | `/api/payment/getList` | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |
+| POST | `/api/payment/mockNotify` | ✓ | ✓ |  |  |  | ✓ |  |  |  |  |  |  |
+| GET | `/api/payment/getList` | ✓ | ✓ |  |  |  | ✓ |  |  |  |  |  |  |
 
 ### `charge_item.py`
 
@@ -394,8 +394,8 @@
 |------|------|------|------|------|------|------|------|------|------|------|------|------|------|
 | GET | `/api/checkIn/getAppointments` |  |  |  |  |  |  |  |  |  |  |  | PUBLIC |
 | POST | `/api/checkIn/checkIn` |  |  |  |  |  |  |  |  |  |  |  | PUBLIC |
-| GET | `/api/breach/getList` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| GET | `/api/breach/checkSuspend` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
+| GET | `/api/breach/getList` | ✓ | ✓ |  |  | ✓ |  |  |  |  |  |  |  |
+| GET | `/api/breach/checkSuspend` | ✓ | ✓ |  |  | ✓ |  |  |  |  |  |  |  |
 
 ### `clinical_pathway.py`
 
@@ -457,7 +457,7 @@
 | POST | `/api/doctorScheduleManagement/register` | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |
 | GET | `/api/doctorScheduleManagement/getList` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
 | POST | `/api/pharmaceuticalManagement/create` | ✓ | ✓ |  |  |  |  | ✓ |  |  |  |  |  |
-| GET | `/api/pharmaceuticalManagement/getList` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
+| GET | `/api/pharmaceuticalManagement/getList` | ✓ | ✓ | ✓ | ✓ |  |  | ✓ |  |  |  |  |  |
 | POST | `/api/pharmaceuticalManagement/update` | ✓ | ✓ |  |  |  |  | ✓ |  |  |  |  |  |
 | POST | `/api/pharmaceuticalManagement/delete` | ✓ | ✓ |  |  |  |  | ✓ |  |  |  |  |  |
 | POST | `/api/pharmaceuticalManagement/restore` | ✓ | ✓ |  |  |  |  | ✓ |  |  |  |  |  |
@@ -503,17 +503,17 @@
 | 方法 | 路径 | admin | super_admin | director | doctor | nurse | cashier | pharmacist | guide | patient | lab_technician | registrar | PUBLIC |
 |------|------|------|------|------|------|------|------|------|------|------|------|------|------|
 | POST | `/api/emergency/triage/create` | ✓ | ✓ |  |  | ✓ |  |  |  |  |  |  |  |
-| GET | `/api/emergency/triage/list` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
+| GET | `/api/emergency/triage/list` | ✓ | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |
 | PUT | `/api/emergency/triage/update` | ✓ | ✓ |  |  | ✓ |  |  |  |  |  |  |  |
 | POST | `/api/emergency/rescue/create` | ✓ | ✓ |  |  | ✓ |  |  |  |  |  |  |  |
-| GET | `/api/emergency/rescue/list` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
+| GET | `/api/emergency/rescue/list` | ✓ | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |
 | POST | `/api/emergency/observation/create` | ✓ | ✓ |  |  | ✓ |  |  |  |  |  |  |  |
-| GET | `/api/emergency/observation/list` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| PUT | `/api/emergency/observation/update` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| POST | `/api/emergency/greenChannel/create` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| GET | `/api/emergency/greenChannel/list` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| POST | `/api/emergency/greenChannel/approve` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| POST | `/api/emergency/greenChannel/close` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
+| GET | `/api/emergency/observation/list` | ✓ | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |
+| PUT | `/api/emergency/observation/update` | ✓ | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |
+| POST | `/api/emergency/greenChannel/create` | ✓ | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |
+| GET | `/api/emergency/greenChannel/list` | ✓ | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |
+| POST | `/api/emergency/greenChannel/approve` | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |
+| POST | `/api/emergency/greenChannel/close` | ✓ | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |
 | POST | `/api/emergency/medicalRecord/create` | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |
 | GET | `/api/emergency/medicalRecord/list` | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |
 | PUT | `/api/emergency/medicalRecord/update` | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |
@@ -548,17 +548,17 @@
 
 | 方法 | 路径 | admin | super_admin | director | doctor | nurse | cashier | pharmacist | guide | patient | lab_technician | registrar | PUBLIC |
 |------|------|------|------|------|------|------|------|------|------|------|------|------|------|
-| GET | `/api/equipment/list` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| POST | `/api/equipment/create` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| POST | `/api/equipment/status` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| GET | `/api/equipment/maintenance/list` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| POST | `/api/equipment/maintenance/create` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| POST | `/api/equipment/maintenance/status` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| GET | `/api/equipment/inspection/list` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| POST | `/api/equipment/inspection/create` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| GET | `/api/equipment/trace/list` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| POST | `/api/equipment/trace/create` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| POST | `/api/equipment/inventory/check` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
+| GET | `/api/equipment/list` | ✓ | ✓ | ✓ |  | ✓ |  | ✓ |  |  |  |  |  |
+| POST | `/api/equipment/create` | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |
+| POST | `/api/equipment/status` | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |
+| GET | `/api/equipment/maintenance/list` | ✓ | ✓ | ✓ |  | ✓ |  | ✓ |  |  |  |  |  |
+| POST | `/api/equipment/maintenance/create` | ✓ | ✓ | ✓ |  | ✓ |  | ✓ |  |  |  |  |  |
+| POST | `/api/equipment/maintenance/status` | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |
+| GET | `/api/equipment/inspection/list` | ✓ | ✓ | ✓ |  | ✓ |  | ✓ |  |  |  |  |  |
+| POST | `/api/equipment/inspection/create` | ✓ | ✓ | ✓ |  | ✓ |  | ✓ |  |  |  |  |  |
+| GET | `/api/equipment/trace/list` | ✓ | ✓ | ✓ |  | ✓ |  | ✓ |  |  |  |  |  |
+| POST | `/api/equipment/trace/create` | ✓ | ✓ | ✓ |  | ✓ |  | ✓ |  |  |  |  |  |
+| POST | `/api/equipment/inventory/check` | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |
 
 ### `events.py`
 
@@ -580,8 +580,8 @@
 | POST | `/api/examItem/update` | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |
 | POST | `/api/examItem/delete` | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |
 | GET | `/api/examAppointment/getList` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| POST | `/api/examAppointment/create` | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |
-| POST | `/api/examAppointment/updateStatus` | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |
+| POST | `/api/examAppointment/create` | ✓ | ✓ | ✓ | ✓ |  |  |  |  | ✓ |  |  |  |
+| POST | `/api/examAppointment/updateStatus` | ✓ | ✓ | ✓ | ✓ |  |  |  |  | ✓ |  |  |  |
 | GET | `/api/examRecord/getList` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
 | POST | `/api/examRecord/create` | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |
 | POST | `/api/examRecord/update` | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |
@@ -594,10 +594,10 @@
 
 | 方法 | 路径 | admin | super_admin | director | doctor | nurse | cashier | pharmacist | guide | patient | lab_technician | registrar | PUBLIC |
 |------|------|------|------|------|------|------|------|------|------|------|------|------|------|
-| GET | `/api/familyMember/list` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| POST | `/api/familyMember/create` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| PUT | `/api/familyMember/update` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| DELETE | `/api/familyMember/delete` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
+| GET | `/api/familyMember/list` |  |  |  |  |  |  |  |  | ✓ |  |  |  |
+| POST | `/api/familyMember/create` |  |  |  |  |  |  |  |  | ✓ |  |  |  |
+| PUT | `/api/familyMember/update` |  |  |  |  |  |  |  |  | ✓ |  |  |  |
+| DELETE | `/api/familyMember/delete` |  |  |  |  |  |  |  |  | ✓ |  |  |  |
 
 ### `followup.py`
 
@@ -612,23 +612,23 @@
 
 | 方法 | 路径 | admin | super_admin | director | doctor | nurse | cashier | pharmacist | guide | patient | lab_technician | registrar | PUBLIC |
 |------|------|------|------|------|------|------|------|------|------|------|------|------|------|
-| GET | `/api/homeIcd/getList` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| GET | `/api/homeIcd/uncoded` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| POST | `/api/homeIcd/bind` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| POST | `/api/homeIcd/unbind` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| POST | `/api/homeIcd/setPrimary` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| GET | `/api/homeIcd/statistics` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
+| GET | `/api/homeIcd/getList` | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |
+| GET | `/api/homeIcd/uncoded` | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |
+| POST | `/api/homeIcd/bind` | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |
+| POST | `/api/homeIcd/unbind` | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |
+| POST | `/api/homeIcd/setPrimary` | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |
+| GET | `/api/homeIcd/statistics` | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |
 
 ### `icd10.py`
 
 | 方法 | 路径 | admin | super_admin | director | doctor | nurse | cashier | pharmacist | guide | patient | lab_technician | registrar | PUBLIC |
 |------|------|------|------|------|------|------|------|------|------|------|------|------|------|
 | GET | `/api/icd10/diagnosis/list` | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |
-| POST | `/api/icd10/diagnosis/create` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| PUT | `/api/icd10/diagnosis/update` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
+| POST | `/api/icd10/diagnosis/create` | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |
+| PUT | `/api/icd10/diagnosis/update` | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |
 | GET | `/api/icd10/operation/list` | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |
-| POST | `/api/icd10/operation/create` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| PUT | `/api/icd10/operation/update` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
+| POST | `/api/icd10/operation/create` | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |
+| PUT | `/api/icd10/operation/update` | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |
 
 ### `imaging.py`
 
@@ -636,18 +636,18 @@
 |------|------|------|------|------|------|------|------|------|------|------|------|------|------|
 | GET | `/api/imaging/order/list` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
 | POST | `/api/imaging/order/create` | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |
-| POST | `/api/imaging/order/status` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| POST | `/api/imaging/order/viewer` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
+| POST | `/api/imaging/order/status` | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  | ✓ |  |  |
+| POST | `/api/imaging/order/viewer` | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  | ✓ |  |  |
 | GET | `/api/imaging/report/list` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| POST | `/api/imaging/report/save` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| POST | `/api/imaging/report/submit` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| POST | `/api/imaging/report/review` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
+| POST | `/api/imaging/report/save` | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  | ✓ |  |  |
+| POST | `/api/imaging/report/submit` | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  | ✓ |  |  |
+| POST | `/api/imaging/report/review` | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |
 | GET | `/api/imaging/template/list` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| POST | `/api/imaging/template/save` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
+| POST | `/api/imaging/template/save` | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  | ✓ |  |  |
 | GET | `/api/imaging/viewer/{imaging_order_id}` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
 | GET | `/api/imaging/film/list` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| POST | `/api/imaging/film/create` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| POST | `/api/imaging/film/status` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
+| POST | `/api/imaging/film/create` | ✓ | ✓ | ✓ | ✓ |  |  |  |  | ✓ | ✓ |  |  |
+| POST | `/api/imaging/film/status` | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  | ✓ |  |  |
 
 ### `infection.py`
 
@@ -655,9 +655,9 @@
 |------|------|------|------|------|------|------|------|------|------|------|------|------|------|
 | GET | `/api/infection/case/list` | ✓ | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |
 | POST | `/api/infection/case/create` | ✓ | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |
-| POST | `/api/infection/case/status` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| GET | `/api/infection/outbreakAlert` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| GET | `/api/infection/report` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
+| POST | `/api/infection/case/status` | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |
+| GET | `/api/infection/outbreakAlert` | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |
+| GET | `/api/infection/report` | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |
 | GET | `/api/infection/disinfection/list` | ✓ | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |
 | POST | `/api/infection/disinfection/create` | ✓ | ✓ |  |  | ✓ |  |  |  |  |  |  |  |
 | GET | `/api/infection/exposure/list` | ✓ | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |
@@ -668,23 +668,23 @@
 
 | 方法 | 路径 | admin | super_admin | director | doctor | nurse | cashier | pharmacist | guide | patient | lab_technician | registrar | PUBLIC |
 |------|------|------|------|------|------|------|------|------|------|------|------|------|------|
-| GET | `/api/mdro/getList` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| POST | `/api/mdro/create` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| POST | `/api/mdro/release` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| GET | `/api/handHygiene/getList` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| POST | `/api/handHygiene/create` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| GET | `/api/notifiableDisease/getList` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| POST | `/api/notifiableDisease/create` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| POST | `/api/notifiableDisease/submit` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
+| GET | `/api/mdro/getList` | ✓ | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |
+| POST | `/api/mdro/create` | ✓ | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |
+| POST | `/api/mdro/release` | ✓ | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |
+| GET | `/api/handHygiene/getList` | ✓ | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |
+| POST | `/api/handHygiene/create` | ✓ | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |
+| GET | `/api/notifiableDisease/getList` | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  | ✓ |  |  |
+| POST | `/api/notifiableDisease/create` | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  | ✓ |  |  |
+| POST | `/api/notifiableDisease/submit` | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  | ✓ |  |  |
 | POST | `/api/notifiableDisease/audit` | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |
-| POST | `/api/notifiableDisease/correct` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
+| POST | `/api/notifiableDisease/correct` | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  | ✓ |  |  |
 
 ### `infusion.py`
 
 | 方法 | 路径 | admin | super_admin | director | doctor | nurse | cashier | pharmacist | guide | patient | lab_technician | registrar | PUBLIC |
 |------|------|------|------|------|------|------|------|------|------|------|------|------|------|
 | POST | `/api/infusion/create` | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |
-| GET | `/api/infusion/list` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
+| GET | `/api/infusion/list` | ✓ | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |
 | POST | `/api/infusion/execute` | ✓ | ✓ |  |  | ✓ |  |  |  |  |  |  |  |
 | POST | `/api/infusion/observe` | ✓ | ✓ |  |  | ✓ |  |  |  |  |  |  |  |
 | POST | `/api/infusion/complete` | ✓ | ✓ |  |  | ✓ |  |  |  |  |  |  |  |
@@ -695,7 +695,7 @@
 | 方法 | 路径 | admin | super_admin | director | doctor | nurse | cashier | pharmacist | guide | patient | lab_technician | registrar | PUBLIC |
 |------|------|------|------|------|------|------|------|------|------|------|------|------|------|
 | POST | `/api/injection/create` | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |
-| GET | `/api/injection/list` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
+| GET | `/api/injection/list` | ✓ | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |
 | POST | `/api/injection/execute` | ✓ | ✓ |  |  | ✓ |  |  |  |  |  |  |  |
 | POST | `/api/injection/complete` | ✓ | ✓ |  |  | ✓ |  |  |  |  |  |  |  |
 | POST | `/api/injection/cancel` | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |
@@ -752,7 +752,7 @@
 
 | 方法 | 路径 | admin | super_admin | director | doctor | nurse | cashier | pharmacist | guide | patient | lab_technician | registrar | PUBLIC |
 |------|------|------|------|------|------|------|------|------|------|------|------|------|------|
-| GET | `/api/inpatientOrder/getList` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
+| GET | `/api/inpatientOrder/getList` | ✓ | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |
 | POST | `/api/inpatientOrder/create` | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |
 | POST | `/api/inpatientOrder/audit` | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |
 | POST | `/api/inpatientOrder/stop` | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |
@@ -780,29 +780,29 @@
 | 方法 | 路径 | admin | super_admin | director | doctor | nurse | cashier | pharmacist | guide | patient | lab_technician | registrar | PUBLIC |
 |------|------|------|------|------|------|------|------|------|------|------|------|------|------|
 | GET | `/api/insurance/catalog/list` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| POST | `/api/insurance/catalog/save` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| GET | `/api/insurance/settlement/list` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
+| POST | `/api/insurance/catalog/save` | ✓ | ✓ | ✓ |  |  | ✓ |  |  |  |  |  |  |
+| GET | `/api/insurance/settlement/list` | ✓ | ✓ | ✓ |  |  | ✓ |  |  |  |  |  |  |
 | POST | `/api/insurance/settlement/create` | ✓ | ✓ |  |  |  | ✓ |  |  |  |  |  |  |
 | POST | `/api/integration/insurance/settlement` |  |  |  |  |  |  |  |  |  |  |  | PUBLIC |
 | GET | `/api/insurance/chronic/list` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
 | POST | `/api/insurance/chronic/create` | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |
-| POST | `/api/insurance/drg/group` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| POST | `/api/insurance/drg/rule` | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |
-| GET | `/api/insurance/drg/rules` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| POST | `/api/insurance/drg/autoGroup` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| GET | `/api/insurance/drg/analysis` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| GET | `/api/insurance/control/warnings` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
+| POST | `/api/insurance/drg/group` | ✓ | ✓ | ✓ |  |  | ✓ |  |  |  |  |  |  |
+| POST | `/api/insurance/drg/rule` | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |
+| GET | `/api/insurance/drg/rules` | ✓ | ✓ | ✓ |  |  | ✓ |  |  |  |  |  |  |
+| POST | `/api/insurance/drg/autoGroup` | ✓ | ✓ | ✓ |  |  | ✓ |  |  |  |  |  |  |
+| GET | `/api/insurance/drg/analysis` | ✓ | ✓ | ✓ |  |  | ✓ |  |  |  |  |  |  |
+| GET | `/api/insurance/control/warnings` | ✓ | ✓ | ✓ |  |  | ✓ |  |  |  |  |  |  |
 
 ### `insurance_catalog.py`
 
 | 方法 | 路径 | admin | super_admin | director | doctor | nurse | cashier | pharmacist | guide | patient | lab_technician | registrar | PUBLIC |
 |------|------|------|------|------|------|------|------|------|------|------|------|------|------|
-| GET | `/api/insuranceCatalog/getList` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| POST | `/api/insuranceCatalog/create` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| POST | `/api/insuranceCatalog/update` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| POST | `/api/insuranceCatalog/delete` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| POST | `/api/insuranceCatalog/import` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| GET | `/api/insuranceCatalog/template` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
+| GET | `/api/insuranceCatalog/getList` | ✓ | ✓ |  |  |  | ✓ |  |  |  |  |  |  |
+| POST | `/api/insuranceCatalog/create` | ✓ | ✓ |  |  |  | ✓ |  |  |  |  |  |  |
+| POST | `/api/insuranceCatalog/update` | ✓ | ✓ |  |  |  | ✓ |  |  |  |  |  |  |
+| POST | `/api/insuranceCatalog/delete` | ✓ | ✓ |  |  |  | ✓ |  |  |  |  |  |  |
+| POST | `/api/insuranceCatalog/import` | ✓ | ✓ |  |  |  | ✓ |  |  |  |  |  |  |
+| GET | `/api/insuranceCatalog/template` | ✓ | ✓ |  |  |  | ✓ |  |  |  |  |  |  |
 
 ### `integration.py`
 
@@ -850,9 +850,9 @@
 
 | 方法 | 路径 | admin | super_admin | director | doctor | nurse | cashier | pharmacist | guide | patient | lab_technician | registrar | PUBLIC |
 |------|------|------|------|------|------|------|------|------|------|------|------|------|------|
-| GET | `/api/labPackage/list` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| POST | `/api/labPackage/create` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| PUT | `/api/labPackage/update` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
+| GET | `/api/labPackage/list` | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  | ✓ |  |  |
+| POST | `/api/labPackage/create` | ✓ | ✓ |  |  |  |  |  |  |  | ✓ |  |  |
+| PUT | `/api/labPackage/update` | ✓ | ✓ |  |  |  |  |  |  |  | ✓ |  |  |
 
 ### `lab_qc.py`
 
@@ -869,8 +869,8 @@
 | POST | `/api/mdt/create` | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |
 | GET | `/api/mdt/getList` | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |
 | POST | `/api/mdt/update` | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |
-| GET | `/api/mdt/approvalList` | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |
-| POST | `/api/mdt/approval` | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |
+| GET | `/api/mdt/approvalList` | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |
+| POST | `/api/mdt/approval` | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |
 
 ### `medical_record_archive.py`
 
@@ -878,12 +878,12 @@
 |------|------|------|------|------|------|------|------|------|------|------|------|------|------|
 | GET | `/api/medicalRecordArchive/list` | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |
 | POST | `/api/medicalRecordArchive/create` | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |
-| POST | `/api/medicalRecordArchive/archive` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
+| POST | `/api/medicalRecordArchive/archive` | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |
 | POST | `/api/medicalRecordArchive/borrow` | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |
-| GET | `/api/medicalRecordArchive/borrowRequests` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| POST | `/api/medicalRecordArchive/borrowApprove` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
+| GET | `/api/medicalRecordArchive/borrowRequests` | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |
+| POST | `/api/medicalRecordArchive/borrowApprove` | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |
 | POST | `/api/medicalRecordArchive/return` | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |
-| POST | `/api/medicalRecordArchive/seal` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
+| POST | `/api/medicalRecordArchive/seal` | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |
 
 ### `medical_record_home.py`
 
@@ -959,19 +959,19 @@
 
 | 方法 | 路径 | admin | super_admin | director | doctor | nurse | cashier | pharmacist | guide | patient | lab_technician | registrar | PUBLIC |
 |------|------|------|------|------|------|------|------|------|------|------|------|------|------|
-| GET | `/api/cssd/getList` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| POST | `/api/cssd/create` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| POST | `/api/cssd/transition` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| GET | `/api/pivas/getList` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| POST | `/api/pivas/create` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| POST | `/api/pivas/transition` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| GET | `/api/icuScore/getList` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| POST | `/api/icuScore/create` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| GET | `/api/pathwayEnrollment/getList` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| POST | `/api/pathwayEnrollment/enroll` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| POST | `/api/pathwayEnrollment/record` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| POST | `/api/pathwayEnrollment/variation` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| POST | `/api/pathwayEnrollment/exit` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
+| GET | `/api/cssd/getList` | ✓ | ✓ |  |  | ✓ |  |  |  |  |  |  |  |
+| POST | `/api/cssd/create` | ✓ | ✓ |  |  | ✓ |  |  |  |  |  |  |  |
+| POST | `/api/cssd/transition` | ✓ | ✓ |  |  | ✓ |  |  |  |  |  |  |  |
+| GET | `/api/pivas/getList` | ✓ | ✓ |  |  | ✓ |  | ✓ |  |  |  |  |  |
+| POST | `/api/pivas/create` | ✓ | ✓ |  |  | ✓ |  | ✓ |  |  |  |  |  |
+| POST | `/api/pivas/transition` | ✓ | ✓ |  |  | ✓ |  | ✓ |  |  |  |  |  |
+| GET | `/api/icuScore/getList` | ✓ | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |
+| POST | `/api/icuScore/create` | ✓ | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |
+| GET | `/api/pathwayEnrollment/getList` | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |
+| POST | `/api/pathwayEnrollment/enroll` | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |
+| POST | `/api/pathwayEnrollment/record` | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |
+| POST | `/api/pathwayEnrollment/variation` | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |
+| POST | `/api/pathwayEnrollment/exit` | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |
 
 ### `patient.py`
 
@@ -995,19 +995,19 @@
 
 | 方法 | 路径 | admin | super_admin | director | doctor | nurse | cashier | pharmacist | guide | patient | lab_technician | registrar | PUBLIC |
 |------|------|------|------|------|------|------|------|------|------|------|------|------|------|
-| GET | `/api/patientCard/list` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
+| GET | `/api/patientCard/list` | ✓ | ✓ |  |  |  |  |  |  | ✓ |  | ✓ |  |
 | POST | `/api/patientCard/issue` | ✓ | ✓ |  |  |  |  |  |  |  |  | ✓ |  |
-| POST | `/api/patientCard/lost` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
+| POST | `/api/patientCard/lost` | ✓ | ✓ |  |  |  |  |  |  | ✓ |  | ✓ |  |
 | POST | `/api/patientCard/cancel` | ✓ | ✓ |  |  |  |  |  |  |  |  | ✓ |  |
 
 ### `performance.py`
 
 | 方法 | 路径 | admin | super_admin | director | doctor | nurse | cashier | pharmacist | guide | patient | lab_technician | registrar | PUBLIC |
 |------|------|------|------|------|------|------|------|------|------|------|------|------|------|
-| GET | `/api/performance/getList` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| POST | `/api/performance/create` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| POST | `/api/performance/update` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| POST | `/api/performance/submit` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
+| GET | `/api/performance/getList` | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |
+| POST | `/api/performance/create` | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |
+| POST | `/api/performance/update` | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |
+| POST | `/api/performance/submit` | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |
 | POST | `/api/performance/audit` | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |
 
 ### `pharmacy.py`
@@ -1019,7 +1019,7 @@
 | GET | `/api/pharmacy/dispenseList` | ✓ | ✓ |  |  |  |  | ✓ |  |  |  |  |  |
 | POST | `/api/pharmacy/audit` | ✓ | ✓ |  |  |  |  | ✓ |  |  |  |  |  |
 | POST | `/api/pharmacy/dispense` | ✓ | ✓ |  |  |  |  | ✓ |  |  |  |  |  |
-| GET | `/api/pharmacy/verificationList` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
+| GET | `/api/pharmacy/verificationList` | ✓ | ✓ |  |  | ✓ |  | ✓ |  |  |  |  |  |
 | POST | `/api/pharmacy/verify` | ✓ | ✓ |  |  | ✓ |  |  |  |  |  |  |  |
 | POST | `/api/pharmacy/return` | ✓ | ✓ |  |  |  |  | ✓ |  |  |  |  |  |
 | POST | `/api/pharmacy/stockCheck` | ✓ | ✓ |  |  |  |  | ✓ |  |  |  |  |  |
@@ -1051,12 +1051,12 @@
 
 | 方法 | 路径 | admin | super_admin | director | doctor | nurse | cashier | pharmacist | guide | patient | lab_technician | registrar | PUBLIC |
 |------|------|------|------|------|------|------|------|------|------|------|------|------|------|
-| GET | `/api/rca/getList` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| POST | `/api/rca/create` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| POST | `/api/rca/advance` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| GET | `/api/hqms/getList` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| POST | `/api/hqms/create` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| POST | `/api/hqms/batchImport` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
+| GET | `/api/rca/getList` | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |
+| POST | `/api/rca/create` | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |
+| POST | `/api/rca/advance` | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |
+| GET | `/api/hqms/getList` | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |
+| POST | `/api/hqms/create` | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |
+| POST | `/api/hqms/batchImport` | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |
 | POST | `/api/hqms/submit` | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |
 
 ### `queue.py`
@@ -1066,7 +1066,7 @@
 | POST | `/api/queue/emergency` | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |
 | POST | `/api/queue/reorder` | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |
 | GET | `/api/queue/getList` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| GET | `/api/queue/progress` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
+| GET | `/api/queue/progress` |  |  |  |  |  |  |  |  | ✓ |  |  |  |
 | POST | `/api/queue/callNext` | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |
 | POST | `/api/queue/pass` | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |
 | POST | `/api/queue/skip` | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |
@@ -1080,26 +1080,26 @@
 | POST | `/api/referral/create` | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |
 | GET | `/api/referral/getList` | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |
 | POST | `/api/referral/updateStatus` | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |
-| GET | `/api/referral/approvalList` | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |
-| POST | `/api/referral/approval` | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |
+| GET | `/api/referral/approvalList` | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |
+| POST | `/api/referral/approval` | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |
 
 ### `report.py`
 
 | 方法 | 路径 | admin | super_admin | director | doctor | nurse | cashier | pharmacist | guide | patient | lab_technician | registrar | PUBLIC |
 |------|------|------|------|------|------|------|------|------|------|------|------|------|------|
-| POST | `/api/report/outpatientVolume` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| POST | `/api/report/finance` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| POST | `/api/report/pharmaceutical` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| POST | `/api/report/doctorWorkload` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| POST | `/api/report/departmentStats` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
+| POST | `/api/report/outpatientVolume` | ✓ | ✓ | ✓ | ✓ |  | ✓ |  |  |  |  |  |  |
+| POST | `/api/report/finance` | ✓ | ✓ | ✓ | ✓ |  | ✓ |  |  |  |  |  |  |
+| POST | `/api/report/pharmaceutical` | ✓ | ✓ | ✓ | ✓ |  | ✓ |  |  |  |  |  |  |
+| POST | `/api/report/doctorWorkload` | ✓ | ✓ | ✓ | ✓ |  | ✓ |  |  |  |  |  |  |
+| POST | `/api/report/departmentStats` | ✓ | ✓ | ✓ | ✓ |  | ✓ |  |  |  |  |  |  |
 
 ### `research.py`
 
 | 方法 | 路径 | admin | super_admin | director | doctor | nurse | cashier | pharmacist | guide | patient | lab_technician | registrar | PUBLIC |
 |------|------|------|------|------|------|------|------|------|------|------|------|------|------|
-| GET | `/api/research/export/tables` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| POST | `/api/research/export` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| POST | `/api/research/export/package` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
+| GET | `/api/research/export/tables` | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |
+| POST | `/api/research/export` | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |
+| POST | `/api/research/export/package` | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |
 | GET | `/api/research/export/audit` | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |
 
 ### `rx_review_rule.py`
@@ -1120,8 +1120,8 @@
 |------|------|------|------|------|------|------|------|------|------|------|------|------|------|
 | POST | `/api/scheduleChange/create` | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |
 | GET | `/api/scheduleChange/list` | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |
-| POST | `/api/scheduleChange/approve` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| POST | `/api/scheduleChange/reject` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
+| POST | `/api/scheduleChange/approve` | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |
+| POST | `/api/scheduleChange/reject` | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |
 
 ### `scheduler.py`
 
@@ -1135,7 +1135,7 @@
 | 方法 | 路径 | admin | super_admin | director | doctor | nurse | cashier | pharmacist | guide | patient | lab_technician | registrar | PUBLIC |
 |------|------|------|------|------|------|------|------|------|------|------|------|------|------|
 | POST | `/api/shiftHandover/create` | ✓ | ✓ |  |  | ✓ |  |  |  |  |  |  |  |
-| GET | `/api/shiftHandover/list` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
+| GET | `/api/shiftHandover/list` | ✓ | ✓ |  |  | ✓ |  |  |  |  |  |  |  |
 | POST | `/api/shiftHandover/receive` | ✓ | ✓ |  |  | ✓ |  |  |  |  |  |  |  |
 
 ### `skin_test.py`
@@ -1143,7 +1143,7 @@
 | 方法 | 路径 | admin | super_admin | director | doctor | nurse | cashier | pharmacist | guide | patient | lab_technician | registrar | PUBLIC |
 |------|------|------|------|------|------|------|------|------|------|------|------|------|------|
 | POST | `/api/skinTest/create` | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |
-| GET | `/api/skinTest/list` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
+| GET | `/api/skinTest/list` | ✓ | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |
 | POST | `/api/skinTest/administer` | ✓ | ✓ |  |  | ✓ |  |  |  |  |  |  |  |
 | POST | `/api/skinTest/assess` | ✓ | ✓ |  |  | ✓ |  |  |  |  |  |  |  |
 | POST | `/api/skinTest/cancel` | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |
@@ -1153,7 +1153,7 @@
 | 方法 | 路径 | admin | super_admin | director | doctor | nurse | cashier | pharmacist | guide | patient | lab_technician | registrar | PUBLIC |
 |------|------|------|------|------|------|------|------|------|------|------|------|------|------|
 | POST | `/api/specialDrug/create` | ✓ | ✓ |  |  |  |  | ✓ |  |  |  |  |  |
-| GET | `/api/specialDrug/list` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
+| GET | `/api/specialDrug/list` | ✓ | ✓ |  |  |  |  | ✓ |  |  |  |  |  |
 | POST | `/api/specialDrug/approve` | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |
 | POST | `/api/specialDrug/reject` | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |
 
@@ -1174,7 +1174,7 @@
 | POST | `/api/surgerySchedule/complete` | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |
 | GET | `/api/anesthesiaRecord/getList` | ✓ | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |
 | POST | `/api/anesthesiaRecord/create` | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |
-| GET | `/api/surgery/antibioticCompliance` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
+| GET | `/api/surgery/antibioticCompliance` | ✓ | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |
 
 ### `system.py`
 
@@ -1236,9 +1236,9 @@
 | POST | `/api/user/resetPassword` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
 | POST | `/api/user/delete` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
 | GET | `/api/prepaid/getBalance` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| POST | `/api/prepaid/recharge` | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |
-| POST | `/api/prepaid/deduct` | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |
-| POST | `/api/prepaid/refund` | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |
+| POST | `/api/prepaid/recharge` | ✓ | ✓ |  |  |  | ✓ |  |  |  |  |  |  |
+| POST | `/api/prepaid/deduct` | ✓ | ✓ |  |  |  | ✓ |  |  |  |  |  |  |
+| POST | `/api/prepaid/refund` | ✓ | ✓ |  |  |  | ✓ |  |  |  |  |  |  |
 | GET | `/api/prepaid/getTransactions` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
 
 ### `version.py`
@@ -1258,11 +1258,11 @@
 
 | 方法 | 路径 | admin | super_admin | director | doctor | nurse | cashier | pharmacist | guide | patient | lab_technician | registrar | PUBLIC |
 |------|------|------|------|------|------|------|------|------|------|------|------|------|------|
-| GET | `/api/ward/getList` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| POST | `/api/ward/create` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| POST | `/api/ward/update` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| POST | `/api/ward/delete` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| GET | `/api/bed/getList` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| POST | `/api/bed/create` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| POST | `/api/bed/update` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| POST | `/api/bed/delete` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
+| GET | `/api/ward/getList` | ✓ | ✓ |  |  | ✓ |  |  |  |  |  |  |  |
+| POST | `/api/ward/create` | ✓ | ✓ |  |  | ✓ |  |  |  |  |  |  |  |
+| POST | `/api/ward/update` | ✓ | ✓ |  |  | ✓ |  |  |  |  |  |  |  |
+| POST | `/api/ward/delete` | ✓ | ✓ |  |  | ✓ |  |  |  |  |  |  |  |
+| GET | `/api/bed/getList` | ✓ | ✓ |  |  | ✓ |  |  |  |  |  |  |  |
+| POST | `/api/bed/create` | ✓ | ✓ |  |  | ✓ |  |  |  |  |  |  |  |
+| POST | `/api/bed/update` | ✓ | ✓ |  |  | ✓ |  |  |  |  |  |  |  |
+| POST | `/api/bed/delete` | ✓ | ✓ |  |  | ✓ |  |  |  |  |  |  |  |

@@ -70,6 +70,8 @@ def generator():
         "ai_qsofa",
         "inpatient_support",
         "ai_vasoactive_mappings",
+        "ai_roster_sources",
+        "ai_roster_plans",
     ],
 )
 def test_observation_matrix_matches_real_mounted_paths_and_role_guards(module, generator):
@@ -134,6 +136,105 @@ def test_all_matrix_paths_match_actual_main_router_mounts(generator):
     assert actual
     assert generated == actual
     assert committed == actual
+
+
+def test_all_mounted_require_roles_match_actual_dependency_closures(generator):
+    """Every restricted route must retain all actual roles, including old groups."""
+    from fastapi.routing import APIRoute
+
+    from app.dependencies import get_current_user, require_roles
+    from app.main import app
+
+    def dependencies(dependant):
+        for child in dependant.dependencies:
+            yield child.call
+            yield from dependencies(child)
+
+    generated = {(item["method"], item["path"]): item["auth"] for item in generator["collect_endpoints"]()}
+    checked = set()
+    for route in app.routes:
+        if not isinstance(route, APIRoute) or not route.endpoint.__module__.startswith("app.routers."):
+            continue
+        calls = list(dependencies(route.dependant))
+        guards = [
+            call for call in calls if getattr(call, "__module__", None) == require_roles.__module__ and getattr(call, "__qualname__", None) == f"{require_roles.__qualname__}.<locals>._require_roles"
+        ]
+        if not guards:
+            continue
+        assert len(guards) == 1, route.path
+        assert get_current_user in calls, route.path
+        actual_roles = sorted(inspect.getclosurevars(guards[0]).nonlocals["allowed_roles"])
+        for method in route.methods:
+            key = (method, route.path)
+            assert generated[key] == actual_roles, key
+            checked.add(key)
+    assert len(checked) > 500, "The comparison must cover the actual application, not only the new routers"
+
+
+@pytest.mark.parametrize("alias", ["facts", "renamed"])
+def test_qualified_role_constant_uses_actual_explicit_import(tmp_path, generator, alias):
+    source = tmp_path / "router.py"
+    source.write_text(f'from app.ai import roster_facts as {alias}\nrouter = APIRouter()\n@router.get("/points")\ndef points(user=Depends(require_roles(*{alias}.SOURCE_ROLES))):\n    pass\n')
+    [endpoint] = generator["analyze_router"](str(source))
+    assert endpoint["auth"] == ["admin", "director", "super_admin"]
+
+
+def test_local_groups_and_imported_single_roles_are_not_guessed_from_global_names(tmp_path, generator):
+    source = tmp_path / "router.py"
+    source.write_text(
+        "from app.dependencies import ROLE_PATIENT as patient, ADMIN_ROLES as admins\n"
+        'LOCAL_ROLES = frozenset({*admins, patient}) | set(["doctor"])\n'
+        'router = APIRouter()\n@router.get("/points")\ndef points(user=Depends(require_roles(*LOCAL_ROLES, "nurse"))):\n    pass\n'
+    )
+    [endpoint] = generator["analyze_router"](str(source))
+    assert endpoint["auth"] == ["admin", "doctor", "nurse", "patient", "super_admin"]
+
+
+@pytest.mark.parametrize(
+    "declarations, expression",
+    [
+        ("", "*facts.SOURCE_ROLES"),
+        ("from elsewhere import roster_facts as facts", "*facts.SOURCE_ROLES"),
+        ("from app.ai import roster_facts as facts", "*unknown.SOURCE_ROLES"),
+        ("from app.ai import roster_facts as facts", "*facts.UNKNOWN_ROLES"),
+        ("from app.ai import roster_facts as facts\nfacts = runtime_module", "*facts.SOURCE_ROLES"),
+        ("from app.ai import roster_facts as facts\nif enabled:\n    facts = runtime_module", "*facts.SOURCE_ROLES"),
+        ("", "*UNKNOWN_ROLES"),
+        ("", "*ADMIN_ROLES"),
+        ("ROLES = get_roles()", "*ROLES"),
+        ('ROLES = {"doctor"}\nROLES = {"patient"}', "*ROLES"),
+        ("A = B\nB = A", "*A"),
+        ("", '"unknown_role"'),
+        ("", '"doctor", UNKNOWN_ROLE'),
+        ("", '*"doctor"'),
+        ("", 'roles={"doctor"}'),
+        ("", ""),
+    ],
+)
+def test_unresolved_or_ambiguous_role_arguments_fail_instead_of_becoming_any(tmp_path, generator, declarations, expression):
+    source = tmp_path / "router.py"
+    source.write_text(f'{declarations}\nrouter = APIRouter()\n@router.get("/points")\ndef points(user=Depends(require_roles({expression}))):\n    pass\n')
+    with pytest.raises(ValueError, match="role"):
+        generator["analyze_router"](str(source))
+
+
+def test_get_current_user_remains_any_authenticated(tmp_path, generator):
+    source = tmp_path / "router.py"
+    source.write_text('router = APIRouter()\n@router.get("/points")\ndef points(user=Depends(get_current_user)):\n    pass\n')
+    [endpoint] = generator["analyze_router"](str(source))
+    assert endpoint["auth"] == "ANY"
+
+
+@pytest.mark.parametrize("roles", ["*UNKNOWN_ROLES", '"doctor"'])
+def test_role_dependencies_are_checked_after_plain_authentication(tmp_path, generator, roles):
+    source = tmp_path / "router.py"
+    source.write_text(f'router = APIRouter()\n@router.get("/points")\ndef points(user=Depends(get_current_user), restricted=Depends(require_roles({roles}))):\n    pass\n')
+    if roles == "*UNKNOWN_ROLES":
+        with pytest.raises(ValueError, match="role"):
+            generator["analyze_router"](str(source))
+    else:
+        [endpoint] = generator["analyze_router"](str(source))
+        assert endpoint["auth"] == ["doctor"]
 
 
 def test_main_router_import_aliases_and_empty_mount_prefix(tmp_path, generator):
@@ -212,9 +313,14 @@ import runpy
 import sys
 from pathlib import Path
 def deny_env(event, args):
-    if event == 'open' and isinstance(args[0], (str, bytes, os.PathLike)) and Path(os.fsdecode(args[0])).name == '.env':
+    if event == 'open' and isinstance(args[0], (str, bytes, os.PathLike)) and (Path(os.fsdecode(args[0])).name == '.env' or Path(os.fsdecode(args[0])).name.startswith('.env.')):
         raise AssertionError('RBAC inventory must not access .env')
 sys.addaudithook(deny_env)
+class NoApplicationImports:
+    def find_spec(self, fullname, path=None, target=None):
+        if fullname == 'app' or fullname.startswith('app.'):
+            raise AssertionError('RBAC inventory must read source AST without importing ' + fullname)
+sys.meta_path.insert(0, NoApplicationImports())
 scope = runpy.run_path(sys.argv[1])
 assert 'app.config' not in sys.modules
 assert 'app.database' not in sys.modules
@@ -222,7 +328,10 @@ assert scope['ROLE_GROUPS']['OBSERVATION_ROLES']
 assert scope['ROLE_GROUPS']['WINDOW_ROLES']
 endpoints = scope['collect_endpoints']()
 assert endpoints
-assert {'inpatient_laboratory.py', 'ai_lab_mappings.py', 'ai_news2.py', 'ai_risk_rules.py', 'ai_aki.py'} <= {item['module'] for item in endpoints}
+assert not any(name == 'app' or name.startswith('app.') for name in sys.modules)
+assert {'inpatient_laboratory.py', 'ai_lab_mappings.py', 'ai_news2.py', 'ai_risk_rules.py', 'ai_aki.py', 'ai_roster_sources.py', 'ai_roster_plans.py'} <= {item['module'] for item in endpoints}
+roster_roles = [item for item in endpoints if item['module'] in {'ai_roster_sources.py', 'ai_roster_plans.py'} and not item['path'].startswith('/api/ai/admin/') and not item['path'].endswith('/review')]
+assert len(roster_roles) == 10 and all(item['auth'] == ['admin', 'director', 'super_admin'] for item in roster_roles)
 """
     result = subprocess.run([sys.executable, "-c", probe, str(Path(SCRIPT).resolve())], cwd=tmp_path, capture_output=True, text=True)
     assert result.returncode == 0, result.stdout + result.stderr

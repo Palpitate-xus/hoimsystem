@@ -166,34 +166,141 @@ def mounted_router_prefixes(path: Path) -> dict[str, str]:
     return mounts
 
 
-def _resolve_decorator_roles(call: ast.Call) -> set[str] | None:
-    """把 require_roles(*A, *B, 'x') 的参数解析为具体角色集合。"""
+class StaticRoles:
+    """Resolve only literal role expressions and their actual source imports.
+
+    No application module is imported or executed. Rebound names, dynamic
+    expressions and imports outside this backend's app package are ambiguous
+    and fail rather than broadening a route to any authenticated user.
+    """
+
+    def __init__(self, path: Path, modules=None):
+        self.path = path.resolve()
+        self.modules = modules if modules is not None else {}
+        self.modules[self.path] = self
+        self.bindings = {}
+        self.resolving = set()
+        self.tree = ast.parse(self.path.read_text(encoding="utf-8"))
+        for statement in self.tree.body:
+            if isinstance(statement, ast.Assign):
+                for target in statement.targets:
+                    if isinstance(target, ast.Name):
+                        self.bind(target.id, ("value", statement.value))
+            elif isinstance(statement, ast.AnnAssign) and isinstance(statement.target, ast.Name):
+                self.bind(statement.target.id, ("value", statement.value))
+            elif isinstance(statement, ast.ImportFrom):
+                for name in statement.names:
+                    self.bind(name.asname or name.name, ("from", (statement.module, statement.level, name.name)))
+            elif isinstance(statement, ast.Import):
+                for name in statement.names:
+                    self.bind(name.asname or name.name.split(".")[0], ("module", name.name if name.asname else name.name.split(".")[0]))
+            elif isinstance(statement, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+                self.bind(statement.name, ("dynamic", None))
+            else:
+                # A conditional/loop/try rebinding is not an unconditional
+                # source constant. Do not silently keep an earlier import.
+                for nested in ast.walk(statement):
+                    if isinstance(nested, ast.Name) and isinstance(nested.ctx, (ast.Store, ast.Del)):
+                        self.bind(nested.id, ("dynamic", None))
+                    elif isinstance(nested, ast.ImportFrom):
+                        for name in nested.names:
+                            self.bind(name.asname or name.name, ("dynamic", None))
+                    elif isinstance(nested, ast.Import):
+                        for name in nested.names:
+                            self.bind(name.asname or name.name.split(".")[0], ("dynamic", None))
+
+    def bind(self, name, definition):
+        self.bindings.setdefault(name, []).append(definition)
+
+    def definition(self, name):
+        definitions = self.bindings.get(name, [])
+        if len(definitions) != 1:
+            raise ValueError(f"{self.path}: role name {name!r} must have one explicit static binding")
+        return definitions[0]
+
+    def module(self, name):
+        if not isinstance(name, str) or not name.startswith("app.") or any(not part.isidentifier() for part in name.split(".")):
+            raise ValueError(f"{self.path}: role imports must name an explicit app module")
+        relative = BACKEND.joinpath(*name.split("."))
+        source = relative.with_suffix(".py")
+        if not source.is_file():
+            source = relative / "__init__.py"
+        if not source.is_file() or not source.resolve().is_relative_to(BACKEND.resolve()):
+            raise ValueError(f"{self.path}: role import module cannot be resolved: {name}")
+        source = source.resolve()
+        return self.modules.get(source) or StaticRoles(source, self.modules)
+
+    def named(self, name):
+        if name in self.resolving:
+            raise ValueError(f"{self.path}: cyclic role constant {name!r}")
+        self.resolving.add(name)
+        try:
+            kind, value = self.definition(name)
+            if kind == "value":
+                return self.value(value)
+            if kind == "from":
+                module, level, symbol = value
+                if level == 0 and symbol != "*":
+                    return self.module(module).named(symbol)
+            raise ValueError(f"{self.path}: role constant {name!r} is not a static value")
+        finally:
+            self.resolving.remove(name)
+
+    def value(self, node):
+        if isinstance(node, ast.Constant) and isinstance(node.value, str):
+            return node.value
+        if isinstance(node, ast.Name):
+            return self.named(node.id)
+        if isinstance(node, ast.Attribute) and isinstance(node.value, ast.Name):
+            kind, binding = self.definition(node.value.id)
+            if kind == "from":
+                module, level, symbol = binding
+                if level == 0 and symbol != "*":
+                    return self.module(f"{module}.{symbol}").named(node.attr)
+            if kind == "module":
+                return self.module(binding).named(node.attr)
+        if isinstance(node, (ast.Set, ast.List, ast.Tuple)):
+            result = set()
+            for item in node.elts:
+                value = self.value(item.value if isinstance(item, ast.Starred) else item)
+                if isinstance(item, ast.Starred) and isinstance(value, set):
+                    result.update(value)
+                elif not isinstance(item, ast.Starred) and isinstance(value, str):
+                    result.add(value)
+                else:
+                    raise ValueError(f"{self.path}: role collection members must be strings or explicit starred sets")
+            return result
+        if isinstance(node, ast.BinOp) and isinstance(node.op, ast.BitOr):
+            left, right = self.value(node.left), self.value(node.right)
+            if isinstance(left, set) and isinstance(right, set):
+                return left | right
+        if isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id in {"set", "frozenset"} and node.func.id not in self.bindings and len(node.args) <= 1 and not node.keywords:
+            value = self.value(node.args[0]) if node.args else set()
+            if isinstance(value, set):
+                return value
+        raise ValueError(f"{self.path}: role expression must be statically resolvable: {ast.unparse(node) if node is not None else 'None'}")
+
+
+def _resolve_decorator_roles(call: ast.Call, source: StaticRoles) -> set[str]:
     roles: set[str] = set()
-
-    def _absorb(node_obj) -> bool:
-        """递归解析角色引用：Name 常量或 {*A, *B} set 字面量。"""
-        if isinstance(node_obj, ast.Name) and node_obj.id in ROLE_GROUPS:
-            roles.update(ROLE_GROUPS[node_obj.id])
-            return True
-        if isinstance(node_obj, ast.Set):
-            ok = True
-            for elt in node_obj.elts:
-                item = elt.value if isinstance(elt, ast.Starred) else elt
-                ok = _absorb(item) and ok
-            return ok
-        return False
-
-    for arg in call.args:
-        if isinstance(arg, ast.Starred):
-            if not _absorb(arg.value):
-                return None  # 未知角色组，按 any-authenticated 处理
-        elif isinstance(arg, ast.Constant) and isinstance(arg.value, str):
-            roles.add(arg.value)
+    if call.keywords or not call.args:
+        raise ValueError(f"{source.path}:{call.lineno}: require_roles needs explicit positional role arguments")
+    for argument in call.args:
+        value = source.value(argument.value if isinstance(argument, ast.Starred) else argument)
+        if isinstance(argument, ast.Starred) and isinstance(value, set):
+            roles.update(value)
+        elif not isinstance(argument, ast.Starred) and isinstance(value, str):
+            roles.add(value)
+        else:
+            raise ValueError(f"{source.path}:{call.lineno}: require_roles arguments must be strings or explicit starred sets")
+    if not roles or not roles <= set(ALL_ROLES):
+        raise ValueError(f"{source.path}:{call.lineno}: require_roles contains empty or unknown roles")
     return roles
 
 
 def analyze_router(path: str, mount_prefix: str = "/api") -> list[dict]:
-    tree = ast.parse(Path(path).read_text(encoding="utf-8"))
+    source = StaticRoles(Path(path))
+    tree = source.tree
     prefixes = router_prefixes(tree, path)
     module = os.path.basename(path)
     endpoints = []
@@ -212,18 +319,17 @@ def analyze_router(path: str, mount_prefix: str = "/api") -> list[dict]:
         if not method or route_path is None:
             continue
 
-        auth = "PUBLIC"
+        authenticated = False
+        restricted_roles = []
         for default in node.args.defaults + [d for d in node.args.kw_defaults if d]:
-            found = None
             for sub in ast.walk(default):
                 if isinstance(sub, ast.Name) and sub.id in AUTH_DEPENDENCIES:
-                    found = "ANY"
+                    authenticated = True
                 elif isinstance(sub, ast.Call) and isinstance(sub.func, ast.Name) and sub.func.id == "require_roles":
-                    roles = _resolve_decorator_roles(sub)
-                    found = roles if roles else "ANY"
-            if found is not None:
-                auth = found
-                break
+                    restricted_roles.append(_resolve_decorator_roles(sub, source))
+        if len(restricted_roles) > 1:
+            raise ValueError(f"{path}:{node.lineno}: multiple require_roles guards need an explicit dependency model")
+        auth = restricted_roles[0] if restricted_roles else "ANY" if authenticated else "PUBLIC"
 
         endpoints.append(
             {

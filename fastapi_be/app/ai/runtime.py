@@ -13,10 +13,12 @@ from app.ai.audio_assets import authorize_audio_snapshot
 from app.ai.audio_files import open_verified_audio
 from app.ai.catalog import CATALOG_VERSION, COMMON_SYSTEM_PROMPT, FeatureSpec
 from app.ai.context import ContextBundle, authorize_patient, context_metadata, minimize_identifiers, patient_snapshot
+from app.ai.ecg_assets import authorize_ecg_snapshot
+from app.ai.ecg_files import open_verified_ecg
 from app.ai.gateway import AIExecutionError, generate
 from app.ai.governance import active_prompt, audit, digest, encode_json, get_spec, provider_credential, provider_feature_issues
 from app.ai.knowledge import evidence_is_current, retrieval_query, retrieve_evidence
-from app.ai.models import AIAudioAsset, AIFeatureConfig, AIProvider, AIRun, utcnow
+from app.ai.models import AIAudioAsset, AIECGAsset, AIFeatureConfig, AIProvider, AIRun, utcnow
 from app.ai.operational_sources import authorize_operational_snapshot, operational_context
 from app.ai.pathway_sources import PATHWAY_SOURCE_FEATURES, selected_pathway_ids
 from app.ai.review_curation import authorize_feedback_snapshot
@@ -95,6 +97,10 @@ def create_run(db: Session, user: User, req: RunRequest) -> AIRun:
         raise HTTPException(409, "库存预测或优化需要授权范围内的明确品种资料，请先选择真实目录品种并核实库存范围")
     if spec.number == 77 and not bundle.data.get("incident_record"):
         raise HTTPException(409, "RCA辅助分析需要明确选择当前已授权患者的不良事件记录")
+    if spec.number == 37:
+        metadata = bundle.data["ecg_source"]["signal_metadata"]
+        if all(lead["missing_samples"] == metadata["sample_count"] for lead in metadata["leads"]):
+            raise HTTPException(409, "原心电没有可用采样，只能查看原记录，不能创建候选判读任务")
     patient = db.get(Patient, req.patient_id) if req.patient_id else None
     clean_input = minimize_identifiers(req.input, patient)
     tools, tool_evidence = business_tools(db, spec, user, req.patient_id, clean_input, bundle)
@@ -164,6 +170,8 @@ def authorize_run(db: Session, user: User, run: AIRun) -> None:
         authorize_patient(db, user, run.patient_id, spec.category, run.encounter_ref)
         if spec.number == 21:
             authorize_audio_snapshot(db, user, json.loads(run.input_json).get("payload", {}).get("context", {}), authorize_patient)
+        if spec.number == 37:
+            authorize_ecg_snapshot(db, user, json.loads(run.input_json).get("payload", {}).get("context", {}), authorize_patient)
         billing_scope = json.loads(run.input_json).get("payload", {}).get("context", {}).get("billing_scope", {}) or {}
         source_encounter = billing_scope.get("admission_id") or billing_scope.get("registration_uuid")
         if source_encounter and source_encounter != run.encounter_ref:
@@ -229,6 +237,9 @@ def describe_run(run: AIRun, include_result: bool = True) -> dict:
         if spec.number == 21:
             context = json.loads(run.input_json).get("payload", {}).get("context", {})
             data["audio_findings"] = {key: context[key] for key in ("scope", "scope_note", "audio_source", "missing_data") if key in context}
+        if spec.number == 37:
+            context = json.loads(run.input_json).get("payload", {}).get("context", {})
+            data["ecg_findings"] = {key: context[key] for key in ("scope", "scope_note", "ecg_source", "missing_data") if key in context}
         if spec.number in {61, 62, 63, 64, 65, 66, 67, 70}:
             context = json.loads(run.input_json).get("payload", {}).get("context", {})
             keys = (
@@ -334,6 +345,7 @@ async def execute_claimed(run_id: str, lease: str, *, transport=None) -> None:
     error = result = None
     inputs = outputs = 0
     audio_file = None
+    ecg_files = None
     try:
         with database.SessionLocal() as db:
             run = db.get(AIRun, run_id)
@@ -343,9 +355,14 @@ async def execute_claimed(run_id: str, lease: str, *, transport=None) -> None:
             if spec.number == 21:
                 asset = db.get(AIAudioAsset, snapshot["payload"]["context"]["audio_source"]["asset_id"])
                 audio_file = open_verified_audio(asset)
+            if spec.number == 37:
+                asset = db.get(AIECGAsset, snapshot["payload"]["context"]["ecg_source"]["asset_id"])
+                ecg_files = open_verified_ecg(asset)
             db.expunge(provider)
         if audio_file is not None:
             result, inputs, outputs = await generate(provider, spec, snapshot["task_prompt"], snapshot["payload"], transport=transport, audio=audio_file)
+        elif ecg_files is not None:
+            result, inputs, outputs = await generate(provider, spec, snapshot["task_prompt"], snapshot["payload"], transport=transport, ecg=ecg_files[1])
         else:
             result, inputs, outputs = await generate(provider, spec, snapshot["task_prompt"], snapshot["payload"], transport=transport)
         pathway_ids = selected_pathway_ids(snapshot["payload"]["context"])
@@ -376,6 +393,9 @@ async def execute_claimed(run_id: str, lease: str, *, transport=None) -> None:
     finally:
         if audio_file is not None:
             audio_file.close()
+        if ecg_files is not None:
+            for stream in ecg_files:
+                stream.close()
     with database.SessionLocal() as db:
         run = db.query(AIRun).filter(AIRun.run_id == run_id, AIRun.status.in_(["running", "cancelled"]), AIRun.lease_token == lease).with_for_update().first()
         if run is None:

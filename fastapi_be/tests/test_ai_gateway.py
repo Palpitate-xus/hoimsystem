@@ -107,16 +107,16 @@ async def test_incomplete_json_response_is_never_treated_as_success():
 @pytest.mark.asyncio
 async def test_specialist_adapter_must_identify_feature_model_and_scope():
     def handle(request):
-        return httpx.Response(200, json={"schema_version": "1", "feature_key": "ecg_analysis", "model_version": "wrong-version", "applicable": True, "result": output()})
+        return httpx.Response(200, json={"schema_version": "1", "feature_key": "patient_summary", "model_version": "wrong-version", "applicable": True, "result": output()})
 
     with pytest.raises(AIExecutionError) as exc:
-        await generate(provider("specialist"), FEATURE_BY_KEY["ecg_analysis"], "任务", {}, transport=httpx.MockTransport(handle))
+        await generate(provider("specialist"), FEATURE_BY_KEY["patient_summary"], "任务", {}, transport=httpx.MockTransport(handle))
     assert exc.value.code == "ADAPTER_CONTRACT_MISMATCH"
 
 
 @pytest.mark.asyncio
 async def test_specialist_request_preserves_full_fixed_and_task_prompts():
-    spec = FEATURE_BY_KEY["ecg_analysis"]
+    spec = FEATURE_BY_KEY["patient_summary"]
     prompt = "独立任务Prompt：仅整理已验证模型的结果，不新增诊断"
 
     def handle(request):

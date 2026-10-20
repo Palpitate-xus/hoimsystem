@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 
 from app.ai.catalog import FEATURES
 from app.ai.context import accessible_patients, authorize_patient, context_metadata, get_encounter, patient_snapshot
+from app.ai.ecg_assets import authorize_ecg_patient
 from app.ai.governance import audit, describe_config, encode_json
 from app.ai.models import AIFeatureConfig, AIFeedback, AIRun, utcnow
 from app.ai.operational_sources import operational_context, operational_options
@@ -75,7 +76,10 @@ def inspect_operational_context(req: OperationalContextRequest, db: Session = De
 def encounter_options(feature_key: str, patient_id: int, db: Session = Depends(get_db), user: User = Depends(get_current_user)) -> dict:
     """Offer authorized encounters without widening access to another doctor's current case."""
     spec, _ = authorized_feature(db, user, feature_key)
-    authorize_patient(db, user, patient_id, spec.category)
+    if spec.number == 37:
+        authorize_ecg_patient(db, user, patient_id, authorize_patient)
+    else:
+        authorize_patient(db, user, patient_id, spec.category)
     items = []
     for model, id_field, time_field, label in [(Registration, "registration_uuid", "time", "门诊"), (Admission, "admission_id", "admission_time", "住院")]:
         for row in db.query(model).filter_by(patient_id=patient_id).order_by(getattr(model, time_field).desc()).limit(20).all():

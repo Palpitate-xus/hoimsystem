@@ -3,7 +3,7 @@
 > 由 `fastapi_be/scripts/generate_rbac_matrix.py` 从源码自动生成，请勿手改。
 > `✓`=可访问 | `PUBLIC`=无需登录 | 留空=不可访问
 
-共 **560** 个接口（PUBLIC 18 个 / 需登录 542 个）。
+共 **577** 个接口（PUBLIC 18 个 / 需登录 559 个）。
 
 
 ### `admin.py`
@@ -54,6 +54,28 @@
 | POST | `/api/adverseReaction/create` | ✓ | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |
 | GET | `/api/adverseReaction/getList` | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |
 | POST | `/api/adverseReaction/updateStatus` | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |
+
+### `ai_admin.py`
+
+| 方法 | 路径 | admin | super_admin | director | doctor | nurse | cashier | pharmacist | guide | patient | lab_technician | registrar | PUBLIC |
+|------|------|------|------|------|------|------|------|------|------|------|------|------|------|
+| GET | `/api/ai/admin/features` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| PUT | `/api/ai/admin/features/{key}` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/admin/providers` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/admin/providers` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| PUT | `/api/ai/admin/providers/{provider_id}` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/admin/prompts/{key}` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/admin/prompts/{key}` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/admin/prompts/{key}/activate` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/admin/knowledge` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/admin/knowledge/{document_id}` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/admin/knowledge` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/admin/knowledge/{document_id}/review` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/admin/grants` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/admin/grants` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| DELETE | `/api/ai/admin/grants/{grant_id}` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/admin/audit` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/admin/usage` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
 
 ### `allergy.py`
 

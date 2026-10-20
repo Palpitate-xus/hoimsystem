@@ -351,6 +351,7 @@ app = FastAPI(title="HOIM System FastAPI", default_response_class=APIJSONRespons
 
 from app.routers import (
     admin,
+    ai_admin,
     admission,
     adverse_event,
     adverse_reaction,
@@ -459,6 +460,7 @@ app.add_middleware(OperationLogMiddleware)
 app.add_middleware(ObservabilityMiddleware)
 
 app.include_router(observability_routes.router)
+app.include_router(ai_admin.router, prefix="/api")
 app.include_router(analytics.router, prefix="/api")
 app.include_router(performance.router, prefix="/api")
 app.include_router(home_icd.router, prefix="/api")

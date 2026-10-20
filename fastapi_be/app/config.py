@@ -24,6 +24,11 @@ class Settings(BaseSettings):
     DB_POOL_RECYCLE_SECONDS: int = Field(default=1800, ge=60, le=86400)
     DB_STATEMENT_TIMEOUT_MS: int = Field(default=15000, ge=1000, le=300000)
     REDIS_URL: str = ""
+    AI_PROVIDER_ALLOWED_HOSTS: str = "localhost,127.0.0.1,::1"
+    AI_CREDENTIAL_KEY: str = ""
+    AI_MAX_INPUT_CHARS: int = Field(default=20000, ge=1000, le=100000)
+    AI_MAX_CONTEXT_CHARS: int = Field(default=40000, ge=5000, le=200000)
+    AI_MAX_OUTPUT_TOKENS: int = Field(default=4000, ge=256, le=16000)
 
     DATABASE_URL: str = ""
 

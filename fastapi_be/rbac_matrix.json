@@ -290,6 +290,159 @@
   "path": "/api/adverseReaction/updateStatus"
  },
  {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "list_features",
+  "method": "GET",
+  "module": "ai_admin.py",
+  "path": "/api/ai/admin/features"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "update_feature",
+  "method": "PUT",
+  "module": "ai_admin.py",
+  "path": "/api/ai/admin/features/{key}"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "list_providers",
+  "method": "GET",
+  "module": "ai_admin.py",
+  "path": "/api/ai/admin/providers"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "create_provider",
+  "method": "POST",
+  "module": "ai_admin.py",
+  "path": "/api/ai/admin/providers"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "update_provider",
+  "method": "PUT",
+  "module": "ai_admin.py",
+  "path": "/api/ai/admin/providers/{provider_id}"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "list_prompts",
+  "method": "GET",
+  "module": "ai_admin.py",
+  "path": "/api/ai/admin/prompts/{key}"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "create_prompt",
+  "method": "POST",
+  "module": "ai_admin.py",
+  "path": "/api/ai/admin/prompts/{key}"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "activate_prompt",
+  "method": "POST",
+  "module": "ai_admin.py",
+  "path": "/api/ai/admin/prompts/{key}/activate"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "list_knowledge",
+  "method": "GET",
+  "module": "ai_admin.py",
+  "path": "/api/ai/admin/knowledge"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "knowledge_detail",
+  "method": "GET",
+  "module": "ai_admin.py",
+  "path": "/api/ai/admin/knowledge/{document_id}"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "create_knowledge",
+  "method": "POST",
+  "module": "ai_admin.py",
+  "path": "/api/ai/admin/knowledge"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "review_knowledge",
+  "method": "POST",
+  "module": "ai_admin.py",
+  "path": "/api/ai/admin/knowledge/{document_id}/review"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "list_grants",
+  "method": "GET",
+  "module": "ai_admin.py",
+  "path": "/api/ai/admin/grants"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "create_grant",
+  "method": "POST",
+  "module": "ai_admin.py",
+  "path": "/api/ai/admin/grants"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "revoke_grant",
+  "method": "DELETE",
+  "module": "ai_admin.py",
+  "path": "/api/ai/admin/grants/{grant_id}"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "list_audit",
+  "method": "GET",
+  "module": "ai_admin.py",
+  "path": "/api/ai/admin/audit"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "usage_summary",
+  "method": "GET",
+  "module": "ai_admin.py",
+  "path": "/api/ai/admin/usage"
+ },
+ {
   "auth": "ANY",
   "function": "list_allergies",
   "method": "GET",

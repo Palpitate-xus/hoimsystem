@@ -8,7 +8,16 @@ export const surgerySourceKinds=Object.freeze({case_requirements:'病例明确�
 export const surgeryRegistryKinds=Object.freeze({pool:'资源池',resource:'全局物理资源',person_account:'自然人账号关联',room_alias:'明确手术室别名',pool_membership:'资源池成员声明'});
 export const surgerySourceStates=Object.freeze({draft:'待审核草稿',published:'已审核发布',rejected:'审核拒绝',revoked:'已撤销'});
 export const surgerySchemaMatches=(name,value,definition=null)=>generatedSchemaMatches(schemas,name,value,definition);
-export function surgeryFormSchema(name){return ['SourceCreate','RegistryCreate','SourceReview','SourceRevoke'].includes(name)?JSON.parse(JSON.stringify(schemas[name])):null;}
+export function surgeryFormSchema(name,type=null){
+ if(!['SourceCreate','RegistryCreate','SourceReview','SourceRevoke','ProtectedCapsuleCreate'].includes(name))return null;
+ const schema=JSON.parse(JSON.stringify(schemas[name]));
+ if(type!==null){
+  const accepts=branch=>{if(branch.$ref){const key=branch.$ref.split('/').at(-1);return accepts(schema.$defs[key]);}if(branch.oneOf)return branch.oneOf.some(accepts);return branch.properties?.kind?.const===type;};
+  const filter=value=>{if(Array.isArray(value.oneOf))value.oneOf=value.oneOf.filter(accepts).map(filter);return value;};
+  filter(schema.properties.payload);
+ }
+ return schema;
+}
 export const surgeryPositive=value=>Number.isSafeInteger(value)&&value>0&&value<=2147483647;
 export const surgeryClock=value=>{try{return typeof value==='string'&&Number(value.slice(0,4))>=1000&&supportUtc(value)===value;}catch{return false;}};
 export const surgeryBasis=value=>typeof value==='string'&&Array.from(value).length<=4000&&Array.from(value).filter(c=>!/[\s\u0085\u001c-\u001f]/u.test(c)).length>=20&&new TextEncoder().encode(value).length<=4000;
@@ -27,6 +36,30 @@ export const getSurgeryRegistryRecord=(type,id,params)=>read(`ai/surgery-registr
 export const createSurgeryRegistry=(type,body)=>{if(body?.payload?.kind!==kind(type,surgeryRegistryKinds))throw new Error('登记正文与路径类型不一致');return write(`ai/surgery-registry/${type}`,body,'RegistryCreate');};
 export const reviewSurgeryRegistry=(type,id,body)=>write(`ai/surgery-registry/${kind(type,surgeryRegistryKinds)}/${segment(id)}/review`,body,'SourceReview');
 export const revokeSurgeryRegistry=(type,id,body)=>write(`ai/surgery-registry/${kind(type,surgeryRegistryKinds)}/${segment(id)}/revoke`,body,'SourceRevoke');
+// Read every actual page before presenting a complete registry candidate set.
+export async function getCompleteSurgeryRegistry(type,params={}){
+ let rows=[],total=null;
+ for(let page=1;page<=200;page++){
+  const data=(await getSurgeryRegistry(type,{...params,page,page_size:100})).data;
+  if(!data||!Array.isArray(data.items)||!Number.isSafeInteger(data.total)||data.total<0||data.total>20000||data.page!==page||data.page_size!==100||data.items.length>100||total!==null&&total!==data.total||data.items.some(r=>r.registry_kind!==type||!supportId(r.registry_record_id)||!supportHash(r.content_hash)||typeof r.eligible_for_new_use!=='boolean'))throw new Error('资源登记完整分页、类型或总量变化，请重新读取');
+  total=data.total;rows.push(...data.items);
+  if(rows.length===total){if(!unique(rows.map(r=>r.registry_record_id)))throw new Error('完整登记目录存在重复原件标识');return rows;}
+  if(!data.items.length||rows.length>total)break;
+ }
+ throw new Error('资源登记目录未完整读取，未使用截断候选');
+}
+// Existing authenticated identity directories, read only. Their status/role/name
+// never establishes surgical competence, actual care or all-location coverage.
+export const getSurgeryDepartments=(page=1)=>read('departmentManagement/getList',{page,page_size:100});
+export const getSurgeryUsers=(page=1)=>read('user/getList',{page,page_size:100});
+export const getSurgeryEquipment=()=>read('equipment/list');
+export const getSurgeryCssd=(keyword='')=>read('cssd/getList',{keyword});
+export async function getSurgeryIdentityDirectories(cssdKeyword=''){
+ async function pages(fetch,id,name){let rows=[],total=null;for(let page=1;page<=200;page++){const response=await fetch(page);if(!Array.isArray(response.data)||!Number.isSafeInteger(response.total)||response.total<0||response.total>20000||response.data.length>100||total!==null&&total!==response.total)throw new Error('身份目录完整分页或总量已变化，请重新读取');total=response.total;rows.push(...response.data);if(rows.length===total){if(rows.some(r=>!surgeryPositive(r[id])||typeof r[name]!=='string')||!unique(rows.map(r=>r[id])))throw new Error('真实身份目录存在错误或重复标识');return rows.map(r=>({value:r[id],label:r[name]+' · #'+r[id]}));}if(!response.data.length||rows.length>total)break;}throw new Error('身份目录未完整读取，不能把首批结果当全名单');}
+ const [departments,users,equipment,cssd]=await Promise.all([pages(getSurgeryDepartments,'id','name'),pages(getSurgeryUsers,'user_id','username'),getSurgeryEquipment(),getSurgeryCssd(cssdKeyword)]);
+ if(!Array.isArray(equipment.data)||!Array.isArray(cssd.data)||equipment.data.some(r=>!surgeryPositive(r.equipment_id)||typeof r.name!=='string')||cssd.data.some(r=>!surgeryPositive(r.instrument_id)||typeof r.package_name!=='string')||!unique(equipment.data.map(r=>r.equipment_id))||!unique(cssd.data.map(r=>r.instrument_id)))throw new Error('真实设备或CSSD检索候选格式不一致');
+ return{department_id:departments,user_id:users,equipment_id:equipment.data.map(r=>({value:r.equipment_id,label:r.name+' · '+r.asset_no+' · #'+r.equipment_id})),cssd_instrument_id:cssd.data.map(r=>({value:r.instrument_id,label:r.package_name+' · '+r.package_code+' · #'+r.instrument_id})),cssd_scope:'原包名/编号匹配候选，旧接口最多返回2000条；此检索不是完整CSSD名单或资源覆盖声明。'};
+}
 
 // Schema constraints remain separate from model-validator semantics. This walks
 // original text/amounts without rounding, inference or clinical default values.
@@ -69,6 +102,7 @@ export function surgeryRequestValid(model,v){
    const clinical=['case_requirements','duration_observation','case_duration_estimate'].includes(v.payload.kind),a=v.professional_attestation;
    return payloadValid(v.payload)&&(clinical?v.application_id!==null&&v.resource_id===null:v.resource_id!==null&&v.application_id===null&&a.status==='unknown')&&(a.status==='confirmed'?a.signer_doctor_id!==null&&a.basis_note!==null:a.signer_doctor_id===null&&a.basis_note===null);
   }
+  if(model==='ProtectedCapsuleCreate')return(v.participant_kind==='room')===(v.room_alias_id!==null)&&(v.participant_kind==='assistant')===(v.assistant_doctor_id!==null)&&surgeryBasis(v.clock_basis_note);
   return model!=='RegistryCreate'||registryPayloadValid(v.payload);
  }catch{return false;}
 }

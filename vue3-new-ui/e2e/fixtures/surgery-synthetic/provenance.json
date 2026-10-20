@@ -24,6 +24,12 @@
       "actual_export": "/tmp/hoim-surgery-provider-eight-kind-real-asgi-fixtures.json",
       "bytes": 41352,
       "sha256": "8d61eca877aa13368aff4a9e93aca399ab4b3e6e47c9a50cdd678c9655a946cb"
+    },
+    {
+      "fixture": "governance.json",
+      "actual_export": "/tmp/hoim-surgery-governance-ui-real-fixtures.json",
+      "bytes": 66875,
+      "sha256": "bcbd848649678a5bebb38503388b6776ce34f93ca7f1eb4644f2d5b172e99ed6"
     }
   ]
 }

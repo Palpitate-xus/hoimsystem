@@ -7,6 +7,14 @@ export const getAIPatients = (params) => request({ url: "ai/patients", method: "
 export const getAIEncounters = (params) => request({ url: "ai/encounters", method: "get", params });
 export const getAIPrescriptions = (params) => request({ url: "ai/prescriptions", method: "get", params });
 export const getAIPathwayOptions = (params) => request({ url: "ai/pathway-options", method: "get", params });
+export const getAIAudioOptions = () => request({ url: "ai/audio-options", method: "get" });
+export const getAIAudioAssets = (params) => request({ url: "ai/audio-assets", method: "get", params });
+export const getAIAudioAsset = (id) => request({ url: `ai/audio-assets/${id}`, method: "get" });
+export const getAIAudioContent = (id) => request({ url: `ai/audio-assets/${id}/content`, method: "get", responseType: "blob", timeout: 120000 });
+export const uploadAIAudio = (data) => request({ url: "ai/audio-assets", method: "post", data, headers: { "Content-Type": undefined }, timeout: 180000 });
+export const withdrawAIAudio = (id, data) => request({ url: `ai/audio-assets/${id}/withdraw`, method: "post", data });
+export const getAIAdminAudioAssets = (params) => request({ url: `${admin}/audio-assets`, method: "get", params });
+export const purgeAIAudio = (id, data) => request({ url: `${admin}/audio-assets/${id}/purge`, method: "post", data });
 export const getAIServiceOptions = (params) => request({ url: "ai/service-options", method: "get", params });
 export const getAIOperationalContext = (data) => request({ url: "ai/operational-context", method: "post", data });
 export const getAIClinicalContext = ({ feature_key, patient_id, encounter_ref, ...source_refs }) => request({ url: "ai/context", method: "post", data: { feature_key, patient_id, encounter_ref, source_refs } });

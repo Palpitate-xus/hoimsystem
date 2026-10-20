@@ -40,12 +40,13 @@
                 </el-table-column>
                 <el-table-column prop="doctor_name" label="医生" width="80" />
                 <el-table-column prop="create_time" label="时间" width="140" />
-                <el-table-column label="操作" width="320">
+                <el-table-column label="操作" width="440">
                   <template #default="{row}">
                     <el-button size="small" @click="showRecordDetail(row)">查看</el-button>
                     <el-button v-if="row.status===0" size="small" type="primary" @click="signRecord(row)">签名</el-button>
                     <diagnosis-review v-if="row.status" source-kind="structured" :source-id="row.record_id" />
                     <ai-action title="AI 住院病历辅助" :patient-id="row.patient_id" :encounter-ref="row.admission_id || ''" :initial-input="{ structured_record_id: row.record_id }" :feature-keys="['patient_summary', 'admission_note', 'progress_note', 'discharge_summary', 'record_quality', 'treatment_pathway', 'clinical_consistency']" initial-feature="record_quality" />
+                    <ai-action v-if="canUseSpeech" label="AI 录音转写" title="AI 原住院录音与转写复核" :patient-id="row.patient_id" :encounter-ref="row.admission_id || ''" :feature-keys="['medical_transcription']" initial-feature="medical_transcription" />
                   </template>
                 </el-table-column>
               </el-table>
@@ -192,6 +193,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from "vue";
+import { useStore } from "vuex";
 import { ElMessage, ElMessageBox } from "element-plus";
 import DiagnosisReview from "@/components/DiagnosisReview/index.vue";
 import AiAction from "@/components/AIAction/index.vue";
@@ -199,6 +201,8 @@ import { getInpatientList } from "@/api/admission";
 import { getStructuredRecordList, createStructuredRecord, getStructuredRecordDetail, signMedicalRecord, getProgressNoteList, createProgressNote, deleteProgressNote, getWardRoundList, createWardRound, deleteWardRound } from "@/api/emr";
 
 const inpatients = ref([]);
+const store = useStore();
+const canUseSpeech = computed(() => store.getters["user/permissions"].some(role => ["super_admin", "doctor", "director"].includes(role)));
 const patientKeyword = ref("");
 const currentPatient = ref(null);
 const activeTab = ref("records");

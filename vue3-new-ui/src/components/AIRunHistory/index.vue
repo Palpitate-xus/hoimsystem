@@ -30,6 +30,7 @@
           <el-alert v-if="!detail.snapshot_complete" type="info" :closable="false" title="旧任务按实际留存内容展示，部分执行快照字段未保存。" class="spaced" />
           <el-tabs v-model="detailTab" class="spaced">
             <el-tab-pane label="结果与引用" name="result">
+              <ai-speech-findings v-if="visible" :findings="detail.audio_findings" :transcription="detail.result?.transcription" @inspect="showEvidence" />
               <p class="plain-text">{{ detail.result?.summary || '此任务没有已接收的结果' }}</p>
               <el-alert v-for="(item, i) in detail.result?.warnings || []" :key="'warning-' + i" type="warning" :closable="false" :title="item" class="spaced" />
               <p v-for="(item, i) in detail.result?.missing_data || []" :key="'missing-' + i">待补资料：{{ item }}</p>
@@ -54,6 +55,7 @@
 import { onActivated, onBeforeUnmount, onDeactivated, onMounted, ref, watch } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { cancelAIRun, getAIAdminRuns, getAIAdminRunTrace } from "@/api/ai";
+import AiSpeechFindings from "@/components/AISpeechFindings/index.vue";
 const props = defineProps({ features: { type: Array, default: () => [] }, active: { type: Boolean, default: true } });
 const states = { queued: "排队中", running: "生成中", succeeded: "待业务复核", failed: "失败", cancelled: "已取消" };
 const outcomes = { accepted: "采纳", rejected: "驳回", modified: "修改后采纳" };

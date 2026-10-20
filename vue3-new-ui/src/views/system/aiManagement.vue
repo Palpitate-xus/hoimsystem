@@ -61,6 +61,8 @@
           </el-table>
         </el-tab-pane>
 
+        <el-tab-pane label="录音治理" name="audio"><ai-audio-management v-if="tab === 'audio'" /></el-tab-pane>
+
         <el-tab-pane label="患者访问授权" name="grants">
           <div class="page-toolbar"><el-button type="primary" @click="openGrant">新增限时授权</el-button><span>用于无法从现有诊疗关系确认的访问；授权不会扩大功能本身允许的角色。</span></div>
           <el-table :data="grants" empty-text="暂无显式授权">
@@ -197,6 +199,7 @@ import { computed, onMounted, ref, watch } from "vue";
 import { ElMessage } from "element-plus";
 import AiRunHistory from "@/components/AIRunHistory/index.vue";
 import AiReviewCuration from "@/components/AIReviewCuration/index.vue";
+import AiAudioManagement from "@/components/AIAudioManagement/index.vue";
 import {
   activateAIPrompt, createAIKnowledge, createAIPatientGrant, createAIPrompt,
   getAIAdminFeatures, getAIAudit, getAIKnowledge, getAIKnowledgeDetail, getAIPatientGrants, getAIPathwaySources, importAIPathway,

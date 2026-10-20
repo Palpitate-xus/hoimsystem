@@ -22,13 +22,14 @@
             <el-tag :type="row.status ? 'success' : 'warning'">{{ row.status_text || (row.status ? '已签名' : '草稿') }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="390">
+        <el-table-column label="操作" width="500">
           <template #default="{row}">
             <el-button v-if="!row.status" size="small" @click="handleEdit(row)">编辑</el-button>
             <el-button v-if="!row.status" size="small" type="success" @click="signRecord(row)">签名</el-button>
             <el-button size="small" @click="viewDetail(row)">详情</el-button>
             <diagnosis-review v-if="row.status" :source-id="row.uuid" @reviewed="fetchList" />
             <ai-action title="AI 病历与诊疗辅助" :patient-id="row.patient_id" :encounter-ref="row.registration_uuid || ''" :initial-input="{ record_id: row.uuid }" :feature-keys="['patient_summary', 'outpatient_note', 'record_quality', 'treatment_pathway', 'clinical_questions', 'guideline_qa']" initial-feature="record_quality" />
+            <ai-action v-if="canUseSpeech" label="AI 录音转写" title="AI 原录音与转写复核" :patient-id="row.patient_id" :encounter-ref="row.registration_uuid || ''" :feature-keys="['medical_transcription']" initial-feature="medical_transcription" />
           </template>
         </el-table-column>
       </el-table>
@@ -81,6 +82,7 @@
 
 <script setup>
 import { ref, onMounted, computed } from "vue";
+import { useStore } from "vuex";
 import AiAction from "@/components/AIAction/index.vue";
 import DiagnosisReview from "@/components/DiagnosisReview/index.vue";
 import { ElMessage, ElMessageBox } from "element-plus";
@@ -88,6 +90,8 @@ import { getMedicalRecordList, createMedicalRecord, updateMedicalRecord, signMed
 import { getPatientList } from "@/api/admin";
 
 const list = ref([]);
+const store = useStore();
+const canUseSpeech = computed(() => store.getters["user/permissions"].some(role => ["super_admin", "doctor", "director"].includes(role)));
 const searchQuery = ref("");
 const currentPage = ref(1);
 const pageSize = ref(10);

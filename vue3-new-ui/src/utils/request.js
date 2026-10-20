@@ -15,7 +15,7 @@ import qs from "qs";
 import router from "@/router";
 import { isArray } from "@/utils/validate";
 import { ElLoading, ElMessage } from "element-plus";
-import { pickBy } from "lodash-es";
+import { isPlainObject, pickBy } from "lodash-es";
 
 let loadingInstance;
 
@@ -93,7 +93,7 @@ instance.interceptors.request.use(
     }
 
     // 不过滤 0 / false / 空字符串，只过滤 null / undefined
-    if (config.data) config.data = pickBy(config.data, (v) => v !== null && v !== undefined);
+    if (isPlainObject(config.data)) config.data = pickBy(config.data, (v) => v !== null && v !== undefined);
     if (
       config.data &&
       config.headers["Content-Type"] ===

@@ -41,3 +41,14 @@ includes a draft with all four private fields null. Large duplicate lifecycle
 copies and native forecast analysis were omitted because these tests cover source
 capture and governance. All browser API responses remain synthetic interceptions;
 these fixtures do not establish production hospital data or model validation.
+
+`pipeline-7.json` and `pipeline-14.json` retain only actual `bed_findings`,
+`result.bed_analysis`, and evidence from the real ORM/native-ASGI/queue/blob/
+history/Super-trace exporter `/tmp/hoim-bed-pipeline-ui-final2-fixtures.json`
+(SHA256 `757aa9b4a3c4c7e0522ec5bcfe990e147c6af685e4dabd89510ba8f5b15f937b`).
+The source has 224 actual published daily originals, complete 112-day history,
+and both original horizon bindings. No values, IDs, hashes, fractions or runtime
+fields were changed. `provider-*.json` are actual authenticated admin route
+responses for matching/model-mismatch/timeout-mismatch configurations, exported
+by backend `test_actual_metadata_route_report` parametrizations 0/1/2. They are
+still mocked browser responses, not live provider probes from the browser.

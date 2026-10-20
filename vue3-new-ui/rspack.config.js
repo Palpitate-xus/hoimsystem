@@ -227,9 +227,10 @@ module.exports = {
         },
         // Reuse small admission-source/API modules across lazy AI screens.
         // The global 20 kB threshold otherwise leaves identical async copies.
+        // Bed source/series/result contracts also occur in several lazy screens.
         aiShared: {
           name: "ai-shared",
-          test: /[\\/]src[\\/](?:api[\\/](?:(?:ai[^\\/]*|inpatient(?:Observations|Gcs|Laboratory|Support)|vasoactiveMappings|roster(?:Sources|Plans)|sofaSchema)\.js|(?:sofa|roster)Schemas\.json)$|components[\\/]AI(?:(?:[A-Za-z]+ProviderCheck|[A-Za-z]+Findings)[\\/]|RosterSources[\\/](?:NullableValue|BreaksEditor)\.vue$|SofaInput[\\/]ReviewFields\.vue$|Action[\\/]index\.vue$))/,
+          test: /[\\/]src[\\/](?:api[\\/](?:(?:ai[^\\/]*|inpatient(?:Observations|Gcs|Laboratory|Support)|vasoactiveMappings|roster(?:Sources|Plans)|bed(?:Sources|Series|Forecast|Math)|sofaSchema)\.js|(?:(?:sofa|roster)Schemas|bed(?:SourceSchemas|SeriesSchemas|ResultSchemas|FixedPolicy))\.json)$|components[\\/]AI(?:(?:[A-Za-z]+ProviderCheck|[A-Za-z]+Findings)[\\/]|RosterSources[\\/](?:NullableValue|BreaksEditor)\.vue$|SofaInput[\\/]ReviewFields\.vue$|Action[\\/]index\.vue$))/,
           chunks: "async",
           minChunks: 2,
           minSize: 0,

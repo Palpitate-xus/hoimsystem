@@ -16,7 +16,7 @@ def dictionary_entry(row, kind: str) -> dict:
 
 
 def attach_coding_sources(db, user, spec, patient, encounter, bundle, add, selected, bounded, authorize) -> None:
-    if spec.number not in {27, 28, 30, 68, 69}:
+    if spec.number not in {27, 28, 30, 68}:
         return
     chosen = selected.get("home_id")
     if chosen is not None:

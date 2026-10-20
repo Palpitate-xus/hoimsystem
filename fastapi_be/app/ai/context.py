@@ -9,6 +9,7 @@ from fastapi import HTTPException
 from sqlalchemy import case, or_, select
 from sqlalchemy.orm import Session, selectinload
 
+from app.ai.billing_sources import attach_billing_sources
 from app.ai.care import surgical_patient_ids
 from app.ai.catalog import FeatureSpec
 from app.ai.coding_sources import attach_coding_sources
@@ -24,6 +25,7 @@ from app.models import (
     Doctor,
     ImagingOrder,
     ImagingReport,
+    InpatientCharge,
     LabObservation,
     LabOrder,
     LabResult,
@@ -187,6 +189,7 @@ def _selected_records(db: Session, user: User, patient_id: int, references: dict
         ("surgery_schedule_id", SurgerySchedule, "schedule_id", None),
         ("perioperative_id", PerioperativeAntibiotic, "perioperative_id", None),
         ("home_id", MedicalRecordHome, "home_id", None),
+        ("inpatient_charge_id", InpatientCharge, "charge_id", None),
     ]
     for key, model, primary_key, order in sources:
         reference = references.get(key)
@@ -248,12 +251,22 @@ def patient_snapshot(db: Session, user: User, spec: FeatureSpec, patient_id: int
         if isinstance(encounter, Admission) and encounter.admission_diagnosis:
             bundle.data["encounter"]["recorded_admission_diagnosis"] = encounter.admission_diagnosis
     else:
-        bundle.data["missing_data"].append("未指定本次就诊，既往诊断不会视为本次确认诊断")
+        bundle.data["missing_data"].append("未指定本次就诊，将核实所选收费资料的范围" if spec.number == 69 else "未指定本次就诊，既往诊断不会视为本次确认诊断")
 
     def add(source_id: str, title: str, fields: dict, observed_at: object = None, *, kind: str = "patient_record") -> dict:
         clean = json.loads(encode_json(minimize_identifiers(fields, patient)))
         bundle.evidence.append({"source_id": source_id, "kind": kind, "title": title, "observed_at": str(observed_at) if observed_at else None, "content": encode_json(clean)})
         return {"source_id": source_id, **clean}
+
+    if spec.number == 69:
+        # Billing only needs the selected financial/execution links, not unrelated clinical history.
+        for key in ("age", "sex", "current_confirmed_diagnoses", "diagnosis_reviews"):
+            bundle.data.pop(key, None)
+        attach_billing_sources(db, user, spec, patient, encounter, bundle, add, selected, bounded, authorize_patient)
+        bundle.data = minimize_identifiers(bundle.data, patient)
+        if len(encode_json(bundle.data)) > settings.AI_MAX_CONTEXT_CHARS:
+            raise HTTPException(422, "账务资料超过上下文限制，请选择具体费用记录缩小范围")
+        return bundle
 
     def attach_diagnosis_review(record, reviews: dict) -> str:
         state, review = review_state(record, reviews)

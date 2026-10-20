@@ -12,6 +12,23 @@
       <p>服务报告覆盖原样本 {{ analysis.processing.processed_original_sample_count }}/{{ analysis.processing.input_sample_count }}；实际使用导联 {{ analysis.processing.used_leads.join('、') }}。完整输入报告不证明识别准确或临床已验证。</p>
       <p>缺失处理：{{ analysis.processing.missing_sample_handling === 'masked' ? '模型报告使用掩码，仍需核对适用性' : '模型报告无缺失样本' }}。</p>
       <p v-for="(item, index) in analysis.processing.preprocessing_notes" :key="index" class="recorded-text">模型预处理说明：{{ item }}</p>
+      <section v-if="localRuntime" class="local-runtime" aria-label="本地心电研究模型运行记录">
+        <h4>本地心电研究模型运行记录</h4>
+        <el-descriptions :column="1" border>
+          <el-descriptions-item label="运行引擎">{{ localRuntime.engine }}；<span v-for="(version, engine) in localRuntime.engine_versions" :key="engine">{{ engine }} {{ version }} </span></el-descriptions-item>
+          <el-descriptions-item label="模型来源版本">{{ localRuntime.model_repository }} · {{ localRuntime.model_revision }}</el-descriptions-item>
+          <el-descriptions-item label="模型文件摘要"><span class="recorded-text">{{ localRuntime.model_digest }}</span></el-descriptions-item>
+          <el-descriptions-item label="运行环境摘要"><span class="recorded-text">{{ localRuntime.runtime_digest }}</span></el-descriptions-item>
+          <el-descriptions-item label="预处理摘要"><span class="recorded-text">{{ localRuntime.preprocessing_digest }}</span></el-descriptions-item>
+          <el-descriptions-item label="固定输入">原始 {{ localRuntime.required_leads.join('、') }} 导联；{{ localRuntime.sample_rate_hz }} Hz，每导联 {{ localRuntime.samples_per_lead }} 个样本，{{ localRuntime.samples_per_lead / localRuntime.sample_rate_hz }} 秒</el-descriptions-item>
+          <el-descriptions-item label="缺失样本策略">{{ localRuntime.missing_sample_policy }}：拒绝缺失样本；不滤波、不重采样、不填补或补零、不裁剪原始输入。</el-descriptions-item>
+          <el-descriptions-item label="模型训练标签">{{ localRuntime.labels.join('、') }}</el-descriptions-item>
+          <el-descriptions-item label="Prompt 处理方式">{{ localRuntime.prompt_handling }}：仅对所选原始信号分类，Prompt 不能补造导联、波形或临床信息。</el-descriptions-item>
+          <el-descriptions-item label="人群适用性">{{ localRuntime.population_applicability }}：未核实采集时人群及本模型适用性。</el-descriptions-item>
+          <el-descriptions-item label="临床验证">{{ localRuntime.clinical_validation }}：未提供临床验证，不代表已验证的临床准确性。</el-descriptions-item>
+        </el-descriptions>
+        <p>以下为训练标签各自的全记录原始分数，未设置诊断阈值，不能据此判定正常或确诊；各分数仍须结合原波形及医生复核。</p>
+      </section>
       <el-table :data="analysis.findings" empty-text="未返回候选不表示正常，仍须结合原波形和医生复核">
         <el-table-column label="模型候选（待复核）" min-width="180"><template #default="{ row }">{{ row.label }}</template></el-table-column>
         <el-table-column label="原导联与定位" min-width="180"><template #default="{ row }">{{ row.leads.join('、') }}<br />{{ row.location === 'recording' ? '全记录级，未提供局部定位' : `原样本${row.start_sample}–${row.end_sample_exclusive}（结束不含）` }}</template></el-table-column>
@@ -31,8 +48,9 @@ import AiEcgViewer from "@/components/AIEcgViewer/index.vue";
 const props = defineProps({ findings: { type: Object, default: null }, analysis: { type: Object, default: null }, allowCopy: Boolean });
 defineEmits(["inspect", "copy"]);
 const viewer = ref(null), source = computed(() => props.findings?.ecg_source || null);
+const localRuntime = computed(() => props.analysis?.processing?.local_runtime || null);
 function locate(row) { if (row.location === "sample_interval") viewer.value?.seekTo(row.start_sample, row.end_sample_exclusive, row.leads); else viewer.value?.showRecording(); }
 </script>
 <style scoped>
-.ecg-findings { margin: 16px 0; line-height: 1.7; }.recorded-text { white-space: pre-wrap; overflow-wrap: anywhere; }.data-gap { color: #8b5d12; }
+.ecg-findings { margin: 16px 0; line-height: 1.7; }.recorded-text { white-space: pre-wrap; overflow-wrap: anywhere; }.data-gap { color: #8b5d12; }.local-runtime { margin: 16px 0; }
 </style>

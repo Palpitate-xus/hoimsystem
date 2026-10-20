@@ -1,0 +1,1913 @@
+{
+  "admin_list": {
+    "items": [
+      {
+        "audit_only": true,
+        "can_record": false,
+        "can_review": false,
+        "can_revoke": true,
+        "content_hash": "264266b9cec417bfe0fa260cf304b86045ad681bfd1485f4ac5c1fd218349828",
+        "created_by": 13,
+        "department_id": 1,
+        "eligibility_basis": "published_governance_and_current_ward_department_not_census_coverage_capacity_readiness_or_forecast_validation",
+        "eligible": false,
+        "exclusion_reasons": [
+          "ward_department_binding_changed"
+        ],
+        "governance_hash": "d360c7bb7d24c3585612e672e650f33f8ca6615e57dd68149811aeb8407f8a0a",
+        "parent_current": false,
+        "recorded_at": "2026-10-20T09:10:11.123456Z",
+        "reviewed_at": "2026-10-20T09:10:11.123456Z",
+        "reviewed_by": 4,
+        "revision": 2,
+        "revoked_at": null,
+        "revoked_by": null,
+        "schema_version": "bed_source_private_v1",
+        "source_id": "bed_census:201e5050-e2ea-4549-b892-77f68979c92f:264266b9cec4",
+        "source_kind": "census",
+        "source_record_id": "201e5050-e2ea-4549-b892-77f68979c92f",
+        "status": "published",
+        "ward_id": 1
+      },
+      {
+        "audit_only": true,
+        "can_record": false,
+        "can_review": false,
+        "can_revoke": false,
+        "content_hash": "65c2dd964950e17ec11f48a51f78750bf347f27e286b48d51bc3c41d0136c81c",
+        "created_by": 13,
+        "department_id": 1,
+        "eligibility_basis": "published_governance_and_current_ward_department_not_census_coverage_capacity_readiness_or_forecast_validation",
+        "eligible": false,
+        "exclusion_reasons": [
+          "ward_department_binding_changed",
+          "source_revoked"
+        ],
+        "governance_hash": "751d51755d70e82598b30578ac55aae0b9773a8039a3401979c7e6462c236c03",
+        "parent_current": false,
+        "recorded_at": "2026-10-20T09:10:11.123456Z",
+        "reviewed_at": "2026-10-20T09:10:11.123456Z",
+        "reviewed_by": 4,
+        "revision": 3,
+        "revoked_at": "2026-10-20T09:10:11.123456Z",
+        "revoked_by": 13,
+        "schema_version": "bed_source_private_v1",
+        "source_id": "bed_capacity_interval:23dedaf3-1d6d-47fa-a681-0e6f3c683622:65c2dd964950",
+        "source_kind": "capacity_interval",
+        "source_record_id": "23dedaf3-1d6d-47fa-a681-0e6f3c683622",
+        "status": "revoked",
+        "ward_id": 1
+      },
+      {
+        "audit_only": true,
+        "can_record": false,
+        "can_review": false,
+        "can_revoke": false,
+        "content_hash": "7d2a3b1474b9c8279f7b318d74b914c9ca2c63c19d3e999415826b421f7007b5",
+        "created_by": 13,
+        "department_id": 1,
+        "eligibility_basis": "published_governance_and_current_ward_department_not_census_coverage_capacity_readiness_or_forecast_validation",
+        "eligible": false,
+        "exclusion_reasons": [
+          "ward_department_binding_changed",
+          "source_revoked"
+        ],
+        "governance_hash": "751d51755d70e82598b30578ac55aae0b9773a8039a3401979c7e6462c236c03",
+        "parent_current": false,
+        "recorded_at": "2026-10-20T09:10:11.123456Z",
+        "reviewed_at": "2026-10-20T09:10:11.123456Z",
+        "reviewed_by": 4,
+        "revision": 3,
+        "revoked_at": "2026-10-20T09:10:11.123456Z",
+        "revoked_by": 13,
+        "schema_version": "bed_source_private_v1",
+        "source_id": "bed_flow_day:273dc01c-9c95-44ba-9b0d-aa14b132713b:7d2a3b1474b9",
+        "source_kind": "flow_day",
+        "source_record_id": "273dc01c-9c95-44ba-9b0d-aa14b132713b",
+        "status": "revoked",
+        "ward_id": 1
+      },
+      {
+        "audit_only": true,
+        "can_record": false,
+        "can_review": false,
+        "can_revoke": false,
+        "content_hash": "146f2c4b9136f997e28a9176397bf5d9460c1458ff8cf95800642de0c06492b5",
+        "created_by": 13,
+        "department_id": 1,
+        "eligibility_basis": "published_governance_and_current_ward_department_not_census_coverage_capacity_readiness_or_forecast_validation",
+        "eligible": false,
+        "exclusion_reasons": [
+          "ward_department_binding_changed",
+          "source_rejected"
+        ],
+        "governance_hash": "6cab4cd63d6e420469c6979a4341016768ac94b84f3a0922359776e5914465f3",
+        "parent_current": false,
+        "recorded_at": "2026-10-20T09:10:11.123456Z",
+        "reviewed_at": "2026-10-20T09:10:11.123456Z",
+        "reviewed_by": 4,
+        "revision": 2,
+        "revoked_at": null,
+        "revoked_by": null,
+        "schema_version": "bed_source_private_v1",
+        "source_id": "bed_census:2c59efce-3f52-4334-a4bc-67a8eebe4c4a:146f2c4b9136",
+        "source_kind": "census",
+        "source_record_id": "2c59efce-3f52-4334-a4bc-67a8eebe4c4a",
+        "status": "rejected",
+        "ward_id": 1
+      },
+      {
+        "audit_only": true,
+        "can_record": false,
+        "can_review": false,
+        "can_revoke": true,
+        "content_hash": "2f9310314667c604cc9a1d90254e2da35bdc71ccb338931a9e3b28d7e15f1bcb",
+        "created_by": 13,
+        "department_id": 1,
+        "eligibility_basis": "published_governance_and_current_ward_department_not_census_coverage_capacity_readiness_or_forecast_validation",
+        "eligible": false,
+        "exclusion_reasons": [
+          "ward_department_binding_changed"
+        ],
+        "governance_hash": "d360c7bb7d24c3585612e672e650f33f8ca6615e57dd68149811aeb8407f8a0a",
+        "parent_current": false,
+        "recorded_at": "2026-10-20T09:10:11.123456Z",
+        "reviewed_at": "2026-10-20T09:10:11.123456Z",
+        "reviewed_by": 4,
+        "revision": 2,
+        "revoked_at": null,
+        "revoked_by": null,
+        "schema_version": "bed_source_private_v1",
+        "source_id": "bed_capacity_interval:af4c65cc-b14d-48e7-bb42-8661fe616b21:2f9310314667",
+        "source_kind": "capacity_interval",
+        "source_record_id": "af4c65cc-b14d-48e7-bb42-8661fe616b21",
+        "status": "published",
+        "ward_id": 1
+      },
+      {
+        "audit_only": true,
+        "can_record": false,
+        "can_review": false,
+        "can_revoke": false,
+        "content_hash": "24f6d92076085d9f2f20d68033b3e04362e78be6a7ae96b621c45bdc83d596e1",
+        "created_by": 13,
+        "department_id": 1,
+        "eligibility_basis": "published_governance_and_current_ward_department_not_census_coverage_capacity_readiness_or_forecast_validation",
+        "eligible": false,
+        "exclusion_reasons": [
+          "ward_department_binding_changed",
+          "source_revoked"
+        ],
+        "governance_hash": "751d51755d70e82598b30578ac55aae0b9773a8039a3401979c7e6462c236c03",
+        "parent_current": false,
+        "recorded_at": "2026-10-20T09:10:11.123456Z",
+        "reviewed_at": "2026-10-20T09:10:11.123456Z",
+        "reviewed_by": 4,
+        "revision": 3,
+        "revoked_at": "2026-10-20T09:10:11.123456Z",
+        "revoked_by": 13,
+        "schema_version": "bed_source_private_v1",
+        "source_id": "bed_census:c4d2b9a2-0e82-4854-a5de-5a3b0afc2601:24f6d9207608",
+        "source_kind": "census",
+        "source_record_id": "c4d2b9a2-0e82-4854-a5de-5a3b0afc2601",
+        "status": "revoked",
+        "ward_id": 1
+      }
+    ],
+    "page": 1,
+    "page_size": 20,
+    "total": 6
+  },
+  "department_options": {
+    "can_record": true,
+    "can_review": false,
+    "department_id": 1,
+    "provider_required": false,
+    "schema_version": "bed_source_private_v1",
+    "scope_note": "仅当前科室病区身份目录，包含停用病区以登记历史原量；不证明占床覆盖、当前可收治名额或未来容量，不回填历史床位状态。",
+    "source_kinds": [
+      "census",
+      "flow_day",
+      "capacity_interval"
+    ],
+    "wards": [
+      {
+        "department_id": 1,
+        "name": "合成病区",
+        "status": 0,
+        "ward_id": 1
+      }
+    ]
+  },
+  "evidence_scope": "isolated synthetic SQLite ORM + actual JWT + actual dedicated FastAPI router; no hospital database, no main app mounting, no external provider",
+  "future_scenario": {
+    "create_request": {
+      "payload": {
+        "basis_kind": "reviewed_future_scenario",
+        "capacity_basis_note": "合成病区床位原证据仅用于隔离工程验证，已明确核对观察与登记时刻及缺项状态，不代表真实医院运营资料。",
+        "capacity_definition": "total_operational_physical_beds_v1",
+        "coverage": "attested_complete",
+        "end_at": "2026-10-21T00:00:00.000000Z",
+        "equipment_readiness": "confirmed",
+        "immediate_admittable_slots": {
+          "absent_reason": "not_recorded",
+          "value": null
+        },
+        "immediate_slots_observed_at": null,
+        "isolation_applicability": "not_confirmed",
+        "observed_at": null,
+        "operational_total_beds": {
+          "absent_reason": null,
+          "value": 20
+        },
+        "schema_version": "bed_capacity_interval_v1",
+        "staff_readiness": "unknown",
+        "start_at": "2026-10-19T00:00:00.000000Z"
+      },
+      "ward_id": 1
+    },
+    "draft": {
+      "audit_only": false,
+      "can_record": true,
+      "can_review": false,
+      "can_revoke": true,
+      "content_hash": "2f9310314667c604cc9a1d90254e2da35bdc71ccb338931a9e3b28d7e15f1bcb",
+      "created_by": 13,
+      "department_id": 1,
+      "eligibility_basis": "published_governance_and_current_ward_department_not_census_coverage_capacity_readiness_or_forecast_validation",
+      "eligible": false,
+      "exclusion_reasons": [
+        "source_draft"
+      ],
+      "governance_hash": "1e92d8dd6c108fe25e5092d431157a1c1177c90e1e90cc704f780af04ea942bd",
+      "parent_binding": {
+        "department": {
+          "department_id": 1
+        },
+        "ward": {
+          "department_id": 1,
+          "ward_id": 1
+        }
+      },
+      "parent_current": true,
+      "payload": {
+        "basis_kind": "reviewed_future_scenario",
+        "capacity_basis_note": "合成病区床位原证据仅用于隔离工程验证，已明确核对观察与登记时刻及缺项状态，不代表真实医院运营资料。",
+        "capacity_definition": "total_operational_physical_beds_v1",
+        "coverage": "attested_complete",
+        "end_at": "2026-10-21T00:00:00.000000Z",
+        "equipment_readiness": "confirmed",
+        "immediate_admittable_slots": {
+          "absent_reason": "not_recorded",
+          "value": null
+        },
+        "immediate_slots_observed_at": null,
+        "isolation_applicability": "not_confirmed",
+        "observed_at": null,
+        "operational_total_beds": {
+          "absent_reason": null,
+          "value": 20
+        },
+        "schema_version": "bed_capacity_interval_v1",
+        "staff_readiness": "unknown",
+        "start_at": "2026-10-19T00:00:00.000000Z"
+      },
+      "recorded_at": "2026-10-20T09:10:11.123456Z",
+      "review_basis_note": "",
+      "reviewed_at": null,
+      "reviewed_by": null,
+      "revision": 1,
+      "revoke_reason": "",
+      "revoked_at": null,
+      "revoked_by": null,
+      "schema_version": "bed_source_private_v1",
+      "source_id": "bed_capacity_interval:af4c65cc-b14d-48e7-bb42-8661fe616b21:2f9310314667",
+      "source_kind": "capacity_interval",
+      "source_record_id": "af4c65cc-b14d-48e7-bb42-8661fe616b21",
+      "status": "draft",
+      "ward_id": 1
+    },
+    "published": {
+      "audit_only": true,
+      "can_record": true,
+      "can_review": false,
+      "can_revoke": true,
+      "content_hash": "2f9310314667c604cc9a1d90254e2da35bdc71ccb338931a9e3b28d7e15f1bcb",
+      "created_by": 13,
+      "department_id": 1,
+      "eligibility_basis": "published_governance_and_current_ward_department_not_census_coverage_capacity_readiness_or_forecast_validation",
+      "eligible": true,
+      "exclusion_reasons": [],
+      "governance_hash": "d360c7bb7d24c3585612e672e650f33f8ca6615e57dd68149811aeb8407f8a0a",
+      "parent_binding": {
+        "department": {
+          "department_id": 1
+        },
+        "ward": {
+          "department_id": 1,
+          "ward_id": 1
+        }
+      },
+      "parent_current": true,
+      "payload": {
+        "basis_kind": "reviewed_future_scenario",
+        "capacity_basis_note": "合成病区床位原证据仅用于隔离工程验证，已明确核对观察与登记时刻及缺项状态，不代表真实医院运营资料。",
+        "capacity_definition": "total_operational_physical_beds_v1",
+        "coverage": "attested_complete",
+        "end_at": "2026-10-21T00:00:00.000000Z",
+        "equipment_readiness": "confirmed",
+        "immediate_admittable_slots": {
+          "absent_reason": "not_recorded",
+          "value": null
+        },
+        "immediate_slots_observed_at": null,
+        "isolation_applicability": "not_confirmed",
+        "observed_at": null,
+        "operational_total_beds": {
+          "absent_reason": null,
+          "value": 20
+        },
+        "schema_version": "bed_capacity_interval_v1",
+        "staff_readiness": "unknown",
+        "start_at": "2026-10-19T00:00:00.000000Z"
+      },
+      "recorded_at": "2026-10-20T09:10:11.123456Z",
+      "review_basis_note": "合成病区床位原证据仅用于隔离工程验证，已明确核对观察与登记时刻及缺项状态，不代表真实医院运营资料。",
+      "reviewed_at": "2026-10-20T09:10:11.123456Z",
+      "reviewed_by": 4,
+      "revision": 2,
+      "revoke_reason": "",
+      "revoked_at": null,
+      "revoked_by": null,
+      "schema_version": "bed_source_private_v1",
+      "source_id": "bed_capacity_interval:af4c65cc-b14d-48e7-bb42-8661fe616b21:2f9310314667",
+      "source_kind": "capacity_interval",
+      "source_record_id": "af4c65cc-b14d-48e7-bb42-8661fe616b21",
+      "status": "published",
+      "ward_id": 1
+    },
+    "review_request": {
+      "decision": "publish",
+      "expected_content_hash": "2f9310314667c604cc9a1d90254e2da35bdc71ccb338931a9e3b28d7e15f1bcb",
+      "expected_revision": 1,
+      "review_basis_note": "合成病区床位原证据仅用于隔离工程验证，已明确核对观察与登记时刻及缺项状态，不代表真实医院运营资料。"
+    }
+  },
+  "kinds": {
+    "capacity_interval": {
+      "create_request": {
+        "payload": {
+          "basis_kind": "observed_operational_capacity",
+          "capacity_basis_note": "合成病区床位原证据仅用于隔离工程验证，已明确核对观察与登记时刻及缺项状态，不代表真实医院运营资料。",
+          "capacity_definition": "total_operational_physical_beds_v1",
+          "coverage": "attested_complete",
+          "end_at": "2026-10-20T00:00:00.000000Z",
+          "equipment_readiness": "confirmed",
+          "immediate_admittable_slots": {
+            "absent_reason": null,
+            "value": 0
+          },
+          "immediate_slots_observed_at": "2026-10-20T08:00:00.000000Z",
+          "isolation_applicability": "not_confirmed",
+          "observed_at": "2026-10-20T00:00:00.000001Z",
+          "operational_total_beds": {
+            "absent_reason": null,
+            "value": 20
+          },
+          "schema_version": "bed_capacity_interval_v1",
+          "staff_readiness": "unknown",
+          "start_at": "2026-10-19T00:00:00.000000Z"
+        },
+        "ward_id": 1
+      },
+      "draft": {
+        "audit_only": false,
+        "can_record": true,
+        "can_review": false,
+        "can_revoke": true,
+        "content_hash": "65c2dd964950e17ec11f48a51f78750bf347f27e286b48d51bc3c41d0136c81c",
+        "created_by": 13,
+        "department_id": 1,
+        "eligibility_basis": "published_governance_and_current_ward_department_not_census_coverage_capacity_readiness_or_forecast_validation",
+        "eligible": false,
+        "exclusion_reasons": [
+          "source_draft"
+        ],
+        "governance_hash": "1e92d8dd6c108fe25e5092d431157a1c1177c90e1e90cc704f780af04ea942bd",
+        "parent_binding": {
+          "department": {
+            "department_id": 1
+          },
+          "ward": {
+            "department_id": 1,
+            "ward_id": 1
+          }
+        },
+        "parent_current": true,
+        "payload": {
+          "basis_kind": "observed_operational_capacity",
+          "capacity_basis_note": "合成病区床位原证据仅用于隔离工程验证，已明确核对观察与登记时刻及缺项状态，不代表真实医院运营资料。",
+          "capacity_definition": "total_operational_physical_beds_v1",
+          "coverage": "attested_complete",
+          "end_at": "2026-10-20T00:00:00.000000Z",
+          "equipment_readiness": "confirmed",
+          "immediate_admittable_slots": {
+            "absent_reason": null,
+            "value": 0
+          },
+          "immediate_slots_observed_at": "2026-10-20T08:00:00.000000Z",
+          "isolation_applicability": "not_confirmed",
+          "observed_at": "2026-10-20T00:00:00.000001Z",
+          "operational_total_beds": {
+            "absent_reason": null,
+            "value": 20
+          },
+          "schema_version": "bed_capacity_interval_v1",
+          "staff_readiness": "unknown",
+          "start_at": "2026-10-19T00:00:00.000000Z"
+        },
+        "recorded_at": "2026-10-20T09:10:11.123456Z",
+        "review_basis_note": "",
+        "reviewed_at": null,
+        "reviewed_by": null,
+        "revision": 1,
+        "revoke_reason": "",
+        "revoked_at": null,
+        "revoked_by": null,
+        "schema_version": "bed_source_private_v1",
+        "source_id": "bed_capacity_interval:23dedaf3-1d6d-47fa-a681-0e6f3c683622:65c2dd964950",
+        "source_kind": "capacity_interval",
+        "source_record_id": "23dedaf3-1d6d-47fa-a681-0e6f3c683622",
+        "status": "draft",
+        "ward_id": 1
+      },
+      "ordinary_published": {
+        "audit_only": false,
+        "can_record": true,
+        "can_review": false,
+        "can_revoke": true,
+        "content_hash": "65c2dd964950e17ec11f48a51f78750bf347f27e286b48d51bc3c41d0136c81c",
+        "created_by": 13,
+        "department_id": 1,
+        "eligibility_basis": "published_governance_and_current_ward_department_not_census_coverage_capacity_readiness_or_forecast_validation",
+        "eligible": true,
+        "exclusion_reasons": [],
+        "governance_hash": "d360c7bb7d24c3585612e672e650f33f8ca6615e57dd68149811aeb8407f8a0a",
+        "parent_binding": {
+          "department": {
+            "department_id": 1
+          },
+          "ward": {
+            "department_id": 1,
+            "ward_id": 1
+          }
+        },
+        "parent_current": true,
+        "payload": {
+          "basis_kind": "observed_operational_capacity",
+          "capacity_basis_note": "合成病区床位原证据仅用于隔离工程验证，已明确核对观察与登记时刻及缺项状态，不代表真实医院运营资料。",
+          "capacity_definition": "total_operational_physical_beds_v1",
+          "coverage": "attested_complete",
+          "end_at": "2026-10-20T00:00:00.000000Z",
+          "equipment_readiness": "confirmed",
+          "immediate_admittable_slots": {
+            "absent_reason": null,
+            "value": 0
+          },
+          "immediate_slots_observed_at": "2026-10-20T08:00:00.000000Z",
+          "isolation_applicability": "not_confirmed",
+          "observed_at": "2026-10-20T00:00:00.000001Z",
+          "operational_total_beds": {
+            "absent_reason": null,
+            "value": 20
+          },
+          "schema_version": "bed_capacity_interval_v1",
+          "staff_readiness": "unknown",
+          "start_at": "2026-10-19T00:00:00.000000Z"
+        },
+        "recorded_at": "2026-10-20T09:10:11.123456Z",
+        "review_basis_note": "合成病区床位原证据仅用于隔离工程验证，已明确核对观察与登记时刻及缺项状态，不代表真实医院运营资料。",
+        "reviewed_at": "2026-10-20T09:10:11.123456Z",
+        "reviewed_by": 4,
+        "revision": 2,
+        "revoke_reason": "",
+        "revoked_at": null,
+        "revoked_by": null,
+        "schema_version": "bed_source_private_v1",
+        "source_id": "bed_capacity_interval:23dedaf3-1d6d-47fa-a681-0e6f3c683622:65c2dd964950",
+        "source_kind": "capacity_interval",
+        "source_record_id": "23dedaf3-1d6d-47fa-a681-0e6f3c683622",
+        "status": "published",
+        "ward_id": 1
+      },
+      "ordinary_revoked": {
+        "audit_only": false,
+        "can_record": true,
+        "can_review": false,
+        "can_revoke": false,
+        "content_hash": "65c2dd964950e17ec11f48a51f78750bf347f27e286b48d51bc3c41d0136c81c",
+        "created_by": 13,
+        "department_id": 1,
+        "eligibility_basis": "published_governance_and_current_ward_department_not_census_coverage_capacity_readiness_or_forecast_validation",
+        "eligible": false,
+        "exclusion_reasons": [
+          "source_revoked"
+        ],
+        "governance_hash": "751d51755d70e82598b30578ac55aae0b9773a8039a3401979c7e6462c236c03",
+        "parent_binding": null,
+        "parent_current": true,
+        "payload": null,
+        "recorded_at": "2026-10-20T09:10:11.123456Z",
+        "review_basis_note": null,
+        "reviewed_at": "2026-10-20T09:10:11.123456Z",
+        "reviewed_by": 4,
+        "revision": 3,
+        "revoke_reason": null,
+        "revoked_at": "2026-10-20T09:10:11.123456Z",
+        "revoked_by": 13,
+        "schema_version": "bed_source_private_v1",
+        "source_id": "bed_capacity_interval:23dedaf3-1d6d-47fa-a681-0e6f3c683622:65c2dd964950",
+        "source_kind": "capacity_interval",
+        "source_record_id": "23dedaf3-1d6d-47fa-a681-0e6f3c683622",
+        "status": "revoked",
+        "ward_id": 1
+      },
+      "published": {
+        "audit_only": true,
+        "can_record": true,
+        "can_review": false,
+        "can_revoke": true,
+        "content_hash": "65c2dd964950e17ec11f48a51f78750bf347f27e286b48d51bc3c41d0136c81c",
+        "created_by": 13,
+        "department_id": 1,
+        "eligibility_basis": "published_governance_and_current_ward_department_not_census_coverage_capacity_readiness_or_forecast_validation",
+        "eligible": true,
+        "exclusion_reasons": [],
+        "governance_hash": "d360c7bb7d24c3585612e672e650f33f8ca6615e57dd68149811aeb8407f8a0a",
+        "parent_binding": {
+          "department": {
+            "department_id": 1
+          },
+          "ward": {
+            "department_id": 1,
+            "ward_id": 1
+          }
+        },
+        "parent_current": true,
+        "payload": {
+          "basis_kind": "observed_operational_capacity",
+          "capacity_basis_note": "合成病区床位原证据仅用于隔离工程验证，已明确核对观察与登记时刻及缺项状态，不代表真实医院运营资料。",
+          "capacity_definition": "total_operational_physical_beds_v1",
+          "coverage": "attested_complete",
+          "end_at": "2026-10-20T00:00:00.000000Z",
+          "equipment_readiness": "confirmed",
+          "immediate_admittable_slots": {
+            "absent_reason": null,
+            "value": 0
+          },
+          "immediate_slots_observed_at": "2026-10-20T08:00:00.000000Z",
+          "isolation_applicability": "not_confirmed",
+          "observed_at": "2026-10-20T00:00:00.000001Z",
+          "operational_total_beds": {
+            "absent_reason": null,
+            "value": 20
+          },
+          "schema_version": "bed_capacity_interval_v1",
+          "staff_readiness": "unknown",
+          "start_at": "2026-10-19T00:00:00.000000Z"
+        },
+        "recorded_at": "2026-10-20T09:10:11.123456Z",
+        "review_basis_note": "合成病区床位原证据仅用于隔离工程验证，已明确核对观察与登记时刻及缺项状态，不代表真实医院运营资料。",
+        "reviewed_at": "2026-10-20T09:10:11.123456Z",
+        "reviewed_by": 4,
+        "revision": 2,
+        "revoke_reason": "",
+        "revoked_at": null,
+        "revoked_by": null,
+        "schema_version": "bed_source_private_v1",
+        "source_id": "bed_capacity_interval:23dedaf3-1d6d-47fa-a681-0e6f3c683622:65c2dd964950",
+        "source_kind": "capacity_interval",
+        "source_record_id": "23dedaf3-1d6d-47fa-a681-0e6f3c683622",
+        "status": "published",
+        "ward_id": 1
+      },
+      "review_request": {
+        "decision": "publish",
+        "expected_content_hash": "65c2dd964950e17ec11f48a51f78750bf347f27e286b48d51bc3c41d0136c81c",
+        "expected_revision": 1,
+        "review_basis_note": "合成病区床位原证据仅用于隔离工程验证，已明确核对观察与登记时刻及缺项状态，不代表真实医院运营资料。"
+      },
+      "revoke_request": {
+        "expected_revision": 2,
+        "reason": "合成生命周期工程验证，原资料停止用于新预测输入。"
+      },
+      "super_draft": {
+        "audit_only": true,
+        "can_record": true,
+        "can_review": true,
+        "can_revoke": true,
+        "content_hash": "65c2dd964950e17ec11f48a51f78750bf347f27e286b48d51bc3c41d0136c81c",
+        "created_by": 13,
+        "department_id": 1,
+        "eligibility_basis": "published_governance_and_current_ward_department_not_census_coverage_capacity_readiness_or_forecast_validation",
+        "eligible": false,
+        "exclusion_reasons": [
+          "source_draft"
+        ],
+        "governance_hash": "1e92d8dd6c108fe25e5092d431157a1c1177c90e1e90cc704f780af04ea942bd",
+        "parent_binding": {
+          "department": {
+            "department_id": 1
+          },
+          "ward": {
+            "department_id": 1,
+            "ward_id": 1
+          }
+        },
+        "parent_current": true,
+        "payload": {
+          "basis_kind": "observed_operational_capacity",
+          "capacity_basis_note": "合成病区床位原证据仅用于隔离工程验证，已明确核对观察与登记时刻及缺项状态，不代表真实医院运营资料。",
+          "capacity_definition": "total_operational_physical_beds_v1",
+          "coverage": "attested_complete",
+          "end_at": "2026-10-20T00:00:00.000000Z",
+          "equipment_readiness": "confirmed",
+          "immediate_admittable_slots": {
+            "absent_reason": null,
+            "value": 0
+          },
+          "immediate_slots_observed_at": "2026-10-20T08:00:00.000000Z",
+          "isolation_applicability": "not_confirmed",
+          "observed_at": "2026-10-20T00:00:00.000001Z",
+          "operational_total_beds": {
+            "absent_reason": null,
+            "value": 20
+          },
+          "schema_version": "bed_capacity_interval_v1",
+          "staff_readiness": "unknown",
+          "start_at": "2026-10-19T00:00:00.000000Z"
+        },
+        "recorded_at": "2026-10-20T09:10:11.123456Z",
+        "review_basis_note": "",
+        "reviewed_at": null,
+        "reviewed_by": null,
+        "revision": 1,
+        "revoke_reason": "",
+        "revoked_at": null,
+        "revoked_by": null,
+        "schema_version": "bed_source_private_v1",
+        "source_id": "bed_capacity_interval:23dedaf3-1d6d-47fa-a681-0e6f3c683622:65c2dd964950",
+        "source_kind": "capacity_interval",
+        "source_record_id": "23dedaf3-1d6d-47fa-a681-0e6f3c683622",
+        "status": "draft",
+        "ward_id": 1
+      },
+      "super_revoked": {
+        "audit_only": true,
+        "can_record": true,
+        "can_review": false,
+        "can_revoke": false,
+        "content_hash": "65c2dd964950e17ec11f48a51f78750bf347f27e286b48d51bc3c41d0136c81c",
+        "created_by": 13,
+        "department_id": 1,
+        "eligibility_basis": "published_governance_and_current_ward_department_not_census_coverage_capacity_readiness_or_forecast_validation",
+        "eligible": false,
+        "exclusion_reasons": [
+          "source_revoked"
+        ],
+        "governance_hash": "751d51755d70e82598b30578ac55aae0b9773a8039a3401979c7e6462c236c03",
+        "parent_binding": {
+          "department": {
+            "department_id": 1
+          },
+          "ward": {
+            "department_id": 1,
+            "ward_id": 1
+          }
+        },
+        "parent_current": true,
+        "payload": {
+          "basis_kind": "observed_operational_capacity",
+          "capacity_basis_note": "合成病区床位原证据仅用于隔离工程验证，已明确核对观察与登记时刻及缺项状态，不代表真实医院运营资料。",
+          "capacity_definition": "total_operational_physical_beds_v1",
+          "coverage": "attested_complete",
+          "end_at": "2026-10-20T00:00:00.000000Z",
+          "equipment_readiness": "confirmed",
+          "immediate_admittable_slots": {
+            "absent_reason": null,
+            "value": 0
+          },
+          "immediate_slots_observed_at": "2026-10-20T08:00:00.000000Z",
+          "isolation_applicability": "not_confirmed",
+          "observed_at": "2026-10-20T00:00:00.000001Z",
+          "operational_total_beds": {
+            "absent_reason": null,
+            "value": 20
+          },
+          "schema_version": "bed_capacity_interval_v1",
+          "staff_readiness": "unknown",
+          "start_at": "2026-10-19T00:00:00.000000Z"
+        },
+        "recorded_at": "2026-10-20T09:10:11.123456Z",
+        "review_basis_note": "合成病区床位原证据仅用于隔离工程验证，已明确核对观察与登记时刻及缺项状态，不代表真实医院运营资料。",
+        "reviewed_at": "2026-10-20T09:10:11.123456Z",
+        "reviewed_by": 4,
+        "revision": 3,
+        "revoke_reason": "合成生命周期工程验证，原资料停止用于新预测输入。",
+        "revoked_at": "2026-10-20T09:10:11.123456Z",
+        "revoked_by": 13,
+        "schema_version": "bed_source_private_v1",
+        "source_id": "bed_capacity_interval:23dedaf3-1d6d-47fa-a681-0e6f3c683622:65c2dd964950",
+        "source_kind": "capacity_interval",
+        "source_record_id": "23dedaf3-1d6d-47fa-a681-0e6f3c683622",
+        "status": "revoked",
+        "ward_id": 1
+      }
+    },
+    "census": {
+      "create_request": {
+        "payload": {
+          "boundary_state_confirmed": "unknown",
+          "business_date": "2026-10-19",
+          "business_timezone": "Etc/UTC",
+          "census_at": "2026-10-20T00:00:00.000000Z",
+          "coverage": "unknown",
+          "coverage_basis_note": "合成病区床位原证据仅用于隔离工程验证，已明确核对观察与登记时刻及缺项状态，不代表真实医院运营资料。",
+          "definition": "occupied_physical_beds_at_boundary_v1",
+          "external_record_key": null,
+          "external_record_key_absent_reason": "not_applicable",
+          "method": "direct_tally",
+          "observed_at": "2026-10-20T00:00:00.000001Z",
+          "occupied_beds": {
+            "absent_reason": null,
+            "value": 0
+          },
+          "schema_version": "bed_census_observation_v1"
+        },
+        "ward_id": 1
+      },
+      "draft": {
+        "audit_only": false,
+        "can_record": true,
+        "can_review": false,
+        "can_revoke": true,
+        "content_hash": "24f6d92076085d9f2f20d68033b3e04362e78be6a7ae96b621c45bdc83d596e1",
+        "created_by": 13,
+        "department_id": 1,
+        "eligibility_basis": "published_governance_and_current_ward_department_not_census_coverage_capacity_readiness_or_forecast_validation",
+        "eligible": false,
+        "exclusion_reasons": [
+          "source_draft"
+        ],
+        "governance_hash": "1e92d8dd6c108fe25e5092d431157a1c1177c90e1e90cc704f780af04ea942bd",
+        "parent_binding": {
+          "department": {
+            "department_id": 1
+          },
+          "ward": {
+            "department_id": 1,
+            "ward_id": 1
+          }
+        },
+        "parent_current": true,
+        "payload": {
+          "boundary_state_confirmed": "unknown",
+          "business_date": "2026-10-19",
+          "business_timezone": "Etc/UTC",
+          "census_at": "2026-10-20T00:00:00.000000Z",
+          "coverage": "unknown",
+          "coverage_basis_note": "合成病区床位原证据仅用于隔离工程验证，已明确核对观察与登记时刻及缺项状态，不代表真实医院运营资料。",
+          "definition": "occupied_physical_beds_at_boundary_v1",
+          "external_record_key": null,
+          "external_record_key_absent_reason": "not_applicable",
+          "method": "direct_tally",
+          "observed_at": "2026-10-20T00:00:00.000001Z",
+          "occupied_beds": {
+            "absent_reason": null,
+            "value": 0
+          },
+          "schema_version": "bed_census_observation_v1"
+        },
+        "recorded_at": "2026-10-20T09:10:11.123456Z",
+        "review_basis_note": "",
+        "reviewed_at": null,
+        "reviewed_by": null,
+        "revision": 1,
+        "revoke_reason": "",
+        "revoked_at": null,
+        "revoked_by": null,
+        "schema_version": "bed_source_private_v1",
+        "source_id": "bed_census:c4d2b9a2-0e82-4854-a5de-5a3b0afc2601:24f6d9207608",
+        "source_kind": "census",
+        "source_record_id": "c4d2b9a2-0e82-4854-a5de-5a3b0afc2601",
+        "status": "draft",
+        "ward_id": 1
+      },
+      "ordinary_published": {
+        "audit_only": false,
+        "can_record": true,
+        "can_review": false,
+        "can_revoke": true,
+        "content_hash": "24f6d92076085d9f2f20d68033b3e04362e78be6a7ae96b621c45bdc83d596e1",
+        "created_by": 13,
+        "department_id": 1,
+        "eligibility_basis": "published_governance_and_current_ward_department_not_census_coverage_capacity_readiness_or_forecast_validation",
+        "eligible": true,
+        "exclusion_reasons": [],
+        "governance_hash": "d360c7bb7d24c3585612e672e650f33f8ca6615e57dd68149811aeb8407f8a0a",
+        "parent_binding": {
+          "department": {
+            "department_id": 1
+          },
+          "ward": {
+            "department_id": 1,
+            "ward_id": 1
+          }
+        },
+        "parent_current": true,
+        "payload": {
+          "boundary_state_confirmed": "unknown",
+          "business_date": "2026-10-19",
+          "business_timezone": "Etc/UTC",
+          "census_at": "2026-10-20T00:00:00.000000Z",
+          "coverage": "unknown",
+          "coverage_basis_note": "合成病区床位原证据仅用于隔离工程验证，已明确核对观察与登记时刻及缺项状态，不代表真实医院运营资料。",
+          "definition": "occupied_physical_beds_at_boundary_v1",
+          "external_record_key": null,
+          "external_record_key_absent_reason": "not_applicable",
+          "method": "direct_tally",
+          "observed_at": "2026-10-20T00:00:00.000001Z",
+          "occupied_beds": {
+            "absent_reason": null,
+            "value": 0
+          },
+          "schema_version": "bed_census_observation_v1"
+        },
+        "recorded_at": "2026-10-20T09:10:11.123456Z",
+        "review_basis_note": "合成病区床位原证据仅用于隔离工程验证，已明确核对观察与登记时刻及缺项状态，不代表真实医院运营资料。",
+        "reviewed_at": "2026-10-20T09:10:11.123456Z",
+        "reviewed_by": 4,
+        "revision": 2,
+        "revoke_reason": "",
+        "revoked_at": null,
+        "revoked_by": null,
+        "schema_version": "bed_source_private_v1",
+        "source_id": "bed_census:c4d2b9a2-0e82-4854-a5de-5a3b0afc2601:24f6d9207608",
+        "source_kind": "census",
+        "source_record_id": "c4d2b9a2-0e82-4854-a5de-5a3b0afc2601",
+        "status": "published",
+        "ward_id": 1
+      },
+      "ordinary_revoked": {
+        "audit_only": false,
+        "can_record": true,
+        "can_review": false,
+        "can_revoke": false,
+        "content_hash": "24f6d92076085d9f2f20d68033b3e04362e78be6a7ae96b621c45bdc83d596e1",
+        "created_by": 13,
+        "department_id": 1,
+        "eligibility_basis": "published_governance_and_current_ward_department_not_census_coverage_capacity_readiness_or_forecast_validation",
+        "eligible": false,
+        "exclusion_reasons": [
+          "source_revoked"
+        ],
+        "governance_hash": "751d51755d70e82598b30578ac55aae0b9773a8039a3401979c7e6462c236c03",
+        "parent_binding": null,
+        "parent_current": true,
+        "payload": null,
+        "recorded_at": "2026-10-20T09:10:11.123456Z",
+        "review_basis_note": null,
+        "reviewed_at": "2026-10-20T09:10:11.123456Z",
+        "reviewed_by": 4,
+        "revision": 3,
+        "revoke_reason": null,
+        "revoked_at": "2026-10-20T09:10:11.123456Z",
+        "revoked_by": 13,
+        "schema_version": "bed_source_private_v1",
+        "source_id": "bed_census:c4d2b9a2-0e82-4854-a5de-5a3b0afc2601:24f6d9207608",
+        "source_kind": "census",
+        "source_record_id": "c4d2b9a2-0e82-4854-a5de-5a3b0afc2601",
+        "status": "revoked",
+        "ward_id": 1
+      },
+      "published": {
+        "audit_only": true,
+        "can_record": true,
+        "can_review": false,
+        "can_revoke": true,
+        "content_hash": "24f6d92076085d9f2f20d68033b3e04362e78be6a7ae96b621c45bdc83d596e1",
+        "created_by": 13,
+        "department_id": 1,
+        "eligibility_basis": "published_governance_and_current_ward_department_not_census_coverage_capacity_readiness_or_forecast_validation",
+        "eligible": true,
+        "exclusion_reasons": [],
+        "governance_hash": "d360c7bb7d24c3585612e672e650f33f8ca6615e57dd68149811aeb8407f8a0a",
+        "parent_binding": {
+          "department": {
+            "department_id": 1
+          },
+          "ward": {
+            "department_id": 1,
+            "ward_id": 1
+          }
+        },
+        "parent_current": true,
+        "payload": {
+          "boundary_state_confirmed": "unknown",
+          "business_date": "2026-10-19",
+          "business_timezone": "Etc/UTC",
+          "census_at": "2026-10-20T00:00:00.000000Z",
+          "coverage": "unknown",
+          "coverage_basis_note": "合成病区床位原证据仅用于隔离工程验证，已明确核对观察与登记时刻及缺项状态，不代表真实医院运营资料。",
+          "definition": "occupied_physical_beds_at_boundary_v1",
+          "external_record_key": null,
+          "external_record_key_absent_reason": "not_applicable",
+          "method": "direct_tally",
+          "observed_at": "2026-10-20T00:00:00.000001Z",
+          "occupied_beds": {
+            "absent_reason": null,
+            "value": 0
+          },
+          "schema_version": "bed_census_observation_v1"
+        },
+        "recorded_at": "2026-10-20T09:10:11.123456Z",
+        "review_basis_note": "合成病区床位原证据仅用于隔离工程验证，已明确核对观察与登记时刻及缺项状态，不代表真实医院运营资料。",
+        "reviewed_at": "2026-10-20T09:10:11.123456Z",
+        "reviewed_by": 4,
+        "revision": 2,
+        "revoke_reason": "",
+        "revoked_at": null,
+        "revoked_by": null,
+        "schema_version": "bed_source_private_v1",
+        "source_id": "bed_census:c4d2b9a2-0e82-4854-a5de-5a3b0afc2601:24f6d9207608",
+        "source_kind": "census",
+        "source_record_id": "c4d2b9a2-0e82-4854-a5de-5a3b0afc2601",
+        "status": "published",
+        "ward_id": 1
+      },
+      "review_request": {
+        "decision": "publish",
+        "expected_content_hash": "24f6d92076085d9f2f20d68033b3e04362e78be6a7ae96b621c45bdc83d596e1",
+        "expected_revision": 1,
+        "review_basis_note": "合成病区床位原证据仅用于隔离工程验证，已明确核对观察与登记时刻及缺项状态，不代表真实医院运营资料。"
+      },
+      "revoke_request": {
+        "expected_revision": 2,
+        "reason": "合成生命周期工程验证，原资料停止用于新预测输入。"
+      },
+      "super_draft": {
+        "audit_only": true,
+        "can_record": true,
+        "can_review": true,
+        "can_revoke": true,
+        "content_hash": "24f6d92076085d9f2f20d68033b3e04362e78be6a7ae96b621c45bdc83d596e1",
+        "created_by": 13,
+        "department_id": 1,
+        "eligibility_basis": "published_governance_and_current_ward_department_not_census_coverage_capacity_readiness_or_forecast_validation",
+        "eligible": false,
+        "exclusion_reasons": [
+          "source_draft"
+        ],
+        "governance_hash": "1e92d8dd6c108fe25e5092d431157a1c1177c90e1e90cc704f780af04ea942bd",
+        "parent_binding": {
+          "department": {
+            "department_id": 1
+          },
+          "ward": {
+            "department_id": 1,
+            "ward_id": 1
+          }
+        },
+        "parent_current": true,
+        "payload": {
+          "boundary_state_confirmed": "unknown",
+          "business_date": "2026-10-19",
+          "business_timezone": "Etc/UTC",
+          "census_at": "2026-10-20T00:00:00.000000Z",
+          "coverage": "unknown",
+          "coverage_basis_note": "合成病区床位原证据仅用于隔离工程验证，已明确核对观察与登记时刻及缺项状态，不代表真实医院运营资料。",
+          "definition": "occupied_physical_beds_at_boundary_v1",
+          "external_record_key": null,
+          "external_record_key_absent_reason": "not_applicable",
+          "method": "direct_tally",
+          "observed_at": "2026-10-20T00:00:00.000001Z",
+          "occupied_beds": {
+            "absent_reason": null,
+            "value": 0
+          },
+          "schema_version": "bed_census_observation_v1"
+        },
+        "recorded_at": "2026-10-20T09:10:11.123456Z",
+        "review_basis_note": "",
+        "reviewed_at": null,
+        "reviewed_by": null,
+        "revision": 1,
+        "revoke_reason": "",
+        "revoked_at": null,
+        "revoked_by": null,
+        "schema_version": "bed_source_private_v1",
+        "source_id": "bed_census:c4d2b9a2-0e82-4854-a5de-5a3b0afc2601:24f6d9207608",
+        "source_kind": "census",
+        "source_record_id": "c4d2b9a2-0e82-4854-a5de-5a3b0afc2601",
+        "status": "draft",
+        "ward_id": 1
+      },
+      "super_revoked": {
+        "audit_only": true,
+        "can_record": true,
+        "can_review": false,
+        "can_revoke": false,
+        "content_hash": "24f6d92076085d9f2f20d68033b3e04362e78be6a7ae96b621c45bdc83d596e1",
+        "created_by": 13,
+        "department_id": 1,
+        "eligibility_basis": "published_governance_and_current_ward_department_not_census_coverage_capacity_readiness_or_forecast_validation",
+        "eligible": false,
+        "exclusion_reasons": [
+          "source_revoked"
+        ],
+        "governance_hash": "751d51755d70e82598b30578ac55aae0b9773a8039a3401979c7e6462c236c03",
+        "parent_binding": {
+          "department": {
+            "department_id": 1
+          },
+          "ward": {
+            "department_id": 1,
+            "ward_id": 1
+          }
+        },
+        "parent_current": true,
+        "payload": {
+          "boundary_state_confirmed": "unknown",
+          "business_date": "2026-10-19",
+          "business_timezone": "Etc/UTC",
+          "census_at": "2026-10-20T00:00:00.000000Z",
+          "coverage": "unknown",
+          "coverage_basis_note": "合成病区床位原证据仅用于隔离工程验证，已明确核对观察与登记时刻及缺项状态，不代表真实医院运营资料。",
+          "definition": "occupied_physical_beds_at_boundary_v1",
+          "external_record_key": null,
+          "external_record_key_absent_reason": "not_applicable",
+          "method": "direct_tally",
+          "observed_at": "2026-10-20T00:00:00.000001Z",
+          "occupied_beds": {
+            "absent_reason": null,
+            "value": 0
+          },
+          "schema_version": "bed_census_observation_v1"
+        },
+        "recorded_at": "2026-10-20T09:10:11.123456Z",
+        "review_basis_note": "合成病区床位原证据仅用于隔离工程验证，已明确核对观察与登记时刻及缺项状态，不代表真实医院运营资料。",
+        "reviewed_at": "2026-10-20T09:10:11.123456Z",
+        "reviewed_by": 4,
+        "revision": 3,
+        "revoke_reason": "合成生命周期工程验证，原资料停止用于新预测输入。",
+        "revoked_at": "2026-10-20T09:10:11.123456Z",
+        "revoked_by": 13,
+        "schema_version": "bed_source_private_v1",
+        "source_id": "bed_census:c4d2b9a2-0e82-4854-a5de-5a3b0afc2601:24f6d9207608",
+        "source_kind": "census",
+        "source_record_id": "c4d2b9a2-0e82-4854-a5de-5a3b0afc2601",
+        "status": "revoked",
+        "ward_id": 1
+      }
+    },
+    "flow_day": {
+      "create_request": {
+        "payload": {
+          "admission_events": {
+            "absent_reason": null,
+            "value": 3
+          },
+          "business_date": "2026-10-19",
+          "business_timezone": "Etc/UTC",
+          "coverage": "unknown",
+          "coverage_basis_note": "合成病区床位原证据仅用于隔离工程验证，已明确核对观察与登记时刻及缺项状态，不代表真实医院运营资料。",
+          "day_end_at": "2026-10-20T00:00:00.000000Z",
+          "day_start_at": "2026-10-19T00:00:00.000000Z",
+          "definition": "ward_physical_day_events_v1",
+          "discharge_events": {
+            "absent_reason": null,
+            "value": 0
+          },
+          "event_definition_basis_note": "合成病区床位原证据仅用于隔离工程验证，已明确核对观察与登记时刻及缺项状态，不代表真实医院运营资料。",
+          "external_record_key": null,
+          "external_record_key_absent_reason": "not_applicable",
+          "method": "direct_tally",
+          "observed_at": "2026-10-20T00:00:00.000001Z",
+          "schema_version": "bed_flow_day_v1",
+          "transfer_in_events": {
+            "absent_reason": "unknown",
+            "value": null
+          },
+          "transfer_out_events": {
+            "absent_reason": "not_recorded",
+            "value": null
+          }
+        },
+        "ward_id": 1
+      },
+      "draft": {
+        "audit_only": false,
+        "can_record": true,
+        "can_review": false,
+        "can_revoke": true,
+        "content_hash": "7d2a3b1474b9c8279f7b318d74b914c9ca2c63c19d3e999415826b421f7007b5",
+        "created_by": 13,
+        "department_id": 1,
+        "eligibility_basis": "published_governance_and_current_ward_department_not_census_coverage_capacity_readiness_or_forecast_validation",
+        "eligible": false,
+        "exclusion_reasons": [
+          "source_draft"
+        ],
+        "governance_hash": "1e92d8dd6c108fe25e5092d431157a1c1177c90e1e90cc704f780af04ea942bd",
+        "parent_binding": {
+          "department": {
+            "department_id": 1
+          },
+          "ward": {
+            "department_id": 1,
+            "ward_id": 1
+          }
+        },
+        "parent_current": true,
+        "payload": {
+          "admission_events": {
+            "absent_reason": null,
+            "value": 3
+          },
+          "business_date": "2026-10-19",
+          "business_timezone": "Etc/UTC",
+          "coverage": "unknown",
+          "coverage_basis_note": "合成病区床位原证据仅用于隔离工程验证，已明确核对观察与登记时刻及缺项状态，不代表真实医院运营资料。",
+          "day_end_at": "2026-10-20T00:00:00.000000Z",
+          "day_start_at": "2026-10-19T00:00:00.000000Z",
+          "definition": "ward_physical_day_events_v1",
+          "discharge_events": {
+            "absent_reason": null,
+            "value": 0
+          },
+          "event_definition_basis_note": "合成病区床位原证据仅用于隔离工程验证，已明确核对观察与登记时刻及缺项状态，不代表真实医院运营资料。",
+          "external_record_key": null,
+          "external_record_key_absent_reason": "not_applicable",
+          "method": "direct_tally",
+          "observed_at": "2026-10-20T00:00:00.000001Z",
+          "schema_version": "bed_flow_day_v1",
+          "transfer_in_events": {
+            "absent_reason": "unknown",
+            "value": null
+          },
+          "transfer_out_events": {
+            "absent_reason": "not_recorded",
+            "value": null
+          }
+        },
+        "recorded_at": "2026-10-20T09:10:11.123456Z",
+        "review_basis_note": "",
+        "reviewed_at": null,
+        "reviewed_by": null,
+        "revision": 1,
+        "revoke_reason": "",
+        "revoked_at": null,
+        "revoked_by": null,
+        "schema_version": "bed_source_private_v1",
+        "source_id": "bed_flow_day:273dc01c-9c95-44ba-9b0d-aa14b132713b:7d2a3b1474b9",
+        "source_kind": "flow_day",
+        "source_record_id": "273dc01c-9c95-44ba-9b0d-aa14b132713b",
+        "status": "draft",
+        "ward_id": 1
+      },
+      "ordinary_published": {
+        "audit_only": false,
+        "can_record": true,
+        "can_review": false,
+        "can_revoke": true,
+        "content_hash": "7d2a3b1474b9c8279f7b318d74b914c9ca2c63c19d3e999415826b421f7007b5",
+        "created_by": 13,
+        "department_id": 1,
+        "eligibility_basis": "published_governance_and_current_ward_department_not_census_coverage_capacity_readiness_or_forecast_validation",
+        "eligible": true,
+        "exclusion_reasons": [],
+        "governance_hash": "d360c7bb7d24c3585612e672e650f33f8ca6615e57dd68149811aeb8407f8a0a",
+        "parent_binding": {
+          "department": {
+            "department_id": 1
+          },
+          "ward": {
+            "department_id": 1,
+            "ward_id": 1
+          }
+        },
+        "parent_current": true,
+        "payload": {
+          "admission_events": {
+            "absent_reason": null,
+            "value": 3
+          },
+          "business_date": "2026-10-19",
+          "business_timezone": "Etc/UTC",
+          "coverage": "unknown",
+          "coverage_basis_note": "合成病区床位原证据仅用于隔离工程验证，已明确核对观察与登记时刻及缺项状态，不代表真实医院运营资料。",
+          "day_end_at": "2026-10-20T00:00:00.000000Z",
+          "day_start_at": "2026-10-19T00:00:00.000000Z",
+          "definition": "ward_physical_day_events_v1",
+          "discharge_events": {
+            "absent_reason": null,
+            "value": 0
+          },
+          "event_definition_basis_note": "合成病区床位原证据仅用于隔离工程验证，已明确核对观察与登记时刻及缺项状态，不代表真实医院运营资料。",
+          "external_record_key": null,
+          "external_record_key_absent_reason": "not_applicable",
+          "method": "direct_tally",
+          "observed_at": "2026-10-20T00:00:00.000001Z",
+          "schema_version": "bed_flow_day_v1",
+          "transfer_in_events": {
+            "absent_reason": "unknown",
+            "value": null
+          },
+          "transfer_out_events": {
+            "absent_reason": "not_recorded",
+            "value": null
+          }
+        },
+        "recorded_at": "2026-10-20T09:10:11.123456Z",
+        "review_basis_note": "合成病区床位原证据仅用于隔离工程验证，已明确核对观察与登记时刻及缺项状态，不代表真实医院运营资料。",
+        "reviewed_at": "2026-10-20T09:10:11.123456Z",
+        "reviewed_by": 4,
+        "revision": 2,
+        "revoke_reason": "",
+        "revoked_at": null,
+        "revoked_by": null,
+        "schema_version": "bed_source_private_v1",
+        "source_id": "bed_flow_day:273dc01c-9c95-44ba-9b0d-aa14b132713b:7d2a3b1474b9",
+        "source_kind": "flow_day",
+        "source_record_id": "273dc01c-9c95-44ba-9b0d-aa14b132713b",
+        "status": "published",
+        "ward_id": 1
+      },
+      "ordinary_revoked": {
+        "audit_only": false,
+        "can_record": true,
+        "can_review": false,
+        "can_revoke": false,
+        "content_hash": "7d2a3b1474b9c8279f7b318d74b914c9ca2c63c19d3e999415826b421f7007b5",
+        "created_by": 13,
+        "department_id": 1,
+        "eligibility_basis": "published_governance_and_current_ward_department_not_census_coverage_capacity_readiness_or_forecast_validation",
+        "eligible": false,
+        "exclusion_reasons": [
+          "source_revoked"
+        ],
+        "governance_hash": "751d51755d70e82598b30578ac55aae0b9773a8039a3401979c7e6462c236c03",
+        "parent_binding": null,
+        "parent_current": true,
+        "payload": null,
+        "recorded_at": "2026-10-20T09:10:11.123456Z",
+        "review_basis_note": null,
+        "reviewed_at": "2026-10-20T09:10:11.123456Z",
+        "reviewed_by": 4,
+        "revision": 3,
+        "revoke_reason": null,
+        "revoked_at": "2026-10-20T09:10:11.123456Z",
+        "revoked_by": 13,
+        "schema_version": "bed_source_private_v1",
+        "source_id": "bed_flow_day:273dc01c-9c95-44ba-9b0d-aa14b132713b:7d2a3b1474b9",
+        "source_kind": "flow_day",
+        "source_record_id": "273dc01c-9c95-44ba-9b0d-aa14b132713b",
+        "status": "revoked",
+        "ward_id": 1
+      },
+      "published": {
+        "audit_only": true,
+        "can_record": true,
+        "can_review": false,
+        "can_revoke": true,
+        "content_hash": "7d2a3b1474b9c8279f7b318d74b914c9ca2c63c19d3e999415826b421f7007b5",
+        "created_by": 13,
+        "department_id": 1,
+        "eligibility_basis": "published_governance_and_current_ward_department_not_census_coverage_capacity_readiness_or_forecast_validation",
+        "eligible": true,
+        "exclusion_reasons": [],
+        "governance_hash": "d360c7bb7d24c3585612e672e650f33f8ca6615e57dd68149811aeb8407f8a0a",
+        "parent_binding": {
+          "department": {
+            "department_id": 1
+          },
+          "ward": {
+            "department_id": 1,
+            "ward_id": 1
+          }
+        },
+        "parent_current": true,
+        "payload": {
+          "admission_events": {
+            "absent_reason": null,
+            "value": 3
+          },
+          "business_date": "2026-10-19",
+          "business_timezone": "Etc/UTC",
+          "coverage": "unknown",
+          "coverage_basis_note": "合成病区床位原证据仅用于隔离工程验证，已明确核对观察与登记时刻及缺项状态，不代表真实医院运营资料。",
+          "day_end_at": "2026-10-20T00:00:00.000000Z",
+          "day_start_at": "2026-10-19T00:00:00.000000Z",
+          "definition": "ward_physical_day_events_v1",
+          "discharge_events": {
+            "absent_reason": null,
+            "value": 0
+          },
+          "event_definition_basis_note": "合成病区床位原证据仅用于隔离工程验证，已明确核对观察与登记时刻及缺项状态，不代表真实医院运营资料。",
+          "external_record_key": null,
+          "external_record_key_absent_reason": "not_applicable",
+          "method": "direct_tally",
+          "observed_at": "2026-10-20T00:00:00.000001Z",
+          "schema_version": "bed_flow_day_v1",
+          "transfer_in_events": {
+            "absent_reason": "unknown",
+            "value": null
+          },
+          "transfer_out_events": {
+            "absent_reason": "not_recorded",
+            "value": null
+          }
+        },
+        "recorded_at": "2026-10-20T09:10:11.123456Z",
+        "review_basis_note": "合成病区床位原证据仅用于隔离工程验证，已明确核对观察与登记时刻及缺项状态，不代表真实医院运营资料。",
+        "reviewed_at": "2026-10-20T09:10:11.123456Z",
+        "reviewed_by": 4,
+        "revision": 2,
+        "revoke_reason": "",
+        "revoked_at": null,
+        "revoked_by": null,
+        "schema_version": "bed_source_private_v1",
+        "source_id": "bed_flow_day:273dc01c-9c95-44ba-9b0d-aa14b132713b:7d2a3b1474b9",
+        "source_kind": "flow_day",
+        "source_record_id": "273dc01c-9c95-44ba-9b0d-aa14b132713b",
+        "status": "published",
+        "ward_id": 1
+      },
+      "review_request": {
+        "decision": "publish",
+        "expected_content_hash": "7d2a3b1474b9c8279f7b318d74b914c9ca2c63c19d3e999415826b421f7007b5",
+        "expected_revision": 1,
+        "review_basis_note": "合成病区床位原证据仅用于隔离工程验证，已明确核对观察与登记时刻及缺项状态，不代表真实医院运营资料。"
+      },
+      "revoke_request": {
+        "expected_revision": 2,
+        "reason": "合成生命周期工程验证，原资料停止用于新预测输入。"
+      },
+      "super_draft": {
+        "audit_only": true,
+        "can_record": true,
+        "can_review": true,
+        "can_revoke": true,
+        "content_hash": "7d2a3b1474b9c8279f7b318d74b914c9ca2c63c19d3e999415826b421f7007b5",
+        "created_by": 13,
+        "department_id": 1,
+        "eligibility_basis": "published_governance_and_current_ward_department_not_census_coverage_capacity_readiness_or_forecast_validation",
+        "eligible": false,
+        "exclusion_reasons": [
+          "source_draft"
+        ],
+        "governance_hash": "1e92d8dd6c108fe25e5092d431157a1c1177c90e1e90cc704f780af04ea942bd",
+        "parent_binding": {
+          "department": {
+            "department_id": 1
+          },
+          "ward": {
+            "department_id": 1,
+            "ward_id": 1
+          }
+        },
+        "parent_current": true,
+        "payload": {
+          "admission_events": {
+            "absent_reason": null,
+            "value": 3
+          },
+          "business_date": "2026-10-19",
+          "business_timezone": "Etc/UTC",
+          "coverage": "unknown",
+          "coverage_basis_note": "合成病区床位原证据仅用于隔离工程验证，已明确核对观察与登记时刻及缺项状态，不代表真实医院运营资料。",
+          "day_end_at": "2026-10-20T00:00:00.000000Z",
+          "day_start_at": "2026-10-19T00:00:00.000000Z",
+          "definition": "ward_physical_day_events_v1",
+          "discharge_events": {
+            "absent_reason": null,
+            "value": 0
+          },
+          "event_definition_basis_note": "合成病区床位原证据仅用于隔离工程验证，已明确核对观察与登记时刻及缺项状态，不代表真实医院运营资料。",
+          "external_record_key": null,
+          "external_record_key_absent_reason": "not_applicable",
+          "method": "direct_tally",
+          "observed_at": "2026-10-20T00:00:00.000001Z",
+          "schema_version": "bed_flow_day_v1",
+          "transfer_in_events": {
+            "absent_reason": "unknown",
+            "value": null
+          },
+          "transfer_out_events": {
+            "absent_reason": "not_recorded",
+            "value": null
+          }
+        },
+        "recorded_at": "2026-10-20T09:10:11.123456Z",
+        "review_basis_note": "",
+        "reviewed_at": null,
+        "reviewed_by": null,
+        "revision": 1,
+        "revoke_reason": "",
+        "revoked_at": null,
+        "revoked_by": null,
+        "schema_version": "bed_source_private_v1",
+        "source_id": "bed_flow_day:273dc01c-9c95-44ba-9b0d-aa14b132713b:7d2a3b1474b9",
+        "source_kind": "flow_day",
+        "source_record_id": "273dc01c-9c95-44ba-9b0d-aa14b132713b",
+        "status": "draft",
+        "ward_id": 1
+      },
+      "super_revoked": {
+        "audit_only": true,
+        "can_record": true,
+        "can_review": false,
+        "can_revoke": false,
+        "content_hash": "7d2a3b1474b9c8279f7b318d74b914c9ca2c63c19d3e999415826b421f7007b5",
+        "created_by": 13,
+        "department_id": 1,
+        "eligibility_basis": "published_governance_and_current_ward_department_not_census_coverage_capacity_readiness_or_forecast_validation",
+        "eligible": false,
+        "exclusion_reasons": [
+          "source_revoked"
+        ],
+        "governance_hash": "751d51755d70e82598b30578ac55aae0b9773a8039a3401979c7e6462c236c03",
+        "parent_binding": {
+          "department": {
+            "department_id": 1
+          },
+          "ward": {
+            "department_id": 1,
+            "ward_id": 1
+          }
+        },
+        "parent_current": true,
+        "payload": {
+          "admission_events": {
+            "absent_reason": null,
+            "value": 3
+          },
+          "business_date": "2026-10-19",
+          "business_timezone": "Etc/UTC",
+          "coverage": "unknown",
+          "coverage_basis_note": "合成病区床位原证据仅用于隔离工程验证，已明确核对观察与登记时刻及缺项状态，不代表真实医院运营资料。",
+          "day_end_at": "2026-10-20T00:00:00.000000Z",
+          "day_start_at": "2026-10-19T00:00:00.000000Z",
+          "definition": "ward_physical_day_events_v1",
+          "discharge_events": {
+            "absent_reason": null,
+            "value": 0
+          },
+          "event_definition_basis_note": "合成病区床位原证据仅用于隔离工程验证，已明确核对观察与登记时刻及缺项状态，不代表真实医院运营资料。",
+          "external_record_key": null,
+          "external_record_key_absent_reason": "not_applicable",
+          "method": "direct_tally",
+          "observed_at": "2026-10-20T00:00:00.000001Z",
+          "schema_version": "bed_flow_day_v1",
+          "transfer_in_events": {
+            "absent_reason": "unknown",
+            "value": null
+          },
+          "transfer_out_events": {
+            "absent_reason": "not_recorded",
+            "value": null
+          }
+        },
+        "recorded_at": "2026-10-20T09:10:11.123456Z",
+        "review_basis_note": "合成病区床位原证据仅用于隔离工程验证，已明确核对观察与登记时刻及缺项状态，不代表真实医院运营资料。",
+        "reviewed_at": "2026-10-20T09:10:11.123456Z",
+        "reviewed_by": 4,
+        "revision": 3,
+        "revoke_reason": "合成生命周期工程验证，原资料停止用于新预测输入。",
+        "revoked_at": "2026-10-20T09:10:11.123456Z",
+        "revoked_by": 13,
+        "schema_version": "bed_source_private_v1",
+        "source_id": "bed_flow_day:273dc01c-9c95-44ba-9b0d-aa14b132713b:7d2a3b1474b9",
+        "source_kind": "flow_day",
+        "source_record_id": "273dc01c-9c95-44ba-9b0d-aa14b132713b",
+        "status": "revoked",
+        "ward_id": 1
+      }
+    }
+  },
+  "options": {
+    "can_record": true,
+    "can_review": false,
+    "departments": [
+      {
+        "department_id": 1,
+        "name": "内科"
+      }
+    ],
+    "provider_required": false,
+    "source_kinds": [
+      "census",
+      "flow_day",
+      "capacity_interval"
+    ]
+  },
+  "rejection": {
+    "create_request": {
+      "payload": {
+        "boundary_state_confirmed": "unknown",
+        "business_date": "2026-10-19",
+        "business_timezone": "Etc/UTC",
+        "census_at": "2026-10-20T00:00:00.000000Z",
+        "coverage": "unknown",
+        "coverage_basis_note": "合成病区床位原证据仅用于隔离工程验证，已明确核对观察与登记时刻及缺项状态，不代表真实医院运营资料。",
+        "definition": "occupied_physical_beds_at_boundary_v1",
+        "external_record_key": null,
+        "external_record_key_absent_reason": "not_applicable",
+        "method": "direct_tally",
+        "observed_at": "2026-10-20T00:00:00.000001Z",
+        "occupied_beds": {
+          "absent_reason": null,
+          "value": 0
+        },
+        "schema_version": "bed_census_observation_v1"
+      },
+      "ward_id": 1
+    },
+    "draft": {
+      "audit_only": false,
+      "can_record": true,
+      "can_review": false,
+      "can_revoke": true,
+      "content_hash": "146f2c4b9136f997e28a9176397bf5d9460c1458ff8cf95800642de0c06492b5",
+      "created_by": 13,
+      "department_id": 1,
+      "eligibility_basis": "published_governance_and_current_ward_department_not_census_coverage_capacity_readiness_or_forecast_validation",
+      "eligible": false,
+      "exclusion_reasons": [
+        "source_draft"
+      ],
+      "governance_hash": "1e92d8dd6c108fe25e5092d431157a1c1177c90e1e90cc704f780af04ea942bd",
+      "parent_binding": {
+        "department": {
+          "department_id": 1
+        },
+        "ward": {
+          "department_id": 1,
+          "ward_id": 1
+        }
+      },
+      "parent_current": true,
+      "payload": {
+        "boundary_state_confirmed": "unknown",
+        "business_date": "2026-10-19",
+        "business_timezone": "Etc/UTC",
+        "census_at": "2026-10-20T00:00:00.000000Z",
+        "coverage": "unknown",
+        "coverage_basis_note": "合成病区床位原证据仅用于隔离工程验证，已明确核对观察与登记时刻及缺项状态，不代表真实医院运营资料。",
+        "definition": "occupied_physical_beds_at_boundary_v1",
+        "external_record_key": null,
+        "external_record_key_absent_reason": "not_applicable",
+        "method": "direct_tally",
+        "observed_at": "2026-10-20T00:00:00.000001Z",
+        "occupied_beds": {
+          "absent_reason": null,
+          "value": 0
+        },
+        "schema_version": "bed_census_observation_v1"
+      },
+      "recorded_at": "2026-10-20T09:10:11.123456Z",
+      "review_basis_note": "",
+      "reviewed_at": null,
+      "reviewed_by": null,
+      "revision": 1,
+      "revoke_reason": "",
+      "revoked_at": null,
+      "revoked_by": null,
+      "schema_version": "bed_source_private_v1",
+      "source_id": "bed_census:2c59efce-3f52-4334-a4bc-67a8eebe4c4a:146f2c4b9136",
+      "source_kind": "census",
+      "source_record_id": "2c59efce-3f52-4334-a4bc-67a8eebe4c4a",
+      "status": "draft",
+      "ward_id": 1
+    },
+    "ordinary_rejected": {
+      "audit_only": false,
+      "can_record": true,
+      "can_review": false,
+      "can_revoke": false,
+      "content_hash": "146f2c4b9136f997e28a9176397bf5d9460c1458ff8cf95800642de0c06492b5",
+      "created_by": 13,
+      "department_id": 1,
+      "eligibility_basis": "published_governance_and_current_ward_department_not_census_coverage_capacity_readiness_or_forecast_validation",
+      "eligible": false,
+      "exclusion_reasons": [
+        "source_rejected"
+      ],
+      "governance_hash": "6cab4cd63d6e420469c6979a4341016768ac94b84f3a0922359776e5914465f3",
+      "parent_binding": null,
+      "parent_current": true,
+      "payload": null,
+      "recorded_at": "2026-10-20T09:10:11.123456Z",
+      "review_basis_note": null,
+      "reviewed_at": "2026-10-20T09:10:11.123456Z",
+      "reviewed_by": 4,
+      "revision": 2,
+      "revoke_reason": null,
+      "revoked_at": null,
+      "revoked_by": null,
+      "schema_version": "bed_source_private_v1",
+      "source_id": "bed_census:2c59efce-3f52-4334-a4bc-67a8eebe4c4a:146f2c4b9136",
+      "source_kind": "census",
+      "source_record_id": "2c59efce-3f52-4334-a4bc-67a8eebe4c4a",
+      "status": "rejected",
+      "ward_id": 1
+    },
+    "review_request": {
+      "decision": "reject",
+      "expected_content_hash": "146f2c4b9136f997e28a9176397bf5d9460c1458ff8cf95800642de0c06492b5",
+      "expected_revision": 1,
+      "review_basis_note": "合成病区床位原证据仅用于隔离工程验证，已明确核对观察与登记时刻及缺项状态，不代表真实医院运营资料。"
+    },
+    "super_draft": {
+      "audit_only": true,
+      "can_record": true,
+      "can_review": true,
+      "can_revoke": true,
+      "content_hash": "146f2c4b9136f997e28a9176397bf5d9460c1458ff8cf95800642de0c06492b5",
+      "created_by": 13,
+      "department_id": 1,
+      "eligibility_basis": "published_governance_and_current_ward_department_not_census_coverage_capacity_readiness_or_forecast_validation",
+      "eligible": false,
+      "exclusion_reasons": [
+        "source_draft"
+      ],
+      "governance_hash": "1e92d8dd6c108fe25e5092d431157a1c1177c90e1e90cc704f780af04ea942bd",
+      "parent_binding": {
+        "department": {
+          "department_id": 1
+        },
+        "ward": {
+          "department_id": 1,
+          "ward_id": 1
+        }
+      },
+      "parent_current": true,
+      "payload": {
+        "boundary_state_confirmed": "unknown",
+        "business_date": "2026-10-19",
+        "business_timezone": "Etc/UTC",
+        "census_at": "2026-10-20T00:00:00.000000Z",
+        "coverage": "unknown",
+        "coverage_basis_note": "合成病区床位原证据仅用于隔离工程验证，已明确核对观察与登记时刻及缺项状态，不代表真实医院运营资料。",
+        "definition": "occupied_physical_beds_at_boundary_v1",
+        "external_record_key": null,
+        "external_record_key_absent_reason": "not_applicable",
+        "method": "direct_tally",
+        "observed_at": "2026-10-20T00:00:00.000001Z",
+        "occupied_beds": {
+          "absent_reason": null,
+          "value": 0
+        },
+        "schema_version": "bed_census_observation_v1"
+      },
+      "recorded_at": "2026-10-20T09:10:11.123456Z",
+      "review_basis_note": "",
+      "reviewed_at": null,
+      "reviewed_by": null,
+      "revision": 1,
+      "revoke_reason": "",
+      "revoked_at": null,
+      "revoked_by": null,
+      "schema_version": "bed_source_private_v1",
+      "source_id": "bed_census:2c59efce-3f52-4334-a4bc-67a8eebe4c4a:146f2c4b9136",
+      "source_kind": "census",
+      "source_record_id": "2c59efce-3f52-4334-a4bc-67a8eebe4c4a",
+      "status": "draft",
+      "ward_id": 1
+    },
+    "super_rejected": {
+      "audit_only": true,
+      "can_record": true,
+      "can_review": false,
+      "can_revoke": false,
+      "content_hash": "146f2c4b9136f997e28a9176397bf5d9460c1458ff8cf95800642de0c06492b5",
+      "created_by": 13,
+      "department_id": 1,
+      "eligibility_basis": "published_governance_and_current_ward_department_not_census_coverage_capacity_readiness_or_forecast_validation",
+      "eligible": false,
+      "exclusion_reasons": [
+        "source_rejected"
+      ],
+      "governance_hash": "6cab4cd63d6e420469c6979a4341016768ac94b84f3a0922359776e5914465f3",
+      "parent_binding": {
+        "department": {
+          "department_id": 1
+        },
+        "ward": {
+          "department_id": 1,
+          "ward_id": 1
+        }
+      },
+      "parent_current": true,
+      "payload": {
+        "boundary_state_confirmed": "unknown",
+        "business_date": "2026-10-19",
+        "business_timezone": "Etc/UTC",
+        "census_at": "2026-10-20T00:00:00.000000Z",
+        "coverage": "unknown",
+        "coverage_basis_note": "合成病区床位原证据仅用于隔离工程验证，已明确核对观察与登记时刻及缺项状态，不代表真实医院运营资料。",
+        "definition": "occupied_physical_beds_at_boundary_v1",
+        "external_record_key": null,
+        "external_record_key_absent_reason": "not_applicable",
+        "method": "direct_tally",
+        "observed_at": "2026-10-20T00:00:00.000001Z",
+        "occupied_beds": {
+          "absent_reason": null,
+          "value": 0
+        },
+        "schema_version": "bed_census_observation_v1"
+      },
+      "recorded_at": "2026-10-20T09:10:11.123456Z",
+      "review_basis_note": "合成病区床位原证据仅用于隔离工程验证，已明确核对观察与登记时刻及缺项状态，不代表真实医院运营资料。",
+      "reviewed_at": "2026-10-20T09:10:11.123456Z",
+      "reviewed_by": 4,
+      "revision": 2,
+      "revoke_reason": "",
+      "revoked_at": null,
+      "revoked_by": null,
+      "schema_version": "bed_source_private_v1",
+      "source_id": "bed_census:2c59efce-3f52-4334-a4bc-67a8eebe4c4a:146f2c4b9136",
+      "source_kind": "census",
+      "source_record_id": "2c59efce-3f52-4334-a4bc-67a8eebe4c4a",
+      "status": "rejected",
+      "ward_id": 1
+    }
+  },
+  "stale": {
+    "create_request": {
+      "payload": {
+        "boundary_state_confirmed": "unknown",
+        "business_date": "2026-10-19",
+        "business_timezone": "Etc/UTC",
+        "census_at": "2026-10-20T00:00:00.000000Z",
+        "coverage": "unknown",
+        "coverage_basis_note": "合成病区床位原证据仅用于隔离工程验证，已明确核对观察与登记时刻及缺项状态，不代表真实医院运营资料。",
+        "definition": "occupied_physical_beds_at_boundary_v1",
+        "external_record_key": null,
+        "external_record_key_absent_reason": "not_applicable",
+        "method": "direct_tally",
+        "observed_at": "2026-10-20T00:00:00.000001Z",
+        "occupied_beds": {
+          "absent_reason": null,
+          "value": 0
+        },
+        "schema_version": "bed_census_observation_v1"
+      },
+      "ward_id": 1
+    },
+    "ordinary_stale": {
+      "audit_only": false,
+      "can_record": false,
+      "can_review": false,
+      "can_revoke": false,
+      "content_hash": "264266b9cec417bfe0fa260cf304b86045ad681bfd1485f4ac5c1fd218349828",
+      "created_by": 13,
+      "department_id": 1,
+      "eligibility_basis": "published_governance_and_current_ward_department_not_census_coverage_capacity_readiness_or_forecast_validation",
+      "eligible": false,
+      "exclusion_reasons": [
+        "ward_department_binding_changed"
+      ],
+      "governance_hash": "d360c7bb7d24c3585612e672e650f33f8ca6615e57dd68149811aeb8407f8a0a",
+      "parent_binding": null,
+      "parent_current": false,
+      "payload": null,
+      "recorded_at": "2026-10-20T09:10:11.123456Z",
+      "review_basis_note": null,
+      "reviewed_at": "2026-10-20T09:10:11.123456Z",
+      "reviewed_by": 4,
+      "revision": 2,
+      "revoke_reason": null,
+      "revoked_at": null,
+      "revoked_by": null,
+      "schema_version": "bed_source_private_v1",
+      "source_id": "bed_census:201e5050-e2ea-4549-b892-77f68979c92f:264266b9cec4",
+      "source_kind": "census",
+      "source_record_id": "201e5050-e2ea-4549-b892-77f68979c92f",
+      "status": "published",
+      "ward_id": 1
+    },
+    "published_before_parent_change": {
+      "audit_only": true,
+      "can_record": true,
+      "can_review": false,
+      "can_revoke": true,
+      "content_hash": "264266b9cec417bfe0fa260cf304b86045ad681bfd1485f4ac5c1fd218349828",
+      "created_by": 13,
+      "department_id": 1,
+      "eligibility_basis": "published_governance_and_current_ward_department_not_census_coverage_capacity_readiness_or_forecast_validation",
+      "eligible": true,
+      "exclusion_reasons": [],
+      "governance_hash": "d360c7bb7d24c3585612e672e650f33f8ca6615e57dd68149811aeb8407f8a0a",
+      "parent_binding": {
+        "department": {
+          "department_id": 1
+        },
+        "ward": {
+          "department_id": 1,
+          "ward_id": 1
+        }
+      },
+      "parent_current": true,
+      "payload": {
+        "boundary_state_confirmed": "unknown",
+        "business_date": "2026-10-19",
+        "business_timezone": "Etc/UTC",
+        "census_at": "2026-10-20T00:00:00.000000Z",
+        "coverage": "unknown",
+        "coverage_basis_note": "合成病区床位原证据仅用于隔离工程验证，已明确核对观察与登记时刻及缺项状态，不代表真实医院运营资料。",
+        "definition": "occupied_physical_beds_at_boundary_v1",
+        "external_record_key": null,
+        "external_record_key_absent_reason": "not_applicable",
+        "method": "direct_tally",
+        "observed_at": "2026-10-20T00:00:00.000001Z",
+        "occupied_beds": {
+          "absent_reason": null,
+          "value": 0
+        },
+        "schema_version": "bed_census_observation_v1"
+      },
+      "recorded_at": "2026-10-20T09:10:11.123456Z",
+      "review_basis_note": "合成病区床位原证据仅用于隔离工程验证，已明确核对观察与登记时刻及缺项状态，不代表真实医院运营资料。",
+      "reviewed_at": "2026-10-20T09:10:11.123456Z",
+      "reviewed_by": 4,
+      "revision": 2,
+      "revoke_reason": "",
+      "revoked_at": null,
+      "revoked_by": null,
+      "schema_version": "bed_source_private_v1",
+      "source_id": "bed_census:201e5050-e2ea-4549-b892-77f68979c92f:264266b9cec4",
+      "source_kind": "census",
+      "source_record_id": "201e5050-e2ea-4549-b892-77f68979c92f",
+      "status": "published",
+      "ward_id": 1
+    },
+    "super_stale": {
+      "audit_only": true,
+      "can_record": false,
+      "can_review": false,
+      "can_revoke": true,
+      "content_hash": "264266b9cec417bfe0fa260cf304b86045ad681bfd1485f4ac5c1fd218349828",
+      "created_by": 13,
+      "department_id": 1,
+      "eligibility_basis": "published_governance_and_current_ward_department_not_census_coverage_capacity_readiness_or_forecast_validation",
+      "eligible": false,
+      "exclusion_reasons": [
+        "ward_department_binding_changed"
+      ],
+      "governance_hash": "d360c7bb7d24c3585612e672e650f33f8ca6615e57dd68149811aeb8407f8a0a",
+      "parent_binding": {
+        "department": {
+          "department_id": 1
+        },
+        "ward": {
+          "department_id": 1,
+          "ward_id": 1
+        }
+      },
+      "parent_current": false,
+      "payload": {
+        "boundary_state_confirmed": "unknown",
+        "business_date": "2026-10-19",
+        "business_timezone": "Etc/UTC",
+        "census_at": "2026-10-20T00:00:00.000000Z",
+        "coverage": "unknown",
+        "coverage_basis_note": "合成病区床位原证据仅用于隔离工程验证，已明确核对观察与登记时刻及缺项状态，不代表真实医院运营资料。",
+        "definition": "occupied_physical_beds_at_boundary_v1",
+        "external_record_key": null,
+        "external_record_key_absent_reason": "not_applicable",
+        "method": "direct_tally",
+        "observed_at": "2026-10-20T00:00:00.000001Z",
+        "occupied_beds": {
+          "absent_reason": null,
+          "value": 0
+        },
+        "schema_version": "bed_census_observation_v1"
+      },
+      "recorded_at": "2026-10-20T09:10:11.123456Z",
+      "review_basis_note": "合成病区床位原证据仅用于隔离工程验证，已明确核对观察与登记时刻及缺项状态，不代表真实医院运营资料。",
+      "reviewed_at": "2026-10-20T09:10:11.123456Z",
+      "reviewed_by": 4,
+      "revision": 2,
+      "revoke_reason": "",
+      "revoked_at": null,
+      "revoked_by": null,
+      "schema_version": "bed_source_private_v1",
+      "source_id": "bed_census:201e5050-e2ea-4549-b892-77f68979c92f:264266b9cec4",
+      "source_kind": "census",
+      "source_record_id": "201e5050-e2ea-4549-b892-77f68979c92f",
+      "status": "published",
+      "ward_id": 1
+    }
+  }
+}

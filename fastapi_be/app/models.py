@@ -9,6 +9,8 @@ from app import inpatient_respiratory_models as _respiratory_models  # noqa: F40
 from app import inpatient_vasoactive_models as _vasoactive_models  # noqa: F401
 
 # Register AI tables in the same metadata for create_all and Alembic migrations.
+from app.ai import bed_models as _bed_models  # noqa: F401
+from app.ai import bed_series_models as _bed_series_models  # noqa: F401
 from app.ai import models as _ai_models  # noqa: F401
 from app.ai import roster_models as _roster_models  # noqa: F401
 from app.ai import roster_plan_models as _roster_plan_models  # noqa: F401

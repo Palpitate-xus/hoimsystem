@@ -15,7 +15,7 @@ from app.inpatient_observations import canonical_json, canonical_uuid, utc_text
 PROFILE_ROLES = {"super_admin"}
 SCHEMA_VERSION = "risk_rule_profile_v1"
 MAX_PROFILE_BYTES = 262144
-RuleId = Literal["news2_2017", "kdigo_aki_2012", "qsofa_sepsis3_2016"]
+RuleId = Literal["news2_2017", "kdigo_aki_2012", "qsofa_sepsis3_2016", "sofa1_native_observed_v1"]
 INPUT_POLICY = {
     "point_selection": "single_explicit_point",
     "temporal_fusion": "no_merge",
@@ -59,6 +59,10 @@ def fixed_options():
     from app.ai.news2_contract import RECIPE, recipe_digest
     from app.ai.qsofa_contract import RECIPE as QSOFA_RECIPE
     from app.ai.qsofa_contract import recipe_digest as qsofa_recipe_digest
+    from app.ai.sofa_contract import INPUT_POLICY as SOFA_INPUT_POLICY
+    from app.ai.sofa_contract import RECIPE as SOFA_RECIPE
+    from app.ai.sofa_contract import RULE_ID as SOFA_RULE_ID
+    from app.ai.sofa_contract import recipe_digest as sofa_recipe_digest
 
     return [
         {"rule_id": "news2_2017", "recipe_digest": recipe_digest(), "recipe": json.loads(canonical_json(RECIPE)), "input_policy": json.loads(canonical_json(INPUT_POLICY))},
@@ -69,6 +73,7 @@ def fixed_options():
             "recipe": json.loads(canonical_json(QSOFA_RECIPE)),
             "input_policy": json.loads(canonical_json({key: QSOFA_RECIPE[key] for key in ("source_policy", "input_precision", "review", "population", "partial_policy")})),
         },
+        {"rule_id": SOFA_RULE_ID, "recipe_digest": sofa_recipe_digest(), "recipe": json.loads(canonical_json(SOFA_RECIPE)), "input_policy": json.loads(canonical_json(SOFA_INPUT_POLICY))},
     ]
 
 

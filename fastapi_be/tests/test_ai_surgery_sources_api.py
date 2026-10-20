@@ -17,6 +17,7 @@ from app.routers import ai_surgery_sources as routes
 from tests.conftest import override_get_db
 from tests.test_ai_surgery_facts import NOTE, create, publish, request
 from tests.test_ai_surgery_facts import surgery_case as surgery_case
+from tests.test_ai_surgery_snapshot import snapshot_case as snapshot_case
 
 
 @pytest_asyncio.fixture
@@ -300,3 +301,39 @@ async def test_main_preview_strict_closed_original_identifiers(async_client, sur
         values["application_ids"] = []
     response = await async_client.post("/api/ai/surgery-sources/preview", headers=auth_headers(case["director"].username), json=values)
     assert response.status_code == 422, response.text
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("kind", ["source", "registry", "scenario"])
+@pytest.mark.parametrize("note", ["x" * 1000, "🙂" * 1000, "x" * 1001], ids=["ascii_1000", "emoji_1000_4000bytes", "ascii_1001_rejected"])
+async def test_revoke_length_matches_actual_sql_column_for_all_governance_routes(async_client, snapshot_case, auth_headers, db_session, kind, note):
+    from tests.test_ai_surgery_scenarios import published_scenario
+
+    case = snapshot_case[3]
+    if kind == "source":
+        row = db_session.query(AISurgerySource).filter_by(pool_id=case["pool"].pool_id, source_kind="case_duration_estimate").one()
+        record_id = row.source_record_id
+        url = source_url(row) + "/revoke"
+    elif kind == "registry":
+        row = case["pool"]
+        record_id = row.pool_id
+        url = "/api/ai/surgery-registry/pool/" + record_id + "/revoke"
+    else:
+        row = published_scenario(db_session, snapshot_case)
+        record_id = row.scenario_id
+        url = "/api/ai/surgery-scenarios/" + record_id + "/revoke"
+    before = row.status, row.revision, row.content_hash, row.revoke_reason
+    before_audits = db_session.query(AIAuditEvent).filter_by(target=record_id).count()
+    result = await async_client.post(url, headers=auth_headers(case["super"].username), json={"expected_revision": 2, "expected_content_hash": row.content_hash, "basis_note": note})
+    if len(note) > 1000:
+        assert result.status_code == 422, result.text
+        db_session.refresh(row)
+        assert (row.status, row.revision, row.content_hash, row.revoke_reason) == before
+        assert db_session.query(AIAuditEvent).filter_by(target=record_id).count() == before_audits
+    else:
+        assert result.status_code == 200, result.text
+        db_session.refresh(row)
+        assert row.status == "revoked" and row.revision == 3 and row.revoke_reason == note
+        response = result.json()["data"]
+        assert (response["governance"]["revoke_reason"] if kind == "registry" else response["revoke_reason"]) == note
+        assert len(row.revoke_reason.encode()) == (4000 if note[0] == "🙂" else 1000)

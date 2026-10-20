@@ -433,6 +433,7 @@ class SourceReview(WithBasis):
 
 
 class SourceRevoke(WithBasis):
+    basis_note: str = Field(min_length=20, max_length=1000)
     expected_revision: int = Field(strict=True, ge=1, le=2)
     expected_content_hash: Hash
 

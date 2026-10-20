@@ -50,7 +50,26 @@ function compact(schema) {
 const root = path.resolve(__dirname, ".."), target = path.join(root, "src/api/sofaSchemas.json");
 if (process.argv.slice(2).some(value => value !== "--check")) throw new Error("Only --check is supported");
 const source = JSON.parse(execFileSync(process.env.HOIM_TEST_PYTHON || "/home/xusheng/miniconda3/bin/python", ["-c", script], { cwd: path.join(root, "../fastapi_be"), encoding: "utf8", maxBuffer: 1048576 }));
-const output = JSON.stringify(Object.fromEntries(Object.entries(source).map(([name, schema]) => [name, compact(schema)]))) + "\n";
+// Lossless static DAG storage shares identical JSON subtrees, while each model
+// retains its original local $defs context. Same-name definitions with different
+// constraints are never merged. No schema constraint or keyword is removed here.
+const actual=Object.fromEntries(Object.entries(source).map(([name,schema])=>[name,compact(schema)]));
+const nodes=[],seen=new Map();
+function intern(value){
+  const key=JSON.stringify(value);if(seen.has(key))return seen.get(key);
+  const encode=item=>item!==null&&typeof item==="object"?[intern(item)]:item;
+  const packed=Array.isArray(value)?value.map(encode):Object.fromEntries(Object.entries(value).map(([key,item])=>[key,encode(item)]));
+  const index=nodes.length;nodes.push(packed);seen.set(key,index);return index;
+}
+const models=Object.fromEntries(Object.entries(actual).map(([name,schema])=>[name,intern(schema)]));
+const restored=[];
+for(const [index,node]of nodes.entries()){
+  const decode=value=>{if(!Array.isArray(value))return value;if(value.length!==1||!Number.isSafeInteger(value[0])||value[0]<0||value[0]>=index)throw new Error("Invalid schema DAG reference");return restored[value[0]];};
+  restored.push(Array.isArray(node)?node.map(decode):Object.fromEntries(Object.entries(node).map(([key,value])=>[key,decode(value)])));
+}
+const roundTrip=Object.fromEntries(Object.entries(models).map(([name,index])=>[name,restored[index]]));
+if(JSON.stringify(roundTrip)!==JSON.stringify(actual))throw new Error("Packed schemas differ from the complete actual Pydantic constraints");
+const output=JSON.stringify({models,nodes})+"\n";
 if (process.argv.includes("--check")) {
   if (fs.readFileSync(target, "utf8") !== output) throw new Error("SOFA browser schemas differ from actual backend models; regenerate them");
   process.stdout.write(`Verified ${Object.keys(source).length} actual SOFA model schemas (${Buffer.byteLength(output)} bytes)\n`);

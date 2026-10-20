@@ -1,9 +1,23 @@
-import schemas from "./sofaSchemas.json";
+import registry from "./sofaSchemas.json";
 
 const own = (value, key) => Object.hasOwn(value, key);
 const object = value => value !== null && typeof value === "object" && !Array.isArray(value);
 const forbidden = key => ["__proto__", "prototype", "constructor"].includes(key);
 const allowed = new Set(["$defs", "$ref", "additionalProperties", "anyOf", "const", "enum", "items", "maxItems", "maxLength", "maximum", "minLength", "minimum", "oneOf", "pattern", "properties", "propertyNames", "required", "type"]);
+
+// Expand generated lossless JSON nodes once. References can only point backward,
+// so malformed/cyclic registries fail before any clinical input is accepted.
+function unpackRegistry(value){
+  if(!object(value)||Object.keys(value).sort().join(",")!=="models,nodes"||!object(value.models)||!Array.isArray(value.nodes))throw new Error("Invalid SOFA schema registry");
+  const nodes=[];
+  for(const [index,node]of value.nodes.entries()){
+    if(!object(node)&&!Array.isArray(node))throw new Error("Invalid SOFA schema node");
+    const decode=item=>{if(Array.isArray(item)){if(item.length!==1||!Number.isSafeInteger(item[0])||item[0]<0||item[0]>=index)throw new Error("Invalid SOFA schema reference");return nodes[item[0]];}if(item!==null&&typeof item==="object")throw new Error("Unpacked SOFA schema object");return item;};
+    nodes.push(Array.isArray(node)?node.map(decode):Object.fromEntries(Object.entries(node).map(([key,item])=>{if(forbidden(key))throw new Error("Forbidden SOFA schema key");return[key,decode(item)];})));
+  }
+  return Object.fromEntries(Object.entries(value.models).map(([name,index])=>{if(forbidden(name)||!Number.isSafeInteger(index)||index<0||index>=nodes.length||!object(nodes[index]))throw new Error("Invalid SOFA schema model");return[name,JSON.parse(JSON.stringify(nodes[index]))];}));
+}
+const schemas=unpackRegistry(registry);
 
 // A closed subset of the schemas generated from actual Pydantic models. Every
 // unsupported constraint rejects; schema/model validators remain distinct.

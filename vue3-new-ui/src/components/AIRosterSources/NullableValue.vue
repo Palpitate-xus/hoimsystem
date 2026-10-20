@@ -1,0 +1,5 @@
+<template><div><el-form-item :label="`${label}状态`"><el-select :model-value="modelValue.state" :aria-label="`${label}状态`" placeholder="明确选择，未知不补零" @update:model-value="set('state',$event)"><template v-if="kind==='boolean'"><el-option label="明确计入工作时间（true）" value="true" /><el-option label="明确不计工作时间（false）" value="false" /></template><el-option v-else label="原值明确已知" value="known" /><el-option label="原值未知" value="unknown" /><el-option label="明确不适用" value="not_applicable" /></el-select></el-form-item><el-form-item v-if="modelValue.state==='known'" :label="label"><el-input :model-value="modelValue.value??''" :aria-label="label" :inputmode="kind==='count'?'numeric':undefined" :placeholder="kind==='clock'?'YYYY-MM-DDTHH:mm:ss.ffffffZ，明确UTC或偏移':kind==='job'?'已核实原岗位代码':'原整数分钟，0保留为已知值'" @update:model-value="set('value',$event)" /></el-form-item></div></template>
+<script setup>
+const props=defineProps({modelValue:{type:Object,default:()=>({})},label:{type:String,required:true},kind:{type:String,default:'count'}}),emit=defineEmits(['update:modelValue']);
+function set(key,value){emit('update:modelValue',{...props.modelValue,[key]:value});}
+</script>

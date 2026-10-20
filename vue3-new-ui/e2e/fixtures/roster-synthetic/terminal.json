@@ -1,0 +1,616 @@
+{
+  "requests": {
+    "qualification": {
+      "department_id": 1,
+      "doctor_id": 2,
+      "payload": {
+        "employment_status": "active",
+        "qualification_status": "verified",
+        "authorized_job_keys": [
+          "general_clinic"
+        ],
+        "valid_from_at": "2026-01-01T00:00:00Z",
+        "valid_until_at": "2026-12-31T00:00:00Z",
+        "expiry_status": "known",
+        "evidence_basis_note": "合成人员证据仅用于工程验证，已逐项核对本次原资料时刻身份和明确缺项状态，不代表外部事实已验证。"
+      }
+    },
+    "availability": {
+      "department_id": 1,
+      "doctor_id": 2,
+      "payload": {
+        "start_at": "2026-10-22T08:00:00.000000Z",
+        "end_at": "2026-10-22T16:00:00.000000Z",
+        "availability": "unknown",
+        "basis_kind": "staff_declaration",
+        "evidence_basis_note": "合成人员证据仅用于工程验证，已逐项核对本次原资料时刻身份和明确缺项状态，不代表外部事实已验证。"
+      }
+    }
+  },
+  "rejected_draft": {
+    "source_record_id": "102566cb-1314-4f34-a690-df9cec5319f7",
+    "source_kind": "qualification",
+    "department_id": 1,
+    "doctor_id": 2,
+    "schema_version": "roster_fact_v1",
+    "recorded_at": "2026-10-20T09:10:11.123456Z",
+    "created_by": 13,
+    "source_id": "roster_qualification:102566cb-1314-4f34-a690-df9cec5319f7:2192184df29f",
+    "content_hash": "2192184df29fe3927f0b3d9d2a756dd764562dbc0b9db45e03ac7873bb53f908",
+    "status": "draft",
+    "revision": 1,
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "review_basis_note": "",
+    "revoked_by": null,
+    "revoked_at": null,
+    "revoke_reason": "",
+    "governance_hash": "1e92d8dd6c108fe25e5092d431157a1c1177c90e1e90cc704f780af04ea942bd",
+    "payload": {
+      "evidence_basis_note": "合成人员证据仅用于工程验证，已逐项核对本次原资料时刻身份和明确缺项状态，不代表外部事实已验证。",
+      "employment_status": "active",
+      "qualification_status": "verified",
+      "authorized_job_keys": [
+        "general_clinic"
+      ],
+      "valid_from_at": "2026-01-01T00:00:00.000000Z",
+      "valid_until_at": "2026-12-31T00:00:00.000000Z",
+      "expiry_status": "known"
+    },
+    "parent_binding": {
+      "department": {
+        "department_id": 1
+      },
+      "doctor": {
+        "department_id": 1,
+        "doctor_id": 2
+      }
+    },
+    "parent_current": true,
+    "eligible": false,
+    "exclusion_reasons": [
+      "source_draft"
+    ],
+    "can_record": true,
+    "can_review": false,
+    "can_revoke": true,
+    "audit_only": false,
+    "eligibility_basis": "published_governance_and_current_parent_not_staff_qualification_or_roster_feasibility"
+  },
+  "rejected_super_draft": {
+    "source_record_id": "102566cb-1314-4f34-a690-df9cec5319f7",
+    "source_kind": "qualification",
+    "department_id": 1,
+    "doctor_id": 2,
+    "schema_version": "roster_fact_v1",
+    "recorded_at": "2026-10-20T09:10:11.123456Z",
+    "created_by": 13,
+    "source_id": "roster_qualification:102566cb-1314-4f34-a690-df9cec5319f7:2192184df29f",
+    "content_hash": "2192184df29fe3927f0b3d9d2a756dd764562dbc0b9db45e03ac7873bb53f908",
+    "status": "draft",
+    "revision": 1,
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "review_basis_note": "",
+    "revoked_by": null,
+    "revoked_at": null,
+    "revoke_reason": "",
+    "governance_hash": "1e92d8dd6c108fe25e5092d431157a1c1177c90e1e90cc704f780af04ea942bd",
+    "payload": {
+      "evidence_basis_note": "合成人员证据仅用于工程验证，已逐项核对本次原资料时刻身份和明确缺项状态，不代表外部事实已验证。",
+      "employment_status": "active",
+      "qualification_status": "verified",
+      "authorized_job_keys": [
+        "general_clinic"
+      ],
+      "valid_from_at": "2026-01-01T00:00:00.000000Z",
+      "valid_until_at": "2026-12-31T00:00:00.000000Z",
+      "expiry_status": "known"
+    },
+    "parent_binding": {
+      "department": {
+        "department_id": 1
+      },
+      "doctor": {
+        "department_id": 1,
+        "doctor_id": 2
+      }
+    },
+    "parent_current": true,
+    "eligible": false,
+    "exclusion_reasons": [
+      "source_draft"
+    ],
+    "can_record": true,
+    "can_review": true,
+    "can_revoke": true,
+    "audit_only": true,
+    "eligibility_basis": "published_governance_and_current_parent_not_staff_qualification_or_roster_feasibility"
+  },
+  "rejected_review_request": {
+    "expected_revision": 1,
+    "expected_content_hash": "2192184df29fe3927f0b3d9d2a756dd764562dbc0b9db45e03ac7873bb53f908",
+    "decision": "reject",
+    "review_basis_note": "合成人员证据仅用于工程验证，已逐项核对本次原资料时刻身份和明确缺项状态，不代表外部事实已验证。"
+  },
+  "rejected_review_response": {
+    "source_record_id": "102566cb-1314-4f34-a690-df9cec5319f7",
+    "source_kind": "qualification",
+    "department_id": 1,
+    "doctor_id": 2,
+    "schema_version": "roster_fact_v1",
+    "recorded_at": "2026-10-20T09:10:11.123456Z",
+    "created_by": 13,
+    "source_id": "roster_qualification:102566cb-1314-4f34-a690-df9cec5319f7:2192184df29f",
+    "content_hash": "2192184df29fe3927f0b3d9d2a756dd764562dbc0b9db45e03ac7873bb53f908",
+    "status": "rejected",
+    "revision": 2,
+    "reviewed_by": 4,
+    "reviewed_at": "2026-10-20T09:10:11.123456Z",
+    "review_basis_note": "合成人员证据仅用于工程验证，已逐项核对本次原资料时刻身份和明确缺项状态，不代表外部事实已验证。",
+    "revoked_by": null,
+    "revoked_at": null,
+    "revoke_reason": "",
+    "governance_hash": "e1b0fff1e78ff19aee60d0714b753ba63c8c1d8b238f179b9737acb4020930d9",
+    "payload": {
+      "evidence_basis_note": "合成人员证据仅用于工程验证，已逐项核对本次原资料时刻身份和明确缺项状态，不代表外部事实已验证。",
+      "employment_status": "active",
+      "qualification_status": "verified",
+      "authorized_job_keys": [
+        "general_clinic"
+      ],
+      "valid_from_at": "2026-01-01T00:00:00.000000Z",
+      "valid_until_at": "2026-12-31T00:00:00.000000Z",
+      "expiry_status": "known"
+    },
+    "parent_binding": {
+      "department": {
+        "department_id": 1
+      },
+      "doctor": {
+        "department_id": 1,
+        "doctor_id": 2
+      }
+    },
+    "parent_current": true,
+    "eligible": false,
+    "exclusion_reasons": [
+      "source_rejected"
+    ],
+    "can_record": true,
+    "can_review": false,
+    "can_revoke": false,
+    "audit_only": true,
+    "eligibility_basis": "published_governance_and_current_parent_not_staff_qualification_or_roster_feasibility"
+  },
+  "rejected_redacted": {
+    "source_record_id": "102566cb-1314-4f34-a690-df9cec5319f7",
+    "source_kind": "qualification",
+    "department_id": 1,
+    "doctor_id": 2,
+    "schema_version": "roster_fact_v1",
+    "recorded_at": "2026-10-20T09:10:11.123456Z",
+    "created_by": 13,
+    "source_id": "roster_qualification:102566cb-1314-4f34-a690-df9cec5319f7:2192184df29f",
+    "content_hash": "2192184df29fe3927f0b3d9d2a756dd764562dbc0b9db45e03ac7873bb53f908",
+    "status": "rejected",
+    "revision": 2,
+    "reviewed_by": 4,
+    "reviewed_at": "2026-10-20T09:10:11.123456Z",
+    "review_basis_note": null,
+    "revoked_by": null,
+    "revoked_at": null,
+    "revoke_reason": null,
+    "governance_hash": "e1b0fff1e78ff19aee60d0714b753ba63c8c1d8b238f179b9737acb4020930d9",
+    "payload": null,
+    "parent_binding": null,
+    "parent_current": true,
+    "eligible": false,
+    "exclusion_reasons": [
+      "source_rejected"
+    ],
+    "can_record": true,
+    "can_review": false,
+    "can_revoke": false,
+    "audit_only": false,
+    "eligibility_basis": "published_governance_and_current_parent_not_staff_qualification_or_roster_feasibility"
+  },
+  "revoked_draft": {
+    "source_record_id": "fc2f6d00-718d-41ac-80ec-92beba3d1af3",
+    "source_kind": "availability",
+    "department_id": 1,
+    "doctor_id": 2,
+    "schema_version": "roster_fact_v1",
+    "recorded_at": "2026-10-20T09:10:11.123456Z",
+    "created_by": 13,
+    "source_id": "roster_availability:fc2f6d00-718d-41ac-80ec-92beba3d1af3:a5db8c6f6d6d",
+    "content_hash": "a5db8c6f6d6dd08bd8fd472d5189037dfa99fe53bef2fdbe91c4db573890f852",
+    "status": "draft",
+    "revision": 1,
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "review_basis_note": "",
+    "revoked_by": null,
+    "revoked_at": null,
+    "revoke_reason": "",
+    "governance_hash": "1e92d8dd6c108fe25e5092d431157a1c1177c90e1e90cc704f780af04ea942bd",
+    "payload": {
+      "evidence_basis_note": "合成人员证据仅用于工程验证，已逐项核对本次原资料时刻身份和明确缺项状态，不代表外部事实已验证。",
+      "start_at": "2026-10-22T08:00:00.000000Z",
+      "end_at": "2026-10-22T16:00:00.000000Z",
+      "availability": "unknown",
+      "basis_kind": "staff_declaration"
+    },
+    "parent_binding": {
+      "department": {
+        "department_id": 1
+      },
+      "doctor": {
+        "department_id": 1,
+        "doctor_id": 2
+      }
+    },
+    "parent_current": true,
+    "eligible": false,
+    "exclusion_reasons": [
+      "source_draft"
+    ],
+    "can_record": true,
+    "can_review": false,
+    "can_revoke": true,
+    "audit_only": false,
+    "eligibility_basis": "published_governance_and_current_parent_not_staff_qualification_or_roster_feasibility"
+  },
+  "published_super_draft": {
+    "source_record_id": "fc2f6d00-718d-41ac-80ec-92beba3d1af3",
+    "source_kind": "availability",
+    "department_id": 1,
+    "doctor_id": 2,
+    "schema_version": "roster_fact_v1",
+    "recorded_at": "2026-10-20T09:10:11.123456Z",
+    "created_by": 13,
+    "source_id": "roster_availability:fc2f6d00-718d-41ac-80ec-92beba3d1af3:a5db8c6f6d6d",
+    "content_hash": "a5db8c6f6d6dd08bd8fd472d5189037dfa99fe53bef2fdbe91c4db573890f852",
+    "status": "draft",
+    "revision": 1,
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "review_basis_note": "",
+    "revoked_by": null,
+    "revoked_at": null,
+    "revoke_reason": "",
+    "governance_hash": "1e92d8dd6c108fe25e5092d431157a1c1177c90e1e90cc704f780af04ea942bd",
+    "payload": {
+      "evidence_basis_note": "合成人员证据仅用于工程验证，已逐项核对本次原资料时刻身份和明确缺项状态，不代表外部事实已验证。",
+      "start_at": "2026-10-22T08:00:00.000000Z",
+      "end_at": "2026-10-22T16:00:00.000000Z",
+      "availability": "unknown",
+      "basis_kind": "staff_declaration"
+    },
+    "parent_binding": {
+      "department": {
+        "department_id": 1
+      },
+      "doctor": {
+        "department_id": 1,
+        "doctor_id": 2
+      }
+    },
+    "parent_current": true,
+    "eligible": false,
+    "exclusion_reasons": [
+      "source_draft"
+    ],
+    "can_record": true,
+    "can_review": true,
+    "can_revoke": true,
+    "audit_only": true,
+    "eligibility_basis": "published_governance_and_current_parent_not_staff_qualification_or_roster_feasibility"
+  },
+  "published_review_request": {
+    "expected_revision": 1,
+    "expected_content_hash": "a5db8c6f6d6dd08bd8fd472d5189037dfa99fe53bef2fdbe91c4db573890f852",
+    "decision": "publish",
+    "review_basis_note": "合成人员证据仅用于工程验证，已逐项核对本次原资料时刻身份和明确缺项状态，不代表外部事实已验证。"
+  },
+  "published_review_response": {
+    "source_record_id": "fc2f6d00-718d-41ac-80ec-92beba3d1af3",
+    "source_kind": "availability",
+    "department_id": 1,
+    "doctor_id": 2,
+    "schema_version": "roster_fact_v1",
+    "recorded_at": "2026-10-20T09:10:11.123456Z",
+    "created_by": 13,
+    "source_id": "roster_availability:fc2f6d00-718d-41ac-80ec-92beba3d1af3:a5db8c6f6d6d",
+    "content_hash": "a5db8c6f6d6dd08bd8fd472d5189037dfa99fe53bef2fdbe91c4db573890f852",
+    "status": "published",
+    "revision": 2,
+    "reviewed_by": 4,
+    "reviewed_at": "2026-10-20T09:10:11.123456Z",
+    "review_basis_note": "合成人员证据仅用于工程验证，已逐项核对本次原资料时刻身份和明确缺项状态，不代表外部事实已验证。",
+    "revoked_by": null,
+    "revoked_at": null,
+    "revoke_reason": "",
+    "governance_hash": "07b068f3a499603959432369cb2203d9defc0ed891b4ecfa5530f0fa505885cc",
+    "payload": {
+      "evidence_basis_note": "合成人员证据仅用于工程验证，已逐项核对本次原资料时刻身份和明确缺项状态，不代表外部事实已验证。",
+      "start_at": "2026-10-22T08:00:00.000000Z",
+      "end_at": "2026-10-22T16:00:00.000000Z",
+      "availability": "unknown",
+      "basis_kind": "staff_declaration"
+    },
+    "parent_binding": {
+      "department": {
+        "department_id": 1
+      },
+      "doctor": {
+        "department_id": 1,
+        "doctor_id": 2
+      }
+    },
+    "parent_current": true,
+    "eligible": true,
+    "exclusion_reasons": [],
+    "can_record": true,
+    "can_review": false,
+    "can_revoke": true,
+    "audit_only": true,
+    "eligibility_basis": "published_governance_and_current_parent_not_staff_qualification_or_roster_feasibility"
+  },
+  "revoked_original_published": {
+    "source_record_id": "fc2f6d00-718d-41ac-80ec-92beba3d1af3",
+    "source_kind": "availability",
+    "department_id": 1,
+    "doctor_id": 2,
+    "schema_version": "roster_fact_v1",
+    "recorded_at": "2026-10-20T09:10:11.123456Z",
+    "created_by": 13,
+    "source_id": "roster_availability:fc2f6d00-718d-41ac-80ec-92beba3d1af3:a5db8c6f6d6d",
+    "content_hash": "a5db8c6f6d6dd08bd8fd472d5189037dfa99fe53bef2fdbe91c4db573890f852",
+    "status": "published",
+    "revision": 2,
+    "reviewed_by": 4,
+    "reviewed_at": "2026-10-20T09:10:11.123456Z",
+    "review_basis_note": "合成人员证据仅用于工程验证，已逐项核对本次原资料时刻身份和明确缺项状态，不代表外部事实已验证。",
+    "revoked_by": null,
+    "revoked_at": null,
+    "revoke_reason": "",
+    "governance_hash": "07b068f3a499603959432369cb2203d9defc0ed891b4ecfa5530f0fa505885cc",
+    "payload": {
+      "evidence_basis_note": "合成人员证据仅用于工程验证，已逐项核对本次原资料时刻身份和明确缺项状态，不代表外部事实已验证。",
+      "start_at": "2026-10-22T08:00:00.000000Z",
+      "end_at": "2026-10-22T16:00:00.000000Z",
+      "availability": "unknown",
+      "basis_kind": "staff_declaration"
+    },
+    "parent_binding": {
+      "department": {
+        "department_id": 1
+      },
+      "doctor": {
+        "department_id": 1,
+        "doctor_id": 2
+      }
+    },
+    "parent_current": true,
+    "eligible": true,
+    "exclusion_reasons": [],
+    "can_record": true,
+    "can_review": false,
+    "can_revoke": true,
+    "audit_only": false,
+    "eligibility_basis": "published_governance_and_current_parent_not_staff_qualification_or_roster_feasibility"
+  },
+  "revoked_request": {
+    "expected_revision": 2,
+    "reason": "原作者实际撤销已发布合成原资料，保留原始量与完整哈希用于审计"
+  },
+  "revoked_redacted": {
+    "source_record_id": "fc2f6d00-718d-41ac-80ec-92beba3d1af3",
+    "source_kind": "availability",
+    "department_id": 1,
+    "doctor_id": 2,
+    "schema_version": "roster_fact_v1",
+    "recorded_at": "2026-10-20T09:10:11.123456Z",
+    "created_by": 13,
+    "source_id": "roster_availability:fc2f6d00-718d-41ac-80ec-92beba3d1af3:a5db8c6f6d6d",
+    "content_hash": "a5db8c6f6d6dd08bd8fd472d5189037dfa99fe53bef2fdbe91c4db573890f852",
+    "status": "revoked",
+    "revision": 3,
+    "reviewed_by": 4,
+    "reviewed_at": "2026-10-20T09:10:11.123456Z",
+    "review_basis_note": null,
+    "revoked_by": 13,
+    "revoked_at": "2026-10-20T09:10:11.123456Z",
+    "revoke_reason": null,
+    "governance_hash": "535d02a3e45b2b0d1655bf09ba995617fdce2fadface216d852a2a331c47ad1c",
+    "payload": null,
+    "parent_binding": null,
+    "parent_current": true,
+    "eligible": false,
+    "exclusion_reasons": [
+      "source_revoked"
+    ],
+    "can_record": true,
+    "can_review": false,
+    "can_revoke": false,
+    "audit_only": false,
+    "eligibility_basis": "published_governance_and_current_parent_not_staff_qualification_or_roster_feasibility"
+  },
+  "revoked_super_audit": {
+    "source_record_id": "fc2f6d00-718d-41ac-80ec-92beba3d1af3",
+    "source_kind": "availability",
+    "department_id": 1,
+    "doctor_id": 2,
+    "schema_version": "roster_fact_v1",
+    "recorded_at": "2026-10-20T09:10:11.123456Z",
+    "created_by": 13,
+    "source_id": "roster_availability:fc2f6d00-718d-41ac-80ec-92beba3d1af3:a5db8c6f6d6d",
+    "content_hash": "a5db8c6f6d6dd08bd8fd472d5189037dfa99fe53bef2fdbe91c4db573890f852",
+    "status": "revoked",
+    "revision": 3,
+    "reviewed_by": 4,
+    "reviewed_at": "2026-10-20T09:10:11.123456Z",
+    "review_basis_note": "合成人员证据仅用于工程验证，已逐项核对本次原资料时刻身份和明确缺项状态，不代表外部事实已验证。",
+    "revoked_by": 13,
+    "revoked_at": "2026-10-20T09:10:11.123456Z",
+    "revoke_reason": "原作者实际撤销已发布合成原资料，保留原始量与完整哈希用于审计",
+    "governance_hash": "535d02a3e45b2b0d1655bf09ba995617fdce2fadface216d852a2a331c47ad1c",
+    "payload": {
+      "evidence_basis_note": "合成人员证据仅用于工程验证，已逐项核对本次原资料时刻身份和明确缺项状态，不代表外部事实已验证。",
+      "start_at": "2026-10-22T08:00:00.000000Z",
+      "end_at": "2026-10-22T16:00:00.000000Z",
+      "availability": "unknown",
+      "basis_kind": "staff_declaration"
+    },
+    "parent_binding": {
+      "department": {
+        "department_id": 1
+      },
+      "doctor": {
+        "department_id": 1,
+        "doctor_id": 2
+      }
+    },
+    "parent_current": true,
+    "eligible": false,
+    "exclusion_reasons": [
+      "source_revoked"
+    ],
+    "can_record": true,
+    "can_review": false,
+    "can_revoke": false,
+    "audit_only": true,
+    "eligibility_basis": "published_governance_and_current_parent_not_staff_qualification_or_roster_feasibility"
+  },
+  "stale_original_published": {
+    "source_record_id": "10dd0edf-47be-4a90-9b71-9469531941ad",
+    "source_kind": "qualification",
+    "department_id": 1,
+    "doctor_id": 2,
+    "schema_version": "roster_fact_v1",
+    "recorded_at": "2026-10-20T09:10:11.123456Z",
+    "created_by": 13,
+    "source_id": "roster_qualification:10dd0edf-47be-4a90-9b71-9469531941ad:6c35b75d84cb",
+    "content_hash": "6c35b75d84cb6bad76446d6b2a24907f02378431d8563f33118b0ba2a7b748fb",
+    "status": "published",
+    "revision": 2,
+    "reviewed_by": 4,
+    "reviewed_at": "2026-10-20T09:10:11.123456Z",
+    "review_basis_note": "合成人员证据仅用于工程验证，已逐项核对本次原资料时刻身份和明确缺项状态，不代表外部事实已验证。",
+    "revoked_by": null,
+    "revoked_at": null,
+    "revoke_reason": "",
+    "governance_hash": "07b068f3a499603959432369cb2203d9defc0ed891b4ecfa5530f0fa505885cc",
+    "payload": {
+      "evidence_basis_note": "合成人员证据仅用于工程验证，已逐项核对本次原资料时刻身份和明确缺项状态，不代表外部事实已验证。",
+      "employment_status": "active",
+      "qualification_status": "verified",
+      "authorized_job_keys": [
+        "general_clinic"
+      ],
+      "valid_from_at": "2026-01-01T00:00:00.000000Z",
+      "valid_until_at": "2026-12-31T00:00:00.000000Z",
+      "expiry_status": "known"
+    },
+    "parent_binding": {
+      "department": {
+        "department_id": 1
+      },
+      "doctor": {
+        "department_id": 1,
+        "doctor_id": 2
+      }
+    },
+    "parent_current": true,
+    "eligible": true,
+    "exclusion_reasons": [],
+    "can_record": true,
+    "can_review": false,
+    "can_revoke": true,
+    "audit_only": false,
+    "eligibility_basis": "published_governance_and_current_parent_not_staff_qualification_or_roster_feasibility"
+  },
+  "stale_redacted": {
+    "source_record_id": "10dd0edf-47be-4a90-9b71-9469531941ad",
+    "source_kind": "qualification",
+    "department_id": 1,
+    "doctor_id": 2,
+    "schema_version": "roster_fact_v1",
+    "recorded_at": "2026-10-20T09:10:11.123456Z",
+    "created_by": 13,
+    "source_id": "roster_qualification:10dd0edf-47be-4a90-9b71-9469531941ad:6c35b75d84cb",
+    "content_hash": "6c35b75d84cb6bad76446d6b2a24907f02378431d8563f33118b0ba2a7b748fb",
+    "status": "published",
+    "revision": 2,
+    "reviewed_by": 4,
+    "reviewed_at": "2026-10-20T09:10:11.123456Z",
+    "review_basis_note": null,
+    "revoked_by": null,
+    "revoked_at": null,
+    "revoke_reason": null,
+    "governance_hash": "07b068f3a499603959432369cb2203d9defc0ed891b4ecfa5530f0fa505885cc",
+    "payload": null,
+    "parent_binding": null,
+    "parent_current": false,
+    "eligible": false,
+    "exclusion_reasons": [
+      "doctor_department_binding_changed"
+    ],
+    "can_record": false,
+    "can_review": false,
+    "can_revoke": false,
+    "audit_only": false,
+    "eligibility_basis": "published_governance_and_current_parent_not_staff_qualification_or_roster_feasibility"
+  },
+  "stale_super_audit": {
+    "source_record_id": "10dd0edf-47be-4a90-9b71-9469531941ad",
+    "source_kind": "qualification",
+    "department_id": 1,
+    "doctor_id": 2,
+    "schema_version": "roster_fact_v1",
+    "recorded_at": "2026-10-20T09:10:11.123456Z",
+    "created_by": 13,
+    "source_id": "roster_qualification:10dd0edf-47be-4a90-9b71-9469531941ad:6c35b75d84cb",
+    "content_hash": "6c35b75d84cb6bad76446d6b2a24907f02378431d8563f33118b0ba2a7b748fb",
+    "status": "published",
+    "revision": 2,
+    "reviewed_by": 4,
+    "reviewed_at": "2026-10-20T09:10:11.123456Z",
+    "review_basis_note": "合成人员证据仅用于工程验证，已逐项核对本次原资料时刻身份和明确缺项状态，不代表外部事实已验证。",
+    "revoked_by": null,
+    "revoked_at": null,
+    "revoke_reason": "",
+    "governance_hash": "07b068f3a499603959432369cb2203d9defc0ed891b4ecfa5530f0fa505885cc",
+    "payload": {
+      "evidence_basis_note": "合成人员证据仅用于工程验证，已逐项核对本次原资料时刻身份和明确缺项状态，不代表外部事实已验证。",
+      "employment_status": "active",
+      "qualification_status": "verified",
+      "authorized_job_keys": [
+        "general_clinic"
+      ],
+      "valid_from_at": "2026-01-01T00:00:00.000000Z",
+      "valid_until_at": "2026-12-31T00:00:00.000000Z",
+      "expiry_status": "known"
+    },
+    "parent_binding": {
+      "department": {
+        "department_id": 1
+      },
+      "doctor": {
+        "department_id": 1,
+        "doctor_id": 2
+      }
+    },
+    "parent_current": false,
+    "eligible": false,
+    "exclusion_reasons": [
+      "doctor_department_binding_changed"
+    ],
+    "can_record": false,
+    "can_review": false,
+    "can_revoke": true,
+    "audit_only": true,
+    "eligibility_basis": "published_governance_and_current_parent_not_staff_qualification_or_roster_feasibility"
+  }
+}

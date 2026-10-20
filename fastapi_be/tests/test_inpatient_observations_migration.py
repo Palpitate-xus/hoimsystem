@@ -24,7 +24,11 @@ def test_new_extension_migration_preserves_unzoned_legacy_values_without_backfil
         connection.execute(text("INSERT INTO hoimsystem_patient(patient_id,name,identity) VALUES(91001,'synthetic immutable migration','migration-observation-only')"))
         connection.execute(text("INSERT INTO hoimsystem_admission(admission_id,patient_id,status,admission_time) VALUES('legacy-admission-not-uuid',91001,2,'2001-02-03 04:05:06.123456')"))
         connection.execute(text("INSERT INTO hoimsystem_vital_sign(vital_id,patient_id,pulse,temperature,check_time) VALUES(91001,91001,0,36.5,'2002-03-04 05:06:07.000001')"))
-        connection.execute(text("INSERT INTO hoimsystem_critical_care_record(record_id,admission_id,patient_id,nurse_id,record_time,consciousness,gcs_score,urine_output,note) VALUES('legacy-critical','legacy-admission-not-uuid',91001,91001,'2003-04-05 06:07:08',0,15,'原尿量无区间','retain original')"))
+        connection.execute(
+            text(
+                "INSERT INTO hoimsystem_critical_care_record(record_id,admission_id,patient_id,nurse_id,record_time,consciousness,gcs_score,urine_output,note) VALUES('legacy-critical','legacy-admission-not-uuid',91001,91001,'2003-04-05 06:07:08',0,15,'原尿量无区间','retain original')"
+            )
+        )
     legacy_tables = ["hoimsystem_patient", "hoimsystem_admission", "hoimsystem_vital_sign", "hoimsystem_critical_care_record"]
     with engine.connect() as connection:
         before = {table: connection.execute(text("SELECT * FROM " + table)).all() for table in legacy_tables}

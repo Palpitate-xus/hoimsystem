@@ -4,6 +4,7 @@
 任何路由的鉴权依赖变更后，必须重新运行 scripts/generate_rbac_matrix.py 并提交。
 审计发现旧版矩阵把若干越权漏洞"合法化"（标 PUBLIC/全角色），此测试确保不再发生。
 """
+
 import inspect
 import json
 import os
@@ -25,9 +26,7 @@ def test_rbac_matrix_matches_code():
         cwd=os.path.join(os.path.dirname(__file__), ".."),
     )
     assert result.returncode == 0, (
-        f"RBAC 矩阵与代码不一致:\n{result.stdout}\n{result.stderr}\n"
-        "请运行: python3 scripts/generate_rbac_matrix.py 并提交更新后的 "
-        "doc/api-rbac-matrix.md 与 fastapi_be/rbac_matrix.json"
+        f"RBAC 矩阵与代码不一致:\n{result.stdout}\n{result.stderr}\n请运行: python3 scripts/generate_rbac_matrix.py 并提交更新后的 doc/api-rbac-matrix.md 与 fastapi_be/rbac_matrix.json"
     )
 
 
@@ -69,31 +68,16 @@ def test_observation_matrix_matches_real_mounted_paths_and_role_guards(module, g
             yield child.call
             yield from dependencies(child)
 
-    mounted = {
-        (method, route.path): route
-        for route in app.routes
-        if isinstance(route, APIRoute) and route.endpoint.__module__ == f"app.routers.{module}"
-        for method in route.methods
-    }
-    generated = {
-        (item["method"], item["path"]): item
-        for item in generator["collect_endpoints"]()
-        if item["module"] == f"{module}.py"
-    }
+    mounted = {(method, route.path): route for route in app.routes if isinstance(route, APIRoute) and route.endpoint.__module__ == f"app.routers.{module}" for method in route.methods}
+    generated = {(item["method"], item["path"]): item for item in generator["collect_endpoints"]() if item["module"] == f"{module}.py"}
     assert mounted, "测试必须覆盖实际主应用挂载路由"
     assert generated.keys() == mounted.keys()
-    committed = {
-        (item["method"], item["path"]): item
-        for item in json.loads((Path(SCRIPT).parents[1] / "rbac_matrix.json").read_text())
-        if item["module"] == f"{module}.py"
-    }
+    committed = {(item["method"], item["path"]): item for item in json.loads((Path(SCRIPT).parents[1] / "rbac_matrix.json").read_text()) if item["module"] == f"{module}.py"}
     assert committed == generated
     for key, route in mounted.items():
         actual = list(dependencies(route.dependant))
         guards = [
-            call for call in actual
-            if getattr(call, "__module__", None) == require_roles.__module__
-            and getattr(call, "__qualname__", None) == f"{require_roles.__qualname__}.<locals>._require_roles"
+            call for call in actual if getattr(call, "__module__", None) == require_roles.__module__ and getattr(call, "__qualname__", None) == f"{require_roles.__qualname__}.<locals>._require_roles"
         ]
         assert len(guards) == 1, f"{key}: expected one real require_roles guard"
         assert get_current_user in actual, f"{key}: missing authentication dependency"
@@ -109,11 +93,14 @@ def test_observation_groups_come_from_real_module_constants(generator):
     assert generator["ROLE_GROUPS"]["OBSERVATION_ROLES"] == set(OBSERVATION_ROLES)
 
 
-@pytest.mark.parametrize("declaration, expected", [
-    ('router = APIRouter()', '/api/points'),
-    ('router = APIRouter(prefix="/inpatient-observations")', '/api/inpatient-observations/points'),
-    ('source = APIRouter(prefix="/two"); router = APIRouter(prefix="/one")', '/api/one/points'),
-])
+@pytest.mark.parametrize(
+    "declaration, expected",
+    [
+        ("router = APIRouter()", "/api/points"),
+        ('router = APIRouter(prefix="/inpatient-observations")', "/api/inpatient-observations/points"),
+        ('source = APIRouter(prefix="/two"); router = APIRouter(prefix="/one")', "/api/one/points"),
+    ],
+)
 def test_literal_router_prefix_is_bound_to_decorator_owner(tmp_path, generator, declaration, expected):
     source = tmp_path / "router.py"
     source.write_text(f'{declaration}\n@router.get("/points")\ndef points():\n    pass\n')
@@ -121,11 +108,14 @@ def test_literal_router_prefix_is_bound_to_decorator_owner(tmp_path, generator, 
     assert endpoint["path"] == expected
 
 
-@pytest.mark.parametrize("declaration", [
-    'router = APIRouter(prefix=runtime_prefix)',
-    'router = APIRouter(prefix=get_prefix())',
-    'router = APIRouter(**configuration)',
-])
+@pytest.mark.parametrize(
+    "declaration",
+    [
+        "router = APIRouter(prefix=runtime_prefix)",
+        "router = APIRouter(prefix=get_prefix())",
+        "router = APIRouter(**configuration)",
+    ],
+)
 def test_dynamic_router_prefix_fails_instead_of_inventing_api_path(tmp_path, generator, declaration):
     source = tmp_path / "router.py"
     source.write_text(f'{declaration}\n@router.get("/points")\ndef points():\n    pass\n')

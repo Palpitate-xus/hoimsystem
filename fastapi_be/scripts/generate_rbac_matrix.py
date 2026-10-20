@@ -8,6 +8,7 @@
 解析方式：AST 遍历 app/routers/*.py 的每个路由函数，
 读取其默认参数中的 Depends(get_current_user / require_roles(...)) 依赖。
 """
+
 import argparse
 import ast
 import glob
@@ -21,6 +22,7 @@ BACKEND = Path(__file__).resolve().parents[1]
 
 ALL_ROLES = ["admin", "super_admin", "director", "doctor", "nurse", "cashier", "pharmacist", "guide", "patient", "lab_technician", "registrar"]
 AUTH_DEPENDENCIES = {"get_current_user", "get_event_identity"}
+
 
 def read_role_groups(path: Path, names: tuple[str, ...]) -> dict[str, set[str]]:
     """Read actual role constants without importing settings, databases or routers."""
@@ -74,10 +76,20 @@ def read_role_groups(path: Path, names: tuple[str, ...]) -> dict[str, set[str]]:
     return groups
 
 
-ROLE_GROUPS = read_role_groups(BACKEND / "app/dependencies.py", (
-    "ADMIN_ROLES", "NOTICE_ROLES", "CLINICAL_ROLES", "CASHIER_ROLES", "PHARMACY_ROLES",
-    "NURSING_ROLES", "GUIDE_ROLES", "LAB_ROLES", "REGISTRAR_ROLES",
-))
+ROLE_GROUPS = read_role_groups(
+    BACKEND / "app/dependencies.py",
+    (
+        "ADMIN_ROLES",
+        "NOTICE_ROLES",
+        "CLINICAL_ROLES",
+        "CASHIER_ROLES",
+        "PHARMACY_ROLES",
+        "NURSING_ROLES",
+        "GUIDE_ROLES",
+        "LAB_ROLES",
+        "REGISTRAR_ROLES",
+    ),
+)
 ROLE_GROUPS.update(read_role_groups(BACKEND / "app/inpatient_observations.py", ("OBSERVATION_ROLES",)))
 ROLE_GROUPS.update(read_role_groups(BACKEND / "app/ai/observation_windows.py", ("WINDOW_ROLES",)))
 # Preserve the existing matrix's two combined role groups.
@@ -112,6 +124,7 @@ def router_prefixes(tree: ast.Module, path: str) -> dict[str, str]:
 def _resolve_decorator_roles(call: ast.Call) -> set[str] | None:
     """把 require_roles(*A, *B, 'x') 的参数解析为具体角色集合。"""
     roles: set[str] = set()
+
     def _absorb(node_obj) -> bool:
         """递归解析角色引用：Name 常量或 {*A, *B} set 字面量。"""
         if isinstance(node_obj, ast.Name) and node_obj.id in ROLE_GROUPS:

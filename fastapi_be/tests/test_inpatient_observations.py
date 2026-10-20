@@ -141,7 +141,8 @@ async def test_urine_unknown_zero_and_overlapping_original_intervals_are_never_m
     assert first.status_code == 200, first.text
     a = first.json()["data"]
     second = await observation_client.post(
-        "/api/inpatient-observations/urine-intervals", headers=headers,
+        "/api/inpatient-observations/urine-intervals",
+        headers=headers,
         json=urine_body(observation_case, volume_ml=None, absent_reason="measurement_error", collection_completeness="partial", patient_total=False),
     )
     assert second.status_code == 200, second.text
@@ -162,56 +163,94 @@ def test_measurements_reject_numeric_coercion_nonfinite_and_precision_loss(value
         PointCreate.model_validate(point_body({"patient_id": 1, "admission_id": str(uuid.uuid4())}, measurements={"heart_rate": measured(value, "/min")}))
 
 
-@pytest.mark.parametrize("measurements", [
-    {"heart_rate": measured("-1", "/min")},
-    {"heart_rate": measured("80", "bpm")},
-    {"fio2": measured("101", "%")},
-    {"spo2": measured("-1", "%")},
-    {"unknown": measured("1", "/min")},
-    {"pulse_rate": {"value": None, "unit": "/min", "absent_reason": None}},
-    {"pulse_rate": {"value": "0", "unit": "/min", "absent_reason": "unknown"}},
-    {"pulse_rate": {"value": "0", "unit": "/min", "absent_reason": None, "normal": True}},
-])
+@pytest.mark.parametrize(
+    "measurements",
+    [
+        {"heart_rate": measured("-1", "/min")},
+        {"heart_rate": measured("80", "bpm")},
+        {"fio2": measured("101", "%")},
+        {"spo2": measured("-1", "%")},
+        {"unknown": measured("1", "/min")},
+        {"pulse_rate": {"value": None, "unit": "/min", "absent_reason": None}},
+        {"pulse_rate": {"value": "0", "unit": "/min", "absent_reason": "unknown"}},
+        {"pulse_rate": {"value": "0", "unit": "/min", "absent_reason": None, "normal": True}},
+    ],
+)
 def test_explicit_measurement_semantics_and_fixed_units(measurements):
     with pytest.raises(ValidationError):
         PointCreate.model_validate(point_body({"patient_id": 1, "admission_id": str(uuid.uuid4())}, measurements=measurements))
 
 
-@pytest.mark.parametrize("time", ["2026-10-20T01:00:00", "", None, True, 123456, "2026-10-20T01:00:00.1234567Z", "0001-01-01T00:00:00+14:00", "9999-12-31T23:59:59-14:00", "2099-01-01T01:00:00Z", "2026-02-30T01:00:00Z", "2026-10-20T01:00:00+01:60", "2026-10-20T01:00:00-00:99"])
+@pytest.mark.parametrize(
+    "time",
+    [
+        "2026-10-20T01:00:00",
+        "",
+        None,
+        True,
+        123456,
+        "2026-10-20T01:00:00.1234567Z",
+        "0001-01-01T00:00:00+14:00",
+        "9999-12-31T23:59:59-14:00",
+        "2099-01-01T01:00:00Z",
+        "2026-02-30T01:00:00Z",
+        "2026-10-20T01:00:00+01:60",
+        "2026-10-20T01:00:00-00:99",
+    ],
+)
 def test_point_clocks_never_guess_replace_or_truncate(time):
     with pytest.raises(ValidationError):
         PointCreate.model_validate(point_body({"patient_id": 1, "admission_id": str(uuid.uuid4())}, observed_at=time))
 
 
-@pytest.mark.parametrize("changes", [
-    {"consciousness": {"system": "AVPU", "code": "new_confusion"}},
-    {"consciousness": {"system": "ACVPU", "code": "normal"}},
-    {"supplemental_oxygen": None}, {"supplemental_oxygen": False}, {"patient_id": True},
-    {"admission_id": "legacy-not-a-uuid"}, {"target_admission": "forged"},
-    {"measurements": {}, "consciousness": None, "supplemental_oxygen": "unknown"},
-])
+@pytest.mark.parametrize(
+    "changes",
+    [
+        {"consciousness": {"system": "AVPU", "code": "new_confusion"}},
+        {"consciousness": {"system": "ACVPU", "code": "normal"}},
+        {"supplemental_oxygen": None},
+        {"supplemental_oxygen": False},
+        {"patient_id": True},
+        {"admission_id": "legacy-not-a-uuid"},
+        {"target_admission": "forged"},
+        {"measurements": {}, "consciousness": None, "supplemental_oxygen": "unknown"},
+    ],
+)
 def test_point_has_no_default_normal_oxygen_or_consciousness(changes):
     with pytest.raises(ValidationError):
         PointCreate.model_validate(point_body({"patient_id": 1, "admission_id": str(uuid.uuid4())}, **changes))
 
 
 def test_negative_temperature_maximum_exact_decimal_and_explicit_acvpu_are_retained():
-    data = PointCreate.model_validate(point_body(
-        {"patient_id": 1, "admission_id": str(uuid.uuid4())},
-        measurements={"temperature": measured("-10.12345678", "Cel"), "body_weight": measured("0", "kg"), "heart_rate": measured("9999999999999999.99999999", "/min")},
-        consciousness={"system": "ACVPU", "code": "new_confusion"},
-    ))
+    data = PointCreate.model_validate(
+        point_body(
+            {"patient_id": 1, "admission_id": str(uuid.uuid4())},
+            measurements={"temperature": measured("-10.12345678", "Cel"), "body_weight": measured("0", "kg"), "heart_rate": measured("9999999999999999.99999999", "/min")},
+            consciousness={"system": "ACVPU", "code": "new_confusion"},
+        )
+    )
     assert data.measurements["temperature"].value == "-10.12345678" and data.measurements["body_weight"].value == "0"
 
 
-@pytest.mark.parametrize("changes", [
-    {"volume_ml": 0}, {"volume_ml": True}, {"volume_ml": "-1"}, {"volume_ml": "1.000000001"},
-    {"volume_ml": None, "absent_reason": None}, {"volume_ml": "0", "absent_reason": "unknown"},
-    {"patient_total": "true"}, {"patient_total": 1}, {"collection_completeness": None}, {"collection_method": " "},
-    {"start_at": "2026-10-20T01:00:00Z", "end_at": "2026-10-20T01:00:00Z"},
-    {"start_at": "2026-10-20T02:00:00Z", "end_at": "2026-10-20T01:00:00Z"},
-    {"end_at": "2099-01-01T01:00:00Z"}, {"end_at": "2026-10-20T01:00:00"},
-])
+@pytest.mark.parametrize(
+    "changes",
+    [
+        {"volume_ml": 0},
+        {"volume_ml": True},
+        {"volume_ml": "-1"},
+        {"volume_ml": "1.000000001"},
+        {"volume_ml": None, "absent_reason": None},
+        {"volume_ml": "0", "absent_reason": "unknown"},
+        {"patient_total": "true"},
+        {"patient_total": 1},
+        {"collection_completeness": None},
+        {"collection_method": " "},
+        {"start_at": "2026-10-20T01:00:00Z", "end_at": "2026-10-20T01:00:00Z"},
+        {"start_at": "2026-10-20T02:00:00Z", "end_at": "2026-10-20T01:00:00Z"},
+        {"end_at": "2099-01-01T01:00:00Z"},
+        {"end_at": "2026-10-20T01:00:00"},
+    ],
+)
 def test_urine_requires_real_interval_explicit_value_and_collection_basis(changes):
     with pytest.raises(ValidationError):
         UrineCreate.model_validate(urine_body({"patient_id": 1, "admission_id": str(uuid.uuid4())}, **changes))
@@ -241,7 +280,11 @@ async def test_unrelated_roles_cannot_create_or_list(role, observation_client, o
     headers = auth_headers(seed_data[role].username)
     for path, body in [("points", point_body(observation_case)), ("urine-intervals", urine_body(observation_case))]:
         assert (await observation_client.post("/api/inpatient-observations/" + path, headers=headers, json=body)).status_code == 403
-        assert (await observation_client.get("/api/inpatient-observations/" + path, headers=headers, params={"patient_id": observation_case["patient_id"], "admission_id": observation_case["admission_id"]})).status_code == 403
+        assert (
+            await observation_client.get(
+                "/api/inpatient-observations/" + path, headers=headers, params={"patient_id": observation_case["patient_id"], "admission_id": observation_case["admission_id"]}
+            )
+        ).status_code == 403
 
 
 @pytest.mark.asyncio
@@ -310,11 +353,17 @@ async def test_same_patient_other_admission_cannot_read_or_revoke_and_foreign_do
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize("field,value", [
-    ("payload_json", '{"forged":true}'), ("content_hash", "0" * 64), ("schema_version", "forged_v2"),
-    ("observed_at", datetime.datetime(2020, 1, 1)), ("recorded_at", datetime.datetime(2020, 1, 1)),
-    ("created_by", 999999),
-])
+@pytest.mark.parametrize(
+    "field,value",
+    [
+        ("payload_json", '{"forged":true}'),
+        ("content_hash", "0" * 64),
+        ("schema_version", "forged_v2"),
+        ("observed_at", datetime.datetime(2020, 1, 1)),
+        ("recorded_at", datetime.datetime(2020, 1, 1)),
+        ("created_by", 999999),
+    ],
+)
 async def test_changed_frozen_fields_are_rejected_on_real_detail(field, value, observation_client, observation_case, seed_data, auth_headers, db_session):
     headers = auth_headers(seed_data["admin_user"].username)
     created = (await observation_client.post("/api/inpatient-observations/points", headers=headers, json=point_body(observation_case))).json()["data"]
@@ -322,7 +371,8 @@ async def test_changed_frozen_fields_are_rejected_on_real_detail(field, value, o
     setattr(row, field, value)
     db_session.commit()
     response = await observation_client.get(
-        "/api/inpatient-observations/points/" + row.observation_id, headers=headers,
+        "/api/inpatient-observations/points/" + row.observation_id,
+        headers=headers,
         params={"patient_id": row.patient_id, "admission_id": row.admission_id},
     )
     assert response.status_code == 409, response.text
@@ -389,10 +439,14 @@ async def test_oversized_identifiers_and_pagination_are_validation_errors(observ
 async def test_outpatient_uuid_collision_cannot_substitute_for_real_admission_care(observation_client, observation_case, seed_data, auth_headers, db_session):
     observation_case["row"].doctor_id = None
     observation_case["row"].department_id = None
-    db_session.add(Registration(
-        registration_uuid=observation_case["admission_id"], patient_id=observation_case["patient_id"],
-        doctor_id=seed_data["doctor"].doctor_id, status=0,
-    ))
+    db_session.add(
+        Registration(
+            registration_uuid=observation_case["admission_id"],
+            patient_id=observation_case["patient_id"],
+            doctor_id=seed_data["doctor"].doctor_id,
+            status=0,
+        )
+    )
     db_session.commit()
     headers = auth_headers(seed_data["doctor_user"].username)
     denied = await observation_client.post("/api/inpatient-observations/points", headers=headers, json=point_body(observation_case))

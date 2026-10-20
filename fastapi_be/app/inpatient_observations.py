@@ -322,8 +322,12 @@ def source_current(db, row, *, allow_revoked=False):
                 raise ValueError("活动来源治理字段无效")
         elif current.status == "revoked":
             if (
-                current.revision != 2 or current.revoked_at is None or type(current.revoked_by) is not int or current.revoked_by <= 0
-                or not 0 < len(current.revoke_reason.strip()) <= 1000 or not current.recorded_at <= current.revoked_at <= utcnow()
+                current.revision != 2
+                or current.revoked_at is None
+                or type(current.revoked_by) is not int
+                or current.revoked_by <= 0
+                or not 0 < len(current.revoke_reason.strip()) <= 1000
+                or not current.recorded_at <= current.revoked_at <= utcnow()
             ):
                 raise ValueError("撤销来源治理字段无效")
         else:

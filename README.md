@@ -4,6 +4,8 @@
 
 基于 **Vue 3 + FastAPI** 的中小型医院综合信息管理系统，覆盖 **门诊、住院、药房、检验、体检、收费** 等核心业务全流程。
 
+AI 扩展提供 [80 项能力目录](doc/ai-capabilities.md)、[独立任务 Prompt](doc/ai-prompts.json)、统一网关、业务工作台和仅超级管理员可用的管理中心。门诊、药房、检验、住院、围术期、编码收费及导航预约已增加相应数据连接和入口；实际启用仍需配置适用模型、知识及验证状态，见 [AI 使用指南](doc/ai-guide.md) 和 [实施记录](doc/ai-implementation-plan.md)。
+
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Vue](https://img.shields.io/badge/Vue-3.x-4FC08D)](https://vuejs.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.111+-009688)](https://fastapi.tiangolo.com/)
@@ -16,7 +18,7 @@
 | 维度 | 数量 |
 |:----:|:----:|
 | 业务模块 | **80** 个后端路由模块 |
-| API 接口 | **560** 个路由方法（以自动生成的 RBAC 矩阵为准） |
+| API 接口 | **593** 个路由方法（以自动生成的 RBAC 矩阵为准） |
 | 数据库表 | **145** 张业务表 |
 | 前端页面 | **154** 个 Vue 页面 |
 | 用户角色 | **11** 种（含超级管理员、检验技师和挂号员） |

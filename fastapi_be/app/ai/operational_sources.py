@@ -100,6 +100,12 @@ def operational_options(db, user: User, spec: FeatureSpec) -> dict:
 
 
 def operational_context(db, user: User, spec: FeatureSpec, values: dict) -> ContextBundle:
+    if "roster_plan_id" in values:
+        if spec.number != 63:
+            raise HTTPException(422, "受审排班计划仅用于排班与号源优化")
+        from app.ai.roster_context import roster_context
+
+        return roster_context(db, user, values)
     if spec.number == 62 and values.get("forecast_series_id") not in (None, ""):
         from app.ai.forecast_sources import forecast_context
 

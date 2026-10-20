@@ -625,6 +625,11 @@ def inspect_run_trace(run_id: str, db: Session = Depends(get_db), user: User = D
     if run is None:
         raise HTTPException(404, "AI 任务不存在")
     snapshot = json.loads(run.input_json)
+    if snapshot.get("payload", {}).get("context", {}).get("roster_binding"):
+        from app.ai.roster_context import authorize_roster_snapshot, expand_context
+
+        authorize_roster_snapshot(db, user, snapshot["payload"]["context"])
+        snapshot["payload"]["context"] = expand_context(db, snapshot["payload"]["context"])
     if snapshot.get("payload", {}).get("context", {}).get("sofa_binding"):
         from app.ai.sofa_context import expand_context
 

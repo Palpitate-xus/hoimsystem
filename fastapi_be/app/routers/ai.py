@@ -1,7 +1,10 @@
 """Role-scoped business entry points for authorized AI tasks and human review."""
 
+import json
+
 from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import JSONResponse
+from sqlalchemy import JSON, type_coerce
 from sqlalchemy.orm import Session
 
 from app.ai.catalog import FEATURES
@@ -20,6 +23,7 @@ from app.config import settings
 from app.database import get_db
 from app.dependencies import get_current_user
 from app.models import Admission, ClinicalPathway, Prescription, Registration, User
+from app.routers.inpatient_support import QueryPositiveInteger
 
 # Evidence text must bypass the legacy response formatter that truncates timestamps.
 router = APIRouter(tags=["AI 业务助手"], default_response_class=JSONResponse)
@@ -70,7 +74,12 @@ def inspect_operational_context(req: OperationalContextRequest, db: Session = De
     bundle = operational_context(db, user, spec, req.input)
     if len(encode_json({"context": bundle.data, "evidence": bundle.evidence, "input": req.input})) > settings.AI_MAX_CONTEXT_CHARS * 2:
         raise HTTPException(422, "运营资料超过任务上下文限制，请缩小日期、科室或品种范围")
-    return {"code": 200, "msg": "success", "data": {"context": bundle.data, "metadata": context_metadata(bundle), "evidence": bundle.evidence}}
+    context = bundle.data
+    if context.get("roster_binding"):
+        from app.ai.roster_context import expand_context
+
+        context = expand_context(db, context, user=user, current=True)
+    return {"code": 200, "msg": "success", "data": {"context": context, "metadata": context_metadata(bundle), "evidence": bundle.evidence}}
 
 
 @router.get("/ai/encounters")
@@ -184,6 +193,8 @@ def list_runs(
     feature_key: str | None = None,
     patient_id: int | None = Query(None, ge=1),
     encounter_ref: str | None = Query(None, max_length=64),
+    department_id: QueryPositiveInteger | None = Query(None, ge=1, le=2147483647),
+    roster_plan_id: str | None = Query(None, max_length=36),
     limit: int = Query(30, ge=1, le=100),
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user),
@@ -195,6 +206,23 @@ def list_runs(
     if feature_key:
         authorized_feature(db, user, feature_key)
         query = query.filter_by(feature_key=feature_key)
+    if department_id is not None or roster_plan_id is not None:
+        if feature_key != "roster_optimization" or patient_id is not None or encounter_ref is not None:
+            raise HTTPException(422, "排班历史筛选仅用于排班功能及明确科室或原计划，不与个体就诊混用")
+        from app.ai import roster_facts as facts
+        from app.ai.roster_context import selection
+        from app.ai.roster_plans import plan_row
+
+        if department_id is not None:
+            facts.roster_scope(db, user, department_id, allow_missing=user.user_role == "super_admin")
+            query = query.filter(type_coerce(AIRun.input_json, JSON)["payload"]["context"]["roster_binding"]["department_id"].as_integer() == department_id)
+        if roster_plan_id is not None:
+            roster_plan_id = selection({"roster_plan_id": roster_plan_id})
+            plan = plan_row(db, roster_plan_id)
+            facts.roster_scope(db, user, plan.department_id, allow_missing=user.user_role == "super_admin")
+            if department_id is not None and plan.department_id != department_id:
+                raise HTTPException(422, "所选原计划与历史筛选科室不一致")
+            query = query.filter(type_coerce(AIRun.input_json, JSON)["payload"]["context"]["roster_binding"]["plan_id"].as_string() == roster_plan_id)
     if patient_id is not None:
         query = query.filter_by(patient_id=patient_id)
     if encounter_ref:
@@ -206,6 +234,11 @@ def list_runs(
         except HTTPException as exc:
             if exc.status_code in {403, 404}:
                 continue
+            if exc.status_code == 409 and item.feature_key == "roster_optimization":
+                from app.ai.roster_storage import is_roster_snapshot
+
+                if is_roster_snapshot(json.loads(item.input_json)):
+                    continue
             raise
         data.append(describe_run(item, False))
     return {"code": 200, "msg": "success", "data": data}
@@ -248,6 +281,13 @@ def review_result(run_id: str, req: FeedbackWrite, db: Session = Depends(get_db)
     authorize_run(db, user, run)
     if run.status != "succeeded":
         raise HTTPException(409, "只能复核已成功生成的建议")
+    if run.feature_key == "roster_optimization":
+        import json
+
+        from app.ai.roster_storage import expand_result, is_roster_snapshot
+
+        if is_roster_snapshot(json.loads(run.input_json)):
+            expand_result(db, run)
     if run.feature_key == "sepsis_risk":
         import json
 

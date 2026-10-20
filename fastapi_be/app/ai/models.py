@@ -3,7 +3,7 @@
 import datetime
 import uuid
 
-from sqlalchemy import Column, Date, DateTime, ForeignKey, Index, Integer, Numeric, String, Text, UniqueConstraint
+from sqlalchemy import CheckConstraint, Column, Date, DateTime, ForeignKey, Index, Integer, Numeric, String, Text, UniqueConstraint
 from sqlalchemy.dialects import mysql
 
 from app.database import Base
@@ -350,4 +350,36 @@ class AIForecastSeries(Base):
     create_time = Column(DateTime().with_variant(mysql.DATETIME(fsp=6), "mysql"), nullable=False, default=utcnow)
     revoked_by = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=True)
     revoked_at = Column(DateTime().with_variant(mysql.DATETIME(fsp=6), "mysql"), nullable=True)
+    revoke_reason = Column(String(1000), nullable=False, default="")
+
+
+class AIObservationWindow(Base):
+    """Immutable UTC admission window; source changes invalidate ordinary use."""
+
+    __tablename__ = "hoimsystem_ai_observation_window"
+    __table_args__ = (
+        CheckConstraint("start_at < end_at AND end_at <= as_of", name="ck_ai_observation_window_time"),
+        CheckConstraint(
+            "(status = 'active' AND revision = 1 AND revoked_at IS NULL AND revoked_by IS NULL AND revoke_reason = '') OR (status = 'revoked' AND revision = 2 AND revoked_at IS NOT NULL AND revoked_by IS NOT NULL AND revoke_reason <> '')",
+            name="ck_ai_observation_window_governance",
+        ),
+        Index("idx_ai_observation_window_scope", "patient_id", "admission_id", "status"),
+        Index("idx_ai_observation_window_created", "created_by", "created_at"),
+    )
+
+    window_id = Column(String(36), primary_key=True, default=new_id)
+    patient_id = Column(Integer, ForeignKey("hoimsystem_patient.patient_id"), nullable=False)
+    admission_id = Column(String(36), ForeignKey("hoimsystem_admission.admission_id"), nullable=False)
+    created_by = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=False)
+    created_at = Column(DateTime().with_variant(mysql.DATETIME(fsp=6), "mysql"), nullable=False, default=utcnow)
+    start_at = Column(DateTime().with_variant(mysql.DATETIME(fsp=6), "mysql"), nullable=False)
+    end_at = Column(DateTime().with_variant(mysql.DATETIME(fsp=6), "mysql"), nullable=False)
+    as_of = Column(DateTime().with_variant(mysql.DATETIME(fsp=6), "mysql"), nullable=False)
+    schema_version = Column(String(40), nullable=False, default="inpatient_window_v1")
+    snapshot_json = Column(Text, nullable=False)
+    content_hash = Column(String(64), nullable=False)
+    status = Column(String(24), nullable=False, default="active")
+    revision = Column(Integer, nullable=False, default=1)
+    revoked_at = Column(DateTime().with_variant(mysql.DATETIME(fsp=6), "mysql"), nullable=True)
+    revoked_by = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=True)
     revoke_reason = Column(String(1000), nullable=False, default="")

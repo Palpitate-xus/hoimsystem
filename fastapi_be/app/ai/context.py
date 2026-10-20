@@ -86,14 +86,28 @@ def minimize_identifiers(value: object, patient: Patient | None = None) -> objec
         def opaque(key, item):
             if not isinstance(item, str):
                 return False
-            if key in {"content_hash", "header_hash", "signal_hash", "chunk_hash", "snapshot_hash", "source_snapshot_hash", "context_digest", "prompt_hash"} and re.fullmatch(r"[a-f0-9]{64}", item):
+            if key in {"content_hash", "header_hash", "signal_hash", "chunk_hash", "snapshot_hash", "source_snapshot_hash", "context_digest", "prompt_hash", "governance_hash"} and re.fullmatch(
+                r"[a-f0-9]{64}", item
+            ):
                 return True
-            if key in SOURCE_REFERENCE_KEYS | {"asset_id", "document_id", "encounter_ref", "admission_id", "review_id", "run_id", "forecast_series_id", "series_id"}:
+            if key in SOURCE_REFERENCE_KEYS | {
+                "asset_id",
+                "document_id",
+                "encounter_ref",
+                "admission_id",
+                "review_id",
+                "run_id",
+                "forecast_series_id",
+                "series_id",
+                "window_id",
+                "observation_id",
+                "interval_id",
+            }:
                 try:
                     return str(uuid.UUID(item)) == item
                 except ValueError:
                     return False
-            if key == "source_id" and re.fullmatch(r"(?:audio|ecg):[a-f0-9-]{36}:[a-f0-9]{12}", item):
+            if key == "source_id" and re.fullmatch(r"(?:audio|ecg|observation_window|inpatient_observation|urine_interval):[a-f0-9-]{36}:[a-f0-9]{12}", item):
                 try:
                     return str(uuid.UUID(item.split(":")[1])) == item.split(":")[1]
                 except ValueError:
@@ -302,6 +316,12 @@ def _selected_records(db: Session, user: User, patient_id: int, references: dict
 
 def patient_snapshot(db: Session, user: User, spec: FeatureSpec, patient_id: int, encounter_ref: str | None = None, source_refs: dict | None = None) -> ContextBundle:
     """Build a bounded snapshot without mixing historical diagnoses into confirmed current ones."""
+    if spec.number in {41, 42, 43}:
+        from app.ai.observation_windows import observation_context
+
+        return observation_context(db, user, patient_id, encounter_ref, source_refs or {})
+    if (source_refs or {}).get("observation_window_id") not in (None, ""):
+        raise HTTPException(422, "原住院观测窗仅供41至43风险输入使用")
     if spec.number == 77 and encounter_ref:
         raise HTTPException(422, "不良事件没有就诊关联字段，请清除本次就诊选择，不能按日期推定事件归属")
     patient = authorize_image_patient(db, user, patient_id, authorize_patient, encounter_ref) if spec.number == 36 else authorize_patient(db, user, patient_id, spec.category, encounter_ref)

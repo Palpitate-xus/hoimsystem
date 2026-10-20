@@ -27,5 +27,6 @@ SOURCE_REFERENCE_KEYS = frozenset(
         "nursing_plan_id",
         "critical_care_record_id",
         "icu_score_id",
+        "observation_window_id",
     }
 )

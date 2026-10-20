@@ -24,6 +24,7 @@ from app.ai.image_files import open_verified_image
 from app.ai.knowledge import evidence_is_current, retrieval_query, retrieve_evidence
 from app.ai.models import AIAudioAsset, AIECGAsset, AIFeatureConfig, AIImageAsset, AIProvider, AIRun, utcnow
 from app.ai.nursing_sources import authorize_nursing_snapshot, has_frozen_nursing_sources
+from app.ai.observation_windows import RISK_FEATURES, authorize_window_snapshot
 from app.ai.operational_sources import authorize_operational_snapshot, operational_context
 from app.ai.pathway_sources import PATHWAY_SOURCE_FEATURES, selected_pathway_ids
 from app.ai.review_curation import authorize_feedback_snapshot
@@ -187,13 +188,15 @@ def authorize_run(db: Session, user: User, run: AIRun) -> None:
     if run.patient_id is not None:
         frozen_context = json.loads(run.input_json).get("payload", {}).get("context", {})
         nursing_frozen = has_frozen_nursing_sources(frozen_context)
-        if spec.number == 36:
+        if spec.number in RISK_FEATURES:
+            authorize_window_snapshot(db, user, frozen_context, run.patient_id, run.encounter_ref)
+        elif spec.number == 36:
             # Frozen super-admin audit does not reconstitute deleted clinical
             # links. Execution still rebuilds and authorizes the current source.
             if user.user_role != "super_admin":
                 authorize_image_patient(db, user, run.patient_id, authorize_patient, run.encounter_ref)
             authorize_image_snapshot(db, user, json.loads(run.input_json).get("payload", {}).get("context", {}), authorize_patient)
-        elif not (nursing_frozen and user.user_role == "super_admin"):
+        elif not ((nursing_frozen or spec.number in RISK_FEATURES) and user.user_role == "super_admin"):
             authorize_patient(db, user, run.patient_id, spec.category, run.encounter_ref)
         if nursing_frozen:
             authorize_nursing_snapshot(db, user, frozen_context, db.get(Patient, run.patient_id), run.encounter_ref, minimize_identifiers)
@@ -246,6 +249,8 @@ def describe_run(run: AIRun, include_result: bool = True) -> dict:
     data.update({"feature_name": spec.name, "requires_human_review": True, "context_metadata": json.loads(run.context_metadata_json)})
     if include_result:
         data["result"] = json.loads(run.result_json)
+        if spec.number in RISK_FEATURES:
+            data["observation_findings"] = json.loads(run.input_json).get("payload", {}).get("context", {}).get("observation_window")
         data["evidence"] = json.loads(run.evidence_json)
         tools = json.loads(run.input_json).get("payload", {}).get("tools", {})
         data["tool_findings"] = {

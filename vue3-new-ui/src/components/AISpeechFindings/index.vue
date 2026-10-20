@@ -7,6 +7,12 @@
     <ai-audio-player ref="player" :asset-id="source.asset_id" :extension="source.extension" />
     <template v-if="transcription">
       <p>模型报告：{{ transcription.speech_detected ? '检出语音' : '未检出可转写语音' }}，仍须听音核实。说话人标签仅表示模型分组，身份与职业未经核实。</p>
+      <template v-if="transcription.processing">
+        <p>服务报告已处理 {{ seconds(transcription.processing.processed_duration_ms) }} 秒输入；原音解码时长 {{ seconds(transcription.processing.decoded_duration_ms) }} 秒。{{ transcription.processing.diarization ? '说话人分组仍须核实' : '本次未区分说话人' }}。</p>
+        <p class="data-gap">处理范围报告不保证逐字完整或识别准确；{{ transcription.processing.vad_filter ? '已启用语音活动筛选，可能漏检语音，请听完整原音核对。' : '请听完整原音核对遗漏。' }}</p>
+        <details><summary>查看识别版本</summary><p>引擎：{{ transcription.processing.engine }} {{ transcription.processing.engine_version }}；模型原版本：{{ transcription.processing.model_revision }}</p><p class="recorded-text">本次运行版本：{{ transcription.processing.runtime_digest }}</p></details>
+      </template>
+      <p v-else class="data-gap">服务未提供完整处理范围报告，请核对原音是否有遗漏。</p>
       <el-table :data="transcription.segments" empty-text="未返回可转写片段；请核对原音和模型适用范围">
         <el-table-column label="相对音频时间" width="125"><template #default="{ row }">{{ seconds(row.start_ms) }}–{{ seconds(row.end_ms) }}秒</template></el-table-column>
         <el-table-column label="说话人" width="125"><template #default="{ row }">{{ row.speaker }}<br />角色待核实</template></el-table-column>

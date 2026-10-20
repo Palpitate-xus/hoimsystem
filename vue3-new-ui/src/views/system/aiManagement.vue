@@ -46,7 +46,7 @@
             <el-table-column label="状态"><template #default="{ row }">{{ row.enabled ? '已启用' : '关闭' }}</template></el-table-column>
             <el-table-column label="密钥"><template #default="{ row }">{{ row.has_api_key ? '已配置，不回显' : '未配置' }}</template></el-table-column>
             <el-table-column label="患者资料"><template #default="{ row }">{{ row.allows_patient_data ? '已授权传输' : '禁止传输' }}</template></el-table-column>
-            <el-table-column label="操作" width="90"><template #default="{ row }"><el-button size="small" @click="editProvider(row)">编辑</el-button></template></el-table-column>
+            <el-table-column label="操作" width="215"><template #default="{ row }"><el-button size="small" @click="editProvider(row)">编辑</el-button><el-button v-if="row.kind === 'specialist' && row.supported_features?.includes('medical_transcription')" size="small" @click="openSpeechCheck(row)">检查本地语音服务</el-button></template></el-table-column>
           </el-table>
         </el-tab-pane>
 
@@ -131,6 +131,25 @@
       <template #footer><el-button @click="providerDialog = false">取消</el-button><el-button type="primary" :loading="saving" @click="submitProvider">保存服务</el-button></template>
     </el-dialog>
 
+    <el-dialog v-model="speechCheckDialog" title="本地语音服务核对" width="760px">
+      <div v-loading="speechCheckLoading">
+        <p>核对已保存服务：{{ speechCheckName }}。检查不发送录音或患者资料，不创建模型任务。</p>
+        <template v-if="speechCheckResult">
+          <el-alert :type="speechCheckResult.compatible ? 'success' : 'warning'" :closable="false" :title="speechCheckResult.compatible ? '服务声明与登记配置匹配；仍须完成医疗场景验证' : '登记配置与服务声明存在差异'" />
+          <p v-for="issue in speechCheckResult.issues" :key="issue">{{ issue }}</p>
+          <el-descriptions :column="1" border>
+            <el-descriptions-item label="实际模型标识"><span class="prompt-text">{{ speechCheckResult.capabilities.model_version }}</span></el-descriptions-item>
+            <el-descriptions-item label="模型来源版本">{{ speechCheckResult.capabilities.model_repository }} · {{ speechCheckResult.capabilities.model_revision }}</el-descriptions-item>
+            <el-descriptions-item label="处理范围">语言 {{ speechCheckResult.capabilities.language }}；最长 {{ speechCheckResult.capabilities.max_duration_seconds }} 秒；最大 {{ Math.floor(speechCheckResult.capabilities.max_bytes / 1048576) }} MiB</el-descriptions-item>
+            <el-descriptions-item label="服务处理时限">{{ speechCheckResult.capabilities.timeout_seconds }} 秒，模型请求超时需另留传输时间</el-descriptions-item>
+          </el-descriptions>
+          <p>本地声学识别只转写原音，未区分说话人。修改任务Prompt不会让识别器补写未听到的内容；专科术语和医疗质量须另行验证。</p>
+          <p>{{ speechCheckResult.scope_note }}</p>
+        </template>
+      </div>
+      <template #footer><el-button @click="speechCheckDialog = false">关闭</el-button><el-button v-if="speechCheckResult && speechCheckResult.configured_model !== speechCheckResult.capabilities.model_version" @click="editActualSpeechModel">填写实际模型，待保存</el-button></template>
+    </el-dialog>
+
     <el-dialog v-model="promptDialog" :title="selectedFeature?.name + '：Prompt 版本'" width="850px">
       <el-form label-width="110px">
         <el-form-item label="历史版本"><el-select v-model="promptSelection" @change="selectPrompt"><el-option v-for="item in promptVersions" :key="item.prompt_id || 'baseline'" :label="'v' + item.version + ' · ' + item.change_note" :value="item.prompt_id || 'baseline'" /></el-select><el-button class="field-hint" @click="activateSelectedPrompt" :loading="saving">启用所选版本</el-button></el-form-item>
@@ -195,7 +214,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref, watch } from "vue";
+import { computed, onMounted, onBeforeUnmount, ref, watch } from "vue";
 import { ElMessage } from "element-plus";
 import AiRunHistory from "@/components/AIRunHistory/index.vue";
 import AiReviewCuration from "@/components/AIReviewCuration/index.vue";
@@ -204,7 +223,7 @@ import {
   activateAIPrompt, createAIKnowledge, createAIPatientGrant, createAIPrompt,
   getAIAdminFeatures, getAIAudit, getAIKnowledge, getAIKnowledgeDetail, getAIPatientGrants, getAIPathwaySources, importAIPathway,
   getAIPrompts, getAIProviders, getAIUsage, reviewAIKnowledge, revokeAIPatientGrant,
-  saveAIFeature, saveAIProvider,
+  saveAIFeature, saveAIProvider, checkAISpeechProvider,
 } from "@/api/ai";
 
 const categories = { cdss: "临床 CDSS", pharmacy: "用药与药房", records: "病历文书", diagnostics: "检验影像体检", inpatient: "住院护理急诊", patient: "患者服务", operations: "运营与收费", knowledge: "知识科研质控" };
@@ -227,6 +246,10 @@ watch([search, category, setupFilter], () => { page.value = 1; });
 const featureName = key => features.value.find(item => item.key === key)?.name || key;
 const selectedFeature = ref(null), featureForm = ref({}), featureDialog = ref(false);
 const providerDialog = ref(false), providerId = ref(null), providerForm = ref({});
+const speechCheckDialog = ref(false), speechCheckLoading = ref(false), speechCheckResult = ref(null), speechCheckName = ref("");
+let speechCheckRequest = 0;
+watch(speechCheckDialog, visible => { if (!visible) speechCheckRequest += 1; });
+onBeforeUnmount(() => { speechCheckRequest += 1; });
 const promptDialog = ref(false), promptVersions = ref([]), promptSelection = ref("baseline"), taskPrompt = ref(""), systemPrompt = ref(""), promptChange = ref(""), activateNewPrompt = ref(false);
 const knowledgeDialog = ref(false), knowledgeForm = ref({}), reviewDialog = ref(false), reviewDocument = ref(null);
 const pathwayImportDialog = ref(false), pathwaySourcesLoading = ref(false), pathwaySources = ref({}), pathwayImportForm = ref({});
@@ -276,6 +299,25 @@ async function submitProvider() {
     await saveAIProvider(providerId.value, { ...providerForm.value, api_key: providerForm.value.api_key || null });
     providerForm.value.api_key = ""; providerDialog.value = false; await refresh(); ElMessage.success("模型服务已保存");
   } finally { saving.value = false; }
+}
+
+async function openSpeechCheck(row) {
+  const version = ++speechCheckRequest;
+  speechCheckName.value = row.name; speechCheckResult.value = null; speechCheckLoading.value = true; speechCheckDialog.value = true;
+  try {
+    const result = await checkAISpeechProvider(row.provider_id, row.revision);
+    if (version === speechCheckRequest && speechCheckDialog.value) speechCheckResult.value = result.data;
+  } catch { /* The request layer reports configuration/connection errors. */ }
+  finally { if (version === speechCheckRequest) speechCheckLoading.value = false; }
+}
+
+function editActualSpeechModel() {
+  const result = speechCheckResult.value;
+  const row = providers.value.find(item => item.provider_id === result?.provider_id);
+  if (!row || row.revision !== result.provider_revision) { ElMessage.warning("已保存配置版本已变化，请刷新后重新检查"); return; }
+  speechCheckDialog.value = false;
+  editProvider(row); providerForm.value.model = result.capabilities.model_version;
+  if (providerForm.value.timeout_seconds <= result.capabilities.timeout_seconds) providerForm.value.timeout_seconds = 120;
 }
 
 function selectPrompt(id) { taskPrompt.value = promptVersions.value.find(item => (item.prompt_id || "baseline") === id)?.task_prompt || ""; }

@@ -8,7 +8,7 @@ function wavClip() {
 }
 const raw = wavClip(), hash = createHash("sha256").update(raw).digest("hex"), sourceId = `audio:${assetId}:${hash.slice(0, 12)}`;
 
-async function session(page, { role = "doctor", existing = false, holdUpload = false, microphone = false } = {}) {
+async function session(page, { role = "doctor", existing = false, holdUpload = false, microphone = false, processing = false } = {}) {
   const state = { uploads: [], previews: [], submissions: [], withdrawals: [], purges: [], businessWrites: [], reads: [], contentReads: [], exists: existing, status: "ready", revision: 1, releaseUpload: null };
   const metadata = () => ({ asset_id: assetId, patient_id: 1, encounter_ref: encounterRef, content_hash: hash, extension: ".wav", media_type: "audio/wav", byte_size: raw.length, duration_ms: 250, sample_rate: 8000, channels: 1, codec: "pcm_s16le", status: state.status, revision: state.revision, created_by: 2, create_time: "2026-10-20T10:00:00", recorded_at: null });
   const source = { ...metadata(), source_id: sourceId };
@@ -57,6 +57,7 @@ async function session(page, { role = "doctor", existing = false, holdUpload = f
     if (path === "/api/ai/context") { state.previews.push(request.postDataJSON()); data = { context, evidence }; }
     if (path === "/api/ai/runs" && method === "POST") { state.submissions.push(request.postDataJSON()); data = { run_id: "speech-run", status: "queued", feature_name: "医疗语音录入", patient_id: 1 }; }
     if (path === "/api/ai/runs/speech-run") data = { run_id: "speech-run", status: "succeeded", feature_name: "医疗语音录入", patient_id: 1, audio_findings: context, evidence, result: { summary: "隔离协议草稿，未验证识别质量", sections: [], warnings: [], missing_data: [], transcription: { asset_id: assetId, content_hash: hash, speech_detected: true, time_basis: "relative_decoded_audio", language: "zh-CN", segments: [{ start_ms: 0, end_ms: 200, speaker: "speaker_1", speaker_role: "unknown", text: "<img src=x onerror=alert(1)> 模拟转写片段", uncertain: true, uncertainty_note: "术语需听音核对", source_id: sourceId }] } } };
+    if (path === "/api/ai/runs/speech-run" && processing) data.result.transcription.processing = { engine: "faster-whisper", engine_version: "1.2.1", model_revision: "a".repeat(40), model_digest: "b".repeat(64), runtime_digest: "c".repeat(64), decoding_options_hash: "d".repeat(64), instructions_digest: "e".repeat(64), decoded_duration_ms: 250, processed_duration_ms: 250, submitted_samples: 4000, sample_rate: 16000, iterator_exhausted: true, vad_filter: true, translation: false, diarization: false, prompt_handling: "acoustic_only", timestamp_policy: "estimated_bounded_to_source" };
     if (method === "POST" && /^\/api\/(medicalRecord|emr|prescriptionManagement|clinicalDiagnosis)\//.test(path)) state.businessWrites.push(path);
     await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ code: 200, msg: "success", data }) });
   });
@@ -93,10 +94,30 @@ test("门诊上传原录音使用真实multipart，预览与转写绑定同一�
   await expect.poll(() => state.submissions.length).toBe(1);
   expect(state.previews[0]).toMatchObject({ patient_id: 1, encounter_ref: encounterRef, source_refs: { audio_asset_id: assetId } }); expect(state.submissions[0].input.audio_asset_id).toBe(assetId);
   const result = drawer.getByLabel("AI任务结果", { exact: true });
+  await expect(result).toContainText("服务未提供完整处理范围报告");
   await expect(result.locator(".speech-findings")).toContainText("角色待核实"); await expect(result.locator(".speech-findings img")).toHaveCount(0);
   await result.getByRole("button", { name: "复制转写草稿", exact: true }).click();
   await expect.poll(() => page.evaluate(() => window.__copiedSpeech)).toContain("模拟转写片段");
   expect(await page.evaluate(() => window.__copiedSpeech)).toContain("speaker_1（角色待核实）"); expect(state.businessWrites).toEqual([]);
+});
+
+test("本地识别报告展示实际处理范围和未区分说话人，完整处理不标作准确率", async ({ page }) => {
+  const state = await session(page, { existing: true, processing: true });
+  await page.goto("/#/doctor/medicalRecord");
+  await page.getByRole("button", { name: "AI 录音转写", exact: true }).click();
+  const drawer = page.getByRole("dialog", { name: "AI 原录音与转写复核", exact: true });
+  const recording = drawer.getByRole("combobox", { name: "待转写原录音", exact: true });
+  await expect(recording).toBeEnabled(); await recording.press("ArrowDown");
+  await page.getByRole("option", { name: /录音 11111111/ }).click();
+  await drawer.getByRole("button", { name: "生成辅助建议", exact: true }).click();
+  const result = drawer.getByLabel("AI任务结果", { exact: true });
+  await expect(result).toContainText("服务报告已处理 0.250 秒输入");
+  await expect(result).toContainText("本次未区分说话人");
+  await expect(result).toContainText("处理范围报告不保证逐字完整或识别准确");
+  await expect(result).toContainText("可能漏检语音");
+  await result.getByText("查看识别版本", { exact: true }).click();
+  await expect(result).toContainText("faster-whisper 1.2.1");
+  expect(state.uploads).toEqual([]); expect(state.businessWrites).toEqual([]);
 });
 
 test("麦克风采集须主动授权，切换患者立即停止并丢弃未登记录音", async ({ page }) => {

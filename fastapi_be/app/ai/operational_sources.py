@@ -57,12 +57,25 @@ def operational_window(values: dict) -> tuple[datetime.date, datetime.date]:
     return start, end
 
 
+def authorize_operational_snapshot(db, user: User, spec: FeatureSpec, context: dict) -> None:
+    """A retained snapshot does not retain a revoked department or hospital privilege."""
+    current = operational_scope(db, user, spec, {})
+    if user.user_role == "pharmacist" and context.get("source_domain") != "inventory":
+        raise HTTPException(403, "旧任务未保留限定库存的数据范围，请由超级管理员核查原始审计")
+    if current is None:
+        return
+    frozen = context.get("department_ids")
+    if context.get("scope") != "department" or not isinstance(frozen, list) or not frozen or not set(frozen) <= current:
+        raise HTTPException(403, "任务原始科室或全院范围已不属于当前运营权限")
+
+
 def operational_context(db, user: User, spec: FeatureSpec, values: dict) -> ContextBundle:
     departments = operational_scope(db, user, spec, values)
     start, end = operational_window(values)
     bundle = ContextBundle(department_ids=departments or set())
     bundle.data = {
         "scope": "hospital" if departments is None else "department",
+        "source_domain": "inventory" if spec.number in {66, 67} else "operations",
         "department_ids": sorted(departments) if departments is not None else None,
         "since": str(start),
         "until": str(end),

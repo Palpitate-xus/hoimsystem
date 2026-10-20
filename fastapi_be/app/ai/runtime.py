@@ -14,7 +14,7 @@ from app.ai.gateway import AIExecutionError, generate
 from app.ai.governance import active_prompt, audit, digest, encode_json, get_spec, provider_credential, provider_feature_issues
 from app.ai.knowledge import evidence_is_current, retrieval_query, retrieve_evidence
 from app.ai.models import AIFeatureConfig, AIProvider, AIRun, utcnow
-from app.ai.operational_sources import operational_context
+from app.ai.operational_sources import authorize_operational_snapshot, operational_context
 from app.ai.schemas import RunRequest
 from app.ai.tools import business_tools
 from app.config import settings
@@ -156,6 +156,8 @@ def authorize_run(db: Session, user: User, run: AIRun) -> None:
         source_encounter = billing_scope.get("admission_id") or billing_scope.get("registration_uuid")
         if source_encounter and source_encounter != run.encounter_ref:
             authorize_patient(db, user, run.patient_id, spec.category, source_encounter)
+    elif spec.scope == "hospital":
+        authorize_operational_snapshot(db, user, spec, json.loads(run.input_json).get("payload", {}).get("context", {}))
 
 
 def describe_run(run: AIRun, include_result: bool = True) -> dict:

@@ -13,9 +13,9 @@ from app.ai.catalog import FEATURE_BY_KEY
 from app.ai.governance import encode_json
 from app.ai.models import AIFeatureConfig, AIFeedback, AIProvider, AIRun
 from app.ai.operational_sources import operational_context, operational_window
-from app.ai.runtime import claim_next_run, create_run, execute_claimed
+from app.ai.runtime import authorize_run, claim_next_run, create_run, execute_claimed
 from app.ai.schemas import RunRequest
-from app.models import Admission, Bed, DailyOperationalMetric, Department, Registration, Ward
+from app.models import Admission, Bed, DailyOperationalMetric, Department, Doctor, Registration, Ward
 
 
 @pytest.fixture(autouse=True)
@@ -142,6 +142,30 @@ async def test_changed_metric_while_queued_stops_before_inference(seed_data, db_
     assert calls == []
     assert run.status == "failed"
     assert run.error_code == "TASK_OPERATIONAL_CONTEXT_CHANGED"
+
+
+def test_retained_results_do_not_retain_department_access_after_reassignment(seed_data, db_session, operational_case):
+    configure(db_session, seed_data)
+    user = seed_data["director_user"]
+    run = create_run(db_session, user, RunRequest(feature_key="operations_qa", input=values_for(operational_case, department_id=seed_data["department"].department_id)))
+    authorize_run(db_session, user, run)
+    seed_data["director_doctor"].department_id = operational_case[4].department_id
+    db_session.commit()
+    with pytest.raises(HTTPException) as denied:
+        authorize_run(db_session, user, run)
+    assert denied.value.status_code == 403
+
+
+def test_previous_hospital_scope_cannot_be_read_using_new_department_only_role(seed_data, db_session, operational_case):
+    configure(db_session, seed_data)
+    user = seed_data["admin_user"]
+    run = create_run(db_session, user, RunRequest(feature_key="operations_qa", input=values_for(operational_case)))
+    user.user_role = "director"
+    db_session.add(Doctor(name="运营角色变更测试", department_id=seed_data["department"].department_id, user_id=user.user_id))
+    db_session.commit()
+    with pytest.raises(HTTPException) as denied:
+        authorize_run(db_session, user, run)
+    assert denied.value.status_code == 403
 
 
 @pytest.mark.asyncio

@@ -1,0 +1,2312 @@
+{
+  "recorded_at_utc": "2026-10-20T10:15:26.058330+00:00",
+  "platform_commit": "75418d9372b9d42b03e91afef5a06c79406b113e",
+  "baseline_commit": "fe081fd8f1462b84c897b1d94f21a1823bb50ac6",
+  "catalog_version": "2026.10.20",
+  "scope": "Actual native DICOM intake, pinned stored-range research preprocessing, authenticated local v4 service and real offline CPU child over synthetic sources; no clinical disease accuracy or training-distribution equivalence evaluation",
+  "real_patient_data_used": false,
+  "clinical_validation_completed": false,
+  "training_distribution_equivalence_established": false,
+  "default_clinical_features_enabled": false,
+  "real_local_dicom_to_model_service_connected": true,
+  "prior_source_and_kernel_record": "ai-imaging-verification.json (historical stage, preserved unchanged)",
+  "inventory": {
+    "api_endpoints": 633,
+    "router_modules": 86,
+    "tables": 159,
+    "vue_view_components": 156,
+    "catalog_features": 80,
+    "source_reference_keys": 21,
+    "alembic_head": "20261020_ai_image_assets"
+  },
+  "model": {
+    "repository": "torchxrayvision/densenet121-res224-all",
+    "revision": "588eadcc6a744da71f8dce768bc974ec629443f5",
+    "architecture_revision": "17726dd8f5e756eec3e5ae958281a289b05b1dae",
+    "weight_bytes": 28283736,
+    "weight_sha256": "6b811edb354d83991e36a4836b914bf41faf8fb3203573c0a61820b97937c529",
+    "manifest_digest": "3e520c2e0b34ba69282c10a26330b6aa4eab990e005d0484cb239e710d6ff8d5",
+    "state_tensor_count": 727,
+    "score_kind": "18 independent raw sigmoid scores, no calibrated disease probabilities",
+    "diagnosis_threshold_applied": false,
+    "spatial_localization": false,
+    "runtime_pickle_loading": false,
+    "licenses": [
+      "third_party/torchxrayvision/LICENSE",
+      "third_party/torchxrayvision/NOTICE",
+      "third_party/torchxrayvision/PREPROCESSING_NOTICE"
+    ]
+  },
+  "preprocessing_reference_parity": {
+    "scope": "Exact pinned author selected-AST numerical semantics only, not diagnostic DICOM display or clinical equivalence",
+    "source_record_sha256": "a405f8d7fbab3b053931ef29e7ab0586ade1f14189c894d88787b3ea088cffd3",
+    "synthetic_dicom_cases": 10,
+    "numerical_boundary_cases": 16,
+    "maximum_absolute_error": 0.0,
+    "optional_cpu_tests": {
+      "passed": 74,
+      "seconds": 13.0
+    },
+    "evidence": {
+      "synthetic_only": true,
+      "clinical_validation": false,
+      "training_distribution_equivalence": false,
+      "profile": {
+        "profile": "xrv_stored_range_v1",
+        "input_profile": {
+          "format": "dicom_i32le_v1",
+          "modalities": [
+            "CR",
+            "DX"
+          ],
+          "body_part_examined": "CHEST",
+          "view_positions": [
+            "PA",
+            "AP"
+          ],
+          "frames": 1,
+          "pixel_representation": "unsigned",
+          "bits_allocated": [
+            8,
+            16
+          ],
+          "bits_stored_min": 8,
+          "bits_stored_max": 16,
+          "max_pixels": 16777216,
+          "max_pixel_bytes": 67108864,
+          "rescale_slope": 1,
+          "rescale_intercept": 0,
+          "presentation_intent_type": [
+            "FOR PRESENTATION",
+            "not_declared"
+          ],
+          "population_applicability": "not_verified",
+          "clinical_validation": "not_provided"
+        },
+        "source_code_revision": "17726dd8f5e756eec3e5ae958281a289b05b1dae",
+        "normalization": "(2*(stored.astype(numpy.float32)/((1<<BitsStored)-1))-1)*1024",
+        "normalization_range": [
+          -1024,
+          1024
+        ],
+        "monochrome1": "maxval-stored before normalization; exactly one inversion",
+        "crop": "center square: side=min(rows,columns); x=columns//2-side//2; y=rows//2-side//2",
+        "resize": {
+          "size": [
+            224,
+            224
+          ],
+          "mode": "bilinear",
+          "align_corners": false,
+          "antialias": true,
+          "skip_if_already_224": true
+        },
+        "resize_roundoff_tolerance": 0.01,
+        "padding_policy": "preserved_as_original_background",
+        "constant_valid_crop_policy": "reject",
+        "voi_window_policy": "ignored_for_research_input_not_diagnostic_display",
+        "modality_lut": "unsupported; identity rescale only",
+        "histogram_equalization": false,
+        "image_minmax_normalization": false,
+        "rotation": false,
+        "flipping": false,
+        "imputation": false,
+        "training_distribution_equivalence": "not_established",
+        "spatial_localization": false
+      },
+      "author_code_revision": "17726dd8f5e756eec3e5ae958281a289b05b1dae",
+      "author_source_sha256": {
+        "utils.py": "37604b4b57ad7f4d662fc6d21ee6b4eeb614c634e14a5a3fc5cf42160055940b",
+        "datasets.py": "77b831e8ac52d92ecddc73715789d0d5a517d1c9bce49ea4fce2428cefbb6539"
+      },
+      "selected_ast_only": [
+        "fix_resolution",
+        "normalize",
+        "read_xray_dcm",
+        "XRayCenterCrop"
+      ],
+      "cases": [
+        {
+          "bits_stored": 8,
+          "photometric_interpretation": "MONOCHROME2",
+          "rows": 3,
+          "columns": 4,
+          "padding": null,
+          "exact_tensor_equal": true,
+          "maximum_absolute_error": 0.0,
+          "prepared_sha256": "a0a08275116e51004f2a49a1e66cda616c4770a32c1c908898e8f5f3aeba5834",
+          "processing": {
+            "normalization_maxval": 255,
+            "input_pixel_count": 12,
+            "cropped_pixel_count": 9,
+            "discarded_pixel_count": 3,
+            "padding_pixels_in_input": 0,
+            "padding_pixels_in_crop": 0,
+            "valid_pixels_in_crop": 9,
+            "prepared_shape": [
+              1,
+              1,
+              224,
+              224
+            ],
+            "prepared_min": -742.9019775390625,
+            "prepared_max": 808.515380859375,
+            "analysis_region": {
+              "x": 1,
+              "y": 0,
+              "width": 3,
+              "height": 3
+            },
+            "resize_applied": true,
+            "single_inversion_applied": false,
+            "padding_policy": "preserved_as_original_background",
+            "voi_window_applied": false,
+            "preprocessing_notes": [
+              "采用作者原生stored-range研究输入链；不证明与混合训练数据转换等价，不代表DICOM诊断显示。",
+              "按BitsStored完整范围归一化，未按图像min/max拉伸，未应用原VOI/窗或直方图均衡。",
+              "原padding按原背景采样路径保留，不补值，不视为病灶；裁剪外像素不纳入分类范围。",
+              "中心方形裁剪后使用固定torch bilinear antialias路径；不冒称与skimage resize等价，不旋转或翻转。",
+              "保留float32插值的实际舍入值；仅允许边界0.01以内的工程数值误差，不裁平或改写张量，不代表临床误差界限。"
+            ]
+          }
+        },
+        {
+          "bits_stored": 8,
+          "photometric_interpretation": "MONOCHROME1",
+          "rows": 4,
+          "columns": 3,
+          "padding": null,
+          "exact_tensor_equal": true,
+          "maximum_absolute_error": 0.0,
+          "prepared_sha256": "b56ba0792dbd0a647a58a82d1fde63d0509fe967547db1d3b7fceb5c80997277",
+          "processing": {
+            "normalization_maxval": 255,
+            "input_pixel_count": 12,
+            "cropped_pixel_count": 9,
+            "discarded_pixel_count": 3,
+            "padding_pixels_in_input": 0,
+            "padding_pixels_in_crop": 0,
+            "valid_pixels_in_crop": 9,
+            "prepared_shape": [
+              1,
+              1,
+              224,
+              224
+            ],
+            "prepared_min": -815.184326171875,
+            "prepared_max": 957.8666381835938,
+            "analysis_region": {
+              "x": 0,
+              "y": 1,
+              "width": 3,
+              "height": 3
+            },
+            "resize_applied": true,
+            "single_inversion_applied": true,
+            "padding_policy": "preserved_as_original_background",
+            "voi_window_applied": false,
+            "preprocessing_notes": [
+              "采用作者原生stored-range研究输入链；不证明与混合训练数据转换等价，不代表DICOM诊断显示。",
+              "按BitsStored完整范围归一化，未按图像min/max拉伸，未应用原VOI/窗或直方图均衡。",
+              "原padding按原背景采样路径保留，不补值，不视为病灶；裁剪外像素不纳入分类范围。",
+              "中心方形裁剪后使用固定torch bilinear antialias路径；不冒称与skimage resize等价，不旋转或翻转。",
+              "保留float32插值的实际舍入值；仅允许边界0.01以内的工程数值误差，不裁平或改写张量，不代表临床误差界限。"
+            ]
+          }
+        },
+        {
+          "bits_stored": 12,
+          "photometric_interpretation": "MONOCHROME2",
+          "rows": 225,
+          "columns": 226,
+          "padding": null,
+          "exact_tensor_equal": true,
+          "maximum_absolute_error": 0.0,
+          "prepared_sha256": "a481aceca8e1ae203fdefe306f20ae969dde5f1f3c81235b9f363d329c547ebe",
+          "processing": {
+            "normalization_maxval": 4095,
+            "input_pixel_count": 50850,
+            "cropped_pixel_count": 50625,
+            "discarded_pixel_count": 225,
+            "padding_pixels_in_input": 0,
+            "padding_pixels_in_crop": 0,
+            "valid_pixels_in_crop": 50625,
+            "prepared_shape": [
+              1,
+              1,
+              224,
+              224
+            ],
+            "prepared_min": -1010.7802124023438,
+            "prepared_max": 1014.1657104492188,
+            "analysis_region": {
+              "x": 1,
+              "y": 0,
+              "width": 225,
+              "height": 225
+            },
+            "resize_applied": true,
+            "single_inversion_applied": false,
+            "padding_policy": "preserved_as_original_background",
+            "voi_window_applied": false,
+            "preprocessing_notes": [
+              "采用作者原生stored-range研究输入链；不证明与混合训练数据转换等价，不代表DICOM诊断显示。",
+              "按BitsStored完整范围归一化，未按图像min/max拉伸，未应用原VOI/窗或直方图均衡。",
+              "原padding按原背景采样路径保留，不补值，不视为病灶；裁剪外像素不纳入分类范围。",
+              "中心方形裁剪后使用固定torch bilinear antialias路径；不冒称与skimage resize等价，不旋转或翻转。",
+              "保留float32插值的实际舍入值；仅允许边界0.01以内的工程数值误差，不裁平或改写张量，不代表临床误差界限。"
+            ]
+          }
+        },
+        {
+          "bits_stored": 12,
+          "photometric_interpretation": "MONOCHROME1",
+          "rows": 226,
+          "columns": 225,
+          "padding": null,
+          "exact_tensor_equal": true,
+          "maximum_absolute_error": 0.0,
+          "prepared_sha256": "abb150bd442d96a51cdf9e5e4930e51702507d622ceb2f3872d99041e5679b58",
+          "processing": {
+            "normalization_maxval": 4095,
+            "input_pixel_count": 50850,
+            "cropped_pixel_count": 50625,
+            "discarded_pixel_count": 225,
+            "padding_pixels_in_input": 0,
+            "padding_pixels_in_crop": 0,
+            "valid_pixels_in_crop": 50625,
+            "prepared_shape": [
+              1,
+              1,
+              224,
+              224
+            ],
+            "prepared_min": -1014.4882202148438,
+            "prepared_max": 1010.4577026367188,
+            "analysis_region": {
+              "x": 0,
+              "y": 1,
+              "width": 225,
+              "height": 225
+            },
+            "resize_applied": true,
+            "single_inversion_applied": true,
+            "padding_policy": "preserved_as_original_background",
+            "voi_window_applied": false,
+            "preprocessing_notes": [
+              "采用作者原生stored-range研究输入链；不证明与混合训练数据转换等价，不代表DICOM诊断显示。",
+              "按BitsStored完整范围归一化，未按图像min/max拉伸，未应用原VOI/窗或直方图均衡。",
+              "原padding按原背景采样路径保留，不补值，不视为病灶；裁剪外像素不纳入分类范围。",
+              "中心方形裁剪后使用固定torch bilinear antialias路径；不冒称与skimage resize等价，不旋转或翻转。",
+              "保留float32插值的实际舍入值；仅允许边界0.01以内的工程数值误差，不裁平或改写张量，不代表临床误差界限。"
+            ]
+          }
+        },
+        {
+          "bits_stored": 16,
+          "photometric_interpretation": "MONOCHROME2",
+          "rows": 257,
+          "columns": 256,
+          "padding": null,
+          "exact_tensor_equal": true,
+          "maximum_absolute_error": 0.0,
+          "prepared_sha256": "eefb00708febeea1ba5eb915baf4bdc343034b8782bb3b9bfb033ee175485718",
+          "processing": {
+            "normalization_maxval": 65535,
+            "input_pixel_count": 65792,
+            "cropped_pixel_count": 65536,
+            "discarded_pixel_count": 256,
+            "padding_pixels_in_input": 0,
+            "padding_pixels_in_crop": 0,
+            "valid_pixels_in_crop": 65536,
+            "prepared_shape": [
+              1,
+              1,
+              224,
+              224
+            ],
+            "prepared_min": -894.1595458984375,
+            "prepared_max": 891.1701049804688,
+            "analysis_region": {
+              "x": 0,
+              "y": 0,
+              "width": 256,
+              "height": 256
+            },
+            "resize_applied": true,
+            "single_inversion_applied": false,
+            "padding_policy": "preserved_as_original_background",
+            "voi_window_applied": false,
+            "preprocessing_notes": [
+              "采用作者原生stored-range研究输入链；不证明与混合训练数据转换等价，不代表DICOM诊断显示。",
+              "按BitsStored完整范围归一化，未按图像min/max拉伸，未应用原VOI/窗或直方图均衡。",
+              "原padding按原背景采样路径保留，不补值，不视为病灶；裁剪外像素不纳入分类范围。",
+              "中心方形裁剪后使用固定torch bilinear antialias路径；不冒称与skimage resize等价，不旋转或翻转。",
+              "保留float32插值的实际舍入值；仅允许边界0.01以内的工程数值误差，不裁平或改写张量，不代表临床误差界限。"
+            ]
+          }
+        },
+        {
+          "bits_stored": 16,
+          "photometric_interpretation": "MONOCHROME1",
+          "rows": 256,
+          "columns": 257,
+          "padding": null,
+          "exact_tensor_equal": true,
+          "maximum_absolute_error": 0.0,
+          "prepared_sha256": "4b3505d1d17d7bd710572c593e6acc790ef94e60bc0924dc567b8b8a22866334",
+          "processing": {
+            "normalization_maxval": 65535,
+            "input_pixel_count": 65792,
+            "cropped_pixel_count": 65536,
+            "discarded_pixel_count": 256,
+            "padding_pixels_in_input": 0,
+            "padding_pixels_in_crop": 0,
+            "valid_pixels_in_crop": 65536,
+            "prepared_shape": [
+              1,
+              1,
+              224,
+              224
+            ],
+            "prepared_min": -833.0460205078125,
+            "prepared_max": 893.654296875,
+            "analysis_region": {
+              "x": 0,
+              "y": 0,
+              "width": 256,
+              "height": 256
+            },
+            "resize_applied": true,
+            "single_inversion_applied": true,
+            "padding_policy": "preserved_as_original_background",
+            "voi_window_applied": false,
+            "preprocessing_notes": [
+              "采用作者原生stored-range研究输入链；不证明与混合训练数据转换等价，不代表DICOM诊断显示。",
+              "按BitsStored完整范围归一化，未按图像min/max拉伸，未应用原VOI/窗或直方图均衡。",
+              "原padding按原背景采样路径保留，不补值，不视为病灶；裁剪外像素不纳入分类范围。",
+              "中心方形裁剪后使用固定torch bilinear antialias路径；不冒称与skimage resize等价，不旋转或翻转。",
+              "保留float32插值的实际舍入值；仅允许边界0.01以内的工程数值误差，不裁平或改写张量，不代表临床误差界限。"
+            ]
+          }
+        },
+        {
+          "bits_stored": 8,
+          "photometric_interpretation": "MONOCHROME2",
+          "rows": 3,
+          "columns": 5,
+          "padding": [
+            3,
+            1
+          ],
+          "exact_tensor_equal": true,
+          "maximum_absolute_error": 0.0,
+          "prepared_sha256": "b5159e71491a9c2e5b108fa90522da18a07b9f5edb2fc0b9dee26348cb23d88e",
+          "processing": {
+            "normalization_maxval": 255,
+            "input_pixel_count": 15,
+            "cropped_pixel_count": 9,
+            "discarded_pixel_count": 6,
+            "padding_pixels_in_input": 3,
+            "padding_pixels_in_crop": 3,
+            "valid_pixels_in_crop": 6,
+            "prepared_shape": [
+              1,
+              1,
+              224,
+              224
+            ],
+            "prepared_min": -1023.9462280273438,
+            "prepared_max": 742.9019775390625,
+            "analysis_region": {
+              "x": 1,
+              "y": 0,
+              "width": 3,
+              "height": 3
+            },
+            "resize_applied": true,
+            "single_inversion_applied": false,
+            "padding_policy": "preserved_as_original_background",
+            "voi_window_applied": false,
+            "preprocessing_notes": [
+              "采用作者原生stored-range研究输入链；不证明与混合训练数据转换等价，不代表DICOM诊断显示。",
+              "按BitsStored完整范围归一化，未按图像min/max拉伸，未应用原VOI/窗或直方图均衡。",
+              "原padding按原背景采样路径保留，不补值，不视为病灶；裁剪外像素不纳入分类范围。",
+              "中心方形裁剪后使用固定torch bilinear antialias路径；不冒称与skimage resize等价，不旋转或翻转。",
+              "保留float32插值的实际舍入值；仅允许边界0.01以内的工程数值误差，不裁平或改写张量，不代表临床误差界限。"
+            ]
+          }
+        },
+        {
+          "bits_stored": 8,
+          "photometric_interpretation": "MONOCHROME1",
+          "rows": 3,
+          "columns": 5,
+          "padding": [
+            3,
+            1
+          ],
+          "exact_tensor_equal": true,
+          "maximum_absolute_error": 0.0,
+          "prepared_sha256": "76275c7ee4e14d8e7fe31142866719d5cc232d996a75fa6b0e64f1ee658038b7",
+          "processing": {
+            "normalization_maxval": 255,
+            "input_pixel_count": 15,
+            "cropped_pixel_count": 9,
+            "discarded_pixel_count": 6,
+            "padding_pixels_in_input": 3,
+            "padding_pixels_in_crop": 3,
+            "valid_pixels_in_crop": 6,
+            "prepared_shape": [
+              1,
+              1,
+              224,
+              224
+            ],
+            "prepared_min": -742.9019775390625,
+            "prepared_max": 1023.9462280273438,
+            "analysis_region": {
+              "x": 1,
+              "y": 0,
+              "width": 3,
+              "height": 3
+            },
+            "resize_applied": true,
+            "single_inversion_applied": true,
+            "padding_policy": "preserved_as_original_background",
+            "voi_window_applied": false,
+            "preprocessing_notes": [
+              "采用作者原生stored-range研究输入链；不证明与混合训练数据转换等价，不代表DICOM诊断显示。",
+              "按BitsStored完整范围归一化，未按图像min/max拉伸，未应用原VOI/窗或直方图均衡。",
+              "原padding按原背景采样路径保留，不补值，不视为病灶；裁剪外像素不纳入分类范围。",
+              "中心方形裁剪后使用固定torch bilinear antialias路径；不冒称与skimage resize等价，不旋转或翻转。",
+              "保留float32插值的实际舍入值；仅允许边界0.01以内的工程数值误差，不裁平或改写张量，不代表临床误差界限。"
+            ]
+          }
+        },
+        {
+          "bits_stored": 12,
+          "photometric_interpretation": "MONOCHROME2",
+          "rows": 224,
+          "columns": 225,
+          "padding": null,
+          "exact_tensor_equal": true,
+          "maximum_absolute_error": 0.0,
+          "prepared_sha256": "23280db178f1d9e3854f4be570d88bfbc7a306220594fbe7601d78a3171a08cc",
+          "processing": {
+            "normalization_maxval": 4095,
+            "input_pixel_count": 50400,
+            "cropped_pixel_count": 50176,
+            "discarded_pixel_count": 224,
+            "padding_pixels_in_input": 0,
+            "padding_pixels_in_crop": 0,
+            "valid_pixels_in_crop": 50176,
+            "prepared_shape": [
+              1,
+              1,
+              224,
+              224
+            ],
+            "prepared_min": -1024.0,
+            "prepared_max": 1024.0,
+            "analysis_region": {
+              "x": 0,
+              "y": 0,
+              "width": 224,
+              "height": 224
+            },
+            "resize_applied": false,
+            "single_inversion_applied": false,
+            "padding_policy": "preserved_as_original_background",
+            "voi_window_applied": false,
+            "preprocessing_notes": [
+              "采用作者原生stored-range研究输入链；不证明与混合训练数据转换等价，不代表DICOM诊断显示。",
+              "按BitsStored完整范围归一化，未按图像min/max拉伸，未应用原VOI/窗或直方图均衡。",
+              "原padding按原背景采样路径保留，不补值，不视为病灶；裁剪外像素不纳入分类范围。",
+              "中心方形裁剪后使用固定torch bilinear antialias路径；不冒称与skimage resize等价，不旋转或翻转。",
+              "保留float32插值的实际舍入值；仅允许边界0.01以内的工程数值误差，不裁平或改写张量，不代表临床误差界限。"
+            ]
+          }
+        },
+        {
+          "bits_stored": 16,
+          "photometric_interpretation": "MONOCHROME1",
+          "rows": 225,
+          "columns": 224,
+          "padding": null,
+          "exact_tensor_equal": true,
+          "maximum_absolute_error": 0.0,
+          "prepared_sha256": "0d052b8a0266c1b8f734e4903ca940b1d14afaa3b826fc9071b7b6ab6bd9990b",
+          "processing": {
+            "normalization_maxval": 65535,
+            "input_pixel_count": 50400,
+            "cropped_pixel_count": 50176,
+            "discarded_pixel_count": 224,
+            "padding_pixels_in_input": 0,
+            "padding_pixels_in_crop": 0,
+            "valid_pixels_in_crop": 50176,
+            "prepared_shape": [
+              1,
+              1,
+              224,
+              224
+            ],
+            "prepared_min": -1024.0,
+            "prepared_max": 1024.0,
+            "analysis_region": {
+              "x": 0,
+              "y": 0,
+              "width": 224,
+              "height": 224
+            },
+            "resize_applied": false,
+            "single_inversion_applied": true,
+            "padding_policy": "preserved_as_original_background",
+            "voi_window_applied": false,
+            "preprocessing_notes": [
+              "采用作者原生stored-range研究输入链；不证明与混合训练数据转换等价，不代表DICOM诊断显示。",
+              "按BitsStored完整范围归一化，未按图像min/max拉伸，未应用原VOI/窗或直方图均衡。",
+              "原padding按原背景采样路径保留，不补值，不视为病灶；裁剪外像素不纳入分类范围。",
+              "中心方形裁剪后使用固定torch bilinear antialias路径；不冒称与skimage resize等价，不旋转或翻转。",
+              "保留float32插值的实际舍入值；仅允许边界0.01以内的工程数值误差，不裁平或改写张量，不代表临床误差界限。"
+            ]
+          }
+        }
+      ],
+      "numerical_boundary_checks": [
+        {
+          "source_bits_stored": 12,
+          "input_shape": [
+            1,
+            1,
+            128,
+            129
+          ],
+          "prepared_shape": [
+            1,
+            1,
+            224,
+            224
+          ],
+          "dtype": "torch.float32",
+          "background_stored": 0,
+          "minimum": -1024.0,
+          "maximum": 240.3475799560547,
+          "overshoot": 0,
+          "exact_tensor_equal": true,
+          "maximum_absolute_error": 0.0
+        },
+        {
+          "source_bits_stored": 12,
+          "input_shape": [
+            1,
+            1,
+            128,
+            129
+          ],
+          "prepared_shape": [
+            1,
+            1,
+            224,
+            224
+          ],
+          "dtype": "torch.float32",
+          "background_stored": 4095,
+          "minimum": -240.3475799560547,
+          "maximum": 1024.0,
+          "overshoot": 0,
+          "exact_tensor_equal": true,
+          "maximum_absolute_error": 0.0
+        },
+        {
+          "source_bits_stored": 12,
+          "input_shape": [
+            1,
+            1,
+            192,
+            193
+          ],
+          "prepared_shape": [
+            1,
+            1,
+            224,
+            224
+          ],
+          "dtype": "torch.float32",
+          "background_stored": 0,
+          "minimum": -1024.0,
+          "maximum": 741.8858642578125,
+          "overshoot": 0,
+          "exact_tensor_equal": true,
+          "maximum_absolute_error": 0.0
+        },
+        {
+          "source_bits_stored": 12,
+          "input_shape": [
+            1,
+            1,
+            192,
+            193
+          ],
+          "prepared_shape": [
+            1,
+            1,
+            224,
+            224
+          ],
+          "dtype": "torch.float32",
+          "background_stored": 4095,
+          "minimum": -741.8858642578125,
+          "maximum": 1024.0,
+          "overshoot": 0,
+          "exact_tensor_equal": true,
+          "maximum_absolute_error": 0.0
+        },
+        {
+          "source_bits_stored": 12,
+          "input_shape": [
+            1,
+            1,
+            223,
+            224
+          ],
+          "prepared_shape": [
+            1,
+            1,
+            224,
+            224
+          ],
+          "dtype": "torch.float32",
+          "background_stored": 0,
+          "minimum": -1024.0,
+          "maximum": -507.4116516113281,
+          "overshoot": 0,
+          "exact_tensor_equal": true,
+          "maximum_absolute_error": 0.0
+        },
+        {
+          "source_bits_stored": 12,
+          "input_shape": [
+            1,
+            1,
+            223,
+            224
+          ],
+          "prepared_shape": [
+            1,
+            1,
+            224,
+            224
+          ],
+          "dtype": "torch.float32",
+          "background_stored": 4095,
+          "minimum": 507.4116516113281,
+          "maximum": 1024.0,
+          "overshoot": 0,
+          "exact_tensor_equal": true,
+          "maximum_absolute_error": 0.0
+        },
+        {
+          "source_bits_stored": 12,
+          "input_shape": [
+            1,
+            1,
+            225,
+            226
+          ],
+          "prepared_shape": [
+            1,
+            1,
+            224,
+            224
+          ],
+          "dtype": "torch.float32",
+          "background_stored": 0,
+          "minimum": -1024.000244140625,
+          "maximum": -516.5121459960938,
+          "overshoot": 0.000244140625,
+          "exact_tensor_equal": true,
+          "maximum_absolute_error": 0.0
+        },
+        {
+          "source_bits_stored": 12,
+          "input_shape": [
+            1,
+            1,
+            225,
+            226
+          ],
+          "prepared_shape": [
+            1,
+            1,
+            224,
+            224
+          ],
+          "dtype": "torch.float32",
+          "background_stored": 4095,
+          "minimum": 516.5121459960938,
+          "maximum": 1024.000244140625,
+          "overshoot": 0.000244140625,
+          "exact_tensor_equal": true,
+          "maximum_absolute_error": 0.0
+        },
+        {
+          "source_bits_stored": 12,
+          "input_shape": [
+            1,
+            1,
+            256,
+            257
+          ],
+          "prepared_shape": [
+            1,
+            1,
+            224,
+            224
+          ],
+          "dtype": "torch.float32",
+          "background_stored": 0,
+          "minimum": -1024.000244140625,
+          "maximum": 252.44744873046875,
+          "overshoot": 0.000244140625,
+          "exact_tensor_equal": true,
+          "maximum_absolute_error": 0.0
+        },
+        {
+          "source_bits_stored": 12,
+          "input_shape": [
+            1,
+            1,
+            256,
+            257
+          ],
+          "prepared_shape": [
+            1,
+            1,
+            224,
+            224
+          ],
+          "dtype": "torch.float32",
+          "background_stored": 4095,
+          "minimum": -252.44744873046875,
+          "maximum": 1024.000244140625,
+          "overshoot": 0.000244140625,
+          "exact_tensor_equal": true,
+          "maximum_absolute_error": 0.0
+        },
+        {
+          "source_bits_stored": 12,
+          "input_shape": [
+            1,
+            1,
+            257,
+            258
+          ],
+          "prepared_shape": [
+            1,
+            1,
+            224,
+            224
+          ],
+          "dtype": "torch.float32",
+          "background_stored": 0,
+          "minimum": -1024.000244140625,
+          "maximum": -621.8851318359375,
+          "overshoot": 0.000244140625,
+          "exact_tensor_equal": true,
+          "maximum_absolute_error": 0.0
+        },
+        {
+          "source_bits_stored": 12,
+          "input_shape": [
+            1,
+            1,
+            257,
+            258
+          ],
+          "prepared_shape": [
+            1,
+            1,
+            224,
+            224
+          ],
+          "dtype": "torch.float32",
+          "background_stored": 4095,
+          "minimum": 621.8851318359375,
+          "maximum": 1024.000244140625,
+          "overshoot": 0.000244140625,
+          "exact_tensor_equal": true,
+          "maximum_absolute_error": 0.0
+        },
+        {
+          "source_bits_stored": 12,
+          "input_shape": [
+            1,
+            1,
+            300,
+            301
+          ],
+          "prepared_shape": [
+            1,
+            1,
+            224,
+            224
+          ],
+          "dtype": "torch.float32",
+          "background_stored": 0,
+          "minimum": -1024.000244140625,
+          "maximum": -203.77935791015625,
+          "overshoot": 0.000244140625,
+          "exact_tensor_equal": true,
+          "maximum_absolute_error": 0.0
+        },
+        {
+          "source_bits_stored": 12,
+          "input_shape": [
+            1,
+            1,
+            300,
+            301
+          ],
+          "prepared_shape": [
+            1,
+            1,
+            224,
+            224
+          ],
+          "dtype": "torch.float32",
+          "background_stored": 4095,
+          "minimum": 203.77935791015625,
+          "maximum": 1024.000244140625,
+          "overshoot": 0.000244140625,
+          "exact_tensor_equal": true,
+          "maximum_absolute_error": 0.0
+        },
+        {
+          "source_bits_stored": 12,
+          "input_shape": [
+            1,
+            1,
+            513,
+            514
+          ],
+          "prepared_shape": [
+            1,
+            1,
+            224,
+            224
+          ],
+          "dtype": "torch.float32",
+          "background_stored": 0,
+          "minimum": -1024.000244140625,
+          "maximum": -928.6080932617188,
+          "overshoot": 0.000244140625,
+          "exact_tensor_equal": true,
+          "maximum_absolute_error": 0.0
+        },
+        {
+          "source_bits_stored": 12,
+          "input_shape": [
+            1,
+            1,
+            513,
+            514
+          ],
+          "prepared_shape": [
+            1,
+            1,
+            224,
+            224
+          ],
+          "dtype": "torch.float32",
+          "background_stored": 4095,
+          "minimum": 928.6080932617188,
+          "maximum": 1024.000244140625,
+          "overshoot": 0.000244140625,
+          "exact_tensor_equal": true,
+          "maximum_absolute_error": 0.0
+        }
+      ],
+      "larger_pinned_kernel_boundary_checks": {
+        "synthetic_only": true,
+        "torch": "2.14.1+cpu",
+        "cases": [
+          {
+            "side": 128,
+            "background": -1024,
+            "min": -1024.0,
+            "max": 240.3475799560547,
+            "overshoot": 0
+          },
+          {
+            "side": 128,
+            "background": 1024,
+            "min": -240.3475799560547,
+            "max": 1024.0,
+            "overshoot": 0
+          },
+          {
+            "side": 192,
+            "background": -1024,
+            "min": -1024.0,
+            "max": 741.8858642578125,
+            "overshoot": 0
+          },
+          {
+            "side": 192,
+            "background": 1024,
+            "min": -741.8858642578125,
+            "max": 1024.0,
+            "overshoot": 0
+          },
+          {
+            "side": 223,
+            "background": -1024,
+            "min": -1024.0,
+            "max": -507.4116516113281,
+            "overshoot": 0
+          },
+          {
+            "side": 223,
+            "background": 1024,
+            "min": 507.4116516113281,
+            "max": 1024.0,
+            "overshoot": 0
+          },
+          {
+            "side": 225,
+            "background": -1024,
+            "min": -1024.000244140625,
+            "max": -516.5121459960938,
+            "overshoot": 0.000244140625
+          },
+          {
+            "side": 225,
+            "background": 1024,
+            "min": 516.5121459960938,
+            "max": 1024.000244140625,
+            "overshoot": 0.000244140625
+          },
+          {
+            "side": 256,
+            "background": -1024,
+            "min": -1024.000244140625,
+            "max": 252.44744873046875,
+            "overshoot": 0.000244140625
+          },
+          {
+            "side": 256,
+            "background": 1024,
+            "min": -252.44744873046875,
+            "max": 1024.000244140625,
+            "overshoot": 0.000244140625
+          },
+          {
+            "side": 257,
+            "background": -1024,
+            "min": -1024.000244140625,
+            "max": -621.8851318359375,
+            "overshoot": 0.000244140625
+          },
+          {
+            "side": 257,
+            "background": 1024,
+            "min": 621.8851318359375,
+            "max": 1024.000244140625,
+            "overshoot": 0.000244140625
+          },
+          {
+            "side": 300,
+            "background": -1024,
+            "min": -1024.000244140625,
+            "max": -203.77935791015625,
+            "overshoot": 0.000244140625
+          },
+          {
+            "side": 300,
+            "background": 1024,
+            "min": 203.77935791015625,
+            "max": 1024.000244140625,
+            "overshoot": 0.000244140625
+          },
+          {
+            "side": 513,
+            "background": -1024,
+            "min": -1024.000244140625,
+            "max": -928.6080932617188,
+            "overshoot": 0.000244140625
+          },
+          {
+            "side": 513,
+            "background": 1024,
+            "min": 928.6080932617188,
+            "max": 1024.000244140625,
+            "overshoot": 0.000244140625
+          },
+          {
+            "side": 1024,
+            "background": -1024,
+            "min": -1024.000244140625,
+            "max": -987.7169189453125,
+            "overshoot": 0.000244140625
+          },
+          {
+            "side": 1024,
+            "background": 1024,
+            "min": 987.7169189453125,
+            "max": 1024.000244140625,
+            "overshoot": 0.000244140625
+          },
+          {
+            "side": 2048,
+            "background": -1024,
+            "min": -1024.00048828125,
+            "max": -1016.4716186523438,
+            "overshoot": 0.00048828125
+          },
+          {
+            "side": 2048,
+            "background": 1024,
+            "min": 1016.4716186523438,
+            "max": 1024.00048828125,
+            "overshoot": 0.00048828125
+          },
+          {
+            "side": 3000,
+            "background": -1024,
+            "shape": [
+              1,
+              1,
+              3000,
+              3000
+            ],
+            "dtype": "torch.float32",
+            "min": -1024.00048828125,
+            "max": -1020.7047729492188,
+            "overshoot": 0.00048828125
+          },
+          {
+            "side": 3000,
+            "background": 1024,
+            "shape": [
+              1,
+              1,
+              3000,
+              3000
+            ],
+            "dtype": "torch.float32",
+            "min": 1020.7047729492188,
+            "max": 1024.00048828125,
+            "overshoot": 0.00048828125
+          },
+          {
+            "side": 3500,
+            "background": -1024,
+            "shape": [
+              1,
+              1,
+              3500,
+              3500
+            ],
+            "dtype": "torch.float32",
+            "min": -1024.000244140625,
+            "max": -1021.6243896484375,
+            "overshoot": 0.000244140625
+          },
+          {
+            "side": 3500,
+            "background": 1024,
+            "shape": [
+              1,
+              1,
+              3500,
+              3500
+            ],
+            "dtype": "torch.float32",
+            "min": 1021.6243896484375,
+            "max": 1024.000244140625,
+            "overshoot": 0.000244140625
+          },
+          {
+            "side": 4000,
+            "background": -1024,
+            "shape": [
+              1,
+              1,
+              4000,
+              4000
+            ],
+            "dtype": "torch.float32",
+            "min": -1024.0003662109375,
+            "max": -1022.208984375,
+            "overshoot": 0.0003662109375
+          },
+          {
+            "side": 4000,
+            "background": 1024,
+            "shape": [
+              1,
+              1,
+              4000,
+              4000
+            ],
+            "dtype": "torch.float32",
+            "min": 1022.208984375,
+            "max": 1024.0003662109375,
+            "overshoot": 0.0003662109375
+          },
+          {
+            "side": 4096,
+            "background": -1024,
+            "shape": [
+              1,
+              1,
+              4096,
+              4096
+            ],
+            "dtype": "torch.float32",
+            "min": -1024.0009765625,
+            "max": -1022.2958984375,
+            "overshoot": 0.0009765625
+          },
+          {
+            "side": 4096,
+            "background": 1024,
+            "shape": [
+              1,
+              1,
+              4096,
+              4096
+            ],
+            "dtype": "torch.float32",
+            "min": 1022.2958984375,
+            "max": 1024.0009765625,
+            "overshoot": 0.0009765625
+          }
+        ],
+        "maximum_overshoot": 0.0009765625
+      },
+      "large_phase_probe": {
+        "dtype": "torch.float32",
+        "torch": "2.14.1+cpu",
+        "pattern": "uniform 1024, numerical kernel upper-bound probe only; not accepted as clinical/source input",
+        "cases": [
+          {
+            "side": 3500,
+            "maximum": 1024.000244140625,
+            "overshoot": 0.000244140625
+          },
+          {
+            "side": 3537,
+            "maximum": 1024.0006103515625,
+            "overshoot": 0.0006103515625
+          },
+          {
+            "side": 3574,
+            "maximum": 1024.00048828125,
+            "overshoot": 0.00048828125
+          },
+          {
+            "side": 3611,
+            "maximum": 1024.000732421875,
+            "overshoot": 0.000732421875
+          },
+          {
+            "side": 3648,
+            "maximum": 1024.0003662109375,
+            "overshoot": 0.0003662109375
+          },
+          {
+            "side": 3685,
+            "maximum": 1024.0008544921875,
+            "overshoot": 0.0008544921875
+          },
+          {
+            "side": 3722,
+            "maximum": 1024.0008544921875,
+            "overshoot": 0.0008544921875
+          },
+          {
+            "side": 3759,
+            "maximum": 1024.00048828125,
+            "overshoot": 0.00048828125
+          },
+          {
+            "side": 3796,
+            "maximum": 1024.0009765625,
+            "overshoot": 0.0009765625
+          },
+          {
+            "side": 3833,
+            "maximum": 1024.0006103515625,
+            "overshoot": 0.0006103515625
+          },
+          {
+            "side": 3870,
+            "maximum": 1024.000732421875,
+            "overshoot": 0.000732421875
+          },
+          {
+            "side": 3907,
+            "maximum": 1024.0013427734375,
+            "overshoot": 0.0013427734375
+          },
+          {
+            "side": 3944,
+            "maximum": 1024.0009765625,
+            "overshoot": 0.0009765625
+          },
+          {
+            "side": 3981,
+            "maximum": 1024.000732421875,
+            "overshoot": 0.000732421875
+          },
+          {
+            "side": 4018,
+            "maximum": 1024.000244140625,
+            "overshoot": 0.000244140625
+          },
+          {
+            "side": 4055,
+            "maximum": 1024.00048828125,
+            "overshoot": 0.00048828125
+          },
+          {
+            "side": 4080,
+            "maximum": 1024.0006103515625,
+            "overshoot": 0.0006103515625
+          },
+          {
+            "side": 4081,
+            "maximum": 1024.0003662109375,
+            "overshoot": 0.0003662109375
+          },
+          {
+            "side": 4090,
+            "maximum": 1024.0008544921875,
+            "overshoot": 0.0008544921875
+          },
+          {
+            "side": 4092,
+            "maximum": 1024.00146484375,
+            "overshoot": 0.00146484375
+          },
+          {
+            "side": 4094,
+            "maximum": 1024.0010986328125,
+            "overshoot": 0.0010986328125
+          },
+          {
+            "side": 4095,
+            "maximum": 1024.0008544921875,
+            "overshoot": 0.0008544921875
+          },
+          {
+            "side": 4096,
+            "maximum": 1024.0009765625,
+            "overshoot": 0.0009765625
+          }
+        ],
+        "max_overshoot": 0.00146484375
+      },
+      "valid_large_sources": {
+        "synthetic_only": true,
+        "clinical_validation": false,
+        "cases": [
+          {
+            "side": 3907,
+            "dtype": "torch.float32",
+            "input_shape": [
+              1,
+              1,
+              3907,
+              3907
+            ],
+            "pixel_bytes": 61058596,
+            "valid_crop_has_variation": true,
+            "input_min": 0,
+            "input_max": 4095,
+            "prepared_min": 1021.5440063476562,
+            "prepared_max": 1024.0013427734375,
+            "overshoot": 0.0013427734375,
+            "exact_to_author_kernel": true,
+            "temporary_probe_tolerance": 0.01
+          },
+          {
+            "side": 4092,
+            "dtype": "torch.float32",
+            "input_shape": [
+              1,
+              1,
+              4092,
+              4092
+            ],
+            "pixel_bytes": 66977856,
+            "valid_crop_has_variation": true,
+            "input_min": 0,
+            "input_max": 4095,
+            "prepared_min": 1021.7694702148438,
+            "prepared_max": 1024.00146484375,
+            "overshoot": 0.00146484375,
+            "exact_to_author_kernel": true,
+            "temporary_probe_tolerance": 0.01
+          },
+          {
+            "side": 4094,
+            "dtype": "torch.float32",
+            "input_shape": [
+              1,
+              1,
+              4094,
+              4094
+            ],
+            "pixel_bytes": 67043344,
+            "valid_crop_has_variation": true,
+            "input_min": 0,
+            "input_max": 4095,
+            "prepared_min": 1021.7713012695312,
+            "prepared_max": 1024.0010986328125,
+            "overshoot": 0.0010986328125,
+            "exact_to_author_kernel": true,
+            "temporary_probe_tolerance": 0.01
+          }
+        ],
+        "maximum_overshoot": 0.00146484375
+      },
+      "implementation_sha256": {
+        "app/ai/imaging_contract.py": "b35fa9700faee2354a8fb4a2f8d2171403d796fe633dd83271ce5ade0234b89a",
+        "app/ai/imaging_preprocessing.py": "f95f4bc0b129d9e182e568c6f4021c99bf6ecdcb9816301131e877eb9fc5f776"
+      },
+      "maximum_absolute_error": 0.0
+    }
+  },
+  "actual_host_service_smoke": {
+    "synthetic_only": true,
+    "clinical_validation": false,
+    "descriptor": {
+      "schema_version": "4",
+      "feature_key": "imaging_detection",
+      "model_version": "xrv:e1cdb4b11def4a85cf6fc558d67eec21cea5a9db8c28bc1456562e938ad45138",
+      "engine": "torchxrayvision-densenet121",
+      "engine_versions": {
+        "torch": "2.14.1+cpu",
+        "numpy": "2.4.4",
+        "safetensors": "0.8.0"
+      },
+      "model_repository": "torchxrayvision/densenet121-res224-all",
+      "model_revision": "588eadcc6a744da71f8dce768bc974ec629443f5",
+      "model_digest": "3e520c2e0b34ba69282c10a26330b6aa4eab990e005d0484cb239e710d6ff8d5",
+      "runtime_digest": "e1cdb4b11def4a85cf6fc558d67eec21cea5a9db8c28bc1456562e938ad45138",
+      "preprocessing_digest": "b5d4764af4c246b027ac4c305e8a88ec45be07a8c66f162fba55b1e60a8c3de9",
+      "profile": "xrv_stored_range_v1",
+      "preprocessing": {
+        "profile": "xrv_stored_range_v1",
+        "input_profile": {
+          "format": "dicom_i32le_v1",
+          "modalities": [
+            "CR",
+            "DX"
+          ],
+          "body_part_examined": "CHEST",
+          "view_positions": [
+            "PA",
+            "AP"
+          ],
+          "frames": 1,
+          "pixel_representation": "unsigned",
+          "bits_allocated": [
+            8,
+            16
+          ],
+          "bits_stored_min": 8,
+          "bits_stored_max": 16,
+          "max_pixels": 16777216,
+          "max_pixel_bytes": 67108864,
+          "rescale_slope": 1,
+          "rescale_intercept": 0,
+          "presentation_intent_type": [
+            "FOR PRESENTATION",
+            "not_declared"
+          ],
+          "population_applicability": "not_verified",
+          "clinical_validation": "not_provided"
+        },
+        "source_code_revision": "17726dd8f5e756eec3e5ae958281a289b05b1dae",
+        "normalization": "(2*(stored.astype(numpy.float32)/((1<<BitsStored)-1))-1)*1024",
+        "normalization_range": [
+          -1024,
+          1024
+        ],
+        "monochrome1": "maxval-stored before normalization; exactly one inversion",
+        "crop": "center square: side=min(rows,columns); x=columns//2-side//2; y=rows//2-side//2",
+        "resize": {
+          "size": [
+            224,
+            224
+          ],
+          "mode": "bilinear",
+          "align_corners": false,
+          "antialias": true,
+          "skip_if_already_224": true
+        },
+        "resize_roundoff_tolerance": 0.01,
+        "padding_policy": "preserved_as_original_background",
+        "constant_valid_crop_policy": "reject",
+        "voi_window_policy": "ignored_for_research_input_not_diagnostic_display",
+        "modality_lut": "unsupported; identity rescale only",
+        "histogram_equalization": false,
+        "image_minmax_normalization": false,
+        "rotation": false,
+        "flipping": false,
+        "imputation": false,
+        "training_distribution_equivalence": "not_established",
+        "spatial_localization": false
+      },
+      "labels": [
+        "Atelectasis",
+        "Consolidation",
+        "Infiltration",
+        "Pneumothorax",
+        "Edema",
+        "Emphysema",
+        "Fibrosis",
+        "Effusion",
+        "Pneumonia",
+        "Pleural_Thickening",
+        "Cardiomegaly",
+        "Nodule",
+        "Mass",
+        "Hernia",
+        "Lung Lesion",
+        "Fracture",
+        "Lung Opacity",
+        "Enlarged Cardiomediastinum"
+      ],
+      "prompt_handling": "pixels_only",
+      "clinical_validation": "not_provided",
+      "population_applicability": "not_verified",
+      "max_bytes": 67108864,
+      "timeout_seconds": 60
+    },
+    "checks": [
+      {
+        "case": "original_mono2",
+        "status": 200
+      },
+      {
+        "case": "equivalent_mono1",
+        "status": 200
+      },
+      {
+        "case": "different_voi_ignored_explicitly",
+        "status": 200
+      },
+      {
+        "case": "padding_only_author_crop",
+        "status": 422
+      },
+      {
+        "case": "unsupported_lateral_view",
+        "status": 422
+      }
+    ],
+    "comparisons": [
+      {
+        "case": "original_mono2",
+        "max_score_difference": 0.0,
+        "analysis_region": {
+          "x": 1,
+          "y": 0,
+          "width": 225,
+          "height": 225
+        },
+        "local_preprocessing": {
+          "normalization_maxval": 4095,
+          "input_pixel_count": 50850,
+          "cropped_pixel_count": 50625,
+          "discarded_pixel_count": 225,
+          "padding_pixels_in_input": 0,
+          "padding_pixels_in_crop": 0,
+          "valid_pixels_in_crop": 50625,
+          "prepared_shape": [
+            1,
+            1,
+            224,
+            224
+          ],
+          "prepared_min": -1009.6868896484375,
+          "prepared_max": 1013.6107788085938
+        }
+      },
+      {
+        "case": "equivalent_mono1",
+        "max_score_difference": 0.0,
+        "analysis_region": {
+          "x": 1,
+          "y": 0,
+          "width": 225,
+          "height": 225
+        },
+        "local_preprocessing": {
+          "normalization_maxval": 4095,
+          "input_pixel_count": 50850,
+          "cropped_pixel_count": 50625,
+          "discarded_pixel_count": 225,
+          "padding_pixels_in_input": 0,
+          "padding_pixels_in_crop": 0,
+          "valid_pixels_in_crop": 50625,
+          "prepared_shape": [
+            1,
+            1,
+            224,
+            224
+          ],
+          "prepared_min": -1009.6868896484375,
+          "prepared_max": 1013.6107788085938
+        }
+      },
+      {
+        "case": "different_voi_ignored_explicitly",
+        "max_score_difference": 0.0,
+        "analysis_region": {
+          "x": 1,
+          "y": 0,
+          "width": 225,
+          "height": 225
+        },
+        "local_preprocessing": {
+          "normalization_maxval": 4095,
+          "input_pixel_count": 50850,
+          "cropped_pixel_count": 50625,
+          "discarded_pixel_count": 225,
+          "padding_pixels_in_input": 0,
+          "padding_pixels_in_crop": 0,
+          "valid_pixels_in_crop": 50625,
+          "prepared_shape": [
+            1,
+            1,
+            224,
+            224
+          ],
+          "prepared_min": -1009.6868896484375,
+          "prepared_max": 1013.6107788085938
+        }
+      }
+    ],
+    "real_worker_jobs": 4,
+    "reference_scores": [
+      {
+        "label": "Atelectasis",
+        "score": 0.01728336326777935
+      },
+      {
+        "label": "Consolidation",
+        "score": 0.013052946887910366
+      },
+      {
+        "label": "Infiltration",
+        "score": 1.83683805516921e-05
+      },
+      {
+        "label": "Pneumothorax",
+        "score": 0.00047149829333648086
+      },
+      {
+        "label": "Edema",
+        "score": 0.006356049329042435
+      },
+      {
+        "label": "Emphysema",
+        "score": 0.003108686301857233
+      },
+      {
+        "label": "Fibrosis",
+        "score": 4.1246667192851305e-10
+      },
+      {
+        "label": "Effusion",
+        "score": 0.060259539633989334
+      },
+      {
+        "label": "Pneumonia",
+        "score": 4.612259999703383e-06
+      },
+      {
+        "label": "Pleural_Thickening",
+        "score": 1.0469358713294241e-08
+      },
+      {
+        "label": "Cardiomegaly",
+        "score": 0.004570008255541325
+      },
+      {
+        "label": "Nodule",
+        "score": 2.755376226559747e-05
+      },
+      {
+        "label": "Mass",
+        "score": 9.343045093146429e-08
+      },
+      {
+        "label": "Hernia",
+        "score": 1.0182593541685492e-05
+      },
+      {
+        "label": "Lung Lesion",
+        "score": 3.561403900675941e-07
+      },
+      {
+        "label": "Fracture",
+        "score": 0.007928739301860332
+      },
+      {
+        "label": "Lung Opacity",
+        "score": 0.1055702194571495
+      },
+      {
+        "label": "Enlarged Cardiomediastinum",
+        "score": 1.363371552542958e-06
+      }
+    ],
+    "hospital_settings_or_database_imported": false
+  },
+  "actual_offline_container_smoke": {
+    "synthetic_only": true,
+    "clinical_validation": false,
+    "descriptor": {
+      "schema_version": "4",
+      "feature_key": "imaging_detection",
+      "model_version": "xrv:5ac0b6e286f810d13ad69932891bf21fcc8b336f4c72887be69318d959cb92aa",
+      "engine": "torchxrayvision-densenet121",
+      "engine_versions": {
+        "torch": "2.14.1+cpu",
+        "numpy": "2.4.4",
+        "safetensors": "0.8.0"
+      },
+      "model_repository": "torchxrayvision/densenet121-res224-all",
+      "model_revision": "588eadcc6a744da71f8dce768bc974ec629443f5",
+      "model_digest": "3e520c2e0b34ba69282c10a26330b6aa4eab990e005d0484cb239e710d6ff8d5",
+      "runtime_digest": "5ac0b6e286f810d13ad69932891bf21fcc8b336f4c72887be69318d959cb92aa",
+      "preprocessing_digest": "b5d4764af4c246b027ac4c305e8a88ec45be07a8c66f162fba55b1e60a8c3de9",
+      "profile": "xrv_stored_range_v1",
+      "preprocessing": {
+        "profile": "xrv_stored_range_v1",
+        "input_profile": {
+          "format": "dicom_i32le_v1",
+          "modalities": [
+            "CR",
+            "DX"
+          ],
+          "body_part_examined": "CHEST",
+          "view_positions": [
+            "PA",
+            "AP"
+          ],
+          "frames": 1,
+          "pixel_representation": "unsigned",
+          "bits_allocated": [
+            8,
+            16
+          ],
+          "bits_stored_min": 8,
+          "bits_stored_max": 16,
+          "max_pixels": 16777216,
+          "max_pixel_bytes": 67108864,
+          "rescale_slope": 1,
+          "rescale_intercept": 0,
+          "presentation_intent_type": [
+            "FOR PRESENTATION",
+            "not_declared"
+          ],
+          "population_applicability": "not_verified",
+          "clinical_validation": "not_provided"
+        },
+        "source_code_revision": "17726dd8f5e756eec3e5ae958281a289b05b1dae",
+        "normalization": "(2*(stored.astype(numpy.float32)/((1<<BitsStored)-1))-1)*1024",
+        "normalization_range": [
+          -1024,
+          1024
+        ],
+        "monochrome1": "maxval-stored before normalization; exactly one inversion",
+        "crop": "center square: side=min(rows,columns); x=columns//2-side//2; y=rows//2-side//2",
+        "resize": {
+          "size": [
+            224,
+            224
+          ],
+          "mode": "bilinear",
+          "align_corners": false,
+          "antialias": true,
+          "skip_if_already_224": true
+        },
+        "resize_roundoff_tolerance": 0.01,
+        "padding_policy": "preserved_as_original_background",
+        "constant_valid_crop_policy": "reject",
+        "voi_window_policy": "ignored_for_research_input_not_diagnostic_display",
+        "modality_lut": "unsupported; identity rescale only",
+        "histogram_equalization": false,
+        "image_minmax_normalization": false,
+        "rotation": false,
+        "flipping": false,
+        "imputation": false,
+        "training_distribution_equivalence": "not_established",
+        "spatial_localization": false
+      },
+      "labels": [
+        "Atelectasis",
+        "Consolidation",
+        "Infiltration",
+        "Pneumothorax",
+        "Edema",
+        "Emphysema",
+        "Fibrosis",
+        "Effusion",
+        "Pneumonia",
+        "Pleural_Thickening",
+        "Cardiomegaly",
+        "Nodule",
+        "Mass",
+        "Hernia",
+        "Lung Lesion",
+        "Fracture",
+        "Lung Opacity",
+        "Enlarged Cardiomediastinum"
+      ],
+      "prompt_handling": "pixels_only",
+      "clinical_validation": "not_provided",
+      "population_applicability": "not_verified",
+      "max_bytes": 67108864,
+      "timeout_seconds": 60
+    },
+    "checks": [
+      {
+        "case": "original_mono2",
+        "status": 200
+      },
+      {
+        "case": "equivalent_mono1",
+        "status": 200
+      },
+      {
+        "case": "different_voi_ignored_explicitly",
+        "status": 200
+      },
+      {
+        "case": "padding_only_author_crop",
+        "status": 422
+      },
+      {
+        "case": "unsupported_lateral_view",
+        "status": 422
+      }
+    ],
+    "comparisons": [
+      {
+        "case": "original_mono2",
+        "max_score_difference": 0.0,
+        "analysis_region": {
+          "x": 1,
+          "y": 0,
+          "width": 225,
+          "height": 225
+        },
+        "local_preprocessing": {
+          "normalization_maxval": 4095,
+          "input_pixel_count": 50850,
+          "cropped_pixel_count": 50625,
+          "discarded_pixel_count": 225,
+          "padding_pixels_in_input": 0,
+          "padding_pixels_in_crop": 0,
+          "valid_pixels_in_crop": 50625,
+          "prepared_shape": [
+            1,
+            1,
+            224,
+            224
+          ],
+          "prepared_min": -1009.6868896484375,
+          "prepared_max": 1013.6107788085938
+        }
+      },
+      {
+        "case": "equivalent_mono1",
+        "max_score_difference": 0.0,
+        "analysis_region": {
+          "x": 1,
+          "y": 0,
+          "width": 225,
+          "height": 225
+        },
+        "local_preprocessing": {
+          "normalization_maxval": 4095,
+          "input_pixel_count": 50850,
+          "cropped_pixel_count": 50625,
+          "discarded_pixel_count": 225,
+          "padding_pixels_in_input": 0,
+          "padding_pixels_in_crop": 0,
+          "valid_pixels_in_crop": 50625,
+          "prepared_shape": [
+            1,
+            1,
+            224,
+            224
+          ],
+          "prepared_min": -1009.6868896484375,
+          "prepared_max": 1013.6107788085938
+        }
+      },
+      {
+        "case": "different_voi_ignored_explicitly",
+        "max_score_difference": 0.0,
+        "analysis_region": {
+          "x": 1,
+          "y": 0,
+          "width": 225,
+          "height": 225
+        },
+        "local_preprocessing": {
+          "normalization_maxval": 4095,
+          "input_pixel_count": 50850,
+          "cropped_pixel_count": 50625,
+          "discarded_pixel_count": 225,
+          "padding_pixels_in_input": 0,
+          "padding_pixels_in_crop": 0,
+          "valid_pixels_in_crop": 50625,
+          "prepared_shape": [
+            1,
+            1,
+            224,
+            224
+          ],
+          "prepared_min": -1009.6868896484375,
+          "prepared_max": 1013.6107788085938
+        }
+      }
+    ],
+    "real_worker_jobs": 4,
+    "reference_scores": [
+      {
+        "label": "Atelectasis",
+        "score": 0.01728336326777935
+      },
+      {
+        "label": "Consolidation",
+        "score": 0.013052946887910366
+      },
+      {
+        "label": "Infiltration",
+        "score": 1.83683805516921e-05
+      },
+      {
+        "label": "Pneumothorax",
+        "score": 0.00047149829333648086
+      },
+      {
+        "label": "Edema",
+        "score": 0.006356049329042435
+      },
+      {
+        "label": "Emphysema",
+        "score": 0.003108686301857233
+      },
+      {
+        "label": "Fibrosis",
+        "score": 4.1246667192851305e-10
+      },
+      {
+        "label": "Effusion",
+        "score": 0.060259539633989334
+      },
+      {
+        "label": "Pneumonia",
+        "score": 4.612259999703383e-06
+      },
+      {
+        "label": "Pleural_Thickening",
+        "score": 1.0469358713294241e-08
+      },
+      {
+        "label": "Cardiomegaly",
+        "score": 0.004570008255541325
+      },
+      {
+        "label": "Nodule",
+        "score": 2.755376226559747e-05
+      },
+      {
+        "label": "Mass",
+        "score": 9.343045093146429e-08
+      },
+      {
+        "label": "Hernia",
+        "score": 1.0182593541685492e-05
+      },
+      {
+        "label": "Lung Lesion",
+        "score": 3.561403900675941e-07
+      },
+      {
+        "label": "Fracture",
+        "score": 0.007928739301860332
+      },
+      {
+        "label": "Lung Opacity",
+        "score": 0.1055702194571495
+      },
+      {
+        "label": "Enlarged Cardiomediastinum",
+        "score": 1.363371552542958e-06
+      }
+    ],
+    "hospital_settings_or_database_imported": false,
+    "uid": 10001,
+    "gid": 10001,
+    "python_version": "3.12.13",
+    "isolated_container": true
+  },
+  "container_package_and_source_audit": {
+    "absent_hospital_paths": [
+      "app/config.py",
+      "app/database.py",
+      "app/models",
+      "app/router",
+      ".env"
+    ],
+    "database_packages_absent": {
+      "pymysql": true,
+      "redis": true,
+      "sqlalchemy": true
+    },
+    "gid": 10001,
+    "image_app_files": [
+      "app/__init__.py",
+      "app/ai/__init__.py",
+      "app/ai/imaging_config.py",
+      "app/ai/imaging_contract.py",
+      "app/ai/imaging_model.py",
+      "app/ai/imaging_network.py",
+      "app/ai/imaging_preprocessing.py",
+      "app/ai/imaging_server.py",
+      "app/ai/imaging_worker.py",
+      "requirements-imaging-service.txt",
+      "requirements-imaging.txt",
+      "scripts/smoke_local_imaging.py",
+      "third_party/torchxrayvision/LICENSE",
+      "third_party/torchxrayvision/NOTICE",
+      "third_party/torchxrayvision/PREPROCESSING_NOTICE"
+    ],
+    "python_version": "3.12.13",
+    "source_sha256": {
+      "app/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "app/ai/__init__.py": "09957ea122e972d43439df3f9b0f75500e61768fabb362dddefb34e78a12171e",
+      "app/ai/imaging_config.py": "20370a549605e57e4c651dd5e33e948b0070089848925a21da84300d4ad8adf6",
+      "app/ai/imaging_contract.py": "b35fa9700faee2354a8fb4a2f8d2171403d796fe633dd83271ce5ade0234b89a",
+      "app/ai/imaging_model.py": "7220cc41e1238acd9b5a5595439baaf95de9500e7f0353dd136ccae86107faff",
+      "app/ai/imaging_network.py": "c438953108a0fb38d3ac5f1518e3b8632d0e3e3e0d8ff41c27ab83cc6378f1c8",
+      "app/ai/imaging_preprocessing.py": "f95f4bc0b129d9e182e568c6f4021c99bf6ecdcb9816301131e877eb9fc5f776",
+      "app/ai/imaging_server.py": "451b7141c24019469467b35924f06fff917b2fbe1392cb7104f366e476afa8d4",
+      "app/ai/imaging_worker.py": "c346518875885a62a42599bc74861408b7429c9e6065e946975219e516484205",
+      "requirements-imaging-service.txt": "8924955b8aa075f14718155e0637a72baf7f30edd7efbafe1453309ee763062b",
+      "requirements-imaging.txt": "abd93b789ea452173ddb66c41e369a88c1c40bf96b5bdbcb402fd8e64fa0dc3c",
+      "scripts/smoke_local_imaging.py": "def020c2f43372233945612a5d5980866f125fd6bf0bbf48638ed77b15eaf379",
+      "third_party/torchxrayvision/LICENSE": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+      "third_party/torchxrayvision/NOTICE": "d23125888206442a1f8e6f3033f7ab5c00a3ac4241e5c27e56db9d3f1ef2b394",
+      "third_party/torchxrayvision/PREPROCESSING_NOTICE": "3d8c34946e514fbec4b062d4671eb9ebe73828336d92dbd7e312c02f39eba1cb"
+    },
+    "uid": 10001,
+    "unmounted_model_directory_absent": true,
+    "image_id": "sha256:78aad42dcced7dac57d4b03ccc597d98e19b0ba9324d58e355f4ee98b324c4f1",
+    "image_size_bytes": 404998266,
+    "image_name": "hoim-local-imaging:development",
+    "workspace_source_sha256": {
+      "app/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "app/ai/__init__.py": "09957ea122e972d43439df3f9b0f75500e61768fabb362dddefb34e78a12171e",
+      "app/ai/imaging_model.py": "7220cc41e1238acd9b5a5595439baaf95de9500e7f0353dd136ccae86107faff",
+      "app/ai/imaging_network.py": "c438953108a0fb38d3ac5f1518e3b8632d0e3e3e0d8ff41c27ab83cc6378f1c8",
+      "app/ai/imaging_contract.py": "b35fa9700faee2354a8fb4a2f8d2171403d796fe633dd83271ce5ade0234b89a",
+      "app/ai/imaging_preprocessing.py": "f95f4bc0b129d9e182e568c6f4021c99bf6ecdcb9816301131e877eb9fc5f776",
+      "app/ai/imaging_config.py": "20370a549605e57e4c651dd5e33e948b0070089848925a21da84300d4ad8adf6",
+      "app/ai/imaging_server.py": "451b7141c24019469467b35924f06fff917b2fbe1392cb7104f366e476afa8d4",
+      "app/ai/imaging_worker.py": "c346518875885a62a42599bc74861408b7429c9e6065e946975219e516484205",
+      "scripts/smoke_local_imaging.py": "def020c2f43372233945612a5d5980866f125fd6bf0bbf48638ed77b15eaf379",
+      "requirements-imaging.txt": "abd93b789ea452173ddb66c41e369a88c1c40bf96b5bdbcb402fd8e64fa0dc3c",
+      "requirements-imaging-service.txt": "8924955b8aa075f14718155e0637a72baf7f30edd7efbafe1453309ee763062b",
+      "third_party/torchxrayvision/LICENSE": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+      "third_party/torchxrayvision/NOTICE": "d23125888206442a1f8e6f3033f7ab5c00a3ac4241e5c27e56db9d3f1ef2b394",
+      "third_party/torchxrayvision/PREPROCESSING_NOTICE": "3d8c34946e514fbec4b062d4671eb9ebe73828336d92dbd7e312c02f39eba1cb"
+    },
+    "all_workspace_sources_match": true,
+    "runtime_module_count": 7,
+    "mounted_model_files_sha256": {
+      "NOTICE": "d23125888206442a1f8e6f3033f7ab5c00a3ac4241e5c27e56db9d3f1ef2b394",
+      "upstream-LICENSE.txt": "75bdbb99fbfb7202e33f19ff8f1f2f713d309143612459274005a43aaa7f6061",
+      "hoim-imaging-model.json": "696f14a0407b21698e7efbe4bbaf2c2aa0d77a46c0826adab332e6fdcc210968",
+      "README.md": "90b88ae29df845efa2ae97cb834266b3ef7d2fa720f42860ee318d6896323c0a",
+      "LICENSE": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+      "config.json": "4b78be461c44f98af46695ce5cdbe57313e97f2e6255ac7b888e0670f368a1dd",
+      "model.safetensors": "6b811edb354d83991e36a4836b914bf41faf8fb3203573c0a61820b97937c529"
+    },
+    "container_security": {
+      "network": "none",
+      "read_only_root": true,
+      "tmpfs_tmp_bytes": 536870912,
+      "memory_bytes": 2147483648,
+      "cpus": 4,
+      "model_mount_read_only": true
+    },
+    "duration_seconds": 19.471,
+    "temporary_containers_removed": true
+  },
+  "host_container_maximum_score_difference": 0.0,
+  "hospital_native_source_to_real_cpu_child": {
+    "test": "tests/test_ai_local_imaging_real.py",
+    "passed": 1,
+    "seconds": 8.01,
+    "service_transport": "actual ASGI service instance and actual subprocess; no listening TCP port was exercised",
+    "evidence": {
+      "actual_crop": {
+        "height": 225,
+        "width": 225,
+        "x": 1,
+        "y": 0
+      },
+      "actual_preprocessing": {
+        "cropped_pixel_count": 50625,
+        "discarded_pixel_count": 225,
+        "input_pixel_count": 50850,
+        "normalization_maxval": 4095,
+        "padding_pixels_in_crop": 0,
+        "padding_pixels_in_input": 0,
+        "prepared_max": 1013.6107788085938,
+        "prepared_min": -1009.6868896484375,
+        "prepared_shape": [
+          1,
+          1,
+          224,
+          224
+        ],
+        "valid_pixels_in_crop": 50625
+      },
+      "business_tables_unchanged": [
+        "hoimsystem_medical_record",
+        "hoimsystem_structured_medical_record",
+        "hoimsystem_clinical_diagnosis_review",
+        "hoimsystem_prescription",
+        "hoimsystem_inpatient_order",
+        "hoimsystem_lab_result",
+        "hoimsystem_imaging_order",
+        "hoimsystem_imaging_report",
+        "hoimsystem_exam_result"
+      ],
+      "clinical_validation": "not_provided",
+      "content_hash": "bd51b8dfb4f6cbc747481d3017887eaacb5f9d5c756e8733188af619b36c659d",
+      "engine_versions": {
+        "numpy": "2.4.4",
+        "safetensors": "0.8.0",
+        "torch": "2.14.1+cpu"
+      },
+      "execution": "main_api_native_source_to_real_offline_cpu_child_super_admin_preview",
+      "feature_enabled": false,
+      "feature_validation_status": "unreviewed",
+      "input_columns": 226,
+      "input_rows": 225,
+      "instructions_digest": "f62971ab0dad348a55dbaee0b88e3368eb7c4a7a1128cfcf8d2cb3abc724363e",
+      "model_digest": "3e520c2e0b34ba69282c10a26330b6aa4eab990e005d0484cb239e710d6ff8d5",
+      "model_version": "xrv:e1cdb4b11def4a85cf6fc558d67eec21cea5a9db8c28bc1456562e938ad45138",
+      "original_hash": "aa2be7fed4d7709375797beff50929e66d1a3be1ec3a3c6f35ad432986b81004",
+      "pixel_hash": "39be851ad4d61f4c0d324cd5d89fae05abea7a614db1cd811220acd01fad4e03",
+      "preprocessing_digest": "b5d4764af4c246b027ac4c305e8a88ec45be07a8c66f162fba55b1e60a8c3de9",
+      "raw_scores": [
+        {
+          "label": "Atelectasis",
+          "score": 0.01728336326777935
+        },
+        {
+          "label": "Consolidation",
+          "score": 0.013052946887910366
+        },
+        {
+          "label": "Infiltration",
+          "score": 1.83683805516921e-05
+        },
+        {
+          "label": "Pneumothorax",
+          "score": 0.00047149829333648086
+        },
+        {
+          "label": "Edema",
+          "score": 0.006356049329042435
+        },
+        {
+          "label": "Emphysema",
+          "score": 0.003108686301857233
+        },
+        {
+          "label": "Fibrosis",
+          "score": 4.1246667192851305e-10
+        },
+        {
+          "label": "Effusion",
+          "score": 0.060259539633989334
+        },
+        {
+          "label": "Pneumonia",
+          "score": 4.612259999703383e-06
+        },
+        {
+          "label": "Pleural_Thickening",
+          "score": 1.0469358713294241e-08
+        },
+        {
+          "label": "Cardiomegaly",
+          "score": 0.004570008255541325
+        },
+        {
+          "label": "Nodule",
+          "score": 2.755376226559747e-05
+        },
+        {
+          "label": "Mass",
+          "score": 9.343045093146429e-08
+        },
+        {
+          "label": "Hernia",
+          "score": 1.0182593541685492e-05
+        },
+        {
+          "label": "Lung Lesion",
+          "score": 3.561403900675941e-07
+        },
+        {
+          "label": "Fracture",
+          "score": 0.007928739301860332
+        },
+        {
+          "label": "Lung Opacity",
+          "score": 0.1055702194571495
+        },
+        {
+          "label": "Enlarged Cardiomediastinum",
+          "score": 1.363371552542958e-06
+        }
+      ],
+      "runtime_digest": "e1cdb4b11def4a85cf6fc558d67eec21cea5a9db8c28bc1456562e938ad45138",
+      "synthetic_only": true
+    }
+  },
+  "hospital_queue_preflight": {
+    "tests": 14,
+    "combined_preflight_and_existing_pipeline_tests": {
+      "passed": 59,
+      "seconds": 12.52
+    },
+    "real_synthetic_dicom_uploads": true,
+    "accepted": [
+      "unsigned DX CHEST PA 8-bit",
+      "unsigned DX CHEST AP 12-bit",
+      "unsigned DX CHEST PA 16-bit",
+      "unsigned CR CHEST PA identity rescale"
+    ],
+    "rejected_without_creating_run": [
+      "signed DX CHEST PA",
+      "7-bit CR",
+      "DX LL",
+      "DX HEAD",
+      "actual CT SOP and modality",
+      "CR nonidentity slope",
+      "CR nonidentity intercept"
+    ],
+    "generic_external_v4_scope_preserved": true,
+    "super_preview_preserves_disabled_unreviewed_status": true
+  },
+  "super_admin_management": {
+    "capability_endpoint": "POST /ai/admin/providers/{id}/image-capabilities",
+    "backend_probe_tests": 40,
+    "new_browser_probe_tests": 7,
+    "new_browser_provenance_tests": 1,
+    "patient_data_or_inference_sent_by_probe": false,
+    "probe_saves_or_enables_configuration": false,
+    "role_configuration_session_rechecked": true,
+    "late_results_isolated": true,
+    "cryptographic_execution_attestation": false
+  },
+  "verification": {
+    "full_backend": {
+      "passed": 2163,
+      "skipped": 28,
+      "seconds": 140.29,
+      "command": "/home/xusheng/miniconda3/bin/python -m pytest -q",
+      "log_sha256": "dc794e9cce6e6273d71e9d25adbd0c3059b42d94fd64fde36633c9b8bae12b9e"
+    },
+    "browser": {
+      "passed": 70,
+      "reported_duration": "1.7m",
+      "command": "E2E_BASE_URL=http://127.0.0.1:4180 npx playwright test e2e/ai-*.spec.js e2e/diagnosis-review.spec.js --workers=2 --reporter=list",
+      "api_requests_intercepted": true,
+      "log_sha256": "eebf68b1d4a075b3ed607a88dc8b9aa1581bf76c71e89747b7889acb80cdf872"
+    },
+    "production_build": {
+      "passed": true,
+      "seconds": 22.17
+    },
+    "bundle": {
+      "largestJavaScript": {
+        "file": "element-plus.1235714c.js",
+        "bytes": 647479
+      },
+      "totalJavaScript": 5901022,
+      "totalAssets": 6419268,
+      "limits": {
+        "largestJavaScript": 700000,
+        "totalJavaScript": 6000000,
+        "totalAssets": 7000000
+      }
+    },
+    "vue_runtime_compiler": "excluded; repository SFCs precompiled",
+    "bundle_limits_changed": false,
+    "rbac_matrix_endpoints_checked": 633,
+    "prompt_exports_checked": 80,
+    "ruff_check": "passed for all 19 changed Python files",
+    "ruff_format_check": "passed for all 19 changed Python files",
+    "router_formatting_ast_unchanged": true
+  },
+  "implementation_sha256": {
+    "fastapi_be/.env.example": "97796a57793368fbd9d7c0e80651bb8f8b32f3aa191142fa6f568b62f882be04",
+    "fastapi_be/Dockerfile.imaging": "cae459596aec08d6bf257d7c4c698a55cf3424bbf26a4b8ad0ccb3357ecaf053",
+    "fastapi_be/app/ai/catalog.py": "3fe7841f45dcf0ab58be29ea2c446a5b2051a6e40013e961b8d1420669c88d77",
+    "fastapi_be/app/ai/gateway.py": "e13b8b6dd234376de7f36f2f49ec12fcd1be5b6cb1aa4055c4bbaf306cafc7ac",
+    "fastapi_be/app/ai/imaging_config.py": "20370a549605e57e4c651dd5e33e948b0070089848925a21da84300d4ad8adf6",
+    "fastapi_be/app/ai/imaging_contract.py": "b35fa9700faee2354a8fb4a2f8d2171403d796fe633dd83271ce5ade0234b89a",
+    "fastapi_be/app/ai/imaging_network.py": "c438953108a0fb38d3ac5f1518e3b8632d0e3e3e0d8ff41c27ab83cc6378f1c8",
+    "fastapi_be/app/ai/imaging_preprocessing.py": "f95f4bc0b129d9e182e568c6f4021c99bf6ecdcb9816301131e877eb9fc5f776",
+    "fastapi_be/app/ai/imaging_probe.py": "54d537cb83808a69085b0831da847e06bbe9520bf13fd5008b06559baf2905fc",
+    "fastapi_be/app/ai/imaging_server.py": "451b7141c24019469467b35924f06fff917b2fbe1392cb7104f366e476afa8d4",
+    "fastapi_be/app/ai/imaging_worker.py": "c346518875885a62a42599bc74861408b7429c9e6065e946975219e516484205",
+    "fastapi_be/app/ai/runtime.py": "5a8627b96e316d0ac32cc90b91418db65ac045f93f0e0153b77b027cb390e4dc",
+    "fastapi_be/app/ai/schemas.py": "82b7f1ac6d2197efba7ccddd54186e1f59b1d5e55c5fe4748f71c16d1d01d3b8",
+    "fastapi_be/app/routers/ai_admin.py": "6805f3b69d8aae9b2f6e35082119a457e148c1e27673aa33adfd95f4f6b26fb6",
+    "fastapi_be/rbac_matrix.json": "7a64472d512ad3e909c00d4e9695281afd18113e3b05ee28609fe345509340b4",
+    "fastapi_be/requirements-imaging-service.txt": "8924955b8aa075f14718155e0637a72baf7f30edd7efbafe1453309ee763062b",
+    "fastapi_be/scripts/smoke_local_imaging.py": "def020c2f43372233945612a5d5980866f125fd6bf0bbf48638ed77b15eaf379",
+    "fastapi_be/tests/test_ai_imaging_preflight.py": "0afaf697e70addbd5b858bb1ab644980955467ce30708be631f3d65661d5b409",
+    "fastapi_be/tests/test_ai_imaging_preprocessing.py": "688a051d9683b11b01c1c7e0870fbf1f33b5295daba9637e180debe5bcd11db8",
+    "fastapi_be/tests/test_ai_imaging_probe.py": "5df7c000f2349327e2068460fbe459018041195409717ba6dde981e68cee5a7e",
+    "fastapi_be/tests/test_ai_imaging_processing.py": "78e4181dfe530f376da073f86ce16093293ec82f86bd9f94e9fdc702a3903dd7",
+    "fastapi_be/tests/test_ai_imaging_server.py": "b2c8a2381d682f22f7b9233b85bb3295d3bf68390fab9046b87110ce6e79151a",
+    "fastapi_be/tests/test_ai_local_imaging_real.py": "3676cbc8296d4648f5ab9b1641e1c72122d5069d83b79e6d5b5fc1755edc88b5",
+    "fastapi_be/third_party/torchxrayvision/PREPROCESSING_NOTICE": "3d8c34946e514fbec4b062d4671eb9ebe73828336d92dbd7e312c02f39eba1cb",
+    "vue3-new-ui/e2e/ai-image-entry.spec.js": "459da99e643513f357fa8836b4fae8f8a8e50394c5e8d01b6d4cfc8417dee0a6",
+    "vue3-new-ui/e2e/ai-image-model-management.spec.js": "e819d06420c48afcea28e0f92d44143d8ec9c2507da0d09ea273b1aed53e3bc2",
+    "vue3-new-ui/rspack.config.js": "a88fbe66a78ab4875c58d1a2791b0a0949d3b1368d8ef6d97f952862ceee275a",
+    "vue3-new-ui/src/api/ai.js": "420b85f66eedecfde65344c7dcab7bd8ba6f423d803185b3ca59d7dc1fd257c3",
+    "vue3-new-ui/src/components/AIImageFindings/index.vue": "361b9fc728ee8827ebe3bd4f30722fc1b8cef9fca8d95fdb1977b7b16cbffaf4",
+    "vue3-new-ui/src/views/system/aiManagement.vue": "b6e062ef217a18ede8d83883aa2cdcb3313b4b61c0edafeb492838b4d3fd8eaa"
+  },
+  "remaining": [
+    "Representative authorized clinical images, independent reference labels, population applicability and local clinical validation are not provided.",
+    "The stored-range research recipe does not establish equivalence to the mixed published training datasets or diagnostic presentation.",
+    "Multiframe, volumes, WSI/pathology, other modalities/views and unimplemented DICOM transformations require their own sources and validated adapters.",
+    "No production service was deployed, no real business database migration was applied, and no feature was enabled for clinical use.",
+    "The long-term 80-feature implementation goal remains active; catalog, prompts and generic adapters alone do not establish completion of every clinical feature."
+  ]
+}

@@ -29,6 +29,7 @@ from app.ai.nursing_sources import authorize_nursing_snapshot, has_frozen_nursin
 from app.ai.observation_windows import RISK_FEATURES, authorize_window_snapshot
 from app.ai.operational_sources import authorize_operational_snapshot, operational_context
 from app.ai.pathway_sources import PATHWAY_SOURCE_FEATURES, selected_pathway_ids
+from app.ai.qsofa_context import authorize_qsofa_snapshot
 from app.ai.review_curation import authorize_feedback_snapshot
 from app.ai.schemas import RunRequest
 from app.ai.tools import business_tools
@@ -124,6 +125,12 @@ def create_run(db: Session, user: User, req: RunRequest) -> AIRun:
             raise HTTPException(422, "当前AKI规则服务需要同时选择原住院窗口和明确核实的肾功能评估来源")
         if bundle.data.get("aki_source") and not aki_mode:
             raise HTTPException(422, "当前服务不是AKI规则适配器，请重新核对模型配置和输入方式")
+    if spec.number == 42:
+        qsofa_mode = provider.model.startswith("qsofa:")
+        if qsofa_mode and not bundle.data.get("qsofa_source"):
+            raise HTTPException(422, "当前qSOFA服务需要同时选择原窗口和明确床旁量/当前医生核实来源")
+        if bundle.data.get("qsofa_source") and not qsofa_mode:
+            raise HTTPException(422, "当前服务不是qSOFA规则适配器，请核对模型和输入方式")
     if spec.key == "treatment_pathway" and not bundle.data.get("current_confirmed_diagnoses"):
         raise HTTPException(409, "治疗路径推荐需要指定本次就诊，并提供该次就诊已确认的诊断")
     if spec.number in {66, 67} and not bundle.data.get("supply_inventory"):
@@ -220,6 +227,8 @@ def authorize_run(db: Session, user: User, run: AIRun) -> None:
         if spec.number in RISK_FEATURES:
             if spec.number == 43 and frozen_context.get("aki_source"):
                 authorize_aki_snapshot(db, user, frozen_context, run.patient_id, run.encounter_ref)
+            elif spec.number == 42 and frozen_context.get("qsofa_source"):
+                authorize_qsofa_snapshot(db, user, frozen_context, run.patient_id, run.encounter_ref)
             else:
                 authorize_window_snapshot(db, user, frozen_context, run.patient_id, run.encounter_ref)
                 if spec.number == 41:
@@ -293,6 +302,10 @@ def describe_run(run: AIRun, include_result: bool = True) -> dict:
             context = json.loads(run.input_json).get("payload", {}).get("context", {})
             if context.get("aki_source"):
                 data["aki_findings"] = {key: context[key] for key in ("aki_source", "aki_assessment")}
+        if spec.number == 42:
+            context = json.loads(run.input_json).get("payload", {}).get("context", {})
+            if context.get("qsofa_source"):
+                data["qsofa_findings"] = {key: context[key] for key in ("qsofa_source", "qsofa_assessment")}
         data["evidence"] = json.loads(run.evidence_json)
         tools = json.loads(run.input_json).get("payload", {}).get("tools", {})
         data["tool_findings"] = {

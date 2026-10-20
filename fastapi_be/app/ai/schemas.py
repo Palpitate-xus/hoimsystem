@@ -9,6 +9,7 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator, model_valida
 from app.ai.aki_contract import AkiAnalysis
 from app.ai.forecast_contract import ForecastAnalysis
 from app.ai.news2_contract import News2Analysis
+from app.ai.qsofa_contract import QsofaAnalysis
 from app.ai.references import SOURCE_REFERENCE_KEYS
 
 
@@ -517,6 +518,10 @@ class News2GenerationResult(GenerationResult):
 
 class AkiGenerationResult(GenerationResult):
     aki_analysis: AkiAnalysis
+
+
+class QsofaGenerationResult(GenerationResult):
+    qsofa_analysis: QsofaAnalysis
 
 
 class FeedbackWrite(StrictRequest):

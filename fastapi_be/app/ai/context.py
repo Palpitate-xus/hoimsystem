@@ -321,6 +321,12 @@ def _selected_records(db: Session, user: User, patient_id: int, references: dict
 
 def patient_snapshot(db: Session, user: User, spec: FeatureSpec, patient_id: int, encounter_ref: str | None = None, source_refs: dict | None = None) -> ContextBundle:
     """Build a bounded snapshot without mixing historical diagnoses into confirmed current ones."""
+    if (source_refs or {}).get("qsofa_assessment_id") not in (None, ""):
+        if spec.number != 42:
+            raise HTTPException(422, "qSOFA评估仅供明确原床旁三项资料核对使用")
+        from app.ai.qsofa_context import qsofa_context
+
+        return qsofa_context(db, user, patient_id, encounter_ref, source_refs)
     if (source_refs or {}).get("aki_assessment_id") not in (None, ""):
         if spec.number != 43:
             raise HTTPException(422, "AKI评估仅供所选肾功能原资料的独立判据核对使用")

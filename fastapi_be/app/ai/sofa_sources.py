@@ -307,6 +307,32 @@ def _validate_governance(row, created):
         raise ValueError("原治理状态不符")
 
 
+def _laboratory_analyte(row):
+    """Use authenticated frozen semantics before loading parents of relevant axes only."""
+    from app import inpatient_laboratory as labs
+    from app.ai.lab_mappings import ANALYTES as MAPPED_ANALYTES
+
+    try:
+        if not isinstance(row.snapshot_json, str) or len(row.snapshot_json.encode("utf-8")) > labs.MAX_SNAPSHOT_BYTES:
+            raise ValueError("原正文容量不符")
+        snapshot = json.loads(row.snapshot_json)
+        if row.schema_version != labs.SCHEMA_VERSION or row.snapshot_json != canonical_json(snapshot) or row.content_hash != hash_content(snapshot):
+            raise ValueError("原全文或摘要不符")
+        if any(snapshot.get(key) != value for key, value in labs.frozen_metadata(row).items()):
+            raise ValueError("冻结原元数据不符")
+        mapping = snapshot["mapping"]
+        if mapping["mapping_id"] != row.mapping_id or mapping["content_hash"] != row.mapping_content_hash or mapping["analyte_key"] not in MAPPED_ANALYTES:
+            raise ValueError("原冻结映射身份不符")
+        if not row.collected_at_utc <= row.registered_at == row.available_at <= utcnow() or explicit_utc(mapping["published_at"]) > row.registered_at:
+            raise ValueError("原可靠时刻不符")
+        _validate_governance(row, row.registered_at)
+        if row.active_observation_id != (row.observation_id if row.status == "active" else None):
+            raise ValueError("原活动索引不符")
+        return mapping["analyte_key"]
+    except (ValueError, TypeError, KeyError, AttributeError, OverflowError, RecursionError) as exc:
+        raise HTTPException(409, "原检验本体、冻结映射身份或可靠UTC时刻不符，不能按未验正文过滤") from exc
+
+
 def _conflict_groups(members):
     groups = defaultdict(list)
     for member in members:
@@ -397,8 +423,8 @@ def period_manifest(db, user, pid, adm, start, end, asof):
         .order_by(InpatientLabSource.lab_source_id)
         .all()
     ):
-        source = inpatient_laboratory.source_current(db, row, allow_revoked=True)
-        if source["snapshot"]["mapping"]["analyte_key"] in ANALYTES:
+        if _laboratory_analyte(row) in ANALYTES:
+            source = inpatient_laboratory.source_current(db, row, allow_revoked=True)
             append("laboratory", row.lab_source_id, source)
     for kind, model, clock in (
         ("gcs", InpatientGcsObservation, InpatientGcsObservation.observed_at),
@@ -479,8 +505,12 @@ def metadata(row):
 
 
 def _bounded(value, cap, description):
-    encoded = canonical_json(value)
-    if len(encoded.encode("utf-8")) > cap:
+    try:
+        encoded = canonical_json(value)
+        count = len(encoded.encode("utf-8"))
+    except (ValueError, TypeError, RecursionError) as exc:
+        raise HTTPException(422, f"{description}须为完整有限且可编码的UTF-8 JSON，未保存") from exc
+    if count > cap:
         raise HTTPException(422, f"{description}超过{cap}个UTF-8字节，不写入、不截断")
     return encoded
 
@@ -505,6 +535,8 @@ def _validate_reviews(req, manifest):
             raise HTTPException(409, "逐源核实类型或完整原文摘要不一致")
         if not member["eligible"] and review.status != "excluded":
             raise HTTPException(409, "撤销或不合当前治理的完整原件须明确排除，不得人工覆写原治理")
+        if member["kind"] == "arterial_pair" and review.qualifying_respiratory_support == "yes" and member["full_source"]["reference_snapshots"]["support"]["payload"]["delivery_mode"] == "none":
+            raise HTTPException(409, "原明确无呼吸支持不能由当前资格声明覆写为有支持，须保留并核对实际原件")
     conflicts = {review.group_id: review for review in req.conflict_reviews}
     if set(conflicts) != {group["group_id"] for group in manifest["conflict_groups"]}:
         raise HTTPException(409, "须逐一核实全部实际冲突组，不得漏选或添加")
@@ -535,8 +567,11 @@ def _review(review):
 
 
 def _lab_projection(source, review):
+    from app.ai.sofa_contract import LIS_NATIVE_UNITS
+
     original, mapping = source["snapshot"]["original"]["observation"], source["snapshot"]["mapping"]
     value = original["value_num"]
+    raw_unit = original["unit"]
     return {
         **_original_binding(source),
         **{key: source[key] for key in ("lab_source_id", "collected_at_utc", "registered_at", "available_at", "mapping_id")},
@@ -544,7 +579,13 @@ def _lab_projection(source, review):
         "mapping_governance_hash": source["mapping_current"]["governance_hash"],
         "identity_hash": hash_content({"observation_id": source["observation_id"]}),
         "analyte": mapping["analyte_key"],
-        "quantity": {"value": value, "unit": original["unit"] or "unknown", "absent_reason": "unknown" if value is None else None, "value_kind": "qualitative" if value is None else "numeric"},
+        "quantity": {
+            "value": value,
+            "unit": raw_unit if raw_unit in LIS_NATIVE_UNITS else "unknown" if raw_unit is None else "unsupported",
+            "original_unit_hash": hash_content(raw_unit),
+            "absent_reason": "unknown" if value is None else None,
+            "value_kind": "qualitative" if value is None else "numeric",
+        },
         "review": _review(review),
     }
 

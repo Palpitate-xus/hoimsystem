@@ -13,6 +13,7 @@ from app import inpatient_laboratory as labs
 from app import inpatient_vasoactive as vaso
 from app.ai import sofa_sources as sofa
 from app.ai.sofa_model import sofa_values
+from app.inpatient_laboratory import hash_content
 from app.inpatient_observations import canonical_json, utc_text
 from app.models import LabObservation, Pharmaceutical
 from tests.test_ai_observation_windows import urine
@@ -24,7 +25,7 @@ from tests.test_ai_sofa_sources import source_case as source_case
 from tests.test_ai_vasoactive_mappings import published_mapping as drug_mapping
 from tests.test_inpatient_laboratory import body as lab_body
 from tests.test_inpatient_laboratory import published_mapping
-from tests.test_inpatient_respiratory_contract import NOTE
+from tests.test_inpatient_respiratory_contract import NOTE, support_payload
 from tests.test_inpatient_respiratory_sources import body as pair_body
 from tests.test_inpatient_respiratory_sources import create
 from tests.test_inpatient_vasoactive import dose
@@ -258,3 +259,73 @@ def test_actual_prefix_and_direct_normalized_dose_are_retained_without_private_s
     cardiovascular = next(domain for domain in result["domains"] if domain["axis"] == "cardiovascular")
     assert cardiovascular["observed_max_score"] == 3 and result["complete_total_score"] == 4
     assert actual["content_hash"] == interval.content_hash
+
+
+@pytest.mark.parametrize("analyte", ["lactate", "c_reactive_protein"])
+def test_authenticated_non_sofa_lab_is_filtered_before_current_unrelated_parent_changes(db_session, assessment_case, analyte):
+    case = assessment_case
+    source, original = lab_original(db_session, case, analyte, "1.00000000", "mg/dL")
+    before = manifest(db_session, case)
+    assert not any(member["identifier"] == source.lab_source_id for member in before["members"])
+    original.value_num = Decimal("999.00000000")
+    db_session.commit()
+    assert manifest(db_session, case) == before
+    source.content_hash = "0" * 64
+    db_session.commit()
+    with pytest.raises(HTTPException) as error:
+        manifest(db_session, case)
+    assert error.value.status_code == 409
+
+
+def test_authenticated_relevant_lab_parent_change_still_blocks_the_whole_day(db_session, assessment_case):
+    case = assessment_case
+    source, original = lab_original(db_session, case, "creatinine", "1.00000000", "mg/dL")
+    assert any(member["identifier"] == source.lab_source_id for member in manifest(db_session, case)["members"])
+    original.value_num = Decimal("2.00000000")
+    db_session.commit()
+    with pytest.raises(HTTPException) as error:
+        manifest(db_session, case)
+    assert error.value.status_code == 409
+
+
+@pytest.mark.parametrize("unit", ["private-patient-name", "private-free-question", "µmol/L", None])
+def test_arbitrary_lis_unit_text_stays_private_with_exact_hash_and_fixed_unsupported_marker(db_session, assessment_case, unit):
+    case = assessment_case
+    value, text = (None, "private qualitative finding") if not unit else ("1.00000000", None)
+    source, _ = lab_original(db_session, case, "total_bilirubin", value, unit, text=text)
+    original = manifest(db_session, case)
+    values = clinical_request(case, original)
+    row = register(db_session, case, values=values)
+    view = sofa.assessment_detail(db_session, row)
+    public = next(item for item in view["specialist_source"]["lab_observations"] if item["lab_source_id"] == source.lab_source_id)
+    assert public["quantity"]["unit"] == ("unknown" if unit is None else "unsupported")
+    assert public["quantity"]["original_unit_hash"] == hash_content(unit)
+    frozen = next(member["full_source"] for member in view["snapshot"]["manifest"]["members"] if member["identifier"] == source.lab_source_id)
+    assert frozen["snapshot"]["original"]["observation"]["unit"] == unit
+    assert unit in (None, "") or unit not in canonical_json(view["specialist_source"])
+
+
+@pytest.mark.parametrize("mode,accepted", [("none", False), ("unknown", True)])
+def test_doctor_support_qualification_cannot_overwrite_original_explicit_absence(db_session, assessment_case, mode, accepted):
+    case = assessment_case
+    support = create(
+        db_session,
+        case,
+        "respiratory_support",
+        support_payload(start_at=utc_text(case["start"]), verified_until_at=utc_text(case["end"]), delivery_mode=mode, continuity_confirmed=True, continuity_basis_note=NOTE),
+    )
+    create(db_session, case, "arterial_pair", pair_body(case, support={"support_source_id": support.support_source_id, "expected_content_hash": support.content_hash}))
+    original = manifest(db_session, case)
+    values = clinical_request(case, original)
+    values["conflict_reviews"] = [
+        {"group_id": group["group_id"], "expected_group_digest": group["group_digest"], "status": "unresolved", "accepted_source_ids": [], "excluded_source_ids": [], "basis_note": NOTE}
+        for group in original["conflict_groups"]
+    ]
+    if accepted:
+        row = register(db_session, case, values=values)
+        source = sofa.assessment_detail(db_session, row)["specialist_source"]
+        assert any(item["support"]["delivery_mode"] == "unknown" and item["qualifying_respiratory_support"] == "yes" for item in source["respiratory_observations"])
+    else:
+        with pytest.raises(HTTPException) as error:
+            register(db_session, case, values=values)
+        assert error.value.status_code == 409 and "原明确无呼吸支持" in error.value.detail

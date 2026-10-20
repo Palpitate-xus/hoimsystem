@@ -411,3 +411,29 @@ def test_private_and_public_utf8_caps_reject_before_any_assessment_write(db_sess
                 sofa.create_assessment(db_session, case["doctor"], case["request"])
             assert error.value.status_code == 422
         assert db_session.query(AISofaAssessment).count() == before
+
+
+def test_member_cap_counts_only_cutoff_visible_roots_before_any_summary_or_truncation(db_session, sofa_case, monkeypatch):
+    case = sofa_case
+    original = manifest(db_session, case)
+    monkeypatch.setattr(sofa, "MAX_MEMBERS", len(original["members"]))
+    monkeypatch.setattr(common, "utcnow", lambda: case["cutoff"] + datetime.timedelta(microseconds=1))
+    create(db_session, case, "map", map_payload(observed_at=utc_text(case["start"])))
+    assert manifest(db_session, case) == original
+    monkeypatch.setattr(common, "utcnow", lambda: case["cutoff"])
+    create(db_session, case, "map", map_payload(observed_at=utc_text(case["start"])))
+    with pytest.raises(HTTPException) as error:
+        manifest(db_session, case)
+    assert error.value.status_code == 422
+
+
+def test_unencodable_clinical_note_is_rejected_atomically_as_invalid_utf8_json(db_session, assessment_case):
+    from app.ai.sofa_models import AISofaAssessment
+
+    values = {**assessment_case["request"], "note": "\ud800"}
+    before = db_session.query(AISofaAssessment).count()
+    with pytest.raises(ValidationError):
+        sofa.create_assessment(db_session, assessment_case["doctor"], values)
+    with pytest.raises(HTTPException) as error:
+        sofa._bounded({"note": values["note"]}, sofa.MAX_PRIVATE_BYTES, "完整原文")
+    assert error.value.status_code == 422 and db_session.query(AISofaAssessment).count() == before

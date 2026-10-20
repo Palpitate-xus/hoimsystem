@@ -141,3 +141,44 @@ def test_frozen_foreign_profile_cannot_become_news2_even_with_recomputed_outer_h
     with pytest.raises(HTTPException) as caught:
         news2_sources.assessment_current(db_session, row, allow_revoked=True, user=case["doctor"])
     assert caught.value.status_code == 409
+
+
+@pytest.mark.asyncio
+async def test_two_actual_fixed_rules_publish_independently_and_news2_rejects_aki_profile(client, db_session, case, auth_headers):
+    from app.ai.aki_contract import INPUT_POLICY as AKI_INPUT_POLICY
+    from app.ai.aki_contract import RECIPE as AKI_RECIPE
+    from app.ai.aki_contract import recipe_digest as aki_recipe_digest
+    from app.routers import ai_risk_rules
+
+    options = risk_rule_profiles.fixed_options()
+    assert options[0]["rule_id"] == "news2_2017"
+    assert options[1] == {"rule_id": "kdigo_aki_2012", "recipe_digest": aki_recipe_digest(), "recipe": AKI_RECIPE, "input_policy": AKI_INPUT_POLICY}
+    supervisor = case["seed"]["super_admin_user"]
+    row = risk_rule_profiles.create_profile(db_session, supervisor, profile_body(rule_id="kdigo_aki_2012", expected_recipe_digest=aki_recipe_digest()))
+    db_session.commit()
+    reviewed = ai_risk_rules.publish_profile(
+        row.rule_profile_id,
+        ai_risk_rules.ProfilePublish(
+            expected_revision=1,
+            expected_recipe_digest=aki_recipe_digest(),
+            implementation_terms_confirmed=True,
+            review_note="明确审核固定原算法和输入政策，仅为工程测试并非临床验证。",
+            review_evidence_reference="Synthetic actual KDIGO fixed recipe review",
+        ),
+        db_session,
+        supervisor,
+    )["data"]
+    assert reviewed["eligible"] and risk_rule_profiles.profile_current(db_session, case["profile"].rule_profile_id)["eligible"]
+    assert reviewed["rule_id"] == "kdigo_aki_2012" and row.published_key != case["profile"].published_key
+    headers = auth_headers(supervisor.username)
+    response = await client.get("/api/ai/admin/risk-rule-profiles", params={"rule_id": "kdigo_aki_2012", "page_size": 1}, headers=headers)
+    assert response.status_code == 200 and response.json()["data"]["total"] == 1
+    assert response.json()["data"]["items"][0]["rule_profile_id"] == row.rule_profile_id
+    before = db_session.query(AINews2Assessment).count(), db_session.query(AIAuditEvent).count()
+    wrong = await client.post(
+        "/api/ai/news2-assessments", json=body(case, rule_profile_id=row.rule_profile_id, expected_rule_profile_hash=row.content_hash), headers=auth_headers(case["doctor"].username)
+    )
+    assert wrong.status_code == 409
+    assert (db_session.query(AINews2Assessment).count(), db_session.query(AIAuditEvent).count()) == before
+    ai_risk_rules.revoke_profile(row.rule_profile_id, ai_risk_rules.ProfileRevoke(expected_revision=2, reason="独立撤销KDIGO工程实施，不影响NEWS2已审核实施。"), db_session, supervisor)
+    assert risk_rule_profiles.profile_current(db_session, case["profile"].rule_profile_id)["eligible"]

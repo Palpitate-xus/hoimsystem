@@ -53,9 +53,15 @@ def canonical_id(value):
 
 
 def fixed_options():
+    from app.ai.aki_contract import INPUT_POLICY as AKI_INPUT_POLICY
+    from app.ai.aki_contract import RECIPE as AKI_RECIPE
+    from app.ai.aki_contract import recipe_digest as aki_recipe_digest
     from app.ai.news2_contract import RECIPE, recipe_digest
 
-    return [{"rule_id": "news2_2017", "recipe_digest": recipe_digest(), "recipe": json.loads(canonical_json(RECIPE)), "input_policy": json.loads(canonical_json(INPUT_POLICY))}]
+    return [
+        {"rule_id": "news2_2017", "recipe_digest": recipe_digest(), "recipe": json.loads(canonical_json(RECIPE)), "input_policy": json.loads(canonical_json(INPUT_POLICY))},
+        {"rule_id": "kdigo_aki_2012", "recipe_digest": aki_recipe_digest(), "recipe": json.loads(canonical_json(AKI_RECIPE)), "input_policy": json.loads(canonical_json(AKI_INPUT_POLICY))},
+    ]
 
 
 def fixed_option(rule_id):

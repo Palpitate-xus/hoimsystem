@@ -256,3 +256,102 @@ def test_old_complete_transaction_failure_keeps_original_state_and_no_charge(db_
     assert db.get(SurgerySchedule, schedule.schedule_id).end_time is None
     assert db.get(SurgeryApplication, case["application"].application_id).status == 1
     assert db.query(InpatientCharge).filter_by(admission_id=case["admission"].admission_id).count() == before
+
+
+def extra_schedule(db, case, *, status=0, start=None, end=None):
+    row = SurgerySchedule(
+        schedule_id=str(uuid.uuid4()),
+        application_id=case["application"].application_id,
+        patient_id=case["application"].patient_id,
+        operating_room="synthetic-child",
+        surgery_date=NOW.date(),
+        status=status,
+        start_time=start,
+        end_time=end,
+        create_time=NOW,
+    )
+    db.add(row)
+    db.flush()
+    return row
+
+
+def child_states(db, application_id):
+    return {row.schedule_id: (row.status, row.start_time, row.end_time) for row in db.query(SurgerySchedule).filter_by(application_id=application_id).all()}
+
+
+@pytest.mark.asyncio
+async def test_cancel_updates_all_unstarted_children_and_preserves_already_cancelled_originals(db_session, legacy_case, async_client, auth_headers):
+    db, case = db_session, legacy_case
+    case["application"].status = 2
+    extra_schedule(db, case)
+    extra_schedule(db, case)
+    cancelled = extra_schedule(db, case, status=3)
+    db.commit()
+    before = child_states(db, case["application"].application_id)
+    response = await async_client.post("/api/surgeryApplication/cancel", headers=auth_headers(case["seed"]["doctor_user"].username), json={"application_id": case["application"].application_id})
+    assert response.status_code == 200 and response.json()["code"] == 200
+    db.expire_all()
+    after = child_states(db, case["application"].application_id)
+    assert len(after) == 4 and all(state == (3, None, None) for state in after.values())
+    assert after[cancelled.schedule_id] == before[cancelled.schedule_id]
+    assert db.get(SurgeryApplication, case["application"].application_id).status == 4
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "status,start,end",
+    [
+        (1, NOW, None),
+        (1, NOW, NOW + datetime.timedelta(hours=1)),
+        (2, NOW, NOW + datetime.timedelta(hours=1)),
+        (3, NOW, None),
+        (0, NOW, None),
+        (0, NOW, NOW + datetime.timedelta(hours=1)),
+        (0, None, NOW),
+    ],
+)
+async def test_cancel_rejects_any_unclosed_or_executed_inconsistent_child_before_changing_others(status, start, end, db_session, legacy_case, async_client, auth_headers):
+    db, case = db_session, legacy_case
+    case["application"].status = 2
+    # The ordinary unstarted first row remains: the former .first() path would
+    # cancel only that row and miss this later running/completed original.
+    extra_schedule(db, case, status=status, start=start, end=end)
+    db.commit()
+    application_id = case["application"].application_id
+    before = child_states(db, application_id)
+    response = await async_client.post("/api/surgeryApplication/cancel", headers=auth_headers(case["seed"]["doctor_user"].username), json={"application_id": application_id})
+    assert response.status_code == 400 and response.json()["code"] == 500
+    db.expire_all()
+    assert child_states(db, application_id) == before
+    assert db.get(SurgeryApplication, application_id).status == 2
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("parent_status", [3, 4])
+async def test_start_cannot_resurrect_unstarted_child_of_completed_or_cancelled_application(parent_status, db_session, legacy_case, async_client, auth_headers):
+    db, case = db_session, legacy_case
+    case["application"].status = parent_status
+    db.commit()
+    response = await async_client.post("/api/surgerySchedule/start", headers=auth_headers(case["seed"]["doctor_user"].username), json={"schedule_id": case["schedule"].schedule_id})
+    assert response.status_code == 400 and response.json()["code"] == 500
+    db.expire_all()
+    schedule = db.get(SurgerySchedule, case["schedule"].schedule_id)
+    assert (schedule.status, schedule.start_time, schedule.end_time) == (0, None, None)
+    assert db.get(SurgeryApplication, case["application"].application_id).status == parent_status
+
+
+def test_cancel_all_children_sql_failure_rolls_back_every_state_without_invented_clocks(db_session, legacy_case):
+    db, case = db_session, legacy_case
+    case["application"].status = 2
+    extra_schedule(db, case)
+    extra_schedule(db, case)
+    db.commit()
+    application_id = case["application"].application_id
+    before = child_states(db, application_id)
+    db.add(AIAuditEvent(actor_id=case["seed"]["admin_user"].user_id, action=None, target=application_id, detail_json="{}"))
+    with pytest.raises(IntegrityError):
+        surgery.cancel_surgery_application({"application_id": application_id}, current_user=case["seed"]["doctor_user"], db=db)
+    db.rollback()
+    db.expire_all()
+    assert child_states(db, application_id) == before
+    assert db.get(SurgeryApplication, application_id).status == 2

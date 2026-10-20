@@ -241,13 +241,23 @@ def cancel_surgery_application(req: dict, current_user: User = Depends(require_r
         return {"code": 500, "msg": "手术已完成，不能取消"}
     if application.status == 4:
         return {"code": 500, "msg": "申请已取消，无需重复操作"}
+    if application.status not in (0, 1, 2):
+        return {"code": 500, "msg": "申请状态未明确，不能取消"}
+    schedules = current_surgery_rows(db.query(SurgerySchedule).filter(SurgerySchedule.application_id == application.application_id).order_by(SurgerySchedule.schedule_id)).all()
+    # 核对全部排台再改任何状态。进行中/未真实闭合的原记录不可
+    # 通过取消申请变成资源已释放，也不在此补写实际结束时刻。
+    if any(item.status == 1 or (item.start_time is not None and item.end_time is None) for item in schedules):
+        return {"code": 500, "msg": "存在进行中或尚未实际闭合的手术排台，不能取消申请"}
+    if any(item.status == 2 for item in schedules):
+        return {"code": 500, "msg": "排台已完成，与申请状态不一致，不能取消"}
+    if any(item.status not in (0, 3) or (item.status == 0 and (item.start_time is not None or item.end_time is not None)) for item in schedules):
+        return {"code": 500, "msg": "排台状态或原始执行时刻不一致，不能按未开始手术取消"}
     application.status = 4
     db.add(application)
-    # 取消已排台的手术（仅待手术/手术中的排台可取消）
-    schedule = current_surgery_rows(db.query(SurgerySchedule).filter(SurgerySchedule.application_id == req.get("application_id"))).first()
-    if schedule and schedule.status in (0, 1):
-        schedule.status = 3
-        db.add(schedule)
+    for schedule in schedules:
+        if schedule.status == 0:
+            schedule.status = 3
+            db.add(schedule)
     db.commit()
     return {"code": 200, "msg": "success"}
 
@@ -367,6 +377,11 @@ def start_surgery(req: dict, current_user: User = Depends(require_roles(*CLINICA
     # 只有待手术(0)的排台可以开始；已取消/已完成的拒绝
     if schedule.status != 0:
         return {"code": 500, "msg": "排台状态不允许开始手术"}
+    application = current_surgery_rows(db.query(SurgeryApplication).filter(SurgeryApplication.application_id == schedule.application_id)).first()
+    if application is None:
+        return {"code": 500, "msg": "排台原手术申请不存在，不能开始手术"}
+    if application.status in (3, 4):
+        return {"code": 500, "msg": "原手术申请已完成或已取消，不能开始手术"}
     schedule.status = 1
     schedule.start_time = datetime.datetime.now()
     db.add(schedule)

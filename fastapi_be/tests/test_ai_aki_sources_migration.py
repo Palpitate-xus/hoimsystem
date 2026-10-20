@@ -1,8 +1,12 @@
 """Actual extension migration on new temporary SQLite plus MySQL precision and capacity DDL."""
 
+import importlib.util
+from io import StringIO
 from pathlib import Path
 
 from alembic.config import Config
+from alembic.migration import MigrationContext
+from alembic.operations import Operations
 from sqlalchemy import create_engine, inspect, text
 from sqlalchemy.dialects import mysql
 from sqlalchemy.schema import CreateTable
@@ -58,3 +62,13 @@ def test_mysql_rule_and_assessment_clocks_have_microseconds_and_full_text_budget
             assert f"{name} DATETIME(6)" in ddl
         assert f"{body} MEDIUMTEXT NOT NULL" in ddl
         assert "revision = 1" in ddl and "revision = 2" in ddl
+
+    path = Path(__file__).resolve().parents[1] / "alembic/versions/20261020_ai_aki_sources.py"
+    spec = importlib.util.spec_from_file_location("aki_migration_downgrade", path)
+    revision = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(revision)
+    statements = StringIO()
+    context = MigrationContext.configure(dialect=mysql.dialect(), opts={"as_sql": True, "output_buffer": statements})
+    with Operations.context(context):
+        revision.downgrade()
+    assert statements.getvalue().strip() == "DROP TABLE hoimsystem_ai_aki_assessment;"

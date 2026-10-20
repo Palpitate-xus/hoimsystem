@@ -47,6 +47,6 @@ def upgrade():
 
 
 def downgrade():
-    op.drop_index("idx_ai_aki_assessment_window", table_name="hoimsystem_ai_aki_assessment")
-    op.drop_index("idx_ai_aki_assessment_scope", table_name="hoimsystem_ai_aki_assessment")
+    # MySQL uses the window index to support its foreign key; dropping the table
+    # removes both together without attempting to drop that required index first.
     op.drop_table("hoimsystem_ai_aki_assessment")

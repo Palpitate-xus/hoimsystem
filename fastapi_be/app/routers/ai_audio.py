@@ -7,7 +7,7 @@ import uuid
 from typing import Literal
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, UploadFile
-from fastapi.responses import StreamingResponse
+from fastapi.responses import JSONResponse, StreamingResponse
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
@@ -23,7 +23,7 @@ from app.database import get_db
 from app.dependencies import require_roles
 from app.models import User
 
-router = APIRouter(tags=["AI 私有录音"])
+router = APIRouter(tags=["AI 私有录音"], default_response_class=JSONResponse)
 
 
 @router.get("/ai/audio-options")

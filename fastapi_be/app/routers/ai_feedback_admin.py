@@ -4,6 +4,7 @@ import datetime
 from typing import Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi.responses import JSONResponse
 from sqlalchemy import and_, case, func
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
@@ -17,7 +18,7 @@ from app.database import get_db
 from app.dependencies import require_roles
 from app.models import Department, Review, User
 
-router = APIRouter(tags=["AI 反馈脱敏审核"])
+router = APIRouter(tags=["AI 反馈脱敏审核"], default_response_class=JSONResponse)
 
 
 def _commit(db):

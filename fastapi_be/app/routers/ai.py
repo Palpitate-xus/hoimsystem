@@ -1,6 +1,7 @@
 """Role-scoped business entry points for authorized AI tasks and human review."""
 
 from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 
 from app.ai.catalog import FEATURES
@@ -18,7 +19,8 @@ from app.database import get_db
 from app.dependencies import get_current_user
 from app.models import Admission, ClinicalPathway, Prescription, Registration, User
 
-router = APIRouter(tags=["AI 业务助手"])
+# Evidence text must bypass the legacy response formatter that truncates timestamps.
+router = APIRouter(tags=["AI 业务助手"], default_response_class=JSONResponse)
 
 
 @router.get("/ai/features")

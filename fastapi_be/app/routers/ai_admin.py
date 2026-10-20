@@ -5,6 +5,7 @@ import json
 from typing import Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi.responses import JSONResponse
 from sqlalchemy import func
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, defer
@@ -34,7 +35,7 @@ from app.database import get_db
 from app.dependencies import require_roles
 from app.models import ClinicalPathway, Department, Patient, User
 
-router = APIRouter(tags=["AI 超级管理员"])
+router = APIRouter(tags=["AI 超级管理员"], default_response_class=JSONResponse)
 
 
 def _commit(db: Session) -> None:

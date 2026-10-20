@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 
 from app.ai.catalog import FeatureSpec
 from app.ai.clinical_tools import critical_value_workflow, laboratory_trends, perioperative_timing
+from app.ai.coding_sources import local_icd_candidates
 from app.ai.context import ContextBundle
 from app.ai.governance import encode_json
 from app.models import Admission, DailyOperationalMetric, Department, Doctor, Pharmaceutical, Prescription, User
@@ -41,6 +42,9 @@ def business_tools(db: Session, spec: FeatureSpec, user: User, patient_id: int |
     """Return explicit tool results and evidence without accepting instructions to execute code."""
     tools: dict = {}
     evidence: list[dict] = []
+    if patient_id and spec.number in {27, 68}:
+        tools["icd_candidates"], dictionary_sources = local_icd_candidates(db, context.data, task_input)
+        evidence.extend(dictionary_sources)
     if patient_id and spec.number == 49:
         tools["perioperative_timing"] = perioperative_timing(context.data)
         rule = tools["perioperative_timing"]["rule"]

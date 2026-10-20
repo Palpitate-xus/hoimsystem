@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session, selectinload
 
 from app.ai.care import surgical_patient_ids
 from app.ai.catalog import FeatureSpec
+from app.ai.coding_sources import attach_coding_sources
 from app.ai.governance import digest, encode_json
 from app.ai.models import AIPatientGrant, utcnow
 from app.ai.patient_sources import attach_patient_sources
@@ -27,6 +28,7 @@ from app.models import (
     LabOrder,
     LabResult,
     MedicalRecord,
+    MedicalRecordHome,
     NursingRecord,
     Patient,
     PatientAllergy,
@@ -184,6 +186,7 @@ def _selected_records(db: Session, user: User, patient_id: int, references: dict
         ("surgery_application_id", SurgeryApplication, "application_id", None),
         ("surgery_schedule_id", SurgerySchedule, "schedule_id", None),
         ("perioperative_id", PerioperativeAntibiotic, "perioperative_id", None),
+        ("home_id", MedicalRecordHome, "home_id", None),
     ]
     for key, model, primary_key, order in sources:
         reference = references.get(key)
@@ -247,9 +250,9 @@ def patient_snapshot(db: Session, user: User, spec: FeatureSpec, patient_id: int
     else:
         bundle.data["missing_data"].append("未指定本次就诊，既往诊断不会视为本次确认诊断")
 
-    def add(source_id: str, title: str, fields: dict, observed_at: object = None) -> dict:
+    def add(source_id: str, title: str, fields: dict, observed_at: object = None, *, kind: str = "patient_record") -> dict:
         clean = json.loads(encode_json(minimize_identifiers(fields, patient)))
-        bundle.evidence.append({"source_id": source_id, "kind": "patient_record", "title": title, "observed_at": str(observed_at) if observed_at else None, "content": encode_json(clean)})
+        bundle.evidence.append({"source_id": source_id, "kind": kind, "title": title, "observed_at": str(observed_at) if observed_at else None, "content": encode_json(clean)})
         return {"source_id": source_id, **clean}
 
     def attach_diagnosis_review(record, reviews: dict) -> str:
@@ -453,6 +456,7 @@ def patient_snapshot(db: Session, user: User, spec: FeatureSpec, patient_id: int
     ]
     attach_patient_sources(db, user, spec, patient, encounter, bundle, add)
     attach_procedural_sources(db, user, spec, patient, encounter, bundle, add, selected, bounded)
+    attach_coding_sources(db, user, spec, patient, encounter, bundle, add, selected, bounded, authorize_patient)
     if not bundle.data["current_confirmed_diagnoses"]:
         bundle.data["missing_data"].append("未取得本次就诊的已确认诊断")
     bundle.data = minimize_identifiers(bundle.data, patient)

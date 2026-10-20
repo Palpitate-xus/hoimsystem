@@ -11,6 +11,7 @@
       "engine": "llm",
       "scope": "patient",
       "source_reference_keys": [
+        "home_id",
         "imaging_report_id",
         "lab_result_id",
         "perioperative_id",
@@ -54,6 +55,7 @@
       "engine": "llm",
       "scope": "patient",
       "source_reference_keys": [
+        "home_id",
         "imaging_report_id",
         "lab_result_id",
         "perioperative_id",
@@ -94,6 +96,7 @@
       "engine": "llm",
       "scope": "patient",
       "source_reference_keys": [
+        "home_id",
         "imaging_report_id",
         "lab_result_id",
         "perioperative_id",
@@ -135,6 +138,7 @@
       "engine": "llm",
       "scope": "patient",
       "source_reference_keys": [
+        "home_id",
         "imaging_report_id",
         "lab_result_id",
         "perioperative_id",
@@ -175,6 +179,7 @@
       "engine": "llm",
       "scope": "patient",
       "source_reference_keys": [
+        "home_id",
         "imaging_report_id",
         "lab_result_id",
         "perioperative_id",
@@ -217,6 +222,7 @@
       "engine": "llm",
       "scope": "patient",
       "source_reference_keys": [
+        "home_id",
         "imaging_report_id",
         "lab_result_id",
         "perioperative_id",
@@ -259,6 +265,7 @@
       "engine": "llm",
       "scope": "patient",
       "source_reference_keys": [
+        "home_id",
         "imaging_report_id",
         "lab_result_id",
         "perioperative_id",
@@ -299,6 +306,7 @@
       "engine": "llm",
       "scope": "patient",
       "source_reference_keys": [
+        "home_id",
         "imaging_report_id",
         "lab_result_id",
         "perioperative_id",
@@ -339,6 +347,7 @@
       "engine": "llm",
       "scope": "patient",
       "source_reference_keys": [
+        "home_id",
         "imaging_report_id",
         "lab_result_id",
         "perioperative_id",
@@ -411,6 +420,7 @@
       "engine": "llm",
       "scope": "patient",
       "source_reference_keys": [
+        "home_id",
         "imaging_report_id",
         "lab_result_id",
         "perioperative_id",
@@ -453,6 +463,7 @@
       "engine": "llm",
       "scope": "patient",
       "source_reference_keys": [
+        "home_id",
         "imaging_report_id",
         "lab_result_id",
         "perioperative_id",
@@ -494,6 +505,7 @@
       "engine": "llm",
       "scope": "patient",
       "source_reference_keys": [
+        "home_id",
         "imaging_report_id",
         "lab_result_id",
         "perioperative_id",
@@ -535,6 +547,7 @@
       "engine": "llm",
       "scope": "patient",
       "source_reference_keys": [
+        "home_id",
         "imaging_report_id",
         "lab_result_id",
         "perioperative_id",
@@ -577,6 +590,7 @@
       "engine": "llm",
       "scope": "patient",
       "source_reference_keys": [
+        "home_id",
         "imaging_report_id",
         "lab_result_id",
         "perioperative_id",
@@ -619,6 +633,7 @@
       "engine": "llm",
       "scope": "patient",
       "source_reference_keys": [
+        "home_id",
         "imaging_report_id",
         "lab_result_id",
         "perioperative_id",
@@ -661,6 +676,7 @@
       "engine": "llm",
       "scope": "patient",
       "source_reference_keys": [
+        "home_id",
         "imaging_report_id",
         "lab_result_id",
         "perioperative_id",
@@ -704,6 +720,7 @@
       "engine": "llm",
       "scope": "patient",
       "source_reference_keys": [
+        "home_id",
         "imaging_report_id",
         "lab_result_id",
         "perioperative_id",
@@ -745,6 +762,7 @@
       "engine": "prediction",
       "scope": "patient",
       "source_reference_keys": [
+        "home_id",
         "imaging_report_id",
         "lab_result_id",
         "perioperative_id",
@@ -787,6 +805,7 @@
       "engine": "llm",
       "scope": "patient",
       "source_reference_keys": [
+        "home_id",
         "imaging_report_id",
         "lab_result_id",
         "perioperative_id",
@@ -860,6 +879,7 @@
       "engine": "llm",
       "scope": "patient",
       "source_reference_keys": [
+        "home_id",
         "imaging_report_id",
         "lab_result_id",
         "perioperative_id",
@@ -902,6 +922,7 @@
       "engine": "llm",
       "scope": "patient",
       "source_reference_keys": [
+        "home_id",
         "imaging_report_id",
         "lab_result_id",
         "perioperative_id",
@@ -944,6 +965,7 @@
       "engine": "llm",
       "scope": "patient",
       "source_reference_keys": [
+        "home_id",
         "imaging_report_id",
         "lab_result_id",
         "perioperative_id",
@@ -986,6 +1008,7 @@
       "engine": "llm",
       "scope": "patient",
       "source_reference_keys": [
+        "home_id",
         "imaging_report_id",
         "lab_result_id",
         "perioperative_id",
@@ -1028,6 +1051,7 @@
       "engine": "llm",
       "scope": "patient",
       "source_reference_keys": [
+        "home_id",
         "imaging_report_id",
         "lab_result_id",
         "perioperative_id",
@@ -1068,6 +1092,7 @@
       "engine": "llm",
       "scope": "patient",
       "source_reference_keys": [
+        "home_id",
         "imaging_report_id",
         "lab_result_id",
         "perioperative_id",
@@ -1107,6 +1132,7 @@
       "engine": "llm",
       "scope": "patient",
       "source_reference_keys": [
+        "home_id",
         "imaging_report_id",
         "lab_result_id",
         "perioperative_id",
@@ -1147,6 +1173,7 @@
       "engine": "llm",
       "scope": "patient",
       "source_reference_keys": [
+        "home_id",
         "imaging_report_id",
         "lab_result_id",
         "perioperative_id",
@@ -1187,6 +1214,7 @@
       "engine": "llm",
       "scope": "patient",
       "source_reference_keys": [
+        "home_id",
         "imaging_report_id",
         "lab_result_id",
         "perioperative_id",
@@ -1228,6 +1256,7 @@
       "engine": "llm",
       "scope": "patient",
       "source_reference_keys": [
+        "home_id",
         "imaging_report_id",
         "lab_result_id",
         "perioperative_id",
@@ -1271,6 +1300,7 @@
       "engine": "llm",
       "scope": "patient",
       "source_reference_keys": [
+        "home_id",
         "imaging_report_id",
         "lab_result_id",
         "perioperative_id",
@@ -1313,6 +1343,7 @@
       "engine": "llm",
       "scope": "patient",
       "source_reference_keys": [
+        "home_id",
         "imaging_report_id",
         "lab_result_id",
         "perioperative_id",
@@ -1354,6 +1385,7 @@
       "engine": "prediction",
       "scope": "patient",
       "source_reference_keys": [
+        "home_id",
         "imaging_report_id",
         "lab_result_id",
         "perioperative_id",
@@ -1396,6 +1428,7 @@
       "engine": "llm",
       "scope": "patient",
       "source_reference_keys": [
+        "home_id",
         "imaging_report_id",
         "lab_result_id",
         "perioperative_id",
@@ -1437,6 +1470,7 @@
       "engine": "vision",
       "scope": "patient",
       "source_reference_keys": [
+        "home_id",
         "imaging_report_id",
         "lab_result_id",
         "perioperative_id",
@@ -1478,6 +1512,7 @@
       "engine": "signal",
       "scope": "patient",
       "source_reference_keys": [
+        "home_id",
         "imaging_report_id",
         "lab_result_id",
         "perioperative_id",
@@ -1519,6 +1554,7 @@
       "engine": "vision",
       "scope": "patient",
       "source_reference_keys": [
+        "home_id",
         "imaging_report_id",
         "lab_result_id",
         "perioperative_id",
@@ -1560,6 +1596,7 @@
       "engine": "llm",
       "scope": "patient",
       "source_reference_keys": [
+        "home_id",
         "imaging_report_id",
         "lab_result_id",
         "perioperative_id",
@@ -1601,6 +1638,7 @@
       "engine": "llm",
       "scope": "patient",
       "source_reference_keys": [
+        "home_id",
         "imaging_report_id",
         "lab_result_id",
         "perioperative_id",
@@ -1642,6 +1680,7 @@
       "engine": "prediction",
       "scope": "patient",
       "source_reference_keys": [
+        "home_id",
         "imaging_report_id",
         "lab_result_id",
         "perioperative_id",
@@ -1683,6 +1722,7 @@
       "engine": "prediction",
       "scope": "patient",
       "source_reference_keys": [
+        "home_id",
         "imaging_report_id",
         "lab_result_id",
         "perioperative_id",
@@ -1724,6 +1764,7 @@
       "engine": "prediction",
       "scope": "patient",
       "source_reference_keys": [
+        "home_id",
         "imaging_report_id",
         "lab_result_id",
         "perioperative_id",
@@ -1766,6 +1807,7 @@
       "engine": "llm",
       "scope": "patient",
       "source_reference_keys": [
+        "home_id",
         "imaging_report_id",
         "lab_result_id",
         "perioperative_id",
@@ -1807,6 +1849,7 @@
       "engine": "llm",
       "scope": "patient",
       "source_reference_keys": [
+        "home_id",
         "imaging_report_id",
         "lab_result_id",
         "perioperative_id",
@@ -1848,6 +1891,7 @@
       "engine": "llm",
       "scope": "patient",
       "source_reference_keys": [
+        "home_id",
         "imaging_report_id",
         "lab_result_id",
         "perioperative_id",
@@ -1889,6 +1933,7 @@
       "engine": "llm",
       "scope": "patient",
       "source_reference_keys": [
+        "home_id",
         "imaging_report_id",
         "lab_result_id",
         "perioperative_id",
@@ -1931,6 +1976,7 @@
       "engine": "llm",
       "scope": "patient",
       "source_reference_keys": [
+        "home_id",
         "imaging_report_id",
         "lab_result_id",
         "perioperative_id",
@@ -1973,6 +2019,7 @@
       "engine": "llm",
       "scope": "patient",
       "source_reference_keys": [
+        "home_id",
         "imaging_report_id",
         "lab_result_id",
         "perioperative_id",
@@ -2014,6 +2061,7 @@
       "engine": "llm",
       "scope": "patient",
       "source_reference_keys": [
+        "home_id",
         "imaging_report_id",
         "lab_result_id",
         "perioperative_id",
@@ -2122,6 +2170,7 @@
       "engine": "llm",
       "scope": "patient",
       "source_reference_keys": [
+        "home_id",
         "imaging_report_id",
         "lab_result_id",
         "perioperative_id",
@@ -2163,6 +2212,7 @@
       "engine": "llm",
       "scope": "patient",
       "source_reference_keys": [
+        "home_id",
         "imaging_report_id",
         "lab_result_id",
         "perioperative_id",
@@ -2205,6 +2255,7 @@
       "engine": "llm",
       "scope": "patient",
       "source_reference_keys": [
+        "home_id",
         "imaging_report_id",
         "lab_result_id",
         "perioperative_id",
@@ -2247,6 +2298,7 @@
       "engine": "llm",
       "scope": "patient",
       "source_reference_keys": [
+        "home_id",
         "imaging_report_id",
         "lab_result_id",
         "perioperative_id",
@@ -2289,6 +2341,7 @@
       "engine": "llm",
       "scope": "patient",
       "source_reference_keys": [
+        "home_id",
         "imaging_report_id",
         "lab_result_id",
         "perioperative_id",
@@ -2650,6 +2703,7 @@
       "engine": "llm",
       "scope": "patient",
       "source_reference_keys": [
+        "home_id",
         "imaging_report_id",
         "lab_result_id",
         "perioperative_id",
@@ -2690,6 +2744,7 @@
       "engine": "llm",
       "scope": "patient",
       "source_reference_keys": [
+        "home_id",
         "imaging_report_id",
         "lab_result_id",
         "perioperative_id",
@@ -2921,6 +2976,7 @@
       "engine": "llm",
       "scope": "patient",
       "source_reference_keys": [
+        "home_id",
         "imaging_report_id",
         "lab_result_id",
         "perioperative_id",
@@ -2963,6 +3019,7 @@
       "engine": "llm",
       "scope": "patient",
       "source_reference_keys": [
+        "home_id",
         "imaging_report_id",
         "lab_result_id",
         "perioperative_id",

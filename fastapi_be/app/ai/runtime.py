@@ -178,6 +178,8 @@ def describe_run(run: AIRun, include_result: bool = True) -> dict:
     if include_result:
         data["result"] = json.loads(run.result_json)
         data["evidence"] = json.loads(run.evidence_json)
+        tools = json.loads(run.input_json).get("payload", {}).get("tools", {})
+        data["tool_findings"] = {key: tools[key] for key in ("icd_candidates", "perioperative_timing", "prescription_review", "billing_reconciliation") if key in tools}
     return data
 
 

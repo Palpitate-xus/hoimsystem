@@ -46,6 +46,8 @@ def list_uncoded(current_user: User = Depends(require_roles(*CODER_ROLES)), db: 
     coded_home_ids = {b[0] for b in db.query(HomeIcdBinding.home_id).filter(HomeIcdBinding.kind == "diagnosis").distinct().all()}
     data = [{
         "home_id": h.home_id,
+        "patient_id": h.patient_id,
+        "admission_id": h.admission_id,
         "admission_no": h.admission.admission_no if h.admission else "",
         "patient_name": h.patient.name if h.patient else "",
         "admission_diagnosis": h.admission_diagnosis,

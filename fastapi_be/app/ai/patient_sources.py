@@ -11,7 +11,6 @@ from app.models import (
     IcuScoreRecord,
     InpatientCharge,
     InpatientOrder,
-    MedicalRecordHome,
     MedicationAdministration,
     NursingAssessment,
     NursingPlan,
@@ -193,16 +192,6 @@ def attach_patient_sources(db, user, spec, patient, encounter, bundle, add) -> N
             "recorded_icu_scores", IcuScoreRecord, "score_id", "assess_time", ("admission_id", "score_type", "scene", "total_score", "detail_json", "interpretation", "assess_time"), 5, admission=True
         )
         bundle.data["score_provenance_note"] = "评分是已保存的院内计算或评估记录，不是本次 AI 重新计算的风险概率，临床适用性仍需核实"
-    if number in {27, 28, 30, 68, 69}:
-        append_rows(
-            "medical_record_homes",
-            MedicalRecordHome,
-            "home_id",
-            "update_time",
-            ("admission_id", "admission_diagnosis", "discharge_diagnosis", "other_diagnosis", "operation_summary", "complication", "status", "submit_time", "total_fee"),
-            1,
-            admission=True,
-        )
     if number == 69:
         append_rows(
             "inpatient_charges",

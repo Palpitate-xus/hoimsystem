@@ -509,6 +509,15 @@
   "auth": [
    "super_admin"
   ],
+  "function": "check_surgery_provider",
+  "method": "POST",
+  "module": "ai_admin.py",
+  "path": "/api/ai/admin/providers/{provider_id}/surgery-capabilities"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
   "function": "list_global_runs",
   "method": "GET",
   "module": "ai_admin.py",
@@ -1993,6 +2002,200 @@
   "method": "GET",
   "module": "ai_sofa_change.py",
   "path": "/api/ai/admin/sofa-change-assessments/{change_assessment_id}"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "super_admin"
+  ],
+  "function": "scenario_list",
+  "method": "GET",
+  "module": "ai_surgery_scenarios.py",
+  "path": "/api/ai/surgery-scenarios"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "super_admin"
+  ],
+  "function": "scenario_create",
+  "method": "POST",
+  "module": "ai_surgery_scenarios.py",
+  "path": "/api/ai/surgery-scenarios"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "super_admin"
+  ],
+  "function": "scenario_detail",
+  "method": "GET",
+  "module": "ai_surgery_scenarios.py",
+  "path": "/api/ai/surgery-scenarios/{scenario_id}"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "scenario_review",
+  "method": "POST",
+  "module": "ai_surgery_scenarios.py",
+  "path": "/api/ai/surgery-scenarios/{scenario_id}/review"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "super_admin"
+  ],
+  "function": "scenario_revoke",
+  "method": "POST",
+  "module": "ai_surgery_scenarios.py",
+  "path": "/api/ai/surgery-scenarios/{scenario_id}/revoke"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "options",
+  "method": "GET",
+  "module": "ai_surgery_sources.py",
+  "path": "/api/ai/surgery-sources/options"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "collection_preview",
+  "method": "POST",
+  "module": "ai_surgery_sources.py",
+  "path": "/api/ai/surgery-sources/preview"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "registry_list",
+  "method": "GET",
+  "module": "ai_surgery_sources.py",
+  "path": "/api/ai/surgery-registry/{kind}"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "registry_create",
+  "method": "POST",
+  "module": "ai_surgery_sources.py",
+  "path": "/api/ai/surgery-registry/{kind}"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "registry_detail",
+  "method": "GET",
+  "module": "ai_surgery_sources.py",
+  "path": "/api/ai/surgery-registry/{kind}/{record_id}"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "registry_review",
+  "method": "POST",
+  "module": "ai_surgery_sources.py",
+  "path": "/api/ai/surgery-registry/{kind}/{record_id}/review"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "registry_revoke",
+  "method": "POST",
+  "module": "ai_surgery_sources.py",
+  "path": "/api/ai/surgery-registry/{kind}/{record_id}/revoke"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "source_list",
+  "method": "GET",
+  "module": "ai_surgery_sources.py",
+  "path": "/api/ai/surgery-sources/{kind}"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "protected_capsule",
+  "method": "POST",
+  "module": "ai_surgery_sources.py",
+  "path": "/api/ai/surgery-protected-capsules"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "source_create",
+  "method": "POST",
+  "module": "ai_surgery_sources.py",
+  "path": "/api/ai/surgery-sources/{kind}"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "source_detail",
+  "method": "GET",
+  "module": "ai_surgery_sources.py",
+  "path": "/api/ai/surgery-sources/{kind}/{record_id}"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "source_review",
+  "method": "POST",
+  "module": "ai_surgery_sources.py",
+  "path": "/api/ai/surgery-sources/{kind}/{record_id}/review"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "source_revoke",
+  "method": "POST",
+  "module": "ai_surgery_sources.py",
+  "path": "/api/ai/surgery-sources/{kind}/{record_id}/revoke"
  },
  {
   "auth": [

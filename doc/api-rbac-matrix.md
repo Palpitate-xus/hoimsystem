@@ -3,7 +3,7 @@
 > 由 `fastapi_be/scripts/generate_rbac_matrix.py` 从源码自动生成，请勿手改。
 > `✓`=可访问 | `PUBLIC`=无需登录 | 留空=不可访问
 
-共 **768** 个接口（PUBLIC 18 个 / 需登录 750 个）。
+共 **787** 个接口（PUBLIC 18 个 / 需登录 769 个）。
 
 
 ### `admin.py`
@@ -91,6 +91,7 @@
 | POST | `/api/ai/admin/providers/{provider_id}/sofa-capabilities` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
 | POST | `/api/ai/admin/providers/{provider_id}/roster-capabilities` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
 | POST | `/api/ai/admin/providers/{provider_id}/bed-capabilities` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/admin/providers/{provider_id}/surgery-capabilities` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
 | GET | `/api/ai/admin/runs` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
 | GET | `/api/ai/admin/runs/{run_id}` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
 | POST | `/api/ai/admin/providers` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
@@ -318,6 +319,34 @@
 | POST | `/api/ai/sofa-change-assessments/{change_assessment_id}/revoke` | ✓ | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |
 | GET | `/api/ai/admin/sofa-change-assessments` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
 | GET | `/api/ai/admin/sofa-change-assessments/{change_assessment_id}` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+
+### `ai_surgery_scenarios.py`
+
+| 方法 | 路径 | admin | super_admin | director | doctor | nurse | cashier | pharmacist | guide | patient | lab_technician | registrar | PUBLIC |
+|------|------|------|------|------|------|------|------|------|------|------|------|------|------|
+| GET | `/api/ai/surgery-scenarios` | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/surgery-scenarios` | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/surgery-scenarios/{scenario_id}` | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/surgery-scenarios/{scenario_id}/review` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/surgery-scenarios/{scenario_id}/revoke` | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |
+
+### `ai_surgery_sources.py`
+
+| 方法 | 路径 | admin | super_admin | director | doctor | nurse | cashier | pharmacist | guide | patient | lab_technician | registrar | PUBLIC |
+|------|------|------|------|------|------|------|------|------|------|------|------|------|------|
+| GET | `/api/ai/surgery-sources/options` | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/surgery-sources/preview` | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/surgery-registry/{kind}` | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/surgery-registry/{kind}` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/surgery-registry/{kind}/{record_id}` | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/surgery-registry/{kind}/{record_id}/review` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/surgery-registry/{kind}/{record_id}/revoke` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/surgery-sources/{kind}` | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/surgery-protected-capsules` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/surgery-sources/{kind}` | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/surgery-sources/{kind}/{record_id}` | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/surgery-sources/{kind}/{record_id}/review` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/surgery-sources/{kind}/{record_id}/revoke` | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |
 
 ### `ai_vasoactive_mappings.py`
 

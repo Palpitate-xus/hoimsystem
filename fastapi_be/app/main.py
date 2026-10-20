@@ -393,6 +393,7 @@ from app.routers import (
     ai_roster_sources,
     ai_sofa,
     ai_sofa_change,
+    ai_surgery_scenarios,
     ai_surgery_sources,
     ai_vasoactive_mappings,
     allergy,
@@ -525,6 +526,7 @@ app.include_router(ai_roster_plans.router, prefix="/api")
 app.include_router(ai_bed_sources.router, prefix="/api")
 app.include_router(ai_bed_series.router, prefix="/api")
 app.include_router(ai_surgery_sources.router, prefix="/api")
+app.include_router(ai_surgery_scenarios.router, prefix="/api")
 app.include_router(inpatient_gcs.router, prefix="/api")
 app.include_router(inpatient_support.router, prefix="/api")
 app.include_router(ai_vasoactive_mappings.router, prefix="/api")

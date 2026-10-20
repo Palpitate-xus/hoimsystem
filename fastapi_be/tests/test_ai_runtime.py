@@ -7,7 +7,7 @@ import uuid
 import httpx
 import pytest
 
-from app.ai.catalog import FEATURE_BY_KEY
+from app.ai.catalog import COMMON_SYSTEM_PROMPT, FEATURE_BY_KEY
 from app.ai.governance import digest, encode_json
 from app.ai.models import AIFeatureConfig, AIFeedback, AIKnowledgeDocument, AIPatientGrant, AIProvider, AIRun, utcnow
 from app.ai.runtime import claim_next_run, create_run, execute_claimed, expire_interrupted_runs
@@ -350,3 +350,54 @@ async def test_context_change_during_inference_rejects_output_and_keeps_actual_u
     assert run.error_code == "TASK_CONTEXT_CHANGED"
     assert (run.input_tokens, run.output_tokens) == (5, 7)
     assert json.loads(run.result_json) == {}
+
+
+@pytest.mark.asyncio
+async def test_inflight_cancellation_rejects_result_but_retains_reported_usage(seed_data, db_session):
+    from app import database
+
+    configure(db_session, seed_data)
+    run = create_run(db_session, seed_data["doctor_user"], RunRequest(feature_key="patient_summary", patient_id=seed_data["patient"].patient_id))
+    claim = claim_next_run(db_session)
+    requests = []
+    baseline = successful_transport(requests)
+
+    def cancel_during_inference(request):
+        with database.SessionLocal() as session:
+            session.query(AIRun).filter_by(run_id=run.run_id).update({"status": "cancelled", "finish_time": utcnow()})
+            session.commit()
+        return baseline.handle_request(request)
+
+    await execute_claimed(*claim, transport=httpx.MockTransport(cancel_during_inference))
+    db_session.refresh(run)
+    assert run.status == "cancelled"
+    assert (run.input_tokens, run.output_tokens) == (5, 7)
+    assert json.loads(run.result_json) == {}
+    assert len(requests) == 1
+
+
+def test_execution_snapshot_keeps_exact_prompts_and_model_but_never_credentials(seed_data, db_session):
+    provider, _ = configure(db_session, seed_data)
+    run = create_run(db_session, seed_data["doctor_user"], RunRequest(feature_key="patient_summary", patient_id=seed_data["patient"].patient_id))
+    snapshot = json.loads(run.input_json)
+    assert snapshot["system_prompt"] == COMMON_SYSTEM_PROMPT
+    assert snapshot["provider_snapshot"]["model"] == provider.model
+    assert "api_key_env" not in snapshot["provider_snapshot"]
+    assert "api_key_encrypted" not in snapshot["provider_snapshot"]
+    assert snapshot["feature_validation"]["note"] == "隔离测试配置，不用于临床启用"
+
+
+@pytest.mark.asyncio
+async def test_worker_output_limit_must_match_the_queued_budget(seed_data, db_session, monkeypatch):
+    from app.config import settings
+
+    configure(db_session, seed_data)
+    run = create_run(db_session, seed_data["doctor_user"], RunRequest(feature_key="patient_summary", patient_id=seed_data["patient"].patient_id))
+    monkeypatch.setattr(settings, "AI_MAX_OUTPUT_TOKENS", 512)
+    claim = claim_next_run(db_session)
+    requests = []
+    await execute_claimed(*claim, transport=successful_transport(requests))
+    db_session.refresh(run)
+    assert run.status == "failed"
+    assert run.error_code == "TASK_MODEL_CHANGED"
+    assert requests == []

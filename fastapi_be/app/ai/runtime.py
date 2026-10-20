@@ -8,7 +8,7 @@ import uuid
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
-from app.ai.catalog import COMMON_SYSTEM_PROMPT, FeatureSpec
+from app.ai.catalog import CATALOG_VERSION, COMMON_SYSTEM_PROMPT, FeatureSpec
 from app.ai.context import ContextBundle, authorize_patient, context_metadata, minimize_identifiers, patient_snapshot
 from app.ai.gateway import AIExecutionError, generate
 from app.ai.governance import active_prompt, audit, digest, encode_json, get_spec, provider_credential, provider_feature_issues
@@ -48,6 +48,16 @@ def check_configuration(db: Session, user: User, spec: FeatureSpec, config: AIFe
         raise HTTPException(409, issues[0]["message"])
     provider_credential(provider)
     return provider
+
+
+def provider_snapshot(provider: AIProvider) -> dict:
+    """Freeze the requested model and limits for audit without any credential or environment reference."""
+    fields = ("provider_id", "revision", "name", "kind", "api_base", "model", "timeout_seconds", "max_output_tokens", "validation_report")
+    snapshot = {name: getattr(provider, name) for name in fields}
+    snapshot["temperature"] = float(provider.temperature)
+    snapshot["allows_patient_data"] = bool(provider.allows_patient_data)
+    snapshot["effective_output_limit"] = min(provider.max_output_tokens, settings.AI_MAX_OUTPUT_TOKENS)
+    return snapshot
 
 
 def create_run(db: Session, user: User, req: RunRequest) -> AIRun:
@@ -106,7 +116,22 @@ def create_run(db: Session, user: User, req: RunRequest) -> AIRun:
         requested_by=user.user_id,
         preview=int(req.preview),
         status="queued",
-        input_json=encode_json({"task_prompt": prompt, "payload": payload}),
+        input_json=encode_json(
+            {
+                "catalog_version": CATALOG_VERSION,
+                "system_prompt": COMMON_SYSTEM_PROMPT,
+                "task_prompt": prompt,
+                "payload": payload,
+                "provider_snapshot": provider_snapshot(provider),
+                "feature_validation": {
+                    "status": config.validation_status,
+                    "note": config.validation_note,
+                    "validated_by": config.validated_by,
+                    "validated_at": config.validated_at,
+                    "feature_revision": config.revision,
+                },
+            }
+        ),
         evidence_json=encode_json(evidence),
         context_metadata_json=encode_json({**context_metadata(bundle), "feature_revision": config.revision, "validation_status": config.validation_status, "tool_fingerprint": digest(tools)}),
     )
@@ -189,6 +214,10 @@ def _recheck_task(db: Session, run: AIRun) -> tuple[FeatureSpec, AIProvider, dic
     if config.revision != metadata["feature_revision"]:
         raise HTTPException(409, "功能或 Prompt 配置已改变，请重新创建任务")
     snapshot = json.loads(run.input_json)
+    if snapshot.get("catalog_version") != CATALOG_VERSION or snapshot.get("system_prompt") != COMMON_SYSTEM_PROMPT:
+        raise AIExecutionError("TASK_CONTRACT_CHANGED", "任务目录或系统契约已改变，请重新创建任务")
+    if digest(provider_snapshot(provider)) != digest(snapshot.get("provider_snapshot")):
+        raise AIExecutionError("TASK_MODEL_CHANGED", "模型参数或输出限制已改变，请重新创建任务")
     if digest(snapshot["payload"]["context"]) != run.context_digest:
         raise AIExecutionError("TASK_SNAPSHOT_INVALID", "任务资料快照校验不一致，请重新创建任务")
     if digest([COMMON_SYSTEM_PROMPT, snapshot["task_prompt"]]) != run.prompt_hash:
@@ -236,8 +265,16 @@ async def execute_claimed(run_id: str, lease: str, *, transport=None) -> None:
     except Exception:
         error = ("TASK_EXECUTION_ERROR", "任务处理失败，请联系管理员查看执行状态")
     with database.SessionLocal() as db:
-        run = db.query(AIRun).filter_by(run_id=run_id, status="running", lease_token=lease).with_for_update().first()
+        run = db.query(AIRun).filter(AIRun.run_id == run_id, AIRun.status.in_(["running", "cancelled"]), AIRun.lease_token == lease).with_for_update().first()
         if run is None:
+            return
+        if run.status == "cancelled":
+            # Cancelling receipt cannot undo a provider request that has already been sent.
+            # Keep reported usage while leaving the generated result unaccepted.
+            run.input_tokens, run.output_tokens = inputs, outputs
+            run.latency_ms = int((time.monotonic() - started) * 1000)
+            run.finish_time = utcnow()
+            db.commit()
             return
         if error is None:
             try:

@@ -4,7 +4,7 @@ import json
 
 from fastapi import HTTPException
 
-from app.models import Admission, CriticalCareRecord, IcuScoreRecord, NursingAssessment, NursingPlan
+from app.models import Admission, CriticalCareRecord, IcuScoreRecord, NursingAssessment, NursingPlan, NursingRecord
 
 NURSING_REFERENCE_FEATURES = {
     "nursing_assessment_id": frozenset({44, 45, 46, 47, 48, 76}),
@@ -25,28 +25,56 @@ NURSING_REFERENCE_MODELS = {
     "critical_care_record_id": (CriticalCareRecord, "record_id", "critical_care_records"),
     "icu_score_id": (IcuScoreRecord, "score_id", "recorded_icu_scores"),
 }
+NURSING_LOADED_MODELS = {collection: (model, primary_key, key) for key, (model, primary_key, collection) in NURSING_REFERENCE_MODELS.items()}
+NURSING_LOADED_MODELS["nursing_records"] = (NursingRecord, "record_id", None)
+
+
+def has_frozen_nursing_sources(context):
+    return bool(set(context.get("selected_sources", {})) & NURSING_REFERENCE_MODELS.keys()) or any(context.get(key) for key in NURSING_LOADED_MODELS)
 
 
 def authorize_nursing_snapshot(db, user, context, patient, encounter_ref, minimize):
-    """Changed, deleted or reassigned selected originals cannot disclose a stale result."""
+    """Check every disclosed nursing original, including automatically attached rows."""
     from app.ai.governance import digest, encode_json
 
     if user.user_role == "super_admin":
         return
-    for key, (model, primary_key, collection) in NURSING_REFERENCE_MODELS.items():
-        reference = context.get("selected_sources", {}).get(key)
-        if reference is None:
+    for collection, (model, primary_key, key) in NURSING_LOADED_MODELS.items():
+        frozen_rows = context.get(collection, [])
+        if not isinstance(frozen_rows, list):
+            raise HTTPException(403, "护理或评分冻结资料格式不完整，请由超级管理员核查原始审计")
+        references = []
+        prefix = collection + ":"
+        for item in frozen_rows:
+            source_id = item.get("source_id") if isinstance(item, dict) else None
+            if not isinstance(source_id, str) or not source_id.startswith(prefix):
+                raise HTTPException(403, "护理或评分冻结资料缺少原引用，请由超级管理员核查原始审计")
+            reference = source_id[len(prefix) :]
+            if (
+                not reference
+                or len(reference) > 50
+                or (model in {IcuScoreRecord, NursingRecord} and (not reference.isascii() or not reference.isdigit() or not 0 < int(reference) <= 2147483647 or str(int(reference)) != reference))
+            ):
+                raise HTTPException(403, "护理或评分冻结资料原引用不规范，请由超级管理员核查原始审计")
+            references.append(reference)
+        selected = context.get("selected_sources", {}).get(key)
+        if len(set(references)) != len(references) or (selected is not None and selected not in references):
+            raise HTTPException(403, "护理或评分冻结资料与原引用不一致，请由超级管理员核查原始审计")
+        if not references:
             continue
-        row = db.query(model).filter(getattr(model, primary_key) == reference).populate_existing().first()
-        source_id = collection + ":" + reference
-        frozen = next((item for item in context.get(collection, []) if item["source_id"] == source_id), None)
-        if row is None or frozen is None or patient is None or row.patient_id != patient.patient_id or row.admission_id != encounter_ref:
-            raise HTTPException(403, "护理或评分原资料不存在或归属已变化，请重新核对原资料；冻结审计由超级管理员保留")
-        fields = {name: value for name, value in frozen.items() if name != "source_id"}
-        current = {name: getattr(row, name) for name in fields}
-        current = json.loads(encode_json(minimize(current, patient)))
-        if digest(current) != digest(fields):
-            raise HTTPException(403, "护理或评分原资料已改变，旧结果不能继续作为当前资料读取，请重新核对；超级管理员可查冻结审计")
+        current_rows = db.query(model).filter(getattr(model, primary_key).in_(references)).populate_existing().all()
+        originals = {str(getattr(row, primary_key)): row for row in current_rows}
+        for reference, frozen in zip(references, frozen_rows, strict=True):
+            row = originals.get(reference)
+            if row is None or patient is None or row.patient_id != patient.patient_id or row.admission_id != encounter_ref:
+                raise HTTPException(403, "护理或评分原资料不存在或归属已变化，请重新核对原资料；冻结审计由超级管理员保留")
+            fields = {name: value for name, value in frozen.items() if name != "source_id"}
+            try:
+                current = json.loads(encode_json(minimize({name: getattr(row, name) for name in fields}, patient)))
+            except (AttributeError, TypeError, ValueError) as exc:
+                raise HTTPException(403, "护理或评分原资料格式已变化，请由超级管理员核查冻结审计") from exc
+            if digest(current) != digest(fields):
+                raise HTTPException(403, "护理或评分原资料已改变，旧结果不能继续作为当前资料读取，请重新核对；超级管理员可查冻结审计")
 
 
 def validate_nursing_selection(spec, selected, encounter):
@@ -107,6 +135,7 @@ def attach_nursing_review(bundle):
             "本地护理风险0–3标记及ADL数值未提供标准量表定义、版本与逐项答案，不自动换算Morse、Braden或其他量表",
             "历史默认值可能未经过显式评估；nullable_v1仅表示新输入允许未知，不证明人工评估或临床正确",
             "评估发生时间未知时不以创建或更新时间代替；其他患者级体征和检验不按日期归入本次住院",
+            "既有护理记录原时间没有独立发生/登记来源标记，不视为已核实的连续监测时间窗",
             "原自由文本入量、出量、氧疗及尿量不自动解析单位、累计区间或给药暴露，不据缺项判断正常",
         ],
     }

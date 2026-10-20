@@ -59,6 +59,7 @@ if (mode === "production") {
 
     if (stats.hasErrors()) {
       console.error(info.errors);
+      process.exitCode = 1;
     }
 
     if (stats.hasWarnings()) {

@@ -21,7 +21,7 @@
           <template #default="{ row }">
             <span v-if="row.rule_type === 'interaction'">{{ row.drug_a }} × {{ row.drug_b }}</span>
             <span v-else-if="row.rule_type === 'dose'">
-              {{ row.drug_a }}（{{ row.min_dose ?? '-' }} ~ {{ row.max_dose ?? '-' }} / 次；日限 {{ row.max_daily_dose ?? '-' }}）
+              {{ row.drug_a }}（{{ row.min_dose ?? '-' }} ~ {{ row.max_dose ?? '-' }} {{ row.dose_unit || '单位待补充' }} / 次；日限 {{ row.max_daily_dose ?? '-' }} {{ row.dose_unit || '' }}）
             </span>
             <span v-else-if="row.rule_type === 'context'">{{ row.drug_a }} · {{ formatCondition(row.condition) }}</span>
             <span v-else>{{ row.drug_a }}</span>
@@ -67,6 +67,7 @@
           <el-input v-model="form.drug_b" placeholder="如：酒精" />
         </el-form-item>
         <template v-if="form.rule_type === 'dose'">
+          <el-form-item label="剂量单位" required><el-input v-model="form.dose_unit" maxlength="24" placeholder="与处方每次剂量一致的原始单位，如 mg" /></el-form-item>
           <el-form-item label="每次剂量下限">
             <el-input-number v-model="form.min_dose" :min="0" :controls="false" style="width: 100%" />
           </el-form-item>
@@ -122,19 +123,20 @@
           <div style="display: flex; gap: 8px; width: 100%">
             <el-input v-model="item.name" placeholder="药品名" style="flex: 1" />
             <el-input-number v-model="item.dosage" :min="0" placeholder="每次剂量" :controls="false" style="width: 110px" />
-            <el-select v-model="item.frequency" style="width: 100px">
-              <el-option v-for="f in ['qd', 'bid', 'tid', 'qid', 'q8h', 'q6h', 'qn', 'prn', 'st']" :key="f" :label="f" :value="f" />
+            <el-input v-model="item.dose_unit" placeholder="剂量单位" maxlength="24" style="width: 100px" />
+            <el-select v-model="item.frequency" placeholder="频次" clearable style="width: 100px">
+              <el-option v-for="f in ['qd', 'bid', 'tid', 'qid', 'q8h', 'q6h', 'q12h', 'qn', 'prn', 'st']" :key="f" :label="f" :value="f" />
             </el-select>
             <el-button type="danger" circle size="small" @click="checkForm.items.splice(i, 1)">−</el-button>
           </div>
         </el-form-item>
-        <el-button size="small" @click="checkForm.items.push({ name: '', dosage: null, frequency: 'bid' })">+ 添加药品</el-button>
+        <el-button size="small" @click="checkForm.items.push({ name: '', dosage: null, dose_unit: '', frequency: '' })">+ 添加药品</el-button>
       </el-form>
       <el-divider content-position="left">检查结果</el-divider>
       <div v-if="checkResult">
-        <el-alert v-if="checkResult.blocked" type="error" :closable="false" title="存在「禁止」级规则命中，处方不可通过" />
-        <el-alert v-else-if="checkResult.findings.length" type="warning" :closable="false" title="存在提示/警告级命中" />
-        <el-alert v-else type="success" :closable="false" title="未命中任何规则" />
+        <el-alert v-if="checkResult.blocked" type="error" :closable="false" title="存在禁止事项或禁止级规则尚未完整评估，处方不可通过" />
+        <el-alert v-else-if="checkResult.findings.length" type="warning" :closable="false" title="存在规则提示或尚待复核事项" />
+        <el-alert v-else type="info" :closable="false" title="现有规则未产生提示；不代表已覆盖全部用药风险" />
         <el-table v-if="checkResult.findings.length" :data="checkResult.findings" border size="small" style="margin-top: 8px">
           <el-table-column prop="severity" label="级别" width="70">
             <template #default="{ row }">
@@ -142,7 +144,16 @@
             </template>
           </el-table-column>
           <el-table-column prop="message" label="消息" />
+          <el-table-column label="评估" width="110"><template #default="{ row }">{{ row.evaluation_status === 'not_evaluated' ? '待完整评估' : '规则命中' }}</template></el-table-column>
         </el-table>
+        <el-collapse v-if="checkResult.dose_evaluations?.length"><el-collapse-item title="剂量规则计算依据">
+          <p>逐行比较原始单位一致的剂量。按需、单次或未知频次不计算每日总量；成分累计和未记录用药需药师核实。</p>
+          <el-table :data="checkResult.dose_evaluations" size="small" border>
+            <el-table-column label="规则" width="120"><template #default="{ row }">#{{ row.rule_id }} · {{ row.dose_unit || '单位未知' }}</template></el-table-column>
+            <el-table-column label="计算记录" min-width="230"><template #default="{ row }"><p v-for="(item, i) in row.calculations" :key="i">{{ item.drug_name }}：每次 {{ item.single_dose }} {{ item.dose_unit }}，{{ item.frequency || '频次未知' }}；该行每日量 {{ item.calculated_daily_dose ?? '未计算' }} {{ item.calculated_daily_dose ? item.dose_unit : '' }}</p></template></el-table-column>
+            <el-table-column label="待复核" min-width="180"><template #default="{ row }">{{ row.issues.join('；') || '该规则输入已具备，仍需核对规则适用性' }}</template></el-table-column>
+          </el-table>
+        </el-collapse-item></el-collapse>
       </div>
       <template #footer>
         <el-button @click="checkDialogVisible = false">关闭</el-button>
@@ -182,7 +193,7 @@ export default {
       dialogVisible: false,
       form: {},
       checkDialogVisible: false,
-      checkForm: { patient_id: "", items: [{ name: "", dosage: null, frequency: "bid" }] },
+      checkForm: { patient_id: "", items: [{ name: "", dosage: null, dose_unit: "", frequency: "" }] },
       checkResult: null,
       conditionDiagnoses: "",
       conditionLabs: "",

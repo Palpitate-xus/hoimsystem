@@ -543,7 +543,8 @@ def _validate_reviews(req, manifest):
             raise HTTPException(409, "原明确无呼吸支持不能由当前资格声明覆写为有支持，须保留并核对实际原件")
         if (
             member["kind"] == "vasoactive"
-            and member["temporal_role"] == "period"
+            and member["full_source"]["payload"]["start_at"] < req.period_end
+            and member["full_source"]["payload"]["verified_until_at"] > req.period_start
             and review.status == "confirmed"
             and req.coverage.cardiovascular.drug_exposure == "none"
             and _known_positive_exposure(member["full_source"]["payload"]["dose_input"])

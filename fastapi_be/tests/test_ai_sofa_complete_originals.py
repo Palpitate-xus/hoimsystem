@@ -368,3 +368,19 @@ def test_no_drug_exposure_cannot_contradict_confirmed_actual_positive_native_dos
         public = sofa.assessment_detail(db_session, assessment)["specialist_source"]
         interval = next(item for item in public["vasoactive_groups"][0]["intervals"] if item["support_source_id"] == active.support_source_id)
         assert interval["dose_input"]["pump_rate" if mode == "pump" else "rate"]["value"] == value
+
+
+@pytest.mark.parametrize("minutes", [0, 15])
+def test_actual_positive_prefix_ended_before_day_does_not_contradict_no_in_period_exposure(db_session, assessment_case, monkeypatch, minutes):
+    case = assessment_case
+    ended = case["period_start"] - datetime.timedelta(minutes=minutes)
+    row, _ = vaso_original(db_session, case, monkeypatch, start=ended - datetime.timedelta(hours=2), end=ended, native="0.10000000")
+    original = manifest(db_session, case)
+    member = next(item for item in original["members"] if item["identifier"] == row.support_source_id)
+    assert member["temporal_role"] == "prefix"
+    values = clinical_request(case, original)
+    values["vasoactive_group_reviews"] = [{"drug_key": "norepinephrine", "relation": "single_stream", "relation_confirmed": True, "dose_basis_consistency_confirmed": True, "basis_note": NOTE}]
+    assessment = register(db_session, case, values=values)
+    public = sofa.assessment_detail(db_session, assessment)["specialist_source"]
+    interval = public["vasoactive_groups"][0]["intervals"][0]
+    assert interval["verified_until_at"] <= public["start_at"] and public["circulation_review"]["drug_exposure"] == "none"

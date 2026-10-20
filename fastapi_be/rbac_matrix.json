@@ -518,6 +518,15 @@
   "auth": [
    "super_admin"
   ],
+  "function": "check_supply_provider",
+  "method": "POST",
+  "module": "ai_admin.py",
+  "path": "/api/ai/admin/providers/{provider_id}/supply-capabilities"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
   "function": "list_global_runs",
   "method": "GET",
   "module": "ai_admin.py",
@@ -2002,6 +2011,249 @@
   "method": "GET",
   "module": "ai_sofa_change.py",
   "path": "/api/ai/admin/sofa-change-assessments/{change_assessment_id}"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "preview",
+  "method": "POST",
+  "module": "ai_supply_series.py",
+  "path": "/api/ai/supply-series/preview"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "series_list",
+  "method": "GET",
+  "module": "ai_supply_series.py",
+  "path": "/api/ai/supply-series"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "create",
+  "method": "POST",
+  "module": "ai_supply_series.py",
+  "path": "/api/ai/supply-series"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "detail",
+  "method": "GET",
+  "module": "ai_supply_series.py",
+  "path": "/api/ai/supply-series/{series_id}"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "review",
+  "method": "POST",
+  "module": "ai_supply_series.py",
+  "path": "/api/ai/supply-series/{series_id}/review"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "revoke",
+  "method": "POST",
+  "module": "ai_supply_series.py",
+  "path": "/api/ai/supply-series/{series_id}/revoke"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "admin_list",
+  "method": "GET",
+  "module": "ai_supply_series.py",
+  "path": "/api/ai/admin/supply-series"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "admin_detail",
+  "method": "GET",
+  "module": "ai_supply_series.py",
+  "path": "/api/ai/admin/supply-series/{series_id}"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "options",
+  "method": "GET",
+  "module": "ai_supply_sources.py",
+  "path": "/api/ai/supply-sources/options"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "unit_list",
+  "method": "GET",
+  "module": "ai_supply_sources.py",
+  "path": "/api/ai/supply-sources/units"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "unit_create",
+  "method": "POST",
+  "module": "ai_supply_sources.py",
+  "path": "/api/ai/supply-sources/units"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "unit_detail",
+  "method": "GET",
+  "module": "ai_supply_sources.py",
+  "path": "/api/ai/supply-sources/units/{record_id}"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "unit_review",
+  "method": "POST",
+  "module": "ai_supply_sources.py",
+  "path": "/api/ai/supply-sources/units/{record_id}/review"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "unit_revoke",
+  "method": "POST",
+  "module": "ai_supply_sources.py",
+  "path": "/api/ai/supply-sources/units/{record_id}/revoke"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "daily_list",
+  "method": "GET",
+  "module": "ai_supply_sources.py",
+  "path": "/api/ai/supply-sources/daily"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "daily_create",
+  "method": "POST",
+  "module": "ai_supply_sources.py",
+  "path": "/api/ai/supply-sources/daily"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "daily_detail",
+  "method": "GET",
+  "module": "ai_supply_sources.py",
+  "path": "/api/ai/supply-sources/daily/{record_id}"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "daily_review",
+  "method": "POST",
+  "module": "ai_supply_sources.py",
+  "path": "/api/ai/supply-sources/daily/{record_id}/review"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "daily_revoke",
+  "method": "POST",
+  "module": "ai_supply_sources.py",
+  "path": "/api/ai/supply-sources/daily/{record_id}/revoke"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "preview",
+  "method": "POST",
+  "module": "ai_supply_sources.py",
+  "path": "/api/ai/supply-sources/preview"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "admin_list",
+  "method": "GET",
+  "module": "ai_supply_sources.py",
+  "path": "/api/ai/admin/supply-sources"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "admin_detail",
+  "method": "GET",
+  "module": "ai_supply_sources.py",
+  "path": "/api/ai/admin/supply-sources/{record_id}"
  },
  {
   "auth": [

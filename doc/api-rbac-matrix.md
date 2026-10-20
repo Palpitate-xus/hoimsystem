@@ -3,7 +3,7 @@
 > 由 `fastapi_be/scripts/generate_rbac_matrix.py` 从源码自动生成，请勿手改。
 > `✓`=可访问 | `PUBLIC`=无需登录 | 留空=不可访问
 
-共 **787** 个接口（PUBLIC 18 个 / 需登录 769 个）。
+共 **810** 个接口（PUBLIC 18 个 / 需登录 792 个）。
 
 
 ### `admin.py`
@@ -92,6 +92,7 @@
 | POST | `/api/ai/admin/providers/{provider_id}/roster-capabilities` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
 | POST | `/api/ai/admin/providers/{provider_id}/bed-capabilities` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
 | POST | `/api/ai/admin/providers/{provider_id}/surgery-capabilities` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/admin/providers/{provider_id}/supply-capabilities` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
 | GET | `/api/ai/admin/runs` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
 | GET | `/api/ai/admin/runs/{run_id}` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
 | POST | `/api/ai/admin/providers` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
@@ -319,6 +320,38 @@
 | POST | `/api/ai/sofa-change-assessments/{change_assessment_id}/revoke` | ✓ | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |
 | GET | `/api/ai/admin/sofa-change-assessments` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
 | GET | `/api/ai/admin/sofa-change-assessments/{change_assessment_id}` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+
+### `ai_supply_series.py`
+
+| 方法 | 路径 | admin | super_admin | director | doctor | nurse | cashier | pharmacist | guide | patient | lab_technician | registrar | PUBLIC |
+|------|------|------|------|------|------|------|------|------|------|------|------|------|------|
+| POST | `/api/ai/supply-series/preview` | ✓ | ✓ | ✓ |  |  |  | ✓ |  |  |  |  |  |
+| GET | `/api/ai/supply-series` | ✓ | ✓ | ✓ |  |  |  | ✓ |  |  |  |  |  |
+| POST | `/api/ai/supply-series` | ✓ | ✓ | ✓ |  |  |  | ✓ |  |  |  |  |  |
+| GET | `/api/ai/supply-series/{series_id}` | ✓ | ✓ | ✓ |  |  |  | ✓ |  |  |  |  |  |
+| POST | `/api/ai/supply-series/{series_id}/review` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/supply-series/{series_id}/revoke` | ✓ | ✓ | ✓ |  |  |  | ✓ |  |  |  |  |  |
+| GET | `/api/ai/admin/supply-series` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/admin/supply-series/{series_id}` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+
+### `ai_supply_sources.py`
+
+| 方法 | 路径 | admin | super_admin | director | doctor | nurse | cashier | pharmacist | guide | patient | lab_technician | registrar | PUBLIC |
+|------|------|------|------|------|------|------|------|------|------|------|------|------|------|
+| GET | `/api/ai/supply-sources/options` | ✓ | ✓ | ✓ |  |  |  | ✓ |  |  |  |  |  |
+| GET | `/api/ai/supply-sources/units` | ✓ | ✓ | ✓ |  |  |  | ✓ |  |  |  |  |  |
+| POST | `/api/ai/supply-sources/units` | ✓ | ✓ | ✓ |  |  |  | ✓ |  |  |  |  |  |
+| GET | `/api/ai/supply-sources/units/{record_id}` | ✓ | ✓ | ✓ |  |  |  | ✓ |  |  |  |  |  |
+| POST | `/api/ai/supply-sources/units/{record_id}/review` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/supply-sources/units/{record_id}/revoke` | ✓ | ✓ | ✓ |  |  |  | ✓ |  |  |  |  |  |
+| GET | `/api/ai/supply-sources/daily` | ✓ | ✓ | ✓ |  |  |  | ✓ |  |  |  |  |  |
+| POST | `/api/ai/supply-sources/daily` | ✓ | ✓ | ✓ |  |  |  | ✓ |  |  |  |  |  |
+| GET | `/api/ai/supply-sources/daily/{record_id}` | ✓ | ✓ | ✓ |  |  |  | ✓ |  |  |  |  |  |
+| POST | `/api/ai/supply-sources/daily/{record_id}/review` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/supply-sources/daily/{record_id}/revoke` | ✓ | ✓ | ✓ |  |  |  | ✓ |  |  |  |  |  |
+| POST | `/api/ai/supply-sources/preview` | ✓ | ✓ | ✓ |  |  |  | ✓ |  |  |  |  |  |
+| GET | `/api/ai/admin/supply-sources` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/admin/supply-sources/{record_id}` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
 
 ### `ai_surgery_scenarios.py`
 

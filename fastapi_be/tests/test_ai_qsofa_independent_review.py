@@ -54,7 +54,12 @@ def register_assessment(db, case, **changes):
 
 
 def request_for(case, **changes):
-    return RunRequest(feature_key="sepsis_risk", patient_id=case["patient_id"], encounter_ref=case["admission_id"], input={"observation_window_id": case["window"].window_id, "qsofa_assessment_id": case["assessment"].assessment_id, "question": "此私有问题不得外发，也不能使低计数被称为排除感染", **changes})
+    return RunRequest(
+        feature_key="sepsis_risk",
+        patient_id=case["patient_id"],
+        encounter_ref=case["admission_id"],
+        input={"observation_window_id": case["window"].window_id, "qsofa_assessment_id": case["assessment"].assessment_id, "question": "此私有问题不得外发，也不能使低计数被称为排除感染", **changes},
+    )
 
 
 class ActualService(httpx.AsyncBaseTransport):
@@ -129,7 +134,21 @@ async def test_original_feature42_window_mode_still_executes_its_own_schema_with
         calls.append(task)
         assert task["schema_version"] == "1" and "qsofa_source" not in task["input"]["context"]
         source_id = task["input"]["evidence"][0]["source_id"]
-        return httpx.Response(200, json={"schema_version": "1", "feature_key": "sepsis_risk", "model_version": case["provider"].model, "applicable": True, "result": {"summary": "合成已有模型的独立测试结果", "sections": [{"title": "原窗口依据", "content": "这是旧协议工程回归测试", "source_ids": [source_id]}], "warnings": [], "missing_data": []}})
+        return httpx.Response(
+            200,
+            json={
+                "schema_version": "1",
+                "feature_key": "sepsis_risk",
+                "model_version": case["provider"].model,
+                "applicable": True,
+                "result": {
+                    "summary": "合成已有模型的独立测试结果",
+                    "sections": [{"title": "原窗口依据", "content": "这是旧协议工程回归测试", "source_ids": [source_id]}],
+                    "warnings": [],
+                    "missing_data": [],
+                },
+            },
+        )
 
     await execute_claimed(*claim_next_run(db_session), transport=httpx.MockTransport(external))
     db_session.expire_all()
@@ -192,7 +211,9 @@ async def test_actual_nurse_reuses_doctor_signed_assessment_with_original_admiss
     case = review_case
     register_assessment(db_session, case)
     nurse = case["seed"]["nurse_user"]
-    care = NursingRecord(patient_id=case["patient_id"], admission_id=case["admission_id"], nurse_id=nurse.user_id, record_time=case["now"], create_time=case["now"], note="合成既有原住院护理照护，不是AI推理写入")
+    care = NursingRecord(
+        patient_id=case["patient_id"], admission_id=case["admission_id"], nurse_id=nurse.user_id, record_time=case["now"], create_time=case["now"], note="合成既有原住院护理照护，不是AI推理写入"
+    )
     db_session.add(care)
     db_session.commit()
     original_assessment = (case["assessment"].snapshot_json, case["assessment"].created_by, case["assessment"].content_hash)

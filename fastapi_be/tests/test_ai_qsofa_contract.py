@@ -83,7 +83,9 @@ def test_original_values_distinct_real_exam_clocks_and_current_retrospective_rev
     assert QsofaSource.model_validate(source).age_at_observation_years is None
 
 
-@pytest.mark.parametrize("field,value", [("patient_id", 1), ("admission_id", "private-original-admission"), ("question", "private-instruction"), ("pregnancy_status", "not_pregnant"), ("note", "private-clinical-note")])
+@pytest.mark.parametrize(
+    "field,value", [("patient_id", 1), ("admission_id", "private-original-admission"), ("question", "private-instruction"), ("pregnancy_status", "not_pregnant"), ("note", "private-clinical-note")]
+)
 def test_no_extra_identifiers_or_private_narrative(field, value):
     source = make_source()
     source[field] = value
@@ -94,12 +96,24 @@ def test_no_extra_identifiers_or_private_narrative(field, value):
 @pytest.mark.parametrize(
     "field,value",
     [
-        ("age_at_observation_years", True), ("age_at_observation_years", "40"), ("age_at_observation_years", 40.5), ("age_at_observation_years", 131),
-        ("source_id", "news2_assessment:wrong"), ("recipe_digest", "0" * 64), ("window_id", "not-a-uuid"),
-        ("point_content_hash", "0" * 64), ("point_governance_hash", "not-a-hash"), ("point_conflicts", ["temperature"]), ("point_conflicts", ["systolic_bp", "systolic_bp"]),
-        ("historical_prediction", True), ("historical_prediction", 0), ("review_mode", "historical_prediction"),
-        ("clinical_statements_recorded_at", "2026-10-20T12:00:00Z"), ("clinical_scope_applies_to", "2026-10-20T11:01:00Z"),
-        ("evaluation_at", "2026-10-20T11:00:00Z"), ("recorded_at", "2026-10-20T13:00:00Z"),
+        ("age_at_observation_years", True),
+        ("age_at_observation_years", "40"),
+        ("age_at_observation_years", 40.5),
+        ("age_at_observation_years", 131),
+        ("source_id", "news2_assessment:wrong"),
+        ("recipe_digest", "0" * 64),
+        ("window_id", "not-a-uuid"),
+        ("point_content_hash", "0" * 64),
+        ("point_governance_hash", "not-a-hash"),
+        ("point_conflicts", ["temperature"]),
+        ("point_conflicts", ["systolic_bp", "systolic_bp"]),
+        ("historical_prediction", True),
+        ("historical_prediction", 0),
+        ("review_mode", "historical_prediction"),
+        ("clinical_statements_recorded_at", "2026-10-20T12:00:00Z"),
+        ("clinical_scope_applies_to", "2026-10-20T11:01:00Z"),
+        ("evaluation_at", "2026-10-20T11:00:00Z"),
+        ("recorded_at", "2026-10-20T13:00:00Z"),
     ],
 )
 def test_invalid_identity_scope_and_time_bindings_fail(field, value):
@@ -125,7 +139,19 @@ def test_clock_format_never_truncates_or_infers_utc(value):
         QsofaSource.model_validate(source)
 
 
-@pytest.mark.parametrize("field,value", [("same_exam_confirmed", 1), ("same_exam_confirmed", False), ("anchor_point_id", "00000000-0000-4000-8000-999999999999"), ("anchor_point_content_hash", "0" * 64), ("observed_at", "2026-10-20T09:59:59Z"), ("observed_at", "2026-10-20T12:00:01Z"), ("recorded_at", "2026-10-20T13:00:00Z"), ("conflict", 0)])
+@pytest.mark.parametrize(
+    "field,value",
+    [
+        ("same_exam_confirmed", 1),
+        ("same_exam_confirmed", False),
+        ("anchor_point_id", "00000000-0000-4000-8000-999999999999"),
+        ("anchor_point_content_hash", "0" * 64),
+        ("observed_at", "2026-10-20T09:59:59Z"),
+        ("observed_at", "2026-10-20T12:00:01Z"),
+        ("recorded_at", "2026-10-20T13:00:00Z"),
+        ("conflict", 0),
+    ],
+)
 def test_gcs_original_anchor_clocks_and_boolean_confirmation_are_required(field, value):
     source = make_source()
     source["gcs"][field] = value

@@ -62,7 +62,9 @@ async def test_authentication_precedes_parsing_and_capabilities_never_score(monk
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize("case,status,total", [("complete", "computed", 0), ("partial", "insufficient_data", None), ("icu", "outside_scope", None), ("unknown", "insufficient_data", None), ("gcs14", "computed", 1)])
+@pytest.mark.parametrize(
+    "case,status,total", [("complete", "computed", 0), ("partial", "insufficient_data", None), ("icu", "outside_scope", None), ("unknown", "insufficient_data", None), ("gcs14", "computed", 1)]
+)
 async def test_actual_service_emits_recomputable_typed_results_and_fixed_text(case, status, total):
     source = make_source()
     if case == "partial":

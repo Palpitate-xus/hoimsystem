@@ -32,9 +32,27 @@ def qsofa_values(source):
         if key in MEASUREMENT_UNITS:
             measurement = source.measurements.get(key)
             raw = measurement.value if measurement else None
-            item = {"key": key, "raw_value": raw, "unit": MEASUREMENT_UNITS[key], "observed_at": source.observed_at, "source_ids": [source.point_source_id], "score": None, "status": "missing", "reason": "not_recorded"}
+            item = {
+                "key": key,
+                "raw_value": raw,
+                "unit": MEASUREMENT_UNITS[key],
+                "observed_at": source.observed_at,
+                "source_ids": [source.point_source_id],
+                "score": None,
+                "status": "missing",
+                "reason": "not_recorded",
+            }
         else:
-            item = {"key": key, "raw_value": str(raw_gcs_total) if raw_gcs_total is not None else None, "unit": "score", "observed_at": gcs.observed_at if gcs else None, "source_ids": [gcs.source_id, source.point_source_id] if gcs else [source.source_id], "score": None, "status": "missing", "reason": "gcs_not_selected_no_avpu_substitution"}
+            item = {
+                "key": key,
+                "raw_value": str(raw_gcs_total) if raw_gcs_total is not None else None,
+                "unit": "score",
+                "observed_at": gcs.observed_at if gcs else None,
+                "source_ids": [gcs.source_id, source.point_source_id] if gcs else [source.source_id],
+                "score": None,
+                "status": "missing",
+                "reason": "gcs_not_selected_no_avpu_substitution",
+            }
         if outside or unknown:
             item.update(status="outside_scope" if outside else "requires_review", reason="population_outside_scope" if outside else "population_applicability_unknown")
         elif key in source.point_conflicts:
@@ -123,10 +141,14 @@ def generation_result_for_analysis(analysis) -> dict:
     """Fixed explanation of verified facts; no generated clinical claims."""
     analysis = QsofaAnalysis.model_validate(analysis)
     if analysis.calculation_status == "computed":
-        summary = f"所选原资料qSOFA三项完整计数为{analysis.total_score}/3；" + ("已达到至少两项的提示阈值。" if analysis.threshold_status == "at_least_two" else "本次完整资料未达到两项提示阈值，但不能排除脓毒症或病情恶化。")
+        summary = f"所选原资料qSOFA三项完整计数为{analysis.total_score}/3；" + (
+            "已达到至少两项的提示阈值。" if analysis.threshold_status == "at_least_two" else "本次完整资料未达到两项提示阈值，但不能排除脓毒症或病情恶化。"
+        )
     elif analysis.scope_status == "confirmed":
         subtotal = str(analysis.observed_subtotal) if analysis.observed_subtotal is not None else "未提供"
-        summary = f"所选原资料有{analysis.scored_count}/3项可计分，已知小计为{subtotal}，完整qSOFA计数为空；" + ("实际已知两项已达到提示阈值，仍缺完整资料。" if analysis.threshold_status == "at_least_two" else "不完整资料的阈值状态未知，不能据此排除脓毒症。")
+        summary = f"所选原资料有{analysis.scored_count}/3项可计分，已知小计为{subtotal}，完整qSOFA计数为空；" + (
+            "实际已知两项已达到提示阈值，仍缺完整资料。" if analysis.threshold_status == "at_least_two" else "不完整资料的阈值状态未知，不能据此排除脓毒症。"
+        )
     else:
         summary = "当前临床核实的适用范围未知或超出本实现范围，原事实保留，未提供qSOFA分项分数、小计或完整计数。"
     summary += "本结果不是唯一脓毒症筛查、诊断、概率或自动治疗依据。"
@@ -136,7 +158,13 @@ def generation_result_for_analysis(analysis) -> dict:
         source_ids.append(source.gcs.source_id)
     return {
         "summary": summary,
-        "sections": [{"title": "所选原资料qSOFA三项核对", "content": "原呼吸频率、收缩压、完整或缺测GCS分项、实际时刻、同次锚定、当前回顾性临床声明、相关冲突与固定规则版本见结构化核对表。0分仅表示未达该单项阈值，不证明数值正常。", "source_ids": source_ids}],
+        "sections": [
+            {
+                "title": "所选原资料qSOFA三项核对",
+                "content": "原呼吸频率、收缩压、完整或缺测GCS分项、实际时刻、同次锚定、当前回顾性临床声明、相关冲突与固定规则版本见结构化核对表。0分仅表示未达该单项阈值，不证明数值正常。",
+                "source_ids": source_ids,
+            }
+        ],
         "warnings": analysis.warnings,
         "missing_data": analysis.missing_data,
     }

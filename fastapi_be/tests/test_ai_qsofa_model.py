@@ -18,11 +18,23 @@ def criterion(result, key):
 
 def analysis_for(source=None):
     source = source or make_source()
-    return QsofaAnalysis.model_validate({"schema_version": "1", "source_binding": source, **qsofa_values(source), "local_runtime": runtime_from_descriptor(runtime_descriptor()), "instructions_digest": hashlib.sha256(b"complete synthetic qSOFA Prompt").hexdigest()})
+    return QsofaAnalysis.model_validate(
+        {
+            "schema_version": "1",
+            "source_binding": source,
+            **qsofa_values(source),
+            "local_runtime": runtime_from_descriptor(runtime_descriptor()),
+            "instructions_digest": hashlib.sha256(b"complete synthetic qSOFA Prompt").hexdigest(),
+        }
+    )
 
 
 # Final Singer consensus: RR >=22/min, SBP <=100 mmHg; no integer rounding.
-@pytest.mark.parametrize("key,value,expected", [("respiratory_rate", value, score) for value, score in [("0", 0), ("21.99999999", 0), ("22", 1), ("22.00000001", 1), ("200.00000000", 1)]] + [("systolic_bp", value, score) for value, score in [("0.00000000", 1), ("99.99999999", 1), ("100", 1), ("100.00000001", 0), ("220", 0)]])
+@pytest.mark.parametrize(
+    "key,value,expected",
+    [("respiratory_rate", value, score) for value, score in [("0", 0), ("21.99999999", 0), ("22", 1), ("22.00000001", 1), ("200.00000000", 1)]]
+    + [("systolic_bp", value, score) for value, score in [("0.00000000", 1), ("99.99999999", 1), ("100", 1), ("100.00000001", 0), ("220", 0)]],
+)
 def test_exact_thresholds_do_not_round_original_precision_or_drop_zero(key, value, expected):
     source = make_source()
     source["measurements"][key]["value"] = value
@@ -109,7 +121,21 @@ def test_same_time_point_conflict_blocks_only_dependent_criterion(key):
     assert criterion(result, "mentation")["score"] == 0
 
 
-@pytest.mark.parametrize("age,setting,infection,scope", [(None, "non_icu", "suspected", "unknown"), (17, "non_icu", "suspected", "outside_scope"), (0, "unknown", "unknown", "outside_scope"), (40, "icu", "unknown", "outside_scope"), (None, "icu", "suspected", "outside_scope"), (40, "non_icu", "not_suspected", "outside_scope"), (40, "unknown", "suspected", "unknown"), (40, "non_icu", "unknown", "unknown"), (18, "non_icu", "documented", "confirmed"), (130, "non_icu", "suspected", "confirmed")])
+@pytest.mark.parametrize(
+    "age,setting,infection,scope",
+    [
+        (None, "non_icu", "suspected", "unknown"),
+        (17, "non_icu", "suspected", "outside_scope"),
+        (0, "unknown", "unknown", "outside_scope"),
+        (40, "icu", "unknown", "outside_scope"),
+        (None, "icu", "suspected", "outside_scope"),
+        (40, "non_icu", "not_suspected", "outside_scope"),
+        (40, "unknown", "suspected", "unknown"),
+        (40, "non_icu", "unknown", "unknown"),
+        (18, "non_icu", "documented", "confirmed"),
+        (130, "non_icu", "suspected", "confirmed"),
+    ],
+)
 def test_explicit_scope_and_definite_outside_precedence_never_assume_adult_infection(age, setting, infection, scope):
     source = make_source()
     source.update(age_at_observation_years=age, care_setting=setting, infection_status=infection)

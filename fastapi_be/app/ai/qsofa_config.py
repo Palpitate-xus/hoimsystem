@@ -34,7 +34,16 @@ def runtime_descriptor(config=None):
         "independent_implementation": True,
     }
     digest = hashlib.sha256(canonical_json(identity).encode()).hexdigest()
-    return {"schema_version": "8", "feature_key": "sepsis_risk", **identity, "runtime_digest": digest, "model_version": "qsofa:" + digest, "recipe": RECIPE, "max_request_bytes": config.max_request_bytes if config else 131072, "timeout_seconds": config.timeout_seconds if config else 15}
+    return {
+        "schema_version": "8",
+        "feature_key": "sepsis_risk",
+        **identity,
+        "runtime_digest": digest,
+        "model_version": "qsofa:" + digest,
+        "recipe": RECIPE,
+        "max_request_bytes": config.max_request_bytes if config else 131072,
+        "timeout_seconds": config.timeout_seconds if config else 15,
+    }
 
 
 def runtime_from_descriptor(descriptor):

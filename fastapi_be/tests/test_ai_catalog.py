@@ -37,10 +37,10 @@ def test_hospital_scope_does_not_advertise_access_to_unscoped_business_roles():
     assert not FEATURE_BY_KEY["operations_qa"].requires_patient_data_permission
 
 
-def test_risk_metadata_advertises_only_its_window_and_optional_news2_assessment():
+def test_risk_metadata_advertises_its_independent_supported_source_modes():
     assert describe_feature(FEATURE_BY_KEY["deterioration_risk"])["source_reference_keys"] == ["news2_assessment_id", "observation_window_id"]
     assert describe_feature(FEATURE_BY_KEY["aki_risk"])["source_reference_keys"] == ["aki_assessment_id", "observation_window_id"]
-    assert describe_feature(FEATURE_BY_KEY["sepsis_risk"])["source_reference_keys"] == ["observation_window_id", "qsofa_assessment_id"]
+    assert describe_feature(FEATURE_BY_KEY["sepsis_risk"])["source_reference_keys"] == ["observation_window_id", "qsofa_assessment_id", "sofa_assessment_id", "sofa_change_assessment_id"]
     for spec in FEATURES:
         if spec.number not in {41, 42, 43}:
             assert "observation_window_id" not in describe_feature(spec)["source_reference_keys"]
@@ -50,6 +50,7 @@ def test_risk_metadata_advertises_only_its_window_and_optional_news2_assessment(
             assert "aki_assessment_id" not in describe_feature(spec)["source_reference_keys"]
         if spec.number != 42:
             assert "qsofa_assessment_id" not in describe_feature(spec)["source_reference_keys"]
+            assert not {"sofa_assessment_id", "sofa_change_assessment_id"} & set(describe_feature(spec)["source_reference_keys"])
         support_keys = {"support_source_id", "support_source_kind"}
         advertised = set(describe_feature(spec)["source_reference_keys"])
         assert support_keys <= advertised if spec.number == 47 else not support_keys & advertised

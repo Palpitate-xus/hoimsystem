@@ -11,7 +11,7 @@
         <p v-if="boundClinicalReferences.length">本次绑定资料：{{ boundClinicalReferences.join('、') }}。所选记录未注明对应就诊；选择就诊仅补充临床背景，不确认其归属。</p>
         <p v-if="boundPathwayReferences.length">本次绑定：{{ boundPathwayReferences.join('、') }}。住院关联以原记录核实；路径适用条件和已审核版本仍须核对。</p>
         <p v-if="boundNursingReferences.length && !needsRiskWindow">本次绑定：{{ boundNursingReferences.join('、') }}。按原患者与原住院核对，不能通过补充JSON替换；缺项、历史默认值及人工评分来源仍须复核。</p>
-        <p v-if="needsRiskWindow">本任务使用明确选择的原住院观测窗；NEWS2/AKI模式另需核对明确原来源与适用性评估，补充文字或JSON不能填补原数据缺项。</p>
+        <p v-if="needsRiskWindow">本任务使用明确选择的原住院观测窗；NEWS2/AKI/qSOFA模式另需核对明确原来源与适用性评估，补充文字或JSON不能填补原数据缺项。</p>
         <p v-if="props.initialInput.audio_asset_id">本次绑定原录音 {{ props.initialInput.audio_asset_id }}；以原登记资料核对患者与就诊，不能通过补充JSON替换。</p>
         <p v-if="props.initialInput.ecg_asset_id">本次绑定原始心电 {{ props.initialInput.ecg_asset_id }}；以原登记资料核对患者与就诊，不能通过补充JSON替换。</p>
         <p v-if="props.initialInput.imaging_order_id">本次绑定真实影像申请 {{ props.initialInput.imaging_order_id }}；原像素与患者须一致，不能通过补充JSON替换申请。</p>
@@ -32,6 +32,7 @@
         <ai-observation-window-input v-if="needsRiskWindow && patientId" :patient-id="patientId" :admission-id="encounterRef" :initial-window-id="String(props.initialInput.observation_window_id || '')" :disabled="submitting" @selection="riskWindowSelection = $event" @availability="riskWindowReady = $event" />
         <ai-news2-input v-if="needsNews2 && patientId && riskWindowReady && riskWindowSelection" :patient-id="patientId" :admission-id="encounterRef" :window-id="riskWindowSelection.observation_window_id" @selection="news2Selection = $event" @availability="news2Ready = $event" />
         <ai-aki-input v-if="needsAki && patientId && riskWindowReady && riskWindowSelection" :patient-id="patientId" :admission-id="encounterRef" :window-id="riskWindowSelection.observation_window_id" @selection="akiSelection = $event" @availability="akiReady = $event" />
+        <ai-qsofa-input v-if="needsQsofa && patientId && riskWindowReady && riskWindowSelection" :patient-id="patientId" :admission-id="encounterRef" :window-id="riskWindowSelection.observation_window_id" @selection="qsofaSelection = $event" @availability="qsofaReady = $event" />
         <ai-image-input v-if="needsImage && patientId" v-model="imageAssetId" :patient-id="patientId" :encounter-ref="encounterRef" :locked-order-id="String(props.initialInput.imaging_order_id || '')" :disabled="submitting" @select="selectImage" @availability="imageReady = $event" />
         <el-form-item v-if="needsPathway && patientId && !props.initialInput.pathway_enrollment_id" label="院内路径（可选）">
           <el-select v-model="pathwayId" :disabled="!!props.initialInput.pathway_id || pathwayOptionsLoading" :clearable="!props.initialInput.pathway_id" filterable placeholder="选择待比选的院内路径；也可仅使用审核指南" style="width: 100%" aria-label="待比选院内路径"><el-option v-for="item in pathwayOptions.items || []" :key="item.pathway_id" :value="String(item.pathway_id)" :disabled="!item.reviewed_for_current_scope" :label="`${item.name} · #${item.pathway_id}${item.reviewed_for_current_scope ? '' : ' · 当前范围未审核'}`" /></el-select>
@@ -72,13 +73,14 @@
           </el-collapse-item>
         </el-collapse>
         <el-alert v-if="needsForecast" type="info" :closable="false" title="本功能使用固定统计计算；Prompt仅用于来源审计，不由文本模型推测数值。" class="spaced" />
+        <el-alert v-else-if="needsQsofa" type="info" :closable="false" title="qSOFA逐项核对原床旁数据及医生当前回顾声明；不作为单一脓毒症筛查，不提供确诊、排除、概率或自动治疗。" class="spaced" />
         <el-alert v-else-if="needsAki" type="info" :closable="false" title="KDIGO AKI由固定代码核对所选资料；至少分期不表示未来概率、完整病程或自动处置，未达所选标准不等于排除AKI。" class="spaced" />
         <el-alert v-else-if="needsNews2" type="info" :closable="false" title="NEWS2使用固定规则计算；Prompt不改变分数。规则分类及小计下界不表示风险概率或自动处置。" class="spaced" />
         <el-alert v-else-if="selected.engine !== 'llm'" type="info" :closable="false" title="此能力通过专用模型处理，需要对应原始资料和已登记的适配服务。" class="spaced" />
         <div class="actions">
-          <el-button v-if="selected.scope === 'patient'" :disabled="!patientId || patientLoading || pathwayOptionsLoading || (needsRiskWindow && !riskWindowReady) || (needsNews2 && !news2Ready) || (needsAki && !akiReady) || (needsAudio && (!audioAssetId || !audioReady)) || (needsEcg && (!ecgAssetId || !ecgReady)) || (needsImage && (!imageAssetId || !imageOrderId || !imageReady))" @click="inspectContext">查看本次资料</el-button>
+          <el-button v-if="selected.scope === 'patient'" :disabled="!patientId || patientLoading || pathwayOptionsLoading || (needsRiskWindow && !riskWindowReady) || (needsNews2 && !news2Ready) || (needsAki && !akiReady) || (needsQsofa && !qsofaReady) || (needsAudio && (!audioAssetId || !audioReady)) || (needsEcg && (!ecgAssetId || !ecgReady)) || (needsImage && (!imageAssetId || !imageOrderId || !imageReady))" @click="inspectContext">查看本次资料</el-button>
           <el-button v-if="needsOperations" :disabled="serviceOptionsLoading || (needsForecast && !forecastReady)" @click="inspectOperationalContext">查看本次运营资料</el-button>
-          <el-button type="primary" :loading="submitting" :disabled="(needsRiskWindow && !riskWindowReady) || (needsNews2 && !news2Ready) || (needsAki && !akiReady) || (needsForecast && !forecastReady) || busy || patientLoading || serviceOptionsLoading || pathwayOptionsLoading || (needsAudio && (!audioAssetId || !audioReady)) || (needsEcg && (!ecgAssetId || !ecgReady)) || (needsImage && (!imageAssetId || !imageOrderId || !imageReady)) || (!selected.enabled && !preview) || (selected.scope === 'patient' && !patientId) || (needsInventory && (!inventoryDrugs.length && !inventoryConsumables.length || serviceOptions.inventory_scope_available === false))" @click="submit">生成辅助建议</el-button>
+          <el-button type="primary" :loading="submitting" :disabled="(needsRiskWindow && !riskWindowReady) || (needsNews2 && !news2Ready) || (needsAki && !akiReady) || (needsQsofa && !qsofaReady) || (needsForecast && !forecastReady) || busy || patientLoading || serviceOptionsLoading || pathwayOptionsLoading || (needsAudio && (!audioAssetId || !audioReady)) || (needsEcg && (!ecgAssetId || !ecgReady)) || (needsImage && (!imageAssetId || !imageOrderId || !imageReady)) || (!selected.enabled && !preview) || (selected.scope === 'patient' && !patientId) || (needsInventory && (!inventoryDrugs.length && !inventoryConsumables.length || serviceOptions.inventory_scope_available === false))" @click="submit">生成辅助建议</el-button>
           <el-button v-if="busy" @click="cancel">取消接收结果</el-button>
         </div>
       </template>
@@ -97,9 +99,10 @@
       <ai-adr-findings :findings="run.adr_findings" @inspect="inspectEvidence" />
       <ai-pathway-findings :findings="run.pathway_findings" @inspect="inspectEvidence" />
       <ai-nursing-findings :findings="run.nursing_findings" @inspect="inspectEvidence" />
-      <ai-observation-findings v-if="!run.aki_findings" :findings="run.observation_findings" :expected-patient-id="run.patient_id" :expected-admission-id="run.encounter_ref || encounterRef" @inspect="inspectEvidence" />
+      <ai-observation-findings v-if="!run.aki_findings && !run.qsofa_findings" :findings="run.observation_findings" :expected-patient-id="run.patient_id" :expected-admission-id="run.encounter_ref || encounterRef" @inspect="inspectEvidence" />
       <ai-news2-findings v-if="run.news2_findings" :source="run.news2_findings.news2_source" :scope="run.news2_findings.news2_assessment" :analysis="run.result?.news2_analysis" :expected-patient-id="run.patient_id" :expected-admission-id="run.encounter_ref || encounterRef" @inspect="inspectEvidence" />
       <ai-aki-findings v-if="run.aki_findings" :source="run.aki_findings.aki_source" :scope="run.aki_findings.aki_assessment" :analysis="run.result?.aki_analysis" :expected-patient-id="run.patient_id" :expected-admission-id="run.encounter_ref || encounterRef" @inspect="inspectEvidence" />
+      <ai-qsofa-findings v-if="run.qsofa_findings" :source="run.qsofa_findings.qsofa_source" :scope="run.qsofa_findings.qsofa_assessment" :analysis="run.result?.qsofa_analysis" :expected-patient-id="run.patient_id" :expected-admission-id="run.encounter_ref || encounterRef" @inspect="inspectEvidence" />
       <ai-speech-findings :findings="run.audio_findings" :transcription="run.result?.transcription" :allow-copy="run.status === 'succeeded'" @inspect="inspectEvidence" @copy="copyDraft" />
       <ai-image-findings :findings="run.image_findings" :analysis="run.result?.image_analysis" :allow-copy="run.status === 'succeeded'" @inspect="inspectEvidence" @copy="copyDraft" />
       <ai-ecg-findings :findings="run.ecg_findings" :analysis="run.result?.ecg_analysis" :allow-copy="run.status === 'succeeded'" @inspect="inspectEvidence" @copy="copyDraft" />
@@ -162,9 +165,10 @@
       <ai-adr-findings :findings="contextData?.context?.adr_sources" @inspect="inspectPreviewEvidence" />
       <ai-pathway-findings :findings="contextData?.context?.pathway_sources" @inspect="inspectPreviewEvidence" />
       <ai-nursing-findings :findings="contextData?.context?.nursing_source_review" @inspect="inspectPreviewEvidence" />
-      <ai-observation-findings v-if="!contextData?.context?.aki_source" :findings="contextData?.context?.observation_window" :expected-patient-id="patientId" :expected-admission-id="encounterRef" @inspect="inspectPreviewEvidence" />
+      <ai-observation-findings v-if="!contextData?.context?.aki_source && !contextData?.context?.qsofa_source" :findings="contextData?.context?.observation_window" :expected-patient-id="patientId" :expected-admission-id="encounterRef" @inspect="inspectPreviewEvidence" />
       <ai-news2-findings v-if="contextData?.context?.news2_source" :source="contextData.context.news2_source" :scope="contextData.context.news2_assessment" :expected-patient-id="patientId" :expected-admission-id="encounterRef" @inspect="inspectPreviewEvidence" />
       <ai-aki-findings v-if="contextData?.context?.aki_source" :source="contextData.context.aki_source" :scope="contextData.context.aki_assessment" :expected-patient-id="patientId" :expected-admission-id="encounterRef" @inspect="inspectPreviewEvidence" />
+      <ai-qsofa-findings v-if="contextData?.context?.qsofa_source" :source="contextData.context.qsofa_source" :scope="contextData.context.qsofa_assessment" :expected-patient-id="patientId" :expected-admission-id="encounterRef" @inspect="inspectPreviewEvidence" />
       <ai-speech-findings v-if="contextDialog" :findings="contextData?.context" @inspect="inspectPreviewEvidence" />
       <ai-image-findings v-if="contextDialog" :findings="contextData?.context" @inspect="inspectPreviewEvidence" />
       <ai-ecg-findings v-if="contextDialog" :findings="contextData?.context" @inspect="inspectPreviewEvidence" />
@@ -182,6 +186,7 @@ import { useStore } from "vuex";
 import { ElMessage } from "element-plus";
 import { cancelAIRun, createAIRun, getAIClinicalContext, getAIOperationalContext, getAIEncounters, getAIFeatures, getAIPatients, getAIPrescriptions, getAIPathwayOptions, getAIServiceOptions, getAIRun, getAIRuns, reviewAIRun } from "@/api/ai";
 import { resolveAkiEvidence } from "@/api/aiAki";
+import { resolveQsofaEvidence } from "@/api/aiQsofa";
 import AiServiceFindings from "@/components/AIServiceFindings/index.vue";
 import AiOperationalFindings from "@/components/AIOperationalFindings/index.vue";
 import AiIncidentFindings from "@/components/AIIncidentFindings/index.vue";
@@ -204,6 +209,8 @@ const AiNews2Input = defineAsyncComponent(() => import("@/components/AINews2Inpu
 const AiNews2Findings = defineAsyncComponent(() => import("@/components/AINews2Findings/index.vue"));
 const AiAkiInput = defineAsyncComponent(() => import("@/components/AIAkiInput/index.vue"));
 const AiAkiFindings = defineAsyncComponent(() => import("@/components/AIAkiFindings/index.vue"));
+const AiQsofaInput = defineAsyncComponent(() => import("@/components/AIQsofaInput/index.vue"));
+const AiQsofaFindings = defineAsyncComponent(() => import("@/components/AIQsofaFindings/index.vue"));
 
 const props = defineProps({ featureKeys: { type: Array, default: () => [] }, initialFeature: { type: String, default: "" }, patientId: { type: Number, default: null }, encounterRef: { type: String, default: "" }, initialInput: { type: Object, default: () => ({}) } });
 const store = useStore();
@@ -217,6 +224,7 @@ const selected = computed(() => features.value.find(item => item.key === feature
 const needsRiskWindow = computed(() => ["deterioration_risk", "sepsis_risk", "aki_risk"].includes(featureKey.value)), riskWindowSelection = ref(null), riskWindowReady = ref(false);
 const needsNews2 = computed(() => featureKey.value === "deterioration_risk" && selected.value?.input_mode === "news2"), news2Selection = ref(null), news2Ready = ref(false);
 const needsAki = computed(() => featureKey.value === "aki_risk" && selected.value?.input_mode === "aki"), akiSelection = ref(null), akiReady = ref(false);
+const needsQsofa = computed(() => featureKey.value === "sepsis_risk" && selected.value?.input_mode === "qsofa"), qsofaSelection = ref(null), qsofaReady = ref(false);
 const encounterOptions = computed(() => needsRiskWindow.value ? encounters.value.filter(item => item.kind === "inpatient") : encounters.value);
 const needsPrescription = computed(() => ["interaction_review", "allergy_review", "dose_review", "antimicrobial_review"].includes(featureKey.value));
 const needsCoding = computed(() => ["icd_candidates", "drg_evidence_review"].includes(featureKey.value));
@@ -314,7 +322,8 @@ watch(patientId, async id => {
 watch(encounterRef, () => { stopPolling(); run.value = null; contextData.value = null; riskWindowSelection.value = null; riskWindowReady.value = false; });
 watch([needsNews2, () => riskWindowSelection.value?.observation_window_id, () => riskWindowSelection.value?.content_hash, riskWindowReady], () => { news2Selection.value = null; news2Ready.value = false; });
 watch([needsAki, () => riskWindowSelection.value?.observation_window_id, () => riskWindowSelection.value?.content_hash, riskWindowReady], () => { akiSelection.value = null; akiReady.value = false; });
-watch([needsAki, () => JSON.stringify(akiSelection.value), akiReady, needsNews2, () => JSON.stringify(news2Selection.value), news2Ready, () => JSON.stringify(riskWindowSelection.value), riskWindowReady, () => JSON.stringify(forecastSelection.value), forecastReady, featureKey, patientId, encounterRef, prescriptionId, incidentId, pathwayId, audioAssetId, ecgAssetId, imageAssetId, imageOrderId, serviceDepartment, serviceDoctor, serviceDate, navigationStart, navigationEnd, operationsRange, operationsPlanRange, () => inventoryDrugs.value.join(','), () => inventoryConsumables.value.join(','), () => JSON.stringify(props.initialInput)], () => {
+watch([needsQsofa, () => riskWindowSelection.value?.observation_window_id, () => riskWindowSelection.value?.content_hash, riskWindowReady], () => { qsofaSelection.value = null; qsofaReady.value = false; });
+watch([needsQsofa, () => JSON.stringify(qsofaSelection.value), qsofaReady, needsAki, () => JSON.stringify(akiSelection.value), akiReady, needsNews2, () => JSON.stringify(news2Selection.value), news2Ready, () => JSON.stringify(riskWindowSelection.value), riskWindowReady, () => JSON.stringify(forecastSelection.value), forecastReady, featureKey, patientId, encounterRef, prescriptionId, incidentId, pathwayId, audioAssetId, ecgAssetId, imageAssetId, imageOrderId, serviceDepartment, serviceDoctor, serviceDate, navigationStart, navigationEnd, operationsRange, operationsPlanRange, () => inventoryDrugs.value.join(','), () => inventoryConsumables.value.join(','), () => JSON.stringify(props.initialInput)], () => {
   selectionVersion += 1; stopPolling(); run.value = null; contextData.value = null; contextDialog.value = false; evidenceDialog.value = false; feedbackDialog.value = false;
 });
 watch(() => run.value?.run_id, () => { evidenceDialog.value = false; feedbackDialog.value = false; feedback.value = { outcome: "accepted", comment: "" }; });
@@ -342,7 +351,7 @@ watch([featureKey, patientId, encounterRef], async () => {
 async function inspectContext() {
   const input = buildTaskInput(); if (!input) return;
   const version = selectionVersion;
-  const sourceKeys = needsRiskWindow.value ? ["observation_window_id", "news2_assessment_id", "aki_assessment_id"] : selected.value?.source_reference_keys || ["record_id", "structured_record_id", "prescription_id", "lab_result_id", "imaging_report_id"];
+  const sourceKeys = needsRiskWindow.value ? ["observation_window_id", "news2_assessment_id", "aki_assessment_id", "qsofa_assessment_id"] : selected.value?.source_reference_keys || ["record_id", "structured_record_id", "prescription_id", "lab_result_id", "imaging_report_id"];
   const references = Object.fromEntries(sourceKeys.filter(key => input[key]).map(key => [key, input[key]]));
   const response = await getAIClinicalContext({ ...references, feature_key: featureKey.value, patient_id: patientId.value, encounter_ref: encounterRef.value || undefined });
   if (version !== selectionVersion) return;
@@ -358,6 +367,10 @@ async function inspectOperationalContext() {
 function buildTaskInput() {
   if (needsRiskWindow.value) {
     if (!riskWindowReady.value || !riskWindowSelection.value || !encounterRef.value) { ElMessage.warning("请先选择并核对原住院观测窗"); return; }
+    if (needsQsofa.value) {
+      if (!qsofaReady.value || !qsofaSelection.value) { ElMessage.warning("请明确选择并核对qSOFA原点测、GCS与医生当前回顾性评估"); return; }
+      return { observation_window_id: riskWindowSelection.value.observation_window_id, qsofa_assessment_id: qsofaSelection.value.qsofa_assessment_id, question: question.value };
+    }
     if (needsAki.value) {
       if (!akiReady.value || !akiSelection.value) { ElMessage.warning("请明确选择并核对AKI原来源、适用性与判据策略"); return; }
       return { observation_window_id: riskWindowSelection.value.observation_window_id, aki_assessment_id: akiSelection.value.aki_assessment_id, question: question.value };
@@ -419,12 +432,12 @@ async function loadHistory(activeNames) {
 watch([() => JSON.stringify(store.getters["user/permissions"]), () => store.state.user.accessToken], () => {
   if (!needsForecast.value && !needsRiskWindow.value) return;
   formVersion++; patientLoadVersion++; patients.value = []; encounters.value = []; prescriptions.value = []; patientLoading.value = false; patientId.value = null; encounterRef.value = ""; prescriptionId.value = null; question.value = ""; extraInput.value = ""; preview.value = false;
-  selectionVersion++; historyVersion++; stopPolling(); run.value = null; contextData.value = null; contextDialog.value = false; evidenceDialog.value = false; feedbackDialog.value = false; history.value = []; forecastReady.value = false; forecastSelection.value = null; riskWindowReady.value = false; riskWindowSelection.value = null; news2Ready.value = false; news2Selection.value = null; akiReady.value = false; akiSelection.value = null;
+  selectionVersion++; historyVersion++; stopPolling(); run.value = null; contextData.value = null; contextDialog.value = false; evidenceDialog.value = false; feedbackDialog.value = false; history.value = []; forecastReady.value = false; forecastSelection.value = null; riskWindowReady.value = false; riskWindowSelection.value = null; news2Ready.value = false; news2Selection.value = null; akiReady.value = false; akiSelection.value = null; qsofaReady.value = false; qsofaSelection.value = null;
   if (needsRiskWindow.value && store.state.user.accessToken) searchPatients().catch(() => {});
 });
 const evidenceTitle = id => run.value?.evidence?.find(item => item.source_id === id)?.title || "来源";
-function inspectEvidence(id) { evidence.value = resolveAkiEvidence(run.value?.evidence?.find(item => item.source_id === id), run.value?.aki_findings, run.value?.patient_id, run.value?.encounter_ref || encounterRef.value); evidenceDialog.value = !!evidence.value; }
-function inspectPreviewEvidence(id) { evidence.value = resolveAkiEvidence(contextData.value?.evidence?.find(item => item.source_id === id), contextData.value?.context, patientId.value, encounterRef.value); evidenceDialog.value = !!evidence.value; }
+function inspectEvidence(id) { const resolver = run.value?.qsofa_findings ? resolveQsofaEvidence : resolveAkiEvidence; evidence.value = resolver(run.value?.evidence?.find(item => item.source_id === id), run.value?.qsofa_findings || run.value?.aki_findings, run.value?.patient_id, run.value?.encounter_ref || encounterRef.value); evidenceDialog.value = !!evidence.value; }
+function inspectPreviewEvidence(id) { const resolver = contextData.value?.context?.qsofa_source ? resolveQsofaEvidence : resolveAkiEvidence; evidence.value = resolver(contextData.value?.evidence?.find(item => item.source_id === id), contextData.value?.context, patientId.value, encounterRef.value); evidenceDialog.value = !!evidence.value; }
 async function copyDraft() {
   const transcript = run.value.result.transcription;
   const segments = transcript ? ["原录音转写草稿，待逐段听音与角色核对：", ...transcript.segments.map(item => `[${item.start_ms}–${item.end_ms}毫秒] ${item.speaker}（角色待核实）\n${item.text}${item.uncertain ? '\n不确定：' + item.uncertainty_note : ''}`)] : [];

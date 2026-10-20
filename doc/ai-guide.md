@@ -970,3 +970,5 @@ schema v9严格区分 `sofa_analysis` 与 `sofa_change_analysis`，网关重新�
 独立服务使用 `requirements-sofa.txt` 和 `Dockerfile.sofa`，只包含四个固定核心模块及服务依赖，不连接医院数据库，不需要模型权重或外部下载。可在隔离环境中运行 `python -m app.ai.sofa_server --host 127.0.0.1 --port 8818`。API、AI worker与独立服务须显式配置同一个至少32字符的 `AI_PROVIDER_LOCAL_SOFA_API_KEY`；独立服务不读取项目`.env`。参考配置见 `.env.example`，不应将实际密钥写入Git。
 
 超级管理员的 `POST /ai/admin/providers/{id}/sofa-capabilities` 只执行鉴权后的元数据GET，核对完整规则、输入政策、四源文件摘要、运行版本和限制；不发送患者资料、不计分，也不自动保存模型、启用功能或认定临床有效。服务源码、运行依赖或配置改变后须重启、重新检查并评审。真实病例验证、适用范围确认、静默运行及临床启用仍须独立完成。
+
+本批最终工程检查为全量后端4827通过、28跳过，完整浏览器451通过；生产构建、原资源预算、依赖审计、真实隔离MySQL迁移与大结果持久化、独立断网SOFA容器及源码摘要检查均通过。浏览器中的156项生产UI和274项隔离UI使用合成API拦截，另21项使用真实合成回环HTTP；没有真实医院数据或远程模型推理。详见[SOFA完整工程验证](ai-sofa-verification.json)，包含原Prompt、规则及源代码绑定、撤销和审计回滚证据。

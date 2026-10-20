@@ -1,0 +1,2091 @@
+{
+  "recorded_at_utc": "2026-10-20T18:44:16.707977+00:00",
+  "baseline_commit": "610803abe9dd9c2ddd55808ce4db2df35f34da9e",
+  "platform_commit_at_recording": "18e1a97b086102caa92503dec00c1737f96b2968",
+  "recording_head_precedes_this_evidence_documentation_commit": true,
+  "goal_status": "active",
+  "scope": "Feature 42 independent local original SOFA-1 six-axis reviewed daily assessment and separate baseline/infection/attribution change review; complete source and result persistence, strict deterministic schema v9 gateway and worker, clinical UI and Super-admin governance. Manual reviewed originals and fixed local policies; not automatic sepsis diagnosis, continuous automatic warning, SOFA-2, clinical validation or all80 completion.",
+  "real_patient_data_used": false,
+  "existing_hospital_database_accessed": false,
+  "existing_hospital_backend_contacted": false,
+  "production_deployment_performed": false,
+  "clinical_validation_performed": false,
+  "remote_model_inference_performed_for_this_batch": false,
+  "stored_business_ai_configuration_changed": false,
+  "version_management": {
+    "branch": "feature/ai-hospital-platform",
+    "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+    "commits_this_batch_before_evidence_commit": 42,
+    "commits_since_original_baseline_before_evidence_commit": 350
+  },
+  "inventory": {
+    "business_router_routes": 734,
+    "all_main_app_api_routes": 735,
+    "router_modules": 100,
+    "orm_tables": 179,
+    "vue_view_files": 160,
+    "catalog": {
+      "version": "2026.10.20.9",
+      "feature_count": 80,
+      "source_reference_count": 33,
+      "source_reference_keys": [
+        "adverse_event_id",
+        "aki_assessment_id",
+        "audio_asset_id",
+        "critical_care_record_id",
+        "ecg_asset_id",
+        "home_id",
+        "icu_score_id",
+        "image_asset_id",
+        "imaging_order_id",
+        "imaging_report_id",
+        "inpatient_charge_id",
+        "lab_result_id",
+        "mdt_id",
+        "news2_assessment_id",
+        "nursing_assessment_id",
+        "nursing_plan_id",
+        "observation_window_id",
+        "outpatient_charge_id",
+        "pathway_enrollment_id",
+        "pathway_id",
+        "perioperative_id",
+        "prescription_id",
+        "qsofa_assessment_id",
+        "reaction_id",
+        "record_id",
+        "referral_id",
+        "sofa_assessment_id",
+        "sofa_change_assessment_id",
+        "structured_record_id",
+        "support_source_id",
+        "support_source_kind",
+        "surgery_application_id",
+        "surgery_schedule_id"
+      ],
+      "risk_feature_reference_keys": {
+        "41": [
+          "news2_assessment_id",
+          "observation_window_id"
+        ],
+        "42": [
+          "observation_window_id",
+          "qsofa_assessment_id",
+          "sofa_assessment_id",
+          "sofa_change_assessment_id"
+        ],
+        "43": [
+          "aki_assessment_id",
+          "observation_window_id"
+        ]
+      },
+      "handover_feature_reference_keys": [
+        "adverse_event_id",
+        "audio_asset_id",
+        "critical_care_record_id",
+        "ecg_asset_id",
+        "home_id",
+        "icu_score_id",
+        "image_asset_id",
+        "imaging_order_id",
+        "imaging_report_id",
+        "inpatient_charge_id",
+        "lab_result_id",
+        "mdt_id",
+        "nursing_assessment_id",
+        "nursing_plan_id",
+        "outpatient_charge_id",
+        "pathway_enrollment_id",
+        "pathway_id",
+        "perioperative_id",
+        "prescription_id",
+        "reaction_id",
+        "record_id",
+        "referral_id",
+        "structured_record_id",
+        "support_source_id",
+        "support_source_kind",
+        "surgery_application_id",
+        "surgery_schedule_id"
+      ],
+      "only_handover_accepts_support_source_references": true,
+      "only_feature42_accepts_daily_and_change_sofa_references": true,
+      "prompt_export": {
+        "default_task_prompt_count": 80,
+        "distinct_task_prompt_count": 80,
+        "all_exported_features_and_prompts_exactly_match_live_catalog": true,
+        "system_prompt_exactly_matches": true,
+        "exported_catalog_version": "2026.10.20.9"
+      }
+    },
+    "alembic_heads": [
+      "20261020_sofa_assessments"
+    ],
+    "implementation_file_count": 104,
+    "production_file_count": 53,
+    "test_and_fixture_file_count": 51,
+    "generated_artifact_count": 4,
+    "all_implementation_bytes_match_committed_capture_head": true,
+    "artifact": {
+      "path": "/tmp/hoim-sofa-platform-final-inventory.json",
+      "bytes": 122177,
+      "sha256": "1c661535b1c931fd6e7410f058e0f6741e7b39f551b0c1233fb29de72dc4074c"
+    },
+    "isolation": {
+      "dotenv_sources_disabled": true,
+      "settings_env_file_none": true,
+      "forbidden_env_open_attempts": [],
+      "database_connections_blocked": true,
+      "database_connection_attempts": [],
+      "configured_database": "sqlite:///:memory:",
+      "engine_constructed_without_connection": true,
+      "lifespan_or_server_started": false,
+      "asgi_and_router_lifecycle_entrypoints_guarded": true,
+      "lifecycle_attempts": [],
+      "repo_write_attempts": [],
+      "filesystem_mutation_attempts": [],
+      "only_explicit_private_result_file_writable": true,
+      "existing_repository_directory_noops_intercepted_without_syscall": [
+        "/home/xusheng/workspace/hoimsystem/fastapi_be/backups",
+        "/home/xusheng/workspace/hoimsystem/fastapi_be/uploads/avatars",
+        "/home/xusheng/workspace/hoimsystem/fastapi_be/uploads/reports"
+      ],
+      "external_process_execution_attempts": [],
+      "all_network_io_and_dns_blocked_before_syscall": true,
+      "network_io_attempts_blocked": [
+        {
+          "operation": "socket.bind",
+          "family": 10,
+          "blocked": true
+        }
+      ],
+      "optional_import_ipv6_capability_probe_attempts_blocked": [
+        {
+          "operation": "socket.bind",
+          "family": 10,
+          "blocked": true,
+          "target": "[::1]:0",
+          "caller": "urllib3.util.connection._has_ipv6",
+          "socket_closed_by_dependency": true
+        }
+      ],
+      "socket_constructors_without_io_allowed": [
+        {
+          "family": 10,
+          "type": 1,
+          "protocol": 0
+        }
+      ],
+      "all_import_constructed_sockets_closed_verified_by_fileno": true,
+      "successful_network_io": 0,
+      "network_io_attempt_count": 1,
+      "unexpected_network_or_database_attempt_count": 0,
+      "synthetic_transport_rsa_generated_in_memory_only": true,
+      "shared_transport_key_file_attempts": [],
+      "existing_dependency_site_added_after_guards_without_pth_execution": "/home/xusheng/.local/lib/python3.13/site-packages"
+    },
+    "network_note": "One urllib3 optional IPv6 loopback capability bind attempt was blocked before its syscall; socket closed. Successful network I/O zero. No database, dotenv, shared transport key, ASGI lifecycle or repository writes."
+  },
+  "source_and_math_contract": {
+    "feature_number": 42,
+    "input_mode": "sofa1",
+    "rule_id": "sofa1_native_observed_v1",
+    "recipe_digest": "849854d26deb3e5d42e9433d839a5db0b365e85206ea5272b6592d75d4769199",
+    "policy_digest": "8f0d250b27c2dd1c6d41c12843da9a4bc0283d09c5bb55adf081fcc2127f8d13",
+    "specialist_schema_version": 9,
+    "source_references_exclusive_to_feature42": [
+      "sofa_assessment_id",
+      "sofa_change_assessment_id"
+    ],
+    "seven_roots": [
+      "laboratory",
+      "map",
+      "respiratory_support",
+      "arterial_pair",
+      "vasoactive",
+      "gcs",
+      "urine"
+    ],
+    "daily_period": "Exact complete 24h half-open UTC period and explicit historical availability cutoff, independently typed current Doctor review, all root membership and parents rechecked; necessary 1h vasoactive prefix retained.",
+    "native_quantities": "LIS signed decimal strings retained; other quantities follow their explicit nonnegative contracts. Closed native unit branches with original-unit SHA; no approximate native conversion, rounding, negative/qualitative-to-zero, NT=1, AVPU/GCS invention, RRT=4, default weight or NE equivalence.",
+    "cardiovascular": "Exact rational native doses and same-drug per-tier >=1h actual continuity; no cross-drug stitching or duplicate physical streams; proven non-overlap continuity retained outside conflicts. Explicit none exposure with known positive actual-day exposure rejected.",
+    "partial_results": "All candidates and source proofs, observed maxima, nullable known subtotal, unknown intervals, numeric collapse and protocol completeness remain independent; complete total only when all six axes and required coverage are complete.",
+    "change_review": "Independent full current/baseline recalculation; observed earlier daily source, explicit conditional-zero assumption or unknown baseline. Infection original and current acute/attribution/temporal review separate. Negative delta and exact [current_min-baseline_max,current_max-baseline_min] retained; unknown history never zero.",
+    "maximum_unique_roots": 4096,
+    "utf8_limits": {
+      "private_original": 8388608,
+      "daily_public": 2097152,
+      "change_public": 6291456,
+      "request": 8388608,
+      "response": 8388608,
+      "complete_result": 8388608,
+      "existing_AIRun_each_TEXT": 65535
+    },
+    "outbound": "Only typed public daily or change source and complete independently versioned system/task Prompts; private narratives, free question, direct patient/admission/author identities, barcode and external stream identity excluded. Technical source UUIDs remain explicit evidence references.",
+    "prompt_changes_numeric_algorithm": false,
+    "binding_and_result_verification": "Frozen Prompt, input, metadata, context, independent evidence and provider anchors; current authorization before queue/wire/acceptance; all math and fixed explanations recomputed; MEDIUMTEXT body and short reference accepted atomically with original lease/status/audit."
+  },
+  "super_admin_governance": {
+    "all80_unified_model_prompt_roles_activation_limits_knowledge_validation_tasks_feedback_management_available": true,
+    "this_does_not_mean_all80_implemented_validated_or_enabled": true,
+    "fourth_independent_rule_draft_review_publish_revoke_slot": true,
+    "daily_and_change_all_hospital_frozen_audit_and_CAS_revoke": true,
+    "provider_revision_bound_GET_only_capabilities_no_patient_inference": true,
+    "administrative_role_alone_creates_clinical_doctor_qualification": false,
+    "source_or_rule_creation_enables_AI_or_marks_clinical_validation": false,
+    "ordinary_history_current_sources_required_super_frozen_audit_retained": true
+  },
+  "migration": {
+    "revision": "20261020_sofa_assessments",
+    "parent": "20261020_organ_support_sources",
+    "new_tables": [
+      "hoimsystem_ai_sofa_assessment",
+      "hoimsystem_ai_sofa_change_assessment",
+      "hoimsystem_ai_sofa_run_result"
+    ],
+    "actual_10_utc6_columns": [
+      [
+        "hoimsystem_ai_sofa_assessment",
+        "as_of",
+        6
+      ],
+      [
+        "hoimsystem_ai_sofa_assessment",
+        "created_at",
+        6
+      ],
+      [
+        "hoimsystem_ai_sofa_assessment",
+        "evaluation_at",
+        6
+      ],
+      [
+        "hoimsystem_ai_sofa_assessment",
+        "period_end",
+        6
+      ],
+      [
+        "hoimsystem_ai_sofa_assessment",
+        "period_start",
+        6
+      ],
+      [
+        "hoimsystem_ai_sofa_assessment",
+        "revoked_at",
+        6
+      ],
+      [
+        "hoimsystem_ai_sofa_change_assessment",
+        "created_at",
+        6
+      ],
+      [
+        "hoimsystem_ai_sofa_change_assessment",
+        "evaluation_at",
+        6
+      ],
+      [
+        "hoimsystem_ai_sofa_change_assessment",
+        "revoked_at",
+        6
+      ],
+      [
+        "hoimsystem_ai_sofa_run_result",
+        "created_at",
+        6
+      ]
+    ],
+    "actual_five_mediumtext_columns": [
+      [
+        "hoimsystem_ai_sofa_assessment",
+        "projection_json",
+        "mediumtext"
+      ],
+      [
+        "hoimsystem_ai_sofa_assessment",
+        "snapshot_json",
+        "mediumtext"
+      ],
+      [
+        "hoimsystem_ai_sofa_change_assessment",
+        "projection_json",
+        "mediumtext"
+      ],
+      [
+        "hoimsystem_ai_sofa_change_assessment",
+        "snapshot_json",
+        "mediumtext"
+      ],
+      [
+        "hoimsystem_ai_sofa_run_result",
+        "result_json",
+        "mediumtext"
+      ]
+    ],
+    "actual_three_table_up_down_up": true,
+    "existing_prerequisite_ddl_and_complete_rows_unchanged": true
+  },
+  "backend_verification": {
+    "full_pytest": {
+      "passed": 4827,
+      "skipped": 28,
+      "warnings": 2,
+      "seconds": 477.74,
+      "net_default_pass_delta_since_previous_batch": 494,
+      "log": {
+        "path": "/tmp/hoim-sofa-full-frozen-pytest.log",
+        "bytes": 6392,
+        "sha256": "f9d203890b913d88cd6fd573376d219e067b6f5b123ebd33fcc67694b7c2b8f1"
+      },
+      "execution_record": {
+        "path": "/tmp/hoim-sofa-full-frozen-pytest-execution.json",
+        "bytes": 543,
+        "sha256": "7fd0d258fcf1a9d95577be11da83e12fbc9c701d51a551fb145631d64b44a8bb"
+      },
+      "scope_note": "Existing synthetic in-memory test DB overrides. This full regression does not claim every dotenv read is disabled; guarded SQL, container and inventory processes establish separate isolation."
+    },
+    "ruff_and_whole_file_format": {
+      "passed": true,
+      "python_files": 47,
+      "log": {
+        "path": "/tmp/hoim-sofa-python-final-ruff.log",
+        "bytes": 1826,
+        "sha256": "bcd8ab0f21dcf445a3d3e41f2802e55d24d7cfcf65d794c6a5204e41145c86a2"
+      }
+    },
+    "frozen_source_record": {
+      "path": "/tmp/hoim-sofa-backend-final-source-freeze.json",
+      "bytes": 5886,
+      "sha256": "76b56e2a82f129714117365dba304a6fe17d8367d1a684b2aa69020713443340"
+    },
+    "targeted_logs": [
+      {
+        "path": "/tmp/hoim-sofa-rule-governance-final-tests.log",
+        "bytes": 630,
+        "sha256": "dcee68b8637e1f83614f589b4c1f63c4baf6b059e85ad24efaf5db55f6d76ae5"
+      },
+      {
+        "path": "/tmp/hoim-sofa-api-rbac-final-tests.log",
+        "bytes": 631,
+        "sha256": "3456c922ee0fcf5490b633bcde59d3d4c00a7e5bf40186ac5015cad1111fda8a"
+      },
+      {
+        "path": "/tmp/hoim-sofa-pipeline-final-tests.log",
+        "bytes": 631,
+        "sha256": "456d299f0805f1e15cb18baaefe8b8a3138028e8e3785265108e5c9dae1f6799"
+      },
+      {
+        "path": "/tmp/hoim-sofa-change-pipeline-first-tests.log",
+        "bytes": 631,
+        "sha256": "5facedc0cf80e5c46d771a511529af827f2b53b527072f59931ce7f991959799"
+      },
+      {
+        "path": "/tmp/hoim-sofa-probe-final-tests.log",
+        "bytes": 630,
+        "sha256": "d10e02278438e1d83e3d1f69b1da217409bcee17b2a05fe96b15183409165701"
+      },
+      {
+        "path": "/tmp/hoim-sofa-migration-first-tests.log",
+        "bytes": 630,
+        "sha256": "90a013604001f73ca8871be4f5c5a4958c5d11ba7c73956205716dc113406239"
+      },
+      {
+        "path": "/tmp/hoim-sofa-integration-review-final-tests.log",
+        "bytes": 631,
+        "sha256": "b2a6c959afba89e75faf717e2f28c842391a1f574c80f50ff7d39dd2831f45fc"
+      },
+      {
+        "path": "/tmp/hoim-sofa-legacy-and-shared-profile-final-tests.log",
+        "bytes": 629,
+        "sha256": "28022348ffc43190336667ac88616e83be29e3d47984f9471a639993b172a692"
+      }
+    ],
+    "targeted_checks_overlap_full_suites_not_added": true,
+    "prompt_export_and_real_mounted_RBAC_exact": true
+  },
+  "frontend_verification": {
+    "npm_verify": {
+      "passed": true,
+      "audit_vulnerabilities": 0,
+      "build_seconds": 25.85,
+      "existing_scss_warnings": 5,
+      "bundle": {
+        "largestJavaScript": {
+          "file": "element-plus.1235714c.js",
+          "bytes": 647479
+        },
+        "totalJavaScript": 5979263,
+        "totalAssets": 6497509,
+        "limits": {
+          "largestJavaScript": 700000,
+          "totalJavaScript": 6000000,
+          "totalAssets": 7000000
+        }
+      },
+      "dependencies_targets_and_budget_unchanged": true,
+      "log": {
+        "path": "/tmp/hoim-sofa-ui-final-verify.log",
+        "bytes": 54522,
+        "sha256": "dea02b6e03c4651754cbd9e3b2d1cd4e8707c2377f67f033055f6c5c37826ce5"
+      }
+    },
+    "full_browser": {
+      "passed": 451,
+      "duration_as_reported": "10.8m",
+      "new_cases_since_previous_batch": 77,
+      "isolated_mock": 274,
+      "production_mock": 156,
+      "real_synthetic_http": 21,
+      "log": {
+        "path": "/tmp/hoim-sofa-browser-frozen-final-tests.log",
+        "bytes": 62824,
+        "sha256": "76929a1f02628965ba8c9a57f5547d13574093ade5a657343f2e43efd59d711f"
+      },
+      "actual_report": {
+        "path": "/tmp/hoim-sofa-browser-frozen-final-report.json",
+        "bytes": 493515,
+        "sha256": "679b2a0dca04440fdcf3ad63ede5b1434479f50f8bd6e610bc29ce4e46659693"
+      },
+      "execution_record": {
+        "path": "/tmp/hoim-sofa-browser-frozen-final-execution.json",
+        "bytes": 2495,
+        "sha256": "06d65d62bb01b7035ce509c15570843840e811539a5511aae58199af655a21b9"
+      },
+      "actual_category_counts": {
+        "path": "/tmp/hoim-sofa-browser-final-category-counts.json",
+        "bytes": 232247,
+        "sha256": "ba92a2159093b66e0b0c251d92311e0d780c7273e5990ba840c5b5ca473a4629"
+      },
+      "scope_note": "Production and isolated UI use synthetic API interception; 21 original request cases use actual synthetic loopback HTTP. No hospital backend or remote model."
+    },
+    "source_and_dist_frozen_record": {
+      "path": "/tmp/hoim-sofa-frontend-final-source-freeze.json",
+      "bytes": 102438,
+      "sha256": "35876fe64d2c1c4d740f2b7b573e9ebc85f00a7eac5ab69e004b11081980bf5c"
+    },
+    "targeted_logs": [
+      {
+        "path": "/tmp/hoim-sofa-independent-browser-final.log",
+        "bytes": 1787,
+        "sha256": "26f04685301486a26b5db9f0988cb5a3104fabde336fbeb2e8e8e4baafef321e"
+      },
+      {
+        "path": "/tmp/hoim-sofa-api-native-final-contract-tests.log",
+        "bytes": 2218,
+        "sha256": "c91ba2a774dda7b09ae92ece80a062486f3de180c15af0e3bc516a2aaa490a80"
+      },
+      {
+        "path": "/tmp/hoim-sofa-entry-qsofa-compatibility-tests.log",
+        "bytes": 544,
+        "sha256": "02096c2b74725e65c8231c1771f40cd9752fed6a5d56555ff94c573f0e843dca"
+      },
+      {
+        "path": "/tmp/hoim-sofa-lossless-schema-isolated-final-tests.log",
+        "bytes": 3613,
+        "sha256": "d1fd9b194e85dad5435f8f035a3ff61896ae63a4136a3f498a8f9abbb43682dd"
+      }
+    ],
+    "independent_lossless_schema_dag_review": {
+      "path": "/tmp/hoim-sofa-schema-dag-independent-review.json",
+      "bytes": 1807,
+      "sha256": "559f043bf38dc7c4c700d0e70e4ef3a7d86f04355fdf252b1743350245c2c830"
+    },
+    "frozen_UI_targeted_summary": {
+      "path": "/tmp/hoim-sofa-ui-frozen-verification.json",
+      "bytes": 5382,
+      "sha256": "04f188e926b895782ecea494ff775a32e88aeece9444295f1edf61b89f296cec"
+    }
+  },
+  "actual_isolated_mysql": {
+    "artifact": {
+      "path": "/tmp/hoim-sofa-mysql-final-verification.json",
+      "bytes": 21775,
+      "sha256": "82ccc3392dbbda758915b01eb0102e9044052a542ec2dc90e819706dcd16b82b"
+    },
+    "seconds": 108.392,
+    "bound_backend_source_files": 82,
+    "image": "mysql:8.0.39",
+    "image_id": "sha256:01faea2cb286276923a223bdbf438b50468f3c4090f6b61e0b27aa871ca0dbac",
+    "isolation": {
+      "network_mode": "none",
+      "port_bindings": {},
+      "readonly_root": true,
+      "user": "999:999",
+      "cap_drop": [
+        "ALL"
+      ],
+      "tmpfs": {
+        "/tmp": "rw,nosuid,nodev,noexec,size=64m,uid=999,gid=999,mode=0700",
+        "/var/lib/mysql": "rw,nosuid,nodev,noexec,size=512m,uid=999,gid=999,mode=0700"
+      },
+      "mount_types": [
+        "bind"
+      ]
+    },
+    "dotenv_open_attempts": 0,
+    "only_private_unix_socket_allowed": true,
+    "source_hashes_stable": true,
+    "actual_daily_and_change_full_member_counts": {
+      "daily": 230,
+      "baseline": 0
+    },
+    "actual_frozen_original_sql_bytes_and_sha256": {
+      "hoimsystem_ai_sofa_assessment": {
+        "private_utf8_bytes": 582151,
+        "public_utf8_bytes": 155077,
+        "private_sql_sha256": "56cfba7eb9dd6de78bbff2898141c81cd63d3cb1ee865b1727f5b2f8e1c365c8",
+        "public_sql_sha256": "0e413b29063b051409d488047a943f8a2eeee0c97f7f8782bf3a82c003ae5179"
+      },
+      "hoimsystem_ai_sofa_change_assessment": {
+        "private_utf8_bytes": 774409,
+        "public_utf8_bytes": 159550,
+        "private_sql_sha256": "f05b22d0bdb7b34ccdd5d713391edb0990502d09fd2a0cf2c564f6bc02467697",
+        "public_sql_sha256": "87e045e1a0f8807b9b881830850f2953e612cd6ac88c5a56a4a228b7be3c6b24"
+      }
+    },
+    "actual_durable_worker_real_sofa_asgi_and_big_blobs": [
+      {
+        "kind": "daily",
+        "run_id": "24cc6a3c-4314-4ea9-8fb6-2c456bfc2c20",
+        "result_bytes": 77144,
+        "result_sql_sha256": "b06a4efe3b37eb2d4b6887c22102f311f8c6b007a6505736e24125cdd2294a74",
+        "airun_four_text_bytes": [
+          10228,
+          1932,
+          656,
+          332
+        ],
+        "wire_bytes": 161132,
+        "result_status": "succeeded",
+        "native_status": "partial"
+      },
+      {
+        "kind": "change",
+        "run_id": "259f0c44-8314-4c6d-83e4-9d52b1309adf",
+        "result_bytes": 91473,
+        "result_sql_sha256": "c83c9def901d081a5e6cd882ee3525ddc238ce4ee7be6fa60968ae442800e364",
+        "airun_four_text_bytes": [
+          13156,
+          4835,
+          656,
+          332
+        ],
+        "wire_bytes": 165612,
+        "result_status": "succeeded",
+        "native_status": "partial"
+      }
+    ],
+    "actual_mysql_failed_audit_atomic_root_and_blob_pointer_rollback": true,
+    "actual_queued_inflight_revocation": [
+      {
+        "phase": "queued",
+        "status": "failed",
+        "error_code": "TASK_NO_LONGER_AUTHORIZED",
+        "wire_calls": 0
+      },
+      {
+        "phase": "inflight",
+        "status": "failed",
+        "error_code": "TASK_NO_LONGER_AUTHORIZED",
+        "wire_calls": 1
+      }
+    ],
+    "actual_super_frozen_history_and_cas_body_preservation": true,
+    "actual_new_governance_microsecond_roundtrip": {
+      "created_at_microsecond": 123456,
+      "revoked_at_microsecond": 654321
+    },
+    "cleanup_verified": true,
+    "limitations": [
+      "Synthetic originals and model responses only; no clinical validation or treatment actions.",
+      "Sequential CAS and actual failed SQL audit rollback, not simultaneous threaded contention.",
+      "Legacy naive clocks remain unknown provenance; no UTC or continuous-dose inference from those strings. Only explicitly timed governed originals enter the independent SOFA calculation."
+    ]
+  },
+  "actual_isolated_sofa_service_container": {
+    "artifact": {
+      "path": "/tmp/hoim-sofa-container-final-verification.json",
+      "bytes": 134777,
+      "sha256": "1bf6f8578b094e19df5ed1993dba86f5dfdca41abccd17e6626c4572fef8633c"
+    },
+    "seconds": 10.79,
+    "image_id": "sha256:00cd59a99b63ef0e945938df11ed88eebaa1e52facb6ac4ed1a1767747e6ae23",
+    "isolation": {
+      "bind_mounts": [],
+      "cap_drop": [
+        "ALL"
+      ],
+      "cpu_nanos": 1000000000,
+      "host_port_bindings": {},
+      "memory_bytes": 536870912,
+      "network_mode": "none",
+      "pids_limit": 64,
+      "read_only": true,
+      "security_opt": [
+        "no-new-privileges"
+      ],
+      "tmpfs": {
+        "/tmp": "rw,noexec,nosuid,size=16m"
+      }
+    },
+    "synthetic_math_cases": 98,
+    "successful_synthetic_task_responses": 99,
+    "http_response_count": 107,
+    "host_runtime": {
+      "clinical_validation": "not_provided",
+      "core_sha256": {
+        "sofa_config.py": "cf5c6a55f7f6dc172a63831f59279074a595856d058b11967149d431886ed179",
+        "sofa_contract.py": "fc99b125f1bc467b3f05874eb361e09889b043929466de58fcc8b506713cb6f7",
+        "sofa_model.py": "c59b9f03a785a05e207556e3df959ccb0638cba67b230845bd5d8886b8bed2a8",
+        "sofa_server.py": "4c01b4e75c3195972a0ba4a3186b59303c2be9dfbb84867616872edbbced440e"
+      },
+      "engine": "hoim_sofa1_native_independent",
+      "fastapi_version": "0.136.1",
+      "feature_key": "sepsis_risk",
+      "independent_implementation": true,
+      "input_policy": {
+        "capacities": {
+          "change_public_bytes": 6291456,
+          "daily_public_bytes": 2097152,
+          "manifest_members": 4096,
+          "private_bytes": 8388608,
+          "request_bytes": 8388608,
+          "response_bytes": 8388608,
+          "result_bytes": 8388608
+        },
+        "change": {
+          "attribution": "explicit_doctor_current_review_never_automatically_inferred_from_delta_or_day_windows",
+          "baseline_modes": [
+            "observed",
+            "conditional_zero",
+            "unknown"
+          ],
+          "conditional_zero": "both_explicit_current_doctor_assumptions_required_else_zero_to_twentyfour_not_zero",
+          "delta": "current_lower_minus_baseline_upper_current_upper_minus_baseline_lower_keep_negative_never_subtract_subtotals",
+          "infection": "actual_governed_original_may_be_available_after_current_asof_explicit_late_flag_current_retrospective_only",
+          "observed": "same_rule_recipe_policy_independent_current_authorized_day_ends_before_current_day_and_known_infection_onset",
+          "unknown": "zero_to_twentyfour_never_normal_imputed"
+        },
+        "coverage": {
+          "clinical_protocol": [
+            "adequate",
+            "incomplete",
+            "unknown"
+          ],
+          "protocol_complete": "actual_required_measurements_plus_all_members_and_resolved_conditions_never_checkbox_only",
+          "source_inventory": [
+            "complete",
+            "incomplete",
+            "unknown"
+          ]
+        },
+        "facts": {
+          "laboratory_native_units": [
+            "10^9/L",
+            "10^3/uL",
+            "mg/dL",
+            "umol/L",
+            "mm[Hg]",
+            "kPa"
+          ],
+          "laboratory_qualitative": "value_null_type_preserved_original_text_private_only_full_hash_bound",
+          "laboratory_units": "closed_exact_native_units_or_unsupported_or_original_null_unknown_marker_with_full_original_unit_hash_no_free_text_outbound_no_conversion",
+          "numbers": "exact_original_decimal_strings_LIS_signed_preserved_negative_unsupported_value_unknown_other_quantities_nonnegative"
+        },
+        "gcs_confounding": "complete_measured_EVM_interpretable_confirmed_and_current_doctor_sedation_and_other_confounding_effects_both_explicitly_excluded_no_drug_presence_inference_or_virtual_pre_sedation_score",
+        "input_precision": {
+          "maximum_fraction_digits": 8,
+          "maximum_integer_digits": 16,
+          "numbers": "exact_original_decimal_strings_LIS_signed_preserved_negative_unsupported_value_unknown_other_quantities_nonnegative",
+          "quantity_conversion": "only_explicit_fraction_dose_formulas_other_native_branches_never_converted",
+          "rounding": "never",
+          "zero_is_missing": false
+        },
+        "partial_policy": {
+          "complete_total": "all_six_protocol_complete_and_within_declared_scope_and_no_unresolved_rules_or_conflicts",
+          "domain_lower_bound": "retain_all_unambiguous_positive_witnesses_including_bounded_candidates",
+          "domain_upper_bound": "account_for_all_unresolved_candidates_required_modalities_and_incomplete_inventory_or_protocol",
+          "exact_numeric": "bounds_collapse_even_at_ceiling_does_not_assert_coverage_complete",
+          "known_subtotal": "sum_nonnull_exact_observed_candidate_domain_maxima_not_complete_total",
+          "normal_imputation": false,
+          "unknown_domain_bounds": [
+            0,
+            4
+          ]
+        },
+        "population": {
+          "adult": "yes_and_explicit_applicability_confirmation",
+          "care_setting": [
+            "icu",
+            "other"
+          ],
+          "clinical_validation": "not_provided"
+        },
+        "respiratory_qualification": {
+          "original_none_and_new_yes": "incompatible_keep_exact_pf_proven_lower_bound_and_support_unknown_upper_never_award_high_tier_pure_math_hospital_new_signature_rejected",
+          "original_unknown_and_new_yes": "allowed_current_doctor_qualification_with_independent_basis_original_mode_remains_unknown",
+          "other_modes": "doctor_explicit_yes_no_unknown_no_invasive_only_narrowing_or_device_inference"
+        },
+        "review": {
+          "basis": "private_statement_hash_public_only",
+          "historical_prediction": false,
+          "mode": "current_retrospective",
+          "original_flags": "preserve_no_current_review_overwrite",
+          "status": [
+            "confirmed",
+            "excluded",
+            "unknown"
+          ]
+        },
+        "source_policy": {
+          "all_members": "complete_actual_asof_root_and_parent_manifest_no_winner_only",
+          "current_use": "active_creation_governance_match_complete_current_source_set_and_all_parent_governance_recheck",
+          "public": "typed_facts_and_review_hashes_no_free_text_patient_admission_author_or_external_stream_identity",
+          "revoked": "retained_review_excluded_no_normal_imputation"
+        },
+        "vasoactive_overlap": {
+          "cross_drug": "same_actual_physical_stream_key_concurrent_intersection_unknown_never_concatenate_agents",
+          "identity": "only_actual_sha_namespace_and_external_stream_id_no_note_or_drug_name_inference",
+          "other_conflicts": "original_identity_lab_pao2_gcs_and_other_unresolved_groups_remain_dependent_candidate_unknown",
+          "policy": "actual_same_stream_piecewise_overlap_unknown_v1",
+          "unresolved_same_stream_overlap": "only_actual_intersection_unknown_retain_independent_nonoverlap_completed_tier_witness"
+        }
+      },
+      "max_request_bytes": 8388608,
+      "max_response_bytes": 8388608,
+      "model_version": "sofa1:0e0f5e865c7005805ec1b77947aed0c851038ce5592746c9fb5823b2eeaf67ad",
+      "policy_digest": "8f0d250b27c2dd1c6d41c12843da9a4bc0283d09c5bb55adf081fcc2127f8d13",
+      "population_applicability": "not_independently_verified",
+      "prompt_handling": "provenance_only",
+      "pydantic_version": "2.12.4",
+      "python_version": "3.13.12",
+      "recipe": {
+        "cardiovascular": {
+          "actual_route": "doctor_confirmed_continuous_iv_no_old_order_route_parsing_or_bolus_inference",
+          "cross_drug_policy": "separate_agents_no_ne_epinephrine_sum_no_equivalent_conversion",
+          "dobutamine": [
+            {
+              "above": "0",
+              "score": 2
+            }
+          ],
+          "dopamine": [
+            {
+              "above": "15",
+              "score": 4
+            },
+            {
+              "above": "5",
+              "at_most": "15",
+              "score": 3
+            },
+            {
+              "above": "0",
+              "at_most": "5",
+              "score": 2
+            }
+          ],
+          "dose_arithmetic": "reduced_exact_fraction_of_original_decimal_inputs_direct_normalized_rate_never_divided_twice",
+          "duration_policy": "local_band_continuity_1h_v1_not_claimed_official_resolution_of_1996_duration_ambiguity",
+          "duration_witness": "each_agent_and_score_predicate_contiguous_true_prefix_allowed_no_gap_or_cross_agent_join_complete_end_b_after_period_start_and_at_or_before_period_end_positive_in_period_exposure",
+          "epinephrine": [
+            {
+              "above": "0.1",
+              "score": 4
+            },
+            {
+              "above": "0",
+              "at_most": "0.1",
+              "score": 3
+            }
+          ],
+          "map": {
+            "below": "70",
+            "missing_branch_bounds": [
+              0,
+              1
+            ],
+            "score": 1,
+            "unit": "mm[Hg]"
+          },
+          "mass_basis": "original_mapping_base_only_and_explicit_compatible_clinician_review_unknown_or_salt_remains_unknown_no_implicit_factor",
+          "minimum_continuous_microseconds": 3600000000,
+          "norepinephrine": [
+            {
+              "above": "0.1",
+              "score": 4
+            },
+            {
+              "above": "0",
+              "at_most": "0.1",
+              "score": 3
+            }
+          ],
+          "normalization": {
+            "mg/h": "original_rate_times_1000_divided_by_60_times_actual_applicable_weight_kg",
+            "pump_mg/mL": "concentration_times_1000_times_pump_ml_h_divided_by_60_times_actual_applicable_weight_kg",
+            "pump_ug/mL": "concentration_times_pump_ml_h_divided_by_60_times_actual_applicable_weight_kg",
+            "ug/kg/min": "original_rate",
+            "ug/min": "original_rate_divided_by_actual_applicable_weight_kg",
+            "weight": "explicit_original_measured_kg_positive_observed_no_later_than_start_recorded_by_asof_original_applicability_true_plus_current_use_confirmed_no_default"
+          },
+          "overlap_policy": "actual_same_stream_piecewise_overlap_unknown_v1_nonoverlap_completed_hour_preserved_cross_drug_same_physical_key_overlap_blocked_no_cross_agent_time_join",
+          "positive_drug_dose_unit": "ug/kg/min",
+          "short_high_dose": "preserve_original_exposure_duration_condition_not_satisfied_no_clinical_reassurance",
+          "stream_policy": "same_drug_explicit_distinct_parallel_stream_rates_sum_piecewise_no_duplicate_or_agent_total_double_count_unresolved_overlap_unknown_stream_key_sha_namespace_and_external_id_only_no_note",
+          "verified_extent": "actual_start_through_verified_until_only_no_forward_fill_or_future_completion",
+          "zero": "never_positive_exposure_never_any_dose_score"
+        },
+        "clinical_validation": "not_provided",
+        "cns": {
+          "bands": [
+            [
+              15,
+              15,
+              0
+            ],
+            [
+              13,
+              14,
+              1
+            ],
+            [
+              10,
+              12,
+              2
+            ],
+            [
+              6,
+              9,
+              3
+            ],
+            [
+              3,
+              5,
+              4
+            ]
+          ],
+          "policy": "measured_interpretable_only_no_nt_to_one_default_fifteen_avpu_proxy_component_fusion_or_carry_forward",
+          "source": "one_actual_full_eye_verbal_motor_exam_only"
+        },
+        "coagulation": {
+          "bands": [
+            [
+              "150",
+              null,
+              true,
+              false,
+              0
+            ],
+            [
+              "100",
+              "150",
+              true,
+              false,
+              1
+            ],
+            [
+              "50",
+              "100",
+              true,
+              false,
+              2
+            ],
+            [
+              "20",
+              "50",
+              true,
+              false,
+              3
+            ],
+            [
+              "0",
+              "20",
+              true,
+              false,
+              4
+            ]
+          ],
+          "native_units": [
+            "10^9/L",
+            "10^3/uL"
+          ],
+          "unit_policy": "explicit_native_numeric_equivalence_only_no_fuzzy_unit_matching"
+        },
+        "diagnosis": "not_provided",
+        "input_policy": {
+          "capacities": {
+            "change_public_bytes": 6291456,
+            "daily_public_bytes": 2097152,
+            "manifest_members": 4096,
+            "private_bytes": 8388608,
+            "request_bytes": 8388608,
+            "response_bytes": 8388608,
+            "result_bytes": 8388608
+          },
+          "change": {
+            "attribution": "explicit_doctor_current_review_never_automatically_inferred_from_delta_or_day_windows",
+            "baseline_modes": [
+              "observed",
+              "conditional_zero",
+              "unknown"
+            ],
+            "conditional_zero": "both_explicit_current_doctor_assumptions_required_else_zero_to_twentyfour_not_zero",
+            "delta": "current_lower_minus_baseline_upper_current_upper_minus_baseline_lower_keep_negative_never_subtract_subtotals",
+            "infection": "actual_governed_original_may_be_available_after_current_asof_explicit_late_flag_current_retrospective_only",
+            "observed": "same_rule_recipe_policy_independent_current_authorized_day_ends_before_current_day_and_known_infection_onset",
+            "unknown": "zero_to_twentyfour_never_normal_imputed"
+          },
+          "coverage": {
+            "clinical_protocol": [
+              "adequate",
+              "incomplete",
+              "unknown"
+            ],
+            "protocol_complete": "actual_required_measurements_plus_all_members_and_resolved_conditions_never_checkbox_only",
+            "source_inventory": [
+              "complete",
+              "incomplete",
+              "unknown"
+            ]
+          },
+          "facts": {
+            "laboratory_native_units": [
+              "10^9/L",
+              "10^3/uL",
+              "mg/dL",
+              "umol/L",
+              "mm[Hg]",
+              "kPa"
+            ],
+            "laboratory_qualitative": "value_null_type_preserved_original_text_private_only_full_hash_bound",
+            "laboratory_units": "closed_exact_native_units_or_unsupported_or_original_null_unknown_marker_with_full_original_unit_hash_no_free_text_outbound_no_conversion",
+            "numbers": "exact_original_decimal_strings_LIS_signed_preserved_negative_unsupported_value_unknown_other_quantities_nonnegative"
+          },
+          "gcs_confounding": "complete_measured_EVM_interpretable_confirmed_and_current_doctor_sedation_and_other_confounding_effects_both_explicitly_excluded_no_drug_presence_inference_or_virtual_pre_sedation_score",
+          "input_precision": {
+            "maximum_fraction_digits": 8,
+            "maximum_integer_digits": 16,
+            "numbers": "exact_original_decimal_strings_LIS_signed_preserved_negative_unsupported_value_unknown_other_quantities_nonnegative",
+            "quantity_conversion": "only_explicit_fraction_dose_formulas_other_native_branches_never_converted",
+            "rounding": "never",
+            "zero_is_missing": false
+          },
+          "partial_policy": {
+            "complete_total": "all_six_protocol_complete_and_within_declared_scope_and_no_unresolved_rules_or_conflicts",
+            "domain_lower_bound": "retain_all_unambiguous_positive_witnesses_including_bounded_candidates",
+            "domain_upper_bound": "account_for_all_unresolved_candidates_required_modalities_and_incomplete_inventory_or_protocol",
+            "exact_numeric": "bounds_collapse_even_at_ceiling_does_not_assert_coverage_complete",
+            "known_subtotal": "sum_nonnull_exact_observed_candidate_domain_maxima_not_complete_total",
+            "normal_imputation": false,
+            "unknown_domain_bounds": [
+              0,
+              4
+            ]
+          },
+          "population": {
+            "adult": "yes_and_explicit_applicability_confirmation",
+            "care_setting": [
+              "icu",
+              "other"
+            ],
+            "clinical_validation": "not_provided"
+          },
+          "respiratory_qualification": {
+            "original_none_and_new_yes": "incompatible_keep_exact_pf_proven_lower_bound_and_support_unknown_upper_never_award_high_tier_pure_math_hospital_new_signature_rejected",
+            "original_unknown_and_new_yes": "allowed_current_doctor_qualification_with_independent_basis_original_mode_remains_unknown",
+            "other_modes": "doctor_explicit_yes_no_unknown_no_invasive_only_narrowing_or_device_inference"
+          },
+          "review": {
+            "basis": "private_statement_hash_public_only",
+            "historical_prediction": false,
+            "mode": "current_retrospective",
+            "original_flags": "preserve_no_current_review_overwrite",
+            "status": [
+              "confirmed",
+              "excluded",
+              "unknown"
+            ]
+          },
+          "source_policy": {
+            "all_members": "complete_actual_asof_root_and_parent_manifest_no_winner_only",
+            "current_use": "active_creation_governance_match_complete_current_source_set_and_all_parent_governance_recheck",
+            "public": "typed_facts_and_review_hashes_no_free_text_patient_admission_author_or_external_stream_identity",
+            "revoked": "retained_review_excluded_no_normal_imputation"
+          },
+          "vasoactive_overlap": {
+            "cross_drug": "same_actual_physical_stream_key_concurrent_intersection_unknown_never_concatenate_agents",
+            "identity": "only_actual_sha_namespace_and_external_stream_id_no_note_or_drug_name_inference",
+            "other_conflicts": "original_identity_lab_pao2_gcs_and_other_unresolved_groups_remain_dependent_candidate_unknown",
+            "policy": "actual_same_stream_piecewise_overlap_unknown_v1",
+            "unresolved_same_stream_overlap": "only_actual_intersection_unknown_retain_independent_nonoverlap_completed_tier_witness"
+          }
+        },
+        "liver": {
+          "analyte": "total_bilirubin",
+          "bands": {
+            "mg/dL": [
+              [
+                "0",
+                "1.2",
+                true,
+                false,
+                0
+              ],
+              [
+                "1.2",
+                "2",
+                true,
+                false,
+                1
+              ],
+              [
+                "2",
+                "6",
+                true,
+                false,
+                2
+              ],
+              [
+                "6",
+                "12",
+                true,
+                false,
+                3
+              ],
+              [
+                "12",
+                null,
+                true,
+                false,
+                4
+              ]
+            ],
+            "umol/L": [
+              [
+                "0",
+                "20",
+                true,
+                false,
+                0
+              ],
+              [
+                "20",
+                "33",
+                true,
+                false,
+                1
+              ],
+              [
+                "33",
+                "102",
+                true,
+                false,
+                2
+              ],
+              [
+                "102",
+                "204",
+                true,
+                false,
+                3
+              ],
+              [
+                "204",
+                null,
+                true,
+                false,
+                4
+              ]
+            ]
+          },
+          "native_policy": "local_mimic_mgdl_continuous_and_amsterdam_si_native_not_exact_converted_equivalence_no_claim_of_official_1996_erratum"
+        },
+        "organ_order": [
+          "respiratory",
+          "coagulation",
+          "liver",
+          "cardiovascular",
+          "cns",
+          "renal"
+        ],
+        "partial_policy": {
+          "complete_total": "all_six_protocol_complete_and_within_declared_scope_and_no_unresolved_rules_or_conflicts",
+          "domain_lower_bound": "retain_all_unambiguous_positive_witnesses_including_bounded_candidates",
+          "domain_upper_bound": "account_for_all_unresolved_candidates_required_modalities_and_incomplete_inventory_or_protocol",
+          "exact_numeric": "bounds_collapse_even_at_ceiling_does_not_assert_coverage_complete",
+          "known_subtotal": "sum_nonnull_exact_observed_candidate_domain_maxima_not_complete_total",
+          "normal_imputation": false,
+          "unknown_domain_bounds": [
+            0,
+            4
+          ]
+        },
+        "period": {
+          "aggregation": "maximum_eligible_candidate_per_domain_never_mix_different_samples_or_gcs_components",
+          "availability": "all_original_recorded_registered_available_at_or_before_as_of",
+          "duration_microseconds": 86400000000,
+          "point_membership": "start_inclusive_end_exclusive",
+          "review": "current_retrospective_evaluation_at_not_historical_prediction"
+        },
+        "population": "clinician_declared_adult_no_qsofa_non_icu_or_news2_pregnancy_exclusion_no_independent_clinical_validation",
+        "probability": "not_provided",
+        "prompt_handling": "provenance_only",
+        "renal": {
+          "combine": "max_creatinine_and_urine_branch_bounds_neither_missing_branch_normal_imputed",
+          "creatinine_bands": {
+            "mg/dL": [
+              [
+                "0",
+                "1.2",
+                true,
+                false,
+                0
+              ],
+              [
+                "1.2",
+                "2",
+                true,
+                false,
+                1
+              ],
+              [
+                "2",
+                "3.5",
+                true,
+                false,
+                2
+              ],
+              [
+                "3.5",
+                "5",
+                true,
+                false,
+                3
+              ],
+              [
+                "5",
+                null,
+                true,
+                false,
+                4
+              ]
+            ],
+            "umol/L": [
+              [
+                "0",
+                "110",
+                true,
+                false,
+                0
+              ],
+              [
+                "110",
+                "171",
+                true,
+                false,
+                1
+              ],
+              [
+                "171",
+                "300",
+                true,
+                false,
+                2
+              ],
+              [
+                "300",
+                "440",
+                true,
+                true,
+                3
+              ],
+              [
+                "440",
+                null,
+                false,
+                false,
+                4
+              ]
+            ]
+          },
+          "native_policy": "local_mimic_mgdl_and_amsterdam_si_cr440_inclusive_score3_not_exact_converted_equivalence",
+          "rrt": "not_a_sofa1_automatic_four_rule",
+          "urine": {
+            "at_least_200_below_500": 3,
+            "at_least_500_branch_contribution": 0,
+            "below_200": 4,
+            "unit": "mL/24h"
+          },
+          "urine_policy": "all_whole_original_intervals_exact_24h_tiling_no_overlap_gap_partial_collection_unknown_volume_or_non_patient_total_no_clip_proration_short_period_extrapolation_or_weight_normalization"
+        },
+        "respiratory": {
+          "comparison": "100_times_pao2_cross_compare_threshold_times_original_fio2_percent_no_rounded_division",
+          "fio2_eligibility": "positive_at_most_100_explicit_original_pair_no_room_air_default",
+          "fio2_unit": "%",
+          "kpa": "independent_rounded_native_thresholds_from_sepsis3_printed_table_no_conversion_or_equivalence_claim",
+          "pao2_units": [
+            "mm[Hg]",
+            "kPa"
+          ],
+          "qualification_consistency_policy": "doctor_yes_requires_original_mode_not_explicit_none_v1_unknown_mode_may_remain_unknown_with_current_explicit_qualification_yes_no_inference",
+          "qualifying_support": "explicit_current_doctor_review_with_basis_hash_never_device_mode_inference",
+          "sample_review": "arterial_sample_same_sampling_state_and_fio2_applicability_all_confirmed",
+          "support_policy": "local_doctor_adjudicated_per_actual_pair_yes_no_unknown_v1",
+          "thresholds_kpa": [
+            "53.3",
+            "40",
+            "26.7",
+            "13.3"
+          ],
+          "thresholds_mmhg": [
+            "400",
+            "300",
+            "200",
+            "100"
+          ],
+          "unknown_support_low_ratio_bounds": {
+            "100_to_below_200": [
+              2,
+              3
+            ],
+            "below_100": [
+              2,
+              4
+            ]
+          },
+          "without_qualifying_support_maximum": 2
+        },
+        "rule_family": "SOFA1",
+        "rule_id": "sofa1_native_observed_v1",
+        "scoring_status": "local_explicit_sofa1_implementation_not_sofa2_or_manual_components",
+        "treatment": "not_provided",
+        "version": "sofa1_native_observed_local_policy_v1"
+      },
+      "recipe_digest": "849854d26deb3e5d42e9433d839a5db0b365e85206ea5272b6592d75d4769199",
+      "rule_id": "sofa1_native_observed_v1",
+      "runtime_digest": "0e0f5e865c7005805ec1b77947aed0c851038ce5592746c9fb5823b2eeaf67ad",
+      "schema_version": "9",
+      "timeout_seconds": 60
+    },
+    "container_runtime": {
+      "clinical_validation": "not_provided",
+      "core_sha256": {
+        "sofa_config.py": "cf5c6a55f7f6dc172a63831f59279074a595856d058b11967149d431886ed179",
+        "sofa_contract.py": "fc99b125f1bc467b3f05874eb361e09889b043929466de58fcc8b506713cb6f7",
+        "sofa_model.py": "c59b9f03a785a05e207556e3df959ccb0638cba67b230845bd5d8886b8bed2a8",
+        "sofa_server.py": "4c01b4e75c3195972a0ba4a3186b59303c2be9dfbb84867616872edbbced440e"
+      },
+      "engine": "hoim_sofa1_native_independent",
+      "fastapi_version": "0.136.1",
+      "feature_key": "sepsis_risk",
+      "independent_implementation": true,
+      "input_policy": {
+        "capacities": {
+          "change_public_bytes": 6291456,
+          "daily_public_bytes": 2097152,
+          "manifest_members": 4096,
+          "private_bytes": 8388608,
+          "request_bytes": 8388608,
+          "response_bytes": 8388608,
+          "result_bytes": 8388608
+        },
+        "change": {
+          "attribution": "explicit_doctor_current_review_never_automatically_inferred_from_delta_or_day_windows",
+          "baseline_modes": [
+            "observed",
+            "conditional_zero",
+            "unknown"
+          ],
+          "conditional_zero": "both_explicit_current_doctor_assumptions_required_else_zero_to_twentyfour_not_zero",
+          "delta": "current_lower_minus_baseline_upper_current_upper_minus_baseline_lower_keep_negative_never_subtract_subtotals",
+          "infection": "actual_governed_original_may_be_available_after_current_asof_explicit_late_flag_current_retrospective_only",
+          "observed": "same_rule_recipe_policy_independent_current_authorized_day_ends_before_current_day_and_known_infection_onset",
+          "unknown": "zero_to_twentyfour_never_normal_imputed"
+        },
+        "coverage": {
+          "clinical_protocol": [
+            "adequate",
+            "incomplete",
+            "unknown"
+          ],
+          "protocol_complete": "actual_required_measurements_plus_all_members_and_resolved_conditions_never_checkbox_only",
+          "source_inventory": [
+            "complete",
+            "incomplete",
+            "unknown"
+          ]
+        },
+        "facts": {
+          "laboratory_native_units": [
+            "10^9/L",
+            "10^3/uL",
+            "mg/dL",
+            "umol/L",
+            "mm[Hg]",
+            "kPa"
+          ],
+          "laboratory_qualitative": "value_null_type_preserved_original_text_private_only_full_hash_bound",
+          "laboratory_units": "closed_exact_native_units_or_unsupported_or_original_null_unknown_marker_with_full_original_unit_hash_no_free_text_outbound_no_conversion",
+          "numbers": "exact_original_decimal_strings_LIS_signed_preserved_negative_unsupported_value_unknown_other_quantities_nonnegative"
+        },
+        "gcs_confounding": "complete_measured_EVM_interpretable_confirmed_and_current_doctor_sedation_and_other_confounding_effects_both_explicitly_excluded_no_drug_presence_inference_or_virtual_pre_sedation_score",
+        "input_precision": {
+          "maximum_fraction_digits": 8,
+          "maximum_integer_digits": 16,
+          "numbers": "exact_original_decimal_strings_LIS_signed_preserved_negative_unsupported_value_unknown_other_quantities_nonnegative",
+          "quantity_conversion": "only_explicit_fraction_dose_formulas_other_native_branches_never_converted",
+          "rounding": "never",
+          "zero_is_missing": false
+        },
+        "partial_policy": {
+          "complete_total": "all_six_protocol_complete_and_within_declared_scope_and_no_unresolved_rules_or_conflicts",
+          "domain_lower_bound": "retain_all_unambiguous_positive_witnesses_including_bounded_candidates",
+          "domain_upper_bound": "account_for_all_unresolved_candidates_required_modalities_and_incomplete_inventory_or_protocol",
+          "exact_numeric": "bounds_collapse_even_at_ceiling_does_not_assert_coverage_complete",
+          "known_subtotal": "sum_nonnull_exact_observed_candidate_domain_maxima_not_complete_total",
+          "normal_imputation": false,
+          "unknown_domain_bounds": [
+            0,
+            4
+          ]
+        },
+        "population": {
+          "adult": "yes_and_explicit_applicability_confirmation",
+          "care_setting": [
+            "icu",
+            "other"
+          ],
+          "clinical_validation": "not_provided"
+        },
+        "respiratory_qualification": {
+          "original_none_and_new_yes": "incompatible_keep_exact_pf_proven_lower_bound_and_support_unknown_upper_never_award_high_tier_pure_math_hospital_new_signature_rejected",
+          "original_unknown_and_new_yes": "allowed_current_doctor_qualification_with_independent_basis_original_mode_remains_unknown",
+          "other_modes": "doctor_explicit_yes_no_unknown_no_invasive_only_narrowing_or_device_inference"
+        },
+        "review": {
+          "basis": "private_statement_hash_public_only",
+          "historical_prediction": false,
+          "mode": "current_retrospective",
+          "original_flags": "preserve_no_current_review_overwrite",
+          "status": [
+            "confirmed",
+            "excluded",
+            "unknown"
+          ]
+        },
+        "source_policy": {
+          "all_members": "complete_actual_asof_root_and_parent_manifest_no_winner_only",
+          "current_use": "active_creation_governance_match_complete_current_source_set_and_all_parent_governance_recheck",
+          "public": "typed_facts_and_review_hashes_no_free_text_patient_admission_author_or_external_stream_identity",
+          "revoked": "retained_review_excluded_no_normal_imputation"
+        },
+        "vasoactive_overlap": {
+          "cross_drug": "same_actual_physical_stream_key_concurrent_intersection_unknown_never_concatenate_agents",
+          "identity": "only_actual_sha_namespace_and_external_stream_id_no_note_or_drug_name_inference",
+          "other_conflicts": "original_identity_lab_pao2_gcs_and_other_unresolved_groups_remain_dependent_candidate_unknown",
+          "policy": "actual_same_stream_piecewise_overlap_unknown_v1",
+          "unresolved_same_stream_overlap": "only_actual_intersection_unknown_retain_independent_nonoverlap_completed_tier_witness"
+        }
+      },
+      "max_request_bytes": 8388608,
+      "max_response_bytes": 8388608,
+      "model_version": "sofa1:392874e1d77f2950b14018658f99e78f710cc5a465aa490db92a978237041b0d",
+      "policy_digest": "8f0d250b27c2dd1c6d41c12843da9a4bc0283d09c5bb55adf081fcc2127f8d13",
+      "population_applicability": "not_independently_verified",
+      "prompt_handling": "provenance_only",
+      "pydantic_version": "2.12.4",
+      "python_version": "3.12.13",
+      "recipe": {
+        "cardiovascular": {
+          "actual_route": "doctor_confirmed_continuous_iv_no_old_order_route_parsing_or_bolus_inference",
+          "cross_drug_policy": "separate_agents_no_ne_epinephrine_sum_no_equivalent_conversion",
+          "dobutamine": [
+            {
+              "above": "0",
+              "score": 2
+            }
+          ],
+          "dopamine": [
+            {
+              "above": "15",
+              "score": 4
+            },
+            {
+              "above": "5",
+              "at_most": "15",
+              "score": 3
+            },
+            {
+              "above": "0",
+              "at_most": "5",
+              "score": 2
+            }
+          ],
+          "dose_arithmetic": "reduced_exact_fraction_of_original_decimal_inputs_direct_normalized_rate_never_divided_twice",
+          "duration_policy": "local_band_continuity_1h_v1_not_claimed_official_resolution_of_1996_duration_ambiguity",
+          "duration_witness": "each_agent_and_score_predicate_contiguous_true_prefix_allowed_no_gap_or_cross_agent_join_complete_end_b_after_period_start_and_at_or_before_period_end_positive_in_period_exposure",
+          "epinephrine": [
+            {
+              "above": "0.1",
+              "score": 4
+            },
+            {
+              "above": "0",
+              "at_most": "0.1",
+              "score": 3
+            }
+          ],
+          "map": {
+            "below": "70",
+            "missing_branch_bounds": [
+              0,
+              1
+            ],
+            "score": 1,
+            "unit": "mm[Hg]"
+          },
+          "mass_basis": "original_mapping_base_only_and_explicit_compatible_clinician_review_unknown_or_salt_remains_unknown_no_implicit_factor",
+          "minimum_continuous_microseconds": 3600000000,
+          "norepinephrine": [
+            {
+              "above": "0.1",
+              "score": 4
+            },
+            {
+              "above": "0",
+              "at_most": "0.1",
+              "score": 3
+            }
+          ],
+          "normalization": {
+            "mg/h": "original_rate_times_1000_divided_by_60_times_actual_applicable_weight_kg",
+            "pump_mg/mL": "concentration_times_1000_times_pump_ml_h_divided_by_60_times_actual_applicable_weight_kg",
+            "pump_ug/mL": "concentration_times_pump_ml_h_divided_by_60_times_actual_applicable_weight_kg",
+            "ug/kg/min": "original_rate",
+            "ug/min": "original_rate_divided_by_actual_applicable_weight_kg",
+            "weight": "explicit_original_measured_kg_positive_observed_no_later_than_start_recorded_by_asof_original_applicability_true_plus_current_use_confirmed_no_default"
+          },
+          "overlap_policy": "actual_same_stream_piecewise_overlap_unknown_v1_nonoverlap_completed_hour_preserved_cross_drug_same_physical_key_overlap_blocked_no_cross_agent_time_join",
+          "positive_drug_dose_unit": "ug/kg/min",
+          "short_high_dose": "preserve_original_exposure_duration_condition_not_satisfied_no_clinical_reassurance",
+          "stream_policy": "same_drug_explicit_distinct_parallel_stream_rates_sum_piecewise_no_duplicate_or_agent_total_double_count_unresolved_overlap_unknown_stream_key_sha_namespace_and_external_id_only_no_note",
+          "verified_extent": "actual_start_through_verified_until_only_no_forward_fill_or_future_completion",
+          "zero": "never_positive_exposure_never_any_dose_score"
+        },
+        "clinical_validation": "not_provided",
+        "cns": {
+          "bands": [
+            [
+              15,
+              15,
+              0
+            ],
+            [
+              13,
+              14,
+              1
+            ],
+            [
+              10,
+              12,
+              2
+            ],
+            [
+              6,
+              9,
+              3
+            ],
+            [
+              3,
+              5,
+              4
+            ]
+          ],
+          "policy": "measured_interpretable_only_no_nt_to_one_default_fifteen_avpu_proxy_component_fusion_or_carry_forward",
+          "source": "one_actual_full_eye_verbal_motor_exam_only"
+        },
+        "coagulation": {
+          "bands": [
+            [
+              "150",
+              null,
+              true,
+              false,
+              0
+            ],
+            [
+              "100",
+              "150",
+              true,
+              false,
+              1
+            ],
+            [
+              "50",
+              "100",
+              true,
+              false,
+              2
+            ],
+            [
+              "20",
+              "50",
+              true,
+              false,
+              3
+            ],
+            [
+              "0",
+              "20",
+              true,
+              false,
+              4
+            ]
+          ],
+          "native_units": [
+            "10^9/L",
+            "10^3/uL"
+          ],
+          "unit_policy": "explicit_native_numeric_equivalence_only_no_fuzzy_unit_matching"
+        },
+        "diagnosis": "not_provided",
+        "input_policy": {
+          "capacities": {
+            "change_public_bytes": 6291456,
+            "daily_public_bytes": 2097152,
+            "manifest_members": 4096,
+            "private_bytes": 8388608,
+            "request_bytes": 8388608,
+            "response_bytes": 8388608,
+            "result_bytes": 8388608
+          },
+          "change": {
+            "attribution": "explicit_doctor_current_review_never_automatically_inferred_from_delta_or_day_windows",
+            "baseline_modes": [
+              "observed",
+              "conditional_zero",
+              "unknown"
+            ],
+            "conditional_zero": "both_explicit_current_doctor_assumptions_required_else_zero_to_twentyfour_not_zero",
+            "delta": "current_lower_minus_baseline_upper_current_upper_minus_baseline_lower_keep_negative_never_subtract_subtotals",
+            "infection": "actual_governed_original_may_be_available_after_current_asof_explicit_late_flag_current_retrospective_only",
+            "observed": "same_rule_recipe_policy_independent_current_authorized_day_ends_before_current_day_and_known_infection_onset",
+            "unknown": "zero_to_twentyfour_never_normal_imputed"
+          },
+          "coverage": {
+            "clinical_protocol": [
+              "adequate",
+              "incomplete",
+              "unknown"
+            ],
+            "protocol_complete": "actual_required_measurements_plus_all_members_and_resolved_conditions_never_checkbox_only",
+            "source_inventory": [
+              "complete",
+              "incomplete",
+              "unknown"
+            ]
+          },
+          "facts": {
+            "laboratory_native_units": [
+              "10^9/L",
+              "10^3/uL",
+              "mg/dL",
+              "umol/L",
+              "mm[Hg]",
+              "kPa"
+            ],
+            "laboratory_qualitative": "value_null_type_preserved_original_text_private_only_full_hash_bound",
+            "laboratory_units": "closed_exact_native_units_or_unsupported_or_original_null_unknown_marker_with_full_original_unit_hash_no_free_text_outbound_no_conversion",
+            "numbers": "exact_original_decimal_strings_LIS_signed_preserved_negative_unsupported_value_unknown_other_quantities_nonnegative"
+          },
+          "gcs_confounding": "complete_measured_EVM_interpretable_confirmed_and_current_doctor_sedation_and_other_confounding_effects_both_explicitly_excluded_no_drug_presence_inference_or_virtual_pre_sedation_score",
+          "input_precision": {
+            "maximum_fraction_digits": 8,
+            "maximum_integer_digits": 16,
+            "numbers": "exact_original_decimal_strings_LIS_signed_preserved_negative_unsupported_value_unknown_other_quantities_nonnegative",
+            "quantity_conversion": "only_explicit_fraction_dose_formulas_other_native_branches_never_converted",
+            "rounding": "never",
+            "zero_is_missing": false
+          },
+          "partial_policy": {
+            "complete_total": "all_six_protocol_complete_and_within_declared_scope_and_no_unresolved_rules_or_conflicts",
+            "domain_lower_bound": "retain_all_unambiguous_positive_witnesses_including_bounded_candidates",
+            "domain_upper_bound": "account_for_all_unresolved_candidates_required_modalities_and_incomplete_inventory_or_protocol",
+            "exact_numeric": "bounds_collapse_even_at_ceiling_does_not_assert_coverage_complete",
+            "known_subtotal": "sum_nonnull_exact_observed_candidate_domain_maxima_not_complete_total",
+            "normal_imputation": false,
+            "unknown_domain_bounds": [
+              0,
+              4
+            ]
+          },
+          "population": {
+            "adult": "yes_and_explicit_applicability_confirmation",
+            "care_setting": [
+              "icu",
+              "other"
+            ],
+            "clinical_validation": "not_provided"
+          },
+          "respiratory_qualification": {
+            "original_none_and_new_yes": "incompatible_keep_exact_pf_proven_lower_bound_and_support_unknown_upper_never_award_high_tier_pure_math_hospital_new_signature_rejected",
+            "original_unknown_and_new_yes": "allowed_current_doctor_qualification_with_independent_basis_original_mode_remains_unknown",
+            "other_modes": "doctor_explicit_yes_no_unknown_no_invasive_only_narrowing_or_device_inference"
+          },
+          "review": {
+            "basis": "private_statement_hash_public_only",
+            "historical_prediction": false,
+            "mode": "current_retrospective",
+            "original_flags": "preserve_no_current_review_overwrite",
+            "status": [
+              "confirmed",
+              "excluded",
+              "unknown"
+            ]
+          },
+          "source_policy": {
+            "all_members": "complete_actual_asof_root_and_parent_manifest_no_winner_only",
+            "current_use": "active_creation_governance_match_complete_current_source_set_and_all_parent_governance_recheck",
+            "public": "typed_facts_and_review_hashes_no_free_text_patient_admission_author_or_external_stream_identity",
+            "revoked": "retained_review_excluded_no_normal_imputation"
+          },
+          "vasoactive_overlap": {
+            "cross_drug": "same_actual_physical_stream_key_concurrent_intersection_unknown_never_concatenate_agents",
+            "identity": "only_actual_sha_namespace_and_external_stream_id_no_note_or_drug_name_inference",
+            "other_conflicts": "original_identity_lab_pao2_gcs_and_other_unresolved_groups_remain_dependent_candidate_unknown",
+            "policy": "actual_same_stream_piecewise_overlap_unknown_v1",
+            "unresolved_same_stream_overlap": "only_actual_intersection_unknown_retain_independent_nonoverlap_completed_tier_witness"
+          }
+        },
+        "liver": {
+          "analyte": "total_bilirubin",
+          "bands": {
+            "mg/dL": [
+              [
+                "0",
+                "1.2",
+                true,
+                false,
+                0
+              ],
+              [
+                "1.2",
+                "2",
+                true,
+                false,
+                1
+              ],
+              [
+                "2",
+                "6",
+                true,
+                false,
+                2
+              ],
+              [
+                "6",
+                "12",
+                true,
+                false,
+                3
+              ],
+              [
+                "12",
+                null,
+                true,
+                false,
+                4
+              ]
+            ],
+            "umol/L": [
+              [
+                "0",
+                "20",
+                true,
+                false,
+                0
+              ],
+              [
+                "20",
+                "33",
+                true,
+                false,
+                1
+              ],
+              [
+                "33",
+                "102",
+                true,
+                false,
+                2
+              ],
+              [
+                "102",
+                "204",
+                true,
+                false,
+                3
+              ],
+              [
+                "204",
+                null,
+                true,
+                false,
+                4
+              ]
+            ]
+          },
+          "native_policy": "local_mimic_mgdl_continuous_and_amsterdam_si_native_not_exact_converted_equivalence_no_claim_of_official_1996_erratum"
+        },
+        "organ_order": [
+          "respiratory",
+          "coagulation",
+          "liver",
+          "cardiovascular",
+          "cns",
+          "renal"
+        ],
+        "partial_policy": {
+          "complete_total": "all_six_protocol_complete_and_within_declared_scope_and_no_unresolved_rules_or_conflicts",
+          "domain_lower_bound": "retain_all_unambiguous_positive_witnesses_including_bounded_candidates",
+          "domain_upper_bound": "account_for_all_unresolved_candidates_required_modalities_and_incomplete_inventory_or_protocol",
+          "exact_numeric": "bounds_collapse_even_at_ceiling_does_not_assert_coverage_complete",
+          "known_subtotal": "sum_nonnull_exact_observed_candidate_domain_maxima_not_complete_total",
+          "normal_imputation": false,
+          "unknown_domain_bounds": [
+            0,
+            4
+          ]
+        },
+        "period": {
+          "aggregation": "maximum_eligible_candidate_per_domain_never_mix_different_samples_or_gcs_components",
+          "availability": "all_original_recorded_registered_available_at_or_before_as_of",
+          "duration_microseconds": 86400000000,
+          "point_membership": "start_inclusive_end_exclusive",
+          "review": "current_retrospective_evaluation_at_not_historical_prediction"
+        },
+        "population": "clinician_declared_adult_no_qsofa_non_icu_or_news2_pregnancy_exclusion_no_independent_clinical_validation",
+        "probability": "not_provided",
+        "prompt_handling": "provenance_only",
+        "renal": {
+          "combine": "max_creatinine_and_urine_branch_bounds_neither_missing_branch_normal_imputed",
+          "creatinine_bands": {
+            "mg/dL": [
+              [
+                "0",
+                "1.2",
+                true,
+                false,
+                0
+              ],
+              [
+                "1.2",
+                "2",
+                true,
+                false,
+                1
+              ],
+              [
+                "2",
+                "3.5",
+                true,
+                false,
+                2
+              ],
+              [
+                "3.5",
+                "5",
+                true,
+                false,
+                3
+              ],
+              [
+                "5",
+                null,
+                true,
+                false,
+                4
+              ]
+            ],
+            "umol/L": [
+              [
+                "0",
+                "110",
+                true,
+                false,
+                0
+              ],
+              [
+                "110",
+                "171",
+                true,
+                false,
+                1
+              ],
+              [
+                "171",
+                "300",
+                true,
+                false,
+                2
+              ],
+              [
+                "300",
+                "440",
+                true,
+                true,
+                3
+              ],
+              [
+                "440",
+                null,
+                false,
+                false,
+                4
+              ]
+            ]
+          },
+          "native_policy": "local_mimic_mgdl_and_amsterdam_si_cr440_inclusive_score3_not_exact_converted_equivalence",
+          "rrt": "not_a_sofa1_automatic_four_rule",
+          "urine": {
+            "at_least_200_below_500": 3,
+            "at_least_500_branch_contribution": 0,
+            "below_200": 4,
+            "unit": "mL/24h"
+          },
+          "urine_policy": "all_whole_original_intervals_exact_24h_tiling_no_overlap_gap_partial_collection_unknown_volume_or_non_patient_total_no_clip_proration_short_period_extrapolation_or_weight_normalization"
+        },
+        "respiratory": {
+          "comparison": "100_times_pao2_cross_compare_threshold_times_original_fio2_percent_no_rounded_division",
+          "fio2_eligibility": "positive_at_most_100_explicit_original_pair_no_room_air_default",
+          "fio2_unit": "%",
+          "kpa": "independent_rounded_native_thresholds_from_sepsis3_printed_table_no_conversion_or_equivalence_claim",
+          "pao2_units": [
+            "mm[Hg]",
+            "kPa"
+          ],
+          "qualification_consistency_policy": "doctor_yes_requires_original_mode_not_explicit_none_v1_unknown_mode_may_remain_unknown_with_current_explicit_qualification_yes_no_inference",
+          "qualifying_support": "explicit_current_doctor_review_with_basis_hash_never_device_mode_inference",
+          "sample_review": "arterial_sample_same_sampling_state_and_fio2_applicability_all_confirmed",
+          "support_policy": "local_doctor_adjudicated_per_actual_pair_yes_no_unknown_v1",
+          "thresholds_kpa": [
+            "53.3",
+            "40",
+            "26.7",
+            "13.3"
+          ],
+          "thresholds_mmhg": [
+            "400",
+            "300",
+            "200",
+            "100"
+          ],
+          "unknown_support_low_ratio_bounds": {
+            "100_to_below_200": [
+              2,
+              3
+            ],
+            "below_100": [
+              2,
+              4
+            ]
+          },
+          "without_qualifying_support_maximum": 2
+        },
+        "rule_family": "SOFA1",
+        "rule_id": "sofa1_native_observed_v1",
+        "scoring_status": "local_explicit_sofa1_implementation_not_sofa2_or_manual_components",
+        "treatment": "not_provided",
+        "version": "sofa1_native_observed_local_policy_v1"
+      },
+      "recipe_digest": "849854d26deb3e5d42e9433d839a5db0b365e85206ea5272b6592d75d4769199",
+      "rule_id": "sofa1_native_observed_v1",
+      "runtime_digest": "392874e1d77f2950b14018658f99e78f710cc5a465aa490db92a978237041b0d",
+      "schema_version": "9",
+      "timeout_seconds": 60
+    },
+    "source_hashes": {
+      "Dockerfile.sofa": "f489c435a6bc484ce431cddc2e89c7b156ede2e7c20fe167cdee2774c31f6443",
+      "app/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "app/ai/__init__.py": "09957ea122e972d43439df3f9b0f75500e61768fabb362dddefb34e78a12171e",
+      "app/ai/sofa_config.py": "cf5c6a55f7f6dc172a63831f59279074a595856d058b11967149d431886ed179",
+      "app/ai/sofa_contract.py": "fc99b125f1bc467b3f05874eb361e09889b043929466de58fcc8b506713cb6f7",
+      "app/ai/sofa_model.py": "c59b9f03a785a05e207556e3df959ccb0638cba67b230845bd5d8886b8bed2a8",
+      "app/ai/sofa_server.py": "4c01b4e75c3195972a0ba4a3186b59303c2be9dfbb84867616872edbbced440e",
+      "requirements-sofa.txt": "b9e657436cd24bb7612c7c7823b9a755fbda70dafa16a1270e975f1f1bf507be"
+    },
+    "prompt_changed_only_provenance": true,
+    "clinical_validation": "not_provided",
+    "cleanup_verified": true
+  },
+  "intermediate_attempts_not_counted_as_final_success": [
+    {
+      "path": "/tmp/hoim-sofa-full-before-prefix-freeze-interrupted-pytest.log",
+      "bytes": 1006,
+      "sha256": "e6067b402654abaa9878c67905f5ff4eb4f3cf138e25792455c3230d1db10179"
+    },
+    {
+      "path": "/tmp/hoim-sofa-full-before-test-isolation-fix-pytest.log",
+      "bytes": 16618,
+      "sha256": "b5346a777d171ebeff81b59f4e9b67f0ad0cd7fe6660702dc554b949f3facf18"
+    },
+    {
+      "path": "/tmp/hoim-sofa-previous-modes-regression-first-tests.log",
+      "bytes": 2577,
+      "sha256": "c72234b87b7fb135bc48b6cd06df4de28e09373fbfd37711e34d769bb9c259ef"
+    },
+    {
+      "path": "/tmp/hoim-sofa-integration-review-fixed-tests.log",
+      "bytes": 4507,
+      "sha256": "ac0ad979d6cc81fad8eff9529c8f9aa777486691dca9018ec6237c07b3e5b7e3"
+    },
+    {
+      "path": "/tmp/hoim-sofa-pipeline-first-tests.log",
+      "bytes": 4821,
+      "sha256": "861161ac6afcb83c17fc96f7392c0065c43e65c472d58a52452638e0f177b519"
+    },
+    {
+      "path": "/tmp/hoim-sofa-entry-independent-tests.log",
+      "bytes": 4534,
+      "sha256": "0f534a7c777a3369bc7d0b96e5488c7c7df706ba0e412f73c9842346931e936f"
+    },
+    {
+      "path": "/tmp/hoim-sofa-ui-before-bundle-dedup-verify.log",
+      "bytes": 55312,
+      "sha256": "7d477d4d50f330e30a5c9bb146b8f6b2671cdd1a5a4117b4e6dc6a98610ef539"
+    },
+    {
+      "path": "/tmp/hoim-sofa-lossless-schema-final-tests.log",
+      "bytes": 5857,
+      "sha256": "30ecd5f2a14ca64ea1300b90483c7a0d4b2118e9a6f1bbbda2ef371e083ce4a7"
+    }
+  ],
+  "fourteen_historical_verification_records_unchanged": {
+    "doc/ai-aki-verification.json": "a2f8e928266ff16d46973db731329d4e96cbfe09e519ba9f5fcbc8ab384a897c",
+    "doc/ai-ecg-classifier-smoke.json": "838b0305249698617bc475f7158dfbfbb9e6e22e6d6e84e51974bfcfebb90c61",
+    "doc/ai-ecg-verification.json": "1eedfa9eb918cf6e6b1ee1f201b7413760eeec501c128f4a73401741f0427f94",
+    "doc/ai-forecast-verification.json": "9b5683bca58efcf7fc460410529fd5aeeed91e2646eb47be24b836cbadc20d63",
+    "doc/ai-frontend-dependencies-verification.json": "968757f4a75e921038133b3fa9a94947ab4d5607142dce8da964f2a13d00bb1d",
+    "doc/ai-imaging-classifier-smoke.json": "b2185a31ff66c4602c10136d5b15404199f50cf7d65ea4a8be4718778c6a9e89",
+    "doc/ai-imaging-verification.json": "63646b181dae4f531abe233708a24f9b9cc05037ef95d57e1e6f39c7f9880148",
+    "doc/ai-laboratory-verification.json": "646103e4874b4f895424987520c7adfb6fb8afdd9eb6e2c7104ed2095b72752f",
+    "doc/ai-news2-verification.json": "363be8c61e2f36705dccc4604631e7d0e84aaa6cc922196ed36e48e740ca6570",
+    "doc/ai-nursing-verification.json": "a04248f9de57ddd878c1b408da1833f53651cd3535d8385d2275874a7f6f9517",
+    "doc/ai-observation-verification.json": "b75ab8c7ff94704cb823be59d51539f06a16a24edf0020b0e87edfd6cf6e6bee",
+    "doc/ai-organ-support-verification.json": "175b4d4b66960f623170aded7ca7dec32f462fc34278289411c1ddda3dbc653d",
+    "doc/ai-qsofa-verification.json": "d3c4cea9a657527540d3c570512a00568f92a5381c066e9a0bcf204a2e3c7ba4",
+    "doc/ai-speech-smoke.json": "41ad522da4f04e2a6d75595660ecbc2549acdcd159450aa99602b495c8e690a0"
+  },
+  "implementation_and_generated_artifact_sha256": {
+    "fastapi_be/.env.example": "42ca54b1ddd53d6f814499376bd5bf0437eab09b36bd5fc47bafa263409a318f",
+    "fastapi_be/Dockerfile.sofa": "f489c435a6bc484ce431cddc2e89c7b156ede2e7c20fe167cdee2774c31f6443",
+    "fastapi_be/alembic/versions/20261020_sofa_assessments.py": "a7e689c71079b77836050d373aa6228de130d31d8b15c07e4963a1d30f2afe27",
+    "fastapi_be/app/ai/catalog.py": "f58a3fba827cb1fa6e8c9fde77e422e9d80f70d6243146471dcf99c28aa007b0",
+    "fastapi_be/app/ai/context.py": "6d6827e6555583b31af5b38fa73a3cfcc9fb3d34d0bbb6b09e813785a9a571d8",
+    "fastapi_be/app/ai/gateway.py": "c62512b22e19fdc107056fc4ab9e5a177e215f5a2157d8b7d1b414a0ef3350d1",
+    "fastapi_be/app/ai/governance.py": "482519fd0b3c6bf0ee8b706d3065bd7ad4a4d4c9254282a963c3a2e37830aea6",
+    "fastapi_be/app/ai/readiness.py": "6b28e5e9c27554fb0083763eabb05c1f68c5286cbd0c7b7fbb1ad60b68d6e818",
+    "fastapi_be/app/ai/references.py": "93e1e3a49f0f5ec05c5c1a584684aebdf068b844d78e9712a68724caf4681eed",
+    "fastapi_be/app/ai/risk_rule_profiles.py": "bb90e68f82c7cddd3d62689be5addc7c5cac3dd2a35a6f529bc4bb72276ffd7d",
+    "fastapi_be/app/ai/runtime.py": "88dc3ef41d00bb768406333256c88d17cac3763d5c0d9a6033ebbbbb9e5e9c92",
+    "fastapi_be/app/ai/schemas.py": "a940a51559dc045778648fa46b1d74863d0df2b7510d7dad9bcd75271afeef7b",
+    "fastapi_be/app/ai/sofa_change_sources.py": "a32ef3406e994f87b9c5ed0bc06e117c3b42af7d4acc6638cad1a23c03dee28a",
+    "fastapi_be/app/ai/sofa_config.py": "cf5c6a55f7f6dc172a63831f59279074a595856d058b11967149d431886ed179",
+    "fastapi_be/app/ai/sofa_context.py": "27a536a8c2dd2504beb85dadafd61c82cf8209f8885a5fec3daf1ea0901f2192",
+    "fastapi_be/app/ai/sofa_contract.py": "fc99b125f1bc467b3f05874eb361e09889b043929466de58fcc8b506713cb6f7",
+    "fastapi_be/app/ai/sofa_model.py": "c59b9f03a785a05e207556e3df959ccb0638cba67b230845bd5d8886b8bed2a8",
+    "fastapi_be/app/ai/sofa_models.py": "388c22b818d5dd04cf7f5f43c18269b71596d3d51c2ad594a8172258e026d396",
+    "fastapi_be/app/ai/sofa_probe.py": "a63f37b456959dd5fe76906db9be16f3aaf0e0a926aa81bee758f5f977702c98",
+    "fastapi_be/app/ai/sofa_protocol.py": "117ad24cb02541b682033fcbcf5cd4d9588cea48038f3f53e3b8fd2bc05e5811",
+    "fastapi_be/app/ai/sofa_server.py": "4c01b4e75c3195972a0ba4a3186b59303c2be9dfbb84867616872edbbced440e",
+    "fastapi_be/app/ai/sofa_sources.py": "26060b86714fec0a3efd898aa32e1263d33df97f1a064fc2978693cf5e293e8f",
+    "fastapi_be/app/ai/sofa_storage.py": "e6eddcdea5802de48803ab235f4a53cb3f6ad1634a23fa4e68ee7a027f5946fc",
+    "fastapi_be/app/ai/tools.py": "bbeaa484da35113b9deb9cf5f78cb85d8d02c176d8ba3ca9d44a4718fd789d58",
+    "fastapi_be/app/main.py": "c734547e977903cd57205d65d6c87b3454347c802cc183f2f65f697b8b168043",
+    "fastapi_be/app/models.py": "d9f4694bed7fe41a29182989ef6bc139d56d5e968e1a128f2146fb37c007efc5",
+    "fastapi_be/app/routers/ai.py": "5f40db53106893a14caad19bb22a32912a9467b101276d8a25ba6ca9688c019f",
+    "fastapi_be/app/routers/ai_admin.py": "5dc23dae9d8d66958c00edeacbe52cfd207a1745bd4df210cd3f023bd2e76571",
+    "fastapi_be/app/routers/ai_sofa.py": "526ff427a652033645edf8441f2a09546dd0b75b5be1ca5f5f86c18665fddce3",
+    "fastapi_be/app/routers/ai_sofa_change.py": "bfbfc1c8c6ea6c43cc99006124de9b9e7c664d0fa47500ef532e4bf370697c30",
+    "fastapi_be/requirements-sofa.txt": "b9e657436cd24bb7612c7c7823b9a755fbda70dafa16a1270e975f1f1bf507be",
+    "fastapi_be/tests/test_ai_catalog.py": "8c3dfb59f7e70ebf6a6dede8046a6b36793b8efbef38f5c8bf2da96674ff1a6f",
+    "fastapi_be/tests/test_ai_qsofa_sources.py": "44d7acc13ebd7033d64135bc11b32ce534cc3979eed3fce3e2c54cdfd98b5447",
+    "fastapi_be/tests/test_ai_sofa_api.py": "d2dc98b59f67cbf612b77b90ca74c7981a73a4546647dffd23193bb7736fbb05",
+    "fastapi_be/tests/test_ai_sofa_change.py": "f53e7409bb75c60c42d8de3bc42243e89a7c9edd04d6a42fb5ba653249354fe7",
+    "fastapi_be/tests/test_ai_sofa_change_api.py": "b2d432ab187a7af3fa299e9fb625bcf7a0ffb56e69c19cbbeb2ac1b8d04730f2",
+    "fastapi_be/tests/test_ai_sofa_change_pipeline.py": "d0237dad297896026d302485ecf91b595209d3389fbee0e1a4928c9f1dd62583",
+    "fastapi_be/tests/test_ai_sofa_change_sources.py": "b188a847d7922825f6a0e3e44b59f9daf1ccf313807ec44d7915a584e0200ce1",
+    "fastapi_be/tests/test_ai_sofa_complete_originals.py": "2c56565280ec768e334b3eaf199b06c1ecf2a83c0f82127425e228a2656ec80c",
+    "fastapi_be/tests/test_ai_sofa_contract.py": "18d5be190e844fe8dbfaa5d2264ca53d559da7ff592a27daf91738fac9b45c18",
+    "fastapi_be/tests/test_ai_sofa_gateway.py": "eef81a0398608b1440b8382b61e4d9a8ac9e457f0917089cabcff4283be06cdd",
+    "fastapi_be/tests/test_ai_sofa_integration_review.py": "8d30dc2daf5cd8551ba03aca20f3d9ff824a949228392fdc5a5c62ce770b9408",
+    "fastapi_be/tests/test_ai_sofa_migration.py": "37975f1ef573544b2389dc78bd586bf302bd2d3276adacf590b4c2f7a7ec17e4",
+    "fastapi_be/tests/test_ai_sofa_model.py": "7ded86046011bc5f68d7e206c6d3bd748c2e88dcd93ff3c6325145baa715f270",
+    "fastapi_be/tests/test_ai_sofa_pipeline.py": "d284bc179b9a62162ba9efef74e7d3a2a5663c37e4818679701abde02debdc98",
+    "fastapi_be/tests/test_ai_sofa_probe.py": "56a8d06bfc59f69f90c3329681ff379f3f324f89497bdc881a39c3cb2fc77847",
+    "fastapi_be/tests/test_ai_sofa_probe_admin.py": "508f981e8b048de7fa8c4da5c9f16f38b9424880f2280ad6171a921318157cee",
+    "fastapi_be/tests/test_ai_sofa_rule_governance.py": "30fccf6c5b199e7c4e9a71952aaa72324580dc3dc07f12122a13a9d3a74acca2",
+    "fastapi_be/tests/test_ai_sofa_server.py": "77bc85da0d4fa8763b61ce594a46b2ebbafca6656954cbd3ccbee445d400cb33",
+    "fastapi_be/tests/test_ai_sofa_sources.py": "b4daf4b60f935b7b931a3a3b8452fe9857bed6c5c1f96d9f5339f4b95419fae0",
+    "vue3-new-ui/e2e/ai-qsofa-source.spec.js": "c0ac093f58d4dceb4293d2d04a3dddce870e748860380c6f9a3e2cb10dacc659",
+    "vue3-new-ui/e2e/ai-sofa-assistant-source.spec.js": "1d30a07febdf222d5224cc6134f7b1e9b53fdcd8ca79c3799a59215065795748",
+    "vue3-new-ui/e2e/ai-sofa-audit-source.spec.js": "c99033066ed5013476150f939b5b6c69f125d422697507e50ebd665e4cdc96f3",
+    "vue3-new-ui/e2e/ai-sofa-change-source.spec.js": "54727938143e7b0704f3bd675247b16194862695f26b57ebf93252db8b32b097",
+    "vue3-new-ui/e2e/ai-sofa-clinical-source.spec.js": "e449b8d1c685e2e0a49761add5b2aeeb6578c41f9f7ed02d1ce3267bb1102d7b",
+    "vue3-new-ui/e2e/ai-sofa-entry-review.spec.js": "97dd1bca56b80339c1764a1ebf65862c084ed869b47d4d4f92eeb8dcbddb0f83",
+    "vue3-new-ui/e2e/ai-sofa-entry.spec.js": "1b3dd3e90a2f4f81018feb6e9ce0d4f63416f9b45763ff047ffd91a7803cd73c",
+    "vue3-new-ui/e2e/ai-sofa-independent-review.spec.js": "84e3081bcdf14652f31aa8afa79851c85bd6dcea675bf06be21ebc5eda991a27",
+    "vue3-new-ui/e2e/ai-sofa-source.spec.js": "a08763830297f792b077b92892cd154ada89201ad915fcb2ae0330658af8ee1e",
+    "vue3-new-ui/e2e/fixtures/sofa-contract-fixtures.cjs": "5c2b9d2380a57cec1f8402600c6340500e4003caa40453a65bf5b3f8ae2694bc",
+    "vue3-new-ui/e2e/fixtures/sofa-native-fixtures.cjs": "bb6f78df085dd729d941c5fccfb76bf5184ed60c6bac0ed5ceb5466357a4be68",
+    "vue3-new-ui/e2e/fixtures/sofa-source-harness.cjs": "7e18fa758c64df449f76b9b84b98417ddd32c745057f1ddaf3360d49063299e7",
+    "vue3-new-ui/e2e/fixtures/sofa-synthetic/README.md": "4a1f3913565e358490e3ba306f808b01cb8345db352f12d6a3170f46270eda6f",
+    "vue3-new-ui/e2e/fixtures/sofa-synthetic/candidates.json": "26596b2a26570516774b0611c463ac0135bc517761b69a4e670892ae452fc9b1",
+    "vue3-new-ui/e2e/fixtures/sofa-synthetic/change-candidates.json": "952c51bb54e329cf8f7a3f1487ef64786846d065c397abd92725ddf1afeeaffb",
+    "vue3-new-ui/e2e/fixtures/sofa-synthetic/change-conditional_zero-create.json": "a488fe8771d2853f7ce5d0a485b4443cacc9aff134b066c2d1c552af9c776567",
+    "vue3-new-ui/e2e/fixtures/sofa-synthetic/change-conditional_zero.json": "dca4fe708ba4bd6c6d57b812628cd72f1413f55f3f47d13391985b21f6d33411",
+    "vue3-new-ui/e2e/fixtures/sofa-synthetic/change-cross-admission.json": "64e6db6d90af19800ff1644085c4624cce9deb593b2913fa21c7c762d6e3f086",
+    "vue3-new-ui/e2e/fixtures/sofa-synthetic/change-observed-create.json": "6e669e65de86b9dbd7f64300d1f03ed83d8e4979aa6b11e6bd91cfae15734838",
+    "vue3-new-ui/e2e/fixtures/sofa-synthetic/change-observed.json": "91948bd6da1e89c80580d0592fecbc2fbe49a9b1fcd4f94fd2ebde74aa3119ed",
+    "vue3-new-ui/e2e/fixtures/sofa-synthetic/change-unknown-create.json": "031ee2f34ca2c95b76b0f17eed848830ca63cf10af0bd28935349152b9ebc1ed",
+    "vue3-new-ui/e2e/fixtures/sofa-synthetic/change-unknown.json": "29e9cea9cbe983cad8c9d909caeb225f8726fbd5f966352df04a3b9ae5833592",
+    "vue3-new-ui/e2e/fixtures/sofa-synthetic/daily-active.json": "d2947139c78583158659ffcc6067dbc87388204ae86bf5edcc329edcd26d2250",
+    "vue3-new-ui/e2e/fixtures/sofa-synthetic/daily-create.json": "8e72edaf60766a0c744b3b52823c9203e37af098ecab5b003e1220dbec6a420a",
+    "vue3-new-ui/e2e/fixtures/sofa-synthetic/daily-revoked.json": "74b8300810eef53f097d51e6a5e293b4c1da6ba938b9b4d187ae29ee6608b10e",
+    "vue3-new-ui/e2e/fixtures/sofa-synthetic/paged-candidates.json": "9bc01df8261fdceff1032557d40d7c8ea59d1f344b14ea0080693cf40d54ec5a",
+    "vue3-new-ui/e2e/fixtures/sofa-synthetic/paged-create.json": "1d61424c4f954e0d0614379d35320695fc31fe3fa1742ad34061c42cf0afa0d6",
+    "vue3-new-ui/e2e/fixtures/sofa-synthetic/paged-daily.json": "73dfbe918c193428f82eb9476ac767faf12cc01efc2769822f9e5e462493f695",
+    "vue3-new-ui/e2e/fixtures/sofa-synthetic/profile-states.json": "081a681f192bda39be753c681a1b613cbacf8583627b2cbc88e6cb9ddefb806c",
+    "vue3-new-ui/e2e/fixtures/sofa-synthetic/seven-candidates.json": "d1cfc4e09bfecabc014fb87f5beb8ba584945a9764672e74ce4436dd845fc3f3",
+    "vue3-new-ui/e2e/fixtures/sofa-synthetic/seven-create.json": "95b49560271a16fa7ed5dcbacb79f6d9ee311e7080ddfb7797779cd27912ebce",
+    "vue3-new-ui/e2e/fixtures/sofa-synthetic/seven-daily.json": "804ccada043467cd43ec7783039bf1806d7f6f1ce7e789852c2295fdeb2f0cda",
+    "vue3-new-ui/rspack.config.js": "aa497af73b33e9f451f6c046b44f528e9a2493916b12a8f38cc3f68acf5b7b14",
+    "vue3-new-ui/scripts/generate-sofa-schemas.cjs": "65927091e9de43e18170b4c4fe0fd5a3e6cb656e8e565bed840bc63e50dfa5da",
+    "vue3-new-ui/src/api/aiSofa.js": "2329224499b1046b0972658ec2fe0b1a7d018a1528c221b1f5b59297254c1f07",
+    "vue3-new-ui/src/api/aiSofaProjection.js": "2c3e9160d1406715e3ae0ebda75035ef110f4cbb05238686ca5beb288ac679a5",
+    "vue3-new-ui/src/api/sofaSchema.js": "470eec22aae563d5fc7bf77b44f46e794515c637b3f9bd37e8b44ba621651d4f",
+    "vue3-new-ui/src/api/sofaSchemas.json": "04a8039c84976cefa7b39cf04ce69b8df813714122a46f11df64bbb15710f93a",
+    "vue3-new-ui/src/components/AIAssistant/index.vue": "ae7599d4622f7bb48d947dfdb283bc84975b40a832737bebc4cc080c7fd75805",
+    "vue3-new-ui/src/components/AIObservationWindowInput/index.vue": "6a73d37a3382728b25058d2c8d2981e71fac9f7fa37638b0f7f22ce061898fbd",
+    "vue3-new-ui/src/components/AIQsofaProviderCheck/index.vue": "9582ca9b744d5d0dc1cd5d39ff00b30bc2c8d177826583da8603b5c4efb82f42",
+    "vue3-new-ui/src/components/AIRuleProviderCheck/index.vue": "5271e15626d867eed3d7af0206cd4a8cc0e0480e4e24867304c07ec506f0349e",
+    "vue3-new-ui/src/components/AISofaFindings/DailyView.vue": "013e80fc6e33594ac7670617dbf6b58d297604443c14c3f360b16f0fa2450c0e",
+    "vue3-new-ui/src/components/AISofaFindings/index.vue": "3639ed9399875496110406ab6d2f3ee2715a32c07c234829627c1ab48e89f7cf",
+    "vue3-new-ui/src/components/AISofaInput/ChangeReview.vue": "baea3939721186228f6d0c47eecbb63490881b1c8003039836e86125b2bbd49f",
+    "vue3-new-ui/src/components/AISofaInput/MemberReviewEditor.vue": "d39e96e83fa07eb02243bd8bb15dde42ac5a0de6d420cff5b37ce23c48c813fc",
+    "vue3-new-ui/src/components/AISofaInput/ReviewFields.vue": "61d9e39b26003c1363082b40a50ea6794c52c53689bce1e1ead684d1aef302f0",
+    "vue3-new-ui/src/components/AISofaInput/index.vue": "329eb10382f7ef08de9b6934c9ee1c05dffbed6fdc7d9e639bfe729464c0d51c",
+    "vue3-new-ui/src/components/AISofaManagement/AssessmentAudit.vue": "6b6dcff006c1e1a8cd57e013b94b88dc72b6c7d14816cfd2a08d422b77dc750f",
+    "vue3-new-ui/src/components/AISofaManagement/index.vue": "f4b5d62430079f187ff039c1449c6ef0bfb4c598c252b61afde43db825fd2020",
+    "vue3-new-ui/src/components/AISofaProviderCheck/index.vue": "f96e0bea2f003268a39fc4b94cf048f9b2cf3e82971596cb40bc4197e223ed0d",
+    "vue3-new-ui/src/components/AISofaSourceHub/index.vue": "c51e2059318c8a20cbd5b47762482111936efb6ad7df3125e56e2548b48b9ed3",
+    "vue3-new-ui/src/views/system/AIRiskRuleManagement.vue": "bf7fc8b65538016f8b757391a84cd778e5163140d2a04a271c6218c7e4382799",
+    "vue3-new-ui/src/views/system/aiManagement.vue": "690d6354ddee5fe8f6c557e3e31b1baf173f50f5cda0e2681b6092fde0d6d756",
+    "doc/ai-prompts.json": "b90c2860cd528c55655d4d5528f7e88b2f9d7904347220825fe88a06d0ce5149",
+    "doc/ai-capabilities.md": "b102152ca15a0dadf68791655a9398b1bae2b461a1774cf2960213a9b6213a10",
+    "doc/api-rbac-matrix.md": "8fbc7d5434bdf2c4e9a5ad27ac745d3e097d304ab53364cdd8450b538be32ca8",
+    "fastapi_be/rbac_matrix.json": "04126d9448608a0f7b0cd34791c45ca0b79d4dfec3bd76d1f9415aae55aa3781"
+  },
+  "no_all80_completion_or_real_clinical_effect_claim": true
+}

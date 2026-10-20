@@ -1,3 +1,4 @@
+import datetime
 import re
 
 from pydantic import BaseModel, Field, field_validator
@@ -904,25 +905,51 @@ class NursingRecordCreateRequest(BaseModel):
     note: str | None = Field(default=None, max_length=500)
 
 
+def _nursing_assessment_time(value):
+    """Accept only an explicitly supplied time with an offset; store it in UTC."""
+    if value is None:
+        return None
+    if not isinstance(value, str | datetime.datetime):
+        raise ValueError("评估时间须为带明确时区的日期时间")
+    if isinstance(value, str) and re.search(r"\.\d{7}", value):
+        raise ValueError("评估时间的小数秒最多6位，不截断来源精度")
+    try:
+        parsed = datetime.datetime.fromisoformat(value) if isinstance(value, str) else value
+    except ValueError as exc:
+        raise ValueError("评估时间格式无效") from exc
+    if parsed.tzinfo is None or parsed.utcoffset() is None:
+        raise ValueError("评估时间必须包含明确时区")
+    try:
+        return parsed.astimezone(datetime.UTC).replace(tzinfo=None)
+    except (OverflowError, ValueError) as exc:
+        raise ValueError("评估时间超出可保存的UTC范围") from exc
+
+
 class NursingAssessmentCreateRequest(BaseModel):
     admission_id: str
     patient_id: int
-    adl_score: int = Field(..., ge=0, le=100)
-    pressure_ulcer_risk: int = Field(default=0, ge=0, le=3)
-    fall_risk: int = Field(default=0, ge=0, le=3)
-    consciousness: int = Field(default=0, ge=0, le=3)
-    nutrition_risk: int = Field(default=0, ge=0, le=3)
+    adl_score: int | None = Field(default=None, ge=0, le=100, strict=True)
+    pressure_ulcer_risk: int | None = Field(default=None, ge=0, le=3, strict=True)
+    fall_risk: int | None = Field(default=None, ge=0, le=3, strict=True)
+    consciousness: int | None = Field(default=None, ge=0, le=3, strict=True)
+    nutrition_risk: int | None = Field(default=None, ge=0, le=3, strict=True)
+    assessed_at: datetime.datetime | None = None
     note: str = Field(default="", max_length=1000)
+
+    _explicit_assessment_time = field_validator("assessed_at", mode="before")(_nursing_assessment_time)
 
 
 class NursingAssessmentUpdateRequest(BaseModel):
     assessment_id: str
-    adl_score: int | None = Field(default=None, ge=0, le=100)
-    pressure_ulcer_risk: int | None = Field(default=None, ge=0, le=3)
-    fall_risk: int | None = Field(default=None, ge=0, le=3)
-    consciousness: int | None = Field(default=None, ge=0, le=3)
-    nutrition_risk: int | None = Field(default=None, ge=0, le=3)
-    note: str | None = Field(default=None, max_length=1000)
+    adl_score: int | None = Field(default=None, ge=0, le=100, strict=True)
+    pressure_ulcer_risk: int | None = Field(default=None, ge=0, le=3, strict=True)
+    fall_risk: int | None = Field(default=None, ge=0, le=3, strict=True)
+    consciousness: int | None = Field(default=None, ge=0, le=3, strict=True)
+    nutrition_risk: int | None = Field(default=None, ge=0, le=3, strict=True)
+    assessed_at: datetime.datetime | None = None
+    note: str = Field(default="", max_length=1000)
+
+    _explicit_assessment_time = field_validator("assessed_at", mode="before")(_nursing_assessment_time)
 
 
 class NursingPlanCreateRequest(BaseModel):
@@ -945,8 +972,8 @@ class CriticalCareRecordCreateRequest(BaseModel):
     admission_id: str
     patient_id: int
     record_time: str | None = None
-    consciousness: int = Field(default=0, ge=0, le=3)
-    gcs_score: int | None = Field(default=None, ge=3, le=15)
+    consciousness: int | None = Field(default=None, ge=0, le=3, strict=True)
+    gcs_score: int | None = Field(default=None, ge=3, le=15, strict=True)
     oxygen_support: str = Field(default="", max_length=200)
     blood_pressure: str = Field(default="", max_length=30)
     pulse: int | None = Field(default=None, ge=0, le=300)

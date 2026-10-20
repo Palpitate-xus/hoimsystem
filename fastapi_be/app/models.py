@@ -1,6 +1,7 @@
 import uuid
 
 from sqlalchemy import CheckConstraint, Column, Date, DateTime, Float, ForeignKey, Index, Integer, Numeric, String, Text, UniqueConstraint
+from sqlalchemy.dialects import mysql
 from sqlalchemy.orm import relationship
 
 # Register AI tables in the same metadata for create_all and Alembic migrations.
@@ -1794,11 +1795,13 @@ class NursingAssessment(Base):
     admission_id = Column(String(36), ForeignKey("hoimsystem_admission.admission_id"), nullable=False)
     patient_id = Column(Integer, ForeignKey("hoimsystem_patient.patient_id"), nullable=False)
     nurse_id = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=False)
-    adl_score = Column(Integer, nullable=False)
-    pressure_ulcer_risk = Column(Integer, nullable=False, default=0)
-    fall_risk = Column(Integer, nullable=False, default=0)
-    consciousness = Column(Integer, nullable=False, default=0)
-    nutrition_risk = Column(Integer, nullable=False, default=0)
+    adl_score = Column(Integer, nullable=True)
+    pressure_ulcer_risk = Column(Integer, nullable=True)
+    fall_risk = Column(Integer, nullable=True)
+    consciousness = Column(Integer, nullable=True)
+    nutrition_risk = Column(Integer, nullable=True)
+    entry_version = Column(String(32), nullable=False, default="legacy_unverified", server_default="legacy_unverified")
+    assessed_at = Column(DateTime().with_variant(mysql.DATETIME(fsp=6), "mysql"), nullable=True)
     note = Column(String(1000), nullable=True)
     status = Column(Integer, nullable=False, default=0)  # 0=草稿 1=已完成
     create_time = Column(DateTime, nullable=False)
@@ -1835,8 +1838,8 @@ class CriticalCareRecord(Base):
     admission_id = Column(String(36), ForeignKey("hoimsystem_admission.admission_id"), nullable=False)
     patient_id = Column(Integer, ForeignKey("hoimsystem_patient.patient_id"), nullable=False)
     nurse_id = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=False)
-    record_time = Column(DateTime, nullable=False)
-    consciousness = Column(Integer, nullable=False, default=0)
+    record_time = Column(DateTime().with_variant(mysql.DATETIME(fsp=6), "mysql"), nullable=False)
+    consciousness = Column(Integer, nullable=True)
     gcs_score = Column(Integer, nullable=True)
     oxygen_support = Column(String(200), nullable=True)
     blood_pressure = Column(String(30), nullable=True)
@@ -1844,6 +1847,8 @@ class CriticalCareRecord(Base):
     spo2 = Column(Float, nullable=True)
     urine_output = Column(String(100), nullable=True)
     note = Column(String(1000), nullable=True)
+    entry_version = Column(String(32), nullable=False, default="legacy_unverified", server_default="legacy_unverified")
+    time_basis = Column(String(24), nullable=False, default="unspecified", server_default="unspecified")
 
     admission = relationship("Admission")
     patient = relationship("Patient")
@@ -2763,6 +2768,8 @@ class IcuScoreRecord(Base):
     assessor_id = Column(Integer, ForeignKey("hoimsystem_users.user_id"))
     assess_time = Column(DateTime, nullable=False)
     create_time = Column(DateTime, nullable=False)
+    calculation_version = Column(String(40), nullable=False, default="legacy_unverified", server_default="legacy_unverified")
+    assessed_at = Column(DateTime().with_variant(mysql.DATETIME(fsp=6), "mysql"), nullable=True)
 
     patient = relationship("Patient")
 

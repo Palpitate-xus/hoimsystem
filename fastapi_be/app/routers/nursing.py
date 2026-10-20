@@ -1,6 +1,8 @@
 import datetime
+import re
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException, Response
+from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 
 from app.database import get_db
@@ -29,12 +31,58 @@ from app.schemas import (
 
 router = APIRouter()
 
+ASSESSMENT_FIELDS = ("adl_score", "pressure_ulcer_risk", "fall_risk", "consciousness", "nutrition_risk")
+
+
+def _nursing_error(response: Response, code: int, message: str):
+    """Preserve business-error HTTP semantics when bypassing the legacy renderer."""
+    response.status_code = 400 if code == 500 else code
+    return {"code": code, "msg": message}
+
+
+def _record_time(value: str | None, *, allow_missing: bool = False):
+    """Retain the stated clock basis; never replace a malformed time with now."""
+    if value is None and allow_missing:
+        return datetime.datetime.now(datetime.UTC).replace(tzinfo=None), "recorded_at_only"
+    if not isinstance(value, str) or not re.fullmatch(r"\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}:\d{2}(?:\.\d{1,6})?(?:Z|[+-]\d{2}:\d{2})?", value):
+        raise HTTPException(422, "记录时间须为有效日期时间，可附明确时区；无效时间不会改用当前时间")
+    try:
+        parsed = datetime.datetime.fromisoformat(value)
+    except ValueError as exc:
+        raise HTTPException(422, "记录时间格式无效，不会改用当前时间") from exc
+    if parsed.tzinfo is not None:
+        try:
+            return parsed.astimezone(datetime.UTC).replace(tzinfo=None), "utc"
+        except (OverflowError, ValueError) as exc:
+            raise HTTPException(422, "记录时间超出可保存的UTC范围") from exc
+    return parsed, "unspecified"
+
 
 def _serialize_assessment(item: NursingAssessment):
-    return {"assessment_id": item.assessment_id, "admission_id": item.admission_id, "patient_id": item.patient_id, "patient_name": item.patient.name if item.patient else "", "adl_score": item.adl_score, "pressure_ulcer_risk": item.pressure_ulcer_risk, "fall_risk": item.fall_risk, "consciousness": item.consciousness, "nutrition_risk": item.nutrition_risk, "note": item.note or "", "status": item.status, "status_text": "已完成" if item.status else "草稿", "nurse_name": item.nurse.username if item.nurse else "", "create_time": item.create_time, "update_time": item.update_time}
+    return {
+        "assessment_id": item.assessment_id,
+        "admission_id": item.admission_id,
+        "patient_id": item.patient_id,
+        "patient_name": item.patient.name if item.patient else "",
+        "adl_score": item.adl_score,
+        "pressure_ulcer_risk": item.pressure_ulcer_risk,
+        "fall_risk": item.fall_risk,
+        "consciousness": item.consciousness,
+        "nutrition_risk": item.nutrition_risk,
+        "entry_version": item.entry_version,
+        "assessed_at": item.assessed_at.replace(tzinfo=datetime.UTC) if item.assessed_at is not None else None,
+        "missing_fields": [name for name in ASSESSMENT_FIELDS if getattr(item, name) is None],
+        "standard_scale_validated": False,
+        "note": item.note or "",
+        "status": item.status,
+        "status_text": "已完成" if item.status else "草稿",
+        "nurse_name": item.nurse.username if item.nurse else "",
+        "create_time": item.create_time,
+        "update_time": item.update_time,
+    }
 
 
-@router.get("/nursingAssessment/list")
+@router.get("/nursingAssessment/list", response_class=JSONResponse)
 def list_nursing_assessments(admission_id: str | None = None, current_user: User = Depends(require_roles(*NURSING_ROLES)), db: Session = Depends(get_db)):
     query = db.query(NursingAssessment).order_by(NursingAssessment.create_time.desc())
     if admission_id:
@@ -42,50 +90,63 @@ def list_nursing_assessments(admission_id: str | None = None, current_user: User
     return {"code": 200, "msg": "success", "data": [_serialize_assessment(item) for item in query.all()]}
 
 
-@router.post("/nursingAssessment/create")
-def create_nursing_assessment(req: NursingAssessmentCreateRequest, current_user: User = Depends(require_roles(*NURSING_ROLES)), db: Session = Depends(get_db)):
+@router.post("/nursingAssessment/create", response_class=JSONResponse)
+def create_nursing_assessment(req: NursingAssessmentCreateRequest, response: Response, current_user: User = Depends(require_roles(*NURSING_ROLES)), db: Session = Depends(get_db)):
     admission = db.query(Admission).filter(Admission.admission_id == req.admission_id, Admission.patient_id == req.patient_id).first()
     if not admission:
-        return {"code": 500, "msg": "在院记录不存在或患者不匹配"}
+        return _nursing_error(response, 500, "在院记录不存在或患者不匹配")
     if admission.status != 1:
-        return {"code": 500, "msg": "患者已出院，不能书写在院护理文书（补录需走病案补录流程）"}
+        return _nursing_error(response, 500, "患者已出院，不能书写在院护理文书（补录需走病案补录流程）")
     active = db.query(NursingAssessment).filter(NursingAssessment.admission_id == req.admission_id, NursingAssessment.status == 0).first()
     if active:
-        return {"code": 500, "msg": "该住院患者已有未完成的护理评估"}
+        return _nursing_error(response, 500, "该住院患者已有未完成的护理评估")
     now = datetime.datetime.now()
-    item = NursingAssessment(admission_id=req.admission_id, patient_id=req.patient_id, nurse_id=current_user.user_id, adl_score=req.adl_score, pressure_ulcer_risk=req.pressure_ulcer_risk, fall_risk=req.fall_risk, consciousness=req.consciousness, nutrition_risk=req.nutrition_risk, note=req.note.strip(), status=0, create_time=now, update_time=now)
+    item = NursingAssessment(
+        admission_id=req.admission_id,
+        patient_id=req.patient_id,
+        nurse_id=current_user.user_id,
+        **{name: getattr(req, name) if name in req.model_fields_set else None for name in ASSESSMENT_FIELDS},
+        assessed_at=req.assessed_at,
+        entry_version="nullable_v1",
+        note=req.note.strip(),
+        status=0,
+        create_time=now,
+        update_time=now,
+    )
     db.add(item)
     db.commit()
     return {"code": 200, "msg": "success", "data": _serialize_assessment(item)}
 
 
-@router.put("/nursingAssessment/update")
-def update_nursing_assessment(req: NursingAssessmentUpdateRequest, current_user: User = Depends(require_roles(*NURSING_ROLES)), db: Session = Depends(get_db)):
+@router.put("/nursingAssessment/update", response_class=JSONResponse)
+def update_nursing_assessment(req: NursingAssessmentUpdateRequest, response: Response, current_user: User = Depends(require_roles(*NURSING_ROLES)), db: Session = Depends(get_db)):
     item = db.query(NursingAssessment).filter(NursingAssessment.assessment_id == req.assessment_id).first()
     if not item:
-        return {"code": 500, "msg": "护理评估不存在"}
+        return _nursing_error(response, 500, "护理评估不存在")
     if item.status:
-        return {"code": 403, "msg": "已完成护理评估不可修改"}
+        return _nursing_error(response, 403, "已完成护理评估不可修改")
     if current_user.user_role not in {"admin", "super_admin"} and item.nurse_id != current_user.user_id:
-        return {"code": 403, "msg": "无权修改他人的护理评估"}
-    for field in ("adl_score", "pressure_ulcer_risk", "fall_risk", "consciousness", "nutrition_risk", "note"):
-        value = getattr(req, field)
-        if value is not None:
+        return _nursing_error(response, 403, "无权修改他人的护理评估")
+    for field in (*ASSESSMENT_FIELDS, "assessed_at", "note"):
+        if field in req.model_fields_set:
+            value = getattr(req, field)
             setattr(item, field, value.strip() if field == "note" else value)
     item.update_time = datetime.datetime.now()
     db.commit()
     return {"code": 200, "msg": "success", "data": _serialize_assessment(item)}
 
 
-@router.post("/nursingAssessment/complete")
-def complete_nursing_assessment(req: NursingAssessmentUpdateRequest, current_user: User = Depends(require_roles(*NURSING_ROLES)), db: Session = Depends(get_db)):
+@router.post("/nursingAssessment/complete", response_class=JSONResponse)
+def complete_nursing_assessment(req: NursingAssessmentUpdateRequest, response: Response, current_user: User = Depends(require_roles(*NURSING_ROLES)), db: Session = Depends(get_db)):
     item = db.query(NursingAssessment).filter(NursingAssessment.assessment_id == req.assessment_id).first()
     if not item:
-        return {"code": 500, "msg": "护理评估不存在"}
+        return _nursing_error(response, 500, "护理评估不存在")
     if current_user.user_role not in {"admin", "super_admin"} and item.nurse_id != current_user.user_id:
-        return {"code": 403, "msg": "无权完成他人的护理评估"}
+        return _nursing_error(response, 403, "无权完成他人的护理评估")
     if item.status:
-        return {"code": 500, "msg": "护理评估已完成"}
+        return _nursing_error(response, 500, "护理评估已完成")
+    if all(getattr(item, name) is None for name in ASSESSMENT_FIELDS):
+        raise HTTPException(422, "至少明确记录一项实际评估值才能完成；缺项保留未知，完成不代表标准量表验证")
     item.status = 1
     item.update_time = datetime.datetime.now()
     db.commit()
@@ -93,7 +154,20 @@ def complete_nursing_assessment(req: NursingAssessmentUpdateRequest, current_use
 
 
 def _serialize_plan(item: NursingPlan):
-    return {"plan_id": item.plan_id, "admission_id": item.admission_id, "patient_id": item.patient_id, "patient_name": item.patient.name if item.patient else "", "nursing_diagnosis": item.nursing_diagnosis, "goal": item.goal, "measures": item.measures, "status": item.status, "status_text": {0: "进行中", 1: "已完成", 2: "已取消"}.get(item.status, "未知"), "nurse_name": item.nurse.username if item.nurse else "", "create_time": item.create_time, "update_time": item.update_time}
+    return {
+        "plan_id": item.plan_id,
+        "admission_id": item.admission_id,
+        "patient_id": item.patient_id,
+        "patient_name": item.patient.name if item.patient else "",
+        "nursing_diagnosis": item.nursing_diagnosis,
+        "goal": item.goal,
+        "measures": item.measures,
+        "status": item.status,
+        "status_text": {0: "进行中", 1: "已完成", 2: "已取消"}.get(item.status, "未知"),
+        "nurse_name": item.nurse.username if item.nurse else "",
+        "create_time": item.create_time,
+        "update_time": item.update_time,
+    }
 
 
 @router.get("/nursingPlan/list")
@@ -112,7 +186,17 @@ def create_nursing_plan(req: NursingPlanCreateRequest, current_user: User = Depe
     if admission.status != 1:
         return {"code": 500, "msg": "患者已出院，不能书写在院护理文书（补录需走病案补录流程）"}
     now = datetime.datetime.now()
-    item = NursingPlan(admission_id=req.admission_id, patient_id=req.patient_id, nurse_id=current_user.user_id, nursing_diagnosis=req.nursing_diagnosis.strip(), goal=req.goal.strip(), measures=req.measures.strip(), status=0, create_time=now, update_time=now)
+    item = NursingPlan(
+        admission_id=req.admission_id,
+        patient_id=req.patient_id,
+        nurse_id=current_user.user_id,
+        nursing_diagnosis=req.nursing_diagnosis.strip(),
+        goal=req.goal.strip(),
+        measures=req.measures.strip(),
+        status=0,
+        create_time=now,
+        update_time=now,
+    )
     db.add(item)
     db.commit()
     return {"code": 200, "msg": "success", "data": _serialize_plan(item)}
@@ -139,10 +223,27 @@ def update_nursing_plan(req: NursingPlanUpdateRequest, current_user: User = Depe
 
 
 def _serialize_critical(item: CriticalCareRecord):
-    return {"record_id": item.record_id, "admission_id": item.admission_id, "patient_id": item.patient_id, "patient_name": item.patient.name if item.patient else "", "record_time": item.record_time, "consciousness": item.consciousness, "gcs_score": item.gcs_score, "oxygen_support": item.oxygen_support or "", "blood_pressure": item.blood_pressure or "", "pulse": item.pulse, "spo2": item.spo2, "urine_output": item.urine_output or "", "note": item.note or "", "nurse_name": item.nurse.username if item.nurse else ""}
+    return {
+        "record_id": item.record_id,
+        "admission_id": item.admission_id,
+        "patient_id": item.patient_id,
+        "patient_name": item.patient.name if item.patient else "",
+        "record_time": item.record_time.replace(tzinfo=datetime.UTC) if item.time_basis == "utc" else item.record_time,
+        "time_basis": item.time_basis,
+        "entry_version": item.entry_version,
+        "consciousness": item.consciousness,
+        "gcs_score": item.gcs_score,
+        "oxygen_support": item.oxygen_support or "",
+        "blood_pressure": item.blood_pressure or "",
+        "pulse": item.pulse,
+        "spo2": item.spo2,
+        "urine_output": item.urine_output or "",
+        "note": item.note or "",
+        "nurse_name": item.nurse.username if item.nurse else "",
+    }
 
 
-@router.get("/criticalCareRecord/list")
+@router.get("/criticalCareRecord/list", response_class=JSONResponse)
 def list_critical_records(admission_id: str | None = None, current_user: User = Depends(require_roles(*NURSING_ROLES)), db: Session = Depends(get_db)):
     query = db.query(CriticalCareRecord).order_by(CriticalCareRecord.record_time.desc())
     if admission_id:
@@ -150,25 +251,52 @@ def list_critical_records(admission_id: str | None = None, current_user: User = 
     return {"code": 200, "msg": "success", "data": [_serialize_critical(item) for item in query.all()]}
 
 
-@router.post("/criticalCareRecord/create")
-def create_critical_record(req: CriticalCareRecordCreateRequest, current_user: User = Depends(require_roles(*NURSING_ROLES)), db: Session = Depends(get_db)):
+@router.post("/criticalCareRecord/create", response_class=JSONResponse)
+def create_critical_record(req: CriticalCareRecordCreateRequest, response: Response, current_user: User = Depends(require_roles(*NURSING_ROLES)), db: Session = Depends(get_db)):
     admission = db.query(Admission).filter(Admission.admission_id == req.admission_id, Admission.patient_id == req.patient_id).first()
     if not admission:
-        return {"code": 500, "msg": "在院记录不存在或患者不匹配"}
+        return _nursing_error(response, 500, "在院记录不存在或患者不匹配")
     if admission.status != 1:
-        return {"code": 500, "msg": "患者已出院，不能书写在院护理文书（补录需走病案补录流程）"}
-    try:
-        record_time = datetime.datetime.strptime(req.record_time, "%Y-%m-%d %H:%M:%S") if req.record_time else datetime.datetime.now()
-    except ValueError:
-        return {"code": 500, "msg": "时间格式必须为 YYYY-MM-DD HH:MM:SS"}
-    item = CriticalCareRecord(admission_id=req.admission_id, patient_id=req.patient_id, nurse_id=current_user.user_id, record_time=record_time, consciousness=req.consciousness, gcs_score=req.gcs_score, oxygen_support=req.oxygen_support.strip(), blood_pressure=req.blood_pressure.strip(), pulse=req.pulse, spo2=req.spo2, urine_output=req.urine_output.strip(), note=req.note.strip())
+        return _nursing_error(response, 500, "患者已出院，不能书写在院护理文书（补录需走病案补录流程）")
+    record_time, time_basis = _record_time(req.record_time, allow_missing=True)
+    item = CriticalCareRecord(
+        admission_id=req.admission_id,
+        patient_id=req.patient_id,
+        nurse_id=current_user.user_id,
+        record_time=record_time,
+        entry_version="nullable_v1",
+        time_basis=time_basis,
+        consciousness=req.consciousness,
+        gcs_score=req.gcs_score,
+        oxygen_support=req.oxygen_support.strip(),
+        blood_pressure=req.blood_pressure.strip(),
+        pulse=req.pulse,
+        spo2=req.spo2,
+        urine_output=req.urine_output.strip(),
+        note=req.note.strip(),
+    )
     db.add(item)
     db.commit()
     return {"code": 200, "msg": "success", "data": _serialize_critical(item)}
 
 
 def _serialize_surgery_nursing(item: SurgeryNursingRecord):
-    return {"record_id": item.record_id, "schedule_id": item.schedule_id, "patient_id": item.patient_id, "patient_name": item.patient.name if item.patient else "", "surgery_name": item.schedule.application.surgery_name if item.schedule and item.schedule.application else "", "phase": item.phase, "phase_text": ["术前", "术中", "术后"][item.phase], "checklist": item.checklist, "instrument_count": item.instrument_count or "", "specimen": item.specimen or "", "wound_condition": item.wound_condition or "", "note": item.note or "", "record_time": item.record_time, "nurse_name": item.nurse.username if item.nurse else ""}
+    return {
+        "record_id": item.record_id,
+        "schedule_id": item.schedule_id,
+        "patient_id": item.patient_id,
+        "patient_name": item.patient.name if item.patient else "",
+        "surgery_name": item.schedule.application.surgery_name if item.schedule and item.schedule.application else "",
+        "phase": item.phase,
+        "phase_text": ["术前", "术中", "术后"][item.phase],
+        "checklist": item.checklist,
+        "instrument_count": item.instrument_count or "",
+        "specimen": item.specimen or "",
+        "wound_condition": item.wound_condition or "",
+        "note": item.note or "",
+        "record_time": item.record_time,
+        "nurse_name": item.nurse.username if item.nurse else "",
+    }
 
 
 @router.get("/surgeryNursingRecord/list")
@@ -188,7 +316,18 @@ def create_surgery_nursing_record(req: SurgeryNursingRecordCreateRequest, curren
         record_time = datetime.datetime.strptime(req.record_time, "%Y-%m-%d %H:%M:%S") if req.record_time else datetime.datetime.now()
     except ValueError:
         return {"code": 500, "msg": "时间格式必须为 YYYY-MM-DD HH:MM:SS"}
-    item = SurgeryNursingRecord(schedule_id=req.schedule_id, patient_id=req.patient_id, nurse_id=current_user.user_id, phase=req.phase, checklist=req.checklist.strip(), instrument_count=req.instrument_count.strip(), specimen=req.specimen.strip(), wound_condition=req.wound_condition.strip(), note=req.note.strip(), record_time=record_time)
+    item = SurgeryNursingRecord(
+        schedule_id=req.schedule_id,
+        patient_id=req.patient_id,
+        nurse_id=current_user.user_id,
+        phase=req.phase,
+        checklist=req.checklist.strip(),
+        instrument_count=req.instrument_count.strip(),
+        specimen=req.specimen.strip(),
+        wound_condition=req.wound_condition.strip(),
+        note=req.note.strip(),
+        record_time=record_time,
+    )
     db.add(item)
     db.commit()
     return {"code": 200, "msg": "success", "data": _serialize_surgery_nursing(item)}
@@ -240,18 +379,19 @@ def create_nursing_record(
     current_user: User = Depends(require_roles(*NURSING_ROLES)),
     db: Session = Depends(get_db),
 ):
-    admission = db.query(Admission).filter(
-        Admission.admission_id == req.admission_id,
-        Admission.patient_id == req.patient_id,
-    ).first()
+    admission = (
+        db.query(Admission)
+        .filter(
+            Admission.admission_id == req.admission_id,
+            Admission.patient_id == req.patient_id,
+        )
+        .first()
+    )
     if not admission:
         return {"code": 500, "msg": "入院记录不存在或患者不匹配"}
     if admission.status != 1:
         return {"code": 500, "msg": "患者已出院，不能书写在院护理文书（补录需走病案补录流程）"}
-    try:
-        record_time = datetime.datetime.strptime(req.record_time, "%Y-%m-%d %H:%M:%S")
-    except ValueError:
-        record_time = datetime.datetime.now()
+    record_time, _ = _record_time(req.record_time)
 
     record = NursingRecord(
         admission_id=req.admission_id,
@@ -330,10 +470,14 @@ def create_temperature_record(
     current_user: User = Depends(require_roles(*NURSING_ROLES)),
     db: Session = Depends(get_db),
 ):
-    admission = db.query(Admission).filter(
-        Admission.admission_id == req.admission_id,
-        Admission.patient_id == req.patient_id,
-    ).first()
+    admission = (
+        db.query(Admission)
+        .filter(
+            Admission.admission_id == req.admission_id,
+            Admission.patient_id == req.patient_id,
+        )
+        .first()
+    )
     if not admission:
         return {"code": 500, "msg": "入院记录不存在或患者不匹配"}
     if admission.status != 1:

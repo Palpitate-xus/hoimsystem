@@ -10,6 +10,7 @@
         <div class="feature-description"><strong>需要的资料：</strong>{{ selected.inputs.join('、') }}<br /><strong>预期产出：</strong>{{ selected.deliverables.join('；') }}</div>
         <p v-if="boundClinicalReferences.length">本次绑定资料：{{ boundClinicalReferences.join('、') }}。所选记录未注明对应就诊；选择就诊仅补充临床背景，不确认其归属。</p>
         <p v-if="boundPathwayReferences.length">本次绑定：{{ boundPathwayReferences.join('、') }}。住院关联以原记录核实；路径适用条件和已审核版本仍须核对。</p>
+        <p v-if="boundNursingReferences.length">本次绑定：{{ boundNursingReferences.join('、') }}。按原患者与原住院核对，不能通过补充JSON替换；缺项、历史默认值及人工评分来源仍须复核。</p>
         <p v-if="props.initialInput.audio_asset_id">本次绑定原录音 {{ props.initialInput.audio_asset_id }}；以原登记资料核对患者与就诊，不能通过补充JSON替换。</p>
         <p v-if="props.initialInput.ecg_asset_id">本次绑定原始心电 {{ props.initialInput.ecg_asset_id }}；以原登记资料核对患者与就诊，不能通过补充JSON替换。</p>
         <p v-if="props.initialInput.imaging_order_id">本次绑定真实影像申请 {{ props.initialInput.imaging_order_id }}；原像素与患者须一致，不能通过补充JSON替换申请。</p>
@@ -84,6 +85,7 @@
       <ai-consultation-findings :findings="run.consultation_findings" @inspect="inspectEvidence" />
       <ai-adr-findings :findings="run.adr_findings" @inspect="inspectEvidence" />
       <ai-pathway-findings :findings="run.pathway_findings" @inspect="inspectEvidence" />
+      <ai-nursing-findings :findings="run.nursing_findings" @inspect="inspectEvidence" />
       <ai-speech-findings :findings="run.audio_findings" :transcription="run.result?.transcription" :allow-copy="run.status === 'succeeded'" @inspect="inspectEvidence" @copy="copyDraft" />
       <ai-image-findings :findings="run.image_findings" :analysis="run.result?.image_analysis" :allow-copy="run.status === 'succeeded'" @inspect="inspectEvidence" @copy="copyDraft" />
       <ai-ecg-findings :findings="run.ecg_findings" :analysis="run.result?.ecg_analysis" :allow-copy="run.status === 'succeeded'" @inspect="inspectEvidence" @copy="copyDraft" />
@@ -144,6 +146,7 @@
       <ai-consultation-findings :findings="contextData?.context?.consultation_sources" @inspect="inspectPreviewEvidence" />
       <ai-adr-findings :findings="contextData?.context?.adr_sources" @inspect="inspectPreviewEvidence" />
       <ai-pathway-findings :findings="contextData?.context?.pathway_sources" @inspect="inspectPreviewEvidence" />
+      <ai-nursing-findings :findings="contextData?.context?.nursing_source_review" @inspect="inspectPreviewEvidence" />
       <ai-speech-findings v-if="contextDialog" :findings="contextData?.context" @inspect="inspectPreviewEvidence" />
       <ai-image-findings v-if="contextDialog" :findings="contextData?.context" @inspect="inspectPreviewEvidence" />
       <ai-ecg-findings v-if="contextDialog" :findings="contextData?.context" @inspect="inspectPreviewEvidence" />
@@ -166,6 +169,7 @@ import AiIncidentFindings from "@/components/AIIncidentFindings/index.vue";
 import AiConsultationFindings from "@/components/AIConsultationFindings/index.vue";
 import AiAdrFindings from "@/components/AIAdrFindings/index.vue";
 import AiPathwayFindings from "@/components/AIPathwayFindings/index.vue";
+import AiNursingFindings from "@/components/AINursingFindings/index.vue";
 import AiAudioInput from "@/components/AIAudioInput/index.vue";
 import AiSpeechFindings from "@/components/AISpeechFindings/index.vue";
 import AiImageInput from "@/components/AiImageInput.vue";
@@ -197,6 +201,8 @@ const boundPathwayLabels = { pathway_id: "院内路径", pathway_enrollment_id: 
 const boundPathwayReferences = computed(() => Object.entries(boundPathwayLabels).filter(([key]) => props.initialInput[key] != null).map(([key, label]) => `${label} #${props.initialInput[key]}`));
 const boundReferenceLabels = { referral_id: "转诊", mdt_id: "MDT", reaction_id: "ADR上报" };
 const boundClinicalReferences = computed(() => Object.entries(boundReferenceLabels).filter(([key]) => props.initialInput[key] != null).map(([key, label]) => `${label} #${props.initialInput[key]}`));
+const boundNursingLabels = { nursing_assessment_id: "原护理评估", nursing_plan_id: "原护理计划", critical_care_record_id: "原危重护理记录", icu_score_id: "原人工评分" };
+const boundNursingReferences = computed(() => Object.entries(boundNursingLabels).filter(([key]) => props.initialInput[key] != null).map(([key, label]) => `${label} #${props.initialInput[key]}`));
 const operationsRange = ref([]), operationsPlanRange = ref([]), inventoryDrugs = ref([]), inventoryConsumables = ref([]), serviceOptionsLoading = ref(false);
 const serviceOptions = ref({}), serviceDepartment = ref(null), serviceDoctor = ref(null), serviceDate = ref(""), navigationStart = ref(null), navigationEnd = ref(null);
 const serviceDoctors = computed(() => (serviceOptions.value.doctors || []).filter(item => !serviceDepartment.value || item.department_id === serviceDepartment.value));
@@ -318,7 +324,7 @@ function buildTaskInput() {
     catch { ElMessage.error("结构化资料应为有效 JSON 对象"); return; }
   }
   const input = { ...props.initialInput, ...extra, question: question.value };
-  for (const key of [...Object.keys(boundReferenceLabels), ...Object.keys(boundPathwayLabels), "audio_asset_id", "ecg_asset_id", "image_asset_id", "imaging_order_id"]) if (props.initialInput[key] != null) input[key] = String(props.initialInput[key]);
+  for (const key of [...Object.keys(boundReferenceLabels), ...Object.keys(boundPathwayLabels), ...Object.keys(boundNursingLabels), "audio_asset_id", "ecg_asset_id", "image_asset_id", "imaging_order_id"]) if (props.initialInput[key] != null) input[key] = String(props.initialInput[key]);
   if (needsAudio.value && !props.initialInput.audio_asset_id) { if (audioAssetId.value) input.audio_asset_id = audioAssetId.value; else delete input.audio_asset_id; }
   if (needsEcg.value && !props.initialInput.ecg_asset_id) { if (ecgAssetId.value) input.ecg_asset_id = ecgAssetId.value; else delete input.ecg_asset_id; }
   if (needsImage.value) { if (imageAssetId.value) input.image_asset_id = imageAssetId.value; else delete input.image_asset_id; if (imageOrderId.value) input.imaging_order_id = String(props.initialInput.imaging_order_id || imageOrderId.value); else delete input.imaging_order_id; }

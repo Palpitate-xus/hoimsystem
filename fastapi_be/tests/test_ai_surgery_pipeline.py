@@ -1,5 +1,6 @@
 """Actual governed scenarios, durable leases, native ASGI wire and SQL proofs."""
 
+import copy
 import json
 import uuid
 
@@ -7,18 +8,21 @@ import httpx
 import pytest
 from sqlalchemy import event, text
 
-from app.ai.governance import encode_json
+from app.ai.governance import digest, encode_json
 from app.ai.models import AIAuditEvent, AIFeatureConfig, AIFeedback, AIProvider, AIRun
 from app.ai.runtime import claim_next_run, create_run, execute_claimed
 from app.ai.schemas import RunRequest
 from app.ai.surgery_config import SurgerySettings, runtime_descriptor
+from app.ai.surgery_contract import canonical_json, hash_content
 from app.ai.surgery_scenario_models import AISurgeryRunResult
 from app.ai.surgery_server import create_surgery_app
 from app.models import SurgeryApplication, SurgerySchedule
 from tests.test_ai_runtime import configure
-from tests.test_ai_surgery_facts import NOTE, create
+from tests.test_ai_surgery_facts import NOTE, amount, create, publish
+from tests.test_ai_surgery_facts import request as original_request
 from tests.test_ai_surgery_facts import surgery_case as surgery_case
 from tests.test_ai_surgery_scenarios import published_scenario, revoke_values
+from tests.test_ai_surgery_snapshot import END, START, declaration_for
 from tests.test_ai_surgery_snapshot import snapshot_case as snapshot_case
 
 KEY = "synthetic-surgery-pipeline-private-key-1234567890"
@@ -46,6 +50,10 @@ def clear_surgery_tasks(db_session):
 def pipeline_case(db_session, snapshot_case, monkeypatch):
     case = snapshot_case[3]
     row = published_scenario(db_session, snapshot_case)
+    return configured_case(db_session, case, row, monkeypatch)
+
+
+def configured_case(db_session, case, row, monkeypatch):
     monkeypatch.setenv("AI_PROVIDER_LOCAL_SURGERY_API_KEY", KEY)
     settings = SurgerySettings(AI_PROVIDER_LOCAL_SURGERY_API_KEY=KEY)
     provider, feature = configure(db_session, case["seed"], "surgery_scheduling")
@@ -56,6 +64,56 @@ def pipeline_case(db_session, snapshot_case, monkeypatch):
     provider.validation_report = "Synthetic engineering only; not clinical or operational deployment validation."
     db_session.commit()
     return {**case, "scenario": row, "provider": provider, "feature": feature, "service": create_surgery_app(settings)}
+
+
+@pytest.fixture
+def large_pipeline_case(db_session, surgery_case, monkeypatch):
+    from app.ai import surgery_collection as collection
+    from app.ai import surgery_facts as facts
+    from tests.test_ai_surgery_collection import capture_request
+
+    db, case = db_session, surgery_case
+    stages = ["synthetic_stage_" + str(index) for index in range(192)]
+    for kind in ("case_requirements", "case_duration_estimate", "operating_room_identity_capability", "person_identity_qualification", "equipment_identity_capability"):
+        body = original_request(case, kind)
+        payload = body["payload"]
+        if kind == "case_requirements":
+            payload.update(
+                required=True,
+                required_absent_reason=None,
+                procedure_group_key="synthetic_private_group",
+                procedure_group_absent_reason=None,
+                release={"kind": "known", "at": START},
+                deadline={"kind": "known", "at": END},
+                other_requirements_status="attested_not_required",
+                patient_segment_ids=stages,
+                patient_occupation_mode="segments",
+            )
+            payload["room"]["occupation"].update(
+                segment_ids=stages, occupation_mode="segments", transition_class_absent_reason="not_applicable", counted_as_work=True, counted_as_work_absent_reason=None
+            )
+        elif kind == "case_duration_estimate":
+            payload["segments"] = [
+                {"segment_id": stage, "start_offset_us": amount(str(index * 2)), "end_offset_us": amount(str(index * 2 + 1)), "basis_note": NOTE} for index, stage in enumerate(stages)
+            ]
+        else:
+            payload.update(identity_status="verified", valid_from_at=START, valid_until={"kind": "known", "at": END})
+            payload["qualification_status" if kind == "person_identity_qualification" else "capability_status"] = "verified"
+        row = facts.create_source(db, case["doctor_user"] if kind in facts.CASE_KINDS else case["director"], kind, body)
+        db.commit()
+        publish(db, case, row)
+    for resource in case["resources"].values():
+        body = original_request(case, "resource_availability_busy")
+        body.update(
+            resource_id=resource.resource_id, payload={"kind": "resource_availability_busy", "record_type": "availability", "start_at": START, "end_at": END, "state": "available", "basis_note": NOTE}
+        )
+        row = facts.create_source(db, case["director"], "resource_availability_busy", body)
+        db.commit()
+        publish(db, case, row)
+    captured = collection.capture_input(db, case["director"], capture_request(case))
+    declaration = declaration_for(captured)
+    row = published_scenario(db, (None, captured, declaration, case))
+    return configured_case(db, case, row, monkeypatch)
 
 
 def request_for(case, **changes):
@@ -73,8 +131,14 @@ async def success(db, case):
 
 
 @pytest.mark.asyncio
-async def test_actual_governed_scenario_queue_native_blob_history_feedback_and_super_frozen_trace(db_session, pipeline_case, async_client, auth_headers, tmp_path):
+@pytest.mark.parametrize("objective_mode", ["all_required_then_min_declared_cost", "max_optional_scheduled_then_min_declared_cost"])
+async def test_actual_governed_scenario_queue_native_blob_history_feedback_and_super_frozen_trace(objective_mode, db_session, pipeline_case, snapshot_case, async_client, auth_headers, tmp_path):
     db, case = db_session, pipeline_case
+    if objective_mode != "all_required_then_min_declared_cost":
+        original, captured, declaration, source_case = snapshot_case
+        declaration = copy.deepcopy(declaration)
+        declaration["objective_mode"] = objective_mode
+        case["scenario"] = published_scenario(db, (original, captured, declaration, source_case))
     before = {
         model.__tablename__: [(row.application_id if model is SurgeryApplication else row.schedule_id, row.status) for row in db.query(model).all()] for model in (SurgeryApplication, SurgerySchedule)
     }
@@ -128,6 +192,7 @@ async def test_actual_governed_scenario_queue_native_blob_history_feedback_and_s
     detail = response.json()["data"]
     assert detail["result"] == json.loads(blob.result_json)
     assert detail["result"]["surgery_analysis"]["solve_status"] == "optimal_proven"
+    assert detail["result"]["surgery_analysis"]["objective_mode"] == objective_mode
     assert detail["surgery_findings"]["surgery_binding"] == context["surgery_binding"]
     assert detail["surgery_findings"]["surgery_source"] == context["surgery_source"]
     response = await async_client.get(
@@ -147,6 +212,36 @@ async def test_actual_governed_scenario_queue_native_blob_history_feedback_and_s
     }
     assert before == after
     (tmp_path / "actual-surgery-pipeline-ui.json").write_text(json.dumps({"inspection": inspection, "receipt": receipt, "run_detail": detail, "super_trace": trace}, ensure_ascii=False, indent=2))
+
+
+@pytest.mark.asyncio
+async def test_actual_192_stage_proof_exceeds_text_and_uses_complete_sql_blob_without_truncation(db_session, large_pipeline_case, async_client, auth_headers):
+    db, case = db_session, large_pipeline_case
+    run, wire = await success(db, case)
+    row = db.get(AISurgeryRunResult, run.run_id)
+    assert row.result_bytes == len(row.result_json.encode()) > 65535
+    assert len(run.result_json.encode()) < 65535 and len(run.input_json.encode()) < 65535
+    source = json.loads(case["scenario"].projection_json)
+    assert len(source["cases"][0]["timing"]["segments"]) == 192
+    response = await async_client.get("/api/ai/runs/" + run.run_id, headers=auth_headers(case["director"].username))
+    assert response.status_code == 200, response.text
+    native = response.json()["data"]["result"]["surgery_analysis"]
+    assert native["solve_status"] == "optimal_proven" and len(native["solution"]["occupancies"]) == 384
+    assert response.json()["data"]["result"] == json.loads(row.result_json)
+    assert wire.requests[0]["input"] == {"context": {"surgery_source": source}}
+
+
+@pytest.mark.asyncio
+async def test_explicit_unknown_domain_preserves_input_unknown_without_claiming_operational_validation(db_session, pipeline_case, snapshot_case):
+    db, case = db_session, pipeline_case
+    original, captured, declaration, source_case = snapshot_case
+    declaration = copy.deepcopy(declaration)
+    declaration["problem_coverage"]["finite_domains_status"] = "unknown"
+    case["scenario"] = published_scenario(db, (original, captured, declaration, source_case))
+    run, wire = await success(db, case)
+    result = json.loads(db.get(AISurgeryRunResult, run.run_id).result_json)["surgery_analysis"]
+    assert result["solve_status"] == "input_unknown" and result["forecast_or_clinical_guarantee"] == "not_provided" and result["automatic_booking"] is False
+    assert wire.requests[0]["input"]["context"]["surgery_source"]["problem_coverage"]["finite_domains_status"] == "unknown"
 
 
 def change_current(db, case, kind):
@@ -276,3 +371,144 @@ async def test_pseudonymous_case_facts_still_require_explicit_provider_patient_d
     response = await async_client.post("/api/ai/runs", headers=auth_headers(case["director"].username), json=request_for(case).model_dump(mode="json"))
     assert response.status_code == 409 and "患者资料" in response.text
     assert db_session.query(AIRun).count() == 0 and db_session.query(AISurgeryRunResult).count() == 0
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("phase", ["queued", "succeeded"])
+async def test_cross_feature_marker_cannot_bypass_detail_cancel_feedback_or_super_trace(phase, db_session, pipeline_case, async_client, auth_headers):
+    db, case = db_session, pipeline_case
+    if phase == "succeeded":
+        run, _ = await success(db, case)
+    else:
+        run = create_run(db, case["director"], request_for(case))
+    change_current(db, case, "scenario")
+    run.feature_key = "operations_qa"
+    db.commit()
+    headers = auth_headers(case["director"].username)
+    response = await async_client.get("/api/ai/runs/" + run.run_id, headers=headers)
+    assert response.status_code == 409, response.text[:300]
+    response = await async_client.post("/api/ai/runs/" + run.run_id + "/cancel", headers=headers)
+    assert response.status_code == 409, response.text[:300]
+    response = await async_client.post("/api/ai/runs/" + run.run_id + "/feedback", headers=headers, json={"outcome": "accepted"})
+    assert response.status_code == 409, response.text[:300]
+    response = await async_client.get("/api/ai/admin/runs/" + run.run_id, headers=auth_headers(case["super"].username))
+    assert response.status_code == 409, response.text[:300]
+    assert db.query(AIFeedback).filter_by(run_id=run.run_id).count() == 0
+    assert db.query(AIAuditEvent).filter_by(target=run.run_id, action="run.cancel").count() == 0
+    db.expire_all()
+    assert db.get(AIRun, run.run_id).status == phase
+
+
+@pytest.mark.asyncio
+async def test_cross_feature_queued_marker_rejects_before_wire_and_keeps_gate_first(db_session, pipeline_case):
+    from app.ai.surgery_models import AISurgeryWriteGate
+
+    db, case = db_session, pipeline_case
+    run = create_run(db, case["director"], request_for(case))
+    run.feature_key = "operations_qa"
+    db.commit()
+    claimed = claim_next_run(db)
+    statements = []
+
+    def read_order(connection, cursor, statement, parameters, context, executemany):
+        statements.append(statement.lower())
+
+    engine = db.get_bind()
+    event.listen(engine, "before_cursor_execute", read_order)
+    wire = NativeSurgeryTransport(case["service"])
+    try:
+        await execute_claimed(*claimed, transport=wire)
+    finally:
+        event.remove(engine, "before_cursor_execute", read_order)
+    db.expire_all()
+    current = db.get(AIRun, run.run_id)
+    assert current.status == "failed" and current.result_json == "{}"
+    assert wire.requests == [] and db.get(AISurgeryRunResult, run.run_id) is None
+    gate = [index for index, sql in enumerate(statements) if AISurgeryWriteGate.__tablename__ in sql]
+    final_locks = [index for index, sql in enumerate(statements) if "from hoimsystem_ai_run" in sql and "lease_token =" in sql]
+    assert gate and final_locks and gate[-1] < final_locks[-1]
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("mutation", ["missing", "objective", "resources", "other_reference", "noncanonical_id", "question_false", "patient", "encounter", "wrong_feature", "external_provider"])
+async def test_native_selected_scene_cannot_be_replaced_by_task_metadata(mutation, db_session, pipeline_case, async_client, auth_headers):
+    db, case = db_session, pipeline_case
+    request = request_for(case).model_dump(mode="json")
+    if mutation == "missing":
+        request["input"].pop("surgery_scenario_id")
+    elif mutation == "objective":
+        request["input"]["objective_mode"] = "max_optional_scheduled_then_min_declared_cost"
+    elif mutation == "resources":
+        request["input"]["resources"] = []
+    elif mutation == "other_reference":
+        request["input"]["roster_plan_id"] = str(uuid.uuid4())
+    elif mutation == "noncanonical_id":
+        request["input"]["surgery_scenario_id"] = " " + case["scenario"].scenario_id
+    elif mutation == "question_false":
+        request["input"]["question"] = False
+    elif mutation == "patient":
+        request["patient_id"] = case["patient"].patient_id
+    elif mutation == "encounter":
+        request["encounter_ref"] = case["admission"].admission_id
+    elif mutation == "wrong_feature":
+        request["feature_key"] = "operations_qa"
+    else:
+        case["provider"].model = "synthetic-external-optimizer"
+        db.commit()
+    response = await async_client.post("/api/ai/runs", headers=auth_headers(case["director"].username), json=request)
+    assert response.status_code in {409, 422}, (mutation, response.text[:300])
+    assert db.query(AIRun).count() == 0 and db.query(AISurgeryRunResult).count() == 0
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("mutation", ["tools", "evidence", "selected_sources"])
+async def test_rehashed_frozen_packet_cannot_override_governed_scene_or_exact_evidence(mutation, db_session, pipeline_case):
+    db, case = db_session, pipeline_case
+    run = create_run(db, case["director"], request_for(case))
+    snapshot, metadata, evidence = json.loads(run.input_json), json.loads(run.context_metadata_json), json.loads(run.evidence_json)
+    payload, context = snapshot["payload"], snapshot["payload"]["context"]
+    if mutation == "tools":
+        payload["tools"] = {"synthetic_unreviewed_rule": {"booking": True}}
+        metadata["tool_fingerprint"] = digest(payload["tools"])
+    elif mutation == "evidence":
+        evidence[0]["content"] = canonical_json({"synthetic_unreviewed_scope": True})
+        payload["evidence"] = evidence
+    else:
+        context["selected_sources"]["surgery_scenario_id"] = str(uuid.uuid4())
+        run.context_digest = metadata["context_digest"] = digest(context)
+        metadata["clinical_context_fingerprint"] = digest({key: value for key, value in context.items() if key != "snapshot_time"})
+    run.input_json, run.context_metadata_json, run.evidence_json = map(canonical_json, (snapshot, metadata, evidence))
+    db.commit()
+    wire = NativeSurgeryTransport(case["service"])
+    await execute_claimed(*claim_next_run(db), transport=wire)
+    db.expire_all()
+    stored = db.get(AIRun, run.run_id)
+    assert stored.status == "failed" and stored.result_json == "{}"
+    assert wire.requests == [] and db.get(AISurgeryRunResult, run.run_id) is None
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("mutation", ["fixed_explanation", "native_proof"])
+async def test_rehashed_complete_blob_still_requires_whole_native_recomputation_on_read_and_feedback(mutation, db_session, pipeline_case, async_client, auth_headers):
+    db, case = db_session, pipeline_case
+    run, _ = await success(db, case)
+    blob = db.get(AISurgeryRunResult, run.run_id)
+    complete = json.loads(blob.result_json)
+    if mutation == "fixed_explanation":
+        complete["summary"] = "合成篡改：可自动预订或声称实际运营已验证"
+    else:
+        complete["surgery_analysis"]["solution"]["scheduled_count"] += 1
+    blob.result_json = canonical_json(complete)
+    blob.content_hash, blob.result_bytes = hash_content(complete), len(blob.result_json.encode())
+    pointer = json.loads(run.result_json)
+    pointer.update(content_hash=blob.content_hash, result_bytes=blob.result_bytes)
+    run.result_json = canonical_json(pointer)
+    db.commit()
+    headers = auth_headers(case["director"].username)
+    response = await async_client.get("/api/ai/runs/" + run.run_id, headers=headers)
+    assert response.status_code == 409, response.text[:300]
+    response = await async_client.post("/api/ai/runs/" + run.run_id + "/feedback", headers=headers, json={"outcome": "accepted"})
+    assert response.status_code == 409, response.text[:300]
+    response = await async_client.get("/api/ai/admin/runs/" + run.run_id, headers=auth_headers(case["super"].username))
+    assert response.status_code == 409, response.text[:300]
+    assert db.query(AIFeedback).filter_by(run_id=run.run_id).count() == 0

@@ -287,23 +287,23 @@ def create_run(db: Session, user: User, req: RunRequest) -> AIRun:
 
 def authorize_run(db: Session, user: User, run: AIRun) -> None:
     """Re-check current permissions, including revoked care access, on every result read."""
-    if run.feature_key == "surgery_scheduling":
+    from app.ai.surgery_storage import is_surgery_snapshot, load_snapshot
+
+    try:
+        surgery_snapshot = json.loads(run.input_json)
+    except (ValueError, TypeError, RecursionError) as exc:
+        raise HTTPException(409, "历史任务缺少有效完整JSON") from exc
+    if is_surgery_snapshot(surgery_snapshot):
         from app.ai import surgery_facts as facts
         from app.ai.surgery_context import authorize_surgery_snapshot
-        from app.ai.surgery_storage import is_surgery_snapshot, load_snapshot
 
-        try:
-            surgery_snapshot = json.loads(run.input_json)
-        except (ValueError, TypeError, RecursionError) as exc:
-            raise HTTPException(409, "手术历史任务缺少有效完整JSON") from exc
-        if is_surgery_snapshot(surgery_snapshot):
-            user = facts.current_actor(db, user)
-            if user.user_role != "super_admin" and run.requested_by != user.user_id:
-                raise HTTPException(403, "不能访问其他用户的 AI 任务")
-            authorized_feature(db, user, run.feature_key)
-            snapshot, _, _, _ = load_snapshot(run)
-            authorize_surgery_snapshot(db, user, snapshot["payload"]["context"])
-            return
+        user = facts.current_actor(db, user)
+        if user.user_role != "super_admin" and run.requested_by != user.user_id:
+            raise HTTPException(403, "不能访问其他用户的 AI 任务")
+        snapshot, _, _, _ = load_snapshot(run)
+        authorized_feature(db, user, run.feature_key)
+        authorize_surgery_snapshot(db, user, snapshot["payload"]["context"])
+        return
     if user.user_role != "super_admin" and run.requested_by != user.user_id:
         raise HTTPException(403, "不能访问其他用户的 AI 任务")
     spec, _ = authorized_feature(db, user, run.feature_key)
@@ -381,12 +381,12 @@ def authorize_run(db: Session, user: User, run: AIRun) -> None:
 def describe_run(run: AIRun, include_result: bool = True) -> dict:
     """Expose the user-facing result, not system instructions or provider secrets."""
     from app.ai.roster_storage import is_roster_snapshot
+    from app.ai.surgery_storage import is_surgery_snapshot
 
-    if run.feature_key == "surgery_scheduling":
-        from app.ai.surgery_storage import is_surgery_snapshot, run_binding
+    if is_surgery_snapshot(json.loads(run.input_json)):
+        from app.ai.surgery_storage import run_binding
 
-        if is_surgery_snapshot(json.loads(run.input_json)):
-            run_binding(run)
+        run_binding(run)
 
     if is_roster_snapshot(json.loads(run.input_json)):
         from app.ai.roster_storage import run_binding
@@ -767,9 +767,19 @@ async def execute_claimed(run_id: str, lease: str, *, transport=None) -> None:
             for stream in ecg_files:
                 stream.close()
     with database.SessionLocal() as db:
-        # Read only the feature discriminator before any AIRun/User row lock.
-        # Even an early rejected surgery task uses the same first-lock order.
-        surgery_feature = db.query(AIRun.feature_key).filter_by(run_id=run_id).scalar() == "surgery_scheduling"
+        # Read frozen markers before any AIRun/User row lock. A corrupted
+        # feature discriminator must not bypass the surgery first-lock order.
+        original = db.query(AIRun.feature_key, AIRun.input_json).filter_by(run_id=run_id).one_or_none()
+        surgery_feature = surgery_run or original is not None and original.feature_key == "surgery_scheduling"
+        if original is not None:
+            from app.ai.surgery_storage import is_surgery_snapshot
+
+            try:
+                surgery_feature = is_surgery_snapshot(json.loads(original.input_json)) or surgery_feature
+            except (HTTPException, ValueError, TypeError, RecursionError):
+                # Malformed originals are already rejected before inference;
+                # an original surgery task still retains its lock order.
+                pass
         if surgery_feature:
             from app.ai.surgery_facts import lock_write_gate
 

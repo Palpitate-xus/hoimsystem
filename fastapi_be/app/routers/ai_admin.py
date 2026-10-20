@@ -742,17 +742,17 @@ def inspect_run_trace(run_id: str, db: Session = Depends(get_db), user: User = D
     if run is None:
         raise HTTPException(404, "AI 任务不存在")
     snapshot = json.loads(run.input_json)
-    if run.feature_key == "surgery_scheduling":
+    from app.ai.surgery_storage import is_surgery_snapshot
+
+    if is_surgery_snapshot(snapshot):
         from app.ai.runtime import authorize_run
         from app.ai.surgery_context import expand_context
-        from app.ai.surgery_storage import is_surgery_snapshot
 
-        if is_surgery_snapshot(snapshot):
-            actor = db.query(User).filter_by(user_id=user.user_id).populate_existing().one_or_none()
-            if actor is None or actor.user_role != "super_admin":
-                raise HTTPException(403, "当前身份已无超级管理员完整手术审计权限")
-            authorize_run(db, actor, run)
-            snapshot["payload"]["context"] = expand_context(db, snapshot["payload"]["context"])
+        actor = db.query(User).filter_by(user_id=user.user_id).populate_existing().one_or_none()
+        if actor is None or actor.user_role != "super_admin":
+            raise HTTPException(403, "当前身份已无超级管理员完整手术审计权限")
+        authorize_run(db, actor, run)
+        snapshot["payload"]["context"] = expand_context(db, snapshot["payload"]["context"])
     if snapshot.get("payload", {}).get("context", {}).get("roster_binding"):
         from app.ai.roster_context import authorize_roster_snapshot, expand_context
 

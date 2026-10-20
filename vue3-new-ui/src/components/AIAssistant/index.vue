@@ -11,6 +11,7 @@
         <p v-if="boundClinicalReferences.length">本次绑定资料：{{ boundClinicalReferences.join('、') }}。所选记录未注明对应就诊；选择就诊仅补充临床背景，不确认其归属。</p>
         <p v-if="boundPathwayReferences.length">本次绑定：{{ boundPathwayReferences.join('、') }}。住院关联以原记录核实；路径适用条件和已审核版本仍须核对。</p>
         <p v-if="boundNursingReferences.length && !needsRiskWindow">本次绑定：{{ boundNursingReferences.join('、') }}。按原患者与原住院核对，不能通过补充JSON替换；缺项、历史默认值及人工评分来源仍须复核。</p>
+        <p v-if="needsSupport">本次只整理明确原来源 {{ supportReferences.support_source_id }}（{{ supportReferences.support_source_kind }}）及其原关联；补充JSON不能替换原类型、原标识或原量，不代表完整交班。</p><p v-if="supportFailure" role="alert">{{ supportFailure }}</p>
         <p v-if="needsRiskWindow">本任务使用明确选择的原住院观测窗；NEWS2/AKI/qSOFA模式另需核对明确原来源与适用性评估，补充文字或JSON不能填补原数据缺项。</p>
         <p v-if="props.initialInput.audio_asset_id">本次绑定原录音 {{ props.initialInput.audio_asset_id }}；以原登记资料核对患者与就诊，不能通过补充JSON替换。</p>
         <p v-if="props.initialInput.ecg_asset_id">本次绑定原始心电 {{ props.initialInput.ecg_asset_id }}；以原登记资料核对患者与就诊，不能通过补充JSON替换。</p>
@@ -67,7 +68,7 @@
         <el-collapse v-if="canPreview" class="spaced">
           <el-collapse-item title="联调与预览选项">
             <el-checkbox v-model="preview">超级管理员预览（结果仅供评估）</el-checkbox>
-            <p v-if="needsForecast">统计预测只使用所选冻结来源和7/14天跨度；此处JSON不参与计算，也不能改写来源、口径、时区或日计数。</p>
+            <p v-if="needsSupport">补充JSON不参与单条原资料输入；原资料自由文字依据和补充问题留在本地核对。</p><p v-if="needsForecast">统计预测只使用所选冻结来源和7/14天跨度；此处JSON不参与计算，也不能改写来源、口径、时区或日计数。</p>
             <p v-if="needsRiskWindow">此处JSON不参与风险观测输入，不能覆盖患者、原住院、窗口、截止时点或原数值。</p>
             <el-input v-model="extraInput" type="textarea" :rows="4" placeholder="可选：专用适配器的结构化输入 JSON，由服务契约规定" class="spaced" />
           </el-collapse-item>
@@ -78,9 +79,9 @@
         <el-alert v-else-if="needsNews2" type="info" :closable="false" title="NEWS2使用固定规则计算；Prompt不改变分数。规则分类及小计下界不表示风险概率或自动处置。" class="spaced" />
         <el-alert v-else-if="selected.engine !== 'llm'" type="info" :closable="false" title="此能力通过专用模型处理，需要对应原始资料和已登记的适配服务。" class="spaced" />
         <div class="actions">
-          <el-button v-if="selected.scope === 'patient'" :disabled="!patientId || patientLoading || pathwayOptionsLoading || (needsRiskWindow && !riskWindowReady) || (needsNews2 && !news2Ready) || (needsAki && !akiReady) || (needsQsofa && !qsofaReady) || (needsAudio && (!audioAssetId || !audioReady)) || (needsEcg && (!ecgAssetId || !ecgReady)) || (needsImage && (!imageAssetId || !imageOrderId || !imageReady))" @click="inspectContext">查看本次资料</el-button>
+          <el-button v-if="selected.scope === 'patient'" :disabled="(needsSupport && !supportModeReady) || !patientId || patientLoading || pathwayOptionsLoading || (needsRiskWindow && !riskWindowReady) || (needsNews2 && !news2Ready) || (needsAki && !akiReady) || (needsQsofa && !qsofaReady) || (needsAudio && (!audioAssetId || !audioReady)) || (needsEcg && (!ecgAssetId || !ecgReady)) || (needsImage && (!imageAssetId || !imageOrderId || !imageReady))" @click="inspectContext">查看本次资料</el-button>
           <el-button v-if="needsOperations" :disabled="serviceOptionsLoading || (needsForecast && !forecastReady)" @click="inspectOperationalContext">查看本次运营资料</el-button>
-          <el-button type="primary" :loading="submitting" :disabled="(needsRiskWindow && !riskWindowReady) || (needsNews2 && !news2Ready) || (needsAki && !akiReady) || (needsQsofa && !qsofaReady) || (needsForecast && !forecastReady) || busy || patientLoading || serviceOptionsLoading || pathwayOptionsLoading || (needsAudio && (!audioAssetId || !audioReady)) || (needsEcg && (!ecgAssetId || !ecgReady)) || (needsImage && (!imageAssetId || !imageOrderId || !imageReady)) || (!selected.enabled && !preview) || (selected.scope === 'patient' && !patientId) || (needsInventory && (!inventoryDrugs.length && !inventoryConsumables.length || serviceOptions.inventory_scope_available === false))" @click="submit">生成辅助建议</el-button>
+          <el-button type="primary" :loading="submitting" :disabled="(needsSupport && !supportModeReady) || (needsRiskWindow && !riskWindowReady) || (needsNews2 && !news2Ready) || (needsAki && !akiReady) || (needsQsofa && !qsofaReady) || (needsForecast && !forecastReady) || busy || patientLoading || serviceOptionsLoading || pathwayOptionsLoading || (needsAudio && (!audioAssetId || !audioReady)) || (needsEcg && (!ecgAssetId || !ecgReady)) || (needsImage && (!imageAssetId || !imageOrderId || !imageReady)) || (!selected.enabled && !preview) || (selected.scope === 'patient' && !patientId) || (needsInventory && (!inventoryDrugs.length && !inventoryConsumables.length || serviceOptions.inventory_scope_available === false))" @click="submit">生成辅助建议</el-button>
           <el-button v-if="busy" @click="cancel">取消接收结果</el-button>
         </div>
       </template>
@@ -102,6 +103,7 @@
       <ai-observation-findings v-if="!run.aki_findings && !run.qsofa_findings" :findings="run.observation_findings" :expected-patient-id="run.patient_id" :expected-admission-id="run.encounter_ref || encounterRef" @inspect="inspectEvidence" />
       <ai-news2-findings v-if="run.news2_findings" :source="run.news2_findings.news2_source" :scope="run.news2_findings.news2_assessment" :analysis="run.result?.news2_analysis" :expected-patient-id="run.patient_id" :expected-admission-id="run.encounter_ref || encounterRef" @inspect="inspectEvidence" />
       <ai-aki-findings v-if="run.aki_findings" :source="run.aki_findings.aki_source" :scope="run.aki_findings.aki_assessment" :analysis="run.result?.aki_analysis" :expected-patient-id="run.patient_id" :expected-admission-id="run.encounter_ref || encounterRef" @inspect="inspectEvidence" />
+      <ai-support-findings v-if="run.support_findings" :findings="run.support_findings" :expected-patient-id="patientId" :expected-admission-id="encounterRef" :references="needsSupport ? supportReferences : null" :active="viewActive" @inspect="inspectEvidence" />
       <ai-qsofa-findings v-if="run.qsofa_findings" :source="run.qsofa_findings.qsofa_source" :scope="run.qsofa_findings.qsofa_assessment" :analysis="run.result?.qsofa_analysis" :expected-patient-id="run.patient_id" :expected-admission-id="run.encounter_ref || encounterRef" @inspect="inspectEvidence" />
       <ai-speech-findings :findings="run.audio_findings" :transcription="run.result?.transcription" :allow-copy="run.status === 'succeeded'" @inspect="inspectEvidence" @copy="copyDraft" />
       <ai-image-findings :findings="run.image_findings" :analysis="run.result?.image_analysis" :allow-copy="run.status === 'succeeded'" @inspect="inspectEvidence" @copy="copyDraft" />
@@ -168,11 +170,13 @@
       <ai-observation-findings v-if="!contextData?.context?.aki_source && !contextData?.context?.qsofa_source" :findings="contextData?.context?.observation_window" :expected-patient-id="patientId" :expected-admission-id="encounterRef" @inspect="inspectPreviewEvidence" />
       <ai-news2-findings v-if="contextData?.context?.news2_source" :source="contextData.context.news2_source" :scope="contextData.context.news2_assessment" :expected-patient-id="patientId" :expected-admission-id="encounterRef" @inspect="inspectPreviewEvidence" />
       <ai-aki-findings v-if="contextData?.context?.aki_source" :source="contextData.context.aki_source" :scope="contextData.context.aki_assessment" :expected-patient-id="patientId" :expected-admission-id="encounterRef" @inspect="inspectPreviewEvidence" />
+      <ai-support-findings v-if="needsSupport && contextDialog" :findings="contextData?.context" :expected-patient-id="patientId" :expected-admission-id="encounterRef" :references="supportReferences" :active="contextDialog && viewActive" @inspect="inspectPreviewEvidence" />
       <ai-qsofa-findings v-if="contextData?.context?.qsofa_source" :source="contextData.context.qsofa_source" :scope="contextData.context.qsofa_assessment" :expected-patient-id="patientId" :expected-admission-id="encounterRef" @inspect="inspectPreviewEvidence" />
       <ai-speech-findings v-if="contextDialog" :findings="contextData?.context" @inspect="inspectPreviewEvidence" />
       <ai-image-findings v-if="contextDialog" :findings="contextData?.context" @inspect="inspectPreviewEvidence" />
       <ai-ecg-findings v-if="contextDialog" :findings="contextData?.context" @inspect="inspectPreviewEvidence" />
-      <el-collapse v-if="needsOperations"><el-collapse-item title="查看原始资料字段"><pre class="plain-text">{{ JSON.stringify(contextData, null, 2) }}</pre></el-collapse-item></el-collapse>
+      <template v-if="needsSupport"><p>以下为本次提供给模型的公开原量与已审核知识；完整冻结原件、人工自由文字依据、患者/住院标识和补充问题留在本地，仅在核对依据时查看。</p><pre class="plain-text" aria-label="单条原资料模型公开输入">{{ JSON.stringify(supportOutboundPreview, null, 2) }}</pre></template>
+      <el-collapse v-else-if="needsOperations"><el-collapse-item title="查看原始资料字段"><pre class="plain-text">{{ JSON.stringify(contextData, null, 2) }}</pre></el-collapse-item></el-collapse>
       <pre v-else class="plain-text">{{ JSON.stringify(contextData, null, 2) }}</pre>
     </el-dialog>
     <el-dialog v-model="evidenceDialog" title="核查引用依据" width="760px"><template v-if="evidence"><p><strong>{{ evidence.title }}</strong> {{ evidence.version ? '· ' + evidence.version : '' }}</p><p v-if="evidence.source_uri" class="plain-text">来源：{{ evidence.source_uri }}</p><p v-if="evidence.observed_at">记录时间：{{ evidence.observed_at }}</p><pre class="plain-text">{{ evidence.content }}</pre></template></el-dialog>
@@ -186,6 +190,7 @@ import { useStore } from "vuex";
 import { ElMessage } from "element-plus";
 import { cancelAIRun, createAIRun, getAIClinicalContext, getAIOperationalContext, getAIEncounters, getAIFeatures, getAIPatients, getAIPrescriptions, getAIPathwayOptions, getAIServiceOptions, getAIRun, getAIRuns, reviewAIRun } from "@/api/ai";
 import { resolveAkiEvidence } from "@/api/aiAki";
+import { resolveSupportEvidence, supportReferencesValid, verifySupportContext } from "@/api/aiSupportContext";
 import { resolveQsofaEvidence } from "@/api/aiQsofa";
 import AiServiceFindings from "@/components/AIServiceFindings/index.vue";
 import AiOperationalFindings from "@/components/AIOperationalFindings/index.vue";
@@ -210,6 +215,7 @@ const AiNews2Findings = defineAsyncComponent(() => import("@/components/AINews2F
 const AiAkiInput = defineAsyncComponent(() => import("@/components/AIAkiInput/index.vue"));
 const AiAkiFindings = defineAsyncComponent(() => import("@/components/AIAkiFindings/index.vue"));
 const AiQsofaInput = defineAsyncComponent(() => import("@/components/AIQsofaInput/index.vue"));
+const AiSupportFindings = defineAsyncComponent(() => import("@/components/AISupportFindings/index.vue"));
 const AiQsofaFindings = defineAsyncComponent(() => import("@/components/AIQsofaFindings/index.vue"));
 
 const props = defineProps({ featureKeys: { type: Array, default: () => [] }, initialFeature: { type: String, default: "" }, patientId: { type: Number, default: null }, encounterRef: { type: String, default: "" }, initialInput: { type: Object, default: () => ({}) } });
@@ -225,7 +231,16 @@ const needsRiskWindow = computed(() => ["deterioration_risk", "sepsis_risk", "ak
 const needsNews2 = computed(() => featureKey.value === "deterioration_risk" && selected.value?.input_mode === "news2"), news2Selection = ref(null), news2Ready = ref(false);
 const needsAki = computed(() => featureKey.value === "aki_risk" && selected.value?.input_mode === "aki"), akiSelection = ref(null), akiReady = ref(false);
 const needsQsofa = computed(() => featureKey.value === "sepsis_risk" && selected.value?.input_mode === "qsofa"), qsofaSelection = ref(null), qsofaReady = ref(false);
-const encounterOptions = computed(() => needsRiskWindow.value ? encounters.value.filter(item => item.kind === "inpatient") : encounters.value);
+const supportWasBound = ref(false), supportFailure = ref(""), viewActive = ref(true);
+const supportReferences = computed(() => ({ support_source_id: props.initialInput.support_source_id, support_source_kind: props.initialInput.support_source_kind }));
+watch(() => [props.initialInput.support_source_id, props.initialInput.support_source_kind], values => { if (values.some(value => value != null)) supportWasBound.value = true; }, { immediate: true, flush: "sync" });
+const needsSupport = computed(() => featureKey.value === "handover_summary" && supportWasBound.value);
+// Every handover view can open a source-backed history row, including views
+// without initial source references. Protect pending history reads as well.
+const supportLifecycle = computed(() => featureKey.value === "handover_summary" || !!run.value?.support_findings || !!contextData.value?.context?.support_source);
+const supportModeReady = computed(() => !needsSupport.value || supportReferencesValid(supportReferences.value) && !!patientId.value && !!encounterRef.value && !!store.state.user.accessToken && viewActive.value && (store.getters["user/permissions"] || []).some(role => selected.value?.allowed_roles?.includes(role)));
+const supportOutboundPreview = computed(() => contextData.value?.context?.support_source ? { context: { scope: "inpatient_support_original", support_source: contextData.value.context.support_source, missing_data: contextData.value.context.missing_data }, evidence: contextData.value.evidence } : null);
+const encounterOptions = computed(() => needsRiskWindow.value || needsSupport.value ? encounters.value.filter(item => item.kind === "inpatient") : encounters.value);
 const needsPrescription = computed(() => ["interaction_review", "allergy_review", "dose_review", "antimicrobial_review"].includes(featureKey.value));
 const needsCoding = computed(() => ["icd_candidates", "drg_evidence_review"].includes(featureKey.value));
 const needsAppointment = computed(() => featureKey.value === "appointment_assistant"), needsNavigation = computed(() => featureKey.value === "hospital_navigation");
@@ -250,23 +265,36 @@ const serviceDoctors = computed(() => (serviceOptions.value.doctors || []).filte
 const busy = computed(() => ["queued", "running"].includes(run.value?.status));
 let timer = null, pollVersion = 0, formVersion = 0, patientLoadVersion = 0, historyVersion = 0, selectionVersion = 0, historyOpen = false, pathwayOptionsVersion = 0;
 
+function supportIdentity() { return JSON.stringify([featureKey.value, patientId.value, encounterRef.value, supportReferences.value, store.state.user.accessToken, store.getters["user/permissions"]]); }
+function captureSupport() { return { key: supportIdentity(), version: selectionVersion, mode: needsSupport.value, patient: patientId.value, admission: encounterRef.value, references: needsSupport.value ? { ...supportReferences.value } : null }; }
+const supportCurrent = ticket => viewActive.value && ticket.version === selectionVersion && ticket.key === supportIdentity();
+async function acceptSupportRun(value, ticket) {
+  if (!ticket.mode && !value?.support_findings) return true;
+  if (!supportCurrent(ticket)) return false;
+  const valid = value?.feature_key === "handover_summary" && value.patient_id === ticket.patient && value.encounter_ref === ticket.admission && await verifySupportContext(value.support_findings, ticket.patient, ticket.admission, ticket.references);
+  if (!supportCurrent(ticket)) return false;
+  if (!valid) { clearUnavailableSupport(ticket,"任务回执与明确原资料、原患者、原住院或公开原量不一致，已拒绝展示。"); return false; }
+  return true;
+}
+function clearUnavailableSupport(ticket,message="当前无法重新核对原资料或访问，暂不展示旧任务。") { if(!supportCurrent(ticket))return; run.value=null;contextData.value=null;contextDialog.value=false;evidence.value=null;evidenceDialog.value=false;feedbackDialog.value=false;supportFailure.value=message; }
 function stopPolling() { pollVersion += 1; clearTimeout(timer); timer = null; }
 function startPolling() {
   stopPolling();
   if (!busy.value) return;
   const version = pollVersion, id = run.value.run_id;
   const poll = async () => {
+    const supportTicket = captureSupport();
     try {
       const response = await getAIRun(id);
-      if (version !== pollVersion) return;
+      if (version !== pollVersion || !await acceptSupportRun(response.data, supportTicket) || version !== pollVersion) return;
       run.value = response.data;
       if (busy.value) timer = setTimeout(poll, 2000);
-    } catch { if (version === pollVersion) stopPolling(); }
+    } catch { if (version === pollVersion) { if(supportLifecycle.value)clearUnavailableSupport(supportTicket); stopPolling(); } }
   };
   timer = setTimeout(poll, 1200);
 }
 async function searchPatients(keyword = "") {
-  if (selected.value?.scope !== "patient") return;
+  if (selected.value?.scope !== "patient" || needsSupport.value && !supportModeReady.value && !(store.getters["user/permissions"] || []).some(role => selected.value?.allowed_roles?.includes(role))) return;
   const version = formVersion;
   const response = await getAIPatients({ feature_key: featureKey.value, keyword });
   if (version !== formVersion) return;
@@ -324,7 +352,7 @@ watch([needsNews2, () => riskWindowSelection.value?.observation_window_id, () =>
 watch([needsAki, () => riskWindowSelection.value?.observation_window_id, () => riskWindowSelection.value?.content_hash, riskWindowReady], () => { akiSelection.value = null; akiReady.value = false; });
 watch([needsQsofa, () => riskWindowSelection.value?.observation_window_id, () => riskWindowSelection.value?.content_hash, riskWindowReady], () => { qsofaSelection.value = null; qsofaReady.value = false; });
 watch([needsQsofa, () => JSON.stringify(qsofaSelection.value), qsofaReady, needsAki, () => JSON.stringify(akiSelection.value), akiReady, needsNews2, () => JSON.stringify(news2Selection.value), news2Ready, () => JSON.stringify(riskWindowSelection.value), riskWindowReady, () => JSON.stringify(forecastSelection.value), forecastReady, featureKey, patientId, encounterRef, prescriptionId, incidentId, pathwayId, audioAssetId, ecgAssetId, imageAssetId, imageOrderId, serviceDepartment, serviceDoctor, serviceDate, navigationStart, navigationEnd, operationsRange, operationsPlanRange, () => inventoryDrugs.value.join(','), () => inventoryConsumables.value.join(','), () => JSON.stringify(props.initialInput)], () => {
-  selectionVersion += 1; stopPolling(); run.value = null; contextData.value = null; contextDialog.value = false; evidenceDialog.value = false; feedbackDialog.value = false;
+  selectionVersion += 1; supportFailure.value = ""; stopPolling(); run.value = null; contextData.value = null; contextDialog.value = false; evidence.value = null; evidenceDialog.value = false; feedbackDialog.value = false;
 });
 watch(() => run.value?.run_id, () => { evidenceDialog.value = false; feedbackDialog.value = false; feedback.value = { outcome: "accepted", comment: "" }; });
 watch(serviceDepartment, id => { const doctor = serviceOptions.value.doctors?.find(item => item.doctor_id === serviceDoctor.value); if (id && doctor && doctor.department_id !== id) serviceDoctor.value = null; });
@@ -350,11 +378,12 @@ watch([featureKey, patientId, encounterRef], async () => {
 }, { flush: "post" });
 async function inspectContext() {
   const input = buildTaskInput(); if (!input) return;
-  const version = selectionVersion;
-  const sourceKeys = needsRiskWindow.value ? ["observation_window_id", "news2_assessment_id", "aki_assessment_id", "qsofa_assessment_id"] : selected.value?.source_reference_keys || ["record_id", "structured_record_id", "prescription_id", "lab_result_id", "imaging_report_id"];
+  const version = selectionVersion, supportTicket = captureSupport();
+  const sourceKeys = needsSupport.value ? ["support_source_id", "support_source_kind"] : needsRiskWindow.value ? ["observation_window_id", "news2_assessment_id", "aki_assessment_id", "qsofa_assessment_id"] : selected.value?.source_reference_keys || ["record_id", "structured_record_id", "prescription_id", "lab_result_id", "imaging_report_id"];
   const references = Object.fromEntries(sourceKeys.filter(key => input[key]).map(key => [key, input[key]]));
-  const response = await getAIClinicalContext({ ...references, feature_key: featureKey.value, patient_id: patientId.value, encounter_ref: encounterRef.value || undefined });
+  let response; try { response = await getAIClinicalContext({ ...references, feature_key: featureKey.value, patient_id: patientId.value, encounter_ref: encounterRef.value || undefined }); } catch(failure) { if(supportLifecycle.value){clearUnavailableSupport(supportTicket);return;} throw failure; }
   if (version !== selectionVersion) return;
+  if (supportTicket.mode || response.data?.context?.support_source) { if (!supportTicket.mode || !await verifySupportContext(response.data?.context, supportTicket.patient, supportTicket.admission, supportTicket.references)) { if (supportCurrent(supportTicket)) { contextData.value = null; contextDialog.value = false; supportFailure.value = "本次原资料、公开原量或完整摘要绑定不一致，不能预览。"; } return; } if (!supportCurrent(supportTicket)) return; }
   contextData.value = response.data; contextDialog.value = true;
 }
 async function inspectOperationalContext() {
@@ -365,6 +394,7 @@ async function inspectOperationalContext() {
   contextData.value = response.data; contextDialog.value = true;
 }
 function buildTaskInput() {
+  if (needsSupport.value) { if (!supportModeReady.value) { ElMessage.warning("请从原资料入口明确选择合法的原类型、原标识及本次住院，并核对当前权限"); return; } return { ...supportReferences.value, question: question.value }; }
   if (needsRiskWindow.value) {
     if (!riskWindowReady.value || !riskWindowSelection.value || !encounterRef.value) { ElMessage.warning("请先选择并核对原住院观测窗"); return; }
     if (needsQsofa.value) {
@@ -412,15 +442,23 @@ function buildTaskInput() {
 async function submit() {
   const input = buildTaskInput(); if (!input) return;
   submitting.value = true;
-  stopPolling(); const selection = selectionVersion, view = pollVersion;
+  stopPolling(); const selection = selectionVersion, view = pollVersion, supportTicket = captureSupport();
   try {
     const response = await createAIRun({ feature_key: featureKey.value, patient_id: selected.value.scope === "patient" ? patientId.value : null, encounter_ref: selected.value.scope === "patient" ? encounterRef.value || null : null, input, preview: canPreview.value && preview.value });
-    if (selection !== selectionVersion || view !== pollVersion) return;
+    if (selection !== selectionVersion || view !== pollVersion || !await acceptSupportRun(response.data, supportTicket) || selection !== selectionVersion || view !== pollVersion) return;
     run.value = response.data; startPolling();
   } finally { submitting.value = false; }
 }
-async function refreshRun() { if (run.value) { stopPolling(); const id = run.value.run_id, selection = selectionVersion, view = pollVersion; const response = await getAIRun(id); if (selection !== selectionVersion || view !== pollVersion || id !== run.value?.run_id) return; run.value = response.data; startPolling(); } }
-async function openRun(id) { stopPolling(); const selection = selectionVersion, view = pollVersion; const response = await getAIRun(id); if (selection !== selectionVersion || view !== pollVersion) return; run.value = response.data; startPolling(); }
+async function refreshRun() {
+  if(!run.value)return;stopPolling();const id=run.value.run_id,selection=selectionVersion,view=pollVersion,supportTicket=captureSupport();
+  try{const response=await getAIRun(id);if(selection!==selectionVersion||view!==pollVersion||id!==run.value?.run_id||!await acceptSupportRun(response.data,supportTicket)||selection!==selectionVersion||view!==pollVersion)return;run.value=response.data;startPolling();}
+  catch(failure){if(supportLifecycle.value){clearUnavailableSupport(supportTicket);return;}throw failure;}
+}
+async function openRun(id) {
+  stopPolling();const selection=selectionVersion,view=pollVersion,supportTicket=captureSupport();
+  try{const response=await getAIRun(id);if(selection!==selectionVersion||view!==pollVersion||!await acceptSupportRun(response.data,supportTicket)||selection!==selectionVersion||view!==pollVersion)return;run.value=response.data;startPolling();}
+  catch(failure){if(supportLifecycle.value){clearUnavailableSupport(supportTicket);return;}throw failure;}
+}
 async function cancel() { await cancelAIRun(run.value.run_id); await refreshRun(); }
 async function loadHistory(activeNames) {
   if (activeNames !== undefined) historyOpen = activeNames.length > 0;
@@ -430,14 +468,14 @@ async function loadHistory(activeNames) {
   if (version === historyVersion) history.value = response.data || [];
 }
 watch([() => JSON.stringify(store.getters["user/permissions"]), () => store.state.user.accessToken], () => {
-  if (!needsForecast.value && !needsRiskWindow.value) return;
+  if (!needsForecast.value && !needsRiskWindow.value && !supportLifecycle.value) return;
   formVersion++; patientLoadVersion++; patients.value = []; encounters.value = []; prescriptions.value = []; patientLoading.value = false; patientId.value = null; encounterRef.value = ""; prescriptionId.value = null; question.value = ""; extraInput.value = ""; preview.value = false;
-  selectionVersion++; historyVersion++; stopPolling(); run.value = null; contextData.value = null; contextDialog.value = false; evidenceDialog.value = false; feedbackDialog.value = false; history.value = []; forecastReady.value = false; forecastSelection.value = null; riskWindowReady.value = false; riskWindowSelection.value = null; news2Ready.value = false; news2Selection.value = null; akiReady.value = false; akiSelection.value = null; qsofaReady.value = false; qsofaSelection.value = null;
+  selectionVersion++; historyVersion++; supportFailure.value = ""; stopPolling(); run.value = null; contextData.value = null; contextDialog.value = false; evidence.value=null; evidenceDialog.value = false; feedbackDialog.value = false; history.value = []; forecastReady.value = false; forecastSelection.value = null; riskWindowReady.value = false; riskWindowSelection.value = null; news2Ready.value = false; news2Selection.value = null; akiReady.value = false; akiSelection.value = null; qsofaReady.value = false; qsofaSelection.value = null;
   if (needsRiskWindow.value && store.state.user.accessToken) searchPatients().catch(() => {});
 });
 const evidenceTitle = id => run.value?.evidence?.find(item => item.source_id === id)?.title || "来源";
-function inspectEvidence(id) { const resolver = run.value?.qsofa_findings ? resolveQsofaEvidence : resolveAkiEvidence; evidence.value = resolver(run.value?.evidence?.find(item => item.source_id === id), run.value?.qsofa_findings || run.value?.aki_findings, run.value?.patient_id, run.value?.encounter_ref || encounterRef.value); evidenceDialog.value = !!evidence.value; }
-function inspectPreviewEvidence(id) { const resolver = contextData.value?.context?.qsofa_source ? resolveQsofaEvidence : resolveAkiEvidence; evidence.value = resolver(contextData.value?.evidence?.find(item => item.source_id === id), contextData.value?.context, patientId.value, encounterRef.value); evidenceDialog.value = !!evidence.value; }
+async function inspectEvidence(id) { const ticket = captureSupport(), currentRun = run.value; evidence.value = null; evidenceDialog.value = false; const value = currentRun?.support_findings ? await resolveSupportEvidence(currentRun.evidence?.find(item => item.source_id === id),currentRun.support_findings,patientId.value,encounterRef.value,needsSupport.value?supportReferences.value:null) : (currentRun?.qsofa_findings ? resolveQsofaEvidence : resolveAkiEvidence)(currentRun?.evidence?.find(item => item.source_id === id), currentRun?.qsofa_findings || currentRun?.aki_findings, currentRun?.patient_id, currentRun?.encounter_ref || encounterRef.value); if (currentRun !== run.value || currentRun?.support_findings && !supportCurrent(ticket)) return; evidence.value = value; evidenceDialog.value = !!value; }
+async function inspectPreviewEvidence(id) { const ticket=captureSupport(), packet=contextData.value; evidence.value=null; evidenceDialog.value=false; const value=packet?.context?.support_source ? await resolveSupportEvidence(packet.evidence?.find(item=>item.source_id===id),packet.context,patientId.value,encounterRef.value,supportReferences.value) : (packet?.context?.qsofa_source?resolveQsofaEvidence:resolveAkiEvidence)(packet?.evidence?.find(item=>item.source_id===id),packet?.context,patientId.value,encounterRef.value); if(packet!==contextData.value||packet?.context?.support_source&&!supportCurrent(ticket))return; evidence.value=value;evidenceDialog.value=!!value; }
 async function copyDraft() {
   const transcript = run.value.result.transcription;
   const segments = transcript ? ["原录音转写草稿，待逐段听音与角色核对：", ...transcript.segments.map(item => `[${item.start_ms}–${item.end_ms}毫秒] ${item.speaker}（角色待核实）\n${item.text}${item.uncertain ? '\n不确定：' + item.uncertainty_note : ''}`)] : [];
@@ -451,12 +489,13 @@ async function copyDraft() {
 async function submitFeedback() { await reviewAIRun(run.value.run_id, feedback.value); feedbackDialog.value = false; feedback.value = { outcome: "accepted", comment: "" }; ElMessage.success("复核反馈已保存"); }
 onMounted(async () => {
   loading.value = true;
-  try { features.value = ((await getAIFeatures()).data || []).filter(item => !props.featureKeys.length || props.featureKeys.includes(item.key)); featureKey.value = features.value.some(item => item.key === props.initialFeature) ? props.initialFeature : features.value[0]?.key || ""; }
+  const initialCredentials = JSON.stringify([store.state.user.accessToken,store.getters["user/permissions"]]);
+  try { const response = await getAIFeatures(); if (supportWasBound.value && initialCredentials !== JSON.stringify([store.state.user.accessToken,store.getters["user/permissions"]])) return; features.value = (response.data || []).filter(item => !props.featureKeys.length || props.featureKeys.includes(item.key)); featureKey.value = features.value.some(item => item.key === props.initialFeature) ? props.initialFeature : features.value[0]?.key || ""; }
   finally { loading.value = false; }
 });
-onActivated(() => { if (busy.value) startPolling(); });
-onDeactivated(() => { selectionVersion += 1; stopPolling(); });
-onBeforeUnmount(() => { selectionVersion += 1; historyVersion += 1; formVersion += 1; pathwayOptionsVersion += 1; stopPolling(); });
+onActivated(() => { viewActive.value = true; if (busy.value) startPolling(); });
+onDeactivated(() => { viewActive.value = false; selectionVersion += 1; stopPolling(); if(supportLifecycle.value){historyVersion++;run.value=null;contextData.value=null;contextDialog.value=false;evidence.value=null;evidenceDialog.value=false;feedbackDialog.value=false;history.value=[];} });
+onBeforeUnmount(() => { viewActive.value = false; selectionVersion += 1; historyVersion += 1; formVersion += 1; pathwayOptionsVersion += 1; stopPolling(); });
 </script>
 
 <style scoped>

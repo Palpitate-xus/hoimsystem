@@ -93,6 +93,7 @@ def upgrade():
         ),
     )
     op.create_index("idx_supply_day_item", "hoimsystem_ai_supply_daily_quantity", ["item_kind", "item_id", "business_date", "target", "recorded_at"])
+    op.create_index("idx_supply_day_span", "hoimsystem_ai_supply_daily_quantity", ["item_kind", "item_id", "day_start_at", "day_end_at"])
     op.create_index("idx_supply_day_author", "hoimsystem_ai_supply_daily_quantity", ["created_by", "status"])
     op.create_index("idx_supply_day_unit", "hoimsystem_ai_supply_daily_quantity", ["unit_definition_id"])
 

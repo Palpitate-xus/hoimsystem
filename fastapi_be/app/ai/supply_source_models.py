@@ -96,6 +96,7 @@ class AISupplyDailyQuantity(GovernedSupplyOriginal, Base):
             name="ck_supply_day_closed_observation",
         ),
         Index("idx_supply_day_item", "item_kind", "item_id", "business_date", "target", "recorded_at"),
+        Index("idx_supply_day_span", "item_kind", "item_id", "day_start_at", "day_end_at"),
         Index("idx_supply_day_author", "created_by", "status"),
         Index("idx_supply_day_unit", "unit_definition_id"),
     )

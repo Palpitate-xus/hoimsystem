@@ -29,6 +29,7 @@ from app.ai.schemas import (
     SofaChangeGenerationResult,
     SofaGenerationResult,
 )
+from app.ai.supply_protocol import SupplyGenerationResult
 from app.ai.surgery_protocol import SurgeryGenerationResult
 from app.config import settings
 
@@ -96,6 +97,8 @@ def validate_generation(
     roster_source: dict | None = None,
     bed_source: dict | None = None,
     surgery_source: dict | None = None,
+    supply_source: dict | None = None,
+    supply_horizon: int | None = None,
     bed_horizon: int | None = None,
     forecast_horizon: int | None = None,
     instructions_digest: str | None = None,
@@ -107,20 +110,41 @@ def validate_generation(
             raise ValueError("SOFA日评估与变化结果不能混用")
         if roster_source is not None and any(
             value is not None
-            for value in (audio_source, ecg_source, image_source, forecast_source, news2_source, aki_source, qsofa_source, sofa_source, sofa_change_source, bed_source, surgery_source)
+            for value in (audio_source, ecg_source, image_source, forecast_source, news2_source, aki_source, qsofa_source, sofa_source, sofa_change_source, bed_source, surgery_source, supply_source)
         ):
             raise ValueError("排班原件不得与其他模型原件混用")
         if bed_source is not None and any(
             value is not None
-            for value in (audio_source, ecg_source, image_source, forecast_source, news2_source, aki_source, qsofa_source, sofa_source, sofa_change_source, roster_source, surgery_source)
+            for value in (
+                audio_source,
+                ecg_source,
+                image_source,
+                forecast_source,
+                news2_source,
+                aki_source,
+                qsofa_source,
+                sofa_source,
+                sofa_change_source,
+                roster_source,
+                surgery_source,
+                supply_source,
+            )
         ):
             raise ValueError("床位原件不得与其他模型原件混用")
         if surgery_source is not None and any(
-            value is not None for value in (audio_source, ecg_source, image_source, forecast_source, news2_source, aki_source, qsofa_source, sofa_source, sofa_change_source, roster_source, bed_source)
+            value is not None
+            for value in (audio_source, ecg_source, image_source, forecast_source, news2_source, aki_source, qsofa_source, sofa_source, sofa_change_source, roster_source, bed_source, supply_source)
         ):
             raise ValueError("手术完整场景不得与其他模型原件混用")
+        if supply_source is not None and any(
+            value is not None
+            for value in (audio_source, ecg_source, image_source, forecast_source, news2_source, aki_source, qsofa_source, sofa_source, sofa_change_source, roster_source, bed_source, surgery_source)
+        ):
+            raise ValueError("物资完整原量序列不得与其他模型原件混用")
         schema = (
-            SurgeryGenerationResult
+            SupplyGenerationResult
+            if supply_source is not None
+            else SurgeryGenerationResult
             if surgery_source is not None
             else BedGenerationResult
             if bed_source is not None
@@ -157,6 +181,21 @@ def validate_generation(
         knowledge_ids = {item["source_id"] for item in evidence if item.get("kind") == "knowledge"}
         if not cited.intersection(knowledge_ids):
             raise AIExecutionError("UNGROUNDED_OUTPUT", "该任务的回答缺少已审核知识依据，结果已拒绝展示")
+    if supply_source is not None:
+        from app.ai.supply_contract import SupplySource
+        from app.ai.supply_model import generation_result_for_analysis, validate_analysis_binding
+
+        try:
+            validate_analysis_binding(result.supply_analysis, SupplySource.model_validate(supply_source), supply_horizon, instructions_digest, model_version)
+            explanation = {key: getattr(result, key) for key in ("summary", "warnings", "missing_data")}
+            explanation["sections"] = [item.model_dump(mode="json") for item in result.sections]
+            expected_explanation = GenerationResult.model_validate(generation_result_for_analysis(result.supply_analysis)).model_dump(mode="json")
+            if explanation != expected_explanation:
+                raise ValueError("固定物资预测解释与完整原量及回测不符")
+        except (ValidationError, ValueError, TypeError, KeyError, OverflowError) as exc:
+            raise AIExecutionError("SUPPLY_BINDING_MISMATCH", "物资原量、单位、三目标、完整回测、明确参数、运行或固定解释重算不一致，结果已拒收") from exc
+        if supply_source["source_id"] not in cited:
+            raise AIExecutionError("UNGROUNDED_SUPPLY", "物资预测说明未引用明确审核的完整原序列")
     if surgery_source is not None:
         from app.ai.surgery_contract import SurgerySource
         from app.ai.surgery_model import generation_result_for_analysis, validate_analysis_binding
@@ -404,6 +443,11 @@ def _request(provider: AIProvider, spec: FeatureSpec, task_prompt: str, data: di
     roster_mode = provider.model.startswith("roster:")
     bed_mode = provider.model.startswith("bed:")
     surgery_mode = provider.model.startswith("surgery:")
+    supply_mode = provider.model.startswith("supply:")
+    if supply_mode and (spec.number != 66 or provider.kind != "specialist"):
+        raise AIExecutionError("SUPPLY_ADAPTER_REQUIRED", "完整物资原量仅由登记的独立物资预测服务处理")
+    if {"supply_source", "supply_binding", "supply_series"} & data.get("context", {}).keys() and not supply_mode:
+        raise AIExecutionError("SUPPLY_ADAPTER_REQUIRED", "完整物资原量不能发送给其他模式或文本模型")
     if surgery_mode and (spec.number != 65 or provider.kind != "specialist"):
         raise AIExecutionError("SURGERY_ADAPTER_REQUIRED", "完整手术场景仅由登记的独立手术排程服务处理")
     if {"surgery_source", "surgery_binding", "surgery_scenario"} & data.get("context", {}).keys() and not surgery_mode:
@@ -442,6 +486,13 @@ def _request(provider: AIProvider, spec: FeatureSpec, task_prompt: str, data: di
     if spec.number == 62 and provider.kind != "specialist":
         raise AIExecutionError("FORECAST_ADAPTER_REQUIRED", "日挂号记录数须通过带固定数值契约的专用预测服务处理")
     specialist_input = data
+    if supply_mode:
+        from app.ai.supply_context import public_payload
+
+        try:
+            specialist_input = public_payload(data)
+        except (HTTPException, ValidationError, ValueError, TypeError, KeyError) as exc:
+            raise AIExecutionError("SUPPLY_SOURCE_REQUIRED", "须选择受审完整物资原量序列、明确期限并核对单位、集合及参数配方绑定") from exc
     if surgery_mode:
         from app.ai.surgery_context import public_payload
 
@@ -595,7 +646,9 @@ def _request(provider: AIProvider, spec: FeatureSpec, task_prompt: str, data: di
         }
     if provider.kind == "specialist":
         return endpoint + "/tasks", {
-            "schema_version": "12"
+            "schema_version": "13"
+            if supply_mode
+            else "12"
             if surgery_mode
             else "11"
             if bed_mode
@@ -614,13 +667,22 @@ def _request(provider: AIProvider, spec: FeatureSpec, task_prompt: str, data: di
             "engine": spec.engine,
             "model": provider.model,
             "instructions": instructions,
-            **({"store": False} if spec.number in {21, 36, 37, 62} or news2_mode or aki_mode or qsofa_mode or sofa_mode or roster_mode or bed_mode or surgery_mode else {}),
+            **({"store": False} if spec.number in {21, 36, 37, 62} or news2_mode or aki_mode or qsofa_mode or sofa_mode or roster_mode or bed_mode or surgery_mode or supply_mode else {}),
             "input": specialist_input,
         }
     raise AIExecutionError("UNSUPPORTED_PROVIDER", "模型接口类型不受支持")
 
 
 def _parse_response(provider: AIProvider, spec: FeatureSpec, value: dict) -> tuple[object, int, int]:
+    if provider.model.startswith("supply:"):
+        from app.ai.supply_protocol import parse_supply_envelope
+
+        if provider.kind != "specialist" or spec.number != 66:
+            raise AIExecutionError("SUPPLY_ADAPTER_REQUIRED", "物资完整预测证据仅由登记的独立物资服务处理")
+        try:
+            return parse_supply_envelope(value, provider.model)
+        except (ValidationError, ValueError, TypeError, KeyError) as exc:
+            raise AIExecutionError("ADAPTER_CONTRACT_MISMATCH", "物资独立服务的版本、完整预测证据或用量不符合严格协议") from exc
     if provider.model.startswith("surgery:"):
         from app.ai.surgery_protocol import parse_surgery_envelope
 
@@ -743,7 +805,15 @@ async def generate(
     bed_source = data.get("context", {}).get("bed_source") if bed_mode else None
     surgery_mode = spec.number == 65 and provider.kind == "specialist" and provider.model.startswith("surgery:")
     surgery_source = data.get("context", {}).get("surgery_source") if surgery_mode else None
+    supply_mode = spec.number == 66 and provider.kind == "specialist" and provider.model.startswith("supply:")
+    supply_source = data.get("context", {}).get("supply_source") if supply_mode else None
     response_limit = MAX_RESPONSE_BYTES
+    if supply_mode:
+        from app.ai.supply_contract import MAX_BYTES
+
+        response_limit = MAX_BYTES
+        if len(encode_json(payload).encode("utf-8")) > MAX_BYTES:
+            raise AIExecutionError("SUPPLY_REQUEST_LIMIT", "物资完整原量及Prompt超过8MiB请求上限，不发送或截断")
     if surgery_mode:
         from app.ai.surgery_contract import MAX_BYTES
 
@@ -824,6 +894,8 @@ async def generate(
             roster_source=roster_source,
             bed_source=bed_source,
             surgery_source=surgery_source,
+            supply_source=supply_source,
+            supply_horizon=data.get("input", {}).get("horizon_days") if supply_mode else None,
             bed_horizon=data.get("input", {}).get("horizon_days") if bed_mode else None,
             forecast_horizon=data.get("input", {}).get("horizon_days") if spec.number == 62 else None,
             instructions_digest=hashlib.sha256(payload.get("instructions", "").encode()).hexdigest(),

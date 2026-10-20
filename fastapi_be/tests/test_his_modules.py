@@ -312,28 +312,45 @@ class TestCssdPivas:
 class TestIcuScorePathway:
     async def test_gcs_scoring(self, async_client, seed_data, auth_headers):
         headers = auth_headers(seed_data["nurse_user"].username)
-        r = await async_client.post("/api/icuScore/create", headers=headers, json={
-            "patient_id": seed_data["patient"].patient_id, "score_type": "gcs", "scene": "icu",
-            "detail": {"eye": 3, "verbal": 4, "motor": 5},
-        })
+        r = await async_client.post(
+            "/api/icuScore/create",
+            headers=headers,
+            json={
+                "patient_id": seed_data["patient"].patient_id,
+                "score_type": "gcs",
+                "scene": "icu",
+                "detail": {"eye": 3, "verbal": 4, "motor": 5},
+            },
+        )
         assert r.json()["code"] == 200
         assert r.json()["data"]["total_score"] == 12
         assert "人工分项合计12分" in r.json()["data"]["interpretation"]
         assert "中度" not in r.json()["data"]["interpretation"], "人工总分不自动推断诊断或预后"
 
         # 越界拒绝
-        r = await async_client.post("/api/icuScore/create", headers=headers, json={
-            "patient_id": seed_data["patient"].patient_id, "score_type": "gcs",
-            "detail": {"eye": 5, "verbal": 4, "motor": 5},
-        })
+        r = await async_client.post(
+            "/api/icuScore/create",
+            headers=headers,
+            json={
+                "patient_id": seed_data["patient"].patient_id,
+                "score_type": "gcs",
+                "detail": {"eye": 5, "verbal": 4, "motor": 5},
+            },
+        )
         assert r.json()["code"] == 400
 
     async def test_aldrete_pacu_discharge_criteria(self, async_client, seed_data, auth_headers):
         headers = auth_headers("doc01")
-        r = await async_client.post("/api/icuScore/create", headers=headers, json={
-            "patient_id": seed_data["patient"].patient_id, "score_type": "aldrete", "scene": "pacu",
-            "detail": {"activity_score": 2, "respiration_score": 2, "circulation_score": 2, "consciousness_score": 2, "color_score": 1},
-        })
+        r = await async_client.post(
+            "/api/icuScore/create",
+            headers=headers,
+            json={
+                "patient_id": seed_data["patient"].patient_id,
+                "score_type": "aldrete",
+                "scene": "pacu",
+                "detail": {"activity_score": 2, "respiration_score": 2, "circulation_score": 2, "consciousness_score": 2, "color_score": 1},
+            },
+        )
         assert r.json()["data"]["total_score"] == 9
         assert "1970" in r.json()["data"]["interpretation"]
         assert "不自动认定" in r.json()["data"]["interpretation"]

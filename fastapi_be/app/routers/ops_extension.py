@@ -240,7 +240,9 @@ def _score_ser(s: IcuScoreRecord) -> dict:
         "admission_id": s.admission_id or None,
         "admission_linkage": "recorded_not_independently_verified" if s.admission_id else "not_recorded",
         "score_type": s.score_type,
-        "score_type_text": definition.label if definition and not legacy else {"apache2": "APACHE II", "sofa": "SOFA", "gcs": "GCS", "aldrete": "Aldrete", "steward": "Steward"}.get(s.score_type, s.score_type),
+        "score_type_text": definition.label
+        if definition and not legacy
+        else {"apache2": "APACHE II", "sofa": "SOFA", "gcs": "GCS", "aldrete": "Aldrete", "steward": "Steward"}.get(s.score_type, s.score_type),
         "score_definition": definition.edition if definition and not legacy else "legacy_unverified",
         "scene": s.scene,
         "total_score": s.total_score,

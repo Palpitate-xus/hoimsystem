@@ -1,0 +1,1012 @@
+{
+  "schema_version": "ai_surgery_engineering_verification_v1",
+  "recorded_at_utc": "2026-10-20T23:58:07.016311+00:00",
+  "baseline_commit": "b6d9737ef1c661f40dd13d25afdd57602c0942ae",
+  "platform_commit_at_recording": "3a96560a51ce59240c024bdde2af3dbb7002aa68",
+  "recording_head_precedes_this_evidence_documentation_commit": true,
+  "goal_status": "active",
+  "scope": "Feature65: complete explicitly selected surgery case cohort, finite declared stage/resource choices and two exact bounded optimization objectives; governed originals, technical Super publication, professional source attestation, independent native service and complete frozen audit. Synthetic engineering evidence only.",
+  "real_patient_data_used": false,
+  "existing_hospital_database_accessed": false,
+  "existing_hospital_backend_contacted": false,
+  "production_deployment_performed": false,
+  "clinical_validation_performed": false,
+  "operational_validation_performed": false,
+  "stored_business_ai_configuration_changed": false,
+  "remote_model_inference_performed": false,
+  "version_management": {
+    "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+    "commits_this_batch_before_evidence_commit": [
+      {
+        "commit": "380c7aa3e880fafdf366feccb0d98c4f25abb8b5",
+        "subject": "feat(ai): define strict surgery scheduling facts and proof contract",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "f427aafe56937a01142b068e2baa378903c27ab0",
+        "subject": "feat(ai): add stable surgery resources and governed source storage",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "983e9490a1c2133686626499cb01d4837da72120",
+        "subject": "feat(ai-surgery): bind complete scenarios and isolate native public payloads",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "a2c2dd5c0ee882316ce25f33eee9405ab3897921",
+        "subject": "test(ai-surgery): define independent typed tiny-domain optimization oracle",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "a0230e59efa6a49743b421a53fade8768fce4dbe",
+        "subject": "test(ai-surgery): compare actual checker against all independent tiny leaves",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "cbbccd0b1ba5e7ccd4b7319644748243e9cd5e19",
+        "subject": "feat(ai-surgery): enforce native schema12 and public-only bounded gateway requests",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "48f5eee2b9e5ab531db54c51d09406eb7beb4b07",
+        "subject": "feat(ai-surgery): persist governed complete scenarios and lease-bound result blobs",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "a3d58bf850b27bbab4c27e9005d98bba8f23e02f",
+        "subject": "test(ai-surgery): exercise actual native gateway and reject forged complete proofs",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "d9b89025c5b6c7dd3bbc86a4b5238a36b3d897e0",
+        "subject": "feat(ai): solve declared surgery resources with exact bounded search",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "0e3421398fc391c8ba144b081857059993acd62c",
+        "subject": "feat(ai-surgery): inspect authenticated fixed optimizer capabilities without cases",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "3aa3b21ce24a9ad3c6e2588cb58afc5a09ba9c77",
+        "subject": "test(ai-surgery): prove cohort costs cursor bounds qualifications and byte limits",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "f58525bea3b0baa13fce44a1a61a7fe3e30781de",
+        "subject": "feat(ai-surgery): require explicit finite domains and reviewed planning scope",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "3c54794f799b27be47a0598b0e4c2f141400be44",
+        "subject": "feat(ai-surgery): add Super-only capability governance with saved revision checks",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "cc60c31866c2f517a2c53921f3ee87c151727ad4",
+        "subject": "fix(ai-surgery): bind every selected original to its complete member review",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "f67ac97639cac25ebf44e9fc2595f3a389e1aae9",
+        "subject": "feat(ai): govern surgical originals and privacy-safe resource busy capsules",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "b58870891731924d7fb2a1992e5da621e0429163",
+        "subject": "feat(ai): expose scoped surgical source review and immutable registry APIs",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "a51df1445afe72271936c87e7eb51137208f2445",
+        "subject": "test(ai): isolate surgical migration roundtrips from subsequent revisions",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "4292a0c1d2828109d3094a43d8d7f1a460f91cb4",
+        "subject": "fix(ai): bound surgery proof construction and charge repeated provenance",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "f282b53e3543a759d1503840e483f35ab49d9b41",
+        "subject": "test(ai): verify isolated surgery optimizer transport and packaging",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "6f9c450a7f5de93252ba5d933af566e69ecc2792",
+        "subject": "fix(ai-surgery): reject impossible planning calendars as validation errors",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "7d9325968aeac05c2d8270c239cc9dd11880b97a",
+        "subject": "feat(ai-surgery): publish dedicated declared-resource prompt and provenance rules",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "636b6ee5b5a9ca55bae6eea41b35627faf93b583",
+        "subject": "merge(ai): retain completed bed verification while developing native surgery",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "4d9356e6f100a9ccc86e2282a5d422d21e84457c",
+        "subject": "feat(ai-surgery): require explicit review of the whole natural-person partition",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "b483e5c88b9833504acb40bd48d127e6f3f8df34",
+        "subject": "feat(ai-surgery): project verified cases with private keyed identities and masked technical names",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "75a6563266c9aa4e08ade22fb5e36a989cc3b71b",
+        "subject": "feat(ai-surgery): generate closed source and provider schemas from actual models",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "09931bfd37172188a52c7088491eba2d328e71db",
+        "subject": "feat(ai-surgery): verify controlled originals and saved provider metadata",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "d0ab30e2f57aad713ebaba3e66c5319b58051212",
+        "subject": "feat(ai): require original equipment identity and capability facts",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "cf767e993cd633bfb7cd6fdce86111fb3325ae0a",
+        "subject": "feat(ai): stage complete surgery proofs with lease-bound SQL references",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "e8426449b3426e62ea85705f454714e03ae1bd37",
+        "subject": "feat(ai): govern equipment capabilities and physical maintenance dependencies",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "9530d4fd276b98b33d88ff765b45f1436a976ea5",
+        "subject": "feat(ai): expose actual clinical signer aliases for surgery originals",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "3854b9bf97acb0a1611e6dc0e495f413f52afbfc",
+        "subject": "feat(ai): expose typed safe all-location surgery resource originals",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "22b782b19cb525cd789672ee2f2ad0c7568a8e0b",
+        "subject": "fix(surgery): serialize legacy writes with the reviewed planning gate",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "0bf1727accec558f909036d8b177e58a22ac981a",
+        "subject": "feat(ai): project whole reviewed surgery resources without private identities",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "1de226d1a3ae344843432cdacacc4c750f2d9a4d",
+        "subject": "fix(surgery): reject unclosed cancellations and cancel all unstarted schedules",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "f73189b06511f3a8cf8e3ab17ea9fa90ce448669",
+        "subject": "feat(ai-surgery): bind equipment capabilities and safe operational originals",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "b84145fb5517bd18b2e00c03976eb8ad31837511",
+        "subject": "fix(ai): disable auto increment on singleton surgery write gate",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "5094623761b074e358ea52eda8b132d32f879ffe",
+        "subject": "feat(ai): capture complete authorized surgery case and resource collections",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "9931534c5801a48cfde50b46ed4e2b8c25f1dc91",
+        "subject": "fix(surgery): recheck original clinical roles after the planning gate",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "34d67a188744901cead430e138eaabbac758be5a",
+        "subject": "feat(ai): mount authorized surgery sources and read-only collection preview",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "f755e9e7cc6173db26c7b1de85915a2ca823be19",
+        "subject": "fix(ai): require explicit unknown person duty instead of exempting it",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "afc0eea67d95cb80322365436b72b341d7aa4dfa",
+        "subject": "feat(ai): freeze closed surgery captures and derive complete anonymous sources",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "7e443e497c68945992f1de758e337bbf3e8f7f5c",
+        "subject": "feat(ai): bind queued surgery scenarios and scoped frozen history",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "45c5e9c6e6bdbd345f453d85929e7eb13e8b3e33",
+        "subject": "feat(ai): govern complete surgery scenarios with current scope and audited CAS",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "d9bc9a3f40c50c2e33daad11c3abb0f52abdce29",
+        "subject": "feat(ai): bind surgery contexts and keep candidate identity resolution local",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "760654e3cfb0e254a2d58286ce0ef961dbbee1d6",
+        "subject": "test(ai): verify surgery scenario governance and current authority atomically",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "7e3bed4e0565fbb45380869b965ea953ce03f998",
+        "subject": "feat(ai): expose authorized surgery scenario lifecycle and permission inventory",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "97af5d7d7600c62b3e325cb802b7b5fe672cc2e2",
+        "subject": "test(ai): verify mounted surgery scenario APIs and private audit isolation",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "f0e5fd15e0b391016d702995d662874e41ce31a0",
+        "subject": "fix(ai): capture protected surgery witnesses through their actual stored field",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "3b89ef33848db1b14bf09dcfc2f68cb726cb5547",
+        "subject": "feat(ai): execute governed surgery tasks and atomically accept complete proofs",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "260390405a50c08887e30557db8042495f121169",
+        "subject": "feat(ai-surgery): bind complete identity directories and source governance requests",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "f3d37874bf938ac6cb425363d5d93d2fbfee64f1",
+        "subject": "feat(ai-surgery): add explicit source forms and independent registry governance",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "6954a20316a734b69505288eaac23836b81c225c",
+        "subject": "fix(ai): match surgery revocation basis bounds to stored column capacity",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "12ef9523063bc64704362179fc46aa320de8b544",
+        "subject": "fix(ai-surgery): enforce Unicode-aware revocation limits before writes",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "dbd254b9d7fa1671aa4d306f3894f4b9ec10d6c1",
+        "subject": "fix(ai): enforce surgery markers across task reads and acceptance",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "9959fd2361e20a126f84703105af8bf0404d59de",
+        "subject": "docs(ai): describe governed surgery scenarios and declared scheduling limits",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "fb08bd62c810c30c04a27f1769cd3bad5dc26e0c",
+        "subject": "test(ai): add actual surgery native browser harness and fixtures",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "65a7aca7c208b5998b2eef37b2aec7aadeff301c",
+        "subject": "fix(ui): limit dynamic menu imports to page modules",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "a6e7b222b9da176f9ecf70a85551b72654b5234f",
+        "subject": "feat(ai-surgery): verify complete scenarios and bound native task states",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "2e57c5bc1011ae23deb16aaac70454fe3ce68f9c",
+        "subject": "feat(ai-ui): verify surgery results and frozen audit traces",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "f9c59abb5de4828adc3a3cdfe3c4e3e1784ee486",
+        "subject": "feat(ai-surgery): bind protected mapping identities to complete real directories",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "fb79b36b39922ab8ae2739218356338a0a17693a",
+        "subject": "test(ai): fill complete surgery scenario through actual typed controls",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "b128cdae48364d929311754dc8a23ad8700bd71d",
+        "subject": "feat(ai-surgery): record protected busy sources from actual schedule rows",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "e978d722e495c454e05f4ef54c28c3f871209e53",
+        "subject": "feat(ai-surgery): capture complete reviewed scenario domains with explicit forms",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "64643da8ad527f39da73e3a711a2a01441228dc2",
+        "subject": "test(ai-surgery): cover actual protected mappings and stale identity boundaries",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "68ff9ebb2941a7307279c84c65a71e69a02d47b9",
+        "subject": "feat(ai-ui): bind surgery tasks to reviewed scenarios and explicit case cohorts",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "2edd993a80ab82f4cfec1ee9626040c409e7bcfd",
+        "subject": "feat(ai-ui): expose surgery governance and source-bound business actions",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "752e3b126496df79264fced80c338487e187d856",
+        "subject": "test(ai): cover native surgery task status and scope boundaries",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "b24541ce84e7a70c6007e6ddb8dfb1bb57496e62",
+        "subject": "test(ai): verify surgery scenario governance and capture races",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "3a96560a51ce59240c024bdde2af3dbb7002aa68",
+        "subject": "test(ai): exercise built surgery business and governance entry points",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      }
+    ]
+  },
+  "implementation": {
+    "catalog_version": "2026.10.20.12",
+    "feature_count": 80,
+    "distinct_default_prompts": 80,
+    "source_reference_count": 36,
+    "native_schema_version": "12",
+    "model_prefix": "surgery:",
+    "rule_id": "surgery_declared_stage_resources_v1",
+    "core_freeze_commit": "d0ab30e",
+    "recipe_digest": "542d7170ebdaf797d772ca812895ca15df12bd66d974814d30eb1e16ba8a00d2",
+    "input_policy_digest": "3b156e4c8f33e9b77459465d4e0e0c677a5f9b8df43816718c30fb12cf1364c0",
+    "source_kinds": [
+      "case_requirements",
+      "duration_observation",
+      "case_duration_estimate",
+      "operating_room_identity_capability",
+      "person_identity_qualification",
+      "resource_availability_busy",
+      "resource_occupation_policy",
+      "equipment_identity_capability"
+    ],
+    "explicit_finite_scope": {
+      "cases": 256,
+      "rooms": 64,
+      "people": 512,
+      "equipment_instances": 512,
+      "facts": 8192,
+      "period_days": [
+        1,
+        31
+      ],
+      "lookahead_days": 366,
+      "json_bytes": 8388608,
+      "operations": 20000000,
+      "nodes": 20000,
+      "frontier_per_graph": 4096
+    },
+    "objectives": [
+      "all_required_then_min_declared_cost",
+      "max_optional_scheduled_then_min_declared_cost"
+    ],
+    "duration_scope": "Explicit reviewed_case_estimate with declared point/upper/unknown only; no trained historical duration estimator or clinical duration guarantee.",
+    "independent_patients_and_resources": "Selected patient segments are independent from rooms, concrete people/roles and concrete equipment slots. Shared people across roles and shared devices across quantity slots conflict.",
+    "qualification_and_scope": "No inferred physical identity, duty, qualification, availability or coverage from names, titles, Doctor aliases, assistant text, legacy room strings or current equipment status. Empty role requirements remain unknown.",
+    "search_scope": "Conservative and optimistic graphs preserve unknowns, exact bounds, stopping reasons and proof status. Nonmonotone adjacent transitions/costs are not pruned as if monotone. Unknown busy facts relax affected optimistic adjacency costs and gaps together.",
+    "professional_and_super_governance": "Actual current professional attestation is separate from technical Super approval. Published roots/scenarios do not enable the feature or establish operational validation.",
+    "outbound": "Complete typed public Source plus full Prompt provenance only; private identity mappings, free questions and original notes stay local. No automatic booking, schedule publication, surgery start, stock, billing or clinical-state writes.",
+    "storage": "Short canonical task/evidence/context anchors fit existing TEXT fields; full private scenario and accepted result use separate bounded MEDIUMTEXT. Current lease, original bindings, result pointer, success state and audit accept atomically.",
+    "live_checks": "Queue, pre-inference, acceptance, post-write checks, ordinary history and feedback recheck actual original permissions/collections/configuration. Native markers are checked independently of a mutable feature discriminator; Super may inspect own-byte-consistent frozen audit.",
+    "known_scope_gap": "v1 has no curated external-patient-busy original. Relevant legacy selected-patient schedules produce legacy_patient_busy_not_curated/input_unknown; they are not silently treated as complete reviewed reservations.",
+    "guide": "doc/ai-guide.md#明确病例与阶段资源的手术候选排程第65项"
+  },
+  "backend_regression": {
+    "passed": 6670,
+    "skipped": 28,
+    "warnings": 2,
+    "pytest_seconds": 1330.53,
+    "outer_seconds": 1342.397,
+    "baseline_passed": 5786,
+    "net_additional_default_passes": 884,
+    "source_file_count": 743,
+    "evidence": {
+      "path": "/tmp/hoim-surgery-full-frozen-pytest-execution.json",
+      "bytes": 2198,
+      "sha256": "a539c046fe79745e6f71088aadedd6dea37574621ff926b845049d8454623c03"
+    },
+    "source_freeze": {
+      "path": "/tmp/hoim-surgery-backend-frozen-source-freeze.json",
+      "bytes": 120687,
+      "sha256": "c51e65dce5895b6dabc4d6370bcee484a15bdf74e979360fc4ffd49cfb0a13f9"
+    }
+  },
+  "python_static_checks": {
+    "files": 61,
+    "ruff_and_complete_format_passed": true,
+    "evidence": {
+      "path": "/tmp/hoim-surgery-backend-frozen-ruff-execution.json",
+      "bytes": 14003,
+      "sha256": "344dba05f577c62184dbd0b15b029aaf189ca74478e75c43c1c630089b9709cf"
+    }
+  },
+  "native_core": {
+    "contract": {
+      "path": "/tmp/hoim-surgery-core-public-eight-kind-contract.json",
+      "bytes": 118168,
+      "sha256": "902610a0c78dc85cbcddece97ee6a53fb7e66e68fbacc4749729a86c1bf8c2db"
+    },
+    "independent_oracle": {
+      "path": "/tmp/hoim-surgery-independent-native-eight-kind-summary.json",
+      "bytes": 6442,
+      "sha256": "9f5e5197499a6b79fabf265a8795cb48ab68ca652bc0c687f8c5ed6721a09c16"
+    },
+    "independent_distinct_tests": 135,
+    "independent_breakdown": {
+      "oracle_cases": 11,
+      "compute_checks": 58,
+      "budget_checks": 64,
+      "capacity_checks": 2
+    },
+    "independent_seconds": 13.92,
+    "internal_oracle_leaves_not_extra_tests": 588,
+    "actual_container": {
+      "path": "/tmp/hoim-surgery-container-eight-kind-final-verification.json",
+      "bytes": 62509,
+      "sha256": "b8bcb862bedef918db6a6b5a469cf8a9dc172f858e59a45aa5023e96236d91ee",
+      "selected_recorded_fields": {
+        "all_checks_passed": true,
+        "seconds": 74.44,
+        "http_response_count": 40,
+        "http_task_response_count": 36,
+        "successful_native_task_count": 25,
+        "synthetic_math_case_count": 24,
+        "actual_cgroup_512m_peak_bytes": 199110656,
+        "source_hashes_unchanged": true,
+        "helper_hashes_unchanged": true,
+        "cleanup_verified": true
+      }
+    },
+    "container_scope": "Actual authenticated HTTP with 24 distinct math cases plus one Prompt change; 1 CPU/512MiB, network none, read-only, non-root UID10001, no host ports/source mounts/hospital database. Host/container environment identities recorded separately.",
+    "limits": "256 required cases execute; amplified 8192 references/8192 segments rejects early without OOM and service remains ready. Standalone core tests and independent oracle are separate targeted evidence, not added to 6670 backend count."
+  },
+  "database": {
+    "migrations": [
+      "20261020_surgery_sources",
+      "20261020_surgery_scenarios"
+    ],
+    "new_tables": 10,
+    "new_utc6_columns": 21,
+    "new_mediumtext_columns": 16,
+    "migration_sql": {
+      "path": "/tmp/hoim-surgery-full-migration-mysql-final-verification.json",
+      "bytes": 18292,
+      "sha256": "34574c2012084bb58391a452c6bda22581914cd57a252aa5966238de51e9b438",
+      "selected_recorded_fields": {
+        "all_checks_passed": true,
+        "seconds": 22.903,
+        "old_table_count": 185,
+        "new_table_count": 10,
+        "all_ten_tables_populated_before_downgrade": {
+          "hoimsystem_ai_surgery_person_account": 1,
+          "hoimsystem_ai_surgery_pool": 2,
+          "hoimsystem_ai_surgery_pool_membership": 4,
+          "hoimsystem_ai_surgery_protected_witness": 1,
+          "hoimsystem_ai_surgery_resource": 3,
+          "hoimsystem_ai_surgery_room_alias": 1,
+          "hoimsystem_ai_surgery_run_result": 1,
+          "hoimsystem_ai_surgery_scenario": 1,
+          "hoimsystem_ai_surgery_source": 13,
+          "hoimsystem_ai_surgery_write_gate": 1
+        },
+        "up_old_ddl_rows_unchanged": true,
+        "down_old_ddl_rows_unchanged": true,
+        "second_up_old_ddl_rows_unchanged": true,
+        "sql_unicode_blob_capacity": {
+          "scope": "database capacity and exact bytes only; no runtime worker/result-schema acceptance claim",
+          "utf8_bytes": 444114,
+          "sha256": "f5126716dae07da567b100d819ea74d272926ba02cc21f3f80d8a1861b6d063c"
+        },
+        "actual_revoke_boundaries": [
+          {
+            "characters": 1000,
+            "utf8_bytes": 1000,
+            "sql_exact_roundtrip": true
+          },
+          {
+            "characters": 1000,
+            "utf8_bytes": 4000,
+            "sql_exact_roundtrip": true
+          }
+        ],
+        "source_hashes_stable": true,
+        "cleanup_verified": true
+      }
+    },
+    "migration_scope": "Real isolated MySQL8.0.39 up/down/up of both exact migrations and all ten populated new tables, 185 existing metadata tables and full original DDL/rows preserved. Unicode capacity SQL blob is storage-only, not a typed native pipeline.",
+    "legacy_gate": {
+      "path": "/tmp/hoim-surgery-legacy-gate-mysql-final-verification.json",
+      "bytes": 4610,
+      "sha256": "89d8875331391d69f286c7c026d8e530725721d5fcee9653311fbf31105ca319",
+      "selected_recorded_fields": {
+        "all_checks_passed": true,
+        "seconds": 13.244,
+        "actual_distinct_mysql_connection_ids": [
+          9,
+          10
+        ],
+        "transaction_isolation": "REPEATABLE-READ",
+        "rr_old_snapshot_cannot_resurrect_cancelled_parent": true,
+        "actual_role_revocation_during_observed_mysql_gate_lock_wait": {
+          "rejected_status": 403,
+          "cached_actor_was_original_doctor": true,
+          "innodb_trx_lock_wait_observed": true,
+          "waiting_connection_id": 11
+        },
+        "all_three_unstarted_children_cancelled_without_fabricated_clocks": true,
+        "source_hashes_unchanged": true,
+        "cleanup_verified": true
+      }
+    },
+    "legacy_scope": "Actual three MySQL connections and real legacy controller calls verify Gate-first lock waits, cancelled-parent protection under old repeatable-read snapshots, role revocation and child cancellations. This is not a JWT/native-worker/full-MySQL pipeline claim.",
+    "isolation": "Network none, private Unix socket, no host ports, no project .env or hospital database. One optional bind attempt is explicitly blocked before I/O in recorded guards; no claim of zero attempted socket binds. Temporary resources cleaned."
+  },
+  "actual_governance_worker_pipeline": {
+    "evidence": {
+      "path": "/tmp/hoim-surgery-pipeline-final-verification.json",
+      "bytes": 60810,
+      "sha256": "8efd5bc6e303ad65ca41efc07c95da645d302a149a7f5aedeb1439ee40b6f61e"
+    },
+    "targeted_tests": 258,
+    "includes_actual_new_pipeline_tests": 44,
+    "seconds": 286.68,
+    "scope": "Actual synthetic governed SQLite originals/scenarios, JWT/ASGI routes, persistent claims, independent native ASGI, complete results, errors/cancellation/permission/source invalidation and SQL/audit rollback. Includes selected prior regressions; not added to full backend count or called MySQL deployment.",
+    "all_status_packet": {
+      "path": "/tmp/hoim-surgery-actual-all-status-full-live-fixtures.json",
+      "bytes": 1951614,
+      "sha256": "a32a6611cef53b18d4739000caef429d5cf78ce0546653a0d2f5ddcc7f2e035c"
+    },
+    "unknown_packet": {
+      "path": "/tmp/hoim-surgery-pipeline-ui-unknown-final-fixture.json",
+      "bytes": 711685,
+      "sha256": "a30db46438d5a3f547e150cead355c269db3b28f8d1f0bffe9310fe4f062a852"
+    }
+  },
+  "frontend_build": {
+    "command": "npm run verify",
+    "exit_code": 0,
+    "audit_vulnerabilities": 0,
+    "elapsed_seconds": 35.219,
+    "source_inputs": 436,
+    "javascript_bytes": 5935906,
+    "all_assets_bytes": 6155342,
+    "largest_javascript_bytes": 647564,
+    "asset_files": 241,
+    "unchanged_budgets": {
+      "javascript": 6000000,
+      "all_assets": 7000000,
+      "largest_javascript": 700000
+    },
+    "dependency_and_browser_targets_unchanged": true,
+    "resolver_preload_used": false,
+    "existing_scss_warnings": 5,
+    "evidence": {
+      "path": "/tmp/hoim-surgery-npm-frozen-final-verify-execution.json",
+      "bytes": 1107,
+      "sha256": "93f6ac98b41970ee30fc4ae2f6a8d16d7490ccfafc6e57aaafd9fae9b8ead105"
+    },
+    "production_input_freeze": {
+      "path": "/tmp/hoim-surgery-frontend-frozen-production-source-freeze.json",
+      "bytes": 71854,
+      "sha256": "d81b828a5794f3b00942d68b7edab36970b7713721bb541319b4b033d7b8a284"
+    },
+    "route_change": "Constrain actual dynamic route context to views; preserve Layout/EmptyLayout/nested metadata/404 behavior, tested against actual resolver inputs and real static routes. Whole-src dynamic context previously bundled APIs/components/JSON unnecessarily; no claim of controlled byte savings across concurrently changing builds."
+  },
+  "frontend_browser": {
+    "total": 890,
+    "baseline_total": 743,
+    "new_distinct_cases": 147,
+    "test_files": 77,
+    "categories": {
+      "isolated_mock": 697,
+      "production_mock": 172,
+      "real_synthetic_http": 21
+    },
+    "workers": 1,
+    "retries": 0,
+    "flaky": 0,
+    "skipped": 0,
+    "all_passed_in_one_full_run": true,
+    "elapsed_seconds": 2687.581,
+    "actual_test_duration_ms": 2679618.0100000002,
+    "source_inputs": 692,
+    "production_assets": 241,
+    "source_and_assets_unchanged": true,
+    "evidence": {
+      "path": "/tmp/hoim-surgery-browser-frozen-final2-execution.json",
+      "bytes": 658198,
+      "sha256": "45e26699bca8db7b51b3824d23d7f85d776afc9f8f37a18a0afdba2ef68fc55f"
+    },
+    "classifier": {
+      "path": "/tmp/hoim-surgery-browser-final2-category-counts.json",
+      "bytes": 482177,
+      "sha256": "9b8004ba773adf43bbbb378a61e6c2ba58aea0e446acb10669cea6a1e46103b7"
+    },
+    "source_freeze": {
+      "path": "/tmp/hoim-surgery-frontend-frozen-final2-source-freeze.json",
+      "bytes": 114883,
+      "sha256": "dc687f7ed7c1246f94aebfd65f2b07c2368139e4e5a63573a37aa8f3efe891c5"
+    },
+    "scope": "Production pages and isolated parent/component harnesses intercept synthetic API replies. Only request-real-http.spec.js performs the existing actual synthetic loopback transport tests. Backend native worker/ASGI, containers, MySQL and independent oracles are separate evidence, not counted as browser model inference or clinical/operational validation.",
+    "owned_static_server": {
+      "origin": "http://127.0.0.1:46335",
+      "served_directory": "/tmp/hoim-surgery-native-20261020/vue3-new-ui/dist",
+      "has_backend_or_proxy": false,
+      "api_requests_reaching_static_server": [],
+      "socket_closed": true,
+      "thread_stopped": true
+    }
+  },
+  "targeted_frontend_evidence_not_added_again": {
+    "source_protected": {
+      "path": "/tmp/hoim-surgery-source-protected-ui-final-verification.json",
+      "bytes": 10873,
+      "sha256": "a6730738da27feb5442872e8ce7735f05cc6c052f80e41820dfe61c9ecde3288"
+    },
+    "native_and_production": {
+      "path": "/tmp/hoim-surgery-native-ui-final-verification.json",
+      "bytes": 51063,
+      "sha256": "3ca374bfca5202a76c541dfad0a2da668d6315e39655a53565f94b4317fcfec4"
+    },
+    "readonly_source_integration": {
+      "path": "/tmp/hoim-surgery-frontend-readonly-integration-review.json",
+      "bytes": 5308,
+      "sha256": "6d2ab113431f65ce02deb742a22bfc25b76d635410550bb202d344d6eba29294"
+    },
+    "readonly_selection_review": {
+      "path": "/tmp/hoim-surgery-ui-readonly-scope-review-fixed.json",
+      "bytes": 3554,
+      "sha256": "1bce0b7cc7baa9402120c5119aee8bf15a83c3c761278ebc46198fe3f4adc7ce"
+    },
+    "legacy_parent_regressions": {
+      "path": "/tmp/hoim-surgery-legacy-parent-regressions-first-verification.json",
+      "bytes": 827,
+      "sha256": "4b16db735d5186c3931fbc20cd62b16908129a274cbc9e06cec56230f1359b64"
+    },
+    "legacy_parent_regression_count": 66,
+    "legacy_parent_scope": "Three prior Node-driven isolated Vue parent suites, not production UI or browser full-run additions. Source was not frozen at their start; this limit remains recorded."
+  },
+  "node_tools": {
+    "passed": 44,
+    "failed": 0,
+    "includes_route_cases": 14,
+    "milliseconds": 375.931788,
+    "log": {
+      "path": "/tmp/hoim-surgery-node-tools-final-tests.log",
+      "bytes": 4134,
+      "sha256": "d7f830d4c80e97cf9f0c4f0a3876bc59e6f43277902e9fd368420bbc2757bba3"
+    },
+    "route_log": {
+      "path": "/tmp/hoim-surgery-handle-routes-final-tests.log",
+      "bytes": 1236,
+      "sha256": "ca11c3f8b3dfa761e5aecc09082868a75b6270347b928f016123c1f9dc98cecc"
+    },
+    "scope": "Actual existing Node tooling and dynamic-route resolver; 14 route cases are already inside 44."
+  },
+  "platform_inventory": {
+    "evidence": {
+      "path": "/tmp/hoim-surgery-platform-final-inventory.json",
+      "bytes": 156930,
+      "sha256": "7be866e49947b346a17701cf15abbdfd55a8d10ce5563f72500b8e38855d499f"
+    },
+    "business_routes": 787,
+    "all_api_routes_including_original_root": 788,
+    "router_modules": 106,
+    "orm_metadata_tables": 195,
+    "vue_views": 160,
+    "new_actual_role_guard_closures": 19,
+    "implementation_test_fixture_file_count": 126,
+    "implementation_sha256": {
+      "fastapi_be/Dockerfile.surgery": "2b950d7abf75d83b2a277a4f070604554f0d724fe036ff3ad4e4986162df333f",
+      "fastapi_be/alembic/versions/20261020_surgery_scenarios.py": "0d08bd368ce9243a098dd8b5396cbc150af15a53268b99d43e8b089e0a053fc4",
+      "fastapi_be/alembic/versions/20261020_surgery_sources.py": "8e9c6bec07478d7e63239d84a6bfe335631effe1893314b2ce4d8f6df58ed308",
+      "fastapi_be/app/ai/catalog.py": "38a0b2bbbb72c5e821be66925c63e3e0aa118402ff4dcaf6b6a2c4d3627d82bb",
+      "fastapi_be/app/ai/context.py": "d3d11090a280b0ad9a78037bbf4119800def6485ab0e68b1777276ec9b31a0dd",
+      "fastapi_be/app/ai/gateway.py": "95c156965ad724187ebac50d3b2df1d7b7065808a598613b18f948de043a23c2",
+      "fastapi_be/app/ai/governance.py": "64bde31add62493d9baa8c2f35bac71ef6f2e271c3f1dffd4111b8406dad9293",
+      "fastapi_be/app/ai/operational_sources.py": "b8c7ea7108a20af3561bb67fd762cf0004ec610c5b8c0c76eb0b66493961c3f2",
+      "fastapi_be/app/ai/references.py": "3c335857223232895d49631f73d948872c45af26aade8584607f01da9920feb0",
+      "fastapi_be/app/ai/runtime.py": "12ccc8567ef07fd0214a6b8b5d937600c0c9be69d8621c2fcd9ef13d017facef",
+      "fastapi_be/app/ai/schemas.py": "88d664d29446098063abac666240c5d2fed25c5e08048e32d9bdc666cc1d98a8",
+      "fastapi_be/app/ai/surgery_collection.py": "8db80e43695354be5dcbf36b710755a9b2d130c414f6d2b3fe7ed25a81b63a64",
+      "fastapi_be/app/ai/surgery_config.py": "f68f166ba6b2f85e5ac28601973b08ebdfe351962a94df5fca9ba9c5bc6a52fb",
+      "fastapi_be/app/ai/surgery_context.py": "d98a486953391d5b8415b28bb2e03a6f67f4dd780c65d1386ce596fbf5f24759",
+      "fastapi_be/app/ai/surgery_contract.py": "077ab81eb8c8265ad54f13f05212142f3e6e34f71cc09b6fe8eba213994b2f34",
+      "fastapi_be/app/ai/surgery_facts.py": "fe0140e373472902c695756e35dfb1f3776a4ce5e34ae5cb1e7daac9680f194c",
+      "fastapi_be/app/ai/surgery_history.py": "8ecf74891d8d327e606b9a03d54f8e90bfe170b97b220c74a895675002742cec",
+      "fastapi_be/app/ai/surgery_model.py": "bf5e177ff668bcdac481b6ea229da6558fc920b391954b424842457e9331c640",
+      "fastapi_be/app/ai/surgery_models.py": "25d7c806d0a3cd5230d4b321a28ad5c77645deb7614b677168dd63f9980cf86f",
+      "fastapi_be/app/ai/surgery_probe.py": "d96a0d7ecd9badb8bc715bc1c00d80e62802a6577969be2faafc5ba273d52a3a",
+      "fastapi_be/app/ai/surgery_projection.py": "aba470fbc0c8641b3281a79c9f746936d811651e01acd7f764f6c438ea2b95e6",
+      "fastapi_be/app/ai/surgery_protocol.py": "7213e3eff7442953ec6e52cba465f218fd3bbc6cbc3b2dafbb8be525e079054c",
+      "fastapi_be/app/ai/surgery_scenario_input.py": "17c54a630e71610ab7d73acb50bdaf98d38b666b3bb3c0348cea003b378e8c15",
+      "fastapi_be/app/ai/surgery_scenario_models.py": "66d9a6e55f0fc070fa5db637ec32ddc4c08163c30dd123bc29489260ec2b4f30",
+      "fastapi_be/app/ai/surgery_scenarios.py": "14d27fcdd5b9fef72e2535b9c6fb82ac36a94d698cf940337c31f978646e5b9e",
+      "fastapi_be/app/ai/surgery_server.py": "def23f2a87ea1aa13ad7fde65effc8fe195f809e74242e5b3b4831af4c9abcb1",
+      "fastapi_be/app/ai/surgery_snapshot.py": "efd3a5c4188f1b65e1fc61aceab60584b7ef1718e648ea3708cf4c399c1832e3",
+      "fastapi_be/app/ai/surgery_storage.py": "41ede14acddd61d96068a3f05366705515aade6e78d3249a70a1aa85a55c6f1c",
+      "fastapi_be/app/ai/surgery_write_guard.py": "ac7d16b48f9b863640a7859c25ed6ef88ed68975be7dcc3c7169c7ba0ce58d36",
+      "fastapi_be/app/main.py": "6009d1d1cfd1f1a07025de6a93d6ceef021e4408fbfbf624aab7eb2faf80c6a3",
+      "fastapi_be/app/models.py": "5380c76fe4656f64c2880b12b72c8076c9d441f5914f9ca192f1b9e67bee0972",
+      "fastapi_be/app/routers/ai.py": "03dd987c5a58e97aef92415979bb593aab7ba7f99b8c72a74c3a62d187a0350b",
+      "fastapi_be/app/routers/ai_admin.py": "5e4a4b91d6093e3519b587bc7053bf034b7f949b104aeeaaf99d4be75ed0d497",
+      "fastapi_be/app/routers/ai_surgery_scenarios.py": "72b3a6bf13b67788adccb55eac2b861ad611bb84e529d4e8bf98ae98f49d28e2",
+      "fastapi_be/app/routers/ai_surgery_sources.py": "60064834c4798bb86e481dbe7e2a519c683ff17930063ed3133e6347abab81f0",
+      "fastapi_be/app/routers/surgery.py": "21309951f8cb191ae4ca3ecd27ad2ffcb9d4967564e9b4ed83fe532a4a091c10",
+      "fastapi_be/requirements-surgery.txt": "c3c24102be50c9ab49f38248029332e2e270ea21c8fab1afe34a4508c7487f62",
+      "fastapi_be/tests/surgery_independent_oracle.py": "67efefad9afd8639de963812522bdaff84184ff95e23600df33dd5defd7cca4a",
+      "fastapi_be/tests/test_ai_surgery_admin.py": "3cc27cfc37873976ecd986cce272b582115ca958f62dcf7544e7f6a1d4704509",
+      "fastapi_be/tests/test_ai_surgery_capacity.py": "7e4762b99c31d646d0cdf2fefcb207c2a90ab8e3928354c3433fbc8570c9d358",
+      "fastapi_be/tests/test_ai_surgery_collection.py": "0b795a7211c2eb45e5fa1ebcab06beaa7859038602d82a9c6321e889d877062c",
+      "fastapi_be/tests/test_ai_surgery_context.py": "60fc3e62d1d7ec5cd1a86faad85ec819b8f933d369b98655a67f8625d0460710",
+      "fastapi_be/tests/test_ai_surgery_context_sql.py": "13b5f3ee6f2d127f81316fd57ea3b2a3489a8b28b5e2cbe86a6690a1af3cc6d6",
+      "fastapi_be/tests/test_ai_surgery_contract.py": "bbb7bafbaa660ce532f80ce16b875885dbf48cbfe5dd0a237e837db33c8086f7",
+      "fastapi_be/tests/test_ai_surgery_facts.py": "bbe5f50ddc302eb719477ca26737d978af05ac4fd75adf336aa9614f4c823a81",
+      "fastapi_be/tests/test_ai_surgery_gateway.py": "4039d31bce1baa07cdc7e690a4a05de1dc2f9bc089d3a8ac796f69e792a9081b",
+      "fastapi_be/tests/test_ai_surgery_history.py": "0fcf232d485ab911f4ccbccced6713e81e33da06bfaa42ac8350a95ed4c372a0",
+      "fastapi_be/tests/test_ai_surgery_model.py": "0f867dd9dd541c0d03ffb38b0bcd5817bc7c867d414c3b7750f7da4714ef0a50",
+      "fastapi_be/tests/test_ai_surgery_model_independent.py": "5136036d1fc99ca1fd1b3df78d0c7145b0953c3bb4cb5fee99f2ccc0b43dabb9",
+      "fastapi_be/tests/test_ai_surgery_pipeline.py": "627cb73542820e20c745caea0c830c67192df451f6fe0643c8c3b95d2f95be58",
+      "fastapi_be/tests/test_ai_surgery_probe.py": "2dd7c1b5ab591bf07808a3753aad11ce56e4fb94afbb13726b09374e647b5d92",
+      "fastapi_be/tests/test_ai_surgery_projection.py": "b5e4663fdcf81df903f114167b17f110683233650c6e4be2d2453cc6b4970c47",
+      "fastapi_be/tests/test_ai_surgery_resource_projection.py": "39631200a6aefa13fe5b3989745469eca9af870c4f37a04d707b2265166c80c7",
+      "fastapi_be/tests/test_ai_surgery_scenario_input.py": "de70e8147ac702b93ad86fc266f2f037b2c355e32fd80014787fedd2d998a149",
+      "fastapi_be/tests/test_ai_surgery_scenario_migration.py": "8a15fa85cfe708f56f3db0961ba53bb3f749a434ff631e7dcedcef75911ff9b2",
+      "fastapi_be/tests/test_ai_surgery_scenarios.py": "cb6d076a743fb89d087565af5d38591b4e5658d5813e922c656f6c2f5c7009dc",
+      "fastapi_be/tests/test_ai_surgery_scenarios_http.py": "9dcca056d8c430f702e0ac54e3b32b12bf0c8e06f54169ec84c62c527d006d64",
+      "fastapi_be/tests/test_ai_surgery_server.py": "9e195eb99e81fe548f8bf56d717315bf741f46a71e5c467a0781c51366d92b43",
+      "fastapi_be/tests/test_ai_surgery_snapshot.py": "3335f4e7bf95c50662fae15cc05e807f4891afbcae8379dc2f5ead460f50b58b",
+      "fastapi_be/tests/test_ai_surgery_source_migration.py": "cdfcd3e9b3e34c63d96f9cdc2e51b6e7fd8f004e6b77540d534670c783d92a60",
+      "fastapi_be/tests/test_ai_surgery_sources_api.py": "ecbf68700a8cec77e3072f18f6b38fb30f55197ad100f5b2ae96d958f20902d2",
+      "fastapi_be/tests/test_ai_surgery_storage.py": "31a83b8843a9d9bdf006ac11f2ea14f5ed0ec019d6c02356665b3e561e63bbd5",
+      "fastapi_be/tests/test_ai_surgery_write_guard.py": "dedb7e10a98ff628a4c54502d6f4647a15f5bb2320eb6f1f1695aa558c2ca7ef",
+      "vue3-new-ui/e2e/ai-surgery-editor.spec.js": "75082c4a324f9b24c8cf92474c9594ed322006ad13a9b7dd02394af990f99598",
+      "vue3-new-ui/e2e/ai-surgery-native-boundaries.spec.js": "06af391fdf43cf42aed5668af42559e041c0fe400292780f4597b7d08b07203c",
+      "vue3-new-ui/e2e/ai-surgery-native-entry.spec.js": "7d42bb791773eb45de6fa32c7223920d2635c6d65c923a4ed4e32c86142295de",
+      "vue3-new-ui/e2e/ai-surgery-protected.spec.js": "4fad28e8b86eaa1aa5e9efeb6879a91184be301f66a2129025aa6f2e1afbcc60",
+      "vue3-new-ui/e2e/ai-surgery-provider.spec.js": "80415671a94b3172a216ccee86ae93c1b3afda05fd8090f338ec527017f71e3a",
+      "vue3-new-ui/e2e/ai-surgery-scenario-api.spec.js": "4175bf21512d81b7b1abf3dcadab9ff4132e443b0907e90464d2375bf84630dc",
+      "vue3-new-ui/e2e/ai-surgery-scenarios.spec.js": "6025be1fba322b948be807b5e0218752d8b5319120d6f79f381a15ef2f90f232",
+      "vue3-new-ui/e2e/ai-surgery-source-api.spec.js": "74e76e7cdf75ec383c880ffe9cda369e824d927d7aa4b4d295bb4d6f90609a43",
+      "vue3-new-ui/e2e/ai-surgery-sources.spec.js": "a93f43fc27e544cdc00bc4a734f0e14b0e05b111d75784a28ae984527d750c05",
+      "vue3-new-ui/e2e/fixtures/surgery-native-harness.cjs": "1d7167c53f1db3255f5dc114d8c48ac750296fab2681f1c76269d373846bb5de",
+      "vue3-new-ui/e2e/fixtures/surgery-native-ui.cjs": "3a0c2c700b47eb1c6b0831d07e4158ea0a7169db59990adf87452949a30b0f09",
+      "vue3-new-ui/e2e/fixtures/surgery-scenario-ui.cjs": "3bb35ed6e377448e6575311d656d2968c6436826f80a35202cfad3957e82bec6",
+      "vue3-new-ui/e2e/fixtures/surgery-source-harness.cjs": "2bc66759de79f06be8acc7b1b4bc826bb109ce6e1720a7a84dd2fb38350c9a7a",
+      "vue3-new-ui/e2e/fixtures/surgery-source-ui.cjs": "6fe5cdd0601a5ef9e11e081dfc8b8c5b26a216164983552cef7859e819367ee2",
+      "vue3-new-ui/e2e/fixtures/surgery-synthetic/governance.json": "bcbd848649678a5bebb38503388b6776ce34f93ca7f1eb4644f2d5b172e99ed6",
+      "vue3-new-ui/e2e/fixtures/surgery-synthetic/native-business.json": "5baffa6b916e42e35a4410a6370c7fa618bf24b20195056164e0df09f3082cf8",
+      "vue3-new-ui/e2e/fixtures/surgery-synthetic/native-pipeline.json": "37adf41c41283b90289b6c0b3a5f51f80f4ec481115bf7609d40b02ea509cb23",
+      "vue3-new-ui/e2e/fixtures/surgery-synthetic/native-transitions.json": "cef53a78fc79874bdeca653f0f8b56ae969710d367cbe214b8a0f1c08bf4a590",
+      "vue3-new-ui/e2e/fixtures/surgery-synthetic/native-unknown.json": "a5e8b65355748b3f07591a87a117f2928714741d7ed756819ee66cbb60ffefc0",
+      "vue3-new-ui/e2e/fixtures/surgery-synthetic/pipeline-live.json": "2cc431fa56fc90ab88a770a35d761d4114475a4ecefc5663d54d59bd5b919ad5",
+      "vue3-new-ui/e2e/fixtures/surgery-synthetic/pipeline-meet.json": "6b1b945b3a2dc97c30cba17a3cec87320a81459ba704813ba251e3e4bce18f02",
+      "vue3-new-ui/e2e/fixtures/surgery-synthetic/pipeline-optional.json": "a7fc58e6e56c4f506e11f2bd5bab14c89b57ecb9a93866fda327b31d5395e509",
+      "vue3-new-ui/e2e/fixtures/surgery-synthetic/pipeline-pending.json": "e5b9b4e3833ebfe43ac240b37e381bb6737ce0a1561aa499bfcae1843a84c9a4",
+      "vue3-new-ui/e2e/fixtures/surgery-synthetic/pipeline-unknown.json": "7d075e2ec2e0b67ab619daf0d4244c051d22798b4f7600a6320bdb77225af715",
+      "vue3-new-ui/e2e/fixtures/surgery-synthetic/protected-mapping.json": "4d1d2035a6071af3d7c89bb40cadfe16c89d01ecb474059b7495d119af7e0a7d",
+      "vue3-new-ui/e2e/fixtures/surgery-synthetic/provenance.json": "703e6138f4a09907a41278b9b031da083d8da6bce427a1f180c585c6d124559b",
+      "vue3-new-ui/e2e/fixtures/surgery-synthetic/providers-eight-kind.json": "0ea33fa45bd8374c40fc70514569cc507503c11dde20166c10a562b7672da0c0",
+      "vue3-new-ui/e2e/fixtures/surgery-synthetic/providers.json": "0b53ffde7c0d16e6c47ac3edcd63c8638e34b0773ca1c1a157808bd75dc41bcb",
+      "vue3-new-ui/e2e/fixtures/surgery-synthetic/scenario-form.json": "0c11a4613062841c40b0223eb5a348ea2bd639e4e8a7802e20eeda168a33ccb7",
+      "vue3-new-ui/e2e/fixtures/surgery-synthetic/scenario-provenance.json": "20cb6db4157cdf9138afcafad2ec6c264e59d1ac52b91bb3ed8c271c15622a84",
+      "vue3-new-ui/e2e/fixtures/surgery-synthetic/scenarios.json": "cb3c5716870a02d1f6a236fbea44837fa5efbc02313308291ad9123cd6e1423d",
+      "vue3-new-ui/e2e/fixtures/surgery-synthetic/sources-eight-kind.json": "8525fb2b52b464c92d8db0af8c5ba87506adca0a2a4fab11fd7ba4b452d19cd2",
+      "vue3-new-ui/e2e/fixtures/surgery-synthetic/sources.json": "af2eb94bcfbe4746a2eee3cd38132eba3d96a7c0b0c59e85c11096de5ef2d7b2",
+      "vue3-new-ui/scripts/generate-surgery-scenario-schemas.cjs": "210a223552e0623c5dcaf7013b28065eb4900b57c39837450006f7e9be3ff0dd",
+      "vue3-new-ui/scripts/generate-surgery-scenario-ui-fixtures.cjs": "9adabca567d97d44844606c058a4db6a0e1865ab432de7edb5f69253342be673",
+      "vue3-new-ui/scripts/generate-surgery-schemas.cjs": "767a0bbd0f335de64790ffe6c34252d2990a4a41c81c33b92bde75890680d44f",
+      "vue3-new-ui/scripts/generate-surgery-ui-fixtures.cjs": "0d4b33bd98371391f5b268d839d478517d1bb32e0ca04d77f951afee63379e12",
+      "vue3-new-ui/scripts/handle-routes-regression.test.cjs": "5d33e4ecee977be1efeb5f5ed7af8a2677a759aaf9054f1f4cabeb85ba8c42a6",
+      "vue3-new-ui/scripts/surgery-schema-storage.cjs": "8053102842df48b0d0c703be756e0d43eb428a94ec8cc191e0058d8181ad38a7",
+      "vue3-new-ui/src/api/ai/surgeryFixedPolicy.json": "cc9bc1402dfbd048ff4cf9f68af27bfdb73ada3ead16b8033be41f6817bdfd10",
+      "vue3-new-ui/src/api/ai/surgeryProjection.js": "fba8524a4716c3f16af2b110d85acb4d1fb31c0ed8507f3bc81fcd439175ecac",
+      "vue3-new-ui/src/api/ai/surgeryProvider.js": "a86d95b4824c2b203333f317435c022e0a90a68689e309f5e41935ac1782be95",
+      "vue3-new-ui/src/api/ai/surgeryProviderSchemas.json": "c98e4830e363dcbae387859c93323312c5cd96ff785c45a73f23795c948c405d",
+      "vue3-new-ui/src/api/ai/surgeryScenarioFields.json": "ec2cc0c4b2979f618e687c75d3f6c3400f63596ce5e2b0ac94ac4fc4ffc77c35",
+      "vue3-new-ui/src/api/ai/surgeryScenarioSchemas.json": "1efdc475f8fdd1daa927acd8f0a4230aeba41c056e7a9009319a81f1f7c0b10d",
+      "vue3-new-ui/src/api/ai/surgeryScenarios.js": "ec61854e13ead5fa3bd5b727a326b53793c2cda74a2c6a24791e182f88017b41",
+      "vue3-new-ui/src/api/ai/surgerySourceSchemas.json": "1a56e2c62eceb6e7119450331f6d384bde44ee74aced793823fe65bee0aa92c3",
+      "vue3-new-ui/src/api/ai/surgerySources.js": "3044ba20800f06b1cadf1d72e69bc8f6a02a547ce042a48362cb4de95ddc3ae0",
+      "vue3-new-ui/src/components/AIAssistant/index.vue": "3e4b344be2048e0f621dbd1192fa51148d2ee5af6aa3264c18e072c31493bff9",
+      "vue3-new-ui/src/components/AIRunHistory/index.vue": "3d09da2a6a7946a3a69dc355363543a2971c0d2c0c4bb634060d7defd93b4885",
+      "vue3-new-ui/src/components/AISurgeryFindings.vue": "ccd04b7c2931be71c279f22be2d9185866458011fb8af1429ee081fbbcee4556",
+      "vue3-new-ui/src/components/AISurgeryInput.vue": "04e24f7b6896b3c74459fd4249b4c81a0ca837ad657683c6e700ebfd4e94c4fc",
+      "vue3-new-ui/src/components/AISurgeryProviderCheck.vue": "b88852c04bade6cc732f17f274ef7dfe994f5040fe54ca80b8f6496c4960bc77",
+      "vue3-new-ui/src/components/AISurgeryScenarios.vue": "e438f9a964a8087df04f3e7f39d964ba7462e80d0384c1cbce015494c6b9a701",
+      "vue3-new-ui/src/components/AISurgerySources.vue": "7df488895d9db881ef5d995fd9f8147884792da8b16b9b5b5ce510fee5971774",
+      "vue3-new-ui/src/components/AISurgerySources/ProtectedEditor.vue": "2d6f9a670a31525bbbb581f4cf28b11a4b4e64c83a4127633bb0b80b84aa8425",
+      "vue3-new-ui/src/components/AISurgerySources/ProtectedMapping.vue": "2a13edfb420a745b2ecf31d723c9f8622785e8483d9be6d0f4f3c0b4a058dd33",
+      "vue3-new-ui/src/components/AISurgerySources/RegistryManager.vue": "295b899e6029e6c88ba56daf0fdcd21272147c5c86268893aa9fbb09b62490e0",
+      "vue3-new-ui/src/components/AISurgerySources/SourceEditor.vue": "93eca8786e4259e0071a4a50a74b5b10945f1fc7860650a3e047979fac4a8a76",
+      "vue3-new-ui/src/components/AISurgerySources/SurgeryFields.vue": "d0a03109009bad98434bfd611885f831c15e704ea01582eec314d6d64e71e66b",
+      "vue3-new-ui/src/utils/handleRoutes.js": "1e118cd0ecc84396db6648ba0fd5a8cf767f261d039d8ef3ef77d05fb83d3292",
+      "vue3-new-ui/src/views/inpatient/surgery.vue": "7ec182a29f898ecbcf10b6a26231b7cfa76ce488bbd48393d05f2699f6a76d4b",
+      "vue3-new-ui/src/views/system/aiManagement.vue": "7c9483ba8b5d41e58ed2e80dfe26eb1af6a810767905daf4f9ea87a6fb28fe11"
+    },
+    "generated_artifacts_sha256": {
+      "doc/ai-prompts.json": "86a59ce833370a4df6cda0f7f3193abfd512a4e0bab046af9efaff24deabeef0",
+      "doc/ai-capabilities.md": "b7784a3ea4750e06ae435573c7ccaaad402c0effc927a72165c1b7bcb9e9c197",
+      "doc/api-rbac-matrix.md": "52820e8f4814ab68cf1227854221af7a1a5acc2755a20a2242999746b99cffaf",
+      "fastapi_be/rbac_matrix.json": "33ef86cf6cd82397986038b1a77febb7655bbd40fee887cc17bd90f14174b2df"
+    },
+    "validation": {
+      "route_matrix_exact_multiset_match": true,
+      "new_route_actual_role_guards_match_matrix": true,
+      "all_implementation_hashes_and_file_set_stable_during_capture": true,
+      "all_generated_artifacts_stable_during_capture": true,
+      "all_selected_implementation_and_generated_bytes_match_captured_head": true,
+      "prompt_export_exact_match": true,
+      "catalog_numbering_complete_1_to_80": true,
+      "seventeen_historical_records_unchanged": true,
+      "ten_new_tables_twenty_one_utc6_and_sixteen_mediumtext_definitions": true,
+      "database_connections": 0,
+      "dotenv_reads": 0,
+      "asgi_lifecycle_calls": 0,
+      "repo_files_modified_by_inventory": false
+    },
+    "source_capture_limit": "Test files and synthetic fixture provenance are captured by exact bytes. Inventory performs no tests and does not attest that any changed test matched an earlier run."
+  },
+  "historical_verification_records": {
+    "baseline_commit": "b6d9737ef1c661f40dd13d25afdd57602c0942ae",
+    "count": 17,
+    "all_unchanged": true,
+    "records": [
+      {
+        "path": "doc/ai-aki-verification.json",
+        "baseline_sha256": "a2f8e928266ff16d46973db731329d4e96cbfe09e519ba9f5fcbc8ab384a897c",
+        "current_sha256": "a2f8e928266ff16d46973db731329d4e96cbfe09e519ba9f5fcbc8ab384a897c",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-bed-verification.json",
+        "baseline_sha256": "a1e678f1eee4ca5da36b38260a633e354a0b76a8a0d074a53c444ae1bcc13217",
+        "current_sha256": "a1e678f1eee4ca5da36b38260a633e354a0b76a8a0d074a53c444ae1bcc13217",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-ecg-classifier-smoke.json",
+        "baseline_sha256": "838b0305249698617bc475f7158dfbfbb9e6e22e6d6e84e51974bfcfebb90c61",
+        "current_sha256": "838b0305249698617bc475f7158dfbfbb9e6e22e6d6e84e51974bfcfebb90c61",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-ecg-verification.json",
+        "baseline_sha256": "1eedfa9eb918cf6e6b1ee1f201b7413760eeec501c128f4a73401741f0427f94",
+        "current_sha256": "1eedfa9eb918cf6e6b1ee1f201b7413760eeec501c128f4a73401741f0427f94",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-forecast-verification.json",
+        "baseline_sha256": "9b5683bca58efcf7fc460410529fd5aeeed91e2646eb47be24b836cbadc20d63",
+        "current_sha256": "9b5683bca58efcf7fc460410529fd5aeeed91e2646eb47be24b836cbadc20d63",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-frontend-dependencies-verification.json",
+        "baseline_sha256": "968757f4a75e921038133b3fa9a94947ab4d5607142dce8da964f2a13d00bb1d",
+        "current_sha256": "968757f4a75e921038133b3fa9a94947ab4d5607142dce8da964f2a13d00bb1d",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-imaging-classifier-smoke.json",
+        "baseline_sha256": "b2185a31ff66c4602c10136d5b15404199f50cf7d65ea4a8be4718778c6a9e89",
+        "current_sha256": "b2185a31ff66c4602c10136d5b15404199f50cf7d65ea4a8be4718778c6a9e89",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-imaging-verification.json",
+        "baseline_sha256": "63646b181dae4f531abe233708a24f9b9cc05037ef95d57e1e6f39c7f9880148",
+        "current_sha256": "63646b181dae4f531abe233708a24f9b9cc05037ef95d57e1e6f39c7f9880148",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-laboratory-verification.json",
+        "baseline_sha256": "646103e4874b4f895424987520c7adfb6fb8afdd9eb6e2c7104ed2095b72752f",
+        "current_sha256": "646103e4874b4f895424987520c7adfb6fb8afdd9eb6e2c7104ed2095b72752f",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-news2-verification.json",
+        "baseline_sha256": "363be8c61e2f36705dccc4604631e7d0e84aaa6cc922196ed36e48e740ca6570",
+        "current_sha256": "363be8c61e2f36705dccc4604631e7d0e84aaa6cc922196ed36e48e740ca6570",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-nursing-verification.json",
+        "baseline_sha256": "a04248f9de57ddd878c1b408da1833f53651cd3535d8385d2275874a7f6f9517",
+        "current_sha256": "a04248f9de57ddd878c1b408da1833f53651cd3535d8385d2275874a7f6f9517",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-observation-verification.json",
+        "baseline_sha256": "b75ab8c7ff94704cb823be59d51539f06a16a24edf0020b0e87edfd6cf6e6bee",
+        "current_sha256": "b75ab8c7ff94704cb823be59d51539f06a16a24edf0020b0e87edfd6cf6e6bee",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-organ-support-verification.json",
+        "baseline_sha256": "175b4d4b66960f623170aded7ca7dec32f462fc34278289411c1ddda3dbc653d",
+        "current_sha256": "175b4d4b66960f623170aded7ca7dec32f462fc34278289411c1ddda3dbc653d",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-qsofa-verification.json",
+        "baseline_sha256": "d3c4cea9a657527540d3c570512a00568f92a5381c066e9a0bcf204a2e3c7ba4",
+        "current_sha256": "d3c4cea9a657527540d3c570512a00568f92a5381c066e9a0bcf204a2e3c7ba4",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-roster-verification.json",
+        "baseline_sha256": "8ec5327889f81368e24755a8122f5b5c753a84a1e9a949ec3957b35a9ba13188",
+        "current_sha256": "8ec5327889f81368e24755a8122f5b5c753a84a1e9a949ec3957b35a9ba13188",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-sofa-verification.json",
+        "baseline_sha256": "20235fe055a6995be2b40270a52f67cba778d445cd10113e7f8185dbeab0cdca",
+        "current_sha256": "20235fe055a6995be2b40270a52f67cba778d445cd10113e7f8185dbeab0cdca",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-speech-smoke.json",
+        "baseline_sha256": "41ad522da4f04e2a6d75595660ecbc2549acdcd159450aa99602b495c8e690a0",
+        "current_sha256": "41ad522da4f04e2a6d75595660ecbc2549acdcd159450aa99602b495c8e690a0",
+        "unchanged": true
+      }
+    ],
+    "all_stable_during_inventory": true
+  },
+  "preserved_attempts": {
+    "broad_default_browser_collection": {
+      "evidence": {
+        "path": "/tmp/hoim-surgery-browser-frozen-final-execution.json",
+        "bytes": 604009,
+        "sha256": "42323e7420df31fb2c1a27e80bf24fe2726926f6f11a073ab5bbc484a90e8165"
+      },
+      "collected": 980,
+      "file_count": 102,
+      "prior_ai_files": 68,
+      "new_ai_files": 9,
+      "unrelated_legacy_business_environment_files": 25,
+      "unrelated_legacy_cases": 90,
+      "exit_code": 130,
+      "passed_before_interrupt": 41,
+      "interrupted": 1,
+      "not_executed": 938,
+      "raw_report_skipped": 939,
+      "scope": "Root stopped its owned runner after detecting the overly broad default collection. 939 report skipped includes the interrupted case and unexecuted cases; 980 are collected entries, not completed executions. Fresh final2 explicitly scopes all 77 previous/new AI files and independently passes all 890 without retry."
+    },
+    "other_attempts": "Original source/protected UI, production bootstrap fixture/ARIA, route/build diagnostics, migration fixture omissions and exception-class correction, evidence-script scope assertions and all predecessor logs are retained in /tmp with targeted owner reports. They are not added to final passing counts. Product and actual operational validation status were never relaxed to obtain a pass."
+  },
+  "artifact_retention": "Raw /tmp logs/reports/fixture exports are referenced by absolute paths and SHA256; they are not permanently packaged in Git. This committed record preserves their bindings and scope, not a promise that temporary artifacts persist.",
+  "limitations": [
+    "Synthetic engineering checks do not establish clinical accuracy, prospective operational performance, historical data availability, complete patient-busy coverage, deployment readiness for a particular hospital, or all80 goal completion.",
+    "No actual hospital schema migration, service deployment, real business AI enablement or patient-data inference was performed."
+  ]
+}

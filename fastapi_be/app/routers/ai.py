@@ -248,6 +248,13 @@ def review_result(run_id: str, req: FeedbackWrite, db: Session = Depends(get_db)
     authorize_run(db, user, run)
     if run.status != "succeeded":
         raise HTTPException(409, "只能复核已成功生成的建议")
+    if run.feature_key == "sepsis_risk":
+        import json
+
+        from app.ai.sofa_storage import expand_result, is_sofa_snapshot
+
+        if is_sofa_snapshot(json.loads(run.input_json)):
+            expand_result(db, run)
     if req.outcome == "modified" and len(req.comment) < 3:
         raise HTTPException(422, "请说明修改内容")
     item = AIFeedback(run_id=run_id, reviewer_id=user.user_id, outcome=req.outcome, comment=req.comment)

@@ -33,15 +33,53 @@ def bounded_result(value):
 
 
 def run_binding(run):
-    from app.ai.sofa_context import SofaBinding
+    from app.ai.governance import digest
+    from app.ai.sofa_context import SofaBinding, selection
 
     try:
-        binding = SofaBinding.model_validate(json.loads(run.input_json)["payload"]["context"]["sofa_binding"])
+        snapshot, metadata = json.loads(run.input_json), json.loads(run.context_metadata_json)
+        payload, context = snapshot["payload"], snapshot["payload"]["context"]
+        binding = SofaBinding.model_validate(context["sofa_binding"])
         if run.feature_key != "sepsis_risk" or binding.patient_id != run.patient_id or binding.admission_id != run.encounter_ref:
             raise ValueError("SOFA任务原患者或住院不符")
+        if canonical_json(snapshot) != run.input_json or canonical_json(metadata) != run.context_metadata_json:
+            raise ValueError("SOFA冻结任务须为完整规范JSON")
+        if digest([snapshot["system_prompt"], snapshot["task_prompt"]]) != run.prompt_hash:
+            raise ValueError("SOFA原Prompt锚与冻结说明不符")
+        if digest(context) != run.context_digest or metadata["context_digest"] != run.context_digest:
+            raise ValueError("SOFA原上下文锚或元数据不符")
+        if digest({key: value for key, value in context.items() if key != "snapshot_time"}) != metadata["clinical_context_fingerprint"] or digest(payload["tools"]) != metadata["tool_fingerprint"]:
+            raise ValueError("SOFA完整冻结来源范围或工具摘要不符")
+        evidence = json.loads(run.evidence_json)
+        source_count = sum(item.get("kind") != "knowledge" for item in evidence)
+        if payload["evidence"] != evidence or type(metadata["source_count"]) is not int or metadata["source_count"] != source_count:
+            raise ValueError("SOFA独立证据列或原计数与冻结任务不符")
+        if metadata["snapshot_time"] != context["snapshot_time"] or metadata["missing_data"] != context["missing_data"]:
+            raise ValueError("SOFA原上下文缺项或快照时钟与元数据不符")
+        if selection(payload["input"]) != (binding.kind, binding.assessment_id):
+            raise ValueError("SOFA冻结输入与原件引用不符")
+        ref = "sofa_assessment_id" if binding.kind == "daily" else "sofa_change_assessment_id"
+        scope = "inpatient_sofa1_assessment" if binding.kind == "daily" else "inpatient_sofa1_change"
+        if context["scope"] != scope or context["selected_sources"] != {ref: binding.assessment_id}:
+            raise ValueError("SOFA冻结原件集合或范围不符")
+        provider = snapshot["provider_snapshot"]
+        if provider["provider_id"] != run.provider_id or provider["revision"] != run.provider_revision or provider["kind"] != "specialist" or not provider["model"].startswith("sofa1:"):
+            raise ValueError("SOFA原服务身份或冻结版本不符")
         return binding.model_dump(mode="json")
-    except (ValueError, TypeError, KeyError, AttributeError, RecursionError) as exc:
+    except (HTTPException, ValueError, TypeError, KeyError, AttributeError, RecursionError) as exc:
         raise HTTPException(409, "SOFA任务完整原件的冻结引用无效") from exc
+
+
+def is_sofa_snapshot(snapshot):
+    if not isinstance(snapshot, dict):
+        raise HTTPException(409, "冻结任务须为原完整JSON对象")
+    payload, provider = snapshot.get("payload", {}), snapshot.get("provider_snapshot", {})
+    if not isinstance(payload, dict) or not isinstance(provider, dict):
+        raise HTTPException(409, "冻结任务的原服务或输入结构无效")
+    context, task_input = payload.get("context", {}), payload.get("input", {})
+    if not isinstance(context, dict) or not isinstance(task_input, dict):
+        raise HTTPException(409, "冻结任务原上下文或引用结构无效")
+    return "sofa_binding" in context or bool({"sofa_assessment_id", "sofa_change_assessment_id"} & task_input.keys()) or str(provider.get("model", "")).startswith("sofa1:")
 
 
 def stage_result(db, run, lease, value):

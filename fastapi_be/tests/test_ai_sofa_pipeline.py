@@ -308,3 +308,39 @@ def test_setup_requires_independent_sofa_rule_without_manufacturing_clinical_val
     report = setup_reports(db_session, {"sepsis_risk": case["feature"]})["sepsis_risk"]
     assert any(issue["code"] == "SOFA1_RULE_PROFILE_REQUIRED" for issue in report["issues"])
     assert case["feature"].validation_status == "validated"
+
+
+@pytest.mark.asyncio
+async def test_optional_reviewed_knowledge_does_not_change_context_source_count_or_escape_to_math_service(async_client, auth_headers, db_session, pipeline_case):
+    from app.ai.governance import digest
+    from app.ai.models import AIKnowledgeDocument, utcnow
+
+    case = pipeline_case
+    content = "脓毒症风险提示的合成审核资料。SYNTH_PRIVATE_OPTIONAL_KNOWLEDGE_仅院内留存，不替代原件或改变固定SOFA评分。"
+    actor_id = case["seed"]["super_admin_user"].user_id
+    document = AIKnowledgeDocument(
+        title="脓毒症风险提示合成知识",
+        version="synthetic-sofa-optional-knowledge",
+        source_uri="hospital://synthetic-sofa-knowledge",
+        content=content,
+        content_hash=digest(content),
+        feature_keys_json='["sepsis_risk"]',
+        status="published",
+        reviewed_by=actor_id,
+        reviewed_at=utcnow(),
+        created_by=actor_id,
+    )
+    db_session.add(document)
+    db_session.commit()
+    run = create_run(db_session, case["doctor"], run_request(case))
+    metadata, evidence = json.loads(run.context_metadata_json), json.loads(run.evidence_json)
+    assert metadata["source_count"] == 2 and any(item["kind"] == "knowledge" for item in evidence)
+    assert len(evidence) > metadata["source_count"]
+    wire = RealSofaTransport(case["service"])
+    await execute_claimed(*claim_next_run(db_session), transport=wire)
+    db_session.expire_all()
+    assert db_session.get(AIRun, run.run_id).status == "succeeded"
+    assert "SYNTH_PRIVATE_OPTIONAL_KNOWLEDGE" not in encode_json(wire.requests)
+    response = await async_client.get(f"/api/ai/runs/{run.run_id}", headers=auth_headers(case["doctor"].username))
+    assert response.status_code == 200, response.text
+    assert response.json()["data"]["context_metadata"]["source_count"] == 2

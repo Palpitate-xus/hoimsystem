@@ -226,11 +226,15 @@ def authorize_run(db: Session, user: User, run: AIRun) -> None:
         raise HTTPException(403, "不能访问其他用户的 AI 任务")
     spec, _ = authorized_feature(db, user, run.feature_key)
     if run.patient_id is not None:
-        frozen_context = json.loads(run.input_json).get("payload", {}).get("context", {})
+        frozen_snapshot = json.loads(run.input_json)
+        frozen_context = frozen_snapshot.get("payload", {}).get("context", {})
+        from app.ai.sofa_storage import is_sofa_snapshot, run_binding
+
         nursing_frozen = has_frozen_nursing_sources(frozen_context)
-        if spec.number == 42 and frozen_context.get("sofa_binding"):
+        if spec.number == 42 and is_sofa_snapshot(frozen_snapshot):
             from app.ai.sofa_context import authorize_sofa_snapshot
 
+            run_binding(run)
             authorize_sofa_snapshot(db, user, frozen_context, run.patient_id, run.encounter_ref)
         elif spec.number == 47 and frozen_context.get("support_source"):
             authorize_support_snapshot(db, user, frozen_context, run.patient_id, run.encounter_ref)
@@ -279,6 +283,11 @@ def authorize_run(db: Session, user: User, run: AIRun) -> None:
 def describe_run(run: AIRun, include_result: bool = True) -> dict:
     """Expose the user-facing result, not system instructions or provider secrets."""
     spec = get_spec(run.feature_key)
+    if spec.number == 42:
+        from app.ai.sofa_storage import is_sofa_snapshot, run_binding
+
+        if is_sofa_snapshot(json.loads(run.input_json)):
+            run_binding(run)
     fields = (
         "run_id",
         "feature_key",

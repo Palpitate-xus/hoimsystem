@@ -1376,6 +1376,89 @@
  },
  {
   "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "nurse",
+   "super_admin"
+  ],
+  "function": "candidates",
+  "method": "POST",
+  "module": "ai_sofa.py",
+  "path": "/api/ai/sofa-assessments/candidates"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "nurse",
+   "super_admin"
+  ],
+  "function": "assessments",
+  "method": "GET",
+  "module": "ai_sofa.py",
+  "path": "/api/ai/sofa-assessments"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "nurse",
+   "super_admin"
+  ],
+  "function": "create",
+  "method": "POST",
+  "module": "ai_sofa.py",
+  "path": "/api/ai/sofa-assessments"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "nurse",
+   "super_admin"
+  ],
+  "function": "assessment",
+  "method": "GET",
+  "module": "ai_sofa.py",
+  "path": "/api/ai/sofa-assessments/{assessment_id}"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "nurse",
+   "super_admin"
+  ],
+  "function": "revoke",
+  "method": "POST",
+  "module": "ai_sofa.py",
+  "path": "/api/ai/sofa-assessments/{assessment_id}/revoke"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "admin_assessments",
+  "method": "GET",
+  "module": "ai_sofa.py",
+  "path": "/api/ai/admin/sofa-assessments"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "admin_assessment",
+  "method": "GET",
+  "module": "ai_sofa.py",
+  "path": "/api/ai/admin/sofa-assessments/{assessment_id}"
+ },
+ {
+  "auth": [
    "super_admin"
   ],
   "function": "options",

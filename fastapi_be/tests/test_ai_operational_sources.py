@@ -333,3 +333,28 @@ async def test_changed_capacity_during_inference_rejects_old_result_and_retains_
     assert run.error_code == "TASK_OPERATIONAL_CONTEXT_CHANGED"
     assert run.input_json == original_input
     assert run.result_json == "{}"
+
+
+@pytest.mark.asyncio
+async def test_historical_qa_excludes_current_capacity_and_is_not_invalidated_by_unrelated_current_bed_changes(seed_data, db_session, operational_case):
+    configure(db_session, seed_data)
+    values = values_for(operational_case)
+    values["date_to"] = str(operational_case[1])
+    run = create_run(db_session, seed_data["super_admin_user"], RunRequest(feature_key="operations_qa", input=values))
+    frozen = json.loads(run.input_json)["payload"]["context"]
+    assert "ward_capacity" not in frozen
+    assert "current_active_admissions" not in frozen
+    bed = db_session.query(Bed).filter_by(ward_id=operational_case[3].ward_id, status=0).one()
+    bed.status = 2
+    db_session.commit()
+    calls = []
+
+    def reply(request):
+        calls.append(request)
+        result = {"summary": "隔离测试历史区间资料", "sections": [], "warnings": [], "missing_data": []}
+        return httpx.Response(200, json={"choices": [{"finish_reason": "stop", "message": {"content": json.dumps(result)}}]})
+
+    await execute_claimed(*claim_next_run(db_session), transport=httpx.MockTransport(reply))
+    db_session.refresh(run)
+    assert len(calls) == 1
+    assert run.status == "succeeded", run.error_message

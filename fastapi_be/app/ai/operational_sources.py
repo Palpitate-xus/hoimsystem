@@ -199,6 +199,9 @@ def operational_context(db, user: User, spec: FeatureSpec, values: dict) -> Cont
     if spec.number in {61, 64}:
         events("recorded_admissions", Admission, Admission.admission_time, "授权范围入院记录日汇总")
         events("recorded_discharges", Admission, Admission.discharge_time, "授权范围出院时间日汇总")
+        if spec.number == 61 and end < datetime.date.today():
+            bundle.data["missing_data"].append("历史分析区间不加载当前病区或床位快照；未提供该时期已核实的床位容量")
+            return bundle
         active = db.query(func.count(Admission.admission_id)).filter(Admission.status == 1)
         if departments is not None:
             active = active.filter(Admission.department_id.in_(departments))

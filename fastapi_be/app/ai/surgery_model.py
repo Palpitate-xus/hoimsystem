@@ -111,6 +111,7 @@ class Checks:
         self.classes = defaultdict(lambda: {key: 0 for key in self.counts})
         self.digest = hashlib.sha256(b"[")
         self.number = 0
+        self.check_stream_bytes = 2
         self.witness_bytes = 0
         self.violations = []
         self.unknowns = []
@@ -120,9 +121,23 @@ class Checks:
         self.budget.charge()
         base = {"status": status, "case_ids": sorted(set(cases)), "resource_ids": sorted(set(resources)), "demand_keys": sorted(set(demands)), "ref_ids": sorted(set(refs))}
         record = {"check_class": check_class, "code": code, **base, **data}
+        # A check with thousands of provenance members is not a scalar operation.
+        # Charge every structural value before repeated normalization/serialization.
+        stack = [record]
+        while stack:
+            self.budget.charge()
+            value = stack.pop()
+            if isinstance(value, dict):
+                stack.extend(value.values())
+            elif isinstance(value, (list, tuple)):
+                stack.extend(value)
+        encoded = canonical_json(record).encode()
+        self.check_stream_bytes += len(encoded) + (1 if self.number else 0)
+        if self.check_stream_bytes > MAX_BYTES:
+            raise ValueError("Complete canonical check stream exceeds proof construction capacity; no truncation")
         if self.number:
             self.digest.update(b",")
-        self.digest.update(canonical_json(record).encode())
+        self.digest.update(encoded)
         self.number += 1
         self.counts[status] += 1
         self.classes[check_class][status] += 1
@@ -223,7 +238,7 @@ def normalized_segments(case, segment_ids, mode, start, facts, budget):
     return union(known, budget), unknown, reversed_segment, tuple(sorted(refs))
 
 
-def selected_uses(source, assignments, checks):
+def selected_uses(source, assignments, checks, record_case_id=None):
     facts = {x.fact_id: x for x in source.manifest}
     cases = {x.case_id: x for x in source.cases}
     uses = []
@@ -248,7 +263,9 @@ def selected_uses(source, assignments, checks):
                 unknown = True
                 intervals = []
                 reversed_segment = False
-            if reversed_segment or unknown or kind == "room" and not intervals:
+            if record_case_id is not None and case.case_id != record_case_id:
+                pass
+            elif reversed_segment or unknown or kind == "room" and not intervals:
                 status = "violated" if reversed_segment or kind == "room" and not intervals and not unknown else "unknown"
                 checks.intervals("duration", "duration", status, intervals=intervals[:1], bases=[case.timing.basis_hash], cases=[case.case_id], demands=[key], refs=refs)
             else:
@@ -283,6 +300,7 @@ def validate_assignment_domain(source, assignments, deferred, checks, partial=Fa
             raise ValueError("Assignment case membership is inconsistent")
         seen.add(assignment.case_id)
         case = cases[assignment.case_id]
+        checks.budget.charge(len(case.starts))
         if assignment.start_at not in {x.start_at for x in case.starts}:
             raise ValueError("Assignment is outside the complete finite start domain")
         if (
@@ -317,7 +335,7 @@ def qualification_status(resource, demand, interval, facts, budget):
         boundaries = {interval[0], interval[1]}
         relevant = []
         for item in resource.capability_facts:
-            budget.charge()
+            budget.charge(1 + len(item.capability_hashes))
             if capability not in item.capability_hashes:
                 continue
             left = clock_us(item.valid_from_at)
@@ -361,13 +379,15 @@ def availability_status(resource, interval, facts, budget):
     return "violated" if "violated" in states else "unknown" if "unknown" in states or not contains(resource.availability_coverage, interval) else "satisfied"
 
 
-def monotone_checks(source, assignments, uses, checks):
+def monotone_checks(source, assignments, uses, checks, new_case_id=None):
     facts = {x.fact_id: x for x in source.manifest}
     resources = {x.resource_id: x for x in source.resources}
     cases = {x.case_id: x for x in source.cases}
     demands = {(case.case_id, demand.slot_id): demand for case in source.cases for demand in [case.room, *case.roles, *case.equipment]}
     period = (clock_us(source.period.days[0].start_at), clock_us(source.period.days[-1].end_at))
     for assignment in assignments:
+        if new_case_id is not None and assignment.case_id != new_case_id:
+            continue
         checks.budget.charge()
         case = cases[assignment.case_id]
         case_uses = [x for x in uses if x.case_id == case.case_id]
@@ -382,6 +402,8 @@ def monotone_checks(source, assignments, uses, checks):
                 status = "unknown" if limit.kind == "unknown" else "not_applicable"
             checks.intervals("time", "time_bounds", status, cases=[case.case_id], refs=case.ref_ids)
     for use in uses:
+        if new_case_id is not None and use.case_id != new_case_id:
+            continue
         checks.budget.charge()
         case = cases[use.case_id]
         if use.kind == "patient":
@@ -439,7 +461,11 @@ def monotone_checks(source, assignments, uses, checks):
                     refs=use.refs,
                 )
     for index, left in enumerate(uses):
-        for right in uses[index + 1 :]:
+        if new_case_id is not None and left.case_id != new_case_id:
+            continue
+        for other_index, right in enumerate(uses):
+            if index == other_index or (new_case_id is None or right.case_id == new_case_id) and other_index < index:
+                continue
             checks.budget.charge()
             same_patient = left.kind == right.kind == "patient" and left.patient is not None and left.patient == right.patient
             same_resource = left.resource_id is not None and left.resource_id == right.resource_id
@@ -463,6 +489,8 @@ def monotone_checks(source, assignments, uses, checks):
                             patient_conflict_token=left.patient if same_patient else None,
                         )
     for use in uses:
+        if new_case_id is not None and use.case_id != new_case_id:
+            continue
         for busy in source.busy_intervals:
             checks.budget.charge()
             matches = (
@@ -623,11 +651,11 @@ def output_occupancies(uses, checks):
     return output
 
 
-def check_partial_assignments(source, assignments, budget):
+def check_partial_assignments(source, assignments, budget, new_case_id=None):
     """Only permanent violations; no adjacency, minima, or duty-group pruning."""
     checks = Checks(budget, retain=False)
-    uses = selected_uses(source, assignments, checks)
-    monotone_checks(source, assignments, uses, checks)
+    uses = selected_uses(source, assignments, checks, record_case_id=new_case_id)
+    monotone_checks(source, assignments, uses, checks, new_case_id=new_case_id)
     return checks.counts["violated"] == 0
 
 
@@ -647,6 +675,11 @@ def transition_checks(source, uses, checks, graph):
     facts = {x.fact_id: x for x in source.manifest}
     total, exact = 0, True
     by_resource = defaultdict(list)
+    policy_index = defaultdict(list)
+    for policy in source.transition_policies:
+        for resource_id in policy.resource_ids:
+            checks.budget.charge()
+            policy_index[resource_id].append(policy)
     unknown_resources = set()
     selected_resources = set(resources)
     for use in uses:
@@ -680,8 +713,11 @@ def transition_checks(source, uses, checks, graph):
         resource = resources[resource_id]
         timeline = sorted(by_resource[resource_id])
         period = (clock_us(source.period.days[0].start_at), clock_us(source.period.days[-1].end_at))
-        policies = [x for x in source.transition_policies if resource_id in x.resource_ids and policy_effect(x, period) != "outside"]
-        checks.budget.charge(len(source.transition_policies))
+        policies = []
+        for policy in policy_index[resource_id]:
+            checks.budget.charge()
+            if policy_effect(policy, period) != "outside":
+                policies.append(policy)
         review = resource.transition_policy_review
         if review.status == "unknown" or review.status == "reviewed_policies" and not policies:
             checks.scope("transition", "policy_unknown", "unknown", "missing_policy", resources=[resource_id], bases=[review.basis_hash])
@@ -829,6 +865,11 @@ def work_checks(source, assignments, uses, checks, graph):
     duties = {x.duty_id: x for x in source.duties}
     cases = {x.case_id: x for x in source.cases}
     by_person = defaultdict(list)
+    policy_index = defaultdict(list)
+    for policy in source.work_policies:
+        for person_id in policy.person_ids:
+            checks.budget.charge()
+            policy_index[person_id].append(policy)
     for resource in source.resources:
         checks.budget.charge()
         if resource.kind == "person":
@@ -846,8 +887,11 @@ def work_checks(source, assignments, uses, checks, graph):
             for interval in use.intervals:
                 checks.budget.charge()
                 scope_span = (min(scope_span[0], interval[0]), max(scope_span[1], interval[1]))
-        policies = [x for x in source.work_policies if person_id in x.person_ids and policy_effect(x, scope_span) != "outside"]
-        checks.budget.charge(len(source.work_policies))
+        policies = []
+        for policy in policy_index[person_id]:
+            checks.budget.charge()
+            if policy_effect(policy, scope_span) != "outside":
+                policies.append(policy)
         review = person.work_policy_review
         if review.status == "attested_not_required" and not policies:
             continue
@@ -1346,9 +1390,9 @@ def solve_graph(source, graph, limits=None):
                 if child_bound is not None and (incumbent_key is None or child_bound < incumbent_key):
                     case_index, step = next_position(plans, node, selected)
                     admissible = True
-                    if case_index > node.case_index:
+                    if case_index > node.case_index and not (node.step == 0 and selected == 1):
                         assignments, _ = decode_assignments(plans, path, budget)
-                        admissible = check_partial_assignments(source, assignments, budget)
+                        admissible = check_partial_assignments(source, assignments, budget, new_case_id=plan.case.case_id)
                     if admissible:
                         children.append(SearchNode(path, case_index, step, 0, child_bound, serial))
                         serial += 1

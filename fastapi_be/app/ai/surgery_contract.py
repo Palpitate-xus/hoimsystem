@@ -954,11 +954,12 @@ RECIPE = {
         "limit_per_graph": OPERATION_LIMIT,
         "node_limit_per_graph": NODE_LIMIT,
         "frontier_limit_per_graph": FRONTIER_LIMIT,
-        "grammar": "One source/factor/constraint scalar visit, option-bound contribution, interval overlap/endpoint contribution, qualification/availability/policy contribution or leaf check is one charged operation; all repeated scans charge per member. Hash/UTF8/parse have separate fixed byte/count limits. Interrupt during a leaf/bound leaves that node unclassified with its original admissible bound.",
+        "grammar": "One source/factor/constraint scalar visit, option-bound contribution, interval overlap/endpoint contribution, qualification/availability/policy contribution or leaf check is one charged operation; repeated scans and every canonical check record's structural/scalar values charge per member. Hash/UTF8/parse have separate fixed byte/count limits. Interrupt during a leaf/bound leaves that node unclassified with its original admissible bound.",
     },
     "order": "Required cases then factor-domain cardinality then case UUID; schedule before defer; chronological starts, UUID resource/duty choices, slot keys; best bound then deeper decision before range then deterministic serial.",
     "caps": {
         "wire_bytes": MAX_BYTES,
+        "canonical_check_stream_bytes_per_candidate": MAX_BYTES,
         "cases": MAX_CASES,
         "rooms": MAX_ROOMS,
         "persons": MAX_PERSONS,

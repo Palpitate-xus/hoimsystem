@@ -88,7 +88,7 @@ def minimize_identifiers(value: object, patient: Patient | None = None) -> objec
                 return False
             if key in {"content_hash", "header_hash", "signal_hash", "chunk_hash", "snapshot_hash", "source_snapshot_hash", "context_digest", "prompt_hash"} and re.fullmatch(r"[a-f0-9]{64}", item):
                 return True
-            if key in SOURCE_REFERENCE_KEYS | {"asset_id", "document_id", "encounter_ref", "admission_id", "review_id", "run_id"}:
+            if key in SOURCE_REFERENCE_KEYS | {"asset_id", "document_id", "encounter_ref", "admission_id", "review_id", "run_id", "forecast_series_id", "series_id"}:
                 try:
                     return str(uuid.UUID(item)) == item
                 except ValueError:

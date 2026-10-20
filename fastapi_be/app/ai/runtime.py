@@ -16,6 +16,7 @@ from app.ai.catalog import CATALOG_VERSION, COMMON_SYSTEM_PROMPT, FeatureSpec
 from app.ai.context import ContextBundle, authorize_patient, context_metadata, minimize_identifiers, patient_snapshot
 from app.ai.ecg_assets import authorize_ecg_snapshot
 from app.ai.ecg_files import open_verified_ecg
+from app.ai.forecast_sources import authorize_forecast_snapshot
 from app.ai.gateway import AIExecutionError, generate
 from app.ai.governance import active_prompt, audit, digest, encode_json, get_spec, provider_credential, provider_feature_issues
 from app.ai.image_assets import authorize_image_patient, authorize_image_snapshot
@@ -52,6 +53,8 @@ def check_configuration(db: Session, user: User, spec: FeatureSpec, config: AIFe
         raise HTTPException(409, "该 AI 功能尚未启用")
     if not preview and spec.clinical and config.validation_status != "validated":
         raise HTTPException(409, "该临床功能尚未完成验证")
+    if not preview and spec.number == 62 and config.validation_status != "validated":
+        raise HTTPException(409, "该运营预测尚未完成指定目标与范围的验证，超级管理员可先预览")
     provider = db.get(AIProvider, config.provider_id)
     if provider is None or not provider.enabled:
         raise HTTPException(409, "模型服务未启用")
@@ -99,6 +102,8 @@ def create_run(db: Session, user: User, req: RunRequest) -> AIRun:
         raise HTTPException(409, "治疗路径推荐需要指定本次就诊，并提供该次就诊已确认的诊断")
     if spec.number in {66, 67} and not bundle.data.get("supply_inventory"):
         raise HTTPException(409, "库存预测或优化需要授权范围内的明确品种资料，请先选择真实目录品种并核实库存范围")
+    if spec.number == 62 and not bundle.data.get("forecast_source"):
+        raise HTTPException(409, "挂号记录数预测需要选择已确认完整历史与时间口径的有效预测来源")
     if spec.number == 77 and not bundle.data.get("incident_record"):
         raise HTTPException(409, "RCA辅助分析需要明确选择当前已授权患者的不良事件记录")
     if spec.number == 36 and bundle.data["image_source"]["image_metadata"]["valid_pixel_count"] < 1:
@@ -207,6 +212,8 @@ def authorize_run(db: Session, user: User, run: AIRun) -> None:
     elif spec.scope == "hospital":
         context = json.loads(run.input_json).get("payload", {}).get("context", {})
         authorize_operational_snapshot(db, user, spec, context)
+        if spec.number == 62 and user.user_role != "super_admin":
+            authorize_forecast_snapshot(db, user, context)
         if spec.number == 70 and user.user_role != "super_admin":
             authorize_feedback_snapshot(db, context)
     elif spec.number == 21 and user.user_role != "super_admin":
@@ -270,6 +277,9 @@ def describe_run(run: AIRun, include_result: bool = True) -> dict:
         if spec.number == 37:
             context = json.loads(run.input_json).get("payload", {}).get("context", {})
             data["ecg_findings"] = {key: context[key] for key in ("scope", "scope_note", "ecg_source", "missing_data") if key in context}
+        if spec.number == 62:
+            context = json.loads(run.input_json).get("payload", {}).get("context", {})
+            data["forecast_findings"] = {key: context[key] for key in ("scope", "scope_note", "forecast_source", "series_revision", "missing_data") if key in context}
         if spec.number in {61, 62, 63, 64, 65, 66, 67, 70}:
             context = json.loads(run.input_json).get("payload", {}).get("context", {})
             keys = (

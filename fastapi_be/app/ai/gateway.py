@@ -15,7 +15,7 @@ from app.ai.catalog import COMMON_SYSTEM_PROMPT, FeatureSpec
 from app.ai.ecg_model import LABELS, LEADS, PREPROCESSING, RELEASE_FILES, ECGModelManifest, canonical_json
 from app.ai.governance import encode_json, provider_credential, validate_endpoint
 from app.ai.models import AIProvider
-from app.ai.schemas import AudioGenerationResult, ECGGenerationResult, GenerationResult, ImageGenerationResult
+from app.ai.schemas import AudioGenerationResult, ECGGenerationResult, ForecastGenerationResult, GenerationResult, ImageGenerationResult
 from app.config import settings
 
 MAX_RESPONSE_BYTES = 512 * 1024
@@ -60,12 +60,24 @@ def validate_generation(
     audio_source: dict | None = None,
     ecg_source: dict | None = None,
     image_source: dict | None = None,
+    forecast_source: dict | None = None,
+    forecast_horizon: int | None = None,
     instructions_digest: str | None = None,
     model_version: str | None = None,
 ) -> GenerationResult:
     """Reject fabricated references and invalid structured output before UI exposure."""
     try:
-        schema = AudioGenerationResult if audio_source is not None else ECGGenerationResult if ecg_source is not None else ImageGenerationResult if image_source is not None else GenerationResult
+        schema = (
+            AudioGenerationResult
+            if audio_source is not None
+            else ECGGenerationResult
+            if ecg_source is not None
+            else ImageGenerationResult
+            if image_source is not None
+            else ForecastGenerationResult
+            if forecast_source is not None
+            else GenerationResult
+        )
         result = schema.model_validate(value)
     except ValidationError as exc:
         raise AIExecutionError("INVALID_OUTPUT", "模型返回的结果不符合任务结构，请调整模型或重试") from exc
@@ -77,6 +89,16 @@ def validate_generation(
         knowledge_ids = {item["source_id"] for item in evidence if item.get("kind") == "knowledge"}
         if not cited.intersection(knowledge_ids):
             raise AIExecutionError("UNGROUNDED_OUTPUT", "该任务的回答缺少已审核知识依据，结果已拒绝展示")
+    if forecast_source is not None:
+        from app.ai.forecast_contract import ForecastSource
+        from app.ai.forecast_model import validate_analysis_binding
+
+        try:
+            validate_analysis_binding(result.forecast_analysis, ForecastSource.model_validate(forecast_source), forecast_horizon, instructions_digest, model_version)
+        except (ValidationError, ValueError, TypeError, KeyError) as exc:
+            raise AIExecutionError("FORECAST_BINDING_MISMATCH", "预测来源、时间范围、固定算法数值、误差分母或Prompt版本不一致，结果已拒收") from exc
+        if result.sections and forecast_source["source_id"] not in cited:
+            raise AIExecutionError("UNGROUNDED_FORECAST", "预测说明未引用本次已确认的原历史来源")
     if audio_source is not None:
         transcript = result.transcription
         if transcript.asset_id != audio_source["asset_id"] or transcript.content_hash != audio_source["content_hash"]:
@@ -203,6 +225,20 @@ def _request(provider: AIProvider, spec: FeatureSpec, task_prompt: str, data: di
         raise AIExecutionError("ECG_ADAPTER_REQUIRED", "原始心电须通过已登记的专用波形模型处理")
     if spec.number == 36 and provider.kind != "specialist":
         raise AIExecutionError("IMAGE_ADAPTER_REQUIRED", "原始影像须通过已登记的专用像素模型处理")
+    if spec.number == 62 and provider.kind != "specialist":
+        raise AIExecutionError("FORECAST_ADAPTER_REQUIRED", "日挂号记录数须通过带固定数值契约的专用预测服务处理")
+    specialist_input = data
+    if spec.number == 62:
+        from app.ai.forecast_contract import ForecastSource
+
+        try:
+            source = ForecastSource.model_validate(data["context"]["forecast_source"]).model_dump()
+            horizon = data["input"]["horizon_days"]
+            if type(horizon) is not int or horizon not in {7, 14}:
+                raise ValueError("invalid forecast horizon")
+        except (ValidationError, ValueError, TypeError, KeyError) as exc:
+            raise AIExecutionError("FORECAST_SOURCE_REQUIRED", "须提供已确认的完整原日序列和明确7或14天预测跨度") from exc
+        specialist_input = {"context": {"forecast_source": source}, "horizon_days": horizon}
     if provider.kind == "responses":
         return endpoint + "/responses", {
             "model": provider.model,
@@ -223,13 +259,13 @@ def _request(provider: AIProvider, spec: FeatureSpec, task_prompt: str, data: di
         }
     if provider.kind == "specialist":
         return endpoint + "/tasks", {
-            "schema_version": {21: "2", 36: "4", 37: "3"}.get(spec.number, "1"),
+            "schema_version": {21: "2", 36: "4", 37: "3", 62: "5"}.get(spec.number, "1"),
             "feature_key": spec.key,
             "engine": spec.engine,
             "model": provider.model,
             "instructions": instructions,
-            **({"store": False} if spec.number in {21, 36, 37} else {}),
-            "input": data,
+            **({"store": False} if spec.number in {21, 36, 37, 62} else {}),
+            "input": specialist_input,
         }
     raise AIExecutionError("UNSUPPORTED_PROVIDER", "模型接口类型不受支持")
 
@@ -250,12 +286,12 @@ def _parse_response(provider: AIProvider, spec: FeatureSpec, value: dict) -> tup
             raise AIExecutionError("INCOMPLETE_RESPONSE", "模型未返回完整结果，请检查输出额度或模型状态")
         usage = value.get("usage") or {}
         return json.loads(choice["message"]["content"]), int(usage.get("prompt_tokens") or 0), int(usage.get("completion_tokens") or 0)
-    if value.get("schema_version") != {21: "2", 36: "4", 37: "3"}.get(spec.number, "1") or value.get("feature_key") != spec.key or value.get("model_version") != provider.model:
+    if value.get("schema_version") != {21: "2", 36: "4", 37: "3", 62: "5"}.get(spec.number, "1") or value.get("feature_key") != spec.key or value.get("model_version") != provider.model:
         raise AIExecutionError("ADAPTER_CONTRACT_MISMATCH", "专用模型返回的功能或模型版本与登记信息不一致")
     if value.get("applicable") is not True:
         raise AIExecutionError("OUTSIDE_VALIDATED_SCOPE", "本次输入不在专用模型声明的适用范围内")
-    if spec.number in {21, 36, 37}:
-        name = {21: "transcription", 36: "image_analysis", 37: "ecg_analysis"}[spec.number]
+    if spec.number in {21, 36, 37, 62}:
+        name = {21: "transcription", 36: "image_analysis", 37: "ecg_analysis", 62: "forecast_analysis"}[spec.number]
         if not isinstance(value["result"], dict) or name in value["result"]:
             raise ValueError("native result belongs to the versioned envelope")
         usage = value.get("usage") or {}
@@ -287,6 +323,9 @@ async def generate(
     source = data.get("context", {}).get("audio_source") if spec.number == 21 else None
     ecg_source = data.get("context", {}).get("ecg_source") if spec.number == 37 else None
     image_source = data.get("context", {}).get("image_source") if spec.number == 36 else None
+    forecast_source = data.get("context", {}).get("forecast_source") if spec.number == 62 else None
+    if spec.number == 62 and (not forecast_source or provider.kind != "specialist"):
+        raise AIExecutionError("FORECAST_SOURCE_REQUIRED", "运营预测需要已确认的原历史来源及专用统计适配器")
     if spec.number == 21:
         if audio is None or not source or source.get("extension") not in AUDIO_FORMATS or source.get("media_type") != AUDIO_FORMATS[source["extension"]][1]:
             raise AIExecutionError("AUDIO_FILE_REQUIRED", "缺少已核实的原录音附件，不能以文字资料冒充语音识别")
@@ -331,6 +370,8 @@ async def generate(
             audio_source=source,
             ecg_source=ecg_source,
             image_source=image_source,
+            forecast_source=forecast_source,
+            forecast_horizon=data.get("input", {}).get("horizon_days") if spec.number == 62 else None,
             instructions_digest=hashlib.sha256(payload.get("instructions", "").encode()).hexdigest(),
             model_version=provider.model,
         )

@@ -6,6 +6,7 @@ from typing import Annotated, Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
+from app.ai.forecast_contract import ForecastAnalysis
 from app.ai.references import SOURCE_REFERENCE_KEYS
 
 
@@ -502,6 +503,10 @@ class ImageAnalysis(StrictRequest):
 
 class ImageGenerationResult(GenerationResult):
     image_analysis: ImageAnalysis
+
+
+class ForecastGenerationResult(GenerationResult):
+    forecast_analysis: ForecastAnalysis
 
 
 class FeedbackWrite(StrictRequest):

@@ -100,6 +100,10 @@ def operational_options(db, user: User, spec: FeatureSpec) -> dict:
 
 
 def operational_context(db, user: User, spec: FeatureSpec, values: dict) -> ContextBundle:
+    if spec.number == 62 and values.get("forecast_series_id") not in (None, ""):
+        from app.ai.forecast_sources import forecast_context
+
+        return forecast_context(db, user, values)
     departments = operational_scope(db, user, spec, values)
     start, end = operational_window(values)
     bundle = ContextBundle(department_ids=departments or set())

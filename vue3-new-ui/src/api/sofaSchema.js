@@ -3,7 +3,7 @@ import registry from "./sofaSchemas.json";
 const own = (value, key) => Object.hasOwn(value, key);
 const object = value => value !== null && typeof value === "object" && !Array.isArray(value);
 const forbidden = key => ["__proto__", "prototype", "constructor"].includes(key);
-const allowed = new Set(["$defs", "$ref", "additionalProperties", "anyOf", "const", "enum", "items", "maxItems", "minItems", "maxLength", "maximum", "minLength", "minimum", "oneOf", "pattern", "properties", "propertyNames", "required", "type"]);
+const allowed = new Set(["$defs", "$ref", "additionalProperties", "anyOf", "const", "enum", "items", "maxItems", "minItems", "maxProperties", "minProperties", "maxLength", "maximum", "minLength", "minimum", "oneOf", "pattern", "properties", "propertyNames", "required", "type"]);
 
 // Expand generated lossless JSON nodes once. References can only point backward,
 // so malformed/cyclic registries fail before any clinical input is accepted.
@@ -43,6 +43,7 @@ function matches(schema, value, root, depth) {
     if (schema.minItems !== undefined && value.length < schema.minItems || schema.maxItems !== undefined && value.length > schema.maxItems || schema.items && value.some(item => !matches(schema.items, item, root, depth + 1))) return false;
   }
   if (object(value)) {
+    if (schema.minProperties !== undefined && Object.keys(value).length < schema.minProperties || schema.maxProperties !== undefined && Object.keys(value).length > schema.maxProperties) return false;
     if (Object.keys(value).some(forbidden) || schema.required?.some(key => !own(value, key))) return false;
     for (const [key, item] of Object.entries(value)) {
       if (schema.propertyNames && !matches(schema.propertyNames, key, root, depth + 1)) return false;

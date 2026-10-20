@@ -2920,3 +2920,67 @@ class DailyOperationalMetric(Base):
     refunds = Column(Numeric(14, 2), nullable=False, default=0)
     average_queue_wait_minutes = Column(Numeric(10, 2))
     updated_at = Column(DateTime, nullable=False)
+
+
+class InpatientObservation(Base):
+    """An immutable, explicitly timed set of measurements for its original admission."""
+
+    __tablename__ = "hoimsystem_inpatient_observation"
+    __table_args__ = (
+        CheckConstraint("status IN ('active', 'revoked')", name="ck_inpatient_observation_status"),
+        CheckConstraint(
+            "(status = 'active' AND revision = 1 AND revoked_at IS NULL AND revoked_by IS NULL AND revoke_reason = '') OR "
+            "(status = 'revoked' AND revision = 2 AND revoked_at IS NOT NULL AND revoked_by IS NOT NULL AND revoke_reason <> '')",
+            name="ck_inpatient_observation_revocation",
+        ),
+        Index("idx_inpatient_observation_admission_time", "admission_id", "observed_at", "observation_id"),
+        Index("idx_inpatient_observation_patient_status", "patient_id", "status"),
+    )
+
+    observation_id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    patient_id = Column(Integer, ForeignKey("hoimsystem_patient.patient_id"), nullable=False)
+    admission_id = Column(String(36), ForeignKey("hoimsystem_admission.admission_id"), nullable=False)
+    observed_at = Column(DateTime().with_variant(mysql.DATETIME(fsp=6), "mysql"), nullable=False)
+    recorded_at = Column(DateTime().with_variant(mysql.DATETIME(fsp=6), "mysql"), nullable=False)
+    created_by = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=False)
+    schema_version = Column(String(40), nullable=False, default="inpatient_observation_v1", server_default="inpatient_observation_v1")
+    payload_json = Column(Text, nullable=False)
+    content_hash = Column(String(64), nullable=False)
+    status = Column(String(16), nullable=False, default="active", server_default="active")
+    revision = Column(Integer, nullable=False, default=1, server_default="1")
+    revoked_at = Column(DateTime().with_variant(mysql.DATETIME(fsp=6), "mysql"), nullable=True)
+    revoked_by = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=True)
+    revoke_reason = Column(String(1000), nullable=False, default="", server_default="")
+
+
+class InpatientUrineInterval(Base):
+    """Original urine volume for a stated interval; unknowns and overlap remain explicit."""
+
+    __tablename__ = "hoimsystem_inpatient_urine_interval"
+    __table_args__ = (
+        CheckConstraint("start_at < end_at", name="ck_inpatient_urine_interval_time"),
+        CheckConstraint("status IN ('active', 'revoked')", name="ck_inpatient_urine_interval_status"),
+        CheckConstraint(
+            "(status = 'active' AND revision = 1 AND revoked_at IS NULL AND revoked_by IS NULL AND revoke_reason = '') OR "
+            "(status = 'revoked' AND revision = 2 AND revoked_at IS NOT NULL AND revoked_by IS NOT NULL AND revoke_reason <> '')",
+            name="ck_inpatient_urine_interval_revocation",
+        ),
+        Index("idx_inpatient_urine_interval_admission_time", "admission_id", "start_at", "end_at", "interval_id"),
+        Index("idx_inpatient_urine_interval_patient_status", "patient_id", "status"),
+    )
+
+    interval_id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    patient_id = Column(Integer, ForeignKey("hoimsystem_patient.patient_id"), nullable=False)
+    admission_id = Column(String(36), ForeignKey("hoimsystem_admission.admission_id"), nullable=False)
+    start_at = Column(DateTime().with_variant(mysql.DATETIME(fsp=6), "mysql"), nullable=False)
+    end_at = Column(DateTime().with_variant(mysql.DATETIME(fsp=6), "mysql"), nullable=False)
+    recorded_at = Column(DateTime().with_variant(mysql.DATETIME(fsp=6), "mysql"), nullable=False)
+    created_by = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=False)
+    schema_version = Column(String(40), nullable=False, default="urine_interval_v1", server_default="urine_interval_v1")
+    payload_json = Column(Text, nullable=False)
+    content_hash = Column(String(64), nullable=False)
+    status = Column(String(16), nullable=False, default="active", server_default="active")
+    revision = Column(Integer, nullable=False, default=1, server_default="1")
+    revoked_at = Column(DateTime().with_variant(mysql.DATETIME(fsp=6), "mysql"), nullable=True)
+    revoked_by = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=True)
+    revoke_reason = Column(String(1000), nullable=False, default="", server_default="")

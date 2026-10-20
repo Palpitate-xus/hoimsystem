@@ -504,3 +504,39 @@ class AINews2Assessment(Base):
     revoked_at = Column(DateTime().with_variant(mysql.DATETIME(fsp=6), "mysql"), nullable=True)
     revoked_by = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=True)
     revoke_reason = Column(String(1000), nullable=False, default="")
+
+
+class AIAKIAssessment(Base):
+    """Explicit controlled creatinine, complete urine intervals and human applicability."""
+
+    __tablename__ = "hoimsystem_ai_aki_assessment"
+    __table_args__ = (
+        CheckConstraint("evaluation_at <= created_at", name="ck_ai_aki_assessment_time"),
+        CheckConstraint(
+            "(status = 'active' AND revision = 1 AND revoked_at IS NULL AND revoked_by IS NULL AND revoke_reason = '') OR "
+            "(status = 'revoked' AND revision = 2 AND revoked_at IS NOT NULL AND revoked_by IS NOT NULL AND revoke_reason <> '')",
+            name="ck_ai_aki_assessment_governance",
+        ),
+        Index("idx_ai_aki_assessment_scope", "patient_id", "admission_id", "created_at"),
+        Index("idx_ai_aki_assessment_window", "window_id", "evaluation_at"),
+    )
+
+    assessment_id = Column(String(36), primary_key=True, default=new_id)
+    patient_id = Column(Integer, ForeignKey("hoimsystem_patient.patient_id"), nullable=False)
+    admission_id = Column(String(36), ForeignKey("hoimsystem_admission.admission_id"), nullable=False)
+    window_id = Column(String(36), ForeignKey("hoimsystem_ai_observation_window.window_id"), nullable=False)
+    window_content_hash = Column(String(64), nullable=False)
+    rule_profile_id = Column(String(36), ForeignKey("hoimsystem_ai_risk_rule_profile.rule_profile_id"), nullable=False)
+    rule_profile_content_hash = Column(String(64), nullable=False)
+    recipe_digest = Column(String(64), nullable=False)
+    evaluation_at = Column(DateTime().with_variant(mysql.DATETIME(fsp=6), "mysql"), nullable=False)
+    created_at = Column(DateTime().with_variant(mysql.DATETIME(fsp=6), "mysql"), nullable=False)
+    created_by = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=False)
+    schema_version = Column(String(40), nullable=False)
+    snapshot_json = Column(Text().with_variant(mysql.MEDIUMTEXT(), "mysql"), nullable=False)
+    content_hash = Column(String(64), nullable=False)
+    status = Column(String(24), nullable=False, default="active")
+    revision = Column(Integer, nullable=False, default=1)
+    revoked_at = Column(DateTime().with_variant(mysql.DATETIME(fsp=6), "mysql"), nullable=True)
+    revoked_by = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=True)
+    revoke_reason = Column(String(1000), nullable=False, default="")

@@ -314,7 +314,13 @@ INPUT_POLICY = {
     "flow_balance": "five_independent_observed_series_no_automatic_mass_conservation_or_unmet_demand_claim",
     "freshness": "date_to_is_asof_local_date_minus_one_closed_day_frozen_origin_never_rolled_forward_platform_new_execution_rechecks_current_last_closed_day",
     "arithmetic": "strict_count_0_to_2147483647_canonical_reduced_decimal_string_fractions_big_uints_no_float",
-    "limits": {"max_utf8_bytes": MAX_BYTES, "max_members": MAX_MEMBERS, "max_fraction_digits": 1024},
+    "limits": {
+        "max_utf8_bytes": MAX_BYTES,
+        "max_members": MAX_MEMBERS,
+        "max_fraction_digits": 1024,
+        "capacity_day_construction_bytes": MAX_BYTES,
+        "capacity_proof_budget": "incremental_per_segment_and_whole_result_reject_without_truncation",
+    },
     "validation": "independent_engineering_only_no_operational_or_clinical_validation",
 }
 RECIPE = {

@@ -322,3 +322,52 @@ def test_pathological_repeated_overlap_proof_rejects_before_oversize_allocation(
             item["end_at"] = item["observed_at"] = item["recorded_at"] = item["published_at"] = value["days"][-1]["day_end_at"]
     with pytest.raises(ValueError, match="Complete native proof exceeds"):
         analyze(value, 14)
+
+
+def make_staggered_overlap_source():
+    """All 3363 actual-history intervals have distinct nested endpoints in one day."""
+    value = make_max_source()
+    begin = datetime.fromisoformat(value["days"][0]["day_start_at"].replace("Z", "+00:00"))
+    end = datetime.fromisoformat(value["days"][0]["day_end_at"].replace("Z", "+00:00"))
+    index = 0
+    for item in value["capacity_intervals"]:
+        if item["basis_kind"] == "observed_operational_capacity":
+            item["start_at"] = (begin + timedelta(microseconds=index)).isoformat(timespec="microseconds").replace("+00:00", "Z")
+            item["end_at"] = (end - timedelta(microseconds=index)).isoformat(timespec="microseconds").replace("+00:00", "Z")
+            index += 1
+    assert index == 3363
+    return value
+
+
+def test_single_day_staggered_overlap_rejects_incrementally_with_bounded_subprocess_rss():
+    import json
+    import subprocess
+    import sys
+    from pathlib import Path
+
+    script = """
+import json,resource,sys,time
+from pathlib import Path
+from app.ai.bed_contract import BedSource,canonical_json
+from app.ai.bed_model import compute_capacity_day
+from tests.test_ai_bed_model import make_staggered_overlap_source
+source=BedSource.model_validate(make_staggered_overlap_source())
+started=time.monotonic()
+try:
+ compute_capacity_day(source,source.days[0])
+except ValueError as exc:
+ assert 'Capacity day construction exceeds' in str(exc),str(exc)
+ result={'error':str(exc),'member_roots':len(source.member_manifest),'source_utf8_bytes':len(canonical_json(source.model_dump()).encode()),'historical_interval_count':sum(x.basis_kind=='observed_operational_capacity' for x in source.capacity_intervals),'max_rss_kib':int(next(line.split()[1] for line in Path('/proc/self/status').read_text().splitlines() if line.startswith('VmHWM:'))),'reported_rusage_maxrss_kib':resource.getrusage(resource.RUSAGE_SELF).ru_maxrss,'seconds':time.monotonic()-started,'platform':sys.platform}
+ assert 'app.database' not in sys.modules and 'app.config' not in sys.modules
+ print(json.dumps(result))
+else:
+ raise AssertionError('Must reject the complete oversized day, never truncate or build every membership')
+"""
+    env = {"PATH": "/usr/bin:/bin", "PYTHONPATH": str(Path(__file__).parents[1]), "PYTHONNOUSERSITE": "1", "PYTHONDONTWRITEBYTECODE": "1", "LANG": "C.UTF-8"}
+    completed = subprocess.run([sys.executable, "-c", script], env=env, capture_output=True, text=True, timeout=30)
+    assert completed.returncode == 0, completed.stderr
+    result = json.loads(completed.stdout)
+    assert result["member_roots"] == 4096 and result["historical_interval_count"] == 3363
+    assert result["source_utf8_bytes"] < 8 * 1024 * 1024
+    if result["platform"].startswith("linux"):
+        assert result["max_rss_kib"] < 384 * 1024, result

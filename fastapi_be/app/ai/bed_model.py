@@ -276,6 +276,7 @@ def compute_capacity_day(source, day, basis_kind="observed_operational_capacity"
         ends.setdefault(min(end, item.end_at), set()).add(identifier)
     boundaries = sorted({start, end, *starts, *ends})
     active, segments = set(), []
+    construction_bytes = 0
     known_duration = unknown_duration = conflict_duration = integral = 0
     for left, right in zip(boundaries, boundaries[1:], strict=False):
         active.difference_update(ends.get(left, ()))
@@ -293,18 +294,23 @@ def compute_capacity_day(source, day, basis_kind="observed_operational_capacity"
             conflict_duration += duration
         else:
             unknown_duration += duration
-        segments.append(
-            {
-                "start_at": left,
-                "end_at": right,
-                "duration_us": str(duration),
-                "status": status,
-                "reasons": reasons,
-                "source_ids": ids,
-                "operational_total_beds": value,
-                "bed_microseconds": str(value * duration) if known else None,
-            }
-        )
+        segment = {
+            "start_at": left,
+            "end_at": right,
+            "duration_us": str(duration),
+            "status": status,
+            "reasons": reasons,
+            "source_ids": ids,
+            "operational_total_beds": value,
+            "bed_microseconds": str(value * duration) if known else None,
+        }
+        # Repeated overlap memberships can be quadratic in the number of
+        # endpoints. Bound EACH constructed segment immediately; waiting for
+        # the whole day can allocate a huge proof before the global cap runs.
+        construction_bytes += len(canonical_json(segment).encode()) + 1
+        if construction_bytes > MAX_BYTES:
+            raise ValueError(f"Capacity day construction exceeds {MAX_BYTES} UTF8 bytes (at least {construction_bytes}); no truncation allowed")
+        segments.append(segment)
     total = _duration(start, end)
     complete = known_duration == total
     ratio = Fraction(discharge * total, integral) if complete and integral and discharge is not None else None

@@ -30,10 +30,11 @@
           </template>
         </el-table-column>
         <el-table-column prop="amount" label="金额" width="80" />
-        <el-table-column label="操作" width="200">
+        <el-table-column label="操作" width="290">
           <template #default="{row}">
             <el-button v-if="row.status===0 && row.charge_id" size="small" type="primary" @click="deskCharge(row)">诊间收费</el-button>
             <el-button size="small" type="danger" @click="cancel(row)">取消</el-button>
+            <ai-action title="AI 处方核查" :patient-id="row.patient_id" :initial-input="{ prescription_id: row.uuid }" :feature-keys="['interaction_review', 'allergy_review', 'drug_comparison', 'dose_review', 'antimicrobial_review']" initial-feature="interaction_review" />
           </template>
         </el-table-column>
       </el-table>
@@ -90,6 +91,7 @@
 
 <script setup>
 import { ref, onMounted, computed } from "vue";
+import AiAction from "@/components/AIAction/index.vue";
 import { ElMessage } from "element-plus";
 import { getPrescriptionList, createPrescription, cancelPrescription, getPrescriptionTemplates, applyPrescriptionTemplate } from "@/api/doctor";
 import { commitCharge } from "@/api/charge";

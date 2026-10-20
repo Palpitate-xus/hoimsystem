@@ -460,6 +460,7 @@ def get_medical_record_list(current_user: User = Depends(get_current_user), keyw
                     "uuid": str(item.medical_record_id),
                     "consultation_time": (item.consultation_time.strftime("%Y-%m-%d %H:%M:%S") if item.consultation_time else None),
                     "patient_id": item.patient_id,
+                    "registration_uuid": item.registration_uuid,
                     "patient_name": item.patient.name if item.patient else "",
                     "symptom": item.symptom,
                     "result": item.result,

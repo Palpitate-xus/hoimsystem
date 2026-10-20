@@ -143,6 +143,17 @@ async def test_patient_selector_is_scoped_to_real_care_relationships(async_clien
 
 
 @pytest.mark.asyncio
+async def test_existing_clinical_rows_carry_the_ids_needed_for_ai_context(async_client, seed_data, auth_headers):
+    pharmacy = await async_client.get("/api/pharmacy/dispenseList", headers=auth_headers(seed_data["pharmacist_user"].username))
+    assert pharmacy.status_code == 200
+    row = next(item for item in pharmacy.json()["data"] if item["uuid"] == seed_data["prescription"].prescription_id)
+    assert row["patient_id"] == seed_data["patient"].patient_id
+    notes = await async_client.get("/api/medicalRecord/getList", headers=auth_headers(seed_data["doctor_user"].username))
+    row = next(item for item in notes.json()["data"] if item["uuid"] == seed_data["medical_record"].medical_record_id)
+    assert "registration_uuid" in row
+
+
+@pytest.mark.asyncio
 async def test_emergency_triage_does_not_wait_for_model_configuration(async_client, seed_data, auth_headers, db_session):
     response = await async_client.post(
         "/api/ai/runs", headers=auth_headers(seed_data["patient_user"].username), json={"feature_key": "conversational_triage", "input": {"question": "持续胸痛，呼吸困难"}}

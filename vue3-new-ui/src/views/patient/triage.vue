@@ -19,6 +19,7 @@
             <el-icon><Search /></el-icon> 智能导诊
           </el-button>
           <el-button size="large" @click="symptomText = ''">清空</el-button>
+          <ai-action label="AI 预问诊" title="AI 导诊与预问诊" :disabled="emergency" :feature-keys="['conversational_triage', 'preconsultation']" initial-feature="preconsultation" :initial-input="{ question: symptomText }" />
         </div>
         <el-alert
           title="导诊仅用于分流参考，不构成医疗诊断"
@@ -99,6 +100,7 @@
 
 <script setup>
 import { ref, onMounted, computed } from "vue";
+import AiAction from "@/components/AIAction/index.vue";
 import { useRouter } from "vue-router";
 import { ElMessage } from "element-plus";
 import { triageSuggest, getTriageKeywords } from "@/api/triage";

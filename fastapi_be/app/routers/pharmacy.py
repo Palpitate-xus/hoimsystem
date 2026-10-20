@@ -111,6 +111,7 @@ def get_dispense_list(keyword: str | None = None, page: int | None = None, page_
         data.append(
             {
                 "uuid": str(item.prescription_id),
+                "patient_id": item.patient_id,
                 "patient_name": item.patient.name if item.patient else "",
                 "doctor_name": item.doctor.name if item.doctor else "",
                 "phas": phas,

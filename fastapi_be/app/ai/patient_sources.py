@@ -80,7 +80,8 @@ def attach_patient_sources(db, user, spec, patient, encounter, bundle, add) -> N
                 **{name: getattr(item, name) for name in ("order_type", "category", "status", "priority", "start_time", "stop_time", "note")},
                 "status_meaning": {0: "新开待审核", 1: "已审核", 2: "执行中", 3: "已停止", 4: "已撤销"}.get(item.status, "未知"),
                 "items": [
-                    {name: getattr(line, name) for name in ("item_name", "item_type", "item_id_ref", "dose", "unit", "frequency", "route", "days", "quantity", "note")} for line in item.items[:20]
+                    {name: getattr(line, name) for name in ("item_name", "item_type", "item_id_ref", "dose", "unit", "frequency", "route", "days", "quantity", "note")}
+                    for line in sorted(item.items, key=lambda line: line.item_id)[:20]
                 ],
                 "items_truncated": len(item.items) > 20,
                 "dose_note": "dose 为医嘱原始文本，unit 可能是发药单位；不进行解析推断或自动剂量换算",
@@ -93,7 +94,7 @@ def attach_patient_sources(db, user, spec, patient, encounter, bundle, add) -> N
         db.query(OrderExecution)
         .join(InpatientOrder)
         .filter(InpatientOrder.patient_id == patient.patient_id, InpatientOrder.admission_id == admission_id)
-        .order_by(OrderExecution.planned_time.desc())
+        .order_by(OrderExecution.planned_time.desc(), OrderExecution.execution_id)
         .limit(17)
         .all()
     )
@@ -118,8 +119,8 @@ def attach_patient_sources(db, user, spec, patient, encounter, bundle, add) -> N
     administrations = (
         db.query(MedicationAdministration)
         .join(InpatientOrder, MedicationAdministration.order_id == InpatientOrder.order_id)
-        .filter(MedicationAdministration.patient_id == patient.patient_id, InpatientOrder.admission_id == admission_id)
-        .order_by(MedicationAdministration.verified_at.desc())
+        .filter(MedicationAdministration.patient_id == patient.patient_id, InpatientOrder.patient_id == patient.patient_id, InpatientOrder.admission_id == admission_id)
+        .order_by(MedicationAdministration.verified_at.desc(), MedicationAdministration.administration_id)
         .limit(13)
         .all()
     )

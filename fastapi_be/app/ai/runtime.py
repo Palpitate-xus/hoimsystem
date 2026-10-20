@@ -111,7 +111,7 @@ def create_run(db: Session, user: User, req: RunRequest) -> AIRun:
         status="queued",
         input_json=encode_json({"task_prompt": prompt, "payload": payload}),
         evidence_json=encode_json(evidence),
-        context_metadata_json=encode_json({**context_metadata(bundle), "feature_revision": config.revision, "validation_status": config.validation_status}),
+        context_metadata_json=encode_json({**context_metadata(bundle), "feature_revision": config.revision, "validation_status": config.validation_status, "tool_fingerprint": digest(tools)}),
     )
     db.add(run)
     db.flush()
@@ -178,6 +178,8 @@ def claim_next_run(db: Session) -> tuple[str, str] | None:
 
 
 def _recheck_task(db: Session, run: AIRun) -> tuple[FeatureSpec, AIProvider, dict]:
+    if utcnow() - run.create_time > datetime.timedelta(seconds=settings.AI_MAX_QUEUE_AGE_SECONDS):
+        raise AIExecutionError("TASK_EXPIRED", "任务等待时间过长，请重新加载最新资料后提交")
     user = db.get(User, run.requested_by)
     if user is None:
         raise HTTPException(403, "任务用户已失效")
@@ -190,10 +192,21 @@ def _recheck_task(db: Session, run: AIRun) -> tuple[FeatureSpec, AIProvider, dic
     if config.revision != metadata["feature_revision"]:
         raise HTTPException(409, "功能或 Prompt 配置已改变，请重新创建任务")
     snapshot = json.loads(run.input_json)
+    if digest(snapshot["payload"]["context"]) != run.context_digest:
+        raise AIExecutionError("TASK_SNAPSHOT_INVALID", "任务资料快照校验不一致，请重新创建任务")
     if digest([COMMON_SYSTEM_PROMPT, snapshot["task_prompt"]]) != run.prompt_hash:
         raise HTTPException(409, "任务系统契约已改变，请重新创建任务")
     if not evidence_is_current(db, json.loads(run.evidence_json)):
         raise HTTPException(409, "任务引用的知识已停用或过期，请重新创建任务")
+    if run.patient_id is not None:
+        current_bundle = patient_snapshot(db, user, spec, run.patient_id, run.encounter_ref, snapshot["payload"]["input"])
+        if context_metadata(current_bundle)["clinical_context_fingerprint"] != metadata.get("clinical_context_fingerprint"):
+            raise AIExecutionError("TASK_CONTEXT_CHANGED", "患者资料或诊断确认状态已改变，请重新加载最新资料后生成")
+    else:
+        current_bundle = ContextBundle(data=snapshot["payload"]["context"])
+    current_tools, _ = business_tools(db, spec, user, run.patient_id, snapshot["payload"]["input"], current_bundle)
+    if digest(current_tools) != metadata.get("tool_fingerprint"):
+        raise AIExecutionError("TASK_TOOLS_CHANGED", "相关审方规则、目录或业务状态已改变，请重新生成")
     return spec, provider, snapshot
 
 
@@ -232,6 +245,8 @@ async def execute_claimed(run_id: str, lease: str, *, transport=None) -> None:
         if error is None:
             try:
                 _recheck_task(db, run)
+            except AIExecutionError as exc:
+                error = (exc.code, exc.message)
             except HTTPException as exc:
                 error = ("TASK_NO_LONGER_AUTHORIZED", str(exc.detail))
         run.input_tokens, run.output_tokens = inputs, outputs

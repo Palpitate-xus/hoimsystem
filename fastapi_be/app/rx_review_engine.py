@@ -116,7 +116,7 @@ def check_prescription(
     items: [{"name": 药品名, "dosage": 每次剂量(float), "frequency": 频次中文, "number": 数量}, ...]
     返回: [{"severity": 1|2|3, "rule_id": n, "type": ..., "message": ...}]，severity=3 必须拦截
     """
-    rules = db.query(PrescriptionReviewRule).filter(PrescriptionReviewRule.status == 1).all()
+    rules = db.query(PrescriptionReviewRule).filter(PrescriptionReviewRule.status == 1).order_by(PrescriptionReviewRule.rule_id).all()
     findings: list[dict] = []
 
     freq_per_day = {"qd": 1, "bid": 2, "tid": 3, "qid": 4, "q8h": 3, "q6h": 4, "q12h": 2, "qn": 1, "prn": 1, "st": 1}

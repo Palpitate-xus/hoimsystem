@@ -288,7 +288,7 @@ def patient_snapshot(db: Session, user: User, spec: FeatureSpec, patient_id: int
         )
     else:
         bundle.data["missing_data"].append("尚未维护结构化临床档案")
-    allergies = db.query(PatientAllergy).filter_by(patient_id=patient_id, status=1).all()
+    allergies = db.query(PatientAllergy).filter_by(patient_id=patient_id, status=1).order_by(PatientAllergy.allergy_id).all()
     bundle.data["allergies"] = [
         add("allergy:" + str(item.allergy_id), "结构化过敏记录", {"allergen": item.allergen, "reaction": item.reaction, "severity": item.severity}, item.update_time) for item in allergies
     ]
@@ -304,7 +304,7 @@ def patient_snapshot(db: Session, user: User, spec: FeatureSpec, patient_id: int
         if encounter_ref
         else record_query.order_by(MedicalRecord.consultation_time.desc())
     )
-    records = bounded(record_query, 15, "门诊病历", "record_id", "medical_record_id")
+    records = bounded(record_query.order_by(MedicalRecord.medical_record_id), 15, "门诊病历", "record_id", "medical_record_id")
     record_reviews = latest_reviews(db, patient_id, [item.medical_record_id for item in records])
     bundle.data["outpatient_records"] = []
     for item in records:
@@ -327,7 +327,7 @@ def patient_snapshot(db: Session, user: User, spec: FeatureSpec, patient_id: int
         if encounter_ref
         else structured_query.order_by(StructuredMedicalRecord.create_time.desc())
     )
-    structured = bounded(structured_query, 8, "结构化病历", "structured_record_id", "record_id")
+    structured = bounded(structured_query.order_by(StructuredMedicalRecord.record_id), 8, "结构化病历", "structured_record_id", "record_id")
     structured_reviews = latest_reviews(db, patient_id, [item.record_id for item in structured])
     bundle.data["structured_records"] = []
     for item in structured:
@@ -350,7 +350,7 @@ def patient_snapshot(db: Session, user: User, spec: FeatureSpec, patient_id: int
         )
         if current and certainty == "confirmed" and item.diagnosis:
             bundle.data["current_confirmed_diagnoses"].append(item.diagnosis)
-    vital = db.query(VitalSign).filter_by(patient_id=patient_id).order_by(VitalSign.check_time.desc()).first()
+    vital = db.query(VitalSign).filter_by(patient_id=patient_id).order_by(VitalSign.check_time.desc(), VitalSign.vital_id.desc()).first()
     bundle.data["latest_vitals"] = (
         add(
             "vital:" + str(vital.vital_id),
@@ -364,7 +364,7 @@ def patient_snapshot(db: Session, user: User, spec: FeatureSpec, patient_id: int
     prescription_query = (
         db.query(Prescription).options(selectinload(Prescription.pre_phas).selectinload(PrePha.pharmaceutical)).filter_by(patient_id=patient_id).order_by(Prescription.create_time.desc())
     )
-    prescriptions = bounded(prescription_query, 12, "处方", "prescription_id", "prescription_id")
+    prescriptions = bounded(prescription_query.order_by(Prescription.prescription_id), 12, "处方", "prescription_id", "prescription_id")
     bundle.data["prescriptions"] = [
         add(
             "prescription:" + item.prescription_id,
@@ -383,7 +383,7 @@ def patient_snapshot(db: Session, user: User, spec: FeatureSpec, patient_id: int
                         "route": getattr(pp, "route", None),
                         "duration_days": getattr(pp, "duration_days", None),
                     }
-                    for pp in item.pre_phas
+                    for pp in sorted(item.pre_phas, key=lambda line: line.pre_pha_id)
                 ],
                 "note": "处方状态不等同于当前正在服用；需核实实际用药时间",
             },
@@ -392,7 +392,7 @@ def patient_snapshot(db: Session, user: User, spec: FeatureSpec, patient_id: int
         for item in prescriptions
     ]
     results = bounded(
-        db.query(LabResult).join(LabOrder).filter(LabOrder.patient_id == patient_id, LabResult.audit_status == 1).order_by(LabResult.report_time.desc()),
+        db.query(LabResult).join(LabOrder).filter(LabOrder.patient_id == patient_id, LabResult.audit_status == 1).order_by(LabResult.report_time.desc(), LabResult.lab_result_id),
         15,
         "已审核检验",
         "lab_result_id",
@@ -427,7 +427,7 @@ def patient_snapshot(db: Session, user: User, spec: FeatureSpec, patient_id: int
     if results and not observations:
         bundle.data["missing_data"].append("历史检验报告未提供结构化数值、原始单位和采样时间，不进行自动数值推断")
     imaging = bounded(
-        db.query(ImagingReport).join(ImagingOrder).filter(ImagingOrder.patient_id == patient_id, ImagingReport.status == 2).order_by(ImagingReport.report_time.desc()),
+        db.query(ImagingReport).join(ImagingOrder).filter(ImagingOrder.patient_id == patient_id, ImagingReport.status == 2).order_by(ImagingReport.report_time.desc(), ImagingReport.report_id),
         8,
         "已审核影像",
         "imaging_report_id",
@@ -447,4 +447,10 @@ def patient_snapshot(db: Session, user: User, spec: FeatureSpec, patient_id: int
 
 def context_metadata(bundle: ContextBundle) -> dict:
     """Store traceability metadata independently of the clinical text."""
-    return {"snapshot_time": bundle.data.get("snapshot_time"), "source_count": len(bundle.evidence), "context_digest": digest(bundle.data), "missing_data": bundle.data.get("missing_data", [])}
+    return {
+        "snapshot_time": bundle.data.get("snapshot_time"),
+        "source_count": len(bundle.evidence),
+        "context_digest": digest(bundle.data),
+        "clinical_context_fingerprint": digest({key: value for key, value in bundle.data.items() if key != "snapshot_time"}),
+        "missing_data": bundle.data.get("missing_data", []),
+    }

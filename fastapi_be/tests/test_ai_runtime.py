@@ -12,7 +12,7 @@ from app.ai.governance import digest, encode_json
 from app.ai.models import AIFeatureConfig, AIFeedback, AIKnowledgeDocument, AIPatientGrant, AIProvider, AIRun, utcnow
 from app.ai.runtime import claim_next_run, create_run, execute_claimed, expire_interrupted_runs
 from app.ai.schemas import RunRequest
-from app.models import MedicalRecord, Prescription, User
+from app.models import MedicalRecord, Patient, Prescription, PrescriptionReviewRule, User
 
 
 @pytest.fixture(autouse=True)
@@ -272,3 +272,81 @@ async def test_clinical_preview_is_labelled_and_does_not_enable_the_feature(asyn
     assert preview.json()["data"]["preview"] == 1
     db_session.refresh(config)
     assert config.enabled == 0
+
+
+@pytest.mark.asyncio
+async def test_expired_queue_item_cannot_make_a_billable_request(seed_data, db_session):
+    configure(db_session, seed_data)
+    run = create_run(db_session, seed_data["doctor_user"], RunRequest(feature_key="patient_summary", patient_id=seed_data["patient"].patient_id))
+    run.create_time = utcnow() - datetime.timedelta(hours=1)
+    db_session.commit()
+    claim = claim_next_run(db_session)
+    requests = []
+    await execute_claimed(*claim, transport=successful_transport(requests))
+    db_session.refresh(run)
+    assert run.status == "failed"
+    assert run.error_code == "TASK_EXPIRED"
+    assert requests == []
+
+
+@pytest.mark.asyncio
+async def test_changed_patient_context_before_inference_does_not_call_provider(seed_data, db_session):
+    configure(db_session, seed_data)
+    run = create_run(db_session, seed_data["doctor_user"], RunRequest(feature_key="patient_summary", patient_id=seed_data["patient"].patient_id))
+    seed_data["patient"].allergy_history = "测试排队期间新增过敏记录"
+    db_session.commit()
+    claim = claim_next_run(db_session)
+    requests = []
+    await execute_claimed(*claim, transport=successful_transport(requests))
+    db_session.refresh(run)
+    assert run.status == "failed"
+    assert run.error_code == "TASK_CONTEXT_CHANGED"
+    assert requests == []
+
+
+@pytest.mark.asyncio
+async def test_changed_prescription_rules_before_inference_do_not_use_stale_tool_results(seed_data, db_session):
+    configure(db_session, seed_data, "interaction_review")
+    run = create_run(
+        db_session,
+        seed_data["doctor_user"],
+        RunRequest(feature_key="interaction_review", patient_id=seed_data["patient"].patient_id, input={"prescription_id": seed_data["prescription"].prescription_id}),
+    )
+    db_session.add(
+        PrescriptionReviewRule(
+            rule_type="contraindication", drug_a=seed_data["pharmaceutical"].name, severity=3, message="测试新增审方规则", source="测试", version="test", status=1, create_time=utcnow()
+        )
+    )
+    db_session.commit()
+    claim = claim_next_run(db_session)
+    requests = []
+    await execute_claimed(*claim, transport=successful_transport(requests))
+    db_session.refresh(run)
+    assert run.status == "failed"
+    assert run.error_code == "TASK_TOOLS_CHANGED"
+    assert requests == []
+
+
+@pytest.mark.asyncio
+async def test_context_change_during_inference_rejects_output_and_keeps_actual_usage(seed_data, db_session):
+    from app import database
+
+    configure(db_session, seed_data)
+    run = create_run(db_session, seed_data["doctor_user"], RunRequest(feature_key="patient_summary", patient_id=seed_data["patient"].patient_id))
+    claim = claim_next_run(db_session)
+    requests = []
+    baseline = successful_transport(requests)
+
+    def change_during_model_call(request):
+        with database.SessionLocal() as session:
+            session.get(Patient, seed_data["patient"].patient_id).allergy_history = "测试推理期间新增过敏记录"
+            session.commit()
+        return baseline.handle_request(request)
+
+    await execute_claimed(*claim, transport=httpx.MockTransport(change_during_model_call))
+    db_session.refresh(run)
+    assert len(requests) == 1
+    assert run.status == "failed"
+    assert run.error_code == "TASK_CONTEXT_CHANGED"
+    assert (run.input_tokens, run.output_tokens) == (5, 7)
+    assert json.loads(run.result_json) == {}

@@ -3,9 +3,12 @@
 import datetime
 import json
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Response
+from fastapi.responses import JSONResponse
+from pydantic import ValidationError
 from sqlalchemy.orm import Session
 
+from app.clinical_scores import CALCULATION_VERSION, LEGACY_CALCULATION_VERSION, SCORE_DEFINITIONS, ManualScoreRequest, compute_manual_score, inspect_manual_components
 from app.database import get_db
 from app.dependencies import ADMIN_ROLES, CLINICAL_ROLES, NURSING_ROLES, PHARMACY_ROLES, User, require_roles
 from app.models import Admission, CssdInstrument, IcuScoreRecord, PathwayEnrollment, Patient, PivasBatch
@@ -212,70 +215,53 @@ def transition_pivas(req: dict, current_user: User = Depends(require_roles(*PIVA
 
 # ---------------- ICU/PACU 评分 ----------------
 
-GCS_ITEMS = {"eye": (4, "睁眼"), "verbal": (5, "语言"), "motor": (6, "运动")}
-
-
 def _compute_score(score_type: str, detail: dict) -> tuple[int, str]:
-    """按评分类型汇总得分并给出结论。分项值由录入者按评分表填写。"""
-    if score_type == "gcs":
-        eye = int(detail.get("eye", 4))
-        verbal = int(detail.get("verbal", 5))
-        motor = int(detail.get("motor", 6))
-        for (low, _), val in zip(GCS_ITEMS.values(), (eye, verbal, motor)):
-            if not 1 <= val <= low + 0:  # eye 1-4, verbal 1-5, motor 1-6
-                raise ValueError("GCS 分项取值不合法（睁眼1-4/语言1-5/运动1-6）")
-        total = eye + verbal + motor
-        interp = "轻度" if total >= 13 else "中度" if total >= 9 else "重度意识障碍"
-        return total, interp
-    if score_type == "apache2":
-        age = int(detail.get("age_points", 0))
-        chronic = int(detail.get("chronic_health_points", 0))
-        aps = detail.get("aps_total")
-        if aps is None:
-            raise ValueError("APACHE II 必须填写急性生理学评分合计（APS）")
-        total = age + int(aps) + chronic
-        if not 0 <= total <= 71:
-            raise ValueError("APACHE II 总分应在 0-71 之间")
-        interp = f"死亡风险分级：{'低' if total <= 9 else '中' if total <= 19 else '高' if total <= 29 else '极高'}（{total} 分）"
-        return total, interp
-    if score_type == "sofa":
-        items = {k: v for k, v in detail.items() if k.endswith("_score")}
-        total = sum(int(v) for v in items.values())
-        if not 0 <= total <= 24:
-            raise ValueError("SOFA 总分应在 0-24 之间")
-        interp = "脏器功能：良好" if total < 6 else "损伤" if total < 11 else "衰竭风险高"
-        return total, interp
-    if score_type == "aldrete":
-        total = sum(int(v) for k, v in detail.items() if k.endswith("_score"))
-        if not 0 <= total <= 10:
-            raise ValueError("Aldrete 总分应在 0-10 之间")
-        interp = "达 PACU 转出标准（≥9）" if total >= 9 else "未达转出标准（需 ≥9）"
-        return total, interp
-    if score_type == "steward":
-        total = sum(int(v) for k, v in detail.items() if k.endswith("_score"))
-        if not 0 <= total <= 6:
-            raise ValueError("Steward 总分应在 0-6 之间")
-        interp = "达转出标准（≥4）" if total >= 4 else "未达转出标准（需 ≥4）"
-        return total, interp
-    raise ValueError("评分类型必须为 apache2/sofa/gcs/aldrete/steward")
+    """Compatibility helper for the strict, explicitly versioned manual sum."""
+    return compute_manual_score(score_type, detail)
 
 
 def _score_ser(s: IcuScoreRecord) -> dict:
+    try:
+        detail = json.loads(s.detail_json) if s.detail_json is not None else None
+    except (ValueError, TypeError):
+        detail = None
+    version = getattr(s, "calculation_version", None) or LEGACY_CALCULATION_VERSION
+    legacy = version != CALCULATION_VERSION
+    definition = SCORE_DEFINITIONS.get(s.score_type)
+    assessed_at = getattr(s, "assessed_at", None)
+    assessed_iso = None
+    if assessed_at is not None:
+        assessed_at = assessed_at.replace(tzinfo=datetime.UTC) if assessed_at.tzinfo is None else assessed_at.astimezone(datetime.UTC)
+        assessed_iso = assessed_at.isoformat().replace("+00:00", "Z")
     return {
         "score_id": s.score_id,
         "patient_id": s.patient_id,
         "patient_name": s.patient.name if s.patient else "",
-        "admission_id": s.admission_id or "",
+        "admission_id": s.admission_id or None,
+        "admission_linkage": "recorded_not_independently_verified" if s.admission_id else "not_recorded",
         "score_type": s.score_type,
-        "score_type_text": {"apache2": "APACHE II", "sofa": "SOFA", "gcs": "GCS", "aldrete": "Aldrete", "steward": "Steward"}.get(s.score_type, s.score_type),
+        "score_type_text": definition.label if definition and not legacy else {"apache2": "APACHE II", "sofa": "SOFA", "gcs": "GCS", "aldrete": "Aldrete", "steward": "Steward"}.get(s.score_type, s.score_type),
+        "score_definition": definition.edition if definition and not legacy else "legacy_unverified",
         "scene": s.scene,
         "total_score": s.total_score,
+        "detail": detail,
+        "calculation_version": version,
+        "legacy_unverified": legacy,
+        "component_integrity": inspect_manual_components(s.score_type, detail, s.total_score, version),
+        "source_verification": "not_independently_verified",
+        "clinical_validation": "not_provided",
+        "calculation_method": "legacy_unverified" if legacy else "manual_component_sum",
         "interpretation": s.interpretation or "",
+        "assessed_at": assessed_iso,
+        "time_basis": "assessed_at_declared" if assessed_iso else "assessment_time_unknown",
         "assess_time": s.assess_time.strftime("%Y-%m-%d %H:%M:%S") if s.assess_time else "",
+        "create_time": s.create_time.strftime("%Y-%m-%d %H:%M:%S") if s.create_time else "",
+        "scope_note": "分项完整性仅核对固定字段、整数范围与汇总，不证明原始观察、人工赋分或临床判断正确；assess_time/create_time是原录入记录时间，不替代实际评估时间。未绑定住院时不按场景或日期推定住院归属。"
+        + ("历史版本保留原总分与原解释，未经本版核实，不能视为当前计算结论。" if legacy else ""),
     }
 
 
-@router.get("/icuScore/getList")
+@router.get("/icuScore/getList", response_class=JSONResponse)
 def list_scores(patient_id: int | None = None, score_type: str | None = None, scene: str | None = None, current_user: User = Depends(require_roles(*SCORE_ROLES)), db: Session = Depends(get_db)):
     query = db.query(IcuScoreRecord)
     if patient_id is not None:
@@ -288,32 +274,45 @@ def list_scores(patient_id: int | None = None, score_type: str | None = None, sc
     return {"code": 200, "msg": "success", "data": [_score_ser(s) for s in rows]}
 
 
-@router.post("/icuScore/create")
-def create_score(req: dict, current_user: User = Depends(require_roles(*SCORE_ROLES)), db: Session = Depends(get_db)):
-    patient = db.query(Patient).filter(Patient.patient_id == req.get("patient_id")).first()
-    if not patient:
-        return {"code": 500, "msg": "患者不存在"}
-    score_type = (req.get("score_type") or "").strip()
-    detail = req.get("detail") or {}
+@router.post("/icuScore/create", response_class=JSONResponse)
+def create_score(req: dict, response: Response, current_user: User = Depends(require_roles(*SCORE_ROLES)), db: Session = Depends(get_db)):
     try:
-        total, interp = _compute_score(score_type, detail)
+        parsed = ManualScoreRequest.model_validate(req)
+        total, interp = compute_manual_score(parsed.score_type, parsed.detail)
+    except ValidationError as exc:
+        response.status_code = 400
+        problem = exc.errors(include_input=False, include_url=False)[0]
+        return {"code": 400, "msg": "评分请求无效：" + ".".join(map(str, problem["loc"])) + " " + problem["msg"]}
     except ValueError as e:
+        response.status_code = 400
         return {"code": 400, "msg": str(e)}
+    patient = db.get(Patient, parsed.patient_id)
+    if patient is None:
+        response.status_code = 404
+        return {"code": 404, "msg": "患者不存在"}
+    if parsed.admission_id is not None:
+        admission = db.get(Admission, parsed.admission_id)
+        if admission is None or admission.patient_id != patient.patient_id:
+            response.status_code = 400
+            return {"code": 400, "msg": "住院记录不存在或不属于所选患者"}
+    recorded_at = datetime.datetime.now(datetime.UTC).replace(tzinfo=None)
     item = IcuScoreRecord(
         patient_id=patient.patient_id,
-        admission_id=(req.get("admission_id") or "").strip() or None,
-        score_type=score_type,
-        scene=(req.get("scene") or "icu").strip(),
+        admission_id=parsed.admission_id,
+        score_type=parsed.score_type,
+        scene=parsed.scene,
         total_score=total,
-        detail_json=json.dumps(detail, ensure_ascii=False),
+        detail_json=json.dumps(parsed.detail, ensure_ascii=False),
         interpretation=interp,
+        calculation_version=CALCULATION_VERSION,
+        assessed_at=parsed.assessed_at,
         assessor_id=current_user.user_id,
-        assess_time=datetime.datetime.now(),
-        create_time=datetime.datetime.now(),
+        assess_time=recorded_at,
+        create_time=recorded_at,
     )
     db.add(item)
     db.commit()
-    return {"code": 200, "msg": "success", "data": {"score_id": item.score_id, "total_score": total, "interpretation": interp}}
+    return {"code": 200, "msg": "success", "data": _score_ser(item)}
 
 
 # ---------------- 临床路径入组 ----------------

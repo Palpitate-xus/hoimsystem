@@ -318,7 +318,8 @@ class TestIcuScorePathway:
         })
         assert r.json()["code"] == 200
         assert r.json()["data"]["total_score"] == 12
-        assert "中度" in r.json()["data"]["interpretation"], "GCS 9-12 为中度意识障碍"
+        assert "人工分项合计12分" in r.json()["data"]["interpretation"]
+        assert "中度" not in r.json()["data"]["interpretation"], "人工总分不自动推断诊断或预后"
 
         # 越界拒绝
         r = await async_client.post("/api/icuScore/create", headers=headers, json={
@@ -334,7 +335,8 @@ class TestIcuScorePathway:
             "detail": {"activity_score": 2, "respiration_score": 2, "circulation_score": 2, "consciousness_score": 2, "color_score": 1},
         })
         assert r.json()["data"]["total_score"] == 9
-        assert "达" in r.json()["data"]["interpretation"]
+        assert "1970" in r.json()["data"]["interpretation"]
+        assert "不自动认定" in r.json()["data"]["interpretation"]
 
     async def test_pathway_enrollment_flow(self, async_client, seed_data, auth_headers):
         from app.models import ClinicalPathway

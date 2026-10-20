@@ -1,0 +1,712 @@
+{
+  "recorded_at_utc": "2026-10-20T15:48:15.608250+00:00",
+  "baseline_commit": "0333112558cbfe03050a7f37a6d80ce6733c4385",
+  "platform_commit": "6b736a0f520d8da73205bdea6d76c08a7727ea29",
+  "recording_head_is_before_evidence_documentation_commit": true,
+  "goal_status": "active",
+  "version_management": {
+    "branch": "feature/ai-hospital-platform",
+    "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+    "commits_this_batch_before_evidence_commit": 25,
+    "commits_since_original_baseline_before_evidence_commit": 261,
+    "frequent_small_function_commits": true
+  },
+  "scope": "Independent adult KDIGO 2012 observed-criterion computation, immutable original evidence and human applicability attestations, dual-reference task execution, complete response recomputation, Super-admin governance, actual container and isolated MySQL verification.",
+  "real_patient_data_used": false,
+  "existing_hospital_database_accessed": false,
+  "existing_hospital_backend_contacted": false,
+  "production_deployment_performed": false,
+  "clinical_validation_performed": false,
+  "stored_business_ai_configuration_changed": false,
+  "inventory": {
+    "business_router_routes": 689,
+    "all_main_app_api_routes": 690,
+    "router_modules": 94,
+    "orm_tables": 168,
+    "vue_view_files": 159,
+    "capabilities": 80,
+    "independent_default_prompts": 80,
+    "catalog_version": "2026.10.20.6",
+    "source_reference_keys": 28,
+    "alembic_heads": [
+      "20261020_ai_aki_sources"
+    ],
+    "aki_source_keys": [
+      "aki_assessment_id",
+      "observation_window_id"
+    ],
+    "isolated_final_inventory": {
+      "path": "/tmp/hoim-aki-platform-final-inventory.json",
+      "sha256": "3082d05cea0800bdf13f87e7a31f1f86f5fcc20cabbc93be5346c97e47dceb45"
+    },
+    "original_inventory_preserved": {
+      "path": "/tmp/hoim-aki-platform-inventory.json",
+      "sha256": "44941429378829725007d22d315a7f1eeebd5306e627f6190371cc7619c13f5b"
+    },
+    "inventory_is_read_only_and_does_not_import_dotenv_or_connect_database": true,
+    "fifty_seven_final_implementation_hashes_still_match_independent_capture": true,
+    "additional_generated_artifacts_bound_below": [
+      "doc/ai-prompts.json",
+      "doc/api-rbac-matrix.md",
+      "fastapi_be/rbac_matrix.json"
+    ]
+  },
+  "fixed_rule_contract": {
+    "schema_version": "7",
+    "model_prefix": "aki:",
+    "rule_id": "kdigo_aki_2012",
+    "recipe_digest": "f200d6d6d3517f48552125bf1438c499f52fe1caf008f1c93f20c5b6738febdc",
+    "minimum_adult_age": 18,
+    "criterion_axes": [
+      "creatinine_48h",
+      "creatinine_ratio_7d",
+      "creatinine_absolute_stage3",
+      "urine_6h",
+      "urine_12h",
+      "urine_24h",
+      "anuria_12h",
+      "acute_rrt"
+    ],
+    "same_native_units_and_full_original_identity_required": true,
+    "si_change_threshold_umol_l": "26.5",
+    "si_absolute_stage3_threshold_umol_l": "353.6",
+    "absolute_stage3_requires_creatinine_based_acute_change": true,
+    "urine_policy": "whole_original_interval_average_v1; exact original boundaries and Fraction arithmetic; never proration, interpolation, gap summing, or a claim of continuously low hourly output",
+    "positive_complete_subchains_survive_localizable_missing_coverage": true,
+    "overlaps_or_unselected_active_intervals_block_urine_axis": true,
+    "complete_twelve_hour_zero_urine_does_not_require_inferred_weight": true,
+    "old_rrt_before_window_is_unknown_without_clearing_other_positive_axes": true,
+    "maintenance_dialysis_and_pediatric_egfr_outside_adult_scope": true,
+    "aki_excluded_always_false": true,
+    "no_stage_zero_future_probability_complete_episode_maximum_or_automatic_treatment": true,
+    "human_attestation_is_not_independent_clinical_truth_validation": true
+  },
+  "super_admin": {
+    "all_eighty_features_share_model_prompt_role_activation_knowledge_validation_and_audit_management": true,
+    "independent_news2_and_aki_publication_slots": true,
+    "fixed_recipe_and_input_policy_only_no_arbitrary_thresholds_or_code": true,
+    "clinical_rrt_and_creatinine_review_need_actual_doctor_identity_role_and_current_care": true,
+    "super_admin_governance_does_not_replace_clinical_care_qualification": true,
+    "capability_probe": "Saved-provider expected_revision; authenticated metadata GET only; current role and provider revision rechecked after await; no patient or scoring request; fills an unsaved model form only.",
+    "capability_checks_and_rule_publication_never_approve_clinical_effects_or_enable_features": true
+  },
+  "gateway_and_lifecycle": {
+    "outbound": "Only the validated typed AkiSource plus complete system/task instructions; no patient/admission IDs, whole observation window, provenance free text, or user question.",
+    "all_typed_analysis_and_fixed_result_recomputed": true,
+    "full_prompt_runtime_recipe_and_source_binding_required": true,
+    "tampered_stage_quantity_criterion_duration_probability_or_free_text_rejected": true,
+    "queue_inflight_and_ordinary_history_recheck_current_requester_original_source_and_care": true,
+    "older_cross_admission_presumed_baseline_requires_separate_current_requester_authorization": true,
+    "super_frozen_history_audit_never_bypasses_current_new_execution": true,
+    "ui_validates_private_original_scope_and_public_source_together": true,
+    "evidence_indexes_resolve_only_allowlisted_same_source_id_paths_in_verified_frozen_context": true,
+    "selection_role_session_cancellation_and_late_receipt_guards": true
+  },
+  "migration_and_storage": {
+    "new_assessment_tables": 1,
+    "new_utc_datetime6_columns": 3,
+    "new_bounded_mediumtext_assessment_max_bytes": 262144,
+    "v1_window_default_legacy_budget_bytes": 40000,
+    "v2_independent_window_budget_bytes": 65535,
+    "prior_v1_v2_serialized_fields_values_and_hash_recipe_unchanged": true,
+    "complete_task_input_evidence_and_result_text_max_bytes_each": 65535,
+    "oversize_input_rejected_before_queue_or_audit_without_truncation": true,
+    "oversize_result_fails_result_storage_limit_preserves_usage_and_keeps_empty_result": true,
+    "sixty_four_intervals_is_a_source_count_bound_not_a_guarantee_that_every_envelope_fits": true,
+    "default_capacity_actual_success": {
+      "path": "/tmp/hoim-aki-capacity-final-v2-verification.json",
+      "sha256": "610a7faf093ebeebed27ca426e71064a7f944ba1e3a53d1155f6192a05d0beab"
+    },
+    "default_capacity_capture_scope": "Queued-only SQLite memory capacity measurement, before the later global nursing UUID minimization fix. It does not claim final worker execution; the final MySQL artifact below captures the final context.py and the actual complete worker.",
+    "actual_isolated_mysql": {
+      "path": "/tmp/hoim-aki-mysql-final-verification.json",
+      "sha256": "80fe31014c7cfb8d11f47f3edb7f27351b5edb7a5b58ca54a81f00468ce4de38"
+    },
+    "final_mysql_twenty_four_hour_bytes": {
+      "window": 47911,
+      "input": 64208,
+      "evidence": 6585,
+      "metadata": 633,
+      "result": 37847
+    },
+    "mysql_failed_downgrade_evidence_preserved": {
+      "path": "/tmp/hoim-aki-mysql-downgrade-failure-verification.json",
+      "sha256": "b67376c347dab1bca23f153f2fa653cdbe3750ff8dffa34a9e05855fcb797f43"
+    },
+    "mysql_fk_dependent_index_downgrade_fix": "Drop the new assessment table directly; MySQL removes its indexes/FK together. Never drop its required window index before dropping the table."
+  },
+  "actual_independent_container": {
+    "final": {
+      "path": "/tmp/hoim-aki-container-final-verification.json",
+      "sha256": "8d688d3168378a280dd876138f4df4a41fdf4f8a9d6aab01da711ed12e1311a3"
+    },
+    "pre_rrt_fix_record_preserved": {
+      "path": "/tmp/hoim-aki-container-verification.json",
+      "sha256": "94b85d48f0a3e437aa0c3ff50c0610e6bbc7f116ed9d78b16ad43706798b8308"
+    },
+    "synthetic_only": true,
+    "actual_tasks": 17,
+    "http_responses": 20,
+    "http_attempts_including_startup_connection_refusals": 30,
+    "seconds": 4.623,
+    "image_id": "sha256:cdc7a2e700583a8ceabf73d2f914df2baec3465dc4037ca4609a54cf1362a384",
+    "host_runtime": {
+      "clinical_validation": "not_provided",
+      "engine": "stdlib-kdigo-aki-rules",
+      "engine_versions": {
+        "fastapi": "0.136.1",
+        "pydantic": "2.12.4"
+      },
+      "feature_key": "aki_risk",
+      "implementation": {
+        "aki_config.py": "42f679574ae03cd5d66d0d95278133048bf04edc39b0490ddd2bced228dfb282",
+        "aki_contract.py": "61bb8962731da667e78e6cddda413bc8e7b19fa25d1fca60c7796f638bb34e8a",
+        "aki_model.py": "bbd74bff1497f69abb0a6b25927e3ee2a90922822d07fd9a091664e8c6e37f0a",
+        "aki_server.py": "41de34d41bdb13d1e781f83f8a5648e673bf94912b9dc55b646d1ef845f7d89c"
+      },
+      "independent_implementation": true,
+      "max_request_bytes": 131072,
+      "model_version": "aki:2736f795f2ab862ba306f3d9db6026a2f32338731ca5b1f27e37a912631c755e",
+      "population_applicability": "not_independently_verified",
+      "prompt_handling": "provenance_only",
+      "python_version": "3.13.12",
+      "recipe": {
+        "absolute_stage3": {
+          "at_least": {
+            "mg/dL": "4.0",
+            "umol/L": "353.6"
+          },
+          "requires_positive_creatinine_acute_change": true,
+          "si_policy": "table2_353.6_prose354_is_rounded_no_hidden_conversion"
+        },
+        "anuria": {
+          "at_least_hours": 12,
+          "stage": 3,
+          "volume_ml": "0"
+        },
+        "arithmetic": "exact_fractions_of_decimal_inputs_and_integer_utc_microseconds_no_rounded_ratios",
+        "clinical_validation": "not_provided",
+        "creatinine_48h": {
+          "increase_at_least": {
+            "mg/dL": "0.3",
+            "umol/L": "26.5"
+          },
+          "max_hours": 48
+        },
+        "creatinine_ratio": {
+          "comparison": "exact_unrounded_cross_multiplication",
+          "max_observed_hours": 168,
+          "stage_thresholds": [
+            [
+              "1.5",
+              1
+            ],
+            [
+              "2.0",
+              2
+            ],
+            [
+              "3.0",
+              3
+            ]
+          ]
+        },
+        "criterion_negative": "not_met_in_selected_data_never_global_aki_exclusion",
+        "criterion_order": [
+          "creatinine_48h",
+          "creatinine_ratio_7d",
+          "creatinine_absolute_stage3",
+          "urine_6h",
+          "urine_12h",
+          "urine_24h",
+          "anuria_12h",
+          "acute_rrt"
+        ],
+        "input_policy": {
+          "anuria": "known_zero_complete_chain_at_least_12h_does_not_require_weight",
+          "baseline": "explicit_actual_source_observed_within_7d_or_older_source_with_clinician_presumed_7d_rise_attestation",
+          "conversion": "none",
+          "creatinine": "explicit_index_48h_comparison_and_baseline_same_unit_same_reviewed_identity_no_automatic_selection",
+          "max_urine_intervals": 64,
+          "missing": "unknown_not_zero_no_aki_exclusion_no_automatic_clinical_action",
+          "population": "declared_adult_at_least_18_no_pediatric_egfr",
+          "rrt": "explicit_clinician_confirmed_new_acute_aki_initiation_not_maintenance_or_order_inference",
+          "rrt_event_period_policy": "initiation_in_selected_window_start_through_evaluation_older_event_unknown_requires_current_episode_review_not_a_clinical_episode_duration_limit",
+          "units": [
+            "mg/dL",
+            "umol/L"
+          ],
+          "urine": "whole_original_interval_average_v1",
+          "urine_selection": "all_intersecting_active_members_checked_hidden_omissions_or_overlap_block_axis_locatable_missing_rows_split_complete_subchains",
+          "urine_subperiods": "consecutive_whole_original_intervals_only_no_clipping_proration_hourly_imputation_or_rounding",
+          "weight": "explicit_measured_kg_before_period_with_whole_period_applicability_attestation_no_default_ideal_or_latest_selection"
+        },
+        "minimum_stage": "highest_supported_positive_criterion_1_or_2_lower_bound_3_reaches_scale_ceiling_not_episode_completeness",
+        "probabilities": "not_provided",
+        "prompt_handling": "provenance_only",
+        "rrt": {
+          "acute_initiated_for_aki": 3,
+          "event_period_policy": "selected_window_start_inclusive_through_evaluation_older_event_unknown",
+          "maintenance": "outside_scope"
+        },
+        "rule_id": "kdigo_aki_2012",
+        "time_scope": "selected_assessment_data_not_entire_aki_episode_maximum_48h7d_are_diagnosis_not_episode_staging_limits",
+        "urine": [
+          {
+            "at_least_hours": 6,
+            "below_ml_kg_h": "0.5",
+            "key": "urine_6h",
+            "stage": 1
+          },
+          {
+            "at_least_hours": 12,
+            "below_ml_kg_h": "0.5",
+            "key": "urine_12h",
+            "stage": 2
+          },
+          {
+            "at_least_hours": 24,
+            "below_ml_kg_h": "0.3",
+            "key": "urine_24h",
+            "stage": 3
+          }
+        ],
+        "urine_partial_policy": "preserve_positive_complete_subchain_with_coverage_issues_never_cross_gaps_or_unmeasured_rows_negative_with_gaps_remains_unknown",
+        "urine_policy_limit": "collection_interval_average_not_proof_of_each_hour_persistent_oliguria",
+        "version": "kdigo_aki_adult_decimal_v1"
+      },
+      "recipe_digest": "f200d6d6d3517f48552125bf1438c499f52fe1caf008f1c93f20c5b6738febdc",
+      "rule_id": "kdigo_aki_2012",
+      "runtime_digest": "2736f795f2ab862ba306f3d9db6026a2f32338731ca5b1f27e37a912631c755e",
+      "schema_version": "7",
+      "timeout_seconds": 15
+    },
+    "container_runtime": {
+      "clinical_validation": "not_provided",
+      "engine": "stdlib-kdigo-aki-rules",
+      "engine_versions": {
+        "fastapi": "0.136.1",
+        "pydantic": "2.12.4"
+      },
+      "feature_key": "aki_risk",
+      "implementation": {
+        "aki_config.py": "42f679574ae03cd5d66d0d95278133048bf04edc39b0490ddd2bced228dfb282",
+        "aki_contract.py": "61bb8962731da667e78e6cddda413bc8e7b19fa25d1fca60c7796f638bb34e8a",
+        "aki_model.py": "bbd74bff1497f69abb0a6b25927e3ee2a90922822d07fd9a091664e8c6e37f0a",
+        "aki_server.py": "41de34d41bdb13d1e781f83f8a5648e673bf94912b9dc55b646d1ef845f7d89c"
+      },
+      "independent_implementation": true,
+      "max_request_bytes": 131072,
+      "model_version": "aki:2cf8b1ad783e803b8b592462992ffaf562a4d8c1b1daab1b57391cfb301c5cd7",
+      "population_applicability": "not_independently_verified",
+      "prompt_handling": "provenance_only",
+      "python_version": "3.12.13",
+      "recipe": {
+        "absolute_stage3": {
+          "at_least": {
+            "mg/dL": "4.0",
+            "umol/L": "353.6"
+          },
+          "requires_positive_creatinine_acute_change": true,
+          "si_policy": "table2_353.6_prose354_is_rounded_no_hidden_conversion"
+        },
+        "anuria": {
+          "at_least_hours": 12,
+          "stage": 3,
+          "volume_ml": "0"
+        },
+        "arithmetic": "exact_fractions_of_decimal_inputs_and_integer_utc_microseconds_no_rounded_ratios",
+        "clinical_validation": "not_provided",
+        "creatinine_48h": {
+          "increase_at_least": {
+            "mg/dL": "0.3",
+            "umol/L": "26.5"
+          },
+          "max_hours": 48
+        },
+        "creatinine_ratio": {
+          "comparison": "exact_unrounded_cross_multiplication",
+          "max_observed_hours": 168,
+          "stage_thresholds": [
+            [
+              "1.5",
+              1
+            ],
+            [
+              "2.0",
+              2
+            ],
+            [
+              "3.0",
+              3
+            ]
+          ]
+        },
+        "criterion_negative": "not_met_in_selected_data_never_global_aki_exclusion",
+        "criterion_order": [
+          "creatinine_48h",
+          "creatinine_ratio_7d",
+          "creatinine_absolute_stage3",
+          "urine_6h",
+          "urine_12h",
+          "urine_24h",
+          "anuria_12h",
+          "acute_rrt"
+        ],
+        "input_policy": {
+          "anuria": "known_zero_complete_chain_at_least_12h_does_not_require_weight",
+          "baseline": "explicit_actual_source_observed_within_7d_or_older_source_with_clinician_presumed_7d_rise_attestation",
+          "conversion": "none",
+          "creatinine": "explicit_index_48h_comparison_and_baseline_same_unit_same_reviewed_identity_no_automatic_selection",
+          "max_urine_intervals": 64,
+          "missing": "unknown_not_zero_no_aki_exclusion_no_automatic_clinical_action",
+          "population": "declared_adult_at_least_18_no_pediatric_egfr",
+          "rrt": "explicit_clinician_confirmed_new_acute_aki_initiation_not_maintenance_or_order_inference",
+          "rrt_event_period_policy": "initiation_in_selected_window_start_through_evaluation_older_event_unknown_requires_current_episode_review_not_a_clinical_episode_duration_limit",
+          "units": [
+            "mg/dL",
+            "umol/L"
+          ],
+          "urine": "whole_original_interval_average_v1",
+          "urine_selection": "all_intersecting_active_members_checked_hidden_omissions_or_overlap_block_axis_locatable_missing_rows_split_complete_subchains",
+          "urine_subperiods": "consecutive_whole_original_intervals_only_no_clipping_proration_hourly_imputation_or_rounding",
+          "weight": "explicit_measured_kg_before_period_with_whole_period_applicability_attestation_no_default_ideal_or_latest_selection"
+        },
+        "minimum_stage": "highest_supported_positive_criterion_1_or_2_lower_bound_3_reaches_scale_ceiling_not_episode_completeness",
+        "probabilities": "not_provided",
+        "prompt_handling": "provenance_only",
+        "rrt": {
+          "acute_initiated_for_aki": 3,
+          "event_period_policy": "selected_window_start_inclusive_through_evaluation_older_event_unknown",
+          "maintenance": "outside_scope"
+        },
+        "rule_id": "kdigo_aki_2012",
+        "time_scope": "selected_assessment_data_not_entire_aki_episode_maximum_48h7d_are_diagnosis_not_episode_staging_limits",
+        "urine": [
+          {
+            "at_least_hours": 6,
+            "below_ml_kg_h": "0.5",
+            "key": "urine_6h",
+            "stage": 1
+          },
+          {
+            "at_least_hours": 12,
+            "below_ml_kg_h": "0.5",
+            "key": "urine_12h",
+            "stage": 2
+          },
+          {
+            "at_least_hours": 24,
+            "below_ml_kg_h": "0.3",
+            "key": "urine_24h",
+            "stage": 3
+          }
+        ],
+        "urine_partial_policy": "preserve_positive_complete_subchain_with_coverage_issues_never_cross_gaps_or_unmeasured_rows_negative_with_gaps_remains_unknown",
+        "urine_policy_limit": "collection_interval_average_not_proof_of_each_hour_persistent_oliguria",
+        "version": "kdigo_aki_adult_decimal_v1"
+      },
+      "recipe_digest": "f200d6d6d3517f48552125bf1438c499f52fe1caf008f1c93f20c5b6738febdc",
+      "rule_id": "kdigo_aki_2012",
+      "runtime_digest": "2cf8b1ad783e803b8b592462992ffaf562a4d8c1b1daab1b57391cfb301c5cd7",
+      "schema_version": "7",
+      "timeout_seconds": 15
+    },
+    "different_host_and_container_versions_are_reported_truthfully": true,
+    "raw_values_and_fixed_outputs_equal_except_actual_runtime_provenance": true,
+    "isolation": {
+      "bind_mounts": [],
+      "cap_drop": [
+        "ALL"
+      ],
+      "cpu_nanos": 1000000000,
+      "host_port_bindings": {},
+      "memory_bytes": 268435456,
+      "network_mode": "none",
+      "pids_limit": 64,
+      "read_only": true,
+      "security_opt": [
+        "no-new-privileges"
+      ],
+      "tmpfs": {
+        "/tmp": "rw,noexec,nosuid,size=16m"
+      }
+    },
+    "cleanup_verified": true,
+    "no_hospital_configuration_database_dotenv_or_weights": true
+  },
+  "final_verification": {
+    "backend": {
+      "passed": 3542,
+      "skipped": 28,
+      "warnings": 2,
+      "seconds": 334.13,
+      "log": {
+        "path": "/tmp/hoim-aki-backend-verified-final.log",
+        "sha256": "b83e15056a78133b16decc0653dee2fa47b579e7b74cfe2f6cce653c70ce153c"
+      },
+      "new_default_passing_cases_since_baseline": 317,
+      "database": "Synthetic fixtures with SQLite memory overrides; no assertion that full pytest never reads dotenv.",
+      "optional_model_checks_remain_explicitly_skipped": true
+    },
+    "new_test_files_unique_collection": {
+      "count": 313,
+      "by_file": {
+        "tests/test_ai_aki_contract.py": 40,
+        "tests/test_ai_aki_model.py": 99,
+        "tests/test_ai_aki_server.py": 31,
+        "tests/test_ai_aki_probe.py": 16,
+        "tests/test_ai_aki_sources.py": 44,
+        "tests/test_ai_aki_sources_migration.py": 2,
+        "tests/test_ai_aki_pipeline.py": 36,
+        "tests/test_ai_aki_probe_admin.py": 18,
+        "tests/test_ai_result_storage.py": 4,
+        "tests/test_ai_risk_rule_isolation.py": 9,
+        "tests/test_ai_nursing_reference_privacy.py": 14
+      },
+      "log": {
+        "path": "/tmp/hoim-aki-unique-final-collection.log",
+        "sha256": "75a4e5c4df4f5a08e70a3c0526fb7b0bc89510c73c19aca8d06eab796131170b"
+      }
+    },
+    "final_source_freeze": "The final full suite was run again after the MySQL downgrade fix and revised migration-test assertion were committed, on the same final implementation bytes used by the browser build and inventory. No production file changed during this last run.",
+    "final_migration_tests": {
+      "path": "/tmp/hoim-aki-migration-mysql-fix-final-tests.log",
+      "sha256": "1237e9a53ab6e5d9ace223eff13a3c04132474d41848c0c530ca70ed80500e19"
+    },
+    "browser": {
+      "passed": 263,
+      "reported_duration": "5.9m",
+      "log": {
+        "path": "/tmp/hoim-aki-browser-verified-final.log",
+        "sha256": "57a952a3b599fe1935f937b7f02f896667b6b729817cbe75a0e667ad12dd69fa"
+      },
+      "production_ui_api_mocked_cases": 139,
+      "isolated_component_api_mocked_cases": 103,
+      "real_synthetic_loopback_http_cases": 21,
+      "by_file": {
+        "e2e/ai-aki-entry.spec.js": 9,
+        "e2e/ai-aki-source.spec.js": 31,
+        "e2e/ai-billing-entry.spec.js": 2,
+        "e2e/ai-clinical-entry.spec.js": 1,
+        "e2e/ai-coding-entry.spec.js": 1,
+        "e2e/ai-coordination-entry.spec.js": 6,
+        "e2e/ai-ecg-entry.spec.js": 6,
+        "e2e/ai-ecg-management.spec.js": 4,
+        "e2e/ai-forecast-entry.spec.js": 9,
+        "e2e/ai-forecast-model-management.spec.js": 8,
+        "e2e/ai-image-entry.spec.js": 4,
+        "e2e/ai-image-management.spec.js": 3,
+        "e2e/ai-image-model-management.spec.js": 7,
+        "e2e/ai-lab-entry.spec.js": 2,
+        "e2e/ai-laboratory-entry.spec.js": 9,
+        "e2e/ai-laboratory-source.spec.js": 19,
+        "e2e/ai-management.spec.js": 5,
+        "e2e/ai-news2-entry.spec.js": 10,
+        "e2e/ai-news2-source.spec.js": 31,
+        "e2e/ai-nursing-entry.spec.js": 9,
+        "e2e/ai-observation-entry.spec.js": 15,
+        "e2e/ai-observation-source.spec.js": 22,
+        "e2e/ai-operational-entry.spec.js": 3,
+        "e2e/ai-pathway-entry.spec.js": 5,
+        "e2e/ai-perioperative-entry.spec.js": 1,
+        "e2e/ai-quality-resource-entry.spec.js": 3,
+        "e2e/ai-review-curation.spec.js": 3,
+        "e2e/ai-services-entry.spec.js": 2,
+        "e2e/ai-speech-entry.spec.js": 5,
+        "e2e/ai-speech-management.spec.js": 2,
+        "e2e/ai-workbench.spec.js": 4,
+        "e2e/diagnosis-review.spec.js": 1,
+        "e2e/request-real-http.spec.js": 21
+      },
+      "api_calls_mocked_except_twenty_one_real_synthetic_loopback_http_cases": true
+    },
+    "frontend": {
+      "audit_vulnerabilities": 0,
+      "build_seconds": 21.59,
+      "existing_scss_warnings": 5,
+      "largestJavaScript": {
+        "file": "element-plus.1235714c.js",
+        "bytes": 647479
+      },
+      "totalJavaScript": 5780909,
+      "totalAssets": 6299155,
+      "limits": {
+        "largestJavaScript": 700000,
+        "totalJavaScript": 6000000,
+        "totalAssets": 7000000
+      },
+      "dependencies_browser_targets_and_limits_unchanged": true,
+      "all_product_src_files_no_newer_than_final_dist_index": true,
+      "dist_index_at_verification": {
+        "path": "/home/xusheng/workspace/hoimsystem/vue3-new-ui/dist/index.html",
+        "sha256": "d043b8b83c8fa0d34b2da946770092d696d61e19a3e31a6bf198821350756905"
+      },
+      "log": {
+        "path": "/tmp/hoim-aki-ui-verified-final.log",
+        "sha256": "8f4df2d1973a844694033c4ede70fbf46f64150c759497fd88145d5eda018213"
+      }
+    },
+    "targeted_pipeline_and_admin": {
+      "path": "/tmp/hoim-aki-root-pipeline-fifth.log",
+      "sha256": "070c7cc9ce7a7a4f4b4def0f618fe4fc02812981e57b641362e0d4c8aa76c84c"
+    },
+    "window_and_mounted_rbac_targeted": {
+      "path": "/tmp/hoim-aki-window-rbac-second.log",
+      "sha256": "9f8582dfd6b55b450872d048d310047a01588f906086db47a04426cc8785944a"
+    },
+    "independent_window_utf8_boundary_targeted": {
+      "path": "/tmp/hoim-aki-window-boundary-tests.log",
+      "sha256": "cc6327993e4a837874c85bd06179d125fb24f1efe64e45e6b6fc5a49f48230c3"
+    },
+    "complete_result_utf8_boundary_targeted": {
+      "path": "/tmp/hoim-aki-result-storage-final-tests.log",
+      "sha256": "cf92aa1fe2cd2b15efa58cb6b76fd9a16ffb40f1efe09e05a1e61b7873eb982b"
+    },
+    "static_ruff_full_format_prompt_export_and_route_matrix": {
+      "path": "/tmp/hoim-aki-static-final.log",
+      "sha256": "037b8c7b12af86fb30b12ad7ecc8b91aec18d5df9bb032dac22b204f717c94fc"
+    },
+    "changed_python_files_ruff_and_full_format": 41,
+    "exported_default_prompts": 80,
+    "actual_mounted_router_matrix": 689,
+    "nursing_canonical_reference_final": {
+      "path": "/tmp/hoim-nursing-reference-privacy-final.log",
+      "sha256": "7ec93b135c4b699dbd18ee9df179f1ab5225969da7e71e7312e12bcdd6bb3b5c"
+    },
+    "compiled_babel_exact_decimal_review": {
+      "path": "/tmp/hoim-aki-decimal-compiled.json",
+      "sha256": "2d1bbe0a4524b45592665a7b3f90a6f7179dbd2c004d45d4da0271340038155a"
+    },
+    "evidence_resolver_independent_review": {
+      "path": "/tmp/hoim-aki-evidence-resolver-readonly-review.json",
+      "sha256": "875dd8292a51041d5046e650cb8c3397203427d8ba89dade4b7069dc3cf9f45e"
+    }
+  },
+  "review_findings_fixed": [
+    "Historical RRT wrongly staged the current window.",
+    "Known complete urine witnesses were initially discarded by unrelated missing coverage.",
+    "A common 24-hour input exceeded the old window budget and repeated task envelope.",
+    "A result could overflow TEXT after provider output and appended business warnings.",
+    "Observed baselines from another original admission were too loosely accepted by the UI.",
+    "An indexed evidence popup initially displayed only a technical path.",
+    "Production Babel transformed BigInt exponentiation to unsupported Math.pow(BigInt,...).",
+    "Phone minimization randomly corrupted canonical nursing UUID source references.",
+    "MySQL rejected dropping the FK-dependent window index before dropping the new assessment table."
+  ],
+  "superseded_or_failed_evidence_preserved": {
+    "initial_full_backend_one_random_nursing_failure": {
+      "path": "/tmp/hoim-aki-full-backend-tests.log",
+      "sha256": "f01064a42ea313b19f6909ea63190dd375952769987d71495d64da4404ad9ce4"
+    },
+    "deterministic_nursing_before_fix": {
+      "path": "/tmp/hoim-nursing-reference-privacy-baseline.log",
+      "sha256": "523d736b21ca4fce71dfe9c0837975261f9587340f368e186b2a5ccbd641b08b"
+    },
+    "pre_capacity_production_defaults": {
+      "path": "/tmp/hoim-aki-capacity-diagnostic.json",
+      "sha256": "d492d33ce4a1d29d39b3c415c8f84e6b8e126fc961e5fce095fe708633641d88"
+    },
+    "pre_babel_fix_build": {
+      "path": "/tmp/hoim-aki-ui-build-final.log",
+      "sha256": "eb1fe6e2e7601a4a6eb02ed2c1ff871630dc13270b67ed3990c09856639361f7"
+    },
+    "earlier_successful_full_suite_before_final_downgrade_commit": {
+      "path": "/tmp/hoim-aki-full-backend-final.log",
+      "sha256": "a88f9b4e8cd5e8c74ed409e64b0bea249808125b56cc8348414084b1769074a3"
+    },
+    "explanation": "These records are preserved as failed or superseded evidence, never counted as final successful checks."
+  },
+  "official_sources": [
+    {
+      "url": "https://kdigo.org/guidelines/acute-kidney-injury/",
+      "verified_on": "2026-10-20",
+      "scope": "2012 formal suite; 2026 update still under preparation after public review."
+    },
+    {
+      "url": "https://kdigo.org/wp-content/uploads/2019/01/KDIGO-2012-AKI-Guideline-English.pdf",
+      "scope": "Chapter 2.1/Table 2, creatinine-based acute-change caveat, and diagnostic interval versus complete episode distinction; independent numeric implementation only."
+    },
+    {
+      "url": "https://kdigo.org/wp-content/uploads/2018/02/KDIGO-AKI-Controversies-Conf-FINAL.pdf",
+      "scope": "2020 controversies, original interval average and weight choice remain explicit software policies."
+    }
+  ],
+  "source_bindings": {
+    "doc/ai-prompts.json": "5f6fbf4890f72e025aba162bfb3ac2da39ab8d5cf32c9eb4f061472755e1247d",
+    "doc/api-rbac-matrix.md": "cccab9a7cb7b9442760748c260638c39b903ee097e1626afbb52da22d7224bf6",
+    "fastapi_be/Dockerfile.aki": "72b50a668b782995adbe556c837c0b7bd88cca4a7e104401ebfb8977c6c5c568",
+    "fastapi_be/alembic/versions/20261020_ai_aki_sources.py": "f373b20bf893337919a3530104cac9035b769524b8d86973e0a76e8b82754a19",
+    "fastapi_be/app/ai/aki_config.py": "42f679574ae03cd5d66d0d95278133048bf04edc39b0490ddd2bced228dfb282",
+    "fastapi_be/app/ai/aki_context.py": "3056696d422722ee949dc8f6da2ec8efe539529a372d0f296bc233e6229f61fb",
+    "fastapi_be/app/ai/aki_contract.py": "61bb8962731da667e78e6cddda413bc8e7b19fa25d1fca60c7796f638bb34e8a",
+    "fastapi_be/app/ai/aki_model.py": "bbd74bff1497f69abb0a6b25927e3ee2a90922822d07fd9a091664e8c6e37f0a",
+    "fastapi_be/app/ai/aki_probe.py": "cc3498e4a9d904c757fec7228d2fdadb213ab0a54c01b12e5f8c486fd1152381",
+    "fastapi_be/app/ai/aki_server.py": "41de34d41bdb13d1e781f83f8a5648e673bf94912b9dc55b646d1ef845f7d89c",
+    "fastapi_be/app/ai/aki_sources.py": "e3fd7904cb929843b8efc157e02e2bb0c5d51a0e74b337f118365a60a5fef98d",
+    "fastapi_be/app/ai/catalog.py": "e3198bca3456ff9d6d92adf3f066ef7dd504a57f72f368de3cfe916627f6cd52",
+    "fastapi_be/app/ai/context.py": "143f4390071f4668d4b115a81770c6cffb5eff105251940e2aa7d95927813774",
+    "fastapi_be/app/ai/gateway.py": "7fc77341a05a164d61f92ca9bbd06cbda72d54c91d7a4f19402f28ced8c49ab7",
+    "fastapi_be/app/ai/governance.py": "61cc8b572f2087205286c36fe25194c1446ad3bebd8d833af83aa6cf8d528a39",
+    "fastapi_be/app/ai/models.py": "259599a9b97946550166283cb0a897bf351d831c8933c1eb7e18ed1833a2239a",
+    "fastapi_be/app/ai/news2_sources.py": "831c19c451dc49a8c33b403e5c0ca6d9d2bd5432c753551a55a05232bc00d752",
+    "fastapi_be/app/ai/observation_windows.py": "9f142221773e9b33de7afbe5f0f1187ec8d53eb7811c0b26fcd05a29f502bec0",
+    "fastapi_be/app/ai/readiness.py": "9bc95c28c7565c18cad14feec6f2fe4ad7d801d25ee7cc13d997df3a9b53c98f",
+    "fastapi_be/app/ai/references.py": "b5cb3f3020ea316824d7e0d1a7f31d34fcf6d2b65f6f1c441060a5e10415f905",
+    "fastapi_be/app/ai/risk_rule_profiles.py": "2af993c463e3794ceac22808bb94a572dfdb625573cd9125adb3654adb28fed7",
+    "fastapi_be/app/ai/runtime.py": "048ecce9e34f82dada115ecd60db488c118c6803a888d6b66f71ec1e9dab76a6",
+    "fastapi_be/app/ai/schemas.py": "70aae7af88a6283e2690359a4c7bd89c3f4d42fc4f9a143b63b6827ecbda19a8",
+    "fastapi_be/app/ai/tools.py": "083b0c1e0abfe231ba362f514cd77590bfd662c9b44e05a23ba3e35940c71b86",
+    "fastapi_be/app/main.py": "2515eb34f497c69d55660f4a5560cde876d111d214150815bd0fd83c589f87e3",
+    "fastapi_be/app/routers/ai_admin.py": "4c5ba42c872005faea18fa11b4bdfe79c375f9a704c39771aa03c933b5e3be9d",
+    "fastapi_be/app/routers/ai_aki.py": "bf83d887c7b7fdb2cb49756ce53b9bd6d6582b2b6b68c2a4c2162d753cef6e53",
+    "fastapi_be/app/routers/ai_news2.py": "d2d723a51a7d2502c3b291bcd19d6307063d930f24a3c5c99a93b125dfd3910a",
+    "fastapi_be/app/routers/ai_risk_rules.py": "98f1a1349b5e92b6d2bdfee23b1010c35f89e1c68749df99da6072b5fd856ad0",
+    "fastapi_be/rbac_matrix.json": "a416385f898837838202562bf5379b1a3444d5a2c81d2e97244e55c56d5e7d35",
+    "fastapi_be/requirements-aki.txt": "73aa64c0161e909fa962ce945550e1398a02d2b3a9a45cb8444d31b70ebee493",
+    "fastapi_be/tests/test_ai_aki_contract.py": "d4d6b4694d25ca127e655b120916856d564b8b266d1e90610d96a62f4c83f52a",
+    "fastapi_be/tests/test_ai_aki_model.py": "419fd17bb5ac5fab1e8ab84fbe0fedda2e0b54394bb435dfb23e2b4e7d2aa913",
+    "fastapi_be/tests/test_ai_aki_pipeline.py": "cb8673678e20510a066f0c976caa62b3ffdf5830e80f00132cf9ab5fba6e8121",
+    "fastapi_be/tests/test_ai_aki_probe.py": "8c9a07a5e88bbd39b8fbef7020552b1f5b77876aa8b2123295ccde0e8a2322ec",
+    "fastapi_be/tests/test_ai_aki_probe_admin.py": "5fd7ac293a8f376859a13dad7b7270371ada089b93c89caf056383f6452eeeb9",
+    "fastapi_be/tests/test_ai_aki_server.py": "e2f2376984a347da6e02ac7464ab57f7cf2b6d50e8bb45c586b7e18efe4d64d5",
+    "fastapi_be/tests/test_ai_aki_sources.py": "55f1252ecbc8b79d16700c2de17a3f8ac2bf4e473f4a4d7c6928812c09410b1b",
+    "fastapi_be/tests/test_ai_aki_sources_migration.py": "12ed36d414802dd0b53fee5a2c3dea43a29a7794d937479eab0f7bef1a08c070",
+    "fastapi_be/tests/test_ai_catalog.py": "3743b3a0763d57a17dc5b511974dec7ec617613aa0906d75963561d3ad220980",
+    "fastapi_be/tests/test_ai_nursing_reference_privacy.py": "a41ebd4ed9cc75406b5f3c1677c363dbc32070167f62935bf9001575d606db7f",
+    "fastapi_be/tests/test_ai_observation_laboratory.py": "9cfe5edc09dd21b3c6ddc0d1b04cc794c851565060b64bd45c84aea27a28a22d",
+    "fastapi_be/tests/test_ai_observation_windows.py": "460be681cfe5ffc637c4c98d5c6f018524a584077ee1f9cefc2244b36747688f",
+    "fastapi_be/tests/test_ai_result_storage.py": "32413809709eca58508de772d74afc20c5ca8306b37275a1ab639e7b1a35f158",
+    "fastapi_be/tests/test_ai_risk_rule_isolation.py": "b1d04b5784b92b3ada90606a5788914ee6eaf1a080128b1e98de311ae7060cfc",
+    "fastapi_be/tests/test_rbac_drift.py": "fbca83c93a5c710337613e49101210a6ec1a850e32cdd0a20cd65a904824e69b",
+    "vue3-new-ui/e2e/ai-aki-entry.spec.js": "47d3d8679626429f5f8b49d46089c0388a3d23b632686365bb7f68b25624dc4e",
+    "vue3-new-ui/e2e/ai-aki-source.spec.js": "664046f287a97fa48cf5842ddf70d98c600c7615101d33d1f8ec66dc5f3be87e",
+    "vue3-new-ui/e2e/ai-news2-entry.spec.js": "676a5c4f8a008a76e52e0053200ae99717e335f14de4350abae127c94f02f972",
+    "vue3-new-ui/e2e/ai-news2-source.spec.js": "8ba6ff3ad6d11496816d507c3f22a8c04fd9f4e949993f3cd9068f052faf1ad3",
+    "vue3-new-ui/e2e/fixtures/aki-fixtures.cjs": "735da16beb97e6c3798ee352c816dfd636ba8499f226b222cf82adbe9c3e3492",
+    "vue3-new-ui/e2e/fixtures/aki-source-harness.cjs": "c6fcf317700a303c4b94d628fe52893f432dd3877a8d7afff5b19967e0d05437",
+    "vue3-new-ui/e2e/fixtures/check-aki-decimal-compiled.cjs": "ea497f4e0b4c0ca1b9b02375e9432b98cf2e7fd150c849d6af303e621c19dcb6",
+    "vue3-new-ui/src/api/aiAki.js": "713df02fbbdac5b96198eeef96e00b5c76a74a2b385cbf9c675673699f53c82a",
+    "vue3-new-ui/src/components/AIAkiFindings/index.vue": "543f82df848e982671c2f0d40f723df6d9f13b147196148f5dc13c4c2a23a044",
+    "vue3-new-ui/src/components/AIAkiInput/index.vue": "9ac0ae3174118631f1fe37b27e61a0bc586e8912c088d770c604971f9a64bb41",
+    "vue3-new-ui/src/components/AIAkiProviderCheck/index.vue": "41cec5c6a225ee37520de5aac108b8768296d67911bd04cd0d585dc9c3f20afd",
+    "vue3-new-ui/src/components/AIAssistant/index.vue": "e570d55df51ad11529bd739e18c8e556f37dd25004670ff8af440afaba013ff6",
+    "vue3-new-ui/src/views/system/AIRiskRuleManagement.vue": "31cdd114c6e0af3673b5c3200973aeb88b676a8e371d29c303475411f7e4b06d",
+    "vue3-new-ui/src/views/system/aiManagement.vue": "85b15e2e981f6fb98e808a5b0582cc74071c0195bdd454649d844e9ee9d34f02"
+  },
+  "source_binding_count": 60,
+  "eleven_historical_verification_records_unchanged": {
+    "doc/ai-ecg-verification.json": "1eedfa9eb918cf6e6b1ee1f201b7413760eeec501c128f4a73401741f0427f94",
+    "doc/ai-imaging-verification.json": "63646b181dae4f531abe233708a24f9b9cc05037ef95d57e1e6f39c7f9880148",
+    "doc/ai-nursing-verification.json": "a04248f9de57ddd878c1b408da1833f53651cd3535d8385d2275874a7f6f9517",
+    "doc/ai-forecast-verification.json": "9b5683bca58efcf7fc460410529fd5aeeed91e2646eb47be24b836cbadc20d63",
+    "doc/ai-frontend-dependencies-verification.json": "968757f4a75e921038133b3fa9a94947ab4d5607142dce8da964f2a13d00bb1d",
+    "doc/ai-observation-verification.json": "b75ab8c7ff94704cb823be59d51539f06a16a24edf0020b0e87edfd6cf6e6bee",
+    "doc/ai-laboratory-verification.json": "646103e4874b4f895424987520c7adfb6fb8afdd9eb6e2c7104ed2095b72752f",
+    "doc/ai-news2-verification.json": "363be8c61e2f36705dccc4604631e7d0e84aaa6cc922196ed36e48e740ca6570",
+    "doc/ai-speech-smoke.json": "41ad522da4f04e2a6d75595660ecbc2549acdcd159450aa99602b495c8e690a0",
+    "doc/ai-ecg-classifier-smoke.json": "838b0305249698617bc475f7158dfbfbb9e6e22e6d6e84e51974bfcfebb90c61",
+    "doc/ai-imaging-classifier-smoke.json": "b2185a31ff66c4602c10136d5b15404199f50cf7d65ea4a8be4718778c6a9e89"
+  },
+  "remaining_work": "Continue the active 80-feature goal: other specialist sources/models, sepsis and other disease-specific capabilities, actual authorized hospital integrations, and independent clinical or operational validation. No assertion that all eighty specialized models are complete."
+}

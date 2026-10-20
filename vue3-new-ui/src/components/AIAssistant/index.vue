@@ -11,6 +11,7 @@
         <p v-if="boundClinicalReferences.length">本次绑定资料：{{ boundClinicalReferences.join('、') }}。所选记录未注明对应就诊；选择就诊仅补充临床背景，不确认其归属。</p>
         <p v-if="boundPathwayReferences.length">本次绑定：{{ boundPathwayReferences.join('、') }}。住院关联以原记录核实；路径适用条件和已审核版本仍须核对。</p>
         <p v-if="props.initialInput.audio_asset_id">本次绑定原录音 {{ props.initialInput.audio_asset_id }}；以原登记资料核对患者与就诊，不能通过补充JSON替换。</p>
+        <p v-if="props.initialInput.ecg_asset_id">本次绑定原始心电 {{ props.initialInput.ecg_asset_id }}；以原登记资料核对患者与就诊，不能通过补充JSON替换。</p>
         <el-alert v-if="!selected.enabled" type="info" :closable="false" title="此功能尚未面向业务启用，由超级管理员配置模型和验证状态。" class="spaced" />
         <el-form-item v-if="selected.scope === 'patient'" label="患者">
           <el-select v-model="patientId" :disabled="!!props.patientId" filterable remote :remote-method="searchPatients" placeholder="搜索有访问权限的患者" style="width: 100%">
@@ -24,6 +25,7 @@
         </el-form-item>
         <el-form-item v-if="needsIncident" label="不良事件标识"><el-input v-model="incidentId" :disabled="!!props.initialInput.adverse_event_id" maxlength="10" placeholder="明确选择本患者事件的正整数标识" /><p>事件未记录就诊关联，不能按上报日期推定属于某次门诊或住院。</p></el-form-item>
         <ai-audio-input v-if="needsAudio && patientId" v-model="audioAssetId" :patient-id="patientId" :encounter-ref="encounterRef" :locked="!!props.initialInput.audio_asset_id" @availability="audioReady = $event" />
+        <ai-ecg-input v-if="needsEcg && patientId" v-model="ecgAssetId" :patient-id="patientId" :encounter-ref="encounterRef" :locked="!!props.initialInput.ecg_asset_id" @availability="ecgReady = $event" />
         <el-form-item v-if="needsPathway && patientId && !props.initialInput.pathway_enrollment_id" label="院内路径（可选）">
           <el-select v-model="pathwayId" :disabled="!!props.initialInput.pathway_id || pathwayOptionsLoading" :clearable="!props.initialInput.pathway_id" filterable placeholder="选择待比选的院内路径；也可仅使用审核指南" style="width: 100%" aria-label="待比选院内路径"><el-option v-for="item in pathwayOptions.items || []" :key="item.pathway_id" :value="String(item.pathway_id)" :disabled="!item.reviewed_for_current_scope" :label="`${item.name} · #${item.pathway_id}${item.reviewed_for_current_scope ? '' : ' · 当前范围未审核'}`" /></el-select>
           <p>{{ pathwayOptions.scope_note }}</p>
@@ -61,9 +63,9 @@
         </el-collapse>
         <el-alert v-if="selected.engine !== 'llm'" type="info" :closable="false" title="此能力通过专用模型处理，需要对应原始资料和已登记的适配服务。" class="spaced" />
         <div class="actions">
-          <el-button v-if="selected.scope === 'patient'" :disabled="!patientId || patientLoading || pathwayOptionsLoading || (needsAudio && (!audioAssetId || !audioReady))" @click="inspectContext">查看本次资料</el-button>
+          <el-button v-if="selected.scope === 'patient'" :disabled="!patientId || patientLoading || pathwayOptionsLoading || (needsAudio && (!audioAssetId || !audioReady)) || (needsEcg && (!ecgAssetId || !ecgReady))" @click="inspectContext">查看本次资料</el-button>
           <el-button v-if="needsOperations" :disabled="serviceOptionsLoading" @click="inspectOperationalContext">查看本次运营资料</el-button>
-          <el-button type="primary" :loading="submitting" :disabled="busy || patientLoading || serviceOptionsLoading || pathwayOptionsLoading || (needsAudio && (!audioAssetId || !audioReady)) || (!selected.enabled && !preview) || (selected.scope === 'patient' && !patientId) || (needsInventory && (!inventoryDrugs.length && !inventoryConsumables.length || serviceOptions.inventory_scope_available === false))" @click="submit">生成辅助建议</el-button>
+          <el-button type="primary" :loading="submitting" :disabled="busy || patientLoading || serviceOptionsLoading || pathwayOptionsLoading || (needsAudio && (!audioAssetId || !audioReady)) || (needsEcg && (!ecgAssetId || !ecgReady)) || (!selected.enabled && !preview) || (selected.scope === 'patient' && !patientId) || (needsInventory && (!inventoryDrugs.length && !inventoryConsumables.length || serviceOptions.inventory_scope_available === false))" @click="submit">生成辅助建议</el-button>
           <el-button v-if="busy" @click="cancel">取消接收结果</el-button>
         </div>
       </template>
@@ -81,6 +83,7 @@
       <ai-adr-findings :findings="run.adr_findings" @inspect="inspectEvidence" />
       <ai-pathway-findings :findings="run.pathway_findings" @inspect="inspectEvidence" />
       <ai-speech-findings :findings="run.audio_findings" :transcription="run.result?.transcription" :allow-copy="run.status === 'succeeded'" @inspect="inspectEvidence" @copy="copyDraft" />
+      <ai-ecg-findings :findings="run.ecg_findings" :analysis="run.result?.ecg_analysis" :allow-copy="run.status === 'succeeded'" @inspect="inspectEvidence" @copy="copyDraft" />
       <div v-if="run.tool_findings?.billing_reconciliation" class="spaced">
         <h4>原始账目与执行关联核对</h4><p>{{ run.tool_findings.billing_reconciliation.scope_note }}</p>
         <el-table v-if="run.tool_findings.billing_reconciliation.scope?.kind === 'inpatient'" :data="run.tool_findings.billing_reconciliation.checks" max-height="320" empty-text="本次范围暂无可核对住院费用">
@@ -139,6 +142,7 @@
       <ai-adr-findings :findings="contextData?.context?.adr_sources" @inspect="inspectPreviewEvidence" />
       <ai-pathway-findings :findings="contextData?.context?.pathway_sources" @inspect="inspectPreviewEvidence" />
       <ai-speech-findings v-if="contextDialog" :findings="contextData?.context" @inspect="inspectPreviewEvidence" />
+      <ai-ecg-findings v-if="contextDialog" :findings="contextData?.context" @inspect="inspectPreviewEvidence" />
       <el-collapse v-if="needsOperations"><el-collapse-item title="查看原始资料字段"><pre class="plain-text">{{ JSON.stringify(contextData, null, 2) }}</pre></el-collapse-item></el-collapse>
       <pre v-else class="plain-text">{{ JSON.stringify(contextData, null, 2) }}</pre>
     </el-dialog>
@@ -160,6 +164,8 @@ import AiAdrFindings from "@/components/AIAdrFindings/index.vue";
 import AiPathwayFindings from "@/components/AIPathwayFindings/index.vue";
 import AiAudioInput from "@/components/AIAudioInput/index.vue";
 import AiSpeechFindings from "@/components/AISpeechFindings/index.vue";
+import AiEcgInput from "@/components/AIEcgInput/index.vue";
+import AiEcgFindings from "@/components/AIEcgFindings/index.vue";
 
 const props = defineProps({ featureKeys: { type: Array, default: () => [] }, initialFeature: { type: String, default: "" }, patientId: { type: Number, default: null }, encounterRef: { type: String, default: "" }, initialInput: { type: Object, default: () => ({}) } });
 const store = useStore();
@@ -177,6 +183,7 @@ const needsOperations = computed(() => selected.value?.scope === "hospital"), ne
 const needsPlanning = computed(() => ["roster_optimization", "surgery_scheduling"].includes(featureKey.value));
 const needsIncident = computed(() => featureKey.value === "incident_rca"), incidentId = ref("");
 const needsAudio = computed(() => featureKey.value === "medical_transcription"), audioAssetId = ref(""), audioReady = ref(false);
+const needsEcg = computed(() => featureKey.value === "ecg_analysis"), ecgAssetId = ref(""), ecgReady = ref(false);
 const needsPathway = computed(() => ["treatment_pathway", "response_review"].includes(featureKey.value)), pathwayId = ref(null), pathwayOptions = ref({}), pathwayOptionsLoading = ref(false);
 const boundPathwayLabels = { pathway_id: "院内路径", pathway_enrollment_id: "原入径记录" };
 const boundPathwayReferences = computed(() => Object.entries(boundPathwayLabels).filter(([key]) => props.initialInput[key] != null).map(([key, label]) => `${label} #${props.initialInput[key]}`));
@@ -219,6 +226,7 @@ watch(featureKey, async () => {
   incidentId.value = props.initialInput.adverse_event_id == null ? "" : String(props.initialInput.adverse_event_id);
   pathwayId.value = props.initialInput.pathway_id == null ? null : String(props.initialInput.pathway_id);
   audioAssetId.value = props.initialInput.audio_asset_id == null ? "" : String(props.initialInput.audio_asset_id); audioReady.value = false;
+  ecgAssetId.value = props.initialInput.ecg_asset_id == null ? "" : String(props.initialInput.ecg_asset_id); ecgReady.value = false;
   serviceOptions.value = {}; serviceDepartment.value = props.initialInput.department_id || null; serviceDoctor.value = props.initialInput.doctor_id || null; serviceDate.value = props.initialInput.appointment_date || "";
   navigationStart.value = props.initialInput.start_node_id || null; navigationEnd.value = props.initialInput.end_node_id || null;
   operationsRange.value = props.initialInput.date_from && props.initialInput.date_to ? [props.initialInput.date_from, props.initialInput.date_to] : []; inventoryDrugs.value = [...(props.initialInput.drug_ids || [])]; inventoryConsumables.value = [...(props.initialInput.consumable_ids || [])]; serviceOptionsLoading.value = false;
@@ -237,6 +245,7 @@ watch(patientId, async id => {
   encounterRef.value = needsIncident.value ? "" : props.encounterRef || ""; prescriptionId.value = props.initialInput.prescription_id || null; contextData.value = null; encounters.value = []; prescriptions.value = [];
   pathwayId.value = props.initialInput.pathway_id == null ? null : String(props.initialInput.pathway_id);
   audioAssetId.value = props.initialInput.audio_asset_id == null ? "" : String(props.initialInput.audio_asset_id); audioReady.value = false;
+  ecgAssetId.value = props.initialInput.ecg_asset_id == null ? "" : String(props.initialInput.ecg_asset_id); ecgReady.value = false;
   if (needsIncident.value) { incidentId.value = props.initialInput.adverse_event_id == null ? "" : String(props.initialInput.adverse_event_id); patientLoading.value = false; return; }
   if (!id) return;
   const version = formVersion, key = featureKey.value;
@@ -251,7 +260,7 @@ watch(patientId, async id => {
   } finally { if (patientVersion === patientLoadVersion) patientLoading.value = false; }
 });
 watch(encounterRef, () => { stopPolling(); run.value = null; contextData.value = null; });
-watch([featureKey, patientId, encounterRef, prescriptionId, incidentId, pathwayId, audioAssetId, serviceDepartment, serviceDoctor, serviceDate, navigationStart, navigationEnd, operationsRange, operationsPlanRange, () => inventoryDrugs.value.join(','), () => inventoryConsumables.value.join(','), () => JSON.stringify(props.initialInput)], () => {
+watch([featureKey, patientId, encounterRef, prescriptionId, incidentId, pathwayId, audioAssetId, ecgAssetId, serviceDepartment, serviceDoctor, serviceDate, navigationStart, navigationEnd, operationsRange, operationsPlanRange, () => inventoryDrugs.value.join(','), () => inventoryConsumables.value.join(','), () => JSON.stringify(props.initialInput)], () => {
   selectionVersion += 1; stopPolling(); run.value = null; contextData.value = null; contextDialog.value = false; evidenceDialog.value = false; feedbackDialog.value = false;
 });
 watch(() => run.value?.run_id, () => { evidenceDialog.value = false; feedbackDialog.value = false; feedback.value = { outcome: "accepted", comment: "" }; });
@@ -264,6 +273,8 @@ watch(() => props.initialInput.adverse_event_id, value => { incidentId.value = v
 watch(() => props.initialInput.pathway_id, value => { pathwayId.value = value == null ? null : String(value); });
 watch(() => props.initialInput.audio_asset_id, value => { audioAssetId.value = value == null ? "" : String(value); });
 watch(audioReady, ready => { if (needsAudio.value && !ready) { stopPolling(); run.value = null; contextData.value = null; } });
+watch(() => props.initialInput.ecg_asset_id, value => { ecgAssetId.value = value == null ? "" : String(value); });
+watch(ecgReady, ready => { if (needsEcg.value && !ready) { stopPolling(); run.value = null; contextData.value = null; } });
 watch([featureKey, patientId, encounterRef], async () => {
   const version = ++pathwayOptionsVersion;
   pathwayOptions.value = {}; pathwayOptionsLoading.value = false;
@@ -295,8 +306,9 @@ function buildTaskInput() {
     catch { ElMessage.error("结构化资料应为有效 JSON 对象"); return; }
   }
   const input = { ...props.initialInput, ...extra, question: question.value };
-  for (const key of [...Object.keys(boundReferenceLabels), ...Object.keys(boundPathwayLabels), "audio_asset_id"]) if (props.initialInput[key] != null) input[key] = String(props.initialInput[key]);
+  for (const key of [...Object.keys(boundReferenceLabels), ...Object.keys(boundPathwayLabels), "audio_asset_id", "ecg_asset_id"]) if (props.initialInput[key] != null) input[key] = String(props.initialInput[key]);
   if (needsAudio.value && !props.initialInput.audio_asset_id) { if (audioAssetId.value) input.audio_asset_id = audioAssetId.value; else delete input.audio_asset_id; }
+  if (needsEcg.value && !props.initialInput.ecg_asset_id) { if (ecgAssetId.value) input.ecg_asset_id = ecgAssetId.value; else delete input.ecg_asset_id; }
   if (needsPathway.value && !props.initialInput.pathway_id && !props.initialInput.pathway_enrollment_id) { if (pathwayId.value) input.pathway_id = String(pathwayId.value); else delete input.pathway_id; }
   if (needsCoding.value && codingQuery.value.trim()) input.icd_query = codingQuery.value.trim();
   if (needsAppointment.value) { for (const [key, value] of [["department_id", serviceDepartment.value], ["doctor_id", serviceDoctor.value], ["appointment_date", serviceDate.value]]) { if (value) input[key] = value; else delete input[key]; } }
@@ -337,7 +349,9 @@ function inspectPreviewEvidence(id) { evidence.value = contextData.value?.eviden
 async function copyDraft() {
   const transcript = run.value.result.transcription;
   const segments = transcript ? ["原录音转写草稿，待逐段听音与角色核对：", ...transcript.segments.map(item => `[${item.start_ms}–${item.end_ms}毫秒] ${item.speaker}（角色待核实）\n${item.text}${item.uncertain ? '\n不确定：' + item.uncertainty_note : ''}`)] : [];
-  const text = [run.value.result.summary, ...run.value.result.sections.map(item => `${item.title}\n${item.content}`), ...segments].join("\n\n");
+  const ecg = run.value.result.ecg_analysis;
+  const ecgFindings = ecg ? ["原始心电候选草稿，待结合原波形和临床资料人工复核：", `原记录 ${ecg.asset_id}；原采样哈希 ${ecg.signal_hash}；原导联 ${ecg.processing.input_leads.join('、')}；实际使用 ${ecg.processing.used_leads.join('、')}`, ...ecg.findings.map(item => `${item.label}\n${item.description}\n导联：${item.leads.join('、')}；位置：${item.location === 'recording' ? '整段候选，不提供精确定位' : '原样本[' + item.start_sample + ', ' + item.end_sample_exclusive + ')'}；${item.score == null ? '未提供模型分数' : '模型原始分数 ' + item.score + '（非患病概率）'}；依据：${item.source_id}`)] : [];
+  const text = [run.value.result.summary, ...run.value.result.sections.map(item => `${item.title}\n${item.content}`), ...segments, ...ecgFindings].join("\n\n");
   try { await navigator.clipboard.writeText(text); ElMessage.success("草稿已复制，请核对后使用"); } catch { ElMessage.info("当前环境无法自动复制，请选中结果文本复制"); }
 }
 async function submitFeedback() { await reviewAIRun(run.value.run_id, feedback.value); feedbackDialog.value = false; feedback.value = { outcome: "accepted", comment: "" }; ElMessage.success("复核反馈已保存"); }

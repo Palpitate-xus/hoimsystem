@@ -52,6 +52,7 @@ def declaration():
             "finite_domains_status": "attested_complete",
             "basis_note": BASIS,
         },
+        "members": [{**ref(index + 1), "source_kind": item["kind"], "selection": "confirmed", "basis_note": BASIS} for index, item in enumerate(source["manifest"])],
         "cases": [
             {
                 "application_id": uid(501),
@@ -191,3 +192,20 @@ def test_choice_never_coerces_resource_identity_or_original_penalty():
     body["penalty"]["value"] = 0
     with pytest.raises(ValidationError):
         DomainChoice.model_validate(body)
+
+
+@pytest.mark.parametrize("change", ["missing", "duplicate", "excluded", "unknown", "kind", "content", "governance"])
+def test_selected_complete_original_cannot_bypass_its_whole_member_review(change):
+    body = declaration()
+    if change == "missing":
+        body["members"].pop(0)
+    elif change == "duplicate":
+        body["members"].append(copy.deepcopy(body["members"][0]))
+    elif change in {"excluded", "unknown"}:
+        body["members"][0]["selection"] = change
+    elif change == "kind":
+        body["members"][0]["source_kind"] = "resource_occupation_policy"
+    else:
+        body["members"][0]["expected_" + change + "_hash"] = "0" * 64
+    with pytest.raises(ValidationError):
+        ScenarioCreate.model_validate(body)

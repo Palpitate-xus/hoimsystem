@@ -10,6 +10,7 @@ from app.ai.surgery_contract import (
     MAX_BYTES,
     MAX_CASES,
     MAX_EQUIPMENT,
+    MAX_FACTS,
     MAX_PERSONS,
     MAX_ROOMS,
     MAX_STARTS,
@@ -17,6 +18,7 @@ from app.ai.surgery_contract import (
     UUID,
     Amount,
     CoverageStatus,
+    FactKind,
     ObjectiveMode,
     Period,
     StartChoice,
@@ -74,6 +76,11 @@ class OriginalReference(StrictModel):
     source_record_id: UUID
     expected_content_hash: SHA256
     expected_governance_hash: SHA256
+
+
+class MemberDeclaration(OriginalReference, Basis):
+    source_kind: FactKind
+    selection: Literal["confirmed", "excluded", "unknown"]
 
 
 class DomainChoice(StrictModel):
@@ -181,6 +188,7 @@ class ScenarioCreate(Basis):
     expected_capture_digest: SHA256
     objective_mode: ObjectiveMode
     problem_coverage: ProblemDeclaration
+    members: list[MemberDeclaration] = Field(max_length=MAX_FACTS)
     cases: list[CaseDomain] = Field(max_length=MAX_CASES)
     resources: list[ResourceDeclaration] = Field(max_length=MAX_ROOMS + MAX_PERSONS + MAX_EQUIPMENT)
 
@@ -188,6 +196,24 @@ class ScenarioCreate(Basis):
     def whole_request(self):
         if len({item.application_id for item in self.cases}) != len(self.cases) or len({item.resource_id for item in self.resources}) != len(self.resources):
             raise ValueError("Repeated actual case or physical resource")
+        members = {item.source_record_id: item for item in self.members}
+        if len(members) != len(self.members):
+            raise ValueError("Every relevant root requires exactly one complete member review")
+        for case in self.cases:
+            references = [
+                (case.requirements, "case_requirements"),
+                (case.duration_estimate, "case_duration_estimate"),
+                *((choice.duty_source, "resource_availability_busy") for demand in case.roles for choice in demand.choices if choice.duty_source is not None),
+            ]
+            for reference, expected_kind in references:
+                member = members.get(reference.source_record_id)
+                if (
+                    member is None
+                    or member.source_kind != expected_kind
+                    or member.selection != "confirmed"
+                    or any(getattr(member, key) != getattr(reference, key) for key in OriginalReference.model_fields)
+                ):
+                    raise ValueError("Every selected case/duty original must match its explicit confirmed member review")
         if sum(len(item.starts) for item in self.cases) > MAX_STARTS:
             raise ValueError("Complete finite starts exceed capacity; no truncation")
         selected = {item.resource_id for item in self.resources}

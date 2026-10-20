@@ -17,5 +17,7 @@ SOURCE_REFERENCE_KEYS = frozenset(
         "referral_id",
         "mdt_id",
         "reaction_id",
+        "pathway_id",
+        "pathway_enrollment_id",
     }
 )

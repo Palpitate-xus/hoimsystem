@@ -20,6 +20,9 @@ def retrieval_query(spec: FeatureSpec, task_input: dict, context: dict, tools: d
     parts = [spec.name]
     parts.extend(value[:3000] for key, value in task_input.items() if key not in SOURCE_REFERENCE_KEYS and isinstance(value, str) and value.strip())
     parts.extend(context.get("current_confirmed_diagnoses", []))
+    for item in context.get("pathway_sources", {}).get("current_templates", []):
+        if item.get("explicitly_selected"):
+            parts.extend(str(item[field])[:500] for field in ("name", "disease_name", "disease_code") if item.get(field))
     for name, fields in [
         ("outpatient_records", ("symptom", "diagnosis_text")),
         ("structured_records", ("chief_complaint", "diagnosis")),

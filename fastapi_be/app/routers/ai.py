@@ -4,17 +4,19 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
 from app.ai.catalog import FEATURES
-from app.ai.context import accessible_patients, authorize_patient, context_metadata, patient_snapshot
+from app.ai.context import accessible_patients, authorize_patient, context_metadata, get_encounter, patient_snapshot
 from app.ai.governance import audit, describe_config, encode_json
 from app.ai.models import AIFeatureConfig, AIFeedback, AIRun, utcnow
 from app.ai.operational_sources import operational_context, operational_options
+from app.ai.pathway_knowledge import eligible_pathway_documents
+from app.ai.pathway_sources import PATHWAY_SOURCE_FEATURES
 from app.ai.runtime import authorize_run, authorized_feature, create_run, describe_run
 from app.ai.schemas import ClinicalContextRequest, FeedbackWrite, OperationalContextRequest, RunRequest
 from app.ai.service_sources import service_options
 from app.config import settings
 from app.database import get_db
 from app.dependencies import get_current_user
-from app.models import Admission, Prescription, Registration, User
+from app.models import Admission, ClinicalPathway, Prescription, Registration, User
 
 router = APIRouter(tags=["AI 业务助手"])
 
@@ -95,6 +97,33 @@ def prescription_options(feature_key: str, patient_id: int, db: Session = Depend
     authorize_patient(db, user, patient_id, spec.category)
     items = db.query(Prescription).filter_by(patient_id=patient_id).order_by(Prescription.create_time.desc()).limit(30).all()
     return {"code": 200, "msg": "success", "data": [{"prescription_id": item.prescription_id, "label": f"{item.create_time} · {item.prescription_id[:8]}", "status": item.status} for item in items]}
+
+
+@router.get("/ai/pathway-options")
+def pathway_options(
+    feature_key: str, patient_id: int = Query(ge=1), encounter_ref: str | None = Query(None, max_length=64), db: Session = Depends(get_db), user: User = Depends(get_current_user)
+) -> dict:
+    """Offer bounded template metadata and scoped review availability without loading steps or calling a model."""
+    spec, _ = authorized_feature(db, user, feature_key)
+    if spec.number not in PATHWAY_SOURCE_FEATURES or user.user_role == "patient":
+        raise HTTPException(422, "该能力不提供临床路径选择")
+    authorize_patient(db, user, patient_id, spec.category, encounter_ref)
+    encounter = get_encounter(db, patient_id, encounter_ref)
+    departments = {encounter.department_id} if encounter and encounter.department_id else set()
+    rows = db.query(ClinicalPathway).filter_by(status=0).order_by(ClinicalPathway.pathway_id.desc()).limit(101).all()
+    reviewed = {item.source_reference_id for item in eligible_pathway_documents(db, [row.pathway_id for row in rows[:100]], spec.key, departments)}
+    return {
+        "code": 200,
+        "msg": "success",
+        "data": {
+            "items": [
+                {"pathway_id": row.pathway_id, "name": row.name, "disease_code": row.disease_code, "disease_name": row.disease_name, "reviewed_for_current_scope": row.pathway_id in reviewed}
+                for row in rows[:100]
+            ],
+            "truncated": len(rows) > 100,
+            "scope_note": "仅当前模板目录和本功能、所选就诊科室的审核状态；不证明适用于该患者。未选就诊时仅匹配院内通用知识，选择就诊后须重新核对",
+        },
+    }
 
 
 def _context_inspection(db: Session, user: User, key: str, patient_id: int, encounter_ref: str | None, references: dict) -> dict:

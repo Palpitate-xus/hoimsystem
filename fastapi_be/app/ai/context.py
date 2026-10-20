@@ -19,6 +19,7 @@ from app.ai.governance import digest, encode_json
 from app.ai.incident_sources import attach_incident_sources
 from app.ai.models import AIPatientGrant, utcnow
 from app.ai.outpatient_billing import resolve_outpatient_charge
+from app.ai.pathway_sources import PATHWAY_SOURCE_FEATURES, attach_pathway_sources
 from app.ai.patient_sources import attach_patient_sources
 from app.ai.procedural_sources import attach_procedural_sources
 from app.clinical_observations import serialize_observation
@@ -28,6 +29,7 @@ from app.models import (
     Admission,
     AdverseEvent,
     AdverseReaction,
+    ClinicalPathway,
     Doctor,
     ImagingOrder,
     ImagingReport,
@@ -39,6 +41,7 @@ from app.models import (
     MedicalRecord,
     MedicalRecordHome,
     NursingRecord,
+    PathwayEnrollment,
     Patient,
     PatientAllergy,
     PerioperativeAntibiotic,
@@ -192,17 +195,22 @@ def _selected_records(db: Session, user: User, patient_id: int, references: dict
         ("reaction_id", AdverseReaction, "reaction_id"),
         ("referral_id", Referral, "referral_id"),
         ("mdt_id", MdtCase, "mdt_id"),
+        ("pathway_enrollment_id", PathwayEnrollment, "enrollment_id"),
+        ("pathway_id", ClinicalPathway, "pathway_id"),
     ):
         reference = references.get(key)
         if reference in (None, ""):
             continue
         if not isinstance(reference, str) or len(reference) > 10 or not reference.isascii() or not reference.isdigit() or not 0 < int(reference) <= 2147483647 or str(int(reference)) != reference:
-            raise HTTPException(422, "所选事件或会诊标识须为规范的正整数字符串")
+            raise HTTPException(422, "所选事件、会诊或路径标识须为规范的正整数字符串")
         if user.user_role == "patient":
-            raise HTTPException(403, "患者端不提供内部事件、转诊和会诊工作资料")
-        row = db.query(model).filter(getattr(model, primary_key) == int(reference), model.patient_id == patient_id).first()
+            raise HTTPException(403, "患者端不提供内部事件、转诊、会诊和路径工作资料")
+        query = db.query(model).filter(getattr(model, primary_key) == int(reference))
+        if model is not ClinicalPathway:
+            query = query.filter(model.patient_id == patient_id)
+        row = query.first()
         if row is None:
-            raise HTTPException(404, "所选事件或会诊不存在或不属于该患者")
+            raise HTTPException(404, "所选事件、会诊或路径不存在或不属于该患者")
         selected[key] = row
     if references.get("outpatient_charge_id") not in (None, ""):
         selected["outpatient_charge_id"] = resolve_outpatient_charge(db, patient_id, references["outpatient_charge_id"])
@@ -244,6 +252,8 @@ def patient_snapshot(db: Session, user: User, spec: FeatureSpec, patient_id: int
     patient = authorize_patient(db, user, patient_id, spec.category, encounter_ref)
     encounter = get_encounter(db, patient_id, encounter_ref)
     selected = _selected_records(db, user, patient_id, source_refs or {})
+    if spec.number not in PATHWAY_SOURCE_FEATURES and any(key in selected for key in ("pathway_id", "pathway_enrollment_id")):
+        raise HTTPException(422, "该功能不接受内部临床路径资料")
     bundle = ContextBundle()
     today = datetime.date.today()
     age = today.year - patient.birthday.year - ((today.month, today.day) < (patient.birthday.month, patient.birthday.day)) if patient.birthday else None
@@ -505,6 +515,7 @@ def patient_snapshot(db: Session, user: User, spec: FeatureSpec, patient_id: int
     attach_coding_sources(db, user, spec, patient, encounter, bundle, add, selected, bounded, authorize_patient)
     attach_consultation_sources(db, user, spec, patient, encounter, bundle, add, selected, bounded)
     attach_adr_sources(db, user, spec, patient, bundle, add, selected, bounded)
+    attach_pathway_sources(db, user, spec, patient, encounter, bundle, add, selected, bounded, authorize_patient)
     if not bundle.data["current_confirmed_diagnoses"]:
         bundle.data["missing_data"].append("未取得本次就诊的已确认诊断")
     bundle.data = minimize_identifiers(bundle.data, patient)

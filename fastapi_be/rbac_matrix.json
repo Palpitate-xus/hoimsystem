@@ -334,6 +334,13 @@
  },
  {
   "auth": "ANY",
+  "function": "pathway_options",
+  "method": "GET",
+  "module": "ai.py",
+  "path": "/api/ai/pathway-options"
+ },
+ {
+  "auth": "ANY",
   "function": "inspect_context_references",
   "method": "POST",
   "module": "ai.py",

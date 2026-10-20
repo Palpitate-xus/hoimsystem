@@ -16,6 +16,7 @@ from app.ai.governance import active_prompt, audit, digest, encode_json, get_spe
 from app.ai.knowledge import evidence_is_current, retrieval_query, retrieve_evidence
 from app.ai.models import AIFeatureConfig, AIProvider, AIRun, utcnow
 from app.ai.operational_sources import authorize_operational_snapshot, operational_context
+from app.ai.pathway_sources import PATHWAY_SOURCE_FEATURES, selected_pathway_ids
 from app.ai.review_curation import authorize_feedback_snapshot
 from app.ai.schemas import RunRequest
 from app.ai.tools import business_tools
@@ -96,7 +97,10 @@ def create_run(db: Session, user: User, req: RunRequest) -> AIRun:
     clean_input = minimize_identifiers(req.input, patient)
     tools, tool_evidence = business_tools(db, spec, user, req.patient_id, clean_input, bundle)
     query = retrieval_query(spec, clean_input, bundle.data, tools)
-    knowledge = retrieve_evidence(db, spec, query, bundle.department_ids)
+    pathway_ids = selected_pathway_ids(bundle.data)
+    knowledge = retrieve_evidence(db, spec, query, bundle.department_ids, preferred_pathway_ids=pathway_ids)
+    if spec.key == "treatment_pathway" and pathway_ids and not any(item.get("source_kind") == "clinical_pathway" and item.get("source_reference_id") in pathway_ids for item in knowledge):
+        raise HTTPException(409, "所选临床路径缺少当前匹配的已审核知识版本，请由超级管理员导入并审核后再比选")
     if spec.requires_knowledge and not knowledge:
         raise HTTPException(409, "未检索到本任务可用的已审核知识，请先录入并审核相关资料")
     evidence = [*bundle.evidence, *tool_evidence, *knowledge]
@@ -160,6 +164,10 @@ def authorize_run(db: Session, user: User, run: AIRun) -> None:
         source_encounter = billing_scope.get("admission_id") or billing_scope.get("registration_uuid")
         if source_encounter and source_encounter != run.encounter_ref:
             authorize_patient(db, user, run.patient_id, spec.category, source_encounter)
+        pathway_scope = json.loads(run.input_json).get("payload", {}).get("context", {}).get("pathway_sources", {})
+        for reference in pathway_scope.get("source_admission_refs", []):
+            if reference != run.encounter_ref:
+                authorize_patient(db, user, run.patient_id, spec.category, reference)
     elif spec.scope == "hospital":
         context = json.loads(run.input_json).get("payload", {}).get("context", {})
         authorize_operational_snapshot(db, user, spec, context)
@@ -209,6 +217,9 @@ def describe_run(run: AIRun, include_result: bool = True) -> dict:
         if spec.number in ADR_SOURCE_FEATURES:
             context = json.loads(run.input_json).get("payload", {}).get("context", {})
             data["adr_findings"] = context.get("adr_sources")
+        if spec.number in PATHWAY_SOURCE_FEATURES:
+            context = json.loads(run.input_json).get("payload", {}).get("context", {})
+            data["pathway_findings"] = context.get("pathway_sources")
         if spec.number in {61, 62, 63, 64, 65, 66, 67, 70}:
             context = json.loads(run.input_json).get("payload", {}).get("context", {})
             keys = (
@@ -318,6 +329,16 @@ async def execute_claimed(run_id: str, lease: str, *, transport=None) -> None:
             spec, provider, snapshot = _recheck_task(db, run)
             db.expunge(provider)
         result, inputs, outputs = await generate(provider, spec, snapshot["task_prompt"], snapshot["payload"], transport=transport)
+        pathway_ids = selected_pathway_ids(snapshot["payload"]["context"])
+        if spec.key == "treatment_pathway" and pathway_ids and result.sections:
+            required = {
+                item["source_id"]
+                for item in snapshot["payload"]["evidence"]
+                if item.get("kind") == "knowledge" and item.get("source_kind") == "clinical_pathway" and item.get("source_reference_id") in pathway_ids
+            }
+            cited = {source for section in result.sections for source in section.source_ids}
+            if not required.intersection(cited):
+                raise AIExecutionError("PATHWAY_CITATION_MISSING", "模型未引用所选路径的已审核版本，结果已拒绝展示，请核对依据后重新生成")
         review = snapshot["payload"].get("tools", {}).get("prescription_review", {})
         for finding in review.get("findings", []):
             if finding.get("severity") == 3:

@@ -165,6 +165,8 @@ def provider_feature_issues(spec: FeatureSpec, provider: AIProvider) -> list[dic
         issues.append({"code": "NEWS2_SCOPE_MISMATCH", "message": "NEWS2规则服务只用于病情恶化预警的独立评分，不用于其他模型、脓毒症诊断或概率预测"})
     if provider.model.startswith("aki:") and (spec.number != 43 or provider.kind != "specialist"):
         issues.append({"code": "AKI_SCOPE_MISMATCH", "message": "KDIGO AKI规则只用于独立核对所选肾功能资料，不用于其他模型、未来风险概率或自动治疗"})
+    if provider.model.startswith("qsofa:") and (spec.number != 42 or provider.kind != "specialist"):
+        issues.append({"code": "QSOFA_SCOPE_MISMATCH", "message": "qSOFA只用于独立核对所选床旁三项资料，不用于单一脓毒症筛查、诊断、排除或风险概率"})
     if spec.engine == "llm" and provider.kind not in {"chat", "responses"}:
         issues.append({"code": "PROTOCOL_MISMATCH", "message": "该能力需要文本模型接口"})
     if spec.engine != "llm" and (provider.kind != "specialist" or spec.key not in json.loads(provider.supported_features_json) or not provider.validation_report):
@@ -179,7 +181,7 @@ def describe_config(db: Session, spec: FeatureSpec, config: AIFeatureConfig | No
     data = describe_feature(spec)
     if spec.number in {41, 42, 43}:
         provider = db.get(AIProvider, config.provider_id) if config and config.provider_id else None
-        mode = {41: "news2", 43: "aki"}.get(spec.number)
+        mode = {41: "news2", 42: "qsofa", 43: "aki"}.get(spec.number)
         data["input_mode"] = mode if mode and provider and provider.kind == "specialist" and provider.model.startswith(mode + ":") else "observation_window"
     roles = json.loads(config.allowed_roles_json) if config else list(spec.default_roles)
     _, version = active_prompt(db, spec, config)

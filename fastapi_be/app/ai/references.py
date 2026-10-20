@@ -30,5 +30,6 @@ SOURCE_REFERENCE_KEYS = frozenset(
         "observation_window_id",
         "news2_assessment_id",
         "aki_assessment_id",
+        "qsofa_assessment_id",
     }
 )

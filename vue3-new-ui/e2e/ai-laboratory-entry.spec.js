@@ -132,7 +132,7 @@ test("医生风险入口显式撤销原检验后清除窗口选择，旧窗口�
   const state = await session(page); await openRisk(page, state); await expect(page.getByRole("button", { name: "生成辅助建议", exact: true })).toBeEnabled(); await page.getByRole("button", { name: "核实原住院来源并建立观测窗", exact: true }).click();
   const panel = page.getByLabel("原住院受控检验来源", { exact: true }); await expect(panel).toContainText(admission); await panel.getByRole("button", { name: "核对原检验来源", exact: true }).first().click();
   const dialog = page.getByRole("dialog", { name: "受控检验原来源核对", exact: true }); await dialog.getByRole("textbox", { name: "检验来源撤销依据", exact: true }).fill("合成核对错误住院关联后撤销原来源"); await dialog.getByRole("button", { name: "撤销此检验来源", exact: true }).click();
-  await expect(page.getByText("检验来源已变化；旧观测窗不会补入新资料，请重新建立窗口并明确选择核对。", { exact: true })).toBeVisible(); await expect(page.getByRole("button", { name: "生成辅助建议", exact: true })).toBeDisabled();
+  await expect(page.getByText("原来源已变化；旧观测窗不会补入新资料，请重新建立窗口并明确选择核对。", { exact: true })).toBeVisible(); await expect(page.getByRole("button", { name: "生成辅助建议", exact: true })).toBeDisabled();
   expect(state.writes).toEqual([{ path: `/api/inpatient-laboratory/sources/${state.sources[0].lab_source_id}/revoke`, body: { patient_id: 1, admission_id: admission, expected_revision: 1, reason: "合成核对错误住院关联后撤销原来源" } }]); expect(state.runs).toEqual([]); expect(state.contexts).toEqual([]);
 });
 

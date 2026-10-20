@@ -7,6 +7,7 @@ export const getAIPatients = (params) => request({ url: "ai/patients", method: "
 export const getAIEncounters = (params) => request({ url: "ai/encounters", method: "get", params });
 export const getAIPrescriptions = (params) => request({ url: "ai/prescriptions", method: "get", params });
 export const getAIServiceOptions = (params) => request({ url: "ai/service-options", method: "get", params });
+export const getAIOperationalContext = (data) => request({ url: "ai/operational-context", method: "post", data });
 export const getAIClinicalContext = ({ feature_key, patient_id, encounter_ref, ...source_refs }) => request({ url: "ai/context", method: "post", data: { feature_key, patient_id, encounter_ref, source_refs } });
 export const createAIRun = (data) => request({ url: "ai/runs", method: "post", data });
 export const getAIRuns = (params = {}) => request({ url: "ai/runs", method: "get", params });

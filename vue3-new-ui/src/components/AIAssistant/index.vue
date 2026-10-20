@@ -23,6 +23,15 @@
           <el-select v-model="prescriptionId" :clearable="!props.initialInput.prescription_id" :disabled="!!props.initialInput.prescription_id" placeholder="选择实际处方" style="width: 100%"><el-option v-for="item in prescriptions" :key="item.prescription_id" :label="item.label" :value="item.prescription_id" /></el-select>
         </el-form-item>
         <el-form-item v-if="needsCoding" label="编码检索词"><el-input v-model="codingQuery" maxlength="500" placeholder="已记录诊断、手术名称或已有编码；多个词用逗号分隔" /></el-form-item>
+        <template v-if="needsOperations">
+          <el-form-item label="运营资料日期"><el-date-picker v-model="operationsRange" type="daterange" value-format="YYYY-MM-DD" start-placeholder="开始日期" end-placeholder="结束日期" /></el-form-item>
+          <el-form-item v-if="!needsInventory" label="运营科室范围"><el-select v-model="serviceDepartment" clearable filterable :placeholder="serviceOptions.allow_hospital_scope ? '默认全院范围' : '默认所属科室范围'"><el-option v-for="item in serviceOptions.departments || []" :key="item.department_id" :value="item.department_id" :label="item.name" /></el-select></el-form-item>
+          <template v-if="needsInventory">
+            <el-form-item label="库存药品"><el-select v-model="inventoryDrugs" multiple filterable clearable :disabled="serviceOptions.inventory_scope_available === false" placeholder="选择真实目录药品"><el-option v-for="item in serviceOptions.inventory_drugs || []" :key="item.item_id" :value="item.item_id" :label="item.name" /></el-select></el-form-item>
+            <el-form-item label="库存耗材"><el-select v-model="inventoryConsumables" multiple filterable clearable :disabled="serviceOptions.inventory_scope_available === false" placeholder="选择真实目录耗材"><el-option v-for="item in serviceOptions.inventory_consumables || []" :key="item.item_id" :value="item.item_id" :label="item.name" /></el-select></el-form-item>
+          </template>
+          <p>{{ serviceOptions.scope_note }}</p>
+        </template>
         <template v-if="needsAppointment">
           <el-form-item label="预约科室"><el-select v-model="serviceDepartment" clearable filterable :disabled="!!props.initialInput.schedule_id" placeholder="可选：限定科室"><el-option v-for="item in serviceOptions.departments || []" :key="item.department_id" :value="item.department_id" :label="item.name" /></el-select></el-form-item>
           <el-form-item label="预约医生"><el-select v-model="serviceDoctor" clearable filterable :disabled="!!props.initialInput.schedule_id" placeholder="可选：限定医生"><el-option v-for="item in serviceDoctors" :key="item.doctor_id" :value="item.doctor_id" :label="item.name" /></el-select></el-form-item>
@@ -32,7 +41,7 @@
           <el-form-item label="导航起点"><el-select v-model="navigationStart" clearable filterable placeholder="选择已配置起点"><el-option v-for="item in serviceOptions.navigation_nodes || []" :key="item.node_id" :value="item.node_id" :label="[item.name, item.floor, item.location].filter(Boolean).join(' · ')" /></el-select></el-form-item>
           <el-form-item label="导航终点"><el-select v-model="navigationEnd" clearable filterable placeholder="选择已配置终点"><el-option v-for="item in serviceOptions.navigation_nodes || []" :key="item.node_id" :value="item.node_id" :label="[item.name, item.floor, item.location].filter(Boolean).join(' · ')" /></el-select></el-form-item>
         </template>
-        <p v-if="(needsNavigation || needsAppointment) && serviceOptions.truncated">当前选项为有限列表；可从具体业务记录进入，或补充更明确的办理需求。</p>
+        <p v-if="(needsNavigation || needsAppointment || needsOperations) && serviceOptions.truncated">当前选项为有限列表；可从具体业务记录进入，或补充更明确的办理需求。</p>
         <el-form-item label="补充资料或问题"><el-input v-model="question" type="textarea" :rows="5" maxlength="12000" show-word-limit :placeholder="'请提供与' + selected.name + '相关的信息，明确哪些是已确认事实'" /></el-form-item>
         <el-collapse v-if="canPreview" class="spaced">
           <el-collapse-item title="联调与预览选项">
@@ -43,7 +52,8 @@
         <el-alert v-if="selected.engine !== 'llm'" type="info" :closable="false" title="此能力通过专用模型处理，需要对应原始资料和已登记的适配服务。" class="spaced" />
         <div class="actions">
           <el-button v-if="selected.scope === 'patient'" :disabled="!patientId || patientLoading" @click="inspectContext">查看本次资料</el-button>
-          <el-button type="primary" :loading="submitting" :disabled="busy || patientLoading || (!selected.enabled && !preview) || (selected.scope === 'patient' && !patientId)" @click="submit">生成辅助建议</el-button>
+          <el-button v-if="needsOperations" :disabled="serviceOptionsLoading" @click="inspectOperationalContext">查看本次运营资料</el-button>
+          <el-button type="primary" :loading="submitting" :disabled="busy || patientLoading || serviceOptionsLoading || (!selected.enabled && !preview) || (selected.scope === 'patient' && !patientId) || (needsInventory && (!inventoryDrugs.length && !inventoryConsumables.length || serviceOptions.inventory_scope_available === false))" @click="submit">生成辅助建议</el-button>
           <el-button v-if="busy" @click="cancel">取消接收结果</el-button>
         </div>
       </template>
@@ -55,6 +65,7 @@
       <el-alert v-if="busy" type="info" :closable="false" title="任务已保存，正在等待处理或生成结果。" />
       <el-alert v-if="run.status === 'failed'" type="error" :closable="false" :title="run.error_message || '生成失败，请联系管理员检查服务状态'" />
       <ai-service-findings :findings="run.tool_findings" @inspect="inspectEvidence" />
+      <ai-operational-findings :findings="run.operational_findings" @inspect="inspectEvidence" />
       <div v-if="run.tool_findings?.billing_reconciliation" class="spaced">
         <h4>原始账目与执行关联核对</h4><p>{{ run.tool_findings.billing_reconciliation.scope_note }}</p>
         <el-table v-if="run.tool_findings.billing_reconciliation.scope?.kind === 'inpatient'" :data="run.tool_findings.billing_reconciliation.checks" max-height="320" empty-text="本次范围暂无可核对住院费用">
@@ -105,7 +116,12 @@
     <el-collapse class="spaced" @change="loadHistory">
       <el-collapse-item title="最近任务"><el-table :data="history" :empty-text="selected?.scope === 'patient' && !patientId ? '先选择患者查看相应任务' : '当前范围暂无历史任务'"><el-table-column prop="feature_name" label="功能" /><el-table-column prop="patient_id" label="患者ID" width="85" /><el-table-column label="状态" width="90"><template #default="{ row }">{{ statuses[row.status] || row.status }}</template></el-table-column><el-table-column prop="create_time" label="时间" /><el-table-column label="操作" width="80"><template #default="{ row }"><el-button link @click="openRun(row.run_id)">查看</el-button></template></el-table-column></el-table></el-collapse-item>
     </el-collapse>
-    <el-dialog v-model="contextDialog" title="本次提供给 AI 的患者资料" width="760px"><el-alert type="info" :closable="false" title="资料保留时间和状态，缺失信息会单独标记。" /><pre class="plain-text">{{ JSON.stringify(contextData, null, 2) }}</pre></el-dialog>
+    <el-dialog v-model="contextDialog" :title="needsOperations ? '本次提供给 AI 的运营资料' : '本次提供给 AI 的患者资料'" width="min(1000px, 96vw)">
+      <el-alert type="info" :closable="false" title="资料保留时间和状态，缺失信息会单独标记。" />
+      <ai-operational-findings v-if="needsOperations" :findings="contextData?.context" @inspect="inspectPreviewEvidence" />
+      <el-collapse v-if="needsOperations"><el-collapse-item title="查看原始资料字段"><pre class="plain-text">{{ JSON.stringify(contextData, null, 2) }}</pre></el-collapse-item></el-collapse>
+      <pre v-else class="plain-text">{{ JSON.stringify(contextData, null, 2) }}</pre>
+    </el-dialog>
     <el-dialog v-model="evidenceDialog" title="核查引用依据" width="760px"><template v-if="evidence"><p><strong>{{ evidence.title }}</strong> {{ evidence.version ? '· ' + evidence.version : '' }}</p><p v-if="evidence.source_uri" class="plain-text">来源：{{ evidence.source_uri }}</p><p v-if="evidence.observed_at">记录时间：{{ evidence.observed_at }}</p><pre class="plain-text">{{ evidence.content }}</pre></template></el-dialog>
     <el-dialog v-model="feedbackDialog" title="人工复核反馈" width="540px"><el-radio-group v-model="feedback.outcome"><el-radio value="accepted">采纳</el-radio><el-radio value="rejected">驳回</el-radio><el-radio value="modified">修改后采纳</el-radio></el-radio-group><el-input v-model="feedback.comment" type="textarea" :rows="4" maxlength="2000" placeholder="说明核查结果或修改内容；反馈不会自动写入病历、处方或医嘱" class="spaced" /><template #footer><el-button @click="feedbackDialog = false">取消</el-button><el-button type="primary" @click="submitFeedback">保存反馈</el-button></template></el-dialog>
   </div>
@@ -115,8 +131,9 @@
 import { computed, onActivated, onBeforeUnmount, onDeactivated, onMounted, ref, watch } from "vue";
 import { useStore } from "vuex";
 import { ElMessage } from "element-plus";
-import { cancelAIRun, createAIRun, getAIClinicalContext, getAIEncounters, getAIFeatures, getAIPatients, getAIPrescriptions, getAIServiceOptions, getAIRun, getAIRuns, reviewAIRun } from "@/api/ai";
+import { cancelAIRun, createAIRun, getAIClinicalContext, getAIOperationalContext, getAIEncounters, getAIFeatures, getAIPatients, getAIPrescriptions, getAIServiceOptions, getAIRun, getAIRuns, reviewAIRun } from "@/api/ai";
 import AiServiceFindings from "@/components/AIServiceFindings/index.vue";
+import AiOperationalFindings from "@/components/AIOperationalFindings/index.vue";
 
 const props = defineProps({ featureKeys: { type: Array, default: () => [] }, initialFeature: { type: String, default: "" }, patientId: { type: Number, default: null }, encounterRef: { type: String, default: "" }, initialInput: { type: Object, default: () => ({}) } });
 const store = useStore();
@@ -130,6 +147,8 @@ const selected = computed(() => features.value.find(item => item.key === feature
 const needsPrescription = computed(() => ["interaction_review", "allergy_review", "dose_review", "antimicrobial_review"].includes(featureKey.value));
 const needsCoding = computed(() => ["icd_candidates", "drg_evidence_review"].includes(featureKey.value));
 const needsAppointment = computed(() => featureKey.value === "appointment_assistant"), needsNavigation = computed(() => featureKey.value === "hospital_navigation");
+const needsOperations = computed(() => selected.value?.scope === "hospital"), needsInventory = computed(() => ["supply_forecast", "inventory_optimization"].includes(featureKey.value));
+const operationsRange = ref([]), inventoryDrugs = ref([]), inventoryConsumables = ref([]), serviceOptionsLoading = ref(false);
 const serviceOptions = ref({}), serviceDepartment = ref(null), serviceDoctor = ref(null), serviceDate = ref(""), navigationStart = ref(null), navigationEnd = ref(null);
 const serviceDoctors = computed(() => (serviceOptions.value.doctors || []).filter(item => !serviceDepartment.value || item.department_id === serviceDepartment.value));
 const busy = computed(() => ["queued", "running"].includes(run.value?.status));
@@ -165,8 +184,13 @@ watch(featureKey, async () => {
   question.value = props.initialInput.question || ""; codingQuery.value = props.initialInput.icd_query || ""; extraInput.value = "";
   serviceOptions.value = {}; serviceDepartment.value = props.initialInput.department_id || null; serviceDoctor.value = props.initialInput.doctor_id || null; serviceDate.value = props.initialInput.appointment_date || "";
   navigationStart.value = props.initialInput.start_node_id || null; navigationEnd.value = props.initialInput.end_node_id || null;
+  operationsRange.value = props.initialInput.date_from && props.initialInput.date_to ? [props.initialInput.date_from, props.initialInput.date_to] : []; inventoryDrugs.value = [...(props.initialInput.drug_ids || [])]; inventoryConsumables.value = [...(props.initialInput.consumable_ids || [])]; serviceOptionsLoading.value = false;
   if (selected.value?.scope === "patient") { await searchPatients(); if (featureVersion !== formVersion) return; patientId.value = props.patientId || (patients.value.length === 1 ? patients.value[0].patient_id : null); }
-  if (needsNavigation.value || needsAppointment.value) { const version = formVersion; const response = await getAIServiceOptions({ feature_key: featureKey.value }); if (version === formVersion) serviceOptions.value = response.data || {}; }
+  if (needsNavigation.value || needsAppointment.value || needsOperations.value) {
+    const version = formVersion; serviceOptionsLoading.value = true;
+    try { const response = await getAIServiceOptions({ feature_key: featureKey.value }); if (version === formVersion) { serviceOptions.value = response.data || {}; if (needsOperations.value && !operationsRange.value?.length) operationsRange.value = serviceOptions.value.default_window || []; } }
+    finally { if (version === formVersion) serviceOptionsLoading.value = false; }
+  }
 });
 watch(patientId, async id => {
   const patientVersion = ++patientLoadVersion;
@@ -186,7 +210,7 @@ watch(patientId, async id => {
   } finally { if (patientVersion === patientLoadVersion) patientLoading.value = false; }
 });
 watch(encounterRef, () => { stopPolling(); run.value = null; contextData.value = null; });
-watch([featureKey, patientId, encounterRef, prescriptionId, serviceDepartment, serviceDoctor, serviceDate, navigationStart, navigationEnd, () => JSON.stringify(props.initialInput)], () => {
+watch([featureKey, patientId, encounterRef, prescriptionId, serviceDepartment, serviceDoctor, serviceDate, navigationStart, navigationEnd, operationsRange, () => inventoryDrugs.value.join(','), () => inventoryConsumables.value.join(','), () => JSON.stringify(props.initialInput)], () => {
   selectionVersion += 1; stopPolling(); run.value = null; contextData.value = null; contextDialog.value = false; evidenceDialog.value = false; feedbackDialog.value = false;
 });
 watch(() => run.value?.run_id, () => { evidenceDialog.value = false; feedbackDialog.value = false; feedback.value = { outcome: "accepted", comment: "" }; });
@@ -196,28 +220,44 @@ watch(() => props.initialFeature, key => { if (features.value.some(item => item.
 watch(() => props.patientId, id => { formVersion += 1; patientId.value = id; });
 watch(() => props.encounterRef, value => { encounterRef.value = value; });
 async function inspectContext() {
+  const input = buildTaskInput(); if (!input) return;
   const version = selectionVersion;
   const sourceKeys = selected.value?.source_reference_keys || ["record_id", "structured_record_id", "prescription_id", "lab_result_id", "imaging_report_id"];
-  const references = Object.fromEntries(sourceKeys.filter(key => props.initialInput[key]).map(key => [key, props.initialInput[key]]));
-  if (prescriptionId.value) references.prescription_id = prescriptionId.value;
+  const references = Object.fromEntries(sourceKeys.filter(key => input[key]).map(key => [key, input[key]]));
   const response = await getAIClinicalContext({ ...references, feature_key: featureKey.value, patient_id: patientId.value, encounter_ref: encounterRef.value || undefined });
   if (version !== selectionVersion) return;
   contextData.value = response.data; contextDialog.value = true;
 }
-async function submit() {
+async function inspectOperationalContext() {
+  const input = buildTaskInput(); if (!input) return;
+  const version = selectionVersion;
+  const response = await getAIOperationalContext({ feature_key: featureKey.value, input });
+  if (version !== selectionVersion) return;
+  contextData.value = response.data; contextDialog.value = true;
+}
+function buildTaskInput() {
   let extra = {};
   if (canPreview.value && extraInput.value.trim()) {
     try { extra = JSON.parse(extraInput.value); if (!extra || Array.isArray(extra) || typeof extra !== "object") throw new Error(); }
     catch { ElMessage.error("结构化资料应为有效 JSON 对象"); return; }
   }
+  const input = { ...props.initialInput, ...extra, question: question.value };
+  if (needsCoding.value && codingQuery.value.trim()) input.icd_query = codingQuery.value.trim();
+  if (needsAppointment.value) { for (const [key, value] of [["department_id", serviceDepartment.value], ["doctor_id", serviceDoctor.value], ["appointment_date", serviceDate.value]]) { if (value) input[key] = value; else delete input[key]; } }
+  if (needsNavigation.value) { for (const [key, value] of [["start_node_id", navigationStart.value], ["end_node_id", navigationEnd.value]]) { if (value) input[key] = value; else delete input[key]; } }
+  if (prescriptionId.value) input.prescription_id = prescriptionId.value;
+  if (needsOperations.value) {
+    if (operationsRange.value?.length === 2) { input.date_from = operationsRange.value[0]; input.date_to = operationsRange.value[1]; } else { delete input.date_from; delete input.date_to; }
+    if (needsInventory.value) { input.drug_ids = [...inventoryDrugs.value]; input.consumable_ids = [...inventoryConsumables.value]; delete input.department_id; }
+    else if (serviceDepartment.value) input.department_id = serviceDepartment.value; else delete input.department_id;
+  }
+  return input;
+}
+async function submit() {
+  const input = buildTaskInput(); if (!input) return;
   submitting.value = true;
   stopPolling(); const selection = selectionVersion, view = pollVersion;
   try {
-    const input = { ...props.initialInput, ...extra, question: question.value };
-    if (needsCoding.value && codingQuery.value.trim()) input.icd_query = codingQuery.value.trim();
-    if (needsAppointment.value) { for (const [key, value] of [["department_id", serviceDepartment.value], ["doctor_id", serviceDoctor.value], ["appointment_date", serviceDate.value]]) { if (value) input[key] = value; else delete input[key]; } }
-    if (needsNavigation.value) { for (const [key, value] of [["start_node_id", navigationStart.value], ["end_node_id", navigationEnd.value]]) { if (value) input[key] = value; else delete input[key]; } }
-    if (prescriptionId.value) input.prescription_id = prescriptionId.value;
     const response = await createAIRun({ feature_key: featureKey.value, patient_id: selected.value.scope === "patient" ? patientId.value : null, encounter_ref: selected.value.scope === "patient" ? encounterRef.value || null : null, input, preview: canPreview.value && preview.value });
     if (selection !== selectionVersion || view !== pollVersion) return;
     run.value = response.data; startPolling();
@@ -235,6 +275,7 @@ async function loadHistory(activeNames) {
 }
 const evidenceTitle = id => run.value?.evidence?.find(item => item.source_id === id)?.title || "来源";
 function inspectEvidence(id) { evidence.value = run.value?.evidence?.find(item => item.source_id === id); evidenceDialog.value = !!evidence.value; }
+function inspectPreviewEvidence(id) { evidence.value = contextData.value?.evidence?.find(item => item.source_id === id); evidenceDialog.value = !!evidence.value; }
 async function copyDraft() {
   const text = [run.value.result.summary, ...run.value.result.sections.map(item => `${item.title}\n${item.content}`)].join("\n\n");
   try { await navigator.clipboard.writeText(text); ElMessage.success("草稿已复制，请核对后使用"); } catch { ElMessage.info("当前环境无法自动复制，请选中结果文本复制"); }

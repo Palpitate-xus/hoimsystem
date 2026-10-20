@@ -6,6 +6,7 @@
         <el-date-picker v-model="range" type="daterange" value-format="YYYY-MM-DD" start-placeholder="开始日期" end-placeholder="结束日期" />
         <el-button type="primary" @click="load">查询</el-button>
         <el-button v-if="isAdmin" :loading="refreshing" @click="refreshToday">重新汇总今日</el-button>
+        <ai-action label="AI 运营分析" title="AI 运营事实与预测辅助" :feature-keys="['operations_qa', 'visit_forecast', 'roster_optimization', 'bed_forecast']" initial-feature="operations_qa" :initial-input="range?.length === 2 ? { date_from: range[0], date_to: range[1] } : {}" />
       </div>
       <el-row :gutter="16" style="margin: 16px 0">
         <el-col v-for="card in cards" :key="card.label" :xs="12" :sm="8" :lg="4">
@@ -35,6 +36,7 @@ import { computed, onMounted, ref } from "vue";
 import { useStore } from "vuex";
 import { ElMessage } from "element-plus";
 import { getOperationalTrend, refreshOperationalMetric } from "@/api/operations";
+import AiAction from "@/components/AIAction/index.vue";
 
 const store = useStore();
 const loading = ref(false);

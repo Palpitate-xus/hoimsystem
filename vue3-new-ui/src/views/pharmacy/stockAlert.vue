@@ -1,6 +1,7 @@
 <template>
   <div class="app-container">
     <vab-page-header title="库存预警" description="监控药品库存，查看预警和效期提醒" />
+    <div class="page-toolbar"><ai-action label="AI 库存分析" title="AI 库存原始资料与预测优化" :feature-keys="['inventory_optimization', 'supply_forecast']" initial-feature="inventory_optimization" /></div>
     <el-tabs v-model="activeTab">
       <el-tab-pane label="库存不足预警" name="lowStock">
         <el-form :inline="true" class="page-toolbar">
@@ -29,6 +30,7 @@
           <el-table-column prop="price" label="单价" />
           <el-table-column prop="expireddate" label="过期日期" />
           <el-table-column prop="supplier" label="供应商" />
+          <el-table-column label="AI 辅助" width="150"><template #default="{ row }"><ai-action label="AI 品种分析" title="AI 所选药品库存分析" :feature-keys="['inventory_optimization', 'supply_forecast']" initial-feature="inventory_optimization" :initial-input="{ drug_ids: [row.id] }" /></template></el-table-column>
         </el-table>
       </el-tab-pane>
 
@@ -57,6 +59,7 @@
             </template>
           </el-table-column>
           <el-table-column prop="supplier" label="供应商" />
+          <el-table-column label="AI 辅助" width="150"><template #default="{ row }"><ai-action label="AI 品种分析" title="AI 所选药品库存分析" :feature-keys="['inventory_optimization', 'supply_forecast']" initial-feature="inventory_optimization" :initial-input="{ drug_ids: [row.id] }" /></template></el-table-column>
         </el-table>
       </el-tab-pane>
     </el-tabs>
@@ -67,6 +70,7 @@
 import { ref, onMounted } from "vue";
 import { getLowStockDrugs, getNearExpiryDrugs } from "@/api/pharmacy";
 import { ElMessage } from "element-plus";
+import AiAction from "@/components/AIAction/index.vue";
 
 const activeTab = ref("lowStock");
 const threshold = ref(10);

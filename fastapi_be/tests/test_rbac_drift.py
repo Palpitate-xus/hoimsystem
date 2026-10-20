@@ -56,7 +56,7 @@ def generator():
     return runpy.run_path(SCRIPT)
 
 
-@pytest.mark.parametrize("module", ["inpatient_observations", "ai_observation_windows", "inpatient_laboratory", "ai_lab_mappings", "ai_risk_rules", "ai_news2", "ai_aki"])
+@pytest.mark.parametrize("module", ["inpatient_observations", "ai_observation_windows", "inpatient_laboratory", "ai_lab_mappings", "ai_risk_rules", "ai_news2", "ai_aki", "inpatient_gcs", "ai_qsofa"])
 def test_observation_matrix_matches_real_mounted_paths_and_role_guards(module, generator):
     """Use actual mounted routes and closure roles, not a second invented role list."""
     from fastapi.routing import APIRoute
@@ -91,6 +91,7 @@ def test_observation_groups_come_from_real_module_constants(generator):
     from app.ai.news2_sources import ASSESSMENT_ROLES
     from app.ai.observation_windows import WINDOW_ROLES
     from app.ai.risk_rule_profiles import PROFILE_ROLES
+    from app.inpatient_gcs import READ_ROLES
     from app.inpatient_laboratory import LAB_READ_ROLES, LAB_SOURCE_ROLES
     from app.inpatient_observations import OBSERVATION_ROLES
 
@@ -101,6 +102,7 @@ def test_observation_groups_come_from_real_module_constants(generator):
     assert generator["ROLE_GROUPS"]["LAB_SOURCE_ROLES"] == set(LAB_SOURCE_ROLES)
     assert generator["ROLE_GROUPS"]["PROFILE_ROLES"] == set(PROFILE_ROLES)
     assert generator["ROLE_GROUPS"]["ASSESSMENT_ROLES"] == set(ASSESSMENT_ROLES)
+    assert generator["ROLE_GROUPS"]["READ_ROLES"] == set(READ_ROLES)
 
 
 def test_all_matrix_paths_match_actual_main_router_mounts(generator):

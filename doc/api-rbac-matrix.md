@@ -3,7 +3,7 @@
 > 由 `fastapi_be/scripts/generate_rbac_matrix.py` 从源码自动生成，请勿手改。
 > `✓`=可访问 | `PUBLIC`=无需登录 | 留空=不可访问
 
-共 **689** 个接口（PUBLIC 18 个 / 需登录 671 个）。
+共 **703** 个接口（PUBLIC 18 个 / 需登录 685 个）。
 
 
 ### `admin.py`
@@ -87,6 +87,7 @@
 | POST | `/api/ai/admin/providers/{provider_id}/forecast-capabilities` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
 | POST | `/api/ai/admin/providers/{provider_id}/news2-capabilities` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
 | POST | `/api/ai/admin/providers/{provider_id}/aki-capabilities` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/admin/providers/{provider_id}/qsofa-capabilities` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
 | GET | `/api/ai/admin/runs` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
 | GET | `/api/ai/admin/runs/{run_id}` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
 | POST | `/api/ai/admin/providers` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
@@ -215,6 +216,18 @@
 | POST | `/api/ai/observation-windows/{window_id}/revoke` | ✓ | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |
 | GET | `/api/ai/admin/observation-windows` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
 | GET | `/api/ai/admin/observation-windows/{window_id}` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+
+### `ai_qsofa.py`
+
+| 方法 | 路径 | admin | super_admin | director | doctor | nurse | cashier | pharmacist | guide | patient | lab_technician | registrar | PUBLIC |
+|------|------|------|------|------|------|------|------|------|------|------|------|------|------|
+| GET | `/api/ai/qsofa-assessments/candidates` | ✓ | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |
+| GET | `/api/ai/qsofa-assessments` | ✓ | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |
+| POST | `/api/ai/qsofa-assessments` | ✓ | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |
+| GET | `/api/ai/qsofa-assessments/{assessment_id}` | ✓ | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |
+| POST | `/api/ai/qsofa-assessments/{assessment_id}/revoke` | ✓ | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |
+| GET | `/api/ai/admin/qsofa-assessments` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/admin/qsofa-assessments/{assessment_id}` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
 
 ### `ai_risk_rules.py`
 
@@ -635,6 +648,17 @@
 | GET | `/api/inpatientCharge/getSummary` | ✓ | ✓ |  |  | ✓ | ✓ |  |  |  |  |  |  |
 | POST | `/api/inpatientCharge/depositRecharge` | ✓ | ✓ |  |  | ✓ | ✓ |  |  |  |  |  |  |
 | GET | `/api/inpatientCharge/depositBalance` | ✓ | ✓ |  |  | ✓ | ✓ |  |  |  |  |  |  |
+
+### `inpatient_gcs.py`
+
+| 方法 | 路径 | admin | super_admin | director | doctor | nurse | cashier | pharmacist | guide | patient | lab_technician | registrar | PUBLIC |
+|------|------|------|------|------|------|------|------|------|------|------|------|------|------|
+| GET | `/api/inpatient-gcs` | ✓ | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |
+| POST | `/api/inpatient-gcs` | ✓ | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |
+| GET | `/api/inpatient-gcs/{gcs_observation_id}` | ✓ | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |
+| POST | `/api/inpatient-gcs/{gcs_observation_id}/revoke` | ✓ | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |
+| GET | `/api/ai/admin/gcs-sources` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/admin/gcs-sources/{gcs_observation_id}` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
 
 ### `inpatient_laboratory.py`
 

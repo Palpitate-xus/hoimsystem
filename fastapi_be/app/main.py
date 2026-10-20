@@ -385,6 +385,7 @@ from app.routers import (
     ai_lab_mappings,
     ai_news2,
     ai_observation_windows,
+    ai_qsofa,
     ai_risk_rules,
     allergy,
     analytics,
@@ -418,6 +419,7 @@ from app.routers import (
     infusion,
     injection,
     inpatient_charge,
+    inpatient_gcs,
     inpatient_laboratory,
     inpatient_observations,
     inpatient_order,
@@ -506,6 +508,8 @@ app.include_router(inpatient_laboratory.router, prefix="/api")
 app.include_router(ai_risk_rules.router, prefix="/api")
 app.include_router(ai_news2.router, prefix="/api")
 app.include_router(ai_aki.router, prefix="/api")
+app.include_router(ai_qsofa.router, prefix="/api")
+app.include_router(inpatient_gcs.router, prefix="/api")
 app.include_router(ai.router, prefix="/api")
 app.include_router(analytics.router, prefix="/api")
 app.include_router(performance.router, prefix="/api")

@@ -23,7 +23,7 @@ ALL_ROLES = ["admin", "super_admin", "director", "doctor", "nurse", "cashier", "
 AUTH_DEPENDENCIES = {"get_current_user", "get_event_identity"}
 
 
-def read_role_groups(path: Path, names: tuple[str, ...]) -> dict[str, set[str]]:
+def read_role_groups(path: Path, names: tuple[str, ...], known_groups: dict[str, set[str]] | None = None) -> dict[str, set[str]]:
     """Read actual role constants without importing settings, databases or routers."""
     assignments = {}
     for node in ast.parse(path.read_text(encoding="utf-8")).body:
@@ -42,6 +42,8 @@ def read_role_groups(path: Path, names: tuple[str, ...]) -> dict[str, set[str]]:
                 return value(assignments[node.id])
             finally:
                 resolving.remove(node.id)
+        if isinstance(node, ast.Name) and known_groups and node.id in known_groups:
+            return set(known_groups[node.id])
         if isinstance(node, (ast.Set, ast.List, ast.Tuple)):
             result = set()
             for item in node.elts:
@@ -90,6 +92,7 @@ ROLE_GROUPS = read_role_groups(
     ),
 )
 ROLE_GROUPS.update(read_role_groups(BACKEND / "app/inpatient_observations.py", ("OBSERVATION_ROLES",)))
+ROLE_GROUPS.update(read_role_groups(BACKEND / "app/inpatient_gcs.py", ("READ_ROLES",), ROLE_GROUPS))
 ROLE_GROUPS.update(read_role_groups(BACKEND / "app/ai/observation_windows.py", ("WINDOW_ROLES",)))
 ROLE_GROUPS.update(read_role_groups(BACKEND / "app/inpatient_laboratory.py", ("LAB_SOURCE_ROLES", "LAB_READ_ROLES")))
 ROLE_GROUPS.update(read_role_groups(BACKEND / "app/ai/lab_mappings.py", ("MAPPING_ROLES",)))

@@ -473,6 +473,15 @@
   "auth": [
    "super_admin"
   ],
+  "function": "check_qsofa_provider",
+  "method": "POST",
+  "module": "ai_admin.py",
+  "path": "/api/ai/admin/providers/{provider_id}/qsofa-capabilities"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
   "function": "list_global_runs",
   "method": "GET",
   "module": "ai_admin.py",
@@ -1227,6 +1236,89 @@
   "method": "GET",
   "module": "ai_observation_windows.py",
   "path": "/api/ai/admin/observation-windows/{window_id}"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "nurse",
+   "super_admin"
+  ],
+  "function": "candidates",
+  "method": "GET",
+  "module": "ai_qsofa.py",
+  "path": "/api/ai/qsofa-assessments/candidates"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "nurse",
+   "super_admin"
+  ],
+  "function": "assessments",
+  "method": "GET",
+  "module": "ai_qsofa.py",
+  "path": "/api/ai/qsofa-assessments"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "nurse",
+   "super_admin"
+  ],
+  "function": "post_assessment",
+  "method": "POST",
+  "module": "ai_qsofa.py",
+  "path": "/api/ai/qsofa-assessments"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "nurse",
+   "super_admin"
+  ],
+  "function": "get_assessment",
+  "method": "GET",
+  "module": "ai_qsofa.py",
+  "path": "/api/ai/qsofa-assessments/{assessment_id}"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "nurse",
+   "super_admin"
+  ],
+  "function": "revoke_assessment",
+  "method": "POST",
+  "module": "ai_qsofa.py",
+  "path": "/api/ai/qsofa-assessments/{assessment_id}/revoke"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "admin_assessments",
+  "method": "GET",
+  "module": "ai_qsofa.py",
+  "path": "/api/ai/admin/qsofa-assessments"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "admin_assessment",
+  "method": "GET",
+  "module": "ai_qsofa.py",
+  "path": "/api/ai/admin/qsofa-assessments/{assessment_id}"
  },
  {
   "auth": [
@@ -3659,6 +3751,76 @@
   "method": "GET",
   "module": "inpatient_charge.py",
   "path": "/api/inpatientCharge/depositBalance"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "nurse",
+   "super_admin"
+  ],
+  "function": "sources",
+  "method": "GET",
+  "module": "inpatient_gcs.py",
+  "path": "/api/inpatient-gcs"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "nurse",
+   "super_admin"
+  ],
+  "function": "post_source",
+  "method": "POST",
+  "module": "inpatient_gcs.py",
+  "path": "/api/inpatient-gcs"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "nurse",
+   "super_admin"
+  ],
+  "function": "source",
+  "method": "GET",
+  "module": "inpatient_gcs.py",
+  "path": "/api/inpatient-gcs/{gcs_observation_id}"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "nurse",
+   "super_admin"
+  ],
+  "function": "revoke",
+  "method": "POST",
+  "module": "inpatient_gcs.py",
+  "path": "/api/inpatient-gcs/{gcs_observation_id}/revoke"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "admin_sources",
+  "method": "GET",
+  "module": "inpatient_gcs.py",
+  "path": "/api/ai/admin/gcs-sources"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "admin_source",
+  "method": "GET",
+  "module": "inpatient_gcs.py",
+  "path": "/api/ai/admin/gcs-sources/{gcs_observation_id}"
  },
  {
   "auth": [

@@ -319,6 +319,13 @@
  },
  {
   "auth": "ANY",
+  "function": "inspect_context_references",
+  "method": "POST",
+  "module": "ai.py",
+  "path": "/api/ai/context"
+ },
+ {
+  "auth": "ANY",
   "function": "inspect_context",
   "method": "GET",
   "module": "ai.py",

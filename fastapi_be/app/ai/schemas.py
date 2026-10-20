@@ -6,6 +6,8 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
+from app.ai.references import SOURCE_REFERENCE_KEYS
+
 
 class StrictRequest(BaseModel):
     """Reject unrecognized fields instead of silently accepting unsafe overrides."""
@@ -112,6 +114,22 @@ class PatientGrantWrite(StrictRequest):
     def normalize_utc(cls, value: datetime.datetime) -> datetime.datetime:
         """Normalize offsets for expiring access checks."""
         return value.astimezone(datetime.UTC).replace(tzinfo=None) if value.tzinfo else value
+
+
+class ClinicalContextRequest(StrictRequest):
+    """Inspect bounded server-owned references without creating an inference request."""
+
+    feature_key: str = Field(min_length=1, max_length=64)
+    patient_id: int = Field(ge=1)
+    encounter_ref: str | None = Field(default=None, max_length=64)
+    source_refs: dict[str, str] = Field(default_factory=dict, max_length=12)
+
+    @field_validator("source_refs")
+    @classmethod
+    def supported_references(cls, value: dict) -> dict:
+        if set(value) - SOURCE_REFERENCE_KEYS or any(not item.strip() or len(item) > 50 for item in value.values()):
+            raise ValueError("资料引用类型或标识无效")
+        return value
 
 
 class RunRequest(StrictRequest):

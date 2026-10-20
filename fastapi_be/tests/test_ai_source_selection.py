@@ -71,3 +71,20 @@ async def test_context_preview_uses_the_same_explicit_row_selection(async_client
     )
     assert response.status_code == 200, response.text
     assert response.json()["data"]["context"]["selected_sources"] == {"record_id": record.medical_record_id}
+
+
+@pytest.mark.asyncio
+async def test_structured_inspection_validates_reference_types_and_patient_scope(async_client, seed_data, auth_headers):
+    record = seed_data["medical_record"]
+    body = {"feature_key": "record_quality", "patient_id": record.patient_id, "source_refs": {"record_id": record.medical_record_id}}
+    headers = auth_headers(seed_data["doctor_user"].username)
+    inspected = await async_client.post("/api/ai/context", headers=headers, json=body)
+    assert inspected.status_code == 200, inspected.text
+    assert inspected.json()["data"]["context"]["selected_sources"] == body["source_refs"]
+    for references in ({"custom_sql": "SELECT * FROM hoimsystem_patient"}, {"record_id": "x" * 51}):
+        denied = await async_client.post("/api/ai/context", headers=headers, json={**body, "source_refs": references})
+        assert denied.status_code == 422
+    denied = await async_client.post(
+        "/api/ai/context", headers=auth_headers(seed_data["patient_user"].username), json={"feature_key": "patient_report_explanation", "patient_id": seed_data["patient2"].patient_id}
+    )
+    assert denied.status_code == 403

@@ -8,7 +8,7 @@ from app.ai.context import accessible_patients, authorize_patient, context_metad
 from app.ai.governance import audit, describe_config
 from app.ai.models import AIFeatureConfig, AIFeedback, AIRun, utcnow
 from app.ai.runtime import authorize_run, authorized_feature, create_run, describe_run
-from app.ai.schemas import FeedbackWrite, RunRequest
+from app.ai.schemas import ClinicalContextRequest, FeedbackWrite, RunRequest
 from app.database import get_db
 from app.dependencies import get_current_user
 from app.models import Admission, Prescription, Registration, User
@@ -72,6 +72,20 @@ def prescription_options(feature_key: str, patient_id: int, db: Session = Depend
     return {"code": 200, "msg": "success", "data": [{"prescription_id": item.prescription_id, "label": f"{item.create_time} · {item.prescription_id[:8]}", "status": item.status} for item in items]}
 
 
+def _context_inspection(db: Session, user: User, key: str, patient_id: int, encounter_ref: str | None, references: dict) -> dict:
+    spec, _ = authorized_feature(db, user, key)
+    if spec.scope != "patient":
+        raise HTTPException(422, "该能力无需加载患者临床资料")
+    bundle = patient_snapshot(db, user, spec, patient_id, encounter_ref, references)
+    return {"code": 200, "msg": "success", "data": {"context": bundle.data, "metadata": context_metadata(bundle)}}
+
+
+@router.post("/ai/context")
+def inspect_context_references(req: ClinicalContextRequest, db: Session = Depends(get_db), user: User = Depends(get_current_user)) -> dict:
+    """Inspect the exact supported source references that will be used by generation."""
+    return _context_inspection(db, user, req.feature_key, req.patient_id, req.encounter_ref, req.source_refs)
+
+
 @router.get("/ai/context")
 def inspect_context(
     feature_key: str,
@@ -86,12 +100,8 @@ def inspect_context(
     user: User = Depends(get_current_user),
 ) -> dict:
     """Inspect the patient's authorized facts and missing information before submission."""
-    spec, _ = authorized_feature(db, user, feature_key)
-    if spec.scope != "patient":
-        raise HTTPException(422, "该能力无需加载患者临床资料")
     references = {"record_id": record_id, "structured_record_id": structured_record_id, "prescription_id": prescription_id, "lab_result_id": lab_result_id, "imaging_report_id": imaging_report_id}
-    bundle = patient_snapshot(db, user, spec, patient_id, encounter_ref, references)
-    return {"code": 200, "msg": "success", "data": {"context": bundle.data, "metadata": context_metadata(bundle)}}
+    return _context_inspection(db, user, feature_key, patient_id, encounter_ref, references)
 
 
 @router.post("/ai/runs")

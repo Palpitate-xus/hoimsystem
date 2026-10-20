@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.dependencies import NURSING_ROLES, PHARMACY_ROLES, User, require_roles
+from app.medication_data import medication_fields
 from app.models import (
     DispenseVerification,
     Patient,
@@ -106,6 +107,7 @@ def get_dispense_list(keyword: str | None = None, page: int | None = None, page_
                     "name": j.pharmaceutical.name if j.pharmaceutical else "",
                     "number": j.number,
                     "pharmaceutical_id": j.pharmaceutical_id,
+                    **medication_fields(j),
                 }
             )
         data.append(

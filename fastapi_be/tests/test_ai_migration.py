@@ -22,7 +22,7 @@ def test_ai_upgrade_and_rollback_preserve_business_data(tmp_path):
     command.upgrade(config, "20261020_ai_platform")
     assert "hoimsystem_ai_feature_config" in inspect(engine).get_table_names()
     assert "hoimsystem_ai_run" in inspect(engine).get_table_names()
-    command.upgrade(config, "head")
+    command.upgrade(config, "20261020_ai_task_leases")
     assert "lease_token" in {item["name"] for item in inspect(engine).get_columns("hoimsystem_ai_run")}
     command.downgrade(config, "20261020_ai_platform")
     assert "lease_token" not in {item["name"] for item in inspect(engine).get_columns("hoimsystem_ai_run")}

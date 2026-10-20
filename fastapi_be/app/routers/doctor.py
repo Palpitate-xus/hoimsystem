@@ -11,6 +11,7 @@ from app.database import get_db
 from app.dependencies import ADMIN_ROLES, CLINICAL_ROLES, PHARMACY_ROLES, get_current_user, require_roles
 from app.event_bus import publish_event
 from app.integration_outbox import enqueue_integration_event
+from app.medication_data import medication_fields, normalize_medication_item
 from app.models import (
     AntibioticApproval,
     Attendance,
@@ -343,9 +344,13 @@ def prescription_register(
                 return {"code": 500, "msg": "处方药品明细格式错误"}
             try:
                 pharmaceutical_id = int(raw_item.get("id"))
-                quantity = int(raw_item.get("number"))
             except (TypeError, ValueError, OverflowError):
                 return {"code": 500, "msg": "处方药品明细格式错误"}
+            try:
+                instructions = normalize_medication_item(raw_item)
+                quantity = instructions["number"]
+            except ValueError as exc:
+                return {"code": 500, "msg": str(exc)}
             if quantity <= 0:
                 return {"code": 500, "msg": "药品数量必须大于0"}
             if pharmaceutical_id in seen_pharmaceuticals:
@@ -353,9 +358,7 @@ def prescription_register(
             seen_pharmaceuticals.add(pharmaceutical_id)
             normalized_phas.append({
                 "id": pharmaceutical_id,
-                "number": quantity,
-                "dosage": raw_item.get("dosage"),
-                "frequency": raw_item.get("frequency"),
+                **instructions,
             })
 
         pharmaceuticals = db.query(Pharmaceutical).filter(
@@ -491,6 +494,11 @@ def prescription_register(
                 prescription_id=str(pre.prescription_id),
                 pharmaceutical_id=pha.pharmaceutical_id,
                 number=item["number"],
+                dosage=item["dosage"],
+                dose_unit=item["dose_unit"],
+                frequency=item["frequency"],
+                route=item["route"],
+                duration_days=item["duration_days"],
             )
             db.add(pp)
             amount += Decimal(str(pha.price)) * quantity
@@ -554,7 +562,7 @@ def get_prescription_list(current_user: User = Depends(get_current_user), keywor
     for item in prescriptions:
         phas = []
         for j in item.pre_phas:
-            phas.append({"name": j.pharmaceutical.name if j.pharmaceutical else "", "number": j.number})
+            phas.append({"name": j.pharmaceutical.name if j.pharmaceutical else "", "number": j.number, **medication_fields(j)})
         charge_obj = item.charges[0] if item.charges else None
         data.append(
             {

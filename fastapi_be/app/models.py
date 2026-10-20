@@ -582,6 +582,11 @@ class PrePha(Base):
     prescription_id = Column(String(50))
     pharmaceutical_id = Column(Integer, ForeignKey("hoimsystem_pharmaceutical.pharmaceutical_id"))
     number = Column(Integer)
+    dosage = Column(Numeric(18, 6), nullable=True)
+    dose_unit = Column(String(24), nullable=True)
+    frequency = Column(String(40), nullable=True)
+    route = Column(String(24), nullable=True)
+    duration_days = Column(Integer, nullable=True)
 
     pharmaceutical = relationship("Pharmaceutical")
     prescription = relationship("Prescription", back_populates="pre_phas", primaryjoin="PrePha.prescription_id == Prescription.prescription_id", foreign_keys="PrePha.prescription_id")

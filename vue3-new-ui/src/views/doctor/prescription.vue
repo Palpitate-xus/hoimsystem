@@ -77,6 +77,13 @@
             <el-button type="danger" size="small" @click="removePharmaceutical(i)">删除</el-button>
             <el-tag v-if="getAntibioticLevel(item.id) === 2" type="warning" size="small" style="margin-left:5px">限制级抗菌药</el-tag>
             <el-tag v-if="getAntibioticLevel(item.id) === 3" type="danger" size="small" style="margin-left:5px">特殊使用级抗菌药</el-tag>
+            <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px">
+              <el-input-number v-model="item.dosage" :min="0.000001" :precision="6" aria-label="每次剂量" placeholder="每次剂量" style="width:150px" />
+              <el-select v-model="item.dose_unit" filterable allow-create default-first-option clearable placeholder="剂量单位" style="width:110px"><el-option v-for="unit in ['mg','g','μg','mL','片','粒','支','单位']" :key="unit" :label="unit" :value="unit" /></el-select>
+              <el-input v-model="item.frequency" placeholder="频次，如 bid" maxlength="40" style="width:130px" />
+              <el-select v-model="item.route" filterable allow-create default-first-option clearable placeholder="给药途径" style="width:120px"><el-option v-for="route in ['口服','静滴','静注','肌注','皮下','外用']" :key="route" :label="route" :value="route" /></el-select>
+              <el-input-number v-model="item.duration_days" :min="1" :max="3650" aria-label="疗程天数" placeholder="疗程天数" style="width:130px" />
+            </div>
           </div>
           <el-button type="primary" size="small" @click="addPharmaceutical">添加药品</el-button>
         </el-form-item>
@@ -155,7 +162,7 @@ const onPatientChange = (pid) => {
 };
 
 const addPharmaceutical = () => {
-  form.value.phas.push({ id: null, number: 1 });
+  form.value.phas.push({ id: null, number: 1, dosage: null, dose_unit: "", frequency: "", route: "", duration_days: null });
 };
 
 const removePharmaceutical = (i) => {

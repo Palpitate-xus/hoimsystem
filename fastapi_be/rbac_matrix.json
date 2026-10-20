@@ -455,6 +455,15 @@
   "auth": [
    "super_admin"
   ],
+  "function": "check_news2_provider",
+  "method": "POST",
+  "module": "ai_admin.py",
+  "path": "/api/ai/admin/providers/{provider_id}/news2-capabilities"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
   "function": "list_global_runs",
   "method": "GET",
   "module": "ai_admin.py",
@@ -982,6 +991,89 @@
    "nurse",
    "super_admin"
   ],
+  "function": "candidates",
+  "method": "GET",
+  "module": "ai_news2.py",
+  "path": "/api/ai/news2-assessments/candidates"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "nurse",
+   "super_admin"
+  ],
+  "function": "assessments",
+  "method": "GET",
+  "module": "ai_news2.py",
+  "path": "/api/ai/news2-assessments"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "nurse",
+   "super_admin"
+  ],
+  "function": "post_assessment",
+  "method": "POST",
+  "module": "ai_news2.py",
+  "path": "/api/ai/news2-assessments"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "nurse",
+   "super_admin"
+  ],
+  "function": "get_assessment",
+  "method": "GET",
+  "module": "ai_news2.py",
+  "path": "/api/ai/news2-assessments/{assessment_id}"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "nurse",
+   "super_admin"
+  ],
+  "function": "revoke_assessment",
+  "method": "POST",
+  "module": "ai_news2.py",
+  "path": "/api/ai/news2-assessments/{assessment_id}/revoke"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "admin_assessments",
+  "method": "GET",
+  "module": "ai_news2.py",
+  "path": "/api/ai/admin/news2-assessments"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "admin_assessment",
+  "method": "GET",
+  "module": "ai_news2.py",
+  "path": "/api/ai/admin/news2-assessments/{assessment_id}"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "nurse",
+   "super_admin"
+  ],
   "function": "post_window",
   "method": "POST",
   "module": "ai_observation_windows.py",
@@ -1043,6 +1135,60 @@
   "method": "GET",
   "module": "ai_observation_windows.py",
   "path": "/api/ai/admin/observation-windows/{window_id}"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "options",
+  "method": "GET",
+  "module": "ai_risk_rules.py",
+  "path": "/api/ai/admin/risk-rule-profiles/options"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "profiles",
+  "method": "GET",
+  "module": "ai_risk_rules.py",
+  "path": "/api/ai/admin/risk-rule-profiles"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "post_profile",
+  "method": "POST",
+  "module": "ai_risk_rules.py",
+  "path": "/api/ai/admin/risk-rule-profiles"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "get_profile",
+  "method": "GET",
+  "module": "ai_risk_rules.py",
+  "path": "/api/ai/admin/risk-rule-profiles/{rule_profile_id}"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "publish_profile",
+  "method": "POST",
+  "module": "ai_risk_rules.py",
+  "path": "/api/ai/admin/risk-rule-profiles/{rule_profile_id}/publish"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "revoke_profile",
+  "method": "POST",
+  "module": "ai_risk_rules.py",
+  "path": "/api/ai/admin/risk-rule-profiles/{rule_profile_id}/revoke"
  },
  {
   "auth": "ANY",

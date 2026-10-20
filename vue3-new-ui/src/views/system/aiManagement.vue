@@ -65,6 +65,7 @@
         <el-tab-pane label="住院观测窗" name="observation_windows" lazy><ai-observation-window-management v-if="tab === 'observation_windows'" /></el-tab-pane>
         <el-tab-pane label="检验项目与来源" name="laboratory_mappings" lazy><ai-lab-mapping-management v-if="tab === 'laboratory_mappings'" /></el-tab-pane>
         <el-tab-pane label="风险规则与评估" name="risk_rules" lazy><ai-risk-rule-management v-if="tab === 'risk_rules'" /></el-tab-pane>
+        <el-tab-pane label="器官支持来源与映射" name="organ_support" lazy><ai-organ-support-management v-if="tab === 'organ_support'" /></el-tab-pane>
         <el-tab-pane label="录音治理" name="audio"><ai-audio-management v-if="tab === 'audio'" /></el-tab-pane>
         <el-tab-pane label="影像原文件" name="images"><ai-image-management v-if="tab === 'images'" /></el-tab-pane>
         <el-tab-pane label="心电原文件" name="ecg"><ai-ecg-management v-if="tab === 'ecg'" /></el-tab-pane>
@@ -301,6 +302,7 @@ const AiForecastProviderCheck = defineAsyncComponent(() => import("@/components/
 const AiNews2ProviderCheck = defineAsyncComponent(() => import("@/components/AINews2ProviderCheck/index.vue"));
 const AiAkiProviderCheck = defineAsyncComponent(() => import("@/components/AIAkiProviderCheck/index.vue"));
 const AiQsofaProviderCheck = defineAsyncComponent(() => import("@/components/AIQsofaProviderCheck/index.vue"));
+const AiOrganSupportManagement = defineAsyncComponent(() => import("./AIOrganSupportManagement.vue"));
 const AiRiskRuleManagement = defineAsyncComponent(() => import("@/views/system/AIRiskRuleManagement.vue"));
 import {
   activateAIPrompt, createAIKnowledge, createAIPatientGrant, createAIPrompt,

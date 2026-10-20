@@ -1,0 +1,40 @@
+{
+  "mapping_id": "9924b991-611c-4c49-89c3-087ba7162a73",
+  "schema_version": "vasoactive_drug_mapping_v1",
+  "name": "合成血管活性原药物映射",
+  "source_namespace": "synthetic-original-drug-catalog",
+  "pharmaceutical_id": 2,
+  "expected_original_drug_identity_hash": "67fa213a2d55e8130205a84eb92056588d8c40951a2ad6781cc2bad3c80828a5",
+  "drug_key": "norepinephrine",
+  "active_moiety_basis": "unknown",
+  "allowed_rate_units": [
+    "ug/kg/min",
+    "ug/min",
+    "mg/h",
+    "mL/h"
+  ],
+  "evidence_reference": "Synthetic actual catalog identity and unit review",
+  "rationale": "合成审核明确核对实际原药品身份、活性成分及原量单位语义；仅为工程测试，不证明临床映射或模型有效性。",
+  "original_drug_identity": {
+    "barcode": "synthetic-vaso-256fb78383734e4e92e2fb8b4f030204",
+    "name": "合成原药c7249113",
+    "pharmaceutical_id": 2
+  },
+  "created_by": 4,
+  "created_at": "2026-10-20T16:53:31.052475Z",
+  "identity_hash": "02edd6cce85122f0dc1122c880dcf9896e22140f9e7aedbc3723632f00cbe21a",
+  "source_id": "vasoactive_drug_mapping:9924b991-611c-4c49-89c3-087ba7162a73:41d578e6d8b4",
+  "content_hash": "41d578e6d8b45a21febe28781c078122d3ea54041964bfe3871535a81e131ff2",
+  "status": "published",
+  "revision": 2,
+  "published_at": "2026-10-20T16:53:31.052475Z",
+  "published_by": 4,
+  "review_note": "合成审核明确核对实际原药品身份、活性成分及原量单位语义；仅为工程测试，不证明临床映射或模型有效性。",
+  "revoked_at": null,
+  "revoked_by": null,
+  "revoke_reason": "",
+  "governance_hash": "e0b43932f291c88a489827a7b8b5cad3ad4842836393c07b18028be99a56337f",
+  "original_identity_current": true,
+  "eligible": true,
+  "exclusion_reasons": []
+}

@@ -1,0 +1,42 @@
+{
+  "support_source_id": "683bc2db-153c-4992-a556-30af51a5391a",
+  "kind": "map",
+  "patient_id": 1,
+  "admission_id": "84706041-c4c7-4c0d-b8d1-629c918e344f",
+  "event_at": "2026-10-20T13:51:45.682491Z",
+  "recorded_at": "2026-10-20T16:51:45.682491Z",
+  "created_by": 10,
+  "schema_version": "inpatient_map_v1",
+  "payload": {
+    "observed_at": "2026-10-20T13:51:45.682491Z",
+    "map": {
+      "value": "0.00000000",
+      "unit": "mm[Hg]",
+      "absent_reason": null
+    },
+    "measurement_method": "unknown",
+    "measurement_basis_note": "合成原资料核实依据；保留实际原始测量和明确区间，没有从文字猜测连续支持或推导临床评分。",
+    "note": ""
+  },
+  "reference_snapshots": {},
+  "author_qualification": {
+    "actor_id": 10,
+    "authorized_at": "2026-10-20T16:51:45.682491Z",
+    "care_authorization": "authorized_original_admission_at_creation",
+    "role_at_creation": "doctor"
+  },
+  "source_id": "map_observation:683bc2db-153c-4992-a556-30af51a5391a:82699460536d",
+  "content_hash": "82699460536deea083b69831e4cdc1bc6de7e09fc85fa3ad8abd3636f7107381",
+  "status": "active",
+  "revision": 1,
+  "revoked_at": null,
+  "revoked_by": null,
+  "revoke_reason": "",
+  "governance_hash": "ef3246b3567206b74fc4e18b8a817be52ebce5613f017d5686429fa713dc6c48",
+  "eligible": true,
+  "exclusion_reasons": [],
+  "original_admission_current": true,
+  "source_verification": "explicit_human_record_not_independently_verified",
+  "can_record": true,
+  "can_revoke": true
+}

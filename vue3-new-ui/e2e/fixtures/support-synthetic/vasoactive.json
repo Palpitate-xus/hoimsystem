@@ -1,0 +1,203 @@
+{
+  "support_source_id": "7509a196-e7b9-4458-ae02-cc822df497a3",
+  "kind": "vasoactive",
+  "patient_id": 1,
+  "admission_id": "25fb51a3-40d9-4ca9-9c99-0c98303bf06f",
+  "event_at": "2026-10-20T14:03:31.052475Z",
+  "recorded_at": "2026-10-20T16:53:31.052475Z",
+  "created_by": 10,
+  "schema_version": "vasoactive_interval_v1",
+  "payload": {
+    "start_at": "2026-10-20T14:03:31.052475Z",
+    "verified_until_at": "2026-10-20T15:53:31.052475Z",
+    "ended_at": null,
+    "drug_mapping": {
+      "mapping_id": "9924b991-611c-4c49-89c3-087ba7162a73",
+      "expected_content_hash": "41d578e6d8b45a21febe28781c078122d3ea54041964bfe3871535a81e131ff2"
+    },
+    "stream_identity": {
+      "source_namespace": "synthetic-bedside-pump",
+      "external_stream_id": "same-explicit-original-stream",
+      "identity_basis_note": "合成审核明确核对实际原药品身份、活性成分及原量单位语义；仅为工程测试，不证明临床映射或模型有效性。"
+    },
+    "origin": {
+      "administration_id": "64032746-c916-4f44-b5c3-34c7aa251d11",
+      "expected_content_hash": "baf72cc1c6f40a459138944223abb756ee3f42dece991a1e0cdcd141b6bb0349"
+    },
+    "continuity_confirmed": false,
+    "continuity_basis_note": null,
+    "dose_input": {
+      "weight_ref": {
+        "observation_id": "6dcc4073-4b36-4039-abfb-92bd4272c862",
+        "expected_content_hash": "924dc9c22ae7e4d9004e5b80398564c7549b4819f04f48ec6427bacf2a727177"
+      },
+      "weight_applicability_confirmed": true,
+      "weight_basis_note": "合成审核明确核对实际原药品身份、活性成分及原量单位语义；仅为工程测试，不证明临床映射或模型有效性。",
+      "mode": "pump",
+      "concentration": {
+        "value": "0.00000000",
+        "unit": "ug/mL",
+        "absent_reason": null
+      },
+      "pump_rate": {
+        "value": "0.00000000",
+        "unit": "mL/h",
+        "absent_reason": null
+      }
+    },
+    "note": "合成实际输注原段，未调用模型或自动标准化"
+  },
+  "reference_snapshots": {
+    "drug_mapping": {
+      "active_moiety_basis": "unknown",
+      "allowed_rate_units": [
+        "ug/kg/min",
+        "ug/min",
+        "mg/h",
+        "mL/h"
+      ],
+      "content_hash": "41d578e6d8b45a21febe28781c078122d3ea54041964bfe3871535a81e131ff2",
+      "created_at": "2026-10-20T16:53:31.052475Z",
+      "created_by": 4,
+      "drug_key": "norepinephrine",
+      "eligible": true,
+      "evidence_reference": "Synthetic actual catalog identity and unit review",
+      "exclusion_reasons": [],
+      "expected_original_drug_identity_hash": "67fa213a2d55e8130205a84eb92056588d8c40951a2ad6781cc2bad3c80828a5",
+      "governance_hash": "e0b43932f291c88a489827a7b8b5cad3ad4842836393c07b18028be99a56337f",
+      "identity_hash": "02edd6cce85122f0dc1122c880dcf9896e22140f9e7aedbc3723632f00cbe21a",
+      "mapping_id": "9924b991-611c-4c49-89c3-087ba7162a73",
+      "name": "合成血管活性原药物映射",
+      "original_drug_identity": {
+        "barcode": "synthetic-vaso-256fb78383734e4e92e2fb8b4f030204",
+        "name": "合成原药c7249113",
+        "pharmaceutical_id": 2
+      },
+      "original_identity_current": true,
+      "pharmaceutical_id": 2,
+      "published_at": "2026-10-20T16:53:31.052475Z",
+      "published_by": 4,
+      "rationale": "合成审核明确核对实际原药品身份、活性成分及原量单位语义；仅为工程测试，不证明临床映射或模型有效性。",
+      "review_note": "合成审核明确核对实际原药品身份、活性成分及原量单位语义；仅为工程测试，不证明临床映射或模型有效性。",
+      "revision": 2,
+      "revoke_reason": "",
+      "revoked_at": null,
+      "revoked_by": null,
+      "schema_version": "vasoactive_drug_mapping_v1",
+      "source_id": "vasoactive_drug_mapping:9924b991-611c-4c49-89c3-087ba7162a73:41d578e6d8b4",
+      "source_namespace": "synthetic-original-drug-catalog",
+      "status": "published"
+    },
+    "origin": {
+      "administration": {
+        "administration_id": "64032746-c916-4f44-b5c3-34c7aa251d11",
+        "administration_time": "2020-01-02T03:04:05.123456",
+        "execution_id": 1,
+        "medication_barcodes_json": "[\"synthetic-vaso-256fb78383734e4e92e2fb8b4f030204\"]",
+        "note": "原给药全文",
+        "nurse_id": 6,
+        "order_id": "ce3bc860-5237-4e89-b401-d672e89ca644",
+        "patient_barcode": "synthetic-private-wristband",
+        "patient_id": 1,
+        "status": 2,
+        "verified_at": "2020-01-02T03:04:05.123456"
+      },
+      "admission_id": "25fb51a3-40d9-4ca9-9c99-0c98303bf06f",
+      "content_hash": "baf72cc1c6f40a459138944223abb756ee3f42dece991a1e0cdcd141b6bb0349",
+      "execution": {
+        "execution_id": 1,
+        "execution_time": "2020-01-02T03:04:05.123456",
+        "note": "原执行全文",
+        "nurse_id": 6,
+        "order_id": "ce3bc860-5237-4e89-b401-d672e89ca644",
+        "planned_time": "2020-01-02T03:04:05.123456",
+        "status": 1
+      },
+      "items": [
+        {
+          "days": 1,
+          "dose": "原量文本不得当作连续UTC剂量",
+          "frequency": null,
+          "item_id": "fdc3e572-987e-4695-9936-fcf760d6b448",
+          "item_id_ref": 2,
+          "item_name": "合成原药c7249113",
+          "item_type": "drug",
+          "note": null,
+          "order_id": "ce3bc860-5237-4e89-b401-d672e89ca644",
+          "quantity": 1,
+          "route": "原途径",
+          "total_price": "0.00",
+          "unit": "原单位",
+          "unit_price": "0.00"
+        }
+      ],
+      "order": {
+        "admission_id": "25fb51a3-40d9-4ca9-9c99-0c98303bf06f",
+        "category": "drug",
+        "create_time": "2020-01-02T03:04:05.123456",
+        "doctor_id": 2,
+        "note": "原医嘱全文",
+        "order_id": "ce3bc860-5237-4e89-b401-d672e89ca644",
+        "order_type": 0,
+        "patient_id": 1,
+        "priority": 0,
+        "start_time": "2020-01-02T03:04:05.123456",
+        "status": 2,
+        "stop_time": null
+      },
+      "patient_id": 1,
+      "schema_version": "vasoactive_origin_v1",
+      "source_id": "medication_administration:64032746-c916-4f44-b5c3-34c7aa251d11:baf72cc1c6f4",
+      "time_basis": "legacy_naive_unknown_not_continuous_utc_evidence"
+    },
+    "weight": {
+      "admission_id": "25fb51a3-40d9-4ca9-9c99-0c98303bf06f",
+      "content_hash": "924dc9c22ae7e4d9004e5b80398564c7549b4819f04f48ec6427bacf2a727177",
+      "created_by": 10,
+      "observation_id": "6dcc4073-4b36-4039-abfb-92bd4272c862",
+      "observed_at": "2026-10-20T13:53:31.052475Z",
+      "patient_id": 1,
+      "payload": {
+        "consciousness": null,
+        "measurements": {
+          "body_weight": {
+            "absent_reason": null,
+            "unit": "kg",
+            "value": "70.00000000"
+          }
+        },
+        "note": "合成原体重备注",
+        "oxygen_device": null,
+        "supplemental_oxygen": "unknown"
+      },
+      "recorded_at": "2026-10-20T16:23:31.052475Z",
+      "revision": 1,
+      "revoke_reason": "",
+      "revoked_at": null,
+      "revoked_by": null,
+      "schema_version": "inpatient_observation_v1",
+      "source_id": "inpatient_observation:6dcc4073-4b36-4039-abfb-92bd4272c862:924dc9c22ae7",
+      "status": "active"
+    }
+  },
+  "author_qualification": {
+    "actor_id": 10,
+    "authorized_at": "2026-10-20T16:53:31.052475Z",
+    "care_authorization": "authorized_original_admission_at_creation",
+    "role_at_creation": "doctor"
+  },
+  "source_id": "vasoactive_interval:7509a196-e7b9-4458-ae02-cc822df497a3:7998de278c10",
+  "content_hash": "7998de278c10b4e3c22254d062f47b4e1c9ab1839873bdb88fa0dfd62c86d8d6",
+  "status": "active",
+  "revision": 1,
+  "revoked_at": null,
+  "revoked_by": null,
+  "revoke_reason": "",
+  "governance_hash": "ef3246b3567206b74fc4e18b8a817be52ebce5613f017d5686429fa713dc6c48",
+  "eligible": true,
+  "exclusion_reasons": [],
+  "original_admission_current": true,
+  "source_verification": "explicit_human_record_not_independently_verified",
+  "can_record": false,
+  "can_revoke": true
+}

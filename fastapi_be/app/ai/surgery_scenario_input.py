@@ -185,12 +185,24 @@ class ProblemDeclaration(Basis):
     finite_domains_status: CoverageStatus
 
 
+class PersonPartitionDeclaration(Basis):
+    status: Literal["verified_distinct_groups", "unknown"]
+    resource_ids: list[UUID] = Field(max_length=MAX_PERSONS)
+
+    @model_validator(mode="after")
+    def explicit_person_cohort(self):
+        if self.resource_ids != sorted(set(self.resource_ids)):
+            raise ValueError("The whole reviewed person cohort must be explicit, distinct and ordered")
+        return self
+
+
 class ScenarioCreate(Basis):
     pool_id: UUID
     period: PeriodSelection
     expected_capture_digest: SHA256
     objective_mode: ObjectiveMode
     problem_coverage: ProblemDeclaration
+    person_partition: PersonPartitionDeclaration
     members: list[MemberDeclaration] = Field(max_length=MAX_FACTS)
     cases: list[CaseDomain] = Field(max_length=MAX_CASES)
     resources: list[ResourceDeclaration] = Field(max_length=MAX_ROOMS + MAX_PERSONS + MAX_EQUIPMENT)
@@ -220,6 +232,8 @@ class ScenarioCreate(Basis):
         if sum(len(item.starts) for item in self.cases) > MAX_STARTS:
             raise ValueError("Complete finite starts exceed capacity; no truncation")
         selected = {item.resource_id for item in self.resources}
+        if not set(self.person_partition.resource_ids) <= selected:
+            raise ValueError("Person identity review cannot refer to a different resource cohort")
         if any(choice.resource_id not in selected for case in self.cases for demand in [case.room, *case.roles, *case.equipment] for choice in demand.choices):
             raise ValueError("Every candidate must belong to the complete declared physical resource cohort")
         if any(start.start_at < self.period.as_of for case in self.cases for start in case.starts):

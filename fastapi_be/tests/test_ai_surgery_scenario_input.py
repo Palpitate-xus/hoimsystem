@@ -53,6 +53,7 @@ def declaration():
             "basis_note": BASIS,
         },
         "members": [{**ref(index + 1), "source_kind": item["kind"], "selection": "confirmed", "basis_note": BASIS} for index, item in enumerate(source["manifest"])],
+        "person_partition": {"status": "unknown", "resource_ids": sorted(item["resource_id"] for item in source["resources"] if item["kind"] == "person"), "basis_note": BASIS},
         "cases": [
             {
                 "application_id": uid(501),
@@ -219,5 +220,18 @@ def test_selected_complete_original_cannot_bypass_its_whole_member_review(change
         body["members"][0]["source_kind"] = "resource_occupation_policy"
     else:
         body["members"][0]["expected_" + change + "_hash"] = "0" * 64
+    with pytest.raises(ValidationError):
+        ScenarioCreate.model_validate(body)
+
+
+@pytest.mark.parametrize("change", ["missing", "foreign", "duplicate"])
+def test_distinct_accounts_never_implicitly_review_the_whole_person_partition(change):
+    body = declaration()
+    if change == "missing":
+        body.pop("person_partition")
+    elif change == "foreign":
+        body["person_partition"]["resource_ids"].append(uid(999))
+    else:
+        body["person_partition"]["resource_ids"] *= 2
     with pytest.raises(ValidationError):
         ScenarioCreate.model_validate(body)

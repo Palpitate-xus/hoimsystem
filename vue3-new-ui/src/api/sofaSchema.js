@@ -3,7 +3,7 @@ import registry from "./sofaSchemas.json";
 const own = (value, key) => Object.hasOwn(value, key);
 const object = value => value !== null && typeof value === "object" && !Array.isArray(value);
 const forbidden = key => ["__proto__", "prototype", "constructor"].includes(key);
-const allowed = new Set(["$defs", "$ref", "additionalProperties", "anyOf", "const", "enum", "items", "maxItems", "minItems", "maxProperties", "minProperties", "maxLength", "maximum", "minLength", "minimum", "oneOf", "pattern", "properties", "propertyNames", "required", "type"]);
+const allowed = new Set(["$defs", "$ref", "additionalProperties", "anyOf", "const", "enum", "exclusiveMinimum", "exclusiveMaximum", "items", "maxItems", "minItems", "maxProperties", "minProperties", "maxLength", "maximum", "minLength", "minimum", "oneOf", "pattern", "properties", "propertyNames", "required", "type"]);
 
 // Expand generated lossless JSON nodes once. References can only point backward,
 // so malformed/cyclic registries fail before any clinical input is accepted.
@@ -25,6 +25,7 @@ function matches(schema, value, root, depth) {
   if (depth > 80 || schema === false) return false;
   if (schema === true) return true;
   if (!object(schema) || Object.keys(schema).some(key => !allowed.has(key))) return false;
+  if (["exclusiveMinimum", "exclusiveMaximum"].some(key => own(schema,key) && (typeof schema[key] !== "number" || !Number.isFinite(schema[key]) || Number.isInteger(schema[key]) && !Number.isSafeInteger(schema[key])))) return false;
   if (schema.$ref) {
     const match = /^#\/\$defs\/([A-Za-z][A-Za-z0-9_]*)$/.exec(schema.$ref);
     if (!match || forbidden(match[1]) || !object(root.$defs) || !own(root.$defs, match[1]) || !matches(root.$defs[match[1]], value, root, depth + 1)) return false;
@@ -38,7 +39,7 @@ function matches(schema, value, root, depth) {
     const length = Array.from(value).length;
     if (schema.minLength !== undefined && length < schema.minLength || schema.maxLength !== undefined && length > schema.maxLength || schema.pattern && !new RegExp(schema.pattern, "u").test(value)) return false;
   }
-  if (typeof value === "number" && (schema.minimum !== undefined && value < schema.minimum || schema.maximum !== undefined && value > schema.maximum)) return false;
+  if (typeof value === "number" && (schema.minimum !== undefined && value < schema.minimum || schema.maximum !== undefined && value > schema.maximum || schema.exclusiveMinimum !== undefined && value <= schema.exclusiveMinimum || schema.exclusiveMaximum !== undefined && value >= schema.exclusiveMaximum)) return false;
   if (Array.isArray(value)) {
     if (schema.minItems !== undefined && value.length < schema.minItems || schema.maxItems !== undefined && value.length > schema.maxItems || schema.items && value.some(item => !matches(schema.items, item, root, depth + 1))) return false;
   }

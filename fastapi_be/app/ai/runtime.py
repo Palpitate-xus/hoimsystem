@@ -214,6 +214,10 @@ def describe_run(run: AIRun, include_result: bool = True) -> dict:
                 "current_active_admissions",
                 "ward_capacity",
                 "supply_inventory",
+                "surgical_applications",
+                "surgical_schedules",
+                "surgical_recorded_overlaps",
+                "surgical_completed_intervals",
             )
             data["operational_findings"] = {key: context[key] for key in keys if key in context}
     return data

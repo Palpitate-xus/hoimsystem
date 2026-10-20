@@ -12,6 +12,7 @@ from app.ai.governance import digest, encode_json
 from app.ai.inventory_sources import attach_inventory_sources
 from app.ai.models import utcnow
 from app.ai.roster_sources import attach_hourly_demand, attach_roster_sources, planning_window
+from app.ai.surgical_resources import attach_surgical_resources
 from app.models import Admission, Bed, Consumable, DailyOperationalMetric, Department, Doctor, Pharmaceutical, Registration, User, Ward
 
 
@@ -76,7 +77,7 @@ def operational_options(db, user: User, spec: FeatureSpec) -> dict:
     departments = operational_scope(db, user, spec, {})
     start, end = operational_window({})
     data = {"default_window": [str(start), str(end)], "allow_hospital_scope": departments is None, "departments": [], "truncated": False}
-    if spec.number == 63:
+    if spec.number in {63, 65}:
         data["default_planning_window"] = [str(date) for date in planning_window({})]
     if spec.number in {66, 67}:
         data["inventory_scope_available"] = departments is None
@@ -126,6 +127,9 @@ def operational_context(db, user: User, spec: FeatureSpec, values: dict) -> Cont
 
     if spec.number in {66, 67}:
         attach_inventory_sources(db, departments, start, end, bundle, add, values)
+        return bundle
+    if spec.number == 65:
+        attach_surgical_resources(db, departments, start, end, values, bundle, add)
         return bundle
     if spec.number not in {61, 62, 63, 64}:
         bundle.data["missing_data"].append("本功能的专属运营来源尚需补充，不以无关全院财务指标代替")

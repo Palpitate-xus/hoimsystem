@@ -2984,3 +2984,41 @@ class InpatientUrineInterval(Base):
     revoked_at = Column(DateTime().with_variant(mysql.DATETIME(fsp=6), "mysql"), nullable=True)
     revoked_by = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=True)
     revoke_reason = Column(String(1000), nullable=False, default="", server_default="")
+
+
+class InpatientLabSource(Base):
+    """A reviewed original lab value explicitly registered for one original admission."""
+
+    __tablename__ = "hoimsystem_inpatient_lab_source"
+    __table_args__ = (
+        UniqueConstraint("active_observation_id", name="uq_inpatient_lab_active_observation"),
+        CheckConstraint("collected_at_utc <= registered_at AND available_at = registered_at", name="ck_inpatient_lab_time"),
+        CheckConstraint(
+            "(status = 'active' AND revision = 1 AND active_observation_id = observation_id AND active_observation_id IS NOT NULL AND revoked_at IS NULL AND revoked_by IS NULL AND revoke_reason = '') OR "
+            "(status = 'revoked' AND revision = 2 AND active_observation_id IS NULL AND revoked_at IS NOT NULL AND revoked_by IS NOT NULL AND revoke_reason <> '')",
+            name="ck_inpatient_lab_governance",
+        ),
+        Index("idx_inpatient_lab_scope_time", "patient_id", "admission_id", "collected_at_utc", "lab_source_id"),
+        Index("idx_inpatient_lab_registered", "registered_at", "available_at"),
+    )
+
+    lab_source_id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    patient_id = Column(Integer, ForeignKey("hoimsystem_patient.patient_id"), nullable=False)
+    admission_id = Column(String(36), ForeignKey("hoimsystem_admission.admission_id"), nullable=False)
+    observation_id = Column(String(36), ForeignKey("hoimsystem_lab_observation.observation_id"), nullable=False)
+    active_observation_id = Column(String(36), nullable=True)
+    mapping_id = Column(String(36), ForeignKey("hoimsystem_ai_lab_mapping.mapping_id"), nullable=False)
+    collected_at_utc = Column(DateTime().with_variant(mysql.DATETIME(fsp=6), "mysql"), nullable=False)
+    registered_at = Column(DateTime().with_variant(mysql.DATETIME(fsp=6), "mysql"), nullable=False)
+    available_at = Column(DateTime().with_variant(mysql.DATETIME(fsp=6), "mysql"), nullable=False)
+    created_by = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=False)
+    schema_version = Column(String(40), nullable=False, default="inpatient_lab_source_v1", server_default="inpatient_lab_source_v1")
+    raw_original_hash = Column(String(64), nullable=False)
+    mapping_content_hash = Column(String(64), nullable=False)
+    snapshot_json = Column(Text, nullable=False)
+    content_hash = Column(String(64), nullable=False)
+    status = Column(String(16), nullable=False, default="active", server_default="active")
+    revision = Column(Integer, nullable=False, default=1, server_default="1")
+    revoked_at = Column(DateTime().with_variant(mysql.DATETIME(fsp=6), "mysql"), nullable=True)
+    revoked_by = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=True)
+    revoke_reason = Column(String(1000), nullable=False, default="", server_default="")

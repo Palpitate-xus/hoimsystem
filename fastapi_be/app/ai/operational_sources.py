@@ -8,6 +8,7 @@ from sqlalchemy import case, func
 
 from app.ai.catalog import FeatureSpec
 from app.ai.context import ContextBundle
+from app.ai.feedback_sources import attach_feedback_sources
 from app.ai.governance import digest, encode_json
 from app.ai.inventory_sources import attach_inventory_sources
 from app.ai.models import utcnow
@@ -104,7 +105,7 @@ def operational_context(db, user: User, spec: FeatureSpec, values: dict) -> Cont
     bundle = ContextBundle(department_ids=departments or set())
     bundle.data = {
         "scope": "hospital" if departments is None else "department",
-        "source_domain": "inventory" if spec.number in {66, 67} else "operations",
+        "source_domain": "inventory" if spec.number in {66, 67} else "feedback" if spec.number == 70 else "operations",
         "department_ids": sorted(departments) if departments is not None else None,
         "department_names": [row[0] for row in db.query(Department.name).filter(Department.department_id.in_(departments)).order_by(Department.department_id).all()] if departments is not None else [],
         "since": str(start),
@@ -130,6 +131,9 @@ def operational_context(db, user: User, spec: FeatureSpec, values: dict) -> Cont
         return bundle
     if spec.number == 65:
         attach_surgical_resources(db, departments, start, end, values, bundle, add)
+        return bundle
+    if spec.number == 70:
+        attach_feedback_sources(db, departments, start, end, bundle, add)
         return bundle
     if spec.number not in {61, 62, 63, 64}:
         bundle.data["missing_data"].append("本功能的专属运营来源尚需补充，不以无关全院财务指标代替")

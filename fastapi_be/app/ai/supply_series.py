@@ -56,7 +56,7 @@ def published_governance(row):
     return facts.governance(row) | {"status": "published", "revision": 2, "revoked_by": None, "revoked_at": None, "revoke_reason": ""}
 
 
-def metadata(row):
+def metadata(row, *, include_private_governance=False):
     state = facts.governance(row)
     return {
         "series_id": row.series_id,
@@ -72,7 +72,7 @@ def metadata(row):
         "collection_digest": row.collection_digest,
         "projection_hash": row.projection_hash,
         "source_id": f"supply_series:{row.series_id}:{row.content_hash[:12]}",
-        **{k: v for k, v in state.items() if k not in {"review_basis_note", "revoke_reason"}},
+        **{k: v for k, v in state.items() if include_private_governance or k not in {"review_basis_note", "revoke_reason"}},
         "governance_hash": core.hash_content(state),
     }
 

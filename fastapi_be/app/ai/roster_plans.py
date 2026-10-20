@@ -33,12 +33,13 @@ def bounded_json(value):
     return serialized
 
 
-def plan_row(db, plan_id):
+def plan_row(db, plan_id, *, locking=False):
     try:
         facts.canonical_id(plan_id)
     except (ValueError, TypeError, AttributeError) as exc:
         raise HTTPException(422, "排班计划标识须为规范UUID") from exc
-    row = db.query(AIRosterPlan).filter_by(plan_id=plan_id).populate_existing().one_or_none()
+    query = db.query(AIRosterPlan).filter_by(plan_id=plan_id).populate_existing()
+    row = (query.with_for_update() if locking else query).one_or_none()
     if row is None:
         raise HTTPException(404, "排班计划不存在")
     return row
@@ -127,18 +128,18 @@ def plan_proof(row):
         raise HTTPException(409, "排班计划的完整原件、治理、原时刻或投影哈希不一致") from exc
 
 
-def _current(db, actor, row):
-    facts.roster_scope(db, actor, row.department_id)
-    collection = current_collection(db, actor, row.department_id)
+def _current(db, actor, row, *, locking=False):
+    facts.roster_scope(db, actor, row.department_id, locking=locking)
+    collection = current_collection(db, actor, row.department_id, locking=locking)
     if collection["collection_digest"] != row.collection_digest:
         raise HTTPException(409, "原人员完整集合或来源治理已经变化，请重新捕获并审核排班计划")
 
 
-def authorize_plan(db, user, plan_id, *, execution=True, binding=None):
-    row = plan_row(db, plan_id)
-    actor = facts.roster_scope(db, user, row.department_id)
+def authorize_plan(db, user, plan_id, *, execution=True, binding=None, locking=False):
+    row = plan_row(db, plan_id, locking=locking)
+    actor = facts.roster_scope(db, user, row.department_id, locking=locking)
     snapshot, source = plan_proof(row)
-    _current(db, actor, row)
+    _current(db, actor, row, locking=locking)
     if row.status != "published" or row.revision != 2 or source is None:
         raise HTTPException(409, "排班计划尚未发布或已经失效，不能执行新任务")
     if execution:
@@ -147,7 +148,7 @@ def authorize_plan(db, user, plan_id, *, execution=True, binding=None):
             RosterSource.model_validate(source)
         except ValidationError as exc:
             raise HTTPException(409, "排班计划绑定的原算法或输入政策已改变，请重新捕获审核") from exc
-    if binding is not None and any(binding[key] != value for key, value in binding_for(row, source).items()):
+    if binding is not None and (not isinstance(binding, dict) or any(binding.get(key) != value for key, value in binding_for(row, source).items())):
         raise HTTPException(409, "排班任务的完整原计划绑定已经变化")
     return row, snapshot, source
 
@@ -237,6 +238,8 @@ def create_plan(db, user, values):
     db.add(row)
     db.flush()
     plan_proof(row)
+    actor = facts.current_actor(db, actor, locking=True)
+    _current(db, actor, row, locking=True)
     governance.audit(db, actor.user_id, "roster.plan.create", row.plan_id, {"content_hash": row.content_hash, "department_id": row.department_id, "collection_digest": row.collection_digest})
     return row
 
@@ -263,6 +266,10 @@ def review_plan(db, user, plan_id, values):
         raise HTTPException(409, "排班计划发生并发审核，本次未保存")
     row = plan_row(db, plan_id)
     plan_proof(row)
+    actor = facts.current_actor(db, actor, locking=True)
+    if actor.user_role != "super_admin":
+        raise HTTPException(403, "当前身份已不再具备排班审核权限，本次未发布")
+    _current(db, actor, row, locking=True)
     governance.audit(
         db,
         actor.user_id,
@@ -294,5 +301,10 @@ def revoke_plan(db, user, plan_id, values):
         raise HTTPException(409, "排班计划发生并发变更，本次未撤销")
     row = plan_row(db, plan_id)
     plan_proof(row)
+    actor = facts.current_actor(db, actor, locking=True)
+    if actor.user_role != "super_admin":
+        _current(db, actor, row, locking=True)
+        if row.created_by != actor.user_id:
+            raise HTTPException(403, "当前身份已不具备撤销该原计划的权限")
     governance.audit(db, actor.user_id, "roster.plan.revoke", plan_id, {"revision": row.revision, "content_hash": row.content_hash, "governance_hash": hash_content(facts.governance_fields(row))})
     return row

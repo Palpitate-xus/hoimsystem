@@ -167,3 +167,31 @@ test('同runId及同短摘要仍须按当前所选原计划核完整private与�
   await assertCleared(page);
   expect(state.errors).toEqual([]);
 });
+
+for (const path of ['openRun', 'refreshRun', 'poll']) test(`同一真实来源的完整${path}回复仍必须对应实际请求runId`, async ({ page }) => {
+  let reads = 0;
+  const state = await prepare(page, {
+    fullMutate(value) {
+      reads += 1;
+      if (path === 'openRun' || reads > 1) return { ...value, run_id: other.run_detail.run_id };
+      // Workflow-only conversion of the actual full DTO. A running full view
+      // retains original findings and has no accepted result, just as the API.
+      return { ...value, status: 'running', result: {} };
+    },
+  });
+  if (path === 'openRun') {
+    await page.getByText('最近任务', { exact: true }).click();
+    await expect(page.getByRole('button', { name: '查看', exact: true })).toBeVisible();
+    // Await the real history handler, so an initially empty view cannot make
+    // this negative assertion pass before the mismatched reply is processed.
+    await page.evaluate(async id => { await window.__rosterProbe.assistant.$.setupState.openRun(id); }, queued.run_id);
+  } else {
+    await submit(page);
+    await expect(page.getByRole('button', { name: '刷新状态', exact: true })).toBeVisible();
+    if (path === 'refreshRun') await page.evaluate(async () => { await window.__rosterProbe.assistant.$.setupState.refreshRun(); });
+    else await expect.poll(() => state.reads.filter(row => row.path === runPath).length).toBe(2);
+  }
+  await assertCleared(page);
+  expect(state.reads.filter(row => row.path.startsWith('/api/ai/runs/')).every(row => row.path === runPath)).toBe(true);
+  expect(state.errors).toEqual([]);
+});

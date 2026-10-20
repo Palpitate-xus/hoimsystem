@@ -152,6 +152,10 @@ class ECGAssetAction(AudioAssetAction):
     """Versioned raw-waveform withdrawal and explicit super-admin purge reason."""
 
 
+class ImageAssetAction(AudioAssetAction):
+    """Versioned private image withdrawal and super-admin purge reason."""
+
+
 class PatientGrantWrite(StrictRequest):
     """Grant narrowly scoped and expiring patient access."""
 
@@ -388,6 +392,62 @@ class ECGAnalysis(StrictRequest):
 
 class ECGGenerationResult(GenerationResult):
     ecg_analysis: ECGAnalysis
+
+
+class ImageRegion(StrictRequest):
+    """Half-open rectangle in the unrotated original row/column pixel matrix."""
+
+    x: int = Field(ge=0, strict=True)
+    y: int = Field(ge=0, strict=True)
+    width: int = Field(ge=1, strict=True)
+    height: int = Field(ge=1, strict=True)
+
+
+class ImageProcessing(StrictRequest):
+    instructions_digest: str = Field(pattern=r"^[a-f0-9]{64}$")
+    input_rows: int = Field(ge=1, strict=True)
+    input_columns: int = Field(ge=1, strict=True)
+    input_frames: int = Field(ge=1, le=1, strict=True)
+    processed_frames: list[int] = Field(min_length=1, max_length=1)
+    analysis_region: ImageRegion
+    preprocessing_notes: list[str] = Field(min_length=1, max_length=20)
+
+    @model_validator(mode="after")
+    def original_region(self):
+        r = self.analysis_region
+        if self.processed_frames != [0] or r.x + r.width > self.input_columns or r.y + r.height > self.input_rows or any(len(item) > 1000 for item in self.preprocessing_notes):
+            raise ValueError("影像实际处理范围超出原像素或缺少明确预处理说明")
+        return self
+
+
+class ImageFinding(StrictRequest):
+    label: str = Field(min_length=1, max_length=200)
+    description: str = Field(min_length=1, max_length=4000)
+    location: Literal["image", "bounding_box"]
+    region: ImageRegion | None = None
+    score: float | None = Field(default=None, allow_inf_nan=False, strict=True)
+    score_kind: Literal["model_score"] = "model_score"
+    source_id: str = Field(min_length=1, max_length=100)
+
+    @model_validator(mode="after")
+    def explicit_location(self):
+        if (self.location == "bounding_box") != (self.region is not None):
+            raise ValueError("仅真实定位模型可提供原像素矩形，图像级分类不伪造定位")
+        return self
+
+
+class ImageAnalysis(StrictRequest):
+    asset_id: str = Field(min_length=36, max_length=36)
+    content_hash: str = Field(pattern=r"^[a-f0-9]{64}$")
+    original_hash: str = Field(pattern=r"^[a-f0-9]{64}$")
+    pixel_hash: str = Field(pattern=r"^[a-f0-9]{64}$")
+    coordinate_space: Literal["source_pixels"]
+    processing: ImageProcessing
+    findings: list[ImageFinding] = Field(max_length=100)
+
+
+class ImageGenerationResult(GenerationResult):
+    image_analysis: ImageAnalysis
 
 
 class FeedbackWrite(StrictRequest):

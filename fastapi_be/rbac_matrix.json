@@ -778,6 +778,80 @@
  },
  {
   "auth": "ANY",
+  "function": "image_options",
+  "method": "GET",
+  "module": "ai_images.py",
+  "path": "/api/ai/image-options"
+ },
+ {
+  "auth": "ANY",
+  "function": "image_orders",
+  "method": "GET",
+  "module": "ai_images.py",
+  "path": "/api/ai/image-orders"
+ },
+ {
+  "auth": "ANY",
+  "function": "upload_image",
+  "method": "POST",
+  "module": "ai_images.py",
+  "path": "/api/ai/image-assets"
+ },
+ {
+  "auth": "ANY",
+  "function": "list_images",
+  "method": "GET",
+  "module": "ai_images.py",
+  "path": "/api/ai/image-assets"
+ },
+ {
+  "auth": "ANY",
+  "function": "inspect_image",
+  "method": "GET",
+  "module": "ai_images.py",
+  "path": "/api/ai/image-assets/{asset_id}"
+ },
+ {
+  "auth": "ANY",
+  "function": "image_pixels",
+  "method": "GET",
+  "module": "ai_images.py",
+  "path": "/api/ai/image-assets/{asset_id}/pixels"
+ },
+ {
+  "auth": "ANY",
+  "function": "image_content",
+  "method": "GET",
+  "module": "ai_images.py",
+  "path": "/api/ai/image-assets/{asset_id}/content"
+ },
+ {
+  "auth": "ANY",
+  "function": "withdraw_image",
+  "method": "POST",
+  "module": "ai_images.py",
+  "path": "/api/ai/image-assets/{asset_id}/withdraw"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "admin_image_list",
+  "method": "GET",
+  "module": "ai_images.py",
+  "path": "/api/ai/admin/image-assets"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "purge_image",
+  "method": "POST",
+  "module": "ai_images.py",
+  "path": "/api/ai/admin/image-assets/{asset_id}/purge"
+ },
+ {
+  "auth": "ANY",
   "function": "list_allergies",
   "method": "GET",
   "module": "allergy.py",

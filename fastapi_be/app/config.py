@@ -39,6 +39,10 @@ class Settings(BaseSettings):
     AI_ECG_MAX_BYTES: int = Field(default=32 * 1024 * 1024, ge=1024, le=128 * 1024 * 1024)
     AI_ECG_MAX_DURATION_SECONDS: int = Field(default=300, ge=1, le=3600)
     AI_ECG_USER_QUOTA_BYTES: int = Field(default=512 * 1024 * 1024, ge=1024, le=20 * 1024 * 1024 * 1024)
+    AI_IMAGE_STORAGE_DIR: str = "private/ai-images"
+    AI_IMAGE_MAX_BYTES: int = Field(default=64 * 1024 * 1024, ge=1024, le=128 * 1024 * 1024)
+    AI_IMAGE_MAX_PIXELS: int = Field(default=16 * 1024 * 1024, ge=1, le=32 * 1024 * 1024)
+    AI_IMAGE_USER_QUOTA_BYTES: int = Field(default=1024 * 1024 * 1024, ge=1024, le=20 * 1024 * 1024 * 1024)
 
     DATABASE_URL: str = ""
 

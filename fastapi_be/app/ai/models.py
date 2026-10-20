@@ -283,3 +283,39 @@ class AIAuditEvent(Base):
     target = Column(String(120), nullable=False)
     detail_json = Column(Text, nullable=False, default="{}")
     create_time = Column(DateTime, nullable=False, default=utcnow)
+
+
+class AIImageAsset(Base):
+    """Private DICOM source and derived pixels with order-bound, revocable model use."""
+
+    __tablename__ = "hoimsystem_ai_image_asset"
+    __table_args__ = (
+        Index("idx_ai_image_patient_time", "patient_id", "create_time"),
+        Index("idx_ai_image_owner_status", "created_by", "status"),
+        Index("idx_ai_image_order", "imaging_order_id"),
+    )
+
+    asset_id = Column(String(36), primary_key=True, default=new_id)
+    patient_id = Column(Integer, ForeignKey("hoimsystem_patient.patient_id"), nullable=False)
+    imaging_order_id = Column(String(36), ForeignKey("hoimsystem_imaging_order.imaging_order_id"), nullable=False)
+    encounter_ref = Column(String(64), nullable=True)
+    content_hash = Column(String(64), nullable=False)
+    original_hash = Column(String(64), nullable=False)
+    pixel_hash = Column(String(64), nullable=False)
+    byte_size = Column(Integer, nullable=False)
+    original_byte_size = Column(Integer, nullable=False)
+    pixel_byte_size = Column(Integer, nullable=False)
+    metadata_json = Column(Text, nullable=False)
+    recorded_at = Column(DateTime, nullable=True)
+    authorization_note = Column(String(1000), nullable=False)
+    authorized_at = Column(DateTime, nullable=False)
+    created_by = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=False)
+    create_time = Column(DateTime, nullable=False, default=utcnow)
+    status = Column(String(24), nullable=False, default="ready")
+    revision = Column(Integer, nullable=False, default=1)
+    withdrawn_by = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=True)
+    withdrawn_at = Column(DateTime, nullable=True)
+    withdrawal_note = Column(String(1000), nullable=False, default="")
+    purged_by = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=True)
+    purged_at = Column(DateTime, nullable=True)
+    purge_note = Column(String(1000), nullable=False, default="")

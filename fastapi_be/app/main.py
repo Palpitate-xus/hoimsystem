@@ -14,7 +14,7 @@ from starlette.responses import JSONResponse
 from app.config import settings
 from app.observability import ObservabilityMiddleware
 
-MICROSECOND_PATTERN = re.compile(rb'(\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}:\d{2})\.\d+')
+MICROSECOND_PATTERN = re.compile(rb"(\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}:\d{2})\.\d+")
 
 # 旧接口把业务错误放在 JSON ``code`` 中但仍返回 HTTP 200。统一响应类在不改变
 # 响应体契约的前提下修正传输层状态码；旧的 code=500 多为参数/状态冲突，而不是
@@ -41,7 +41,7 @@ class APIJSONResponse(JSONResponse):
         super().__init__(content=content, status_code=status_code, *args, **kwargs)
 
     def render(self, content) -> bytes:
-        return MICROSECOND_PATTERN.sub(rb'\1', super().render(content))
+        return MICROSECOND_PATTERN.sub(rb"\1", super().render(content))
 
 
 # 操作日志：路径到中文操作名的映射
@@ -191,8 +191,12 @@ class OperationLogMiddleware(BaseHTTPMiddleware):
 
     # 始终跳过的路径(无业务含义)
     SKIP_PATHS = {
-        "/docs", "/openapi.json", "/favicon.ico",
-        "/api/logout", "/api/test", "/api/publicKey",
+        "/docs",
+        "/openapi.json",
+        "/favicon.ico",
+        "/api/logout",
+        "/api/test",
+        "/api/publicKey",
     }
     # 登录/注册本身需要审计：记录成功与失败（含 401/403），否则暴力破解不留痕迹。
     # 用户名从请求体提取，密码绝不落日志。
@@ -219,6 +223,8 @@ class OperationLogMiddleware(BaseHTTPMiddleware):
         "/api/ai/admin/review-excerpts",
         "/api/ai/audio-assets",
         "/api/ai/admin/audio-assets",
+        "/api/ai/image-assets",
+        "/api/ai/admin/image-assets",
         "/api/ai/ecg-assets",
         "/api/ai/admin/ecg-assets",
         "/api/clinicalDiagnosis/review",
@@ -282,8 +288,7 @@ class OperationLogMiddleware(BaseHTTPMiddleware):
 
         # 提取 detail: 从 query params 取 id 类参数
         detail_parts = []
-        for k in ("id", "uuid", "patient_id", "prescription_id", "charge_id",
-                  "admission_id", "medical_record_id", "schedule_id"):
+        for k in ("id", "uuid", "patient_id", "prescription_id", "charge_id", "admission_id", "medical_record_id", "schedule_id"):
             v = request.query_params.get(k)
             if v:
                 detail_parts.append(f"{k}={v}")
@@ -325,6 +330,7 @@ class OperationLogMiddleware(BaseHTTPMiddleware):
                     db.close()
             except Exception:
                 import logging
+
                 logging.getLogger("audit").warning("写入审计日志失败", exc_info=True)
 
         # 合并已有 background（如依赖注入的清理任务），保证不互相覆盖
@@ -373,6 +379,7 @@ from app.routers import (
     ai_audio,
     ai_ecg,
     ai_feedback_admin,
+    ai_images,
     allergy,
     analytics,
     antibiotic,
@@ -481,6 +488,7 @@ app.include_router(observability_routes.router)
 app.include_router(ai_admin.router, prefix="/api")
 app.include_router(ai_audio.router, prefix="/api")
 app.include_router(ai_ecg.router, prefix="/api")
+app.include_router(ai_images.router, prefix="/api")
 app.include_router(ai_feedback_admin.router, prefix="/api")
 app.include_router(ai.router, prefix="/api")
 app.include_router(analytics.router, prefix="/api")

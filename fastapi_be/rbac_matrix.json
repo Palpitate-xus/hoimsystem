@@ -1384,6 +1384,68 @@
   "path": "/api/ai/admin/risk-rule-profiles/{rule_profile_id}/revoke"
  },
  {
+  "auth": "ANY",
+  "function": "options",
+  "method": "GET",
+  "module": "ai_roster_sources.py",
+  "path": "/api/ai/roster-sources/options"
+ },
+ {
+  "auth": "ANY",
+  "function": "sources",
+  "method": "GET",
+  "module": "ai_roster_sources.py",
+  "path": "/api/ai/roster-sources/{kind}"
+ },
+ {
+  "auth": "ANY",
+  "function": "create",
+  "method": "POST",
+  "module": "ai_roster_sources.py",
+  "path": "/api/ai/roster-sources/{kind}"
+ },
+ {
+  "auth": "ANY",
+  "function": "source",
+  "method": "GET",
+  "module": "ai_roster_sources.py",
+  "path": "/api/ai/roster-sources/{kind}/{source_record_id}"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "review",
+  "method": "POST",
+  "module": "ai_roster_sources.py",
+  "path": "/api/ai/roster-sources/{kind}/{source_record_id}/review"
+ },
+ {
+  "auth": "ANY",
+  "function": "revoke",
+  "method": "POST",
+  "module": "ai_roster_sources.py",
+  "path": "/api/ai/roster-sources/{kind}/{source_record_id}/revoke"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "admin_sources",
+  "method": "GET",
+  "module": "ai_roster_sources.py",
+  "path": "/api/ai/admin/roster-sources"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "admin_source",
+  "method": "GET",
+  "module": "ai_roster_sources.py",
+  "path": "/api/ai/admin/roster-sources/{source_record_id}"
+ },
+ {
   "auth": [
    "admin",
    "director",

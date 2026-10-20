@@ -37,7 +37,8 @@
           <el-select v-model="prescriptionId" :clearable="!props.initialInput.prescription_id" :disabled="!!props.initialInput.prescription_id" placeholder="选择实际处方" style="width: 100%"><el-option v-for="item in prescriptions" :key="item.prescription_id" :label="item.label" :value="item.prescription_id" /></el-select>
         </el-form-item>
         <el-form-item v-if="needsCoding" label="编码检索词"><el-input v-model="codingQuery" maxlength="500" placeholder="已记录诊断、手术名称或已有编码；多个词用逗号分隔" /></el-form-item>
-        <template v-if="needsOperations">
+        <ai-forecast-input v-if="needsForecast" :initial-series-id="String(props.initialInput.forecast_series_id || '')" @selection="forecastSelection = $event" @availability="forecastReady = $event" />
+        <template v-if="needsOperations && !needsForecast">
           <el-form-item label="运营资料日期"><el-date-picker v-model="operationsRange" type="daterange" value-format="YYYY-MM-DD" start-placeholder="开始日期" end-placeholder="结束日期" /></el-form-item>
           <el-form-item v-if="needsPlanning" :label="featureKey === 'surgery_scheduling' ? '排台计划日期' : '排班计划日期'"><el-date-picker v-model="operationsPlanRange" type="daterange" value-format="YYYY-MM-DD" start-placeholder="计划开始日期" end-placeholder="计划结束日期" /></el-form-item>
           <el-form-item v-if="!needsInventory" label="运营科室范围"><el-select v-model="serviceDepartment" clearable filterable :placeholder="serviceOptions.allow_hospital_scope ? '默认全院范围' : '默认所属科室范围'"><el-option v-for="item in serviceOptions.departments || []" :key="item.department_id" :value="item.department_id" :label="item.name" /></el-select></el-form-item>
@@ -61,14 +62,16 @@
         <el-collapse v-if="canPreview" class="spaced">
           <el-collapse-item title="联调与预览选项">
             <el-checkbox v-model="preview">超级管理员预览（结果仅供评估）</el-checkbox>
+            <p v-if="needsForecast">统计预测只使用所选冻结来源和7/14天跨度；此处JSON不参与计算，也不能改写来源、口径、时区或日计数。</p>
             <el-input v-model="extraInput" type="textarea" :rows="4" placeholder="可选：专用适配器的结构化输入 JSON，由服务契约规定" class="spaced" />
           </el-collapse-item>
         </el-collapse>
-        <el-alert v-if="selected.engine !== 'llm'" type="info" :closable="false" title="此能力通过专用模型处理，需要对应原始资料和已登记的适配服务。" class="spaced" />
+        <el-alert v-if="needsForecast" type="info" :closable="false" title="本功能使用固定统计计算；Prompt仅用于来源审计，不由文本模型推测数值。" class="spaced" />
+        <el-alert v-else-if="selected.engine !== 'llm'" type="info" :closable="false" title="此能力通过专用模型处理，需要对应原始资料和已登记的适配服务。" class="spaced" />
         <div class="actions">
           <el-button v-if="selected.scope === 'patient'" :disabled="!patientId || patientLoading || pathwayOptionsLoading || (needsAudio && (!audioAssetId || !audioReady)) || (needsEcg && (!ecgAssetId || !ecgReady)) || (needsImage && (!imageAssetId || !imageOrderId || !imageReady))" @click="inspectContext">查看本次资料</el-button>
-          <el-button v-if="needsOperations" :disabled="serviceOptionsLoading" @click="inspectOperationalContext">查看本次运营资料</el-button>
-          <el-button type="primary" :loading="submitting" :disabled="busy || patientLoading || serviceOptionsLoading || pathwayOptionsLoading || (needsAudio && (!audioAssetId || !audioReady)) || (needsEcg && (!ecgAssetId || !ecgReady)) || (needsImage && (!imageAssetId || !imageOrderId || !imageReady)) || (!selected.enabled && !preview) || (selected.scope === 'patient' && !patientId) || (needsInventory && (!inventoryDrugs.length && !inventoryConsumables.length || serviceOptions.inventory_scope_available === false))" @click="submit">生成辅助建议</el-button>
+          <el-button v-if="needsOperations" :disabled="serviceOptionsLoading || (needsForecast && !forecastReady)" @click="inspectOperationalContext">查看本次运营资料</el-button>
+          <el-button type="primary" :loading="submitting" :disabled="(needsForecast && !forecastReady) || busy || patientLoading || serviceOptionsLoading || pathwayOptionsLoading || (needsAudio && (!audioAssetId || !audioReady)) || (needsEcg && (!ecgAssetId || !ecgReady)) || (needsImage && (!imageAssetId || !imageOrderId || !imageReady)) || (!selected.enabled && !preview) || (selected.scope === 'patient' && !patientId) || (needsInventory && (!inventoryDrugs.length && !inventoryConsumables.length || serviceOptions.inventory_scope_available === false))" @click="submit">生成辅助建议</el-button>
           <el-button v-if="busy" @click="cancel">取消接收结果</el-button>
         </div>
       </template>
@@ -81,6 +84,7 @@
       <el-alert v-if="run.status === 'failed'" type="error" :closable="false" :title="run.error_message || '生成失败，请联系管理员检查服务状态'" />
       <ai-service-findings :findings="run.tool_findings" @inspect="inspectEvidence" />
       <ai-operational-findings :findings="run.operational_findings" @inspect="inspectEvidence" />
+      <ai-forecast-findings v-if="run.feature_key === 'visit_forecast'" :findings="run.forecast_findings" :analysis="run.result?.forecast_analysis" @inspect="inspectEvidence" />
       <ai-incident-findings :findings="run.incident_findings" @inspect="inspectEvidence" />
       <ai-consultation-findings :findings="run.consultation_findings" @inspect="inspectEvidence" />
       <ai-adr-findings :findings="run.adr_findings" @inspect="inspectEvidence" />
@@ -141,7 +145,8 @@
     </el-collapse>
     <el-dialog v-model="contextDialog" :title="needsOperations ? '本次提供给 AI 的运营资料' : '本次提供给 AI 的患者资料'" width="min(1000px, 96vw)">
       <el-alert type="info" :closable="false" title="资料保留时间和状态，缺失信息会单独标记。" />
-      <ai-operational-findings v-if="needsOperations" :findings="contextData?.context" @inspect="inspectPreviewEvidence" />
+      <ai-operational-findings v-if="needsOperations && !needsForecast" :findings="contextData?.context" @inspect="inspectPreviewEvidence" />
+      <ai-forecast-findings v-if="needsForecast && contextDialog" :findings="contextData?.context" @inspect="inspectPreviewEvidence" />
       <ai-incident-findings v-if="needsIncident" :findings="contextData?.context" @inspect="inspectPreviewEvidence" />
       <ai-consultation-findings :findings="contextData?.context?.consultation_sources" @inspect="inspectPreviewEvidence" />
       <ai-adr-findings :findings="contextData?.context?.adr_sources" @inspect="inspectPreviewEvidence" />
@@ -159,7 +164,7 @@
 </template>
 
 <script setup>
-import { computed, onActivated, onBeforeUnmount, onDeactivated, onMounted, ref, watch } from "vue";
+import { computed, defineAsyncComponent, onActivated, onBeforeUnmount, onDeactivated, onMounted, ref, watch } from "vue";
 import { useStore } from "vuex";
 import { ElMessage } from "element-plus";
 import { cancelAIRun, createAIRun, getAIClinicalContext, getAIOperationalContext, getAIEncounters, getAIFeatures, getAIPatients, getAIPrescriptions, getAIPathwayOptions, getAIServiceOptions, getAIRun, getAIRuns, reviewAIRun } from "@/api/ai";
@@ -177,6 +182,9 @@ import AiImageFindings from "@/components/AIImageFindings/index.vue";
 import AiEcgInput from "@/components/AIEcgInput/index.vue";
 import AiEcgFindings from "@/components/AIEcgFindings/index.vue";
 
+const AiForecastInput = defineAsyncComponent(() => import("@/components/AIForecastInput/index.vue"));
+const AiForecastFindings = defineAsyncComponent(() => import("@/components/AIForecastFindings/index.vue"));
+
 const props = defineProps({ featureKeys: { type: Array, default: () => [] }, initialFeature: { type: String, default: "" }, patientId: { type: Number, default: null }, encounterRef: { type: String, default: "" }, initialInput: { type: Object, default: () => ({}) } });
 const store = useStore();
 const canPreview = computed(() => store.getters["user/permissions"].includes("super_admin"));
@@ -190,6 +198,7 @@ const needsPrescription = computed(() => ["interaction_review", "allergy_review"
 const needsCoding = computed(() => ["icd_candidates", "drg_evidence_review"].includes(featureKey.value));
 const needsAppointment = computed(() => featureKey.value === "appointment_assistant"), needsNavigation = computed(() => featureKey.value === "hospital_navigation");
 const needsOperations = computed(() => selected.value?.scope === "hospital"), needsInventory = computed(() => ["supply_forecast", "inventory_optimization"].includes(featureKey.value));
+const needsForecast = computed(() => featureKey.value === "visit_forecast"), forecastSelection = ref(null), forecastReady = ref(false);
 const needsPlanning = computed(() => ["roster_optimization", "surgery_scheduling"].includes(featureKey.value));
 const needsIncident = computed(() => featureKey.value === "incident_rca"), incidentId = ref("");
 const needsAudio = computed(() => featureKey.value === "medical_transcription"), audioAssetId = ref(""), audioReady = ref(false);
@@ -242,12 +251,13 @@ watch(featureKey, async () => {
   audioAssetId.value = props.initialInput.audio_asset_id == null ? "" : String(props.initialInput.audio_asset_id); audioReady.value = false;
   ecgAssetId.value = props.initialInput.ecg_asset_id == null ? "" : String(props.initialInput.ecg_asset_id); ecgReady.value = false;
   imageAssetId.value = props.initialInput.image_asset_id == null ? "" : String(props.initialInput.image_asset_id); imageOrderId.value = props.initialInput.imaging_order_id || ""; imageReady.value = false;
+  forecastSelection.value = null; forecastReady.value = false;
   serviceOptions.value = {}; serviceDepartment.value = props.initialInput.department_id || null; serviceDoctor.value = props.initialInput.doctor_id || null; serviceDate.value = props.initialInput.appointment_date || "";
   navigationStart.value = props.initialInput.start_node_id || null; navigationEnd.value = props.initialInput.end_node_id || null;
   operationsRange.value = props.initialInput.date_from && props.initialInput.date_to ? [props.initialInput.date_from, props.initialInput.date_to] : []; inventoryDrugs.value = [...(props.initialInput.drug_ids || [])]; inventoryConsumables.value = [...(props.initialInput.consumable_ids || [])]; serviceOptionsLoading.value = false;
   operationsPlanRange.value = props.initialInput.planning_date_from && props.initialInput.planning_date_to ? [props.initialInput.planning_date_from, props.initialInput.planning_date_to] : [];
   if (selected.value?.scope === "patient") { await searchPatients(); if (featureVersion !== formVersion) return; patientId.value = props.patientId || (patients.value.length === 1 ? patients.value[0].patient_id : null); }
-  if (needsNavigation.value || needsAppointment.value || needsOperations.value) {
+  if (needsNavigation.value || needsAppointment.value || (needsOperations.value && !needsForecast.value)) {
     const version = formVersion; serviceOptionsLoading.value = true;
     try { const response = await getAIServiceOptions({ feature_key: featureKey.value }); if (version === formVersion) { serviceOptions.value = response.data || {}; if (needsOperations.value && !operationsRange.value?.length) operationsRange.value = serviceOptions.value.default_window || []; if (needsPlanning.value && !operationsPlanRange.value?.length) operationsPlanRange.value = serviceOptions.value.default_planning_window || []; } }
     finally { if (version === formVersion) serviceOptionsLoading.value = false; }
@@ -276,7 +286,7 @@ watch(patientId, async id => {
   } finally { if (patientVersion === patientLoadVersion) patientLoading.value = false; }
 });
 watch(encounterRef, () => { stopPolling(); run.value = null; contextData.value = null; });
-watch([featureKey, patientId, encounterRef, prescriptionId, incidentId, pathwayId, audioAssetId, ecgAssetId, imageAssetId, imageOrderId, serviceDepartment, serviceDoctor, serviceDate, navigationStart, navigationEnd, operationsRange, operationsPlanRange, () => inventoryDrugs.value.join(','), () => inventoryConsumables.value.join(','), () => JSON.stringify(props.initialInput)], () => {
+watch([() => JSON.stringify(forecastSelection.value), forecastReady, featureKey, patientId, encounterRef, prescriptionId, incidentId, pathwayId, audioAssetId, ecgAssetId, imageAssetId, imageOrderId, serviceDepartment, serviceDoctor, serviceDate, navigationStart, navigationEnd, operationsRange, operationsPlanRange, () => inventoryDrugs.value.join(','), () => inventoryConsumables.value.join(','), () => JSON.stringify(props.initialInput)], () => {
   selectionVersion += 1; stopPolling(); run.value = null; contextData.value = null; contextDialog.value = false; evidenceDialog.value = false; feedbackDialog.value = false;
 });
 watch(() => run.value?.run_id, () => { evidenceDialog.value = false; feedbackDialog.value = false; feedback.value = { outcome: "accepted", comment: "" }; });
@@ -318,6 +328,10 @@ async function inspectOperationalContext() {
   contextData.value = response.data; contextDialog.value = true;
 }
 function buildTaskInput() {
+  if (needsForecast.value) {
+    if (!forecastReady.value || !forecastSelection.value) { ElMessage.warning("请先选择并核对冻结预测来源"); return; }
+    return { forecast_series_id: forecastSelection.value.forecast_series_id, horizon_days: forecastSelection.value.horizon_days, question: question.value };
+  }
   let extra = {};
   if (canPreview.value && extraInput.value.trim()) {
     try { extra = JSON.parse(extraInput.value); if (!extra || Array.isArray(extra) || typeof extra !== "object") throw new Error(); }
@@ -362,6 +376,10 @@ async function loadHistory(activeNames) {
   const response = await getAIRuns({ feature_key: featureKey.value, patient_id: selected.value?.scope === "patient" ? patientId.value : undefined, encounter_ref: selected.value?.scope === "patient" ? encounterRef.value || undefined : undefined });
   if (version === historyVersion) history.value = response.data || [];
 }
+watch([() => JSON.stringify(store.getters["user/permissions"]), () => store.state.user.accessToken], () => {
+  if (!needsForecast.value) return;
+  selectionVersion++; historyVersion++; stopPolling(); run.value = null; contextData.value = null; contextDialog.value = false; evidenceDialog.value = false; feedbackDialog.value = false; history.value = []; forecastReady.value = false; forecastSelection.value = null;
+});
 const evidenceTitle = id => run.value?.evidence?.find(item => item.source_id === id)?.title || "来源";
 function inspectEvidence(id) { evidence.value = run.value?.evidence?.find(item => item.source_id === id); evidenceDialog.value = !!evidence.value; }
 function inspectPreviewEvidence(id) { evidence.value = contextData.value?.evidence?.find(item => item.source_id === id); evidenceDialog.value = !!evidence.value; }

@@ -56,7 +56,7 @@ def generator():
     return runpy.run_path(SCRIPT)
 
 
-@pytest.mark.parametrize("module", ["inpatient_observations", "ai_observation_windows", "inpatient_laboratory", "ai_lab_mappings", "ai_risk_rules", "ai_news2"])
+@pytest.mark.parametrize("module", ["inpatient_observations", "ai_observation_windows", "inpatient_laboratory", "ai_lab_mappings", "ai_risk_rules", "ai_news2", "ai_aki"])
 def test_observation_matrix_matches_real_mounted_paths_and_role_guards(module, generator):
     """Use actual mounted routes and closure roles, not a second invented role list."""
     from fastapi.routing import APIRoute
@@ -203,7 +203,7 @@ assert scope['ROLE_GROUPS']['OBSERVATION_ROLES']
 assert scope['ROLE_GROUPS']['WINDOW_ROLES']
 endpoints = scope['collect_endpoints']()
 assert endpoints
-assert {'inpatient_laboratory.py', 'ai_lab_mappings.py', 'ai_news2.py', 'ai_risk_rules.py'} <= {item['module'] for item in endpoints}
+assert {'inpatient_laboratory.py', 'ai_lab_mappings.py', 'ai_news2.py', 'ai_risk_rules.py', 'ai_aki.py'} <= {item['module'] for item in endpoints}
 """
     result = subprocess.run([sys.executable, "-c", probe, str(Path(SCRIPT).resolve())], cwd=tmp_path, capture_output=True, text=True)
     assert result.returncode == 0, result.stdout + result.stderr

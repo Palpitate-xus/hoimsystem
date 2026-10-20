@@ -371,6 +371,58 @@ async def check_news2_provider(provider_id: int, req: ProviderCheck, db: Session
     }
 
 
+@router.post("/ai/admin/providers/{provider_id}/aki-capabilities")
+async def check_aki_provider(provider_id: int, req: ProviderCheck, db: Session = Depends(get_db), user: User = Depends(require_roles("super_admin"))) -> dict:
+    """Inspect actual rule/runtime metadata without sending observations or scoring."""
+    from app.ai.aki_probe import inspect_aki_capabilities
+
+    provider = db.get(AIProvider, provider_id)
+    if provider is None:
+        raise HTTPException(404, "模型配置不存在")
+    ensure_revision(provider.revision, req.expected_revision)
+    if provider.kind != "specialist" or "aki_risk" not in json.loads(provider.supported_features_json):
+        raise HTTPException(422, "请选择已登记急性肾损伤判据核对的专用KDIGO AKI规则服务")
+    actor_id, revision, configured_model, timeout = user.user_id, provider.revision, provider.model, provider.timeout_seconds
+    db.expunge(provider)
+    db.commit()
+    error = None
+    try:
+        capabilities = await inspect_aki_capabilities(provider)
+    except AIExecutionError as exc:
+        error = exc
+    db.expire_all()
+    actor, current = db.get(User, actor_id), db.get(AIProvider, provider_id)
+    if actor is None or actor.user_role != "super_admin":
+        raise HTTPException(403, "当前用户不再具备AI管理权限")
+    if current is None:
+        raise HTTPException(409, "模型配置已删除，请刷新后重试")
+    ensure_revision(current.revision, revision)
+    if error:
+        audit(db, actor_id, "provider.aki_check_failed", str(provider_id), {"revision": revision, "error_code": error.code})
+        _commit(db)
+        raise HTTPException(502, error.message)
+    issues = []
+    if capabilities["model_version"] != configured_model:
+        issues.append("登记模型与服务实际规则实现及运行版本不同，请核对并保存后重新评审")
+    if timeout <= capabilities["timeout_seconds"]:
+        issues.append("模型请求超时应大于规则服务处理时限，保留传输和回执时间")
+    audit(db, actor_id, "provider.aki_check", str(provider_id), {"revision": revision, "compatible": not issues, "actual_model": capabilities["model_version"]})
+    _commit(db)
+    return {
+        "code": 200,
+        "msg": "success",
+        "data": {
+            "provider_id": provider_id,
+            "provider_revision": revision,
+            "configured_model": configured_model,
+            "compatible": not issues,
+            "capabilities": capabilities,
+            "issues": issues,
+            "scope_note": "只核对固定KDIGO AKI算法、输入策略及运行版本，不发送患者肌酐、尿量、适用性声明或执行分期；不证明临床适用、原声明独立核实或效果验证，不改变功能启停与验证状态。",
+        },
+    }
+
+
 @router.get("/ai/admin/runs")
 def list_global_runs(
     feature_key: str | None = None,

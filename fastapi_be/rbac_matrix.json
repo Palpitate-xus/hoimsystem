@@ -464,6 +464,15 @@
   "auth": [
    "super_admin"
   ],
+  "function": "check_aki_provider",
+  "method": "POST",
+  "module": "ai_admin.py",
+  "path": "/api/ai/admin/providers/{provider_id}/aki-capabilities"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
   "function": "list_global_runs",
   "method": "GET",
   "module": "ai_admin.py",
@@ -621,6 +630,89 @@
   "method": "GET",
   "module": "ai_admin.py",
   "path": "/api/ai/admin/usage"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "nurse",
+   "super_admin"
+  ],
+  "function": "candidates",
+  "method": "GET",
+  "module": "ai_aki.py",
+  "path": "/api/ai/aki-assessments/candidates"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "nurse",
+   "super_admin"
+  ],
+  "function": "assessments",
+  "method": "GET",
+  "module": "ai_aki.py",
+  "path": "/api/ai/aki-assessments"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "nurse",
+   "super_admin"
+  ],
+  "function": "post_assessment",
+  "method": "POST",
+  "module": "ai_aki.py",
+  "path": "/api/ai/aki-assessments"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "nurse",
+   "super_admin"
+  ],
+  "function": "get_assessment",
+  "method": "GET",
+  "module": "ai_aki.py",
+  "path": "/api/ai/aki-assessments/{assessment_id}"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "nurse",
+   "super_admin"
+  ],
+  "function": "revoke_assessment",
+  "method": "POST",
+  "module": "ai_aki.py",
+  "path": "/api/ai/aki-assessments/{assessment_id}/revoke"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "admin_assessments",
+  "method": "GET",
+  "module": "ai_aki.py",
+  "path": "/api/ai/admin/aki-assessments"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "admin_assessment",
+  "method": "GET",
+  "module": "ai_aki.py",
+  "path": "/api/ai/admin/aki-assessments/{assessment_id}"
  },
  {
   "auth": "ANY",

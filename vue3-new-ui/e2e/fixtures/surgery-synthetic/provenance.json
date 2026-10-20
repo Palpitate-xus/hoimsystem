@@ -1,0 +1,17 @@
+{
+  "scope": "Actual synthetic source ORM/services/router-function outputs, and separate real JWT/ASGI admin metadata replies. Source export is not HTTP or native inference; browser tests intercept these exact DTOs. No hand-edited status, UUID, original value or hash.",
+  "origins": [
+    {
+      "fixture": "sources.json",
+      "actual_export": "/tmp/hoim-surgery-source-ui-real-fixtures.json",
+      "bytes": 79505,
+      "sha256": "af2eb94bcfbe4746a2eee3cd38132eba3d96a7c0b0c59e85c11096de5ef2d7b2"
+    },
+    {
+      "fixture": "providers.json",
+      "actual_export": "/tmp/hoim-surgery-provider-real-asgi-fixtures.json",
+      "bytes": 39355,
+      "sha256": "ea50ebd19c550d24ac0e3199b843dc24de3bf7b0f0ffcbc8c363c02abbd5f507"
+    }
+  ]
+}

@@ -217,7 +217,7 @@ module.exports = {
         // The global 20 kB threshold otherwise leaves identical async copies.
         aiShared: {
           name: "ai-shared",
-          test: /[\\/]src[\\/](?:api[\\/](?:ai[^\\/]*|inpatient(?:Observations|Gcs|Laboratory))\.js$|components[\\/]AI(?:[A-Za-z]+ProviderCheck|[A-Za-z]+Findings)[\\/])/,
+          test: /[\\/]src[\\/](?:api[\\/](?:ai[^\\/]*|inpatient(?:Observations|Gcs|Laboratory|Support)|vasoactiveMappings)\.js$|components[\\/]AI(?:[A-Za-z]+ProviderCheck|[A-Za-z]+Findings)[\\/])/,
           chunks: "async",
           minChunks: 2,
           minSize: 0,

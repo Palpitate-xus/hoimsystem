@@ -376,3 +376,55 @@ def test_incomplete_inventory_retains_rolling_lower_bound_without_false_satisfie
     rolling = next(c for c in checked(source).checks if c.kind == "rolling_24h")
     assert rolling.status == "violated"
     assert rolling.actual_microseconds == 480 * MINUTE
+
+
+def capacity_source(staff_count=512, days=31):
+    from datetime import date, timedelta
+
+    source = complete_source()
+    source["business_dates"] = [str(date(2026, 10, 20) + timedelta(days=i)) for i in range(days)]
+    source["planning_end_at"] = f"{date(2026, 10, 20) + timedelta(days=days)}T00:00:00.000000Z"
+    original = copy.deepcopy(source["staff"][0])
+    source["staff"] = []
+    for index in range(staff_count):
+        person = copy.deepcopy(original)
+        person["staff_id"] = identifier(10000 + index)
+        person["qualifications"][0]["ref"] = fact("qualification", 20000 + index)
+        person["availability"][0]["ref"] = fact("availability", 30000 + index)
+        person["availability"][0]["end_at"] = source["planning_end_at"]
+        source["staff"].append(person)
+    source["work_policies"][0]["applicable_staff_ids"] = [p["staff_id"] for p in source["staff"]]
+    original = copy.deepcopy(source["sessions"][0])
+    source["sessions"] = []
+    for index in range(days):
+        business_day = str(date(2026, 10, 20) + timedelta(days=index))
+        session = copy.deepcopy(original)
+        session.update(session_id=identifier(40000 + index), business_date=business_day, start_at=business_day + "T08:00:00.000000Z", end_at=business_day + "T16:00:00.000000Z")
+        source["sessions"].append(session)
+    original = copy.deepcopy(source["options"][0])
+    source["options"] = []
+    for si, session in enumerate(source["sessions"]):
+        for pi, person in enumerate(source["staff"]):
+            option = copy.deepcopy(original)
+            option.update(option_id=identifier(50000 + si * staff_count + pi), staff_id=person["staff_id"], session_id=session["session_id"], cost_points=limit(0))
+            source["options"].append(option)
+    return source
+
+
+def test_actual_512_person_full_month_graph_exceeds_decimal_bitmask_string_limit_without_changing_it():
+    import sys
+
+    from app.ai.roster_contract import MAX_BYTES, canonical_json
+    from app.ai.roster_model import compute_roster
+
+    digit_limit = sys.get_int_max_str_digits()
+    source = capacity_source()
+    assert len(source["options"]) == 512 * 31
+    assert 7000000 < len(canonical_json(source).encode()) < MAX_BYTES
+    analysis = compute_roster(source, "a" * 64, runtime())
+    assert sys.get_int_max_str_digits() == digit_limit
+    assert analysis.solve_status == "optimal_proven"
+    assert len(analysis.solution.selected_option_ids) == 31
+    assert analysis.feasible_incumbent_objective.penalty_points == 0
+    assert analysis.optimistic_search.frontier_nodes == 31
+    assert analysis.optimistic_search.expanded_nodes == 40

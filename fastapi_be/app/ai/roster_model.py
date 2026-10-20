@@ -778,7 +778,8 @@ def _search(source, graph):
     candidate_bounds = ([incumbent_key] if incumbent_key is not None else []) + ([frontier[0][0]] if frontier else [])
     optimum_bound = min(candidate_bounds) if candidate_bounds else None
     frontier_facts = [
-        {"bound": item[0], "index": item[3].index, "mask": str(item[3].selected_mask), "counts": item[3].counts, "capacities": item[3].capacities, "cost": item[3].cost} for item in sorted(frontier)
+        {"bound": item[0], "index": item[3].index, "mask_hex": hex(item[3].selected_mask), "counts": item[3].counts, "capacities": item[3].capacities, "cost": item[3].cost}
+        for item in sorted(frontier)
     ]
     proof = RosterSearchProof(
         graph=graph,

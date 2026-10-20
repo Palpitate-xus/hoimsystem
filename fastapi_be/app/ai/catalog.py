@@ -2,6 +2,8 @@
 
 from dataclasses import dataclass
 
+from app.ai.references import SOURCE_REFERENCE_KEYS
+
 CATALOG_VERSION = "2026.10.2"
 
 COMMON_SYSTEM_PROMPT = """你是 HOIM 院内业务的辅助智能系统。使用简体中文，完成指定任务。
@@ -188,6 +190,7 @@ def describe_feature(spec: FeatureSpec) -> dict:
         "priority": spec.priority,
         "engine": spec.engine,
         "scope": spec.scope,
+        "source_reference_keys": sorted(SOURCE_REFERENCE_KEYS) if spec.scope == "patient" else [],
         "inputs": list(spec.inputs),
         "deliverables": list(spec.deliverables),
         "requires_knowledge": spec.requires_knowledge,

@@ -10,6 +10,16 @@
       "priority": "P0",
       "engine": "llm",
       "scope": "patient",
+      "source_reference_keys": [
+        "imaging_report_id",
+        "lab_result_id",
+        "perioperative_id",
+        "prescription_id",
+        "record_id",
+        "structured_record_id",
+        "surgery_application_id",
+        "surgery_schedule_id"
+      ],
       "inputs": [
         "本次就诊",
         "既往记录",
@@ -43,6 +53,16 @@
       "priority": "P1",
       "engine": "llm",
       "scope": "patient",
+      "source_reference_keys": [
+        "imaging_report_id",
+        "lab_result_id",
+        "perioperative_id",
+        "prescription_id",
+        "record_id",
+        "structured_record_id",
+        "surgery_application_id",
+        "surgery_schedule_id"
+      ],
       "inputs": [
         "主诉",
         "症状时间线",
@@ -73,6 +93,16 @@
       "priority": "P1",
       "engine": "llm",
       "scope": "patient",
+      "source_reference_keys": [
+        "imaging_report_id",
+        "lab_result_id",
+        "perioperative_id",
+        "prescription_id",
+        "record_id",
+        "structured_record_id",
+        "surgery_application_id",
+        "surgery_schedule_id"
+      ],
       "inputs": [
         "主诉",
         "查体",
@@ -104,6 +134,16 @@
       "priority": "P1",
       "engine": "llm",
       "scope": "patient",
+      "source_reference_keys": [
+        "imaging_report_id",
+        "lab_result_id",
+        "perioperative_id",
+        "prescription_id",
+        "record_id",
+        "structured_record_id",
+        "surgery_application_id",
+        "surgery_schedule_id"
+      ],
       "inputs": [
         "当前临床问题",
         "近期检查",
@@ -134,6 +174,16 @@
       "priority": "P0",
       "engine": "llm",
       "scope": "patient",
+      "source_reference_keys": [
+        "imaging_report_id",
+        "lab_result_id",
+        "perioperative_id",
+        "prescription_id",
+        "record_id",
+        "structured_record_id",
+        "surgery_application_id",
+        "surgery_schedule_id"
+      ],
       "inputs": [
         "医生确认诊断",
         "当前病情",
@@ -166,6 +216,16 @@
       "priority": "P1",
       "engine": "llm",
       "scope": "patient",
+      "source_reference_keys": [
+        "imaging_report_id",
+        "lab_result_id",
+        "perioperative_id",
+        "prescription_id",
+        "record_id",
+        "structured_record_id",
+        "surgery_application_id",
+        "surgery_schedule_id"
+      ],
       "inputs": [
         "已选方案",
         "年龄体重",
@@ -198,6 +258,16 @@
       "priority": "P1",
       "engine": "llm",
       "scope": "patient",
+      "source_reference_keys": [
+        "imaging_report_id",
+        "lab_result_id",
+        "perioperative_id",
+        "prescription_id",
+        "record_id",
+        "structured_record_id",
+        "surgery_application_id",
+        "surgery_schedule_id"
+      ],
       "inputs": [
         "当前诊断列表",
         "各病治疗方案",
@@ -228,6 +298,16 @@
       "priority": "P1",
       "engine": "llm",
       "scope": "patient",
+      "source_reference_keys": [
+        "imaging_report_id",
+        "lab_result_id",
+        "perioperative_id",
+        "prescription_id",
+        "record_id",
+        "structured_record_id",
+        "surgery_application_id",
+        "surgery_schedule_id"
+      ],
       "inputs": [
         "治疗起止时间",
         "治疗前后症状",
@@ -258,6 +338,16 @@
       "priority": "P1",
       "engine": "llm",
       "scope": "patient",
+      "source_reference_keys": [
+        "imaging_report_id",
+        "lab_result_id",
+        "perioperative_id",
+        "prescription_id",
+        "record_id",
+        "structured_record_id",
+        "surgery_application_id",
+        "surgery_schedule_id"
+      ],
       "inputs": [
         "临床问题",
         "诊疗经过",
@@ -289,6 +379,7 @@
       "priority": "P0",
       "engine": "llm",
       "scope": "input",
+      "source_reference_keys": [],
       "inputs": [
         "医学问题",
         "审核知识",
@@ -319,6 +410,16 @@
       "priority": "P1",
       "engine": "llm",
       "scope": "patient",
+      "source_reference_keys": [
+        "imaging_report_id",
+        "lab_result_id",
+        "perioperative_id",
+        "prescription_id",
+        "record_id",
+        "structured_record_id",
+        "surgery_application_id",
+        "surgery_schedule_id"
+      ],
       "inputs": [
         "候选药品",
         "适应证",
@@ -351,6 +452,16 @@
       "priority": "P1",
       "engine": "llm",
       "scope": "patient",
+      "source_reference_keys": [
+        "imaging_report_id",
+        "lab_result_id",
+        "perioperative_id",
+        "prescription_id",
+        "record_id",
+        "structured_record_id",
+        "surgery_application_id",
+        "surgery_schedule_id"
+      ],
       "inputs": [
         "医生选定方案",
         "目录药品ID",
@@ -382,6 +493,16 @@
       "priority": "P0",
       "engine": "llm",
       "scope": "patient",
+      "source_reference_keys": [
+        "imaging_report_id",
+        "lab_result_id",
+        "perioperative_id",
+        "prescription_id",
+        "record_id",
+        "structured_record_id",
+        "surgery_application_id",
+        "surgery_schedule_id"
+      ],
       "inputs": [
         "本次处方",
         "在用药",
@@ -413,6 +534,16 @@
       "priority": "P0",
       "engine": "llm",
       "scope": "patient",
+      "source_reference_keys": [
+        "imaging_report_id",
+        "lab_result_id",
+        "perioperative_id",
+        "prescription_id",
+        "record_id",
+        "structured_record_id",
+        "surgery_application_id",
+        "surgery_schedule_id"
+      ],
       "inputs": [
         "结构化过敏",
         "过敏史文本",
@@ -445,6 +576,16 @@
       "priority": "P1",
       "engine": "llm",
       "scope": "patient",
+      "source_reference_keys": [
+        "imaging_report_id",
+        "lab_result_id",
+        "perioperative_id",
+        "prescription_id",
+        "record_id",
+        "structured_record_id",
+        "surgery_application_id",
+        "surgery_schedule_id"
+      ],
       "inputs": [
         "完整用法",
         "年龄体重",
@@ -477,6 +618,16 @@
       "priority": "P1",
       "engine": "llm",
       "scope": "patient",
+      "source_reference_keys": [
+        "imaging_report_id",
+        "lab_result_id",
+        "perioperative_id",
+        "prescription_id",
+        "record_id",
+        "structured_record_id",
+        "surgery_application_id",
+        "surgery_schedule_id"
+      ],
       "inputs": [
         "年龄",
         "妊娠哺乳状态",
@@ -509,6 +660,16 @@
       "priority": "P1",
       "engine": "llm",
       "scope": "patient",
+      "source_reference_keys": [
+        "imaging_report_id",
+        "lab_result_id",
+        "perioperative_id",
+        "prescription_id",
+        "record_id",
+        "structured_record_id",
+        "surgery_application_id",
+        "surgery_schedule_id"
+      ],
       "inputs": [
         "诊断",
         "抗菌药级别",
@@ -542,6 +703,16 @@
       "priority": "P1",
       "engine": "llm",
       "scope": "patient",
+      "source_reference_keys": [
+        "imaging_report_id",
+        "lab_result_id",
+        "perioperative_id",
+        "prescription_id",
+        "record_id",
+        "structured_record_id",
+        "surgery_application_id",
+        "surgery_schedule_id"
+      ],
       "inputs": [
         "入院前用药",
         "当前医嘱",
@@ -573,6 +744,16 @@
       "priority": "P2",
       "engine": "prediction",
       "scope": "patient",
+      "source_reference_keys": [
+        "imaging_report_id",
+        "lab_result_id",
+        "perioperative_id",
+        "prescription_id",
+        "record_id",
+        "structured_record_id",
+        "surgery_application_id",
+        "surgery_schedule_id"
+      ],
       "inputs": [
         "用药时间线",
         "症状",
@@ -605,6 +786,16 @@
       "priority": "P1",
       "engine": "llm",
       "scope": "patient",
+      "source_reference_keys": [
+        "imaging_report_id",
+        "lab_result_id",
+        "perioperative_id",
+        "prescription_id",
+        "record_id",
+        "structured_record_id",
+        "surgery_application_id",
+        "surgery_schedule_id"
+      ],
       "inputs": [
         "缺药品种",
         "院内库存",
@@ -637,6 +828,7 @@
       "priority": "P1",
       "engine": "speech",
       "scope": "input",
+      "source_reference_keys": [],
       "inputs": [
         "授权录音",
         "医学术语表",
@@ -667,6 +859,16 @@
       "priority": "P0",
       "engine": "llm",
       "scope": "patient",
+      "source_reference_keys": [
+        "imaging_report_id",
+        "lab_result_id",
+        "perioperative_id",
+        "prescription_id",
+        "record_id",
+        "structured_record_id",
+        "surgery_application_id",
+        "surgery_schedule_id"
+      ],
       "inputs": [
         "预问诊",
         "医生补充",
@@ -699,6 +901,16 @@
       "priority": "P1",
       "engine": "llm",
       "scope": "patient",
+      "source_reference_keys": [
+        "imaging_report_id",
+        "lab_result_id",
+        "perioperative_id",
+        "prescription_id",
+        "record_id",
+        "structured_record_id",
+        "surgery_application_id",
+        "surgery_schedule_id"
+      ],
       "inputs": [
         "入院资料",
         "转诊记录",
@@ -731,6 +943,16 @@
       "priority": "P1",
       "engine": "llm",
       "scope": "patient",
+      "source_reference_keys": [
+        "imaging_report_id",
+        "lab_result_id",
+        "perioperative_id",
+        "prescription_id",
+        "record_id",
+        "structured_record_id",
+        "surgery_application_id",
+        "surgery_schedule_id"
+      ],
       "inputs": [
         "上次病程",
         "当天变化",
@@ -763,6 +985,16 @@
       "priority": "P1",
       "engine": "llm",
       "scope": "patient",
+      "source_reference_keys": [
+        "imaging_report_id",
+        "lab_result_id",
+        "perioperative_id",
+        "prescription_id",
+        "record_id",
+        "structured_record_id",
+        "surgery_application_id",
+        "surgery_schedule_id"
+      ],
       "inputs": [
         "住院经过",
         "出院诊断",
@@ -795,6 +1027,16 @@
       "priority": "P0",
       "engine": "llm",
       "scope": "patient",
+      "source_reference_keys": [
+        "imaging_report_id",
+        "lab_result_id",
+        "perioperative_id",
+        "prescription_id",
+        "record_id",
+        "structured_record_id",
+        "surgery_application_id",
+        "surgery_schedule_id"
+      ],
       "inputs": [
         "待审病历",
         "关联原始记录",
@@ -825,6 +1067,16 @@
       "priority": "P1",
       "engine": "llm",
       "scope": "patient",
+      "source_reference_keys": [
+        "imaging_report_id",
+        "lab_result_id",
+        "perioperative_id",
+        "prescription_id",
+        "record_id",
+        "structured_record_id",
+        "surgery_application_id",
+        "surgery_schedule_id"
+      ],
       "inputs": [
         "已记录诊断手术",
         "有效编码字典"
@@ -854,6 +1106,16 @@
       "priority": "P1",
       "engine": "llm",
       "scope": "patient",
+      "source_reference_keys": [
+        "imaging_report_id",
+        "lab_result_id",
+        "perioperative_id",
+        "prescription_id",
+        "record_id",
+        "structured_record_id",
+        "surgery_application_id",
+        "surgery_schedule_id"
+      ],
       "inputs": [
         "病案首页",
         "出院记录",
@@ -884,6 +1146,16 @@
       "priority": "P1",
       "engine": "llm",
       "scope": "patient",
+      "source_reference_keys": [
+        "imaging_report_id",
+        "lab_result_id",
+        "perioperative_id",
+        "prescription_id",
+        "record_id",
+        "structured_record_id",
+        "surgery_application_id",
+        "surgery_schedule_id"
+      ],
       "inputs": [
         "已确定方案",
         "审核告知模板",
@@ -914,6 +1186,16 @@
       "priority": "P1",
       "engine": "llm",
       "scope": "patient",
+      "source_reference_keys": [
+        "imaging_report_id",
+        "lab_result_id",
+        "perioperative_id",
+        "prescription_id",
+        "record_id",
+        "structured_record_id",
+        "surgery_application_id",
+        "surgery_schedule_id"
+      ],
       "inputs": [
         "诊断",
         "医嘱",
@@ -945,6 +1227,16 @@
       "priority": "P0",
       "engine": "llm",
       "scope": "patient",
+      "source_reference_keys": [
+        "imaging_report_id",
+        "lab_result_id",
+        "perioperative_id",
+        "prescription_id",
+        "record_id",
+        "structured_record_id",
+        "surgery_application_id",
+        "surgery_schedule_id"
+      ],
       "inputs": [
         "已审核结果",
         "单位参考区间",
@@ -978,6 +1270,16 @@
       "priority": "P1",
       "engine": "llm",
       "scope": "patient",
+      "source_reference_keys": [
+        "imaging_report_id",
+        "lab_result_id",
+        "perioperative_id",
+        "prescription_id",
+        "record_id",
+        "structured_record_id",
+        "surgery_application_id",
+        "surgery_schedule_id"
+      ],
       "inputs": [
         "同项目连续结果",
         "单位",
@@ -1010,6 +1312,16 @@
       "priority": "P1",
       "engine": "llm",
       "scope": "patient",
+      "source_reference_keys": [
+        "imaging_report_id",
+        "lab_result_id",
+        "perioperative_id",
+        "prescription_id",
+        "record_id",
+        "structured_record_id",
+        "surgery_application_id",
+        "surgery_schedule_id"
+      ],
       "inputs": [
         "规则危急值",
         "通知确认记录",
@@ -1041,6 +1353,16 @@
       "priority": "P2",
       "engine": "prediction",
       "scope": "patient",
+      "source_reference_keys": [
+        "imaging_report_id",
+        "lab_result_id",
+        "perioperative_id",
+        "prescription_id",
+        "record_id",
+        "structured_record_id",
+        "surgery_application_id",
+        "surgery_schedule_id"
+      ],
       "inputs": [
         "标本信息",
         "质量记录",
@@ -1073,6 +1395,16 @@
       "priority": "P1",
       "engine": "llm",
       "scope": "patient",
+      "source_reference_keys": [
+        "imaging_report_id",
+        "lab_result_id",
+        "perioperative_id",
+        "prescription_id",
+        "record_id",
+        "structured_record_id",
+        "surgery_application_id",
+        "surgery_schedule_id"
+      ],
       "inputs": [
         "影像医生所见",
         "部位侧别",
@@ -1104,6 +1436,16 @@
       "priority": "P2",
       "engine": "vision",
       "scope": "patient",
+      "source_reference_keys": [
+        "imaging_report_id",
+        "lab_result_id",
+        "perioperative_id",
+        "prescription_id",
+        "record_id",
+        "structured_record_id",
+        "surgery_application_id",
+        "surgery_schedule_id"
+      ],
       "inputs": [
         "原始影像引用",
         "模态部位",
@@ -1135,6 +1477,16 @@
       "priority": "P2",
       "engine": "signal",
       "scope": "patient",
+      "source_reference_keys": [
+        "imaging_report_id",
+        "lab_result_id",
+        "perioperative_id",
+        "prescription_id",
+        "record_id",
+        "structured_record_id",
+        "surgery_application_id",
+        "surgery_schedule_id"
+      ],
       "inputs": [
         "原始心电波形",
         "导联采样信息",
@@ -1166,6 +1518,16 @@
       "priority": "P2",
       "engine": "vision",
       "scope": "patient",
+      "source_reference_keys": [
+        "imaging_report_id",
+        "lab_result_id",
+        "perioperative_id",
+        "prescription_id",
+        "record_id",
+        "structured_record_id",
+        "surgery_application_id",
+        "surgery_schedule_id"
+      ],
       "inputs": [
         "数字切片引用",
         "组织染色信息",
@@ -1197,6 +1559,16 @@
       "priority": "P1",
       "engine": "llm",
       "scope": "patient",
+      "source_reference_keys": [
+        "imaging_report_id",
+        "lab_result_id",
+        "perioperative_id",
+        "prescription_id",
+        "record_id",
+        "structured_record_id",
+        "surgery_application_id",
+        "surgery_schedule_id"
+      ],
       "inputs": [
         "已审核分项结果",
         "体检项目",
@@ -1228,6 +1600,16 @@
       "priority": "P1",
       "engine": "llm",
       "scope": "patient",
+      "source_reference_keys": [
+        "imaging_report_id",
+        "lab_result_id",
+        "perioperative_id",
+        "prescription_id",
+        "record_id",
+        "structured_record_id",
+        "surgery_application_id",
+        "surgery_schedule_id"
+      ],
       "inputs": [
         "年龄风险因素",
         "既往筛查",
@@ -1259,6 +1641,16 @@
       "priority": "P2",
       "engine": "prediction",
       "scope": "patient",
+      "source_reference_keys": [
+        "imaging_report_id",
+        "lab_result_id",
+        "perioperative_id",
+        "prescription_id",
+        "record_id",
+        "structured_record_id",
+        "surgery_application_id",
+        "surgery_schedule_id"
+      ],
       "inputs": [
         "连续生命体征",
         "检验",
@@ -1290,6 +1682,16 @@
       "priority": "P2",
       "engine": "prediction",
       "scope": "patient",
+      "source_reference_keys": [
+        "imaging_report_id",
+        "lab_result_id",
+        "perioperative_id",
+        "prescription_id",
+        "record_id",
+        "structured_record_id",
+        "surgery_application_id",
+        "surgery_schedule_id"
+      ],
       "inputs": [
         "感染相关记录",
         "连续指标",
@@ -1321,6 +1723,16 @@
       "priority": "P2",
       "engine": "prediction",
       "scope": "patient",
+      "source_reference_keys": [
+        "imaging_report_id",
+        "lab_result_id",
+        "perioperative_id",
+        "prescription_id",
+        "record_id",
+        "structured_record_id",
+        "surgery_application_id",
+        "surgery_schedule_id"
+      ],
       "inputs": [
         "连续肾功能",
         "用药",
@@ -1353,6 +1765,16 @@
       "priority": "P1",
       "engine": "llm",
       "scope": "patient",
+      "source_reference_keys": [
+        "imaging_report_id",
+        "lab_result_id",
+        "perioperative_id",
+        "prescription_id",
+        "record_id",
+        "structured_record_id",
+        "surgery_application_id",
+        "surgery_schedule_id"
+      ],
       "inputs": [
         "评估人群",
         "量表各项",
@@ -1384,6 +1806,16 @@
       "priority": "P1",
       "engine": "llm",
       "scope": "patient",
+      "source_reference_keys": [
+        "imaging_report_id",
+        "lab_result_id",
+        "perioperative_id",
+        "prescription_id",
+        "record_id",
+        "structured_record_id",
+        "surgery_application_id",
+        "surgery_schedule_id"
+      ],
       "inputs": [
         "护理评估",
         "量表工具结果",
@@ -1415,6 +1847,16 @@
       "priority": "P1",
       "engine": "llm",
       "scope": "patient",
+      "source_reference_keys": [
+        "imaging_report_id",
+        "lab_result_id",
+        "perioperative_id",
+        "prescription_id",
+        "record_id",
+        "structured_record_id",
+        "surgery_application_id",
+        "surgery_schedule_id"
+      ],
       "inputs": [
         "确认诊断",
         "护理评估",
@@ -1446,6 +1888,16 @@
       "priority": "P1",
       "engine": "llm",
       "scope": "patient",
+      "source_reference_keys": [
+        "imaging_report_id",
+        "lab_result_id",
+        "perioperative_id",
+        "prescription_id",
+        "record_id",
+        "structured_record_id",
+        "surgery_application_id",
+        "surgery_schedule_id"
+      ],
       "inputs": [
         "当前班次",
         "有效医嘱",
@@ -1478,6 +1930,16 @@
       "priority": "P1",
       "engine": "llm",
       "scope": "patient",
+      "source_reference_keys": [
+        "imaging_report_id",
+        "lab_result_id",
+        "perioperative_id",
+        "prescription_id",
+        "record_id",
+        "structured_record_id",
+        "surgery_application_id",
+        "surgery_schedule_id"
+      ],
       "inputs": [
         "已定手术",
         "风险因素",
@@ -1510,6 +1972,16 @@
       "priority": "P1",
       "engine": "llm",
       "scope": "patient",
+      "source_reference_keys": [
+        "imaging_report_id",
+        "lab_result_id",
+        "perioperative_id",
+        "prescription_id",
+        "record_id",
+        "structured_record_id",
+        "surgery_application_id",
+        "surgery_schedule_id"
+      ],
       "inputs": [
         "手术时间",
         "实际给药时间",
@@ -1541,6 +2013,16 @@
       "priority": "P1",
       "engine": "llm",
       "scope": "patient",
+      "source_reference_keys": [
+        "imaging_report_id",
+        "lab_result_id",
+        "perioperative_id",
+        "prescription_id",
+        "record_id",
+        "structured_record_id",
+        "surgery_application_id",
+        "surgery_schedule_id"
+      ],
       "inputs": [
         "主诉",
         "生命体征",
@@ -1572,6 +2054,7 @@
       "priority": "P0",
       "engine": "llm",
       "scope": "input",
+      "source_reference_keys": [],
       "inputs": [
         "症状描述",
         "实际科室",
@@ -1604,6 +2087,7 @@
       "priority": "P0",
       "engine": "llm",
       "scope": "input",
+      "source_reference_keys": [],
       "inputs": [
         "患者自述",
         "已回答问题",
@@ -1637,6 +2121,16 @@
       "priority": "P1",
       "engine": "llm",
       "scope": "patient",
+      "source_reference_keys": [
+        "imaging_report_id",
+        "lab_result_id",
+        "perioperative_id",
+        "prescription_id",
+        "record_id",
+        "structured_record_id",
+        "surgery_application_id",
+        "surgery_schedule_id"
+      ],
       "inputs": [
         "已审核报告",
         "审核解释知识"
@@ -1668,6 +2162,16 @@
       "priority": "P1",
       "engine": "llm",
       "scope": "patient",
+      "source_reference_keys": [
+        "imaging_report_id",
+        "lab_result_id",
+        "perioperative_id",
+        "prescription_id",
+        "record_id",
+        "structured_record_id",
+        "surgery_application_id",
+        "surgery_schedule_id"
+      ],
       "inputs": [
         "确认疾病",
         "确认治疗",
@@ -1700,6 +2204,16 @@
       "priority": "P1",
       "engine": "llm",
       "scope": "patient",
+      "source_reference_keys": [
+        "imaging_report_id",
+        "lab_result_id",
+        "perioperative_id",
+        "prescription_id",
+        "record_id",
+        "structured_record_id",
+        "surgery_application_id",
+        "surgery_schedule_id"
+      ],
       "inputs": [
         "医生确认出院计划",
         "功能限制",
@@ -1732,6 +2246,16 @@
       "priority": "P1",
       "engine": "llm",
       "scope": "patient",
+      "source_reference_keys": [
+        "imaging_report_id",
+        "lab_result_id",
+        "perioperative_id",
+        "prescription_id",
+        "record_id",
+        "structured_record_id",
+        "surgery_application_id",
+        "surgery_schedule_id"
+      ],
       "inputs": [
         "既定随访计划",
         "患者自报",
@@ -1764,6 +2288,16 @@
       "priority": "P1",
       "engine": "llm",
       "scope": "patient",
+      "source_reference_keys": [
+        "imaging_report_id",
+        "lab_result_id",
+        "perioperative_id",
+        "prescription_id",
+        "record_id",
+        "structured_record_id",
+        "surgery_application_id",
+        "surgery_schedule_id"
+      ],
       "inputs": [
         "确认用药计划",
         "患者反馈",
@@ -1796,6 +2330,7 @@
       "priority": "P1",
       "engine": "llm",
       "scope": "input",
+      "source_reference_keys": [],
       "inputs": [
         "办事问题",
         "院内地点",
@@ -1828,6 +2363,7 @@
       "priority": "P1",
       "engine": "llm",
       "scope": "input",
+      "source_reference_keys": [],
       "inputs": [
         "预约需求",
         "实际号源",
@@ -1860,6 +2396,7 @@
       "priority": "P1",
       "engine": "speech",
       "scope": "input",
+      "source_reference_keys": [],
       "inputs": [
         "授权语音或文本",
         "目标语言",
@@ -1892,6 +2429,7 @@
       "priority": "P1",
       "engine": "llm",
       "scope": "hospital",
+      "source_reference_keys": [],
       "inputs": [
         "授权指标",
         "时间范围",
@@ -1922,6 +2460,7 @@
       "priority": "P2",
       "engine": "prediction",
       "scope": "hospital",
+      "source_reference_keys": [],
       "inputs": [
         "历史分时就诊量",
         "日历",
@@ -1952,6 +2491,7 @@
       "priority": "P2",
       "engine": "optimizer",
       "scope": "hospital",
+      "source_reference_keys": [],
       "inputs": [
         "人员资质",
         "工时约束",
@@ -1983,6 +2523,7 @@
       "priority": "P2",
       "engine": "prediction",
       "scope": "hospital",
+      "source_reference_keys": [],
       "inputs": [
         "历史床位指标",
         "出入院趋势",
@@ -2013,6 +2554,7 @@
       "priority": "P2",
       "engine": "optimizer",
       "scope": "hospital",
+      "source_reference_keys": [],
       "inputs": [
         "手术候选",
         "人员设备约束",
@@ -2043,6 +2585,7 @@
       "priority": "P2",
       "engine": "prediction",
       "scope": "hospital",
+      "source_reference_keys": [],
       "inputs": [
         "历史消耗",
         "库存",
@@ -2074,6 +2617,7 @@
       "priority": "P2",
       "engine": "optimizer",
       "scope": "hospital",
+      "source_reference_keys": [],
       "inputs": [
         "库存批次",
         "有效期",
@@ -2105,6 +2649,16 @@
       "priority": "P1",
       "engine": "llm",
       "scope": "patient",
+      "source_reference_keys": [
+        "imaging_report_id",
+        "lab_result_id",
+        "perioperative_id",
+        "prescription_id",
+        "record_id",
+        "structured_record_id",
+        "surgery_application_id",
+        "surgery_schedule_id"
+      ],
       "inputs": [
         "已选编码",
         "分组规则",
@@ -2135,6 +2689,16 @@
       "priority": "P1",
       "engine": "llm",
       "scope": "patient",
+      "source_reference_keys": [
+        "imaging_report_id",
+        "lab_result_id",
+        "perioperative_id",
+        "prescription_id",
+        "record_id",
+        "structured_record_id",
+        "surgery_application_id",
+        "surgery_schedule_id"
+      ],
       "inputs": [
         "有效医嘱",
         "执行记录",
@@ -2165,6 +2729,7 @@
       "priority": "P1",
       "engine": "llm",
       "scope": "hospital",
+      "source_reference_keys": [],
       "inputs": [
         "获授权的去标识反馈",
         "统计范围"
@@ -2194,6 +2759,7 @@
       "priority": "P1",
       "engine": "llm",
       "scope": "input",
+      "source_reference_keys": [],
       "inputs": [
         "待审核文档",
         "标题版本",
@@ -2226,6 +2792,7 @@
       "priority": "P1",
       "engine": "llm",
       "scope": "input",
+      "source_reference_keys": [],
       "inputs": [
         "新旧审核版本",
         "现有规则模板"
@@ -2257,6 +2824,7 @@
       "priority": "P1",
       "engine": "llm",
       "scope": "input",
+      "source_reference_keys": [],
       "inputs": [
         "完整说明书",
         "版本",
@@ -2289,6 +2857,7 @@
       "priority": "P2",
       "engine": "prediction",
       "scope": "hospital",
+      "source_reference_keys": [],
       "inputs": [
         "获授权病例",
         "明确入排标准",
@@ -2319,6 +2888,7 @@
       "priority": "P1",
       "engine": "llm",
       "scope": "input",
+      "source_reference_keys": [],
       "inputs": [
         "获授权待处理文本",
         "脱敏规则"
@@ -2350,6 +2920,16 @@
       "priority": "P2",
       "engine": "llm",
       "scope": "patient",
+      "source_reference_keys": [
+        "imaging_report_id",
+        "lab_result_id",
+        "perioperative_id",
+        "prescription_id",
+        "record_id",
+        "structured_record_id",
+        "surgery_application_id",
+        "surgery_schedule_id"
+      ],
       "inputs": [
         "获授权病历",
         "研究变量字典",
@@ -2382,6 +2962,16 @@
       "priority": "P1",
       "engine": "llm",
       "scope": "patient",
+      "source_reference_keys": [
+        "imaging_report_id",
+        "lab_result_id",
+        "perioperative_id",
+        "prescription_id",
+        "record_id",
+        "structured_record_id",
+        "surgery_application_id",
+        "surgery_schedule_id"
+      ],
       "inputs": [
         "已记录事件",
         "时间线",
@@ -2414,6 +3004,7 @@
       "priority": "P2",
       "engine": "prediction",
       "scope": "hospital",
+      "source_reference_keys": [],
       "inputs": [
         "授权病区病原时间数据",
         "验证模型"
@@ -2443,6 +3034,7 @@
       "priority": "P1",
       "engine": "llm",
       "scope": "input",
+      "source_reference_keys": [],
       "inputs": [
         "去凭据日志",
         "审核运维手册",
@@ -2475,6 +3067,7 @@
       "priority": "P1",
       "engine": "llm",
       "scope": "input",
+      "source_reference_keys": [],
       "inputs": [
         "审核模拟病例",
         "培训目标",

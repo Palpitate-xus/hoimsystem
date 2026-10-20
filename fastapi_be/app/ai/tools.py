@@ -7,7 +7,7 @@ from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from app.ai.catalog import FeatureSpec
-from app.ai.clinical_tools import critical_value_workflow, laboratory_trends
+from app.ai.clinical_tools import critical_value_workflow, laboratory_trends, perioperative_timing
 from app.ai.context import ContextBundle
 from app.ai.governance import encode_json
 from app.models import Admission, DailyOperationalMetric, Department, Doctor, Pharmaceutical, Prescription, User
@@ -41,6 +41,10 @@ def business_tools(db: Session, spec: FeatureSpec, user: User, patient_id: int |
     """Return explicit tool results and evidence without accepting instructions to execute code."""
     tools: dict = {}
     evidence: list[dict] = []
+    if patient_id and spec.number == 49:
+        tools["perioperative_timing"] = perioperative_timing(context.data)
+        rule = tools["perioperative_timing"]["rule"]
+        evidence.append({"source_id": f"rule:{rule['rule_id']}:{rule['version']}", "kind": "rule", "title": "既有围术期统计时窗口径", "content": encode_json(rule)})
     if patient_id and spec.number in {8, 19, 31, 32, 33, 41, 42, 43, 56}:
         tools["laboratory_trends"] = laboratory_trends(context.data)
     if patient_id and spec.number in {1, 31, 33, 41, 42, 43, 47, 50}:

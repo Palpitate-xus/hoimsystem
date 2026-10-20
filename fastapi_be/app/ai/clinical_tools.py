@@ -1,7 +1,10 @@
 """Read-only calculations over reviewed source values; no medical thresholds are inferred."""
 
 from collections import defaultdict
+from datetime import datetime
 from decimal import Decimal
+
+from app.perioperative_review import assess_existing_timing, existing_timing_rule
 
 
 def laboratory_trends(context: dict) -> dict:
@@ -62,3 +65,41 @@ def critical_value_workflow(context: dict) -> dict:
         "actions_executed": [],
         "note": "此工具仅展示既有危急值状态，通知、确认与处置仍在原业务流程完成",
     }
+
+
+def perioperative_timing(context: dict) -> dict:
+    """Pair executed prophylaxis only with an unambiguous or explicitly selected actual schedule."""
+    schedules = context.get("surgery_schedules", [])
+    applications = {item["application_id"]: item for item in context.get("surgery_applications", [])}
+    chosen = context.get("selected_sources", {}).get("surgery_schedule_id")
+    truncated = any(item["source"] == "手术排台" for item in context.get("truncated_sources", []))
+    results = []
+    for medication in context.get("perioperative_antibiotics", []):
+        row = {
+            "source_ids": [medication["source_id"]],
+            "perioperative_id": medication["perioperative_id"],
+            "application_id": medication["application_id"],
+            "status": "not_evaluated",
+            "within_existing_window": None,
+        }
+        if medication["application_id"] not in applications or applications[medication["application_id"]]["status"] == 4:
+            row["reason"] = "申请资料缺失或手术已取消，需核对原始状态后再评估"
+        elif medication["status"] != 1:
+            row["reason"] = "该用药为计划或取消状态，未作为已给药分析"
+        else:
+            candidates = [item for item in schedules if item["application_id"] == medication["application_id"] and (item["schedule_id"] == chosen if chosen else item["status"] in {1, 2})]
+            if (truncated and not chosen) or len(candidates) != 1:
+                row["reason"] = "排台记录缺失、超出快照或存在多个候选，需明确选择对应排台"
+            elif candidates[0]["status"] not in {1, 2}:
+                row["reason"] = "所选排台尚未进入手术中或完成状态，未将开始字段视为实际时刻"
+            else:
+                schedule = candidates[0]
+                row["source_ids"].append(schedule["source_id"])
+                try:
+                    given = datetime.fromisoformat(medication["administered_time"]) if medication.get("administered_time") else None
+                    start = datetime.fromisoformat(schedule["start_time"]) if schedule.get("start_time") else None
+                    row.update(assess_existing_timing(given, start))
+                except (ValueError, TypeError):
+                    row["reason"] = "原始时间格式无效，需人工核对"
+        results.append(row)
+    return {"rule": existing_timing_rule(), "results": results, "actions_executed": [], "missing_data": [] if results else ["未取得对应手术的围术期用药原始记录"]}

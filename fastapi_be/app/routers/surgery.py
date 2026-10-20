@@ -23,6 +23,7 @@ def _perioperative_data(item: PerioperativeAntibiotic):
     return {
         "perioperative_id": item.perioperative_id,
         "application_id": item.application_id,
+        "admission_id": item.application.admission_id if item.application else None,
         "patient_id": item.patient_id,
         "patient_name": item.patient.name if item.patient else "",
         "surgery_name": item.application.surgery_name if item.application else "",
@@ -273,6 +274,7 @@ def get_surgery_schedule_list(
             {
                 "schedule_id": item.schedule_id,
                 "application_id": item.application_id,
+                "admission_id": item.application.admission_id if item.application else None,
                 "patient_id": item.patient_id,
                 "patient_name": item.patient.name if item.patient else "",
                 "surgery_name": item.application.surgery_name if item.application else "",

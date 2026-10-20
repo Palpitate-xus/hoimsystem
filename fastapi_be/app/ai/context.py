@@ -9,10 +9,12 @@ from fastapi import HTTPException
 from sqlalchemy import case, or_, select
 from sqlalchemy.orm import Session, selectinload
 
+from app.ai.care import surgical_patient_ids
 from app.ai.catalog import FeatureSpec
 from app.ai.governance import digest, encode_json
 from app.ai.models import AIPatientGrant, utcnow
 from app.ai.patient_sources import attach_patient_sources
+from app.ai.procedural_sources import attach_procedural_sources
 from app.clinical_observations import serialize_observation
 from app.config import settings
 from app.diagnosis_review import latest_reviews, review_state
@@ -28,10 +30,13 @@ from app.models import (
     NursingRecord,
     Patient,
     PatientAllergy,
+    PerioperativeAntibiotic,
     PrePha,
     Prescription,
     Registration,
     StructuredMedicalRecord,
+    SurgeryApplication,
+    SurgerySchedule,
     User,
     VitalSign,
 )
@@ -94,11 +99,13 @@ def accessible_patients(db: Session, user: User, spec: FeatureSpec, keyword: str
         if ids:
             for model in (Registration, MedicalRecord, Prescription, Admission, LabOrder):
                 criteria.append(Patient.patient_id.in_(select(model.patient_id).where(model.doctor_id.in_(ids))))
+            criteria.append(Patient.patient_id.in_(surgical_patient_ids(ids)))
         if user.user_role == "director" and departments:
             for model in (Registration, Admission):
                 criteria.append(Patient.patient_id.in_(select(model.patient_id).where(model.department_id.in_(departments))))
         if user.user_role == "nurse" and spec.category in {"inpatient", "patient"}:
             criteria.append(Patient.patient_id.in_(select(NursingRecord.patient_id).where(NursingRecord.nurse_id == user.user_id)))
+            criteria.append(Patient.patient_id.in_(surgical_patient_ids([], user.user_id)))
         if user.user_role == "pharmacist" and spec.category == "pharmacy":
             criteria.append(Patient.patient_id.in_(select(Prescription.patient_id).where(Prescription.status.in_([0, 1, 2]))))
         if user.user_role == "lab_technician" and spec.category == "diagnostics":
@@ -148,6 +155,11 @@ def authorize_patient(db: Session, user: User, patient_id: int, category: str, e
             for model in (Registration, Admission):
                 if db.query(model).filter(model.patient_id == patient_id, model.department_id.in_(departments)).first():
                     return patient
+    nurse_assignment = user.user_id if user.user_role == "nurse" and category in {"inpatient", "patient"} else None
+    if (doctor_ids or nurse_assignment) and (encounter is None or isinstance(encounter, Admission)):
+        care = surgical_patient_ids(doctor_ids, nurse_assignment, encounter.admission_id if encounter else None)
+        if db.query(Patient.patient_id).filter(Patient.patient_id == patient_id, Patient.patient_id.in_(care)).first():
+            return patient
     if user.user_role == "nurse" and category in {"inpatient", "patient"}:
         if db.query(NursingRecord.record_id).filter_by(patient_id=patient_id, nurse_id=user.user_id).first():
             return patient
@@ -169,6 +181,9 @@ def _selected_records(db: Session, user: User, patient_id: int, references: dict
         ("prescription_id", Prescription, "prescription_id", None),
         ("lab_result_id", LabResult, "lab_result_id", LabOrder),
         ("imaging_report_id", ImagingReport, "report_id", ImagingOrder),
+        ("surgery_application_id", SurgeryApplication, "application_id", None),
+        ("surgery_schedule_id", SurgerySchedule, "schedule_id", None),
+        ("perioperative_id", PerioperativeAntibiotic, "perioperative_id", None),
     ]
     for key, model, primary_key, order in sources:
         reference = references.get(key)
@@ -437,6 +452,7 @@ def patient_snapshot(db: Session, user: User, spec: FeatureSpec, patient_id: int
         add("imaging:" + item.report_id, "已审核影像报告", {"findings": item.findings, "impression": item.impression, "review_time": item.review_time}, item.report_time) for item in imaging
     ]
     attach_patient_sources(db, user, spec, patient, encounter, bundle, add)
+    attach_procedural_sources(db, user, spec, patient, encounter, bundle, add, selected, bounded)
     if not bundle.data["current_confirmed_diagnoses"]:
         bundle.data["missing_data"].append("未取得本次就诊的已确认诊断")
     bundle.data = minimize_identifiers(bundle.data, patient)

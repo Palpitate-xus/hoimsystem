@@ -58,7 +58,7 @@ def is_supply_snapshot(snapshot):
     context, values = payload.get("context", {}), payload.get("input", {})
     if not isinstance(context, dict) or not isinstance(values, dict):
         raise HTTPException(409, "物资预测原上下文或引用结构无效")
-    return "supply_binding" in context or "supply_series_id" in values or str(provider.get("model", "")).startswith("supply:")
+    return bool({"supply_binding", "supply_source", "supply_series"} & context.keys()) or "supply_series_id" in values or str(provider.get("model", "")).startswith("supply:")
 
 
 def load_snapshot(run):

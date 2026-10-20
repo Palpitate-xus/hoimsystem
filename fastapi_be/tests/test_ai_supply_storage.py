@@ -127,11 +127,11 @@ def test_short_sql_snapshot_has_exact_local_anchors_and_complete_native_recomput
     assert _verify_result(case["result"], case["snapshot"], case["evidence"], case["source"]) == case["result"]
 
 
-@pytest.mark.parametrize("marker", ["binding", "reference", "provider"])
+@pytest.mark.parametrize("marker", ["binding", "source", "series", "reference", "provider"])
 def test_every_native_marker_detects_tampered_feature_independently(marker):
     snapshot = {"payload": {"context": {}, "input": {}}, "provider_snapshot": {"model": "external"}}
-    if marker == "binding":
-        snapshot["payload"]["context"]["supply_binding"] = {}
+    if marker in {"binding", "source", "series"}:
+        snapshot["payload"]["context"]["supply_" + marker] = {}
     elif marker == "reference":
         snapshot["payload"]["input"]["supply_series_id"] = uid("series")
     else:

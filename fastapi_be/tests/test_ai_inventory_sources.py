@@ -148,6 +148,26 @@ def test_item_selection_is_explicit_typed_and_bounded():
 
 
 @pytest.mark.asyncio
+async def test_pharmacist_can_preview_selected_inventory_without_loading_hospital_or_patient_history(async_client, seed_data, db_session, auth_headers, inventory_case):
+    headers = auth_headers(seed_data["pharmacist_user"].username)
+    options = await async_client.get("/api/ai/service-options", headers=headers, params={"feature_key": "inventory_optimization"})
+    assert options.status_code == 200, options.text
+    assert options.json()["data"]["departments"] == []
+    assert options.json()["data"]["inventory_scope_available"] is True
+    drug = inventory_case[0]
+    response = await async_client.post("/api/ai/operational-context", headers=headers, json={"feature_key": "inventory_optimization", "input": {"drug_ids": [drug.pharmaceutical_id]}})
+    assert response.status_code == 200, response.text
+    context = response.json()["data"]["context"]
+    assert context["source_domain"] == "inventory"
+    assert "saved_daily_metrics" not in context
+    assert "outpatient_records" not in context
+    assert "patient_id" not in context
+    invalid = await async_client.post("/api/ai/operational-context", headers=headers, json={"feature_key": "inventory_optimization", "patient_id": seed_data["patient"].patient_id})
+    assert invalid.status_code == 422
+    assert db_session.query(AIRun).count() == 0
+
+
+@pytest.mark.asyncio
 async def test_inventory_change_while_queued_stops_specialist_inference(seed_data, db_session, inventory_case):
     key = "inventory_optimization"
     provider = AIProvider(

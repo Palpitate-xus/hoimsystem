@@ -13,7 +13,7 @@ from app.ai.catalog import FEATURE_BY_KEY
 from app.ai.governance import encode_json
 from app.ai.models import AIFeatureConfig, AIFeedback, AIProvider, AIRun
 from app.ai.operational_sources import operational_context, operational_window
-from app.ai.runtime import authorize_run, claim_next_run, create_run, execute_claimed
+from app.ai.runtime import authorize_run, claim_next_run, create_run, describe_run, execute_claimed
 from app.ai.schemas import RunRequest
 from app.models import Admission, Bed, DailyOperationalMetric, Department, Doctor, Registration, Ward
 
@@ -166,6 +166,48 @@ def test_previous_hospital_scope_cannot_be_read_using_new_department_only_role(s
     with pytest.raises(HTTPException) as denied:
         authorize_run(db_session, user, run)
     assert denied.value.status_code == 403
+
+
+@pytest.mark.asyncio
+async def test_operational_preview_and_options_use_real_scope_without_creating_inference(async_client, seed_data, db_session, auth_headers, operational_case):
+    headers = auth_headers(seed_data["director_user"].username)
+    options = await async_client.get("/api/ai/service-options", headers=headers, params={"feature_key": "operations_qa"})
+    assert options.status_code == 200, options.text
+    assert options.json()["data"]["allow_hospital_scope"] is False
+    department_ids = {row["department_id"] for row in options.json()["data"]["departments"]}
+    assert seed_data["department"].department_id in department_ids
+    assert operational_case[4].department_id not in department_ids
+    response = await async_client.post(
+        "/api/ai/operational-context", headers=headers, json={"feature_key": "operations_qa", "input": values_for(operational_case, department_id=seed_data["department"].department_id)}
+    )
+    assert response.status_code == 200, response.text
+    assert response.json()["data"]["context"]["department_ids"] == [seed_data["department"].department_id]
+    assert "saved_daily_metrics" not in response.json()["data"]["context"]
+    assert response.json()["data"]["evidence"]
+    denied = await async_client.post("/api/ai/operational-context", headers=auth_headers(seed_data["patient_user"].username), json={"feature_key": "operations_qa"})
+    assert denied.status_code == 403
+    assert db_session.query(AIRun).count() == 0
+
+
+def test_business_result_projects_only_allowlisted_operational_context():
+    run = AIRun(
+        feature_key="operations_qa",
+        input_json=encode_json(
+            {
+                "system_prompt": "private-system",
+                "provider_snapshot": {"api_base": "private-endpoint"},
+                "payload": {"context": {"scope": "hospital", "saved_daily_metrics": {"rows": []}, "unapproved_secret": "private-context"}},
+            }
+        ),
+        result_json="{}",
+        evidence_json="[]",
+        context_metadata_json="{}",
+    )
+    data = describe_run(run)
+    assert data["operational_findings"] == {"scope": "hospital", "saved_daily_metrics": {"rows": []}}
+    assert "private-context" not in encode_json(data)
+    assert "private-system" not in encode_json(data)
+    assert "private-endpoint" not in encode_json(data)
 
 
 @pytest.mark.asyncio

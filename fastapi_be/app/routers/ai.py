@@ -5,11 +5,13 @@ from sqlalchemy.orm import Session
 
 from app.ai.catalog import FEATURES
 from app.ai.context import accessible_patients, authorize_patient, context_metadata, patient_snapshot
-from app.ai.governance import audit, describe_config
+from app.ai.governance import audit, describe_config, encode_json
 from app.ai.models import AIFeatureConfig, AIFeedback, AIRun, utcnow
+from app.ai.operational_sources import operational_context, operational_options
 from app.ai.runtime import authorize_run, authorized_feature, create_run, describe_run
-from app.ai.schemas import ClinicalContextRequest, FeedbackWrite, RunRequest
+from app.ai.schemas import ClinicalContextRequest, FeedbackWrite, OperationalContextRequest, RunRequest
 from app.ai.service_sources import service_options
+from app.config import settings
 from app.database import get_db
 from app.dependencies import get_current_user
 from app.models import Admission, Prescription, Registration, User
@@ -47,7 +49,22 @@ def patient_options(feature_key: str, keyword: str = Query("", max_length=100), 
 def hospital_service_options(feature_key: str, db: Session = Depends(get_db), user: User = Depends(get_current_user)) -> dict:
     """Offer public hospital places or clinicians for the authorized service capability."""
     spec, _ = authorized_feature(db, user, feature_key)
-    return {"code": 200, "msg": "success", "data": service_options(db, spec.number)}
+    data = operational_options(db, user, spec) if spec.scope == "hospital" else service_options(db, spec.number)
+    return {"code": 200, "msg": "success", "data": data}
+
+
+@router.post("/ai/operational-context")
+def inspect_operational_context(req: OperationalContextRequest, db: Session = Depends(get_db), user: User = Depends(get_current_user)) -> dict:
+    """Inspect the same scoped facts used by generation, without contacting a provider."""
+    spec, _ = authorized_feature(db, user, req.feature_key)
+    if spec.scope != "hospital":
+        raise HTTPException(422, "该功能不使用医院运营资料范围")
+    if len(encode_json(req.input)) > settings.AI_MAX_INPUT_CHARS:
+        raise HTTPException(422, "运营筛选输入超过允许长度")
+    bundle = operational_context(db, user, spec, req.input)
+    if len(encode_json({"context": bundle.data, "evidence": bundle.evidence, "input": req.input})) > settings.AI_MAX_CONTEXT_CHARS * 2:
+        raise HTTPException(422, "运营资料超过任务上下文限制，请缩小日期、科室或品种范围")
+    return {"code": 200, "msg": "success", "data": {"context": bundle.data, "metadata": context_metadata(bundle), "evidence": bundle.evidence}}
 
 
 @router.get("/ai/encounters")

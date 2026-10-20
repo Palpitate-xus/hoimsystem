@@ -312,6 +312,13 @@
  },
  {
   "auth": "ANY",
+  "function": "inspect_operational_context",
+  "method": "POST",
+  "module": "ai.py",
+  "path": "/api/ai/operational-context"
+ },
+ {
+  "auth": "ANY",
   "function": "encounter_options",
   "method": "GET",
   "module": "ai.py",

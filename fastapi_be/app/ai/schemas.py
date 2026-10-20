@@ -132,6 +132,13 @@ class ClinicalContextRequest(StrictRequest):
         return value
 
 
+class OperationalContextRequest(StrictRequest):
+    """Inspect scope and facts without credentials, provider configuration or an inference task."""
+
+    feature_key: str = Field(min_length=1, max_length=64)
+    input: dict[str, Any] = Field(default_factory=dict)
+
+
 class RunRequest(StrictRequest):
     """Business input cannot choose providers, system instructions or evidence IDs."""
 

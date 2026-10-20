@@ -10,7 +10,7 @@ from app.ai.catalog import FeatureSpec
 from app.ai.context import ContextBundle
 from app.ai.governance import digest, encode_json
 from app.ai.inventory_sources import attach_inventory_sources
-from app.models import Admission, Bed, DailyOperationalMetric, Department, Doctor, Registration, User, Ward
+from app.models import Admission, Bed, Consumable, DailyOperationalMetric, Department, Doctor, Pharmaceutical, Registration, User, Ward
 
 
 def operational_scope(db, user: User, spec: FeatureSpec, values: dict) -> set[int] | None:
@@ -67,6 +67,30 @@ def authorize_operational_snapshot(db, user: User, spec: FeatureSpec, context: d
     frozen = context.get("department_ids")
     if context.get("scope") != "department" or not isinstance(frozen, list) or not frozen or not set(frozen) <= current:
         raise HTTPException(403, "任务原始科室或全院范围已不属于当前运营权限")
+
+
+def operational_options(db, user: User, spec: FeatureSpec) -> dict:
+    """Offer only valid filters inside this actor's independently verified scope."""
+    departments = operational_scope(db, user, spec, {})
+    start, end = operational_window({})
+    data = {"default_window": [str(start), str(end)], "allow_hospital_scope": departments is None, "departments": [], "truncated": False}
+    if spec.number in {66, 67}:
+        data["inventory_scope_available"] = departments is None
+        data["scope_note"] = "库存尚未按科室归属切分；科室范围不提供全院库存。单次最多选择20个真实品种。"
+        if departments is None:
+            for key, model, id_field in (("inventory_drugs", Pharmaceutical, "pharmaceutical_id"), ("inventory_consumables", Consumable, "consumable_id")):
+                rows = db.query(model).order_by(getattr(model, id_field)).limit(301).all()
+                data[key] = [{"item_id": getattr(row, id_field), "name": row.name, "status": row.status} for row in rows[:300]]
+                data["truncated"] = data["truncated"] or len(rows) > 300
+    else:
+        query = db.query(Department)
+        if departments is not None:
+            query = query.filter(Department.department_id.in_(departments))
+        rows = query.order_by(Department.department_id).limit(201).all()
+        data["departments"] = [{"department_id": row.department_id, "name": row.name} for row in rows[:200]]
+        data["truncated"] = len(rows) > 200
+        data["scope_note"] = "未选具体科室时使用当前账号已获准的全院或所属科室范围。"
+    return data
 
 
 def operational_context(db, user: User, spec: FeatureSpec, values: dict) -> ContextBundle:

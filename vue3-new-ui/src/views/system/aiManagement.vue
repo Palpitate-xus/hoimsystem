@@ -46,7 +46,7 @@
             <el-table-column label="状态"><template #default="{ row }">{{ row.enabled ? '已启用' : '关闭' }}</template></el-table-column>
             <el-table-column label="密钥"><template #default="{ row }">{{ row.has_api_key ? '已配置，不回显' : '未配置' }}</template></el-table-column>
             <el-table-column label="患者资料"><template #default="{ row }">{{ row.allows_patient_data ? '已授权传输' : '禁止传输' }}</template></el-table-column>
-            <el-table-column label="操作" width="230"><template #default="{ row }"><el-button size="small" @click="editProvider(row)">编辑</el-button><el-button v-if="row.kind === 'specialist' && row.supported_features?.includes('medical_transcription')" size="small" @click="openSpeechCheck(row)">检查本地语音服务</el-button><el-button v-if="row.kind === 'specialist' && row.supported_features?.includes('ecg_analysis')" size="small" @click="openEcgCheck(row)">检查本地心电服务</el-button><el-button v-if="canCheckImage && row.kind === 'specialist' && row.supported_features?.includes('imaging_detection')" size="small" @click="openImageCheck(row)">检查本地影像服务</el-button></template></el-table-column>
+            <el-table-column label="操作" width="230"><template #default="{ row }"><el-button size="small" @click="editProvider(row)">编辑</el-button><el-button v-if="row.kind === 'specialist' && row.supported_features?.includes('medical_transcription')" size="small" @click="openSpeechCheck(row)">检查本地语音服务</el-button><el-button v-if="row.kind === 'specialist' && row.supported_features?.includes('ecg_analysis')" size="small" @click="openEcgCheck(row)">检查本地心电服务</el-button><el-button v-if="canCheckImage && row.kind === 'specialist' && row.supported_features?.includes('imaging_detection')" size="small" @click="openImageCheck(row)">检查本地影像服务</el-button><el-button v-if="canCheckForecast && row.kind === 'specialist' && row.supported_features?.includes('visit_forecast')" size="small" @click="openForecastCheck(row)">检查本地统计服务</el-button></template></el-table-column>
           </el-table>
         </el-tab-pane>
 
@@ -133,6 +133,8 @@
       <el-alert type="info" :closable="false" title="服务主机需由部署配置 AI_PROVIDER_ALLOWED_HOSTS 允许；保存密钥需配置 AI_CREDENTIAL_KEY。更改模型会关闭其关联功能，等待重新评审启用。" />
       <template #footer><el-button @click="providerDialog = false">取消</el-button><el-button type="primary" :loading="saving" @click="submitProvider">保存服务</el-button></template>
     </el-dialog>
+
+    <AiForecastProviderCheck v-if="forecastCheckTarget" :target="forecastCheckTarget" :providers="providers" @close="forecastCheckTarget = null" @edit-model="editActualForecastModel" />
 
     <el-dialog v-model="speechCheckDialog" title="本地语音服务核对" width="760px">
       <div v-loading="speechCheckLoading">
@@ -287,6 +289,7 @@ import AiAudioManagement from "@/components/AIAudioManagement/index.vue";
 import AiImageManagement from "@/components/AIImageManagement/index.vue";
 import AiEcgManagement from "@/components/AIEcgManagement/index.vue";
 const AiForecastSeriesManagement = defineAsyncComponent(() => import("@/components/AIForecastSeriesManagement.vue"));
+const AiForecastProviderCheck = defineAsyncComponent(() => import("@/components/AIForecastProviderCheck/index.vue"));
 import {
   activateAIPrompt, createAIKnowledge, createAIPatientGrant, createAIPrompt,
   getAIAdminFeatures, getAIAudit, getAIKnowledge, getAIKnowledgeDetail, getAIPatientGrants, getAIPathwaySources, importAIPathway,
@@ -314,6 +317,20 @@ watch([search, category, setupFilter], () => { page.value = 1; });
 const featureName = key => features.value.find(item => item.key === key)?.name || key;
 const selectedFeature = ref(null), featureForm = ref({}), featureDialog = ref(false);
 const providerDialog = ref(false), providerId = ref(null), providerForm = ref({});
+const forecastCheckTarget = ref(null);
+const canCheckForecast = computed(() => !!store.state.user.accessToken && store.state.user.permissions.includes("super_admin"));
+watch([() => store.state.user.accessToken, () => JSON.stringify(store.state.user.permissions)], () => { forecastCheckTarget.value = null; });
+onDeactivated(() => { forecastCheckTarget.value = null; });
+onBeforeUnmount(() => { forecastCheckTarget.value = null; });
+function openForecastCheck(row) {
+  if (!canCheckForecast.value) return;
+  forecastCheckTarget.value = { provider_id: row.provider_id, revision: row.revision, model: row.model, name: row.name, session: store.state.user.accessToken };
+}
+function editActualForecastModel(result) {
+  const row = providers.value.find(item => item.provider_id === result.provider_id && item.revision === result.revision && item.model === result.configured_model && item.kind === "specialist" && item.supported_features?.includes("visit_forecast"));
+  if (!canCheckForecast.value || result.session !== store.state.user.accessToken || !row) { ElMessage.warning("统计服务配置或管理会话已变化，请重新核对"); return; }
+  editProvider(row); providerForm.value.model = result.model;
+}
 const speechCheckDialog = ref(false), speechCheckLoading = ref(false), speechCheckResult = ref(null), speechCheckName = ref("");
 let speechCheckRequest = 0;
 watch(speechCheckDialog, visible => { if (!visible) speechCheckRequest += 1; });

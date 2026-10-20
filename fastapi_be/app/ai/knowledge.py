@@ -9,6 +9,41 @@ from sqlalchemy.orm import Session
 from app.ai.catalog import FeatureSpec
 from app.ai.governance import digest
 from app.ai.models import AIKnowledgeDocument, utcnow
+from app.ai.references import SOURCE_REFERENCE_KEYS
+
+
+def retrieval_query(spec: FeatureSpec, task_input: dict, context: dict) -> str:
+    """Use clinical terms, rather than opaque record IDs, for a contextual one-click request."""
+    parts = [spec.name]
+    parts.extend(value[:3000] for key, value in task_input.items() if key not in SOURCE_REFERENCE_KEYS and isinstance(value, str) and value.strip())
+    parts.extend(context.get("current_confirmed_diagnoses", []))
+    for name, fields in [
+        ("outpatient_records", ("symptom", "diagnosis_text")),
+        ("structured_records", ("chief_complaint", "diagnosis")),
+        ("reviewed_observations", ("display", "code")),
+        ("surgery_applications", ("surgery_name", "preop_diagnosis", "surgery_indication")),
+        ("perioperative_antibiotics", ("pharmaceutical_name", "indication")),
+    ]:
+        for item in context.get(name, []):
+            if (
+                name in {"outpatient_records", "structured_records"}
+                and not item.get("current_encounter")
+                and item.get("source_id")
+                not in {
+                    "outpatient:" + str(task_input.get("record_id")),
+                    "structured:" + str(task_input.get("structured_record_id")),
+                }
+            ):
+                continue
+            if name == "reviewed_observations" and task_input.get("lab_result_id") and item.get("lab_result_id") != task_input["lab_result_id"]:
+                continue
+            parts.extend(str(item[field])[:500] for field in fields if item.get(field))
+    for prescription in context.get("prescriptions", []):
+        if task_input.get("prescription_id") and prescription.get("source_id") != "prescription:" + task_input["prescription_id"]:
+            continue
+        parts.extend(item["drug_name"] for item in prescription.get("items", []) if item.get("drug_name"))
+    # Building retrieval terms does not change diagnostic certainty or any clinical record.
+    return " ".join(dict.fromkeys(parts))[:8000]
 
 
 def _terms(value: str) -> set[str]:

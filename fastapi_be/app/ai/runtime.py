@@ -12,7 +12,7 @@ from app.ai.catalog import CATALOG_VERSION, COMMON_SYSTEM_PROMPT, FeatureSpec
 from app.ai.context import ContextBundle, authorize_patient, context_metadata, minimize_identifiers, patient_snapshot
 from app.ai.gateway import AIExecutionError, generate
 from app.ai.governance import active_prompt, audit, digest, encode_json, get_spec, provider_credential, provider_feature_issues
-from app.ai.knowledge import evidence_is_current, retrieve_evidence
+from app.ai.knowledge import evidence_is_current, retrieval_query, retrieve_evidence
 from app.ai.models import AIFeatureConfig, AIProvider, AIRun, utcnow
 from app.ai.schemas import RunRequest
 from app.ai.tools import business_tools, operational_context
@@ -88,7 +88,7 @@ def create_run(db: Session, user: User, req: RunRequest) -> AIRun:
     patient = db.get(Patient, req.patient_id) if req.patient_id else None
     clean_input = minimize_identifiers(req.input, patient)
     tools, tool_evidence = business_tools(db, spec, user, req.patient_id, clean_input, bundle)
-    query = encode_json(clean_input) + " " + " ".join(bundle.data.get("current_confirmed_diagnoses", []))
+    query = retrieval_query(spec, clean_input, bundle.data)
     knowledge = retrieve_evidence(db, spec, query, bundle.department_ids)
     if spec.requires_knowledge and not knowledge:
         raise HTTPException(409, "未检索到本任务可用的已审核知识，请先录入并审核相关资料")

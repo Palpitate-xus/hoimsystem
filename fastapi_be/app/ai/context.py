@@ -576,6 +576,7 @@ def context_metadata(bundle: ContextBundle) -> dict:
     return {
         "snapshot_time": bundle.data.get("snapshot_time"),
         "source_count": len(bundle.evidence),
+        "department_ids": sorted(bundle.department_ids),
         "context_digest": digest(bundle.data),
         "clinical_context_fingerprint": digest({key: value for key, value in bundle.data.items() if key != "snapshot_time"}),
         "missing_data": bundle.data.get("missing_data", []),

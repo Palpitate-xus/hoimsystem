@@ -316,7 +316,10 @@ def _recheck_task(db: Session, run: AIRun) -> tuple[FeatureSpec, AIProvider, dic
         if context_metadata(current_bundle)["clinical_context_fingerprint"] != metadata.get("clinical_context_fingerprint"):
             raise AIExecutionError("TASK_OPERATIONAL_CONTEXT_CHANGED", "运营资料或科室范围已改变，请重新加载后生成")
     else:
-        current_bundle = ContextBundle(data=snapshot["payload"]["context"])
+        departments = {item[0] for item in db.query(Doctor.department_id).filter_by(user_id=user.user_id).all() if item[0]}
+        current_bundle = ContextBundle(data=snapshot["payload"]["context"], department_ids=departments)
+    if sorted(current_bundle.department_ids) != metadata.get("department_ids"):
+        raise AIExecutionError("TASK_DEPARTMENT_SCOPE_CHANGED", "任务适用的科室范围已变化，请按当前就诊或医生资料重新准备依据")
     current_tools, _ = business_tools(db, spec, user, run.patient_id, snapshot["payload"]["input"], current_bundle)
     if digest(current_tools) != metadata.get("tool_fingerprint"):
         raise AIExecutionError("TASK_TOOLS_CHANGED", "相关审方规则、目录或业务状态已改变，请重新生成")

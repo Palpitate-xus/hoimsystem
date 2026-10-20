@@ -131,7 +131,8 @@ export function getIcuScoreList(params) {
   return request({ url: "icuScore/getList", method: "get", params });
 }
 export function createIcuScore(data) {
-  return request({ url: "icuScore/create", method: "post", data });
+  // Preserve explicit unknown timestamps/admission links through the generic null-filtering interceptor.
+  return request({ url: "icuScore/create", method: "post", data: JSON.stringify(data), headers: { "Content-Type": "application/json" } });
 }
 
 // 临床路径入组

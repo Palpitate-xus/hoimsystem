@@ -64,13 +64,15 @@ export function getShiftHandoverList() { return request({ url: "/shiftHandover/l
 export function createShiftHandover(data) { return request({ url: "/shiftHandover/create", method: "post", data }); }
 export function receiveShiftHandover(data) { return request({ url: "/shiftHandover/receive", method: "post", data }); }
 export function getNursingAssessmentList(params) { return request({ url: "/nursingAssessment/list", method: "get", params }); }
-export function createNursingAssessment(data) { return request({ url: "/nursingAssessment/create", method: "post", data }); }
-export function updateNursingAssessment(data) { return request({ url: "/nursingAssessment/update", method: "put", data }); }
+// Serialize these nullable contracts before the generic interceptor, which drops top-level nulls.
+// An explicit null in assessment updates clears an item; omission leaves its old value intact.
+export function createNursingAssessment(data) { return request({ url: "/nursingAssessment/create", method: "post", data: JSON.stringify(data), headers: { "Content-Type": "application/json" } }); }
+export function updateNursingAssessment(data) { return request({ url: "/nursingAssessment/update", method: "put", data: JSON.stringify(data), headers: { "Content-Type": "application/json" } }); }
 export function completeNursingAssessment(data) { return request({ url: "/nursingAssessment/complete", method: "post", data }); }
 export function getNursingPlanList(params) { return request({ url: "/nursingPlan/list", method: "get", params }); }
 export function createNursingPlan(data) { return request({ url: "/nursingPlan/create", method: "post", data }); }
 export function updateNursingPlan(data) { return request({ url: "/nursingPlan/update", method: "put", data }); }
 export function getCriticalCareRecordList(params) { return request({ url: "/criticalCareRecord/list", method: "get", params }); }
-export function createCriticalCareRecord(data) { return request({ url: "/criticalCareRecord/create", method: "post", data }); }
+export function createCriticalCareRecord(data) { return request({ url: "/criticalCareRecord/create", method: "post", data: JSON.stringify(data), headers: { "Content-Type": "application/json" } }); }
 export function getSurgeryNursingRecordList(params) { return request({ url: "/surgeryNursingRecord/list", method: "get", params }); }
 export function createSurgeryNursingRecord(data) { return request({ url: "/surgeryNursingRecord/create", method: "post", data }); }

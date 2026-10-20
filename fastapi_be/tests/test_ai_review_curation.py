@@ -1,8 +1,10 @@
 """Feedback text has immutable versions, explicit review and source-bound publication."""
 
 import datetime
+import json
 from pathlib import Path
 
+import httpx
 import pytest
 from alembic.config import Config
 from fastapi import HTTPException
@@ -10,17 +12,21 @@ from pydantic import ValidationError
 from sqlalchemy import create_engine, inspect, text
 
 from alembic import command
+from app import database
+from app.ai.catalog import FEATURE_BY_KEY
 from app.ai.governance import encode_json
-from app.ai.models import AIAuditEvent, AIReviewExcerpt, AIRun
+from app.ai.models import AIAuditEvent, AIFeatureConfig, AIFeedback, AIProvider, AIReviewExcerpt, AIRun
+from app.ai.operational_sources import operational_context
 from app.ai.review_curation import create_excerpt, describe_excerpt, load_review_source, review_excerpt, source_state
-from app.ai.schemas import ReviewExcerptReview, ReviewExcerptWrite
+from app.ai.runtime import authorize_run, claim_next_run, create_run, describe_run, execute_claimed
+from app.ai.schemas import ReviewExcerptReview, ReviewExcerptWrite, RunRequest
 from app.models import Department, MedicalRecord, Registration, Review
 
 
 @pytest.fixture
 def source_case(seed_data, db_session):
-    db_session.query(AIReviewExcerpt).delete()
-    db_session.query(Review).delete()
+    for model in (AIFeedback, AIRun, AIFeatureConfig, AIProvider, AIReviewExcerpt, AIAuditEvent, Review):
+        db_session.query(model).delete()
     now = datetime.datetime.now()
     registration = Registration(patient_id=seed_data["patient"].patient_id, doctor_id=seed_data["doctor"].doctor_id, department_id=seed_data["department"].department_id, time=now)
     db_session.add(registration)
@@ -246,3 +252,163 @@ async def test_source_change_and_creation_status_override_cannot_bypass_review(s
     db_session.commit()
     stale = await async_client.post("/api/ai/admin/review-excerpts", headers=headers, json=payload)
     assert stale.status_code == 409 and db_session.query(AIReviewExcerpt).count() == 0
+
+
+def feedback_context(db_session, seed_data):
+    return operational_context(db_session, seed_data["director_user"], FEATURE_BY_KEY["feedback_analysis"], {"department_id": seed_data["department"].department_id})
+
+
+@pytest.mark.asyncio
+async def test_public_context_contains_only_reviewed_current_scoped_text_and_individual_citations(seed_data, db_session, source_case, async_client, auth_headers):
+    review, _, _ = source_case
+    published = decide(db_session, seed_data, draft(db_session, seed_data, review))
+    draft(db_session, seed_data, review, redacted_text="尚未审核的稿件不得发送")
+    foreign = Department(name="不可见评价科室")
+    db_session.add(foreign)
+    db_session.flush()
+    registration = Registration(patient_id=review.patient_id, doctor_id=review.doctor_id, department_id=foreign.department_id, time=review.review_time)
+    db_session.add(registration)
+    db_session.flush()
+    visit = MedicalRecord(patient_id=review.patient_id, doctor_id=review.doctor_id, registration_uuid=registration.registration_uuid)
+    db_session.add(visit)
+    db_session.flush()
+    other = Review(patient_id=review.patient_id, doctor_id=review.doctor_id, visit_id=visit.medical_record_id, score=1, comment="跨科不可见的评价片段", review_time=review.review_time)
+    db_session.add(other)
+    db_session.commit()
+    decide(db_session, seed_data, draft(db_session, seed_data, other, redacted_text="跨科不可见的评价片段"))
+    response = await async_client.post(
+        "/api/ai/operational-context",
+        headers=auth_headers(seed_data["director_user"].username),
+        json={"feature_key": "feedback_analysis", "input": {"department_id": seed_data["department"].department_id}},
+    )
+    assert response.status_code == 200, response.text
+    data = response.json()["data"]
+    rows = data["context"]["reviewed_feedback_excerpts"]["items"]
+    assert len(rows) == 1 and rows[0]["excerpt_ref"] == published.excerpt_id
+    assert rows[0]["verification_status"] == "reported_feedback_only"
+    assert any(item["source_id"] == rows[0]["source_id"] and published.redacted_text in item["content"] for item in data["evidence"])
+    serialized = encode_json(data)
+    for forbidden in ("跨科不可见", "尚未审核的稿件", "13800138000", seed_data["patient"].name, "source_hash", '"patient_id"', '"doctor_id"', '"review_id"'):
+        assert forbidden not in serialized
+    assert db_session.query(AIRun).count() == 0
+
+
+@pytest.mark.parametrize("mutation", ["comment", "association", "department", "artifact", "retire"])
+def test_changed_or_withdrawn_text_is_removed_from_future_model_context(mutation, seed_data, db_session, source_case):
+    review, registration, _ = source_case
+    item = decide(db_session, seed_data, draft(db_session, seed_data, review))
+    assert feedback_context(db_session, seed_data).data["reviewed_feedback_excerpts"]["included_excerpt_count"] == 1
+    if mutation == "comment":
+        review.comment += "原文变化"
+    elif mutation == "association":
+        registration.patient_id = seed_data["patient2"].patient_id
+    elif mutation == "department":
+        department = Department(name="已调离的评价科室")
+        db_session.add(department)
+        db_session.flush()
+        registration.department_id = department.department_id
+    elif mutation == "artifact":
+        item.redacted_text = "直接改库的未审核文本"
+    else:
+        decide(db_session, seed_data, item, status="retired")
+    db_session.commit()
+    bundle = feedback_context(db_session, seed_data)
+    assert bundle.data["reviewed_feedback_excerpts"]["items"] == []
+    assert all("已审核脱敏评价片段" != evidence["title"] for evidence in bundle.evidence)
+    assert any("不能生成投诉主题" in text for text in bundle.data["missing_data"])
+
+
+def configure_feedback(db_session, seed_data):
+    provider = AIProvider(
+        name="feedback-isolated", kind="chat", api_base="http://localhost:11434/v1", model="isolated", enabled=1, allows_patient_data=1, created_by=seed_data["super_admin_user"].user_id
+    )
+    db_session.add(provider)
+    db_session.flush()
+    db_session.add(
+        AIFeatureConfig(
+            feature_key="feedback_analysis",
+            enabled=1,
+            provider_id=provider.provider_id,
+            allowed_roles_json=encode_json(FEATURE_BY_KEY["feedback_analysis"].default_roles),
+            updated_by=seed_data["super_admin_user"].user_id,
+        )
+    )
+    db_session.commit()
+
+
+def create_feedback_task(db_session, seed_data):
+    configure_feedback(db_session, seed_data)
+    return create_run(db_session, seed_data["admin_user"], RunRequest(feature_key="feedback_analysis", input={"department_id": seed_data["department"].department_id}))
+
+
+@pytest.mark.asyncio
+async def test_withdrawal_stops_queued_call_and_revokes_ordinary_history_but_preserves_super_audit(seed_data, db_session, source_case):
+    item = decide(db_session, seed_data, draft(db_session, seed_data, source_case[0]))
+    run = create_feedback_task(db_session, seed_data)
+    original_input = run.input_json
+    decide(db_session, seed_data, item, status="retired")
+    calls = []
+    await execute_claimed(*claim_next_run(db_session), transport=httpx.MockTransport(lambda request: (calls.append(request), httpx.Response(500))[1]))
+    db_session.refresh(run)
+    assert calls == [] and run.status == "failed" and run.error_code == "TASK_NO_LONGER_AUTHORIZED"
+    with pytest.raises(HTTPException) as error:
+        authorize_run(db_session, seed_data["admin_user"], run)
+    assert error.value.status_code == 403
+    authorize_run(db_session, seed_data["super_admin_user"], run)
+    assert run.input_json == original_input
+    assert describe_run(run)["operational_findings"]["reviewed_feedback_excerpts"]["items"][0]["text"] == item.redacted_text
+
+
+@pytest.mark.asyncio
+async def test_withdrawal_during_inference_discards_result_without_changing_frozen_evidence(seed_data, db_session, source_case):
+    item = decide(db_session, seed_data, draft(db_session, seed_data, source_case[0]))
+    run = create_feedback_task(db_session, seed_data)
+    original_input = run.input_json
+    calls = []
+
+    def reply(request):
+        calls.append(request)
+        with database.SessionLocal() as session:
+            current = session.get(AIReviewExcerpt, item.excerpt_id)
+            current.status = "retired"
+            current.revision += 1
+            session.commit()
+        result = {"summary": "旧片段分析应作废", "sections": [], "warnings": [], "missing_data": []}
+        return httpx.Response(200, json={"choices": [{"finish_reason": "stop", "message": {"content": encode_json(result)}}], "usage": {"prompt_tokens": 4, "completion_tokens": 5}})
+
+    await execute_claimed(*claim_next_run(db_session), transport=httpx.MockTransport(reply))
+    db_session.refresh(run)
+    assert len(calls) == 1 and run.error_code == "TASK_NO_LONGER_AUTHORIZED"
+    assert run.result_json == "{}" and run.input_json == original_input and run.output_tokens == 5
+
+
+@pytest.mark.asyncio
+async def test_model_receives_reviewed_citation_and_replacement_revokes_old_business_result(seed_data, db_session, source_case):
+    decide(db_session, seed_data, draft(db_session, seed_data, source_case[0]))
+    run = create_feedback_task(db_session, seed_data)
+    frozen = json.loads(run.input_json)
+    source_id = frozen["payload"]["context"]["reviewed_feedback_excerpts"]["items"][0]["source_id"]
+    calls = []
+
+    def reply(request):
+        payload = request.content.decode()
+        assert "13800138000" not in payload and source_id in payload
+        assert "尚未审核" not in payload
+        calls.append(request)
+        result = {
+            "summary": "所载反馈提到候诊问题，未核实流程原因",
+            "sections": [{"title": "所载片段主题", "content": "一条审核片段提到等待较久，不代表全体意见", "source_ids": [source_id]}],
+            "warnings": [],
+            "missing_data": ["全体就诊分母未知"],
+        }
+        return httpx.Response(200, json={"choices": [{"finish_reason": "stop", "message": {"content": encode_json(result)}}]})
+
+    await execute_claimed(*claim_next_run(db_session), transport=httpx.MockTransport(reply))
+    db_session.refresh(run)
+    assert run.status == "succeeded" and len(calls) == 1
+    authorize_run(db_session, seed_data["admin_user"], run)
+    replacement = draft(db_session, seed_data, source_case[0], redacted_text="候诊较久，希望完善顺序说明。")
+    decide(db_session, seed_data, replacement)
+    with pytest.raises(HTTPException):
+        authorize_run(db_session, seed_data["admin_user"], run)
+    authorize_run(db_session, seed_data["super_admin_user"], run)

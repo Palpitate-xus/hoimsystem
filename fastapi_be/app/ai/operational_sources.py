@@ -117,14 +117,17 @@ def operational_context(db, user: User, spec: FeatureSpec, values: dict) -> Cont
         "scope_note": "仅授权范围内的原始记录汇总和已保存统计；未核实外部数据导入完整性，未记录日不等于已验证零业务量，当前记录状态不回推为历史状态",
     }
 
-    def add(key: str, title: str, fields: dict):
+    def add(key: str, title: str, fields: dict, *, store=True):
         clean = json.loads(encode_json(fields))
         provenance = {name: bundle.data[name] for name in ("scope", "source_domain", "department_ids", "since", "until")}
         source_id = "operations:" + key + ":" + digest([provenance, clean])[:20]
-        bundle.data[key] = {"source_id": source_id, **clean}
+        record = {"source_id": source_id, **clean}
+        if store:
+            bundle.data[key] = record
         bundle.evidence.append(
             {"source_id": source_id, "kind": "operational_record", "title": title, "observed_at": bundle.data["snapshot_time"], "content": encode_json({**provenance, "record": clean})}
         )
+        return record
 
     if spec.number in {66, 67}:
         attach_inventory_sources(db, departments, start, end, bundle, add, values)

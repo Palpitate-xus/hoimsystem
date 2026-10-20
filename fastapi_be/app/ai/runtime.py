@@ -15,6 +15,7 @@ from app.ai.governance import active_prompt, audit, digest, encode_json, get_spe
 from app.ai.knowledge import evidence_is_current, retrieval_query, retrieve_evidence
 from app.ai.models import AIFeatureConfig, AIProvider, AIRun, utcnow
 from app.ai.operational_sources import authorize_operational_snapshot, operational_context
+from app.ai.review_curation import authorize_feedback_snapshot
 from app.ai.schemas import RunRequest
 from app.ai.tools import business_tools
 from app.config import settings
@@ -159,7 +160,10 @@ def authorize_run(db: Session, user: User, run: AIRun) -> None:
         if source_encounter and source_encounter != run.encounter_ref:
             authorize_patient(db, user, run.patient_id, spec.category, source_encounter)
     elif spec.scope == "hospital":
-        authorize_operational_snapshot(db, user, spec, json.loads(run.input_json).get("payload", {}).get("context", {}))
+        context = json.loads(run.input_json).get("payload", {}).get("context", {})
+        authorize_operational_snapshot(db, user, spec, context)
+        if spec.number == 70 and user.user_role != "super_admin":
+            authorize_feedback_snapshot(db, context)
 
 
 def describe_run(run: AIRun, include_result: bool = True) -> dict:
@@ -227,6 +231,7 @@ def describe_run(run: AIRun, include_result: bool = True) -> dict:
                 "surgical_completed_intervals",
                 "feedback_rating_summary",
                 "feedback_rating_series",
+                "reviewed_feedback_excerpts",
             )
             data["operational_findings"] = {key: context[key] for key in keys if key in context}
     return data

@@ -105,11 +105,75 @@ def describe_excerpt(item, *, include_text=False):
 
 
 def source_state(db, item):
+    if digest(item.redacted_text) != item.text_hash:
+        return "artifact_changed"
     try:
         source = load_review_source(db, item.review_id)
     except HTTPException:
         return "unavailable"
     return "current" if source.fingerprint == item.source_hash and source.department_id == item.department_id else "stale"
+
+
+def _current_published(item, source):
+    return (
+        item.status == "published"
+        and item.privacy_checked == 1
+        and item.faithfulness_checked == 1
+        and item.reviewed_by is not None
+        and item.reviewed_at is not None
+        and source.department_id == item.department_id
+        and source.fingerprint == item.source_hash
+        and digest(item.redacted_text) == item.text_hash
+        and source.redact(item.redacted_text) == item.redacted_text
+    )
+
+
+def published_feedback_sources(db, departments, start, end):
+    """Inspect at most sixty published candidates; raw text is used only to verify their hashes."""
+    rows = (
+        verified_review_query(db, departments, start, end)
+        .join(AIReviewExcerpt, AIReviewExcerpt.review_id == Review.review_id)
+        .join(Department, Department.department_id == review_department())
+        .filter(AIReviewExcerpt.status == "published")
+        .with_entities(AIReviewExcerpt, Review, MedicalRecord, Doctor, Patient, Registration)
+        .order_by(Review.review_time.desc(), AIReviewExcerpt.excerpt_id)
+        .populate_existing()
+        .limit(61)
+        .all()
+    )
+    included, stale = [], 0
+    for item, review, visit, doctor, patient, registration in rows[:60]:
+        source = ReviewSource(review, visit, doctor, patient, registration)
+        if not _current_published(item, source):
+            stale += 1
+            continue
+        included.append(
+            {
+                "excerpt_ref": item.excerpt_id,
+                "version": item.version,
+                "text": item.redacted_text,
+                "recorded_review_date": review.review_time.date().isoformat(),
+                "recorded_score": review.score if review.score is not None and 1 <= review.score <= 5 else None,
+                "department_id": item.department_id,
+                "reviewed_at": item.reviewed_at,
+                "verification_status": "reported_feedback_only",
+                "definition_note": "人工审核的脱敏摘录/整理文本，不能声称原话未作修改；审核表示检查脱敏和原意，并不证明反馈事实、流程原因或个人责任已核实",
+            }
+        )
+    return included[:20], stale, len(rows) > 60 or len(included) > 20
+
+
+def authorize_feedback_snapshot(db, context):
+    """Ordinary result access cannot retain withdrawn or invalidated feedback excerpts."""
+    envelope = context.get("reviewed_feedback_excerpts") or {}
+    for frozen in envelope.get("items", []):
+        item = db.get(AIReviewExcerpt, frozen.get("excerpt_ref"))
+        try:
+            source = load_review_source(db, item.review_id) if item is not None else None
+        except HTTPException:
+            source = None
+        if item is None or source is None or not _current_published(item, source) or digest(frozen.get("text")) != item.text_hash:
+            raise HTTPException(403, "任务引用的评价片段已停用或来源变化，请重新分析；超级管理员可追查冻结审计")
 
 
 def create_excerpt(db, user, req):

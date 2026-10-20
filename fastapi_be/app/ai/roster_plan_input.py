@@ -160,7 +160,10 @@ def period_bounds(request):
             raise ValueError("This business boundary has no real local midnight; it cannot be silently shifted")
         return facts.utc_text(utc)
 
-    return midnight(first), midnight(last + datetime.timedelta(days=1)), dates
+    try:
+        return midnight(first), midnight(last + datetime.timedelta(days=1)), dates
+    except OverflowError as exc:
+        raise ValueError("Business-date midnights and the exclusive end must fit the supported UTC range") from exc
 
 
 def typed_request(value, *, stored=False):
@@ -189,19 +192,21 @@ def _collection_digest(cohort, manifest):
     return facts.hash_content({"cohort": cohort, "fact_manifest": manifest})
 
 
-def current_collection(db, user, department_id):
+def current_collection(db, user, department_id, *, locking=False):
     """Date-independent live closed collection; do not rewrite a historical cutoff."""
-    actor = facts.roster_scope(db, user, department_id)
-    rows = db.query(Doctor.doctor_id, Doctor.department_id).filter(Doctor.department_id == department_id).order_by(Doctor.doctor_id).limit(MAX_STAFF + 1).all()
+    actor = facts.roster_scope(db, user, department_id, locking=locking)
+    cohort_query = db.query(Doctor.doctor_id, Doctor.department_id).filter(Doctor.department_id == department_id).order_by(Doctor.doctor_id).limit(MAX_STAFF + 1)
+    rows = facts.current_query(cohort_query, locking=locking).all()
     if len(rows) > MAX_STAFF:
         raise HTTPException(422, "完整科室人员集合超过容量，不得截断为部分候选")
     cohort = [{"doctor_id": row.doctor_id, "department_id": row.department_id} for row in rows]
-    originals = db.query(AIRosterSource).filter_by(department_id=department_id).order_by(AIRosterSource.source_record_id).limit(MAX_FACTS + 1).all()
+    original_query = db.query(AIRosterSource).filter_by(department_id=department_id).order_by(AIRosterSource.source_record_id).limit(MAX_FACTS + 1)
+    originals = facts.current_query(original_query, locking=locking).all()
     if len(originals) > MAX_FACTS:
         raise HTTPException(422, "完整原来源集合超过容量，不得仅选择已发布或最新原件")
     # Explicitly refuse audit_only even for a Super-created problem. Stale
     # personnel notes cannot enter a new scenario through administrative access.
-    records = [facts.source_current(db, actor, row.source_kind, row.source_record_id, audit_only=False) for row in originals]
+    records = [facts.source_current(db, actor, row.source_kind, row.source_record_id, audit_only=False, locking=locking) for row in originals]
     manifest = [_manifest_item(record) for record in records]
     result = {"department_id": department_id, "cohort": cohort, "fact_manifest": manifest, "facts": records, "collection_digest": _collection_digest(cohort, manifest)}
     if len(facts.canonical_json(result).encode()) > MAX_BYTES:

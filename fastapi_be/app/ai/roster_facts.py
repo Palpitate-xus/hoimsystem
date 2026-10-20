@@ -9,6 +9,7 @@ from typing import Annotated, Literal
 
 from fastapi import HTTPException
 from pydantic import AfterValidator, BaseModel, ConfigDict, Field, ValidationError, field_validator, model_validator
+from sqlalchemy import inspect
 
 from app.ai import governance
 from app.ai.catalog import FEATURE_BY_KEY
@@ -287,12 +288,20 @@ def model():
     return AIRosterSource
 
 
-def current_actor(db, user):
-    actor = db.query(User).filter_by(user_id=user.user_id).populate_existing().one_or_none()
+def current_query(query, *, locking=False):
+    """Refresh ORM identities and optionally use an actual current locking read."""
+    query = query.populate_existing()
+    return query.with_for_update() if locking else query
+
+
+def current_actor(db, user, *, locking=False):
+    state = inspect(user, raiseerr=False)
+    actor_id = state.identity[0] if state is not None and state.identity is not None else user.user_id
+    actor = current_query(db.query(User).filter_by(user_id=actor_id), locking=locking).one_or_none()
     if actor is None or actor.user_role not in SOURCE_ROLES:
         raise HTTPException(403, "当前身份没有排班人员原来源管理权限")
     if actor.user_role != "super_admin":
-        config = db.query(AIFeatureConfig).filter_by(feature_key="roster_optimization").populate_existing().one_or_none()
+        config = current_query(db.query(AIFeatureConfig).filter_by(feature_key="roster_optimization"), locking=locking).one_or_none()
         try:
             roles = json.loads(config.allowed_roles_json) if config is not None else list(FEATURE_BY_KEY["roster_optimization"].default_roles)
             if not isinstance(roles, list) or any(not isinstance(item, str) for item in roles) or actor.user_role not in roles:
@@ -302,23 +311,25 @@ def current_actor(db, user):
     return actor
 
 
-def authorized_departments(db, actor):
+def authorized_departments(db, actor, *, locking=False):
     if actor.user_role in {"admin", "super_admin"}:
         return None
-    departments = {item[0] for item in db.query(Doctor.department_id).filter(Doctor.user_id == actor.user_id, Doctor.department_id.is_not(None)).all()}
+    query = db.query(Doctor.department_id).filter(Doctor.user_id == actor.user_id, Doctor.department_id.is_not(None))
+    departments = {item[0] for item in current_query(query, locking=locking).all()}
     if not departments:
         raise HTTPException(403, "未建立可核实的当前科室运营范围")
     return departments
 
 
-def roster_scope(db, user, department_id, *, allow_missing=False):
-    actor = current_actor(db, user)
+def roster_scope(db, user, department_id, *, allow_missing=False, locking=False):
+    actor = current_actor(db, user, locking=locking)
     if type(department_id) is not int or department_id < 1:
         raise HTTPException(422, "科室标识须为正整数")
-    permitted = authorized_departments(db, actor)
+    permitted = authorized_departments(db, actor, locking=locking)
     if permitted is not None and department_id not in permitted:
         raise HTTPException(403, "不能访问其他科室的排班人员原来源")
-    if not allow_missing and db.query(Department).filter_by(department_id=department_id).populate_existing().one_or_none() is None:
+    department = current_query(db.query(Department).filter_by(department_id=department_id), locking=locking).one_or_none() if locking or not allow_missing else None
+    if not allow_missing and department is None:
         raise HTTPException(422, "来源科室不存在")
     return actor
 
@@ -409,12 +420,12 @@ def source_proof(row):
         raise HTTPException(409, "排班人员原来源的完整正文、身份、时刻、哈希或治理状态不一致") from exc
 
 
-def parent_exclusion_reasons(db, row, parent):
+def parent_exclusion_reasons(db, row, parent, *, locking=False):
     reasons = []
-    if db.query(Department).filter_by(department_id=row.department_id).populate_existing().one_or_none() is None:
+    if current_query(db.query(Department).filter_by(department_id=row.department_id), locking=locking).one_or_none() is None:
         reasons.append("original_department_missing")
     if row.doctor_id is not None:
-        doctor = db.query(Doctor).filter_by(doctor_id=row.doctor_id).populate_existing().one_or_none()
+        doctor = current_query(db.query(Doctor).filter_by(doctor_id=row.doctor_id), locking=locking).one_or_none()
         if doctor is None:
             reasons.append("original_doctor_missing")
         elif {"doctor_id": doctor.doctor_id, "department_id": doctor.department_id} != parent["doctor"]:
@@ -422,25 +433,25 @@ def parent_exclusion_reasons(db, row, parent):
     return reasons
 
 
-def source_row(db, source_record_id, kind=None):
+def source_row(db, source_record_id, kind=None, *, locking=False):
     try:
         source_record_id = canonical_id(source_record_id)
     except (ValueError, TypeError, AttributeError) as exc:
         raise HTTPException(422, "来源标识须为规范UUID") from exc
-    row = db.query(model()).filter_by(source_record_id=source_record_id).populate_existing().one_or_none()
+    row = current_query(db.query(model()).filter_by(source_record_id=source_record_id), locking=locking).one_or_none()
     if row is None or kind is not None and row.source_kind != kind:
         raise HTTPException(404, "所选类型的排班人员原来源不存在")
     return row
 
 
-def source_current(db, user, kind, source_record_id, *, audit_only=False, require_published=False):
-    row = source_row(db, source_record_id, kind)
-    actor = current_actor(db, user)
+def source_current(db, user, kind, source_record_id, *, audit_only=False, require_published=False, locking=False):
+    row = source_row(db, source_record_id, kind, locking=locking)
+    actor = current_actor(db, user, locking=locking)
     if audit_only and actor.user_role != "super_admin":
         raise HTTPException(403, "只有超级管理员可读取完整冻结审计")
-    roster_scope(db, actor, row.department_id, allow_missing=actor.user_role in {"admin", "super_admin"})
+    roster_scope(db, actor, row.department_id, allow_missing=actor.user_role in {"admin", "super_admin"}, locking=locking)
     payload, parent = source_proof(row)
-    parent_reasons = parent_exclusion_reasons(db, row, parent)
+    parent_reasons = parent_exclusion_reasons(db, row, parent, locking=locking)
     reasons = [*parent_reasons, *([] if row.status == "published" else ["source_" + row.status])]
     if require_published and reasons:
         raise HTTPException(409, "原来源、原人员科室或发布状态已变化，不能用于新计划")
@@ -508,6 +519,9 @@ def create_source(db, user, kind, values):
     db.add(row)
     db.flush()
     source_proof(row)
+    actor = roster_scope(db, actor, row.department_id, locking=True)
+    if parent_exclusion_reasons(db, row, parent, locking=True):
+        raise HTTPException(409, "保存前原人员科室已经变化，本次来源未登记")
     governance.audit(db, actor.user_id, "roster_source.create", row.source_record_id, {"source_kind": kind, "content_hash": row.content_hash, "department_id": row.department_id})
     return row
 
@@ -540,6 +554,11 @@ def review_source(db, user, kind, source_record_id, values):
     db.expire(row)
     row = source_row(db, row.source_record_id, kind)
     source_proof(row)
+    actor = current_actor(db, actor, locking=True)
+    if actor.user_role != "super_admin":
+        raise HTTPException(403, "当前身份已不再具备原来源审核权限，本次未发布")
+    if parent_exclusion_reasons(db, row, parent, locking=True):
+        raise HTTPException(409, "审核保存前原人员科室已经变化，本次未发布")
     governance.audit(
         db, actor.user_id, "roster_source." + request.decision, row.source_record_id, {"content_hash": row.content_hash, "expected_revision": request.expected_revision, "revision": row.revision}
     )
@@ -573,12 +592,17 @@ def revoke_source(db, user, kind, source_record_id, values):
     db.expire(row)
     row = source_row(db, row.source_record_id, kind)
     source_proof(row)
+    actor = current_actor(db, actor, locking=True)
+    if actor.user_role != "super_admin":
+        roster_scope(db, actor, row.department_id, locking=True)
+        if row.created_by != actor.user_id or parent_exclusion_reasons(db, row, parent, locking=True):
+            raise HTTPException(403, "撤销保存前原人员、科室或当前作者权限已经变化")
     governance.audit(db, actor.user_id, "roster_source.revoke", row.source_record_id, {"content_hash": row.content_hash, "expected_revision": request.expected_revision, "revision": row.revision})
     return row
 
 
-def authorize_source(db, user, kind, source_record_id, *, as_of=None):
-    data = source_current(db, user, kind, source_record_id, require_published=True)
+def authorize_source(db, user, kind, source_record_id, *, as_of=None, locking=False):
+    data = source_current(db, user, kind, source_record_id, require_published=True, locking=locking)
     if as_of is not None and instant(data["recorded_at"]) > instant(canonical_utc(as_of)):
         raise HTTPException(409, "原来源在所选可用截止时刻尚未登记")
     return data

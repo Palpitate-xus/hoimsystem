@@ -153,3 +153,8 @@ def authorize_image_snapshot(db, user, context, authorize_patient):
     current = image_snapshot(asset, db=db)
     if asset.status != "ready" or digest(current) != digest({key: source.get(key) for key in current}):
         raise HTTPException(403, "影像来源或申请状态已变化，不能继续读取旧辅助识别结果")
+    from app.ai.image_files import open_verified_image
+
+    streams = open_verified_image(asset)
+    for stream in streams:
+        stream.close()

@@ -8,6 +8,7 @@ from app.ai.catalog import FEATURES
 from app.ai.context import accessible_patients, authorize_patient, context_metadata, get_encounter, patient_snapshot
 from app.ai.ecg_assets import authorize_ecg_patient
 from app.ai.governance import audit, describe_config, encode_json
+from app.ai.image_assets import authorize_image_patient
 from app.ai.models import AIFeatureConfig, AIFeedback, AIRun, utcnow
 from app.ai.operational_sources import operational_context, operational_options
 from app.ai.pathway_knowledge import eligible_pathway_documents
@@ -76,7 +77,9 @@ def inspect_operational_context(req: OperationalContextRequest, db: Session = De
 def encounter_options(feature_key: str, patient_id: int, db: Session = Depends(get_db), user: User = Depends(get_current_user)) -> dict:
     """Offer authorized encounters without widening access to another doctor's current case."""
     spec, _ = authorized_feature(db, user, feature_key)
-    if spec.number == 37:
+    if spec.number == 36:
+        authorize_image_patient(db, user, patient_id, authorize_patient)
+    elif spec.number == 37:
         authorize_ecg_patient(db, user, patient_id, authorize_patient)
     else:
         authorize_patient(db, user, patient_id, spec.category)

@@ -21,5 +21,7 @@ SOURCE_REFERENCE_KEYS = frozenset(
         "pathway_enrollment_id",
         "audio_asset_id",
         "ecg_asset_id",
+        "image_asset_id",
+        "imaging_order_id",
     }
 )

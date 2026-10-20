@@ -2,7 +2,7 @@
 
 import datetime
 import re
-from typing import Any, Literal
+from typing import Annotated, Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
@@ -408,7 +408,7 @@ class ImageProcessing(StrictRequest):
     input_rows: int = Field(ge=1, strict=True)
     input_columns: int = Field(ge=1, strict=True)
     input_frames: int = Field(ge=1, le=1, strict=True)
-    processed_frames: list[int] = Field(min_length=1, max_length=1)
+    processed_frames: list[Annotated[int, Field(strict=True)]] = Field(min_length=1, max_length=1)
     analysis_region: ImageRegion
     preprocessing_notes: list[str] = Field(min_length=1, max_length=20)
 

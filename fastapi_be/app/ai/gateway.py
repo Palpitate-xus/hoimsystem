@@ -15,7 +15,7 @@ from app.ai.catalog import COMMON_SYSTEM_PROMPT, FeatureSpec
 from app.ai.ecg_model import LABELS, LEADS, PREPROCESSING, RELEASE_FILES, ECGModelManifest, canonical_json
 from app.ai.governance import encode_json, provider_credential, validate_endpoint
 from app.ai.models import AIProvider
-from app.ai.schemas import AudioGenerationResult, ECGGenerationResult, GenerationResult
+from app.ai.schemas import AudioGenerationResult, ECGGenerationResult, GenerationResult, ImageGenerationResult
 from app.config import settings
 
 MAX_RESPONSE_BYTES = 512 * 1024
@@ -52,10 +52,20 @@ def result_json_schema() -> dict:
     return schema
 
 
-def validate_generation(value: object, evidence: list[dict], requires_knowledge: bool = False, *, audio_source: dict | None = None, ecg_source: dict | None = None, instructions_digest: str | None = None, model_version: str | None = None) -> GenerationResult:
+def validate_generation(
+    value: object,
+    evidence: list[dict],
+    requires_knowledge: bool = False,
+    *,
+    audio_source: dict | None = None,
+    ecg_source: dict | None = None,
+    image_source: dict | None = None,
+    instructions_digest: str | None = None,
+    model_version: str | None = None,
+) -> GenerationResult:
     """Reject fabricated references and invalid structured output before UI exposure."""
     try:
-        schema = AudioGenerationResult if audio_source is not None else ECGGenerationResult if ecg_source is not None else GenerationResult
+        schema = AudioGenerationResult if audio_source is not None else ECGGenerationResult if ecg_source is not None else ImageGenerationResult if image_source is not None else GenerationResult
         result = schema.model_validate(value)
     except ValidationError as exc:
         raise AIExecutionError("INVALID_OUTPUT", "模型返回的结果不符合任务结构，请调整模型或重试") from exc
@@ -88,7 +98,12 @@ def validate_generation(value: object, evidence: list[dict], requires_knowledge:
         processing = analysis.processing
         if analysis.asset_id != ecg_source["asset_id"] or analysis.content_hash != ecg_source["content_hash"] or analysis.signal_hash != ecg_source["signal_hash"]:
             raise AIExecutionError("ECG_SOURCE_MISMATCH", "心电候选结果与所选原始波形不一致")
-        if processing.input_sample_count != metadata["sample_count"] or processing.input_sample_rate_hz != metadata["sample_rate_hz"] or processing.input_leads != [lead["name"] for lead in metadata["leads"]] or (instructions_digest and processing.instructions_digest != instructions_digest):
+        if (
+            processing.input_sample_count != metadata["sample_count"]
+            or processing.input_sample_rate_hz != metadata["sample_rate_hz"]
+            or processing.input_leads != [lead["name"] for lead in metadata["leads"]]
+            or (instructions_digest and processing.instructions_digest != instructions_digest)
+        ):
             raise AIExecutionError("ECG_PROCESSING_MISMATCH", "心电输入采样、导联顺序或任务Prompt与实际任务不符")
         local = processing.local_runtime
         if local is not None or (model_version and model_version.startswith("ssl-ecg:")):
@@ -103,7 +118,9 @@ def validate_generation(value: object, evidence: list[dict], requires_knowledge:
                 in_scope = False
             if not in_scope or processing.used_leads != LEADS or processing.missing_sample_handling != "none_present" or any(lead["missing_samples"] for lead in metadata["leads"]):
                 raise AIExecutionError("ECG_LOCAL_SCOPE_MISMATCH", "本地研究模型输入超出原始12导联、100Hz、10秒无缺失范围")
-            if [finding.label for finding in analysis.findings] != LABELS or any(finding.location != "recording" or finding.leads != LEADS or finding.score is None or not 0 <= finding.score <= 1 for finding in analysis.findings):
+            if [finding.label for finding in analysis.findings] != LABELS or any(
+                finding.location != "recording" or finding.leads != LEADS or finding.score is None or not 0 <= finding.score <= 1 for finding in analysis.findings
+            ):
                 raise AIExecutionError("ECG_LOCAL_SCORE_MISMATCH", "本地研究模型须保留完整五类整段原始分数，不能改作诊断阈值或局部定位")
         used = {lead["name"]: lead for lead in metadata["leads"] if lead["name"] in processing.used_leads}
         has_missing = any(lead["missing_samples"] for lead in metadata["leads"])
@@ -118,6 +135,29 @@ def validate_generation(value: object, evidence: list[dict], requires_knowledge:
                 raise AIExecutionError("INVALID_ECG_FINDING", "心电候选的定位超出原始采样范围")
         if result.sections and ecg_source["source_id"] not in cited:
             raise AIExecutionError("UNGROUNDED_ECG_OUTPUT", "心电判读说明未引用所选原始波形")
+    if image_source is not None:
+        analysis, metadata = result.image_analysis, image_source["image_metadata"]
+        if any(getattr(analysis, key) != image_source[key] for key in ("asset_id", "content_hash", "original_hash", "pixel_hash")):
+            raise AIExecutionError("IMAGE_SOURCE_MISMATCH", "影像候选结果与所选原文件或实际像素不一致")
+        processing = analysis.processing
+        if (
+            processing.input_rows != metadata["rows"]
+            or processing.input_columns != metadata["columns"]
+            or processing.input_frames != metadata["frames"]
+            or (instructions_digest and processing.instructions_digest != instructions_digest)
+        ):
+            raise AIExecutionError("IMAGE_PROCESSING_MISMATCH", "影像尺寸、帧数或实际任务Prompt不一致")
+        if metadata["valid_pixel_count"] < 1:
+            raise AIExecutionError("IMAGE_NO_USABLE_PIXELS", "影像只有padding背景，不能生成候选发现")
+        crop = processing.analysis_region
+        for finding in analysis.findings:
+            region = finding.region
+            if finding.source_id != image_source["source_id"] or (
+                region is not None and (region.x < crop.x or region.y < crop.y or region.x + region.width > crop.x + crop.width or region.y + region.height > crop.y + crop.height)
+            ):
+                raise AIExecutionError("INVALID_IMAGE_FINDING", "候选影像定位超出实际分析区域或引用其他原像素")
+        if result.sections and image_source["source_id"] not in cited:
+            raise AIExecutionError("UNGROUNDED_IMAGE_OUTPUT", "影像识别说明未引用所选原像素")
     return result
 
 
@@ -129,6 +169,8 @@ def _request(provider: AIProvider, spec: FeatureSpec, task_prompt: str, data: di
         raise AIExecutionError("AUDIO_ADAPTER_REQUIRED", "医疗录音须通过已登记的专用语音服务处理")
     if spec.number == 37 and provider.kind != "specialist":
         raise AIExecutionError("ECG_ADAPTER_REQUIRED", "原始心电须通过已登记的专用波形模型处理")
+    if spec.number == 36 and provider.kind != "specialist":
+        raise AIExecutionError("IMAGE_ADAPTER_REQUIRED", "原始影像须通过已登记的专用像素模型处理")
     if provider.kind == "responses":
         return endpoint + "/responses", {
             "model": provider.model,
@@ -149,12 +191,12 @@ def _request(provider: AIProvider, spec: FeatureSpec, task_prompt: str, data: di
         }
     if provider.kind == "specialist":
         return endpoint + "/tasks", {
-            "schema_version": {21: "2", 37: "3"}.get(spec.number, "1"),
+            "schema_version": {21: "2", 36: "4", 37: "3"}.get(spec.number, "1"),
             "feature_key": spec.key,
             "engine": spec.engine,
             "model": provider.model,
             "instructions": instructions,
-            **({"store": False} if spec.number in {21, 37} else {}),
+            **({"store": False} if spec.number in {21, 36, 37} else {}),
             "input": data,
         }
     raise AIExecutionError("UNSUPPORTED_PROVIDER", "模型接口类型不受支持")
@@ -176,12 +218,12 @@ def _parse_response(provider: AIProvider, spec: FeatureSpec, value: dict) -> tup
             raise AIExecutionError("INCOMPLETE_RESPONSE", "模型未返回完整结果，请检查输出额度或模型状态")
         usage = value.get("usage") or {}
         return json.loads(choice["message"]["content"]), int(usage.get("prompt_tokens") or 0), int(usage.get("completion_tokens") or 0)
-    if value.get("schema_version") != {21: "2", 37: "3"}.get(spec.number, "1") or value.get("feature_key") != spec.key or value.get("model_version") != provider.model:
+    if value.get("schema_version") != {21: "2", 36: "4", 37: "3"}.get(spec.number, "1") or value.get("feature_key") != spec.key or value.get("model_version") != provider.model:
         raise AIExecutionError("ADAPTER_CONTRACT_MISMATCH", "专用模型返回的功能或模型版本与登记信息不一致")
     if value.get("applicable") is not True:
         raise AIExecutionError("OUTSIDE_VALIDATED_SCOPE", "本次输入不在专用模型声明的适用范围内")
-    if spec.number in {21, 37}:
-        name = "transcription" if spec.number == 21 else "ecg_analysis"
+    if spec.number in {21, 36, 37}:
+        name = {21: "transcription", 36: "image_analysis", 37: "ecg_analysis"}[spec.number]
         if not isinstance(value["result"], dict) or name in value["result"]:
             raise ValueError("native result belongs to the versioned envelope")
         usage = value.get("usage") or {}
@@ -198,6 +240,7 @@ async def generate(
     transport: httpx.AsyncBaseTransport | None = None,
     audio: BinaryIO | None = None,
     ecg: BinaryIO | None = None,
+    image: BinaryIO | None = None,
 ) -> tuple[GenerationResult, int, int]:
     """Call only a configured endpoint; never retry billable tasks or follow redirects."""
     inputs = outputs = None
@@ -211,10 +254,15 @@ async def generate(
         headers["Authorization"] = "Bearer " + credential
     source = data.get("context", {}).get("audio_source") if spec.number == 21 else None
     ecg_source = data.get("context", {}).get("ecg_source") if spec.number == 37 else None
+    image_source = data.get("context", {}).get("image_source") if spec.number == 36 else None
     if spec.number == 21:
         if audio is None or not source or source.get("extension") not in AUDIO_FORMATS or source.get("media_type") != AUDIO_FORMATS[source["extension"]][1]:
             raise AIExecutionError("AUDIO_FILE_REQUIRED", "缺少已核实的原录音附件，不能以文字资料冒充语音识别")
         request_body = {"data": {"task": encode_json(payload)}, "files": {"audio": ("recording" + source["extension"], audio, source["media_type"])}}
+    elif spec.number == 36:
+        if image is None or not image_source or image_source.get("image_metadata", {}).get("format") != "dicom_i32le_v1" or audio is not None or ecg is not None:
+            raise AIExecutionError("IMAGE_FILE_REQUIRED", "须提供已核实的原像素附件，不以报告、调阅链接或其他患者文件代替")
+        request_body = {"data": {"task": encode_json(payload)}, "files": {"image": ("pixels.i32le", image, "application/octet-stream")}}
     elif spec.number == 37:
         if ecg is None or not ecg_source or ecg_source.get("signal_metadata", {}).get("format") != "wfdb16" or audio is not None:
             raise AIExecutionError("ECG_FILE_REQUIRED", "须提供已核实的原始心电采样附件，不能以文字或外部链接代替")
@@ -225,6 +273,8 @@ async def generate(
         request_body = {"json": payload}
     if ecg is not None and spec.number != 37:
         raise AIExecutionError("UNEXPECTED_ECG_FILE", "该任务不接受原始心电附件")
+    if image is not None and spec.number != 36:
+        raise AIExecutionError("UNEXPECTED_IMAGE_FILE", "该任务不接受原始影像附件")
     try:
         timeout = httpx.Timeout(provider.timeout_seconds, connect=min(provider.timeout_seconds, 10))
         async with httpx.AsyncClient(timeout=timeout, follow_redirects=False, trust_env=False, transport=transport) as client:
@@ -242,7 +292,16 @@ async def generate(
         output, inputs, outputs = _parse_response(provider, spec, parsed)
         if min(inputs, outputs) < 0 or max(inputs, outputs) > 2000000:
             raise ValueError("invalid token accounting")
-        result = validate_generation(output, data.get("evidence", []), spec.requires_knowledge, audio_source=source, ecg_source=ecg_source, instructions_digest=hashlib.sha256(payload.get("instructions", "").encode()).hexdigest(), model_version=provider.model)
+        result = validate_generation(
+            output,
+            data.get("evidence", []),
+            spec.requires_knowledge,
+            audio_source=source,
+            ecg_source=ecg_source,
+            image_source=image_source,
+            instructions_digest=hashlib.sha256(payload.get("instructions", "").encode()).hexdigest(),
+            model_version=provider.model,
+        )
         return result, inputs, outputs
     except AIExecutionError as exc:
         exc.input_tokens, exc.output_tokens = inputs, outputs

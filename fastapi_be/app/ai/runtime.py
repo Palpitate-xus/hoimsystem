@@ -17,8 +17,10 @@ from app.ai.ecg_assets import authorize_ecg_snapshot
 from app.ai.ecg_files import open_verified_ecg
 from app.ai.gateway import AIExecutionError, generate
 from app.ai.governance import active_prompt, audit, digest, encode_json, get_spec, provider_credential, provider_feature_issues
+from app.ai.image_assets import authorize_image_patient, authorize_image_snapshot
+from app.ai.image_files import open_verified_image
 from app.ai.knowledge import evidence_is_current, retrieval_query, retrieve_evidence
-from app.ai.models import AIAudioAsset, AIECGAsset, AIFeatureConfig, AIProvider, AIRun, utcnow
+from app.ai.models import AIAudioAsset, AIECGAsset, AIFeatureConfig, AIImageAsset, AIProvider, AIRun, utcnow
 from app.ai.operational_sources import authorize_operational_snapshot, operational_context
 from app.ai.pathway_sources import PATHWAY_SOURCE_FEATURES, selected_pathway_ids
 from app.ai.review_curation import authorize_feedback_snapshot
@@ -97,6 +99,8 @@ def create_run(db: Session, user: User, req: RunRequest) -> AIRun:
         raise HTTPException(409, "库存预测或优化需要授权范围内的明确品种资料，请先选择真实目录品种并核实库存范围")
     if spec.number == 77 and not bundle.data.get("incident_record"):
         raise HTTPException(409, "RCA辅助分析需要明确选择当前已授权患者的不良事件记录")
+    if spec.number == 36 and bundle.data["image_source"]["image_metadata"]["valid_pixel_count"] < 1:
+        raise HTTPException(409, "原影像没有可用像素，只能查看原记录，不能创建候选识别任务")
     if spec.number == 37:
         metadata = bundle.data["ecg_source"]["signal_metadata"]
         if all(lead["missing_samples"] == metadata["sample_count"] for lead in metadata["leads"]):
@@ -167,7 +171,11 @@ def authorize_run(db: Session, user: User, run: AIRun) -> None:
         raise HTTPException(403, "不能访问其他用户的 AI 任务")
     spec, _ = authorized_feature(db, user, run.feature_key)
     if run.patient_id is not None:
-        authorize_patient(db, user, run.patient_id, spec.category, run.encounter_ref)
+        if spec.number == 36:
+            authorize_image_patient(db, user, run.patient_id, authorize_patient, run.encounter_ref)
+            authorize_image_snapshot(db, user, json.loads(run.input_json).get("payload", {}).get("context", {}), authorize_patient)
+        else:
+            authorize_patient(db, user, run.patient_id, spec.category, run.encounter_ref)
         if spec.number == 21:
             authorize_audio_snapshot(db, user, json.loads(run.input_json).get("payload", {}).get("context", {}), authorize_patient)
         if spec.number == 37:
@@ -237,6 +245,9 @@ def describe_run(run: AIRun, include_result: bool = True) -> dict:
         if spec.number == 21:
             context = json.loads(run.input_json).get("payload", {}).get("context", {})
             data["audio_findings"] = {key: context[key] for key in ("scope", "scope_note", "audio_source", "missing_data") if key in context}
+        if spec.number == 36:
+            context = json.loads(run.input_json).get("payload", {}).get("context", {})
+            data["image_findings"] = {key: context[key] for key in ("scope", "scope_note", "image_source", "missing_data") if key in context}
         if spec.number == 37:
             context = json.loads(run.input_json).get("payload", {}).get("context", {})
             data["ecg_findings"] = {key: context[key] for key in ("scope", "scope_note", "ecg_source", "missing_data") if key in context}
@@ -346,6 +357,7 @@ async def execute_claimed(run_id: str, lease: str, *, transport=None) -> None:
     inputs = outputs = 0
     audio_file = None
     ecg_files = None
+    image_files = None
     try:
         with database.SessionLocal() as db:
             run = db.get(AIRun, run_id)
@@ -358,9 +370,14 @@ async def execute_claimed(run_id: str, lease: str, *, transport=None) -> None:
             if spec.number == 37:
                 asset = db.get(AIECGAsset, snapshot["payload"]["context"]["ecg_source"]["asset_id"])
                 ecg_files = open_verified_ecg(asset)
+            if spec.number == 36:
+                asset = db.get(AIImageAsset, snapshot["payload"]["context"]["image_source"]["asset_id"])
+                image_files = open_verified_image(asset)
             db.expunge(provider)
         if audio_file is not None:
             result, inputs, outputs = await generate(provider, spec, snapshot["task_prompt"], snapshot["payload"], transport=transport, audio=audio_file)
+        elif image_files is not None:
+            result, inputs, outputs = await generate(provider, spec, snapshot["task_prompt"], snapshot["payload"], transport=transport, image=image_files[1])
         elif ecg_files is not None:
             result, inputs, outputs = await generate(provider, spec, snapshot["task_prompt"], snapshot["payload"], transport=transport, ecg=ecg_files[1])
         else:
@@ -393,6 +410,9 @@ async def execute_claimed(run_id: str, lease: str, *, transport=None) -> None:
     finally:
         if audio_file is not None:
             audio_file.close()
+        if image_files is not None:
+            for stream in image_files:
+                stream.close()
         if ecg_files is not None:
             for stream in ecg_files:
                 stream.close()

@@ -21,8 +21,10 @@ from app.ai.consultation_sources import attach_consultation_sources
 from app.ai.ecg_assets import authorize_ecg, ecg_granted_patients, ecg_snapshot
 from app.ai.ecg_files import open_verified_ecg
 from app.ai.governance import digest, encode_json
+from app.ai.image_assets import authorize_image, authorize_image_patient, image_granted_patients, image_snapshot
+from app.ai.image_files import open_verified_image
 from app.ai.incident_sources import attach_incident_sources
-from app.ai.models import AIAudioAsset, AIECGAsset, AIPatientGrant, utcnow
+from app.ai.models import AIAudioAsset, AIECGAsset, AIImageAsset, AIPatientGrant, utcnow
 from app.ai.outpatient_billing import resolve_outpatient_charge
 from app.ai.pathway_sources import PATHWAY_SOURCE_FEATURES, attach_pathway_sources
 from app.ai.patient_sources import attach_patient_sources
@@ -139,6 +141,8 @@ def accessible_patients(db: Session, user: User, spec: FeatureSpec, keyword: str
             for model in (Registration, MedicalRecord, Prescription, Admission, LabOrder):
                 criteria.append(Patient.patient_id.in_(select(model.patient_id).where(model.doctor_id.in_(ids))))
             criteria.append(Patient.patient_id.in_(surgical_patient_ids(ids)))
+            if spec.number == 36:
+                criteria.append(Patient.patient_id.in_(select(ImagingOrder.patient_id).where(ImagingOrder.doctor_id.in_(ids))))
         if user.user_role == "director" and departments:
             for model in (Registration, Admission):
                 criteria.append(Patient.patient_id.in_(select(model.patient_id).where(model.department_id.in_(departments))))
@@ -150,6 +154,8 @@ def accessible_patients(db: Session, user: User, spec: FeatureSpec, keyword: str
         if user.user_role == "lab_technician" and spec.category == "diagnostics":
             criteria.append(Patient.patient_id.in_(select(LabOrder.patient_id)))
         query = query.filter(or_(*criteria))
+        if user.user_role == "lab_technician" and spec.number == 36:
+            query = query.filter(Patient.patient_id.in_(image_granted_patients(user.user_id)))
         if user.user_role == "lab_technician" and spec.number == 37:
             query = query.filter(Patient.patient_id.in_(ecg_granted_patients(user.user_id)))
     if keyword:
@@ -253,6 +259,8 @@ def _selected_records(db: Session, user: User, patient_id: int, references: dict
         ("inpatient_charge_id", InpatientCharge, "charge_id", None),
         ("audio_asset_id", AIAudioAsset, "asset_id", None),
         ("ecg_asset_id", AIECGAsset, "asset_id", None),
+        ("image_asset_id", AIImageAsset, "asset_id", None),
+        ("imaging_order_id", ImagingOrder, "imaging_order_id", None),
     ]
     for key, model, primary_key, order in sources:
         reference = references.get(key)
@@ -260,7 +268,7 @@ def _selected_records(db: Session, user: User, patient_id: int, references: dict
             continue
         if not isinstance(reference, str) or len(reference) > 50:
             raise HTTPException(422, "所选资料标识格式不正确")
-        if key in {"audio_asset_id", "ecg_asset_id"} and user.user_role == "patient":
+        if key in {"audio_asset_id", "ecg_asset_id", "image_asset_id", "imaging_order_id"} and user.user_role == "patient":
             raise HTTPException(403, "患者端不提供内部录音或原始心电工作资料")
         query = db.query(model).filter(getattr(model, primary_key) == reference)
         query = query.join(order).filter(order.patient_id == patient_id) if order else query.filter(model.patient_id == patient_id)
@@ -279,7 +287,7 @@ def patient_snapshot(db: Session, user: User, spec: FeatureSpec, patient_id: int
     """Build a bounded snapshot without mixing historical diagnoses into confirmed current ones."""
     if spec.number == 77 and encounter_ref:
         raise HTTPException(422, "不良事件没有就诊关联字段，请清除本次就诊选择，不能按日期推定事件归属")
-    patient = authorize_patient(db, user, patient_id, spec.category, encounter_ref)
+    patient = authorize_image_patient(db, user, patient_id, authorize_patient, encounter_ref) if spec.number == 36 else authorize_patient(db, user, patient_id, spec.category, encounter_ref)
     encounter = get_encounter(db, patient_id, encounter_ref)
     if spec.number == 21 and user.user_role == "patient":
         raise HTTPException(403, "患者端不提供内部录音工作资料")
@@ -291,6 +299,11 @@ def patient_snapshot(db: Session, user: User, spec: FeatureSpec, patient_id: int
         raise HTTPException(422, "该功能不接受原始心电文件，须使用专用心电辅助判读与人工复核")
     if spec.number == 37 and any(key in SOURCE_REFERENCE_KEYS - {"ecg_asset_id"} and item not in (None, "") for key, item in (source_refs or {}).items()):
         raise HTTPException(422, "心电辅助判读只加载明确原波形及技术资料，不把其他报告当作原始信号")
+    image_keys = {"image_asset_id", "imaging_order_id"}
+    if spec.number != 36 and any((source_refs or {}).get(key) not in (None, "") for key in image_keys):
+        raise HTTPException(422, "原始影像与申请引用仅供专用影像辅助识别使用")
+    if spec.number == 36 and any(key in SOURCE_REFERENCE_KEYS - image_keys and item not in (None, "") for key, item in (source_refs or {}).items()):
+        raise HTTPException(422, "影像辅助识别只接受真实原像素与申请引用，不把文字报告当成影像")
     selected = _selected_records(db, user, patient_id, source_refs or {})
     if spec.number != 21 and "audio_asset_id" in selected:
         raise HTTPException(422, "该功能不接受录音文件，须先完成医疗语音转写和人工核对")
@@ -339,6 +352,43 @@ def patient_snapshot(db: Session, user: User, spec: FeatureSpec, patient_id: int
         bundle.evidence.append({"source_id": source_id, "kind": kind, "title": title, "observed_at": str(observed_at) if observed_at else None, "content": encode_json(clean)})
         return {"source_id": source_id, **clean}
 
+    if spec.number == 36:
+        if not selected.get("image_asset_id") or not selected.get("imaging_order_id"):
+            raise HTTPException(422, "请选择已登记的原始影像及其真实影像申请，不能以报告或调阅链接代替像素")
+        asset = authorize_image(
+            db,
+            user,
+            selected["image_asset_id"],
+            authorize_patient,
+            patient_id=patient_id,
+            encounter_ref=encounter_ref,
+            imaging_order_id=selected["imaging_order_id"].imaging_order_id,
+            for_inference=True,
+        )
+        handles = open_verified_image(asset)
+        for stream in handles:
+            stream.close()
+        source_id = "image:" + asset.asset_id + ":" + asset.content_hash[:12]
+        fields = json.loads(encode_json(image_snapshot(asset, db=db)))
+        source = {"source_id": source_id, **fields}
+        bundle.evidence.append(
+            {
+                "source_id": source_id,
+                "kind": "image_asset",
+                "title": "当前申请对应的单帧原影像及白名单技术参数",
+                "observed_at": str(asset.recorded_at) if asset.recorded_at else None,
+                "content": encode_json(fields),
+            }
+        )
+        bundle.data = {
+            "scope": "native_single_image_analysis",
+            "snapshot_time": bundle.data["snapshot_time"],
+            "selected_sources": {"image_asset_id": asset.asset_id, "imaging_order_id": asset.imaging_order_id},
+            "image_source": source,
+            "scope_note": "仅所选单帧原像素及技术参数，不代表完整序列、容积或整次检查；像素保持原行列坐标，不推测解剖方向。头标签未传给模型，但像素仍可能包含身份信息，不能声称匿名化。申请未保存就诊关联，不能按日期推定。登记校验不证明临床诊断质量",
+            "missing_data": ["未提供经核实的采集时年龄及人群适用信息；不能以当前年龄或标签猜测", *([] if asset.recorded_at else ["原采集时间未知，不以上传时刻代替"])],
+        }
+        return bundle
     if spec.number == 37:
         if not selected.get("ecg_asset_id"):
             raise HTTPException(422, "请选择已登记且当前获授权的原始心电，不能以文字报告代替波形")
@@ -351,11 +401,25 @@ def patient_snapshot(db: Session, user: User, spec: FeatureSpec, patient_id: int
         source_id = "ecg:" + asset.asset_id + ":" + asset.content_hash[:12]
         fields = json.loads(encode_json(ecg_snapshot(asset)))
         source = {"source_id": source_id, **fields}
-        bundle.evidence.append({"source_id": source_id, "kind": "ecg_asset", "title": "当前诊疗授权范围内的原始心电及校准资料", "observed_at": str(asset.recorded_at) if asset.recorded_at else None, "content": encode_json(fields)})
+        bundle.evidence.append(
+            {
+                "source_id": source_id,
+                "kind": "ecg_asset",
+                "title": "当前诊疗授权范围内的原始心电及校准资料",
+                "observed_at": str(asset.recorded_at) if asset.recorded_at else None,
+                "content": encode_json(fields),
+            }
+        )
         bundle.data = {
-            "scope": "raw_ecg_analysis", "snapshot_time": bundle.data["snapshot_time"], "selected_sources": {"ecg_asset_id": asset.asset_id}, "ecg_source": source,
+            "scope": "raw_ecg_analysis",
+            "snapshot_time": bundle.data["snapshot_time"],
+            "selected_sources": {"ecg_asset_id": asset.asset_id},
+            "ecg_source": source,
             "scope_note": "只提供所选原波形与经文件校验的技术声明，不加载无关病史或把文字报告当原信号。导联顺序、缺失值和单位保留；文件校验不证明患者身份、设备校准或生理/诊断质量。采样位置相对原记录，不代表诊疗发生时刻",
-            "missing_data": ["未提供经核实的采集时年龄、人群及临床适用信息，专用模型须核对其验证范围；不能以当前年龄或未审核头注释补写", *([] if asset.recorded_at else ["未记录带时区的原始采集时间，头时钟不自动升级为诊疗时刻"])],
+            "missing_data": [
+                "未提供经核实的采集时年龄、人群及临床适用信息，专用模型须核对其验证范围；不能以当前年龄或未审核头注释补写",
+                *([] if asset.recorded_at else ["未记录带时区的原始采集时间，头时钟不自动升级为诊疗时刻"]),
+            ],
         }
         return bundle
     if spec.number == 21:

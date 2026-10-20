@@ -4,6 +4,7 @@ import datetime
 import json
 import uuid
 from collections import defaultdict
+from fractions import Fraction
 from typing import Annotated, Literal
 
 from fastapi import HTTPException
@@ -313,6 +314,9 @@ def _laboratory_analyte(row):
     from app.ai.lab_mappings import ANALYTES as MAPPED_ANALYTES
 
     try:
+        for key in ("lab_source_id", "admission_id", "mapping_id"):
+            canonical_uuid(getattr(row, key))
+        labs.opaque_id(row.observation_id)
         if not isinstance(row.snapshot_json, str) or len(row.snapshot_json.encode("utf-8")) > labs.MAX_SNAPSHOT_BYTES:
             raise ValueError("原正文容量不符")
         snapshot = json.loads(row.snapshot_json)
@@ -537,6 +541,14 @@ def _validate_reviews(req, manifest):
             raise HTTPException(409, "撤销或不合当前治理的完整原件须明确排除，不得人工覆写原治理")
         if member["kind"] == "arterial_pair" and review.qualifying_respiratory_support == "yes" and member["full_source"]["reference_snapshots"]["support"]["payload"]["delivery_mode"] == "none":
             raise HTTPException(409, "原明确无呼吸支持不能由当前资格声明覆写为有支持，须保留并核对实际原件")
+        if (
+            member["kind"] == "vasoactive"
+            and member["temporal_role"] == "period"
+            and review.status == "confirmed"
+            and req.coverage.cardiovascular.drug_exposure == "none"
+            and _known_positive_exposure(member["full_source"]["payload"]["dose_input"])
+        ):
+            raise HTTPException(409, "同日明确接受的原持续给药存在已知正剂量，不能同时声明无给药暴露")
     conflicts = {review.group_id: review for review in req.conflict_reviews}
     if set(conflicts) != {group["group_id"] for group in manifest["conflict_groups"]}:
         raise HTTPException(409, "须逐一核实全部实际冲突组，不得漏选或添加")
@@ -552,6 +564,15 @@ def _validate_reviews(req, manifest):
     actual_drugs = {member["full_source"]["reference_snapshots"]["drug_mapping"]["drug_key"] for member in manifest["members"] if member["kind"] == "vasoactive"}
     if actual_drugs != {review.drug_key for review in req.vasoactive_group_reviews}:
         raise HTTPException(409, "须对实际全部原药物给出完整流关系核实，不得虚构或漏掉药物流组")
+
+
+def _known_positive_exposure(dose):
+    def positive(quantity):
+        return quantity["value"] is not None and Fraction(quantity["value"]) > 0
+
+    if dose["mode"] == "pump":
+        return positive(dose["concentration"]) and positive(dose["pump_rate"])
+    return positive(dose["rate"])
 
 
 def _binding(source):

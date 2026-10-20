@@ -329,3 +329,42 @@ def test_doctor_support_qualification_cannot_overwrite_original_explicit_absence
         with pytest.raises(HTTPException) as error:
             register(db_session, case, values=values)
         assert error.value.status_code == 409 and "原明确无呼吸支持" in error.value.detail
+
+
+@pytest.mark.parametrize("mode", ["weight_normalized", "absolute", "pump"])
+@pytest.mark.parametrize("value", ["0.10000000", "0.00000000", None])
+def test_no_drug_exposure_cannot_contradict_confirmed_actual_positive_native_dose(db_session, assessment_case, monkeypatch, mode, value):
+    case = assessment_case
+    row, _ = vaso_original(db_session, case, monkeypatch, native=value)
+    if mode != "weight_normalized":
+        payload = json.loads(row.payload_json)
+        payload["dose_input"] = dose(mode, value)
+        from app import inpatient_support_common as common
+
+        common.revoke_source(
+            db_session, case["doctor"], "vasoactive", row.support_source_id, {"patient_id": case["patient_id"], "admission_id": row.admission_id, "expected_revision": 1, "reason": NOTE}
+        )
+        db_session.commit()
+        active = create(db_session, case, "vasoactive", payload)
+    else:
+        active = row
+    original = manifest(db_session, case)
+    values = clinical_request(case, original)
+    for item in values["member_reviews"]:
+        member = next(member for member in original["members"] if member["member_key"] == item["member_key"])
+        if not member["eligible"]:
+            item.update(status="excluded", exclusion_reason="not_applicable")
+    values["vasoactive_group_reviews"] = [{"drug_key": "norepinephrine", "relation": "single_stream", "relation_confirmed": True, "dose_basis_consistency_confirmed": True, "basis_note": NOTE}]
+    values["conflict_reviews"] = [
+        {"group_id": group["group_id"], "expected_group_digest": group["group_digest"], "status": "unresolved", "accepted_source_ids": [], "excluded_source_ids": [], "basis_note": NOTE}
+        for group in original["conflict_groups"]
+    ]
+    if value == "0.10000000":
+        with pytest.raises(HTTPException) as error:
+            register(db_session, case, values=values)
+        assert error.value.status_code == 409 and "已知正剂量" in error.value.detail
+    else:
+        assessment = register(db_session, case, values=values)
+        public = sofa.assessment_detail(db_session, assessment)["specialist_source"]
+        interval = next(item for item in public["vasoactive_groups"][0]["intervals"] if item["support_source_id"] == active.support_source_id)
+        assert interval["dose_input"]["pump_rate" if mode == "pump" else "rate"]["value"] == value

@@ -596,3 +596,36 @@ async def test_author_record_does_not_grant_care_and_care_loss_blocks_current_re
     assert (await client.post(endpoint + "/revoke", json={**scope(case), "expected_revision": 1, "reason": NOTE}, headers=headers)).status_code == 403
     audit = await client.get(f"/api/ai/admin/aki-assessments/{identifier}", headers=auth_headers(case["seed"]["super_admin_user"].username))
     assert audit.status_code == 200 and audit.json()["data"]["snapshot"] is not None
+
+
+@pytest.mark.asyncio
+async def test_old_rrt_event_is_preserved_as_declared_but_cannot_establish_selected_period_stage_three(client, case, auth_headers):
+    response = await post(
+        client,
+        case,
+        auth_headers,
+        index_creatinine=None,
+        comparison_48h=None,
+        baseline_creatinine=None,
+        baseline_mode="unknown",
+        serum_creatinine_confirmed=False,
+        creatinine_review_note=None,
+        weight_point=None,
+        weight_applicability_confirmed=False,
+        weight_basis_note=None,
+        urine_intervals=[],
+        rrt_status="acute_initiated_for_aki",
+        rrt_started_at="2020-01-01T00:00:00Z",
+        rrt_acute_aki_confirmed=True,
+        rrt_basis_note=NOTE,
+    )
+    assert response.status_code == 200, response.text
+    data = response.json()["data"]
+    assert data["eligible"] is True
+    source = data["specialist_source"]
+    assert source["rrt"]["started_at"] == data["snapshot"]["attestation"]["rrt_started_at"] == "2020-01-01T00:00:00.000000Z"
+    assert source["rrt"]["started_at"] < source["start_at"]
+    result = aki_values(source)
+    rrt = next(item for item in result["criteria"] if item["key"] == "acute_rrt")
+    assert rrt["status"] == "unknown" and rrt["stage"] is None
+    assert result["minimum_stage"] is None and result["detection"] == "insufficient_data" and result["aki_excluded"] is False

@@ -6,6 +6,7 @@ already participate in it. No foreign clinical witness is returned by this modul
 """
 
 import datetime
+import hashlib
 import json
 import re
 import uuid
@@ -37,7 +38,7 @@ from app.ai.surgery_models import (
 from app.ai.surgery_models import (
     SOURCE_KINDS as SOURCE_KINDS,
 )
-from app.models import Admission, CssdInstrument, Department, Doctor, Equipment, Patient, SurgeryApplication, SurgerySchedule, User
+from app.models import Admission, CssdInstrument, Department, Doctor, Equipment, EquipmentInspection, EquipmentMaintenance, Patient, SurgeryApplication, SurgerySchedule, User
 
 SOURCE_ROLES = frozenset({"admin", "super_admin", "director", "doctor"})
 RegistryKind = Literal["pool", "resource", "person_account", "room_alias", "pool_membership"]
@@ -275,6 +276,12 @@ class PersonQualificationPayload(WithBasis):
     valid_until: TimeLimit
 
 
+class EquipmentCapabilityPayload(RoomCapabilityPayload):
+    """Explicit reviewed equipment/CSSD capability; no inference from asset names."""
+
+    kind: Literal["equipment_identity_capability"]
+
+
 class OperationalInterval(WithBasis):
     start_at: UtcText
     end_at: UtcText
@@ -375,7 +382,14 @@ class WorkPolicyPayload(WithBasis):
 
 OccupationPolicyPayload = Annotated[TransitionPolicyPayload | WorkPolicyPayload, Field(discriminator="policy_type")]
 SourcePayload = Annotated[
-    CaseRequirementsPayload | DurationObservationPayload | CaseDurationEstimatePayload | RoomCapabilityPayload | PersonQualificationPayload | ResourceAvailabilityPayload | OccupationPolicyPayload,
+    CaseRequirementsPayload
+    | DurationObservationPayload
+    | CaseDurationEstimatePayload
+    | RoomCapabilityPayload
+    | PersonQualificationPayload
+    | ResourceAvailabilityPayload
+    | OccupationPolicyPayload
+    | EquipmentCapabilityPayload,
     Field(discriminator="kind"),
 ]
 
@@ -1049,7 +1063,13 @@ def _source_parent(db, actor, request, *, signature=None, locking=False, authori
             raise HTTPException(409, "资源池成员原父件已变化")
         kind = request.payload.kind
         required = (
-            "room" if kind == "operating_room_identity_capability" else "person" if kind == "person_identity_qualification" or isinstance(request.payload, (DutyPayload, WorkPolicyPayload)) else None
+            "room"
+            if kind == "operating_room_identity_capability"
+            else "equipment"
+            if kind == "equipment_identity_capability"
+            else "person"
+            if kind == "person_identity_qualification" or isinstance(request.payload, (DutyPayload, WorkPolicyPayload))
+            else None
         )
         if required is not None and resource.resource_kind != required:
             raise HTTPException(422, "人员班次、资格、工时或手术室能力与真实资源种类不符")
@@ -1078,11 +1098,10 @@ def _source_parent(db, actor, request, *, signature=None, locking=False, authori
                     "identity_content_hash": hash_content({key: getattr(doctor, key) for key in ("name", "title", "education", "permission")}),
                 }
         if resource.equipment_id is not None:
-            item = _row(db, Equipment, "equipment_id", resource.equipment_id, locking=locking)
             result["physical_condition"] = {
-                "equipment_id": item.equipment_id,
+                "equipment_id": resource.equipment_id,
                 "cssd_instrument_id": None,
-                "state_hash": hash_content({"status": item.status, "expiry_date": item.expiry_date.isoformat() if item.expiry_date else None}),
+                "state_hash": physical_resource_current_state(db, resource, locking=locking)["state_hash"],
             }
         if resource.cssd_instrument_id is not None:
             item = _row(db, CssdInstrument, "instrument_id", resource.cssd_instrument_id, locking=locking)
@@ -1094,6 +1113,86 @@ def _source_parent(db, actor, request, *, signature=None, locking=False, authori
                 ),
             }
     return SourceParentBinding.model_validate(result).model_dump(mode="json")
+
+
+def _json_size(value):
+    """Count canonical UTF-8/escaping before materializing a large raw TEXT body."""
+    if isinstance(value, str):
+        size = 2
+        if len(value) > FACT_BYTES:
+            raise HTTPException(422, "完整设备原证据超过字节容量，不能截断")
+        for char in value:
+            if char in {'"', "\\", "\b", "\f", "\n", "\r", "\t"}:
+                size += 2
+            elif ord(char) < 32:
+                size += 6
+            else:
+                size += 1 if ord(char) < 128 else len(char.encode("utf-8"))
+            if size > FACT_BYTES:
+                raise HTTPException(422, "完整设备原证据超过字节容量，不能截断")
+        return size
+    if isinstance(value, dict):
+        return 2 + max(len(value) - 1, 0) + sum(_json_size(key) + 1 + _json_size(item) for key, item in value.items())
+    if isinstance(value, list):
+        return 2 + max(len(value) - 1, 0) + sum(_json_size(item) for item in value)
+    return len(canonical_json(value).encode())
+
+
+def physical_resource_current_state(db, resource, *, locking=False):
+    """Complete bounded maintenance/inspection commitment, never a UTC conversion.
+
+    Inventory counts/notes do not determine future availability. Real equipment
+    and complete child-row locking are separate from empirical MySQL lock proof.
+    """
+    if resource.equipment_id is None:
+        raise HTTPException(422, "此依赖集合仅适用于真实 Equipment 资产")
+    item = _row(db, Equipment, "equipment_id", resource.equipment_id, locking=locking)
+    asset = {key: getattr(item, key) for key in ("equipment_id", "asset_no", "name", "category", "model", "department_id", "location", "status")}
+    asset["expiry_date"] = item.expiry_date.isoformat() if item.expiry_date else None
+    if _json_size(asset) + 32 > FACT_BYTES:
+        raise HTTPException(422, "完整设备依赖超过字节容量")
+    header = ('{"asset":' + canonical_json(asset) + ',"child_rows":[').encode()
+    digest = hashlib.sha256(header)
+    used = len(header) + 2
+    count = 0
+    counts = {}
+    for cls in (EquipmentMaintenance, EquipmentInspection):
+        primary = inspect(cls).primary_key[0]
+        cursor = None
+        counts[cls.__tablename__] = 0
+        while True:
+            query = db.query(cls).filter(cls.equipment_id == resource.equipment_id)
+            if cursor is not None:
+                query = query.filter(primary > cursor)
+            rows = current_query(query.order_by(primary).limit(128), locking=locking).all()
+            if not rows:
+                break
+            for row in rows:
+                count += 1
+                if count > 200000:
+                    raise HTTPException(422, "完整设备依赖超过扫描容量，不能截断")
+                values = {}
+                for column in cls.__table__.columns:
+                    value = getattr(row, column.name)
+                    if isinstance(value, datetime.datetime):
+                        value = value.isoformat(timespec="microseconds")  # lexical naive original; no Z suffix guessed
+                    elif isinstance(value, datetime.date):
+                        value = value.isoformat()
+                    elif value is not None and not isinstance(value, (str, int, float, bool)):
+                        value = str(value)  # original SQL fixed-precision Decimal
+                    values[column.name] = value
+                original = {"kind": cls.__tablename__, "row": values}
+                size = _json_size(original) + (1 if count > 1 else 0)
+                if size > FACT_BYTES - used:
+                    raise HTTPException(422, "完整设备依赖累计超过8MiB，不能截断或先构建超大对象")
+                used += size
+                if count > 1:
+                    digest.update(b",")
+                digest.update(canonical_json(original).encode())
+                counts[cls.__tablename__] += 1
+            cursor = getattr(rows[-1], primary.name)
+    digest.update(b"]}")
+    return {"state_hash": digest.hexdigest(), "child_counts": counts, "canonical_bytes": used}
 
 
 def _source_identity(row):

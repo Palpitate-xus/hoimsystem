@@ -13,7 +13,7 @@ from sqlalchemy.dialects import mysql
 
 from app.ai import surgery_facts as facts
 from app.ai.surgery_models import AISurgeryPool, AISurgeryProtectedWitness, AISurgerySource
-from app.models import Admission, Department, Doctor, Equipment, SurgeryApplication, SurgerySchedule, User
+from app.models import Admission, Department, Doctor, Equipment, EquipmentInspection, EquipmentMaintenance, SurgeryApplication, SurgerySchedule, User
 
 NOTE = "隔离合成手术工程原件，明确记录实际来源和缺项，全部专业及运营声明仅用于测试，不代表医院验证或真实人员资质。"
 NOW = datetime.datetime(2026, 10, 20, 12, 0, 0, 123456)
@@ -154,7 +154,7 @@ def payload(kind, case):
             "other_requirements_status": "unknown",
             "basis_note": NOTE,
         }
-    if kind in {"operating_room_identity_capability", "person_identity_qualification"}:
+    if kind in {"operating_room_identity_capability", "person_identity_qualification", "equipment_identity_capability"}:
         result = {"kind": kind, "identity_status": "unknown", "capability_keys": [], "valid_from_at": "2026-10-20T00:00:00.000000Z", "valid_until": unknown_time(), "basis_note": NOTE}
         if kind == "person_identity_qualification":
             result.update(user_id=case["doctor_user"].user_id, doctor_id=case["doctor"].doctor_id, qualification_status="unknown")
@@ -183,7 +183,7 @@ def payload(kind, case):
 
 def request(case, kind="case_duration_estimate", *, confirmed=True):
     clinical = kind in facts.CASE_KINDS
-    resource_kind = "room" if kind == "operating_room_identity_capability" else "person"
+    resource_kind = "room" if kind == "operating_room_identity_capability" else "equipment" if kind == "equipment_identity_capability" else "person"
     return {
         "pool_id": case["pool"].pool_id,
         "resource_id": None if clinical else case["resources"][resource_kind].resource_id,
@@ -211,7 +211,7 @@ def publish(db, case, row, decision="publish"):
 
 
 @pytest.mark.parametrize("kind", list(facts.SOURCE_KINDS))
-def test_all_seven_actual_immutable_originals_preserve_unknown_and_separate_review(db_session, surgery_case, kind):
+def test_all_eight_actual_immutable_originals_preserve_unknown_and_separate_review(db_session, surgery_case, kind):
     case = surgery_case
     row = create(db_session, case, kind)
     before = row.payload_json, row.parent_binding_json, row.content_hash
@@ -564,3 +564,95 @@ def test_utf8_review_cap_is_bytes_and_not_character_count():
     with pytest.raises(ValidationError):
         facts.SourceReview(expected_revision=1, expected_content_hash="a" * 64, decision="publish", basis_note="合" * 1400)
     assert facts.SourceReview(expected_revision=1, expected_content_hash="a" * 64, decision="publish", basis_note="x" * 4000).basis_note == "x" * 4000
+
+
+def equipment_availability(db, case):
+    values = request(case, "resource_availability_busy")
+    values["resource_id"] = case["resources"]["equipment"].resource_id
+    values["payload"] = {
+        "kind": "resource_availability_busy",
+        "record_type": "availability",
+        "start_at": "2026-10-21T08:00:00.000000Z",
+        "end_at": "2026-10-21T20:00:00.000000Z",
+        "state": "unknown",
+        "basis_note": NOTE,
+    }
+    row = facts.create_source(db, case["director"], "resource_availability_busy", values)
+    db.commit()
+    return publish(db, case, row)
+
+
+def maintenance(db, case):
+    row = EquipmentMaintenance(
+        maintenance_id=str(uuid.uuid4()), equipment_id=case["equipment"].equipment_id, maintenance_type="合成检修", description=NOTE, status=0, operator_id=case["super"].user_id, report_time=NOW
+    )
+    db.add(row)
+    db.commit()
+    return row
+
+
+@pytest.mark.parametrize("change", ["new_maintenance", "new_inspection", "child_update", "different_row_same_count"])
+def test_equipment_maintenance_and_inspection_complete_original_set_invalidates_availability(db_session, surgery_case, change):
+    case = surgery_case
+    existing = maintenance(db_session, case) if change in {"child_update", "different_row_same_count"} else None
+    row = equipment_availability(db_session, case)
+    before = facts.source_proof(row)[0]
+    if change == "new_maintenance":
+        maintenance(db_session, case)
+    elif change == "new_inspection":
+        db_session.add(EquipmentInspection(equipment_id=case["equipment"].equipment_id, result=NOTE, pass_flag=0, inspector_id=case["super"].user_id, inspection_time=NOW))
+    elif change == "child_update":
+        existing.status = 1
+    else:
+        db_session.delete(existing)
+        db_session.flush()
+        maintenance(db_session, case)
+    db_session.commit()
+    data = facts.source_current(db_session, case["director"], row.source_kind, row.source_record_id)
+    assert not data["eligible_for_new_use"] and "original_parent_changed" in data["exclusion_reasons"]
+    assert data["payload"] is data["parent_binding"] is None
+    assert facts.source_proof(row)[0] == before
+    assert facts.source_current(db_session, case["super"], row.source_kind, row.source_record_id, audit_only=True)["payload"] == before["payload"]
+
+
+def test_unrelated_inventory_note_does_not_change_equipment_availability_evidence(db_session, surgery_case):
+    case = surgery_case
+    row = equipment_availability(db_session, case)
+    before = facts.physical_resource_current_state(db_session, case["resources"]["equipment"])
+    case["equipment"].inventory_note = "合成普通盘点说明，不是维修或实际可用性变化"
+    case["equipment"].inventory_status = 1
+    db_session.commit()
+    assert facts.physical_resource_current_state(db_session, case["resources"]["equipment"]) == before
+    assert facts.source_current(db_session, case["director"], row.source_kind, row.source_record_id)["eligible_for_new_use"]
+
+
+def test_equipment_parent_huge_control_character_text_is_rejected_before_full_json_build(db_session, surgery_case, monkeypatch):
+    case = surgery_case
+    row = maintenance(db_session, case)
+    row.description = "\x00" * (facts.FACT_BYTES // 5)
+    db_session.commit()
+    original_json = facts.canonical_json
+    materialized = []
+
+    def checked_json(value):
+        if isinstance(value, dict) and "row" in value and "description" in value["row"]:
+            materialized.append(True)
+        return original_json(value)
+
+    monkeypatch.setattr(facts, "canonical_json", checked_json)
+    with pytest.raises(HTTPException) as error:
+        facts.physical_resource_current_state(db_session, case["resources"]["equipment"])
+    assert error.value.status_code == 422 and materialized == []
+
+
+def test_equipment_capability_is_separate_from_availability_and_wrong_resource_is_rejected(db_session, surgery_case):
+    case = surgery_case
+    values = request(case, "equipment_identity_capability")
+    values["resource_id"] = case["resources"]["room"].resource_id
+    with pytest.raises(HTTPException) as error:
+        facts.create_source(db_session, case["director"], "equipment_identity_capability", values)
+    assert error.value.status_code == 422
+    db_session.rollback()
+    row = create(db_session, case, "equipment_identity_capability")
+    publish(db_session, case, row)
+    assert json.loads(row.payload_json)["capability_keys"] == [] and json.loads(row.payload_json)["capability_status"] == "unknown"

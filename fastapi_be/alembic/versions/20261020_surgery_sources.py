@@ -241,7 +241,7 @@ def upgrade():
             name="ck_surgery_source_governance",
         ),
         sa.CheckConstraint(
-            "source_kind IN ('case_requirements','duration_observation','case_duration_estimate','operating_room_identity_capability','person_identity_qualification','resource_availability_busy','resource_occupation_policy')",
+            "source_kind IN ('case_requirements','duration_observation','case_duration_estimate','operating_room_identity_capability','person_identity_qualification','resource_availability_busy','resource_occupation_policy','equipment_identity_capability')",
             name="ck_surgery_source_kind",
         ),
         sa.CheckConstraint(
@@ -249,7 +249,7 @@ def upgrade():
             name="ck_surgery_source_signature",
         ),
         sa.CheckConstraint(
-            "(source_kind IN ('case_requirements','duration_observation','case_duration_estimate') AND application_id IS NOT NULL AND patient_id IS NOT NULL AND resource_id IS NULL) OR (source_kind IN ('operating_room_identity_capability','person_identity_qualification','resource_availability_busy','resource_occupation_policy') AND application_id IS NULL AND patient_id IS NULL AND admission_id IS NULL AND resource_id IS NOT NULL)",
+            "(source_kind IN ('case_requirements','duration_observation','case_duration_estimate') AND application_id IS NOT NULL AND patient_id IS NOT NULL AND resource_id IS NULL) OR (source_kind IN ('operating_room_identity_capability','person_identity_qualification','resource_availability_busy','resource_occupation_policy','equipment_identity_capability') AND application_id IS NULL AND patient_id IS NULL AND admission_id IS NULL AND resource_id IS NOT NULL)",
             name="ck_surgery_source_subject",
         ),
         sa.ForeignKeyConstraint(["pool_id"], ["hoimsystem_ai_surgery_pool.pool_id"], name=None),

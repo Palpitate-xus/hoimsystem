@@ -22,6 +22,7 @@ SOURCE_KINDS = (
     "person_identity_qualification",
     "resource_availability_busy",
     "resource_occupation_policy",
+    "equipment_identity_capability",
 )
 
 
@@ -216,7 +217,7 @@ class AISurgerySource(GovernedOriginal, Base):
         CheckConstraint(
             "(source_kind IN ('case_requirements','duration_observation','case_duration_estimate') "
             "AND application_id IS NOT NULL AND patient_id IS NOT NULL AND resource_id IS NULL) OR "
-            "(source_kind IN ('operating_room_identity_capability','person_identity_qualification','resource_availability_busy','resource_occupation_policy') "
+            "(source_kind IN ('operating_room_identity_capability','person_identity_qualification','resource_availability_busy','resource_occupation_policy','equipment_identity_capability') "
             "AND application_id IS NULL AND patient_id IS NULL AND admission_id IS NULL AND resource_id IS NOT NULL)",
             name="ck_surgery_source_subject",
         ),

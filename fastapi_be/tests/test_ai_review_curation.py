@@ -178,7 +178,7 @@ def test_excerpt_migration_upgrade_rollback_preserves_source_review(tmp_path):
     config = Config(str(Path(__file__).resolve().parents[1] / "alembic.ini"))
     config.set_main_option("sqlalchemy.url", f"sqlite:///{path}")
     command.stamp(config, "20261020_dose_rule_units")
-    command.upgrade(config, "head")
+    command.upgrade(config, "20261020_ai_review_excerpts")
     assert "hoimsystem_ai_review_excerpt" in inspect(engine).get_table_names()
     command.downgrade(config, "20261020_dose_rule_units")
     assert "hoimsystem_ai_review_excerpt" not in inspect(engine).get_table_names()

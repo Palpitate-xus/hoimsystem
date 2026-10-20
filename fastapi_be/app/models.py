@@ -1255,6 +1255,10 @@ class AdverseReaction(Base):
     reporter_id = Column(Integer, ForeignKey("hoimsystem_users.user_id"))
     status = Column(Integer, default=0)  # 0=待审核 1=已确认 2=已处理
     note = Column(String(200))
+    status_resolution = Column(String(24), nullable=True)  # confirmed / processed / excluded; NULL保留历史歧义
+    resolution_note = Column(String(1000), nullable=True)
+    status_reviewed_by = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=True)
+    status_reviewed_at = Column(DateTime, nullable=True)
 
     patient = relationship("Patient")
     pharmaceutical = relationship("Pharmaceutical")

@@ -1,0 +1,1803 @@
+{
+  "schema_version": "ai_bed_engineering_verification_v1",
+  "recorded_at_utc": "2026-10-20T21:37:17.562373+00:00",
+  "baseline_commit": "c65a25a68d71c16714fbcaa2f32ff69349937993",
+  "platform_commit_at_recording": "83fe06e924b1bc91679cdbf6f2e7d9a29d4f1880",
+  "recording_head_precedes_this_evidence_documentation_commit": true,
+  "goal_status": "active",
+  "scope": "Feature64 independent native physical-bed census and actual day-event forecast, explicit single ward/department, governed originals and complete reviewed series; synthetic engineering evidence only.",
+  "real_patient_data_used": false,
+  "existing_hospital_database_accessed": false,
+  "existing_hospital_backend_contacted": false,
+  "production_deployment_performed": false,
+  "operational_validation_performed": false,
+  "clinical_validation_performed": false,
+  "remote_model_inference_performed_for_this_batch": false,
+  "stored_business_ai_configuration_changed": false,
+  "version_management": {
+    "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+    "commits_this_batch_before_evidence_commit": [
+      {
+        "commit": "740a9cd8c4d6f2f46e2a9e1b67e770aabea7ff6b",
+        "subject": "feat-ai-add-explicit-bed-source-count-states-without-zero-defaults",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "fe3b2db4d0792e907a0b2d8dbe983d0a58d281eb",
+        "subject": "feat-ai-define-strict-physical-bed-source-and-exact-forecast-evidence",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "e57839bcc63e62fa19491907ec2286ab0eb2fbf8",
+        "subject": "feat-ai-bed-persist-governed-originals-complete-series-and-forecast-results",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "8f5c1f84e000a5ad9381c5badfdca76246fdceb5",
+        "subject": "feat-ai-govern-original-ward-census-flow-and-capacity-facts",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "1f52a9fc3858cfb73acdd1836a2b81af8a0c7700",
+        "subject": "feat-ai-add-scoped-ward-source-management-and-Super-review-API",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "c148c16b533841c8d7208b9686b8a79fa824d630",
+        "subject": "feat-ai-calculate-exact-bed-forecasts-and-governed-capacity-proofs",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "714bde5d3b1795c22a4b9e6b8b781000151b3dbe",
+        "subject": "feat-ai-bed-bind-three-original-source-APIs-to-strict-actual-contracts",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "acab045ddc05b6baaaa34fde5333b54e12f72840",
+        "subject": "feat-ai-bed-register-and-govern-explicit-ward-census-flow-and-capacity-originals",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "12109b9c9e9233a63cb92a0d266ec029657af995",
+        "subject": "test-ai-verify-full-size-bed-proofs-and-explicit-output-limits",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "34ce8f0c32039f411416260c8bb029a4b17c5c6b",
+        "subject": "test-ai-bed-verify-actual-ward-source-proofs-forms-and-governance-races",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "38e6d12dc359db01f03e7f78846937ec3628cf03",
+        "subject": "feat-ai-freeze-complete-physical-bed-series-and-explicit-source-selections",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "5495fe51b727822b6f536f9246486dd4d5ea46b9",
+        "subject": "fix-ai-bound-bed-source-scans-and-exclude-unrelated-history-endpoints",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "415e8c53d08df995067591896b141148f23bac6a",
+        "subject": "fix-ai-bound-bed-capacity-proof-memory-during-segment-construction",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "0d57bfd6c63257f49036c038d94a8c5f2035f90e",
+        "subject": "feat-ai-govern-immutable-physical-bed-series-with-current-scope-checks",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "f623425d86c6fa148544eb82296411ee67eb8a3c",
+        "subject": "feat-ai-bind-bed-forecasts-to-reviewed-series-and-explicit-horizons",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "88f4abdce1890988d4e5fe11e425d847c0c35951",
+        "subject": "test-ai-independently-verify-bed-series-frozen-proofs-and-current-authorization",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "9bf053f503b143f5f614e0babd0d356fb0592ebb",
+        "subject": "merge-ai-integrate-verified-bed-originals-series-governance-and-native-core",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "f7b086a15aab6d146d1807e0eb938147876e8261",
+        "subject": "feat-ai-bed-bind-complete-series-source-collections-and-published-projections",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "2b5b059e18265f7a6ff82454c58f959edeb9be7d",
+        "subject": "feat-ai-verify-schema11-bed-forecasts-with-public-only-native-requests",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "d9c6f3d93faf0ebb7156796af551648b52cb8192",
+        "subject": "feat-ai-inspect-authenticated-physical-bed-engine-capabilities-without-forecasting",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "d8cc86330491e6a23de7eca5bcb6a5e18b4f51e7",
+        "subject": "fix-ai-use-the-exact-bed-series-migration-revision-identifier",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "8cb201935dcbbc46f98bd563dc615c1c9f7e4d84",
+        "subject": "feat-ai-bed-review-every-history-day-and-original-before-series-capture",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "da56d21bf0e12489bb738c2b5bb093ad729d499d",
+        "subject": "feat-ai-define-governed-bed-prediction-mode-and-dedicated-versioned-prompt",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "bab79b9846c038359ac571ca2b4b19c9b9373a9b",
+        "subject": "feat-ai-bed-capture-review-and-audit-complete-ward-series-independently",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "786bfd4fb48a796e818a2debbabc9a9fe1110bc4",
+        "subject": "test-ai-bed-verify-full-series-input-governance-and-asynchronous-scope-boundaries",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "2732a29e1c6b332fd437cc2d07a2db1ef4a3ccaf",
+        "subject": "feat-ai-expose-scoped-bed-governance-and-Super-admin-engine-inspection",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "6991365e201f5b2c71930b5464e853f7f80e65f7",
+        "subject": "fix-ai-bed-exclude-current-day-observed-capacity-from-closed-history",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "643b1141ad49a2a5cb36d4eb03739f574d9b0143",
+        "subject": "docs-ai-describe-observed-bed-forecasting-governance-and-standalone-service",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "c3108f31072a5e08b3db3b6bc45d7f40c030695a",
+        "subject": "test-ai-verify-governed-bed-forecast-pipeline-and-atomic-result-blobs",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "3f84662761207b3878562e728d79519025be2957",
+        "subject": "feat-ai-filter-bed-forecast-history-by-exact-governed-scope",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "c906d60152a054aecce9a6caae934cc7abc5be31",
+        "subject": "feat-ai-persist-complete-bed-forecasts-with-lease-and-original-evidence-checks",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "9188bf96e655887f9dae7f3d299116d7373f87f0",
+        "subject": "feat-schema-enforce-actual-object-property-count-constraints",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "2bd0dc336a77cd056eb5529f9e13865623efa38d",
+        "subject": "fix-ai-bed-invalidate-parent-selections-when-source-authority-changes",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "10ef6a78a81e64d6dcc36fa5dc072a93460b8524",
+        "subject": "feat-ai-bed-independently-verify-exact-forecasts-and-capacity-evidence",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "9b11ace6fb7bc718561a1800a2a10cd25405c6d9",
+        "subject": "feat-ai-bed-select-governed-ward-series-with-explicit-forecast-horizons",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "43ec402f64f45fa6d1162081144239ada2323afe",
+        "subject": "feat-ai-bed-display-independent-target-forecasts-and-exact-capacity-proofs",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "0a0820e21ffd32afff2be5a9b5a3e9a3cc19f6f0",
+        "subject": "feat-ai-bed-inspect-provider-metadata-and-stage-model-edits-explicitly",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "9d247bc4e2c634a46691dfced5bf031111d6e14e",
+        "subject": "fix-ai-bed-bound-original-count-serialization-before-numeric-output",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "132f27f3ce84e2db60c06b423b6d48ec07c0d76c",
+        "subject": "test-ai-bed-verify-native-evidence-display-provider-CAS-and-late-result-isolation",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "a716cc4450889807d9f7e881d9b6681b355219fd",
+        "subject": "feat-ai-bed-expose-ward-forecasts-and-super-admin-source-governance",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "dd9c09a2a301d4107c70199f4b38af8b49a787dc",
+        "subject": "test-ai-bed-integrate-native-assistant-with-exact-frozen-task-receipts",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "e381f95778316769cf41263d02b0d16e31cde631",
+        "subject": "test-ai-cover-strict-short-source-queue-receipts-and-stale-replies",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "d438adb0d544a34208a4a72d1b2eaf297b1074b9",
+        "subject": "fix-build-fail-verification-when-rspack-reports-compilation-errors",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "d2bc96215212f96b364841b17ec7a20ad8067122",
+        "subject": "perf-ai-bed-reuse-exact-source-series-and-result-modules-across-lazy-views",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "c2fc2f1162481ca0a681819b11eb72399af3bb91",
+        "subject": "test-ai-bed-cover-built-super-admin-governance-provider-checks-and-dedicated-prompts",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "93cb9a976458283e20d9a04c73f6cf879acb9199",
+        "subject": "test-ai-bind-history-refresh-and-poll-replies-to-requested-run-IDs",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "96b839a2f1bc33bda1b56bb7456339d24208d46e",
+        "subject": "test-ai-bed-verify-selected-ward-scope-reaches-the-built-business-entry",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "3a4af4798c3c350bb619452637f63ccbcdbded12",
+        "subject": "test-ai-bed-isolate-parent-scopes-and-preserve-native-task-provenance",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "73a2fe599b5d5315fb5448f5de9282a78045edb6",
+        "subject": "feat-ai-bed-bind-native-assistant-previews-results-and-exact-task-reads",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "ef9185ab513b87018d3f3a69db9d1840715c9644",
+        "subject": "perf-ui-share-the-administration-API-across-lazy-business-screens",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      },
+      {
+        "commit": "83fe06e924b1bc91679cdbf6f2e7d9a29d4f1880",
+        "subject": "test-ai-bed-await-the-ward-scoped-series-request-before-asserting-it",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>"
+      }
+    ],
+    "count_before_evidence_commit": 51
+  },
+  "source_and_math_contract": {
+    "feature_key": "bed_forecast",
+    "input_mode": "bed",
+    "schema_version": 11,
+    "runtime_model_prefix": "bed:",
+    "rule_id": "bed_physical_daily_v1",
+    "runtime_metadata": {
+      "clinical_validation": "not_provided",
+      "core_sha256": {
+        "bed_config": "df5b378b6522d26e595c97452b8f47ed031a9e33f0ce450ebe3b380cd15a7dec",
+        "bed_contract": "cefcd0b6ca32d3780e08942ec13f8469b0b9b764d6ee678548b1c3abb49d7ed5",
+        "bed_model": "508645a2537a1cdf0c234191e35b1596e622b312d4431b94a56e15a3dd87bf7b",
+        "bed_server": "6c4a2c49a5431836bd466c2790f710b4ffc95a0a9a5d039f6ed1e48cd79535c5"
+      },
+      "coverage_guarantee": "not_provided",
+      "engine": "stdlib_physical_bed_forecast",
+      "engine_versions": {
+        "fastapi": "0.136.1",
+        "pydantic": "2.12.4",
+        "pydantic-settings": "2.12.0",
+        "uvicorn": "0.46.0"
+      },
+      "feature_key": "bed_forecast",
+      "forecast_only": true,
+      "independent_implementation": true,
+      "input_policy": {
+        "arithmetic": "strict_count_0_to_2147483647_canonical_reduced_decimal_string_fractions_big_uints_no_float",
+        "calendar": "IANA_actual_unique_midnight_reject_nonexistent_ambiguous_overflow_no_86400_day_assumption",
+        "capacity": "historical_closed_end_le_observed_le_recorded_future_scenario_observed_null_no_immediate_slots_substitution",
+        "capacity_conflict": "all_selected_accepted_overlaps_are_unresolved_even_equal_counts_no_automatic_winner",
+        "capacity_readiness": "known_total_requires_staff_readiness_equipment_readiness_isolation_applicability_all_confirmed_unknown_original_quantity_and_quality_preserved",
+        "clocks": "canonical_UTC6_actual_calendar_census_or_flow_end_le_observed_le_recorded_le_published_le_asof_capture_ge_asof",
+        "flow_balance": "five_independent_observed_series_no_automatic_mass_conservation_or_unmet_demand_claim",
+        "forecast_first_day": "whole_business_day_may_be_partly_elapsed_at_asof_no_partial_day_data_or_runtime_now_in_fit",
+        "freshness": "date_to_is_asof_local_date_minus_one_closed_day_frozen_origin_never_rolled_forward_platform_new_execution_rechecks_current_last_closed_day",
+        "history": "112_to_366_contiguous_closed_business_days_unknown_target_no_fill_no_forecast_other_complete_targets_preserved",
+        "identity": "private_frozen_content_hash_separate_current_governance_public_manifest_hash_complete_public_projection_hash_no_cycle",
+        "limits": {
+          "capacity_day_construction_bytes": 8388608,
+          "capacity_proof_budget": "incremental_per_segment_and_whole_result_reject_without_truncation",
+          "max_fraction_digits": 1024,
+          "max_members": 4096,
+          "max_utf8_bytes": 8388608
+        },
+        "methods": [
+          "direct_tally",
+          "external_register"
+        ],
+        "originals": "selected_published_current_full_nullable_originals_preserved_manifest_all_candidates_no_automatic_winner",
+        "privacy": "public_opaque_scope_hashes_typed_original_quantities_and_clocks_only_no_notes_names_patient_bed_ids_or_questions",
+        "scope": "single_real_ward_same_physical_definition_reviewed_population_stable_membership_current_status_not_historical_hash",
+        "validation": "independent_engineering_only_no_operational_or_clinical_validation"
+      },
+      "input_policy_digest": "2fe33cda3518ec6e2af939a25285c23251c6e0006826d76adfb7aab1755d5eb6",
+      "max_request_bytes": 8388608,
+      "max_response_bytes": 8388608,
+      "model_version": "bed:9006cc646e75a9ca757b4b180d778f87c3e5f509fac283bb06550ee30af15ab4",
+      "operational_validation": "not_provided",
+      "prompt_handling": "provenance_only",
+      "python_version": "3.13.12",
+      "recipe": {
+        "arithmetic": "canonical_exact_fraction_decimal_strings",
+        "backtest": {
+          "basis": "current_snapshot_retrospective",
+          "origins": 28,
+          "step_days": 1
+        },
+        "baselines": [
+          "seasonal_naive_7d",
+          "rolling_mean_7d",
+          "rolling_mean_28d"
+        ],
+        "capacity": {
+          "boundary": "start<=census_at<end",
+          "day_mean": "integral/actual_business_day_duration_us",
+          "forecast_clamp": false,
+          "future": "reviewed_future_scenario",
+          "historical": "observed_operational_capacity",
+          "integral_unit": "bed_microseconds",
+          "interval": "[start,end)",
+          "zero_ratio": "null"
+        },
+        "grain": "business_day",
+        "history_days": {
+          "max": 366,
+          "min": 112
+        },
+        "horizon_days": [
+          7,
+          14
+        ],
+        "input_policy": {
+          "arithmetic": "strict_count_0_to_2147483647_canonical_reduced_decimal_string_fractions_big_uints_no_float",
+          "calendar": "IANA_actual_unique_midnight_reject_nonexistent_ambiguous_overflow_no_86400_day_assumption",
+          "capacity": "historical_closed_end_le_observed_le_recorded_future_scenario_observed_null_no_immediate_slots_substitution",
+          "capacity_conflict": "all_selected_accepted_overlaps_are_unresolved_even_equal_counts_no_automatic_winner",
+          "capacity_readiness": "known_total_requires_staff_readiness_equipment_readiness_isolation_applicability_all_confirmed_unknown_original_quantity_and_quality_preserved",
+          "clocks": "canonical_UTC6_actual_calendar_census_or_flow_end_le_observed_le_recorded_le_published_le_asof_capture_ge_asof",
+          "flow_balance": "five_independent_observed_series_no_automatic_mass_conservation_or_unmet_demand_claim",
+          "forecast_first_day": "whole_business_day_may_be_partly_elapsed_at_asof_no_partial_day_data_or_runtime_now_in_fit",
+          "freshness": "date_to_is_asof_local_date_minus_one_closed_day_frozen_origin_never_rolled_forward_platform_new_execution_rechecks_current_last_closed_day",
+          "history": "112_to_366_contiguous_closed_business_days_unknown_target_no_fill_no_forecast_other_complete_targets_preserved",
+          "identity": "private_frozen_content_hash_separate_current_governance_public_manifest_hash_complete_public_projection_hash_no_cycle",
+          "limits": {
+            "capacity_day_construction_bytes": 8388608,
+            "capacity_proof_budget": "incremental_per_segment_and_whole_result_reject_without_truncation",
+            "max_fraction_digits": 1024,
+            "max_members": 4096,
+            "max_utf8_bytes": 8388608
+          },
+          "methods": [
+            "direct_tally",
+            "external_register"
+          ],
+          "originals": "selected_published_current_full_nullable_originals_preserved_manifest_all_candidates_no_automatic_winner",
+          "privacy": "public_opaque_scope_hashes_typed_original_quantities_and_clocks_only_no_notes_names_patient_bed_ids_or_questions",
+          "scope": "single_real_ward_same_physical_definition_reviewed_population_stable_membership_current_status_not_historical_hash",
+          "validation": "independent_engineering_only_no_operational_or_clinical_validation"
+        },
+        "interval": {
+          "coverage_guarantee": "not_provided",
+          "lower": "max(0,point-q)",
+          "minimum_residuals": 20,
+          "nominal_coverage": {
+            "denominator": "10",
+            "numerator": "9"
+          },
+          "order": "ceil(9*(n+1)/10)",
+          "residual_window": 28,
+          "target_available": "r+h<=t",
+          "upper": "point+q"
+        },
+        "mase_zero_scale": "any_zero_in_aggregate_makes_null",
+        "metrics": [
+          "mae",
+          "mse",
+          "wape",
+          "seasonal_mase_lag7"
+        ],
+        "missing": "per_target_no_fill_no_forecast",
+        "operational_validation": "not_provided",
+        "primary": "weekday_mean_4w",
+        "prompt_handling": "provenance_only",
+        "rule_id": "bed_physical_daily_v1",
+        "scope": "single_ward",
+        "target_order": [
+          "occupied_physical_bed_census",
+          "physical_admission_events",
+          "physical_discharge_events",
+          "physical_transfer_in_events",
+          "physical_transfer_out_events"
+        ],
+        "training_min_days": 28,
+        "version": "1"
+      },
+      "recipe_digest": "19292908d8587be3a135da765958c33773e57f7cf1cbb60c6f33c505970d55ca",
+      "rule_id": "bed_physical_daily_v1",
+      "runtime_digest": "9006cc646e75a9ca757b4b180d778f87c3e5f509fac283bb06550ee30af15ab4",
+      "schema_version": "11",
+      "scope": "single_ward_physical_census_and_independent_day_events",
+      "timeout_seconds": 90,
+      "timezone_database_digest": "f776ce09945c8a952b2a671aaa10c582423301e186038670ddcd0a94442f4be5"
+    },
+    "native_input": {
+      "required": [
+        "bed_series_id",
+        "horizon_days"
+      ],
+      "horizon_days": [
+        7,
+        14
+      ],
+      "optional_local_only": [
+        "question"
+      ],
+      "legacy_external_mode_preserved": true
+    },
+    "governed_original_kinds": [
+      "census",
+      "flow_day",
+      "capacity_interval"
+    ],
+    "complete_series_days": {
+      "minimum": 112,
+      "maximum": 366
+    },
+    "series_policy": "One explicit whole census and whole independent flow source per day, or explicit unknown; all relevant roots, their current governance, full manifests, per-member reviews and five coverage declarations are frozen. Today Bed.status/admission records do not reconstruct historical observations.",
+    "count_policy": "Zero, unknown and not_recorded remain distinct. Observed, recorded, UTC day boundaries and reviewed future scenario clocks remain separate. Flow-day counts are actual independent events, not inferred census changes or unmet demand.",
+    "forecast_policy": "Five targets have independent completeness. Fixed four-week same-weekday primary and three baselines; 28 rolling origins, horizon7/14 gives196/392 pairs and34/41 unique scored dates. Calibration uses information before each origin; no historical availability replay or real-effect validation is claimed.",
+    "arithmetic_policy": "Canonical exact rational numerators/denominators and large integers retain native text. Zero WAPE/MASE denominators are undefined, not zero error. Last calendar day and last eligible observation are separate.",
+    "capacity_policy": "Historical observed capacity requires positive overlap; reviewed future scenarios may witness the final census instant. Total operational physical capacity is not instantaneous admittability. Three readiness facts remain independent; actual IANA23/25-hour days, half-open pressure and zero-capacity null ratios retain exact semantics.",
+    "outbound_policy": "Typed public source and explicit horizon only. Private source text, ward/person identities, bed cohort, free question and private evidence stay in hospital-side frozen records. Public projection/private SHA/runtime/horizon/math are independently rebound and full analysis recomputed.",
+    "not_claimed": [
+      "unmet demand",
+      "overload probability",
+      "instantaneous admittable beds",
+      "clinical prediction",
+      "operational effectiveness",
+      "live historical availability replay"
+    ]
+  },
+  "super_admin_governance": {
+    "originals_and_series": "Independent draft/review/publish/reject/revoke and all-hospital frozen audit; ordinary recording/current scope and Super governance use actual capabilities, not fabricated clinical qualification.",
+    "provider_prompt_execution_controls": "Super manages saved provider/model, feature roles, enablement, independent prompt, operational validation and audits. Capability check is authenticated GET metadata through admin wrapper; it neither forecasts nor enables nor validates the feature.",
+    "normal_operational_gate": "Features62..67 ordinary execution requires validation_status=validated. Super preview/source publication is not operational validation.",
+    "lifecycle": "Current scope and all source/cohort/manifest/runtime bindings are checked for queue, in-flight acceptance, normal history, evidence and feedback. Super can audit its intact frozen proof. Current and late stale token/role/department/ward/source/config/mode/deactivation responses cannot restore previous private data.",
+    "queue_receipt": "Source queue POST is strictly typed short metadata, followed by exact requested-run GET full detail. Short or mismatched IDs are not interpreted as a full result."
+  },
+  "inventory": {
+    "artifact": {
+      "path": "/tmp/hoim-bed-platform-final3-inventory.json",
+      "bytes": 131944,
+      "sha256": "7c2e13bed4bd6e3ea5646353325cdb4d1ed78469018c75924247f0d3a9e61f4c",
+      "retention": "Temporary local evidence; path and digest are recorded, contents are not packaged in this repository."
+    },
+    "business_router_routes_matching_matrix": 768,
+    "all_main_app_api_routes": 769,
+    "extra_non_matrix_main_route": [
+      {
+        "method": "GET",
+        "path": "/",
+        "module": "app.main",
+        "function": "root"
+      }
+    ],
+    "router_modules": 104,
+    "orm_tables_metadata": 185,
+    "vue_view_files": 160,
+    "catalog_version": "2026.10.20.11",
+    "independent_prompts": 80,
+    "stable_source_references": 35,
+    "implementation_files": 117,
+    "production_files": 57,
+    "tests_and_fixture_files": 60,
+    "generated_artifacts": 4,
+    "all_current_and_committed_capture_bytes_match": true,
+    "no_database_connections_dotenv_reads_asgi_lifecycle_or_successful_network_io": true,
+    "optional_import_ipv6_capability_probe_blocked_before_syscall": true,
+    "metadata_not_database_migration_or_API_execution": true
+  },
+  "migration": {
+    "head": "20261020_bed_series",
+    "new_migrations": [
+      {
+        "revision": "20261020_bed_sources",
+        "down_revision": "20261020_roster_plans",
+        "path": "fastapi_be/alembic/versions/20261020_bed_sources.py"
+      },
+      {
+        "revision": "20261020_bed_series",
+        "down_revision": "20261020_bed_sources",
+        "path": "fastapi_be/alembic/versions/20261020_bed_series.py"
+      }
+    ],
+    "new_tables": [
+      "hoimsystem_ai_bed_run_result",
+      "hoimsystem_ai_bed_series",
+      "hoimsystem_ai_bed_source"
+    ],
+    "new_utc6_columns": 8,
+    "new_mediumtext_columns": 5,
+    "storage": "Complete sources, private series, public projection and results have strict typed UTF-8 caps; >limit rejects, no truncation. AIRun TEXT stores bounded short references, and successful result/blob pointer, original lease and audit commit atomically."
+  },
+  "backend_verification": {
+    "full_pytest": {
+      "passed": 5786,
+      "skipped": 28,
+      "warnings": 2,
+      "pytest_seconds": 963.16,
+      "runner_seconds": 974.656,
+      "exit_code": 0,
+      "source_files_frozen_unchanged": 693,
+      "execution": {
+        "path": "/tmp/hoim-bed-full-frozen-pytest-execution.json",
+        "bytes": 1832,
+        "sha256": "c9612cbf05b84fc1ba43f6d3df08ce8bc40730dc5812d64db1c054ae8a914ee0",
+        "retention": "Temporary local evidence; path and digest are recorded, contents are not packaged in this repository."
+      },
+      "log": {
+        "path": "/tmp/hoim-bed-full-frozen-pytest.log",
+        "bytes": 7432,
+        "sha256": "0c5e8be7751c7406affc99bd997e3576293bfc5b6988fde64a00c48481cc941a",
+        "retention": "Temporary local evidence; path and digest are recorded, contents are not packaged in this repository."
+      },
+      "source_freeze": {
+        "path": "/tmp/hoim-bed-backend-frozen-source-freeze.json",
+        "bytes": 116783,
+        "sha256": "33756ae80622e64af3f7a958aa79b39a1a08309a42d0319be486448fde568707",
+        "retention": "Temporary local evidence; path and digest are recorded, contents are not packaged in this repository."
+      }
+    },
+    "ruff_and_whole_file_format": {
+      "python_files": 46,
+      "checks": [
+        {
+          "command": [
+            "/home/xusheng/miniconda3/bin/ruff",
+            "check",
+            "fastapi_be/alembic/versions/20261020_bed_series.py",
+            "fastapi_be/alembic/versions/20261020_bed_sources.py",
+            "fastapi_be/app/ai/bed_config.py",
+            "fastapi_be/app/ai/bed_context.py",
+            "fastapi_be/app/ai/bed_contract.py",
+            "fastapi_be/app/ai/bed_facts.py",
+            "fastapi_be/app/ai/bed_history.py",
+            "fastapi_be/app/ai/bed_model.py",
+            "fastapi_be/app/ai/bed_models.py",
+            "fastapi_be/app/ai/bed_probe.py",
+            "fastapi_be/app/ai/bed_protocol.py",
+            "fastapi_be/app/ai/bed_series.py",
+            "fastapi_be/app/ai/bed_series_input.py",
+            "fastapi_be/app/ai/bed_series_models.py",
+            "fastapi_be/app/ai/bed_server.py",
+            "fastapi_be/app/ai/bed_storage.py",
+            "fastapi_be/app/ai/catalog.py",
+            "fastapi_be/app/ai/context.py",
+            "fastapi_be/app/ai/gateway.py",
+            "fastapi_be/app/ai/governance.py",
+            "fastapi_be/app/ai/operational_sources.py",
+            "fastapi_be/app/ai/references.py",
+            "fastapi_be/app/ai/runtime.py",
+            "fastapi_be/app/ai/schemas.py",
+            "fastapi_be/app/main.py",
+            "fastapi_be/app/models.py",
+            "fastapi_be/app/routers/ai.py",
+            "fastapi_be/app/routers/ai_admin.py",
+            "fastapi_be/app/routers/ai_bed_series.py",
+            "fastapi_be/app/routers/ai_bed_sources.py",
+            "fastapi_be/tests/test_ai_bed_admin.py",
+            "fastapi_be/tests/test_ai_bed_catalog.py",
+            "fastapi_be/tests/test_ai_bed_context.py",
+            "fastapi_be/tests/test_ai_bed_contract.py",
+            "fastapi_be/tests/test_ai_bed_facts.py",
+            "fastapi_be/tests/test_ai_bed_gateway.py",
+            "fastapi_be/tests/test_ai_bed_history.py",
+            "fastapi_be/tests/test_ai_bed_migration.py",
+            "fastapi_be/tests/test_ai_bed_model.py",
+            "fastapi_be/tests/test_ai_bed_pipeline.py",
+            "fastapi_be/tests/test_ai_bed_probe.py",
+            "fastapi_be/tests/test_ai_bed_series.py",
+            "fastapi_be/tests/test_ai_bed_series_independent.py",
+            "fastapi_be/tests/test_ai_bed_series_input.py",
+            "fastapi_be/tests/test_ai_bed_server.py",
+            "fastapi_be/tests/test_ai_bed_sources_api.py"
+          ],
+          "exit_code": 0,
+          "seconds": 0.046
+        },
+        {
+          "command": [
+            "/home/xusheng/miniconda3/bin/ruff",
+            "format",
+            "--check",
+            "fastapi_be/alembic/versions/20261020_bed_series.py",
+            "fastapi_be/alembic/versions/20261020_bed_sources.py",
+            "fastapi_be/app/ai/bed_config.py",
+            "fastapi_be/app/ai/bed_context.py",
+            "fastapi_be/app/ai/bed_contract.py",
+            "fastapi_be/app/ai/bed_facts.py",
+            "fastapi_be/app/ai/bed_history.py",
+            "fastapi_be/app/ai/bed_model.py",
+            "fastapi_be/app/ai/bed_models.py",
+            "fastapi_be/app/ai/bed_probe.py",
+            "fastapi_be/app/ai/bed_protocol.py",
+            "fastapi_be/app/ai/bed_series.py",
+            "fastapi_be/app/ai/bed_series_input.py",
+            "fastapi_be/app/ai/bed_series_models.py",
+            "fastapi_be/app/ai/bed_server.py",
+            "fastapi_be/app/ai/bed_storage.py",
+            "fastapi_be/app/ai/catalog.py",
+            "fastapi_be/app/ai/context.py",
+            "fastapi_be/app/ai/gateway.py",
+            "fastapi_be/app/ai/governance.py",
+            "fastapi_be/app/ai/operational_sources.py",
+            "fastapi_be/app/ai/references.py",
+            "fastapi_be/app/ai/runtime.py",
+            "fastapi_be/app/ai/schemas.py",
+            "fastapi_be/app/main.py",
+            "fastapi_be/app/models.py",
+            "fastapi_be/app/routers/ai.py",
+            "fastapi_be/app/routers/ai_admin.py",
+            "fastapi_be/app/routers/ai_bed_series.py",
+            "fastapi_be/app/routers/ai_bed_sources.py",
+            "fastapi_be/tests/test_ai_bed_admin.py",
+            "fastapi_be/tests/test_ai_bed_catalog.py",
+            "fastapi_be/tests/test_ai_bed_context.py",
+            "fastapi_be/tests/test_ai_bed_contract.py",
+            "fastapi_be/tests/test_ai_bed_facts.py",
+            "fastapi_be/tests/test_ai_bed_gateway.py",
+            "fastapi_be/tests/test_ai_bed_history.py",
+            "fastapi_be/tests/test_ai_bed_migration.py",
+            "fastapi_be/tests/test_ai_bed_model.py",
+            "fastapi_be/tests/test_ai_bed_pipeline.py",
+            "fastapi_be/tests/test_ai_bed_probe.py",
+            "fastapi_be/tests/test_ai_bed_series.py",
+            "fastapi_be/tests/test_ai_bed_series_independent.py",
+            "fastapi_be/tests/test_ai_bed_series_input.py",
+            "fastapi_be/tests/test_ai_bed_server.py",
+            "fastapi_be/tests/test_ai_bed_sources_api.py"
+          ],
+          "exit_code": 0,
+          "seconds": 0.041
+        }
+      ],
+      "execution": {
+        "path": "/tmp/hoim-bed-backend-frozen-ruff-execution.json",
+        "bytes": 5123,
+        "sha256": "2c6ef714648fa63b4d68ace5cb2f9f69117060fa45a3c43c0e1994a6e81ab1ef",
+        "retention": "Temporary local evidence; path and digest are recorded, contents are not packaged in this repository."
+      }
+    },
+    "targeted_checks_overlap_full_suite_not_added": true
+  },
+  "frontend_verification": {
+    "npm_verify": {
+      "command": [
+        "npm",
+        "run",
+        "verify"
+      ],
+      "exit_code": 0,
+      "audit_vulnerabilities": 0,
+      "build_seconds": 28.34,
+      "runner_seconds": 31.652,
+      "existing_scss_warnings": 5,
+      "bundle": {
+        "largestJavaScript": {
+          "file": "element-plus.1235714c.js",
+          "bytes": 647479
+        },
+        "totalJavaScript": 5969150,
+        "totalAssets": 6487396,
+        "limits": {
+          "largestJavaScript": 700000,
+          "totalJavaScript": 6000000,
+          "totalAssets": 7000000
+        }
+      },
+      "dependencies_targets_and_original_budgets_not_changed": true,
+      "execution": {
+        "path": "/tmp/hoim-bed-npm-final2-verify-execution.json",
+        "bytes": 49077,
+        "sha256": "2441c4bf5ed244114634735f98864506740370f41c07e8bdb4412377ef81a545",
+        "retention": "Temporary local evidence; path and digest are recorded, contents are not packaged in this repository."
+      },
+      "log": {
+        "path": "/tmp/hoim-bed-npm-final2-verify.log",
+        "bytes": 54926,
+        "sha256": "85a7fcd6b65cf053adeb666bf863343f58e782fb2cf5cb72c2087fbd9da947d8",
+        "retention": "Temporary local evidence; path and digest are recorded, contents are not packaged in this repository."
+      }
+    },
+    "node_tool_checks": {
+      "passed": 30,
+      "failed": 0,
+      "skipped": 0,
+      "log": {
+        "path": "/tmp/hoim-bed-node-final-tests.log",
+        "bytes": 3019,
+        "sha256": "72456f6d083bc47144450b64433465c06bda2bd0e24bc65fc73e975b67f4add4",
+        "retention": "Temporary local evidence; path and digest are recorded, contents are not packaged in this repository."
+      },
+      "not_included_in_browser_count": true
+    },
+    "deduplication": {
+      "pre_8_bed_module_dedup_js": 6078708,
+      "after_8_exact_bed_modules_js": 6043015,
+      "final_js": 5969150,
+      "exact_admin_api_module_copies_before": 28,
+      "exact_admin_api_module_copies_after": 1,
+      "module_bytes_each": 2756,
+      "actual_whole_js_saving": 73865,
+      "final_js_headroom": 30850,
+      "artifact": {
+        "path": "/tmp/hoim-bed-admin-dedup-final2-verification.json",
+        "bytes": 2805,
+        "sha256": "4f741be9d019f7cecbb7624656af24ac11caed1ff506b65aeeb64ce12858ef3f",
+        "retention": "Temporary local evidence; path and digest are recorded, contents are not packaged in this repository."
+      },
+      "configuration_only_no_guard_or_feature_removed": true
+    },
+    "full_browser": {
+      "passed": 743,
+      "failed": 0,
+      "skipped": 0,
+      "flaky": 0,
+      "retries": 0,
+      "duration_ms_playwright": 1178604.7310000001,
+      "elapsed_seconds_runner": 1180.123,
+      "categories": {
+        "isolated_mock": 556,
+        "production_mock": 166,
+        "real_synthetic_http": 21
+      },
+      "spec_files": 68,
+      "baseline_cases": 546,
+      "new_cases": 197,
+      "new_spec_files": {
+        "ai-bed-assistant.spec.js": 36,
+        "ai-bed-entry.spec.js": 5,
+        "ai-bed-findings.spec.js": 15,
+        "ai-bed-input.spec.js": 29,
+        "ai-bed-provider.spec.js": 12,
+        "ai-bed-result-api.spec.js": 12,
+        "ai-bed-series-api.spec.js": 10,
+        "ai-bed-series.spec.js": 22,
+        "ai-bed-source-api.spec.js": 6,
+        "ai-bed-sources.spec.js": 18,
+        "ai-source-queue-receipt.spec.js": 32
+      },
+      "all_prior_file_counts_unchanged": true,
+      "frozen_frontend_inputs": 633,
+      "frozen_dist_files": 366,
+      "all_inputs_and_dist_bytes_unchanged": true,
+      "execution": {
+        "path": "/tmp/hoim-bed-browser-frozen-final2-execution.json",
+        "bytes": 3234,
+        "sha256": "1a9d2953dcf3d05a017982a381b11d473706b2b6936940c2a7430361216611b4",
+        "retention": "Temporary local evidence; path and digest are recorded, contents are not packaged in this repository."
+      },
+      "report": {
+        "path": "/tmp/hoim-bed-browser-frozen-final2-report.json",
+        "bytes": 810250,
+        "sha256": "fda42a8edc0824db5506467497375c491822e03b4ad33c7a2553bfbbb87ab105",
+        "retention": "Temporary local evidence; path and digest are recorded, contents are not packaged in this repository."
+      },
+      "log": {
+        "path": "/tmp/hoim-bed-browser-frozen-final2-tests.log",
+        "bytes": 103115,
+        "sha256": "20874d46fc249c91a275a91f9295467e7e322e26bd9a1931b19b315a91b1a2d8",
+        "retention": "Temporary local evidence; path and digest are recorded, contents are not packaged in this repository."
+      },
+      "source_freeze": {
+        "path": "/tmp/hoim-bed-frontend-final2-source-freeze.json",
+        "bytes": 117305,
+        "sha256": "694e687e043b4825c49b0db0fb78851745a312811e1da7fbee468afa8dee3dda",
+        "retention": "Temporary local evidence; path and digest are recorded, contents are not packaged in this repository."
+      },
+      "actual_result_classification": {
+        "path": "/tmp/hoim-bed-browser-final2-category-counts.json",
+        "bytes": 378399,
+        "sha256": "9ec89c21a3cea5472510bd262ad9761875d29a1966e3a749a7f7d1e0e2d16287",
+        "retention": "Temporary local evidence; path and digest are recorded, contents are not packaged in this repository."
+      },
+      "collection_only_crosscheck": {
+        "path": "/tmp/hoim-bed-browser-final2-list-counts.json",
+        "bytes": 210451,
+        "sha256": "5a4f45dca30eaccf820f2468a0a10d2336a0a4fdff22cc4b00324beca02827c0",
+        "retention": "Temporary local evidence; path and digest are recorded, contents are not packaged in this repository."
+      },
+      "scope": "Production UI and isolated component/parent harness categories both intercept synthetic HTTP API replies; only request-real-http.spec.js uses actual synthetic loopback HTTP. The ten newly admitted bed/source-queue specs are isolated harnesses; ai-bed-entry.spec.js uses the production application build. The frozen baseline retains 546 executions; the eleven new files add 197 actual executions. No hospital backend or remote model."
+    },
+    "targeted_evidence_not_added_to_full743": {
+      "C_owned_95": {
+        "collection": 95,
+        "execution_scope": "Distinct phased isolated cases:24source+32series+39result/findings/provider; not a single finalHEAD95 run. Final743 includes them all.",
+        "source": {
+          "path": "/tmp/hoim-bed-source-ui-frozen-verification.json",
+          "bytes": 6851,
+          "sha256": "2e110bc9c7fd7adc2094ca0d34bf1e090368a3810049fed13c97beec5bd1eea9",
+          "retention": "Temporary local evidence; path and digest are recorded, contents are not packaged in this repository."
+        },
+        "initial_series": {
+          "path": "/tmp/hoim-bed-series-ui-frozen-verification.json",
+          "bytes": 9755,
+          "sha256": "9557ca9c9c3496e328dd722cf25223371f4e5563f904aa1112cac41b6c49e3aa",
+          "retention": "Temporary local evidence; path and digest are recorded, contents are not packaged in this repository."
+        },
+        "final_series_api_and_invalidation": {
+          "path": "/tmp/hoim-bed-series-ui-final2-verification.json",
+          "bytes": 4919,
+          "sha256": "a65ca5a3d5ec6f5abe98c2985fb09631770b3a0a86825c244f6c6ad0f629ef05",
+          "retention": "Temporary local evidence; path and digest are recorded, contents are not packaged in this repository."
+        },
+        "result_findings_provider": {
+          "path": "/tmp/hoim-bed-result-ui-frozen-verification.json",
+          "bytes": 10371,
+          "sha256": "3a47b56e8ad2553b40d5a1b9fcd6902d54a1bf2693962a6889676c849d9dac74",
+          "retention": "Temporary local evidence; path and digest are recorded, contents are not packaged in this repository."
+        }
+      },
+      "B_input_29": {
+        "passed": 29,
+        "kind": "isolated_mock",
+        "log": {
+          "path": "/tmp/hoim-bed-input-controlled-frozen-tests.log",
+          "bytes": 3931,
+          "sha256": "1943097211571928fe95bbcf9ec176f11adbc517ce200877fb5fca961e2ca16e",
+          "retention": "Temporary local evidence; path and digest are recorded, contents are not packaged in this repository."
+        }
+      },
+      "B_parent_36": {
+        "passed": 36,
+        "kind": "isolated_mock",
+        "source_bindings": 45,
+        "artifact": {
+          "path": "/tmp/hoim-bed-assistant-final-verification.json",
+          "bytes": 24868,
+          "sha256": "d4e375e54d86e860f71a4349c5b87085fe827133074300ea4a41ed5313ba6105",
+          "retention": "Temporary local evidence; path and digest are recorded, contents are not packaged in this repository."
+        }
+      },
+      "A_source_queue_receipt_32": {
+        "passed": 32,
+        "kind": "isolated_mock",
+        "scope": "Actual compiled parent with roster harness and actual unpersisted ORM short serializer; not32bed-native HTTP requests or durable SQL queue executions.",
+        "artifact": {
+          "path": "/tmp/hoim-source-queue-receipt-final-browser-verification.json",
+          "bytes": 2285,
+          "sha256": "028b37e654d28fbcdf2a8daeb26f2ea44b9cc0874f7d9136d810dc72fae8f234",
+          "retention": "Temporary local evidence; path and digest are recorded, contents are not packaged in this repository."
+        }
+      },
+      "shared_sofa_schema_old_contract_22": {
+        "passed": 22,
+        "included_in_final_browser_baseline": true,
+        "artifact": {
+          "path": "/tmp/hoim-bed-series-ui-final2-verification.json",
+          "bytes": 4919,
+          "sha256": "a65ca5a3d5ec6f5abe98c2985fb09631770b3a0a86825c244f6c6ad0f629ef05",
+          "retention": "Temporary local evidence; path and digest are recorded, contents are not packaged in this repository."
+        }
+      },
+      "all_compiled_components_and_actual_synthetic_DTOs_but_browser_API_mocked": true
+    }
+  },
+  "actual_isolated_bed_service_container": {
+    "artifact": {
+      "path": "/tmp/hoim-bed-container-final-verification.json",
+      "bytes": 52998,
+      "sha256": "5c9f958fc074cfc75e0a98226ba615ca8f2b5fb4518949f8a523398ae7d04675",
+      "retention": "Temporary local evidence; path and digest are recorded, contents are not packaged in this repository."
+    },
+    "image": "hoim-bed-final:354a9791b517",
+    "image_id": "sha256:a718e1dd2eb958e53298913bc2745be17a260bc0cf4e9c4f02e56fbb22efd2f9",
+    "http_responses": 33,
+    "task_post_responses": 29,
+    "successful_tasks": 20,
+    "math_cases": 19,
+    "one_additional_prompt_variant": true,
+    "rejected_task_responses": 9,
+    "startup_connection_errors_not_http_responses": [
+      "ion(\n                ^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.12/socket.py\", line 865, in create_connection\n    raise exceptions[0]\n  File \"/usr/local/lib/python3.12/socket.py\", line 850, in create_connection\n    sock.connect(sa)\nConnectionRefusedError: [Errno 111] Connection refused\n",
+      "ion(\n                ^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.12/socket.py\", line 865, in create_connection\n    raise exceptions[0]\n  File \"/usr/local/lib/python3.12/socket.py\", line 850, in create_connection\n    sock.connect(sa)\nConnectionRefusedError: [Errno 111] Connection refused\n",
+      "ion(\n                ^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.12/socket.py\", line 865, in create_connection\n    raise exceptions[0]\n  File \"/usr/local/lib/python3.12/socket.py\", line 850, in create_connection\n    sock.connect(sa)\nConnectionRefusedError: [Errno 111] Connection refused\n"
+    ],
+    "host_container_math_matches_except_actual_environment_runtime": true,
+    "actual_cgroup_512m_peak_bytes": 297934848,
+    "actual_uid": 10001,
+    "actual_gid": 10001,
+    "isolation": {
+      "bind_mounts": [],
+      "cap_drop": [
+        "ALL"
+      ],
+      "cpu_nanos": 1000000000,
+      "host_ports": {},
+      "memory_bytes": 536870912,
+      "network": "none",
+      "pids_limit": 64,
+      "readonly": true,
+      "security_opt": [
+        "no-new-privileges"
+      ],
+      "tmpfs": {
+        "/tmp": "rw,noexec,nosuid,size=16m"
+      }
+    },
+    "bound_source_files": 8,
+    "source_hashes_unchanged": true,
+    "staggered_large_source_bytes": 6444622,
+    "staggered_budget_reject_without_oom_ready_after": true,
+    "limitations": "Response/input byte limits are not a claim every syntactically accepted8MiB input completes within memory/proof budgets. Container has only its own loopback, no hospital data/config/database/weights or host mounts/ports.",
+    "seconds": 134.766,
+    "cleanup_verified_by_producer": true
+  },
+  "actual_isolated_mysql": {
+    "artifact": {
+      "path": "/tmp/hoim-bed-mysql-final-verification.json",
+      "bytes": 14740,
+      "sha256": "2bc912f78fcf34ad70a4a4f0b3f3960931a0dcc63cfcca71c3a1d1b8db3c2f21",
+      "retention": "Temporary local evidence; path and digest are recorded, contents are not packaged in this repository."
+    },
+    "server_version": "8.0.39",
+    "seconds": 126.29,
+    "worker_seconds": 117.562,
+    "bound_backend_files_unchanged": 40,
+    "migrations_up_down_up": 2,
+    "new_tables": 3,
+    "preserved_synthetic_prerequisite_tables": [
+      "hoimsystem_admission",
+      "hoimsystem_ai_audit_event",
+      "hoimsystem_ai_feature_config",
+      "hoimsystem_ai_feedback",
+      "hoimsystem_ai_knowledge_document",
+      "hoimsystem_ai_prompt_version",
+      "hoimsystem_ai_provider",
+      "hoimsystem_ai_run",
+      "hoimsystem_bed",
+      "hoimsystem_department",
+      "hoimsystem_doctor",
+      "hoimsystem_hospital_campus",
+      "hoimsystem_patient",
+      "hoimsystem_users",
+      "hoimsystem_ward"
+    ],
+    "prerequisite_table_count": 15,
+    "all185tables_were_not_instantiated_or_migrated": true,
+    "eight_utc6_columns": [
+      [
+        "hoimsystem_ai_bed_run_result",
+        "created_at",
+        6
+      ],
+      [
+        "hoimsystem_ai_bed_series",
+        "as_of",
+        6
+      ],
+      [
+        "hoimsystem_ai_bed_series",
+        "created_at",
+        6
+      ],
+      [
+        "hoimsystem_ai_bed_series",
+        "reviewed_at",
+        6
+      ],
+      [
+        "hoimsystem_ai_bed_series",
+        "revoked_at",
+        6
+      ],
+      [
+        "hoimsystem_ai_bed_source",
+        "recorded_at",
+        6
+      ],
+      [
+        "hoimsystem_ai_bed_source",
+        "reviewed_at",
+        6
+      ],
+      [
+        "hoimsystem_ai_bed_source",
+        "revoked_at",
+        6
+      ]
+    ],
+    "five_mediumtext_columns": [
+      [
+        "hoimsystem_ai_bed_run_result",
+        "result_json",
+        "mediumtext"
+      ],
+      [
+        "hoimsystem_ai_bed_series",
+        "projection_json",
+        "mediumtext"
+      ],
+      [
+        "hoimsystem_ai_bed_series",
+        "snapshot_json",
+        "mediumtext"
+      ],
+      [
+        "hoimsystem_ai_bed_source",
+        "parent_binding_json",
+        "mediumtext"
+      ],
+      [
+        "hoimsystem_ai_bed_source",
+        "payload_json",
+        "mediumtext"
+      ]
+    ],
+    "published_originals": {
+      "daily_originals": 224,
+      "census_days": 112,
+      "whole_flow_days": 112,
+      "historical_observed_capacity": 1,
+      "reviewed_future_scenario": 1,
+      "total_roots": 226,
+      "actual_all_three_kinds": [
+        "capacity_interval",
+        "census",
+        "flow_day"
+      ]
+    },
+    "native_ASGI_calls": 6,
+    "not_added_to_container33_HTTP_responses": true,
+    "actual_complete_private_public_series_sql_bytes_and_sha256": {
+      "snapshot_json": {
+        "utf8_bytes": 937568,
+        "sql_sha256": "5d318a95316bf2f3fe360cb402d2074f4ed65d42c49ef2b0387c5ba14d07205e"
+      },
+      "projection_json": {
+        "utf8_bytes": 393313,
+        "sql_sha256": "1e3b78320613741f51780e1be738be0b914c409be45e5ea82e8b9be98ff46e0e"
+      }
+    },
+    "actual_queue_native_blob_by_horizon": {
+      "7": {
+        "run_id": "8ba94edb-6f41-4924-94f3-e6fc13029f45",
+        "result_sql": {
+          "result_json": {
+            "utf8_bytes": 1612716,
+            "sql_sha256": "09903e939a531738cec6620d3f4e4ea85dd3ba0b29734a40bf944bd74932d218"
+          }
+        },
+        "airun_text_bytes": [
+          9680,
+          1523,
+          808,
+          384
+        ],
+        "wire_bytes": 398689,
+        "five_targets_complete": true,
+        "forecast_pairs_per_target": 196,
+        "unique_target_dates_per_target": 34
+      },
+      "14": {
+        "run_id": "2d60958e-4a41-4bd3-b448-276e43581cb5",
+        "result_sql": {
+          "result_json": {
+            "utf8_bytes": 3093451,
+            "sql_sha256": "ad3a39fec48dfbc08fe262921cf08853b0dd3fd61111220f6c7ccb67d59202d3"
+          }
+        },
+        "airun_text_bytes": [
+          9683,
+          1524,
+          808,
+          384
+        ],
+        "wire_bytes": 398690,
+        "five_targets_complete": true,
+        "forecast_pairs_per_target": 392,
+        "unique_target_dates_per_target": 41
+      }
+    },
+    "actual_independent_connection_lock_contention": {
+      "connection_ids": [
+        12,
+        14
+      ],
+      "mutations": [
+        {
+          "mutation": "new_bed",
+          "mysql_error": 1205,
+          "seconds": 1.002,
+          "blocked_until_acceptance_commit": true,
+          "retry_after_commit_succeeded_and_was_rolled_back": true
+        },
+        {
+          "mutation": "new_fact",
+          "mysql_error": 1205,
+          "seconds": 1.01,
+          "blocked_until_acceptance_commit": true,
+          "retry_after_commit_succeeded_and_was_rolled_back": true
+        },
+        {
+          "mutation": "move_bed",
+          "mysql_error": 1205,
+          "seconds": 1.001,
+          "blocked_until_acceptance_commit": true,
+          "retry_after_commit_succeeded_and_was_rolled_back": true
+        },
+        {
+          "mutation": "revoke_fact",
+          "mysql_error": 1205,
+          "seconds": 1.007,
+          "blocked_until_acceptance_commit": true,
+          "retry_after_commit_succeeded_and_was_rolled_back": true
+        },
+        {
+          "mutation": "move_ward",
+          "mysql_error": 1205,
+          "seconds": 1.001,
+          "blocked_until_acceptance_commit": true,
+          "retry_after_commit_succeeded_and_was_rolled_back": true
+        },
+        {
+          "mutation": "revoke_series",
+          "mysql_error": 1205,
+          "seconds": 1.548,
+          "blocked_until_acceptance_commit": true,
+          "retry_after_commit_succeeded_and_was_rolled_back": true
+        },
+        {
+          "mutation": "move_actor_doctor",
+          "mysql_error": 1205,
+          "seconds": 1.001,
+          "blocked_until_acceptance_commit": true,
+          "retry_after_commit_succeeded_and_was_rolled_back": true
+        },
+        {
+          "mutation": "actor_role",
+          "mysql_error": 1205,
+          "seconds": 1.001,
+          "blocked_until_acceptance_commit": true,
+          "retry_after_commit_succeeded_and_was_rolled_back": true
+        }
+      ],
+      "accepted_blob_and_pointer_committed_together": true
+    },
+    "actual_old_rr_snapshot_and_locked_current_collection": {
+      "connection_ids": [
+        9,
+        12
+      ],
+      "old_bed_count": 1,
+      "current_bed_count": 2,
+      "old_fact_count": 226,
+      "current_fact_count": 227,
+      "old_plain_read_remained_stale": true,
+      "locking_read_found_both_committed_additions": true
+    },
+    "actual_typed_json_history_filter": {
+      "forged_rows": 5,
+      "forged_rows_rejected_before_limit": true,
+      "successful_original_runs_included": 2,
+      "invalid_json_did_not_raise_sql_error": true
+    },
+    "cancel_and_old_lease_rejected": [
+      {
+        "mode": "cancelled",
+        "status": "cancelled",
+        "old_result_rejected": true
+      },
+      {
+        "mode": "lease_replaced",
+        "status": "running",
+        "old_result_rejected": true
+      }
+    ],
+    "source_create_series_publish_and_result_SQL_audit_failures_atomically_rollback": true,
+    "old_DDL_and_full_rows_unchanged_for_15_enumerated_prerequisites": true,
+    "SQL_only_large_unicode_column_probe_was_rolled_back_not_typed_source": true,
+    "isolation": {
+      "network_mode": "none",
+      "port_bindings": {},
+      "readonly_root": true,
+      "user": "999:999",
+      "cap_drop": [
+        "ALL"
+      ],
+      "tmpfs": {
+        "/tmp": "rw,nosuid,nodev,noexec,size=64m,uid=999,gid=999,mode=0700",
+        "/var/lib/mysql": "rw,nosuid,nodev,noexec,size=512m,uid=999,gid=999,mode=0700"
+      },
+      "mount_types": [
+        "bind"
+      ]
+    },
+    "limitations": [
+      "All records and users are synthetic; no hospital data, genuine credentials or operational validation.",
+      "All old tables refers to the explicitly enumerated instantiated prerequisite tables, not an uninstantiated full hospital deployment.",
+      "SQL-only >65535-byte source payload is a column probe rolled back before any typed series capture; actual governed source fields retain their strict caps.",
+      "Two-connection lock tests use actual production locking reads and bounded one-second timeouts, not a guarantee about arbitrary distributed failures or deadlock-free scheduling."
+    ],
+    "cleanup_verified_by_producer": true
+  },
+  "independent_evidence_reviews": {
+    "pre_completion": {
+      "artifact": {
+        "path": "/tmp/hoim-bed-final-evidence-independent-review.json",
+        "bytes": 74446,
+        "sha256": "89a699ab8071922626fc10f8730d37c91401f61c4092cad45780d1871c1c2b4a",
+        "retention": "Temporary local evidence; path and digest are recorded, contents are not packaged in this repository."
+      },
+      "full743_was_explicitly_pending_at_review_time": true
+    },
+    "post_complete_browser": {
+      "artifact": {
+        "path": "/tmp/hoim-bed-final-evidence-post-browser-review.json",
+        "bytes": 4448,
+        "sha256": "9da5a37f77c80f34e0beffb8c38769e7482c0726131bcab94cf2848ca3611d4c",
+        "retention": "Temporary local evidence; path and digest are recorded, contents are not packaged in this repository."
+      },
+      "raw743_results_and_all_categories_current_hashes_independently_checked": true
+    },
+    "no_extra_browser_or_native_executions_in_read_only_audits": true
+  },
+  "intermediate_attempts_not_counted_as_final_success": {
+    "first_full_browser": {
+      "runner_exit_code": 130,
+      "runner_seconds": 354.017,
+      "actual_results": {
+        "passed": 150,
+        "failed": 1,
+        "interrupted": 2,
+        "not_run_no_results": 590
+      },
+      "playwright_stats_skipped": 592,
+      "skipped592_includes_interrupted_and_not_executed_not592_actual_skips": true,
+      "all633source_and366dist_unchanged_during_first_attempt": true,
+      "failure": "Ward production test asserted before asynchronous child series GET.83fe06e changed only that exact scoped assertion to await expect.poll; single target1passed2.9s, then all743fresh. No product/dist bytes changed or rebuild.",
+      "execution": {
+        "path": "/tmp/hoim-bed-browser-frozen-final-execution.json",
+        "bytes": 3235,
+        "sha256": "d68548a537a058927454e5157e084ef05568692348bae21cd301f4babe5b88dc",
+        "retention": "Temporary local evidence; path and digest are recorded, contents are not packaged in this repository."
+      },
+      "report": {
+        "path": "/tmp/hoim-bed-browser-frozen-final-report.json",
+        "bytes": 562002,
+        "sha256": "343869794db6ee0ef4e7d931f045489126af5e217f447198f4e64c20a8cbb573",
+        "retention": "Temporary local evidence; path and digest are recorded, contents are not packaged in this repository."
+      },
+      "error_context": {
+        "path": "/tmp/hoim-bed-full-browser-first-ward-error-context.md",
+        "bytes": 29851,
+        "sha256": "bb880978e71761d2c8df26d2cc1d9ee7b6caf831058af90a230156842aaa30bb",
+        "retention": "Temporary local evidence; path and digest are recorded, contents are not packaged in this repository."
+      }
+    },
+    "bundle_attempts": "Real6078708 diagnostic and6043015 failed verify retained. Exact8bed modules then exactadmin API dedup fixes only; finalnpmverify uses original budgets.",
+    "classifier_metadata": {
+      "first_failed_old_path_assertion_log": {
+        "path": "/tmp/hoim-bed-browser-category-first-attempt.log",
+        "bytes": 440,
+        "sha256": "5070521c1b72ffb7eec79bb94a04abf5431e0e5fc10c894ffd0c6dd1b8d0381b",
+        "retention": "Temporary local evidence; path and digest are recorded, contents are not packaged in this repository."
+      },
+      "final3_corrected_only_expected_frozen_classifier_path": {
+        "path": "/tmp/hoim-bed-browser-extract-final3-categories.py",
+        "bytes": 15012,
+        "sha256": "bb09b217b4753b8e0d186edcb624853fb27f6c2936fab674ab13a3e6278260e7",
+        "retention": "Temporary local evidence; path and digest are recorded, contents are not packaged in this repository."
+      },
+      "final4_corrected_output_path_and_inherited_roster_schema_scope_note_only": {
+        "path": "/tmp/hoim-bed-browser-extract-final4-categories.py",
+        "bytes": 15038,
+        "sha256": "d5713b0998405db813b370216d3a999ff2c8c7f14db946780391294ba6dd1ffe",
+        "retention": "Temporary local evidence; path and digest are recorded, contents are not packaged in this repository."
+      },
+      "old_category_record_preserved": {
+        "path": "/tmp/hoim-bed-browser-final-category-counts.json",
+        "bytes": 378374,
+        "sha256": "eb9bfc0e6e7130195047f7d5609ceac331dfc5e95b1aaec08784043a9813fd66",
+        "retention": "Temporary local evidence; path and digest are recorded, contents are not packaged in this repository."
+      },
+      "actual_report_collection_test_bytes_and_execution_data_not_changed": true
+    },
+    "UI_phase_failures": "Retained in source/series/result phase manifests; include own locator/fixture mistakes and installation-free legacy harness resolution. Not added as passes or hidden by retries; final743unretried proves current combined state."
+  },
+  "sixteen_historical_verification_records_unchanged": {
+    "baseline_commit": "c65a25a68d71c16714fbcaa2f32ff69349937993",
+    "count": 16,
+    "all_unchanged": true,
+    "records": [
+      {
+        "path": "doc/ai-aki-verification.json",
+        "baseline_sha256": "a2f8e928266ff16d46973db731329d4e96cbfe09e519ba9f5fcbc8ab384a897c",
+        "current_sha256": "a2f8e928266ff16d46973db731329d4e96cbfe09e519ba9f5fcbc8ab384a897c",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-ecg-classifier-smoke.json",
+        "baseline_sha256": "838b0305249698617bc475f7158dfbfbb9e6e22e6d6e84e51974bfcfebb90c61",
+        "current_sha256": "838b0305249698617bc475f7158dfbfbb9e6e22e6d6e84e51974bfcfebb90c61",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-ecg-verification.json",
+        "baseline_sha256": "1eedfa9eb918cf6e6b1ee1f201b7413760eeec501c128f4a73401741f0427f94",
+        "current_sha256": "1eedfa9eb918cf6e6b1ee1f201b7413760eeec501c128f4a73401741f0427f94",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-forecast-verification.json",
+        "baseline_sha256": "9b5683bca58efcf7fc460410529fd5aeeed91e2646eb47be24b836cbadc20d63",
+        "current_sha256": "9b5683bca58efcf7fc460410529fd5aeeed91e2646eb47be24b836cbadc20d63",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-frontend-dependencies-verification.json",
+        "baseline_sha256": "968757f4a75e921038133b3fa9a94947ab4d5607142dce8da964f2a13d00bb1d",
+        "current_sha256": "968757f4a75e921038133b3fa9a94947ab4d5607142dce8da964f2a13d00bb1d",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-imaging-classifier-smoke.json",
+        "baseline_sha256": "b2185a31ff66c4602c10136d5b15404199f50cf7d65ea4a8be4718778c6a9e89",
+        "current_sha256": "b2185a31ff66c4602c10136d5b15404199f50cf7d65ea4a8be4718778c6a9e89",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-imaging-verification.json",
+        "baseline_sha256": "63646b181dae4f531abe233708a24f9b9cc05037ef95d57e1e6f39c7f9880148",
+        "current_sha256": "63646b181dae4f531abe233708a24f9b9cc05037ef95d57e1e6f39c7f9880148",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-laboratory-verification.json",
+        "baseline_sha256": "646103e4874b4f895424987520c7adfb6fb8afdd9eb6e2c7104ed2095b72752f",
+        "current_sha256": "646103e4874b4f895424987520c7adfb6fb8afdd9eb6e2c7104ed2095b72752f",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-news2-verification.json",
+        "baseline_sha256": "363be8c61e2f36705dccc4604631e7d0e84aaa6cc922196ed36e48e740ca6570",
+        "current_sha256": "363be8c61e2f36705dccc4604631e7d0e84aaa6cc922196ed36e48e740ca6570",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-nursing-verification.json",
+        "baseline_sha256": "a04248f9de57ddd878c1b408da1833f53651cd3535d8385d2275874a7f6f9517",
+        "current_sha256": "a04248f9de57ddd878c1b408da1833f53651cd3535d8385d2275874a7f6f9517",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-observation-verification.json",
+        "baseline_sha256": "b75ab8c7ff94704cb823be59d51539f06a16a24edf0020b0e87edfd6cf6e6bee",
+        "current_sha256": "b75ab8c7ff94704cb823be59d51539f06a16a24edf0020b0e87edfd6cf6e6bee",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-organ-support-verification.json",
+        "baseline_sha256": "175b4d4b66960f623170aded7ca7dec32f462fc34278289411c1ddda3dbc653d",
+        "current_sha256": "175b4d4b66960f623170aded7ca7dec32f462fc34278289411c1ddda3dbc653d",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-qsofa-verification.json",
+        "baseline_sha256": "d3c4cea9a657527540d3c570512a00568f92a5381c066e9a0bcf204a2e3c7ba4",
+        "current_sha256": "d3c4cea9a657527540d3c570512a00568f92a5381c066e9a0bcf204a2e3c7ba4",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-roster-verification.json",
+        "baseline_sha256": "8ec5327889f81368e24755a8122f5b5c753a84a1e9a949ec3957b35a9ba13188",
+        "current_sha256": "8ec5327889f81368e24755a8122f5b5c753a84a1e9a949ec3957b35a9ba13188",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-sofa-verification.json",
+        "baseline_sha256": "20235fe055a6995be2b40270a52f67cba778d445cd10113e7f8185dbeab0cdca",
+        "current_sha256": "20235fe055a6995be2b40270a52f67cba778d445cd10113e7f8185dbeab0cdca",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-speech-smoke.json",
+        "baseline_sha256": "41ad522da4f04e2a6d75595660ecbc2549acdcd159450aa99602b495c8e690a0",
+        "current_sha256": "41ad522da4f04e2a6d75595660ecbc2549acdcd159450aa99602b495c8e690a0",
+        "unchanged": true
+      }
+    ],
+    "all_stable_during_inventory": true
+  },
+  "implementation_and_generated_artifact_sha256": {
+    "fastapi_be/.env.example": "1b17c5ddc2cf47b00d0ed26cf53b1400dc01a52eabecc7a91e36f0ea32b73a37",
+    "fastapi_be/Dockerfile.bed": "ab617a8e2baf41697f73b6180d6afa4dd0e7942ba7d2153d1c4a7432ce8979eb",
+    "fastapi_be/alembic/versions/20261020_bed_series.py": "301dcdccaaad5446a8201434f9f0d273cfdfa33d228827e13efaf87d5df1ba3b",
+    "fastapi_be/alembic/versions/20261020_bed_sources.py": "9a22f63e04cf7e7aed320a917f2d6659c755388f4d9a12f15a62ed3f2e9beb99",
+    "fastapi_be/app/ai/bed_config.py": "df5b378b6522d26e595c97452b8f47ed031a9e33f0ce450ebe3b380cd15a7dec",
+    "fastapi_be/app/ai/bed_context.py": "c2312d0d5cb85117baeeac69810a0875b69c83395fb04f906432dc2e56d270e0",
+    "fastapi_be/app/ai/bed_contract.py": "cefcd0b6ca32d3780e08942ec13f8469b0b9b764d6ee678548b1c3abb49d7ed5",
+    "fastapi_be/app/ai/bed_facts.py": "85dc88b1ef111bb073e1efb10701c7a53f3c58666733ffc488144ad68db1331c",
+    "fastapi_be/app/ai/bed_history.py": "3427dd9c1c0de4ce45bc68b29ce3ed4a0db167157f3f606cc871b6b2801d86b1",
+    "fastapi_be/app/ai/bed_model.py": "508645a2537a1cdf0c234191e35b1596e622b312d4431b94a56e15a3dd87bf7b",
+    "fastapi_be/app/ai/bed_models.py": "38708ed7fed1b9ce2f12b1289c0d3accc01235dc3040ecca330fe577715e52e7",
+    "fastapi_be/app/ai/bed_probe.py": "f3297aeb8c24835290fc4f6a216d4f4a850c65e48673ed1888345aaded20a5fe",
+    "fastapi_be/app/ai/bed_protocol.py": "5e66ae502323ae26003e54c3dc96327f29c00e6129319c3f4ec8a74b1a0b5969",
+    "fastapi_be/app/ai/bed_series.py": "7728731f673ef70a0a7eca53dd369daaff6211209528dac42734e5da63013dc3",
+    "fastapi_be/app/ai/bed_series_input.py": "364d5908b90c4fbef0c02a21cbddadd2f7dcb5976395f369320c78c5470c2a4b",
+    "fastapi_be/app/ai/bed_series_models.py": "1f2fb6b7802dda3aa35c7bee0ed6b76ec68c884d9b032021492180532c12a44b",
+    "fastapi_be/app/ai/bed_server.py": "6c4a2c49a5431836bd466c2790f710b4ffc95a0a9a5d039f6ed1e48cd79535c5",
+    "fastapi_be/app/ai/bed_storage.py": "7160d075be831d02adb36b487d8237681f494f9b46a7855c2be91592ddf1a5d3",
+    "fastapi_be/app/ai/catalog.py": "6f954a989d1f1e3f463fe2aef706760fc778cd6d2a916a692adb247713920f39",
+    "fastapi_be/app/ai/context.py": "e160a156788ecf66a6a2c172d7e3339d33fc4f4e565d113ec421888f785ecbf7",
+    "fastapi_be/app/ai/gateway.py": "efd2f19c64252a19bcc14f07f6dee50a3808867b1587add575ec6746b4c87d76",
+    "fastapi_be/app/ai/governance.py": "0be2839196f1fa13d62f8819dddd9d17d208ea739aa2c340bc1b3a5a646c7d33",
+    "fastapi_be/app/ai/operational_sources.py": "6621427fdca8997190989396450f5a1d9b8fbab0639f25abeac6cf1b7edb04dd",
+    "fastapi_be/app/ai/references.py": "45d3f0333d31fc4fabc0462ed2109c9726f80810e2d4563c97aaef0f0b886faa",
+    "fastapi_be/app/ai/runtime.py": "a34cf09a6d521b5bcd013fda660d0ba795f03d8704bf5ba1d51b2e67b9e16c0f",
+    "fastapi_be/app/ai/schemas.py": "f9b75bf182fcdbfd483cfd45ed709e0a70be6e8a84aaf80d844175ce4fd5856f",
+    "fastapi_be/app/main.py": "955236a0c7de4fd9c2e2e61ca3d1ee9c390f12a9971acb5251fb3d061040dc4a",
+    "fastapi_be/app/models.py": "c1f31046d0e83e7316a9c83d5dd4243646aa0153b5da4f744c187b84ce8dd255",
+    "fastapi_be/app/routers/ai.py": "5e4cd23ae54f2297a624df92d578268d498351b4942bae81a2454017a1de1bda",
+    "fastapi_be/app/routers/ai_admin.py": "75e4f41d79be65a70b5c0cc0f625543cc235faab3e23aa4e17b35f023d67e318",
+    "fastapi_be/app/routers/ai_bed_series.py": "8baabba5e6d61a269d4c9bd62336d44e5149a26d03c8f4ccbcda0423ed4f2d3e",
+    "fastapi_be/app/routers/ai_bed_sources.py": "581f8946ee3643d51a2a06fd7617a88a2cd93a1d99cd1d226d1415636dd4f922",
+    "fastapi_be/requirements-bed.txt": "03da44eeb905de0759605bc96b535f9407cfcab5953a6a4d459f7649e346544a",
+    "fastapi_be/tests/test_ai_bed_admin.py": "b8f7e636d750e79bec5729f1f6d2da5ced676b150c0ed7a8404da14fdc3cd517",
+    "fastapi_be/tests/test_ai_bed_catalog.py": "07ee2de68a7f98e8143a0c3a49f5f2b45110fa761de4cc22b6897edd73337f51",
+    "fastapi_be/tests/test_ai_bed_context.py": "ee3328fe35bc27541abf2de28a8a88c3a83028ed6e0a69908aa538f2301f468a",
+    "fastapi_be/tests/test_ai_bed_contract.py": "ebae85fe2ce1e232e80172d44bbdf25a418f371dc1bd58715ff7b3601af6044e",
+    "fastapi_be/tests/test_ai_bed_facts.py": "8caec03c4e0e6ff9b77ad7108520e2fe59c3e3e7eb2647e9823dd31a19beac3e",
+    "fastapi_be/tests/test_ai_bed_gateway.py": "0fa933746a11939320f5423dce516e1b5a5e34c4f6430a9842eb42d700ffe719",
+    "fastapi_be/tests/test_ai_bed_history.py": "143d20e8a8283f3e4796eae14bdcdfcb58161ed87f28cb18fe6e69e723266e18",
+    "fastapi_be/tests/test_ai_bed_migration.py": "d88c9ad47fb576a50877946c8a1a02d4bda4eb1f6b2638802a25a22e0ac00c9f",
+    "fastapi_be/tests/test_ai_bed_model.py": "426ba1c579c827194592a567e4fe61c47ecb303e4ed3a7b11b946f18c7404fa1",
+    "fastapi_be/tests/test_ai_bed_pipeline.py": "5876cc5d963dbad83f192f9db45f758d2c00116848a2bfcb1c1c36ec46376be4",
+    "fastapi_be/tests/test_ai_bed_probe.py": "df972062a4373a727800c05c82504aa2e64f6396a69f5053f53d190dd1089466",
+    "fastapi_be/tests/test_ai_bed_series.py": "040fd391d67620fed6e9474840c3ed3f1b3d8adc22f9f8847f7bd1bc1dfa8be1",
+    "fastapi_be/tests/test_ai_bed_series_independent.py": "e57aba62a39758646777986a64cbcb4624db22bf20d49d6ab0166edc5e8aec49",
+    "fastapi_be/tests/test_ai_bed_series_input.py": "e74ccae188d86cca084084aa082fbd3f03bb2e1bf5670c625b56ad2b6f3e4c96",
+    "fastapi_be/tests/test_ai_bed_server.py": "09b1fb3fbc02b5a9c0e55442894d86e916081474fc60df3ddf2848b44927b25e",
+    "fastapi_be/tests/test_ai_bed_sources_api.py": "2a22379337386e93e0c2724e009c429ddf4d76a0aea39dac3e6034853d737041",
+    "vue3-new-ui/e2e/ai-bed-assistant.spec.js": "71d884099d22c2f091c076cb5f69ea6e21a0156ff1cd38401db97582d6ffbbcf",
+    "vue3-new-ui/e2e/ai-bed-entry.spec.js": "026debf6ae7809dc389116b0d674612ef10b509679740edeec169366e61c0146",
+    "vue3-new-ui/e2e/ai-bed-findings.spec.js": "21fdd7de536a65b96c9fbdbdb830ce197159e764b4f0689ed395fb9f720ed44f",
+    "vue3-new-ui/e2e/ai-bed-input.spec.js": "68a65221d5ea54b0a51b50fff93d628039fa50be6842d65a85cef39de68c4a22",
+    "vue3-new-ui/e2e/ai-bed-provider.spec.js": "18cc28f083af490dff81120eff9916a6aabac7d4db9e236036d6a3173d7aa6c6",
+    "vue3-new-ui/e2e/ai-bed-result-api.spec.js": "dbe909749f826d00a14b4cb0b88e292ded1fef2662c92c2f33c69c700b136c53",
+    "vue3-new-ui/e2e/ai-bed-series-api.spec.js": "a9045517dde90fed8b81988a7aabf6365410dddb76ea587c878cd399ef956431",
+    "vue3-new-ui/e2e/ai-bed-series.spec.js": "4b4aab8099128d65fb9eff058d2fddb329aeb60e4e53bd9127e03c07a4abc741",
+    "vue3-new-ui/e2e/ai-bed-source-api.spec.js": "2757ee8957365194aca055a6a13b373d2c728ca35584ecfcbafa28bf58e000d8",
+    "vue3-new-ui/e2e/ai-bed-sources.spec.js": "b23803f2e67999bfaeb603a2d80360100b678e516c697accae54ab711c38600e",
+    "vue3-new-ui/e2e/ai-source-queue-receipt.spec.js": "a414953dd3c6fa57bb8f59b3c2df3b2ba2078ba39b31851c8ec9f68b458c1bb0",
+    "vue3-new-ui/e2e/fixtures/bed-assistant-harness.cjs": "b86bbca6941a9998dfe0f8330d36d1413c5c97f88c453788cbd21e7ec3d4db6f",
+    "vue3-new-ui/e2e/fixtures/bed-assistant-ui.cjs": "36586dc5bfc4eae8850fafee7484209fab7fd8ad7466a432c0c6f78409cf6c40",
+    "vue3-new-ui/e2e/fixtures/bed-input-harness.cjs": "7820522f1d5463209e483146cbf6a14dc8a7708d01ccd868741983537359cf50",
+    "vue3-new-ui/e2e/fixtures/bed-input-ui.cjs": "3c9af4d24b77ff7c1400f63b78aac35e2c5bdca405ce4f7280f2ffda3cc4d80f",
+    "vue3-new-ui/e2e/fixtures/bed-native-fixtures.cjs": "efadc86ba2a29dc8c2691c9b67f4cab22bee854023a0e008160a141b916a660c",
+    "vue3-new-ui/e2e/fixtures/bed-result-harness.cjs": "0ff17f16bb8aed6fddf0eb60724a1a070709463a8face36df26d85f6e51dbb14",
+    "vue3-new-ui/e2e/fixtures/bed-result-ui.cjs": "ae3766bf7eda90f1cf2743e3eb2ad692cbbc2a91722be32ba590f9e2c4e1f55e",
+    "vue3-new-ui/e2e/fixtures/bed-series-harness.cjs": "4c4b602c90835b8ea808e5b1869e25809cde7d53a20bd5d0f034ea08e2d02d4e",
+    "vue3-new-ui/e2e/fixtures/bed-series-ui.cjs": "6f277e68851c5339691c35d9e01b5617fff7bcbcfbf8e4c7780864ad0291f0e4",
+    "vue3-new-ui/e2e/fixtures/bed-source-harness.cjs": "dd893371a53b13fb15204d1feb4eb3fc907dc669cd0965a4534665a5a881af1f",
+    "vue3-new-ui/e2e/fixtures/bed-source-ui.cjs": "978a9c929f309c9a776f51ac81852f6fc7069908126100ab17564508c8b4c230",
+    "vue3-new-ui/e2e/fixtures/bed-synthetic/README.md": "84e63d70ce66aea30ead2be67f4f23f1f74d1b9d656c6480740053b5374d488f",
+    "vue3-new-ui/e2e/fixtures/bed-synthetic/assistant-README.md": "adc0761e1941b34c7c65cb9b6aabacdb7ec78c81f844133b0b000634c310f52d",
+    "vue3-new-ui/e2e/fixtures/bed-synthetic/assistant-frozen.json": "ac13c10958094ff83428dedd17240b2666720837dbc4c65b1d3799b18ce06f02",
+    "vue3-new-ui/e2e/fixtures/bed-synthetic/assistant-partial-inspection.json": "6e3046b55b0be6c45b18f01fd89ed8398b5d4eeb352cafa83a5e0a98b06b5665",
+    "vue3-new-ui/e2e/fixtures/bed-synthetic/assistant-queued-serializer.json": "c7cff060a135c19671a3d6238fda7bc279475cabcf8bdd4ff19ec7a7ab489c9a",
+    "vue3-new-ui/e2e/fixtures/bed-synthetic/assistant-receipt-states.json": "aa399410e682aec79b917d384e3dcefca939023b09198402021421c9d6605279",
+    "vue3-new-ui/e2e/fixtures/bed-synthetic/catalog-prompt.json": "acfe7e2ada7f114a994b8791a2a91d1f1eae55774f52eba9496d756908c6b09f",
+    "vue3-new-ui/e2e/fixtures/bed-synthetic/pipeline-14.json": "a58af1cc28720ae179eca4ccb4c238a8d807e395e51be3d2a71d5ff23664c081",
+    "vue3-new-ui/e2e/fixtures/bed-synthetic/pipeline-7.json": "09f3815454b6b634e810e1d6b298705ac5b2b3bd2864f1533eb640dd7b076601",
+    "vue3-new-ui/e2e/fixtures/bed-synthetic/pipeline-partial.json": "30956b4f6005563145e04e3feb73e99a84ee025fccb9cbe00b95f33df9b7bf44",
+    "vue3-new-ui/e2e/fixtures/bed-synthetic/provider-compatible.json": "7c87a5621b3fbb60f0e0c32db5bb4f5ac7bbc719d8c54d789323c18d1d81491c",
+    "vue3-new-ui/e2e/fixtures/bed-synthetic/provider-model-mismatch.json": "45b175c2e3bdfce013207134de7e4a891ff35207ea014a6b4cadbb47c5a15fb2",
+    "vue3-new-ui/e2e/fixtures/bed-synthetic/provider-timeout-mismatch.json": "486a0c1aa6f3f1c2eed1b468a0b6f36c29cb981e522fc4f51dc2b36d4cff0e20",
+    "vue3-new-ui/e2e/fixtures/bed-synthetic/series-complete.json": "d55592b51230c6bc65d44d73fa64c91af8e6a4bb505a3213af8d74af4f5c90dc",
+    "vue3-new-ui/e2e/fixtures/bed-synthetic/series-options.json": "e0b12dbf6d23eae9f49d2b9cdfcde56f98d90316265aa14f59265a0dc84b0f2d",
+    "vue3-new-ui/e2e/fixtures/bed-synthetic/series-partial.json": "86b24fa58493fe125d89c48cc27f4013e9373c4a7db759579f690d0ba2c053e4",
+    "vue3-new-ui/e2e/fixtures/bed-synthetic/series-rejected.json": "828d0ed9ba778b5537f837bf98a0cdc6cd7ee829868ab82b6444755180fbdcfc",
+    "vue3-new-ui/e2e/fixtures/bed-synthetic/series-stale.json": "fe37a973120efe9a07418fd8d227a1cc5b8b390f16b7bb6df52738b037850685",
+    "vue3-new-ui/e2e/fixtures/bed-synthetic/sources.json": "afb8a2e5e84a9acf0084b6f8a0401ba68a100d6723eb9d53356e12d6e3a1a5d4",
+    "vue3-new-ui/e2e/fixtures/source-queue-receipt-states.json": "aa8aefe945a79942287b786f9d15eaa21889cca3fa6bbb2b1316013715697bb7",
+    "vue3-new-ui/e2e/fixtures/source-queue-receipt.json": "624594e04ae2f9a60947792bcfa7e14cbf3c1272480fdb4f32783a13e1a52154",
+    "vue3-new-ui/rspack.config.js": "fe9499a004016f56b075bf9371e79d72ad794b2608f2004bc3ac5ef5accbeea8",
+    "vue3-new-ui/scripts/generate-bed-result-schemas.cjs": "f4ae927b5b3da1ca9452d49a859854c4dc0fd9f1712338a920600a250cce8f6d",
+    "vue3-new-ui/scripts/generate-bed-series-schemas.cjs": "a08641a9393a235d07351d804976e00a59b1dde839e041acf878ea7533090e03",
+    "vue3-new-ui/scripts/generate-bed-source-schemas.cjs": "1526f2c632c5b76eaec1ce179feb8ab8866396790d6d29f2d4892bf393ba5351",
+    "vue3-new-ui/src/api/bedFixedPolicy.json": "a9b6d45f9a1a9a9d1af95e7aaeedf29de99f1bc39c401416bad7e0fcba41872f",
+    "vue3-new-ui/src/api/bedForecast.js": "c7b723cc6238bfc6a20c585e71cc54cd4a2aa3e3de24876a4436aa6fab53458f",
+    "vue3-new-ui/src/api/bedMath.js": "9a385c5bdb567e9da85c595da6f90a267ac33278a593d276390878c84022cffc",
+    "vue3-new-ui/src/api/bedResultSchemas.json": "5abf18b9b210569909579bb18547dc56ff2772ace27db39a7b65ab403afeedd6",
+    "vue3-new-ui/src/api/bedSeries.js": "cf05e05c70f2812ef40c18c10b84445409fa7e717fc30cefbef21ee8052f7341",
+    "vue3-new-ui/src/api/bedSeriesSchemas.json": "e199ee3ba7068006b572bf537ed8a43f1b0a423c33d0c0e36367a94e5396b047",
+    "vue3-new-ui/src/api/bedSourceSchemas.json": "ee40f6586e03ae849211e8669158a84f14d43decb77cdf25052e8726409dbfea",
+    "vue3-new-ui/src/api/bedSources.js": "71a425637d267f5a9ed914ac78e43a20916db1711e2aba1f5269ebdeea9f8f2b",
+    "vue3-new-ui/src/api/sofaSchema.js": "404c8547f64d89978da1f9af97f5c7d8e19ffcb0a569f4a168ee0624f7a12209",
+    "vue3-new-ui/src/components/AIAssistant/index.vue": "3155250abd922b3972cfb603eabd28c4c2c1d46dd2ceff13c36cd23572bb27a8",
+    "vue3-new-ui/src/components/AIBedFindings/index.vue": "1f37209cab9062b4b397e20dbe0184ab4f11cd31338dabc39a4e2afd90bc1cd8",
+    "vue3-new-ui/src/components/AIBedInput/index.vue": "5cd13874fd189f1187efb381a5fd4e4a9e6c7a92d2e225dd8e3f0075f4f039d2",
+    "vue3-new-ui/src/components/AIBedProviderCheck/index.vue": "60edd9bf09012c5ec16cc8f13db06f62aac399d31b85b69954032c5e9eedde7b",
+    "vue3-new-ui/src/components/AIBedSeries/SeriesForm.vue": "1836917eb30c08cf048ac15b91e1e227a7f3f643a79accdcb5021189474787d2",
+    "vue3-new-ui/src/components/AIBedSeries/index.vue": "fdfb22f751da2cfe5dea5849cb9d7d842ed9fdeb338adb3564e04cd04289a00e",
+    "vue3-new-ui/src/components/AIBedSources/CountField.vue": "28b61aa20b7b1abc4be2805eee20923bbc43df5b80ec6195d111f77703fb4b9f",
+    "vue3-new-ui/src/components/AIBedSources/SourceForm.vue": "ae549876ac0b21c95969d70c1644fa709abc17ac64e331f4d6dc647f6ceaa4d5",
+    "vue3-new-ui/src/components/AIBedSources/index.vue": "cbe5e4ba97774c1cd76b6a31026d61467f2fdbce91feb0d3bcc65103086ae8ff",
+    "vue3-new-ui/src/views/inpatient/wardManagement.vue": "6317425fdf394d47ca5eca90a2caab81fc502e302dea5f85b3713cf22731f958",
+    "vue3-new-ui/src/views/system/aiManagement.vue": "fb886b1988f184cb9b84ed63aab2b14e55b0f98d8b851aaf1bfc3d61a045e7b5",
+    "vue3-new-ui/tests/rspackExit.test.cjs": "9e1c3bc7f9fef90d2c8e9bd9692d9f279eec7e50a635b7bcc122fa0d5c554f76",
+    "doc/ai-prompts.json": "340d13b35ef82d75fb61f8a0f5ea467a13b6c763935cf3fdcb2480959acc4993",
+    "doc/ai-capabilities.md": "b7784a3ea4750e06ae435573c7ccaaad402c0effc927a72165c1b7bcb9e9c197",
+    "doc/api-rbac-matrix.md": "57be0e0cedc9a896cc874d2aa0ee6b529e11002614c8019e7fcc3e565215326e",
+    "fastapi_be/rbac_matrix.json": "3914d7e35e24632685727f79b25feedc7870bdc21388a8660fee212a1924cc55"
+  },
+  "evidence_artifacts": {
+    "hoim-bed-full-frozen-pytest-execution.json": {
+      "path": "/tmp/hoim-bed-full-frozen-pytest-execution.json",
+      "bytes": 1832,
+      "sha256": "c9612cbf05b84fc1ba43f6d3df08ce8bc40730dc5812d64db1c054ae8a914ee0",
+      "retention": "Temporary local evidence; path and digest are recorded, contents are not packaged in this repository."
+    },
+    "hoim-bed-full-frozen-pytest.log": {
+      "path": "/tmp/hoim-bed-full-frozen-pytest.log",
+      "bytes": 7432,
+      "sha256": "0c5e8be7751c7406affc99bd997e3576293bfc5b6988fde64a00c48481cc941a",
+      "retention": "Temporary local evidence; path and digest are recorded, contents are not packaged in this repository."
+    },
+    "hoim-bed-backend-frozen-source-freeze.json": {
+      "path": "/tmp/hoim-bed-backend-frozen-source-freeze.json",
+      "bytes": 116783,
+      "sha256": "33756ae80622e64af3f7a958aa79b39a1a08309a42d0319be486448fde568707",
+      "retention": "Temporary local evidence; path and digest are recorded, contents are not packaged in this repository."
+    },
+    "hoim-bed-backend-frozen-ruff-execution.json": {
+      "path": "/tmp/hoim-bed-backend-frozen-ruff-execution.json",
+      "bytes": 5123,
+      "sha256": "2c6ef714648fa63b4d68ace5cb2f9f69117060fa45a3c43c0e1994a6e81ab1ef",
+      "retention": "Temporary local evidence; path and digest are recorded, contents are not packaged in this repository."
+    },
+    "hoim-bed-backend-frozen-ruff.log": {
+      "path": "/tmp/hoim-bed-backend-frozen-ruff.log",
+      "bytes": 46,
+      "sha256": "eb96790a30d189ee0c724f6c3c3dd60e13d76cf8da612718b87e3cf94a714bf7",
+      "retention": "Temporary local evidence; path and digest are recorded, contents are not packaged in this repository."
+    },
+    "hoim-bed-platform-final3-inventory.json": {
+      "path": "/tmp/hoim-bed-platform-final3-inventory.json",
+      "bytes": 131944,
+      "sha256": "7c2e13bed4bd6e3ea5646353325cdb4d1ed78469018c75924247f0d3a9e61f4c",
+      "retention": "Temporary local evidence; path and digest are recorded, contents are not packaged in this repository."
+    },
+    "hoim-bed-container-final-verification.json": {
+      "path": "/tmp/hoim-bed-container-final-verification.json",
+      "bytes": 52998,
+      "sha256": "5c9f958fc074cfc75e0a98226ba615ca8f2b5fb4518949f8a523398ae7d04675",
+      "retention": "Temporary local evidence; path and digest are recorded, contents are not packaged in this repository."
+    },
+    "hoim-bed-mysql-final-verification.json": {
+      "path": "/tmp/hoim-bed-mysql-final-verification.json",
+      "bytes": 14740,
+      "sha256": "2bc912f78fcf34ad70a4a4f0b3f3960931a0dcc63cfcca71c3a1d1b8db3c2f21",
+      "retention": "Temporary local evidence; path and digest are recorded, contents are not packaged in this repository."
+    },
+    "hoim-bed-npm-final2-verify-execution.json": {
+      "path": "/tmp/hoim-bed-npm-final2-verify-execution.json",
+      "bytes": 49077,
+      "sha256": "2441c4bf5ed244114634735f98864506740370f41c07e8bdb4412377ef81a545",
+      "retention": "Temporary local evidence; path and digest are recorded, contents are not packaged in this repository."
+    },
+    "hoim-bed-npm-final2-verify.log": {
+      "path": "/tmp/hoim-bed-npm-final2-verify.log",
+      "bytes": 54926,
+      "sha256": "85a7fcd6b65cf053adeb666bf863343f58e782fb2cf5cb72c2087fbd9da947d8",
+      "retention": "Temporary local evidence; path and digest are recorded, contents are not packaged in this repository."
+    },
+    "hoim-bed-node-final-tests.log": {
+      "path": "/tmp/hoim-bed-node-final-tests.log",
+      "bytes": 3019,
+      "sha256": "72456f6d083bc47144450b64433465c06bda2bd0e24bc65fc73e975b67f4add4",
+      "retention": "Temporary local evidence; path and digest are recorded, contents are not packaged in this repository."
+    },
+    "hoim-bed-admin-dedup-final2-verification.json": {
+      "path": "/tmp/hoim-bed-admin-dedup-final2-verification.json",
+      "bytes": 2805,
+      "sha256": "4f741be9d019f7cecbb7624656af24ac11caed1ff506b65aeeb64ce12858ef3f",
+      "retention": "Temporary local evidence; path and digest are recorded, contents are not packaged in this repository."
+    },
+    "hoim-bed-browser-frozen-final2-execution.json": {
+      "path": "/tmp/hoim-bed-browser-frozen-final2-execution.json",
+      "bytes": 3234,
+      "sha256": "1a9d2953dcf3d05a017982a381b11d473706b2b6936940c2a7430361216611b4",
+      "retention": "Temporary local evidence; path and digest are recorded, contents are not packaged in this repository."
+    },
+    "hoim-bed-browser-frozen-final2-report.json": {
+      "path": "/tmp/hoim-bed-browser-frozen-final2-report.json",
+      "bytes": 810250,
+      "sha256": "fda42a8edc0824db5506467497375c491822e03b4ad33c7a2553bfbbb87ab105",
+      "retention": "Temporary local evidence; path and digest are recorded, contents are not packaged in this repository."
+    },
+    "hoim-bed-browser-frozen-final2-tests.log": {
+      "path": "/tmp/hoim-bed-browser-frozen-final2-tests.log",
+      "bytes": 103115,
+      "sha256": "20874d46fc249c91a275a91f9295467e7e322e26bd9a1931b19b315a91b1a2d8",
+      "retention": "Temporary local evidence; path and digest are recorded, contents are not packaged in this repository."
+    },
+    "hoim-bed-frontend-final2-source-freeze.json": {
+      "path": "/tmp/hoim-bed-frontend-final2-source-freeze.json",
+      "bytes": 117305,
+      "sha256": "694e687e043b4825c49b0db0fb78851745a312811e1da7fbee468afa8dee3dda",
+      "retention": "Temporary local evidence; path and digest are recorded, contents are not packaged in this repository."
+    },
+    "hoim-bed-browser-final2-list-counts.json": {
+      "path": "/tmp/hoim-bed-browser-final2-list-counts.json",
+      "bytes": 210451,
+      "sha256": "5a4f45dca30eaccf820f2468a0a10d2336a0a4fdff22cc4b00324beca02827c0",
+      "retention": "Temporary local evidence; path and digest are recorded, contents are not packaged in this repository."
+    },
+    "hoim-bed-browser-final2-list.log": {
+      "path": "/tmp/hoim-bed-browser-final2-list.log",
+      "bytes": 87485,
+      "sha256": "dc1f58d62ec4b56db6b74ef09e8d876f42b8b52b0cd67b3d1c9b4026cf862f0f",
+      "retention": "Temporary local evidence; path and digest are recorded, contents are not packaged in this repository."
+    },
+    "hoim-bed-browser-final2-category-counts.json": {
+      "path": "/tmp/hoim-bed-browser-final2-category-counts.json",
+      "bytes": 378399,
+      "sha256": "9ec89c21a3cea5472510bd262ad9761875d29a1966e3a749a7f7d1e0e2d16287",
+      "retention": "Temporary local evidence; path and digest are recorded, contents are not packaged in this repository."
+    },
+    "hoim-bed-browser-extract-final4-categories.py": {
+      "path": "/tmp/hoim-bed-browser-extract-final4-categories.py",
+      "bytes": 15038,
+      "sha256": "d5713b0998405db813b370216d3a999ff2c8c7f14db946780391294ba6dd1ffe",
+      "retention": "Temporary local evidence; path and digest are recorded, contents are not packaged in this repository."
+    },
+    "hoim-bed-browser-final2-static-server-cleanup.json": {
+      "path": "/tmp/hoim-bed-browser-final2-static-server-cleanup.json",
+      "bytes": 428,
+      "sha256": "dfade778b55858fe294f8c3eba29edaf016014bea4ba574dcdd635b023b8c7fd",
+      "retention": "Temporary local evidence; path and digest are recorded, contents are not packaged in this repository."
+    },
+    "hoim-bed-browser-extract-final2-categories.py": {
+      "path": "/tmp/hoim-bed-browser-extract-final2-categories.py",
+      "bytes": 15015,
+      "sha256": "680c30b4292f8fc02851c2592197ac705a75d5cc2f6c35ae0a2f520f785749b6",
+      "retention": "Temporary local evidence; path and digest are recorded, contents are not packaged in this repository."
+    },
+    "hoim-bed-browser-extract-final3-categories.py": {
+      "path": "/tmp/hoim-bed-browser-extract-final3-categories.py",
+      "bytes": 15012,
+      "sha256": "bb09b217b4753b8e0d186edcb624853fb27f6c2936fab674ab13a3e6278260e7",
+      "retention": "Temporary local evidence; path and digest are recorded, contents are not packaged in this repository."
+    },
+    "hoim-bed-browser-final-category-counts.json": {
+      "path": "/tmp/hoim-bed-browser-final-category-counts.json",
+      "bytes": 378374,
+      "sha256": "eb9bfc0e6e7130195047f7d5609ceac331dfc5e95b1aaec08784043a9813fd66",
+      "retention": "Temporary local evidence; path and digest are recorded, contents are not packaged in this repository."
+    },
+    "hoim-bed-browser-category-first-attempt.log": {
+      "path": "/tmp/hoim-bed-browser-category-first-attempt.log",
+      "bytes": 440,
+      "sha256": "5070521c1b72ffb7eec79bb94a04abf5431e0e5fc10c894ffd0c6dd1b8d0381b",
+      "retention": "Temporary local evidence; path and digest are recorded, contents are not packaged in this repository."
+    },
+    "hoim-bed-browser-frozen-final-execution.json": {
+      "path": "/tmp/hoim-bed-browser-frozen-final-execution.json",
+      "bytes": 3235,
+      "sha256": "d68548a537a058927454e5157e084ef05568692348bae21cd301f4babe5b88dc",
+      "retention": "Temporary local evidence; path and digest are recorded, contents are not packaged in this repository."
+    },
+    "hoim-bed-browser-frozen-final-report.json": {
+      "path": "/tmp/hoim-bed-browser-frozen-final-report.json",
+      "bytes": 562002,
+      "sha256": "343869794db6ee0ef4e7d931f045489126af5e217f447198f4e64c20a8cbb573",
+      "retention": "Temporary local evidence; path and digest are recorded, contents are not packaged in this repository."
+    },
+    "hoim-bed-browser-frozen-final-tests.log": {
+      "path": "/tmp/hoim-bed-browser-frozen-final-tests.log",
+      "bytes": 32047,
+      "sha256": "7afec9cf4646b5dd964a89e2bcb257ad5168bc4eedd80b5f4e77b18645c57fd9",
+      "retention": "Temporary local evidence; path and digest are recorded, contents are not packaged in this repository."
+    },
+    "hoim-bed-frontend-final-source-freeze.json": {
+      "path": "/tmp/hoim-bed-frontend-final-source-freeze.json",
+      "bytes": 117305,
+      "sha256": "15c239b58cb11412f2a79f19170a243c2181254641312fd2183c86667d29d971",
+      "retention": "Temporary local evidence; path and digest are recorded, contents are not packaged in this repository."
+    },
+    "hoim-bed-full-browser-first-ward-error-context.md": {
+      "path": "/tmp/hoim-bed-full-browser-first-ward-error-context.md",
+      "bytes": 29851,
+      "sha256": "bb880978e71761d2c8df26d2cc1d9ee7b6caf831058af90a230156842aaa30bb",
+      "retention": "Temporary local evidence; path and digest are recorded, contents are not packaged in this repository."
+    },
+    "hoim-bed-source-ui-frozen-verification.json": {
+      "path": "/tmp/hoim-bed-source-ui-frozen-verification.json",
+      "bytes": 6851,
+      "sha256": "2e110bc9c7fd7adc2094ca0d34bf1e090368a3810049fed13c97beec5bd1eea9",
+      "retention": "Temporary local evidence; path and digest are recorded, contents are not packaged in this repository."
+    },
+    "hoim-bed-series-ui-frozen-verification.json": {
+      "path": "/tmp/hoim-bed-series-ui-frozen-verification.json",
+      "bytes": 9755,
+      "sha256": "9557ca9c9c3496e328dd722cf25223371f4e5563f904aa1112cac41b6c49e3aa",
+      "retention": "Temporary local evidence; path and digest are recorded, contents are not packaged in this repository."
+    },
+    "hoim-bed-series-ui-final2-verification.json": {
+      "path": "/tmp/hoim-bed-series-ui-final2-verification.json",
+      "bytes": 4919,
+      "sha256": "a65ca5a3d5ec6f5abe98c2985fb09631770b3a0a86825c244f6c6ad0f629ef05",
+      "retention": "Temporary local evidence; path and digest are recorded, contents are not packaged in this repository."
+    },
+    "hoim-bed-result-ui-frozen-verification.json": {
+      "path": "/tmp/hoim-bed-result-ui-frozen-verification.json",
+      "bytes": 10371,
+      "sha256": "3a47b56e8ad2553b40d5a1b9fcd6902d54a1bf2693962a6889676c849d9dac74",
+      "retention": "Temporary local evidence; path and digest are recorded, contents are not packaged in this repository."
+    },
+    "hoim-bed-ui-owned-frozen-list.json": {
+      "path": "/tmp/hoim-bed-ui-owned-frozen-list.json",
+      "bytes": 61207,
+      "sha256": "a2376f30910b77c07706d4d7389c1039aa7e685c048c59d662dcce9bb8fbfc34",
+      "retention": "Temporary local evidence; path and digest are recorded, contents are not packaged in this repository."
+    },
+    "hoim-bed-input-controlled-frozen-tests.log": {
+      "path": "/tmp/hoim-bed-input-controlled-frozen-tests.log",
+      "bytes": 3931,
+      "sha256": "1943097211571928fe95bbcf9ec176f11adbc517ce200877fb5fca961e2ca16e",
+      "retention": "Temporary local evidence; path and digest are recorded, contents are not packaged in this repository."
+    },
+    "hoim-bed-assistant-final-verification.json": {
+      "path": "/tmp/hoim-bed-assistant-final-verification.json",
+      "bytes": 24868,
+      "sha256": "d4e375e54d86e860f71a4349c5b87085fe827133074300ea4a41ed5313ba6105",
+      "retention": "Temporary local evidence; path and digest are recorded, contents are not packaged in this repository."
+    },
+    "hoim-source-queue-receipt-final-browser-verification.json": {
+      "path": "/tmp/hoim-source-queue-receipt-final-browser-verification.json",
+      "bytes": 2285,
+      "sha256": "028b37e654d28fbcdf2a8daeb26f2ea44b9cc0874f7d9136d810dc72fae8f234",
+      "retention": "Temporary local evidence; path and digest are recorded, contents are not packaged in this repository."
+    },
+    "hoim-bed-final-evidence-independent-review.json": {
+      "path": "/tmp/hoim-bed-final-evidence-independent-review.json",
+      "bytes": 74446,
+      "sha256": "89a699ab8071922626fc10f8730d37c91401f61c4092cad45780d1871c1c2b4a",
+      "retention": "Temporary local evidence; path and digest are recorded, contents are not packaged in this repository."
+    },
+    "hoim-bed-final-evidence-post-browser-review.json": {
+      "path": "/tmp/hoim-bed-final-evidence-post-browser-review.json",
+      "bytes": 4448,
+      "sha256": "9da5a37f77c80f34e0beffb8c38769e7482c0726131bcab94cf2848ca3611d4c",
+      "retention": "Temporary local evidence; path and digest are recorded, contents are not packaged in this repository."
+    }
+  },
+  "evidence_retention_limit": "Only this summary and exact source/generated/historical digests are committed. Listed /tmp logs, scripts, fixtures, reports and cleaned-container artifacts are temporary local evidence, not a permanent repository evidence bundle; archival is separate.",
+  "no_all80_completion_or_real_operational_effect_claim": true,
+  "recording_script": {
+    "path": "/tmp/hoim-bed-final-evidence-builder.py",
+    "bytes": 42460,
+    "sha256": "59a8eb5678bbf24db5d5db19d9ca38c59b6c3758b1a71baaaf0ab886c8fa1ba6",
+    "retention": "Temporary local evidence; path and digest are recorded, contents are not packaged in this repository."
+  }
+}

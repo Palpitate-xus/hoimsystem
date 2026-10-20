@@ -521,8 +521,13 @@ async function loadHistory(activeNames) {
   if(rosterLifecycle.value&&!rosterAuthorized.value)return;
   if (!historyOpen || !featureKey.value || (selected.value?.scope === "patient" && !patientId.value)) return;
   const version = ++historyVersion,ticket=captureSupport();
-  const response = await getAIRuns({...(rosterLifecycle.value?{department_id:serviceDepartment.value||undefined,roster_plan_id:(rosterInitialReferences.value||rosterSelection.value)?.roster_plan_id}:{}),feature_key: featureKey.value, patient_id: selected.value?.scope === "patient" ? patientId.value : undefined, encounter_ref: selected.value?.scope === "patient" ? encounterRef.value || undefined : undefined });
-  if (version === historyVersion&&supportCurrent(ticket)) history.value = response.data || [];
+  try {
+    const response = await getAIRuns({...(rosterLifecycle.value?{department_id:serviceDepartment.value||undefined,roster_plan_id:(rosterInitialReferences.value||rosterSelection.value)?.roster_plan_id}:{}),feature_key: featureKey.value, patient_id: selected.value?.scope === "patient" ? patientId.value : undefined, encounter_ref: selected.value?.scope === "patient" ? encounterRef.value || undefined : undefined });
+    if (version === historyVersion&&supportCurrent(ticket)) history.value = response.data || [];
+  } catch(failure) {
+    if(supportLifecycle.value||sofaLifecycle.value||rosterLifecycle.value){if(version===historyVersion&&supportCurrent(ticket)){history.value=[];stopPolling();clearUnavailableSupport(ticket);}return;}
+    throw failure;
+  }
 }
 watch([() => JSON.stringify(store.getters["user/permissions"]), () => store.state.user.accessToken,()=>store.state.user.username], () => {
   if (!needsForecast.value && !needsRiskWindow.value && !supportLifecycle.value && !sofaLifecycle.value&&!rosterLifecycle.value) return;
@@ -544,7 +549,11 @@ async function copyDraft() {
   const text = [run.value.result.summary, ...run.value.result.sections.map(item => `${item.title}\n${item.content}`), ...segments, ...ecgFindings, ...imageFindings].join("\n\n");
   try { await navigator.clipboard.writeText(text); ElMessage.success("草稿已复制，请核对后使用"); } catch { ElMessage.info("当前环境无法自动复制，请选中结果文本复制"); }
 }
-async function submitFeedback() { await reviewAIRun(run.value.run_id, feedback.value); feedbackDialog.value = false; feedback.value = { outcome: "accepted", comment: "" }; ElMessage.success("复核反馈已保存"); }
+async function submitFeedback() {
+  if(!run.value)return;const id=run.value.run_id,ticket=captureSupport();
+  try{await reviewAIRun(id,feedback.value);if(!supportCurrent(ticket)||run.value?.run_id!==id)return;feedbackDialog.value=false;feedback.value={outcome:"accepted",comment:""};ElMessage.success("复核反馈已保存");}
+  catch(failure){if(supportLifecycle.value||sofaLifecycle.value||rosterLifecycle.value){if(supportCurrent(ticket)&&run.value?.run_id===id){historyVersion++;history.value=[];stopPolling();clearUnavailableSupport(ticket);}return;}throw failure;}
+}
 onMounted(async () => {
   loading.value = true;
   const initialSelection=selectionVersion,initialCredentials = JSON.stringify([store.state.user.accessToken,store.getters["user/permissions"]]);

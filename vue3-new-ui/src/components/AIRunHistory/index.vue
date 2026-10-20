@@ -1,11 +1,12 @@
 <template>
-  <div>
+  <div v-if="allowed">
     <el-form inline @submit.prevent="load(true)">
       <el-form-item label="能力"><el-select v-model="filters.feature_key" clearable filterable placeholder="全部能力" style="width: 210px"><el-option v-for="item in features" :key="item.key" :value="item.key" :label="item.name" /></el-select></el-form-item>
       <el-form-item label="状态"><el-select v-model="filters.status" clearable placeholder="全部状态" style="width: 130px"><el-option v-for="(label, value) in states" :key="value" :value="value" :label="label" /></el-select></el-form-item>
       <el-form-item label="反馈"><el-select v-model="filters.outcome" clearable placeholder="全部反馈" style="width: 150px"><el-option v-for="(label, value) in outcomes" :key="value" :value="value" :label="'含' + label + '反馈'" /></el-select></el-form-item>
       <el-form-item label="发起用户ID"><el-input-number v-model="filters.requested_by" :min="1" :controls="false" style="width: 130px" /></el-form-item>
       <el-form-item label="患者ID"><el-input-number v-model="filters.patient_id" :min="1" :controls="false" style="width: 130px" /></el-form-item>
+      <template v-if="filters.feature_key==='surgery_scheduling'"><el-form-item label="原手术科室"><el-input-number v-model="filters.department_id" :min="1" :controls="false" /></el-form-item><el-form-item label="原手术资源池"><el-input v-model="filters.surgery_pool_id" placeholder="原资源池规范UUID" /></el-form-item><el-form-item label="原受审手术场景"><el-input v-model="filters.surgery_scenario_id" placeholder="原场景规范UUID" /></el-form-item></template>
       <el-form-item><el-button type="primary" native-type="submit">查询任务</el-button><el-button @click="load()">刷新任务</el-button></el-form-item>
     </el-form>
     <el-table :data="rows" v-loading="loading" empty-text="暂无匹配任务">
@@ -30,6 +31,7 @@
           <el-alert v-if="!detail.snapshot_complete" type="info" :closable="false" title="旧任务按实际留存内容展示，部分执行快照字段未保存。" class="spaced" />
           <el-tabs v-model="detailTab" class="spaced">
             <el-tab-pane label="结果与引用" name="result">
+              <ai-surgery-findings v-if="visible&&detail.surgery_findings" :run="detail" :active="allowed&&visible" @inspect="showEvidence" />
               <ai-speech-findings v-if="visible" :findings="detail.audio_findings" :transcription="detail.result?.transcription" @inspect="showEvidence" />
               <ai-image-findings v-if="visible" :findings="detail.image_findings" :analysis="detail.result?.image_analysis" @inspect="showEvidence" />
               <ai-ecg-findings v-if="visible" :findings="detail.ecg_findings" :analysis="detail.result?.ecg_analysis" @inspect="showEvidence" />
@@ -54,43 +56,61 @@
 </template>
 
 <script setup>
-import { onActivated, onBeforeUnmount, onDeactivated, onMounted, ref, watch } from "vue";
+import { computed, defineAsyncComponent, onActivated, onBeforeUnmount, onDeactivated, onMounted, ref, watch } from "vue";
+import { useStore } from "vuex";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { cancelAIRun, getAIAdminRuns, getAIAdminRunTrace } from "@/api/ai";
 import AiSpeechFindings from "@/components/AISpeechFindings/index.vue";
 import AiImageFindings from "@/components/AIImageFindings/index.vue";
 import AiEcgFindings from "@/components/AIEcgFindings/index.vue";
+import { resolveSurgeryEvidence, verifySurgeryRun } from "@/api/ai/surgeryScenarios";
+import { supportCanonical, supportId } from "@/api/inpatientSupport";
+const AiSurgeryFindings=defineAsyncComponent(()=>import("@/components/AISurgeryFindings.vue"));
 const props = defineProps({ features: { type: Array, default: () => [] }, active: { type: Boolean, default: true } });
+const store=useStore(),roles=computed(()=>store.getters['user/permissions']||[]),allowed=computed(()=>props.active&&!!store.state.user.accessToken&&roles.value.includes('super_admin'));
+const auth=()=>supportCanonical([props.active,store.state.user.accessToken,store.state.user.username,roles.value]);
 const states = { queued: "排队中", running: "生成中", succeeded: "待业务复核", failed: "失败", cancelled: "已取消" };
 const outcomes = { accepted: "采纳", rejected: "驳回", modified: "修改后采纳" };
-const rows = ref([]), loading = ref(false), page = ref(1), total = ref(0), filters = ref({ feature_key: "", status: "", outcome: "", requested_by: undefined, patient_id: undefined });
+const rows = ref([]), loading = ref(false), page = ref(1), total = ref(0), filters = ref({ feature_key: "", status: "", outcome: "", requested_by: undefined, patient_id: undefined, department_id: undefined, surgery_pool_id:'',surgery_scenario_id:'' });
 const visible = ref(false), detail = ref(null), detailLoading = ref(false), detailTab = ref("result"), evidenceVisible = ref(false), evidence = ref(null);
 let listVersion = 0, detailVersion = 0;
 let wasDeactivated = false;
+let alive=true;
+const current=key=>alive&&!wasDeactivated&&allowed.value&&key===auth();
+const hasSurgery=value=>!!value?.surgery_findings||!!value?.result?.surgery_analysis||!!value?.frozen_request?.payload?.context?.surgery_binding||!!value?.frozen_request?.payload?.input?.surgery_scenario_id||String(value?.frozen_request?.provider_snapshot?.model||'').startsWith('surgery:');
+function clear(){++listVersion;++detailVersion;rows.value=[];total.value=0;detail.value=null;evidence.value=null;visible.value=evidenceVisible.value=false;loading.value=detailLoading.value=false;}
 async function load(reset = false) {
+  if(!allowed.value||!alive||wasDeactivated)return;
   if (reset) page.value = 1;
-  const version = ++listVersion; loading.value = true;
+  const version = ++listVersion,key=auth(); loading.value = true;
   const params = Object.fromEntries(Object.entries(filters.value).filter(([, value]) => value !== "" && value != null));
-  try { const response = await getAIAdminRuns({ ...params, page: page.value, page_size: 30 }); if (version === listVersion) { rows.value = response.data || []; total.value = response.total || 0; } }
-  finally { if (version === listVersion) loading.value = false; }
+  if(['surgery_pool_id','surgery_scenario_id'].some(name=>params[name]&&!supportId(params[name]))){loading.value=false;ElMessage.warning('原资源池与场景过滤须为明确规范UUID');return;}
+  try { const response = await getAIAdminRuns({ ...params, page: page.value, page_size: 30 }); if (current(key)&&version === listVersion) { rows.value = response.data || []; total.value = response.total || 0; } }
+  catch { if(current(key)&&version===listVersion){clear();ElMessage.warning('当前任务目录或审计权限无法重新核对，旧资料已清除');} }
+  finally { if (current(key)&&version === listVersion) loading.value = false; }
 }
 async function inspect(row) {
-  const version = ++detailVersion; visible.value = true; detail.value = null; detailTab.value = "result"; detailLoading.value = true;
-  try { const response = await getAIAdminRunTrace(row.run_id); if (version === detailVersion) detail.value = response.data; }
-  finally { if (version === detailVersion) detailLoading.value = false; }
+  if(!allowed.value||!alive||wasDeactivated)return;
+  const version = ++detailVersion,key=auth(); visible.value = true; detail.value = null; evidence.value=null;evidenceVisible.value=false;detailTab.value = "result"; detailLoading.value = true;
+  try { const response = await getAIAdminRunTrace(row.run_id);if(!current(key)||version!==detailVersion)return;const value=response.data;if(value?.run_id!==row.run_id||hasSurgery(value)&&!await verifySurgeryRun(value)){if(current(key)&&version===detailVersion)ElMessage.warning('原任务或完整手术冻结绑定无法核对，暂不展示');return;}if(current(key)&&version===detailVersion)detail.value=value; }
+  catch { if(current(key)&&version===detailVersion){clear();ElMessage.warning('当前完整任务或审计权限无法重新核对，旧资料已清除');} }
+  finally { if (current(key)&&version === detailVersion) detailLoading.value = false; }
 }
-function showEvidence(id) { evidence.value = detail.value?.evidence?.find(item => item.source_id === id); evidenceVisible.value = !!evidence.value; }
+async function showEvidence(id) { const key=auth(),version=detailVersion,original=detail.value;evidence.value=null;evidenceVisible.value=false;if(!current(key)||!original)return;const item=original.evidence?.find(value=>value.source_id===id),value=hasSurgery(original)?await resolveSurgeryEvidence(item,original.surgery_findings):item;if(current(key)&&version===detailVersion&&original===detail.value){evidence.value=value;evidenceVisible.value=!!value;} }
 async function cancel(row) {
+  const key=auth();if(!current(key))return;
   try {
     await ElMessageBox.confirm("取消后将停止接收结果，已发出的模型请求仍可能计费。", "取消任务结果接收", { confirmButtonText: "取消接收", cancelButtonText: "保留任务", type: "warning" });
-    await cancelAIRun(row.run_id); ElMessage.success("任务结果已取消接收"); await load();
-  } catch (error) { if (error !== "cancel" && error !== "close") throw error; }
+    if(!current(key))return;await cancelAIRun(row.run_id);if(!current(key))return;ElMessage.success("任务结果已取消接收"); await load();
+  } catch (error) { if (error !== "cancel" && error !== "close"&&current(key)){clear();ElMessage.warning('当前任务或取消权限已经变化，请重新核对');} }
 }
-watch(() => props.active, value => { if (value) load(); else { visible.value = false; evidenceVisible.value = false; ++detailVersion; } });
-onMounted(() => { if (props.active) load(); });
-onDeactivated(() => { wasDeactivated = true; visible.value = false; evidenceVisible.value = false; detail.value = null; ++detailVersion; });
-onActivated(() => { if (wasDeactivated) { wasDeactivated = false; if (props.active) load(); } });
-onBeforeUnmount(() => { ++listVersion; ++detailVersion; });
+watch(()=>filters.value.feature_key,value=>{if(value!=='surgery_scheduling'){filters.value.department_id=undefined;filters.value.surgery_pool_id=filters.value.surgery_scenario_id='';}},{flush:'sync'});
+watch(filters,clear,{deep:true,flush:'sync'});
+watch(auth,()=>{clear();if(allowed.value&&!wasDeactivated)load();},{flush:'sync'});
+onMounted(() => { if (allowed.value) load(); });
+onDeactivated(() => { wasDeactivated = true;clear(); });
+onActivated(() => { if (wasDeactivated) { wasDeactivated = false; if (allowed.value) load(); } });
+onBeforeUnmount(() => { alive=false;clear(); });
 </script>
 
 <style scoped>

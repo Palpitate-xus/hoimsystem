@@ -127,6 +127,9 @@ def create_run(db: Session, user: User, req: RunRequest) -> AIRun:
         if bundle.data.get("aki_source") and not aki_mode:
             raise HTTPException(422, "当前服务不是AKI规则适配器，请重新核对模型配置和输入方式")
     if spec.number == 42:
+        sofa_mode = provider.model.startswith("sofa1:")
+        if sofa_mode != bool(bundle.data.get("sofa_binding")):
+            raise HTTPException(422, "完整SOFA服务须选择独立日评估或变化核实引用，且不能由其他模式处理SOFA原件")
         qsofa_mode = provider.model.startswith("qsofa:")
         if qsofa_mode and not bundle.data.get("qsofa_source"):
             raise HTTPException(422, "当前qSOFA服务需要同时选择原窗口和明确床旁量/当前医生核实来源")
@@ -225,7 +228,11 @@ def authorize_run(db: Session, user: User, run: AIRun) -> None:
     if run.patient_id is not None:
         frozen_context = json.loads(run.input_json).get("payload", {}).get("context", {})
         nursing_frozen = has_frozen_nursing_sources(frozen_context)
-        if spec.number == 47 and frozen_context.get("support_source"):
+        if spec.number == 42 and frozen_context.get("sofa_binding"):
+            from app.ai.sofa_context import authorize_sofa_snapshot
+
+            authorize_sofa_snapshot(db, user, frozen_context, run.patient_id, run.encounter_ref)
+        elif spec.number == 47 and frozen_context.get("support_source"):
             authorize_support_snapshot(db, user, frozen_context, run.patient_id, run.encounter_ref)
         elif spec.number in RISK_FEATURES:
             if spec.number == 43 and frozen_context.get("aki_source"):
@@ -294,7 +301,27 @@ def describe_run(run: AIRun, include_result: bool = True) -> dict:
     data = {name: getattr(run, name) for name in fields}
     data.update({"feature_name": spec.name, "requires_human_review": True, "context_metadata": json.loads(run.context_metadata_json)})
     if include_result:
-        data["result"] = json.loads(run.result_json)
+        context = json.loads(run.input_json).get("payload", {}).get("context", {})
+        result = json.loads(run.result_json)
+        if context.get("sofa_binding"):
+            from sqlalchemy.orm import object_session
+
+            from app.ai.sofa_context import expand_context
+            from app.ai.sofa_storage import expand_result
+
+            db = object_session(run)
+            if db is None:
+                raise HTTPException(409, "完整SOFA任务须在授权数据库会话内展开")
+            expanded = expand_context(db, context)
+            if run.status == "succeeded" or result.get("schema_version") == "sofa_result_ref_v1":
+                result = expand_result(db, run)
+            if context["sofa_binding"]["kind"] == "daily":
+                data["sofa_findings"] = {key: expanded[key] for key in ("sofa_source", "sofa_assessment")}
+            else:
+                data["sofa_change_findings"] = {key: expanded[key] for key in ("sofa_change_source", "sofa_change_assessment")}
+        elif result.get("schema_version") == "sofa_result_ref_v1":
+            raise HTTPException(409, "SOFA完整结果引用不能由其他任务模式读取")
+        data["result"] = result
         if spec.number in RISK_FEATURES:
             data["observation_findings"] = json.loads(run.input_json).get("payload", {}).get("context", {}).get("observation_window")
         if spec.number == 41:
@@ -421,7 +448,9 @@ def _recheck_task(db: Session, run: AIRun) -> tuple[FeatureSpec, AIProvider, dic
         raise AIExecutionError("TASK_MODEL_CHANGED", "模型参数或输出限制已改变，请重新创建任务")
     if digest(snapshot["payload"]["context"]) != run.context_digest:
         raise AIExecutionError("TASK_SNAPSHOT_INVALID", "任务资料快照校验不一致，请重新创建任务")
-    if spec.number == 47 and snapshot["payload"]["context"].get("support_source") is not None and snapshot["payload"].get("evidence") != json.loads(run.evidence_json):
+    if (spec.number == 47 and snapshot["payload"]["context"].get("support_source") is not None or spec.number == 42 and snapshot["payload"]["context"].get("sofa_binding")) and snapshot["payload"].get(
+        "evidence"
+    ) != json.loads(run.evidence_json):
         raise AIExecutionError("TASK_EVIDENCE_CHANGED", "任务原支持资料引用与冻结证据不一致，请重新创建任务")
     if digest([COMMON_SYSTEM_PROMPT, snapshot["task_prompt"]]) != run.prompt_hash:
         raise HTTPException(409, "任务系统契约已改变，请重新创建任务")
@@ -457,12 +486,18 @@ async def execute_claimed(run_id: str, lease: str, *, transport=None) -> None:
     audio_file = None
     ecg_files = None
     image_files = None
+    sofa_run = False
     try:
         with database.SessionLocal() as db:
             run = db.get(AIRun, run_id)
             if not run or run.status != "running" or run.lease_token != lease:
                 return
             spec, provider, snapshot = _recheck_task(db, run)
+            sofa_run = spec.number == 42 and bool(snapshot["payload"]["context"].get("sofa_binding"))
+            if sofa_run:
+                from app.ai.sofa_context import expand_context
+
+                snapshot["payload"]["context"] = expand_context(db, snapshot["payload"]["context"], user=db.get(User, run.requested_by), current=True)
             if spec.number == 21:
                 asset = db.get(AIAudioAsset, snapshot["payload"]["context"]["audio_source"]["asset_id"])
                 audio_file = open_verified_audio(asset)
@@ -500,7 +535,12 @@ async def execute_claimed(run_id: str, lease: str, *, transport=None) -> None:
             result.warnings.insert(0, triage["emergency_message"])
         serialized_result = encode_json(result.model_dump())
         try:
-            _check_run_storage_json({"result_json": serialized_result})
+            if sofa_run:
+                from app.ai.sofa_storage import bounded_result
+
+                bounded_result(result.model_dump(mode="json"))
+            else:
+                _check_run_storage_json({"result_json": serialized_result})
         except HTTPException as exc:
             raise AIExecutionError("RESULT_STORAGE_LIMIT", "完整结果超过UTF-8文本存储能力，未接收或截断结果；可核对资料范围及适配器输出") from exc
     except AIExecutionError as exc:
@@ -542,13 +582,32 @@ async def execute_claimed(run_id: str, lease: str, *, transport=None) -> None:
         run.input_tokens, run.output_tokens = inputs, outputs
         run.latency_ms = int((time.monotonic() - started) * 1000)
         run.finish_time = utcnow()
-        if error:
-            run.status = "failed"
-            run.error_code, run.error_message = error
-        else:
-            run.status = "succeeded"
-            run.result_json = serialized_result
-        db.commit()
+        try:
+            if error:
+                run.status = "failed"
+                run.error_code, run.error_message = error
+            else:
+                if sofa_run:
+                    from app.ai.sofa_storage import stage_result
+
+                    run.result_json = stage_result(db, run, lease, result.model_dump(mode="json"))
+                else:
+                    run.result_json = serialized_result
+                run.status = "succeeded"
+            db.commit()
+        except Exception:
+            db.rollback()
+            if not sofa_run:
+                raise
+            # A rejected blob or audit transaction must never leave an accepted pointer.
+            failed = db.query(AIRun).filter_by(run_id=run_id, status="running", lease_token=lease).with_for_update().one_or_none()
+            if failed is not None:
+                failed.status = "failed"
+                failed.error_code, failed.error_message = "RESULT_STORAGE_ERROR", "完整SOFA结果与审计未能原子保存，结果未接收"
+                failed.input_tokens, failed.output_tokens = inputs, outputs
+                failed.latency_ms = int((time.monotonic() - started) * 1000)
+                failed.finish_time = utcnow()
+                db.commit()
 
 
 def expire_interrupted_runs(db: Session) -> int:

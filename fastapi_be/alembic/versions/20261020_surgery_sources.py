@@ -16,7 +16,7 @@ def upgrade():
     original = sa.Text().with_variant(mysql.MEDIUMTEXT(), "mysql")
     op.create_table(
         "hoimsystem_ai_surgery_write_gate",
-        sa.Column("gate_id", sa.Integer(), primary_key=True, nullable=False),
+        sa.Column("gate_id", sa.Integer(), primary_key=True, nullable=False, autoincrement=False),
         sa.Column("revision", sa.Integer(), nullable=False),
         sa.CheckConstraint("gate_id = 1 AND revision >= 1", name="ck_surgery_write_gate_singleton"),
     )

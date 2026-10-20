@@ -315,3 +315,13 @@ def test_foreign_busy_protected_body_cannot_attach_to_a_clinical_case_source(sql
             },
         )
     assert AISurgerySource.__table__.c.payload_json.type.length is None
+
+
+def test_singleton_gate_never_uses_mysql_auto_increment_with_checked_primary_key():
+    model_sql = str(CreateTable(SURGERY_MODELS[0].__table__).compile(dialect=mysql.dialect()))
+    assert "AUTO_INCREMENT" not in model_sql
+    assert SURGERY_MODELS[0].__table__.c.gate_id.autoincrement is False
+    sql = offline("upgrade")
+    gate = sql.split("CREATE TABLE hoimsystem_ai_surgery_write_gate", 1)[1].split(";", 1)[0]
+    assert "AUTO_INCREMENT" not in gate
+    assert "gate_id = 1 AND revision >= 1" in gate

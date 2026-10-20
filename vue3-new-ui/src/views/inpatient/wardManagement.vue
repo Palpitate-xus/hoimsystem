@@ -1,7 +1,7 @@
 <template>
   <div class="app-container">
     <vab-page-header title="病区床位管理" description="管理住院病区、房间和床位信息" />
-    <div v-if="canUseOperationalAI" class="page-toolbar"><ai-action label="AI 床位资料与预测" title="AI 床位容量与需求辅助" :feature-keys="['bed_forecast', 'operations_qa']" initial-feature="bed_forecast" :initial-input="currentWard?.department_id ? { department_id: currentWard.department_id } : {}" /></div>
+    <div v-if="canUseOperationalAI" class="page-toolbar"><ai-action label="AI 床位占用与流转预测" title="AI 床位占用与实际流转辅助" :feature-keys="['bed_forecast', 'operations_qa']" initial-feature="bed_forecast" :initial-input="currentWard?.department_id ? { department_id: currentWard.department_id, ward_id: currentWard.ward_id } : {}" /></div>
     <el-row :gutter="20">
       <el-col :span="8">
         <el-card>

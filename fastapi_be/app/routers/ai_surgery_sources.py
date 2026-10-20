@@ -81,6 +81,9 @@ def options(db: Session = Depends(get_db), user: User = Depends(require_roles(*f
             if exc.status_code != 403:
                 raise
             can_operate = False
+    signers = db.query(Doctor).filter_by(user_id=actor.user_id).order_by(Doctor.doctor_id).limit(2001).all() if actor.user_role in {"doctor", "director", "super_admin"} else []
+    if len(signers) > 2000:
+        raise HTTPException(422, "当前账号完整医师别名集合超过安全容量，不得截断")
     return {
         "code": 200,
         "data": {
@@ -91,6 +94,7 @@ def options(db: Session = Depends(get_db), user: User = Depends(require_roles(*f
             "has_actual_doctor": db.query(Doctor.doctor_id).filter_by(user_id=actor.user_id).first() is not None,
             "can_manage_registry": actor.user_role == "super_admin",
             "can_review": actor.user_role == "super_admin",
+            "clinical_signers": [{"doctor_id": row.doctor_id, "name": row.name, "department_id": row.department_id} for row in signers],
             "provider_required": False,
         },
     }

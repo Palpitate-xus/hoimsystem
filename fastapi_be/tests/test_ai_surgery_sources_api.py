@@ -70,6 +70,9 @@ async def test_options_separates_clinical_doctor_from_operational_and_super_mana
     assert result.status_code == 200, result.text
     data = result.json()["data"]
     assert data["has_actual_doctor"] and not data["can_record_operational"] and not data["can_review"] and not data["provider_required"]
+    assert data["clinical_signers"] == [{"doctor_id": case["doctor"].doctor_id, "name": case["doctor"].name, "department_id": case["doctor"].department_id}]
+    super_options = await surgery_http.get("/api/ai/surgery-sources/options", headers=auth_headers(case["super"].username))
+    assert super_options.status_code == 200 and super_options.json()["data"]["clinical_signers"] == []
     assert {item["pool_id"] for item in data["pools"]} == {case["pool"].pool_id}
     denied = await surgery_http.post(
         "/api/ai/surgery-registry/pool",

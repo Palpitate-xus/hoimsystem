@@ -416,6 +416,7 @@ async def execute_claimed(run_id: str, lease: str, *, transport=None) -> None:
 
     started = time.monotonic()
     error = result = None
+    serialized_result = None
     inputs = outputs = 0
     audio_file = None
     ecg_files = None
@@ -461,6 +462,11 @@ async def execute_claimed(run_id: str, lease: str, *, transport=None) -> None:
         triage = snapshot["payload"].get("tools", {}).get("triage_rules", {})
         if triage.get("emergency"):
             result.warnings.insert(0, triage["emergency_message"])
+        serialized_result = encode_json(result.model_dump())
+        try:
+            _check_run_storage_json({"result_json": serialized_result})
+        except HTTPException as exc:
+            raise AIExecutionError("RESULT_STORAGE_LIMIT", "完整结果超过UTF-8文本存储能力，未接收或截断结果；可核对资料范围及适配器输出") from exc
     except AIExecutionError as exc:
         if exc.input_tokens is not None:
             inputs, outputs = exc.input_tokens, exc.output_tokens
@@ -505,7 +511,7 @@ async def execute_claimed(run_id: str, lease: str, *, transport=None) -> None:
             run.error_code, run.error_message = error
         else:
             run.status = "succeeded"
-            run.result_json = encode_json(result.model_dump())
+            run.result_json = serialized_result
         db.commit()
 
 

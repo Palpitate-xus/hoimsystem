@@ -2580,6 +2580,7 @@ class PrescriptionReviewRule(Base):
     min_dose = Column(Numeric(12, 2))  # 剂量下限（每次）
     max_dose = Column(Numeric(12, 2))  # 剂量上限（每次）
     max_daily_dose = Column(Numeric(12, 2))  # 每日上限
+    dose_unit = Column(String(24), nullable=True)  # 与每次剂量相同的原始单位；旧规则保持未知
     condition_json = Column(Text)  # context 规则的结构化患者条件
     source = Column(String(100))
     version = Column(String(30))

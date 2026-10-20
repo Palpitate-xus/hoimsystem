@@ -10,7 +10,7 @@
 """
 import datetime
 import json
-import re
+from decimal import Decimal, InvalidOperation
 
 from sqlalchemy.orm import Session
 
@@ -105,11 +105,63 @@ def _context_matches(condition: dict, context: dict) -> bool:
         return False
 
 
+def _dose_evaluation(rule: PrescriptionReviewRule, items: list[dict]) -> dict | None:
+    """Evaluate explicit same-unit instructions; uncertain frequencies remain unevaluated."""
+    matches = [item for item in items if _match_drug(item.get("name", ""), rule.drug_a)]
+    if not matches:
+        return None
+    result = {"rule_id": rule.rule_id, "dose_unit": rule.dose_unit, "source": rule.source, "version": rule.version, "hit": False, "issues": [], "calculations": [], "unit_conversion_performed": False, "scope": "per_prescription_line"}
+    bounds = {name: getattr(rule, name) for name in ("min_dose", "max_dose", "max_daily_dose")}
+    result["limits"] = {name: str(value) if value is not None else None for name, value in bounds.items()}
+    if not rule.dose_unit:
+        result["issues"].append("剂量规则缺少原始单位，需药师明确规则单位后复核")
+    if not any(value is not None for value in bounds.values()):
+        result["issues"].append("剂量规则未配置阈值")
+    if result["issues"]:
+        return {**result, "evaluation_status": "not_evaluated"}
+    frequencies = {"qd": 1, "bid": 2, "tid": 3, "qid": 4, "q8h": 3, "q6h": 4, "q12h": 2, "qn": 1}
+    for item in matches:
+        name = item.get("name", "")
+        unit = item.get("dose_unit")
+        unit = unit.strip() if isinstance(unit, str) else unit
+        if unit != rule.dose_unit:
+            result["issues"].append(name + "：处方与规则剂量单位缺失或不一致，未自动换算")
+            continue
+        try:
+            dose = Decimal(str(item.get("dosage")))
+        except (InvalidOperation, ValueError):
+            dose = None
+        if dose is None or not dose.is_finite() or dose <= 0:
+            result["issues"].append(name + "：每次剂量缺失或无效，未进行数值比较")
+            continue
+        calculation = {"drug_name": name, "single_dose": str(dose), "dose_unit": unit, "frequency": item.get("frequency"), "calculated_daily_dose": None}
+        if bounds["min_dose"] is not None and dose < Decimal(str(bounds["min_dose"])):
+            result["hit"] = True
+        if bounds["max_dose"] is not None and dose > Decimal(str(bounds["max_dose"])):
+            result["hit"] = True
+        if bounds["max_daily_dose"] is not None:
+            frequency = item.get("frequency")
+            per_day = frequencies.get(frequency.strip().lower()) if isinstance(frequency, str) else None
+            if "/" in unit or "每" in unit:
+                result["issues"].append(name + "：带分母或速率的剂量单位需专用规则，未推算每日总量")
+            elif per_day is None:
+                result["issues"].append(name + "：频次未知、按需或单次给药，未推测每日总量")
+            else:
+                daily = dose * per_day
+                calculation["calculated_daily_dose"] = str(daily)
+                if daily > Decimal(str(bounds["max_daily_dose"])):
+                    result["hit"] = True
+        result["calculations"].append(calculation)
+    result["evaluation_status"] = "hit" if result["hit"] else "not_evaluated" if result["issues"] else "within_recorded_limits"
+    return result
+
+
 def check_prescription(
     db: Session,
     items: list[dict],
     allergy_history: str | None = None,
     patient_context: dict | None = None,
+    evaluation_log: list[dict] | None = None,
 ) -> list[dict]:
     """对一组处方明细执行全部启用规则。
 
@@ -119,16 +171,6 @@ def check_prescription(
     rules = db.query(PrescriptionReviewRule).filter(PrescriptionReviewRule.status == 1).order_by(PrescriptionReviewRule.rule_id).all()
     findings: list[dict] = []
 
-    freq_per_day = {"qd": 1, "bid": 2, "tid": 3, "qid": 4, "q8h": 3, "q6h": 4, "q12h": 2, "qn": 1, "prn": 1, "st": 1}
-
-    def daily_dose(it: dict) -> float:
-        freq = (it.get("frequency") or "").strip().lower()
-        per_day = freq_per_day.get(freq)
-        if per_day is None:
-            digits = re.findall(r"\d+", freq)
-            per_day = int(digits[0]) if digits else 1
-        return float(it.get("dosage") or 0) * per_day
-
     for rule in rules:
         today = datetime.date.today()
         if rule.effective_from and today < rule.effective_from:
@@ -136,24 +178,18 @@ def check_prescription(
         if rule.effective_to and today > rule.effective_to:
             continue
         hit = False
+        dose_evaluation = None
         if rule.rule_type == "interaction":
             names = [it.get("name", "") for it in items]
             hit = any(_match_drug(n, rule.drug_a) for n in names) and any(_match_drug(n, rule.drug_b) for n in names)
         elif rule.rule_type == "contraindication":
             hit = any(_match_drug(it.get("name", ""), rule.drug_a) for it in items)
         elif rule.rule_type == "dose":
-            for it in items:
-                if not _match_drug(it.get("name", ""), rule.drug_a):
-                    continue
-                dose = it.get("dosage")
-                if dose is None:
-                    continue
-                if rule.min_dose is not None and dose < float(rule.min_dose):
-                    hit = True
-                if rule.max_dose is not None and dose > float(rule.max_dose):
-                    hit = True
-                if rule.max_daily_dose is not None and daily_dose(it) > float(rule.max_daily_dose):
-                    hit = True
+            dose_evaluation = _dose_evaluation(rule, items)
+            if dose_evaluation:
+                if evaluation_log is not None:
+                    evaluation_log.append(dose_evaluation)
+                hit = dose_evaluation["hit"] or bool(dose_evaluation["issues"])
         elif rule.rule_type == "duplicate":
             names = [it.get("name", "") for it in items]
             hits = sum(1 for n in names if _match_drug(n, rule.drug_a))
@@ -177,9 +213,10 @@ def check_prescription(
                 "severity": rule.severity,
                 "rule_id": rule.rule_id,
                 "type": rule.rule_type,
-                "message": rule.message,
+                "message": rule.message + ("；需复核：" + "；".join(dose_evaluation["issues"]) if dose_evaluation and dose_evaluation["issues"] else ""),
                 "source": rule.source,
                 "version": rule.version,
+                "evaluation_status": dose_evaluation["evaluation_status"] if dose_evaluation else "hit",
             })
 
     # severity 排序：禁止(3) 在前
@@ -191,7 +228,7 @@ def has_blocking(findings: list[dict]) -> bool:
     return any(f["severity"] == 3 for f in findings)
 
 
-def review_saved_prescription(db: Session, prescription: Prescription) -> list[dict]:
+def review_saved_prescription(db: Session, prescription: Prescription, evaluation_log: list[dict] | None = None) -> list[dict]:
     """Re-evaluate persisted instructions against the patient's current recorded conditions."""
     patient = db.get(Patient, prescription.patient_id)
     if patient is None:
@@ -204,4 +241,4 @@ def review_saved_prescription(db: Session, prescription: Prescription) -> list[d
             items.append({"name": line.pharmaceutical.name, "number": line.number, "dosage": line.dosage, "dose_unit": line.dose_unit, "frequency": line.frequency, "route": line.route, "duration_days": line.duration_days})
     structured_allergens = [item[0] for item in db.query(PatientAllergy.allergen).filter_by(patient_id=patient.patient_id, status=1).all()]
     allergies = ";".join([patient.allergy_history or "", *structured_allergens])
-    return check_prescription(db, items, allergies, build_patient_context(db, patient))
+    return check_prescription(db, items, allergies, build_patient_context(db, patient), evaluation_log=evaluation_log)

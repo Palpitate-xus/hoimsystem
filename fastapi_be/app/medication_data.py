@@ -2,6 +2,37 @@
 
 from decimal import Decimal, InvalidOperation
 
+from pydantic import BaseModel, ConfigDict, Field, model_validator
+
+
+class DoseRuleFields(BaseModel):
+    """Validate rule precision against the existing NUMERIC(12,2) storage without rounding."""
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+    dose_unit: str | None = Field(default=None, min_length=1, max_length=24)
+    min_dose: Decimal | None = Field(default=None, ge=0, max_digits=12, decimal_places=2, allow_inf_nan=False)
+    max_dose: Decimal | None = Field(default=None, ge=0, max_digits=12, decimal_places=2, allow_inf_nan=False)
+    max_daily_dose: Decimal | None = Field(default=None, ge=0, max_digits=12, decimal_places=2, allow_inf_nan=False)
+
+    @model_validator(mode="after")
+    def ordered_bounds(self):
+        if self.min_dose is not None and self.max_dose is not None and self.min_dose > self.max_dose:
+            raise ValueError("每次剂量下限不能高于上限")
+        return self
+
+
+def normalize_dose_rule(raw: dict, current=None, *, required: bool) -> dict:
+    fields = ("dose_unit", "min_dose", "max_dose", "max_daily_dose")
+    values = {name: raw.get(name, getattr(current, name, None)) for name in fields}
+    values = {name: None if value == "" else value for name, value in values.items()}
+    try:
+        validated = DoseRuleFields(**values)
+    except ValueError as exc:
+        raise ValueError("剂量规则需填写有效单位及非负有限阈值，阈值最多2位小数且下限不能高于上限") from exc
+    if required and (not validated.dose_unit or all(getattr(validated, name) is None for name in fields[1:])):
+        raise ValueError("启用剂量规则必须明确剂量单位并填写至少一项阈值")
+    return validated.model_dump()
+
 
 def _positive_number(raw: object, label: str, *, integer: bool = False) -> Decimal | None:
     if raw is None or raw == "":

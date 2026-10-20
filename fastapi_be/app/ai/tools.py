@@ -58,14 +58,19 @@ def business_tools(db: Session, spec: FeatureSpec, user: User, patient_id: int |
             prescription = db.query(Prescription).filter_by(prescription_id=str(prescription_id), patient_id=patient_id).first()
             if not prescription:
                 raise HTTPException(404, "处方不存在或不属于该患者")
-            findings = review_saved_prescription(db, prescription)
+            dose_evaluations = []
+            findings = review_saved_prescription(db, prescription, evaluation_log=dose_evaluations)
             tools["prescription_review"] = {
                 "findings": findings,
                 "blocked": any(item["severity"] == 3 for item in findings),
-                "dose_check_status": "stored_instructions_checked_against_existing_local_rules",
+                "dose_check_status": "no_matching_dose_rules" if not dose_evaluations else "incomplete" if any(item["issues"] for item in dose_evaluations) else "evaluated_against_matching_local_rules",
                 "automatic_unit_conversion": False,
-                "unit_mapping_validation": "剂量单位与院内规则的对应关系仍须药师核实，未执行自动单位换算",
+                "dose_evaluations": dose_evaluations,
+                "unit_mapping_validation": "仅在处方与规则原始单位完全一致时比较；按处方行检查，不推测按需频次或跨行成分累计量",
+                "coverage_note": "未匹配到剂量规则时不代表剂量合适；命中范围也不代表覆盖全部用药风险",
             }
+            for evaluation in dose_evaluations:
+                evidence.append({"source_id": f"dose-rule:{evaluation['rule_id']}:{evaluation.get('version') or 'unversioned'}", "kind": "rule", "title": "院内剂量规则逐行校验", "content": encode_json(evaluation)})
             for finding in findings:
                 source_id = f"rule:{finding['rule_id']}:{finding.get('version') or 'unversioned'}"
                 evidence.append({"source_id": source_id, "kind": "rule", "title": "现有处方审核规则", "content": encode_json(finding)})

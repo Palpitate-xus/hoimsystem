@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.dependencies import ADMIN_ROLES, CLINICAL_ROLES, PHARMACY_ROLES, User, require_roles
+from app.medication_data import normalize_dose_rule
 from app.models import Patient, PatientClinicalProfile, PrescriptionReviewRule
 from app.rx_review_engine import build_patient_context, check_prescription, has_blocking
 
@@ -73,6 +74,7 @@ def _serialize(r: PrescriptionReviewRule) -> dict:
         "min_dose": float(r.min_dose) if r.min_dose is not None else None,
         "max_dose": float(r.max_dose) if r.max_dose is not None else None,
         "max_daily_dose": float(r.max_daily_dose) if r.max_daily_dose is not None else None,
+        "dose_unit": r.dose_unit,
         "condition": json.loads(r.condition_json) if r.condition_json else None,
         "source": r.source or "",
         "version": r.version or "",
@@ -113,6 +115,10 @@ def create_rule(req: dict, current_user: User = Depends(require_roles(*{*PHARMAC
     if rule_type == "context" and not (req.get("drug_a") or "").strip():
         return {"code": 400, "msg": "患者条件规则必须填写药品关键词"}
     try:
+        dose_fields = normalize_dose_rule(req, required=rule_type == "dose")
+    except ValueError as exc:
+        return {"code": 400, "msg": str(exc)}
+    try:
         condition_json = _condition_json(req.get("condition"))
     except (TypeError, ValueError, json.JSONDecodeError) as exc:
         return {"code": 400, "msg": f"患者条件格式错误：{exc}"}
@@ -132,9 +138,7 @@ def create_rule(req: dict, current_user: User = Depends(require_roles(*{*PHARMAC
         rule_type=rule_type,
         drug_a=(req.get("drug_a") or "").strip() or None,
         drug_b=(req.get("drug_b") or "").strip() or None,
-        min_dose=req.get("min_dose"),
-        max_dose=req.get("max_dose"),
-        max_daily_dose=req.get("max_daily_dose"),
+        **dose_fields,
         condition_json=condition_json,
         source=(req.get("source") or "").strip()[:100] or None,
         version=(req.get("version") or "").strip()[:30] or None,
@@ -157,12 +161,15 @@ def update_rule(req: dict, current_user: User = Depends(require_roles(*{*PHARMAC
     rule = db.query(PrescriptionReviewRule).filter(PrescriptionReviewRule.rule_id == req.get("rule_id")).first()
     if not rule:
         return {"code": 500, "msg": "规则不存在"}
+    try:
+        dose_fields = normalize_dose_rule(req, rule, required=rule.rule_type == "dose" and req.get("status", rule.status) == 1)
+    except ValueError as exc:
+        return {"code": 400, "msg": str(exc)}
     for field in ("drug_a", "drug_b", "message"):
         if req.get(field) is not None:
             setattr(rule, field, (req.get(field) or "").strip() or None)
-    for field in ("min_dose", "max_dose", "max_daily_dose"):
-        if req.get(field) is not None:
-            setattr(rule, field, req.get(field))
+    for field, value in dose_fields.items():
+        setattr(rule, field, value)
     if "condition" in req:
         try:
             rule.condition_json = _condition_json(req.get("condition"))
@@ -210,11 +217,12 @@ def run_check(req: dict, current_user: User = Depends(require_roles(*{*PHARMACY_
         patient = db.query(Patient).filter(Patient.patient_id == req["patient_id"]).first()
         allergy_history = patient.allergy_history if patient else None
         context = build_patient_context(db, patient) if patient else None
-    findings = check_prescription(db, items, allergy_history, context)
+    evaluations = []
+    findings = check_prescription(db, items, allergy_history, context, evaluation_log=evaluations)
     return {
         "code": 200,
         "msg": "success",
-        "data": {"findings": findings, "blocked": has_blocking(findings)},
+        "data": {"findings": findings, "blocked": has_blocking(findings), "dose_evaluations": evaluations},
     }
 
 

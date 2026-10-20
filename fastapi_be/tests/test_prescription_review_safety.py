@@ -52,7 +52,7 @@ async def test_saved_dose_and_frequency_are_rechecked(async_client, seed_data, a
     line.dosage = Decimal("10")
     line.dose_unit = "mg"
     line.frequency = "bid"
-    db_session.add(rule(seed_data, rule_type="dose", max_daily_dose=15, message="测试每日剂量限制"))
+    db_session.add(rule(seed_data, rule_type="dose", dose_unit="mg", max_daily_dose=15, message="测试每日剂量限制"))
     db_session.commit()
     await assert_both_transitions_block(async_client, seed_data, auth_headers, db_session, "测试每日剂量限制")
 

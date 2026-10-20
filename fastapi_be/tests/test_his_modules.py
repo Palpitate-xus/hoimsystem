@@ -21,7 +21,7 @@ class TestRxReviewRule:
 
         # 剂量规则（警告级）
         r = await async_client.post("/api/rxReviewRule/create", headers=headers, json={
-            "rule_type": "dose", "drug_a": "地高辛", "max_dose": 0.5,
+            "rule_type": "dose", "drug_a": "地高辛", "max_dose": 0.5, "dose_unit": "mg",
             "severity": 2, "message": "地高辛每日剂量超限",
         })
         assert r.json()["code"] == 200
@@ -31,7 +31,7 @@ class TestRxReviewRule:
             "items": [
                 {"name": "头孢曲松钠注射液", "dosage": 1.0, "frequency": "qd"},
                 {"name": "藿香正气水(含酒精)", "dosage": 10, "frequency": "tid"},
-                {"name": "地高辛片", "dosage": 0.8, "frequency": "qd"},
+                {"name": "地高辛片", "dosage": 0.8, "frequency": "qd", "dose_unit": "mg"},
             ]
         })
         assert r.json()["code"] == 200

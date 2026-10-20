@@ -1,0 +1,685 @@
+{
+  "recorded_at_utc": "2026-10-20T17:31:53.845779+00:00",
+  "baseline_commit": "6354f14acbbd438269fc786034dac597a866151e",
+  "platform_commit_at_recording": "5cae50be8e4326a05b64a40cf46099359eb01969",
+  "recording_head_precedes_this_evidence_documentation_commit": true,
+  "goal_status": "active",
+  "version_management": {
+    "branch": "feature/ai-hospital-platform",
+    "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+    "commits_this_batch_before_evidence_commit": 21,
+    "commits_since_original_baseline_before_evidence_commit": 307
+  },
+  "scope": "Five governed original clinical support source kinds, independent original drug mappings, Super-admin frozen governance, and feature 47 selected-original handover through existing text protocols. Not complete SOFA or sepsis diagnosis.",
+  "real_patient_data_used": false,
+  "existing_hospital_database_accessed": false,
+  "existing_hospital_backend_contacted": false,
+  "production_deployment_performed": false,
+  "clinical_validation_performed": false,
+  "remote_model_inference_performed_for_this_batch": false,
+  "stored_business_ai_configuration_changed": false,
+  "inventory": {
+    "business_router_routes": 719,
+    "all_main_app_api_routes": 720,
+    "router_modules": 98,
+    "orm_tables": 176,
+    "vue_view_files": 160,
+    "catalog": {
+      "version": "2026.10.20.8",
+      "feature_count": 80,
+      "source_reference_count": 31,
+      "source_reference_keys": [
+        "adverse_event_id",
+        "aki_assessment_id",
+        "audio_asset_id",
+        "critical_care_record_id",
+        "ecg_asset_id",
+        "home_id",
+        "icu_score_id",
+        "image_asset_id",
+        "imaging_order_id",
+        "imaging_report_id",
+        "inpatient_charge_id",
+        "lab_result_id",
+        "mdt_id",
+        "news2_assessment_id",
+        "nursing_assessment_id",
+        "nursing_plan_id",
+        "observation_window_id",
+        "outpatient_charge_id",
+        "pathway_enrollment_id",
+        "pathway_id",
+        "perioperative_id",
+        "prescription_id",
+        "qsofa_assessment_id",
+        "reaction_id",
+        "record_id",
+        "referral_id",
+        "structured_record_id",
+        "support_source_id",
+        "support_source_kind",
+        "surgery_application_id",
+        "surgery_schedule_id"
+      ],
+      "risk_feature_reference_keys": {
+        "41": [
+          "news2_assessment_id",
+          "observation_window_id"
+        ],
+        "42": [
+          "observation_window_id",
+          "qsofa_assessment_id"
+        ],
+        "43": [
+          "aki_assessment_id",
+          "observation_window_id"
+        ]
+      },
+      "handover_feature_reference_keys": [
+        "adverse_event_id",
+        "audio_asset_id",
+        "critical_care_record_id",
+        "ecg_asset_id",
+        "home_id",
+        "icu_score_id",
+        "image_asset_id",
+        "imaging_order_id",
+        "imaging_report_id",
+        "inpatient_charge_id",
+        "lab_result_id",
+        "mdt_id",
+        "nursing_assessment_id",
+        "nursing_plan_id",
+        "outpatient_charge_id",
+        "pathway_enrollment_id",
+        "pathway_id",
+        "perioperative_id",
+        "prescription_id",
+        "reaction_id",
+        "record_id",
+        "referral_id",
+        "structured_record_id",
+        "support_source_id",
+        "support_source_kind",
+        "surgery_application_id",
+        "surgery_schedule_id"
+      ],
+      "only_handover_accepts_support_source_references": true,
+      "prompt_export": {
+        "default_task_prompt_count": 80,
+        "distinct_task_prompt_count": 80,
+        "all_exported_features_and_prompts_exactly_match_live_catalog": true,
+        "system_prompt_exactly_matches": true,
+        "exported_catalog_version": "2026.10.20.8"
+      }
+    },
+    "alembic_heads": [
+      "20261020_organ_support_sources"
+    ],
+    "implementation_file_count": 60,
+    "implementation_partition": {
+      "production": 34,
+      "tests_and_fixtures": 26
+    },
+    "generated_artifact_count": 4,
+    "all_implementation_bytes_match_committed_capture_head": true,
+    "artifact": {
+      "path": "/tmp/hoim-organ-support-platform-final-inventory.json",
+      "sha256": "e634aba716cf1962c5ab50167024c8ca941b8024c267027985ab16572e63b67b"
+    },
+    "isolation": {
+      "dotenv_sources_disabled": true,
+      "settings_env_file_none": true,
+      "forbidden_env_open_attempts": [],
+      "database_connections_blocked": true,
+      "database_connection_attempts": [],
+      "configured_database": "sqlite:///:memory:",
+      "engine_constructed_without_connection": true,
+      "lifespan_or_server_started": false,
+      "asgi_and_router_lifecycle_entrypoints_guarded": true,
+      "lifecycle_attempts": [],
+      "repo_write_attempts": [],
+      "existing_dependency_site_added_after_guards_without_pth_execution": "/home/xusheng/.local/lib/python3.13/site-packages"
+    }
+  },
+  "source_contract": {
+    "kinds": [
+      "map",
+      "respiratory_support",
+      "arterial_pair",
+      "vasoactive",
+      "infection_episode"
+    ],
+    "quantities": "Exact original NUMERIC(24,8) compatible decimal strings. Zero, null and unknown remain distinct; no quantity conversion or score is performed.",
+    "clocks": "Actual UTC clinical clocks and separate server UTC6 recording; stopped intervals [start,end), ongoing intervals [start,verified_until]. No extrapolation or legacy naive UTC imputation.",
+    "pairing": "Explicit actual PaO2 lab, FiO2 point and support source with full dependency hashes; separate actual clocks; current doctor review does not create historical availability.",
+    "vasoactive": "Explicit published original pharmaceutical identity mapping, base/salt/unknown, three native dose input modes, optional actual weight and complete executed eMAR/order/item chain. No default weight, normalization or NE equivalent.",
+    "infection": "Actual current Doctor and original care authorization for every status, including unknown. Unknown onset stays null; original lab or latest signed structured diagnosis review full provenance, with reliable lab clocks bounded by episode recording.",
+    "payload_utf8_limit": 32768,
+    "complete_content_utf8_limit": 262144,
+    "human_recording_is_not_independent_clinical_validation": true
+  },
+  "selected_source_handover": {
+    "feature": "handover_summary",
+    "feature_number": 47,
+    "required_references": [
+      "support_source_id",
+      "support_source_kind"
+    ],
+    "other_79_features_reject_these_references": true,
+    "protocols": [
+      "chat",
+      "responses"
+    ],
+    "full_private_provenance_retained_locally": true,
+    "outbound_keys": [
+      "context",
+      "evidence"
+    ],
+    "outbound_exclusions": [
+      "local patient/admission identifiers",
+      "private notes and review narratives",
+      "full original parent chains",
+      "drug barcode and full author qualification",
+      "free question",
+      "unbound evidence and arbitrary knowledge fields"
+    ],
+    "public_projection_and_independent_evidence_column_bound_before_wire": true,
+    "queued_inflight_and_ordinary_history_recheck_current_sources_qualification_and_care": true,
+    "super_admin_retains_frozen_audit_after_current_source_change": true,
+    "source_binding_checks_do_not_validate_generated_clinical_prose": true,
+    "complete_handover_sofa_diagnosis_probability_or_treatment_provided": false,
+    "existing_handover_mode_without_these_references_preserved": true
+  },
+  "super_admin_governance": {
+    "all_80_features_model_prompt_roles_activation_limits_knowledge_validation_tasks_and_feedback": true,
+    "all_five_kinds_all_hospital_list_full_frozen_detail_and_cas_revocation": true,
+    "independent_drug_mapping_draft_review_publish_revoke": true,
+    "administrative_role_or_patient_grant_alone_does_not_create_doctor_identity": true,
+    "clinical_creation_or_mapping_publication_does_not_enable_ai_or_mark_clinical_validation": true
+  },
+  "migration": {
+    "revision": "20261020_organ_support_sources",
+    "parent": "20261020_qsofa_sources",
+    "new_tables": [
+      "hoimsystem_ai_vasoactive_drug_mapping",
+      "hoimsystem_inpatient_arterial_pair_source",
+      "hoimsystem_inpatient_infection_episode_source",
+      "hoimsystem_inpatient_map_source",
+      "hoimsystem_inpatient_respiratory_source",
+      "hoimsystem_inpatient_vasoactive_source"
+    ],
+    "actual_18_utc6_columns": [
+      [
+        "hoimsystem_ai_vasoactive_drug_mapping",
+        "created_at",
+        6
+      ],
+      [
+        "hoimsystem_ai_vasoactive_drug_mapping",
+        "published_at",
+        6
+      ],
+      [
+        "hoimsystem_ai_vasoactive_drug_mapping",
+        "revoked_at",
+        6
+      ],
+      [
+        "hoimsystem_inpatient_arterial_pair_source",
+        "event_at",
+        6
+      ],
+      [
+        "hoimsystem_inpatient_arterial_pair_source",
+        "recorded_at",
+        6
+      ],
+      [
+        "hoimsystem_inpatient_arterial_pair_source",
+        "revoked_at",
+        6
+      ],
+      [
+        "hoimsystem_inpatient_infection_episode_source",
+        "event_at",
+        6
+      ],
+      [
+        "hoimsystem_inpatient_infection_episode_source",
+        "recorded_at",
+        6
+      ],
+      [
+        "hoimsystem_inpatient_infection_episode_source",
+        "revoked_at",
+        6
+      ],
+      [
+        "hoimsystem_inpatient_map_source",
+        "event_at",
+        6
+      ],
+      [
+        "hoimsystem_inpatient_map_source",
+        "recorded_at",
+        6
+      ],
+      [
+        "hoimsystem_inpatient_map_source",
+        "revoked_at",
+        6
+      ],
+      [
+        "hoimsystem_inpatient_respiratory_source",
+        "event_at",
+        6
+      ],
+      [
+        "hoimsystem_inpatient_respiratory_source",
+        "recorded_at",
+        6
+      ],
+      [
+        "hoimsystem_inpatient_respiratory_source",
+        "revoked_at",
+        6
+      ],
+      [
+        "hoimsystem_inpatient_vasoactive_source",
+        "event_at",
+        6
+      ],
+      [
+        "hoimsystem_inpatient_vasoactive_source",
+        "recorded_at",
+        6
+      ],
+      [
+        "hoimsystem_inpatient_vasoactive_source",
+        "revoked_at",
+        6
+      ]
+    ],
+    "actual_five_mediumtext_columns": [
+      [
+        "hoimsystem_inpatient_arterial_pair_source",
+        "reference_snapshot_json",
+        "mediumtext"
+      ],
+      [
+        "hoimsystem_inpatient_infection_episode_source",
+        "reference_snapshot_json",
+        "mediumtext"
+      ],
+      [
+        "hoimsystem_inpatient_map_source",
+        "reference_snapshot_json",
+        "mediumtext"
+      ],
+      [
+        "hoimsystem_inpatient_respiratory_source",
+        "reference_snapshot_json",
+        "mediumtext"
+      ],
+      [
+        "hoimsystem_inpatient_vasoactive_source",
+        "reference_snapshot_json",
+        "mediumtext"
+      ]
+    ],
+    "up_down_up_only_new_tables": true,
+    "existing_prerequisite_ddl_and_complete_rows_unchanged_across_migration": true
+  },
+  "backend_verification": {
+    "full_pytest": {
+      "passed": 4333,
+      "skipped": 28,
+      "warnings": 2,
+      "seconds": 415.41,
+      "new_default_passes_since_previous_batch": 328,
+      "log": {
+        "path": "/tmp/hoim-organ-support-full-frozen-pytest.log",
+        "sha256": "bc3523cb3392920c7fe7dc5b45c9b3adf5a896f1839285af432851725045ae92"
+      },
+      "scope_note": "Existing test DB overrides; no claim that this full regression disables every dotenv read. Guarded MySQL and inventory processes establish their own isolation."
+    },
+    "python_ruff_and_whole_file_format": {
+      "files": 30,
+      "passed": true
+    },
+    "source_context_pipeline": {
+      "passed": 68,
+      "seconds": 22.89,
+      "log": {
+        "path": "/tmp/hoim-support-context-pipeline-final-68-tests.log",
+        "sha256": "6136c1a5a023b8b0464d0051904d08efccf499f2af3067041e266de69bb263bb"
+      }
+    },
+    "root_source_http_rbac_catalog_targeted": {
+      "passed": 87,
+      "seconds": 19.09,
+      "log": {
+        "path": "/tmp/hoim-organ-support-root-frozen-target-tests.log",
+        "sha256": "dfcdd19ea6e0fd3044c0c75a8cd9c61155fcccb9091ceded2c0f6473b5085cd5"
+      }
+    },
+    "targeted_counts_overlap_full_suite_and_are_not_added_to_it": true,
+    "prompt_export_and_real_mounted_rbac_exact": true
+  },
+  "frontend_verification": {
+    "npm_verify": {
+      "passed": true,
+      "audit_vulnerabilities": 0,
+      "build_seconds": 23.17,
+      "existing_scss_warnings": 5,
+      "bundle": {
+        "largestJavaScript": {
+          "file": "element-plus.1235714c.js",
+          "bytes": 647479
+        },
+        "totalJavaScript": 5739210,
+        "totalAssets": 6257456,
+        "limits": {
+          "largestJavaScript": 700000,
+          "totalJavaScript": 6000000,
+          "totalAssets": 7000000
+        }
+      },
+      "dependencies_targets_and_budget_unchanged": true,
+      "net_javascript_reduction_bytes_from_batch_start": 165973,
+      "log": {
+        "path": "/tmp/hoim-organ-support-ui-final-verify.log",
+        "sha256": "8b7c270e405a5535d89a924c0e4aca6ab724369818932ec36c124b0fef85c856"
+      }
+    },
+    "full_browser": {
+      "passed": 374,
+      "duration_as_reported": "16.4m",
+      "new_cases_since_previous_batch": 60,
+      "production_mock": 153,
+      "isolated_mock": 200,
+      "real_synthetic_http": 21,
+      "log": {
+        "path": "/tmp/hoim-organ-support-browser-frozen-final-tests.log",
+        "sha256": "0c57711fe38da1733f9a8bbe11f9faa4291aecfbe49a1ba1ee728bc965ea9f77"
+      },
+      "actual_category_counts": {
+        "path": "/tmp/hoim-organ-support-browser-final-category-counts.json",
+        "sha256": "b285512a4297a52c569e610619d3ea07bb13f022be49ca2d3f87177d59f4f49d"
+      },
+      "scope_note": "153 final production UI and 200 isolated UI cases use synthetic API mocks; 21 exercise real synthetic loopback HTTP. No hospital backend or remote model."
+    },
+    "targeted_handover_cases": {
+      "passed": 24,
+      "log": {
+        "path": "/tmp/hoim-organ-support-handover-frozen-target-tests.log",
+        "sha256": "40a62503a21f39e17e73f69252f71a310e851f77e590d796f4d124cf5fe5110e"
+      }
+    },
+    "final_production_entry_cases": {
+      "passed": 5,
+      "log": {
+        "path": "/tmp/hoim-organ-support-entry-frozen-tests.log",
+        "sha256": "004ada9e676f4042afe23918b2e055821b94ae639ca520b8d1bea3b06bd0804b"
+      }
+    },
+    "independent_python_js_full_projection_review": {
+      "path": "/tmp/hoim-support-frontend-independent-review.json",
+      "sha256": "71f48249f32b8664136bfb687c372689b737fe2765a23efc18db957401a6f939"
+    },
+    "independent_findings_five_sources_and_seven_async_races": {
+      "path": "/tmp/hoim-support-findings-independent-review.json",
+      "sha256": "1e5503f4cc6abad726b10b82748ea83567a4ddf4ea8ebfb238300a52fecb21fa"
+    },
+    "independent_history_session_role_deactivation_and_five_late_reads": {
+      "path": "/tmp/hoim-support-assistant-final-independent-lifecycle.json",
+      "sha256": "6d29efaf00ee431ca3796cb864bc13869edaa9a557b6c2cca6ec30f9a73c82bb"
+    },
+    "intermediate_displayed_private_history_session_bug_reproduced_fixed_and_regressed": true
+  },
+  "actual_isolated_mysql": {
+    "artifact": {
+      "path": "/tmp/hoim-organ-support-mysql-final-verification.json",
+      "sha256": "54319964943df6d68cd15d4e589c660890f0974cbfbe321944c9e051dc8cc1f0"
+    },
+    "seconds": 19.831,
+    "bound_backend_source_files": 45,
+    "image": "mysql:8.0.39",
+    "image_id": "sha256:01faea2cb286276923a223bdbf438b50468f3c4090f6b61e0b27aa871ca0dbac",
+    "isolation": {
+      "network_mode": "none",
+      "port_bindings": {},
+      "readonly_root": true,
+      "user": "999:999",
+      "cap_drop": [
+        "ALL"
+      ],
+      "tmpfs": {
+        "/tmp": "rw,nosuid,nodev,noexec,size=64m,uid=999,gid=999,mode=0700",
+        "/var/lib/mysql": "rw,nosuid,nodev,noexec,size=512m,uid=999,gid=999,mode=0700"
+      },
+      "mount_types": [
+        "bind"
+      ]
+    },
+    "dotenv_open_attempts": 0,
+    "only_private_unix_socket_allowed": true,
+    "source_hashes_stable": true,
+    "actual_authenticated_asgi_all_five_kinds": true,
+    "actual_durable_tasks_and_complete_sql_sha": [
+      {
+        "source_kind": "map",
+        "status": "succeeded",
+        "input_utf8_bytes": 8271,
+        "evidence_utf8_bytes": 213,
+        "context_metadata_utf8_bytes": 650,
+        "result_utf8_bytes": 346,
+        "complete_sql_sha256": [
+          "f02313dde9652ee229baeece31c8e52850b15b69f497ca945c51a4d3b0fa7ecf",
+          "85b9f1ee864654595f258b231b03fc541be24edfe35f05d054949ca275eb6b33",
+          "24b0d399d6f66dca4494fc4990bdaccc176b64efbfb63f0c1a90fdfbd2715177",
+          "dcecba750cd9c0b5424bccab2cac29fc280bc9463f3428aea99b6ff8ce900e27"
+        ],
+        "actual_adaptor": "chat with MockTransport only; real gateway, queue, worker and citation validation"
+      },
+      {
+        "source_kind": "respiratory_support",
+        "status": "succeeded",
+        "input_utf8_bytes": 8284,
+        "evidence_utf8_bytes": 217,
+        "context_metadata_utf8_bytes": 650,
+        "result_utf8_bytes": 350,
+        "complete_sql_sha256": [
+          "d23fda9dfdd085a9489e685743868825da3459d53d0e3fa32d0d9c80b566ca14",
+          "3430675a8756751ae5d1c70a79053d7f1b735212c92db7c252655e829e895aaa",
+          "17524fd87522e6832bfa64e2e1928195a802ddcdb4a3ceca8d0df514f236d770",
+          "113df9cefdaee78d5ca0229deda2dc1b7a8fab11728c80ec96611eecc90c91ac"
+        ],
+        "actual_adaptor": "chat with MockTransport only; real gateway, queue, worker and citation validation"
+      },
+      {
+        "source_kind": "arterial_pair",
+        "status": "succeeded",
+        "input_utf8_bytes": 17982,
+        "evidence_utf8_bytes": 211,
+        "context_metadata_utf8_bytes": 650,
+        "result_utf8_bytes": 344,
+        "complete_sql_sha256": [
+          "eff5a285ff957d29e60b480d50ebe1ccb32fc23871fc70d477196d9c41330a31",
+          "75cb07b386d9c0bc38179fd95c081f2859326be96c4912fbc9c89676cbaee02d",
+          "ce1ac63b7fbd89475993c3775daea8acd5b25216420fb791200719821e700ca5",
+          "145a71c2d07a2193b00e53ab2d7ce48be06ffb14ec638638eee477e242a4541b"
+        ],
+        "actual_adaptor": "chat with MockTransport only; real gateway, queue, worker and citation validation"
+      },
+      {
+        "source_kind": "vasoactive",
+        "status": "succeeded",
+        "input_utf8_bytes": 14571,
+        "evidence_utf8_bytes": 217,
+        "context_metadata_utf8_bytes": 650,
+        "result_utf8_bytes": 350,
+        "complete_sql_sha256": [
+          "bb6dad508daddd556846d2ee6cc9fe4a6e39b244bfb2050cfe0674ce9138aa31",
+          "9f764db9e48ab6da776f02db49ea8f0974548b916abe560904c279ff1334a406",
+          "ee46f935a2ca9275cb3e5f7d978bfea679f911fd50675b7348038252e1d9de04",
+          "5b5dddb2ea00aabc3c134adddb8f8c319338a8865f0b4d4b71a6f6a4ebb1c803"
+        ],
+        "actual_adaptor": "chat with MockTransport only; real gateway, queue, worker and citation validation"
+      },
+      {
+        "source_kind": "infection_episode",
+        "status": "succeeded",
+        "input_utf8_bytes": 14906,
+        "evidence_utf8_bytes": 215,
+        "context_metadata_utf8_bytes": 650,
+        "result_utf8_bytes": 348,
+        "complete_sql_sha256": [
+          "93f5387c5f5940a58df43e3484958aab46a4e03fd200088c32400bef657d3d75",
+          "d7aa0b21035a29a701a8e7cb781fc8f840c3086fb8239209081ef0cd94224983",
+          "8221cae31b727f068bcb792d4907689dbbe529c9d7ed41e0e322112c7f5d3439",
+          "e63c89bb043fc12b66733c1b11e992f870b7f64723c08e9f5fdae15bf89fa637"
+        ],
+        "actual_adaptor": "chat with MockTransport only; real gateway, queue, worker and citation validation"
+      }
+    ],
+    "actual_queue_revoke": {
+      "status": "failed",
+      "error_code": "TASK_NO_LONGER_AUTHORIZED"
+    },
+    "actual_inflight_revoke": {
+      "status": "failed",
+      "error_code": "TASK_NO_LONGER_AUTHORIZED",
+      "input_tokens": 5,
+      "output_tokens": 7
+    },
+    "actual_sql_audit_create_rollback": {
+      "status": 409,
+      "detail": "原资料与审计发生版本或数据竞争，本次变更均未保存"
+    },
+    "actual_sql_audit_revoke_rollback": {
+      "status": 409,
+      "detail": "原资料与审计发生版本或数据竞争，本次变更均未保存"
+    },
+    "cleanup_verified": true,
+    "limitations": [
+      "Synthetic originals and model responses only; no clinical validation or treatment actions.",
+      "Sequential CAS and actual failed SQL audit rollback, not simultaneous threaded contention.",
+      "Legacy naive clocks are preserved as unknown provenance; no UTC imputation or dose/score calculation."
+    ],
+    "intermediate_fixture_failure_artifacts_retained": [
+      {
+        "path": "/tmp/hoim-organ-support-mysql-drug-fixture-failure-verification.json",
+        "sha256": "f5a8d64f1b94179e735ffad0506dd841a106b5c75008659595a8116d4fce3256"
+      },
+      {
+        "path": "/tmp/hoim-organ-support-mysql-legacy-clock-fixture-failure-verification.json",
+        "sha256": "91d80409f7337a321a0cb2834f02ca5fae2c0f9cb60bf4d081ad05cd4a0e4946"
+      },
+      {
+        "path": "/tmp/hoim-organ-support-mysql-outbound-contract-fixture-failure-verification.json",
+        "sha256": "6da025169b752c1fae9e0e578d4ed68308b63058e1731632441530ceaf005677"
+      },
+      {
+        "path": "/tmp/hoim-organ-support-mysql-patient-fixture-failure-verification.json",
+        "sha256": "d91f6e60450febf5508bf593fc5e6144041c3a0fd351aed8f43b80dc88acc763"
+      },
+      {
+        "path": "/tmp/hoim-organ-support-mysql-session-fixture-failure-verification.json",
+        "sha256": "c9d69acd109c762792019825906495c79b2fea7dbfe296f1a372746fbf282b96"
+      },
+      {
+        "path": "/tmp/hoim-organ-support-mysql-worker-diagnostic-failure-verification.json",
+        "sha256": "3c21450264325c06dfc87ef25055e3377804a20ce52be555ec395ae7cb83754c"
+      }
+    ]
+  },
+  "thirteen_historical_verification_records_unchanged": {
+    "doc/ai-aki-verification.json": "a2f8e928266ff16d46973db731329d4e96cbfe09e519ba9f5fcbc8ab384a897c",
+    "doc/ai-ecg-classifier-smoke.json": "838b0305249698617bc475f7158dfbfbb9e6e22e6d6e84e51974bfcfebb90c61",
+    "doc/ai-ecg-verification.json": "1eedfa9eb918cf6e6b1ee1f201b7413760eeec501c128f4a73401741f0427f94",
+    "doc/ai-forecast-verification.json": "9b5683bca58efcf7fc460410529fd5aeeed91e2646eb47be24b836cbadc20d63",
+    "doc/ai-frontend-dependencies-verification.json": "968757f4a75e921038133b3fa9a94947ab4d5607142dce8da964f2a13d00bb1d",
+    "doc/ai-imaging-classifier-smoke.json": "b2185a31ff66c4602c10136d5b15404199f50cf7d65ea4a8be4718778c6a9e89",
+    "doc/ai-imaging-verification.json": "63646b181dae4f531abe233708a24f9b9cc05037ef95d57e1e6f39c7f9880148",
+    "doc/ai-laboratory-verification.json": "646103e4874b4f895424987520c7adfb6fb8afdd9eb6e2c7104ed2095b72752f",
+    "doc/ai-news2-verification.json": "363be8c61e2f36705dccc4604631e7d0e84aaa6cc922196ed36e48e740ca6570",
+    "doc/ai-nursing-verification.json": "a04248f9de57ddd878c1b408da1833f53651cd3535d8385d2275874a7f6f9517",
+    "doc/ai-observation-verification.json": "b75ab8c7ff94704cb823be59d51539f06a16a24edf0020b0e87edfd6cf6e6bee",
+    "doc/ai-qsofa-verification.json": "d3c4cea9a657527540d3c570512a00568f92a5381c066e9a0bcf204a2e3c7ba4",
+    "doc/ai-speech-smoke.json": "41ad522da4f04e2a6d75595660ecbc2549acdcd159450aa99602b495c8e690a0"
+  },
+  "final_implementation_and_generated_sha256": {
+    "fastapi_be/alembic/versions/20261020_organ_support_sources.py": "e0e8d0efa8dae8ff1724bdf10f598174e4ce9a30484f43946be3f71ffcf4dd6e",
+    "fastapi_be/app/ai/catalog.py": "3d0c594562d70c475e707eedb7fce1fad76ea5d7ead0620bc7cd205334503bc4",
+    "fastapi_be/app/ai/context.py": "3615cedd2f0f70840802f8121d28f56f4ed0ceb2bfb5418671364b90ef3a0e86",
+    "fastapi_be/app/ai/gateway.py": "33e85b60fd7ba04a7a9ecc57896b39c84f024546ecd7033287defe6dfd049077",
+    "fastapi_be/app/ai/references.py": "9a7247dd73f740f3acefa538f2e382067b220fa0aa79afa244e6783a074bad5a",
+    "fastapi_be/app/ai/runtime.py": "ab37f8183bfe37eeb824b68cfdf837225173610d3024501d1eddbec879ac00fb",
+    "fastapi_be/app/ai/support_context.py": "d76b934bb37dab31d3471d07f4b734486b2753a5f5140706018a9d144851f98c",
+    "fastapi_be/app/ai/tools.py": "f0ea35643b963e2c78145a7c4a4228eb164b6c3b278b3b419d789d4450c746a5",
+    "fastapi_be/app/inpatient_infection_episodes.py": "75d1353638bce9cb1ba98eeb27b3654943f33e8a37667d899637d5e5dad41c60",
+    "fastapi_be/app/inpatient_infection_models.py": "5a4418954f924ba2423cc8b960c7efaf4acfa9161b2fa79555a69feb83608c32",
+    "fastapi_be/app/inpatient_respiratory_models.py": "63bc412f62b86466b1cd68fdd36e20415560b53137e80640ad97658e677eca41",
+    "fastapi_be/app/inpatient_respiratory_sources.py": "b98573d19d909f355bfac812be10774b7fbc5be291bc65d52ab7b5c046052834",
+    "fastapi_be/app/inpatient_support_common.py": "7e652c5412cd883c42bcc15d256d49728836c6811b218320d80b9f894dd43880",
+    "fastapi_be/app/inpatient_vasoactive.py": "cdffaa5b2e8958191b08a73756b3970191c81be3431c5c06aaee193f2ec9da6d",
+    "fastapi_be/app/inpatient_vasoactive_models.py": "19604a2de8014ec79cdc73d03c2cc59428a7a0932ce2c9bc30a755671c219e68",
+    "fastapi_be/app/main.py": "7325fd2a4a99957b901cc1d29994a72d331b05e670f71ec58bfca28aaed1ad64",
+    "fastapi_be/app/models.py": "1340587be1848b25ab900dd0472372ff0f45de9b0d2fe43eac8011efb0284564",
+    "fastapi_be/app/routers/ai_vasoactive_mappings.py": "0a1a4bb83e89003311d42c24ca4a5d3bbfde40c6cc88e02e0579611f1310a537",
+    "fastapi_be/app/routers/inpatient_support.py": "e50d23b83fe1bb626f2e6e8d95964cd5534dce75ffd1cd39347ae3b9e34cb625",
+    "fastapi_be/scripts/generate_rbac_matrix.py": "67b219b4d5d7412ddcafd17fa4fce98d55e7acd841b99ded280413a401b44b56",
+    "fastapi_be/tests/test_ai_catalog.py": "d2c796bc55767e80af3ef69a291d9ee6fdace8cc4fcb1a5eb303b2a688a65f6f",
+    "fastapi_be/tests/test_ai_support_context_pipeline.py": "d05467150d0f6167d65faf2b071ba94f7b40eb9ab70a70d683c35df68be2cffa",
+    "fastapi_be/tests/test_ai_vasoactive_mappings.py": "42115022359d05c0dacf461d9ff890911459d38680194d50c14405be8e6fbbac",
+    "fastapi_be/tests/test_inpatient_infection_episodes.py": "eec37c453b3501f1ad88989af42b6cd757b7d69c319694e882cc79a32693cd8d",
+    "fastapi_be/tests/test_inpatient_respiratory_api.py": "dfc2b90868f8d04ded6916cdf9d5ff8e0976056b77ccc0e686dc43fdc8508fc8",
+    "fastapi_be/tests/test_inpatient_respiratory_contract.py": "a93087f2116bcb9c69804149b358d54346edfdbc26316ff086b6deb10110f5ca",
+    "fastapi_be/tests/test_inpatient_respiratory_sources.py": "ef27de29518ad6f8faf576b7d4c7cf895e5610379a1056b0fd2364e7e379126c",
+    "fastapi_be/tests/test_inpatient_support_migration.py": "76a95a933595c888d35d253dcafd20491bff4440c91e23be63146f5566e45480",
+    "fastapi_be/tests/test_inpatient_vasoactive.py": "baa31a9c3e9a27d55cce5e9779a31bb28a59d20a8baaaf4e2e5a0e94f50df2c0",
+    "fastapi_be/tests/test_rbac_drift.py": "63d43e569de9617d9a3b19740bb3ef5d6cbe4a87348aeb59f0b12a2cb48bb211",
+    "vue3-new-ui/e2e/ai-support-entry.spec.js": "694dfb957e5317e093e409e7d383e4b2882742b481693f9c90b269d0b0445192",
+    "vue3-new-ui/e2e/ai-support-handover-source.spec.js": "edf8fe098550ddc70e9dad6bf3841c5ddfdecc40153700b0f1e4dc13f810605d",
+    "vue3-new-ui/e2e/ai-support-source.spec.js": "830471a8d4f16469254e3a8473338c588619c363a9059fb64d71af6da46c5d51",
+    "vue3-new-ui/e2e/ai-vasoactive-mapping-source.spec.js": "869b5b683863300aa782e5dea3f8c392b4dadbe86d1692f5a1dfa511f29d322d",
+    "vue3-new-ui/e2e/fixtures/support-fixtures.cjs": "48e59986832242bec12a1665ba7bff0274bfcb2fbf8bb2de9da64eb5f68ae5e8",
+    "vue3-new-ui/e2e/fixtures/support-handover-harness.cjs": "408067539784e64fe463c8bfc40804b6c760f5abd6c26a137ebb6ca62c6aac4e",
+    "vue3-new-ui/e2e/fixtures/support-public-fixtures.cjs": "34fa1f7e6dffe8843e0f1708658dd68932a5f9682e1eba7d70803205216df69a",
+    "vue3-new-ui/e2e/fixtures/support-source-harness.cjs": "5ce8b93a9d0ab20279bf3e1a38fa98edf78354dcaa7faa2696394ba4dbb60488",
+    "vue3-new-ui/e2e/fixtures/support-synthetic/README.md": "a8fb4b1417242aa151c1d703a8968beab4fd206036f470c96fe7293a28da5e5c",
+    "vue3-new-ui/e2e/fixtures/support-synthetic/arterial_pair.json": "1ef499730815f71a2a6c82a1ed260e8aa108bba070208ae1cc9335c87419c5aa",
+    "vue3-new-ui/e2e/fixtures/support-synthetic/infection_episode.json": "2541f873b10c84d301dc27f0fb00b5b2a36bcbd9f1698636dbaa17d2a76caf6e",
+    "vue3-new-ui/e2e/fixtures/support-synthetic/map.json": "2cc31f5455de0c4922bddb7898c4b6bd6da59bdd80f103883cce05ae18944f81",
+    "vue3-new-ui/e2e/fixtures/support-synthetic/mapping-draft.json": "06171d3ffe680ccefa4e6c3dcc09b25f84c1cbb400ca9e24bc25bec81c760e3d",
+    "vue3-new-ui/e2e/fixtures/support-synthetic/mapping.json": "97e62c2b2bffb106018e79f422eae07624503b6e1e02bb47d3ea9e07aac0462c",
+    "vue3-new-ui/e2e/fixtures/support-synthetic/respiratory_support.json": "620037a7612a52d8597a4c1d8f651989dedae806540e86f75614272eba5646eb",
+    "vue3-new-ui/e2e/fixtures/support-synthetic/vasoactive.json": "f95a047b14688070eb88d8514e653117df163861baf5d6f38ae94e57d70cc082",
+    "vue3-new-ui/rspack.config.js": "3b4bc63faf6a1425c1f8247f9823f22be833ac422d02146fc1b966c0eea1ed43",
+    "vue3-new-ui/src/api/aiSupportContext.js": "99200dc2e9f88e4b00ff167cb062a8ae4d5b6b4b802306324a5ac9ad1ac95e30",
+    "vue3-new-ui/src/api/inpatientSupport.js": "e0549a3f3320fb6441d6601d898fe328bd9ee9149dd8bbd38a2cfc992acb7f34",
+    "vue3-new-ui/src/api/vasoactiveMappings.js": "810f83bb13c47cc5abb0b530a2b787fe0f1b0c5e5ed00572386294841fbd167e",
+    "vue3-new-ui/src/components/AIAssistant/index.vue": "748284cd1cfc710bb19c6f6bedf7cd08e1b881e2f7df5527ade3eb419748def3",
+    "vue3-new-ui/src/components/AIObservationWindowInput/index.vue": "7c152cd1e67fb36ae1a8957b421ee0d6833e8a7d534b06e92acdc670a0120552",
+    "vue3-new-ui/src/components/AISupportFindings/index.vue": "4b19bc1d2c94a9d03a0c2fbefb10db07d112984ffdad1a10796af88657f6034c",
+    "vue3-new-ui/src/components/AIVasoactiveMappingManagement/index.vue": "9eaee981c3b409c451c15596bcb363f566d7f3574fe7a912e7ec6a66524d0c94",
+    "vue3-new-ui/src/components/InpatientSupportSourcePanel/QuantityField.vue": "4dc173c513fd6f1fae797c1820b4b30752212675fadf2403ad1b55e079bfedb6",
+    "vue3-new-ui/src/components/InpatientSupportSourcePanel/ReferencePicker.vue": "1fe1d3a16141b1010983c9758d339d254e7e0b3db23bb9ab275c797d82359ea6",
+    "vue3-new-ui/src/components/InpatientSupportSourcePanel/SourceForm.vue": "cdfedf2cc10cbb733176732f1df09e68370cc0485d701ee03b24044ee97a24cf",
+    "vue3-new-ui/src/components/InpatientSupportSourcePanel/index.vue": "e29d27dc961ac29dee71efcbd0d51edd49476d03bac277d87c28587c1bccf072",
+    "vue3-new-ui/src/views/system/AIOrganSupportManagement.vue": "5b3efc34df9cd529220d7ece35cf5a5d6513ab079f5cbd1890f11b76a349fdb8",
+    "vue3-new-ui/src/views/system/aiManagement.vue": "052237f3b05d9929f8645895b596d5815520e1dee707e7dd244d2e906a7310d4",
+    "doc/ai-prompts.json": "97f1348e01d840a65db8183167acadadee1a3975dc35be2661e8ca965b32734b",
+    "doc/ai-capabilities.md": "b102152ca15a0dadf68791655a9398b1bae2b461a1774cf2960213a9b6213a10",
+    "doc/api-rbac-matrix.md": "1486be68db095d2192923818139729717fb0ae2b7f2eda22453bebe02477b724",
+    "fastapi_be/rbac_matrix.json": "d16540c093c23a7eec7554f66a1a5ec922880c2c382fcb24c4edb09cfb031038"
+  },
+  "all_64_bound_files_unchanged_after_full_checks": true,
+  "remaining_work": [
+    "Complete SOFA multi-organ rules and explicit native-unit policy, complete 24h source membership and current recheck.",
+    "Explicit baseline and interval-valued delta, infection attribution, independently evaluated sepsis models.",
+    "Other specialty sources/models and independent real clinical/operational validation retained in the active 80-feature goal."
+  ]
+}

@@ -119,27 +119,33 @@ def _creatinine_pair(source, reference, key):
 def _urine_criteria(source):
     intervals = sorted(source.urine_intervals, key=lambda value: (_clock(value.start_at), _clock(value.end_at), value.interval_id))
     keys = ("urine_6h", "urine_12h", "urine_24h", "anuria_12h")
-    items = {key: _criterion(key, sources=[value.source_id for value in intervals]) for key in keys}
+    items = {key: _criterion(key) for key in keys}
     if not intervals:
         return items
     issues = set(source.urine_coverage_issues)
+    located_issues = set()
     for index, value in enumerate(intervals):
         if value.collection_completeness != "complete":
-            issues.add("partial_collection")
+            located_issues.add("partial_collection")
         if value.patient_total is not True:
-            issues.add("not_patient_total")
+            located_issues.add("not_patient_total")
         if value.volume_ml is None:
-            issues.add("unknown_volume")
+            located_issues.add("unknown_volume")
         if index:
             previous = intervals[index - 1]
             if _clock(value.start_at) < _clock(previous.end_at):
-                issues.add("overlap")
+                located_issues.add("overlap")
             elif _clock(value.start_at) > _clock(previous.end_at):
-                issues.add("gap")
-    if issues:
+                located_issues.add("gap")
+    unlocated = issues - located_issues
+    issues |= located_issues
+    for item in items.values():
+        item["evidence"]["coverage_issues"] = sorted(issues)
+    # An omitted active original row or overlapping collection can contradict
+    # any proposed witness. A declared but unlocatable defect is also unknown.
+    if issues & {"unselected_active_interval", "overlap"} or unlocated:
         for item in items.values():
             item["reason_code"] = "urine_coverage_invalid"
-            item["evidence"]["coverage_issues"] = sorted(issues)
         return items
     weight = source.weight
     weight_problem = (
@@ -155,13 +161,25 @@ def _urine_criteria(source):
         if _clock(weight.observed_at) > _clock(intervals[0].start_at)
         else None
     )
+    blocks, current = [], []
+    for value in intervals:
+        valid = value.collection_completeness == "complete" and value.patient_total is True and value.volume_ml is not None
+        if not valid or (current and _clock(current[-1].end_at) != _clock(value.start_at)):
+            if current:
+                blocks.append(current)
+                current = []
+        if valid:
+            current.append(value)
+    if current:
+        blocks.append(current)
     candidates = []
-    for first in range(len(intervals)):
-        total = Fraction(0)
-        for last in range(first, len(intervals)):
-            total += _number(intervals[last].volume_ml)
-            duration = _duration(intervals[first].start_at, intervals[last].end_at)
-            candidates.append((duration, first, last, total))
+    for block_number, block in enumerate(blocks):
+        for first in range(len(block)):
+            total = Fraction(0)
+            for last in range(first, len(block)):
+                total += _number(block[last].volume_ml)
+                duration = _duration(block[first].start_at, block[last].end_at)
+                candidates.append((duration, block_number, first, last, total))
     for key in keys:
         item = items[key]
         anuria = key == "anuria_12h"
@@ -175,15 +193,18 @@ def _urine_criteria(source):
             continue
 
         def matches(candidate):
-            duration, _, _, total = candidate
+            duration, _, _, _, total = candidate
             return total == 0 if anuria else total * HOUR_US < _number(rule["below_ml_kg_h"]) * _number(weight.value) * duration
 
         matched = [value for value in possible if matches(value)]
+        if not matched and issues:
+            item["reason_code"] = "no_positive_complete_subchain_with_coverage_issues"
+            continue
         # Deterministic shortest positive whole-boundary witness; when negative,
         # show the full selected chain without claiming its hourly profile.
-        candidate = min(matched, key=lambda value: (value[0], value[1], value[2])) if matched else candidates[len(intervals) - 1]
-        duration, first, last, total = candidate
-        selected = intervals[first : last + 1]
+        candidate = min(matched, key=lambda value: value[:4]) if matched else max(possible, key=lambda value: value[:4])
+        duration, block_number, first, last, total = candidate
+        selected = blocks[block_number][first : last + 1]
         evidence = {
             "interval_start_at": selected[0].start_at,
             "interval_end_at": selected[-1].end_at,
@@ -193,11 +214,13 @@ def _urine_criteria(source):
             "unit": "mL" if anuria else "mL/kg/h",
             "weight_kg": None if anuria else weight.value,
             "interval_source_ids": [value.source_id for value in selected],
+            "coverage_issues": sorted(issues),
         }
         if not anuria:
             rate = total * HOUR_US / (_number(weight.value) * duration)
             evidence.update(rate_numerator=str(rate.numerator), rate_denominator=str(rate.denominator))
         item["evidence"] = AkiCriterionEvidence.model_validate(evidence).model_dump()
+        item["source_ids"] = [value.source_id for value in selected]
         if not anuria:
             item["source_ids"].append(weight.source_id)
         _evaluated(item, bool(matched), rule["stage"], "known_zero_whole_intervals" if anuria else "whole_original_interval_average_not_hourly_persistence")
@@ -255,6 +278,7 @@ def aki_values(source):
         "资料按冻结as_of可用截止回溯核对，允许截止前新登记的旧采样；这不是evaluation_at当时数据库可得资料的历史重放。",
         "肌酐只比较同原单位及同已审核身份；原表SI绝对3期采用353.6μmol/L，正文354为舍入写法，不暗中换算、舍入或更改26.5μmol/L的48小时界值。",
         "尿量采用本软件明确的原完整采集区间平均策略，枚举原边界连续子链；不裁剪、分摊或虚构逐小时记录，不能证明每一小时持续少尿。",
+        "可定位的缺口、部分采集、未测或非患者总量会切断尿量链；仍保留完整子链已满足的阳性证据。缺口下未满足不能视为阴性；隐藏未选原记录或重叠冲突阻断尿量轴。",
         "体重须明确选取测量值并人工核实适用于整个所选尿量期；未知体重不用于每公斤判据，但完整12小时零尿量可独立符合无尿判据。",
         "最低支持1/2期仍可能被未观察资料提高，标记为下界；3期达到本量表上界不代表病程资料完整。儿童eGFR、维持透析及2026草案规则不在本实现范围。",
     ]

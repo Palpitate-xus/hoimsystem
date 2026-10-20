@@ -218,8 +218,8 @@ def test_bad_urine_axis_preserves_independent_positive_creatinine(problem):
     if problem.startswith("actual_"):
         if problem in {"actual_gap", "actual_overlap"}:
             source["urine_intervals"] = [
-                urine(end="2026-10-16T12:00:00Z", volume="0", number=31),
-                urine(start="2026-10-16T12:00:00.000001Z" if problem == "actual_gap" else "2026-10-16T11:59:59.999999Z", volume="0", number=32),
+                urine(end="2026-10-16T12:00:00Z", volume="500", number=31),
+                urine(start="2026-10-16T12:00:00.000001Z" if problem == "actual_gap" else "2026-10-16T11:59:59.999999Z", volume="500", number=32),
             ]
         elif problem == "actual_partial":
             source["urine_intervals"][0]["collection_completeness"] = "partial"
@@ -232,6 +232,62 @@ def test_bad_urine_axis_preserves_independent_positive_creatinine(problem):
     result = aki_values(source)
     assert result["minimum_stage"] == 2 and result["detection"] == "met"
     assert all(criterion(result, key)["status"] == "unknown" for key in ("urine_6h", "urine_12h", "urine_24h", "anuria_12h"))
+
+
+@pytest.mark.parametrize("problem", ["partial_suffix", "unknown_prefix", "not_total_suffix", "gap_after_positive"])
+def test_complete_zero_12h_witness_survives_locatable_missing_other_intervals(problem):
+    source = make_source()
+    first = urine(end="2026-10-16T12:00:00Z", volume="0", number=31)
+    second = urine(start="2026-10-16T12:00:00Z", volume="0", number=32)
+    expected_id = first["source_id"]
+    if problem == "partial_suffix":
+        second["collection_completeness"] = "partial"
+    elif problem == "unknown_prefix":
+        first.update(volume_ml=None, absent_reason="not_performed")
+        expected_id = second["source_id"]
+    elif problem == "not_total_suffix":
+        second["patient_total"] = False
+    else:
+        second.update(start_at="2026-10-16T12:00:00.000001Z", volume_ml="500")
+    source["urine_intervals"] = [first, second]
+    source["weight"] = None
+    result = aki_values(source)
+    item = criterion(result, "anuria_12h")
+    assert result["minimum_stage"] == item["stage"] == 3 and item["status"] == "met"
+    assert item["evidence"]["interval_source_ids"] == [expected_id] and item["source_ids"] == [expected_id]
+    assert item["evidence"]["coverage_issues"]
+    assert criterion(result, "urine_24h")["status"] == "unknown"
+
+
+def test_separate_four_hour_zero_blocks_cannot_be_joined_across_four_hour_gap():
+    source = make_source()
+    source["urine_intervals"] = [
+        urine(start="2026-10-16T00:00:00Z", end="2026-10-16T04:00:00Z", volume="0", number=31),
+        urine(start="2026-10-16T08:00:00Z", end="2026-10-16T12:00:00Z", volume="0", number=32),
+    ]
+    result = aki_values(source)
+    assert result["minimum_stage"] is None
+    assert all(criterion(result, key)["status"] == "unknown" for key in ("urine_6h", "urine_12h", "urine_24h", "anuria_12h"))
+    assert criterion(result, "urine_6h")["evidence"]["coverage_issues"] == ["gap"]
+
+
+@pytest.mark.parametrize("problem", ["unselected_active_interval", "overlap"])
+def test_hidden_omission_or_overlap_cannot_preserve_potentially_conflicted_zero_witness(problem):
+    source = make_source()
+    source["urine_intervals"] = [urine(volume="0")]
+    source["urine_coverage_issues"] = [problem]
+    result = aki_values(source)
+    assert criterion(result, "anuria_12h")["status"] == "unknown" and result["minimum_stage"] is None
+
+
+def test_per_kg_positive_complete_subchain_is_preserved_but_negative_with_gap_is_unknown():
+    source = make_source()
+    source["urine_intervals"] = [urine(end="2026-10-16T06:00:00Z", volume="100", number=31), urine(start="2026-10-16T12:00:00Z", volume="1000", number=32)]
+    result = aki_values(source)
+    assert criterion(result, "urine_6h")["stage"] == result["minimum_stage"] == 1
+    assert criterion(result, "urine_6h")["evidence"]["interval_source_ids"] == [source["urine_intervals"][0]["source_id"]]
+    assert criterion(result, "urine_12h")["status"] == "unknown"
+    assert criterion(result, "anuria_12h")["status"] == "unknown"
 
 
 def test_huge_exact_decimal_and_microsecond_arithmetic_does_not_use_float_or_decimal_default_precision():

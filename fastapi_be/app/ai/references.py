@@ -36,5 +36,6 @@ SOURCE_REFERENCE_KEYS = frozenset(
         "support_source_id",
         "support_source_kind",
         "roster_plan_id",
+        "bed_series_id",
     }
 )

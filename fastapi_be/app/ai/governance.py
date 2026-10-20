@@ -163,6 +163,8 @@ def provider_feature_issues(spec: FeatureSpec, provider: AIProvider) -> list[dic
     issues = []
     if provider.model.startswith("roster:") and (spec.number != 63 or provider.kind != "specialist"):
         issues.append({"code": "ROSTER_SCOPE_MISMATCH", "message": "本地排班服务仅用于受审运营场景的固定约束与优化证明"})
+    if provider.model.startswith("bed:") and (spec.number != 64 or provider.kind != "specialist"):
+        issues.append({"code": "BED_SCOPE_MISMATCH", "message": "本地床位服务仅用于受审病区实占及流转事件序列的固定统计预测，不推断未满足需求或即时可收治床位"})
     if provider.model.startswith("sofa1:") and (spec.number != 42 or provider.kind != "specialist"):
         issues.append({"code": "SOFA_SCOPE_MISMATCH", "message": "本地SOFA-1固定实施仅用于完整原资料及独立变化核对，不用于自动诊断、风险概率或治疗"})
     if provider.model.startswith("news2:") and (spec.number != 41 or provider.kind != "specialist"):
@@ -186,6 +188,9 @@ def describe_config(db: Session, spec: FeatureSpec, config: AIFeatureConfig | No
     if spec.number == 63:
         provider = db.get(AIProvider, config.provider_id) if config and config.provider_id else None
         data["input_mode"] = "roster" if provider and provider.kind == "specialist" and provider.model.startswith("roster:") else "external_optimizer"
+    if spec.number == 64:
+        provider = db.get(AIProvider, config.provider_id) if config and config.provider_id else None
+        data["input_mode"] = "bed" if provider and provider.kind == "specialist" and provider.model.startswith("bed:") else "external_forecast"
     if spec.number in {41, 42, 43}:
         provider = db.get(AIProvider, config.provider_id) if config and config.provider_id else None
         mode = {41: "news2", 42: "qsofa", 43: "aki"}.get(spec.number)

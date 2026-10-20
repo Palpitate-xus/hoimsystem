@@ -214,6 +214,8 @@ class RunRequest(StrictRequest):
     def dedicated_roster_reference(self):
         if "roster_plan_id" in self.input and self.feature_key != "roster_optimization":
             raise ValueError("受审排班计划仅用于排班与号源优化")
+        if "bed_series_id" in self.input and self.feature_key != "bed_forecast":
+            raise ValueError("受审床位序列仅用于病区实占及流转事件预测")
         return self
 
 

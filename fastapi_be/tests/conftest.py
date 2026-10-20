@@ -86,8 +86,14 @@ async def async_client():
         yield client
 
 
+@pytest.fixture(scope="session")
+def baseline_password_hashes():
+    """Reuse each fixture identity's real bcrypt hash across database resets."""
+    return {}
+
+
 @pytest.fixture
-def seed_data(db_session: Session):
+def seed_data(db_session: Session, baseline_password_hashes):
     """Create a consistent baseline dataset for tests."""
     sess = db_session
 
@@ -98,7 +104,10 @@ def seed_data(db_session: Session):
         if user is None:
             user = User(username=username)
             sess.add(user)
-        user.password = hash_password(password)
+        identity = (username, password)
+        if identity not in baseline_password_hashes:
+            baseline_password_hashes[identity] = hash_password(password)
+        user.password = baseline_password_hashes[identity]
         user.user_role = role
         user.token_invalid_before = None
         sess.flush()

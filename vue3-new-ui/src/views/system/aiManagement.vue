@@ -46,7 +46,7 @@
             <el-table-column label="状态"><template #default="{ row }">{{ row.enabled ? '已启用' : '关闭' }}</template></el-table-column>
             <el-table-column label="密钥"><template #default="{ row }">{{ row.has_api_key ? '已配置，不回显' : '未配置' }}</template></el-table-column>
             <el-table-column label="患者资料"><template #default="{ row }">{{ row.allows_patient_data ? '已授权传输' : '禁止传输' }}</template></el-table-column>
-            <el-table-column label="操作" width="215"><template #default="{ row }"><el-button size="small" @click="editProvider(row)">编辑</el-button><el-button v-if="row.kind === 'specialist' && row.supported_features?.includes('medical_transcription')" size="small" @click="openSpeechCheck(row)">检查本地语音服务</el-button></template></el-table-column>
+            <el-table-column label="操作" width="230"><template #default="{ row }"><el-button size="small" @click="editProvider(row)">编辑</el-button><el-button v-if="row.kind === 'specialist' && row.supported_features?.includes('medical_transcription')" size="small" @click="openSpeechCheck(row)">检查本地语音服务</el-button><el-button v-if="row.kind === 'specialist' && row.supported_features?.includes('ecg_analysis')" size="small" @click="openEcgCheck(row)">检查本地心电服务</el-button></template></el-table-column>
           </el-table>
         </el-tab-pane>
 
@@ -151,6 +151,35 @@
       <template #footer><el-button @click="speechCheckDialog = false">关闭</el-button><el-button v-if="speechCheckResult && speechCheckResult.configured_model !== speechCheckResult.capabilities.model_version" @click="editActualSpeechModel">填写实际模型，待保存</el-button></template>
     </el-dialog>
 
+    <el-dialog v-model="ecgCheckDialog" title="本地心电服务核对" width="800px">
+      <div v-loading="ecgCheckLoading">
+        <p>核对已保存服务：{{ ecgCheckName }}。检查只获取服务声明，不发送心电波形或患者资料，不创建模型任务。</p>
+        <template v-if="ecgCheckResult">
+          <el-alert :type="ecgCheckResult.compatible ? 'success' : 'warning'" :closable="false" :title="ecgCheckResult.compatible ? '服务声明与登记配置匹配；临床质量仍待验证' : '登记配置与服务声明存在差异'" />
+          <p v-for="issue in ecgCheckResult.issues" :key="issue">{{ issue }}</p>
+          <el-descriptions :column="1" border>
+            <el-descriptions-item label="实际模型标识"><span class="prompt-text">{{ ecgCheckResult.capabilities.model_version }}</span></el-descriptions-item>
+            <el-descriptions-item label="模型来源版本">{{ ecgCheckResult.capabilities.model_repository }} · {{ ecgCheckResult.capabilities.model_revision }}</el-descriptions-item>
+            <el-descriptions-item label="运行引擎">{{ ecgCheckResult.capabilities.engine }}；<span v-for="(version, engine) in ecgCheckResult.capabilities.engine_versions" :key="engine">{{ engine }} {{ version }} </span></el-descriptions-item>
+            <el-descriptions-item label="协议">v{{ ecgCheckResult.capabilities.schema_version }} · {{ ecgCheckResult.capabilities.feature_key }}</el-descriptions-item>
+            <el-descriptions-item label="要求的原始导联">{{ ecgCheckResult.capabilities.required_leads.join('、') }}</el-descriptions-item>
+            <el-descriptions-item label="采样与时长">{{ ecgCheckResult.capabilities.sample_rate_hz }} Hz；每导联 {{ ecgCheckResult.capabilities.samples_per_lead }} 个样本，{{ ecgCheckResult.capabilities.samples_per_lead / ecgCheckResult.capabilities.sample_rate_hz }} 秒</el-descriptions-item>
+            <el-descriptions-item label="模型训练标签">{{ ecgCheckResult.capabilities.labels.join('、') }}</el-descriptions-item>
+            <el-descriptions-item label="缺失样本策略">{{ ecgCheckResult.capabilities.missing_sample_policy }}（拒绝含缺失样本的输入）</el-descriptions-item>
+            <el-descriptions-item label="Prompt 处理方式">{{ ecgCheckResult.capabilities.prompt_handling }}：仅对真实信号分类。Prompt 不参与信号推断，不能补造缺失导联、波形或临床信息。</el-descriptions-item>
+            <el-descriptions-item label="请求限制">最大 {{ Math.floor(ecgCheckResult.capabilities.max_bytes / 1048576) }} MiB；服务处理时限 {{ ecgCheckResult.capabilities.timeout_seconds }} 秒，模型请求超时需另留传输时间</el-descriptions-item>
+            <el-descriptions-item label="模型文件摘要"><span class="prompt-text">{{ ecgCheckResult.capabilities.model_digest }}</span></el-descriptions-item>
+            <el-descriptions-item label="运行环境摘要"><span class="prompt-text">{{ ecgCheckResult.capabilities.runtime_digest }}</span></el-descriptions-item>
+            <el-descriptions-item label="预处理摘要"><span class="prompt-text">{{ ecgCheckResult.capabilities.preprocessing_digest }}</span></el-descriptions-item>
+            <el-descriptions-item label="临床验证声明">{{ ecgCheckResult.capabilities.clinical_validation }}（未提供临床验证）</el-descriptions-item>
+          </el-descriptions>
+          <p>来源模型和格式匹配不代表临床准确性。填写模型标识仅更新待保存表单，仍需另行保存、评审及配置启用。</p>
+          <p>{{ ecgCheckResult.scope_note }}</p>
+        </template>
+      </div>
+      <template #footer><el-button @click="ecgCheckDialog = false">关闭</el-button><el-button v-if="ecgCheckResult && ecgCheckResult.configured_model !== ecgCheckResult.capabilities.model_version" @click="editActualEcgModel">填写实际模型，待保存</el-button></template>
+    </el-dialog>
+
     <el-dialog v-model="promptDialog" :title="selectedFeature?.name + '：Prompt 版本'" width="850px">
       <el-form label-width="110px">
         <el-form-item label="历史版本"><el-select v-model="promptSelection" @change="selectPrompt"><el-option v-for="item in promptVersions" :key="item.prompt_id || 'baseline'" :label="'v' + item.version + ' · ' + item.change_note" :value="item.prompt_id || 'baseline'" /></el-select><el-button class="field-hint" @click="activateSelectedPrompt" :loading="saving">启用所选版本</el-button></el-form-item>
@@ -215,7 +244,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted, onBeforeUnmount, ref, watch } from "vue";
+import { computed, onMounted, onBeforeUnmount, onDeactivated, ref, watch } from "vue";
 import { ElMessage } from "element-plus";
 import AiRunHistory from "@/components/AIRunHistory/index.vue";
 import AiReviewCuration from "@/components/AIReviewCuration/index.vue";
@@ -225,7 +254,7 @@ import {
   activateAIPrompt, createAIKnowledge, createAIPatientGrant, createAIPrompt,
   getAIAdminFeatures, getAIAudit, getAIKnowledge, getAIKnowledgeDetail, getAIPatientGrants, getAIPathwaySources, importAIPathway,
   getAIPrompts, getAIProviders, getAIUsage, reviewAIKnowledge, revokeAIPatientGrant,
-  saveAIFeature, saveAIProvider, checkAISpeechProvider,
+  saveAIFeature, saveAIProvider, checkAISpeechProvider, checkAIEcgProvider,
 } from "@/api/ai";
 
 const categories = { cdss: "临床 CDSS", pharmacy: "用药与药房", records: "病历文书", diagnostics: "检验影像体检", inpatient: "住院护理急诊", patient: "患者服务", operations: "运营与收费", knowledge: "知识科研质控" };
@@ -252,6 +281,12 @@ const speechCheckDialog = ref(false), speechCheckLoading = ref(false), speechChe
 let speechCheckRequest = 0;
 watch(speechCheckDialog, visible => { if (!visible) speechCheckRequest += 1; });
 onBeforeUnmount(() => { speechCheckRequest += 1; });
+const ecgCheckDialog = ref(false), ecgCheckLoading = ref(false), ecgCheckResult = ref(null), ecgCheckName = ref("");
+let ecgCheckRequest = 0;
+watch(ecgCheckDialog, visible => { if (!visible) { ecgCheckRequest += 1; ecgCheckResult.value = null; ecgCheckLoading.value = false; } });
+function clearEcgCheck() { ecgCheckRequest += 1; ecgCheckDialog.value = false; ecgCheckResult.value = null; ecgCheckLoading.value = false; }
+onDeactivated(clearEcgCheck);
+onBeforeUnmount(clearEcgCheck);
 const promptDialog = ref(false), promptVersions = ref([]), promptSelection = ref("baseline"), taskPrompt = ref(""), systemPrompt = ref(""), promptChange = ref(""), activateNewPrompt = ref(false);
 const knowledgeDialog = ref(false), knowledgeForm = ref({}), reviewDialog = ref(false), reviewDocument = ref(null);
 const pathwayImportDialog = ref(false), pathwaySourcesLoading = ref(false), pathwaySources = ref({}), pathwayImportForm = ref({});
@@ -318,6 +353,34 @@ function editActualSpeechModel() {
   const row = providers.value.find(item => item.provider_id === result?.provider_id);
   if (!row || row.revision !== result.provider_revision) { ElMessage.warning("已保存配置版本已变化，请刷新后重新检查"); return; }
   speechCheckDialog.value = false;
+  editProvider(row); providerForm.value.model = result.capabilities.model_version;
+  if (providerForm.value.timeout_seconds <= result.capabilities.timeout_seconds) providerForm.value.timeout_seconds = 120;
+}
+
+async function openEcgCheck(row) {
+  const version = ++ecgCheckRequest;
+  const target = { provider_id: row.provider_id, revision: row.revision, model: row.model };
+  ecgCheckName.value = row.name; ecgCheckResult.value = null; ecgCheckLoading.value = true; ecgCheckDialog.value = true;
+  try {
+    const response = await checkAIEcgProvider(target.provider_id, target.revision);
+    if (version !== ecgCheckRequest || !ecgCheckDialog.value) return;
+    const result = response.data;
+    if (result?.provider_id !== target.provider_id || result.provider_revision !== target.revision || result.configured_model !== target.model) {
+      ElMessage.warning("服务核对回执与已保存配置不一致，请刷新后重新检查"); return;
+    }
+    ecgCheckResult.value = result;
+  } catch { /* The request layer reports configuration/connection errors. */ }
+  finally { if (version === ecgCheckRequest) ecgCheckLoading.value = false; }
+}
+
+function editActualEcgModel() {
+  const result = ecgCheckResult.value;
+  if (!ecgCheckDialog.value || !result) return;
+  const row = providers.value.find(item => item.provider_id === result.provider_id);
+  if (!row || row.revision !== result.provider_revision || row.model !== result.configured_model || row.kind !== "specialist" || !row.supported_features?.includes("ecg_analysis")) {
+    ElMessage.warning("已保存配置版本已变化，请刷新后重新检查"); return;
+  }
+  ecgCheckDialog.value = false;
   editProvider(row); providerForm.value.model = result.capabilities.model_version;
   if (providerForm.value.timeout_seconds <= result.capabilities.timeout_seconds) providerForm.value.timeout_seconds = 120;
 }

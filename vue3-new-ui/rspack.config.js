@@ -213,6 +213,18 @@ module.exports = {
       // 减小最小块大小，允许更细粒度的分割
       minSize: 20000,
       cacheGroups: {
+        // This exact shared header and its SFC style were repeated in 121 lazy
+        // chunks. Keep one copy without changing pages or global split limits.
+        pageHeaderShared: {
+          name: "page-header-shared",
+          test: /[\\/]src[\\/]components[\\/]VabPageHeader[\\/]index\.vue(?:\?.*)?$/,
+          chunks: "async",
+          minChunks: 2,
+          minSize: 0,
+          minSizeReduction: 0,
+          reuseExistingChunk: true,
+          priority: 15,
+        },
         // Reuse small admission-source/API modules across lazy AI screens.
         // The global 20 kB threshold otherwise leaves identical async copies.
         aiShared: {

@@ -390,6 +390,24 @@
   "auth": [
    "super_admin"
   ],
+  "function": "list_global_runs",
+  "method": "GET",
+  "module": "ai_admin.py",
+  "path": "/api/ai/admin/runs"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "inspect_run_trace",
+  "method": "GET",
+  "module": "ai_admin.py",
+  "path": "/api/ai/admin/runs/{run_id}"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
   "function": "create_provider",
   "method": "POST",
   "module": "ai_admin.py",

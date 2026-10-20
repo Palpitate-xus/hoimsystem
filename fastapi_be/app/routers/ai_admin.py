@@ -2,11 +2,12 @@
 
 import datetime
 import json
+from typing import Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import func
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, defer
 
 from app.ai.catalog import COMMON_SYSTEM_PROMPT, FEATURES
 from app.ai.governance import (
@@ -24,8 +25,9 @@ from app.ai.governance import (
     provider_feature_issues,
     validate_endpoint,
 )
-from app.ai.models import AIAuditEvent, AIFeatureConfig, AIKnowledgeDocument, AIPatientGrant, AIPromptVersion, AIProvider, AIRun, utcnow
+from app.ai.models import AIAuditEvent, AIFeatureConfig, AIFeedback, AIKnowledgeDocument, AIPatientGrant, AIPromptVersion, AIProvider, AIRun, utcnow
 from app.ai.readiness import setup_reports
+from app.ai.runtime import describe_run
 from app.ai.schemas import FeatureWrite, KnowledgeReview, KnowledgeWrite, PatientGrantWrite, PromptActivate, PromptWrite, ProviderWrite
 from app.database import get_db
 from app.dependencies import require_roles
@@ -106,6 +108,67 @@ def update_feature(key: str, req: FeatureWrite, db: Session = Depends(get_db), u
 def list_providers(db: Session = Depends(get_db), user: User = Depends(require_roles("super_admin"))) -> dict:
     """Never return plaintext or encrypted API keys."""
     return {"code": 200, "msg": "success", "data": [describe_provider(item) for item in db.query(AIProvider).order_by(AIProvider.provider_id).all()]}
+
+
+@router.get("/ai/admin/runs")
+def list_global_runs(
+    feature_key: str | None = None,
+    status: Literal["queued", "running", "succeeded", "failed", "cancelled"] | None = None,
+    outcome: Literal["accepted", "rejected", "modified"] | None = None,
+    requested_by: int | None = Query(None, ge=1),
+    patient_id: int | None = Query(None, ge=1),
+    page: int = Query(1, ge=1, le=100000),
+    page_size: int = Query(30, ge=1, le=100),
+    db: Session = Depends(get_db),
+    user: User = Depends(require_roles("super_admin")),
+) -> dict:
+    """Inspect all users' task metadata and feedback counts without loading clinical payloads."""
+    query = db.query(AIRun)
+    if feature_key:
+        get_spec(feature_key)
+        query = query.filter(AIRun.feature_key == feature_key)
+    if status:
+        query = query.filter(AIRun.status == status)
+    if requested_by:
+        query = query.filter(AIRun.requested_by == requested_by)
+    if patient_id:
+        query = query.filter(AIRun.patient_id == patient_id)
+    if outcome:
+        query = query.filter(AIRun.run_id.in_(db.query(AIFeedback.run_id).filter(AIFeedback.outcome == outcome)))
+    total = query.count()
+    rows = (
+        query.options(defer(AIRun.input_json), defer(AIRun.result_json), defer(AIRun.evidence_json))
+        .order_by(AIRun.create_time.desc(), AIRun.run_id)
+        .offset((page - 1) * page_size)
+        .limit(page_size)
+        .all()
+    )
+    counts = dict(db.query(AIFeedback.run_id, func.count(AIFeedback.feedback_id)).filter(AIFeedback.run_id.in_([item.run_id for item in rows])).group_by(AIFeedback.run_id).all()) if rows else {}
+    data = [{**describe_run(item, False), "requested_by": item.requested_by, "provider_id": item.provider_id, "feedback_count": counts.get(item.run_id, 0)} for item in rows]
+    return {"code": 200, "msg": "success", "data": data, "total": total, "page": page, "page_size": page_size}
+
+
+@router.get("/ai/admin/runs/{run_id}")
+def inspect_run_trace(run_id: str, db: Session = Depends(get_db), user: User = Depends(require_roles("super_admin"))) -> dict:
+    """Read the frozen prompts, requested model, source payload and append-only review history."""
+    run = db.get(AIRun, run_id)
+    if run is None:
+        raise HTTPException(404, "AI 任务不存在")
+    snapshot = json.loads(run.input_json)
+    feedback = db.query(AIFeedback).filter_by(run_id=run_id).order_by(AIFeedback.create_time.desc(), AIFeedback.feedback_id).limit(101).all()
+    return {
+        "code": 200,
+        "msg": "success",
+        "data": {
+            **describe_run(run),
+            "requested_by": run.requested_by,
+            "provider_id": run.provider_id,
+            "frozen_request": snapshot,
+            "snapshot_complete": all(key in snapshot for key in ("system_prompt", "provider_snapshot", "catalog_version")),
+            "feedback": [{name: getattr(item, name) for name in ("feedback_id", "reviewer_id", "outcome", "comment", "create_time")} for item in feedback[:100]],
+            "feedback_truncated": len(feedback) > 100,
+        },
+    }
 
 
 def _write_provider(db: Session, req: ProviderWrite, user: User, provider: AIProvider | None) -> AIProvider:

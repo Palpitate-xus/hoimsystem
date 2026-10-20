@@ -214,6 +214,7 @@ class OperationLogMiddleware(BaseHTTPMiddleware):
         "/api/ai/encounters",
         "/api/ai/prescriptions",
         "/api/ai/runs",
+        "/api/ai/admin/runs",
         "/api/clinicalDiagnosis/review",
     }
 

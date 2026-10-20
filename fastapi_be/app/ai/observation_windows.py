@@ -16,7 +16,9 @@ WINDOW_ROLES = {"nurse", "doctor", "director", "admin", "super_admin"}
 RISK_FEATURES = {41, 42, 43}
 MEASUREMENTS = ("heart_rate", "pulse_rate", "respiratory_rate", "systolic_bp", "diastolic_bp", "temperature", "spo2", "body_weight", "oxygen_flow", "fio2")
 MAX_ROWS = 1000
-SCHEMA_VERSION = "inpatient_window_v1"
+LEGACY_SCHEMA_VERSION = "inpatient_window_v1"
+SCHEMA_VERSION = LEGACY_SCHEMA_VERSION
+SUPPORTED_SCHEMA_VERSIONS = {LEGACY_SCHEMA_VERSION, SCHEMA_VERSION}
 
 
 def canonical_json(value):
@@ -156,7 +158,8 @@ def _urine_quality(rows, start, end):
     }
 
 
-def build_snapshot(db, *, window_id, patient_id, admission_id, created_by, created_at, start_at, end_at, as_of):
+def _build_v1_snapshot(db, *, window_id, patient_id, admission_id, created_by, created_at, start_at, end_at, as_of):
+    """Retain the original v1 recipe, including all frozen text and fields."""
     from app.ai.context import minimize_identifiers
     from app.inpatient_observations import source_current
     from app.models import InpatientObservation, InpatientUrineInterval
@@ -203,7 +206,7 @@ def build_snapshot(db, *, window_id, patient_id, admission_id, created_by, creat
                 item["payload"][key] = minimize_identifiers(item["payload"][key], patient)
         item["revoke_reason"] = minimize_identifiers(item["revoke_reason"], patient)
     snapshot = {
-        "schema_version": SCHEMA_VERSION,
+        "schema_version": LEGACY_SCHEMA_VERSION,
         "window_id": window_id,
         "patient_id": patient_id,
         "admission_id": admission_id,
@@ -240,6 +243,17 @@ def build_snapshot(db, *, window_id, patient_id, admission_id, created_by, creat
     return snapshot
 
 
+def build_snapshot(db, *, window_id, patient_id, admission_id, created_by, created_at, start_at, end_at, as_of, schema_version=SCHEMA_VERSION):
+    if schema_version not in SUPPORTED_SCHEMA_VERSIONS:
+        raise HTTPException(422, "不支持的观测窗版本，不能自动升级历史冻结资料")
+    snapshot = _build_v1_snapshot(
+        db, window_id=window_id, patient_id=patient_id, admission_id=admission_id, created_by=created_by, created_at=created_at, start_at=start_at, end_at=end_at, as_of=as_of
+    )
+    if schema_version == LEGACY_SCHEMA_VERSION:
+        return snapshot
+    raise HTTPException(422, "不支持的观测窗版本，不能自动升级历史冻结资料")
+
+
 def create_window(db, user, values):
     authorize_scope(db, user, values["patient_id"], values["admission_id"])
     now, identifier = utcnow(), str(uuid.uuid4())
@@ -268,7 +282,7 @@ def snapshot_current(db, user, window_or_id):
     if row is None:
         raise HTTPException(409, "原观测窗不存在")
     authorize_scope(db, user, row.patient_id, row.admission_id)
-    if row.status != "active" or row.revision != 1 or row.schema_version != SCHEMA_VERSION or row.revoked_at is not None or row.revoked_by is not None or row.revoke_reason != "":
+    if row.status != "active" or row.revision != 1 or row.schema_version not in SUPPORTED_SCHEMA_VERSIONS or row.revoked_at is not None or row.revoked_by is not None or row.revoke_reason != "":
         raise HTTPException(409, "原观测窗已撤销或版本不一致")
     if not row.start_at < row.end_at <= row.as_of <= row.created_at <= utcnow() or row.end_at - row.start_at > datetime.timedelta(hours=168):
         raise HTTPException(409, "原观测窗UTC时间边界已不符合冻结契约")
@@ -276,7 +290,9 @@ def snapshot_current(db, user, window_or_id):
         frozen = json.loads(row.snapshot_json)
         if content_hash(frozen) != row.content_hash or frozen.get("content_hash") != row.content_hash or frozen.get("source_id") != f"observation_window:{identifier}:{row.content_hash[:12]}":
             raise ValueError()
-        expected = build_snapshot(db, **{key: getattr(row, key) for key in ("window_id", "patient_id", "admission_id", "created_by", "created_at", "start_at", "end_at", "as_of")})
+        expected = build_snapshot(
+            db, schema_version=row.schema_version, **{key: getattr(row, key) for key in ("window_id", "patient_id", "admission_id", "created_by", "created_at", "start_at", "end_at", "as_of")}
+        )
         if canonical_json(expected) != canonical_json(frozen):
             raise ValueError()
     except (ValueError, TypeError, KeyError) as exc:

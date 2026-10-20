@@ -3,6 +3,7 @@
 from sqlalchemy import case
 from sqlalchemy.orm import selectinload
 
+from app.ai.nursing_sources import NURSING_ROW_REFERENCES, attach_nursing_review
 from app.models import (
     Admission,
     CriticalCareRecord,
@@ -29,9 +30,28 @@ def attach_patient_sources(db, user, spec, patient, encounter, bundle, add) -> N
         if admission:
             query = query.filter(model.admission_id == encounter.admission_id)
         rows = query.order_by(getattr(model, time_field).desc(), getattr(model, primary_key)).limit(limit + 1).all()
+        reference = bundle.data.get("selected_sources", {}).get(NURSING_ROW_REFERENCES.get(key))
+        if reference:
+            chosen = query.filter(getattr(model, primary_key) == reference).first()
+            if chosen is not None:
+                rows = [chosen, *[row for row in rows if str(getattr(row, primary_key)) != reference]]
         if len(rows) > limit:
             bundle.data["truncated_sources"].append({"source": key, "limit": limit, "note": "其余记录未纳入本次快照"})
-        bundle.data[key] = [add(key + ":" + str(getattr(item, primary_key)), key, {name: getattr(item, name) for name in fields}, getattr(item, time_field)) for item in rows[:limit]]
+        bundle.data[key] = [
+            add(
+                key + ":" + str(getattr(item, primary_key)),
+                key,
+                {name: getattr(item, name) for name in fields},
+                item.assessed_at
+                if key in {"completed_nursing_assessments", "recorded_icu_scores"}
+                else item.record_time
+                if key == "critical_care_records" and item.time_basis == "utc"
+                else None
+                if key == "critical_care_records"
+                else getattr(item, time_field),
+            )
+            for item in rows[:limit]
+        ]
         return rows[:limit]
 
     if number in {1, 8, 25, 54, 55, 56, 57}:
@@ -170,7 +190,7 @@ def attach_patient_sources(db, user, spec, patient, encounter, bundle, add) -> N
             NursingAssessment,
             "assessment_id",
             "update_time",
-            ("admission_id", "adl_score", "pressure_ulcer_risk", "fall_risk", "consciousness", "nutrition_risk", "note", "status", "update_time"),
+            ("admission_id", "adl_score", "pressure_ulcer_risk", "fall_risk", "consciousness", "nutrition_risk", "note", "status", "entry_version", "assessed_at", "create_time", "update_time"),
             3,
             admission=True,
             extra_filters=(NursingAssessment.status == 1,),
@@ -183,11 +203,18 @@ def attach_patient_sources(db, user, spec, patient, encounter, bundle, add) -> N
             CriticalCareRecord,
             "record_id",
             "record_time",
-            ("admission_id", "record_time", "consciousness", "gcs_score", "oxygen_support", "blood_pressure", "pulse", "spo2", "urine_output", "note"),
+            ("admission_id", "record_time", "time_basis", "entry_version", "consciousness", "gcs_score", "oxygen_support", "blood_pressure", "pulse", "spo2", "urine_output", "note"),
             5,
             admission=True,
         )
         append_rows(
-            "recorded_icu_scores", IcuScoreRecord, "score_id", "assess_time", ("admission_id", "score_type", "scene", "total_score", "detail_json", "interpretation", "assess_time"), 5, admission=True
+            "recorded_icu_scores",
+            IcuScoreRecord,
+            "score_id",
+            "assess_time",
+            ("admission_id", "score_type", "scene", "total_score", "detail_json", "interpretation", "assess_time", "assessed_at", "calculation_version", "create_time"),
+            5,
+            admission=True,
         )
         bundle.data["score_provenance_note"] = "评分是已保存的院内计算或评估记录，不是本次 AI 重新计算的风险概率，临床适用性仍需核实"
+    attach_nursing_review(bundle)

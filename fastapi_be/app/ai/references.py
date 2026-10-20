@@ -23,5 +23,9 @@ SOURCE_REFERENCE_KEYS = frozenset(
         "ecg_asset_id",
         "image_asset_id",
         "imaging_order_id",
+        "nursing_assessment_id",
+        "nursing_plan_id",
+        "critical_care_record_id",
+        "icu_score_id",
     }
 )

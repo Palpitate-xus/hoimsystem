@@ -25,6 +25,7 @@ from app.ai.image_assets import authorize_image, authorize_image_patient, image_
 from app.ai.image_files import open_verified_image
 from app.ai.incident_sources import attach_incident_sources
 from app.ai.models import AIAudioAsset, AIECGAsset, AIImageAsset, AIPatientGrant, utcnow
+from app.ai.nursing_sources import validate_nursing_selection
 from app.ai.outpatient_billing import resolve_outpatient_charge
 from app.ai.pathway_sources import PATHWAY_SOURCE_FEATURES, attach_pathway_sources
 from app.ai.patient_sources import attach_patient_sources
@@ -38,7 +39,9 @@ from app.models import (
     AdverseEvent,
     AdverseReaction,
     ClinicalPathway,
+    CriticalCareRecord,
     Doctor,
+    IcuScoreRecord,
     ImagingOrder,
     ImagingReport,
     InpatientCharge,
@@ -48,6 +51,8 @@ from app.models import (
     MdtCase,
     MedicalRecord,
     MedicalRecordHome,
+    NursingAssessment,
+    NursingPlan,
     NursingRecord,
     PathwayEnrollment,
     Patient,
@@ -83,7 +88,7 @@ def minimize_identifiers(value: object, patient: Patient | None = None) -> objec
                 return False
             if key in {"content_hash", "header_hash", "signal_hash", "chunk_hash", "snapshot_hash", "source_snapshot_hash", "context_digest", "prompt_hash"} and re.fullmatch(r"[a-f0-9]{64}", item):
                 return True
-            if key in SOURCE_REFERENCE_KEYS | {"asset_id", "document_id", "encounter_ref", "review_id", "run_id"}:
+            if key in SOURCE_REFERENCE_KEYS | {"asset_id", "document_id", "encounter_ref", "admission_id", "review_id", "run_id"}:
                 try:
                     return str(uuid.UUID(item)) == item
                 except ValueError:
@@ -147,7 +152,9 @@ def accessible_patients(db: Session, user: User, spec: FeatureSpec, keyword: str
             for model in (Registration, Admission):
                 criteria.append(Patient.patient_id.in_(select(model.patient_id).where(model.department_id.in_(departments))))
         if user.user_role == "nurse" and spec.category in {"inpatient", "patient"}:
-            criteria.append(Patient.patient_id.in_(select(NursingRecord.patient_id).where(NursingRecord.nurse_id == user.user_id)))
+            for model in (NursingRecord, NursingAssessment, NursingPlan, CriticalCareRecord):
+                criteria.append(Patient.patient_id.in_(select(model.patient_id).where(model.nurse_id == user.user_id)))
+            criteria.append(Patient.patient_id.in_(select(IcuScoreRecord.patient_id).where(IcuScoreRecord.assessor_id == user.user_id)))
             criteria.append(Patient.patient_id.in_(surgical_patient_ids([], user.user_id)))
         if user.user_role == "pharmacist" and spec.category == "pharmacy":
             criteria.append(Patient.patient_id.in_(select(Prescription.patient_id).where(Prescription.status.in_([0, 1, 2]))))
@@ -208,8 +215,14 @@ def authorize_patient(db: Session, user: User, patient_id: int, category: str, e
         if db.query(Patient.patient_id).filter(Patient.patient_id == patient_id, Patient.patient_id.in_(care)).first():
             return patient
     if user.user_role == "nurse" and category in {"inpatient", "patient"}:
-        if db.query(NursingRecord.record_id).filter_by(patient_id=patient_id, nurse_id=user.user_id).first():
-            return patient
+        if encounter is None or isinstance(encounter, Admission):
+            for model in (NursingRecord, NursingAssessment, NursingPlan, CriticalCareRecord, IcuScoreRecord):
+                author = model.assessor_id if model is IcuScoreRecord else model.nurse_id
+                query = db.query(model).filter(model.patient_id == patient_id, author == user.user_id)
+                if encounter is not None:
+                    query = query.filter(model.admission_id == encounter.admission_id)
+                if query.first():
+                    return patient
     if user.user_role == "pharmacist" and category == "pharmacy":
         if db.query(Prescription.prescription_id).filter(Prescription.patient_id == patient_id, Prescription.status.in_([0, 1, 2])).first():
             return patient
@@ -229,12 +242,13 @@ def _selected_records(db: Session, user: User, patient_id: int, references: dict
         ("mdt_id", MdtCase, "mdt_id"),
         ("pathway_enrollment_id", PathwayEnrollment, "enrollment_id"),
         ("pathway_id", ClinicalPathway, "pathway_id"),
+        ("icu_score_id", IcuScoreRecord, "score_id"),
     ):
         reference = references.get(key)
         if reference in (None, ""):
             continue
         if not isinstance(reference, str) or len(reference) > 10 or not reference.isascii() or not reference.isdigit() or not 0 < int(reference) <= 2147483647 or str(int(reference)) != reference:
-            raise HTTPException(422, "所选事件、会诊或路径标识须为规范的正整数字符串")
+            raise HTTPException(422, "所选事件、会诊、路径或评分标识须为规范的正整数字符串")
         if user.user_role == "patient":
             raise HTTPException(403, "患者端不提供内部事件、转诊、会诊和路径工作资料")
         query = db.query(model).filter(getattr(model, primary_key) == int(reference))
@@ -261,6 +275,9 @@ def _selected_records(db: Session, user: User, patient_id: int, references: dict
         ("ecg_asset_id", AIECGAsset, "asset_id", None),
         ("image_asset_id", AIImageAsset, "asset_id", None),
         ("imaging_order_id", ImagingOrder, "imaging_order_id", None),
+        ("nursing_assessment_id", NursingAssessment, "assessment_id", None),
+        ("nursing_plan_id", NursingPlan, "plan_id", None),
+        ("critical_care_record_id", CriticalCareRecord, "record_id", None),
     ]
     for key, model, primary_key, order in sources:
         reference = references.get(key)
@@ -305,6 +322,7 @@ def patient_snapshot(db: Session, user: User, spec: FeatureSpec, patient_id: int
     if spec.number == 36 and any(key in SOURCE_REFERENCE_KEYS - image_keys and item not in (None, "") for key, item in (source_refs or {}).items()):
         raise HTTPException(422, "影像辅助识别只接受真实原像素与申请引用，不把文字报告当成影像")
     selected = _selected_records(db, user, patient_id, source_refs or {})
+    validate_nursing_selection(spec, selected, encounter)
     if spec.number != 21 and "audio_asset_id" in selected:
         raise HTTPException(422, "该功能不接受录音文件，须先完成医疗语音转写和人工核对")
     if spec.number not in PATHWAY_SOURCE_FEATURES and any(key in selected for key in ("pathway_id", "pathway_enrollment_id")):

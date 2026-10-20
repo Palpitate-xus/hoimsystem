@@ -151,6 +151,10 @@ def configure(db_session, seed_data):
             enabled=1,
             provider_id=provider.provider_id,
             allowed_roles_json=encode_json(FEATURE_BY_KEY["surgery_scheduling"].default_roles),
+            validation_status="validated",
+            validation_note="仅隔离合成运营契约验证，不代表医院真实运营验证或效果评估",
+            validated_by=seed_data["super_admin_user"].user_id,
+            validated_at=datetime.datetime.now(datetime.UTC).replace(tzinfo=None),
             updated_by=seed_data["super_admin_user"].user_id,
         )
     )
@@ -181,3 +185,4 @@ def test_surgical_adapter_requires_patient_data_purpose(seed_data, db_session):
     with pytest.raises(HTTPException) as error:
         create_run(db_session, seed_data["super_admin_user"], RunRequest(feature_key="surgery_scheduling"))
     assert error.value.status_code == 409
+    assert error.value.detail == "该模型服务尚未获准处理患者资料"

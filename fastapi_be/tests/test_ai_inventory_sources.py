@@ -184,7 +184,15 @@ async def test_inventory_change_while_queued_stops_specialist_inference(seed_dat
     db_session.flush()
     db_session.add(
         AIFeatureConfig(
-            feature_key=key, provider_id=provider.provider_id, enabled=1, allowed_roles_json=encode_json(FEATURE_BY_KEY[key].default_roles), updated_by=seed_data["super_admin_user"].user_id
+            feature_key=key,
+            provider_id=provider.provider_id,
+            enabled=1,
+            allowed_roles_json=encode_json(FEATURE_BY_KEY[key].default_roles),
+            validation_status="validated",
+            validation_note="仅隔离合成运营契约验证，不代表医院真实运营验证或效果评估",
+            validated_by=seed_data["super_admin_user"].user_id,
+            validated_at=datetime.datetime.now(datetime.UTC).replace(tzinfo=None),
+            updated_by=seed_data["super_admin_user"].user_id,
         )
     )
     db_session.commit()

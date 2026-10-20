@@ -446,6 +446,15 @@
   "auth": [
    "super_admin"
   ],
+  "function": "check_forecast_provider",
+  "method": "POST",
+  "module": "ai_admin.py",
+  "path": "/api/ai/admin/providers/{provider_id}/forecast-capabilities"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
   "function": "list_global_runs",
   "method": "GET",
   "module": "ai_admin.py",
@@ -784,6 +793,58 @@
   "method": "POST",
   "module": "ai_feedback_admin.py",
   "path": "/api/ai/admin/review-excerpts/{excerpt_id}/review"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "admin_list_forecast_series",
+  "method": "GET",
+  "module": "ai_forecast.py",
+  "path": "/api/ai/admin/forecast-series"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "preview_forecast_series",
+  "method": "POST",
+  "module": "ai_forecast.py",
+  "path": "/api/ai/admin/forecast-series/preview"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "create_forecast_series",
+  "method": "POST",
+  "module": "ai_forecast.py",
+  "path": "/api/ai/admin/forecast-series"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "detail_forecast_series",
+  "method": "GET",
+  "module": "ai_forecast.py",
+  "path": "/api/ai/admin/forecast-series/{series_id}"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "revoke_forecast_series",
+  "method": "POST",
+  "module": "ai_forecast.py",
+  "path": "/api/ai/admin/forecast-series/{series_id}/revoke"
+ },
+ {
+  "auth": "ANY",
+  "function": "business_forecast_series",
+  "method": "GET",
+  "module": "ai_forecast.py",
+  "path": "/api/ai/forecast-series"
  },
  {
   "auth": "ANY",

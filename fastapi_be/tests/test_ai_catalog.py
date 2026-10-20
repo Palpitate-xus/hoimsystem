@@ -39,10 +39,13 @@ def test_hospital_scope_does_not_advertise_access_to_unscoped_business_roles():
 
 def test_risk_metadata_advertises_only_its_window_and_optional_news2_assessment():
     assert describe_feature(FEATURE_BY_KEY["deterioration_risk"])["source_reference_keys"] == ["news2_assessment_id", "observation_window_id"]
-    for key in ("sepsis_risk", "aki_risk"):
+    assert describe_feature(FEATURE_BY_KEY["aki_risk"])["source_reference_keys"] == ["aki_assessment_id", "observation_window_id"]
+    for key in ("sepsis_risk",):
         assert describe_feature(FEATURE_BY_KEY[key])["source_reference_keys"] == ["observation_window_id"]
     for spec in FEATURES:
         if spec.number not in {41, 42, 43}:
             assert "observation_window_id" not in describe_feature(spec)["source_reference_keys"]
         if spec.number != 41:
             assert "news2_assessment_id" not in describe_feature(spec)["source_reference_keys"]
+        if spec.number != 43:
+            assert "aki_assessment_id" not in describe_feature(spec)["source_reference_keys"]

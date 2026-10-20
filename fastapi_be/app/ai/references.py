@@ -29,5 +29,6 @@ SOURCE_REFERENCE_KEYS = frozenset(
         "icu_score_id",
         "observation_window_id",
         "news2_assessment_id",
+        "aki_assessment_id",
     }
 )

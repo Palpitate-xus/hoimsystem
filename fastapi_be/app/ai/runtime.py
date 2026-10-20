@@ -6,6 +6,7 @@ import time
 import uuid
 
 from fastapi import HTTPException
+from pydantic import ValidationError
 from sqlalchemy.orm import Session
 
 from app.ai.adr_sources import ADR_SOURCE_FEATURES
@@ -101,6 +102,13 @@ def create_run(db: Session, user: User, req: RunRequest) -> AIRun:
         raise HTTPException(409, "RCA辅助分析需要明确选择当前已授权患者的不良事件记录")
     if spec.number == 36 and bundle.data["image_source"]["image_metadata"]["valid_pixel_count"] < 1:
         raise HTTPException(409, "原影像没有可用像素，只能查看原记录，不能创建候选识别任务")
+    if spec.number == 36 and provider.model.startswith("xrv:"):
+        from app.ai.imaging_contract import ImageSource
+
+        try:
+            ImageSource.model_validate(bundle.data["image_source"])
+        except ValidationError as exc:
+            raise HTTPException(409, "当前本地胸片研究模型只接受明确CR/DX胸部PA/AP、单帧、无符号8–16位及恒等重标定的原像素；可继续复核原图，请核对资料或选择适用模型") from exc
     if spec.number == 37:
         metadata = bundle.data["ecg_source"]["signal_metadata"]
         if all(lead["missing_samples"] == metadata["sample_count"] for lead in metadata["leads"]):

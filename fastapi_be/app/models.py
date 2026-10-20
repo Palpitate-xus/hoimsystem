@@ -10,6 +10,7 @@ from app import inpatient_vasoactive_models as _vasoactive_models  # noqa: F401
 
 # Register AI tables in the same metadata for create_all and Alembic migrations.
 from app.ai import models as _ai_models  # noqa: F401
+from app.ai import sofa_models as _sofa_models  # noqa: F401
 from app.clinical_observations import ObservationDecimal
 from app.database import Base
 

@@ -1373,6 +1373,26 @@
  },
  {
   "auth": [
+   "director",
+   "doctor"
+  ],
+  "function": "get_diagnosis_review",
+  "method": "GET",
+  "module": "doctor.py",
+  "path": "/api/clinicalDiagnosis/review"
+ },
+ {
+  "auth": [
+   "director",
+   "doctor"
+  ],
+  "function": "save_diagnosis_review",
+  "method": "POST",
+  "module": "doctor.py",
+  "path": "/api/clinicalDiagnosis/review"
+ },
+ {
+  "auth": [
    "admin",
    "director",
    "doctor",

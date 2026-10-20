@@ -14,6 +14,7 @@ from app.ai.governance import digest, encode_json
 from app.ai.models import AIPatientGrant, utcnow
 from app.clinical_observations import serialize_observation
 from app.config import settings
+from app.diagnosis_review import latest_reviews, review_state
 from app.models import (
     Admission,
     Doctor,
@@ -204,6 +205,7 @@ def patient_snapshot(db: Session, user: User, spec: FeatureSpec, patient_id: int
         "missing_data": [],
         "scope_note": "按近期记录和明确所选资料构建的有限快照，不代表完整病史；所选资料不等同于本次就诊资料",
         "truncated_sources": [],
+        "diagnosis_reviews": [],
         "selected_sources": {key: (source_refs or {})[key] for key in selected},
     }
 
@@ -233,6 +235,28 @@ def patient_snapshot(db: Session, user: User, spec: FeatureSpec, patient_id: int
         clean = json.loads(encode_json(minimize_identifiers(fields, patient)))
         bundle.evidence.append({"source_id": source_id, "kind": "patient_record", "title": title, "observed_at": str(observed_at) if observed_at else None, "content": encode_json(clean)})
         return {"source_id": source_id, **clean}
+
+    def attach_diagnosis_review(record, reviews: dict) -> str:
+        state, review = review_state(record, reviews)
+        if review:
+            bundle.data["diagnosis_reviews"].append(
+                add(
+                    "diagnosis-review:" + review.review_id,
+                    "责任医生诊断复核",
+                    {
+                        "source_kind": review.source_kind,
+                        "source_id": review.source_id,
+                        "diagnosis_text_at_review": review.diagnosis_text,
+                        "certainty": state,
+                        "reviewed_certainty": review.certainty,
+                        "revision": review.revision,
+                        "reason": review.reason,
+                        "reviewed_at": review.reviewed_at,
+                    },
+                    review.reviewed_at,
+                )
+            )
+        return state
 
     profile = patient.clinical_profile
     if profile:
@@ -280,17 +304,19 @@ def patient_snapshot(db: Session, user: User, spec: FeatureSpec, patient_id: int
         else record_query.order_by(MedicalRecord.consultation_time.desc())
     )
     records = bounded(record_query, 15, "门诊病历", "record_id", "medical_record_id")
+    record_reviews = latest_reviews(db, patient_id, [item.medical_record_id for item in records])
     bundle.data["outpatient_records"] = []
     for item in records:
         current = isinstance(encounter, Registration) and item.registration_uuid == encounter.registration_uuid
+        certainty = attach_diagnosis_review(item, record_reviews)
         record = add(
             "outpatient:" + item.medical_record_id,
             "门诊病历",
-            {"symptom": item.symptom, "diagnosis_text": item.result, "signed": item.status == 1, "current_encounter": current},
+            {"symptom": item.symptom, "diagnosis_text": item.result, "diagnosis_certainty": certainty, "signed": item.status == 1, "current_encounter": current},
             item.consultation_time,
         )
         bundle.data["outpatient_records"].append(record)
-        if current and item.status == 1 and item.result:
+        if current and certainty == "confirmed" and item.result:
             bundle.data["current_confirmed_diagnoses"].append(item.result)
     structured_query = db.query(StructuredMedicalRecord).filter_by(patient_id=patient_id)
     if user.user_role == "patient":
@@ -301,15 +327,18 @@ def patient_snapshot(db: Session, user: User, spec: FeatureSpec, patient_id: int
         else structured_query.order_by(StructuredMedicalRecord.create_time.desc())
     )
     structured = bounded(structured_query, 8, "结构化病历", "structured_record_id", "record_id")
+    structured_reviews = latest_reviews(db, patient_id, [item.record_id for item in structured])
     bundle.data["structured_records"] = []
     for item in structured:
         current = isinstance(encounter, Admission) and item.admission_id == encounter.admission_id
+        certainty = attach_diagnosis_review(item, structured_reviews)
         bundle.data["structured_records"].append(
             add(
                 "structured:" + item.record_id,
                 "结构化病历",
                 {
                     "current_encounter": current,
+                    "diagnosis_certainty": certainty,
                     **{
                         name: getattr(item, name)
                         for name in ("record_type", "chief_complaint", "present_illness", "past_history", "physical_exam", "auxiliary_exam", "diagnosis", "treatment_plan", "status")
@@ -318,7 +347,7 @@ def patient_snapshot(db: Session, user: User, spec: FeatureSpec, patient_id: int
                 item.update_time,
             )
         )
-        if current and item.status in {1, 2} and item.sign_time and item.diagnosis:
+        if current and certainty == "confirmed" and item.diagnosis:
             bundle.data["current_confirmed_diagnoses"].append(item.diagnosis)
     vital = db.query(VitalSign).filter_by(patient_id=patient_id).order_by(VitalSign.check_time.desc()).first()
     bundle.data["latest_vitals"] = (

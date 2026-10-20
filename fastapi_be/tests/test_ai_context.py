@@ -10,6 +10,7 @@ from app.ai.context import authorize_patient, minimize_identifiers, patient_snap
 from app.ai.governance import digest, encode_json
 from app.ai.knowledge import evidence_is_current, retrieve_evidence
 from app.ai.models import AIKnowledgeDocument, AIPatientGrant, utcnow
+from app.diagnosis_review import DiagnosisReviewWrite, record_diagnosis_review, source_facts
 from app.models import Patient, Registration, User
 
 
@@ -57,7 +58,7 @@ def test_snapshot_keeps_missing_data_distinct_and_scrubs_adjacent_chinese_identi
     assert minimize_identifiers("联系电话13911112222，证件370101199001011234。") == "联系电话[手机号已隐藏]，证件[证件号已隐藏]。"
 
 
-def test_only_signed_diagnosis_from_selected_encounter_is_current(seed_data, db_session):
+def test_only_explicitly_confirmed_signed_diagnosis_from_selected_encounter_is_current(seed_data, db_session):
     encounter = Registration(patient_id=seed_data["patient"].patient_id, doctor_id=seed_data["doctor"].doctor_id, department_id=seed_data["department"].department_id, time=utcnow(), status=0)
     db_session.add(encounter)
     db_session.flush()
@@ -69,6 +70,20 @@ def test_only_signed_diagnosis_from_selected_encounter_is_current(seed_data, db_
     assert before.data["current_confirmed_diagnoses"] == []
     record.status = 1
     db_session.commit()
+    signed = patient_snapshot(db_session, seed_data["doctor_user"], FEATURE_BY_KEY["treatment_pathway"], seed_data["patient"].patient_id, encounter.registration_uuid)
+    assert signed.data["current_confirmed_diagnoses"] == []
+    record_diagnosis_review(
+        db_session,
+        seed_data["doctor_user"],
+        DiagnosisReviewWrite(
+            source_kind="outpatient",
+            source_id=record.medical_record_id,
+            source_hash=digest(source_facts(record)),
+            expected_revision=0,
+            certainty="confirmed",
+            reason="隔离测试：责任医生完成诊断复核",
+        ),
+    )
     after = patient_snapshot(db_session, seed_data["doctor_user"], FEATURE_BY_KEY["treatment_pathway"], seed_data["patient"].patient_id, encounter.registration_uuid)
     assert record.result in after.data["current_confirmed_diagnoses"]
 

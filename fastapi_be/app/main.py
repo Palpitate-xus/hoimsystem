@@ -82,6 +82,7 @@ TARGET_MAP_ORDERED = [
     ("registrationmanagement", "挂号"),
     ("prescriptionmanagement", "处方"),
     ("medicalrecordmanagement", "病历"),
+    ("clinicaldiagnosis", "临床诊断复核"),
     ("inpatientorder", "住院医嘱"),
     ("inpatientcharge", "住院费用"),
     ("clinicalpathway", "临床路径"),
@@ -213,6 +214,7 @@ class OperationLogMiddleware(BaseHTTPMiddleware):
         "/api/ai/encounters",
         "/api/ai/prescriptions",
         "/api/ai/runs",
+        "/api/clinicalDiagnosis/review",
     }
 
     async def dispatch(self, request, call_next):

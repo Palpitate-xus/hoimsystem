@@ -615,6 +615,29 @@ class MedicalRecord(Base):
     patient = relationship("Patient", back_populates="medical_records")
 
 
+class ClinicalDiagnosisReview(Base):
+    """Append-only physician assertions separate from signing or rewriting a medical record."""
+
+    __tablename__ = "hoimsystem_clinical_diagnosis_review"
+    __table_args__ = (
+        UniqueConstraint("source_kind", "source_id", "revision", name="uq_diagnosis_review_source_revision"),
+        Index("idx_diagnosis_review_patient_encounter", "patient_id", "encounter_ref"),
+    )
+
+    review_id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    source_kind = Column(String(24), nullable=False)
+    source_id = Column(String(36), nullable=False)
+    patient_id = Column(Integer, ForeignKey("hoimsystem_patient.patient_id"), nullable=False)
+    encounter_ref = Column(String(36), nullable=True)
+    diagnosis_text = Column(String(300), nullable=False)
+    source_hash = Column(String(64), nullable=False)
+    certainty = Column(String(24), nullable=False)
+    reason = Column(String(1000), nullable=False)
+    revision = Column(Integer, nullable=False)
+    reviewed_by = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=False)
+    reviewed_at = Column(DateTime, nullable=False)
+
+
 class Pharmaceutical(Base):
     __tablename__ = "hoimsystem_pharmaceutical"
     __table_args__ = (Index("uq_pharmaceutical_barcode", "barcode", unique=True),)

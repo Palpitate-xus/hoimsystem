@@ -3,7 +3,7 @@
 > 由 `fastapi_be/scripts/generate_rbac_matrix.py` 从源码自动生成，请勿手改。
 > `✓`=可访问 | `PUBLIC`=无需登录 | 留空=不可访问
 
-共 **587** 个接口（PUBLIC 18 个 / 需登录 569 个）。
+共 **589** 个接口（PUBLIC 18 个 / 需登录 571 个）。
 
 
 ### `admin.py`
@@ -256,6 +256,8 @@
 | POST | `/api/prescriptionManagement/create` | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |
 | GET | `/api/prescriptionManagement/getList` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
 | POST | `/api/prescriptionManagement/cancel` | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |
+| GET | `/api/clinicalDiagnosis/review` |  |  | ✓ | ✓ |  |  |  |  |  |  |  |  |
+| POST | `/api/clinicalDiagnosis/review` |  |  | ✓ | ✓ |  |  |  |  |  |  |  |  |
 | POST | `/api/medicalRecord/create` | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |
 | POST | `/api/medicalRecord/update` | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |
 | POST | `/api/medicalRecord/sign` | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |

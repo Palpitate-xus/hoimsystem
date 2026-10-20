@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session, joinedload, selectinload
 
 from app.database import get_db
 from app.dependencies import ADMIN_ROLES, CLINICAL_ROLES, PHARMACY_ROLES, get_current_user, require_roles
+from app.diagnosis_review import DiagnosisReviewWrite, describe_review_source, load_review_source, record_diagnosis_review
 from app.event_bus import publish_event
 from app.integration_outbox import enqueue_integration_event
 from app.medication_data import medication_fields, normalize_medication_item
@@ -614,6 +615,18 @@ def cancel_prescription(req: PrescriptionCancelRequest, current_user: User = Dep
         )
     db.commit()
     return {"code": 200, "msg": "success"}
+
+
+@router.get("/clinicalDiagnosis/review")
+def get_diagnosis_review(source_kind: str, source_id: str, current_user: User = Depends(require_roles("doctor", "director")), db: Session = Depends(get_db)):
+    record = load_review_source(db, current_user, source_kind, source_id)
+    return {"code": 200, "msg": "success", "data": describe_review_source(db, record)}
+
+
+@router.post("/clinicalDiagnosis/review")
+def save_diagnosis_review(req: DiagnosisReviewWrite, current_user: User = Depends(require_roles("doctor", "director")), db: Session = Depends(get_db)):
+    review = record_diagnosis_review(db, current_user, req)
+    return {"code": 200, "msg": "诊断复核已记录，原病历保持原有签署内容", "data": {"review_id": review.review_id, "revision": review.revision, "certainty": review.certainty}}
 
 
 @router.post("/medicalRecord/create")

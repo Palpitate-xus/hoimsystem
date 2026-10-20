@@ -136,6 +136,8 @@ class AIRun(Base):
     input_tokens = Column(Integer, nullable=False, default=0)
     output_tokens = Column(Integer, nullable=False, default=0)
     latency_ms = Column(Integer, nullable=True)
+    start_time = Column(DateTime, nullable=True)
+    lease_token = Column(String(36), nullable=True)
     create_time = Column(DateTime, nullable=False, default=utcnow)
     finish_time = Column(DateTime, nullable=True)
 

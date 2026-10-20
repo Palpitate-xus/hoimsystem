@@ -290,6 +290,55 @@
   "path": "/api/adverseReaction/updateStatus"
  },
  {
+  "auth": "ANY",
+  "function": "available_features",
+  "method": "GET",
+  "module": "ai.py",
+  "path": "/api/ai/features"
+ },
+ {
+  "auth": "ANY",
+  "function": "inspect_context",
+  "method": "GET",
+  "module": "ai.py",
+  "path": "/api/ai/context"
+ },
+ {
+  "auth": "ANY",
+  "function": "submit_run",
+  "method": "POST",
+  "module": "ai.py",
+  "path": "/api/ai/runs"
+ },
+ {
+  "auth": "ANY",
+  "function": "list_runs",
+  "method": "GET",
+  "module": "ai.py",
+  "path": "/api/ai/runs"
+ },
+ {
+  "auth": "ANY",
+  "function": "run_detail",
+  "method": "GET",
+  "module": "ai.py",
+  "path": "/api/ai/runs/{run_id}"
+ },
+ {
+  "auth": "ANY",
+  "function": "cancel_run",
+  "method": "POST",
+  "module": "ai.py",
+  "path": "/api/ai/runs/{run_id}/cancel"
+ },
+ {
+  "auth": "ANY",
+  "function": "review_result",
+  "method": "POST",
+  "module": "ai.py",
+  "path": "/api/ai/runs/{run_id}/feedback"
+ },
+ {
   "auth": [
    "super_admin"
   ],

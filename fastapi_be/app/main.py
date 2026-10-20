@@ -208,6 +208,8 @@ class OperationLogMiddleware(BaseHTTPMiddleware):
         "/api/research/export",
         "/api/invoice/print",
         "/api/backup/download",
+        "/api/ai/context",
+        "/api/ai/runs",
     }
 
     async def dispatch(self, request, call_next):
@@ -354,6 +356,7 @@ from app.routers import (
     admission,
     adverse_event,
     adverse_reaction,
+    ai,
     ai_admin,
     allergy,
     analytics,
@@ -461,6 +464,7 @@ app.add_middleware(ObservabilityMiddleware)
 
 app.include_router(observability_routes.router)
 app.include_router(ai_admin.router, prefix="/api")
+app.include_router(ai.router, prefix="/api")
 app.include_router(analytics.router, prefix="/api")
 app.include_router(performance.router, prefix="/api")
 app.include_router(home_icd.router, prefix="/api")

@@ -14,8 +14,9 @@ from app.ai.gateway import AIExecutionError, generate
 from app.ai.governance import active_prompt, audit, digest, encode_json, get_spec, provider_credential, provider_feature_issues
 from app.ai.knowledge import evidence_is_current, retrieval_query, retrieve_evidence
 from app.ai.models import AIFeatureConfig, AIProvider, AIRun, utcnow
+from app.ai.operational_sources import operational_context
 from app.ai.schemas import RunRequest
-from app.ai.tools import business_tools, operational_context
+from app.ai.tools import business_tools
 from app.config import settings
 from app.models import Doctor, Patient, User
 
@@ -79,7 +80,7 @@ def create_run(db: Session, user: User, req: RunRequest) -> AIRun:
     if req.patient_id is not None:
         bundle = patient_snapshot(db, user, spec, req.patient_id, req.encounter_ref, req.input)
     elif spec.scope == "hospital":
-        bundle = operational_context(db, user)
+        bundle = operational_context(db, user, spec, req.input)
     else:
         departments = {item[0] for item in db.query(Doctor.department_id).filter_by(user_id=user.user_id).all() if item[0]}
         bundle = ContextBundle(data={"scope": "task_input", "missing_data": []}, department_ids=departments)
@@ -236,6 +237,10 @@ def _recheck_task(db: Session, run: AIRun) -> tuple[FeatureSpec, AIProvider, dic
         current_bundle = patient_snapshot(db, user, spec, run.patient_id, run.encounter_ref, snapshot["payload"]["input"])
         if context_metadata(current_bundle)["clinical_context_fingerprint"] != metadata.get("clinical_context_fingerprint"):
             raise AIExecutionError("TASK_CONTEXT_CHANGED", "患者资料或诊断确认状态已改变，请重新加载最新资料后生成")
+    elif spec.scope == "hospital":
+        current_bundle = operational_context(db, user, spec, snapshot["payload"]["input"])
+        if context_metadata(current_bundle)["clinical_context_fingerprint"] != metadata.get("clinical_context_fingerprint"):
+            raise AIExecutionError("TASK_OPERATIONAL_CONTEXT_CHANGED", "运营资料或科室范围已改变，请重新加载后生成")
     else:
         current_bundle = ContextBundle(data=snapshot["payload"]["context"])
     current_tools, _ = business_tools(db, spec, user, run.patient_id, snapshot["payload"]["input"], current_bundle)

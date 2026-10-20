@@ -19,7 +19,7 @@ RUN pip install --no-cache-dir -r requirements.txt gunicorn
 COPY . .
 
 # 创建上传目录
-RUN mkdir -p app/uploads /tmp/prometheus private/ai-audio && chmod 755 app/uploads /tmp/prometheus && chmod 700 private/ai-audio
+RUN mkdir -p app/uploads /tmp/prometheus private/ai-audio private/ai-ecg && chmod 755 app/uploads /tmp/prometheus && chmod 700 private/ai-audio private/ai-ecg
 
 # 暴露端口
 EXPOSE 8000

@@ -15,6 +15,23 @@ class StrictRequest(BaseModel):
     model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
 
 
+class ReviewExcerptWrite(StrictRequest):
+    """Create a new immutable text version against a freshly inspected source."""
+
+    review_id: int = Field(ge=1, strict=True)
+    expected_source_hash: str = Field(pattern=r"^[a-f0-9]{64}$")
+    redacted_text: str = Field(min_length=3, max_length=1000)
+    change_note: str = Field(min_length=3, max_length=1000)
+
+
+class ReviewExcerptReview(StrictRequest):
+    expected_revision: int = Field(ge=1, strict=True)
+    status: Literal["published", "rejected", "retired"]
+    privacy_checked: bool = False
+    faithfulness_checked: bool = False
+    review_note: str = Field(min_length=3, max_length=1000)
+
+
 class ProviderWrite(StrictRequest):
     """A provider secret is write-only; updates require the current revision."""
 

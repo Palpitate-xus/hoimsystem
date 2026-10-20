@@ -106,6 +106,36 @@ class AIKnowledgeDocument(Base):
     create_time = Column(DateTime, nullable=False, default=utcnow)
 
 
+class AIReviewExcerpt(Base):
+    """Immutable reviewed text versions, tied to a verifiable original review snapshot."""
+
+    __tablename__ = "hoimsystem_ai_review_excerpt"
+    __table_args__ = (
+        UniqueConstraint("review_id", "version", name="uq_ai_review_excerpt_version"),
+        Index("idx_ai_review_excerpt_status_dept", "status", "department_id"),
+    )
+
+    excerpt_id = Column(String(36), primary_key=True, default=new_id)
+    review_id = Column(Integer, ForeignKey("hoimsystem_review.review_id"), nullable=False)
+    version = Column(Integer, nullable=False)
+    source_hash = Column(String(64), nullable=False)
+    department_id = Column(Integer, ForeignKey("hoimsystem_department.department_id"), nullable=False)
+    redacted_text = Column(Text, nullable=False)
+    text_hash = Column(String(64), nullable=False)
+    change_note = Column(String(1000), nullable=False)
+    status = Column(String(24), nullable=False, default="draft")
+    revision = Column(Integer, nullable=False, default=1)
+    privacy_checked = Column(Integer, nullable=False, default=0)
+    faithfulness_checked = Column(Integer, nullable=False, default=0)
+    review_note = Column(String(1000), nullable=False, default="")
+    created_by = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=False)
+    create_time = Column(DateTime, nullable=False, default=utcnow)
+    reviewed_by = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=True)
+    reviewed_at = Column(DateTime, nullable=True)
+    retired_by = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=True)
+    retired_at = Column(DateTime, nullable=True)
+
+
 class AIRun(Base):
     """A traceable AI task; access to both input and result requires patient authorization."""
 

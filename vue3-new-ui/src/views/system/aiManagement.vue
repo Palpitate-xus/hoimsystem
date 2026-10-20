@@ -79,6 +79,7 @@
           </el-table>
         </el-tab-pane>
         <el-tab-pane label="任务与反馈" name="runs" lazy><ai-run-history :features="features" :active="tab === 'runs'" /></el-tab-pane>
+        <el-tab-pane label="反馈脱敏审核" name="review_excerpts" lazy><ai-review-curation :active="tab === 'review_excerpts'" /></el-tab-pane>
         <el-tab-pane label="调用统计" name="usage">
           <el-table :data="usage" empty-text="暂无调用记录">
             <el-table-column label="功能"><template #default="{ row }">{{ featureName(row.feature_key) }}</template></el-table-column>
@@ -176,6 +177,7 @@
 import { computed, onMounted, ref, watch } from "vue";
 import { ElMessage } from "element-plus";
 import AiRunHistory from "@/components/AIRunHistory/index.vue";
+import AiReviewCuration from "@/components/AIReviewCuration/index.vue";
 import {
   activateAIPrompt, createAIKnowledge, createAIPatientGrant, createAIPrompt,
   getAIAdminFeatures, getAIAudit, getAIKnowledge, getAIKnowledgeDetail, getAIPatientGrants,

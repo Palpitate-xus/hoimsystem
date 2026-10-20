@@ -19,6 +19,17 @@
       </el-descriptions>
       <el-button link @click="$emit('inspect', findings.feedback_rating_summary.source_id)">查看评分汇总依据</el-button>
     </template>
+    <template v-if="findings.reviewed_feedback_excerpts">
+      <h4>本次已审核反馈片段</h4><p>{{ findings.reviewed_feedback_excerpts.scope_note }}</p>
+      <p>纳入 {{ findings.reviewed_feedback_excerpts.included_excerpt_count ?? '未知' }} 条；当前候选中因来源校验失效而排除 {{ findings.reviewed_feedback_excerpts.excluded_changed_source_count ?? '未知' }} 条。</p>
+      <p v-if="findings.reviewed_feedback_excerpts.truncated" class="data-gap">审核片段清单有截断，仅描述本次所载片段，不外推总体主题占比。</p>
+      <p v-if="!findings.reviewed_feedback_excerpts.items?.length">本次范围没有当前有效的审核文本。</p>
+      <div v-for="item in findings.reviewed_feedback_excerpts.items || []" :key="item.source_id" class="reviewed-excerpt">
+        <p>原评价日期 {{ item.recorded_review_date || '未知' }} · 有效原评分 {{ item.recorded_score ?? '未知' }} · 审核版本 v{{ item.version }}</p>
+        <p class="excerpt-text">{{ item.text }}</p><p>{{ item.definition_note }}</p>
+        <el-button link @click="$emit('inspect', item.source_id)">查看片段依据</el-button>
+      </div>
+    </template>
     <el-collapse>
       <el-collapse-item v-for="section in series" :key="section.key" :title="section.title" :name="section.key">
         <p>{{ section.data.definition_note || section.data.status_note }}</p>
@@ -77,4 +88,6 @@ Object.assign(labels, { application_id: "手术申请标识", surgery_name: "原
 <style scoped>
 .operational-findings { line-height: 1.7; margin: 16px 0; }
 .data-gap { color: #9a6700; }
+.reviewed-excerpt { border-top: 1px solid #ebeef5; padding-top: 8px; }
+.excerpt-text { white-space: pre-wrap; overflow-wrap: anywhere; }
 </style>

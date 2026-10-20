@@ -33,3 +33,9 @@ export const getAIAudit = () => request({ url: `${admin}/audit`, method: "get" }
 export const getAIUsage = () => request({ url: `${admin}/usage`, method: "get" });
 export const getAIAdminRuns = (params) => request({ url: `${admin}/runs`, method: "get", params });
 export const getAIAdminRunTrace = (id) => request({ url: `${admin}/runs/${id}`, method: "get" });
+export const getAIReviewSources = (params) => request({ url: `${admin}/review-sources`, method: "get", params });
+export const getAIReviewSource = (id) => request({ url: `${admin}/review-sources/${id}`, method: "get" });
+export const getAIReviewExcerpts = (params) => request({ url: `${admin}/review-excerpts`, method: "get", params });
+export const getAIReviewExcerpt = (id) => request({ url: `${admin}/review-excerpts/${id}`, method: "get" });
+export const createAIReviewExcerpt = (data) => request({ url: `${admin}/review-excerpts`, method: "post", data });
+export const reviewAIReviewExcerpt = (id, data) => request({ url: `${admin}/review-excerpts/${id}/review`, method: "post", data });

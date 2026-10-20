@@ -41,10 +41,12 @@ def list_sources(
 ) -> dict:
     """Return source metadata; comment text is available only through audited detail."""
     query = verified_review_query(db, {department_id} if department_id else None)
+    applied_window = None
     if review_id is not None:
         query = query.filter(Review.review_id == review_id)
     if review_id is None or date_from is not None or date_to is not None:
         start, end = operational_window({"date_from": str(date_from) if date_from else None, "date_to": str(date_to) if date_to else None})
+        applied_window = [str(start), str(end)]
         query = query.filter(
             Review.review_time >= datetime.datetime.combine(start, datetime.time.min), Review.review_time < datetime.datetime.combine(end + datetime.timedelta(days=1), datetime.time.min)
         )
@@ -57,7 +59,7 @@ def list_sources(
         .limit(page_size)
         .all()
     )
-    return {"code": 200, "msg": "success", "data": {"items": [dict(row._mapping) for row in rows], "total": total, "page": page, "page_size": page_size}}
+    return {"code": 200, "msg": "success", "data": {"items": [dict(row._mapping) for row in rows], "total": total, "page": page, "page_size": page_size, "window": applied_window}}
 
 
 @router.get("/ai/admin/review-sources/{review_id}")

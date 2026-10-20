@@ -29,6 +29,7 @@ KINDS = [
     "person_identity_qualification",
     "resource_availability_busy",
     "resource_occupation_policy",
+    "equipment_identity_capability",
 ]
 ROOM, PERSON, EQUIPMENT, DUTY, CASE = [uid(x) for x in range(10, 15)]
 
@@ -62,10 +63,10 @@ def resource(resource_id, kind):
         "kind": kind,
         "identity_hash": H,
         "identity_status": "verified",
-        "ref_ids": [{"room": uid(4), "person": uid(5), "equipment": uid(6)}[kind]],
+        "ref_ids": [{"room": uid(4), "person": uid(5), "equipment": uid(8)}[kind]],
         "capability_facts": [
             {
-                "ref_ids": [uid(5)],
+                "ref_ids": [uid(5) if kind == "person" else uid(8)],
                 "capability_hashes": [H],
                 "status": "verified",
                 "valid_from_at": "2026-10-01T00:00:00.000000Z",
@@ -73,7 +74,7 @@ def resource(resource_id, kind):
                 "basis_hash": H,
             }
         ]
-        if kind == "person"
+        if kind in {"person", "equipment"}
         else [],
         "availability": [{"ref_ids": [uid(6)], "start_at": START, "end_at": END, "state": "available", "basis_hash": H}],
         "availability_coverage": coverage(),
@@ -248,6 +249,18 @@ def test_duplicate_references_and_unknown_json_fields_rejected():
     body = source_dict()
     body["cases"][0]["question"] = "private arbitrary narrative"
     with pytest.raises(ValidationError):
+        SurgerySource.model_validate(body)
+
+
+@pytest.mark.parametrize("part", ["identity", "capability"])
+def test_equipment_availability_cannot_replace_explicit_equipment_identity_capability(part):
+    body = source_dict()
+    equipment = body["resources"][2]
+    if part == "identity":
+        equipment["ref_ids"] = [uid(6)]
+    else:
+        equipment["capability_facts"][0]["ref_ids"] = [uid(6)]
+    with pytest.raises(ValidationError, match="different clinical/operational source kind"):
         SurgerySource.model_validate(body)
 
 

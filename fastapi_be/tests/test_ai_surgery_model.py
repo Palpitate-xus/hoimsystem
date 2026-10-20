@@ -166,6 +166,26 @@ def test_required_person_capability_must_cover_every_microsecond_of_occupation()
     assert native(body).solve_status == "feasibility_unknown"
 
 
+@pytest.mark.parametrize("state,expected", [("verified", "optimal_proven"), ("unknown", "feasibility_unknown"), ("not_verified", "infeasible_proven")])
+def test_equipment_capability_is_supported_by_its_own_effective_original(state, expected):
+    body = source_dict()
+    body["cases"][0]["equipment"][0]["capability_hashes"] = [H]
+    body["resources"][2]["capability_facts"][0]["status"] = state
+    assert body["manifest"][7]["kind"] == "equipment_identity_capability"
+    assert native(body).solve_status == expected
+
+
+def test_known_equipment_availability_cannot_fill_missing_capability_or_expired_evidence():
+    body = source_dict()
+    body["cases"][0]["equipment"][0]["capability_hashes"] = [H]
+    body["resources"][2]["capability_facts"] = []
+    assert native(body).solve_status == "feasibility_unknown"
+    body = source_dict()
+    body["cases"][0]["equipment"][0]["capability_hashes"] = [H]
+    body["resources"][2]["capability_facts"][0]["valid_until"] = {"kind": "known", "at": "2026-10-21T08:30:00.000000Z"}
+    assert native(body).solve_status == "feasibility_unknown"
+
+
 def test_same_equipment_cannot_cover_two_simultaneous_quantity_slots():
     body = source_dict()
     duplicate = copy.deepcopy(body["cases"][0]["equipment"][0])

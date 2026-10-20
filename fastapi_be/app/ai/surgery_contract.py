@@ -112,6 +112,7 @@ FactKind = Literal[
     "person_identity_qualification",
     "resource_availability_busy",
     "resource_occupation_policy",
+    "equipment_identity_capability",
 ]
 
 
@@ -687,7 +688,7 @@ class SurgerySource(StrictModel):
                 raise ValueError("Fact references cannot substitute a different clinical/operational source kind")
 
         for resource in self.resources:
-            kinds = {"room": {"operating_room_identity_capability"}, "person": {"person_identity_qualification"}, "equipment": {"resource_availability_busy"}}[resource.kind]
+            kinds = {"room": {"operating_room_identity_capability"}, "person": {"person_identity_qualification"}, "equipment": {"equipment_identity_capability"}}[resource.kind]
             require_kind(resource.ref_ids, kinds)
             for capability in resource.capability_facts:
                 require_kind(capability.ref_ids, kinds)
@@ -931,6 +932,7 @@ INPUT_POLICY = {
     "timing": "Only reviewed case estimates or unknown; no unimplemented statistical estimator. Signed exact microseconds, explicit zero segments, positive main-room occupancy; upper/point durations are declared conditions, not clinical guarantees.",
     "resources": "Patient presence is independent of room. One concrete asset per equipment quantity slot. Different role/equipment demands cannot union away quantity; same-demand stages union or envelope only as explicitly declared.",
     "person_qualification": "Each person role needs at least one explicitly reviewed authorization capability hash supported over every occupied interval by actual effective qualification facts. Empty role capability requirements mean unknown, never authorized by identity, role_kind, platform role or title alone.",
+    "equipment_capability": "Equipment identity and effective capability require explicit equipment_identity_capability originals. Equipment names, database status, resource anchors and availability/busy facts cannot substitute capability or identity evidence. Unknown capability never becomes verified availability.",
     "work": "Reviewed explicit duty membership only. Duty baseline and selected counted work use interval union, never double-count. Confirmed non-work break vs counted surgery is a conflicting original, not overwritten. Rest applies between distinct explicit duties; full duty span defines maximum presence. All-location duty/work prefix/suffix coverage is required. Applicable policies are conjunctive; absent policy is unknown unless explicitly reviewed not required.",
     "sequence": "Extra transitions are separate from declared intrinsic stages. Missing directed pair is unknown, not zero. Partial adjacency gap/cost is not monotone. Optimistic unknown occupancy/status/identity that can change adjacency relaxes the affected resource's extra transition gaps and costs together; cost lower bound zero. Known hard overlaps and identities remain enforced.",
     "scope": "Only the declared closed case/resource/period/policy problem; no hospital-wide or real booking guarantee. Candidate output never creates a reservation or changes clinical state.",

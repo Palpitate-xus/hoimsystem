@@ -4,7 +4,7 @@ import hashlib
 from importlib.metadata import version
 from pathlib import Path
 
-from pydantic import Field, SecretStr
+from pydantic import Field, SecretStr, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from app.ai.speech_model import canonical_json, verify_model
@@ -20,6 +20,12 @@ class SpeechSettings(BaseSettings):
     max_bytes: int = Field(default=67108864, ge=1024, le=268435456)
     max_duration_seconds: int = Field(default=300, ge=1, le=3600)
     timeout_seconds: int = Field(default=110, ge=3, le=110)
+
+    @field_validator("model_dir")
+    @classmethod
+    def absolute_model_directory(cls, value: Path):
+        # The recognition child runs from the package directory, not the caller's cwd.
+        return value.expanduser().resolve()
 
     def decoding_options(self):
         return {

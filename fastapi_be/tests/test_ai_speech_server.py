@@ -70,9 +70,11 @@ async def test_service_authenticates_before_parsing_and_reports_no_secret_or_mod
 
 
 @pytest.mark.asyncio
-async def test_original_bytes_are_private_then_removed_and_free_text_never_enters_recognizer(tmp_path, descriptor):
+async def test_original_bytes_are_private_then_removed_and_free_text_never_enters_recognizer(tmp_path, descriptor, monkeypatch):
     raw = b"RIFF-fixture-not-real-speech"
     paths = []
+    monkeypatch.chdir(tmp_path)
+    service_config = SpeechSettings(model_dir=Path("relative-weights"), AI_PROVIDER_LOCAL_SPEECH_API_KEY=KEY)
 
     async def execute(job, timeout):
         path = Path(job["audio_path"])
@@ -81,11 +83,12 @@ async def test_original_bytes_are_private_then_removed_and_free_text_never_enter
         assert path.parent.stat().st_mode & 0o777 == 0o700
         assert job["source"]["content_hash"] == hashlib.sha256(raw).hexdigest()
         assert timeout == 110 and KEY not in json.dumps(job)
+        assert job["config"]["model_dir"] == str(tmp_path / "relative-weights")
         assert "不能冒充" not in json.dumps(job, ensure_ascii=False) and "完整系统" not in json.dumps(job, ensure_ascii=False)
         assert job["instructions_digest"] == hashlib.sha256(task_for()["instructions"].encode()).hexdigest()
         return {"isolated_executor": True}
 
-    async with httpx.AsyncClient(transport=httpx.ASGITransport(app=speech_server.create_speech_app(config(tmp_path), executor=execute)), base_url="http://speech") as client:
+    async with httpx.AsyncClient(transport=httpx.ASGITransport(app=speech_server.create_speech_app(service_config, executor=execute)), base_url="http://speech") as client:
         response = await client.post("/tasks", headers={"Authorization": "Bearer " + KEY}, data={"task": json.dumps(task_for())}, files={"audio": ("potential-name-is-ignored.wav", raw, "audio/wav")})
     assert response.status_code == 200 and response.json() == {"isolated_executor": True}
     assert len(paths) == 1 and not paths[0].parent.exists()

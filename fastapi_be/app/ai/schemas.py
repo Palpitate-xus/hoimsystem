@@ -139,6 +139,11 @@ class PathwayKnowledgeImport(StrictRequest):
         return value
 
 
+class AudioAssetAction(StrictRequest):
+    expected_revision: int = Field(ge=1, strict=True)
+    reason: str = Field(min_length=5, max_length=1000)
+
+
 class PatientGrantWrite(StrictRequest):
     """Grant narrowly scoped and expiring patient access."""
 

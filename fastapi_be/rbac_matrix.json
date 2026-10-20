@@ -578,6 +578,66 @@
   "path": "/api/ai/admin/usage"
  },
  {
+  "auth": "ANY",
+  "function": "audio_options",
+  "method": "GET",
+  "module": "ai_audio.py",
+  "path": "/api/ai/audio-options"
+ },
+ {
+  "auth": "ANY",
+  "function": "upload_audio",
+  "method": "POST",
+  "module": "ai_audio.py",
+  "path": "/api/ai/audio-assets"
+ },
+ {
+  "auth": "ANY",
+  "function": "list_audio",
+  "method": "GET",
+  "module": "ai_audio.py",
+  "path": "/api/ai/audio-assets"
+ },
+ {
+  "auth": "ANY",
+  "function": "inspect_audio_asset",
+  "method": "GET",
+  "module": "ai_audio.py",
+  "path": "/api/ai/audio-assets/{asset_id}"
+ },
+ {
+  "auth": "ANY",
+  "function": "download_audio",
+  "method": "GET",
+  "module": "ai_audio.py",
+  "path": "/api/ai/audio-assets/{asset_id}/content"
+ },
+ {
+  "auth": "ANY",
+  "function": "withdraw_audio",
+  "method": "POST",
+  "module": "ai_audio.py",
+  "path": "/api/ai/audio-assets/{asset_id}/withdraw"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "admin_audio_list",
+  "method": "GET",
+  "module": "ai_audio.py",
+  "path": "/api/ai/admin/audio-assets"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "purge_audio",
+  "method": "POST",
+  "module": "ai_audio.py",
+  "path": "/api/ai/admin/audio-assets/{asset_id}/purge"
+ },
+ {
   "auth": [
    "super_admin"
   ],

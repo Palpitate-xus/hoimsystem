@@ -123,8 +123,9 @@ def test_audio_migration_roundtrip_preserves_existing_patient_rows(tmp_path):
     config = Config(str(Path(__file__).resolve().parents[1] / "alembic.ini"))
     config.set_main_option("sqlalchemy.url", "sqlite:///" + str(database))
     command.stamp(config, "20261020_pathway_revision")
-    command.upgrade(config, "20261020_ai_audio_assets")
+    command.upgrade(config, "20261020_audio_governance")
     assert "hoimsystem_ai_audio_asset" in inspect(engine).get_table_names()
+    assert "purge_note" in {row["name"] for row in inspect(engine).get_columns("hoimsystem_ai_audio_asset")}
     assert {row["name"] for row in inspect(engine).get_indexes("hoimsystem_ai_audio_asset")} == {"idx_ai_audio_patient_owner", "idx_ai_audio_status"}
     command.downgrade(config, "20261020_pathway_revision")
     assert "hoimsystem_ai_audio_asset" not in inspect(engine).get_table_names()

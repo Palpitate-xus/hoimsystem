@@ -172,6 +172,7 @@ class AIAudioAsset(Base):
     withdrawal_note = Column(String(1000), nullable=False, default="")
     purged_by = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=True)
     purged_at = Column(DateTime, nullable=True)
+    purge_note = Column(String(1000), nullable=False, default="")
 
 
 class AIRun(Base):

@@ -65,6 +65,7 @@
         <el-tab-pane label="住院观测窗" name="observation_windows" lazy><ai-observation-window-management v-if="tab === 'observation_windows'" /></el-tab-pane>
         <el-tab-pane label="检验项目与来源" name="laboratory_mappings" lazy><ai-lab-mapping-management v-if="tab === 'laboratory_mappings'" /></el-tab-pane>
         <el-tab-pane label="风险规则与评估" name="risk_rules" lazy><ai-risk-rule-management v-if="tab === 'risk_rules'" /></el-tab-pane>
+        <el-tab-pane label="排班人员来源治理" name="roster_sources" lazy><ai-roster-sources v-if="tab==='roster_sources'" governance /></el-tab-pane>
         <el-tab-pane label="SOFA独立规则与全院评估" name="sofa" lazy><ai-sofa-management v-if="tab==='sofa'" /></el-tab-pane>
         <el-tab-pane label="器官支持来源与映射" name="organ_support" lazy><ai-organ-support-management v-if="tab === 'organ_support'" /></el-tab-pane>
         <el-tab-pane label="录音治理" name="audio"><ai-audio-management v-if="tab === 'audio'" /></el-tab-pane>
@@ -109,9 +110,9 @@
         <el-form-item label="模型服务"><el-select v-model="featureForm.provider_id" clearable placeholder="选择已配置的服务"><el-option v-for="item in providers" :key="item.provider_id" :label="item.name" :value="item.provider_id" /></el-select></el-form-item>
         <el-form-item label="使用角色"><el-checkbox-group v-model="featureForm.allowed_roles"><el-checkbox v-for="role in selectedFeature.default_roles" :key="role" :value="role">{{ roles[role] || role }}</el-checkbox></el-checkbox-group></el-form-item>
         <el-form-item label="验证状态"><el-select v-model="featureForm.validation_status"><el-option v-for="(label, value) in validations" :key="value" :label="label" :value="value" /></el-select></el-form-item>
-        <el-form-item label="验证记录"><el-input v-model="featureForm.validation_note" type="textarea" :rows="4" maxlength="5000" placeholder="记录适用范围、病例验证结果、负责人和依据；临床启用前需要完成验证" /></el-form-item>
+        <el-form-item label="验证记录"><el-input v-model="featureForm.validation_note" type="textarea" :rows="4" maxlength="5000" :placeholder="selectedFeature.requires_operational_validation ? '记录实际科室、输入覆盖、离线回放与边界验证结果、负责人和依据；普通运营执行与启用前须完成验证' : '记录适用范围、病例验证结果、负责人和依据；临床启用前需要完成验证'" /></el-form-item>
         <el-form-item label="每日调用上限"><el-input-number v-model="featureForm.daily_limit" :min="1" :max="10000" /></el-form-item>
-        <el-form-item label="面向业务启用"><el-switch v-model="featureForm.enabled" /></el-form-item>
+        <el-form-item label="面向业务启用"><el-switch v-model="featureForm.enabled" :disabled="selectedFeature.requires_operational_validation && !featureForm.enabled && featureForm.validation_status!=='validated'" /><p v-if="selectedFeature.requires_operational_validation">此运营能力须完成实际范围验证后才能面向业务启用和普通执行；管理员预览不代表本地验证、候选获批或实际排班已改变。</p></el-form-item>
       </el-form>
       <template #footer><el-button @click="featureDialog = false">取消</el-button><el-button type="primary" :loading="saving" @click="submitFeature">保存配置</el-button></template>
     </el-dialog>
@@ -303,6 +304,7 @@ const AiLabMappingManagement = defineAsyncComponent(() => import("@/views/system
 const AiForecastProviderCheck = defineAsyncComponent(() => import("@/components/AIForecastProviderCheck/index.vue"));
 const AiNews2ProviderCheck = defineAsyncComponent(() => import("@/components/AINews2ProviderCheck/index.vue"));
 const AiAkiProviderCheck = defineAsyncComponent(() => import("@/components/AIAkiProviderCheck/index.vue"));
+const AiRosterSources=defineAsyncComponent(()=>import("@/components/AIRosterSources/index.vue"));
 const AiSofaManagement=defineAsyncComponent(()=>import("@/components/AISofaManagement/index.vue"));
 const AiSofaProviderCheck=defineAsyncComponent(()=>import("@/components/AISofaProviderCheck/index.vue"));
 const AiQsofaProviderCheck = defineAsyncComponent(() => import("@/components/AIQsofaProviderCheck/index.vue"));

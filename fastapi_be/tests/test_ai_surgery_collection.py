@@ -394,3 +394,25 @@ def test_latest_available_clock_is_actual_original_clock_not_the_requested_cutof
     assert actual["max_available_at"] == facts.utc_text(NOW)
     assert actual["as_of"] == values["period"]["as_of"]
     assert actual["captured_at"] == facts.utc_text(NOW + datetime.timedelta(seconds=20))
+
+
+def test_published_foreign_protected_capsule_is_captured_without_exposing_raw_witness(db_session, surgery_case):
+    from tests.test_ai_surgery_facts import protected_request
+
+    case = surgery_case
+    values, schedule = protected_request(db_session, case, foreign_pool=True)
+    foreign_application_id = schedule.application_id
+    row = facts.create_protected_capsule(db_session, case["super"], values)
+    db_session.commit()
+    publish(db_session, case, row)
+    captured = collection.capture_input(db_session, case["director"], capture_request(case))
+    assert len(captured["source_records"]) == 1
+    record = captured["source_records"][0]
+    assert record["metadata"]["source_record_id"] == row.source_record_id
+    assert record["original"] is None and record["capsule"]["eligible_for_new_use"]
+    assert record["capsule"]["payload"]["basis_code"] == "protected_legacy_witness"
+    assert record["capsule"]["payload"]["protected_witness_hash"] is not None
+    assert "legacy_resource_busy_not_curated" not in {gap["code"] for gap in captured["known_gaps"]}
+    text = facts.canonical_json(captured)
+    assert foreign_application_id not in text and schedule.schedule_id not in text
+    assert "witness_json" not in text and "original_schedule" not in text

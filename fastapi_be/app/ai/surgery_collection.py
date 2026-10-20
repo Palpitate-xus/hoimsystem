@@ -424,8 +424,8 @@ def _legacy_gaps(db, cases, resources, source_records, aliases, person_users, bu
         if capsule is None or not capsule["eligible_for_new_use"] or capsule["payload"].get("protected_witness_hash") is None:
             continue
         witness = facts.current_query(db.query(AISurgeryProtectedWitness).filter_by(source_record_id=capsule["source_record_id"]), locking=locking).one()
-        budget.bytes(len(witness.raw_witness_json.encode()))
-        raw = json.loads(witness.raw_witness_json)
+        budget.bytes(len(witness.witness_json.encode()))
+        raw = json.loads(witness.witness_json)
         covered.add((raw["original_schedule"]["schedule_id"], capsule["resource_id"]))
     predicates = [SurgerySchedule.patient_id.in_(patients)]
     if person_users:

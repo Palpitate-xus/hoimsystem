@@ -50,3 +50,6 @@ def test_risk_metadata_advertises_only_its_window_and_optional_news2_assessment(
             assert "aki_assessment_id" not in describe_feature(spec)["source_reference_keys"]
         if spec.number != 42:
             assert "qsofa_assessment_id" not in describe_feature(spec)["source_reference_keys"]
+        support_keys = {"support_source_id", "support_source_kind"}
+        advertised = set(describe_feature(spec)["source_reference_keys"])
+        assert support_keys <= advertised if spec.number == 47 else not support_keys & advertised

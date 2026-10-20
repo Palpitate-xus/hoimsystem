@@ -279,6 +279,12 @@ def _request(provider: AIProvider, spec: FeatureSpec, task_prompt: str, data: di
     endpoint = validate_endpoint(provider.api_base)
     budget = min(provider.max_output_tokens, settings.AI_MAX_OUTPUT_TOKENS)
     instructions = COMMON_SYSTEM_PROMPT + "\n\n" + task_prompt
+    if data.get("context", {}).get("support_source") is not None:
+        from app.ai.support_context import outbound_support_payload
+
+        if provider.kind not in {"chat", "responses"}:
+            raise AIExecutionError("SUPPORT_TEXT_ADAPTER_REQUIRED", "单条交班原资料整理须由登记的文本模型接口处理")
+        data = outbound_support_payload(spec, data)
     news2_mode = provider.model.startswith("news2:")
     aki_mode = provider.model.startswith("aki:")
     qsofa_mode = provider.model.startswith("qsofa:")

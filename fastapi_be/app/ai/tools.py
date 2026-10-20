@@ -17,6 +17,17 @@ def business_tools(db: Session, spec: FeatureSpec, user: User, patient_id: int |
     """Return explicit tool results and evidence without accepting instructions to execute code."""
     tools: dict = {}
     evidence: list[dict] = []
+    if spec.number == 47 and context.data.get("support_source"):
+        source = context.data["support_source"]
+        return {
+            "support_source_input": {
+                "source_id": source["source_id"],
+                "source_kind": source["kind"],
+                "clinical_score_calculated": False,
+                "complete_handover_provided": False,
+                "scope_note": "仅整理明确选择的单条原支持资料；未载资料不构成正常、无治疗、完整交班或SOFA",
+            }
+        }, []
     if spec.number == 42 and context.data.get("qsofa_source"):
         source = context.data["qsofa_source"]
         return {

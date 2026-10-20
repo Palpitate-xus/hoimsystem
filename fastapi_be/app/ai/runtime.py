@@ -32,6 +32,7 @@ from app.ai.pathway_sources import PATHWAY_SOURCE_FEATURES, selected_pathway_ids
 from app.ai.qsofa_context import authorize_qsofa_snapshot
 from app.ai.review_curation import authorize_feedback_snapshot
 from app.ai.schemas import RunRequest
+from app.ai.support_context import authorize_support_snapshot
 from app.ai.tools import business_tools
 from app.config import settings
 from app.models import Doctor, Patient, User
@@ -224,7 +225,9 @@ def authorize_run(db: Session, user: User, run: AIRun) -> None:
     if run.patient_id is not None:
         frozen_context = json.loads(run.input_json).get("payload", {}).get("context", {})
         nursing_frozen = has_frozen_nursing_sources(frozen_context)
-        if spec.number in RISK_FEATURES:
+        if spec.number == 47 and frozen_context.get("support_source"):
+            authorize_support_snapshot(db, user, frozen_context, run.patient_id, run.encounter_ref)
+        elif spec.number in RISK_FEATURES:
             if spec.number == 43 and frozen_context.get("aki_source"):
                 authorize_aki_snapshot(db, user, frozen_context, run.patient_id, run.encounter_ref)
             elif spec.number == 42 and frozen_context.get("qsofa_source"):
@@ -306,6 +309,10 @@ def describe_run(run: AIRun, include_result: bool = True) -> dict:
             context = json.loads(run.input_json).get("payload", {}).get("context", {})
             if context.get("qsofa_source"):
                 data["qsofa_findings"] = {key: context[key] for key in ("qsofa_source", "qsofa_assessment")}
+        if spec.number == 47:
+            context = json.loads(run.input_json).get("payload", {}).get("context", {})
+            if context.get("support_source"):
+                data["support_findings"] = {key: context[key] for key in ("support_source", "support_source_provenance", "support_public_hash")}
         data["evidence"] = json.loads(run.evidence_json)
         tools = json.loads(run.input_json).get("payload", {}).get("tools", {})
         data["tool_findings"] = {
@@ -414,6 +421,8 @@ def _recheck_task(db: Session, run: AIRun) -> tuple[FeatureSpec, AIProvider, dic
         raise AIExecutionError("TASK_MODEL_CHANGED", "模型参数或输出限制已改变，请重新创建任务")
     if digest(snapshot["payload"]["context"]) != run.context_digest:
         raise AIExecutionError("TASK_SNAPSHOT_INVALID", "任务资料快照校验不一致，请重新创建任务")
+    if spec.number == 47 and snapshot["payload"]["context"].get("support_source") is not None and snapshot["payload"].get("evidence") != json.loads(run.evidence_json):
+        raise AIExecutionError("TASK_EVIDENCE_CHANGED", "任务原支持资料引用与冻结证据不一致，请重新创建任务")
     if digest([COMMON_SYSTEM_PROMPT, snapshot["task_prompt"]]) != run.prompt_hash:
         raise HTTPException(409, "任务系统契约已改变，请重新创建任务")
     if not evidence_is_current(db, json.loads(run.evidence_json)):

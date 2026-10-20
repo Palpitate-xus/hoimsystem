@@ -31,5 +31,7 @@ SOURCE_REFERENCE_KEYS = frozenset(
         "news2_assessment_id",
         "aki_assessment_id",
         "qsofa_assessment_id",
+        "support_source_id",
+        "support_source_kind",
     }
 )

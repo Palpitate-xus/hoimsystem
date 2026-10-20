@@ -86,6 +86,8 @@ def minimize_identifiers(value: object, patient: Patient | None = None) -> objec
         def opaque(key, item):
             if not isinstance(item, str):
                 return False
+            if key == "support_source_kind" and item in {"map", "respiratory_support", "arterial_pair", "vasoactive", "infection_episode"}:
+                return True
             if key in {"content_hash", "header_hash", "signal_hash", "chunk_hash", "snapshot_hash", "source_snapshot_hash", "context_digest", "prompt_hash", "governance_hash"} and re.fullmatch(
                 r"[a-f0-9]{64}", item
             ):
@@ -321,6 +323,12 @@ def _selected_records(db: Session, user: User, patient_id: int, references: dict
 
 def patient_snapshot(db: Session, user: User, spec: FeatureSpec, patient_id: int, encounter_ref: str | None = None, source_refs: dict | None = None) -> ContextBundle:
     """Build a bounded snapshot without mixing historical diagnoses into confirmed current ones."""
+    if any((source_refs or {}).get(key) not in (None, "") for key in ("support_source_id", "support_source_kind")):
+        if spec.number != 47:
+            raise HTTPException(422, "原器官支持资料引用仅用于明确单条交班资料整理")
+        from app.ai.support_context import support_context
+
+        return support_context(db, user, patient_id, encounter_ref, source_refs)
     if (source_refs or {}).get("qsofa_assessment_id") not in (None, ""):
         if spec.number != 42:
             raise HTTPException(422, "qSOFA评估仅供明确原床旁三项资料核对使用")

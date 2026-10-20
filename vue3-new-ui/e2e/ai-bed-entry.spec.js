@@ -110,7 +110,7 @@ test('生产病区页面把当前科室和病区传入AI，不默认选择序列
   await expect(drawer.locator('.el-form-item').filter({hasText:'床位预测病区'})).toContainText('合成病区 · #1');
   await expect(drawer.locator('.el-form-item').filter({hasText:'床位预测期限'})).toContainText('明确7或14天，不默认');
   await expect(drawer.getByRole('button',{name:'生成辅助建议',exact:true})).toBeDisabled();
-  expect(state.reads.some(r=>r.path==='/api/ai/bed-series'&&r.query.department_id==='1'&&r.query.ward_id==='1')).toBe(true);
+  await expect.poll(()=>state.reads.some(r=>r.path==='/api/ai/bed-series'&&r.query.department_id==='1'&&r.query.ward_id==='1')).toBe(true);
   expect(state.reads.some(r=>r.path==='/api/ai/service-options')).toBe(false);
   expect(state.writes).toEqual([]);bootstrapChecked(state);
 });

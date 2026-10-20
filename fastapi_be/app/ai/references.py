@@ -19,5 +19,6 @@ SOURCE_REFERENCE_KEYS = frozenset(
         "reaction_id",
         "pathway_id",
         "pathway_enrollment_id",
+        "audio_asset_id",
     }
 )

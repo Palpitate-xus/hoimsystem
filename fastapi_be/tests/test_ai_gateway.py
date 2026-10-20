@@ -6,7 +6,7 @@ import httpx
 import pytest
 from pydantic import ValidationError
 
-from app.ai.catalog import FEATURE_BY_KEY
+from app.ai.catalog import COMMON_SYSTEM_PROMPT, FEATURE_BY_KEY
 from app.ai.gateway import AIExecutionError, generate
 from app.ai.models import AIProvider
 from app.ai.schemas import ProviderWrite
@@ -112,3 +112,18 @@ async def test_specialist_adapter_must_identify_feature_model_and_scope():
     with pytest.raises(AIExecutionError) as exc:
         await generate(provider("specialist"), FEATURE_BY_KEY["ecg_analysis"], "任务", {}, transport=httpx.MockTransport(handle))
     assert exc.value.code == "ADAPTER_CONTRACT_MISMATCH"
+
+
+@pytest.mark.asyncio
+async def test_specialist_request_preserves_full_fixed_and_task_prompts():
+    spec = FEATURE_BY_KEY["ecg_analysis"]
+    prompt = "独立任务Prompt：仅整理已验证模型的结果，不新增诊断"
+
+    def handle(request):
+        body = json.loads(request.content)
+        assert body["instructions"] == COMMON_SYSTEM_PROMPT + "\n\n" + prompt
+        assert body["schema_version"] == "1"
+        return httpx.Response(200, json={"schema_version": "1", "feature_key": spec.key, "model_version": "test-model", "applicable": True, "result": output()})
+
+    result, _, _ = await generate(provider("specialist"), spec, prompt, {"evidence": [{"source_id": "known-source", "kind": "patient_record"}]}, transport=httpx.MockTransport(handle))
+    assert result.summary == "隔离测试结果"

@@ -9,12 +9,14 @@ from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
 from app.ai.adr_sources import ADR_SOURCE_FEATURES
+from app.ai.audio_assets import authorize_audio_snapshot
+from app.ai.audio_files import open_verified_audio
 from app.ai.catalog import CATALOG_VERSION, COMMON_SYSTEM_PROMPT, FeatureSpec
 from app.ai.context import ContextBundle, authorize_patient, context_metadata, minimize_identifiers, patient_snapshot
 from app.ai.gateway import AIExecutionError, generate
 from app.ai.governance import active_prompt, audit, digest, encode_json, get_spec, provider_credential, provider_feature_issues
 from app.ai.knowledge import evidence_is_current, retrieval_query, retrieve_evidence
-from app.ai.models import AIFeatureConfig, AIProvider, AIRun, utcnow
+from app.ai.models import AIAudioAsset, AIFeatureConfig, AIProvider, AIRun, utcnow
 from app.ai.operational_sources import authorize_operational_snapshot, operational_context
 from app.ai.pathway_sources import PATHWAY_SOURCE_FEATURES, selected_pathway_ids
 from app.ai.review_curation import authorize_feedback_snapshot
@@ -160,6 +162,8 @@ def authorize_run(db: Session, user: User, run: AIRun) -> None:
     spec, _ = authorized_feature(db, user, run.feature_key)
     if run.patient_id is not None:
         authorize_patient(db, user, run.patient_id, spec.category, run.encounter_ref)
+        if spec.number == 21:
+            authorize_audio_snapshot(db, user, json.loads(run.input_json).get("payload", {}).get("context", {}), authorize_patient)
         billing_scope = json.loads(run.input_json).get("payload", {}).get("context", {}).get("billing_scope", {}) or {}
         source_encounter = billing_scope.get("admission_id") or billing_scope.get("registration_uuid")
         if source_encounter and source_encounter != run.encounter_ref:
@@ -173,6 +177,8 @@ def authorize_run(db: Session, user: User, run: AIRun) -> None:
         authorize_operational_snapshot(db, user, spec, context)
         if spec.number == 70 and user.user_role != "super_admin":
             authorize_feedback_snapshot(db, context)
+    elif spec.number == 21 and user.user_role != "super_admin":
+        raise HTTPException(403, "历史语音任务缺少原录音与患者引用，不能作为已核实转写读取")
 
 
 def describe_run(run: AIRun, include_result: bool = True) -> dict:
@@ -220,6 +226,9 @@ def describe_run(run: AIRun, include_result: bool = True) -> dict:
         if spec.number in PATHWAY_SOURCE_FEATURES:
             context = json.loads(run.input_json).get("payload", {}).get("context", {})
             data["pathway_findings"] = context.get("pathway_sources")
+        if spec.number == 21:
+            context = json.loads(run.input_json).get("payload", {}).get("context", {})
+            data["audio_findings"] = {key: context[key] for key in ("scope", "scope_note", "audio_source", "missing_data") if key in context}
         if spec.number in {61, 62, 63, 64, 65, 66, 67, 70}:
             context = json.loads(run.input_json).get("payload", {}).get("context", {})
             keys = (
@@ -321,14 +330,21 @@ async def execute_claimed(run_id: str, lease: str, *, transport=None) -> None:
     started = time.monotonic()
     error = result = None
     inputs = outputs = 0
+    audio_file = None
     try:
         with database.SessionLocal() as db:
             run = db.get(AIRun, run_id)
             if not run or run.status != "running" or run.lease_token != lease:
                 return
             spec, provider, snapshot = _recheck_task(db, run)
+            if spec.number == 21:
+                asset = db.get(AIAudioAsset, snapshot["payload"]["context"]["audio_source"]["asset_id"])
+                audio_file = open_verified_audio(asset)
             db.expunge(provider)
-        result, inputs, outputs = await generate(provider, spec, snapshot["task_prompt"], snapshot["payload"], transport=transport)
+        if audio_file is not None:
+            result, inputs, outputs = await generate(provider, spec, snapshot["task_prompt"], snapshot["payload"], transport=transport, audio=audio_file)
+        else:
+            result, inputs, outputs = await generate(provider, spec, snapshot["task_prompt"], snapshot["payload"], transport=transport)
         pathway_ids = selected_pathway_ids(snapshot["payload"]["context"])
         if spec.key == "treatment_pathway" and pathway_ids and result.sections:
             required = {
@@ -347,11 +363,16 @@ async def execute_claimed(run_id: str, lease: str, *, transport=None) -> None:
         if triage.get("emergency"):
             result.warnings.insert(0, triage["emergency_message"])
     except AIExecutionError as exc:
+        if exc.input_tokens is not None:
+            inputs, outputs = exc.input_tokens, exc.output_tokens
         error = (exc.code, exc.message)
     except HTTPException as exc:
         error = ("TASK_NO_LONGER_AUTHORIZED", str(exc.detail))
     except Exception:
         error = ("TASK_EXECUTION_ERROR", "任务处理失败，请联系管理员查看执行状态")
+    finally:
+        if audio_file is not None:
+            audio_file.close()
     with database.SessionLocal() as db:
         run = db.query(AIRun).filter(AIRun.run_id == run_id, AIRun.status.in_(["running", "cancelled"]), AIRun.lease_token == lease).with_for_update().first()
         if run is None:

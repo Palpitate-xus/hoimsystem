@@ -3,6 +3,7 @@
 import datetime
 import json
 import re
+import uuid
 from dataclasses import dataclass, field
 
 from fastapi import HTTPException
@@ -10,6 +11,8 @@ from sqlalchemy import case, or_, select
 from sqlalchemy.orm import Session, selectinload
 
 from app.ai.adr_sources import attach_adr_sources
+from app.ai.audio_assets import audio_snapshot, authorize_audio
+from app.ai.audio_files import open_verified_audio
 from app.ai.billing_sources import attach_billing_sources
 from app.ai.care import surgical_patient_ids
 from app.ai.catalog import FeatureSpec
@@ -17,11 +20,12 @@ from app.ai.coding_sources import attach_coding_sources
 from app.ai.consultation_sources import attach_consultation_sources
 from app.ai.governance import digest, encode_json
 from app.ai.incident_sources import attach_incident_sources
-from app.ai.models import AIPatientGrant, utcnow
+from app.ai.models import AIAudioAsset, AIPatientGrant, utcnow
 from app.ai.outpatient_billing import resolve_outpatient_charge
 from app.ai.pathway_sources import PATHWAY_SOURCE_FEATURES, attach_pathway_sources
 from app.ai.patient_sources import attach_patient_sources
 from app.ai.procedural_sources import attach_procedural_sources
+from app.ai.references import SOURCE_REFERENCE_KEYS
 from app.clinical_observations import serialize_observation
 from app.config import settings
 from app.diagnosis_review import latest_reviews, review_state
@@ -69,7 +73,25 @@ class ContextBundle:
 def minimize_identifiers(value: object, patient: Patient | None = None) -> object:
     """Remove known direct identifiers; this is minimization, not guaranteed anonymization."""
     if isinstance(value, dict):
-        return {key: minimize_identifiers(item, patient) for key, item in value.items()}
+
+        def opaque(key, item):
+            if not isinstance(item, str):
+                return False
+            if key in {"content_hash", "chunk_hash", "snapshot_hash", "source_snapshot_hash", "context_digest", "prompt_hash"} and re.fullmatch(r"[a-f0-9]{64}", item):
+                return True
+            if key in SOURCE_REFERENCE_KEYS | {"asset_id", "document_id", "encounter_ref", "review_id", "run_id"}:
+                try:
+                    return str(uuid.UUID(item)) == item
+                except ValueError:
+                    return False
+            if key == "source_id" and re.fullmatch(r"audio:[a-f0-9-]{36}:[a-f0-9]{12}", item):
+                try:
+                    return str(uuid.UUID(item.split(":")[1])) == item.split(":")[1]
+                except ValueError:
+                    return False
+            return False
+
+        return {key: item if opaque(key, item) else minimize_identifiers(item, patient) for key, item in value.items()}
     if isinstance(value, list):
         return [minimize_identifiers(item, patient) for item in value]
     if not isinstance(value, str):
@@ -225,6 +247,7 @@ def _selected_records(db: Session, user: User, patient_id: int, references: dict
         ("perioperative_id", PerioperativeAntibiotic, "perioperative_id", None),
         ("home_id", MedicalRecordHome, "home_id", None),
         ("inpatient_charge_id", InpatientCharge, "charge_id", None),
+        ("audio_asset_id", AIAudioAsset, "asset_id", None),
     ]
     for key, model, primary_key, order in sources:
         reference = references.get(key)
@@ -232,6 +255,8 @@ def _selected_records(db: Session, user: User, patient_id: int, references: dict
             continue
         if not isinstance(reference, str) or len(reference) > 50:
             raise HTTPException(422, "所选资料标识格式不正确")
+        if key == "audio_asset_id" and user.user_role == "patient":
+            raise HTTPException(403, "患者端不提供内部录音工作资料")
         query = db.query(model).filter(getattr(model, primary_key) == reference)
         query = query.join(order).filter(order.patient_id == patient_id) if order else query.filter(model.patient_id == patient_id)
         row = query.first()
@@ -251,7 +276,13 @@ def patient_snapshot(db: Session, user: User, spec: FeatureSpec, patient_id: int
         raise HTTPException(422, "不良事件没有就诊关联字段，请清除本次就诊选择，不能按日期推定事件归属")
     patient = authorize_patient(db, user, patient_id, spec.category, encounter_ref)
     encounter = get_encounter(db, patient_id, encounter_ref)
+    if spec.number == 21 and user.user_role == "patient":
+        raise HTTPException(403, "患者端不提供内部录音工作资料")
+    if spec.number == 21 and any(key in SOURCE_REFERENCE_KEYS - {"audio_asset_id"} and item not in (None, "") for key, item in (source_refs or {}).items()):
+        raise HTTPException(422, "录音转写只接受明确的原录音引用，不加载其他临床历史")
     selected = _selected_records(db, user, patient_id, source_refs or {})
+    if spec.number != 21 and "audio_asset_id" in selected:
+        raise HTTPException(422, "该功能不接受录音文件，须先完成医疗语音转写和人工核对")
     if spec.number not in PATHWAY_SOURCE_FEATURES and any(key in selected for key in ("pathway_id", "pathway_enrollment_id")):
         raise HTTPException(422, "该功能不接受内部临床路径资料")
     bundle = ContextBundle()
@@ -297,6 +328,22 @@ def patient_snapshot(db: Session, user: User, spec: FeatureSpec, patient_id: int
         bundle.evidence.append({"source_id": source_id, "kind": kind, "title": title, "observed_at": str(observed_at) if observed_at else None, "content": encode_json(clean)})
         return {"source_id": source_id, **clean}
 
+    if spec.number == 21:
+        if not selected.get("audio_asset_id"):
+            raise HTTPException(422, "请选择已登记并获授权的原录音，不能以文字资料冒充语音识别")
+        asset = authorize_audio(db, user, selected.get("audio_asset_id"), authorize_patient, patient_id=patient_id, encounter_ref=encounter_ref)
+        with open_verified_audio(asset):
+            pass
+        source = add("audio:" + asset.asset_id + ":" + asset.content_hash[:12], "本人登记并获当前访问授权的原录音", audio_snapshot(asset), asset.recorded_at, kind="audio_asset")
+        bundle.data = {
+            "scope": "recording_transcription",
+            "snapshot_time": bundle.data["snapshot_time"],
+            "selected_sources": {"audio_asset_id": asset.asset_id},
+            "audio_source": source,
+            "scope_note": "仅所选原录音及其技术元数据；未加载无关病史。原音频可能含直接标识，不能保证匿名化。分段时间以解码音频为参考，不代表临床发生时刻；说话人标签不证明真实身份和职业",
+            "missing_data": ["未取得经核实的说话人身份映射，角色保持未知", *([] if asset.recorded_at else ["未记录原录音发生时间，不以登记或上传时间代替"])],
+        }
+        return bundle
     if spec.number in {69, 77}:
         # These tasks need selected source links rather than unrelated clinical history.
         for key in ("age", "sex", "current_confirmed_diagnoses", "diagnosis_reviews"):

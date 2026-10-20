@@ -2,15 +2,17 @@
 
 import copy
 import json
+from typing import BinaryIO
 
 import httpx
 from fastapi import HTTPException
 from pydantic import ValidationError
 
+from app.ai.audio_files import AUDIO_FORMATS
 from app.ai.catalog import COMMON_SYSTEM_PROMPT, FeatureSpec
 from app.ai.governance import encode_json, provider_credential, validate_endpoint
 from app.ai.models import AIProvider
-from app.ai.schemas import GenerationResult
+from app.ai.schemas import AudioGenerationResult, GenerationResult
 from app.config import settings
 
 MAX_RESPONSE_BYTES = 512 * 1024
@@ -22,6 +24,8 @@ class AIExecutionError(Exception):
     def __init__(self, code: str, message: str):
         self.code = code
         self.message = message
+        self.input_tokens = None
+        self.output_tokens = None
         super().__init__(message)
 
 
@@ -45,10 +49,10 @@ def result_json_schema() -> dict:
     return schema
 
 
-def validate_generation(value: object, evidence: list[dict], requires_knowledge: bool = False) -> GenerationResult:
+def validate_generation(value: object, evidence: list[dict], requires_knowledge: bool = False, *, audio_source: dict | None = None) -> GenerationResult:
     """Reject fabricated references and invalid structured output before UI exposure."""
     try:
-        result = GenerationResult.model_validate(value)
+        result = (AudioGenerationResult if audio_source is not None else GenerationResult).model_validate(value)
     except ValidationError as exc:
         raise AIExecutionError("INVALID_OUTPUT", "模型返回的结果不符合任务结构，请调整模型或重试") from exc
     allowed = {item["source_id"] for item in evidence}
@@ -59,6 +63,17 @@ def validate_generation(value: object, evidence: list[dict], requires_knowledge:
         knowledge_ids = {item["source_id"] for item in evidence if item.get("kind") == "knowledge"}
         if not cited.intersection(knowledge_ids):
             raise AIExecutionError("UNGROUNDED_OUTPUT", "该任务的回答缺少已审核知识依据，结果已拒绝展示")
+    if audio_source is not None:
+        transcript = result.transcription
+        if transcript.asset_id != audio_source["asset_id"] or transcript.content_hash != audio_source["content_hash"]:
+            raise AIExecutionError("AUDIO_SOURCE_MISMATCH", "转写结果与所选原录音不一致，结果已拒收")
+        previous_start = -1
+        for segment in transcript.segments:
+            if segment.end_ms > audio_source["duration_ms"] or segment.start_ms < previous_start or segment.source_id != audio_source["source_id"]:
+                raise AIExecutionError("INVALID_AUDIO_SEGMENT", "转写时间、顺序或原录音引用不符合实际录音范围，结果已拒收")
+            previous_start = segment.start_ms
+        if result.sections and audio_source["source_id"] not in cited:
+            raise AIExecutionError("UNGROUNDED_TRANSCRIPTION", "转写说明未引用所选原录音，结果已拒收")
     return result
 
 
@@ -66,6 +81,8 @@ def _request(provider: AIProvider, spec: FeatureSpec, task_prompt: str, data: di
     endpoint = validate_endpoint(provider.api_base)
     budget = min(provider.max_output_tokens, settings.AI_MAX_OUTPUT_TOKENS)
     instructions = COMMON_SYSTEM_PROMPT + "\n\n" + task_prompt
+    if spec.number == 21 and provider.kind != "specialist":
+        raise AIExecutionError("AUDIO_ADAPTER_REQUIRED", "医疗录音须通过已登记的专用语音服务处理")
     if provider.kind == "responses":
         return endpoint + "/responses", {
             "model": provider.model,
@@ -86,10 +103,12 @@ def _request(provider: AIProvider, spec: FeatureSpec, task_prompt: str, data: di
         }
     if provider.kind == "specialist":
         return endpoint + "/tasks", {
-            "schema_version": "1",
+            "schema_version": "2" if spec.number == 21 else "1",
             "feature_key": spec.key,
             "engine": spec.engine,
             "model": provider.model,
+            "instructions": instructions,
+            **({"store": False} if spec.number == 21 else {}),
             "input": data,
         }
     raise AIExecutionError("UNSUPPORTED_PROVIDER", "模型接口类型不受支持")
@@ -111,10 +130,15 @@ def _parse_response(provider: AIProvider, spec: FeatureSpec, value: dict) -> tup
             raise AIExecutionError("INCOMPLETE_RESPONSE", "模型未返回完整结果，请检查输出额度或模型状态")
         usage = value.get("usage") or {}
         return json.loads(choice["message"]["content"]), int(usage.get("prompt_tokens") or 0), int(usage.get("completion_tokens") or 0)
-    if value.get("schema_version") != "1" or value.get("feature_key") != spec.key or value.get("model_version") != provider.model:
+    if value.get("schema_version") != ("2" if spec.number == 21 else "1") or value.get("feature_key") != spec.key or value.get("model_version") != provider.model:
         raise AIExecutionError("ADAPTER_CONTRACT_MISMATCH", "专用模型返回的功能或模型版本与登记信息不一致")
     if value.get("applicable") is not True:
         raise AIExecutionError("OUTSIDE_VALIDATED_SCOPE", "本次输入不在专用模型声明的适用范围内")
+    if spec.number == 21:
+        if not isinstance(value["result"], dict) or "transcription" in value["result"]:
+            raise ValueError("transcription belongs to the versioned envelope")
+        usage = value.get("usage") or {}
+        return {**value["result"], "transcription": value["transcription"]}, int(usage.get("input_tokens") or 0), int(usage.get("output_tokens") or 0)
     return value["result"], 0, 0
 
 
@@ -125,8 +149,10 @@ async def generate(
     data: dict,
     *,
     transport: httpx.AsyncBaseTransport | None = None,
+    audio: BinaryIO | None = None,
 ) -> tuple[GenerationResult, int, int]:
     """Call only a configured endpoint; never retry billable tasks or follow redirects."""
+    inputs = outputs = None
     try:
         endpoint, payload = _request(provider, spec, task_prompt, data)
         credential = provider_credential(provider)
@@ -135,10 +161,19 @@ async def generate(
     headers = {"Accept": "application/json"}
     if credential:
         headers["Authorization"] = "Bearer " + credential
+    source = data.get("context", {}).get("audio_source") if spec.number == 21 else None
+    if spec.number == 21:
+        if audio is None or not source or source.get("extension") not in AUDIO_FORMATS or source.get("media_type") != AUDIO_FORMATS[source["extension"]][1]:
+            raise AIExecutionError("AUDIO_FILE_REQUIRED", "缺少已核实的原录音附件，不能以文字资料冒充语音识别")
+        request_body = {"data": {"task": encode_json(payload)}, "files": {"audio": ("recording" + source["extension"], audio, source["media_type"])}}
+    else:
+        if audio is not None:
+            raise AIExecutionError("UNEXPECTED_AUDIO_FILE", "该任务不接受录音附件")
+        request_body = {"json": payload}
     try:
         timeout = httpx.Timeout(provider.timeout_seconds, connect=min(provider.timeout_seconds, 10))
         async with httpx.AsyncClient(timeout=timeout, follow_redirects=False, trust_env=False, transport=transport) as client:
-            async with client.stream("POST", endpoint, json=payload, headers=headers) as response:
+            async with client.stream("POST", endpoint, **request_body, headers=headers) as response:
                 if response.status_code != 200:
                     raise AIExecutionError("PROVIDER_HTTP_ERROR", f"模型服务返回 HTTP {response.status_code}，请联系管理员检查配置")
                 body = bytearray()
@@ -152,8 +187,11 @@ async def generate(
         output, inputs, outputs = _parse_response(provider, spec, parsed)
         if min(inputs, outputs) < 0 or max(inputs, outputs) > 2000000:
             raise ValueError("invalid token accounting")
-        result = validate_generation(output, data.get("evidence", []), spec.requires_knowledge)
+        result = validate_generation(output, data.get("evidence", []), spec.requires_knowledge, audio_source=source)
         return result, inputs, outputs
+    except AIExecutionError as exc:
+        exc.input_tokens, exc.output_tokens = inputs, outputs
+        raise
     except httpx.TimeoutException as exc:
         raise AIExecutionError("PROVIDER_TIMEOUT", "模型服务响应超时，请稍后重试或调整模型配置") from exc
     except httpx.HTTPError as exc:

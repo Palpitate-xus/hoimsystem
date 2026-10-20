@@ -4,7 +4,7 @@ import datetime
 import re
 from typing import Any, Literal
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from app.ai.references import SOURCE_REFERENCE_KEYS
 
@@ -216,6 +216,42 @@ class GenerationResult(StrictRequest):
         if any(len(item) > 2000 for item in value):
             raise ValueError("列表项过长")
         return value
+
+
+class AudioSegment(StrictRequest):
+    start_ms: int = Field(ge=0, strict=True)
+    end_ms: int = Field(ge=1, strict=True)
+    speaker: str = Field(pattern=r"^(unknown|speaker_[1-9][0-9]{0,2})$")
+    speaker_role: Literal["unknown"] = "unknown"
+    text: str = Field(min_length=1, max_length=2000)
+    uncertain: bool = Field(strict=True)
+    uncertainty_note: str = Field(default="", max_length=500)
+    source_id: str = Field(min_length=1, max_length=100)
+
+    @model_validator(mode="after")
+    def interval_and_uncertainty(self):
+        if self.end_ms <= self.start_ms or (self.uncertain and not self.uncertainty_note):
+            raise ValueError("转写区间及不确定片段的说明不完整")
+        return self
+
+
+class AudioTranscript(StrictRequest):
+    asset_id: str = Field(min_length=36, max_length=36)
+    content_hash: str = Field(pattern=r"^[a-f0-9]{64}$")
+    time_basis: Literal["relative_decoded_audio"]
+    speech_detected: bool = Field(strict=True)
+    language: str = Field(min_length=1, max_length=40)
+    segments: list[AudioSegment] = Field(max_length=1000)
+
+    @model_validator(mode="after")
+    def speech_and_segments(self):
+        if bool(self.segments) != self.speech_detected:
+            raise ValueError("是否检出语音与原分段结果不一致")
+        return self
+
+
+class AudioGenerationResult(GenerationResult):
+    transcription: AudioTranscript
 
 
 class FeedbackWrite(StrictRequest):

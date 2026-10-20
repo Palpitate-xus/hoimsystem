@@ -1,0 +1,572 @@
+{
+  "recorded_at_utc": "2026-10-20T11:51:02.713692+00:00",
+  "platform_commit": "a5eca2a435e2a6487c0d4c29c68fa0135a2bd9fa",
+  "baseline_commit": "e510f81537d1f3b553ab9de1f8b7819771a392bf",
+  "scope": "Actual fixed statistical forecast of daily registration creation records with immutable scope/coverage/time interpretation, strict v5 gateway, real rolling arithmetic, admin management and review UI. Not actual arrivals, unique patients, clinical risk or independently validated operational effectiveness.",
+  "real_patient_data_used": false,
+  "existing_hospital_database_accessed": false,
+  "production_deployment_performed": false,
+  "paid_or_external_model_invoked": false,
+  "clinical_validation_completed": false,
+  "operational_effectiveness_validated": false,
+  "real_clinical_or_operational_features_enabled": false,
+  "inventory": {
+    "catalog_version": "2026.10.20.2",
+    "features": 80,
+    "source_reference_keys": 25,
+    "api_endpoints": 640,
+    "router_modules": 87,
+    "tables": 160,
+    "vue_view_components": 156,
+    "alembic_head": "20261020_ai_forecast_series"
+  },
+  "source": {
+    "target": "registration_record_count",
+    "grain": "day",
+    "includes_all_current_record_statuses": true,
+    "actual_arrivals_or_unique_patients": false,
+    "time_basis": "naive_registration_time",
+    "timezone": "Explicit super-admin IANA interpretation, never inferred from browser/server and never converts old database clocks",
+    "coverage": "Immutable 112..366-day full-window super_admin_attested declaration, with complete-history/day-ended/timezone confirmations and a 20..2000-character note; not independent external completeness verification",
+    "pre_confirmation_train_values": "null even when observed_count is 0",
+    "post_confirmation_zero": "Only actual source count after explicit whole-window coverage attestation",
+    "unassigned_time_records": "All NULL-time rows in the selected hospital/department scope across all history; cannot be assigned to the selected date window and excluded from daily counts",
+    "original_digest": "SHA256 of canonical [registration_uuid, database time with six-place serialization, department_id] lines in UUID order; original storage precision is not upgraded",
+    "max_timestamped_rows_in_window": 200000,
+    "over_limit": "reject; never truncate or infer zero",
+    "status_only_change_alters_all_status_target": false,
+    "day_values_supplied_by_client": false,
+    "existing_daily_or_hourly_metrics_used_as_complete_history": false,
+    "in_place_source_edit_or_reactivation_allowed": false,
+    "revision_revoke": "active v1 -> revoked v2; new source required for corrections",
+    "mysql_precise_columns": [
+      "create_time",
+      "revoked_at"
+    ],
+    "coverage_attested_at_bound_to": "create_time, including microseconds",
+    "revoked_at": "separate UTC microsecond timestamp"
+  },
+  "recipe": {
+    "recipe": "weekday_mean_4w",
+    "version": "registration_daily_v1",
+    "history_days": {
+      "min": 112,
+      "max": 366
+    },
+    "horizon_days": [
+      7,
+      14
+    ],
+    "training_min_days": 28,
+    "backtest_origins": 28,
+    "backtest_origin_step_days": 1,
+    "baselines": [
+      "seasonal_naive_7d",
+      "rolling_mean_7d",
+      "rolling_mean_28d"
+    ],
+    "model_selection": "fixed_no_selection",
+    "interval": {
+      "nominal_coverage": 0.9,
+      "residual_window": 28,
+      "minimum_residuals": 20,
+      "order": "ceil((n+1)*0.9)",
+      "availability": "prior_origin_and_target_on_or_before_origin",
+      "lower": "max(0,point-q)",
+      "upper": "point+q",
+      "coverage_guarantee": "not_provided"
+    },
+    "mase": {
+      "lag_days": 7,
+      "scale": "origin_prefix_mean_abs_lag7",
+      "zero_scale": "any_zero_makes_aggregate_null"
+    },
+    "missing_dates": "reject_never_fill",
+    "prompt_handling": "provenance_only"
+  },
+  "numeric_contract": {
+    "fixed_model_selection": true,
+    "source_and_prompt_hash_binding": true,
+    "all_forecast_interval_baseline_metric_and_denominator_numbers_recomputed_by_gateway": true,
+    "forecast_origin": "Selected historical final day; forecast starts on its next calendar day, not necessarily tomorrow",
+    "backtest_data_basis": "current_snapshot_retrospective; not historical as-of database replay",
+    "origin_count": 28,
+    "seven_day_forecast_pairs": 196,
+    "seven_day_unique_target_dates": 34,
+    "fourteen_day_forecast_pairs": 392,
+    "fourteen_day_unique_target_dates": 41,
+    "overlapping_targets_are_independent_samples": false,
+    "calibration": "Prior origin residual whose target was observed on/before each evaluation origin; last 28 per lead, min20, ceil((n+1)*0.9) absolute-error radius",
+    "future_coverage_guarantee": false,
+    "wape": "sum absolute error / sum actual; zero denominator -> null",
+    "mase": "Origin-prefix lag7 mean absolute difference, all scale numerators and denominators retained; any zero origin scale -> aggregate null"
+  },
+  "authorization_and_lifecycle": {
+    "source_management": "super_admin only",
+    "business_scopes": "admin/super_admin hospital or single department; director only current verified own departments",
+    "outbound": "Only frozen daily aggregate source+horizon and full system/task Prompt; no row UUID lists, patient/doctor identity, question, note body, other context, tools or evidence payload",
+    "prompt_handling": "provenance_only; does not alter fixed numbers",
+    "queue_and_receipt_rechecked": true,
+    "ordinary_frozen_result_sources_and_scope_rechecked": true,
+    "changed_deleted_reassigned_same_count_replaced_null_time_or_revoked_source_blocks_result": true,
+    "super_admin_frozen_audit_retained": true,
+    "ordinary_business_enablement_requires_explicit_validated_status": true,
+    "source_confirmation_or_probe_auto_enables_or_validates": false,
+    "provider_probe": "Authenticated bounded GET /capabilities, no series or inference, actor and saved revision rechecked; actual model only explicitly fills an unsaved form",
+    "ai_writes_registration_scheduling_or_clinical_business_records": false
+  },
+  "verification": {
+    "full_backend": {
+      "passed": 2555,
+      "skipped": 28,
+      "seconds": 269.38,
+      "command": "/home/xusheng/miniconda3/bin/python -m pytest -q",
+      "log_sha256": "b840bd0c56d038ccb2c85b8c491e440a1d15fada37c46afccaf7ddc992ea3888"
+    },
+    "new_default_passing_tests": 209,
+    "new_test_groups": {
+      "pure_contract_model_and_independent_service": 98,
+      "source_api_and_migration": 48,
+      "real_source_queue_service_gateway_frozen_result": 37,
+      "provider_metadata_and_async_admin_guards": 26
+    },
+    "actual_statistics_test_transport": "Actual hospital API/SQLite/queue/worker and native statistical FastAPI service via ASGI HTTP; actual fixed arithmetic, no fake model responses for valid pipeline cases; explicit tamper cases mutate real returned output to prove rejection",
+    "browser": {
+      "passed": 96,
+      "reported_duration": "2.4m",
+      "new_forecast_entry_cases": 9,
+      "new_provider_metadata_cases": 8,
+      "api_mocked": true,
+      "command": "E2E_BASE_URL=http://127.0.0.1:4180 npx playwright test e2e/ai-*.spec.js e2e/diagnosis-review.spec.js --workers=2 --reporter=list",
+      "log_sha256": "8aec5a49aa7e5266d1cb7fd3ab4de8833526889d37ffcac111801cad63579ae0",
+      "source_checkpoint": {
+        "source_commit": "a5eca2a435e2a6487c0d4c29c68fa0135a2bd9fa",
+        "fixture_sha256": "74593f35b859bcbf96f309259e6b1daa6c9c5098f2614403c87058e05d46ec5e",
+        "scope": "All runtime sources and test data frozen before this final 96-case run"
+      }
+    },
+    "production_build": {
+      "passed": true,
+      "seconds": 20.05,
+      "vue_runtime_sources_unchanged_since_build": true,
+      "log_sha256": "8d41462050766ffb08c3d6886a4d1e469d6c06f1f3afe24e79bb0adef291fe99"
+    },
+    "bundle": {
+      "largestJavaScript": {
+        "file": "element-plus.1235714c.js",
+        "bytes": 647479
+      },
+      "totalJavaScript": 5328946,
+      "totalAssets": 5847192,
+      "limits": {
+        "largestJavaScript": 700000,
+        "totalJavaScript": 6000000,
+        "totalAssets": 7000000
+      }
+    },
+    "bundle_limits_changed": false,
+    "node_image_pixel_tests_passed": 11,
+    "ruff_check_and_full_format_changed_python_files": 26,
+    "rbac_matrix_endpoints_checked": 640,
+    "default_prompt_exports_checked": 80,
+    "actual_mysql": {
+      "synthetic_only": true,
+      "image": "mysql:8.0.39",
+      "transport": "real SQLAlchemy/PyMySQL unix socket",
+      "network": "none",
+      "host_ports": [],
+      "source_mounts": false,
+      "existing_database_accessed": false,
+      "project_env_file_read": false,
+      "actual_migration_functions": true,
+      "actual_source_functions": true,
+      "scope": "Actual original Alembic functions and ORM/source/revoke functions on isolated synthetic tables; not HTTP API/full hospital bootstrap/production deployment/prediction validation",
+      "prior_attempt": {
+        "result": "MySQL temporary initialization server restarted before DDL; startup readiness was corrected",
+        "cleanup_verified": true
+      },
+      "image_id": "sha256:01faea2cb286276923a223bdbf438b50468f3c4090f6b61e0b27aa871ca0dbac",
+      "waited_for_completed_mysql_initialization": true,
+      "dotenv_disabled_before_import": true,
+      "dotenv_open_guard_enabled": true,
+      "hospital_service_started": false,
+      "server_version": "8.0.39",
+      "synthetic_prerequisite_tables": [
+        "hoimsystem_ai_audit_event",
+        "hoimsystem_ai_feature_config",
+        "hoimsystem_department",
+        "hoimsystem_registration",
+        "hoimsystem_users"
+      ],
+      "source_sha256": {
+        "alembic/versions/20261020_ai_forecast_series.py": "b6bfb85f125ea00cec92f9750947e34bfcc1d97c7b4f11af6141eac89061f830",
+        "app/ai/models.py": "d507b53a877b4f1e82e37949f865291e107198d3f05ba05dabcf03c31d56e950",
+        "app/ai/forecast_sources.py": "a0561ccb7825d0017f7e0b318ce5daf1e6bcc3651a411ed0a5ace5710e314a31",
+        "app/ai/forecast_contract.py": "ff35b91c7690264116c9658a159f44ca117c395ebc7e6d943f701cef339c214f",
+        "app/routers/ai_forecast.py": "8cb3794330458d0d11df2883f3bd09e5cceb3b21d9941be691fd1c969a650aeb"
+      },
+      "fsp": {
+        "create_time": 6,
+        "revoked_at": 6
+      },
+      "preview_unknown_including_observed_zero": true,
+      "create_time_microsecond_roundtrip": 123456,
+      "source_json_roundtrip_hash_verified": true,
+      "chinese_note_and_utf8_sha256_verified": true,
+      "confirmed_zero_and_null_time_gap_preserved": true,
+      "content_hash": "01482278195bb39cc715d4e51fc18fa121cf20d4daeaf09f67dcbe0614341efc",
+      "registration_digest": "bb8dfb8b4cea6466e4541684247ff043767846203bef6792ccf4f2e0afaa56b9",
+      "coverage_note_hash": "aa9c0ab8c9a01ef2c92af633f66d83746927179fcc0f575f489f668ffd8a24b7",
+      "same_count_changed_row_rejected_409": true,
+      "changed_unassigned_time_count_rejected_409": true,
+      "revoked_at_microsecond_roundtrip": 654321,
+      "actual_revoke_route_function_executed": true,
+      "revocation_preserves_frozen_json_and_hash": true,
+      "ordinary_history_denied_super_frozen_audit_allowed": true,
+      "original_registration_second_times_and_states_unchanged": true,
+      "actual_downgrade_upgrade_roundtrip_preserved_prerequisites": true,
+      "all_checks_passed": true,
+      "own_container_and_volumes_removed": true,
+      "own_container_absent_verified": true,
+      "own_socket_directory_and_script_removed": true,
+      "cleanup_verified": true,
+      "seconds": 13.255
+    },
+    "mysql_record_sha256": "d018a2ea066879a5cd7cee7e2d89e7aa4286b748bd6dadc9c43e8a51f293365d",
+    "host_smoke": {
+      "synthetic_only": true,
+      "clinical_or_operational_validation": false,
+      "existing_database_accessed": false,
+      "external_network_or_model_used": false,
+      "actual_v5_service_execution": true,
+      "cases": [
+        {
+          "case": "all_zero",
+          "horizon_days": 7,
+          "source_hash": "5794cbdf264346a2fd8e7b49491c14ee744174cd30b984f017343fcabc4e6453",
+          "numeric_digest": "df04bad683c5524965faaaf74bb50873b1ed8902682eda2ad7863e029d5eb3e0",
+          "forecast_pair_count": 196,
+          "unique_target_dates": 34,
+          "wape": null,
+          "wape_numerator_abs_error": 0.0,
+          "wape_denominator_actual": 0,
+          "mase": null,
+          "interval_evaluated_count": 196,
+          "interval_covered_count": 196,
+          "all_numbers_recomputed": true
+        },
+        {
+          "case": "positive_constant",
+          "horizon_days": 14,
+          "source_hash": "e07533f7d34cca6e8c31a36d4ffe261e985e6fdff9aca57adf06939f0ad8a647",
+          "numeric_digest": "27e3605ac39aeca3004d5f5553a781918ed1f10d582b85bf7d0127e166b5d043",
+          "forecast_pair_count": 392,
+          "unique_target_dates": 41,
+          "wape": 0.0,
+          "wape_numerator_abs_error": 0.0,
+          "wape_denominator_actual": 4704,
+          "mase": null,
+          "interval_evaluated_count": 392,
+          "interval_covered_count": 392,
+          "all_numbers_recomputed": true
+        },
+        {
+          "case": "weekly_trend",
+          "horizon_days": 14,
+          "source_hash": "1fb2858b167659aaf4eec140a87184e01f5000474f7079dce02be4847d2e6fc1",
+          "numeric_digest": "f067c43d790aad607e730e17f776c3d7731671865a8962776718dd640a8f565a",
+          "forecast_pair_count": 392,
+          "unique_target_dates": 41,
+          "wape": 0.09312638580931264,
+          "wape_numerator_abs_error": 588.0,
+          "wape_denominator_actual": 6314,
+          "mase": 3.569283864861734,
+          "interval_evaluated_count": 392,
+          "interval_covered_count": 392,
+          "all_numbers_recomputed": true
+        }
+      ],
+      "invalid_source_status": 422,
+      "unauthorized_status": 401,
+      "runtime": {
+        "schema_version": "5",
+        "feature_key": "visit_forecast",
+        "engine": "stdlib-statistical-forecast",
+        "recipe": "weekday_mean_4w",
+        "recipe_digest": "8a21dc7626fe8de7330baff70d96d118c766e54eb2fc71ee6dbe92ddb49cb16c",
+        "implementation": {
+          "forecast_contract.py": "ff35b91c7690264116c9658a159f44ca117c395ebc7e6d943f701cef339c214f",
+          "forecast_model.py": "9e8faa2f17708808bb2cae77c21bf526577e6f6bd996042b65b90651e6fb6654",
+          "forecast_config.py": "fd41a8d4049759de78a3dba6b81cdda52aab86f4480c89b6f6238c7f485395ab",
+          "forecast_server.py": "1991847bd47e90736d6baa60773a61b9b330fbe497963ad919819c2d31910653"
+        },
+        "python_version": "3.13.12",
+        "engine_versions": {
+          "fastapi": "0.136.1",
+          "pydantic": "2.12.4"
+        },
+        "prompt_handling": "provenance_only",
+        "clinical_validation": "not_provided",
+        "operational_validation": "not_provided",
+        "coverage_guarantee": "not_provided",
+        "runtime_digest": "d6dcf1966444777b17e78255d305762a4a1152de0776f5d4bcf79fd21beb763d",
+        "model_version": "stat-forecast:d6dcf1966444777b17e78255d305762a4a1152de0776f5d4bcf79fd21beb763d",
+        "history_min_days": 112,
+        "history_max_days": 366,
+        "horizon_days": [
+          7,
+          14
+        ],
+        "backtest_origins": 28,
+        "nominal_coverage": 0.9,
+        "max_request_bytes": 131072,
+        "timeout_seconds": 30
+      },
+      "effective_uid": 1001,
+      "forbidden_modules_imported": [],
+      "seconds": 0.1603
+    },
+    "host_smoke_record_sha256": "def86248b2a155b386ad61bb0d62d1d243f1f1e34d4d020429c3ce1b7ea34a90",
+    "actual_isolated_image": {
+      "image": "hoim-local-forecast:20261020",
+      "image_id": "sha256:75aeac93220ffca0c1df8e5c04f6fbe8c0a8a5e950c652d647366c079be4eef7",
+      "scope": "Actual synthetic ASGI v5 arithmetic in isolated independent image; not production deployment or operational effectiveness validation",
+      "network": "none",
+      "read_only_root": true,
+      "cap_drop": [
+        "ALL"
+      ],
+      "security_opt": [
+        "no-new-privileges"
+      ],
+      "memory_bytes": 536870912,
+      "nano_cpus": 2000000000,
+      "pids_limit": 128,
+      "tmpfs": {
+        "/tmp": "rw,noexec,nosuid,size=32m"
+      },
+      "user": "10001:10001",
+      "bind_mounts": [],
+      "port_bindings": {},
+      "packaged_files_match": true,
+      "packaged_file_sha256": {
+        "requirements-forecast.txt": "7aaf9d3570655893610e43dca1b5b3f48dbc1190e5a4b354c6c2de998d0760bc",
+        "scripts/smoke_local_forecast.py": "f567d9293ab675b0a1e713c7e5305634d310929e33794ba25851c16f282951e0",
+        "app/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "app/ai/__init__.py": "09957ea122e972d43439df3f9b0f75500e61768fabb362dddefb34e78a12171e",
+        "app/ai/forecast_contract.py": "ff35b91c7690264116c9658a159f44ca117c395ebc7e6d943f701cef339c214f",
+        "app/ai/forecast_server.py": "1991847bd47e90736d6baa60773a61b9b330fbe497963ad919819c2d31910653",
+        "app/ai/forecast_model.py": "9e8faa2f17708808bb2cae77c21bf526577e6f6bd996042b65b90651e6fb6654",
+        "app/ai/forecast_config.py": "fd41a8d4049759de78a3dba6b81cdda52aab86f4480c89b6f6238c7f485395ab"
+      },
+      "smoke": {
+        "synthetic_only": true,
+        "clinical_or_operational_validation": false,
+        "existing_database_accessed": false,
+        "external_network_or_model_used": false,
+        "actual_v5_service_execution": true,
+        "cases": [
+          {
+            "case": "all_zero",
+            "horizon_days": 7,
+            "source_hash": "5794cbdf264346a2fd8e7b49491c14ee744174cd30b984f017343fcabc4e6453",
+            "numeric_digest": "df04bad683c5524965faaaf74bb50873b1ed8902682eda2ad7863e029d5eb3e0",
+            "forecast_pair_count": 196,
+            "unique_target_dates": 34,
+            "wape": null,
+            "wape_numerator_abs_error": 0.0,
+            "wape_denominator_actual": 0,
+            "mase": null,
+            "interval_evaluated_count": 196,
+            "interval_covered_count": 196,
+            "all_numbers_recomputed": true
+          },
+          {
+            "case": "positive_constant",
+            "horizon_days": 14,
+            "source_hash": "e07533f7d34cca6e8c31a36d4ffe261e985e6fdff9aca57adf06939f0ad8a647",
+            "numeric_digest": "27e3605ac39aeca3004d5f5553a781918ed1f10d582b85bf7d0127e166b5d043",
+            "forecast_pair_count": 392,
+            "unique_target_dates": 41,
+            "wape": 0.0,
+            "wape_numerator_abs_error": 0.0,
+            "wape_denominator_actual": 4704,
+            "mase": null,
+            "interval_evaluated_count": 392,
+            "interval_covered_count": 392,
+            "all_numbers_recomputed": true
+          },
+          {
+            "case": "weekly_trend",
+            "horizon_days": 14,
+            "source_hash": "1fb2858b167659aaf4eec140a87184e01f5000474f7079dce02be4847d2e6fc1",
+            "numeric_digest": "f067c43d790aad607e730e17f776c3d7731671865a8962776718dd640a8f565a",
+            "forecast_pair_count": 392,
+            "unique_target_dates": 41,
+            "wape": 0.09312638580931264,
+            "wape_numerator_abs_error": 588.0,
+            "wape_denominator_actual": 6314,
+            "mase": 3.569283864861734,
+            "interval_evaluated_count": 392,
+            "interval_covered_count": 392,
+            "all_numbers_recomputed": true
+          }
+        ],
+        "invalid_source_status": 422,
+        "unauthorized_status": 401,
+        "runtime": {
+          "schema_version": "5",
+          "feature_key": "visit_forecast",
+          "engine": "stdlib-statistical-forecast",
+          "recipe": "weekday_mean_4w",
+          "recipe_digest": "8a21dc7626fe8de7330baff70d96d118c766e54eb2fc71ee6dbe92ddb49cb16c",
+          "implementation": {
+            "forecast_contract.py": "ff35b91c7690264116c9658a159f44ca117c395ebc7e6d943f701cef339c214f",
+            "forecast_model.py": "9e8faa2f17708808bb2cae77c21bf526577e6f6bd996042b65b90651e6fb6654",
+            "forecast_config.py": "fd41a8d4049759de78a3dba6b81cdda52aab86f4480c89b6f6238c7f485395ab",
+            "forecast_server.py": "1991847bd47e90736d6baa60773a61b9b330fbe497963ad919819c2d31910653"
+          },
+          "python_version": "3.12.13",
+          "engine_versions": {
+            "fastapi": "0.136.1",
+            "pydantic": "2.12.4"
+          },
+          "prompt_handling": "provenance_only",
+          "clinical_validation": "not_provided",
+          "operational_validation": "not_provided",
+          "coverage_guarantee": "not_provided",
+          "runtime_digest": "bae7099dfdab478ed8ba03f6640c2ecbf0ae7c75ce7eaf415fec17ebac980411",
+          "model_version": "stat-forecast:bae7099dfdab478ed8ba03f6640c2ecbf0ae7c75ce7eaf415fec17ebac980411",
+          "history_min_days": 112,
+          "history_max_days": 366,
+          "horizon_days": [
+            7,
+            14
+          ],
+          "backtest_origins": 28,
+          "nominal_coverage": 0.9,
+          "max_request_bytes": 131072,
+          "timeout_seconds": 30
+        },
+        "effective_uid": 10001,
+        "forbidden_modules_imported": [],
+        "seconds": 0.196
+      },
+      "own_container_removed": true
+    },
+    "container_record_sha256": "60d75e0d2f0189f5817e2128164c52db2032611610d9fd6ac656b31a5975de6e",
+    "all_three_host_container_numeric_cases_equal": true,
+    "dependency_audit": {
+      "passed": false,
+      "baseline_commit": "e510f81",
+      "existing_findings_unchanged": true,
+      "newly_introduced_findings": 0,
+      "counts": {
+        "info": 0,
+        "low": 0,
+        "moderate": 2,
+        "high": 8,
+        "critical": 0,
+        "total": 10
+      },
+      "affected_packages": [
+        "@vue/server-renderer",
+        "axios",
+        "brace-expansion",
+        "braces",
+        "chokidar",
+        "fast-uri",
+        "postcss-selector-parser",
+        "sass",
+        "source-map-js",
+        "vue"
+      ],
+      "unique_advisory_count": 20,
+      "unique_advisory_urls": [
+        "https://github.com/advisories/GHSA-3pq3-5fj3-cg6v",
+        "https://github.com/advisories/GHSA-44g4-m2mj-wpvx",
+        "https://github.com/advisories/GHSA-4hqw-qxg8-jxx2",
+        "https://github.com/advisories/GHSA-542g-h47m-68v8",
+        "https://github.com/advisories/GHSA-68fv-2mgg-jv7q",
+        "https://github.com/advisories/GHSA-6j4f-fj2g-mc7p",
+        "https://github.com/advisories/GHSA-9fr6-4gfg-395g",
+        "https://github.com/advisories/GHSA-c29m-xwm3-cm6r",
+        "https://github.com/advisories/GHSA-g2v6-rqmx-r4w6",
+        "https://github.com/advisories/GHSA-hrr3-gc8f-f4qj",
+        "https://github.com/advisories/GHSA-j8rh-479h-cp32",
+        "https://github.com/advisories/GHSA-m8m8-qj5v-23w3",
+        "https://github.com/advisories/GHSA-mghh-pgcx-3jjj",
+        "https://github.com/advisories/GHSA-q2hr-2g5m-vwhr",
+        "https://github.com/advisories/GHSA-qhr7-859c-m2p7",
+        "https://github.com/advisories/GHSA-r4gj-5m52-g5wh",
+        "https://github.com/advisories/GHSA-rj75-hqrm-r3gf",
+        "https://github.com/advisories/GHSA-vfj7-8cjw-p6xm",
+        "https://github.com/advisories/GHSA-vh66-26gq-q6x8",
+        "https://github.com/advisories/GHSA-x97p-jq2g-jp4f"
+      ],
+      "new_runtime_package": "@babel/runtime@7.29.10",
+      "new_build_plugin": "@babel/plugin-transform-runtime@7.29.7",
+      "babel_helper_plugin_preserves_existing_preset_targets": true,
+      "current_report_sha256": "2b61b88f3322eb1fb3221fff8cb0db9907249c3ce77f218ec2d6a0cd4252ccaa",
+      "baseline_report_sha256": "0eae1e312c3222670b4d83e2853903b065166cedc3557d179a6c8020db7e2835",
+      "note": "10 affected packages (2 moderate/8 high package findings), representing 20 unique advisories, exactly match pre-batch lock audit; not presented as an audit pass. Existing dependency remediation remains separate work."
+    }
+  },
+  "implementation_sha256": {
+    "fastapi_be/Dockerfile.forecast": "d7358d5a16ce8068c60458ba5185ae68f9308df2e30069d53fe35fef715718c9",
+    "fastapi_be/alembic/versions/20261020_ai_forecast_series.py": "b6bfb85f125ea00cec92f9750947e34bfcc1d97c7b4f11af6141eac89061f830",
+    "fastapi_be/app/ai/catalog.py": "c41f3366645c57d242379de2ade81b3f61b092a903ea879a52780881d2c73fbf",
+    "fastapi_be/app/ai/context.py": "5282e4f4b656043387d680588ca303574cfb6180a3790762927c61810dfbd169",
+    "fastapi_be/app/ai/forecast_config.py": "fd41a8d4049759de78a3dba6b81cdda52aab86f4480c89b6f6238c7f485395ab",
+    "fastapi_be/app/ai/forecast_contract.py": "ff35b91c7690264116c9658a159f44ca117c395ebc7e6d943f701cef339c214f",
+    "fastapi_be/app/ai/forecast_model.py": "9e8faa2f17708808bb2cae77c21bf526577e6f6bd996042b65b90651e6fb6654",
+    "fastapi_be/app/ai/forecast_probe.py": "40d67041fd9030a73b0027096e1fdcc2b3f547d70750d20efac0eff4b1b014e0",
+    "fastapi_be/app/ai/forecast_server.py": "1991847bd47e90736d6baa60773a61b9b330fbe497963ad919819c2d31910653",
+    "fastapi_be/app/ai/forecast_sources.py": "a0561ccb7825d0017f7e0b318ce5daf1e6bcc3651a411ed0a5ace5710e314a31",
+    "fastapi_be/app/ai/gateway.py": "7475bd0187d17d9249b727229246efe544500182307209479745e3dfc498514f",
+    "fastapi_be/app/ai/models.py": "d507b53a877b4f1e82e37949f865291e107198d3f05ba05dabcf03c31d56e950",
+    "fastapi_be/app/ai/operational_sources.py": "de02324c03694ddb1467dd2879dd6c7d79c8b5c071cf4bd232a3b147a676b0e5",
+    "fastapi_be/app/ai/readiness.py": "7ad58ea477667610cdfa0bc8287029585ffe43cee9fbacb58450d70e6f6f836c",
+    "fastapi_be/app/ai/runtime.py": "b70857f1fdd27af8fda923eebb8a8fbb98b02a11778136b60c74e31ba26f23de",
+    "fastapi_be/app/ai/schemas.py": "2ed5757a1407b298e698f95796701df6906ba37ea2fceadf5de4694e36f747a5",
+    "fastapi_be/app/main.py": "91c7e5019bb05bc6344475ac52b8dd44b18851d0da473fd97b08941fe38f3d32",
+    "fastapi_be/app/routers/ai_admin.py": "93f2e872c7cd8ef76754520cd3a72c08c1fdf38ed44cad6021b2098355fdf2d2",
+    "fastapi_be/app/routers/ai_forecast.py": "8cb3794330458d0d11df2883f3bd09e5cceb3b21d9941be691fd1c969a650aeb",
+    "fastapi_be/rbac_matrix.json": "08d3583daa0d0ba58ae6800bc505fa0795f9799259ec75ac63735dd64662404a",
+    "fastapi_be/requirements-forecast.txt": "7aaf9d3570655893610e43dca1b5b3f48dbc1190e5a4b354c6c2de998d0760bc",
+    "fastapi_be/scripts/smoke_local_forecast.py": "f567d9293ab675b0a1e713c7e5305634d310929e33794ba25851c16f282951e0",
+    "fastapi_be/tests/test_ai_forecast_contract.py": "e428454a0358b873f7a12b422b5d5359016834d0adb648973895384bb4a88481",
+    "fastapi_be/tests/test_ai_forecast_model.py": "edf818cf9e27b95eafe005b3cff8e90f24d1344648e09c62db64bd17c3090a38",
+    "fastapi_be/tests/test_ai_forecast_pipeline.py": "49978e9b3d252968444de0229410ea0b20cbc6873ab65a58cafb852c1d446245",
+    "fastapi_be/tests/test_ai_forecast_probe.py": "30d78d49be75e047c9a4d7e5f0c26ca22a1f8bf402959684f4ffc9b12ebc2461",
+    "fastapi_be/tests/test_ai_forecast_server.py": "24ae9b1d79f9c8221b244f84362dec7c8cc78852e1374d2a4f502ed63aa9d9f7",
+    "fastapi_be/tests/test_ai_forecast_sources.py": "796ceb7050f4d3a6ccd4db94f2e1cc55811dc2e79077c5eda812c3e8351dd864",
+    "fastapi_be/tests/test_nursing_source_integrity.py": "ffd6e5fb193251291482176c0e03da83da4e8edfae296279048423537c245372",
+    "vue3-new-ui/e2e/ai-forecast-entry.spec.js": "4d85be38eec952aaa60632df8ba36361f47172b29fb9538f78cd73e8989e053d",
+    "vue3-new-ui/e2e/ai-forecast-model-management.spec.js": "98455370c8ad5392b3b3bcefe6087bdfe94fad21a80f640abb9e5b866af8a6da",
+    "vue3-new-ui/e2e/fixtures/forecast-synthetic.json": "74593f35b859bcbf96f309259e6b1daa6c9c5098f2614403c87058e05d46ec5e",
+    "vue3-new-ui/package-lock.json": "4c13e3f2db4dcd6f44e1f8d8705501b7946c6f454aeced729761e9769480bbf4",
+    "vue3-new-ui/package.json": "ebd68fdffb771c12dd41ef0daf740a937f232c797ee5a95afe8c63619920743f",
+    "vue3-new-ui/rspack.config.js": "c98ebfcf468776f20e3278af1ad2faf8c13e98fbf01a26b588c01a206ba5a7d8",
+    "vue3-new-ui/src/api/ai.js": "bb3b7de86b0ffd1f2e9b3cba38e4573931c4501a960eeb9ac5959f7d2d7c5beb",
+    "vue3-new-ui/src/api/aiForecastProbe.js": "0aca9069f459d2a5252ff2cc5c8326e98e625a08e8c1c33861dbd55f641f1f76",
+    "vue3-new-ui/src/components/AIAssistant/index.vue": "ac8fff3153ada74d38112759f1a5c0aa66b50ea3c995d1b50541a3c2cbf7ae73",
+    "vue3-new-ui/src/components/AIForecastFindings/index.vue": "0377334764f8341c0eac010ebe59732cb6fc19165789771ad3da1c7216fc0602",
+    "vue3-new-ui/src/components/AIForecastInput/index.vue": "d65ab584180401380cc1c0f8411cf973f458820aca7acbcf5e13318f16a853c6",
+    "vue3-new-ui/src/components/AIForecastProviderCheck/index.vue": "b4e7b7a362981ad9524c0c704019cd3b95cd502c8710a4a81c5183f41ba7301f",
+    "vue3-new-ui/src/components/AIForecastSeriesManagement.vue": "910e2c2ee39e5f5aba626a60d5ae2dcf0fb33b6e4a03388a369f478d3d963edd",
+    "vue3-new-ui/src/views/system/aiManagement.vue": "2bfd7fc1591e8584675d7145dd6beb98f41ae445be9842421db8f07501a07c5c"
+  },
+  "primary_method_sources": [
+    "https://otexts.com/fpp3/toolbox.html",
+    "https://robjhyndman.com/hyndsight/wape.html",
+    "https://v7.babeljs.io/docs/babel-plugin-transform-runtime"
+  ],
+  "remaining": [
+    "No independent real hospital operational evaluation, future coverage guarantee, actual-arrival target or production enablement/deployment.",
+    "Future holiday/closure signals and other statistical/learned models require their own data and evaluation.",
+    "Features64/66 bed/supply forecasts still need dedicated verified targets, sources and models.",
+    "Existing npm audit advisories need separate remediation and regression validation.",
+    "The full 80-feature goal remains active, including WSI pathology sources/models, continuous clinical observation/prediction contracts, other specialist inputs and clinical validation."
+  ]
+}

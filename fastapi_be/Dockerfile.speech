@@ -14,6 +14,7 @@ RUN pip install --no-cache-dir -r requirements.txt -r requirements-speech.txt \
     && useradd --system --uid 10001 --create-home speech
 
 COPY app ./app
+COPY third_party/ssl-ecg ./third_party/ssl-ecg
 COPY scripts/smoke_local_speech.py ./scripts/smoke_local_speech.py
 USER 10001:10001
 EXPOSE 8810

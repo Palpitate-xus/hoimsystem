@@ -2,12 +2,15 @@
   <section v-if="findings" class="operational-findings">
     <h4>本次原始业务资料</h4>
     <p>{{ findings.scope === 'department' ? '所属科室范围' : findings.source_domain === 'inventory' ? '所选库存品种范围' : '全院范围' }} · {{ findings.since }} 至 {{ findings.until }}</p>
+    <p>资料读取时刻：{{ findings.snapshot_time || '旧任务未留存' }}；任务结果保留本次读取的资料版本。</p>
     <p>{{ findings.scope_note }}</p>
+    <p v-if="findings.department_names?.length">科室：{{ findings.department_names.join('、') }}</p>
     <p v-for="(item, index) in findings.missing_data || []" :key="'missing-' + index" class="data-gap">{{ item }}</p>
     <p v-if="findings.truncated_sources?.length" class="data-gap">本次有资料截断，请缩小日期、科室或品种范围，不能把部分清单当作完整序列。</p>
     <el-collapse>
       <el-collapse-item v-for="section in series" :key="section.key" :title="section.title" :name="section.key">
-        <p>{{ section.data.definition_note }}</p>
+        <p>{{ section.data.definition_note || section.data.status_note }}</p>
+        <p v-if="section.data.planning_window">排班计划区间：{{ section.data.planning_window.join(' 至 ') }}</p>
         <p v-if="section.data.missing_dates?.length">未汇总日期 {{ section.data.missing_dates.length }} 天，保持缺失，未补零。</p>
         <el-table :data="section.rows" max-height="300" empty-text="本次范围未取得相应原始记录">
           <el-table-column v-for="column in section.data.columns" :key="column" :label="labels[column] || column" min-width="110"><template #default="{ row }">{{ row[column] ?? '未知' }}</template></el-table-column>
@@ -45,12 +48,16 @@
 import { computed } from "vue";
 const props = defineProps({ findings: { type: Object, default: null } });
 defineEmits(["inspect"]);
-const sections = [{ key: "saved_daily_metrics", title: "已保存日统计" }, { key: "recorded_registrations", title: "挂号原记录汇总" }, { key: "recorded_admissions", title: "入院原记录汇总" }, { key: "recorded_discharges", title: "出院时间汇总" }];
-const series = computed(() => sections.filter(item => props.findings?.[item.key]).map(item => {
-  const data = props.findings[item.key];
-  return { ...item, data, rows: (data.rows || []).map(row => Object.fromEntries((data.columns || []).map((column, index) => [column, row[index]]))) };
-}));
-const labels = { date: "日期", updated_at: "汇总更新时间", current_record_status: "当前原状态", record_count: "原记录数", outpatient_visits: "原门诊统计", emergency_visits: "原急诊统计", admissions: "原入院统计", discharges: "原出院统计", active_inpatients: "原在院估算", prescriptions: "处方统计", lab_orders: "检验统计", imaging_orders: "影像统计", critical_labs: "危急值统计", successful_payments: "成功支付数", revenue: "原收入统计", refunds: "原退款统计", average_queue_wait_minutes: "原平均候诊分钟" };
+const sections = [{ key: "saved_daily_metrics", title: "已保存日统计" }, { key: "recorded_registrations", title: "挂号原记录汇总" }, { key: "recorded_hourly_registrations", title: "挂号原记录小时汇总" }, { key: "recorded_admissions", title: "入院原记录汇总" }, { key: "recorded_discharges", title: "出院时间汇总" }, { key: "recorded_schedules", title: "当前周期排班" }, { key: "recorded_schedule_changes", title: "计划区间排班变更" }];
+const series = computed(() => {
+  const items = sections.filter(item => props.findings?.[item.key]).map(item => ({ ...item, data: props.findings[item.key] }));
+  const inventory = props.findings?.supply_inventory;
+  for (const [key, title] of [["drug_ledger_daily", "药品原台账汇总"], ["consumable_trace_daily", "耗材追溯汇总"]]) {
+    if (inventory?.[key]?.columns) items.push({ key, title, data: { ...inventory[key], source_id: inventory.source_id } });
+  }
+  return items.map(item => ({ ...item, rows: (item.data.rows || []).map(row => Object.fromEntries((item.data.columns || []).map((column, index) => [column, row[index]]))) }));
+});
+const labels = { date: "日期", updated_at: "汇总更新时间", current_record_status: "当前原状态", record_count: "原记录数", outpatient_visits: "原门诊统计", emergency_visits: "原急诊统计", admissions: "原入院统计", discharges: "原出院统计", active_inpatients: "原在院估算", prescriptions: "处方统计", lab_orders: "检验统计", imaging_orders: "影像统计", critical_labs: "危急值统计", successful_payments: "成功支付数", revenue: "原收入统计", refunds: "原退款统计", average_queue_wait_minutes: "原平均候诊分钟", recorded_hour: "原记录小时", schedule_id: "排班标识", doctor_id: "医生标识", department_id: "科室标识", recorded_weekday: "原星期", recorded_period: "原时段编码", current_shared_stock: "当前共享余量", specialist: "原号类", recorded_title: "档案职称", request_id: "申请标识", target_date: "目标日期", request_type: "原申请类型", extra_slots: "原加号数量", request_status: "原申请状态", drug_id: "药品标识", consumable_id: "耗材标识", transaction_type: "原台账类型", raw_quantity_sum: "原数量合计", recorded_stock_delta_sum: "前后库存差额合计", consistent_quantity_delta_count: "数量差额一致记录数", recorded_action: "原追溯动作", negative_quantity_record_count: "负数量记录数" };
 </script>
 
 <style scoped>

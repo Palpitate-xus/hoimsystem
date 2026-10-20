@@ -381,6 +381,7 @@ from app.routers import (
     ai_feedback_admin,
     ai_forecast,
     ai_images,
+    ai_lab_mappings,
     ai_observation_windows,
     allergy,
     analytics,
@@ -492,6 +493,7 @@ app.include_router(ai_admin.router, prefix="/api")
 app.include_router(ai_audio.router, prefix="/api")
 app.include_router(ai_ecg.router, prefix="/api")
 app.include_router(ai_images.router, prefix="/api")
+app.include_router(ai_lab_mappings.router, prefix="/api")
 app.include_router(ai_feedback_admin.router, prefix="/api")
 app.include_router(ai_forecast.router, prefix="/api")
 app.include_router(ai_observation_windows.router, prefix="/api")

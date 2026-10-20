@@ -383,3 +383,48 @@ class AIObservationWindow(Base):
     revoked_at = Column(DateTime().with_variant(mysql.DATETIME(fsp=6), "mysql"), nullable=True)
     revoked_by = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=True)
     revoke_reason = Column(String(1000), nullable=False, default="")
+
+
+class AILabMapping(Base):
+    """Immutable namespace-specific project identity, separately reviewed by Super."""
+
+    __tablename__ = "hoimsystem_ai_lab_mapping"
+    __table_args__ = (
+        UniqueConstraint("published_key", name="uq_ai_lab_mapping_published"),
+        CheckConstraint("value_kind IN ('numeric', 'qualitative')", name="ck_ai_lab_mapping_value_kind"),
+        CheckConstraint("value_kind <> 'numeric' OR (unit IS NOT NULL AND unit <> '')", name="ck_ai_lab_mapping_numeric_unit"),
+        CheckConstraint(
+            "(status = 'draft' AND revision = 1 AND published_at IS NULL AND published_by IS NULL AND published_key IS NULL AND review_note = '' AND revoked_at IS NULL AND revoked_by IS NULL AND revoke_reason = '') OR "
+            "(status = 'published' AND revision = 2 AND published_at IS NOT NULL AND published_by IS NOT NULL AND published_key IS NOT NULL AND published_key = identity_hash AND review_note <> '' AND revoked_at IS NULL AND revoked_by IS NULL AND revoke_reason = '') OR "
+            "(status = 'revoked' AND published_key IS NULL AND revoked_at IS NOT NULL AND revoked_by IS NOT NULL AND revoke_reason <> '' AND "
+            "((revision = 2 AND published_at IS NULL AND published_by IS NULL AND review_note = '') OR (revision = 3 AND published_at IS NOT NULL AND published_by IS NOT NULL AND review_note <> '')))",
+            name="ck_ai_lab_mapping_governance",
+        ),
+        Index("idx_ai_lab_mapping_identity", "identity_hash", "status"),
+        Index("idx_ai_lab_mapping_created", "created_at", "mapping_id"),
+    )
+
+    mapping_id = Column(String(36), primary_key=True, default=new_id)
+    schema_version = Column(String(40), nullable=False, default="lab_mapping_v1")
+    source_namespace = Column(String(120), nullable=False)
+    code_system = Column(String(80), nullable=False)
+    code = Column(String(80), nullable=False)
+    unit = Column(String(40), nullable=True)
+    method = Column(String(100), nullable=False)
+    specimen_type = Column(String(80), nullable=False)
+    value_kind = Column(String(24), nullable=False)
+    analyte_key = Column(String(64), nullable=False)
+    identity_hash = Column(String(64), nullable=False)
+    published_key = Column(String(64), nullable=True)
+    payload_json = Column(Text, nullable=False)
+    content_hash = Column(String(64), nullable=False)
+    created_by = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=False)
+    created_at = Column(DateTime().with_variant(mysql.DATETIME(fsp=6), "mysql"), nullable=False, default=utcnow)
+    status = Column(String(24), nullable=False, default="draft")
+    revision = Column(Integer, nullable=False, default=1)
+    published_by = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=True)
+    published_at = Column(DateTime().with_variant(mysql.DATETIME(fsp=6), "mysql"), nullable=True)
+    review_note = Column(String(2000), nullable=False, default="")
+    revoked_by = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=True)
+    revoked_at = Column(DateTime().with_variant(mysql.DATETIME(fsp=6), "mysql"), nullable=True)
+    revoke_reason = Column(String(1000), nullable=False, default="")

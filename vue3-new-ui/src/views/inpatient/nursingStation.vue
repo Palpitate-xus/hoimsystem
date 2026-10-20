@@ -21,6 +21,7 @@
             <el-tab-pane label="结构化观测" name="observations" lazy>
               <inpatient-observation-panel v-if="activeTab === 'observations'" :patient-id="Number(currentPatient.patient_id)" :admission-id="currentPatient.admission_id" :active="activeTab === 'observations'" />
             </el-tab-pane>
+            <el-tab-pane label="检验来源" name="laboratory" lazy><inpatient-lab-source-panel v-if="activeTab === 'laboratory'" :patient-id="Number(currentPatient.patient_id)" :admission-id="currentPatient.admission_id" :active="activeTab === 'laboratory'" /></el-tab-pane>
             <el-tab-pane label="医嘱执行" name="execution">
               <div class="page-toolbar">
                 <el-select v-model="executionFilter" placeholder="状态" clearable size="small" style="width: 120px;">
@@ -239,6 +240,7 @@ import { getExecutionList, executeOrder } from "@/api/inpatientOrder";
 import { getNursingRecordList, createNursingRecord } from "@/api/nursing";
 import { getTemperatureRecordList, createTemperatureRecord } from "@/api/nursing";
 const InpatientObservationPanel = defineAsyncComponent(() => import("@/components/InpatientObservationPanel/index.vue"));
+const InpatientLabSourcePanel = defineAsyncComponent(() => import("@/components/InpatientLabSourcePanel/index.vue"));
 
 const inpatients = ref([]);
 const patientKeyword = ref("");

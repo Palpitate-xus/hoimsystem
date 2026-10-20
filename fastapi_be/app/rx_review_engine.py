@@ -14,7 +14,7 @@ import re
 
 from sqlalchemy.orm import Session
 
-from app.models import MedicalRecord, PrescriptionReviewRule, VitalSign
+from app.models import MedicalRecord, Patient, PatientAllergy, Prescription, PrescriptionReviewRule, VitalSign
 
 
 def _match_drug(name: str, keyword: str | None) -> bool:
@@ -189,3 +189,19 @@ def check_prescription(
 
 def has_blocking(findings: list[dict]) -> bool:
     return any(f["severity"] == 3 for f in findings)
+
+
+def review_saved_prescription(db: Session, prescription: Prescription) -> list[dict]:
+    """Re-evaluate persisted instructions against the patient's current recorded conditions."""
+    patient = db.get(Patient, prescription.patient_id)
+    if patient is None:
+        raise ValueError("处方关联患者不存在")
+    items = []
+    for line in prescription.pre_phas:
+        if not line.pharmaceutical:
+            raise ValueError("处方药品资料不完整")
+        if line.number and line.number > 0:
+            items.append({"name": line.pharmaceutical.name, "number": line.number, "dosage": line.dosage, "dose_unit": line.dose_unit, "frequency": line.frequency, "route": line.route, "duration_days": line.duration_days})
+    structured_allergens = [item[0] for item in db.query(PatientAllergy.allergen).filter_by(patient_id=patient.patient_id, status=1).all()]
+    allergies = ";".join([patient.allergy_history or "", *structured_allergens])
+    return check_prescription(db, items, allergies, build_patient_context(db, patient))

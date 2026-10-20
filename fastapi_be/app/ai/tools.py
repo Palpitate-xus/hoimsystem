@@ -46,21 +46,20 @@ def business_tools(db: Session, spec: FeatureSpec, user: User, patient_id: int |
             {"drug_id": item.pharmaceutical_id, "name": item.name, "stock": item.stock, "expiry_date": item.expireddate, "antibiotic_level": item.antibiotic_level} for item in rows
         ]
     if spec.number in {13, 14, 15, 17} and patient_id:
-        from app.models import Patient
-        from app.rx_review_engine import build_patient_context, check_prescription
+        from app.rx_review_engine import review_saved_prescription
 
-        patient = db.get(Patient, patient_id)
         prescription_id = task_input.get("prescription_id")
         if prescription_id:
             prescription = db.query(Prescription).filter_by(prescription_id=str(prescription_id), patient_id=patient_id).first()
             if not prescription:
                 raise HTTPException(404, "处方不存在或不属于该患者")
-            items = [{"name": pp.pharmaceutical.name, "number": pp.number} for pp in prescription.pre_phas if pp.pharmaceutical]
-            findings = check_prescription(db, items, patient.allergy_history, build_patient_context(db, patient))
+            findings = review_saved_prescription(db, prescription)
             tools["prescription_review"] = {
                 "findings": findings,
                 "blocked": any(item["severity"] == 3 for item in findings),
-                "dose_check_status": "not_evaluated_without_complete_units_and_dose_rules",
+                "dose_check_status": "stored_instructions_checked_against_existing_local_rules",
+                "automatic_unit_conversion": False,
+                "unit_mapping_validation": "剂量单位与院内规则的对应关系仍须药师核实，未执行自动单位换算",
             }
             for finding in findings:
                 source_id = f"rule:{finding['rule_id']}:{finding.get('version') or 'unversioned'}"

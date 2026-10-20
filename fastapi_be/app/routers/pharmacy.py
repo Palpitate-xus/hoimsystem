@@ -11,7 +11,6 @@ from app.dependencies import NURSING_ROLES, PHARMACY_ROLES, User, require_roles
 from app.medication_data import medication_fields
 from app.models import (
     DispenseVerification,
-    Patient,
     Pharmaceutical,
     PharmaceuticalBatch,
     PharmaceuticalStockLedger,
@@ -22,6 +21,19 @@ from app.pagination import paginate
 from app.schemas import PharmacyAuditRequest, PharmacyDispenseRequest, PharmacyReturnRequest, PharmacyVerificationRequest
 
 router = APIRouter()
+
+
+def _prescription_review_error(db: Session, prescription: Prescription) -> str | None:
+    """Preserve mandatory clinical checks before either audit or dispensing writes."""
+    from app.rx_review_engine import review_saved_prescription
+
+    try:
+        findings = review_saved_prescription(db, prescription)
+    except Exception:
+        db.rollback()
+        return "审方安全检查暂不可用，请稍后重试或联系药师"
+    blocked = [item["message"] for item in findings if item["severity"] == 3]
+    return "审方规则禁止发药：" + "；".join(blocked) if blocked else None
 
 
 @router.get("/pharmacy/batch/list")
@@ -138,25 +150,9 @@ def audit_prescription(req: PharmacyAuditRequest, current_user: User = Depends(r
     if pre.status != 0:
         return {"code": 500, "msg": "处方状态不正确"}
 
-    # 审方规则引擎：禁止级规则命中 → 拒绝发药，医生需修改处方
-    try:
-        from app.rx_review_engine import check_prescription
-
-        pre_items = []
-        for pp in db.query(PrePha).filter(PrePha.prescription_id == str(pre.prescription_id)).all():
-            pha = db.query(Pharmaceutical).filter(Pharmaceutical.pharmaceutical_id == pp.pharmaceutical_id).first()
-            if pha:
-                pre_items.append({"name": pha.name, "number": pp.number})
-        patient = db.query(Patient).filter(Patient.patient_id == pre.patient_id).first()
-        findings = check_prescription(db, pre_items, allergy_history=(patient.allergy_history or "") if patient else "")
-        if findings and any(f.get("severity") == 3 for f in findings):
-            db.rollback()
-            blocked_msgs = [f["message"] for f in findings if f.get("severity") == 3]
-            return {"code": 500, "msg": f"审方规则禁止发药：{'；'.join(blocked_msgs)}"}
-    except Exception:
-        import traceback as _tb
-
-        _tb.print_exc()  # 引擎异常不阻断审核主流程
+    error = _prescription_review_error(db, pre)
+    if error:
+        return {"code": 500, "msg": error}
 
     # Use a conditional update so two concurrent audit requests cannot both
     # observe status=0 and report success.
@@ -283,6 +279,9 @@ def dispense_prescription(req: PharmacyDispenseRequest, current_user: User = Dep
         return {"code": 500, "msg": "处方不存在"}
     if pre.status != 1:
         return {"code": 500, "msg": "处方未审核或已发药"}
+    error = _prescription_review_error(db, pre)
+    if error:
+        return {"code": 500, "msg": error}
     expired_names = [
         line.pharmaceutical.name
         for line in pre.pre_phas

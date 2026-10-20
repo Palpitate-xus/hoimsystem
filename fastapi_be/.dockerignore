@@ -8,6 +8,8 @@ benchmark.db
 test.db
 hoimsystem.db
 uploads/
+app/uploads/
+private/
 .env
 .env.*
 !.env.example

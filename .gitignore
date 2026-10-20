@@ -59,6 +59,8 @@ fastapi_be/app/uploads/avatars/
 fastapi_be/app/uploads/reports/
 fastapi_be/app/uploads/*.xlsx
 fastapi_be/app/uploads/*.csv
+fastapi_be/private/
+/private/ai-audio/
 
 # 测试/压测产物
 fastapi_benchmark/benchmark/

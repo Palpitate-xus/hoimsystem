@@ -140,6 +140,40 @@ class AIReviewExcerpt(Base):
     retired_at = Column(DateTime, nullable=True)
 
 
+class AIAudioAsset(Base):
+    """Immutable private audio with explicit patient scope and revocable use authorization."""
+
+    __tablename__ = "hoimsystem_ai_audio_asset"
+    __table_args__ = (
+        Index("idx_ai_audio_patient_owner", "patient_id", "created_by", "create_time"),
+        Index("idx_ai_audio_status", "status"),
+    )
+
+    asset_id = Column(String(36), primary_key=True, default=new_id)
+    patient_id = Column(Integer, ForeignKey("hoimsystem_patient.patient_id"), nullable=False)
+    encounter_ref = Column(String(64), nullable=True)
+    media_type = Column(String(80), nullable=False)
+    extension = Column(String(12), nullable=False)
+    content_hash = Column(String(64), nullable=False)
+    byte_size = Column(Integer, nullable=False)
+    duration_ms = Column(Integer, nullable=False)
+    sample_rate = Column(Integer, nullable=False)
+    channels = Column(Integer, nullable=False)
+    codec = Column(String(80), nullable=False)
+    recorded_at = Column(DateTime, nullable=True)
+    authorization_note = Column(String(1000), nullable=False)
+    authorized_at = Column(DateTime, nullable=False)
+    created_by = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=False)
+    create_time = Column(DateTime, nullable=False, default=utcnow)
+    status = Column(String(24), nullable=False, default="ready")
+    revision = Column(Integer, nullable=False, default=1)
+    withdrawn_by = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=True)
+    withdrawn_at = Column(DateTime, nullable=True)
+    withdrawal_note = Column(String(1000), nullable=False, default="")
+    purged_by = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=True)
+    purged_at = Column(DateTime, nullable=True)
+
+
 class AIRun(Base):
     """A traceable AI task; access to both input and result requires patient authorization."""
 

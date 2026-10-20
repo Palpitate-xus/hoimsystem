@@ -30,6 +30,11 @@ class Settings(BaseSettings):
     AI_MAX_CONTEXT_CHARS: int = Field(default=40000, ge=5000, le=200000)
     AI_MAX_OUTPUT_TOKENS: int = Field(default=4000, ge=256, le=16000)
     AI_MAX_QUEUE_AGE_SECONDS: int = Field(default=900, ge=60, le=86400)
+    AI_AUDIO_STORAGE_DIR: str = "private/ai-audio"
+    AI_AUDIO_MAX_BYTES: int = Field(default=64 * 1024 * 1024, ge=1024, le=256 * 1024 * 1024)
+    AI_AUDIO_MAX_DURATION_SECONDS: int = Field(default=3600, ge=1, le=14400)
+    AI_AUDIO_USER_QUOTA_BYTES: int = Field(default=512 * 1024 * 1024, ge=1024, le=20 * 1024 * 1024 * 1024)
+    AI_AUDIO_PROCESS_TIMEOUT_SECONDS: int = Field(default=30, ge=3, le=120)
 
     DATABASE_URL: str = ""
 

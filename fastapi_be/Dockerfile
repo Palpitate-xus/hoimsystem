@@ -6,6 +6,7 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
     libpq-dev \
+    ffmpeg \
     && rm -rf /var/lib/apt/lists/*
 
 # 复制依赖文件
@@ -18,7 +19,7 @@ RUN pip install --no-cache-dir -r requirements.txt gunicorn
 COPY . .
 
 # 创建上传目录
-RUN mkdir -p app/uploads /tmp/prometheus && chmod 755 app/uploads /tmp/prometheus
+RUN mkdir -p app/uploads /tmp/prometheus private/ai-audio && chmod 755 app/uploads /tmp/prometheus && chmod 700 private/ai-audio
 
 # 暴露端口
 EXPOSE 8000

@@ -14,6 +14,7 @@
             <el-select v-model="category" placeholder="全部分类" clearable style="width: 160px">
               <el-option v-for="(label, value) in categories" :key="value" :label="label" :value="value" />
             </el-select>
+            <el-select v-model="setupFilter" aria-label="配置检查筛选" style="width: 170px"><el-option label="全部配置状态" value="all" /><el-option label="基础配置就绪" value="ready" /><el-option label="尚需补齐条件" value="pending" /></el-select>
             <el-button @click="refresh">刷新</el-button>
           </div>
           <el-table :data="pagedFeatures" empty-text="暂无能力配置">
@@ -22,6 +23,13 @@
             <el-table-column label="分类" width="115"><template #default="{ row }">{{ categories[row.category] }}</template></el-table-column>
             <el-table-column prop="priority" label="批次" width="70" />
             <el-table-column label="实现入口" width="150"><template #default="{ row }">{{ row.engine === 'llm' ? '文本任务网关' : '需专用适配器' }}</template></el-table-column>
+            <el-table-column label="配置检查" width="145"><template #default="{ row }">
+              <el-popover trigger="click" placement="left" :width="380" :title="row.name + '：配置检查'">
+                <p v-for="item in row.setup_check?.issues || []" :key="item.code">{{ item.message }}</p>
+                <p v-if="row.setup_check?.ready">基础配置已具备。</p><p class="setup-note">{{ row.setup_check?.scope_note || '实际执行仍按患者、科室、问题和资料范围重新核验。' }}</p>
+                <template #reference><el-button link :type="row.setup_check?.ready ? 'success' : 'warning'" :aria-label="row.name + '配置检查'">{{ row.setup_check ? row.setup_check.ready ? '基础配置就绪' : '待补齐 ' + row.setup_check.issues.length + ' 项' : '待检查' }}</el-button></template>
+              </el-popover>
+            </template></el-table-column>
             <el-table-column label="验证状态" width="110"><template #default="{ row }"><el-tag :type="row.validation_status === 'validated' ? 'success' : 'info'">{{ validations[row.validation_status] }}</el-tag></template></el-table-column>
             <el-table-column label="启用" width="75"><template #default="{ row }"><el-tag :type="row.enabled ? 'success' : 'info'">{{ row.enabled ? '已启用' : '关闭' }}</el-tag></template></el-table-column>
             <el-table-column label="Prompt" width="85"><template #default="{ row }">v{{ row.prompt_version }}</template></el-table-column>
@@ -82,6 +90,7 @@
 
     <el-dialog v-model="featureDialog" :title="selectedFeature?.name + '：功能配置'" width="680px">
       <el-form v-if="selectedFeature" label-width="120px">
+        <el-form-item v-if="selectedFeature.setup_check?.issues?.length" label="当前待补齐"><div><p v-for="item in selectedFeature.setup_check.issues" :key="item.code">{{ item.message }}</p></div></el-form-item>
         <el-form-item label="需要的资料"><span>{{ selectedFeature.inputs.join('、') }}</span></el-form-item>
         <el-form-item label="输出要求"><span>{{ selectedFeature.deliverables.join('；') }}</span></el-form-item>
         <el-form-item label="模型服务"><el-select v-model="featureForm.provider_id" clearable placeholder="选择已配置的服务"><el-option v-for="item in providers" :key="item.provider_id" :label="item.name" :value="item.provider_id" /></el-select></el-form-item>
@@ -178,16 +187,16 @@ const knowledgeStatuses = { draft: "草稿", published: "已发布", retired: "�
 const roles = { super_admin: "超级管理员", admin: "管理员", doctor: "医生", director: "科室主任", pharmacist: "药师", nurse: "护士", patient: "患者", guide: "导诊员", lab_technician: "检验技师" };
 const loading = ref(false), saving = ref(false), tab = ref("features");
 const features = ref([]), providers = ref([]), knowledge = ref([]), grants = ref([]), auditEvents = ref([]), usage = ref([]);
-const search = ref(""), category = ref(""), page = ref(1);
+const search = ref(""), category = ref(""), setupFilter = ref("all"), page = ref(1);
 const summary = computed(() => [
   { label: "规划能力", value: features.value.length },
   { label: "已启用", value: features.value.filter(item => item.enabled).length },
   { label: "已验证", value: features.value.filter(item => item.validation_status === "validated").length },
-  { label: "可用模型服务", value: providers.value.filter(item => item.enabled).length },
+  { label: "已启用模型服务", value: providers.value.filter(item => item.enabled).length },
 ]);
-const filteredFeatures = computed(() => features.value.filter(item => (!category.value || item.category === category.value) && `${item.number} ${item.name} ${item.key}`.toLowerCase().includes(search.value.toLowerCase())));
+const filteredFeatures = computed(() => features.value.filter(item => (!category.value || item.category === category.value) && (setupFilter.value === "all" || (setupFilter.value === "ready" ? item.setup_check?.ready : !item.setup_check?.ready)) && `${item.number} ${item.name} ${item.key}`.toLowerCase().includes(search.value.toLowerCase())));
 const pagedFeatures = computed(() => filteredFeatures.value.slice((page.value - 1) * 15, page.value * 15));
-watch([search, category], () => { page.value = 1; });
+watch([search, category, setupFilter], () => { page.value = 1; });
 const featureName = key => features.value.find(item => item.key === key)?.name || key;
 const selectedFeature = ref(null), featureForm = ref({}), featureDialog = ref(false);
 const providerDialog = ref(false), providerId = ref(null), providerForm = ref({});
@@ -206,7 +215,7 @@ async function refresh() {
 
 function editFeature(row) {
   selectedFeature.value = row;
-  featureForm.value = { expected_revision: row.revision, provider_id: row.provider_id, allowed_roles: [...row.allowed_roles], enabled: row.enabled, validation_status: row.validation_status, validation_note: row.validation_note, daily_limit: row.daily_limit };
+  featureForm.value = { expected_revision: row.revision, provider_id: row.provider_id, allowed_roles: row.allowed_roles.filter(role => row.default_roles.includes(role)), enabled: row.enabled, validation_status: row.validation_status, validation_note: row.validation_note, daily_limit: row.daily_limit };
   featureDialog.value = true;
 }
 
@@ -293,6 +302,7 @@ onMounted(refresh);
 .summary-row { margin-bottom: 20px; }
 .summary-row .el-col { margin-bottom: 12px; }
 .summary-value { font-size: 30px; font-weight: 600; margin-bottom: 8px; }
+.setup-note { font-size: 12px; color: var(--el-text-color-secondary); line-height: 1.6; }
 .field-hint { margin-left: 12px; font-size: 12px; color: #606266; }
 .prompt-text { white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.7; font-family: inherit; }
 .knowledge-text { max-height: 55vh; overflow: auto; }

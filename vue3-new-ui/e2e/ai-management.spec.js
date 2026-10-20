@@ -9,6 +9,7 @@ async function managementSession(page, role = "super_admin") {
     default_roles: ["super_admin", "doctor"], allowed_roles: ["super_admin", "doctor"],
     enabled: false, validation_status: "unreviewed", validation_note: "", prompt_version: 0, active_prompt_id: null,
     revision: 0, provider_id: null, daily_limit: 100,
+    setup_check: { ready: false, issues: [{ code: "MODEL_UNASSIGNED", message: "尚未选择模型服务" }], scope_note: "实际执行仍按患者、科室、问题和资料范围重新核验。" },
   }));
   await page.addInitScript(() => localStorage.setItem("hoim-token", "isolated-ui-test-token"));
   await page.route("**/api/**", async route => {
@@ -77,4 +78,14 @@ test("普通管理员直接访问管理地址也不会加载AI管理接口", asy
   await expect(page).toHaveURL(/#\/404/);
   await expect(page.getByText("AI 管理中心", { exact: true })).toHaveCount(0);
   expect(calls).toHaveLength(0);
+});
+
+test("超级管理员逐项查看未就绪原因而无需发起模型请求", async ({ page }) => {
+  const calls = await managementSession(page);
+  await page.goto("/#/ai/manage");
+  await page.getByPlaceholder("搜索名称或功能编号").fill("治疗路径推荐");
+  await page.getByRole("button", { name: "治疗路径推荐配置检查", exact: true }).click();
+  await expect(page.getByText("尚未选择模型服务", { exact: true })).toBeVisible();
+  await expect(page.getByText("实际执行仍按患者、科室、问题和资料范围重新核验。", { exact: true })).toBeVisible();
+  expect(calls.every(call => call.method === "GET")).toBe(true);
 });

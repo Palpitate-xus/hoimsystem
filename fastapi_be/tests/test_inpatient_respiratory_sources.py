@@ -47,7 +47,6 @@ def body(case, **changes):
 @pytest.fixture
 def source_case(db_session, observation_case, monkeypatch):
     case = observation_case
-    monkeypatch.setattr(common, "definitions", lambda: {item.kind: item for item in respiratory.DEFINITIONS})
     monkeypatch.setattr(common, "utcnow", lambda: case["now"])
     for module in (labs, lab_routes, lab_mappings, mapping_routes):
         monkeypatch.setattr(module, "utcnow", lambda: case["now"] - datetime.timedelta(minutes=5))
@@ -249,3 +248,98 @@ def test_nurse_can_record_original_bedside_sources_but_never_doctor_required_pai
     with pytest.raises(HTTPException) as error:
         create(db_session, case, "arterial_pair", body(case), actor=case["seed"]["nurse_user"])
     assert error.value.status_code == 403
+
+
+@pytest.mark.parametrize("offset,accepted", [(-1, False), (0, True), (1, True)])
+def test_support_actual_start_is_inclusive_at_microsecond_precision(db_session, source_case, offset, accepted):
+    case = source_case
+    sample = case["lab"].collected_at_utc
+    support = create(
+        db_session,
+        case,
+        "respiratory_support",
+        support_payload(start_at=utc_text(sample - datetime.timedelta(microseconds=offset)), verified_until_at=utc_text(case["end"])),
+    )
+    data = body(case, support={"support_source_id": support.support_source_id, "expected_content_hash": support.content_hash})
+    if accepted:
+        assert create(db_session, case, "arterial_pair", data).event_at == sample
+    else:
+        with pytest.raises(HTTPException) as error:
+            create(db_session, case, "arterial_pair", data)
+        assert error.value.status_code == 409
+
+
+def test_actual_lab_mapped_to_other_analyte_cannot_be_pao2_despite_display_or_unit(db_session, source_case):
+    case = source_case
+    observation = case["lab_observation"]
+    wrong_mapping = published_mapping(db_session, case["seed"]["super_admin_user"], observation, analyte_key="creatinine")
+    wrong_case = {"patient_id": case["patient_id"], "admission_id": case["admission"].admission_id, "observation": observation, "mapping": wrong_mapping}
+    prior = case["lab"]
+    prior.active_observation_id, prior.status, prior.revision = None, "revoked", 2
+    prior.revoked_at, prior.revoked_by, prior.revoke_reason = case["now"] - datetime.timedelta(minutes=5), case["doctor"].user_id, NOTE
+    db_session.commit()
+    lab = labs.create_source(db_session, case["doctor"], lab_body(db_session, wrong_case, collected_at_utc=utc_text(prior.collected_at_utc)))
+    db_session.commit()
+    with pytest.raises(HTTPException) as error:
+        create(db_session, case, "arterial_pair", body(case, pao2={"lab_source_id": lab.lab_source_id, "expected_content_hash": lab.content_hash}))
+    assert error.value.status_code == 409
+
+
+def test_existing_parent_registered_after_frozen_pair_review_cannot_be_retroactively_available(db_session, source_case):
+    case = source_case
+    # The current parent is valid now; a historical review cutoff still cannot borrow it.
+    cutoff = case["support"].recorded_at - datetime.timedelta(microseconds=1)
+    assert common.source_current(db_session, case["support"], "respiratory_support")["eligible"] is True
+    with pytest.raises(HTTPException) as error:
+        respiratory.prepare_arterial_pair(db_session, case["patient_id"], case["admission"].admission_id, body(case), cutoff)
+    assert error.value.status_code == 409
+
+
+@pytest.mark.parametrize("kind", ["map", "respiratory_support", "arterial_pair"])
+def test_pure_super_and_administrator_cannot_fabricate_bedside_originals_or_doctor_review(db_session, source_case, kind):
+    case = source_case
+    payload = (
+        body(case)
+        if kind == "arterial_pair"
+        else map_payload(observed_at=utc_text(case["start"]))
+        if kind == "map"
+        else support_payload(start_at=utc_text(case["start"]), verified_until_at=utc_text(case["end"]))
+    )
+    for actor in (case["seed"]["super_admin_user"], case["seed"]["admin_user"]):
+        with pytest.raises(HTTPException) as error:
+            create(db_session, case, kind, payload, actor=actor)
+        assert error.value.status_code == 403
+
+
+def test_qualified_super_with_actual_original_doctor_care_can_sign_pair(db_session, source_case):
+    case = source_case
+    # Same real clinician, now also holds Super management; capture both roles truthfully.
+    case["doctor"].user_role = "super_admin"
+    db_session.commit()
+    row = create(db_session, case, "arterial_pair", body(case))
+    qualification = common.source_current(db_session, row, "arterial_pair")["author_qualification"]
+    assert qualification["role_at_creation"] == "super_admin" and qualification["clinical_review_signed"] is True
+    assert qualification["doctor_user_id"] == case["doctor"].user_id
+
+
+def test_signed_pair_parent_scope_change_preserves_frozen_audit_and_super_cas_revoke(db_session, source_case):
+    case = source_case
+    row = create(db_session, case, "arterial_pair", body(case))
+    original = common.source_current(db_session, row, "arterial_pair")
+    case["admission"].patient_id = case["seed"]["patient2"].patient_id
+    db_session.commit()
+    with pytest.raises(HTTPException) as ordinary:
+        common.authorize_source(db_session, case["doctor"], case["patient_id"], row.admission_id, "arterial_pair", row.support_source_id)
+    assert ordinary.value.status_code in (403, 404, 409)
+    audit = common.source_current(db_session, row, "arterial_pair", audit_only=True)
+    assert audit["eligible"] is audit["original_admission_current"] is False
+    assert audit["reference_snapshots"] == original["reference_snapshots"]
+    request = {"patient_id": case["patient_id"], "admission_id": row.admission_id, "expected_revision": 1, "reason": NOTE}
+    common.revoke_source(db_session, case["seed"]["super_admin_user"], "arterial_pair", row.support_source_id, request)
+    db_session.commit()
+    audit = common.source_current(db_session, row, "arterial_pair", audit_only=True, allow_revoked=True)
+    assert audit["status"] == "revoked" and audit["revision"] == 2 and "source_revoked" in audit["exclusion_reasons"]
+    assert audit["content_hash"] == original["content_hash"] and audit["reference_snapshots"] == original["reference_snapshots"]
+    with pytest.raises(HTTPException) as stale:
+        common.revoke_source(db_session, case["seed"]["super_admin_user"], "arterial_pair", row.support_source_id, request)
+    assert stale.value.status_code == 409

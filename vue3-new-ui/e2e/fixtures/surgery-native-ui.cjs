@@ -3,16 +3,16 @@ const fixture = require('./surgery-synthetic/native-pipeline.json');
 
 // Actual pipeline packets remain unchanged. History entries are an explicitly
 // lossless metadata extraction, not a claim of a separately executed HTTP list.
-const packets = { ...fixture.by_objective, unknown: require('./surgery-synthetic/native-unknown.json') };
+const packets = { ...fixture.by_objective, unknown: require('./surgery-synthetic/native-unknown.json'), transitions: require('./surgery-synthetic/native-transitions.json').packet };
 const metadata = run => Object.fromEntries(Object.keys(run).filter(k => !['result', 'evidence', 'surgery_findings', 'frozen_request', 'tool_findings', 'operational_findings', 'feedback'].includes(k)).map(k => [k, run[k]]));
 const feature = inputMode => ({ key: 'surgery_scheduling', number: 65, name: '手术排程优化', category: 'operations', engine: 'specialist', scope: 'hospital', input_mode: inputMode, enabled: true, requires_operational_validation: true, validation_status: 'validated', revision: 1, provider_id: 1, provider_revision: 1, inputs: ['明确病例队列与受审资源场景'], deliverables: ['候选方案及原始搜索界'], allowed_roles: ['admin', 'director', 'super_admin'] });
 const references = packet => ({ surgery_scenario_id: packet.run_detail.surgery_findings.surgery_scenario.scenario_id });
-const boundInput = packet => ({ ...references(packet), department_id: packet.run_detail.surgery_findings.surgery_scenario.department_id, surgery_pool_id: packet.run_detail.surgery_findings.surgery_scenario.pool_id });
+const boundInput = packet => ({ ...references(packet), department_id: packet.run_detail.surgery_findings.surgery_scenario.department_id, surgery_pool_id: packet.run_detail.surgery_findings.surgery_scenario.pool_id, surgery_application_ids: packet.scenario_detail.snapshot.request.cases.map(c => c.application_id).sort() });
 
 async function setupSurgeryNative(page, harness, config = {}) {
-  const state = { mode: 'assistant', objective: 'required', role: 'admin', inputMode: 'surgery', writes: [], reads: [], errors: [], releases: {}, completed: [], ...config };
+  const state = { mode: 'assistant', objective: 'required', role: 'admin', inputMode: 'surgery', writes: [], reads: [], errors: [], releases: {}, completed: [], runReplyStatuses: [], ...config };
   const packet = packets[state.objective];
-  state.packet = packet;
+  state.packet = packet; page.__surgeryNativeState = state;
   state.history ??= [metadata(packet.run_detail)];
   page.on('pageerror', error => state.errors.push(error.message));
   await page.context().route('**/*', route => new URL(route.request().url()).origin === harness.origin ? route.continue() : route.abort('blockedbyclient'));
@@ -29,7 +29,7 @@ async function setupSurgeryNative(page, harness, config = {}) {
       else if (path === '/api/ai/runs') data = state.history;
       else if (path === '/api/ai/admin/runs') { data = state.history; total = data.length; }
       else if (path.startsWith('/api/ai/admin/runs/')) data = state.trace || Object.values(packets).find(p => path.endsWith(p.super_trace.run_id))?.super_trace;
-      else if (path.startsWith('/api/ai/runs/')) data = state.run || Object.values(packets).find(p => path.endsWith(p.run_detail.run_id))?.run_detail;
+      else if (path.startsWith('/api/ai/runs/')) { data = state.runSequence?.length ? state.runSequence.shift() : state.run || Object.values(packets).find(p => path.endsWith(p.run_detail.run_id))?.run_detail; if (data) state.runReplyStatuses.push(data.status); }
     } else {
       const body = req.postDataJSON(); state.writes.push({ path, body });
       if (path === '/api/ai/operational-context') data = state.inspection || packet.inspection;
@@ -53,7 +53,7 @@ async function setupSurgeryNative(page, harness, config = {}) {
 }
 async function ready(page) { await expect(page.getByRole('button', { name: '生成辅助建议', exact: true })).toBeEnabled(); }
 async function generate(page) { await ready(page); await page.getByRole('button', { name: '生成辅助建议', exact: true }).click(); await expect(page.getByLabel('AI任务结果', { exact: true })).toBeVisible(); await expect(page.getByRole('region', { name: '完整手术排程候选核对', exact: true })).toContainText('在明确声明范围内已证最优'); }
-async function history(page) { await ready(page); await page.getByText('最近任务', { exact: true }).click(); await page.getByRole('button', { name: '查看', exact: true }).first().click(); await expect(page.getByLabel('AI任务结果', { exact: true })).toBeVisible(); }
+async function history(page) { await ready(page); const header = page.getByText('最近任务', { exact: true }).locator('xpath=ancestor-or-self::*[@aria-expanded][1]'); if (await header.getAttribute('aria-expanded') !== 'true') await page.getByText('最近任务', { exact: true }).click(); await page.evaluate(() => window.__surgeryNativeProbe.assistant.$.setupState.loadHistory(['0'])); await page.getByRole('button', { name: '查看', exact: true }).first().click(); await expect(page.getByLabel('AI任务结果', { exact: true })).toBeVisible(); }
 async function evidence(page) { await page.getByRole('button', { name: '核对本次完整场景证据', exact: true }).click(); await expect(page.getByRole('dialog', { name: '核查引用依据', exact: true })).toContainText('surgery_scenario_private_v1'); }
 async function cleared(page, held = false) {
   await expect(page.getByLabel('AI任务结果', { exact: true })).toHaveCount(0);

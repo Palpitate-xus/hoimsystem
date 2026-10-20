@@ -3,7 +3,7 @@ import registry from "./sofaSchemas.json";
 const own = (value, key) => Object.hasOwn(value, key);
 const object = value => value !== null && typeof value === "object" && !Array.isArray(value);
 const forbidden = key => ["__proto__", "prototype", "constructor"].includes(key);
-const allowed = new Set(["$defs", "$ref", "additionalProperties", "anyOf", "const", "enum", "items", "maxItems", "maxLength", "maximum", "minLength", "minimum", "oneOf", "pattern", "properties", "propertyNames", "required", "type"]);
+const allowed = new Set(["$defs", "$ref", "additionalProperties", "anyOf", "const", "enum", "items", "maxItems", "minItems", "maxLength", "maximum", "minLength", "minimum", "oneOf", "pattern", "properties", "propertyNames", "required", "type"]);
 
 // Expand generated lossless JSON nodes once. References can only point backward,
 // so malformed/cyclic registries fail before any clinical input is accepted.
@@ -62,3 +62,6 @@ export function sofaSchemaDefinition(name, definition) {
   const root = schemas[name];
   return root && (definition ? own(root.$defs || {}, definition) && !forbidden(definition) ? root.$defs[definition] : null : root);
 }
+
+export {unpackRegistry as decodeGeneratedSchemas};
+export function generatedSchemaMatches(models,name,value,definition=null){try{if(typeof name!=="string"||forbidden(name)||!own(models,name))return false;const root=models[name],schema=definition?own(root.$defs||{},definition)&&!forbidden(definition)?root.$defs[definition]:null:root;return !!schema&&matches(schema,value,root,0);}catch{return false;}}

@@ -314,3 +314,20 @@ def test_actual_full112_by_three_target_sources_project_without_truncation(db_se
     assert all(c["source_id"] is not None for d in source["days"] for c in d["selections"])
     core.SupplySource.model_validate(source)
     assert row.content_hash == core.hash_content(snapshot) and row.projection_hash == core.hash_content(source)
+
+
+def test_per_series_hmac_hides_units_and_notes_but_keeps_whole_original_sha_anchors(db_session, series_case):
+    from app.ai.supply_projection import token
+
+    case = series_case
+    first = published(db_session, case)
+    s1 = series.series_proof(first)
+    second = published(db_session, case)
+    s2 = series.series_proof(second)
+    o1, o2 = s1[1]["observations"][0], s2[1]["observations"][0]
+    assert o1["ref"] == o2["ref"]
+    assert o1["original_unit_hash"] == token(s1[0], "original_unit", "原明确计数包")
+    assert o1["original_unit_hash"] != core.hash_content("原明确计数包") and o1["original_unit_hash"] != o2["original_unit_hash"]
+    assert o1["coverage_basis_hash"] != o2["coverage_basis_hash"] and o1["stock_constraint_basis_hash"] != o2["stock_constraint_basis_hash"]
+    assert s1[1]["member_manifest"][0]["selection_basis_hash"] != s2[1]["member_manifest"][0]["selection_basis_hash"]
+    assert s1[1]["target_coverage"][0]["basis_hash"] != s2[1]["target_coverage"][0]["basis_hash"]

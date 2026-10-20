@@ -39,7 +39,7 @@ def project_source(value, governance_hash, *, validate_current_recipe=True):
             "content_hash": source["content_hash"],
             "governance_hash": source["governance_hash"],
         }
-        manifest.append({**ref, "status": source["status"], "eligible": source["eligible"], "selection": r.selection, "selection_basis_hash": core.hash_content(r.basis_note)})
+        manifest.append({**ref, "status": source["status"], "eligible": source["eligible"], "selection": r.selection, "selection_basis_hash": token(snapshot, "selection_basis", r.basis_note)})
         if r.selection != "confirmed":
             continue
         p = source["payload"]
@@ -53,15 +53,15 @@ def project_source(value, governance_hash, *, validate_current_recipe=True):
                 "day_end_at": p["day_end_at"],
                 "quantity": p["quantity"],
                 "unit_token": None if original_unit is None else unit_token(snapshot, source["unit_definition_id"], original_unit),
-                "original_unit_hash": core.hash_content(original_unit),
+                "original_unit_hash": token(snapshot, "original_unit", original_unit),
                 "unit_review": p["unit_review"],
                 "coverage": p["coverage"],
-                "coverage_basis_hash": core.hash_content(p["coverage_basis_note"]),
+                "coverage_basis_hash": token(snapshot, "coverage_basis", p["coverage_basis_note"]),
                 "method": p["method"],
                 "original_scope_hash": token(snapshot, "original_scope", {"item_kind": source["item_kind"], "item_id": source["item_id"], "scope": source["scope"]}),
                 "external_record_key_hash": None if p["external_record_key"] is None else token(snapshot, "external_record_key", p["external_record_key"]),
                 "stock_constraint": p["stock_constraint"],
-                "stock_constraint_basis_hash": core.hash_content(p["stock_constraint_basis_note"]),
+                "stock_constraint_basis_hash": token(snapshot, "stock_constraint_basis", p["stock_constraint_basis_note"]),
                 "observed_at": p["observed_at"],
                 "recorded_at": source["recorded_at"],
                 "published_at": source["reviewed_at"],
@@ -113,7 +113,7 @@ def project_source(value, governance_hash, *, validate_current_recipe=True):
                 "same_scope_confirmed": r.same_scope_confirmed,
                 "same_definition_confirmed": r.same_definition_confirmed,
                 "same_method_confirmed": r.same_method_confirmed,
-                "basis_hash": core.hash_content(r.basis_note),
+                "basis_hash": token(snapshot, "target_coverage_basis", {"target": r.target, "basis_note": r.basis_note}),
             }
             for r in req.target_coverage
         ],

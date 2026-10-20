@@ -100,6 +100,12 @@ def operational_options(db, user: User, spec: FeatureSpec) -> dict:
 
 
 def operational_context(db, user: User, spec: FeatureSpec, values: dict) -> ContextBundle:
+    if "bed_series_id" in values:
+        if spec.number != 64:
+            raise HTTPException(422, "受审床位序列仅用于独立病区实占及流转事件预测")
+        from app.ai.bed_context import bed_context
+
+        return bed_context(db, user, values)
     if "roster_plan_id" in values:
         if spec.number != 63:
             raise HTTPException(422, "受审排班计划仅用于排班与号源优化")

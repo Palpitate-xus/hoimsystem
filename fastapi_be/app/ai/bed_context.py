@@ -51,6 +51,11 @@ def selection(values):
         raise HTTPException(422, "床位序列须为规范UUID") from exc
 
 
+def bed_evidence(binding):
+    """Reconstruct the sole local citation from the typed immutable task binding."""
+    return {"source_id": binding["source_id"], "kind": "operational_record", "title": "受审病区实占床位与实际流转事件序列", "content": canonical_json({"bed_binding": binding})}
+
+
 def bed_context(db, user, values):
     from app.ai.bed_series import authorize_series, binding_for
     from app.ai.context import ContextBundle
@@ -72,7 +77,7 @@ def bed_context(db, user, values):
             "truncated_sources": [],
             "snapshot_time": facts.utc_text(facts.utcnow()),
         },
-        evidence=[{"source_id": source["source_id"], "kind": "operational_record", "title": "受审病区实占床位与实际流转事件序列", "content": canonical_json({"bed_binding": bound})}],
+        evidence=[bed_evidence(bound)],
         department_ids={row.department_id},
     )
 

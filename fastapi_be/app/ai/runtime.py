@@ -121,6 +121,12 @@ def create_run(db: Session, user: User, req: RunRequest) -> AIRun:
             raise HTTPException(422, "本地排班服务须选择已审核完整计划，其他适配器不能接收该原件")
         if roster_mode and req.encounter_ref is not None:
             raise HTTPException(422, "运营排班计划不接受个体就诊引用")
+    if spec.number == 64:
+        bed_mode = provider.model.startswith("bed:")
+        if bed_mode != bool(bundle.data.get("bed_binding")):
+            raise HTTPException(422, "本地床位预测服务须选择已审核完整序列，其他适配器不能接收该原件")
+        if bed_mode and req.encounter_ref is not None:
+            raise HTTPException(422, "病区床位序列不接受个体就诊引用")
     if spec.number == 41:
         news2_mode = provider.model.startswith("news2:")
         if news2_mode and not bundle.data.get("news2_source"):
@@ -170,7 +176,7 @@ def create_run(db: Session, user: User, req: RunRequest) -> AIRun:
     pathway_ids = selected_pathway_ids(bundle.data)
     # The fixed optimizer accepts only the reviewed complete scenario. Retrieved
     # prose cannot add constraints or become an extra source for its proof.
-    knowledge = [] if bundle.data.get("roster_binding") else retrieve_evidence(db, spec, query, bundle.department_ids, preferred_pathway_ids=pathway_ids)
+    knowledge = [] if bundle.data.get("roster_binding") or bundle.data.get("bed_binding") else retrieve_evidence(db, spec, query, bundle.department_ids, preferred_pathway_ids=pathway_ids)
     if spec.key == "treatment_pathway" and pathway_ids and not any(item.get("source_kind") == "clinical_pathway" and item.get("source_reference_id") in pathway_ids for item in knowledge):
         raise HTTPException(409, "所选临床路径缺少当前匹配的已审核知识版本，请由超级管理员导入并审核后再比选")
     if spec.requires_knowledge and not knowledge:
@@ -233,6 +239,15 @@ def create_run(db: Session, user: User, req: RunRequest) -> AIRun:
         except Exception:
             db.rollback()
             raise
+    if bundle.data.get("bed_binding"):
+        from app.ai.bed_series import authorize_series
+
+        bound = bundle.data["bed_binding"]
+        try:
+            authorize_series(db, user, bound["series_id"], binding=bound, locking=True)
+        except Exception:
+            db.rollback()
+            raise
     audit(db, user.user_id, "run.create", run.run_id, {"feature_key": spec.key, "preview": req.preview})
     db.commit()
     return run
@@ -251,6 +266,14 @@ def authorize_run(db: Session, user: User, run: AIRun) -> None:
 
         run_binding(run)
         authorize_roster_snapshot(db, user, json.loads(run.input_json)["payload"]["context"])
+    from app.ai.bed_storage import is_bed_snapshot
+
+    if is_bed_snapshot(json.loads(run.input_json)):
+        from app.ai.bed_context import authorize_bed_snapshot
+        from app.ai.bed_storage import run_binding
+
+        run_binding(run)
+        authorize_bed_snapshot(db, user, json.loads(run.input_json)["payload"]["context"])
     if run.patient_id is not None:
         frozen_snapshot = json.loads(run.input_json)
         frozen_context = frozen_snapshot.get("payload", {}).get("context", {})
@@ -314,6 +337,12 @@ def describe_run(run: AIRun, include_result: bool = True) -> dict:
         from app.ai.roster_storage import run_binding
 
         run_binding(run)
+    from app.ai.bed_storage import is_bed_snapshot
+
+    if is_bed_snapshot(json.loads(run.input_json)):
+        from app.ai.bed_storage import run_binding
+
+        run_binding(run)
     spec = get_spec(run.feature_key)
     if spec.number == 42:
         from app.ai.sofa_storage import is_sofa_snapshot, run_binding
@@ -359,6 +388,21 @@ def describe_run(run: AIRun, include_result: bool = True) -> dict:
             data["roster_findings"] = {key: expanded[key] for key in ("roster_source", "roster_plan")}
         elif result.get("schema_version") == "roster_result_ref_v1":
             raise HTTPException(409, "完整排班结果引用不能由其他模式读取")
+        if context.get("bed_binding"):
+            from sqlalchemy.orm import object_session
+
+            from app.ai.bed_context import expand_context
+            from app.ai.bed_storage import expand_result
+
+            db = object_session(run)
+            if db is None:
+                raise HTTPException(409, "完整床位任务须在授权数据库会话内展开")
+            expanded = expand_context(db, context)
+            if run.status == "succeeded" or result.get("schema_version") == "bed_result_ref_v1":
+                result = expand_result(db, run)
+            data["bed_findings"] = {key: expanded[key] for key in ("bed_source", "bed_series", "bed_binding")}
+        elif result.get("schema_version") == "bed_result_ref_v1":
+            raise HTTPException(409, "完整床位结果引用不能由其他模式读取")
         if context.get("sofa_binding"):
             from sqlalchemy.orm import object_session
 
@@ -544,6 +588,7 @@ async def execute_claimed(run_id: str, lease: str, *, transport=None) -> None:
     image_files = None
     sofa_run = False
     roster_run = False
+    bed_run = False
     try:
         with database.SessionLocal() as db:
             run = db.get(AIRun, run_id)
@@ -552,6 +597,11 @@ async def execute_claimed(run_id: str, lease: str, *, transport=None) -> None:
             spec, provider, snapshot = _recheck_task(db, run)
             sofa_run = spec.number == 42 and bool(snapshot["payload"]["context"].get("sofa_binding"))
             roster_run = spec.number == 63 and bool(snapshot["payload"]["context"].get("roster_binding"))
+            bed_run = spec.number == 64 and bool(snapshot["payload"]["context"].get("bed_binding"))
+            if bed_run:
+                from app.ai.bed_context import expand_context
+
+                snapshot["payload"]["context"] = expand_context(db, snapshot["payload"]["context"], user=db.get(User, run.requested_by), current=True)
             if roster_run:
                 from app.ai.roster_context import expand_context
 
@@ -597,7 +647,11 @@ async def execute_claimed(run_id: str, lease: str, *, transport=None) -> None:
             result.warnings.insert(0, triage["emergency_message"])
         serialized_result = encode_json(result.model_dump())
         try:
-            if roster_run:
+            if bed_run:
+                from app.ai.bed_storage import bounded_result
+
+                bounded_result(result.model_dump(mode="json"))
+            elif roster_run:
                 from app.ai.roster_storage import bounded_result
 
                 bounded_result(result.model_dump(mode="json"))
@@ -653,7 +707,11 @@ async def execute_claimed(run_id: str, lease: str, *, transport=None) -> None:
                 run.status = "failed"
                 run.error_code, run.error_message = error
             else:
-                if roster_run:
+                if bed_run:
+                    from app.ai.bed_storage import stage_result
+
+                    run.result_json = stage_result(db, run, lease, result.model_dump(mode="json"))
+                elif roster_run:
                     from app.ai.roster_storage import stage_result
 
                     run.result_json = stage_result(db, run, lease, result.model_dump(mode="json"))
@@ -667,13 +725,16 @@ async def execute_claimed(run_id: str, lease: str, *, transport=None) -> None:
             db.commit()
         except Exception:
             db.rollback()
-            if not sofa_run and not roster_run:
+            if not sofa_run and not roster_run and not bed_run:
                 raise
             # A rejected blob or audit transaction must never leave an accepted pointer.
             failed = db.query(AIRun).filter_by(run_id=run_id, status="running", lease_token=lease).with_for_update().one_or_none()
             if failed is not None:
                 failed.status = "failed"
-                failed.error_code, failed.error_message = "RESULT_STORAGE_ERROR", "完整排班结果与审计未能原子保存，结果未接收" if roster_run else "完整SOFA结果与审计未能原子保存，结果未接收"
+                failed.error_code = "RESULT_STORAGE_ERROR"
+                failed.error_message = (
+                    "完整床位结果与审计未能原子保存，结果未接收" if bed_run else "完整排班结果与审计未能原子保存，结果未接收" if roster_run else "完整SOFA结果与审计未能原子保存，结果未接收"
+                )
                 failed.input_tokens, failed.output_tokens = inputs, outputs
                 failed.latency_ms = int((time.monotonic() - started) * 1000)
                 failed.finish_time = utcnow()

@@ -271,6 +271,8 @@ def change_source(change, case, db, seed_data):
         (image_directory(asset.asset_id) / "pixels.i32le").write_bytes(b"x" * asset.pixel_byte_size)
     elif change == "original_bytes":
         (image_directory(asset.asset_id) / "source.dcm").write_bytes(b"x" * asset.original_byte_size)
+    elif change == "encounter_removed":
+        db.delete(encounter)
     elif change == "care":
         encounter.doctor_id = None
     elif change == "canceled":
@@ -351,7 +353,7 @@ async def test_native_attachment_is_required_and_text_models_cannot_substitute(k
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize("change", ["bytes", "original_bytes", "withdraw", "canceled", "reassociated", "order_changed"])
+@pytest.mark.parametrize("change", ["bytes", "original_bytes", "withdraw", "canceled", "reassociated", "order_changed", "encounter_removed"])
 async def test_succeeded_candidates_require_current_original_source_and_order_on_every_read(change, image_case, seed_data, db_session, async_client, auth_headers):
     run = create_run(db_session, seed_data["doctor_user"], task(image_case))
     await execute_claimed(*claim_next_run(db_session), transport=httpx.MockTransport(lambda request: httpx.Response(200, json=response_for(parts(request)[0]))))
@@ -360,7 +362,7 @@ async def test_succeeded_candidates_require_current_original_source_and_order_on
     frozen_result = run.result_json
     change_source(change, image_case, db_session, seed_data)
     ordinary = await async_client.get("/api/ai/runs/" + run.run_id, headers=auth_headers(seed_data["doctor_user"].username))
-    assert ordinary.status_code in {403, 409}, (change, ordinary.status_code)
+    assert ordinary.status_code in ({404} if change == "encounter_removed" else {403, 409}), (change, ordinary.status_code)
     audit = await async_client.get("/api/ai/admin/runs/" + run.run_id, headers=auth_headers(seed_data["super_admin_user"].username))
     assert audit.status_code == 200
     data = audit.json()["data"]

@@ -172,7 +172,10 @@ def authorize_run(db: Session, user: User, run: AIRun) -> None:
     spec, _ = authorized_feature(db, user, run.feature_key)
     if run.patient_id is not None:
         if spec.number == 36:
-            authorize_image_patient(db, user, run.patient_id, authorize_patient, run.encounter_ref)
+            # Frozen super-admin audit does not reconstitute deleted clinical
+            # links. Execution still rebuilds and authorizes the current source.
+            if user.user_role != "super_admin":
+                authorize_image_patient(db, user, run.patient_id, authorize_patient, run.encounter_ref)
             authorize_image_snapshot(db, user, json.loads(run.input_json).get("payload", {}).get("context", {}), authorize_patient)
         else:
             authorize_patient(db, user, run.patient_id, spec.category, run.encounter_ref)

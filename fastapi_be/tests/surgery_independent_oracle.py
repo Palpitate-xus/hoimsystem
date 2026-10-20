@@ -9,7 +9,7 @@ import copy
 import itertools
 from datetime import UTC, datetime, timedelta
 
-from tests.test_ai_surgery_contract import DUTY, END, EQUIPMENT, H, PERSON, ROOM, START, accounting, amount, demand, resource, source_dict, uid
+from tests.test_ai_surgery_contract import END, PERSON, ROOM, START, H, accounting, amount, resource, source_dict, uid
 
 EPOCH = datetime(2026, 10, 21, 8, tzinfo=UTC)
 MODES = ("all_required_then_min_declared_cost", "max_optional_scheduled_then_min_declared_cost")
@@ -166,7 +166,13 @@ def evaluate(body, selected):
                 if any(a["state"] == "unavailable" and overlap(interval, (micros(a["start_at"]), micros(a["end_at"]))) for a in res["availability"]):
                     return None
                 for capability in req["capability_hashes"]:
-                    if not any(c["status"] == "verified" and capability in c["capability_hashes"] and micros(c["valid_from_at"]) <= interval[0] and (c["valid_until"]["kind"] == "not_applicable" or c["valid_until"]["kind"] == "known" and interval[1] <= micros(c["valid_until"]["at"])) for c in res["capability_facts"]):
+                    if not any(
+                        c["status"] == "verified"
+                        and capability in c["capability_hashes"]
+                        and micros(c["valid_from_at"]) <= interval[0]
+                        and (c["valid_until"]["kind"] == "not_applicable" or c["valid_until"]["kind"] == "known" and interval[1] <= micros(c["valid_until"]["at"]))
+                        for c in res["capability_facts"]
+                    ):
                         return None
                 if res["kind"] == "person":
                     binding = selected_resource["duty_binding"]
@@ -258,10 +264,13 @@ def exhaustive(body):
 def matches(assignment, option):
     case = option["case"]
     selected = option["choices"]
-    return assignment["start_at"] == option["start"]["start_at"] and assignment["room_id"] == selected[0]["resource_id"] and assignment["roles"] == [
-        {"slot_id": req["slot_id"], "person_id": c["resource_id"], "duty_id": c["duty_binding"]["duty_id"]}
-        for req, c in zip(case["roles"], selected[1:1 + len(case["roles"])], strict=True)
-    ] and assignment["equipment"] == [{"slot_id": req["slot_id"], "equipment_id": c["resource_id"]} for req, c in zip(case["equipment"], selected[1 + len(case["roles"]):], strict=True)]
+    return (
+        assignment["start_at"] == option["start"]["start_at"]
+        and assignment["room_id"] == selected[0]["resource_id"]
+        and assignment["roles"]
+        == [{"slot_id": req["slot_id"], "person_id": c["resource_id"], "duty_id": c["duty_binding"]["duty_id"]} for req, c in zip(case["roles"], selected[1 : 1 + len(case["roles"])], strict=True)]
+        and assignment["equipment"] == [{"slot_id": req["slot_id"], "equipment_id": c["resource_id"]} for req, c in zip(case["equipment"], selected[1 + len(case["roles"]) :], strict=True)]
+    )
 
 
 def objective_of_native_candidate(body, candidate):
@@ -282,7 +291,7 @@ def objective_of_native_candidate(body, candidate):
 
 def transition_source(mode=MODES[0], gap=0, direct_cost=0, optional_middle=False, alternate_room=False):
     body = tiny_source(3, mode)
-    classes = [uid(400 + i).replace('-', '') * 2 for i in range(3)]
+    classes = [uid(400 + i).replace("-", "") * 2 for i in range(3)]
     for case, start, label in zip(body["cases"], (0, 4, 2), classes, strict=True):
         case["starts"] = [{"start_at": clock(start), "penalty": amount()}]
         case["timing"]["segments"][0]["end_offset_us"] = amount("1")
@@ -301,13 +310,46 @@ def transition_source(mode=MODES[0], gap=0, direct_cost=0, optional_middle=False
         is_direct = (left, right) == (classes[0], classes[1])
         cost = direct_cost if is_direct else 1 if (left, right) in {(classes[0], classes[2]), (classes[2], classes[1])} else 0
         pairs.append({"from_class_hash": left, "to_class_hash": right, "minimum_gap_us": amount(str(gap if is_direct else 0)), "penalty": amount(str(cost)), "basis_hash": H})
-    body["transition_policies"] = [{"policy_id": uid(450), "ref_ids": [uid(7)], "resource_ids": [transition_room], "effective_from_at": START, "effective_until": {"kind": "known", "at": END}, "pairs": pairs, "pair_coverage": "attested_complete", "basis_hash": H}]
+    body["transition_policies"] = [
+        {
+            "policy_id": uid(450),
+            "ref_ids": [uid(7)],
+            "resource_ids": [transition_room],
+            "effective_from_at": START,
+            "effective_until": {"kind": "known", "at": END},
+            "pairs": pairs,
+            "pair_coverage": "attested_complete",
+            "basis_hash": H,
+        }
+    ]
     return body
+
+
+def assignment_for_option(item):
+    case, selected = item["case"], item["choices"]
+    return {
+        "case_id": case["case_id"],
+        "start_at": item["start"]["start_at"],
+        "room_id": selected[0]["resource_id"],
+        "roles": [
+            {"slot_id": req["slot_id"], "person_id": c["resource_id"], "duty_id": c["duty_binding"]["duty_id"]} for req, c in zip(case["roles"], selected[1 : 1 + len(case["roles"])], strict=True)
+        ],
+        "equipment": [{"slot_id": req["slot_id"], "equipment_id": c["resource_id"]} for req, c in zip(case["equipment"], selected[1 + len(case["roles"]) :], strict=True)],
+    }
 
 
 def work_policy(body, **limits):
     unused = {"value": None, "unit": "us", "absent_reason": "not_applicable"}
-    result = {"policy_id": uid(500), "ref_ids": [uid(7)], "person_ids": [PERSON], "effective_from_at": START, "effective_until": {"kind": "known", "at": END}, "fixed_windows": [], "policy_reference_hash": H, "basis_hash": H}
+    result = {
+        "policy_id": uid(500),
+        "ref_ids": [uid(7)],
+        "person_ids": [PERSON],
+        "effective_from_at": START,
+        "effective_until": {"kind": "known", "at": END},
+        "fixed_windows": [],
+        "policy_reference_hash": H,
+        "basis_hash": H,
+    }
     for key in ("max_single_presence", "max_work_rolling_24h", "max_work_rolling_7d", "minimum_rest"):
         result[key] = {"value": str(limits[key]), "unit": "us", "absent_reason": None} if key in limits else copy.deepcopy(unused)
     body["resources"][1]["work_policy_review"]["status"] = "reviewed_policies"

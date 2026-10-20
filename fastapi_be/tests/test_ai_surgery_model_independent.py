@@ -11,8 +11,8 @@ import itertools
 import pytest
 
 from app.ai.surgery_contract import SurgerySource
-from tests.surgery_independent_oracle import MODES, choice, clock, exhaustive, objective_of_native_candidate, tiny_source, transition_source, work_policy
-from tests.test_ai_surgery_contract import DUTY, END, EQUIPMENT, H, PERSON, ROOM, START, amount, uid
+from tests.surgery_independent_oracle import MODES, assignment_for_option, choice, clock, evaluate, exhaustive, objective_of_native_candidate, options, tiny_source, transition_source, work_policy
+from tests.test_ai_surgery_contract import DUTY, EQUIPMENT, PERSON, ROOM, H, amount, uid
 
 
 def typed(body):
@@ -21,6 +21,7 @@ def typed(body):
 
 def native(body):
     from app.ai.surgery_config import runtime_descriptor, runtime_from_descriptor
+
     from app.ai.surgery_model import compute_surgery
 
     return compute_surgery(typed(body), H, runtime_from_descriptor(runtime_descriptor())).model_dump(mode="json")
@@ -85,6 +86,23 @@ def test_oracle_self_actual_typed_three_sequence_counterexamples(mode):
     removed = copy.deepcopy(cost)
     removed["cases"].pop()
     assert exhaustive(removed)["best"][-1] == 10
+
+
+@pytest.mark.parametrize("mode,seed", itertools.product(MODES, (0, 1)))
+def test_actual_candidate_checker_matches_independent_every_tiny_leaf(mode, seed):
+    from app.ai.surgery_model import check_candidate
+
+    body = lattice_source(seed, mode)
+    source = typed(body)
+    for selected in itertools.product(*(list(options(case)) for case in body["cases"])):
+        expected = evaluate(body, selected)
+        assignments = [assignment_for_option(item) for item in selected if item is not None]
+        deferred = [case["case_id"] for case, item in zip(body["cases"], selected, strict=True) if item is None]
+        result = check_candidate(source, assignments, deferred).model_dump(mode="json")
+        assert (result["status"] == "feasible_under_declared_scope") == (expected is not None)
+        if expected is not None:
+            assert int(result["exact_penalty_points"]) == expected[-1]
+            assert objective_of_native_candidate(body, result) == expected
 
 
 @pytest.mark.parametrize("mode,seed", itertools.product(MODES, range(12)))
@@ -176,7 +194,9 @@ def test_native_minimum_work_failure_in_partial_prefix_can_be_repaired():
     body["duties"][0].update(start_at=clock(0), end_at=clock(10))
     body["duties"][0]["accounting"]["counted_as_work"] = False
     policy = work_policy(body)
-    policy["fixed_windows"] = [{"start_at": clock(0), "end_at": clock(10), "minimum_work": {"value": "4", "unit": "us", "absent_reason": None}, "maximum_work": {"value": "4", "unit": "us", "absent_reason": None}}]
+    policy["fixed_windows"] = [
+        {"start_at": clock(0), "end_at": clock(10), "minimum_work": {"value": "4", "unit": "us", "absent_reason": None}, "maximum_work": {"value": "4", "unit": "us", "absent_reason": None}}
+    ]
     assert_exact_native(body)
 
 

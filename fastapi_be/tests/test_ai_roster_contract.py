@@ -7,7 +7,7 @@ from datetime import date, timedelta
 import pytest
 from pydantic import ValidationError
 
-from app.ai.roster_contract import ConstraintValue, RosterSource, hash_content, input_policy_digest, recipe_digest
+from app.ai.roster_contract import MAX_POLICY_MINUTES, MAX_SAFE_INTEGER, ConstraintValue, MinuteConstraintValue, RosterSource, hash_content, input_policy_digest, recipe_digest
 
 
 def identifier(value):
@@ -155,6 +155,22 @@ def test_original_known_zero_and_unknown_are_distinct(value):
 def test_counts_never_coerce_bool_float_text_or_out_of_domain(value):
     with pytest.raises(ValidationError):
         ConstraintValue.model_validate({"value": value, "absent_reason": None})
+
+
+def test_policy_minutes_exact_microseconds_fit_public_safe_integer_domain():
+    assert MinuteConstraintValue.model_validate(limit(MAX_POLICY_MINUTES)).value * 60000000 <= MAX_SAFE_INTEGER
+    assert (MAX_POLICY_MINUTES + 1) * 60000000 > MAX_SAFE_INTEGER
+    assert ConstraintValue.model_validate(limit(2147483647)).value == 2147483647
+    with pytest.raises(ValidationError):
+        MinuteConstraintValue.model_validate(limit(MAX_POLICY_MINUTES + 1))
+
+
+@pytest.mark.parametrize("field", ["max_single_duty_presence_minutes", "max_work_minutes_rolling_24h", "max_work_minutes_rolling_7d", "minimum_rest_minutes"])
+def test_large_policy_minutes_are_rejected_at_source_boundary(field):
+    source = complete_source()
+    source["work_policies"][0][field] = limit(MAX_POLICY_MINUTES + 1)
+    with pytest.raises(ValidationError):
+        RosterSource.model_validate(source)
 
 
 @pytest.mark.parametrize(

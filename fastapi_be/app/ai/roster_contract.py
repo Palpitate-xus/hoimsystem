@@ -16,6 +16,7 @@ MAX_OPTIONS = 32768
 MAX_BYTES = 8 * 1024 * 1024
 MAX_INTERVALS = 32768
 MAX_SAFE_INTEGER = 9007199254740991
+MAX_POLICY_MINUTES = MAX_SAFE_INTEGER // 60000000
 SHA256 = Annotated[str, Field(pattern=r"^[a-f0-9]{64}$")]
 Count = Annotated[int, Field(strict=True, ge=0, le=MAX_SAFE_INTEGER)]
 RawCount = Annotated[int, Field(strict=True, ge=0, le=2147483647)]
@@ -37,7 +38,8 @@ def hash_content(value):
 def utc(value):
     if not isinstance(value, str) or not re.fullmatch(r"\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d\.\d{6}Z", value):
         raise ValueError("A canonical explicit UTC microsecond clock is required")
-    if datetime.fromisoformat(value.replace("Z", "+00:00")).isoformat(timespec="microseconds").replace("+00:00", "Z") != value:
+    parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    if parsed.year < 1000 or parsed.isoformat(timespec="microseconds").replace("+00:00", "Z") != value:
         raise ValueError("Invalid Gregorian UTC clock")
     return value
 
@@ -76,6 +78,10 @@ class ConstraintValue(StrictModel):
         if (self.value is None) != (self.absent_reason is not None):
             raise ValueError("Known zero and explicit absence are distinct")
         return self
+
+
+class MinuteConstraintValue(ConstraintValue):
+    value: Annotated[int, Field(strict=True, ge=0, le=MAX_POLICY_MINUTES)] | None
 
 
 class RosterFactRef(StrictModel):
@@ -194,8 +200,8 @@ class RosterAvailability(Interval):
 
 
 class RosterWorkWindow(Interval):
-    minimum_work_minutes: ConstraintValue
-    maximum_work_minutes: ConstraintValue
+    minimum_work_minutes: MinuteConstraintValue
+    maximum_work_minutes: MinuteConstraintValue
 
     @model_validator(mode="after")
     def consistent_window(self):
@@ -214,10 +220,10 @@ class RosterWorkPolicy(StrictModel):
     effective_from_at: UtcText
     effective_until_at: UtcText | None
     effective_until_absent_reason: Literal["unknown", "not_applicable"] | None
-    max_single_duty_presence_minutes: ConstraintValue
-    max_work_minutes_rolling_24h: ConstraintValue
-    max_work_minutes_rolling_7d: ConstraintValue
-    minimum_rest_minutes: ConstraintValue
+    max_single_duty_presence_minutes: MinuteConstraintValue
+    max_work_minutes_rolling_24h: MinuteConstraintValue
+    max_work_minutes_rolling_7d: MinuteConstraintValue
+    minimum_rest_minutes: MinuteConstraintValue
     fixed_work_windows: list[RosterWorkWindow] = Field(max_length=64)
     basis_hash: SHA256
     policy_reference_hash: SHA256

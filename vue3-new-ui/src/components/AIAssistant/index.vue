@@ -181,6 +181,7 @@ import { computed, defineAsyncComponent, onActivated, onBeforeUnmount, onDeactiv
 import { useStore } from "vuex";
 import { ElMessage } from "element-plus";
 import { cancelAIRun, createAIRun, getAIClinicalContext, getAIOperationalContext, getAIEncounters, getAIFeatures, getAIPatients, getAIPrescriptions, getAIPathwayOptions, getAIServiceOptions, getAIRun, getAIRuns, reviewAIRun } from "@/api/ai";
+import { resolveAkiEvidence } from "@/api/aiAki";
 import AiServiceFindings from "@/components/AIServiceFindings/index.vue";
 import AiOperationalFindings from "@/components/AIOperationalFindings/index.vue";
 import AiIncidentFindings from "@/components/AIIncidentFindings/index.vue";
@@ -422,8 +423,8 @@ watch([() => JSON.stringify(store.getters["user/permissions"]), () => store.stat
   if (needsRiskWindow.value && store.state.user.accessToken) searchPatients().catch(() => {});
 });
 const evidenceTitle = id => run.value?.evidence?.find(item => item.source_id === id)?.title || "来源";
-function inspectEvidence(id) { evidence.value = run.value?.evidence?.find(item => item.source_id === id); evidenceDialog.value = !!evidence.value; }
-function inspectPreviewEvidence(id) { evidence.value = contextData.value?.evidence?.find(item => item.source_id === id); evidenceDialog.value = !!evidence.value; }
+function inspectEvidence(id) { evidence.value = resolveAkiEvidence(run.value?.evidence?.find(item => item.source_id === id), run.value?.aki_findings, run.value?.patient_id, run.value?.encounter_ref || encounterRef.value); evidenceDialog.value = !!evidence.value; }
+function inspectPreviewEvidence(id) { evidence.value = resolveAkiEvidence(contextData.value?.evidence?.find(item => item.source_id === id), contextData.value?.context, patientId.value, encounterRef.value); evidenceDialog.value = !!evidence.value; }
 async function copyDraft() {
   const transcript = run.value.result.transcription;
   const segments = transcript ? ["原录音转写草稿，待逐段听音与角色核对：", ...transcript.segments.map(item => `[${item.start_ms}–${item.end_ms}毫秒] ${item.speaker}（角色待核实）\n${item.text}${item.uncertain ? '\n不确定：' + item.uncertainty_note : ''}`)] : [];

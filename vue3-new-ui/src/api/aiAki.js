@@ -54,3 +54,24 @@ export function akiAssessmentMatches(row, patientId, admissionId, windowId = nul
     return true;
   } catch { return false; }
 }
+
+// Resolve only server-defined AKI indexes within this same frozen source.
+// A path is never executed or used to walk arbitrary object properties.
+export function resolveAkiEvidence(item, context, patientId, admissionId) {
+  if (!item) return item;
+  let reference;
+  try { reference = JSON.parse(item.content); } catch { return item; }
+  if (!object(reference) || !("context_path" in reference)) return item;
+  const unavailable = () => ({ ...item, content: "原资料索引与当前冻结来源不一致，无法展开。请重新核对原评估。" });
+  const scope = context?.aki_assessment, source = context?.aki_source;
+  if (Object.keys(reference).length !== 1 || !akiAssessmentMatches({ ...scope, specialist_source: source }, patientId, admissionId, scope?.window_id, true)) return unavailable();
+  const candidates = [
+    ["context.aki_assessment", scope],
+    ["context.observation_window_binding", scope.snapshot.window_binding],
+    ["context.aki_assessment.snapshot.rule_profile", scope.snapshot.rule_profile],
+    ...["index_creatinine", "comparison_48h", "baseline_creatinine", "weight"].map(key => [`context.aki_source.${key}`, source[key]]),
+    ...source.urine_intervals.map((value, index) => [`context.aki_source.urine_intervals[${index}]`, value]),
+  ];
+  const match = candidates.find(([path, value]) => path === reference.context_path && value?.source_id === item.source_id);
+  return match ? { ...item, title: "冻结原始依据", content: JSON.stringify(match[1], null, 2) } : unavailable();
+}

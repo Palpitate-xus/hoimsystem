@@ -1,0 +1,113 @@
+{
+  "queued": {
+    "run_id": "d05d503d-4f2d-47fd-bbf5-0626fb030384",
+    "feature_key": "roster_optimization",
+    "status": "queued",
+    "preview": 0,
+    "prompt_version": 0,
+    "provider_revision": 1,
+    "context_digest": "67d8312c565d74f6cd69570f90e7e269a8cd8141fcd03ed337088903ec331771",
+    "patient_id": null,
+    "encounter_ref": null,
+    "error_code": null,
+    "error_message": null,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "latency_ms": null,
+    "create_time": "2026-10-20T19:27:57.517597",
+    "start_time": null,
+    "finish_time": null,
+    "feature_name": "排班与号源优化",
+    "requires_human_review": true,
+    "context_metadata": {
+      "clinical_context_fingerprint": "907b46b26de807b3a90c434861345b2928bf0c773e4b18972a3f1791cc12847b",
+      "context_digest": "67d8312c565d74f6cd69570f90e7e269a8cd8141fcd03ed337088903ec331771",
+      "department_ids": [
+        1
+      ],
+      "feature_revision": 1,
+      "missing_data": [
+        "仅明确审核的场景净容量与约束，不是实时可预约余号；来源审核与合成算例不构成实际运营效果验证，不自动发布排班或修改库存",
+        "人员按整班分配不等于每个时刻均有人提供服务；未实现连续在岗人数和连续本地工作日限制"
+      ],
+      "snapshot_time": "2026-10-20T09:10:11.123456Z",
+      "source_count": 1,
+      "tool_fingerprint": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+      "validation_status": "validated"
+    }
+  },
+  "running": {
+    "run_id": "d05d503d-4f2d-47fd-bbf5-0626fb030384",
+    "feature_key": "roster_optimization",
+    "status": "running",
+    "preview": 0,
+    "prompt_version": 0,
+    "provider_revision": 1,
+    "context_digest": "67d8312c565d74f6cd69570f90e7e269a8cd8141fcd03ed337088903ec331771",
+    "patient_id": null,
+    "encounter_ref": null,
+    "error_code": null,
+    "error_message": null,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "latency_ms": null,
+    "create_time": "2026-10-20T19:27:57.517597",
+    "start_time": null,
+    "finish_time": null,
+    "feature_name": "排班与号源优化",
+    "requires_human_review": true,
+    "context_metadata": {
+      "clinical_context_fingerprint": "907b46b26de807b3a90c434861345b2928bf0c773e4b18972a3f1791cc12847b",
+      "context_digest": "67d8312c565d74f6cd69570f90e7e269a8cd8141fcd03ed337088903ec331771",
+      "department_ids": [
+        1
+      ],
+      "feature_revision": 1,
+      "missing_data": [
+        "仅明确审核的场景净容量与约束，不是实时可预约余号；来源审核与合成算例不构成实际运营效果验证，不自动发布排班或修改库存",
+        "人员按整班分配不等于每个时刻均有人提供服务；未实现连续在岗人数和连续本地工作日限制"
+      ],
+      "snapshot_time": "2026-10-20T09:10:11.123456Z",
+      "source_count": 1,
+      "tool_fingerprint": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+      "validation_status": "validated"
+    }
+  },
+  "succeeded": {
+    "run_id": "d05d503d-4f2d-47fd-bbf5-0626fb030384",
+    "feature_key": "roster_optimization",
+    "status": "succeeded",
+    "preview": 0,
+    "prompt_version": 0,
+    "provider_revision": 1,
+    "context_digest": "67d8312c565d74f6cd69570f90e7e269a8cd8141fcd03ed337088903ec331771",
+    "patient_id": null,
+    "encounter_ref": null,
+    "error_code": null,
+    "error_message": null,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "latency_ms": null,
+    "create_time": "2026-10-20T19:27:57.517597",
+    "start_time": null,
+    "finish_time": null,
+    "feature_name": "排班与号源优化",
+    "requires_human_review": true,
+    "context_metadata": {
+      "clinical_context_fingerprint": "907b46b26de807b3a90c434861345b2928bf0c773e4b18972a3f1791cc12847b",
+      "context_digest": "67d8312c565d74f6cd69570f90e7e269a8cd8141fcd03ed337088903ec331771",
+      "department_ids": [
+        1
+      ],
+      "feature_revision": 1,
+      "missing_data": [
+        "仅明确审核的场景净容量与约束，不是实时可预约余号；来源审核与合成算例不构成实际运营效果验证，不自动发布排班或修改库存",
+        "人员按整班分配不等于每个时刻均有人提供服务；未实现连续在岗人数和连续本地工作日限制"
+      ],
+      "snapshot_time": "2026-10-20T09:10:11.123456Z",
+      "source_count": 1,
+      "tool_fingerprint": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+      "validation_status": "validated"
+    }
+  }
+}

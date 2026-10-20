@@ -25,6 +25,17 @@ Method = Literal["direct_tally", "external_register"]
 Review = Literal["confirmed", "not_confirmed", "unknown"]
 Coverage = Literal["attested_complete", "incomplete", "unknown"]
 BasisKind = Literal["observed_operational_capacity", "reviewed_future_scenario"]
+CapacityReason = Literal[
+    "missing_capacity_interval",
+    "unknown_quantity",
+    "not_recorded_quantity",
+    "coverage_incomplete",
+    "coverage_unknown",
+    "staff_readiness_not_confirmed",
+    "equipment_readiness_not_confirmed",
+    "isolation_applicability_not_confirmed",
+    "unresolved_capacity_overlap",
+]
 Reason = Literal[
     "missing_selected_original",
     "unresolved_conflict",
@@ -384,7 +395,10 @@ class BedSource(StrictModel):
     def complete_source(self):
         if self.source_id != f"bed_series:{self.series_id}:{self.content_hash[:12]}" or self.recipe_digest != recipe_digest() or self.input_policy_digest != input_policy_digest():
             raise ValueError("Series identity or fixed rule policy differs")
-        expected_last = datetime.fromisoformat(self.as_of.replace("Z", "+00:00")).astimezone(ZoneInfo(self.timezone)).date() - timedelta(days=1)
+        try:
+            expected_last = datetime.fromisoformat(self.as_of.replace("Z", "+00:00")).astimezone(ZoneInfo(self.timezone)).date() - timedelta(days=1)
+        except (ZoneInfoNotFoundError, OverflowError) as exc:
+            raise ValueError("Invalid IANA timezone or closed-day calendar") from exc
         if self.date_to != expected_last.isoformat():
             raise ValueError("History must end at the last closed business day of its frozen as_of")
         if self.captured_at < self.as_of or self.days[0].date != self.date_from or self.days[-1].date != self.date_to:
@@ -606,6 +620,7 @@ class CapacitySegment(StrictModel):
     end_at: UtcText
     duration_us: BigUInt
     status: Literal["known", "unknown", "conflict"]
+    reasons: list[CapacityReason] = Field(max_length=9)
     source_ids: list[str] = Field(max_length=MAX_MEMBERS)
     operational_total_beds: Count | None
     bed_microseconds: BigUInt | None
@@ -633,6 +648,8 @@ class BoundaryPressure(StrictModel):
     date: DateText
     census_at: UtcText
     status: Literal["known", "forecast_unknown", "capacity_unknown", "capacity_conflict"]
+    capacity_status: Literal["known", "unknown", "conflict"]
+    capacity_reasons: list[CapacityReason] = Field(max_length=9)
     capacity_source_ids: list[str] = Field(max_length=MAX_MEMBERS)
     operational_total_beds: Count | None
     point_minus_capacity: ExactFraction | None

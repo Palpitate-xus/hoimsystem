@@ -238,3 +238,18 @@ def test_late_observation_clock_is_distinct_and_preserved():
     original["observed_at"] = original["recorded_at"] = original["published_at"] = value["as_of"]
     source = BedSource.model_validate(value)
     assert source.census_observations[0].observed_at != source.census_observations[0].census_at
+
+
+@pytest.mark.parametrize("timezone,asof", [("Unknown/Invented", None), ("Pacific/Kiritimati", "9999-12-31T23:59:59.999999Z"), ("America/New_York", "1000-01-01T00:00:00.000000Z")])
+def test_timezone_and_calendar_extremes_raise_validation_error(timezone, asof):
+    value = make_source()
+    value["timezone"] = timezone
+    if asof is not None:
+        value["as_of"] = value["captured_at"] = asof
+    with pytest.raises(ValidationError):
+        BedSource.model_validate(value)
+
+
+def test_future_calendar_range_overflow_is_a_value_error():
+    with pytest.raises(ValueError):
+        day_bounds("9999-12-31", "UTC")

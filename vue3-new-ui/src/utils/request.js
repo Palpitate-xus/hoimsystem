@@ -60,6 +60,7 @@ const canRetry = (error) => {
     !config.retry ||
     error.code === "ERR_CANCELED" ||
     error.code === "ECONNABORTED" ||
+    error.code === "ERR_BLOCKED_ORIGIN" ||
     config.signal?.aborted
   ) return false;
 
@@ -93,9 +94,30 @@ const instance = axios.create({
 instance.defaults.retry = retryConfig.retry;
 instance.defaults.retryDelay = retryConfig.retryDelay;
 
+const assertHospitalDestination = (config) => {
+  let allowed = false;
+  try {
+    const trusted = new URL(baseURL, window.location.href);
+    const target = new URL(instance.getUri({
+      baseURL: config.baseURL,
+      url: config.url,
+      allowAbsoluteUrls: config.allowAbsoluteUrls,
+    }), document.baseURI);
+    allowed = ["http:", "https:"].includes(target.protocol) &&
+      target.origin === trusted.origin && !target.username && !target.password;
+  } catch {
+    // Reject malformed destinations before attaching hospital credentials.
+  }
+  if (!allowed) {
+    // Do not attach config, which can contain credentials or patient data.
+    throw new axios.AxiosError("请求目标不属于配置的医院服务", "ERR_BLOCKED_ORIGIN");
+  }
+};
+
 // 请求拦截器
 instance.interceptors.request.use(
   (config) => {
+    assertHospitalDestination(config);
     if (store.state.user.accessToken) {
       config.headers[tokenName] = store.state.user.accessToken;
     }
@@ -160,6 +182,10 @@ instance.interceptors.response.use(
   },
   (error) => {
     if (loadingInstance) loadingInstance.close();
+    if (error?.code === "ERR_BLOCKED_ORIGIN") {
+      ElMessage.error(error.message);
+      return Promise.reject(error);
+    }
 
     // 处理请求重试
     const { config } = error;

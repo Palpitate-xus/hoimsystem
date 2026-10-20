@@ -112,6 +112,11 @@ def minimize_identifiers(value: object, patient: Patient | None = None) -> objec
                     return str(uuid.UUID(item.split(":")[1])) == item.split(":")[1]
                 except ValueError:
                     return False
+            if key == "source_id" and re.fullmatch(r"(?:completed_nursing_assessments|nursing_plans|critical_care_records):[a-f0-9-]{36}", item):
+                try:
+                    return str(uuid.UUID(item.split(":")[1])) == item.split(":")[1]
+                except ValueError:
+                    return False
             return False
 
         return {key: item if opaque(key, item) else minimize_identifiers(item, patient) for key, item in value.items()}

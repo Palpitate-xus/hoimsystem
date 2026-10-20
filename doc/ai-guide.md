@@ -138,7 +138,7 @@ worker 在执行前和保存结果前重新检查权限、配置、患者资料�
 
 运营历史默认近 30 天，可选不含未来且最多 367 天的正序区间。医院数据问答的区间若完全早于当前业务日，不加载当前病区或床位快照，也不因无关的当前床位变化使历史分析失效；床位需求预测则单独保留当前容量供核查。排班/手术排台计划与历史资料分开，默认计划为业务日起 14 天，单次最多 31 天且不晚于业务日后 366 天。大范围资料可能超过模型输入预算，需缩小日期、科室或品种；原始清单若截断会明确标记。
 
-手术页的“AI 排台分析”、运营页的评价分析，以及已关联患者的不良事件行“AI 事件复盘”，都能先查看资料再提交。事件行入口固定患者和事件，不展示就诊归属选择，结果同时展示冻结的原上报和原分析，并可检查引用。未绑定患者的组织事件仍待独立访问范围及数据连接，不强行归属某位患者。手术排台和反馈分析均受模型服务患者数据用途开关控制。当前默认目录及Prompt版本为 `2026.10.16`，旧队列不会沿用更新前的固定任务契约。
+手术页的“AI 排台分析”、运营页的评价分析，以及已关联患者的不良事件行“AI 事件复盘”，都能先查看资料再提交。事件行入口固定患者和事件，不展示就诊归属选择，结果同时展示冻结的原上报和原分析，并可检查引用。未绑定患者的组织事件仍待独立访问范围及数据连接，不强行归属某位患者。手术排台和反馈分析均受模型服务患者数据用途开关控制。当前默认目录及Prompt版本为 `2026.10.17`，旧队列不会沿用更新前的固定任务契约。
 
 临床路径模板页提供“AI 治疗方案比选”，固定所选路径后选择已授权患者和本次就诊。工作台也可选择当前科室及功能已有审核版本的路径；选择就诊后重新核对审核范围。路径执行行的“AI 路径复评”固定患者、所记住院、原入径和路径标识，补充JSON不能替换这些绑定引用。预览与生成使用相同标识，原模板元数据、原入径与变异、未知计数及引用独立展示，结果保存任务当时版本。新增、入径、变异、退出及用药仍走原人工业务流程。
 
@@ -168,6 +168,7 @@ ADR列表对管理员保留既有管理范围；药师只读现有处方业务�
 | `app/ai/consultation_sources.py` | 同患者转诊/MDT原状态、实际科室引用和审批/结果资料 |
 | `app/ai/adr_sources.py` / `app/adr_status.py` | ADR原报告、明确处理结果及历史歧义区分 |
 | `app/ai/audio_files.py` / `audio_assets.py` | 私有原音频、格式与解码校验、归属及撤回后的读取权限 |
+| `app/ai/ecg_files.py` / `ecg_assets.py` | 私有WFDB成对原文件、原导联校准与缺失采样、诊疗团队及来源版本校验 |
 | `app/ai/pathway_sources.py` / `pathway_knowledge.py` | 原路径入径资料、来源快照、审核匹配与所选路径知识核对 |
 | `app/pathway_progress.py` | 保留未知或矛盾计数的进度口径，供业务列表和AI资料共用 |
 | `app/ai/procedural_sources.py` / `care.py` | 手术申请/排台/围术期资料及手术团队关系 |
@@ -189,6 +190,7 @@ ADR列表对管理员保留既有管理范围；药师只读现有处方业务�
 | `app/routers/ai_admin.py` | 仅 `super_admin` 的治理接口 |
 | `app/routers/ai_feedback_admin.py` | 仅超级管理员的评价原文读取、脱敏稿及审核接口 |
 | `app/routers/ai_audio.py` | 授权录音登记、私有读取、撤回和超级管理员清除流程 |
+| `app/routers/ai_ecg.py` | 原始心电登记、经鉴权的采样窗口与成对导出、撤回及超管清除恢复 |
 | `app/routers/ai.py` | 授权能力、患者选择、资料、任务和反馈接口 |
 | `src/components/AIAssistant` | 工作台与业务页面共享的调用、来源和复核组件 |
 | `src/components/AIRunHistory` | 全院任务、原始调用快照与人工反馈查看 |
@@ -200,6 +202,8 @@ ADR列表对管理员保留既有管理范围；药师只读现有处方业务�
 | `src/components/AIReviewCuration` | 逐条整理、原文对照、审核发布和停用界面 |
 | `src/components/AIAudioInput` / `AIAudioPlayer` | 显式麦克风采集、原文件登记选择及经鉴权的听音与下载 |
 | `src/components/AISpeechFindings` / `AIAudioManagement` | 分段草稿、未知说话人、原音引用和超级管理员录音治理 |
+| `src/components/AIEcgInput` / `AIEcgViewer` | 成对登记、患者切换隔离、原始采样窗口与导联校准显示 |
+| `src/components/AIEcgFindings` / `AIEcgManagement` | 冻结原始依据、候选导联与样本定位、超管原文件治理 |
 
 主要业务接口：`GET /api/ai/features`、`GET /api/ai/patients`、`GET /api/ai/encounters`、`POST /api/ai/context`、`POST /api/ai/operational-context`、`GET /api/ai/service-options`、`POST /api/ai/runs`、`GET /api/ai/runs/{id}` 和 `POST /api/ai/runs/{id}/feedback`。管理接口统一位于 `/api/ai/admin/`，以生成的 RBAC 矩阵为准。
 
@@ -211,7 +215,7 @@ ADR列表对管理员保留既有管理范围；药师只读现有处方业务�
 
 `GET /api/ai/pathway-options`按功能、患者和所选就诊返回有限模板元数据及当前范围的审核可用性，不返回步骤。超级管理员独有`GET /api/ai/admin/pathway-sources`和`POST /api/ai/admin/pathway-sources/{id}/import`，导入须带刚读取的`expected_source_hash`。发布继续使用原知识审核接口，并验证正文哈希及原路径未变化。
 
-迁移`20261020_adr_resolution`添加ADR明确结果、说明、处理者和时间，旧行保持NULL；`20261020_pathway_knowledge`添加可空的知识来源绑定，不把原独立知识改成路径；`20261020_pathway_revision`给原路径添加来源版本，已有行从1开始，不补造历史版本。`20261020_ai_audio_assets`新增录音元数据，当前迁移头`20261020_audio_governance`另存原清除请求说明。迁移往返已在隔离数据库验证保留既有资料，未对真实业务数据库执行迁移。
+迁移`20261020_adr_resolution`添加ADR明确结果、说明、处理者和时间，旧行保持NULL；`20261020_pathway_knowledge`添加可空的知识来源绑定，不把原独立知识改成路径；`20261020_pathway_revision`给原路径添加来源版本，已有行从1开始，不补造历史版本。`20261020_ai_audio_assets`新增录音元数据，`20261020_audio_governance`另存原清除请求说明；当前迁移头`20261020_ai_ecg_assets`只新增原始心电元数据与索引。新库使用项目的`python -m app.db_migrate`引导流程，已有库继续沿当前版本升级；隔离往返测试保留既有患者资料，未对真实业务数据库执行迁移。
 
 AI接口保留原知识、引用及反馈正文中时间戳的小数部分，返回原文与其版本哈希对应。经结构验证的UUID和哈希保留原值，不因随机数字类似手机号而被缩减。任务同时冻结适用科室，调用前后按所选就诊或当前医生资料重新核对；仅科室调动、文字未变化的独立问答也会停止旧任务或拒收在途结果。
 
@@ -323,6 +327,78 @@ export SPEECH_LANGUAGE=zh
 
 2026-10-20已实际构建该镜像，并在禁用网络、只读根目录、UID10001、4CPU/2GiB及独立临时目录的容器中通过3项检查：3.94秒WAV与WebM均识别出固定句子的四个核对关键词，0.25秒静音未返回片段。容器内153个Python源码文件与当时工作区哈希逐项一致；本地Python3.13环境和镜像Python3.12环境的依赖差异各自进入实际运行标识。详见[离线试跑记录](ai-speech-smoke.json)，其中只保存合成文本、实际版本和工程验证边界。
 
+## 原始心电接入、候选复核与治理
+
+编号37“心电辅助分析”使用明确的`ecg_asset_id`。门诊、住院病历行的“AI 心电复核”固定原患者及已记就诊，不把病历正文、检验文字、报告截图或外部URL当作原波形。工作台可以另选同患者的已登记记录。预览只提供原采样技术资料与独立引用；原头注释、原文件名、登记授权说明和无关病史不发送给模型。原采集时刻未知时保持未知，头文件时钟没有时区或核验依据时不升级为已确认采集时刻，也不按今天年龄推定采集人群。
+
+### 当前支持的原文件
+
+当前接收单段、单`.dat`文件的WFDB格式16（有符号16位小端、按导联交错），原`.hea`和`.dat`名称必须对应。每份1–16导联，采样率50–10000Hz，须显式声明样本数、导联、正增益、基线或ADC零值、物理单位、初值和校验和；不采用缺省增益或单位。识别标准导联及明确的MLII/MCL1/VX/VY/VZ标签，MLII不改成II。不接收212压缩、跨文件、多段、非零偏移/延迟或不同导联频率，不静默重采样、导联补全或截断。
+
+原数字值`-32768`保留为缺失，不按0参与有效幅度或恒定值计算。校准按`(ADC－基线)/增益`及原单位换算mV，支持mV、uV/µV/μV和V；校验和按原数字样本核对。返回原初值声明和实际观察，不把恒定采样判为心搏停止或证明信号有效。全部导联只有缺失采样时仍可核查登记资料，但不能创建判读任务。格式校验、显示幅度与模型覆盖报告均不构成设备、信号质量或诊断验证。
+
+格式解释参考[WFDB头文件规范](https://wfdb.io/spec/header-files.html)、[原采样格式规范](https://wfdb.io/spec/signal-files.html)及[官方Python读取接口](https://wfdb.readthedocs.io/en/latest/wfdb.html)。可选的`requirements-ecg-verification.txt`只安装格式对照库，不是诊断模型。`scripts/verify_ecg_wfdb.py`使用固定合成数字值、三种单位和不同基线，与WFDB 4.3.1对照：原导联顺序、缺失位置及mV换算一致。验证记录见[心电工程验证](ai-ecg-verification.json)，没有使用实际患者心电或评估疾病识别。
+
+### 登记、读取及超管管理
+
+`POST /api/ai/ecg-assets`以multipart提交`header`、`signal`、`patient_id`、可选`encounter_ref`、`authorization_confirmed`和至少5字的`authorization_note`；可选`recorded_at`须带时区，服务端统一UTC。先校验当前患者/原就诊权限，再解析文件，登记前再次核对当前角色、授权、配额和资料。原文件用独立私有目录保存，目录0700、文件0600，校验与登记不调用模型。不能将`AI_ECG_STORAGE_DIR`放在公开上传目录内。
+
+| 项目 | 当前行为 |
+| --- | --- |
+| 使用角色 | 超级管理员、医生、科主任；检验技师另需当前有效、诊断用途的限时患者授权，普通检验单不自动授予原心电读取权 |
+| 团队共享 | 当前具备原患者及原就诊诊疗权限的成员可读取他人登记原文件；撤回仅限登记人及超级管理员 |
+| 文件额度 | 默认32MiB/份、300秒、512MiB/登记用户；`AI_ECG_MAX_BYTES`、`AI_ECG_MAX_DURATION_SECONDS`、`AI_ECG_USER_QUOTA_BYTES`可配置，撤回未清除的原文件仍占额度 |
+| 原波形 | 鉴权`GET /api/ai/ecg-assets/{id}/window`，以原样本`start_sample`、`sample_count`及每导联点数`max_points`请求；保留原索引，概览保留极值并断开缺失区间 |
+| 原文件导出 | 鉴权`GET /api/ai/ecg-assets/{id}/content?part=header\|signal\|pair`；pair为保留原文件名及原字节的ZIP，便于另行读取。原头注释可能含身份资料，仅明确操作时导出 |
+| 撤回与清除 | 撤回和超管清除均要求`expected_revision`及原因；先持久化清除中状态，再删除当前原文件，失败可按新版本继续且保留首次清除说明 |
+| 已有任务 | 原文件、当前诊疗关系、来源状态或版本变化会停止旧队列调用或拒收在途结果；普通用户不能继续读取失效来源的旧结果，超管仍可追查冻结快照 |
+
+登记选项为`GET /api/ai/ecg-options`，患者目录为`GET /api/ai/ecg-assets`；超管目录和清除分别为`GET /api/ai/admin/ecg-assets`及`POST /api/ai/admin/ecg-assets/{id}/purge`。超管“心电原文件”页可查看原授权说明、按版本撤回及清除恢复，原文按纯文本显示。原波形和导出只在用户点击后读取，鉴权Token使用请求头，URL不含Token。关闭或切换来源会清理视图，迟到的上传、读取或定位回执不覆盖新患者和当前窗口。
+
+API与worker必须共享`AI_ECG_STORAGE_DIR`；Compose已配置独立`ai_ecg_private`卷和相同额度，前端代理为成对上传保留最高128MiB及表单开销。清除删除当前存储原文件，任务文字、元数据及审计保留；撤回不能收回已发出的请求或已下载资料。
+
+### 心电附件契约v3
+
+该功能只接受`specialist`服务，不能回退到通用文本模型。网关发送multipart到已登记服务的`POST /tasks`：`task`为带完整系统/任务Prompt、原始技术资料、输入与引用的JSON字段，`waveform`为原始16位小端采样附件，固定文件名`signal.dat`。不发送磁盘路径或原头注释。服务必须按原导联数、原顺序、原采样率和校准参数解释附件，并核对所传文件哈希及其适用人群。
+
+返回`schema_version: "3"`、准确的`feature_key: "ecg_analysis"`、登记的`model_version`、`applicable: true`和标准`result`，顶层另有`ecg_analysis`：
+
+```json
+{
+  "asset_id": "请求中的原记录UUID",
+  "content_hash": "请求中的64位组合哈希",
+  "signal_hash": "请求中的64位原采样哈希",
+  "time_basis": "relative_samples",
+  "processing": {
+    "instructions_digest": "完整instructions原文的SHA256",
+    "input_sample_count": 1000,
+    "input_sample_rate_hz": "500",
+    "input_leads": ["I", "MLII"],
+    "used_leads": ["I", "MLII"],
+    "processed_original_sample_count": 1000,
+    "complete_input": true,
+    "missing_sample_handling": "masked",
+    "preprocessing_notes": ["如实说明缺失掩码、滤波、重采样及适用性"]
+  },
+  "findings": [{
+    "category": "other",
+    "label": "待人工复核的候选",
+    "description": "如实说明候选依据和局限",
+    "leads": ["I"],
+    "location": "sample_interval",
+    "start_sample": 600,
+    "end_sample_exclusive": 800,
+    "score": 0.0,
+    "score_kind": "model_score",
+    "source_id": "请求提供的原心电引用"
+  }]
+}
+```
+
+该示例仅示意字段，标识、哈希、Prompt摘要、输入参数必须与实际请求一致。原采样计数和定位均为严格整数；`input_sample_rate_hz`保留原字符串，`input_leads`严格匹配原顺序，实际使用导联必须来自原输入。缺失样本必须报告`masked`及预处理说明，所用导联不能全部缺失。服务须报告完整原输入处理，不能把截短范围冒充全部；报告是服务声明，不是独立质量证明。定位使用原样本半开区间且不得越界，模型内部重采样后的索引必须还原。全记录候选用`location: "recording"`及空的起止值，不补写精确位置。最多100项，模型分数保留0和未提供的区别，不解释成患病概率。
+
+结果可按候选定位到指定原导联，核查冻结元数据与原始波形，复制带导联、原区间、来源和原分数的待复核草稿；没有自动改写诊断、心电报告或签署。当前未集成或评估真实心电分类模型；85项心电后端测试和5项浏览器测试只验证合成波形、权限、传输协议及复核行为，临床启用仍需适用模型、真实数据、模型验证报告和人工评审。
+
 ## 验证命令
 
 ```bash
@@ -331,6 +407,9 @@ pytest -q tests/test_ai_catalog.py tests/test_ai_admin.py tests/test_ai_gateway.
 pytest -q tests/test_ai_pathway_knowledge.py tests/test_ai_pathway_sources.py
 pytest -q tests/test_ai_audio_files.py tests/test_ai_audio_assets.py tests/test_ai_audio_transcription.py tests/test_ai_response_fidelity.py tests/test_ai_knowledge_scope.py
 pytest -q tests/test_ai_speech_model.py tests/test_ai_speech_processing.py tests/test_ai_speech_server.py tests/test_ai_speech_worker.py tests/test_ai_speech_probe.py
+pytest -q tests/test_ai_ecg_files.py tests/test_ai_ecg_assets.py tests/test_ai_ecg_pipeline.py
+# 可选格式互操作验证，安装requirements-ecg-verification.txt后运行，不下载心电模型
+python scripts/verify_ecg_wfdb.py
 # 可选真实模型检查；在已安装requirements-speech.txt的隔离环境运行
 SPEECH_LANGUAGE=en python scripts/smoke_local_speech.py
 HOIM_SPEECH_REAL_MODEL_DIR="$SPEECH_MODEL_DIR" pytest -q tests/test_ai_local_speech_real.py

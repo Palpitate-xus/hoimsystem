@@ -1,0 +1,99 @@
+{
+  "recorded_at_utc": "2026-10-20T08:16:56.535094+00:00",
+  "platform_commit": "03fcda49c5b0ecdd93fe7b4d6200a8aaee91c10c",
+  "catalog_version": "2026.10.17",
+  "scope": "Synthetic WFDB calibration, private native-source transport and review workflow only; no ECG classifier or diagnostic validation",
+  "real_patient_data_used": false,
+  "ecg_classifier_executed": false,
+  "clinical_validation_completed": false,
+  "source_sha256": {
+    "fastapi_be/app/ai/catalog.py": "bdf3b6210f30582d40909f255ce684561783105809449cdd0c1be26149bacd23",
+    "fastapi_be/app/ai/ecg_files.py": "deb8ee9583174961ea1979d0f21efe6204ff72f8a6728a375e3983e138b7d6d2",
+    "fastapi_be/app/ai/ecg_assets.py": "9cb1b5461e35c26972e597c0bb79b241b304994b112b29f9e682c63bf0ff4538",
+    "fastapi_be/app/ai/schemas.py": "6ebd0e11bf9dc3bb79671cf5a640245bacecd34f5de61fae17cca19252d1171c",
+    "fastapi_be/app/ai/context.py": "a952072858ce43e4bc9bd8306a88567dddd7be1168bcf48dd899ef571384ee17",
+    "fastapi_be/app/ai/gateway.py": "5c33e7fb996dc0ed9ed6b1fb6c425d41f92c3ab7e84cedc7b534a584eae55796",
+    "fastapi_be/app/ai/runtime.py": "e9f40c54e5ea2b1cbff94cd3752008c2c60963527fe5111f33aa84dec53dfbf2",
+    "fastapi_be/app/routers/ai_ecg.py": "30268eeaaf2103e1e812b89252a3f0bad13f56fa0dcc0621aa263eeafb7b8415",
+    "fastapi_be/alembic/versions/20261020_ai_ecg_assets.py": "edb5705aee16e1ccc2e8f5c3dfd5bcd3e154d94d3f219b2ce67ab1231fcf8a09",
+    "fastapi_be/scripts/verify_ecg_wfdb.py": "f2ae56197c5049ed757d81a2c976326f2fd40fa8e3d9c0279c34487723b80e15",
+    "vue3-new-ui/src/components/AIEcgInput/index.vue": "1c16b8f57e6ac6a8d823cf4e04889415f9abc73705179472331e64cc86a34f21",
+    "vue3-new-ui/src/components/AIEcgViewer/index.vue": "a95a0e84469a04feafa9e8087409e5dd4bf6c3dd70ce46e8f5d2dedd1d394671",
+    "vue3-new-ui/src/components/AIEcgFindings/index.vue": "3b8f53e70f6485462da8e6de2cebd9882b80036aefd6fa50a6518672d79eaf8f",
+    "vue3-new-ui/src/components/AIEcgManagement/index.vue": "b7ef9dc9c97dd409a11a178193381767d21104030dee32b5891ce084d9ec7558",
+    "vue3-new-ui/e2e/ai-ecg-entry.spec.js": "38d26000b0cc7bb94b72a2dc031381ead4e67b17f0d508a3fefca5427f1e6f53"
+  },
+  "accepted_profile": {
+    "format": "WFDB 16 single-segment, one interleaved little-endian signed 16-bit data file",
+    "explicit_calibration": true,
+    "missing_sample_value": -32768,
+    "derives_missing_leads": false,
+    "resamples_on_intake": false
+  },
+  "official_wfdb_interoperability": {
+    "command": "python scripts/verify_ecg_wfdb.py",
+    "optional_requirements": "fastapi_be/requirements-ecg-verification.txt",
+    "result": {
+      "wfdb_version": "4.3.1",
+      "scope": "synthetic calibration/interoperability only, not model or diagnostic quality",
+      "lead_order": [
+        "I",
+        "II",
+        "III"
+      ],
+      "samples_per_lead": 6,
+      "fs_hz": 500,
+      "missing_mask_matched": true,
+      "maximum_absolute_error_mv": 0.0,
+      "header_hash": "af2305457836852d56fb0641a7f9b5193689cce5c3c6649650fb0ad3c50efee8",
+      "signal_hash": "a26d8edeca9a90bca46fd9c7ef6f31c76f1175a910bd254d3c90d21395bed972",
+      "physical_unit": "mV"
+    }
+  },
+  "regression": {
+    "backend": {
+      "command": "python -m pytest -q --tb=short",
+      "passed": 1593,
+      "skipped": 4,
+      "elapsed_seconds": 131.05,
+      "ecg_specific_tests": 85
+    },
+    "browser": {
+      "command": "E2E_BASE_URL=http://127.0.0.1:4180 npx playwright test e2e/ai-*.spec.js e2e/diagnosis-review.spec.js --workers=2 --reporter=list",
+      "passed": 51,
+      "elapsed_reported": "1.3m",
+      "ecg_specific_tests": 5,
+      "actual_native_multipart_asserted": true,
+      "actual_canvas_signal_and_lead_highlight_asserted": true
+    },
+    "production_frontend_build": {
+      "passed": true,
+      "total_javascript_bytes": 5880039,
+      "total_assets_bytes": 6398285,
+      "largest_javascript_bytes": 645575,
+      "javascript_budget_bytes": 6000000,
+      "assets_budget_bytes": 7000000,
+      "single_javascript_budget_bytes": 700000
+    },
+    "compose_private_storage": {
+      "checked_with_isolated_placeholder_environment": true,
+      "api_and_worker_share_volume": "ai_ecg_private",
+      "real_services_started": false
+    },
+    "nginx_configuration": {
+      "syntax_check_passed": true,
+      "image": "nginx:1.29.4",
+      "network_mode": "none",
+      "real_services_started": false
+    },
+    "rbac_endpoints_checked": 621,
+    "default_ai_prompts_checked": 80,
+    "migration_head": "20261020_ai_ecg_assets",
+    "migration_scope": "Isolated SQLite bootstrap/upgrade/downgrade; existing patient row preserved; no real business database migrated"
+  },
+  "remaining_work": [
+    "Integrate and evaluate an actual ECG classifier",
+    "Verify actual acquisition population, device calibration, signal quality and model preprocessing applicability",
+    "Extend device-specific waveform formats and authorized clinical validation data"
+  ]
+}

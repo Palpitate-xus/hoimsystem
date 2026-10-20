@@ -15,10 +15,10 @@ A comprehensive hospital information management system for small and medium-size
 
 | Metric | Count |
 |:------:|:-----:|
-| Business Modules | **80** backend routers |
-| API Endpoints | **560** route methods (authoritative count: generated RBAC matrix) |
-| Database Tables | **145** business tables |
-| Frontend Pages | **154** Vue pages |
+| Business Modules | **85** backend routers |
+| API Endpoints | **621** route methods (authoritative count: generated RBAC matrix) |
+| Database Tables | **158** registered tables including AI governance |
+| Frontend Pages | **156** Vue pages |
 | User Roles | **11**, including super admin, lab technician, and registrar |
 
 ---
@@ -73,7 +73,7 @@ A comprehensive hospital information management system for small and medium-size
 │        Vue 3 · Element Plus · Vuex · Vue Router · Rspack    │
 ├─────────────────────────────────────────────────────────────┤
 │                  Application (FastAPI)                       │
-│   80 routers · 560 route methods · JWT/RBAC · Metrics/Audit  │
+│   85 routers · 621 route methods · JWT/RBAC · Metrics/Audit  │
 ├─────────────────────────────────────────────────────────────┤
 │                  Data Layer                                  │
 │             SQLite (dev) / PostgreSQL (prod)                 │
@@ -212,8 +212,8 @@ These accounts are written only when the development initializer `fastapi_be/ini
 | [Doc Index](doc/README.md) | Navigation for all docs |
 | [Architecture](doc/architecture.md) | System architecture & design decisions |
 | [Requirements](doc/demandDoc.md) | Functional & non-functional requirements |
-| [API Doc](doc/apiDoc.md) | core API definitions (560 total in the RBAC matrix) |
-| [Database Doc](doc/databaseDoc.md) | core table definitions; all 145 tables are authoritative in the models |
+| [API Doc](doc/apiDoc.md) | core API definitions (621 total in the RBAC matrix) |
+| [Database Doc](doc/databaseDoc.md) | core table definitions; all 158 tables are authoritative in the models |
 | [Deployment](doc/deployDoc.md) | Dev/prod/Docker deployment guide |
 | [User Manual](doc/user-manual.md) | Role-based operation guide |
 | [Roadmap](doc/todos.md) | Completed & planned modules |
@@ -252,7 +252,7 @@ Every Locust request validates both the HTTP status and response-body `code == 2
 ## ✨ Highlights
 
 - **Broad coverage**: Outpatient + Inpatient + Pharmacy + Lab + Exam + Surgery, 9 domains 40+ modules
-- **Clean code**: 560 route methods organized by module, frontend/backend separation, with local lint, test, audit, and bundle-budget checks
+- **Clean code**: 621 route methods organized by module, frontend/backend separation, with local lint, test, audit, and bundle-budget checks
 - **Great DX**: FastAPI auto docs, hot reload, zero-config SQLite startup
 - **Observable**: Liveness/readiness probes, Prometheus metrics, request IDs, operation auditing, and daily operational aggregates
 - **Secure**: JWT auth, bcrypt passwords, ID masking, operation auditing

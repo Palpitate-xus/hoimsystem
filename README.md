@@ -4,7 +4,7 @@
 
 基于 **Vue 3 + FastAPI** 的中小型医院综合信息管理系统，覆盖 **门诊、住院、药房、检验、体检、收费** 等核心业务全流程。
 
-AI 扩展提供 [80 项能力目录](doc/ai-capabilities.md)、[独立任务 Prompt](doc/ai-prompts.json)、统一网关、业务工作台和仅超级管理员可用的管理中心。门诊、药房、检验、住院、围术期、编码收费、导航预约及运营库存已增加相应数据连接和入口；医疗语音支持私有录音、可选本地CPU识别和听音复核。实际启用仍需配置适用模型、知识及验证状态，见 [AI 使用指南](doc/ai-guide.md) 和 [实施记录](doc/ai-implementation-plan.md)。
+AI 扩展提供 [80 项能力目录](doc/ai-capabilities.md)、[独立任务 Prompt](doc/ai-prompts.json)、统一网关、业务工作台和仅超级管理员可用的管理中心。门诊、药房、检验、住院、围术期、编码收费、导航预约及运营库存已增加相应数据连接和入口；医疗语音支持私有录音、可选本地CPU识别和听音复核，心电支持私有WFDB原文件、原导联波形与候选定位复核及超管治理。心电识别模型尚未接入，实际启用仍需配置适用模型、知识及验证状态，见 [AI 使用指南](doc/ai-guide.md) 和 [实施记录](doc/ai-implementation-plan.md)。
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Vue](https://img.shields.io/badge/Vue-3.x-4FC08D)](https://vuejs.org/)
@@ -17,9 +17,9 @@ AI 扩展提供 [80 项能力目录](doc/ai-capabilities.md)、[独立任务 Pro
 
 | 维度 | 数量 |
 |:----:|:----:|
-| 业务模块 | **84** 个后端路由模块 |
-| API 接口 | **612** 个路由方法（以自动生成的 RBAC 矩阵为准） |
-| 数据库表 | **157** 张已注册表（含 AI 治理表） |
+| 业务模块 | **85** 个后端路由模块 |
+| API 接口 | **621** 个路由方法（以自动生成的 RBAC 矩阵为准） |
+| 数据库表 | **158** 张已注册表（含 AI 治理表） |
 | 前端页面 | **156** 个 Vue 页面文件 |
 | 用户角色 | **11** 种（含超级管理员、检验技师和挂号员） |
 
@@ -177,7 +177,7 @@ AI 扩展提供 [80 项能力目录](doc/ai-capabilities.md)、[独立任务 Pro
 │        Vue 3 · Element Plus · Vuex · Vue Router · Rspack      │
 ├─────────────────────────────────────────────────────────────┤
 │                         应用层 (FastAPI)                       │
-│    84 个路由模块 · 612 个路由方法 · JWT/RBAC · 指标/审计          │
+│    85 个路由模块 · 621 个路由方法 · JWT/RBAC · 指标/审计          │
 ├─────────────────────────────────────────────────────────────┤
 │                         数据层                                 │
 │              SQLite (开发) / PostgreSQL (生产)                 │
@@ -228,7 +228,7 @@ hoimsystem/
 │
 ├── fastapi_be/                 # FastAPI 后端
 │   ├── app/
-│   │   ├── routers/            # 84 个路由模块
+│   │   ├── routers/            # 85 个路由模块
 │   │   │   ├── user.py            # 登录认证
 │   │   │   ├── admin.py           # 管理员（医生/病人/科室）
 │   │   │   ├── patient.py         # 患者服务
@@ -263,7 +263,7 @@ hoimsystem/
 │   │   │   ├── system.py          # 操作日志/字典/配置
 │   │   │   ├── backup.py          # 数据备份
 │   │   │   └── upload.py          # 文件上传
-│   │   ├── models.py           # 模型入口，含 AI 模块共注册 157 张表
+│   │   ├── models.py           # 模型入口，含 AI 模块共注册 158 张表
 │   │   ├── schemas.py          # Pydantic 请求/响应模型
 │   │   ├── dependencies.py     # JWT 解析、权限校验
 │   │   ├── database.py         # 数据库连接
@@ -414,8 +414,8 @@ docker compose up -d
 | [文档总览](doc/README.md) | 所有文档的导航索引 |
 | [架构文档](doc/architecture.md) | 系统架构、技术选型、设计原则 |
 | [需求文档](doc/demandDoc.md) | 功能需求、业务流程、非功能需求 |
-| [API 文档](doc/apiDoc.md) | 核心接口定义（全量 612 见 RBAC 矩阵） |
-| [数据库文档](doc/databaseDoc.md) | 核心表结构说明；全量 157 张表以模型为准 |
+| [API 文档](doc/apiDoc.md) | 核心接口定义（全量 621 见 RBAC 矩阵） |
+| [数据库文档](doc/databaseDoc.md) | 核心表结构说明；全量 158 张表以模型为准 |
 | [部署文档](doc/deployDoc.md) | 开发/生产/Docker 部署指南 |
 | [用户手册](doc/user-manual.md) | 按角色分组的用户操作指南 |
 | [路线图](doc/todos.md) | 已完成功能与待开发模块 |
@@ -428,7 +428,7 @@ docker compose up -d
 ## ✨ 项目亮点
 
 - **业务覆盖广**：门诊 + 住院 + 药房 + 检验 + 体检 + 手术，9 大领域 40+ 模块
-- **工程检查**：612 个路由方法按模块组织，前后端分离，并提供 lint、测试、依赖审计和 bundle 预算检查
+- **工程检查**：621 个路由方法按模块组织，前后端分离，并提供 lint、测试、依赖审计和 bundle 预算检查
 - **开发体验好**：FastAPI 自动文档、热重载、SQLite 零配置启动
 - **可观测性强**：存活/就绪探针、Prometheus 指标、请求 ID、操作审计和每日运营聚合
 - **安全可控**：JWT 认证、bcrypt 密码、身份证号脱敏显示、操作审计

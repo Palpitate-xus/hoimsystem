@@ -31,6 +31,8 @@ async def test_real_jwt_pharmacist_unit_daily_super_review_catalog_and_redaction
     async with AsyncClient(transport=ASGITransport(app=source_app), base_url="http://synthetic") as client:
         pharmacy = auth_headers(case["pharmacist"].username)
         super_headers = auth_headers(case["super"].username)
+        self_identity = await client.get("/api/ai/supply-sources/options", headers=pharmacy)
+        assert self_identity.status_code == 200 and self_identity.json()["data"]["professional_signer_user_id"] == case["pharmacist"].user_id
         response = await client.post("/api/ai/supply-sources/units", json=unit_request(case), headers=pharmacy)
         assert response.status_code == 200
         draft = response.json()["data"]
@@ -77,6 +79,7 @@ async def test_real_jwt_technical_role_may_record_unknown_but_never_sign_as_phar
         assert denied.status_code == 403
         options = await client.get("/api/ai/supply-sources/options", headers=headers)
         assert options.status_code == 200 and options.json()["data"]["items"] == [] and not options.json()["data"]["can_confirm_professional"]
+        assert options.json()["data"]["professional_signer_user_id"] is None
 
 
 @pytest.mark.asyncio

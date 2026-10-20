@@ -77,6 +77,7 @@ def options(
             "targets": list(TARGETS),
             "can_record": True,
             "can_confirm_professional": actor.user_role == "pharmacist",
+            "professional_signer_user_id": actor.user_id if actor.user_role == "pharmacist" else None,
             "can_review": actor.user_role == "super_admin",
             "provider_required": False,
             "scope_note": "当前平台明确授权的全院库存原件；不虚构科室、库房或执照权限。单SKU/单原计数单位，不自动换算，不把目录库存变化当实际历史。",

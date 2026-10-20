@@ -140,7 +140,7 @@ export const asyncRoutes = [
     redirect: "noRedirect",
     name: "Patient",
     alwaysShow: true,
-    meta: { title: "患者服务", icon: "first-aid-kit", permissions: ["patient", "guide"] },
+    meta: { title: "患者服务", icon: "first-aid-kit", permissions: ["patient", "guide", "doctor", "director"] },
     children: [
       {
         path: "triage",
@@ -218,7 +218,7 @@ export const asyncRoutes = [
         path: "referral",
         name: "Referral",
         component: () => import("@/views/patient/referral.vue"),
-        meta: { title: "双向转诊", permissions: ["patient", "admin"] },
+        meta: { title: "双向转诊", permissions: ["admin", "doctor", "director"] },
       },
     ],
   },

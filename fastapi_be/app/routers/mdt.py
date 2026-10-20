@@ -49,6 +49,7 @@ def get_mdt_list(current_user: User = Depends(require_roles(*CLINICAL_ROLES)),
         data.append(
             {
                 "mdt_id": it.mdt_id,
+                "patient_id": it.patient_id,
                 "patient_name": it.patient.name if it.patient else "",
                 "diagnosis": it.diagnosis,
                 "department_ids": it.department_ids,

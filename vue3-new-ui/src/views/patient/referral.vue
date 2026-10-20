@@ -11,8 +11,9 @@
         <el-table-column prop="to_department" label="转入科室" />
         <el-table-column prop="referral_type" label="转诊类型" />
         <el-table-column prop="status_text" label="状态" />
-        <el-table-column label="操作" width="200">
+        <el-table-column label="操作" width="350">
           <template #default="scope">
+            <ai-action v-if="scope.row.patient_id" label="AI 转诊准备" title="AI 所选转诊记录辅助" :patient-id="scope.row.patient_id" :initial-input="{ referral_id: String(scope.row.referral_id) }" :feature-keys="['referral_mdt', 'patient_summary']" initial-feature="referral_mdt" />
             <el-button
               v-if="scope.row.status === 1"
               size="small"
@@ -67,6 +68,7 @@
 <script setup>
 import { ref, onMounted } from "vue";
 import { ElMessage } from "element-plus";
+import AiAction from "@/components/AIAction/index.vue";
 import { createReferral, getReferralList, updateReferralStatus } from "@/api/referral";
 import { getDepartmentList } from "@/api/admin";
 

@@ -34,8 +34,9 @@
         </el-table-column>
         <el-table-column prop="result" label="会诊结果" show-overflow-tooltip />
         <el-table-column prop="create_time" label="创建时间" width="160" />
-        <el-table-column label="操作" width="120">
+        <el-table-column label="操作" width="270">
           <template #default="scope">
+            <ai-action v-if="scope.row.patient_id" label="AI 会诊准备" title="AI 所选MDT病例辅助" :patient-id="scope.row.patient_id" :initial-input="{ mdt_id: String(scope.row.mdt_id) }" :feature-keys="['referral_mdt', 'patient_summary']" initial-feature="referral_mdt" />
             <el-button
               v-if="scope.row.status === 2 && !scope.row.result"
               size="small"
@@ -98,6 +99,7 @@
 <script setup>
 import { ref, onMounted } from "vue";
 import { ElMessage } from "element-plus";
+import AiAction from "@/components/AIAction/index.vue";
 import { createMdt, getMdtList, updateMdt } from "@/api/mdt";
 import { getDepartmentList, getPatientList } from "@/api/admin";
 

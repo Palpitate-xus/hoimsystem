@@ -37,6 +37,7 @@ def get_referral_list(current_user: User = Depends(require_roles(*CLINICAL_ROLES
         data.append(
             {
                 "referral_id": it.referral_id,
+                "patient_id": it.patient_id,
                 "patient_name": it.patient.name if it.patient else "",
                 "from_department": it.from_department.name if it.from_department else "",
                 "to_department": it.to_department.name if it.to_department else "",

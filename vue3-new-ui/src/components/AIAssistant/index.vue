@@ -8,6 +8,7 @@
       </el-form-item>
       <template v-if="selected">
         <div class="feature-description"><strong>需要的资料：</strong>{{ selected.inputs.join('、') }}<br /><strong>预期产出：</strong>{{ selected.deliverables.join('；') }}</div>
+        <p v-if="boundClinicalReferences.length">本次绑定资料：{{ boundClinicalReferences.join('、') }}。所选记录未注明对应就诊；选择就诊仅补充临床背景，不确认其归属。</p>
         <el-alert v-if="!selected.enabled" type="info" :closable="false" title="此功能尚未面向业务启用，由超级管理员配置模型和验证状态。" class="spaced" />
         <el-form-item v-if="selected.scope === 'patient'" label="患者">
           <el-select v-model="patientId" :disabled="!!props.patientId" filterable remote :remote-method="searchPatients" placeholder="搜索有访问权限的患者" style="width: 100%">
@@ -69,6 +70,8 @@
       <ai-service-findings :findings="run.tool_findings" @inspect="inspectEvidence" />
       <ai-operational-findings :findings="run.operational_findings" @inspect="inspectEvidence" />
       <ai-incident-findings :findings="run.incident_findings" @inspect="inspectEvidence" />
+      <ai-consultation-findings :findings="run.consultation_findings" @inspect="inspectEvidence" />
+      <ai-adr-findings :findings="run.adr_findings" @inspect="inspectEvidence" />
       <div v-if="run.tool_findings?.billing_reconciliation" class="spaced">
         <h4>原始账目与执行关联核对</h4><p>{{ run.tool_findings.billing_reconciliation.scope_note }}</p>
         <el-table v-if="run.tool_findings.billing_reconciliation.scope?.kind === 'inpatient'" :data="run.tool_findings.billing_reconciliation.checks" max-height="320" empty-text="本次范围暂无可核对住院费用">
@@ -123,6 +126,8 @@
       <el-alert type="info" :closable="false" title="资料保留时间和状态，缺失信息会单独标记。" />
       <ai-operational-findings v-if="needsOperations" :findings="contextData?.context" @inspect="inspectPreviewEvidence" />
       <ai-incident-findings v-if="needsIncident" :findings="contextData?.context" @inspect="inspectPreviewEvidence" />
+      <ai-consultation-findings :findings="contextData?.context?.consultation_sources" @inspect="inspectPreviewEvidence" />
+      <ai-adr-findings :findings="contextData?.context?.adr_sources" @inspect="inspectPreviewEvidence" />
       <el-collapse v-if="needsOperations"><el-collapse-item title="查看原始资料字段"><pre class="plain-text">{{ JSON.stringify(contextData, null, 2) }}</pre></el-collapse-item></el-collapse>
       <pre v-else class="plain-text">{{ JSON.stringify(contextData, null, 2) }}</pre>
     </el-dialog>
@@ -139,6 +144,8 @@ import { cancelAIRun, createAIRun, getAIClinicalContext, getAIOperationalContext
 import AiServiceFindings from "@/components/AIServiceFindings/index.vue";
 import AiOperationalFindings from "@/components/AIOperationalFindings/index.vue";
 import AiIncidentFindings from "@/components/AIIncidentFindings/index.vue";
+import AiConsultationFindings from "@/components/AIConsultationFindings/index.vue";
+import AiAdrFindings from "@/components/AIAdrFindings/index.vue";
 
 const props = defineProps({ featureKeys: { type: Array, default: () => [] }, initialFeature: { type: String, default: "" }, patientId: { type: Number, default: null }, encounterRef: { type: String, default: "" }, initialInput: { type: Object, default: () => ({}) } });
 const store = useStore();
@@ -155,6 +162,8 @@ const needsAppointment = computed(() => featureKey.value === "appointment_assist
 const needsOperations = computed(() => selected.value?.scope === "hospital"), needsInventory = computed(() => ["supply_forecast", "inventory_optimization"].includes(featureKey.value));
 const needsPlanning = computed(() => ["roster_optimization", "surgery_scheduling"].includes(featureKey.value));
 const needsIncident = computed(() => featureKey.value === "incident_rca"), incidentId = ref("");
+const boundReferenceLabels = { referral_id: "转诊", mdt_id: "MDT", reaction_id: "ADR上报" };
+const boundClinicalReferences = computed(() => Object.entries(boundReferenceLabels).filter(([key]) => props.initialInput[key] != null).map(([key, label]) => `${label} #${props.initialInput[key]}`));
 const operationsRange = ref([]), operationsPlanRange = ref([]), inventoryDrugs = ref([]), inventoryConsumables = ref([]), serviceOptionsLoading = ref(false);
 const serviceOptions = ref({}), serviceDepartment = ref(null), serviceDoctor = ref(null), serviceDate = ref(""), navigationStart = ref(null), navigationEnd = ref(null);
 const serviceDoctors = computed(() => (serviceOptions.value.doctors || []).filter(item => !serviceDepartment.value || item.department_id === serviceDepartment.value));
@@ -253,6 +262,7 @@ function buildTaskInput() {
     catch { ElMessage.error("结构化资料应为有效 JSON 对象"); return; }
   }
   const input = { ...props.initialInput, ...extra, question: question.value };
+  for (const key of Object.keys(boundReferenceLabels)) if (props.initialInput[key] != null) input[key] = String(props.initialInput[key]);
   if (needsCoding.value && codingQuery.value.trim()) input.icd_query = codingQuery.value.trim();
   if (needsAppointment.value) { for (const [key, value] of [["department_id", serviceDepartment.value], ["doctor_id", serviceDoctor.value], ["appointment_date", serviceDate.value]]) { if (value) input[key] = value; else delete input[key]; } }
   if (needsNavigation.value) { for (const [key, value] of [["start_node_id", navigationStart.value], ["end_node_id", navigationEnd.value]]) { if (value) input[key] = value; else delete input[key]; } }

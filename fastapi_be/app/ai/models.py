@@ -428,3 +428,79 @@ class AILabMapping(Base):
     revoked_by = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=True)
     revoked_at = Column(DateTime().with_variant(mysql.DATETIME(fsp=6), "mysql"), nullable=True)
     revoke_reason = Column(String(1000), nullable=False, default="")
+
+
+class AIRiskRuleProfile(Base):
+    """Fixed reviewed implementation profile; publication is separate from clinical validation."""
+
+    __tablename__ = "hoimsystem_ai_risk_rule_profile"
+    __table_args__ = (
+        UniqueConstraint("published_key", name="uq_ai_risk_rule_published"),
+        CheckConstraint("(published_at IS NULL AND implementation_terms_confirmed = 0) OR (published_at IS NOT NULL AND implementation_terms_confirmed = 1)", name="ck_ai_risk_rule_terms"),
+        CheckConstraint(
+            "(status = 'draft' AND revision = 1 AND published_key IS NULL AND published_at IS NULL AND published_by IS NULL AND review_note = '' AND review_evidence_reference = '' AND revoked_at IS NULL AND revoked_by IS NULL AND revoke_reason = '') OR "
+            "(status = 'published' AND revision = 2 AND published_key = identity_hash AND published_key IS NOT NULL AND published_at IS NOT NULL AND published_by IS NOT NULL AND review_note <> '' AND review_evidence_reference <> '' AND revoked_at IS NULL AND revoked_by IS NULL AND revoke_reason = '') OR "
+            "(status = 'revoked' AND published_key IS NULL AND revoked_at IS NOT NULL AND revoked_by IS NOT NULL AND revoke_reason <> '' AND ((revision = 2 AND published_at IS NULL AND published_by IS NULL AND review_note = '' AND review_evidence_reference = '') OR (revision = 3 AND published_at IS NOT NULL AND published_by IS NOT NULL AND review_note <> '' AND review_evidence_reference <> '')))",
+            name="ck_ai_risk_rule_governance",
+        ),
+        Index("idx_ai_risk_rule_status", "rule_id", "status"),
+    )
+
+    rule_profile_id = Column(String(36), primary_key=True, default=new_id)
+    schema_version = Column(String(40), nullable=False)
+    rule_id = Column(String(80), nullable=False)
+    recipe_digest = Column(String(64), nullable=False)
+    policy_digest = Column(String(64), nullable=False)
+    identity_hash = Column(String(64), nullable=False)
+    published_key = Column(String(64), nullable=True)
+    payload_json = Column(Text().with_variant(mysql.MEDIUMTEXT(), "mysql"), nullable=False)
+    content_hash = Column(String(64), nullable=False)
+    created_by = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=False)
+    created_at = Column(DateTime().with_variant(mysql.DATETIME(fsp=6), "mysql"), nullable=False)
+    status = Column(String(24), nullable=False, default="draft")
+    revision = Column(Integer, nullable=False, default=1)
+    published_at = Column(DateTime().with_variant(mysql.DATETIME(fsp=6), "mysql"), nullable=True)
+    published_by = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=True)
+    review_note = Column(String(2000), nullable=False, default="")
+    review_evidence_reference = Column(String(2000), nullable=False, default="")
+    implementation_terms_confirmed = Column(Integer, nullable=False, default=0)
+    revoked_at = Column(DateTime().with_variant(mysql.DATETIME(fsp=6), "mysql"), nullable=True)
+    revoked_by = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=True)
+    revoke_reason = Column(String(1000), nullable=False, default="")
+
+
+class AINews2Assessment(Base):
+    """Explicit point and human applicability declarations, never implicit last-observation fusion."""
+
+    __tablename__ = "hoimsystem_ai_news2_assessment"
+    __table_args__ = (
+        CheckConstraint("observed_at <= created_at", name="ck_ai_news2_assessment_time"),
+        CheckConstraint(
+            "(status = 'active' AND revision = 1 AND revoked_at IS NULL AND revoked_by IS NULL AND revoke_reason = '') OR (status = 'revoked' AND revision = 2 AND revoked_at IS NOT NULL AND revoked_by IS NOT NULL AND revoke_reason <> '')",
+            name="ck_ai_news2_assessment_governance",
+        ),
+        Index("idx_ai_news2_assessment_scope", "patient_id", "admission_id", "created_at"),
+        Index("idx_ai_news2_assessment_window", "window_id", "point_id"),
+    )
+
+    assessment_id = Column(String(36), primary_key=True, default=new_id)
+    patient_id = Column(Integer, ForeignKey("hoimsystem_patient.patient_id"), nullable=False)
+    admission_id = Column(String(36), ForeignKey("hoimsystem_admission.admission_id"), nullable=False)
+    window_id = Column(String(36), ForeignKey("hoimsystem_ai_observation_window.window_id"), nullable=False)
+    window_content_hash = Column(String(64), nullable=False)
+    point_id = Column(String(36), ForeignKey("hoimsystem_inpatient_observation.observation_id"), nullable=False)
+    point_content_hash = Column(String(64), nullable=False)
+    rule_profile_id = Column(String(36), ForeignKey("hoimsystem_ai_risk_rule_profile.rule_profile_id"), nullable=False)
+    rule_profile_content_hash = Column(String(64), nullable=False)
+    recipe_digest = Column(String(64), nullable=False)
+    observed_at = Column(DateTime().with_variant(mysql.DATETIME(fsp=6), "mysql"), nullable=False)
+    created_at = Column(DateTime().with_variant(mysql.DATETIME(fsp=6), "mysql"), nullable=False)
+    created_by = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=False)
+    schema_version = Column(String(40), nullable=False)
+    snapshot_json = Column(Text().with_variant(mysql.MEDIUMTEXT(), "mysql"), nullable=False)
+    content_hash = Column(String(64), nullable=False)
+    status = Column(String(24), nullable=False, default="active")
+    revision = Column(Integer, nullable=False, default=1)
+    revoked_at = Column(DateTime().with_variant(mysql.DATETIME(fsp=6), "mysql"), nullable=True)
+    revoked_by = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=True)
+    revoke_reason = Column(String(1000), nullable=False, default="")

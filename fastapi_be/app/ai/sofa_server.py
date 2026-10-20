@@ -10,15 +10,22 @@ from typing import Literal
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse
-from pydantic import Field, ValidationError, field_validator
+from pydantic import Field, ValidationError, field_validator, model_validator
 
 from app.ai.sofa_config import SofaSettings, runtime_descriptor, runtime_from_descriptor
-from app.ai.sofa_contract import MAX_RESPONSE_BYTES, SofaSource, StrictModel, canonical_json
-from app.ai.sofa_model import compute_sofa, generation_result_for_analysis, validate_analysis_binding
+from app.ai.sofa_contract import MAX_RESPONSE_BYTES, SofaChangeSource, SofaSource, StrictModel, canonical_json
+from app.ai.sofa_model import compute_change, compute_sofa, generation_result_for_analysis, generation_result_for_change_analysis, validate_analysis_binding, validate_change_analysis_binding
 
 
 class SofaTaskContext(StrictModel):
-    sofa_source: SofaSource
+    sofa_source: SofaSource | None = None
+    sofa_change_source: SofaChangeSource | None = None
+
+    @model_validator(mode="after")
+    def exactly_one(self):
+        if (self.sofa_source is None) == (self.sofa_change_source is None):
+            raise ValueError("须且只能提供一份日评估或变化评估")
+        return self
 
 
 class SofaTaskInput(StrictModel):
@@ -43,17 +50,27 @@ class SofaTask(StrictModel):
 
 
 def build_response(task, descriptor):
-    source = task.input.context.sofa_source
     prompt_hash = hashlib.sha256(task.instructions.encode()).hexdigest()
-    analysis = compute_sofa(source, prompt_hash, runtime_from_descriptor(descriptor))
-    validate_analysis_binding(analysis, source, prompt_hash, task.model)
+    runtime = runtime_from_descriptor(descriptor)
+    if task.input.context.sofa_source is not None:
+        source = task.input.context.sofa_source
+        analysis = compute_sofa(source, prompt_hash, runtime)
+        validate_analysis_binding(analysis, source, prompt_hash, task.model)
+        native = {"sofa_analysis": analysis.model_dump()}
+        generation = generation_result_for_analysis(analysis)
+    else:
+        source = task.input.context.sofa_change_source
+        analysis = compute_change(source, prompt_hash, runtime)
+        validate_change_analysis_binding(analysis, source, prompt_hash, task.model)
+        native = {"sofa_change_analysis": analysis.model_dump()}
+        generation = generation_result_for_change_analysis(analysis)
     result = {
         "schema_version": "9",
         "feature_key": "sepsis_risk",
         "model_version": descriptor["model_version"],
         "handled": True,
-        "result": generation_result_for_analysis(analysis),
-        "sofa_analysis": analysis.model_dump(),
+        "result": generation,
+        **native,
         "usage": {"input_tokens": 0, "output_tokens": 0},
     }
     if len(canonical_json(result).encode()) > MAX_RESPONSE_BYTES:

@@ -594,3 +594,151 @@ def generation_result_for_analysis(analysis):
         "warnings": analysis.warnings,
         "missing_data": analysis.missing_data,
     }
+
+
+def change_source_binding(source):
+    observed = source.baseline.source if source.baseline.mode == "observed" else None
+    return {
+        "change_assessment_id": source.change_assessment_id,
+        "source_id": source.source_id,
+        "content_hash": source.content_hash,
+        "assessment_governance_hash": source.assessment_governance_hash,
+        "projection_hash": hash_content(source.model_dump()),
+        "current_assessment_id": source.current.assessment_id,
+        "current_content_hash": source.current.content_hash,
+        "current_projection_hash": hash_content(source.current.model_dump()),
+        "baseline_mode": source.baseline.mode,
+        "baseline_assessment_id": observed.assessment_id if observed else None,
+        "baseline_content_hash": observed.content_hash if observed else None,
+        "baseline_projection_hash": hash_content(observed.model_dump()) if observed else None,
+        "infection_source_id": source.infection.source_id,
+        "infection_content_hash": source.infection.content_hash,
+        "infection_governance_hash": source.infection.governance_hash,
+        "rule_id": RULE_ID,
+        "recipe_digest": recipe_digest(),
+        "policy_digest": policy_digest(),
+    }
+
+
+def compute_change(source, instructions_digest, runtime):
+    """Recompute actual daily evidence twice; never subtract incomplete subtotals."""
+    from app.ai.sofa_contract import SofaChangeAnalysis, SofaChangeSource
+
+    source = SofaChangeSource.model_validate(source)
+    current = compute_sofa(source.current, instructions_digest, runtime)
+    baseline = source.baseline
+    missing = []
+    if baseline.mode == "observed":
+        prior = compute_sofa(baseline.source, instructions_digest, runtime)
+        baseline_analysis = {"mode": "observed", "analysis": prior.model_dump()}
+        bmin, bmax, btotal = prior.lower_bound, prior.upper_bound, prior.complete_total_score
+        baseline_scope = prior.scope_status
+        if btotal is None:
+            missing.append("baseline_complete_total_unavailable")
+    elif baseline.mode == "conditional_zero":
+        confirmed = baseline.no_known_preexisting_organ_dysfunction and baseline.preinfection_baseline_assumption_confirmed
+        bmin, bmax, btotal = 0, 0 if confirmed else 24, 0 if confirmed else None
+        baseline_analysis = {"mode": "conditional_zero", "assumptions_confirmed": confirmed, "lower_bound": bmin, "upper_bound": bmax, "assumed_total_score": btotal, "basis_hash": baseline.basis_hash}
+        baseline_scope = "within_declared_scope" if confirmed else "unknown"
+        missing.append("baseline_zero_is_current_explicit_clinician_assumption_not_measured")
+        if not confirmed:
+            missing.append("conditional_zero_assumptions_not_both_confirmed")
+    else:
+        bmin, bmax, btotal = 0, 24, None
+        baseline_analysis = {"mode": "unknown", "lower_bound": 0, "upper_bound": 24, "basis_hash": baseline.basis_hash}
+        baseline_scope = "unknown"
+        missing.append("baseline_unknown_not_zero")
+    lower, upper = current.lower_bound - bmax, current.upper_bound - bmin
+    complete_delta = current.complete_total_score - btotal if current.complete_total_score is not None and btotal is not None else None
+    threshold = "at_least_two" if lower >= 2 else "below_two" if upper < 2 else "indeterminate"
+    infection = source.infection
+    outside = current.scope_status == "outside_scope" or baseline_scope == "outside_scope" or infection.infection_status == "not_suspected" or infection.current_presence == "no"
+    within = not outside and current.scope_status == baseline_scope == "within_declared_scope" and infection.infection_status in {"suspected", "documented"} and infection.current_presence == "yes"
+    scope = "outside_scope" if outside else "within_declared_scope" if within else "unknown"
+    if current.complete_total_score is None:
+        missing.append("current_complete_total_unavailable")
+    if infection.current_presence != "yes" or infection.infection_status not in {"suspected", "documented"}:
+        missing.append("infection_presence_not_currently_confirmed")
+    if infection.onset_at is None or infection.onset_review != "known":
+        missing.append("infection_onset_unknown_or_not_currently_reviewed")
+    if infection.late_original_available_after_current_as_of:
+        missing.append("infection_original_available_after_current_asof_current_retrospective_only")
+    if source.review.acute_change != "confirmed":
+        missing.append("acute_change_not_clinician_confirmed")
+    if source.review.attribution != "infection_related":
+        missing.append("infection_attribution_not_clinician_confirmed")
+    if source.review.temporal_relation in {"before", "unknown"}:
+        missing.append("temporal_relation_not_clinician_confirmed_as_overlapping_or_after_infection")
+    warnings = WARNINGS + [
+        "两期SOFA-1均从完整冻结原件重新计算；变化范围为当前下界减基线上界、当前上界减基线下界，保留负变化，不相减缺项小计。",
+        "条件性零基线仅为医生明确核实假设，不等于实测正常或缺失默认0；基线未知保留0至24范围。数值变化达到2本身不构成脓毒症诊断。",
+        "感染存在、急性变化、归因与相对感染时序均为当前独立临床判读；本实现不从评分变化或两个日窗口推定这些结论。",
+    ]
+    return SofaChangeAnalysis.model_validate(
+        {
+            "schema_version": "1",
+            "source_binding": change_source_binding(source),
+            "rule_id": RULE_ID,
+            "recipe_digest": recipe_digest(),
+            "policy_digest": policy_digest(),
+            "current_analysis": current.model_dump(),
+            "baseline_analysis": baseline_analysis,
+            "scope_status": scope,
+            "calculation_status": "outside_scope" if outside else "computed" if complete_delta is not None and within else "partial",
+            "delta_lower_bound": lower,
+            "delta_upper_bound": upper,
+            "exact_numeric_delta": lower if lower == upper else None,
+            "complete_delta": complete_delta,
+            "delta_threshold_status": threshold,
+            "acute_change": source.review.acute_change,
+            "attribution": source.review.attribution,
+            "temporal_relation": source.review.temporal_relation,
+            "local_runtime": current.local_runtime.model_dump(),
+            "instructions_digest": instructions_digest,
+            "warnings": warnings,
+            "missing_data": missing,
+            "diagnosis_provided": False,
+            "probability_provided": False,
+            "treatment_provided": False,
+            "historical_prediction": False,
+            "clinical_validation": "not_provided",
+            "independent_implementation": True,
+            "attribution_statement": ATTRIBUTION,
+            "rule_references": RULE_REFERENCES,
+        }
+    )
+
+
+def validate_change_analysis_binding(analysis, source, instructions_digest, model_version):
+    from app.ai.sofa_contract import SofaChangeAnalysis
+
+    analysis = SofaChangeAnalysis.model_validate(analysis)
+    if analysis.local_runtime.model_version != model_version:
+        raise ValueError("SOFA变化所请求模型与实际运行版本不同")
+    expected = compute_change(source, instructions_digest, analysis.local_runtime)
+    if canonical_json(expected.model_dump()) != canonical_json(analysis.model_dump()):
+        raise ValueError("SOFA变化全部原件、两期数学、基线假设、变化界限、归因或固定解释不一致")
+
+
+def generation_result_for_change_analysis(analysis):
+    from app.ai.sofa_contract import SofaChangeAnalysis
+
+    analysis = SofaChangeAnalysis.model_validate(analysis)
+    baseline = {"observed": "实测原基线", "conditional_zero": "明确条件性零基线假设", "unknown": "未知基线"}[analysis.baseline_analysis.mode]
+    exact = f"完整变化{analysis.complete_delta}" if analysis.complete_delta is not None else "完整变化为空"
+    summary = f"SOFA-1采用{baseline}；变化范围{analysis.delta_lower_bound}至{analysis.delta_upper_bound}，{exact}。"
+    summary += "数值变化与临床急变、感染归因分别核对；本结果不是脓毒症诊断、概率或自动治疗依据。"
+    binding = analysis.source_binding
+    return {
+        "summary": summary,
+        "sections": [
+            {
+                "title": "SOFA-1两期完整重算与变化范围",
+                "content": "当前及原基线六轴完整重算、基线模式、精确或部分变化界限和当前医生感染/急变/归因/时序声明见结构化结果；未知基线不补0。",
+                "source_ids": [binding.source_id, analysis.current_analysis.source_binding.source_id, binding.infection_source_id]
+                + ([analysis.baseline_analysis.analysis.source_binding.source_id] if analysis.baseline_analysis.mode == "observed" else []),
+            }
+        ],
+        "warnings": analysis.warnings,
+        "missing_data": analysis.missing_data,
+    }

@@ -877,6 +877,15 @@ INPUT_POLICY = RECIPE["input_policy"]
 INPUT_POLICY["gcs_confounding"] = (
     "complete_measured_EVM_interpretable_confirmed_and_current_doctor_sedation_and_other_confounding_effects_both_explicitly_excluded_no_drug_presence_inference_or_virtual_pre_sedation_score"
 )
+INPUT_POLICY["change"] = {
+    "baseline_modes": ["observed", "conditional_zero", "unknown"],
+    "observed": "same_rule_recipe_policy_independent_current_authorized_day_ends_before_current_day_and_known_infection_onset",
+    "conditional_zero": "both_explicit_current_doctor_assumptions_required_else_zero_to_twentyfour_not_zero",
+    "unknown": "zero_to_twentyfour_never_normal_imputed",
+    "delta": "current_lower_minus_baseline_upper_current_upper_minus_baseline_lower_keep_negative_never_subtract_subtotals",
+    "infection": "actual_governed_original_may_be_available_after_current_asof_explicit_late_flag_current_retrospective_only",
+    "attribution": "explicit_doctor_current_review_never_automatically_inferred_from_delta_or_day_windows",
+}
 AXES = tuple(RECIPE["organ_order"])
 MAX_MEMBERS = 4096
 MAX_DAILY_PUBLIC_BYTES = 2 * 1024 * 1024
@@ -898,3 +907,176 @@ def recipe_digest():
 
 def policy_digest():
     return hash_content(INPUT_POLICY)
+
+
+class SofaObservedBaseline(StrictModel):
+    mode: Literal["observed"]
+    source: SofaSource
+
+
+class SofaConditionalZeroBaseline(StrictModel):
+    mode: Literal["conditional_zero"]
+    no_known_preexisting_organ_dysfunction: bool
+    preinfection_baseline_assumption_confirmed: bool
+    basis_hash: SHA256
+
+
+class SofaUnknownBaseline(StrictModel):
+    mode: Literal["unknown"]
+    basis_hash: SHA256
+
+
+SofaBaseline = Annotated[SofaObservedBaseline | SofaConditionalZeroBaseline | SofaUnknownBaseline, Field(discriminator="mode")]
+
+
+class SofaInfection(OriginalBinding):
+    schema_version: Literal["infection_episode_v1"]
+    support_source_id: UUIDText
+    infection_status: Literal["suspected", "documented", "not_suspected", "unknown"]
+    clinical_scope_start_at: UTCText
+    clinical_scope_end_at: UTCText | None
+    first_suspected_at: UTCText | None
+    onset_at: UTCText | None
+    onset_time_basis: Literal["explicit_clinician_verified_utc", "unknown"]
+    current_presence: YesNoUnknown
+    current_presence_basis_hash: SHA256
+    onset_review: Literal["known", "unknown"]
+    onset_review_basis_hash: SHA256
+    late_original_available_after_current_as_of: bool
+
+    @model_validator(mode="after")
+    def original_episode(self):
+        if self.source_id != f"infection_episode:{self.support_source_id}:{self.content_hash[:12]}":
+            raise ValueError("感染原声明技术绑定不一致")
+        if (self.onset_at is not None) != (self.onset_time_basis == "explicit_clinician_verified_utc"):
+            raise ValueError("原感染onset未知不能由新判读补出时刻")
+        if self.onset_review == "known" and self.onset_at is None:
+            raise ValueError("当前判读不能伪造原未知onset")
+        if self.clinical_scope_end_at is not None and self.clinical_scope_end_at <= self.clinical_scope_start_at:
+            raise ValueError("原感染明确范围终点须晚于起点")
+        clocks = [self.clinical_scope_start_at, self.clinical_scope_end_at, self.first_suspected_at, self.onset_at]
+        if any(value is not None and value > self.recorded_at for value in clocks):
+            raise ValueError("原感染核实范围/疑似/onset晚于其系统登记")
+        return self
+
+
+class SofaChangeReview(StrictModel):
+    acute_change: Literal["confirmed", "not_confirmed", "unknown"]
+    acute_change_basis_hash: SHA256
+    attribution: Literal["infection_related", "not_related", "uncertain"]
+    attribution_basis_hash: SHA256
+    temporal_relation: Literal["before", "overlapping", "after", "unknown"]
+    temporal_relation_basis_hash: SHA256
+
+
+class SofaChangeSource(StrictModel):
+    schema_version: Literal["sofa1_change_source_v1"]
+    change_assessment_id: UUIDText
+    source_id: TechnicalId
+    content_hash: SHA256
+    assessment_governance_hash: SHA256
+    evaluation_at: UTCText
+    current: SofaSource
+    baseline: SofaBaseline
+    infection: SofaInfection
+    review: SofaChangeReview
+    review_mode: Literal["current_retrospective_review"]
+    historical_prediction: Literal[False]
+
+    @model_validator(mode="after")
+    def complete_change(self):
+        if self.source_id != f"sofa_change_assessment:{self.change_assessment_id}:{self.content_hash[:12]}":
+            raise ValueError("SOFA变化评估技术绑定不一致")
+        if self.current.evaluation_at > self.evaluation_at or self.infection.recorded_at > self.evaluation_at:
+            raise ValueError("两期当前可用原评估/感染源不能晚于变化评估登记")
+        if self.infection.late_original_available_after_current_as_of != (self.infection.recorded_at > self.current.as_of):
+            raise ValueError("感染原声明在历史截止后可用的标记不一致")
+        if self.baseline.mode == "observed":
+            baseline = self.baseline.source
+            if baseline.assessment_id == self.current.assessment_id or baseline.end_at > self.current.start_at or baseline.as_of > self.current.as_of or baseline.evaluation_at > self.evaluation_at:
+                raise ValueError("原基线须为独立当前可用且早于当前窗口的真实24h")
+            if (baseline.rule_id, baseline.recipe_digest, baseline.policy_digest) != (self.current.rule_id, self.current.recipe_digest, self.current.policy_digest):
+                raise ValueError("两期必须同一固定SOFA-1规则及原单位政策")
+            if self.infection.onset_at is not None and baseline.end_at > self.infection.onset_at:
+                raise ValueError("已知原感染onset时，基线整日终点须不晚于该onset")
+        if len(canonical_json(self.model_dump()).encode()) > MAX_CHANGE_PUBLIC_BYTES:
+            raise ValueError("完整SOFA变化公共投影超过6MiB，不截断")
+        return self
+
+
+class SofaChangeBinding(StrictModel):
+    change_assessment_id: UUIDText
+    source_id: TechnicalId
+    content_hash: SHA256
+    assessment_governance_hash: SHA256
+    projection_hash: SHA256
+    current_assessment_id: UUIDText
+    current_content_hash: SHA256
+    current_projection_hash: SHA256
+    baseline_mode: Literal["observed", "conditional_zero", "unknown"]
+    baseline_assessment_id: UUIDText | None
+    baseline_content_hash: SHA256 | None
+    baseline_projection_hash: SHA256 | None
+    infection_source_id: TechnicalId
+    infection_content_hash: SHA256
+    infection_governance_hash: SHA256
+    rule_id: Literal["sofa1_native_observed_v1"]
+    recipe_digest: SHA256
+    policy_digest: SHA256
+
+
+class SofaObservedBaselineAnalysis(StrictModel):
+    mode: Literal["observed"]
+    analysis: SofaAnalysis
+
+
+class SofaConditionalZeroBaselineAnalysis(StrictModel):
+    mode: Literal["conditional_zero"]
+    assumptions_confirmed: bool
+    lower_bound: TotalScore
+    upper_bound: TotalScore
+    assumed_total_score: Literal[0] | None
+    basis_hash: SHA256
+
+
+class SofaUnknownBaselineAnalysis(StrictModel):
+    mode: Literal["unknown"]
+    lower_bound: Literal[0]
+    upper_bound: Literal[24]
+    basis_hash: SHA256
+
+
+SofaBaselineAnalysis = Annotated[SofaObservedBaselineAnalysis | SofaConditionalZeroBaselineAnalysis | SofaUnknownBaselineAnalysis, Field(discriminator="mode")]
+DeltaScore = Annotated[int, Field(strict=True, ge=-24, le=24)]
+
+
+class SofaChangeAnalysis(StrictModel):
+    schema_version: Literal["1"]
+    source_binding: SofaChangeBinding
+    rule_id: Literal["sofa1_native_observed_v1"]
+    recipe_digest: SHA256
+    policy_digest: SHA256
+    current_analysis: SofaAnalysis
+    baseline_analysis: SofaBaselineAnalysis
+    scope_status: Literal["within_declared_scope", "outside_scope", "unknown"]
+    calculation_status: Literal["computed", "partial", "outside_scope"]
+    delta_lower_bound: DeltaScore
+    delta_upper_bound: DeltaScore
+    exact_numeric_delta: DeltaScore | None
+    complete_delta: DeltaScore | None
+    delta_threshold_status: Literal["at_least_two", "below_two", "indeterminate"]
+    acute_change: Literal["confirmed", "not_confirmed", "unknown"]
+    attribution: Literal["infection_related", "not_related", "uncertain"]
+    temporal_relation: Literal["before", "overlapping", "after", "unknown"]
+    local_runtime: SofaRuntime
+    instructions_digest: SHA256
+    warnings: list[TechnicalId]
+    missing_data: list[TechnicalId]
+    diagnosis_provided: Literal[False]
+    probability_provided: Literal[False]
+    treatment_provided: Literal[False]
+    historical_prediction: Literal[False]
+    clinical_validation: Literal["not_provided"]
+    independent_implementation: Literal[True]
+    attribution_statement: str
+    rule_references: list[str]

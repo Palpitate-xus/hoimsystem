@@ -6,7 +6,7 @@ import pytest
 
 from app.ai.roster_contract import RosterSource
 from app.ai.roster_model import DAY, MINUTE, WorkIntegral, check_candidate, clock_text, clock_us, merge_intervals, subtract_intervals
-from tests.test_ai_roster_contract import complete_source, fact, limit
+from tests.test_ai_roster_contract import complete_source, fact, identifier, limit
 
 
 def checked(source, selected=None):
@@ -183,3 +183,160 @@ def test_empty_candidate_and_unknown_empty_cohort_are_not_auto_feasible():
     result = checked(source, [])
     assert result.status == "unknown"
     assert result.total_planned_slots == 0
+
+
+def runtime():
+    from app.ai.roster_contract import hash_content, input_policy_digest, recipe_digest
+
+    digest = hash_content("synthetic independently identifiable runtime")
+    return {
+        "engine": "stdlib_roster_branch_and_bound",
+        "model_version": "roster:" + digest,
+        "runtime_digest": digest,
+        "python_version": "synthetic-test-runtime",
+        "engine_versions": {},
+        "core_sha256": {},
+        "recipe_digest": recipe_digest(),
+        "input_policy_digest": input_policy_digest(),
+        "timezone_database_digest": digest,
+        "clinical_validation": "not_provided",
+        "operational_validation": "not_provided",
+        "prompt_handling": "provenance_only",
+    }
+
+
+def small_problem(seed, mode="meet_targets_min_penalty"):
+    import random
+
+    rng = random.Random(seed)
+    source = complete_source()
+    source["objective_mode"] = mode
+    source["work_policies"][0]["minimum_rest_minutes"] = limit(0)
+    source["work_policies"][0]["max_work_minutes_rolling_24h"] = limit(960)
+    source["sessions"][0].update(minimum_staff=1, maximum_staff=2, required_slots=limit(rng.randrange(0, 8)))
+    second = copy.deepcopy(source["sessions"][0])
+    second.update(
+        session_id=identifier(40),
+        start_at="2026-10-20T12:00:00.000000Z" if seed % 2 else "2026-10-21T08:00:00.000000Z",
+        end_at="2026-10-20T20:00:00.000000Z" if seed % 2 else "2026-10-21T16:00:00.000000Z",
+        business_date="2026-10-20" if seed % 2 else "2026-10-21",
+        required_slots=limit(rng.randrange(0, 8)),
+    )
+    source["sessions"].append(second)
+    template = copy.deepcopy(source["staff"][0])
+    for i in range(2):
+        person = copy.deepcopy(template)
+        person.update(staff_id=identifier(100 + i))
+        person["qualifications"][0]["ref"] = fact("qualification", 200 + i)
+        person["availability"][0]["ref"] = fact("availability", 210 + i)
+        source["staff"].append(person)
+    source["work_policies"][0]["applicable_staff_ids"] = [p["staff_id"] for p in source["staff"]]
+    template = copy.deepcopy(source["options"][0])
+    source["options"] = []
+    for si, session in enumerate(source["sessions"]):
+        for pi, person in enumerate(source["staff"]):
+            option = copy.deepcopy(template)
+            option.update(
+                option_id=identifier(300 + si * 10 + pi),
+                staff_id=person["staff_id"],
+                session_id=session["session_id"],
+                cost_points=limit(rng.randrange(0, 6)),
+                slot_capacity=limit(rng.randrange(0, 7)),
+            )
+            source["options"].append(option)
+    return source
+
+
+def exhaustive_oracle(source):
+    import itertools
+
+    typed = RosterSource.model_validate(source)
+    feasible = []
+    for flags in itertools.product((False, True), repeat=len(typed.options)):
+        candidate = check_candidate(typed, [o.option_id for o, selected in zip(typed.options, flags, strict=True) if selected])
+        if candidate.status == "feasible_under_declared_scope":
+            key = (candidate.cost_points,) if typed.objective_mode == "meet_targets_min_penalty" else (-candidate.total_planned_slots, candidate.cost_points)
+            feasible.append(key)
+    return min(feasible) if feasible else None
+
+
+@pytest.mark.parametrize("mode", ["meet_targets_min_penalty", "max_slots_then_min_penalty"])
+@pytest.mark.parametrize("seed", range(8))
+def test_real_branch_and_bound_matches_exhaustive_independent_subset_oracle(seed, mode):
+    from app.ai.roster_model import compute_roster
+
+    source = small_problem(seed, mode)
+    oracle = exhaustive_oracle(source)
+    analysis = compute_roster(source, "a" * 64, runtime())
+    if oracle is None:
+        assert analysis.solve_status == "infeasible_proven"
+        assert analysis.infeasibility_proven
+        assert analysis.solution is None
+    else:
+        assert analysis.solve_status == "optimal_proven"
+        assert analysis.optimality_proven
+        value = analysis.feasible_incumbent_objective
+        actual = (value.penalty_points,) if mode == "meet_targets_min_penalty" else (-value.planned_slots, value.penalty_points)
+        assert actual == oracle
+        assert analysis.solution.status == "feasible_under_declared_scope"
+        assert analysis.penalty_gap_when_slot_bound_closed == 0
+        assert analysis.planned_slots_gap == (0 if mode == "max_slots_then_min_penalty" else None)
+
+
+@pytest.mark.parametrize("field", ["cost_points", "slot_capacity"])
+def test_optimistic_unknown_domain_is_explicit_and_cannot_become_real_solution(field):
+    from app.ai.roster_model import compute_roster
+
+    source = complete_source()
+    source["options"][0][field] = limit(None)
+    analysis = compute_roster(source, "a" * 64, runtime())
+    assert analysis.solve_status == "feasibility_unknown"
+    assert analysis.solution is None
+    assert analysis.optimistic_search.incumbent_objective is not None
+    assert any("domain" in r for r in analysis.optimistic_search.relaxations)
+    assert not analysis.optimality_proven
+
+
+def test_unknown_requirement_scope_cannot_turn_empty_tree_into_all_department_optimum():
+    from app.ai.roster_model import compute_roster
+
+    source = complete_source()
+    source.update(staff=[], sessions=[], options=[], work_policies=[], session_requirements_coverage="unknown")
+    analysis = compute_roster(source, "a" * 64, runtime())
+    assert analysis.solve_status == "input_unknown"
+    assert analysis.solution is None
+    assert not analysis.infeasibility_proven
+    assert not analysis.optimality_proven
+
+
+@pytest.mark.parametrize("stop", ["node_limit_per_graph", "operation_limit_per_graph", "frontier_limit_per_graph"])
+def test_budget_exhaustion_preserves_unexpanded_frontier_bound(monkeypatch, stop):
+    from app.ai.roster_contract import RECIPE
+    from app.ai.roster_model import compute_roster
+
+    monkeypatch.setitem(RECIPE["search"], stop, 1)
+    source = small_problem(0)
+    oracle = exhaustive_oracle(source)
+    analysis = compute_roster(source, "a" * 64, runtime())
+    assert analysis.optimistic_search.termination in ("node_limit", "operation_limit", "frontier_limit")
+    assert analysis.optimistic_search.frontier_nodes >= 1
+    if oracle is not None:
+        assert analysis.optimistic_objective_bound.penalty_points <= oracle[0]
+    assert not analysis.infeasibility_proven
+    assert not analysis.optimality_proven
+
+
+def test_complete_recomputation_rejects_numeric_and_proof_tampering():
+    from app.ai.roster_model import compute_roster, validate_analysis_binding
+
+    source = complete_source()
+    analysis = compute_roster(source, "a" * 64, runtime())
+    validate_analysis_binding(analysis, source, "a" * 64, runtime()["model_version"])
+    for path, replacement in (("solve_status", "feasible_not_proven"), ("instructions_digest", "b" * 64), ("planned_slots_gap", 0)):
+        changed = analysis.model_copy(update={path: replacement})
+        with pytest.raises(ValueError):
+            validate_analysis_binding(changed, source, "a" * 64, runtime()["model_version"])
+    changed = analysis.model_copy(deep=True)
+    changed.optimistic_search.expanded_nodes += 1
+    with pytest.raises(ValueError):
+        validate_analysis_binding(changed, source, "a" * 64, runtime()["model_version"])

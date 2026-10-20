@@ -6,15 +6,25 @@ mathematical relaxations; they never become an observed roster or observed cost.
 
 import bisect
 import hashlib
+import heapq
+from dataclasses import dataclass, replace
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 from app.ai.roster_contract import (
+    MAX_BYTES,
     MAX_SAFE_INTEGER,
+    RECIPE,
+    RosterAnalysis,
+    RosterBinding,
     RosterCandidateCheck,
     RosterCheck,
+    RosterObjectiveValue,
+    RosterSearchProof,
     RosterSessionAllocation,
     RosterSource,
+    canonical_json,
+    hash_content,
 )
 
 MINUTE = 60000000
@@ -493,3 +503,385 @@ def check_candidate(source, selected_option_ids):
 def implementation_hashes():
     base = Path(__file__).parent
     return {name: hashlib.sha256((base / (name + ".py")).read_bytes()).hexdigest() for name in ("roster_contract", "roster_model", "roster_config", "roster_server")}
+
+
+# These are defined work operations, not wall-clock or Python-instruction counts:
+# option eligibility evaluations, produced constraint checks, rolling endpoint
+# evaluations, bound session evaluations and expanded decision nodes.
+class _BudgetStopError(Exception):
+    pass
+
+
+class _Budget:
+    def __init__(self, maximum):
+        self.maximum = maximum
+        self.operations = 0
+
+    def charge(self, amount=1):
+        if self.operations + amount > self.maximum:
+            raise _BudgetStopError
+        self.operations += amount
+
+
+@dataclass(frozen=True)
+class _Node:
+    index: int
+    selected_mask: int
+    counts: tuple
+    capacities: tuple
+    cost: int
+
+
+@dataclass
+class _SearchResult:
+    proof: RosterSearchProof
+    solution: RosterCandidateCheck | None
+
+
+def _objective_key(source, value):
+    return (value.penalty_points,) if source.objective_mode == "meet_targets_min_penalty" else (-value.planned_slots, value.penalty_points)
+
+
+def _objective_from_key(source, key):
+    if key is None:
+        return None
+    return RosterObjectiveValue(planned_slots=None if source.objective_mode == "meet_targets_min_penalty" else -key[0], penalty_points=key[-1])
+
+
+def _candidate_objective(source, candidate):
+    if candidate.status != "feasible_under_declared_scope" or candidate.cost_points is None or candidate.total_planned_slots is None:
+        return None
+    return RosterObjectiveValue(planned_slots=None if source.objective_mode == "meet_targets_min_penalty" else candidate.total_planned_slots, penalty_points=candidate.cost_points)
+
+
+def _relaxations(source, base_checks, option_checks):
+    result = set()
+    unknown_checks = [c for c in base_checks if c.status == "unknown"] + [c for group in option_checks.values() for c in group if c.status == "unknown"]
+    if any(c.kind in ("qualification", "availability") for c in unknown_checks):
+        result.add("unknown_eligibility_allowed")
+    if any(c.kind in ("context_coverage", "accounting") for c in unknown_checks):
+        result.add("unknown_external_duty_omitted")
+        result.add("unknown_work_accounting_lower_bound")
+    if any(c.kind in ("policy", "single_duty_presence", "minimum_rest", "rolling_24h", "rolling_7d", "fixed_minimum_work", "fixed_maximum_work") for c in unknown_checks):
+        result.add("unknown_numeric_constraint_omitted")
+    if any(o.cost_points.value is None for o in source.options):
+        result.add("unknown_cost_nonnegative_domain_lower_bound")
+    if any(o.slot_capacity.value is None for o in source.options) or any(s.facility_slot_ceiling.value is None for s in source.sessions):
+        result.add("unknown_capacity_integer_domain_upper_bound")
+    if any(s.required_slots.value is None for s in source.sessions):
+        result.add("unknown_required_slots_nonnegative_domain_lower_bound")
+    return sorted(result)
+
+
+def _search(source, graph):
+    limits = RECIPE["search"]
+    budget = _Budget(limits["operation_limit_per_graph"])
+    sessions = sorted(source.sessions, key=lambda s: s.session_id)
+    session_map = {s.session_id: s for s in sessions}
+    staff = {p.staff_id: p for p in source.staff}
+    base_checks = [c for p in source.staff for c in _person_checks(source, p, [], session_map, partial=True)]
+    eligibility = {o.option_id: _option_checks(staff[o.staff_id], session_map[o.session_id], o) for o in source.options}
+    relaxation = _relaxations(source, base_checks, eligibility) if graph == "optimistic" else []
+    initial_unknown = source.personnel_coverage != "attested_complete" or source.session_requirements_coverage != "attested_complete"
+    if graph == "definite":
+        initial_unknown |= any(c.status == "unknown" for c in base_checks)
+        initial_unknown |= any(s.required_slots.value is None or s.facility_slot_ceiling.value is None for s in sessions)
+    if initial_unknown:
+        return _SearchResult(
+            RosterSearchProof(
+                graph=graph,
+                expanded_nodes=0,
+                primitive_operations=0,
+                frontier_nodes=0,
+                termination="input_unknown",
+                incumbent_objective=None,
+                optimistic_bound=None,
+                frontier_digest=hash_content([graph, "input_unknown"]),
+                relaxations=relaxation,
+            ),
+            None,
+        )
+    # Every original pair exists in Source.  Only a checked hard exclusion may
+    # remove it from this graph; absence in an input collection never excludes.
+    allowed = [o for o in source.options if not any(c.status == "violated" or graph == "definite" and c.status == "unknown" for c in eligibility[o.option_id])]
+    allowed.sort(key=lambda o: (o.session_id, o.cost_points.value if o.cost_points.value is not None else 0, o.staff_id, o.option_id))
+    session_index = {s.session_id: i for i, s in enumerate(sessions)}
+    option_session = [session_index[o.session_id] for o in allowed]
+    option_capacity = [o.slot_capacity.value if o.slot_capacity.value is not None else RAW_DOMAIN_MAX for o in allowed]
+    option_cost = [o.cost_points.value if o.cost_points.value is not None else 0 for o in allowed]
+    ranges, capacity_suffix, max_capacity_suffix, cost_prefix = [], [], [], []
+    cursor = 0
+    for index, _session in enumerate(sessions):
+        start = cursor
+        while cursor < len(allowed) and option_session[cursor] == index:
+            cursor += 1
+        ranges.append((start, cursor))
+        caps = option_capacity[start:cursor]
+        suffix, maximum = [0] * (len(caps) + 1), [0] * (len(caps) + 1)
+        for position in range(len(caps) - 1, -1, -1):
+            suffix[position] = suffix[position + 1] + caps[position]
+            maximum[position] = max(maximum[position + 1], caps[position])
+        capacity_suffix.append(suffix)
+        max_capacity_suffix.append(maximum)
+        prefix = [0]
+        for value in option_cost[start:cursor]:
+            prefix.append(prefix[-1] + value)
+        cost_prefix.append(prefix)
+
+    def normalize(node):
+        index = node.index
+        while index < len(allowed):
+            si = option_session[index]
+            if node.counts[si] < sessions[si].maximum_staff:
+                break
+            index = ranges[si][1]
+        return replace(node, index=index)
+
+    def bound(node):
+        penalty, total_slots = node.cost, 0
+        for si, session in enumerate(sessions):
+            budget.charge()
+            first, last = ranges[si]
+            position = min(last, max(first, node.index)) - first
+            remaining = last - first - position
+            room = session.maximum_staff - node.counts[si]
+            if room < 0 or node.counts[si] + min(room, remaining) < session.minimum_staff:
+                return None
+            maximum = max_capacity_suffix[si][position]
+            extra_upper = min(capacity_suffix[si][position], min(room, remaining) * maximum)
+            cap_upper = node.capacities[si] + extra_upper
+            ceiling = session.facility_slot_ceiling.value if session.facility_slot_ceiling.value is not None else RAW_DOMAIN_MAX
+            required = session.required_slots.value if session.required_slots.value is not None else 0
+            if min(cap_upper, ceiling) < required:
+                return None
+            needed = max(0, session.minimum_staff - node.counts[si])
+            shortfall = max(0, required - node.capacities[si])
+            if shortfall:
+                if not maximum:
+                    return None
+                needed = max(needed, (shortfall + maximum - 1) // maximum)
+            if needed > min(room, remaining):
+                return None
+            # Canonical session options are sorted by nonnegative domain cost;
+            # cheapest required cardinality ignores coupling, hence admissible.
+            penalty += cost_prefix[si][position + needed] - cost_prefix[si][position]
+            total_slots += min(cap_upper, ceiling)
+        return (penalty,) if source.objective_mode == "meet_targets_min_penalty" else (-total_slots, penalty)
+
+    def leaf_key(node):
+        if source.objective_mode == "meet_targets_min_penalty":
+            return (node.cost,)
+        slots = sum(min(node.capacities[si], s.facility_slot_ceiling.value if s.facility_slot_ceiling.value is not None else RAW_DOMAIN_MAX) for si, s in enumerate(sessions))
+        return (-slots, node.cost)
+
+    def selected_options(node):
+        bits, selected = node.selected_mask, []
+        while bits:
+            lowest = bits & -bits
+            selected.append(allowed[lowest.bit_length() - 1])
+            bits -= lowest
+        return selected
+
+    frontier, serial, expanded = [], 0, 0
+    incumbent_key, real_key, solution = None, None, None
+    termination = "exhausted"
+    root = _Node(0, 0, (0,) * len(sessions), (0,) * len(sessions), 0)
+    base_violated = any(c.status == "violated" for c in base_checks)
+    try:
+        budget.charge(len(source.options) + len(base_checks) + sum(len(c) for c in eligibility.values()))
+        initial_bound = None if base_violated else bound(root)
+    except _BudgetStopError:
+        # Preprocessing cannot consume the root or silently certify anything.
+        generic = (
+            (0,) if source.objective_mode == "meet_targets_min_penalty" else (-sum(s.facility_slot_ceiling.value if s.facility_slot_ceiling.value is not None else RAW_DOMAIN_MAX for s in sessions), 0)
+        )
+        proof = RosterSearchProof(
+            graph=graph,
+            expanded_nodes=0,
+            primitive_operations=budget.operations,
+            frontier_nodes=1,
+            termination="operation_limit",
+            incumbent_objective=None,
+            optimistic_bound=_objective_from_key(source, generic),
+            frontier_digest=hash_content(["unexpanded_root", generic]),
+            relaxations=relaxation,
+        )
+        return _SearchResult(proof, None)
+    if initial_bound is not None:
+        heapq.heappush(frontier, (initial_bound, 0, serial, root))
+    while frontier:
+        if incumbent_key is not None and frontier[0][0] >= incumbent_key:
+            termination = "bound_closed"
+            break
+        if expanded >= limits["node_limit_per_graph"]:
+            termination = "node_limit"
+            break
+        parent_bound, _, _, original = frontier[0]
+        node = normalize(original)
+        children = []
+        new_incumbent, new_real, new_solution = incumbent_key, real_key, solution
+        try:
+            budget.charge()
+            if node.index == len(allowed):
+                candidate = check_candidate(source, [o.option_id for o in selected_options(node)])
+                budget.charge(len(candidate.checks) + sum(c.evaluated_window_count or 0 for c in candidate.checks))
+                possible = candidate.status != "violated" if graph == "optimistic" else candidate.status == "feasible_under_declared_scope"
+                if possible:
+                    key = leaf_key(node)
+                    if new_incumbent is None or key < new_incumbent:
+                        new_incumbent = key
+                    objective = _candidate_objective(source, candidate)
+                    if objective is not None:
+                        key_actual = _objective_key(source, objective)
+                        if new_real is None or key_actual < new_real:
+                            new_real, new_solution = key_actual, candidate
+            else:
+                index = node.index
+                option = allowed[index]
+                si = option_session[index]
+                # Exclusion and inclusion are independent children.  Neither is
+                # committed until both have been bounded within the operation
+                # budget; an interrupted expansion retains its whole parent.
+                excluded = normalize(replace(node, index=index + 1))
+                excluded_bound = bound(excluded)
+                if excluded_bound is not None and (incumbent_key is None or excluded_bound < incumbent_key):
+                    children.append((excluded_bound, excluded))
+                existing = [o for o in selected_options(node) if o.staff_id == option.staff_id]
+                partial_checks = _person_checks(source, staff[option.staff_id], existing + [option], session_map, partial=True)
+                budget.charge(len(partial_checks) + sum(c.evaluated_window_count or 0 for c in partial_checks))
+                if not any(c.status == "violated" or graph == "definite" and c.status == "unknown" for c in partial_checks):
+                    counts, capacities = list(node.counts), list(node.capacities)
+                    counts[si] += 1
+                    capacities[si] += option_capacity[index]
+                    included = normalize(_Node(index + 1, node.selected_mask | (1 << index), tuple(counts), tuple(capacities), node.cost + option_cost[index]))
+                    included_bound = bound(included)
+                    if included_bound is not None and (incumbent_key is None or included_bound < incumbent_key):
+                        children.append((included_bound, included))
+        except _BudgetStopError:
+            termination = "operation_limit"
+            break
+        if len(frontier) - 1 + len(children) > limits["frontier_limit_per_graph"]:
+            termination = "frontier_limit"
+            break
+        heapq.heappop(frontier)
+        expanded += 1
+        incumbent_key, real_key, solution = new_incumbent, new_real, new_solution
+        for child_bound, child in children:
+            serial += 1
+            heapq.heappush(frontier, (child_bound, -child.index, serial, child))
+    candidate_bounds = ([incumbent_key] if incumbent_key is not None else []) + ([frontier[0][0]] if frontier else [])
+    optimum_bound = min(candidate_bounds) if candidate_bounds else None
+    frontier_facts = [
+        {"bound": item[0], "index": item[3].index, "mask": str(item[3].selected_mask), "counts": item[3].counts, "capacities": item[3].capacities, "cost": item[3].cost} for item in sorted(frontier)
+    ]
+    proof = RosterSearchProof(
+        graph=graph,
+        expanded_nodes=expanded,
+        primitive_operations=budget.operations,
+        frontier_nodes=len(frontier),
+        termination=termination,
+        incumbent_objective=_objective_from_key(source, incumbent_key),
+        optimistic_bound=_objective_from_key(source, optimum_bound),
+        frontier_digest=hash_content(frontier_facts),
+        relaxations=relaxation,
+    )
+    return _SearchResult(proof, solution)
+
+
+def compute_roster(source, instructions_digest, runtime):
+    if not isinstance(source, RosterSource):
+        source = RosterSource.model_validate(source)
+    definite, optimistic = _search(source, "definite"), _search(source, "optimistic")
+    candidates = [r.solution for r in (definite, optimistic) if r.solution is not None]
+    solution = min(candidates, key=lambda c: _objective_key(source, _candidate_objective(source, c))) if candidates else None
+    incumbent = _candidate_objective(source, solution) if solution else None
+    bound = optimistic.proof.optimistic_bound
+    infeasible = optimistic.proof.termination == "exhausted" and optimistic.proof.incumbent_objective is None
+    optimal = incumbent is not None and bound is not None and _objective_key(source, incumbent) == _objective_key(source, bound)
+    if incumbent is not None and bound is not None and _objective_key(source, bound) > _objective_key(source, incumbent):
+        raise ValueError("Optimistic lower bound exceeds an actually feasible objective")
+    status = (
+        "input_unknown"
+        if optimistic.proof.termination == "input_unknown"
+        else "infeasible_proven"
+        if infeasible
+        else "optimal_proven"
+        if optimal
+        else "feasible_not_proven"
+        if solution is not None
+        else "feasibility_unknown"
+    )
+    slot_gap = None
+    penalty_gap = None
+    if incumbent is not None and bound is not None:
+        if source.objective_mode == "max_slots_then_min_penalty":
+            slot_gap = bound.planned_slots - incumbent.planned_slots
+        if source.objective_mode == "meet_targets_min_penalty" or slot_gap == 0:
+            penalty_gap = incumbent.penalty_points - bound.penalty_points
+    submitted = check_candidate(source, source.submitted_candidate) if source.submitted_candidate is not None else None
+    base = check_candidate(source, [])
+    missing = sorted({reason for candidate in (base, solution, submitted) if candidate is not None for check in candidate.checks if check.status == "unknown" for reason in check.reason_codes})
+    source_binding = RosterBinding(**{key: getattr(source, key) for key in RosterBinding.model_fields if key != "projection_hash"}, projection_hash=hash_content(source.model_dump()))
+    analysis = RosterAnalysis(
+        schema_version="roster_analysis_v1",
+        source_binding=source_binding,
+        objective_mode=source.objective_mode,
+        solve_status=status,
+        optimality_proven=optimal,
+        infeasibility_proven=infeasible,
+        optimistic_objective_bound=bound,
+        feasible_incumbent_objective=incumbent,
+        planned_slots_gap=slot_gap,
+        penalty_gap_when_slot_bound_closed=penalty_gap,
+        solution=solution,
+        submitted_candidate_check=submitted,
+        definite_search=definite.proof,
+        optimistic_search=optimistic.proof,
+        warnings=[
+            "candidate_plan_only_no_appointment_stock_or_staff_schedule_write",
+            "proof_limited_to_complete_declared_department_cohort_dated_sessions_and_local_reviewed_constraints",
+            "assigned_person_counts_do_not_certify_continuous_instantaneous_staffing",
+            "not_independently_operationally_validated",
+        ],
+        missing_data=missing,
+        instructions_digest=instructions_digest,
+        local_runtime=runtime,
+    )
+    if len(canonical_json(analysis.model_dump()).encode()) > MAX_BYTES:
+        raise ValueError("Complete optimization proof exceeds the UTF-8 bound; no truncation is allowed")
+    return analysis
+
+
+def validate_analysis_binding(analysis, source, instructions_digest, model_version):
+    if not isinstance(analysis, RosterAnalysis):
+        analysis = RosterAnalysis.model_validate(analysis)
+    if analysis.local_runtime.model_version != model_version:
+        raise ValueError("Requested model differs from actual runtime")
+    expected = compute_roster(source, instructions_digest, analysis.local_runtime)
+    if analysis.model_dump() != expected.model_dump():
+        raise ValueError("Complete optimization, candidate constraints, objectives and frontier proof do not recompute")
+    return analysis
+
+
+def generation_result_for_analysis(analysis):
+    if not isinstance(analysis, RosterAnalysis):
+        analysis = RosterAnalysis.model_validate(analysis)
+    descriptions = {
+        "optimal_proven": "已在声明范围与确定性搜索界限下证明所选目标最优。",
+        "feasible_not_proven": "已有满足声明约束的候选方案，尚未证明目标最优。",
+        "infeasible_proven": "在完整声明范围与乐观放宽图中已证明不存在可行方案。",
+        "feasibility_unknown": "尚不能确认存在满足全部声明约束的方案。",
+        "input_unknown": "人员或需求范围不完整，无法给出完整可行性与最优性证明。",
+    }
+    return {
+        "summary": descriptions[analysis.solve_status],
+        "sections": [
+            {
+                "title": "声明范围排班与日期号源候选",
+                "content": "原量、资格、可用性、连续工时、休息、候选与乐观搜索界限见结构化结果；未知项未补0。由排班负责人核对后决定是否采用。",
+                "source_ids": [analysis.source_binding.source_id],
+            }
+        ],
+        "warnings": analysis.warnings,
+        "missing_data": analysis.missing_data,
+    }

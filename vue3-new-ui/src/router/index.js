@@ -30,6 +30,22 @@ export const constantRoutes = [
 
 export const asyncRoutes = [
   {
+    path: "/ai",
+    component: Layout,
+    redirect: "/ai/manage",
+    name: "AIPlatform",
+    alwaysShow: true,
+    meta: { title: "AI 平台", icon: "setting", permissions: ["super_admin"] },
+    children: [
+      {
+        path: "manage",
+        name: "AIManagement",
+        component: () => import("@/views/system/aiManagement.vue"),
+        meta: { title: "AI 管理中心", permissions: ["super_admin"] },
+      },
+    ],
+  },
+  {
     path: "/",
     component: Layout,
     redirect: "/index",

@@ -8,9 +8,9 @@ const seriesMetadata=row=>Object.fromEntries(Object.entries(row).filter(([k])=>!
 
 // These exercise the built application with isolated intercepted API responses.
 // Original source/series/metadata DTOs are actual synthetic backend exports.
-async function setup(page,role='super_admin'){
+async function setup(page,role='super_admin',config={}){
   const state={reads:[],writes:[],bootstrap:[],errors:[]};
-  const feature={...catalog.feature,input_mode:'bed',revision:3,prompt_version:0,active_prompt_id:null,enabled:false,validation_status:'unreviewed',validation_note:'',allowed_roles:catalog.feature.default_roles,provider_id:null,daily_limit:50,setup_check:{ready:false,issues:[],scope_note:'合成界面配置；未启用实际运营预测'}};
+  const feature={...catalog.feature,input_mode:'bed',revision:3,prompt_version:0,active_prompt_id:null,enabled:!!config.operational,validation_status:config.operational?'validated':'unreviewed',validation_note:'',allowed_roles:catalog.feature.default_roles,provider_id:null,daily_limit:50,setup_check:{ready:false,issues:[],scope_note:'合成界面配置；未启用实际运营预测'}};
   page.on('pageerror',error=>state.errors.push(error.message));
   await page.addInitScript(()=>localStorage.setItem('hoim-token','synthetic-bed-production'));
   await page.context().route('**/*',route=>new URL(route.request().url()).origin===new URL(process.env.E2E_BASE_URL||'http://127.0.0.1:4180').origin?route.continue():route.abort('blockedbyclient'));
@@ -20,7 +20,10 @@ async function setup(page,role='super_admin'){
     else if(method==='GET')state.reads.push({path,query:Object.fromEntries(url.searchParams)});
     else state.writes.push({method,path,body:req.postDataJSON()});
     if(path==='/api/userInfo')data={username:'合成床位生产入口',permissions:[role],avatar:''};
-    if(path==='/api/ai/admin/features')data=[feature];
+    if(['/api/ai/admin/features','/api/ai/features'].includes(path))data=[feature];
+    if(path==='/api/ward/getList')data=[{ward_id:1,department_id:1,name:'合成病区',bed_total:1,bed_used:0,bed_free:1}];
+    if(path==='/api/departmentManagement/getList')data=[{id:1,name:'内科'}];
+    if(path==='/api/ai/bed-series')data={items:[],total:0,page:1,page_size:20};
     if(path==='/api/ai/admin/providers')data=[{provider_id:metadataReply.data.provider_id,revision:metadataReply.data.provider_revision,model:metadataReply.data.configured_model,kind:'specialist',name:'合成床位固定服务',supported_features:['bed_forecast'],enabled:false,allows_patient_data:false,timeout_seconds:110,max_output_tokens:16000,temperature:0,validation_report:'尚未进行实际运营范围验证'}];
     if(path.endsWith('/bed-capabilities'))data=metadataReply.data;
     if(path==='/api/ai/bed-sources/options')data=url.searchParams.has('department_id')?source.department_options:source.options;
@@ -94,5 +97,20 @@ test('生产普通管理员直达AI管理页不会读取床位治理或管理接
   const state=await setup(page,'admin');await page.goto('/#/ai/manage');
   await expect(page).toHaveURL(/#\/404/);
   expect(state.reads.filter(r=>r.path.startsWith('/api/ai/admin'))).toEqual([]);
+  expect(state.writes).toEqual([]);bootstrapChecked(state);
+});
+
+
+test('生产病区页面把当前科室和病区传入AI，不默认选择序列或期限',async({page})=>{
+  const state=await setup(page,'admin',{operational:true});await page.goto('/#/inpatient/wardManagement');
+  await page.getByRole('row').filter({hasText:'合成病区'}).click();
+  await page.getByRole('button',{name:'AI 床位占用与流转预测',exact:true}).click();
+  const drawer=page.getByRole('dialog',{name:'AI 床位占用与实际流转辅助',exact:true});
+  await expect(drawer.locator('.el-form-item').filter({hasText:'床位预测科室'})).toContainText('内科 · #1');
+  await expect(drawer.locator('.el-form-item').filter({hasText:'床位预测病区'})).toContainText('合成病区 · #1');
+  await expect(drawer.locator('.el-form-item').filter({hasText:'床位预测期限'})).toContainText('明确7或14天，不默认');
+  await expect(drawer.getByRole('button',{name:'生成辅助建议',exact:true})).toBeDisabled();
+  expect(state.reads.some(r=>r.path==='/api/ai/bed-series'&&r.query.department_id==='1'&&r.query.ward_id==='1')).toBe(true);
+  expect(state.reads.some(r=>r.path==='/api/ai/service-options')).toBe(false);
   expect(state.writes).toEqual([]);bootstrapChecked(state);
 });

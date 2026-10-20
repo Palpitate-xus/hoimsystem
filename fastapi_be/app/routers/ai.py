@@ -140,7 +140,12 @@ def _context_inspection(db: Session, user: User, key: str, patient_id: int, enco
     if spec.scope != "patient":
         raise HTTPException(422, "该能力无需加载患者临床资料")
     bundle = patient_snapshot(db, user, spec, patient_id, encounter_ref, references)
-    return {"code": 200, "msg": "success", "data": {"context": bundle.data, "metadata": context_metadata(bundle), "evidence": bundle.evidence}}
+    context = bundle.data
+    if context.get("sofa_binding"):
+        from app.ai.sofa_context import expand_context
+
+        context = expand_context(db, context, user=user, current=True)
+    return {"code": 200, "msg": "success", "data": {"context": context, "metadata": context_metadata(bundle), "evidence": bundle.evidence}}
 
 
 @router.post("/ai/context")

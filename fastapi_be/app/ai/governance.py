@@ -161,6 +161,8 @@ def active_prompt(db: Session, spec: FeatureSpec, config: AIFeatureConfig | None
 def provider_feature_issues(spec: FeatureSpec, provider: AIProvider) -> list[dict]:
     """Share protocol and data-purpose checks between activation, execution and setup inspection."""
     issues = []
+    if provider.model.startswith("sofa1:") and (spec.number != 42 or provider.kind != "specialist"):
+        issues.append({"code": "SOFA_SCOPE_MISMATCH", "message": "本地SOFA-1固定实施仅用于完整原资料及独立变化核对，不用于自动诊断、风险概率或治疗"})
     if provider.model.startswith("news2:") and (spec.number != 41 or provider.kind != "specialist"):
         issues.append({"code": "NEWS2_SCOPE_MISMATCH", "message": "NEWS2规则服务只用于病情恶化预警的独立评分，不用于其他模型、脓毒症诊断或概率预测"})
     if provider.model.startswith("aki:") and (spec.number != 43 or provider.kind != "specialist"):
@@ -182,6 +184,8 @@ def describe_config(db: Session, spec: FeatureSpec, config: AIFeatureConfig | No
     if spec.number in {41, 42, 43}:
         provider = db.get(AIProvider, config.provider_id) if config and config.provider_id else None
         mode = {41: "news2", 42: "qsofa", 43: "aki"}.get(spec.number)
+        if spec.number == 42 and provider and provider.model.startswith("sofa1:"):
+            mode = "sofa1"
         data["input_mode"] = mode if mode and provider and provider.kind == "specialist" and provider.model.startswith(mode + ":") else "observation_window"
     roles = json.loads(config.allowed_roles_json) if config else list(spec.default_roles)
     _, version = active_prompt(db, spec, config)

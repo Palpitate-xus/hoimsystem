@@ -63,6 +63,8 @@ def setup_reports(db, configs: dict) -> dict:
             issues.extend(provider_checks[provider.provider_id])
             issues.extend(provider_feature_issues(spec, provider))
             rule = {41: ("news2", "news2_2017", "NEWS2"), 42: ("qsofa", "qsofa_sepsis3_2016", "qSOFA"), 43: ("aki", "kdigo_aki_2012", "KDIGO AKI")}.get(spec.number)
+            if spec.number == 42 and provider.model.startswith("sofa1:"):
+                rule = ("sofa1", "sofa1_native_observed_v1", "SOFA-1本地原单位实施")
             if rule and provider.kind == "specialist" and provider.model.startswith(rule[0] + ":"):
                 if rule[1] not in rule_profile_ready:
                     from app.ai.risk_rule_profiles import profile_current
@@ -71,6 +73,8 @@ def setup_reports(db, configs: dict) -> dict:
                         from app.ai.news2_contract import recipe_digest
                     elif rule[0] == "qsofa":
                         from app.ai.qsofa_contract import recipe_digest
+                    elif rule[0] == "sofa1":
+                        from app.ai.sofa_contract import recipe_digest
                     else:
                         from app.ai.aki_contract import recipe_digest
 

@@ -17,6 +17,18 @@ def business_tools(db: Session, spec: FeatureSpec, user: User, patient_id: int |
     """Return explicit tool results and evidence without accepting instructions to execute code."""
     tools: dict = {}
     evidence: list[dict] = []
+    if spec.number == 42 and context.data.get("sofa_binding"):
+        source = context.data["sofa_binding"]
+        return {
+            "sofa_source_input": {
+                "source_id": source["source_id"],
+                "projection_hash": source["projection_hash"],
+                "recipe_digest": source["recipe_digest"],
+                "clinical_score_calculated": False,
+                "historical_prediction": False,
+                "scope_note": "完整原件由已绑定专用SOFA-1服务重算六轴；变化评估独立核对两日、基线假设和当前感染声明，不作诊断或自动治疗",
+            }
+        }, []
     if spec.number == 47 and context.data.get("support_source"):
         source = context.data["support_source"]
         return {

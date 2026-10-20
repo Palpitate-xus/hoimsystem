@@ -323,6 +323,12 @@ def _selected_records(db: Session, user: User, patient_id: int, references: dict
 
 def patient_snapshot(db: Session, user: User, spec: FeatureSpec, patient_id: int, encounter_ref: str | None = None, source_refs: dict | None = None) -> ContextBundle:
     """Build a bounded snapshot without mixing historical diagnoses into confirmed current ones."""
+    if any(key in (source_refs or {}) for key in ("sofa_assessment_id", "sofa_change_assessment_id")):
+        if spec.number != 42:
+            raise HTTPException(422, "完整SOFA日评估及变化核实引用仅用于独立的脓毒症相关原资料核对")
+        from app.ai.sofa_context import sofa_context
+
+        return sofa_context(db, user, patient_id, encounter_ref, source_refs)
     if any((source_refs or {}).get(key) not in (None, "") for key in ("support_source_id", "support_source_kind")):
         if spec.number != 47:
             raise HTTPException(422, "原器官支持资料引用仅用于明确单条交班资料整理")

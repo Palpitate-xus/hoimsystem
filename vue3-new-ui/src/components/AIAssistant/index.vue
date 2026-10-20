@@ -92,7 +92,7 @@
     </el-card>
 
     <el-collapse class="spaced" @change="loadHistory">
-      <el-collapse-item title="最近任务"><el-table :data="history" empty-text="暂无历史任务"><el-table-column prop="feature_name" label="功能" /><el-table-column label="状态" width="90"><template #default="{ row }">{{ statuses[row.status] || row.status }}</template></el-table-column><el-table-column prop="create_time" label="时间" /><el-table-column label="操作" width="80"><template #default="{ row }"><el-button link @click="openRun(row.run_id)">查看</el-button></template></el-table-column></el-table></el-collapse-item>
+      <el-collapse-item title="最近任务"><el-table :data="history" :empty-text="selected?.scope === 'patient' && !patientId ? '先选择患者查看相应任务' : '当前范围暂无历史任务'"><el-table-column prop="feature_name" label="功能" /><el-table-column prop="patient_id" label="患者ID" width="85" /><el-table-column label="状态" width="90"><template #default="{ row }">{{ statuses[row.status] || row.status }}</template></el-table-column><el-table-column prop="create_time" label="时间" /><el-table-column label="操作" width="80"><template #default="{ row }"><el-button link @click="openRun(row.run_id)">查看</el-button></template></el-table-column></el-table></el-collapse-item>
     </el-collapse>
     <el-dialog v-model="contextDialog" title="本次提供给 AI 的患者资料" width="760px"><el-alert type="info" :closable="false" title="资料保留时间和状态，缺失信息会单独标记。" /><pre class="plain-text">{{ JSON.stringify(contextData, null, 2) }}</pre></el-dialog>
     <el-dialog v-model="evidenceDialog" title="核查引用依据" width="760px"><template v-if="evidence"><p><strong>{{ evidence.title }}</strong> {{ evidence.version ? '· ' + evidence.version : '' }}</p><p v-if="evidence.source_uri" class="plain-text">来源：{{ evidence.source_uri }}</p><p v-if="evidence.observed_at">记录时间：{{ evidence.observed_at }}</p><pre class="plain-text">{{ evidence.content }}</pre></template></el-dialog>
@@ -118,7 +118,7 @@ const selected = computed(() => features.value.find(item => item.key === feature
 const needsPrescription = computed(() => ["interaction_review", "allergy_review", "dose_review", "antimicrobial_review"].includes(featureKey.value));
 const needsCoding = computed(() => ["icd_candidates", "drg_evidence_review"].includes(featureKey.value));
 const busy = computed(() => ["queued", "running"].includes(run.value?.status));
-let timer = null, pollVersion = 0, formVersion = 0;
+let timer = null, pollVersion = 0, formVersion = 0, historyVersion = 0, historyOpen = false;
 
 function stopPolling() { pollVersion += 1; clearTimeout(timer); timer = null; }
 function startPolling() {
@@ -163,6 +163,8 @@ watch(patientId, async id => {
   }
 });
 watch(encounterRef, () => { stopPolling(); run.value = null; contextData.value = null; });
+watch(prescriptionId, () => { stopPolling(); run.value = null; });
+watch([featureKey, patientId, encounterRef], () => { historyVersion += 1; history.value = []; if (historyOpen) loadHistory(); });
 watch(() => props.initialFeature, key => { if (features.value.some(item => item.key === key)) featureKey.value = key; });
 watch(() => props.patientId, id => { formVersion += 1; patientId.value = id; });
 watch(() => props.encounterRef, value => { encounterRef.value = value; });
@@ -188,9 +190,15 @@ async function submit() {
   } finally { submitting.value = false; }
 }
 async function refreshRun() { if (run.value) { run.value = (await getAIRun(run.value.run_id)).data; startPolling(); } }
-async function openRun(id) { stopPolling(); run.value = (await getAIRun(id)).data; startPolling(); }
+async function openRun(id) { stopPolling(); const version = historyVersion; const response = await getAIRun(id); if (version !== historyVersion) return; run.value = response.data; startPolling(); }
 async function cancel() { await cancelAIRun(run.value.run_id); await refreshRun(); }
-async function loadHistory() { history.value = (await getAIRuns({ feature_key: featureKey.value || undefined })).data || []; }
+async function loadHistory(activeNames) {
+  if (activeNames !== undefined) historyOpen = activeNames.length > 0;
+  if (!historyOpen || !featureKey.value || (selected.value?.scope === "patient" && !patientId.value)) return;
+  const version = ++historyVersion;
+  const response = await getAIRuns({ feature_key: featureKey.value, patient_id: selected.value?.scope === "patient" ? patientId.value : undefined, encounter_ref: selected.value?.scope === "patient" ? encounterRef.value || undefined : undefined });
+  if (version === historyVersion) history.value = response.data || [];
+}
 const evidenceTitle = id => run.value?.evidence?.find(item => item.source_id === id)?.title || "来源";
 function inspectEvidence(id) { evidence.value = run.value?.evidence?.find(item => item.source_id === id); evidenceDialog.value = !!evidence.value; }
 async function copyDraft() {

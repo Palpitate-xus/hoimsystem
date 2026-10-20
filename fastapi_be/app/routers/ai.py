@@ -112,7 +112,14 @@ def submit_run(req: RunRequest, db: Session = Depends(get_db), user: User = Depe
 
 
 @router.get("/ai/runs")
-def list_runs(feature_key: str | None = None, limit: int = Query(30, ge=1, le=100), db: Session = Depends(get_db), user: User = Depends(get_current_user)) -> dict:
+def list_runs(
+    feature_key: str | None = None,
+    patient_id: int | None = Query(None, ge=1),
+    encounter_ref: str | None = Query(None, max_length=64),
+    limit: int = Query(30, ge=1, le=100),
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+) -> dict:
     """List own tasks; super-admins can inspect global execution history."""
     query = db.query(AIRun)
     if user.user_role != "super_admin":
@@ -120,12 +127,16 @@ def list_runs(feature_key: str | None = None, limit: int = Query(30, ge=1, le=10
     if feature_key:
         authorized_feature(db, user, feature_key)
         query = query.filter_by(feature_key=feature_key)
+    if patient_id is not None:
+        query = query.filter_by(patient_id=patient_id)
+    if encounter_ref:
+        query = query.filter_by(encounter_ref=encounter_ref)
     data = []
     for item in query.order_by(AIRun.create_time.desc()).limit(limit).all():
         try:
             authorize_run(db, user, item)
         except HTTPException as exc:
-            if exc.status_code == 403:
+            if exc.status_code in {403, 404}:
                 continue
             raise
         data.append(describe_run(item, False))

@@ -57,3 +57,39 @@ test("任务准备失败显示服务端原因且不重复提交", async ({ page 
   await expect(page.locator(".el-message--error")).toContainText("未检索到本任务可用的已审核知识");
   expect(calls.filter(item => item.kind === "submission")).toHaveLength(1);
 });
+
+test("切换患者后历史按当前病例查询，迟到的旧病例响应不会覆盖新列表", async ({ page }) => {
+  const requests = [], fulfilled = [];
+  let releaseFirst;
+  const firstGate = new Promise(resolve => { releaseFirst = resolve; });
+  await page.addInitScript(() => localStorage.setItem("hoim-token", "history-test"));
+  await page.route("**/api/**", async route => {
+    const url = new URL(route.request().url());
+    const path = url.pathname;
+    let data = [];
+    if (path === "/api/userInfo") data = { username: "测试医生", permissions: ["doctor"], avatar: "" };
+    if (path === "/api/ai/features") data = [{ key: "patient_summary", number: 1, name: "患者全景摘要", scope: "patient", enabled: true, engine: "llm", inputs: ["患者记录"], deliverables: ["摘要"] }];
+    if (path === "/api/ai/patients") data = [{ patient_id: 1, label: "病例甲 · #1" }, { patient_id: 2, label: "病例乙 · #2" }];
+    if (path === "/api/ai/runs") {
+      requests.push(Object.fromEntries(url.searchParams));
+      const patient = url.searchParams.get("patient_id");
+      if (patient === "1") await firstGate;
+      data = [{ run_id: "history-" + patient, feature_name: patient === "1" ? "病例甲旧任务" : "病例乙当前任务", patient_id: Number(patient), status: "succeeded" }];
+      fulfilled.push(patient);
+    }
+    await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ code: 200, msg: "success", data }) });
+  });
+  await page.goto("/#/ai/workbench");
+  const patient = page.getByRole("combobox", { name: "患者", exact: true });
+  await patient.press("ArrowDown");
+  await page.getByRole("option", { name: "病例甲 · #1", exact: true }).click();
+  await page.getByText("最近任务", { exact: true }).click();
+  await expect.poll(() => requests.some(row => row.patient_id === "1")).toBe(true);
+  await patient.press("ArrowDown");
+  await page.getByRole("option", { name: "病例乙 · #2", exact: true }).click();
+  await expect(page.getByRole("cell", { name: "病例乙当前任务", exact: true })).toBeVisible();
+  releaseFirst();
+  await expect.poll(() => fulfilled.includes("1")).toBe(true);
+  await expect(page.getByRole("cell", { name: "病例甲旧任务", exact: true })).toHaveCount(0);
+  expect(requests.every(row => row.feature_key === "patient_summary" && ["1", "2"].includes(row.patient_id))).toBe(true);
+});

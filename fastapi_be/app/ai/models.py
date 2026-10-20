@@ -86,12 +86,16 @@ class AIKnowledgeDocument(Base):
     __table_args__ = (
         UniqueConstraint("title", "version", name="uq_ai_knowledge_title_version"),
         Index("idx_ai_knowledge_status_category", "status", "category"),
+        Index("idx_ai_knowledge_source", "source_kind", "source_reference_id"),
     )
 
     document_id = Column(String(36), primary_key=True, default=new_id)
     title = Column(String(200), nullable=False)
     version = Column(String(80), nullable=False)
     source_uri = Column(String(2000), nullable=False)
+    source_kind = Column(String(40), nullable=True)
+    source_reference_id = Column(Integer, nullable=True)
+    source_snapshot_hash = Column(String(64), nullable=True)
     category = Column(String(40), nullable=False, default="clinical")
     content = Column(Text, nullable=False)
     content_hash = Column(String(64), nullable=False)

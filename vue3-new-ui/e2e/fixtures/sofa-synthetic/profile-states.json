@@ -1,0 +1,2542 @@
+{
+  "draft": {
+    "clinical_validation": "not_provided",
+    "content_hash": "0a40753e5ba073a62baba2b01b0ba2dd9b13f6c4dd809f32aed42dd1b90b5139",
+    "created_at": "2026-10-20T18:03:38.017819Z",
+    "created_by": 4,
+    "eligible": false,
+    "evidence_reference": "Synthetic implementation review document",
+    "exclusion_reasons": [
+      "profile_not_published"
+    ],
+    "governance_hash": "731b5a0b0b64d0a0d4062203da520568404104a3bb964b2f63db5de1ace3e375",
+    "implementation_current": true,
+    "implementation_terms_confirmed": false,
+    "input_policy": {
+      "capacities": {
+        "change_public_bytes": 6291456,
+        "daily_public_bytes": 2097152,
+        "manifest_members": 4096,
+        "private_bytes": 8388608,
+        "request_bytes": 8388608,
+        "response_bytes": 8388608,
+        "result_bytes": 8388608
+      },
+      "change": {
+        "attribution": "explicit_doctor_current_review_never_automatically_inferred_from_delta_or_day_windows",
+        "baseline_modes": [
+          "observed",
+          "conditional_zero",
+          "unknown"
+        ],
+        "conditional_zero": "both_explicit_current_doctor_assumptions_required_else_zero_to_twentyfour_not_zero",
+        "delta": "current_lower_minus_baseline_upper_current_upper_minus_baseline_lower_keep_negative_never_subtract_subtotals",
+        "infection": "actual_governed_original_may_be_available_after_current_asof_explicit_late_flag_current_retrospective_only",
+        "observed": "same_rule_recipe_policy_independent_current_authorized_day_ends_before_current_day_and_known_infection_onset",
+        "unknown": "zero_to_twentyfour_never_normal_imputed"
+      },
+      "coverage": {
+        "clinical_protocol": [
+          "adequate",
+          "incomplete",
+          "unknown"
+        ],
+        "protocol_complete": "actual_required_measurements_plus_all_members_and_resolved_conditions_never_checkbox_only",
+        "source_inventory": [
+          "complete",
+          "incomplete",
+          "unknown"
+        ]
+      },
+      "facts": {
+        "laboratory_native_units": [
+          "10^9/L",
+          "10^3/uL",
+          "mg/dL",
+          "umol/L",
+          "mm[Hg]",
+          "kPa"
+        ],
+        "laboratory_qualitative": "value_null_type_preserved_original_text_private_only_full_hash_bound",
+        "laboratory_units": "closed_exact_native_units_or_unsupported_or_original_null_unknown_marker_with_full_original_unit_hash_no_free_text_outbound_no_conversion",
+        "numbers": "exact_original_decimal_strings_LIS_signed_preserved_negative_unsupported_value_unknown_other_quantities_nonnegative"
+      },
+      "gcs_confounding": "complete_measured_EVM_interpretable_confirmed_and_current_doctor_sedation_and_other_confounding_effects_both_explicitly_excluded_no_drug_presence_inference_or_virtual_pre_sedation_score",
+      "input_precision": {
+        "maximum_fraction_digits": 8,
+        "maximum_integer_digits": 16,
+        "numbers": "exact_original_decimal_strings_LIS_signed_preserved_negative_unsupported_value_unknown_other_quantities_nonnegative",
+        "quantity_conversion": "only_explicit_fraction_dose_formulas_other_native_branches_never_converted",
+        "rounding": "never",
+        "zero_is_missing": false
+      },
+      "partial_policy": {
+        "complete_total": "all_six_protocol_complete_and_within_declared_scope_and_no_unresolved_rules_or_conflicts",
+        "domain_lower_bound": "retain_all_unambiguous_positive_witnesses_including_bounded_candidates",
+        "domain_upper_bound": "account_for_all_unresolved_candidates_required_modalities_and_incomplete_inventory_or_protocol",
+        "exact_numeric": "bounds_collapse_even_at_ceiling_does_not_assert_coverage_complete",
+        "known_subtotal": "sum_nonnull_exact_observed_candidate_domain_maxima_not_complete_total",
+        "normal_imputation": false,
+        "unknown_domain_bounds": [
+          0,
+          4
+        ]
+      },
+      "population": {
+        "adult": "yes_and_explicit_applicability_confirmation",
+        "care_setting": [
+          "icu",
+          "other"
+        ],
+        "clinical_validation": "not_provided"
+      },
+      "respiratory_qualification": {
+        "original_none_and_new_yes": "incompatible_keep_exact_pf_proven_lower_bound_and_support_unknown_upper_never_award_high_tier_pure_math_hospital_new_signature_rejected",
+        "original_unknown_and_new_yes": "allowed_current_doctor_qualification_with_independent_basis_original_mode_remains_unknown",
+        "other_modes": "doctor_explicit_yes_no_unknown_no_invasive_only_narrowing_or_device_inference"
+      },
+      "review": {
+        "basis": "private_statement_hash_public_only",
+        "historical_prediction": false,
+        "mode": "current_retrospective",
+        "original_flags": "preserve_no_current_review_overwrite",
+        "status": [
+          "confirmed",
+          "excluded",
+          "unknown"
+        ]
+      },
+      "source_policy": {
+        "all_members": "complete_actual_asof_root_and_parent_manifest_no_winner_only",
+        "current_use": "active_creation_governance_match_complete_current_source_set_and_all_parent_governance_recheck",
+        "public": "typed_facts_and_review_hashes_no_free_text_patient_admission_author_or_external_stream_identity",
+        "revoked": "retained_review_excluded_no_normal_imputation"
+      },
+      "vasoactive_overlap": {
+        "cross_drug": "same_actual_physical_stream_key_concurrent_intersection_unknown_never_concatenate_agents",
+        "identity": "only_actual_sha_namespace_and_external_stream_id_no_note_or_drug_name_inference",
+        "other_conflicts": "original_identity_lab_pao2_gcs_and_other_unresolved_groups_remain_dependent_candidate_unknown",
+        "policy": "actual_same_stream_piecewise_overlap_unknown_v1",
+        "unresolved_same_stream_overlap": "only_actual_intersection_unknown_retain_independent_nonoverlap_completed_tier_witness"
+      }
+    },
+    "name": "Synthetic NEWS2 profile",
+    "published_at": null,
+    "published_by": null,
+    "rationale": "合成测试明确核对实施版本和原采样时点的人群适用性；这是人工声明而非独立临床验证。",
+    "recipe": {
+      "cardiovascular": {
+        "actual_route": "doctor_confirmed_continuous_iv_no_old_order_route_parsing_or_bolus_inference",
+        "cross_drug_policy": "separate_agents_no_ne_epinephrine_sum_no_equivalent_conversion",
+        "dobutamine": [
+          {
+            "above": "0",
+            "score": 2
+          }
+        ],
+        "dopamine": [
+          {
+            "above": "15",
+            "score": 4
+          },
+          {
+            "above": "5",
+            "at_most": "15",
+            "score": 3
+          },
+          {
+            "above": "0",
+            "at_most": "5",
+            "score": 2
+          }
+        ],
+        "dose_arithmetic": "reduced_exact_fraction_of_original_decimal_inputs_direct_normalized_rate_never_divided_twice",
+        "duration_policy": "local_band_continuity_1h_v1_not_claimed_official_resolution_of_1996_duration_ambiguity",
+        "duration_witness": "each_agent_and_score_predicate_contiguous_true_prefix_allowed_no_gap_or_cross_agent_join_complete_end_b_after_period_start_and_at_or_before_period_end_positive_in_period_exposure",
+        "epinephrine": [
+          {
+            "above": "0.1",
+            "score": 4
+          },
+          {
+            "above": "0",
+            "at_most": "0.1",
+            "score": 3
+          }
+        ],
+        "map": {
+          "below": "70",
+          "missing_branch_bounds": [
+            0,
+            1
+          ],
+          "score": 1,
+          "unit": "mm[Hg]"
+        },
+        "mass_basis": "original_mapping_base_only_and_explicit_compatible_clinician_review_unknown_or_salt_remains_unknown_no_implicit_factor",
+        "minimum_continuous_microseconds": 3600000000,
+        "norepinephrine": [
+          {
+            "above": "0.1",
+            "score": 4
+          },
+          {
+            "above": "0",
+            "at_most": "0.1",
+            "score": 3
+          }
+        ],
+        "normalization": {
+          "mg/h": "original_rate_times_1000_divided_by_60_times_actual_applicable_weight_kg",
+          "pump_mg/mL": "concentration_times_1000_times_pump_ml_h_divided_by_60_times_actual_applicable_weight_kg",
+          "pump_ug/mL": "concentration_times_pump_ml_h_divided_by_60_times_actual_applicable_weight_kg",
+          "ug/kg/min": "original_rate",
+          "ug/min": "original_rate_divided_by_actual_applicable_weight_kg",
+          "weight": "explicit_original_measured_kg_positive_observed_no_later_than_start_recorded_by_asof_original_applicability_true_plus_current_use_confirmed_no_default"
+        },
+        "overlap_policy": "actual_same_stream_piecewise_overlap_unknown_v1_nonoverlap_completed_hour_preserved_cross_drug_same_physical_key_overlap_blocked_no_cross_agent_time_join",
+        "positive_drug_dose_unit": "ug/kg/min",
+        "short_high_dose": "preserve_original_exposure_duration_condition_not_satisfied_no_clinical_reassurance",
+        "stream_policy": "same_drug_explicit_distinct_parallel_stream_rates_sum_piecewise_no_duplicate_or_agent_total_double_count_unresolved_overlap_unknown_stream_key_sha_namespace_and_external_id_only_no_note",
+        "verified_extent": "actual_start_through_verified_until_only_no_forward_fill_or_future_completion",
+        "zero": "never_positive_exposure_never_any_dose_score"
+      },
+      "clinical_validation": "not_provided",
+      "cns": {
+        "bands": [
+          [
+            15,
+            15,
+            0
+          ],
+          [
+            13,
+            14,
+            1
+          ],
+          [
+            10,
+            12,
+            2
+          ],
+          [
+            6,
+            9,
+            3
+          ],
+          [
+            3,
+            5,
+            4
+          ]
+        ],
+        "policy": "measured_interpretable_only_no_nt_to_one_default_fifteen_avpu_proxy_component_fusion_or_carry_forward",
+        "source": "one_actual_full_eye_verbal_motor_exam_only"
+      },
+      "coagulation": {
+        "bands": [
+          [
+            "150",
+            null,
+            true,
+            false,
+            0
+          ],
+          [
+            "100",
+            "150",
+            true,
+            false,
+            1
+          ],
+          [
+            "50",
+            "100",
+            true,
+            false,
+            2
+          ],
+          [
+            "20",
+            "50",
+            true,
+            false,
+            3
+          ],
+          [
+            "0",
+            "20",
+            true,
+            false,
+            4
+          ]
+        ],
+        "native_units": [
+          "10^9/L",
+          "10^3/uL"
+        ],
+        "unit_policy": "explicit_native_numeric_equivalence_only_no_fuzzy_unit_matching"
+      },
+      "diagnosis": "not_provided",
+      "input_policy": {
+        "capacities": {
+          "change_public_bytes": 6291456,
+          "daily_public_bytes": 2097152,
+          "manifest_members": 4096,
+          "private_bytes": 8388608,
+          "request_bytes": 8388608,
+          "response_bytes": 8388608,
+          "result_bytes": 8388608
+        },
+        "change": {
+          "attribution": "explicit_doctor_current_review_never_automatically_inferred_from_delta_or_day_windows",
+          "baseline_modes": [
+            "observed",
+            "conditional_zero",
+            "unknown"
+          ],
+          "conditional_zero": "both_explicit_current_doctor_assumptions_required_else_zero_to_twentyfour_not_zero",
+          "delta": "current_lower_minus_baseline_upper_current_upper_minus_baseline_lower_keep_negative_never_subtract_subtotals",
+          "infection": "actual_governed_original_may_be_available_after_current_asof_explicit_late_flag_current_retrospective_only",
+          "observed": "same_rule_recipe_policy_independent_current_authorized_day_ends_before_current_day_and_known_infection_onset",
+          "unknown": "zero_to_twentyfour_never_normal_imputed"
+        },
+        "coverage": {
+          "clinical_protocol": [
+            "adequate",
+            "incomplete",
+            "unknown"
+          ],
+          "protocol_complete": "actual_required_measurements_plus_all_members_and_resolved_conditions_never_checkbox_only",
+          "source_inventory": [
+            "complete",
+            "incomplete",
+            "unknown"
+          ]
+        },
+        "facts": {
+          "laboratory_native_units": [
+            "10^9/L",
+            "10^3/uL",
+            "mg/dL",
+            "umol/L",
+            "mm[Hg]",
+            "kPa"
+          ],
+          "laboratory_qualitative": "value_null_type_preserved_original_text_private_only_full_hash_bound",
+          "laboratory_units": "closed_exact_native_units_or_unsupported_or_original_null_unknown_marker_with_full_original_unit_hash_no_free_text_outbound_no_conversion",
+          "numbers": "exact_original_decimal_strings_LIS_signed_preserved_negative_unsupported_value_unknown_other_quantities_nonnegative"
+        },
+        "gcs_confounding": "complete_measured_EVM_interpretable_confirmed_and_current_doctor_sedation_and_other_confounding_effects_both_explicitly_excluded_no_drug_presence_inference_or_virtual_pre_sedation_score",
+        "input_precision": {
+          "maximum_fraction_digits": 8,
+          "maximum_integer_digits": 16,
+          "numbers": "exact_original_decimal_strings_LIS_signed_preserved_negative_unsupported_value_unknown_other_quantities_nonnegative",
+          "quantity_conversion": "only_explicit_fraction_dose_formulas_other_native_branches_never_converted",
+          "rounding": "never",
+          "zero_is_missing": false
+        },
+        "partial_policy": {
+          "complete_total": "all_six_protocol_complete_and_within_declared_scope_and_no_unresolved_rules_or_conflicts",
+          "domain_lower_bound": "retain_all_unambiguous_positive_witnesses_including_bounded_candidates",
+          "domain_upper_bound": "account_for_all_unresolved_candidates_required_modalities_and_incomplete_inventory_or_protocol",
+          "exact_numeric": "bounds_collapse_even_at_ceiling_does_not_assert_coverage_complete",
+          "known_subtotal": "sum_nonnull_exact_observed_candidate_domain_maxima_not_complete_total",
+          "normal_imputation": false,
+          "unknown_domain_bounds": [
+            0,
+            4
+          ]
+        },
+        "population": {
+          "adult": "yes_and_explicit_applicability_confirmation",
+          "care_setting": [
+            "icu",
+            "other"
+          ],
+          "clinical_validation": "not_provided"
+        },
+        "respiratory_qualification": {
+          "original_none_and_new_yes": "incompatible_keep_exact_pf_proven_lower_bound_and_support_unknown_upper_never_award_high_tier_pure_math_hospital_new_signature_rejected",
+          "original_unknown_and_new_yes": "allowed_current_doctor_qualification_with_independent_basis_original_mode_remains_unknown",
+          "other_modes": "doctor_explicit_yes_no_unknown_no_invasive_only_narrowing_or_device_inference"
+        },
+        "review": {
+          "basis": "private_statement_hash_public_only",
+          "historical_prediction": false,
+          "mode": "current_retrospective",
+          "original_flags": "preserve_no_current_review_overwrite",
+          "status": [
+            "confirmed",
+            "excluded",
+            "unknown"
+          ]
+        },
+        "source_policy": {
+          "all_members": "complete_actual_asof_root_and_parent_manifest_no_winner_only",
+          "current_use": "active_creation_governance_match_complete_current_source_set_and_all_parent_governance_recheck",
+          "public": "typed_facts_and_review_hashes_no_free_text_patient_admission_author_or_external_stream_identity",
+          "revoked": "retained_review_excluded_no_normal_imputation"
+        },
+        "vasoactive_overlap": {
+          "cross_drug": "same_actual_physical_stream_key_concurrent_intersection_unknown_never_concatenate_agents",
+          "identity": "only_actual_sha_namespace_and_external_stream_id_no_note_or_drug_name_inference",
+          "other_conflicts": "original_identity_lab_pao2_gcs_and_other_unresolved_groups_remain_dependent_candidate_unknown",
+          "policy": "actual_same_stream_piecewise_overlap_unknown_v1",
+          "unresolved_same_stream_overlap": "only_actual_intersection_unknown_retain_independent_nonoverlap_completed_tier_witness"
+        }
+      },
+      "liver": {
+        "analyte": "total_bilirubin",
+        "bands": {
+          "mg/dL": [
+            [
+              "0",
+              "1.2",
+              true,
+              false,
+              0
+            ],
+            [
+              "1.2",
+              "2",
+              true,
+              false,
+              1
+            ],
+            [
+              "2",
+              "6",
+              true,
+              false,
+              2
+            ],
+            [
+              "6",
+              "12",
+              true,
+              false,
+              3
+            ],
+            [
+              "12",
+              null,
+              true,
+              false,
+              4
+            ]
+          ],
+          "umol/L": [
+            [
+              "0",
+              "20",
+              true,
+              false,
+              0
+            ],
+            [
+              "20",
+              "33",
+              true,
+              false,
+              1
+            ],
+            [
+              "33",
+              "102",
+              true,
+              false,
+              2
+            ],
+            [
+              "102",
+              "204",
+              true,
+              false,
+              3
+            ],
+            [
+              "204",
+              null,
+              true,
+              false,
+              4
+            ]
+          ]
+        },
+        "native_policy": "local_mimic_mgdl_continuous_and_amsterdam_si_native_not_exact_converted_equivalence_no_claim_of_official_1996_erratum"
+      },
+      "organ_order": [
+        "respiratory",
+        "coagulation",
+        "liver",
+        "cardiovascular",
+        "cns",
+        "renal"
+      ],
+      "partial_policy": {
+        "complete_total": "all_six_protocol_complete_and_within_declared_scope_and_no_unresolved_rules_or_conflicts",
+        "domain_lower_bound": "retain_all_unambiguous_positive_witnesses_including_bounded_candidates",
+        "domain_upper_bound": "account_for_all_unresolved_candidates_required_modalities_and_incomplete_inventory_or_protocol",
+        "exact_numeric": "bounds_collapse_even_at_ceiling_does_not_assert_coverage_complete",
+        "known_subtotal": "sum_nonnull_exact_observed_candidate_domain_maxima_not_complete_total",
+        "normal_imputation": false,
+        "unknown_domain_bounds": [
+          0,
+          4
+        ]
+      },
+      "period": {
+        "aggregation": "maximum_eligible_candidate_per_domain_never_mix_different_samples_or_gcs_components",
+        "availability": "all_original_recorded_registered_available_at_or_before_as_of",
+        "duration_microseconds": 86400000000,
+        "point_membership": "start_inclusive_end_exclusive",
+        "review": "current_retrospective_evaluation_at_not_historical_prediction"
+      },
+      "population": "clinician_declared_adult_no_qsofa_non_icu_or_news2_pregnancy_exclusion_no_independent_clinical_validation",
+      "probability": "not_provided",
+      "prompt_handling": "provenance_only",
+      "renal": {
+        "combine": "max_creatinine_and_urine_branch_bounds_neither_missing_branch_normal_imputed",
+        "creatinine_bands": {
+          "mg/dL": [
+            [
+              "0",
+              "1.2",
+              true,
+              false,
+              0
+            ],
+            [
+              "1.2",
+              "2",
+              true,
+              false,
+              1
+            ],
+            [
+              "2",
+              "3.5",
+              true,
+              false,
+              2
+            ],
+            [
+              "3.5",
+              "5",
+              true,
+              false,
+              3
+            ],
+            [
+              "5",
+              null,
+              true,
+              false,
+              4
+            ]
+          ],
+          "umol/L": [
+            [
+              "0",
+              "110",
+              true,
+              false,
+              0
+            ],
+            [
+              "110",
+              "171",
+              true,
+              false,
+              1
+            ],
+            [
+              "171",
+              "300",
+              true,
+              false,
+              2
+            ],
+            [
+              "300",
+              "440",
+              true,
+              true,
+              3
+            ],
+            [
+              "440",
+              null,
+              false,
+              false,
+              4
+            ]
+          ]
+        },
+        "native_policy": "local_mimic_mgdl_and_amsterdam_si_cr440_inclusive_score3_not_exact_converted_equivalence",
+        "rrt": "not_a_sofa1_automatic_four_rule",
+        "urine": {
+          "at_least_200_below_500": 3,
+          "at_least_500_branch_contribution": 0,
+          "below_200": 4,
+          "unit": "mL/24h"
+        },
+        "urine_policy": "all_whole_original_intervals_exact_24h_tiling_no_overlap_gap_partial_collection_unknown_volume_or_non_patient_total_no_clip_proration_short_period_extrapolation_or_weight_normalization"
+      },
+      "respiratory": {
+        "comparison": "100_times_pao2_cross_compare_threshold_times_original_fio2_percent_no_rounded_division",
+        "fio2_eligibility": "positive_at_most_100_explicit_original_pair_no_room_air_default",
+        "fio2_unit": "%",
+        "kpa": "independent_rounded_native_thresholds_from_sepsis3_printed_table_no_conversion_or_equivalence_claim",
+        "pao2_units": [
+          "mm[Hg]",
+          "kPa"
+        ],
+        "qualification_consistency_policy": "doctor_yes_requires_original_mode_not_explicit_none_v1_unknown_mode_may_remain_unknown_with_current_explicit_qualification_yes_no_inference",
+        "qualifying_support": "explicit_current_doctor_review_with_basis_hash_never_device_mode_inference",
+        "sample_review": "arterial_sample_same_sampling_state_and_fio2_applicability_all_confirmed",
+        "support_policy": "local_doctor_adjudicated_per_actual_pair_yes_no_unknown_v1",
+        "thresholds_kpa": [
+          "53.3",
+          "40",
+          "26.7",
+          "13.3"
+        ],
+        "thresholds_mmhg": [
+          "400",
+          "300",
+          "200",
+          "100"
+        ],
+        "unknown_support_low_ratio_bounds": {
+          "100_to_below_200": [
+            2,
+            3
+          ],
+          "below_100": [
+            2,
+            4
+          ]
+        },
+        "without_qualifying_support_maximum": 2
+      },
+      "rule_family": "SOFA1",
+      "rule_id": "sofa1_native_observed_v1",
+      "scoring_status": "local_explicit_sofa1_implementation_not_sofa2_or_manual_components",
+      "treatment": "not_provided",
+      "version": "sofa1_native_observed_local_policy_v1"
+    },
+    "recipe_digest": "849854d26deb3e5d42e9433d839a5db0b365e85206ea5272b6592d75d4769199",
+    "review_basis": "human_implementation_review_not_clinical_validation",
+    "review_evidence_reference": "",
+    "review_note": "",
+    "revision": 1,
+    "revoke_reason": "",
+    "revoked_at": null,
+    "revoked_by": null,
+    "rule_id": "sofa1_native_observed_v1",
+    "rule_profile_id": "afd20aa4-f6d8-4d8f-9238-9f94d452e9ff",
+    "schema_version": "risk_rule_profile_v1",
+    "source_id": "risk_rule_profile:afd20aa4-f6d8-4d8f-9238-9f94d452e9ff:0a40753e5ba0",
+    "status": "draft"
+  },
+  "option": {
+    "input_policy": {
+      "capacities": {
+        "change_public_bytes": 6291456,
+        "daily_public_bytes": 2097152,
+        "manifest_members": 4096,
+        "private_bytes": 8388608,
+        "request_bytes": 8388608,
+        "response_bytes": 8388608,
+        "result_bytes": 8388608
+      },
+      "change": {
+        "attribution": "explicit_doctor_current_review_never_automatically_inferred_from_delta_or_day_windows",
+        "baseline_modes": [
+          "observed",
+          "conditional_zero",
+          "unknown"
+        ],
+        "conditional_zero": "both_explicit_current_doctor_assumptions_required_else_zero_to_twentyfour_not_zero",
+        "delta": "current_lower_minus_baseline_upper_current_upper_minus_baseline_lower_keep_negative_never_subtract_subtotals",
+        "infection": "actual_governed_original_may_be_available_after_current_asof_explicit_late_flag_current_retrospective_only",
+        "observed": "same_rule_recipe_policy_independent_current_authorized_day_ends_before_current_day_and_known_infection_onset",
+        "unknown": "zero_to_twentyfour_never_normal_imputed"
+      },
+      "coverage": {
+        "clinical_protocol": [
+          "adequate",
+          "incomplete",
+          "unknown"
+        ],
+        "protocol_complete": "actual_required_measurements_plus_all_members_and_resolved_conditions_never_checkbox_only",
+        "source_inventory": [
+          "complete",
+          "incomplete",
+          "unknown"
+        ]
+      },
+      "facts": {
+        "laboratory_native_units": [
+          "10^9/L",
+          "10^3/uL",
+          "mg/dL",
+          "umol/L",
+          "mm[Hg]",
+          "kPa"
+        ],
+        "laboratory_qualitative": "value_null_type_preserved_original_text_private_only_full_hash_bound",
+        "laboratory_units": "closed_exact_native_units_or_unsupported_or_original_null_unknown_marker_with_full_original_unit_hash_no_free_text_outbound_no_conversion",
+        "numbers": "exact_original_decimal_strings_LIS_signed_preserved_negative_unsupported_value_unknown_other_quantities_nonnegative"
+      },
+      "gcs_confounding": "complete_measured_EVM_interpretable_confirmed_and_current_doctor_sedation_and_other_confounding_effects_both_explicitly_excluded_no_drug_presence_inference_or_virtual_pre_sedation_score",
+      "input_precision": {
+        "maximum_fraction_digits": 8,
+        "maximum_integer_digits": 16,
+        "numbers": "exact_original_decimal_strings_LIS_signed_preserved_negative_unsupported_value_unknown_other_quantities_nonnegative",
+        "quantity_conversion": "only_explicit_fraction_dose_formulas_other_native_branches_never_converted",
+        "rounding": "never",
+        "zero_is_missing": false
+      },
+      "partial_policy": {
+        "complete_total": "all_six_protocol_complete_and_within_declared_scope_and_no_unresolved_rules_or_conflicts",
+        "domain_lower_bound": "retain_all_unambiguous_positive_witnesses_including_bounded_candidates",
+        "domain_upper_bound": "account_for_all_unresolved_candidates_required_modalities_and_incomplete_inventory_or_protocol",
+        "exact_numeric": "bounds_collapse_even_at_ceiling_does_not_assert_coverage_complete",
+        "known_subtotal": "sum_nonnull_exact_observed_candidate_domain_maxima_not_complete_total",
+        "normal_imputation": false,
+        "unknown_domain_bounds": [
+          0,
+          4
+        ]
+      },
+      "population": {
+        "adult": "yes_and_explicit_applicability_confirmation",
+        "care_setting": [
+          "icu",
+          "other"
+        ],
+        "clinical_validation": "not_provided"
+      },
+      "respiratory_qualification": {
+        "original_none_and_new_yes": "incompatible_keep_exact_pf_proven_lower_bound_and_support_unknown_upper_never_award_high_tier_pure_math_hospital_new_signature_rejected",
+        "original_unknown_and_new_yes": "allowed_current_doctor_qualification_with_independent_basis_original_mode_remains_unknown",
+        "other_modes": "doctor_explicit_yes_no_unknown_no_invasive_only_narrowing_or_device_inference"
+      },
+      "review": {
+        "basis": "private_statement_hash_public_only",
+        "historical_prediction": false,
+        "mode": "current_retrospective",
+        "original_flags": "preserve_no_current_review_overwrite",
+        "status": [
+          "confirmed",
+          "excluded",
+          "unknown"
+        ]
+      },
+      "source_policy": {
+        "all_members": "complete_actual_asof_root_and_parent_manifest_no_winner_only",
+        "current_use": "active_creation_governance_match_complete_current_source_set_and_all_parent_governance_recheck",
+        "public": "typed_facts_and_review_hashes_no_free_text_patient_admission_author_or_external_stream_identity",
+        "revoked": "retained_review_excluded_no_normal_imputation"
+      },
+      "vasoactive_overlap": {
+        "cross_drug": "same_actual_physical_stream_key_concurrent_intersection_unknown_never_concatenate_agents",
+        "identity": "only_actual_sha_namespace_and_external_stream_id_no_note_or_drug_name_inference",
+        "other_conflicts": "original_identity_lab_pao2_gcs_and_other_unresolved_groups_remain_dependent_candidate_unknown",
+        "policy": "actual_same_stream_piecewise_overlap_unknown_v1",
+        "unresolved_same_stream_overlap": "only_actual_intersection_unknown_retain_independent_nonoverlap_completed_tier_witness"
+      }
+    },
+    "recipe": {
+      "cardiovascular": {
+        "actual_route": "doctor_confirmed_continuous_iv_no_old_order_route_parsing_or_bolus_inference",
+        "cross_drug_policy": "separate_agents_no_ne_epinephrine_sum_no_equivalent_conversion",
+        "dobutamine": [
+          {
+            "above": "0",
+            "score": 2
+          }
+        ],
+        "dopamine": [
+          {
+            "above": "15",
+            "score": 4
+          },
+          {
+            "above": "5",
+            "at_most": "15",
+            "score": 3
+          },
+          {
+            "above": "0",
+            "at_most": "5",
+            "score": 2
+          }
+        ],
+        "dose_arithmetic": "reduced_exact_fraction_of_original_decimal_inputs_direct_normalized_rate_never_divided_twice",
+        "duration_policy": "local_band_continuity_1h_v1_not_claimed_official_resolution_of_1996_duration_ambiguity",
+        "duration_witness": "each_agent_and_score_predicate_contiguous_true_prefix_allowed_no_gap_or_cross_agent_join_complete_end_b_after_period_start_and_at_or_before_period_end_positive_in_period_exposure",
+        "epinephrine": [
+          {
+            "above": "0.1",
+            "score": 4
+          },
+          {
+            "above": "0",
+            "at_most": "0.1",
+            "score": 3
+          }
+        ],
+        "map": {
+          "below": "70",
+          "missing_branch_bounds": [
+            0,
+            1
+          ],
+          "score": 1,
+          "unit": "mm[Hg]"
+        },
+        "mass_basis": "original_mapping_base_only_and_explicit_compatible_clinician_review_unknown_or_salt_remains_unknown_no_implicit_factor",
+        "minimum_continuous_microseconds": 3600000000,
+        "norepinephrine": [
+          {
+            "above": "0.1",
+            "score": 4
+          },
+          {
+            "above": "0",
+            "at_most": "0.1",
+            "score": 3
+          }
+        ],
+        "normalization": {
+          "mg/h": "original_rate_times_1000_divided_by_60_times_actual_applicable_weight_kg",
+          "pump_mg/mL": "concentration_times_1000_times_pump_ml_h_divided_by_60_times_actual_applicable_weight_kg",
+          "pump_ug/mL": "concentration_times_pump_ml_h_divided_by_60_times_actual_applicable_weight_kg",
+          "ug/kg/min": "original_rate",
+          "ug/min": "original_rate_divided_by_actual_applicable_weight_kg",
+          "weight": "explicit_original_measured_kg_positive_observed_no_later_than_start_recorded_by_asof_original_applicability_true_plus_current_use_confirmed_no_default"
+        },
+        "overlap_policy": "actual_same_stream_piecewise_overlap_unknown_v1_nonoverlap_completed_hour_preserved_cross_drug_same_physical_key_overlap_blocked_no_cross_agent_time_join",
+        "positive_drug_dose_unit": "ug/kg/min",
+        "short_high_dose": "preserve_original_exposure_duration_condition_not_satisfied_no_clinical_reassurance",
+        "stream_policy": "same_drug_explicit_distinct_parallel_stream_rates_sum_piecewise_no_duplicate_or_agent_total_double_count_unresolved_overlap_unknown_stream_key_sha_namespace_and_external_id_only_no_note",
+        "verified_extent": "actual_start_through_verified_until_only_no_forward_fill_or_future_completion",
+        "zero": "never_positive_exposure_never_any_dose_score"
+      },
+      "clinical_validation": "not_provided",
+      "cns": {
+        "bands": [
+          [
+            15,
+            15,
+            0
+          ],
+          [
+            13,
+            14,
+            1
+          ],
+          [
+            10,
+            12,
+            2
+          ],
+          [
+            6,
+            9,
+            3
+          ],
+          [
+            3,
+            5,
+            4
+          ]
+        ],
+        "policy": "measured_interpretable_only_no_nt_to_one_default_fifteen_avpu_proxy_component_fusion_or_carry_forward",
+        "source": "one_actual_full_eye_verbal_motor_exam_only"
+      },
+      "coagulation": {
+        "bands": [
+          [
+            "150",
+            null,
+            true,
+            false,
+            0
+          ],
+          [
+            "100",
+            "150",
+            true,
+            false,
+            1
+          ],
+          [
+            "50",
+            "100",
+            true,
+            false,
+            2
+          ],
+          [
+            "20",
+            "50",
+            true,
+            false,
+            3
+          ],
+          [
+            "0",
+            "20",
+            true,
+            false,
+            4
+          ]
+        ],
+        "native_units": [
+          "10^9/L",
+          "10^3/uL"
+        ],
+        "unit_policy": "explicit_native_numeric_equivalence_only_no_fuzzy_unit_matching"
+      },
+      "diagnosis": "not_provided",
+      "input_policy": {
+        "capacities": {
+          "change_public_bytes": 6291456,
+          "daily_public_bytes": 2097152,
+          "manifest_members": 4096,
+          "private_bytes": 8388608,
+          "request_bytes": 8388608,
+          "response_bytes": 8388608,
+          "result_bytes": 8388608
+        },
+        "change": {
+          "attribution": "explicit_doctor_current_review_never_automatically_inferred_from_delta_or_day_windows",
+          "baseline_modes": [
+            "observed",
+            "conditional_zero",
+            "unknown"
+          ],
+          "conditional_zero": "both_explicit_current_doctor_assumptions_required_else_zero_to_twentyfour_not_zero",
+          "delta": "current_lower_minus_baseline_upper_current_upper_minus_baseline_lower_keep_negative_never_subtract_subtotals",
+          "infection": "actual_governed_original_may_be_available_after_current_asof_explicit_late_flag_current_retrospective_only",
+          "observed": "same_rule_recipe_policy_independent_current_authorized_day_ends_before_current_day_and_known_infection_onset",
+          "unknown": "zero_to_twentyfour_never_normal_imputed"
+        },
+        "coverage": {
+          "clinical_protocol": [
+            "adequate",
+            "incomplete",
+            "unknown"
+          ],
+          "protocol_complete": "actual_required_measurements_plus_all_members_and_resolved_conditions_never_checkbox_only",
+          "source_inventory": [
+            "complete",
+            "incomplete",
+            "unknown"
+          ]
+        },
+        "facts": {
+          "laboratory_native_units": [
+            "10^9/L",
+            "10^3/uL",
+            "mg/dL",
+            "umol/L",
+            "mm[Hg]",
+            "kPa"
+          ],
+          "laboratory_qualitative": "value_null_type_preserved_original_text_private_only_full_hash_bound",
+          "laboratory_units": "closed_exact_native_units_or_unsupported_or_original_null_unknown_marker_with_full_original_unit_hash_no_free_text_outbound_no_conversion",
+          "numbers": "exact_original_decimal_strings_LIS_signed_preserved_negative_unsupported_value_unknown_other_quantities_nonnegative"
+        },
+        "gcs_confounding": "complete_measured_EVM_interpretable_confirmed_and_current_doctor_sedation_and_other_confounding_effects_both_explicitly_excluded_no_drug_presence_inference_or_virtual_pre_sedation_score",
+        "input_precision": {
+          "maximum_fraction_digits": 8,
+          "maximum_integer_digits": 16,
+          "numbers": "exact_original_decimal_strings_LIS_signed_preserved_negative_unsupported_value_unknown_other_quantities_nonnegative",
+          "quantity_conversion": "only_explicit_fraction_dose_formulas_other_native_branches_never_converted",
+          "rounding": "never",
+          "zero_is_missing": false
+        },
+        "partial_policy": {
+          "complete_total": "all_six_protocol_complete_and_within_declared_scope_and_no_unresolved_rules_or_conflicts",
+          "domain_lower_bound": "retain_all_unambiguous_positive_witnesses_including_bounded_candidates",
+          "domain_upper_bound": "account_for_all_unresolved_candidates_required_modalities_and_incomplete_inventory_or_protocol",
+          "exact_numeric": "bounds_collapse_even_at_ceiling_does_not_assert_coverage_complete",
+          "known_subtotal": "sum_nonnull_exact_observed_candidate_domain_maxima_not_complete_total",
+          "normal_imputation": false,
+          "unknown_domain_bounds": [
+            0,
+            4
+          ]
+        },
+        "population": {
+          "adult": "yes_and_explicit_applicability_confirmation",
+          "care_setting": [
+            "icu",
+            "other"
+          ],
+          "clinical_validation": "not_provided"
+        },
+        "respiratory_qualification": {
+          "original_none_and_new_yes": "incompatible_keep_exact_pf_proven_lower_bound_and_support_unknown_upper_never_award_high_tier_pure_math_hospital_new_signature_rejected",
+          "original_unknown_and_new_yes": "allowed_current_doctor_qualification_with_independent_basis_original_mode_remains_unknown",
+          "other_modes": "doctor_explicit_yes_no_unknown_no_invasive_only_narrowing_or_device_inference"
+        },
+        "review": {
+          "basis": "private_statement_hash_public_only",
+          "historical_prediction": false,
+          "mode": "current_retrospective",
+          "original_flags": "preserve_no_current_review_overwrite",
+          "status": [
+            "confirmed",
+            "excluded",
+            "unknown"
+          ]
+        },
+        "source_policy": {
+          "all_members": "complete_actual_asof_root_and_parent_manifest_no_winner_only",
+          "current_use": "active_creation_governance_match_complete_current_source_set_and_all_parent_governance_recheck",
+          "public": "typed_facts_and_review_hashes_no_free_text_patient_admission_author_or_external_stream_identity",
+          "revoked": "retained_review_excluded_no_normal_imputation"
+        },
+        "vasoactive_overlap": {
+          "cross_drug": "same_actual_physical_stream_key_concurrent_intersection_unknown_never_concatenate_agents",
+          "identity": "only_actual_sha_namespace_and_external_stream_id_no_note_or_drug_name_inference",
+          "other_conflicts": "original_identity_lab_pao2_gcs_and_other_unresolved_groups_remain_dependent_candidate_unknown",
+          "policy": "actual_same_stream_piecewise_overlap_unknown_v1",
+          "unresolved_same_stream_overlap": "only_actual_intersection_unknown_retain_independent_nonoverlap_completed_tier_witness"
+        }
+      },
+      "liver": {
+        "analyte": "total_bilirubin",
+        "bands": {
+          "mg/dL": [
+            [
+              "0",
+              "1.2",
+              true,
+              false,
+              0
+            ],
+            [
+              "1.2",
+              "2",
+              true,
+              false,
+              1
+            ],
+            [
+              "2",
+              "6",
+              true,
+              false,
+              2
+            ],
+            [
+              "6",
+              "12",
+              true,
+              false,
+              3
+            ],
+            [
+              "12",
+              null,
+              true,
+              false,
+              4
+            ]
+          ],
+          "umol/L": [
+            [
+              "0",
+              "20",
+              true,
+              false,
+              0
+            ],
+            [
+              "20",
+              "33",
+              true,
+              false,
+              1
+            ],
+            [
+              "33",
+              "102",
+              true,
+              false,
+              2
+            ],
+            [
+              "102",
+              "204",
+              true,
+              false,
+              3
+            ],
+            [
+              "204",
+              null,
+              true,
+              false,
+              4
+            ]
+          ]
+        },
+        "native_policy": "local_mimic_mgdl_continuous_and_amsterdam_si_native_not_exact_converted_equivalence_no_claim_of_official_1996_erratum"
+      },
+      "organ_order": [
+        "respiratory",
+        "coagulation",
+        "liver",
+        "cardiovascular",
+        "cns",
+        "renal"
+      ],
+      "partial_policy": {
+        "complete_total": "all_six_protocol_complete_and_within_declared_scope_and_no_unresolved_rules_or_conflicts",
+        "domain_lower_bound": "retain_all_unambiguous_positive_witnesses_including_bounded_candidates",
+        "domain_upper_bound": "account_for_all_unresolved_candidates_required_modalities_and_incomplete_inventory_or_protocol",
+        "exact_numeric": "bounds_collapse_even_at_ceiling_does_not_assert_coverage_complete",
+        "known_subtotal": "sum_nonnull_exact_observed_candidate_domain_maxima_not_complete_total",
+        "normal_imputation": false,
+        "unknown_domain_bounds": [
+          0,
+          4
+        ]
+      },
+      "period": {
+        "aggregation": "maximum_eligible_candidate_per_domain_never_mix_different_samples_or_gcs_components",
+        "availability": "all_original_recorded_registered_available_at_or_before_as_of",
+        "duration_microseconds": 86400000000,
+        "point_membership": "start_inclusive_end_exclusive",
+        "review": "current_retrospective_evaluation_at_not_historical_prediction"
+      },
+      "population": "clinician_declared_adult_no_qsofa_non_icu_or_news2_pregnancy_exclusion_no_independent_clinical_validation",
+      "probability": "not_provided",
+      "prompt_handling": "provenance_only",
+      "renal": {
+        "combine": "max_creatinine_and_urine_branch_bounds_neither_missing_branch_normal_imputed",
+        "creatinine_bands": {
+          "mg/dL": [
+            [
+              "0",
+              "1.2",
+              true,
+              false,
+              0
+            ],
+            [
+              "1.2",
+              "2",
+              true,
+              false,
+              1
+            ],
+            [
+              "2",
+              "3.5",
+              true,
+              false,
+              2
+            ],
+            [
+              "3.5",
+              "5",
+              true,
+              false,
+              3
+            ],
+            [
+              "5",
+              null,
+              true,
+              false,
+              4
+            ]
+          ],
+          "umol/L": [
+            [
+              "0",
+              "110",
+              true,
+              false,
+              0
+            ],
+            [
+              "110",
+              "171",
+              true,
+              false,
+              1
+            ],
+            [
+              "171",
+              "300",
+              true,
+              false,
+              2
+            ],
+            [
+              "300",
+              "440",
+              true,
+              true,
+              3
+            ],
+            [
+              "440",
+              null,
+              false,
+              false,
+              4
+            ]
+          ]
+        },
+        "native_policy": "local_mimic_mgdl_and_amsterdam_si_cr440_inclusive_score3_not_exact_converted_equivalence",
+        "rrt": "not_a_sofa1_automatic_four_rule",
+        "urine": {
+          "at_least_200_below_500": 3,
+          "at_least_500_branch_contribution": 0,
+          "below_200": 4,
+          "unit": "mL/24h"
+        },
+        "urine_policy": "all_whole_original_intervals_exact_24h_tiling_no_overlap_gap_partial_collection_unknown_volume_or_non_patient_total_no_clip_proration_short_period_extrapolation_or_weight_normalization"
+      },
+      "respiratory": {
+        "comparison": "100_times_pao2_cross_compare_threshold_times_original_fio2_percent_no_rounded_division",
+        "fio2_eligibility": "positive_at_most_100_explicit_original_pair_no_room_air_default",
+        "fio2_unit": "%",
+        "kpa": "independent_rounded_native_thresholds_from_sepsis3_printed_table_no_conversion_or_equivalence_claim",
+        "pao2_units": [
+          "mm[Hg]",
+          "kPa"
+        ],
+        "qualification_consistency_policy": "doctor_yes_requires_original_mode_not_explicit_none_v1_unknown_mode_may_remain_unknown_with_current_explicit_qualification_yes_no_inference",
+        "qualifying_support": "explicit_current_doctor_review_with_basis_hash_never_device_mode_inference",
+        "sample_review": "arterial_sample_same_sampling_state_and_fio2_applicability_all_confirmed",
+        "support_policy": "local_doctor_adjudicated_per_actual_pair_yes_no_unknown_v1",
+        "thresholds_kpa": [
+          "53.3",
+          "40",
+          "26.7",
+          "13.3"
+        ],
+        "thresholds_mmhg": [
+          "400",
+          "300",
+          "200",
+          "100"
+        ],
+        "unknown_support_low_ratio_bounds": {
+          "100_to_below_200": [
+            2,
+            3
+          ],
+          "below_100": [
+            2,
+            4
+          ]
+        },
+        "without_qualifying_support_maximum": 2
+      },
+      "rule_family": "SOFA1",
+      "rule_id": "sofa1_native_observed_v1",
+      "scoring_status": "local_explicit_sofa1_implementation_not_sofa2_or_manual_components",
+      "treatment": "not_provided",
+      "version": "sofa1_native_observed_local_policy_v1"
+    },
+    "recipe_digest": "849854d26deb3e5d42e9433d839a5db0b365e85206ea5272b6592d75d4769199",
+    "rule_id": "sofa1_native_observed_v1"
+  },
+  "published": {
+    "clinical_validation": "not_provided",
+    "content_hash": "0a40753e5ba073a62baba2b01b0ba2dd9b13f6c4dd809f32aed42dd1b90b5139",
+    "created_at": "2026-10-20T18:03:38.017819Z",
+    "created_by": 4,
+    "eligible": true,
+    "evidence_reference": "Synthetic implementation review document",
+    "exclusion_reasons": [],
+    "governance_hash": "2bc077c375d2067ca012eb97f36fd324dbbac3d5ccf3b0ec9cb52892d53c075b",
+    "implementation_current": true,
+    "implementation_terms_confirmed": true,
+    "input_policy": {
+      "capacities": {
+        "change_public_bytes": 6291456,
+        "daily_public_bytes": 2097152,
+        "manifest_members": 4096,
+        "private_bytes": 8388608,
+        "request_bytes": 8388608,
+        "response_bytes": 8388608,
+        "result_bytes": 8388608
+      },
+      "change": {
+        "attribution": "explicit_doctor_current_review_never_automatically_inferred_from_delta_or_day_windows",
+        "baseline_modes": [
+          "observed",
+          "conditional_zero",
+          "unknown"
+        ],
+        "conditional_zero": "both_explicit_current_doctor_assumptions_required_else_zero_to_twentyfour_not_zero",
+        "delta": "current_lower_minus_baseline_upper_current_upper_minus_baseline_lower_keep_negative_never_subtract_subtotals",
+        "infection": "actual_governed_original_may_be_available_after_current_asof_explicit_late_flag_current_retrospective_only",
+        "observed": "same_rule_recipe_policy_independent_current_authorized_day_ends_before_current_day_and_known_infection_onset",
+        "unknown": "zero_to_twentyfour_never_normal_imputed"
+      },
+      "coverage": {
+        "clinical_protocol": [
+          "adequate",
+          "incomplete",
+          "unknown"
+        ],
+        "protocol_complete": "actual_required_measurements_plus_all_members_and_resolved_conditions_never_checkbox_only",
+        "source_inventory": [
+          "complete",
+          "incomplete",
+          "unknown"
+        ]
+      },
+      "facts": {
+        "laboratory_native_units": [
+          "10^9/L",
+          "10^3/uL",
+          "mg/dL",
+          "umol/L",
+          "mm[Hg]",
+          "kPa"
+        ],
+        "laboratory_qualitative": "value_null_type_preserved_original_text_private_only_full_hash_bound",
+        "laboratory_units": "closed_exact_native_units_or_unsupported_or_original_null_unknown_marker_with_full_original_unit_hash_no_free_text_outbound_no_conversion",
+        "numbers": "exact_original_decimal_strings_LIS_signed_preserved_negative_unsupported_value_unknown_other_quantities_nonnegative"
+      },
+      "gcs_confounding": "complete_measured_EVM_interpretable_confirmed_and_current_doctor_sedation_and_other_confounding_effects_both_explicitly_excluded_no_drug_presence_inference_or_virtual_pre_sedation_score",
+      "input_precision": {
+        "maximum_fraction_digits": 8,
+        "maximum_integer_digits": 16,
+        "numbers": "exact_original_decimal_strings_LIS_signed_preserved_negative_unsupported_value_unknown_other_quantities_nonnegative",
+        "quantity_conversion": "only_explicit_fraction_dose_formulas_other_native_branches_never_converted",
+        "rounding": "never",
+        "zero_is_missing": false
+      },
+      "partial_policy": {
+        "complete_total": "all_six_protocol_complete_and_within_declared_scope_and_no_unresolved_rules_or_conflicts",
+        "domain_lower_bound": "retain_all_unambiguous_positive_witnesses_including_bounded_candidates",
+        "domain_upper_bound": "account_for_all_unresolved_candidates_required_modalities_and_incomplete_inventory_or_protocol",
+        "exact_numeric": "bounds_collapse_even_at_ceiling_does_not_assert_coverage_complete",
+        "known_subtotal": "sum_nonnull_exact_observed_candidate_domain_maxima_not_complete_total",
+        "normal_imputation": false,
+        "unknown_domain_bounds": [
+          0,
+          4
+        ]
+      },
+      "population": {
+        "adult": "yes_and_explicit_applicability_confirmation",
+        "care_setting": [
+          "icu",
+          "other"
+        ],
+        "clinical_validation": "not_provided"
+      },
+      "respiratory_qualification": {
+        "original_none_and_new_yes": "incompatible_keep_exact_pf_proven_lower_bound_and_support_unknown_upper_never_award_high_tier_pure_math_hospital_new_signature_rejected",
+        "original_unknown_and_new_yes": "allowed_current_doctor_qualification_with_independent_basis_original_mode_remains_unknown",
+        "other_modes": "doctor_explicit_yes_no_unknown_no_invasive_only_narrowing_or_device_inference"
+      },
+      "review": {
+        "basis": "private_statement_hash_public_only",
+        "historical_prediction": false,
+        "mode": "current_retrospective",
+        "original_flags": "preserve_no_current_review_overwrite",
+        "status": [
+          "confirmed",
+          "excluded",
+          "unknown"
+        ]
+      },
+      "source_policy": {
+        "all_members": "complete_actual_asof_root_and_parent_manifest_no_winner_only",
+        "current_use": "active_creation_governance_match_complete_current_source_set_and_all_parent_governance_recheck",
+        "public": "typed_facts_and_review_hashes_no_free_text_patient_admission_author_or_external_stream_identity",
+        "revoked": "retained_review_excluded_no_normal_imputation"
+      },
+      "vasoactive_overlap": {
+        "cross_drug": "same_actual_physical_stream_key_concurrent_intersection_unknown_never_concatenate_agents",
+        "identity": "only_actual_sha_namespace_and_external_stream_id_no_note_or_drug_name_inference",
+        "other_conflicts": "original_identity_lab_pao2_gcs_and_other_unresolved_groups_remain_dependent_candidate_unknown",
+        "policy": "actual_same_stream_piecewise_overlap_unknown_v1",
+        "unresolved_same_stream_overlap": "only_actual_intersection_unknown_retain_independent_nonoverlap_completed_tier_witness"
+      }
+    },
+    "name": "Synthetic NEWS2 profile",
+    "published_at": "2026-10-20T18:03:38.017819Z",
+    "published_by": 4,
+    "rationale": "合成测试明确核对实施版本和原采样时点的人群适用性；这是人工声明而非独立临床验证。",
+    "recipe": {
+      "cardiovascular": {
+        "actual_route": "doctor_confirmed_continuous_iv_no_old_order_route_parsing_or_bolus_inference",
+        "cross_drug_policy": "separate_agents_no_ne_epinephrine_sum_no_equivalent_conversion",
+        "dobutamine": [
+          {
+            "above": "0",
+            "score": 2
+          }
+        ],
+        "dopamine": [
+          {
+            "above": "15",
+            "score": 4
+          },
+          {
+            "above": "5",
+            "at_most": "15",
+            "score": 3
+          },
+          {
+            "above": "0",
+            "at_most": "5",
+            "score": 2
+          }
+        ],
+        "dose_arithmetic": "reduced_exact_fraction_of_original_decimal_inputs_direct_normalized_rate_never_divided_twice",
+        "duration_policy": "local_band_continuity_1h_v1_not_claimed_official_resolution_of_1996_duration_ambiguity",
+        "duration_witness": "each_agent_and_score_predicate_contiguous_true_prefix_allowed_no_gap_or_cross_agent_join_complete_end_b_after_period_start_and_at_or_before_period_end_positive_in_period_exposure",
+        "epinephrine": [
+          {
+            "above": "0.1",
+            "score": 4
+          },
+          {
+            "above": "0",
+            "at_most": "0.1",
+            "score": 3
+          }
+        ],
+        "map": {
+          "below": "70",
+          "missing_branch_bounds": [
+            0,
+            1
+          ],
+          "score": 1,
+          "unit": "mm[Hg]"
+        },
+        "mass_basis": "original_mapping_base_only_and_explicit_compatible_clinician_review_unknown_or_salt_remains_unknown_no_implicit_factor",
+        "minimum_continuous_microseconds": 3600000000,
+        "norepinephrine": [
+          {
+            "above": "0.1",
+            "score": 4
+          },
+          {
+            "above": "0",
+            "at_most": "0.1",
+            "score": 3
+          }
+        ],
+        "normalization": {
+          "mg/h": "original_rate_times_1000_divided_by_60_times_actual_applicable_weight_kg",
+          "pump_mg/mL": "concentration_times_1000_times_pump_ml_h_divided_by_60_times_actual_applicable_weight_kg",
+          "pump_ug/mL": "concentration_times_pump_ml_h_divided_by_60_times_actual_applicable_weight_kg",
+          "ug/kg/min": "original_rate",
+          "ug/min": "original_rate_divided_by_actual_applicable_weight_kg",
+          "weight": "explicit_original_measured_kg_positive_observed_no_later_than_start_recorded_by_asof_original_applicability_true_plus_current_use_confirmed_no_default"
+        },
+        "overlap_policy": "actual_same_stream_piecewise_overlap_unknown_v1_nonoverlap_completed_hour_preserved_cross_drug_same_physical_key_overlap_blocked_no_cross_agent_time_join",
+        "positive_drug_dose_unit": "ug/kg/min",
+        "short_high_dose": "preserve_original_exposure_duration_condition_not_satisfied_no_clinical_reassurance",
+        "stream_policy": "same_drug_explicit_distinct_parallel_stream_rates_sum_piecewise_no_duplicate_or_agent_total_double_count_unresolved_overlap_unknown_stream_key_sha_namespace_and_external_id_only_no_note",
+        "verified_extent": "actual_start_through_verified_until_only_no_forward_fill_or_future_completion",
+        "zero": "never_positive_exposure_never_any_dose_score"
+      },
+      "clinical_validation": "not_provided",
+      "cns": {
+        "bands": [
+          [
+            15,
+            15,
+            0
+          ],
+          [
+            13,
+            14,
+            1
+          ],
+          [
+            10,
+            12,
+            2
+          ],
+          [
+            6,
+            9,
+            3
+          ],
+          [
+            3,
+            5,
+            4
+          ]
+        ],
+        "policy": "measured_interpretable_only_no_nt_to_one_default_fifteen_avpu_proxy_component_fusion_or_carry_forward",
+        "source": "one_actual_full_eye_verbal_motor_exam_only"
+      },
+      "coagulation": {
+        "bands": [
+          [
+            "150",
+            null,
+            true,
+            false,
+            0
+          ],
+          [
+            "100",
+            "150",
+            true,
+            false,
+            1
+          ],
+          [
+            "50",
+            "100",
+            true,
+            false,
+            2
+          ],
+          [
+            "20",
+            "50",
+            true,
+            false,
+            3
+          ],
+          [
+            "0",
+            "20",
+            true,
+            false,
+            4
+          ]
+        ],
+        "native_units": [
+          "10^9/L",
+          "10^3/uL"
+        ],
+        "unit_policy": "explicit_native_numeric_equivalence_only_no_fuzzy_unit_matching"
+      },
+      "diagnosis": "not_provided",
+      "input_policy": {
+        "capacities": {
+          "change_public_bytes": 6291456,
+          "daily_public_bytes": 2097152,
+          "manifest_members": 4096,
+          "private_bytes": 8388608,
+          "request_bytes": 8388608,
+          "response_bytes": 8388608,
+          "result_bytes": 8388608
+        },
+        "change": {
+          "attribution": "explicit_doctor_current_review_never_automatically_inferred_from_delta_or_day_windows",
+          "baseline_modes": [
+            "observed",
+            "conditional_zero",
+            "unknown"
+          ],
+          "conditional_zero": "both_explicit_current_doctor_assumptions_required_else_zero_to_twentyfour_not_zero",
+          "delta": "current_lower_minus_baseline_upper_current_upper_minus_baseline_lower_keep_negative_never_subtract_subtotals",
+          "infection": "actual_governed_original_may_be_available_after_current_asof_explicit_late_flag_current_retrospective_only",
+          "observed": "same_rule_recipe_policy_independent_current_authorized_day_ends_before_current_day_and_known_infection_onset",
+          "unknown": "zero_to_twentyfour_never_normal_imputed"
+        },
+        "coverage": {
+          "clinical_protocol": [
+            "adequate",
+            "incomplete",
+            "unknown"
+          ],
+          "protocol_complete": "actual_required_measurements_plus_all_members_and_resolved_conditions_never_checkbox_only",
+          "source_inventory": [
+            "complete",
+            "incomplete",
+            "unknown"
+          ]
+        },
+        "facts": {
+          "laboratory_native_units": [
+            "10^9/L",
+            "10^3/uL",
+            "mg/dL",
+            "umol/L",
+            "mm[Hg]",
+            "kPa"
+          ],
+          "laboratory_qualitative": "value_null_type_preserved_original_text_private_only_full_hash_bound",
+          "laboratory_units": "closed_exact_native_units_or_unsupported_or_original_null_unknown_marker_with_full_original_unit_hash_no_free_text_outbound_no_conversion",
+          "numbers": "exact_original_decimal_strings_LIS_signed_preserved_negative_unsupported_value_unknown_other_quantities_nonnegative"
+        },
+        "gcs_confounding": "complete_measured_EVM_interpretable_confirmed_and_current_doctor_sedation_and_other_confounding_effects_both_explicitly_excluded_no_drug_presence_inference_or_virtual_pre_sedation_score",
+        "input_precision": {
+          "maximum_fraction_digits": 8,
+          "maximum_integer_digits": 16,
+          "numbers": "exact_original_decimal_strings_LIS_signed_preserved_negative_unsupported_value_unknown_other_quantities_nonnegative",
+          "quantity_conversion": "only_explicit_fraction_dose_formulas_other_native_branches_never_converted",
+          "rounding": "never",
+          "zero_is_missing": false
+        },
+        "partial_policy": {
+          "complete_total": "all_six_protocol_complete_and_within_declared_scope_and_no_unresolved_rules_or_conflicts",
+          "domain_lower_bound": "retain_all_unambiguous_positive_witnesses_including_bounded_candidates",
+          "domain_upper_bound": "account_for_all_unresolved_candidates_required_modalities_and_incomplete_inventory_or_protocol",
+          "exact_numeric": "bounds_collapse_even_at_ceiling_does_not_assert_coverage_complete",
+          "known_subtotal": "sum_nonnull_exact_observed_candidate_domain_maxima_not_complete_total",
+          "normal_imputation": false,
+          "unknown_domain_bounds": [
+            0,
+            4
+          ]
+        },
+        "population": {
+          "adult": "yes_and_explicit_applicability_confirmation",
+          "care_setting": [
+            "icu",
+            "other"
+          ],
+          "clinical_validation": "not_provided"
+        },
+        "respiratory_qualification": {
+          "original_none_and_new_yes": "incompatible_keep_exact_pf_proven_lower_bound_and_support_unknown_upper_never_award_high_tier_pure_math_hospital_new_signature_rejected",
+          "original_unknown_and_new_yes": "allowed_current_doctor_qualification_with_independent_basis_original_mode_remains_unknown",
+          "other_modes": "doctor_explicit_yes_no_unknown_no_invasive_only_narrowing_or_device_inference"
+        },
+        "review": {
+          "basis": "private_statement_hash_public_only",
+          "historical_prediction": false,
+          "mode": "current_retrospective",
+          "original_flags": "preserve_no_current_review_overwrite",
+          "status": [
+            "confirmed",
+            "excluded",
+            "unknown"
+          ]
+        },
+        "source_policy": {
+          "all_members": "complete_actual_asof_root_and_parent_manifest_no_winner_only",
+          "current_use": "active_creation_governance_match_complete_current_source_set_and_all_parent_governance_recheck",
+          "public": "typed_facts_and_review_hashes_no_free_text_patient_admission_author_or_external_stream_identity",
+          "revoked": "retained_review_excluded_no_normal_imputation"
+        },
+        "vasoactive_overlap": {
+          "cross_drug": "same_actual_physical_stream_key_concurrent_intersection_unknown_never_concatenate_agents",
+          "identity": "only_actual_sha_namespace_and_external_stream_id_no_note_or_drug_name_inference",
+          "other_conflicts": "original_identity_lab_pao2_gcs_and_other_unresolved_groups_remain_dependent_candidate_unknown",
+          "policy": "actual_same_stream_piecewise_overlap_unknown_v1",
+          "unresolved_same_stream_overlap": "only_actual_intersection_unknown_retain_independent_nonoverlap_completed_tier_witness"
+        }
+      },
+      "liver": {
+        "analyte": "total_bilirubin",
+        "bands": {
+          "mg/dL": [
+            [
+              "0",
+              "1.2",
+              true,
+              false,
+              0
+            ],
+            [
+              "1.2",
+              "2",
+              true,
+              false,
+              1
+            ],
+            [
+              "2",
+              "6",
+              true,
+              false,
+              2
+            ],
+            [
+              "6",
+              "12",
+              true,
+              false,
+              3
+            ],
+            [
+              "12",
+              null,
+              true,
+              false,
+              4
+            ]
+          ],
+          "umol/L": [
+            [
+              "0",
+              "20",
+              true,
+              false,
+              0
+            ],
+            [
+              "20",
+              "33",
+              true,
+              false,
+              1
+            ],
+            [
+              "33",
+              "102",
+              true,
+              false,
+              2
+            ],
+            [
+              "102",
+              "204",
+              true,
+              false,
+              3
+            ],
+            [
+              "204",
+              null,
+              true,
+              false,
+              4
+            ]
+          ]
+        },
+        "native_policy": "local_mimic_mgdl_continuous_and_amsterdam_si_native_not_exact_converted_equivalence_no_claim_of_official_1996_erratum"
+      },
+      "organ_order": [
+        "respiratory",
+        "coagulation",
+        "liver",
+        "cardiovascular",
+        "cns",
+        "renal"
+      ],
+      "partial_policy": {
+        "complete_total": "all_six_protocol_complete_and_within_declared_scope_and_no_unresolved_rules_or_conflicts",
+        "domain_lower_bound": "retain_all_unambiguous_positive_witnesses_including_bounded_candidates",
+        "domain_upper_bound": "account_for_all_unresolved_candidates_required_modalities_and_incomplete_inventory_or_protocol",
+        "exact_numeric": "bounds_collapse_even_at_ceiling_does_not_assert_coverage_complete",
+        "known_subtotal": "sum_nonnull_exact_observed_candidate_domain_maxima_not_complete_total",
+        "normal_imputation": false,
+        "unknown_domain_bounds": [
+          0,
+          4
+        ]
+      },
+      "period": {
+        "aggregation": "maximum_eligible_candidate_per_domain_never_mix_different_samples_or_gcs_components",
+        "availability": "all_original_recorded_registered_available_at_or_before_as_of",
+        "duration_microseconds": 86400000000,
+        "point_membership": "start_inclusive_end_exclusive",
+        "review": "current_retrospective_evaluation_at_not_historical_prediction"
+      },
+      "population": "clinician_declared_adult_no_qsofa_non_icu_or_news2_pregnancy_exclusion_no_independent_clinical_validation",
+      "probability": "not_provided",
+      "prompt_handling": "provenance_only",
+      "renal": {
+        "combine": "max_creatinine_and_urine_branch_bounds_neither_missing_branch_normal_imputed",
+        "creatinine_bands": {
+          "mg/dL": [
+            [
+              "0",
+              "1.2",
+              true,
+              false,
+              0
+            ],
+            [
+              "1.2",
+              "2",
+              true,
+              false,
+              1
+            ],
+            [
+              "2",
+              "3.5",
+              true,
+              false,
+              2
+            ],
+            [
+              "3.5",
+              "5",
+              true,
+              false,
+              3
+            ],
+            [
+              "5",
+              null,
+              true,
+              false,
+              4
+            ]
+          ],
+          "umol/L": [
+            [
+              "0",
+              "110",
+              true,
+              false,
+              0
+            ],
+            [
+              "110",
+              "171",
+              true,
+              false,
+              1
+            ],
+            [
+              "171",
+              "300",
+              true,
+              false,
+              2
+            ],
+            [
+              "300",
+              "440",
+              true,
+              true,
+              3
+            ],
+            [
+              "440",
+              null,
+              false,
+              false,
+              4
+            ]
+          ]
+        },
+        "native_policy": "local_mimic_mgdl_and_amsterdam_si_cr440_inclusive_score3_not_exact_converted_equivalence",
+        "rrt": "not_a_sofa1_automatic_four_rule",
+        "urine": {
+          "at_least_200_below_500": 3,
+          "at_least_500_branch_contribution": 0,
+          "below_200": 4,
+          "unit": "mL/24h"
+        },
+        "urine_policy": "all_whole_original_intervals_exact_24h_tiling_no_overlap_gap_partial_collection_unknown_volume_or_non_patient_total_no_clip_proration_short_period_extrapolation_or_weight_normalization"
+      },
+      "respiratory": {
+        "comparison": "100_times_pao2_cross_compare_threshold_times_original_fio2_percent_no_rounded_division",
+        "fio2_eligibility": "positive_at_most_100_explicit_original_pair_no_room_air_default",
+        "fio2_unit": "%",
+        "kpa": "independent_rounded_native_thresholds_from_sepsis3_printed_table_no_conversion_or_equivalence_claim",
+        "pao2_units": [
+          "mm[Hg]",
+          "kPa"
+        ],
+        "qualification_consistency_policy": "doctor_yes_requires_original_mode_not_explicit_none_v1_unknown_mode_may_remain_unknown_with_current_explicit_qualification_yes_no_inference",
+        "qualifying_support": "explicit_current_doctor_review_with_basis_hash_never_device_mode_inference",
+        "sample_review": "arterial_sample_same_sampling_state_and_fio2_applicability_all_confirmed",
+        "support_policy": "local_doctor_adjudicated_per_actual_pair_yes_no_unknown_v1",
+        "thresholds_kpa": [
+          "53.3",
+          "40",
+          "26.7",
+          "13.3"
+        ],
+        "thresholds_mmhg": [
+          "400",
+          "300",
+          "200",
+          "100"
+        ],
+        "unknown_support_low_ratio_bounds": {
+          "100_to_below_200": [
+            2,
+            3
+          ],
+          "below_100": [
+            2,
+            4
+          ]
+        },
+        "without_qualifying_support_maximum": 2
+      },
+      "rule_family": "SOFA1",
+      "rule_id": "sofa1_native_observed_v1",
+      "scoring_status": "local_explicit_sofa1_implementation_not_sofa2_or_manual_components",
+      "treatment": "not_provided",
+      "version": "sofa1_native_observed_local_policy_v1"
+    },
+    "recipe_digest": "849854d26deb3e5d42e9433d839a5db0b365e85206ea5272b6592d75d4769199",
+    "review_basis": "human_implementation_review_not_clinical_validation",
+    "review_evidence_reference": "Synthetic implementation and terms review only",
+    "review_note": "合成测试明确核对实施版本和原采样时点的人群适用性；这是人工声明而非独立临床验证。",
+    "revision": 2,
+    "revoke_reason": "",
+    "revoked_at": null,
+    "revoked_by": null,
+    "rule_id": "sofa1_native_observed_v1",
+    "rule_profile_id": "afd20aa4-f6d8-4d8f-9238-9f94d452e9ff",
+    "schema_version": "risk_rule_profile_v1",
+    "source_id": "risk_rule_profile:afd20aa4-f6d8-4d8f-9238-9f94d452e9ff:0a40753e5ba0",
+    "status": "published"
+  },
+  "revoked": {
+    "clinical_validation": "not_provided",
+    "content_hash": "0a40753e5ba073a62baba2b01b0ba2dd9b13f6c4dd809f32aed42dd1b90b5139",
+    "created_at": "2026-10-20T18:03:38.017819Z",
+    "created_by": 4,
+    "eligible": false,
+    "evidence_reference": "Synthetic implementation review document",
+    "exclusion_reasons": [
+      "profile_not_published"
+    ],
+    "governance_hash": "c2885f83df0bd7f6d5898d8f88e5e4aa017b918b71139f3eda426aee02a385f6",
+    "implementation_current": true,
+    "implementation_terms_confirmed": true,
+    "input_policy": {
+      "capacities": {
+        "change_public_bytes": 6291456,
+        "daily_public_bytes": 2097152,
+        "manifest_members": 4096,
+        "private_bytes": 8388608,
+        "request_bytes": 8388608,
+        "response_bytes": 8388608,
+        "result_bytes": 8388608
+      },
+      "change": {
+        "attribution": "explicit_doctor_current_review_never_automatically_inferred_from_delta_or_day_windows",
+        "baseline_modes": [
+          "observed",
+          "conditional_zero",
+          "unknown"
+        ],
+        "conditional_zero": "both_explicit_current_doctor_assumptions_required_else_zero_to_twentyfour_not_zero",
+        "delta": "current_lower_minus_baseline_upper_current_upper_minus_baseline_lower_keep_negative_never_subtract_subtotals",
+        "infection": "actual_governed_original_may_be_available_after_current_asof_explicit_late_flag_current_retrospective_only",
+        "observed": "same_rule_recipe_policy_independent_current_authorized_day_ends_before_current_day_and_known_infection_onset",
+        "unknown": "zero_to_twentyfour_never_normal_imputed"
+      },
+      "coverage": {
+        "clinical_protocol": [
+          "adequate",
+          "incomplete",
+          "unknown"
+        ],
+        "protocol_complete": "actual_required_measurements_plus_all_members_and_resolved_conditions_never_checkbox_only",
+        "source_inventory": [
+          "complete",
+          "incomplete",
+          "unknown"
+        ]
+      },
+      "facts": {
+        "laboratory_native_units": [
+          "10^9/L",
+          "10^3/uL",
+          "mg/dL",
+          "umol/L",
+          "mm[Hg]",
+          "kPa"
+        ],
+        "laboratory_qualitative": "value_null_type_preserved_original_text_private_only_full_hash_bound",
+        "laboratory_units": "closed_exact_native_units_or_unsupported_or_original_null_unknown_marker_with_full_original_unit_hash_no_free_text_outbound_no_conversion",
+        "numbers": "exact_original_decimal_strings_LIS_signed_preserved_negative_unsupported_value_unknown_other_quantities_nonnegative"
+      },
+      "gcs_confounding": "complete_measured_EVM_interpretable_confirmed_and_current_doctor_sedation_and_other_confounding_effects_both_explicitly_excluded_no_drug_presence_inference_or_virtual_pre_sedation_score",
+      "input_precision": {
+        "maximum_fraction_digits": 8,
+        "maximum_integer_digits": 16,
+        "numbers": "exact_original_decimal_strings_LIS_signed_preserved_negative_unsupported_value_unknown_other_quantities_nonnegative",
+        "quantity_conversion": "only_explicit_fraction_dose_formulas_other_native_branches_never_converted",
+        "rounding": "never",
+        "zero_is_missing": false
+      },
+      "partial_policy": {
+        "complete_total": "all_six_protocol_complete_and_within_declared_scope_and_no_unresolved_rules_or_conflicts",
+        "domain_lower_bound": "retain_all_unambiguous_positive_witnesses_including_bounded_candidates",
+        "domain_upper_bound": "account_for_all_unresolved_candidates_required_modalities_and_incomplete_inventory_or_protocol",
+        "exact_numeric": "bounds_collapse_even_at_ceiling_does_not_assert_coverage_complete",
+        "known_subtotal": "sum_nonnull_exact_observed_candidate_domain_maxima_not_complete_total",
+        "normal_imputation": false,
+        "unknown_domain_bounds": [
+          0,
+          4
+        ]
+      },
+      "population": {
+        "adult": "yes_and_explicit_applicability_confirmation",
+        "care_setting": [
+          "icu",
+          "other"
+        ],
+        "clinical_validation": "not_provided"
+      },
+      "respiratory_qualification": {
+        "original_none_and_new_yes": "incompatible_keep_exact_pf_proven_lower_bound_and_support_unknown_upper_never_award_high_tier_pure_math_hospital_new_signature_rejected",
+        "original_unknown_and_new_yes": "allowed_current_doctor_qualification_with_independent_basis_original_mode_remains_unknown",
+        "other_modes": "doctor_explicit_yes_no_unknown_no_invasive_only_narrowing_or_device_inference"
+      },
+      "review": {
+        "basis": "private_statement_hash_public_only",
+        "historical_prediction": false,
+        "mode": "current_retrospective",
+        "original_flags": "preserve_no_current_review_overwrite",
+        "status": [
+          "confirmed",
+          "excluded",
+          "unknown"
+        ]
+      },
+      "source_policy": {
+        "all_members": "complete_actual_asof_root_and_parent_manifest_no_winner_only",
+        "current_use": "active_creation_governance_match_complete_current_source_set_and_all_parent_governance_recheck",
+        "public": "typed_facts_and_review_hashes_no_free_text_patient_admission_author_or_external_stream_identity",
+        "revoked": "retained_review_excluded_no_normal_imputation"
+      },
+      "vasoactive_overlap": {
+        "cross_drug": "same_actual_physical_stream_key_concurrent_intersection_unknown_never_concatenate_agents",
+        "identity": "only_actual_sha_namespace_and_external_stream_id_no_note_or_drug_name_inference",
+        "other_conflicts": "original_identity_lab_pao2_gcs_and_other_unresolved_groups_remain_dependent_candidate_unknown",
+        "policy": "actual_same_stream_piecewise_overlap_unknown_v1",
+        "unresolved_same_stream_overlap": "only_actual_intersection_unknown_retain_independent_nonoverlap_completed_tier_witness"
+      }
+    },
+    "name": "Synthetic NEWS2 profile",
+    "published_at": "2026-10-20T18:03:38.017819Z",
+    "published_by": 4,
+    "rationale": "合成测试明确核对实施版本和原采样时点的人群适用性；这是人工声明而非独立临床验证。",
+    "recipe": {
+      "cardiovascular": {
+        "actual_route": "doctor_confirmed_continuous_iv_no_old_order_route_parsing_or_bolus_inference",
+        "cross_drug_policy": "separate_agents_no_ne_epinephrine_sum_no_equivalent_conversion",
+        "dobutamine": [
+          {
+            "above": "0",
+            "score": 2
+          }
+        ],
+        "dopamine": [
+          {
+            "above": "15",
+            "score": 4
+          },
+          {
+            "above": "5",
+            "at_most": "15",
+            "score": 3
+          },
+          {
+            "above": "0",
+            "at_most": "5",
+            "score": 2
+          }
+        ],
+        "dose_arithmetic": "reduced_exact_fraction_of_original_decimal_inputs_direct_normalized_rate_never_divided_twice",
+        "duration_policy": "local_band_continuity_1h_v1_not_claimed_official_resolution_of_1996_duration_ambiguity",
+        "duration_witness": "each_agent_and_score_predicate_contiguous_true_prefix_allowed_no_gap_or_cross_agent_join_complete_end_b_after_period_start_and_at_or_before_period_end_positive_in_period_exposure",
+        "epinephrine": [
+          {
+            "above": "0.1",
+            "score": 4
+          },
+          {
+            "above": "0",
+            "at_most": "0.1",
+            "score": 3
+          }
+        ],
+        "map": {
+          "below": "70",
+          "missing_branch_bounds": [
+            0,
+            1
+          ],
+          "score": 1,
+          "unit": "mm[Hg]"
+        },
+        "mass_basis": "original_mapping_base_only_and_explicit_compatible_clinician_review_unknown_or_salt_remains_unknown_no_implicit_factor",
+        "minimum_continuous_microseconds": 3600000000,
+        "norepinephrine": [
+          {
+            "above": "0.1",
+            "score": 4
+          },
+          {
+            "above": "0",
+            "at_most": "0.1",
+            "score": 3
+          }
+        ],
+        "normalization": {
+          "mg/h": "original_rate_times_1000_divided_by_60_times_actual_applicable_weight_kg",
+          "pump_mg/mL": "concentration_times_1000_times_pump_ml_h_divided_by_60_times_actual_applicable_weight_kg",
+          "pump_ug/mL": "concentration_times_pump_ml_h_divided_by_60_times_actual_applicable_weight_kg",
+          "ug/kg/min": "original_rate",
+          "ug/min": "original_rate_divided_by_actual_applicable_weight_kg",
+          "weight": "explicit_original_measured_kg_positive_observed_no_later_than_start_recorded_by_asof_original_applicability_true_plus_current_use_confirmed_no_default"
+        },
+        "overlap_policy": "actual_same_stream_piecewise_overlap_unknown_v1_nonoverlap_completed_hour_preserved_cross_drug_same_physical_key_overlap_blocked_no_cross_agent_time_join",
+        "positive_drug_dose_unit": "ug/kg/min",
+        "short_high_dose": "preserve_original_exposure_duration_condition_not_satisfied_no_clinical_reassurance",
+        "stream_policy": "same_drug_explicit_distinct_parallel_stream_rates_sum_piecewise_no_duplicate_or_agent_total_double_count_unresolved_overlap_unknown_stream_key_sha_namespace_and_external_id_only_no_note",
+        "verified_extent": "actual_start_through_verified_until_only_no_forward_fill_or_future_completion",
+        "zero": "never_positive_exposure_never_any_dose_score"
+      },
+      "clinical_validation": "not_provided",
+      "cns": {
+        "bands": [
+          [
+            15,
+            15,
+            0
+          ],
+          [
+            13,
+            14,
+            1
+          ],
+          [
+            10,
+            12,
+            2
+          ],
+          [
+            6,
+            9,
+            3
+          ],
+          [
+            3,
+            5,
+            4
+          ]
+        ],
+        "policy": "measured_interpretable_only_no_nt_to_one_default_fifteen_avpu_proxy_component_fusion_or_carry_forward",
+        "source": "one_actual_full_eye_verbal_motor_exam_only"
+      },
+      "coagulation": {
+        "bands": [
+          [
+            "150",
+            null,
+            true,
+            false,
+            0
+          ],
+          [
+            "100",
+            "150",
+            true,
+            false,
+            1
+          ],
+          [
+            "50",
+            "100",
+            true,
+            false,
+            2
+          ],
+          [
+            "20",
+            "50",
+            true,
+            false,
+            3
+          ],
+          [
+            "0",
+            "20",
+            true,
+            false,
+            4
+          ]
+        ],
+        "native_units": [
+          "10^9/L",
+          "10^3/uL"
+        ],
+        "unit_policy": "explicit_native_numeric_equivalence_only_no_fuzzy_unit_matching"
+      },
+      "diagnosis": "not_provided",
+      "input_policy": {
+        "capacities": {
+          "change_public_bytes": 6291456,
+          "daily_public_bytes": 2097152,
+          "manifest_members": 4096,
+          "private_bytes": 8388608,
+          "request_bytes": 8388608,
+          "response_bytes": 8388608,
+          "result_bytes": 8388608
+        },
+        "change": {
+          "attribution": "explicit_doctor_current_review_never_automatically_inferred_from_delta_or_day_windows",
+          "baseline_modes": [
+            "observed",
+            "conditional_zero",
+            "unknown"
+          ],
+          "conditional_zero": "both_explicit_current_doctor_assumptions_required_else_zero_to_twentyfour_not_zero",
+          "delta": "current_lower_minus_baseline_upper_current_upper_minus_baseline_lower_keep_negative_never_subtract_subtotals",
+          "infection": "actual_governed_original_may_be_available_after_current_asof_explicit_late_flag_current_retrospective_only",
+          "observed": "same_rule_recipe_policy_independent_current_authorized_day_ends_before_current_day_and_known_infection_onset",
+          "unknown": "zero_to_twentyfour_never_normal_imputed"
+        },
+        "coverage": {
+          "clinical_protocol": [
+            "adequate",
+            "incomplete",
+            "unknown"
+          ],
+          "protocol_complete": "actual_required_measurements_plus_all_members_and_resolved_conditions_never_checkbox_only",
+          "source_inventory": [
+            "complete",
+            "incomplete",
+            "unknown"
+          ]
+        },
+        "facts": {
+          "laboratory_native_units": [
+            "10^9/L",
+            "10^3/uL",
+            "mg/dL",
+            "umol/L",
+            "mm[Hg]",
+            "kPa"
+          ],
+          "laboratory_qualitative": "value_null_type_preserved_original_text_private_only_full_hash_bound",
+          "laboratory_units": "closed_exact_native_units_or_unsupported_or_original_null_unknown_marker_with_full_original_unit_hash_no_free_text_outbound_no_conversion",
+          "numbers": "exact_original_decimal_strings_LIS_signed_preserved_negative_unsupported_value_unknown_other_quantities_nonnegative"
+        },
+        "gcs_confounding": "complete_measured_EVM_interpretable_confirmed_and_current_doctor_sedation_and_other_confounding_effects_both_explicitly_excluded_no_drug_presence_inference_or_virtual_pre_sedation_score",
+        "input_precision": {
+          "maximum_fraction_digits": 8,
+          "maximum_integer_digits": 16,
+          "numbers": "exact_original_decimal_strings_LIS_signed_preserved_negative_unsupported_value_unknown_other_quantities_nonnegative",
+          "quantity_conversion": "only_explicit_fraction_dose_formulas_other_native_branches_never_converted",
+          "rounding": "never",
+          "zero_is_missing": false
+        },
+        "partial_policy": {
+          "complete_total": "all_six_protocol_complete_and_within_declared_scope_and_no_unresolved_rules_or_conflicts",
+          "domain_lower_bound": "retain_all_unambiguous_positive_witnesses_including_bounded_candidates",
+          "domain_upper_bound": "account_for_all_unresolved_candidates_required_modalities_and_incomplete_inventory_or_protocol",
+          "exact_numeric": "bounds_collapse_even_at_ceiling_does_not_assert_coverage_complete",
+          "known_subtotal": "sum_nonnull_exact_observed_candidate_domain_maxima_not_complete_total",
+          "normal_imputation": false,
+          "unknown_domain_bounds": [
+            0,
+            4
+          ]
+        },
+        "population": {
+          "adult": "yes_and_explicit_applicability_confirmation",
+          "care_setting": [
+            "icu",
+            "other"
+          ],
+          "clinical_validation": "not_provided"
+        },
+        "respiratory_qualification": {
+          "original_none_and_new_yes": "incompatible_keep_exact_pf_proven_lower_bound_and_support_unknown_upper_never_award_high_tier_pure_math_hospital_new_signature_rejected",
+          "original_unknown_and_new_yes": "allowed_current_doctor_qualification_with_independent_basis_original_mode_remains_unknown",
+          "other_modes": "doctor_explicit_yes_no_unknown_no_invasive_only_narrowing_or_device_inference"
+        },
+        "review": {
+          "basis": "private_statement_hash_public_only",
+          "historical_prediction": false,
+          "mode": "current_retrospective",
+          "original_flags": "preserve_no_current_review_overwrite",
+          "status": [
+            "confirmed",
+            "excluded",
+            "unknown"
+          ]
+        },
+        "source_policy": {
+          "all_members": "complete_actual_asof_root_and_parent_manifest_no_winner_only",
+          "current_use": "active_creation_governance_match_complete_current_source_set_and_all_parent_governance_recheck",
+          "public": "typed_facts_and_review_hashes_no_free_text_patient_admission_author_or_external_stream_identity",
+          "revoked": "retained_review_excluded_no_normal_imputation"
+        },
+        "vasoactive_overlap": {
+          "cross_drug": "same_actual_physical_stream_key_concurrent_intersection_unknown_never_concatenate_agents",
+          "identity": "only_actual_sha_namespace_and_external_stream_id_no_note_or_drug_name_inference",
+          "other_conflicts": "original_identity_lab_pao2_gcs_and_other_unresolved_groups_remain_dependent_candidate_unknown",
+          "policy": "actual_same_stream_piecewise_overlap_unknown_v1",
+          "unresolved_same_stream_overlap": "only_actual_intersection_unknown_retain_independent_nonoverlap_completed_tier_witness"
+        }
+      },
+      "liver": {
+        "analyte": "total_bilirubin",
+        "bands": {
+          "mg/dL": [
+            [
+              "0",
+              "1.2",
+              true,
+              false,
+              0
+            ],
+            [
+              "1.2",
+              "2",
+              true,
+              false,
+              1
+            ],
+            [
+              "2",
+              "6",
+              true,
+              false,
+              2
+            ],
+            [
+              "6",
+              "12",
+              true,
+              false,
+              3
+            ],
+            [
+              "12",
+              null,
+              true,
+              false,
+              4
+            ]
+          ],
+          "umol/L": [
+            [
+              "0",
+              "20",
+              true,
+              false,
+              0
+            ],
+            [
+              "20",
+              "33",
+              true,
+              false,
+              1
+            ],
+            [
+              "33",
+              "102",
+              true,
+              false,
+              2
+            ],
+            [
+              "102",
+              "204",
+              true,
+              false,
+              3
+            ],
+            [
+              "204",
+              null,
+              true,
+              false,
+              4
+            ]
+          ]
+        },
+        "native_policy": "local_mimic_mgdl_continuous_and_amsterdam_si_native_not_exact_converted_equivalence_no_claim_of_official_1996_erratum"
+      },
+      "organ_order": [
+        "respiratory",
+        "coagulation",
+        "liver",
+        "cardiovascular",
+        "cns",
+        "renal"
+      ],
+      "partial_policy": {
+        "complete_total": "all_six_protocol_complete_and_within_declared_scope_and_no_unresolved_rules_or_conflicts",
+        "domain_lower_bound": "retain_all_unambiguous_positive_witnesses_including_bounded_candidates",
+        "domain_upper_bound": "account_for_all_unresolved_candidates_required_modalities_and_incomplete_inventory_or_protocol",
+        "exact_numeric": "bounds_collapse_even_at_ceiling_does_not_assert_coverage_complete",
+        "known_subtotal": "sum_nonnull_exact_observed_candidate_domain_maxima_not_complete_total",
+        "normal_imputation": false,
+        "unknown_domain_bounds": [
+          0,
+          4
+        ]
+      },
+      "period": {
+        "aggregation": "maximum_eligible_candidate_per_domain_never_mix_different_samples_or_gcs_components",
+        "availability": "all_original_recorded_registered_available_at_or_before_as_of",
+        "duration_microseconds": 86400000000,
+        "point_membership": "start_inclusive_end_exclusive",
+        "review": "current_retrospective_evaluation_at_not_historical_prediction"
+      },
+      "population": "clinician_declared_adult_no_qsofa_non_icu_or_news2_pregnancy_exclusion_no_independent_clinical_validation",
+      "probability": "not_provided",
+      "prompt_handling": "provenance_only",
+      "renal": {
+        "combine": "max_creatinine_and_urine_branch_bounds_neither_missing_branch_normal_imputed",
+        "creatinine_bands": {
+          "mg/dL": [
+            [
+              "0",
+              "1.2",
+              true,
+              false,
+              0
+            ],
+            [
+              "1.2",
+              "2",
+              true,
+              false,
+              1
+            ],
+            [
+              "2",
+              "3.5",
+              true,
+              false,
+              2
+            ],
+            [
+              "3.5",
+              "5",
+              true,
+              false,
+              3
+            ],
+            [
+              "5",
+              null,
+              true,
+              false,
+              4
+            ]
+          ],
+          "umol/L": [
+            [
+              "0",
+              "110",
+              true,
+              false,
+              0
+            ],
+            [
+              "110",
+              "171",
+              true,
+              false,
+              1
+            ],
+            [
+              "171",
+              "300",
+              true,
+              false,
+              2
+            ],
+            [
+              "300",
+              "440",
+              true,
+              true,
+              3
+            ],
+            [
+              "440",
+              null,
+              false,
+              false,
+              4
+            ]
+          ]
+        },
+        "native_policy": "local_mimic_mgdl_and_amsterdam_si_cr440_inclusive_score3_not_exact_converted_equivalence",
+        "rrt": "not_a_sofa1_automatic_four_rule",
+        "urine": {
+          "at_least_200_below_500": 3,
+          "at_least_500_branch_contribution": 0,
+          "below_200": 4,
+          "unit": "mL/24h"
+        },
+        "urine_policy": "all_whole_original_intervals_exact_24h_tiling_no_overlap_gap_partial_collection_unknown_volume_or_non_patient_total_no_clip_proration_short_period_extrapolation_or_weight_normalization"
+      },
+      "respiratory": {
+        "comparison": "100_times_pao2_cross_compare_threshold_times_original_fio2_percent_no_rounded_division",
+        "fio2_eligibility": "positive_at_most_100_explicit_original_pair_no_room_air_default",
+        "fio2_unit": "%",
+        "kpa": "independent_rounded_native_thresholds_from_sepsis3_printed_table_no_conversion_or_equivalence_claim",
+        "pao2_units": [
+          "mm[Hg]",
+          "kPa"
+        ],
+        "qualification_consistency_policy": "doctor_yes_requires_original_mode_not_explicit_none_v1_unknown_mode_may_remain_unknown_with_current_explicit_qualification_yes_no_inference",
+        "qualifying_support": "explicit_current_doctor_review_with_basis_hash_never_device_mode_inference",
+        "sample_review": "arterial_sample_same_sampling_state_and_fio2_applicability_all_confirmed",
+        "support_policy": "local_doctor_adjudicated_per_actual_pair_yes_no_unknown_v1",
+        "thresholds_kpa": [
+          "53.3",
+          "40",
+          "26.7",
+          "13.3"
+        ],
+        "thresholds_mmhg": [
+          "400",
+          "300",
+          "200",
+          "100"
+        ],
+        "unknown_support_low_ratio_bounds": {
+          "100_to_below_200": [
+            2,
+            3
+          ],
+          "below_100": [
+            2,
+            4
+          ]
+        },
+        "without_qualifying_support_maximum": 2
+      },
+      "rule_family": "SOFA1",
+      "rule_id": "sofa1_native_observed_v1",
+      "scoring_status": "local_explicit_sofa1_implementation_not_sofa2_or_manual_components",
+      "treatment": "not_provided",
+      "version": "sofa1_native_observed_local_policy_v1"
+    },
+    "recipe_digest": "849854d26deb3e5d42e9433d839a5db0b365e85206ea5272b6592d75d4769199",
+    "review_basis": "human_implementation_review_not_clinical_validation",
+    "review_evidence_reference": "Synthetic implementation and terms review only",
+    "review_note": "合成测试明确核对实施版本和原采样时点的人群适用性；这是人工声明而非独立临床验证。",
+    "revision": 3,
+    "revoke_reason": "仅撤销合成SOFA实施审核，其余三个规则不受影响。",
+    "revoked_at": "2026-10-20T18:03:38.017819Z",
+    "revoked_by": 4,
+    "rule_id": "sofa1_native_observed_v1",
+    "rule_profile_id": "afd20aa4-f6d8-4d8f-9238-9f94d452e9ff",
+    "schema_version": "risk_rule_profile_v1",
+    "source_id": "risk_rule_profile:afd20aa4-f6d8-4d8f-9238-9f94d452e9ff:0a40753e5ba0",
+    "status": "revoked"
+  },
+  "source": "actual isolated HTTP responses from test_actual_four_rule_publication_slots_are_independent_and_do_not_enable_ai"
+}

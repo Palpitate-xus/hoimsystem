@@ -1,0 +1,3063 @@
+{
+  "manifest": {
+    "schema_version": "sofa1_period_manifest_v1",
+    "patient_id": 1,
+    "admission_id": "fe12bff3-e46a-41e8-9dc3-743c9e1ed099",
+    "period_start": "2026-10-19T17:03:41.141148Z",
+    "period_end": "2026-10-20T17:03:41.141148Z",
+    "as_of": "2026-10-20T18:03:41.141148Z",
+    "members": [
+      {
+        "member_key": "arterial_pair:e16fad09-124f-45ac-bfa7-911fa8ba532a",
+        "kind": "arterial_pair",
+        "identifier": "e16fad09-124f-45ac-bfa7-911fa8ba532a",
+        "source_id": "arterial_pair:e16fad09-124f-45ac-bfa7-911fa8ba532a:e402b4a7aed7",
+        "content_hash": "e402b4a7aed7e98c635650aa838b6d41915f55059a315a0a7d15b015667f5e07",
+        "governance_hash": "ef3246b3567206b74fc4e18b8a817be52ebce5613f017d5686429fa713dc6c48",
+        "full_source": {
+          "support_source_id": "e16fad09-124f-45ac-bfa7-911fa8ba532a",
+          "kind": "arterial_pair",
+          "patient_id": 1,
+          "admission_id": "fe12bff3-e46a-41e8-9dc3-743c9e1ed099",
+          "event_at": "2026-10-20T16:03:41.141148Z",
+          "recorded_at": "2026-10-20T18:03:41.141148Z",
+          "created_by": 10,
+          "schema_version": "arterial_pair_review_v1",
+          "payload": {
+            "pao2": {
+              "lab_source_id": "d3b216b9-616f-439e-a57f-c5a84716af56",
+              "expected_content_hash": "24485d5a01c4719b94dc99f108475ecd38c70d34aec4ff05eb518ecc3ba805af"
+            },
+            "fio2": {
+              "observation_id": "0e2a64d1-599b-4104-8404-ff0fce7b24d4",
+              "expected_content_hash": "5b099bded00b41a9d057119f362518c2e458e7b463cfed4d20ba0dcf4ea560c9"
+            },
+            "support": {
+              "support_source_id": "5708bb89-e5a9-47d2-a9d2-70136e3e37f2",
+              "expected_content_hash": "b8ff6612f013d16e19aa0cbb2ab983383f7c80198234a0c95392953117e4af7d"
+            },
+            "arterial_sample_confirmed": true,
+            "same_sampling_state_confirmed": true,
+            "fio2_applicability_confirmed": true,
+            "review_note": "合成原资料核实依据；保留实际原始测量和明确区间，没有从文字猜测连续支持或推导临床评分。",
+            "note": "明确当前回顾核实；实际原量并不自动构成SOFA评分或脓毒症诊断"
+          },
+          "reference_snapshots": {
+            "fio2": {
+              "admission_id": "fe12bff3-e46a-41e8-9dc3-743c9e1ed099",
+              "content_hash": "5b099bded00b41a9d057119f362518c2e458e7b463cfed4d20ba0dcf4ea560c9",
+              "created_by": 10,
+              "observation_id": "0e2a64d1-599b-4104-8404-ff0fce7b24d4",
+              "observed_at": "2026-10-20T15:20:41.141271Z",
+              "patient_id": 1,
+              "payload": {
+                "consciousness": null,
+                "measurements": {
+                  "fio2": {
+                    "absent_reason": null,
+                    "unit": "%",
+                    "value": "21.00000000"
+                  }
+                },
+                "note": "",
+                "oxygen_device": null,
+                "supplemental_oxygen": "unknown"
+              },
+              "recorded_at": "2026-10-20T17:33:41.141148Z",
+              "revision": 1,
+              "revoke_reason": "",
+              "revoked_at": null,
+              "revoked_by": null,
+              "schema_version": "inpatient_observation_v1",
+              "source_id": "inpatient_observation:0e2a64d1-599b-4104-8404-ff0fce7b24d4:5b099bded00b",
+              "status": "active"
+            },
+            "pao2": {
+              "admission_id": "fe12bff3-e46a-41e8-9dc3-743c9e1ed099",
+              "available_at": "2026-10-20T17:58:41.141148Z",
+              "collected_at_utc": "2026-10-20T16:03:41.141148Z",
+              "content_hash": "24485d5a01c4719b94dc99f108475ecd38c70d34aec4ff05eb518ecc3ba805af",
+              "created_by": 10,
+              "eligible": true,
+              "exclusion_reasons": [],
+              "lab_source_id": "d3b216b9-616f-439e-a57f-c5a84716af56",
+              "mapping_content_hash": "760f6d9d440993c40e4fa39378befe10fde6e4314af52dc84a7b8d131e7f6ee4",
+              "mapping_current": {
+                "content_hash": "760f6d9d440993c40e4fa39378befe10fde6e4314af52dc84a7b8d131e7f6ee4",
+                "governance_hash": "613c09674569ec1fac0f1ca17bc87e4a325fe4873c876fd4bb3be06eeb8a8c5e",
+                "mapping_id": "cce2cc1a-acb5-497c-b8f0-495289dfde7e",
+                "published_at": "2026-10-20T17:58:41.141148Z",
+                "published_by": 4,
+                "revision": 2,
+                "revoke_reason": "",
+                "revoked_at": null,
+                "revoked_by": null,
+                "source_id": "lab_mapping:cce2cc1a-acb5-497c-b8f0-495289dfde7e:760f6d9d4409",
+                "status": "published"
+              },
+              "mapping_id": "cce2cc1a-acb5-497c-b8f0-495289dfde7e",
+              "observation_id": "pair-lab-02532745cb09",
+              "patient_id": 1,
+              "raw_original_hash": "0dd7fdfab805d64fc95cb47d61d53d56faa1ef9bf5bc2dba584abfd1ddafa767",
+              "registered_at": "2026-10-20T17:58:41.141148Z",
+              "revision": 1,
+              "revoke_reason": "",
+              "revoked_at": null,
+              "revoked_by": null,
+              "schema_version": "inpatient_lab_source_v1",
+              "snapshot": {
+                "admission_binding_confirmed": true,
+                "admission_binding_note": "合成测试人工核对原申请、患者住院、原采样记录与时区依据；不声称旧钟点已知UTC。",
+                "admission_id": "fe12bff3-e46a-41e8-9dc3-743c9e1ed099",
+                "availability_basis": "server_registered_after_verification",
+                "available_at": "2026-10-20T17:58:41.141148Z",
+                "collected_at_utc": "2026-10-20T16:03:41.141148Z",
+                "collection_time_basis_note": "合成测试人工核对原申请、患者住院、原采样记录与时区依据；不声称旧钟点已知UTC。",
+                "collection_time_confirmed": true,
+                "created_by": 10,
+                "lab_source_id": "d3b216b9-616f-439e-a57f-c5a84716af56",
+                "mapping": {
+                  "analyte_key": "arterial_oxygen_partial_pressure",
+                  "analyte_label": "动脉氧分压",
+                  "content_hash": "760f6d9d440993c40e4fa39378befe10fde6e4314af52dc84a7b8d131e7f6ee4",
+                  "created_at": "2026-10-20T17:58:41.141148Z",
+                  "created_by": 4,
+                  "evidence_reference": "synthetic dictionary only, document 2026 page 1",
+                  "governance_hash": "613c09674569ec1fac0f1ca17bc87e4a325fe4873c876fd4bb3be06eeb8a8c5e",
+                  "mapping_id": "cce2cc1a-acb5-497c-b8f0-495289dfde7e",
+                  "published_at": "2026-10-20T17:58:41.141148Z",
+                  "published_by": 4,
+                  "rationale": "Synthetic explicit identity verification; no clinical model or unit conversion validation.",
+                  "review_note": "合成测试人工核对原申请、患者住院、原采样记录与时区依据；不声称旧钟点已知UTC。",
+                  "revision": 2,
+                  "revoke_reason": "",
+                  "revoked_at": null,
+                  "revoked_by": null,
+                  "schema_version": "lab_mapping_v1",
+                  "signature": {
+                    "code": "BG-PAO2",
+                    "code_system": "original-local-lis",
+                    "method": "original blood gas method",
+                    "specimen_type": "original arterial specimen",
+                    "unit": "mm[Hg]",
+                    "value_kind": "numeric"
+                  },
+                  "source_id": "lab_mapping:cce2cc1a-acb5-497c-b8f0-495289dfde7e:760f6d9d4409",
+                  "source_namespace": "synthetic-lis-82e039a1e5da4d1581639e5fbdc2b8bc",
+                  "status": "published"
+                },
+                "mapping_content_hash": "760f6d9d440993c40e4fa39378befe10fde6e4314af52dc84a7b8d131e7f6ee4",
+                "mapping_id": "cce2cc1a-acb5-497c-b8f0-495289dfde7e",
+                "observation_id": "pair-lab-02532745cb09",
+                "original": {
+                  "observation": {
+                    "code": "BG-PAO2",
+                    "code_system": "original-local-lis",
+                    "collected_at": "2099-01-01T00:00:00.000000",
+                    "display": "仅显示名不能用于猜测映射",
+                    "flag": "unknown",
+                    "lab_result_id": "pair-report-02532745cb09",
+                    "method": "original blood gas method",
+                    "observation_id": "pair-lab-02532745cb09",
+                    "reference_high": null,
+                    "reference_low": null,
+                    "reference_text": null,
+                    "specimen_type": "original arterial specimen",
+                    "time_basis": "unknown",
+                    "unit": "mm[Hg]",
+                    "value_num": "80.12000000",
+                    "value_representation": "database_stored_decimal_text",
+                    "value_text": null
+                  },
+                  "order": {
+                    "check_items": "旧血气项目",
+                    "check_type": null,
+                    "create_time": null,
+                    "doctor_id": 2,
+                    "lab_order_id": "pair-order-02532745cb09",
+                    "patient_id": 1,
+                    "sample_status": 1,
+                    "status": 2,
+                    "time_basis": "unknown",
+                    "urgent": null
+                  },
+                  "report": {
+                    "abnormal_flag": null,
+                    "audit_status": 1,
+                    "audit_time": null,
+                    "auditor_id": 1,
+                    "lab_order_id": "pair-order-02532745cb09",
+                    "lab_result_id": "pair-report-02532745cb09",
+                    "report_time": null,
+                    "result": "完整原始血气报告",
+                    "review_scheme": "no_local_entry_actor_plus_local_reviewer",
+                    "sample_id": null,
+                    "technician_id": null,
+                    "time_basis": "unknown"
+                  }
+                },
+                "patient_id": 1,
+                "raw_original_hash": "0dd7fdfab805d64fc95cb47d61d53d56faa1ef9bf5bc2dba584abfd1ddafa767",
+                "registered_at": "2026-10-20T17:58:41.141148Z",
+                "sampling_time_basis": "explicit_user_verified_utc_not_legacy_clock_proof",
+                "schema_version": "inpatient_lab_source_v1",
+                "source_namespace": "synthetic-lis-82e039a1e5da4d1581639e5fbdc2b8bc",
+                "source_namespace_basis_note": "合成测试人工核对原申请、患者住院、原采样记录与时区依据；不声称旧钟点已知UTC。",
+                "source_namespace_confirmed": true,
+                "source_namespace_origin_basis": "explicit_user_attestation_no_stored_lis_origin",
+                "source_verification": "explicit_user_attestation_not_independently_verified"
+              },
+              "source_id": "inpatient_lab:d3b216b9-616f-439e-a57f-c5a84716af56:24485d5a01c4",
+              "status": "active"
+            },
+            "support": {
+              "admission_id": "fe12bff3-e46a-41e8-9dc3-743c9e1ed099",
+              "author_qualification": {
+                "actor_id": 10,
+                "authorized_at": "2026-10-20T18:03:41.141148Z",
+                "care_authorization": "authorized_original_admission_at_creation",
+                "role_at_creation": "doctor"
+              },
+              "content_hash": "b8ff6612f013d16e19aa0cbb2ab983383f7c80198234a0c95392953117e4af7d",
+              "created_by": 10,
+              "eligible": true,
+              "event_at": "2026-10-20T15:03:41.141148Z",
+              "exclusion_reasons": [],
+              "governance_hash": "ef3246b3567206b74fc4e18b8a817be52ebce5613f017d5686429fa713dc6c48",
+              "kind": "respiratory_support",
+              "original_admission_current": true,
+              "patient_id": 1,
+              "payload": {
+                "continuity_basis_note": "合成原资料核实依据；保留实际原始测量和明确区间，没有从文字猜测连续支持或推导临床评分。",
+                "continuity_confirmed": true,
+                "delivery_mode": "invasive_mechanical",
+                "device_description": null,
+                "ended_at": null,
+                "note": "",
+                "start_at": "2026-10-20T15:03:41.141148Z",
+                "verified_until_at": "2026-10-20T17:03:41.141148Z"
+              },
+              "recorded_at": "2026-10-20T18:03:41.141148Z",
+              "reference_snapshots": {},
+              "revision": 1,
+              "revoke_reason": "",
+              "revoked_at": null,
+              "revoked_by": null,
+              "schema_version": "respiratory_support_v1",
+              "source_id": "respiratory_support:5708bb89-e5a9-47d2-a9d2-70136e3e37f2:b8ff6612f013",
+              "source_verification": "explicit_human_record_not_independently_verified",
+              "status": "active",
+              "support_source_id": "5708bb89-e5a9-47d2-a9d2-70136e3e37f2"
+            }
+          },
+          "author_qualification": {
+            "actor_id": 10,
+            "authorized_at": "2026-10-20T18:03:41.141148Z",
+            "care_authorization": "authorized_original_admission_at_creation",
+            "clinical_review_signed": true,
+            "doctor_id": 2,
+            "doctor_user_id": 10,
+            "role_at_creation": "doctor"
+          },
+          "source_id": "arterial_pair:e16fad09-124f-45ac-bfa7-911fa8ba532a:e402b4a7aed7",
+          "content_hash": "e402b4a7aed7e98c635650aa838b6d41915f55059a315a0a7d15b015667f5e07",
+          "status": "active",
+          "revision": 1,
+          "revoked_at": null,
+          "revoked_by": null,
+          "revoke_reason": "",
+          "governance_hash": "ef3246b3567206b74fc4e18b8a817be52ebce5613f017d5686429fa713dc6c48",
+          "eligible": true,
+          "exclusion_reasons": [],
+          "original_admission_current": true,
+          "source_verification": "explicit_human_record_not_independently_verified"
+        },
+        "temporal_role": "period",
+        "eligible": true,
+        "exclusion_reasons": []
+      },
+      {
+        "member_key": "gcs:4d127ecb-a839-4344-b30e-e516da3c67e2",
+        "kind": "gcs",
+        "identifier": "4d127ecb-a839-4344-b30e-e516da3c67e2",
+        "source_id": "gcs_observation:4d127ecb-a839-4344-b30e-e516da3c67e2:2da85f0a47a1",
+        "content_hash": "2da85f0a47a1e5ad5fdbfc70c47e591b729919363d6a93e7aced9a9c3483010e",
+        "governance_hash": "ef3246b3567206b74fc4e18b8a817be52ebce5613f017d5686429fa713dc6c48",
+        "full_source": {
+          "gcs_observation_id": "4d127ecb-a839-4344-b30e-e516da3c67e2",
+          "patient_id": 1,
+          "admission_id": "fe12bff3-e46a-41e8-9dc3-743c9e1ed099",
+          "observed_at": "2026-10-20T15:19:41.141148Z",
+          "recorded_at": "2026-10-20T18:03:41.141148Z",
+          "created_by": 10,
+          "schema_version": "inpatient_gcs_v1",
+          "payload": {
+            "components": {
+              "eye": {
+                "score": 4,
+                "absent_reason": null
+              },
+              "verbal": {
+                "score": 5,
+                "absent_reason": null
+              },
+              "motor": {
+                "score": 6,
+                "absent_reason": null
+              }
+            },
+            "anchor_point": null,
+            "same_exam_confirmed": false,
+            "same_exam_basis_note": null,
+            "note": "独立实际完整EVM检查，未替换旧NT原件"
+          },
+          "anchor_point_snapshot": null,
+          "content_hash": "2da85f0a47a1e5ad5fdbfc70c47e591b729919363d6a93e7aced9a9c3483010e",
+          "source_id": "gcs_observation:4d127ecb-a839-4344-b30e-e516da3c67e2:2da85f0a47a1",
+          "status": "active",
+          "revision": 1,
+          "revoked_at": null,
+          "revoked_by": null,
+          "revoke_reason": "",
+          "governance_hash": "ef3246b3567206b74fc4e18b8a817be52ebce5613f017d5686429fa713dc6c48",
+          "derived_total": 15,
+          "anchor_current": false,
+          "anchor_exclusion_reasons": [
+            "no_explicit_original_point_anchor"
+          ],
+          "original_admission_current": true,
+          "eligible": true,
+          "exclusion_reasons": [],
+          "eligibility_basis": "original_gcs_integrity_and_admission_not_qsofa_applicability"
+        },
+        "temporal_role": "period",
+        "eligible": true,
+        "exclusion_reasons": []
+      },
+      {
+        "member_key": "gcs:a03f8a28-68a9-4649-9eda-6612189716ba",
+        "kind": "gcs",
+        "identifier": "a03f8a28-68a9-4649-9eda-6612189716ba",
+        "source_id": "gcs_observation:a03f8a28-68a9-4649-9eda-6612189716ba:9a6d01844386",
+        "content_hash": "9a6d0184438615260dd426374387b4cf591be6fd22f9938cbd4a972e76d0ba9c",
+        "governance_hash": "ef3246b3567206b74fc4e18b8a817be52ebce5613f017d5686429fa713dc6c48",
+        "full_source": {
+          "gcs_observation_id": "a03f8a28-68a9-4649-9eda-6612189716ba",
+          "patient_id": 1,
+          "admission_id": "fe12bff3-e46a-41e8-9dc3-743c9e1ed099",
+          "observed_at": "2026-10-20T15:14:41.141148Z",
+          "recorded_at": "2026-10-20T18:03:41.141148Z",
+          "created_by": 10,
+          "schema_version": "inpatient_gcs_v1",
+          "payload": {
+            "components": {
+              "eye": {
+                "score": 4,
+                "absent_reason": null
+              },
+              "verbal": {
+                "score": null,
+                "absent_reason": "not_testable"
+              },
+              "motor": {
+                "score": 6,
+                "absent_reason": null
+              }
+            },
+            "anchor_point": null,
+            "same_exam_confirmed": false,
+            "same_exam_basis_note": null,
+            "note": "合成不可测言语原GCS，不得补正常15或NT1"
+          },
+          "anchor_point_snapshot": null,
+          "content_hash": "9a6d0184438615260dd426374387b4cf591be6fd22f9938cbd4a972e76d0ba9c",
+          "source_id": "gcs_observation:a03f8a28-68a9-4649-9eda-6612189716ba:9a6d01844386",
+          "status": "active",
+          "revision": 1,
+          "revoked_at": null,
+          "revoked_by": null,
+          "revoke_reason": "",
+          "governance_hash": "ef3246b3567206b74fc4e18b8a817be52ebce5613f017d5686429fa713dc6c48",
+          "derived_total": null,
+          "anchor_current": false,
+          "anchor_exclusion_reasons": [
+            "no_explicit_original_point_anchor"
+          ],
+          "original_admission_current": true,
+          "eligible": true,
+          "exclusion_reasons": [],
+          "eligibility_basis": "original_gcs_integrity_and_admission_not_qsofa_applicability"
+        },
+        "temporal_role": "period",
+        "eligible": true,
+        "exclusion_reasons": []
+      },
+      {
+        "member_key": "laboratory:2cf29c76-ab99-4272-b501-9337dc119fb0",
+        "kind": "laboratory",
+        "identifier": "2cf29c76-ab99-4272-b501-9337dc119fb0",
+        "source_id": "inpatient_lab:2cf29c76-ab99-4272-b501-9337dc119fb0:42ca6d55faf4",
+        "content_hash": "42ca6d55faf41be6ff9153ebb4c28c1adc53a0a072e651c4cf9a74980e503b0b",
+        "governance_hash": "ef3246b3567206b74fc4e18b8a817be52ebce5613f017d5686429fa713dc6c48",
+        "full_source": {
+          "lab_source_id": "2cf29c76-ab99-4272-b501-9337dc119fb0",
+          "patient_id": 1,
+          "admission_id": "fe12bff3-e46a-41e8-9dc3-743c9e1ed099",
+          "observation_id": "sofa-lab-58e19e6fcff545ecb5a7",
+          "mapping_id": "6f9476e0-c95e-4d32-84b9-8d0b9910a11f",
+          "schema_version": "inpatient_lab_source_v1",
+          "created_by": 10,
+          "raw_original_hash": "0344c7fdb5ad2386094e9d0f8e2fa15abf4e55854e6159fc02eed026d78ff313",
+          "mapping_content_hash": "d26eda09b46e90b4065b6d53c2c39bed6abdc99ba58b3f3290cf5b32aff88bf5",
+          "collected_at_utc": "2026-10-20T15:10:41.141148Z",
+          "registered_at": "2026-10-20T17:58:41.141148Z",
+          "available_at": "2026-10-20T17:58:41.141148Z",
+          "source_id": "inpatient_lab:2cf29c76-ab99-4272-b501-9337dc119fb0:42ca6d55faf4",
+          "content_hash": "42ca6d55faf41be6ff9153ebb4c28c1adc53a0a072e651c4cf9a74980e503b0b",
+          "status": "active",
+          "revision": 1,
+          "revoked_at": null,
+          "revoked_by": null,
+          "revoke_reason": "",
+          "snapshot": {
+            "admission_binding_confirmed": true,
+            "admission_binding_note": "合成测试人工核对原申请、患者住院、原采样记录与时区依据；不声称旧钟点已知UTC。",
+            "admission_id": "fe12bff3-e46a-41e8-9dc3-743c9e1ed099",
+            "availability_basis": "server_registered_after_verification",
+            "available_at": "2026-10-20T17:58:41.141148Z",
+            "collected_at_utc": "2026-10-20T15:10:41.141148Z",
+            "collection_time_basis_note": "合成测试人工核对原申请、患者住院、原采样记录与时区依据；不声称旧钟点已知UTC。",
+            "collection_time_confirmed": true,
+            "created_by": 10,
+            "lab_source_id": "2cf29c76-ab99-4272-b501-9337dc119fb0",
+            "mapping": {
+              "analyte_key": "creatinine",
+              "analyte_label": "肌酐",
+              "content_hash": "d26eda09b46e90b4065b6d53c2c39bed6abdc99ba58b3f3290cf5b32aff88bf5",
+              "created_at": "2026-10-20T17:58:41.141148Z",
+              "created_by": 4,
+              "evidence_reference": "synthetic dictionary only, document 2026 page 1",
+              "governance_hash": "613c09674569ec1fac0f1ca17bc87e4a325fe4873c876fd4bb3be06eeb8a8c5e",
+              "mapping_id": "6f9476e0-c95e-4d32-84b9-8d0b9910a11f",
+              "published_at": "2026-10-20T17:58:41.141148Z",
+              "published_by": 4,
+              "rationale": "Synthetic explicit identity verification; no clinical model or unit conversion validation.",
+              "review_note": "合成测试人工核对原申请、患者住院、原采样记录与时区依据；不声称旧钟点已知UTC。",
+              "revision": 2,
+              "revoke_reason": "",
+              "revoked_at": null,
+              "revoked_by": null,
+              "schema_version": "lab_mapping_v1",
+              "signature": {
+                "code": "SYN-74a6358f72",
+                "code_system": "synthetic-sofa",
+                "method": "synthetic",
+                "specimen_type": "synthetic",
+                "unit": "mg/dL",
+                "value_kind": "numeric"
+              },
+              "source_id": "lab_mapping:6f9476e0-c95e-4d32-84b9-8d0b9910a11f:d26eda09b46e",
+              "source_namespace": "synthetic-lis-1ccb67eadbe94dfbaf0ddad2b6c6b9e2",
+              "status": "published"
+            },
+            "mapping_content_hash": "d26eda09b46e90b4065b6d53c2c39bed6abdc99ba58b3f3290cf5b32aff88bf5",
+            "mapping_id": "6f9476e0-c95e-4d32-84b9-8d0b9910a11f",
+            "observation_id": "sofa-lab-58e19e6fcff545ecb5a7",
+            "original": {
+              "observation": {
+                "code": "SYN-74a6358f72",
+                "code_system": "synthetic-sofa",
+                "collected_at": "2000-01-01T12:00:00.000000",
+                "display": "private original display is never clinical identity",
+                "flag": "unknown",
+                "lab_result_id": "pair-report-02532745cb09",
+                "method": "synthetic",
+                "observation_id": "sofa-lab-58e19e6fcff545ecb5a7",
+                "reference_high": null,
+                "reference_low": null,
+                "reference_text": null,
+                "specimen_type": "synthetic",
+                "time_basis": "unknown",
+                "unit": "mg/dL",
+                "value_num": "1.00000000",
+                "value_representation": "database_stored_decimal_text",
+                "value_text": null
+              },
+              "order": {
+                "check_items": "旧血气项目",
+                "check_type": null,
+                "create_time": null,
+                "doctor_id": 2,
+                "lab_order_id": "pair-order-02532745cb09",
+                "patient_id": 1,
+                "sample_status": 1,
+                "status": 2,
+                "time_basis": "unknown",
+                "urgent": null
+              },
+              "report": {
+                "abnormal_flag": null,
+                "audit_status": 1,
+                "audit_time": null,
+                "auditor_id": 1,
+                "lab_order_id": "pair-order-02532745cb09",
+                "lab_result_id": "pair-report-02532745cb09",
+                "report_time": null,
+                "result": "完整原始血气报告",
+                "review_scheme": "no_local_entry_actor_plus_local_reviewer",
+                "sample_id": null,
+                "technician_id": null,
+                "time_basis": "unknown"
+              }
+            },
+            "patient_id": 1,
+            "raw_original_hash": "0344c7fdb5ad2386094e9d0f8e2fa15abf4e55854e6159fc02eed026d78ff313",
+            "registered_at": "2026-10-20T17:58:41.141148Z",
+            "sampling_time_basis": "explicit_user_verified_utc_not_legacy_clock_proof",
+            "schema_version": "inpatient_lab_source_v1",
+            "source_namespace": "synthetic-lis-1ccb67eadbe94dfbaf0ddad2b6c6b9e2",
+            "source_namespace_basis_note": "合成测试人工核对原申请、患者住院、原采样记录与时区依据；不声称旧钟点已知UTC。",
+            "source_namespace_confirmed": true,
+            "source_namespace_origin_basis": "explicit_user_attestation_no_stored_lis_origin",
+            "source_verification": "explicit_user_attestation_not_independently_verified"
+          },
+          "mapping_current": {
+            "mapping_id": "6f9476e0-c95e-4d32-84b9-8d0b9910a11f",
+            "source_id": "lab_mapping:6f9476e0-c95e-4d32-84b9-8d0b9910a11f:d26eda09b46e",
+            "content_hash": "d26eda09b46e90b4065b6d53c2c39bed6abdc99ba58b3f3290cf5b32aff88bf5",
+            "status": "published",
+            "revision": 2,
+            "governance_hash": "613c09674569ec1fac0f1ca17bc87e4a325fe4873c876fd4bb3be06eeb8a8c5e",
+            "published_at": "2026-10-20T17:58:41.141148Z",
+            "published_by": 4,
+            "revoked_at": null,
+            "revoked_by": null,
+            "revoke_reason": ""
+          },
+          "eligible": true,
+          "exclusion_reasons": []
+        },
+        "temporal_role": "period",
+        "eligible": true,
+        "exclusion_reasons": []
+      },
+      {
+        "member_key": "laboratory:85599b6a-7684-44a8-bed1-3ba577ed0acc",
+        "kind": "laboratory",
+        "identifier": "85599b6a-7684-44a8-bed1-3ba577ed0acc",
+        "source_id": "inpatient_lab:85599b6a-7684-44a8-bed1-3ba577ed0acc:880feb3f78b5",
+        "content_hash": "880feb3f78b51e0b91ed212f0b688dd3bea095d8924675bd35cb24639f1beaec",
+        "governance_hash": "ef3246b3567206b74fc4e18b8a817be52ebce5613f017d5686429fa713dc6c48",
+        "full_source": {
+          "lab_source_id": "85599b6a-7684-44a8-bed1-3ba577ed0acc",
+          "patient_id": 1,
+          "admission_id": "fe12bff3-e46a-41e8-9dc3-743c9e1ed099",
+          "observation_id": "sofa-lab-053ccd854f0d4215a0c5",
+          "mapping_id": "e70d78c1-ab89-476a-beec-e7e7a84b30bb",
+          "schema_version": "inpatient_lab_source_v1",
+          "created_by": 10,
+          "raw_original_hash": "04be4099c036e65b6eaf5daed153981b7b2f038b48f29d095f9ca3fb4190d359",
+          "mapping_content_hash": "367b441e8197d7f6077a1e95d5d767807b726f54dff0058cb7a3fdb68a2472b2",
+          "collected_at_utc": "2026-10-20T15:10:41.141148Z",
+          "registered_at": "2026-10-20T17:58:41.141148Z",
+          "available_at": "2026-10-20T17:58:41.141148Z",
+          "source_id": "inpatient_lab:85599b6a-7684-44a8-bed1-3ba577ed0acc:880feb3f78b5",
+          "content_hash": "880feb3f78b51e0b91ed212f0b688dd3bea095d8924675bd35cb24639f1beaec",
+          "status": "active",
+          "revision": 1,
+          "revoked_at": null,
+          "revoked_by": null,
+          "revoke_reason": "",
+          "snapshot": {
+            "admission_binding_confirmed": true,
+            "admission_binding_note": "合成测试人工核对原申请、患者住院、原采样记录与时区依据；不声称旧钟点已知UTC。",
+            "admission_id": "fe12bff3-e46a-41e8-9dc3-743c9e1ed099",
+            "availability_basis": "server_registered_after_verification",
+            "available_at": "2026-10-20T17:58:41.141148Z",
+            "collected_at_utc": "2026-10-20T15:10:41.141148Z",
+            "collection_time_basis_note": "合成测试人工核对原申请、患者住院、原采样记录与时区依据；不声称旧钟点已知UTC。",
+            "collection_time_confirmed": true,
+            "created_by": 10,
+            "lab_source_id": "85599b6a-7684-44a8-bed1-3ba577ed0acc",
+            "mapping": {
+              "analyte_key": "total_bilirubin",
+              "analyte_label": "总胆红素",
+              "content_hash": "367b441e8197d7f6077a1e95d5d767807b726f54dff0058cb7a3fdb68a2472b2",
+              "created_at": "2026-10-20T17:58:41.141148Z",
+              "created_by": 4,
+              "evidence_reference": "synthetic dictionary only, document 2026 page 1",
+              "governance_hash": "613c09674569ec1fac0f1ca17bc87e4a325fe4873c876fd4bb3be06eeb8a8c5e",
+              "mapping_id": "e70d78c1-ab89-476a-beec-e7e7a84b30bb",
+              "published_at": "2026-10-20T17:58:41.141148Z",
+              "published_by": 4,
+              "rationale": "Synthetic explicit identity verification; no clinical model or unit conversion validation.",
+              "review_note": "合成测试人工核对原申请、患者住院、原采样记录与时区依据；不声称旧钟点已知UTC。",
+              "revision": 2,
+              "revoke_reason": "",
+              "revoked_at": null,
+              "revoked_by": null,
+              "schema_version": "lab_mapping_v1",
+              "signature": {
+                "code": "SYN-fa8db8d771",
+                "code_system": "synthetic-sofa",
+                "method": "synthetic",
+                "specimen_type": "synthetic",
+                "unit": "mg/dL",
+                "value_kind": "numeric"
+              },
+              "source_id": "lab_mapping:e70d78c1-ab89-476a-beec-e7e7a84b30bb:367b441e8197",
+              "source_namespace": "synthetic-lis-b74bfcda2e0b4531a5b9e6661f8508f4",
+              "status": "published"
+            },
+            "mapping_content_hash": "367b441e8197d7f6077a1e95d5d767807b726f54dff0058cb7a3fdb68a2472b2",
+            "mapping_id": "e70d78c1-ab89-476a-beec-e7e7a84b30bb",
+            "observation_id": "sofa-lab-053ccd854f0d4215a0c5",
+            "original": {
+              "observation": {
+                "code": "SYN-fa8db8d771",
+                "code_system": "synthetic-sofa",
+                "collected_at": "2000-01-01T12:00:00.000000",
+                "display": "private original display is never clinical identity",
+                "flag": "unknown",
+                "lab_result_id": "pair-report-02532745cb09",
+                "method": "synthetic",
+                "observation_id": "sofa-lab-053ccd854f0d4215a0c5",
+                "reference_high": null,
+                "reference_low": null,
+                "reference_text": null,
+                "specimen_type": "synthetic",
+                "time_basis": "unknown",
+                "unit": "mg/dL",
+                "value_num": "1.00000000",
+                "value_representation": "database_stored_decimal_text",
+                "value_text": null
+              },
+              "order": {
+                "check_items": "旧血气项目",
+                "check_type": null,
+                "create_time": null,
+                "doctor_id": 2,
+                "lab_order_id": "pair-order-02532745cb09",
+                "patient_id": 1,
+                "sample_status": 1,
+                "status": 2,
+                "time_basis": "unknown",
+                "urgent": null
+              },
+              "report": {
+                "abnormal_flag": null,
+                "audit_status": 1,
+                "audit_time": null,
+                "auditor_id": 1,
+                "lab_order_id": "pair-order-02532745cb09",
+                "lab_result_id": "pair-report-02532745cb09",
+                "report_time": null,
+                "result": "完整原始血气报告",
+                "review_scheme": "no_local_entry_actor_plus_local_reviewer",
+                "sample_id": null,
+                "technician_id": null,
+                "time_basis": "unknown"
+              }
+            },
+            "patient_id": 1,
+            "raw_original_hash": "04be4099c036e65b6eaf5daed153981b7b2f038b48f29d095f9ca3fb4190d359",
+            "registered_at": "2026-10-20T17:58:41.141148Z",
+            "sampling_time_basis": "explicit_user_verified_utc_not_legacy_clock_proof",
+            "schema_version": "inpatient_lab_source_v1",
+            "source_namespace": "synthetic-lis-b74bfcda2e0b4531a5b9e6661f8508f4",
+            "source_namespace_basis_note": "合成测试人工核对原申请、患者住院、原采样记录与时区依据；不声称旧钟点已知UTC。",
+            "source_namespace_confirmed": true,
+            "source_namespace_origin_basis": "explicit_user_attestation_no_stored_lis_origin",
+            "source_verification": "explicit_user_attestation_not_independently_verified"
+          },
+          "mapping_current": {
+            "mapping_id": "e70d78c1-ab89-476a-beec-e7e7a84b30bb",
+            "source_id": "lab_mapping:e70d78c1-ab89-476a-beec-e7e7a84b30bb:367b441e8197",
+            "content_hash": "367b441e8197d7f6077a1e95d5d767807b726f54dff0058cb7a3fdb68a2472b2",
+            "status": "published",
+            "revision": 2,
+            "governance_hash": "613c09674569ec1fac0f1ca17bc87e4a325fe4873c876fd4bb3be06eeb8a8c5e",
+            "published_at": "2026-10-20T17:58:41.141148Z",
+            "published_by": 4,
+            "revoked_at": null,
+            "revoked_by": null,
+            "revoke_reason": ""
+          },
+          "eligible": true,
+          "exclusion_reasons": []
+        },
+        "temporal_role": "period",
+        "eligible": true,
+        "exclusion_reasons": []
+      },
+      {
+        "member_key": "laboratory:d3b216b9-616f-439e-a57f-c5a84716af56",
+        "kind": "laboratory",
+        "identifier": "d3b216b9-616f-439e-a57f-c5a84716af56",
+        "source_id": "inpatient_lab:d3b216b9-616f-439e-a57f-c5a84716af56:24485d5a01c4",
+        "content_hash": "24485d5a01c4719b94dc99f108475ecd38c70d34aec4ff05eb518ecc3ba805af",
+        "governance_hash": "ef3246b3567206b74fc4e18b8a817be52ebce5613f017d5686429fa713dc6c48",
+        "full_source": {
+          "lab_source_id": "d3b216b9-616f-439e-a57f-c5a84716af56",
+          "patient_id": 1,
+          "admission_id": "fe12bff3-e46a-41e8-9dc3-743c9e1ed099",
+          "observation_id": "pair-lab-02532745cb09",
+          "mapping_id": "cce2cc1a-acb5-497c-b8f0-495289dfde7e",
+          "schema_version": "inpatient_lab_source_v1",
+          "created_by": 10,
+          "raw_original_hash": "0dd7fdfab805d64fc95cb47d61d53d56faa1ef9bf5bc2dba584abfd1ddafa767",
+          "mapping_content_hash": "760f6d9d440993c40e4fa39378befe10fde6e4314af52dc84a7b8d131e7f6ee4",
+          "collected_at_utc": "2026-10-20T16:03:41.141148Z",
+          "registered_at": "2026-10-20T17:58:41.141148Z",
+          "available_at": "2026-10-20T17:58:41.141148Z",
+          "source_id": "inpatient_lab:d3b216b9-616f-439e-a57f-c5a84716af56:24485d5a01c4",
+          "content_hash": "24485d5a01c4719b94dc99f108475ecd38c70d34aec4ff05eb518ecc3ba805af",
+          "status": "active",
+          "revision": 1,
+          "revoked_at": null,
+          "revoked_by": null,
+          "revoke_reason": "",
+          "snapshot": {
+            "admission_binding_confirmed": true,
+            "admission_binding_note": "合成测试人工核对原申请、患者住院、原采样记录与时区依据；不声称旧钟点已知UTC。",
+            "admission_id": "fe12bff3-e46a-41e8-9dc3-743c9e1ed099",
+            "availability_basis": "server_registered_after_verification",
+            "available_at": "2026-10-20T17:58:41.141148Z",
+            "collected_at_utc": "2026-10-20T16:03:41.141148Z",
+            "collection_time_basis_note": "合成测试人工核对原申请、患者住院、原采样记录与时区依据；不声称旧钟点已知UTC。",
+            "collection_time_confirmed": true,
+            "created_by": 10,
+            "lab_source_id": "d3b216b9-616f-439e-a57f-c5a84716af56",
+            "mapping": {
+              "analyte_key": "arterial_oxygen_partial_pressure",
+              "analyte_label": "动脉氧分压",
+              "content_hash": "760f6d9d440993c40e4fa39378befe10fde6e4314af52dc84a7b8d131e7f6ee4",
+              "created_at": "2026-10-20T17:58:41.141148Z",
+              "created_by": 4,
+              "evidence_reference": "synthetic dictionary only, document 2026 page 1",
+              "governance_hash": "613c09674569ec1fac0f1ca17bc87e4a325fe4873c876fd4bb3be06eeb8a8c5e",
+              "mapping_id": "cce2cc1a-acb5-497c-b8f0-495289dfde7e",
+              "published_at": "2026-10-20T17:58:41.141148Z",
+              "published_by": 4,
+              "rationale": "Synthetic explicit identity verification; no clinical model or unit conversion validation.",
+              "review_note": "合成测试人工核对原申请、患者住院、原采样记录与时区依据；不声称旧钟点已知UTC。",
+              "revision": 2,
+              "revoke_reason": "",
+              "revoked_at": null,
+              "revoked_by": null,
+              "schema_version": "lab_mapping_v1",
+              "signature": {
+                "code": "BG-PAO2",
+                "code_system": "original-local-lis",
+                "method": "original blood gas method",
+                "specimen_type": "original arterial specimen",
+                "unit": "mm[Hg]",
+                "value_kind": "numeric"
+              },
+              "source_id": "lab_mapping:cce2cc1a-acb5-497c-b8f0-495289dfde7e:760f6d9d4409",
+              "source_namespace": "synthetic-lis-82e039a1e5da4d1581639e5fbdc2b8bc",
+              "status": "published"
+            },
+            "mapping_content_hash": "760f6d9d440993c40e4fa39378befe10fde6e4314af52dc84a7b8d131e7f6ee4",
+            "mapping_id": "cce2cc1a-acb5-497c-b8f0-495289dfde7e",
+            "observation_id": "pair-lab-02532745cb09",
+            "original": {
+              "observation": {
+                "code": "BG-PAO2",
+                "code_system": "original-local-lis",
+                "collected_at": "2099-01-01T00:00:00.000000",
+                "display": "仅显示名不能用于猜测映射",
+                "flag": "unknown",
+                "lab_result_id": "pair-report-02532745cb09",
+                "method": "original blood gas method",
+                "observation_id": "pair-lab-02532745cb09",
+                "reference_high": null,
+                "reference_low": null,
+                "reference_text": null,
+                "specimen_type": "original arterial specimen",
+                "time_basis": "unknown",
+                "unit": "mm[Hg]",
+                "value_num": "80.12000000",
+                "value_representation": "database_stored_decimal_text",
+                "value_text": null
+              },
+              "order": {
+                "check_items": "旧血气项目",
+                "check_type": null,
+                "create_time": null,
+                "doctor_id": 2,
+                "lab_order_id": "pair-order-02532745cb09",
+                "patient_id": 1,
+                "sample_status": 1,
+                "status": 2,
+                "time_basis": "unknown",
+                "urgent": null
+              },
+              "report": {
+                "abnormal_flag": null,
+                "audit_status": 1,
+                "audit_time": null,
+                "auditor_id": 1,
+                "lab_order_id": "pair-order-02532745cb09",
+                "lab_result_id": "pair-report-02532745cb09",
+                "report_time": null,
+                "result": "完整原始血气报告",
+                "review_scheme": "no_local_entry_actor_plus_local_reviewer",
+                "sample_id": null,
+                "technician_id": null,
+                "time_basis": "unknown"
+              }
+            },
+            "patient_id": 1,
+            "raw_original_hash": "0dd7fdfab805d64fc95cb47d61d53d56faa1ef9bf5bc2dba584abfd1ddafa767",
+            "registered_at": "2026-10-20T17:58:41.141148Z",
+            "sampling_time_basis": "explicit_user_verified_utc_not_legacy_clock_proof",
+            "schema_version": "inpatient_lab_source_v1",
+            "source_namespace": "synthetic-lis-82e039a1e5da4d1581639e5fbdc2b8bc",
+            "source_namespace_basis_note": "合成测试人工核对原申请、患者住院、原采样记录与时区依据；不声称旧钟点已知UTC。",
+            "source_namespace_confirmed": true,
+            "source_namespace_origin_basis": "explicit_user_attestation_no_stored_lis_origin",
+            "source_verification": "explicit_user_attestation_not_independently_verified"
+          },
+          "mapping_current": {
+            "mapping_id": "cce2cc1a-acb5-497c-b8f0-495289dfde7e",
+            "source_id": "lab_mapping:cce2cc1a-acb5-497c-b8f0-495289dfde7e:760f6d9d4409",
+            "content_hash": "760f6d9d440993c40e4fa39378befe10fde6e4314af52dc84a7b8d131e7f6ee4",
+            "status": "published",
+            "revision": 2,
+            "governance_hash": "613c09674569ec1fac0f1ca17bc87e4a325fe4873c876fd4bb3be06eeb8a8c5e",
+            "published_at": "2026-10-20T17:58:41.141148Z",
+            "published_by": 4,
+            "revoked_at": null,
+            "revoked_by": null,
+            "revoke_reason": ""
+          },
+          "eligible": true,
+          "exclusion_reasons": []
+        },
+        "temporal_role": "period",
+        "eligible": true,
+        "exclusion_reasons": []
+      },
+      {
+        "member_key": "laboratory:f155357a-3d16-43e4-8a74-b81b3df15391",
+        "kind": "laboratory",
+        "identifier": "f155357a-3d16-43e4-8a74-b81b3df15391",
+        "source_id": "inpatient_lab:f155357a-3d16-43e4-8a74-b81b3df15391:48224821443c",
+        "content_hash": "48224821443ce9d2ec49d546aeb756ea5108c93a39baa0caac36afdd8965416c",
+        "governance_hash": "ef3246b3567206b74fc4e18b8a817be52ebce5613f017d5686429fa713dc6c48",
+        "full_source": {
+          "lab_source_id": "f155357a-3d16-43e4-8a74-b81b3df15391",
+          "patient_id": 1,
+          "admission_id": "fe12bff3-e46a-41e8-9dc3-743c9e1ed099",
+          "observation_id": "sofa-lab-7323829b9fa54889955e",
+          "mapping_id": "854d06ec-47ed-49af-8239-48566d94422f",
+          "schema_version": "inpatient_lab_source_v1",
+          "created_by": 10,
+          "raw_original_hash": "ac3fb8b3031f31970a7013da1199095c54bdc2d944cac78b7ce76716c524f0c6",
+          "mapping_content_hash": "0bdc19d4ae3e6a5daaa3fde064cb4dfcc8ca4e976b475b525e8bab6cf1287f5c",
+          "collected_at_utc": "2026-10-20T15:10:41.141148Z",
+          "registered_at": "2026-10-20T17:58:41.141148Z",
+          "available_at": "2026-10-20T17:58:41.141148Z",
+          "source_id": "inpatient_lab:f155357a-3d16-43e4-8a74-b81b3df15391:48224821443c",
+          "content_hash": "48224821443ce9d2ec49d546aeb756ea5108c93a39baa0caac36afdd8965416c",
+          "status": "active",
+          "revision": 1,
+          "revoked_at": null,
+          "revoked_by": null,
+          "revoke_reason": "",
+          "snapshot": {
+            "admission_binding_confirmed": true,
+            "admission_binding_note": "合成测试人工核对原申请、患者住院、原采样记录与时区依据；不声称旧钟点已知UTC。",
+            "admission_id": "fe12bff3-e46a-41e8-9dc3-743c9e1ed099",
+            "availability_basis": "server_registered_after_verification",
+            "available_at": "2026-10-20T17:58:41.141148Z",
+            "collected_at_utc": "2026-10-20T15:10:41.141148Z",
+            "collection_time_basis_note": "合成测试人工核对原申请、患者住院、原采样记录与时区依据；不声称旧钟点已知UTC。",
+            "collection_time_confirmed": true,
+            "created_by": 10,
+            "lab_source_id": "f155357a-3d16-43e4-8a74-b81b3df15391",
+            "mapping": {
+              "analyte_key": "platelet_count",
+              "analyte_label": "血小板计数",
+              "content_hash": "0bdc19d4ae3e6a5daaa3fde064cb4dfcc8ca4e976b475b525e8bab6cf1287f5c",
+              "created_at": "2026-10-20T17:58:41.141148Z",
+              "created_by": 4,
+              "evidence_reference": "synthetic dictionary only, document 2026 page 1",
+              "governance_hash": "613c09674569ec1fac0f1ca17bc87e4a325fe4873c876fd4bb3be06eeb8a8c5e",
+              "mapping_id": "854d06ec-47ed-49af-8239-48566d94422f",
+              "published_at": "2026-10-20T17:58:41.141148Z",
+              "published_by": 4,
+              "rationale": "Synthetic explicit identity verification; no clinical model or unit conversion validation.",
+              "review_note": "合成测试人工核对原申请、患者住院、原采样记录与时区依据；不声称旧钟点已知UTC。",
+              "revision": 2,
+              "revoke_reason": "",
+              "revoked_at": null,
+              "revoked_by": null,
+              "schema_version": "lab_mapping_v1",
+              "signature": {
+                "code": "SYN-f496a553fa",
+                "code_system": "synthetic-sofa",
+                "method": "synthetic",
+                "specimen_type": "synthetic",
+                "unit": "10^9/L",
+                "value_kind": "numeric"
+              },
+              "source_id": "lab_mapping:854d06ec-47ed-49af-8239-48566d94422f:0bdc19d4ae3e",
+              "source_namespace": "synthetic-lis-c3c37a1cd2cb45b490a209ef880588e1",
+              "status": "published"
+            },
+            "mapping_content_hash": "0bdc19d4ae3e6a5daaa3fde064cb4dfcc8ca4e976b475b525e8bab6cf1287f5c",
+            "mapping_id": "854d06ec-47ed-49af-8239-48566d94422f",
+            "observation_id": "sofa-lab-7323829b9fa54889955e",
+            "original": {
+              "observation": {
+                "code": "SYN-f496a553fa",
+                "code_system": "synthetic-sofa",
+                "collected_at": "2000-01-01T12:00:00.000000",
+                "display": "private original display is never clinical identity",
+                "flag": "unknown",
+                "lab_result_id": "pair-report-02532745cb09",
+                "method": "synthetic",
+                "observation_id": "sofa-lab-7323829b9fa54889955e",
+                "reference_high": null,
+                "reference_low": null,
+                "reference_text": null,
+                "specimen_type": "synthetic",
+                "time_basis": "unknown",
+                "unit": "10^9/L",
+                "value_num": "160.00000000",
+                "value_representation": "database_stored_decimal_text",
+                "value_text": null
+              },
+              "order": {
+                "check_items": "旧血气项目",
+                "check_type": null,
+                "create_time": null,
+                "doctor_id": 2,
+                "lab_order_id": "pair-order-02532745cb09",
+                "patient_id": 1,
+                "sample_status": 1,
+                "status": 2,
+                "time_basis": "unknown",
+                "urgent": null
+              },
+              "report": {
+                "abnormal_flag": null,
+                "audit_status": 1,
+                "audit_time": null,
+                "auditor_id": 1,
+                "lab_order_id": "pair-order-02532745cb09",
+                "lab_result_id": "pair-report-02532745cb09",
+                "report_time": null,
+                "result": "完整原始血气报告",
+                "review_scheme": "no_local_entry_actor_plus_local_reviewer",
+                "sample_id": null,
+                "technician_id": null,
+                "time_basis": "unknown"
+              }
+            },
+            "patient_id": 1,
+            "raw_original_hash": "ac3fb8b3031f31970a7013da1199095c54bdc2d944cac78b7ce76716c524f0c6",
+            "registered_at": "2026-10-20T17:58:41.141148Z",
+            "sampling_time_basis": "explicit_user_verified_utc_not_legacy_clock_proof",
+            "schema_version": "inpatient_lab_source_v1",
+            "source_namespace": "synthetic-lis-c3c37a1cd2cb45b490a209ef880588e1",
+            "source_namespace_basis_note": "合成测试人工核对原申请、患者住院、原采样记录与时区依据；不声称旧钟点已知UTC。",
+            "source_namespace_confirmed": true,
+            "source_namespace_origin_basis": "explicit_user_attestation_no_stored_lis_origin",
+            "source_verification": "explicit_user_attestation_not_independently_verified"
+          },
+          "mapping_current": {
+            "mapping_id": "854d06ec-47ed-49af-8239-48566d94422f",
+            "source_id": "lab_mapping:854d06ec-47ed-49af-8239-48566d94422f:0bdc19d4ae3e",
+            "content_hash": "0bdc19d4ae3e6a5daaa3fde064cb4dfcc8ca4e976b475b525e8bab6cf1287f5c",
+            "status": "published",
+            "revision": 2,
+            "governance_hash": "613c09674569ec1fac0f1ca17bc87e4a325fe4873c876fd4bb3be06eeb8a8c5e",
+            "published_at": "2026-10-20T17:58:41.141148Z",
+            "published_by": 4,
+            "revoked_at": null,
+            "revoked_by": null,
+            "revoke_reason": ""
+          },
+          "eligible": true,
+          "exclusion_reasons": []
+        },
+        "temporal_role": "period",
+        "eligible": true,
+        "exclusion_reasons": []
+      },
+      {
+        "member_key": "map:62845a4a-4ddf-4fbb-9d64-7255dbca5cc2",
+        "kind": "map",
+        "identifier": "62845a4a-4ddf-4fbb-9d64-7255dbca5cc2",
+        "source_id": "map_observation:62845a4a-4ddf-4fbb-9d64-7255dbca5cc2:bad0d7ec1bce",
+        "content_hash": "bad0d7ec1bce9f423c34f4fabfee4e7d40bd3a47f196f0db6b66db2978b783a4",
+        "governance_hash": "ef3246b3567206b74fc4e18b8a817be52ebce5613f017d5686429fa713dc6c48",
+        "full_source": {
+          "support_source_id": "62845a4a-4ddf-4fbb-9d64-7255dbca5cc2",
+          "kind": "map",
+          "patient_id": 1,
+          "admission_id": "fe12bff3-e46a-41e8-9dc3-743c9e1ed099",
+          "event_at": "2026-10-20T15:03:41.141148Z",
+          "recorded_at": "2026-10-20T18:03:41.141148Z",
+          "created_by": 10,
+          "schema_version": "inpatient_map_v1",
+          "payload": {
+            "observed_at": "2026-10-20T15:03:41.141148Z",
+            "map": {
+              "value": "0.00000000",
+              "unit": "mm[Hg]",
+              "absent_reason": null
+            },
+            "measurement_method": "unknown",
+            "measurement_basis_note": "合成原资料核实依据；保留实际原始测量和明确区间，没有从文字猜测连续支持或推导临床评分。",
+            "note": ""
+          },
+          "reference_snapshots": {},
+          "author_qualification": {
+            "actor_id": 10,
+            "authorized_at": "2026-10-20T18:03:41.141148Z",
+            "care_authorization": "authorized_original_admission_at_creation",
+            "role_at_creation": "doctor"
+          },
+          "source_id": "map_observation:62845a4a-4ddf-4fbb-9d64-7255dbca5cc2:bad0d7ec1bce",
+          "content_hash": "bad0d7ec1bce9f423c34f4fabfee4e7d40bd3a47f196f0db6b66db2978b783a4",
+          "status": "active",
+          "revision": 1,
+          "revoked_at": null,
+          "revoked_by": null,
+          "revoke_reason": "",
+          "governance_hash": "ef3246b3567206b74fc4e18b8a817be52ebce5613f017d5686429fa713dc6c48",
+          "eligible": true,
+          "exclusion_reasons": [],
+          "original_admission_current": true,
+          "source_verification": "explicit_human_record_not_independently_verified"
+        },
+        "temporal_role": "period",
+        "eligible": true,
+        "exclusion_reasons": []
+      },
+      {
+        "member_key": "respiratory_support:5708bb89-e5a9-47d2-a9d2-70136e3e37f2",
+        "kind": "respiratory_support",
+        "identifier": "5708bb89-e5a9-47d2-a9d2-70136e3e37f2",
+        "source_id": "respiratory_support:5708bb89-e5a9-47d2-a9d2-70136e3e37f2:b8ff6612f013",
+        "content_hash": "b8ff6612f013d16e19aa0cbb2ab983383f7c80198234a0c95392953117e4af7d",
+        "governance_hash": "ef3246b3567206b74fc4e18b8a817be52ebce5613f017d5686429fa713dc6c48",
+        "full_source": {
+          "support_source_id": "5708bb89-e5a9-47d2-a9d2-70136e3e37f2",
+          "kind": "respiratory_support",
+          "patient_id": 1,
+          "admission_id": "fe12bff3-e46a-41e8-9dc3-743c9e1ed099",
+          "event_at": "2026-10-20T15:03:41.141148Z",
+          "recorded_at": "2026-10-20T18:03:41.141148Z",
+          "created_by": 10,
+          "schema_version": "respiratory_support_v1",
+          "payload": {
+            "start_at": "2026-10-20T15:03:41.141148Z",
+            "verified_until_at": "2026-10-20T17:03:41.141148Z",
+            "ended_at": null,
+            "delivery_mode": "invasive_mechanical",
+            "continuity_confirmed": true,
+            "continuity_basis_note": "合成原资料核实依据；保留实际原始测量和明确区间，没有从文字猜测连续支持或推导临床评分。",
+            "device_description": null,
+            "note": ""
+          },
+          "reference_snapshots": {},
+          "author_qualification": {
+            "actor_id": 10,
+            "authorized_at": "2026-10-20T18:03:41.141148Z",
+            "care_authorization": "authorized_original_admission_at_creation",
+            "role_at_creation": "doctor"
+          },
+          "source_id": "respiratory_support:5708bb89-e5a9-47d2-a9d2-70136e3e37f2:b8ff6612f013",
+          "content_hash": "b8ff6612f013d16e19aa0cbb2ab983383f7c80198234a0c95392953117e4af7d",
+          "status": "active",
+          "revision": 1,
+          "revoked_at": null,
+          "revoked_by": null,
+          "revoke_reason": "",
+          "governance_hash": "ef3246b3567206b74fc4e18b8a817be52ebce5613f017d5686429fa713dc6c48",
+          "eligible": true,
+          "exclusion_reasons": [],
+          "original_admission_current": true,
+          "source_verification": "explicit_human_record_not_independently_verified"
+        },
+        "temporal_role": "period",
+        "eligible": true,
+        "exclusion_reasons": []
+      },
+      {
+        "member_key": "urine:0a13a0fd-03d3-4acd-97f0-d7226524af5c",
+        "kind": "urine",
+        "identifier": "0a13a0fd-03d3-4acd-97f0-d7226524af5c",
+        "source_id": "urine_interval:0a13a0fd-03d3-4acd-97f0-d7226524af5c:343610646876",
+        "content_hash": "343610646876467bd7f036b9b75421d04c6bac20b904d5f2880cc79ff3e993d7",
+        "governance_hash": "ef3246b3567206b74fc4e18b8a817be52ebce5613f017d5686429fa713dc6c48",
+        "full_source": {
+          "interval_id": "0a13a0fd-03d3-4acd-97f0-d7226524af5c",
+          "patient_id": 1,
+          "admission_id": "fe12bff3-e46a-41e8-9dc3-743c9e1ed099",
+          "recorded_at": "2026-10-20T18:03:41.141148Z",
+          "created_by": 10,
+          "schema_version": "urine_interval_v1",
+          "payload": {
+            "absent_reason": null,
+            "collection_completeness": "complete",
+            "collection_method": "synthetic complete measured 24h",
+            "note": "实际收集整日，不外推",
+            "patient_total": true,
+            "volume_ml": "1000.00000000"
+          },
+          "start_at": "2026-10-19T17:03:41.141148Z",
+          "end_at": "2026-10-20T17:03:41.141148Z",
+          "source_id": "urine_interval:0a13a0fd-03d3-4acd-97f0-d7226524af5c:343610646876",
+          "content_hash": "343610646876467bd7f036b9b75421d04c6bac20b904d5f2880cc79ff3e993d7",
+          "status": "active",
+          "revision": 1,
+          "revoked_at": null,
+          "revoked_by": null,
+          "revoke_reason": ""
+        },
+        "temporal_role": "period",
+        "eligible": true,
+        "exclusion_reasons": []
+      },
+      {
+        "member_key": "urine:83c2ac3b-7092-4f43-be64-30414be15a96",
+        "kind": "urine",
+        "identifier": "83c2ac3b-7092-4f43-be64-30414be15a96",
+        "source_id": "urine_interval:83c2ac3b-7092-4f43-be64-30414be15a96:9a07ac69a3b5",
+        "content_hash": "9a07ac69a3b5ddb9032aa9eba556266b73270df05bf8d21f0b53270d2eb18b55",
+        "governance_hash": "ef3246b3567206b74fc4e18b8a817be52ebce5613f017d5686429fa713dc6c48",
+        "full_source": {
+          "interval_id": "83c2ac3b-7092-4f43-be64-30414be15a96",
+          "patient_id": 1,
+          "admission_id": "fe12bff3-e46a-41e8-9dc3-743c9e1ed099",
+          "recorded_at": "2026-10-20T17:33:41.141148Z",
+          "created_by": 10,
+          "schema_version": "urine_interval_v1",
+          "payload": {
+            "absent_reason": null,
+            "collection_completeness": "complete",
+            "collection_method": "synthetic explicit collection",
+            "note": "",
+            "patient_total": true,
+            "volume_ml": "0"
+          },
+          "start_at": "2026-10-20T15:03:41.141148Z",
+          "end_at": "2026-10-20T17:03:41.141148Z",
+          "source_id": "urine_interval:83c2ac3b-7092-4f43-be64-30414be15a96:9a07ac69a3b5",
+          "content_hash": "9a07ac69a3b5ddb9032aa9eba556266b73270df05bf8d21f0b53270d2eb18b55",
+          "status": "active",
+          "revision": 1,
+          "revoked_at": null,
+          "revoked_by": null,
+          "revoke_reason": ""
+        },
+        "temporal_role": "period",
+        "eligible": true,
+        "exclusion_reasons": []
+      },
+      {
+        "member_key": "vasoactive:2b024269-b400-4dd9-9163-5f698a755d36",
+        "kind": "vasoactive",
+        "identifier": "2b024269-b400-4dd9-9163-5f698a755d36",
+        "source_id": "vasoactive_interval:2b024269-b400-4dd9-9163-5f698a755d36:8afa32956a5d",
+        "content_hash": "8afa32956a5dc3b8abc9a0b28dac4428ea27cdce81797b432ca519b55f667b7b",
+        "governance_hash": "ef3246b3567206b74fc4e18b8a817be52ebce5613f017d5686429fa713dc6c48",
+        "full_source": {
+          "support_source_id": "2b024269-b400-4dd9-9163-5f698a755d36",
+          "kind": "vasoactive",
+          "patient_id": 1,
+          "admission_id": "fe12bff3-e46a-41e8-9dc3-743c9e1ed099",
+          "event_at": "2026-10-20T15:13:41.141148Z",
+          "recorded_at": "2026-10-20T18:03:41.141148Z",
+          "created_by": 10,
+          "schema_version": "vasoactive_interval_v1",
+          "payload": {
+            "start_at": "2026-10-20T15:13:41.141148Z",
+            "verified_until_at": "2026-10-20T17:03:41.141148Z",
+            "ended_at": null,
+            "drug_mapping": {
+              "mapping_id": "45846201-4143-4e4b-b3ba-1319c98f3fc3",
+              "expected_content_hash": "a081dd3c5786ccfb5c8734c5bc95c06b95c2a2ce0a30a71a28069298a45f3584"
+            },
+            "stream_identity": {
+              "source_namespace": "synthetic-bedside-pump",
+              "external_stream_id": "same-explicit-original-stream",
+              "identity_basis_note": "合成审核明确核对实际原药品身份、活性成分及原量单位语义；仅为工程测试，不证明临床映射或模型有效性。"
+            },
+            "origin": null,
+            "continuity_confirmed": true,
+            "continuity_basis_note": "合成原资料核实依据；保留实际原始测量和明确区间，没有从文字猜测连续支持或推导临床评分。",
+            "dose_input": {
+              "weight_ref": {
+                "observation_id": "7c32fe6c-4262-49a0-9c98-8f27d57d6571",
+                "expected_content_hash": "40267e46facb3a7e9430eae4980f2e5edc83b0e1524a3465bae759a47d98970f"
+              },
+              "weight_applicability_confirmed": true,
+              "weight_basis_note": "合成审核明确核对实际原药品身份、活性成分及原量单位语义；仅为工程测试，不证明临床映射或模型有效性。",
+              "mode": "pump",
+              "concentration": {
+                "value": "0.00000000",
+                "unit": "ug/mL",
+                "absent_reason": null
+              },
+              "pump_rate": {
+                "value": "0.00000000",
+                "unit": "mL/h",
+                "absent_reason": null
+              }
+            },
+            "note": "合成实际输注原段，未调用模型或自动标准化"
+          },
+          "reference_snapshots": {
+            "drug_mapping": {
+              "active_moiety_basis": "base",
+              "allowed_rate_units": [
+                "ug/kg/min",
+                "ug/min",
+                "mg/h",
+                "mL/h"
+              ],
+              "content_hash": "a081dd3c5786ccfb5c8734c5bc95c06b95c2a2ce0a30a71a28069298a45f3584",
+              "created_at": "2026-10-20T18:03:41.141148Z",
+              "created_by": 4,
+              "drug_key": "norepinephrine",
+              "eligible": true,
+              "evidence_reference": "Synthetic actual catalog identity and unit review",
+              "exclusion_reasons": [],
+              "expected_original_drug_identity_hash": "c9c3c832b0fc0270e38503b0a0b94aed26d606c4317eb8f4661f40420f9f26b3",
+              "governance_hash": "37ac269e3b296e1d3e09f835ba416ea741bfa5dbc6bb963c02274e22b27ceaaf",
+              "identity_hash": "aa58bd8e305cc909b1a45670bb8ea19a0ce6d1fdc2564738b39bfeb72c2ec9ff",
+              "mapping_id": "45846201-4143-4e4b-b3ba-1319c98f3fc3",
+              "name": "合成血管活性原药物映射",
+              "original_drug_identity": {
+                "barcode": "synthetic-05e204096f7c43028259d2faa0f6f744",
+                "name": "SyntheticNE-791df206",
+                "pharmaceutical_id": 2
+              },
+              "original_identity_current": true,
+              "pharmaceutical_id": 2,
+              "published_at": "2026-10-20T18:03:41.141148Z",
+              "published_by": 4,
+              "rationale": "合成审核明确核对实际原药品身份、活性成分及原量单位语义；仅为工程测试，不证明临床映射或模型有效性。",
+              "review_note": "合成审核明确核对实际原药品身份、活性成分及原量单位语义；仅为工程测试，不证明临床映射或模型有效性。",
+              "revision": 2,
+              "revoke_reason": "",
+              "revoked_at": null,
+              "revoked_by": null,
+              "schema_version": "vasoactive_drug_mapping_v1",
+              "source_id": "vasoactive_drug_mapping:45846201-4143-4e4b-b3ba-1319c98f3fc3:a081dd3c5786",
+              "source_namespace": "synthetic-original-drug-catalog",
+              "status": "published"
+            },
+            "origin": null,
+            "weight": {
+              "admission_id": "fe12bff3-e46a-41e8-9dc3-743c9e1ed099",
+              "content_hash": "40267e46facb3a7e9430eae4980f2e5edc83b0e1524a3465bae759a47d98970f",
+              "created_by": 10,
+              "observation_id": "7c32fe6c-4262-49a0-9c98-8f27d57d6571",
+              "observed_at": "2026-10-20T15:03:41.141148Z",
+              "patient_id": 1,
+              "payload": {
+                "consciousness": null,
+                "measurements": {
+                  "body_weight": {
+                    "absent_reason": null,
+                    "unit": "kg",
+                    "value": "70.00000000"
+                  }
+                },
+                "note": "合成实际原体重，不默认70kg",
+                "oxygen_device": null,
+                "supplemental_oxygen": "unknown"
+              },
+              "recorded_at": "2026-10-20T17:33:41.141148Z",
+              "revision": 1,
+              "revoke_reason": "",
+              "revoked_at": null,
+              "revoked_by": null,
+              "schema_version": "inpatient_observation_v1",
+              "source_id": "inpatient_observation:7c32fe6c-4262-49a0-9c98-8f27d57d6571:40267e46facb",
+              "status": "active"
+            }
+          },
+          "author_qualification": {
+            "actor_id": 10,
+            "authorized_at": "2026-10-20T18:03:41.141148Z",
+            "care_authorization": "authorized_original_admission_at_creation",
+            "role_at_creation": "doctor"
+          },
+          "source_id": "vasoactive_interval:2b024269-b400-4dd9-9163-5f698a755d36:8afa32956a5d",
+          "content_hash": "8afa32956a5dc3b8abc9a0b28dac4428ea27cdce81797b432ca519b55f667b7b",
+          "status": "active",
+          "revision": 1,
+          "revoked_at": null,
+          "revoked_by": null,
+          "revoke_reason": "",
+          "governance_hash": "ef3246b3567206b74fc4e18b8a817be52ebce5613f017d5686429fa713dc6c48",
+          "eligible": true,
+          "exclusion_reasons": [],
+          "original_admission_current": true,
+          "source_verification": "explicit_human_record_not_independently_verified"
+        },
+        "temporal_role": "period",
+        "eligible": true,
+        "exclusion_reasons": []
+      },
+      {
+        "member_key": "vasoactive:6d72a1c3-57a5-4285-b8fe-db2b36e4315f",
+        "kind": "vasoactive",
+        "identifier": "6d72a1c3-57a5-4285-b8fe-db2b36e4315f",
+        "source_id": "vasoactive_interval:6d72a1c3-57a5-4285-b8fe-db2b36e4315f:c21f3403e9fa",
+        "content_hash": "c21f3403e9fa485a03d73e9ded048a4531bf6502cd4e2f433f701dfbd9ba63da",
+        "governance_hash": "ef3246b3567206b74fc4e18b8a817be52ebce5613f017d5686429fa713dc6c48",
+        "full_source": {
+          "support_source_id": "6d72a1c3-57a5-4285-b8fe-db2b36e4315f",
+          "kind": "vasoactive",
+          "patient_id": 1,
+          "admission_id": "fe12bff3-e46a-41e8-9dc3-743c9e1ed099",
+          "event_at": "2026-10-19T16:18:41.141148Z",
+          "recorded_at": "2026-10-20T18:03:41.141148Z",
+          "created_by": 10,
+          "schema_version": "vasoactive_interval_v1",
+          "payload": {
+            "start_at": "2026-10-19T16:18:41.141148Z",
+            "verified_until_at": "2026-10-19T17:18:41.141148Z",
+            "ended_at": null,
+            "drug_mapping": {
+              "mapping_id": "45846201-4143-4e4b-b3ba-1319c98f3fc3",
+              "expected_content_hash": "a081dd3c5786ccfb5c8734c5bc95c06b95c2a2ce0a30a71a28069298a45f3584"
+            },
+            "stream_identity": {
+              "source_namespace": "synthetic-sofa-pump",
+              "external_stream_id": "actual-same-stream",
+              "identity_basis_note": "合成原资料核实依据；保留实际原始测量和明确区间，没有从文字猜测连续支持或推导临床评分。"
+            },
+            "origin": null,
+            "continuity_confirmed": true,
+            "continuity_basis_note": "合成原资料核实依据；保留实际原始测量和明确区间，没有从文字猜测连续支持或推导临床评分。",
+            "dose_input": {
+              "weight_ref": null,
+              "weight_applicability_confirmed": false,
+              "weight_basis_note": null,
+              "mode": "weight_normalized",
+              "rate": {
+                "value": "0.10000000",
+                "unit": "ug/kg/min",
+                "absent_reason": null
+              }
+            },
+            "note": "合成实际输注原段，未调用模型或自动标准化"
+          },
+          "reference_snapshots": {
+            "drug_mapping": {
+              "active_moiety_basis": "base",
+              "allowed_rate_units": [
+                "ug/kg/min",
+                "ug/min",
+                "mg/h",
+                "mL/h"
+              ],
+              "content_hash": "a081dd3c5786ccfb5c8734c5bc95c06b95c2a2ce0a30a71a28069298a45f3584",
+              "created_at": "2026-10-20T18:03:41.141148Z",
+              "created_by": 4,
+              "drug_key": "norepinephrine",
+              "eligible": true,
+              "evidence_reference": "Synthetic actual catalog identity and unit review",
+              "exclusion_reasons": [],
+              "expected_original_drug_identity_hash": "c9c3c832b0fc0270e38503b0a0b94aed26d606c4317eb8f4661f40420f9f26b3",
+              "governance_hash": "37ac269e3b296e1d3e09f835ba416ea741bfa5dbc6bb963c02274e22b27ceaaf",
+              "identity_hash": "aa58bd8e305cc909b1a45670bb8ea19a0ce6d1fdc2564738b39bfeb72c2ec9ff",
+              "mapping_id": "45846201-4143-4e4b-b3ba-1319c98f3fc3",
+              "name": "合成血管活性原药物映射",
+              "original_drug_identity": {
+                "barcode": "synthetic-05e204096f7c43028259d2faa0f6f744",
+                "name": "SyntheticNE-791df206",
+                "pharmaceutical_id": 2
+              },
+              "original_identity_current": true,
+              "pharmaceutical_id": 2,
+              "published_at": "2026-10-20T18:03:41.141148Z",
+              "published_by": 4,
+              "rationale": "合成审核明确核对实际原药品身份、活性成分及原量单位语义；仅为工程测试，不证明临床映射或模型有效性。",
+              "review_note": "合成审核明确核对实际原药品身份、活性成分及原量单位语义；仅为工程测试，不证明临床映射或模型有效性。",
+              "revision": 2,
+              "revoke_reason": "",
+              "revoked_at": null,
+              "revoked_by": null,
+              "schema_version": "vasoactive_drug_mapping_v1",
+              "source_id": "vasoactive_drug_mapping:45846201-4143-4e4b-b3ba-1319c98f3fc3:a081dd3c5786",
+              "source_namespace": "synthetic-original-drug-catalog",
+              "status": "published"
+            },
+            "origin": null,
+            "weight": null
+          },
+          "author_qualification": {
+            "actor_id": 10,
+            "authorized_at": "2026-10-20T18:03:41.141148Z",
+            "care_authorization": "authorized_original_admission_at_creation",
+            "role_at_creation": "doctor"
+          },
+          "source_id": "vasoactive_interval:6d72a1c3-57a5-4285-b8fe-db2b36e4315f:c21f3403e9fa",
+          "content_hash": "c21f3403e9fa485a03d73e9ded048a4531bf6502cd4e2f433f701dfbd9ba63da",
+          "status": "active",
+          "revision": 1,
+          "revoked_at": null,
+          "revoked_by": null,
+          "revoke_reason": "",
+          "governance_hash": "ef3246b3567206b74fc4e18b8a817be52ebce5613f017d5686429fa713dc6c48",
+          "eligible": true,
+          "exclusion_reasons": [],
+          "original_admission_current": true,
+          "source_verification": "explicit_human_record_not_independently_verified"
+        },
+        "temporal_role": "period",
+        "eligible": true,
+        "exclusion_reasons": []
+      }
+    ],
+    "conflict_groups": [
+      {
+        "group_id": "sofa_conflict:43e7cfb1316179f02ea5a3e42f241898e72def47b716401698ab51fae83bb91b",
+        "axis": "renal",
+        "relation": "overlapping_urine",
+        "group_digest": "dfc9713c7d2fc1d1b1bb6688f0a9fe6587e1c67a0fe183205ac0d6a582e61b8c",
+        "member_keys": [
+          "urine:0a13a0fd-03d3-4acd-97f0-d7226524af5c",
+          "urine:83c2ac3b-7092-4f43-be64-30414be15a96"
+        ],
+        "member_source_ids": [
+          "urine_interval:0a13a0fd-03d3-4acd-97f0-d7226524af5c:343610646876",
+          "urine_interval:83c2ac3b-7092-4f43-be64-30414be15a96:9a07ac69a3b5"
+        ]
+      }
+    ],
+    "content_hash": "7d22e7f0d4aa356ec001df82e60d4855bc8c6e307f694f0acf734e7ca0ee9e6a"
+  },
+  "can_sign": true,
+  "profiles": [
+    {
+      "clinical_validation": "not_provided",
+      "created_at": "2026-10-20T18:03:41.141147Z",
+      "created_by": 4,
+      "evidence_reference": "Synthetic original implementation review, no clinical validation",
+      "input_policy": {
+        "capacities": {
+          "change_public_bytes": 6291456,
+          "daily_public_bytes": 2097152,
+          "manifest_members": 4096,
+          "private_bytes": 8388608,
+          "request_bytes": 8388608,
+          "response_bytes": 8388608,
+          "result_bytes": 8388608
+        },
+        "change": {
+          "attribution": "explicit_doctor_current_review_never_automatically_inferred_from_delta_or_day_windows",
+          "baseline_modes": [
+            "observed",
+            "conditional_zero",
+            "unknown"
+          ],
+          "conditional_zero": "both_explicit_current_doctor_assumptions_required_else_zero_to_twentyfour_not_zero",
+          "delta": "current_lower_minus_baseline_upper_current_upper_minus_baseline_lower_keep_negative_never_subtract_subtotals",
+          "infection": "actual_governed_original_may_be_available_after_current_asof_explicit_late_flag_current_retrospective_only",
+          "observed": "same_rule_recipe_policy_independent_current_authorized_day_ends_before_current_day_and_known_infection_onset",
+          "unknown": "zero_to_twentyfour_never_normal_imputed"
+        },
+        "coverage": {
+          "clinical_protocol": [
+            "adequate",
+            "incomplete",
+            "unknown"
+          ],
+          "protocol_complete": "actual_required_measurements_plus_all_members_and_resolved_conditions_never_checkbox_only",
+          "source_inventory": [
+            "complete",
+            "incomplete",
+            "unknown"
+          ]
+        },
+        "facts": {
+          "laboratory_native_units": [
+            "10^9/L",
+            "10^3/uL",
+            "mg/dL",
+            "umol/L",
+            "mm[Hg]",
+            "kPa"
+          ],
+          "laboratory_qualitative": "value_null_type_preserved_original_text_private_only_full_hash_bound",
+          "laboratory_units": "closed_exact_native_units_or_unsupported_or_original_null_unknown_marker_with_full_original_unit_hash_no_free_text_outbound_no_conversion",
+          "numbers": "exact_original_decimal_strings_LIS_signed_preserved_negative_unsupported_value_unknown_other_quantities_nonnegative"
+        },
+        "gcs_confounding": "complete_measured_EVM_interpretable_confirmed_and_current_doctor_sedation_and_other_confounding_effects_both_explicitly_excluded_no_drug_presence_inference_or_virtual_pre_sedation_score",
+        "input_precision": {
+          "maximum_fraction_digits": 8,
+          "maximum_integer_digits": 16,
+          "numbers": "exact_original_decimal_strings_LIS_signed_preserved_negative_unsupported_value_unknown_other_quantities_nonnegative",
+          "quantity_conversion": "only_explicit_fraction_dose_formulas_other_native_branches_never_converted",
+          "rounding": "never",
+          "zero_is_missing": false
+        },
+        "partial_policy": {
+          "complete_total": "all_six_protocol_complete_and_within_declared_scope_and_no_unresolved_rules_or_conflicts",
+          "domain_lower_bound": "retain_all_unambiguous_positive_witnesses_including_bounded_candidates",
+          "domain_upper_bound": "account_for_all_unresolved_candidates_required_modalities_and_incomplete_inventory_or_protocol",
+          "exact_numeric": "bounds_collapse_even_at_ceiling_does_not_assert_coverage_complete",
+          "known_subtotal": "sum_nonnull_exact_observed_candidate_domain_maxima_not_complete_total",
+          "normal_imputation": false,
+          "unknown_domain_bounds": [
+            0,
+            4
+          ]
+        },
+        "population": {
+          "adult": "yes_and_explicit_applicability_confirmation",
+          "care_setting": [
+            "icu",
+            "other"
+          ],
+          "clinical_validation": "not_provided"
+        },
+        "respiratory_qualification": {
+          "original_none_and_new_yes": "incompatible_keep_exact_pf_proven_lower_bound_and_support_unknown_upper_never_award_high_tier_pure_math_hospital_new_signature_rejected",
+          "original_unknown_and_new_yes": "allowed_current_doctor_qualification_with_independent_basis_original_mode_remains_unknown",
+          "other_modes": "doctor_explicit_yes_no_unknown_no_invasive_only_narrowing_or_device_inference"
+        },
+        "review": {
+          "basis": "private_statement_hash_public_only",
+          "historical_prediction": false,
+          "mode": "current_retrospective",
+          "original_flags": "preserve_no_current_review_overwrite",
+          "status": [
+            "confirmed",
+            "excluded",
+            "unknown"
+          ]
+        },
+        "source_policy": {
+          "all_members": "complete_actual_asof_root_and_parent_manifest_no_winner_only",
+          "current_use": "active_creation_governance_match_complete_current_source_set_and_all_parent_governance_recheck",
+          "public": "typed_facts_and_review_hashes_no_free_text_patient_admission_author_or_external_stream_identity",
+          "revoked": "retained_review_excluded_no_normal_imputation"
+        },
+        "vasoactive_overlap": {
+          "cross_drug": "same_actual_physical_stream_key_concurrent_intersection_unknown_never_concatenate_agents",
+          "identity": "only_actual_sha_namespace_and_external_stream_id_no_note_or_drug_name_inference",
+          "other_conflicts": "original_identity_lab_pao2_gcs_and_other_unresolved_groups_remain_dependent_candidate_unknown",
+          "policy": "actual_same_stream_piecewise_overlap_unknown_v1",
+          "unresolved_same_stream_overlap": "only_actual_intersection_unknown_retain_independent_nonoverlap_completed_tier_witness"
+        }
+      },
+      "name": "Synthetic complete SOFA original-source implementation",
+      "rationale": "合成原资料核实依据；保留实际原始测量和明确区间，没有从文字猜测连续支持或推导临床评分。",
+      "recipe": {
+        "cardiovascular": {
+          "actual_route": "doctor_confirmed_continuous_iv_no_old_order_route_parsing_or_bolus_inference",
+          "cross_drug_policy": "separate_agents_no_ne_epinephrine_sum_no_equivalent_conversion",
+          "dobutamine": [
+            {
+              "above": "0",
+              "score": 2
+            }
+          ],
+          "dopamine": [
+            {
+              "above": "15",
+              "score": 4
+            },
+            {
+              "above": "5",
+              "at_most": "15",
+              "score": 3
+            },
+            {
+              "above": "0",
+              "at_most": "5",
+              "score": 2
+            }
+          ],
+          "dose_arithmetic": "reduced_exact_fraction_of_original_decimal_inputs_direct_normalized_rate_never_divided_twice",
+          "duration_policy": "local_band_continuity_1h_v1_not_claimed_official_resolution_of_1996_duration_ambiguity",
+          "duration_witness": "each_agent_and_score_predicate_contiguous_true_prefix_allowed_no_gap_or_cross_agent_join_complete_end_b_after_period_start_and_at_or_before_period_end_positive_in_period_exposure",
+          "epinephrine": [
+            {
+              "above": "0.1",
+              "score": 4
+            },
+            {
+              "above": "0",
+              "at_most": "0.1",
+              "score": 3
+            }
+          ],
+          "map": {
+            "below": "70",
+            "missing_branch_bounds": [
+              0,
+              1
+            ],
+            "score": 1,
+            "unit": "mm[Hg]"
+          },
+          "mass_basis": "original_mapping_base_only_and_explicit_compatible_clinician_review_unknown_or_salt_remains_unknown_no_implicit_factor",
+          "minimum_continuous_microseconds": 3600000000,
+          "norepinephrine": [
+            {
+              "above": "0.1",
+              "score": 4
+            },
+            {
+              "above": "0",
+              "at_most": "0.1",
+              "score": 3
+            }
+          ],
+          "normalization": {
+            "mg/h": "original_rate_times_1000_divided_by_60_times_actual_applicable_weight_kg",
+            "pump_mg/mL": "concentration_times_1000_times_pump_ml_h_divided_by_60_times_actual_applicable_weight_kg",
+            "pump_ug/mL": "concentration_times_pump_ml_h_divided_by_60_times_actual_applicable_weight_kg",
+            "ug/kg/min": "original_rate",
+            "ug/min": "original_rate_divided_by_actual_applicable_weight_kg",
+            "weight": "explicit_original_measured_kg_positive_observed_no_later_than_start_recorded_by_asof_original_applicability_true_plus_current_use_confirmed_no_default"
+          },
+          "overlap_policy": "actual_same_stream_piecewise_overlap_unknown_v1_nonoverlap_completed_hour_preserved_cross_drug_same_physical_key_overlap_blocked_no_cross_agent_time_join",
+          "positive_drug_dose_unit": "ug/kg/min",
+          "short_high_dose": "preserve_original_exposure_duration_condition_not_satisfied_no_clinical_reassurance",
+          "stream_policy": "same_drug_explicit_distinct_parallel_stream_rates_sum_piecewise_no_duplicate_or_agent_total_double_count_unresolved_overlap_unknown_stream_key_sha_namespace_and_external_id_only_no_note",
+          "verified_extent": "actual_start_through_verified_until_only_no_forward_fill_or_future_completion",
+          "zero": "never_positive_exposure_never_any_dose_score"
+        },
+        "clinical_validation": "not_provided",
+        "cns": {
+          "bands": [
+            [
+              15,
+              15,
+              0
+            ],
+            [
+              13,
+              14,
+              1
+            ],
+            [
+              10,
+              12,
+              2
+            ],
+            [
+              6,
+              9,
+              3
+            ],
+            [
+              3,
+              5,
+              4
+            ]
+          ],
+          "policy": "measured_interpretable_only_no_nt_to_one_default_fifteen_avpu_proxy_component_fusion_or_carry_forward",
+          "source": "one_actual_full_eye_verbal_motor_exam_only"
+        },
+        "coagulation": {
+          "bands": [
+            [
+              "150",
+              null,
+              true,
+              false,
+              0
+            ],
+            [
+              "100",
+              "150",
+              true,
+              false,
+              1
+            ],
+            [
+              "50",
+              "100",
+              true,
+              false,
+              2
+            ],
+            [
+              "20",
+              "50",
+              true,
+              false,
+              3
+            ],
+            [
+              "0",
+              "20",
+              true,
+              false,
+              4
+            ]
+          ],
+          "native_units": [
+            "10^9/L",
+            "10^3/uL"
+          ],
+          "unit_policy": "explicit_native_numeric_equivalence_only_no_fuzzy_unit_matching"
+        },
+        "diagnosis": "not_provided",
+        "input_policy": {
+          "capacities": {
+            "change_public_bytes": 6291456,
+            "daily_public_bytes": 2097152,
+            "manifest_members": 4096,
+            "private_bytes": 8388608,
+            "request_bytes": 8388608,
+            "response_bytes": 8388608,
+            "result_bytes": 8388608
+          },
+          "change": {
+            "attribution": "explicit_doctor_current_review_never_automatically_inferred_from_delta_or_day_windows",
+            "baseline_modes": [
+              "observed",
+              "conditional_zero",
+              "unknown"
+            ],
+            "conditional_zero": "both_explicit_current_doctor_assumptions_required_else_zero_to_twentyfour_not_zero",
+            "delta": "current_lower_minus_baseline_upper_current_upper_minus_baseline_lower_keep_negative_never_subtract_subtotals",
+            "infection": "actual_governed_original_may_be_available_after_current_asof_explicit_late_flag_current_retrospective_only",
+            "observed": "same_rule_recipe_policy_independent_current_authorized_day_ends_before_current_day_and_known_infection_onset",
+            "unknown": "zero_to_twentyfour_never_normal_imputed"
+          },
+          "coverage": {
+            "clinical_protocol": [
+              "adequate",
+              "incomplete",
+              "unknown"
+            ],
+            "protocol_complete": "actual_required_measurements_plus_all_members_and_resolved_conditions_never_checkbox_only",
+            "source_inventory": [
+              "complete",
+              "incomplete",
+              "unknown"
+            ]
+          },
+          "facts": {
+            "laboratory_native_units": [
+              "10^9/L",
+              "10^3/uL",
+              "mg/dL",
+              "umol/L",
+              "mm[Hg]",
+              "kPa"
+            ],
+            "laboratory_qualitative": "value_null_type_preserved_original_text_private_only_full_hash_bound",
+            "laboratory_units": "closed_exact_native_units_or_unsupported_or_original_null_unknown_marker_with_full_original_unit_hash_no_free_text_outbound_no_conversion",
+            "numbers": "exact_original_decimal_strings_LIS_signed_preserved_negative_unsupported_value_unknown_other_quantities_nonnegative"
+          },
+          "gcs_confounding": "complete_measured_EVM_interpretable_confirmed_and_current_doctor_sedation_and_other_confounding_effects_both_explicitly_excluded_no_drug_presence_inference_or_virtual_pre_sedation_score",
+          "input_precision": {
+            "maximum_fraction_digits": 8,
+            "maximum_integer_digits": 16,
+            "numbers": "exact_original_decimal_strings_LIS_signed_preserved_negative_unsupported_value_unknown_other_quantities_nonnegative",
+            "quantity_conversion": "only_explicit_fraction_dose_formulas_other_native_branches_never_converted",
+            "rounding": "never",
+            "zero_is_missing": false
+          },
+          "partial_policy": {
+            "complete_total": "all_six_protocol_complete_and_within_declared_scope_and_no_unresolved_rules_or_conflicts",
+            "domain_lower_bound": "retain_all_unambiguous_positive_witnesses_including_bounded_candidates",
+            "domain_upper_bound": "account_for_all_unresolved_candidates_required_modalities_and_incomplete_inventory_or_protocol",
+            "exact_numeric": "bounds_collapse_even_at_ceiling_does_not_assert_coverage_complete",
+            "known_subtotal": "sum_nonnull_exact_observed_candidate_domain_maxima_not_complete_total",
+            "normal_imputation": false,
+            "unknown_domain_bounds": [
+              0,
+              4
+            ]
+          },
+          "population": {
+            "adult": "yes_and_explicit_applicability_confirmation",
+            "care_setting": [
+              "icu",
+              "other"
+            ],
+            "clinical_validation": "not_provided"
+          },
+          "respiratory_qualification": {
+            "original_none_and_new_yes": "incompatible_keep_exact_pf_proven_lower_bound_and_support_unknown_upper_never_award_high_tier_pure_math_hospital_new_signature_rejected",
+            "original_unknown_and_new_yes": "allowed_current_doctor_qualification_with_independent_basis_original_mode_remains_unknown",
+            "other_modes": "doctor_explicit_yes_no_unknown_no_invasive_only_narrowing_or_device_inference"
+          },
+          "review": {
+            "basis": "private_statement_hash_public_only",
+            "historical_prediction": false,
+            "mode": "current_retrospective",
+            "original_flags": "preserve_no_current_review_overwrite",
+            "status": [
+              "confirmed",
+              "excluded",
+              "unknown"
+            ]
+          },
+          "source_policy": {
+            "all_members": "complete_actual_asof_root_and_parent_manifest_no_winner_only",
+            "current_use": "active_creation_governance_match_complete_current_source_set_and_all_parent_governance_recheck",
+            "public": "typed_facts_and_review_hashes_no_free_text_patient_admission_author_or_external_stream_identity",
+            "revoked": "retained_review_excluded_no_normal_imputation"
+          },
+          "vasoactive_overlap": {
+            "cross_drug": "same_actual_physical_stream_key_concurrent_intersection_unknown_never_concatenate_agents",
+            "identity": "only_actual_sha_namespace_and_external_stream_id_no_note_or_drug_name_inference",
+            "other_conflicts": "original_identity_lab_pao2_gcs_and_other_unresolved_groups_remain_dependent_candidate_unknown",
+            "policy": "actual_same_stream_piecewise_overlap_unknown_v1",
+            "unresolved_same_stream_overlap": "only_actual_intersection_unknown_retain_independent_nonoverlap_completed_tier_witness"
+          }
+        },
+        "liver": {
+          "analyte": "total_bilirubin",
+          "bands": {
+            "mg/dL": [
+              [
+                "0",
+                "1.2",
+                true,
+                false,
+                0
+              ],
+              [
+                "1.2",
+                "2",
+                true,
+                false,
+                1
+              ],
+              [
+                "2",
+                "6",
+                true,
+                false,
+                2
+              ],
+              [
+                "6",
+                "12",
+                true,
+                false,
+                3
+              ],
+              [
+                "12",
+                null,
+                true,
+                false,
+                4
+              ]
+            ],
+            "umol/L": [
+              [
+                "0",
+                "20",
+                true,
+                false,
+                0
+              ],
+              [
+                "20",
+                "33",
+                true,
+                false,
+                1
+              ],
+              [
+                "33",
+                "102",
+                true,
+                false,
+                2
+              ],
+              [
+                "102",
+                "204",
+                true,
+                false,
+                3
+              ],
+              [
+                "204",
+                null,
+                true,
+                false,
+                4
+              ]
+            ]
+          },
+          "native_policy": "local_mimic_mgdl_continuous_and_amsterdam_si_native_not_exact_converted_equivalence_no_claim_of_official_1996_erratum"
+        },
+        "organ_order": [
+          "respiratory",
+          "coagulation",
+          "liver",
+          "cardiovascular",
+          "cns",
+          "renal"
+        ],
+        "partial_policy": {
+          "complete_total": "all_six_protocol_complete_and_within_declared_scope_and_no_unresolved_rules_or_conflicts",
+          "domain_lower_bound": "retain_all_unambiguous_positive_witnesses_including_bounded_candidates",
+          "domain_upper_bound": "account_for_all_unresolved_candidates_required_modalities_and_incomplete_inventory_or_protocol",
+          "exact_numeric": "bounds_collapse_even_at_ceiling_does_not_assert_coverage_complete",
+          "known_subtotal": "sum_nonnull_exact_observed_candidate_domain_maxima_not_complete_total",
+          "normal_imputation": false,
+          "unknown_domain_bounds": [
+            0,
+            4
+          ]
+        },
+        "period": {
+          "aggregation": "maximum_eligible_candidate_per_domain_never_mix_different_samples_or_gcs_components",
+          "availability": "all_original_recorded_registered_available_at_or_before_as_of",
+          "duration_microseconds": 86400000000,
+          "point_membership": "start_inclusive_end_exclusive",
+          "review": "current_retrospective_evaluation_at_not_historical_prediction"
+        },
+        "population": "clinician_declared_adult_no_qsofa_non_icu_or_news2_pregnancy_exclusion_no_independent_clinical_validation",
+        "probability": "not_provided",
+        "prompt_handling": "provenance_only",
+        "renal": {
+          "combine": "max_creatinine_and_urine_branch_bounds_neither_missing_branch_normal_imputed",
+          "creatinine_bands": {
+            "mg/dL": [
+              [
+                "0",
+                "1.2",
+                true,
+                false,
+                0
+              ],
+              [
+                "1.2",
+                "2",
+                true,
+                false,
+                1
+              ],
+              [
+                "2",
+                "3.5",
+                true,
+                false,
+                2
+              ],
+              [
+                "3.5",
+                "5",
+                true,
+                false,
+                3
+              ],
+              [
+                "5",
+                null,
+                true,
+                false,
+                4
+              ]
+            ],
+            "umol/L": [
+              [
+                "0",
+                "110",
+                true,
+                false,
+                0
+              ],
+              [
+                "110",
+                "171",
+                true,
+                false,
+                1
+              ],
+              [
+                "171",
+                "300",
+                true,
+                false,
+                2
+              ],
+              [
+                "300",
+                "440",
+                true,
+                true,
+                3
+              ],
+              [
+                "440",
+                null,
+                false,
+                false,
+                4
+              ]
+            ]
+          },
+          "native_policy": "local_mimic_mgdl_and_amsterdam_si_cr440_inclusive_score3_not_exact_converted_equivalence",
+          "rrt": "not_a_sofa1_automatic_four_rule",
+          "urine": {
+            "at_least_200_below_500": 3,
+            "at_least_500_branch_contribution": 0,
+            "below_200": 4,
+            "unit": "mL/24h"
+          },
+          "urine_policy": "all_whole_original_intervals_exact_24h_tiling_no_overlap_gap_partial_collection_unknown_volume_or_non_patient_total_no_clip_proration_short_period_extrapolation_or_weight_normalization"
+        },
+        "respiratory": {
+          "comparison": "100_times_pao2_cross_compare_threshold_times_original_fio2_percent_no_rounded_division",
+          "fio2_eligibility": "positive_at_most_100_explicit_original_pair_no_room_air_default",
+          "fio2_unit": "%",
+          "kpa": "independent_rounded_native_thresholds_from_sepsis3_printed_table_no_conversion_or_equivalence_claim",
+          "pao2_units": [
+            "mm[Hg]",
+            "kPa"
+          ],
+          "qualification_consistency_policy": "doctor_yes_requires_original_mode_not_explicit_none_v1_unknown_mode_may_remain_unknown_with_current_explicit_qualification_yes_no_inference",
+          "qualifying_support": "explicit_current_doctor_review_with_basis_hash_never_device_mode_inference",
+          "sample_review": "arterial_sample_same_sampling_state_and_fio2_applicability_all_confirmed",
+          "support_policy": "local_doctor_adjudicated_per_actual_pair_yes_no_unknown_v1",
+          "thresholds_kpa": [
+            "53.3",
+            "40",
+            "26.7",
+            "13.3"
+          ],
+          "thresholds_mmhg": [
+            "400",
+            "300",
+            "200",
+            "100"
+          ],
+          "unknown_support_low_ratio_bounds": {
+            "100_to_below_200": [
+              2,
+              3
+            ],
+            "below_100": [
+              2,
+              4
+            ]
+          },
+          "without_qualifying_support_maximum": 2
+        },
+        "rule_family": "SOFA1",
+        "rule_id": "sofa1_native_observed_v1",
+        "scoring_status": "local_explicit_sofa1_implementation_not_sofa2_or_manual_components",
+        "treatment": "not_provided",
+        "version": "sofa1_native_observed_local_policy_v1"
+      },
+      "recipe_digest": "849854d26deb3e5d42e9433d839a5db0b365e85206ea5272b6592d75d4769199",
+      "review_basis": "human_implementation_review_not_clinical_validation",
+      "rule_id": "sofa1_native_observed_v1",
+      "rule_profile_id": "682f09b3-7477-4c3d-a51c-70199d0024fc",
+      "schema_version": "risk_rule_profile_v1",
+      "content_hash": "f93c2e2078fdb4b64b0f6b1a72aeaf1687bea69eea90b13717f1646472f65532",
+      "source_id": "risk_rule_profile:682f09b3-7477-4c3d-a51c-70199d0024fc:f93c2e2078fd",
+      "status": "published",
+      "revision": 2,
+      "published_at": "2026-10-20T18:03:41.141147Z",
+      "published_by": 4,
+      "implementation_terms_confirmed": true,
+      "review_note": "合成原资料核实依据；保留实际原始测量和明确区间，没有从文字猜测连续支持或推导临床评分。",
+      "review_evidence_reference": "Synthetic independent implementation source review",
+      "revoked_at": null,
+      "revoked_by": null,
+      "revoke_reason": "",
+      "governance_hash": "58025a24d533343a3489bac8d8938bffdc0dbf634fa6e10c108dec7b0e93d614",
+      "implementation_current": true,
+      "eligible": true,
+      "exclusion_reasons": []
+    }
+  ],
+  "options": {
+    "member_kinds": [
+      "laboratory",
+      "map",
+      "respiratory_support",
+      "arterial_pair",
+      "vasoactive",
+      "gcs",
+      "urine"
+    ],
+    "axes": [
+      "respiratory",
+      "coagulation",
+      "liver",
+      "cardiovascular",
+      "cns",
+      "renal"
+    ],
+    "request_schema": {
+      "$defs": {
+        "ArterialPairReview": {
+          "additionalProperties": false,
+          "properties": {
+            "member_key": {
+              "maxLength": 200,
+              "minLength": 1,
+              "title": "Member Key",
+              "type": "string"
+            },
+            "expected_content_hash": {
+              "pattern": "^[a-f0-9]{64}$",
+              "title": "Expected Content Hash",
+              "type": "string"
+            },
+            "status": {
+              "enum": [
+                "confirmed",
+                "excluded",
+                "unknown"
+              ],
+              "title": "Status",
+              "type": "string"
+            },
+            "basis_note": {
+              "maxLength": 1000,
+              "minLength": 20,
+              "title": "Basis Note",
+              "type": "string"
+            },
+            "exclusion_reason": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "not_patient_measurement",
+                    "wrong_sample_or_analyte",
+                    "duplicate_record",
+                    "measurement_error",
+                    "not_applicable",
+                    "conflicting_alternative",
+                    "other_clinician_reason"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Exclusion Reason"
+            },
+            "kind": {
+              "const": "arterial_pair",
+              "title": "Kind",
+              "type": "string"
+            },
+            "qualifying_respiratory_support": {
+              "enum": [
+                "yes",
+                "no",
+                "unknown"
+              ],
+              "title": "Qualifying Respiratory Support",
+              "type": "string"
+            },
+            "support_qualification_basis_note": {
+              "maxLength": 1000,
+              "minLength": 20,
+              "title": "Support Qualification Basis Note",
+              "type": "string"
+            }
+          },
+          "required": [
+            "member_key",
+            "expected_content_hash",
+            "status",
+            "basis_note",
+            "exclusion_reason",
+            "kind",
+            "qualifying_respiratory_support",
+            "support_qualification_basis_note"
+          ],
+          "title": "ArterialPairReview",
+          "type": "object"
+        },
+        "CardiovascularCoverage": {
+          "additionalProperties": false,
+          "properties": {
+            "source_inventory": {
+              "enum": [
+                "complete",
+                "incomplete",
+                "unknown"
+              ],
+              "title": "Source Inventory",
+              "type": "string"
+            },
+            "clinical_protocol": {
+              "enum": [
+                "adequate",
+                "incomplete",
+                "unknown"
+              ],
+              "title": "Clinical Protocol",
+              "type": "string"
+            },
+            "basis_note": {
+              "maxLength": 1000,
+              "minLength": 20,
+              "title": "Basis Note",
+              "type": "string"
+            },
+            "drug_exposure": {
+              "enum": [
+                "none",
+                "reviewed_intervals",
+                "unknown"
+              ],
+              "title": "Drug Exposure",
+              "type": "string"
+            },
+            "no_other_unrepresented_exposure_confirmed": {
+              "title": "No Other Unrepresented Exposure Confirmed",
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "source_inventory",
+            "clinical_protocol",
+            "basis_note",
+            "drug_exposure",
+            "no_other_unrepresented_exposure_confirmed"
+          ],
+          "title": "CardiovascularCoverage",
+          "type": "object"
+        },
+        "ConflictReview": {
+          "additionalProperties": false,
+          "properties": {
+            "group_id": {
+              "maxLength": 200,
+              "minLength": 1,
+              "title": "Group Id",
+              "type": "string"
+            },
+            "expected_group_digest": {
+              "pattern": "^[a-f0-9]{64}$",
+              "title": "Expected Group Digest",
+              "type": "string"
+            },
+            "status": {
+              "enum": [
+                "resolved",
+                "unresolved"
+              ],
+              "title": "Status",
+              "type": "string"
+            },
+            "accepted_source_ids": {
+              "items": {
+                "maxLength": 200,
+                "minLength": 1,
+                "type": "string"
+              },
+              "maxItems": 4096,
+              "title": "Accepted Source Ids",
+              "type": "array"
+            },
+            "excluded_source_ids": {
+              "items": {
+                "maxLength": 200,
+                "minLength": 1,
+                "type": "string"
+              },
+              "maxItems": 4096,
+              "title": "Excluded Source Ids",
+              "type": "array"
+            },
+            "basis_note": {
+              "maxLength": 1000,
+              "minLength": 20,
+              "title": "Basis Note",
+              "type": "string"
+            }
+          },
+          "required": [
+            "group_id",
+            "expected_group_digest",
+            "status",
+            "accepted_source_ids",
+            "excluded_source_ids",
+            "basis_note"
+          ],
+          "title": "ConflictReview",
+          "type": "object"
+        },
+        "Coverage": {
+          "additionalProperties": false,
+          "properties": {
+            "source_inventory": {
+              "enum": [
+                "complete",
+                "incomplete",
+                "unknown"
+              ],
+              "title": "Source Inventory",
+              "type": "string"
+            },
+            "clinical_protocol": {
+              "enum": [
+                "adequate",
+                "incomplete",
+                "unknown"
+              ],
+              "title": "Clinical Protocol",
+              "type": "string"
+            },
+            "basis_note": {
+              "maxLength": 1000,
+              "minLength": 20,
+              "title": "Basis Note",
+              "type": "string"
+            }
+          },
+          "required": [
+            "source_inventory",
+            "clinical_protocol",
+            "basis_note"
+          ],
+          "title": "Coverage",
+          "type": "object"
+        },
+        "GcsReview": {
+          "additionalProperties": false,
+          "properties": {
+            "member_key": {
+              "maxLength": 200,
+              "minLength": 1,
+              "title": "Member Key",
+              "type": "string"
+            },
+            "expected_content_hash": {
+              "pattern": "^[a-f0-9]{64}$",
+              "title": "Expected Content Hash",
+              "type": "string"
+            },
+            "status": {
+              "enum": [
+                "confirmed",
+                "excluded",
+                "unknown"
+              ],
+              "title": "Status",
+              "type": "string"
+            },
+            "basis_note": {
+              "maxLength": 1000,
+              "minLength": 20,
+              "title": "Basis Note",
+              "type": "string"
+            },
+            "exclusion_reason": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "not_patient_measurement",
+                    "wrong_sample_or_analyte",
+                    "duplicate_record",
+                    "measurement_error",
+                    "not_applicable",
+                    "conflicting_alternative",
+                    "other_clinician_reason"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Exclusion Reason"
+            },
+            "kind": {
+              "const": "gcs",
+              "title": "Kind",
+              "type": "string"
+            },
+            "interpretable": {
+              "enum": [
+                "confirmed",
+                "limited",
+                "unknown"
+              ],
+              "title": "Interpretable",
+              "type": "string"
+            },
+            "sedation_confounding_status": {
+              "enum": [
+                "excluded",
+                "present",
+                "unknown"
+              ],
+              "title": "Sedation Confounding Status",
+              "type": "string"
+            },
+            "other_confounding_status": {
+              "enum": [
+                "excluded",
+                "present",
+                "unknown"
+              ],
+              "title": "Other Confounding Status",
+              "type": "string"
+            },
+            "confounding_basis_note": {
+              "maxLength": 1000,
+              "minLength": 20,
+              "title": "Confounding Basis Note",
+              "type": "string"
+            }
+          },
+          "required": [
+            "member_key",
+            "expected_content_hash",
+            "status",
+            "basis_note",
+            "exclusion_reason",
+            "kind",
+            "interpretable",
+            "sedation_confounding_status",
+            "other_confounding_status",
+            "confounding_basis_note"
+          ],
+          "title": "GcsReview",
+          "type": "object"
+        },
+        "LaboratoryReview": {
+          "additionalProperties": false,
+          "properties": {
+            "member_key": {
+              "maxLength": 200,
+              "minLength": 1,
+              "title": "Member Key",
+              "type": "string"
+            },
+            "expected_content_hash": {
+              "pattern": "^[a-f0-9]{64}$",
+              "title": "Expected Content Hash",
+              "type": "string"
+            },
+            "status": {
+              "enum": [
+                "confirmed",
+                "excluded",
+                "unknown"
+              ],
+              "title": "Status",
+              "type": "string"
+            },
+            "basis_note": {
+              "maxLength": 1000,
+              "minLength": 20,
+              "title": "Basis Note",
+              "type": "string"
+            },
+            "exclusion_reason": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "not_patient_measurement",
+                    "wrong_sample_or_analyte",
+                    "duplicate_record",
+                    "measurement_error",
+                    "not_applicable",
+                    "conflicting_alternative",
+                    "other_clinician_reason"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Exclusion Reason"
+            },
+            "kind": {
+              "const": "laboratory",
+              "title": "Kind",
+              "type": "string"
+            }
+          },
+          "required": [
+            "member_key",
+            "expected_content_hash",
+            "status",
+            "basis_note",
+            "exclusion_reason",
+            "kind"
+          ],
+          "title": "LaboratoryReview",
+          "type": "object"
+        },
+        "MapReview": {
+          "additionalProperties": false,
+          "properties": {
+            "member_key": {
+              "maxLength": 200,
+              "minLength": 1,
+              "title": "Member Key",
+              "type": "string"
+            },
+            "expected_content_hash": {
+              "pattern": "^[a-f0-9]{64}$",
+              "title": "Expected Content Hash",
+              "type": "string"
+            },
+            "status": {
+              "enum": [
+                "confirmed",
+                "excluded",
+                "unknown"
+              ],
+              "title": "Status",
+              "type": "string"
+            },
+            "basis_note": {
+              "maxLength": 1000,
+              "minLength": 20,
+              "title": "Basis Note",
+              "type": "string"
+            },
+            "exclusion_reason": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "not_patient_measurement",
+                    "wrong_sample_or_analyte",
+                    "duplicate_record",
+                    "measurement_error",
+                    "not_applicable",
+                    "conflicting_alternative",
+                    "other_clinician_reason"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Exclusion Reason"
+            },
+            "kind": {
+              "const": "map",
+              "title": "Kind",
+              "type": "string"
+            }
+          },
+          "required": [
+            "member_key",
+            "expected_content_hash",
+            "status",
+            "basis_note",
+            "exclusion_reason",
+            "kind"
+          ],
+          "title": "MapReview",
+          "type": "object"
+        },
+        "RespiratorySupportReview": {
+          "additionalProperties": false,
+          "properties": {
+            "member_key": {
+              "maxLength": 200,
+              "minLength": 1,
+              "title": "Member Key",
+              "type": "string"
+            },
+            "expected_content_hash": {
+              "pattern": "^[a-f0-9]{64}$",
+              "title": "Expected Content Hash",
+              "type": "string"
+            },
+            "status": {
+              "enum": [
+                "confirmed",
+                "excluded",
+                "unknown"
+              ],
+              "title": "Status",
+              "type": "string"
+            },
+            "basis_note": {
+              "maxLength": 1000,
+              "minLength": 20,
+              "title": "Basis Note",
+              "type": "string"
+            },
+            "exclusion_reason": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "not_patient_measurement",
+                    "wrong_sample_or_analyte",
+                    "duplicate_record",
+                    "measurement_error",
+                    "not_applicable",
+                    "conflicting_alternative",
+                    "other_clinician_reason"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Exclusion Reason"
+            },
+            "kind": {
+              "const": "respiratory_support",
+              "title": "Kind",
+              "type": "string"
+            }
+          },
+          "required": [
+            "member_key",
+            "expected_content_hash",
+            "status",
+            "basis_note",
+            "exclusion_reason",
+            "kind"
+          ],
+          "title": "RespiratorySupportReview",
+          "type": "object"
+        },
+        "SixAxisCoverage": {
+          "additionalProperties": false,
+          "properties": {
+            "respiratory": {
+              "$ref": "#/$defs/Coverage"
+            },
+            "coagulation": {
+              "$ref": "#/$defs/Coverage"
+            },
+            "liver": {
+              "$ref": "#/$defs/Coverage"
+            },
+            "cardiovascular": {
+              "$ref": "#/$defs/CardiovascularCoverage"
+            },
+            "cns": {
+              "$ref": "#/$defs/Coverage"
+            },
+            "renal": {
+              "$ref": "#/$defs/Coverage"
+            }
+          },
+          "required": [
+            "respiratory",
+            "coagulation",
+            "liver",
+            "cardiovascular",
+            "cns",
+            "renal"
+          ],
+          "title": "SixAxisCoverage",
+          "type": "object"
+        },
+        "UrineReview": {
+          "additionalProperties": false,
+          "properties": {
+            "member_key": {
+              "maxLength": 200,
+              "minLength": 1,
+              "title": "Member Key",
+              "type": "string"
+            },
+            "expected_content_hash": {
+              "pattern": "^[a-f0-9]{64}$",
+              "title": "Expected Content Hash",
+              "type": "string"
+            },
+            "status": {
+              "enum": [
+                "confirmed",
+                "excluded",
+                "unknown"
+              ],
+              "title": "Status",
+              "type": "string"
+            },
+            "basis_note": {
+              "maxLength": 1000,
+              "minLength": 20,
+              "title": "Basis Note",
+              "type": "string"
+            },
+            "exclusion_reason": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "not_patient_measurement",
+                    "wrong_sample_or_analyte",
+                    "duplicate_record",
+                    "measurement_error",
+                    "not_applicable",
+                    "conflicting_alternative",
+                    "other_clinician_reason"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Exclusion Reason"
+            },
+            "kind": {
+              "const": "urine",
+              "title": "Kind",
+              "type": "string"
+            }
+          },
+          "required": [
+            "member_key",
+            "expected_content_hash",
+            "status",
+            "basis_note",
+            "exclusion_reason",
+            "kind"
+          ],
+          "title": "UrineReview",
+          "type": "object"
+        },
+        "VasoactiveGroupReview": {
+          "additionalProperties": false,
+          "properties": {
+            "drug_key": {
+              "enum": [
+                "dopamine",
+                "dobutamine",
+                "epinephrine",
+                "norepinephrine",
+                "other"
+              ],
+              "title": "Drug Key",
+              "type": "string"
+            },
+            "relation": {
+              "enum": [
+                "single_stream",
+                "distinct_parallel_streams",
+                "agent_total",
+                "unresolved"
+              ],
+              "title": "Relation",
+              "type": "string"
+            },
+            "relation_confirmed": {
+              "title": "Relation Confirmed",
+              "type": "boolean"
+            },
+            "dose_basis_consistency_confirmed": {
+              "title": "Dose Basis Consistency Confirmed",
+              "type": "boolean"
+            },
+            "basis_note": {
+              "maxLength": 1000,
+              "minLength": 20,
+              "title": "Basis Note",
+              "type": "string"
+            }
+          },
+          "required": [
+            "drug_key",
+            "relation",
+            "relation_confirmed",
+            "dose_basis_consistency_confirmed",
+            "basis_note"
+          ],
+          "title": "VasoactiveGroupReview",
+          "type": "object"
+        },
+        "VasoactiveReview": {
+          "additionalProperties": false,
+          "properties": {
+            "member_key": {
+              "maxLength": 200,
+              "minLength": 1,
+              "title": "Member Key",
+              "type": "string"
+            },
+            "expected_content_hash": {
+              "pattern": "^[a-f0-9]{64}$",
+              "title": "Expected Content Hash",
+              "type": "string"
+            },
+            "status": {
+              "enum": [
+                "confirmed",
+                "excluded",
+                "unknown"
+              ],
+              "title": "Status",
+              "type": "string"
+            },
+            "basis_note": {
+              "maxLength": 1000,
+              "minLength": 20,
+              "title": "Basis Note",
+              "type": "string"
+            },
+            "exclusion_reason": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "not_patient_measurement",
+                    "wrong_sample_or_analyte",
+                    "duplicate_record",
+                    "measurement_error",
+                    "not_applicable",
+                    "conflicting_alternative",
+                    "other_clinician_reason"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Exclusion Reason"
+            },
+            "kind": {
+              "const": "vasoactive",
+              "title": "Kind",
+              "type": "string"
+            },
+            "continuous_iv": {
+              "enum": [
+                "confirmed",
+                "not_confirmed",
+                "unknown"
+              ],
+              "title": "Continuous Iv",
+              "type": "string"
+            },
+            "rate_scope": {
+              "enum": [
+                "stream_rate",
+                "agent_total",
+                "unknown"
+              ],
+              "title": "Rate Scope",
+              "type": "string"
+            },
+            "weight_use_confirmed": {
+              "title": "Weight Use Confirmed",
+              "type": "boolean"
+            },
+            "weight_basis_note": {
+              "maxLength": 1000,
+              "minLength": 20,
+              "title": "Weight Basis Note",
+              "type": "string"
+            },
+            "mass_basis_compatible_confirmed": {
+              "title": "Mass Basis Compatible Confirmed",
+              "type": "boolean"
+            },
+            "mass_basis_note": {
+              "maxLength": 1000,
+              "minLength": 20,
+              "title": "Mass Basis Note",
+              "type": "string"
+            }
+          },
+          "required": [
+            "member_key",
+            "expected_content_hash",
+            "status",
+            "basis_note",
+            "exclusion_reason",
+            "kind",
+            "continuous_iv",
+            "rate_scope",
+            "weight_use_confirmed",
+            "weight_basis_note",
+            "mass_basis_compatible_confirmed",
+            "mass_basis_note"
+          ],
+          "title": "VasoactiveReview",
+          "type": "object"
+        }
+      },
+      "additionalProperties": false,
+      "properties": {
+        "patient_id": {
+          "maximum": 2147483647,
+          "minimum": 1,
+          "title": "Patient Id",
+          "type": "integer"
+        },
+        "admission_id": {
+          "title": "Admission Id",
+          "type": "string"
+        },
+        "period_start": {
+          "title": "Period Start",
+          "type": "string"
+        },
+        "period_end": {
+          "title": "Period End",
+          "type": "string"
+        },
+        "as_of": {
+          "title": "As Of",
+          "type": "string"
+        },
+        "rule_profile_id": {
+          "title": "Rule Profile Id",
+          "type": "string"
+        },
+        "expected_rule_profile_hash": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Expected Rule Profile Hash",
+          "type": "string"
+        },
+        "expected_manifest_hash": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Expected Manifest Hash",
+          "type": "string"
+        },
+        "age_at_period_years": {
+          "anyOf": [
+            {
+              "maximum": 130,
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Age At Period Years"
+        },
+        "age_basis_note": {
+          "maxLength": 1000,
+          "minLength": 20,
+          "title": "Age Basis Note",
+          "type": "string"
+        },
+        "care_setting": {
+          "enum": [
+            "icu",
+            "other",
+            "unknown"
+          ],
+          "title": "Care Setting",
+          "type": "string"
+        },
+        "care_setting_basis_note": {
+          "maxLength": 1000,
+          "minLength": 20,
+          "title": "Care Setting Basis Note",
+          "type": "string"
+        },
+        "applicability_confirmed": {
+          "title": "Applicability Confirmed",
+          "type": "boolean"
+        },
+        "member_reviews": {
+          "items": {
+            "discriminator": {
+              "mapping": {
+                "arterial_pair": "#/$defs/ArterialPairReview",
+                "gcs": "#/$defs/GcsReview",
+                "laboratory": "#/$defs/LaboratoryReview",
+                "map": "#/$defs/MapReview",
+                "respiratory_support": "#/$defs/RespiratorySupportReview",
+                "urine": "#/$defs/UrineReview",
+                "vasoactive": "#/$defs/VasoactiveReview"
+              },
+              "propertyName": "kind"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/LaboratoryReview"
+              },
+              {
+                "$ref": "#/$defs/MapReview"
+              },
+              {
+                "$ref": "#/$defs/RespiratorySupportReview"
+              },
+              {
+                "$ref": "#/$defs/ArterialPairReview"
+              },
+              {
+                "$ref": "#/$defs/VasoactiveReview"
+              },
+              {
+                "$ref": "#/$defs/GcsReview"
+              },
+              {
+                "$ref": "#/$defs/UrineReview"
+              }
+            ]
+          },
+          "maxItems": 4096,
+          "title": "Member Reviews",
+          "type": "array"
+        },
+        "coverage": {
+          "$ref": "#/$defs/SixAxisCoverage"
+        },
+        "conflict_reviews": {
+          "items": {
+            "$ref": "#/$defs/ConflictReview"
+          },
+          "maxItems": 4096,
+          "title": "Conflict Reviews",
+          "type": "array"
+        },
+        "vasoactive_group_reviews": {
+          "items": {
+            "$ref": "#/$defs/VasoactiveGroupReview"
+          },
+          "maxItems": 5,
+          "title": "Vasoactive Group Reviews",
+          "type": "array"
+        },
+        "note": {
+          "maxLength": 1000,
+          "title": "Note",
+          "type": "string"
+        }
+      },
+      "required": [
+        "patient_id",
+        "admission_id",
+        "period_start",
+        "period_end",
+        "as_of",
+        "rule_profile_id",
+        "expected_rule_profile_hash",
+        "expected_manifest_hash",
+        "age_at_period_years",
+        "age_basis_note",
+        "care_setting",
+        "care_setting_basis_note",
+        "applicability_confirmed",
+        "member_reviews",
+        "coverage",
+        "conflict_reviews",
+        "vasoactive_group_reviews",
+        "note"
+      ],
+      "title": "AssessmentCreate",
+      "type": "object"
+    }
+  }
+}

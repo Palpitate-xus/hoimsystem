@@ -1,0 +1,108 @@
+{
+  "patient_id": 1,
+  "admission_id": "ef3e7497-3df6-4eba-8a7b-04b0b3a1ecdd",
+  "period_start": "2026-10-19T17:03:40.573970Z",
+  "period_end": "2026-10-20T17:03:40.573970Z",
+  "as_of": "2026-10-20T18:03:40.573970Z",
+  "rule_profile_id": "0da97d63-da8e-4323-9082-7bd95d3ccf76",
+  "expected_rule_profile_hash": "c9d68a6902eb181fb46e89d85a4cb477145f4de5a88ab2d44941a6c71e197296",
+  "expected_manifest_hash": "a7682cb9dc21c0ac210030b7e22a98858f5f03bdebbbb532174646432358ffc7",
+  "age_at_period_years": null,
+  "age_basis_note": "合成原资料核实依据；保留实际原始测量和明确区间，没有从文字猜测连续支持或推导临床评分。",
+  "care_setting": "unknown",
+  "care_setting_basis_note": "合成原资料核实依据；保留实际原始测量和明确区间，没有从文字猜测连续支持或推导临床评分。",
+  "applicability_confirmed": false,
+  "member_reviews": [
+    {
+      "kind": "arterial_pair",
+      "member_key": "arterial_pair:3449fd97-a81b-4d78-b026-24a84dd3d7a8",
+      "expected_content_hash": "28b74613f48e6a4b1188e71fd2debebe20d8bbe5ab60a3d7ff577461a09a1dc5",
+      "status": "unknown",
+      "basis_note": "合成原资料核实依据；保留实际原始测量和明确区间，没有从文字猜测连续支持或推导临床评分。",
+      "exclusion_reason": null,
+      "qualifying_respiratory_support": "unknown",
+      "support_qualification_basis_note": "合成原资料核实依据；保留实际原始测量和明确区间，没有从文字猜测连续支持或推导临床评分。"
+    },
+    {
+      "kind": "gcs",
+      "member_key": "gcs:a05f7add-b299-4b65-b7ef-c96382863d93",
+      "expected_content_hash": "d7d7df8884f2045db07ca1ef7b23f45d2dd5a5b8a633fff385014d5a27e245f5",
+      "status": "unknown",
+      "basis_note": "合成原资料核实依据；保留实际原始测量和明确区间，没有从文字猜测连续支持或推导临床评分。",
+      "exclusion_reason": null,
+      "interpretable": "unknown",
+      "sedation_confounding_status": "unknown",
+      "other_confounding_status": "unknown",
+      "confounding_basis_note": "合成原资料核实依据；保留实际原始测量和明确区间，没有从文字猜测连续支持或推导临床评分。"
+    },
+    {
+      "kind": "laboratory",
+      "member_key": "laboratory:aa56406f-7bd6-43c9-ba4f-f0acde65e154",
+      "expected_content_hash": "6d8158fbbfcfa019e574f4134f76a2277a26392dfef038705dbba691f0d9ef4e",
+      "status": "unknown",
+      "basis_note": "合成原资料核实依据；保留实际原始测量和明确区间，没有从文字猜测连续支持或推导临床评分。",
+      "exclusion_reason": null
+    },
+    {
+      "kind": "map",
+      "member_key": "map:ccbc071d-1965-4f29-b0a0-f2306fd150ff",
+      "expected_content_hash": "7249ba2a584dc3d3c4ff264952c2963e4319de33894500bb3e181d5c2a494070",
+      "status": "unknown",
+      "basis_note": "合成原资料核实依据；保留实际原始测量和明确区间，没有从文字猜测连续支持或推导临床评分。",
+      "exclusion_reason": null
+    },
+    {
+      "kind": "respiratory_support",
+      "member_key": "respiratory_support:3bd0e667-99a8-40bd-a8ae-61e9470287de",
+      "expected_content_hash": "0c12712b129205b729c3299cd08c80638589c1eb13c2934e2ed2bbecd38d478f",
+      "status": "unknown",
+      "basis_note": "合成原资料核实依据；保留实际原始测量和明确区间，没有从文字猜测连续支持或推导临床评分。",
+      "exclusion_reason": null
+    },
+    {
+      "kind": "urine",
+      "member_key": "urine:485348ff-565f-4677-8bc0-0819041c5c22",
+      "expected_content_hash": "319e6ec9a5664df20d1debdc2047e85c9df6b38e520f2a43e52f11eade281908",
+      "status": "unknown",
+      "basis_note": "合成原资料核实依据；保留实际原始测量和明确区间，没有从文字猜测连续支持或推导临床评分。",
+      "exclusion_reason": null
+    }
+  ],
+  "coverage": {
+    "respiratory": {
+      "source_inventory": "unknown",
+      "clinical_protocol": "unknown",
+      "basis_note": "合成原资料核实依据；保留实际原始测量和明确区间，没有从文字猜测连续支持或推导临床评分。"
+    },
+    "coagulation": {
+      "source_inventory": "unknown",
+      "clinical_protocol": "unknown",
+      "basis_note": "合成原资料核实依据；保留实际原始测量和明确区间，没有从文字猜测连续支持或推导临床评分。"
+    },
+    "liver": {
+      "source_inventory": "unknown",
+      "clinical_protocol": "unknown",
+      "basis_note": "合成原资料核实依据；保留实际原始测量和明确区间，没有从文字猜测连续支持或推导临床评分。"
+    },
+    "cardiovascular": {
+      "source_inventory": "unknown",
+      "clinical_protocol": "unknown",
+      "basis_note": "合成原资料核实依据；保留实际原始测量和明确区间，没有从文字猜测连续支持或推导临床评分。",
+      "drug_exposure": "unknown",
+      "no_other_unrepresented_exposure_confirmed": false
+    },
+    "cns": {
+      "source_inventory": "unknown",
+      "clinical_protocol": "unknown",
+      "basis_note": "合成原资料核实依据；保留实际原始测量和明确区间，没有从文字猜测连续支持或推导临床评分。"
+    },
+    "renal": {
+      "source_inventory": "unknown",
+      "clinical_protocol": "unknown",
+      "basis_note": "合成原资料核实依据；保留实际原始测量和明确区间，没有从文字猜测连续支持或推导临床评分。"
+    }
+  },
+  "conflict_reviews": [],
+  "vasoactive_group_reviews": [],
+  "note": ""
+}

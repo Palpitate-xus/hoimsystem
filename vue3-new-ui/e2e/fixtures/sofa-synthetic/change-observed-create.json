@@ -1,0 +1,31 @@
+{
+  "patient_id": 1,
+  "admission_id": "fe12bff3-e46a-41e8-9dc3-743c9e1ed099",
+  "current_assessment_id": "06255e04-d34c-4265-b7ba-918fe9b53aaf",
+  "expected_current_content_hash": "a7e0d0376020d1a1a63e9f487b45352543953bbe51b33513a54cfc8bbb9a619b",
+  "expected_current_projection_hash": "d77df48b6ae519bed499f37224ea56d081dfa4b87b84629907577d426f8d81c8",
+  "baseline": {
+    "mode": "observed",
+    "assessment_id": "0553e0cd-0352-4f7f-99e8-4e31ed5830bb",
+    "expected_content_hash": "e9c8fa3d58fbb45b664a42cef31ecd78eeabcb31301a79da86173290ec339289",
+    "expected_projection_hash": "1534c86294b60ba0332890b0b28ca1245fcdd9ad0fc9d05bdda2987284d82600"
+  },
+  "infection_source_id": "4f476288-f44e-4807-a106-f19dffcd6a80",
+  "expected_infection_content_hash": "47f0f8e6daee8385f340c1d4c716fb8cb685a4f8d730466760a406bcc633a45c",
+  "expected_infection_governance_hash": "ef3246b3567206b74fc4e18b8a817be52ebce5613f017d5686429fa713dc6c48",
+  "infection_review": {
+    "current_presence": "unknown",
+    "current_presence_basis_note": "合成原资料核实依据；保留实际原始测量和明确区间，没有从文字猜测连续支持或推导临床评分。",
+    "onset_review": "unknown",
+    "onset_review_basis_note": "合成原资料核实依据；保留实际原始测量和明确区间，没有从文字猜测连续支持或推导临床评分。"
+  },
+  "review": {
+    "acute_change": "unknown",
+    "acute_change_basis_note": "合成原资料核实依据；保留实际原始测量和明确区间，没有从文字猜测连续支持或推导临床评分。",
+    "attribution": "uncertain",
+    "attribution_basis_note": "合成原资料核实依据；保留实际原始测量和明确区间，没有从文字猜测连续支持或推导临床评分。",
+    "temporal_relation": "unknown",
+    "temporal_relation_basis_note": "合成原资料核实依据；保留实际原始测量和明确区间，没有从文字猜测连续支持或推导临床评分。"
+  },
+  "note": "合成当前回顾性归因核实，不能冒充历史预测或感染所致器官障碍诊断"
+}

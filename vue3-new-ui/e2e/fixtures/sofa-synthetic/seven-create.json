@@ -1,0 +1,201 @@
+{
+  "patient_id": 1,
+  "admission_id": "fe12bff3-e46a-41e8-9dc3-743c9e1ed099",
+  "period_start": "2026-10-19T17:03:41.141148Z",
+  "period_end": "2026-10-20T17:03:41.141148Z",
+  "as_of": "2026-10-20T18:03:41.141148Z",
+  "rule_profile_id": "682f09b3-7477-4c3d-a51c-70199d0024fc",
+  "expected_rule_profile_hash": "f93c2e2078fdb4b64b0f6b1a72aeaf1687bea69eea90b13717f1646472f65532",
+  "expected_manifest_hash": "7d22e7f0d4aa356ec001df82e60d4855bc8c6e307f694f0acf734e7ca0ee9e6a",
+  "age_at_period_years": 60,
+  "age_basis_note": "合成原资料核实依据；保留实际原始测量和明确区间，没有从文字猜测连续支持或推导临床评分。",
+  "care_setting": "icu",
+  "care_setting_basis_note": "合成原资料核实依据；保留实际原始测量和明确区间，没有从文字猜测连续支持或推导临床评分。",
+  "applicability_confirmed": true,
+  "member_reviews": [
+    {
+      "kind": "arterial_pair",
+      "member_key": "arterial_pair:e16fad09-124f-45ac-bfa7-911fa8ba532a",
+      "expected_content_hash": "e402b4a7aed7e98c635650aa838b6d41915f55059a315a0a7d15b015667f5e07",
+      "status": "confirmed",
+      "basis_note": "合成原资料核实依据；保留实际原始测量和明确区间，没有从文字猜测连续支持或推导临床评分。",
+      "exclusion_reason": null,
+      "qualifying_respiratory_support": "yes",
+      "support_qualification_basis_note": "合成原资料核实依据；保留实际原始测量和明确区间，没有从文字猜测连续支持或推导临床评分。"
+    },
+    {
+      "kind": "gcs",
+      "member_key": "gcs:4d127ecb-a839-4344-b30e-e516da3c67e2",
+      "expected_content_hash": "2da85f0a47a1e5ad5fdbfc70c47e591b729919363d6a93e7aced9a9c3483010e",
+      "status": "confirmed",
+      "basis_note": "合成原资料核实依据；保留实际原始测量和明确区间，没有从文字猜测连续支持或推导临床评分。",
+      "exclusion_reason": null,
+      "interpretable": "confirmed",
+      "sedation_confounding_status": "excluded",
+      "other_confounding_status": "excluded",
+      "confounding_basis_note": "合成原资料核实依据；保留实际原始测量和明确区间，没有从文字猜测连续支持或推导临床评分。"
+    },
+    {
+      "kind": "gcs",
+      "member_key": "gcs:a03f8a28-68a9-4649-9eda-6612189716ba",
+      "expected_content_hash": "9a6d0184438615260dd426374387b4cf591be6fd22f9938cbd4a972e76d0ba9c",
+      "status": "excluded",
+      "basis_note": "合成原资料核实依据；保留实际原始测量和明确区间，没有从文字猜测连续支持或推导临床评分。",
+      "exclusion_reason": "not_applicable",
+      "interpretable": "confirmed",
+      "sedation_confounding_status": "excluded",
+      "other_confounding_status": "excluded",
+      "confounding_basis_note": "合成原资料核实依据；保留实际原始测量和明确区间，没有从文字猜测连续支持或推导临床评分。"
+    },
+    {
+      "kind": "laboratory",
+      "member_key": "laboratory:2cf29c76-ab99-4272-b501-9337dc119fb0",
+      "expected_content_hash": "42ca6d55faf41be6ff9153ebb4c28c1adc53a0a072e651c4cf9a74980e503b0b",
+      "status": "confirmed",
+      "basis_note": "合成原资料核实依据；保留实际原始测量和明确区间，没有从文字猜测连续支持或推导临床评分。",
+      "exclusion_reason": null
+    },
+    {
+      "kind": "laboratory",
+      "member_key": "laboratory:85599b6a-7684-44a8-bed1-3ba577ed0acc",
+      "expected_content_hash": "880feb3f78b51e0b91ed212f0b688dd3bea095d8924675bd35cb24639f1beaec",
+      "status": "confirmed",
+      "basis_note": "合成原资料核实依据；保留实际原始测量和明确区间，没有从文字猜测连续支持或推导临床评分。",
+      "exclusion_reason": null
+    },
+    {
+      "kind": "laboratory",
+      "member_key": "laboratory:d3b216b9-616f-439e-a57f-c5a84716af56",
+      "expected_content_hash": "24485d5a01c4719b94dc99f108475ecd38c70d34aec4ff05eb518ecc3ba805af",
+      "status": "confirmed",
+      "basis_note": "合成原资料核实依据；保留实际原始测量和明确区间，没有从文字猜测连续支持或推导临床评分。",
+      "exclusion_reason": null
+    },
+    {
+      "kind": "laboratory",
+      "member_key": "laboratory:f155357a-3d16-43e4-8a74-b81b3df15391",
+      "expected_content_hash": "48224821443ce9d2ec49d546aeb756ea5108c93a39baa0caac36afdd8965416c",
+      "status": "confirmed",
+      "basis_note": "合成原资料核实依据；保留实际原始测量和明确区间，没有从文字猜测连续支持或推导临床评分。",
+      "exclusion_reason": null
+    },
+    {
+      "kind": "map",
+      "member_key": "map:62845a4a-4ddf-4fbb-9d64-7255dbca5cc2",
+      "expected_content_hash": "bad0d7ec1bce9f423c34f4fabfee4e7d40bd3a47f196f0db6b66db2978b783a4",
+      "status": "confirmed",
+      "basis_note": "合成原资料核实依据；保留实际原始测量和明确区间，没有从文字猜测连续支持或推导临床评分。",
+      "exclusion_reason": null
+    },
+    {
+      "kind": "respiratory_support",
+      "member_key": "respiratory_support:5708bb89-e5a9-47d2-a9d2-70136e3e37f2",
+      "expected_content_hash": "b8ff6612f013d16e19aa0cbb2ab983383f7c80198234a0c95392953117e4af7d",
+      "status": "confirmed",
+      "basis_note": "合成原资料核实依据；保留实际原始测量和明确区间，没有从文字猜测连续支持或推导临床评分。",
+      "exclusion_reason": null
+    },
+    {
+      "kind": "urine",
+      "member_key": "urine:0a13a0fd-03d3-4acd-97f0-d7226524af5c",
+      "expected_content_hash": "343610646876467bd7f036b9b75421d04c6bac20b904d5f2880cc79ff3e993d7",
+      "status": "confirmed",
+      "basis_note": "合成原资料核实依据；保留实际原始测量和明确区间，没有从文字猜测连续支持或推导临床评分。",
+      "exclusion_reason": null
+    },
+    {
+      "kind": "urine",
+      "member_key": "urine:83c2ac3b-7092-4f43-be64-30414be15a96",
+      "expected_content_hash": "9a07ac69a3b5ddb9032aa9eba556266b73270df05bf8d21f0b53270d2eb18b55",
+      "status": "excluded",
+      "basis_note": "合成原资料核实依据；保留实际原始测量和明确区间，没有从文字猜测连续支持或推导临床评分。",
+      "exclusion_reason": "not_applicable"
+    },
+    {
+      "kind": "vasoactive",
+      "member_key": "vasoactive:2b024269-b400-4dd9-9163-5f698a755d36",
+      "expected_content_hash": "8afa32956a5dc3b8abc9a0b28dac4428ea27cdce81797b432ca519b55f667b7b",
+      "status": "confirmed",
+      "basis_note": "合成原资料核实依据；保留实际原始测量和明确区间，没有从文字猜测连续支持或推导临床评分。",
+      "exclusion_reason": null,
+      "continuous_iv": "confirmed",
+      "rate_scope": "stream_rate",
+      "weight_use_confirmed": true,
+      "weight_basis_note": "合成原资料核实依据；保留实际原始测量和明确区间，没有从文字猜测连续支持或推导临床评分。",
+      "mass_basis_compatible_confirmed": true,
+      "mass_basis_note": "合成原资料核实依据；保留实际原始测量和明确区间，没有从文字猜测连续支持或推导临床评分。"
+    },
+    {
+      "kind": "vasoactive",
+      "member_key": "vasoactive:6d72a1c3-57a5-4285-b8fe-db2b36e4315f",
+      "expected_content_hash": "c21f3403e9fa485a03d73e9ded048a4531bf6502cd4e2f433f701dfbd9ba63da",
+      "status": "confirmed",
+      "basis_note": "合成原资料核实依据；保留实际原始测量和明确区间，没有从文字猜测连续支持或推导临床评分。",
+      "exclusion_reason": null,
+      "continuous_iv": "confirmed",
+      "rate_scope": "stream_rate",
+      "weight_use_confirmed": false,
+      "weight_basis_note": "合成原资料核实依据；保留实际原始测量和明确区间，没有从文字猜测连续支持或推导临床评分。",
+      "mass_basis_compatible_confirmed": true,
+      "mass_basis_note": "合成原资料核实依据；保留实际原始测量和明确区间，没有从文字猜测连续支持或推导临床评分。"
+    }
+  ],
+  "coverage": {
+    "respiratory": {
+      "source_inventory": "complete",
+      "clinical_protocol": "adequate",
+      "basis_note": "合成原资料核实依据；保留实际原始测量和明确区间，没有从文字猜测连续支持或推导临床评分。"
+    },
+    "coagulation": {
+      "source_inventory": "complete",
+      "clinical_protocol": "adequate",
+      "basis_note": "合成原资料核实依据；保留实际原始测量和明确区间，没有从文字猜测连续支持或推导临床评分。"
+    },
+    "liver": {
+      "source_inventory": "complete",
+      "clinical_protocol": "adequate",
+      "basis_note": "合成原资料核实依据；保留实际原始测量和明确区间，没有从文字猜测连续支持或推导临床评分。"
+    },
+    "cardiovascular": {
+      "source_inventory": "complete",
+      "clinical_protocol": "adequate",
+      "basis_note": "合成原资料核实依据；保留实际原始测量和明确区间，没有从文字猜测连续支持或推导临床评分。",
+      "drug_exposure": "reviewed_intervals",
+      "no_other_unrepresented_exposure_confirmed": true
+    },
+    "cns": {
+      "source_inventory": "complete",
+      "clinical_protocol": "adequate",
+      "basis_note": "合成原资料核实依据；保留实际原始测量和明确区间，没有从文字猜测连续支持或推导临床评分。"
+    },
+    "renal": {
+      "source_inventory": "complete",
+      "clinical_protocol": "adequate",
+      "basis_note": "合成原资料核实依据；保留实际原始测量和明确区间，没有从文字猜测连续支持或推导临床评分。"
+    }
+  },
+  "conflict_reviews": [
+    {
+      "group_id": "sofa_conflict:43e7cfb1316179f02ea5a3e42f241898e72def47b716401698ab51fae83bb91b",
+      "expected_group_digest": "dfc9713c7d2fc1d1b1bb6688f0a9fe6587e1c67a0fe183205ac0d6a582e61b8c",
+      "status": "resolved",
+      "accepted_source_ids": [
+        "urine_interval:0a13a0fd-03d3-4acd-97f0-d7226524af5c:343610646876"
+      ],
+      "excluded_source_ids": [
+        "urine_interval:83c2ac3b-7092-4f43-be64-30414be15a96:9a07ac69a3b5"
+      ],
+      "basis_note": "合成原资料核实依据；保留实际原始测量和明确区间，没有从文字猜测连续支持或推导临床评分。"
+    }
+  ],
+  "vasoactive_group_reviews": [
+    {
+      "drug_key": "norepinephrine",
+      "relation": "single_stream",
+      "relation_confirmed": true,
+      "dose_basis_consistency_confirmed": true,
+      "basis_note": "合成原资料核实依据；保留实际原始测量和明确区间，没有从文字猜测连续支持或推导临床评分。"
+    }
+  ],
+  "note": ""
+}

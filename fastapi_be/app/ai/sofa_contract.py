@@ -11,7 +11,7 @@ import json
 import math
 from datetime import datetime, timedelta
 from decimal import Decimal
-from typing import Annotated, Literal
+from typing import Annotated, Literal, get_args, get_origin
 
 from pydantic import AfterValidator, BaseModel, ConfigDict, Field, model_validator
 
@@ -61,6 +61,7 @@ ReasonCode = Literal[
     "missing_support",
     "unsupported_unit",
     "unknown_quantity",
+    "unsupported_value",
     "review_unknown",
     "review_excluded",
     "unresolved_conflict",
@@ -102,6 +103,16 @@ ReasonCode = Literal[
 
 class StrictModel(BaseModel):
     model_config = ConfigDict(strict=True, extra="forbid")
+
+    @model_validator(mode="before")
+    @classmethod
+    def no_literal_boolean_coercion(cls, data):
+        if isinstance(data, dict):
+            for name, field in cls.model_fields.items():
+                args = get_args(field.annotation)
+                if get_origin(field.annotation) is Literal and any(isinstance(value, bool) for value in args) and name in data and type(data[name]) is not bool:
+                    raise ValueError("固定布尔声明须为真实JSON布尔值")
+        return data
 
 
 class Quantity(StrictModel):
@@ -221,6 +232,22 @@ class ConflictGroup(StrictModel):
     # unresolved -> accepted/excluded empty, dependent members cannot create exact score.
 
 
+SignedDecimalText = Annotated[str, Field(strict=True, pattern=r"^-?(?:0|[1-9]\d{0,15})(?:\.\d{1,8})?$")]
+
+
+class SofaLabQuantity(StrictModel):
+    value: SignedDecimalText | None
+    unit: Annotated[str, Field(strict=True, min_length=1, max_length=64)]
+    absent_reason: AbsentReason | None
+    value_kind: Literal["numeric", "qualitative"]
+
+    @model_validator(mode="after")
+    def exclusive_presence(self):
+        if (self.value is None) == (self.absent_reason is None) or (self.value_kind == "qualitative" and self.value is not None):
+            raise ValueError("检验原量/定性类型/未测原因不一致")
+        return self
+
+
 class SofaLab(OriginalBinding):
     @model_validator(mode="after")
     def original_clocks(self):
@@ -237,7 +264,7 @@ class SofaLab(OriginalBinding):
     mapping_governance_hash: SHA256
     identity_hash: SHA256
     analyte: Literal["platelet_count", "total_bilirubin", "creatinine", "arterial_oxygen_partial_pressure"]
-    quantity: Quantity
+    quantity: SofaLabQuantity
     review: MemberReview
     # registered_at == available_at == recorded_at; collected <= registered <= as_of.
 

@@ -79,7 +79,7 @@ def lab(analyte="creatinine", value="0", unit="mg/dL", name=None):
         "mapping_governance_hash": sha(name + "mapping-governance"),
         "identity_hash": sha(name + "identity"),
         "analyte": analyte,
-        "quantity": quantity(value, unit),
+        "quantity": {**quantity(value, unit), "value_kind": "numeric"},
         "review": review(),
     }
 

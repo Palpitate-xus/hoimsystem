@@ -55,7 +55,13 @@ const RETRYABLE_STATUS = new Set([408, 425, 429, 500, 502, 503, 504]);
 
 const canRetry = (error) => {
   const config = error?.config;
-  if (!config || !config.retry || error.code === "ERR_CANCELED") return false;
+  if (
+    !config ||
+    !config.retry ||
+    error.code === "ERR_CANCELED" ||
+    error.code === "ECONNABORTED" ||
+    config.signal?.aborted
+  ) return false;
 
   const method = (config.method || "get").toLowerCase();
   // 写操作只有在调用方明确提供幂等键时才允许自动重试，防止重复挂号、收费或开药。
@@ -76,6 +82,8 @@ const retryDelay = (error, attempt) => {
 const instance = axios.create({
   baseURL,
   timeout: requestTimeout,
+  // Keep genuine timeouts retryable as ETIMEDOUT; native XHR aborts must stop.
+  transitional: { clarifyTimeoutError: true },
   headers: {
     "Content-Type": contentType,
   },

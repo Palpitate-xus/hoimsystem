@@ -28,5 +28,6 @@ SOURCE_REFERENCE_KEYS = frozenset(
         "critical_care_record_id",
         "icu_score_id",
         "observation_window_id",
+        "news2_assessment_id",
     }
 )

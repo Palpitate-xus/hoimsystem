@@ -8,7 +8,7 @@ from sqlalchemy.orm import defer
 
 from app.ai.catalog import FEATURES
 from app.ai.governance import provider_credential, provider_feature_issues, validate_endpoint
-from app.ai.models import AIKnowledgeDocument, AIProvider, utcnow
+from app.ai.models import AIKnowledgeDocument, AIProvider, AIRiskRuleProfile, utcnow
 from app.ai.pathway_knowledge import source_is_current
 from app.models import ClinicalPathway
 
@@ -50,6 +50,7 @@ def setup_reports(db, configs: dict) -> dict:
             issues.append({"code": "CREDENTIAL_UNAVAILABLE", "message": str(exc.detail)})
         provider_checks[provider.provider_id] = issues
     reports = {}
+    news2_profile_ready = None
     for spec in FEATURES:
         config = configs.get(spec.key)
         provider = providers.get(config.provider_id) if config and config.provider_id else None
@@ -61,6 +62,21 @@ def setup_reports(db, configs: dict) -> dict:
         else:
             issues.extend(provider_checks[provider.provider_id])
             issues.extend(provider_feature_issues(spec, provider))
+            if spec.number == 41 and provider.kind == "specialist" and provider.model.startswith("news2:"):
+                if news2_profile_ready is None:
+                    from app.ai.news2_contract import recipe_digest
+                    from app.ai.risk_rule_profiles import profile_current
+
+                    news2_profile_ready = False
+                    rows = db.query(AIRiskRuleProfile).filter_by(rule_id="news2_2017", recipe_digest=recipe_digest(), status="published").limit(2).all()
+                    for row in rows:
+                        try:
+                            profile_current(db, row.rule_profile_id)
+                        except HTTPException:
+                            continue
+                        news2_profile_ready = True
+                if not news2_profile_ready:
+                    issues.append({"code": "NEWS2_RULE_PROFILE_REQUIRED", "message": "尚无当前固定NEWS2规则与输入策略的已审核发布版本，请由超级管理员核实"})
         if spec.clinical and (not config or config.validation_status != "validated"):
             issues.append({"code": "CLINICAL_VALIDATION_REQUIRED", "message": "临床能力尚未完成适用范围验证"})
         if spec.number == 62 and (not config or config.validation_status != "validated"):

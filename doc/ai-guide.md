@@ -183,7 +183,36 @@ ADR列表对管理员保留既有管理范围；药师只读现有处方业务�
 | `/api/ai/observation-windows`及`/{id}` | 创建、列出和重核明确观测窗，`/{id}/revoke`撤销 |
 | `/api/ai/admin/observation-windows`及`/{id}` | 仅超级管理员全院目录与冻结审计 |
 
-新增迁移`20261020_inpatient_observations`和`20261020_ai_observation_windows`只增加三张表，不重写旧体征、危重护理、检验或住院。这里借鉴[FHIR R4 Observation的发生/可用时间、缺失原因原则](https://hl7.org/fhir/R4/observation-definitions.html)及[UCUM单位](https://ucum.org/ucum)，仍是本项目来源契约，没有声明完整FHIR服务或术语映射。当前独立Prompt与目录版本为`2026.10.20.3`，80项Prompt、26个稳定患者来源引用；本批补齐输入与来源治理，尚未提供连续监护完整性、已审核住院检验映射、NEWS2/KDIGO分期、风险概率、适用人群校准或临床效果验证。工程检查及真实隔离MySQL的具体范围见[住院观测验证](ai-observation-verification.json)。
+新增迁移`20261020_inpatient_observations`和`20261020_ai_observation_windows`只增加三张表，不重写旧体征、危重护理、检验或住院。这里借鉴[FHIR R4 Observation的发生/可用时间、缺失原因原则](https://hl7.org/fhir/R4/observation-definitions.html)及[UCUM单位](https://ucum.org/ucum)，仍是本项目来源契约，没有声明完整FHIR服务或术语映射。该批冻结的独立Prompt与目录版本为`2026.10.20.3`，80项Prompt、26个稳定患者来源引用；当时的v1窗未接检验。工程检查及真实隔离MySQL的具体范围见[住院观测验证](ai-observation-verification.json)，后续检验接入见下节，历史记录不改写。
+
+### 受控住院检验与v2观测窗
+
+新建窗口默认使用`inpatient_window_v2`，加入经核实的检验来源子集；已有v1窗继续按原构建逻辑核对，不补入后来登记的检验、项目映射或新质量字段，历史哈希及普通用户的有效历史读取保持兼容。41–43仍只接受`observation_window_id`，其独立Prompt明确区分来源治理、模型适用性和临床验证，不能以有检验值推定已具备风险预测能力。当前目录版本为`2026.10.20.4`，80项独立Prompt与26个引用键保持完整。
+
+超级管理员在“AI管理→检验项目与来源”手工建立项目映射草稿：填写经核实的来源命名空间、编码体系/编码、原单位、方法、标本及数值/定性类型，再选择项目分类和填写审核依据。九个项目分类只是管理选项，没有预装已验证映射、参考范围、风险阈值或单位换算。发布须明确确认项目语义和原签名，一份精确身份在同一命名空间只允许一个已发布版本；撤销后才能另行审核替代版本。草稿、发布、撤销均保留不可变正文、内容摘要、治理摘要、版本和审计，不支持修改、恢复或删除。
+
+匹配区分大小写和原单位符号，不从显示名猜项目，不把不同系统的`local`编码自动合并；缺方法、缺标本不作通配符。此身份结构参考[LOINC项目术语的主要组成](https://loinc.org/kb/users-guide/major-parts-of-a-loinc-term/)和[UCUM的单位语义](https://ucum.org/ucum)，但每份映射仍须院方实际核实，并未获得术语服务认证。
+
+医生、主任、管理员和超级管理员可在现有住院照护权限内登记检验来源，护士不能新登记，护理界面只读。候选目录仅说明同一患者的已审核原结构化观察项，不证明属于当前住院，不自动选择最近报告；同范围护士可只读候选API，护理界面不加载登记候选。登记者须分别确认并填写至少20字依据：实际采样UTC、明确原住院关联、原来源命名空间。原数值、单位和身份从数据库读取且只读；请求同时携带原资料与映射摘要，资料变化须重新核对。原报告须已审核，已有审核者和录入者不得相同；LIS自动录入没有人工录入者时，单个人工审核不能称为双人复核。
+
+原检验Decimal保存为数据库现存十进制文本，保留`0.00000000`、NULL和定性原文；这不证明最初输入的字面尾零或超出原库精度的原值。旧采样、报告和审核时钟保留原无时区值，不添加Z；固定六位小数序列化不提高原库或原采集精度。人工确认的`collected_at_utc`另行保存，`registered_at == available_at`为服务器本次核实后纳入AI的时刻，不可倒填，也不声称是原LIS首次发布时间。[FHIR Observation的effective与issued区分](https://hl7.org/fhir/R4/observation-definitions.html)及[DiagnosticReport的issued定义](https://hl7.org/fhir/R4/diagnosticreport-definitions.html#DiagnosticReport.issued)用于说明这一边界；人工依据仍是声明，不是独立时间证明。
+
+一条原观察项同时只能有一个活动住院来源，跨住院、跨映射也不能重复登记；纠错先按原版本撤销，再核实另建。普通原作者撤销须仍有该住院当前照护读取权限，转为护士后也可经API撤销本人旧登记，护理界面不提供这个动作。超级管理员可按存储的原范围治理冻结来源，即使原住院已删除。来源哈希绑定原申请/报告/结构化观察项、原审核及临床正文，不把同步时间或危急值处理流程变动作成检验值变化。原内容、归属、审核或映射变化会阻止旧来源继续作为当前输入；普通用户读取失效来源不显示旧冻结正文，超级管理员仍能追查冻结审计和按版本撤销。
+
+v2只选采样UTC位于`[start,end]`、登记及本次可用时间均不晚于`as_of`的受控来源；不查询未登记检验或报告“未来来源计数”。点测、尿量和检验合计仍最多1000项，撤销成员也计入，超过正文预算拒绝而不截断。来源或映射已撤销时列出排除原因，不充当有效测值。同刻且同项目、同精确身份的重复或原值/参考资料冲突分别展示，不取最后一条、不平均、不把定性转为数值。来源治理通过仅表示可以审查此受控子集，`model_input_validation`仍为`not_provided`，不证明全套检验齐全、已确诊或无风险。
+
+风险输入采用`risk_lab_projection_v1`：省略完整父报告正文及申请的自由检查文字，保留结构化原值、原clock、人工核实说明和来源/映射证据；人工说明仅作来源依据。完整原文仍受原资料和来源哈希约束，删改被省略的正文也会使旧窗失效。原始来源快照单独有262144 UTF-8字节上限，MySQL新列用MEDIUMTEXT；超限在写入和审计前拒绝，不静默截短。窗口和模型请求还受各自的更小预算约束。
+
+护理工作台增加“检验来源”只读入口；风险入口可展开登记来源、点测/尿量及新建窗口。登记或撤销来源后清除旧窗口选择，要求重新冻结并明确选择，不能让旧窗悄悄包含新资料。超管管理页提供映射发布/撤销和全院来源冻结审计，普通管理员没有这些AI治理权限。所有来源操作均不调用模型，也不会自动更改启停、知识或临床验证状态。
+
+| 接口 | 权限与用途 |
+| --- | --- |
+| `GET /api/inpatient-laboratory/candidates` | 同患者已审核候选，须有明确住院照护权限；护士可只读API，护理界面不加载登记候选 |
+| `/api/inpatient-laboratory/sources`及`/{id}` | 按明确患者/原住院列出、登记、重核来源；`/{id}/revoke`按版本撤销 |
+| `/api/ai/admin/lab-mappings`、`/options`及`/{id}` | 仅超管读取选项、建立草稿和核对正文；`/{id}/publish`及`/revoke`治理版本 |
+| `/api/ai/admin/lab-sources`及`/{id}` | 仅超管全院目录及冻结来源审计 |
+
+迁移`20261020_ai_lab_mappings → 20261020_inpatient_laboratory`只增加两张表，不修改原检验列、审核时钟或已有住院关系。v1/v2兼容、真实MySQL迁移往返/大快照、前端实际入口和工程测试范围见[检验来源验证](ai-laboratory-verification.json)。连续采集完整性、模型适用特征、专用风险算法、独立临床验证、NEWS2/KDIGO与概率预测尚须单独实施。
 
 ## 主要代码与接口
 
@@ -196,6 +225,8 @@ ADR列表对管理员保留既有管理范围；药师只读现有处方业务�
 | `app/ai/patient_sources.py` / `clinical_tools.py` | 住院来源、检验趋势和既有危急值状态 |
 | `app/inpatient_observations.py` / `app/routers/inpatient_observations.py` | 原住院点测量、分时尿量、严格时间/数量、不可变来源及按版本撤销 |
 | `app/ai/observation_windows.py` / `app/routers/ai_observation_windows.py` | 明确截止的冻结观测窗、冲突/间隔/覆盖缺口、执行与历史重核及超管审计 |
+| `app/ai/lab_mappings.py` / `app/routers/ai_lab_mappings.py` | 仅超管审核精确检验身份映射、命名空间及发布/撤销治理 |
+| `app/inpatient_laboratory.py` / `app/routers/inpatient_laboratory.py` | 核实原住院检验、原报告及哈希、独立采样/可用时刻、不可变来源与撤销 |
 | `app/ai/consultation_sources.py` | 同患者转诊/MDT原状态、实际科室引用和审批/结果资料 |
 | `app/ai/adr_sources.py` / `app/adr_status.py` | ADR原报告、明确处理结果及历史歧义区分 |
 | `app/ai/audio_files.py` / `audio_assets.py` | 私有原音频、格式与解码校验、归属及撤回后的读取权限 |
@@ -229,6 +260,8 @@ ADR列表对管理员保留既有管理范围；药师只读现有处方业务�
 | `src/components/AIAssistant` | 工作台与业务页面共享的调用、来源和复核组件 |
 | `src/components/InpatientObservationPanel` / `AIObservationWindowInput` / `AIObservationFindings` | 原始观测登记、明确窗口选择及独立于模型文案的冻结数值和缺口展示 |
 | `src/views/system/AIObservationWindowManagement.vue` | 仅超级管理员的全院观测窗目录、冻结审计与按版本撤销 |
+| `src/components/InpatientLabSourcePanel` / `AILaboratoryFindings` | 受控检验登记/只读核对、DB原值、原clock及来源证据 |
+| `src/views/system/AILabMappingManagement.vue` | 仅超管的项目映射草稿、发布/撤销与全院来源审计 |
 | `src/components/AIRunHistory` | 全院任务、原始调用快照与人工反馈查看 |
 | `src/components/AIServiceFindings` | 原始导航和预约候选及来源展示 |
 | `src/components/AIOperationalFindings` | 原始运营、床位、库存、排班、手术资源及评分资料与引用展示 |

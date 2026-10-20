@@ -1,0 +1,780 @@
+{
+  "recorded_at_utc": "2026-10-20T13:46:49.135919+00:00",
+  "baseline_commit": "cace12ba7fa2e6ce9e25b677bf2503cb59d71924",
+  "platform_commit": "a4a05279a098525f39c7af4d9b1099c99f58af19",
+  "scope": "Super-admin-reviewed exact laboratory mappings, explicit admission-bound reviewed original lab source registrations, default v2 risk windows with v1 compatibility, independent risk Prompts, business and Super-admin UI, queue/inflight/history source guards, bounded full-source storage, and actual route/ORM inventory. No clinical risk model delivered in this batch.",
+  "goal_status": "active",
+  "real_patient_data_used": false,
+  "existing_hospital_database_accessed": false,
+  "existing_hospital_backend_contacted": false,
+  "production_deployment_performed": false,
+  "clinical_validation_performed": false,
+  "stored_business_ai_configuration_changed": false,
+  "inventory": {
+    "matrix_covered_router_api_routes": 667,
+    "all_main_app_api_routes": 668,
+    "matrix_scope": "Mounted app.routers.* APIRoute method/path multiset; existing main GET / welcome entry explicitly excluded",
+    "router_modules": 91,
+    "orm_tables": 165,
+    "vue_view_files": 158,
+    "catalog_version": "2026.10.20.4",
+    "capabilities": 80,
+    "global_source_reference_keys": 26,
+    "risk_feature_source_reference_keys": [
+      "observation_window_id"
+    ],
+    "alembic_heads": [
+      "20261020_inpatient_laboratory"
+    ]
+  },
+  "mapping_contract": {
+    "schema": "lab_mapping_v1",
+    "manager_roles": [
+      "super_admin"
+    ],
+    "identity": [
+      "source_namespace",
+      "code_system",
+      "code",
+      "unit",
+      "method",
+      "specimen_type",
+      "value_kind"
+    ],
+    "matching": "Exact original identity and case-sensitive namespace/code/unit/method/specimen; no display-name inference, missing-field wildcard, unit conversion or cross-system local-code merge. Python exact filtering also checked with real MySQL case-insensitive collation.",
+    "analyte_options": 9,
+    "prevalidated_mappings_seeded": 0,
+    "publication": "Immutable draft revision 1; two explicit literal confirmations and review note publish revision 2; nullable unique active identity slot; irreversible CAS withdrawal, with content and governance hashes and transactional audit.",
+    "timestamps": "created_at/published_at/revoked_at explicitly UTC, MySQL DATETIME(6)",
+    "clinical_thresholds_or_reference_ranges_seeded": false
+  },
+  "source_contract": {
+    "schema": "inpatient_lab_source_v1",
+    "create_roles": [
+      "doctor",
+      "director",
+      "admin",
+      "super_admin"
+    ],
+    "read_roles": [
+      "doctor",
+      "director",
+      "admin",
+      "super_admin",
+      "nurse"
+    ],
+    "revoke": "Ordinary original authors require current same-admission care/read authorization; an original author whose current role changed to nurse can still revoke via API. Actual Super-admin may revoke a frozen source even if its original admission was deleted, using the stored original scope. Nursing UI offers read-only registered-source access and no candidate/create/revoke controls.",
+    "scope": "Explicit patient and real admission under existing care/grant authorization; same-patient reviewed candidates do not establish admission membership. No date-based binding or source-authorship self-grant.",
+    "attestation": "Separate literal confirmations and meaningful notes for collection UTC, original admission membership and source namespace; notes remain attestations, not independently verified measurement facts.",
+    "review": "Original report reviewed and order in reviewed state; auditor exists, and when a technician exists the auditor differs. Machine LIS entry with no technician is not proof of two human reviews.",
+    "quantity": "Original database Decimal(24,8) formatted as decimal text, including zero/NULL/qualitative originals; no original-input lexical/trailing-zero or extra precision claim.",
+    "legacy_clock": "Original naive database values retained, serialized with six fractional places without Z; this does not increase original acquisition/database precision or establish a timezone.",
+    "timing": "Explicit attested collected_at_utc, seconds/offset and at most six fractional places; registered_at == available_at are server registration UTC, not historical LIS first-issued UTC.",
+    "identity_and_lifecycle": "One active registration per original observation globally across admissions and mappings; active revision 1 to irreversible revoked revision 2, CAS and audit atomicity; correction requires withdrawal and separately verified new registration.",
+    "raw_hash": "Original observation plus patient/parent report/order chain, original review facts and complete parent clinical text. Workflow critical-value handling and sync-only fields excluded.",
+    "storage": {
+      "max_utf8_bytes": 262144,
+      "mysql_type": "MEDIUMTEXT",
+      "creation_and_current_read_overflow_rejected": true,
+      "truncation": false
+    },
+    "legacy_tables_modified": false
+  },
+  "window_contract": {
+    "new_default_schema": "inpatient_window_v2",
+    "supported_saved_schemas": [
+      "inpatient_window_v1",
+      "inpatient_window_v2"
+    ],
+    "v1": "Preserved original builder and exact canonical snapshot behavior; later registered labs do not augment or change v1/hash, and valid ordinary historical reads remain supported.",
+    "v1_normalized_builder_ast_sha256": "873071787e8c006ccaddc4a7937e86f43bdecb2b73961144e39eb51d00881531",
+    "v1_ast_normalization": "Function name, SCHEMA_VERSION constant alias and added explanatory docstring only",
+    "lab_selection": "collected_at_utc in [start,end] AND registered_at <= as_of AND available_at <= as_of; mapping must have been published by source registration. No query/count of unregistered or future sources.",
+    "snapshot_basis": "current_snapshot_retrospective, not historical database as-of replay",
+    "engineering_limits": {
+      "max_hours": 168,
+      "max_combined_source_rows": 1000,
+      "includes_revoked_members": true,
+      "source_or_window_oversize": "Reject without truncation; prior window context byte budget unchanged"
+    },
+    "projection_schema": "risk_lab_projection_v1",
+    "omitted_parent_fields": [
+      "original.report.result",
+      "original.order.check_type",
+      "original.order.check_items"
+    ],
+    "projection_integrity": "Full parent content remains bound by original/source hashes, so omitted-text edits invalidate prior windows; only explicit free-text fields minimized, protected decimals/units/times/technical IDs remain original. Not an anonymization guarantee.",
+    "quality": "Eligible governance subset, numeric/qualitative counts, revoked source or mapping exclusions, exact-identity same-time duplicate/conflict groups; no last-row selection, averaging or qualitative-to-numeric conversion.",
+    "eligibility_is_model_applicability": false,
+    "not_all_labs_confirmed": true,
+    "unit_conversion_performed": false,
+    "model_input_validation": "not_provided",
+    "clinical_score_or_probability_calculated": false,
+    "staleness": "Original content/ownership/review or mapping/source lifecycle changes reject queued/inflight/ordinary old results; Super-admin frozen audit retained, actual new execution still verifies current sources."
+  },
+  "super_admin": {
+    "mapping_drafts_publication_revocation": true,
+    "global_source_frozen_audit": true,
+    "window_audit_and_revocation": true,
+    "ordinary_admin_global_ai_governance": false,
+    "source_governance_calls_model": false,
+    "automatic_enablement_or_clinical_validation_changes": false,
+    "all_eighty_independent_prompts_versionable": true
+  },
+  "frontend_integrity_fixes": {
+    "full_v2_member_required": "Metadata-only lab source bodies are valid in directories but rejected inside a verified v2 window; require non-null object body, known risk projection, patient/admission and original parent/mapping chain.",
+    "findings": "Both selection and displayed frozen findings use the complete window scope/structure guard.",
+    "initial_selection": "A deep-linked window may be initially selected once per patient/admission/initial-ID identity; refresh, source change, window creation, session/role change or deactivation cannot silently reselect the old ID.",
+    "late_reply": "Source changes invalidate pending directory and detail epochs, clear selection and require explicit re-selection; no automatic model invocation.",
+    "pre_fix_direct_vue_probe": {
+      "path": "/tmp/hoim-laboratory-window-readonly-review.json",
+      "sha256": "22156885b7458e3b61c28d3cd1b664ec7a7f899c2c4739f267c4dcda9ccf6f2f"
+    },
+    "formal_node_reactivity_regressions": 16
+  },
+  "rbac": {
+    "new_endpoints": 13,
+    "actual_router_method_path_multiset_matches_matrix": 667,
+    "actual_main_welcome_route_outside_matrix": "GET /",
+    "role_constants_read_by_pure_ast": [
+      "MAPPING_ROLES",
+      "LAB_SOURCE_ROLES",
+      "LAB_READ_ROLES"
+    ],
+    "targeted_tests": 22,
+    "log": {
+      "path": "/tmp/hoim-laboratory-rbac-tests.log",
+      "sha256": "7a0272832f0361c83d6cbce6c1038d15525e977615ee8aebc85892bfca9fcc4a"
+    }
+  },
+  "final_verification": {
+    "backend": {
+      "command": "/home/xusheng/miniconda3/bin/python -m pytest -q",
+      "passed": 2864,
+      "skipped": 28,
+      "warnings": 2,
+      "seconds": 213.1,
+      "database": "SQLite memory test override, synthetic fixtures; optional real-model tests remain explicitly skipped",
+      "dotenv_read_not_asserted_for_full_pytest": true,
+      "warning_note": "Existing temporary SECRET_KEY and deliberately invalid pydicom DS NaN fixture warnings retained",
+      "new_default_passing_cases": 138,
+      "new_case_breakdown": {
+        "mapping_and_its_migration": 34,
+        "source_and_its_migration": 55,
+        "window_v1_v2_laboratory": 47,
+        "additional_mounted_rbac_parameters": 2
+      },
+      "log": {
+        "path": "/tmp/hoim-laboratory-backend-final.log",
+        "sha256": "4d9027c0a1a4728eb35057927b7f3154df6cc78089f437d9660ef4723f88e277"
+      }
+    },
+    "browser": {
+      "command": "E2E_BASE_URL=http://127.0.0.1:4180 npx playwright test e2e/ai-*.spec.js e2e/diagnosis-review.spec.js e2e/request-real-http.spec.js --workers=2 --reporter=list",
+      "passed": 182,
+      "reported_duration": "3.8m",
+      "production_ui_api_mocked_cases": 120,
+      "isolated_observation_component_api_mocked_cases": 22,
+      "isolated_laboratory_component_api_mocked_cases": 19,
+      "real_loopback_http_cases": 21,
+      "total_api_mocked_cases": 161,
+      "new_laboratory_cases": 28,
+      "no_hospital_backend_or_risk_inference": true,
+      "log": {
+        "path": "/tmp/hoim-laboratory-browser-final.log",
+        "sha256": "1c6a9afa0f3987a8e96ba07d91333efbd446c910fe2b5b4d90e1b5c5b15b949f"
+      },
+      "earlier_full_attempt": {
+        "passed": 181,
+        "failed": 1,
+        "reported_duration": "4.0m",
+        "failure": "Existing ADR source-evidence dialog absent at assertion after click; no product/assertion change was made to bypass it.",
+        "log": {
+          "path": "/tmp/hoim-laboratory-browser-first.log",
+          "sha256": "c9ca6d22b3b94d7c602f2486e9585229361168717cdfc659aedc0e5fa68fed42"
+        }
+      },
+      "coordination_targeted_recheck": {
+        "passed": 6,
+        "reported_duration": "20.6s",
+        "log": {
+          "path": "/tmp/hoim-laboratory-coordination-recheck.log",
+          "sha256": "b95d26ff1a3e3a8d70a38defd207ec1b85ad55a4988008700647b552efd93b28"
+        }
+      }
+    },
+    "node_selector": {
+      "command": "node --test tests/aiObservationWindowInput.test.cjs",
+      "passed": 16,
+      "scope": "Actual SFC script with real Vue reactivity and synthetic injected APIs/macros/lifecycle; no browser or HTTP",
+      "log": {
+        "path": "/tmp/hoim-observation-selector-node-final.log",
+        "sha256": "e21c3726cad0c74bbf6bf50c4aa6fa3aac6b885bd31a4ad27d5a8fa72696d339"
+      }
+    },
+    "node_pixel": {
+      "passed": 11,
+      "log": {
+        "path": "/tmp/hoim-laboratory-pixel-tests.log",
+        "sha256": "5a6b711f2c5b1fc24a4d6e754e1a6fa6cacc14fec597d34d205baff4a9daf241"
+      }
+    },
+    "verify": {
+      "command": "npm run verify",
+      "exit_code": 0,
+      "audit_affected_packages": 0,
+      "build_seconds": 22.31,
+      "existing_scss_warning_count": 5,
+      "warning_note": "Existing vab.scss mixed-decls warnings remain unsuppressed",
+      "bundle_passed": true,
+      "log": {
+        "path": "/tmp/hoim-laboratory-ui-build-final.log",
+        "sha256": "c24ff21032ce28d5153461bc7db556f9ff067664de868414794a859e577b5aea"
+      }
+    },
+    "bundle": {
+      "largestJavaScript": {
+        "file": "element-plus.1235714c.js",
+        "bytes": 647479
+      },
+      "totalJavaScript": 5544581,
+      "totalAssets": 6062827,
+      "limits": {
+        "largestJavaScript": 700000,
+        "totalJavaScript": 6000000,
+        "totalAssets": 7000000
+      }
+    },
+    "bundle_limits_changed": false,
+    "browser_targets_changed": false,
+    "dependency_files_unchanged": true,
+    "all_product_frontend_sources_unchanged_since_build": true,
+    "python_files_checked": 17,
+    "ruff_passed": true,
+    "format_passed": true,
+    "python_lint_and_format_log": {
+      "path": "/tmp/hoim-laboratory-ruff-final.log",
+      "sha256": "e4af3ae6ce50c1170577573fe8479e5515ec16ce0c4be9266a69b711e681d326"
+    },
+    "prompt_export_check": {
+      "capabilities": 80,
+      "version": "2026.10.20.4",
+      "passed": true
+    }
+  },
+  "actual_isolated_mysql_record_sha256": "2b2fe9acc025168ef89b71ccfefa75380b6093beb4c2c8c90f99b4d15e4596b9",
+  "actual_isolated_mysql": {
+    "image": "mysql:8.0.39",
+    "container_name": "hoim-laboratory-mysql-9099bdde177a",
+    "synthetic_only": true,
+    "network": "none",
+    "host_ports": [],
+    "source_mounts": false,
+    "existing_database_accessed": false,
+    "project_env_file_read": false,
+    "scope": "Actual two new Alembic revision functions and original mapping/source/window/revocation/history helpers on real private MySQL with synthetic FK prerequisites; not hospital HTTP/bootstrap, inference, deployment or clinical validation.",
+    "image_id": "sha256:01faea2cb286276923a223bdbf438b50468f3c4090f6b61e0b27aa871ca0dbac",
+    "isolation": {
+      "network_mode": "none",
+      "port_bindings": {},
+      "readonly_root": true,
+      "user": "999:999",
+      "cap_drop": [
+        "ALL"
+      ],
+      "tmpfs": {
+        "/tmp": "rw,nosuid,nodev,noexec,size=64m,uid=999,gid=999,mode=0700",
+        "/var/lib/mysql": "rw,nosuid,nodev,noexec,size=512m,uid=999,gid=999,mode=0700"
+      },
+      "mount_types": [
+        "bind"
+      ]
+    },
+    "waited_for_final_mysql_initialization": true,
+    "dotenv_disabled_before_import": true,
+    "dotenv_open_guard_enabled": true,
+    "only_private_unix_socket_allowed": true,
+    "hospital_service_started": false,
+    "source_sha256": {
+      "app/models.py": "ee94c9c2cd8494f727720871de2d63af5b3a8c21639afc6f938b1da7c0af05ce",
+      "app/inpatient_laboratory.py": "9ef913d25d1d9a90a2937cb6a8a561faf437691132b384c72518dd4828616701",
+      "app/routers/inpatient_laboratory.py": "8258f7878449055713f51e3c15d3b6645f9a8138eed017fe39f92421fe54fc94",
+      "alembic/versions/20261020_inpatient_laboratory.py": "c5ab615150fd5e263d902565914235fe21797222f4303968fe85e0cb23d1c9c7",
+      "app/ai/lab_mappings.py": "463b2ea4987dcd42fd3780a4b47738dd1d7d86ab0a1f12df30c67c698eb2ce6f",
+      "app/routers/ai_lab_mappings.py": "a817f1158a43c843f177a17000a60bc5f6396fb0d135c3820468c0f823c570ae",
+      "alembic/versions/20261020_ai_lab_mappings.py": "deda60a444df85fecf43926a35e8be10dd010d84fa79906f8f64f9387697acca",
+      "app/ai/models.py": "b932187f6c296f4cedc494562e8e504344438678b53044c00d51d7cb2ef72534",
+      "app/ai/observation_windows.py": "2b42d79f2193144aab56dbd838434e31c4ac2ce63ce27ff3180f7c2d58851ddc",
+      "app/routers/ai_observation_windows.py": "ac242ba5bdce4c13302a120bb9abdb0c6d4f415f93f1d0e03f24c5f9f0acaebe",
+      "app/inpatient_observations.py": "e63c4d2fa4dcd9a7f840e2aa90f978c7dfd5b1270a4490a3d647ce724f64712c",
+      "app/ai/context.py": "be7bddc4e01618d96c01ac9396a8b691648d6497b001463c4a007ba3db1978d2",
+      "app/ai/governance.py": "d1f497895b59f9836350534e8799d8594262043bd88dc9046a88c0b3431d893f",
+      "app/dependencies.py": "2f0340337885f96d833635f00727cc4beb900e1d44ae38fdcd2fd3981c8092f2",
+      "app/config.py": "3fc4a8051ca93f8fbff9cb9de3dcd6f143cb2c4140b13958b6307b6ec6ef07bc",
+      "app/database.py": "74f053e5bc70a95bfafe750adba216079bc0023a24fc620849fe6b6d42acfa68",
+      "app/clinical_observations.py": "28fcd9838848e6946281b980a657937b79abd11fd8e38a5bc528cb628c5b7132"
+    },
+    "actual_source_functions": true,
+    "actual_mapping_functions": true,
+    "actual_window_functions": true,
+    "actual_migration_functions": true,
+    "limitations": [
+      "Synthetic engineering verification only; no real patient records or paid/model requests.",
+      "Old clocks stay naive and unknown; server registered availability is not historical LIS issued UTC.",
+      "Existing v1 window was materialized with original versioned build_snapshot plus ORM, because create_window now creates v2."
+    ],
+    "server_version": "8.0.39",
+    "server_session_timezone": "SYSTEM",
+    "server_sql_mode": "ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION",
+    "synthetic_prerequisite_tables": [
+      "hoimsystem_admission",
+      "hoimsystem_ai_audit_event",
+      "hoimsystem_ai_observation_window",
+      "hoimsystem_ai_patient_grant",
+      "hoimsystem_bed",
+      "hoimsystem_critical_care_record",
+      "hoimsystem_department",
+      "hoimsystem_doctor",
+      "hoimsystem_doctor_schedule",
+      "hoimsystem_hospital_campus",
+      "hoimsystem_inpatient_observation",
+      "hoimsystem_inpatient_urine_interval",
+      "hoimsystem_lab_observation",
+      "hoimsystem_lab_order",
+      "hoimsystem_lab_result",
+      "hoimsystem_patient",
+      "hoimsystem_registration",
+      "hoimsystem_users",
+      "hoimsystem_vital_sign",
+      "hoimsystem_ward"
+    ],
+    "initial_upgrade_order": [
+      "20261020_ai_lab_mappings",
+      "20261020_inpatient_laboratory"
+    ],
+    "actual_datetime_precision": {
+      "hoimsystem_ai_lab_mapping": {
+        "created_at": 6,
+        "published_at": 6,
+        "revoked_at": 6
+      },
+      "hoimsystem_ai_observation_window": {
+        "as_of": 6,
+        "created_at": 6,
+        "end_at": 6,
+        "revoked_at": 6,
+        "start_at": 6
+      },
+      "hoimsystem_inpatient_lab_source": {
+        "available_at": 6,
+        "collected_at_utc": 6,
+        "registered_at": 6,
+        "revoked_at": 6
+      }
+    },
+    "actual_source_snapshot_data_type": "mediumtext",
+    "actual_original_numeric_storage": [
+      "decimal",
+      24,
+      8
+    ],
+    "duplicate_published_mapping_rejected": {
+      "status": 409,
+      "detail": "此命名空间与原身份已有发布映射，请先核对并撤销旧版本"
+    },
+    "mysql_case_insensitive_collation_does_not_bypass_exact_identity_or_namespace": true,
+    "actual_database_collation": "utf8mb4_0900_ai_ci",
+    "source_roundtrip": {
+      "source_count": 3,
+      "original_parent_report_utf8_bytes": 45000,
+      "complete_snapshot_utf8_bytes": 66478,
+      "complete_snapshot_sha256": "e25f2f2306011ac5ba8ca4a82183fb5a1ead8a4ebdeaf42f12ec16b8634c0607",
+      "sql_sha256_matches_read_bytes": true,
+      "whole_chinese_notes_preserved": true,
+      "collected_microseconds": 654321,
+      "registered_available_microseconds": 123456,
+      "numeric_zero": "0.00000000",
+      "large_exact_decimal": "1234567890123456.12345678",
+      "null_and_qualitative_preserved": true,
+      "old_clocks_not_promoted_to_utc": true,
+      "value_representation": "database_stored_decimal_text",
+      "availability_basis": "server_registered_after_verification"
+    },
+    "one_active_source_across_admissions_rejected": {
+      "status": 409,
+      "detail": "原检验已有活动登记或来源发生竞争，请重新核对；不会覆盖原值"
+    },
+    "v1_v2_initial_current_and_45kb_parent_not_exported": true,
+    "initial_window_hashes": {
+      "v1": "8a19ff121bf446c2b76ba62ed452a334d1c6499556c0ac8fed631a676ad8b12b",
+      "v2": "938aa7a60ca6fa1cf326b6aeff280c6e6148b664087a5cf160711f30bacd360b"
+    },
+    "v2_projected_snapshot_utf8_bytes": 39061,
+    "late_registered_source_excluded_by_asof_and_v1_hash_unchanged": true,
+    "mapping_revoke_invalidates_existing_v2": {
+      "status": 409,
+      "detail": "原观测窗内容、来源成员或时间归属已改变"
+    },
+    "ordinary_history_after_mapping_revoke": {
+      "status": 403,
+      "detail": "原观测窗、来源或当前住院权限已改变，不能继续读取旧风险结果"
+    },
+    "super_frozen_audit_retained_and_mapping_revoked_values_ineligible": true,
+    "same_asof_current_governance_is_not_historical_database_replay": true,
+    "source_duplicate_cas_revoke_rejected": {
+      "status": 409,
+      "detail": "来源已改变或撤销，不可重复撤销或恢复"
+    },
+    "mapping_unique_slot_and_source_active_slot_release_only_after_revoke": true,
+    "existing_window_revoked_microsecond": 654321,
+    "legacy_full_rows_unchanged_after_mapping_source_window_functions": true,
+    "legacy_before": {
+      "hoimsystem_admission": [
+        {
+          "admission_diagnosis": null,
+          "admission_id": "00000000-0000-4000-8000-000000092001",
+          "admission_no": "SYNTHLAB92001",
+          "admission_time": "2099-01-02 03:04:05",
+          "admission_type": 0,
+          "bed_id": null,
+          "chief_complaint": null,
+          "create_time": "2001-02-03 04:05:06",
+          "department_id": null,
+          "deposit_amount": "0.00",
+          "discharge_diagnosis": null,
+          "discharge_time": null,
+          "doctor_id": 92001,
+          "past_history": null,
+          "patient_id": 92001,
+          "present_illness": null,
+          "status": 2,
+          "ward_id": null
+        },
+        {
+          "admission_diagnosis": null,
+          "admission_id": "00000000-0000-4000-8000-000000092002",
+          "admission_no": "SYNTHLAB92002",
+          "admission_time": "2001-02-03 04:05:06",
+          "admission_type": 0,
+          "bed_id": null,
+          "chief_complaint": null,
+          "create_time": null,
+          "department_id": null,
+          "deposit_amount": "0.00",
+          "discharge_diagnosis": null,
+          "discharge_time": null,
+          "doctor_id": 92001,
+          "past_history": null,
+          "patient_id": 92001,
+          "present_illness": null,
+          "status": 1,
+          "ward_id": null
+        }
+      ],
+      "hoimsystem_critical_care_record": [
+        {
+          "admission_id": "00000000-0000-4000-8000-000000092001",
+          "blood_pressure": null,
+          "consciousness": 0,
+          "entry_version": "legacy_unverified",
+          "gcs_score": 15,
+          "note": "保留旧中文内容",
+          "nurse_id": 92001,
+          "oxygen_support": null,
+          "patient_id": 92001,
+          "pulse": null,
+          "record_id": "opaque-old-critical",
+          "record_time": "2004-05-06 07:08:09",
+          "spo2": null,
+          "time_basis": "unspecified",
+          "urine_output": "原记录无区间"
+        }
+      ],
+      "hoimsystem_lab_observation": [
+        {
+          "code": "SYN-LATE",
+          "code_system": "local",
+          "collected_at": "2099-05-06 07:08:12",
+          "display": "显示名不用于猜测",
+          "flag": "unknown",
+          "lab_result_id": "opaque-old-laboratory-report",
+          "method": "Original-Method",
+          "observation_id": "opaque-late",
+          "reference_high": null,
+          "reference_low": "0E-8",
+          "reference_text": "原参考范围",
+          "specimen_type": "Original-Serum",
+          "unit": "mg/dL",
+          "value_num": "1.23456789",
+          "value_text": null
+        },
+        {
+          "code": "SYN-CREA",
+          "code_system": "local",
+          "collected_at": "2099-05-06 07:08:10",
+          "display": "显示名不用于猜测",
+          "flag": "unknown",
+          "lab_result_id": "opaque-old-laboratory-report",
+          "method": "Original-Method",
+          "observation_id": "opaque-precise",
+          "reference_high": null,
+          "reference_low": "0E-8",
+          "reference_text": "原参考范围",
+          "specimen_type": "Original-Serum",
+          "unit": "mg/dL",
+          "value_num": "1234567890123456.12345678",
+          "value_text": null
+        },
+        {
+          "code": "SYN-CULTURE",
+          "code_system": "local",
+          "collected_at": "2099-05-06 07:08:11",
+          "display": "显示名不用于猜测",
+          "flag": "unknown",
+          "lab_result_id": "opaque-old-laboratory-report",
+          "method": "Original-Method",
+          "observation_id": "opaque-qualitative",
+          "reference_high": null,
+          "reference_low": null,
+          "reference_text": "原参考范围",
+          "specimen_type": "Original-Serum",
+          "unit": null,
+          "value_num": null,
+          "value_text": "未检出，原文本不是零"
+        },
+        {
+          "code": "SYN-CREA",
+          "code_system": "local",
+          "collected_at": "2099-05-06 07:08:09",
+          "display": "显示名不用于猜测",
+          "flag": "unknown",
+          "lab_result_id": "opaque-old-laboratory-report",
+          "method": "Original-Method",
+          "observation_id": "opaque-zero",
+          "reference_high": null,
+          "reference_low": "0E-8",
+          "reference_text": "原参考范围",
+          "specimen_type": "Original-Serum",
+          "unit": "mg/dL",
+          "value_num": "0E-8",
+          "value_text": null
+        }
+      ],
+      "hoimsystem_lab_order": [
+        {
+          "check_items": "原项目；不按日期归入住院",
+          "check_type": "原中文分类",
+          "create_time": "2001-02-03 04:05:06",
+          "doctor_id": 92001,
+          "external_order_id": null,
+          "integration_status": "pending",
+          "lab_order_id": "opaque-old-laboratory-order",
+          "last_sync_time": null,
+          "patient_id": 92001,
+          "sample_status": 1,
+          "status": 2,
+          "urgent": 0
+        }
+      ],
+      "hoimsystem_lab_result": [
+        {
+          "abnormal_flag": 0,
+          "audit_status": 1,
+          "audit_time": "2002-03-05 05:06:07",
+          "auditor_id": 92002,
+          "critical_acknowledged_by": null,
+          "critical_acknowledged_time": null,
+          "critical_handled_by": null,
+          "critical_handled_time": null,
+          "critical_handling_note": null,
+          "critical_notified_by": null,
+          "critical_notified_time": null,
+          "critical_status": 0,
+          "lab_order_id": "opaque-old-laboratory-order",
+          "lab_result_id": "opaque-old-laboratory-report",
+          "report_time": "2002-03-04 05:06:07",
+          "result": "检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文检验原文",
+          "sample_id": "SYN-LAB",
+          "technician_id": 92003
+        }
+      ],
+      "hoimsystem_vital_sign": [
+        {
+          "blood_pressure_diastolic": null,
+          "blood_pressure_systolic": null,
+          "check_time": "2003-04-05 06:07:08",
+          "nurse_id": 92001,
+          "patient_id": 92001,
+          "pulse": 0,
+          "temperature": null,
+          "vital_id": 1,
+          "weight": 0.0
+        }
+      ]
+    },
+    "audit_actions": [
+      "lab_mapping.publish",
+      "lab_mapping.publish",
+      "lab_mapping.publish",
+      "inpatient_lab_source.create",
+      "inpatient_lab_source.create",
+      "inpatient_lab_source.create",
+      "inpatient_lab_source.create",
+      "lab_mapping.revoke",
+      "inpatient_lab_source.revoke",
+      "lab_mapping.publish",
+      "inpatient_lab_source.create",
+      "observation_window.revoke"
+    ],
+    "actual_functions_executed": [
+      "create_mapping",
+      "publish_mapping",
+      "mapping_current",
+      "matching_mappings",
+      "revoke_mapping",
+      "post_source/create_source",
+      "source_current",
+      "revoke_source",
+      "build_snapshot(v1)",
+      "create_window(v2)",
+      "snapshot_current(v1/v2)",
+      "observation_context",
+      "authorize_window_snapshot",
+      "window_detail",
+      "revoke_window"
+    ],
+    "actual_two_new_migration_up_down_up_only_two_new_tables": true,
+    "prerequisite_ddl_and_full_rows_unchanged_by_migration_roundtrips": true,
+    "source_hashes_unchanged_during_execution": true,
+    "dotenv_open_attempts": 0,
+    "private_unix_socket_connection_count": 2,
+    "all_checks_passed": true,
+    "worker_seconds": 4.402,
+    "worker_exit_code": 0,
+    "worker_stdout": "",
+    "worker_stderr": "",
+    "verification_script_sha256": {
+      "/tmp/hoim-laboratory-mysql-runner.py": "0d86dd25725c0eac5fa7c445ca7dc0487668b2908cc80823cd7b35459467dab0",
+      "/tmp/hoim-laboratory-mysql-worker.py": "ec4294e277b152cbf71e5e4cb10cfd836c3872946a67cc55cbf600559b1048f7"
+    },
+    "own_container_absent_verified": true,
+    "own_container_and_volumes_removed": true,
+    "own_private_directory_removed": true,
+    "cleanup_verified": true,
+    "verification_scripts_retained_in_tmp": [
+      "/tmp/hoim-laboratory-mysql-runner.py",
+      "/tmp/hoim-laboratory-mysql-worker.py"
+    ],
+    "seconds": 10.396,
+    "completed_at_utc": "2026-10-20T13:31:06.229508+00:00"
+  },
+  "actual_inventory_record_sha256": "5487224cc9aa7b986cf92cc46260f7ae72d6f8035cfb7203f1ba61c843f29fc6",
+  "actual_inventory_capture_provenance": {
+    "artifact_path": "/tmp/hoim-laboratory-inventory.json",
+    "artifact_sha256": "973beb033a435c0b5a7b3896a2544cb0afbe938b59509a5a68e029db8dc77bab",
+    "captured_at": "2026-10-20T13:35:46.225428+00:00",
+    "captured_code_commit": "b0aac0dcd1408011206762c5bd29aab2fcd50c12",
+    "scope": "Read-only actual app route/ORM/catalog/Alembic metadata and changed implementation bytes. No HTTP, lifespan, inference, migration execution, production dotenv or database connection.",
+    "fields_retained_from_original_capture": [
+      "routes",
+      "orm",
+      "frontend",
+      "catalog",
+      "alembic",
+      "isolation",
+      "checks",
+      "probe"
+    ],
+    "route_scope": "APIRoute entries from app.routers.* only, matching the RBAC generator and regression test scope"
+  },
+  "actual_inventory_validation": {
+    "route_matrix_exact_match": true,
+    "new_route_actual_role_guards_match_matrix": true,
+    "all_implementation_hashes_stable_during_capture": true,
+    "all_implementation_hashes_match_captured_platform": false,
+    "ruff_check_and_format_passed": true,
+    "database_connections": 0,
+    "dotenv_reads": 0,
+    "repo_files_modified_by_inventory": false
+  },
+  "actual_inventory_isolation": {
+    "dotenv_sources_disabled": true,
+    "settings_env_file_none": true,
+    "forbidden_env_open_attempts": [],
+    "database_connections_blocked": true,
+    "database_connection_attempts": [],
+    "configured_database": "sqlite:///:memory:",
+    "engine_constructed_without_connection": true,
+    "lifespan_or_server_started": false,
+    "repo_write_attempts": [],
+    "existing_dependency_site_added_after_guards_without_pth_execution": "/home/xusheng/.local/lib/python3.13/site-packages"
+  },
+  "actual_inventory_final_binding": {
+    "final_code_commit": "a4a05279a098525f39c7af4d9b1099c99f58af19",
+    "implementation_file_count": 32,
+    "generated_artifact_count": 3,
+    "source_hash_binding_count": 35,
+    "all_final_binding_checks_passed": true,
+    "earlier_ruff_still_binds_all_final_python_bytes": true,
+    "metadata_probe_rerun": false
+  },
+  "implementation_sha256": {
+    "doc/ai-prompts.json": "d178f985dab7413d5cb89876da7ed24eef376db0ba87fdb7aed0e82231a1a6b3",
+    "doc/api-rbac-matrix.md": "96c28f2e0211a08c4ab72680631c24914e4d8f606a22937dda1625364e38e6eb",
+    "fastapi_be/alembic/versions/20261020_ai_lab_mappings.py": "deda60a444df85fecf43926a35e8be10dd010d84fa79906f8f64f9387697acca",
+    "fastapi_be/alembic/versions/20261020_inpatient_laboratory.py": "c5ab615150fd5e263d902565914235fe21797222f4303968fe85e0cb23d1c9c7",
+    "fastapi_be/app/ai/catalog.py": "ddd1398f5a605632ab0c67aff19dbbf320a49300785437c9a029135f4a5e5431",
+    "fastapi_be/app/ai/lab_mappings.py": "463b2ea4987dcd42fd3780a4b47738dd1d7d86ab0a1f12df30c67c698eb2ce6f",
+    "fastapi_be/app/ai/models.py": "b932187f6c296f4cedc494562e8e504344438678b53044c00d51d7cb2ef72534",
+    "fastapi_be/app/ai/observation_windows.py": "2b42d79f2193144aab56dbd838434e31c4ac2ce63ce27ff3180f7c2d58851ddc",
+    "fastapi_be/app/inpatient_laboratory.py": "9ef913d25d1d9a90a2937cb6a8a561faf437691132b384c72518dd4828616701",
+    "fastapi_be/app/main.py": "8a294706e6ceff8aa1d5241e5b46ddad72ea8e147f16e87d0bceebeaafb6d150",
+    "fastapi_be/app/models.py": "ee94c9c2cd8494f727720871de2d63af5b3a8c21639afc6f938b1da7c0af05ce",
+    "fastapi_be/app/routers/ai_lab_mappings.py": "a817f1158a43c843f177a17000a60bc5f6396fb0d135c3820468c0f823c570ae",
+    "fastapi_be/app/routers/inpatient_laboratory.py": "8258f7878449055713f51e3c15d3b6645f9a8138eed017fe39f92421fe54fc94",
+    "fastapi_be/rbac_matrix.json": "a26a3cf93fcb007eca69281376387023eaa1430f9e00c4c00012ea89b9568dc2",
+    "fastapi_be/scripts/generate_rbac_matrix.py": "f13833785d97c5e0033c827d61c7b7306171d4e88622586894f7ed602961b4cb",
+    "fastapi_be/tests/test_ai_lab_mappings.py": "d4cfe78be0010f7b8fe65e55f61e85651bcea4569fec091f155613399de036bb",
+    "fastapi_be/tests/test_ai_observation_laboratory.py": "09dffaeb0c2af1c6a4cea23af03880344cca0b66db40f46cdb3ebce491241b94",
+    "fastapi_be/tests/test_inpatient_laboratory.py": "a877d640e37fef295e13a935a6a60aa731a893db76d14e67b6418b851d195f7a",
+    "fastapi_be/tests/test_inpatient_laboratory_migration.py": "93f17573456a85acf15063d368b4f803474e46f8961a9254ec72e3560572af2e",
+    "fastapi_be/tests/test_rbac_drift.py": "727ae52fa256d75d54840af7d18c77a9d0b1f5696d7135945e47492ea0d7932f",
+    "vue3-new-ui/e2e/ai-laboratory-entry.spec.js": "c6e2e2bf05c7ffbf37d840c86d323fd9056958953a4c27b66e5d450a9c5c5442",
+    "vue3-new-ui/e2e/ai-laboratory-source.spec.js": "15f4f17ae68effc3ab5fb7774bccf1bc07ebc69c7060319f8044026eb6fa8818",
+    "vue3-new-ui/e2e/ai-observation-source.spec.js": "7e92d4f8578dcd515eec4138180fceb574fa9308143be6fe82188ff902463e20",
+    "vue3-new-ui/e2e/fixtures/laboratory-source-harness.cjs": "d48888cfc16bff3f9837b8c624b75ee3b1a95b0a4a5408fccd6d411e3f0f6d09",
+    "vue3-new-ui/src/api/inpatientLaboratory.js": "b10395adeacefe66132eb596fd67720e350609137134c4775eddc6583a6b6e35",
+    "vue3-new-ui/src/api/inpatientObservations.js": "4132a63915ff5163017a7bbe158ef6b5f4ffe19c76f7b041045372c1eed0c219",
+    "vue3-new-ui/src/components/AILaboratoryFindings/index.vue": "25cce4cba56cc3420a8aa48ff4d844f08fbe64cfcca90612e6140295613844d5",
+    "vue3-new-ui/src/components/AIObservationFindings/index.vue": "87e019d74e8d60985974b465919e6e1dcb1935fb662ad35c17d62609378cfe8f",
+    "vue3-new-ui/src/components/AIObservationWindowInput/index.vue": "8efa122854fb511e52e0174a81de55aec6200619faea954360f0411e8ba5f6ba",
+    "vue3-new-ui/src/components/InpatientLabSourcePanel/index.vue": "d8a01d6f991fb909df74628e55990dc99b970aeeacbbe1a91bd0efe973b4b8fb",
+    "vue3-new-ui/src/views/doctor/labOrder.vue": "40331905895cb417730a2f2b6065dfb3ac2248853cc63ba0082ed2be4b0e002a",
+    "vue3-new-ui/src/views/inpatient/nursingStation.vue": "c7c3c5f474e911b8b857bf0451e3ffdb6c992e6b5bd28f1ab9116628d139c354",
+    "vue3-new-ui/src/views/system/AILabMappingManagement.vue": "e1f723a7cb606338e5ce04e5c108fef245af677049f099ee4aba2a8a38760b2b",
+    "vue3-new-ui/src/views/system/aiManagement.vue": "6eb426bf8c1b7cf9b6fd2b0d0b7fd0901012f681245b4e00e365e1c8da752460",
+    "vue3-new-ui/tests/aiObservationWindowInput.test.cjs": "f768573f084481bb3d831fb03ac8826a074b7beee043f9de74868ad9d95b1e5f"
+  },
+  "historical_records_unchanged_sha256": {
+    "doc/ai-ecg-classifier-smoke.json": "838b0305249698617bc475f7158dfbfbb9e6e22e6d6e84e51974bfcfebb90c61",
+    "doc/ai-ecg-verification.json": "1eedfa9eb918cf6e6b1ee1f201b7413760eeec501c128f4a73401741f0427f94",
+    "doc/ai-forecast-verification.json": "9b5683bca58efcf7fc460410529fd5aeeed91e2646eb47be24b836cbadc20d63",
+    "doc/ai-frontend-dependencies-verification.json": "968757f4a75e921038133b3fa9a94947ab4d5607142dce8da964f2a13d00bb1d",
+    "doc/ai-imaging-classifier-smoke.json": "b2185a31ff66c4602c10136d5b15404199f50cf7d65ea4a8be4718778c6a9e89",
+    "doc/ai-imaging-verification.json": "63646b181dae4f531abe233708a24f9b9cc05037ef95d57e1e6f39c7f9880148",
+    "doc/ai-nursing-verification.json": "a04248f9de57ddd878c1b408da1833f53651cd3535d8385d2275874a7f6f9517",
+    "doc/ai-observation-verification.json": "b75ab8c7ff94704cb823be59d51539f06a16a24edf0020b0e87edfd6cf6e6bee",
+    "doc/ai-speech-smoke.json": "41ad522da4f04e2a6d75595660ecbc2549acdcd159450aa99602b495c8e690a0"
+  },
+  "primary_sources": [
+    "https://hl7.org/fhir/R4/observation-definitions.html",
+    "https://hl7.org/fhir/R4/diagnosticreport-definitions.html#DiagnosticReport.issued",
+    "https://loinc.org/kb/users-guide/major-parts-of-a-loinc-term/",
+    "https://ucum.org/ucum"
+  ],
+  "remaining": [
+    "Actual continuous acquisition/completeness and original LIS historical availability evidence; independent verification of manual source attestations",
+    "Applicable risk algorithm, model feature/outcome definitions, calibration and independent clinical validation; no NEWS2/KDIGO or risk probabilities supplied here",
+    "Other feature-specific sources, specialist models and real workflow validation in the active 80-feature goal"
+  ]
+}

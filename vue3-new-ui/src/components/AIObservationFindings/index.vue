@@ -1,13 +1,27 @@
 <template>
-  <section v-if="findings?.schema_version === 'inpatient_window_v1'" aria-label="原住院观测窗复核">
-    <el-alert v-if="!scoped" type="error" :closable="false" title="观测窗与当前患者或原住院不符，不显示其他范围的观测数值。" />
+  <section v-if="['inpatient_window_v1', 'inpatient_window_v2'].includes(findings?.schema_version)" aria-label="原住院观测窗复核">
+    <el-alert v-if="!scoped" type="error" :closable="false" title="观测窗范围不符或冻结来源不完整，不显示观测数值。" />
     <template v-else>
       <h4>原住院观测窗</h4>
       <p>观察区间 {{ findings.start_at }} 至 {{ findings.end_at }}；系统可用截止 {{ findings.as_of }}。点测量包含起止两端，尿量按原始半开区间记录。</p>
       <p>当前快照的回溯观测资料，非历史数据库回放。离散测量不证明连续监护或采样完整；未提供模型输入适用性验证。</p>
       <el-button link @click="$emit('inspect', findings.source_id)">核对原冻结观测窗依据</el-button>
       <p v-for="item in findings.limitations || []" :key="item">{{ item }}</p>
-      <p>检验尚需明确原住院关联和审核指标映射；此处不会从旧报告或问题正文补充肌酐、感染证据或基线。</p>
+      <p v-if="findings.schema_version === 'inpatient_window_v1'">此v1旧窗未接入检验，保留当时缺口；不会补入现在的项目映射、肌酐、感染证据或基线。</p>
+      <template v-else>
+        <h4>受控检验来源子集</h4>
+        <p>本窗 {{ findings.quality?.laboratory?.member_count ?? '未知' }} 项原来源，来源及映射核对可纳入 {{ findings.quality?.laboratory?.eligible_count ?? '未知' }} 项；不证明全套检验齐全、模型适用或临床效果。</p>
+        <p>采样时间须在窗口内，本次受控登记可用时间须不晚于截止；不是原LIS首次发布时间。不自动换算单位、补肾功能基线或把定性文本转为数值。</p>
+        <p v-if="findings.laboratory_projection">风险输入仅保留结构化原值和来源依据；完整父报告正文及申请自由文字未外发，仍按原哈希重核。核实说明只作来源依据。</p>
+        <p v-for="item in findings.quality?.laboratory?.excluded_sources || []" :key="item.source_id">{{ item.source_id }} 未作有效输入：{{ item.reasons.join('；') }}。</p>
+        <p v-for="(item, index) in findings.quality?.laboratory?.same_time_groups || []" :key="`lab:${index}`">{{ item.collected_at_utc }} · {{ item.analyte_key }} · {{ item.identity?.source_namespace }}：{{ item.state === 'duplicate_same_value' ? '同值重复，未合并选择' : '原值或参考资料冲突，未任取最后一条' }}，{{ item.source_ids.length }} 个原来源。</p>
+        <p v-if="!findings.lab_observations?.length">窗口内没有已登记的受控检验来源；不能解释为正常、阴性或危急值0条。</p>
+        <article v-for="item in findings.lab_observations || []" :key="item.lab_source_id" class="spaced">
+          <ai-laboratory-findings :source="item" :expected-patient-id="findings.patient_id" :expected-admission-id="findings.admission_id" />
+          <el-button link @click="$emit('inspect', item.source_id)">核对冻结检验依据</el-button>
+          <el-button v-if="item.snapshot?.mapping?.source_id" link @click="$emit('inspect', item.snapshot.mapping.source_id)">核对冻结项目映射依据</el-button>
+        </article>
+      </template>
       <el-table :data="pointValues" max-height="340" aria-label="原点测量数值与缺项" empty-text="窗口内没有记录点测量">
         <el-table-column prop="observed_at" label="原观察时刻" min-width="205" />
         <el-table-column prop="recorded_at" label="系统登记时刻" min-width="205" />
@@ -53,7 +67,9 @@
 </template>
 
 <script setup>
-import { computed } from "vue";
+import { computed, defineAsyncComponent } from "vue";
+import { observationWindowMatches } from "@/api/inpatientObservations";
+const AiLaboratoryFindings = defineAsyncComponent(() => import("@/components/AILaboratoryFindings/index.vue"));
 const props = defineProps({ findings: { type: Object, default: null }, expectedPatientId: { type: Number, default: null }, expectedAdmissionId: { type: String, default: "" } });
 defineEmits(["inspect"]);
 const labels = { heart_rate: "心率", pulse_rate: "脉率", respiratory_rate: "呼吸率", systolic_bp: "收缩压", diastolic_bp: "舒张压", temperature: "体温", spo2: "SpO₂", body_weight: "体重", oxygen_flow: "氧流量", fio2: "FiO₂百分比", supplemental_oxygen: "吸氧状态", consciousness: "意识" };
@@ -62,6 +78,9 @@ const absent = { unknown: "未知", not_performed: "未测", measurement_error: 
 const completeness = { complete: "声明完整", partial: "部分收集", unknown: "未知" }, oxygen = { yes: "明确吸氧", no: "明确未吸氧", unknown: "未知" };
 const consciousness = { alert: "清醒", voice: "对声音反应", pain: "对疼痛反应", unresponsive: "无反应", new_confusion: "新发意识混乱" };
 const urineReasons = { revoked: "原记录已撤销", crosses_window_boundary_no_proration: "跨窗口边界，未按时长分摊", collection_not_complete: "未确认完整收集", not_confirmed_patient_total: "未确认患者总量", volume_not_measured: "体积未知", overlapping_intervals: "原区间存在重叠" };
-const scoped = computed(() => (!props.expectedPatientId || props.findings?.patient_id === props.expectedPatientId) && (!props.expectedAdmissionId || props.findings?.admission_id === props.expectedAdmissionId));
+const scoped = computed(() => {
+  const snapshot = props.findings;
+  return !!snapshot && observationWindowMatches({ window_id: snapshot.window_id, patient_id: snapshot.patient_id, admission_id: snapshot.admission_id, snapshot }, props.expectedPatientId ?? snapshot.patient_id, props.expectedAdmissionId || snapshot.admission_id);
+});
 const pointValues = computed(() => (props.findings?.points || []).flatMap(row => Object.entries(row.payload?.measurements || {}).map(([code, value]) => ({ ...row, label: label(code), display: value.value ?? `未知（${absent[value.absent_reason] || value.absent_reason || '未记录'}）`, unit: value.unit, status_label: row.status === "active" ? "活动来源" : "已撤销，仅审计" }))));
 </script>

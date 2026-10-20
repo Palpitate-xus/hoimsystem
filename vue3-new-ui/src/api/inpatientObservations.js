@@ -1,4 +1,5 @@
 import request from "@/utils/request";
+import { labSourceMatches } from "@/api/inpatientLaboratory";
 
 const sources = "inpatient-observations";
 const windows = "ai/observation-windows";
@@ -56,5 +57,9 @@ export function observationWindowMatches(row, patientId, admissionId) {
   if (row?.patient_id !== patientId || row.admission_id !== admissionId) return false;
   if (row.snapshot == null) return true;
   const snapshot = row.snapshot;
-  return snapshot.window_id === row.window_id && snapshot.patient_id === patientId && snapshot.admission_id === admissionId && Array.isArray(snapshot.points) && Array.isArray(snapshot.urine_intervals) && [...snapshot.points, ...snapshot.urine_intervals].every(item => item?.patient_id === patientId && item.admission_id === admissionId);
+  if (!["inpatient_window_v1", "inpatient_window_v2"].includes(snapshot.schema_version) || snapshot.window_id !== row.window_id || snapshot.patient_id !== patientId || snapshot.admission_id !== admissionId || !Array.isArray(snapshot.points) || !Array.isArray(snapshot.urine_intervals) || ![...snapshot.points, ...snapshot.urine_intervals].every(item => item?.patient_id === patientId && item.admission_id === admissionId)) return false;
+  if (snapshot.schema_version === "inpatient_window_v1") return true;
+  // Metadata directories can omit source bodies. A verified v2 window cannot:
+  // every member must contain its frozen, scoped risk projection.
+  return Array.isArray(snapshot.lab_observations) && snapshot.lab_observations.every(item => item?.window_projection === "risk_lab_projection_v1" && item.snapshot && typeof item.snapshot === "object" && !Array.isArray(item.snapshot) && labSourceMatches(item, patientId, admissionId));
 }

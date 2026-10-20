@@ -78,6 +78,7 @@
             <el-table-column label="变更摘要"><template #default="{ row }"><span class="break-text">{{ JSON.stringify(row.detail) }}</span></template></el-table-column>
           </el-table>
         </el-tab-pane>
+        <el-tab-pane label="任务与反馈" name="runs" lazy><ai-run-history :features="features" :active="tab === 'runs'" /></el-tab-pane>
         <el-tab-pane label="调用统计" name="usage">
           <el-table :data="usage" empty-text="暂无调用记录">
             <el-table-column label="功能"><template #default="{ row }">{{ featureName(row.feature_key) }}</template></el-table-column>
@@ -174,6 +175,7 @@
 <script setup>
 import { computed, onMounted, ref, watch } from "vue";
 import { ElMessage } from "element-plus";
+import AiRunHistory from "@/components/AIRunHistory/index.vue";
 import {
   activateAIPrompt, createAIKnowledge, createAIPatientGrant, createAIPrompt,
   getAIAdminFeatures, getAIAudit, getAIKnowledge, getAIKnowledgeDetail, getAIPatientGrants,

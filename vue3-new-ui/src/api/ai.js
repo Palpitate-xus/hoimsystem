@@ -29,3 +29,5 @@ export const createAIPatientGrant = (data) => request({ url: `${admin}/grants`, 
 export const revokeAIPatientGrant = (id) => request({ url: `${admin}/grants/${id}`, method: "delete" });
 export const getAIAudit = () => request({ url: `${admin}/audit`, method: "get" });
 export const getAIUsage = () => request({ url: `${admin}/usage`, method: "get" });
+export const getAIAdminRuns = (params) => request({ url: `${admin}/runs`, method: "get", params });
+export const getAIAdminRunTrace = (id) => request({ url: `${admin}/runs/${id}`, method: "get" });

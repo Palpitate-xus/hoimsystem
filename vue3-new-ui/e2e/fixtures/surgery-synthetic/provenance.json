@@ -30,6 +30,12 @@
       "actual_export": "/tmp/hoim-surgery-governance-ui-real-fixtures.json",
       "bytes": 66875,
       "sha256": "bcbd848649678a5bebb38503388b6776ce34f93ca7f1eb4644f2d5b172e99ed6"
+    },
+    {
+      "fixture": "protected-mapping.json",
+      "actual_export": "/tmp/hoim-surgery-protected-ui-real-fixtures.json",
+      "bytes": 33498,
+      "sha256": "4d1d2035a6071af3d7c89bb40cadfe16c89d01ecb474059b7495d119af7e0a7d"
     }
   ]
 }

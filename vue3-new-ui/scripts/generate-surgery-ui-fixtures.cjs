@@ -2,7 +2,7 @@ const fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypt
 const root=path.resolve(__dirname,'..'),directory=path.join(root,'e2e/fixtures/surgery-synthetic'),check=process.argv.includes('--check');
 if(process.argv.slice(2).some(v=>v!=='--check'))throw new Error('Only --check is supported');
 const inputs=[['sources.json','/tmp/hoim-surgery-source-ui-real-fixtures.json'],['providers.json','/tmp/hoim-surgery-provider-real-asgi-fixtures.json'],['sources-eight-kind.json','/tmp/hoim-surgery-eight-source-ui-real-fixtures.json'],['providers-eight-kind.json','/tmp/hoim-surgery-provider-eight-kind-real-asgi-fixtures.json']];
-inputs.push(['governance.json','/tmp/hoim-surgery-governance-ui-real-fixtures.json']);
+inputs.push(['governance.json','/tmp/hoim-surgery-governance-ui-real-fixtures.json'],['protected-mapping.json','/tmp/hoim-surgery-protected-ui-real-fixtures.json']);
 const provenance=[];
 for(const[name,origin]of inputs){
  const raw=fs.readFileSync(origin),value=JSON.parse(raw),text=JSON.stringify(value)+'\n',target=path.join(directory,name);

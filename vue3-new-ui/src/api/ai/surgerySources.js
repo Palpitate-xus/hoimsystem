@@ -55,6 +55,17 @@ export const getSurgeryDepartments=(page=1)=>read('departmentManagement/getList'
 export const getSurgeryUsers=(page=1)=>read('user/getList',{page,page_size:100});
 export const getSurgeryEquipment=()=>read('equipment/list');
 export const getSurgeryCssd=(keyword='')=>read('cssd/getList',{keyword});
+export async function getSurgeryDoctorIdentities(){
+ let rows=[],total=null;
+ for(let page=1;page<=200;page++){
+  const response=await read('doctorManagement/getList',{page,page_size:100});
+  if(!Array.isArray(response.data)||!Number.isSafeInteger(response.total)||response.total<0||response.total>20000||response.data.length>100||total!==null&&total!==response.total)throw new Error('医师别名目录完整分页或总量变化，请重新读取');
+  total=response.total;rows.push(...response.data);
+  if(rows.length===total){if(rows.some(r=>!surgeryPositive(r.id)||typeof r.name!=='string')||!unique(rows.map(r=>r.id)))throw new Error('医师别名目录存在错误或重复原标识');return rows.map(r=>({doctor_id:r.id,name:r.name}));}
+  if(!response.data.length||rows.length>total)break;
+ }
+ throw new Error('医师别名目录未完整读取，不能使用截断名单');
+}
 export async function getSurgeryIdentityDirectories(cssdKeyword=''){
  async function pages(fetch,id,name){let rows=[],total=null;for(let page=1;page<=200;page++){const response=await fetch(page);if(!Array.isArray(response.data)||!Number.isSafeInteger(response.total)||response.total<0||response.total>20000||response.data.length>100||total!==null&&total!==response.total)throw new Error('身份目录完整分页或总量已变化，请重新读取');total=response.total;rows.push(...response.data);if(rows.length===total){if(rows.some(r=>!surgeryPositive(r[id])||typeof r[name]!=='string')||!unique(rows.map(r=>r[id])))throw new Error('真实身份目录存在错误或重复标识');return rows.map(r=>({value:r[id],label:r[name]+' · #'+r[id]}));}if(!response.data.length||rows.length>total)break;}throw new Error('身份目录未完整读取，不能把首批结果当全名单');}
  const [departments,users,equipment,cssd]=await Promise.all([pages(getSurgeryDepartments,'id','name'),pages(getSurgeryUsers,'user_id','username'),getSurgeryEquipment(),getSurgeryCssd(cssdKeyword)]);

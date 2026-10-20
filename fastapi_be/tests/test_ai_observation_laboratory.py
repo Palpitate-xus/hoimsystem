@@ -359,12 +359,10 @@ def test_combined_row_limit_includes_laboratory_and_revoked_members(db_session, 
 
 
 def test_laboratory_expansion_that_exceeds_context_budget_is_rejected(db_session, laboratory_case, monkeypatch):
-    from app.config import settings
-
     case = laboratory_case["case"]
     laboratory_case["make"]()
     legacy = legacy_window(db_session, case)
-    monkeypatch.setattr(settings, "AI_MAX_CONTEXT_CHARS", len(legacy.snapshot_json.encode()) + 200)
+    monkeypatch.setattr(windows, "MAX_SNAPSHOT_BYTES", len(legacy.snapshot_json.encode()) + 200)
     with pytest.raises(HTTPException) as caught:
         create(db_session, case)
     assert caught.value.status_code == 422 and "字节" in caught.value.detail

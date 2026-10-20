@@ -20,6 +20,9 @@ MAX_ROWS = 1000
 LEGACY_SCHEMA_VERSION = "inpatient_window_v1"
 SCHEMA_VERSION = "inpatient_window_v2"
 SUPPORTED_SCHEMA_VERSIONS = {LEGACY_SCHEMA_VERSION, SCHEMA_VERSION}
+# The persisted v2 snapshot has its own TEXT byte budget. Task envelopes have
+# separate, smaller usable space after prompts and evidence; neither is cut.
+MAX_SNAPSHOT_BYTES = 65535
 
 
 def canonical_json(value):
@@ -159,7 +162,7 @@ def _urine_quality(rows, start, end):
     }
 
 
-def _build_v1_snapshot(db, *, window_id, patient_id, admission_id, created_by, created_at, start_at, end_at, as_of):
+def _build_v1_snapshot(db, *, window_id, patient_id, admission_id, created_by, created_at, start_at, end_at, as_of, max_bytes=None):
     """Retain the original v1 recipe, including all frozen text and fields."""
     from app.ai.context import minimize_identifiers
     from app.inpatient_observations import source_current
@@ -239,7 +242,7 @@ def _build_v1_snapshot(db, *, window_id, patient_id, admission_id, created_by, c
     }
     snapshot["content_hash"] = content_hash(snapshot)
     snapshot["source_id"] = f"observation_window:{window_id}:{snapshot['content_hash'][:12]}"
-    if len(canonical_json(snapshot).encode()) > settings.AI_MAX_CONTEXT_CHARS:
+    if len(canonical_json(snapshot).encode()) > (settings.AI_MAX_CONTEXT_CHARS if max_bytes is None else max_bytes):
         raise HTTPException(422, "原观测窗及质量说明超过AI上下文字节限制，请缩小窗口，不自动截断")
     return snapshot
 
@@ -376,7 +379,7 @@ def _extend_laboratory_snapshot(db, snapshot, *, patient_id, admission_id, start
     )
     snapshot["content_hash"] = content_hash(snapshot)
     snapshot["source_id"] = f"observation_window:{snapshot['window_id']}:{snapshot['content_hash'][:12]}"
-    if len(canonical_json(snapshot).encode()) > settings.AI_MAX_CONTEXT_CHARS:
+    if len(canonical_json(snapshot).encode()) > MAX_SNAPSHOT_BYTES:
         raise HTTPException(422, "原观测窗及质量说明超过AI上下文字节限制，请缩小窗口，不自动截断")
     return snapshot
 
@@ -385,7 +388,16 @@ def build_snapshot(db, *, window_id, patient_id, admission_id, created_by, creat
     if schema_version not in SUPPORTED_SCHEMA_VERSIONS:
         raise HTTPException(422, "不支持的观测窗版本，不能自动升级历史冻结资料")
     snapshot = _build_v1_snapshot(
-        db, window_id=window_id, patient_id=patient_id, admission_id=admission_id, created_by=created_by, created_at=created_at, start_at=start_at, end_at=end_at, as_of=as_of
+        db,
+        window_id=window_id,
+        patient_id=patient_id,
+        admission_id=admission_id,
+        created_by=created_by,
+        created_at=created_at,
+        start_at=start_at,
+        end_at=end_at,
+        as_of=as_of,
+        max_bytes=None if schema_version == LEGACY_SCHEMA_VERSION else MAX_SNAPSHOT_BYTES,
     )
     if schema_version == LEGACY_SCHEMA_VERSION:
         return snapshot

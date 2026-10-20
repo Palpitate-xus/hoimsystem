@@ -226,10 +226,35 @@ def test_creation_refuses_invalid_scope_and_incomplete_bounded_query(change, db_
     elif change == "too_many":
         monkeypatch.setattr(windows, "MAX_ROWS", 1)
     else:
-        monkeypatch.setattr(windows.settings, "AI_MAX_CONTEXT_CHARS", 20)
+        monkeypatch.setattr(windows, "MAX_SNAPSHOT_BYTES", 20)
     with pytest.raises(HTTPException):
         windows.create_window(db_session, case["doctor"], args)
     assert db_session.query(AIObservationWindow).count() == 0
+
+
+def test_v2_uses_independent_storage_budget_without_rewriting_frozen_content_or_legacy_policy(db_session, observation_case, monkeypatch):
+    case = observation_case
+    row = windows.create_window(db_session, case["doctor"], values(case))
+    frozen = row.snapshot_json
+    monkeypatch.setattr(windows.settings, "AI_MAX_CONTEXT_CHARS", 20)
+    assert canonical_json(windows.snapshot_current(db_session, case["doctor"], row)) == frozen
+    with pytest.raises(HTTPException) as caught:
+        windows.build_snapshot(db_session, **values(case), window_id=row.window_id, created_by=row.created_by, created_at=row.created_at, schema_version=windows.LEGACY_SCHEMA_VERSION)
+    assert caught.value.status_code == 422
+
+
+@pytest.mark.parametrize("offset", [0, -1])
+def test_v2_complete_original_window_capacity_counts_utf8_bytes_at_exact_boundary(offset, db_session, observation_case, monkeypatch):
+    case = observation_case
+    row = windows.create_window(db_session, case["doctor"], values(case))
+    assert len(row.snapshot_json.encode("utf-8")) > len(row.snapshot_json)
+    monkeypatch.setattr(windows, "MAX_SNAPSHOT_BYTES", len(row.snapshot_json.encode("utf-8")) + offset)
+    if offset == 0:
+        assert canonical_json(windows.snapshot_current(db_session, case["doctor"], row)) == row.snapshot_json
+    else:
+        with pytest.raises(HTTPException) as caught:
+            windows.snapshot_current(db_session, case["doctor"], row)
+        assert caught.value.status_code == 422
 
 
 @pytest.mark.asyncio

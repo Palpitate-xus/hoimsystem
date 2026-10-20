@@ -37,6 +37,7 @@
           </el-row>
           <div class="page-toolbar">
             <el-button type="success" size="small" @click="settleAll" :disabled="dailyBill.unsettled_amount <= 0">全部结算</el-button>
+            <ai-action :key="currentPatient.admission_id" label="AI 收费核对" title="AI 住院账目与执行核对" :patient-id="currentPatient.patient_id" :encounter-ref="currentPatient.admission_id" :feature-keys="['charge_reconciliation']" initial-feature="charge_reconciliation" />
           </div>
           <el-tabs>
             <el-tab-pane label="费用明细">
@@ -82,6 +83,7 @@ import { ref, computed, onMounted } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { getInpatientList } from "@/api/admission";
 import { getInpatientChargeList, getDailyBill, settleCharges, refundCharge as apiRefundCharge } from "@/api/inpatientCharge";
+import AiAction from "@/components/AIAction/index.vue";
 
 const inpatients = ref([]);
 const patientKeyword = ref("");

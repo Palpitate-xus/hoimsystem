@@ -44,6 +44,24 @@
       <template #header><div class="result-header"><strong>{{ run.feature_name }}</strong><el-tag>{{ statuses[run.status] || run.status }}</el-tag><el-tag v-if="run.patient_id" type="info">患者 #{{ run.patient_id }}</el-tag><el-tag v-if="run.preview" type="warning">评估预览</el-tag><el-button v-if="busy" link @click="refreshRun">刷新状态</el-button></div></template>
       <el-alert v-if="busy" type="info" :closable="false" title="任务已保存，正在等待处理或生成结果。" />
       <el-alert v-if="run.status === 'failed'" type="error" :closable="false" :title="run.error_message || '生成失败，请联系管理员检查服务状态'" />
+      <div v-if="run.tool_findings?.billing_reconciliation" class="spaced">
+        <h4>原始账目与执行关联核对</h4><p>{{ run.tool_findings.billing_reconciliation.scope_note }}</p>
+        <el-table :data="run.tool_findings.billing_reconciliation.checks" max-height="320" empty-text="本次范围暂无可核对住院费用">
+          <el-table-column prop="item_name" label="收费项目" min-width="130" />
+          <el-table-column label="账务状态" width="85"><template #default="{ row }">{{ ({ 0: '未结算', 1: '已结算', 2: '已退费' })[row.charge_status] || '未知' }}</template></el-table-column>
+          <el-table-column prop="quantity" label="原数量" width="90" /><el-table-column prop="unit_price" label="原单价" width="90" /><el-table-column prop="stored_amount" label="保存金额" width="95" />
+          <el-table-column label="核对提示" min-width="260"><template #default="{ row }"><p v-for="(finding, index) in row.findings" :key="index">{{ finding }}</p><span v-if="!row.findings.length">未产生上述核对提示，收费资格仍需人工核实</span></template></el-table-column>
+          <el-table-column label="原始依据" width="110"><template #default="{ row }"><el-button v-for="id in row.source_ids" :key="id" link @click="inspectEvidence(id)">{{ evidenceTitle(id) }}</el-button></template></el-table-column>
+        </el-table>
+        <template v-if="run.tool_findings.billing_reconciliation.executed_without_charge_link?.length">
+          <h4>已记录执行、未保存收费关联的待核实医嘱</h4><p>此列表不构成漏收费或应补费结论。</p>
+          <el-table :data="run.tool_findings.billing_reconciliation.executed_without_charge_link" max-height="240">
+            <el-table-column prop="order_id" label="医嘱标识" min-width="240" /><el-table-column prop="category" label="原分类" width="110" />
+            <el-table-column label="原始依据" width="140"><template #default="{ row }"><el-button v-for="id in row.source_ids" :key="id" link @click="inspectEvidence(id)">查看执行汇总</el-button></template></el-table-column>
+          </el-table>
+        </template>
+        <p v-if="run.tool_findings.billing_reconciliation.truncated_sources?.length">本次资料已截断，请结合完整业务清单核查。</p>
+      </div>
       <div v-if="run.tool_findings?.icd_candidates" class="spaced">
         <h4>院内字典文字匹配候选</h4><p>{{ run.tool_findings.icd_candidates.scope_note }}</p>
         <el-table :data="run.tool_findings.icd_candidates.candidates" max-height="290" empty-text="当前检索词未匹配到有效条目，请补充已记录的诊断或手术检索词">

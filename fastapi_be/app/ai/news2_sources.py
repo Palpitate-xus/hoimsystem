@@ -236,6 +236,8 @@ def create_assessment(db, user, values):
     if point["content_hash"] != req.expected_point_hash or point["patient_id"] != req.patient_id or point["admission_id"] != req.admission_id:
         raise HTTPException(409, "原点测归属或临床内容已变化")
     profile = profile_current(db, req.rule_profile_id)
+    if profile["rule_id"] != "news2_2017":
+        raise HTTPException(409, "NEWS2评估只能绑定已发布的NEWS2固定规则，不能使用其他风险规则")
     now = utcnow()
     if profile["content_hash"] != req.expected_rule_profile_hash or explicit_utc(profile["published_at"]) > now or explicit_utc(window["created_at"]) > now:
         raise HTTPException(409, "规则原文或发布/窗口时钟已改变")
@@ -303,6 +305,7 @@ def assessment_current(db, row_or_id, allow_revoked=False, *, user=None):
         snapshot = json.loads(row.snapshot_json)
         if (
             row.schema_version != SCHEMA_VERSION
+            or snapshot["rule_profile"]["rule_id"] != "news2_2017"
             or row.snapshot_json != canonical_json(snapshot)
             or row.content_hash != hash_content(snapshot)
             or any(snapshot.get(key) != value for key, value in frozen_metadata(row).items())
@@ -375,6 +378,8 @@ def assessment_current(db, row_or_id, allow_revoked=False, *, user=None):
         excluded.append("point_not_current")
     try:
         profile = profile_current(db, row.rule_profile_id, allow_revoked=True)
+        if profile["rule_id"] != "news2_2017":
+            excluded.append("profile_rule_mismatch")
         mutable = {"status", "revision", "revoked_at", "revoked_by", "revoke_reason", "governance_hash", "implementation_current", "eligible", "exclusion_reasons"}
         if (
             {key: value for key, value in profile.items() if key not in mutable} != {key: value for key, value in snapshot["rule_profile"].items() if key not in mutable}

@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 
 from app.ai.governance import audit
 from app.ai.models import AIRiskRuleProfile, utcnow
-from app.ai.risk_rule_profiles import PROFILE_ROLES, ProfileCreate, actual_super, canonical_id, create_profile, fixed_options, profile_detail
+from app.ai.risk_rule_profiles import PROFILE_ROLES, ProfileCreate, RuleId, actual_super, canonical_id, create_profile, fixed_options, profile_detail
 from app.database import get_db
 from app.dependencies import require_roles
 from app.models import User
@@ -71,6 +71,7 @@ def options(db: Session = Depends(get_db), user: User = Depends(require_roles(*P
 @router.get("/ai/admin/risk-rule-profiles")
 def profiles(
     status: Literal["draft", "published", "revoked"] | None = None,
+    rule_id: RuleId | None = None,
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=100),
     db: Session = Depends(get_db),
@@ -80,6 +81,8 @@ def profiles(
     query = db.query(AIRiskRuleProfile)
     if status is not None:
         query = query.filter_by(status=status)
+    if rule_id is not None:
+        query = query.filter_by(rule_id=rule_id)
     total = query.count()
     rows = query.order_by(AIRiskRuleProfile.created_at.desc(), AIRiskRuleProfile.rule_profile_id).offset((page - 1) * page_size).limit(page_size).all()
     return {"code": 200, "data": {"items": [profile_detail(db, row) for row in rows], "total": total, "page": page, "page_size": page_size}}

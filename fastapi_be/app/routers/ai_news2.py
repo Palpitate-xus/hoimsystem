@@ -100,7 +100,7 @@ def candidates(
     window = snapshot_current(db, actor, window_id)
     if window["patient_id"] != patient_id or window["admission_id"] != admission_id:
         raise HTTPException(409, "候选窗口不属于本次原患者与住院")
-    profiles = db.query(AIRiskRuleProfile).filter_by(status="published").order_by(AIRiskRuleProfile.created_at.desc(), AIRiskRuleProfile.rule_profile_id).all()
+    profiles = db.query(AIRiskRuleProfile).filter_by(status="published", rule_id="news2_2017").order_by(AIRiskRuleProfile.created_at.desc(), AIRiskRuleProfile.rule_profile_id).all()
     published = [profile_current(db, row.rule_profile_id) for row in profiles]
     authorize_scope(db, actor, patient_id, admission_id)
     return {

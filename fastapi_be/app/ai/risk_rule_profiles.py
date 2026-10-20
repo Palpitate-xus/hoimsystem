@@ -15,6 +15,7 @@ from app.inpatient_observations import canonical_json, canonical_uuid, utc_text
 PROFILE_ROLES = {"super_admin"}
 SCHEMA_VERSION = "risk_rule_profile_v1"
 MAX_PROFILE_BYTES = 262144
+RuleId = Literal["news2_2017", "kdigo_aki_2012"]
 INPUT_POLICY = {
     "point_selection": "single_explicit_point",
     "temporal_fusion": "no_merge",
@@ -31,7 +32,7 @@ INPUT_POLICY = {
 class ProfileCreate(BaseModel):
     model_config = ConfigDict(extra="forbid", strict=True)
     name: str = Field(min_length=1, max_length=120)
-    rule_id: Literal["news2_2017"]
+    rule_id: RuleId
     expected_recipe_digest: str = Field(pattern=r"^[a-f0-9]{64}$")
     evidence_reference: str = Field(min_length=5, max_length=1000)
     rationale: str = Field(min_length=20, max_length=2000)
@@ -57,6 +58,13 @@ def fixed_options():
     return [{"rule_id": "news2_2017", "recipe_digest": recipe_digest(), "recipe": json.loads(canonical_json(RECIPE)), "input_policy": json.loads(canonical_json(INPUT_POLICY))}]
 
 
+def fixed_option(rule_id):
+    option = next((item for item in fixed_options() if item["rule_id"] == rule_id), None)
+    if option is None:
+        raise HTTPException(409, "所选固定规则实现尚不可用，请重新核对规则及版本")
+    return option
+
+
 def actual_super(db, user):
     from app.models import User
 
@@ -69,7 +77,7 @@ def actual_super(db, user):
 def create_profile(db, user, values):
     user = actual_super(db, user)
     req = values if isinstance(values, ProfileCreate) else ProfileCreate.model_validate(values)
-    option = fixed_options()[0]
+    option = fixed_option(req.rule_id)
     if req.expected_recipe_digest != option["recipe_digest"]:
         raise HTTPException(409, "规则实现已变化，请重新核对固定版本")
     now, identifier = utcnow(), str(uuid.uuid4())
@@ -173,8 +181,8 @@ def profile_detail(db, row_or_id):
             "revoked_by": row.revoked_by,
             "revoke_reason": row.revoke_reason,
         }
-        current = fixed_options()[0]
-        implementation_current = raw["recipe"] == current["recipe"] and row.recipe_digest == current["recipe_digest"] and raw["input_policy"] == current["input_policy"]
+        current = next((item for item in fixed_options() if item["rule_id"] == raw["rule_id"]), None)
+        implementation_current = current is not None and raw["recipe"] == current["recipe"] and row.recipe_digest == current["recipe_digest"] and raw["input_policy"] == current["input_policy"]
         reasons = ([] if row.status == "published" else ["profile_not_published"]) + ([] if implementation_current else ["recipe_or_input_policy_changed"])
         return {
             **raw,

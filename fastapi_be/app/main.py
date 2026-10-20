@@ -415,6 +415,7 @@ from app.routers import (
     infusion,
     injection,
     inpatient_charge,
+    inpatient_laboratory,
     inpatient_observations,
     inpatient_order,
     insurance,
@@ -498,6 +499,7 @@ app.include_router(ai_feedback_admin.router, prefix="/api")
 app.include_router(ai_forecast.router, prefix="/api")
 app.include_router(ai_observation_windows.router, prefix="/api")
 app.include_router(inpatient_observations.router, prefix="/api")
+app.include_router(inpatient_laboratory.router, prefix="/api")
 app.include_router(ai.router, prefix="/api")
 app.include_router(analytics.router, prefix="/api")
 app.include_router(performance.router, prefix="/api")

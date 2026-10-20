@@ -5,6 +5,7 @@ from fastapi.responses import JSONResponse
 from sqlalchemy.exc import IntegrityError, OperationalError
 from sqlalchemy.orm import Session
 
+from app.ai import surgery_collection as collection
 from app.ai import surgery_facts as facts
 from app.ai.surgery_contract import FactKind
 from app.ai.surgery_models import AISurgeryPool, AISurgerySource
@@ -98,6 +99,13 @@ def options(db: Session = Depends(get_db), user: User = Depends(require_roles(*f
             "provider_required": False,
         },
     }
+
+
+@router.post("/ai/surgery-sources/preview")
+def collection_preview(req: collection.CaptureRequest, db: Session = Depends(get_db), user: User = Depends(require_roles(*facts.SOURCE_ROLES))):
+    # Deliberately no mutation wrapper, commit or governance audit. Late roots
+    # remain visible so preview never masquerades as a cutoff-valid capture.
+    return {"code": 200, "data": collection.preview_input(db, user, req)}
 
 
 @router.get("/ai/surgery-registry/{kind}")

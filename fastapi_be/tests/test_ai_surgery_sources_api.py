@@ -202,3 +202,101 @@ async def test_registry_audit_failure_rolls_back_new_anchor_and_gate_bootstrap(s
         json={"payload": {"kind": "pool", "department_id": case["department"].department_id, "name": "合成事务失败池", "basis_note": NOTE}},
     )
     assert result.status_code == 409 and db_session.query(AISurgeryPool).count() == before
+
+
+@pytest.mark.asyncio
+async def test_main_source_router_is_mounted_and_actual_jwt_lifecycle_is_separate_from_professional_signing(async_client, surgery_case, auth_headers):
+    from app.main import app
+
+    case = surgery_case
+    paths = [
+        (route.path, method)
+        for route in app.routes
+        for method in getattr(route, "methods", ())
+        if route.path.startswith(("/api/ai/surgery-sources", "/api/ai/surgery-registry", "/api/ai/surgery-protected-capsules"))
+    ]
+    assert len(paths) == len(set(paths)) == 13
+    response = await async_client.post("/api/ai/surgery-sources/case_duration_estimate", headers=auth_headers(case["doctor_user"].username), json=request(case))
+    assert response.status_code == 200, response.text
+    draft = response.json()["data"]
+    url = "/api/ai/surgery-sources/case_duration_estimate/" + draft["source_record_id"]
+    review = await async_client.post(
+        url + "/review", headers=auth_headers(case["super"].username), json={"expected_revision": 1, "expected_content_hash": draft["content_hash"], "decision": "publish", "basis_note": NOTE}
+    )
+    assert review.status_code == 200, review.text
+    published = await async_client.get(url, headers=auth_headers(case["doctor_user"].username))
+    assert published.status_code == 200 and published.json()["data"]["eligible_for_new_use"]
+    assert published.json()["data"]["signed_by_user_id"] == case["doctor_user"].user_id
+    revoked = await async_client.post(url + "/revoke", headers=auth_headers(case["super"].username), json={"expected_revision": 2, "expected_content_hash": draft["content_hash"], "basis_note": NOTE})
+    assert revoked.status_code == 200 and revoked.json()["data"]["status"] == "revoked"
+
+
+@pytest.mark.asyncio
+async def test_main_preview_is_complete_authorized_read_only_and_keeps_late_root_diagnostic(async_client, surgery_case, auth_headers, db_session, monkeypatch):
+    import datetime
+
+    from app.ai import surgery_collection as collection
+    from app.ai.surgery_models import AISurgeryProtectedWitness
+    from tests.test_ai_surgery_collection import capture_request, complete_originals
+    from tests.test_ai_surgery_facts import NOW
+
+    case = surgery_case
+    complete_originals(db_session, case)
+    values = capture_request(case)
+    monkeypatch.setattr(routes.facts, "utcnow", lambda: NOW + datetime.timedelta(seconds=2))
+    late = publish(db_session, case, create(db_session, case))
+    before = [db_session.query(cls).count() for cls in (AISurgerySource, AISurgeryPool, AISurgeryProtectedWitness, AIAuditEvent)]
+    response = await async_client.post("/api/ai/surgery-sources/preview", headers=auth_headers(case["director"].username), json=values)
+    assert response.status_code == 200, response.text
+    data = response.json()["data"]
+    assert len(data["member_manifest"]) == 9 and len(data["resources"]) == 3
+    assert late.source_record_id in {item["source_record_id"] for item in data["member_manifest"]}
+    assert data["as_of"] == values["period"]["as_of"] and data["max_available_at"] > data["as_of"]
+    assert data["collection_digest"] == collection.preview_input(db_session, case["director"], values)["collection_digest"]
+    assert [db_session.query(cls).count() for cls in (AISurgerySource, AISurgeryPool, AISurgeryProtectedWitness, AIAuditEvent)] == before
+    with pytest.raises(routes.HTTPException) as error:
+        collection.capture_input(db_session, case["director"], values)
+    assert error.value.status_code == 409
+
+
+@pytest.mark.asyncio
+async def test_main_preview_requires_ops_pool_and_independent_current_case_care(async_client, surgery_case, auth_headers, db_session):
+    from tests.test_ai_surgery_collection import capture_request
+    from tests.test_ai_surgery_facts import registry
+
+    case = surgery_case
+    values = capture_request(case)
+    for actor in (case["doctor_user"], case["foreign_user"], case["seed"]["admin_user"]):
+        denied = await async_client.post("/api/ai/surgery-sources/preview", headers=auth_headers(actor.username), json=values)
+        assert denied.status_code == 403, denied.text
+    # The explicit member now has Pool scope but still no patient-care authority.
+    registry(db_session, case["super"], {"kind": "person_account", "resource_id": case["resources"]["person"].resource_id, "user_id": case["seed"]["admin_user"].user_id, "basis_note": NOTE})
+    denied = await async_client.post("/api/ai/surgery-sources/preview", headers=auth_headers(case["seed"]["admin_user"].username), json=values)
+    assert denied.status_code == 403
+    accepted = await async_client.post("/api/ai/surgery-sources/preview", headers=auth_headers(case["super"].username), json=values)
+    assert accepted.status_code == 200, accepted.text
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("mutation", ["extra_patient", "duplicate_cases", "upper_uuid", "bad_timezone", "nonstring_cutoff", "bad_pool", "empty_cohort"])
+async def test_main_preview_strict_closed_original_identifiers(async_client, surgery_case, auth_headers, mutation):
+    from tests.test_ai_surgery_collection import capture_request
+
+    case = surgery_case
+    values = capture_request(case)
+    if mutation == "extra_patient":
+        values["patient_id"] = case["patient"].patient_id
+    elif mutation == "duplicate_cases":
+        values["application_ids"] *= 2
+    elif mutation == "upper_uuid":
+        values["pool_id"] = values["pool_id"].upper()
+    elif mutation == "bad_timezone":
+        values["period"]["business_timezone"] = "MadeUp/NotARealZone"
+    elif mutation == "nonstring_cutoff":
+        values["period"]["as_of"] = True
+    elif mutation == "bad_pool":
+        values["pool_id"] = "1.0"
+    else:
+        values["application_ids"] = []
+    response = await async_client.post("/api/ai/surgery-sources/preview", headers=auth_headers(case["director"].username), json=values)
+    assert response.status_code == 422, response.text

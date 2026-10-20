@@ -24,6 +24,8 @@ from app.ai.schemas import (
     ImageGenerationResult,
     News2GenerationResult,
     QsofaGenerationResult,
+    SofaChangeGenerationResult,
+    SofaGenerationResult,
 )
 from app.config import settings
 
@@ -73,14 +75,22 @@ def validate_generation(
     news2_source: dict | None = None,
     aki_source: dict | None = None,
     qsofa_source: dict | None = None,
+    sofa_source: dict | None = None,
+    sofa_change_source: dict | None = None,
     forecast_horizon: int | None = None,
     instructions_digest: str | None = None,
     model_version: str | None = None,
 ) -> GenerationResult:
     """Reject fabricated references and invalid structured output before UI exposure."""
     try:
+        if sofa_source is not None and sofa_change_source is not None:
+            raise ValueError("SOFA日评估与变化结果不能混用")
         schema = (
-            AudioGenerationResult
+            SofaGenerationResult
+            if sofa_source is not None
+            else SofaChangeGenerationResult
+            if sofa_change_source is not None
+            else AudioGenerationResult
             if audio_source is not None
             else ECGGenerationResult
             if ecg_source is not None
@@ -97,7 +107,7 @@ def validate_generation(
             else GenerationResult
         )
         result = schema.model_validate(value)
-    except ValidationError as exc:
+    except (ValidationError, ValueError) as exc:
         raise AIExecutionError("INVALID_OUTPUT", "模型返回的结果不符合任务结构，请调整模型或重试") from exc
     allowed = {item["source_id"] for item in evidence}
     cited = {source for section in result.sections for source in section.source_ids}
@@ -149,6 +159,26 @@ def validate_generation(
             raise AIExecutionError("QSOFA_BINDING_MISMATCH", "qSOFA原来源、当前回顾声明、规则版本、三分项、总数或小计、原时刻、缺项或解释与实际计算不一致，结果已拒收") from exc
         if result.sections and qsofa_source["source_id"] not in cited:
             raise AIExecutionError("UNGROUNDED_QSOFA", "qSOFA核对说明未引用所选原点测、GCS与当前临床声明来源")
+    if sofa_source is not None or sofa_change_source is not None:
+        from app.ai.sofa_contract import SofaChangeSource, SofaSource
+        from app.ai.sofa_model import generation_result_for_analysis, generation_result_for_change_analysis, validate_analysis_binding, validate_change_analysis_binding
+
+        is_change = sofa_change_source is not None
+        original = sofa_change_source if is_change else sofa_source
+        analysis = result.sofa_change_analysis if is_change else result.sofa_analysis
+        try:
+            source_type = SofaChangeSource if is_change else SofaSource
+            validator = validate_change_analysis_binding if is_change else validate_analysis_binding
+            explanation_for = generation_result_for_change_analysis if is_change else generation_result_for_analysis
+            validator(analysis, source_type.model_validate(original), instructions_digest, model_version)
+            explanation = {key: getattr(result, key) for key in ("summary", "warnings", "missing_data")}
+            explanation["sections"] = [item.model_dump(mode="json") for item in result.sections]
+            if explanation != explanation_for(analysis):
+                raise ValueError("SOFA固定说明与完整重算结果不符")
+        except (ValidationError, ValueError, TypeError, KeyError) as exc:
+            raise AIExecutionError("SOFA_BINDING_MISMATCH", "SOFA完整原件、六轴候选、精确计算、覆盖上下界、基线或变化及固定解释不一致，结果已拒收") from exc
+        if original["source_id"] not in cited:
+            raise AIExecutionError("UNGROUNDED_SOFA", "SOFA说明须引用所选完整原件或变化核实来源")
     if forecast_source is not None:
         from app.ai.forecast_contract import ForecastSource
         from app.ai.forecast_model import validate_analysis_binding
@@ -288,6 +318,12 @@ def _request(provider: AIProvider, spec: FeatureSpec, task_prompt: str, data: di
     news2_mode = provider.model.startswith("news2:")
     aki_mode = provider.model.startswith("aki:")
     qsofa_mode = provider.model.startswith("qsofa:")
+    sofa_mode = provider.model.startswith("sofa1:")
+    if sofa_mode and (spec.number != 42 or provider.kind != "specialist"):
+        raise AIExecutionError("SOFA_ADAPTER_REQUIRED", "完整SOFA原件仅由登记的独立SOFA-1服务处理")
+    sofa_context_keys = {"sofa_source", "sofa_change_source", "sofa_binding"} & data.get("context", {}).keys()
+    if sofa_context_keys and not sofa_mode:
+        raise AIExecutionError("SOFA_ADAPTER_REQUIRED", "完整SOFA原件不能发送给其他模式或文本模型")
     if qsofa_mode and (spec.number != 42 or provider.kind != "specialist"):
         raise AIExecutionError("QSOFA_ADAPTER_REQUIRED", "qSOFA三项核对只能由所登记的独立专用规则服务处理")
     if data.get("context", {}).get("qsofa_source") is not None and not qsofa_mode:
@@ -309,6 +345,36 @@ def _request(provider: AIProvider, spec: FeatureSpec, task_prompt: str, data: di
     if spec.number == 62 and provider.kind != "specialist":
         raise AIExecutionError("FORECAST_ADAPTER_REQUIRED", "日挂号记录数须通过带固定数值契约的专用预测服务处理")
     specialist_input = data
+    if sofa_mode:
+        from app.ai.sofa_context import SofaBinding, selection
+        from app.ai.sofa_contract import SofaChangeSource, SofaSource, hash_content
+
+        try:
+            kind, identifier = selection(data["input"])
+            key = "sofa_source" if kind == "daily" else "sofa_change_source"
+            other = "sofa_change_source" if kind == "daily" else "sofa_source"
+            context = data["context"]
+            if other in context:
+                raise ValueError("混用SOFA来源")
+            source_type = SofaSource if kind == "daily" else SofaChangeSource
+            source = source_type.model_validate(context[key]).model_dump(mode="json")
+            bound = SofaBinding.model_validate(context["sofa_binding"])
+            rule_source = source if kind == "daily" else source["current"]
+            actual_id = source["assessment_id" if kind == "daily" else "change_assessment_id"]
+            if (
+                bound.kind != kind
+                or bound.assessment_id != identifier
+                or identifier != actual_id
+                or bound.source_id != source["source_id"]
+                or bound.content_hash != source["content_hash"]
+                or bound.projection_hash != hash_content(source)
+                or bound.governance_hash != source["assessment_governance_hash"]
+                or any(getattr(bound, name) != rule_source[name] for name in ("rule_id", "recipe_digest", "policy_digest"))
+            ):
+                raise ValueError("完整SOFA原件与冻结任务引用不符")
+            specialist_input = {"context": {key: source}}
+        except (HTTPException, ValidationError, ValueError, TypeError, KeyError) as exc:
+            raise AIExecutionError("SOFA_SOURCE_REQUIRED", "须且只能选择一件完整SOFA日评估或独立变化核实，并核对完整公开原件SHA") from exc
     if news2_mode:
         from app.ai.news2_contract import News2Source
 
@@ -370,18 +436,27 @@ def _request(provider: AIProvider, spec: FeatureSpec, task_prompt: str, data: di
         }
     if provider.kind == "specialist":
         return endpoint + "/tasks", {
-            "schema_version": "8" if qsofa_mode else "7" if aki_mode else "6" if news2_mode else {21: "2", 36: "4", 37: "3", 62: "5"}.get(spec.number, "1"),
+            "schema_version": "9" if sofa_mode else "8" if qsofa_mode else "7" if aki_mode else "6" if news2_mode else {21: "2", 36: "4", 37: "3", 62: "5"}.get(spec.number, "1"),
             "feature_key": spec.key,
             "engine": spec.engine,
             "model": provider.model,
             "instructions": instructions,
-            **({"store": False} if spec.number in {21, 36, 37, 62} or news2_mode or aki_mode or qsofa_mode else {}),
+            **({"store": False} if spec.number in {21, 36, 37, 62} or news2_mode or aki_mode or qsofa_mode or sofa_mode else {}),
             "input": specialist_input,
         }
     raise AIExecutionError("UNSUPPORTED_PROVIDER", "模型接口类型不受支持")
 
 
 def _parse_response(provider: AIProvider, spec: FeatureSpec, value: dict) -> tuple[object, int, int]:
+    if provider.model.startswith("sofa1:"):
+        from app.ai.sofa_protocol import parse_sofa_envelope
+
+        if provider.kind != "specialist" or spec.number != 42:
+            raise AIExecutionError("SOFA_ADAPTER_REQUIRED", "完整SOFA仅由其登记的独立专用服务处理")
+        try:
+            return parse_sofa_envelope(value, provider.model)
+        except (ValidationError, ValueError, TypeError, KeyError) as exc:
+            raise AIExecutionError("ADAPTER_CONTRACT_MISMATCH", "SOFA独立服务的版本、互斥原件结果或用量回执不符合严格协议") from exc
     if provider.kind == "responses":
         if value.get("status") != "completed":
             raise AIExecutionError("INCOMPLETE_RESPONSE", "模型响应未完成，请检查输出额度或模型状态")
@@ -459,6 +534,17 @@ async def generate(
     news2_source = data.get("context", {}).get("news2_source") if spec.number == 41 and provider.model.startswith("news2:") else None
     aki_source = data.get("context", {}).get("aki_source") if spec.number == 43 and provider.model.startswith("aki:") else None
     qsofa_source = data.get("context", {}).get("qsofa_source") if spec.number == 42 and provider.model.startswith("qsofa:") else None
+    sofa_mode = spec.number == 42 and provider.kind == "specialist" and provider.model.startswith("sofa1:")
+    sofa_source = data.get("context", {}).get("sofa_source") if sofa_mode else None
+    sofa_change_source = data.get("context", {}).get("sofa_change_source") if sofa_mode else None
+    response_limit = MAX_RESPONSE_BYTES
+    if sofa_mode:
+        from app.ai.sofa_contract import MAX_REQUEST_BYTES
+        from app.ai.sofa_contract import MAX_RESPONSE_BYTES as SOFA_RESPONSE_BYTES
+
+        response_limit = SOFA_RESPONSE_BYTES
+        if len(encode_json(payload).encode("utf-8")) > MAX_REQUEST_BYTES:
+            raise AIExecutionError("SOFA_REQUEST_LIMIT", "SOFA完整原件及Prompt超过8MiB请求上限，不发送或截断")
     if spec.number == 62 and (not forecast_source or provider.kind != "specialist"):
         raise AIExecutionError("FORECAST_SOURCE_REQUIRED", "运营预测需要已确认的原历史来源及专用统计适配器")
     if spec.number == 21:
@@ -490,7 +576,7 @@ async def generate(
                 body = bytearray()
                 async for chunk in response.aiter_bytes():
                     body.extend(chunk)
-                    if len(body) > MAX_RESPONSE_BYTES:
+                    if len(body) > response_limit:
                         raise AIExecutionError("RESPONSE_TOO_LARGE", "模型响应超过允许大小")
         parsed = json.loads(body)
         if not isinstance(parsed, dict):
@@ -509,6 +595,8 @@ async def generate(
             news2_source=news2_source,
             aki_source=aki_source,
             qsofa_source=qsofa_source,
+            sofa_source=sofa_source,
+            sofa_change_source=sofa_change_source,
             forecast_horizon=data.get("input", {}).get("horizon_days") if spec.number == 62 else None,
             instructions_digest=hashlib.sha256(payload.get("instructions", "").encode()).hexdigest(),
             model_version=provider.model,

@@ -175,6 +175,37 @@ class AIAudioAsset(Base):
     purge_note = Column(String(1000), nullable=False, default="")
 
 
+class AIECGAsset(Base):
+    """Immutable patient-chart waveform pair with revocable model use and raw-file audit."""
+
+    __tablename__ = "hoimsystem_ai_ecg_asset"
+    __table_args__ = (Index("idx_ai_ecg_patient_time", "patient_id", "create_time"), Index("idx_ai_ecg_owner_status", "created_by", "status"))
+
+    asset_id = Column(String(36), primary_key=True, default=new_id)
+    patient_id = Column(Integer, ForeignKey("hoimsystem_patient.patient_id"), nullable=False)
+    encounter_ref = Column(String(64), nullable=True)
+    content_hash = Column(String(64), nullable=False)
+    header_hash = Column(String(64), nullable=False)
+    signal_hash = Column(String(64), nullable=False)
+    byte_size = Column(Integer, nullable=False)
+    header_byte_size = Column(Integer, nullable=False)
+    signal_byte_size = Column(Integer, nullable=False)
+    metadata_json = Column(Text, nullable=False)
+    recorded_at = Column(DateTime, nullable=True)
+    authorization_note = Column(String(1000), nullable=False)
+    authorized_at = Column(DateTime, nullable=False)
+    created_by = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=False)
+    create_time = Column(DateTime, nullable=False, default=utcnow)
+    status = Column(String(24), nullable=False, default="ready")
+    revision = Column(Integer, nullable=False, default=1)
+    withdrawn_by = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=True)
+    withdrawn_at = Column(DateTime, nullable=True)
+    withdrawal_note = Column(String(1000), nullable=False, default="")
+    purged_by = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=True)
+    purged_at = Column(DateTime, nullable=True)
+    purge_note = Column(String(1000), nullable=False, default="")
+
+
 class AIRun(Base):
     """A traceable AI task; access to both input and result requires patient authorization."""
 

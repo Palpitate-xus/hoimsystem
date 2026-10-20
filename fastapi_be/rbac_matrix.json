@@ -647,6 +647,73 @@
   "path": "/api/ai/admin/audio-assets/{asset_id}/purge"
  },
  {
+  "auth": "ANY",
+  "function": "ecg_options",
+  "method": "GET",
+  "module": "ai_ecg.py",
+  "path": "/api/ai/ecg-options"
+ },
+ {
+  "auth": "ANY",
+  "function": "upload_ecg",
+  "method": "POST",
+  "module": "ai_ecg.py",
+  "path": "/api/ai/ecg-assets"
+ },
+ {
+  "auth": "ANY",
+  "function": "list_ecg",
+  "method": "GET",
+  "module": "ai_ecg.py",
+  "path": "/api/ai/ecg-assets"
+ },
+ {
+  "auth": "ANY",
+  "function": "inspect_ecg",
+  "method": "GET",
+  "module": "ai_ecg.py",
+  "path": "/api/ai/ecg-assets/{asset_id}"
+ },
+ {
+  "auth": "ANY",
+  "function": "ecg_window",
+  "method": "GET",
+  "module": "ai_ecg.py",
+  "path": "/api/ai/ecg-assets/{asset_id}/window"
+ },
+ {
+  "auth": "ANY",
+  "function": "download_ecg",
+  "method": "GET",
+  "module": "ai_ecg.py",
+  "path": "/api/ai/ecg-assets/{asset_id}/content"
+ },
+ {
+  "auth": "ANY",
+  "function": "withdraw_ecg",
+  "method": "POST",
+  "module": "ai_ecg.py",
+  "path": "/api/ai/ecg-assets/{asset_id}/withdraw"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "admin_ecg_list",
+  "method": "GET",
+  "module": "ai_ecg.py",
+  "path": "/api/ai/admin/ecg-assets"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "purge_ecg",
+  "method": "POST",
+  "module": "ai_ecg.py",
+  "path": "/api/ai/admin/ecg-assets/{asset_id}/purge"
+ },
+ {
   "auth": [
    "super_admin"
   ],

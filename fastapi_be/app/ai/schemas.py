@@ -148,6 +148,10 @@ class AudioAssetAction(StrictRequest):
     reason: str = Field(min_length=5, max_length=1000)
 
 
+class ECGAssetAction(AudioAssetAction):
+    """Versioned raw-waveform withdrawal and explicit super-admin purge reason."""
+
+
 class PatientGrantWrite(StrictRequest):
     """Grant narrowly scoped and expiring patient access."""
 
@@ -286,6 +290,63 @@ class AudioTranscript(StrictRequest):
 
 class AudioGenerationResult(GenerationResult):
     transcription: AudioTranscript
+
+
+class ECGProcessing(StrictRequest):
+    instructions_digest: str = Field(pattern=r"^[a-f0-9]{64}$")
+    input_sample_count: int = Field(ge=1, strict=True)
+    input_sample_rate_hz: str = Field(min_length=1, max_length=40)
+    input_leads: list[str] = Field(min_length=1, max_length=16)
+    used_leads: list[str] = Field(min_length=1, max_length=16)
+    processed_original_sample_count: int = Field(ge=1, strict=True)
+    complete_input: bool = Field(strict=True)
+    missing_sample_handling: Literal["none_present", "masked"]
+    preprocessing_notes: list[str] = Field(max_length=20)
+
+    @model_validator(mode="after")
+    def bounded_complete_input(self):
+        if not self.complete_input or self.processed_original_sample_count != self.input_sample_count or len(set(self.input_leads)) != len(self.input_leads) or len(set(self.used_leads)) != len(self.used_leads):
+            raise ValueError("原始输入处理不完整或导联声明重复")
+        if not set(self.used_leads) <= set(self.input_leads) or any(len(item) > 1000 for item in self.preprocessing_notes):
+            raise ValueError("使用导联或预处理说明无效")
+        return self
+
+
+class ECGFinding(StrictRequest):
+    category: Literal["signal_quality", "rhythm", "conduction", "morphology", "other"]
+    label: str = Field(min_length=1, max_length=200)
+    description: str = Field(min_length=1, max_length=4000)
+    leads: list[str] = Field(min_length=1, max_length=16)
+    location: Literal["recording", "sample_interval"]
+    start_sample: int | None = Field(default=None, ge=0, strict=True)
+    end_sample_exclusive: int | None = Field(default=None, ge=1, strict=True)
+    score: float | None = Field(default=None, allow_inf_nan=False, strict=True)
+    score_kind: Literal["model_score"] = "model_score"
+    source_id: str = Field(min_length=1, max_length=100)
+
+    @model_validator(mode="after")
+    def explicit_location(self):
+        if len(set(self.leads)) != len(self.leads):
+            raise ValueError("候选导联不能重复")
+        if self.location == "recording":
+            if self.start_sample is not None or self.end_sample_exclusive is not None:
+                raise ValueError("全记录候选不能伪造精确采样定位")
+        elif self.start_sample is None or self.end_sample_exclusive is None or self.end_sample_exclusive <= self.start_sample:
+            raise ValueError("采样定位须提供明确的开始与结束样本")
+        return self
+
+
+class ECGAnalysis(StrictRequest):
+    asset_id: str = Field(min_length=36, max_length=36)
+    content_hash: str = Field(pattern=r"^[a-f0-9]{64}$")
+    signal_hash: str = Field(pattern=r"^[a-f0-9]{64}$")
+    time_basis: Literal["relative_samples"]
+    processing: ECGProcessing
+    findings: list[ECGFinding] = Field(max_length=100)
+
+
+class ECGGenerationResult(GenerationResult):
+    ecg_analysis: ECGAnalysis
 
 
 class FeedbackWrite(StrictRequest):

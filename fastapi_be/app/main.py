@@ -219,6 +219,8 @@ class OperationLogMiddleware(BaseHTTPMiddleware):
         "/api/ai/admin/review-excerpts",
         "/api/ai/audio-assets",
         "/api/ai/admin/audio-assets",
+        "/api/ai/ecg-assets",
+        "/api/ai/admin/ecg-assets",
         "/api/clinicalDiagnosis/review",
     }
 
@@ -369,6 +371,7 @@ from app.routers import (
     ai,
     ai_admin,
     ai_audio,
+    ai_ecg,
     ai_feedback_admin,
     allergy,
     analytics,
@@ -477,6 +480,7 @@ app.add_middleware(ObservabilityMiddleware)
 app.include_router(observability_routes.router)
 app.include_router(ai_admin.router, prefix="/api")
 app.include_router(ai_audio.router, prefix="/api")
+app.include_router(ai_ecg.router, prefix="/api")
 app.include_router(ai_feedback_admin.router, prefix="/api")
 app.include_router(ai.router, prefix="/api")
 app.include_router(analytics.router, prefix="/api")

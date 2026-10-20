@@ -3,7 +3,7 @@
 > 由 `fastapi_be/scripts/generate_rbac_matrix.py` 从源码自动生成，请勿手改。
 > `✓`=可访问 | `PUBLIC`=无需登录 | 留空=不可访问
 
-共 **612** 个接口（PUBLIC 18 个 / 需登录 594 个）。
+共 **621** 个接口（PUBLIC 18 个 / 需登录 603 个）。
 
 
 ### `admin.py`
@@ -113,6 +113,20 @@
 | POST | `/api/ai/audio-assets/{asset_id}/withdraw` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
 | GET | `/api/ai/admin/audio-assets` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
 | POST | `/api/ai/admin/audio-assets/{asset_id}/purge` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+
+### `ai_ecg.py`
+
+| 方法 | 路径 | admin | super_admin | director | doctor | nurse | cashier | pharmacist | guide | patient | lab_technician | registrar | PUBLIC |
+|------|------|------|------|------|------|------|------|------|------|------|------|------|------|
+| GET | `/api/ai/ecg-options` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
+| POST | `/api/ai/ecg-assets` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
+| GET | `/api/ai/ecg-assets` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
+| GET | `/api/ai/ecg-assets/{asset_id}` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
+| GET | `/api/ai/ecg-assets/{asset_id}/window` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
+| GET | `/api/ai/ecg-assets/{asset_id}/content` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
+| POST | `/api/ai/ecg-assets/{asset_id}/withdraw` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
+| GET | `/api/ai/admin/ecg-assets` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/admin/ecg-assets/{asset_id}/purge` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
 
 ### `ai_feedback_admin.py`
 

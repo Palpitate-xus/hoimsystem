@@ -1,0 +1,2 @@
+# Optional format oracle for scripts/verify_ecg_wfdb.py; not required by API/worker.
+wfdb==4.3.1

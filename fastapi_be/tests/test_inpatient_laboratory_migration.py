@@ -71,4 +71,5 @@ def test_mysql_source_clocks_and_database_constraints_match_migration_contract()
     for key in ("collected_at_utc", "registered_at", "available_at", "revoked_at"):
         assert f"{key} DATETIME(6)" in ddl
     assert "UNIQUE (active_observation_id)" in ddl
+    assert "snapshot_json MEDIUMTEXT NOT NULL" in ddl
     assert "available_at = registered_at" in ddl and "revision = 1" in ddl and "revision = 2" in ddl

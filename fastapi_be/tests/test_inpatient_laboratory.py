@@ -495,3 +495,58 @@ async def test_unpublished_or_revoked_mapping_cannot_register_new_source(state, 
         changes = {}
     response = await client.post("/api/inpatient-laboratory/sources", headers=auth_headers(seed_data["doctor_user"].username), json=body(db_session, case, **changes))
     assert response.status_code == 409
+
+
+@pytest.mark.asyncio
+async def test_source_larger_than_mysql_text_roundtrips_without_truncation_and_window_does_not_export_full_text(client, db_session, case, seed_data, auth_headers, monkeypatch):
+    from app.ai import observation_windows as windows
+
+    monkeypatch.setattr(windows, "utcnow", lambda: NOW)
+    case["report"].result = "检验原文" * 3750  # 45,000 UTF-8 bytes; fits the unchanged original MySQL TEXT column.
+    db_session.commit()
+    notes = {key: "核" * 2000 for key in sources.NOTE_FIELDS}
+    data = await create(client, db_session, case, auth_headers(seed_data["doctor_user"].username), **notes)
+    row = db_session.get(InpatientLabSource, data["lab_source_id"])
+    assert 65535 < len(row.snapshot_json.encode("utf-8")) < sources.MAX_SNAPSHOT_BYTES
+    assert len(case["report"].result.encode("utf-8")) == 45000
+    assert sources.source_current(db_session, row)["snapshot"]["original"]["report"]["result"] == case["report"].result
+    assert data["snapshot"]["collection_time_basis_note"] == notes["collection_time_basis_note"]
+    window = windows.create_window(db_session, seed_data["doctor_user"], {**scope(case), "start_at": datetime.datetime(2026, 10, 19), "end_at": datetime.datetime(2026, 10, 20), "as_of": NOW})
+    db_session.commit()
+    frozen = windows.snapshot_current(db_session, seed_data["doctor_user"], window)
+    assert frozen["lab_observations"][0]["content_hash"] == row.content_hash
+    assert "result" not in frozen["lab_observations"][0]["snapshot"]["original"]["report"]
+    assert case["report"].result not in windows.canonical_json(frozen)
+    assert row.snapshot_json == sources.canonical_json(data["snapshot"])
+
+
+@pytest.mark.asyncio
+async def test_utf8_byte_limit_rejects_whole_create_without_source_or_audit_write(client, db_session, case, seed_data, auth_headers):
+    # A synthetic SQLite row can exceed legacy MySQL TEXT; it proves the new portable byte guard itself.
+    case["report"].result = "中" * 88000
+    db_session.commit()
+    assert len(case["report"].result) < sources.MAX_SNAPSHOT_BYTES < len(case["report"].result.encode("utf-8"))
+    before_sources = db_session.query(InpatientLabSource).count()
+    before_audit = db_session.query(AIAuditEvent).count()
+    response = await client.post("/api/inpatient-laboratory/sources", headers=auth_headers(seed_data["doctor_user"].username), json=body(db_session, case))
+    assert response.status_code == 422 and "UTF-8" in response.json()["detail"]
+    assert db_session.query(InpatientLabSource).count() == before_sources and db_session.query(AIAuditEvent).count() == before_audit
+    assert db_session.get(LabResult, case["report"].lab_result_id).result == "中" * 88000
+
+
+def test_current_rejects_oversized_utf8_frozen_content_before_original_lookup(db_session, case, seed_data, monkeypatch):
+    row = sources.create_source(db_session, seed_data["doctor_user"], body(db_session, case))
+    db_session.commit()
+    snapshot = json.loads(row.snapshot_json)
+    snapshot["boundary"] = "中" * 88000
+    row.snapshot_json = sources.canonical_json(snapshot)
+    row.content_hash = sources.hash_content(snapshot)
+    db_session.commit()
+
+    def must_not_read_original(*args):
+        raise AssertionError("Oversized frozen text must be rejected before loading originals")
+
+    monkeypatch.setattr(sources, "load_original", must_not_read_original)
+    with pytest.raises(HTTPException) as caught:
+        sources.source_current(db_session, row, allow_revoked=True)
+    assert caught.value.status_code == 409

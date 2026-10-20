@@ -17,6 +17,7 @@ LAB_READ_ROLES = LAB_SOURCE_ROLES | {"nurse"}
 SCHEMA_VERSION = "inpatient_lab_source_v1"
 AVAILABILITY_BASIS = "server_registered_after_verification"
 NAMESPACE_BASIS = "explicit_user_attestation_no_stored_lis_origin"
+MAX_SNAPSHOT_BYTES = 262144
 MAPPING_GOVERNANCE = ("mapping_id", "source_id", "content_hash", "status", "revision", "governance_hash", "published_at", "published_by", "revoked_at", "revoked_by", "revoke_reason")
 FROZEN_FIELDS = ("lab_source_id", "patient_id", "admission_id", "observation_id", "mapping_id", "schema_version", "created_by", "raw_original_hash", "mapping_content_hash")
 NOTE_FIELDS = ("collection_time_basis_note", "admission_binding_note", "source_namespace_basis_note")
@@ -246,6 +247,8 @@ def create_source(db, user, values):
         **{key: getattr(req, key) for key in (*NOTE_FIELDS, *CONFIRM_FIELDS)},
     }
     row.snapshot_json = canonical_json(snapshot)
+    if len(row.snapshot_json.encode("utf-8")) > MAX_SNAPSHOT_BYTES:
+        raise HTTPException(422, "检验来源正文超过262144个UTF-8字节工程上限；未登记、未截断，请核查原文")
     row.content_hash = hash_content(snapshot)
     db.add(row)
     return row
@@ -265,6 +268,8 @@ def source_current(db, row, *, allow_revoked=False):
         for key in ("lab_source_id", "admission_id", "mapping_id"):
             canonical_uuid(getattr(current, key))
         opaque_id(current.observation_id)
+        if not isinstance(current.snapshot_json, str) or len(current.snapshot_json.encode("utf-8")) > MAX_SNAPSHOT_BYTES:
+            raise ValueError("冻结来源正文超过UTF-8字节工程上限")
         snapshot = json.loads(current.snapshot_json)
         if not isinstance(snapshot, dict) or not isinstance(snapshot.get("mapping"), dict):
             raise ValueError("冻结来源或映射正文结构无效")

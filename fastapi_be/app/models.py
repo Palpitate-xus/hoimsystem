@@ -3015,7 +3015,7 @@ class InpatientLabSource(Base):
     schema_version = Column(String(40), nullable=False, default="inpatient_lab_source_v1", server_default="inpatient_lab_source_v1")
     raw_original_hash = Column(String(64), nullable=False)
     mapping_content_hash = Column(String(64), nullable=False)
-    snapshot_json = Column(Text, nullable=False)
+    snapshot_json = Column(Text().with_variant(mysql.MEDIUMTEXT(), "mysql"), nullable=False)
     content_hash = Column(String(64), nullable=False)
     status = Column(String(16), nullable=False, default="active", server_default="active")
     revision = Column(Integer, nullable=False, default=1, server_default="1")

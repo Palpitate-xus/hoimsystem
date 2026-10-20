@@ -29,7 +29,7 @@ def upgrade():
         sa.Column("schema_version", sa.String(40), nullable=False, server_default="inpatient_lab_source_v1"),
         sa.Column("raw_original_hash", sa.String(64), nullable=False),
         sa.Column("mapping_content_hash", sa.String(64), nullable=False),
-        sa.Column("snapshot_json", sa.Text(), nullable=False),
+        sa.Column("snapshot_json", sa.Text().with_variant(mysql.MEDIUMTEXT(), "mysql"), nullable=False),
         sa.Column("content_hash", sa.String(64), nullable=False),
         sa.Column("status", sa.String(16), nullable=False, server_default="active"),
         sa.Column("revision", sa.Integer(), nullable=False, server_default="1"),

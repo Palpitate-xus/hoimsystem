@@ -51,7 +51,7 @@ def get_perioperative_antibiotic_list(application_id: str | None = None, current
 
 @router.post("/surgery/perioperative/create")
 def create_perioperative_antibiotic(req: dict, current_user: User = Depends(require_roles(*CLINICAL_ROLES)), db: Session = Depends(get_db)):
-    lock_surgery_write(db)
+    lock_surgery_write(db, current_user)
     application = current_surgery_rows(db.query(SurgeryApplication).filter(SurgeryApplication.application_id == req.get("application_id"))).first()
     if not application:
         return {"code": 404, "msg": "手术申请不存在"}
@@ -87,7 +87,7 @@ def create_perioperative_antibiotic(req: dict, current_user: User = Depends(requ
 
 @router.post("/surgery/perioperative/status")
 def update_perioperative_antibiotic_status(req: dict, current_user: User = Depends(require_roles(*CLINICAL_ROLES)), db: Session = Depends(get_db)):
-    lock_surgery_write(db)
+    lock_surgery_write(db, current_user)
     item = current_surgery_rows(db.query(PerioperativeAntibiotic).filter(PerioperativeAntibiotic.perioperative_id == req.get("perioperative_id"))).first()
     if not item:
         return {"code": 404, "msg": "围术期用药记录不存在"}
@@ -179,7 +179,7 @@ def _parse_datetime(value):
 
 @router.post("/surgeryApplication/create")
 def create_surgery_application(req: dict, current_user: User = Depends(require_roles(*CLINICAL_ROLES)), db: Session = Depends(get_db)):
-    lock_surgery_write(db)
+    lock_surgery_write(db, current_user)
     admission = current_surgery_rows(db.query(Admission).filter(Admission.admission_id == req.get("admission_id"))).first()
     if not admission:
         return {"code": 500, "msg": "入院记录不存在"}
@@ -213,7 +213,7 @@ def create_surgery_application(req: dict, current_user: User = Depends(require_r
 
 @router.post("/surgeryApplication/approve")
 def approve_surgery_application(req: dict, current_user: User = Depends(require_roles(*CLINICAL_ROLES)), db: Session = Depends(get_db)):
-    lock_surgery_write(db)
+    lock_surgery_write(db, current_user)
     application = current_surgery_rows(db.query(SurgeryApplication).filter(SurgeryApplication.application_id == req.get("application_id"))).first()
     if not application:
         return {"code": 500, "msg": "申请不存在"}
@@ -232,7 +232,7 @@ def approve_surgery_application(req: dict, current_user: User = Depends(require_
 
 @router.post("/surgeryApplication/cancel")
 def cancel_surgery_application(req: dict, current_user: User = Depends(require_roles(*CLINICAL_ROLES)), db: Session = Depends(get_db)):
-    lock_surgery_write(db)
+    lock_surgery_write(db, current_user)
     application = current_surgery_rows(db.query(SurgeryApplication).filter(SurgeryApplication.application_id == req.get("application_id"))).first()
     if not application:
         return {"code": 500, "msg": "申请不存在"}
@@ -308,7 +308,7 @@ def get_surgery_schedule_list(
 
 @router.post("/surgerySchedule/create")
 def create_surgery_schedule(req: dict, current_user: User = Depends(require_roles(*CLINICAL_ROLES)), db: Session = Depends(get_db)):
-    lock_surgery_write(db)
+    lock_surgery_write(db, current_user)
     application = current_surgery_rows(db.query(SurgeryApplication).filter(SurgeryApplication.application_id == req.get("application_id"))).first()
     if not application:
         return {"code": 500, "msg": "手术申请不存在"}
@@ -370,7 +370,7 @@ def create_surgery_schedule(req: dict, current_user: User = Depends(require_role
 
 @router.post("/surgerySchedule/start")
 def start_surgery(req: dict, current_user: User = Depends(require_roles(*CLINICAL_ROLES)), db: Session = Depends(get_db)):
-    lock_surgery_write(db)
+    lock_surgery_write(db, current_user)
     schedule = current_surgery_rows(db.query(SurgerySchedule).filter(SurgerySchedule.schedule_id == req.get("schedule_id"))).first()
     if not schedule:
         return {"code": 500, "msg": "排台记录不存在"}
@@ -391,7 +391,7 @@ def start_surgery(req: dict, current_user: User = Depends(require_roles(*CLINICA
 
 @router.post("/surgerySchedule/complete")
 def complete_surgery(req: dict, current_user: User = Depends(require_roles(*CLINICAL_ROLES)), db: Session = Depends(get_db)):
-    lock_surgery_write(db)
+    lock_surgery_write(db, current_user)
     schedule = current_surgery_rows(db.query(SurgerySchedule).filter(SurgerySchedule.schedule_id == req.get("schedule_id"))).first()
     if not schedule:
         return {"code": 500, "msg": "排台记录不存在"}
@@ -470,7 +470,7 @@ def get_anesthesia_record_list(schedule_id: str | None = None, current_user: Use
 
 @router.post("/anesthesiaRecord/create")
 def create_anesthesia_record(req: dict, current_user: User = Depends(require_roles(*CLINICAL_ROLES)), db: Session = Depends(get_db)):
-    lock_surgery_write(db)
+    lock_surgery_write(db, current_user)
     schedule = current_surgery_rows(db.query(SurgerySchedule).filter(SurgerySchedule.schedule_id == req.get("schedule_id"))).first()
     if not schedule:
         return {"code": 500, "msg": "手术排台不存在"}

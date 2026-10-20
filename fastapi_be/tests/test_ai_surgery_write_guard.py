@@ -7,6 +7,7 @@ import pytest
 from sqlalchemy import event, text
 from sqlalchemy.exc import IntegrityError
 
+from app.ai import surgery_facts as facts
 from app.ai.models import AIAuditEvent
 from app.ai.surgery_models import AISurgeryWriteGate
 from app.ai.surgery_write_guard import current_surgery_rows, lock_surgery_write
@@ -355,3 +356,29 @@ def test_cancel_all_children_sql_failure_rolls_back_every_state_without_invented
     db.expire_all()
     assert child_states(db, application_id) == before
     assert db.get(SurgeryApplication, application_id).status == 2
+
+
+@pytest.mark.asyncio
+async def test_actual_http_rechecks_original_clinical_role_after_gate_sequence_and_rolls_back(db_session, legacy_case, async_client, auth_headers, monkeypatch):
+    db, case = db_session, legacy_case
+    actor_id = case["seed"]["doctor_user"].user_id
+    original = facts.lock_write_gate
+    trace = []
+
+    def changed_after_gate(session):
+        gate = original(session)
+        trace.append("gate_acquired")
+        # This deliberately models the order of a role change while the
+        # dependency's User remains cached. SQLite proves the current re-read
+        # and rollback only; actual connection lock waiting is a MySQL probe.
+        session.execute(text("UPDATE hoimsystem_users SET user_role='nurse' WHERE user_id=:id"), {"id": actor_id})
+        trace.append("role_changed_after_dependency")
+        return gate
+
+    monkeypatch.setattr(facts, "lock_write_gate", changed_after_gate)
+    response = await async_client.post("/api/surgerySchedule/start", headers=auth_headers(case["seed"]["doctor_user"].username), json={"schedule_id": case["schedule"].schedule_id})
+    assert response.status_code == 403 and trace == ["gate_acquired", "role_changed_after_dependency"]
+    db.expire_all()
+    schedule = db.get(SurgerySchedule, case["schedule"].schedule_id)
+    assert (schedule.status, schedule.start_time, schedule.end_time) == (0, None, None)
+    assert case["seed"]["doctor_user"].user_role == "doctor"  # Request tx closed/rolled back.

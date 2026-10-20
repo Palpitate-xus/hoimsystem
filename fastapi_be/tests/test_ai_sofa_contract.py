@@ -157,3 +157,17 @@ def test_same_original_cannot_be_two_different_raw_quantities():
 def test_gcs_no_component_range_or_boolean_proxy(eye, verbal, motor):
     with pytest.raises(ValidationError):
         GcsComponents.model_validate({key: {"score": value, "absent_reason": None} for key, value in zip(("eye", "verbal", "motor"), (eye, verbal, motor))})
+
+
+def test_identical_original_root_cannot_appear_twice_even_if_hash_agrees():
+    data = empty_source()
+    data["lab_observations"] = [lab(), lab()]
+    with pytest.raises(ValidationError):
+        SofaSource.model_validate(data)
+
+
+def test_member_issue_cannot_point_to_an_unprojected_source():
+    data = empty_source()
+    data["member_issues"] = [{"axis": "renal", "code": "unresolved_conflict", "source_ids": ["unprojected"]}]
+    with pytest.raises(ValidationError):
+        SofaSource.model_validate(data)

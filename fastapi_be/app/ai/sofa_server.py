@@ -21,6 +21,16 @@ class SofaTaskContext(StrictModel):
     sofa_source: SofaSource | None = None
     sofa_change_source: SofaChangeSource | None = None
 
+    @model_validator(mode="before")
+    @classmethod
+    def no_null_or_second_native_key(cls, value):
+        if not isinstance(value, dict) or len({"sofa_source", "sofa_change_source"} & value.keys()) != 1:
+            raise ValueError("须只含一个实际SOFA原件字段")
+        key = next(iter({"sofa_source", "sofa_change_source"} & value.keys()))
+        if value[key] is None:
+            raise ValueError("SOFA原件不可为空")
+        return value
+
     @model_validator(mode="after")
     def exactly_one(self):
         if (self.sofa_source is None) == (self.sofa_change_source is None):

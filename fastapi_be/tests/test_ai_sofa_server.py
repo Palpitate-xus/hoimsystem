@@ -129,3 +129,13 @@ def test_service_module_has_no_hospital_import_or_persistence():
 
     result = subprocess.run([sys.executable, "-c", code], capture_output=True, text=True, env={**os.environ, "AI_PROVIDER_LOCAL_SOFA_API_KEY": KEY}, timeout=15)
     assert result.returncode == 0, result.stderr
+
+
+@pytest.mark.asyncio
+async def test_request_cannot_smuggle_a_second_native_field_as_null(config):
+    app = create_sofa_app(config)
+    payload = task(runtime_descriptor(config))
+    payload["input"]["context"]["sofa_change_source"] = None
+    async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="http://sofa") as client:
+        response = await client.post("/tasks", json=payload, headers={"Authorization": "Bearer " + KEY})
+    assert response.status_code == 422

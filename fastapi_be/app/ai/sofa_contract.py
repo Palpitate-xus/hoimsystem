@@ -304,6 +304,8 @@ class GcsComponents(StrictModel):
 class SofaGcs(OriginalBinding):
     @model_validator(mode="after")
     def original_exam(self):
+        if self.anchor is not None and (not self.anchor.source_id.startswith("inpatient_observation:") or not self.anchor.source_id.endswith(":" + self.anchor.content_hash[:12])):
+            raise ValueError("原GCS已有锚须绑定真实点测技术来源")
         if self.observed_at > self.recorded_at or (self.anchor is None and not self.anchor_current):
             raise ValueError("原GCS时刻或既有锚定声明无效")
         return self
@@ -541,10 +543,27 @@ class SofaSource(StrictModel):
 
         for root in roots:
             walk(root)
+        for items in (
+            self.lab_observations,
+            self.respiratory_support_observations,
+            self.map_observations,
+            self.gcs_observations,
+            self.urine_intervals,
+            *[group.intervals for group in self.vasoactive_groups],
+        ):
+            if len({item.source_id for item in items}) != len(items):
+                raise ValueError("同一原件不能在根成员数组重复列入")
+        if len({item.candidate_id for item in self.respiratory_observations}) != len(self.respiratory_observations) or len({group.group_id for group in self.conflict_groups}) != len(
+            self.conflict_groups
+        ):
+            raise ValueError("呼吸候选/冲突组技术标识不可重复")
         ids = set(seen)
         root_prefixes = {"inpatient_lab", "map_observation", "gcs_observation", "urine_interval", "respiratory_support", "arterial_pair", "vasoactive_interval"}
         if sum(source_id.split(":", 1)[0] in root_prefixes for source_id in ids) > MAX_MEMBERS:
             raise ValueError("SOFA唯一原成员超过4096，不能截断")
+        for issue in self.member_issues:
+            if not set(issue.source_ids) <= ids:
+                raise ValueError("缺项/来源问题不能指向未投影原件")
         for group in self.conflict_groups:
             if not set(group.member_source_ids) <= ids:
                 raise ValueError("冲突组包含未投影的原成员")

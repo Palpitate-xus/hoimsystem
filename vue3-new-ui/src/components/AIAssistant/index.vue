@@ -10,7 +10,8 @@
         <div class="feature-description"><strong>需要的资料：</strong>{{ selected.inputs.join('、') }}<br /><strong>预期产出：</strong>{{ selected.deliverables.join('；') }}</div>
         <p v-if="boundClinicalReferences.length">本次绑定资料：{{ boundClinicalReferences.join('、') }}。所选记录未注明对应就诊；选择就诊仅补充临床背景，不确认其归属。</p>
         <p v-if="boundPathwayReferences.length">本次绑定：{{ boundPathwayReferences.join('、') }}。住院关联以原记录核实；路径适用条件和已审核版本仍须核对。</p>
-        <p v-if="boundNursingReferences.length">本次绑定：{{ boundNursingReferences.join('、') }}。按原患者与原住院核对，不能通过补充JSON替换；缺项、历史默认值及人工评分来源仍须复核。</p>
+        <p v-if="boundNursingReferences.length && !needsRiskWindow">本次绑定：{{ boundNursingReferences.join('、') }}。按原患者与原住院核对，不能通过补充JSON替换；缺项、历史默认值及人工评分来源仍须复核。</p>
+        <p v-if="needsRiskWindow">本任务只使用明确选择的原住院观测窗；旧护理记录、人工评分和补充JSON不替代窗口或填补缺项。</p>
         <p v-if="props.initialInput.audio_asset_id">本次绑定原录音 {{ props.initialInput.audio_asset_id }}；以原登记资料核对患者与就诊，不能通过补充JSON替换。</p>
         <p v-if="props.initialInput.ecg_asset_id">本次绑定原始心电 {{ props.initialInput.ecg_asset_id }}；以原登记资料核对患者与就诊，不能通过补充JSON替换。</p>
         <p v-if="props.initialInput.imaging_order_id">本次绑定真实影像申请 {{ props.initialInput.imaging_order_id }}；原像素与患者须一致，不能通过补充JSON替换申请。</p>
@@ -21,13 +22,14 @@
           </el-select>
         </el-form-item>
         <el-form-item v-if="selected.scope === 'patient' && patientId && !needsIncident" label="本次就诊">
-          <el-select v-model="encounterRef" clearable :disabled="!!props.encounterRef" placeholder="选择门诊或住院记录；治疗路径推荐需要本次就诊" style="width: 100%">
-            <el-option v-for="item in encounters" :key="item.encounter_ref" :label="item.label" :value="item.encounter_ref" />
+          <el-select v-model="encounterRef" clearable :disabled="!!props.encounterRef" :placeholder="needsRiskWindow ? '选择原住院，不能按日期归入门诊或其他住院' : '选择门诊或住院记录；治疗路径推荐需要本次就诊'" style="width: 100%">
+            <el-option v-for="item in encounterOptions" :key="item.encounter_ref" :label="item.label" :value="item.encounter_ref" />
           </el-select>
         </el-form-item>
         <el-form-item v-if="needsIncident" label="不良事件标识"><el-input v-model="incidentId" :disabled="!!props.initialInput.adverse_event_id" maxlength="10" placeholder="明确选择本患者事件的正整数标识" /><p>事件未记录就诊关联，不能按上报日期推定属于某次门诊或住院。</p></el-form-item>
         <ai-audio-input v-if="needsAudio && patientId" v-model="audioAssetId" :patient-id="patientId" :encounter-ref="encounterRef" :locked="!!props.initialInput.audio_asset_id" @availability="audioReady = $event" />
         <ai-ecg-input v-if="needsEcg && patientId" v-model="ecgAssetId" :patient-id="patientId" :encounter-ref="encounterRef" :locked="!!props.initialInput.ecg_asset_id" @availability="ecgReady = $event" />
+        <ai-observation-window-input v-if="needsRiskWindow && patientId" :patient-id="patientId" :admission-id="encounterRef" :initial-window-id="String(props.initialInput.observation_window_id || '')" :disabled="submitting" @selection="riskWindowSelection = $event" @availability="riskWindowReady = $event" />
         <ai-image-input v-if="needsImage && patientId" v-model="imageAssetId" :patient-id="patientId" :encounter-ref="encounterRef" :locked-order-id="String(props.initialInput.imaging_order_id || '')" :disabled="submitting" @select="selectImage" @availability="imageReady = $event" />
         <el-form-item v-if="needsPathway && patientId && !props.initialInput.pathway_enrollment_id" label="院内路径（可选）">
           <el-select v-model="pathwayId" :disabled="!!props.initialInput.pathway_id || pathwayOptionsLoading" :clearable="!props.initialInput.pathway_id" filterable placeholder="选择待比选的院内路径；也可仅使用审核指南" style="width: 100%" aria-label="待比选院内路径"><el-option v-for="item in pathwayOptions.items || []" :key="item.pathway_id" :value="String(item.pathway_id)" :disabled="!item.reviewed_for_current_scope" :label="`${item.name} · #${item.pathway_id}${item.reviewed_for_current_scope ? '' : ' · 当前范围未审核'}`" /></el-select>
@@ -63,15 +65,16 @@
           <el-collapse-item title="联调与预览选项">
             <el-checkbox v-model="preview">超级管理员预览（结果仅供评估）</el-checkbox>
             <p v-if="needsForecast">统计预测只使用所选冻结来源和7/14天跨度；此处JSON不参与计算，也不能改写来源、口径、时区或日计数。</p>
+            <p v-if="needsRiskWindow">此处JSON不参与风险观测输入，不能覆盖患者、原住院、窗口、截止时点或原数值。</p>
             <el-input v-model="extraInput" type="textarea" :rows="4" placeholder="可选：专用适配器的结构化输入 JSON，由服务契约规定" class="spaced" />
           </el-collapse-item>
         </el-collapse>
         <el-alert v-if="needsForecast" type="info" :closable="false" title="本功能使用固定统计计算；Prompt仅用于来源审计，不由文本模型推测数值。" class="spaced" />
         <el-alert v-else-if="selected.engine !== 'llm'" type="info" :closable="false" title="此能力通过专用模型处理，需要对应原始资料和已登记的适配服务。" class="spaced" />
         <div class="actions">
-          <el-button v-if="selected.scope === 'patient'" :disabled="!patientId || patientLoading || pathwayOptionsLoading || (needsAudio && (!audioAssetId || !audioReady)) || (needsEcg && (!ecgAssetId || !ecgReady)) || (needsImage && (!imageAssetId || !imageOrderId || !imageReady))" @click="inspectContext">查看本次资料</el-button>
+          <el-button v-if="selected.scope === 'patient'" :disabled="!patientId || patientLoading || pathwayOptionsLoading || (needsRiskWindow && !riskWindowReady) || (needsAudio && (!audioAssetId || !audioReady)) || (needsEcg && (!ecgAssetId || !ecgReady)) || (needsImage && (!imageAssetId || !imageOrderId || !imageReady))" @click="inspectContext">查看本次资料</el-button>
           <el-button v-if="needsOperations" :disabled="serviceOptionsLoading || (needsForecast && !forecastReady)" @click="inspectOperationalContext">查看本次运营资料</el-button>
-          <el-button type="primary" :loading="submitting" :disabled="(needsForecast && !forecastReady) || busy || patientLoading || serviceOptionsLoading || pathwayOptionsLoading || (needsAudio && (!audioAssetId || !audioReady)) || (needsEcg && (!ecgAssetId || !ecgReady)) || (needsImage && (!imageAssetId || !imageOrderId || !imageReady)) || (!selected.enabled && !preview) || (selected.scope === 'patient' && !patientId) || (needsInventory && (!inventoryDrugs.length && !inventoryConsumables.length || serviceOptions.inventory_scope_available === false))" @click="submit">生成辅助建议</el-button>
+          <el-button type="primary" :loading="submitting" :disabled="(needsRiskWindow && !riskWindowReady) || (needsForecast && !forecastReady) || busy || patientLoading || serviceOptionsLoading || pathwayOptionsLoading || (needsAudio && (!audioAssetId || !audioReady)) || (needsEcg && (!ecgAssetId || !ecgReady)) || (needsImage && (!imageAssetId || !imageOrderId || !imageReady)) || (!selected.enabled && !preview) || (selected.scope === 'patient' && !patientId) || (needsInventory && (!inventoryDrugs.length && !inventoryConsumables.length || serviceOptions.inventory_scope_available === false))" @click="submit">生成辅助建议</el-button>
           <el-button v-if="busy" @click="cancel">取消接收结果</el-button>
         </div>
       </template>
@@ -90,6 +93,7 @@
       <ai-adr-findings :findings="run.adr_findings" @inspect="inspectEvidence" />
       <ai-pathway-findings :findings="run.pathway_findings" @inspect="inspectEvidence" />
       <ai-nursing-findings :findings="run.nursing_findings" @inspect="inspectEvidence" />
+      <ai-observation-findings :findings="run.observation_findings" :expected-patient-id="run.patient_id" :expected-admission-id="run.encounter_ref || encounterRef" @inspect="inspectEvidence" />
       <ai-speech-findings :findings="run.audio_findings" :transcription="run.result?.transcription" :allow-copy="run.status === 'succeeded'" @inspect="inspectEvidence" @copy="copyDraft" />
       <ai-image-findings :findings="run.image_findings" :analysis="run.result?.image_analysis" :allow-copy="run.status === 'succeeded'" @inspect="inspectEvidence" @copy="copyDraft" />
       <ai-ecg-findings :findings="run.ecg_findings" :analysis="run.result?.ecg_analysis" :allow-copy="run.status === 'succeeded'" @inspect="inspectEvidence" @copy="copyDraft" />
@@ -152,6 +156,7 @@
       <ai-adr-findings :findings="contextData?.context?.adr_sources" @inspect="inspectPreviewEvidence" />
       <ai-pathway-findings :findings="contextData?.context?.pathway_sources" @inspect="inspectPreviewEvidence" />
       <ai-nursing-findings :findings="contextData?.context?.nursing_source_review" @inspect="inspectPreviewEvidence" />
+      <ai-observation-findings :findings="contextData?.context?.observation_window" :expected-patient-id="patientId" :expected-admission-id="encounterRef" @inspect="inspectPreviewEvidence" />
       <ai-speech-findings v-if="contextDialog" :findings="contextData?.context" @inspect="inspectPreviewEvidence" />
       <ai-image-findings v-if="contextDialog" :findings="contextData?.context" @inspect="inspectPreviewEvidence" />
       <ai-ecg-findings v-if="contextDialog" :findings="contextData?.context" @inspect="inspectPreviewEvidence" />
@@ -184,6 +189,8 @@ import AiEcgFindings from "@/components/AIEcgFindings/index.vue";
 
 const AiForecastInput = defineAsyncComponent(() => import("@/components/AIForecastInput/index.vue"));
 const AiForecastFindings = defineAsyncComponent(() => import("@/components/AIForecastFindings/index.vue"));
+const AiObservationWindowInput = defineAsyncComponent(() => import("@/components/AIObservationWindowInput/index.vue"));
+const AiObservationFindings = defineAsyncComponent(() => import("@/components/AIObservationFindings/index.vue"));
 
 const props = defineProps({ featureKeys: { type: Array, default: () => [] }, initialFeature: { type: String, default: "" }, patientId: { type: Number, default: null }, encounterRef: { type: String, default: "" }, initialInput: { type: Object, default: () => ({}) } });
 const store = useStore();
@@ -194,6 +201,8 @@ const patientId = ref(null), encounterRef = ref(""), prescriptionId = ref(null),
 const question = ref(""), codingQuery = ref(""), extraInput = ref(""), preview = ref(false), run = ref(null), history = ref([]);
 const contextDialog = ref(false), contextData = ref(null), evidenceDialog = ref(false), evidence = ref(null), feedbackDialog = ref(false), feedback = ref({ outcome: "accepted", comment: "" });
 const selected = computed(() => features.value.find(item => item.key === featureKey.value));
+const needsRiskWindow = computed(() => ["deterioration_risk", "sepsis_risk", "aki_risk"].includes(featureKey.value)), riskWindowSelection = ref(null), riskWindowReady = ref(false);
+const encounterOptions = computed(() => needsRiskWindow.value ? encounters.value.filter(item => item.kind === "inpatient") : encounters.value);
 const needsPrescription = computed(() => ["interaction_review", "allergy_review", "dose_review", "antimicrobial_review"].includes(featureKey.value));
 const needsCoding = computed(() => ["icd_candidates", "drg_evidence_review"].includes(featureKey.value));
 const needsAppointment = computed(() => featureKey.value === "appointment_assistant"), needsNavigation = computed(() => featureKey.value === "hospital_navigation");
@@ -252,6 +261,7 @@ watch(featureKey, async () => {
   ecgAssetId.value = props.initialInput.ecg_asset_id == null ? "" : String(props.initialInput.ecg_asset_id); ecgReady.value = false;
   imageAssetId.value = props.initialInput.image_asset_id == null ? "" : String(props.initialInput.image_asset_id); imageOrderId.value = props.initialInput.imaging_order_id || ""; imageReady.value = false;
   forecastSelection.value = null; forecastReady.value = false;
+  riskWindowSelection.value = null; riskWindowReady.value = false;
   serviceOptions.value = {}; serviceDepartment.value = props.initialInput.department_id || null; serviceDoctor.value = props.initialInput.doctor_id || null; serviceDate.value = props.initialInput.appointment_date || "";
   navigationStart.value = props.initialInput.start_node_id || null; navigationEnd.value = props.initialInput.end_node_id || null;
   operationsRange.value = props.initialInput.date_from && props.initialInput.date_to ? [props.initialInput.date_from, props.initialInput.date_to] : []; inventoryDrugs.value = [...(props.initialInput.drug_ids || [])]; inventoryConsumables.value = [...(props.initialInput.consumable_ids || [])]; serviceOptionsLoading.value = false;
@@ -266,6 +276,7 @@ watch(featureKey, async () => {
 watch(patientId, async id => {
   const patientVersion = ++patientLoadVersion;
   patientLoading.value = !!id;
+  riskWindowSelection.value = null; riskWindowReady.value = false;
   stopPolling(); run.value = null;
   encounterRef.value = needsIncident.value ? "" : props.encounterRef || ""; prescriptionId.value = props.initialInput.prescription_id || null; contextData.value = null; encounters.value = []; prescriptions.value = [];
   pathwayId.value = props.initialInput.pathway_id == null ? null : String(props.initialInput.pathway_id);
@@ -285,8 +296,8 @@ watch(patientId, async id => {
     }
   } finally { if (patientVersion === patientLoadVersion) patientLoading.value = false; }
 });
-watch(encounterRef, () => { stopPolling(); run.value = null; contextData.value = null; });
-watch([() => JSON.stringify(forecastSelection.value), forecastReady, featureKey, patientId, encounterRef, prescriptionId, incidentId, pathwayId, audioAssetId, ecgAssetId, imageAssetId, imageOrderId, serviceDepartment, serviceDoctor, serviceDate, navigationStart, navigationEnd, operationsRange, operationsPlanRange, () => inventoryDrugs.value.join(','), () => inventoryConsumables.value.join(','), () => JSON.stringify(props.initialInput)], () => {
+watch(encounterRef, () => { stopPolling(); run.value = null; contextData.value = null; riskWindowSelection.value = null; riskWindowReady.value = false; });
+watch([() => JSON.stringify(riskWindowSelection.value), riskWindowReady, () => JSON.stringify(forecastSelection.value), forecastReady, featureKey, patientId, encounterRef, prescriptionId, incidentId, pathwayId, audioAssetId, ecgAssetId, imageAssetId, imageOrderId, serviceDepartment, serviceDoctor, serviceDate, navigationStart, navigationEnd, operationsRange, operationsPlanRange, () => inventoryDrugs.value.join(','), () => inventoryConsumables.value.join(','), () => JSON.stringify(props.initialInput)], () => {
   selectionVersion += 1; stopPolling(); run.value = null; contextData.value = null; contextDialog.value = false; evidenceDialog.value = false; feedbackDialog.value = false;
 });
 watch(() => run.value?.run_id, () => { evidenceDialog.value = false; feedbackDialog.value = false; feedback.value = { outcome: "accepted", comment: "" }; });
@@ -314,7 +325,7 @@ watch([featureKey, patientId, encounterRef], async () => {
 async function inspectContext() {
   const input = buildTaskInput(); if (!input) return;
   const version = selectionVersion;
-  const sourceKeys = selected.value?.source_reference_keys || ["record_id", "structured_record_id", "prescription_id", "lab_result_id", "imaging_report_id"];
+  const sourceKeys = needsRiskWindow.value ? ["observation_window_id"] : selected.value?.source_reference_keys || ["record_id", "structured_record_id", "prescription_id", "lab_result_id", "imaging_report_id"];
   const references = Object.fromEntries(sourceKeys.filter(key => input[key]).map(key => [key, input[key]]));
   const response = await getAIClinicalContext({ ...references, feature_key: featureKey.value, patient_id: patientId.value, encounter_ref: encounterRef.value || undefined });
   if (version !== selectionVersion) return;
@@ -328,6 +339,10 @@ async function inspectOperationalContext() {
   contextData.value = response.data; contextDialog.value = true;
 }
 function buildTaskInput() {
+  if (needsRiskWindow.value) {
+    if (!riskWindowReady.value || !riskWindowSelection.value || !encounterRef.value) { ElMessage.warning("请先选择并核对原住院观测窗"); return; }
+    return { observation_window_id: riskWindowSelection.value.observation_window_id, question: question.value };
+  }
   if (needsForecast.value) {
     if (!forecastReady.value || !forecastSelection.value) { ElMessage.warning("请先选择并核对冻结预测来源"); return; }
     return { forecast_series_id: forecastSelection.value.forecast_series_id, horizon_days: forecastSelection.value.horizon_days, question: question.value };
@@ -377,8 +392,8 @@ async function loadHistory(activeNames) {
   if (version === historyVersion) history.value = response.data || [];
 }
 watch([() => JSON.stringify(store.getters["user/permissions"]), () => store.state.user.accessToken], () => {
-  if (!needsForecast.value) return;
-  selectionVersion++; historyVersion++; stopPolling(); run.value = null; contextData.value = null; contextDialog.value = false; evidenceDialog.value = false; feedbackDialog.value = false; history.value = []; forecastReady.value = false; forecastSelection.value = null;
+  if (!needsForecast.value && !needsRiskWindow.value) return;
+  selectionVersion++; historyVersion++; stopPolling(); run.value = null; contextData.value = null; contextDialog.value = false; evidenceDialog.value = false; feedbackDialog.value = false; history.value = []; forecastReady.value = false; forecastSelection.value = null; riskWindowReady.value = false; riskWindowSelection.value = null;
 });
 const evidenceTitle = id => run.value?.evidence?.find(item => item.source_id === id)?.title || "来源";
 function inspectEvidence(id) { evidence.value = run.value?.evidence?.find(item => item.source_id === id); evidenceDialog.value = !!evidence.value; }

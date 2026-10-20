@@ -6,9 +6,9 @@ import re
 import secrets
 import uuid
 
-from app.ai.surgery_contract import FactRef, SurgeryCase, canonical_json, hash_content, identity
+from app.ai.surgery_contract import Availability, Busy, Capability, Duty, FactRef, Resource, SurgeryCase, TransitionPolicy, WorkPolicy, canonical_json, hash_content, identity
 from app.ai.surgery_facts import GOVERNANCE_FIELDS, SourceFrozenIdentity, SourceWrapper
-from app.ai.surgery_scenario_input import CaseDomain, MemberDeclaration, OriginalReference
+from app.ai.surgery_scenario_input import CaseDomain, MemberDeclaration, OriginalReference, ResourceDeclaration
 
 
 def new_identity_secret():
@@ -209,3 +209,209 @@ def project_case(domain, requirements, estimate, duty_originals, identities):
         other_requirements={"status": case.other_requirements_status, "basis_hash": identities.basis(case.basis_note)},
     )
     return {"case": value, "issues": []}
+
+
+def verified_safe_resource(value):
+    """Verify the disclosed capsule; its raw-source hash remains an opaque anchor."""
+    from app.ai.surgery_collection import SafeResourceOriginal, SafeResourceOriginalWrapper
+
+    capsule = SafeResourceOriginalWrapper.model_validate(value)
+    safe = {key: getattr(capsule, key) for key in SafeResourceOriginal.model_fields}
+    if hash_content(SafeResourceOriginal(**safe).model_dump(mode="json")) != capsule.capsule_hash:
+        raise ValueError("Complete safe resource capsule SHA differs")
+    return capsule
+
+
+def public_operational_fact(value, declaration, identities, as_of):
+    capsule = verified_safe_resource(value)
+    declaration = MemberDeclaration.model_validate(declaration.model_dump() if isinstance(declaration, MemberDeclaration) else declaration)
+    if (
+        declaration.source_record_id != capsule.source_record_id
+        or declaration.source_kind != capsule.source_kind
+        or declaration.expected_content_hash != capsule.source_content_hash
+        or declaration.expected_governance_hash != capsule.source_governance_hash
+    ):
+        raise ValueError("Safe original differs from the complete member review")
+    if capsule.recorded_at > as_of or capsule.reviewed_at is not None and capsule.reviewed_at > as_of:
+        raise ValueError("Safe original was not available at the original cutoff")
+    if declaration.selection == "confirmed" and (not capsule.eligible_for_new_use or capsule.redacted or capsule.exclusion_reasons):
+        raise ValueError("Review cannot restore a redacted or ineligible safe original")
+    return FactRef(
+        fact_id=identities.uuid("fact", capsule.source_record_id),
+        kind=capsule.source_kind,
+        content_hash=capsule.source_content_hash,
+        governance_hash=capsule.source_governance_hash,
+        recorded_at=capsule.recorded_at,
+        published_at=capsule.published_at,
+        status=capsule.status,
+        revision=capsule.revision,
+        review=declaration.selection,
+        review_basis_hash=identities.basis(declaration.basis_note),
+    )
+
+
+def _safe_time_limit(value, identities):
+    raw = value.model_dump(mode="json")
+    return raw if raw["kind"] == "known" else {"kind": raw["kind"], "basis_hash": identities.prehashed_key("basis", raw["basis_hash"])}
+
+
+def project_resource(*, resource_id, kind, original_identity_hash, declaration, capsules, members, identities):
+    """Keep every current operational original, with exact kinds and whole refs.
+
+    Live pool membership, physical parents and capture closure are checked by the
+    SQL layer. Declared coverage cannot turn missing/omitted facts into known ones.
+    """
+    identity(resource_id)
+    declaration = ResourceDeclaration.model_validate(declaration.model_dump() if isinstance(declaration, ResourceDeclaration) else declaration)
+    if declaration.resource_id != resource_id or declaration.expected_resource_hash != original_identity_hash:
+        raise ValueError("Physical resource differs from its explicit complete declaration")
+    if kind not in {"room", "person", "equipment"}:
+        raise ValueError("Unknown physical resource kind")
+    if (
+        kind == "person"
+        and (declaration.work_policy_review is None or declaration.all_locations_duty_coverage is None)
+        or kind != "person"
+        and (declaration.work_policy_review is not None or declaration.all_locations_duty_coverage is not None)
+    ):
+        raise ValueError("Only a person has complete explicit work and duty review fields")
+    selected, seen = [], set()
+    for value in capsules:
+        capsule = verified_safe_resource(value)
+        if capsule.resource_id != resource_id or capsule.source_record_id in seen:
+            raise ValueError("Repeated or foreign physical-resource original")
+        seen.add(capsule.source_record_id)
+        member = MemberDeclaration.model_validate(members[capsule.source_record_id])
+        if (
+            member.source_record_id != capsule.source_record_id
+            or member.source_kind != capsule.source_kind
+            or member.expected_content_hash != capsule.source_content_hash
+            or member.expected_governance_hash != capsule.source_governance_hash
+        ):
+            raise ValueError("Original resource member or governance differs")
+        if capsule.eligible_for_new_use:
+            if member.selection != "confirmed":
+                return {"resource": None, "busy_intervals": [], "duties": [], "transition_policies": [], "work_policies": [], "issues": ["current_resource_original_not_confirmed"]}
+            if capsule.exclusion_reasons or capsule.redacted or capsule.payload is None or capsule.status != "published":
+                raise ValueError("A current resource original cannot conceal a contrary eligibility flag")
+            selected.append(capsule)
+        elif member.selection == "confirmed":
+            raise ValueError("An unavailable original cannot be restored by its member review")
+    identity_kind = {"room": "operating_room_identity_capability", "person": "person_identity_qualification", "equipment": "equipment_identity_capability"}[kind]
+    identity_originals = [item for item in selected if item.source_kind == identity_kind]
+    if not identity_originals:
+        return {"resource": None, "busy_intervals": [], "duties": [], "transition_policies": [], "work_policies": [], "issues": ["resource_identity_original_missing"]}
+    rid = identities.uuid("resource", resource_id)
+    capabilities, availability, busy, duties, transitions, policies = [], [], [], [], [], []
+    for item in selected:
+        payload = item.payload
+        refs = [identities.uuid("fact", item.source_record_id)]
+        basis = identities.prehashed_key("basis", payload.basis_hash)
+        if item.source_kind in {"operating_room_identity_capability", "person_identity_qualification", "equipment_identity_capability"}:
+            if item.source_kind != identity_kind:
+                raise ValueError("A capability original belongs to a different physical resource kind")
+            capabilities.append(
+                Capability(
+                    ref_ids=refs,
+                    capability_hashes=[identities.prehashed_key("capability", key) for key in payload.capability_hashes],
+                    status=payload.qualification_status if kind == "person" else payload.capability_status,
+                    valid_from_at=payload.valid_from_at,
+                    valid_until=_safe_time_limit(payload.valid_until, identities),
+                    basis_hash=basis,
+                )
+            )
+        elif item.source_kind == "resource_availability_busy":
+            if payload.record_type == "availability":
+                availability.append(Availability(ref_ids=refs, start_at=payload.start_at, end_at=payload.end_at, state=payload.state, basis_hash=basis))
+            elif payload.record_type == "duty":
+                if kind != "person":
+                    raise ValueError("A duty original requires its actual person")
+                duties.append(
+                    Duty(
+                        duty_id=identities.uuid("duty", item.source_record_id),
+                        person_id=rid,
+                        start_at=payload.start_at,
+                        end_at=payload.end_at,
+                        accounting=payload.accounting.model_dump(),
+                        ref_ids=refs,
+                        basis_hash=basis,
+                    )
+                )
+            else:
+                busy.append(
+                    Busy(
+                        interval_id=identities.uuid("busy", item.source_record_id),
+                        target={"kind": "resource", "resource_id": rid},
+                        ref_ids=refs,
+                        start_at=payload.start_at,
+                        end_at=payload.end_at,
+                        end_absent_reason=payload.end_absent_reason,
+                        verified_until_at=payload.verified_until_at,
+                        continuity_status=payload.continuity_status,
+                        busy_status=payload.busy_status,
+                        transition_class_hash=identities.prehashed_key("transition_class", payload.transition_class_hash) if payload.transition_class_hash is not None else None,
+                        transition_class_absent_reason=payload.transition_class_absent_reason,
+                        accounting=payload.accounting.model_dump(),
+                        basis_hash=basis,
+                    )
+                )
+        elif payload.policy_type == "transition":
+            transitions.append(
+                TransitionPolicy(
+                    policy_id=identities.uuid("policy", item.source_record_id),
+                    ref_ids=refs,
+                    resource_ids=[rid],
+                    effective_from_at=payload.effective_from_at,
+                    effective_until=_safe_time_limit(payload.effective_until, identities),
+                    pairs=[
+                        {
+                            "from_class_hash": identities.prehashed_key("transition_class", pair.from_class_hash),
+                            "to_class_hash": identities.prehashed_key("transition_class", pair.to_class_hash),
+                            "minimum_gap_us": pair.minimum_gap_us.model_dump(),
+                            "penalty": pair.penalty.model_dump(),
+                            "basis_hash": identities.prehashed_key("basis", pair.basis_hash),
+                        }
+                        for pair in payload.pairs
+                    ],
+                    pair_coverage=payload.pair_coverage,
+                    basis_hash=basis,
+                )
+            )
+        else:
+            if kind != "person":
+                raise ValueError("An actual work policy requires its person")
+            policies.append(
+                WorkPolicy(
+                    policy_id=identities.uuid("policy", item.source_record_id),
+                    ref_ids=refs,
+                    person_ids=[rid],
+                    effective_from_at=payload.effective_from_at,
+                    effective_until=_safe_time_limit(payload.effective_until, identities),
+                    **{key: getattr(payload, key).model_dump() for key in ("max_single_presence", "max_work_rolling_24h", "max_work_rolling_7d", "minimum_rest")},
+                    fixed_windows=[window.model_dump() for window in payload.fixed_windows],
+                    policy_reference_hash=identities.prehashed_key("policy_reference", payload.policy_reference_hash),
+                    basis_hash=basis,
+                )
+            )
+
+    def coverage(value):
+        return {"start_at": value.start_at, "end_at": value.end_at, "status": value.status, "basis_hash": identities.basis(value.basis_note)}
+
+    def review(value):
+        return {"status": value.status, "basis_hash": identities.basis(value.basis_note)}
+
+    resource = Resource(
+        resource_id=rid,
+        kind=kind,
+        identity_hash=identities.prehashed_key("physical_identity", original_identity_hash),
+        identity_status="verified" if all(item.payload.identity_status == "verified" for item in identity_originals) else "unknown",
+        ref_ids=[identities.uuid("fact", item.source_record_id) for item in identity_originals],
+        capability_facts=[item.model_dump() for item in capabilities],
+        availability=[item.model_dump() for item in availability],
+        availability_coverage=coverage(declaration.availability_coverage),
+        all_locations_busy_coverage=coverage(declaration.all_locations_busy_coverage),
+        transition_class_coverage={"status": declaration.transition_class_status, "basis_hash": identities.basis(declaration.basis_note)},
+        transition_policy_review=review(declaration.transition_policy_review),
+        work_policy_review=review(declaration.work_policy_review) if kind == "person" else None,
+        all_locations_duty_coverage=coverage(declaration.all_locations_duty_coverage) if kind == "person" else None,
+    )
+    return {"resource": resource, "busy_intervals": busy, "duties": duties, "transition_policies": transitions, "work_policies": policies, "issues": []}

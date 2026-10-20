@@ -1,0 +1,217 @@
+{
+  "recorded_at": "2026-10-20T09:36:09.353104+00:00",
+  "checkpoint": "eafbeb1672067d4824ac2ea0073ad9eea47e7d9d",
+  "catalog_version": "2026.10.19",
+  "clinical_validation": false,
+  "real_patient_data_used": false,
+  "inventory": {
+    "features": 80,
+    "api_route_methods": 632,
+    "routers": 86,
+    "registered_tables": 159,
+    "source_reference_keys": 21,
+    "migration_head": "20261020_ai_image_assets"
+  },
+  "native_source": {
+    "format": "dicom_i32le_v1",
+    "decoder": "pydicom3.0.2 + reviewed native stored sample extraction",
+    "transfer_syntax": [
+      "ExplicitVRLittleEndian",
+      "ImplicitVRLittleEndian"
+    ],
+    "frames": 1,
+    "bits_allocated": [
+      8,
+      16
+    ],
+    "coordinate_space": "source_pixels",
+    "max_source_bytes": 67108864,
+    "max_pixels": 16777216,
+    "source_and_pipeline_tests_passed": 114,
+    "independent_window_oracle_cases": 8,
+    "unused_high_bits_cleared": true,
+    "original_preserved": true,
+    "original_tags_not_sent_to_model": true,
+    "pixel_anonymity_guaranteed": false
+  },
+  "adapter": {
+    "schema_version": "4",
+    "multipart_field": "image",
+    "payload": "canonical int32le stored samples plus full task instructions and allowlisted technical metadata",
+    "http_pipeline_tested_with": "isolated synthetic files + httpx.MockTransport",
+    "source_hash_prompt_and_crop_bound": true,
+    "real_local_dicom_to_model_service_connected": false
+  },
+  "model_kernel": {
+    "recorded_at": "2026-10-20T09:27:33.099050+00:00",
+    "synthetic_only": true,
+    "clinical_validation": false,
+    "dicom_decoding_or_preprocessing_tested": false,
+    "repository": "torchxrayvision/densenet121-res224-all",
+    "revision": "588eadcc6a744da71f8dce768bc974ec629443f5",
+    "architecture_revision": "17726dd8f5e756eec3e5ae958281a289b05b1dae",
+    "manifest_digest": "3e520c2e0b34ba69282c10a26330b6aa4eab990e005d0484cb239e710d6ff8d5",
+    "weight_size": 28283736,
+    "weight_sha256": "6b811edb354d83991e36a4836b914bf41faf8fb3203573c0a61820b97937c529",
+    "dependencies": {
+      "torch": "2.14.1+cpu",
+      "safetensors": "0.8.0",
+      "numpy": "2.4.4"
+    },
+    "implementation": {
+      "app/ai/imaging_model.py": "7220cc41e1238acd9b5a5595439baaf95de9500e7f0353dd136ccae86107faff",
+      "app/ai/imaging_network.py": "eca55c2534829a2e85aabf02e72e994bed76f6f35abdca5d9c1be76db970a99c",
+      "scripts/prepare_local_imaging.py": "c32ee2ab781d9d8651fe35164833580d0f0677b393465d35ef38a945aa39fe73",
+      "scripts/convert_imaging_weights.py": "9959cedc9e3e7e31601e5e2079f19ee663b08c002e23293978109c0d7c5c7de8",
+      "requirements-imaging.txt": "abd93b789ea452173ddb66c41e369a88c1c40bf96b5bdbcb402fd8e64fa0dc3c",
+      "third_party/torchxrayvision/LICENSE": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+      "third_party/torchxrayvision/NOTICE": "d23125888206442a1f8e6f3033f7ab5c00a3ac4241e5c27e56db9d3f1ef2b394"
+    },
+    "synthetic_input": {
+      "pattern": "torch.linspace(-1024,1024,224*224)",
+      "shape": [
+        1,
+        1,
+        224,
+        224
+      ],
+      "dtype": "torch.float32",
+      "sha256": "855a5434bed890994c3759ff8f4215f033da753dcfd4bc6a8cf6eb1b359f6da6"
+    },
+    "score_kind": "independent_raw_sigmoid_not_calibrated_probability",
+    "scores": [
+      {
+        "label": "Atelectasis",
+        "score": 0.3619460165500641
+      },
+      {
+        "label": "Consolidation",
+        "score": 0.11133379489183426
+      },
+      {
+        "label": "Infiltration",
+        "score": 0.19245384633541107
+      },
+      {
+        "label": "Pneumothorax",
+        "score": 0.0013964229729026556
+      },
+      {
+        "label": "Edema",
+        "score": 0.1089913472533226
+      },
+      {
+        "label": "Emphysema",
+        "score": 0.0007527834386564791
+      },
+      {
+        "label": "Fibrosis",
+        "score": 0.0008122597937472165
+      },
+      {
+        "label": "Effusion",
+        "score": 0.30867066979408264
+      },
+      {
+        "label": "Pneumonia",
+        "score": 0.2546871304512024
+      },
+      {
+        "label": "Pleural_Thickening",
+        "score": 0.009674559347331524
+      },
+      {
+        "label": "Cardiomegaly",
+        "score": 0.21490179002285004
+      },
+      {
+        "label": "Nodule",
+        "score": 0.010723506100475788
+      },
+      {
+        "label": "Mass",
+        "score": 0.008633850142359734
+      },
+      {
+        "label": "Hernia",
+        "score": 0.003230693517252803
+      },
+      {
+        "label": "Lung Lesion",
+        "score": 0.05504976958036423
+      },
+      {
+        "label": "Fracture",
+        "score": 0.031369954347610474
+      },
+      {
+        "label": "Lung Opacity",
+        "score": 0.5032765865325928
+      },
+      {
+        "label": "Enlarged Cardiomediastinum",
+        "score": 0.07809852063655853
+      }
+    ],
+    "automatic_thresholds": false,
+    "spatial_localization": false,
+    "base_tests": {
+      "passed": 33,
+      "skipped": 1
+    },
+    "real_cpu_test": {
+      "passed": 1,
+      "seconds": 3.55
+    }
+  },
+  "verification": {
+    "backend": {
+      "passed": 1934,
+      "skipped": 6,
+      "seconds": 142.54
+    },
+    "browser": {
+      "passed": 62,
+      "duration_report": "1.6m",
+      "api_transport": "all intercepted, static local frontend only"
+    },
+    "image_pixel_unit_tests": 11,
+    "real_public_image_weights_synthetic_forward": {
+      "passed": 1,
+      "seconds": 3.33
+    },
+    "real_ecg_source_to_cpu_regression": {
+      "passed": 1,
+      "seconds": 7.0
+    },
+    "build": {
+      "passed": true,
+      "total_javascript_bytes": 5992301,
+      "total_asset_bytes": 6510547,
+      "largest_javascript_bytes": 645575,
+      "existing_limits_unchanged": true
+    },
+    "rbac_catalog_ruff_checks": true,
+    "real_business_database_migrated": false,
+    "business_services_deployed": false
+  },
+  "implementation_sha256": {
+    "fastapi_be/app/ai/image_files.py": "63536f850e864507d6ed51bafde0813ea73825d6ba4a0e192ccd38e3472cd3fa",
+    "fastapi_be/app/ai/image_assets.py": "611e83ee53e098df2c204315f66cb3e5226007a45edf6ae3f10cdc6888e33b9b",
+    "fastapi_be/app/ai/context.py": "75385f687b51bb58d10e0ae1d9de292887ecbc6171040a04b2e915c839cb9441",
+    "fastapi_be/app/ai/gateway.py": "3cd85d0da6a57bfc79295a90c0f988dec0dbe98eefebc38c550bb0cd2015d52c",
+    "fastapi_be/app/ai/runtime.py": "3b74c33ca2417a2bf84b81ee694631e5e2b0dbddecf03420e904cde5323311fe",
+    "fastapi_be/app/ai/schemas.py": "d1bf5cd5e07c2ae1e0b6dac6855fd07e6f4676a565006d4d7df8873f70a261f0",
+    "fastapi_be/app/routers/ai_images.py": "82957a73aaa9fc4b301e425938614cfdc5c97e6cb990b7f34115c6db468ecab4",
+    "vue3-new-ui/src/components/AiImageInput.vue": "689f2a74912aaac14196ff98a9ccebc265e3a0d42920a3a3d720a891424efb66",
+    "vue3-new-ui/src/components/AiImageViewer.vue": "4d307e38865adee48f0220e828dba949a8c84008ce859f8cbb3cccc6be5ebc67",
+    "vue3-new-ui/src/utils/aiImagePixels.js": "e70d2ab3304d3ef4239dfd06ad9bc4f8cf558c02035b1f91dd26caf3495fd096",
+    "vue3-new-ui/e2e/fixtures/dicom-window-oracle.json": "e320c690005b8a86b3439f5a5471e3065a34621f71a8a8ca81f580508bd2b0d1"
+  },
+  "remaining": [
+    "Freeze actual DICOM presentation/intensity, crop and resize preprocessing for the selected frontal chest X-ray profile",
+    "Connect authenticated isolated local v4 imaging service and super-admin metadata-only model capability inspection",
+    "Validate model applicability and diagnostic performance with authorized representative images and independent clinical references",
+    "Add broader transfer syntaxes, multi-frame/volume and WSI profiles through explicit adapters rather than taking the first image"
+  ]
+}

@@ -138,7 +138,7 @@ worker 在执行前和保存结果前重新检查权限、配置、患者资料�
 
 运营历史默认近 30 天，可选不含未来且最多 367 天的正序区间。医院数据问答的区间若完全早于当前业务日，不加载当前病区或床位快照，也不因无关的当前床位变化使历史分析失效；床位需求预测则单独保留当前容量供核查。排班/手术排台计划与历史资料分开，默认计划为业务日起 14 天，单次最多 31 天且不晚于业务日后 366 天。大范围资料可能超过模型输入预算，需缩小日期、科室或品种；原始清单若截断会明确标记。
 
-手术页的“AI 排台分析”、运营页的评价分析，以及已关联患者的不良事件行“AI 事件复盘”，都能先查看资料再提交。事件行入口固定患者和事件，不展示就诊归属选择，结果同时展示冻结的原上报和原分析，并可检查引用。未绑定患者的组织事件仍待独立访问范围及数据连接，不强行归属某位患者。手术排台和反馈分析均受模型服务患者数据用途开关控制。当前默认目录及Prompt版本为 `2026.10.18`，旧队列不会沿用更新前的固定任务契约。
+手术页的“AI 排台分析”、运营页的评价分析，以及已关联患者的不良事件行“AI 事件复盘”，都能先查看资料再提交。事件行入口固定患者和事件，不展示就诊归属选择，结果同时展示冻结的原上报和原分析，并可检查引用。未绑定患者的组织事件仍待独立访问范围及数据连接，不强行归属某位患者。手术排台和反馈分析均受模型服务患者数据用途开关控制。当前默认目录及Prompt版本为 `2026.10.19`，旧队列不会沿用更新前的固定任务契约。
 
 临床路径模板页提供“AI 治疗方案比选”，固定所选路径后选择已授权患者和本次就诊。工作台也可选择当前科室及功能已有审核版本的路径；选择就诊后重新核对审核范围。路径执行行的“AI 路径复评”固定患者、所记住院、原入径和路径标识，补充JSON不能替换这些绑定引用。预览与生成使用相同标识，原模板元数据、原入径与变异、未知计数及引用独立展示，结果保存任务当时版本。新增、入径、变异、退出及用药仍走原人工业务流程。
 
@@ -218,7 +218,7 @@ ADR列表对管理员保留既有管理范围；药师只读现有处方业务�
 
 `GET /api/ai/pathway-options`按功能、患者和所选就诊返回有限模板元数据及当前范围的审核可用性，不返回步骤。超级管理员独有`GET /api/ai/admin/pathway-sources`和`POST /api/ai/admin/pathway-sources/{id}/import`，导入须带刚读取的`expected_source_hash`。发布继续使用原知识审核接口，并验证正文哈希及原路径未变化。
 
-迁移`20261020_adr_resolution`添加ADR明确结果、说明、处理者和时间，旧行保持NULL；`20261020_pathway_knowledge`添加可空的知识来源绑定，不把原独立知识改成路径；`20261020_pathway_revision`给原路径添加来源版本，已有行从1开始，不补造历史版本。`20261020_ai_audio_assets`新增录音元数据，`20261020_audio_governance`另存原清除请求说明；当前迁移头`20261020_ai_ecg_assets`只新增原始心电元数据与索引。新库使用项目的`python -m app.db_migrate`引导流程，已有库继续沿当前版本升级；隔离往返测试保留既有患者资料，未对真实业务数据库执行迁移。
+迁移`20261020_adr_resolution`添加ADR明确结果、说明、处理者和时间，旧行保持NULL；`20261020_pathway_knowledge`添加可空的知识来源绑定，不把原独立知识改成路径；`20261020_pathway_revision`给原路径添加来源版本，已有行从1开始，不补造历史版本。`20261020_ai_audio_assets`新增录音元数据，`20261020_audio_governance`另存原清除请求说明；`20261020_ai_ecg_assets`新增原始心电元数据与索引；当前迁移头`20261020_ai_image_assets`只新增与真实影像申请绑定的私有原图元数据与索引。新库使用项目的`python -m app.db_migrate`引导流程，已有库继续沿当前版本升级；隔离往返测试保留既有患者资料，未对真实业务数据库执行迁移。
 
 AI接口保留原知识、引用及反馈正文中时间戳的小数部分，返回原文与其版本哈希对应。经结构验证的UUID和哈希保留原值，不因随机数字类似手机号而被缩减。任务同时冻结适用科室，调用前后按所选就诊或当前医生资料重新核对；仅科室调动、文字未变化的独立问答也会停止旧任务或拒收在途结果。
 
@@ -444,6 +444,7 @@ pytest -q tests/test_ai_pathway_knowledge.py tests/test_ai_pathway_sources.py
 pytest -q tests/test_ai_audio_files.py tests/test_ai_audio_assets.py tests/test_ai_audio_transcription.py tests/test_ai_response_fidelity.py tests/test_ai_knowledge_scope.py
 pytest -q tests/test_ai_speech_model.py tests/test_ai_speech_processing.py tests/test_ai_speech_server.py tests/test_ai_speech_worker.py tests/test_ai_speech_probe.py
 pytest -q tests/test_ai_ecg_files.py tests/test_ai_ecg_assets.py tests/test_ai_ecg_pipeline.py
+pytest -q tests/test_ai_image_files.py tests/test_ai_image_sources.py tests/test_ai_image_pipeline.py tests/test_ai_imaging_model.py
 # 可选格式互操作验证，安装requirements-ecg-verification.txt后运行，不下载心电模型
 python scripts/verify_ecg_wfdb.py
 # 在独立可选CPU环境，显式选择已准备模型；只使用固定合成输入
@@ -462,7 +463,78 @@ ruff check app/ai app/routers/ai.py app/routers/ai_admin.py
 # vue3-new-ui，E2E_BASE_URL 指向已启动的前端
 npm run build
 npm run check:bundle
+node --test tests/aiImagePixels.test.cjs
 npm run test:e2e -- e2e/ai-*.spec.js e2e/diagnosis-review.spec.js
 ```
 
 协议实现参考：[Responses API](https://developers.openai.com/api/reference/resources/responses/methods/create)、[Structured Outputs](https://developers.openai.com/api/docs/guides/structured-outputs)、[Chat Completions](https://developers.openai.com/api/reference/resources/chat/subresources/completions/methods/create)。本地隔离测试不会调用真实付费模型。
+
+
+## 单帧DICOM原图、v4像素任务与超管治理
+
+医学影像辅助识别（36，`imaging_detection`）现在要求真实 `image_asset_id` 和 `imaging_order_id`。影像检查页行入口固定患者和原申请；不能通过补充JSON换绑申请或把PACS调阅地址当像素。原申请没有就诊关联字段，所选就诊仍须按现有权限单独核对，不由申请日期推定。报告辅助起草（35）继续使用实际报告文字，病理切片（38）另需WSI来源与专用模型。
+
+新接口使用当前医生/科主任的诊疗关系或真实申请医生关系；仅申请关系不授予其他功能的患者病历权限。技师须有当前患者的限时诊断授权，普通检验单不形成原影像权限。患者端和普通管理员不读内部原图。登记人及超管可按版本撤回；超管可查看来源核对说明、冻结任务、撤回和清除并恢复失败流程。原申请患者重新关联时拒绝原文件读取，超管仍可按原源标识治理。撤回、原文件变化、申请取消/变化或诊疗权限撤销会阻止排队调用、作废在途候选及普通用户旧结果。超管保留冻结审计；这不允许对当前失效来源继续推理。
+
+| 接口（均以`/api`开头） | 用途 |
+| --- | --- |
+| `GET /ai/image-options` | 当前文件/像素上限及本人累计额度 |
+| `GET /ai/image-orders?patient_id=...` | 按实际患者权限选择原申请；原检查号和部位文字只供人工核对 |
+| `POST /ai/image-assets` | multipart字段`image`、`patient_id`、`imaging_order_id`、可选`encounter_ref`、明确来源授权核对及可选带时区`recorded_at` |
+| `GET /ai/image-assets`、`GET /ai/image-assets/{id}` | 当前患者/申请来源及版本，详情含登记人的核对说明 |
+| `GET /ai/image-assets/{id}/pixels` | 鉴权后的原坐标、小端有符号int32逻辑存储像素，含尺寸/摘要头，禁止缓存 |
+| `GET /ai/image-assets/{id}/content` | 鉴权后的不改写DICOM原文件，使用不含原文件名的附件名 |
+| `POST /ai/image-assets/{id}/withdraw` | `expected_revision`及原因，限登记人/超管 |
+| `GET /ai/admin/image-assets`、`POST /ai/admin/image-assets/{id}/purge` | 超管患者/状态筛选及清除/恢复；清除中不继续读文件，保留首次清除请求和冻结审计 |
+
+原件`source.dcm`和解码后的`pixels.i32le`位于独立0700私有目录，文件0600，不进入通用上传目录。读取时拒绝符号链接/非普通文件，校验原文件及实际像素哈希后使用同一打开句柄。`AI_IMAGE_STORAGE_DIR`默认`private/ai-images`，默认原件64MiB、16Mi像素、本人1GiB额度（包含原件及派生像素）；Compose的API和AI worker共享`ai_image_private`卷。未对真实数据库执行迁移或启动Compose业务服务。
+
+当前接入范围是DICOM Part10、原生显式/隐式小端、单帧单样本、8/16位MONOCHROME1/2，支持常规CR/DX/CT/MR/MG单图存储类、明确有效位宽及线性重标定和窗参数。先以有限长度顶层扫描限制解析工作，再由固定pydicom3.0.2只读取白名单技术字段。压缩、未实现的LUT、未定义长度元素、多帧、增强影像或容积均明确拒绝，不取首帧或首张冒充完整检查。CT/MR单图可登记但不代表完整扫描，也不自动成为胸片模型适用输入。
+
+解码仅提取BitsStored声明的逻辑存储值，清除未使用高位并进行明确符号扩展，不重采样、旋转、开窗或修改原件。模型只收到原坐标int32le像素与技术参数，不收到原始DICOM头、文件名、检查号或自由文本；Study/Series/Instance UID只保留摘要。头信息剥离不代表像素匿名化，`BurnedInAnnotation`是原声明。PixelSpacing与ImagerPixelSpacing分别保留，不据显示比例推测病灶实际尺寸。
+
+前端只在显式点击后读取带当前鉴权的原像素，并核对实际SHA256。显示按原存储坐标，先线性重标定，再选择LINEAR/LINEAR_EXACT/SIGMOID窗，最后按已核对的MONOCHROME/PresentationLUT配对反转一次；padding在原存储值域掩黑。无预设时自动非填充最小/最大窗明确标为显示选项。支持人工窗位/窗宽、缩放平移及原行列坐标，未知方向不补写左右。8组独立pydicom窗函数对照包含窗内斜坡和中点；解码整数与独立`pixel_array`对照。
+
+专用模型接口使用`schema_version="4"`，multipart包含完整`task` JSON及`image=(pixels.i32le, application/octet-stream)`；原始DICOM不发适配器。普通文本接口不会回退代替像素。响应外层要求功能、模型版本、`applicable=true`及普通结构化`result`；并列`image_analysis`包含原来源三种哈希、`coordinate_space="source_pixels"`、实际处理及候选：
+
+```json
+{
+  "asset_id": "实际原图UUID",
+  "content_hash": "实际组合SHA256",
+  "original_hash": "原DICOM的SHA256",
+  "pixel_hash": "实际int32le附件SHA256",
+  "coordinate_space": "source_pixels",
+  "processing": {
+    "instructions_digest": "完整任务instructions的SHA256",
+    "input_rows": 1024,
+    "input_columns": 1536,
+    "input_frames": 1,
+    "processed_frames": [0],
+    "analysis_region": {"x": 256, "y": 0, "width": 1024, "height": 1024},
+    "preprocessing_notes": ["示例：实际居中裁剪后缩放；此处必须按真实处理填报"]
+  },
+  "findings": []
+}
+```
+
+原来源/尺寸/Prompt必须精确匹配。分析区域为原像素半开矩形，候选真实矩形须位于实际处理区域内。图像级分类使用`location="image"`、`region=null`；有真实定位模型才可用`bounding_box`。原分数`score_kind="model_score"`不称患病概率，零分与未提供分别显示；未返回候选不代表正常。不生成虚构框、掩码、测量或完整检查结论，不改诊断或签署报告。完整独立Prompt仍可由超管管理版本；目录版本为`2026.10.19`。
+
+## 胸片研究模型权重与CPU网络准备
+
+已固定[TorchXRayVision模型发布](https://huggingface.co/torchxrayvision/densenet121-res224-all/tree/588eadcc6a744da71f8dce768bc974ec629443f5)及[原作者架构](https://github.com/mlmed/torchxrayvision/blob/17726dd8f5e756eec3e5ae958281a289b05b1dae/torchxrayvision/models.py)，必要网络代码、改动说明、完整Apache许可及BSD说明保留在`fastapi_be/third_party/torchxrayvision/`。发布方权重采用旧完整module pickle格式，因此准备阶段先校验原文件固定字节，在无网络、只读根目录、非root、无capabilities、仅挂载公开输入/临时输出的Docker容器中使用固定16类allowlist及无来源代码stub转换；host及运行时不反序列化该pickle。运行时仅校验并读取固定safetensors字节，不执行下载的Python或自动联网。
+
+```bash
+# fastapi_be；先有包含固定requirements-imaging.txt依赖的本地CPU镜像
+python scripts/prepare_local_imaging.py --destination /srv/models/hoim-imaging-v1 --conversion-image hoim-local-ecg:development
+# 可选：原公开文件已离线取得时加 --reference-dir /srv/public-imaging-reference
+# 已有完整固定安全模型包可离线复制到新目录（不覆盖原版本）
+python scripts/prepare_local_imaging.py --destination /srv/models/hoim-imaging-copy --source-dir /srv/models/hoim-imaging-v1
+# 在可选CPU环境，只测试已准备权重与固定合成224×224张量
+HOIM_IMAGING_REAL_MODEL=/srv/models/hoim-imaging-v1 pytest -q tests/test_ai_imaging_model.py
+```
+
+实际转换的safetensors为28,283,736字节，SHA256 `6b811edb354d83991e36a4836b914bf41faf8fb3203573c0a61820b97937c529`；727个状态张量逐项保留，固定模型清单摘要`3e520c2e0b34ba69282c10a26330b6aa4eab990e005d0484cb239e710d6ff8d5`。可选网络只接受已准备的CPU float32 `[1,1,224,224]`、[-1024,1024]张量，保留18项独立原sigmoid分数，不使用作者operating-point阈值映射或伪造定位。
+
+目前已完成权重安全准备、网络加载和真实CPU合成输入前向对照；**尚未连接DICOM前处理和本地v4影像推理服务**。下一步须冻结适用胸片输入、真实VOI/强度处理、裁剪/缩放及范围报告，再接通隔离服务、模型能力核对和本院临床验证。当前不能把原图登记、合成像素测试或公开权重发布者数字当作疾病识别效果。工程验证记录见`ai-imaging-verification.json`。
+
+实现依据：[pydicom像素解码](https://pydicom.github.io/pydicom/stable/reference/generated/pydicom.pixels.pixel_array.html)、[DICOM DX灰阶变换](https://dicom.nema.org/medical/dicom/current/output/chtml/part03/sect_C.8.11.3.html)、[DICOM灰阶与MONOCHROME](https://dicom.nema.org/medical/dicom/current/output/chtml/part03/sect_C.7.6.3.html)。

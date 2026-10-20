@@ -235,3 +235,10 @@ def test_distinct_accounts_never_implicitly_review_the_whole_person_partition(ch
         body["person_partition"]["resource_ids"] *= 2
     with pytest.raises(ValidationError):
         ScenarioCreate.model_validate(body)
+
+
+def test_missing_person_duty_cannot_be_declared_not_applicable():
+    body = declaration()
+    body["cases"][0]["roles"][0]["choices"][0].update(duty_source=None, duty_binding_status="not_applicable", duty_basis_note=BASIS)
+    with pytest.raises(ValidationError):
+        ScenarioCreate.model_validate(body)

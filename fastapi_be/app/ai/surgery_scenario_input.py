@@ -90,7 +90,7 @@ class DomainChoice(StrictModel):
     resource_id: UUID
     penalty: Amount
     duty_source: OriginalReference | None
-    duty_binding_status: Literal["verified", "unknown", "not_applicable"] | None
+    duty_binding_status: Literal["verified", "unknown"] | None
     duty_basis_note: str | None = Field(min_length=20, max_length=4000)
 
     @model_validator(mode="after")
@@ -103,7 +103,7 @@ class DomainChoice(StrictModel):
             raise ValueError("Non-person choices have no person-duty fields")
         if self.duty_binding_status == "verified" and self.duty_source is None:
             raise ValueError("Verified duty membership requires its actual original")
-        if self.duty_binding_status in {"unknown", "not_applicable"} and (self.duty_source is not None or self.duty_basis_note is None):
+        if self.duty_binding_status == "unknown" and (self.duty_source is not None or self.duty_basis_note is None):
             raise ValueError("Missing duty remains an explicit declaration with original basis")
         return self
 

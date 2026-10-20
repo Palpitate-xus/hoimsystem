@@ -1,0 +1,55 @@
+TorchXRayVision DenseNet121 local research adapter
+
+Architecture source: mlmed/torchxrayvision, commit
+17726dd8f5e756eec3e5ae958281a289b05b1dae, torchxrayvision/models.py.
+https://github.com/mlmed/torchxrayvision
+
+Weights: torchxrayvision/densenet121-res224-all, revision
+588eadcc6a744da71f8dce768bc974ec629443f5.
+https://huggingface.co/torchxrayvision/densenet121-res224-all
+
+The upstream library declares xrv.models, xrv.datasets and xrv.utils to be
+Apache-2.0; the fixed weights' model card separately declares Apache-2.0.
+The complete Apache License 2.0 is reproduced in LICENSE. Preserve the original
+upstream license declaration and model card alongside distributed weights.
+
+Local modifications: only the reviewed one-channel 18-output DenseNet121
+architecture; removed torchvision, dataset loaders, downloaders, repository-code
+execution, automatic resize, and operating-point output remapping. The model
+loads only a fixed, hash-verified safetensors conversion. Conversion uses an
+isolated, non-root, network-disabled container and inert source-class stubs with
+an exact pickle-global allowlist. No legacy pickle is loaded by the runtime.
+Output is the independent sigmoid of all 18 logits without diagnosis thresholds
+or spatial localization. Synthetic conversion/inference checks establish no
+clinical validation, DICOM preprocessing validity or population applicability.
+
+The DenseNet implementation follows the torchvision architecture used upstream.
+The torchvision BSD 3-Clause notice is retained below:
+
+Copyright (c) Soumith Chintala 2016,
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+* Redistributions of source code must retain the above copyright notice, this
+  list of conditions and the following disclaimer.
+
+* Redistributions in binary form must reproduce the above copyright notice,
+  this list of conditions and the following disclaimer in the documentation
+  and/or other materials provided with the distribution.
+
+* Neither the name of the copyright holder nor the names of its
+  contributors may be used to endorse or promote products derived from
+  this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.

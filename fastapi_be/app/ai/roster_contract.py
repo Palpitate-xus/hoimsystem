@@ -525,7 +525,7 @@ RECIPE = {
         "max_slots_then_min_penalty": "lexicographic_maximize_total_planned_slots_then_minimize_total_explicit_reviewed_penalty_no_free_weights",
     },
     "planning_dates": "one_to_31_explicit_consecutive_business_local_dates_UTC_midnights_validate_IANA_not_86400_times_days",
-    "arithmetic": "integer_UTC_microseconds_no_float_minutes_times_60000000",
+    "arithmetic": "integer_UTC_microseconds_no_float_minutes_times_60000000_policy_minutes_max150119987_other_raw_counts_max2147483647",
     "presence": "complete_duty_start_end_no_overlap_breaks_do_not_release_person_or_reset_rest",
     "work": "union_duty_work_segments_subtract_only_explicit_nonwork_breaks_complete_accounting_required_for_confirmed_feasibility",
     "rolling": "continuous_UTC24h_7d_maximum_at_domain_boundaries_work_endpoints_or_endpoints_minus_window_exact_prefix_integral",
@@ -534,7 +534,8 @@ RECIPE = {
     "fixed_work_windows": "explicit_up_to64_up_to366day_windows_exact_work_intersection_no_plan_boundary_reset",
     "staff_counts": "number_assigned_to_whole_dated_session_not_instantaneous_service_coverage",
     "planned_slots": "meet_mode_required_slots_only_max_mode_min_of_facility_ceiling_and_sum_reviewed_net_staff_capacity_both_hard_required_targets_no_booking_or_stock_mutation",
-    "policy": "explicit_reviewed_local_constraints_not_universal_labor_law_compliance",
+    "policy": "all_published_applicable_whole_period_policies_conjoined_no_most_favorable_selection_no_policy_unknown_partial_validity_or_unknown_expiry_is_explicit_unknown_and_optimistic_relaxation_not_NA_not_complete_infeasibility_proof_explicit_local_constraints_not_universal_labor_law_compliance",
+    "unknown_work": "unknown_commitment_or_accounting_has_zero_confirmed_work_lower_bound_and_original_presence_upper_bound_missing_inventory_fixed_window_upper_bound_is_full_window_not_zero",
     "graphs": "definite_confirmed_eligible_and_optimistic_unknown_relaxed_no_unknown_as_observed_fact",
     "proof": "admissible_frontier_lower_bound_and_known_feasible_upper_bound_optimal_only_bounds_close_infeasible_only_possible_tree_exhausted",
     "search": {

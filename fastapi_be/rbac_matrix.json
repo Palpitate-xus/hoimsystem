@@ -428,6 +428,15 @@
   "auth": [
    "super_admin"
   ],
+  "function": "check_ecg_provider",
+  "method": "POST",
+  "module": "ai_admin.py",
+  "path": "/api/ai/admin/providers/{provider_id}/ecg-capabilities"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
   "function": "list_global_runs",
   "method": "GET",
   "module": "ai_admin.py",

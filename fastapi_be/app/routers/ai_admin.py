@@ -11,6 +11,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, defer
 
 from app.ai.catalog import COMMON_SYSTEM_PROMPT, FEATURES
+from app.ai.ecg_probe import inspect_ecg_capabilities
 from app.ai.gateway import AIExecutionError
 from app.ai.governance import (
     audit,
@@ -153,6 +154,48 @@ async def check_speech_provider(provider_id: int, req: ProviderCheck, db: Sessio
         "provider_id": provider_id, "provider_revision": revision, "configured_model": configured_model, "compatible": not issues,
         "capabilities": capabilities, "issues": issues,
         "scope_note": "仅读取服务声明与登记配置的匹配情况，不发送患者资料、不执行识别，不证明医疗质量或完成临床验证。",
+    }}
+
+
+@router.post("/ai/admin/providers/{provider_id}/ecg-capabilities")
+async def check_ecg_provider(provider_id: int, req: ProviderCheck, db: Session = Depends(get_db), user: User = Depends(require_roles("super_admin"))) -> dict:
+    """Inspect only the saved ECG endpoint; never enable, save a model or approve clinical use."""
+    provider = db.get(AIProvider, provider_id)
+    if provider is None:
+        raise HTTPException(404, "模型配置不存在")
+    ensure_revision(provider.revision, req.expected_revision)
+    if provider.kind != "specialist" or "ecg_analysis" not in json.loads(provider.supported_features_json):
+        raise HTTPException(422, "请选择已登记心电辅助判读的专用服务")
+    actor_id, revision, configured_model, timeout = user.user_id, provider.revision, provider.model, provider.timeout_seconds
+    db.expunge(provider)
+    db.commit()  # Release the read transaction before the network request.
+    error = None
+    try:
+        capabilities = await inspect_ecg_capabilities(provider)
+    except AIExecutionError as exc:
+        error = exc
+    db.expire_all()
+    actor, current = db.get(User, actor_id), db.get(AIProvider, provider_id)
+    if actor is None or actor.user_role != "super_admin":
+        raise HTTPException(403, "当前用户不再具备AI管理权限")
+    if current is None:
+        raise HTTPException(409, "模型配置已删除，请刷新后重试")
+    ensure_revision(current.revision, revision)
+    if error:
+        audit(db, actor_id, "provider.ecg_check_failed", str(provider_id), {"revision": revision, "error_code": error.code})
+        _commit(db)
+        raise HTTPException(502, error.message)
+    issues = []
+    if capabilities["model_version"] != configured_model:
+        issues.append("登记模型与服务实际版本不同；请核对并保存实际版本后重新评审")
+    if timeout <= capabilities["timeout_seconds"]:
+        issues.append("模型请求超时应大于心电服务处理时限，保留传输和回执时间")
+    audit(db, actor_id, "provider.ecg_check", str(provider_id), {"revision": revision, "compatible": not issues, "actual_model": capabilities["model_version"]})
+    _commit(db)
+    return {"code": 200, "msg": "success", "data": {
+        "provider_id": provider_id, "provider_revision": revision, "configured_model": configured_model, "compatible": not issues,
+        "capabilities": capabilities, "issues": issues,
+        "scope_note": "仅读取心电服务声明与登记配置的匹配情况，不发送患者资料、不执行分类，不证明临床适用性、识别质量或完成临床验证。",
     }}
 
 

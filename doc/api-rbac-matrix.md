@@ -3,7 +3,7 @@
 > 由 `fastapi_be/scripts/generate_rbac_matrix.py` 从源码自动生成，请勿手改。
 > `✓`=可访问 | `PUBLIC`=无需登录 | 留空=不可访问
 
-共 **621** 个接口（PUBLIC 18 个 / 需登录 603 个）。
+共 **622** 个接口（PUBLIC 18 个 / 需登录 604 个）。
 
 
 ### `admin.py`
@@ -82,6 +82,7 @@
 | PUT | `/api/ai/admin/features/{key}` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
 | GET | `/api/ai/admin/providers` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
 | POST | `/api/ai/admin/providers/{provider_id}/speech-capabilities` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/admin/providers/{provider_id}/ecg-capabilities` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
 | GET | `/api/ai/admin/runs` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
 | GET | `/api/ai/admin/runs/{run_id}` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
 | POST | `/api/ai/admin/providers` |  | ✓ |  |  |  |  |  |  |  |  |  |  |

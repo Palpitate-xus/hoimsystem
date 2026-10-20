@@ -242,3 +242,13 @@ async def test_actual_change_service_uses_exclusive_top_level_native_analysis():
         assert (await client.post("/tasks", json=task, headers={"Authorization": "Bearer " + KEY})).status_code == 422
         task["input"]["context"] = {}
         assert (await client.post("/tasks", json=task, headers={"Authorization": "Bearer " + KEY})).status_code == 422
+
+
+@pytest.mark.parametrize("value", [False, 0.0, "0"])
+def test_assumed_zero_is_an_integer_not_false_or_coercion(value):
+    from app.ai.sofa_contract import SofaConditionalZeroBaselineAnalysis
+
+    with pytest.raises(ValidationError):
+        SofaConditionalZeroBaselineAnalysis.model_validate(
+            {"mode": "conditional_zero", "assumptions_confirmed": True, "lower_bound": 0, "upper_bound": 0, "assumed_total_score": value, "basis_hash": sha("basis")}
+        )

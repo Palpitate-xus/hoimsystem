@@ -469,3 +469,12 @@ def test_real_pair_clocks_not_forced_equal_or_automatic_nearest():
     assert result["lower_bound"] == 4
     pair["same_sampling_state_confirmed"] = False
     assert domain(source_with(respiratory_observations=[pair]), "respiratory")["observed_max_score"] is None
+
+
+def test_shared_weight_original_allows_distinct_current_review_basis_hashes():
+    one = vaso("0.1", name="one", end="2026-10-19T00:30:00.000000Z")
+    two = vaso("0.1", name="two", start=one["verified_until_at"])
+    for item in [one, two]:
+        item.update(weight=weight(), weight_applicability_confirmed=True, weight_use_confirmed=True, dose_input={"mode": "absolute", "rate": quantity("6", "ug/min")})
+    two["weight"]["review"]["basis_hash"] = sha("separate current dose context")
+    assert domain(with_vaso([one, two]), "cardiovascular")["lower_bound"] == 3

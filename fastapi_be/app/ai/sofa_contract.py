@@ -9,6 +9,7 @@ from __future__ import annotations
 import hashlib
 import json
 import math
+import re
 from datetime import datetime, timedelta
 from decimal import Decimal
 from typing import Annotated, Literal, get_args, get_origin
@@ -110,6 +111,14 @@ class StrictModel(BaseModel):
         if isinstance(data, dict):
             for name, field in cls.model_fields.items():
                 args = get_args(field.annotation)
+
+                def integer_literal(annotation):
+                    if get_origin(annotation) is Literal:
+                        return any(type(value) is int for value in get_args(annotation))
+                    return any(integer_literal(value) for value in get_args(annotation))
+
+                if name in data and data[name] is not None and integer_literal(field.annotation) and type(data[name]) is not int:
+                    raise ValueError("固定整数声明须为真实JSON整数，不能以布尔或浮点代替")
                 if get_origin(field.annotation) is Literal and any(isinstance(value, bool) for value in args) and name in data and type(data[name]) is not bool:
                     raise ValueError("固定布尔声明须为真实JSON布尔值")
         return data
@@ -304,7 +313,10 @@ class GcsComponents(StrictModel):
 class SofaGcs(OriginalBinding):
     @model_validator(mode="after")
     def original_exam(self):
-        if self.anchor is not None and (not self.anchor.source_id.startswith("inpatient_observation:") or not self.anchor.source_id.endswith(":" + self.anchor.content_hash[:12])):
+        if self.anchor is not None and (
+            re.fullmatch(r"inpatient_observation:[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}:[a-f0-9]{12}", self.anchor.source_id) is None
+            or not self.anchor.source_id.endswith(":" + self.anchor.content_hash[:12])
+        ):
             raise ValueError("原GCS已有锚须绑定真实点测技术来源")
         if self.observed_at > self.recorded_at or (self.anchor is None and not self.anchor_current):
             raise ValueError("原GCS时刻或既有锚定声明无效")
@@ -528,7 +540,7 @@ class SofaSource(StrictModel):
                     raise ValueError("重复原来源具有不一致内容/治理/时刻")
                 seen[item.source_id] = binding
                 fact_key = (type(item).__name__, item.source_id)
-                facts = item.model_dump()
+                facts = item.model_dump(exclude={"review"})
                 if fact_key in same_type_facts and same_type_facts[fact_key] != facts:
                     raise ValueError("同一类原件不能具有不同原事实或判读")
                 same_type_facts[fact_key] = facts

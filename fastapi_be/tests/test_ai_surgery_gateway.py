@@ -1,6 +1,8 @@
 """Actual outbound contracts and rejection before any surgery HTTP invocation."""
 
 import copy
+import hashlib
+import json
 
 import httpx
 import pytest
@@ -163,3 +165,134 @@ async def test_complete_request_over_8mib_is_rejected_before_any_http(monkeypatc
         await generate(provider(), SPEC, "x" * (MAX_BYTES + 1), copy.deepcopy(case()), transport=httpx.MockTransport(rejected_request))
     assert error.value.code == "SURGERY_REQUEST_LIMIT"
     assert seen == []
+
+
+class ActualWire(httpx.AsyncBaseTransport):
+    """Use the real native ASGI app and optionally alter its actual JSON bytes."""
+
+    def __init__(self, app, mutation=None, raw=None):
+        self.inner = httpx.ASGITransport(app=app)
+        self.seen, self.mutation, self.raw = [], mutation, raw
+
+    async def handle_async_request(self, request):
+        self.seen.append(json.loads(await request.aread()))
+        response = await self.inner.handle_async_request(request)
+        body = await response.aread()
+        if self.raw:
+            body = self.raw(body)
+        elif self.mutation:
+            value = json.loads(body)
+            self.mutation(value)
+            body = json.dumps(value, ensure_ascii=False, separators=(",", ":")).encode()
+        return httpx.Response(response.status_code, content=body, headers={"Content-Type": "application/json"})
+
+
+def actual_provider(monkeypatch):
+    from app.ai.surgery_config import SurgerySettings, runtime_descriptor
+    from app.ai.surgery_server import create_surgery_app
+
+    key = "synthetic-surgery-gateway-key-00000001"
+    monkeypatch.setenv("AI_PROVIDER_LOCAL_SURGERY_API_KEY", key)
+    config = SurgerySettings(AI_PROVIDER_LOCAL_SURGERY_API_KEY=key)
+    native = create_surgery_app(config)
+    p = provider()
+    p.model = runtime_descriptor(config)["model_version"]
+    return p, native
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("mode", ["all_required_then_min_declared_cost", "max_optional_scheduled_then_min_declared_cost"])
+async def test_actual_native_asgi_gateway_recomputes_complete_candidate_and_search_with_full_prompt(monkeypatch, mode):
+    p, app = actual_provider(monkeypatch)
+    data = case()
+    data["context"]["surgery_source"]["objective_mode"] = mode
+    data["context"]["surgery_binding"] = binding_for(data["context"]["surgery_source"], pool_id=uid(500), department_id=2)
+    data["evidence"] = [surgery_evidence(data["context"]["surgery_binding"])]
+    wire = ActualWire(app)
+    result, inputs, outputs = await generate(p, SPEC, PROMPT, data, transport=wire)
+    proof = result.surgery_analysis
+    assert inputs == outputs == 0
+    assert proof.objective_mode == mode and proof.solve_status == "optimal_proven"
+    assert proof.solution.status == "feasible_under_declared_scope"
+    assert proof.solution.exact_penalty_points == "0"
+    assert proof.automatic_booking is False
+    assert proof.instructions_digest == hashlib.sha256((COMMON_SYSTEM_PROMPT + "\n\n" + PROMPT).encode()).hexdigest()
+    assert proof.local_runtime.model_version == p.model
+    assert len(wire.seen) == 1
+    assert wire.seen[0]["input"] == {"context": {"surgery_source": data["context"]["surgery_source"]}}
+    assert "SYNTH_PRIVATE" not in json.dumps(wire.seen, ensure_ascii=False)
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "change",
+    [
+        "handled_int",
+        "schema",
+        "model",
+        "usage_bool",
+        "usage_negative",
+        "extra",
+        "mixed_result",
+        "missing_field",
+        "source",
+        "prompt",
+        "runtime",
+        "automatic_booking",
+        "explanation",
+        "citation",
+        "solution",
+        "optimistic_bound",
+        "gap",
+    ],
+)
+async def test_actual_native_response_cannot_forge_envelope_bindings_candidate_search_or_explanation(monkeypatch, change):
+    p, app = actual_provider(monkeypatch)
+
+    def mutation(value):
+        proof = value["surgery_analysis"]
+        if change == "handled_int":
+            value["handled"] = 1
+        elif change == "schema":
+            value["schema_version"] = "11"
+        elif change == "model":
+            value["model_version"] = "surgery:" + "0" * 64
+        elif change == "usage_bool":
+            value["usage"]["input_tokens"] = True
+        elif change == "usage_negative":
+            value["usage"]["output_tokens"] = -1
+        elif change == "extra":
+            value["extra"] = {}
+        elif change == "mixed_result":
+            value["result"]["surgery_analysis"] = proof
+        elif change == "missing_field":
+            value["result"].pop("warnings")
+        elif change == "source":
+            proof["source_binding"]["projection_hash"] = "0" * 64
+        elif change == "prompt":
+            proof["instructions_digest"] = "0" * 64
+        elif change == "runtime":
+            proof["local_runtime"]["core_sha256"]["surgery_model"] = "0" * 64
+        elif change == "automatic_booking":
+            proof["automatic_booking"] = True
+        elif change == "explanation":
+            value["result"]["summary"] = "未经核验的自动手术安排"
+        elif change == "citation":
+            value["result"]["sections"][0]["source_ids"] = ["forged-source"]
+        elif change == "solution":
+            proof["solution"]["exact_penalty_points"] = "999"
+        elif change == "optimistic_bound":
+            proof["optimistic_objective_bound"]["penalty_points"] = "999"
+        else:
+            proof["optional_count_gap"] = 999
+
+    with pytest.raises(AIExecutionError):
+        await generate(p, SPEC, PROMPT, case(), transport=ActualWire(app, mutation))
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("raw", [lambda body: body[:-1] + b',"handled":true}', lambda body: body[:-1] + b',"not_finite":NaN}', lambda body: b"x" * (MAX_BYTES + 1)])
+async def test_actual_native_duplicate_keys_nonfinite_and_oversized_response_rejected(monkeypatch, raw):
+    p, app = actual_provider(monkeypatch)
+    with pytest.raises(AIExecutionError):
+        await generate(p, SPEC, PROMPT, case(), transport=ActualWire(app, raw=raw))

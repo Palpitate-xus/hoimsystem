@@ -272,6 +272,7 @@
  {
   "auth": [
    "admin",
+   "pharmacist",
    "super_admin"
   ],
   "function": "get_adr_list",

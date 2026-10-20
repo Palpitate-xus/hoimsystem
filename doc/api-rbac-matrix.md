@@ -52,7 +52,7 @@
 | 方法 | 路径 | admin | super_admin | director | doctor | nurse | cashier | pharmacist | guide | patient | lab_technician | registrar | PUBLIC |
 |------|------|------|------|------|------|------|------|------|------|------|------|------|------|
 | POST | `/api/adverseReaction/create` | ✓ | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |
-| GET | `/api/adverseReaction/getList` | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |
+| GET | `/api/adverseReaction/getList` | ✓ | ✓ |  |  |  |  | ✓ |  |  |  |  |  |
 | POST | `/api/adverseReaction/updateStatus` | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |
 
 ### `ai.py`

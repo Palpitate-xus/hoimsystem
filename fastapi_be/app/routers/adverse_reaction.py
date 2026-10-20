@@ -1,12 +1,13 @@
 import datetime
 
 from fastapi import APIRouter, Depends
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.adr_status import AdrStatusWrite, describe_adr_status
 from app.database import get_db
 from app.dependencies import ADMIN_ROLES, CLINICAL_ROLES, NURSING_ROLES, User, require_roles
-from app.models import AdverseReaction
+from app.models import AdverseReaction, Prescription
 
 router = APIRouter()
 
@@ -29,8 +30,11 @@ def create_adr(req: dict, current_user: User = Depends(require_roles(*{*CLINICAL
 
 
 @router.get("/adverseReaction/getList")
-def get_adr_list(current_user: User = Depends(require_roles(*ADMIN_ROLES)), db: Session = Depends(get_db)):
-    items = db.query(AdverseReaction).order_by(AdverseReaction.report_time.desc()).all()
+def get_adr_list(current_user: User = Depends(require_roles(*ADMIN_ROLES, "pharmacist")), db: Session = Depends(get_db)):
+    query = db.query(AdverseReaction)
+    if current_user.user_role == "pharmacist":
+        query = query.filter(AdverseReaction.patient_id.in_(select(Prescription.patient_id).where(Prescription.status.in_([0, 1, 2]))))
+    items = query.order_by(AdverseReaction.report_time.desc()).all()
     data = []
     for it in items:
         data.append(

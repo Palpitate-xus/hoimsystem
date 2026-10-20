@@ -4,7 +4,8 @@
     <p>ADR处理与药物过敏分别登记；确认ADR不会自动新增过敏记录。历史结果缺少明确说明时，须核实是已处理还是已排除。</p>
     <el-card>
       <div class="page-toolbar">
-        <el-button type="primary" @click="handleAdd">上报ADR</el-button>
+        <el-button v-if="canManageAdr" type="primary" @click="handleAdd">上报ADR</el-button>
+        <span v-else>药师按处方业务范围查看患者记录；处理结果由管理角色核实。</span>
       </div>
       <el-table :data="list" v-loading="loading" empty-text="暂无记录">
         <el-table-column prop="patient_name" label="患者" />
@@ -15,9 +16,9 @@
         <el-table-column prop="report_time" label="上报时间" width="160" />
         <el-table-column label="操作" width="380">
           <template #default="{row}">
-            <el-button v-if="row.status===0" size="small" type="primary" @click="updateStatus(row,1)">确认</el-button>
-            <el-button v-if="row.status===1" size="small" type="success" @click="updateStatus(row,2)">处理</el-button>
-            <el-button v-if="row.status === 0 || row.status === 2 && !row.status_resolution" size="small" @click="openResolution(row)">{{ row.status === 0 ? '排除ADR' : '核实历史结果' }}</el-button>
+            <el-button v-if="canManageAdr && row.status===0" size="small" type="primary" @click="updateStatus(row,1)">确认</el-button>
+            <el-button v-if="canManageAdr && row.status===1" size="small" type="success" @click="updateStatus(row,2)">处理</el-button>
+            <el-button v-if="canManageAdr && (row.status === 0 || row.status === 2 && !row.status_resolution)" size="small" @click="openResolution(row)">{{ row.status === 0 ? '排除ADR' : '核实历史结果' }}</el-button>
             <ai-action v-if="canUseClinicalAi && row.patient_id" label="AI ADR资料分析" title="AI 所选ADR记录与信号辅助" :patient-id="row.patient_id" :initial-input="{ reaction_id: String(row.reaction_id) }" :feature-keys="['adr_signal', 'allergy_review', 'patient_summary']" initial-feature="adr_signal" />
           </template>
         </el-table-column>
@@ -67,6 +68,7 @@ const list = ref([]), loading = ref(false), dialogVisible = ref(false), form = r
 const patients = ref([]);
 const pharmaceuticals = ref([]);
 const store = useStore();
+const canManageAdr = computed(() => store.getters["user/permissions"].some(role => ["super_admin", "admin"].includes(role)));
 const canUseClinicalAi = computed(() => store.getters["user/permissions"].some(role => ["super_admin", "doctor", "director", "pharmacist"].includes(role)));
 const resolutionDialog = ref(false), resolutionRow = ref(null), resolutionSaving = ref(false), resolutionForm = ref({ resolution: "excluded", note: "" });
 

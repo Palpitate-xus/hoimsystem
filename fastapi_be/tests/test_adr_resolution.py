@@ -9,7 +9,7 @@ from sqlalchemy import create_engine, inspect, text
 
 from alembic import command
 from app.adr_status import describe_adr_status
-from app.models import AdverseReaction, PatientAllergy
+from app.models import AdverseReaction, PatientAllergy, Prescription
 
 
 @pytest.fixture
@@ -106,3 +106,23 @@ def test_migration_does_not_infer_legacy_resolution_or_rewrite_business_rows(tmp
     with engine.connect() as conn:
         assert conn.execute(text("SELECT status, symptom FROM hoimsystem_adverse_reaction")).one() == (2, "历史症状")
     engine.dispose()
+
+
+@pytest.mark.asyncio
+async def test_pharmacist_read_scope_follows_prescription_care_without_status_write_permission(async_client, auth_headers, db_session, seed_data, adr_case):
+    foreign = AdverseReaction(patient_id=seed_data["patient2"].patient_id, symptom="其他患者的ADR", status=0, report_time=datetime.datetime.now())
+    db_session.add(foreign)
+    db_session.commit()
+    headers = auth_headers(seed_data["pharmacist_user"].username)
+    response = await async_client.get("/api/adverseReaction/getList", headers=headers)
+    assert response.status_code == 200, response.text
+    ids = {item["reaction_id"] for item in response.json()["data"]}
+    assert adr_case.reaction_id in ids and foreign.reaction_id not in ids
+    denied = await async_client.post("/api/adverseReaction/updateStatus", headers=headers, json={"reaction_id": adr_case.reaction_id, "status": 1})
+    assert denied.status_code == 403
+    db_session.query(Prescription).filter_by(patient_id=adr_case.patient_id).update({"status": 3})
+    db_session.commit()
+    response = await async_client.get("/api/adverseReaction/getList", headers=headers)
+    assert adr_case.reaction_id not in {item["reaction_id"] for item in response.json()["data"]}
+    admin = await async_client.get("/api/adverseReaction/getList", headers=auth_headers(seed_data["admin_user"].username))
+    assert {adr_case.reaction_id, foreign.reaction_id} <= {item["reaction_id"] for item in admin.json()["data"]}

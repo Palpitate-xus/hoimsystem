@@ -114,3 +114,17 @@ test("患者端不开放内部转诊工作页或加载其病例列表", async ({
   expect(state.reads).not.toContain("/api/referral/getList");
   expect(state.previews).toEqual([]);
 });
+
+test("药师从业务范围内ADR记录进入AI预览，管理状态操作不开放", async ({ page }) => {
+  const state = await session(page, "adr", "pharmacist");
+  await page.goto("/#/pharmacy/adverseReaction");
+  await expect(page.getByRole("button", { name: "核实历史结果", exact: true })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "上报ADR", exact: true })).toHaveCount(0);
+  await page.getByRole("button", { name: "AI ADR资料分析", exact: true }).click();
+  const drawer = page.getByRole("dialog", { name: "AI 所选ADR记录与信号辅助", exact: true });
+  await drawer.getByRole("button", { name: "查看本次资料", exact: true }).click();
+  await expect.poll(() => state.previews.length).toBe(1);
+  expect(state.previews[0].source_refs).toEqual({ reaction_id: "9" });
+  expect(state.businessWrites).toEqual([]);
+  expect(state.submissions).toEqual([]);
+});

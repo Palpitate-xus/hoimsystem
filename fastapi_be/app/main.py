@@ -387,6 +387,7 @@ from app.routers import (
     ai_observation_windows,
     ai_qsofa,
     ai_risk_rules,
+    ai_vasoactive_mappings,
     allergy,
     analytics,
     antibiotic,
@@ -423,6 +424,7 @@ from app.routers import (
     inpatient_laboratory,
     inpatient_observations,
     inpatient_order,
+    inpatient_support,
     insurance,
     insurance_catalog,
     integration,
@@ -510,6 +512,8 @@ app.include_router(ai_news2.router, prefix="/api")
 app.include_router(ai_aki.router, prefix="/api")
 app.include_router(ai_qsofa.router, prefix="/api")
 app.include_router(inpatient_gcs.router, prefix="/api")
+app.include_router(inpatient_support.router, prefix="/api")
+app.include_router(ai_vasoactive_mappings.router, prefix="/api")
 app.include_router(ai.router, prefix="/api")
 app.include_router(analytics.router, prefix="/api")
 app.include_router(performance.router, prefix="/api")

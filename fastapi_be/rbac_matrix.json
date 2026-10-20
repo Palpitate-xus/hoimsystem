@@ -1375,6 +1375,60 @@
   "path": "/api/ai/admin/risk-rule-profiles/{rule_profile_id}/revoke"
  },
  {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "options",
+  "method": "GET",
+  "module": "ai_vasoactive_mappings.py",
+  "path": "/api/ai/admin/vasoactive-drug-mappings/options"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "list_mappings",
+  "method": "GET",
+  "module": "ai_vasoactive_mappings.py",
+  "path": "/api/ai/admin/vasoactive-drug-mappings"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "post_mapping",
+  "method": "POST",
+  "module": "ai_vasoactive_mappings.py",
+  "path": "/api/ai/admin/vasoactive-drug-mappings"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "get_mapping",
+  "method": "GET",
+  "module": "ai_vasoactive_mappings.py",
+  "path": "/api/ai/admin/vasoactive-drug-mappings/{mapping_id}"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "publish_mapping",
+  "method": "POST",
+  "module": "ai_vasoactive_mappings.py",
+  "path": "/api/ai/admin/vasoactive-drug-mappings/{mapping_id}/publish"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "revoke_mapping",
+  "method": "POST",
+  "module": "ai_vasoactive_mappings.py",
+  "path": "/api/ai/admin/vasoactive-drug-mappings/{mapping_id}/revoke"
+ },
+ {
   "auth": "ANY",
   "function": "list_allergies",
   "method": "GET",
@@ -4086,6 +4140,128 @@
   "method": "POST",
   "module": "inpatient_order.py",
   "path": "/api/inpatientOrder/execute"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "nurse",
+   "super_admin"
+  ],
+  "function": "source_options",
+  "method": "GET",
+  "module": "inpatient_support.py",
+  "path": "/api/inpatient-support/options"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "nurse",
+   "super_admin"
+  ],
+  "function": "infection_evidence",
+  "method": "GET",
+  "module": "inpatient_support.py",
+  "path": "/api/inpatient-support/infection-evidence"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "nurse",
+   "super_admin"
+  ],
+  "function": "vasoactive_origins",
+  "method": "GET",
+  "module": "inpatient_support.py",
+  "path": "/api/inpatient-support/vasoactive/origin-candidates"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "nurse",
+   "super_admin"
+  ],
+  "function": "vasoactive_mappings",
+  "method": "GET",
+  "module": "inpatient_support.py",
+  "path": "/api/inpatient-support/vasoactive/mapping-candidates"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "nurse",
+   "super_admin"
+  ],
+  "function": "sources",
+  "method": "GET",
+  "module": "inpatient_support.py",
+  "path": "/api/inpatient-support/{kind}"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "nurse",
+   "super_admin"
+  ],
+  "function": "create",
+  "method": "POST",
+  "module": "inpatient_support.py",
+  "path": "/api/inpatient-support/{kind}"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "nurse",
+   "super_admin"
+  ],
+  "function": "source",
+  "method": "GET",
+  "module": "inpatient_support.py",
+  "path": "/api/inpatient-support/{kind}/{identifier}"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "nurse",
+   "super_admin"
+  ],
+  "function": "revoke",
+  "method": "POST",
+  "module": "inpatient_support.py",
+  "path": "/api/inpatient-support/{kind}/{identifier}/revoke"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "admin_sources",
+  "method": "GET",
+  "module": "inpatient_support.py",
+  "path": "/api/ai/admin/support-sources/{kind}"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "admin_source",
+  "method": "GET",
+  "module": "inpatient_support.py",
+  "path": "/api/ai/admin/support-sources/{kind}/{identifier}"
  },
  {
   "auth": "ANY",

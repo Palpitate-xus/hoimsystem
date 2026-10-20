@@ -93,6 +93,7 @@ ROLE_GROUPS = read_role_groups(
 )
 ROLE_GROUPS.update(read_role_groups(BACKEND / "app/inpatient_observations.py", ("OBSERVATION_ROLES",)))
 ROLE_GROUPS.update(read_role_groups(BACKEND / "app/inpatient_gcs.py", ("READ_ROLES",), ROLE_GROUPS))
+ROLE_GROUPS.update(read_role_groups(BACKEND / "app/inpatient_support_common.py", ("SUPPORT_ROLES",)))
 ROLE_GROUPS.update(read_role_groups(BACKEND / "app/ai/observation_windows.py", ("WINDOW_ROLES",)))
 ROLE_GROUPS.update(read_role_groups(BACKEND / "app/inpatient_laboratory.py", ("LAB_SOURCE_ROLES", "LAB_READ_ROLES")))
 ROLE_GROUPS.update(read_role_groups(BACKEND / "app/ai/lab_mappings.py", ("MAPPING_ROLES",)))

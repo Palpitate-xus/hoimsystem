@@ -3,7 +3,7 @@
 > 由 `fastapi_be/scripts/generate_rbac_matrix.py` 从源码自动生成，请勿手改。
 > `✓`=可访问 | `PUBLIC`=无需登录 | 留空=不可访问
 
-共 **703** 个接口（PUBLIC 18 个 / 需登录 685 个）。
+共 **719** 个接口（PUBLIC 18 个 / 需登录 701 个）。
 
 
 ### `admin.py`
@@ -239,6 +239,17 @@
 | GET | `/api/ai/admin/risk-rule-profiles/{rule_profile_id}` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
 | POST | `/api/ai/admin/risk-rule-profiles/{rule_profile_id}/publish` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
 | POST | `/api/ai/admin/risk-rule-profiles/{rule_profile_id}/revoke` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+
+### `ai_vasoactive_mappings.py`
+
+| 方法 | 路径 | admin | super_admin | director | doctor | nurse | cashier | pharmacist | guide | patient | lab_technician | registrar | PUBLIC |
+|------|------|------|------|------|------|------|------|------|------|------|------|------|------|
+| GET | `/api/ai/admin/vasoactive-drug-mappings/options` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/admin/vasoactive-drug-mappings` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/admin/vasoactive-drug-mappings` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/admin/vasoactive-drug-mappings/{mapping_id}` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/admin/vasoactive-drug-mappings/{mapping_id}/publish` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/admin/vasoactive-drug-mappings/{mapping_id}/revoke` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
 
 ### `allergy.py`
 
@@ -696,6 +707,21 @@
 | POST | `/api/inpatientOrder/cancel` | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |
 | GET | `/api/inpatientOrder/getExecutionList` | ✓ | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |
 | POST | `/api/inpatientOrder/execute` | ✓ | ✓ |  |  | ✓ |  |  |  |  |  |  |  |
+
+### `inpatient_support.py`
+
+| 方法 | 路径 | admin | super_admin | director | doctor | nurse | cashier | pharmacist | guide | patient | lab_technician | registrar | PUBLIC |
+|------|------|------|------|------|------|------|------|------|------|------|------|------|------|
+| GET | `/api/inpatient-support/options` | ✓ | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |
+| GET | `/api/inpatient-support/infection-evidence` | ✓ | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |
+| GET | `/api/inpatient-support/vasoactive/origin-candidates` | ✓ | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |
+| GET | `/api/inpatient-support/vasoactive/mapping-candidates` | ✓ | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |
+| GET | `/api/inpatient-support/{kind}` | ✓ | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |
+| POST | `/api/inpatient-support/{kind}` | ✓ | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |
+| GET | `/api/inpatient-support/{kind}/{identifier}` | ✓ | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |
+| POST | `/api/inpatient-support/{kind}/{identifier}/revoke` | ✓ | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |
+| GET | `/api/ai/admin/support-sources/{kind}` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/admin/support-sources/{kind}/{identifier}` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
 
 ### `insurance.py`
 

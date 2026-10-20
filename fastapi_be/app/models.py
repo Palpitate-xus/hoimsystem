@@ -4,6 +4,10 @@ from sqlalchemy import CheckConstraint, Column, Date, DateTime, Float, ForeignKe
 from sqlalchemy.dialects import mysql
 from sqlalchemy.orm import relationship
 
+from app import inpatient_infection_models as _infection_models  # noqa: F401
+from app import inpatient_respiratory_models as _respiratory_models  # noqa: F401
+from app import inpatient_vasoactive_models as _vasoactive_models  # noqa: F401
+
 # Register AI tables in the same metadata for create_all and Alembic migrations.
 from app.ai import models as _ai_models  # noqa: F401
 from app.clinical_observations import ObservationDecimal

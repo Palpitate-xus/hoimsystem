@@ -31,6 +31,7 @@ ROLES = {
     "patient": "患者",
     "guide": "导诊",
     "lab_technician": "检验技师",
+    "cashier": "收费员",
 }
 
 

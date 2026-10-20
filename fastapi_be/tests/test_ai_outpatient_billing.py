@@ -12,7 +12,7 @@ from app.ai.billing_sources import billing_reconciliation
 from app.ai.catalog import FEATURE_BY_KEY
 from app.ai.context import patient_snapshot
 from app.ai.governance import encode_json
-from app.ai.models import AIRun
+from app.ai.models import AIPatientGrant, AIRun, utcnow
 from app.ai.runtime import authorize_run
 from app.models import Admission, Charge, Department, Invoice, Patient, Payment, Prescription, Registration
 
@@ -158,3 +158,40 @@ def test_result_access_rechecks_actual_billing_encounter_even_when_caller_omitte
     with pytest.raises(HTTPException) as denied:
         authorize_run(db_session, director, run)
     assert denied.value.status_code == 403
+
+
+@pytest.mark.asyncio
+async def test_cashier_uses_only_billing_capability_and_explicit_revocable_patient_grants(async_client, seed_data, db_session, auth_headers, outpatient_bills):
+    registration, _, charges, _, _ = outpatient_bills
+    user = seed_data["cashier_user"]
+    headers = auth_headers(user.username)
+    features = await async_client.get("/api/ai/features", headers=headers)
+    assert {row["key"] for row in features.json()["data"]} == {"charge_reconciliation"}
+    request = {
+        "feature_key": "charge_reconciliation",
+        "patient_id": registration.patient_id,
+        "encounter_ref": registration.registration_uuid,
+        "source_refs": {"outpatient_charge_id": charges[0].charge_id},
+    }
+    denied = await async_client.post("/api/ai/context", headers=headers, json=request)
+    assert denied.status_code == 403
+    grant = AIPatientGrant(
+        user_id=user.user_id,
+        patient_id=registration.patient_id,
+        category="operations",
+        reason="测试限定收费核对用途",
+        expires_at=utcnow() + datetime.timedelta(hours=1),
+        created_by=seed_data["super_admin_user"].user_id,
+    )
+    db_session.add(grant)
+    db_session.commit()
+    allowed = await async_client.post("/api/ai/context", headers=headers, json=request)
+    assert allowed.status_code == 200, allowed.text
+    context = allowed.json()["data"]["context"]
+    assert context["outpatient_charges"][0]["charge_id"] == charges[0].charge_id
+    assert "outpatient_records" not in context
+    assert "reviewed_lab_results" not in context
+    grant.revoked = 1
+    db_session.commit()
+    revoked = await async_client.post("/api/ai/context", headers=headers, json=request)
+    assert revoked.status_code == 403

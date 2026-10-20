@@ -186,7 +186,7 @@ import {
 const categories = { cdss: "临床 CDSS", pharmacy: "用药与药房", records: "病历文书", diagnostics: "检验影像体检", inpatient: "住院护理急诊", patient: "患者服务", operations: "运营与收费", knowledge: "知识科研质控" };
 const validations = { unreviewed: "未评审", pilot: "试点评估", validated: "已验证", suspended: "已暂停" };
 const knowledgeStatuses = { draft: "草稿", published: "已发布", retired: "已停用" };
-const roles = { super_admin: "超级管理员", admin: "管理员", doctor: "医生", director: "科室主任", pharmacist: "药师", nurse: "护士", patient: "患者", guide: "导诊员", lab_technician: "检验技师" };
+const roles = { super_admin: "超级管理员", admin: "管理员", doctor: "医生", director: "科室主任", pharmacist: "药师", nurse: "护士", patient: "患者", guide: "导诊员", lab_technician: "检验技师", cashier: "收费员" };
 const loading = ref(false), saving = ref(false), tab = ref("features");
 const features = ref([]), providers = ref([]), knowledge = ref([]), grants = ref([]), auditEvents = ref([]), usage = ref([]);
 const search = ref(""), category = ref(""), setupFilter = ref("all"), page = ref(1);

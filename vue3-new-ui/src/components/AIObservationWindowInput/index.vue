@@ -14,6 +14,7 @@
         <el-collapse-item title="核实原住院来源并建立观测窗" name="sources">
           <el-tabs v-if="sourceSections.includes('sources')" v-model="sourceTab">
             <el-tab-pane label="检验来源登记" name="laboratory" lazy><inpatient-lab-source-panel v-if="sourceTab === 'laboratory'" :patient-id="patientId" :admission-id="admissionId" :active="!disabled" @source-created="sourceChanged" @source-revoked="sourceChanged" /></el-tab-pane>
+            <el-tab-pane label="GCS分项来源登记" name="gcs" lazy><inpatient-gcs-source-panel v-if="sourceTab === 'gcs'" :patient-id="patientId" :admission-id="admissionId" :active="!disabled" @source-created="sourceChanged" @source-revoked="sourceChanged" /></el-tab-pane>
             <el-tab-pane label="点测、尿量与新建窗口" name="observations" lazy><inpatient-observation-panel v-if="sourceTab === 'observations'" :patient-id="patientId" :admission-id="admissionId" :active="!disabled" @window-created="windowCreated" /></el-tab-pane>
           </el-tabs>
         </el-collapse-item>
@@ -35,6 +36,7 @@ import { useStore } from "vuex";
 import { getObservationWindow, getObservationWindows, observationWindowMatches } from "@/api/inpatientObservations";
 
 const InpatientLabSourcePanel = defineAsyncComponent(() => import("@/components/InpatientLabSourcePanel/index.vue"));
+const InpatientGcsSourcePanel = defineAsyncComponent(() => import("@/components/InpatientGcsSourcePanel/index.vue"));
 const InpatientObservationPanel = defineAsyncComponent(() => import("@/components/InpatientObservationPanel/index.vue"));
 
 const props = defineProps({ patientId: { type: Number, required: true }, admissionId: { type: String, default: "" }, initialWindowId: { type: String, default: "" }, disabled: { type: Boolean, default: false } });
@@ -48,7 +50,7 @@ let listVersion = 0, detailVersion = 0, alive = true, paused = false, allowIniti
 const scope = () => JSON.stringify([props.patientId, props.admissionId, props.initialWindowId, store.state.user.accessToken, roles.value]);
 const valid = (stamp, identity, detail = false) => alive && !paused && stamp === (detail ? detailVersion : listVersion) && identity === scope() && canUse.value;
 function clearSelection() { current.value = null; emit("selection", null); emit("availability", false); }
-function sourceChanged() { listVersion++; detailVersion++; allowInitialSelection = false; selectedId.value = ""; options.value = []; loading.value = false; checking.value = false; truncated.value = false; clearSelection(); sourceNotice.value = "检验来源已变化；旧观测窗不会补入新资料，请重新建立窗口并明确选择核对。"; }
+function sourceChanged() { listVersion++; detailVersion++; allowInitialSelection = false; selectedId.value = ""; options.value = []; loading.value = false; checking.value = false; truncated.value = false; clearSelection(); sourceNotice.value = "原来源已变化；旧观测窗不会补入新资料，请重新建立窗口并明确选择核对。"; }
 function windowCreated() { allowInitialSelection = false; reload(); sourceNotice.value = "新观测窗已建立，请从目录明确选择并核对；此操作未调用模型。"; }
 async function reload() {
   const stamp = ++listVersion, identity = scope();

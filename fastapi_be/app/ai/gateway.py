@@ -11,6 +11,7 @@ from fastapi import HTTPException
 from pydantic import ValidationError
 
 from app.ai.audio_files import AUDIO_FORMATS
+from app.ai.bed_protocol import BedGenerationResult
 from app.ai.catalog import COMMON_SYSTEM_PROMPT, FeatureSpec
 from app.ai.ecg_model import LABELS, LEADS, PREPROCESSING, RELEASE_FILES, ECGModelManifest, canonical_json
 from app.ai.governance import encode_json, provider_credential, validate_endpoint
@@ -92,6 +93,8 @@ def validate_generation(
     sofa_source: dict | None = None,
     sofa_change_source: dict | None = None,
     roster_source: dict | None = None,
+    bed_source: dict | None = None,
+    bed_horizon: int | None = None,
     forecast_horizon: int | None = None,
     instructions_digest: str | None = None,
     model_version: str | None = None,
@@ -101,11 +104,17 @@ def validate_generation(
         if sofa_source is not None and sofa_change_source is not None:
             raise ValueError("SOFA日评估与变化结果不能混用")
         if roster_source is not None and any(
-            value is not None for value in (audio_source, ecg_source, image_source, forecast_source, news2_source, aki_source, qsofa_source, sofa_source, sofa_change_source)
+            value is not None for value in (audio_source, ecg_source, image_source, forecast_source, news2_source, aki_source, qsofa_source, sofa_source, sofa_change_source, bed_source)
         ):
             raise ValueError("排班原件不得与其他模型原件混用")
+        if bed_source is not None and any(
+            value is not None for value in (audio_source, ecg_source, image_source, forecast_source, news2_source, aki_source, qsofa_source, sofa_source, sofa_change_source, roster_source)
+        ):
+            raise ValueError("床位原件不得与其他模型原件混用")
         schema = (
-            RosterGenerationResult
+            BedGenerationResult
+            if bed_source is not None
+            else RosterGenerationResult
             if roster_source is not None
             else SofaGenerationResult
             if sofa_source is not None
@@ -138,6 +147,20 @@ def validate_generation(
         knowledge_ids = {item["source_id"] for item in evidence if item.get("kind") == "knowledge"}
         if not cited.intersection(knowledge_ids):
             raise AIExecutionError("UNGROUNDED_OUTPUT", "该任务的回答缺少已审核知识依据，结果已拒绝展示")
+    if bed_source is not None:
+        from app.ai.bed_contract import BedSource
+        from app.ai.bed_model import generation_result_for_analysis, validate_analysis_binding
+
+        try:
+            validate_analysis_binding(result.bed_analysis, BedSource.model_validate(bed_source), bed_horizon, instructions_digest, model_version)
+            explanation = {key: getattr(result, key) for key in ("summary", "warnings", "missing_data")}
+            explanation["sections"] = [item.model_dump(mode="json") for item in result.sections]
+            if explanation != generation_result_for_analysis(result.bed_analysis):
+                raise ValueError("固定床位解释与完整统计证据不符")
+        except (ValidationError, ValueError, TypeError, KeyError, OverflowError) as exc:
+            raise AIExecutionError("BED_BINDING_MISMATCH", "床位完整原件、五项目标、原钟点、预测期、滚动回测、精确分母、容量情景或固定解释重算不一致，结果已拒收") from exc
+        if bed_source["source_id"] not in cited:
+            raise AIExecutionError("UNGROUNDED_BED", "床位预测说明未引用明确审核的完整原序列")
     if roster_source is not None:
         from app.ai.roster_contract import RosterSource
         from app.ai.roster_model import generation_result_for_analysis, validate_analysis_binding
@@ -355,6 +378,11 @@ def _request(provider: AIProvider, spec: FeatureSpec, task_prompt: str, data: di
     qsofa_mode = provider.model.startswith("qsofa:")
     sofa_mode = provider.model.startswith("sofa1:")
     roster_mode = provider.model.startswith("roster:")
+    bed_mode = provider.model.startswith("bed:")
+    if bed_mode and (spec.number != 64 or provider.kind != "specialist"):
+        raise AIExecutionError("BED_ADAPTER_REQUIRED", "完整床位原件仅由登记的独立床位预测服务处理")
+    if {"bed_source", "bed_binding", "bed_series"} & data.get("context", {}).keys() and not bed_mode:
+        raise AIExecutionError("BED_ADAPTER_REQUIRED", "完整床位原件不能发送给其他模式或文本模型")
     if roster_mode and (spec.number != 63 or provider.kind != "specialist"):
         raise AIExecutionError("ROSTER_ADAPTER_REQUIRED", "完整排班原件仅由登记的独立排班服务处理")
     if {"roster_source", "roster_binding"} & data.get("context", {}).keys() and not roster_mode:
@@ -385,6 +413,40 @@ def _request(provider: AIProvider, spec: FeatureSpec, task_prompt: str, data: di
     if spec.number == 62 and provider.kind != "specialist":
         raise AIExecutionError("FORECAST_ADAPTER_REQUIRED", "日挂号记录数须通过带固定数值契约的专用预测服务处理")
     specialist_input = data
+    if bed_mode:
+        from app.ai.bed_context import BedContextBinding, selection
+        from app.ai.bed_contract import BedSource, hash_content
+
+        try:
+            identifier, horizon = selection(data["input"])
+            source = BedSource.model_validate(data["context"]["bed_source"]).model_dump(mode="json")
+            bound = BedContextBinding.model_validate(data["context"]["bed_binding"])
+            if (
+                identifier != bound.series_id
+                or identifier != source["series_id"]
+                or horizon != bound.horizon_days
+                or bound.projection_hash != hash_content(source)
+                or bound.series_governance_hash != source["governance_hash"]
+                or any(
+                    getattr(bound, key) != source[key]
+                    for key in (
+                        "source_id",
+                        "content_hash",
+                        "scope_token",
+                        "member_manifest_hash",
+                        "historical_collection_digest",
+                        "current_membership_digest",
+                        "future_scenario_collection_digest",
+                        "rule_id",
+                        "recipe_digest",
+                        "input_policy_digest",
+                    )
+                )
+            ):
+                raise ValueError("完整床位公开原件与冻结输入或预测期不同")
+            specialist_input = {"context": {"bed_source": source}, "horizon_days": horizon}
+        except (HTTPException, ValidationError, ValueError, TypeError, KeyError) as exc:
+            raise AIExecutionError("BED_SOURCE_REQUIRED", "须选择一件已审核完整床位序列、明确预测期并核对公开投影SHA") from exc
     if roster_mode:
         from app.ai.roster_context import RosterContextBinding, selection
         from app.ai.roster_contract import RosterSource, hash_content
@@ -497,7 +559,9 @@ def _request(provider: AIProvider, spec: FeatureSpec, task_prompt: str, data: di
         }
     if provider.kind == "specialist":
         return endpoint + "/tasks", {
-            "schema_version": "10"
+            "schema_version": "11"
+            if bed_mode
+            else "10"
             if roster_mode
             else "9"
             if sofa_mode
@@ -512,13 +576,22 @@ def _request(provider: AIProvider, spec: FeatureSpec, task_prompt: str, data: di
             "engine": spec.engine,
             "model": provider.model,
             "instructions": instructions,
-            **({"store": False} if spec.number in {21, 36, 37, 62} or news2_mode or aki_mode or qsofa_mode or sofa_mode or roster_mode else {}),
+            **({"store": False} if spec.number in {21, 36, 37, 62} or news2_mode or aki_mode or qsofa_mode or sofa_mode or roster_mode or bed_mode else {}),
             "input": specialist_input,
         }
     raise AIExecutionError("UNSUPPORTED_PROVIDER", "模型接口类型不受支持")
 
 
 def _parse_response(provider: AIProvider, spec: FeatureSpec, value: dict) -> tuple[object, int, int]:
+    if provider.model.startswith("bed:"):
+        from app.ai.bed_protocol import parse_bed_envelope
+
+        if provider.kind != "specialist" or spec.number != 64:
+            raise AIExecutionError("BED_ADAPTER_REQUIRED", "床位完整证据仅由登记的独立床位服务处理")
+        try:
+            return parse_bed_envelope(value, provider.model)
+        except (ValidationError, ValueError, TypeError, KeyError) as exc:
+            raise AIExecutionError("ADAPTER_CONTRACT_MISMATCH", "床位独立服务的版本、完整证据或用量不符合严格协议") from exc
     if provider.model.startswith("roster:"):
         from app.ai.roster_protocol import parse_roster_envelope
 
@@ -619,7 +692,15 @@ async def generate(
     sofa_change_source = data.get("context", {}).get("sofa_change_source") if sofa_mode else None
     roster_mode = spec.number == 63 and provider.kind == "specialist" and provider.model.startswith("roster:")
     roster_source = data.get("context", {}).get("roster_source") if roster_mode else None
+    bed_mode = spec.number == 64 and provider.kind == "specialist" and provider.model.startswith("bed:")
+    bed_source = data.get("context", {}).get("bed_source") if bed_mode else None
     response_limit = MAX_RESPONSE_BYTES
+    if bed_mode:
+        from app.ai.bed_contract import MAX_BYTES
+
+        response_limit = MAX_BYTES
+        if len(encode_json(payload).encode("utf-8")) > MAX_BYTES:
+            raise AIExecutionError("BED_REQUEST_LIMIT", "床位完整原件及Prompt超过8MiB请求上限，不发送或截断")
     if roster_mode:
         from app.ai.roster_contract import MAX_BYTES
 
@@ -686,6 +767,8 @@ async def generate(
             sofa_source=sofa_source,
             sofa_change_source=sofa_change_source,
             roster_source=roster_source,
+            bed_source=bed_source,
+            bed_horizon=data.get("input", {}).get("horizon_days") if bed_mode else None,
             forecast_horizon=data.get("input", {}).get("horizon_days") if spec.number == 62 else None,
             instructions_digest=hashlib.sha256(payload.get("instructions", "").encode()).hexdigest(),
             model_version=provider.model,

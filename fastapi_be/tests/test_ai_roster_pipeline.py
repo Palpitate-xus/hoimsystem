@@ -79,6 +79,13 @@ async def test_actual_context_queue_solver_blob_history_feedback_and_super_trace
     context = inspection["context"]
     assert context["roster_plan"]["snapshot"] == json.loads(case["plan"].snapshot_json)
     assert context["roster_source"] == context["roster_plan"]["public_source"] == json.loads(case["plan"].projection_json)
+    response = await async_client.get("/api/ai/roster-plans/" + case["plan"].plan_id, headers=headers)
+    assert response.status_code == 200, response.text
+    plan_detail = response.json()["data"]
+    assert plan_detail["eligible"] is True and plan_detail["public_source"] == context["roster_source"]
+    response = await async_client.get("/api/ai/roster-sources/options", headers=headers, params={"department_id": case["department"].department_id})
+    assert response.status_code == 200, response.text
+    source_options = response.json()["data"]
     run = create_run(db_session, case["director"], run_request(case))
     frozen = json.loads(run.input_json)
     assert "roster_source" not in frozen["payload"]["context"] and "roster_plan" not in frozen["payload"]["context"]
@@ -109,7 +116,7 @@ async def test_actual_context_queue_solver_blob_history_feedback_and_super_trace
     response = await async_client.get(f"/api/ai/admin/runs/{run.run_id}", headers=auth_headers(case["super"].username))
     assert response.status_code == 200, response.text
     assert response.json()["data"]["frozen_request"]["payload"]["context"]["roster_source"] == context["roster_source"]
-    fixture = {"inspection": inspection, "run_detail": data, "frozen_request": frozen, "super_trace": response.json()["data"]}
+    fixture = {"inspection": inspection, "run_detail": data, "frozen_request": frozen, "super_trace": response.json()["data"], "plan_detail": plan_detail, "source_options": source_options}
     (tmp_path / "actual-roster-pipeline-ui.json").write_text(json.dumps(fixture, ensure_ascii=False, indent=2), encoding="utf-8")
     assert before == {
         model.__tablename__: [tuple(getattr(row, col.name) for col in model.__table__.columns) for row in db_session.query(model).all()]

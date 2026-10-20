@@ -52,3 +52,14 @@ fields were changed. `provider-*.json` are actual authenticated admin route
 responses for matching/model-mismatch/timeout-mismatch configurations, exported
 by backend `test_actual_metadata_route_report` parametrizations 0/1/2. They are
 still mocked browser responses, not live provider probes from the browser.
+
+`pipeline-partial.json` retains exact `bed_source`/`bed_series`/`bed_binding`
+and analysis from `/tmp/hoim-bed-partial-findings-ui.json` (SHA256
+`c5230eac75298aab3ce7af318e9f6a58ee331e4dc451adc77b07bc7c485e6c11`).
+The exporter used actual in-memory source/series publication, the actual local
+context/expand helper, and actual native compute. All five axes remain unknown;
+its task-view flags are from the backend helper, not a hand-written wrapper.
+`bed-native-fixtures.cjs` separately invokes the actual typed pure core with
+network and dotenv disabled for spring/fall DST, large microsecond integrals,
+zero denominators and missing axes. Those pure engineering sources do not claim
+to be private ORM sources or hospital data.

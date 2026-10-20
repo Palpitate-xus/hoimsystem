@@ -1,0 +1,632 @@
+{
+  "recorded_at_utc": "2026-10-20T11:00:26.646887+00:00",
+  "platform_commit": "c7118255351c317781710511630b82bd757fcc7f",
+  "baseline_commit": "792ba5e1a6a070a068449d8b84fbead16e2abc89",
+  "catalog_version": "2026.10.20.1",
+  "scope": "Explicit nullable nursing data, original-admission provenance, complete manual ICU/PACU component arithmetic and permission-checked AI source/result workflows over synthetic records; not a risk-prediction model or clinical validation",
+  "real_patient_data_used": false,
+  "clinical_validation_completed": false,
+  "new_clinical_features_enabled": false,
+  "paid_or_real_external_model_invoked": false,
+  "ai_test_transport": "Real hospital API, SQLite records, queue/worker/result/access paths with synthetic LLM responses via httpx.MockTransport",
+  "inventory": {
+    "api_endpoints": 633,
+    "router_modules": 86,
+    "tables": 159,
+    "vue_view_components": 156,
+    "features": 80,
+    "source_reference_keys": 25,
+    "alembic_head": "20261020_ai_nursing_sources"
+  },
+  "nursing_input": {
+    "nullable_fields": [
+      "adl_score",
+      "pressure_ulcer_risk",
+      "fall_risk",
+      "consciousness",
+      "nutrition_risk"
+    ],
+    "omitted_update_fields": "preserve previous value",
+    "explicit_null_update_fields": "clear to unknown",
+    "explicit_zero": "preserved as entered, never treated as missing",
+    "new_entry_version": "nullable_v1",
+    "legacy_entry_version": "legacy_unverified",
+    "entry_version_proves_clinical_correctness": false,
+    "all_unknown_assessment_draft_allowed": true,
+    "completion_requires_one_recorded_item": true,
+    "completed_assessment_mutation_allowed": false,
+    "morse_braden_or_vte_recalculation": false,
+    "critical_consciousness_or_gcs_default_normal": false
+  },
+  "time_provenance": {
+    "assessment_occurrence": "explicit timezone-aware assessed_at normalized to UTC, or null; never copied from create/update/recording timestamps",
+    "critical_record_time_bases": [
+      "utc",
+      "unspecified",
+      "recorded_at_only"
+    ],
+    "critical_evidence_observed_at": "only explicitly UTC; unknown otherwise, with original record_time retained",
+    "legacy_nursing_record_time": "original time retained, occurrence/recording provenance not independently verified",
+    "invalid_nursing_record_time_falls_back_to_now": false,
+    "mysql_datetime_precision": 6,
+    "downgrade_imputes_unknown_scores_or_truncates_microseconds": false
+  },
+  "manual_scores": {
+    "calculation_version": "manual_components_v2",
+    "definitions": {
+      "gcs": {
+        "edition": "gcs_e4_v5_m6",
+        "label": "GCS（E4/V5/M6）",
+        "components": [
+          {
+            "key": "eye",
+            "label": "睁眼",
+            "allowed": [
+              1,
+              2,
+              3,
+              4
+            ]
+          },
+          {
+            "key": "verbal",
+            "label": "语言",
+            "allowed": [
+              1,
+              2,
+              3,
+              4,
+              5
+            ]
+          },
+          {
+            "key": "motor",
+            "label": "运动",
+            "allowed": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        ],
+        "scope_note": "仅汇总人工填写的睁眼、语言及运动分项；未测或NT不可计算总分，不由总分自动判断诊断或预后。"
+      },
+      "sofa": {
+        "edition": "sofa_1996",
+        "label": "SOFA（1996原版）",
+        "components": [
+          {
+            "key": "resp_score",
+            "label": "呼吸",
+            "allowed": [
+              0,
+              1,
+              2,
+              3,
+              4
+            ]
+          },
+          {
+            "key": "coag_score",
+            "label": "凝血",
+            "allowed": [
+              0,
+              1,
+              2,
+              3,
+              4
+            ]
+          },
+          {
+            "key": "liver_score",
+            "label": "肝脏",
+            "allowed": [
+              0,
+              1,
+              2,
+              3,
+              4
+            ]
+          },
+          {
+            "key": "cardio_score",
+            "label": "心血管",
+            "allowed": [
+              0,
+              1,
+              2,
+              3,
+              4
+            ]
+          },
+          {
+            "key": "neuro_score",
+            "label": "中枢神经",
+            "allowed": [
+              0,
+              1,
+              2,
+              3,
+              4
+            ]
+          },
+          {
+            "key": "renal_score",
+            "label": "肾脏",
+            "allowed": [
+              0,
+              1,
+              2,
+              3,
+              4
+            ]
+          }
+        ],
+        "scope_note": "仅汇总人工六分项，未从原始生理资料自动评分或核实取值时间窗；不是SOFA 2.0，不据此确认脏器功能、脓毒症或死亡风险。"
+      },
+      "apache2": {
+        "edition": "apache_ii_1985_manual_aps",
+        "label": "APACHE II（1985，人工APS小计）",
+        "components": [
+          {
+            "key": "aps_total",
+            "label": "外部人工APS小计",
+            "allowed": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8,
+              9,
+              10,
+              11,
+              12,
+              13,
+              14,
+              15,
+              16,
+              17,
+              18,
+              19,
+              20,
+              21,
+              22,
+              23,
+              24,
+              25,
+              26,
+              27,
+              28,
+              29,
+              30,
+              31,
+              32,
+              33,
+              34,
+              35,
+              36,
+              37,
+              38,
+              39,
+              40,
+              41,
+              42,
+              43,
+              44,
+              45,
+              46,
+              47,
+              48,
+              49,
+              50,
+              51,
+              52,
+              53,
+              54,
+              55,
+              56,
+              57,
+              58,
+              59,
+              60
+            ]
+          },
+          {
+            "key": "age_points",
+            "label": "年龄分",
+            "allowed": [
+              0,
+              2,
+              3,
+              5,
+              6
+            ]
+          },
+          {
+            "key": "chronic_health_points",
+            "label": "慢性健康分",
+            "allowed": [
+              0,
+              2,
+              5
+            ]
+          }
+        ],
+        "scope_note": "APS是外部人工小计，本系统未自动评估12项生理参数、年龄对应关系、慢性健康条件或首24小时窗口，不生成死亡风险分级。"
+      },
+      "aldrete": {
+        "edition": "aldrete_1970_color",
+        "label": "Aldrete（1970原版，肤色项）",
+        "components": [
+          {
+            "key": "activity_score",
+            "label": "活动",
+            "allowed": [
+              0,
+              1,
+              2
+            ]
+          },
+          {
+            "key": "respiration_score",
+            "label": "呼吸",
+            "allowed": [
+              0,
+              1,
+              2
+            ]
+          },
+          {
+            "key": "circulation_score",
+            "label": "循环",
+            "allowed": [
+              0,
+              1,
+              2
+            ]
+          },
+          {
+            "key": "consciousness_score",
+            "label": "意识",
+            "allowed": [
+              0,
+              1,
+              2
+            ]
+          },
+          {
+            "key": "color_score",
+            "label": "肤色",
+            "allowed": [
+              0,
+              1,
+              2
+            ]
+          }
+        ],
+        "scope_note": "仅汇总1970原版人工五分项，肤色项不等同于1995改良版氧饱和度项；不自动认定达到PACU转出或出院条件。"
+      },
+      "steward": {
+        "edition": "steward_1975",
+        "label": "Steward（1975三分项版）",
+        "components": [
+          {
+            "key": "wake_score",
+            "label": "清醒程度",
+            "allowed": [
+              0,
+              1,
+              2
+            ]
+          },
+          {
+            "key": "airway_score",
+            "label": "呼吸道通畅",
+            "allowed": [
+              0,
+              1,
+              2
+            ]
+          },
+          {
+            "key": "motor_score",
+            "label": "肢体活动",
+            "allowed": [
+              0,
+              1,
+              2
+            ]
+          }
+        ],
+        "scope_note": "仅汇总1975三分项人工评分，不替代持续观察，也不自动认定达到PACU转出或出院条件。"
+      }
+    },
+    "synthetic_arithmetic_boundary_examples": {
+      "gcs": {
+        "minimum_components": {
+          "eye": 1,
+          "verbal": 1,
+          "motor": 1
+        },
+        "minimum_sum": 3,
+        "maximum_components": {
+          "eye": 4,
+          "verbal": 5,
+          "motor": 6
+        },
+        "maximum_sum": 15,
+        "clinical_case": false,
+        "observation_to_point_assignment_performed": false
+      },
+      "sofa": {
+        "minimum_components": {
+          "resp_score": 0,
+          "coag_score": 0,
+          "liver_score": 0,
+          "cardio_score": 0,
+          "neuro_score": 0,
+          "renal_score": 0
+        },
+        "minimum_sum": 0,
+        "maximum_components": {
+          "resp_score": 4,
+          "coag_score": 4,
+          "liver_score": 4,
+          "cardio_score": 4,
+          "neuro_score": 4,
+          "renal_score": 4
+        },
+        "maximum_sum": 24,
+        "clinical_case": false,
+        "observation_to_point_assignment_performed": false
+      },
+      "apache2": {
+        "minimum_components": {
+          "aps_total": 0,
+          "age_points": 0,
+          "chronic_health_points": 0
+        },
+        "minimum_sum": 0,
+        "maximum_components": {
+          "aps_total": 60,
+          "age_points": 6,
+          "chronic_health_points": 5
+        },
+        "maximum_sum": 71,
+        "clinical_case": false,
+        "observation_to_point_assignment_performed": false
+      },
+      "aldrete": {
+        "minimum_components": {
+          "activity_score": 0,
+          "respiration_score": 0,
+          "circulation_score": 0,
+          "consciousness_score": 0,
+          "color_score": 0
+        },
+        "minimum_sum": 0,
+        "maximum_components": {
+          "activity_score": 2,
+          "respiration_score": 2,
+          "circulation_score": 2,
+          "consciousness_score": 2,
+          "color_score": 2
+        },
+        "maximum_sum": 10,
+        "clinical_case": false,
+        "observation_to_point_assignment_performed": false
+      },
+      "steward": {
+        "minimum_components": {
+          "wake_score": 0,
+          "airway_score": 0,
+          "motor_score": 0
+        },
+        "minimum_sum": 0,
+        "maximum_components": {
+          "wake_score": 2,
+          "airway_score": 2,
+          "motor_score": 2
+        },
+        "maximum_sum": 6,
+        "clinical_case": false,
+        "observation_to_point_assignment_performed": false
+      }
+    },
+    "all_defined_components_required": true,
+    "strict_integer_components": true,
+    "unknown_keys_or_arbitrary_score_suffixes_accepted": false,
+    "nt_or_missing_inputs_imputed": false,
+    "apache_aps_is_manual_external_subtotal": true,
+    "clinical_probability_or_discharge_decision_generated": false,
+    "legacy_total_detail_interpretation_rewritten": false,
+    "provided_admission_patient_link_checked": true,
+    "scene_proves_actual_icu_admission": false
+  },
+  "ai_sources": {
+    "explicit_references": [
+      "nursing_assessment_id",
+      "nursing_plan_id",
+      "critical_care_record_id",
+      "icu_score_id"
+    ],
+    "loaded_collections_rechecked": [
+      "completed_nursing_assessments",
+      "nursing_plans",
+      "critical_care_records",
+      "recorded_icu_scores",
+      "nursing_records"
+    ],
+    "original_patient_and_admission_required": true,
+    "draft_assessment_reference_accepted": false,
+    "selected_old_row_preserved_before_bounds": true,
+    "canonical_integer_score_id_required": true,
+    "admission_uuid_minimization_preserves_technical_identity": true,
+    "nurse_previous_admission_care_grants_selected_other_admission": false,
+    "preview_and_execution_share_references": true,
+    "business_row_reference_overridden_by_extra_json": false,
+    "queue_and_inflight_context_rechecked": true,
+    "completed_result_all_loaded_nursing_originals_rechecked": true,
+    "automatically_attached_unselected_sources_rechecked": true,
+    "changed_deleted_or_reassigned_original_blocks_ordinary_result": true,
+    "super_admin_frozen_audit_retained_after_original_admission_removal": true,
+    "original_nursing_or_score_records_written_by_ai": false,
+    "super_admin_model_prompt_knowledge_role_enablement_validation_and_audit_management": "existing central controls retained for all 80 features"
+  },
+  "verification": {
+    "full_backend": {
+      "passed": 2346,
+      "skipped": 28,
+      "seconds": 239.81,
+      "command": "/home/xusheng/miniconda3/bin/python -m pytest -q",
+      "log_sha256": "8abfcc659d9ade6a74dde108b1cea664607995f61dd827170791c5e3aa954975"
+    },
+    "new_nursing_api_migration_tests": 56,
+    "new_manual_score_tests": {
+      "passed": 40,
+      "seconds": 8.28
+    },
+    "new_explicit_source_tests": {
+      "passed": 57,
+      "seconds": 9.84
+    },
+    "new_automatically_attached_source_tests": {
+      "passed": 30,
+      "seconds": 10.27,
+      "matrix": "5 collections x 2 reference modes x 3 source changes; actual queue/worker and completed-result API, before/after ordinary and super-admin reads"
+    },
+    "new_default_passing_tests_vs_baseline": 183,
+    "browser": {
+      "passed": 79,
+      "reported_duration": "2.1m",
+      "new_cases": 9,
+      "api_requests_intercepted": true,
+      "command": "E2E_BASE_URL=http://127.0.0.1:4180 npx playwright test e2e/ai-*.spec.js e2e/diagnosis-review.spec.js --workers=2 --reporter=list",
+      "log_sha256": "e1eccb29475462d797028bb83fe35c2786915b44610964154450b0f8711a8dc5"
+    },
+    "production_build": {
+      "passed": true,
+      "seconds": 21.5,
+      "runtime_sources_unchanged_since_build": true
+    },
+    "bundle": {
+      "largestJavaScript": {
+        "file": "element-plus.1235714c.js",
+        "bytes": 647479
+      },
+      "totalJavaScript": 5939670,
+      "totalAssets": 6457916,
+      "limits": {
+        "largestJavaScript": 700000,
+        "totalJavaScript": 6000000,
+        "totalAssets": 7000000
+      }
+    },
+    "bundle_limits_changed": false,
+    "rbac_matrix": {
+      "checked": true,
+      "endpoints": 633
+    },
+    "prompt_exports": {
+      "checked": true,
+      "features": 80
+    },
+    "ruff_check_changed_python_files": 17,
+    "ruff_full_format_check_files": 15,
+    "ruff_changed_function_range_checks": [
+      "app/routers/ops_extension.py: four scoring functions",
+      "tests/test_his_modules.py: two updated score cases"
+    ],
+    "format_only_commit": "bc54336",
+    "format_only_edit_preserved_entire_file_ast": [
+      "app/routers/ops_extension.py",
+      "tests/test_his_modules.py"
+    ],
+    "mysql_record_sha256": "6e29168441bbc6fad0fb8af3b54930d548daf753dcf7a925e823b804ff265dfc",
+    "actual_mysql": {
+      "synthetic_only": true,
+      "image": "mysql:8.0.39",
+      "transport": "real SQLAlchemy/PyMySQL unix socket",
+      "actual_migration_functions": true,
+      "network": "none",
+      "host_ports": [],
+      "source_mounts": false,
+      "image_id": "sha256:01faea2cb286276923a223bdbf438b50468f3c4090f6b61e0b27aa871ca0dbac",
+      "server_version": "8.0.39",
+      "migration_sha256": "648852aa984e665882c2d754e625d8d57da97e6ba88546b71280d0012161b876",
+      "fsp": {
+        "hoimsystem_critical_care_record.record_time": 6,
+        "hoimsystem_icu_score.assessed_at": 6,
+        "hoimsystem_nursing_assessment.assessed_at": 6
+      },
+      "legacy_values_and_provenance_preserved": true,
+      "actual_microsecond_roundtrip": 123456,
+      "actual_nulls_preserved": true,
+      "null_guard_no_ddl": true,
+      "one_microsecond_guards_no_ddl": [
+        "hoimsystem_nursing_assessment.assessed_at",
+        "hoimsystem_critical_care_record.record_time",
+        "hoimsystem_icu_score.assessed_at"
+      ],
+      "safe_roundtrip_preserved_legacy_rows": true,
+      "all_checks_passed": true,
+      "own_container_and_volumes_removed": true,
+      "own_socket_directory_removed": true,
+      "seconds": 11.994,
+      "existing_database_accessed": false,
+      "project_env_file_read": false,
+      "scope": "Original Alembic upgrade/downgrade functions through real SQLAlchemy/PyMySQL on three isolated synthetic tables; not full hospital bootstrap or production deployment",
+      "cleanup_verified": true
+    }
+  },
+  "primary_score_sources": {
+    "gcs_nt": "https://www.glasgowcomascale.org/faq/",
+    "sofa_1996": "https://www.esicm.org/wp-content/uploads/2018/03/esicmworking5-2.pdf",
+    "apache_ii": "https://www.cms.gov/files/document/hcfr-84-supp-091pdf",
+    "aldrete_1970": "https://doi.org/10.1213/00000539-197011000-00020",
+    "steward_1975": "https://link.springer.com/content/pdf/10.1007/BF03004827.pdf"
+  },
+  "implementation_sha256": {
+    "fastapi_be/alembic/versions/20261020_ai_nursing_sources.py": "648852aa984e665882c2d754e625d8d57da97e6ba88546b71280d0012161b876",
+    "fastapi_be/app/ai/catalog.py": "2c0c29fcd0707a150bd1bf2c7506adc4bf6248c2e3cefbfa69c8c78aac59fcaf",
+    "fastapi_be/app/ai/context.py": "bf5fb52e32652f447658e9cb31a5e16899ca3a0ab6a2fe92b7bb110a4b56a027",
+    "fastapi_be/app/ai/nursing_sources.py": "d2cf33cb28001abeaa1c5e109bd9a2b72c3ad225d32a2d5aecc5462bb27f5f1b",
+    "fastapi_be/app/ai/patient_sources.py": "6c770cadda6b63aa3d8708c6845fa1a3a31c8103ea795322e19046c9c9b37903",
+    "fastapi_be/app/ai/references.py": "d5f52d696ae7d9176e399d79a972b60660bdb9755079094e12c7b89b0f85d303",
+    "fastapi_be/app/ai/runtime.py": "3fdf9ee5509ed6d541f98fb5a92df1bda4307fd00316b2722865133f4ad2683d",
+    "fastapi_be/app/clinical_scores.py": "640cb1370bf4e131b24fe869e8960800f9e803f111f3a5aed8f4db7f90408242",
+    "fastapi_be/app/models.py": "54825c8a3c88c771d303f9d8f7c8f7ec324e7f622c438449e54b78beb9bcdc78",
+    "fastapi_be/app/routers/nursing.py": "7eda20a89ff6c372e9b4e2b9285fec242d3ea5f86480131ae79f45a217fae97d",
+    "fastapi_be/app/routers/ops_extension.py": "9f7c75f94329175e8c552dbd11bb8038a0c400536cf37c79286acf36d01283bf",
+    "fastapi_be/app/schemas.py": "1fbd955e5c7643d077231631f2c1904792bd1a2b8ec79dacdcedd66eba37340b",
+    "fastapi_be/tests/test_ai_nursing_history.py": "dc0094c19d01011d49bfebeb23e73669b1a2f98655be81169839b6ae539aa8da",
+    "fastapi_be/tests/test_ai_nursing_sources.py": "9bda1d49cb14cf01584aa7a07831dd0484d41c149d22049728b50ca220958235",
+    "fastapi_be/tests/test_clinical_score_integrity.py": "baf214585ea16a74b6652a8417845c2aa8375eac11b3401a7a551582615044e6",
+    "fastapi_be/tests/test_his_modules.py": "831aa5f7a8845db9cc7d94ce14a07a72de3c9022ff0ddcd11e43b30071f76a23",
+    "fastapi_be/tests/test_nursing_source_integrity.py": "a5feedb161a63fcb2984138ada648af116bfcd52fe6cf62d1adb53bf8d321b78",
+    "vue3-new-ui/e2e/ai-nursing-entry.spec.js": "efd55d1ad6d8212227109f8b21317a65398d8b6dcc68fa1b0ec19ead1fe20275",
+    "vue3-new-ui/src/api/hisModules.js": "cc36fd437d6b66bb94209f38746fb315e937ce90d911cf095f8ea86fb712a23e",
+    "vue3-new-ui/src/api/nursing.js": "2e9e998287a4334fc922c7bac21d1408f50f879ac80b55325d74c24ca32536e7",
+    "vue3-new-ui/src/components/AIAssistant/index.vue": "3b00edd5ddce681e51fea196d09ce472c7517f4d7f886e16374ebb358b07a884",
+    "vue3-new-ui/src/components/AINursingFindings/index.vue": "20f3884718846e54918ba24319d100bb99e4ac88364a25593e8b2f58852ed503",
+    "vue3-new-ui/src/views/inpatient/opsExtension.vue": "6f0116676b71523fdb7d6b9965bac5d9f83888f424adbf61673adf2dfeb811f1",
+    "vue3-new-ui/src/views/vitalsign/criticalCareRecord.vue": "8107b17e9b72ed7e04ca7699baa84a1e9e2ea02876309eb1f64f463c0aaa2499",
+    "vue3-new-ui/src/views/vitalsign/nursingAssessment.vue": "430df6c04c6889381438a730498986728944be2aa132bfe79a095f6cb7c2e66c",
+    "vue3-new-ui/src/views/vitalsign/nursingPlan.vue": "99000d01e9d2eba809faa2fdd0d0f25db2690a2dc3c8ea1e5e3c3f96b7dbe8eb"
+  },
+  "remaining": [
+    "Nullable fields and complete manual arithmetic do not establish observation accuracy, standard nursing instrument validation, diagnosis, mortality probabilities or PACU discharge eligibility.",
+    "Continuous physiological observations, split blood pressure, explicit urine volume intervals and verified kidney baseline/observation mappings remain to be implemented.",
+    "Patient-level laboratory/vital records lack verified admission linkage; no date-based linkage is inferred.",
+    "Features 41-43 still require dedicated time-window/prediction contracts, suitable model services, population applicability and independent validation.",
+    "No production deployment, live hospital database migration or clinical enablement was performed.",
+    "The full 80-feature goal remains active; pathology WSI sources/models, statistical forecasts, other specialized inputs and clinical validation still require work."
+  ]
+}

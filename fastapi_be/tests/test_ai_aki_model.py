@@ -342,6 +342,29 @@ def test_acute_rrt_is_actual_confirmed_initiation_not_an_order_or_assumed_dialys
         assert result["minimum_stage"] == 3
 
 
+@pytest.mark.parametrize("started,met", [("2020-01-01T00:00:00Z", False), ("2026-10-09T23:59:59.999999Z", False), ("2026-10-10T00:00:00Z", True), ("2026-10-17T00:00:00Z", True)])
+def test_rrt_event_must_belong_to_selected_period_without_imposing_a_clinical_episode_duration_limit(started, met):
+    source = make_source()
+    source["rrt"].update(status="acute_initiated_for_aki", started_at=started, acute_aki_confirmed=True)
+    result = aki_values(source)
+    item = criterion(result, "acute_rrt")
+    assert item["evidence"]["index_at"] == started
+    assert item["status"] == ("met" if met else "unknown")
+    assert result["minimum_stage"] == (3 if met else None)
+    if not met:
+        assert item["reason_code"] == "rrt_event_outside_selected_assessment_period_requires_episode_review"
+        assert result["detection"] == "insufficient_data" and result["aki_excluded"] is False
+
+
+def test_old_rrt_unknown_preserves_other_positive_stage_in_current_selected_data():
+    source = make_source()
+    source["index_creatinine"]["value"] = "2"
+    source["rrt"].update(status="acute_initiated_for_aki", started_at="2020-01-01T00:00:00Z", acute_aki_confirmed=True)
+    result = aki_values(source)
+    assert criterion(result, "acute_rrt")["status"] == "unknown"
+    assert result["detection"] == "met" and result["minimum_stage"] == 2 and result["stage_is_lower_bound"] is True
+
+
 @pytest.mark.parametrize("change", ["child", "maintenance"])
 def test_outside_scope_does_not_supply_adult_stages(change):
     source = make_source()

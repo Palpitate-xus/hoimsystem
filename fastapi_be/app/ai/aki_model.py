@@ -263,7 +263,10 @@ def aki_values(source):
         if source.rrt.status == "not_initiated" and source.rrt.evidence_hash is not None:
             _evaluated(rrt, False, 3, "clinician_declared_not_initiated")
         elif source.rrt.status == "acute_initiated_for_aki" and source.rrt.started_at is not None and source.rrt.acute_aki_confirmed is True and source.rrt.evidence_hash is not None:
-            _evaluated(rrt, True, 3, "clinician_confirmed_new_acute_rrt_for_aki")
+            if _clock(source.rrt.started_at) < _clock(source.start_at):
+                rrt["reason_code"] = "rrt_event_outside_selected_assessment_period_requires_episode_review"
+            else:
+                _evaluated(rrt, True, 3, "clinician_confirmed_new_acute_rrt_for_aki")
         else:
             rrt["reason_code"] = "acute_rrt_status_or_aki_indication_not_confirmed"
         criteria = [first, ratio, absolute, *(urine[key] for key in ("urine_6h", "urine_12h", "urine_24h", "anuria_12h")), rrt]
@@ -275,6 +278,7 @@ def aki_values(source):
         "结果为明确选定资料中的规则符合情况与最低支持分期，不是未来风险概率、最终临床诊断、病因判断或治疗/启动透析指令。",
         "未符合所选资料中的判据不排除AKI；缺项、定性/非正肌酐、未知单位、相关冲突或覆盖问题不填0，也不选择自动最小/最近/估算基线。",
         "48小时及7日用于急性变化定义，不限制整个AKI病程分期；本结果不声称完整病程最高分期或当前仍持续AKI，旧肌酐时点不冒称与评估时刻同时。",
+        "RRT启动早于所选窗口起点时，只保留原历史声明并将本期RRT判据标为未知，须另核当前病程；这项软件证据范围不限制真实AKI病程可以延续超过7日。",
         "资料按冻结as_of可用截止回溯核对，允许截止前新登记的旧采样；这不是evaluation_at当时数据库可得资料的历史重放。",
         "肌酐只比较同原单位及同已审核身份；原表SI绝对3期采用353.6μmol/L，正文354为舍入写法，不暗中换算、舍入或更改26.5μmol/L的48小时界值。",
         "尿量采用本软件明确的原完整采集区间平均策略，枚举原边界连续子链；不裁剪、分摊或虚构逐小时记录，不能证明每一小时持续少尿。",

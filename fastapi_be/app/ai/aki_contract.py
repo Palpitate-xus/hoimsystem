@@ -37,6 +37,7 @@ INPUT_POLICY = {
     "weight": "explicit_measured_kg_before_period_with_whole_period_applicability_attestation_no_default_ideal_or_latest_selection",
     "anuria": "known_zero_complete_chain_at_least_12h_does_not_require_weight",
     "rrt": "explicit_clinician_confirmed_new_acute_aki_initiation_not_maintenance_or_order_inference",
+    "rrt_event_period_policy": "initiation_in_selected_window_start_through_evaluation_older_event_unknown_requires_current_episode_review_not_a_clinical_episode_duration_limit",
     "max_urine_intervals": 64,
     "missing": "unknown_not_zero_no_aki_exclusion_no_automatic_clinical_action",
 }
@@ -54,7 +55,7 @@ RECIPE = {
         {"key": "urine_24h", "below_ml_kg_h": "0.3", "at_least_hours": 24, "stage": 3},
     ],
     "anuria": {"volume_ml": "0", "at_least_hours": 12, "stage": 3},
-    "rrt": {"acute_initiated_for_aki": 3, "maintenance": "outside_scope"},
+    "rrt": {"acute_initiated_for_aki": 3, "maintenance": "outside_scope", "event_period_policy": "selected_window_start_inclusive_through_evaluation_older_event_unknown"},
     "arithmetic": "exact_fractions_of_decimal_inputs_and_integer_utc_microseconds_no_rounded_ratios",
     "criterion_negative": "not_met_in_selected_data_never_global_aki_exclusion",
     "minimum_stage": "highest_supported_positive_criterion_1_or_2_lower_bound_3_reaches_scale_ceiling_not_episode_completeness",

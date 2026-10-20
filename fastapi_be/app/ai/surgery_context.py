@@ -96,3 +96,81 @@ def public_payload(data):
     if expected != bound.model_dump(mode="json"):
         raise ValueError("Complete public surgery source, collections or policy binding differs")
     return {"context": {"surgery_source": public}}
+
+
+def _short_context(binding, snapshot_time):
+    from app.ai.surgery_contract import utc
+
+    bound = SurgeryContextBinding.model_validate(binding)
+    return {
+        "scope": "department",
+        "source_domain": "surgery_declared_stage_resources",
+        "department_ids": [bound.department_id],
+        "pool_ids": [bound.pool_id],
+        "selected_sources": {"surgery_scenario_id": bound.scenario_id},
+        "surgery_binding": bound.model_dump(mode="json"),
+        "scope_note": SCOPE_NOTE,
+        "missing_data": list(MISSING_DATA),
+        "truncated_sources": [],
+        "snapshot_time": utc(snapshot_time),
+    }
+
+
+def surgery_context(db, user, values):
+    from app.ai import surgery_facts as facts
+    from app.ai.context import ContextBundle
+    from app.ai.surgery_scenarios import authorize_scenario
+
+    row, _, source = authorize_scenario(db, user, selection(values))
+    bound = binding_for(source, pool_id=row.pool_id, department_id=row.department_id)
+    return ContextBundle(
+        data=_short_context(bound, facts.utc_text(facts.utcnow())),
+        evidence=[surgery_evidence(bound)],
+        department_ids={row.department_id},
+    )
+
+
+def expand_context(db, context, *, user=None, current=False, execution=True):
+    from app.ai.surgery_scenarios import authorize_scenario, metadata, scenario_proof, scenario_row
+    from app.ai.surgery_snapshot import local_resolution
+
+    try:
+        bound = SurgeryContextBinding.model_validate(context["surgery_binding"])
+        binding = bound.model_dump(mode="json")
+        if canonical_json(context) != canonical_json(_short_context(binding, context["snapshot_time"])):
+            raise ValueError("Original short surgery context contains a different scope or undisclosed extra fields")
+        if current:
+            row, snapshot, source = authorize_scenario(db, user, bound.scenario_id, binding=binding, execution=execution)
+        else:
+            row = scenario_row(db, bound.scenario_id)
+            snapshot, source = scenario_proof(row)
+        if source is None or binding_for(source, pool_id=row.pool_id, department_id=row.department_id) != binding:
+            raise ValueError("Complete original surgery source or publication binding differs")
+        return {
+            **context,
+            "surgery_source": source,
+            "surgery_scenario": {
+                **metadata(row),
+                "snapshot": snapshot,
+                "public_source": source,
+                "local_resolution": local_resolution(snapshot),
+                "frozen_task_view": True,
+                "can_record": False,
+                "can_review": False,
+                "can_revoke": False,
+                "automatic_booking": False,
+            },
+        }
+    except HTTPException as exc:
+        if exc.status_code == 403:
+            raise
+        raise HTTPException(409, "手术场景完整原件、公开投影或冻结任务绑定不符") from exc
+    except (ValueError, TypeError, KeyError, AttributeError) as exc:
+        raise HTTPException(409, "手术场景完整原件、公开投影或冻结任务绑定不符") from exc
+
+
+def authorize_surgery_snapshot(db, user, context):
+    from app.ai import surgery_facts as facts
+
+    actor = facts.current_actor(db, user)
+    expand_context(db, context, user=actor, current=actor.user_role != "super_admin", execution=False)

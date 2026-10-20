@@ -193,6 +193,9 @@ def describe_config(db: Session, spec: FeatureSpec, config: AIFeatureConfig | No
     if spec.number == 64:
         provider = db.get(AIProvider, config.provider_id) if config and config.provider_id else None
         data["input_mode"] = "bed" if provider and provider.kind == "specialist" and provider.model.startswith("bed:") else "external_forecast"
+    if spec.number == 65:
+        provider = db.get(AIProvider, config.provider_id) if config and config.provider_id else None
+        data["input_mode"] = "surgery" if provider and provider.kind == "specialist" and provider.model.startswith("surgery:") else "external_optimizer"
     if spec.number in {41, 42, 43}:
         provider = db.get(AIProvider, config.provider_id) if config and config.provider_id else None
         mode = {41: "news2", 42: "qsofa", 43: "aki"}.get(spec.number)

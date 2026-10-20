@@ -3502,7 +3502,9 @@
       "priority": "P2",
       "engine": "optimizer",
       "scope": "hospital",
-      "source_reference_keys": [],
+      "source_reference_keys": [
+        "surgery_scenario_id"
+      ],
       "inputs": [
         "明确原病例与共享物理资源池",
         "独立受审岗位资格与完整可用性忙时职责政策原件",

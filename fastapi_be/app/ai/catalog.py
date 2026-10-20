@@ -200,7 +200,17 @@ def describe_feature(spec: FeatureSpec) -> dict:
             else {"observation_window_id", "qsofa_assessment_id", "sofa_assessment_id", "sofa_change_assessment_id"}
             if spec.number == 42
             else SOURCE_REFERENCE_KEYS
-            - {"observation_window_id", "news2_assessment_id", "aki_assessment_id", "qsofa_assessment_id", "sofa_assessment_id", "sofa_change_assessment_id", "roster_plan_id", "bed_series_id"}
+            - {
+                "observation_window_id",
+                "news2_assessment_id",
+                "aki_assessment_id",
+                "qsofa_assessment_id",
+                "sofa_assessment_id",
+                "sofa_change_assessment_id",
+                "roster_plan_id",
+                "bed_series_id",
+                "surgery_scenario_id",
+            }
             - (set() if spec.number == 47 else {"support_source_id", "support_source_kind"})
         )
         if spec.scope == "patient"
@@ -208,6 +218,8 @@ def describe_feature(spec: FeatureSpec) -> dict:
         if spec.number == 63
         else {"bed_series_id"}
         if spec.number == 64
+        else {"surgery_scenario_id"}
+        if spec.number == 65
         else set()
     )
     return {

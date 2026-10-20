@@ -474,3 +474,62 @@ def project_snapshot(value, governance_hash, *, validate_current_recipe=True):
 
 def project_source(snapshot, governance_hash, *, validate_current_recipe=True):
     return project_snapshot(snapshot, governance_hash, validate_current_recipe=validate_current_recipe)["source"]
+
+
+def local_resolution(value):
+    """Resolve public candidate tokens only inside an already authorized view.
+
+    Labels are the original technical registry labels, never professional
+    qualification evidence. This object must never enter the native payload.
+    """
+    snapshot = verify_snapshot(value)
+    identities = PublicIdentity(snapshot.identity_secret)
+    cases = {item["application_id"]: item for item in snapshot.collection["cases"]}
+    records = {item["metadata"]["source_record_id"]: item for item in snapshot.collection["source_records"]}
+    result = {
+        "schema_version": "surgery_local_resolution_v1",
+        "scenario_id": snapshot.scenario_id,
+        "source_content_hash": hash_content(value),
+        "cases": [{"case_token": identities.uuid("case", key), "application_id": key, "patient_id": item["patient_id"], "admission_id": item["admission_id"]} for key, item in cases.items()],
+        "resources": [
+            {
+                "resource_token": identities.uuid("resource", item["resource_id"]),
+                "resource_id": item["resource_id"],
+                "resource_kind": item["resource_kind"],
+                "label": item["original"]["payload"]["label"],
+            }
+            for item in snapshot.collection["resources"]
+        ],
+        "facts": [{"fact_token": identities.uuid("fact", key), "source_record_id": key, "source_kind": item["metadata"]["source_kind"]} for key, item in records.items()],
+        "demands": [],
+        "stages": [],
+        "duties": [],
+    }
+    for domain in snapshot.request.cases:
+        for kind, demands in (("room", [domain.room]), ("person", domain.roles), ("equipment", domain.equipment)):
+            result["demands"].extend(
+                {
+                    "case_token": identities.uuid("case", domain.application_id),
+                    "demand_token": identities.technical("demand", domain.application_id, demand.slot_id),
+                    "original_slot_id": demand.slot_id,
+                    "resource_kind": kind,
+                }
+                for demand in demands
+            )
+        estimate = records[domain.duration_estimate.source_record_id]["original"]
+        result["stages"].extend(
+            {
+                "case_token": identities.uuid("case", domain.application_id),
+                "stage_token": identities.technical("stage", domain.application_id, item["segment_id"]),
+                "original_segment_id": item["segment_id"],
+            }
+            for item in estimate["payload"]["segments"]
+        )
+    for key, record in records.items():
+        capsule = record["capsule"]
+        if capsule is not None and capsule["eligible_for_new_use"] and capsule["payload"].get("record_type") == "duty":
+            result["duties"].append({"duty_token": identities.uuid("duty", key), "source_record_id": key, "resource_token": identities.uuid("resource", capsule["resource_id"])})
+    for name in ("cases", "resources", "facts", "demands", "stages", "duties"):
+        result[name].sort(key=canonical_json)
+    bounded_json(result)
+    return result

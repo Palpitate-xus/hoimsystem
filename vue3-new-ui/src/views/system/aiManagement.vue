@@ -61,6 +61,7 @@
           </el-table>
         </el-tab-pane>
 
+        <el-tab-pane label="挂号预测来源" name="forecast_sources" lazy><ai-forecast-series-management v-if="tab === 'forecast_sources'" /></el-tab-pane>
         <el-tab-pane label="录音治理" name="audio"><ai-audio-management v-if="tab === 'audio'" /></el-tab-pane>
         <el-tab-pane label="影像原文件" name="images"><ai-image-management v-if="tab === 'images'" /></el-tab-pane>
         <el-tab-pane label="心电原文件" name="ecg"><ai-ecg-management v-if="tab === 'ecg'" /></el-tab-pane>
@@ -277,7 +278,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted, onBeforeUnmount, onDeactivated, ref, watch } from "vue";
+import { computed, defineAsyncComponent, onMounted, onBeforeUnmount, onDeactivated, ref, watch } from "vue";
 import { ElMessage } from "element-plus";
 import store from "@/store";
 import AiRunHistory from "@/components/AIRunHistory/index.vue";
@@ -285,6 +286,7 @@ import AiReviewCuration from "@/components/AIReviewCuration/index.vue";
 import AiAudioManagement from "@/components/AIAudioManagement/index.vue";
 import AiImageManagement from "@/components/AIImageManagement/index.vue";
 import AiEcgManagement from "@/components/AIEcgManagement/index.vue";
+const AiForecastSeriesManagement = defineAsyncComponent(() => import("@/components/AIForecastSeriesManagement.vue"));
 import {
   activateAIPrompt, createAIKnowledge, createAIPatientGrant, createAIPrompt,
   getAIAdminFeatures, getAIAudit, getAIKnowledge, getAIKnowledgeDetail, getAIPatientGrants, getAIPathwaySources, importAIPathway,

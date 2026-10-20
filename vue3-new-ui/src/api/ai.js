@@ -72,3 +72,10 @@ export const getAIReviewExcerpts = (params) => request({ url: `${admin}/review-e
 export const getAIReviewExcerpt = (id) => request({ url: `${admin}/review-excerpts/${id}`, method: "get" });
 export const createAIReviewExcerpt = (data) => request({ url: `${admin}/review-excerpts`, method: "post", data });
 export const reviewAIReviewExcerpt = (id, data) => request({ url: `${admin}/review-excerpts/${id}/review`, method: "post", data });
+
+export const getAIForecastSeries = (params = {}) => request({ url: "ai/forecast-series", method: "get", params });
+export const getAIAdminForecastSeries = (params = {}) => request({ url: `${admin}/forecast-series`, method: "get", params });
+export const getAIAdminForecastSeriesDetail = (id) => request({ url: `${admin}/forecast-series/${encodeURIComponent(id)}`, method: "get" });
+export const previewAIForecastSeries = (data) => request({ url: `${admin}/forecast-series/preview`, method: "post", data: JSON.stringify(data), headers: { "Content-Type": "application/json" } });
+export const createAIForecastSeries = (data) => request({ url: `${admin}/forecast-series`, method: "post", data: JSON.stringify(data), headers: { "Content-Type": "application/json" } });
+export const revokeAIForecastSeries = (id, data) => request({ url: `${admin}/forecast-series/${encodeURIComponent(id)}/revoke`, method: "post", data });

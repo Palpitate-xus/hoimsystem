@@ -24,12 +24,26 @@ from app.ai.schemas import (
     ImageGenerationResult,
     News2GenerationResult,
     QsofaGenerationResult,
+    RosterGenerationResult,
     SofaChangeGenerationResult,
     SofaGenerationResult,
 )
 from app.config import settings
 
 MAX_RESPONSE_BYTES = 512 * 1024
+
+
+def _unique_response_pairs(pairs):
+    value = {}
+    for key, item in pairs:
+        if key in value:
+            raise ValueError("模型响应不接受重复JSON字段")
+        value[key] = item
+    return value
+
+
+def _finite_response_constant(_):
+    raise ValueError("模型响应不接受非有限JSON常量")
 
 
 class AIExecutionError(Exception):
@@ -77,6 +91,7 @@ def validate_generation(
     qsofa_source: dict | None = None,
     sofa_source: dict | None = None,
     sofa_change_source: dict | None = None,
+    roster_source: dict | None = None,
     forecast_horizon: int | None = None,
     instructions_digest: str | None = None,
     model_version: str | None = None,
@@ -85,8 +100,14 @@ def validate_generation(
     try:
         if sofa_source is not None and sofa_change_source is not None:
             raise ValueError("SOFA日评估与变化结果不能混用")
+        if roster_source is not None and any(
+            value is not None for value in (audio_source, ecg_source, image_source, forecast_source, news2_source, aki_source, qsofa_source, sofa_source, sofa_change_source)
+        ):
+            raise ValueError("排班原件不得与其他模型原件混用")
         schema = (
-            SofaGenerationResult
+            RosterGenerationResult
+            if roster_source is not None
+            else SofaGenerationResult
             if sofa_source is not None
             else SofaChangeGenerationResult
             if sofa_change_source is not None
@@ -117,6 +138,20 @@ def validate_generation(
         knowledge_ids = {item["source_id"] for item in evidence if item.get("kind") == "knowledge"}
         if not cited.intersection(knowledge_ids):
             raise AIExecutionError("UNGROUNDED_OUTPUT", "该任务的回答缺少已审核知识依据，结果已拒绝展示")
+    if roster_source is not None:
+        from app.ai.roster_contract import RosterSource
+        from app.ai.roster_model import generation_result_for_analysis, validate_analysis_binding
+
+        try:
+            validate_analysis_binding(result.roster_analysis, RosterSource.model_validate(roster_source), instructions_digest, model_version)
+            explanation = {key: getattr(result, key) for key in ("summary", "warnings", "missing_data")}
+            explanation["sections"] = [item.model_dump(mode="json") for item in result.sections]
+            if explanation != generation_result_for_analysis(result.roster_analysis):
+                raise ValueError("固定排班解释与完整优化证明不符")
+        except (ValidationError, ValueError, TypeError, KeyError) as exc:
+            raise AIExecutionError("ROSTER_BINDING_MISMATCH", "排班完整原件、目标、工时、候选、两图证明、运行或固定解释重算不一致，结果已拒收") from exc
+        if roster_source["source_id"] not in cited:
+            raise AIExecutionError("UNGROUNDED_ROSTER", "排班说明未引用明确审核的完整原计划")
     if news2_source is not None:
         from app.ai.news2_contract import News2Source
         from app.ai.news2_model import generation_result_for_analysis, validate_analysis_binding
@@ -319,6 +354,11 @@ def _request(provider: AIProvider, spec: FeatureSpec, task_prompt: str, data: di
     aki_mode = provider.model.startswith("aki:")
     qsofa_mode = provider.model.startswith("qsofa:")
     sofa_mode = provider.model.startswith("sofa1:")
+    roster_mode = provider.model.startswith("roster:")
+    if roster_mode and (spec.number != 63 or provider.kind != "specialist"):
+        raise AIExecutionError("ROSTER_ADAPTER_REQUIRED", "完整排班原件仅由登记的独立排班服务处理")
+    if {"roster_source", "roster_binding"} & data.get("context", {}).keys() and not roster_mode:
+        raise AIExecutionError("ROSTER_ADAPTER_REQUIRED", "完整排班原件不能发送给其他模式或文本模型")
     if sofa_mode and (spec.number != 42 or provider.kind != "specialist"):
         raise AIExecutionError("SOFA_ADAPTER_REQUIRED", "完整SOFA原件仅由登记的独立SOFA-1服务处理")
     sofa_context_keys = {"sofa_source", "sofa_change_source", "sofa_binding"} & data.get("context", {}).keys()
@@ -345,6 +385,27 @@ def _request(provider: AIProvider, spec: FeatureSpec, task_prompt: str, data: di
     if spec.number == 62 and provider.kind != "specialist":
         raise AIExecutionError("FORECAST_ADAPTER_REQUIRED", "日挂号记录数须通过带固定数值契约的专用预测服务处理")
     specialist_input = data
+    if roster_mode:
+        from app.ai.roster_context import RosterContextBinding, selection
+        from app.ai.roster_contract import RosterSource, hash_content
+
+        try:
+            identifier = selection(data["input"])
+            source = RosterSource.model_validate(data["context"]["roster_source"]).model_dump(mode="json")
+            bound = RosterContextBinding.model_validate(data["context"]["roster_binding"])
+            if (
+                identifier != bound.plan_id
+                or identifier != source["problem_id"]
+                or bound.projection_hash != hash_content(source)
+                or any(
+                    getattr(bound, key) != source[key]
+                    for key in ("source_id", "content_hash", "problem_governance_hash", "scope_binding_hash", "manifest_digest", "rule_id", "recipe_digest", "input_policy_digest")
+                )
+            ):
+                raise ValueError("完整排班公开原件与冻结输入不同")
+            specialist_input = {"context": {"roster_source": source}}
+        except (HTTPException, ValidationError, ValueError, TypeError, KeyError) as exc:
+            raise AIExecutionError("ROSTER_SOURCE_REQUIRED", "须选择一件已审核完整排班计划并核对公开投影SHA") from exc
     if sofa_mode:
         from app.ai.sofa_context import SofaBinding, selection
         from app.ai.sofa_contract import SofaChangeSource, SofaSource, hash_content
@@ -436,18 +497,37 @@ def _request(provider: AIProvider, spec: FeatureSpec, task_prompt: str, data: di
         }
     if provider.kind == "specialist":
         return endpoint + "/tasks", {
-            "schema_version": "9" if sofa_mode else "8" if qsofa_mode else "7" if aki_mode else "6" if news2_mode else {21: "2", 36: "4", 37: "3", 62: "5"}.get(spec.number, "1"),
+            "schema_version": "10"
+            if roster_mode
+            else "9"
+            if sofa_mode
+            else "8"
+            if qsofa_mode
+            else "7"
+            if aki_mode
+            else "6"
+            if news2_mode
+            else {21: "2", 36: "4", 37: "3", 62: "5"}.get(spec.number, "1"),
             "feature_key": spec.key,
             "engine": spec.engine,
             "model": provider.model,
             "instructions": instructions,
-            **({"store": False} if spec.number in {21, 36, 37, 62} or news2_mode or aki_mode or qsofa_mode or sofa_mode else {}),
+            **({"store": False} if spec.number in {21, 36, 37, 62} or news2_mode or aki_mode or qsofa_mode or sofa_mode or roster_mode else {}),
             "input": specialist_input,
         }
     raise AIExecutionError("UNSUPPORTED_PROVIDER", "模型接口类型不受支持")
 
 
 def _parse_response(provider: AIProvider, spec: FeatureSpec, value: dict) -> tuple[object, int, int]:
+    if provider.model.startswith("roster:"):
+        from app.ai.roster_protocol import parse_roster_envelope
+
+        if provider.kind != "specialist" or spec.number != 63:
+            raise AIExecutionError("ROSTER_ADAPTER_REQUIRED", "排班完整证明仅由登记的独立排班服务处理")
+        try:
+            return parse_roster_envelope(value, provider.model)
+        except (ValidationError, ValueError, TypeError, KeyError) as exc:
+            raise AIExecutionError("ADAPTER_CONTRACT_MISMATCH", "排班独立服务的版本、完整证明或用量不符合严格协议") from exc
     if provider.model.startswith("sofa1:"):
         from app.ai.sofa_protocol import parse_sofa_envelope
 
@@ -537,7 +617,15 @@ async def generate(
     sofa_mode = spec.number == 42 and provider.kind == "specialist" and provider.model.startswith("sofa1:")
     sofa_source = data.get("context", {}).get("sofa_source") if sofa_mode else None
     sofa_change_source = data.get("context", {}).get("sofa_change_source") if sofa_mode else None
+    roster_mode = spec.number == 63 and provider.kind == "specialist" and provider.model.startswith("roster:")
+    roster_source = data.get("context", {}).get("roster_source") if roster_mode else None
     response_limit = MAX_RESPONSE_BYTES
+    if roster_mode:
+        from app.ai.roster_contract import MAX_BYTES
+
+        response_limit = MAX_BYTES
+        if len(encode_json(payload).encode("utf-8")) > MAX_BYTES:
+            raise AIExecutionError("ROSTER_REQUEST_LIMIT", "排班完整原件及Prompt超过8MiB请求上限，不发送或截断")
     if sofa_mode:
         from app.ai.sofa_contract import MAX_REQUEST_BYTES
         from app.ai.sofa_contract import MAX_RESPONSE_BYTES as SOFA_RESPONSE_BYTES
@@ -578,7 +666,7 @@ async def generate(
                     body.extend(chunk)
                     if len(body) > response_limit:
                         raise AIExecutionError("RESPONSE_TOO_LARGE", "模型响应超过允许大小")
-        parsed = json.loads(body)
+        parsed = json.loads(body, object_pairs_hook=_unique_response_pairs, parse_constant=_finite_response_constant)
         if not isinstance(parsed, dict):
             raise ValueError("response must be an object")
         output, inputs, outputs = _parse_response(provider, spec, parsed)
@@ -597,6 +685,7 @@ async def generate(
             qsofa_source=qsofa_source,
             sofa_source=sofa_source,
             sofa_change_source=sofa_change_source,
+            roster_source=roster_source,
             forecast_horizon=data.get("input", {}).get("horizon_days") if spec.number == 62 else None,
             instructions_digest=hashlib.sha256(payload.get("instructions", "").encode()).hexdigest(),
             model_version=provider.model,

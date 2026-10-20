@@ -15,7 +15,7 @@ from app.ai.catalog import COMMON_SYSTEM_PROMPT, FeatureSpec
 from app.ai.ecg_model import LABELS, LEADS, PREPROCESSING, RELEASE_FILES, ECGModelManifest, canonical_json
 from app.ai.governance import encode_json, provider_credential, validate_endpoint
 from app.ai.models import AIProvider
-from app.ai.schemas import AudioGenerationResult, ECGGenerationResult, ForecastGenerationResult, GenerationResult, ImageGenerationResult, News2GenerationResult
+from app.ai.schemas import AkiGenerationResult, AudioGenerationResult, ECGGenerationResult, ForecastGenerationResult, GenerationResult, ImageGenerationResult, News2GenerationResult
 from app.config import settings
 
 MAX_RESPONSE_BYTES = 512 * 1024
@@ -62,6 +62,7 @@ def validate_generation(
     image_source: dict | None = None,
     forecast_source: dict | None = None,
     news2_source: dict | None = None,
+    aki_source: dict | None = None,
     forecast_horizon: int | None = None,
     instructions_digest: str | None = None,
     model_version: str | None = None,
@@ -79,6 +80,8 @@ def validate_generation(
             if forecast_source is not None
             else News2GenerationResult
             if news2_source is not None
+            else AkiGenerationResult
+            if aki_source is not None
             else GenerationResult
         )
         result = schema.model_validate(value)
@@ -106,6 +109,20 @@ def validate_generation(
             raise AIExecutionError("NEWS2_BINDING_MISMATCH", "NEWS2原来源、适用性、规则版本、分项、总数、缺项或解释与实际计算不一致，结果已拒收") from exc
         if result.sections and news2_source["source_id"] not in cited:
             raise AIExecutionError("UNGROUNDED_NEWS2", "NEWS2评分说明未引用所选原点测与适用性核实来源")
+    if aki_source is not None:
+        from app.ai.aki_contract import AkiSource
+        from app.ai.aki_model import generation_result_for_analysis, validate_analysis_binding
+
+        try:
+            validate_analysis_binding(result.aki_analysis, AkiSource.model_validate(aki_source), instructions_digest, model_version)
+            explanation = {key: getattr(result, key) for key in ("summary", "warnings", "missing_data")}
+            explanation["sections"] = [item.model_dump(mode="json") for item in result.sections]
+            if explanation != generation_result_for_analysis(result.aki_analysis):
+                raise ValueError("KDIGO AKI explanation differs from the fixed rule result")
+        except (ValidationError, ValueError, TypeError, KeyError) as exc:
+            raise AIExecutionError("AKI_BINDING_MISMATCH", "KDIGO AKI原来源、适用性、规则版本、判据、分期下界、原时段、缺项或解释与实际计算不一致，结果已拒收") from exc
+        if result.sections and aki_source["source_id"] not in cited:
+            raise AIExecutionError("UNGROUNDED_AKI", "KDIGO AKI分期说明未引用所选原资料与人工适用性来源")
     if forecast_source is not None:
         from app.ai.forecast_contract import ForecastSource
         from app.ai.forecast_model import validate_analysis_binding
@@ -237,6 +254,11 @@ def _request(provider: AIProvider, spec: FeatureSpec, task_prompt: str, data: di
     budget = min(provider.max_output_tokens, settings.AI_MAX_OUTPUT_TOKENS)
     instructions = COMMON_SYSTEM_PROMPT + "\n\n" + task_prompt
     news2_mode = provider.model.startswith("news2:")
+    aki_mode = provider.model.startswith("aki:")
+    if aki_mode and (spec.number != 43 or provider.kind != "specialist"):
+        raise AIExecutionError("AKI_ADAPTER_REQUIRED", "KDIGO AKI判据只能由肾功能资料核对的专用规则服务处理")
+    if data.get("context", {}).get("aki_source") is not None and not aki_mode:
+        raise AIExecutionError("AKI_ADAPTER_REQUIRED", "明确AKI评估只能发送给已登记的AKI规则服务")
     if news2_mode and (spec.number != 41 or provider.kind != "specialist"):
         raise AIExecutionError("NEWS2_ADAPTER_REQUIRED", "NEWS2规则只能由病情恶化预警的专用服务处理")
     if data.get("context", {}).get("news2_source") is not None and not news2_mode:
@@ -260,6 +282,16 @@ def _request(provider: AIProvider, spec: FeatureSpec, task_prompt: str, data: di
         except (ValidationError, ValueError, TypeError, KeyError) as exc:
             raise AIExecutionError("NEWS2_SOURCE_REQUIRED", "须选择当前窗口的明确原点测、已审核规则和人工适用性核实来源") from exc
         specialist_input = {"context": {"news2_source": source}}
+    if aki_mode:
+        from app.ai.aki_contract import AkiSource
+
+        try:
+            source = AkiSource.model_validate(data["context"]["aki_source"]).model_dump(mode="json")
+            if data["input"]["aki_assessment_id"] != source["assessment_id"] or data["input"]["observation_window_id"] != source["window_id"]:
+                raise ValueError("KDIGO AKI references differ from the verified source")
+        except (ValidationError, ValueError, TypeError, KeyError) as exc:
+            raise AIExecutionError("AKI_SOURCE_REQUIRED", "须选择当前窗口的明确肾功能资料、已审核规则和人工适用性核实来源") from exc
+        specialist_input = {"context": {"aki_source": source}}
     if spec.number == 62:
         from app.ai.forecast_contract import ForecastSource
 
@@ -291,12 +323,12 @@ def _request(provider: AIProvider, spec: FeatureSpec, task_prompt: str, data: di
         }
     if provider.kind == "specialist":
         return endpoint + "/tasks", {
-            "schema_version": "6" if news2_mode else {21: "2", 36: "4", 37: "3", 62: "5"}.get(spec.number, "1"),
+            "schema_version": "7" if aki_mode else "6" if news2_mode else {21: "2", 36: "4", 37: "3", 62: "5"}.get(spec.number, "1"),
             "feature_key": spec.key,
             "engine": spec.engine,
             "model": provider.model,
             "instructions": instructions,
-            **({"store": False} if spec.number in {21, 36, 37, 62} or news2_mode else {}),
+            **({"store": False} if spec.number in {21, 36, 37, 62} or news2_mode or aki_mode else {}),
             "input": specialist_input,
         }
     raise AIExecutionError("UNSUPPORTED_PROVIDER", "模型接口类型不受支持")
@@ -319,18 +351,21 @@ def _parse_response(provider: AIProvider, spec: FeatureSpec, value: dict) -> tup
         usage = value.get("usage") or {}
         return json.loads(choice["message"]["content"]), int(usage.get("prompt_tokens") or 0), int(usage.get("completion_tokens") or 0)
     news2_mode = spec.number == 41 and provider.model.startswith("news2:")
+    aki_mode = spec.number == 43 and provider.model.startswith("aki:")
     if (
-        value.get("schema_version") != ("6" if news2_mode else {21: "2", 36: "4", 37: "3", 62: "5"}.get(spec.number, "1"))
+        value.get("schema_version") != ("7" if aki_mode else "6" if news2_mode else {21: "2", 36: "4", 37: "3", 62: "5"}.get(spec.number, "1"))
         or value.get("feature_key") != spec.key
         or value.get("model_version") != provider.model
     ):
         raise AIExecutionError("ADAPTER_CONTRACT_MISMATCH", "专用模型返回的功能或模型版本与登记信息不一致")
     if news2_mode and value.get("handled") is not True:
         raise AIExecutionError("NEWS2_NOT_HANDLED", "NEWS2服务未完成结构化规则处理，不能读取评分")
-    if not news2_mode and value.get("applicable") is not True:
+    if aki_mode and value.get("handled") is not True:
+        raise AIExecutionError("AKI_NOT_HANDLED", "AKI服务未完成结构化判据处理，不能读取分期")
+    if not (news2_mode or aki_mode) and value.get("applicable") is not True:
         raise AIExecutionError("OUTSIDE_VALIDATED_SCOPE", "本次输入不在专用模型声明的适用范围内")
-    if spec.number in {21, 36, 37, 62} or news2_mode:
-        name = "news2_analysis" if news2_mode else {21: "transcription", 36: "image_analysis", 37: "ecg_analysis", 62: "forecast_analysis"}[spec.number]
+    if spec.number in {21, 36, 37, 62} or news2_mode or aki_mode:
+        name = "aki_analysis" if aki_mode else "news2_analysis" if news2_mode else {21: "transcription", 36: "image_analysis", 37: "ecg_analysis", 62: "forecast_analysis"}[spec.number]
         if not isinstance(value["result"], dict) or name in value["result"]:
             raise ValueError("native result belongs to the versioned envelope")
         usage = value.get("usage") or {}
@@ -364,6 +399,7 @@ async def generate(
     image_source = data.get("context", {}).get("image_source") if spec.number == 36 else None
     forecast_source = data.get("context", {}).get("forecast_source") if spec.number == 62 else None
     news2_source = data.get("context", {}).get("news2_source") if spec.number == 41 and provider.model.startswith("news2:") else None
+    aki_source = data.get("context", {}).get("aki_source") if spec.number == 43 and provider.model.startswith("aki:") else None
     if spec.number == 62 and (not forecast_source or provider.kind != "specialist"):
         raise AIExecutionError("FORECAST_SOURCE_REQUIRED", "运营预测需要已确认的原历史来源及专用统计适配器")
     if spec.number == 21:
@@ -412,6 +448,7 @@ async def generate(
             image_source=image_source,
             forecast_source=forecast_source,
             news2_source=news2_source,
+            aki_source=aki_source,
             forecast_horizon=data.get("input", {}).get("horizon_days") if spec.number == 62 else None,
             instructions_digest=hashlib.sha256(payload.get("instructions", "").encode()).hexdigest(),
             model_version=provider.model,

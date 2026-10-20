@@ -6,6 +6,7 @@ from typing import Annotated, Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
+from app.ai.aki_contract import AkiAnalysis
 from app.ai.forecast_contract import ForecastAnalysis
 from app.ai.news2_contract import News2Analysis
 from app.ai.references import SOURCE_REFERENCE_KEYS
@@ -512,6 +513,10 @@ class ForecastGenerationResult(GenerationResult):
 
 class News2GenerationResult(GenerationResult):
     news2_analysis: News2Analysis
+
+
+class AkiGenerationResult(GenerationResult):
+    aki_analysis: AkiAnalysis
 
 
 class FeedbackWrite(StrictRequest):

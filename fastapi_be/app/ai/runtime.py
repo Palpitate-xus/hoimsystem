@@ -10,6 +10,7 @@ from pydantic import ValidationError
 from sqlalchemy.orm import Session
 
 from app.ai.adr_sources import ADR_SOURCE_FEATURES
+from app.ai.aki_context import authorize_aki_snapshot
 from app.ai.audio_assets import authorize_audio_snapshot
 from app.ai.audio_files import open_verified_audio
 from app.ai.catalog import CATALOG_VERSION, COMMON_SYSTEM_PROMPT, FeatureSpec
@@ -117,6 +118,12 @@ def create_run(db: Session, user: User, req: RunRequest) -> AIRun:
             raise HTTPException(422, "当前NEWS2服务需要同时选择原住院窗口和明确的点测/适用性评估来源")
         if bundle.data.get("news2_source") and not news2_mode:
             raise HTTPException(422, "当前服务不是NEWS2规则适配器，请重新核对模型配置和输入方式")
+    if spec.number == 43:
+        aki_mode = provider.model.startswith("aki:")
+        if aki_mode and not bundle.data.get("aki_source"):
+            raise HTTPException(422, "当前AKI规则服务需要同时选择原住院窗口和明确核实的肾功能评估来源")
+        if bundle.data.get("aki_source") and not aki_mode:
+            raise HTTPException(422, "当前服务不是AKI规则适配器，请重新核对模型配置和输入方式")
     if spec.key == "treatment_pathway" and not bundle.data.get("current_confirmed_diagnoses"):
         raise HTTPException(409, "治疗路径推荐需要指定本次就诊，并提供该次就诊已确认的诊断")
     if spec.number in {66, 67} and not bundle.data.get("supply_inventory"):
@@ -211,9 +218,12 @@ def authorize_run(db: Session, user: User, run: AIRun) -> None:
         frozen_context = json.loads(run.input_json).get("payload", {}).get("context", {})
         nursing_frozen = has_frozen_nursing_sources(frozen_context)
         if spec.number in RISK_FEATURES:
-            authorize_window_snapshot(db, user, frozen_context, run.patient_id, run.encounter_ref)
-            if spec.number == 41:
-                authorize_news2_snapshot(db, user, frozen_context, run.patient_id, run.encounter_ref)
+            if spec.number == 43 and frozen_context.get("aki_source"):
+                authorize_aki_snapshot(db, user, frozen_context, run.patient_id, run.encounter_ref)
+            else:
+                authorize_window_snapshot(db, user, frozen_context, run.patient_id, run.encounter_ref)
+                if spec.number == 41:
+                    authorize_news2_snapshot(db, user, frozen_context, run.patient_id, run.encounter_ref)
         elif spec.number == 36:
             # Frozen super-admin audit does not reconstitute deleted clinical
             # links. Execution still rebuilds and authorizes the current source.
@@ -279,6 +289,10 @@ def describe_run(run: AIRun, include_result: bool = True) -> dict:
             context = json.loads(run.input_json).get("payload", {}).get("context", {})
             if context.get("news2_source"):
                 data["news2_findings"] = {key: context[key] for key in ("news2_source", "news2_assessment")}
+        if spec.number == 43:
+            context = json.loads(run.input_json).get("payload", {}).get("context", {})
+            if context.get("aki_source"):
+                data["aki_findings"] = {key: context[key] for key in ("aki_source", "aki_assessment")}
         data["evidence"] = json.loads(run.evidence_json)
         tools = json.loads(run.input_json).get("payload", {}).get("tools", {})
         data["tool_findings"] = {

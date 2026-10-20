@@ -376,6 +376,7 @@ from app.routers import (
     adverse_reaction,
     ai,
     ai_admin,
+    ai_aki,
     ai_audio,
     ai_ecg,
     ai_feedback_admin,
@@ -504,6 +505,7 @@ app.include_router(inpatient_observations.router, prefix="/api")
 app.include_router(inpatient_laboratory.router, prefix="/api")
 app.include_router(ai_risk_rules.router, prefix="/api")
 app.include_router(ai_news2.router, prefix="/api")
+app.include_router(ai_aki.router, prefix="/api")
 app.include_router(ai.router, prefix="/api")
 app.include_router(analytics.router, prefix="/api")
 app.include_router(performance.router, prefix="/api")

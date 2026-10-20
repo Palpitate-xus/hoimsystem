@@ -17,6 +17,17 @@ def business_tools(db: Session, spec: FeatureSpec, user: User, patient_id: int |
     """Return explicit tool results and evidence without accepting instructions to execute code."""
     tools: dict = {}
     evidence: list[dict] = []
+    if spec.number == 43 and context.data.get("aki_source"):
+        source = context.data["aki_source"]
+        return {
+            "aki_source_input": {
+                "source_id": source["source_id"],
+                "window_source_id": source["window_source_id"],
+                "recipe_digest": source["recipe_digest"],
+                "clinical_score_calculated": False,
+                "scope_note": "只核实明确原资料、原区间与人工声明；实际判据由专用固定程序计算，未进行患者级全病程筛查或未来风险预测",
+            }
+        }, []
     if spec.number in {41, 42, 43}:
         window = context.data.get("observation_window", {})
         return {

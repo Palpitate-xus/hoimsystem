@@ -1,6 +1,7 @@
 """Bounded HTTP model adapters with strict results and server-owned citation IDs."""
 
 import copy
+import hashlib
 import json
 from typing import BinaryIO
 
@@ -49,7 +50,7 @@ def result_json_schema() -> dict:
     return schema
 
 
-def validate_generation(value: object, evidence: list[dict], requires_knowledge: bool = False, *, audio_source: dict | None = None) -> GenerationResult:
+def validate_generation(value: object, evidence: list[dict], requires_knowledge: bool = False, *, audio_source: dict | None = None, instructions_digest: str | None = None, model_version: str | None = None) -> GenerationResult:
     """Reject fabricated references and invalid structured output before UI exposure."""
     try:
         result = (AudioGenerationResult if audio_source is not None else GenerationResult).model_validate(value)
@@ -67,6 +68,11 @@ def validate_generation(value: object, evidence: list[dict], requires_knowledge:
         transcript = result.transcription
         if transcript.asset_id != audio_source["asset_id"] or transcript.content_hash != audio_source["content_hash"]:
             raise AIExecutionError("AUDIO_SOURCE_MISMATCH", "转写结果与所选原录音不一致，结果已拒收")
+        processing = transcript.processing
+        if model_version and model_version.startswith("fw:") and (processing is None or model_version != "fw:" + processing.runtime_digest):
+            raise AIExecutionError("SPEECH_RUNTIME_MISMATCH", "本地识别缺少登记模型的运行版本与完整处理报告")
+        if processing and (abs(processing.decoded_duration_ms - audio_source["duration_ms"]) > 1 or (instructions_digest and processing.instructions_digest != instructions_digest)):
+            raise AIExecutionError("SPEECH_PROCESSING_MISMATCH", "识别处理范围或任务Prompt与原录音任务不一致")
         previous_start = -1
         for segment in transcript.segments:
             if segment.end_ms > audio_source["duration_ms"] or segment.start_ms < previous_start or segment.source_id != audio_source["source_id"]:
@@ -187,7 +193,7 @@ async def generate(
         output, inputs, outputs = _parse_response(provider, spec, parsed)
         if min(inputs, outputs) < 0 or max(inputs, outputs) > 2000000:
             raise ValueError("invalid token accounting")
-        result = validate_generation(output, data.get("evidence", []), spec.requires_knowledge, audio_source=source)
+        result = validate_generation(output, data.get("evidence", []), spec.requires_knowledge, audio_source=source, instructions_digest=hashlib.sha256(payload.get("instructions", "").encode()).hexdigest(), model_version=provider.model)
         return result, inputs, outputs
     except AIExecutionError as exc:
         exc.input_tokens, exc.output_tokens = inputs, outputs

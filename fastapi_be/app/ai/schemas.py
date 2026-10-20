@@ -60,6 +60,10 @@ class ProviderWrite(StrictRequest):
         return value
 
 
+class ProviderCheck(StrictRequest):
+    expected_revision: int = Field(ge=1, strict=True)
+
+
 class FeatureWrite(StrictRequest):
     """Update activation without conflating configuration with clinical validation."""
 
@@ -235,6 +239,35 @@ class AudioSegment(StrictRequest):
         return self
 
 
+class AudioProcessing(StrictRequest):
+    """Recognizer-reported input coverage and immutable runtime identity, not word accuracy."""
+
+    engine: Literal["faster-whisper"]
+    engine_version: str = Field(min_length=1, max_length=40)
+    model_revision: str = Field(pattern=r"^[a-f0-9]{40}$")
+    model_digest: str = Field(pattern=r"^[a-f0-9]{64}$")
+    runtime_digest: str = Field(pattern=r"^[a-f0-9]{64}$")
+    decoding_options_hash: str = Field(pattern=r"^[a-f0-9]{64}$")
+    instructions_digest: str = Field(pattern=r"^[a-f0-9]{64}$")
+    decoded_duration_ms: int = Field(gt=0, strict=True)
+    processed_duration_ms: int = Field(gt=0, strict=True)
+    submitted_samples: int = Field(gt=0, strict=True)
+    sample_rate: int = Field(ge=16000, le=16000, strict=True)
+    iterator_exhausted: bool = Field(strict=True)
+    vad_filter: bool = Field(strict=True)
+    translation: bool = Field(strict=True)
+    diarization: bool = Field(strict=True)
+    prompt_handling: Literal["acoustic_only"]
+    timestamp_policy: Literal["estimated_bounded_to_source"]
+
+    @model_validator(mode="after")
+    def whole_input_processed(self):
+        actual_ms = (self.submitted_samples * 1000 + self.sample_rate - 1) // self.sample_rate
+        if not self.iterator_exhausted or self.translation or self.diarization or self.processed_duration_ms != self.decoded_duration_ms or actual_ms != self.decoded_duration_ms:
+            raise ValueError("本地转写处理范围不完整或声明与输入样本不一致")
+        return self
+
+
 class AudioTranscript(StrictRequest):
     asset_id: str = Field(min_length=36, max_length=36)
     content_hash: str = Field(pattern=r"^[a-f0-9]{64}$")
@@ -242,6 +275,7 @@ class AudioTranscript(StrictRequest):
     speech_detected: bool = Field(strict=True)
     language: str = Field(min_length=1, max_length=40)
     segments: list[AudioSegment] = Field(max_length=1000)
+    processing: AudioProcessing | None = None
 
     @model_validator(mode="after")
     def speech_and_segments(self):

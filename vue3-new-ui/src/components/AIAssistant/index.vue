@@ -14,18 +14,19 @@
             <el-option v-for="item in patients" :key="item.patient_id" :label="item.label" :value="item.patient_id" />
           </el-select>
         </el-form-item>
-        <el-form-item v-if="selected.scope === 'patient' && patientId" label="本次就诊">
+        <el-form-item v-if="selected.scope === 'patient' && patientId && !needsIncident" label="本次就诊">
           <el-select v-model="encounterRef" clearable :disabled="!!props.encounterRef" placeholder="选择门诊或住院记录；治疗路径推荐需要本次就诊" style="width: 100%">
             <el-option v-for="item in encounters" :key="item.encounter_ref" :label="item.label" :value="item.encounter_ref" />
           </el-select>
         </el-form-item>
+        <el-form-item v-if="needsIncident" label="不良事件标识"><el-input v-model="incidentId" :disabled="!!props.initialInput.adverse_event_id" maxlength="10" placeholder="明确选择本患者事件的正整数标识" /><p>事件未记录就诊关联，不能按上报日期推定属于某次门诊或住院。</p></el-form-item>
         <el-form-item v-if="needsPrescription && patientId" label="待核查处方">
           <el-select v-model="prescriptionId" :clearable="!props.initialInput.prescription_id" :disabled="!!props.initialInput.prescription_id" placeholder="选择实际处方" style="width: 100%"><el-option v-for="item in prescriptions" :key="item.prescription_id" :label="item.label" :value="item.prescription_id" /></el-select>
         </el-form-item>
         <el-form-item v-if="needsCoding" label="编码检索词"><el-input v-model="codingQuery" maxlength="500" placeholder="已记录诊断、手术名称或已有编码；多个词用逗号分隔" /></el-form-item>
         <template v-if="needsOperations">
           <el-form-item label="运营资料日期"><el-date-picker v-model="operationsRange" type="daterange" value-format="YYYY-MM-DD" start-placeholder="开始日期" end-placeholder="结束日期" /></el-form-item>
-          <el-form-item v-if="needsRoster" label="排班计划日期"><el-date-picker v-model="operationsPlanRange" type="daterange" value-format="YYYY-MM-DD" start-placeholder="计划开始日期" end-placeholder="计划结束日期" /></el-form-item>
+          <el-form-item v-if="needsPlanning" :label="featureKey === 'surgery_scheduling' ? '排台计划日期' : '排班计划日期'"><el-date-picker v-model="operationsPlanRange" type="daterange" value-format="YYYY-MM-DD" start-placeholder="计划开始日期" end-placeholder="计划结束日期" /></el-form-item>
           <el-form-item v-if="!needsInventory" label="运营科室范围"><el-select v-model="serviceDepartment" clearable filterable :placeholder="serviceOptions.allow_hospital_scope ? '默认全院范围' : '默认所属科室范围'"><el-option v-for="item in serviceOptions.departments || []" :key="item.department_id" :value="item.department_id" :label="item.name" /></el-select></el-form-item>
           <template v-if="needsInventory">
             <el-form-item label="库存药品"><el-select v-model="inventoryDrugs" multiple filterable clearable :disabled="serviceOptions.inventory_scope_available === false" placeholder="选择真实目录药品"><el-option v-for="item in serviceOptions.inventory_drugs || []" :key="item.item_id" :value="item.item_id" :label="item.name" /></el-select></el-form-item>
@@ -67,6 +68,7 @@
       <el-alert v-if="run.status === 'failed'" type="error" :closable="false" :title="run.error_message || '生成失败，请联系管理员检查服务状态'" />
       <ai-service-findings :findings="run.tool_findings" @inspect="inspectEvidence" />
       <ai-operational-findings :findings="run.operational_findings" @inspect="inspectEvidence" />
+      <ai-incident-findings :findings="run.incident_findings" @inspect="inspectEvidence" />
       <div v-if="run.tool_findings?.billing_reconciliation" class="spaced">
         <h4>原始账目与执行关联核对</h4><p>{{ run.tool_findings.billing_reconciliation.scope_note }}</p>
         <el-table v-if="run.tool_findings.billing_reconciliation.scope?.kind === 'inpatient'" :data="run.tool_findings.billing_reconciliation.checks" max-height="320" empty-text="本次范围暂无可核对住院费用">
@@ -120,6 +122,7 @@
     <el-dialog v-model="contextDialog" :title="needsOperations ? '本次提供给 AI 的运营资料' : '本次提供给 AI 的患者资料'" width="min(1000px, 96vw)">
       <el-alert type="info" :closable="false" title="资料保留时间和状态，缺失信息会单独标记。" />
       <ai-operational-findings v-if="needsOperations" :findings="contextData?.context" @inspect="inspectPreviewEvidence" />
+      <ai-incident-findings v-if="needsIncident" :findings="contextData?.context" @inspect="inspectPreviewEvidence" />
       <el-collapse v-if="needsOperations"><el-collapse-item title="查看原始资料字段"><pre class="plain-text">{{ JSON.stringify(contextData, null, 2) }}</pre></el-collapse-item></el-collapse>
       <pre v-else class="plain-text">{{ JSON.stringify(contextData, null, 2) }}</pre>
     </el-dialog>
@@ -135,6 +138,7 @@ import { ElMessage } from "element-plus";
 import { cancelAIRun, createAIRun, getAIClinicalContext, getAIOperationalContext, getAIEncounters, getAIFeatures, getAIPatients, getAIPrescriptions, getAIServiceOptions, getAIRun, getAIRuns, reviewAIRun } from "@/api/ai";
 import AiServiceFindings from "@/components/AIServiceFindings/index.vue";
 import AiOperationalFindings from "@/components/AIOperationalFindings/index.vue";
+import AiIncidentFindings from "@/components/AIIncidentFindings/index.vue";
 
 const props = defineProps({ featureKeys: { type: Array, default: () => [] }, initialFeature: { type: String, default: "" }, patientId: { type: Number, default: null }, encounterRef: { type: String, default: "" }, initialInput: { type: Object, default: () => ({}) } });
 const store = useStore();
@@ -149,7 +153,8 @@ const needsPrescription = computed(() => ["interaction_review", "allergy_review"
 const needsCoding = computed(() => ["icd_candidates", "drg_evidence_review"].includes(featureKey.value));
 const needsAppointment = computed(() => featureKey.value === "appointment_assistant"), needsNavigation = computed(() => featureKey.value === "hospital_navigation");
 const needsOperations = computed(() => selected.value?.scope === "hospital"), needsInventory = computed(() => ["supply_forecast", "inventory_optimization"].includes(featureKey.value));
-const needsRoster = computed(() => featureKey.value === "roster_optimization");
+const needsPlanning = computed(() => ["roster_optimization", "surgery_scheduling"].includes(featureKey.value));
+const needsIncident = computed(() => featureKey.value === "incident_rca"), incidentId = ref("");
 const operationsRange = ref([]), operationsPlanRange = ref([]), inventoryDrugs = ref([]), inventoryConsumables = ref([]), serviceOptionsLoading = ref(false);
 const serviceOptions = ref({}), serviceDepartment = ref(null), serviceDoctor = ref(null), serviceDate = ref(""), navigationStart = ref(null), navigationEnd = ref(null);
 const serviceDoctors = computed(() => (serviceOptions.value.doctors || []).filter(item => !serviceDepartment.value || item.department_id === serviceDepartment.value));
@@ -184,6 +189,7 @@ watch(featureKey, async () => {
   const featureVersion = formVersion;
   patientId.value = null; encounters.value = []; prescriptions.value = []; encounterRef.value = ""; prescriptionId.value = null;
   question.value = props.initialInput.question || ""; codingQuery.value = props.initialInput.icd_query || ""; extraInput.value = "";
+  incidentId.value = props.initialInput.adverse_event_id == null ? "" : String(props.initialInput.adverse_event_id);
   serviceOptions.value = {}; serviceDepartment.value = props.initialInput.department_id || null; serviceDoctor.value = props.initialInput.doctor_id || null; serviceDate.value = props.initialInput.appointment_date || "";
   navigationStart.value = props.initialInput.start_node_id || null; navigationEnd.value = props.initialInput.end_node_id || null;
   operationsRange.value = props.initialInput.date_from && props.initialInput.date_to ? [props.initialInput.date_from, props.initialInput.date_to] : []; inventoryDrugs.value = [...(props.initialInput.drug_ids || [])]; inventoryConsumables.value = [...(props.initialInput.consumable_ids || [])]; serviceOptionsLoading.value = false;
@@ -191,7 +197,7 @@ watch(featureKey, async () => {
   if (selected.value?.scope === "patient") { await searchPatients(); if (featureVersion !== formVersion) return; patientId.value = props.patientId || (patients.value.length === 1 ? patients.value[0].patient_id : null); }
   if (needsNavigation.value || needsAppointment.value || needsOperations.value) {
     const version = formVersion; serviceOptionsLoading.value = true;
-    try { const response = await getAIServiceOptions({ feature_key: featureKey.value }); if (version === formVersion) { serviceOptions.value = response.data || {}; if (needsOperations.value && !operationsRange.value?.length) operationsRange.value = serviceOptions.value.default_window || []; if (needsRoster.value && !operationsPlanRange.value?.length) operationsPlanRange.value = serviceOptions.value.default_planning_window || []; } }
+    try { const response = await getAIServiceOptions({ feature_key: featureKey.value }); if (version === formVersion) { serviceOptions.value = response.data || {}; if (needsOperations.value && !operationsRange.value?.length) operationsRange.value = serviceOptions.value.default_window || []; if (needsPlanning.value && !operationsPlanRange.value?.length) operationsPlanRange.value = serviceOptions.value.default_planning_window || []; } }
     finally { if (version === formVersion) serviceOptionsLoading.value = false; }
   }
 });
@@ -199,7 +205,8 @@ watch(patientId, async id => {
   const patientVersion = ++patientLoadVersion;
   patientLoading.value = !!id;
   stopPolling(); run.value = null;
-  encounterRef.value = props.encounterRef || ""; prescriptionId.value = props.initialInput.prescription_id || null; contextData.value = null; encounters.value = []; prescriptions.value = [];
+  encounterRef.value = needsIncident.value ? "" : props.encounterRef || ""; prescriptionId.value = props.initialInput.prescription_id || null; contextData.value = null; encounters.value = []; prescriptions.value = [];
+  if (needsIncident.value) { incidentId.value = props.initialInput.adverse_event_id == null ? "" : String(props.initialInput.adverse_event_id); patientLoading.value = false; return; }
   if (!id) return;
   const version = formVersion, key = featureKey.value;
   try {
@@ -213,7 +220,7 @@ watch(patientId, async id => {
   } finally { if (patientVersion === patientLoadVersion) patientLoading.value = false; }
 });
 watch(encounterRef, () => { stopPolling(); run.value = null; contextData.value = null; });
-watch([featureKey, patientId, encounterRef, prescriptionId, serviceDepartment, serviceDoctor, serviceDate, navigationStart, navigationEnd, operationsRange, operationsPlanRange, () => inventoryDrugs.value.join(','), () => inventoryConsumables.value.join(','), () => JSON.stringify(props.initialInput)], () => {
+watch([featureKey, patientId, encounterRef, prescriptionId, incidentId, serviceDepartment, serviceDoctor, serviceDate, navigationStart, navigationEnd, operationsRange, operationsPlanRange, () => inventoryDrugs.value.join(','), () => inventoryConsumables.value.join(','), () => JSON.stringify(props.initialInput)], () => {
   selectionVersion += 1; stopPolling(); run.value = null; contextData.value = null; contextDialog.value = false; evidenceDialog.value = false; feedbackDialog.value = false;
 });
 watch(() => run.value?.run_id, () => { evidenceDialog.value = false; feedbackDialog.value = false; feedback.value = { outcome: "accepted", comment: "" }; });
@@ -221,7 +228,8 @@ watch(serviceDepartment, id => { const doctor = serviceOptions.value.doctors?.fi
 watch([featureKey, patientId, encounterRef], () => { historyVersion += 1; history.value = []; if (historyOpen) loadHistory(); });
 watch(() => props.initialFeature, key => { if (features.value.some(item => item.key === key)) featureKey.value = key; });
 watch(() => props.patientId, id => { formVersion += 1; patientId.value = id; });
-watch(() => props.encounterRef, value => { encounterRef.value = value; });
+watch(() => props.encounterRef, value => { encounterRef.value = needsIncident.value ? "" : value; });
+watch(() => props.initialInput.adverse_event_id, value => { incidentId.value = value == null ? "" : String(value); });
 async function inspectContext() {
   const input = buildTaskInput(); if (!input) return;
   const version = selectionVersion;
@@ -249,9 +257,10 @@ function buildTaskInput() {
   if (needsAppointment.value) { for (const [key, value] of [["department_id", serviceDepartment.value], ["doctor_id", serviceDoctor.value], ["appointment_date", serviceDate.value]]) { if (value) input[key] = value; else delete input[key]; } }
   if (needsNavigation.value) { for (const [key, value] of [["start_node_id", navigationStart.value], ["end_node_id", navigationEnd.value]]) { if (value) input[key] = value; else delete input[key]; } }
   if (prescriptionId.value) input.prescription_id = prescriptionId.value;
+  if (needsIncident.value && incidentId.value.trim()) input.adverse_event_id = incidentId.value.trim();
   if (needsOperations.value) {
     if (operationsRange.value?.length === 2) { input.date_from = operationsRange.value[0]; input.date_to = operationsRange.value[1]; } else { delete input.date_from; delete input.date_to; }
-    if (needsRoster.value && operationsPlanRange.value?.length === 2) { input.planning_date_from = operationsPlanRange.value[0]; input.planning_date_to = operationsPlanRange.value[1]; } else { delete input.planning_date_from; delete input.planning_date_to; }
+    if (needsPlanning.value && operationsPlanRange.value?.length === 2) { input.planning_date_from = operationsPlanRange.value[0]; input.planning_date_to = operationsPlanRange.value[1]; } else { delete input.planning_date_from; delete input.planning_date_to; }
     if (needsInventory.value) { input.drug_ids = [...inventoryDrugs.value]; input.consumable_ids = [...inventoryConsumables.value]; delete input.department_id; }
     else if (serviceDepartment.value) input.department_id = serviceDepartment.value; else delete input.department_id;
   }

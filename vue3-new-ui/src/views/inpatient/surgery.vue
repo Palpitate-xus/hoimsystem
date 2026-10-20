@@ -6,6 +6,7 @@
         <div class="page-toolbar">
           <el-button type="primary" @click="openApplyDialog()">手术申请</el-button>
           <el-button type="success" @click="openScheduleDialog()">手术排台</el-button>
+          <ai-action v-if="canOptimizeSurgery" label="AI 排台分析" title="AI 手术排台资料与资源分析" :feature-keys="['surgery_scheduling']" initial-feature="surgery_scheduling" />
           <el-select v-model="filterStatus" placeholder="状态" clearable style="width: 120px;" size="small">
             <el-option label="待审批" :value="0" />
             <el-option label="已批准" :value="1" />
@@ -190,6 +191,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from "vue";
+import { useStore } from "vuex";
 import { ElMessage, ElMessageBox } from "element-plus";
 import AiAction from "@/components/AIAction/index.vue";
 import { getSurgeryApplicationList, createSurgeryApplication, approveSurgeryApplication, cancelSurgeryApplication, getSurgeryScheduleList, createSurgerySchedule, startSurgery, completeSurgery, createAnesthesiaRecord, getPerioperativeAntibiotics, createPerioperativeAntibiotic, updatePerioperativeAntibioticStatus } from "@/api/surgery";
@@ -197,6 +199,8 @@ import { getInpatientList } from "@/api/admission";
 import { getDoctorList } from "@/api/admin";
 import { getPharmaceuticalList } from "@/api/pharmacy";
 
+const store = useStore();
+const canOptimizeSurgery = computed(() => store.getters["user/permissions"].some(role => ["super_admin", "admin", "director"].includes(role)));
 const applications = ref([]);
 const schedules = ref([]);
 const loading = ref(false);

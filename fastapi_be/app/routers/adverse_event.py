@@ -34,6 +34,7 @@ def get_event_list(current_user: User = Depends(require_roles(*ADMIN_ROLES)), db
         data.append(
             {
                 "event_id": it.event_id,
+                "patient_id": it.patient_id,
                 "event_type": it.event_type,
                 "patient_name": it.patient.name if it.patient else "",
                 "description": it.description,

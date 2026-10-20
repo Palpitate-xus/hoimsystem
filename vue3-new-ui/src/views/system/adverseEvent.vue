@@ -11,8 +11,9 @@
         <el-table-column prop="description" label="描述" show-overflow-tooltip />
         <el-table-column prop="severity_text" label="严重程度" />
         <el-table-column prop="status_text" label="状态" />
-        <el-table-column label="操作" width="200">
+        <el-table-column label="操作" width="310">
           <template #default="scope">
+            <ai-action v-if="scope.row.patient_id" label="AI 事件复盘" title="AI 所选不良事件RCA辅助" :patient-id="scope.row.patient_id" :initial-input="{ adverse_event_id: String(scope.row.event_id) }" :feature-keys="['incident_rca']" initial-feature="incident_rca" />
             <el-button
               v-if="scope.row.status === 1"
               size="small"
@@ -67,6 +68,7 @@
 <script setup>
 import { ref, onMounted } from "vue";
 import { ElMessage } from "element-plus";
+import AiAction from "@/components/AIAction/index.vue";
 import { createAdverseEvent, getAdverseEventList, updateEventStatus } from "@/api/adverseEvent";
 
 const tableData = ref([]);

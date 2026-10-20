@@ -11,6 +11,7 @@ import os
 import runpy
 import subprocess
 import sys
+from collections import Counter
 from pathlib import Path
 
 import pytest
@@ -91,6 +92,58 @@ def test_observation_groups_come_from_real_module_constants(generator):
 
     assert generator["ROLE_GROUPS"]["WINDOW_ROLES"] == set(WINDOW_ROLES)
     assert generator["ROLE_GROUPS"]["OBSERVATION_ROLES"] == set(OBSERVATION_ROLES)
+
+
+def test_all_matrix_paths_match_actual_main_router_mounts(generator):
+    """Include health/metrics mounts without assuming every router uses /api."""
+    from fastapi.routing import APIRoute
+
+    from app.main import app
+
+    actual = Counter((method, route.path) for route in app.routes if isinstance(route, APIRoute) and route.endpoint.__module__.startswith("app.routers.") for method in route.methods)
+    generated = Counter((row["method"], row["path"]) for row in generator["collect_endpoints"]())
+    committed = Counter((row["method"], row["path"]) for row in json.loads((Path(SCRIPT).parents[1] / "rbac_matrix.json").read_text()))
+    assert actual
+    assert generated == actual
+    assert committed == actual
+
+
+def test_main_router_import_aliases_and_empty_mount_prefix(tmp_path, generator):
+    source = tmp_path / "main.py"
+    source.write_text('from app.routers import first as renamed, second\napp.include_router(renamed.router)\napp.include_router(second.router, prefix="/api")\n')
+    assert generator["mounted_router_prefixes"](source) == {"first.py": "", "second.py": "/api"}
+
+
+def test_mount_and_router_prefixes_match_actual_fastapi_composition(tmp_path, generator):
+    from fastapi import APIRouter, FastAPI
+    from fastapi.routing import APIRoute
+
+    source = tmp_path / "main.py"
+    source.write_text('from app.routers import scoped\napp.include_router(scoped.router, prefix="/hospital")\n')
+    router_source = tmp_path / "scoped.py"
+    router_source.write_text('router = APIRouter(prefix="/observations")\n@router.get("/points")\ndef points():\n    pass\n')
+    [generated] = generator["analyze_router"](str(router_source), mount_prefix=generator["mounted_router_prefixes"](source)["scoped.py"])
+    actual_app, actual_router = FastAPI(), APIRouter(prefix="/observations")
+    actual_router.add_api_route("/points", lambda: None, methods=["GET"])
+    actual_app.include_router(actual_router, prefix="/hospital")
+    assert [generated["path"]] == [route.path for route in actual_app.routes if isinstance(route, APIRoute)]
+
+
+@pytest.mark.parametrize(
+    "mounts, message",
+    [
+        ("app.include_router(scoped.router, prefix=runtime_prefix)", "prefix must be literal"),
+        ("app.include_router(scoped.router, **configuration)", "prefix must be literal"),
+        ("app.include_router(unknown.router)", "module cannot be resolved"),
+        ('app.include_router(scoped.router)\napp.include_router(scoped.router, prefix="/other")', "multiple mounts"),
+        ("if enabled:\n    app.include_router(scoped.router)", "nested or dynamic router mounts"),
+    ],
+)
+def test_dynamic_or_multiple_main_router_mounts_are_explicitly_rejected(tmp_path, generator, mounts, message):
+    source = tmp_path / "main.py"
+    source.write_text(f"from app.routers import scoped\n{mounts}\n")
+    with pytest.raises(ValueError, match=message):
+        generator["mounted_router_prefixes"](source)
 
 
 @pytest.mark.parametrize(

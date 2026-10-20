@@ -4508,21 +4508,21 @@
   "function": "liveness",
   "method": "GET",
   "module": "observability.py",
-  "path": "/api/health/live"
+  "path": "/health/live"
  },
  {
   "auth": "PUBLIC",
   "function": "readiness",
   "method": "GET",
   "module": "observability.py",
-  "path": "/api/health/ready"
+  "path": "/health/ready"
  },
  {
   "auth": "PUBLIC",
   "function": "metrics",
   "method": "GET",
   "module": "observability.py",
-  "path": "/api/metrics"
+  "path": "/metrics"
  },
  {
   "auth": "ANY",

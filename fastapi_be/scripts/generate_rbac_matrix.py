@@ -11,7 +11,6 @@
 
 import argparse
 import ast
-import glob
 import json
 import os
 import sys
@@ -121,6 +120,44 @@ def router_prefixes(tree: ast.Module, path: str) -> dict[str, str]:
     return prefixes
 
 
+def mounted_router_prefixes(path: Path) -> dict[str, str]:
+    """Resolve the application's literal mounts, including aliased router imports."""
+    tree = ast.parse(path.read_text(encoding="utf-8"))
+    modules = {}
+    for node in tree.body:
+        if isinstance(node, ast.ImportFrom) and node.module == "app.routers":
+            for name in node.names:
+                if name.name == "*":
+                    raise ValueError(f"{path}:{node.lineno}: router imports must be explicit")
+                modules[name.asname or name.name] = name.name
+    top_level_calls = {id(node.value) for node in tree.body if isinstance(node, ast.Expr) and isinstance(node.value, ast.Call)}
+    mounts = {}
+    for call in ast.walk(tree):
+        if not isinstance(call, ast.Call) or not isinstance(call.func, ast.Attribute) or call.func.attr != "include_router":
+            continue
+        receiver = call.func.value
+        if id(call) not in top_level_calls or not isinstance(receiver, ast.Name) or receiver.id != "app":
+            raise ValueError(f"{path}:{call.lineno}: nested or dynamic router mounts cannot be guessed")
+        if len(call.args) != 1:
+            raise ValueError(f"{path}:{call.lineno}: include_router requires one explicit router")
+        router = call.args[0]
+        if not isinstance(router, ast.Attribute) or router.attr != "router" or not isinstance(router.value, ast.Name) or router.value.id not in modules:
+            raise ValueError(f"{path}:{call.lineno}: mounted router module cannot be resolved")
+        module = modules[router.value.id] + ".py"
+        prefix = ""
+        for keyword in call.keywords:
+            if keyword.arg is None or (keyword.arg == "prefix" and not (isinstance(keyword.value, ast.Constant) and isinstance(keyword.value.value, str))):
+                raise ValueError(f"{path}:{call.lineno}: include_router prefix must be literal; dynamic configuration cannot be guessed")
+            if keyword.arg == "prefix":
+                prefix = keyword.value.value
+        if prefix and (not prefix.startswith("/") or prefix.endswith("/")):
+            raise ValueError(f"{path}:{call.lineno}: invalid include_router prefix")
+        if module in mounts:
+            raise ValueError(f"{path}:{call.lineno}: multiple mounts of {module} require explicit inventory support")
+        mounts[module] = prefix
+    return mounts
+
+
 def _resolve_decorator_roles(call: ast.Call) -> set[str] | None:
     """把 require_roles(*A, *B, 'x') 的参数解析为具体角色集合。"""
     roles: set[str] = set()
@@ -147,7 +184,7 @@ def _resolve_decorator_roles(call: ast.Call) -> set[str] | None:
     return roles
 
 
-def analyze_router(path: str) -> list[dict]:
+def analyze_router(path: str, mount_prefix: str = "/api") -> list[dict]:
     tree = ast.parse(Path(path).read_text(encoding="utf-8"))
     prefixes = router_prefixes(tree, path)
     module = os.path.basename(path)
@@ -184,7 +221,7 @@ def analyze_router(path: str) -> list[dict]:
             {
                 "module": module,
                 "method": method,
-                "path": f"/api{route_path}",
+                "path": f"{mount_prefix}{route_path}",
                 "function": node.name,
                 "auth": sorted(auth) if isinstance(auth, set) else auth,
             }
@@ -194,10 +231,11 @@ def analyze_router(path: str) -> list[dict]:
 
 def collect_endpoints() -> list[dict]:
     all_eps = []
-    for f in sorted(glob.glob(str(BACKEND / "app/routers/*.py"))):
-        if f.endswith("__init__.py"):
-            continue
-        all_eps.extend(analyze_router(f))
+    for module, prefix in sorted(mounted_router_prefixes(BACKEND / "app/main.py").items()):
+        path = BACKEND / "app/routers" / module
+        if not path.is_file():
+            raise ValueError(f"{path}: mounted router source is missing")
+        all_eps.extend(analyze_router(str(path), mount_prefix=prefix))
     return all_eps
 
 

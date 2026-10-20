@@ -789,9 +789,9 @@
 
 | 方法 | 路径 | admin | super_admin | director | doctor | nurse | cashier | pharmacist | guide | patient | lab_technician | registrar | PUBLIC |
 |------|------|------|------|------|------|------|------|------|------|------|------|------|------|
-| GET | `/api/health/live` |  |  |  |  |  |  |  |  |  |  |  | PUBLIC |
-| GET | `/api/health/ready` |  |  |  |  |  |  |  |  |  |  |  | PUBLIC |
-| GET | `/api/metrics` |  |  |  |  |  |  |  |  |  |  |  | PUBLIC |
+| GET | `/health/live` |  |  |  |  |  |  |  |  |  |  |  | PUBLIC |
+| GET | `/health/ready` |  |  |  |  |  |  |  |  |  |  |  | PUBLIC |
+| GET | `/metrics` |  |  |  |  |  |  |  |  |  |  |  | PUBLIC |
 
 ### `ops_extension.py`
 

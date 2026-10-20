@@ -14,6 +14,7 @@ from app.models import (
     SurgeryApplication,
     SurgerySchedule,
 )
+from app.perioperative_review import assess_existing_timing, existing_timing_rule
 
 router = APIRouter()
 
@@ -522,10 +523,8 @@ def antibiotic_compliance_statistics(
 ):
     """围术期预防用药时限依从统计。
 
-    判定规则（以手术开始时间为基准）：
-    - 依从：术前 30-120 分钟内给药（切皮前 0.5-2h，国家抗菌药临床应用指导原则）
-    - 过早：> 120 分钟；过晚/未给：< 30 分钟或未执行
-    汇总：总体依从率、按时给药率、按手术级别人群分布。
+    沿用以手术开始记录为基准的30-120分钟统计窗口。
+    该字段不自动视为独立切皮时刻，统计结果不等同于通用临床适用判断。
     """
 
     from app.models import PerioperativeAntibiotic, SurgerySchedule
@@ -549,12 +548,16 @@ def antibiotic_compliance_statistics(
 
     app_ids = {pa.application_id for pa, _ in rows}
     levels = {a.application_id: a.surgery_level for a in db.query(SurgeryApplication).filter(SurgeryApplication.application_id.in_(app_ids)).all()} if app_ids else {}
-    total = compliant = on_time_or_early = late_or_missing = 0
+    total = compliant = on_time_or_early = late_or_missing = not_evaluated = 0
     by_level: dict[int, dict] = {}
     for pa, sch in rows:
+        assessment = assess_existing_timing(pa.administered_time, sch.start_time)
+        if assessment["status"] != "evaluated":
+            not_evaluated += 1
+            continue
         total += 1
-        delta_min = (sch.start_time - pa.administered_time).total_seconds() / 60
-        is_ok = 30 <= delta_min <= 120
+        delta_min = assessment["minutes_before_start"]
+        is_ok = assessment["within_existing_window"]
         if is_ok:
             compliant += 1
         lv = levels.get(pa.application_id) or 0
@@ -578,6 +581,8 @@ def antibiotic_compliance_statistics(
             "too_early_gt120min": on_time_or_early,
             "too_late_lt30min": late_or_missing,
             "by_level": [by_level[k] for k in sorted(by_level)],
-            "rule": "切皮前 30-120 分钟给药为依从（0.5-2h）",
+            "rule": existing_timing_rule()["label"],
+            "rule_metadata": existing_timing_rule(),
+            "not_evaluated": not_evaluated,
         },
     }

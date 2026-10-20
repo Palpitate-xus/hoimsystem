@@ -217,7 +217,7 @@ module.exports = {
         // The global 20 kB threshold otherwise leaves identical async copies.
         aiShared: {
           name: "ai-shared",
-          test: /[\\/]src[\\/](?:api[\\/](?:(?:ai[^\\/]*|inpatient(?:Observations|Gcs|Laboratory|Support)|vasoactiveMappings|rosterSources|sofaSchema)\.js|sofaSchemas\.json)$|components[\\/]AI(?:(?:[A-Za-z]+ProviderCheck|[A-Za-z]+Findings)[\\/]|SofaInput[\\/]ReviewFields\.vue$|Action[\\/]index\.vue$))/,
+          test: /[\\/]src[\\/](?:api[\\/](?:(?:ai[^\\/]*|inpatient(?:Observations|Gcs|Laboratory|Support)|vasoactiveMappings|roster(?:Sources|Plans)|sofaSchema)\.js|(?:sofa|roster)Schemas\.json)$|components[\\/]AI(?:(?:[A-Za-z]+ProviderCheck|[A-Za-z]+Findings)[\\/]|RosterSources[\\/](?:NullableValue|BreaksEditor)\.vue$|SofaInput[\\/]ReviewFields\.vue$|Action[\\/]index\.vue$))/,
           chunks: "async",
           minChunks: 2,
           minSize: 0,

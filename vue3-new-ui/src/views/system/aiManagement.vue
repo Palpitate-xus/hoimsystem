@@ -46,7 +46,7 @@
             <el-table-column label="状态"><template #default="{ row }">{{ row.enabled ? '已启用' : '关闭' }}</template></el-table-column>
             <el-table-column label="密钥"><template #default="{ row }">{{ row.has_api_key ? '已配置，不回显' : '未配置' }}</template></el-table-column>
             <el-table-column label="患者资料"><template #default="{ row }">{{ row.allows_patient_data ? '已授权传输' : '禁止传输' }}</template></el-table-column>
-            <el-table-column label="操作" width="230"><template #default="{ row }"><el-button size="small" @click="editProvider(row)">编辑</el-button><el-button v-if="row.kind === 'specialist' && row.supported_features?.includes('medical_transcription')" size="small" @click="openSpeechCheck(row)">检查本地语音服务</el-button><el-button v-if="row.kind === 'specialist' && row.supported_features?.includes('ecg_analysis')" size="small" @click="openEcgCheck(row)">检查本地心电服务</el-button><el-button v-if="canCheckImage && row.kind === 'specialist' && row.supported_features?.includes('imaging_detection')" size="small" @click="openImageCheck(row)">检查本地影像服务</el-button><el-button v-if="canCheckForecast && row.kind === 'specialist' && row.supported_features?.includes('deterioration_risk')" size="small" @click="openNews2Check(row)">检查本地NEWS2服务</el-button><el-button v-if="canCheckForecast && row.kind === 'specialist' && row.supported_features?.includes('aki_risk')" size="small" @click="openAkiCheck(row)">检查本地AKI服务</el-button><el-button v-if="canCheckForecast && row.kind === 'specialist' && row.supported_features?.includes('sepsis_risk')" size="small" @click="openQsofaCheck(row)">检查本地qSOFA服务</el-button><el-button v-if="canCheckForecast && row.kind === 'specialist' && row.supported_features?.includes('sepsis_risk')" size="small" @click="openSofaCheck(row)">检查本地SOFA服务</el-button><el-button v-if="canCheckForecast && row.kind === 'specialist' && row.supported_features?.includes('visit_forecast')" size="small" @click="openForecastCheck(row)">检查本地统计服务</el-button></template></el-table-column>
+            <el-table-column label="操作" width="230"><template #default="{ row }"><el-button size="small" @click="editProvider(row)">编辑</el-button><el-button v-if="row.kind === 'specialist' && row.supported_features?.includes('medical_transcription')" size="small" @click="openSpeechCheck(row)">检查本地语音服务</el-button><el-button v-if="row.kind === 'specialist' && row.supported_features?.includes('ecg_analysis')" size="small" @click="openEcgCheck(row)">检查本地心电服务</el-button><el-button v-if="canCheckImage && row.kind === 'specialist' && row.supported_features?.includes('imaging_detection')" size="small" @click="openImageCheck(row)">检查本地影像服务</el-button><el-button v-if="canCheckForecast && row.kind === 'specialist' && row.supported_features?.includes('deterioration_risk')" size="small" @click="openNews2Check(row)">检查本地NEWS2服务</el-button><el-button v-if="canCheckForecast && row.kind === 'specialist' && row.supported_features?.includes('aki_risk')" size="small" @click="openAkiCheck(row)">检查本地AKI服务</el-button><el-button v-if="canCheckForecast && row.kind === 'specialist' && row.supported_features?.includes('sepsis_risk')" size="small" @click="openQsofaCheck(row)">检查本地qSOFA服务</el-button><el-button v-if="canCheckForecast && row.kind === 'specialist' && row.supported_features?.includes('sepsis_risk')" size="small" @click="openSofaCheck(row)">检查本地SOFA服务</el-button><el-button v-if="canCheckForecast&&row.kind==='specialist'&&row.supported_features?.includes('roster_optimization')" size="small" @click="openRosterCheck(row)">检查本地排班服务</el-button><el-button v-if="canCheckForecast && row.kind === 'specialist' && row.supported_features?.includes('visit_forecast')" size="small" @click="openForecastCheck(row)">检查本地统计服务</el-button></template></el-table-column>
           </el-table>
         </el-tab-pane>
 
@@ -65,6 +65,7 @@
         <el-tab-pane label="住院观测窗" name="observation_windows" lazy><ai-observation-window-management v-if="tab === 'observation_windows'" /></el-tab-pane>
         <el-tab-pane label="检验项目与来源" name="laboratory_mappings" lazy><ai-lab-mapping-management v-if="tab === 'laboratory_mappings'" /></el-tab-pane>
         <el-tab-pane label="风险规则与评估" name="risk_rules" lazy><ai-risk-rule-management v-if="tab === 'risk_rules'" /></el-tab-pane>
+        <el-tab-pane label="受审排班计划治理" name="roster_plans" lazy><ai-roster-input v-if="tab==='roster_plans'" governance /></el-tab-pane>
         <el-tab-pane label="排班人员来源治理" name="roster_sources" lazy><ai-roster-sources v-if="tab==='roster_sources'" governance /></el-tab-pane>
         <el-tab-pane label="SOFA独立规则与全院评估" name="sofa" lazy><ai-sofa-management v-if="tab==='sofa'" /></el-tab-pane>
         <el-tab-pane label="器官支持来源与映射" name="organ_support" lazy><ai-organ-support-management v-if="tab === 'organ_support'" /></el-tab-pane>
@@ -143,6 +144,7 @@
     <AiForecastProviderCheck v-if="forecastCheckTarget" :target="forecastCheckTarget" :providers="providers" @close="forecastCheckTarget = null" @edit-model="editActualForecastModel" />
     <AiNews2ProviderCheck v-if="news2CheckTarget" :target="news2CheckTarget" :providers="providers" @close="news2CheckTarget = null" @edit-model="editActualNews2Model" />
     <AiAkiProviderCheck v-if="akiCheckTarget" :target="akiCheckTarget" :providers="providers" @close="akiCheckTarget = null" @edit-model="editActualAkiModel" />
+    <AiRosterProviderCheck v-if="rosterCheckTarget" :target="rosterCheckTarget" :providers="providers" @close="rosterCheckTarget=null" @edit-model="editActualRosterModel" />
     <AiSofaProviderCheck v-if="sofaCheckTarget" :target="sofaCheckTarget" :providers="providers" @close="sofaCheckTarget=null" @edit-model="editActualSofaModel" />
     <AiQsofaProviderCheck v-if="qsofaCheckTarget" :target="qsofaCheckTarget" :providers="providers" @close="qsofaCheckTarget = null" @edit-model="editActualQsofaModel" />
 
@@ -304,6 +306,8 @@ const AiLabMappingManagement = defineAsyncComponent(() => import("@/views/system
 const AiForecastProviderCheck = defineAsyncComponent(() => import("@/components/AIForecastProviderCheck/index.vue"));
 const AiNews2ProviderCheck = defineAsyncComponent(() => import("@/components/AINews2ProviderCheck/index.vue"));
 const AiAkiProviderCheck = defineAsyncComponent(() => import("@/components/AIAkiProviderCheck/index.vue"));
+const AiRosterInput=defineAsyncComponent(()=>import("@/components/AIRosterInput/index.vue"));
+const AiRosterProviderCheck=defineAsyncComponent(()=>import("@/components/AIRosterProviderCheck/index.vue"));
 const AiRosterSources=defineAsyncComponent(()=>import("@/components/AIRosterSources/index.vue"));
 const AiSofaManagement=defineAsyncComponent(()=>import("@/components/AISofaManagement/index.vue"));
 const AiSofaProviderCheck=defineAsyncComponent(()=>import("@/components/AISofaProviderCheck/index.vue"));
@@ -359,6 +363,9 @@ function editActualAkiModel(result) {
   if (!canCheckForecast.value || result.session !== store.state.user.accessToken || !row || !/^aki:[a-f0-9]{64}$/.test(result.model || "")) { ElMessage.warning("KDIGO AKI服务配置或管理会话已变化，请重新核对"); return; }
   editProvider(row); providerForm.value.model = result.model;
 }
+const rosterCheckTarget=ref(null);
+function openRosterCheck(row){if(canCheckForecast.value)rosterCheckTarget.value={provider_id:row.provider_id,revision:row.revision,model:row.model,name:row.name,session:store.state.user.accessToken};}
+function editActualRosterModel(result){const row=providers.value.find(item=>item.provider_id===result.provider_id&&item.revision===result.revision&&item.model===result.configured_model&&item.kind==='specialist'&&item.supported_features?.includes('roster_optimization'));if(!canCheckForecast.value||result.session!==store.state.user.accessToken||!row||!/^roster:[a-f0-9]{64}$/.test(result.model||'')){ElMessage.warning('排班服务配置或管理会话已变化，请重新核对');return;}editProvider(row);providerForm.value.model=result.model;}
 const sofaCheckTarget=ref(null);
 function openSofaCheck(row){if(canCheckForecast.value)sofaCheckTarget.value={provider_id:row.provider_id,revision:row.revision,model:row.model,name:row.name,session:store.state.user.accessToken};}
 function editActualSofaModel(result){const row=providers.value.find(item=>item.provider_id===result.provider_id&&item.revision===result.revision&&item.model===result.configured_model&&item.kind==="specialist"&&item.supported_features?.includes("sepsis_risk"));if(!canCheckForecast.value||result.session!==store.state.user.accessToken||!row||!/^sofa1:[a-f0-9]{64}$/.test(result.model||"")){ElMessage.warning("SOFA服务配置或管理会话已变化，请重新核对");return;}editProvider(row);providerForm.value.model=result.model;}
@@ -372,9 +379,9 @@ function editActualQsofaModel(result) {
   if (!canCheckForecast.value || result.session !== store.state.user.accessToken || !row || !/^qsofa:[a-f0-9]{64}$/.test(result.model || "")) { ElMessage.warning("qSOFA服务配置或管理会话已变化，请重新核对"); return; }
   editProvider(row); providerForm.value.model = result.model;
 }
-watch([() => store.state.user.accessToken, () => JSON.stringify(store.state.user.permissions)], () => { news2CheckTarget.value = null; akiCheckTarget.value = null; qsofaCheckTarget.value = null;sofaCheckTarget.value=null; });
-onDeactivated(() => { news2CheckTarget.value = null; akiCheckTarget.value = null; qsofaCheckTarget.value = null;sofaCheckTarget.value=null; });
-onBeforeUnmount(() => { news2CheckTarget.value = null; akiCheckTarget.value = null; qsofaCheckTarget.value = null;sofaCheckTarget.value=null; });
+watch([() => store.state.user.accessToken, () => JSON.stringify(store.state.user.permissions)], () => { news2CheckTarget.value = null; akiCheckTarget.value = null; qsofaCheckTarget.value = null;sofaCheckTarget.value=null;rosterCheckTarget.value=null; });
+onDeactivated(() => { news2CheckTarget.value = null; akiCheckTarget.value = null; qsofaCheckTarget.value = null;sofaCheckTarget.value=null;rosterCheckTarget.value=null; });
+onBeforeUnmount(() => { news2CheckTarget.value = null; akiCheckTarget.value = null; qsofaCheckTarget.value = null;sofaCheckTarget.value=null;rosterCheckTarget.value=null; });
 watch([() => store.state.user.accessToken, () => JSON.stringify(store.state.user.permissions)], () => { forecastCheckTarget.value = null; });
 onDeactivated(() => { forecastCheckTarget.value = null; });
 onBeforeUnmount(() => { forecastCheckTarget.value = null; });

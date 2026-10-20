@@ -1,9 +1,9 @@
 <template>
-  <el-dialog :model-value="!!target && allowed" :title="`本地${label}规则服务核对`" width="min(820px, 95vw)" @update:model-value="visible => { if (!visible) close(); }">
+  <el-dialog :model-value="!!target && allowed" :title="`本地${label}${mode==='roster'?'优化':'规则'}服务核对`" width="min(820px, 95vw)" @update:model-value="visible => { if (!visible) close(); }">
     <div v-loading="loading">
-      <p>核对已保存服务：{{ target?.name }}。只读取规则与运行声明，不发送患者原测量、临床判读、基线或创建计分任务。</p>
+      <p>核对已保存服务：{{ target?.name }}。{{ mode==='roster'?'只读取优化器运行与固定政策声明，不发送人员或需求，不创建优化任务。':'只读取规则与运行声明，不发送患者原测量、临床判读、基线或创建计分任务。' }}</p>
       <template v-if="result">
-        <el-alert :type="result.compatible ? 'success' : 'warning'" :closable="false" :title="result.compatible ? '服务声明与登记配置匹配；临床适用性及效果仍待验证' : '登记配置与服务声明存在差异'" />
+        <el-alert :type="result.compatible ? 'success' : 'warning'" :closable="false" :title="result.compatible ? mode==='roster'?'服务声明与登记配置匹配；运营适用性和效果仍须本地验证':'服务声明与登记配置匹配；临床适用性及效果仍待验证' : '登记配置与服务声明存在差异'" />
         <p v-for="issue in result.issues || []" :key="issue">{{ issue }}</p>
         <el-descriptions :column="1" border class="qsofa-description">
           <el-descriptions-item v-for="row in descriptions" :key="row[0]" :label="row[0]"><span class="digest">{{ row[1] }}</span></el-descriptions-item>
@@ -22,17 +22,21 @@
 import { computed, onBeforeUnmount, onDeactivated, ref, watch } from "vue";
 import { useStore } from "vuex";
 import { ElMessage } from "element-plus";
+import {checkRosterProvider,verifyRosterCapabilities} from "@/api/rosterPlans";
 import { checkSofaProvider } from "@/api/aiSofa";
 import { checkQsofaProvider } from "@/api/aiQsofa";
 
 const props = defineProps({ mode: {type:String,default:"qsofa"}, target: { type: Object, default: null }, providers: { type: Array, default: () => [] } });
-const label=computed(()=>props.mode==="sofa1"?"SOFA":"qSOFA");
+const label=computed(()=>props.mode==="roster"?"排班":props.mode==="sofa1"?"SOFA":"qSOFA"),feature=computed(()=>props.mode==="roster"?"roster_optimization":"sepsis_risk");
 const emit = defineEmits(["close", "edit-model"]);
 const store = useStore();
-const allowed = computed(() => !!store.state.user.accessToken && store.state.user.permissions.includes("super_admin"));
+const allowed = computed(() => ["qsofa","sofa1","roster"].includes(props.mode)&&!!store.state.user.accessToken && store.state.user.permissions.includes("super_admin"));
 const result = ref(null), loading = ref(false);
 const descriptions = computed(() => {
   const cap = result.value?.capabilities;
+  if(cap&&props.mode==="roster")return[
+    ['实际模型',cap.model_version],['固定优化目标','满足硬需求后最小化惩罚；或先最大化计划净服务量，再最小化惩罚，不混成任意权重。'],['完整原资料','完整本科人员、每人每会话配对、受审资格/可用性与全地点工时上下文；未知项保留。'],['最优性证明','确定域与显式放宽域分别保存实际界、间隙、节点和操作预算终止依据；放宽域数学值不作为实际可行排班。'],['候选用途','场景净容量不是实时库存或可预约余号；不自动发布排班、预约或修改号源。'],['实际运行环境',`Python ${cap.python_version}；${Object.entries(cap.engine_versions).map(([key,v])=>`${key} ${v}`).join(' ')}`],['时区库摘要',cap.timezone_database_digest],['请求限制',`最大${cap.max_request_bytes}字节；服务时限${cap.timeout_seconds}秒。`],['运营验证',`${cap.operational_validation}：来源审核、数值测试和能力声明均不代替实际运营效果验证。`],['Prompt','仅用于溯源，不改变固定目标、工时或证明。'],['规则摘要',cap.recipe_digest],['输入政策摘要',cap.input_policy_digest],['运行摘要',cap.runtime_digest],['四核心摘要',JSON.stringify(cap.core_sha256)]
+  ];
   if(cap&&props.mode==="sofa1")return[
     ["实际模型",cap.model_version],
     ["固定规则","SOFA-1六轴固定24小时完整清单与本地原单位连续边界；不提供脓毒症确诊、排除、概率或自动治疗。"],
@@ -61,7 +65,7 @@ const descriptions = computed(() => {
 let epoch = 0, session = null;
 function current() {
   const row = props.providers.find(item => item.provider_id === props.target?.provider_id);
-  return allowed.value && session === store.state.user.accessToken && props.target?.session === session && row && row.revision === props.target.revision && row.model === props.target.model && row.kind === "specialist" && row.supported_features?.includes("sepsis_risk") ? row : null;
+  return allowed.value && session === store.state.user.accessToken && props.target?.session === session && row && row.revision === props.target.revision && row.model === props.target.model && row.kind === "specialist" && row.supported_features?.includes(feature.value) ? row : null;
 }
 function close() { epoch++; result.value = null; loading.value = false; session = null; emit("close"); }
 watch(() => [props.target,props.mode], async ([target]) => {
@@ -70,12 +74,14 @@ watch(() => [props.target,props.mode], async ([target]) => {
   if (!target || !current()) return;
   loading.value = true;
   try {
-    const response = await (props.mode==="sofa1"?checkSofaProvider:checkQsofaProvider)(target.provider_id, target.revision);
+    const response = await (props.mode==="roster"?checkRosterProvider:props.mode==="sofa1"?checkSofaProvider:checkQsofaProvider)(target.provider_id, target.revision);
     if (requestEpoch !== epoch || !current()) return;
     const data = response.data;
-    if (data?.provider_id !== target.provider_id || data.provider_revision !== target.revision || data.configured_model !== target.model || !(props.mode==="sofa1"?/^sofa1:[a-f0-9]{64}$/:/^qsofa:[a-f0-9]{64}$/).test(data.capabilities?.model_version || "") || data.capabilities.schema_version !== (props.mode==="sofa1"?"9":"8") || data.capabilities.feature_key !== "sepsis_risk") {
+    if (data?.provider_id !== target.provider_id || data.provider_revision !== target.revision || data.configured_model !== target.model || !(props.mode==="roster"?/^roster:[a-f0-9]{64}$/:props.mode==="sofa1"?/^sofa1:[a-f0-9]{64}$/:/^qsofa:[a-f0-9]{64}$/).test(data.capabilities?.model_version || "") || data.capabilities.schema_version !== (props.mode==="roster"?"10":props.mode==="sofa1"?"9":"8") || data.capabilities.feature_key !== feature.value) {
       ElMessage.warning(`核对回执与已保存${label.value}服务配置不一致，请刷新后重试`); return;
     }
+    if(props.mode==='roster'&&(typeof data.compatible!=='boolean'||!Array.isArray(data.issues)||data.issues.some(v=>typeof v!=='string')||typeof data.scope_note!=='string'||!await verifyRosterCapabilities(data.capabilities)))return;
+    if(requestEpoch!==epoch||!current())return;
     result.value = data;
   } catch { /* The shared request layer reports sanitized connection/configuration errors. */ }
   finally { if (requestEpoch === epoch) loading.value = false; }

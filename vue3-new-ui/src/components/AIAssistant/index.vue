@@ -278,7 +278,7 @@ watch(patientId, async id => {
   patientLoading.value = !!id;
   riskWindowSelection.value = null; riskWindowReady.value = false;
   stopPolling(); run.value = null;
-  encounterRef.value = needsIncident.value ? "" : props.encounterRef || ""; prescriptionId.value = props.initialInput.prescription_id || null; contextData.value = null; encounters.value = []; prescriptions.value = [];
+  encounterRef.value = id && !needsIncident.value ? props.encounterRef || "" : ""; prescriptionId.value = id ? props.initialInput.prescription_id || null : null; contextData.value = null; encounters.value = []; prescriptions.value = [];
   pathwayId.value = props.initialInput.pathway_id == null ? null : String(props.initialInput.pathway_id);
   audioAssetId.value = props.initialInput.audio_asset_id == null ? "" : String(props.initialInput.audio_asset_id); audioReady.value = false;
   ecgAssetId.value = props.initialInput.ecg_asset_id == null ? "" : String(props.initialInput.ecg_asset_id); ecgReady.value = false;
@@ -393,7 +393,9 @@ async function loadHistory(activeNames) {
 }
 watch([() => JSON.stringify(store.getters["user/permissions"]), () => store.state.user.accessToken], () => {
   if (!needsForecast.value && !needsRiskWindow.value) return;
+  formVersion++; patientLoadVersion++; patients.value = []; encounters.value = []; prescriptions.value = []; patientLoading.value = false; patientId.value = null; encounterRef.value = ""; prescriptionId.value = null; question.value = ""; extraInput.value = ""; preview.value = false;
   selectionVersion++; historyVersion++; stopPolling(); run.value = null; contextData.value = null; contextDialog.value = false; evidenceDialog.value = false; feedbackDialog.value = false; history.value = []; forecastReady.value = false; forecastSelection.value = null; riskWindowReady.value = false; riskWindowSelection.value = null;
+  if (needsRiskWindow.value && store.state.user.accessToken) searchPatients().catch(() => {});
 });
 const evidenceTitle = id => run.value?.evidence?.find(item => item.source_id === id)?.title || "来源";
 function inspectEvidence(id) { evidence.value = run.value?.evidence?.find(item => item.source_id === id); evidenceDialog.value = !!evidence.value; }

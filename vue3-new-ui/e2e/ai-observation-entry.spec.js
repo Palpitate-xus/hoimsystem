@@ -34,7 +34,7 @@ async function select(page, label, optionLabel) {
   await page.locator(`#${await input.getAttribute("aria-controls")}`).getByRole("option", { name: optionLabel, exact: true }).click();
 }
 async function session(page, options = {}) {
-  const state = { contexts: [], runs: [], writes: [], details: [], completed: [], sourceReads: [], ...options };
+  const state = { contexts: [], runs: [], writes: [], details: [], completed: [], sourceReads: [], freshDirectoryReleases: [], ...options };
   await page.addInitScript(() => localStorage.setItem("hoim-token", "synthetic-observation-entry-only"));
   await page.route("**/api/**", async route => {
     const request = route.request(), url = new URL(request.url()), path = url.pathname, method = request.method(); let data = [], extra = {};
@@ -42,8 +42,15 @@ async function session(page, options = {}) {
     if (path === "/api/admission/getInpatientList") data = [{ patient_id: 1, admission_id: admission, patient_name: "合成患者甲", bed_no: "A01" }, { patient_id: 2, admission_id: secondAdmission, patient_name: "合成患者乙", bed_no: "A02" }];
     if (path.startsWith("/api/inpatient-observations/")) { state.sourceReads.push({ path, params: Object.fromEntries(url.searchParams) }); data = { items: [], total: 0, page: 1, page_size: 50 }; }
     if (["/api/ai/features", "/api/ai/admin/features"].includes(path)) data = [{ key: "deterioration_risk", number: 41, name: "病情恶化预警", category: "inpatient", scope: "patient", engine: "prediction", enabled: true, inputs: ["原住院冻结观测窗"], deliverables: ["原资料与缺口"], source_reference_keys: ["observation_window_id"] }];
-    if (path === "/api/ai/patients") data = [{ patient_id: 1, label: "合成患者甲" }, { patient_id: 2, label: "合成患者乙" }];
-    if (path === "/api/ai/encounters") data = [{ encounter_ref: url.searchParams.get("patient_id") === "2" ? secondAdmission : admission, kind: "inpatient", label: "住院 · 合成原记录" }, { encounter_ref: "outpatient-only", kind: "outpatient", label: "门诊 · 不归入风险窗" }];
+    if (path === "/api/ai/patients") {
+      data = state.emptyDirectories ? [] : [{ patient_id: 1, label: "合成患者甲" }, { patient_id: 2, label: "合成患者乙" }];
+      if (state.holdPatients && !state.patientsHeld) { state.patientsHeld = true; await new Promise(resolve => { state.releasePatients = resolve; }); state.completed.push("held-patients"); }
+      else if (state.emptyDirectories && state.holdFreshDirectories) await new Promise(resolve => state.freshDirectoryReleases.push(resolve));
+    }
+    if (path === "/api/ai/encounters") {
+      data = state.emptyDirectories ? [] : [{ encounter_ref: url.searchParams.get("patient_id") === "2" ? secondAdmission : admission, kind: "inpatient", label: "住院 · 合成原记录" }, { encounter_ref: "outpatient-only", kind: "outpatient", label: "门诊 · 不归入风险窗" }];
+      if (state.holdEncounters && !state.encountersHeld) { state.encountersHeld = true; await new Promise(resolve => { state.releaseEncounters = resolve; }); state.completed.push("held-encounters"); }
+    }
     if (path === "/api/ai/observation-windows") { data = Number(url.searchParams.get("patient_id")) === 2 ? [c] : [a, b]; data = data.map(item => ({ ...copy(item), snapshot: undefined, freshness: { state: "not_checked" } })); }
     const detail = path.match(/^\/api\/ai\/observation-windows\/([^/]+)$/);
     if (detail) {
@@ -119,3 +126,45 @@ test("护士工作站延迟打开观测页，切换患者清除未保存测量�
   await expect.poll(() => state.sourceReads.filter(read => read.params.patient_id === "2" && read.params.admission_id === secondAdmission).length).toBe(2);
   expect(state.runs).toEqual([]); expect(state.writes).toEqual([]);
 });
+
+for (const change of ["token", "role"]) for (const directory of ["patients", "encounters"]) {
+  test(`${change}变化后${directory}旧目录回执不能重新显示患者或住院`, async ({ page }) => {
+    const state = await session(page, directory === "patients" ? { holdPatients: true } : { holdEncounters: true });
+    await page.addInitScript(() => {
+      const counts = {}, open = XMLHttpRequest.prototype.open; window.__observationDirectorySettled = [];
+      XMLHttpRequest.prototype.open = function(method, url, ...args) {
+        const path = new URL(url, location.href).pathname;
+        if (["/api/ai/patients", "/api/ai/encounters"].includes(path)) {
+          const marker = `${path}:${counts[path] = (counts[path] || 0) + 1}`;
+          // Observe the native transport; the next task follows its promise/Vue updates.
+          this.addEventListener("loadend", () => setTimeout(() => window.__observationDirectorySettled.push(marker), 0), { once: true });
+        }
+        return open.call(this, method, url, ...args);
+      };
+    });
+    await page.goto("/#/ai/workbench?feature=deterioration_risk");
+    if (directory === "encounters") await select(page, "患者", "合成患者甲");
+    const release = directory === "patients" ? "releasePatients" : "releaseEncounters";
+    await expect.poll(() => !!state[release]).toBe(true); state.emptyDirectories = true; state.holdFreshDirectories = true;
+    await page.evaluate(kind => {
+      const store = document.querySelector("#hoim").__vue_app__.config.globalProperties.$store;
+      store.commit(kind === "token" ? "user/setAccessToken" : "user/setPermissions", kind === "token" ? "synthetic-new-session" : ["patient"]);
+    }, change);
+    state[release](); await expect.poll(() => state.completed.includes(`held-${directory}`)).toBe(true);
+    await page.waitForFunction(marker => window.__observationDirectorySettled.includes(marker), `/api/ai/${directory}:1`);
+    try {
+      // Element Plus displays selected labels outside the combobox input.
+      await expect(page.locator(".el-select__selected-item").filter({ hasText: /^合成患者甲$/ })).toHaveCount(0);
+      await expect(page.getByRole("combobox", { name: "本次就诊", exact: true })).toHaveCount(0);
+      const control = page.getByRole("combobox", { name: "患者", exact: true }); await control.press("ArrowDown");
+      // Keep fresh requests pending: opening a remote select must not erase evidence
+      // of a stale reply before we inspect the actual rendered empty state.
+      // An empty remote select hides its popup. Wait for actual focus and its next
+      // rendered frame before inspecting options, rather than the search input.
+      await expect(control).toBeFocused();
+      await page.evaluate(() => new Promise(requestAnimationFrame));
+      await expect(page.getByRole("option", { name: "合成患者甲", exact: true })).toHaveCount(0);
+      await expect(page.getByRole("button", { name: "生成辅助建议", exact: true })).toBeDisabled(); expect(state.runs).toEqual([]); expect(state.contexts).toEqual([]);
+    } finally { state.holdFreshDirectories = false; for (const resolve of state.freshDirectoryReleases) resolve(); }
+  });
+}

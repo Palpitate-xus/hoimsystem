@@ -3022,3 +3022,36 @@ class InpatientLabSource(Base):
     revoked_at = Column(DateTime().with_variant(mysql.DATETIME(fsp=6), "mysql"), nullable=True)
     revoked_by = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=True)
     revoke_reason = Column(String(1000), nullable=False, default="", server_default="")
+
+
+class InpatientGcsObservation(Base):
+    """Original GCS E/V/M or NT, with an optional explicitly linked bedside point."""
+
+    __tablename__ = "hoimsystem_inpatient_gcs_observation"
+    __table_args__ = (
+        CheckConstraint("observed_at <= recorded_at", name="ck_inpatient_gcs_time"),
+        CheckConstraint(
+            "(status = 'active' AND revision = 1 AND revoked_at IS NULL AND revoked_by IS NULL AND revoke_reason = '') OR "
+            "(status = 'revoked' AND revision = 2 AND revoked_at IS NOT NULL AND revoked_by IS NOT NULL AND revoke_reason <> '')",
+            name="ck_inpatient_gcs_governance",
+        ),
+        Index("idx_inpatient_gcs_scope", "patient_id", "admission_id", "observed_at"),
+        Index("idx_inpatient_gcs_anchor", "anchor_point_id", "recorded_at", "gcs_observation_id"),
+    )
+
+    gcs_observation_id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    patient_id = Column(Integer, ForeignKey("hoimsystem_patient.patient_id"), nullable=False)
+    admission_id = Column(String(36), ForeignKey("hoimsystem_admission.admission_id"), nullable=False)
+    observed_at = Column(DateTime().with_variant(mysql.DATETIME(fsp=6), "mysql"), nullable=False)
+    recorded_at = Column(DateTime().with_variant(mysql.DATETIME(fsp=6), "mysql"), nullable=False)
+    created_by = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=False)
+    schema_version = Column(String(40), nullable=False)
+    anchor_point_id = Column(String(36), ForeignKey("hoimsystem_inpatient_observation.observation_id"), nullable=True)
+    payload_json = Column(Text, nullable=False)
+    anchor_snapshot_json = Column(Text, nullable=True)
+    content_hash = Column(String(64), nullable=False)
+    status = Column(String(16), nullable=False, default="active")
+    revision = Column(Integer, nullable=False, default=1)
+    revoked_at = Column(DateTime().with_variant(mysql.DATETIME(fsp=6), "mysql"), nullable=True)
+    revoked_by = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=True)
+    revoke_reason = Column(String(1000), nullable=False, default="")

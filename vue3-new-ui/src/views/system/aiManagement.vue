@@ -46,7 +46,7 @@
             <el-table-column label="状态"><template #default="{ row }">{{ row.enabled ? '已启用' : '关闭' }}</template></el-table-column>
             <el-table-column label="密钥"><template #default="{ row }">{{ row.has_api_key ? '已配置，不回显' : '未配置' }}</template></el-table-column>
             <el-table-column label="患者资料"><template #default="{ row }">{{ row.allows_patient_data ? '已授权传输' : '禁止传输' }}</template></el-table-column>
-            <el-table-column label="操作" width="230"><template #default="{ row }"><el-button size="small" @click="editProvider(row)">编辑</el-button><el-button v-if="row.kind === 'specialist' && row.supported_features?.includes('medical_transcription')" size="small" @click="openSpeechCheck(row)">检查本地语音服务</el-button><el-button v-if="row.kind === 'specialist' && row.supported_features?.includes('ecg_analysis')" size="small" @click="openEcgCheck(row)">检查本地心电服务</el-button><el-button v-if="canCheckImage && row.kind === 'specialist' && row.supported_features?.includes('imaging_detection')" size="small" @click="openImageCheck(row)">检查本地影像服务</el-button><el-button v-if="canCheckForecast && row.kind === 'specialist' && row.supported_features?.includes('visit_forecast')" size="small" @click="openForecastCheck(row)">检查本地统计服务</el-button></template></el-table-column>
+            <el-table-column label="操作" width="230"><template #default="{ row }"><el-button size="small" @click="editProvider(row)">编辑</el-button><el-button v-if="row.kind === 'specialist' && row.supported_features?.includes('medical_transcription')" size="small" @click="openSpeechCheck(row)">检查本地语音服务</el-button><el-button v-if="row.kind === 'specialist' && row.supported_features?.includes('ecg_analysis')" size="small" @click="openEcgCheck(row)">检查本地心电服务</el-button><el-button v-if="canCheckImage && row.kind === 'specialist' && row.supported_features?.includes('imaging_detection')" size="small" @click="openImageCheck(row)">检查本地影像服务</el-button><el-button v-if="canCheckForecast && row.kind === 'specialist' && row.supported_features?.includes('deterioration_risk')" size="small" @click="openNews2Check(row)">检查本地NEWS2服务</el-button><el-button v-if="canCheckForecast && row.kind === 'specialist' && row.supported_features?.includes('visit_forecast')" size="small" @click="openForecastCheck(row)">检查本地统计服务</el-button></template></el-table-column>
           </el-table>
         </el-tab-pane>
 
@@ -64,6 +64,7 @@
         <el-tab-pane label="挂号预测来源" name="forecast_sources" lazy><ai-forecast-series-management v-if="tab === 'forecast_sources'" /></el-tab-pane>
         <el-tab-pane label="住院观测窗" name="observation_windows" lazy><ai-observation-window-management v-if="tab === 'observation_windows'" /></el-tab-pane>
         <el-tab-pane label="检验项目与来源" name="laboratory_mappings" lazy><ai-lab-mapping-management v-if="tab === 'laboratory_mappings'" /></el-tab-pane>
+        <el-tab-pane label="风险规则与NEWS2" name="risk_rules" lazy><ai-risk-rule-management v-if="tab === 'risk_rules'" /></el-tab-pane>
         <el-tab-pane label="录音治理" name="audio"><ai-audio-management v-if="tab === 'audio'" /></el-tab-pane>
         <el-tab-pane label="影像原文件" name="images"><ai-image-management v-if="tab === 'images'" /></el-tab-pane>
         <el-tab-pane label="心电原文件" name="ecg"><ai-ecg-management v-if="tab === 'ecg'" /></el-tab-pane>
@@ -137,6 +138,7 @@
     </el-dialog>
 
     <AiForecastProviderCheck v-if="forecastCheckTarget" :target="forecastCheckTarget" :providers="providers" @close="forecastCheckTarget = null" @edit-model="editActualForecastModel" />
+    <AiNews2ProviderCheck v-if="news2CheckTarget" :target="news2CheckTarget" :providers="providers" @close="news2CheckTarget = null" @edit-model="editActualNews2Model" />
 
     <el-dialog v-model="speechCheckDialog" title="本地语音服务核对" width="760px">
       <div v-loading="speechCheckLoading">
@@ -294,6 +296,8 @@ const AiForecastSeriesManagement = defineAsyncComponent(() => import("@/componen
 const AiObservationWindowManagement = defineAsyncComponent(() => import("@/views/system/AIObservationWindowManagement.vue"));
 const AiLabMappingManagement = defineAsyncComponent(() => import("@/views/system/AILabMappingManagement.vue"));
 const AiForecastProviderCheck = defineAsyncComponent(() => import("@/components/AIForecastProviderCheck/index.vue"));
+const AiNews2ProviderCheck = defineAsyncComponent(() => import("@/components/AINews2ProviderCheck/index.vue"));
+const AiRiskRuleManagement = defineAsyncComponent(() => import("@/views/system/AIRiskRuleManagement.vue"));
 import {
   activateAIPrompt, createAIKnowledge, createAIPatientGrant, createAIPrompt,
   getAIAdminFeatures, getAIAudit, getAIKnowledge, getAIKnowledgeDetail, getAIPatientGrants, getAIPathwaySources, importAIPathway,
@@ -322,7 +326,20 @@ const featureName = key => features.value.find(item => item.key === key)?.name |
 const selectedFeature = ref(null), featureForm = ref({}), featureDialog = ref(false);
 const providerDialog = ref(false), providerId = ref(null), providerForm = ref({});
 const forecastCheckTarget = ref(null);
+const news2CheckTarget = ref(null);
 const canCheckForecast = computed(() => !!store.state.user.accessToken && store.state.user.permissions.includes("super_admin"));
+function openNews2Check(row) {
+  if (!canCheckForecast.value) return;
+  news2CheckTarget.value = { provider_id: row.provider_id, revision: row.revision, model: row.model, name: row.name, session: store.state.user.accessToken };
+}
+function editActualNews2Model(result) {
+  const row = providers.value.find(item => item.provider_id === result.provider_id && item.revision === result.revision && item.model === result.configured_model && item.kind === "specialist" && item.supported_features?.includes("deterioration_risk"));
+  if (!canCheckForecast.value || result.session !== store.state.user.accessToken || !row || !/^news2:[a-f0-9]{64}$/.test(result.model || "")) { ElMessage.warning("NEWS2服务配置或管理会话已变化，请重新核对"); return; }
+  editProvider(row); providerForm.value.model = result.model;
+}
+watch([() => store.state.user.accessToken, () => JSON.stringify(store.state.user.permissions)], () => { news2CheckTarget.value = null; });
+onDeactivated(() => { news2CheckTarget.value = null; });
+onBeforeUnmount(() => { news2CheckTarget.value = null; });
 watch([() => store.state.user.accessToken, () => JSON.stringify(store.state.user.permissions)], () => { forecastCheckTarget.value = null; });
 onDeactivated(() => { forecastCheckTarget.value = null; });
 onBeforeUnmount(() => { forecastCheckTarget.value = null; });

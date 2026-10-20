@@ -19,6 +19,7 @@ SCHEMA_VERSION = "bed_series_private_v1"
 MAX_BYTES = 8 * 1024 * 1024
 MAX_MEMBERS = 4096
 MAX_SCANNED = 200000
+SOURCE_BATCH_SIZE = 128
 MAX_BEDS = 200000
 Basis = Annotated[str, Field(min_length=20, max_length=4000)]
 
@@ -223,13 +224,13 @@ def _overlap(start, end, left, right):
 def _relevant(locator, request, period):
     kind = locator["kind"]
     if kind == "census":
-        return request.date_from <= locator["business_date"] <= request.date_to or period["history_start_at"] <= locator["census_at"] <= period["history_end_at"]
+        return request.date_from <= locator["business_date"] <= request.date_to or period["history_start_at"] < locator["census_at"] <= period["history_end_at"]
     if kind == "flow_day":
         return request.date_from <= locator["business_date"] <= request.date_to or _overlap(locator["day_start_at"], locator["day_end_at"], period["history_start_at"], period["history_end_at"])
     left, right = (period["history_start_at"], period["history_end_at"]) if locator["basis_kind"] == "observed_operational_capacity" else (period["future_start_at"], period["future_end_at"])
-    # Day integrals are half open, while the last census instant needs a source
-    # containing that endpoint. A source ending there cannot cover that instant.
-    return _overlap(locator["start_at"], locator["end_at"], left, right) or locator["start_at"] <= right < locator["end_at"]
+    # Historical capacity serves only day integrals. The future scenario also
+    # needs a source containing the final forecast census instant, not ending there.
+    return _overlap(locator["start_at"], locator["end_at"], left, right) or (locator["basis_kind"] == "reviewed_future_scenario" and locator["start_at"] <= right < locator["end_at"])
 
 
 def _capture_source(db, actor, row, payload, parent, *, locking=False):
@@ -357,25 +358,39 @@ def current_collection(db, user, ward_id, *, request, locking=False):
     if ward is None or ward.department_id != department_id:
         raise HTTPException(409, "读取期间病区科室已变化，请重新捕获")
     ward_binding = {"ward_id": ward_id, "department_id": department_id}
-    beds = facts.current_query(db.query(Bed).filter_by(ward_id=ward_id).order_by(Bed.bed_id).limit(MAX_BEDS + 1), locking=locking).all()
+    beds = facts.current_query(db.query(Bed.bed_id, Bed.ward_id).filter_by(ward_id=ward_id).order_by(Bed.bed_id).limit(MAX_BEDS + 1), locking=locking).all()
     if len(beds) > MAX_BEDS:
         raise HTTPException(422, "完整床位身份集合超过明确容量，不得截断为部分床位")
     cohort = [{"bed_id": row.bed_id, "ward_id": row.ward_id} for row in beds]
-    query = db.query(AIBedSource).filter_by(ward_id=ward_id).order_by(AIBedSource.source_record_id).limit(MAX_SCANNED + 1)
-    rows = facts.current_query(query, locking=locking).all()
-    if len(rows) > MAX_SCANNED:
-        raise HTTPException(422, "病区原来源扫描超过200000记录，不能截断或假称集合完整")
     records = []
-    for row in rows:
-        # Authenticate every scanned body before using its clocks to skip it.
-        # Parent currentness is checked only after genuine relevance is known.
-        payload, parent = facts.source_proof(row)
-        locator = _locator(row.source_kind, payload)
-        if not _relevant(locator, request, period):
-            continue
-        if len(records) >= MAX_MEMBERS:
-            raise HTTPException(422, "完整相关原来源超过4096根，不得挑少量候选或截断")
-        records.append({"source": _capture_source(db, actor, row, payload, parent, locking=locking), "locator": locator, "locator_hash": facts.hash_content(locator)})
+    scanned = byte_count = 0
+    last_id = None
+    while True:
+        query = db.query(AIBedSource).filter_by(ward_id=ward_id)
+        if last_id is not None:
+            query = query.filter(AIBedSource.source_record_id > last_id)
+        query = query.order_by(AIBedSource.source_record_id).limit(min(SOURCE_BATCH_SIZE, MAX_SCANNED + 1 - scanned))
+        rows = facts.current_query(query, locking=locking).all()
+        if not rows:
+            break
+        for row in rows:
+            scanned += 1
+            if scanned > MAX_SCANNED:
+                raise HTTPException(422, "病区原来源扫描超过200000记录，不能截断或假称集合完整")
+            # Authenticate every bounded batch before using clocks to skip a body.
+            # Locking capture holds the Ward FK parent and all visited source rows.
+            payload, parent = facts.source_proof(row)
+            locator = _locator(row.source_kind, payload)
+            if not _relevant(locator, request, period):
+                continue
+            if len(records) >= MAX_MEMBERS:
+                raise HTTPException(422, "完整相关原来源超过4096根，不得挑少量候选或截断")
+            record = {"source": _capture_source(db, actor, row, payload, parent, locking=locking), "locator": locator, "locator_hash": facts.hash_content(locator)}
+            byte_count += len(facts.canonical_json(record).encode("utf-8"))
+            if byte_count > MAX_BYTES:
+                raise HTTPException(422, "相关完整原件累计超过8MiB，不得先构建超大集合后截断")
+            records.append(record)
+        last_id = rows[-1].source_record_id
     manifest = [_manifest_item(record) for record in records]
     value = {
         "ward_binding": ward_binding,

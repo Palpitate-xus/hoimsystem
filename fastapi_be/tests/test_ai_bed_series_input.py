@@ -459,3 +459,39 @@ def test_actual_224_daily_originals_native_forecast_and_each_unknown_target_inde
         assert next(item for item in unknown if item["ref"]["source_record_id"] == replacement.source_record_id)[field] == count(None, "not_recorded")
         assert result.targets[index].forecast is None and result.targets[index].observed_sum is None
         assert all(item.forecast is not None for position, item in enumerate(result.targets) if position != index)
+
+
+def test_previous_boundary_census_and_current_day_observed_capacity_are_unrelated(db_session, series_case):
+    case = series_case
+    before = collection(db_session, case)
+    previous = (datetime.date.fromisoformat(case["period"]["date_from"]) - datetime.timedelta(days=1)).isoformat()
+    old = original(db_session, case, "census", previous)
+    current = original(
+        db_session, case, "capacity_interval", values={"start_at": before["period"]["history_end_at"], "end_at": "2026-10-20T08:00:00.000000Z", "observed_at": "2026-10-20T08:00:00.000000Z"}
+    )
+    after = collection(db_session, case)
+    ids = {item["source_record_id"] for item in after["fact_manifest"]}
+    assert old.source_record_id not in ids and current.source_record_id not in ids
+    assert after["collection_digest"] == before["collection_digest"]
+
+
+def test_keyset_scanning_uses_bounded_batches_and_never_truncates_relevant_roots(db_session, series_case, monkeypatch):
+    from app.ai.bed_models import AIBedSource
+
+    case = series_case
+    before = collection(db_session, case)
+    for _ in range(4):
+        original(db_session, case, "census", "2024-01-01")
+    real = facts.current_query
+    limits = []
+
+    def traced(query, *, locking=False):
+        if any(item["entity"] is AIBedSource for item in query.column_descriptions):
+            limits.append(query._limit_clause.value)
+        return real(query, locking=locking)
+
+    monkeypatch.setattr(series, "SOURCE_BATCH_SIZE", 2)
+    monkeypatch.setattr(facts, "current_query", traced)
+    after = collection(db_session, case)
+    assert len(limits) >= 5 and max(limits) == 2
+    assert after["collection_digest"] == before["collection_digest"]

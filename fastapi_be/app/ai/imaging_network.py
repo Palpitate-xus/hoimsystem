@@ -107,8 +107,8 @@ def predict_scores(model, values):
 
     if not isinstance(values, torch.Tensor) or values.dtype != torch.float32 or values.device.type != "cpu" or tuple(values.shape) != (1, 1, 224, 224):
         raise ValueError("影像网络仅接受已处理的 CPU float32 [1,1,224,224] 张量")
-    if not torch.isfinite(values).all().item() or values.min().item() < -1024 or values.max().item() > 1024:
-        raise ValueError("影像网络输入须为[-1024,1024]范围内的有限数值")
+    if not torch.isfinite(values).all().item() or values.min().item() < -1024.01 or values.max().item() > 1024.01:
+        raise ValueError("影像网络输入须为归一化范围内的有限数值；仅容许固定双线性float32舍入的1e-2边界误差")
     with torch.inference_mode():
         logits = model(values)
     if tuple(logits.shape) != (1, 18) or not torch.isfinite(logits).all().item():

@@ -138,7 +138,7 @@ worker 在执行前和保存结果前重新检查权限、配置、患者资料�
 
 运营历史默认近 30 天，可选不含未来且最多 367 天的正序区间。医院数据问答的区间若完全早于当前业务日，不加载当前病区或床位快照，也不因无关的当前床位变化使历史分析失效；床位需求预测则单独保留当前容量供核查。排班/手术排台计划与历史资料分开，默认计划为业务日起 14 天，单次最多 31 天且不晚于业务日后 366 天。大范围资料可能超过模型输入预算，需缩小日期、科室或品种；原始清单若截断会明确标记。
 
-手术页的“AI 排台分析”、运营页的评价分析，以及已关联患者的不良事件行“AI 事件复盘”，都能先查看资料再提交。事件行入口固定患者和事件，不展示就诊归属选择，结果同时展示冻结的原上报和原分析，并可检查引用。未绑定患者的组织事件仍待独立访问范围及数据连接，不强行归属某位患者。手术排台和反馈分析均受模型服务患者数据用途开关控制。当前默认目录及Prompt版本为 `2026.10.19`，旧队列不会沿用更新前的固定任务契约。
+手术页的“AI 排台分析”、运营页的评价分析，以及已关联患者的不良事件行“AI 事件复盘”，都能先查看资料再提交。事件行入口固定患者和事件，不展示就诊归属选择，结果同时展示冻结的原上报和原分析，并可检查引用。未绑定患者的组织事件仍待独立访问范围及数据连接，不强行归属某位患者。手术排台和反馈分析均受模型服务患者数据用途开关控制。当前默认目录及Prompt版本为 `2026.10.20`，旧队列不会沿用更新前的固定任务契约。
 
 临床路径模板页提供“AI 治疗方案比选”，固定所选路径后选择已授权患者和本次就诊。工作台也可选择当前科室及功能已有审核版本的路径；选择就诊后重新核对审核范围。路径执行行的“AI 路径复评”固定患者、所记住院、原入径和路径标识，补充JSON不能替换这些绑定引用。预览与生成使用相同标识，原模板元数据、原入径与变异、未知计数及引用独立展示，结果保存任务当时版本。新增、入径、变异、退出及用药仍走原人工业务流程。
 
@@ -517,7 +517,7 @@ npm run test:e2e -- e2e/ai-*.spec.js e2e/diagnosis-review.spec.js
 }
 ```
 
-原来源/尺寸/Prompt必须精确匹配。分析区域为原像素半开矩形，候选真实矩形须位于实际处理区域内。图像级分类使用`location="image"`、`region=null`；有真实定位模型才可用`bounding_box`。原分数`score_kind="model_score"`不称患病概率，零分与未提供分别显示；未返回候选不代表正常。不生成虚构框、掩码、测量或完整检查结论，不改诊断或签署报告。完整独立Prompt仍可由超管管理版本；目录版本为`2026.10.19`。
+原来源/尺寸/Prompt必须精确匹配。分析区域为原像素半开矩形，候选真实矩形须位于实际处理区域内。图像级分类使用`location="image"`、`region=null`；有真实定位模型才可用`bounding_box`。原分数`score_kind="model_score"`不称患病概率，零分与未提供分别显示；未返回候选不代表正常。不生成虚构框、掩码、测量或完整检查结论，不改诊断或签署报告。完整独立Prompt仍可由超管管理版本；目录版本为`2026.10.20`。
 
 ## 胸片研究模型权重与CPU网络准备
 
@@ -533,8 +533,67 @@ python scripts/prepare_local_imaging.py --destination /srv/models/hoim-imaging-c
 HOIM_IMAGING_REAL_MODEL=/srv/models/hoim-imaging-v1 pytest -q tests/test_ai_imaging_model.py
 ```
 
-实际转换的safetensors为28,283,736字节，SHA256 `6b811edb354d83991e36a4836b914bf41faf8fb3203573c0a61820b97937c529`；727个状态张量逐项保留，固定模型清单摘要`3e520c2e0b34ba69282c10a26330b6aa4eab990e005d0484cb239e710d6ff8d5`。可选网络只接受已准备的CPU float32 `[1,1,224,224]`、[-1024,1024]张量，保留18项独立原sigmoid分数，不使用作者operating-point阈值映射或伪造定位。
+实际转换的safetensors为28,283,736字节，SHA256 `6b811edb354d83991e36a4836b914bf41faf8fb3203573c0a61820b97937c529`；727个状态张量逐项保留，固定模型清单摘要`3e520c2e0b34ba69282c10a26330b6aa4eab990e005d0484cb239e710d6ff8d5`。可选网络只接受已准备的CPU float32 `[1,1,224,224]`、[-1024,1024]归一化张量及固定0.01内的实际缩放舍入值，保留18项独立原sigmoid分数，不使用作者operating-point阈值映射或伪造定位。
 
-目前已完成权重安全准备、网络加载和真实CPU合成输入前向对照；**尚未连接DICOM前处理和本地v4影像推理服务**。下一步须冻结适用胸片输入、真实VOI/强度处理、裁剪/缩放及范围报告，再接通隔离服务、模型能力核对和本院临床验证。当前不能把原图登记、合成像素测试或公开权重发布者数字当作疾病识别效果。工程验证记录见`ai-imaging-verification.json`。
+现已接通下述固定研究预处理、独立v4影像服务、真实CPU子进程和超管能力核对。原图与模型内核准备阶段记录保留于`ai-imaging-verification.json`；本地分类链路的新验证见`ai-imaging-classifier-smoke.json`。仍需授权代表性胸片和独立临床参考进行本院适用范围及诊断质量验证，不能把合成工程测试或发布者数字当作本院疾病识别效果。
 
 实现依据：[pydicom像素解码](https://pydicom.github.io/pydicom/stable/reference/generated/pydicom.pixels.pixel_array.html)、[DICOM DX灰阶变换](https://dicom.nema.org/medical/dicom/current/output/chtml/part03/sect_C.8.11.3.html)、[DICOM灰阶与MONOCHROME](https://dicom.nema.org/medical/dicom/current/output/chtml/part03/sect_C.7.6.3.html)。
+
+
+## 本地胸片v4研究服务与能力核对
+
+`app.ai.imaging_server`现在可以接收医院网关发送的实际`pixels.i32le`附件，通过独立CPU子进程返回18项研究模型分数。`xrv_stored_range_v1`明确采用作者原生存储值帮助器路径；作者不同训练数据集的PNG/JPEG转换并不构成统一原生DICOM训练链，本实现不称训练等价或DICOM诊断显示。
+
+| 项目 | 固定行为 |
+| --- | --- |
+| 原图声明范围 | 单帧CR/DX对应presentation存储类、CHEST、PA/AP、无符号8–16有效位、8/16位容器、恒等重标定；PresentationIntentType仅FOR PRESENTATION或未声明，拒绝FOR PROCESSING；源像素最大16Mi/64MiB |
+| 强度 | 先核对实际小端int32逻辑值及源统计，再按原BitsStored最大值`2**BitsStored-1`做作者float32归一化；MONOCHROME1在此之前做一次`maxval-stored` |
+| VOI及显示 | 原窗声明仍须合法，但模型研究输入明确不应用VOI窗、图像min/max或直方图均衡；阅片组件继续按其DICOM显示链独立开窗 |
+| 背景 | 原padding沿原像素路径保留，不填补、不当病灶；报告全输入和实际裁剪区的padding/有效数量，裁剪区没有含变化的有效像素时拒绝 |
+| 裁剪 | `side=min(rows,columns)`；`x=columns//2-side//2`、`y=rows//2-side//2`，保持作者整数中心公式；奇偶组合不能用`(columns-side)//2`替代 |
+| 缩放 | CPU float32，原中心方形按torch bilinear、`align_corners=False`、`antialias=True`缩放至224×224；已224时不重采样，不旋转或翻转 |
+| 数值边界 | 保留实际插值张量，固定0.01浮点舍入容差，不clip或伪造范围；原逻辑像素范围仍逐值精确校验。实测合法大图越界最大0.00146484375，越过工程容差仍拒绝 |
+| 结果 | 完整18个原始sigmoid分数，图像级、无病灶框/掩码、无诊断阈值/概率校准；实际裁剪区外未分析 |
+| Prompt | 保留完整系统与任务Prompt的SHA256；子进程只接收白名单来源、私有像素路径和摘要，不接收问题、指令、病史或DICOM原头 |
+
+医院侧在创建`xrv:`任务前先核对已知技术范围，明确不匹配时不排队。原图登记/阅片可继续使用受支持的通用单图范围；其他已登记专用模型沿用自身契约，不把其输入范围缩成固定胸片模型。真正像素值、padding分布和裁剪区可用性仍由实际独立进程核对，不能只信元数据声明。
+
+服务使用独立`ImagingSettings`，不导入医院设置或数据库、不读取本项目`.env`。模型目录、线程、大小及时限从服务进程环境取得；医院API和AI worker通过已有模型凭据管理使用相同独立密钥。原文件临时目录只在任务期间存在；请求认证、唯一multipart字段、大小/实际SHA、模型版本与原技术参数必须一致。仅一项任务并发；超时/取消杀死子进程组并清理临时文件。子进程环境不含医院数据库或模型服务鉴权密钥。
+
+```bash
+# fastapi_be；在独立CPU环境安装完整可选服务及合成检查依赖
+pip install -r requirements-imaging-service.txt
+# 先按上一节准备固定权重，并显式导出IMAGING_MODEL_DIR与独立随机密钥。
+# AI_PROVIDER_LOCAL_IMAGING_API_KEY至少32字符，不在命令或日志中输出密钥。
+python -m app.ai.imaging_server --host 127.0.0.1 --port 8812
+# 使用同一配置在当前进程创建服务并调用真实子进程，进行合成检查
+python scripts/smoke_local_imaging.py
+# 真实医院API→私有原图→服务/CPU子进程的隔离测试，只使用合成资料
+HOIM_IMAGING_REAL_MODEL_DIR=/srv/models/hoim-imaging-v1 pytest -q tests/test_ai_local_imaging_real.py
+```
+
+可选独立镜像：
+
+```bash
+# fastapi_be
+# 只构建本地镜像，不包含任何模型权重或医院配置
+docker build -f Dockerfile.imaging -t hoim-local-imaging:development .
+# 已在环境提供独立密钥；只读挂载已准备公开模型，断网执行合成检查
+# /srv/models/hoim-imaging-v1及文件须允许UID10001读取。
+docker run --rm --network none --read-only --tmpfs /tmp:size=512m \
+  --memory 2g --cpus 4 --env AI_PROVIDER_LOCAL_IMAGING_API_KEY \
+  --mount type=bind,src=/srv/models/hoim-imaging-v1,dst=/models,readonly \
+  hoim-local-imaging:development python scripts/smoke_local_imaging.py
+```
+
+镜像仅包含7个运行模块、两个包初始化文件、合成检查脚本、两份依赖清单和三份许可/说明；无医院`config.py`、数据库、业务模型、路由、`.env`或内置权重，也未安装SQLAlchemy/Redis/PyMySQL。新补充许可说明位于`third_party/torchxrayvision/PREPROCESSING_NOTICE`，固定安全权重包原NOTICE与其哈希保留。
+
+`GET /capabilities`需要服务鉴权，`GET /health/ready`核对当前运行文件和模型。实际模型标识为`xrv:<runtime_digest>`，绑定固定权重、预处理、7个实现模块、Python/机器/字节序、三项ML依赖和线程。声明含完整固定PREPROCESSING、标签、限制与`not_provided`临床状态；模型或运行文件变化时拒绝继续沿用旧运行标识。宿主Python3.13和镜像Python3.12会形成不同实际标识，不能混用。
+
+超级管理员可使用`POST /ai/admin/providers/{id}/image-capabilities`核对已保存的`imaging_detection`专用服务。请求只做鉴权后的metadata GET，不发送患者或像素、不发起推理；请求前后均重新检查角色及已保存配置版本。管理台的“本地影像服务核对”显示实际模型、配方、依赖、18标签及限制，可显式填入待保存模型表单；不会自动保存、启用或登记临床验证。关闭、切页、切换会话/权限或服务配置变化后，迟到回执不覆盖当前表单。该检查验证服务声明的一致性，不是任意外部服务已执行权重的加密证明。
+
+网关要求`xrv:`响应的`processing.local_runtime`和`local_preprocessing`完整，绑定实际模型、固定发布与配方摘要、原18标签顺序、全部原始分数、精确原中心裁剪和真实输入/舍弃/padding数量及224张量范围。候选保留源、完整Prompt和运行版本；复核区展示实际研究处理与缺口，阅片调窗不改变冻结分数，不新增报告、诊断或治疗动作。当前目录/Prompt版本`2026.10.20`，不沿用更新前的排队契约。
+
+前处理已对照固定作者源码选定AST：10个真实合成DICOM与16个边界输入逐元素一致，最大差0。真实合成医院原图登记到CPU链路中，225×226源实际裁剪为x=1/y=0/225×225，返回18项完整分数，9张业务表及原诊断/报告未改变。独立镜像的三种等效输入分数最大差0，裁剪区全padding与侧位输入分别在真实进程和进入进程前拒绝。上述只证明工程路径与原数值语义，不评估临床准确性；当次功能保持关闭、临床状态未评审。
+
+来源：[固定作者存储值及缩放帮助器](https://github.com/mlmed/torchxrayvision/blob/17726dd8f5e756eec3e5ae958281a289b05b1dae/torchxrayvision/utils.py)、[固定作者中心裁剪与数据集读取](https://github.com/mlmed/torchxrayvision/blob/17726dd8f5e756eec3e5ae958281a289b05b1dae/torchxrayvision/datasets.py)。

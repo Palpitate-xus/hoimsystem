@@ -519,6 +519,8 @@ class SurgeryCase(StrictModel):
             raise ValueError("Finite starts must be canonical and ordered")
         unique(self.timing.segments, "case segment", lambda x: x.segment_id)
         unique([self.room, *self.roles, *self.equipment], "case demand", lambda x: x.slot_id)
+        if any(x.slot_id == "patient" for x in [self.room, *self.roles, *self.equipment]):
+            raise ValueError("Patient presence has its own reserved technical demand identity")
         ids = {x.segment_id for x in self.timing.segments}
         for demand in [self.room, *self.roles, *self.equipment]:
             if not set(demand.occupation.segment_ids) <= ids:
@@ -655,6 +657,8 @@ class SurgerySource(StrictModel):
         for busy in self.busy_intervals:
             if busy.target.kind == "resource" and busy.target.resource_id not in resources:
                 raise ValueError("Busy interval refers outside this complete resource domain")
+            if busy.busy_status == "completed" and (busy.end_at is None or busy.end_at > self.as_of):
+                raise ValueError("A completed original busy interval needs an actual closed end no later than the availability cutoff")
         for policy in self.transition_policies:
             if not set(policy.resource_ids) <= resources.keys():
                 raise ValueError("Transition policy resource is missing")
@@ -676,6 +680,7 @@ class SurgerySource(StrictModel):
                         raise ValueError("Non-person choice cannot select a duty")
         manifest = {item.fact_id for item in self.manifest}
         manifest_kinds = {item.fact_id: item.kind for item in self.manifest}
+        usable = {item.fact_id for item in self.manifest if item.status == "published" and item.review == "confirmed"}
 
         def require_kind(refs, kinds):
             if not any(manifest_kinds.get(ref) in kinds for ref in refs):
@@ -705,6 +710,8 @@ class SurgerySource(StrictModel):
                     refs = value.ref_ids
                     if refs != sorted(set(refs)) or not set(refs) <= manifest:
                         raise ValueError("Original references must be closed, unique and canonical")
+                    if not set(refs) <= usable:
+                        raise ValueError("Only published and confirmed originals may project usable public fact objects; other roots remain in the manifest")
                 for field in value.__class__.model_fields:
                     walk(getattr(value, field))
             elif isinstance(value, list):
@@ -923,6 +930,7 @@ INPUT_POLICY = {
     "domains": "All reviewed finite starts and demand resource/duty choices are complete and factorized. Incomplete case/resource/start domains cannot prove global infeasibility or optimality. No hidden time grid, truncation or invented external resource.",
     "timing": "Only reviewed case estimates or unknown; no unimplemented statistical estimator. Signed exact microseconds, explicit zero segments, positive main-room occupancy; upper/point durations are declared conditions, not clinical guarantees.",
     "resources": "Patient presence is independent of room. One concrete asset per equipment quantity slot. Different role/equipment demands cannot union away quantity; same-demand stages union or envelope only as explicitly declared.",
+    "person_qualification": "Each person role needs at least one explicitly reviewed authorization capability hash supported over every occupied interval by actual effective qualification facts. Empty role capability requirements mean unknown, never authorized by identity, role_kind, platform role or title alone.",
     "work": "Reviewed explicit duty membership only. Duty baseline and selected counted work use interval union, never double-count. Confirmed non-work break vs counted surgery is a conflicting original, not overwritten. Rest applies between distinct explicit duties; full duty span defines maximum presence. All-location duty/work prefix/suffix coverage is required. Applicable policies are conjunctive; absent policy is unknown unless explicitly reviewed not required.",
     "sequence": "Extra transitions are separate from declared intrinsic stages. Missing directed pair is unknown, not zero. Partial adjacency gap/cost is not monotone. Optimistic unknown occupancy/status/identity that can change adjacency relaxes the affected resource's extra transition gaps and costs together; cost lower bound zero. Known hard overlaps and identities remain enforced.",
     "scope": "Only the declared closed case/resource/period/policy problem; no hospital-wide or real booking guarantee. Candidate output never creates a reservation or changes clinical state.",
@@ -965,7 +973,7 @@ RECIPE = {
         "policies_each": MAX_POLICIES,
         "days": 31,
     },
-    "verification": "All selected constraints, search operations, frontier, full objectives and fixed explanation are deterministically recomputed from the complete public source; digest-only validation is insufficient.",
+    "verification": "All cohort persons' work rules including unselected fixed-window minima, all declared resource final timelines including fixed busy transition costs, selected constraints, search operations, frontier, objectives and fixed explanation are recomputed from the complete public source; digest-only validation is insufficient.",
     "clinical_validation": "not_provided",
     "operational_validation": "not_provided",
     "automatic_booking": False,

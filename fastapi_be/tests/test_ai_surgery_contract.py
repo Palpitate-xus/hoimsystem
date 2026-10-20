@@ -63,7 +63,18 @@ def resource(resource_id, kind):
         "identity_hash": H,
         "identity_status": "verified",
         "ref_ids": [{"room": uid(4), "person": uid(5), "equipment": uid(6)}[kind]],
-        "capability_facts": [],
+        "capability_facts": [
+            {
+                "ref_ids": [uid(5)],
+                "capability_hashes": [H],
+                "status": "verified",
+                "valid_from_at": "2026-10-01T00:00:00.000000Z",
+                "valid_until": {"kind": "not_applicable", "basis_hash": H},
+                "basis_hash": H,
+            }
+        ]
+        if kind == "person"
+        else [],
         "availability": [{"ref_ids": [uid(6)], "start_at": START, "end_at": END, "state": "available", "basis_hash": H}],
         "availability_coverage": coverage(),
         "all_locations_busy_coverage": coverage(),
@@ -77,7 +88,7 @@ def resource(resource_id, kind):
 def demand(slot_id, resource_id, person=False):
     return {
         "slot_id": slot_id,
-        "capability_hashes": [],
+        "capability_hashes": [H] if person else [],
         "occupation": occupation(),
         "domain_status": "attested_complete",
         "choices": [{"resource_id": resource_id, "penalty": amount(), "duty_binding": {"duty_id": DUTY, "status": "verified", "basis_hash": H} if person else None}],
@@ -259,6 +270,19 @@ def test_actual_publication_availability_clock_cannot_be_synthesized():
     body["collection"]["manifest_digest"] = hash_content(body["manifest"])
     with pytest.raises(ValidationError):
         SurgerySource.model_validate(body)
+
+
+def test_nonusable_roots_remain_manifest_only_instead_of_projecting_unreviewed_required_flags():
+    body = source_dict()
+    body["manifest"][0]["review"] = "unknown"
+    body["collection"]["manifest_digest"] = hash_content(body["manifest"])
+    with pytest.raises(ValidationError):
+        SurgerySource.model_validate(body)
+    body = source_dict()
+    body["manifest"][1]["review"] = "excluded"
+    body["manifest"][1]["status"] = "revoked"
+    body["collection"]["manifest_digest"] = hash_content(body["manifest"])
+    assert SurgerySource.model_validate(body).manifest[1].review == "excluded"
 
 
 @pytest.mark.parametrize("zone,day", [("Unknown/NoHospitalZone", "2026-10-21"), ("Etc/UTC", "9999-12-31"), ("Pacific/Apia", "2011-12-30"), ("America/Havana", "2026-11-01")])

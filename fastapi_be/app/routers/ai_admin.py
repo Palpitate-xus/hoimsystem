@@ -25,6 +25,7 @@ from app.ai.governance import (
     validate_endpoint,
 )
 from app.ai.models import AIAuditEvent, AIFeatureConfig, AIKnowledgeDocument, AIPatientGrant, AIPromptVersion, AIProvider, AIRun, utcnow
+from app.ai.readiness import setup_reports
 from app.ai.schemas import FeatureWrite, KnowledgeReview, KnowledgeWrite, PatientGrantWrite, PromptActivate, PromptWrite, ProviderWrite
 from app.database import get_db
 from app.dependencies import require_roles
@@ -46,7 +47,8 @@ def _commit(db: Session) -> None:
 def list_features(db: Session = Depends(get_db), user: User = Depends(require_roles("super_admin"))) -> dict:
     """List all 80 capabilities, including disabled and unvalidated ones."""
     configs = {item.feature_key: item for item in db.query(AIFeatureConfig).all()}
-    return {"code": 200, "msg": "success", "data": [describe_config(db, spec, configs.get(spec.key), True) for spec in FEATURES]}
+    reports = setup_reports(db, configs)
+    return {"code": 200, "msg": "success", "data": [{**describe_config(db, spec, configs.get(spec.key), True), "setup_check": reports[spec.key]} for spec in FEATURES]}
 
 
 @router.put("/ai/admin/features/{key}")

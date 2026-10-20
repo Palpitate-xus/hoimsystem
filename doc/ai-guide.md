@@ -138,7 +138,7 @@ worker 在执行前和保存结果前重新检查权限、配置、患者资料�
 
 运营历史默认近 30 天，可选不含未来且最多 367 天的正序区间。医院数据问答的区间若完全早于当前业务日，不加载当前病区或床位快照，也不因无关的当前床位变化使历史分析失效；床位需求预测则单独保留当前容量供核查。排班/手术排台计划与历史资料分开，默认计划为业务日起 14 天，单次最多 31 天且不晚于业务日后 366 天。大范围资料可能超过模型输入预算，需缩小日期、科室或品种；原始清单若截断会明确标记。
 
-手术页的“AI 排台分析”、运营页的评价分析，以及已关联患者的不良事件行“AI 事件复盘”，都能先查看资料再提交。事件行入口固定患者和事件，不展示就诊归属选择，结果同时展示冻结的原上报和原分析，并可检查引用。未绑定患者的组织事件仍待独立访问范围及数据连接，不强行归属某位患者。手术排台和反馈分析均受模型服务患者数据用途开关控制。当前默认目录及Prompt版本为 `2026.10.14`，旧队列不会沿用更新前的固定任务契约。
+手术页的“AI 排台分析”、运营页的评价分析，以及已关联患者的不良事件行“AI 事件复盘”，都能先查看资料再提交。事件行入口固定患者和事件，不展示就诊归属选择，结果同时展示冻结的原上报和原分析，并可检查引用。未绑定患者的组织事件仍待独立访问范围及数据连接，不强行归属某位患者。手术排台和反馈分析均受模型服务患者数据用途开关控制。当前默认目录及Prompt版本为 `2026.10.15`，旧队列不会沿用更新前的固定任务契约。
 
 临床路径模板页提供“AI 治疗方案比选”，固定所选路径后选择已授权患者和本次就诊。工作台也可选择当前科室及功能已有审核版本的路径；选择就诊后重新核对审核范围。路径执行行的“AI 路径复评”固定患者、所记住院、原入径和路径标识，补充JSON不能替换这些绑定引用。预览与生成使用相同标识，原模板元数据、原入径与变异、未知计数及引用独立展示，结果保存任务当时版本。新增、入径、变异、退出及用药仍走原人工业务流程。
 
@@ -167,6 +167,7 @@ ADR列表对管理员保留既有管理范围；药师只读现有处方业务�
 | `app/ai/patient_sources.py` / `clinical_tools.py` | 住院来源、检验趋势和既有危急值状态 |
 | `app/ai/consultation_sources.py` | 同患者转诊/MDT原状态、实际科室引用和审批/结果资料 |
 | `app/ai/adr_sources.py` / `app/adr_status.py` | ADR原报告、明确处理结果及历史歧义区分 |
+| `app/ai/audio_files.py` / `audio_assets.py` | 私有原音频、格式与解码校验、归属及撤回后的读取权限 |
 | `app/ai/pathway_sources.py` / `pathway_knowledge.py` | 原路径入径资料、来源快照、审核匹配与所选路径知识核对 |
 | `app/pathway_progress.py` | 保留未知或矛盾计数的进度口径，供业务列表和AI资料共用 |
 | `app/ai/procedural_sources.py` / `care.py` | 手术申请/排台/围术期资料及手术团队关系 |
@@ -187,6 +188,7 @@ ADR列表对管理员保留既有管理范围；药师只读现有处方业务�
 | `app/ai/readiness.py` | 超级管理员的基础配置依赖检查 |
 | `app/routers/ai_admin.py` | 仅 `super_admin` 的治理接口 |
 | `app/routers/ai_feedback_admin.py` | 仅超级管理员的评价原文读取、脱敏稿及审核接口 |
+| `app/routers/ai_audio.py` | 授权录音登记、私有读取、撤回和超级管理员清除流程 |
 | `app/routers/ai.py` | 授权能力、患者选择、资料、任务和反馈接口 |
 | `src/components/AIAssistant` | 工作台与业务页面共享的调用、来源和复核组件 |
 | `src/components/AIRunHistory` | 全院任务、原始调用快照与人工反馈查看 |
@@ -196,6 +198,8 @@ ADR列表对管理员保留既有管理范围；药师只读现有处方业务�
 | `src/components/AIConsultationFindings` / `AIAdrFindings` | 独立于模型文案的转诊、MDT和ADR原始资料与引用 |
 | `src/components/AIPathwayFindings` | 原模板元数据、审核版本、入径变异、原计数及引用 |
 | `src/components/AIReviewCuration` | 逐条整理、原文对照、审核发布和停用界面 |
+| `src/components/AIAudioInput` / `AIAudioPlayer` | 显式麦克风采集、原文件登记选择及经鉴权的听音与下载 |
+| `src/components/AISpeechFindings` / `AIAudioManagement` | 分段草稿、未知说话人、原音引用和超级管理员录音治理 |
 
 主要业务接口：`GET /api/ai/features`、`GET /api/ai/patients`、`GET /api/ai/encounters`、`POST /api/ai/context`、`POST /api/ai/operational-context`、`GET /api/ai/service-options`、`POST /api/ai/runs`、`GET /api/ai/runs/{id}` 和 `POST /api/ai/runs/{id}/feedback`。管理接口统一位于 `/api/ai/admin/`，以生成的 RBAC 矩阵为准。
 
@@ -207,19 +211,76 @@ ADR列表对管理员保留既有管理范围；药师只读现有处方业务�
 
 `GET /api/ai/pathway-options`按功能、患者和所选就诊返回有限模板元数据及当前范围的审核可用性，不返回步骤。超级管理员独有`GET /api/ai/admin/pathway-sources`和`POST /api/ai/admin/pathway-sources/{id}/import`，导入须带刚读取的`expected_source_hash`。发布继续使用原知识审核接口，并验证正文哈希及原路径未变化。
 
-迁移`20261020_adr_resolution`添加ADR明确结果、说明、处理者和时间，旧行保持NULL；`20261020_pathway_knowledge`添加可空的知识来源绑定，不把原独立知识改成路径；当前迁移头`20261020_pathway_revision`给原路径添加来源版本，已有行从1开始，不补造历史版本。迁移往返已在隔离数据库验证保留原状态、文本和知识，未操作真实业务数据库。
+迁移`20261020_adr_resolution`添加ADR明确结果、说明、处理者和时间，旧行保持NULL；`20261020_pathway_knowledge`添加可空的知识来源绑定，不把原独立知识改成路径；`20261020_pathway_revision`给原路径添加来源版本，已有行从1开始，不补造历史版本。`20261020_ai_audio_assets`新增录音元数据，当前迁移头`20261020_audio_governance`另存原清除请求说明。迁移往返已在隔离数据库验证保留既有资料，未对真实业务数据库执行迁移。
+
+AI接口保留原知识、引用及反馈正文中时间戳的小数部分，返回原文与其版本哈希对应。经结构验证的UUID和哈希保留原值，不因随机数字类似手机号而被缩减。任务同时冻结适用科室，调用前后按所选就诊或当前医生资料重新核对；仅科室调动、文字未变化的独立问答也会停止旧任务或拒收在途结果。
+
+## 医疗语音录入与录音治理
+
+“医疗语音录入”现在需要选择已授权患者和明确的`audio_asset_id`。门诊和住院病历行各有独立的“AI 录音转写”，固定原患者与所记就诊；不沿用病历正文作为语音识别输入。工作台也可选择已有录音。转写只自动提供所选原录音与其技术资料，不附带其他临床历史；用户补充问题不能当作实际听到的发言。
+
+1. 展开“登记新录音或使用麦克风采集”，核对患者、所记就诊及录音采集和处理授权，明确勾选并填写说明。说明为登记人的核对记录，不表示系统独立核实了授权或真实身份。
+2. 选择授权原文件，或主动点击“开始录音”。麦克风依赖浏览器能力及安全上下文；采集使用浏览器报告支持的编码，停止后仍需单独登记。切换患者或就诊、关闭面板及离开页面会停止采集并丢弃未登记录音；上传迟到回执不会绑定新患者。
+3. 文件登记成功后明确选择原录音，先查看本次资料和原音，再提交转写。上传、目录读取和听音不创建模型任务。原文件时间可留空；提供时须有时区，不用上传时间补写。浏览器采集的时间来自采集端时钟，未独立核验。
+4. 配置本功能的专用语音服务、患者资料传输权限及验证记录。原音可能含直接标识；提交转写会把原音附件发送给所选服务。默认未启用临床能力，超级管理员仍需按原流程配置和评审。
+5. 结果显示相对解码音频的片段时间、说话人分组及不确定说明，可听对应片段、查看元数据引用并复制完整转写草稿。说话人身份与职业保持未知；不能据标签认定医生意见或患者陈述。片段范围校验不证明转写完整或识别准确，须听音核对后再走原文书书写和签署流程。
+
+支持WAV、MP3、M4A、Ogg/OGA和WebM的单一纯音频轨。服务端检查固定格式、声道/采样资料和实际解码输出，浏览器WebM未保存时长头也可校验；解码校验不改写或保存处理后的副本，原字节与哈希保留。文件名不写入登记元数据；原容器和声音本身仍可能有识别线索，不构成匿名化。私有文件采用0600权限，目录0700，不经通用报告下载命名空间提供。
+
+| 配置 | 默认值与作用 |
+| --- | --- |
+| `AI_AUDIO_STORAGE_DIR` | `private/ai-audio`；API与worker共享且可读取的私有目录，必须与上传和Web静态目录分开 |
+| `AI_AUDIO_MAX_BYTES` | 67,108,864（64MiB）单文件上限 |
+| `AI_AUDIO_MAX_DURATION_SECONDS` | 3600秒实际解码时长上限，需与模型验证范围相符 |
+| `AI_AUDIO_USER_QUOTA_BYTES` | 536,870,912（512MiB）每登记人额度，按未清除的登记原文件字节计算 |
+| `AI_AUDIO_PROCESS_TIMEOUT_SECONDS` | 30秒原格式探测/解码处理时限；超时明确失败 |
+
+镜像安装FFmpeg，Compose的API与worker共享`ai_audio_private`卷并使用同一路径；私有目录及通用上传资料排除于镜像构建上下文。Nginx支持录音表单开销、同源麦克风和本地Blob播放；前端读取原音经`accesstoken`请求头鉴权，令牌不放入播放URL。关闭音频窗口或切换来源会停止播放并释放临时链接。格式处理参考[FFmpeg协议限制](https://ffmpeg.org/ffmpeg-protocols.html)与[ffprobe资料读取](https://ffmpeg.org/ffprobe.html)，浏览器采集使用[MediaStream Recording](https://www.w3.org/TR/mediastream-recording/)接口。
+
+录音限登记人与超级管理员在当前诊疗关系或有效用途授权内使用；患者用途授权不转移他人登记的录音。功能使用角色配置另行限制登记和转写，普通管理员不能管理全院录音。超级管理员在“录音治理”中检查原授权说明和元数据、撤回及按版本清除原文件。撤回不释放文件额度；清除流程先持久化“清除中”，成功删除后标记“已清除”，存储失败可按当前版本恢复。原撤回原因与原清除原因分别保留。
+
+撤回会阻断排队任务，在途结果重新检查后拒收；原文件、录音版本、当前诊疗关系或适用科室变化也会停止旧任务或拒收结果。已报告用量仍保留。普通用户不能继续读取已撤回来源的旧转写，超级管理员可追查冻结文字和元数据；原文件清除后不能播放。撤回无法收回已经发出的服务请求或已读取资料，清除当前原文件不会删除审计和既存任务文字。
+
+录音接口：`GET /api/ai/audio-options`、`POST/GET /api/ai/audio-assets`、`GET /api/ai/audio-assets/{id}`、`GET /api/ai/audio-assets/{id}/content`、`POST /api/ai/audio-assets/{id}/withdraw`。全院目录与原文件清除分别为`GET /api/ai/admin/audio-assets`、`POST /api/ai/admin/audio-assets/{id}/purge`，仅限超级管理员。状态操作须有`expected_revision`和明确原因；内容变更与患者/就诊重绑不通过更新原文件实现。
 
 ## 专用适配器契约
 
 配置类型为 `specialist`，登记实际模型版本、支持的功能 key 和验证报告。平台向配置基础地址的 `/tasks` 发送：
 
 ```json
-{"schema_version":"1","feature_key":"ecg_analysis","engine":"signal","model":"实际模型版本","input":{"input":{},"context":{},"tools":{},"evidence":[]}}
+{"schema_version":"1","feature_key":"ecg_analysis","engine":"signal","model":"实际模型版本","instructions":"实际冻结的固定系统Prompt与任务Prompt","input":{"input":{},"context":{},"tools":{},"evidence":[]}}
 ```
 
 适配器必须核对适用人群、原始资料类型和输入质量。响应包含 `schema_version`、相同的 `feature_key`、与配置一致的 `model_version`、布尔值 `applicable` 以及 `result`。`applicable` 不为 `true` 时任务失败，不退化为大模型编造结果。
 
 `result` 的结构与文本任务一致：`summary`、`sections`（每项含 `title`、`content`、`source_ids`）、`warnings`、`missing_data`。原始图像、波形、数字切片、带结局标注的队列及模型性能必须由具体适配项目提供和验证；此接口契约不替代这些工作。
+
+### 语音附件契约v2
+
+`medical_transcription`使用同一`/tasks`路径的`multipart/form-data`：`task`部分为JSON，含`schema_version:"2"`、功能、引擎、实际模型、完整`instructions`、`store:false`及冻结的`input`；`audio`部分为经核实的原文件，文件名为固定`recording`加原格式后缀。`input.context.audio_source`和`evidence`给出原文件标识、SHA-256、字节数、解码时长、采样与声道、版本和引用标识，不传私有磁盘路径或凭据。
+
+接收端须校验实际收到字节的SHA-256、长度、原格式及模型适用范围，只解码该附件，不抓取输入中的任意URL。`store:false`是接收端需落实的处理约定，客户端标记不能证明服务实际保留策略。响应示例：
+
+```json
+{
+  "schema_version": "2",
+  "feature_key": "medical_transcription",
+  "model_version": "与登记一致的实际模型",
+  "applicable": true,
+  "result": {"summary": "待听音复核的转写草稿", "sections": [], "warnings": [], "missing_data": ["说话人角色未经核实"]},
+  "transcription": {
+    "asset_id": "原录音UUID",
+    "content_hash": "实际收到原文件的64位SHA-256",
+    "time_basis": "relative_decoded_audio",
+    "speech_detected": true,
+    "language": "zh-CN",
+    "segments": [{"start_ms": 0, "end_ms": 200, "speaker": "speaker_1", "speaker_role": "unknown", "text": "实际识别且待核对的内容", "uncertain": true, "uncertainty_note": "具体不确定处", "source_id": "提供的原音引用标识"}]
+  },
+  "usage": {"input_tokens": 5, "output_tokens": 7}
+}
+```
+
+分段使用严格的整型毫秒，按开始时间排序且不超过原解码范围，可保留重叠发言。每段引用必须是该原录音，身份角色只接受`unknown`，不确定片段须给出说明。声明未检出语音时须为空片段。响应仍受512KiB及1000段上限约束，超限失败，不静默截断。输出不合法也保留已经正确解析的服务报告用量。上述例子不是识别结果或验证数据；本地测试使用合成静音和隔离响应，真实语音服务、完整性/识别质量、说话人映射及专科术语验证仍待接入。
 
 ## 验证命令
 
@@ -227,6 +288,7 @@ ADR列表对管理员保留既有管理范围；药师只读现有处方业务�
 # fastapi_be
 pytest -q tests/test_ai_catalog.py tests/test_ai_admin.py tests/test_ai_gateway.py tests/test_ai_context.py tests/test_ai_runtime.py tests/test_ai_migration.py tests/test_rbac_drift.py
 pytest -q tests/test_ai_pathway_knowledge.py tests/test_ai_pathway_sources.py
+pytest -q tests/test_ai_audio_files.py tests/test_ai_audio_assets.py tests/test_ai_audio_transcription.py tests/test_ai_response_fidelity.py tests/test_ai_knowledge_scope.py
 python scripts/generate_rbac_matrix.py --check
 python scripts/export_ai_catalog.py --check
 ruff check app/ai app/routers/ai.py app/routers/ai_admin.py

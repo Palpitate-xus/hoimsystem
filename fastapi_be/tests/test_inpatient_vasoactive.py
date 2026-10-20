@@ -14,7 +14,7 @@ from app import inpatient_support_common as common
 from app import inpatient_vasoactive as vaso
 from app.inpatient_observations import utc_text
 from app.inpatient_vasoactive_models import AIVasoactiveDrugMapping, InpatientVasoactiveSource
-from app.models import InpatientOrder, InpatientOrderItem, MedicationAdministration, OrderExecution
+from app.models import InpatientOrder, InpatientOrderItem, MedicationAdministration, NursingRecord, OrderExecution
 from app.routers import ai_vasoactive_mappings as mapping_routes
 from tests.test_ai_observation_windows import point
 from tests.test_ai_vasoactive_mappings import NOTE, published_mapping
@@ -318,3 +318,127 @@ def test_no_model_score_probability_or_default_quantity_is_added_and_mysql_types
     assert "MEDIUMTEXT" in source_ddl and source_ddl.count("DATETIME(6)") == 3
     assert mapping_ddl.count("DATETIME(6)") == 3
     assert "sofa" not in InpatientVasoactiveSource.__table__.columns.keys()
+
+
+def request_body(case, **changes):
+    return {"patient_id": case["patient_id"], "admission_id": case["admission"].admission_id, "payload": payload(case, **changes)}
+
+
+def scope(case):
+    return {"patient_id": case["patient_id"], "admission_id": case["admission"].admission_id}
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("mode,value", [("weight_normalized", "0.12345678"), ("absolute", "0.00000000"), ("pump", None)])
+async def test_actual_main_http_freezes_selected_mapping_weight_and_given_chain_without_clinical_conversion(async_client, auth_headers, db_session, source_case, mode, value):
+    case = source_case
+    headers = auth_headers(case["doctor"].username)
+    administration, _, _, _ = given_origin(db_session, case)
+    options = await async_client.get("/api/inpatient-support/options", params=scope(case), headers=headers)
+    assert options.status_code == 200, options.text
+    kind = next(item for item in options.json()["data"]["kinds"] if item["kind"] == "vasoactive")
+    assert kind["can_record"] is True and kind["schema_version"] == "vasoactive_interval_v1"
+    mappings = await async_client.get("/api/inpatient-support/vasoactive/mapping-candidates", params=scope(case), headers=headers)
+    assert mappings.status_code == 200, mappings.text
+    actual_mapping = mappings.json()["data"]["items"][0]
+    assert actual_mapping == vaso.mapping_current(db_session, case["mapping"].mapping_id)
+    candidates = await async_client.get("/api/inpatient-support/vasoactive/origin-candidates", params={**scope(case), "mapping_id": actual_mapping["mapping_id"]}, headers=headers)
+    assert candidates.status_code == 200, candidates.text
+    actual_origin = candidates.json()["data"]["items"][0]
+    assert actual_origin["administration_id"] == administration.administration_id
+    original = request_body(
+        case,
+        origin={"administration_id": administration.administration_id, "expected_content_hash": actual_origin["content_hash"]},
+        dose_input=dose(mode, value, weight_ref=weight_ref(case), confirmed=True),
+    )
+    response = await async_client.post("/api/inpatient-support/vasoactive", headers=headers, json=original)
+    assert response.status_code == 200, response.text
+    source = response.json()["data"]
+    assert source["payload"] == original["payload"]
+    assert source["eligible"] and source["can_record"] and source["can_revoke"]
+    assert source["reference_snapshots"]["drug_mapping"] == actual_mapping
+    assert source["reference_snapshots"]["origin"] == actual_origin["snapshot"]
+    assert source["reference_snapshots"]["weight"]["payload"]["measurements"]["body_weight"]["value"] == "70.00000000"
+    assert source["reference_snapshots"]["origin"]["administration"]["administration_time"] == "2020-01-02T03:04:05.123456"
+    assert source["event_at"] == original["payload"]["start_at"]
+    assert source["author_qualification"]["actor_id"] == case["doctor"].user_id
+    assert not {"sofa", "normalized_rate", "sepsis_probability"} & source.keys()
+    identifier = source["support_source_id"]
+    detail = await async_client.get(f"/api/inpatient-support/vasoactive/{identifier}", params=scope(case), headers=headers)
+    listed = await async_client.get("/api/inpatient-support/vasoactive", params=scope(case), headers=headers)
+    assert detail.status_code == listed.status_code == 200
+    assert detail.json()["data"] == source == listed.json()["data"]["items"][0]
+
+
+@pytest.mark.asyncio
+async def test_actual_nurse_cannot_bootstrap_vaso_care_but_original_admission_nursing_assignment_can_record(async_client, auth_headers, db_session, source_case):
+    case = source_case
+    nurse = case["seed"]["nurse_user"]
+    headers = auth_headers(nurse.username)
+    # New organ-support authorship and other-admission care do not grant this encounter.
+    existing = create(db_session, case)
+    existing.created_by = nurse.user_id
+    db_session.add(NursingRecord(patient_id=case["patient_id"], admission_id=case["other"].admission_id, nurse_id=nurse.user_id, record_time=case["now"], create_time=case["now"]))
+    db_session.commit()
+    denied = await async_client.post("/api/inpatient-support/vasoactive", json=request_body(case), headers=headers)
+    assert denied.status_code == 403, denied.text
+    for path in ("mapping-candidates", "origin-candidates"):
+        denied = await async_client.get(f"/api/inpatient-support/vasoactive/{path}", params=scope(case), headers=headers)
+        assert denied.status_code == 403
+    db_session.add(NursingRecord(patient_id=case["patient_id"], admission_id=case["admission"].admission_id, nurse_id=nurse.user_id, record_time=case["now"], create_time=case["now"]))
+    db_session.commit()
+    created = await async_client.post("/api/inpatient-support/vasoactive", json=request_body(case, dose_input=dose("absolute", "0")), headers=headers)
+    assert created.status_code == 200, created.text
+    source = created.json()["data"]
+    assert source["author_qualification"]["role_at_creation"] == "nurse"
+    assert source["payload"]["dose_input"]["rate"]["value"] == "0" and source["can_revoke"]
+    identifier = source["support_source_id"]
+    revoked = await async_client.post(f"/api/inpatient-support/vasoactive/{identifier}/revoke", json={**scope(case), "expected_revision": 1, "reason": NOTE}, headers=headers)
+    assert revoked.status_code == 200 and revoked.json()["data"]["status"] == "revoked"
+
+
+@pytest.mark.asyncio
+async def test_actual_super_mapping_authority_does_not_create_clinical_vaso_originals(async_client, auth_headers, source_case):
+    case = source_case
+    headers = auth_headers(case["seed"]["super_admin_user"].username)
+    options = await async_client.get("/api/inpatient-support/options", params=scope(case), headers=headers)
+    assert options.status_code == 200
+    assert next(item for item in options.json()["data"]["kinds"] if item["kind"] == "vasoactive")["can_record"] is False
+    response = await async_client.post("/api/inpatient-support/vasoactive", headers=headers, json=request_body(case))
+    assert response.status_code == 403, response.text
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("parent", ["mapping", "origin_item"])
+async def test_actual_http_stale_parent_blocks_clinical_reuse_but_super_retains_full_original_and_can_revoke(async_client, auth_headers, db_session, source_case, parent):
+    case = source_case
+    administration, _, _, item = given_origin(db_session, case)
+    original = vaso.origin_snapshot(db_session, case["patient_id"], case["admission"].admission_id, administration.administration_id, vaso.mapping_current(db_session, case["mapping"].mapping_id))
+    doctor_headers = auth_headers(case["doctor"].username)
+    super_headers = auth_headers(case["seed"]["super_admin_user"].username)
+    created = await async_client.post(
+        "/api/inpatient-support/vasoactive",
+        headers=doctor_headers,
+        json=request_body(case, origin={"administration_id": administration.administration_id, "expected_content_hash": original["content_hash"]}),
+    )
+    assert created.status_code == 200, created.text
+    before = created.json()["data"]
+    identifier = before["support_source_id"]
+    if parent == "mapping":
+        mapping_routes.revoke_mapping(case["mapping"].mapping_id, mapping_routes.MappingRevoke(expected_revision=2, reason=NOTE), db_session, case["seed"]["super_admin_user"])
+    else:
+        item.dose += "完整原链发生变化"
+        db_session.commit()
+    ordinary = await async_client.get(f"/api/inpatient-support/vasoactive/{identifier}", params=scope(case), headers=doctor_headers)
+    assert ordinary.status_code == 409, ordinary.text
+    audit = await async_client.get(f"/api/ai/admin/support-sources/vasoactive/{identifier}", headers=super_headers)
+    assert audit.status_code == 200, audit.text
+    frozen = audit.json()["data"]
+    assert not frozen["eligible"] and frozen["exclusion_reasons"]
+    assert frozen["reference_snapshots"] == before["reference_snapshots"] and frozen["content_hash"] == before["content_hash"]
+    revoke = await async_client.post(f"/api/inpatient-support/vasoactive/{identifier}/revoke", headers=super_headers, json={**scope(case), "expected_revision": 1, "reason": NOTE})
+    assert revoke.status_code == 200, revoke.text
+    after = revoke.json()["data"]
+    assert after["status"] == "revoked" and after["revision"] == 2 and not after["can_revoke"]
+    assert after["content_hash"] == before["content_hash"] and after["reference_snapshots"] == before["reference_snapshots"]
+    assert not after["eligible"] and after["governance_hash"] != before["governance_hash"]

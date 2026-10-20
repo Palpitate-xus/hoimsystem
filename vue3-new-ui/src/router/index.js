@@ -32,11 +32,17 @@ export const asyncRoutes = [
   {
     path: "/ai",
     component: Layout,
-    redirect: "/ai/manage",
+    redirect: "/ai/workbench",
     name: "AIPlatform",
     alwaysShow: true,
-    meta: { title: "AI 平台", icon: "setting", permissions: ["super_admin"] },
+    meta: { title: "AI 平台", icon: "setting", permissions: ["super_admin", "admin", "doctor", "director", "nurse", "pharmacist", "patient", "guide", "lab_technician"] },
     children: [
+      {
+        path: "workbench",
+        name: "AIWorkbench",
+        component: () => import("@/views/ai/workbench.vue"),
+        meta: { title: "AI 业务助手", permissions: ["super_admin", "admin", "doctor", "director", "nurse", "pharmacist", "patient", "guide", "lab_technician"] },
+      },
       {
         path: "manage",
         name: "AIManagement",

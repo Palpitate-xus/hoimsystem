@@ -189,7 +189,8 @@ instance.interceptors.response.use(
     const { response, message } = error;
     if (response && response.data) {
       const { status, data } = response;
-      handleCode(status, data.msg || message || "未知错误");
+      const detail = typeof data.detail === "string" ? data.detail : Array.isArray(data.detail) ? data.detail.slice(0, 3).map(item => item.msg).join("；") : "";
+      handleCode(status, data.msg || detail || message || "未知错误");
       return Promise.reject(error);
     } else {
       let errorMsg = "后端接口未知异常";

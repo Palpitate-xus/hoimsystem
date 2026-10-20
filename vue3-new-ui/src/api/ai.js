@@ -2,6 +2,17 @@ import request from "@/utils/request";
 
 const admin = "ai/admin";
 
+export const getAIFeatures = () => request({ url: "ai/features", method: "get" });
+export const getAIPatients = (params) => request({ url: "ai/patients", method: "get", params });
+export const getAIEncounters = (params) => request({ url: "ai/encounters", method: "get", params });
+export const getAIPrescriptions = (params) => request({ url: "ai/prescriptions", method: "get", params });
+export const getAIClinicalContext = (params) => request({ url: "ai/context", method: "get", params });
+export const createAIRun = (data) => request({ url: "ai/runs", method: "post", data });
+export const getAIRuns = (params = {}) => request({ url: "ai/runs", method: "get", params });
+export const getAIRun = (id) => request({ url: `ai/runs/${id}`, method: "get" });
+export const cancelAIRun = (id) => request({ url: `ai/runs/${id}/cancel`, method: "post" });
+export const reviewAIRun = (id, data) => request({ url: `ai/runs/${id}/feedback`, method: "post", data });
+
 export const getAIAdminFeatures = () => request({ url: `${admin}/features`, method: "get" });
 export const saveAIFeature = (key, data) => request({ url: `${admin}/features/${key}`, method: "put", data });
 export const getAIProviders = () => request({ url: `${admin}/providers`, method: "get" });

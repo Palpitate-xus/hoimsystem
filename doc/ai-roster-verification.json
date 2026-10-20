@@ -1,0 +1,1767 @@
+{
+  "recorded_at_utc": "2026-10-20T20:22:35.374713+00:00",
+  "baseline_commit": "8f46afde6740e62d1f5308f624b08712f2874728",
+  "platform_commit_at_recording": "aa57f06a9ea259447671d04ec65d62873d73b940",
+  "recording_head_precedes_this_evidence_documentation_commit": true,
+  "goal_status": "active",
+  "scope": "Feature 63 governed original qualification/availability/all-location duty/local policy sources, complete reviewed single-department Doctor-cohort scenarios, fixed two-objective native branch-and-bound optimization, strict public-only v10 gateway with full recomputation, durable tasks and complete result persistence, business review UI and Super-admin governance. Also operational validation gates for features 62-67 and correction of static role inventory. Existing external optimizer mode retained.",
+  "real_patient_data_used": false,
+  "existing_hospital_database_accessed": false,
+  "existing_hospital_backend_contacted": false,
+  "production_deployment_performed": false,
+  "operational_validation_performed": false,
+  "clinical_validation_performed": false,
+  "remote_model_inference_performed_for_this_batch": false,
+  "stored_business_ai_configuration_changed": false,
+  "version_management": {
+    "branch": "feature/ai-hospital-platform",
+    "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+    "commits_this_batch_before_evidence_commit": 45,
+    "commits_since_original_baseline_before_evidence_commit": 396
+  },
+  "inventory": {
+    "business_router_routes": 751,
+    "all_main_app_api_routes": 752,
+    "router_modules": 102,
+    "orm_tables": 182,
+    "vue_view_files": 160,
+    "catalog": {
+      "version": "2026.10.20.10",
+      "feature_count": 80,
+      "source_reference_count": 34,
+      "source_reference_keys": [
+        "adverse_event_id",
+        "aki_assessment_id",
+        "audio_asset_id",
+        "critical_care_record_id",
+        "ecg_asset_id",
+        "home_id",
+        "icu_score_id",
+        "image_asset_id",
+        "imaging_order_id",
+        "imaging_report_id",
+        "inpatient_charge_id",
+        "lab_result_id",
+        "mdt_id",
+        "news2_assessment_id",
+        "nursing_assessment_id",
+        "nursing_plan_id",
+        "observation_window_id",
+        "outpatient_charge_id",
+        "pathway_enrollment_id",
+        "pathway_id",
+        "perioperative_id",
+        "prescription_id",
+        "qsofa_assessment_id",
+        "reaction_id",
+        "record_id",
+        "referral_id",
+        "roster_plan_id",
+        "sofa_assessment_id",
+        "sofa_change_assessment_id",
+        "structured_record_id",
+        "support_source_id",
+        "support_source_kind",
+        "surgery_application_id",
+        "surgery_schedule_id"
+      ],
+      "risk_feature_reference_keys": {
+        "41": [
+          "news2_assessment_id",
+          "observation_window_id"
+        ],
+        "42": [
+          "observation_window_id",
+          "qsofa_assessment_id",
+          "sofa_assessment_id",
+          "sofa_change_assessment_id"
+        ],
+        "43": [
+          "aki_assessment_id",
+          "observation_window_id"
+        ]
+      },
+      "handover_feature_reference_keys": [
+        "adverse_event_id",
+        "audio_asset_id",
+        "critical_care_record_id",
+        "ecg_asset_id",
+        "home_id",
+        "icu_score_id",
+        "image_asset_id",
+        "imaging_order_id",
+        "imaging_report_id",
+        "inpatient_charge_id",
+        "lab_result_id",
+        "mdt_id",
+        "nursing_assessment_id",
+        "nursing_plan_id",
+        "outpatient_charge_id",
+        "pathway_enrollment_id",
+        "pathway_id",
+        "perioperative_id",
+        "prescription_id",
+        "reaction_id",
+        "record_id",
+        "referral_id",
+        "structured_record_id",
+        "support_source_id",
+        "support_source_kind",
+        "surgery_application_id",
+        "surgery_schedule_id"
+      ],
+      "only_handover_accepts_support_source_references": true,
+      "only_feature42_accepts_daily_and_change_sofa_references": true,
+      "prompt_export": {
+        "default_task_prompt_count": 80,
+        "distinct_task_prompt_count": 80,
+        "all_exported_features_and_prompts_exactly_match_live_catalog": true,
+        "system_prompt_exactly_matches": true,
+        "exported_catalog_version": "2026.10.20.10"
+      }
+    },
+    "alembic_heads": [
+      "20261020_roster_plans"
+    ],
+    "implementation_file_count": 94,
+    "generated_artifact_count": 4,
+    "all_implementation_bytes_match_committed_capture_head": true,
+    "artifact": {
+      "path": "/tmp/hoim-roster-platform-final2-inventory.json",
+      "bytes": 114105,
+      "sha256": "a3d0133c587da196146d53e9607f6f70c5834ac66a573a0c72a00330f5a7e3ee"
+    },
+    "isolation": {
+      "dotenv_sources_disabled": true,
+      "settings_env_file_none": true,
+      "forbidden_env_open_attempts": [],
+      "database_connections_blocked": true,
+      "database_connection_attempts": [],
+      "configured_database": "sqlite:///:memory:",
+      "engine_constructed_without_connection": true,
+      "lifespan_or_server_started": false,
+      "asgi_and_router_lifecycle_entrypoints_guarded": true,
+      "lifecycle_attempts": [],
+      "repo_write_attempts": [],
+      "filesystem_mutation_attempts": [],
+      "only_explicit_private_result_file_writable": true,
+      "existing_repository_directory_noops_intercepted_without_syscall": [
+        "/home/xusheng/workspace/hoimsystem/fastapi_be/backups",
+        "/home/xusheng/workspace/hoimsystem/fastapi_be/uploads/avatars",
+        "/home/xusheng/workspace/hoimsystem/fastapi_be/uploads/reports"
+      ],
+      "external_process_execution_attempts": [],
+      "all_network_io_and_dns_blocked_before_syscall": true,
+      "network_io_attempts_blocked": [
+        {
+          "operation": "socket.bind",
+          "family": 10,
+          "blocked": true
+        }
+      ],
+      "optional_import_ipv6_capability_probe_attempts_blocked": [
+        {
+          "operation": "socket.bind",
+          "family": 10,
+          "blocked": true,
+          "target": "[::1]:0",
+          "caller": "urllib3.util.connection._has_ipv6",
+          "socket_closed_by_dependency": true
+        }
+      ],
+      "socket_constructors_without_io_allowed": [
+        {
+          "family": 10,
+          "type": 1,
+          "protocol": 0
+        }
+      ],
+      "all_import_constructed_sockets_closed_verified_by_fileno": true,
+      "successful_network_io": 0,
+      "network_io_attempt_count": 1,
+      "unexpected_network_or_database_attempt_count": 0,
+      "synthetic_transport_rsa_generated_in_memory_only": true,
+      "shared_transport_key_file_attempts": [],
+      "existing_dependency_site_added_after_guards_without_pth_execution": "/home/xusheng/.local/lib/python3.13/site-packages"
+    }
+  },
+  "source_and_math_contract": {
+    "feature_number": 63,
+    "input_mode": "roster",
+    "source_reference": "roster_plan_id",
+    "reference_exclusive_to_feature63": true,
+    "specialist_schema_version": 10,
+    "rule_id": "roster_declared_constraints_v1",
+    "recipe_digest": "32d3df3336970832ecd2ea9f1de65a3c61b70f2fcbd3ad0ff901dd1fcdc3fe13",
+    "input_policy_digest": "9f088a402b3c55560a7158df2d76ba91aecf9ed17034178f9b1e74c178e30105",
+    "original_fact_kinds": [
+      "qualification",
+      "availability",
+      "duty",
+      "policy"
+    ],
+    "scope": "Complete current department Doctor cohort, complete staff-by-session Cartesian options, explicit 1..31 local business dates within a 366-day planning bound, original IANA/UTC6 boundaries, demand/capacity/cost/break/accounting quantities and independent completeness declarations.",
+    "objectives": [
+      "meet_targets_min_penalty",
+      "max_slots_then_min_penalty"
+    ],
+    "search": "Deterministic definite and explicitly optimistic graphs; each graph bounded at 32768 expanded nodes, 2000000 defined work operations and 4096 frontier items. Actual stopping reason, admissible bounds and exact objective gaps retained. Unknown input is not observed zero or an executable solution; only appropriate exhaustive graph results prove optimality or infeasibility.",
+    "constraints": "Full presence overlaps, original breaks and work accounting, adjacent rest, exact integral rolling 24h/7d and explicit fixed UTC work windows with all-location prefix/suffix duty context; all applicable complete published policies conjoined. No continuous staffing or consecutive-local-working-day compliance claim.",
+    "maximum_staff": 512,
+    "maximum_sessions": 256,
+    "maximum_options_and_facts": 32768,
+    "utf8_limits": {
+      "each_private_plan_public_source_request_response_complete_result": 8388608,
+      "source_payload": 262144,
+      "source_parent": 32768,
+      "existing_AIRun_each_TEXT": 65535
+    },
+    "outbound": "Only strictly typed opaque public roster_source and complete system/task Prompts. No private identity mapping, clinical data, free question, review narrative or retrieved prose.",
+    "prompt_changes_numeric_algorithm": false,
+    "currentness": "Immutable full facts/cohort collection and source/governance hashes; fresh locked role/config/department/personnel/fact checks after CAS and until final acceptance commit. Ordinary history rechecks current scope; intact Super-admin frozen audit does not bypass self-integrity.",
+    "results": "Full native proof and fixed explanation recomputed on response, persisted reading, history and feedback; complete lease-bound blob, short AIRun reference, successful status and audit accepted atomically."
+  },
+  "super_admin_governance": {
+    "all80_model_prompt_roles_activation_knowledge_validation_tasks_feedback_management_available": true,
+    "all80_implemented_validated_or_enabled": false,
+    "four_source_kinds_and_complete_plan_draft_review_publish_reject_revoke": true,
+    "all_hospital_frozen_audit": true,
+    "provider_revision_bound_GET_only_capabilities_without_input_or_optimization": true,
+    "source_publication_or_probe_changes_feature_activation_or_operational_validation": false,
+    "ordinary_operations_features_62_through_67_require_explicit_scope_validation": true
+  },
+  "migration": {
+    "revisions": [
+      "20261020_roster_sources",
+      "20261020_roster_plans"
+    ],
+    "first_parent": "20261020_sofa_assessments",
+    "new_tables": 3,
+    "actual_eight_datetime6_columns": [
+      [
+        "hoimsystem_ai_roster_plan",
+        "as_of",
+        6
+      ],
+      [
+        "hoimsystem_ai_roster_plan",
+        "created_at",
+        6
+      ],
+      [
+        "hoimsystem_ai_roster_plan",
+        "reviewed_at",
+        6
+      ],
+      [
+        "hoimsystem_ai_roster_plan",
+        "revoked_at",
+        6
+      ],
+      [
+        "hoimsystem_ai_roster_run_result",
+        "created_at",
+        6
+      ],
+      [
+        "hoimsystem_ai_roster_source",
+        "recorded_at",
+        6
+      ],
+      [
+        "hoimsystem_ai_roster_source",
+        "reviewed_at",
+        6
+      ],
+      [
+        "hoimsystem_ai_roster_source",
+        "revoked_at",
+        6
+      ]
+    ],
+    "actual_five_mediumtext_columns": [
+      [
+        "hoimsystem_ai_roster_plan",
+        "projection_json",
+        "mediumtext"
+      ],
+      [
+        "hoimsystem_ai_roster_plan",
+        "snapshot_json",
+        "mediumtext"
+      ],
+      [
+        "hoimsystem_ai_roster_run_result",
+        "result_json",
+        "mediumtext"
+      ],
+      [
+        "hoimsystem_ai_roster_source",
+        "parent_binding_json",
+        "mediumtext"
+      ],
+      [
+        "hoimsystem_ai_roster_source",
+        "payload_json",
+        "mediumtext"
+      ]
+    ],
+    "actual_up_down_up": true,
+    "all_existing_prerequisite_ddl_and_complete_rows_unchanged": true
+  },
+  "backend_verification": {
+    "full_pytest": {
+      "passed": 5284,
+      "skipped": 28,
+      "warnings": 2,
+      "seconds": 622.97,
+      "net_new_default_passing_cases_from_sofa_batch": 457,
+      "log": {
+        "path": "/tmp/hoim-roster-full-final3-pytest.log",
+        "bytes": 6872,
+        "sha256": "ca05940f6aded3f5afb95ffd313edbb0b24e2a1b12a1b668e2362d3ef1bb8f75"
+      },
+      "execution": {
+        "path": "/tmp/hoim-roster-full-final3-pytest-execution.json",
+        "bytes": 1838,
+        "sha256": "bbd697334bda17936fd2a5491be9acacccc4d12a195996031e9f74ed4c357c01"
+      }
+    },
+    "ruff_and_whole_file_format": {
+      "python_files": 50,
+      "artifact": {
+        "path": "/tmp/hoim-roster-backend-final3-ruff-execution.json",
+        "bytes": 5553,
+        "sha256": "fbfc9f04e9ea9d7fc9060b30bb50a1a84878abcfdb6a788426aae39e414cb331"
+      },
+      "log": {
+        "path": "/tmp/hoim-roster-backend-final3-ruff.log",
+        "bytes": 46,
+        "sha256": "fa6e34469cf6b49bbd34e6fba28d8316d94b29e06144ea92008e209a3d2a2778"
+      }
+    },
+    "frozen_source_record": {
+      "path": "/tmp/hoim-roster-backend-final3-source-freeze.json",
+      "bytes": 8732,
+      "sha256": "ebc25e35ffffa3f16ffca3782a81a95eb209b64f5309c33c86f0896952509644"
+    },
+    "targeted_checks_overlap_full_suites_not_added": true,
+    "prompt_export_and_actual_mounted_RBAC_checked_by_final_inventory": true,
+    "static_role_inventory_corrections": {
+      "artifact": {
+        "path": "/tmp/hoim-roster-rbac-role-corrections.json",
+        "bytes": 49890,
+        "sha256": "3f600616f314e561077672a229a968e94786d6121a24d6d8733808969bd537a1"
+      },
+      "actual_route_permissions_changed": false,
+      "route_keys_unchanged": true,
+      "audit_entries_corrected": 201,
+      "previous_ANY_now_exact": 174,
+      "previous_explicit_list_corrected": 27,
+      "all_current_require_roles_closures_checked_by_tests": true
+    }
+  },
+  "frontend_verification": {
+    "npm_verify": {
+      "command": [
+        "npm",
+        "run",
+        "verify"
+      ],
+      "exit_code": 0,
+      "audit_vulnerabilities": 0,
+      "build_warnings": 5,
+      "build_seconds": 28.29,
+      "total_seconds": 31.211,
+      "bundle": {
+        "largestJavaScript": {
+          "file": "element-plus.1235714c.js",
+          "bytes": 647479
+        },
+        "totalJavaScript": 5784333,
+        "totalAssets": 6302579,
+        "limits": {
+          "largestJavaScript": 700000,
+          "totalJavaScript": 6000000,
+          "totalAssets": 7000000
+        }
+      },
+      "log": {
+        "path": "/tmp/hoim-roster-ui-final3-verify.log",
+        "bytes": 54730,
+        "sha256": "b2ea84b49052eb7e97a4e42c0c5a50759fd26c14dda72f4d94b0d23703466861"
+      },
+      "execution": {
+        "path": "/tmp/hoim-roster-ui-final3-verify-execution.json",
+        "bytes": 40218,
+        "sha256": "f789cbbb6f3ad8b34c6185cba483459700cdd5a711b5f1f56b744a286b8b9d14"
+      },
+      "frozen_inputs": {
+        "path": "/tmp/hoim-roster-ui-final3-verify-source-freeze.json",
+        "bytes": 68127,
+        "sha256": "334d7b994148f694c5e15dd317454a1571d7ca889c615b50286e835c9074643b"
+      },
+      "post_build_test_only_changes": {
+        "vue3-new-ui/e2e/ai-roster-entry.spec.js": {
+          "build_capture_sha256": "597bb3c6b51b39808c8519281d7d6965facef55989deb80e3818286a7daf5a90",
+          "final_test_sha256": "f89393ae163763ce64aa0ada63214a3bda54c86fcd9829dacaf998e6674f5525"
+        },
+        "vue3-new-ui/e2e/ai-roster-source-entry.spec.js": {
+          "build_capture_sha256": "ebc0d8dd93ebd426ce9953d6d2303b5b0b30647c11b2aada4eae067a88d5e563",
+          "final_test_sha256": "dc96fec03f8697f7e3375216cf32f007e2c4dbe2a9c1d5dc312854943c1747cf"
+        }
+      },
+      "production_inputs_and_all_dist_bytes_unchanged_after_build": true,
+      "direct_dependencies_browser_targets_and_budgets_unchanged": true,
+      "transitive_security_fix": {
+        "package": "follow-redirects",
+        "from": "1.16.0",
+        "to": "1.16.1",
+        "scope": "Only this package lock entry changed after a newly reported audit failure; actual installed version and browser requests verified separately."
+      }
+    },
+    "full_browser": {
+      "passed": 546,
+      "categories": {
+        "isolated_mock": 364,
+        "production_mock": 161,
+        "real_synthetic_http": 21
+      },
+      "seconds": 764.061,
+      "log": {
+        "path": "/tmp/hoim-roster-browser-frozen-final2-tests.log",
+        "bytes": 76326,
+        "sha256": "01fa075f60908e91cc3690bbb3ba9d98df04f2818cd6c04e9d6eb7c07f989d3e"
+      },
+      "report": {
+        "path": "/tmp/hoim-roster-browser-frozen-final2-report.json",
+        "bytes": 597367,
+        "sha256": "e968097ef3096003bc759270e5e80d90b1e5b2f0e389104618ae38ce695e8cf2"
+      },
+      "execution": {
+        "path": "/tmp/hoim-roster-browser-frozen-final2-execution.json",
+        "bytes": 2842,
+        "sha256": "0e4a7292e77e733beb5563abe6ed44648cefa0647641b462974d8b25c7df3290"
+      },
+      "category_extraction": {
+        "path": "/tmp/hoim-roster-browser-final-category-counts.json",
+        "bytes": 280851,
+        "sha256": "83dda516240e93ee911c01cf75686031528c966cc87afc9f5bcb2305024e085f"
+      },
+      "targeted_runs_not_added": true,
+      "mock_API_data_is_synthetic_even_when_generated_by_actual_backend_functions": true
+    },
+    "source_and_dist_frozen_record": {
+      "path": "/tmp/hoim-roster-frontend-final2-source-freeze.json",
+      "bytes": 108091,
+      "sha256": "288af29975d9d19ede8468386f42bb1561a2b42c645ce9c36879cc1cf8c15e86"
+    },
+    "frozen_UI_targeted_summary": {
+      "artifact": {
+        "path": "/tmp/hoim-roster-ui-frozen4-verification.json",
+        "bytes": 59567,
+        "sha256": "c57019d97dbd08c0490ac883deb1cfd02897fbbd59dd9dd074f96ebbc10dbef6"
+      },
+      "contents": {
+        "schema_version": "roster_ui_frozen_verification_v4",
+        "created_at": "2026-10-20T20:08:59.316838+00:00",
+        "baseline": "8f46afd",
+        "frontend_commit": "aa57f06a9ea259447671d04ec65d62873d73b940",
+        "frontend_source_and_test_sha256": {
+          "vue3-new-ui/e2e/ai-roster-assistant.spec.js": "c17704713b3b6ec9d7bdc7873c195778662b94dd73dac5f973b19069a9597985",
+          "vue3-new-ui/e2e/ai-roster-entry.spec.js": "f89393ae163763ce64aa0ada63214a3bda54c86fcd9829dacaf998e6674f5525",
+          "vue3-new-ui/e2e/ai-roster-findings.spec.js": "6ff27b0ba2fbfd82747fa8cf7e1c9ca2da4babd9c55293b6a7c9f230361d327f",
+          "vue3-new-ui/e2e/ai-roster-plan-api.spec.js": "410a186d49242421d53608f014761ca3b334e5d65e340a17e170b2b9fe7b45ae",
+          "vue3-new-ui/e2e/ai-roster-plan-input.spec.js": "5bb100be9fb2da91454d4584372bcbc5b7e782f05cb23072eb4cbd2191b78e17",
+          "vue3-new-ui/e2e/ai-roster-provider.spec.js": "7fda3e1f5db10a7c66d0a4a76019bda1ab0e1aec1ee6ed24adccc4a352c64bd0",
+          "vue3-new-ui/e2e/ai-roster-source-api.spec.js": "a1db3a04ee6234fab9845b8db4547577eb4aa2bef25428b3fe99237db869cef7",
+          "vue3-new-ui/e2e/ai-roster-source-entry.spec.js": "dc96fec03f8697f7e3375216cf32f007e2c4dbe2a9c1d5dc312854943c1747cf",
+          "vue3-new-ui/e2e/ai-roster-sources.spec.js": "94baa82b1400dca1dfcc77c6135beddb136af27d609683b344d3a15734e86302",
+          "vue3-new-ui/e2e/fixtures/roster-source-harness.cjs": "ebfddf287938b05decef6d992d0940281395ac250f5b3fb94b52cd6fd98f9230",
+          "vue3-new-ui/e2e/fixtures/roster-synthetic/README.md": "5609bf490428a52a904881428471a1d7862e97e816405df5178ccd27e6ba5f4f",
+          "vue3-new-ui/e2e/fixtures/roster-synthetic/capabilities.json": "aa84852414a7ec75e59c17aae7615ad5489a276069b37581b88d2c8b8de595dc",
+          "vue3-new-ui/e2e/fixtures/roster-synthetic/core-meet.json": "d789e72d8721004a60edbc2dade2967c587464b7dea90b0a20be10495e2cee68",
+          "vue3-new-ui/e2e/fixtures/roster-synthetic/core-slots.json": "22dc0c252b9771a5950c772893a01d24a22a1cb9c954bfac62c5c561850553e8",
+          "vue3-new-ui/e2e/fixtures/roster-synthetic/feasible-meet.json": "bc7d138de7ac7bd6c93a4bef36950a073913eb630cdcc0125d65f84fbdf77880",
+          "vue3-new-ui/e2e/fixtures/roster-synthetic/feasible-slots.json": "7eda95ae747adc49176223a23652d367cbadd7aed265d0f2fa376e59196ec114",
+          "vue3-new-ui/e2e/fixtures/roster-synthetic/pipeline-plan.json": "b2e7bbf9b50f95a948e30afc9853569b8950a793084c675703ac11d3f170048c",
+          "vue3-new-ui/e2e/fixtures/roster-synthetic/pipeline.json": "1ea2a8bc156d06f57c34183d8b17c055dceb8d9a77059f9abded7fb5b4b8cd68",
+          "vue3-new-ui/e2e/fixtures/roster-synthetic/plan-options.json": "96fe5f7b09e03675803469a8866f47b356f39843b742428370b977b009a25c7b",
+          "vue3-new-ui/e2e/fixtures/roster-synthetic/plans.json": "01113fdd60939e13d01d1eae940f01825d0a4adccafa34759f7e9f16bdf75fb0",
+          "vue3-new-ui/e2e/fixtures/roster-synthetic/sources.json": "5b55dca843c1d8e997a2837727d08426e0bd664c6605de8d7f692845483ed6ab",
+          "vue3-new-ui/e2e/fixtures/roster-synthetic/terminal.json": "5ac953a0eaf5338a8731e263d40a34fe423e05f415a933f911ac7611b723cb8a",
+          "vue3-new-ui/e2e/fixtures/roster-ui.cjs": "4787a51f7550b3f4fc6f5e0a8d9a6d5b926599dc9d7e137249590f75ffffeebb",
+          "vue3-new-ui/package-lock.json": "97a0a0ecf04a2a4c4707457e8a7601a9f39f1c76d5d0f8ed6464e841477eb538",
+          "vue3-new-ui/rspack.config.js": "741a6b4dd7a2cae3bd229bbedaed9e721725045f8be8932a995e037bc305fff2",
+          "vue3-new-ui/scripts/generate-roster-schemas.cjs": "693742be192c1226136c7226e448064820c26e7a9bc72f41c2ef6e81bac676d9",
+          "vue3-new-ui/src/api/rosterPlans.js": "57197d7fa266598e409dfe2809f7107ca66b285c15658cb4f7658ebc86781b34",
+          "vue3-new-ui/src/api/rosterSchemas.json": "7ebb3d1354b3cd302b024bb4c8b5d9f6f72cef11e4a5daab36453bf51ddbdb8e",
+          "vue3-new-ui/src/api/rosterSources.js": "95430442541e26262959ad0436d3856c9826e8cccf35657dbeb7eabd703ef946",
+          "vue3-new-ui/src/api/sofaSchema.js": "dc9e670e0e724663701df146a5502a95d31a7a45a221cb6e0cf8a1e199eb2f20",
+          "vue3-new-ui/src/components/AIAssistant/index.vue": "ddcf52f2bf341b7fa39cdfff1d4d9a549d2d57b68521338a1670fa91032e62b0",
+          "vue3-new-ui/src/components/AIRosterFindings/index.vue": "1bb7328c57ee62848d44106032c106f512bdf55741443d5a95bce0b59735594f",
+          "vue3-new-ui/src/components/AIRosterInput/PlanForm.vue": "035485e2216a7c3b55033c401707a0924b966773a5e7a928c123a6e500a899e2",
+          "vue3-new-ui/src/components/AIRosterInput/index.vue": "6214b542317448348f92a2caeb1f3e0d6bf63d7d7ba307a833ca30e8b4e549f5",
+          "vue3-new-ui/src/components/AIRosterProviderCheck/index.vue": "21e4fe356d7168d61f395fdf08446b95898516f450305750bf6b031672489f50",
+          "vue3-new-ui/src/components/AIRosterSources/BreaksEditor.vue": "c1e4aace8cded3fbdf524e44a239f5b0cea56fdfcd79df8fb79fb702e23d0fba",
+          "vue3-new-ui/src/components/AIRosterSources/NullableValue.vue": "cead600fbff4b228d6e659bf7ec936494265bbbc9d80a42aeb532e54e810ab63",
+          "vue3-new-ui/src/components/AIRosterSources/SourceForm.vue": "54d926f233006c1acbdb56d1ed8bf26bb50f520665ea969c64dc01a7d30f0493",
+          "vue3-new-ui/src/components/AIRosterSources/index.vue": "859aa9040e475ede5fa8dcae11ae2d220c866de9c960bcd0ec1643c3353cc8bf",
+          "vue3-new-ui/src/components/AIRuleProviderCheck/index.vue": "e66a833f7461bd229720333c6bfaa124e03ad15bea6c91cdd46c373de6e80534",
+          "vue3-new-ui/src/views/system/aiManagement.vue": "66d3f71d1d9fcc73434d6602c5f7d0e97ff1398de3fe8b9258ae46111f9bf53a"
+        },
+        "final_target_groups": [
+          {
+            "command": "npx playwright test e2e/ai-roster-plan-api.spec.js e2e/ai-roster-plan-input.spec.js e2e/ai-roster-findings.spec.js e2e/ai-roster-assistant.spec.js --workers=1 --retries=0 --reporter=line",
+            "log": "/tmp/hoim-roster-ui-refined-target-tests.log",
+            "passed": 37,
+            "classification": "isolated_mock",
+            "duration": "1.6m",
+            "log_sha256": "fa3ed667525ba7c06d37af817d0332212e55a543fdbd330c50f8a068514bc1bd",
+            "note": "The 23 API/input/findings cases remain current; its original 14 parent cases were all revalidated with the 9 new parent failure/race cases in the frozen2 parent group. Do not add duplicate passes."
+          },
+          {
+            "command": "npx playwright test e2e/ai-roster-provider.spec.js e2e/ai-roster-source-api.spec.js e2e/ai-roster-sources.spec.js e2e/ai-sofa-source.spec.js e2e/ai-sofa-independent-review.spec.js --workers=1 --retries=0 --reporter=line",
+            "log": "/tmp/hoim-roster-shared-regression-tests.log",
+            "passed": 66,
+            "classification": "isolated_mock",
+            "duration": "2.1m",
+            "new_roster_cases": 44,
+            "existing_sofa_cases": 22,
+            "log_sha256": "8803d446038355281a291537fe06f0537c920ee9efa6ed9db7820e219c930f3f"
+          },
+          {
+            "command": "node scripts/generate-roster-schemas.cjs --check",
+            "log": "/tmp/hoim-roster-schema-final-check.log",
+            "classification": "static_actual_pydantic_schema_check",
+            "models": 6,
+            "bytes": 18793,
+            "log_sha256": "7988e7745cbe2580a6aeba7e73987f1d6e67ef75fe38c4a1e886c317e79d3586"
+          },
+          {
+            "command": "npx playwright test e2e/ai-roster-assistant.spec.js e2e/ai-sofa-entry-review.spec.js --workers=1 --retries=0 --reporter=line",
+            "log": "/tmp/hoim-roster-parent-frozen2-final-tests.log",
+            "log_sha256": "835ec70db16c3dd14326c177107b0350d50c676c53cd5cd925c16f3e07bcd011",
+            "passed": 38,
+            "duration": "1.6m",
+            "classification": "isolated_mock",
+            "new_roster_parent_cases": 23,
+            "existing_sofa_parent_cases": 15
+          },
+          {
+            "command": "npx playwright test e2e/request-real-http.spec.js --workers=1 --retries=0 --reporter=line",
+            "log": "/tmp/hoim-roster-follow-redirects-real-http-tests.log",
+            "log_sha256": "f8fdf49fe4aba4e1772757f1359d13feda50ba85d25d73dce2c2cde8e7ed52b4",
+            "passed": 21,
+            "duration": "8.0s",
+            "classification": "real_http_loopback",
+            "not_added_to_browser_suite_collection": true
+          },
+          {
+            "command": "E2E_BASE_URL=http://127.0.0.1:4180 npx playwright test e2e/ai-roster-entry.spec.js e2e/ai-roster-source-entry.spec.js --workers=1 --retries=0 --reporter=json",
+            "cwd": "/home/xusheng/workspace/hoimsystem/vue3-new-ui",
+            "report": "/tmp/hoim-roster-production-entry-frozen4-target-report.json",
+            "report_sha256": "b3574a4551fe1179d5b3d2b8f8e52bd560cc1d26132219dde17412b500aa7169",
+            "stderr_log": "/tmp/hoim-roster-production-entry-frozen4-target-tests.log",
+            "stderr_log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "passed": 5,
+            "duration_ms": 10972.816,
+            "classification": "production_mock",
+            "run_against_root_final3_dist": true
+          }
+        ],
+        "unique_new_roster_isolated_cases_passed": 90,
+        "existing_sofa_cases_rechecked": 22,
+        "new_specs": {
+          "ai-roster-assistant.spec.js": {
+            "count": 23,
+            "classification": "isolated_mock"
+          },
+          "ai-roster-entry.spec.js": {
+            "count": 3,
+            "classification": "production_mock"
+          },
+          "ai-roster-findings.spec.js": {
+            "count": 8,
+            "classification": "isolated_mock"
+          },
+          "ai-roster-plan-api.spec.js": {
+            "count": 6,
+            "classification": "isolated_mock"
+          },
+          "ai-roster-plan-input.spec.js": {
+            "count": 9,
+            "classification": "isolated_mock"
+          },
+          "ai-roster-provider.spec.js": {
+            "count": 9,
+            "classification": "isolated_mock"
+          },
+          "ai-roster-source-api.spec.js": {
+            "count": 7,
+            "classification": "isolated_mock"
+          },
+          "ai-roster-source-entry.spec.js": {
+            "count": 2,
+            "classification": "production_mock"
+          },
+          "ai-roster-sources.spec.js": {
+            "count": 28,
+            "classification": "isolated_mock"
+          }
+        },
+        "new_spec_case_count": 95,
+        "pending_production_dist_cases": 0,
+        "existing_baseline_spec_case_delta": 0,
+        "baseline_specs_modified": [],
+        "browser_list": {
+          "path": "/tmp/hoim-roster-target-frozen2-list.json",
+          "sha256": "4c533b56619ee48f94134e70dd764dafa316b98d7da99b9876d2d01141ef6ffb",
+          "list_only_not_execution": true
+        },
+        "schema_oracle": {
+          "models": [
+            "RosterSource",
+            "RosterAnalysis",
+            "PlanRequest",
+            "PlanCreate",
+            "PlanReview",
+            "PlanRevoke"
+          ],
+          "source": "actual Pydantic model_json_schema() with dotenv disabled, fake database declaration and blocked sockets",
+          "stored_bytes": 18793,
+          "representation": "lossless subtree DAG; expanded canonical JSON equals compact complete actual schema; per-root decoder JSON clone keeps all subtrees independent",
+          "omitted_metadata": [
+            "title",
+            "description",
+            "default",
+            "examples"
+          ],
+          "semantics": "closed local refs and keywords; minItems supported; own-property/prototype/unknown constraints rejection retained; actual model-validator semantics additionally guarded in rosterPlans"
+        },
+        "coverage": [
+          "four source explicit draft/review/publish/reject/revoke and stale redaction plus original zero/null/false",
+          "complete four-doctor cohort and every person/session pair with explicit unknown coverage; no old schedule omission",
+          "actual queue/blob detail original full private/public SHA and UUID5 mapping binding",
+          "two full actual native ASGI optimization flows: meet planned slots 5/cost 2 and max-slots 8/cost 2; no relaxed-domain candidate substitution",
+          "input_unknown and original null remain distinct from feasible/optimal",
+          "initialInput={} history retains full proof; token/role/department/mode/config/source/deactivate/unmount clear task/history/context/evidence and refuse late detail",
+          "first history list late response rejected after identity/deactivate changes",
+          "actual capability runtime from isolated Docker; provider positive-int ID/CAS/role/token/model/revision/deactivate race; model copied only into unsaved edit form",
+          "current server403/409 on history and feedback clears old private proof; stale-session and same-session older-list failures cannot clear newer authorized proof"
+        ],
+        "limitations": [
+          "all UI browser verification uses synthetic API interception on isolated compiled real Vue sources; no hospital database or external service",
+          "native ASGI and durable worker evidence is from actual synthetic backend fixture exports, not live hospital operation validation",
+          "no automatic roster publication, appointment, inventory writes or validation-status mutation; unknown operational facts remain unknown",
+          "source/plan field pagination renders portions of full requests; declared original complete arrays are serialized, not truncated",
+          "Five final production targets passed, but their five successes are not added to the first full run to claim546 green; Root fresh full-suite evidence is required and independent."
+        ],
+        "intermediate_attempts_not_counted": [
+          {
+            "path": "/tmp/hoim-roster-ui-target-tests.log",
+            "sha256": "3748ef4005e976cedb382480183bb4554a8af930c4918989c5877c67c50a9b4c",
+            "status": "intermediate failures or interrupted obsolete locator run, superseded by final groups above"
+          },
+          {
+            "path": "/tmp/hoim-roster-plan-form-api-tests.log",
+            "sha256": "d827783349cd38f67e7f3b3996d7affe5086c763c5a2da969cffb51384443417",
+            "status": "intermediate failures or interrupted obsolete locator run, superseded by final groups above"
+          },
+          {
+            "path": "/tmp/hoim-roster-plan-core-pipeline-api-tests.log",
+            "sha256": "59a4b6b6862d9e1c4563523073cb89181f83934787faa6971eb87c2e2597a40d",
+            "status": "intermediate failures or interrupted obsolete locator run, superseded by final groups above"
+          },
+          {
+            "path": "/tmp/hoim-roster-source-ui-tests.log",
+            "sha256": "63d9bdab5ccb3fe8fa357dd55869ba976ae098a734ac5d40097ed85db7a6cbc7",
+            "status": "intermediate failures or interrupted obsolete locator run, superseded by final groups above"
+          },
+          {
+            "path": "/tmp/hoim-roster-authorization-lifecycle-final-tests.log",
+            "sha256": "d5055a405f9918c54070c62416357091b59219587c155ab268e0d436cb0b8532",
+            "status": "37 current-source harness cases passed; 5 mistakenly included old-dist production cases were blocked before application load because default localhost8091 differed from their loopback4180 allowlist. No product regression claimed; all38 proper current-source cases re-run clean separately."
+          }
+        ],
+        "historical_verification_jsons_modified": false,
+        "build_performed_by_this_agent": false,
+        "supersedes_summary": {
+          "path": "/tmp/hoim-roster-ui-frozen3-verification.json",
+          "sha256": "77b7460a4d64b7526ced305d54dcaf148ee667abf9a6c481be25ae2c915189b8",
+          "preserved": true
+        },
+        "baseline_plus_new_expected_suite_count": 546,
+        "expected_full_classification": {
+          "production_mock": 161,
+          "isolated_mock": 364,
+          "real_http": 21
+        },
+        "existing_sofa_parent_cases_rechecked": 15,
+        "current_source_browser_successes_are_not_additive": true,
+        "security_fix": {
+          "commit": "3dfa83d",
+          "version": "follow-redirects1.16.0->1.16.1",
+          "lock_entry_only": [
+            "version",
+            "resolved",
+            "integrity"
+          ],
+          "actual_installed_version": "1.16.1",
+          "audit_vulnerabilities": 0,
+          "evidence": "/tmp/hoim-roster-follow-redirects-security-fix-verification.json",
+          "evidence_sha256": "e410122d4fcd0deb236071bb6487d489c901c031cea966cdc7a69a65c13ce9d0",
+          "oneoff_direct_node_security_cases": 2,
+          "oneoff_cases_not_in_browser_total": true
+        },
+        "server_authorization_failure_fix": {
+          "commit": "13ec70f",
+          "source": "AIAssistant/index.vue loadHistory/submitFeedback",
+          "new_cases": 9,
+          "scope": "Current403/409 history or feedback failures clear old run/history/context/private evidence and stop polling; stale session failures preserve new authorized data; same-session older historyVersion failure preserves newer successful history and current proof. Feedback success/failure is bound to current run ID and ticket.",
+          "independent_vm_review": "/tmp/hoim-roster-frontend-independent-review-final2.json",
+          "independent_vm_review_sha256": "9cee84f34d51326952c5e49a096de7438e3a992628ae85bcade6d60c55fdfd96",
+          "vm_checks_not_browser_count": 48
+        },
+        "exact_header_dedup": {
+          "commit": "3e315b6",
+          "only_product_change_since_frozen2": "rspack.config.js cacheGroups.pageHeaderShared",
+          "scope": "exact src/components/VabPageHeader/index.vue and its own SFC resource query, including original style",
+          "before_module_copies": 121,
+          "before_redundant_bytes": 348960,
+          "validation": [
+            "node --check rspack.config.js",
+            "actual final2 dist AST module identity/copy/byte read; exact path/query positive and neighboring path negative checks"
+          ],
+          "static_evidence": "/tmp/hoim-roster-header-dedup-static-verification.json",
+          "static_evidence_sha256": "be4e58ae5926f5a36494137845a2533e214ba634ccb1a48f64b625db95bdda6f",
+          "no_post_build_savings_claim_before_root_final3": true,
+          "unchanged": [
+            "page component source",
+            "dependencies",
+            "build targets",
+            "budgets",
+            "guards",
+            "clinical rules",
+            "browser case collection"
+          ]
+        },
+        "final_dist_and_full_browser_owner": "Root; no further product/test changes planned",
+        "new_production_dist_cases_passed": 5,
+        "production_test_contract_fix": {
+          "commit": "aa57f06",
+          "only_modified_files": [
+            "vue3-new-ui/e2e/ai-roster-entry.spec.js",
+            "vue3-new-ui/e2e/ai-roster-source-entry.spec.js"
+          ],
+          "product_inputs_unchanged_against_root_build": true,
+          "all_other_tracked_frontend_inputs_verified_unchanged": 568,
+          "changes": [
+            "Separate only exact /api/userInfo bootstrap from business writes; every case asserts exact POST and synthetic accesstoken body. Every other non-GET remains in exact business writes assertion.",
+            "Assert actual hospital run transport omits top-level null patient_id/encounter_ref while preserving exact roster_plan_id/question input and preview flag.",
+            "Locate validation combobox by actual accessible name 验证状态 instead of a nested dialog-scoped has locator."
+          ],
+          "case_counts_unchanged": true,
+          "full_suite_expected_count": 546,
+          "classification_unchanged": {
+            "production_mock": 161,
+            "isolated_mock": 364,
+            "real_http": 21
+          }
+        },
+        "dist_unchanged": {
+          "root_final3_verify_execution": "/tmp/hoim-roster-ui-final3-verify-execution.json",
+          "execution_sha256": "f789cbbb6f3ad8b34c6185cba483459700cdd5a711b5f1f56b744a286b8b9d14",
+          "all_files_and_full_file_set_equal": true,
+          "file_count": 354,
+          "dist_sha256": {
+            "vue3-new-ui/dist/index.html": "2f2e6e524de315ea9e2b2f1613a16b357ed4ccc53194fc06c5a3053687c5640f",
+            "vue3-new-ui/dist/js/1007.e0bd9c2a.js": "65ab34bd050366b6e8a36b11cc23fad0449b9536676d3efea5c2411cfc9930b2",
+            "vue3-new-ui/dist/js/1018.e1d82dea.js": "7c0245a26ff409342eec0926088c3828dd481786c33a1dab8b47a5f552ec033e",
+            "vue3-new-ui/dist/js/1027.3253cfa3.js": "b25b1c091929df66575b97a586eb2654e865142bc004941928bb0997a1f52984",
+            "vue3-new-ui/dist/js/1169.37c3f867.js": "1152739d3c68b80904519d79129ed5709334a2084f42e21de49021d835a1e1ca",
+            "vue3-new-ui/dist/js/1213.2146ef50.js": "62ee56902cad1953971f70d7ed85c52723ebecfcb851da46999405a8366e1571",
+            "vue3-new-ui/dist/js/1260.d46a6c6c.js": "82a1f007b64eddab76b5b04790389a18a4220e70cbaf94e73252c18ea021e025",
+            "vue3-new-ui/dist/js/1321.b356622c.js": "79b5019be0ff63bff5cdd799f58f28c76a687aafe5cfd9455b9c7083563bc7a6",
+            "vue3-new-ui/dist/js/1357.aeebe3e4.js": "0c7442291bb179e593233602b149230d80b798b69a8c677d640f344d5640ac50",
+            "vue3-new-ui/dist/js/1371.be7ed545.js": "7a918774f73a30f8711dad8c9fb555f68c2a043182ba814f45594e03a8d3ff73",
+            "vue3-new-ui/dist/js/14.42f70b4e.js": "4f83ac4972b9f07a2be0232e32585ca0d142787801b69fccd753d7e53d349136",
+            "vue3-new-ui/dist/js/1426.291bd6ee.js": "0c2d7b8d1914603bd6a1c32445ebcf263bc445a0792ca2ca676d35c74a91f05d",
+            "vue3-new-ui/dist/js/1434.020337e0.js": "f867f3cc6c16d3a97bafba7999b66073cc7c85837b33ea7683faf5cca19a4b5a",
+            "vue3-new-ui/dist/js/1471.ea5f0d2e.js": "b651d42b01e881f8233782d454194a7b4a46df89ffa06eb839547a22694e1f59",
+            "vue3-new-ui/dist/js/1479.fe85b457.js": "0fb0126282c574dea627719b4a82e6630df005360b67065cb22a9ee2573e056a",
+            "vue3-new-ui/dist/js/1483.b7cfb052.js": "94148ecb4c762760fb1154c619ffe2ef399be0d6bd38618f52ab4d984d104ddd",
+            "vue3-new-ui/dist/js/1509.a40ac241.js": "98d9b4e7054f46885ccd0206c3261b72443bdf01faef3c2ca5044100b86cedc0",
+            "vue3-new-ui/dist/js/151.6c62d699.js": "5d1d9939a08829041b793e7e7818bc6912910f31c531ec8f598713088f4933de",
+            "vue3-new-ui/dist/js/1518.786e8309.js": "001da811c0850470cf7aee5627b73d7a92b9a37c62fc3476ac2cc1fa0c2de401",
+            "vue3-new-ui/dist/js/1547.0cb96d1e.js": "464ab705f5756ff1e91ad4f5ebc4824fabb8cab443f70abd8c20810874814c75",
+            "vue3-new-ui/dist/js/1589.42eea7ab.js": "824f7e0661f94b94af15f2063ec5f08db5eb3c12d67896e735532a6292e9426b",
+            "vue3-new-ui/dist/js/1771.afd518fb.js": "8a3a22d0387146d1efb703170d451c7606208a0ea5db6c7df75a452e0df44688",
+            "vue3-new-ui/dist/js/1790.d54e9090.js": "f8cf28c9df75a383e5874725ca26520a07269052d545c8814078735e41dbcad9",
+            "vue3-new-ui/dist/js/183.ae6fa4ef.js": "80ce6ad286e0403a46f20911aeef19769a39480a6d416039c74af3a54a3316b3",
+            "vue3-new-ui/dist/js/1899.5b60fee0.js": "a19a2bf3422f4a8ec17f524e6d0fb690e5abf4fc1b98b5547ca4f0dd177bee8f",
+            "vue3-new-ui/dist/js/1947.eabd5941.js": "d3c79dea5f76c295c1bf592013780d536d1596a8a417cf318c98ad3717f0e220",
+            "vue3-new-ui/dist/js/1948.bd5ecc99.js": "ca77eb04c8b92acd6b7afcdb0a5bfbdfc53b73a461c2a8f28afc6f391ce0a003",
+            "vue3-new-ui/dist/js/2014.4068ef79.js": "d74d5be637e31b1706dee4a944b691fb7734d7a3eb132effee3d1b899270bcc9",
+            "vue3-new-ui/dist/js/2044.21be242e.js": "a6cb821d755063f2ecad8a5f861842fdef2f20318746e921df8f90a8b36c68e9",
+            "vue3-new-ui/dist/js/2054.4a9abfe1.js": "e9b82151035656dd098164a80e4b64995fa73b57fe6221ae0f633d4515ffa162",
+            "vue3-new-ui/dist/js/2080.39685c4b.js": "414d2439947a798661686033cd0a4f670f9593a04693dece63249bc5e8e34955",
+            "vue3-new-ui/dist/js/2088.af96eb08.js": "17145b5cc672ba7011f189c7da8497703c0553e9fa9d2d7f72f3fad923bdbdd1",
+            "vue3-new-ui/dist/js/2173.86cccad2.js": "24ffabe3de3a6ee2fda9b07155d635c203fea6ff232a9ccf8e3e24a355a58b7b",
+            "vue3-new-ui/dist/js/2174.5dde0c2f.js": "50fd60dee139d8aa5b30db12d5cad398cfbb836ee31664ab49cd88ce171e136d",
+            "vue3-new-ui/dist/js/2188.cb252a8b.js": "691ff697d735c1c350004175159f1eeb4534c05da268b7e87685be0aacebd316",
+            "vue3-new-ui/dist/js/2229.76ac1685.js": "27f03c8ba64bab3f4b5811761589ecbd3bf310590526b0a5447bb803f83fe294",
+            "vue3-new-ui/dist/js/2270.65f6c7e3.js": "6a4cec78078d64da20e4be386af1101e7d603d1aa879b052a5d437bcd02e212c",
+            "vue3-new-ui/dist/js/2287.e1475ff8.js": "b36406627d24488391f3bfff8ecc12127a8e88e79e3ef4a686d0f2bbc646c706",
+            "vue3-new-ui/dist/js/2295.ca34b28a.js": "f2445422e7d555dc5b62bd62dec5aa7583e423c0b4fd6917c742555cf81cf064",
+            "vue3-new-ui/dist/js/23.935ee2c5.js": "b76dae119b9d949c2acd5adc36c82645c1f8ea1b43350b78d5a94961d4788bdb",
+            "vue3-new-ui/dist/js/2322.9c946e9e.js": "359dceff180216bd8d1a81424421ae542bb995efb60f4c28d90cbea99684499a",
+            "vue3-new-ui/dist/js/2326.ac779234.js": "111163b658fc9f463788e5987a61019a5ccad14cbbc38726fbcb6fc779dfa1c2",
+            "vue3-new-ui/dist/js/2373.f92d2009.js": "df0d74627c009dd11d649b6266444a13a24af38c954de9c712a66abe844fdbec",
+            "vue3-new-ui/dist/js/2375.bbf55ad2.js": "0a9f9ef62c2a85831cebab079b26da5ed5cc7cfb6735296f2277afc852a27b02",
+            "vue3-new-ui/dist/js/2401.df9421c3.js": "22cd51a39e2866fc15f8e9fbaf210ad639cc55bb50b66b3ea287fccc93698dd8",
+            "vue3-new-ui/dist/js/2423.3c116c09.js": "7bf036cbb587085d249a9ae339121eabdbcd6d15db5627738b28cee0a409147a",
+            "vue3-new-ui/dist/js/2449.318b245b.js": "3cf570510761d41769e861cef29dbad24bf6815970f7c323102df95757cf2f8a",
+            "vue3-new-ui/dist/js/2513.81e8f7c3.js": "0178ce2b83610dcc8678f4a7a7ca03e582305b118eac8498670405d9f6024138",
+            "vue3-new-ui/dist/js/2514.536e1846.js": "4f3d5d0bf54cc651e5a3c19a6564afc7f89e88a13be37aa4ff3a5cc86ea447ec",
+            "vue3-new-ui/dist/js/254.980672f8.js": "82cf8714951269e86bc7bc666ee368a3a73807b2b2db2ddb2c5d359cab22fe91",
+            "vue3-new-ui/dist/js/2544.85624956.js": "57ed01a7640acde00d396a86d4d658ccf026ca62ed17abc4c1ddbb0010792507",
+            "vue3-new-ui/dist/js/2591.970d763a.js": "ce58569b107152441a2f1e2fef9e9255762e28a20349407649d8a59145974af5",
+            "vue3-new-ui/dist/js/2592.ee85141b.js": "d85e2247dc02e91f41a052cc37806ef50a336de45ab0acddbf61613d0cdf45e1",
+            "vue3-new-ui/dist/js/2661.000f7311.js": "3ff98cc52e2767dc32ee893f5014ea9fb19761fc533b563d23f79e70b1749ff0",
+            "vue3-new-ui/dist/js/2675.4911c2a3.js": "2a2bfc97e3e01bf097085e42f9c0c7fdbca53701c7d76f5991569cf19bbac85f",
+            "vue3-new-ui/dist/js/2720.fcb0d4f6.js": "c53d319ee7aaed7cf4e9aba2fa952643fe1c2c3629968a61d6bfc4edacde6daf",
+            "vue3-new-ui/dist/js/2751.8d8a9885.js": "52d03fffee3f3a3cc4a89fb7db42434bba9063aed6a6210930f8c69eb5abcc39",
+            "vue3-new-ui/dist/js/2853.38d2bb16.js": "ce09acd03add04dcfa0b9776d734f87c9f49dcec946e4d5e3d3647a6b3bdb0ee",
+            "vue3-new-ui/dist/js/2860.8013c603.js": "1db579fabfed0e6e8b4cc54677c9a2e5b5d8b0b1c33e2e63bfe4955d3575eb8e",
+            "vue3-new-ui/dist/js/287.f6ac48ea.js": "fe31a229f8e88d3d6367e4e325225d1ec5aec55c30bd4079ae6a98da98b27a39",
+            "vue3-new-ui/dist/js/2899.cd9bb8cd.js": "d10c3971705fe58ddb219d39ac3838d4d9ec924f9296becfd5331ef5b0eb3089",
+            "vue3-new-ui/dist/js/2912.b683b57b.js": "182ebf6c6e106e1c5dbd2af1c8b1da0876b3395c9f97f440bf0a72a1e2af0286",
+            "vue3-new-ui/dist/js/2916.67561b63.js": "4bd368c92a499e7c12efef54d998eaa6d625df40aef8e84d595e3cfc288972c3",
+            "vue3-new-ui/dist/js/2923.6f6601e5.js": "4e173de08aa4335a0a9dfc489c3817d740abb23c3d9403e0734be87d8632d30c",
+            "vue3-new-ui/dist/js/294.92f155d7.js": "f2fd4e1042981fdb3fddbe4e07bb80797f664762c60314c6751960eaf6184b7f",
+            "vue3-new-ui/dist/js/2978.75c712c4.js": "e5b93360f081e7ff063abb843a83e22a86427db174ec10220fe8766fa8fe5a8c",
+            "vue3-new-ui/dist/js/3023.72d2a0f6.js": "a69cab635a62cb66bf28ad0739c0fed1269ad1c27a59a80d61d371566b5d9589",
+            "vue3-new-ui/dist/js/3042.124f9665.js": "8706b2cbfc044acaeb5345b79355515936fa06cd939f522fbf1a5deabe9dc708",
+            "vue3-new-ui/dist/js/3154.cac3a25d.js": "bbbc6568da92aa35d5a66f15044681ec01a75f231f694d79906ae87605e15dd1",
+            "vue3-new-ui/dist/js/3162.737598e5.js": "dc4ba028298f9b1c3e21c968c3d748bb295b844850c768567e3217da4cf429b2",
+            "vue3-new-ui/dist/js/3175.79e7bdc6.js": "404b5480e828d69bb1f17eb55ddc63bd85c51a6c4741f6e7e53cbd1efb3b6472",
+            "vue3-new-ui/dist/js/3181.a018feef.js": "44d2fbbc8c817a77fc3130e1706e9fa7d17de18b685fbe93a272dd0c66fff8fe",
+            "vue3-new-ui/dist/js/3242.79e00fcf.js": "f8a7ec7497993b2129028e679e8588c7118845c6053f1116756e889f13043b3d",
+            "vue3-new-ui/dist/js/3267.4fb18088.js": "41ed92bc21e7489ccb494f0dd838161b2f033ee3bcc8ecfac676835472ad77d1",
+            "vue3-new-ui/dist/js/3274.3676c613.js": "76d52ef299baa6e559e21dcd16d05aca9fa53f39ad830a697038696b0beed74f",
+            "vue3-new-ui/dist/js/3308.91102938.js": "9a2746daf2940f370deb55ad8e837a1dba057842498221dc1686e2cacd7f5b75",
+            "vue3-new-ui/dist/js/3328.0a0158c3.js": "2ba6af34574a8fb7ad01b094c2e57b64ed945c10990af126cbca3d5312f576f4",
+            "vue3-new-ui/dist/js/3351.1f6194e4.js": "383f48849e3183b58e307da3cce303b8177f5f7a828149dfc0033ef2d5c5781a",
+            "vue3-new-ui/dist/js/3354.474e07b2.js": "6027259b9c08aa46d2339a6c14f5e1fd08b844b16382ce63f592bee7ef721396",
+            "vue3-new-ui/dist/js/3376.fe470e17.js": "fa1e5e876ce62514e597736d4cdd32b0dcbaeda85ffd8583cb97b8e1d3ed57c7",
+            "vue3-new-ui/dist/js/3388.e73b34ce.js": "4b14b8540f0655e785956b53a003cc7aa2390e09e0f1ed0d701f39141ce2f05c",
+            "vue3-new-ui/dist/js/3399.7d4e5bc6.js": "448f5597236827e03a0a06617b712de4e7e481a13a842b03048f4af50e0753ee",
+            "vue3-new-ui/dist/js/3418.55ec3a17.js": "54800493413319e06db69ec862d6fb5a7f9bf3cea30a9acda40088b882c5c988",
+            "vue3-new-ui/dist/js/3451.bcbbbdaf.js": "f9d122840d3f6826f23a5142977a5d51884d0c9f2972a78326c99511ca06628e",
+            "vue3-new-ui/dist/js/3528.2631c8c7.js": "d82f8cc3032e9b214ccfe2e328dce6bd4cf4d42dff0c2f74018fa72daba7ea7c",
+            "vue3-new-ui/dist/js/3578.cb432934.js": "7b5822c9bbbf366a2aeaf013f3a39953800b6f3f77000bf07b2f6745a09ab433",
+            "vue3-new-ui/dist/js/3618.c637923c.js": "f0873bffa90d3c7968f4c56100579b80c6049aad3cc2a713c79e324e3f2ccbf1",
+            "vue3-new-ui/dist/js/363.63e3ef80.js": "0ad5fa5bc803e1f06722870dcb95fc62cc5e19b75bdf618f8516da1200307818",
+            "vue3-new-ui/dist/js/3635.3411c12c.js": "a2802e98258b4cd9f701d24cc970fbafe2d732616261db9e7907675a3d9a7caa",
+            "vue3-new-ui/dist/js/3638.c0aa9f37.js": "a9eb1cff68d003745b163e6e7ddb6baaa929de5f4a693f09c23f655651c4dc7f",
+            "vue3-new-ui/dist/js/3642.816eb253.js": "9ad54943e1f8877de567316e84ddc734d91af5da38985e379bf4697a57a839b3",
+            "vue3-new-ui/dist/js/365.24c8affe.js": "ef2fe8406541e19477ba79d1eca8ac7a31c55ecae229843e30fb3dee65a2cc1e",
+            "vue3-new-ui/dist/js/3776.f7345c69.js": "695c6e26c41cc4a23835e90e0bd7c7d73d2a2a849591da7c22e2556d40d54969",
+            "vue3-new-ui/dist/js/3844.e91eadcf.js": "639a1b2db604cfcccc8f8902a51de8072174cc1afc5a954da6406f7d42979b65",
+            "vue3-new-ui/dist/js/3852.1ebe88ab.js": "d4c422dbcb8220f6516c398e2a1bb67c5ccbb985469772f0291090e55bbc3f5c",
+            "vue3-new-ui/dist/js/3864.af24fbbb.js": "042fbed115d428751e91f57371004679bbee9eaece0fcbe716c2d0334eef739b",
+            "vue3-new-ui/dist/js/3917.b725f3b9.js": "8f982cb750162b449f33e4c4e9a1815f95306772b5d71ddb319bea3e53017acb",
+            "vue3-new-ui/dist/js/3927.24b29432.js": "b844d2f5988ff4fe26808e2e980742c4dbaa6738192d96b1fd6fbbd195412901",
+            "vue3-new-ui/dist/js/4003.ff81acd3.js": "c72e5ffb784cd9e4e7433435c51b03120011d7c9046bdfff0c44376211f3bd2a",
+            "vue3-new-ui/dist/js/4013.6490e80b.js": "5b6c4838ad4db03860c7077e9260fa7728516373bad2564d1aec7f5092afa240",
+            "vue3-new-ui/dist/js/4035.db552b59.js": "95ab426822f39732c4e4f354c1458824369d1a39bbab46b97ff8411ef8453fd2",
+            "vue3-new-ui/dist/js/4187.4bef0b73.js": "07e7e2a34e134f5eef0a0b82fd9828fb4e52bbaee141bd10b059df412b7648d1",
+            "vue3-new-ui/dist/js/42.18589047.js": "b7c2e4f8c179fd32133bec3bd22bf1d52c99a4272b59283d81edf5bd911e19f5",
+            "vue3-new-ui/dist/js/4208.08cd91c2.js": "799885fa5c2b619e17631359ff01f114577af49a7b30b7dec329494cd09c0a1d",
+            "vue3-new-ui/dist/js/4247.df469a11.js": "d9908f82c0421900bf8ebc0851f11517fc74cb63ac030aebc68b5f91d01f6c28",
+            "vue3-new-ui/dist/js/4276.50df93d0.js": "6b811ccedd25d2dbd1c5ba8c36d6e5c2cc03f24655daea5cac951987c812cbdb",
+            "vue3-new-ui/dist/js/4280.fbb823f9.js": "1aa90259b5af49d23c17df86520941582b2f7e554605bfa858d89ea9b4d2e76c",
+            "vue3-new-ui/dist/js/4288.ea807150.js": "38e4abdddbcabbecebb6b09422d7d507b1caf1087bd10f6e224691edd67c747a",
+            "vue3-new-ui/dist/js/4325.b9abec0d.js": "e265eefa5f445744df565fbb4800dcefbe2bb6c1ebd97668ed979440e05f5726",
+            "vue3-new-ui/dist/js/4328.a036b7ad.js": "66010dd30a912c64c461828a88cc2aa32a7d51253aa6e0b2ce595aa5b9178947",
+            "vue3-new-ui/dist/js/4331.63fcd795.js": "f018604cff4ab5044fc4801c0bf3d47d310cd7c20e11303f87171dfa436f896f",
+            "vue3-new-ui/dist/js/4372.a5f7ec73.js": "9bea7e6d7a068460fd46cb14e5306b51b9b9ff66231b8de58a30ed7cd73fa2ca",
+            "vue3-new-ui/dist/js/4407.20c23561.js": "2c8bd725189277bde9a8aabd70c473f284eefd5fc99f1fa350f9fc4658438b7e",
+            "vue3-new-ui/dist/js/4457.92acde5f.js": "d6a58a8b4cd745b8240a5e4c52a2be78247a10f80dad0bfcc2dd9c6d2315abb4",
+            "vue3-new-ui/dist/js/4507.2b28f179.js": "c5a1377806aee474e9096051f344e9240ecf2247b1bfc44a8f356760d7e8305a",
+            "vue3-new-ui/dist/js/4608.647030f6.js": "0d722e33e8cfd1efdb1b3ec23196652d5204a04c894ca387db46421acf66a613",
+            "vue3-new-ui/dist/js/4627.a7124c39.js": "21252cb6b52ef30847c72641a71c6f3558dbc06f80d5b46e572e7f7117d61ec9",
+            "vue3-new-ui/dist/js/4676.a13650b5.js": "ba60998bdc074c3e4d96e5a8b576780ffb4aa242d8c6604388cb81d95d1bc07f",
+            "vue3-new-ui/dist/js/4756.646fc80a.js": "8b72c7e7c26f37363786b5fc58996520eed22ff6347fefdec63cd38926701d73",
+            "vue3-new-ui/dist/js/4793.4e547e43.js": "a4a2a79eb766ef8470e72b1f2b70c6e3aa7778752c6ea56a0ca344e90629bab3",
+            "vue3-new-ui/dist/js/4799.119fc435.js": "70ff727c6ca679e322add287b45ecb286166514087528261a2f792b62be89f2e",
+            "vue3-new-ui/dist/js/4804.829a952b.js": "15b757bf66b16969d65bc1823998869f6fb70891a99427725619a40dc1d8e1c8",
+            "vue3-new-ui/dist/js/4838.663cfee4.js": "43de4f3cdaef7f8c53ee98cefa2e4d346973eef5288511b160bd0b90d2c5a7b5",
+            "vue3-new-ui/dist/js/4839.8da8261e.js": "ad0ca48da0fafecc52e03b477959e288adeabf3a7987122b48ab19ec48458c0d",
+            "vue3-new-ui/dist/js/4848.1a70a5e7.js": "680be03245787c18fcb4d00319c6a6166b14c26b08aea4284c75b0b02b1d175b",
+            "vue3-new-ui/dist/js/4864.8210d4d9.js": "aee45c8d6397ee6e1022d91142cec0ad6104925a10bcf74d2ffa079d63cc2339",
+            "vue3-new-ui/dist/js/4899.a3f8b29f.js": "9812b8f9e70b9da7ee7579b82453f932cc86f8393b207ca7a6aaeda36e684fc7",
+            "vue3-new-ui/dist/js/4924.07440920.js": "3db3f722fcc114391b31c1e54334073bab3449797d34583f664c133c08d22677",
+            "vue3-new-ui/dist/js/4934.32a5f47e.js": "c567afa41349b50c2235cdd48940a46122d5f6f476d3c0f2c819e6d6b32fe72e",
+            "vue3-new-ui/dist/js/4935.038bb64f.js": "469b65746a9d56944d8aa34bcfac8f18c1f1d4c5a1c7bc064b91475eb9759665",
+            "vue3-new-ui/dist/js/4967.2f4fc76f.js": "7fbbb9baf03503eb0613f591283f2825b90ca9857d42cb3ba41916234bcaac34",
+            "vue3-new-ui/dist/js/4979.055147e7.js": "ba936f597c072f1b9d4e37bd9db6ab351466bebfb9bd7bd179d3a667d0861f33",
+            "vue3-new-ui/dist/js/4987.e47d6acc.js": "c54e71225cabcad6c479e292e5b400c98786502c534c3f3c9106b53e95eec4aa",
+            "vue3-new-ui/dist/js/4997.65d37495.js": "992e5960c1b2730c480961e6d82c3893f2992e27f8bacf204fccf34f20532859",
+            "vue3-new-ui/dist/js/501.08598177.js": "87c282a166783a1048cf8ee6c371d5b7805b811b8382cd3948cb745c5298e593",
+            "vue3-new-ui/dist/js/5040.ae272875.js": "6553d856eac505b2dd6683fc6f54841aa0801523e1436daee24f6c9c77700beb",
+            "vue3-new-ui/dist/js/5119.e8439f67.js": "c736fd0ff3fc9eb27295752d44ce05a08572b80b4dc250b29cd6313cfd6ee172",
+            "vue3-new-ui/dist/js/5160.fbca7d02.js": "11a97a07cfe2ec40f5bb838ba84c4844826d0693723ee391bc9a71d3e33cf708",
+            "vue3-new-ui/dist/js/5225.05ecdded.js": "e325468433b1f11fe64c1eb1312408289d8451086682366bc699eefabb6fb67f",
+            "vue3-new-ui/dist/js/5233.f967f22b.js": "7f97a01b5075981660306ac452035e4e9f45cd525f7fc75ad1801661219f728c",
+            "vue3-new-ui/dist/js/5243.a4717148.js": "c11a29716e4c24e04fe350046607e536a3396d41779bd63dc6028be6a8c3ab15",
+            "vue3-new-ui/dist/js/5259.ef860949.js": "16c770813e44e7bdf94c602ab122d847e608f66361dfabaf72a50e942c1031fd",
+            "vue3-new-ui/dist/js/5285.9441ea02.js": "f0a2646b7fe9f5c1d0dcdc5503994778d2e18bf1b4bed713acb8081c017c2798",
+            "vue3-new-ui/dist/js/5304.289f3fa0.js": "e2fd21d851008ac85e570c31211e8b1def9a8029b15796e9d8d1984de166c99c",
+            "vue3-new-ui/dist/js/531.f2297085.js": "cadc6f13342e367524cf7d3590576f803b956cf597407740e63cd90c842b6174",
+            "vue3-new-ui/dist/js/5394.49329d0b.js": "e9ad4bff4f9d4e4c063c40b2cbf35277ff0c58fbc853d22ca3642390653d3563",
+            "vue3-new-ui/dist/js/542.1c4c6e86.js": "d7737feb849a65f128a069b73371a34eca1c05d95ade93e3ae80801cd6e90b28",
+            "vue3-new-ui/dist/js/5469.fddbb08c.js": "1688ffb68a07f8913230ae2f265a5b988a7328195ab96fec1bf436941456a3db",
+            "vue3-new-ui/dist/js/5567.16605121.js": "3a7a753a64f7fe040babdb16b8626e9bb79961bcd627bc6ddc2ac392e16f9dd3",
+            "vue3-new-ui/dist/js/5593.384b964a.js": "33d8e8c22afc8025061b397adc10ec2e4d7ad3d80204dcbd3f56e292009de1d9",
+            "vue3-new-ui/dist/js/5616.5ff8a34b.js": "b1a293b78ed99790a0b2eb72f42aa6ab033407d9b9329eb1468aa43970fe07ef",
+            "vue3-new-ui/dist/js/5617.20fdfa13.js": "d1982bfccafdec25d126fa1b896a71d43954e12ddfdf26ccab01ee565ef92908",
+            "vue3-new-ui/dist/js/5623.4db94451.js": "92ce5222ad3f43932a9940966df0215fe9908ba35e26b0ade1d260630b1b2aa8",
+            "vue3-new-ui/dist/js/5648.f427a159.js": "fce255bf243a52d9d147fa87e06d49dd40130f1e6ca6bbef953c457987cca1ab",
+            "vue3-new-ui/dist/js/5653.beaf5a55.js": "c9143372fa7dd3b9333fb936539dbd07f6a15db711b4504341215730e23db889",
+            "vue3-new-ui/dist/js/5682.cb478216.js": "a25aca30e0a51325233abcbd476eeeb1c1eb978f79617546b2c9eb9da1941618",
+            "vue3-new-ui/dist/js/5687.917b0955.js": "4cf5cb89c8fbc6b4d7ef9bac19ef61729d0a7f0466cd0db1451e5b2f50e52674",
+            "vue3-new-ui/dist/js/5707.a98c9cef.js": "3e42372820f0513424dc8c3860bdfc4d57d796dfc98ab037ae6e179cf9eab5bf",
+            "vue3-new-ui/dist/js/5710.c173bfda.js": "1aeca5f3ef2905ff77338fa13d43f4ad1bfa64d2675d35b73611f34989204085",
+            "vue3-new-ui/dist/js/5712.854aff92.js": "82bce1cd6128cd6038a5ce363b39acb3f3d2c4491aabe28632ddb34ed1fdfe50",
+            "vue3-new-ui/dist/js/5717.6be076a7.js": "1717e934ba57d868ed243170f32d86bb3bc1519cbcce98ac7aaca2be32882050",
+            "vue3-new-ui/dist/js/5732.eb55bc45.js": "88e3faf775276d54fb0396b68e5dab328e18c31d7775c49200b334b9584702e8",
+            "vue3-new-ui/dist/js/5748.4e276c71.js": "2c51513613c4e86139045494c7bc7f139eb0ed4e9f4015d0e1be2d9afbba0f6f",
+            "vue3-new-ui/dist/js/5749.85361ba7.js": "087dcdadb860db6cda17ffb7b22600be316cf587caddaeeee91b0b15bbeb5db4",
+            "vue3-new-ui/dist/js/5754.1cbd4d22.js": "e8a54e81601b5b5c429b027943d72e91c592529c896fa07e578122ae0bc78d30",
+            "vue3-new-ui/dist/js/5765.3b3ac2be.js": "55280b5a4047b1dcab1a96ec8445bc5583ce2f1f45cf5a08e198743fb5a57e85",
+            "vue3-new-ui/dist/js/5769.c6a02b26.js": "b47239573a565717c992efa1789ddcc06a775a4821b39a96b55c48f8f3c904db",
+            "vue3-new-ui/dist/js/5780.ba78d9c0.js": "cb2038103bb4c33609ab16eec923ccf084299b9d3ec228d8c248b583f9e69c07",
+            "vue3-new-ui/dist/js/5823.cdc000cc.js": "eb19df26e291986faa01d5d160dcc2bfcf8016aa5e66b535c331174a4161f778",
+            "vue3-new-ui/dist/js/5896.c74e3e8e.js": "0434bd3d08949c787c65bb67e779c8985424406fab849fbfe8f22b15db6b38c9",
+            "vue3-new-ui/dist/js/59.319e060d.js": "0b59aa1344da3ccbfbb1c7c8f6c6cedede50c043cc3266408ae61f96dec5ef62",
+            "vue3-new-ui/dist/js/5901.70a6325d.js": "5b3fcec4b2ea4dc12b815d688ffbad4741bc2237c8aa70ce61263312722ee4fd",
+            "vue3-new-ui/dist/js/5921.8a07139a.js": "b21b2c454cd57c2fe949d00fc0de7aaed5073be46c23531010384dfc35f4643b",
+            "vue3-new-ui/dist/js/5970.6425e46f.js": "411e4d096e89ed3beb79b2868340d7e3fa70d32ffd4ec72975ee0b0e77d3bda9",
+            "vue3-new-ui/dist/js/598.a623ac61.js": "5011316c566d4b00a56e4e47f5fbff76a48b31c36b0446d1687e52e0cc10dbe1",
+            "vue3-new-ui/dist/js/5992.35a67c16.js": "3440b410c5bec9c27481a0418f7f519371fb7a3a71cc539ac17b240834e91088",
+            "vue3-new-ui/dist/js/5995.8f33e047.js": "f7173be7978a15200b5b8edcef69519cfae3b5ad6cfea64fe6042bd8cefed344",
+            "vue3-new-ui/dist/js/6016.a07588cb.js": "d97c6f59594c1734eb73099b8ee54f4a995ba5afe5e5f30232c546efabc3216a",
+            "vue3-new-ui/dist/js/6021.fb2f0f21.js": "3db185a385fe7d0e9828be4a26a82617066acc067a28c1375c12938a2b21ea44",
+            "vue3-new-ui/dist/js/6024.4478da6b.js": "ba642acb19fab1c2c69230807c7ee9e5148d53105925e065777a5bca263dca37",
+            "vue3-new-ui/dist/js/6037.73b6a564.js": "345142af48e80dd8b37c23e916b3653e09c0b58c31275bc50a6e70dbce6d37ec",
+            "vue3-new-ui/dist/js/6099.e7177430.js": "29b31d8a8d3fb4d0997b5587a077449dec92f21111540705b699eb63ad2b1c0f",
+            "vue3-new-ui/dist/js/6118.a455ab85.js": "b4b3c8022248ce026c8316a68b8848189c5a3745f9746ebb2235a86456ac5191",
+            "vue3-new-ui/dist/js/6145.d57fa95f.js": "d6f55510b53d444bba1a730af5764090f8030c86679f8a4c7b8448908e334cff",
+            "vue3-new-ui/dist/js/6148.647ad429.js": "fc77c6d080eb1548aabc6d575d2c14bde76e5c73367646d79a320616cedcd6d1",
+            "vue3-new-ui/dist/js/6153.fafedf78.js": "da239ef1f607fd361fef36540311dea34f081d4b32d710eadfb1f671aa9be611",
+            "vue3-new-ui/dist/js/6158.e4f851cb.js": "1b093f7b259970781bbf11a399bc6b37290542e2953f971aa4f837820549bee2",
+            "vue3-new-ui/dist/js/6185.dfe15d80.js": "9db4c52816a162837c5083bbbaea53f898bf15fd013ba0bc4ea039044ead182e",
+            "vue3-new-ui/dist/js/6202.cb5a11b5.js": "70b9270c1120deeaca2ea2df1ad505fab3f79d99497a84f4b3752ef38b54d34a",
+            "vue3-new-ui/dist/js/6218.9a31dacf.js": "70ba4e9da80df5a9aa4ec194a90ec6e3fb5c659f9cec816f3234235d650f55ac",
+            "vue3-new-ui/dist/js/6244.5733393f.js": "85d5e4aad848bc2abce63186bb845529d8b207bd8e922f096ae193ccdde3bb6d",
+            "vue3-new-ui/dist/js/6245.e9f109cd.js": "4c1158fa5d6b36b68d6f1a7e7955849f1046685e36c6cc21b7f815d411382dbb",
+            "vue3-new-ui/dist/js/6257.674b40fc.js": "049cfc1bdf3d5eb083e0b00ed90a8bcf766e70e4ade428738abee93c325a32ff",
+            "vue3-new-ui/dist/js/6269.fc84708d.js": "f87063c3c00a978ac53bf9dbef78a6ffdfabf280be8f512511e048c85e04e4bc",
+            "vue3-new-ui/dist/js/6292.374b3cf1.js": "21afb4dac1cc7b1aa798f6a3a70f49dc82563cb22f5830e0cf9e14974dd005f7",
+            "vue3-new-ui/dist/js/6301.539b505d.js": "c8863492ff024fb7b7f4446a360115e39add3dcb4c96386272463deb0661b6ca",
+            "vue3-new-ui/dist/js/6305.47e7d9d7.js": "43778cd018eab178c38f8ed12e07514fc77bd797db3fa4b1d8133428ecf5a5e4",
+            "vue3-new-ui/dist/js/6337.be09ddf7.js": "505e546543e1b857c4c0ee9f19a29453b4c0b8601925603ae093eb6c7e260071",
+            "vue3-new-ui/dist/js/6364.b8cab801.js": "9b3913642581379fe17dee13557a4a39cf11c84d6d362264a12e53befcbbfc3a",
+            "vue3-new-ui/dist/js/6403.21cc699f.js": "765822afcdace6f99c3d64203c9d0bff5708d1ccd9896d05eca9f721345339dd",
+            "vue3-new-ui/dist/js/642.8c2f6c70.js": "80f445a00f58b50318aabd564782ff1dcd055da5e99b90c59a5f191efc3a2c04",
+            "vue3-new-ui/dist/js/6434.775a3fde.js": "8c36a6e15560d2dc76b029bccd14ec2ac07b16fc8cec8aa06fef332afd1e9cdf",
+            "vue3-new-ui/dist/js/6438.0417b5f1.js": "12510a601f8535a76a78e24e4e95d3f7778f35f2b51c714a8419f234676db790",
+            "vue3-new-ui/dist/js/6479.b4efabe2.js": "2d6d7f2fd22ce43250def945afd9ae17ef87e29bc37b0ff26d0176977e244d48",
+            "vue3-new-ui/dist/js/6486.516163f6.js": "e30e9eadf240e79917a80f87f2e96ee1f4f060384ad268f62980001522966c33",
+            "vue3-new-ui/dist/js/6523.3c28e771.js": "9a471d548fa6c96b46f53d6a8d8b8303e6975bb0476a52fd599d1398c3fbc93c",
+            "vue3-new-ui/dist/js/6529.05a3ba24.js": "8cc88506ccfdbd92db8a516dbb04bc11d64ee228319064735549e9c81f30e759",
+            "vue3-new-ui/dist/js/6533.bb06a1e4.js": "3a706918434f627b14a7af9d513bdefd3125f7617c2db4d9807ad7c798ac4d80",
+            "vue3-new-ui/dist/js/654.171f90f1.js": "99f11a49ef4909c7b2683c42032a0c42e8cafc4733c6a1df34c3e00d72ed5e3e",
+            "vue3-new-ui/dist/js/6541.7ab18053.js": "1f1307fc7c0b6f70bb14e0195580af2ecee37a0a6e14d784b0aa0c7d0faee24b",
+            "vue3-new-ui/dist/js/6548.ced910aa.js": "9e88e4a3841ed2650b9c3b02dff88207c535f722b9df579c0acb286b6dc89856",
+            "vue3-new-ui/dist/js/6562.84224291.js": "7ec5f40f5548e793550c25321a2ea4189407a2fdbfd76830ab28d969c9867ddf",
+            "vue3-new-ui/dist/js/6610.a39141c1.js": "f22606a66e3a58407bea9991bbe6e537cbaf0c6066003b9dd0a680fb75c2c2cd",
+            "vue3-new-ui/dist/js/6681.e38c87b5.js": "bf4144973e2ffca13f42ddb9f32b6cb7f1fe43b877c65dcfe236ac9ea5dba655",
+            "vue3-new-ui/dist/js/6771.3d6c966b.js": "ffa0d7b88f87a3a6fdaab7e0337a48b0509edf8af60c013aece9e206cbd112ba",
+            "vue3-new-ui/dist/js/680.d04b4b63.js": "ec7029bc84fc62de1331a5822ffae47fa8694845ec4dc01c5081efbce25efbf0",
+            "vue3-new-ui/dist/js/6844.99cb38f4.js": "ceb2a71d0343560364e54f885c6fb7232a2a016c5198c895b8932a76c58bdb11",
+            "vue3-new-ui/dist/js/6852.21a713c1.js": "434b4cf1ce0d50caddc9654d38f7c545579e896cf0d3acffa2581a060a92a160",
+            "vue3-new-ui/dist/js/6856.9f107c2a.js": "0435a9c843e5de3aefbcebf1c3e6cebf0958c162e5984fdd8d247cd0493efdac",
+            "vue3-new-ui/dist/js/6876.6e08aaf0.js": "0d5b58ee5a82a75e26dcdfce0d1f95e987996483db8861b4f20a86ec536b9fe3",
+            "vue3-new-ui/dist/js/6920.9cdaa89b.js": "fb98d06069a5c838a1634f9cc532d1ad1d0637eadc01cd5696cc72ffe2e8622a",
+            "vue3-new-ui/dist/js/7092.2db0f8ca.js": "96c69acceea45a63f79c227054d7fd5834bd333b35238780577dd0115c734ee4",
+            "vue3-new-ui/dist/js/7137.47c1dad7.js": "f7edf5a716c5a19acdfe4a6847d5ac7f5078a6153607e2eb19a45a6b477c19cb",
+            "vue3-new-ui/dist/js/7147.16cf2206.js": "cd1601b2093a75f005d5db3458c46efad362dca28029e48777eefa4e4bcc1142",
+            "vue3-new-ui/dist/js/7185.922e41f5.js": "5ae7e1a3df67f07da5245e01b8f14f7c85d4c3bf4c59fdf570ecb8eb5cbb058e",
+            "vue3-new-ui/dist/js/7189.cdfc49ed.js": "f299cbaf9b2e90e73998b55a99621a5cbf02d3af4e46c2bd9ea5f8cd9825c64d",
+            "vue3-new-ui/dist/js/7209.2a57b0eb.js": "08ebaa88499531605b46c4c055994ad3280725dbf29f5a0a120c2eb8da151a04",
+            "vue3-new-ui/dist/js/7282.293b682f.js": "f21e1aed4064c8c53e41695733600219aab08c8c317f3458f620486ad4891de6",
+            "vue3-new-ui/dist/js/7308.fb36cf3a.js": "e6e0ddcedd9d0732b4f2e43352313d5625cd75f703d022a1554ee6d196a0f874",
+            "vue3-new-ui/dist/js/7314.67aef7c4.js": "46699d008684b108c86a76cf75b773af75f5e5d0c9e379ba7043e8d3dec25e13",
+            "vue3-new-ui/dist/js/7327.d3f4bc9f.js": "2a0142730f1b90b5d7d7ecea9f6a3c5326886ba4d0fab0007f403678cd3bc6a9",
+            "vue3-new-ui/dist/js/7382.ecb29192.js": "c39ce30ce633b0bd0bfbeb37cedffa3f544a03f9abbc8a00ba7d73fb9c497bd4",
+            "vue3-new-ui/dist/js/7455.ad7553dc.js": "819956bbea8debfcb34661856401fdedcb15e288d5ad25bac0ebcae6871732d2",
+            "vue3-new-ui/dist/js/7533.fe2fd4dc.js": "78bc5abc8158dbf2600683388f56998e8a735e6197d9716075c5b5a28ee17daa",
+            "vue3-new-ui/dist/js/7536.c22709f7.js": "58c2fb3c37c932c5a628dccaecd9bcd28e6800f2e51a431ccdc13465a1ef833d",
+            "vue3-new-ui/dist/js/7567.3bf218ef.js": "8de736a584ecaa649e2f1e8a09a3d3558d43080f48a6e6cd9e52b592d42ce108",
+            "vue3-new-ui/dist/js/7584.a5820cae.js": "7020e0ae71360a613e5c4ddac929b2e3bd04b6ecba12f161d8c79b7a7fa9eb6a",
+            "vue3-new-ui/dist/js/7585.9edf5154.js": "80e0ca90c4abb824d3bf7ae02e84b6bc4ecdb4770c761aa7f8da93aec6b61de6",
+            "vue3-new-ui/dist/js/7606.92f71b7b.js": "d3d5e4ddf51b1ef60150b7c916c8d7596b1e713e6979ed76a180358b87487ab2",
+            "vue3-new-ui/dist/js/7613.fdb6ad40.js": "035183d1aabb97d3f29260c290d0ad9f677e4948cc93722bdc0a7fd67d8ee5fc",
+            "vue3-new-ui/dist/js/7661.d736872a.js": "75ea343e0b932a58c5698f9552e6ecd12132a34a58da888606589b2b5ccb4812",
+            "vue3-new-ui/dist/js/7664.ceb3cd3e.js": "b4895164127f2edd6dd4e19c4734bb9b8e7b09f97c1a814a43d53782a5ba8805",
+            "vue3-new-ui/dist/js/7689.5904fa0e.js": "55dfe09293d495f2365c28870413c7347d05b9f74205c82a6f87deacb0ea4142",
+            "vue3-new-ui/dist/js/7705.e9d81638.js": "79246361be4d512f2516640a3bae8e57b05103c868b20c45b91d59a0b6cf5ab3",
+            "vue3-new-ui/dist/js/7734.9e34ff42.js": "3d9a906d8e06c7d6cab9bf6a91f99c613ad1eb4498934f0e13a6dbf579142f8f",
+            "vue3-new-ui/dist/js/7745.3401910e.js": "ecb357106f0bc8d8a85794954c22d68e33433288f55e0712458130b3b763d760",
+            "vue3-new-ui/dist/js/7762.9da14a7d.js": "54bb7abefb987b168ca8e94d99e6b6e33d5522abfb6d7c47f4554f6a3b603146",
+            "vue3-new-ui/dist/js/779.30226da3.js": "438582a459ddd6f9a54ac3d8732922b14d0feaaa8850ae7323e1e3756e3253b5",
+            "vue3-new-ui/dist/js/7837.e65c5bb6.js": "88ff9f43e49b7ebe503f1641e256d9bb79957c594249ae6b12506430ab420788",
+            "vue3-new-ui/dist/js/7845.1d072080.js": "a33d4d9839cfd8f0e4c92f3a1f15a5a555ba418fe47503a334c38c9585e2d61f",
+            "vue3-new-ui/dist/js/7882.32404ba5.js": "b76a0a3f503f8839ce48054e187be3306e4cc23de36f4e0c013a7bc903228519",
+            "vue3-new-ui/dist/js/7886.6f5005e6.js": "3d5b4c9b2bbfe1a04b6befaa494a7d4a4222fa416eaf1013f1c7740ef7edda7f",
+            "vue3-new-ui/dist/js/7918.6a15058a.js": "764ac2994a702ac615c7d4e6ca652c10ff0772dee9e1e66845c0ca6cbfcf56ec",
+            "vue3-new-ui/dist/js/7937.d27b02dc.js": "2693eec77e7c74f480f220242401227747c8725a0eddcf0acda36796fe18fa82",
+            "vue3-new-ui/dist/js/7950.5cf3e8e0.js": "0f16175a9874f11922d101450136b130ea4703d2dc022a78a524bf932ea9524b",
+            "vue3-new-ui/dist/js/7981.c5a43a76.js": "8a3bbb0fbe74fd354cd626e012b8ea8d38c781d96b4c515f49c842626ff2c2bc",
+            "vue3-new-ui/dist/js/7986.0cded597.js": "69b138d374e1007382eb177206b0ca5882f849102e8aa5887c20c0125af8449f",
+            "vue3-new-ui/dist/js/7991.11cd2e9a.js": "06786db0c5c35095ed33e3ac7e4d83c5523ff6d4285b7aae62b28dc003c0d199",
+            "vue3-new-ui/dist/js/800.c11a061a.js": "02326a4dcb07e0294a03e0a54f45a6831b58537f3a34b68247623612ab2b3daf",
+            "vue3-new-ui/dist/js/8018.d3057518.js": "21338d375d7ca989a3dc05e334e578d9787c4980703c1a06a611351aafd1a0bb",
+            "vue3-new-ui/dist/js/807.2c23c610.js": "07a1f8f8ebfa5dbc147cb05179e842a8c679d911c4399f5e9ded5f9dd577fe58",
+            "vue3-new-ui/dist/js/8092.435d28ef.js": "18e872120114e235427062e89b8de36432266517d4c2f4db7918e3e6c14dabd1",
+            "vue3-new-ui/dist/js/8150.a287fb16.js": "1d9550fadc3df094e9d26d3d8084cf89426ed8856f84013e8f5ce216809ae0d9",
+            "vue3-new-ui/dist/js/8161.ff349275.js": "6d83d3fe4d7786b110e424857867a267e6e9d0f23764f576e626a5359f983549",
+            "vue3-new-ui/dist/js/8166.28ce2175.js": "425c4029897cfa3f99ca0b4e8983ffd5c76fcd4360faeaab88f3d7d41aa408a9",
+            "vue3-new-ui/dist/js/8233.d299f2bb.js": "6b2518d4d959d97500b23bacaefa8828f9a640bb17cf519f6826898045e9a9d9",
+            "vue3-new-ui/dist/js/8312.279863ba.js": "bfba85a9ba116e622beeadf54802dd565bc845511c4ed83c07d8bd66e04187a7",
+            "vue3-new-ui/dist/js/8313.13604775.js": "5836a4bfb533c9f81c28036e887ad96518ea236b859e98842f8e971dd428cc5c",
+            "vue3-new-ui/dist/js/8320.b5bae105.js": "6bbcfcfc6086c915350c80b29516b6feb8cb5e28cb8c1fb95c497a7dfa084461",
+            "vue3-new-ui/dist/js/8339.16cfceee.js": "5d601877c96442b84ffb34ffdfc3c0208e623d1b479a32edd611e169181a7ccb",
+            "vue3-new-ui/dist/js/8397.036ba5dd.js": "d598155117274d893247d7ad579b3061f453a0d24eda7e1378838f5b653c002d",
+            "vue3-new-ui/dist/js/8444.4196a695.js": "f3c6501a6b83044ab274b797ece8e79293528bfb40cfbc5519d427a12eba7549",
+            "vue3-new-ui/dist/js/8449.4267ef31.js": "5bb2ca4ffe750ea649474bc782a043bf3e459e93d3ac8a16d7981346cc7f85ba",
+            "vue3-new-ui/dist/js/8488.83d3844d.js": "e0f373c07051eac9ec6993abdb451e602fcdad6e91411cc03cd968e4b8950029",
+            "vue3-new-ui/dist/js/8512.8955b9a9.js": "c4ed061241bf917b9b4e98bc865695324c20ec7767e14108a2f203122fca001f",
+            "vue3-new-ui/dist/js/8534.481eef36.js": "c4f31214a58bc299e265fe2bb2484f4a4d8d0c3b80775698ee3fffd1acff4cb1",
+            "vue3-new-ui/dist/js/855.a139617b.js": "5196d634f749135c38cd1b90da84e9b7193f65e6c430465524507c0c1d1b15e0",
+            "vue3-new-ui/dist/js/8566.23989521.js": "4a4a21fa1dc0303aef9dbd279afa20e13f477fb6ea0795e4cf201006237712cd",
+            "vue3-new-ui/dist/js/8589.12298ba1.js": "7ee042d93dd88508d791737b941aba40b259e40f2412426aa428a1683d477e3c",
+            "vue3-new-ui/dist/js/8614.2bb77df3.js": "13c0fb43095cc6d461523b23d5d3b0f4bf2b2278aaae1a9fab7a1d3fe78868f2",
+            "vue3-new-ui/dist/js/8626.e3bc211b.js": "e0516ca9c80700fb4e5b57f73e1f65abe0da9f30a9cf80aec769a6c5d03f1385",
+            "vue3-new-ui/dist/js/8637.4104e2a3.js": "6c577ba32a063658e81b9ea55e3579fe929c3890e53fdb63c64d4954a01290de",
+            "vue3-new-ui/dist/js/8647.dc7a1cc3.js": "8957258f1fe013035284c77652b450f860387301ed7cc2509caf4036675ec77b",
+            "vue3-new-ui/dist/js/8665.69a07859.js": "790b9f8d7c84bd1663f7987461ab6afb326ea32fc90948ff6a31ab3650745d2f",
+            "vue3-new-ui/dist/js/8697.a30f3250.js": "08a8199ec9897cfaf3af9a82d4ab651f6773308754aad5c99541b927259ba1b6",
+            "vue3-new-ui/dist/js/8711.ea2f64ce.js": "e0b93903292567996f7d49407e3f6c7eebc9992ac1e23fb2f12e0537ee67099e",
+            "vue3-new-ui/dist/js/8777.712de57f.js": "ec9d2480443b34d6facdfa680b0a3999a7f3255f4bc91881aad79c0b87ce5a75",
+            "vue3-new-ui/dist/js/8821.fd634362.js": "6b84e916f9207e6761f4439e88fac03160fbf399c41aa5f82011f83b16b8080b",
+            "vue3-new-ui/dist/js/8825.d290c8ca.js": "5fe2ecfe39a5a12a683dd72de6fe4eb27defaf048ca3deb053dea498babe4459",
+            "vue3-new-ui/dist/js/8872.99cd26ba.js": "6049e716c896dcf386f3b4d88020bcb0b61fbfa1895ef2f37b0e580d6d335322",
+            "vue3-new-ui/dist/js/8881.c9481681.js": "84427f2983e58fb06180f8fcccfb34f8f4f95be5c98a72051dbe8f0f5bb41ae8",
+            "vue3-new-ui/dist/js/8897.f0c3bb2b.js": "75fc2f117d13670200d62e213867c826ff424757d440a8b58a31485778c96755",
+            "vue3-new-ui/dist/js/8900.6d6dc6cd.js": "325ddababd44b7c07c83ebd10d72d1fd02c773d4f6ad0624385f5a7ef3200ec2",
+            "vue3-new-ui/dist/js/8904.b988ed67.js": "1fa83ce650a172a7d4181f1e5908cd1832e296014e9dc6e7999c5806a67196f3",
+            "vue3-new-ui/dist/js/893.12f11900.js": "256f1424f5c8dce2c31b397c3143c12802709a29081481d5eadc2adc8a9d87c9",
+            "vue3-new-ui/dist/js/8938.c316f693.js": "7ac4dc992ef737019de857f33eb4942515daf4987495ee4717982ba3063f8063",
+            "vue3-new-ui/dist/js/8943.0c766104.js": "c0c2c16c5f40b97bb5527f5a2e03d9000ecc355d8687ae1fe63eec6988695be9",
+            "vue3-new-ui/dist/js/9002.1407eb49.js": "2e75e300bbf8498c6a74b426032f8104ac6eb8d2fef76576d2ac79dd8fe8ff27",
+            "vue3-new-ui/dist/js/9005.5573cdc7.js": "b09aaf7834ff56f640cc1f95bd28e3c43c9665e7b340fc3f5816449f3b079fa2",
+            "vue3-new-ui/dist/js/9018.f0e88ba8.js": "b71262b48ae87ebb1d2873d0906f98f9f86b75517f4ffbb3746a6bf4c945ad75",
+            "vue3-new-ui/dist/js/9028.8b245548.js": "20f523d1e455417132f3bd766b296698f96ddfc0796e0ed99701fd9d7c057ebb",
+            "vue3-new-ui/dist/js/9037.621e8602.js": "8363736f983e274e4b266d4a452ddee9acb81b13b61e686adf33dc361df59215",
+            "vue3-new-ui/dist/js/9118.5be54b15.js": "79dd218cfd9ef4cd3428a519b7e984e03cb649141fc4a5ad77ab6598e77470f2",
+            "vue3-new-ui/dist/js/9165.e669e6d1.js": "81277392a10cbcc7c47fb79e1608e314e1f93a47f716ad9f86c8757bee25a2ec",
+            "vue3-new-ui/dist/js/9184.1ef9ff4a.js": "23fc53cf780bbf340372f50515fc48763989ad16d10ae795a5a9c934997af43e",
+            "vue3-new-ui/dist/js/9186.ace10d03.js": "d96c11338c344c5a6cd213a3d10232371816623f137ce5cfb0b64cedd867909c",
+            "vue3-new-ui/dist/js/9305.cb1adc70.js": "f049d741b7055e49000ed83ae1480aaeea0278fad0fcee70495eb975166dc4c1",
+            "vue3-new-ui/dist/js/9314.99976fa6.js": "15c92192d47ab282de021908f4c7ffa43967be363816dc4b77b5f19814f19253",
+            "vue3-new-ui/dist/js/9338.03d8969b.js": "c16c732ba641336747608d06a7aeda626d20f2832dfbbd6f03ee93eb15d110c1",
+            "vue3-new-ui/dist/js/9392.0887a705.js": "b89bc7a69aa9ecbda91821a0bc574232d53005ad16bc0e1e54988a361807f62e",
+            "vue3-new-ui/dist/js/9415.e379a2d3.js": "18fab5bbe510515860b75b240431936b0b224141b20b1d897def09c29308abee",
+            "vue3-new-ui/dist/js/9518.ea64e18e.js": "76d8bda438d9229f4177b8be9efda783b080ede174e7eb5bb02744c136bb3e9c",
+            "vue3-new-ui/dist/js/956.e2f4023a.js": "8150d2672ad338ebe5b69578923a82c4efec231c5c365805e9d2d7bc2b6b7fd0",
+            "vue3-new-ui/dist/js/9562.575e9cd6.js": "6a92affe0b5ae48260e13c6c883b9550428d6574127014257b8760b2021c3550",
+            "vue3-new-ui/dist/js/9566.f3adcf4c.js": "f98880f78cb8420c200238f3ee82c5f155cc93ff9eb3f92102c7700c41a5d9c2",
+            "vue3-new-ui/dist/js/9590.1c1f0e7d.js": "5ca608891dc6b102a4afa8e31819f2de8362d12100b5d0e22d03a15fe1565b24",
+            "vue3-new-ui/dist/js/9611.50e77455.js": "697233faaf610c16858e0f57e431c842f03cad316f46c6f2dbe2be6b18804f2c",
+            "vue3-new-ui/dist/js/9612.a9fed284.js": "e82814ed5b2b9c13ed583d2f0aa8e8da74b598cd8c2e8e9a86389b968e65b3e7",
+            "vue3-new-ui/dist/js/9649.b022f64d.js": "5f6895f317bc4857422cce29af7164f8029cca0d0c17e5bc83b2bf7ba77f6d22",
+            "vue3-new-ui/dist/js/965.a50cc42b.js": "fcabfbbed2a30e2ac40374efe2372b4016245ccfc136856632f27bebe7febd1c",
+            "vue3-new-ui/dist/js/9673.b35e9da3.js": "ab10c94a1b07027f766aec60754aea4a0faa71d8e190fea8f36d0584fb7ce634",
+            "vue3-new-ui/dist/js/9730.94474e1c.js": "016610ee5e63e8fa2726122c7a47a69990a266cbff48cb40bb0ce30e1740f663",
+            "vue3-new-ui/dist/js/9758.00a2c5fd.js": "e0b62a5619f25f97cee799458e89879134fffebd150eee72253067cdcdc20e7a",
+            "vue3-new-ui/dist/js/9777.c44489f4.js": "029ff171daa7e214f913a6c53143af8a23b83768baf81db3abc116b9c0bccfa1",
+            "vue3-new-ui/dist/js/9911.60311df9.js": "6f610dd008bc33df6292e2871f5810116b03e2bb459e9db218e3957774553cbe",
+            "vue3-new-ui/dist/js/9914.c6c8bdc0.js": "d23045cb2bd7526ab40903e46086115899c4ba04d81f48cec12283352157aefb",
+            "vue3-new-ui/dist/js/995.227d7c81.js": "98e06b27600c7aaa21a3d396b606a82c49218034da85413554804cfc6ad0dcae",
+            "vue3-new-ui/dist/js/9964.f7878cd5.js": "fce29b15fd67be43199ab4f8f6140694381def74a901d82870f7f3f076e85a6b",
+            "vue3-new-ui/dist/js/9983.b106a674.js": "f8eeabb852a174df1b4a335981ae85a0e43a5cb6d14a0e271be80729ac669b5f",
+            "vue3-new-ui/dist/js/9994.c521cee2.js": "b494b8fbae149afc40364f72e8cc052d43e56410eb920ba7ece4cd24429b1fe9",
+            "vue3-new-ui/dist/js/ai-shared.155334b5.js": "f248b61b893c8c05c046f8c179edc2f95a8e84adf62dab89578fcf86b85caee1",
+            "vue3-new-ui/dist/js/app.742cc61c.js": "08b465cebe0d76b6c348377e743146d0749f68e500b465eb8ed1e36555f649c2",
+            "vue3-new-ui/dist/js/element-plus.1235714c.js": "89bddbfa619a08f58406e757b9d5e879fd9f4d5f8b707ecd1fe7dfeb0f2296f0",
+            "vue3-new-ui/dist/js/page-header-shared.c5d1890d.js": "da30ec65942e33cfd99dfc5ad717e2416fae871f6bd70aa2dc6c0634d8da43c9",
+            "vue3-new-ui/dist/js/styles.168af27d.js": "879519a584fa54af2eaf8e3d491eeda1e0a093ff1009ab4372b506cb22115747",
+            "vue3-new-ui/dist/js/vab-chunk-0.3ab2c9ac.js": "af0fa009da4ca4935b654ba0612f4d28f0b6f8aadb0ad6b18a9bb437ee3a7ec9",
+            "vue3-new-ui/dist/js/vab-chunk-1.0d5b1c11.js": "05aaf36561732f4e80bc223fbd171a9cedce167c5aec486946cea62b4603cb27",
+            "vue3-new-ui/dist/js/vab-chunk-2.3dd693f0.js": "b57fa60e43bcf78962d784df71fdbc497880d793b3dbc587296104c6806e8d92",
+            "vue3-new-ui/dist/js/vab-chunk-3.ac1d20b7.js": "f63031ab66fef91cc1a2b59120677348fc70aeadf1c970a70708c5f76d3e6b0b",
+            "vue3-new-ui/dist/js/vab-chunk-4.f3cca157.js": "a7402271e3e3be8032bb9164aed8d75af048016bab272fa36e2c36ff66731398",
+            "vue3-new-ui/dist/js/vab-chunk-5.74353fcc.js": "2f762af10ec57b922f13e0bf34e65a045b2a792ed41543ea099e2ba59a9a4fe2",
+            "vue3-new-ui/dist/js/vab-chunk-6.ebdf89c7.js": "11540c6bcece1798f7ab3abad6be5e2e48a8c3fc102380cefeacd823571ffb38",
+            "vue3-new-ui/dist/js/vab-chunk-7.ef5f526d.js": "2da47a377439913ca2c2a215db36cc07cfce3429ccea018f1b0f93a1e5a46dc1",
+            "vue3-new-ui/dist/js/vab-layouts.854a842a.js": "de99329cfab6e767033c1e3ffef5ac618eeb651f9bdb99a049c8734ad936c2ab",
+            "vue3-new-ui/dist/js/vendors.5c3b5336.js": "d46a0d0e3e8654a80b797cc1107b6ee9a8d31985e60d7422b925e243a2e0d7c7",
+            "vue3-new-ui/dist/js/vue.26d9a9a8.js": "d1031494113d839ac810befd3ff0ad40ea4e17fa75635df5ef3d501a755cca57",
+            "vue3-new-ui/dist/manifest.webmanifest": "ee6c546e99d295be3c7a9461e377eae5caddf639089b0e85fca02823c3594a27",
+            "vue3-new-ui/dist/medical-cross.svg": "b330dfee295688d0f7ac5e394d88f97860351ee92ca03ae10b62be601bd867ce",
+            "vue3-new-ui/dist/static/401..png": "97b5c8ebb987663fe3eaddeef12cd287330cf2287e4de0b60e8f4dc4f778bdd7",
+            "vue3-new-ui/dist/static/404..png": "4ddd4288f37470c3affaf5efe546d0463c2c0d99898e6cf3d23509bdd04d11e6",
+            "vue3-new-ui/dist/static/background..jpg": "c1f048fc00064339872c423e1ed85f1030ceba5a9a286a3d8e701b20ec655f14",
+            "vue3-new-ui/dist/static/mynb..jpg": "f492021545eed19ae8c192ce51492466b77acfb6006b85e9236d4c4f12a6111b",
+            "vue3-new-ui/dist/static/zfb_kf..jpg": "0c0e369f805e7008eaea3d11dd3a9fcd01d6279af029a477a355af9643e48783",
+            "vue3-new-ui/dist/sw.js": "a5cb4f64cda0c353694a3f824be05af22003471ae3fd1b1fbf2bd9e99bd9f07d"
+          },
+          "rebuild_performed": false
+        },
+        "first_full_browser_attempt_preserved": {
+          "report": "/tmp/hoim-roster-browser-frozen-final-report.json",
+          "report_sha256": "edf6d2fda69ac07287f73a1a28f93140633e645251c6e4b6eb7c3d75bc120d5d",
+          "execution": "/tmp/hoim-roster-browser-frozen-final-execution.json",
+          "execution_sha256": "ebb5cf04c37f8651e5007c54e65eefc824edd89af050f6514e7fc43e0ac4594c",
+          "passed": 541,
+          "failed": 5,
+          "reason": "New production test fixture transport assertions and one locator; no product defect established. Not claimed as full green."
+        },
+        "full_browser_final_status": "Root will run fresh full546 against unchanged final3 dist and frozen4 tests; pending at this report."
+      }
+    },
+    "independent_original_projection_and_lifecycle_review": {
+      "artifact": {
+        "path": "/tmp/hoim-roster-frontend-independent-review-final2.json",
+        "bytes": 6731,
+        "sha256": "9cee84f34d51326952c5e49a096de7438e3a992628ae85bcade6d60c55fdfd96"
+      },
+      "checks": 48,
+      "resolved_material_finding": "Current history or feedback access rejection must clear previously displayed complete originals; stale prior scope or prior history-version failures must not clear the new view.",
+      "pure_VM_no_network_checks_not_added_to_browser_execution_total": true
+    },
+    "minimum_transitive_security_fix": {
+      "artifact": {
+        "path": "/tmp/hoim-roster-follow-redirects-security-fix-verification.json",
+        "bytes": 4662,
+        "sha256": "e410122d4fcd0deb236071bb6487d489c901c031cea966cdc7a69a65c13ce9d0"
+      },
+      "contents": {
+        "schema_version": "follow_redirects_security_fix_verification_v1",
+        "created_at": "2026-10-20T19:48:53.515334+00:00",
+        "commit": "3dfa83d",
+        "change": "only node_modules/follow-redirects package-lock entry version/resolved/integrity changed from 1.16.0 to 1.16.1; package.json and other dependency entries unchanged",
+        "rationale": "Both reviewed GitHub advisories identify >=1.16.0,<1.16.1 affected and 1.16.1 patched; Axios1.20.0 already permits ^1.16.0. Keep existing dependency ranges and upgrade exactly the locked transitive package; no broad audit fix/target/budget changes.",
+        "sources": {
+          "maintainer_advisories": [
+            "https://github.com/follow-redirects/follow-redirects/security/advisories/GHSA-q3jh-wrc6-jgq8",
+            "https://github.com/follow-redirects/follow-redirects/security/advisories/GHSA-8r9p-f939-6h3c"
+          ],
+          "reviewed_advisories": [
+            "https://github.com/advisories/GHSA-q3jh-wrc6-jgq8",
+            "https://github.com/advisories/GHSA-8r9p-f939-6h3c"
+          ],
+          "official_release": "https://github.com/follow-redirects/follow-redirects/releases/tag/v1.16.1",
+          "npm_metadata": "npm view follow-redirects@1.16.1 version dist repository time --json -- default official registry"
+        },
+        "official_npm_version": "1.16.1",
+        "before_audit_counts": {
+          "info": 0,
+          "low": 0,
+          "moderate": 0,
+          "high": 1,
+          "critical": 0,
+          "total": 1
+        },
+        "after_audit_counts": {
+          "info": 0,
+          "low": 0,
+          "moderate": 0,
+          "high": 0,
+          "critical": 0,
+          "total": 0
+        },
+        "installed_package_version": "1.16.1",
+        "installed_node_module_note": "npm package-lock-only updates hidden lock; initial npm install trusted that entry and retained actual1.16.0. Removed only node_modules/follow-redirects and installed from exact lock, then independently verified actual package.json1.16.1 before testing.",
+        "real_http_regression": {
+          "command": "npx playwright test e2e/request-real-http.spec.js --workers=1 --retries=0 --reporter=line",
+          "passed": 21,
+          "duration": "8.0s",
+          "classification": "real_http_loopback",
+          "axios": "unchanged1.20.0",
+          "adapter": "actual browser XHR",
+          "no_external_or_hospital_requests": true
+        },
+        "direct_node_security_probe": {
+          "command": "node /tmp/hoim-roster-follow-redirects-security-probe.cjs",
+          "passed": 2,
+          "classification": "real_http_loopback_oneoff",
+          "cases": [
+            "array-form sensitive header stripping across host redirect",
+            "literal caret/pipe custom sensitive header stripping across host redirect"
+          ],
+          "note": "Node wrapper execution supplements browser XHR regressions; uses explicit loopback lookup only. Initial oneoff failed due Node all-address DNS callback shape and was corrected; old failure log retained."
+        },
+        "lock_sha256": "97a0a0ecf04a2a4c4707457e8a7601a9f39f1c76d5d0f8ed6464e841477eb538",
+        "package_json_sha256": "719292c59929f86d6e74da17785e0fdf99a3b5fa5f758ab65a1bfb52b5a132de",
+        "artifacts_sha256": {
+          "/tmp/hoim-roster-follow-redirects-before-audit.json": "bcf45fd8c00752ba292560fa29c0e256dc4fe94da2b5ec86a6fcb4de51ed2488",
+          "/tmp/hoim-roster-follow-redirects-after-audit.json": "7880c3670ed5e8b4d7004b0e23de2e72830eab5425ec4fbe56cb6d17c89e7d9d",
+          "/tmp/hoim-roster-follow-redirects-after-audit.log": "6d8c5c8f3d7684adb070417bd608d01ae90aa3dc26a65af03ffda4955f38d9a3",
+          "/tmp/hoim-roster-follow-redirects-before-package-lock.json": "d0c90a0f970ef8a1ad8f34e50c2a5bd7c2b31d5452694172a2df3897701a0a8f",
+          "/tmp/hoim-roster-follow-redirects-official-npm-metadata.json": "1183bfef004b6519d084293e4eb8b55902a7d4e1aec35fba6770f6d43ba0a9c4",
+          "/tmp/hoim-roster-follow-redirects-lock.diff": "0cfd0ebfe13590c56192eced21c6bdf0bbfacc9e2caf7c8f6a838a5ca0ef87b0",
+          "/tmp/hoim-roster-follow-redirects-lock-update.log": "d1adabc1d5ada711f167111430103ad7a8fc76bee2a340262e046b5d35d8f133",
+          "/tmp/hoim-roster-follow-redirects-install.log": "16079a9afd4f5a7172e3c3d947fb9291a1b382916b907a1f8ceb9f729956b41d",
+          "/tmp/hoim-roster-follow-redirects-targeted-reinstall.log": "da13ab9d025b19c91553bc7d4c450975d3e4e36dd7c5fef6f223f8008ba39547",
+          "/tmp/hoim-roster-follow-redirects-real-http-tests.log": "f8fdf49fe4aba4e1772757f1359d13feda50ba85d25d73dce2c2cde8e7ed52b4",
+          "/tmp/hoim-roster-follow-redirects-security-probe.cjs": "0016b00713dd93391096621fa7eacaf89fd633ae703640e06807006cb0f93ff2",
+          "/tmp/hoim-roster-follow-redirects-security-probe.json": "a7fa3127b5fd8f9e3a07f4c5ba57e7e23e5e440514d88126fb4fcaa6d8b2be8f",
+          "/tmp/hoim-roster-follow-redirects-security-probe-final.log": "a4f23f9871fb9624866a644ffb7c05dcc68b8cc4f02595a60a9dd995d7777612"
+        },
+        "build_performed": false
+      },
+      "targeted_21_http_cases_also_included_in_full_browser_total": true,
+      "two_additional_direct_Node_loopback_probes_not_added_to_browser_total": true
+    }
+  },
+  "actual_isolated_mysql": {
+    "artifact": {
+      "path": "/tmp/hoim-roster-mysql-final-verification.json",
+      "bytes": 12144,
+      "sha256": "cb216e79544679741807f914c6c44e006c8e6b4fc4f5b647e830f180646347d4"
+    },
+    "seconds": 36.88,
+    "bound_backend_source_files": 38,
+    "image": "mysql:8.0.39",
+    "image_id": "sha256:01faea2cb286276923a223bdbf438b50468f3c4090f6b61e0b27aa871ca0dbac",
+    "isolation": {
+      "network_mode": "none",
+      "port_bindings": {},
+      "readonly_root": true,
+      "user": "999:999",
+      "cap_drop": [
+        "ALL"
+      ],
+      "tmpfs": {
+        "/tmp": "rw,nosuid,nodev,noexec,size=64m,uid=999,gid=999,mode=0700",
+        "/var/lib/mysql": "rw,nosuid,nodev,noexec,size=512m,uid=999,gid=999,mode=0700"
+      },
+      "mount_types": [
+        "bind"
+      ]
+    },
+    "dotenv_open_attempts": 0,
+    "only_private_unix_socket_allowed": true,
+    "source_hashes_stable": true,
+    "actual_typed_four_kind_lifecycle_count": 50,
+    "actual_private_public_plan_sql": {
+      "snapshot_json": {
+        "utf8_bytes": 173950,
+        "sql_sha256": "2f1380e822e511e294688f14651f0d1647d4eafb7e0fd05ca6be13e0c09fa8f8"
+      },
+      "projection_json": {
+        "utf8_bytes": 92834,
+        "sql_sha256": "823eb9c6952e053b8c592e50e70fdbea4d49fcbf4f90d6c9ede0c0912e52cac6"
+      }
+    },
+    "actual_native_task_blob": {
+      "run_id": "6cf463fe-106e-47a9-b521-e94915e1a3a7",
+      "result_sql": {
+        "result_json": {
+          "utf8_bytes": 469886,
+          "sql_sha256": "eb20a39082226ba304258397dc8feb84622e27eeaff9a1d07055e9709c20401e"
+        }
+      },
+      "airun_text_bytes": [
+        8838,
+        1193,
+        730,
+        384
+      ],
+      "wire_bytes": 98123,
+      "native_solve_status": "optimal_proven",
+      "actual_submitted_candidate_status": "violated",
+      "old_schedule_attendance_appointment_registration_rows_unchanged": true
+    },
+    "actual_old_rr_and_locked_current_reads": {
+      "connection_ids": [
+        9,
+        12
+      ],
+      "isolation": "REPEATABLE-READ",
+      "old_cohort_count": 24,
+      "current_cohort_count": 25,
+      "old_fact_count": 50,
+      "current_fact_count": 51,
+      "old_plain_read_remained_stale": true,
+      "locking_read_found_both_committed_additions": true
+    },
+    "actual_independent_connection_acceptance_lock_contention": {
+      "connection_ids": [
+        12,
+        14
+      ],
+      "mutations": [
+        {
+          "mutation": "new_doctor",
+          "mysql_error": 1205,
+          "seconds": 1.003,
+          "blocked_until_acceptance_commit": true,
+          "retry_after_commit_succeeded_and_was_rolled_back": true
+        },
+        {
+          "mutation": "new_fact",
+          "mysql_error": 1205,
+          "seconds": 1.012,
+          "blocked_until_acceptance_commit": true,
+          "retry_after_commit_succeeded_and_was_rolled_back": true
+        },
+        {
+          "mutation": "move_doctor",
+          "mysql_error": 1205,
+          "seconds": 1.001,
+          "blocked_until_acceptance_commit": true,
+          "retry_after_commit_succeeded_and_was_rolled_back": true
+        },
+        {
+          "mutation": "revoke_fact",
+          "mysql_error": 1205,
+          "seconds": 1.011,
+          "blocked_until_acceptance_commit": true,
+          "retry_after_commit_succeeded_and_was_rolled_back": true
+        }
+      ],
+      "accepted_blob_and_pointer_committed_together": true
+    },
+    "failed_source_and_result_sql_audit_atomic_rollback": true,
+    "revoked_ordinary_denied_super_frozen_recomputed": true,
+    "cleanup_verified": true,
+    "limitations": [
+      "Synthetic engineering evidence only; no actual hospital staffing, booking, credentials or deployment.",
+      "Two-connection MySQL lock contention uses bounded one-second lock timeouts and real production locking reads; it does not simulate arbitrary distributed deployment failures.",
+      "Large SQL-only source payload probe is deliberately separate from a valid typed source; actual governed sources retain their smaller strict business field caps."
+    ]
+  },
+  "actual_isolated_roster_service_container": {
+    "artifact": {
+      "path": "/tmp/hoim-roster-container-final-verification.json",
+      "bytes": 42167,
+      "sha256": "f6dabf0a47036acf08653aa26abf239a7bd2b7d3782972f05406d960b294e0d0"
+    },
+    "seconds": 43.131,
+    "image_id": "sha256:f4f9fb1f153a6e452d2712787128fcdb24431f8b56dfb8eabb341fd0895a1124",
+    "isolation": {
+      "bind_mounts": [],
+      "cap_drop": [
+        "ALL"
+      ],
+      "cpu_nanos": 1000000000,
+      "host_port_bindings": {},
+      "memory_bytes": 536870912,
+      "network_mode": "none",
+      "pids_limit": 64,
+      "read_only": true,
+      "security_opt": [
+        "no-new-privileges"
+      ],
+      "tmpfs": {
+        "/tmp": "rw,noexec,nosuid,size=16m"
+      }
+    },
+    "synthetic_math_cases": 36,
+    "successful_synthetic_task_responses": 37,
+    "http_response_count": 46,
+    "rejected_http_tasks": {
+      "duplicate_json_key": 422,
+      "mixed_native": 422,
+      "store_zero": 422,
+      "unauthenticated": 401,
+      "wrong_model": 409,
+      "wrong_schema": 422
+    },
+    "host_runtime": {
+      "clinical_validation": "not_provided",
+      "core_sha256": {
+        "roster_config": "b988f37928ad0c0040b0e7d8e950687e113eb59dd1432c69a21a6c836521ebcb",
+        "roster_contract": "558b284f70b8af4265abd899713da7d0ee2fadc7aa2882645d45213d6e69d344",
+        "roster_model": "9f1bfea24581c948f57fd0f201d1d619e9a0b75ad11292044156be55ab9450c7",
+        "roster_server": "fbb2818325610e53a576399b050b32d704fe4f196b35c9fc3717c389576b2ae1"
+      },
+      "engine": "stdlib_roster_branch_and_bound",
+      "engine_versions": {
+        "fastapi": "0.136.1",
+        "pydantic": "2.12.4",
+        "pydantic-settings": "2.12.0",
+        "uvicorn": "0.46.0"
+      },
+      "feature_key": "roster_optimization",
+      "independent_implementation": true,
+      "input_policy": {
+        "facts": "published_immutable_originals_current_capture_complete_manifest_and_explicit_review_no_name_title_or_old_time_inference",
+        "privacy": "only_problem_local_staff_session_tokens_job_hashes_typed_facts_and_basis_hashes_no_names_contacts_leave_health_certificate_or_appointment_identity",
+        "slots": "explicit_reviewed_dated_required_slots_facility_ceiling_and_net_person_session_capacity_not_shared_stock_forecast_records_or_booked_inventory",
+        "source_limit": "reject_whole_utf8_oversize_or_member_cap_never_truncate",
+        "staff_universe": "all_current_doctors_in_one_department_including_without_periodic_schedule_all_locations_work_context",
+        "unknown": "never_zero_or_unrestricted_qualification_availability_preference_capacity_break_accounting_or_global_prefix_suffix_coverage"
+      },
+      "input_policy_digest": "9f088a402b3c55560a7158df2d76ba91aecf9ed17034178f9b1e74c178e30105",
+      "max_request_bytes": 8388608,
+      "max_response_bytes": 8388608,
+      "model_version": "roster:96124cf3c6c0c20143383cb2120d3e4743b549a366c2b0996e59bd62cdeddc75",
+      "operational_validation": "not_provided",
+      "plan_only": true,
+      "prompt_handling": "provenance_only",
+      "python_version": "3.13.12",
+      "recipe": {
+        "arithmetic": "integer_UTC_microseconds_no_float_minutes_times_60000000_policy_minutes_max150119987_other_raw_counts_max2147483647",
+        "capacities": {
+          "bytes": 8388608,
+          "facts": 32768,
+          "options": 32768,
+          "sessions": 256,
+          "staff": 512
+        },
+        "fixed_work_windows": "explicit_up_to64_up_to366day_windows_exact_work_intersection_no_plan_boundary_reset",
+        "graphs": "definite_confirmed_eligible_and_optimistic_unknown_relaxed_no_unknown_as_observed_fact",
+        "input_policy": {
+          "facts": "published_immutable_originals_current_capture_complete_manifest_and_explicit_review_no_name_title_or_old_time_inference",
+          "privacy": "only_problem_local_staff_session_tokens_job_hashes_typed_facts_and_basis_hashes_no_names_contacts_leave_health_certificate_or_appointment_identity",
+          "slots": "explicit_reviewed_dated_required_slots_facility_ceiling_and_net_person_session_capacity_not_shared_stock_forecast_records_or_booked_inventory",
+          "source_limit": "reject_whole_utf8_oversize_or_member_cap_never_truncate",
+          "staff_universe": "all_current_doctors_in_one_department_including_without_periodic_schedule_all_locations_work_context",
+          "unknown": "never_zero_or_unrestricted_qualification_availability_preference_capacity_break_accounting_or_global_prefix_suffix_coverage"
+        },
+        "objectives": {
+          "max_slots_then_min_penalty": "lexicographic_maximize_total_planned_slots_then_minimize_total_explicit_reviewed_penalty_no_free_weights",
+          "meet_targets_min_penalty": "minimize_total_explicit_reviewed_assignment_penalty_hard_staffing_and_required_slot_targets"
+        },
+        "planned_slots": "meet_mode_required_slots_only_max_mode_min_of_facility_ceiling_and_sum_reviewed_net_staff_capacity_both_hard_required_targets_no_booking_or_stock_mutation",
+        "planning_dates": "one_to_31_explicit_consecutive_business_local_dates_UTC_midnights_validate_IANA_not_86400_times_days",
+        "policy": "all_published_applicable_whole_period_policies_conjoined_no_most_favorable_selection_no_policy_unknown_partial_validity_or_unknown_expiry_is_explicit_unknown_and_optimistic_relaxation_not_NA_not_complete_infeasibility_proof_explicit_local_constraints_not_universal_labor_law_compliance",
+        "presence": "complete_duty_start_end_no_overlap_breaks_do_not_release_person_or_reset_rest",
+        "prompt_handling": "provenance_only",
+        "proof": "admissible_frontier_lower_bound_and_known_feasible_upper_bound_optimal_only_bounds_close_infeasible_only_possible_tree_exhausted",
+        "rest": "adjacent_full_presence_intervals_including_all_locations_prefix_and_suffix_no_boundary_reset",
+        "rolling": "continuous_UTC24h_7d_maximum_at_domain_boundaries_work_endpoints_or_endpoints_minus_window_exact_prefix_integral",
+        "rolling_start_domain": "closed_hull_planning_start_minus_window_through_planning_end_all_influencing_prefix_and_suffix",
+        "rule_id": "roster_declared_constraints_v1",
+        "search": {
+          "bounds": "session_staff_cardinality_and_capacity_domain_upper_bound_cheapest_necessary_remaining_cardinality_cost_lower_bound_ignore_coupling_only_for_admissible_relaxation",
+          "deterministic_order": "canonical_source_identity_and_domain_cost_then_identity",
+          "frontier_limit_per_graph": 4096,
+          "interruption": "commit_children_and_incumbent_only_after_whole_parent_expansion_within_budget_otherwise_retain_parent_frontier_bound_no_discarded_sibling",
+          "node_limit_per_graph": 32768,
+          "operation_limit_per_graph": 2000000,
+          "operations": "option_eligibility_evaluations_produced_constraint_checks_rolling_endpoint_evaluations_session_bound_evaluations_and_decision_expansions_not_Python_instruction_or_wallclock_count",
+          "walltime": "not_a_numeric_search_stop_outer_timeout_returns_no_analysis"
+        },
+        "staff_counts": "number_assigned_to_whole_dated_session_not_instantaneous_service_coverage",
+        "unknown_work": "unknown_commitment_or_accounting_has_zero_confirmed_work_lower_bound_and_original_presence_upper_bound_missing_inventory_fixed_window_upper_bound_is_full_window_not_zero",
+        "version": "declared_constraints_exact_integer_v1",
+        "work": "union_duty_work_segments_subtract_only_explicit_nonwork_breaks_complete_accounting_required_for_confirmed_feasibility"
+      },
+      "recipe_digest": "32d3df3336970832ecd2ea9f1de65a3c61b70f2fcbd3ad0ff901dd1fcdc3fe13",
+      "rule_id": "roster_declared_constraints_v1",
+      "runtime_digest": "96124cf3c6c0c20143383cb2120d3e4743b549a366c2b0996e59bd62cdeddc75",
+      "schema_version": "10",
+      "scope": "reviewed_single_department_doctor_cohort_dated_sessions_all_location_duty_context",
+      "timeout_seconds": 90,
+      "timezone_database_digest": "f776ce09945c8a952b2a671aaa10c582423301e186038670ddcd0a94442f4be5"
+    },
+    "container_runtime": {
+      "clinical_validation": "not_provided",
+      "core_sha256": {
+        "roster_config": "b988f37928ad0c0040b0e7d8e950687e113eb59dd1432c69a21a6c836521ebcb",
+        "roster_contract": "558b284f70b8af4265abd899713da7d0ee2fadc7aa2882645d45213d6e69d344",
+        "roster_model": "9f1bfea24581c948f57fd0f201d1d619e9a0b75ad11292044156be55ab9450c7",
+        "roster_server": "fbb2818325610e53a576399b050b32d704fe4f196b35c9fc3717c389576b2ae1"
+      },
+      "engine": "stdlib_roster_branch_and_bound",
+      "engine_versions": {
+        "fastapi": "0.136.1",
+        "pydantic": "2.12.4",
+        "pydantic-settings": "2.12.0",
+        "uvicorn": "0.46.0"
+      },
+      "feature_key": "roster_optimization",
+      "independent_implementation": true,
+      "input_policy": {
+        "facts": "published_immutable_originals_current_capture_complete_manifest_and_explicit_review_no_name_title_or_old_time_inference",
+        "privacy": "only_problem_local_staff_session_tokens_job_hashes_typed_facts_and_basis_hashes_no_names_contacts_leave_health_certificate_or_appointment_identity",
+        "slots": "explicit_reviewed_dated_required_slots_facility_ceiling_and_net_person_session_capacity_not_shared_stock_forecast_records_or_booked_inventory",
+        "source_limit": "reject_whole_utf8_oversize_or_member_cap_never_truncate",
+        "staff_universe": "all_current_doctors_in_one_department_including_without_periodic_schedule_all_locations_work_context",
+        "unknown": "never_zero_or_unrestricted_qualification_availability_preference_capacity_break_accounting_or_global_prefix_suffix_coverage"
+      },
+      "input_policy_digest": "9f088a402b3c55560a7158df2d76ba91aecf9ed17034178f9b1e74c178e30105",
+      "max_request_bytes": 8388608,
+      "max_response_bytes": 8388608,
+      "model_version": "roster:b6aad609cc2f6417991540082967074e0d8383906d37ec0edcc07b1f041ee5a6",
+      "operational_validation": "not_provided",
+      "plan_only": true,
+      "prompt_handling": "provenance_only",
+      "python_version": "3.12.13",
+      "recipe": {
+        "arithmetic": "integer_UTC_microseconds_no_float_minutes_times_60000000_policy_minutes_max150119987_other_raw_counts_max2147483647",
+        "capacities": {
+          "bytes": 8388608,
+          "facts": 32768,
+          "options": 32768,
+          "sessions": 256,
+          "staff": 512
+        },
+        "fixed_work_windows": "explicit_up_to64_up_to366day_windows_exact_work_intersection_no_plan_boundary_reset",
+        "graphs": "definite_confirmed_eligible_and_optimistic_unknown_relaxed_no_unknown_as_observed_fact",
+        "input_policy": {
+          "facts": "published_immutable_originals_current_capture_complete_manifest_and_explicit_review_no_name_title_or_old_time_inference",
+          "privacy": "only_problem_local_staff_session_tokens_job_hashes_typed_facts_and_basis_hashes_no_names_contacts_leave_health_certificate_or_appointment_identity",
+          "slots": "explicit_reviewed_dated_required_slots_facility_ceiling_and_net_person_session_capacity_not_shared_stock_forecast_records_or_booked_inventory",
+          "source_limit": "reject_whole_utf8_oversize_or_member_cap_never_truncate",
+          "staff_universe": "all_current_doctors_in_one_department_including_without_periodic_schedule_all_locations_work_context",
+          "unknown": "never_zero_or_unrestricted_qualification_availability_preference_capacity_break_accounting_or_global_prefix_suffix_coverage"
+        },
+        "objectives": {
+          "max_slots_then_min_penalty": "lexicographic_maximize_total_planned_slots_then_minimize_total_explicit_reviewed_penalty_no_free_weights",
+          "meet_targets_min_penalty": "minimize_total_explicit_reviewed_assignment_penalty_hard_staffing_and_required_slot_targets"
+        },
+        "planned_slots": "meet_mode_required_slots_only_max_mode_min_of_facility_ceiling_and_sum_reviewed_net_staff_capacity_both_hard_required_targets_no_booking_or_stock_mutation",
+        "planning_dates": "one_to_31_explicit_consecutive_business_local_dates_UTC_midnights_validate_IANA_not_86400_times_days",
+        "policy": "all_published_applicable_whole_period_policies_conjoined_no_most_favorable_selection_no_policy_unknown_partial_validity_or_unknown_expiry_is_explicit_unknown_and_optimistic_relaxation_not_NA_not_complete_infeasibility_proof_explicit_local_constraints_not_universal_labor_law_compliance",
+        "presence": "complete_duty_start_end_no_overlap_breaks_do_not_release_person_or_reset_rest",
+        "prompt_handling": "provenance_only",
+        "proof": "admissible_frontier_lower_bound_and_known_feasible_upper_bound_optimal_only_bounds_close_infeasible_only_possible_tree_exhausted",
+        "rest": "adjacent_full_presence_intervals_including_all_locations_prefix_and_suffix_no_boundary_reset",
+        "rolling": "continuous_UTC24h_7d_maximum_at_domain_boundaries_work_endpoints_or_endpoints_minus_window_exact_prefix_integral",
+        "rolling_start_domain": "closed_hull_planning_start_minus_window_through_planning_end_all_influencing_prefix_and_suffix",
+        "rule_id": "roster_declared_constraints_v1",
+        "search": {
+          "bounds": "session_staff_cardinality_and_capacity_domain_upper_bound_cheapest_necessary_remaining_cardinality_cost_lower_bound_ignore_coupling_only_for_admissible_relaxation",
+          "deterministic_order": "canonical_source_identity_and_domain_cost_then_identity",
+          "frontier_limit_per_graph": 4096,
+          "interruption": "commit_children_and_incumbent_only_after_whole_parent_expansion_within_budget_otherwise_retain_parent_frontier_bound_no_discarded_sibling",
+          "node_limit_per_graph": 32768,
+          "operation_limit_per_graph": 2000000,
+          "operations": "option_eligibility_evaluations_produced_constraint_checks_rolling_endpoint_evaluations_session_bound_evaluations_and_decision_expansions_not_Python_instruction_or_wallclock_count",
+          "walltime": "not_a_numeric_search_stop_outer_timeout_returns_no_analysis"
+        },
+        "staff_counts": "number_assigned_to_whole_dated_session_not_instantaneous_service_coverage",
+        "unknown_work": "unknown_commitment_or_accounting_has_zero_confirmed_work_lower_bound_and_original_presence_upper_bound_missing_inventory_fixed_window_upper_bound_is_full_window_not_zero",
+        "version": "declared_constraints_exact_integer_v1",
+        "work": "union_duty_work_segments_subtract_only_explicit_nonwork_breaks_complete_accounting_required_for_confirmed_feasibility"
+      },
+      "recipe_digest": "32d3df3336970832ecd2ea9f1de65a3c61b70f2fcbd3ad0ff901dd1fcdc3fe13",
+      "rule_id": "roster_declared_constraints_v1",
+      "runtime_digest": "b6aad609cc2f6417991540082967074e0d8383906d37ec0edcc07b1f041ee5a6",
+      "schema_version": "10",
+      "scope": "reviewed_single_department_doctor_cohort_dated_sessions_all_location_duty_context",
+      "timeout_seconds": 90,
+      "timezone_database_digest": "d7f3dc68ab7df46bdccfa4eb80c6731a87ff405b87d88c4ace3dd0a4a8e811f5"
+    },
+    "source_hashes": {
+      "Dockerfile.roster": "21d7074bc1c3797a5f9734d1768253d652ceed13f489d611f085d5837b2dd0b8",
+      "app/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "app/ai/__init__.py": "09957ea122e972d43439df3f9b0f75500e61768fabb362dddefb34e78a12171e",
+      "app/ai/roster_config.py": "b988f37928ad0c0040b0e7d8e950687e113eb59dd1432c69a21a6c836521ebcb",
+      "app/ai/roster_contract.py": "558b284f70b8af4265abd899713da7d0ee2fadc7aa2882645d45213d6e69d344",
+      "app/ai/roster_model.py": "9f1bfea24581c948f57fd0f201d1d619e9a0b75ad11292044156be55ab9450c7",
+      "app/ai/roster_server.py": "fbb2818325610e53a576399b050b32d704fe4f196b35c9fc3717c389576b2ae1",
+      "requirements-roster.txt": "a959df5e064f8d57bc50ab1af69e7ad667592e6355bc014433cb7bdadd6886b5"
+    },
+    "prompt_changed_only_provenance": true,
+    "operational_validation": false,
+    "cleanup_verified": true
+  },
+  "intermediate_attempts_not_counted_as_final_success": [
+    {
+      "artifact": {
+        "path": "/tmp/hoim-roster-browser-frozen-final-execution.json",
+        "bytes": 2842,
+        "sha256": "ebb5cf04c37f8651e5007c54e65eefc824edd89af050f6514e7fc43e0ac4594c"
+      },
+      "report": {
+        "path": "/tmp/hoim-roster-browser-frozen-final-report.json",
+        "bytes": 661821,
+        "sha256": "edf6d2fda69ac07287f73a1a28f93140633e645251c6e4b6eb7c3d75bc120d5d"
+      },
+      "reason": "First actual full browser run had 541 passes and five new production test failures. Exact auth-bootstrap classification, nullable hospital request serialization expectations, and one Element Plus combobox locator were fixed only in two spec files. Product inputs and all354 actual dist files stayed byte-identical; five targeted cases then passed before a fresh full frozen run."
+    },
+    {
+      "artifact": {
+        "path": "/tmp/hoim-roster-full-frozen-pytest-execution.json",
+        "bytes": 1936,
+        "sha256": "de56aa6bb112c058cee6a039246cd964e53e7d26e580b0f44e3833236b2b8b97"
+      },
+      "reason": "First full run had two legacy synthetic configurations missing the newly required operational validation fields; both complete test modules were corrected without changing the production gate."
+    },
+    {
+      "artifact": {
+        "path": "/tmp/hoim-roster-full-final2-pytest-execution.json",
+        "bytes": 1745,
+        "sha256": "87f629c337a9cccad90d714d60184d815e097ab035f2aec9232232c994368ab5"
+      },
+      "reason": "Deliberately interrupted after a read-only final inventory identified static RBAC alias misclassification; no failing test had occurred. Frozen source was unchanged during this attempt."
+    },
+    {
+      "artifact": {
+        "path": "/tmp/hoim-roster-ui-final-verify-execution.json",
+        "bytes": 38971,
+        "sha256": "2412e3c422d52e98d402fad5da3c055eb2730c428acb0fd5dd159f87956b60c0"
+      },
+      "reason": "Initial npm verify stopped at an actual newly reported follow-redirects 1.16.0 high-severity audit failure, before build. Only the affected transitive package was upgraded to its official 1.16.1 patch."
+    },
+    {
+      "artifact": {
+        "path": "/tmp/hoim-roster-ui-final2-verify-execution.json",
+        "bytes": 40204,
+        "sha256": "5938bcf99f897f57665b6dae4d6799c722e94d5ff9354a3d816bc99a6c7820cf"
+      },
+      "reason": "After the dependency and lifecycle fixes, real npm audit and build succeeded but total JS 6131087 exceeded the unchanged 6000000-byte budget. Only the exact repeated VabPageHeader SFC was deduplicated before the final3 passing build."
+    },
+    {
+      "artifact": {
+        "path": "/tmp/hoim-roster-frontend-independent-review.json",
+        "bytes": 5592,
+        "sha256": "c9dabaaf184467ed0020f80a2c6c897554d35d7ec06dc3d8051d2fc09ec38f8d"
+      },
+      "reason": "Independent pure-VM review reproduced history403 retaining an already displayed private original. Product cleanup and nine actual browser lifecycle regressions subsequently fixed current/stale request handling; final independent48 checks passed."
+    }
+  ],
+  "fifteen_historical_verification_records_unchanged": {
+    "doc/ai-aki-verification.json": "a2f8e928266ff16d46973db731329d4e96cbfe09e519ba9f5fcbc8ab384a897c",
+    "doc/ai-ecg-classifier-smoke.json": "838b0305249698617bc475f7158dfbfbb9e6e22e6d6e84e51974bfcfebb90c61",
+    "doc/ai-ecg-verification.json": "1eedfa9eb918cf6e6b1ee1f201b7413760eeec501c128f4a73401741f0427f94",
+    "doc/ai-forecast-verification.json": "9b5683bca58efcf7fc460410529fd5aeeed91e2646eb47be24b836cbadc20d63",
+    "doc/ai-frontend-dependencies-verification.json": "968757f4a75e921038133b3fa9a94947ab4d5607142dce8da964f2a13d00bb1d",
+    "doc/ai-imaging-classifier-smoke.json": "b2185a31ff66c4602c10136d5b15404199f50cf7d65ea4a8be4718778c6a9e89",
+    "doc/ai-imaging-verification.json": "63646b181dae4f531abe233708a24f9b9cc05037ef95d57e1e6f39c7f9880148",
+    "doc/ai-laboratory-verification.json": "646103e4874b4f895424987520c7adfb6fb8afdd9eb6e2c7104ed2095b72752f",
+    "doc/ai-news2-verification.json": "363be8c61e2f36705dccc4604631e7d0e84aaa6cc922196ed36e48e740ca6570",
+    "doc/ai-nursing-verification.json": "a04248f9de57ddd878c1b408da1833f53651cd3535d8385d2275874a7f6f9517",
+    "doc/ai-observation-verification.json": "b75ab8c7ff94704cb823be59d51539f06a16a24edf0020b0e87edfd6cf6e6bee",
+    "doc/ai-organ-support-verification.json": "175b4d4b66960f623170aded7ca7dec32f462fc34278289411c1ddda3dbc653d",
+    "doc/ai-qsofa-verification.json": "d3c4cea9a657527540d3c570512a00568f92a5381c066e9a0bcf204a2e3c7ba4",
+    "doc/ai-sofa-verification.json": "20235fe055a6995be2b40270a52f67cba778d445cd10113e7f8185dbeab0cdca",
+    "doc/ai-speech-smoke.json": "41ad522da4f04e2a6d75595660ecbc2549acdcd159450aa99602b495c8e690a0"
+  },
+  "implementation_and_generated_artifact_sha256": {
+    "fastapi_be/.env.example": "d6d95fe4b3b7151569ecb6f13864371f1327e60fe5b7c79ba5635e61e0c3d3ab",
+    "fastapi_be/Dockerfile.roster": "21d7074bc1c3797a5f9734d1768253d652ceed13f489d611f085d5837b2dd0b8",
+    "fastapi_be/alembic/versions/20261020_roster_plans.py": "e822b6f51353ea1fefb1b68a2a0404e47846396f8fe3abf29d0346343b548ba6",
+    "fastapi_be/alembic/versions/20261020_roster_sources.py": "c575bbc7704f9144a5981932ff4fa2acf56a3dd5f2f4ba6e632b305e0d85369c",
+    "fastapi_be/app/ai/catalog.py": "4c56b62e3a5e02d47e6defec5d4fa76d918a176ffd88e90b7a11fabc36a946b5",
+    "fastapi_be/app/ai/context.py": "2a03470784826e9910ed19c7c35f785eb5dc5dd7bd8d6d0961772c994161fc49",
+    "fastapi_be/app/ai/gateway.py": "8af31c7c1af319efbdded7c4189a8d645016f55cc11c6d7ea7d72f197f822827",
+    "fastapi_be/app/ai/governance.py": "159bc5fab39ad6a4a37452905133cdb8b62ddea8fd37bd1d329abed2e664dabe",
+    "fastapi_be/app/ai/operational_sources.py": "ce1482a2b30221e8e1095b453e69a729c50e352844530a0f18f308ff016fd5de",
+    "fastapi_be/app/ai/readiness.py": "3182819ad44167b9bd7d4cc7124e1f44c7151669ea95559953474e60e2ad6bf4",
+    "fastapi_be/app/ai/references.py": "096a87c05cbfd58a520cbf6879c2cc4e6e0b18b7b9a763241c2fe642204d5b09",
+    "fastapi_be/app/ai/roster_config.py": "b988f37928ad0c0040b0e7d8e950687e113eb59dd1432c69a21a6c836521ebcb",
+    "fastapi_be/app/ai/roster_context.py": "dd50abd4f005385894103c150f8497ab317fb37ff864b2ce5956882c9511012f",
+    "fastapi_be/app/ai/roster_contract.py": "558b284f70b8af4265abd899713da7d0ee2fadc7aa2882645d45213d6e69d344",
+    "fastapi_be/app/ai/roster_facts.py": "db3e403b0d0f1339eaf1c336d3848841bba3cf1f75fb1988267de2b5ba40fffc",
+    "fastapi_be/app/ai/roster_model.py": "9f1bfea24581c948f57fd0f201d1d619e9a0b75ad11292044156be55ab9450c7",
+    "fastapi_be/app/ai/roster_models.py": "db2eeb2241f91e88c194b6f75e4fb85456a1110ec6ff02f7fdec96b7ea271347",
+    "fastapi_be/app/ai/roster_plan_input.py": "e010260c7f973b52f9b76aee35012adbb30a433a5b2a1c8ed99afed080ba63b5",
+    "fastapi_be/app/ai/roster_plan_models.py": "098a31e8cdd54765de48e6233ac197ce97265a56fa0f1fec2b893a1ace25819e",
+    "fastapi_be/app/ai/roster_plans.py": "d055dad61a94b7fce968df1ae52d6538f4d3eaf30681e4ceadbf34a7c1817879",
+    "fastapi_be/app/ai/roster_probe.py": "052228dcd92c1b22bae810cd6c60a5c46c01af8dbedadc7f971eaf0b6b1d5cfb",
+    "fastapi_be/app/ai/roster_protocol.py": "37e29f7eb99fbc1c7fc50e8cf8bc6d6b272e34df0ea6573553c4deeb6dd62523",
+    "fastapi_be/app/ai/roster_server.py": "fbb2818325610e53a576399b050b32d704fe4f196b35c9fc3717c389576b2ae1",
+    "fastapi_be/app/ai/roster_storage.py": "3c8fd95057e0c9fa4d7694d2778361765f2fe6084e365afa6739057408775929",
+    "fastapi_be/app/ai/runtime.py": "a4f73807802a411b424af5f544e99442b6c3891c67c5617e431bfda77420c9be",
+    "fastapi_be/app/ai/schemas.py": "42c31ec691d6bef94c0ece6f166bc826b072a742d62b6aee04a98b64706ebb62",
+    "fastapi_be/app/main.py": "8983f07dc01f1e11301144a9b8626114647dc7262da35aa52810bcc7cfe6a463",
+    "fastapi_be/app/models.py": "3f696c8c310760df0f959392d3962672fe06a7624cd41e95618d78d226d9c027",
+    "fastapi_be/app/routers/ai.py": "c5185b46e494cec4fc23b9d5f02dd47669b3003a616b69141c2a11913a7d0bf7",
+    "fastapi_be/app/routers/ai_admin.py": "465913adeccdd8e87d050a1a48d78d331635746b9a3e837743b5960c76cc2671",
+    "fastapi_be/app/routers/ai_roster_plans.py": "b4326569be948491297f713859f1ebf83afe62645df292e6b0658ef78a99d6d7",
+    "fastapi_be/app/routers/ai_roster_sources.py": "ed9818e3a617c6a6d32d17f41b8bea256aed30d372200c7180213b065e4bc3e4",
+    "fastapi_be/requirements-roster.txt": "a959df5e064f8d57bc50ab1af69e7ad667592e6355bc014433cb7bdadd6886b5",
+    "fastapi_be/scripts/generate_rbac_matrix.py": "d0d749266bb1657f048e6adf0150ac039a5d5486733594387a48455ef80a2810",
+    "fastapi_be/tests/test_ai_inventory_sources.py": "8fbde2adeb7758dd5b465ade11885f2c5cc4c6184fd9aee41746f6f9380dc338",
+    "fastapi_be/tests/test_ai_operational_validation.py": "05afe77eaef53d7f00bcf56a9a89f651ec271932cd4427d27aa0514c9b159723",
+    "fastapi_be/tests/test_ai_roster_catalog.py": "c75931d0fb40b4de77fed8a400e406cbb0ab9cee133514f800c2de53503543e4",
+    "fastapi_be/tests/test_ai_roster_contract.py": "5794004d7cbb9023b18b00c02857997eb7ac55a09ae066539664b87eade42098",
+    "fastapi_be/tests/test_ai_roster_facts.py": "f08930511e1c67ad5fa271c2ce5bf659d5af08cf83df9da66c7331280ceec884",
+    "fastapi_be/tests/test_ai_roster_gateway.py": "829e1e7354da32142751b6d6a58e5794eb3655eec1d5ebd784737ede08f414fa",
+    "fastapi_be/tests/test_ai_roster_history_filters.py": "631692dd4859832cc4383cb3453782cbf1a9b9320f69707d6a2ad8f30a6a4baf",
+    "fastapi_be/tests/test_ai_roster_model.py": "b0ccdd631cfb62cbdce0c0a45fa724b155106c2732a9ff844882e70c489de6b7",
+    "fastapi_be/tests/test_ai_roster_pipeline.py": "711b6dd919c17eed199422fa82beb4398c0c67ea5d06a3372ae29e8aa2caea34",
+    "fastapi_be/tests/test_ai_roster_plan_guards.py": "952fad2fb4c834b411deeef996043796ced67c3c9a84420229cc24e03f2ccce2",
+    "fastapi_be/tests/test_ai_roster_plan_input.py": "529d0c2af1a201f5a44c3530105581158f8cb4a8204bb6914210b9ffc919a931",
+    "fastapi_be/tests/test_ai_roster_plans.py": "da57fe4bcbd7e839ab81954d7abde727af65137fb22ae2f23a49b586e1c19966",
+    "fastapi_be/tests/test_ai_roster_plans_migration.py": "86fdbe7eb99acdaef9034b1ae239f2f389a2f319dea18ff0253f2005e75f92ef",
+    "fastapi_be/tests/test_ai_roster_probe.py": "8469bfc20071b47538efc7288e6370ab71cfef66c25f51c599d938b88d3d3afa",
+    "fastapi_be/tests/test_ai_roster_server.py": "73bbeac00a368d70d5f6420c32e88e11fe1925c42c1650dd63008bbcb56834d0",
+    "fastapi_be/tests/test_ai_roster_sources_api.py": "4000900df2914fca8dc3bffa1459c67307527254ed27f3552e5d36b370a30ff7",
+    "fastapi_be/tests/test_ai_roster_sources_migration.py": "73f4ab68df3b0b34538728751399006f2b80f7332656993e1ab14497744fdc8e",
+    "fastapi_be/tests/test_ai_surgical_resources.py": "3867642e4656801a1133457302a1f1b824492a0a1a0d0f2489dd393d6f2d2746",
+    "fastapi_be/tests/test_rbac_drift.py": "c9041d15cd544729b59d9b98fb57d1afd474e85fde2c5031c10303710396d11c",
+    "vue3-new-ui/e2e/ai-roster-assistant.spec.js": "c17704713b3b6ec9d7bdc7873c195778662b94dd73dac5f973b19069a9597985",
+    "vue3-new-ui/e2e/ai-roster-entry.spec.js": "f89393ae163763ce64aa0ada63214a3bda54c86fcd9829dacaf998e6674f5525",
+    "vue3-new-ui/e2e/ai-roster-findings.spec.js": "6ff27b0ba2fbfd82747fa8cf7e1c9ca2da4babd9c55293b6a7c9f230361d327f",
+    "vue3-new-ui/e2e/ai-roster-plan-api.spec.js": "410a186d49242421d53608f014761ca3b334e5d65e340a17e170b2b9fe7b45ae",
+    "vue3-new-ui/e2e/ai-roster-plan-input.spec.js": "5bb100be9fb2da91454d4584372bcbc5b7e782f05cb23072eb4cbd2191b78e17",
+    "vue3-new-ui/e2e/ai-roster-provider.spec.js": "7fda3e1f5db10a7c66d0a4a76019bda1ab0e1aec1ee6ed24adccc4a352c64bd0",
+    "vue3-new-ui/e2e/ai-roster-source-api.spec.js": "a1db3a04ee6234fab9845b8db4547577eb4aa2bef25428b3fe99237db869cef7",
+    "vue3-new-ui/e2e/ai-roster-source-entry.spec.js": "dc96fec03f8697f7e3375216cf32f007e2c4dbe2a9c1d5dc312854943c1747cf",
+    "vue3-new-ui/e2e/ai-roster-sources.spec.js": "94baa82b1400dca1dfcc77c6135beddb136af27d609683b344d3a15734e86302",
+    "vue3-new-ui/e2e/fixtures/roster-source-harness.cjs": "ebfddf287938b05decef6d992d0940281395ac250f5b3fb94b52cd6fd98f9230",
+    "vue3-new-ui/e2e/fixtures/roster-synthetic/README.md": "5609bf490428a52a904881428471a1d7862e97e816405df5178ccd27e6ba5f4f",
+    "vue3-new-ui/e2e/fixtures/roster-synthetic/capabilities.json": "aa84852414a7ec75e59c17aae7615ad5489a276069b37581b88d2c8b8de595dc",
+    "vue3-new-ui/e2e/fixtures/roster-synthetic/core-meet.json": "d789e72d8721004a60edbc2dade2967c587464b7dea90b0a20be10495e2cee68",
+    "vue3-new-ui/e2e/fixtures/roster-synthetic/core-slots.json": "22dc0c252b9771a5950c772893a01d24a22a1cb9c954bfac62c5c561850553e8",
+    "vue3-new-ui/e2e/fixtures/roster-synthetic/feasible-meet.json": "bc7d138de7ac7bd6c93a4bef36950a073913eb630cdcc0125d65f84fbdf77880",
+    "vue3-new-ui/e2e/fixtures/roster-synthetic/feasible-slots.json": "7eda95ae747adc49176223a23652d367cbadd7aed265d0f2fa376e59196ec114",
+    "vue3-new-ui/e2e/fixtures/roster-synthetic/pipeline-plan.json": "b2e7bbf9b50f95a948e30afc9853569b8950a793084c675703ac11d3f170048c",
+    "vue3-new-ui/e2e/fixtures/roster-synthetic/pipeline.json": "1ea2a8bc156d06f57c34183d8b17c055dceb8d9a77059f9abded7fb5b4b8cd68",
+    "vue3-new-ui/e2e/fixtures/roster-synthetic/plan-options.json": "96fe5f7b09e03675803469a8866f47b356f39843b742428370b977b009a25c7b",
+    "vue3-new-ui/e2e/fixtures/roster-synthetic/plans.json": "01113fdd60939e13d01d1eae940f01825d0a4adccafa34759f7e9f16bdf75fb0",
+    "vue3-new-ui/e2e/fixtures/roster-synthetic/sources.json": "5b55dca843c1d8e997a2837727d08426e0bd664c6605de8d7f692845483ed6ab",
+    "vue3-new-ui/e2e/fixtures/roster-synthetic/terminal.json": "5ac953a0eaf5338a8731e263d40a34fe423e05f415a933f911ac7611b723cb8a",
+    "vue3-new-ui/e2e/fixtures/roster-ui.cjs": "4787a51f7550b3f4fc6f5e0a8d9a6d5b926599dc9d7e137249590f75ffffeebb",
+    "vue3-new-ui/package-lock.json": "97a0a0ecf04a2a4c4707457e8a7601a9f39f1c76d5d0f8ed6464e841477eb538",
+    "vue3-new-ui/rspack.config.js": "741a6b4dd7a2cae3bd229bbedaed9e721725045f8be8932a995e037bc305fff2",
+    "vue3-new-ui/scripts/generate-roster-schemas.cjs": "693742be192c1226136c7226e448064820c26e7a9bc72f41c2ef6e81bac676d9",
+    "vue3-new-ui/src/api/rosterPlans.js": "57197d7fa266598e409dfe2809f7107ca66b285c15658cb4f7658ebc86781b34",
+    "vue3-new-ui/src/api/rosterSchemas.json": "7ebb3d1354b3cd302b024bb4c8b5d9f6f72cef11e4a5daab36453bf51ddbdb8e",
+    "vue3-new-ui/src/api/rosterSources.js": "95430442541e26262959ad0436d3856c9826e8cccf35657dbeb7eabd703ef946",
+    "vue3-new-ui/src/api/sofaSchema.js": "dc9e670e0e724663701df146a5502a95d31a7a45a221cb6e0cf8a1e199eb2f20",
+    "vue3-new-ui/src/components/AIAssistant/index.vue": "ddcf52f2bf341b7fa39cdfff1d4d9a549d2d57b68521338a1670fa91032e62b0",
+    "vue3-new-ui/src/components/AIRosterFindings/index.vue": "1bb7328c57ee62848d44106032c106f512bdf55741443d5a95bce0b59735594f",
+    "vue3-new-ui/src/components/AIRosterInput/PlanForm.vue": "035485e2216a7c3b55033c401707a0924b966773a5e7a928c123a6e500a899e2",
+    "vue3-new-ui/src/components/AIRosterInput/index.vue": "6214b542317448348f92a2caeb1f3e0d6bf63d7d7ba307a833ca30e8b4e549f5",
+    "vue3-new-ui/src/components/AIRosterProviderCheck/index.vue": "21e4fe356d7168d61f395fdf08446b95898516f450305750bf6b031672489f50",
+    "vue3-new-ui/src/components/AIRosterSources/BreaksEditor.vue": "c1e4aace8cded3fbdf524e44a239f5b0cea56fdfcd79df8fb79fb702e23d0fba",
+    "vue3-new-ui/src/components/AIRosterSources/NullableValue.vue": "cead600fbff4b228d6e659bf7ec936494265bbbc9d80a42aeb532e54e810ab63",
+    "vue3-new-ui/src/components/AIRosterSources/SourceForm.vue": "54d926f233006c1acbdb56d1ed8bf26bb50f520665ea969c64dc01a7d30f0493",
+    "vue3-new-ui/src/components/AIRosterSources/index.vue": "859aa9040e475ede5fa8dcae11ae2d220c866de9c960bcd0ec1643c3353cc8bf",
+    "vue3-new-ui/src/components/AIRuleProviderCheck/index.vue": "e66a833f7461bd229720333c6bfaa124e03ad15bea6c91cdd46c373de6e80534",
+    "vue3-new-ui/src/views/system/aiManagement.vue": "66d3f71d1d9fcc73434d6602c5f7d0e97ff1398de3fe8b9258ae46111f9bf53a",
+    "doc/ai-prompts.json": "83cf671bf7c0d702fc6aac86221c77732e2ab5156d57093980b2eab8fb1bb705",
+    "doc/ai-capabilities.md": "b102152ca15a0dadf68791655a9398b1bae2b461a1774cf2960213a9b6213a10",
+    "doc/api-rbac-matrix.md": "2ea7589946a34fbea96397e8ab12bbe91068d0c0c1bbfe2fd41da387f5b740bf",
+    "fastapi_be/rbac_matrix.json": "d63d98fe255602e7ac9362a7a9835ad6132517393d5faa1446edf4d1cb5769a5"
+  },
+  "no_all80_completion_or_real_operational_effect_claim": true,
+  "recording_script": {
+    "path": "/tmp/hoim-roster-record-final-evidence.py",
+    "bytes": 24403,
+    "sha256": "c611d33248a5ed4ea6c87f0461cc998839f9689b78ca0513acf6891cd895b3d0"
+  }
+}

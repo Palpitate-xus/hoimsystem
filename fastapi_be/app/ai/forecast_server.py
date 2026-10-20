@@ -164,7 +164,7 @@ def create_forecast_app(config):
                 return await asyncio.wait_for(asyncio.to_thread(build_response, task, descriptor), config.timeout_seconds)
             except TimeoutError as exc:
                 raise HTTPException(504, "统计任务超时，请核对服务资源") from exc
-            except (ValidationError, ValueError, TypeError, KeyError, OverflowError, UnicodeDecodeError) as exc:
+            except (ValidationError, ValueError, TypeError, KeyError, OverflowError, RecursionError, UnicodeDecodeError) as exc:
                 raise HTTPException(422, "统计任务、来源覆盖、日期或固定数值契约无效") from exc
 
     return app

@@ -151,6 +151,29 @@ async def test_ambiguous_or_nonfinite_json_is_rejected(body):
 
 
 @pytest.mark.asyncio
+async def test_deep_json_below_byte_limit_is_rejected_without_forecasting(monkeypatch):
+    config = configuration()
+    app = forecast_server.create_forecast_app(config)
+    calls = []
+
+    def forbidden(*args):
+        calls.append(args)
+        raise AssertionError("invalid deep input must not execute forecasting")
+
+    monkeypatch.setattr(forecast_server, "build_response", forbidden)
+    body = '{"x":' + "[" * 10000 + "0" + "]" * 10000 + "}"
+    assert len(body.encode()) < config.max_request_bytes
+    async with httpx.AsyncClient(
+        transport=httpx.ASGITransport(app=app, raise_app_exceptions=False),
+        base_url="http://forecast",
+        headers={"Authorization": "Bearer " + KEY, "Content-Type": "application/json"},
+    ) as client:
+        response = await client.post("/tasks", content=body)
+    assert response.status_code == 422
+    assert not calls
+
+
+@pytest.mark.asyncio
 async def test_body_limit_applies_to_streamed_bytes_without_content_length():
     app = forecast_server.create_forecast_app(configuration())
 

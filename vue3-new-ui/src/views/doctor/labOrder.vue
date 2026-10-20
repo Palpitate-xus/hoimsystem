@@ -17,9 +17,10 @@
         <el-table-column prop="check_type" label="检查类型"  sortable />
         <el-table-column prop="status" label="状态">
           <template #default="{row}">
-            <el-tag v-if="row.status===0" type="warning">待缴费</el-tag>
-            <el-tag v-else-if="row.status===1" type="primary">待检查</el-tag>
-            <el-tag v-else type="success">已完成</el-tag>
+            <el-tag v-if="row.status===0" type="warning">待处理</el-tag>
+            <el-tag v-else-if="row.status===1" type="primary">已录入，待审核</el-tag>
+            <el-tag v-else-if="row.status===2" type="success">已审核</el-tag>
+            <el-tag v-else type="info">状态未核实</el-tag>
           </template>
         </el-table-column>
         <el-table-column prop="create_time" label="申请时间"  sortable />

@@ -119,6 +119,10 @@ test("AKI报告精确原差值或选段总量与冻结原量矛盾时拒绝展�
   const state = await session(page), row = makeAssessment(), report = analysisFor(row.specialist_source); report.criteria[0].evidence.absolute_change = "99.9"; const view = await render(page, row, report); await expect(view.getByRole("alert")).toContainText("计算结果已拒绝展示"); const complete = negativeAssessment(), negative = analysisFor(complete.specialist_source, "negative"); negative.criteria[3].evidence.total_volume_ml = "0"; await render(page, complete, negative); await expect(view.getByRole("alert")).toContainText("计算结果已拒绝展示"); noModel(state);
 });
 
+test("尿量标准声称已满足却没有任何原区间证据链时拒绝分期", async ({ page }) => {
+  const state = await session(page), row = makeAssessment(), report = analysisFor(row.specialist_source); report.criteria[3].status = "met"; report.criteria[3].stage = 1; const view = await render(page, row, report); await expect(view.getByRole("alert")).toContainText("计算结果已拒绝展示"); await expect(view.getByLabel("AKI最低达到分期", { exact: true })).toHaveCount(0); noModel(state);
+});
+
 test("完整原尿量子段支持阳性时仍展示其他覆盖缺口，不将区间均值说成逐小时持续", async ({ page }) => {
   const state = await session(page), row = negativeAssessment(), source = row.specialist_source;
   row.snapshot.urine_intervals[0].payload.volume_ml = source.urine_intervals[0].volume_ml = "0.00000000";

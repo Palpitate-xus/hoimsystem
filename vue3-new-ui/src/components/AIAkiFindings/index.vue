@@ -59,6 +59,7 @@ function evidenceMatches(row, source) {
     if (!Array.isArray(ids) || new Set(ids).size !== ids.length) return false;
     const chain = ids.map(id => source.urine_intervals.find(item => item.source_id === id));
     if (chain.some(item => !item)) return false;
+    if (["met", "not_met_in_selected_data"].includes(row.status) && !chain.length) return false;
     if (chain.length) {
       if (evidence.interval_start_at !== chain[0].start_at || evidence.interval_end_at !== chain.at(-1).end_at || chain.some((item, index) => index && item.start_at !== chain[index - 1].end_at) || chain.some(item => item.volume_ml === null || item.collection_completeness !== "complete" || item.patient_total !== true)) return false;
       try {

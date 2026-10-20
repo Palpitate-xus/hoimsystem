@@ -18,6 +18,9 @@
       <el-col :span="19">
         <el-card v-if="currentPatient">
           <el-tabs v-model="activeTab">
+            <el-tab-pane label="结构化观测" name="observations" lazy>
+              <inpatient-observation-panel v-if="activeTab === 'observations'" :patient-id="Number(currentPatient.patient_id)" :admission-id="currentPatient.admission_id" :active="activeTab === 'observations'" />
+            </el-tab-pane>
             <el-tab-pane label="医嘱执行" name="execution">
               <div class="page-toolbar">
                 <el-select v-model="executionFilter" placeholder="状态" clearable size="small" style="width: 120px;">
@@ -229,12 +232,13 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from "vue";
+import { ref, computed, defineAsyncComponent, onMounted, watch } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { getInpatientList } from "@/api/admission";
 import { getExecutionList, executeOrder } from "@/api/inpatientOrder";
 import { getNursingRecordList, createNursingRecord } from "@/api/nursing";
 import { getTemperatureRecordList, createTemperatureRecord } from "@/api/nursing";
+const InpatientObservationPanel = defineAsyncComponent(() => import("@/components/InpatientObservationPanel/index.vue"));
 
 const inpatients = ref([]);
 const patientKeyword = ref("");

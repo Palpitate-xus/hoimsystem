@@ -62,6 +62,7 @@
         </el-tab-pane>
 
         <el-tab-pane label="挂号预测来源" name="forecast_sources" lazy><ai-forecast-series-management v-if="tab === 'forecast_sources'" /></el-tab-pane>
+        <el-tab-pane label="住院观测窗" name="observation_windows" lazy><ai-observation-window-management v-if="tab === 'observation_windows'" /></el-tab-pane>
         <el-tab-pane label="录音治理" name="audio"><ai-audio-management v-if="tab === 'audio'" /></el-tab-pane>
         <el-tab-pane label="影像原文件" name="images"><ai-image-management v-if="tab === 'images'" /></el-tab-pane>
         <el-tab-pane label="心电原文件" name="ecg"><ai-ecg-management v-if="tab === 'ecg'" /></el-tab-pane>
@@ -289,6 +290,7 @@ import AiAudioManagement from "@/components/AIAudioManagement/index.vue";
 import AiImageManagement from "@/components/AIImageManagement/index.vue";
 import AiEcgManagement from "@/components/AIEcgManagement/index.vue";
 const AiForecastSeriesManagement = defineAsyncComponent(() => import("@/components/AIForecastSeriesManagement.vue"));
+const AiObservationWindowManagement = defineAsyncComponent(() => import("@/views/system/AIObservationWindowManagement.vue"));
 const AiForecastProviderCheck = defineAsyncComponent(() => import("@/components/AIForecastProviderCheck/index.vue"));
 import {
   activateAIPrompt, createAIKnowledge, createAIPatientGrant, createAIPrompt,

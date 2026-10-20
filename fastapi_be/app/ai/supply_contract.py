@@ -328,6 +328,7 @@ RECIPE = {
         "daily": ["mae", "mse", "me", "wape", "mase_lag1"],
         "groups": ["all_eligible_pairs", "each_lead", "each_origin_horizon_sum"],
         "mase_scale": "origin_training_prefix_mean_absolute_first_difference",
+        "cumulative_mase": "not_provided_distinct_aggregation",
         "zero_actual_sum": "wape_null",
         "any_zero_training_scale": "mase_null_no_pair_dropping",
     },
@@ -491,7 +492,7 @@ class Metrics(StrictModel):
     wape: ExactFraction | None
     wape_undefined_reason: Literal["zero_actual_sum"] | None
     mase: ExactFraction | None
-    mase_undefined_reason: Literal["zero_origin_scale"] | None
+    mase_undefined_reason: Literal["zero_origin_scale", "not_applicable_to_cumulative"] | None
     zero_scale_count: Count
 
 

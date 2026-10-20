@@ -1,0 +1,1123 @@
+{
+  "recorded_at_utc": "2026-10-20T12:07:41.435723+00:00",
+  "baseline_commit": "26cde373e2c6d09aeaf983754ea9d33a239cfd16",
+  "platform_commit": "94aebd101da72504fee1b8a8ace179b6c1a597fb",
+  "scope": "Minimal pinned frontend dependency remediation plus two reproduced HTTP wrapper fixes and actual isolated browser/HTTP/style-HMR regression. Historical forecast/model evidence remains unchanged.",
+  "real_patient_data_used": false,
+  "existing_hospital_database_accessed": false,
+  "existing_hospital_backend_contacted": false,
+  "production_deployment_performed": false,
+  "clinical_or_operational_validation_performed": false,
+  "ai_model_or_prompt_configuration_changed": false,
+  "dependency_delivery": {
+    "node": "24.15.0",
+    "npm": "11.12.1",
+    "installation_flags": [
+      "--ignore-scripts",
+      "--no-audit",
+      "--no-fund"
+    ],
+    "dependency_only_commits": [
+      "14821c1",
+      "5b6e56d",
+      "bbb1b1b"
+    ],
+    "stage_verification": [
+      {
+        "name": "batch1",
+        "commit": "14821c1",
+        "build": {
+          "exit_code": 0,
+          "seconds": 19.38,
+          "warning_count": 0,
+          "log": "/tmp/hoim-deps-batch1-build.log"
+        },
+        "npm_ls_exit_code": 0,
+        "audit_exit_code": 1,
+        "audit": {
+          "affected_package_count": 6,
+          "unique_advisory_count": 14,
+          "metadata": {
+            "info": 0,
+            "low": 0,
+            "moderate": 0,
+            "high": 6,
+            "critical": 0,
+            "total": 6
+          },
+          "log": "/tmp/hoim-deps-batch1-audit.json"
+        },
+        "bundle": {
+          "largestJavaScript": {
+            "file": "element-plus.1235714c.js",
+            "bytes": 647479
+          },
+          "totalJavaScript": 5328946,
+          "totalAssets": 5847192,
+          "limits": {
+            "largestJavaScript": 700000,
+            "totalJavaScript": 6000000,
+            "totalAssets": 7000000
+          }
+        },
+        "lock_diff": "/tmp/hoim-deps-batch1-lock-diff.json",
+        "actual_full_tree": "/tmp/hoim-deps-batch1-tree.json",
+        "install_log": "/tmp/hoim-deps-batch1-install.log"
+      },
+      {
+        "name": "batch2",
+        "commit": "5b6e56d",
+        "build": {
+          "exit_code": 0,
+          "seconds": 21.31,
+          "warning_count": 0,
+          "log": "/tmp/hoim-deps-batch2-build.log"
+        },
+        "npm_ls_exit_code": 0,
+        "audit_exit_code": 1,
+        "audit": {
+          "affected_package_count": 3,
+          "unique_advisory_count": 1,
+          "metadata": {
+            "info": 0,
+            "low": 0,
+            "moderate": 0,
+            "high": 3,
+            "critical": 0,
+            "total": 3
+          },
+          "log": "/tmp/hoim-deps-batch2-audit.json"
+        },
+        "bundle": {
+          "largestJavaScript": {
+            "file": "element-plus.1235714c.js",
+            "bytes": 647479
+          },
+          "totalJavaScript": 5333439,
+          "totalAssets": 5851685,
+          "limits": {
+            "largestJavaScript": 700000,
+            "totalJavaScript": 6000000,
+            "totalAssets": 7000000
+          }
+        },
+        "lock_diff": "/tmp/hoim-deps-batch2-lock-diff.json",
+        "actual_full_tree": "/tmp/hoim-deps-batch2-tree.json",
+        "install_log": "/tmp/hoim-deps-batch2-install.log"
+      },
+      {
+        "name": "batch3",
+        "commit": "bbb1b1b",
+        "build": {
+          "exit_code": 0,
+          "seconds": 20.88,
+          "warning_count": 5,
+          "log": "/tmp/hoim-deps-batch3-build.log"
+        },
+        "npm_ls_exit_code": 0,
+        "audit_exit_code": 0,
+        "audit": {
+          "affected_package_count": 0,
+          "unique_advisory_count": 0,
+          "metadata": {
+            "info": 0,
+            "low": 0,
+            "moderate": 0,
+            "high": 0,
+            "critical": 0,
+            "total": 0
+          },
+          "log": "/tmp/hoim-deps-batch3-audit.json"
+        },
+        "bundle": {
+          "largestJavaScript": {
+            "file": "element-plus.1235714c.js",
+            "bytes": 647479
+          },
+          "totalJavaScript": 5333960,
+          "totalAssets": 5852206,
+          "limits": {
+            "largestJavaScript": 700000,
+            "totalJavaScript": 6000000,
+            "totalAssets": 7000000
+          }
+        },
+        "lock_diff": "/tmp/hoim-deps-batch3-lock-diff.json",
+        "actual_full_tree": "/tmp/hoim-deps-batch3-tree.json",
+        "install_log": "/tmp/hoim-deps-batch3-install.log"
+      }
+    ],
+    "audit_phases": [
+      {
+        "phase": "baseline",
+        "metadata": {
+          "info": 0,
+          "low": 0,
+          "moderate": 2,
+          "high": 8,
+          "critical": 0,
+          "total": 10
+        },
+        "affected_packages": [
+          "@vue/server-renderer",
+          "axios",
+          "brace-expansion",
+          "braces",
+          "chokidar",
+          "fast-uri",
+          "postcss-selector-parser",
+          "sass",
+          "source-map-js",
+          "vue"
+        ],
+        "unique_advisory_urls": [
+          "https://github.com/advisories/GHSA-3pq3-5fj3-cg6v",
+          "https://github.com/advisories/GHSA-44g4-m2mj-wpvx",
+          "https://github.com/advisories/GHSA-4hqw-qxg8-jxx2",
+          "https://github.com/advisories/GHSA-542g-h47m-68v8",
+          "https://github.com/advisories/GHSA-68fv-2mgg-jv7q",
+          "https://github.com/advisories/GHSA-6j4f-fj2g-mc7p",
+          "https://github.com/advisories/GHSA-9fr6-4gfg-395g",
+          "https://github.com/advisories/GHSA-c29m-xwm3-cm6r",
+          "https://github.com/advisories/GHSA-g2v6-rqmx-r4w6",
+          "https://github.com/advisories/GHSA-hrr3-gc8f-f4qj",
+          "https://github.com/advisories/GHSA-j8rh-479h-cp32",
+          "https://github.com/advisories/GHSA-m8m8-qj5v-23w3",
+          "https://github.com/advisories/GHSA-mghh-pgcx-3jjj",
+          "https://github.com/advisories/GHSA-q2hr-2g5m-vwhr",
+          "https://github.com/advisories/GHSA-qhr7-859c-m2p7",
+          "https://github.com/advisories/GHSA-r4gj-5m52-g5wh",
+          "https://github.com/advisories/GHSA-rj75-hqrm-r3gf",
+          "https://github.com/advisories/GHSA-vfj7-8cjw-p6xm",
+          "https://github.com/advisories/GHSA-vh66-26gq-q6x8",
+          "https://github.com/advisories/GHSA-x97p-jq2g-jp4f"
+        ]
+      },
+      {
+        "phase": "batch1",
+        "metadata": {
+          "info": 0,
+          "low": 0,
+          "moderate": 0,
+          "high": 6,
+          "critical": 0,
+          "total": 6
+        },
+        "affected_packages": [
+          "@vue/server-renderer",
+          "axios",
+          "braces",
+          "chokidar",
+          "sass",
+          "vue"
+        ],
+        "unique_advisory_urls": [
+          "https://github.com/advisories/GHSA-3pq3-5fj3-cg6v",
+          "https://github.com/advisories/GHSA-44g4-m2mj-wpvx",
+          "https://github.com/advisories/GHSA-4hqw-qxg8-jxx2",
+          "https://github.com/advisories/GHSA-542g-h47m-68v8",
+          "https://github.com/advisories/GHSA-9fr6-4gfg-395g",
+          "https://github.com/advisories/GHSA-c29m-xwm3-cm6r",
+          "https://github.com/advisories/GHSA-g2v6-rqmx-r4w6",
+          "https://github.com/advisories/GHSA-j8rh-479h-cp32",
+          "https://github.com/advisories/GHSA-m8m8-qj5v-23w3",
+          "https://github.com/advisories/GHSA-mghh-pgcx-3jjj",
+          "https://github.com/advisories/GHSA-r4gj-5m52-g5wh",
+          "https://github.com/advisories/GHSA-vfj7-8cjw-p6xm",
+          "https://github.com/advisories/GHSA-vh66-26gq-q6x8",
+          "https://github.com/advisories/GHSA-x97p-jq2g-jp4f"
+        ]
+      },
+      {
+        "phase": "batch2",
+        "metadata": {
+          "info": 0,
+          "low": 0,
+          "moderate": 0,
+          "high": 3,
+          "critical": 0,
+          "total": 3
+        },
+        "affected_packages": [
+          "braces",
+          "chokidar",
+          "sass"
+        ],
+        "unique_advisory_urls": [
+          "https://github.com/advisories/GHSA-vfj7-8cjw-p6xm"
+        ]
+      },
+      {
+        "phase": "batch3",
+        "metadata": {
+          "info": 0,
+          "low": 0,
+          "moderate": 0,
+          "high": 0,
+          "critical": 0,
+          "total": 0
+        },
+        "affected_packages": [],
+        "unique_advisory_urls": []
+      }
+    ],
+    "final_audit": {
+      "auditReportVersion": 2,
+      "vulnerabilities": {},
+      "metadata": {
+        "vulnerabilities": {
+          "info": 0,
+          "low": 0,
+          "moderate": 0,
+          "high": 0,
+          "critical": 0,
+          "total": 0
+        },
+        "dependencies": {
+          "prod": 142,
+          "dev": 341,
+          "optional": 18,
+          "peer": 0,
+          "peerOptional": 0,
+          "total": 482
+        }
+      }
+    },
+    "final_audit_record_sha256": "7880c3670ed5e8b4d7004b0e23de2e72830eab5425ec4fbe56cb6d17c89e7d9d",
+    "package_names_affected": 29,
+    "upgraded_package_version_sets": 18,
+    "fully_removed_package_names": [
+      "anymatch",
+      "binary-extensions",
+      "braces",
+      "fill-range",
+      "glob-parent",
+      "is-binary-path",
+      "is-extglob",
+      "is-glob",
+      "is-number",
+      "to-regex-range"
+    ],
+    "partially_removed_package_versions": {
+      "fsevents": {
+        "removed": [
+          "2.3.3"
+        ],
+        "retained": [
+          "2.3.2"
+        ]
+      }
+    },
+    "lock_entries_including_root": {
+      "before": 493,
+      "after": 483
+    },
+    "lock_layout_changes": {
+      "updated": [
+        {
+          "path": "node_modules/@vue/compiler-core",
+          "before": "3.5.34",
+          "after": "3.5.42"
+        },
+        {
+          "path": "node_modules/@vue/compiler-dom",
+          "before": "3.5.34",
+          "after": "3.5.42"
+        },
+        {
+          "path": "node_modules/@vue/compiler-sfc",
+          "before": "3.5.34",
+          "after": "3.5.42"
+        },
+        {
+          "path": "node_modules/@vue/compiler-ssr",
+          "before": "3.5.34",
+          "after": "3.5.42"
+        },
+        {
+          "path": "node_modules/@vue/reactivity",
+          "before": "3.5.34",
+          "after": "3.5.42"
+        },
+        {
+          "path": "node_modules/@vue/runtime-core",
+          "before": "3.5.34",
+          "after": "3.5.42"
+        },
+        {
+          "path": "node_modules/@vue/runtime-dom",
+          "before": "3.5.34",
+          "after": "3.5.42"
+        },
+        {
+          "path": "node_modules/@vue/server-renderer",
+          "before": "3.5.34",
+          "after": "3.5.42"
+        },
+        {
+          "path": "node_modules/@vue/shared",
+          "before": "3.5.34",
+          "after": "3.5.42"
+        },
+        {
+          "path": "node_modules/axios",
+          "before": "1.19.0",
+          "after": "1.20.0"
+        },
+        {
+          "path": "node_modules/brace-expansion",
+          "before": "5.0.9",
+          "after": "5.0.12"
+        },
+        {
+          "path": "node_modules/sass",
+          "before": "1.71.1",
+          "after": "1.79.0"
+        },
+        {
+          "path": "node_modules/sass/node_modules/chokidar",
+          "before": "3.6.0",
+          "after": "4.0.3"
+        },
+        {
+          "path": "node_modules/sass/node_modules/readdirp",
+          "before": "3.6.0",
+          "after": "4.1.2"
+        },
+        {
+          "path": "node_modules/source-map-js",
+          "before": "1.2.1",
+          "after": "1.2.2"
+        },
+        {
+          "path": "node_modules/vue",
+          "before": "3.5.34",
+          "after": "3.5.42"
+        }
+      ],
+      "added": [
+        {
+          "path": "node_modules/ajv/node_modules/fast-uri",
+          "before": null,
+          "after": "3.1.8"
+        },
+        {
+          "path": "node_modules/postcss-modules-local-by-default/node_modules/postcss-selector-parser",
+          "before": null,
+          "after": "7.1.6"
+        },
+        {
+          "path": "node_modules/postcss-modules-scope/node_modules/postcss-selector-parser",
+          "before": null,
+          "after": "7.1.6"
+        }
+      ],
+      "removed": [
+        {
+          "path": "node_modules/anymatch",
+          "before": "3.1.3",
+          "after": null
+        },
+        {
+          "path": "node_modules/binary-extensions",
+          "before": "2.3.0",
+          "after": null
+        },
+        {
+          "path": "node_modules/braces",
+          "before": "3.0.3",
+          "after": null
+        },
+        {
+          "path": "node_modules/fast-uri",
+          "before": "3.1.7",
+          "after": null
+        },
+        {
+          "path": "node_modules/fill-range",
+          "before": "7.1.1",
+          "after": null
+        },
+        {
+          "path": "node_modules/fsevents",
+          "before": "2.3.3",
+          "after": null
+        },
+        {
+          "path": "node_modules/glob-parent",
+          "before": "5.1.2",
+          "after": null
+        },
+        {
+          "path": "node_modules/is-binary-path",
+          "before": "2.1.0",
+          "after": null
+        },
+        {
+          "path": "node_modules/is-extglob",
+          "before": "2.1.1",
+          "after": null
+        },
+        {
+          "path": "node_modules/is-glob",
+          "before": "4.0.3",
+          "after": null
+        },
+        {
+          "path": "node_modules/is-number",
+          "before": "7.0.0",
+          "after": null
+        },
+        {
+          "path": "node_modules/postcss-selector-parser",
+          "before": "7.1.5",
+          "after": null
+        },
+        {
+          "path": "node_modules/to-regex-range",
+          "before": "5.0.1",
+          "after": null
+        }
+      ]
+    },
+    "all_package_changes": [
+      {
+        "name": "@vue/compiler-core",
+        "before_versions": [
+          "3.5.34"
+        ],
+        "after_versions": [
+          "3.5.42"
+        ]
+      },
+      {
+        "name": "@vue/compiler-dom",
+        "before_versions": [
+          "3.5.34"
+        ],
+        "after_versions": [
+          "3.5.42"
+        ]
+      },
+      {
+        "name": "@vue/compiler-sfc",
+        "before_versions": [
+          "3.5.34"
+        ],
+        "after_versions": [
+          "3.5.42"
+        ]
+      },
+      {
+        "name": "@vue/compiler-ssr",
+        "before_versions": [
+          "3.5.34"
+        ],
+        "after_versions": [
+          "3.5.42"
+        ]
+      },
+      {
+        "name": "@vue/reactivity",
+        "before_versions": [
+          "3.5.34"
+        ],
+        "after_versions": [
+          "3.5.42"
+        ]
+      },
+      {
+        "name": "@vue/runtime-core",
+        "before_versions": [
+          "3.5.34"
+        ],
+        "after_versions": [
+          "3.5.42"
+        ]
+      },
+      {
+        "name": "@vue/runtime-dom",
+        "before_versions": [
+          "3.5.34"
+        ],
+        "after_versions": [
+          "3.5.42"
+        ]
+      },
+      {
+        "name": "@vue/server-renderer",
+        "before_versions": [
+          "3.5.34"
+        ],
+        "after_versions": [
+          "3.5.42"
+        ]
+      },
+      {
+        "name": "@vue/shared",
+        "before_versions": [
+          "3.5.34"
+        ],
+        "after_versions": [
+          "3.5.42"
+        ]
+      },
+      {
+        "name": "anymatch",
+        "before_versions": [
+          "3.1.3"
+        ],
+        "after_versions": []
+      },
+      {
+        "name": "axios",
+        "before_versions": [
+          "1.19.0"
+        ],
+        "after_versions": [
+          "1.20.0"
+        ]
+      },
+      {
+        "name": "binary-extensions",
+        "before_versions": [
+          "2.3.0"
+        ],
+        "after_versions": []
+      },
+      {
+        "name": "brace-expansion",
+        "before_versions": [
+          "5.0.9"
+        ],
+        "after_versions": [
+          "5.0.12"
+        ]
+      },
+      {
+        "name": "braces",
+        "before_versions": [
+          "3.0.3"
+        ],
+        "after_versions": []
+      },
+      {
+        "name": "chokidar",
+        "before_versions": [
+          "3.6.0",
+          "5.0.0"
+        ],
+        "after_versions": [
+          "4.0.3",
+          "5.0.0"
+        ]
+      },
+      {
+        "name": "fast-uri",
+        "before_versions": [
+          "3.1.7"
+        ],
+        "after_versions": [
+          "3.1.8"
+        ]
+      },
+      {
+        "name": "fill-range",
+        "before_versions": [
+          "7.1.1"
+        ],
+        "after_versions": []
+      },
+      {
+        "name": "fsevents",
+        "before_versions": [
+          "2.3.2",
+          "2.3.3"
+        ],
+        "after_versions": [
+          "2.3.2"
+        ]
+      },
+      {
+        "name": "glob-parent",
+        "before_versions": [
+          "5.1.2"
+        ],
+        "after_versions": []
+      },
+      {
+        "name": "is-binary-path",
+        "before_versions": [
+          "2.1.0"
+        ],
+        "after_versions": []
+      },
+      {
+        "name": "is-extglob",
+        "before_versions": [
+          "2.1.1"
+        ],
+        "after_versions": []
+      },
+      {
+        "name": "is-glob",
+        "before_versions": [
+          "4.0.3"
+        ],
+        "after_versions": []
+      },
+      {
+        "name": "is-number",
+        "before_versions": [
+          "7.0.0"
+        ],
+        "after_versions": []
+      },
+      {
+        "name": "postcss-selector-parser",
+        "before_versions": [
+          "7.1.5"
+        ],
+        "after_versions": [
+          "7.1.6"
+        ]
+      },
+      {
+        "name": "readdirp",
+        "before_versions": [
+          "3.6.0",
+          "5.0.0"
+        ],
+        "after_versions": [
+          "4.1.2",
+          "5.0.0"
+        ]
+      },
+      {
+        "name": "sass",
+        "before_versions": [
+          "1.71.1"
+        ],
+        "after_versions": [
+          "1.79.0"
+        ]
+      },
+      {
+        "name": "source-map-js",
+        "before_versions": [
+          "1.2.1"
+        ],
+        "after_versions": [
+          "1.2.2"
+        ]
+      },
+      {
+        "name": "to-regex-range",
+        "before_versions": [
+          "5.0.1"
+        ],
+        "after_versions": []
+      },
+      {
+        "name": "vue",
+        "before_versions": [
+          "3.5.34"
+        ],
+        "after_versions": [
+          "3.5.42"
+        ]
+      }
+    ],
+    "root_chokidar": "5.0.0",
+    "sass_private_chokidar": "4.0.3",
+    "sass_private_readdirp": "4.1.2",
+    "braces_remaining": false,
+    "brace_expansion_is_a_different_retained_package": true,
+    "vue_source_proof": {
+      "version": "3.5.42",
+      "files": [
+        {
+          "path": "node_modules/@vue/shared/dist/shared.cjs.js",
+          "sha256": "3bdb3097b9b0e53a0534bd44370e98c4c4e4cb0478e129dd1b001c17b544db33",
+          "regex": "const unsafeAttrCharRE = /[>/=\"'\\u0009\\u000a\\u000c\\u000d\\u0020]/;",
+          "checks": [
+            {
+              "name": "data-safe",
+              "accepted": true
+            },
+            {
+              "name": "data-\rtest",
+              "accepted": false
+            },
+            {
+              "name": "data-\ntest",
+              "accepted": false
+            },
+            {
+              "name": "data-\ttest",
+              "accepted": false
+            },
+            {
+              "name": "data- test",
+              "accepted": false
+            }
+          ]
+        },
+        {
+          "path": "node_modules/@vue/shared/dist/shared.cjs.prod.js",
+          "sha256": "65846bef8da92ca3d122ab2b1e9e76cc7a88631291ced54eef10709a90b60cf0",
+          "regex": "const unsafeAttrCharRE = /[>/=\"'\\u0009\\u000a\\u000c\\u000d\\u0020]/;",
+          "checks": [
+            {
+              "name": "data-safe",
+              "accepted": true
+            },
+            {
+              "name": "data-\rtest",
+              "accepted": false
+            },
+            {
+              "name": "data-\ntest",
+              "accepted": false
+            },
+            {
+              "name": "data-\ttest",
+              "accepted": false
+            },
+            {
+              "name": "data- test",
+              "accepted": false
+            }
+          ]
+        },
+        {
+          "path": "node_modules/@vue/shared/dist/shared.esm-bundler.js",
+          "sha256": "8481fa2d1e885de1050d99239526cacdc3e69ae5e2c309147dbd145cdedb4e99",
+          "regex": "const unsafeAttrCharRE = /[>/=\"'\\u0009\\u000a\\u000c\\u000d\\u0020]/;"
+        }
+      ],
+      "expected_unsafe_diagnostics": [
+        "unsafe attribute name: data-\rtest",
+        "unsafe attribute name: data-\ntest",
+        "unsafe attribute name: data-\ttest",
+        "unsafe attribute name: data- test",
+        "unsafe attribute name: data-\rtest",
+        "unsafe attribute name: data-\ntest",
+        "unsafe attribute name: data-\ttest",
+        "unsafe attribute name: data- test"
+      ],
+      "lock_shared": {
+        "version": "3.5.42",
+        "resolved": "https://registry.npmjs.org/@vue/shared/-/shared-3.5.42.tgz",
+        "integrity": "sha512-2rPxex1jQf4jvl9MOHl6YaXCPcrNqz/FstMOEh3QWY+/OME9nQTvl9WYeCwhW7AFjaR0SnngZGlp/wkR6rkI6g==",
+        "license": "MIT"
+      },
+      "official_database_url": "https://github.com/advisories/GHSA-g2v6-rqmx-r4w6",
+      "official_original_url": "https://github.com/vuejs/core/security/advisories/GHSA-g2v6-rqmx-r4w6",
+      "registry_audit_range_evidence": "/tmp/hoim-deps-vue-registry-audit-range.json"
+    },
+    "vue_baseline_proof": {
+      "version": "3.5.34",
+      "checks": [
+        {
+          "name": "data-safe",
+          "accepted": true
+        },
+        {
+          "name": "data-\rtest",
+          "accepted": true
+        },
+        {
+          "name": "data-\ntest",
+          "accepted": false
+        },
+        {
+          "name": "data-\ttest",
+          "accepted": false
+        },
+        {
+          "name": "data- test",
+          "accepted": false
+        }
+      ],
+      "files": [
+        {
+          "path": "node_modules/@vue/shared/dist/shared.cjs.js",
+          "sha256": "5faef44a88d481481c055d5105b1ec47e65fb53fd6112706c6610b776134bf62",
+          "regex": [
+            "const unsafeAttrCharRE = /[>/=\"'\\u0009\\u000a\\u000c\\u0020]/;",
+            "function isSSRSafeAttrName(name) {",
+            "  const isUnsafe = unsafeAttrCharRE.test(name);",
+            "exports.isSSRSafeAttrName = isSSRSafeAttrName;"
+          ]
+        },
+        {
+          "path": "node_modules/@vue/shared/dist/shared.cjs.prod.js",
+          "sha256": "401eb153ec5b040b58f1d08eaf9ca1240036d384b69e214fe57ad10a3157896e",
+          "regex": [
+            "const unsafeAttrCharRE = /[>/=\"'\\u0009\\u000a\\u000c\\u0020]/;",
+            "function isSSRSafeAttrName(name) {",
+            "  const isUnsafe = unsafeAttrCharRE.test(name);",
+            "exports.isSSRSafeAttrName = isSSRSafeAttrName;"
+          ]
+        },
+        {
+          "path": "node_modules/@vue/shared/dist/shared.esm-bundler.js",
+          "sha256": "88cf5fd9dfd81640594652e2c58bdc736397d989a9d00d37e29b3a30071968a9",
+          "regex": [
+            "const unsafeAttrCharRE = /[>/=\"'\\u0009\\u000a\\u000c\\u0020]/;",
+            "function isSSRSafeAttrName(name) {",
+            "  const isUnsafe = unsafeAttrCharRE.test(name);",
+            "export { EMPTY_ARR, EMPTY_OBJ, NO, NOOP, PatchFlagNames, PatchFlags, ShapeFlags, SlotFlags, camelize, capitalize, cssVarNameEscapeSymbolsRE, def, escapeHtml, escapeHtmlComment, extend, genCacheKey, genPropsAccessExp, generateCodeFrame, getEscapedCssVarName, getGlobalThis, hasChanged, hasOwn, hyphenate, includeBooleanAttr, invokeArrayFns, isArray, isBooleanAttr, isBuiltInDirective, isDate, isFunction, isGloballyAllowed, isGloballyWhitelisted, isHTMLTag, isIntegerKey, isKnownHtmlAttr, isKnownMathMLAttr, isKnownSvgAttr, isMap, isMathMLTag, isModelListener, isObject, isOn, isPlainObject, isPromise, isRegExp, isRenderableAttrValue, isReservedProp, isSSRSafeAttrName, isSVGTag, isSet, isSpecialBooleanAttr, isString, isSymbol, isVoidTag, looseEqual, looseIndexOf, looseToNumber, makeMap, normalizeClass, normalizeCssVarValue, normalizeProps, normalizeStyle, objectToString, parseStringStyle, propsToAttrMap, remove, slotFlagsText, stringifyStyle, toDisplayString, toHandlerKey, toNumber, toRawType, toTypeString };"
+          ]
+        }
+      ]
+    },
+    "official_vue_evidence": {
+      "canonical": "https://github.com/advisories/GHSA-g2v6-rqmx-r4w6",
+      "canonical_html": "/tmp/hoim-deps-vue-database.html",
+      "original": "https://github.com/vuejs/core/security/advisories/GHSA-g2v6-rqmx-r4w6",
+      "original_html": "/tmp/hoim-deps-vue-original.html",
+      "note": "Canonical database lists patched3.5.42; original repository structured patched field is stale None. Actual installed cjs/prod/esm regex verified includes U+000D, unsafe CR attr rejected, normal attr accepted. GitHub API was403 rate-limited; official HTML and npm audit range were preserved.",
+      "registry_audit_range": "/tmp/hoim-deps-vue-registry-audit-range.json"
+    },
+    "audit_scope": "Actual lock and registry advisory database at recorded time, not a guarantee against future advisories; no audit fix/force or browser-target/bundle-limit relaxation"
+  },
+  "http_wrapper": {
+    "baseline_request_source_git_revision": "26cde37",
+    "baseline_request_source_sha256": "bf1586a23c143bd08fefbf1232bd10e22b652982454ee030c162cf0dafbf085a",
+    "baseline_actual_axios": "1.20.0",
+    "baseline_transport": "Actual Chromium native XMLHttpRequest with old request source exported from fixed Git baseline; product source was not rolled back",
+    "baseline_native_abort": {
+      "resolved": true,
+      "http_requests": 2,
+      "unexpected_retry": true
+    },
+    "baseline_cross_origin": {
+      "response_code": 200,
+      "synthetic_token_received": true,
+      "http_requests": 1,
+      "preflights": 0,
+      "gets": 1
+    },
+    "baseline_evidence_sha256": "9dba007ce74e704d776c5d4d2adfee497bd23888472c0614ae4fb096310cae3d",
+    "synthetic_credentials_only": true,
+    "network_scope": "Two ephemeral 127.0.0.1 origins, every other browser origin blocked",
+    "fixed_abort": "Native ECONNABORTED, ERR_CANCELED and aborted signals never retry; clarifyTimeoutError=true preserves actual GET timeouts as ETIMEDOUT; unkeyed POST remains non-retryable",
+    "fixed_destination": "Before credentials/body processing, compare actual Axios getUri resolution against configured hospital API origin, resolving actual target against document.baseURI; block foreign/scheme/userinfo/base-tag target with ERR_BLOCKED_ORIGIN, no request config retained or retry",
+    "destination_guard_scope": "Initial resolved target only; HTTP redirect following/policy is not changed or proved safe by this work",
+    "cancellation_scope": "Prevents retries, does not undo an already-received server request or promise immediate settlement/clearing of every existing backoff timer",
+    "actual_regression_tests": 21,
+    "regression_coverage": [
+      "Installed and locked Axios browser xhr identity",
+      "Token injection/401 frontend effects and JSON business rejection",
+      "Zero/false/empty/null and explicit JSON/form encoding",
+      "Original audio/ECG/image and legacy multipart API bytes, filenames and generated boundaries",
+      "Actual Blob/ArrayBuffer bytes and HTTP errors",
+      "Actual GET transient/network retry and exhaustion",
+      "404/unkeyed POST not retried",
+      "AbortController during transport and backoff",
+      "Native xhr.abort no retry",
+      "Real timeout GET retry versus no unkeyed POST retry",
+      "Five cross-origin forms yield no sink requests",
+      "Changed document base blocked",
+      "Non-HTTP target and userinfo rejected",
+      "Same-origin absolute API remains allowed"
+    ],
+    "harness_stubs": [
+      "UI/store/router effects only"
+    ],
+    "actual_sources": [
+      "request.js",
+      "configuration",
+      "API functions",
+      "Axios",
+      "qs",
+      "lodash"
+    ],
+    "not_validated": [
+      "Production TLS/CORS or redirect policies",
+      "Real backend JWT authentication",
+      "Backend audio/WFDB/DICOM decoding",
+      "Medical or AI model quality"
+    ],
+    "uploaded_bytes": "Synthetic transport fixtures, not asserted to be valid medical samples"
+  },
+  "style_hmr": {
+    "scope": "Actual project Rspack/style-loader/css-loader/sass-loader SCSS variable injection, file watching and browser HMR; not Sass CLI or every chokidar mode",
+    "application_data_used": false,
+    "product_sources_modified": false,
+    "external_network_allowed": false,
+    "proxy_enabled": false,
+    "full_product_build_performed": false,
+    "passed": true,
+    "versions": {
+      "@rspack/core": "2.0.2",
+      "@rspack/dev-server": "2.0.1",
+      "sass": "1.79.0",
+      "sass-loader": "17.0.1",
+      "style-loader": "4.0.0",
+      "css-loader": "7.1.4",
+      "@playwright/test": "1.59.1",
+      "node": "v24.15.0",
+      "sass_private_chokidar": "4.0.3"
+    },
+    "project_config_sha256": "c98ebfcf468776f20e3278af1ad2faf8c13e98fbf01a26b588c01a206ba5a7d8",
+    "original_variables_sha256": "a1709451c92aeedced61841f673ae57488b55f4f50b182155bc43932401d0951",
+    "additional_data_sha256": "848531b719f26593ecd0e14c3dc293987d24b673cb1fdcf9cf8fd4d30200baa8",
+    "compilations": [
+      {
+        "hash": "6b398eb566378240",
+        "errors": 0,
+        "warnings": 0,
+        "original_variables_dependency": true
+      },
+      {
+        "hash": "9f2988f0b2179408",
+        "errors": 0,
+        "warnings": 0,
+        "original_variables_dependency": true
+      },
+      {
+        "hash": "ac1cdd45dd782508",
+        "errors": 0,
+        "warnings": 0,
+        "original_variables_dependency": true
+      }
+    ],
+    "loopback_address": "http://127.0.0.1:44493",
+    "hot_only": false,
+    "live_reload_enabled": true,
+    "initial_css": {
+      "color": "rgb(64, 158, 255)",
+      "background": "rgb(33, 37, 43)",
+      "padding": "20px",
+      "border": "3px",
+      "boot": "1c2d3972-e8d1-4584-9d6c-36d2164bae67",
+      "timeOrigin": 1792497812607.9,
+      "hmr": true,
+      "statuses": [],
+      "sentinel": "be653a71-ef65-4a75-ba91-6af5dbc00aa1"
+    },
+    "hot_updates": [
+      {
+        "color": "rgb(65, 184, 130)",
+        "background": "rgb(33, 37, 43)",
+        "padding": "20px",
+        "border": "7px",
+        "boot": "1c2d3972-e8d1-4584-9d6c-36d2164bae67",
+        "timeOrigin": 1792497812607.9,
+        "hmr": true,
+        "statuses": [
+          "check",
+          "prepare",
+          "dispose",
+          "apply",
+          "idle"
+        ],
+        "sentinel": "be653a71-ef65-4a75-ba91-6af5dbc00aa1"
+      },
+      {
+        "color": "rgb(64, 158, 255)",
+        "background": "rgb(33, 37, 43)",
+        "padding": "20px",
+        "border": "11px",
+        "boot": "1c2d3972-e8d1-4584-9d6c-36d2164bae67",
+        "timeOrigin": 1792497812607.9,
+        "hmr": true,
+        "statuses": [
+          "check",
+          "prepare",
+          "dispose",
+          "apply",
+          "idle",
+          "check",
+          "prepare",
+          "dispose",
+          "apply",
+          "idle"
+        ],
+        "sentinel": "be653a71-ef65-4a75-ba91-6af5dbc00aa1"
+      }
+    ],
+    "document_navigations": 1,
+    "actual_hmr_without_full_reload": true,
+    "actual_variable_injection": true,
+    "filesystem_updates_detected_without_manual_invalidation": true,
+    "product_configuration_variables_and_lock_preserved": true,
+    "blocked_network_attempts": [],
+    "cleanup_errors": [],
+    "temporary_directory_removed": true,
+    "cleanup_verified": true,
+    "seconds": 2.942
+  },
+  "style_hmr_record_sha256": "d27d051005d3ab421dab4d71c8d52e8d3ff88e7a05bfd9995f270cb0eccd0ff7",
+  "final_verification": {
+    "verify": {
+      "command": "npm run verify",
+      "exit_code": 0,
+      "audit_passed": true,
+      "production_build_passed": true,
+      "production_build_seconds": 21.13,
+      "production_build_warning_count": 5,
+      "production_build_warning_note": "Existing vab.scss mixed declarations future-behavior deprecation warnings; product styles not modified and warnings not suppressed",
+      "bundle_passed": true,
+      "log_sha256": "91107b7024b21a77111e9f2e6c472fc96584eeaa8f4a173a4c6f5ea815cc1c3f"
+    },
+    "bundle": {
+      "largestJavaScript": {
+        "file": "element-plus.1235714c.js",
+        "bytes": 647479
+      },
+      "totalJavaScript": 5333960,
+      "totalAssets": 5852206,
+      "limits": {
+        "largestJavaScript": 700000,
+        "totalJavaScript": 6000000,
+        "totalAssets": 7000000
+      }
+    },
+    "bundle_limits_changed": false,
+    "browser_targets_changed": false,
+    "browser": {
+      "passed": 117,
+      "ai_page_api_mocked_cases": 96,
+      "actual_loopback_http_cases": 21,
+      "reported_duration": "2.5m",
+      "command": "E2E_BASE_URL=http://127.0.0.1:4180 npx playwright test e2e/ai-*.spec.js e2e/diagnosis-review.spec.js e2e/request-real-http.spec.js --workers=2 --reporter=list",
+      "log_sha256": "5ac3d72b6227064a30e57dfc2b3b30caa09323cf6251a9460dc4274a02a85ed0"
+    },
+    "image_pixel_node_tests_passed": 11,
+    "image_pixel_log_sha256": "af0cf27d96e5272cf94597660a4373c267c9f4e060d3328fc6f427a3b7460bfe",
+    "all_product_vue_sources_unchanged_since_build": true,
+    "backend_source_changed": false,
+    "full_backend_rerun_this_batch": false,
+    "previous_full_backend": {
+      "passed": 2555,
+      "skipped": 28,
+      "seconds": 269.38,
+      "command": "/home/xusheng/miniconda3/bin/python -m pytest -q",
+      "log_sha256": "b840bd0c56d038ccb2c85b8c491e440a1d15fada37c46afccaf7ddc992ea3888"
+    },
+    "previous_forecast_verification_sha256": "9b5683bca58efcf7fc460410529fd5aeeed91e2646eb47be24b836cbadc20d63"
+  },
+  "implementation_sha256": {
+    "vue3-new-ui/e2e/request-real-http.spec.js": "c39fdedc0984feaf71662f70ae8e63f44134c8885110bc5169475beb171c5008",
+    "vue3-new-ui/package-lock.json": "d0c90a0f970ef8a1ad8f34e50c2a5bd7c2b31d5452694172a2df3897701a0a8f",
+    "vue3-new-ui/package.json": "719292c59929f86d6e74da17785e0fdf99a3b5fa5f758ab65a1bfb52b5a132de",
+    "vue3-new-ui/scripts/check-style-hmr.cjs": "fe4f23adea486a5cc20c836c0cc5e3aa0d0dbf8e7f7848a6694591ee974c53fd",
+    "vue3-new-ui/scripts/request-regression-harness.cjs": "11a396cd6781dd65deb822b347d4225489ace56bfa6c85ba6216dcfb33816e9b",
+    "vue3-new-ui/src/utils/request.js": "5f0bc634ee94a9265db2b64f4aa64cf8790fd9559b5f61f73ad998b8981b03dc"
+  },
+  "primary_sources": [
+    "https://github.com/advisories/GHSA-g2v6-rqmx-r4w6",
+    "https://github.com/axios/axios/releases/tag/v1.20.0",
+    "https://registry.npmjs.org/sass/1.79.0",
+    "https://sass-lang.com/documentation/breaking-changes/import/"
+  ],
+  "remaining": [
+    "Five existing SCSS mixed-decls deprecation warnings remain explicit.",
+    "Initial target checks do not enforce browser HTTP redirect policy.",
+    "The 80-feature AI goal remains active; actual medical/operational data, specialist sources/models and feature-specific quality validation still require their own delivery."
+  ]
+}

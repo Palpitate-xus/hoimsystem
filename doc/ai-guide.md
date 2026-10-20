@@ -695,6 +695,32 @@ v5请求仅外发冻结的日聚合来源、跨度及完整系统/任务Prompt�
 
 当前目录/默认Prompt版本为`2026.10.20.2`，80项独立Prompt继续由超管版本化管理。62虽然不是临床功能，面向普通业务启用仍要求明确`validation_status=validated`和相应范围依据；超管可先预览。来源确认、服务核对、合成回测和工程测试不会自动修改任何验证、启停、模型或知识配置。检查实际模型后只能显式填入待保存表单，再通过既有配置接口保存与重新评审。
 
-新增前端复核界面仍使用原构建体积预算。构建采用[`@babel/plugin-transform-runtime`官方共享辅助代码机制](https://v7.babeljs.io/docs/babel-plugin-transform-runtime)，保留已有`preset-env`目标及全局polyfill设置，避免每个异步页面重复内联相同辅助代码；插件与运行依赖均精确记录在锁文件。此构建改动不改变预测配方或验证状态。当前`npm audit`仍报告与本批基线完全相同的10个受影响包（包级统计为2中危、8高危，共20条独立GHSA），新增Babel依赖没有新增告警；审计结果没有标为通过，既有依赖修复仍待完成。
+新增前端复核界面仍使用原构建体积预算。构建采用[`@babel/plugin-transform-runtime`官方共享辅助代码机制](https://v7.babeljs.io/docs/babel-plugin-transform-runtime)，保留已有`preset-env`目标及全局polyfill设置，避免每个异步页面重复内联相同辅助代码；插件与运行依赖均精确记录在锁文件。此构建改动不改变预测配方或验证状态。统计预测批次冻结于`26cde37`时，`npm audit`报告与当批基线完全相同的10个受影响包（包级统计为2中危、8高危，共20条独立GHSA），新增Babel依赖没有新增告警；当时的审计结果没有标为通过。后续修复另见下节，历史验证JSON保留原结果。
 
 工程记录见[统计预测验证](ai-forecast-verification.json)，包含独立镜像和隔离MySQL的真实合成检查。它们没有使用真实患者、实际医院数据库或外部计费模型，也不证明真实运营预测有效性。实际到诊来源、节假日/停诊等未来条件、其他统计或学习模型、床位/耗材预测及真实数据范围验证仍须分别接入与评估。
+
+## AI前端依赖与请求链验证
+
+预测批次后的依赖维护分三次提交，将已确认的最小修复版本精确写入包声明和锁文件，没有执行`npm audit fix --force`、变更浏览器目标或放宽资源预算。
+
+| 依赖 | 原锁定版本 → 本次版本 |
+| --- | --- |
+| Vue、直接`@vue/compiler-sfc`及内部Vue依赖 | `3.5.34 → 3.5.42`，家族版本同步 |
+| Axios | `1.19.0 → 1.20.0` |
+| Sass | `1.71.1 → 1.79.0`，其私有chokidar改为`4.0.3`，根目录chokidar仍为`5.0.0` |
+| brace-expansion | `5.0.9 → 5.0.12` |
+| fast-uri | `3.1.7 → 3.1.8` |
+| postcss-selector-parser | `7.1.5 → 7.1.6` |
+| source-map-js | `1.2.1 → 1.2.2` |
+
+各阶段真实审计由10个受影响包/20条独立GHSA，经6包/14条、3包/1条，降至0包/0条；最终`npm audit`和`npm run verify`通过。这是当次锁文件与审计库的结果，不保证未来没有新通告。Vue修复依据[更新后的规范GHSA记录](https://github.com/advisories/GHSA-g2v6-rqmx-r4w6)，同时核对实际发布文件中U+000D规则与运行探针；原仓库旧通告的修复字段尚未同步，证据保留两者区别。当前应用使用SPA，没有在本批引入SSR。
+
+真实浏览器检查还复现了共享请求封装的两处问题：原生`XMLHttpRequest.abort()`后GET被自动重发并最终成功；显式外源URL收到合成登录令牌。现已将原生中止与主动取消设为不可重试，明确将真实超时标为`ETIMEDOUT`以保留GET超时重试，未带幂等键的POST仍不自动重试；取消不会撤回服务端已经收到的请求。该区别与[Axios发布说明的XHR行为](https://github.com/axios/axios/releases/tag/v1.20.0)一起核对，不能只看升级后接口是否返回200。
+
+共享请求在注入院内令牌与处理正文前，按实际Axios URL拼接规则及浏览器`document.baseURI`核对配置的医院服务origin。外origin、协议相对绕行、恶意base标签、非HTTP(S)目标及URL内嵌账户被拒绝；`ERR_BLOCKED_ORIGIN`不重试且不附带可能含凭据或患者资料的请求配置。同origin绝对API地址继续可用；遗留外域广告/公告调用若被使用会明确拒绝。此检查约束首次请求目标，未改变浏览器跟随HTTP重定向的策略。
+
+`e2e/request-real-http.spec.js`使用原请求封装、配置和API函数，实际安装的Axios浏览器XHR及两个随机端口的本机HTTP服务。21项测试覆盖令牌注入/401前端效果、JSON的0/false/null、三类AI multipart原字节和边界、Blob/ArrayBuffer、重试、中止、超时及目的源限制；只有UI、store和router副作用使用内存桩，其他外源全部拦截。合成上传字节仅验证传输，不是有效医学样本或模型质量评估，也没有执行真实后端鉴权。
+
+`node scripts/check-style-hmr.cjs`以原SCSS加载器配置及变量文件构建临时样式入口，实际修改临时文件两次，通过浏览器CSS、HMR生命周期及窗口标记确认热更新且无整页重载；不修改产品样式或运行真实开发后端。检查限于项目实际Rspack/Sass使用链，不涵盖Sass CLI和所有chokidar模式。生产构建仍有5条原`vab.scss`混合声明的未来行为弃用提示，未隐藏警告或更改既有样式语义。
+
+最终构建、全部AI页面回归、真实HTTP测试、原像素工具测试及来源哈希见[前端依赖与请求验证](ai-frontend-dependencies-verification.json)。本批没有修改后端源码、AI目录/Prompt、模型、来源声明或验证/启停配置；上一批2,555通过/28跳过的后端记录仍保留，本批未重复运行后端全量测试。

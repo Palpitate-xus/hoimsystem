@@ -263,7 +263,33 @@ async def test_preview_and_options_are_read_only_and_review_availability_uses_en
     )
     assert response.status_code == 200, response.text
     assert response.json()["data"]["context"]["pathway_sources"]["current_templates"][0]["reviewed_knowledge"]
+    assert any(item["source_id"] == "pathway-enrollment:" + str(selected.enrollment_id) for item in response.json()["data"]["evidence"])
     assert db_session.query(AIRun).count() == 0 and selected.status == 2
+
+
+@pytest.mark.asyncio
+async def test_business_pathway_edits_preserve_steps_and_status_and_enrollment_rejects_broken_links(seed_data, db_session, pathway_case, async_client, auth_headers):
+    path, admission, enrollment, _ = pathway_case
+    headers = auth_headers(seed_data["doctor_user"].username)
+    created = await async_client.post("/api/clinicalPathway/create", headers=headers, json={"name": "停用模板", "steps": '["原值"]', "status": 1, "expected_days": 7})
+    assert created.status_code == 200, created.text
+    row = db_session.query(ClinicalPathway).filter_by(name="停用模板").one()
+    assert row.status == 1 and row.steps == '["原值"]' and row.source_revision == 1
+    delete_used = await async_client.post("/api/clinicalPathway/delete", headers=headers, json={"pathway_id": path.pathway_id})
+    assert delete_used.status_code == 409 and db_session.get(ClinicalPathway, path.pathway_id) is not None
+    foreign = Admission(patient_id=seed_data["patient2"].patient_id, admission_time=utcnow())
+    db_session.add(foreign)
+    db_session.commit()
+    before = db_session.query(PathwayEnrollment).count()
+    for reference in ("missing-admission", foreign.admission_id, 3):
+        response = await async_client.post("/api/pathwayEnrollment/enroll", headers=headers, json={"pathway_id": path.pathway_id, "patient_id": admission.patient_id, "admission_id": reference})
+        assert response.status_code == 422, response.text
+    assert db_session.query(PathwayEnrollment).count() == before
+    enrollment.completed_items = None
+    db_session.commit()
+    response = await async_client.get("/api/pathwayEnrollment/getList", headers=headers)
+    result = next(item for item in response.json()["data"] if item["enrollment_id"] == enrollment.enrollment_id)
+    assert result["completed_items"] is None and result["completion_rate"] is None and result["counter_state"] == "unknown"
 
 
 def test_treatment_requires_physician_confirmation_and_exact_selected_path_review_despite_other_knowledge(seed_data, db_session, pathway_case):

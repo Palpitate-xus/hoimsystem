@@ -95,6 +95,7 @@ def attach_pathway_sources(db, user, spec, patient, encounter, bundle, add, sele
                     "recorded_status": row.status if row else None,
                     "expected_days": row.expected_days if row else None,
                     "snapshot_hash": pathway_hash(row) if row else None,
+                    "source_revision": row.source_revision if row else None,
                     "explicitly_selected": identifier == chosen_id,
                     "reviewed_knowledge": {"document_id": document.document_id, "version": document.version, "content_hash": document.content_hash} if document else None,
                     "steps_in_patient_context": False,

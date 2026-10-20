@@ -1,13 +1,15 @@
 """运营扩展：CSSD 器械包 / PIVAS 批次 / ICU-PACU 评分 / 临床路径入组。"""
+
 import datetime
 import json
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.dependencies import ADMIN_ROLES, CLINICAL_ROLES, NURSING_ROLES, PHARMACY_ROLES, User, require_roles
-from app.models import CssdInstrument, IcuScoreRecord, PathwayEnrollment, Patient, PivasBatch
+from app.models import Admission, CssdInstrument, IcuScoreRecord, PathwayEnrollment, Patient, PivasBatch
+from app.pathway_progress import pathway_progress
 
 router = APIRouter()
 
@@ -335,9 +337,9 @@ def _enroll_ser(e: PathwayEnrollment) -> dict:
         "variation_reason": e.variation_reason or "",
         "variation_type": e.variation_type or "",
         "exit_reason": e.exit_reason or "",
-        "completed_items": e.completed_items or 0,
-        "total_items": e.total_items or 0,
-        "completion_rate": round(e.completed_items / e.total_items * 100, 1) if e.total_items else None,
+        "completed_items": e.completed_items,
+        "total_items": e.total_items,
+        **pathway_progress(e.completed_items, e.total_items),
     }
 
 
@@ -362,10 +364,22 @@ def enroll_pathway(req: dict, current_user: User = Depends(require_roles(*PATHWA
     patient = db.query(Patient).filter(Patient.patient_id == req.get("patient_id")).first()
     if not patient:
         return {"code": 500, "msg": "患者不存在"}
-    active = db.query(PathwayEnrollment).filter(
-        PathwayEnrollment.patient_id == patient.patient_id,
-        PathwayEnrollment.status.in_((1, 2)),
-    ).first()
+    admission_id = req.get("admission_id")
+    if admission_id is not None and (not isinstance(admission_id, str) or len(admission_id) > 36):
+        raise HTTPException(422, "住院标识格式不正确")
+    admission_id = (admission_id or "").strip() or None
+    if admission_id:
+        admission = db.get(Admission, admission_id)
+        if admission is None or admission.patient_id != patient.patient_id:
+            raise HTTPException(422, "所选住院不存在或不属于入径患者")
+    active = (
+        db.query(PathwayEnrollment)
+        .filter(
+            PathwayEnrollment.patient_id == patient.patient_id,
+            PathwayEnrollment.status.in_((1, 2)),
+        )
+        .first()
+    )
     if active:
         return {"code": 500, "msg": "该患者已有在径/变异记录，不能重复入组"}
     doctor = db.query(Doctor).filter(Doctor.user_id == current_user.user_id).first()
@@ -376,7 +390,7 @@ def enroll_pathway(req: dict, current_user: User = Depends(require_roles(*PATHWA
     item = PathwayEnrollment(
         pathway_id=pathway.pathway_id,
         patient_id=patient.patient_id,
-        admission_id=(req.get("admission_id") or "").strip() or None,
+        admission_id=admission_id,
         doctor_id=doctor.doctor_id if doctor else None,
         status=1,
         enroll_date=datetime.date.today(),

@@ -1368,6 +1368,7 @@ class ClinicalPathway(Base):
     steps = Column(String(1000))  # JSON格式的步骤
     expected_days = Column(Integer)
     status = Column(Integer, default=0)  # 0=启用 1=停用
+    source_revision = Column(Integer, nullable=False, default=1, server_default="1")
     create_time = Column(DateTime)
 
 

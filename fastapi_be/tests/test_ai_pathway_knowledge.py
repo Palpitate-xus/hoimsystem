@@ -66,7 +66,9 @@ def test_source_snapshot_keeps_all_original_fields_without_implying_review(seed_
     assert eligible_pathway_documents(db_session, [pathway_case.pathway_id], "treatment_pathway", set()) == []
 
 
-@pytest.mark.parametrize("value", ["[]", "not-json", "[1]", '[""]', "[{}]", '{"steps":true}', '["x",NaN]', "[" * 1001])
+@pytest.mark.parametrize(
+    "value", ["[]", "not-json", "[1]", '[""]', "[{}]", '{"steps":true}', '["x",NaN]', "[" * 1001, '{"steps":["first"],"steps":["last"]}', '[{"exclusion":"first","exclusion":"last"}]']
+)
 def test_unusable_or_ambiguous_step_structure_is_not_imported(value):
     with pytest.raises(HTTPException) as error:
         parse_pathway_steps(value)
@@ -223,3 +225,42 @@ async def test_internal_source_uri_cannot_be_forged_through_generic_knowledge_cr
     response = await async_client.post("/api/ai/admin/knowledge", headers=auth_headers("super01"), json=body)
     assert response.status_code == 422
     assert db_session.query(AIKnowledgeDocument).count() == 0
+
+
+@pytest.mark.asyncio
+async def test_disable_then_restore_identical_template_does_not_revive_old_review(seed_data, db_session, pathway_case, async_client, auth_headers):
+    item = document(db_session, seed_data, pathway_case)
+    item.status, item.reviewed_by, item.reviewed_at = "published", seed_data["super_admin_user"].user_id, utcnow()
+    db_session.commit()
+    headers = auth_headers(seed_data["doctor_user"].username)
+    endpoint = "/api/clinicalPathway/update"
+    original = pathway_case.source_revision
+    disabled = await async_client.post(endpoint, headers=headers, json={"pathway_id": pathway_case.pathway_id, "status": 1, "expected_source_revision": original})
+    assert disabled.status_code == 200, disabled.text
+    stale = await async_client.post(endpoint, headers=headers, json={"pathway_id": pathway_case.pathway_id, "status": 0, "expected_source_revision": original})
+    assert stale.status_code == 409
+    restored = await async_client.post(endpoint, headers=headers, json={"pathway_id": pathway_case.pathway_id, "status": 0, "expected_source_revision": original + 1})
+    assert restored.status_code == 200, restored.text
+    db_session.expire_all()
+    assert pathway_case.source_revision == original + 2
+    assert source_state(db_session, item) == "changed"
+    assert eligible_pathway_documents(db_session, [pathway_case.pathway_id], "treatment_pathway", set()) == []
+
+
+def test_source_revision_migration_preserves_legacy_pathway_content(tmp_path):
+    path = tmp_path / "pathway-revision.db"
+    engine = create_engine(f"sqlite:///{path}")
+    with engine.begin() as conn:
+        conn.exec_driver_sql("CREATE TABLE hoimsystem_clinical_pathway (pathway_id INTEGER PRIMARY KEY, steps TEXT, status INTEGER)")
+        conn.exec_driver_sql("INSERT INTO hoimsystem_clinical_pathway VALUES (1, '[\"原有措施\"]', 0)")
+    config = Config(str(Path(__file__).resolve().parents[1] / "alembic.ini"))
+    config.set_main_option("sqlalchemy.url", f"sqlite:///{path}")
+    command.stamp(config, "20261020_pathway_knowledge")
+    command.upgrade(config, "20261020_pathway_revision")
+    with engine.connect() as conn:
+        assert conn.execute(text("SELECT steps, status, source_revision FROM hoimsystem_clinical_pathway")).one() == ('["原有措施"]', 0, 1)
+    command.downgrade(config, "20261020_pathway_knowledge")
+    assert "source_revision" not in {item["name"] for item in inspect(engine).get_columns("hoimsystem_clinical_pathway")}
+    with engine.connect() as conn:
+        assert conn.scalar(text("SELECT steps FROM hoimsystem_clinical_pathway")) == '["原有措施"]'
+    engine.dispose()

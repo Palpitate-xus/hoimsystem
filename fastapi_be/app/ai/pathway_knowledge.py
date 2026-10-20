@@ -16,7 +16,10 @@ PATHWAY_URI_PREFIX = "hoim://clinical-pathway/"
 
 
 def pathway_snapshot(row):
-    return {"snapshot_schema_version": 1, **{name: getattr(row, name) for name in ("pathway_id", "name", "disease_code", "disease_name", "steps", "expected_days", "status", "create_time")}}
+    return {
+        "snapshot_schema_version": 2,
+        **{name: getattr(row, name) for name in ("pathway_id", "name", "disease_code", "disease_name", "steps", "expected_days", "status", "source_revision", "create_time")},
+    }
 
 
 def pathway_hash(row):
@@ -27,8 +30,17 @@ def parse_pathway_steps(value):
     """Validate bounded JSON as data, retaining every field rather than guessing a clinical step schema."""
     if not isinstance(value, str) or len(value) > 1000:
         raise HTTPException(422, "路径步骤须为不超过原字段1000字符的JSON文本")
+
+    def unique_pairs(pairs):
+        result = {}
+        for key, item in pairs:
+            if key in result:
+                raise ValueError("duplicate field")
+            result[key] = item
+        return result
+
     try:
-        parsed = json.loads(value, parse_float=Decimal)
+        parsed = json.loads(value, parse_float=Decimal, object_pairs_hook=unique_pairs)
     except (ValueError, TypeError, RecursionError) as exc:
         raise HTTPException(422, "路径步骤JSON无法解析，须先整理原模板") from exc
     steps = parsed.get("steps") if isinstance(parsed, dict) else parsed

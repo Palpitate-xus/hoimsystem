@@ -1,0 +1,20 @@
+FROM python:3.12-slim
+
+WORKDIR /app
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    HF_HUB_OFFLINE=1 \
+    HF_HUB_DISABLE_TELEMETRY=1 \
+    SPEECH_MODEL_DIR=/models
+
+RUN apt-get update && apt-get install -y --no-install-recommends ffmpeg libgomp1 \
+    && rm -rf /var/lib/apt/lists/*
+COPY requirements.txt requirements-speech.txt ./
+RUN pip install --no-cache-dir -r requirements.txt -r requirements-speech.txt \
+    && useradd --system --uid 10001 --create-home speech
+
+COPY app ./app
+COPY scripts/smoke_local_speech.py ./scripts/smoke_local_speech.py
+USER 10001:10001
+EXPOSE 8810
+CMD ["python", "-m", "app.ai.speech_server", "--host", "0.0.0.0"]

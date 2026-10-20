@@ -15,6 +15,7 @@ private/
 !.env.example
 venv/
 .venv/
+.venv-speech/
 __pycache__/
 *.py[cod]
 .pytest_cache/

@@ -351,10 +351,10 @@ app = FastAPI(title="HOIM System FastAPI", default_response_class=APIJSONRespons
 
 from app.routers import (
     admin,
-    ai_admin,
     admission,
     adverse_event,
     adverse_reaction,
+    ai_admin,
     allergy,
     analytics,
     antibiotic,

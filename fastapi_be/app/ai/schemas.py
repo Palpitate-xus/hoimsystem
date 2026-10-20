@@ -16,7 +16,7 @@ class ProviderWrite(StrictRequest):
     """A provider secret is write-only; updates require the current revision."""
 
     name: str = Field(min_length=1, max_length=80)
-    kind: Literal["chat", "specialist"] = "chat"
+    kind: Literal["chat", "responses", "specialist"] = "chat"
     api_base: str = Field(min_length=1, max_length=1000)
     model: str = Field(min_length=1, max_length=160)
     api_key: str | None = Field(default=None, max_length=4000)

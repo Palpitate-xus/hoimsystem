@@ -90,7 +90,7 @@ def update_feature(key: str, req: FeatureWrite, db: Session = Depends(get_db), u
         if config.validation_status == "suspended":
             raise HTTPException(422, "已暂停的功能不能启用")
         expected_kind = "chat" if spec.engine == "llm" else "specialist"
-        if provider.kind != expected_kind:
+        if (spec.engine == "llm" and provider.kind not in {"chat", "responses"}) or (spec.engine != "llm" and provider.kind != "specialist"):
             raise HTTPException(422, "该功能需要匹配的文本模型或专用适配器")
         if expected_kind == "specialist" and (spec.key not in json.loads(provider.supported_features_json) or not provider.validation_report):
             raise HTTPException(422, "专用适配器必须声明支持该功能并登记验证报告")

@@ -51,13 +51,34 @@ python -m app.ai.worker
 
 提交任务后，服务器先检查角色、患者关系、模型用途和所需知识，冻结资料、Prompt 和证据版本，再由独立 worker 处理。当前知识检索使用有版本的段落关键词检索，检索不到适用知识时明确拒绝相关任务。
 
-患者摘要区分当前就诊与既往、已签名与草稿、已审核与未审核、处方记录与实际服药。治疗路径推荐要求指定本次就诊，并取得该次就诊的确认诊断。
+患者摘要区分当前就诊与既往、已签名与草稿、已审核与未审核、处方记录与实际服药。治疗路径推荐要求指定本次就诊，并取得责任医生单独复核为“已明确”的诊断；单纯病历签名不会产生确诊状态。
+
+病历与报告行传入的明确资料标识会校验患者归属，并优先纳入有限快照。快照显示截断范围，不能据有限近期记录断言不存在其他病史或用药。患者端不加载未签署病历、未审核报告及医护住院工作笔记。
 
 模型返回必须满足 JSON 结构。引用 ID 必须来自本次服务器提供的来源；需要医学知识的回答必须引用已审核知识。ID 校验只证明引用属于已提供的材料，语义支持程度仍需人工核对。
 
-worker 在执行前和保存结果前重新检查权限、配置与知识有效性。授权撤销、版本改变或知识停用后，旧任务不会静默使用新配置继续完成。长时间中断的任务标记失败，避免自动重复可能计费的推理请求。
+worker 在执行前和保存结果前重新检查权限、配置、患者资料、确定性工具结果与知识有效性。患者资料、诊断确认、审方规则或目录改变时拒收旧结果；授权撤销、版本改变或知识停用后，旧任务不会静默使用新配置继续完成。`AI_MAX_QUEUE_AGE_SECONDS` 默认 900 秒，过期排队任务不发起模型调用。长时间中断的任务标记失败，避免自动重复可能计费的推理请求。
 
 结果使用纯文本呈现，附来源查看入口、缺失信息和人工反馈。采纳反馈用于审计与质量分析，不代表临床结论已验证；也不会自动写入病历或处方。
+
+## 已接入的临床资料与工具
+
+| 内容 | 行为与边界 |
+| --- | --- |
+| 处方用法 | 保存每次剂量、单位、频次、途径和疗程；历史未知字段保持空值。药房审核、发药和 AI 使用同一套已保存用法复核 |
+| 剂量规则 | 单位明确且与处方一致时才比较。采用十进制运算；未知、按需、单次频次及速率单位不推算每日量，不跨行推断成分累计 |
+| 未完整剂量评估 | 保留原规则等级，标注未评估原因；禁止级规则输入不完整时仍阻止审核和发药。旧剂量规则需由药师补充单位 |
+| 诊断复核 | 门诊和住院页面由责任医生单独记录诊断确认状态、依据和版本；原文改变使旧确认失效，全部历史版本保留 |
+| 检验指标 | 手工录入和 LIS 接收支持项目编码、数值或定性结果、原单位、参考范围、带时区采样时间、方法、标本和原始标记。继承原报告双人审核状态 |
+| 检验趋势 | 仅比较编码体系、项目编码、单位、检测方法和标本相同的已审核数值；重复采样时间和缺少可比条件时不计算方向，不更改原危急值规则 |
+| 危急值辅助 | 展示原通知、确认、处理状态与时间；AI 不关闭或降低危急值，不代替原闭环流程 |
+| 住院连接 | 限定所选住院的医嘱、执行、给药核对、护理评估与计划、病程、查房、出院记录、既有 ICU 评分及相应首页和收费资料 |
+| 给药事实 | 核对通过不等同给药，须同时有已给药状态和实际时间才标记“已记录给药”；条码不发送给模型 |
+| 随访与出院 | 读取既定随访及患者反馈；患者端仅在已出院住院记录中加载出院指导 |
+
+检验数值保留最多 8 位小数，生产 PostgreSQL 使用 NUMERIC，SQLite 开发环境使用精确十进制文本映射，避免二进制浮点丢失。处方剂量最多 6 位小数；现有规则阈值数据库为 2 位小数，超出精度会拒绝保存，不静默四舍五入。
+
+上述结构参考 [FHIR R4 Condition 的验证状态与就诊关系](https://hl7.org/fhir/R4/condition.html)、[Observation 的结果、单位与采样资料](https://hl7.org/fhir/R4/observation.html)、[Dosage 的用法结构](https://hl7.org/fhir/R4/dosage.html)。本系统采用现有院内字段与扩展表，未声明实现完整 FHIR 服务或术语映射。
 
 ## 主要代码与接口
 
@@ -67,6 +88,8 @@ worker 在执行前和保存结果前重新检查权限、配置与知识有效�
 | `app/ai/models.py` | 配置、Prompt、知识、任务、反馈、授权和审计表 |
 | `app/ai/governance.py` | 密钥、版本、角色元数据与配置审计 |
 | `app/ai/context.py` | 真实诊疗关系校验和患者资料快照 |
+| `app/ai/patient_sources.py` / `clinical_tools.py` | 住院来源、检验趋势和既有危急值状态 |
+| `app/clinical_observations.py` / `diagnosis_review.py` | 精确检验数据和责任医生诊断复核 |
 | `app/ai/knowledge.py` | 适用、有效且已审核知识的段落检索 |
 | `app/ai/gateway.py` | 有界 HTTP 调用、响应解析和引用校验 |
 | `app/ai/runtime.py` / `worker.py` | 持久化任务、并发领取、执行与失效检查 |
@@ -94,6 +117,7 @@ worker 在执行前和保存结果前重新检查权限、配置与知识有效�
 # fastapi_be
 pytest -q tests/test_ai_catalog.py tests/test_ai_admin.py tests/test_ai_gateway.py tests/test_ai_context.py tests/test_ai_runtime.py tests/test_ai_migration.py tests/test_rbac_drift.py
 python scripts/generate_rbac_matrix.py --check
+python scripts/export_ai_catalog.py --check
 ruff check app/ai app/routers/ai.py app/routers/ai_admin.py
 ```
 
@@ -101,7 +125,7 @@ ruff check app/ai app/routers/ai.py app/routers/ai_admin.py
 # vue3-new-ui，E2E_BASE_URL 指向已启动的前端
 npm run build
 npm run check:bundle
-npm run test:e2e -- e2e/ai-management.spec.js e2e/ai-workbench.spec.js
+npm run test:e2e -- e2e/ai-*.spec.js e2e/diagnosis-review.spec.js
 ```
 
 协议实现参考：[Responses API](https://developers.openai.com/api/reference/resources/responses/methods/create)、[Structured Outputs](https://developers.openai.com/api/docs/guides/structured-outputs)、[Chat Completions](https://developers.openai.com/api/reference/resources/chat/subresources/completions/methods/create)。本地隔离测试不会调用真实付费模型。

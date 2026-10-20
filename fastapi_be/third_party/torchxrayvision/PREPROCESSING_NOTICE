@@ -1,0 +1,40 @@
+TorchXRayVision stored-range research preprocessing adaptation
+
+This companion notice supplements NOTICE without modifying the existing fixed
+network/checkpoint attribution or the prepared model package's file hashes.
+The Apache License 2.0 is reproduced in LICENSE. Retain all three notices when
+distributing this local runtime.
+
+Reviewed upstream: mlmed/torchxrayvision, commit
+17726dd8f5e756eec3e5ae958281a289b05b1dae.
+
+Author methods: utils.normalize, utils.read_xray_dcm, utils.fix_resolution,
+and datasets.XRayCenterCrop, at these fixed source locations:
+https://github.com/mlmed/torchxrayvision/blob/17726dd8f5e756eec3e5ae958281a289b05b1dae/torchxrayvision/utils.py
+https://github.com/mlmed/torchxrayvision/blob/17726dd8f5e756eec3e5ae958281a289b05b1dae/torchxrayvision/datasets.py
+
+Local changes and explicit research choices:
+
+- Accept only verified, canonical single-frame stored pixels and a restricted
+  CR/DX chest-input contract; load no upstream Python or dataset/download code.
+- Normalize float32 samples with the unsigned BitsStored maximum (2^bits - 1),
+  rather than each image's observed minimum/maximum. Resolve MONOCHROME1 once
+  in stored space before normalization. Require identity modality rescale.
+- Ignore DICOM VOI windows for this research input. The separate original-image
+  viewer retains diagnostic-display window handling; its output is not model
+  input. This choice does not establish equivalence to mixed training-dataset
+  conversions, human presentation or population applicability.
+- Preserve original padding along the background sampling path. Count padding
+  separately in the source and crop; do not impute pixels or label it a lesion.
+  Reject a crop with no varying valid samples.
+- Use the author's integer-centered square crop and explicit CPU PyTorch
+  224-by-224 bilinear interpolation with antialiasing and align_corners=False.
+  Skip interpolation when already 224 square. Do not substitute the skimage
+  resize path, rotate, flip or claim analysis of discarded source pixels.
+- Permit only the declared 0.01 float32 interpolation-roundoff tolerance near
+  the nominal normalized endpoints. Do not clip the resulting tensor; report
+  its actual shape, range, source crop and valid/padding/discarded pixel counts.
+
+This fixed profile is xrv_stored_range_v1. Numerical parity and synthetic smoke
+checks provide engineering evidence only, not diagnostic accuracy, calibrated
+disease probabilities, clinical validation or training-distribution equivalence.

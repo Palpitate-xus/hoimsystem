@@ -1,0 +1,33 @@
+FROM python:3.12-slim AS dependencies
+
+WORKDIR /app
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    HF_HUB_OFFLINE=1 \
+    HF_HUB_DISABLE_TELEMETRY=1 \
+    IMAGING_MODEL_DIR=/models
+
+RUN apt-get update && apt-get install -y --no-install-recommends libgomp1 \
+    && rm -rf /var/lib/apt/lists/*
+COPY requirements-imaging.txt requirements-imaging-service.txt ./
+RUN pip install --no-cache-dir -r requirements-imaging-service.txt \
+    && groupadd --gid 10001 imaging \
+    && useradd --uid 10001 --gid 10001 --create-home --shell /usr/sbin/nologin imaging
+
+FROM dependencies AS runtime
+
+COPY app/__init__.py ./app/__init__.py
+COPY app/ai/__init__.py ./app/ai/__init__.py
+COPY app/ai/imaging_model.py \
+    app/ai/imaging_network.py \
+    app/ai/imaging_contract.py \
+    app/ai/imaging_preprocessing.py \
+    app/ai/imaging_config.py \
+    app/ai/imaging_server.py \
+    app/ai/imaging_worker.py ./app/ai/
+COPY scripts/smoke_local_imaging.py ./scripts/smoke_local_imaging.py
+COPY third_party/torchxrayvision ./third_party/torchxrayvision
+
+USER 10001:10001
+EXPOSE 8812
+CMD ["python", "-m", "app.ai.imaging_server", "--host", "0.0.0.0"]

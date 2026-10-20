@@ -13,7 +13,7 @@ from app.config import settings
 from app.database import get_db
 from app.dependencies import ADMIN_ROLES, ROLE_CASHIER, ROLE_PATIENT, ROLE_REGISTRAR, get_current_user, require_roles
 from app.integration_outbox import enqueue_integration_event
-from app.models import Charge, Doctor, Invoice, Patient, Payment, Prescription, User
+from app.models import Charge, Doctor, Invoice, Patient, Payment, Prescription, Registration, User
 from app.pagination import paginate
 from app.registration import allocate_registration_id
 from app.schemas import (
@@ -43,6 +43,8 @@ def _owns_charge(user: User, charge: Charge | None) -> bool:
 
 @router.get("/chargeManagement/getList")
 def get_charge_list(current_user: User = Depends(get_current_user), keyword: str | None = None, page: int | None = None, page_size: int | None = None, db: Session = Depends(get_db)):
+    registration_patients = {}
+
     def _enrich(item):
         patient_name = item.prescription.patient.name if item.prescription and item.prescription.patient else ""
         doctor_name = item.prescription.doctor.name if item.prescription and item.prescription.doctor else ""
@@ -51,12 +53,20 @@ def get_charge_list(current_user: User = Depends(get_current_user), keyword: str
             "charge_time": (item.charge_time.strftime("%Y-%m-%d %H:%M:%S") if item.charge_time else None),
             "time": (item.time.strftime("%Y-%m-%d %H:%M:%S") if item.time and item.time.year > 1970 else ""),
             "pre_id": str(item.prescription.prescription_id) if item.prescription else "",
+            "patient_id": item.prescription.patient_id if item.prescription else registration_patients.get(item.registration_uuid),
+            "registration_uuid": item.registration_uuid,
             "patient_name": patient_name,
             "doctor_name": doctor_name,
             "amount": round(item.amount, 2) if item.amount else 0,
             "status": item.status,
             "status_text": {0: "未缴费", 1: "已缴费", 2: "已退费"}.get(item.status, ""),
         }
+
+    def _enrich_rows(rows):
+        registration_ids = sorted({row.registration_uuid for row in rows if row.registration_uuid and not row.prescription})
+        for start in range(0, len(registration_ids), 500):
+            registration_patients.update(db.query(Registration.registration_uuid, Registration.patient_id).filter(Registration.registration_uuid.in_(registration_ids[start : start + 500])).all())
+        return [_enrich(row) for row in rows]
 
     data = []
     total = 0
@@ -66,8 +76,7 @@ def get_charge_list(current_user: User = Depends(get_current_user), keyword: str
             joinedload(Charge.prescription).joinedload(Prescription.doctor),
         )
         charge_list, total = paginate(query, page, page_size)
-        for item in charge_list:
-            data.append(_enrich(item))
+        data.extend(_enrich_rows(charge_list))
     elif current_user.user_role == ROLE_PATIENT:
         patient_obj = db.query(Patient).filter(Patient.identity == current_user.username).first()
         if patient_obj:
@@ -81,7 +90,7 @@ def get_charge_list(current_user: User = Depends(get_current_user), keyword: str
                 .filter(Prescription.patient_id == patient_obj.patient_id)
             )
             charge_list, total = paginate(query, page, page_size)
-            data.extend(_enrich(item) for item in charge_list)
+            data.extend(_enrich_rows(charge_list))
     else:
         return {"code": 403, "msg": "无权访问", "data": []}
     if keyword:

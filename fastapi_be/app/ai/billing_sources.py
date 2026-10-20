@@ -5,11 +5,14 @@ from decimal import Decimal, InvalidOperation, localcontext
 from fastapi import HTTPException
 from sqlalchemy import case, exists, func
 
+from app.ai.outpatient_billing import attach_outpatient_billing, outpatient_reconciliation
 from app.models import Admission, InpatientCharge, InpatientOrder, OrderExecution
 
 
 def attach_billing_sources(db, user, spec, patient, encounter, bundle, add, selected, bounded, authorize) -> None:
     if spec.number != 69:
+        return
+    if attach_outpatient_billing(db, user, spec, patient, encounter, bundle, add, selected, bounded, authorize):
         return
     chosen = selected.get("inpatient_charge_id")
     home = selected.get("home_id")
@@ -172,8 +175,13 @@ def billing_reconciliation(context: dict) -> dict:
     return {
         "scope": context.get("billing_scope"),
         "checks": checks,
+        "outpatient_checks": outpatient_reconciliation(context),
         "executed_without_charge_link": [{"order_id": row["order_id"], "category": row.get("category"), "source_ids": [row["source_id"]]} for row in orders.values() if row.get("has_no_charge_link")],
-        "scope_note": "有限原始账目与执行关联核对；无收费关联可能是免费项目、打包计费或关联未保存，不能直接认定漏收费；数量乘单价未套用未提供的舍入或计价政策",
+        "scope_note": (
+            "门诊收费与支付票据原始金额、状态核对；现金或历史流水缺失须人工核实，不按当前药价反算历史账单"
+            if context.get("billing_scope", {}).get("kind") == "outpatient"
+            else "有限原始账目与执行关联核对；无收费关联可能是免费项目、打包计费或关联未保存，不能直接认定漏收费；数量乘单价未套用未提供的舍入或计价政策"
+        ),
         "truncated_sources": context.get("truncated_sources", []),
         "missing_data": context.get("missing_data", []),
         "changes_written": [],

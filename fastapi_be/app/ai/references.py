@@ -12,5 +12,6 @@ SOURCE_REFERENCE_KEYS = frozenset(
         "perioperative_id",
         "home_id",
         "inpatient_charge_id",
+        "outpatient_charge_id",
     }
 )

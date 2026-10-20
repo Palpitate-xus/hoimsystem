@@ -149,6 +149,10 @@ def authorize_run(db: Session, user: User, run: AIRun) -> None:
     spec, _ = authorized_feature(db, user, run.feature_key)
     if run.patient_id is not None:
         authorize_patient(db, user, run.patient_id, spec.category, run.encounter_ref)
+        billing_scope = json.loads(run.input_json).get("payload", {}).get("context", {}).get("billing_scope", {}) or {}
+        source_encounter = billing_scope.get("admission_id") or billing_scope.get("registration_uuid")
+        if source_encounter and source_encounter != run.encounter_ref:
+            authorize_patient(db, user, run.patient_id, spec.category, source_encounter)
 
 
 def describe_run(run: AIRun, include_result: bool = True) -> dict:

@@ -15,6 +15,7 @@ from app.ai.catalog import FeatureSpec
 from app.ai.coding_sources import attach_coding_sources
 from app.ai.governance import digest, encode_json
 from app.ai.models import AIPatientGrant, utcnow
+from app.ai.outpatient_billing import resolve_outpatient_charge
 from app.ai.patient_sources import attach_patient_sources
 from app.ai.procedural_sources import attach_procedural_sources
 from app.clinical_observations import serialize_observation
@@ -179,6 +180,8 @@ def authorize_patient(db: Session, user: User, patient_id: int, category: str, e
 def _selected_records(db: Session, user: User, patient_id: int, references: dict) -> dict:
     """Resolve explicit row selections inside this patient's scope before bounded history queries."""
     selected = {}
+    if references.get("outpatient_charge_id") not in (None, ""):
+        selected["outpatient_charge_id"] = resolve_outpatient_charge(db, patient_id, references["outpatient_charge_id"])
     sources = [
         ("record_id", MedicalRecord, "medical_record_id", None),
         ("structured_record_id", StructuredMedicalRecord, "record_id", None),

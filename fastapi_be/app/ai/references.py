@@ -14,5 +14,8 @@ SOURCE_REFERENCE_KEYS = frozenset(
         "inpatient_charge_id",
         "outpatient_charge_id",
         "adverse_event_id",
+        "referral_id",
+        "mdt_id",
+        "reaction_id",
     }
 )

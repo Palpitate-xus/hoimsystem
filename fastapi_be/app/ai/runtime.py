@@ -202,6 +202,9 @@ def describe_run(run: AIRun, include_result: bool = True) -> dict:
             data["incident_findings"] = {
                 key: context[key] for key in ("scope_note", "snapshot_time", "missing_data", "truncated_sources", "incident_source_scope", "incident_record", "incident_rca_records") if key in context
             }
+        if spec.number in {1, 5, 7, 9}:
+            context = json.loads(run.input_json).get("payload", {}).get("context", {})
+            data["consultation_findings"] = context.get("consultation_sources")
         if spec.number in {61, 62, 63, 64, 65, 66, 67, 70}:
             context = json.loads(run.input_json).get("payload", {}).get("context", {})
             keys = (

@@ -13,6 +13,7 @@ from app.ai.billing_sources import attach_billing_sources
 from app.ai.care import surgical_patient_ids
 from app.ai.catalog import FeatureSpec
 from app.ai.coding_sources import attach_coding_sources
+from app.ai.consultation_sources import attach_consultation_sources
 from app.ai.governance import digest, encode_json
 from app.ai.incident_sources import attach_incident_sources
 from app.ai.models import AIPatientGrant, utcnow
@@ -25,6 +26,7 @@ from app.diagnosis_review import latest_reviews, review_state
 from app.models import (
     Admission,
     AdverseEvent,
+    AdverseReaction,
     Doctor,
     ImagingOrder,
     ImagingReport,
@@ -32,6 +34,7 @@ from app.models import (
     LabObservation,
     LabOrder,
     LabResult,
+    MdtCase,
     MedicalRecord,
     MedicalRecordHome,
     NursingRecord,
@@ -40,6 +43,7 @@ from app.models import (
     PerioperativeAntibiotic,
     PrePha,
     Prescription,
+    Referral,
     Registration,
     StructuredMedicalRecord,
     SurgeryApplication,
@@ -182,16 +186,23 @@ def authorize_patient(db: Session, user: User, patient_id: int, category: str, e
 def _selected_records(db: Session, user: User, patient_id: int, references: dict) -> dict:
     """Resolve explicit row selections inside this patient's scope before bounded history queries."""
     selected = {}
-    if references.get("adverse_event_id") not in (None, ""):
-        reference = references["adverse_event_id"]
+    for key, model, primary_key in (
+        ("adverse_event_id", AdverseEvent, "event_id"),
+        ("reaction_id", AdverseReaction, "reaction_id"),
+        ("referral_id", Referral, "referral_id"),
+        ("mdt_id", MdtCase, "mdt_id"),
+    ):
+        reference = references.get(key)
+        if reference in (None, ""):
+            continue
         if not isinstance(reference, str) or len(reference) > 10 or not reference.isascii() or not reference.isdigit() or not 0 < int(reference) <= 2147483647 or str(int(reference)) != reference:
-            raise HTTPException(422, "事件标识须为规范的正整数字符串")
+            raise HTTPException(422, "所选事件或会诊标识须为规范的正整数字符串")
         if user.user_role == "patient":
-            raise HTTPException(403, "患者端不提供内部不良事件调查资料")
-        row = db.query(AdverseEvent).filter_by(event_id=int(reference), patient_id=patient_id).first()
+            raise HTTPException(403, "患者端不提供内部事件、转诊和会诊工作资料")
+        row = db.query(model).filter(getattr(model, primary_key) == int(reference), model.patient_id == patient_id).first()
         if row is None:
-            raise HTTPException(404, "所选事件不存在或不属于该患者")
-        selected["adverse_event_id"] = row
+            raise HTTPException(404, "所选事件或会诊不存在或不属于该患者")
+        selected[key] = row
     if references.get("outpatient_charge_id") not in (None, ""):
         selected["outpatient_charge_id"] = resolve_outpatient_charge(db, patient_id, references["outpatient_charge_id"])
     sources = [
@@ -491,6 +502,7 @@ def patient_snapshot(db: Session, user: User, spec: FeatureSpec, patient_id: int
     attach_patient_sources(db, user, spec, patient, encounter, bundle, add)
     attach_procedural_sources(db, user, spec, patient, encounter, bundle, add, selected, bounded)
     attach_coding_sources(db, user, spec, patient, encounter, bundle, add, selected, bounded, authorize_patient)
+    attach_consultation_sources(db, user, spec, patient, encounter, bundle, add, selected, bounded)
     if not bundle.data["current_confirmed_diagnoses"]:
         bundle.data["missing_data"].append("未取得本次就诊的已确认诊断")
     bundle.data = minimize_identifiers(bundle.data, patient)

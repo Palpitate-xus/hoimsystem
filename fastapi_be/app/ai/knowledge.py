@@ -38,6 +38,11 @@ def retrieval_query(spec: FeatureSpec, task_input: dict, context: dict, tools: d
             if name == "reviewed_observations" and task_input.get("lab_result_id") and item.get("lab_result_id") != task_input["lab_result_id"]:
                 continue
             parts.extend(str(item[field])[:500] for field in fields if item.get(field))
+    consultations = context.get("consultation_sources", {})
+    for name, reference, fields in (("referrals", "referral_id", ("recorded_reason",)), ("mdt_cases", "mdt_id", ("recorded_diagnosis", "recorded_result"))):
+        for item in consultations.get(name, []):
+            if task_input.get(reference) is not None and str(item.get(reference)) == str(task_input[reference]):
+                parts.extend(str(item[field])[:500] for field in fields if item.get(field))
     for prescription in context.get("prescriptions", []):
         if task_input.get("prescription_id") and prescription.get("source_id") != "prescription:" + task_input["prescription_id"]:
             continue

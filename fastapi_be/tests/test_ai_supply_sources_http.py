@@ -2,7 +2,6 @@
 
 # ruff: noqa: F811 -- imported pytest fixture is registered at module scope.
 
-
 import pytest
 from fastapi import FastAPI, HTTPException
 from httpx import ASGITransport, AsyncClient

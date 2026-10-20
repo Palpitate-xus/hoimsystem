@@ -1,0 +1,23 @@
+FROM python:3.12-slim AS dependencies
+
+WORKDIR /app
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
+
+COPY requirements-roster.txt ./
+RUN pip install --no-cache-dir -r requirements-roster.txt \
+    && groupadd --gid 10001 roster \
+    && useradd --uid 10001 --gid 10001 --create-home --shell /usr/sbin/nologin roster
+
+FROM dependencies AS runtime
+
+COPY app/__init__.py ./app/__init__.py
+COPY app/ai/__init__.py ./app/ai/__init__.py
+COPY app/ai/roster_contract.py \
+    app/ai/roster_model.py \
+    app/ai/roster_config.py \
+    app/ai/roster_server.py ./app/ai/
+
+USER 10001:10001
+EXPOSE 8819
+CMD ["python", "-m", "app.ai.roster_server", "--host", "0.0.0.0"]

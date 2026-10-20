@@ -7,6 +7,7 @@ mathematical relaxations; they never become an observed roster or observed cost.
 import bisect
 import hashlib
 import heapq
+import re
 from dataclasses import dataclass, replace
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
@@ -20,11 +21,14 @@ from app.ai.roster_contract import (
     RosterCandidateCheck,
     RosterCheck,
     RosterObjectiveValue,
+    RosterRuntime,
     RosterSearchProof,
     RosterSessionAllocation,
     RosterSource,
     canonical_json,
     hash_content,
+    input_policy_digest,
+    recipe_digest,
 )
 
 MINUTE = 60000000
@@ -413,8 +417,7 @@ def _person_checks(source, person, selected, sessions, *, partial=False):
 
 
 def check_candidate(source, selected_option_ids):
-    if not isinstance(source, RosterSource):
-        source = RosterSource.model_validate(source)
+    source = RosterSource.model_validate(source.model_dump() if isinstance(source, RosterSource) else source)
     selected_set = set(selected_option_ids)
     options = {o.option_id: o for o in source.options}
     if len(selected_set) != len(selected_option_ids) or not selected_set <= options.keys():
@@ -789,8 +792,8 @@ def _search(source, graph):
 
 
 def compute_roster(source, instructions_digest, runtime):
-    if not isinstance(source, RosterSource):
-        source = RosterSource.model_validate(source)
+    runtime = validate_runtime(runtime)
+    source = RosterSource.model_validate(source.model_dump() if isinstance(source, RosterSource) else source)
     definite, optimistic = _search(source, "definite"), _search(source, "optimistic")
     candidates = [r.solution for r in (definite, optimistic) if r.solution is not None]
     solution = min(candidates, key=lambda c: _objective_key(source, _candidate_objective(source, c))) if candidates else None
@@ -852,9 +855,24 @@ def compute_roster(source, instructions_digest, runtime):
     return analysis
 
 
+def validate_runtime(runtime):
+    values = RosterRuntime.model_validate(runtime.model_dump() if isinstance(runtime, RosterRuntime) else runtime).model_dump()
+    if values["core_sha256"] != implementation_hashes() or values["recipe_digest"] != recipe_digest() or values["input_policy_digest"] != input_policy_digest():
+        raise ValueError("Roster implementation, fixed recipe or input policy differs")
+    versions = values["engine_versions"]
+    if set(versions) != {"fastapi", "pydantic", "pydantic-settings", "uvicorn"}:
+        raise ValueError("Complete independent engine package identity is required")
+    if any(not re.fullmatch(r"\d+\.\d+\.\d+(?:[A-Za-z0-9.+_-]{0,50})?", version) for version in [values["python_version"], *versions.values()]):
+        raise ValueError("Invalid independent runtime version identity")
+    identity = {key: value for key, value in values.items() if key not in {"runtime_digest", "model_version"}}
+    digest = hash_content(identity)
+    if values["runtime_digest"] != digest or values["model_version"] != "roster:" + digest:
+        raise ValueError("Complete runtime metadata, timezone digest and registered model do not bind")
+    return values
+
+
 def validate_analysis_binding(analysis, source, instructions_digest, model_version):
-    if not isinstance(analysis, RosterAnalysis):
-        analysis = RosterAnalysis.model_validate(analysis)
+    analysis = RosterAnalysis.model_validate(analysis.model_dump() if isinstance(analysis, RosterAnalysis) else analysis)
     if analysis.local_runtime.model_version != model_version:
         raise ValueError("Requested model differs from actual runtime")
     expected = compute_roster(source, instructions_digest, analysis.local_runtime)

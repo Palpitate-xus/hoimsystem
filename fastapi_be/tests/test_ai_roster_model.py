@@ -186,23 +186,9 @@ def test_empty_candidate_and_unknown_empty_cohort_are_not_auto_feasible():
 
 
 def runtime():
-    from app.ai.roster_contract import hash_content, input_policy_digest, recipe_digest
+    from app.ai.roster_config import runtime_descriptor, runtime_from_descriptor
 
-    digest = hash_content("synthetic independently identifiable runtime")
-    return {
-        "engine": "stdlib_roster_branch_and_bound",
-        "model_version": "roster:" + digest,
-        "runtime_digest": digest,
-        "python_version": "synthetic-test-runtime",
-        "engine_versions": {},
-        "core_sha256": {},
-        "recipe_digest": recipe_digest(),
-        "input_policy_digest": input_policy_digest(),
-        "timezone_database_digest": digest,
-        "clinical_validation": "not_provided",
-        "operational_validation": "not_provided",
-        "prompt_handling": "provenance_only",
-    }
+    return runtime_from_descriptor(runtime_descriptor())
 
 
 def small_problem(seed, mode="meet_targets_min_penalty"):
@@ -340,3 +326,40 @@ def test_complete_recomputation_rejects_numeric_and_proof_tampering():
     changed.optimistic_search.expanded_nodes += 1
     with pytest.raises(ValueError):
         validate_analysis_binding(changed, source, "a" * 64, runtime()["model_version"])
+
+
+@pytest.mark.parametrize("field", ["runtime_digest", "timezone_database_digest", "recipe_digest", "input_policy_digest", "python_version", "core_sha256", "engine_versions"])
+def test_runtime_identity_cannot_self_attest_arbitrary_metadata(field):
+    from app.ai.roster_model import compute_roster
+
+    values = runtime()
+    if field in ("core_sha256", "engine_versions"):
+        values[field] = {}
+    elif field == "python_version":
+        values[field] = "3.12.0"
+    else:
+        values[field] = "0" * 64
+    with pytest.raises(ValueError):
+        compute_roster(complete_source(), "a" * 64, values)
+
+
+def test_rehashed_wrong_core_metadata_is_still_rejected():
+    from app.ai.roster_contract import hash_content
+    from app.ai.roster_model import compute_roster
+
+    values = runtime()
+    values["core_sha256"]["roster_model"] = "0" * 64
+    digest = hash_content({k: v for k, v in values.items() if k not in ("runtime_digest", "model_version")})
+    values.update(runtime_digest=digest, model_version="roster:" + digest)
+    with pytest.raises(ValueError):
+        compute_roster(complete_source(), "a" * 64, values)
+
+
+def test_preconstructed_pydantic_bool_cannot_bypass_strict_numeric_proof():
+    from app.ai.roster_model import compute_roster, validate_analysis_binding
+
+    source = complete_source()
+    analysis = compute_roster(source, "a" * 64, runtime())
+    analysis.optimistic_search = analysis.optimistic_search.model_copy(update={"frontier_nodes": False})
+    with pytest.raises(ValueError):
+        validate_analysis_binding(analysis, source, "a" * 64, runtime()["model_version"])

@@ -1,0 +1,23 @@
+FROM python:3.12-slim AS dependencies
+
+WORKDIR /app
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
+
+COPY requirements-supply.txt ./
+RUN pip install --no-cache-dir -r requirements-supply.txt \
+    && groupadd --gid 10001 supply \
+    && useradd --uid 10001 --gid 10001 --create-home --shell /usr/sbin/nologin supply
+
+FROM dependencies AS runtime
+
+COPY app/__init__.py ./app/__init__.py
+COPY app/ai/__init__.py ./app/ai/__init__.py
+COPY app/ai/supply_contract.py \
+    app/ai/supply_model.py \
+    app/ai/supply_config.py \
+    app/ai/supply_server.py ./app/ai/
+
+USER 10001:10001
+EXPOSE 8822
+CMD ["python", "-m", "app.ai.supply_server", "--host", "0.0.0.0"]

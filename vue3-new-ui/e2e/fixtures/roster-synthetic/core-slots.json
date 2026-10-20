@@ -1,0 +1,649 @@
+{
+  "analysis": {
+    "definite_search": {
+      "expanded_nodes": 2,
+      "frontier_digest": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "frontier_nodes": 0,
+      "graph": "definite",
+      "incumbent_objective": {
+        "penalty_points": 2,
+        "planned_slots": 8
+      },
+      "optimistic_bound": {
+        "penalty_points": 2,
+        "planned_slots": 8
+      },
+      "primitive_operations": 63,
+      "relaxations": [],
+      "termination": "exhausted"
+    },
+    "feasible_incumbent_objective": {
+      "penalty_points": 2,
+      "planned_slots": 8
+    },
+    "infeasibility_proven": false,
+    "instructions_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "local_runtime": {
+      "clinical_validation": "not_provided",
+      "core_sha256": {
+        "roster_config": "b988f37928ad0c0040b0e7d8e950687e113eb59dd1432c69a21a6c836521ebcb",
+        "roster_contract": "558b284f70b8af4265abd899713da7d0ee2fadc7aa2882645d45213d6e69d344",
+        "roster_model": "9f1bfea24581c948f57fd0f201d1d619e9a0b75ad11292044156be55ab9450c7",
+        "roster_server": "fbb2818325610e53a576399b050b32d704fe4f196b35c9fc3717c389576b2ae1"
+      },
+      "engine": "stdlib_roster_branch_and_bound",
+      "engine_versions": {
+        "fastapi": "0.136.1",
+        "pydantic": "2.12.4",
+        "pydantic-settings": "2.12.0",
+        "uvicorn": "0.46.0"
+      },
+      "input_policy_digest": "9f088a402b3c55560a7158df2d76ba91aecf9ed17034178f9b1e74c178e30105",
+      "model_version": "roster:96124cf3c6c0c20143383cb2120d3e4743b549a366c2b0996e59bd62cdeddc75",
+      "operational_validation": "not_provided",
+      "prompt_handling": "provenance_only",
+      "python_version": "3.13.12",
+      "recipe_digest": "32d3df3336970832ecd2ea9f1de65a3c61b70f2fcbd3ad0ff901dd1fcdc3fe13",
+      "runtime_digest": "96124cf3c6c0c20143383cb2120d3e4743b549a366c2b0996e59bd62cdeddc75",
+      "timezone_database_digest": "f776ce09945c8a952b2a671aaa10c582423301e186038670ddcd0a94442f4be5"
+    },
+    "missing_data": [],
+    "objective_mode": "max_slots_then_min_penalty",
+    "optimality_proven": true,
+    "optimistic_objective_bound": {
+      "penalty_points": 2,
+      "planned_slots": 8
+    },
+    "optimistic_search": {
+      "expanded_nodes": 2,
+      "frontier_digest": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "frontier_nodes": 0,
+      "graph": "optimistic",
+      "incumbent_objective": {
+        "penalty_points": 2,
+        "planned_slots": 8
+      },
+      "optimistic_bound": {
+        "penalty_points": 2,
+        "planned_slots": 8
+      },
+      "primitive_operations": 63,
+      "relaxations": [],
+      "termination": "exhausted"
+    },
+    "penalty_gap_when_slot_bound_closed": 0,
+    "planned_slots_gap": 0,
+    "schema_version": "roster_analysis_v1",
+    "solution": {
+      "checks": [
+        {
+          "actual_count": null,
+          "actual_microseconds": null,
+          "evaluated_window_count": null,
+          "kind": "personnel_coverage",
+          "limit_count": null,
+          "limit_microseconds": null,
+          "option_ids": [],
+          "reason_codes": [
+            "complete_declared_department_doctor_cohort"
+          ],
+          "session_id": null,
+          "source_ids": [],
+          "staff_id": null,
+          "status": "satisfied",
+          "witness_end_at": null,
+          "witness_start_at": null
+        },
+        {
+          "actual_count": null,
+          "actual_microseconds": null,
+          "evaluated_window_count": null,
+          "kind": "personnel_coverage",
+          "limit_count": null,
+          "limit_microseconds": null,
+          "option_ids": [],
+          "reason_codes": [
+            "complete_reviewed_dated_session_collection"
+          ],
+          "session_id": null,
+          "source_ids": [],
+          "staff_id": null,
+          "status": "satisfied",
+          "witness_end_at": null,
+          "witness_start_at": null
+        },
+        {
+          "actual_count": null,
+          "actual_microseconds": null,
+          "evaluated_window_count": null,
+          "kind": "qualification",
+          "limit_count": null,
+          "limit_microseconds": null,
+          "option_ids": [
+            "00000000-0000-0000-0000-000000000004"
+          ],
+          "reason_codes": [
+            "whole_session_published_job_qualification"
+          ],
+          "session_id": "00000000-0000-0000-0000-000000000003",
+          "source_ids": [
+            "roster_qualification:00000000-0000-0000-0000-00000000000b:12bc957404ee"
+          ],
+          "staff_id": "00000000-0000-0000-0000-000000000002",
+          "status": "satisfied",
+          "witness_end_at": null,
+          "witness_start_at": null
+        },
+        {
+          "actual_count": null,
+          "actual_microseconds": null,
+          "evaluated_window_count": null,
+          "kind": "availability",
+          "limit_count": null,
+          "limit_microseconds": null,
+          "option_ids": [
+            "00000000-0000-0000-0000-000000000004"
+          ],
+          "reason_codes": [
+            "explicit_whole_session_availability"
+          ],
+          "session_id": "00000000-0000-0000-0000-000000000003",
+          "source_ids": [
+            "roster_availability:00000000-0000-0000-0000-00000000000c:edaa687c365f"
+          ],
+          "staff_id": "00000000-0000-0000-0000-000000000002",
+          "status": "satisfied",
+          "witness_end_at": null,
+          "witness_start_at": null
+        },
+        {
+          "actual_count": null,
+          "actual_microseconds": null,
+          "evaluated_window_count": null,
+          "kind": "accounting",
+          "limit_count": null,
+          "limit_microseconds": null,
+          "option_ids": [
+            "00000000-0000-0000-0000-000000000004"
+          ],
+          "reason_codes": [
+            "explicit_complete_break_accounting"
+          ],
+          "session_id": "00000000-0000-0000-0000-000000000003",
+          "source_ids": [],
+          "staff_id": "00000000-0000-0000-0000-000000000002",
+          "status": "satisfied",
+          "witness_end_at": null,
+          "witness_start_at": null
+        },
+        {
+          "actual_count": 2,
+          "actual_microseconds": null,
+          "evaluated_window_count": null,
+          "kind": "cost",
+          "limit_count": null,
+          "limit_microseconds": null,
+          "option_ids": [
+            "00000000-0000-0000-0000-000000000004"
+          ],
+          "reason_codes": [
+            "reviewed_nonnegative_penalty"
+          ],
+          "session_id": "00000000-0000-0000-0000-000000000003",
+          "source_ids": [],
+          "staff_id": "00000000-0000-0000-0000-000000000002",
+          "status": "satisfied",
+          "witness_end_at": null,
+          "witness_start_at": null
+        },
+        {
+          "actual_count": 8,
+          "actual_microseconds": null,
+          "evaluated_window_count": null,
+          "kind": "capacity",
+          "limit_count": null,
+          "limit_microseconds": null,
+          "option_ids": [
+            "00000000-0000-0000-0000-000000000004"
+          ],
+          "reason_codes": [
+            "reviewed_net_dated_capacity"
+          ],
+          "session_id": "00000000-0000-0000-0000-000000000003",
+          "source_ids": [],
+          "staff_id": "00000000-0000-0000-0000-000000000002",
+          "status": "satisfied",
+          "witness_end_at": null,
+          "witness_start_at": null
+        },
+        {
+          "actual_count": null,
+          "actual_microseconds": null,
+          "evaluated_window_count": null,
+          "kind": "presence_overlap",
+          "limit_count": null,
+          "limit_microseconds": null,
+          "option_ids": [
+            "00000000-0000-0000-0000-000000000004"
+          ],
+          "reason_codes": [
+            "all_known_full_presence_intervals_nonoverlapping"
+          ],
+          "session_id": null,
+          "source_ids": [],
+          "staff_id": "00000000-0000-0000-0000-000000000002",
+          "status": "satisfied",
+          "witness_end_at": null,
+          "witness_start_at": null
+        },
+        {
+          "actual_count": null,
+          "actual_microseconds": null,
+          "evaluated_window_count": null,
+          "kind": "policy",
+          "limit_count": null,
+          "limit_microseconds": null,
+          "option_ids": [],
+          "reason_codes": [
+            "all_applicable_published_policies_conjoined"
+          ],
+          "session_id": null,
+          "source_ids": [
+            "roster_work_policy:00000000-0000-0000-0000-00000000000a:44672ba3975d"
+          ],
+          "staff_id": "00000000-0000-0000-0000-000000000002",
+          "status": "satisfied",
+          "witness_end_at": null,
+          "witness_start_at": null
+        },
+        {
+          "actual_count": null,
+          "actual_microseconds": 28800000000,
+          "evaluated_window_count": null,
+          "kind": "single_duty_presence",
+          "limit_count": null,
+          "limit_microseconds": 28800000000,
+          "option_ids": [
+            "00000000-0000-0000-0000-000000000004"
+          ],
+          "reason_codes": [
+            "exact_integer_duration"
+          ],
+          "session_id": null,
+          "source_ids": [
+            "roster_work_policy:00000000-0000-0000-0000-00000000000a:44672ba3975d"
+          ],
+          "staff_id": "00000000-0000-0000-0000-000000000002",
+          "status": "satisfied",
+          "witness_end_at": "2026-10-20T16:00:00.000000Z",
+          "witness_start_at": "2026-10-20T08:00:00.000000Z"
+        },
+        {
+          "actual_count": null,
+          "actual_microseconds": 28800000000,
+          "evaluated_window_count": 6,
+          "kind": "rolling_24h",
+          "limit_count": null,
+          "limit_microseconds": 28800000000,
+          "option_ids": [
+            "00000000-0000-0000-0000-000000000004"
+          ],
+          "reason_codes": [
+            "exact_integer_duration"
+          ],
+          "session_id": null,
+          "source_ids": [
+            "roster_work_policy:00000000-0000-0000-0000-00000000000a:44672ba3975d"
+          ],
+          "staff_id": "00000000-0000-0000-0000-000000000002",
+          "status": "satisfied",
+          "witness_end_at": "2026-10-20T16:00:00.000000Z",
+          "witness_start_at": "2026-10-19T16:00:00.000000Z"
+        },
+        {
+          "actual_count": null,
+          "actual_microseconds": 28800000000,
+          "evaluated_window_count": 6,
+          "kind": "rolling_7d",
+          "limit_count": null,
+          "limit_microseconds": 144000000000,
+          "option_ids": [
+            "00000000-0000-0000-0000-000000000004"
+          ],
+          "reason_codes": [
+            "exact_integer_duration"
+          ],
+          "session_id": null,
+          "source_ids": [
+            "roster_work_policy:00000000-0000-0000-0000-00000000000a:44672ba3975d"
+          ],
+          "staff_id": "00000000-0000-0000-0000-000000000002",
+          "status": "satisfied",
+          "witness_end_at": "2026-10-20T16:00:00.000000Z",
+          "witness_start_at": "2026-10-13T16:00:00.000000Z"
+        },
+        {
+          "actual_count": null,
+          "actual_microseconds": null,
+          "evaluated_window_count": null,
+          "kind": "context_coverage",
+          "limit_count": null,
+          "limit_microseconds": null,
+          "option_ids": [
+            "00000000-0000-0000-0000-000000000004"
+          ],
+          "reason_codes": [
+            "all_location_prefix_suffix_and_fixed_window_coverage"
+          ],
+          "session_id": null,
+          "source_ids": [],
+          "staff_id": "00000000-0000-0000-0000-000000000002",
+          "status": "satisfied",
+          "witness_end_at": "2026-11-03T00:00:00.000000Z",
+          "witness_start_at": "2026-10-13T00:00:00.000000Z"
+        },
+        {
+          "actual_count": 1,
+          "actual_microseconds": null,
+          "evaluated_window_count": null,
+          "kind": "minimum_staff",
+          "limit_count": 1,
+          "limit_microseconds": null,
+          "option_ids": [
+            "00000000-0000-0000-0000-000000000004"
+          ],
+          "reason_codes": [
+            "assigned_people_not_continuous_presence_staffing"
+          ],
+          "session_id": "00000000-0000-0000-0000-000000000003",
+          "source_ids": [],
+          "staff_id": null,
+          "status": "satisfied",
+          "witness_end_at": null,
+          "witness_start_at": null
+        },
+        {
+          "actual_count": 1,
+          "actual_microseconds": null,
+          "evaluated_window_count": null,
+          "kind": "maximum_staff",
+          "limit_count": 1,
+          "limit_microseconds": null,
+          "option_ids": [
+            "00000000-0000-0000-0000-000000000004"
+          ],
+          "reason_codes": [
+            "assigned_people_not_continuous_presence_staffing"
+          ],
+          "session_id": "00000000-0000-0000-0000-000000000003",
+          "source_ids": [],
+          "staff_id": null,
+          "status": "satisfied",
+          "witness_end_at": null,
+          "witness_start_at": null
+        },
+        {
+          "actual_count": 8,
+          "actual_microseconds": null,
+          "evaluated_window_count": null,
+          "kind": "required_slots",
+          "limit_count": 5,
+          "limit_microseconds": null,
+          "option_ids": [
+            "00000000-0000-0000-0000-000000000004"
+          ],
+          "reason_codes": [
+            "reviewed_dated_required_slots_not_forecast_or_stock"
+          ],
+          "session_id": "00000000-0000-0000-0000-000000000003",
+          "source_ids": [],
+          "staff_id": null,
+          "status": "satisfied",
+          "witness_end_at": null,
+          "witness_start_at": null
+        },
+        {
+          "actual_count": 10,
+          "actual_microseconds": null,
+          "evaluated_window_count": null,
+          "kind": "facility_slot_ceiling",
+          "limit_count": null,
+          "limit_microseconds": null,
+          "option_ids": [],
+          "reason_codes": [
+            "explicit_facility_ceiling"
+          ],
+          "session_id": "00000000-0000-0000-0000-000000000003",
+          "source_ids": [],
+          "staff_id": null,
+          "status": "satisfied",
+          "witness_end_at": null,
+          "witness_start_at": null
+        }
+      ],
+      "cost_points": 2,
+      "selected_option_ids": [
+        "00000000-0000-0000-0000-000000000004"
+      ],
+      "session_allocations": [
+        {
+          "assigned_staff": 1,
+          "capacity_headroom": 3,
+          "facility_slot_ceiling": 10,
+          "planned_slots": 8,
+          "required_slots": 5,
+          "session_id": "00000000-0000-0000-0000-000000000003",
+          "staff_slot_capacity": 8
+        }
+      ],
+      "status": "feasible_under_declared_scope",
+      "total_planned_slots": 8
+    },
+    "solve_status": "optimal_proven",
+    "source_binding": {
+      "content_hash": "77010c602af9a234f4ef6725aa75b505e058f826ef9e278a9c2709cea482994d",
+      "input_policy_digest": "9f088a402b3c55560a7158df2d76ba91aecf9ed17034178f9b1e74c178e30105",
+      "manifest_digest": "310bcef63e6bb41815865a583221b416d0cd21cb61005dd4449c31211b384865",
+      "problem_governance_hash": "310bcef63e6bb41815865a583221b416d0cd21cb61005dd4449c31211b384865",
+      "problem_id": "00000000-0000-0000-0000-000000000001",
+      "projection_hash": "366eef9896cd51e1fc6c457616b93ed8e7ff146de717e57b9897e669e66e0b5d",
+      "recipe_digest": "32d3df3336970832ecd2ea9f1de65a3c61b70f2fcbd3ad0ff901dd1fcdc3fe13",
+      "rule_id": "roster_declared_constraints_v1",
+      "scope_binding_hash": "310bcef63e6bb41815865a583221b416d0cd21cb61005dd4449c31211b384865",
+      "source_id": "roster_problem:00000000-0000-0000-0000-000000000001:77010c602af9"
+    },
+    "submitted_candidate_check": null,
+    "warnings": [
+      "candidate_plan_only_no_appointment_stock_or_staff_schedule_write",
+      "proof_limited_to_complete_declared_department_cohort_dated_sessions_and_local_reviewed_constraints",
+      "assigned_person_counts_do_not_certify_continuous_instantaneous_staffing",
+      "not_independently_operationally_validated"
+    ]
+  },
+  "result": {
+    "missing_data": [],
+    "sections": [
+      {
+        "content": "原量、资格、可用性、连续工时、休息、候选与乐观搜索界限见结构化结果；未知项未补0。由排班负责人核对后决定是否采用。",
+        "source_ids": [
+          "roster_problem:00000000-0000-0000-0000-000000000001:77010c602af9"
+        ],
+        "title": "声明范围排班与日期号源候选"
+      }
+    ],
+    "summary": "已在声明范围与确定性搜索界限下证明所选目标最优。",
+    "warnings": [
+      "candidate_plan_only_no_appointment_stock_or_staff_schedule_write",
+      "proof_limited_to_complete_declared_department_cohort_dated_sessions_and_local_reviewed_constraints",
+      "assigned_person_counts_do_not_certify_continuous_instantaneous_staffing",
+      "not_independently_operationally_validated"
+    ]
+  },
+  "source": {
+    "as_of": "2026-10-19T00:00:00.000000Z",
+    "business_dates": [
+      "2026-10-20",
+      "2026-10-21",
+      "2026-10-22",
+      "2026-10-23",
+      "2026-10-24",
+      "2026-10-25",
+      "2026-10-26"
+    ],
+    "business_timezone": "UTC",
+    "capture_mode": "current_capture",
+    "captured_at": "2026-10-19T00:00:00.000001Z",
+    "content_hash": "77010c602af9a234f4ef6725aa75b505e058f826ef9e278a9c2709cea482994d",
+    "input_policy_digest": "9f088a402b3c55560a7158df2d76ba91aecf9ed17034178f9b1e74c178e30105",
+    "manifest_digest": "310bcef63e6bb41815865a583221b416d0cd21cb61005dd4449c31211b384865",
+    "objective_mode": "max_slots_then_min_penalty",
+    "options": [
+      {
+        "basis_hash": "310bcef63e6bb41815865a583221b416d0cd21cb61005dd4449c31211b384865",
+        "breaks": [],
+        "breaks_complete": true,
+        "cost_points": {
+          "absent_reason": null,
+          "value": 2
+        },
+        "option_id": "00000000-0000-0000-0000-000000000004",
+        "session_id": "00000000-0000-0000-0000-000000000003",
+        "slot_capacity": {
+          "absent_reason": null,
+          "value": 8
+        },
+        "staff_id": "00000000-0000-0000-0000-000000000002",
+        "time_accounting_status": "verified"
+      }
+    ],
+    "personnel_coverage": "attested_complete",
+    "personnel_coverage_basis_hash": "310bcef63e6bb41815865a583221b416d0cd21cb61005dd4449c31211b384865",
+    "planning_end_at": "2026-10-27T00:00:00.000000Z",
+    "planning_start_at": "2026-10-20T00:00:00.000000Z",
+    "problem_governance_hash": "310bcef63e6bb41815865a583221b416d0cd21cb61005dd4449c31211b384865",
+    "problem_id": "00000000-0000-0000-0000-000000000001",
+    "recipe_digest": "32d3df3336970832ecd2ea9f1de65a3c61b70f2fcbd3ad0ff901dd1fcdc3fe13",
+    "rule_id": "roster_declared_constraints_v1",
+    "schema_version": "roster_source_v1",
+    "scope_binding_hash": "310bcef63e6bb41815865a583221b416d0cd21cb61005dd4449c31211b384865",
+    "session_requirements_coverage": "attested_complete",
+    "session_requirements_coverage_basis_hash": "310bcef63e6bb41815865a583221b416d0cd21cb61005dd4449c31211b384865",
+    "sessions": [
+      {
+        "business_date": "2026-10-20",
+        "capacity_basis_hash": "310bcef63e6bb41815865a583221b416d0cd21cb61005dd4449c31211b384865",
+        "end_at": "2026-10-20T16:00:00.000000Z",
+        "facility_slot_ceiling": {
+          "absent_reason": null,
+          "value": 10
+        },
+        "maximum_staff": 1,
+        "minimum_staff": 1,
+        "required_job_hash": "310bcef63e6bb41815865a583221b416d0cd21cb61005dd4449c31211b384865",
+        "required_slots": {
+          "absent_reason": null,
+          "value": 5
+        },
+        "requirements_basis_hash": "310bcef63e6bb41815865a583221b416d0cd21cb61005dd4449c31211b384865",
+        "session_id": "00000000-0000-0000-0000-000000000003",
+        "start_at": "2026-10-20T08:00:00.000000Z"
+      }
+    ],
+    "source_id": "roster_problem:00000000-0000-0000-0000-000000000001:77010c602af9",
+    "staff": [
+      {
+        "all_locations_duty_coverage": {
+          "basis_hash": "310bcef63e6bb41815865a583221b416d0cd21cb61005dd4449c31211b384865",
+          "end_at": "2027-01-01T00:00:00.000000Z",
+          "start_at": "2025-01-01T00:00:00.000000Z",
+          "status": "attested_complete"
+        },
+        "availability": [
+          {
+            "availability": "available",
+            "basis_hash": "310bcef63e6bb41815865a583221b416d0cd21cb61005dd4449c31211b384865",
+            "basis_kind": "administrative_confirmation",
+            "end_at": "2026-10-27T00:00:00.000000Z",
+            "ref": {
+              "content_hash": "edaa687c365f36a120ba82afc2c7c1c7e398a02e0cb1db009f075b0bf4f0f926",
+              "governance_hash": "c94677580b89a24fc02ab5c172807159623c567d6aa58cc685401947eeaf4d8b",
+              "kind": "availability",
+              "recorded_at": "2026-01-01T00:00:00.000000Z",
+              "revision": 2,
+              "source_id": "roster_availability:00000000-0000-0000-0000-00000000000c:edaa687c365f",
+              "source_record_id": "00000000-0000-0000-0000-00000000000c",
+              "status": "published"
+            },
+            "start_at": "2026-10-20T00:00:00.000000Z"
+          }
+        ],
+        "duties": [],
+        "identity_binding_hash": "310bcef63e6bb41815865a583221b416d0cd21cb61005dd4449c31211b384865",
+        "qualifications": [
+          {
+            "authorized_job_hashes": [
+              "310bcef63e6bb41815865a583221b416d0cd21cb61005dd4449c31211b384865"
+            ],
+            "basis_hash": "310bcef63e6bb41815865a583221b416d0cd21cb61005dd4449c31211b384865",
+            "employment_status": "active",
+            "expiry_status": "known",
+            "qualification_status": "verified",
+            "ref": {
+              "content_hash": "12bc957404ee0c1143b29bfd1186a86d87ce7ce6f76b771744d7dc8dfece993f",
+              "governance_hash": "e1368360c294a77c87d9cc04f89bf36b9ea07c10afdde96b59230b156f5942dc",
+              "kind": "qualification",
+              "recorded_at": "2026-01-01T00:00:00.000000Z",
+              "revision": 2,
+              "source_id": "roster_qualification:00000000-0000-0000-0000-00000000000b:12bc957404ee",
+              "source_record_id": "00000000-0000-0000-0000-00000000000b",
+              "status": "published"
+            },
+            "valid_from_at": "2026-01-01T00:00:00.000000Z",
+            "valid_until_at": "2027-01-01T00:00:00.000000Z"
+          }
+        ],
+        "staff_id": "00000000-0000-0000-0000-000000000002"
+      }
+    ],
+    "submitted_candidate": null,
+    "work_policies": [
+      {
+        "applicable_staff_ids": [
+          "00000000-0000-0000-0000-000000000002"
+        ],
+        "basis_hash": "310bcef63e6bb41815865a583221b416d0cd21cb61005dd4449c31211b384865",
+        "effective_from_at": "2026-01-01T00:00:00.000000Z",
+        "effective_until_absent_reason": null,
+        "effective_until_at": "2027-01-01T00:00:00.000000Z",
+        "fixed_work_windows": [],
+        "max_single_duty_presence_minutes": {
+          "absent_reason": null,
+          "value": 480
+        },
+        "max_work_minutes_rolling_24h": {
+          "absent_reason": null,
+          "value": 480
+        },
+        "max_work_minutes_rolling_7d": {
+          "absent_reason": null,
+          "value": 2400
+        },
+        "minimum_rest_minutes": {
+          "absent_reason": null,
+          "value": 660
+        },
+        "policy_reference_hash": "310bcef63e6bb41815865a583221b416d0cd21cb61005dd4449c31211b384865",
+        "ref": {
+          "content_hash": "44672ba3975db46dbfc692e9d27db9be2c30e19fa6adeb6bb76f2b4c3580843d",
+          "governance_hash": "b3a1e4fff2c21456d0f0b1e6d32d24635dd1d34fee82aba9d52bda7682c33cf7",
+          "kind": "work_rule_policy",
+          "recorded_at": "2026-01-01T00:00:00.000000Z",
+          "revision": 2,
+          "source_id": "roster_work_policy:00000000-0000-0000-0000-00000000000a:44672ba3975d",
+          "source_record_id": "00000000-0000-0000-0000-00000000000a",
+          "status": "published"
+        }
+      }
+    ]
+  }
+}

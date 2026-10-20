@@ -1,0 +1,89 @@
+{
+  "clinical_validation": "not_provided",
+  "core_sha256": {
+    "roster_config": "b988f37928ad0c0040b0e7d8e950687e113eb59dd1432c69a21a6c836521ebcb",
+    "roster_contract": "558b284f70b8af4265abd899713da7d0ee2fadc7aa2882645d45213d6e69d344",
+    "roster_model": "9f1bfea24581c948f57fd0f201d1d619e9a0b75ad11292044156be55ab9450c7",
+    "roster_server": "fbb2818325610e53a576399b050b32d704fe4f196b35c9fc3717c389576b2ae1"
+  },
+  "engine": "stdlib_roster_branch_and_bound",
+  "engine_versions": {
+    "fastapi": "0.136.1",
+    "pydantic": "2.12.4",
+    "pydantic-settings": "2.12.0",
+    "uvicorn": "0.46.0"
+  },
+  "feature_key": "roster_optimization",
+  "independent_implementation": true,
+  "input_policy": {
+    "facts": "published_immutable_originals_current_capture_complete_manifest_and_explicit_review_no_name_title_or_old_time_inference",
+    "privacy": "only_problem_local_staff_session_tokens_job_hashes_typed_facts_and_basis_hashes_no_names_contacts_leave_health_certificate_or_appointment_identity",
+    "slots": "explicit_reviewed_dated_required_slots_facility_ceiling_and_net_person_session_capacity_not_shared_stock_forecast_records_or_booked_inventory",
+    "source_limit": "reject_whole_utf8_oversize_or_member_cap_never_truncate",
+    "staff_universe": "all_current_doctors_in_one_department_including_without_periodic_schedule_all_locations_work_context",
+    "unknown": "never_zero_or_unrestricted_qualification_availability_preference_capacity_break_accounting_or_global_prefix_suffix_coverage"
+  },
+  "input_policy_digest": "9f088a402b3c55560a7158df2d76ba91aecf9ed17034178f9b1e74c178e30105",
+  "max_request_bytes": 8388608,
+  "max_response_bytes": 8388608,
+  "model_version": "roster:b6aad609cc2f6417991540082967074e0d8383906d37ec0edcc07b1f041ee5a6",
+  "operational_validation": "not_provided",
+  "plan_only": true,
+  "prompt_handling": "provenance_only",
+  "python_version": "3.12.13",
+  "recipe": {
+    "arithmetic": "integer_UTC_microseconds_no_float_minutes_times_60000000_policy_minutes_max150119987_other_raw_counts_max2147483647",
+    "capacities": {
+      "bytes": 8388608,
+      "facts": 32768,
+      "options": 32768,
+      "sessions": 256,
+      "staff": 512
+    },
+    "fixed_work_windows": "explicit_up_to64_up_to366day_windows_exact_work_intersection_no_plan_boundary_reset",
+    "graphs": "definite_confirmed_eligible_and_optimistic_unknown_relaxed_no_unknown_as_observed_fact",
+    "input_policy": {
+      "facts": "published_immutable_originals_current_capture_complete_manifest_and_explicit_review_no_name_title_or_old_time_inference",
+      "privacy": "only_problem_local_staff_session_tokens_job_hashes_typed_facts_and_basis_hashes_no_names_contacts_leave_health_certificate_or_appointment_identity",
+      "slots": "explicit_reviewed_dated_required_slots_facility_ceiling_and_net_person_session_capacity_not_shared_stock_forecast_records_or_booked_inventory",
+      "source_limit": "reject_whole_utf8_oversize_or_member_cap_never_truncate",
+      "staff_universe": "all_current_doctors_in_one_department_including_without_periodic_schedule_all_locations_work_context",
+      "unknown": "never_zero_or_unrestricted_qualification_availability_preference_capacity_break_accounting_or_global_prefix_suffix_coverage"
+    },
+    "objectives": {
+      "max_slots_then_min_penalty": "lexicographic_maximize_total_planned_slots_then_minimize_total_explicit_reviewed_penalty_no_free_weights",
+      "meet_targets_min_penalty": "minimize_total_explicit_reviewed_assignment_penalty_hard_staffing_and_required_slot_targets"
+    },
+    "planned_slots": "meet_mode_required_slots_only_max_mode_min_of_facility_ceiling_and_sum_reviewed_net_staff_capacity_both_hard_required_targets_no_booking_or_stock_mutation",
+    "planning_dates": "one_to_31_explicit_consecutive_business_local_dates_UTC_midnights_validate_IANA_not_86400_times_days",
+    "policy": "all_published_applicable_whole_period_policies_conjoined_no_most_favorable_selection_no_policy_unknown_partial_validity_or_unknown_expiry_is_explicit_unknown_and_optimistic_relaxation_not_NA_not_complete_infeasibility_proof_explicit_local_constraints_not_universal_labor_law_compliance",
+    "presence": "complete_duty_start_end_no_overlap_breaks_do_not_release_person_or_reset_rest",
+    "prompt_handling": "provenance_only",
+    "proof": "admissible_frontier_lower_bound_and_known_feasible_upper_bound_optimal_only_bounds_close_infeasible_only_possible_tree_exhausted",
+    "rest": "adjacent_full_presence_intervals_including_all_locations_prefix_and_suffix_no_boundary_reset",
+    "rolling": "continuous_UTC24h_7d_maximum_at_domain_boundaries_work_endpoints_or_endpoints_minus_window_exact_prefix_integral",
+    "rolling_start_domain": "closed_hull_planning_start_minus_window_through_planning_end_all_influencing_prefix_and_suffix",
+    "rule_id": "roster_declared_constraints_v1",
+    "search": {
+      "bounds": "session_staff_cardinality_and_capacity_domain_upper_bound_cheapest_necessary_remaining_cardinality_cost_lower_bound_ignore_coupling_only_for_admissible_relaxation",
+      "deterministic_order": "canonical_source_identity_and_domain_cost_then_identity",
+      "frontier_limit_per_graph": 4096,
+      "interruption": "commit_children_and_incumbent_only_after_whole_parent_expansion_within_budget_otherwise_retain_parent_frontier_bound_no_discarded_sibling",
+      "node_limit_per_graph": 32768,
+      "operation_limit_per_graph": 2000000,
+      "operations": "option_eligibility_evaluations_produced_constraint_checks_rolling_endpoint_evaluations_session_bound_evaluations_and_decision_expansions_not_Python_instruction_or_wallclock_count",
+      "walltime": "not_a_numeric_search_stop_outer_timeout_returns_no_analysis"
+    },
+    "staff_counts": "number_assigned_to_whole_dated_session_not_instantaneous_service_coverage",
+    "unknown_work": "unknown_commitment_or_accounting_has_zero_confirmed_work_lower_bound_and_original_presence_upper_bound_missing_inventory_fixed_window_upper_bound_is_full_window_not_zero",
+    "version": "declared_constraints_exact_integer_v1",
+    "work": "union_duty_work_segments_subtract_only_explicit_nonwork_breaks_complete_accounting_required_for_confirmed_feasibility"
+  },
+  "recipe_digest": "32d3df3336970832ecd2ea9f1de65a3c61b70f2fcbd3ad0ff901dd1fcdc3fe13",
+  "rule_id": "roster_declared_constraints_v1",
+  "runtime_digest": "b6aad609cc2f6417991540082967074e0d8383906d37ec0edcc07b1f041ee5a6",
+  "schema_version": "10",
+  "scope": "reviewed_single_department_doctor_cohort_dated_sessions_all_location_duty_context",
+  "timeout_seconds": 90,
+  "timezone_database_digest": "d7f3dc68ab7df46bdccfa4eb80c6731a87ff405b87d88c4ace3dd0a4a8e811f5"
+}

@@ -1,0 +1,57 @@
+{
+  "departments": {
+    "departments": [
+      {
+        "department_id": 1,
+        "name": "内科"
+      }
+    ],
+    "source_kinds": [
+      "qualification",
+      "duty_interval",
+      "availability",
+      "work_rule_policy"
+    ],
+    "can_record": true,
+    "can_review": false,
+    "provider_required": false
+  },
+  "personnel": {
+    "department_id": 1,
+    "source_kinds": [
+      "qualification",
+      "duty_interval",
+      "availability",
+      "work_rule_policy"
+    ],
+    "schema_version": "roster_fact_v1",
+    "doctors": [
+      {
+        "doctor_id": 1,
+        "department_id": 1,
+        "name": "李主任"
+      },
+      {
+        "doctor_id": 2,
+        "department_id": 1,
+        "name": "王医生"
+      },
+      {
+        "doctor_id": 4,
+        "department_id": 1,
+        "name": "无周期排班仍须纳入"
+      },
+      {
+        "doctor_id": 5,
+        "department_id": 1,
+        "name": "合成排班负责人"
+      }
+    ],
+    "personnel_collection_complete_in_database": true,
+    "personnel_qualification_verified": false,
+    "can_record": true,
+    "can_review": false,
+    "provider_required": false,
+    "scope_note": "仅当前科室全部Doctor档案；账号、职称或存在排班不证明资质和可用性。本来源不提供逐日号源、完整劳动规则或已发布排班。"
+  }
+}

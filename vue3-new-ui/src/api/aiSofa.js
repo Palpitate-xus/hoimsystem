@@ -28,7 +28,7 @@ export const createSofaChangeAssessment = data => write(change, data);
 export const revokeSofaChangeAssessment = (id, data) => write(`${change}/${segment(id)}/revoke`, data);
 export const getAdminSofaChangeAssessments = params => read("ai/admin/sofa-change-assessments", params);
 export const getAdminSofaChangeAssessment = id => read(`ai/admin/sofa-change-assessments/${segment(id)}`);
-export const checkSofaProvider = (id, expectedRevision) => write(`ai/admin/providers/${segment(id)}/sofa-capabilities`, { expected_revision: expectedRevision });
+export const checkSofaProvider = (id, expectedRevision) => { if (!Number.isSafeInteger(id) || id < 1 || id > 2147483647) throw new Error("SOFA服务配置标识须为正整数"); return write(`ai/admin/providers/${id}/sofa-capabilities`, { expected_revision: expectedRevision }); };
 
 export function sofaReferencesValid(value) {
   if (!value || typeof value !== "object" || Array.isArray(value)) return false;

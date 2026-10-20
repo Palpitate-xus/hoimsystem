@@ -44,6 +44,7 @@ export function sofaSchemaMatches(name, value, definition = null) {
 }
 
 export function sofaSchemaDefinition(name, definition) {
+  if (typeof name !== "string" || forbidden(name) || !own(schemas, name)) return null;
   const root = schemas[name];
   return root && (definition ? own(root.$defs || {}, definition) && !forbidden(definition) ? root.$defs[definition] : null : root);
 }

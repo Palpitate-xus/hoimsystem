@@ -1,0 +1,17 @@
+SSL-ECG CNN local adapter
+
+The reviewed architecture is adapted from Tumo505/SSL-for-ECG-classification,
+commit 6b82956004c0ffa7ae6e983df7867eec1b450d85, and the corresponding
+Tumo505/SSL-ECG-Classification-model-card release
+6ec2ee1a1badd9508f9c1219fb07de38f3f6936b.
+
+Original code and model release: Apache License 2.0, reproduced in LICENSE.
+Upstream did not provide a NOTICE file.
+
+Local modifications: reviewed offline PyTorch architecture and safetensors-only
+loading; removed Transformers and remote repository-code execution; explicit
+native calibration/lead mapping and original-input scope; research scores,
+versioned provenance and human review, with no clinical validation claim.
+
+https://github.com/Tumo505/SSL-for-ECG-classification
+https://huggingface.co/Tumo505/SSL-ECG-Classification-model-card

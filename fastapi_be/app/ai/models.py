@@ -3,7 +3,8 @@
 import datetime
 import uuid
 
-from sqlalchemy import Column, DateTime, ForeignKey, Index, Integer, Numeric, String, Text, UniqueConstraint
+from sqlalchemy import Column, Date, DateTime, ForeignKey, Index, Integer, Numeric, String, Text, UniqueConstraint
+from sqlalchemy.dialects import mysql
 
 from app.database import Base
 
@@ -319,3 +320,34 @@ class AIImageAsset(Base):
     purged_by = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=True)
     purged_at = Column(DateTime, nullable=True)
     purge_note = Column(String(1000), nullable=False, default="")
+
+
+class AIForecastSeries(Base):
+    """Immutable attested registration window; revocation never rewrites its facts."""
+
+    __tablename__ = "hoimsystem_ai_forecast_series"
+    __table_args__ = (
+        Index("idx_ai_forecast_scope_status", "scope", "department_id", "status"),
+        Index("idx_ai_forecast_created", "create_time"),
+    )
+
+    series_id = Column(String(36), primary_key=True, default=new_id)
+    name = Column(String(120), nullable=False)
+    target = Column(String(48), nullable=False, default="registration_record_count")
+    scope = Column(String(24), nullable=False)
+    department_id = Column(Integer, ForeignKey("hoimsystem_department.department_id"), nullable=True)
+    date_from = Column(Date, nullable=False)
+    date_to = Column(Date, nullable=False)
+    timezone = Column(String(100), nullable=False)
+    time_basis = Column(String(40), nullable=False, default="naive_registration_time")
+    source_json = Column(Text, nullable=False)
+    content_hash = Column(String(64), nullable=False)
+    registration_digest = Column(String(64), nullable=False)
+    coverage_note = Column(String(2000), nullable=False)
+    status = Column(String(24), nullable=False, default="active")
+    revision = Column(Integer, nullable=False, default=1)
+    created_by = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=False)
+    create_time = Column(DateTime().with_variant(mysql.DATETIME(fsp=6), "mysql"), nullable=False, default=utcnow)
+    revoked_by = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=True)
+    revoked_at = Column(DateTime().with_variant(mysql.DATETIME(fsp=6), "mysql"), nullable=True)
+    revoke_reason = Column(String(1000), nullable=False, default="")

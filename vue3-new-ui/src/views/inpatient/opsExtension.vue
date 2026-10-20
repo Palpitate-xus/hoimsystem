@@ -69,17 +69,18 @@
             <el-option label="Aldrete" value="aldrete" />
             <el-option label="Steward" value="steward" />
           </el-select>
-          <el-button type="primary" @click="scoreDialogVisible = true">新建评分</el-button>
+          <el-button type="primary" @click="openScoreDialog">新建评分</el-button>
         </div>
         <el-table :data="scoreData" v-loading="scoreLoading" border empty-text="暂无评分记录">
           <el-table-column prop="patient_name" label="患者" width="90" />
           <el-table-column prop="score_type_text" label="类型" width="100" />
-          <el-table-column prop="scene" label="场景" width="70">
-            <template #default="{ row }">{{ row.scene === "pacu" ? "PACU" : "ICU" }}</template>
+          <el-table-column prop="scene" label="场景原标记" width="110">
+            <template #default="{ row }">{{ row.scene === "pacu" ? "PACU" : row.scene === "icu" ? "ICU" : "未记录/未知" }}</template>
           </el-table-column>
-          <el-table-column prop="total_score" label="总分" width="70" />
-          <el-table-column prop="interpretation" label="结论" min-width="180" />
-          <el-table-column prop="assess_time" label="评估时间" width="160" />
+          <el-table-column label="人工分项与原始总分" min-width="230"><template #default="{ row }"><div>原始总分：{{ row.total_score ?? '未记录' }}</div><div>{{ scoreDetailText(row) }}</div><el-tag :type="row.calculation_version === 'manual_components_v2' ? 'info' : 'warning'">{{ row.calculation_version === 'manual_components_v2' ? '人工分项汇总' : '历史原值未核实' }}</el-tag><div v-if="row.component_integrity && row.calculation_version === 'manual_components_v2'">{{ row.component_integrity.status === 'complete' ? '分项齐全；来源尚未独立核实' : '分项待核对' }}</div></template></el-table-column>
+          <el-table-column label="汇总说明" min-width="230"><template #default="{ row }"><div v-if="row.calculation_version !== 'manual_components_v2'">原记录说明（未核实）：{{ row.interpretation ?? '未记录' }}</div><template v-else><div>{{ row.score_definition ?? '版本未记录' }}</div><div>{{ row.scope_note ?? '仅汇总人工分项，须结合原始资料核实。' }}</div></template></template></el-table-column>
+          <el-table-column label="评估时点与登记时间" min-width="240"><template #default="{ row }"><div>评估：{{ row.assessed_at ?? '未记录' }}</div><div>{{ row.time_basis === 'assessed_at_declared' ? '已声明评估时点（UTC）' : '实际评估时点未知' }}</div><div>登记：{{ row.create_time ?? row.assess_time ?? '未记录' }}</div></template></el-table-column>
+          <el-table-column v-if="canUseNursingAI" label="AI辅助" width="150"><template #default="{ row }"><ai-action v-if="row.admission_id" label="AI 评分资料辅助" title="AI 原人工评分资料辅助" :patient-id="Number(row.patient_id)" :encounter-ref="row.admission_id" :feature-keys="['deterioration_risk', 'sepsis_risk', 'aki_risk', 'handover_summary']" initial-feature="handover_summary" :initial-input="{ icu_score_id: String(row.score_id) }" /><span v-else>未关联住院，不提供本次就诊 AI</span></template></el-table-column>
         </el-table>
       </el-tab-pane>
 
@@ -197,55 +198,22 @@
       <template #footer><el-button @click="pivasTransitionVisible = false">取消</el-button><el-button type="primary" @click="handlePivasTransition">确认</el-button></template>
     </el-dialog>
 
-    <!-- 评分对话框 -->
-    <el-dialog v-model="scoreDialogVisible" title="新建专科评分" width="560px">
-      <el-form :model="scoreForm" label-width="110px" class="dialog-form">
-        <el-form-item label="患者ID"><el-input v-model="scoreForm.patient_id" /></el-form-item>
-        <el-form-item label="评分类型">
-          <el-select v-model="scoreForm.score_type" @change="scoreForm.detail = {}">
-            <el-option label="APACHE II" value="apache2" />
-            <el-option label="SOFA" value="sofa" />
-            <el-option label="GCS" value="gcs" />
-            <el-option label="Aldrete(PACU)" value="aldrete" />
-            <el-option label="Steward(PACU)" value="steward" />
-          </el-select>
+    <!-- 评分对话框：仅汇总已明确录入的全部人工分项。 -->
+    <el-dialog v-model="scoreDialogVisible" title="新建专科评分" width="620px" @closed="closeScoreDialog">
+      <el-form :model="scoreForm" label-width="120px" class="dialog-form" @submit.prevent>
+        <el-form-item label="患者ID"><el-input-number v-model="scoreForm.patient_id" aria-label="评分患者ID" :min="1" :controls="false" :precision="0" placeholder="必填" @change="changeScorePatient" /></el-form-item>
+        <el-form-item label="住院ID"><el-input v-model="scoreForm.admission_id" aria-label="评分住院ID" placeholder="可空；仅填写真实住院标识，保存时核实归属" @input="resetScoreValues" /></el-form-item>
+        <el-form-item label="评分类型"><el-select v-model="scoreForm.score_type" aria-label="评分类型" @change="resetScoreValues"><el-option label="APACHE II" value="apache2" /><el-option label="SOFA（原1996版）" value="sofa" /><el-option label="GCS" value="gcs" /><el-option label="Aldrete（原1970肤色版）" value="aldrete" /><el-option label="Steward（原1975版）" value="steward" /></el-select></el-form-item>
+        <el-form-item label="场景"><el-radio-group v-model="scoreForm.scene" aria-label="评分场景" @change="resetScoreValues"><el-radio value="icu">ICU</el-radio><el-radio value="pacu">PACU</el-radio></el-radio-group></el-form-item>
+        <p class="sofa-hint">{{ scoreDefinitions[scoreForm.score_type] }}。所有分项须人工明确录入；未测、无法评估或缺项时不能计算。汇总不判断死亡风险、器官功能或 PACU 转出条件。</p>
+        <el-form-item v-for="field in currentScoreFields" :key="`${scoreForm.score_type}:${field.key}`" :label="field.label">
+          <el-input-number v-if="field.key === 'aps_total'" v-model="scoreForm.detail[field.key]" :aria-label="field.label" :min="0" :max="60" :precision="0" :controls="false" placeholder="未评估" />
+          <el-select v-else v-model="scoreForm.detail[field.key]" :aria-label="field.label" clearable placeholder="未评估"><el-option v-for="value in field.values" :key="value" :label="String(value)" :value="value" /></el-select>
         </el-form-item>
-        <el-form-item label="场景">
-          <el-radio-group v-model="scoreForm.scene">
-            <el-radio label="icu">ICU</el-radio>
-            <el-radio label="pacu">PACU</el-radio>
-          </el-radio-group>
-        </el-form-item>
-        <template v-if="scoreForm.score_type === 'gcs'">
-          <el-form-item label="睁眼(1-4)"><el-input-number v-model="scoreForm.detail.eye" :min="1" :max="4" /></el-form-item>
-          <el-form-item label="语言(1-5)"><el-input-number v-model="scoreForm.detail.verbal" :min="1" :max="5" /></el-form-item>
-          <el-form-item label="运动(1-6)"><el-input-number v-model="scoreForm.detail.motor" :min="1" :max="6" /></el-form-item>
-        </template>
-        <template v-else-if="scoreForm.score_type === 'apache2'">
-          <el-form-item label="年龄评分(0-6)"><el-input-number v-model="scoreForm.detail.age_points" :min="0" :max="6" /></el-form-item>
-          <el-form-item label="APS 合计(0-60)"><el-input-number v-model="scoreForm.detail.aps_total" :min="0" :max="60" /></el-form-item>
-          <el-form-item label="慢性健康(0/2/5)"><el-input-number v-model="scoreForm.detail.chronic_health_points" :min="0" :max="5" /></el-form-item>
-        </template>
-        <template v-else-if="scoreForm.score_type === 'sofa'">
-          <p class="sofa-hint">六项脏器各 0-4 分（呼吸/凝血/肝脏/心血管/神经/肾脏）</p>
-          <el-form-item v-for="o in ['resp', 'coag', 'liver', 'cardio', 'neuro', 'renal']" :key="o" :label="sofaLabels[o]">
-            <el-input-number v-model="scoreForm.detail[o + '_score']" :min="0" :max="4" />
-          </el-form-item>
-        </template>
-        <template v-else-if="scoreForm.score_type === 'aldrete'">
-          <p class="sofa-hint">五项各 0-2 分（活动/呼吸/循环/意识/肤色），≥9 可转出</p>
-          <el-form-item v-for="o in ['activity', 'respiration', 'circulation', 'consciousness', 'color']" :key="o" :label="aldreteLabels[o]">
-            <el-input-number v-model="scoreForm.detail[o + '_score']" :min="0" :max="2" />
-          </el-form-item>
-        </template>
-        <template v-else-if="scoreForm.score_type === 'steward'">
-          <p class="sofa-hint">三项各 0-2 分（清醒程度/呼吸道通畅/肢体活动），≥4 可转出</p>
-          <el-form-item v-for="o in ['wake', 'airway', 'motor']" :key="o" :label="stewardLabels[o]">
-            <el-input-number v-model="scoreForm.detail[o + '_score']" :min="0" :max="2" />
-          </el-form-item>
-        </template>
+        <el-form-item label="评估时点"><el-input v-model="scoreForm.assessed_at" aria-label="评分评估时点" placeholder="如 2026-10-20T08:30:00+08:00，可留空" /></el-form-item>
+        <p class="sofa-hint">留空时点仅保存登记时间。住院 ID 留空时不提供固定本次住院的 AI 入口。</p>
       </el-form>
-      <template #footer><el-button @click="scoreDialogVisible = false">取消</el-button><el-button type="primary" @click="handleCreateScore">提交评分</el-button></template>
+      <template #footer><el-button @click="scoreDialogVisible = false">取消</el-button><el-button type="primary" :loading="scoreSubmitting" @click="handleCreateScore">提交评分</el-button></template>
     </el-dialog>
 
     <!-- 路径入组对话框 -->
@@ -266,6 +234,26 @@ import { getCssdList, createCssd, transitionCssd, getPivasList, createPivas, tra
 import { ElMessage, ElMessageBox } from "element-plus";
 import AiAction from "@/components/AIAction/index.vue";
 
+
+const scoreFields = {
+  gcs: [{ key: "eye", label: "睁眼(1-4)", values: [1, 2, 3, 4] }, { key: "verbal", label: "语言(1-5)", values: [1, 2, 3, 4, 5] }, { key: "motor", label: "运动(1-6)", values: [1, 2, 3, 4, 5, 6] }],
+  apache2: [{ key: "aps_total", label: "APS合计(0-60)" }, { key: "age_points", label: "年龄评分(0/2/3/5/6)", values: [0, 2, 3, 5, 6] }, { key: "chronic_health_points", label: "慢性健康(0/2/5)", values: [0, 2, 5] }],
+  sofa: ["resp", "coag", "liver", "cardio", "neuro", "renal"].map((key, i) => ({ key: `${key}_score`, label: ["呼吸", "凝血", "肝脏", "心血管", "神经", "肾脏"][i], values: [0, 1, 2, 3, 4] })),
+  aldrete: ["activity", "respiration", "circulation", "consciousness", "color"].map((key, i) => ({ key: `${key}_score`, label: ["活动", "呼吸", "循环", "意识", "肤色"][i], values: [0, 1, 2] })),
+  steward: ["wake", "airway", "motor"].map((key, i) => ({ key: `${key}_score`, label: ["清醒程度", "气道通畅", "肢体活动"][i], values: [0, 1, 2] })),
+};
+const newScoreForm = () => ({ patient_id: null, admission_id: "", score_type: "gcs", scene: "icu", detail: Object.fromEntries(scoreFields.gcs.map(field => [field.key, null])), assessed_at: "" });
+const scoreAwareTime = value => {
+  const text = value.trim();
+  if (!text) return null;
+  const match = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})(?:\.\d{1,6})?(Z|[+-]\d{2}:\d{2})$/.exec(text);
+  if (!match) throw new Error("评估时点须带时区，例如 2026-10-20T08:30:00+08:00");
+  const [, year, month, day, hour, minute, second, zone] = match;
+  const y = Number(year), m = Number(month), d = Number(day), days = [31, y % 4 === 0 && (y % 100 !== 0 || y % 400 === 0) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+  if (y < 1 || m < 1 || m > 12 || d < 1 || d > days[m - 1] || Number(hour) > 23 || Number(minute) > 59 || Number(second) > 59 || (zone !== "Z" && (Number(zone.slice(1, 3)) > 23 || Number(zone.slice(4)) > 59)) || !Number.isFinite(Date.parse(text)) || new Date(text).getUTCFullYear() < 1 || new Date(text).getUTCFullYear() > 9999) throw new Error("请输入合法的日期、时间和时区");
+  return text;
+};
+
 export default {
   name: "OpsExtension",
   components: { AiAction },
@@ -281,15 +269,15 @@ export default {
       pivasDialogVisible: false, pivasForm: { label_count: 0 },
       pivasTransitionVisible: false, pivasTransitionStatus: null, pivasCurrent: {},
       scoreLoading: false, scoreData: [], scoreQuery: { score_type: null },
-      scoreDialogVisible: false, scoreForm: { score_type: "gcs", scene: "icu", detail: {} },
-      sofaLabels: { resp: "呼吸", coag: "凝血", liver: "肝脏", cardio: "心血管", neuro: "神经", renal: "肾脏" },
-      aldreteLabels: { activity: "活动", respiration: "呼吸", circulation: "循环", consciousness: "意识", color: "肤色" },
-      stewardLabels: { wake: "清醒程度", airway: "气道通畅", motor: "肢体活动" },
+      scoreDialogVisible: false, scoreForm: newScoreForm(), scoreSubmitting: false, scoreEpoch: 0, scoreLoadSequence: 0,
+      scoreDefinitions: { gcs: "GCS 人工分项", apache2: "APACHE II 人工分项（APS已由人员汇总）", sofa: "SOFA 原1996版人工分项", aldrete: "Aldrete 原1970肤色版（不含SpO₂替代）", steward: "Steward 原1975版人工分项" },
       pathwayLoading: false, pathwayData: [], pathwayQuery: { status: null },
       pathwayDialogVisible: false, pathwayForm: { total_items: 0 },
     };
   },
   computed: {
+    canUseNursingAI() { return this.$store.getters["user/permissions"].some(role => ["super_admin", "doctor", "director", "nurse"].includes(role)); },
+    currentScoreFields() { return scoreFields[this.scoreForm.score_type] ?? []; },
     canUsePathwayAI() { return this.$store.getters["user/permissions"].some(role => ["super_admin", "doctor", "director"].includes(role)); },
     cssdNextStates() {
       if (!this.cssdCurrentItem) return [];
@@ -300,6 +288,8 @@ export default {
       return labels[this.pivasCurrent.status] || "";
     },
   },
+  deactivated() { this.scoreEpoch++; this.scoreLoadSequence++; this.scoreDialogVisible = false; this.scoreForm = newScoreForm(); this.scoreLoading = false; },
+  beforeUnmount() { this.scoreEpoch++; this.scoreLoadSequence++; },
   created() {
     this.loadCssd();
     this.loadPivas();
@@ -345,18 +335,39 @@ export default {
       if (res.code === 200) { ElMessage.success("已流转"); this.pivasTransitionVisible = false; this.loadPivas(); }
       else ElMessage.error(res.msg);
     },
+    openScoreDialog() { this.scoreEpoch++; this.scoreForm = newScoreForm(); this.scoreDialogVisible = true; },
+    closeScoreDialog() { this.scoreEpoch++; this.scoreForm = newScoreForm(); },
+    resetScoreValues() { this.scoreEpoch++; this.scoreForm.detail = Object.fromEntries(this.currentScoreFields.map(field => [field.key, null])); this.scoreForm.assessed_at = ""; },
+    changeScorePatient() { this.scoreForm.admission_id = ""; this.resetScoreValues(); },
+    scoreDetailText(row) {
+      const detail = row.detail;
+      if (!detail || typeof detail !== "object" || Array.isArray(detail)) return "原分项未记录或无法解析";
+      return Object.entries(detail).map(([key, value]) => `${scoreFields[row.score_type]?.find(field => field.key === key)?.label ?? key}：${value ?? '未记录'}`).join("；") || "原分项未记录";
+    },
     async loadScores() {
+      const sequence = ++this.scoreLoadSequence;
       this.scoreLoading = true;
-      try { const res = await getIcuScoreList(this.scoreQuery); this.scoreData = res.data || []; } finally { this.scoreLoading = false; }
+      try { const res = await getIcuScoreList(this.scoreQuery); if (sequence === this.scoreLoadSequence) this.scoreData = res.data ?? []; }
+      catch (error) { if (sequence === this.scoreLoadSequence) ElMessage.error(error?.msg || "评分记录加载失败"); }
+      finally { if (sequence === this.scoreLoadSequence) this.scoreLoading = false; }
     },
     async handleCreateScore() {
-      const res = await createIcuScore(this.scoreForm);
-      if (res.code === 200) {
-        ElMessage.success(`评分完成：${res.data.total_score} 分 — ${res.data.interpretation}`);
-        this.scoreDialogVisible = false;
-        this.scoreForm = { score_type: "gcs", scene: "icu", detail: {} };
-        this.loadScores();
-      } else ElMessage.error(res.msg);
+      if (this.scoreSubmitting) return;
+      if (!Number.isSafeInteger(this.scoreForm.patient_id) || this.scoreForm.patient_id < 1) { ElMessage.warning("请填写有效的患者ID"); return; }
+      const fields = this.currentScoreFields;
+      if (!fields.length || fields.some(field => !Number.isInteger(this.scoreForm.detail[field.key]) || (field.values ? !field.values.includes(this.scoreForm.detail[field.key]) : this.scoreForm.detail[field.key] < 0 || this.scoreForm.detail[field.key] > 60))) { ElMessage.warning("请明确填写所有人工分项；未测或无法评估时不能计算"); return; }
+      let assessed_at;
+      try { assessed_at = scoreAwareTime(this.scoreForm.assessed_at); } catch (error) { ElMessage.warning(error.message); return; }
+      const payload = { patient_id: this.scoreForm.patient_id, admission_id: this.scoreForm.admission_id.trim() || null, score_type: this.scoreForm.score_type, scene: this.scoreForm.scene, detail: Object.fromEntries(fields.map(field => [field.key, this.scoreForm.detail[field.key]])), assessed_at }, epoch = this.scoreEpoch;
+      this.scoreSubmitting = true;
+      try {
+        const res = await createIcuScore(payload);
+        if (res.code === 200) {
+          ElMessage.success(`人工分项已保存，总分 ${res.data.total_score}；须结合原资料核实`);
+          if (epoch === this.scoreEpoch) { this.scoreDialogVisible = false; this.scoreEpoch++; this.scoreForm = newScoreForm(); }
+          await this.loadScores();
+        } else ElMessage.error(res.msg);
+      } catch (error) { ElMessage.error(error?.msg || "评分保存失败"); } finally { this.scoreSubmitting = false; }
     },
     async loadPathways() {
       this.pathwayLoading = true;

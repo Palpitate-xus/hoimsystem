@@ -16,7 +16,7 @@ from sqlalchemy.schema import CreateIndex, CreateTable
 
 from alembic import command
 from app.ai.surgery_models import SURGERY_MODELS, AISurgerySource
-from app.db_migrate import migrate
+from app.database import Base
 from tests.test_inpatient_support_migration import normalize_sql, snapshot
 
 REVISION = "20261020_surgery_sources"
@@ -43,9 +43,12 @@ def test_actual_up_down_up_preserves_every_previous_table_definition_and_row(tmp
     url = "sqlite:///" + str(tmp_path / "surgery-originals.sqlite")
     config = Config(str(Path(__file__).resolve().parents[1] / "alembic.ini"))
     config.set_main_option("sqlalchemy.url", url)
-    assert migrate(url) == "bootstrapped"
-    command.downgrade(config, PARENT)
     engine = create_engine(url)
+    # Explicit parent metadata setup avoids depending on concurrently authored
+    # later scenario migrations/imports. The eight actual upgrade/downgrade
+    # operations below still run through Alembic, never metadata.create_all.
+    Base.metadata.create_all(engine, tables=[table for table in Base.metadata.sorted_tables if not table.name.startswith("hoimsystem_ai_surgery_")])
+    command.stamp(config, PARENT)
     old_names = set(inspect(engine).get_table_names())
     assert not old_names & TABLES
     with engine.begin() as connection:

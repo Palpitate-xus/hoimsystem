@@ -30,6 +30,7 @@
     ]
   },
   "dependencies": {
+    "@babel/runtime": "7.29.10",
     "@element-plus/icons-vue": "^2.3.2",
     "axios": "^1.19.0",
     "caniuse-lite": "^1.0.30001791",
@@ -53,6 +54,7 @@
   },
   "devDependencies": {
     "@babel/core": "^7.29.7",
+    "@babel/plugin-transform-runtime": "7.29.7",
     "@babel/preset-env": "^7.29.2",
     "@playwright/test": "^1.59.1",
     "@rspack/cli": "^2.0.1",

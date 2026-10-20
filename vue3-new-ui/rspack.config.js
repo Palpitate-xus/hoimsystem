@@ -73,6 +73,8 @@ module.exports = {
           loader: "babel-loader",
           options: {
             presets: ["@babel/preset-env"],
+            // Reuse Babel helpers across async views while preserving the preset's targets.
+            plugins: [["@babel/plugin-transform-runtime", { version: require("@babel/runtime/package.json").version }]],
           },
         },
       },

@@ -76,6 +76,9 @@ async function session(page, options = {}) {
       data = copy(state.window);
       if (state.wrongNested === "patient") data.snapshot.lab_observations[0].snapshot.patient_id = 99;
       if (state.wrongNested === "admission") data.snapshot.lab_observations[0].snapshot.admission_id = secondAdmission;
+      if (state.invalidMember === "missing_snapshot") data.snapshot.lab_observations[0].snapshot = null;
+      if (state.invalidMember === "missing_projection") delete data.snapshot.lab_observations[0].window_projection;
+      if (state.invalidMember === "unknown_projection") data.snapshot.lab_observations[0].window_projection = "unrecognized-risk-projection";
     }
     const evidence = [
       { source_id: state.window.source_id, title: "合成冻结原住院窗", content: JSON.stringify(state.window.snapshot) },
@@ -138,5 +141,19 @@ for (const wrongNested of ["patient", "admission"]) {
     const state = await session(page, { wrongNested }); await openRisk(page, state);
     await expect(page.getByText("窗口已撤销、原资料已变化或范围不符，请重新建立并核对来源。", { exact: true })).toBeVisible(); await expect(page.getByRole("button", { name: "生成辅助建议", exact: true })).toBeDisabled(); await expect(page.getByRole("button", { name: "查看本次资料", exact: true })).toBeDisabled();
     await expect(page.getByLabel("冻结原检验值", { exact: true })).toHaveCount(0); expect(state.runs).toEqual([]); expect(state.contexts).toEqual([]); expect(state.writes).toEqual([]);
+  });
+}
+
+
+for (const [invalidMember, title] of [["missing_snapshot", "成员冻结正文为null"], ["missing_projection", "成员缺少投影标识"], ["unknown_projection", "成员投影标识未知"]]) {
+  test(`风险v2窗口${title}拒绝选中，不把元数据当完整有效检验`, async ({ page }) => {
+    const state = await session(page, { invalidMember }); await openRisk(page, state);
+    await expect(page.getByText("窗口已撤销、原资料已变化或范围不符，请重新建立并核对来源。", { exact: true })).toBeVisible();
+    await expect(page.getByRole("button", { name: "生成辅助建议", exact: true })).toBeDisabled();
+    await expect(page.getByRole("button", { name: "查看本次资料", exact: true })).toBeDisabled();
+    await expect(page.getByLabel("原住院观测窗复核", { exact: true })).toHaveCount(0);
+    await expect(page.getByLabel("冻结原检验值", { exact: true })).toHaveCount(0);
+    await expect(page.getByText(/来源及映射核对可纳入/)).toHaveCount(0);
+    expect(state.runs).toEqual([]); expect(state.contexts).toEqual([]); expect(state.writes).toEqual([]);
   });
 }

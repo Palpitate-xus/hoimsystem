@@ -35,6 +35,10 @@ class Settings(BaseSettings):
     AI_AUDIO_MAX_DURATION_SECONDS: int = Field(default=3600, ge=1, le=14400)
     AI_AUDIO_USER_QUOTA_BYTES: int = Field(default=512 * 1024 * 1024, ge=1024, le=20 * 1024 * 1024 * 1024)
     AI_AUDIO_PROCESS_TIMEOUT_SECONDS: int = Field(default=30, ge=3, le=120)
+    AI_ECG_STORAGE_DIR: str = "private/ai-ecg"
+    AI_ECG_MAX_BYTES: int = Field(default=32 * 1024 * 1024, ge=1024, le=128 * 1024 * 1024)
+    AI_ECG_MAX_DURATION_SECONDS: int = Field(default=300, ge=1, le=3600)
+    AI_ECG_USER_QUOTA_BYTES: int = Field(default=512 * 1024 * 1024, ge=1024, le=20 * 1024 * 1024 * 1024)
 
     DATABASE_URL: str = ""
 

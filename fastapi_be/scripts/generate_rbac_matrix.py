@@ -15,37 +15,98 @@ import json
 import os
 import sys
 from collections import OrderedDict
+from pathlib import Path
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
-
-from app.dependencies import (  # noqa: E402
-    ADMIN_ROLES,
-    CASHIER_ROLES,
-    CLINICAL_ROLES,
-    GUIDE_ROLES,
-    LAB_ROLES,
-    NOTICE_ROLES,
-    NURSING_ROLES,
-    PHARMACY_ROLES,
-    REGISTRAR_ROLES,
-)
+BACKEND = Path(__file__).resolve().parents[1]
 
 ALL_ROLES = ["admin", "super_admin", "director", "doctor", "nurse", "cashier", "pharmacist", "guide", "patient", "lab_technician", "registrar"]
 AUTH_DEPENDENCIES = {"get_current_user", "get_event_identity"}
 
-ROLE_GROUPS = {
-    "ADMIN_ROLES": set(ADMIN_ROLES),
-    "NOTICE_ROLES": set(NOTICE_ROLES),
-    "CLINICAL_ROLES": set(CLINICAL_ROLES),
-    "CASHIER_ROLES": set(CASHIER_ROLES),
-    "PHARMACY_ROLES": set(PHARMACY_ROLES),
-    "NURSING_ROLES": set(NURSING_ROLES),
-    "GUIDE_ROLES": set(GUIDE_ROLES),
-    "LAB_ROLES": set(LAB_ROLES),
-    "REGISTRAR_ROLES": set(REGISTRAR_ROLES),
-    "INPATIENT_FINANCE_ROLES": set(CASHIER_ROLES) | set(NURSING_ROLES),
-    "OPERATE_ROLES": set(CLINICAL_ROLES) | set(NURSING_ROLES),
-}
+def read_role_groups(path: Path, names: tuple[str, ...]) -> dict[str, set[str]]:
+    """Read actual role constants without importing settings, databases or routers."""
+    assignments = {}
+    for node in ast.parse(path.read_text(encoding="utf-8")).body:
+        if isinstance(node, ast.Assign):
+            for target in node.targets:
+                if isinstance(target, ast.Name):
+                    assignments[target.id] = node.value
+    resolving = set()
+
+    def value(node):
+        if isinstance(node, ast.Constant) and isinstance(node.value, str):
+            return node.value
+        if isinstance(node, ast.Name) and node.id in assignments and node.id not in resolving:
+            resolving.add(node.id)
+            try:
+                return value(assignments[node.id])
+            finally:
+                resolving.remove(node.id)
+        if isinstance(node, (ast.Set, ast.List, ast.Tuple)):
+            result = set()
+            for item in node.elts:
+                if isinstance(item, ast.Starred):
+                    group = value(item.value)
+                    if not isinstance(group, set):
+                        raise ValueError(f"{path}: starred role constant is not a set")
+                    result.update(group)
+                else:
+                    role = value(item)
+                    if not isinstance(role, str):
+                        raise ValueError(f"{path}: role constant is not a string")
+                    result.add(role)
+            return result
+        if isinstance(node, ast.BinOp) and isinstance(node.op, ast.BitOr):
+            left, right = value(node.left), value(node.right)
+            if isinstance(left, set) and isinstance(right, set):
+                return left | right
+        if isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id in {"set", "frozenset"} and len(node.args) == 1 and not node.keywords:
+            result = value(node.args[0])
+            if isinstance(result, set):
+                return result
+        raise ValueError(f"{path}: role constants must be statically resolvable")
+
+    groups = {}
+    for name in names:
+        group = value(ast.Name(id=name))
+        if not isinstance(group, set) or not group or not group <= set(ALL_ROLES):
+            raise ValueError(f"{path}: invalid role group {name}")
+        groups[name] = group
+    return groups
+
+
+ROLE_GROUPS = read_role_groups(BACKEND / "app/dependencies.py", (
+    "ADMIN_ROLES", "NOTICE_ROLES", "CLINICAL_ROLES", "CASHIER_ROLES", "PHARMACY_ROLES",
+    "NURSING_ROLES", "GUIDE_ROLES", "LAB_ROLES", "REGISTRAR_ROLES",
+))
+ROLE_GROUPS.update(read_role_groups(BACKEND / "app/inpatient_observations.py", ("OBSERVATION_ROLES",)))
+ROLE_GROUPS.update(read_role_groups(BACKEND / "app/ai/observation_windows.py", ("WINDOW_ROLES",)))
+# Preserve the existing matrix's two combined role groups.
+ROLE_GROUPS["INPATIENT_FINANCE_ROLES"] = ROLE_GROUPS["CASHIER_ROLES"] | ROLE_GROUPS["NURSING_ROLES"]
+ROLE_GROUPS["OPERATE_ROLES"] = ROLE_GROUPS["CLINICAL_ROLES"] | ROLE_GROUPS["NURSING_ROLES"]
+
+
+def router_prefixes(tree: ast.Module, path: str) -> dict[str, str]:
+    """Only literal APIRouter prefixes can safely be added to source paths."""
+    prefixes = {}
+    for node in tree.body:
+        if not isinstance(node, ast.Assign) or not isinstance(node.value, ast.Call):
+            continue
+        call = node.value
+        constructor = call.func.id if isinstance(call.func, ast.Name) else call.func.attr if isinstance(call.func, ast.Attribute) else None
+        if constructor != "APIRouter":
+            continue
+        prefix = ""
+        for keyword in call.keywords:
+            if keyword.arg is None or (keyword.arg == "prefix" and not (isinstance(keyword.value, ast.Constant) and isinstance(keyword.value.value, str))):
+                raise ValueError(f"{path}:{node.lineno}: APIRouter prefix must be literal; dynamic configuration cannot be guessed")
+            if keyword.arg == "prefix":
+                prefix = keyword.value.value
+        if prefix and (not prefix.startswith("/") or prefix.endswith("/")):
+            raise ValueError(f"{path}:{node.lineno}: invalid APIRouter prefix")
+        for target in node.targets:
+            if isinstance(target, ast.Name):
+                prefixes[target.id] = prefix
+    return prefixes
 
 
 def _resolve_decorator_roles(call: ast.Call) -> set[str] | None:
@@ -74,7 +135,8 @@ def _resolve_decorator_roles(call: ast.Call) -> set[str] | None:
 
 
 def analyze_router(path: str) -> list[dict]:
-    tree = ast.parse(open(path).read())
+    tree = ast.parse(Path(path).read_text(encoding="utf-8"))
+    prefixes = router_prefixes(tree, path)
     module = os.path.basename(path)
     endpoints = []
     for node in ast.walk(tree):
@@ -84,8 +146,11 @@ def analyze_router(path: str) -> list[dict]:
         for dec in node.decorator_list:
             if isinstance(dec, ast.Call) and isinstance(dec.func, ast.Attribute) and dec.func.attr in ("get", "post", "put", "delete", "patch"):
                 method = dec.func.attr.upper()
-                if dec.args and isinstance(dec.args[0], ast.Constant):
-                    route_path = dec.args[0].value
+                if dec.args and isinstance(dec.args[0], ast.Constant) and isinstance(dec.args[0].value, str):
+                    receiver = dec.func.value
+                    if not isinstance(receiver, ast.Name) or receiver.id not in prefixes:
+                        raise ValueError(f"{path}:{node.lineno}: route owner has no statically known APIRouter prefix")
+                    route_path = prefixes[receiver.id] + dec.args[0].value
         if not method or route_path is None:
             continue
 
@@ -116,7 +181,7 @@ def analyze_router(path: str) -> list[dict]:
 
 def collect_endpoints() -> list[dict]:
     all_eps = []
-    for f in sorted(glob.glob("app/routers/*.py")):
+    for f in sorted(glob.glob(str(BACKEND / "app/routers/*.py"))):
         if f.endswith("__init__.py"):
             continue
         all_eps.extend(analyze_router(f))
@@ -163,7 +228,11 @@ def main() -> int:
     parser.add_argument("--check", action="store_true", help="CI 模式：与 rbac_matrix.json 比对，漂移则失败")
     args = parser.parse_args()
 
-    eps = collect_endpoints()
+    try:
+        eps = collect_endpoints()
+    except ValueError as exc:
+        print(f"FAIL: {exc}")
+        return 1
     doc_dir = os.path.join(os.path.dirname(__file__), "..", "..", "doc")
     json_path = os.path.join(os.path.dirname(__file__), "..", "rbac_matrix.json")
 

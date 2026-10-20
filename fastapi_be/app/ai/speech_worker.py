@@ -74,6 +74,8 @@ def recognize(job):
     from faster_whisper import WhisperModel
 
     model = WhisperModel(str(config.model_dir), device="cpu", compute_type="int8", cpu_threads=config.cpu_threads, num_workers=1, local_files_only=True)
+    if config.language != "auto" and config.language not in model.supported_languages:
+        raise ValueError("配置语言不在实际模型支持范围内，不能静默改用其他语言")
     segments, info = model.transcribe(samples, **config.decoding_options())
     output = []
     for segment in segments:

@@ -37,6 +37,8 @@ def test_acoustic_model_gets_all_samples_and_end_estimate_is_retained_in_uncerta
     exhausted = []
 
     class Model:
+        supported_languages = ["en"]
+
         def __init__(self, *args, **kwargs):
             assert kwargs["device"] == "cpu" and kwargs["local_files_only"] is True
 
@@ -63,6 +65,8 @@ def test_acoustic_model_gets_all_samples_and_end_estimate_is_retained_in_uncerta
 @pytest.mark.parametrize("failure", ["partial", "text_limit", "outside_source"])
 def test_failed_iteration_or_invalid_segments_never_return_partial_transcription(failure, job, monkeypatch):
     class Model:
+        supported_languages = ["en"]
+
         def __init__(self, *args, **kwargs):
             pass
 
@@ -77,4 +81,21 @@ def test_failed_iteration_or_invalid_segments_never_return_partial_transcription
 
     monkeypatch.setitem(sys.modules, "faster_whisper", SimpleNamespace(WhisperModel=Model))
     with pytest.raises((ValueError, RuntimeError)):
+        speech_worker.recognize(job)
+
+
+def test_model_cannot_silently_switch_configured_language_to_english(job, monkeypatch):
+    job["config"]["language"] = "zh"
+
+    class EnglishOnlyModel:
+        supported_languages = ["en"]
+
+        def __init__(self, *args, **kwargs):
+            pass
+
+        def transcribe(self, *args, **kwargs):
+            raise AssertionError("unsupported configured language must not reach recognition")
+
+    monkeypatch.setitem(sys.modules, "faster_whisper", SimpleNamespace(WhisperModel=EnglishOnlyModel))
+    with pytest.raises(ValueError, match="配置语言"):
         speech_worker.recognize(job)

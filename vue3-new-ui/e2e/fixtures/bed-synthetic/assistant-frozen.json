@@ -1,0 +1,409 @@
+{
+  "evidence_scope": "Exact lossless field extraction from actual isolated SQLite/JWT/native-worker final2; large findings/analysis/evidence use committed pipeline-7/14 unchanged. Brief queued transport is a separately declared actual serializer over a rehydrated synthetic AIRun, not a real HTTP queue transition.",
+  "origin_sha256": "757aa9b4a3c4c7e0522ec5bcfe990e147c6af685e4dabd89510ba8f5b15f937b",
+  "series_metadata": {
+    "series_id": "960fb856-97ba-45f3-9e1b-c6888a562288",
+    "department_id": 1,
+    "ward_id": 1,
+    "schema_version": "bed_series_private_v1",
+    "as_of": "2026-10-20T09:10:11.123456Z",
+    "created_at": "2026-10-20T09:10:11.123456Z",
+    "created_by": 13,
+    "content_hash": "5a97338df260fc00d3947dec7dbc9689d7e35f3c1336d96a7d6f42c45496b02a",
+    "collection_digest": "5d2ef01a620230911e35c2d9950fa8c91a9b04f8ad6cfe5dabaca5936c8bd9da",
+    "projection_hash": "a8accad8d8a35dd9cf6125f9079bb83b7dda032e028c12f802335a503df28b25",
+    "source_id": "bed_series:960fb856-97ba-45f3-9e1b-c6888a562288:5a97338df260",
+    "status": "published",
+    "revision": 2,
+    "reviewed_by": 4,
+    "reviewed_at": "2026-10-20T09:10:11.123456Z",
+    "review_basis_note": "合成病区床位原证据仅用于隔离工程验证，已明确核对观察与登记时刻及缺项状态，不代表真实医院运营资料。",
+    "revoked_by": null,
+    "revoked_at": null,
+    "revoke_reason": "",
+    "governance_hash": "d360c7bb7d24c3585612e672e650f33f8ca6615e57dd68149811aeb8407f8a0a",
+    "source_current": true,
+    "eligible": true,
+    "exclusion_reasons": [],
+    "can_record": true,
+    "can_review": false,
+    "can_revoke": true,
+    "audit_only": false,
+    "forecast_purpose": "frozen_observed_physical_counts_and_explicit_capacity_scenario_not_unmet_demand_or_admittable_slots"
+  },
+  "source_options": {
+    "department_id": 1,
+    "source_kinds": [
+      "census",
+      "flow_day",
+      "capacity_interval"
+    ],
+    "schema_version": "bed_source_private_v1",
+    "wards": [
+      {
+        "ward_id": 1,
+        "department_id": 1,
+        "name": "合成病区",
+        "status": 0
+      }
+    ],
+    "can_record": true,
+    "can_review": false,
+    "provider_required": false,
+    "scope_note": "仅当前科室病区身份目录，包含停用病区以登记历史原量；不证明占床覆盖、当前可收治名额或未来容量，不回填历史床位状态。"
+  },
+  "history": [
+    {
+      "run_id": "1003d804-8751-4759-ad2f-b6c33ddfc833",
+      "feature_key": "bed_forecast",
+      "status": "succeeded",
+      "preview": 0,
+      "prompt_version": 0,
+      "provider_revision": 1,
+      "context_digest": "cfd4ec0b891df5a819ae9f906770f4c31328561bd4f75fc1fd44765159cdb337",
+      "patient_id": null,
+      "encounter_ref": null,
+      "error_code": null,
+      "error_message": null,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "latency_ms": 10467,
+      "create_time": "2026-10-20T20:36:34.308761",
+      "start_time": "2026-10-20T20:36:35.102868",
+      "finish_time": "2026-10-20T20:36:45.571909",
+      "feature_name": "床位占用与流转预测",
+      "requires_human_review": true,
+      "context_metadata": {
+        "clinical_context_fingerprint": "bbc86d9066e9a4d20eff10d4b8371910c75506431aaa79fa4a5089b16d97c757",
+        "context_digest": "cfd4ec0b891df5a819ae9f906770f4c31328561bd4f75fc1fd44765159cdb337",
+        "department_ids": [
+          1
+        ],
+        "feature_revision": 1,
+        "missing_data": [
+          "预测对象为原业务日边界实占床位数及四类实际流转事件；未来总运行床位仅为明确审核情景，不能解释为即时可收治床位或未满足需求",
+          "各目标独立检查来源完整性；缺项保留未知，流转事件预测不能替代实占床位预测。回测基于本次冻结原件，不构成历史可得性重放或实际运营验证"
+        ],
+        "snapshot_time": "2026-10-20T09:10:11.123456Z",
+        "source_count": 1,
+        "tool_fingerprint": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+        "validation_status": "validated"
+      }
+    },
+    {
+      "run_id": "f0d8778f-6762-4f60-8ee1-a6b6a92c26fe",
+      "feature_key": "bed_forecast",
+      "status": "succeeded",
+      "preview": 0,
+      "prompt_version": 0,
+      "provider_revision": 1,
+      "context_digest": "1d78fbe612c5231f7475d9dc45167470c316f3d513ce671af9d453137302f58e",
+      "patient_id": null,
+      "encounter_ref": null,
+      "error_code": null,
+      "error_message": null,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "latency_ms": 7522,
+      "create_time": "2026-10-20T20:36:12.548746",
+      "start_time": "2026-10-20T20:36:13.353797",
+      "finish_time": "2026-10-20T20:36:20.878511",
+      "feature_name": "床位占用与流转预测",
+      "requires_human_review": true,
+      "context_metadata": {
+        "clinical_context_fingerprint": "54a160f04b784082dde05f09aca78adccac2c10687bbb0cce22c9d4acd0b71d5",
+        "context_digest": "1d78fbe612c5231f7475d9dc45167470c316f3d513ce671af9d453137302f58e",
+        "department_ids": [
+          1
+        ],
+        "feature_revision": 1,
+        "missing_data": [
+          "预测对象为原业务日边界实占床位数及四类实际流转事件；未来总运行床位仅为明确审核情景，不能解释为即时可收治床位或未满足需求",
+          "各目标独立检查来源完整性；缺项保留未知，流转事件预测不能替代实占床位预测。回测基于本次冻结原件，不构成历史可得性重放或实际运营验证"
+        ],
+        "snapshot_time": "2026-10-20T09:10:11.123456Z",
+        "source_count": 1,
+        "tool_fingerprint": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+        "validation_status": "validated"
+      }
+    }
+  ],
+  "by_horizon": {
+    "7": {
+      "run": {
+        "run_id": "f0d8778f-6762-4f60-8ee1-a6b6a92c26fe",
+        "feature_key": "bed_forecast",
+        "status": "succeeded",
+        "preview": 0,
+        "prompt_version": 0,
+        "provider_revision": 1,
+        "context_digest": "1d78fbe612c5231f7475d9dc45167470c316f3d513ce671af9d453137302f58e",
+        "patient_id": null,
+        "encounter_ref": null,
+        "error_code": null,
+        "error_message": null,
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "latency_ms": 7522,
+        "create_time": "2026-10-20T20:36:12.548746",
+        "start_time": "2026-10-20T20:36:13.353797",
+        "finish_time": "2026-10-20T20:36:20.878511",
+        "feature_name": "床位占用与流转预测",
+        "requires_human_review": true,
+        "context_metadata": {
+          "clinical_context_fingerprint": "54a160f04b784082dde05f09aca78adccac2c10687bbb0cce22c9d4acd0b71d5",
+          "context_digest": "1d78fbe612c5231f7475d9dc45167470c316f3d513ce671af9d453137302f58e",
+          "department_ids": [
+            1
+          ],
+          "feature_revision": 1,
+          "missing_data": [
+            "预测对象为原业务日边界实占床位数及四类实际流转事件；未来总运行床位仅为明确审核情景，不能解释为即时可收治床位或未满足需求",
+            "各目标独立检查来源完整性；缺项保留未知，流转事件预测不能替代实占床位预测。回测基于本次冻结原件，不构成历史可得性重放或实际运营验证"
+          ],
+          "snapshot_time": "2026-10-20T09:10:11.123456Z",
+          "source_count": 1,
+          "tool_fingerprint": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+          "validation_status": "validated"
+        },
+        "result": {
+          "summary": "已分别计算实测占床与四项独立日事件预测。",
+          "sections": [
+            {
+              "title": "单病区实测占床与独立事件",
+              "content": "固定同星期原量均值、回顾性滚动回测及原误差区间见结构化结果。容量为明确审核场景，边界压力与整日容量积分分开；预测未按容量截断。",
+              "source_ids": [
+                "bed_series:960fb856-97ba-45f3-9e1b-c6888a562288:5a97338df260"
+              ]
+            }
+          ],
+          "warnings": [
+            "实测占床不等于未满足床位需求；经验区间不提供覆盖保证。",
+            "日出院数与整日可运营容量的比值仅为本地定义，不是标准周转率。",
+            "原资料按当前冻结件回顾性评估；不宣称历史时点已经可用或实际运营验证。"
+          ],
+          "missing_data": [
+            "future_boundary_capacity_or_census_forecast"
+          ]
+        },
+        "tool_findings": {},
+        "operational_findings": {
+          "scope": "department",
+          "source_domain": "bed_observed_physical_series",
+          "department_ids": [
+            1
+          ],
+          "snapshot_time": "2026-10-20T09:10:11.123456Z",
+          "missing_data": [
+            "预测对象为原业务日边界实占床位数及四类实际流转事件；未来总运行床位仅为明确审核情景，不能解释为即时可收治床位或未满足需求",
+            "各目标独立检查来源完整性；缺项保留未知，流转事件预测不能替代实占床位预测。回测基于本次冻结原件，不构成历史可得性重放或实际运营验证"
+          ],
+          "truncated_sources": [],
+          "scope_note": "预测对象为原业务日边界实占床位数及四类实际流转事件；未来总运行床位仅为明确审核情景，不能解释为即时可收治床位或未满足需求"
+        }
+      },
+      "inspection": {
+        "context": {
+          "scope": "department",
+          "source_domain": "bed_observed_physical_series",
+          "department_ids": [
+            1
+          ],
+          "ward_ids": [
+            1
+          ],
+          "selected_sources": {
+            "bed_series_id": "960fb856-97ba-45f3-9e1b-c6888a562288"
+          },
+          "bed_binding": {
+            "schema_version": "bed_context_binding_v1",
+            "series_id": "960fb856-97ba-45f3-9e1b-c6888a562288",
+            "department_id": 1,
+            "ward_id": 1,
+            "revision": 2,
+            "source_id": "bed_series:960fb856-97ba-45f3-9e1b-c6888a562288:5a97338df260",
+            "content_hash": "5a97338df260fc00d3947dec7dbc9689d7e35f3c1336d96a7d6f42c45496b02a",
+            "series_governance_hash": "d360c7bb7d24c3585612e672e650f33f8ca6615e57dd68149811aeb8407f8a0a",
+            "projection_hash": "a8accad8d8a35dd9cf6125f9079bb83b7dda032e028c12f802335a503df28b25",
+            "scope_token": "6c8d7e84bdf515a2cac1a6a90f9db60a2bba007e2ad9b7e48f80d5d7c3e995c9",
+            "member_manifest_hash": "5913f622547c4ed4024b4c5535a0690b953c41b05592bfe8d68400f851e04380",
+            "collection_digest": "5d2ef01a620230911e35c2d9950fa8c91a9b04f8ad6cfe5dabaca5936c8bd9da",
+            "historical_collection_digest": "bcbe057271ec27b370770e0d2d972692c9c50dc906704f37ad698d4c34ff50da",
+            "current_membership_digest": "86f913cd617f7b1d911e0d24d057db33ed0046c0d9232427a8f970b5f14be0ff",
+            "future_scenario_collection_digest": "ef4c8ae7ac44c7dff0af485ddc873e29976636f69aa881e110cbcf99714addce",
+            "rule_id": "bed_physical_daily_v1",
+            "recipe_digest": "19292908d8587be3a135da765958c33773e57f7cf1cbb60c6f33c505970d55ca",
+            "input_policy_digest": "2fe33cda3518ec6e2af939a25285c23251c6e0006826d76adfb7aab1755d5eb6",
+            "horizon_days": 7
+          },
+          "scope_note": "预测对象为原业务日边界实占床位数及四类实际流转事件；未来总运行床位仅为明确审核情景，不能解释为即时可收治床位或未满足需求",
+          "missing_data": [
+            "预测对象为原业务日边界实占床位数及四类实际流转事件；未来总运行床位仅为明确审核情景，不能解释为即时可收治床位或未满足需求",
+            "各目标独立检查来源完整性；缺项保留未知，流转事件预测不能替代实占床位预测。回测基于本次冻结原件，不构成历史可得性重放或实际运营验证"
+          ],
+          "truncated_sources": [],
+          "snapshot_time": "2026-10-20T09:10:11.123456Z"
+        },
+        "metadata": {
+          "snapshot_time": "2026-10-20T09:10:11.123456Z",
+          "source_count": 1,
+          "department_ids": [
+            1
+          ],
+          "context_digest": "1d78fbe612c5231f7475d9dc45167470c316f3d513ce671af9d453137302f58e",
+          "clinical_context_fingerprint": "54a160f04b784082dde05f09aca78adccac2c10687bbb0cce22c9d4acd0b71d5",
+          "missing_data": [
+            "预测对象为原业务日边界实占床位数及四类实际流转事件；未来总运行床位仅为明确审核情景，不能解释为即时可收治床位或未满足需求",
+            "各目标独立检查来源完整性；缺项保留未知，流转事件预测不能替代实占床位预测。回测基于本次冻结原件，不构成历史可得性重放或实际运营验证"
+          ]
+        },
+        "evidence": [
+          {
+            "source_id": "bed_series:960fb856-97ba-45f3-9e1b-c6888a562288:5a97338df260",
+            "kind": "operational_record",
+            "title": "受审病区实占床位与实际流转事件序列",
+            "content": "{\"bed_binding\":{\"collection_digest\":\"5d2ef01a620230911e35c2d9950fa8c91a9b04f8ad6cfe5dabaca5936c8bd9da\",\"content_hash\":\"5a97338df260fc00d3947dec7dbc9689d7e35f3c1336d96a7d6f42c45496b02a\",\"current_membership_digest\":\"86f913cd617f7b1d911e0d24d057db33ed0046c0d9232427a8f970b5f14be0ff\",\"department_id\":1,\"future_scenario_collection_digest\":\"ef4c8ae7ac44c7dff0af485ddc873e29976636f69aa881e110cbcf99714addce\",\"historical_collection_digest\":\"bcbe057271ec27b370770e0d2d972692c9c50dc906704f37ad698d4c34ff50da\",\"horizon_days\":7,\"input_policy_digest\":\"2fe33cda3518ec6e2af939a25285c23251c6e0006826d76adfb7aab1755d5eb6\",\"member_manifest_hash\":\"5913f622547c4ed4024b4c5535a0690b953c41b05592bfe8d68400f851e04380\",\"projection_hash\":\"a8accad8d8a35dd9cf6125f9079bb83b7dda032e028c12f802335a503df28b25\",\"recipe_digest\":\"19292908d8587be3a135da765958c33773e57f7cf1cbb60c6f33c505970d55ca\",\"revision\":2,\"rule_id\":\"bed_physical_daily_v1\",\"schema_version\":\"bed_context_binding_v1\",\"scope_token\":\"6c8d7e84bdf515a2cac1a6a90f9db60a2bba007e2ad9b7e48f80d5d7c3e995c9\",\"series_governance_hash\":\"d360c7bb7d24c3585612e672e650f33f8ca6615e57dd68149811aeb8407f8a0a\",\"series_id\":\"960fb856-97ba-45f3-9e1b-c6888a562288\",\"source_id\":\"bed_series:960fb856-97ba-45f3-9e1b-c6888a562288:5a97338df260\",\"ward_id\":1}}"
+          }
+        ]
+      }
+    },
+    "14": {
+      "run": {
+        "run_id": "1003d804-8751-4759-ad2f-b6c33ddfc833",
+        "feature_key": "bed_forecast",
+        "status": "succeeded",
+        "preview": 0,
+        "prompt_version": 0,
+        "provider_revision": 1,
+        "context_digest": "cfd4ec0b891df5a819ae9f906770f4c31328561bd4f75fc1fd44765159cdb337",
+        "patient_id": null,
+        "encounter_ref": null,
+        "error_code": null,
+        "error_message": null,
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "latency_ms": 10467,
+        "create_time": "2026-10-20T20:36:34.308761",
+        "start_time": "2026-10-20T20:36:35.102868",
+        "finish_time": "2026-10-20T20:36:45.571909",
+        "feature_name": "床位占用与流转预测",
+        "requires_human_review": true,
+        "context_metadata": {
+          "clinical_context_fingerprint": "bbc86d9066e9a4d20eff10d4b8371910c75506431aaa79fa4a5089b16d97c757",
+          "context_digest": "cfd4ec0b891df5a819ae9f906770f4c31328561bd4f75fc1fd44765159cdb337",
+          "department_ids": [
+            1
+          ],
+          "feature_revision": 1,
+          "missing_data": [
+            "预测对象为原业务日边界实占床位数及四类实际流转事件；未来总运行床位仅为明确审核情景，不能解释为即时可收治床位或未满足需求",
+            "各目标独立检查来源完整性；缺项保留未知，流转事件预测不能替代实占床位预测。回测基于本次冻结原件，不构成历史可得性重放或实际运营验证"
+          ],
+          "snapshot_time": "2026-10-20T09:10:11.123456Z",
+          "source_count": 1,
+          "tool_fingerprint": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+          "validation_status": "validated"
+        },
+        "result": {
+          "summary": "已分别计算实测占床与四项独立日事件预测。",
+          "sections": [
+            {
+              "title": "单病区实测占床与独立事件",
+              "content": "固定同星期原量均值、回顾性滚动回测及原误差区间见结构化结果。容量为明确审核场景，边界压力与整日容量积分分开；预测未按容量截断。",
+              "source_ids": [
+                "bed_series:960fb856-97ba-45f3-9e1b-c6888a562288:5a97338df260"
+              ]
+            }
+          ],
+          "warnings": [
+            "实测占床不等于未满足床位需求；经验区间不提供覆盖保证。",
+            "日出院数与整日可运营容量的比值仅为本地定义，不是标准周转率。",
+            "原资料按当前冻结件回顾性评估；不宣称历史时点已经可用或实际运营验证。"
+          ],
+          "missing_data": [
+            "future_boundary_capacity_or_census_forecast"
+          ]
+        },
+        "tool_findings": {},
+        "operational_findings": {
+          "scope": "department",
+          "source_domain": "bed_observed_physical_series",
+          "department_ids": [
+            1
+          ],
+          "snapshot_time": "2026-10-20T09:10:11.123456Z",
+          "missing_data": [
+            "预测对象为原业务日边界实占床位数及四类实际流转事件；未来总运行床位仅为明确审核情景，不能解释为即时可收治床位或未满足需求",
+            "各目标独立检查来源完整性；缺项保留未知，流转事件预测不能替代实占床位预测。回测基于本次冻结原件，不构成历史可得性重放或实际运营验证"
+          ],
+          "truncated_sources": [],
+          "scope_note": "预测对象为原业务日边界实占床位数及四类实际流转事件；未来总运行床位仅为明确审核情景，不能解释为即时可收治床位或未满足需求"
+        }
+      },
+      "inspection": {
+        "context": {
+          "scope": "department",
+          "source_domain": "bed_observed_physical_series",
+          "department_ids": [
+            1
+          ],
+          "ward_ids": [
+            1
+          ],
+          "selected_sources": {
+            "bed_series_id": "960fb856-97ba-45f3-9e1b-c6888a562288"
+          },
+          "bed_binding": {
+            "schema_version": "bed_context_binding_v1",
+            "series_id": "960fb856-97ba-45f3-9e1b-c6888a562288",
+            "department_id": 1,
+            "ward_id": 1,
+            "revision": 2,
+            "source_id": "bed_series:960fb856-97ba-45f3-9e1b-c6888a562288:5a97338df260",
+            "content_hash": "5a97338df260fc00d3947dec7dbc9689d7e35f3c1336d96a7d6f42c45496b02a",
+            "series_governance_hash": "d360c7bb7d24c3585612e672e650f33f8ca6615e57dd68149811aeb8407f8a0a",
+            "projection_hash": "a8accad8d8a35dd9cf6125f9079bb83b7dda032e028c12f802335a503df28b25",
+            "scope_token": "6c8d7e84bdf515a2cac1a6a90f9db60a2bba007e2ad9b7e48f80d5d7c3e995c9",
+            "member_manifest_hash": "5913f622547c4ed4024b4c5535a0690b953c41b05592bfe8d68400f851e04380",
+            "collection_digest": "5d2ef01a620230911e35c2d9950fa8c91a9b04f8ad6cfe5dabaca5936c8bd9da",
+            "historical_collection_digest": "bcbe057271ec27b370770e0d2d972692c9c50dc906704f37ad698d4c34ff50da",
+            "current_membership_digest": "86f913cd617f7b1d911e0d24d057db33ed0046c0d9232427a8f970b5f14be0ff",
+            "future_scenario_collection_digest": "ef4c8ae7ac44c7dff0af485ddc873e29976636f69aa881e110cbcf99714addce",
+            "rule_id": "bed_physical_daily_v1",
+            "recipe_digest": "19292908d8587be3a135da765958c33773e57f7cf1cbb60c6f33c505970d55ca",
+            "input_policy_digest": "2fe33cda3518ec6e2af939a25285c23251c6e0006826d76adfb7aab1755d5eb6",
+            "horizon_days": 14
+          },
+          "scope_note": "预测对象为原业务日边界实占床位数及四类实际流转事件；未来总运行床位仅为明确审核情景，不能解释为即时可收治床位或未满足需求",
+          "missing_data": [
+            "预测对象为原业务日边界实占床位数及四类实际流转事件；未来总运行床位仅为明确审核情景，不能解释为即时可收治床位或未满足需求",
+            "各目标独立检查来源完整性；缺项保留未知，流转事件预测不能替代实占床位预测。回测基于本次冻结原件，不构成历史可得性重放或实际运营验证"
+          ],
+          "truncated_sources": [],
+          "snapshot_time": "2026-10-20T09:10:11.123456Z"
+        },
+        "metadata": {
+          "snapshot_time": "2026-10-20T09:10:11.123456Z",
+          "source_count": 1,
+          "department_ids": [
+            1
+          ],
+          "context_digest": "cfd4ec0b891df5a819ae9f906770f4c31328561bd4f75fc1fd44765159cdb337",
+          "clinical_context_fingerprint": "bbc86d9066e9a4d20eff10d4b8371910c75506431aaa79fa4a5089b16d97c757",
+          "missing_data": [
+            "预测对象为原业务日边界实占床位数及四类实际流转事件；未来总运行床位仅为明确审核情景，不能解释为即时可收治床位或未满足需求",
+            "各目标独立检查来源完整性；缺项保留未知，流转事件预测不能替代实占床位预测。回测基于本次冻结原件，不构成历史可得性重放或实际运营验证"
+          ]
+        },
+        "evidence": [
+          {
+            "source_id": "bed_series:960fb856-97ba-45f3-9e1b-c6888a562288:5a97338df260",
+            "kind": "operational_record",
+            "title": "受审病区实占床位与实际流转事件序列",
+            "content": "{\"bed_binding\":{\"collection_digest\":\"5d2ef01a620230911e35c2d9950fa8c91a9b04f8ad6cfe5dabaca5936c8bd9da\",\"content_hash\":\"5a97338df260fc00d3947dec7dbc9689d7e35f3c1336d96a7d6f42c45496b02a\",\"current_membership_digest\":\"86f913cd617f7b1d911e0d24d057db33ed0046c0d9232427a8f970b5f14be0ff\",\"department_id\":1,\"future_scenario_collection_digest\":\"ef4c8ae7ac44c7dff0af485ddc873e29976636f69aa881e110cbcf99714addce\",\"historical_collection_digest\":\"bcbe057271ec27b370770e0d2d972692c9c50dc906704f37ad698d4c34ff50da\",\"horizon_days\":14,\"input_policy_digest\":\"2fe33cda3518ec6e2af939a25285c23251c6e0006826d76adfb7aab1755d5eb6\",\"member_manifest_hash\":\"5913f622547c4ed4024b4c5535a0690b953c41b05592bfe8d68400f851e04380\",\"projection_hash\":\"a8accad8d8a35dd9cf6125f9079bb83b7dda032e028c12f802335a503df28b25\",\"recipe_digest\":\"19292908d8587be3a135da765958c33773e57f7cf1cbb60c6f33c505970d55ca\",\"revision\":2,\"rule_id\":\"bed_physical_daily_v1\",\"schema_version\":\"bed_context_binding_v1\",\"scope_token\":\"6c8d7e84bdf515a2cac1a6a90f9db60a2bba007e2ad9b7e48f80d5d7c3e995c9\",\"series_governance_hash\":\"d360c7bb7d24c3585612e672e650f33f8ca6615e57dd68149811aeb8407f8a0a\",\"series_id\":\"960fb856-97ba-45f3-9e1b-c6888a562288\",\"source_id\":\"bed_series:960fb856-97ba-45f3-9e1b-c6888a562288:5a97338df260\",\"ward_id\":1}}"
+          }
+        ]
+      }
+    }
+  }
+}

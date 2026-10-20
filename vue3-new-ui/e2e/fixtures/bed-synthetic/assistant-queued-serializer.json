@@ -1,0 +1,79 @@
+{
+  "by_horizon": {
+    "14": {
+      "context_digest": "cfd4ec0b891df5a819ae9f906770f4c31328561bd4f75fc1fd44765159cdb337",
+      "context_metadata": {
+        "clinical_context_fingerprint": "bbc86d9066e9a4d20eff10d4b8371910c75506431aaa79fa4a5089b16d97c757",
+        "context_digest": "cfd4ec0b891df5a819ae9f906770f4c31328561bd4f75fc1fd44765159cdb337",
+        "department_ids": [
+          1
+        ],
+        "feature_revision": 1,
+        "missing_data": [
+          "预测对象为原业务日边界实占床位数及四类实际流转事件；未来总运行床位仅为明确审核情景，不能解释为即时可收治床位或未满足需求",
+          "各目标独立检查来源完整性；缺项保留未知，流转事件预测不能替代实占床位预测。回测基于本次冻结原件，不构成历史可得性重放或实际运营验证"
+        ],
+        "snapshot_time": "2026-10-20T09:10:11.123456Z",
+        "source_count": 1,
+        "tool_fingerprint": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+        "validation_status": "validated"
+      },
+      "create_time": "2026-10-20T20:36:34.308761",
+      "encounter_ref": null,
+      "error_code": null,
+      "error_message": null,
+      "feature_key": "bed_forecast",
+      "feature_name": "床位占用与流转预测",
+      "finish_time": null,
+      "input_tokens": 0,
+      "latency_ms": null,
+      "output_tokens": 0,
+      "patient_id": null,
+      "preview": 0,
+      "prompt_version": 0,
+      "provider_revision": 1,
+      "requires_human_review": true,
+      "run_id": "1003d804-8751-4759-ad2f-b6c33ddfc833",
+      "start_time": null,
+      "status": "queued"
+    },
+    "7": {
+      "context_digest": "1d78fbe612c5231f7475d9dc45167470c316f3d513ce671af9d453137302f58e",
+      "context_metadata": {
+        "clinical_context_fingerprint": "54a160f04b784082dde05f09aca78adccac2c10687bbb0cce22c9d4acd0b71d5",
+        "context_digest": "1d78fbe612c5231f7475d9dc45167470c316f3d513ce671af9d453137302f58e",
+        "department_ids": [
+          1
+        ],
+        "feature_revision": 1,
+        "missing_data": [
+          "预测对象为原业务日边界实占床位数及四类实际流转事件；未来总运行床位仅为明确审核情景，不能解释为即时可收治床位或未满足需求",
+          "各目标独立检查来源完整性；缺项保留未知，流转事件预测不能替代实占床位预测。回测基于本次冻结原件，不构成历史可得性重放或实际运营验证"
+        ],
+        "snapshot_time": "2026-10-20T09:10:11.123456Z",
+        "source_count": 1,
+        "tool_fingerprint": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+        "validation_status": "validated"
+      },
+      "create_time": "2026-10-20T20:36:12.548746",
+      "encounter_ref": null,
+      "error_code": null,
+      "error_message": null,
+      "feature_key": "bed_forecast",
+      "feature_name": "床位占用与流转预测",
+      "finish_time": null,
+      "input_tokens": 0,
+      "latency_ms": null,
+      "output_tokens": 0,
+      "patient_id": null,
+      "preview": 0,
+      "prompt_version": 0,
+      "provider_revision": 1,
+      "requires_human_review": true,
+      "run_id": "f0d8778f-6762-4f60-8ee1-a6b6a92c26fe",
+      "start_time": null,
+      "status": "queued"
+    }
+  },
+  "evidence_scope": "Synthetic AIRun metadata rehydrated from final2 frozen native run exports with status explicitly queued; actual runtime.describe_run(include_result=False) + FastAPI jsonable_encoder. No database, actual HTTP queue call, or durable state transition is claimed."
+}

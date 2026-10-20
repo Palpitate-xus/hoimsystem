@@ -244,8 +244,16 @@ assert 'app.database' not in sys.modules
 assert 'app.models' not in sys.modules
 assert 'sqlalchemy' not in sys.modules
 assert len(app.routes)==3
-print(json.dumps({'database_imported':False,'route_count':len(app.routes)}))
+assert settings.max_request_bytes == 65536
+assert settings.timeout_seconds == 20
+print(json.dumps({'database_imported':False,'route_count':len(app.routes),'max_request_bytes':settings.max_request_bytes,'timeout_seconds':settings.timeout_seconds}))
 """
-    env = {"PATH": os.environ.get("PATH", ""), "PYTHONPATH": str(__import__("pathlib").Path(__file__).resolve().parents[1]), "AI_PROVIDER_LOCAL_NEWS2_API_KEY": KEY, "NEWS2_TIMEOUT_SECONDS": "3"}
+    env = {
+        "PATH": os.environ.get("PATH", ""),
+        "PYTHONPATH": str(__import__("pathlib").Path(__file__).resolve().parents[1]),
+        "AI_PROVIDER_LOCAL_NEWS2_API_KEY": KEY,
+        "NEWS2_MAX_REQUEST_BYTES": "65536",
+        "NEWS2_TIMEOUT_SECONDS": "20",
+    }
     result = subprocess.run([sys.executable, "-c", code], cwd=tmp_path, env=env, capture_output=True, text=True, check=True, timeout=20)
-    assert json.loads(result.stdout) == {"database_imported": False, "route_count": 3}
+    assert json.loads(result.stdout) == {"database_imported": False, "route_count": 3, "max_request_bytes": 65536, "timeout_seconds": 20}

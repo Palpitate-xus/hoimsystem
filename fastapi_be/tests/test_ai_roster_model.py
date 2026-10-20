@@ -363,3 +363,16 @@ def test_preconstructed_pydantic_bool_cannot_bypass_strict_numeric_proof():
     analysis.optimistic_search = analysis.optimistic_search.model_copy(update={"frontier_nodes": False})
     with pytest.raises(ValueError):
         validate_analysis_binding(analysis, source, "a" * 64, runtime()["model_version"])
+
+
+def test_incomplete_inventory_retains_rolling_lower_bound_without_false_satisfied_limit():
+    source = complete_source()
+    source["staff"][0]["all_locations_duty_coverage"]["status"] = "unknown"
+    result = checked(source)
+    rolling = next(c for c in result.checks if c.kind == "rolling_24h")
+    assert rolling.status == "unknown"
+    assert rolling.actual_microseconds == 480 * MINUTE
+    source["work_policies"][0]["max_work_minutes_rolling_24h"] = limit(479)
+    rolling = next(c for c in checked(source).checks if c.kind == "rolling_24h")
+    assert rolling.status == "violated"
+    assert rolling.actual_microseconds == 480 * MINUTE

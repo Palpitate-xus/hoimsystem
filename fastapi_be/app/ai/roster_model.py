@@ -254,7 +254,7 @@ def _person_checks(source, person, selected, sessions, *, partial=False):
     option_ids = [o.option_id for o in selected]
     for duty in person.duties:
         duty_sources.append(duty.ref.source_id)
-        if duty.commitment_status == "cancelled":
+        if duty.commitment_status == "cancelled" and published(duty.ref):
             continue
         if not published(duty.ref) or duty.commitment_status == "unknown":
             checks.append(_check("accounting", "unknown", person=person.staff_id, sources=[duty.ref.source_id], reasons=["external_duty_commitment_or_publication_unknown"]))
@@ -377,6 +377,9 @@ def _person_checks(source, person, selected, sessions, *, partial=False):
             dependency_start, dependency_end = min(dependency_start, start - width), max(dependency_end, end + width)
             low, witness, count = integral_low.maximum_rolling(width, start - width, end)
             high, _, _ = integral_high.maximum_rolling(width, start - width, end)
+            coverage = person.all_locations_duty_coverage
+            if coverage.status != "attested_complete" or clock_us(coverage.start_at) > start - width or clock_us(coverage.end_at) < end + width:
+                high = width
             checks.append(_duration_check(kind, low, high, field, person=person.staff_id, sources=refs, options=option_ids, start=witness, end=witness + width, windows=count))
         for window in policy.fixed_work_windows:
             low, high = clock_us(window.start_at), clock_us(window.end_at)

@@ -1,6 +1,6 @@
 const { test, expect } = require("@playwright/test");
 
-async function setupWorkbench(page, fail = false) {
+async function setupWorkbench(page, fail = false, options = {}) {
   const calls = [];
   const feature = { key: "patient_summary", number: 1, name: "患者全景摘要", scope: "patient", engine: "llm", enabled: true, inputs: ["就诊记录", "过敏信息"], deliverables: ["当前问题", "资料缺口"] };
   const run = { run_id: "ui-isolated-task", feature_key: feature.key, feature_name: feature.name, status: "queued", patient_id: 1, preview: 0, prompt_version: 0, provider_revision: 1, input_tokens: 20, output_tokens: 30 };
@@ -10,10 +10,11 @@ async function setupWorkbench(page, fail = false) {
     let data = [];
     if (path === "/api/userInfo") data = { username: "测试医生", permissions: ["doctor"], avatar: "" };
     if (path === "/api/ai/features") data = [feature];
-    if (path === "/api/ai/patients") data = [{ patient_id: 1, label: "测试患者 · #1" }];
+    if (path === "/api/ai/patients") data = options.patients || [{ patient_id: 1, label: "测试患者 · #1" }];
     if (path === "/api/ai/encounters") data = [{ encounter_ref: "test-encounter", label: "门诊 · 测试就诊" }];
     if (path === "/api/ai/runs" && route.request().method() === "POST") {
       calls.push({ kind: "submission", body: route.request().postDataJSON() });
+      if (options.submissionGate) await options.submissionGate;
       if (fail) { await route.fulfill({ status: 409, contentType: "application/json", body: JSON.stringify({ detail: "未检索到本任务可用的已审核知识" }) }); return; }
       data = run;
     }
@@ -92,4 +93,25 @@ test("切换患者后历史按当前病例查询，迟到的旧病例响应不�
   await expect.poll(() => fulfilled.includes("1")).toBe(true);
   await expect(page.getByRole("cell", { name: "病例甲旧任务", exact: true })).toHaveCount(0);
   expect(requests.every(row => row.feature_key === "patient_summary" && ["1", "2"].includes(row.patient_id))).toBe(true);
+});
+
+test("提交后切换患者，迟到的任务回执不会挂到新病例或开始轮询", async ({ page }) => {
+  let release;
+  const submissionGate = new Promise(resolve => { release = resolve; });
+  const calls = await setupWorkbench(page, false, { submissionGate, patients: [{ patient_id: 1, label: "提交病例甲" }, { patient_id: 2, label: "切换病例乙" }] });
+  await page.goto("/#/ai/workbench");
+  const patient = page.getByRole("combobox", { name: "患者", exact: true });
+  await patient.press("ArrowDown");
+  await page.getByRole("option", { name: "提交病例甲", exact: true }).click();
+  const generate = page.getByRole("button", { name: "生成辅助建议", exact: true });
+  await generate.click();
+  await expect.poll(() => calls.some(item => item.kind === "submission")).toBe(true);
+  await patient.press("ArrowDown");
+  await page.getByRole("option", { name: "切换病例乙", exact: true }).click();
+  const receipt = page.waitForResponse(response => response.url().endsWith("/api/ai/runs") && response.request().method() === "POST");
+  release();
+  await receipt;
+  await expect(generate).toBeEnabled();
+  await expect(page.locator('[aria-label="AI任务结果"]')).toHaveCount(0);
+  expect(calls.find(item => item.kind === "submission").body.patient_id).toBe(1);
 });

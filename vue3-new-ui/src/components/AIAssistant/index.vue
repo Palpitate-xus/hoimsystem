@@ -20,7 +20,7 @@
           </el-select>
         </el-form-item>
         <el-form-item v-if="needsPrescription && patientId" label="待核查处方">
-          <el-select v-model="prescriptionId" clearable placeholder="选择实际处方" style="width: 100%"><el-option v-for="item in prescriptions" :key="item.prescription_id" :label="item.label" :value="item.prescription_id" /></el-select>
+          <el-select v-model="prescriptionId" :clearable="!props.initialInput.prescription_id" :disabled="!!props.initialInput.prescription_id" placeholder="选择实际处方" style="width: 100%"><el-option v-for="item in prescriptions" :key="item.prescription_id" :label="item.label" :value="item.prescription_id" /></el-select>
         </el-form-item>
         <el-form-item v-if="needsCoding" label="编码检索词"><el-input v-model="codingQuery" maxlength="500" placeholder="已记录诊断、手术名称或已有编码；多个词用逗号分隔" /></el-form-item>
         <template v-if="needsAppointment">
@@ -42,8 +42,8 @@
         </el-collapse>
         <el-alert v-if="selected.engine !== 'llm'" type="info" :closable="false" title="此能力通过专用模型处理，需要对应原始资料和已登记的适配服务。" class="spaced" />
         <div class="actions">
-          <el-button v-if="selected.scope === 'patient'" :disabled="!patientId" @click="inspectContext">查看本次资料</el-button>
-          <el-button type="primary" :loading="submitting" :disabled="busy || (!selected.enabled && !preview) || (selected.scope === 'patient' && !patientId)" @click="submit">生成辅助建议</el-button>
+          <el-button v-if="selected.scope === 'patient'" :disabled="!patientId || patientLoading" @click="inspectContext">查看本次资料</el-button>
+          <el-button type="primary" :loading="submitting" :disabled="busy || patientLoading || (!selected.enabled && !preview) || (selected.scope === 'patient' && !patientId)" @click="submit">生成辅助建议</el-button>
           <el-button v-if="busy" @click="cancel">取消接收结果</el-button>
         </div>
       </template>
@@ -122,7 +122,7 @@ const props = defineProps({ featureKeys: { type: Array, default: () => [] }, ini
 const store = useStore();
 const canPreview = computed(() => store.getters["user/permissions"].includes("super_admin"));
 const statuses = { queued: "已排队", running: "生成中", succeeded: "待复核", failed: "失败", cancelled: "已取消" };
-const loading = ref(false), submitting = ref(false), features = ref([]), featureKey = ref("");
+const loading = ref(false), submitting = ref(false), patientLoading = ref(false), features = ref([]), featureKey = ref("");
 const patientId = ref(null), encounterRef = ref(""), prescriptionId = ref(null), patients = ref([]), encounters = ref([]), prescriptions = ref([]);
 const question = ref(""), codingQuery = ref(""), extraInput = ref(""), preview = ref(false), run = ref(null), history = ref([]);
 const contextDialog = ref(false), contextData = ref(null), evidenceDialog = ref(false), evidence = ref(null), feedbackDialog = ref(false), feedback = ref({ outcome: "accepted", comment: "" });
@@ -133,7 +133,7 @@ const needsAppointment = computed(() => featureKey.value === "appointment_assist
 const serviceOptions = ref({}), serviceDepartment = ref(null), serviceDoctor = ref(null), serviceDate = ref(""), navigationStart = ref(null), navigationEnd = ref(null);
 const serviceDoctors = computed(() => (serviceOptions.value.doctors || []).filter(item => !serviceDepartment.value || item.department_id === serviceDepartment.value));
 const busy = computed(() => ["queued", "running"].includes(run.value?.status));
-let timer = null, pollVersion = 0, formVersion = 0, historyVersion = 0, historyOpen = false;
+let timer = null, pollVersion = 0, formVersion = 0, patientLoadVersion = 0, historyVersion = 0, selectionVersion = 0, historyOpen = false;
 
 function stopPolling() { pollVersion += 1; clearTimeout(timer); timer = null; }
 function startPolling() {
@@ -160,39 +160,49 @@ async function searchPatients(keyword = "") {
 }
 watch(featureKey, async () => {
   formVersion += 1; stopPolling(); run.value = null; contextData.value = null;
+  const featureVersion = formVersion;
   patientId.value = null; encounters.value = []; prescriptions.value = []; encounterRef.value = ""; prescriptionId.value = null;
   question.value = props.initialInput.question || ""; codingQuery.value = props.initialInput.icd_query || ""; extraInput.value = "";
   serviceOptions.value = {}; serviceDepartment.value = props.initialInput.department_id || null; serviceDoctor.value = props.initialInput.doctor_id || null; serviceDate.value = props.initialInput.appointment_date || "";
   navigationStart.value = props.initialInput.start_node_id || null; navigationEnd.value = props.initialInput.end_node_id || null;
-  if (selected.value?.scope === "patient") { await searchPatients(); patientId.value = props.patientId || (patients.value.length === 1 ? patients.value[0].patient_id : null); }
+  if (selected.value?.scope === "patient") { await searchPatients(); if (featureVersion !== formVersion) return; patientId.value = props.patientId || (patients.value.length === 1 ? patients.value[0].patient_id : null); }
   if (needsNavigation.value || needsAppointment.value) { const version = formVersion; const response = await getAIServiceOptions({ feature_key: featureKey.value }); if (version === formVersion) serviceOptions.value = response.data || {}; }
 });
 watch(patientId, async id => {
+  const patientVersion = ++patientLoadVersion;
+  patientLoading.value = !!id;
   stopPolling(); run.value = null;
-  encounterRef.value = ""; prescriptionId.value = null; contextData.value = null; encounters.value = []; prescriptions.value = [];
+  encounterRef.value = props.encounterRef || ""; prescriptionId.value = props.initialInput.prescription_id || null; contextData.value = null; encounters.value = []; prescriptions.value = [];
   if (!id) return;
   const version = formVersion, key = featureKey.value;
-  const response = await getAIEncounters({ feature_key: key, patient_id: id });
-  if (version !== formVersion || id !== patientId.value) return;
-  encounters.value = response.data || []; encounterRef.value = props.encounterRef || "";
-  if (needsPrescription.value) {
-    const response = await getAIPrescriptions({ feature_key: key, patient_id: id });
-    if (version === formVersion && id === patientId.value) { prescriptions.value = response.data || []; prescriptionId.value = props.initialInput.prescription_id || null; }
-  }
+  try {
+    const response = await getAIEncounters({ feature_key: key, patient_id: id });
+    if (version !== formVersion || patientVersion !== patientLoadVersion) return;
+    encounters.value = response.data || [];
+    if (needsPrescription.value) {
+      const response = await getAIPrescriptions({ feature_key: key, patient_id: id });
+      if (version === formVersion && patientVersion === patientLoadVersion) prescriptions.value = response.data || [];
+    }
+  } finally { if (patientVersion === patientLoadVersion) patientLoading.value = false; }
 });
 watch(encounterRef, () => { stopPolling(); run.value = null; contextData.value = null; });
-watch(prescriptionId, () => { stopPolling(); run.value = null; });
-watch([serviceDepartment, serviceDoctor, serviceDate, navigationStart, navigationEnd], () => { stopPolling(); run.value = null; });
+watch([featureKey, patientId, encounterRef, prescriptionId, serviceDepartment, serviceDoctor, serviceDate, navigationStart, navigationEnd, () => JSON.stringify(props.initialInput)], () => {
+  selectionVersion += 1; stopPolling(); run.value = null; contextData.value = null; contextDialog.value = false; evidenceDialog.value = false; feedbackDialog.value = false;
+});
+watch(() => run.value?.run_id, () => { evidenceDialog.value = false; feedbackDialog.value = false; feedback.value = { outcome: "accepted", comment: "" }; });
 watch(serviceDepartment, id => { const doctor = serviceOptions.value.doctors?.find(item => item.doctor_id === serviceDoctor.value); if (id && doctor && doctor.department_id !== id) serviceDoctor.value = null; });
 watch([featureKey, patientId, encounterRef], () => { historyVersion += 1; history.value = []; if (historyOpen) loadHistory(); });
 watch(() => props.initialFeature, key => { if (features.value.some(item => item.key === key)) featureKey.value = key; });
 watch(() => props.patientId, id => { formVersion += 1; patientId.value = id; });
 watch(() => props.encounterRef, value => { encounterRef.value = value; });
 async function inspectContext() {
+  const version = selectionVersion;
   const sourceKeys = selected.value?.source_reference_keys || ["record_id", "structured_record_id", "prescription_id", "lab_result_id", "imaging_report_id"];
   const references = Object.fromEntries(sourceKeys.filter(key => props.initialInput[key]).map(key => [key, props.initialInput[key]]));
   if (prescriptionId.value) references.prescription_id = prescriptionId.value;
-  contextData.value = (await getAIClinicalContext({ ...references, feature_key: featureKey.value, patient_id: patientId.value, encounter_ref: encounterRef.value || undefined })).data; contextDialog.value = true;
+  const response = await getAIClinicalContext({ ...references, feature_key: featureKey.value, patient_id: patientId.value, encounter_ref: encounterRef.value || undefined });
+  if (version !== selectionVersion) return;
+  contextData.value = response.data; contextDialog.value = true;
 }
 async function submit() {
   let extra = {};
@@ -201,6 +211,7 @@ async function submit() {
     catch { ElMessage.error("结构化资料应为有效 JSON 对象"); return; }
   }
   submitting.value = true;
+  stopPolling(); const selection = selectionVersion, view = pollVersion;
   try {
     const input = { ...props.initialInput, ...extra, question: question.value };
     if (needsCoding.value && codingQuery.value.trim()) input.icd_query = codingQuery.value.trim();
@@ -208,11 +219,12 @@ async function submit() {
     if (needsNavigation.value) { for (const [key, value] of [["start_node_id", navigationStart.value], ["end_node_id", navigationEnd.value]]) { if (value) input[key] = value; else delete input[key]; } }
     if (prescriptionId.value) input.prescription_id = prescriptionId.value;
     const response = await createAIRun({ feature_key: featureKey.value, patient_id: selected.value.scope === "patient" ? patientId.value : null, encounter_ref: selected.value.scope === "patient" ? encounterRef.value || null : null, input, preview: canPreview.value && preview.value });
+    if (selection !== selectionVersion || view !== pollVersion) return;
     run.value = response.data; startPolling();
   } finally { submitting.value = false; }
 }
-async function refreshRun() { if (run.value) { run.value = (await getAIRun(run.value.run_id)).data; startPolling(); } }
-async function openRun(id) { stopPolling(); const version = historyVersion; const response = await getAIRun(id); if (version !== historyVersion) return; run.value = response.data; startPolling(); }
+async function refreshRun() { if (run.value) { stopPolling(); const id = run.value.run_id, selection = selectionVersion, view = pollVersion; const response = await getAIRun(id); if (selection !== selectionVersion || view !== pollVersion || id !== run.value?.run_id) return; run.value = response.data; startPolling(); } }
+async function openRun(id) { stopPolling(); const selection = selectionVersion, view = pollVersion; const response = await getAIRun(id); if (selection !== selectionVersion || view !== pollVersion) return; run.value = response.data; startPolling(); }
 async function cancel() { await cancelAIRun(run.value.run_id); await refreshRun(); }
 async function loadHistory(activeNames) {
   if (activeNames !== undefined) historyOpen = activeNames.length > 0;
@@ -234,8 +246,8 @@ onMounted(async () => {
   finally { loading.value = false; }
 });
 onActivated(() => { if (busy.value) startPolling(); });
-onDeactivated(stopPolling);
-onBeforeUnmount(stopPolling);
+onDeactivated(() => { selectionVersion += 1; stopPolling(); });
+onBeforeUnmount(() => { selectionVersion += 1; historyVersion += 1; formVersion += 1; stopPolling(); });
 </script>
 
 <style scoped>

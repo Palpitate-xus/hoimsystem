@@ -209,6 +209,9 @@ class OperationLogMiddleware(BaseHTTPMiddleware):
         "/api/invoice/print",
         "/api/backup/download",
         "/api/ai/context",
+        "/api/ai/patients",
+        "/api/ai/encounters",
+        "/api/ai/prescriptions",
         "/api/ai/runs",
     }
 

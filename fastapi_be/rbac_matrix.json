@@ -298,6 +298,27 @@
  },
  {
   "auth": "ANY",
+  "function": "patient_options",
+  "method": "GET",
+  "module": "ai.py",
+  "path": "/api/ai/patients"
+ },
+ {
+  "auth": "ANY",
+  "function": "encounter_options",
+  "method": "GET",
+  "module": "ai.py",
+  "path": "/api/ai/encounters"
+ },
+ {
+  "auth": "ANY",
+  "function": "prescription_options",
+  "method": "GET",
+  "module": "ai.py",
+  "path": "/api/ai/prescriptions"
+ },
+ {
+  "auth": "ANY",
   "function": "inspect_context",
   "method": "GET",
   "module": "ai.py",

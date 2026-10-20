@@ -6,6 +6,7 @@ import re
 from dataclasses import dataclass, field
 
 from fastapi import HTTPException
+from sqlalchemy import or_, select
 from sqlalchemy.orm import Session, selectinload
 
 from app.ai.catalog import FeatureSpec
@@ -68,6 +69,40 @@ def get_encounter(db: Session, patient_id: int, reference: str | None) -> Regist
     if encounter is None:
         raise HTTPException(404, "本次就诊不存在或不属于该患者")
     return encounter
+
+
+def accessible_patients(db: Session, user: User, spec: FeatureSpec, keyword: str = "", limit: int = 50) -> list[Patient]:
+    """Filter patient selection in SQL using the execution care and grant boundaries."""
+    query = db.query(Patient)
+    if user.user_role == "patient":
+        query = query.filter(Patient.identity == user.username)
+    elif user.user_role not in {"super_admin", "admin"}:
+        criteria = [
+            Patient.patient_id.in_(
+                select(AIPatientGrant.patient_id).where(
+                    AIPatientGrant.user_id == user.user_id, AIPatientGrant.category == spec.category, AIPatientGrant.revoked == 0, AIPatientGrant.expires_at > utcnow()
+                )
+            )
+        ]
+        doctors = db.query(Doctor).filter_by(user_id=user.user_id).all()
+        ids = [item.doctor_id for item in doctors]
+        departments = {item.department_id for item in doctors if item.department_id}
+        if ids:
+            for model in (Registration, MedicalRecord, Prescription, Admission, LabOrder):
+                criteria.append(Patient.patient_id.in_(select(model.patient_id).where(model.doctor_id.in_(ids))))
+        if user.user_role == "director" and departments:
+            for model in (Registration, Admission):
+                criteria.append(Patient.patient_id.in_(select(model.patient_id).where(model.department_id.in_(departments))))
+        if user.user_role == "nurse" and spec.category in {"inpatient", "patient"}:
+            criteria.append(Patient.patient_id.in_(select(NursingRecord.patient_id).where(NursingRecord.nurse_id == user.user_id)))
+        if user.user_role == "pharmacist" and spec.category == "pharmacy":
+            criteria.append(Patient.patient_id.in_(select(Prescription.patient_id).where(Prescription.status.in_([0, 1, 2]))))
+        if user.user_role == "lab_technician" and spec.category == "diagnostics":
+            criteria.append(Patient.patient_id.in_(select(LabOrder.patient_id)))
+        query = query.filter(or_(*criteria))
+    if keyword:
+        query = query.filter(Patient.name.contains(keyword, autoescape=True))
+    return query.order_by(Patient.patient_id.desc()).limit(limit).all()
 
 
 def authorize_patient(db: Session, user: User, patient_id: int, category: str, encounter_ref: str | None = None) -> Patient:

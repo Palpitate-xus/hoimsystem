@@ -131,6 +131,17 @@ async def test_revoked_grant_prevents_model_call_after_queuing(seed_data, db_ses
     assert requests == []
 
 
+@pytest.mark.asyncio
+async def test_patient_selector_is_scoped_to_real_care_relationships(async_client, seed_data, auth_headers):
+    headers = auth_headers(seed_data["patient_user"].username)
+    options = await async_client.get("/api/ai/patients", headers=headers, params={"feature_key": "patient_report_explanation"})
+    assert {item["patient_id"] for item in options.json()["data"]} == {seed_data["patient"].patient_id}
+    assert seed_data["patient"].identity not in options.text
+    doctors = await async_client.get("/api/ai/patients", headers=auth_headers(seed_data["doctor_user"].username), params={"feature_key": "patient_summary"})
+    assert seed_data["patient"].patient_id in {item["patient_id"] for item in doctors.json()["data"]}
+    assert seed_data["patient2"].patient_id not in {item["patient_id"] for item in doctors.json()["data"]}
+
+
 def reviewed_knowledge(db, seed_data):
     content = "测试知识：问诊资料缺失时先核对临床记录，本文仅用于隔离测试，不提供实际诊疗建议。"
     row = AIKnowledgeDocument(

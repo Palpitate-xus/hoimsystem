@@ -372,7 +372,8 @@ def test_recomputed_outer_hash_cannot_hide_changed_frozen_original_types_notes_s
 
 
 def test_three_actual_fixed_rule_profiles_publish_with_independent_identity_and_withdrawal(db_session, case):
-    options = risk_rule_profiles.fixed_options()
+    # The independent SOFA extension must leave the original three slots intact.
+    options = [item for item in risk_rule_profiles.fixed_options() if item["rule_id"] != "sofa1_native_observed_v1"]
     assert [item["rule_id"] for item in options] == ["news2_2017", "kdigo_aki_2012", "qsofa_sepsis3_2016"]
     expected = options[2]
     assert expected["recipe_digest"] == recipe_digest()

@@ -303,11 +303,17 @@ def test_setup_requires_independent_sofa_rule_without_manufacturing_clinical_val
     case = pipeline_case
     report = setup_reports(db_session, {"sepsis_risk": case["feature"]})["sepsis_risk"]
     assert not any(issue["code"] == "SOFA1_RULE_PROFILE_REQUIRED" for issue in report["issues"])
-    case["profile"].payload_json = "{}"
-    db_session.commit()
-    report = setup_reports(db_session, {"sepsis_risk": case["feature"]})["sepsis_risk"]
-    assert any(issue["code"] == "SOFA1_RULE_PROFILE_REQUIRED" for issue in report["issues"])
-    assert case["feature"].validation_status == "validated"
+    original = case["profile"].payload_json
+    try:
+        case["profile"].payload_json = "{}"
+        db_session.commit()
+        report = setup_reports(db_session, {"sepsis_risk": case["feature"]})["sepsis_risk"]
+        assert any(issue["code"] == "SOFA1_RULE_PROFILE_REQUIRED" for issue in report["issues"])
+        assert case["feature"].validation_status == "validated"
+    finally:
+        # This fixture deliberately reuses the published immutable rule in this module.
+        case["profile"].payload_json = original
+        db_session.commit()
 
 
 @pytest.mark.asyncio

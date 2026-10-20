@@ -82,6 +82,7 @@ def test_both_actual_migrations_roundtrip_keep_all_previous_rows_and_occupancy(t
 
 def test_mysql_ddl_is_two_linked_additive_migrations_with_eight_utc6_and_five_mediumtext():
     first, second = map(revision_module, REVISIONS)
+    assert (first.revision, second.revision) == REVISIONS
     assert first.down_revision == PARENT and second.down_revision == first.revision
     assert all(module.branch_labels is module.depends_on is None for module in (first, second))
     sql = "\n".join(offline(revision, "upgrade") for revision in REVISIONS)

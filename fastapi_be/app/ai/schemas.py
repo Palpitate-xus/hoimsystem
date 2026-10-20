@@ -403,6 +403,58 @@ class ImageRegion(StrictRequest):
     height: int = Field(ge=1, strict=True)
 
 
+class LocalImagingRuntime(StrictRequest):
+    engine: Literal["torchxrayvision-densenet121"]
+    engine_versions: dict[str, str] = Field(min_length=3, max_length=3)
+    model_repository: Literal["torchxrayvision/densenet121-res224-all"]
+    model_revision: Literal["588eadcc6a744da71f8dce768bc974ec629443f5"]
+    model_digest: str = Field(pattern=r"^[a-f0-9]{64}$")
+    runtime_digest: str = Field(pattern=r"^[a-f0-9]{64}$")
+    preprocessing_digest: str = Field(pattern=r"^[a-f0-9]{64}$")
+    profile: Literal["xrv_stored_range_v1"]
+    preprocessing: dict
+    labels: list[str] = Field(min_length=18, max_length=18)
+    prompt_handling: Literal["pixels_only"]
+    clinical_validation: Literal["not_provided"]
+    population_applicability: Literal["not_verified"]
+
+    @model_validator(mode="after")
+    def reviewed_runtime_only(self):
+        import hashlib
+
+        from app.ai.imaging_model import LABELS, canonical_json
+        from app.ai.imaging_preprocessing import PREPROCESSING
+
+        if self.labels != LABELS or self.engine_versions != {"torch": "2.14.1+cpu", "numpy": "2.4.4", "safetensors": "0.8.0"}:
+            raise ValueError("胸片研究模型标签顺序或固定CPU依赖不一致")
+        if canonical_json(self.preprocessing) != canonical_json(PREPROCESSING) or self.preprocessing_digest != hashlib.sha256(canonical_json(PREPROCESSING).encode()).hexdigest():
+            raise ValueError("胸片研究模型预处理与已审查固定profile不一致")
+        return self
+
+
+class LocalImagePreprocessing(StrictRequest):
+    normalization_maxval: int = Field(ge=255, le=65535, strict=True)
+    input_pixel_count: int = Field(ge=1, le=16777216, strict=True)
+    cropped_pixel_count: int = Field(ge=1, le=16777216, strict=True)
+    discarded_pixel_count: int = Field(ge=0, le=16777216, strict=True)
+    padding_pixels_in_input: int = Field(ge=0, le=16777216, strict=True)
+    padding_pixels_in_crop: int = Field(ge=0, le=16777216, strict=True)
+    valid_pixels_in_crop: int = Field(ge=1, le=16777216, strict=True)
+    prepared_shape: list[Annotated[int, Field(strict=True)]] = Field(min_length=4, max_length=4)
+    prepared_min: float = Field(ge=-1024.01, le=1024.01, allow_inf_nan=False, strict=True)
+    prepared_max: float = Field(ge=-1024.01, le=1024.01, allow_inf_nan=False, strict=True)
+
+    @model_validator(mode="after")
+    def actual_counts(self):
+        if self.prepared_shape != [1, 1, 224, 224] or self.prepared_min > self.prepared_max:
+            raise ValueError("胸片模型输入形状或实际范围无效")
+        if self.cropped_pixel_count + self.discarded_pixel_count != self.input_pixel_count or self.valid_pixels_in_crop + self.padding_pixels_in_crop != self.cropped_pixel_count:
+            raise ValueError("实际裁剪、舍弃及填充像素数量不一致")
+        if self.padding_pixels_in_crop > self.padding_pixels_in_input or self.padding_pixels_in_input > self.input_pixel_count:
+            raise ValueError("填充像素数量不符合原输入范围")
+        return self
+
+
 class ImageProcessing(StrictRequest):
     instructions_digest: str = Field(pattern=r"^[a-f0-9]{64}$")
     input_rows: int = Field(ge=1, strict=True)
@@ -411,6 +463,8 @@ class ImageProcessing(StrictRequest):
     processed_frames: list[Annotated[int, Field(strict=True)]] = Field(min_length=1, max_length=1)
     analysis_region: ImageRegion
     preprocessing_notes: list[str] = Field(min_length=1, max_length=20)
+    local_runtime: LocalImagingRuntime | None = None
+    local_preprocessing: LocalImagePreprocessing | None = None
 
     @model_validator(mode="after")
     def original_region(self):

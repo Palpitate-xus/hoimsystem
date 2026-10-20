@@ -149,6 +149,38 @@ def validate_generation(
             raise AIExecutionError("IMAGE_PROCESSING_MISMATCH", "影像尺寸、帧数或实际任务Prompt不一致")
         if metadata["valid_pixel_count"] < 1:
             raise AIExecutionError("IMAGE_NO_USABLE_PIXELS", "影像只有padding背景，不能生成候选发现")
+        local, native = processing.local_runtime, processing.local_preprocessing
+        if local is not None or native is not None or (model_version and model_version.startswith("xrv:")):
+            from app.ai.imaging_contract import ImageSource
+            from app.ai.imaging_model import LABELS as IMAGE_LABELS
+            from app.ai.imaging_model import RELEASE_FILES as IMAGE_FILES
+            from app.ai.imaging_model import ImagingModelManifest
+            from app.ai.imaging_preprocessing import center_crop
+
+            if local is None or native is None or model_version != "xrv:" + local.runtime_digest:
+                raise AIExecutionError("IMAGE_RUNTIME_MISMATCH", "胸片结果缺少所登记实际运行版本及真实处理报告")
+            manifest = ImagingModelManifest(files={name: {"size": size, "sha256": sha} for name, (size, sha) in IMAGE_FILES.items()})
+            if local.model_digest != manifest.digest:
+                raise AIExecutionError("IMAGE_RUNTIME_MISMATCH", "胸片模型权重与已审查固定发布不一致")
+            try:
+                ImageSource.model_validate(image_source)
+            except ValidationError as exc:
+                raise AIExecutionError("IMAGE_LOCAL_SCOPE_MISMATCH", "原像素超出明确胸片单帧研究输入范围") from exc
+            region = center_crop(metadata["rows"], metadata["columns"])
+            if processing.analysis_region.model_dump() != region:
+                raise AIExecutionError("IMAGE_LOCAL_CROP_MISMATCH", "胸片实际分析范围与原作者中心裁剪公式不一致")
+            count = metadata["rows"] * metadata["columns"]
+            if (
+                native.input_pixel_count != count
+                or native.cropped_pixel_count != region["width"] * region["height"]
+                or native.normalization_maxval != (1 << metadata["bits_stored"]) - 1
+                or native.padding_pixels_in_input != count - metadata["valid_pixel_count"]
+            ):
+                raise AIExecutionError("IMAGE_LOCAL_PROCESSING_MISMATCH", "胸片实际像素数量、归一化或原padding统计不一致")
+            if [finding.label for finding in analysis.findings] != IMAGE_LABELS or any(
+                finding.location != "image" or finding.region is not None or finding.score is None or not 0 <= finding.score <= 1 for finding in analysis.findings
+            ):
+                raise AIExecutionError("IMAGE_LOCAL_SCORE_MISMATCH", "胸片研究模型须保留18项原始图像级分数，不能改作诊断阈值或虚构病灶定位")
         crop = processing.analysis_region
         for finding in analysis.findings:
             region = finding.region

@@ -83,6 +83,10 @@ def inspect_operational_context(req: OperationalContextRequest, db: Session = De
         from app.ai.bed_context import expand_context
 
         context = expand_context(db, context, user=user, current=True)
+    if context.get("surgery_binding"):
+        from app.ai.surgery_context import expand_context
+
+        context = expand_context(db, context, user=user, current=True)
     return {"code": 200, "msg": "success", "data": {"context": context, "metadata": context_metadata(bundle), "evidence": bundle.evidence}}
 
 
@@ -201,6 +205,8 @@ def list_runs(
     roster_plan_id: str | None = Query(None, max_length=36),
     ward_id: QueryPositiveInteger | None = Query(None, ge=1, le=2147483647),
     bed_series_id: str | None = Query(None, max_length=36),
+    surgery_pool_id: str | None = Query(None, max_length=36),
+    surgery_scenario_id: str | None = Query(None, max_length=36),
     limit: int = Query(30, ge=1, le=100),
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user),
@@ -212,7 +218,13 @@ def list_runs(
     if feature_key:
         authorized_feature(db, user, feature_key)
         query = query.filter_by(feature_key=feature_key)
-    if ward_id is not None or bed_series_id is not None or feature_key == "bed_forecast" and department_id is not None:
+    if surgery_pool_id is not None or surgery_scenario_id is not None or feature_key == "surgery_scheduling" and department_id is not None:
+        if feature_key != "surgery_scheduling" or any(value is not None for value in (patient_id, encounter_ref, roster_plan_id, ward_id, bed_series_id)):
+            raise HTTPException(422, "手术历史筛选仅用于明确科室、资源池或原场景，不能与其他运营或个体就诊范围混用")
+        from app.ai.surgery_history import filter_history
+
+        query = filter_history(db, user, query, department_id=department_id, surgery_pool_id=surgery_pool_id, surgery_scenario_id=surgery_scenario_id)
+    elif ward_id is not None or bed_series_id is not None or feature_key == "bed_forecast" and department_id is not None:
         if feature_key != "bed_forecast" or patient_id is not None or encounter_ref is not None or roster_plan_id is not None:
             raise HTTPException(422, "床位历史筛选仅用于床位功能及明确科室、病区或原序列，不与排班或个体就诊混用")
         from app.ai.bed_history import filter_history
@@ -245,6 +257,8 @@ def list_runs(
             authorize_run(db, user, item)
         except HTTPException as exc:
             if exc.status_code in {403, 404}:
+                continue
+            if exc.status_code == 409 and item.feature_key == "surgery_scheduling":
                 continue
             if exc.status_code == 409 and item.feature_key == "roster_optimization":
                 from app.ai.roster_storage import is_roster_snapshot
@@ -307,6 +321,11 @@ def review_result(run_id: str, req: FeedbackWrite, db: Session = Depends(get_db)
         from app.ai.bed_storage import expand_result, is_bed_snapshot
 
         if is_bed_snapshot(json.loads(run.input_json)):
+            expand_result(db, run)
+    if run.feature_key == "surgery_scheduling":
+        from app.ai.surgery_storage import expand_result, is_surgery_snapshot
+
+        if is_surgery_snapshot(json.loads(run.input_json)):
             expand_result(db, run)
     if run.feature_key == "sepsis_risk":
         from app.ai.sofa_storage import expand_result, is_sofa_snapshot

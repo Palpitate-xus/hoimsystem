@@ -1,0 +1,5 @@
+# Independent exact scheduling; no hospital DB or ML training package.
+fastapi==0.136.1
+pydantic==2.12.4
+pydantic-settings==2.12.0
+uvicorn==0.46.0

@@ -7,6 +7,7 @@
           <el-button type="primary" @click="openApplyDialog()">手术申请</el-button>
           <el-button type="success" @click="openScheduleDialog()">手术排台</el-button>
           <ai-action v-if="canOptimizeSurgery" label="AI 排台分析" title="AI 手术排台资料与资源分析" :feature-keys="['surgery_scheduling']" initial-feature="surgery_scheduling" />
+          <ai-action v-if="canOptimizeSurgery&&surgeryCohort.length" label="核对所选病例的完整排程场景" title="明确原病例队列的受审排程场景" :disabled="surgeryCohort.length>256" :initial-input="{surgery_application_ids:surgeryCohort}" :feature-keys="['surgery_scheduling']" initial-feature="surgery_scheduling" />
           <el-select v-model="filterStatus" placeholder="状态" clearable style="width: 120px;" size="small">
             <el-option label="待审批" :value="0" />
             <el-option label="已批准" :value="1" />
@@ -17,7 +18,9 @@
           <el-button type="primary" size="small" @click="loadApplications">查询</el-button>
         </div>
       </template>
-      <el-table :data="applications" size="small" v-loading="loading" empty-text="暂无记录">
+      <p v-if="canOptimizeSurgery">已明确勾选 {{ surgeryCohort.length }} 件原申请；一次完整场景最多256件。勾选只声明病例队列，实际照护、科室与来源由服务器重新核对。</p>
+      <el-table :data="applications" row-key="application_id" size="small" v-loading="loading" empty-text="暂无记录" @selection-change="chooseSurgeryCohort">
+        <el-table-column v-if="canOptimizeSurgery" type="selection" width="45" :selectable="row=>[0,1].includes(row.status)&&supportId(row.application_id)" />
         <el-table-column prop="patient_name" label="患者" width="80" />
         <el-table-column prop="surgery_name" label="手术名称" />
         <el-table-column prop="surgery_level_text" label="级别" width="70" />
@@ -38,11 +41,21 @@
             <el-button v-if="row.status===1" size="small" @click="openScheduleDialog(row)">排台</el-button>
             <el-button v-if="row.status===2" size="small" type="success" @click="openAnesthesiaDialog(row)">麻醉</el-button>
             <el-button size="small" type="danger" @click="cancelApp(row)">取消</el-button>
+            <el-button v-if="canRecordSurgeryOriginal" size="small" :disabled="!supportId(row.application_id)" @click="openSurgeryOriginal(row)">登记手术AI原资料</el-button>
             <ai-action title="AI 围术期评估与用药分析" :patient-id="row.patient_id" :encounter-ref="row.admission_id || ''" :initial-input="{ surgery_application_id: row.application_id }" :feature-keys="['perioperative_assessment', 'perioperative_antibiotics', 'patient_summary', 'clinical_consistency']" initial-feature="perioperative_assessment" />
           </template>
         </el-table-column>
       </el-table>
     </el-card>
+
+    <el-dialog v-model="surgeryOriginalOpen" title="明确原申请的手术专业资料" width="min(1100px,96vw)" destroy-on-close @closed="!surgeryOriginalOpen&&(surgeryOriginalId=null)">
+      <p>原申请 {{ surgeryOriginalId }}。原需求、观测与阶段估计分别登记；专业签署使用当前账号实际医师别名，超级管理员的技术审核不代替专业签署。</p>
+      <ai-surgery-sources v-if="surgeryOriginalOpen&&surgeryOriginalId&&canRecordSurgeryOriginal" :application-id="surgeryOriginalId" :active="surgeryViewActive" />
+    </el-dialog>
+    <el-dialog v-model="surgeryBusyOpen" title="按原业务排台登记受控资源占用" width="min(1100px,96vw)" destroy-on-close @closed="!surgeryBusyOpen&&(surgeryBusyId=null)">
+      <p>原排台 {{ surgeryBusyId }}。明确选择实际资源映射并登记 UTC 区间；旧日期与房间文字不自动转换成占用或资格。</p>
+      <ai-surgery-sources v-if="surgeryBusyOpen&&surgeryBusyId&&canRecordSurgeryBusy" :legacy-schedule-id="surgeryBusyId" :active="surgeryViewActive" />
+    </el-dialog>
 
     <el-card style="margin-top: 20px;">
       <template #header><span>手术排台列表</span></template>
@@ -60,10 +73,11 @@
             <el-tag v-else type="success" size="small">{{ row.status_text }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="260">
+        <el-table-column label="操作" width="410">
           <template #default="{row}">
             <el-button v-if="row.status===0" size="small" type="primary" @click="startSurgeryFn(row)">开始</el-button>
             <el-button v-if="row.status===1" size="small" type="success" @click="completeSurgeryFn(row)">完成</el-button>
+            <el-button v-if="canRecordSurgeryBusy" size="small" :disabled="!supportId(row.schedule_id)" @click="openSurgeryBusy(row)">登记原排台资源占用</el-button>
             <ai-action label="AI 时机分析" title="AI 围术期时机分析" :patient-id="row.patient_id" :encounter-ref="row.admission_id || ''" :initial-input="{ surgery_application_id: row.application_id, surgery_schedule_id: row.schedule_id }" :feature-keys="['perioperative_antibiotics', 'perioperative_assessment']" initial-feature="perioperative_antibiotics" />
           </template>
         </el-table-column>
@@ -190,7 +204,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, defineAsyncComponent, onActivated, onDeactivated, onBeforeUnmount, onMounted, watch } from "vue";
 import { useStore } from "vuex";
 import { ElMessage, ElMessageBox } from "element-plus";
 import AiAction from "@/components/AIAction/index.vue";
@@ -198,9 +212,21 @@ import { getSurgeryApplicationList, createSurgeryApplication, approveSurgeryAppl
 import { getInpatientList } from "@/api/admission";
 import { getDoctorList } from "@/api/admin";
 import { getPharmaceuticalList } from "@/api/pharmacy";
+import {supportId} from '@/api/inpatientSupport';
+const AiSurgerySources=defineAsyncComponent(()=>import('@/components/AISurgerySources.vue'));
 
 const store = useStore();
-const canOptimizeSurgery = computed(() => store.getters["user/permissions"].some(role => ["super_admin", "admin", "director"].includes(role)));
+const canOptimizeSurgery = computed(() => surgeryViewActive.value&&!!store.state.user.accessToken&&(store.getters["user/permissions"]||[]).some(role => ["super_admin", "admin", "director"].includes(role)));
+const canRecordSurgeryOriginal=computed(()=>surgeryViewActive.value&&!!store.state.user.accessToken&&(store.getters['user/permissions']||[]).some(role=>['super_admin','admin','director','doctor'].includes(role)));
+const canRecordSurgeryBusy=computed(()=>surgeryViewActive.value&&!!store.state.user.accessToken&&(store.getters['user/permissions']||[]).includes('super_admin'));
+const surgeryCohort=ref([]),surgeryOriginalOpen=ref(false),surgeryOriginalId=ref(null),surgeryViewActive=ref(true);
+const surgeryBusyOpen=ref(false),surgeryBusyId=ref(null);
+function clearSurgeryAI(){surgeryCohort.value=[];surgeryOriginalOpen.value=false;surgeryOriginalId.value=null;surgeryBusyOpen.value=false;surgeryBusyId.value=null;}
+function chooseSurgeryCohort(rows){surgeryCohort.value=canOptimizeSurgery.value&&!loading.value?[...new Set(rows.filter(row=>applications.value.some(item=>item.application_id===row.application_id)&&[0,1].includes(row.status)&&supportId(row.application_id)).map(row=>row.application_id))].sort():[];}
+function openSurgeryOriginal(row){if(canRecordSurgeryOriginal.value&&supportId(row.application_id)&&applications.value.some(item=>item.application_id===row.application_id)){surgeryOriginalId.value=row.application_id;surgeryOriginalOpen.value=true;}}
+function openSurgeryBusy(row){if(canRecordSurgeryBusy.value&&supportId(row.schedule_id)&&schedules.value.some(item=>item.schedule_id===row.schedule_id)){surgeryBusyId.value=row.schedule_id;surgeryBusyOpen.value=true;}}
+watch(()=>[store.state.user.accessToken,store.state.user.username,JSON.stringify(store.getters['user/permissions'])],clearSurgeryAI,{flush:'sync'});
+onDeactivated(()=>{surgeryViewActive.value=false;clearSurgeryAI();});onActivated(()=>{surgeryViewActive.value=true;});onBeforeUnmount(()=>{surgeryViewActive.value=false;clearSurgeryAI();});
 const applications = ref([]);
 const schedules = ref([]);
 const loading = ref(false);
@@ -224,6 +250,7 @@ const perioperativeForm = ref({ application_id: "", pharmaceutical_id: null, dos
 const approvedApps = computed(() => applications.value.filter(a => a.status === 1));
 
 const loadApplications = async () => {
+  clearSurgeryAI();
   loading.value = true;
   const params = {};
   if (filterStatus.value !== "") params.status = filterStatus.value;

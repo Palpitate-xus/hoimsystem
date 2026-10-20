@@ -39,6 +39,7 @@ from app.ai.speech_probe import inspect_speech_capabilities
 from app.database import get_db
 from app.dependencies import require_roles
 from app.models import ClinicalPathway, Department, Patient, User
+from app.routers.inpatient_support import QueryPositiveInteger
 
 router = APIRouter(tags=["AI 超级管理员"], default_response_class=JSONResponse)
 
@@ -632,6 +633,58 @@ async def check_bed_provider(provider_id: int, req: ProviderCheck, db: Session =
     }
 
 
+@router.post("/ai/admin/providers/{provider_id}/surgery-capabilities")
+async def check_surgery_provider(provider_id: int, req: ProviderCheck, db: Session = Depends(get_db), user: User = Depends(require_roles("super_admin"))) -> dict:
+    """Inspect schema12 metadata without cases, resource facts or scheduling."""
+    from app.ai.surgery_probe import inspect_surgery_capabilities
+
+    provider = db.get(AIProvider, provider_id)
+    if provider is None:
+        raise HTTPException(404, "模型配置不存在")
+    ensure_revision(provider.revision, req.expected_revision)
+    if provider.kind != "specialist" or "surgery_scheduling" not in json.loads(provider.supported_features_json):
+        raise HTTPException(422, "请选择已登记手术排程的独立阶段资源优化服务")
+    actor_id, revision, configured_model, timeout = user.user_id, provider.revision, provider.model, provider.timeout_seconds
+    db.expunge(provider)
+    db.commit()
+    error = None
+    try:
+        capabilities = await inspect_surgery_capabilities(provider)
+    except AIExecutionError as exc:
+        error = exc
+    db.expire_all()
+    actor, current = db.get(User, actor_id), db.get(AIProvider, provider_id)
+    if actor is None or actor.user_role != "super_admin":
+        raise HTTPException(403, "当前用户不再具备AI管理权限")
+    if current is None:
+        raise HTTPException(409, "模型配置已删除，请刷新后重试")
+    ensure_revision(current.revision, revision)
+    if error:
+        audit(db, actor_id, "provider.surgery_check_failed", str(provider_id), {"revision": revision, "error_code": error.code})
+        _commit(db)
+        raise HTTPException(502, error.message)
+    issues = []
+    if capabilities["model_version"] != configured_model:
+        issues.append("登记模型与服务实际固定约束、配方及运行版本不同，请核对并保存后重新评审")
+    if timeout <= capabilities["timeout_seconds"]:
+        issues.append("模型请求超时应大于手术优化处理时限，保留传输和回执时间")
+    audit(db, actor_id, "provider.surgery_check", str(provider_id), {"revision": revision, "compatible": not issues, "actual_model": capabilities["model_version"]})
+    _commit(db)
+    return {
+        "code": 200,
+        "msg": "success",
+        "data": {
+            "provider_id": provider_id,
+            "provider_revision": revision,
+            "configured_model": configured_model,
+            "compatible": not issues,
+            "capabilities": capabilities,
+            "issues": issues,
+            "scope_note": "只核对声明阶段资源、两种目标、固定输入政策、四个核心文件及实际运行版本；不发送病例或资源原件，不执行排程或预订，不证明临床及运营效果，不改变功能启停与验证状态。",
+        },
+    }
+
+
 @router.get("/ai/admin/runs")
 def list_global_runs(
     feature_key: str | None = None,
@@ -639,6 +692,9 @@ def list_global_runs(
     outcome: Literal["accepted", "rejected", "modified"] | None = None,
     requested_by: int | None = Query(None, ge=1),
     patient_id: int | None = Query(None, ge=1),
+    department_id: QueryPositiveInteger | None = Query(None, ge=1, le=2147483647),
+    surgery_pool_id: str | None = Query(None, max_length=36),
+    surgery_scenario_id: str | None = Query(None, max_length=36),
     page: int = Query(1, ge=1, le=100000),
     page_size: int = Query(30, ge=1, le=100),
     db: Session = Depends(get_db),
@@ -646,6 +702,15 @@ def list_global_runs(
 ) -> dict:
     """Inspect all users' task metadata and feedback counts without loading clinical payloads."""
     query = db.query(AIRun)
+    if department_id is not None or surgery_pool_id is not None or surgery_scenario_id is not None:
+        if feature_key != "surgery_scheduling" or patient_id is not None:
+            raise HTTPException(422, "手术管理历史筛选仅用于手术科室、资源池或原场景")
+        from app.ai.surgery_history import filter_history
+
+        actor = db.query(User).filter_by(user_id=user.user_id).populate_existing().one_or_none()
+        if actor is None or actor.user_role != "super_admin":
+            raise HTTPException(403, "当前身份已无超级管理员历史审计权限")
+        query = filter_history(db, actor, query, department_id=department_id, surgery_pool_id=surgery_pool_id, surgery_scenario_id=surgery_scenario_id)
     if feature_key:
         get_spec(feature_key)
         query = query.filter(AIRun.feature_key == feature_key)
@@ -677,6 +742,17 @@ def inspect_run_trace(run_id: str, db: Session = Depends(get_db), user: User = D
     if run is None:
         raise HTTPException(404, "AI 任务不存在")
     snapshot = json.loads(run.input_json)
+    from app.ai.surgery_storage import is_surgery_snapshot
+
+    if is_surgery_snapshot(snapshot):
+        from app.ai.runtime import authorize_run
+        from app.ai.surgery_context import expand_context
+
+        actor = db.query(User).filter_by(user_id=user.user_id).populate_existing().one_or_none()
+        if actor is None or actor.user_role != "super_admin":
+            raise HTTPException(403, "当前身份已无超级管理员完整手术审计权限")
+        authorize_run(db, actor, run)
+        snapshot["payload"]["context"] = expand_context(db, snapshot["payload"]["context"])
     if snapshot.get("payload", {}).get("context", {}).get("roster_binding"):
         from app.ai.roster_context import authorize_roster_snapshot, expand_context
 

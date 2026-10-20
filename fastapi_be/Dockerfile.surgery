@@ -1,0 +1,23 @@
+FROM python:3.12-slim AS dependencies
+
+WORKDIR /app
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
+
+COPY requirements-surgery.txt ./
+RUN pip install --no-cache-dir -r requirements-surgery.txt \
+    && groupadd --gid 10001 surgery \
+    && useradd --uid 10001 --gid 10001 --create-home --shell /usr/sbin/nologin surgery
+
+FROM dependencies AS runtime
+
+COPY app/__init__.py ./app/__init__.py
+COPY app/ai/__init__.py ./app/ai/__init__.py
+COPY app/ai/surgery_contract.py \
+    app/ai/surgery_model.py \
+    app/ai/surgery_config.py \
+    app/ai/surgery_server.py ./app/ai/
+
+USER 10001:10001
+EXPOSE 8821
+CMD ["python", "-m", "app.ai.surgery_server", "--host", "0.0.0.0"]

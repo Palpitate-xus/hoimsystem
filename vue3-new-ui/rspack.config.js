@@ -213,6 +213,18 @@ module.exports = {
       // 减小最小块大小，允许更细粒度的分割
       minSize: 20000,
       cacheGroups: {
+        // Reuse small admission-source/API modules across lazy AI screens.
+        // The global 20 kB threshold otherwise leaves identical async copies.
+        aiShared: {
+          name: "ai-shared",
+          test: /[\\/]src[\\/](?:api[\\/](?:ai[^\\/]*|inpatient(?:Observations|Gcs|Laboratory))\.js$|components[\\/]AI(?:[A-Za-z]+ProviderCheck|[A-Za-z]+Findings)[\\/])/,
+          chunks: "async",
+          minChunks: 2,
+          minSize: 0,
+          minSizeReduction: 0,
+          reuseExistingChunk: true,
+          priority: 15,
+        },
         chunk: {
           name: "vab-chunk",
           test: /[\\/]node_modules[\\/]/,

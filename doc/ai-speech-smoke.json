@@ -1,0 +1,133 @@
+{
+  "recorded_at_utc": "2026-10-20T06:54:31.120902+00:00",
+  "scope": "Fixed nonclinical synthetic English speech and silence; not a medical or Chinese ASR evaluation",
+  "platform_commit": "157839e5d79763472cb55dea62d678c6dd0c4e5c",
+  "catalog_version": "2026.10.16",
+  "container": {
+    "image_id": "sha256:6b02616189ceae54d586808f9bd175d39124d8fd73e32e3bfd573de4e4d1e015",
+    "runtime": {
+      "python_version": "3.12.13",
+      "uid": 10001,
+      "root_read_only": true,
+      "ffmpeg_version": "ffmpeg version 7.1.5-0+deb13u1 Copyright (c) 2000-2026 the FFmpeg developers"
+    },
+    "network_mode": "none",
+    "read_only_root": true,
+    "memory_limit_bytes": 2147483648,
+    "cpu_limit": 4,
+    "tmpfs_bytes": 536870912,
+    "source_files_matched": 153,
+    "source_tree_sha256": "d840ae7b7f4ce2f30a43bac0e9188cc7b47ceac5b3870b992ba904447d90d211"
+  },
+  "test_script": "fastapi_be/scripts/smoke_local_speech.py",
+  "result": {
+    "synthetic_text": "The blue bicycle is beside the garden. Please open the window.",
+    "model_version": "fw:e2c820fa90ee6a66316dba8719eaa3eb1f6993bd78e6ab2dddbb9d4f99fbacee",
+    "engine_versions": {
+      "faster-whisper": "1.2.1",
+      "ctranslate2": "4.8.3",
+      "onnxruntime": "1.31.0",
+      "av": "16.1.0",
+      "tokenizers": "0.23.3",
+      "numpy": "2.5.4"
+    },
+    "decoding_options": {
+      "language": "en",
+      "beam_size": 5,
+      "temperature": 0.0,
+      "condition_on_previous_text": false,
+      "vad_filter": true,
+      "task": "transcribe"
+    },
+    "device": "cpu",
+    "compute_type": "int8",
+    "cpu_threads": 4,
+    "cases": [
+      {
+        "fixture": "synthetic.wav",
+        "source_sha256": "d1d7b21d26ee24703530917e839a6d78ed474b2ad498ae708b0f5ac508992963",
+        "source_duration_ms": 3940,
+        "transcript": "The blue bicycle is beside the garden, please open the window.",
+        "check_passed": true,
+        "processing": {
+          "engine": "faster-whisper",
+          "engine_version": "1.2.1",
+          "model_revision": "518d6e0b5a068b278f66842b17377f9523de5cd1",
+          "model_digest": "074263250422cec62c3fa0fbd435f2ae4c53cc3cf2c739e10d42e91077bb05c7",
+          "runtime_digest": "e2c820fa90ee6a66316dba8719eaa3eb1f6993bd78e6ab2dddbb9d4f99fbacee",
+          "decoding_options_hash": "cbd570bd40a1a0da1b3819b6cc84aa94aeeeb8e69be38d43f1ded4c98de30a20",
+          "instructions_digest": "db7bf204c98e6e986f4bb37ecd4c9edad251a6fb72fbd7448c9c1a3612fd65ae",
+          "decoded_duration_ms": 3940,
+          "processed_duration_ms": 3940,
+          "submitted_samples": 63040,
+          "sample_rate": 16000,
+          "iterator_exhausted": true,
+          "vad_filter": true,
+          "translation": false,
+          "diarization": false,
+          "prompt_handling": "acoustic_only",
+          "timestamp_policy": "estimated_bounded_to_source"
+        }
+      },
+      {
+        "fixture": "synthetic.webm",
+        "source_sha256": "8028d1535225f10f42d80411fff451a7da56ead48aaadb2659654e819989b693",
+        "source_duration_ms": 3940,
+        "transcript": "The blue bicycle is beside the garden, please open the window.",
+        "check_passed": true,
+        "processing": {
+          "engine": "faster-whisper",
+          "engine_version": "1.2.1",
+          "model_revision": "518d6e0b5a068b278f66842b17377f9523de5cd1",
+          "model_digest": "074263250422cec62c3fa0fbd435f2ae4c53cc3cf2c739e10d42e91077bb05c7",
+          "runtime_digest": "e2c820fa90ee6a66316dba8719eaa3eb1f6993bd78e6ab2dddbb9d4f99fbacee",
+          "decoding_options_hash": "cbd570bd40a1a0da1b3819b6cc84aa94aeeeb8e69be38d43f1ded4c98de30a20",
+          "instructions_digest": "db7bf204c98e6e986f4bb37ecd4c9edad251a6fb72fbd7448c9c1a3612fd65ae",
+          "decoded_duration_ms": 3940,
+          "processed_duration_ms": 3940,
+          "submitted_samples": 63040,
+          "sample_rate": 16000,
+          "iterator_exhausted": true,
+          "vad_filter": true,
+          "translation": false,
+          "diarization": false,
+          "prompt_handling": "acoustic_only",
+          "timestamp_policy": "estimated_bounded_to_source"
+        }
+      },
+      {
+        "fixture": "silence.wav",
+        "source_sha256": "6fef23faad4d2382a388484ce8a6dc1a79647829e4ac975273f549e9faa68258",
+        "source_duration_ms": 250,
+        "transcript": "",
+        "check_passed": true,
+        "processing": {
+          "engine": "faster-whisper",
+          "engine_version": "1.2.1",
+          "model_revision": "518d6e0b5a068b278f66842b17377f9523de5cd1",
+          "model_digest": "074263250422cec62c3fa0fbd435f2ae4c53cc3cf2c739e10d42e91077bb05c7",
+          "runtime_digest": "e2c820fa90ee6a66316dba8719eaa3eb1f6993bd78e6ab2dddbb9d4f99fbacee",
+          "decoding_options_hash": "cbd570bd40a1a0da1b3819b6cc84aa94aeeeb8e69be38d43f1ded4c98de30a20",
+          "instructions_digest": "db7bf204c98e6e986f4bb37ecd4c9edad251a6fb72fbd7448c9c1a3612fd65ae",
+          "decoded_duration_ms": 250,
+          "processed_duration_ms": 250,
+          "submitted_samples": 4000,
+          "sample_rate": 16000,
+          "iterator_exhausted": true,
+          "vad_filter": true,
+          "translation": false,
+          "diarization": false,
+          "prompt_handling": "acoustic_only",
+          "timestamp_policy": "estimated_bounded_to_source"
+        }
+      }
+    ],
+    "clinical_validation": "not_performed"
+  },
+  "limits": [
+    "No actual patient recordings were used",
+    "No clinical validation or Chinese terminology evaluation was performed",
+    "Keyword and silence checks do not establish transcription accuracy or absence of omissions",
+    "No business feature was enabled and no paid model was called"
+  ]
+}

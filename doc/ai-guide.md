@@ -138,7 +138,7 @@ worker 在执行前和保存结果前重新检查权限、配置、患者资料�
 
 运营历史默认近 30 天，可选不含未来且最多 367 天的正序区间。医院数据问答的区间若完全早于当前业务日，不加载当前病区或床位快照，也不因无关的当前床位变化使历史分析失效；床位需求预测则单独保留当前容量供核查。排班/手术排台计划与历史资料分开，默认计划为业务日起 14 天，单次最多 31 天且不晚于业务日后 366 天。大范围资料可能超过模型输入预算，需缩小日期、科室或品种；原始清单若截断会明确标记。
 
-手术页的“AI 排台分析”、运营页的评价分析，以及已关联患者的不良事件行“AI 事件复盘”，都能先查看资料再提交。事件行入口固定患者和事件，不展示就诊归属选择，结果同时展示冻结的原上报和原分析，并可检查引用。未绑定患者的组织事件仍待独立访问范围及数据连接，不强行归属某位患者。手术排台和反馈分析均受模型服务患者数据用途开关控制。当前默认目录及Prompt版本为 `2026.10.15`，旧队列不会沿用更新前的固定任务契约。
+手术页的“AI 排台分析”、运营页的评价分析，以及已关联患者的不良事件行“AI 事件复盘”，都能先查看资料再提交。事件行入口固定患者和事件，不展示就诊归属选择，结果同时展示冻结的原上报和原分析，并可检查引用。未绑定患者的组织事件仍待独立访问范围及数据连接，不强行归属某位患者。手术排台和反馈分析均受模型服务患者数据用途开关控制。当前默认目录及Prompt版本为 `2026.10.16`，旧队列不会沿用更新前的固定任务契约。
 
 临床路径模板页提供“AI 治疗方案比选”，固定所选路径后选择已授权患者和本次就诊。工作台也可选择当前科室及功能已有审核版本的路径；选择就诊后重新核对审核范围。路径执行行的“AI 路径复评”固定患者、所记住院、原入径和路径标识，补充JSON不能替换这些绑定引用。预览与生成使用相同标识，原模板元数据、原入径与变异、未知计数及引用独立展示，结果保存任务当时版本。新增、入径、变异、退出及用药仍走原人工业务流程。
 
@@ -280,7 +280,48 @@ AI接口保留原知识、引用及反馈正文中时间戳的小数部分，返
 }
 ```
 
-分段使用严格的整型毫秒，按开始时间排序且不超过原解码范围，可保留重叠发言。每段引用必须是该原录音，身份角色只接受`unknown`，不确定片段须给出说明。声明未检出语音时须为空片段。响应仍受512KiB及1000段上限约束，超限失败，不静默截断。输出不合法也保留已经正确解析的服务报告用量。上述例子不是识别结果或验证数据；本地测试使用合成静音和隔离响应，真实语音服务、完整性/识别质量、说话人映射及专科术语验证仍待接入。
+分段使用严格的整型毫秒，按开始时间排序且不超过原解码范围，可保留重叠发言。每段引用必须是该原录音，身份角色只接受`unknown`，不确定片段须给出说明。声明未检出语音时须为空片段。响应仍受512KiB及1000段上限约束，超限失败，不静默截断。输出不合法也保留已经正确解析的服务报告用量。上述JSON只是协议示例，不是识别质量或验证数据。
+
+本地`fw:`模型另须返回`transcription.processing`，外部v2适配器未提供时界面明确显示处理范围未知。处理报告包含`engine`、`engine_version`、固定40位`model_revision`、`model_digest`、`runtime_digest`、`decoding_options_hash`和本次完整系统及任务Prompt的`instructions_digest`，以及`decoded_duration_ms`、`processed_duration_ms`、`submitted_samples`、`sample_rate`、`iterator_exhausted`、`vad_filter`、`translation`、`diarization`、`prompt_handling`、`timestamp_policy`。平台核对实际登记模型、原音时长、16kHz样本计数、完整迭代及本次Prompt哈希；不接受只处理部分输入的本地结果。完整处理是服务对输入范围的报告，不证明逐字完整、VAD无漏检或医学识别准确。
+
+### 可选本地CPU语音服务
+
+仓库提供`app.ai.speech_server`和独立的识别子进程。API与业务worker仍通过已登记的`specialist`网关调用，不要求给主业务运行环境安装识别依赖；默认不启动服务或启用临床能力。模型只从经核实的本地文件加载，推理启用离线模式，不接受请求中的模型路径或URL。一次最多处理一份原音，繁忙时明确拒绝而不重复排队；识别超时或进程任务取消时终止子进程组，临时原音与响应文件在处理结束后释放。
+
+运行依赖在`requirements-speech.txt`固定；实际权重清单、各引擎库版本、语言、解码配置和CPU线程数共同形成`fw:<运行哈希>`。准备工具要求明确的仓库及40位提交哈希，复制并校验配置、权重、tokenizer和词表，不覆盖原版本。文件、依赖或识别配置变化须登记新的实际模型标识；服务核对与实际任务均不静默使用其他版本。
+
+下面的小模型仅供非临床工程联调，不能据此选择医疗生产模型或推定中文术语效果。示例权重来源及许可见[固定版本模型卡](https://huggingface.co/Systran/faster-whisper-tiny/tree/518d6e0b5a068b278f66842b17377f9523de5cd1)，引擎行为参考[faster-whisper官方实现](https://github.com/SYSTRAN/faster-whisper/tree/v1.2.1)。
+
+```bash
+cd fastapi_be
+python -m venv .venv-speech
+.venv-speech/bin/python -m pip install -r requirements.txt -r requirements-speech.txt
+.venv-speech/bin/python scripts/prepare_speech_model.py \
+  --repository Systran/faster-whisper-tiny \
+  --revision 518d6e0b5a068b278f66842b17377f9523de5cd1 \
+  --destination "$PWD/private/ai-models/engineering-tiny"
+
+# 先通过部署系统注入AI_PROVIDER_LOCAL_SPEECH_API_KEY，至少32字符的独立随机密钥。
+# API/worker如使用环境变量引用，也须注入相同变量；不要把密钥写入Prompt或版本库。
+export SPEECH_MODEL_DIR="$PWD/private/ai-models/engineering-tiny"
+export SPEECH_LANGUAGE=zh
+.venv-speech/bin/python -m app.ai.speech_server --describe
+.venv-speech/bin/python -m app.ai.speech_server
+```
+
+服务配置示例为`.env.speech.example`，进程仅读取已导入的环境变量，不自动加载该文件。默认语言`zh`、CPU int8、4线程、beam size 5、单文件64MiB、300秒原音、110秒识别处理时限；模型冷启动计入处理时限，传输和登记校验开销另计。依赖FFmpeg，处理失败返回明确错误。`--source-dir`可从已有离线目录准备模型，不发起模型下载。
+
+超级管理员在“模型服务”中登记类型`specialist`、适配功能`medical_transcription`，基础地址为同主机运行时的`http://127.0.0.1:8810`，密钥引用`AI_PROVIDER_LOCAL_SPEECH_API_KEY`或录入相同的加密保存密钥，模型标识使用`--describe`返回的实际值。请求超时设为120秒以覆盖110秒识别时限及部分传输开销。服务自身的语言、时长和资源配置属于部署参数，临床评审需记录其实际范围。
+
+“检查本地语音服务”只对已保存配置执行鉴权`GET /capabilities`，不发录音、患者资料或模型推理；API接口为`POST /api/ai/admin/providers/{id}/speech-capabilities`，须有`expected_revision`，且仅超级管理员能调用。检查前后核对当前管理角色和配置版本，报告只显示已定义字段，不回显密钥、磁盘路径或任意服务响应。实际模型或请求超时不匹配时展示差异；“填写实际模型，待保存”只填写表单，保存与后续评审仍需分别执行。检查不会更改启用状态或登记临床验证。
+
+该引擎执行声学转写，不把完整系统/任务Prompt、用户问题或病史作为`initial_prompt`或热词来补写发言；报告`prompt_handling: acoustic_only`。识别前核对实际模型支持的配置语言，拒绝英语专用模型把中文配置静默改为英语。保持原识别词句并逐段标记待核对，不区分说话人，统一`unknown`。若模型末尾估计超出原音，听音区间限定在实际范围，并在不确定说明中保留原估计值；`timestamp_policy: estimated_bounded_to_source`表示估计时间，不是人工对齐。VAD可能漏检；未返回片段不证明原音无人发言。真实术语、说话人和医疗质量评估仍未完成。
+
+可用`Dockerfile.speech`单独构建运行镜像，主识别权重通过外部只读目录提供，不打包进应用镜像或Git；VAD资源随固定的识别依赖安装。镜像以非root用户运行，挂载目录需允许该运行UID读取；建议只读根文件系统与独立临时目录。镜像默认监听容器内8810端口，跨主机或容器调用需受信任HTTPS端点并加入原`AI_PROVIDER_ALLOWED_HOSTS`，可使用`--ssl-certfile`和`--ssl-keyfile`或已有TLS代理。容器内`127.0.0.1`指自身，不能直接当作另一个容器地址。没有修改现有Compose来默认启动或发布语音服务。
+
+`scripts/smoke_local_speech.py`只生成固定的非临床英文合成语音及静音，检查WAV、WebM原字节传输、真实本地识别、完整输入报告与静音结果；它不接受实际患者录音。`tests/test_ai_local_speech_real.py`另用隔离数据库和合成患者，验证登记→排队→worker真实识别→冻结结果→授权读取，确认没有修改病历。默认测试不下载权重，该项需显式选择已准备的模型；两种检查均不构成中文、药名剂量、重叠发言或临床质量评估，也没有调用付费模型。
+
+2026-10-20已实际构建该镜像，并在禁用网络、只读根目录、UID10001、4CPU/2GiB及独立临时目录的容器中通过3项检查：3.94秒WAV与WebM均识别出固定句子的四个核对关键词，0.25秒静音未返回片段。容器内153个Python源码文件与当时工作区哈希逐项一致；本地Python3.13环境和镜像Python3.12环境的依赖差异各自进入实际运行标识。详见[离线试跑记录](ai-speech-smoke.json)，其中只保存合成文本、实际版本和工程验证边界。
 
 ## 验证命令
 
@@ -289,6 +330,10 @@ AI接口保留原知识、引用及反馈正文中时间戳的小数部分，返
 pytest -q tests/test_ai_catalog.py tests/test_ai_admin.py tests/test_ai_gateway.py tests/test_ai_context.py tests/test_ai_runtime.py tests/test_ai_migration.py tests/test_rbac_drift.py
 pytest -q tests/test_ai_pathway_knowledge.py tests/test_ai_pathway_sources.py
 pytest -q tests/test_ai_audio_files.py tests/test_ai_audio_assets.py tests/test_ai_audio_transcription.py tests/test_ai_response_fidelity.py tests/test_ai_knowledge_scope.py
+pytest -q tests/test_ai_speech_model.py tests/test_ai_speech_processing.py tests/test_ai_speech_server.py tests/test_ai_speech_worker.py tests/test_ai_speech_probe.py
+# 可选真实模型检查；在已安装requirements-speech.txt的隔离环境运行
+SPEECH_LANGUAGE=en python scripts/smoke_local_speech.py
+HOIM_SPEECH_REAL_MODEL_DIR="$SPEECH_MODEL_DIR" pytest -q tests/test_ai_local_speech_real.py
 python scripts/generate_rbac_matrix.py --check
 python scripts/export_ai_catalog.py --check
 ruff check app/ai app/routers/ai.py app/routers/ai_admin.py

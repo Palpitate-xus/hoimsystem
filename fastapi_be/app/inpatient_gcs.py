@@ -189,7 +189,7 @@ def anchor_current(db, row, payload, anchor):
     return True, []
 
 
-def source_current(db, row, *, allow_revoked=False):
+def source_current(db, row, *, allow_revoked=False, audit_only=False):
     from app.models import Admission, InpatientGcsObservation
 
     if not isinstance(row, InpatientGcsObservation):
@@ -231,12 +231,16 @@ def source_current(db, row, *, allow_revoked=False):
             raise ValueError("原状态无效")
     except (ValueError, TypeError, AttributeError, KeyError, OverflowError, RecursionError) as exc:
         raise HTTPException(409, "GCS原资料完整性校验失败") from exc
-    if db.query(Admission).filter_by(admission_id=current.admission_id, patient_id=current.patient_id).populate_existing().one_or_none() is None:
+    parent_current = db.query(Admission).filter_by(admission_id=current.admission_id, patient_id=current.patient_id).populate_existing().one_or_none() is not None
+    if not parent_current and not audit_only:
         raise HTTPException(409, "GCS原住院不存在或归属变化")
     if current.status == "revoked" and not allow_revoked:
         raise HTTPException(409, "GCS原资料已撤销")
     governance = {key: utc_text(getattr(current, key)) if key == "revoked_at" and current.revoked_at is not None else getattr(current, key) for key in GOVERNANCE_FIELDS}
     valid_anchor, anchor_reasons = anchor_current(db, current, payload, anchor)
+    exclusions = (["source_revoked"] if current.status == "revoked" else []) + (["original_admission_changed"] if not parent_current else [])
+    if payload["anchor_point"] is not None and not valid_anchor:
+        exclusions.append("original_point_anchor_not_current")
     return {
         **frozen_content(current, payload, anchor),
         "content_hash": current.content_hash,
@@ -246,6 +250,10 @@ def source_current(db, row, *, allow_revoked=False):
         "derived_total": derived_total(payload),
         "anchor_current": valid_anchor,
         "anchor_exclusion_reasons": anchor_reasons,
+        "original_admission_current": parent_current,
+        "eligible": not exclusions,
+        "exclusion_reasons": exclusions,
+        "eligibility_basis": "original_gcs_integrity_and_admission_not_qsofa_applicability",
     }
 
 

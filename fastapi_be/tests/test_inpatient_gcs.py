@@ -325,3 +325,61 @@ async def test_source_and_audit_are_rolled_back_together_on_actual_audit_failure
         )
     db_session.refresh(row)
     assert row.status == "active" and row.revision == 1 and row.revoked_at is None
+
+
+@pytest.mark.asyncio
+async def test_lost_actual_care_blocks_original_author_but_super_keeps_frozen_audit_and_can_revoke(gcs_client, db_session, gcs_case, auth_headers):
+    case = gcs_case
+    row = register(db_session, case)
+    original = (row.payload_json, row.anchor_snapshot_json, row.content_hash, row.observed_at, row.recorded_at)
+    case["admission"].doctor_id = None
+    db_session.commit()
+    params = {"patient_id": case["patient_id"], "admission_id": case["admission"].admission_id}
+    regular = await gcs_client.get(f"/api/inpatient-gcs/{row.gcs_observation_id}", headers=auth_headers(case["doctor"].username), params=params)
+    assert regular.status_code == 403
+    blocked = await gcs_client.post(f"/api/inpatient-gcs/{row.gcs_observation_id}/revoke", headers=auth_headers(case["doctor"].username), json={**params, "expected_revision": 1, "reason": NOTE})
+    assert blocked.status_code == 403
+    super_headers = auth_headers(case["seed"]["super_admin_user"].username)
+    fetched = await gcs_client.get(f"/api/ai/admin/gcs-sources/{row.gcs_observation_id}", headers=super_headers)
+    assert fetched.status_code == 200 and fetched.json()["data"]["payload"] == json.loads(original[0])
+    changed = await gcs_client.post(f"/api/inpatient-gcs/{row.gcs_observation_id}/revoke", headers=super_headers, json={**params, "expected_revision": 1, "reason": NOTE})
+    assert changed.status_code == 200 and changed.json()["data"]["status"] == "revoked"
+    assert (row.payload_json, row.anchor_snapshot_json, row.content_hash, row.observed_at, row.recorded_at) == original
+    assert case["admission"].doctor_id is None
+
+
+@pytest.mark.asyncio
+async def test_changed_original_parent_is_only_frozen_super_audit_never_current_source_but_remains_revocable(gcs_client, db_session, gcs_case, auth_headers):
+    case = gcs_case
+    row = register(db_session, case)
+    original = (row.patient_id, row.admission_id, row.payload_json, row.anchor_snapshot_json, row.content_hash)
+    original_point = (case["point"].patient_id, case["point"].admission_id, case["point"].payload_json, case["point"].content_hash)
+    case["admission"].patient_id = case["seed"]["patient2"].patient_id
+    db_session.commit()
+    with pytest.raises(HTTPException) as error:
+        gcs.source_current(db_session, row)
+    assert error.value.status_code == 409
+    super_headers = auth_headers(case["seed"]["super_admin_user"].username)
+    fetched = await gcs_client.get(f"/api/ai/admin/gcs-sources/{row.gcs_observation_id}", headers=super_headers)
+    assert fetched.status_code == 200, fetched.text
+    data = fetched.json()["data"]
+    assert data["original_admission_current"] is False and data["eligible"] is False and "original_admission_changed" in data["exclusion_reasons"]
+    assert data["patient_id"] == original[0] and data["admission_id"] == original[1] and data["can_record"] is False and data["can_revoke"] is True
+    changed = await gcs_client.post(
+        f"/api/inpatient-gcs/{row.gcs_observation_id}/revoke", headers=super_headers, json={"patient_id": original[0], "admission_id": original[1], "expected_revision": 1, "reason": NOTE}
+    )
+    assert changed.status_code == 200 and changed.json()["data"]["status"] == "revoked" and changed.json()["data"]["eligible"] is False
+    assert (row.patient_id, row.admission_id, row.payload_json, row.anchor_snapshot_json, row.content_hash) == original
+    assert (case["point"].patient_id, case["point"].admission_id, case["point"].payload_json, case["point"].content_hash) == original_point
+    assert case["admission"].patient_id == case["seed"]["patient2"].patient_id
+
+
+@pytest.mark.asyncio
+async def test_super_audit_never_pretends_hash_tampered_gcs_is_intact(gcs_client, db_session, gcs_case, auth_headers):
+    row = register(db_session, gcs_case)
+    raw = json.loads(row.payload_json)
+    raw["note"] = "真实存储原文被修改，不能假称完整冻结原件"
+    row.payload_json = canonical_json(raw)
+    db_session.commit()
+    fetched = await gcs_client.get(f"/api/ai/admin/gcs-sources/{row.gcs_observation_id}", headers=auth_headers(gcs_case["seed"]["super_admin_user"].username))
+    assert fetched.status_code == 409

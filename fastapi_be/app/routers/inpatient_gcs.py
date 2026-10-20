@@ -49,7 +49,7 @@ def detail(db, user, row):
     actor = current_actor(db, user)
     if actor.user_role != "super_admin":
         authorize_scope(db, actor, row.patient_id, row.admission_id)
-    data = source_current(db, row, allow_revoked=True)
+    data = source_current(db, row, allow_revoked=True, audit_only=actor.user_role == "super_admin")
     if actor.user_role != "super_admin":
         authorize_scope(db, actor, row.patient_id, row.admission_id)
     return {
@@ -118,13 +118,20 @@ def source(
 
 @router.post("/inpatient-gcs/{gcs_observation_id}/revoke")
 def revoke(gcs_observation_id: str, req: GcsRevoke, db: Session = Depends(get_db), user: User = Depends(require_roles(*READ_ROLES))):
-    actor, row = scoped_row(db, user, gcs_observation_id, req.patient_id, req.admission_id)
-    source_current(db, row, allow_revoked=True)
+    actor = current_actor(db, user)
+    if actor.user_role == "super_admin":
+        row = row_by_id(db, gcs_observation_id)
+        if row.patient_id != req.patient_id or row.admission_id != req.admission_id:
+            raise HTTPException(409, "撤销请求不属于冻结GCS的原患者及住院")
+    else:
+        actor, row = scoped_row(db, actor, gcs_observation_id, req.patient_id, req.admission_id)
+    source_current(db, row, allow_revoked=True, audit_only=actor.user_role == "super_admin")
     if actor.user_role != "super_admin" and row.created_by != actor.user_id:
         raise HTTPException(403, "仅原记录人或超级管理员可撤销GCS原观测")
     if row.status != "active" or row.revision != req.expected_revision:
         raise HTTPException(409, "GCS来源已改变或撤销，不重复撤销或恢复")
-    authorize_scope(db, actor, req.patient_id, req.admission_id)
+    if actor.user_role != "super_admin":
+        authorize_scope(db, actor, req.patient_id, req.admission_id)
     changed = (
         db.query(InpatientGcsObservation)
         .filter_by(gcs_observation_id=gcs_observation_id, status="active", revision=req.expected_revision, content_hash=row.content_hash)

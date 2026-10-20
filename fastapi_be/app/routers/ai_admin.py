@@ -102,8 +102,9 @@ def update_feature(key: str, req: FeatureWrite, db: Session = Depends(get_db), u
             raise HTTPException(422, issues[0]["message"])
         if spec.clinical and config.validation_status != "validated":
             raise HTTPException(422, "临床功能完成验证后才能面向业务启用；超级管理员可先进行预览")
-        if spec.number == 62 and config.validation_status != "validated":
-            raise HTTPException(422, "运营预测完成指定目标与范围的验证后才能启用；超级管理员可先预览，来源确认不代表预测验证")
+        if spec.requires_operational_validation and config.validation_status != "validated":
+            purpose = "优化" if spec.engine == "optimizer" else "预测"
+            raise HTTPException(422, f"运营{purpose}完成指定目标与范围的验证后才能启用；超级管理员可先预览，来源确认不代表实际业务验证")
         if config.validation_status == "suspended":
             raise HTTPException(422, "已暂停的功能不能启用")
     config.revision += 1

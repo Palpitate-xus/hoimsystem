@@ -46,6 +46,11 @@ class FeatureSpec:
         return self.number <= 50 or self.number in {53, 54, 55, 56, 57, 78}
 
     @property
+    def requires_operational_validation(self) -> bool:
+        """Forecasts and optimizers require evidence for their actual business scope."""
+        return self.category == "operations" and self.engine in {"prediction", "optimizer"}
+
+    @property
     def requires_patient_data_permission(self) -> bool:
         """Free-form feedback and cohort inputs can also contain sensitive clinical details."""
         return self.scope == "patient" or self.clinical or self.category == "patient" or self.number in {65, 70, 74, 75}

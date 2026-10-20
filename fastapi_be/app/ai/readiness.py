@@ -90,8 +90,16 @@ def setup_reports(db, configs: dict) -> dict:
                     issues.append({"code": rule[0].upper() + "_RULE_PROFILE_REQUIRED", "message": f"尚无当前固定{rule[2]}规则与输入策略的已审核发布版本，请由超级管理员核实"})
         if spec.clinical and (not config or config.validation_status != "validated"):
             issues.append({"code": "CLINICAL_VALIDATION_REQUIRED", "message": "临床能力尚未完成适用范围验证"})
-        if spec.number == 62 and (not config or config.validation_status != "validated"):
-            issues.append({"code": "PREDICTION_VALIDATION_REQUIRED", "message": "运营预测尚未完成指定目标与范围的验证；历史覆盖确认和服务能力检查不代替预测效果验证"})
+        if spec.requires_operational_validation and (not config or config.validation_status != "validated"):
+            optimization = spec.engine == "optimizer"
+            issues.append(
+                {
+                    "code": "OPTIMIZATION_VALIDATION_REQUIRED" if optimization else "PREDICTION_VALIDATION_REQUIRED",
+                    "message": "运营优化尚未完成指定目标与范围的验证；原件审核、约束算例和服务能力核对不代替实际业务验证"
+                    if optimization
+                    else "运营预测尚未完成指定目标与范围的验证；历史覆盖确认和服务能力检查不代替预测效果验证",
+                }
+            )
         if config and config.validation_status == "suspended":
             issues.append({"code": "FEATURE_SUSPENDED", "message": "该能力处于暂停状态"})
         if spec.requires_knowledge and spec.key not in published:

@@ -58,8 +58,9 @@ def check_configuration(db: Session, user: User, spec: FeatureSpec, config: AIFe
         raise HTTPException(409, "该 AI 功能尚未启用")
     if not preview and spec.clinical and config.validation_status != "validated":
         raise HTTPException(409, "该临床功能尚未完成验证")
-    if not preview and spec.number == 62 and config.validation_status != "validated":
-        raise HTTPException(409, "该运营预测尚未完成指定目标与范围的验证，超级管理员可先预览")
+    if not preview and spec.requires_operational_validation and config.validation_status != "validated":
+        purpose = "优化" if spec.engine == "optimizer" else "预测"
+        raise HTTPException(409, f"该运营{purpose}尚未完成指定目标与范围的验证，超级管理员可先预览")
     provider = db.get(AIProvider, config.provider_id)
     if provider is None or not provider.enabled:
         raise HTTPException(409, "模型服务未启用")

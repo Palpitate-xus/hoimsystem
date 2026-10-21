@@ -43,7 +43,16 @@ def create_special_drug(req: SpecialDrugRegisterCreateRequest, current_user: Use
         return {"code": 500, "msg": "药品不存在"}
     if req.patient_id and not db.query(Patient).filter(Patient.patient_id == req.patient_id).first():
         return {"code": 500, "msg": "患者不存在"}
-    item = SpecialDrugRegister(pharmaceutical_id=req.pharmaceutical_id, patient_id=req.patient_id, action=req.action, quantity=req.quantity, reason=req.reason.strip(), status=0, applicant_id=current_user.user_id, create_time=datetime.datetime.now())
+    item = SpecialDrugRegister(
+        pharmaceutical_id=req.pharmaceutical_id,
+        patient_id=req.patient_id,
+        action=req.action,
+        quantity=req.quantity,
+        reason=req.reason.strip(),
+        status=0,
+        applicant_id=current_user.user_id,
+        create_time=datetime.datetime.now(),
+    )
     db.add(item)
     db.commit()
     return {"code": 200, "msg": "success", "data": _serialize(item)}

@@ -172,11 +172,7 @@ def audit_prescription(req: PharmacyAuditRequest, current_user: User = Depends(r
 
     # Use a conditional update so two concurrent audit requests cannot both
     # observe status=0 and report success.
-    updated = (
-        db.query(Prescription)
-        .filter(Prescription.prescription_id == req.prescription_id, Prescription.status == 0)
-        .update({Prescription.status: 1}, synchronize_session=False)
-    )
+    updated = db.query(Prescription).filter(Prescription.prescription_id == req.prescription_id, Prescription.status == 0).update({Prescription.status: 1}, synchronize_session=False)
     if updated != 1:
         db.rollback()
         return {"code": 500, "msg": "处方状态不正确"}
@@ -381,26 +377,40 @@ def get_verification_list(current_user: User = Depends(require_roles(*(PHARMACY_
     items = db.query(DispenseVerification).join(Prescription).order_by(DispenseVerification.create_time.desc()).all()
     data = []
     for item in items:
-        data.append({
-            "verification_id": item.verification_id,
-            "prescription_id": item.prescription_id,
-            "patient_name": item.prescription.patient.name if item.prescription and item.prescription.patient else "",
-            "doctor_name": item.prescription.doctor.name if item.prescription and item.prescription.doctor else "",
-            "pharmaceuticals": [{"name": line.pharmaceutical.name if line.pharmaceutical else "", "number": line.number} for line in item.prescription.pre_phas] if item.prescription else [],
-            "status": item.status,
-            "status_text": {0: "待护士核对", 1: "已核对", 2: "核对异常"}.get(item.status, "未知"),
-            "note": item.note or "",
-            "pharmacist_name": item.pharmacist.username if item.pharmacist else "",
-            "verifier_name": item.verifier.username if item.verifier else "",
-            "create_time": item.create_time,
-            "verify_time": item.verify_time,
-        })
+        data.append(
+            {
+                "verification_id": item.verification_id,
+                "prescription_id": item.prescription_id,
+                "patient_name": item.prescription.patient.name if item.prescription and item.prescription.patient else "",
+                "doctor_name": item.prescription.doctor.name if item.prescription and item.prescription.doctor else "",
+                "pharmaceuticals": [{"name": line.pharmaceutical.name if line.pharmaceutical else "", "number": line.number} for line in item.prescription.pre_phas] if item.prescription else [],
+                "status": item.status,
+                "status_text": {0: "待护士核对", 1: "已核对", 2: "核对异常"}.get(item.status, "未知"),
+                "note": item.note or "",
+                "pharmacist_name": item.pharmacist.username if item.pharmacist else "",
+                "verifier_name": item.verifier.username if item.verifier else "",
+                "create_time": item.create_time,
+                "verify_time": item.verify_time,
+            }
+        )
     return {"code": 200, "msg": "success", "data": data}
 
 
 @router.post("/pharmacy/verify")
 def verify_dispense(req: PharmacyVerificationRequest, current_user: User = Depends(require_roles(*NURSING_ROLES)), db: Session = Depends(get_db)):
-    updated = db.query(DispenseVerification).filter(DispenseVerification.verification_id == req.verification_id, DispenseVerification.status == 0).update({DispenseVerification.status: 1, DispenseVerification.verifier_id: current_user.user_id, DispenseVerification.note: req.note.strip(), DispenseVerification.verify_time: datetime.datetime.now()}, synchronize_session=False)
+    updated = (
+        db.query(DispenseVerification)
+        .filter(DispenseVerification.verification_id == req.verification_id, DispenseVerification.status == 0)
+        .update(
+            {
+                DispenseVerification.status: 1,
+                DispenseVerification.verifier_id: current_user.user_id,
+                DispenseVerification.note: req.note.strip(),
+                DispenseVerification.verify_time: datetime.datetime.now(),
+            },
+            synchronize_session=False,
+        )
+    )
     if updated != 1:
         return {"code": 500, "msg": "核对记录不存在或已处理"}
     db.commit()

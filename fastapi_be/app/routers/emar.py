@@ -61,11 +61,7 @@ def verify_medication(
         return {"code": 404, "msg": "医嘱执行记录不存在"}
     if execution.status != 0 or execution.order.status not in (1, 2):
         return {"code": 409, "msg": "该医嘱当前不可执行"}
-    active_card = (
-        db.query(PatientCard)
-        .filter(PatientCard.card_no == req.patient_barcode.strip(), PatientCard.status == 0)
-        .first()
-    )
+    active_card = db.query(PatientCard).filter(PatientCard.card_no == req.patient_barcode.strip(), PatientCard.status == 0).first()
     if not active_card or active_card.patient_id != execution.order.patient_id:
         return {"code": 400, "msg": "患者腕带/就诊卡与医嘱患者不匹配"}
 

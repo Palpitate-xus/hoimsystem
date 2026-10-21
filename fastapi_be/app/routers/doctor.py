@@ -144,12 +144,7 @@ def doctor_schedule_getlist(current_user: User = Depends(get_current_user), keyw
                 }
             )
     elif current_user.user_role in ("doctor", "director"):
-        doctor_obj = (
-            db.query(Doctor)
-            .options(selectinload(Doctor.schedules))
-            .filter(Doctor.user_id == current_user.user_id)
-            .first()
-        )
+        doctor_obj = db.query(Doctor).options(selectinload(Doctor.schedules)).filter(Doctor.user_id == current_user.user_id).first()
         if doctor_obj:
             schedule_list = doctor_obj.schedules
             schedule = []
@@ -696,10 +691,14 @@ def sign_medical_record(req: MedicalRecordSignRequest, current_user: User = Depe
     if record.status != 0:
         return {"code": 500, "msg": "病历已签名"}
     now = datetime.datetime.now()
-    updated = db.query(MedicalRecord).filter(
-        MedicalRecord.medical_record_id == record.medical_record_id,
-        MedicalRecord.status == 0,
-    ).update({MedicalRecord.status: 1, MedicalRecord.sign_time: now}, synchronize_session=False)
+    updated = (
+        db.query(MedicalRecord)
+        .filter(
+            MedicalRecord.medical_record_id == record.medical_record_id,
+            MedicalRecord.status == 0,
+        )
+        .update({MedicalRecord.status: 1, MedicalRecord.sign_time: now}, synchronize_session=False)
+    )
     if updated != 1:
         db.rollback()
         return {"code": 500, "msg": "病历已签名"}
@@ -722,7 +721,8 @@ def sign_medical_record(req: MedicalRecordSignRequest, current_user: User = Depe
             Queue.status.in_((0, 1)),
         )
         .all()
-        if record.patient_id and record.doctor_id else []
+        if record.patient_id and record.doctor_id
+        else []
     )
     for queue_item in queue_items:
         queue_item.status = 2
@@ -873,8 +873,7 @@ def get_attendance_list(
 
 
 @router.get("/slotPool/getList")
-def get_slot_pool(current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)):
+def get_slot_pool(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     """号源池：按科室统计各时段号源总数"""
 
     rows = (

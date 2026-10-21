@@ -172,9 +172,13 @@ def reject_inventory_adjustment(
     item = db.query(InventoryAdjustment).filter(InventoryAdjustment.adjustment_id == req.adjustment_id).first()
     if not item:
         return {"code": 404, "msg": "库存调整单不存在"}
-    updated = db.query(InventoryAdjustment).filter(InventoryAdjustment.adjustment_id == item.adjustment_id, InventoryAdjustment.status == 0).update(
-        {InventoryAdjustment.status: 2, InventoryAdjustment.approver_id: current_user.user_id, InventoryAdjustment.approve_time: datetime.datetime.now()},
-        synchronize_session=False,
+    updated = (
+        db.query(InventoryAdjustment)
+        .filter(InventoryAdjustment.adjustment_id == item.adjustment_id, InventoryAdjustment.status == 0)
+        .update(
+            {InventoryAdjustment.status: 2, InventoryAdjustment.approver_id: current_user.user_id, InventoryAdjustment.approve_time: datetime.datetime.now()},
+            synchronize_session=False,
+        )
     )
     if updated != 1:
         db.rollback()

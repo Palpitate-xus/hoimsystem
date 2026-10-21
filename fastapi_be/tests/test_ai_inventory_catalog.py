@@ -21,7 +21,19 @@ def test_inventory_has_dedicated_nonclinical_comparison_prompt_and_management_ro
     assert describe_feature(spec)["source_reference_keys"] == ["inventory_scenario_id"]
     assert "inventory_scenario_id" in SOURCE_REFERENCE_KEYS
     assert len(FEATURES) == len({item.task_prompt for item in FEATURES}) == 80
-    for text in ("inventory_scenario_id", "FEFO", "零订单", "best_among_declared_candidates", "legacy_current_capture", "observed_at", "Prompt", "不自动采购", "原币种", "全部并列", "任一声明候选未知"):
+    for text in (
+        "inventory_scenario_id",
+        "FEFO",
+        "零订单",
+        "best_among_declared_candidates",
+        "legacy_current_capture",
+        "observed_at",
+        "Prompt",
+        "不自动采购",
+        "原币种",
+        "全部并列",
+        "任一声明候选未知",
+    ):
         assert text in spec.task_prompt
 
 

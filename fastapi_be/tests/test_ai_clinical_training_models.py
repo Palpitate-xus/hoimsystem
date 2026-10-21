@@ -107,9 +107,11 @@ def test_mysql_compilation_has_complete_mediumtext_utf8_checks_six_utc6_and_conc
 def test_actual_additive_sqlite_migration_up_down_up_keeps_all_old_ddl_and_rows():
     engine = create_engine("sqlite:///:memory:")
     new_names = {model.__tablename__ for model in TRAINING_SOURCE_MODELS}
+    from app.ai.clinical_training_practice_models import TRAINING_PRACTICE_MODELS
+    later_names = {model.__tablename__ for model in TRAINING_PRACTICE_MODELS}
     old = MetaData()
     for name, table in Base.metadata.tables.items():
-        if name not in new_names:
+        if name not in new_names | later_names:
             table.to_metadata(old)
     old.create_all(engine)
     with engine.begin() as connection:

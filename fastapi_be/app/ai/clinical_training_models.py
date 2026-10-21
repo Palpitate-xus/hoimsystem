@@ -102,6 +102,7 @@ class AITrainingReview(Base):
     revoke_reason = Column(String(1000), nullable=False)
     revocation_event_id = Column(Integer, ForeignKey("hoimsystem_ai_audit_event.event_id"), nullable=True, unique=True)
     __table_args__ = (
+        UniqueConstraint("review_id", "lesson_id", "review_hash", "lesson_private_hash", "lesson_public_hash", "lesson_references_hash", name="uq_training_review_exact_source"),
         ForeignKeyConstraint(["lesson_id", "lesson_private_hash", "lesson_public_hash", "lesson_references_hash"], ["hoimsystem_ai_training_lesson.lesson_id", "hoimsystem_ai_training_lesson.private_hash", "hoimsystem_ai_training_lesson.public_hash", "hoimsystem_ai_training_lesson.references_hash"], name="fk_training_review_exact_lesson"),
         CheckConstraint("reviewer_role='super_admin' AND length(review_hash)=64", name="ck_training_review_origin"),
         CheckConstraint("review_decision IN ('published','rejected') AND (status=review_decision OR status='revoked')", name="ck_training_review_decision"),

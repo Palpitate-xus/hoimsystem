@@ -161,6 +161,8 @@ def active_prompt(db: Session, spec: FeatureSpec, config: AIFeatureConfig | None
 def provider_feature_issues(spec: FeatureSpec, provider: AIProvider) -> list[dict]:
     """Share protocol and data-purpose checks between activation, execution and setup inspection."""
     issues = []
+    if provider.model.startswith("inventory:") and (spec.number != 67 or provider.kind != "specialist"):
+        issues.append({"code": "INVENTORY_SCOPE_MISMATCH", "message": "本地库存服务仅比较受审完整有限采购候选及逐日精确守恒和明确成本，不执行采购、调拨或库存写入"})
     if provider.model.startswith("supply:") and (spec.number != 66 or provider.kind != "specialist"):
         issues.append({"code": "SUPPLY_SCOPE_MISMATCH", "message": "本地物资服务仅用于单品种受审原量序列的固定预测，不推断潜在需求、采购量或承诺交期"})
     if provider.model.startswith("surgery:") and (spec.number != 65 or provider.kind != "specialist"):
@@ -198,6 +200,9 @@ def describe_config(db: Session, spec: FeatureSpec, config: AIFeatureConfig | No
     if spec.number == 65:
         provider = db.get(AIProvider, config.provider_id) if config and config.provider_id else None
         data["input_mode"] = "surgery" if provider and provider.kind == "specialist" and provider.model.startswith("surgery:") else "external_optimizer"
+    if spec.number == 67:
+        provider = db.get(AIProvider, config.provider_id) if config and config.provider_id else None
+        data["input_mode"] = "inventory" if provider and provider.kind == "specialist" and provider.model.startswith("inventory:") else "external_optimizer"
     if spec.number == 66:
         provider = db.get(AIProvider, config.provider_id) if config and config.provider_id else None
         data["input_mode"] = "supply" if provider and provider.kind == "specialist" and provider.model.startswith("supply:") else "external_forecast"

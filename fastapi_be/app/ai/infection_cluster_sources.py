@@ -8,7 +8,7 @@ import secrets
 import uuid
 
 from fastapi import HTTPException
-from sqlalchemy import inspect
+from sqlalchemy import func, inspect
 
 from app.ai import infection_cluster_contract as c
 from app.ai import infection_cluster_input as i
@@ -325,6 +325,6 @@ def snapshot_directory(db, user, *, page=1, size=20):
     query = db.query(*columns)
     if actor.user_role != "super_admin":
         query = query.filter(AIInfectionSnapshot.created_by == actor.user_id)
-    total = query.count()
+    total = current(query.with_entities(func.count(AIInfectionSnapshot.snapshot_id)), shared=True).scalar()
     rows = current(query.order_by(AIInfectionSnapshot.captured_at, AIInfectionSnapshot.snapshot_id), shared=True).offset((page - 1) * size).limit(size).all()
     return {"items": [metadata(row) for row in rows], "total": total, "page": page, "size": size, "clinical_body_included": False}

@@ -409,3 +409,9 @@
 - 新的完整默认后端一次10687通过、28可选模型测试跳过、7条既有负控/适配器提示，10715实际收集；pytest4352.78秒/外层4365.394秒，全部1150 BE与四映射输入前后及永久保存时稳定。未把202/46/5/8等独立组相加，也不覆盖75–80新树。第一完整12失败与主动中断第二188通过的原记录完整保留。
 - 此前175文件2818项完整浏览器同次全部通过、无skip/retry/flaky/error；此时再核1199 FE/spec/fixture/build与375实际dist精确匹配原冻结。完整证据见ai-research-native-backend-verification.json与ai-research-native-browser-verification.json。
 - 本地主工作树合并及精确字节/正式构建准入随后执行；不是新MySQL/远端模型/医院或临床验证/部署证明，现代浏览器目标的明确记录保持。
+
+### 第74项进入主工作树（2026-10-21）
+
+- 本地merge0320876f（原e317e7d+研究652ba8e）已将完整验收69–74纳入feature/ai-hospital-platform；1150 BE/四映射和1199 FE/spec/fixture/build逐字等于上游完整10687P/28skip/7warn与2818浏览器对应冻结。没有重新执行或加总这些全量。
+- Main正式npm run verify一次29.745秒、审计0、660生产输入稳定；JS5,364,118/全资源6,439,013/最大646,853，原6M/7M/700k限制不变。Main实际新产物与上游dist并非逐字相同，不臆断原因；额外完整12文件Node163全绿6.440秒、6文件实际生产20全绿47.767秒，零skip/retry/flaky/error，1199源核验与375实际dist稳定，独立静态服务关闭且无未mock API。
+- 独立Python再核Main实际HTML44记录：28完整schema/43完整源JSON与许可SVG精确相等；934接口RBAC与80能力Prompt导出check通过。详见ai-research-main-admission.json，全部原runner/report/log无损保存。未push/部署/重启、医院DB/远端模型或临床验证；75–80继续独立开发，既有明确现代浏览器目标不变。

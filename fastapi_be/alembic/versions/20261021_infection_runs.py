@@ -22,6 +22,7 @@ def upgrade():
         sa.Column("requested_by", sa.Integer(), nullable=False),
         sa.Column("schema_version", sa.String(length=48), nullable=False),
         sa.Column("created_at", sa.DateTime().with_variant(mysql.DATETIME(fsp=6), "mysql"), nullable=False),
+        sa.Column("preview", sa.Integer(), nullable=False),
         sa.Column("requester_epoch_hash", sa.String(length=64), nullable=False),
         sa.Column("configuration_hash", sa.String(length=64), nullable=False),
         sa.Column("source_binding_hash", sa.String(length=64), nullable=False),
@@ -45,7 +46,7 @@ def upgrade():
         sa.Column("accept_event_id", sa.Integer(), nullable=True),
         sa.Column("accepted_lease", sa.String(length=36), nullable=True),
         sa.Column("accepted_at", sa.DateTime().with_variant(mysql.DATETIME(fsp=6), "mysql"), nullable=True),
-        sa.CheckConstraint("schema_version='infection_local_run_artifact_v1' AND source_bytes BETWEEN 1 AND 8388608", name="ck_inf_run_identity"),
+        sa.CheckConstraint("schema_version='infection_local_run_artifact_v1' AND preview IN (0,1) AND source_bytes BETWEEN 1 AND 8388608", name="ck_inf_run_identity"),
         sa.CheckConstraint(
             "(result_json IS NULL AND result_hash IS NULL AND result_bytes IS NULL AND accept_event_id IS NULL AND accepted_lease IS NULL AND accepted_at IS NULL) OR (result_json IS NOT NULL AND length(result_hash)=64 AND result_bytes BETWEEN 1 AND 8388608 AND accept_event_id IS NOT NULL AND length(accepted_lease)=36 AND accepted_at IS NOT NULL AND usage_event_id IS NOT NULL)",
             name="ck_inf_run_result_state",

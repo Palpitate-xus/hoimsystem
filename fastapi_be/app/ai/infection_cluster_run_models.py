@@ -9,7 +9,7 @@ from app.database import Base
 class AIInfectionRunArtifact(Base):
     __tablename__ = "hoimsystem_ai_infection_run_artifact"
     __table_args__ = (
-        CheckConstraint("schema_version='infection_local_run_artifact_v1' AND source_bytes BETWEEN 1 AND 8388608", name="ck_inf_run_identity"),
+        CheckConstraint("schema_version='infection_local_run_artifact_v1' AND preview IN (0,1) AND source_bytes BETWEEN 1 AND 8388608", name="ck_inf_run_identity"),
         CheckConstraint(func.length(cast(column("source_json"), LargeBinary)) == column("source_bytes"), name="ck_inf_run_source_utf8"),
         CheckConstraint(
             "length(source_hash)=64 AND length(input_hash)=64 AND length(evidence_hash)=64 AND length(metadata_hash)=64 AND length(source_binding_hash)=64 AND length(requester_epoch_hash)=64 AND length(configuration_hash)=64 AND length(scenario_content_hash)=64 AND length(scenario_governance_hash)=64 AND length(profile_content_hash)=64 AND length(profile_governance_hash)=64 AND length(recipe_hash)=64 AND length(implementation_hash)=64",
@@ -34,6 +34,7 @@ class AIInfectionRunArtifact(Base):
     requested_by = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=False)
     schema_version = Column(String(48), nullable=False)
     created_at = Column(utc6(), nullable=False)
+    preview = Column(Integer, nullable=False)
     requester_epoch_hash = Column(String(64), nullable=False)
     configuration_hash = Column(String(64), nullable=False)
     source_binding_hash = Column(String(64), nullable=False)

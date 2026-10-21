@@ -150,8 +150,9 @@ def create_review(db, user, values):
             **life.initialise(),
         )
         db.add(row)
-        life.finish(db, actor, row, "review_id", "review", "deidentification.review.create", lambda current: _validate(db, current, identifier))
-        return get_review(db, actor, identifier)
+        return life.finish(
+            db, actor, row, "review_id", "review", "deidentification.review.create", lambda current: _validate(db, current, identifier), response=lambda current: get_review(db, current, identifier)
+        )
     except Exception:
         db.rollback()
         raise
@@ -173,8 +174,16 @@ def review_original(db, user, identifier, values, *, manual=False, revoke=False)
             raise HTTPException(409, "技术发布不能代替当前独立签署")
         for key, value in updates.items():
             setattr(row, key, value)
-        life.finish(db, actor, row, "review_id", "review", "deidentification.review.manual" if manual else "deidentification.review.review", lambda current: _validate(db, current, identifier))
-        return get_review(db, actor, identifier)
+        return life.finish(
+            db,
+            actor,
+            row,
+            "review_id",
+            "review",
+            "deidentification.review.manual" if manual else "deidentification.review.review",
+            lambda current: _validate(db, current, identifier),
+            response=lambda current: get_review(db, current, identifier),
+        )
     except Exception:
         db.rollback()
         raise

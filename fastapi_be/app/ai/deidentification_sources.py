@@ -245,8 +245,12 @@ def _finish(db, actor, row, action, *, current_required):
         _authorize(db, actor, checked)
         if not _current(db, original_proof(row)):
             raise HTTPException(409, "来源接收前完整集合变化")
+    value = source_current(db, actor, row.case_id, audit_only=actor.user_role == "super_admin")
+    from app.ai.deidentification_http import response_bytes
+
+    response_bytes(value)
     db.commit()
-    return source_current(db, actor, row.case_id, audit_only=actor.user_role == "super_admin")
+    return value
 
 
 def create_case(db, user, values):
@@ -338,8 +342,12 @@ def review_case(db, user, identifier, values, *, revoke=False):
                 or (event.actor_id, event.action, event.target, event.detail_json) != (actor.user_id, "deidentification.case.revoke", identifier, detail)
             ):
                 raise HTTPException(409, "停止来源的opaque完整SHA或具体审计PK不一致")
+            value = source_current(db, actor, identifier, audit_only=actor.user_role == "super_admin")
+            from app.ai.deidentification_http import response_bytes
+
+            response_bytes(value)
             db.commit()
-            return source_current(db, actor, identifier, audit_only=actor.user_role == "super_admin")
+            return value
         for key, value in updates.items():
             setattr(row, key, value)
         return _finish(db, actor, row, "deidentification.case.review", current_required=True)

@@ -81,6 +81,10 @@ const read=(path,params)=>request({url:BASE+path,method:'get',params,responseTyp
 export const getTrainingTaskDescriptor=()=>read('/task-descriptor');
 export function createTrainingTask(v,{preview=false}={}){if(!trainingTaskSelectionValid(v)||typeof preview!=='boolean')throw new Error('请选择实际已提交练习与明确教学目标');return request({url:BASE+'/tasks',method:'post',data:canonical({...v,preview}),headers:{'Content-Type':'application/json'},responseType:'arraybuffer',retry:0}).then(decodeTrainingResponse);}
 export const getTrainingTask=identifier=>read('/tasks/'+uuid(identifier));
+// The common Main dispatcher returns this same dedicated closed metadata.
+// Keep the original bytes; no generic summary fallback is permitted.
+export const getTrainingSharedTask=identifier=>request({url:'/ai/runs/'+uuid(identifier),method:'get',responseType:'arraybuffer',retry:0}).then(decodeTrainingResponse);
+export function createTrainingSharedTask(v,{preview=false}={}){if(!trainingTaskSelectionValid(v)||typeof preview!=='boolean')throw new Error('请选择本次实际提交和教学目标');return request({url:'/ai/runs',method:'post',data:canonical({feature_key:'clinical_training',input:v,preview}),headers:{'Content-Type':'application/json'},responseType:'arraybuffer',retry:0}).then(decodeTrainingResponse);}
 export const getTrainingTaskTrace=identifier=>read('/tasks/'+uuid(identifier)+'/trace');
 export function getTrainingTasks({submissionId=null,page=1,size=20}={}){if(!nullable(submissionId,id)||!bounded(page,1,100000)||!bounded(size,1,50))throw new Error('请核对实际提交与任务目录页');return read('/tasks',{...(submissionId===null?{}:{submission_id:submissionId}),page,size});}
 export function getTrainingTaskPart(identifier,name){if(!fixed.parts.includes(name))throw new Error('任务须读取四个独立完整分件');let wire;return request({url:BASE+'/tasks/'+uuid(identifier)+'/parts/'+name,method:'get',responseType:'arraybuffer',retry:0,transformResponse:[(raw,headers)=>{wire={parts_wire:headers['x-ai-parts-wire']??null};return raw;}]}).then(raw=>Object.freeze({...decodeTrainingPart(raw),wire:Object.freeze(wire)}));}

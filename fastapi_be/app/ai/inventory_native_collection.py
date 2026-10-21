@@ -333,3 +333,230 @@ def verify_legacy_capture(value):
         )
     except (ValueError, TypeError, KeyError, OverflowError, InvalidOperation):
         return False
+
+
+# Conservatively binds every governed root for this actual SKU, including other
+# periods. This deliberately broader closure prevents a corrupt/unknown period
+# header or an unselected adverse plan from disappearing from current review.
+MAX_MEMBERS = 4096
+MAX_CAPTURE_BYTES = 8388608
+COLLECTION_KEYS = frozenset(
+    {
+        "schema_version",
+        "request",
+        "as_of",
+        "captured_at",
+        "sku_binding",
+        "unit_definitions",
+        "source_records",
+        "legacy_snapshot",
+        "historical_collection_digest",
+        "current_membership_digest",
+        "collection_digest",
+    }
+)
+
+
+def capture_view(value, *, unit=False):
+    from copy import deepcopy
+
+    from app.ai import inventory_native_sources as sources
+    from app.ai import supply_sources as units
+
+    result = deepcopy(value)
+    result.update(capture_view=True, audit_only=False, can_record=False, can_review=False, can_revoke=False)
+    if not result["eligible"]:
+        for key in ("payload", "parent_binding", "review_basis_note", "revoke_reason"):
+            result[key] = None
+    if unit:
+        if not units.verify_source_wrapper(result, capture=True):
+            raise HTTPException(409, "完整单位原件捕获闭包无法核对")
+    elif not sources.verify_source_wrapper(result, capture=True):
+        raise HTTPException(409, "库存原件完整/隐去捕获声明不一致")
+    return result
+
+
+def source_locator(source):
+    result = {key: source[key] for key in ("source_kind", "source_record_id", "item_kind", "item_id", "scope")}
+    if source["source_kind"] != "unit_definition":
+        result.update({key: source[key] for key in ("date_from", "date_to", "timezone")})
+    return result
+
+
+def _member_state(source):
+    keys = (
+        "source_kind",
+        "source_record_id",
+        "item_kind",
+        "item_id",
+        "scope",
+        "content_hash",
+        "governance_hash",
+        "status",
+        "revision",
+        "recorded_at",
+        "reviewed_at",
+        "revoked_at",
+        "eligible",
+        "parent_current",
+        "professional_status",
+        "eligibility_basis",
+    )
+    return {key: source[key] for key in keys}
+
+
+def _historical(value):
+    return {**{key: value[key] for key in ("request", "sku_binding", "unit_definitions", "source_records")}, "legacy_content": legacy_content(value["legacy_snapshot"])}
+
+
+def _membership(value):
+    return {
+        "sku_binding": value["sku_binding"],
+        "legacy_content_digest": value["legacy_snapshot"]["collection_digest"],
+        "members": [_member_state(entry["source"]) for group in ("unit_definitions", "source_records") for entry in value[group]],
+    }
+
+
+def _finish(value):
+    value["historical_collection_digest"] = hash_content(_historical(value))
+    value["current_membership_digest"] = hash_content(_membership(value))
+    value["collection_digest"] = hash_content({key: value[key] for key in ("request", "sku_binding", "historical_collection_digest", "current_membership_digest")})
+    if len(canonical_json(value).encode()) > MAX_CAPTURE_BYTES:
+        raise HTTPException(409, "库存原件完整集合超过安全字节上限，不能截断")
+    return value
+
+
+def capture_sources(db, user, period, *, locking=False):
+    """Current all-SKU closure, never an old-cutoff historical replay.
+
+    Every query is a current lock read behind the same inventory Gate. `locking`
+    is retained for callers; neither False nor read-only preview permits stale
+    RR authority, membership or stock to escape serialization.
+    """
+    from app.ai import inventory_native_sources as sources
+    from app.ai import supply_sources as units
+    from app.ai.inventory_native_source_input import SOURCE_ROLES, CapturePeriod
+    from app.ai.inventory_native_source_models import AIInventoryNativeSource
+    from app.ai.inventory_write_guard import lock_inventory_write
+    from app.ai.supply_source_models import AISupplyUnitDefinition
+
+    req = CapturePeriod.model_validate(period.model_dump(mode="json") if hasattr(period, "model_dump") else period)
+    actor = lock_inventory_write(db, user, allowed_roles=SOURCE_ROLES, skus=[(req.item_kind, req.item_id)], require_active=True)
+    now = utcnow()
+    cutoff = units.utc_datetime(req.as_of)
+    if cutoff > now:
+        raise HTTPException(422, "资料截止不能晚于真实服务器捕获时刻")
+    result = {
+        "schema_version": "inventory_capture_all_sku_v1",
+        "request": req.model_dump(mode="json"),
+        "as_of": req.as_of,
+        "captured_at": None,
+        "sku_binding": units.sku_binding(db, req.item_kind, req.item_id, locking=True, require_active=True),
+        "unit_definitions": [],
+        "source_records": [],
+        "legacy_snapshot": capture_legacy_inventory(db, req.item_kind, req.item_id),
+    }
+    budget = len(canonical_json(result["legacy_snapshot"]).encode())
+    members = 0
+    models = ((True, AISupplyUnitDefinition, AISupplyUnitDefinition.unit_definition_id), (False, AIInventoryNativeSource, AIInventoryNativeSource.source_record_id))
+    # Preflight every kind before loading any governed original. A late source
+    # cannot cause even an earlier unit body to be read during a rejected view.
+    for _, model, primary in models:
+        query = db.query(model).filter(model.item_kind == req.item_kind, model.item_id == req.item_id, model.scope == req.scope)
+        if (
+            current_inventory_rows(query.with_entities(primary).filter(or_(model.recorded_at > cutoff, model.reviewed_at > cutoff, model.revoked_at > cutoff)), shared=True).limit(1).first()
+            is not None
+        ):
+            raise HTTPException(409, "当前完整来源集合已有变化，请刷新真实截止后重新捕获")
+    for unit, model, primary in models:
+        query = db.query(model).filter(model.item_kind == req.item_kind, model.item_id == req.item_id, model.scope == req.scope)
+        late = current_inventory_rows(query.with_entities(primary).filter(or_(model.recorded_at > cutoff, model.reviewed_at > cutoff, model.revoked_at > cutoff)), shared=True).limit(1).first()
+        if late is not None:
+            raise HTTPException(409, "当前完整来源集合已有变化，请刷新真实截止后重新捕获")
+        cursor = None
+        while True:
+            page = query if cursor is None else query.filter(primary > cursor)
+            # Fetch only bounded PKs; load and charge each original separately.
+            identifiers = current_inventory_rows(page.with_entities(primary).order_by(primary).limit(BATCH_SIZE), shared=True).all()
+            if not identifiers:
+                break
+            for (identifier,) in identifiers:
+                members += 1
+                if members > MAX_MEMBERS:
+                    raise HTTPException(409, "同SKU完整来源根超过受控上限，不能取前N件冒充完整")
+                current = units.source_current(db, actor, "unit", identifier, audit_only=False, locking=True) if unit else sources.source_current(db, actor, identifier, audit_only=False, locking=True)
+                if any(current[key] is not None and current[key] > req.as_of for key in ("recorded_at", "reviewed_at", "revoked_at")):
+                    raise HTTPException(409, "当前完整来源集合已有变化，请刷新真实截止后重新捕获")
+                view = capture_view(current, unit=unit)
+                where = source_locator(view)
+                entry = {"source": view, "locator": where, "locator_hash": hash_content(where)}
+                budget += len(canonical_json(entry).encode())
+                if budget > MAX_CAPTURE_BYTES:
+                    raise HTTPException(409, "同SKU完整来源集合超过安全字节上限，未截断")
+                result["unit_definitions" if unit else "source_records"].append(entry)
+            cursor = identifiers[-1][0]
+    result["captured_at"] = utc_text(utcnow())
+    result = _finish(result)
+    if not verify_capture(result):
+        raise HTTPException(409, "库存完整来源捕获原件闭包无法核对")
+    return result
+
+
+def verify_capture(value):
+    """Pure disclosed proof. Hidden bodies/opaque raw-row hashes remain opaque."""
+    from app.ai import inventory_native_sources as sources
+    from app.ai import supply_sources as units
+    from app.ai.inventory_native_source_input import CapturePeriod
+
+    try:
+        if not isinstance(value, dict) or set(value) != COLLECTION_KEYS or value["schema_version"] != "inventory_capture_all_sku_v1" or len(canonical_json(value).encode()) > MAX_CAPTURE_BYTES:
+            return False
+        req = CapturePeriod.model_validate(value["request"])
+        utc(value["captured_at"])
+        legacy = value["legacy_snapshot"]
+        if value["as_of"] != req.as_of or value["captured_at"] < req.as_of or not verify_legacy_capture(legacy) or legacy["captured_at"] > value["captured_at"]:
+            return False
+        if any(value["sku_binding"][key] != getattr(req, key) or legacy[key] != getattr(req, key) for key in ("item_kind", "item_id", "scope")):
+            return False
+        raw = legacy["sku"]["projection"]
+        expected_identity = {"name": raw["name"], "status": raw["status"]}
+        expected_identity.update({"barcode": raw["barcode"]} if req.item_kind == "pharmaceutical" else {"category": raw["category"], "catalog_unit": raw["unit"]})
+        if value["sku_binding"] != {"item_kind": req.item_kind, "item_id": req.item_id, "scope": req.scope, "identity": expected_identity} or raw["status"] != 0:
+            return False
+        if not all(isinstance(value[key], list) for key in ("unit_definitions", "source_records")) or len(value["unit_definitions"]) + len(value["source_records"]) > MAX_MEMBERS:
+            return False
+        seen = set()
+        for unit, group in ((True, "unit_definitions"), (False, "source_records")):
+            order = []
+            for entry in value[group]:
+                if not isinstance(entry, dict) or set(entry) != {"source", "locator", "locator_hash"}:
+                    return False
+                source = entry["source"]
+                if unit:
+                    if source.get("source_kind") != "unit_definition":
+                        return False
+                    if not units.verify_source_wrapper(source, capture=True):
+                        return False
+                    if any(source[key] for key in ("audit_only", "can_record", "can_review", "can_revoke")):
+                        return False
+                elif not sources.verify_source_wrapper(source, capture=True):
+                    return False
+                if any(source[key] != getattr(req, key) for key in ("item_kind", "item_id", "scope")) or source["source_record_id"] in seen:
+                    return False
+                if any(source[key] is not None and source[key] > req.as_of for key in ("recorded_at", "reviewed_at", "revoked_at")):
+                    return False
+                if source["payload"] is not None and source["parent_binding"]["sku"] != value["sku_binding"]:
+                    return False
+                if entry["locator"] != source_locator(source) or entry["locator_hash"] != hash_content(entry["locator"]):
+                    return False
+                seen.add(source["source_record_id"])
+                order.append(source["source_record_id"])
+            if order != sorted(order):
+                return False
+        return (
+            value["historical_collection_digest"] == hash_content(_historical(value))
+            and value["current_membership_digest"] == hash_content(_membership(value))
+            and value["collection_digest"] == hash_content({key: value[key] for key in ("request", "sku_binding", "historical_collection_digest", "current_membership_digest")})
+        )
+    except (ValueError, TypeError, KeyError, AttributeError, OverflowError, RecursionError):
+        return False

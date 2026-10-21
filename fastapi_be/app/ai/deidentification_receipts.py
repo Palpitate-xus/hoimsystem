@@ -1,6 +1,8 @@
 """Specific-PK usage/acceptance receipts; no audit action/target range locks."""
 
 from fastapi import HTTPException
+from sqlalchemy import inspect
+from sqlalchemy.orm import defer
 
 from app.ai.deidentification_collection import _sql_hash
 from app.ai.deidentification_run_models import RESULT_SCHEMA, AIDeidentificationRunResult, AIDeidentificationRunSource
@@ -36,15 +38,23 @@ def result_header(db, run_id, *, writing=False):
 
 def run_state(run, source):
     hashes = dict(zip(TEXT_FIELDS, HASH_FIELDS, strict=True))
-    return {field: source[hashes[field]] if field in hashes else getattr(run, field) for field in WRITE_FIELDS}
+    values = {field: source[hashes[field]] if field in hashes else getattr(run, field) for field in WRITE_FIELDS if field != "result_json"}
+    state = inspect(run)
+    raw = state.dict.get("result_json")
+    values["result_json"] = text_digest(raw) if type(raw) is str else state.dict.get("_deid_result_pointer_hash")
+    if values["result_json"] is None:
+        raise HTTPException(409, "75原结果指针摘要缺失，未隐式读取私有TEXT")
+    return values
 
 
 def verify_run_state(db, run_id, expected, source):
-    fields = [_sql_hash(db, getattr(AIRun, field)).label(field) if field in TEXT_FIELDS else getattr(AIRun, field) for field in WRITE_FIELDS]
+    text_fields = (*TEXT_FIELDS, "result_json")
+    fields = [_sql_hash(db, getattr(AIRun, field)).label(field + "_opaque_sha") if field in text_fields else getattr(AIRun, field) for field in WRITE_FIELDS]
     row = current_research_rows(db.query(*fields).filter_by(run_id=run_id)).one_or_none()
     header = opaque_artifact(db, run_id)
     source_sha = current_research_rows(db.query(_sql_hash(db, AIDeidentificationRunSource.source_json)).filter_by(run_id=run_id), shared=True).scalar()
-    if row is None or dict(row._mapping) != expected or header != source or source_sha != source["source_hash"]:
+    actual = {field: row._mapping[field + "_opaque_sha" if field in text_fields else field] for field in WRITE_FIELDS} if row is not None else None
+    if actual != expected or header != source or source_sha != source["source_hash"]:
         raise HTTPException(409, "75实际22Task列/原raw3完整SHA/永久Source锚写后不一致")
 
 
@@ -117,8 +127,9 @@ def stage_terminal(db, run, source, receipt, result=None, *, accepted_at=None):
         db.flush()
         verify_audit(db, accepted.event_id, accept_expected)
         verify_run_state(db, run.run_id, expected, source)
-    row = current_research_rows(db.query(AIDeidentificationRunResult).filter_by(run_id=run.run_id)).one()
-    if row.usage_event_id is not None or row.accept_event_id is not None or row.result_json is not None:
+    pending = result_header(db, run.run_id, writing=True)
+    row = current_research_rows(db.query(AIDeidentificationRunResult).options(defer(AIDeidentificationRunResult.result_json)).filter_by(run_id=run.run_id)).one()
+    if row.usage_event_id is not None or row.accept_event_id is not None or pending["stored_result_hash"] is not None:
         raise HTTPException(409, "原任务已有终态回执，未重复记用量或接收")
     row.usage_event_id = event.event_id
     if accepted is not None:
@@ -134,6 +145,8 @@ def stage_terminal(db, run, source, receipt, result=None, *, accepted_at=None):
         "run_id": run.run_id,
         "schema_version": RESULT_SCHEMA,
         "created_at": source["created_at"],
+        "claim_event_id": pending["claim_event_id"],
+        "dispatch_event_id": pending["dispatch_event_id"],
         "usage_event_id": event.event_id,
         "accept_event_id": accepted.event_id if accepted is not None else None,
         "result_hash": text_digest(raw) if raw is not None else None,
@@ -152,6 +165,14 @@ def usage_receipt(db, run, *, source=None):
     """Internal technical reader. Public callers must authorize owner/current role."""
     source = source or opaque_artifact(db, run.run_id)
     header = result_header(db, run.run_id)
+    if header["dispatch_event_id"] is not None:
+        from app.ai.deidentification_dispatch import read_dispatch
+
+        read_dispatch(db, run.run_id)
+    elif header["claim_event_id"] is not None:
+        from app.ai.deidentification_dispatch import verify_claim
+
+        verify_claim(db, run.run_id, run.lease_token, header["claim_event_id"], pending=False)
     if header["usage_event_id"] is None:
         # A running cancellation can retain the durable pre-call reservation
         # (latency_ms=0) while its one-shot worker is still awaiting HTTP. It is

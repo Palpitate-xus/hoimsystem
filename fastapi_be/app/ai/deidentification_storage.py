@@ -129,9 +129,15 @@ def opaque_artifact(db, run_id, *, writing=False):
 
 
 def technical_run(db, run_id, *, writing=False):
-    """Trusted lease code may close usage without recovering raw3 or any body."""
-    query = db.query(AIRun).options(*(defer(getattr(AIRun, name)) for name in TEXT_FIELDS)).filter_by(run_id=run_id)
-    return current_research_rows(query, shared=not writing).one_or_none()
+    """Trusted lease code reads opaque hashes instead of any Task/Result TEXT."""
+    from app.ai.deidentification_collection import _sql_hash
+
+    query = db.query(AIRun).options(*(defer(getattr(AIRun, name)) for name in (*TEXT_FIELDS, "result_json"))).filter_by(run_id=run_id)
+    run = current_research_rows(query, shared=not writing).one_or_none()
+    if run is not None:
+        digest = current_research_rows(db.query(_sql_hash(db, AIRun.result_json)).filter_by(run_id=run_id), shared=True).scalar()
+        run.__dict__["_deid_result_pointer_hash"] = digest
+    return run
 
 
 def stage_source(db, run, body, create_event_id):

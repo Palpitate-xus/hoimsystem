@@ -2,11 +2,13 @@
 
 import datetime as dt
 import time
-import uuid
 
 from fastapi import HTTPException
+from sqlalchemy import and_, or_
 
 from app.ai import deidentification_storage as storage
+from app.ai.deidentification_dispatch import claim_deidentification_run as claim_deidentification_run
+from app.ai.deidentification_dispatch import stage_dispatch, validate_delivery
 from app.ai.deidentification_gateway import DeidentificationExecutionError, generate, prepare_request
 from app.ai.deidentification_receipts import CREATE, audit_expected, result_header, run_state, stage_terminal, usage, usage_receipt, verify_audit, verify_run_state
 from app.ai.deidentification_spans import canonical, digest
@@ -81,31 +83,6 @@ def create_deidentification_run(db, user, values, *, preview=False):
         raise
 
 
-def claim_deidentification_run(db, run_id):
-    try:
-        locator = opaque_locator(db, run_id)
-        if locator is None:
-            return None
-        _write_user(db, locator)
-        run = storage.technical_run(db, run_id, writing=True)
-        if run is None or run.status != "queued":
-            db.rollback()
-            return None
-        if run.lease_token is not None or run.start_time is not None or run.latency_ms is not None or run.result_json != "{}":
-            raise HTTPException(409, "排队Task已有执行痕迹")
-        run.status, run.lease_token, run.start_time = "running", str(uuid.uuid4()), utcnow()
-        source = storage.opaque_artifact(db, run_id)
-        expected = run_state(run, source)
-        db.flush()
-        verify_run_state(db, run_id, expected, source)
-        result = run_id, run.lease_token
-        db.commit()
-        return result
-    except Exception:
-        db.rollback()
-        raise
-
-
 def _terminal(db, run_id, lease, receipt, result, error, started, *, actor=None, commit=True):
     locator = opaque_locator(db, run_id)
     if locator is None:
@@ -137,8 +114,14 @@ def _terminal(db, run_id, lease, receipt, result, error, started, *, actor=None,
     return True
 
 
-async def execute_deidentification_claimed(run_id, lease, *, transport=None):
+async def execute_deidentification_claimed(run_id, lease, claim_event_id=None, *, transport=None):
     from app import database
+
+    # Exact delivery validation is outside the error-to-terminal handler: a
+    # wrong/missing PK must not terminate the original worker or assert usage.
+    with database.SessionLocal() as delivery_db:
+        if not validate_delivery(delivery_db, run_id, lease, claim_event_id):
+            return
 
     started, error, result = time.monotonic(), None, None
     receipt = usage(0, 0, False)
@@ -178,6 +161,7 @@ async def execute_deidentification_claimed(run_id, lease, *, transport=None):
                 expected = run_state(run, source)
                 db.flush()
                 verify_run_state(db, run_id, expected, source)
+                stage_dispatch(db, run_id, lease, claim_event_id)
                 storage.load_snapshot(db, actor, run_id, execution=True)
                 db.commit()
         if error is None:
@@ -293,9 +277,25 @@ def expire_interrupted_deidentification_runs(db):
     try:
         lock_research_gate(db)
         # PK-only enumeration; complete task bodies are not needed for recovery.
-        from app.ai.deidentification_run_models import AIDeidentificationRunSource
+        from app.ai.deidentification_run_models import AIDeidentificationRunResult, AIDeidentificationRunSource
 
-        ids = db.query(AIDeidentificationRunSource.run_id).order_by(AIDeidentificationRunSource.run_id).all()
+        # Bounded technical maintenance with persistent progress: completed rows
+        # leave this predicate. Each worker poll supplies its own fresh Session.
+        queued_before = utcnow() - dt.timedelta(seconds=settings.AI_MAX_QUEUE_AGE_SECONDS)
+        running_before = queued_before - dt.timedelta(seconds=150)
+        ids = (
+            db.query(AIDeidentificationRunSource.run_id)
+            .join(AIRun, AIRun.run_id == AIDeidentificationRunSource.run_id)
+            .join(AIDeidentificationRunResult, AIDeidentificationRunResult.run_id == AIRun.run_id)
+            .filter(
+                AIRun.status.in_(("queued", "running", "cancelled")),
+                AIDeidentificationRunResult.usage_event_id.is_(None),
+                or_(and_(AIRun.start_time.is_(None), AIRun.create_time < queued_before), and_(AIRun.start_time.is_not(None), AIRun.start_time < running_before)),
+            )
+            .order_by(AIRun.create_time, AIRun.run_id)
+            .limit(256)
+            .all()
+        )
         expired = 0
         for (identifier,) in ids:
             locator = opaque_locator(db, identifier)
@@ -307,7 +307,7 @@ def expire_interrupted_deidentification_runs(db):
             allowance = settings.AI_MAX_QUEUE_AGE_SECONDS + (150 if run.start_time is not None else 0)
             if utcnow() - origin <= dt.timedelta(seconds=allowance):
                 continue
-            receipt = usage(0, 0, False) if run.latency_ms is None else usage()
+            receipt = usage(0, 0, False) if run.latency_ms is None and result_header(db, identifier)["dispatch_event_id"] is None else usage()
             _terminal(db, identifier, run.lease_token, receipt, None, ("TASK_INTERRUPTED", "任务已中断；未重放模型，实际用量按已知或未知保留"), time.monotonic())
             expired += 1
         db.commit()

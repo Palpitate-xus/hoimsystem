@@ -1,8 +1,4 @@
-"""Main/JWT/SQLite with the new registry router explicitly mounted for tests.
-
-This does not claim the Source catalog/runtime has been integrated in product
-main. Routes are restored after every test; no original route matrix is edited.
-"""
+"""Actual product Main/JWT/SQLite Source routes; native task integration is separate."""
 
 import datetime as dt
 
@@ -20,15 +16,12 @@ from tests.test_ai_research_cohort_sources import research_case as research_case
 @pytest.fixture
 def mounted_research_router():
     from app.main import app
-    from app.routers.ai_research_cohort_sources import router
+    from fastapi.routing import APIRoute
 
-    previous = list(app.router.routes)
-    app.include_router(router, prefix="/api")
-    try:
-        yield
-    finally:
-        app.router.routes[:] = previous
-        app.openapi_schema = None
+    routes = [route for route in app.routes if isinstance(route, APIRoute) and route.endpoint.__module__ == "app.routers.ai_research_cohort_sources"]
+    assert len(routes) == 23
+    assert len({(method, route.path) for route in routes for method in route.methods}) == 23
+    yield
 
 
 @pytest.mark.asyncio

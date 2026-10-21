@@ -5,6 +5,7 @@
       <el-form-item label="状态"><el-select v-model="filters.status" clearable placeholder="全部状态" style="width: 130px"><el-option v-for="(label, value) in states" :key="value" :value="value" :label="label" /></el-select></el-form-item>
       <el-form-item label="反馈"><el-select v-model="filters.outcome" clearable placeholder="全部反馈" style="width: 150px"><el-option v-for="(label, value) in outcomes" :key="value" :value="value" :label="'含' + label + '反馈'" /></el-select></el-form-item>
       <el-form-item label="发起用户ID"><el-input-number v-model="filters.requested_by" :min="1" :controls="false" style="width: 130px" /></el-form-item>
+      <el-form-item v-if="filters.feature_key==='drg_evidence_review'" label="原编码证据"><el-input v-model="filters.coding_case_id" placeholder="原完整编码证据规范UUID" aria-label="审计编码证据" /></el-form-item>
       <el-form-item label="患者ID"><el-input-number v-model="filters.patient_id" :min="1" :controls="false" style="width: 130px" /></el-form-item>
       <template v-if="filters.feature_key==='surgery_scheduling'"><el-form-item label="原手术科室"><el-input-number v-model="filters.department_id" :min="1" :controls="false" /></el-form-item><el-form-item label="原手术资源池"><el-input v-model="filters.surgery_pool_id" placeholder="原资源池规范UUID" /></el-form-item><el-form-item label="原受审手术场景"><el-input v-model="filters.surgery_scenario_id" placeholder="原场景规范UUID" /></el-form-item></template>
       <template v-if="filters.feature_key==='supply_forecast'"><el-form-item label="原物资类型"><el-select v-model="filters.supply_item_kind" clearable aria-label="审计物资类型"><el-option value="pharmaceutical" label="药品" /><el-option value="consumable" label="耗材" /></el-select></el-form-item><el-form-item label="原物资标识"><el-input-number v-model="filters.supply_item_id" :min="1" :controls="false" :precision="0" aria-label="审计物资标识" /></el-form-item><el-form-item label="原物资序列"><el-input v-model="filters.supply_series_id" placeholder="原受审序列规范UUID" aria-label="审计物资序列" /></el-form-item></template>
@@ -33,6 +34,7 @@
           <el-alert v-if="!detail.snapshot_complete" type="info" :closable="false" title="旧任务按实际留存内容展示，部分执行快照字段未保存。" class="spaced" />
           <el-tabs v-model="detailTab" class="spaced">
             <el-tab-pane label="结果与引用" name="result">
+              <coding-findings v-if="visible&&detail.feature_key==='drg_evidence_review'" :run="detail" :active="allowed&&visible" audit-only @inspect="showEvidence" />
               <ai-supply-findings v-if="visible&&detail.supply_findings" :run="detail" :active="allowed&&visible" audit-only @inspect="showEvidence" />
               <ai-inventory-findings v-if="visible&&detail.inventory_findings" :run="detail" :active="allowed&&visible" audit-only @inspect="showEvidence" />
               <ai-surgery-findings v-if="visible&&detail.surgery_findings" :run="detail" :active="allowed&&visible" @inspect="showEvidence" />
@@ -70,7 +72,9 @@ import AiEcgFindings from "@/components/AIEcgFindings/index.vue";
 import { resolveSurgeryEvidence, verifySurgeryRun } from "@/api/ai/surgeryScenarios";
 import {resolveSupplyEvidence,verifySupplyRun,supplyAnalysisVersionSupported} from "@/api/ai/supplyResults";
 import {resolveInventoryEvidence,verifyInventoryRun,inventoryAnalysisVersionSupported,inventoryRunHasNativeMarkers} from "@/api/ai/inventoryResults";
+import {codingRunHasMarkers,verifyCodingRun,resolveCodingEvidence} from "@/api/ai/codingResults";
 import { supportCanonical, supportId } from "@/api/inpatientSupport";
+const CodingFindings=defineAsyncComponent(()=>import("@/components/ai/CodingFindings.vue"));
 const AiInventoryFindings=defineAsyncComponent(()=>import("@/components/ai/InventoryFindings.vue"));
 const AiSupplyFindings=defineAsyncComponent(()=>import("@/components/SupplyFindings.vue"));
 const AiSurgeryFindings=defineAsyncComponent(()=>import("@/components/AISurgeryFindings.vue"));
@@ -79,7 +83,7 @@ const store=useStore(),roles=computed(()=>store.getters['user/permissions']||[])
 const auth=()=>supportCanonical([props.active,store.state.user.accessToken,store.state.user.username,roles.value]);
 const states = { queued: "排队中", running: "生成中", succeeded: "待业务复核", failed: "失败", cancelled: "已取消" };
 const outcomes = { accepted: "采纳", rejected: "驳回", modified: "修改后采纳" };
-const rows = ref([]), loading = ref(false), page = ref(1), total = ref(0), filters = ref({ feature_key: "", status: "", outcome: "", requested_by: undefined, patient_id: undefined, department_id: undefined, surgery_pool_id:'',surgery_scenario_id:'',supply_item_kind:'',supply_item_id:undefined,supply_series_id:'',inventory_item_kind:'',inventory_item_id:undefined,inventory_scenario_id:'' });
+const rows = ref([]), loading = ref(false), page = ref(1), total = ref(0), filters = ref({ feature_key: "", status: "", outcome: "", requested_by: undefined, patient_id: undefined, department_id: undefined, surgery_pool_id:'',surgery_scenario_id:'',supply_item_kind:'',supply_item_id:undefined,supply_series_id:'',inventory_item_kind:'',inventory_item_id:undefined,inventory_scenario_id:'',coding_case_id:'' });
 const visible = ref(false), detail = ref(null), detailLoading = ref(false), detailTab = ref("result"), evidenceVisible = ref(false), evidence = ref(null);
 let listVersion = 0, detailVersion = 0;
 let wasDeactivated = false;
@@ -87,14 +91,14 @@ let alive=true;
 const current=key=>alive&&!wasDeactivated&&allowed.value&&key===auth();
 const hasSurgery=value=>!!value?.surgery_findings||!!value?.result?.surgery_analysis||!!value?.frozen_request?.payload?.context?.surgery_binding||!!value?.frozen_request?.payload?.input?.surgery_scenario_id||String(value?.frozen_request?.provider_snapshot?.model||'').startsWith('surgery:');
 const hasSupply=value=>!!value?.supply_findings||!!value?.result?.supply_analysis||['supply_binding','supply_source','supply_series'].some(name=>!!value?.frozen_request?.payload?.context?.[name])||!!value?.frozen_request?.payload?.input?.supply_series_id||String(value?.frozen_request?.provider_snapshot?.model||'').startsWith('supply:');
-const hasInventory=inventoryRunHasNativeMarkers;
+const hasInventory=inventoryRunHasNativeMarkers,hasCoding=codingRunHasMarkers;
 function clear(){++listVersion;++detailVersion;rows.value=[];total.value=0;detail.value=null;evidence.value=null;visible.value=evidenceVisible.value=false;loading.value=detailLoading.value=false;}
 async function load(reset = false) {
   if(!allowed.value||!alive||wasDeactivated)return;
   if (reset) page.value = 1;
   const version = ++listVersion,key=auth(); loading.value = true;
   const params = Object.fromEntries(Object.entries(filters.value).filter(([, value]) => value !== "" && value != null));
-  if(['inventory_scenario_id','supply_series_id','surgery_pool_id','surgery_scenario_id'].some(name=>params[name]&&!supportId(params[name]))){loading.value=false;ElMessage.warning('原序列、资源池与场景过滤须为明确规范UUID');return;}
+  if(['coding_case_id','inventory_scenario_id','supply_series_id','surgery_pool_id','surgery_scenario_id'].some(name=>params[name]&&!supportId(params[name]))){loading.value=false;ElMessage.warning('原序列、资源池与场景过滤须为明确规范UUID');return;}
   if((!!params.supply_item_kind)!==(params.supply_item_id!==undefined)||params.supply_item_kind&&!['pharmaceutical','consumable'].includes(params.supply_item_kind)||params.supply_item_id!==undefined&&(!Number.isSafeInteger(params.supply_item_id)||params.supply_item_id<1)){loading.value=false;ElMessage.warning('物资审计须同时明确有效类型与整数标识');return;}
   if((!!params.inventory_item_kind)!==(params.inventory_item_id!==undefined)||params.inventory_item_kind&&!['pharmaceutical','consumable'].includes(params.inventory_item_kind)||params.inventory_item_id!==undefined&&(!/^[1-9][0-9]*$/.test(String(params.inventory_item_id))||!Number.isSafeInteger(Number(params.inventory_item_id))||Number(params.inventory_item_id)>2147483647)){loading.value=false;ElMessage.warning('库存审计须同时明确有效类型与规范正整数品种标识');return;}
   try { const response = await getAIAdminRuns({ ...params, page: page.value, page_size: 30 }); if (current(key)&&version === listVersion) { rows.value = response.data || []; total.value = response.total || 0; } }
@@ -104,11 +108,11 @@ async function load(reset = false) {
 async function inspect(row) {
   if(!allowed.value||!alive||wasDeactivated)return;
   const version = ++detailVersion,key=auth(); visible.value = true; detail.value = null; evidence.value=null;evidenceVisible.value=false;detailTab.value = "result"; detailLoading.value = true;
-  try { const response = await getAIAdminRunTrace(row.run_id);if(!current(key)||version!==detailVersion)return;const value=response.data;if(value?.run_id!==row.run_id||hasInventory(value)&&!await verifyInventoryRun(value,{}, {auditOnly:true,current:()=>current(key)&&version===detailVersion&&visible.value})||hasSupply(value)&&!await verifySupplyRun(value,{}, {auditOnly:true,current:()=>current(key)&&version===detailVersion})||hasSurgery(value)&&!await verifySurgeryRun(value)){if(current(key)&&version===detailVersion)ElMessage.warning(hasInventory(value)&&value?.result?.inventory_analysis&&!inventoryAnalysisVersionSupported(value.result.inventory_analysis)?'原运行版本当前无法重算，暂不展示旧库存比较正文':hasSupply(value)&&value?.result?.supply_analysis&&!supplyAnalysisVersionSupported(value.result.supply_analysis)?'原运行版本当前无法重算，暂不展示旧预测正文':'原任务或完整冻结来源及固定结果无法核对，暂不展示');return;}if(current(key)&&version===detailVersion)detail.value=value; }
+  try { const response = await getAIAdminRunTrace(row.run_id);if(!current(key)||version!==detailVersion)return;const value=response.data;if(value?.run_id!==row.run_id||(row.feature_key==='drg_evidence_review'||hasCoding(value))&&!await verifyCodingRun(value,{}, {auditOnly:true,current:()=>current(key)&&version===detailVersion&&visible.value})||hasInventory(value)&&!await verifyInventoryRun(value,{}, {auditOnly:true,current:()=>current(key)&&version===detailVersion&&visible.value})||hasSupply(value)&&!await verifySupplyRun(value,{}, {auditOnly:true,current:()=>current(key)&&version===detailVersion})||hasSurgery(value)&&!await verifySurgeryRun(value)){if(current(key)&&version===detailVersion)ElMessage.warning(hasInventory(value)&&value?.result?.inventory_analysis&&!inventoryAnalysisVersionSupported(value.result.inventory_analysis)?'原运行版本当前无法重算，暂不展示旧库存比较正文':hasSupply(value)&&value?.result?.supply_analysis&&!supplyAnalysisVersionSupported(value.result.supply_analysis)?'原运行版本当前无法重算，暂不展示旧预测正文':'原任务或完整冻结来源及固定结果无法核对，暂不展示');return;}if(current(key)&&version===detailVersion)detail.value=value; }
   catch { if(current(key)&&version===detailVersion){clear();ElMessage.warning('当前完整任务或审计权限无法重新核对，旧资料已清除');} }
   finally { if (current(key)&&version === detailVersion) detailLoading.value = false; }
 }
-async function showEvidence(id) { const key=auth(),version=detailVersion,original=detail.value;evidence.value=null;evidenceVisible.value=false;if(!current(key)||!visible.value||!original)return;const item=original.evidence?.find(value=>value.source_id===id),value=hasInventory(original)?await resolveInventoryEvidence(item,original.inventory_findings||original.frozen_request?.payload?.context,{}, {auditOnly:true,current:()=>current(key)&&version===detailVersion&&visible.value}):hasSupply(original)?await resolveSupplyEvidence(item,original.supply_findings,{}, {auditOnly:true,current:()=>current(key)&&version===detailVersion}):hasSurgery(original)?await resolveSurgeryEvidence(item,original.surgery_findings):item;if(current(key)&&visible.value&&version===detailVersion&&original===detail.value){evidence.value=value;evidenceVisible.value=!!value;} }
+async function showEvidence(id) { if(id&&typeof id==='object')id=id.source_id;const key=auth(),version=detailVersion,original=detail.value;evidence.value=null;evidenceVisible.value=false;if(!current(key)||!visible.value||!original)return;const item=original.evidence?.find(value=>value.source_id===id),value=hasCoding(original)?await resolveCodingEvidence(item,original.coding_findings||original.frozen_request?.payload?.context,{}, {auditOnly:true,current:()=>current(key)&&version===detailVersion&&visible.value}):hasInventory(original)?await resolveInventoryEvidence(item,original.inventory_findings||original.frozen_request?.payload?.context,{}, {auditOnly:true,current:()=>current(key)&&version===detailVersion&&visible.value}):hasSupply(original)?await resolveSupplyEvidence(item,original.supply_findings,{}, {auditOnly:true,current:()=>current(key)&&version===detailVersion}):hasSurgery(original)?await resolveSurgeryEvidence(item,original.surgery_findings):item;if(current(key)&&visible.value&&version===detailVersion&&original===detail.value){evidence.value=value;evidenceVisible.value=!!value;} }
 async function cancel(row) {
   const key=auth();if(!current(key))return;
   try {
@@ -118,7 +122,7 @@ async function cancel(row) {
 }
 watch(visible,open=>{if(!open){++detailVersion;detail.value=null;evidence.value=null;evidenceVisible.value=false;detailLoading.value=false;}},{flush:'sync'});
 watch(evidenceVisible,open=>{if(!open)evidence.value=null;},{flush:'sync'});
-watch(()=>filters.value.feature_key,value=>{if(value!=='surgery_scheduling'){filters.value.department_id=undefined;filters.value.surgery_pool_id=filters.value.surgery_scenario_id='';}if(value!=='supply_forecast'){filters.value.supply_item_kind='';filters.value.supply_item_id=undefined;filters.value.supply_series_id='';}if(value!=='inventory_optimization'){filters.value.inventory_item_kind='';filters.value.inventory_item_id=undefined;filters.value.inventory_scenario_id='';}else filters.value.patient_id=undefined;},{flush:'sync'});
+watch(()=>filters.value.feature_key,value=>{if(value!=='drg_evidence_review')filters.value.coding_case_id='';if(value!=='surgery_scheduling'){filters.value.department_id=undefined;filters.value.surgery_pool_id=filters.value.surgery_scenario_id='';}if(value!=='supply_forecast'){filters.value.supply_item_kind='';filters.value.supply_item_id=undefined;filters.value.supply_series_id='';}if(value!=='inventory_optimization'){filters.value.inventory_item_kind='';filters.value.inventory_item_id=undefined;filters.value.inventory_scenario_id='';}else filters.value.patient_id=undefined;},{flush:'sync'});
 watch(filters,clear,{deep:true,flush:'sync'});
 watch(auth,()=>{clear();if(allowed.value&&!wasDeactivated)load();},{flush:'sync'});
 onMounted(() => { if (allowed.value) load(); });

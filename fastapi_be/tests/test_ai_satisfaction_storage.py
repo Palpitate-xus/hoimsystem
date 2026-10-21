@@ -457,3 +457,40 @@ def test_current_configured_role_removal_blocks_historical_result_before_blob_re
     finally:
         event.remove(db.get_bind(), "before_cursor_execute", record)
     assert not any("hoimsystem_ai_satisfaction_run_artifact.result_json" in row for row in statements)
+
+
+@pytest.mark.parametrize("malformed", ["{", '{"admin":true}', '["admin",1]'])
+def test_current_super_frozen_audit_survives_malformed_live_roles_ordinary_fails_before_blob(db_session, satisfaction_run, malformed):
+    db, case = db_session, satisfaction_run
+    finish(db, case)
+    case["config"].allowed_roles_json = malformed
+    db.commit()
+    statements = []
+
+    def seen(conn, cursor, statement, parameters, context, many):
+        statements.append(statement)
+
+    event.listen(db.bind, "before_cursor_execute", seen)
+    try:
+        with pytest.raises(HTTPException) as error:
+            expand_result(db, case["run"], user=case["admin_user"])
+        assert error.value.status_code == 409
+    finally:
+        event.remove(db.bind, "before_cursor_execute", seen)
+    assert not any("satisfaction_run_artifact" in sql.lower() for sql in statements)
+    db.rollback()
+    revoke_case(db, case["super_admin_user"], case["made"]["case_id"], {"expected_revision": 2, "basis_note": BASIS})
+    actor, expanded = authorize_run_scope(db, case["super_admin_user"], case["run"], audit_only=True)
+    assert actor.user_role == "super_admin" and expanded["satisfaction_case"]["status"] == "revoked"
+    assert expand_result(db, case["run"]) == case["result"]
+
+
+def test_malformed_live_roles_still_rejects_new_result_acceptance_with_no_blob_or_receipt(db_session, satisfaction_run):
+    db, case = db_session, satisfaction_run
+    case["config"].allowed_roles_json = "{"
+    db.commit()
+    with pytest.raises(HTTPException) as error:
+        stage_result(db, case["run"], case["run"].lease_token, case["result"])
+    assert error.value.status_code == 409
+    assert db.get(AISatisfactionRunArtifact, case["run"].run_id).result_json is None
+    assert db.query(AIAuditEvent).filter_by(action=RECEIPT_ACTION, target=case["run"].run_id).count() == 0

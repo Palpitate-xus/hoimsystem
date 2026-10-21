@@ -231,16 +231,20 @@ def authorize_run_scope(db, user, run, *, execution=False, audit_only=False):
         raise HTTPException(403, "没有读取该评价任务的权限")
     if audit_only and (actor.user_role != "super_admin" or execution):
         raise HTTPException(403, "冻结任务审计仅限当前超级管理员，不能替代新执行授权")
-    with db.no_autoflush:
-        config = db.query(AIFeatureConfig).filter_by(feature_key=FEATURE_KEY).populate_existing().with_for_update(read=True).one_or_none()
-    try:
-        roles = json.loads(config.allowed_roles_json) if config is not None else list(FEATURE_BY_KEY[FEATURE_KEY].default_roles)
-        if not isinstance(roles, list) or any(type(role) is not str for role in roles):
-            raise ValueError("The actual configured feature roles are invalid")
-    except (ValueError, TypeError) as exc:
-        raise HTTPException(409, "评价任务当前适用角色配置无法核对") from exc
-    if actor.user_role != "super_admin" and (actor.user_role not in roles or actor.user_role not in FEATURE_BY_KEY[FEATURE_KEY].default_roles):
-        raise HTTPException(403, "当前账户已无该评价任务的适用权限")
+    if actor.user_role != "super_admin":
+        with db.no_autoflush:
+            config = db.query(AIFeatureConfig).filter_by(feature_key=FEATURE_KEY).populate_existing().with_for_update(read=True).one_or_none()
+        try:
+            roles = json.loads(config.allowed_roles_json) if config is not None else list(FEATURE_BY_KEY[FEATURE_KEY].default_roles)
+            if not isinstance(roles, list) or any(type(role) is not str for role in roles):
+                raise ValueError("The actual configured feature roles are invalid")
+        except (ValueError, TypeError) as exc:
+            raise HTTPException(409, "评价任务当前适用角色配置无法核对") from exc
+        if actor.user_role not in roles or actor.user_role not in FEATURE_BY_KEY[FEATURE_KEY].default_roles:
+            raise HTTPException(403, "当前账户已无该评价任务的适用权限")
+    # A current Super's own frozen audit depends on actual authority and original
+    # proofs, not on a later malformed live role configuration. New acceptance
+    # still validates every live configuration field in _current_configuration.
     snapshot = load_snapshot(db, run, execution=execution)[0]
     expanded = expand_context(db, snapshot["payload"]["context"], user=None if audit_only else actor, current=execution, locking=execution)
     return actor, expanded

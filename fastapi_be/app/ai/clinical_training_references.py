@@ -33,7 +33,11 @@ def actor_packet(row):
     return dict(user_id=row.user_id, user_role=row.user_role, token_invalid_before=utc_text(row.token_invalid_before) if row.token_invalid_before is not None else None)
 
 
-def _capture_current(db, actor_id, lesson_id, identifiers, *, now=None, expected_references=None):
+def reference_state_hash(value):
+    return c.content_hash([dict(metadata=item.metadata.model_dump(), author=item.author.model_dump(), reviewer=item.reviewer.model_dump()) for item in value.references])
+
+
+def _capture_current(db, actor_id, lesson_id, identifiers, *, now=None, expected_references=None, expected_state_hash=None):
     """Internal: current lesson/submission authority must be established first."""
     try:
         lesson_id = TypeAdapter(c.Identifier).validate_python(lesson_id, strict=True)
@@ -69,6 +73,9 @@ def _capture_current(db, actor_id, lesson_id, identifiers, *, now=None, expected
         if [row.user_id for row in actors] != actor_ids or any(row.user_role != "super_admin" for row in actors):
             raise HTTPException(403, "培训参考的作者或审核人当前不具备治理角色")
         actor_values = {row.user_id: actor_packet(row) for row in actors}
+        state = [dict(metadata=item.model_dump(), author=actor_values[item.created_by], reviewer=actor_values[item.reviewed_by]) for item in metadata]
+        if expected_state_hash is not None and c.content_hash(state) != expected_state_hash:
+            raise HTTPException(409, "课程所绑定的参考元数据或账户授权时刻已变化，未读取任何参考正文")
         if expected_references is not None:
             for item, expected in zip(metadata, expected_references, strict=True):
                 if c.whole(item) != c.whole(expected.metadata) or actor_values[item.created_by] != expected.author.model_dump() or actor_values[item.reviewed_by] != expected.reviewer.model_dump():

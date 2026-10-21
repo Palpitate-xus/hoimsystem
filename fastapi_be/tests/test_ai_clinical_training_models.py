@@ -38,7 +38,8 @@ def physical(db_session, seed_data):
     audit = AIAuditEvent(actor_id=actor.user_id, action="training.physical.fixture.only", target=identifier, detail_json="{}", create_time=when.replace(microsecond=0))
     db.add(audit)
     db.flush()
-    row = AITrainingLesson(lesson_id=identifier, schema_version="clinical_training_private_lesson_v1", title=private["title"], version_label=private["version_label"], created_by=actor.user_id, author_role="super_admin", author_epoch=None, created_at=when, creation_event_id=audit.event_id, status="active", revision=1, revoke_reason="", **{key: value for prefix, value in [("private", private_json), ("public", public_json), ("references", references_json)] for key, value in [(prefix + "_json", value), (prefix + "_hash", hashlib.sha256(value.encode()).hexdigest()), (prefix + "_bytes", len(value.encode()))]})
+    ids_json = c.canonical_json(sorted({key for question in private["questions"] for key in question["reference_ids"]}))
+    row = AITrainingLesson(lesson_id=identifier, schema_version="clinical_training_private_lesson_v1", title=private["title"], version_label=private["version_label"], reference_ids_json=ids_json, reference_ids_hash=hashlib.sha256(ids_json.encode()).hexdigest(), reference_ids_bytes=len(ids_json.encode()), reference_state_hash="0" * 64, created_by=actor.user_id, author_role="super_admin", author_epoch=None, created_at=when, creation_event_id=audit.event_id, status="active", revision=1, revoke_reason="", **{key: value for prefix, value in [("private", private_json), ("public", public_json), ("references", references_json)] for key, value in [(prefix + "_json", value), (prefix + "_hash", hashlib.sha256(value.encode()).hexdigest()), (prefix + "_bytes", len(value.encode()))]})
     db.add(row)
     db.flush()
     yield db, row, actor, when
@@ -98,7 +99,7 @@ def test_review_compound_lesson_identity_and_independent_flags_are_physical_cons
 
 def test_mysql_compilation_has_complete_mediumtext_utf8_checks_six_utc6_and_concrete_audit_fks():
     sql = "\n".join(str(CreateTable(model.__table__).compile(dialect=mysql.dialect())) for model in TRAINING_SOURCE_MODELS)
-    assert sql.count("MEDIUMTEXT") == 3 and sql.count("DATETIME(6)") == 6
+    assert sql.count("MEDIUMTEXT") == 4 and sql.count("DATETIME(6)") == 6
     assert "length(CAST(private_json AS BINARY))" in sql and "fk_training_review_exact_lesson" in sql
     assert sql.count("REFERENCES hoimsystem_ai_audit_event") == 4
 

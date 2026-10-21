@@ -35,6 +35,10 @@ class AITrainingLesson(Base):
     private_json = Column(medium_text(), nullable=False)
     public_json = Column(medium_text(), nullable=False)
     references_json = Column(medium_text(), nullable=False)
+    reference_ids_json = Column(medium_text(), nullable=False)
+    reference_ids_hash = Column(String(64), nullable=False)
+    reference_ids_bytes = Column(Integer, nullable=False)
+    reference_state_hash = Column(String(64), nullable=False)
     private_hash = Column(String(64), nullable=False)
     public_hash = Column(String(64), nullable=False)
     references_hash = Column(String(64), nullable=False)
@@ -56,6 +60,9 @@ class AITrainingLesson(Base):
         UniqueConstraint("lesson_id", "private_hash", "public_hash", "references_hash", name="uq_training_lesson_binding"),
         CheckConstraint("schema_version='clinical_training_private_lesson_v1' AND author_role='super_admin'", name="ck_training_lesson_origin"),
         CheckConstraint("length(private_hash)=64 AND length(public_hash)=64 AND length(references_hash)=64", name="ck_training_lesson_hashes"),
+        CheckConstraint("length(reference_ids_hash)=64 AND length(reference_state_hash)=64 AND reference_ids_bytes BETWEEN 1 AND 131072", name="ck_training_reference_headers"),
+        byte_bounds(reference_ids_json, 131072, "ck_training_reference_ids_size"),
+        CheckConstraint(func.length(cast(reference_ids_json, LargeBinary)) == reference_ids_bytes, name="ck_training_reference_ids_exact"),
         CheckConstraint("private_bytes BETWEEN 1 AND 8388608 AND public_bytes BETWEEN 1 AND 8388608 AND references_bytes BETWEEN 1 AND 8388608", name="ck_training_lesson_sizes"),
         byte_bounds(private_json, 8388608, "ck_training_private_bytes"),
         byte_bounds(public_json, 8388608, "ck_training_public_bytes"),

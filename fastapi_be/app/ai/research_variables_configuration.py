@@ -10,7 +10,7 @@ from fastapi import HTTPException
 from pydantic import TypeAdapter
 
 from app.ai.catalog import FEATURE_BY_KEY
-from app.ai.governance import provider_credential, provider_feature_issues
+from app.ai.governance import provider_credential, provider_feature_issues, validate_endpoint
 from app.ai.models import AIFeatureConfig, AIPromptVersion, AIProvider
 from app.ai.research_cohort_contract import UUID
 from app.ai.research_cohort_write_guard import current_research_rows, lock_research_write
@@ -68,6 +68,10 @@ def current_configuration(db, user, *, preview, require_credentials=False):
     issues = provider_feature_issues(spec, provider)
     if issues:
         raise HTTPException(409, issues[0]["message"])
+    try:
+        validate_endpoint(provider.api_base)
+    except HTTPException as exc:
+        raise HTTPException(409, "当前模型地址未通过独立服务器出口策略，未冻结凭据URL或发送原文") from exc
     origin = VariablePromptOrigin(prompt_id=None, prompt_version=0)
     task_prompt = spec.task_prompt
     if config.active_prompt_id is not None:

@@ -19,7 +19,7 @@ def configured(db_session, seed_data):
     provider = AIProvider(
         name="variable-config-" + uuid.uuid4().hex,
         kind="chat",
-        api_base="https://synthetic.invalid/v1",
+        api_base="http://localhost/v1",
         model="synthetic-no-call",
         enabled=1,
         allows_patient_data=1,
@@ -136,3 +136,15 @@ def test_configured_role_does_not_expand_fixed_source_or_catalog_role(db_session
         with pytest.raises(HTTPException) as error:
             current_configuration(db_session, user, preview=False)
         assert error.value.status_code == 403
+
+
+@pytest.mark.parametrize(
+    "address", ["http://secret:credential@localhost/v1", "http://localhost/v1?key=not-a-real-key", "http://localhost/v1#not-an-endpoint", "https://unapproved-synthetic.invalid/v1"]
+)
+def test_current_saved_endpoint_still_requires_server_egress_policy_before_freezing_any_url(db_session, configured, address):
+    case, _, provider = configured
+    provider.api_base = address
+    db_session.commit()
+    with pytest.raises(HTTPException) as error:
+        current_configuration(db_session, case["super_admin_user"], preview=True)
+    assert error.value.status_code == 409

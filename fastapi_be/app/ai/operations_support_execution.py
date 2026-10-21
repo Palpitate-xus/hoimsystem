@@ -89,6 +89,11 @@ async def execute_operations_claimed(identifier, lease, *, session_factory=None,
         error = "OPERATIONS_CURRENT_STATE_CHANGED"
     except Exception:
         error = "OPERATIONS_EXECUTION_ERROR"
+        if dispatch_id is not None:
+            # A committed original dispatch without an actual gateway receipt
+            # is uncertain, never evidence of a provably unattempted request.
+            actual_usage = usage(None, None, None)
+            error = "WORKER_INTERRUPTED"
     if draft is not None and error is None:
         try:
             with factory() as db:

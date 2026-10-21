@@ -200,3 +200,7 @@ async def generate_operations(provider, source, selection, task_prompt, *, trans
         raise OperationsCallError("PROVIDER_UNAVAILABLE", "运维模型连接失败；未自动重试", usage(None, None, True) if attempted else usage(0, 0, False)) from exc
     except (ValueError, TypeError, KeyError, AttributeError, UnicodeError, RecursionError) as exc:
         raise OperationsCallError("INVALID_OPERATIONS_RESPONSE", "运维模型未返回唯一键、有限数值和完整UTF8响应", usage(None, None, True) if attempted else usage(0, 0, False)) from exc
+    except Exception as exc:
+        # Preserve the actual HTTP-entry flag when an unexpected transport or
+        # response-processing exception has no independently reported usage.
+        raise OperationsCallError("OPERATIONS_DELIVERY_INTERRUPTED", "运维模型交付意外中断；实际未知用量保持未知，未自动重试", usage(None, None, True) if attempted else usage(0, 0, False)) from exc

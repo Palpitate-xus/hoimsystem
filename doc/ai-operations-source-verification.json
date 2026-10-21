@@ -246,7 +246,7 @@
     "publication_proof": "not supplied by pure declared review models",
     "automatic_execution": "no files, processes, settings, DB or network operations",
     "raw_private_fields_excluded": [
-      "original text and title",
+      "unreviewed original text/title as additional fields; a reviewed derivative may legitimately equal the original text",
       "source origin/path and original declared host/version",
       "original ID",
       "registrar/reviewer/requester IDs",

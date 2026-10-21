@@ -354,6 +354,23 @@ def _postflush(db, auth, row, expected, audit_id, audit_value, *, require_curren
     current_auth = g.authorize_event(db, auth.actor, auth.identity.event_id)
     if tuple(current_auth.identity) != tuple(auth.identity):
         raise ValueError("Actual association changed after flush")
+    metadata = current_keys.current_metadata(
+        db,
+        AIRcaEvidenceCase,
+        "case_id",
+        expected["case_id"],
+        expected["event_id"],
+        (
+            AIRcaEvidenceCase.case_id,
+            AIRcaEvidenceCase.event_id,
+            AIRcaEvidenceCase.patient_id_at_capture,
+            AIRcaEvidenceCase.content_hash,
+            AIRcaEvidenceCase.json_bytes,
+            originals._bytes_expression(db, AIRcaEvidenceCase.case_json),
+        ),
+    )
+    if tuple(metadata[2:5]) != (expected["patient_id_at_capture"], expected["content_hash"], expected["json_bytes"]) or metadata[5] != expected["json_bytes"]:
+        raise ValueError("The actual postflush Case scope/hash/bytes changed before any private body read")
     actual = current_rows(db.query(AIRcaEvidenceCase).filter_by(case_id=expected["case_id"])).one()
     if originals._values(actual) != expected:
         raise ValueError("The exact persisted Case/scope/governance changed")

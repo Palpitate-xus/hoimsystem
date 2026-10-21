@@ -228,6 +228,23 @@ def _postflush(db, auth, row, expected, audit_id, audit_value, *, require_matchi
     current_auth = g.authorize_event(db, auth.actor, auth.identity.event_id)
     if tuple(current_auth.identity) != tuple(auth.identity):
         raise ValueError("Actual Event/patient scope changed after flush")
+    metadata = current_keys.current_metadata(
+        db,
+        AIRcaEvidenceOriginal,
+        "original_id",
+        identifier,
+        expected["event_id"],
+        (
+            AIRcaEvidenceOriginal.original_id,
+            AIRcaEvidenceOriginal.event_id,
+            AIRcaEvidenceOriginal.patient_id_at_capture,
+            AIRcaEvidenceOriginal.content_hash,
+            AIRcaEvidenceOriginal.json_bytes,
+            _bytes_expression(db, AIRcaEvidenceOriginal.original_json),
+        ),
+    )
+    if tuple(metadata[2:5]) != (expected["patient_id_at_capture"], expected["content_hash"], expected["json_bytes"]) or metadata[5] != expected["json_bytes"]:
+        raise ValueError("The actual postflush original scope/hash/bytes changed before any private body read")
     current = current_rows(db.query(AIRcaEvidenceOriginal).filter_by(original_id=identifier)).one()
     if _values(current) != expected:
         raise ValueError("The exact newly written original or review changed after flush")

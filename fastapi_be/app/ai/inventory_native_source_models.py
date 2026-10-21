@@ -20,7 +20,7 @@ class AIInventoryWriteGate(Base):
     __tablename__ = "hoimsystem_ai_inventory_write_gate"
     __table_args__ = (CheckConstraint("gate_id = 1 AND revision > 0", name="ck_inventory_gate_singleton"),)
 
-    gate_id = Column(Integer, primary_key=True)
+    gate_id = Column(Integer, primary_key=True, autoincrement=False)
     revision = Column(Integer, nullable=False)
 
 

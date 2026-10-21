@@ -10,6 +10,7 @@ from alembic.operations import Operations
 from sqlalchemy import CheckConstraint, create_engine, inspect, text
 from sqlalchemy.dialects import mysql
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.schema import CreateTable
 
 from app.ai.inventory_native_source_models import AIInventoryNativeSource, AIInventoryWriteGate
 from app.database import Base
@@ -69,6 +70,8 @@ def test_mysql_utc6_utf8_bounds_and_only_new_table_downgrade():
         for module in modules:
             module.upgrade()
     ddl = output.getvalue()
+    assert "AUTO_INCREMENT" not in ddl.split("CREATE TABLE hoimsystem_ai_inventory_native_source")[0]
+    assert "AUTO_INCREMENT" not in str(CreateTable(AIInventoryWriteGate.__table__).compile(dialect=mysql.dialect()))
     assert ddl.count("DATETIME(6)") == 3 and ddl.count("MEDIUMTEXT") == 2
     assert "revoke_reason VARCHAR(1000)" in ddl
     assert "length(review_basis_note) <= 4000" in ddl and "length(revoke_reason) <= 1000" not in ddl

@@ -25,12 +25,15 @@ ROOT = Path(__file__).resolve().parents[1]
 
 def test_expanded_head_is_additive_and_contains_all_five_artifact_domains():
     scripts = ScriptDirectory.from_config(Config(str(ROOT / "alembic.ini")))
-    assert scripts.get_heads() == ["20261021_native_expanded_merge"]
-    assert set(scripts.get_revision(scripts.get_heads()[0]).down_revision) == {"20261021_native_shared_merge", "20261021_document_change_runs"}
+    assert scripts.get_heads() == ["20261021_infection_runs"]
+    additions = ["20261021_infection_runs", "20261021_infection_profiles", "20261021_infection_scenarios", "20261021_infection_sources", "20261021_native_expanded_merge"]
+    for child, parent in zip(additions, additions[1:]):
+        assert scripts.get_revision(child).down_revision == parent
+    assert set(scripts.get_revision("20261021_native_expanded_merge").down_revision) == {"20261021_native_shared_merge", "20261021_document_change_runs"}
     chain = list(scripts.walk_revisions())
     assert len(chain) == len({row.revision for row in chain})
     assert {"20261021_charge_runs", "20261021_sat_usage_receipt", "20261021_doc_extraction_runs", "20261021_drug_label_runs", "20261021_document_change_runs"} <= {row.revision for row in chain}
-    assert [row[0] for row in routing._domains()] == ["charge", "satisfaction", "document", "drug_label", "document_change"]
+    assert [row[0] for row in routing._domains()] == ["charge", "satisfaction", "document", "drug_label", "document_change", "infection"]
 
 
 def test_document_change_pure_prompt_reexports_are_exact():

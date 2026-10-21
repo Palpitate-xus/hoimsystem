@@ -141,3 +141,17 @@ def test_coding_metadata_always_advertises_strict_evidence_input_and_actual_syst
     assert ordinary["source_reference_keys"] == ["coding_case_id"]
     assert "doctor" in ordinary["allowed_roles"]
     assert management["system_prompt_hash"] == digest(CODING_SYSTEM_PROMPT)
+
+
+@pytest.mark.asyncio
+async def test_super_prompt_history_displays_the_actual_fixed_coding_contract(async_client, auth_headers, seed_data):
+    from app.ai.catalog import COMMON_SYSTEM_PROMPT, FEATURE_BY_KEY
+    from app.ai.coding_evidence_prompt import CODING_SYSTEM_PROMPT
+
+    headers = auth_headers(seed_data["super_admin_user"].username)
+    coding = await async_client.get("/api/ai/admin/prompts/drg_evidence_review", headers=headers)
+    general = await async_client.get("/api/ai/admin/prompts/patient_summary", headers=headers)
+    assert coding.status_code == general.status_code == 200
+    assert coding.json()["data"]["system_prompt"] == CODING_SYSTEM_PROMPT
+    assert coding.json()["data"]["versions"][-1]["task_prompt"] == FEATURE_BY_KEY["drg_evidence_review"].task_prompt
+    assert general.json()["data"]["system_prompt"] == COMMON_SYSTEM_PROMPT

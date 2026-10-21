@@ -10,7 +10,7 @@ from sqlalchemy import func, inspect
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, defer
 
-from app.ai.catalog import COMMON_SYSTEM_PROMPT, FEATURES
+from app.ai.catalog import FEATURES
 from app.ai.ecg_probe import inspect_ecg_capabilities
 from app.ai.forecast_probe import inspect_forecast_capabilities
 from app.ai.gateway import AIExecutionError
@@ -1008,11 +1008,14 @@ def update_provider(provider_id: int, req: ProviderWrite, db: Session = Depends(
 @router.get("/ai/admin/prompts/{key}")
 def list_prompts(key: str, db: Session = Depends(get_db), user: User = Depends(require_roles("super_admin"))) -> dict:
     """Display the fixed system contract and immutable task prompt history."""
+    from app.ai.coding_evidence_prompt import system_prompt_for
+
+    _current_super_admin(db, user)
     spec = get_spec(key)
     versions = db.query(AIPromptVersion).filter_by(feature_key=key).order_by(AIPromptVersion.version.desc()).all()
     baseline = {"prompt_id": None, "version": 0, "task_prompt": spec.task_prompt, "change_note": "项目默认任务 Prompt"}
     data = [{name: getattr(item, name) for name in ("prompt_id", "version", "task_prompt", "change_note", "created_by", "create_time")} for item in versions]
-    return {"code": 200, "msg": "success", "data": {"system_prompt": COMMON_SYSTEM_PROMPT, "versions": [*data, baseline]}}
+    return {"code": 200, "msg": "success", "data": {"system_prompt": system_prompt_for({"coding_binding": None} if spec.number == 68 else {}), "versions": [*data, baseline]}}
 
 
 @router.post("/ai/admin/prompts/{key}")

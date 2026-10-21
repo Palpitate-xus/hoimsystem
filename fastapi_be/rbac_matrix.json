@@ -1027,6 +1027,159 @@
  },
  {
   "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "options",
+  "method": "GET",
+  "module": "ai_coding_evidence.py",
+  "path": "/api/ai/coding-evidence/options"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "homes",
+  "method": "GET",
+  "module": "ai_coding_evidence.py",
+  "path": "/api/ai/coding-evidence/homes"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "rules",
+  "method": "GET",
+  "module": "ai_coding_evidence.py",
+  "path": "/api/ai/coding-evidence/rules"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "preview",
+  "method": "POST",
+  "module": "ai_coding_evidence.py",
+  "path": "/api/ai/coding-evidence/cases/preview"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "cases",
+  "method": "GET",
+  "module": "ai_coding_evidence.py",
+  "path": "/api/ai/coding-evidence/cases"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "create",
+  "method": "POST",
+  "module": "ai_coding_evidence.py",
+  "path": "/api/ai/coding-evidence/cases"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "detail",
+  "method": "GET",
+  "module": "ai_coding_evidence.py",
+  "path": "/api/ai/coding-evidence/cases/{identifier}"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "review_case",
+  "method": "POST",
+  "module": "ai_coding_evidence.py",
+  "path": "/api/ai/coding-evidence/cases/{identifier}/review"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "revoke_case",
+  "method": "POST",
+  "module": "ai_coding_evidence.py",
+  "path": "/api/ai/coding-evidence/cases/{identifier}/revoke"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "packages",
+  "method": "GET",
+  "module": "ai_coding_evidence.py",
+  "path": "/api/ai/coding-evidence/packages"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "create_package",
+  "method": "POST",
+  "module": "ai_coding_evidence.py",
+  "path": "/api/ai/coding-evidence/packages"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "super_admin"
+  ],
+  "function": "package",
+  "method": "GET",
+  "module": "ai_coding_evidence.py",
+  "path": "/api/ai/coding-evidence/packages/{identifier}"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "review_package",
+  "method": "POST",
+  "module": "ai_coding_evidence.py",
+  "path": "/api/ai/coding-evidence/packages/{identifier}/review"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "revoke_package",
+  "method": "POST",
+  "module": "ai_coding_evidence.py",
+  "path": "/api/ai/coding-evidence/packages/{identifier}/revoke"
+ },
+ {
+  "auth": [
    "director",
    "doctor",
    "lab_technician",

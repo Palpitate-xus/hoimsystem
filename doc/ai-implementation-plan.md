@@ -464,3 +464,5 @@
 - 独立Python再核Main实际HTML44记录：28完整schema/43完整源JSON与许可SVG精确相等；934接口RBAC与80能力Prompt导出check通过。详见ai-research-main-admission.json，全部原runner/report/log无损保存。未push/部署/重启、医院DB/远端模型或临床验证；75–80继续独立开发，既有明确现代浏览器目标不变。
 
 - 2026-10-21 第80项原生目录/Prompt/教学启用范围：28完整文件一次546通过/19既有SQLite提示，88.19s pytest、99.444s外层、1209输入稳定。唯一已提交练习UUID、clinical_training_evidence模式、真实独立System/Task及原catalog指令导出，六固定staff含护士；不沿用通用知识检索或患者权限。超管版本编辑固定System与完整Task一致，AI反馈启用另需教学范围验证且本地评分不冒称模型验证；公共Task路由/队列和FE继续。
+
+- 2026-10-21 第80项正式培训Task/四分件/目录/人工反馈：31完整文件一次619通过/19既有SQLite提示，125.82s pytest、137.761s外层、1213输入稳定，8新增Main端点/959 RBAC。两协议真实提交的native service+注入HTTP在await零worker SQL，固定原成绩、缺失/部分用量、六状态null结果、当前课程撤回零BODY、超管技术目录/trace不开放别人作答；人工复核独立第六Audit绑定原接受PK和用量PK。四同案真实HTTP包各自保留；首轮604P/15setup E由测试commit后唯一配置残留导致，明确teardown后重跑全绿，原失败保留。统一公共queue/runtime/trace/FE及Task实际MySQL继续。

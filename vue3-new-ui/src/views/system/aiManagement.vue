@@ -22,7 +22,7 @@
             <el-table-column prop="name" label="功能" min-width="190" />
             <el-table-column label="分类" width="115"><template #default="{ row }">{{ categories[row.category] }}</template></el-table-column>
             <el-table-column prop="priority" label="批次" width="70" />
-            <el-table-column label="实现入口" width="150"><template #default="{ row }">{{ row.engine === 'llm' ? '文本任务网关' : '需专用适配器' }}</template></el-table-column>
+            <el-table-column label="实现入口" width="150"><template #default="{ row }">{{ row.key==='infection_cluster'?'本地固定精确统计':row.engine === 'llm' ? '文本任务网关' : '需专用适配器' }}</template></el-table-column>
             <el-table-column label="配置检查" width="145"><template #default="{ row }">
               <el-popover trigger="click" placement="left" :width="380" :title="row.name + '：配置检查'">
                 <p v-for="item in row.setup_check?.issues || []" :key="item.code">{{ item.message }}</p>
@@ -80,6 +80,7 @@
         <el-tab-pane v-if="canCheckForecast" label="病案编码证据与本地规则治理" name="coding_evidence" lazy><ai-coding-evidence-sources v-if="tab==='coding_evidence'&&canCheckForecast" audit-only /></el-tab-pane>
         <el-tab-pane v-if="canCheckForecast" label="完整住院账目来源治理" name="charge_sources" lazy><charge-reconciliation-source-panel v-if="tab==='charge_sources'&&canCheckForecast" :active="tab==='charge_sources'&&canCheckForecast" audit-only /></el-tab-pane>
         <el-tab-pane v-if="canCheckForecast" label="完整评价与人工摘录治理" name="satisfaction_sources" lazy><satisfaction-source-panel v-if="tab==='satisfaction_sources'&&canCheckForecast" :active="tab==='satisfaction_sources'&&canCheckForecast" audit-only /></el-tab-pane>
+        <el-tab-pane v-if="canCheckForecast" label="有限病例来源与本地统计治理" name="infection_sources" lazy><infection-sources v-if="tab==='infection_sources'&&canCheckForecast" :active="tab==='infection_sources'&&canCheckForecast" governance @source-changed="refresh" /></el-tab-pane>
         <el-tab-pane label="完整手术排程场景治理" name="surgery_scenarios" lazy><ai-surgery-scenarios v-if="tab==='surgery_scenarios'" governance /></el-tab-pane>
         <el-tab-pane label="SOFA独立规则与全院评估" name="sofa" lazy><ai-sofa-management v-if="tab==='sofa'" /></el-tab-pane>
         <el-tab-pane label="器官支持来源与映射" name="organ_support" lazy><ai-organ-support-management v-if="tab === 'organ_support'" /></el-tab-pane>
@@ -345,6 +346,7 @@ watch([()=>store.state.user.accessToken,()=>JSON.stringify(store.state.user.perm
 const DocumentChangeSources=defineAsyncComponent(()=>import("@/components/ai/DocumentChangeSources.vue"));
 const AiCodingEvidenceSources=defineAsyncComponent(()=>import("@/components/CodingEvidenceSources.vue"));
 const ChargeReconciliationSourcePanel=defineAsyncComponent(()=>import("@/components/ai/ChargeReconciliationSourcePanel.vue"));
+const InfectionSources=defineAsyncComponent(()=>import('@/components/ai/InfectionSources.vue'));
 const SatisfactionSourcePanel=defineAsyncComponent(()=>import("@/components/ai/SatisfactionSourcePanel.vue"));
 const AiSurgerySources=defineAsyncComponent(()=>import("@/components/AISurgerySources.vue"));
 const AiSurgeryScenarios=defineAsyncComponent(()=>import("@/components/AISurgeryScenarios.vue"));
@@ -486,6 +488,7 @@ async function refresh() {
 }
 
 function editFeature(row) {
+  if(row.key==='infection_cluster'){featureDialog.value=false;tab.value='infection_sources';return;}
   selectedFeature.value = row;
   featureForm.value = { expected_revision: row.revision, provider_id: row.provider_id, allowed_roles: row.allowed_roles.filter(role => row.default_roles.includes(role)), enabled: row.enabled, validation_status: row.validation_status, validation_note: row.validation_note, daily_limit: row.daily_limit };
   featureDialog.value = true;
@@ -597,6 +600,7 @@ function editActualImageModel() {
 
 function selectPrompt(id) { taskPrompt.value = promptVersions.value.find(item => (item.prompt_id || "baseline") === id)?.task_prompt || ""; }
 async function openPrompts(row) {
+  if(row.key==='infection_cluster'){promptDialog.value=false;tab.value='infection_sources';ElMessage.info('本域使用版本化本地固定统计配方，不使用或编辑LLM Prompt；请核对实际实现及适用范围。');return;}
   selectedFeature.value = row;
   const result = await getAIPrompts(row.key);
   promptVersions.value = result.data.versions; systemPrompt.value = result.data.system_prompt;

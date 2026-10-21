@@ -916,6 +916,20 @@ async def generate(
     image: BinaryIO | None = None,
 ) -> tuple[GenerationResult, int, int]:
     """Call only a configured endpoint; never retry billable tasks or follow redirects."""
+    rca_context = data.get("context", {})
+    if (
+        spec.number == 77
+        or "rca_evidence_case_id" in data.get("input", {})
+        or isinstance(rca_context, dict)
+        and (
+            "rca_evidence_binding" in rca_context
+            or "rca_evidence_source" in rca_context
+            or rca_context.get("source_domain") == "published_event_investigation_released_evidence"
+            or isinstance(rca_context.get("selected_sources"), dict)
+            and "rca_evidence_case_id" in rca_context["selected_sources"]
+        )
+    ):
+        raise AIExecutionError("RCA_DEDICATED_PROTOCOL_REQUIRED", "完整事件调查必须走原Task、确切claim/dispatch与独立用量协议，未降级发送通用请求")
     from app.ai.charge_reconciliation_gateway import generate_charge, matches_charge_request
 
     if matches_charge_request(spec, data):

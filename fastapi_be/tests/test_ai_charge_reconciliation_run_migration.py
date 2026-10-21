@@ -66,7 +66,8 @@ def test_actual_artifact_mysql_ddl_is_exact_utf8_bytes_and_single_incremental_ta
     assert ddl.count("CREATE TABLE") == ddl.count("DATETIME(6)") == ddl.count("MEDIUMTEXT") == 1
     assert "length(CAST(result_json AS BINARY)) = result_bytes" in ddl
     assert ddl.count("FOREIGN KEY") == 4 and "AUTO_INCREMENT" not in ddl
-    assert "8388608" in ddl and "HEX(input_hash)" in ddl and "HEX(schema_version)" in ddl
+    assert "REGEXP" not in ddl
+    assert "8388608" in ddl and "length(input_hash)=64" in ddl and "HEX(schema_version)" in ddl
     output = StringIO()
     with Operations.context(MigrationContext.configure(dialect=mysql.dialect(), opts={"as_sql": True, "output_buffer": output})):
         module.downgrade()
@@ -129,6 +130,7 @@ def test_actual_artifact_queue_anchor_and_complete_unicode_result_roundtrip(char
         {"schema_version": "CHARGE_RUN_ARTIFACT_V1"},
         *[{name: "A" * 64} for name in SHA_FIELDS],
         {"input_hash": "g" * 64},
+        {"input_hash": "١" * 64},
         {"result_json": "🙂", "result_hash": "a" * 64, "result_bytes": 1},
         {"result_json": "{}", "result_hash": None, "result_bytes": 2},
         {"result_json": "{}", "result_hash": "G" * 64, "result_bytes": 2},
@@ -136,6 +138,7 @@ def test_actual_artifact_queue_anchor_and_complete_unicode_result_roundtrip(char
         {"result_json": "", "result_hash": "a" * 64, "result_bytes": 0},
         {"accepted_lease": "A" * 8 + "-" + "b" * 4 + "-" + "c" * 4 + "-" + "d" * 4 + "-" + "e" * 12},
         {"accepted_lease": "not-a-lease"},
+        {"accepted_lease": "abcdefab-abcdabcd-abcd-abcd-abcdefab"},
         {"receipt_event_id": 0},
         {"receipt_event_id": 2147483647},
         {"requested_by": 0},

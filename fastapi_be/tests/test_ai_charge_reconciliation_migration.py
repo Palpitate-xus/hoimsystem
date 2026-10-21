@@ -1,4 +1,4 @@
-"""One real additive migration and independent MySQL DDL shape checks."""
+"""Two real additive Source migrations and independent MySQL DDL checks."""
 
 import importlib.util
 from io import StringIO
@@ -29,7 +29,10 @@ def migration(name="gate"):
 
 def test_actual_additive_up_down_up_preserves_every_legacy_ddl_and_row(tmp_path):
     engine = create_engine("sqlite:///" + str(tmp_path / "inventory-additive.sqlite"))
-    Base.metadata.create_all(engine, tables=[t for t in Base.metadata.sorted_tables if t.name not in TABLES])
+    # The later Run artifact depends on this Case migration, so it cannot be
+    # manufactured as a pre-existing table in this historical boundary test.
+    later = {"hoimsystem_ai_charge_run_artifact"}
+    Base.metadata.create_all(engine, tables=[t for t in Base.metadata.sorted_tables if t.name not in TABLES | later])
     names = set(inspect(engine).get_table_names())
     with engine.begin() as c:
         c.execute(text("INSERT INTO hoimsystem_users(user_id,username,user_role) VALUES(90671,'synthetic-inventory','pharmacist')"))

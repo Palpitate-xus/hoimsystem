@@ -11,6 +11,18 @@ branch_labels = None
 depends_on = None
 
 
+def lower_hex_sql(name, size=64):
+    remaining = name
+    for character in "0123456789abcdef":
+        remaining = "replace(" + remaining + ",'" + character + "','')"
+    return "length(" + name + ")=" + str(size) + " AND length(" + remaining + ")=0"
+
+
+def lease_sql():
+    positions = " AND ".join("substr(accepted_lease," + str(position) + ",1)='-'" for position in (9, 14, 19, 24))
+    return "accepted_lease IS NULL OR (length(accepted_lease)=36 AND " + positions + " AND " + lower_hex_sql("replace(accepted_lease,'-','')", 32) + ")"
+
+
 def upgrade():
     result_json = sa.Column("result_json", sa.Text().with_variant(mysql.MEDIUMTEXT(), "mysql"), nullable=True)
     result_bytes = sa.Column("result_bytes", sa.Integer(), nullable=True)
@@ -29,8 +41,8 @@ def upgrade():
         sa.Column("receipt_event_id", sa.Integer(), sa.ForeignKey("hoimsystem_ai_audit_event.event_id"), nullable=True),
         sa.Column("accepted_lease", sa.String(36), nullable=True),
         sa.CheckConstraint("HEX(schema_version)=HEX('charge_run_artifact_v1') AND requested_by>0", name="ck_charge_artifact_schema_actor"),
-        *(sa.CheckConstraint("HEX(" + name + ") REGEXP '^(3[0-9]|6[1-6]){64}$'", name="ck_charge_artifact_" + name) for name in hash_fields),
-        sa.CheckConstraint("result_hash IS NULL OR HEX(result_hash) REGEXP '^(3[0-9]|6[1-6]){64}$'", name="ck_charge_artifact_result_hash"),
+        *(sa.CheckConstraint(lower_hex_sql(name), name="ck_charge_artifact_" + name) for name in hash_fields),
+        sa.CheckConstraint("result_hash IS NULL OR (" + lower_hex_sql("result_hash") + ")", name="ck_charge_artifact_result_hash"),
         sa.CheckConstraint(
             "(result_json IS NULL AND result_hash IS NULL AND result_bytes IS NULL) OR (result_json IS NOT NULL AND result_hash IS NOT NULL AND result_bytes IS NOT NULL)",
             name="ck_charge_artifact_result_tuple",
@@ -40,10 +52,7 @@ def upgrade():
             name="ck_charge_artifact_exact_bytes",
         ),
         sa.CheckConstraint("receipt_event_id IS NULL OR receipt_event_id>0", name="ck_charge_artifact_receipt"),
-        sa.CheckConstraint(
-            "accepted_lease IS NULL OR (accepted_lease REGEXP '^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$' AND HEX(accepted_lease)=HEX(LOWER(accepted_lease)))",
-            name="ck_charge_artifact_lease",
-        ),
+        sa.CheckConstraint(lease_sql(), name="ck_charge_artifact_lease"),
     )
 
 

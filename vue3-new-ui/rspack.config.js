@@ -91,8 +91,11 @@ module.exports = {
           loader: "babel-loader",
           options: {
             presets: ["@babel/preset-env"],
+            // Production follows the installed Vue 3 / Element Plus browser floor.
+            // Keep existing polyfills; development harnesses retain their own targets.
+            ...(mode === "production" ? {targets: {chrome: "85", edge: "85", firefox: "79", safari: "14.1"}} : {}),
             ...(mode === "production" ? {customize: resolve("scripts/public-interface-babel.cjs")} : {}),
-            // Reuse Babel helpers while retaining the original targets and loader contract.
+            // Reuse Babel helpers while retaining the one-loader contract.
             plugins: [["@babel/plugin-transform-runtime", {version: require("@babel/runtime/package.json").version}]],
           },
         },

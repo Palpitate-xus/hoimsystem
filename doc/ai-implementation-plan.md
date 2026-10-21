@@ -439,3 +439,5 @@
 - 2026-10-21 第80项原生Task两增量表：17完整文件一次388通过/13既有SQLite提示，36.07s pytest、47.515s外层，1191输入稳定。Artifact/Result共5MEDIUM/4UTC6，完整Source/结果各8MiB，绑定/Prompt/执行快照各256KiB；原Lesson/Review/Submission实际Audit锚和五阶段Audit字段，结果复合FK绑定原lease/Source/System指令摘要。真实SQLite含NUL/emoji容量/+1/FK/角色目标/claim闭合与独立up/down/up保持235旧表DDL/行/Gate；物理合成Audit动作不冒称运行回执，MySQL此处仅编译，当前Task服务/worker继续。
 
 - 2026-10-21 第80项真实Task入队/原始审计与来源前置重读：18完整文件一次412通过/15既有SQLite提示，44.13s pytest、55.481s外层，1195后端/映射/两原同案fixture输入稳定。完整Source/绑定/Prompt/执行帧、65535 raw3及原25字段Run与独立具体创建Audit绑定；当前owner/role/epoch/独立模型复核/全部参考元数据/原回执先于任意任务答案正文，执行另核当前版本。额度及3类after-insert来源/owner/config变化均整笔回滚，超管自己的UUID预览不启用。首轮411P/1F仅新测试误把原撤回403写409，改精确既有403与消息后重跑，原失败保留；claim/dispatch/真实用量/接收和Task Main/FE继续。
+
+- 2026-10-21 第80项具体claim/dispatch阶段：19完整文件一次430通过/17既有SQLite提示，47.43s pytest、58.157s外层，1197输入稳定。创建/领取/发送三个不同实际AuditPK与原Source/指令锚、Artifact UTC6 claimed_at/lease及Run旧秒时钟绑定；同Session实际未提交SQL重复不重领/不重发，不靠内存标记。当前来源/epoch/config丢失及六类伪造claim均正文前拒绝；阶段UPDATE后参考突变由实际重读检测并随调用者事务回滚。仅发送预约不冒称HTTP已尝试；真实用量/接收/worker/Main/FE继续。

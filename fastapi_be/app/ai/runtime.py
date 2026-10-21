@@ -412,7 +412,7 @@ def authorize_run(db: Session, user: User, run: AIRun) -> None:
     from app.ai.research_cohort_shared import guard_research_task, is_research_task
 
     if is_deidentification_task(db, run):
-        guard_deidentification_task(db, user, run.run_id)
+        guard_deidentification_task(db, user, opaque_run_id(run))
         return
 
     if is_research_task(db, run):

@@ -9,6 +9,7 @@ from app.ai import infection_cluster_contract as c
 from app.ai import infection_cluster_registry as r
 from app.ai import infection_cluster_task_contract as t
 from app.ai import infection_cluster_task_storage as storage
+from app.ai import infection_cluster_task_view_contract as wire
 from app.ai.infection_cluster_run_models import AIInfectionRunArtifact as Artifact
 from app.ai.infection_cluster_write_guard import current
 from app.dependencies import VALID_USER_ROLES
@@ -57,8 +58,7 @@ def metadata(db, user, rid):
         parts_separately_bounded=True,
         automatic_actions=False,
     )
-    c.canonical(result)
-    return result
+    return wire.TaskMetadata.model_validate(result).model_dump(mode="json")
 
 
 def part(db, user, rid, name):
@@ -77,8 +77,7 @@ def part(db, user, rid, name):
         value_bytes=len(c.utf8(c.canonical(value))),
         authority="current_patient_processing_and_local_profile_not_anonymity_or_clinical_validation",
     )
-    c.canonical(result)
-    return result
+    return wire.TaskPart.model_validate(result).model_dump(mode="json")
 
 
 def directory(db, user, *, scenario_id=None, page=1, size=20):
@@ -98,4 +97,6 @@ def directory(db, user, *, scenario_id=None, page=1, size=20):
     # This is a native Artifact directory, not a claim to include unverifiable
     # legacy78 generic tasks. Every item remains bodyless and hash-opaque.
     items = [metadata(db, actor, row.run_id) for row in ids]
-    return dict(schema_version="infection_local_task_directory_v1", items=items, total=total, page=page, size=size, native_artifacts_only=True, clinical_body_included=False)
+    return wire.TaskDirectory(schema_version="infection_local_task_directory_v1", items=items, total=total, page=page, size=size, native_artifacts_only=True, clinical_body_included=False).model_dump(
+        mode="json"
+    )

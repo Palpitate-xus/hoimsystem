@@ -49,3 +49,13 @@ test('structural native markers include null fields but not question literals',a
 test('explicit request closure rejects patients free questions and noncanonical foreign references',async({page})=>{
  expect(await page.evaluate(()=>{const a=window.__operationsProbe.api,v={operations_case_id:'11111111-1111-1111-1111-111111111111',objective:'explain_observations'};return[a.operationsRequestValid('OperationsTaskSelection',v),a.operationsRequestValid('OperationsTaskSelection',{...v,patient_id:1}),a.operationsRequestValid('OperationsTaskSelection',{...v,question:'free'}),a.operationsRequestValid('OperationsTaskSelection',{...v,objective:'execute'})];})).toEqual([true,false,false,false]);
 });
+
+test('actual descriptor and queued cancellation ACK bind closed fields and actual receipt PK',async({page})=>{
+ expect(await page.evaluate(({descriptor,ack})=>{const a=window.__operationsProbe.api;return[a.verifyOperationsTaskDescriptor(descriptor),a.verifyOperationsTaskDescriptor({...descriptor,parts:['source']}),a.verifyOperationsCancelAck(ack,{runId:ack.run_id}),a.verifyOperationsCancelAck({...ack,usage_event_id:null}),a.verifyOperationsCancelAck(ack,{runId:'11111111-1111-1111-1111-111111111111'})];},{descriptor:main.data(main.rows[1]),ack:main.data(main.rows[20])})).toEqual([true,false,true,false,false]);
+});
+test('actual feature configuration is required for execution while Super preview remains explicit',async({page})=>{
+ const feature=main.data(main.rows[0]).find(v=>v.key==='operations_support');expect(await page.evaluate(f=>{const a=window.__operationsProbe.api;return[a.operationsFeatureAllowed(f,'admin'),a.operationsFeatureAllowed({...f,enabled:false},'admin'),a.operationsFeatureAllowed({...f,validation_status:'unreviewed'},'admin'),a.operationsFeatureAllowed({...f,enabled:false,validation_status:'unreviewed'},'super_admin',{preview:true}),a.operationsFeatureAllowed(f,'doctor'),a.operationsFeatureAllowed({...f,input_mode:'chat'},'super_admin')];},feature)).toEqual([true,false,false,true,false,false]);
+});
+test('selection refs have one canonical Case key and no patient free question or objective',async({page})=>{
+ expect(await page.evaluate(()=>{const a=window.__operationsProbe.api,v={operations_case_id:'11111111-1111-1111-1111-111111111111'};return[a.operationsReferencesValid(v),a.operationsReferencesValid({...v,objective:'explain_observations'}),a.operationsReferencesValid({...v,patient_id:1}),a.operationsReferencesValid({...v,question:'free'}),a.operationsReferencesValid({operations_case_id:null})];})).toEqual([true,false,false,false,false]);
+});

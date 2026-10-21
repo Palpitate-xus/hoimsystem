@@ -400,3 +400,5 @@
 - 2026-10-21：第79项当前资料与配置授权阶段已完成；十一整文件一次260通过（24.72秒pytest/35.286秒外层），1176输入稳定。全部Source当前模型许可先于配置读取，当前Config/Provider/不可变Prompt及完整frame容量先于私有正文，Super预览不能恢复撤回资料。首轮夹具重复配置导致25 setup error/235通过原记录保留；此阶段尚无Task入队、HTTP调用或commit，后续实际执行链继续。
 
 - 2026-10-21：第79项专用Chat/Responses完整文本适配器已提交；十二整文件一次311通过（26.14秒pytest/37.243秒外层），1180输入稳定。51项新MockTransport/协议/用量测试覆盖实际完整wire双重JSON转义超限在HTTP前拒绝、仅单次调用、工具/拒答/截断/错误引文/重复键拒收、未知与实际零/部分用量不混淆。固定System+原版本Task完整发送，未连接外部模型。实际Task入队/claim/dispatch/接受与共享FE仍继续，适配器测试不替代该生命周期。
+
+- 2026-10-21：第79项真实staged Run/Artifact+具体创建审计与当前源前置核验已提交；十三整文件一次342通过（32.55秒pytest/43.329秒外层），1182输入稳定。具体Audit绑定原25字段/全部不可变技术锚/原角色与UTC6登录epoch；Config/Provider/Prompt冻结SHA在受保护正文前比较，按Config X的当前每日COUNT控制额度。首轮1个产品读取顺序负控+6个SQLite触发器清理失败、333通过均保留并修复；七类实际SQL触发器证明Run/Artifact/Audit/Source整体回滚。仍是无commit的staged创建，未称真实shared claim/worker、MySQL Task或79FE完成。

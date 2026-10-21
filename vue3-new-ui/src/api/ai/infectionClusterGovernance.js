@@ -1,0 +1,38 @@
+import{infectionHttp,infectionRequestValid,infectionSnapshotMetadataValid}from'./infectionClusterSources';
+import{basis,bytes,canonical,clock,digest,fixed,hash,keys,modelValid,nonblank,same,textDigest,unique,uuid,verifyProfile,windowValid}from'./infectionClusterProofs';
+export const getInfectionDepartments=({page=1,size=20}={})=>infectionHttp('/departments',{params:{page,size}});
+export const getInfectionImplementation=()=>infectionHttp('/local-implementation');
+const integer=(v,min=1)=>Number.isSafeInteger(v)&&v>=min;
+const pageValid=(v,page,size)=>integer(page)&&integer(size)&&size<=100&&v.page===page&&v.size===size&&integer(v.total,0)&&Array.isArray(v.items)&&v.items.length===Math.min(size,Math.max(0,v.total-(page-1)*size));
+export async function verifyInfectionDepartmentDirectory(v,{page=1,size=20,current=()=>true}={}){try{
+ if(!current()||!keys(v,['items','page','size','total','identity_basis'])||v.identity_basis!=='actual_pk_and_recorded_name_only_no_active_status_or_professional_qualification'||!pageValid(v,page,size)||v.total>4096||!unique(v.items.map(r=>r.department_id)))return false;
+ for(const r of v.items)if(!keys(r,['department_id','recorded_name','directory_hash'])||!integer(r.department_id)||r.recorded_name!==null&&(typeof r.recorded_name!=='string'||Array.from(r.recorded_name).length>24)||r.directory_hash!==await digest({department_id:r.department_id,name:r.recorded_name})||!current())return false;
+ return current();
+}catch{return false;}}
+export function infectionDirectoryValid(kind,v,{page=1,size=20}={}){try{
+ const snapshot=kind==='snapshot';if(!keys(v,['items','total','page','size',snapshot?'clinical_body_included':'clinical_body_included'])||v.clinical_body_included!==false||!pageValid(v,page,size)||!unique(v.items.map(r=>r[kind+'_id'])))return false;
+ return v.items.every(r=>{
+  if(snapshot)return infectionSnapshotMetadataValid(r);
+  const common=['schema_version',kind+'_id','status','revision','content_hash','recorded_at','detail_required','clinical_body_included','publication_does_not_enable_execution'],fields=kind==='scenario'?[...common,'snapshot_id','plan_hash','recipe_hash','implementation_hash','can_execute']:[...common,'implementation_hash','directory_hash'];
+  return keys(r,fields)&&r.schema_version===({scenario:'infection_comparison_scenario_metadata_v1',profile:'infection_local_profile_metadata_v1'}[kind])&&uuid(r[kind+'_id'])&&hash(r.content_hash)&&clock(r.recorded_at)&&integer(r.revision)&&['draft','published','rejected','revoked'].includes(r.status)&&r.detail_required===true&&r.clinical_body_included===false&&r.publication_does_not_enable_execution===true&&hash(r.implementation_hash)&&(kind==='scenario'?uuid(r.snapshot_id)&&hash(r.plan_hash)&&r.recipe_hash===fixed.recipe_hash&&r.can_execute===false:hash(r.directory_hash));
+ });
+}catch{return false;}}
+export function infectionSnapshotDirectoryValid(v,{page=1,size=20}={}){try{return keys(v,['items','total','page','size','clinical_body_included'])&&v.clinical_body_included===false&&pageValid(v,page,size)&&unique(v.items.map(r=>r.snapshot_id))&&v.items.every(infectionSnapshotMetadataValid);}catch{return false;}}
+export async function verifyInfectionRootPreview(v,request,{current=()=>true}={}){try{
+ if(!current()||!keys(v,['schema_version','request','definition','originals','complete','root_count','clinical_interpretation','captured_at'])||v.schema_version!=='infection_root_preview_v1'||!infectionRequestValid('SnapshotCreate',request)||!same(v.request,request)||!clock(v.captured_at)||v.complete!==true||v.clinical_interpretation!=='recorded_reports_not_diagnoses_or_outbreaks'||!Array.isArray(v.originals)||v.root_count!==v.originals.length||v.originals.length>4096||!unique(v.originals.map(p=>p.original.case_id))||bytes(v)>8388608)return false;
+ const d=v.definition,g=d.governance;
+ if(!modelValid('PublishedDefinition',d)||d.payload.definition_id!==request.definition_id||!nonblank(d.payload.version_label)||!nonblank(d.payload.definition_text)||!clock(d.payload.recorded_at)||!clock(g.published_at)||g.published_at<d.payload.recorded_at||g.published_at>v.captured_at||d.payload.authored_by===g.published_by||d.content_hash!==await digest(d.payload)||!current()||d.governance_hash!==await digest(g)||!current()||g.definition_content_hash!==d.content_hash||g.publication_basis_hash!==await textDigest(g.publication_basis_note)||!current())return false;
+ for(const p of v.originals){const row=p.original;if(!modelValid('OriginalProof',p)||p.content_hash!==await digest(row)||!current()||!request.patient_ids.includes(row.patient_id)||row.onset_date<request.window.date_from||row.onset_date>request.window.date_to||!clock(row.create_time.text,'naive')||!clock(row.update_time.text,'naive')||!windowValid({date_from:row.onset_date,date_to:row.onset_date}))return false;}
+ return current();
+}catch{return false;}}
+export async function verifyInfectionConfiguration(v,{current=()=>true}={}){try{
+ const fields=['schema_version','feature_key','engine','execution','enabled','validation_status','feature_revision','selection_revision','profile','profile_id','allowed_roles','daily_limit','validation_note','config_hash','current_role_in_fixed_and_configured','configuration_governor_current','implementation_descriptor','requires_explicit_configuration','provider_id'];
+ if(!current()||!keys(v,fields)||v.schema_version!=='infection_local_configuration_v1'||v.feature_key!=='infection_cluster'||v.engine!=='prediction'||v.execution!=='local_exact_statistics'||v.provider_id!==null||!same(v.implementation_descriptor,fixed.implementation)||![v.enabled,v.current_role_in_fixed_and_configured,v.configuration_governor_current,v.requires_explicit_configuration].every(x=>typeof x==='boolean')||!integer(v.feature_revision,0)||!integer(v.selection_revision,0)||!['unreviewed','pilot','validated','suspended'].includes(v.validation_status)||!Array.isArray(v.allowed_roles)||!v.allowed_roles.length||!unique(v.allowed_roles)||!v.allowed_roles.every(r=>typeof r==='string')||v.validation_note!==null&&(typeof v.validation_note!=='string'||bytes(v.validation_note)>20000))return false;
+ if(v.requires_explicit_configuration)return v.feature_revision===0&&v.selection_revision===0&&!v.enabled&&v.profile_id===null&&v.profile===null&&v.daily_limit===null&&v.config_hash===null&&!v.current_role_in_fixed_and_configured&&!v.configuration_governor_current;
+ return integer(v.feature_revision)&&integer(v.selection_revision)&&hash(v.config_hash)&&integer(v.daily_limit)&&v.daily_limit<=10000&&(v.profile_id===null||uuid(v.profile_id))&&(v.profile===null||v.profile.profile_id===v.profile_id&&await verifyProfile(v.profile,{current}))&&current();
+}catch{return false;}}
+export function infectionMutationMatches(previous,next,body,{revoke=false}={}){try{
+ const a=previous.governance,b=next.governance;
+ return previous.content_hash===next.content_hash&&same(previous.payload,next.payload)&&body.expected_revision===a.revision&&body.expected_content_hash===previous.content_hash&&body.expected_governance_hash===previous.governance_hash&&b.revision===a.revision+1&&(revoke?b.status==='revoked'&&b.revoke_basis===body.basis_note:b.status===(body.decision==='publish'?'published':'rejected')&&b.review_basis===body.basis_note&&b.privacy_review===body.privacy_review&&b.faithfulness_review===body.faithfulness_review&&(!Object.hasOwn(body,'parameters_review')||b.parameters_review===body.parameters_review));
+}catch{return false;}}
+export function reviewForm(record,{parameters=false}={}){return{expected_revision:record.governance.revision,expected_content_hash:record.content_hash,expected_governance_hash:record.governance_hash,...(parameters?{}:{})};}

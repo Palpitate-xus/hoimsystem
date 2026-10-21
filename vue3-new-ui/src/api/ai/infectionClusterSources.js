@@ -33,7 +33,7 @@ export const previewInfectionRoots=value=>write('/roots/preview','SnapshotCreate
 export const createInfectionSnapshot=value=>write('/snapshots','SnapshotCreate',value);
 export const getInfectionSnapshots=({page=1,size=20}={})=>infectionHttp('/snapshots',{params:query(page,size)});
 export const getInfectionSnapshotPart=(value,part)=>{if(!['private','public'].includes(part))throw new Error('须明确完整来源读取件');return infectionHttp('/snapshots/'+id(value)+'/parts/'+part);};
-export const getInfectionScenarios=({page=1,size=20}={})=>infectionHttp('/scenarios',{params:query(page,size)});
+export const getInfectionScenarios=({page=1,size=20,snapshotId=null}={})=>infectionHttp('/scenarios',{params:{...query(page,size),...(snapshotId===null?{}:{snapshot_id:id(snapshotId)})}});
 export const getInfectionScenario=value=>infectionHttp('/scenarios/'+id(value));
 export const createInfectionScenario=value=>write('/scenarios','ScenarioCreate',value);
 export const reviewInfectionScenario=(value,body)=>write('/scenarios/'+id(value)+'/review','ScenarioReview',body);

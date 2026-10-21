@@ -850,6 +850,7 @@ def list_global_runs(
     satisfaction_native_only: bool = False,
     encounter_ref: str | None = Query(None, max_length=64),
     document_original_id: str | None = Query(None, max_length=36),
+    drug_label_source_binding_id: str | None = None,
     page: int = Query(1, ge=1, le=100000),
     page_size: int = Query(30, ge=1, le=100),
     db: Session = Depends(get_db),
@@ -862,7 +863,35 @@ def list_global_runs(
     # current User/Run/Artifact locks even when no feature filter was supplied.
     lock_directory_gates(db)
     user = _current_super_admin(db, user)
-    query = db.query(AIRun)
+    query = db.query(AIRun).options(*(defer(getattr(AIRun, key)) for key in ("input_json", "evidence_json", "context_metadata_json", "result_json")))
+    if drug_label_source_binding_id is not None:
+        from app.ai.drug_label_history import filter_history
+
+        query = filter_history(
+            db,
+            user,
+            query,
+            feature_key=feature_key,
+            binding_id=drug_label_source_binding_id,
+            other_scope=(
+                patient_id,
+                encounter_ref,
+                department_id,
+                surgery_pool_id,
+                surgery_scenario_id,
+                supply_item_kind,
+                supply_item_id,
+                supply_series_id,
+                inventory_item_kind,
+                inventory_item_id,
+                inventory_scenario_id,
+                coding_case_id,
+                charge_case_id,
+                document_original_id,
+                satisfaction_case_id,
+                True if satisfaction_native_only else None,
+            ),
+        )
     if satisfaction_case_id is not None or satisfaction_native_only:
         from app.ai.satisfaction_history import filter_history
 
@@ -888,6 +917,7 @@ def list_global_runs(
                 coding_case_id,
                 charge_case_id,
                 document_original_id,
+                drug_label_source_binding_id,
             ),
         )
     if feature_key == "guideline_ingestion" or document_original_id is not None:
@@ -901,8 +931,11 @@ def list_global_runs(
             original_id=document_original_id,
             other_scope=(
                 patient_id,
+                True if satisfaction_native_only else None,
+                satisfaction_case_id,
                 encounter_ref,
                 charge_case_id,
+                drug_label_source_binding_id,
                 department_id,
                 surgery_pool_id,
                 surgery_scenario_id,
@@ -999,13 +1032,20 @@ def list_global_runs(
 @router.get("/ai/admin/runs/{run_id}")
 def inspect_run_trace(run_id: str, db: Session = Depends(get_db), user: User = Depends(require_roles("super_admin"))) -> dict:
     """Read the frozen prompts, requested model, source payload and append-only review history."""
-    from app.ai.native_task_access import lock_directory_gates
+    from app.ai.native_task_access import guard_private_task_read, lock_directory_gates
 
     lock_directory_gates(db)
     user = _current_super_admin(db, user)
+    guard_private_task_read(db, user, run_id)
     run = db.get(AIRun, run_id)
     if run is None:
         raise HTTPException(404, "AI 任务不存在")
+    from app.ai.drug_label_storage import is_drug_label_run
+
+    if is_drug_label_run(db, run):
+        from app.ai.drug_label_views import response, trace_view
+
+        return response(trace_view(db, user, run))
     from app.ai.charge_reconciliation_storage import is_charge_run
 
     charge = is_charge_run(db, run)

@@ -103,7 +103,10 @@ def create_run(db: Session, user: User, req: RunRequest) -> AIRun:
         from app.ai.charge_reconciliation_runtime import create_charge_run
 
         return create_charge_run(db, user, req)
-        return
+    if req.feature_key == "drug_label_extraction":
+        from app.ai.drug_label_runtime import create_drug_label_run
+
+        return create_drug_label_run(db, user, req)
     if req.feature_key == "guideline_ingestion":
         from app.ai.document_extraction_runtime import create_document_run
 
@@ -405,6 +408,11 @@ def authorize_run(db: Session, user: User, run: AIRun) -> None:
 
         authorize_satisfaction_run(db, user, run, audit_only=user.user_role == "super_admin")
         return
+    from app.ai.drug_label_storage import authorize_drug_label_run, is_drug_label_run
+
+    if is_drug_label_run(db, run):
+        authorize_drug_label_run(db, user, run, frozen_audit=user.user_role == "super_admin")
+        return
     from app.ai.document_extraction_storage import authorize_document_run, is_extraction_run
 
     if is_extraction_run(db, run):
@@ -571,6 +579,15 @@ def describe_run(run: AIRun, include_result: bool = True, *, user: User | None =
         from app.ai.satisfaction_views import describe_satisfaction_run
 
         return describe_satisfaction_run(db, user, run, include_result=include_result)
+    from app.ai.drug_label_storage import is_drug_label_run
+
+    if is_drug_label_run(object_session(run), run):
+        from app.ai.drug_label_views import run_view
+
+        if user is None or object_session(run) is None:
+            raise HTTPException(403, "完整说明书任务须在当前授权会话读取")
+        return run_view(object_session(run), user, run, include_result, frozen_audit=user.user_role == "super_admin")
+
     from app.ai.document_extraction_storage import is_extraction_run
 
     if is_extraction_run(object_session(run), run):
@@ -849,21 +866,29 @@ def describe_run(run: AIRun, include_result: bool = True, *, user: User | None =
 
 def claim_next_run(db: Session) -> tuple[str, str] | None:
     """Claim durable work without allowing two workers to execute the same queued task."""
-    query = db.query(AIRun.run_id, AIRun.feature_key).filter_by(status="queued").order_by(AIRun.create_time)
+    from app.ai.native_task_routing import locate_native_task
+
+    candidate = db.query(AIRun.run_id, AIRun.feature_key).filter_by(status="queued").order_by(AIRun.create_time, AIRun.run_id).first()
+    if candidate is None:
+        return None
+    identity = locate_native_task(db, candidate.run_id)
+    domain = identity.domain if identity is not None else None
+    if domain == "drug_label" or domain is None and candidate.feature_key == "drug_label_extraction":
+        from app.ai.drug_label_runtime import claim_drug_label_run
+
+        lease = claim_drug_label_run(db, candidate.run_id)
+        return (candidate.run_id, lease) if lease is not None else None
+    if domain == "satisfaction" or domain is None and candidate.feature_key == "feedback_analysis":
+        from app.ai.satisfaction_execution import claim_satisfaction_run
+
+        lease = claim_satisfaction_run(db, candidate.run_id)
+        return (candidate.run_id, lease) if lease is not None else None
+    query = db.query(AIRun.run_id, AIRun.feature_key).filter_by(run_id=candidate.run_id, status="queued")
     if db.bind.dialect.name == "postgresql":
         query = query.with_for_update(skip_locked=True)
     run = query.first()
     if run is None:
         return None
-    from app.ai.satisfaction_artifact_models import AISatisfactionRunArtifact
-
-    with db.no_autoflush:
-        satisfaction = db.query(AISatisfactionRunArtifact.run_id).filter_by(run_id=run.run_id).first()
-    if satisfaction is not None:
-        from app.ai.satisfaction_execution import claim_satisfaction_run
-
-        lease = claim_satisfaction_run(db, run.run_id)
-        return (run.run_id, lease) if lease is not None else None
     lease = str(uuid.uuid4())
     changed = db.query(AIRun).filter_by(run_id=run.run_id, status="queued").update({"status": "running", "start_time": utcnow(), "lease_token": lease}, synchronize_session=False)
     if changed != 1:
@@ -877,6 +902,8 @@ def claim_next_run(db: Session) -> tuple[str, str] | None:
 def _recheck_task(db: Session, run: AIRun) -> tuple[FeatureSpec, AIProvider, dict]:
     if run.feature_key == "feedback_analysis":
         raise AIExecutionError("TASK_CONTRACT_CHANGED", "旧评价任务仅可读取历史；须明确选择受审完整原件后新建任务")
+    if run.feature_key == "drug_label_extraction":
+        raise AIExecutionError("TASK_CONTRACT_CHANGED", "旧说明书任务缺少完整原件绑定，不能沿用通用推理")
     if utcnow() - run.create_time > datetime.timedelta(seconds=settings.AI_MAX_QUEUE_AGE_SECONDS):
         raise AIExecutionError("TASK_EXPIRED", "任务等待时间过长，请重新加载最新资料后提交")
     user = db.get(User, run.requested_by)
@@ -959,22 +986,31 @@ async def execute_claimed(run_id: str, lease: str, *, transport=None) -> None:
     from app import database
     from app.ai.charge_reconciliation_storage import is_charge_run
     from app.ai.document_extraction_storage import is_extraction_run
+    from app.ai.native_task_routing import locate_native_task
     from app.ai.satisfaction_storage import is_satisfaction_run
 
-    # Only locate native identities here; release this short session before
-    # either dedicated worker acquires its own current authorization locks.
+    # Locate only immutable technical identities, then return the connection
+    # before the dedicated worker takes its own Source/current authority locks.
     with database.SessionLocal() as routing_db:
-        routing_run = routing_db.get(AIRun, run_id)
-        charge = routing_run is not None and is_charge_run(routing_db, routing_run)
-        satisfaction_task = not charge and routing_run is not None and is_satisfaction_run(routing_db, routing_run)
-        document_task = (
-            not charge
-            and not satisfaction_task
-            and routing_run is not None
-            and routing_run.status in {"running", "cancelled"}
-            and routing_run.lease_token == lease
-            and is_extraction_run(routing_db, routing_run)
-        )
+        header = routing_db.query(AIRun.run_id, AIRun.feature_key).filter(AIRun.run_id == run_id, AIRun.status.in_(["running", "cancelled"]), AIRun.lease_token == lease).one_or_none()
+        identity = locate_native_task(routing_db, run_id) if header is not None else None
+        domain = identity.domain if identity is not None else None
+        drug_label_task = header is not None and (domain == "drug_label" or domain is None and header.feature_key == "drug_label_extraction")
+        satisfaction_task = header is not None and (domain == "satisfaction" or domain is None and header.feature_key == "feedback_analysis")
+        document_task = header is not None and (domain == "document" or domain is None and header.feature_key == "guideline_ingestion")
+        charge = domain == "charge"
+        # Legacy tasks without a durable native identity retain their original
+        # read/dispatch contracts; no erased real Artifact can enter this path.
+        routing_run = routing_db.get(AIRun, run_id) if header is not None and domain is None and not any((drug_label_task, satisfaction_task, document_task)) else None
+        if routing_run is not None:
+            charge = is_charge_run(routing_db, routing_run)
+            satisfaction_task = not charge and is_satisfaction_run(routing_db, routing_run)
+            document_task = not charge and not satisfaction_task and is_extraction_run(routing_db, routing_run)
+    if drug_label_task:
+        from app.ai.drug_label_runtime import execute_drug_label_claimed
+
+        await execute_drug_label_claimed(run_id, lease, transport=transport)
+        return
     if charge:
         from app.ai.charge_reconciliation_execution import execute_charge_claimed
 
@@ -1372,15 +1408,25 @@ def expire_interrupted_runs(db: Session) -> int:
     """Mark abandoned inference failed without repeating potentially billable calls."""
     from app.ai.charge_reconciliation_execution import expire_interrupted_charge_runs
     from app.ai.charge_reconciliation_run_models import AIChargeRunArtifact
+    from app.ai.drug_label_run_models import AIDrugLabelRunArtifact
+    from app.ai.drug_label_runtime import expire_interrupted_drug_label_runs
     from app.ai.satisfaction_artifact_models import AISatisfactionRunArtifact
     from app.ai.satisfaction_execution import expire_interrupted_satisfaction_runs
 
     recovered = expire_interrupted_charge_runs(db)
     recovered += expire_interrupted_satisfaction_runs(db)
+    recovered += expire_interrupted_drug_label_runs(db)
     deadline = utcnow() - datetime.timedelta(minutes=10)
     count = (
         db.query(AIRun)
-        .filter(AIRun.status == "running", AIRun.start_time < deadline, ~AIRun.run_id.in_(db.query(AIChargeRunArtifact.run_id)), ~AIRun.run_id.in_(db.query(AISatisfactionRunArtifact.run_id)))
+        .filter(
+            AIRun.status == "running",
+            AIRun.start_time < deadline,
+            AIRun.feature_key != "drug_label_extraction",
+            ~AIRun.run_id.in_(db.query(AIChargeRunArtifact.run_id)),
+            ~AIRun.run_id.in_(db.query(AISatisfactionRunArtifact.run_id)),
+            ~AIRun.run_id.in_(db.query(AIDrugLabelRunArtifact.run_id)),
+        )
         .update({"status": "failed", "error_code": "WORKER_INTERRUPTED", "error_message": "执行进程中断，任务未自动重试，可检查后重新提交", "finish_time": utcnow()}, synchronize_session=False)
     )
     db.commit()

@@ -32,6 +32,7 @@
         <el-table-column prop="remark" label="备注" />
         <el-table-column v-if="canUseSupplyAI" label="AI 原量预测" width="160"><template #default="{ row }"><ai-action :key="supplyAuth" v-if="Number.isSafeInteger(row.id)&&row.id>0" label="核对原量与预测" title="受审物资原量预测" :feature-keys="['supply_forecast']" initial-feature="supply_forecast" :initial-input="{ item_kind: 'pharmaceutical', item_id: row.id }" /></template></el-table-column>
         <el-table-column v-if="canUseSupplyAI" label="AI 库存候选比较" width="175"><template #default="{ row }"><ai-action :key="supplyAuth+'-inventory'" v-if="Number.isSafeInteger(row.id)&&row.id>0&&row.id<=2147483647" label="核对库存候选" title="受审完整库存候选比较" :feature-keys="['inventory_optimization']" initial-feature="inventory_optimization" :initial-input="{ item_kind: 'pharmaceutical', item_id: row.id }" /></template></el-table-column>
+        <el-table-column v-if="canUseDrugLabelAI" label="AI 说明书复核" width="280"><template #default="{ row }"><template v-if="Number.isSafeInteger(row.id)&&row.id>0&&row.id<=2147483647"><ai-action :key="supplyAuth+'-leaflet-'+row.id" label="核对说明书字段" title="本药品说明书逐字字段复核" :feature-keys="['drug_label_extraction']" initial-feature="drug_label_extraction" :pharmaceutical-id="row.id" /><el-button size="small" @click="openDrugLabelSources(row.id)">说明书原文与签署</el-button></template></template></el-table-column>
         <el-table-column label="操作" width="250">
           <template #default="{row}">
             <el-button size="small" @click="handleEdit(row)">编辑</el-button>
@@ -50,6 +51,8 @@
       />
 
     </el-card>
+
+    <el-drawer v-model="drugLabelSourcesOpen" title="本药品说明书原文与本人签署" size="min(1000px,96vw)" append-to-body destroy-on-close><drug-label-sources v-if="drugLabelSourcesOpen&&canUseDrugLabelAI" :key="supplyAuth+'-'+drugLabelSku" :pharmaceutical-id="drugLabelSku" :active="drugLabelSourcesOpen&&supplyViewActive" /></el-drawer>
 
     <el-dialog v-model="dialogVisible" :title="isEdit?'编辑药品':'新增药品'" width="600px">
       <el-form :model="form" label-width="100px" class="dialog-form">
@@ -89,15 +92,22 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onActivated, onDeactivated, computed } from "vue";
+import { ref, onMounted, onActivated, onDeactivated, computed, watch, defineAsyncComponent } from "vue";
 import { useStore } from "vuex";
 import AiAction from "@/components/AIAction/index.vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { getPharmaceuticalList, createPharmaceutical, updatePharmaceutical, deletePharmaceutical, setMedicationBarcode } from "@/api/pharmacy";
 
+const DrugLabelSources=defineAsyncComponent(()=>import('@/components/ai/DrugLabelSources.vue'));
 const supplyStore=useStore(),supplyViewActive=ref(true);
-const canUseSupplyAI=computed(()=>supplyViewActive.value&&!!supplyStore.state.user.accessToken&&(supplyStore.getters['user/permissions']||[]).some(role=>['super_admin','admin','director','pharmacist'].includes(role)));
+const drugLabelSourcesOpen=ref(false),drugLabelSku=ref(null);
+const canUseDrugLabelAI=computed(()=>supplyViewActive.value&&typeof supplyStore.state.user.accessToken==='string'&&!!supplyStore.state.user.accessToken&&Array.isArray(supplyStore.getters['user/permissions'])&&supplyStore.getters['user/permissions'].some(role=>['super_admin','pharmacist'].includes(role)));
+function openDrugLabelSources(id){if(!canUseDrugLabelAI.value||!Number.isSafeInteger(id)||id<1||id>2147483647)return;drugLabelSku.value=id;drugLabelSourcesOpen.value=true;}
+
+const canUseSupplyAI=computed(()=>supplyViewActive.value&&!!supplyStore.state.user.accessToken&&Array.isArray(supplyStore.getters['user/permissions'])&&supplyStore.getters['user/permissions'].some(role=>['super_admin','admin','director','pharmacist'].includes(role)));
 const supplyAuth=computed(()=>JSON.stringify([supplyStore.state.user.username,supplyStore.state.user.accessToken,supplyStore.getters['user/permissions']]));
+watch([supplyAuth,supplyViewActive],()=>{drugLabelSourcesOpen.value=false;drugLabelSku.value=null;},{flush:'sync'});
+watch(drugLabelSourcesOpen,value=>{if(!value)drugLabelSku.value=null;},{flush:'sync'});
 onDeactivated(()=>{supplyViewActive.value=false;});onActivated(()=>{supplyViewActive.value=true;});
 const list = ref([]);
 const searchQuery = ref("");

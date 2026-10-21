@@ -333,8 +333,12 @@ def stage_anchor(db, run):
         clock = utcnow()
         if utc_text(clock) < snapshot["payload"]["context"]["snapshot_time"]:
             raise ValueError("The server task clock precedes the source capture")
-        db.add(AISatisfactionRunArtifact(run_id=run.run_id, case_id=binding["case_id"], requested_by=run.requested_by, schema_version=ARTIFACT_SCHEMA, created_at=clock, **_anchors(run, binding)))
+        artifact = AISatisfactionRunArtifact(run_id=run.run_id, case_id=binding["case_id"], requested_by=run.requested_by, schema_version=ARTIFACT_SCHEMA, created_at=clock, **_anchors(run, binding))
+        db.add(artifact)
         db.flush()
+        from app.ai.native_task_routing import remember_staged_identity
+
+        remember_staged_identity(db, artifact)
         actor = lock_run_scope(db, run)
         authorize_case(db, actor, binding["case_id"], binding=source_binding(binding), locking=True, execution=True)
         return load_snapshot(db, run, execution=True)[0]

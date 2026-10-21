@@ -235,8 +235,23 @@ class RunRequest(StrictRequest):
                 raise ValueError("完整账目任务的预览状态须为布尔值")
         return value
 
+    @field_validator("preview", mode="before")
+    @classmethod
+    def exact_drug_label_preview_flag(cls, value, info):
+        if info.data.get("feature_key") == "drug_label_extraction" and type(value) is not bool:
+            raise ValueError("说明书任务预览标记须为明确布尔值")
+        return value
+
     @model_validator(mode="after")
     def dedicated_roster_reference(self):
+        if "drug_label_source_binding_id" in self.input and self.feature_key != "drug_label_extraction":
+            raise ValueError("完整说明书来源仅用于说明书逐字字段复核")
+        if self.feature_key == "drug_label_extraction":
+            from app.ai.drug_label_context_contract import selection
+
+            selection(self.input)
+            if self.patient_id is not None or self.encounter_ref is not None:
+                raise ValueError("说明书任务不接受患者或就诊范围")
         if "roster_plan_id" in self.input and self.feature_key != "roster_optimization":
             raise ValueError("受审排班计划仅用于排班与号源优化")
         if "bed_series_id" in self.input and self.feature_key != "bed_forecast":

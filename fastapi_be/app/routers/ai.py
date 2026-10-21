@@ -287,15 +287,15 @@ def list_runs(
     satisfaction_case_id: str | None = None,
     satisfaction_native_only: bool = False,
     document_original_id: str | None = Query(None, max_length=36),
+    drug_label_source_binding_id: str | None = None,
     limit: int = Query(30, ge=1, le=100),
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user),
 ) -> dict:
     """List own tasks; super-admins can inspect global execution history."""
-    if feature_key in {None, "charge_reconciliation", "feedback_analysis"} or charge_case_id is not None or satisfaction_case_id is not None or satisfaction_native_only:
-        from app.ai.native_task_access import lock_directory_gates
+    from app.ai.native_task_access import lock_directory_gates
 
-        lock_directory_gates(db)
+    lock_directory_gates(db)
     if feature_key == "feedback_analysis" or satisfaction_case_id is not None or satisfaction_native_only:
         from app.ai.satisfaction_runtime import current_actor
 
@@ -311,6 +311,38 @@ def list_runs(
     # The per-item native guard below must run before any deferred task TEXT is
     # fetched. This also keeps an unfiltered mixed directory safe to classify.
     query = db.query(AIRun).options(*(defer(getattr(AIRun, key)) for key in ("input_json", "evidence_json", "context_metadata_json", "result_json")))
+    if drug_label_source_binding_id is not None:
+        from app.ai.drug_label_history import filter_history
+
+        query = filter_history(
+            db,
+            user,
+            query,
+            feature_key=feature_key,
+            binding_id=drug_label_source_binding_id,
+            other_scope=(
+                patient_id,
+                encounter_ref,
+                department_id,
+                roster_plan_id,
+                ward_id,
+                bed_series_id,
+                surgery_pool_id,
+                surgery_scenario_id,
+                supply_item_kind,
+                supply_item_id,
+                supply_series_id,
+                inventory_item_kind,
+                inventory_item_id,
+                inventory_scenario_id,
+                coding_case_id,
+                charge_case_id,
+                True if charge_native_only else None,
+                satisfaction_case_id,
+                True if satisfaction_native_only else None,
+                document_original_id,
+            ),
+        )
     if satisfaction_case_id is not None or satisfaction_native_only:
         from app.ai.satisfaction_history import filter_history
 
@@ -340,6 +372,7 @@ def list_runs(
                 charge_case_id,
                 True if charge_native_only else None,
                 document_original_id,
+                drug_label_source_binding_id,
             ),
         )
     if feature_key == "guideline_ingestion" or document_original_id is not None:
@@ -353,6 +386,8 @@ def list_runs(
             original_id=document_original_id,
             other_scope=(
                 patient_id,
+                True if satisfaction_native_only else None,
+                satisfaction_case_id,
                 charge_case_id,
                 True if charge_native_only else None,
                 encounter_ref,
@@ -369,6 +404,7 @@ def list_runs(
                 inventory_item_id,
                 inventory_scenario_id,
                 coding_case_id,
+                drug_label_source_binding_id,
             ),
         )
     if user.user_role != "super_admin":
@@ -376,6 +412,10 @@ def list_runs(
     if feature_key:
         if feature_key == "feedback_analysis":
             from app.ai.satisfaction_history import authorize_history
+
+            user = authorize_history(db, user)
+        elif feature_key == "drug_label_extraction":
+            from app.ai.drug_label_history import authorize_history
 
             user = authorize_history(db, user)
         else:
@@ -516,6 +556,10 @@ def list_runs(
 
                 if item.feature_key == "feedback_analysis" or db.query(AISatisfactionRunArtifact.run_id).filter_by(run_id=item.run_id).first() is not None:
                     continue
+                from app.ai.drug_label_storage import is_drug_label_run
+
+                if is_drug_label_run(db, item):
+                    continue
             if exc.status_code == 409 and any(is_document_evidence(db, entry) for entry in json.loads(item.evidence_json)):
                 continue
             if exc.status_code == 409:
@@ -592,6 +636,13 @@ def cancel_run(run_id: str, db: Session = Depends(get_db), user: User = Depends(
         cancel_satisfaction_run(db, user, run_id)
         return {"code": 200, "msg": "任务结果已取消接收"}
     authorize_run(db, user, run)
+    from app.ai.drug_label_storage import is_drug_label_run
+
+    if is_drug_label_run(db, run):
+        from app.ai.drug_label_runtime import cancel_drug_label_run
+
+        cancel_drug_label_run(db, user, run_id, frozen_audit=user.user_role == "super_admin")
+        return {"code": 200, "msg": "任务结果已取消接收"}
     from app.ai.document_extraction_storage import is_extraction_run
 
     if is_extraction_run(db, run):
@@ -636,6 +687,12 @@ def review_result(run_id: str, req: FeedbackWrite, db: Session = Depends(get_db)
         from app.ai.satisfaction_receipts import load_terminal
 
         load_terminal(db, run)
+    from app.ai.drug_label_storage import is_drug_label_run
+
+    if is_drug_label_run(db, run):
+        from app.ai.drug_label_views import run_view
+
+        run_view(db, user, run, frozen_audit=user.user_role == "super_admin")
     from app.ai.document_extraction_storage import is_extraction_run, load_result
 
     if not charge and not satisfaction and is_extraction_run(db, run):

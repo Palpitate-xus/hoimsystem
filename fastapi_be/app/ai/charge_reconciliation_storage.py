@@ -118,12 +118,14 @@ def stage_anchor(db, run):
     clock = utcnow()
     if c.utc_text(clock) < snapshot["payload"]["context"]["snapshot_time"]:
         raise HTTPException(409, "服务器时钟早于本次完整来源核对，任务未入队")
-    db.add(
-        AIChargeRunArtifact(
-            run_id=run.run_id, case_snapshot_id=binding["case_snapshot_id"], requested_by=run.requested_by, schema_version=ARTIFACT_SCHEMA, created_at=clock, **_anchor_values(run, binding)
-        )
+    artifact = AIChargeRunArtifact(
+        run_id=run.run_id, case_snapshot_id=binding["case_snapshot_id"], requested_by=run.requested_by, schema_version=ARTIFACT_SCHEMA, created_at=clock, **_anchor_values(run, binding)
     )
+    db.add(artifact)
     db.flush()
+    from app.ai.native_task_routing import remember_staged_identity
+
+    remember_staged_identity(db, artifact)
     load_snapshot(db, run)
     return snapshot
 

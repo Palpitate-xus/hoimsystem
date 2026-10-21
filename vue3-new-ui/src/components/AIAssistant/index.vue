@@ -111,6 +111,8 @@
     <document-extraction-assistant v-else-if="dedicatedPanel==='document'" :feature="configuredFeature||null" :feature-key="featureKey" :initial-input="props.initialInput" :patient-id="props.patientId" :encounter-ref="props.encounterRef" :active="viewActive" />
     <satisfaction-assistant v-else-if="dedicatedPanel==='satisfaction'" :feature="configuredFeature||null" :feature-key="featureKey" :initial-input="props.initialInput" :patient-id="props.patientId" :encounter-ref="props.encounterRef" :active="viewActive" />
 
+    <drug-label-assistant v-else-if="dedicatedPanel==='drug_label'" :feature="configuredFeature||null" :feature-key="featureKey" :initial-input="props.initialInput" :patient-id="props.patientId" :encounter-ref="props.encounterRef" :pharmaceutical-id="props.pharmaceuticalId" :active="viewActive" />
+
     <template v-if="!dedicatedLifecycle">
     <el-card v-if="run" shadow="never" class="spaced" aria-label="AI任务结果">
       <template #header><div class="result-header"><strong>{{ run.feature_name }}</strong><el-tag>{{ statuses[run.status] || run.status }}</el-tag><el-tag v-if="run.patient_id" type="info">患者 #{{ run.patient_id }}</el-tag><el-tag v-if="run.preview" type="warning">评估预览</el-tag><el-button v-if="busy" link @click="refreshRun">刷新状态</el-button></div></template>
@@ -258,6 +260,7 @@ import AiEcgFindings from "@/components/AIEcgFindings/index.vue";
 const ChargeReconciliationAssistant=defineAsyncComponent(()=>import("@/components/ai/ChargeReconciliationAssistant.vue"));
 const DocumentExtractionAssistant=defineAsyncComponent(()=>import("@/components/ai/DocumentExtractionAssistant.vue"));
 const SatisfactionAssistant=defineAsyncComponent(()=>import("@/components/ai/SatisfactionAssistant.vue"));
+const DrugLabelAssistant=defineAsyncComponent(()=>import("@/components/ai/DrugLabelAssistant.vue"));
 const CodingEvidenceInput=defineAsyncComponent(()=>import("@/components/CodingEvidenceInput.vue"));
 const CodingFindings=defineAsyncComponent(()=>import("@/components/ai/CodingFindings.vue"));
 const AiRosterInput=defineAsyncComponent(()=>import("@/components/AIRosterInput/index.vue"));
@@ -284,7 +287,7 @@ const AiSofaInput = defineAsyncComponent(() => import("@/components/AISofaInput/
 const AiSofaFindings = defineAsyncComponent(() => import("@/components/AISofaFindings/index.vue"));
 const AiQsofaFindings = defineAsyncComponent(() => import("@/components/AIQsofaFindings/index.vue"));
 
-const props = defineProps({ featureKeys: { type: Array, default: () => [] }, initialFeature: { type: String, default: "" }, patientId: { type: Number, default: null }, encounterRef: { type: String, default: "" }, initialInput: { type: Object, default: () => ({}) } });
+const props = defineProps({ featureKeys: { type: Array, default: () => [] }, initialFeature: { type: String, default: "" }, patientId: { type: Number, default: null }, encounterRef: { type: String, default: "" }, pharmaceuticalId: { type: Number, default: null }, initialInput: { type: Object, default: () => ({}) } });
 const store = useStore();
 const canPreview = computed(() => Array.isArray(store.getters["user/permissions"])&&store.getters["user/permissions"].includes("super_admin"));
 const statuses = { queued: "已排队", running: "生成中", succeeded: "待复核", failed: "失败", cancelled: "已取消" };
@@ -299,9 +302,11 @@ const documentWasBound=ref(false),documentLifecycle=computed(()=>documentWasBoun
 watch([featureKey,()=>Object.hasOwn(props.initialInput,'document_original_id')],([key,bound])=>{if(key==='guideline_ingestion'||bound)documentWasBound.value=true;},{immediate:true,flush:'sync'});
 const satisfactionWasBound=ref(false),satisfactionLifecycle=computed(()=>satisfactionWasBound.value||featureKey.value==='feedback_analysis'||Object.hasOwn(props.initialInput,'satisfaction_case_id'));
 watch([featureKey,()=>Object.hasOwn(props.initialInput,'satisfaction_case_id')],([key,bound])=>{if(key==='feedback_analysis'||bound)satisfactionWasBound.value=true;},{immediate:true,flush:'sync'});
-const dedicatedLifecycle=computed(()=>chargeLifecycle.value||documentLifecycle.value||satisfactionLifecycle.value);
+const drugLabelWasBound=ref(false),drugLabelLifecycle=computed(()=>drugLabelWasBound.value||featureKey.value==='drug_label_extraction'||Object.hasOwn(props.initialInput,'drug_label_source_binding_id'));
+watch([featureKey,()=>Object.hasOwn(props.initialInput,'drug_label_source_binding_id')],([key,bound])=>{if(key==='drug_label_extraction'||bound)drugLabelWasBound.value=true;},{immediate:true,flush:'sync'});
+const dedicatedLifecycle=computed(()=>chargeLifecycle.value||documentLifecycle.value||satisfactionLifecycle.value||drugLabelLifecycle.value);
 const dedicatedPanel=ref(null);
-watch([featureKey,()=>Object.hasOwn(props.initialInput,'charge_case_id'),()=>Object.hasOwn(props.initialInput,'document_original_id'),()=>Object.hasOwn(props.initialInput,'satisfaction_case_id')],([key,charge,document,satisfaction])=>{const explicit={charge_reconciliation:'charge',guideline_ingestion:'document',feedback_analysis:'satisfaction'}[key];if(explicit){dedicatedPanel.value=explicit;return;}const bound=[charge?'charge':null,document?'document':null,satisfaction?'satisfaction':null].filter(Boolean);if(bound.length===1||!dedicatedPanel.value&&bound.length)dedicatedPanel.value=bound[0];},{immediate:true,flush:'sync'});
+watch([featureKey,()=>Object.hasOwn(props.initialInput,'charge_case_id'),()=>Object.hasOwn(props.initialInput,'document_original_id'),()=>Object.hasOwn(props.initialInput,'satisfaction_case_id'),()=>Object.hasOwn(props.initialInput,'drug_label_source_binding_id')],([key,charge,document,satisfaction,drugLabel])=>{const explicit={charge_reconciliation:'charge',guideline_ingestion:'document',feedback_analysis:'satisfaction',drug_label_extraction:'drug_label'}[key];if(explicit){dedicatedPanel.value=explicit;return;}const bound=[charge?'charge':null,document?'document':null,satisfaction?'satisfaction':null,drugLabel?'drug_label':null].filter(Boolean);if(bound.length===1||!dedicatedPanel.value&&bound.length)dedicatedPanel.value=bound[0];},{immediate:true,flush:'sync'});
 const selected = computed(() => dedicatedLifecycle.value?null:configuredFeature.value);
 const needsRoster=computed(()=>featureKey.value==='roster_optimization'&&selected.value?.input_mode==='roster'),rosterSelection=ref(null),rosterReady=ref(false),rosterWasBound=ref(false),rosterInputKey=ref(0);
 const rosterInitialReferences=computed(()=>props.initialInput.roster_plan_id==null?null:{roster_plan_id:props.initialInput.roster_plan_id});

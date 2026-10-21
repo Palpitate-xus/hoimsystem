@@ -1414,6 +1414,102 @@
  },
  {
   "auth": [
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "options",
+  "method": "GET",
+  "module": "ai_drug_label_sources.py",
+  "path": "/api/ai/drug-label-sources/options"
+ },
+ {
+  "auth": [
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "catalog",
+  "method": "GET",
+  "module": "ai_drug_label_sources.py",
+  "path": "/api/ai/drug-label-sources/catalog"
+ },
+ {
+  "auth": [
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "directory",
+  "method": "GET",
+  "module": "ai_drug_label_sources.py",
+  "path": "/api/ai/drug-label-sources"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "create",
+  "method": "POST",
+  "module": "ai_drug_label_sources.py",
+  "path": "/api/ai/drug-label-sources"
+ },
+ {
+  "auth": [
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "detail",
+  "method": "GET",
+  "module": "ai_drug_label_sources.py",
+  "path": "/api/ai/drug-label-sources/{binding_id}"
+ },
+ {
+  "auth": [
+   "pharmacist"
+  ],
+  "function": "professional_sign",
+  "method": "POST",
+  "module": "ai_drug_label_sources.py",
+  "path": "/api/ai/drug-label-sources/{binding_id}/professional-review"
+ },
+ {
+  "auth": [
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "professional_revoke",
+  "method": "POST",
+  "module": "ai_drug_label_sources.py",
+  "path": "/api/ai/drug-label-sources/{binding_id}/professional-review/revoke"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "review",
+  "method": "POST",
+  "module": "ai_drug_label_sources.py",
+  "path": "/api/ai/drug-label-sources/{binding_id}/review"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "revoke",
+  "method": "POST",
+  "module": "ai_drug_label_sources.py",
+  "path": "/api/ai/drug-label-sources/{binding_id}/revoke"
+ },
+ {
+  "auth": [
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "inspect_drug_label_context",
+  "method": "POST",
+  "module": "ai_drug_label_tasks.py",
+  "path": "/api/ai/drug-label/context"
+ },
+ {
+  "auth": [
    "director",
    "doctor",
    "lab_technician",

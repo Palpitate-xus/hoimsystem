@@ -195,6 +195,8 @@ def describe_config(db: Session, spec: FeatureSpec, config: AIFeatureConfig | No
         data["input_mode"] = "charge_reconciliation"
     if spec.number == 70:
         data["input_mode"] = "satisfaction_evidence"
+    if spec.number == 73:
+        data["input_mode"] = "drug_label_evidence"
     if spec.number == 71:
         data["input_mode"] = "document_extraction"
     if spec.number == 68:

@@ -30,12 +30,13 @@ def test_audit_readers_recheck_stale_super_before_any_run_read(db_session, seed_
     finally:
         event.remove(db_session, "do_orm_execute", observe)
         db_session.rollback()
-    # Mixed directories take Billing then Satisfaction before the actor lock;
+    # Mixed directories take Billing, Satisfaction and Inventory before actor;
     # neither Gate carries private Run or Source text.
-    assert len(sql) == 3
+    assert len(sql) == 4
     assert "hoimsystem_ai_charge_write_gate" in sql[0] and sql[0].rstrip().endswith("FOR UPDATE")
     assert "hoimsystem_ai_satisfaction_write_gate" in sql[1] and sql[1].rstrip().endswith("FOR UPDATE")
-    assert "hoimsystem_users" in sql[2] and sql[2].rstrip().endswith("LOCK IN SHARE MODE")
+    assert "hoimsystem_ai_inventory_write_gate" in sql[2] and sql[2].rstrip().endswith("FOR UPDATE")
+    assert "hoimsystem_users" in sql[3] and sql[3].rstrip().endswith("LOCK IN SHARE MODE")
 
 
 def test_audit_actor_rejects_changed_loaded_token_epoch_before_task_reads(db_session, seed_data):

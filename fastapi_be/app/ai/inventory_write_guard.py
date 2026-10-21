@@ -21,7 +21,10 @@ def lock_inventory_gate(db):
     """Acquire the singleton, including a fresh database without a seeded row."""
     dialect = db.get_bind().dialect.name
     if dialect == "mysql":
-        statement = mysql_insert(AIInventoryWriteGate).values(gate_id=1, revision=1).prefix_with("IGNORE")
+        # Duplicate INSERT IGNORE takes a shared record lock; two callers
+        # can deadlock when both later upgrade to FOR UPDATE. A same-value
+        # duplicate UPDATE acquires the already-required exclusive gate lock.
+        statement = mysql_insert(AIInventoryWriteGate).values(gate_id=1, revision=1).on_duplicate_key_update(revision=AIInventoryWriteGate.revision)
     elif dialect == "sqlite":
         statement = sqlite_insert(AIInventoryWriteGate).values(gate_id=1, revision=1).on_conflict_do_nothing(index_elements=["gate_id"])
     else:

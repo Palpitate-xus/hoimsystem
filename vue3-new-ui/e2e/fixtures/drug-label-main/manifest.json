@@ -1,0 +1,20 @@
+{
+  "scope": "Actual mounted Main JWT/HTTP Source/context/short/full/super-full/trace/history bodies from one stable five-test run using synthetic SQLite and Chat/Responses MockTransport; no hospital, real model, MySQL or production-page claim. Gzip wraps decoded packet JSON; retained raw_http_responses keep exact original HTTP UTF8 bodies and their byte digests.",
+  "verification_file": "hoim-drug-label-shared-main-fourth-verification.json",
+  "verification_sha256": "9b6bb7cb324c3b05db436b44cc75496c019e37525e1904cbbb6157c9671f7cb0",
+  "export_file": "hoim-drug-label-shared-main-fourth-actual-http-packet.json",
+  "export_sha256": "9dcc523afdbd824e97c4c80d53fe5964d0552cc0751450c2d0f2861ec0934365",
+  "kinds": {
+    "chat": {
+      "raw_bytes": 214639,
+      "raw_sha256": "67b13efc6cbc8cc89faf6e484654103858a282dc5cb010eaf3d52df442bad357",
+      "gzip_sha256": "a208fa10451b3402310268b05592b3aefb3f6c5061a6365bb600713950da08cd"
+    },
+    "responses": {
+      "raw_bytes": 215389,
+      "raw_sha256": "20f2ba9eeab0ba001e5ff5ef7844ba406e7233e0a54f89a8385c58628b504db8",
+      "gzip_sha256": "9b522952cb4a3d46c7975ac5d21c4e8c541e71b71f79d2114acdef337c7bf4de"
+    }
+  },
+  "packed_sha256": "87b99528a38f190fa5e2f586122615c20a700b90d4b5daadd849cd7f15fa7257"
+}

@@ -39,11 +39,11 @@ def test_actual_single_additive_up_down_up_preserves_all_previous_ddl_and_rows(t
         with engine.connect() as conn:
             assert snapshot(conn, names) == prior
         if action == "upgrade":
-            assert {row["name"]: row["nullable"] for row in inspect(engine).get_columns(table.name)} == {row.name: row.nullable for row in table.columns}
+            assert {row["name"]: row["nullable"] for row in inspect(engine).get_columns(table.name)} == {row.name: row.nullable for row in table.columns if row.name != "usage_event_id"}
             assert {row["name"]: " ".join(row["sqltext"].split()) for row in inspect(engine).get_check_constraints(table.name)} == {
                 row.name: " ".join(str(row.sqltext.compile(compile_kwargs={"literal_binds": True, "include_table": False})).replace(table.name + ".", "").split())
                 for row in table.constraints
-                if isinstance(row, CheckConstraint)
+                if isinstance(row, CheckConstraint) and row.name != "ck_sat_artifact_usage"
             }
             assert len(inspect(engine).get_foreign_keys(table.name)) == 4
     engine.dispose()

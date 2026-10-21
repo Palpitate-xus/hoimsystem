@@ -1,6 +1,6 @@
 """One durable task anchor and optional complete, audited satisfaction result."""
 
-from sqlalchemy import CheckConstraint, Column, ForeignKey, Integer, LargeBinary, String, cast, func
+from sqlalchemy import CheckConstraint, Column, ForeignKey, Integer, LargeBinary, String, UniqueConstraint, cast, func
 
 from app.ai.satisfaction_models import MAX_BYTES, original_json, utc6
 from app.database import Base
@@ -37,9 +37,12 @@ class AISatisfactionRunArtifact(Base):
     result_hash = Column(String(64), nullable=True)
     result_bytes = Column(Integer, nullable=True)
     receipt_event_id = Column(Integer, ForeignKey("hoimsystem_ai_audit_event.event_id"), nullable=True, unique=True)
+    usage_event_id = Column(Integer, ForeignKey("hoimsystem_ai_audit_event.event_id", name="fk_sat_artifact_usage"), nullable=True)
     accepted_lease = Column(String(36), nullable=True)
     accepted_at = Column(utc6(), nullable=True)
     __table_args__ = (
+        UniqueConstraint("usage_event_id", name="uq_sat_artifact_usage"),
+        CheckConstraint("usage_event_id IS NULL OR usage_event_id>0", name="ck_sat_artifact_usage"),
         CheckConstraint("HEX(schema_version)=HEX('satisfaction_run_artifact_v1') AND requested_by>0", name="ck_satisfaction_artifact_schema"),
         *(CheckConstraint(lower_hex_sql(name), name="ck_satisfaction_artifact_" + name) for name in ANCHOR_FIELDS),
         CheckConstraint("result_hash IS NULL OR (" + lower_hex_sql("result_hash") + ")", name="ck_satisfaction_artifact_result_hash"),

@@ -2,6 +2,7 @@
 
 from app.ai.catalog import COMMON_SYSTEM_PROMPT, FEATURE_BY_KEY, FEATURES, describe_feature
 from app.ai.document_change_prompt import SYSTEM_PROMPT as DOCUMENT_CHANGE_SYSTEM_PROMPT
+from app.ai.operations_support_task_prompt import SYSTEM_PROMPT as OPERATIONS_SYSTEM_PROMPT
 from app.ai.research_cohort_prompt import RESEARCH_SYSTEM_PROMPT
 from app.dependencies import VALID_USER_ROLES
 
@@ -78,6 +79,7 @@ def test_actual_coding_and_charge_prompts_and_unique_charge_reference_are_export
         "guideline_change_review": DOCUMENT_CHANGE_SYSTEM_PROMPT,
         "drug_label_extraction": DRUG_LABEL_SYSTEM_PROMPT,
         "research_cohort": RESEARCH_SYSTEM_PROMPT,
+        "operations_support": OPERATIONS_SYSTEM_PROMPT,
     }
     assert len(exported["features"]) == 80
     for spec, value in zip(FEATURES, exported["features"], strict=True):
@@ -108,6 +110,7 @@ def test_export_declares_actual_distinct_fixed_system_prompts_for_closed_drafts(
         "guideline_change_review": DOCUMENT_CHANGE_SYSTEM_PROMPT,
         "drug_label_extraction": DRUG_LABEL_SYSTEM_PROMPT,
         "research_cohort": RESEARCH_SYSTEM_PROMPT,
+        "operations_support": OPERATIONS_SYSTEM_PROMPT,
     }
     assert FEATURE_BY_KEY["guideline_ingestion"].default_roles == ("super_admin",)
     assert FEATURE_BY_KEY["guideline_ingestion"].requires_patient_data_permission

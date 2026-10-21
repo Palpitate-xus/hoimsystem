@@ -39,7 +39,7 @@ class AIResearchCohortRunArtifact(Base):
     source_projection_hash = Column(String(64), nullable=False)
     source_binding_json = Column(Text, nullable=False)
     source_binding_hash = Column(String(64), nullable=False)
-    prompt_id = Column(String(36), ForeignKey("hoimsystem_ai_prompt_version.prompt_id"), nullable=False)
+    prompt_id = Column(String(36), ForeignKey("hoimsystem_ai_prompt_version.prompt_id"), nullable=True)
     prompt_version = Column(Integer, nullable=False)
     prompt_snapshot_json = Column(original_json(), nullable=False)
     prompt_snapshot_hash = Column(String(64), nullable=False)
@@ -58,9 +58,10 @@ class AIResearchCohortRunArtifact(Base):
     __table_args__ = (
         CheckConstraint(f"HEX(schema_version)=HEX('{ARTIFACT_SCHEMA}')", name="ck_rcr_artifact_schema"),
         CheckConstraint(
-            "requested_by>0 AND prompt_version>0 AND provider_revision>0 AND config_revision>0 AND created_audit_event_id>0 AND (usage_event_id IS NULL OR (usage_event_id>0 AND usage_event_id<>created_audit_event_id))",
+            "requested_by>0 AND prompt_version>=0 AND provider_revision>0 AND config_revision>0 AND created_audit_event_id>0 AND (usage_event_id IS NULL OR (usage_event_id>0 AND usage_event_id<>created_audit_event_id))",
             name="ck_rcr_artifact_positive",
         ),
+        CheckConstraint("(prompt_id IS NULL AND prompt_version=0) OR (prompt_id IS NOT NULL AND prompt_version>0)", name="ck_rcr_artifact_prompt_origin"),
         CheckConstraint(f"source_bytes>0 AND source_bytes<={SNAPSHOT_BYTES}", name="ck_rcr_artifact_source_bytes"),
         _json_constraint("source_json", SNAPSHOT_BYTES, "ck_rcr_artifact_source_json"),
         CheckConstraint(column("source_bytes") == _bytes("source_json"), name="ck_rcr_artifact_exact_bytes"),

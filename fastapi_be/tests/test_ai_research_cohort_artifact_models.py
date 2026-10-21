@@ -224,6 +224,11 @@ def test_incremental_frozen_migration_up_down_up_preserves_all_prior_source_and_
                 for model in RESEARCH_COHORT_RUN_MODELS:
                     assert {value["name"] for value in inspect(conn).get_columns(model.__tablename__)} == set(model.__table__.columns.keys())
                     assert {value["name"] for value in inspect(conn).get_indexes(model.__tablename__)} == {index.name for index in model.__table__.indexes}
-                    assert len(inspect(conn).get_check_constraints(model.__tablename__)) == len([value for value in model.__table__.constraints if value.__class__.__name__ == "CheckConstraint"])
+                    # This original migration is the frozen database-Prompt-only
+                    # stage. A later additive revision permits packaged version0.
+                    expected = len([value for value in model.__table__.constraints if value.__class__.__name__ == "CheckConstraint"])
+                    assert len(inspect(conn).get_check_constraints(model.__tablename__)) == expected - (model is AIResearchCohortRunArtifact)
+                    if model is AIResearchCohortRunArtifact:
+                        assert next(value for value in inspect(conn).get_columns(model.__tablename__) if value["name"] == "prompt_id")["nullable"] is False
                     assert len(inspect(conn).get_foreign_keys(model.__tablename__)) == len(model.__table__.foreign_key_constraints)
     engine.dispose()

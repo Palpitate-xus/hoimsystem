@@ -117,3 +117,31 @@ def test_closed_actual_queue_view_rejects_private_or_mixed_or_incomplete_fields(
         value["create_time"] += ".123456"
     with pytest.raises(ValueError):
         checked_wire(copy.deepcopy(value))
+
+
+def test_preview_is_actual_current_context_projection_and_source_without_private_seed(case):
+    from app.ai.context import context_metadata
+    from app.ai.drug_label_context import prepare_context
+    from app.ai.drug_label_context_contract import expand_public_context
+    from app.ai.drug_label_draft import SYSTEM_PROMPT
+    from app.ai.drug_label_task_view_contract import DrugLabelPreview
+
+    bundle, record, public, seed = prepare_context(case.db, case.actor, case.request.input)
+    value = {
+        "context": expand_public_context(bundle.data, public),
+        "metadata": {
+            **context_metadata(bundle),
+            "feature_revision": case.config.revision,
+            "validation_status": case.config.validation_status,
+            "tool_fingerprint": runtime.d.digest({}),
+            "instructions_digest": storage.instructions_digest(SYSTEM_PROMPT, case.prompt.task_prompt),
+            "model_version": case.provider.model,
+        },
+        "evidence": bundle.evidence,
+        "drug_label_source_record": record.model_dump(mode="json"),
+    }
+    checked_wire(value, DrugLabelPreview)
+    assert seed not in json.dumps(value, ensure_ascii=False)
+    assert value["context"]["drug_label_source"]["text"] == record.snapshot.original.snapshot.text
+    with pytest.raises(ValueError):
+        checked_wire({**value, "mapping_seed": seed}, DrugLabelPreview)

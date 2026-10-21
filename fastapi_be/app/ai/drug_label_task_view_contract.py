@@ -97,6 +97,17 @@ class DrugLabelTaskEvidence(d.StrictModel):
     content: str = Field(min_length=1, max_length=65535)
 
 
+class DrugLabelExpandedContext(DrugLabelShortContext):
+    drug_label_source: DrugLabelPublicSource
+
+
+class DrugLabelPreview(d.StrictModel):
+    context: DrugLabelExpandedContext
+    metadata: DrugLabelTaskMetadata
+    evidence: list[DrugLabelTaskEvidence] = Field(min_length=2, max_length=2)
+    drug_label_source_record: SourceRecord
+
+
 class DrugLabelRunSummary(d.StrictModel):
     run_id: d.UUID
     feature_key: Literal["drug_label_extraction"]

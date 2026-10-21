@@ -227,6 +227,18 @@ module.exports = {
       // 减小最小块大小，允许更细粒度的分割
       minSize: 20000,
       cacheGroups: {
+        // Actual production chunks copied these unchanged small modules across
+        // two screens each. Share their code without changing global limits.
+        smallEvidenceShared: {
+          name: "small-evidence-shared",
+          test: /[\\/]src[\\/](?:components[\\/](?:DiagnosisReview[\\/]index|AISurgerySources[\\/]ProtectedEditor)\.vue(?:\?.*)?$|api[\\/]ai[\\/]nativeOriginalJson\.js$)/,
+          chunks: "async",
+          minChunks: 2,
+          minSize: 0,
+          minSizeReduction: 0,
+          reuseExistingChunk: true,
+          priority: 15,
+        },
         schemaDataDecoderShared: {
           name: "schema-data-decoder-shared",
           test: /[\\/]src[\\/]api[\\/]schemaDataCodec\.cjs$/,

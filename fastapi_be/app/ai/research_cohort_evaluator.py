@@ -6,8 +6,12 @@ Text absence only describes the recorded string; it is not absence of illness.
 
 import datetime as dt
 
-from app.ai.research_cohort_contract import CohortCriteria
+from fastapi import HTTPException
+
+from app.ai.research_cohort_contract import CohortCriteria, canonical_json
 from app.ai.research_cohort_sources import hash_content
+
+MAX_EVALUATION_BYTES = 8 * 1024 * 1024
 
 TRUTH = {True: "true", False: "false", None: "unknown"}
 LIMITATIONS = [
@@ -65,11 +69,13 @@ def evaluate_criteria(collection, values):
     criteria = values if isinstance(values, CohortCriteria) else CohortCriteria.model_validate(values)
     allowed = collection["scope_original"]["payload"]["data_families"]
     outcomes = []
+    construction_bytes = 0
     for patient_id in collection["scope_original"]["payload"]["patient_ids"]:
         records = [r for r in collection["records"] if r["patient_id"] == patient_id]
         leaves = []
 
         def visit(node, path):
+            nonlocal construction_bytes
             if node.op in {"all", "any"}:
                 results = [visit(child, f"{path}.{index}") for index, child in enumerate(node.children)]
                 return _all(results) if node.op == "all" else _any(results)
@@ -83,7 +89,11 @@ def evaluate_criteria(collection, values):
             for record in candidates:
                 result, proof = _atom(node, record)
                 results.append(result)
-                evidence.append({**proof, "truth": TRUTH[result]})
+                item = {**proof, "truth": TRUTH[result]}
+                construction_bytes += len(canonical_json(item).encode("utf-8"))
+                if construction_bytes > MAX_EVALUATION_BYTES:
+                    raise HTTPException(413, "完整三值证据构建超过8MiB，未先构造无界重复引用")
+                evidence.append(item)
             # Neither empty universals nor missing documents become true.
             result = None if not candidates else _any(results) if node.quantifier == "any_record" else _all(results)
             leaves.append(
@@ -93,4 +103,7 @@ def evaluate_criteria(collection, values):
 
         result = visit(criteria.root, "root")
         outcomes.append({"patient_id": patient_id, "truth": TRUTH[result], "interpretation": "recorded_criteria_only_not_clinical_eligibility", "leaves": leaves})
-    return {"schema_version": "research_recorded_evaluation_v1", "criteria_hash": hash_content(criteria.model_dump()), "outcomes": outcomes, "limitations": list(LIMITATIONS)}
+    result = {"schema_version": "research_recorded_evaluation_v1", "criteria_hash": hash_content(criteria.model_dump()), "outcomes": outcomes, "limitations": list(LIMITATIONS)}
+    if len(canonical_json(result).encode("utf-8")) > MAX_EVALUATION_BYTES:
+        raise HTTPException(413, "完整三值研究证据超过8MiB，未裁剪原成员")
+    return result

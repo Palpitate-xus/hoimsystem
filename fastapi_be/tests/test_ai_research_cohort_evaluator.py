@@ -63,3 +63,13 @@ def test_unsupported_family_scope_does_not_silently_grow_and_inputs_are_unchange
     with pytest.raises(ValueError):
         evaluate_criteria(value, {"schema_version": "research_recorded_criteria_v1", "root": atom()})
     assert value == before
+
+
+def test_evidence_construction_refuses_before_whole_repeated_output_exceeds_budget():
+    from fastapi import HTTPException
+
+    records = [record("原" * 2000) for _ in range(128)]
+    root = {"op": "all", "children": [atom("原" * 2000) for _ in range(63)]}
+    with pytest.raises(HTTPException) as error:
+        evaluate(records, root)
+    assert error.value.status_code == 413

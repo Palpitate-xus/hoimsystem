@@ -1,5 +1,6 @@
 /* Build-time storage encoding only; no schema constraint or validator changes. */
 const path = require('node:path');
+const crypto = require('node:crypto');
 const { MAX_SCHEMA_BYTES, decodeSchemaText } = require('../src/api/schemaDataCodec.cjs');
 
 function encodeSchemaData(source) {
@@ -62,6 +63,14 @@ function encodeSchemaData(source) {
 function schemaDataLoader(source) {
   this.cacheable();
   const value = encodeSchemaData(source);
+  if (this.getOptions?.().documentData === true) {
+    const packed = Buffer.from(value.encoded, 'base64');
+    const sha256 = crypto.createHash('sha256').update(packed).digest('hex');
+    const filename = `static/schema-data/${sha256}.schema.json`;
+    this.emitFile(filename, JSON.stringify({schema_version:'hoim_static_schema_record_v1',encoded:value.encoded,byteLength:value.byteLength,packedBytes:packed.length,sha256}));
+    const reader = this.utils.contextify(this.context, path.resolve(__dirname, '../src/api/schemaDataDocument.cjs'));
+    return `module.exports = require(${JSON.stringify(reader)}).readSchemaDocumentData(${JSON.stringify(sha256)}, ${value.byteLength}, ${packed.length});`;
+  }
   const decoder = this.utils.contextify(this.context, path.resolve(__dirname, '../src/api/schemaDataCodec.cjs'));
   return `module.exports = require(${JSON.stringify(decoder)}).decodeSchemaData(${JSON.stringify(value.encoded)}, ${value.byteLength});`;
 }

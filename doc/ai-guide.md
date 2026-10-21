@@ -667,6 +667,8 @@ node --test tests/aiImagePixels.test.cjs
 npm run test:e2e -- e2e/ai-*.spec.js e2e/diagnosis-review.spec.js
 ```
 
+生产构建把完整生成的前端校验契约存入页面内的 `application/json` 只读数据块；它只含版本化字段、类型和边界定义，不含患者、任务、凭据或模型响应。同步读取器按编译时SHA、完整字节长度和原UTF8解码逐件核对，损坏时停止模块加载；开发构建仍保留原同步内联方式。重复的同一组件样式单独共享。JavaScript 6,000,000字节、总资源7,000,000字节和单脚本700,000字节预算保持原值，HTML数据也计入总资源，不改变浏览器目标、校验字段或依赖。
+
 协议实现参考：[Responses API](https://developers.openai.com/api/reference/resources/responses/methods/create)、[Structured Outputs](https://developers.openai.com/api/docs/guides/structured-outputs)、[Chat Completions](https://developers.openai.com/api/reference/resources/chat/subresources/completions/methods/create)。本地隔离测试不会调用真实付费模型。
 
 

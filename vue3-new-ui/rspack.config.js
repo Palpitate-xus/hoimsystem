@@ -2,6 +2,7 @@ const path = require("path");
 const { Configuration, CopyRspackPlugin, DefinePlugin, CssExtractRspackPlugin } = require("@rspack/core");
 const HtmlRspackPlugin = require("html-rspack-plugin");
 const { VueLoaderPlugin } = require("vue-loader");
+const { SchemaHtmlDataPlugin } = require("./scripts/schema-html-data-plugin.cjs");
 const Components = require("unplugin-vue-components/rspack");
 const { ElementPlusResolver } = require("unplugin-vue-components/resolvers");
 const {
@@ -60,7 +61,7 @@ module.exports = {
         // every original UTF8 byte before emitting data; validators stay intact.
         test: /[\\/]src[\\/]api[\\/](?:ai[\\/])?[A-Za-z]+Schemas\.json$/,
         type: "javascript/auto",
-        use: [{ loader: resolve("scripts/schema-data-loader.cjs") }],
+        use: [{ loader: resolve("scripts/schema-data-loader.cjs"), options: {documentData: mode === "production"} }],
       },
       {
         test: /\.vue$/,
@@ -166,6 +167,7 @@ module.exports = {
     },
   },
   plugins: [
+    ...(mode === "production" ? [new SchemaHtmlDataPlugin()] : []),
     ...(mode === "production" ? [new CssExtractRspackPlugin({
       filename: "css/[name].[contenthash:8].css",
       chunkFilename: "css/[name].[contenthash:8].css",
@@ -227,6 +229,19 @@ module.exports = {
       // 减小最小块大小，允许更细粒度的分割
       minSize: 20000,
       cacheGroups: {
+        // Reuse the exact scoped style module across lazy screens. The normal
+        // CSS filename rule does not match SFC resource queries.
+        sharedComponentStyles: {
+          name: "shared-component-styles",
+          test: module => module.type === "css/mini-extract",
+          chunks: "async",
+          minChunks: 2,
+          minSize: 0,
+          minSizeReduction: 0,
+          enforce: true,
+          reuseExistingChunk: true,
+          priority: 41,
+        },
         // Actual production chunks copied these unchanged small modules across
         // two screens each. Share their code without changing global limits.
         smallEvidenceShared: {

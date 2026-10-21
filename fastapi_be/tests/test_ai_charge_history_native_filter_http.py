@@ -63,3 +63,51 @@ async def test_native_only_history_requires_current_complete_charge_scope(source
     async with httpx.AsyncClient(transport=httpx.ASGITransport(app=source_app), base_url="http://synthetic") as client:
         response = await client.get("/api/ai/runs", headers=auth_headers(actor.username), params=query)
     assert response.status_code in {403, 422}, response.text
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("path", ["/api/ai/runs", "/api/ai/admin/runs"])
+@pytest.mark.parametrize("feature,reference", [("charge_reconciliation", "document_original_id"), ("guideline_ingestion", "charge_case_id")])
+async def test_native_histories_reject_the_other_complete_source_scope(source_app, charge_case, auth_headers, path, feature, reference):
+    actor, _, _, _, _ = configured(charge_case)
+    async with httpx.AsyncClient(transport=httpx.ASGITransport(app=source_app), base_url="http://synthetic") as client:
+        response = await client.get(path, headers=auth_headers(actor.username), params={"feature_key": feature, reference: str(uuid.uuid4())})
+    assert response.status_code == 422, response.text
+
+
+@pytest.mark.asyncio
+async def test_document_history_cannot_accept_native_charge_directory_mode(source_app, charge_case, auth_headers):
+    actor, _, _, _, _ = configured(charge_case)
+    async with httpx.AsyncClient(transport=httpx.ASGITransport(app=source_app), base_url="http://synthetic") as client:
+        response = await client.get("/api/ai/runs", headers=auth_headers(actor.username), params={"feature_key": "guideline_ingestion", "charge_native_only": True})
+    assert response.status_code == 422, response.text
+
+
+def test_charge_read_identity_locators_take_gate_before_any_document_anchor_lock(charge_case):
+    from sqlalchemy import event, inspect
+    from sqlalchemy.dialects import mysql
+
+    from app.ai.charge_reconciliation_runtime import create_charge_run
+    from app.ai.native_task_access import guard_private_task_read
+
+    actor, req, _, _, _ = configured(charge_case)
+    db = charge_case["db"]
+    run = create_charge_run(db, actor, req)
+    run_id = inspect(run).identity[0]
+    statements = []
+
+    def observe(state):
+        if state.is_select:
+            statements.append(str(state.statement.compile(dialect=mysql.dialect())))
+
+    event.listen(db, "do_orm_execute", observe)
+    try:
+        guard_private_task_read(db, actor, run_id)
+    finally:
+        event.remove(db, "do_orm_execute", observe)
+    gate = next(i for i, sql in enumerate(statements) if "hoimsystem_ai_charge_write_gate" in sql)
+    original = next(i for i, sql in enumerate(statements) if "hoimsystem_ai_document_extraction_run_anchor" in sql)
+    assert gate < original
+    assert statements[gate].rstrip().endswith("FOR UPDATE")
+    assert all("FOR UPDATE" not in sql and "LOCK IN SHARE MODE" not in sql for sql in statements[:gate])
+    assert all("input_json" not in sql and "result_json" not in sql for sql in statements)

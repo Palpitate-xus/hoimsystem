@@ -3,7 +3,7 @@
 > 由 `fastapi_be/scripts/generate_rbac_matrix.py` 从源码自动生成，请勿手改。
 > `✓`=可访问 | `PUBLIC`=无需登录 | 留空=不可访问
 
-共 **850** 个接口（PUBLIC 18 个 / 需登录 832 个）。
+共 **867** 个接口（PUBLIC 18 个 / 需登录 849 个）。
 
 
 ### `admin.py`
@@ -59,6 +59,8 @@
 
 | 方法 | 路径 | admin | super_admin | director | doctor | nurse | cashier | pharmacist | guide | patient | lab_technician | registrar | PUBLIC |
 |------|------|------|------|------|------|------|------|------|------|------|------|------|------|
+| POST | `/api/ai/document-extraction/context` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/runs/{run_id}/document-candidates` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
 | GET | `/api/ai/features` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
 | GET | `/api/ai/patients` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
 | GET | `/api/ai/service-options` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
@@ -194,6 +196,26 @@
 | GET | `/api/ai/coding-evidence/packages/{identifier}` | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |
 | POST | `/api/ai/coding-evidence/packages/{identifier}/review` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
 | POST | `/api/ai/coding-evidence/packages/{identifier}/revoke` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+
+### `ai_document_evidence.py`
+
+| 方法 | 路径 | admin | super_admin | director | doctor | nurse | cashier | pharmacist | guide | patient | lab_technician | registrar | PUBLIC |
+|------|------|------|------|------|------|------|------|------|------|------|------|------|------|
+| GET | `/api/ai/admin/document-evidence/options` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/admin/document-evidence/originals` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/admin/document-evidence/originals` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/admin/document-evidence/originals/{original_id}` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/admin/document-evidence/originals/{original_id}/review` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/admin/document-evidence/originals/{original_id}/revoke` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/admin/document-evidence/candidates` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/admin/document-evidence/candidates` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/admin/document-evidence/candidates/{candidate_id}` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/admin/document-evidence/candidates/{candidate_id}/review` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/admin/document-evidence/candidates/{candidate_id}/revoke` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/admin/document-evidence/candidates/{candidate_id}/publish` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/admin/document-evidence/publications` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/admin/document-evidence/publications/{publication_id}` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/admin/document-evidence/publications/{publication_id}/revoke` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
 
 ### `ai_ecg.py`
 

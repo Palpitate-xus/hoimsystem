@@ -193,6 +193,8 @@ def describe_config(db: Session, spec: FeatureSpec, config: AIFeatureConfig | No
     data = describe_feature(spec)
     if spec.number == 69:
         data["input_mode"] = "charge_reconciliation"
+    if spec.number == 71:
+        data["input_mode"] = "document_extraction"
     if spec.number == 68:
         data["input_mode"] = "coding_evidence"
     if spec.number == 63:
@@ -231,7 +233,8 @@ def describe_config(db: Session, spec: FeatureSpec, config: AIFeatureConfig | No
         }
     )
     if management:
-        from app.ai.coding_evidence_prompt import system_prompt_for
+        from app.ai.charge_reconciliation_prompt import CHARGE_RECONCILIATION_SYSTEM_PROMPT
+        from app.ai.document_extraction_prompt import system_prompt_for
 
         data.update(
             {
@@ -240,7 +243,11 @@ def describe_config(db: Session, spec: FeatureSpec, config: AIFeatureConfig | No
                 "validation_note": config.validation_note if config else "",
                 "validated_by": config.validated_by if config else None,
                 "validated_at": config.validated_at if config else None,
-                "system_prompt_hash": digest(system_prompt_for({"coding_binding": None} if spec.number == 68 else {})),
+                "system_prompt_hash": digest(
+                    CHARGE_RECONCILIATION_SYSTEM_PROMPT
+                    if spec.number == 69
+                    else system_prompt_for({"document_binding": None} if spec.number == 71 else {"coding_binding": None} if spec.number == 68 else {})
+                ),
             }
         )
     return data

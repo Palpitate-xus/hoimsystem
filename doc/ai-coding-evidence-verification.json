@@ -1,0 +1,788 @@
+{
+  "schema_version": "coding_evidence_engineering_verification_v1",
+  "recorded_at_utc": "2026-10-21T05:04:56.872261+00:00",
+  "baseline_commit": "d9ff639adc08c411914662d80bbd628e876a063a",
+  "platform_commit_at_recording": "3d16b77a2c6d9be5cf95f733abd166628666f386",
+  "recording_head_precedes_this_evidence_documentation_commit": true,
+  "goal_status": "active",
+  "scope": "Feature68 complete single actual Home/Admission governed coding-evidence collection, minimal model-visible projection and exact draft citation checks; synthetic engineering delivery, not official DRG/DIP grouping or medical/coding confirmation. The all80 goal continues.",
+  "real_patient_data_used": false,
+  "existing_hospital_database_accessed": false,
+  "existing_hospital_backend_contacted": false,
+  "production_deployment_performed": false,
+  "clinical_validation_performed": false,
+  "coding_professional_validation_performed": false,
+  "stored_business_ai_configuration_changed": false,
+  "remote_model_inference_performed": false,
+  "version_management": {
+    "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+    "commits_this_batch_before_evidence_commit": [
+      {
+        "commit": "d40508fdf8a1eb2d67a26bc835607c5d1c4cc3d0",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai): validate closed coding drafts against complete original bindings and literal spans"
+      },
+      {
+        "commit": "45839b76f96cd1397b9d06cf021e78cd02b92983",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai-coding): add immutable evidence models and current write gate"
+      },
+      {
+        "commit": "3fa7537ad0a46ce372d669670c864329021e7634",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "fix(coding): serialize original home edits and archive transitions"
+      },
+      {
+        "commit": "511edc2842b93bcf754a0ee92f03464dc45bb3d0",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "fix(coding): guard ICD and recorded local grouping writes with current reads"
+      },
+      {
+        "commit": "284cf4ee18b9ccce1f77c7e980b8ed2590bcc7f3",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai): verify complete coding case originals and exact minimized projections"
+      },
+      {
+        "commit": "00de320adf24e89188dbdbd17d24e7f563b7542d",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai-coding): capture complete authorized case evidence and immutable projection proofs"
+      },
+      {
+        "commit": "39c2dfd44d7971606299f547bc589dae5f08e1da",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai-coding): expose scoped source and local rule package governance APIs"
+      },
+      {
+        "commit": "7e2eb8d9b73dc134583463f34f7aa27e148fc09a",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai-coding): bind complete case contexts and literal draft explanations"
+      },
+      {
+        "commit": "8df3f772a1fc49fd5668de83ba413f86d90a4335",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai-coding): constrain text gateways to complete cited draft contracts"
+      },
+      {
+        "commit": "52b49ed585246e1622d7f54964b979e1002621bc",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai-coding): accept lease-bound complete drafts with atomic source rechecks"
+      },
+      {
+        "commit": "f25f18ad8c5830d25cadea85f51912ab871d4558",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "fix(ai): preserve unknown coding kinds and verify real frozen case proofs"
+      },
+      {
+        "commit": "c059d5694d3fe4b3abe7ca096071a0667968c0ef",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "fix(ai-coding): reject downgraded tasks and incomplete frozen service audits"
+      },
+      {
+        "commit": "c748cad60a46d6f5827147583ba11894e3ccc4aa",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "fix(ai-coding): declare exact source and super governance route roles"
+      },
+      {
+        "commit": "a82c235268292445d4be02530bea0b6b1f124943",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "fix(ai): verify coding redacted governance and scalar text"
+      },
+      {
+        "commit": "652b0aa4508d2d49b1f0fa960346cd3b66ddd0e2",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai): govern and select complete coding evidence originals"
+      },
+      {
+        "commit": "d61a251c5a49fde5240b31e88ce8538a1332ec22",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai): select coding cases within authorized admission scope"
+      },
+      {
+        "commit": "df3daf86f8c3f1a40784d8e9bedb6d53cf7b566d",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai-coding): verify complete browser drafts and frozen case receipts"
+      },
+      {
+        "commit": "85897e6a4f315e20d2e001188bb268f2ae9ebf09",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai-coding): display reviewed originals and literal model claim citations"
+      },
+      {
+        "commit": "c4326c0a24a8b96a37c288c08f3fac71759f8742",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai-coding): expose Super governance and case-bound home review entry"
+      },
+      {
+        "commit": "c31afec5e31fb65d00675fe9f69d2852118ba876",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "fix(ai-coding): expose actual fixed prompts and complete source role matrix"
+      },
+      {
+        "commit": "10f82524cd3fc012f73a8c5ece885410cfe2dcc7",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai): bind coding assistant and audit history to reviewed cases"
+      },
+      {
+        "commit": "af6d8adcabc550b12c17d75c9f95781f4db52daa",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "test(ai): verify complete coding workflow and session boundaries"
+      },
+      {
+        "commit": "4a2fefc6223ae00f44af3cffa10d536efd276170",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "test(ai): inherit inventory protocol compatibility regression"
+      },
+      {
+        "commit": "f1b769f769b65609e77b968be0b16c29b88ddb0d",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "fix(ai): keep Home scope outside coding protocol on legacy features"
+      },
+      {
+        "commit": "951ba975727b8b04979685bf2229582ba5312266",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "test(ai): validate coding evidence entries on canonical production build"
+      },
+      {
+        "commit": "a1c632430b9d381ef13bae4cdfe47fd6d7a9a3fc",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "fix(ai-coding): preserve unsaved legacy authorization before result defaults"
+      },
+      {
+        "commit": "c74a9cb1b5567850aa75a028c820853043b0e699",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "docs: explain governed coding evidence review and task provenance"
+      },
+      {
+        "commit": "18595b231511ed77c5a33bdcc9ec0e55a1eb8707",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "docs(ai-inventory): record final governed candidate verification and scope"
+      },
+      {
+        "commit": "3d16b77a2c6d9be5cf95f733abd166628666f386",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "fix(ai): export the actual coding system contract and current catalog"
+      }
+    ]
+  },
+  "implementation": {
+    "catalog_version": "2026.10.21.15",
+    "feature_count": 80,
+    "distinct_default_task_prompts": 80,
+    "source_reference_count": 39,
+    "feature_key": "drg_evidence_review",
+    "input_mode": "coding_evidence",
+    "only_feature_reference_key": "coding_case_id",
+    "scope": "Explicit actual patient/admission/home identity and current operations-category patient authorization before private data. Current account/role/care/grant/Doctor/Department checked; coder/business role is not professional qualification.",
+    "complete_members": "One actual Home, all original code bindings and corresponding current diagnosis/operation dictionary entries, every recorded group of that Home and its current linked local rules, optional one exact governed local_prefix_snapshot package.131-binding and separate invalid-kind actual SQL fixtures are independent cases, not stitched provenance.",
+    "limits": "4096 code bindings,256 groups,4096 linked rules and complete8MiB boundaries. PK-only bounded keyset collection and current metadata pagination, no legacy100/5 truncation as completeness.",
+    "time": "Current complete server capture, not historical availability replay. Preserve original nulls/date/naive clocks and unknown historical timezone basis; no Z invented for legacy clock.",
+    "governance": "Immutable draft1/published-or-rejected2/revoked2-or3 with current scope, CAS, audit and postwrite rechecks. Technical Super publication does not confirm medical interpretation, professional coding, dictionary release or official historical grouping rule.",
+    "public_projection": "Five explicitly minimized original document fields, full recorded bindings/current dictionaries/groups/linked local rules and structural checks. Per-Case secret HMAC opaque identity. Original private rows, patient/admission/home/operator IDs, notes and identity_secret stay local; declared identifier minimization is not anonymity.",
+    "outbound": "Actual System and independently versioned Task plus checked coding_source, source_projection_hash and optional current question through Chat/Responses only. No private Case or arbitrary context/tools. No native model/grouper service claimed.",
+    "draft": "coding_evidence_draft_v1 exact source_id/projection SHA, one claim per binding. support_claim/conflict_claim require literal document-source/text-SHA/Unicode-codepoint half-open citation; BOM,CRLF,emoji and whitespace preserved. All assessments remain unreviewed model claims, not clinical/coding facts.",
+    "unknowns": "Current dictionary release and recorded grouping historical rule basis remain unknown. Empty/inactive/name-mismatched/invalid-kind and malformed primary facts retained; current local prefixes are not official or historical grouping.",
+    "task_integrity": "Short queued receipt then exact same-ID/context full GET; feature68/retained FK/any marker cannot downgrade to generic result. Queue/running/failed/cancelled contain no fabricated successful draft. Frozen Prompt and full12-field provider/5-field feature validation snapshots checked.",
+    "privacy_lifecycle": "Patient/admission/home/account/token/username/role/config/ref/KeepAlive changes clear old private detail/evidence/history. Closed preview/trace/evidence and stale async SHA/network cannot reopen prior private objects. Ordinary source selection is current non-audit even for Super.",
+    "history": "Ordinary historical full body needs current source and actual patient permission; Super can separately audit own complete frozen published anchor after source revocation, without new-execution eligibility. Broken own bytes still rejected.",
+    "business_writes": "None from AI capture/generation/feedback; diagnosis, primary code, grouping, amounts, billing, Home status and official coding adoption remain existing separately authorized workflows.",
+    "guide": {
+      "path": "doc/ai-guide.md",
+      "sha256": "d71e62aa0c4b7f420625bcdaa112f1d2d6a688153c789e318afd34a837924eb2",
+      "section": "完整病案编码证据与本地规则治理（第68项）"
+    }
+  },
+  "backend_regression": {
+    "passed": 8046,
+    "skipped": 28,
+    "warnings": 2,
+    "pytest_seconds": 2158.76,
+    "outer_seconds": 2173.467,
+    "source_file_count": 869,
+    "all_frozen_source_files_unchanged_during_full_run": true,
+    "baseline_passed": 7882,
+    "net_additional_default_passes_in_that_full_run": 164,
+    "evidence": {
+      "path": "/tmp/hoim-coding-full-frozen-second-pytest-execution.json",
+      "sha256": "8b5ea91742684a14f3b64b2843259d8182e089557e9f48529fe55d25f5d21420",
+      "bytes": 2217
+    },
+    "source_freeze": {
+      "path": "/tmp/hoim-coding-backend-frozen-second-source-freeze.json",
+      "sha256": "539fa11e877c220877e60e385d0c4cdc605823fa03cf3baec27f8962fa2602f7",
+      "bytes": 141597
+    },
+    "post_full_export_only_change": {
+      "evidence": {
+        "path": "/tmp/hoim-coding-export-final-verification.json",
+        "sha256": "45ea14977ba70f2eba0727a97a9a4e3c960537a88be8bd0d349425b3b81c8be2",
+        "bytes": 6532
+      },
+      "exact_changed_paths": [
+        {
+          "path": "fastapi_be/scripts/export_ai_catalog.py",
+          "full8046_sha256": "a7ab8f5625426dd4bcd7d40ca771d46ba4932a18ba9c2d2ef18730793f09356f",
+          "current_sha256": "d63aed33d7904ba52fefcc9243daf1f1e737c1c0a65c613a5babe35d44735401"
+        },
+        {
+          "path": "fastapi_be/tests/test_ai_catalog.py",
+          "full8046_sha256": "8c3dfb59f7e70ebf6a6dede8046a6b36793b8efbef38f5c8bf2da96674ff1a6f",
+          "current_sha256": "e5573fcbef8dca626501b18758c2ddbf6b74319193e81edddbe8fd392b55833b"
+        }
+      ],
+      "scope": "After full8046 only scripts/export_ai_catalog.py and tests/test_ai_catalog.py changed; actual app/runtime/provider/Source/product bytes remain those of the full run. Five catalog tests and pure export/import guard plus final static checks cover this subsequent tool/test change. No new full-suite8047 claim or addition of targeted counts."
+    }
+  },
+  "python_static_checks": {
+    "files": 42,
+    "scope": "Actual changed Python files relative to completed67; no fix/format mutation. Includes subsequent exporter and catalog test.",
+    "ruff_and_complete_format_passed": true,
+    "evidence": {
+      "path": "/tmp/hoim-coding-export-final-verification.json",
+      "sha256": "45ea14977ba70f2eba0727a97a9a4e3c960537a88be8bd0d349425b3b81c8be2",
+      "bytes": 6532
+    },
+    "earlier40_before_export_repair": {
+      "path": "/tmp/hoim-coding-backend-frozen-final-ruff-execution.json",
+      "sha256": "5fc38e338ca9e16709586632aca474058f6fb9967d49a2778022b0ed3087bdf2",
+      "bytes": 8868
+    }
+  },
+  "prompt_export": {
+    "actual_coding_system_override_key": "drg_evidence_review",
+    "shared_common_system_remains_separate": true,
+    "evidence": {
+      "path": "/tmp/hoim-coding-export-final-verification.json",
+      "sha256": "45ea14977ba70f2eba0727a97a9a4e3c960537a88be8bd0d349425b3b81c8be2",
+      "bytes": 6532
+    },
+    "catalog_target_evidence": {
+      "path": "/tmp/hoim-coding-export-catalog-final-verification.json",
+      "sha256": "42f8d081c48ce807d546d7e82d53106c897c5467ca16ad7c9c3b7eb886703444",
+      "bytes": 7599
+    },
+    "pure_export_guard": {
+      "path": "/tmp/hoim-coding-export-pure-guard.py",
+      "sha256": "d256fe524f5fcfe4b35bc5d05ff438a30ee9b6558bfb3a403472217c68a1213f",
+      "bytes": 1592
+    },
+    "pure_export_log": {
+      "path": "/tmp/hoim-coding-export-pure-final-tests.log",
+      "sha256": "1a93d43db26f93ee0912a5f8fc9e6308bd3856dc45a7b6dfb5338bc753bef537",
+      "bytes": 346
+    },
+    "scope": "Actual checked .15/80 independent Task defaults/39 refs/Doctor role and explicit coding System override; no settings/dotenv/SQLAlchemy/database/network imports in pure export guard. RBAC outputs regenerated and exact unchanged. Actual runtime froze System separately before this documentation repair."
+  },
+  "database": {
+    "migrations": [
+      "20261021_coding_evidence"
+    ],
+    "new_tables": 4,
+    "new_utc6_columns": 7,
+    "new_mediumtext_columns": 4,
+    "actual_migration": {
+      "path": "/tmp/hoim-coding-full-migration-mysql-verification.json",
+      "sha256": "aea7245817a996377a01d563b5ec4dd2deffae6bb36354b945ece356eac49855",
+      "bytes": 17326
+    },
+    "migration_scope": "Private MySQL8.0.39 actual203-table prior metadata/seed baseline, real single incremental migration up/down/up. All203 prior exact DDL/rows preserved at each step, four new governed tables, UTC6, Unicode/8MiB SQL and1000 ASCII/1000 emoji revocation boundary. Not an empty-database historical full chain, HTTP/JWT, worker acceptance or clinical validation.",
+    "current_gate": {
+      "path": "/tmp/hoim-coding-current-gate-mysql-verification.json",
+      "sha256": "4a2d62a473d2b76318b92a95f286684af3c382bd1fed7f8487dc367d0e8f9680",
+      "bytes": 12467
+    },
+    "gate_scope": "Three real RR connections: all14 actual legacy functions blocked at common Gate before business writes; actual bind_icd/update_diagnosis complete and archived Home update rejects current status. Old RR demotion/care revocation, new nonselected binding and dictionary changes tested. Not14 full successful business workflows.",
+    "current_directory": {
+      "path": "/tmp/hoim-coding-current-directory-mysql-verification.json",
+      "sha256": "2574b5937a44a008c872ae265ea075a359f80b7c2829c09a04314e9a36ec53b4",
+      "bytes": 5876
+    },
+    "directory_scope": "Two actual RR connections and original router functions for case/rule/package current total and complete PK-only pages after old snapshot/concurrent insert. No HTTP/model/ASGI/migration claim. Report binds the prior route-dependency version; all18 function bodies are AST-identical to final. Explicit role dependency defaults changed later and were covered by8 main-JWT repeats/full8046/final mounted inventory; no MySQL rerun on final whole-router bytes is claimed.",
+    "directory_source_lineage": {
+      "path": "/tmp/hoim-coding-directory-mysql-source-lineage.json",
+      "sha256": "db4b402b6dde91df828c2174b5138b52d07bba2e8dfcc28d076a87094607bea0",
+      "bytes": 8464
+    }
+  },
+  "actual_governance_worker_pipeline": {
+    "source": {
+      "path": "/tmp/hoim-coding-source-backend-final-verification.json",
+      "sha256": "3cebec54941b558430ae2e63885744ebd525622966e9ac0bb8d307ad8370b479",
+      "bytes": 8057
+    },
+    "source_scope": "Foundation/source/pure proof/main JWT APIs52 distinct targeted tests,8 repeat afterRBAC not added again. Current scope/dictionary/whole manifest/Package/UTC6, ordinary redaction and Super own-frozen behavior.",
+    "legacy_writers": {
+      "path": "/tmp/hoim-coding-legacy-writers-final-verification.json",
+      "sha256": "6253cd1303364f6232c1211919ed0a032af604877dab9bf62374436c10a69b96",
+      "bytes": 2486
+    },
+    "pipeline": {
+      "path": "/tmp/hoim-coding-pipeline-second-verification.json",
+      "sha256": "7a6d3245cbf57566e732c7598a37ed6f860defe4f98fadfe8abdc79f00b78257",
+      "bytes": 6248
+    },
+    "pipeline_scope": "22 actual synthetic mainJWT/SQLite cases include queue/claim/Chat and Responses MockTransport/complete result blob/history/feedback/Super revoked audit,8 queued/inflight source changes and4 SQL postwrite faults. MockTransport is not remote LLM inference.",
+    "literal_utf8": {
+      "path": "/tmp/hoim-coding-pipeline-utf8-third-verification.json",
+      "sha256": "74ccf6247e1c794f7babce4393ffb33793d6c0d4bb220f32f551e7ffe3bc675d",
+      "bytes": 6409
+    },
+    "literal_utf8_scope": "Separate two actual positive pipelines add real BOM+CRLF+emoji literal quotes; earlier22 retained, not24 new unique checks.",
+    "prompt_role_checks": {
+      "path": "/tmp/hoim-coding-prompt-rbac-final-verification.json",
+      "sha256": "ef8a43fb921871a833233715bd47ffa00afa8a89b9889576aa0e5f4f0dbf1917",
+      "bytes": 7676
+    },
+    "scope": "Actual narrow SQL/HTTP/worker reports retain their own source SHA and transport scopes; never accumulated into8046 or browser1537."
+  },
+  "frontend_build": {
+    "command": [
+      "npm",
+      "run",
+      "verify"
+    ],
+    "exit_code": 0,
+    "audit_vulnerabilities": 0,
+    "elapsed_seconds": 40.324,
+    "source_inputs": 475,
+    "javascript_bytes": 5819018,
+    "all_assets_bytes": 6605546,
+    "largest_javascript_bytes": 644905,
+    "asset_files": 411,
+    "unchanged_budgets": {
+      "javascript": 6000000,
+      "all_assets": 7000000,
+      "largest_javascript": 700000
+    },
+    "dependencies_and_browser_targets_unchanged": true,
+    "resolver_preload_used": false,
+    "existing_scss_warnings": 5,
+    "evidence": {
+      "path": "/tmp/hoim-coding-npm-frozen-second-verify-execution.json",
+      "sha256": "849acfaa80aab6403804bba1ab76e1c45395b03a7054377999d4444f45b807d9",
+      "bytes": 1184
+    },
+    "production_input_freeze": {
+      "path": "/tmp/hoim-coding-frontend-frozen-second-production-source-freeze.json",
+      "sha256": "1537069f446f1b07455990d9722c1cf4dd49db7f9a5285a2196cb0444df9ac08",
+      "bytes": 78580
+    }
+  },
+  "frontend_browser": {
+    "total": 1537,
+    "baseline_total": 1401,
+    "new_distinct_cases": 136,
+    "test_files": 107,
+    "new_files": 7,
+    "categories": {
+      "isolated_mock": 1318,
+      "production_mock": 198,
+      "real_synthetic_http": 21
+    },
+    "workers": 1,
+    "retries": 0,
+    "flaky": 0,
+    "skipped": 0,
+    "all_passed_in_one_full_run": true,
+    "elapsed_seconds": 4040.76,
+    "actual_test_duration_ms": 4026955.583,
+    "source_inputs": 865,
+    "production_assets": 411,
+    "source_and_assets_unchanged": true,
+    "evidence": {
+      "path": "/tmp/hoim-coding-browser-frozen-first-execution.json",
+      "sha256": "042ba1fbab7b5397efce1c18b515b2163169c2ca4badc9d787ad42a7ad156341",
+      "bytes": 1022431
+    },
+    "classifier": {
+      "path": "/tmp/hoim-coding-browser-final-category-counts.json",
+      "sha256": "2fb4c89258e0e542dff62c3ddd399184962dfc885bf2b23d6d399f45920d19a8",
+      "bytes": 822758
+    },
+    "source_freeze": {
+      "path": "/tmp/hoim-coding-frontend-browser-frozen-first-source-freeze.json",
+      "sha256": "b4e9cdb9ca0c622f52fd4b5f7ba996df775815a9f8711a5404df470ce18f9409",
+      "bytes": 145016
+    },
+    "baseline_continuity": {
+      "validated66": {
+        "path": "/tmp/hoim-supply-browser-final-category-counts.json",
+        "sha256": "e7df10ce81aff52b234edb1900f83ae52dd175e0845caffaa5f571324c3c9157",
+        "total": 1117,
+        "unmodified_previous_test_files": 89,
+        "all_previous_test_source_bytes_unchanged": true,
+        "all_89_previous_file_counts_unchanged": true
+      },
+      "independent_final67": {
+        "path": "/tmp/hoim-inventory-browser-frozen-second-execution.json",
+        "sha256": "7662f77facbf3a9cef9cd4a61e7debae5c11927f2a9fbb22d42631ad9fa96cde",
+        "report_path": "/tmp/hoim-inventory-browser-frozen-second-report.json",
+        "report_sha256": "b5ca17be7b91aca77f3cee3b9f7672b6fb1201ea885cd9561a3b758eba0b41e6",
+        "total": 1401,
+        "new_files": 11,
+        "new_case_count": 284,
+        "all_eleven_specs_bytes_counts_and_case_identities_match": true
+      }
+    },
+    "scope": "Explicit complete AI files only; inherited89files1117 plus reviewed67 eleven files284 plus68 seven files136.198 production and1318 isolated replay synthetic APIs;21 designated existing cases use actual synthetic loopback HTTP. No browser hospital/backend/model execution.",
+    "new_case_ownership": {
+      "source_api_input_governance_and_parent_isolated": 99,
+      "Root_result_and_findings_isolated": 29,
+      "production_mock": 8
+    },
+    "owned_static_server": {
+      "origin": "http://127.0.0.1:38385",
+      "served_directory": "/tmp/hoim-coding-evidence-20261021/vue3-new-ui/dist",
+      "has_backend_or_proxy": false,
+      "api_requests_reaching_static_server": [],
+      "socket_closed": true,
+      "thread_stopped": true
+    }
+  },
+  "targeted_frontend_evidence_not_added_again": {
+    "source_input58": {
+      "path": "/tmp/hoim-coding-source-input-final-verification.json",
+      "sha256": "12044e12aba71af160e8d8b8431a62c80b5fa297ba57626dd3009ac74d3e413b",
+      "bytes": 5232
+    },
+    "parent_home_and_inherited_inventory73": {
+      "path": "/tmp/hoim-coding-parent-home-final3-verification.json",
+      "sha256": "21430d51bd57e962238e9df90b188d884d18268e1b4d2889d56a8a15ef2ce202",
+      "bytes": 8112
+    },
+    "result_findings29": {
+      "path": "/tmp/hoim-coding-results-findings-fourth-verification.json",
+      "sha256": "c9df69402daa4801e56a756607467fe71ffe0c5dc5aa1e57746edbed96ccd555",
+      "bytes": 4366
+    },
+    "production8": {
+      "path": "/tmp/hoim-coding-production-second-verification.json",
+      "sha256": "8798d8433a414ccd4b124fcdf970ac4613333e2548064083bd779973f9a035b0",
+      "bytes": 237388
+    },
+    "same_case_actual_production_export": {
+      "path": "/tmp/hoim-coding-production-actual-export-first-verification.json",
+      "sha256": "5ea1b422b4cc4cafc584e1764dde8cd2cb8193270e2f91a5fa6bad384de088aa",
+      "bytes": 6570
+    },
+    "scope": "58+41+29+8=136 new cases. Parent73 includes inheritedInventory32, not additional new coding cases. Earlier71 and repeated targeted guards are never added again; production data is one actual synthetic case, not stitched task IDs."
+  },
+  "node_tools": {
+    "passed": 44,
+    "failed": 0,
+    "files": 4,
+    "includes_route_cases": 14,
+    "evidence": {
+      "path": "/tmp/hoim-coding-node-tools-final-verification.json",
+      "sha256": "c28fb515bd375283ddcb8bc1664b766317a8d5d2c0ff20c805d56e303a39dd81",
+      "bytes": 1532
+    },
+    "scope": "Existing four independent Node tooling files, separate from backend/browser/model counts."
+  },
+  "platform_inventory": {
+    "evidence": {
+      "path": "/tmp/hoim-coding-platform-fourth-inventory.json",
+      "sha256": "56446c2df059aae1da9a33dbb18c8a82d921b8d6e995710acebe0c1a8b9a2ff3",
+      "bytes": 106223
+    },
+    "business_routes": 843,
+    "all_api_routes_including_original_root": 844,
+    "router_modules": 111,
+    "orm_metadata_tables": 207,
+    "vue_views": 160,
+    "new_actual_route_role_guard_closures": 14,
+    "implementation_test_fixture_file_count": 78,
+    "implementation_sha256": {
+      "fastapi_be/alembic/versions/20261021_coding_evidence.py": "33e2317b96efc87a107960624292a9dcebda51620ec324078cfacfdd64e45c2d",
+      "fastapi_be/app/ai/catalog.py": "3c88c383a8ab7fd9c583ebc678ea2c519d399c3dc540f45c8bed7a3506d6de4b",
+      "fastapi_be/app/ai/coding_evidence_context.py": "e0d34804c78f32c2f8c6d6b1f0686c8fee665912a004a285a707d3aaab5c87df",
+      "fastapi_be/app/ai/coding_evidence_contract.py": "7d728a18f6a20f87116538385f956236a9fc2a6a0d145321ed8cfa2831071bd4",
+      "fastapi_be/app/ai/coding_evidence_frozen.py": "97bda9e62f23709b937556d973fe96bdea381c17263e91a8a85c21f836099d7b",
+      "fastapi_be/app/ai/coding_evidence_guard.py": "4087fd93cdae14cf0075cd158fbb95b975465f2817e50c8fb5193a6a236e731c",
+      "fastapi_be/app/ai/coding_evidence_history.py": "f05c1d40d86216c721f085fee8bd6995ffb7f5c5550b5a89ed4e42fbf606a0bd",
+      "fastapi_be/app/ai/coding_evidence_input.py": "f02e6d9e1788c043dc335296059a7723eb34fec32d52121c41df25015b5ccebe",
+      "fastapi_be/app/ai/coding_evidence_models.py": "db710892808aa990c9f0c4c1b1fdf1dc9bffe42db7ea3972cd85fe83e8a2df46",
+      "fastapi_be/app/ai/coding_evidence_projection.py": "03140847a99428820228b3850b6c13db91b0f1bcbfbefd36130ec5cd50da1f87",
+      "fastapi_be/app/ai/coding_evidence_prompt.py": "d8c7911214af4b8ef73f7e0697554a37d764fa9c7146452383337213b0fd60bb",
+      "fastapi_be/app/ai/coding_evidence_protocol.py": "71f349d395576b569930e1e0a96ccce9859be8e747721dcc4c62e2184458894b",
+      "fastapi_be/app/ai/coding_evidence_result.py": "dc6d9b7baf5392ba9889c21cc5e10d7b128cba847873f2cbe68ed8b72659c9ab",
+      "fastapi_be/app/ai/coding_evidence_sources.py": "276152f42680ea5b4b3fe7bba293c1dcf924def98d0f7462bd50dbe1e52c1a9e",
+      "fastapi_be/app/ai/coding_evidence_storage.py": "db33b3a4b9201fdde8ab369ff102090ba8a21e246f06e535e4594679456a1312",
+      "fastapi_be/app/ai/context.py": "76af40aa71f8efc54cf4c423e87fe23f2760b7a45c82fcb4672705f871730e98",
+      "fastapi_be/app/ai/gateway.py": "2176317171bbe002e1485a40c65a1164c0f41985beef130e28dbe9835935d047",
+      "fastapi_be/app/ai/governance.py": "7c30f4c5a4d41d4fc367f32468d0094a6c5407a3e0d5b527377d69b1ac6ce4dc",
+      "fastapi_be/app/ai/references.py": "4a30a26ebf55fe2a7ff1bcb17e9faeedbb8f6fceb46d757e8462ef87de174f2f",
+      "fastapi_be/app/ai/runtime.py": "ae4d177752613879f3d4490ba02729ae67696bb9dbf50e21fb5c91e90f8bc825",
+      "fastapi_be/app/ai/schemas.py": "00f2e9fe83c581d653bc14444e2651a6d5da71df8ab16a8540612cc3b602240c",
+      "fastapi_be/app/main.py": "f27245339eba064c978d31d2c616dedee047a8c85a7fd3b866d20de552047eae",
+      "fastapi_be/app/models.py": "8b73f3aaa5c9098102e5560bb9a4b2c2e1b64698cb5e91c9233ee3335d14a57c",
+      "fastapi_be/app/routers/ai.py": "eff1cc91830b4737bf4b9c87f18c7d484c229c261920fbefc6980820a37a5d15",
+      "fastapi_be/app/routers/ai_admin.py": "6a63b5c6e98476936c98245217e76a62ad13005194f2bafddb73d9f564fa6621",
+      "fastapi_be/app/routers/ai_coding_evidence.py": "bff02fd305ab89a776fef06af751abce46d4562c12186458578dae64b1c63862",
+      "fastapi_be/app/routers/home_icd.py": "7d7cd9f4666e29e4da8fbfc9bbc75985576a05176b5dfb9ca1809c449ff8e9ae",
+      "fastapi_be/app/routers/icd10.py": "7fa7d1a2cb7181e999f3aab8ea9c9e2c7d0a6ca71dae3356cdfc48e47d2768aa",
+      "fastapi_be/app/routers/insurance.py": "7cc5468c6ec5d8f083d13e4cfa5e7e4aacd8b1bb8e1dc6ee1fb800590fd7e8f9",
+      "fastapi_be/app/routers/medical_record_archive.py": "73f089fb2c33b0cff1a10024f127240dd0f88cbbbdd4e460e864a908172db649",
+      "fastapi_be/app/routers/medical_record_home.py": "1212b289a4d508c3f029d790db2a80ba384f1fc7203058bde5fdc647b659186a",
+      "fastapi_be/scripts/export_ai_catalog.py": "d63aed33d7904ba52fefcc9243daf1f1e737c1c0a65c613a5babe35d44735401",
+      "fastapi_be/tests/test_ai_catalog.py": "e5573fcbef8dca626501b18758c2ddbf6b74319193e81edddbe8fd392b55833b",
+      "fastapi_be/tests/test_ai_coding_evidence_context.py": "e4dc71f82b278213c0192e596dc94e1df7f546fa5284f7582342635ccb1dca90",
+      "fastapi_be/tests/test_ai_coding_evidence_contract.py": "6be583861a2e32e1708333c7270f78bd287465b3084593adf34b116a649dfb35",
+      "fastapi_be/tests/test_ai_coding_evidence_gateway.py": "4cf15b65430a9ccba829959fa8581affb2b674cd47ed30853d9995078d477508",
+      "fastapi_be/tests/test_ai_coding_evidence_guard.py": "b407aeae473fcdd3377afecc4c43436d21e37368793ef256d50962b257f8e152",
+      "fastapi_be/tests/test_ai_coding_evidence_migration.py": "229c733eb4992634c8a2a00d12f41fb119a358239749548421718a35329a6257",
+      "fastapi_be/tests/test_ai_coding_evidence_pipeline.py": "40e511cbb19dbc3ab125947609c188916d856b6a42ddca5fb3322caba2c69ca1",
+      "fastapi_be/tests/test_ai_coding_evidence_sources.py": "d8bb0d84967014aa0a7035df7fc9525456b59570762197ee6a735a1928f3501c",
+      "fastapi_be/tests/test_ai_coding_evidence_sources_http.py": "54db0ac18f50520d99308af9df625d306b7a45cb13a52b1fdb099be5cb1d54c0",
+      "fastapi_be/tests/test_coding_evidence_legacy_writes.py": "2192203da003dc5ae12249604e6168eec0b6bfdb716d3846fa3daaa8aee53089",
+      "vue3-new-ui/e2e/ai-coding-assistant.spec.js": "9ff54ad978ab87d19c64cc0180d03c5775c3d6b10eb3755fb81188bee772e6d4",
+      "vue3-new-ui/e2e/ai-coding-evidence-api.spec.js": "61587eb0ef2664787059f7854c318ebed5dc29374022b82e93e9eb5c0c7a8503",
+      "vue3-new-ui/e2e/ai-coding-evidence-input.spec.js": "3e8d3460e7fd7a304f55905a3d229d0ec679ccccf24b791287ec27a8104deb7f",
+      "vue3-new-ui/e2e/ai-coding-evidence-sources.spec.js": "1295683c551085ef706604b44e40d39c0d916ae0f86a0882b11f046d3efb080a",
+      "vue3-new-ui/e2e/ai-coding-findings.spec.js": "18721005269e76f62681d6de1a65fe38c074d2ae2c6a3e408d012f5feb5b788e",
+      "vue3-new-ui/e2e/ai-coding-native-entry.spec.js": "b7879274a77c6fdacd7e3e930a655ec82c9cab9dfbfa84b0f10da24f979f1d86",
+      "vue3-new-ui/e2e/ai-coding-results.spec.js": "88185a9e63e537f8f3356dc1528b33d3aedadec592116c3003653125d733cd54",
+      "vue3-new-ui/e2e/fixtures/coding-evidence-harness.cjs": "b57d475988154bc1d725a178523546185fc72cbfd2e70319e39df83e806fd61a",
+      "vue3-new-ui/e2e/fixtures/coding-evidence-packets.cjs": "899f6ac84f38191babaa798f52e94bd5ce0d69c45821476b51ed4b30461de777",
+      "vue3-new-ui/e2e/fixtures/coding-evidence-ui.cjs": "136d67f03b6211f655accadb774a9740ac9cedbfdd3d45445ccb1990a26546bd",
+      "vue3-new-ui/e2e/fixtures/coding-evidence/README.md": "27bada063b756a48b44a7386a08fb132c757fb026f2f9d32393a9324c324728b",
+      "vue3-new-ui/e2e/fixtures/coding-evidence/packets.json": "4bdfbca93b7b7f30c91dbbe6e016eff56750723fbf42a446396ea282606ca16a",
+      "vue3-new-ui/e2e/fixtures/coding-parent-README.md": "406a9ab4b0f498192c88e7eef4ba9e5c402fe27eaa284915bb9bcac592a086c8",
+      "vue3-new-ui/e2e/fixtures/coding-parent-actual.json": "25b4a99a23460eb585b9b87b5b7b62816e52c05f8dc62daf80f1e0de7a1074eb",
+      "vue3-new-ui/e2e/fixtures/coding-parent-harness.cjs": "82a256b0bd76c4841978ab891e7c832871495a5573edc754f65e00f2b15d3829",
+      "vue3-new-ui/e2e/fixtures/coding-parent-ui.cjs": "f043d3a6fc3761072f40279f12c57922b457ef62e012f7ec828be077e6985cf5",
+      "vue3-new-ui/e2e/fixtures/coding-production-README.md": "f12f62fe4ab89408dce50aea5aa1f72f4163902cd88b41844f63953df9e623e1",
+      "vue3-new-ui/e2e/fixtures/coding-production-actual.json": "3e273a88d9b53f09a4b267b83a0756647bb70fa843d71ba7c56509e0459cc550",
+      "vue3-new-ui/e2e/fixtures/coding-production-entry.cjs": "9f9c7b5b500c1c2b0972b7a0576fa64c48566e0a676da34f7a6cad4bb3b47d36",
+      "vue3-new-ui/e2e/fixtures/coding-results-actual.README.md": "8beed3ef547a0ffec9e414c9f4827e987f3fe9ae5c4f39a0790eafcd18e0e5c6",
+      "vue3-new-ui/e2e/fixtures/coding-results-actual.json": "c0bc5a820a653e65365e41446979b0c7e646756fc9a5a1525adcd595abc88fd5",
+      "vue3-new-ui/e2e/fixtures/coding-results-harness.cjs": "fdb9069b29bb72afb565812bfbf1f9c6f9c5ac3e5749a3ffbfeae09dbc361c94",
+      "vue3-new-ui/scripts/generate-coding-evidence-schemas.cjs": "abc3e66e98c8a9f8a3063c37c4aa24990f6c03f2e2398f992b4c5e9b1b167524",
+      "vue3-new-ui/scripts/generate-coding-result-schemas.cjs": "a2d5d4c5b98fc4c7ac6f738e9438e0cec8e2f09ceadfa2c790e2d3d77db109ff",
+      "vue3-new-ui/src/api/ai/codingEvidence.js": "8699721b29befef1d2d28ea2502c03fda66ee70da135c69695719ffc811bff6b",
+      "vue3-new-ui/src/api/ai/codingEvidenceSchemas.json": "a9864da62ef1573d2d6dee3f21e39bcaf0c62591234343e66cc9fa96570e40d8",
+      "vue3-new-ui/src/api/ai/codingFixedPolicy.json": "e79403df2312ffb2ad01a0210a3114386f96a368da5074062e38ed6a00a9b490",
+      "vue3-new-ui/src/api/ai/codingResultSchemas.json": "eaf54dc487dd8ff63e56ce7749cc8c728fece53e97b7828164ad70a6a6a771ac",
+      "vue3-new-ui/src/api/ai/codingResults.js": "a6f37def1a2073166b35725e12ac057ff3ed817dd72b27011e06482ca114b406",
+      "vue3-new-ui/src/components/AIAssistant/index.vue": "8c5f1e0c78a49ff37de8d7aaebc925db18efc861965cc0c426d72355c74f7d15",
+      "vue3-new-ui/src/components/AIRunHistory/index.vue": "9d02107cd400144d73bc1e8deeaf3e873cc00593a5258e30cd1dc58cc529e606",
+      "vue3-new-ui/src/components/CodingEvidenceInput.vue": "e9519edc8fbacf482f17ad958d9b9dd70922b694ae1ac234e8367087da148c21",
+      "vue3-new-ui/src/components/CodingEvidenceSources.vue": "c40d7f3e88c0013edfd5f68516f61aa44aabc3d5f2ef8f109e2a27d2da231578",
+      "vue3-new-ui/src/components/ai/CodingFindings.vue": "50bd6cacebef4d97d763c89c77ed650118d246cc68409666fb2f528c94929b33",
+      "vue3-new-ui/src/views/inpatient/medicalRecordHome.vue": "079ea4047fea242d071d8c34797d60dcd7fe4ef5358c18b7a984ed383293a6af",
+      "vue3-new-ui/src/views/system/aiManagement.vue": "726cdd1e3ec94894909f0c54faa2ccae6bda9d08fdf63340b873a9985447cfe0"
+    },
+    "generated_artifacts_sha256": {
+      "doc/ai-prompts.json": "d1d11981895028adc7a7baa89b6edfe0728259b78cc063db0b3670d4e16a22cf",
+      "doc/ai-capabilities.md": "e4ab5662994730dcec12e8e075249e7803b49404f5ad478e1d7fd8196f8d045a",
+      "doc/api-rbac-matrix.md": "ad32ef16f38ef6308469e464c772b22fb7e15cdd21161de91cce87c9c4bcd0e5",
+      "fastapi_be/rbac_matrix.json": "85f891b260848407fcfdd25c2d2a3927fd31bae37e5e79989d5b2944d7c9ae46"
+    },
+    "validation": {
+      "route_matrix_exact_multiset_match": true,
+      "new_route_actual_role_guards_match_matrix": true,
+      "all_implementation_hashes_and_file_set_stable_during_capture": true,
+      "all_generated_artifacts_stable_during_capture": true,
+      "all_selected_implementation_and_generated_bytes_match_captured_head": true,
+      "prompt_export_exact_match": true,
+      "catalog_numbering_complete_1_to_80": true,
+      "twenty_historical_records_unchanged": true,
+      "four_new_tables_seven_utc6_and_four_mediumtext_definitions": true,
+      "database_connections": 0,
+      "dotenv_reads": 0,
+      "asgi_lifecycle_calls": 0,
+      "repo_files_modified_by_inventory": false
+    },
+    "scope": "Read-only actual mounted app metadata, no connection/startup/request/DB/lifecycle. Explicit memory synthetic RSA and disabled dotenv, repo/process writes denied; one optional urllib3 IPv6 bind capability probe may be blocked and recorded, successful networkIO0. Original implementation maps equal committed HEAD."
+  },
+  "historical_verification_records": {
+    "baseline_commit": "d9ff639adc08c411914662d80bbd628e876a063a",
+    "count": 20,
+    "all_unchanged": true,
+    "records": [
+      {
+        "path": "doc/ai-aki-verification.json",
+        "baseline_sha256": "a2f8e928266ff16d46973db731329d4e96cbfe09e519ba9f5fcbc8ab384a897c",
+        "current_sha256": "a2f8e928266ff16d46973db731329d4e96cbfe09e519ba9f5fcbc8ab384a897c",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-bed-verification.json",
+        "baseline_sha256": "a1e678f1eee4ca5da36b38260a633e354a0b76a8a0d074a53c444ae1bcc13217",
+        "current_sha256": "a1e678f1eee4ca5da36b38260a633e354a0b76a8a0d074a53c444ae1bcc13217",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-ecg-classifier-smoke.json",
+        "baseline_sha256": "838b0305249698617bc475f7158dfbfbb9e6e22e6d6e84e51974bfcfebb90c61",
+        "current_sha256": "838b0305249698617bc475f7158dfbfbb9e6e22e6d6e84e51974bfcfebb90c61",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-ecg-verification.json",
+        "baseline_sha256": "1eedfa9eb918cf6e6b1ee1f201b7413760eeec501c128f4a73401741f0427f94",
+        "current_sha256": "1eedfa9eb918cf6e6b1ee1f201b7413760eeec501c128f4a73401741f0427f94",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-forecast-verification.json",
+        "baseline_sha256": "9b5683bca58efcf7fc460410529fd5aeeed91e2646eb47be24b836cbadc20d63",
+        "current_sha256": "9b5683bca58efcf7fc460410529fd5aeeed91e2646eb47be24b836cbadc20d63",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-frontend-dependencies-verification.json",
+        "baseline_sha256": "968757f4a75e921038133b3fa9a94947ab4d5607142dce8da964f2a13d00bb1d",
+        "current_sha256": "968757f4a75e921038133b3fa9a94947ab4d5607142dce8da964f2a13d00bb1d",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-imaging-classifier-smoke.json",
+        "baseline_sha256": "b2185a31ff66c4602c10136d5b15404199f50cf7d65ea4a8be4718778c6a9e89",
+        "current_sha256": "b2185a31ff66c4602c10136d5b15404199f50cf7d65ea4a8be4718778c6a9e89",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-imaging-verification.json",
+        "baseline_sha256": "63646b181dae4f531abe233708a24f9b9cc05037ef95d57e1e6f39c7f9880148",
+        "current_sha256": "63646b181dae4f531abe233708a24f9b9cc05037ef95d57e1e6f39c7f9880148",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-inventory-verification.json",
+        "baseline_sha256": "afee2f2dc7228d6c0ded2b5e5643a2c6a50d8aad8e03207d9925cf5b70a68ab3",
+        "current_sha256": "afee2f2dc7228d6c0ded2b5e5643a2c6a50d8aad8e03207d9925cf5b70a68ab3",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-laboratory-verification.json",
+        "baseline_sha256": "646103e4874b4f895424987520c7adfb6fb8afdd9eb6e2c7104ed2095b72752f",
+        "current_sha256": "646103e4874b4f895424987520c7adfb6fb8afdd9eb6e2c7104ed2095b72752f",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-news2-verification.json",
+        "baseline_sha256": "363be8c61e2f36705dccc4604631e7d0e84aaa6cc922196ed36e48e740ca6570",
+        "current_sha256": "363be8c61e2f36705dccc4604631e7d0e84aaa6cc922196ed36e48e740ca6570",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-nursing-verification.json",
+        "baseline_sha256": "a04248f9de57ddd878c1b408da1833f53651cd3535d8385d2275874a7f6f9517",
+        "current_sha256": "a04248f9de57ddd878c1b408da1833f53651cd3535d8385d2275874a7f6f9517",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-observation-verification.json",
+        "baseline_sha256": "b75ab8c7ff94704cb823be59d51539f06a16a24edf0020b0e87edfd6cf6e6bee",
+        "current_sha256": "b75ab8c7ff94704cb823be59d51539f06a16a24edf0020b0e87edfd6cf6e6bee",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-organ-support-verification.json",
+        "baseline_sha256": "175b4d4b66960f623170aded7ca7dec32f462fc34278289411c1ddda3dbc653d",
+        "current_sha256": "175b4d4b66960f623170aded7ca7dec32f462fc34278289411c1ddda3dbc653d",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-qsofa-verification.json",
+        "baseline_sha256": "d3c4cea9a657527540d3c570512a00568f92a5381c066e9a0bcf204a2e3c7ba4",
+        "current_sha256": "d3c4cea9a657527540d3c570512a00568f92a5381c066e9a0bcf204a2e3c7ba4",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-roster-verification.json",
+        "baseline_sha256": "8ec5327889f81368e24755a8122f5b5c753a84a1e9a949ec3957b35a9ba13188",
+        "current_sha256": "8ec5327889f81368e24755a8122f5b5c753a84a1e9a949ec3957b35a9ba13188",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-sofa-verification.json",
+        "baseline_sha256": "20235fe055a6995be2b40270a52f67cba778d445cd10113e7f8185dbeab0cdca",
+        "current_sha256": "20235fe055a6995be2b40270a52f67cba778d445cd10113e7f8185dbeab0cdca",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-speech-smoke.json",
+        "baseline_sha256": "41ad522da4f04e2a6d75595660ecbc2549acdcd159450aa99602b495c8e690a0",
+        "current_sha256": "41ad522da4f04e2a6d75595660ecbc2549acdcd159450aa99602b495c8e690a0",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-supply-verification.json",
+        "baseline_sha256": "12ff22420c62a264aa94975a2f54d669b9752be2757537d46b755d92b6e32414",
+        "current_sha256": "12ff22420c62a264aa94975a2f54d669b9752be2757537d46b755d92b6e32414",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-surgery-verification.json",
+        "baseline_sha256": "302fc7655eda439297885b15c2b3f001f1e044fd2eaa5d559941dea5d1e89816",
+        "current_sha256": "302fc7655eda439297885b15c2b3f001f1e044fd2eaa5d559941dea5d1e89816",
+        "unchanged": true
+      }
+    ],
+    "all_stable_during_inventory": true
+  },
+  "preserved_attempts": {
+    "first_full_backend_actual_failure": {
+      "path": "/tmp/hoim-coding-full-frozen-final-pytest-execution.json",
+      "sha256": "7c0b1ff7abf6f54cfde62a4731c9e7ca0aed235f3e351f8910b222171f3e75b1",
+      "bytes": 2187
+    },
+    "first_backend_scope": "Actual1failed8044passed28skipped. New coding classifier json.loads(None) failed on old nonpersisted non68 AIRun before existing billing403. Root narrow transient-only compatibility fix retains durablefeature/marker/FK strict classification; final8046 is a separate complete run.",
+    "transient_diagnosis": {
+      "path": "/tmp/hoim-coding-outpatient-failure-first-verification.json",
+      "sha256": "c27711ba4ebbfcbe0fbf0b04d1c2e3cc9892e9b099f8a372d0458c502ad6b87c",
+      "bytes": 6508
+    },
+    "transient_actual_scope_control": {
+      "path": "/tmp/hoim-coding-outpatient-transient-scope-second-verification.json",
+      "sha256": "a5005f5720d1fb476c21279e28468ebdab6de7f2ee6507cdb62fe25efd459e2c",
+      "bytes": 6756
+    },
+    "transient_regression": {
+      "path": "/tmp/hoim-coding-transient-compatibility-first-verification.json",
+      "sha256": "81b8f97e615dd1cff70857dac9ff89ba76e8df242684e497ab8df5040ca7fc07",
+      "bytes": 7388
+    },
+    "first_production7_passed_1_test_assertion_failure": {
+      "path": "/tmp/hoim-coding-production-first-verification.json",
+      "sha256": "ffe12d6121741c9d3f18b83809c5d303522a96969ffab578c946c414f8d5ab37",
+      "bytes": 237377
+    },
+    "production_scope": "Only helper expectedinline-flex rejected legitimate computedflex CSS. Test accepts Element flex/inline-flex and solid border; no product or dist change. Final8 production and single1537 run are separate evidence.",
+    "first_build_before_legacy_home_fix": {
+      "path": "/tmp/hoim-coding-npm-frozen-first-verify-execution.json",
+      "sha256": "7b95d47cb5f3d49565d5e014fd8b1101f61d30d210e64a816f6e5ddd72407c0f",
+      "bytes": 1183
+    },
+    "home_scope_actual_review": {
+      "path": "/tmp/hoim-coding-home-legacy-review.json",
+      "sha256": "2fd63cfd01b339d8abab14af4000fb7a88c017a0dec7f2784b8d14e2d9f366dc",
+      "bytes": 1093
+    },
+    "home_scope_fix": "home_id alone is business scope for legacy record_home_review; only explicit coding_case_id or truefeature68Home bind triggers coding protocol. Final Parent41 includes two distinct realVue regressions; current second canonical build binds fix.",
+    "metadata_initial_role_expectation_failure": {
+      "path": "/tmp/hoim-coding-platform-final-inventory.json",
+      "sha256": "9169e9063df461f9454e6e278218e25022dc5f244243cad4b79bebc9066aa464",
+      "bytes": 52471
+    },
+    "metadata_initial_scope": "Audit script incorrectly assumed published Package ordinaryGET also Super-only. Correct per-method guard expectations retain actual ordinarySource access and only5 Super-only new routes; no product change.",
+    "metadata_generated_prompt_drift": {
+      "path": "/tmp/hoim-coding-platform-third-inventory.json",
+      "sha256": "33c66fa9e2dc10090bbed3679fb7f74cc104ecdd081a42daa19d93cc6e34c72f",
+      "bytes": 65492
+    },
+    "metadata_drift_scope": "Actual checked catalog.15/68 contract diverged from stale .14 generateddefault JSON. Re-export adds explicit actual coding System override and current80 tasks/roles/refs, with dedicated noDB-import guard/catalog5. Earlierfailed inventory retained; fourth is final.",
+    "other_attempts": "Preserve source export/auth hook signature failures, actual invalid-kind projection mismatch, redacted CAS/Unicode scalar fixes and directed failures in original specialist reports. These are development evidence, not final green counts."
+  },
+  "artifact_retention": "Committed ledger binds complete final implementation and generated hashes plus external reports/log/source-freeze hashes. Large synthetic packet/runners/logs remain local/tmp, not guaranteed permanent/bundled. No real hospital/patient/credentials committed.",
+  "limitations": [
+    "No deploy/push/production enablement, actual hospital access, remote paid inference or clinical/coding efficacy validation.",
+    "Exact hashes and Unicode citations prove declared provenance/consistency, not medical interpretation, billability, diagnosis or official DRG/DIP rules.",
+    "Current dictionary and local prefixes cannot restore missing official/history grouping versions.",
+    "Ordinary current scope and Super own-frozen audit differ; frozen audit is not new-execution permission.",
+    "Technical role/Source publication is not professional confirmation; identifier minimization is not guaranteed anonymity.",
+    "Full8046 binds runtime/product code before the separately verified exporter/test documentation repair; no full-suite result claimed for added catalog test.",
+    "All80-feature goal remains active; next source, document and charge proposals continue independently."
+  ]
+}

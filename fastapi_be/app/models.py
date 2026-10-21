@@ -14,6 +14,8 @@ from app.ai import bed_series_models as _bed_series_models  # noqa: F401
 from app.ai import charge_reconciliation_models as _charge_reconciliation_models  # noqa: F401
 from app.ai import charge_reconciliation_run_models as _charge_reconciliation_run_models  # noqa: F401
 from app.ai import coding_evidence_models as _coding_evidence_models  # noqa: F401
+from app.ai import document_evidence_models as _document_evidence_models  # noqa: F401
+from app.ai import document_extraction_models as _document_extraction_models  # noqa: F401
 from app.ai import inventory_native_source_models as _inventory_native_source_models  # noqa: F401
 from app.ai import inventory_scenario_models as _inventory_scenario_models  # noqa: F401
 from app.ai import models as _ai_models  # noqa: F401

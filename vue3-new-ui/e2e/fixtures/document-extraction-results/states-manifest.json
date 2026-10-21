@@ -1,0 +1,12 @@
+{
+  "scope": "Actual synthetic SQLite/JWT complete task HTTP DTOs and native MockTransport worker; genuine queue/claim/terminal transitions, no fabricated terminal status or clinical validation",
+  "input": {
+    "file": "hoim-document-extraction-findings-actual-states-v1.json",
+    "bytes": 210402,
+    "sha256": "c08099eba79886cc04e279a69a8faab241cb217a35d8dfa52200c8cd4586f987"
+  },
+  "output": {
+    "bytes": 168996,
+    "sha256": "1f4c60d2fcffe37ff09e13fc23087a172ce648238f540c4b857bfe0ba99dbe38"
+  }
+}

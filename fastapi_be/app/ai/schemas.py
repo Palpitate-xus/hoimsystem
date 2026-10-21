@@ -220,6 +220,8 @@ class RunRequest(StrictRequest):
             raise ValueError("受审手术场景仅用于明确病例与共享阶段资源排程")
         if "supply_series_id" in self.input and self.feature_key != "supply_forecast":
             raise ValueError("受审物资原量序列仅用于单品种申请、实际发出与确认消耗预测")
+        if "inventory_scenario_id" in self.input and self.feature_key != "inventory_optimization":
+            raise ValueError("受审完整库存场景仅用于明确有限采购候选比较")
         return self
 
 

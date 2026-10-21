@@ -3,6 +3,7 @@ import datetime
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
+from app.ai.inventory_write_guard import current_inventory_rows, lock_inventory_write
 from app.database import get_db
 from app.dependencies import ADMIN_ROLES, PHARMACY_ROLES, User, require_roles
 from app.models import InventoryAdjustment, Pharmaceutical
@@ -71,28 +72,37 @@ def approve_inventory_adjustment(
     current_user: User = Depends(require_roles(*ADMIN_ROLES)),
     db: Session = Depends(get_db),
 ):
-    item = db.query(InventoryAdjustment).filter(InventoryAdjustment.adjustment_id == req.adjustment_id).first()
+    current_user = lock_inventory_write(db, current_user, allowed_roles=ADMIN_ROLES)
+    item = current_inventory_rows(db.query(InventoryAdjustment)).filter(InventoryAdjustment.adjustment_id == req.adjustment_id).first()
     if not item:
         return {"code": 404, "msg": "库存调整单不存在"}
     if item.status != 0:
         return {"code": 500, "msg": "库存调整单已处理"}
-    pharmaceutical = db.query(Pharmaceutical).filter(Pharmaceutical.pharmaceutical_id == item.pharmaceutical_id).first()
+    pharmaceutical = current_inventory_rows(db.query(Pharmaceutical)).filter(Pharmaceutical.pharmaceutical_id == item.pharmaceutical_id).first()
     if not pharmaceutical:
         return {"code": 500, "msg": "药品不存在"}
-    updated_adjustment = db.query(InventoryAdjustment).filter(InventoryAdjustment.adjustment_id == item.adjustment_id, InventoryAdjustment.status == 0).update(
-        {InventoryAdjustment.status: 1, InventoryAdjustment.approver_id: current_user.user_id, InventoryAdjustment.approve_time: datetime.datetime.now()},
-        synchronize_session=False,
+    updated_adjustment = (
+        current_inventory_rows(db.query(InventoryAdjustment))
+        .filter(InventoryAdjustment.adjustment_id == item.adjustment_id, InventoryAdjustment.status == 0)
+        .update(
+            {InventoryAdjustment.status: 1, InventoryAdjustment.approver_id: current_user.user_id, InventoryAdjustment.approve_time: datetime.datetime.now()},
+            synchronize_session=False,
+        )
     )
     if updated_adjustment != 1:
         db.rollback()
         return {"code": 500, "msg": "库存调整单已处理"}
     if item.adjustment_type == "loss":
-        updated = db.query(Pharmaceutical).filter(Pharmaceutical.pharmaceutical_id == item.pharmaceutical_id, Pharmaceutical.stock >= item.quantity).update(
-            {Pharmaceutical.stock: Pharmaceutical.stock - item.quantity}, synchronize_session=False
+        updated = (
+            current_inventory_rows(db.query(Pharmaceutical))
+            .filter(Pharmaceutical.pharmaceutical_id == item.pharmaceutical_id, Pharmaceutical.stock >= item.quantity)
+            .update({Pharmaceutical.stock: Pharmaceutical.stock - item.quantity}, synchronize_session=False)
         )
     else:
-        updated = db.query(Pharmaceutical).filter(Pharmaceutical.pharmaceutical_id == item.pharmaceutical_id).update(
-            {Pharmaceutical.stock: Pharmaceutical.stock + item.quantity}, synchronize_session=False
+        updated = (
+            current_inventory_rows(db.query(Pharmaceutical))
+            .filter(Pharmaceutical.pharmaceutical_id == item.pharmaceutical_id)
+            .update({Pharmaceutical.stock: Pharmaceutical.stock + item.quantity}, synchronize_session=False)
         )
     if updated != 1:
         db.rollback()
@@ -104,7 +114,7 @@ def approve_inventory_adjustment(
 
         remaining = item.quantity
         batches = (
-            db.query(PharmaceuticalBatch)
+            current_inventory_rows(db.query(PharmaceuticalBatch))
             .filter(
                 PharmaceuticalBatch.pharmaceutical_id == item.pharmaceutical_id,
                 PharmaceuticalBatch.status == 0,
@@ -132,19 +142,21 @@ def approve_inventory_adjustment(
                 b.stock -= cut
                 remaining -= cut
                 db.add(b)
-                db.add(PharmaceuticalStockLedger(
-                    pharmaceutical_id=item.pharmaceutical_id,
-                    batch_id=b.batch_id,
-                    transaction_type="adjustment",
-                    quantity=-cut,
-                    before_stock=before,
-                    after_stock=b.stock,
-                    reference_type="inventory_adjustment",
-                    reference_id=str(item.adjustment_id),
-                    operator_id=current_user.user_id,
-                    reason=f"报损审批冲减批次 {b.batch_no}",
-                    create_time=datetime.datetime.now(),
-                ))
+                db.add(
+                    PharmaceuticalStockLedger(
+                        pharmaceutical_id=item.pharmaceutical_id,
+                        batch_id=b.batch_id,
+                        transaction_type="adjustment",
+                        quantity=-cut,
+                        before_stock=before,
+                        after_stock=b.stock,
+                        reference_type="inventory_adjustment",
+                        reference_id=str(item.adjustment_id),
+                        operator_id=current_user.user_id,
+                        reason=f"报损审批冲减批次 {b.batch_no}",
+                        create_time=datetime.datetime.now(),
+                    )
+                )
                 deducted_batches.append(f"{b.batch_no}×{cut}")
             batch_note = f"；批次冲减：{'、'.join(deducted_batches)}"
     db.commit()
@@ -160,9 +172,13 @@ def reject_inventory_adjustment(
     item = db.query(InventoryAdjustment).filter(InventoryAdjustment.adjustment_id == req.adjustment_id).first()
     if not item:
         return {"code": 404, "msg": "库存调整单不存在"}
-    updated = db.query(InventoryAdjustment).filter(InventoryAdjustment.adjustment_id == item.adjustment_id, InventoryAdjustment.status == 0).update(
-        {InventoryAdjustment.status: 2, InventoryAdjustment.approver_id: current_user.user_id, InventoryAdjustment.approve_time: datetime.datetime.now()},
-        synchronize_session=False,
+    updated = (
+        db.query(InventoryAdjustment)
+        .filter(InventoryAdjustment.adjustment_id == item.adjustment_id, InventoryAdjustment.status == 0)
+        .update(
+            {InventoryAdjustment.status: 2, InventoryAdjustment.approver_id: current_user.user_id, InventoryAdjustment.approve_time: datetime.datetime.now()},
+            synchronize_session=False,
+        )
     )
     if updated != 1:
         db.rollback()

@@ -5,7 +5,9 @@ import traceback
 from fastapi import APIRouter, Depends
 from sqlalchemy import or_
 from sqlalchemy.orm import Session
+from sqlalchemy.orm.attributes import set_committed_value
 
+from app.ai.inventory_write_guard import current_inventory_rows, lock_inventory_write
 from app.database import get_db
 from app.dependencies import NURSING_ROLES, PHARMACY_ROLES, User, require_roles
 from app.medication_data import medication_fields
@@ -21,6 +23,20 @@ from app.pagination import paginate
 from app.schemas import PharmacyAuditRequest, PharmacyDispenseRequest, PharmacyReturnRequest, PharmacyVerificationRequest
 
 router = APIRouter()
+
+
+def _current_inventory_prescription(db, prescription_id):
+    """Reload inventory-bearing children and SKU references beyond an old RR snapshot."""
+    pre = current_inventory_rows(db.query(Prescription).filter(Prescription.prescription_id == prescription_id)).first()
+    if pre is None:
+        return None
+    lines = current_inventory_rows(db.query(PrePha).filter(PrePha.prescription_id == prescription_id)).order_by(PrePha.pharmaceutical_id).all()
+    ids = {line.pharmaceutical_id for line in lines}
+    drugs = {row.pharmaceutical_id: row for row in current_inventory_rows(db.query(Pharmaceutical).filter(Pharmaceutical.pharmaceutical_id.in_(ids))).order_by(Pharmaceutical.pharmaceutical_id).all()}
+    for line in lines:
+        set_committed_value(line, "pharmaceutical", drugs.get(line.pharmaceutical_id))
+    set_committed_value(pre, "pre_phas", lines)
+    return pre
 
 
 def _prescription_review_error(db: Session, prescription: Prescription) -> str | None:
@@ -156,11 +172,7 @@ def audit_prescription(req: PharmacyAuditRequest, current_user: User = Depends(r
 
     # Use a conditional update so two concurrent audit requests cannot both
     # observe status=0 and report success.
-    updated = (
-        db.query(Prescription)
-        .filter(Prescription.prescription_id == req.prescription_id, Prescription.status == 0)
-        .update({Prescription.status: 1}, synchronize_session=False)
-    )
+    updated = db.query(Prescription).filter(Prescription.prescription_id == req.prescription_id, Prescription.status == 0).update({Prescription.status: 1}, synchronize_session=False)
     if updated != 1:
         db.rollback()
         return {"code": 500, "msg": "处方状态不正确"}
@@ -175,30 +187,16 @@ def _deduct_batches_fefo(db: Session, pharmaceutical_id: int, quantity: int, ope
     已在开方时预留扣减（doctor.py），批次账仅对有批次的药品生效。
     """
     now = datetime.datetime.now()
-    has_batches = (
-        db.query(PharmaceuticalBatch)
-        .filter(PharmaceuticalBatch.pharmaceutical_id == pharmaceutical_id, PharmaceuticalBatch.status == 0)
-        .count()
-        > 0
-    )
-    if not has_batches:
-        return None
-    remaining = quantity
     batches = (
-        db.query(PharmaceuticalBatch)
-        .filter(
-            PharmaceuticalBatch.pharmaceutical_id == pharmaceutical_id,
-            PharmaceuticalBatch.status == 0,
-            PharmaceuticalBatch.stock > 0,
-        )
-        .order_by(
-            PharmaceuticalBatch.expiry_date.is_(None),
-            PharmaceuticalBatch.expiry_date.asc(),
-            PharmaceuticalBatch.batch_id.asc(),
-        )
-        .with_for_update()
+        current_inventory_rows(db.query(PharmaceuticalBatch))
+        .filter(PharmaceuticalBatch.pharmaceutical_id == pharmaceutical_id, PharmaceuticalBatch.status == 0)
+        .order_by(PharmaceuticalBatch.expiry_date.is_(None), PharmaceuticalBatch.expiry_date.asc(), PharmaceuticalBatch.batch_id.asc())
         .all()
     )
+    if not batches:
+        return None
+    remaining = quantity
+    batches = [batch for batch in batches if batch.stock > 0]
     for batch in batches:
         if remaining <= 0:
             break
@@ -207,19 +205,21 @@ def _deduct_batches_fefo(db: Session, pharmaceutical_id: int, quantity: int, ope
         batch.stock = before - take
         batch.update_time = now
         db.add(batch)
-        db.add(PharmaceuticalStockLedger(
-            batch_id=batch.batch_id,
-            pharmaceutical_id=pharmaceutical_id,
-            transaction_type="outbound",
-            quantity=take,
-            before_stock=before,
-            after_stock=batch.stock,
-            reference_type="prescription",
-            reference_id=str(reference_id),
-            operator_id=operator_id,
-            reason="发药出库",
-            create_time=now,
-        ))
+        db.add(
+            PharmaceuticalStockLedger(
+                batch_id=batch.batch_id,
+                pharmaceutical_id=pharmaceutical_id,
+                transaction_type="outbound",
+                quantity=take,
+                before_stock=before,
+                after_stock=batch.stock,
+                reference_type="prescription",
+                reference_id=str(reference_id),
+                operator_id=operator_id,
+                reason="发药出库",
+                create_time=now,
+            )
+        )
         remaining -= take
     if remaining > 0:
         return f"批次库存不足，尚缺 {remaining}"
@@ -230,7 +230,7 @@ def _return_to_batches(db: Session, pharmaceutical_id: int, quantity: int, opera
     """退药回冲：优先回到最近出库的未过期批次，其次最早未过期批次；写台账。"""
     now = datetime.datetime.now()
     batch = (
-        db.query(PharmaceuticalBatch)
+        current_inventory_rows(db.query(PharmaceuticalBatch))
         .filter(
             PharmaceuticalBatch.pharmaceutical_id == pharmaceutical_id,
             PharmaceuticalBatch.status == 0,
@@ -256,25 +256,28 @@ def _return_to_batches(db: Session, pharmaceutical_id: int, quantity: int, opera
     batch.stock = before + quantity
     batch.update_time = now
     db.add(batch)
-    db.add(PharmaceuticalStockLedger(
-        batch_id=batch.batch_id,
-        pharmaceutical_id=pharmaceutical_id,
-        transaction_type="return",
-        quantity=quantity,
-        before_stock=before,
-        after_stock=batch.stock,
-        reference_type="prescription_return",
-        reference_id=str(reference_id),
-        operator_id=operator_id,
-        reason="退药回冲",
-        create_time=now,
-    ))
+    db.add(
+        PharmaceuticalStockLedger(
+            batch_id=batch.batch_id,
+            pharmaceutical_id=pharmaceutical_id,
+            transaction_type="return",
+            quantity=quantity,
+            before_stock=before,
+            after_stock=batch.stock,
+            reference_type="prescription_return",
+            reference_id=str(reference_id),
+            operator_id=operator_id,
+            reason="退药回冲",
+            create_time=now,
+        )
+    )
     return None
 
 
 @router.post("/pharmacy/dispense")
 def dispense_prescription(req: PharmacyDispenseRequest, current_user: User = Depends(require_roles(*PHARMACY_ROLES)), db: Session = Depends(get_db)):
-    pre = db.query(Prescription).filter(Prescription.prescription_id == req.prescription_id).first()
+    current_user = lock_inventory_write(db, current_user, allowed_roles=PHARMACY_ROLES)
+    pre = _current_inventory_prescription(db, req.prescription_id)
     if not pre:
         return {"code": 500, "msg": "处方不存在"}
     if pre.status != 1:
@@ -283,9 +286,7 @@ def dispense_prescription(req: PharmacyDispenseRequest, current_user: User = Dep
     if error:
         return {"code": 500, "msg": error}
     expired_names = [
-        line.pharmaceutical.name
-        for line in pre.pre_phas
-        if line.pharmaceutical and line.pharmaceutical.expireddate and line.pharmaceutical.expireddate < datetime.date.today() and line.number > 0
+        line.pharmaceutical.name for line in pre.pre_phas if line.pharmaceutical and line.pharmaceutical.expireddate and line.pharmaceutical.expireddate < datetime.date.today() and line.number > 0
     ]
     if expired_names:
         return {"code": 400, "msg": f"药品已过期，禁止发药：{', '.join(expired_names)}"}
@@ -293,11 +294,7 @@ def dispense_prescription(req: PharmacyDispenseRequest, current_user: User = Dep
     # 缴费校验：处方关联收费未结清禁止发药（原缺陷：未缴费即可发药形成漏费通道）
     from app.models import Charge
 
-    unpaid = (
-        db.query(Charge)
-        .filter(Charge.prescription_id == str(req.prescription_id), Charge.status == 0)
-        .count()
-    )
+    unpaid = current_inventory_rows(db.query(Charge)).filter(Charge.prescription_id == str(req.prescription_id), Charge.status == 0).count()
     if unpaid:
         return {"code": 400, "msg": "该处方存在未缴费收费记录，请先缴费再发药"}
 
@@ -309,7 +306,7 @@ def dispense_prescription(req: PharmacyDispenseRequest, current_user: User = Dep
         if not line.pharmaceutical or line.number <= 0:
             continue
         st = (
-            db.query(SkinTestOrder)
+            current_inventory_rows(db.query(SkinTestOrder))
             .filter(
                 SkinTestOrder.patient_id == pre.patient_id,
                 SkinTestOrder.pharmaceutical_id == line.pharmaceutical_id,
@@ -332,7 +329,7 @@ def dispense_prescription(req: PharmacyDispenseRequest, current_user: User = Dep
             continue
         if line.pharmaceutical.antibiotic_level and line.pharmaceutical.antibiotic_level >= 2:
             bound = (
-                db.query(AntibioticApproval)
+                current_inventory_rows(db.query(AntibioticApproval))
                 .filter(
                     AntibioticApproval.prescription_id == str(req.prescription_id),
                     AntibioticApproval.pharmaceutical_id == line.pharmaceutical_id,
@@ -353,7 +350,7 @@ def dispense_prescription(req: PharmacyDispenseRequest, current_user: User = Dep
             return {"code": 500, "msg": f"{line.pharmaceutical.name}：{error}"}
         # 总量库存同步扣减（处方开立时是预留语义；未走处方开立入口的数据以此为准）
         updated_total = (
-            db.query(Pharmaceutical)
+            current_inventory_rows(db.query(Pharmaceutical))
             .filter(Pharmaceutical.pharmaceutical_id == line.pharmaceutical_id, Pharmaceutical.stock >= line.number)
             .update({Pharmaceutical.stock: Pharmaceutical.stock - line.number}, synchronize_session=False)
         )
@@ -364,14 +361,12 @@ def dispense_prescription(req: PharmacyDispenseRequest, current_user: User = Dep
     # Only the audited state may transition to dispensed.  Keeping the state
     # predicate in the UPDATE closes the duplicate-dispense race window.
     updated = (
-        db.query(Prescription)
-        .filter(Prescription.prescription_id == req.prescription_id, Prescription.status == 1)
-        .update({Prescription.status: 2}, synchronize_session=False)
+        current_inventory_rows(db.query(Prescription)).filter(Prescription.prescription_id == req.prescription_id, Prescription.status == 1).update({Prescription.status: 2}, synchronize_session=False)
     )
     if updated != 1:
         db.rollback()
         return {"code": 500, "msg": "处方未审核或已发药"}
-    if not db.query(DispenseVerification).filter(DispenseVerification.prescription_id == req.prescription_id).first():
+    if not current_inventory_rows(db.query(DispenseVerification)).filter(DispenseVerification.prescription_id == req.prescription_id).first():
         db.add(DispenseVerification(prescription_id=req.prescription_id, pharmacist_id=current_user.user_id, status=0, create_time=datetime.datetime.now()))
     db.commit()
     return {"code": 200, "msg": "success"}
@@ -382,26 +377,40 @@ def get_verification_list(current_user: User = Depends(require_roles(*(PHARMACY_
     items = db.query(DispenseVerification).join(Prescription).order_by(DispenseVerification.create_time.desc()).all()
     data = []
     for item in items:
-        data.append({
-            "verification_id": item.verification_id,
-            "prescription_id": item.prescription_id,
-            "patient_name": item.prescription.patient.name if item.prescription and item.prescription.patient else "",
-            "doctor_name": item.prescription.doctor.name if item.prescription and item.prescription.doctor else "",
-            "pharmaceuticals": [{"name": line.pharmaceutical.name if line.pharmaceutical else "", "number": line.number} for line in item.prescription.pre_phas] if item.prescription else [],
-            "status": item.status,
-            "status_text": {0: "待护士核对", 1: "已核对", 2: "核对异常"}.get(item.status, "未知"),
-            "note": item.note or "",
-            "pharmacist_name": item.pharmacist.username if item.pharmacist else "",
-            "verifier_name": item.verifier.username if item.verifier else "",
-            "create_time": item.create_time,
-            "verify_time": item.verify_time,
-        })
+        data.append(
+            {
+                "verification_id": item.verification_id,
+                "prescription_id": item.prescription_id,
+                "patient_name": item.prescription.patient.name if item.prescription and item.prescription.patient else "",
+                "doctor_name": item.prescription.doctor.name if item.prescription and item.prescription.doctor else "",
+                "pharmaceuticals": [{"name": line.pharmaceutical.name if line.pharmaceutical else "", "number": line.number} for line in item.prescription.pre_phas] if item.prescription else [],
+                "status": item.status,
+                "status_text": {0: "待护士核对", 1: "已核对", 2: "核对异常"}.get(item.status, "未知"),
+                "note": item.note or "",
+                "pharmacist_name": item.pharmacist.username if item.pharmacist else "",
+                "verifier_name": item.verifier.username if item.verifier else "",
+                "create_time": item.create_time,
+                "verify_time": item.verify_time,
+            }
+        )
     return {"code": 200, "msg": "success", "data": data}
 
 
 @router.post("/pharmacy/verify")
 def verify_dispense(req: PharmacyVerificationRequest, current_user: User = Depends(require_roles(*NURSING_ROLES)), db: Session = Depends(get_db)):
-    updated = db.query(DispenseVerification).filter(DispenseVerification.verification_id == req.verification_id, DispenseVerification.status == 0).update({DispenseVerification.status: 1, DispenseVerification.verifier_id: current_user.user_id, DispenseVerification.note: req.note.strip(), DispenseVerification.verify_time: datetime.datetime.now()}, synchronize_session=False)
+    updated = (
+        db.query(DispenseVerification)
+        .filter(DispenseVerification.verification_id == req.verification_id, DispenseVerification.status == 0)
+        .update(
+            {
+                DispenseVerification.status: 1,
+                DispenseVerification.verifier_id: current_user.user_id,
+                DispenseVerification.note: req.note.strip(),
+                DispenseVerification.verify_time: datetime.datetime.now(),
+            },
+            synchronize_session=False,
+        )
+    )
     if updated != 1:
         return {"code": 500, "msg": "核对记录不存在或已处理"}
     db.commit()
@@ -410,7 +419,8 @@ def verify_dispense(req: PharmacyVerificationRequest, current_user: User = Depen
 
 @router.post("/pharmacy/return")
 def return_medicine(req: PharmacyReturnRequest, current_user: User = Depends(require_roles(*PHARMACY_ROLES)), db: Session = Depends(get_db)):
-    pre = db.query(Prescription).filter(Prescription.prescription_id == req.prescription_id).first()
+    current_user = lock_inventory_write(db, current_user, allowed_roles=PHARMACY_ROLES)
+    pre = current_inventory_rows(db.query(Prescription)).filter(Prescription.prescription_id == req.prescription_id).first()
     if not pre:
         return {"code": 500, "msg": "处方不存在"}
     if pre.status != 2:
@@ -418,14 +428,14 @@ def return_medicine(req: PharmacyReturnRequest, current_user: User = Depends(req
     if req.number <= 0:
         return {"code": 500, "msg": "退药数量必须大于0"}
 
-    pp = db.query(PrePha).filter(PrePha.prescription_id == req.prescription_id, PrePha.pharmaceutical_id == req.pha_id).first()
+    pp = current_inventory_rows(db.query(PrePha)).filter(PrePha.prescription_id == req.prescription_id, PrePha.pharmaceutical_id == req.pha_id).first()
     if not pp:
         return {"code": 500, "msg": "药品记录不存在"}
 
     # Make the quantity check part of the update so concurrent return
     # requests cannot both consume the same remaining prescription quantity.
     updated = (
-        db.query(PrePha)
+        current_inventory_rows(db.query(PrePha))
         .filter(
             PrePha.prescription_id == req.prescription_id,
             PrePha.pharmaceutical_id == req.pha_id,
@@ -438,7 +448,7 @@ def return_medicine(req: PharmacyReturnRequest, current_user: User = Depends(req
         return {"code": 500, "msg": "退药数量超过处方数量"}
 
     db.expire_all()
-    pp = db.query(PrePha).filter(PrePha.prescription_id == req.prescription_id, PrePha.pharmaceutical_id == req.pha_id).first()
+    pp = current_inventory_rows(db.query(PrePha)).filter(PrePha.prescription_id == req.prescription_id, PrePha.pharmaceutical_id == req.pha_id).first()
     if not pp:
         db.rollback()
         return {"code": 500, "msg": "药品记录不存在"}
@@ -446,7 +456,7 @@ def return_medicine(req: PharmacyReturnRequest, current_user: User = Depends(req
         db.delete(pp)
 
     try:
-        pha = db.query(Pharmaceutical).filter(Pharmaceutical.pharmaceutical_id == req.pha_id).first()
+        pha = current_inventory_rows(db.query(Pharmaceutical)).filter(Pharmaceutical.pharmaceutical_id == req.pha_id).first()
         if pha:
             pha.stock += req.number
             db.add(pha)
@@ -455,7 +465,7 @@ def return_medicine(req: PharmacyReturnRequest, current_user: User = Depends(req
 
         # Status 4 is the documented fully-returned state.  Partial returns
         # keep status=2 so the remaining dispensed medicines can be returned.
-        remaining = db.query(PrePha).filter(PrePha.prescription_id == req.prescription_id, PrePha.number > 0).count()
+        remaining = len(current_inventory_rows(db.query(PrePha)).filter(PrePha.prescription_id == req.prescription_id, PrePha.number > 0).all())
         if remaining == 0:
             pre.status = 4
             db.add(pre)
@@ -471,6 +481,7 @@ def return_medicine(req: PharmacyReturnRequest, current_user: User = Depends(req
 @router.post("/pharmacy/stockCheck")
 def stock_check(req: dict, current_user: User = Depends(require_roles(*PHARMACY_ROLES)), db: Session = Depends(get_db)):
     """库存盘点：传入 {items: [{pharmaceutical_id, actual_stock}]}，返回盈亏"""
+    current_user = lock_inventory_write(db, current_user, allowed_roles=PHARMACY_ROLES)
     items = req.get("items", [])
     if not isinstance(items, list):
         return {"code": 500, "msg": "盘点明细格式错误"}
@@ -491,7 +502,7 @@ def stock_check(req: dict, current_user: User = Depends(require_roles(*PHARMACY_
     for item in items:
         pha_id = item.get("pharmaceutical_id")
         actual = int(item.get("actual_stock"))
-        pha = db.query(Pharmaceutical).filter(Pharmaceutical.pharmaceutical_id == pha_id).first()
+        pha = current_inventory_rows(db.query(Pharmaceutical)).filter(Pharmaceutical.pharmaceutical_id == pha_id).first()
         if pha:
             diff = actual - pha.stock
             result.append(

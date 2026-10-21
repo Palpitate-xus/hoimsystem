@@ -1,5 +1,5 @@
 const path = require("path");
-const { Configuration, CopyRspackPlugin, DefinePlugin } = require("@rspack/core");
+const { Configuration, CopyRspackPlugin, DefinePlugin, CssExtractRspackPlugin } = require("@rspack/core");
 const HtmlRspackPlugin = require("html-rspack-plugin");
 const { VueLoaderPlugin } = require("vue-loader");
 const Components = require("unplugin-vue-components/rspack");
@@ -25,6 +25,8 @@ process.env.VUE_APP_AUTHOR = "vue-admin-better"; // 设置作者
 const resolve = (dir) => path.join(__dirname, dir);
 // 定义一个模式变量，避免冲突
 const mode = process.argv[2] === "build" ? "production" : "development";
+// Production styles load as CSS assets; development keeps live style updates.
+const styleLoader = mode === "production" ? CssExtractRspackPlugin.loader : "style-loader";
 
 /**
  * @type {Configuration}
@@ -33,7 +35,8 @@ module.exports = {
   mode: mode,
   context: __dirname,
   entry: {
-    app: "./src/main.js",
+    // One library stylesheet fixes its order across independently loaded pages.
+    app: mode === "production" ? ["element-plus/dist/index.css", "./src/main.js"] : "./src/main.js",
   },
   output: {
     path: resolve(outputDir),
@@ -80,12 +83,12 @@ module.exports = {
       },
       {
         test: /\.css$/,
-        use: ["style-loader", "css-loader"],
+        use: [styleLoader, "css-loader"],
       },
       {
         test: /\.scss$/,
         use: [
-          "style-loader",
+          styleLoader,
           {
             loader: "css-loader",
             options: {
@@ -156,10 +159,14 @@ module.exports = {
     },
   },
   plugins: [
+    ...(mode === "production" ? [new CssExtractRspackPlugin({
+      filename: "css/[name].[contenthash:8].css",
+      chunkFilename: "css/[name].[contenthash:8].css",
+    })] : []),
     new VueLoaderPlugin(),
     Components({
       dts: false,
-      resolvers: [ElementPlusResolver({ importStyle: "css" })],
+      resolvers: [ElementPlusResolver({ importStyle: mode === "production" ? false : "css" })],
     }),
     new DefinePlugin({
       // Vue 3需要的全局常量

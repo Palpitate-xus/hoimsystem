@@ -3,12 +3,14 @@ import re
 
 from sqlalchemy.orm import Session
 
+from app.ai.inventory_write_guard import current_inventory_rows
 from app.models import Patient, Pharmaceutical
 
 
-def get_usable_pharmaceutical(db: Session, pharmaceutical_id: int) -> tuple[Pharmaceutical | None, str | None]:
+def get_usable_pharmaceutical(db: Session, pharmaceutical_id: int, *, current_inventory=False) -> tuple[Pharmaceutical | None, str | None]:
     """Return a medication that is active and not past its expiry date."""
-    pharmaceutical = db.query(Pharmaceutical).filter(Pharmaceutical.pharmaceutical_id == pharmaceutical_id).first()
+    query = db.query(Pharmaceutical).filter(Pharmaceutical.pharmaceutical_id == pharmaceutical_id)
+    pharmaceutical = (current_inventory_rows(query) if current_inventory else query).first()
     if not pharmaceutical:
         return None, "药品不存在"
     if pharmaceutical.status != 0:
@@ -18,11 +20,12 @@ def get_usable_pharmaceutical(db: Session, pharmaceutical_id: int) -> tuple[Phar
     return pharmaceutical, None
 
 
-def get_patient_safe_pharmaceutical(db: Session, pharmaceutical_id: int, patient_id: int) -> tuple[Pharmaceutical | None, str | None]:
-    pharmaceutical, error = get_usable_pharmaceutical(db, pharmaceutical_id)
+def get_patient_safe_pharmaceutical(db: Session, pharmaceutical_id: int, patient_id: int, *, current_inventory=False) -> tuple[Pharmaceutical | None, str | None]:
+    pharmaceutical, error = get_usable_pharmaceutical(db, pharmaceutical_id, current_inventory=current_inventory)
     if error:
         return None, error
-    patient = db.query(Patient).filter(Patient.patient_id == patient_id).first()
+    query = db.query(Patient).filter(Patient.patient_id == patient_id)
+    patient = (current_inventory_rows(query) if current_inventory else query).first()
     if not patient:
         return None, "患者不存在"
     allergy_history = (patient.allergy_history or "").strip()

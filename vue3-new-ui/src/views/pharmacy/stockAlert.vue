@@ -30,7 +30,7 @@
           <el-table-column prop="price" label="单价" />
           <el-table-column prop="expireddate" label="过期日期" />
           <el-table-column prop="supplier" label="供应商" />
-          <el-table-column label="AI 辅助" width="150"><template #default="{ row }"><ai-action label="AI 品种分析" title="AI 所选药品库存分析" :feature-keys="['inventory_optimization', 'supply_forecast']" initial-feature="inventory_optimization" :initial-input="{ drug_ids: [row.id] }" /></template></el-table-column>
+          <el-table-column label="AI 辅助" width="150"><template #default="{ row }"><ai-action v-if="Number.isSafeInteger(row.id)&&row.id>0&&row.id<=2147483647" label="AI 品种分析" title="AI 所选药品库存分析" :feature-keys="['inventory_optimization', 'supply_forecast']" initial-feature="inventory_optimization" :initial-input="{ item_kind: 'pharmaceutical', item_id: row.id, drug_ids: [row.id] }" /></template></el-table-column>
         </el-table>
       </el-tab-pane>
 
@@ -59,7 +59,7 @@
             </template>
           </el-table-column>
           <el-table-column prop="supplier" label="供应商" />
-          <el-table-column label="AI 辅助" width="150"><template #default="{ row }"><ai-action label="AI 品种分析" title="AI 所选药品库存分析" :feature-keys="['inventory_optimization', 'supply_forecast']" initial-feature="inventory_optimization" :initial-input="{ drug_ids: [row.id] }" /></template></el-table-column>
+          <el-table-column label="AI 辅助" width="150"><template #default="{ row }"><ai-action v-if="Number.isSafeInteger(row.id)&&row.id>0&&row.id<=2147483647" label="AI 品种分析" title="AI 所选药品库存分析" :feature-keys="['inventory_optimization', 'supply_forecast']" initial-feature="inventory_optimization" :initial-input="{ item_kind: 'pharmaceutical', item_id: row.id, drug_ids: [row.id] }" /></template></el-table-column>
         </el-table>
       </el-tab-pane>
     </el-tabs>

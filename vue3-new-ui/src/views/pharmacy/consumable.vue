@@ -23,6 +23,7 @@
           </template>
         </el-table-column>
         <el-table-column v-if="canUseSupplyAI" label="AI 原量预测" width="160"><template #default="{ row }"><ai-action :key="supplyAuth" v-if="Number.isSafeInteger(row.consumable_id)&&row.consumable_id>0" label="核对原量与预测" title="受审物资原量预测" :feature-keys="['supply_forecast']" initial-feature="supply_forecast" :initial-input="{ item_kind: 'consumable', item_id: row.consumable_id }" /></template></el-table-column>
+        <el-table-column v-if="canUseSupplyAI" label="AI 库存候选比较" width="175"><template #default="{ row }"><ai-action :key="supplyAuth+'-inventory'" v-if="Number.isSafeInteger(row.consumable_id)&&row.consumable_id>0&&row.consumable_id<=2147483647" label="核对库存候选" title="受审完整库存候选比较" :feature-keys="['inventory_optimization']" initial-feature="inventory_optimization" :initial-input="{ item_kind: 'consumable', item_id: row.consumable_id }" /></template></el-table-column>
         <el-table-column label="操作" width="150">
           <template #default="{row}">
             <el-button size="small" @click="handleEdit(row)">编辑</el-button>

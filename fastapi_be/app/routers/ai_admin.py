@@ -747,6 +747,58 @@ async def check_supply_provider(provider_id: int, req: ProviderCheck, db: Sessio
     }
 
 
+@router.post("/ai/admin/providers/{provider_id}/inventory-capabilities")
+async def check_inventory_provider(provider_id: int, req: ProviderCheck, db: Session = Depends(get_db), user: User = Depends(require_roles("super_admin"))) -> dict:
+    """Inspect schema14 metadata without SKU originals, quantities or comparison."""
+    from app.ai.inventory_probe import inspect_inventory_capabilities
+
+    provider = db.get(AIProvider, provider_id)
+    if provider is None:
+        raise HTTPException(404, "模型配置不存在")
+    ensure_revision(provider.revision, req.expected_revision)
+    if provider.kind != "specialist" or "inventory_optimization" not in json.loads(provider.supported_features_json):
+        raise HTTPException(422, "请选择已登记库存候选比较的独立候选比较服务")
+    actor_id, revision, configured_model, timeout = user.user_id, provider.revision, provider.model, provider.timeout_seconds
+    db.expunge(provider)
+    db.commit()
+    error = None
+    try:
+        capabilities = await inspect_inventory_capabilities(provider)
+    except AIExecutionError as exc:
+        error = exc
+    db.expire_all()
+    actor, current = db.get(User, actor_id), db.get(AIProvider, provider_id)
+    if actor is None or actor.user_role != "super_admin":
+        raise HTTPException(403, "当前用户不再具备AI管理权限")
+    if current is None:
+        raise HTTPException(409, "模型配置已删除，请刷新后重试")
+    ensure_revision(current.revision, revision)
+    if error:
+        audit(db, actor_id, "provider.inventory_check_failed", str(provider_id), {"revision": revision, "error_code": error.code})
+        _commit(db)
+        raise HTTPException(502, error.message)
+    issues = []
+    if capabilities["model_version"] != configured_model:
+        issues.append("登记模型与服务实际固定约束、配方及运行版本不同，请核对并保存后重新评审")
+    if timeout <= capabilities["timeout_seconds"]:
+        issues.append("模型请求超时应大于库存候选比较处理时限，保留传输和回执时间")
+    audit(db, actor_id, "provider.inventory_check", str(provider_id), {"revision": revision, "compatible": not issues, "actual_model": capabilities["model_version"]})
+    _commit(db)
+    return {
+        "code": 200,
+        "msg": "success",
+        "data": {
+            "provider_id": provider_id,
+            "provider_revision": revision,
+            "configured_model": configured_model,
+            "compatible": not issues,
+            "capabilities": capabilities,
+            "issues": issues,
+            "scope_note": "只核对完整有限采购候选、逐日效期与冻结量守恒、明确采购成本、共同约束政策、四个核心文件、时区数据库及实际运行版本；不发送库存或采购原件，不执行比较或采购，不证明实际运营效果，不改变功能启停与验证状态。",
+        },
+    }
+
+
 @router.get("/ai/admin/runs")
 def list_global_runs(
     feature_key: str | None = None,
@@ -760,6 +812,9 @@ def list_global_runs(
     supply_item_kind: str | None = Query(None, max_length=20),
     supply_item_id: QueryPositiveInteger | None = Query(None, ge=1, le=2147483647),
     supply_series_id: str | None = Query(None, max_length=36),
+    inventory_item_kind: str | None = Query(None, max_length=20),
+    inventory_item_id: QueryPositiveInteger | None = Query(None, ge=1, le=2147483647),
+    inventory_scenario_id: str | None = Query(None, max_length=36),
     page: int = Query(1, ge=1, le=100000),
     page_size: int = Query(30, ge=1, le=100),
     db: Session = Depends(get_db),
@@ -768,7 +823,15 @@ def list_global_runs(
     """Inspect all users' task metadata and feedback counts without loading clinical payloads."""
     user = _current_super_admin(db, user)
     query = db.query(AIRun)
-    if any(value is not None for value in (supply_item_kind, supply_item_id, supply_series_id)):
+    if any(value is not None for value in (inventory_item_kind, inventory_item_id, inventory_scenario_id)):
+        if feature_key != "inventory_optimization" or any(
+            value is not None for value in (patient_id, department_id, surgery_pool_id, surgery_scenario_id, supply_item_kind, supply_item_id, supply_series_id)
+        ):
+            raise HTTPException(422, "库存比较管理历史仅筛选明确品种与原场景，不能与其他运营或患者范围混用")
+        from app.ai.inventory_history import filter_history
+
+        query = filter_history(db, user, query, inventory_item_kind=inventory_item_kind, inventory_item_id=inventory_item_id, inventory_scenario_id=inventory_scenario_id)
+    elif any(value is not None for value in (supply_item_kind, supply_item_id, supply_series_id)):
         if feature_key != "supply_forecast" or any(value is not None for value in (patient_id, department_id, surgery_pool_id, surgery_scenario_id)):
             raise HTTPException(422, "物资管理历史仅筛选明确品种与原序列，不能与科室、其他运营或患者范围混用")
         from app.ai.supply_history import filter_history
@@ -815,6 +878,14 @@ def inspect_run_trace(run_id: str, db: Session = Depends(get_db), user: User = D
     if run is None:
         raise HTTPException(404, "AI 任务不存在")
     snapshot = json.loads(run.input_json)
+    from app.ai.inventory_storage import is_inventory_snapshot
+
+    if is_inventory_snapshot(snapshot):
+        from app.ai.inventory_context import expand_context
+        from app.ai.runtime import authorize_run
+
+        authorize_run(db, user, run)
+        snapshot["payload"]["context"] = expand_context(db, snapshot["payload"]["context"])
     from app.ai.supply_storage import is_supply_snapshot
 
     if is_supply_snapshot(snapshot):

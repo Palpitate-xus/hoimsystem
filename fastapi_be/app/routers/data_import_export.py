@@ -11,6 +11,7 @@ from openpyxl import Workbook, load_workbook
 from sqlalchemy.orm import Session, joinedload
 from starlette.background import BackgroundTask
 
+from app.ai.inventory_write_guard import lock_inventory_write
 from app.database import get_db
 from app.dependencies import ADMIN_ROLES, User, require_roles
 from app.models import Department, Doctor, Patient, Pharmaceutical
@@ -31,6 +32,8 @@ def _generate_initial_password(seed: str) -> str:
     alphabet = string.ascii_letters + string.digits
     rnd = "".join(secrets.choice(alphabet) for _ in range(10))
     return f"Ho{secrets.token_hex(2)}-{rnd[:8]}"
+
+
 ENTITY_HEADERS = {
     "doctors": ["name", "sex", "title", "education", "phone", "department_id", "permission", "username", "password"],
     "patients": ["name", "sex", "identity", "birthday", "phone", "address", "permission", "allergy_history"],
@@ -181,6 +184,8 @@ def import_data(entity: str, file: UploadFile = File(...), current_user: User = 
     missing = [header for header in ENTITY_HEADERS[entity] if header not in headers]
     if missing:
         raise HTTPException(status_code=400, detail=f"缺少列: {', '.join(missing)}")
+    if entity == "pharmaceuticals":
+        current_user = lock_inventory_write(db, current_user, allowed_roles=ADMIN_ROLES)
     imported = 0
     errors = []
     from sqlalchemy.exc import IntegrityError

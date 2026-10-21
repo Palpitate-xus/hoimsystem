@@ -3,6 +3,7 @@ import datetime
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
+from app.ai.inventory_write_guard import current_inventory_rows, lock_inventory_write
 from app.database import get_db
 from app.dependencies import ADMIN_ROLES, PHARMACY_ROLES, User, require_roles
 from app.models import Patient, Pharmaceutical, SpecialDrugRegister
@@ -42,7 +43,16 @@ def create_special_drug(req: SpecialDrugRegisterCreateRequest, current_user: Use
         return {"code": 500, "msg": "药品不存在"}
     if req.patient_id and not db.query(Patient).filter(Patient.patient_id == req.patient_id).first():
         return {"code": 500, "msg": "患者不存在"}
-    item = SpecialDrugRegister(pharmaceutical_id=req.pharmaceutical_id, patient_id=req.patient_id, action=req.action, quantity=req.quantity, reason=req.reason.strip(), status=0, applicant_id=current_user.user_id, create_time=datetime.datetime.now())
+    item = SpecialDrugRegister(
+        pharmaceutical_id=req.pharmaceutical_id,
+        patient_id=req.patient_id,
+        action=req.action,
+        quantity=req.quantity,
+        reason=req.reason.strip(),
+        status=0,
+        applicant_id=current_user.user_id,
+        create_time=datetime.datetime.now(),
+    )
     db.add(item)
     db.commit()
     return {"code": 200, "msg": "success", "data": _serialize(item)}
@@ -55,7 +65,7 @@ def list_special_drugs(current_user: User = Depends(require_roles(*(PHARMACY_ROL
 
 
 def _check_special_drug(register_id: str, current_user: User, db: Session, status: int):
-    item = db.query(SpecialDrugRegister).filter(SpecialDrugRegister.register_id == register_id, SpecialDrugRegister.status == 0).first()
+    item = current_inventory_rows(db.query(SpecialDrugRegister)).filter(SpecialDrugRegister.register_id == register_id, SpecialDrugRegister.status == 0).first()
     if not item:
         return None, {"code": 500, "msg": "记录不存在或已处理"}
     if item.applicant_id == current_user.user_id:
@@ -68,10 +78,11 @@ def _check_special_drug(register_id: str, current_user: User, db: Session, statu
 
 @router.post("/specialDrug/approve")
 def approve_special_drug(req: SpecialDrugRegisterActionRequest, current_user: User = Depends(require_roles(*ADMIN_ROLES)), db: Session = Depends(get_db)):
+    current_user = lock_inventory_write(db, current_user, allowed_roles=ADMIN_ROLES)
     item, error = _check_special_drug(req.register_id, current_user, db, 1)
     if error:
         return error
-    drug = db.query(Pharmaceutical).filter(Pharmaceutical.pharmaceutical_id == item.pharmaceutical_id).first()
+    drug = current_inventory_rows(db.query(Pharmaceutical)).filter(Pharmaceutical.pharmaceutical_id == item.pharmaceutical_id).first()
     delta = item.quantity if item.action in {"in", "return"} else -item.quantity
     if drug.stock + delta < 0:
         db.rollback()

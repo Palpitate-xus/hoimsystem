@@ -3,6 +3,7 @@ import datetime
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
+from app.ai.inventory_write_guard import current_inventory_rows, lock_inventory_write
 from app.database import get_db
 from app.dependencies import ADMIN_ROLES, PHARMACY_ROLES, User, require_roles
 from app.models import DrugDamage, Pharmaceutical
@@ -71,10 +72,15 @@ def create_drug_damage(req: dict, current_user: User = Depends(require_roles(*PH
 
 @router.post("/pharmacy/drugDamage/approve")
 def approve_drug_damage(req: dict, current_user: User = Depends(require_roles(*ADMIN_ROLES)), db: Session = Depends(get_db)):
-    item = db.query(DrugDamage).filter(DrugDamage.damage_id == req.get("damage_id"), DrugDamage.status == 0).first()
+    current_user = lock_inventory_write(db, current_user, allowed_roles=ADMIN_ROLES)
+    item = current_inventory_rows(db.query(DrugDamage)).filter(DrugDamage.damage_id == req.get("damage_id"), DrugDamage.status == 0).first()
     if not item:
         return {"code": 404, "msg": "待审批报损记录不存在"}
-    updated = db.query(Pharmaceutical).filter(Pharmaceutical.pharmaceutical_id == item.pharmaceutical_id, Pharmaceutical.stock >= item.quantity).update({Pharmaceutical.stock: Pharmaceutical.stock - item.quantity}, synchronize_session=False)
+    updated = (
+        current_inventory_rows(db.query(Pharmaceutical))
+        .filter(Pharmaceutical.pharmaceutical_id == item.pharmaceutical_id, Pharmaceutical.stock >= item.quantity)
+        .update({Pharmaceutical.stock: Pharmaceutical.stock - item.quantity}, synchronize_session=False)
+    )
     if updated != 1:
         db.rollback()
         return {"code": 400, "msg": "当前库存不足，无法审批"}

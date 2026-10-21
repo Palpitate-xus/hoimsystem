@@ -7,6 +7,7 @@ from fastapi import APIRouter, BackgroundTasks, Depends
 from sqlalchemy import func
 from sqlalchemy.orm import Session, joinedload, selectinload
 
+from app.ai.inventory_write_guard import current_inventory_rows, lock_inventory_write
 from app.database import get_db
 from app.dependencies import ADMIN_ROLES, CLINICAL_ROLES, PHARMACY_ROLES, get_current_user, require_roles
 from app.diagnosis_review import DiagnosisReviewWrite, describe_review_source, load_review_source, record_diagnosis_review
@@ -143,12 +144,7 @@ def doctor_schedule_getlist(current_user: User = Depends(get_current_user), keyw
                 }
             )
     elif current_user.user_role in ("doctor", "director"):
-        doctor_obj = (
-            db.query(Doctor)
-            .options(selectinload(Doctor.schedules))
-            .filter(Doctor.user_id == current_user.user_id)
-            .first()
-        )
+        doctor_obj = db.query(Doctor).options(selectinload(Doctor.schedules)).filter(Doctor.user_id == current_user.user_id).first()
         if doctor_obj:
             schedule_list = doctor_obj.schedules
             schedule = []
@@ -181,6 +177,7 @@ def parse_date_str(val):
 
 @router.post("/pharmaceuticalManagement/create")
 def pharmaceutical_register(req: PharmaceuticalCreateRequest, current_user: User = Depends(require_roles(*PHARMACY_ROLES)), db: Session = Depends(get_db)):
+    current_user = lock_inventory_write(db, current_user, allowed_roles=PHARMACY_ROLES)
     pha = Pharmaceutical(
         name=req.name,
         stock=req.stock,
@@ -224,7 +221,8 @@ def get_pharmaceutical_list(keyword: str | None = None, current_user: User = Dep
 
 @router.post("/pharmaceuticalManagement/update")
 def update_pharmaceutical(req: PharmaceuticalUpdateRequest, current_user: User = Depends(require_roles(*PHARMACY_ROLES)), db: Session = Depends(get_db)):
-    pha = db.query(Pharmaceutical).filter(Pharmaceutical.pharmaceutical_id == req.pharmaceutical_id).first()
+    current_user = lock_inventory_write(db, current_user, allowed_roles=PHARMACY_ROLES)
+    pha = current_inventory_rows(db.query(Pharmaceutical)).filter(Pharmaceutical.pharmaceutical_id == req.pharmaceutical_id).first()
     if not pha:
         return {"code": 500, "msg": "药品不存在"}
     pha.name = req.name
@@ -242,7 +240,8 @@ def update_pharmaceutical(req: PharmaceuticalUpdateRequest, current_user: User =
 
 @router.post("/pharmaceuticalManagement/delete")
 def delete_pharmaceutical(req: PharmaceuticalDeleteRequest, current_user: User = Depends(require_roles(*PHARMACY_ROLES)), db: Session = Depends(get_db)):
-    pha = db.query(Pharmaceutical).filter(Pharmaceutical.pharmaceutical_id == req.pharmaceutical_id).first()
+    current_user = lock_inventory_write(db, current_user, allowed_roles=PHARMACY_ROLES)
+    pha = current_inventory_rows(db.query(Pharmaceutical)).filter(Pharmaceutical.pharmaceutical_id == req.pharmaceutical_id).first()
     if not pha:
         return {"code": 500, "msg": "药品不存在"}
     if pha.status == 1:
@@ -255,7 +254,8 @@ def delete_pharmaceutical(req: PharmaceuticalDeleteRequest, current_user: User =
 
 @router.post("/pharmaceuticalManagement/restore")
 def restore_pharmaceutical(req: PharmaceuticalDeleteRequest, current_user: User = Depends(require_roles(*PHARMACY_ROLES)), db: Session = Depends(get_db)):
-    pha = db.query(Pharmaceutical).filter(Pharmaceutical.pharmaceutical_id == req.pharmaceutical_id).first()
+    current_user = lock_inventory_write(db, current_user, allowed_roles=PHARMACY_ROLES)
+    pha = current_inventory_rows(db.query(Pharmaceutical)).filter(Pharmaceutical.pharmaceutical_id == req.pharmaceutical_id).first()
     if not pha:
         return {"code": 500, "msg": "药品不存在"}
     if pha.status == 0:
@@ -331,8 +331,9 @@ def prescription_register(
     current_user: User = Depends(require_roles(*CLINICAL_ROLES)),
     db: Session = Depends(get_db),
 ):
-    doctor_obj = db.query(Doctor).filter(Doctor.user_id == current_user.user_id).first()
-    patient_obj = db.query(Patient).filter(Patient.patient_id == req.patient).first()
+    current_user = lock_inventory_write(db, current_user, allowed_roles=CLINICAL_ROLES)
+    doctor_obj = current_inventory_rows(db.query(Doctor)).filter(Doctor.user_id == current_user.user_id).first()
+    patient_obj = current_inventory_rows(db.query(Patient)).filter(Patient.patient_id == req.patient).first()
     if not doctor_obj or not patient_obj:
         return {"code": 500, "msg": "医生或病人信息不存在"}
     try:
@@ -357,14 +358,14 @@ def prescription_register(
             if pharmaceutical_id in seen_pharmaceuticals:
                 return {"code": 500, "msg": "同一药品不能重复开立"}
             seen_pharmaceuticals.add(pharmaceutical_id)
-            normalized_phas.append({
-                "id": pharmaceutical_id,
-                **instructions,
-            })
+            normalized_phas.append(
+                {
+                    "id": pharmaceutical_id,
+                    **instructions,
+                }
+            )
 
-        pharmaceuticals = db.query(Pharmaceutical).filter(
-            Pharmaceutical.pharmaceutical_id.in_(seen_pharmaceuticals)
-        ).all()
+        pharmaceuticals = current_inventory_rows(db.query(Pharmaceutical)).filter(Pharmaceutical.pharmaceutical_id.in_(seen_pharmaceuticals)).all()
         pharmaceutical_by_id = {item.pharmaceutical_id: item for item in pharmaceuticals}
         if len(pharmaceutical_by_id) != len(seen_pharmaceuticals):
             return {"code": 500, "msg": "药品不存在"}
@@ -387,19 +388,19 @@ def prescription_register(
         # 限制级/特殊使用级抗菌药：医生必须携带本人、患者、药品匹配的已通过审批
         elevated_roles = ADMIN_ROLES | {"director"}
         approved = []
-        approval_required_ids = {
-            item["id"]
-            for item in normalized_phas
-            if (pharmaceutical_by_id[item["id"]].antibiotic_level or 0) >= 2
-        }
+        approval_required_ids = {item["id"] for item in normalized_phas if (pharmaceutical_by_id[item["id"]].antibiotic_level or 0) >= 2}
         if approval_required_ids and current_user.user_role not in elevated_roles:
-            approved = db.query(AntibioticApproval).filter(
-                AntibioticApproval.approval_id.in_(req.antibiotic_approval_ids or ["__missing__"]),
-                AntibioticApproval.patient_id == patient_obj.patient_id,
-                AntibioticApproval.applicant_id == current_user.user_id,
-                AntibioticApproval.status == 1,
-                AntibioticApproval.prescription_id.is_(None),
-            ).all()
+            approved = (
+                current_inventory_rows(db.query(AntibioticApproval))
+                .filter(
+                    AntibioticApproval.approval_id.in_(req.antibiotic_approval_ids or ["__missing__"]),
+                    AntibioticApproval.patient_id == patient_obj.patient_id,
+                    AntibioticApproval.applicant_id == current_user.user_id,
+                    AntibioticApproval.status == 1,
+                    AntibioticApproval.prescription_id.is_(None),
+                )
+                .all()
+            )
             approved_drug_ids = {item.pharmaceutical_id for item in approved}
             if not approval_required_ids.issubset(approved_drug_ids):
                 db.rollback()
@@ -450,12 +451,14 @@ def prescription_register(
             engine_items = []
             for item in normalized_phas:
                 pha_obj = pharmaceutical_by_id[item["id"]]
-                engine_items.append({
-                    "name": pha_obj.name,
-                    "dosage": item.get("dosage"),
-                    "frequency": item.get("frequency"),
-                    "number": item.get("number"),
-                })
+                engine_items.append(
+                    {
+                        "name": pha_obj.name,
+                        "dosage": item.get("dosage"),
+                        "frequency": item.get("frequency"),
+                        "number": item.get("number"),
+                    }
+                )
             findings = check_prescription(
                 db,
                 engine_items,
@@ -483,11 +486,15 @@ def prescription_register(
         for item in normalized_phas:
             pha = pharmaceutical_by_id[item["id"]]
             quantity = int(item["number"])
-            updated = db.query(Pharmaceutical).filter(
-                Pharmaceutical.pharmaceutical_id == pha.pharmaceutical_id,
-                Pharmaceutical.status == 0,
-                Pharmaceutical.stock >= quantity,
-            ).update({Pharmaceutical.stock: Pharmaceutical.stock - quantity}, synchronize_session=False)
+            updated = (
+                current_inventory_rows(db.query(Pharmaceutical))
+                .filter(
+                    Pharmaceutical.pharmaceutical_id == pha.pharmaceutical_id,
+                    Pharmaceutical.status == 0,
+                    Pharmaceutical.stock >= quantity,
+                )
+                .update({Pharmaceutical.stock: Pharmaceutical.stock - quantity}, synchronize_session=False)
+            )
             if updated != 1:
                 db.rollback()
                 return {"code": 500, "msg": f"药品 {pha.name} 库存不足"}
@@ -590,27 +597,32 @@ def get_prescription_list(current_user: User = Depends(get_current_user), keywor
 
 @router.post("/prescriptionManagement/cancel")
 def cancel_prescription(req: PrescriptionCancelRequest, current_user: User = Depends(require_roles(*CLINICAL_ROLES)), db: Session = Depends(get_db)):
-    pre = db.query(Prescription).filter(Prescription.prescription_id == req.prescription_id).first()
+    current_user = lock_inventory_write(db, current_user, allowed_roles=CLINICAL_ROLES)
+    pre = current_inventory_rows(db.query(Prescription)).filter(Prescription.prescription_id == req.prescription_id).first()
     if not pre:
         return {"code": 500, "msg": "处方不存在"}
     if pre.status == 3:
         return {"code": 500, "msg": "处方已取消,无需重复操作"}
     if pre.status == 2:
         return {"code": 500, "msg": "已发药的处方不能直接取消,请走退药流程"}
-    doctor_obj = db.query(Doctor).filter(Doctor.user_id == current_user.user_id).first()
+    doctor_obj = current_inventory_rows(db.query(Doctor)).filter(Doctor.user_id == current_user.user_id).first()
     if not doctor_obj or pre.doctor_id != doctor_obj.doctor_id:
         return {"code": 403, "msg": "无权取消他人处方"}
-    updated = db.query(Prescription).filter(
-        Prescription.prescription_id == pre.prescription_id,
-        Prescription.status.in_((0, 1)),
-    ).update({Prescription.status: 3}, synchronize_session=False)
+    updated = (
+        current_inventory_rows(db.query(Prescription))
+        .filter(
+            Prescription.prescription_id == pre.prescription_id,
+            Prescription.status.in_((0, 1)),
+        )
+        .update({Prescription.status: 3}, synchronize_session=False)
+    )
     if updated != 1:
         db.rollback()
         return {"code": 500, "msg": "处方已取消,无需重复操作"}
     # 释放锁定的库存
-    pre_phas = db.query(PrePha).filter(PrePha.prescription_id == pre.prescription_id).all()
+    pre_phas = current_inventory_rows(db.query(PrePha)).filter(PrePha.prescription_id == pre.prescription_id).all()
     for pp in pre_phas:
-        db.query(Pharmaceutical).filter(Pharmaceutical.pharmaceutical_id == pp.pharmaceutical_id).update(
+        current_inventory_rows(db.query(Pharmaceutical)).filter(Pharmaceutical.pharmaceutical_id == pp.pharmaceutical_id).update(
             {Pharmaceutical.stock: Pharmaceutical.stock + pp.number}, synchronize_session=False
         )
     db.commit()
@@ -679,10 +691,14 @@ def sign_medical_record(req: MedicalRecordSignRequest, current_user: User = Depe
     if record.status != 0:
         return {"code": 500, "msg": "病历已签名"}
     now = datetime.datetime.now()
-    updated = db.query(MedicalRecord).filter(
-        MedicalRecord.medical_record_id == record.medical_record_id,
-        MedicalRecord.status == 0,
-    ).update({MedicalRecord.status: 1, MedicalRecord.sign_time: now}, synchronize_session=False)
+    updated = (
+        db.query(MedicalRecord)
+        .filter(
+            MedicalRecord.medical_record_id == record.medical_record_id,
+            MedicalRecord.status == 0,
+        )
+        .update({MedicalRecord.status: 1, MedicalRecord.sign_time: now}, synchronize_session=False)
+    )
     if updated != 1:
         db.rollback()
         return {"code": 500, "msg": "病历已签名"}
@@ -705,7 +721,8 @@ def sign_medical_record(req: MedicalRecordSignRequest, current_user: User = Depe
             Queue.status.in_((0, 1)),
         )
         .all()
-        if record.patient_id and record.doctor_id else []
+        if record.patient_id and record.doctor_id
+        else []
     )
     for queue_item in queue_items:
         queue_item.status = 2
@@ -856,8 +873,7 @@ def get_attendance_list(
 
 
 @router.get("/slotPool/getList")
-def get_slot_pool(current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)):
+def get_slot_pool(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     """号源池：按科室统计各时段号源总数"""
 
     rows = (

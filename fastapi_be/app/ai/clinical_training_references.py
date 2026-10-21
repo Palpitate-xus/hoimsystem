@@ -37,7 +37,7 @@ def reference_state_hash(value):
     return c.content_hash([dict(metadata=item.metadata.model_dump(), author=item.author.model_dump(), reviewer=item.reviewer.model_dump()) for item in value.references])
 
 
-def _capture_current(db, actor_id, lesson_id, identifiers, *, now=None, expected_references=None, expected_state_hash=None):
+def _capture_current(db, actor_id, lesson_id, identifiers, *, now=None, expected_references=None, expected_state_hash=None, metadata_only=False):
     """Internal: current lesson/submission authority must be established first."""
     try:
         lesson_id = TypeAdapter(c.Identifier).validate_python(lesson_id, strict=True)
@@ -80,6 +80,8 @@ def _capture_current(db, actor_id, lesson_id, identifiers, *, now=None, expected
             for item, expected in zip(metadata, expected_references, strict=True):
                 if c.whole(item) != c.whole(expected.metadata) or actor_values[item.created_by] != expected.author.model_dump() or actor_values[item.reviewed_by] != expected.reviewer.model_dump():
                     raise HTTPException(409, "受审参考元数据或作者/审核人授权时刻已变化，未读取参考正文")
+        if metadata_only:
+            return dict(reference_ids=identifiers, state_hash=c.content_hash(state), checked_at=clock)
         # Every member has passed current metadata/actor checks before the first
         # actual content column is returned. No identity-map body is trusted.
         with db.no_autoflush:

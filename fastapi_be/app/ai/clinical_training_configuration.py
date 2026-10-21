@@ -17,18 +17,13 @@ from app.ai import clinical_training_practice as practice
 from app.ai import clinical_training_reference_contract as references
 from app.ai import clinical_training_references as current_references
 from app.ai import clinical_training_registry as registry
+from app.ai.clinical_training_protocol import instructions_for
 from app.ai.clinical_training_task_contract import TrainingFeedbackSource, TrainingTaskSelection
 from app.ai.clinical_training_task_prompt import PROMPT_VERSION, SYSTEM_PROMPT, TASK_PROMPT
 from app.ai.clinical_training_write_guard import current_rows
 
 FEATURE = "clinical_training"
 FRAME_BYTES = 262144
-
-
-def instructions_for(task):
-    if type(task) is not str or not task or len(task.encode("utf-8", errors="strict")) > 65535:
-        raise ValueError("An entire nonempty Task prompt within actual TEXT bytes is required")
-    return SYSTEM_PROMPT + "\n\n" + task
 
 
 def bounded_frame(value):

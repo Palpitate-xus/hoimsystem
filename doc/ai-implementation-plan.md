@@ -476,3 +476,5 @@
 - 2026-10-21 第79项first-fixed完整默认后端结束：11186P/5F/28skip/7warn，11219实际收集，4740.49pytest/4753.901outer，1204BE/映射稳定。余下仅4DocPipeline严格六Gate SQL预期+1第79 operational-validation scope，已在独立79722cc两整模块77绿覆盖；本轮仍记RED不重标，final release含79722cc及f9c685c另行full冻结运行，原8F独立保留。全部本轮raw/JUnit/索引永久保存。
 
 - 2026-10-21 新任意交付异常4项真实RED发现旧产品错误0/0/false后，精确SIGINT停止本域旧完整candidate；实际6352P/25skip/2warn，2505.15s pytest/2517.867s outer，源1205稳定，exit2。本轮无已执行assertion失败，但不能证明新修复；未执行后续用例不算pass/skip，全部raw/JUnit保留，修正完成后fresh完整重新开始。运维原JUnit额外一个中断entry不多算一P。
+
+- 2026-10-21 operations任意交付异常修正f0dad33：实际gateway/worker各RuntimeError/AssertionError四原始SQL RED复现错误0/0/false；最终六完整模块一次144P，51.43s pytest/64.488s outer，全部1206源稳定。gateway实际已尝试→true+null计数；worker自有dispatch后无真实回执→WORKER_INTERRUPTED+null/null/None；不放松具体PK/未知回执约束，已知未调用零与实际paid计数保留。中间未使用现有WORKER_INTERRUPTED策略的2个拒绝、运维一次错误测试路径无执行均完整保留。只声明Ruff check通过；完整format诊断仅旧长条件保留，不称全格式绿。新独立full及修正后的实际MySQL正在跑，旧partial/RED不重标。

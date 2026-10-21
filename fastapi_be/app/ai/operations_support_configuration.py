@@ -14,6 +14,7 @@ from fastapi import HTTPException
 from app.ai import operations_support_cases as cases
 from app.ai import operations_support_projection as projection
 from app.ai import operations_support_registry as registry
+from app.ai.operations_support_protocol import instructions_for as protocol_instructions
 from app.ai.operations_support_run_models import FRAME_BYTES
 from app.ai.operations_support_task_contract import OperationsTaskSelection
 from app.ai.operations_support_task_prompt import PROMPT_VERSION, SYSTEM_PROMPT, TASK_PROMPT
@@ -23,9 +24,10 @@ FEATURE = "operations_support"
 
 
 def instructions_for(task):
-    if type(task) is not str or not task.strip() or len(task.encode("utf-8")) > 65535:
-        raise HTTPException(409, "运维任务Prompt须为完整且不超过65535字节的非空原文")
-    return SYSTEM_PROMPT + "\n\n" + task
+    try:
+        return protocol_instructions(task)
+    except (ValueError, TypeError, UnicodeError) as exc:
+        raise HTTPException(409, "运维任务Prompt须为完整且不超过65535字节的非空原文") from exc
 
 
 def roles_for(raw):

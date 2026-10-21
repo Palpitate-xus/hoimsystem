@@ -72,8 +72,13 @@ def _current_super_admin(db, user):
     """Recheck audit authority beyond a JWT-created MySQL RR snapshot."""
     state = inspect(user, raiseerr=False)
     user_id = state.identity[0] if state is not None and state.identity is not None else getattr(user, "user_id", None)
-    actor = db.query(User).filter_by(user_id=user_id).populate_existing().with_for_update(read=True).one_or_none()
-    if actor is None or actor.user_role != "super_admin":
+    # Preserve the already authenticated request's epoch before ORM refresh
+    # mutates that same instance. Expired attributes must not trigger an earlier
+    # unlocked SELECT; technical callers without loaded epochs get current SQL.
+    loaded = {key: state.dict[key] for key in ("user_role", "token_invalid_before") if state is not None and key in state.dict}
+    with db.no_autoflush:
+        actor = db.query(User).filter_by(user_id=user_id).populate_existing().with_for_update(read=True).one_or_none()
+    if actor is None or actor.user_role != "super_admin" or any(getattr(actor, key) != original for key, original in loaded.items()):
         raise HTTPException(403, "当前身份已无超级管理员审计权限")
     return actor
 
@@ -841,6 +846,8 @@ def list_global_runs(
     inventory_scenario_id: str | None = Query(None, max_length=36),
     coding_case_id: str | None = Query(None, max_length=36),
     charge_case_id: str | None = Query(None, max_length=36),
+    satisfaction_case_id: str | None = None,
+    satisfaction_native_only: bool = False,
     encounter_ref: str | None = Query(None, max_length=64),
     document_original_id: str | None = Query(None, max_length=36),
     page: int = Query(1, ge=1, le=100000),
@@ -849,13 +856,40 @@ def list_global_runs(
     user: User = Depends(require_roles("super_admin")),
 ) -> dict:
     """Return all users' audited task metadata and feedback counts without exposing full payloads."""
-    from app.ai.charge_reconciliation_write_guard import lock_charge_gate
+    from app.ai.native_task_access import lock_directory_gates
 
     # A global directory may contain native charge tasks. Billing precedes
     # current User/Run/Artifact locks even when no feature filter was supplied.
-    lock_charge_gate(db)
+    lock_directory_gates(db)
     user = _current_super_admin(db, user)
     query = db.query(AIRun)
+    if satisfaction_case_id is not None or satisfaction_native_only:
+        from app.ai.satisfaction_history import filter_history
+
+        query = filter_history(
+            db,
+            user,
+            query,
+            feature_key=feature_key,
+            case_id=satisfaction_case_id,
+            native_only=satisfaction_native_only,
+            other_scope=(
+                patient_id,
+                encounter_ref,
+                department_id,
+                surgery_pool_id,
+                surgery_scenario_id,
+                supply_item_kind,
+                supply_item_id,
+                supply_series_id,
+                inventory_item_kind,
+                inventory_item_id,
+                inventory_scenario_id,
+                coding_case_id,
+                charge_case_id,
+                document_original_id,
+            ),
+        )
     if feature_key == "guideline_ingestion" or document_original_id is not None:
         from app.ai.document_extraction_history import filter_document_history
 
@@ -965,9 +999,9 @@ def list_global_runs(
 @router.get("/ai/admin/runs/{run_id}")
 def inspect_run_trace(run_id: str, db: Session = Depends(get_db), user: User = Depends(require_roles("super_admin"))) -> dict:
     """Read the frozen prompts, requested model, source payload and append-only review history."""
-    from app.ai.charge_reconciliation_write_guard import lock_charge_gate
+    from app.ai.native_task_access import lock_directory_gates
 
-    lock_charge_gate(db)
+    lock_directory_gates(db)
     user = _current_super_admin(db, user)
     run = db.get(AIRun, run_id)
     if run is None:
@@ -979,13 +1013,21 @@ def inspect_run_trace(run_id: str, db: Session = Depends(get_db), user: User = D
         from app.ai.charge_reconciliation_runtime import authorize_charge_run
 
         authorize_charge_run(db, user, run)
+    from app.ai.satisfaction_storage import is_satisfaction_run
+
+    satisfaction = not charge and is_satisfaction_run(db, run)
+    satisfaction_trace = {}
+    if satisfaction:
+        from app.ai.satisfaction_views import trace_proof
+
+        snapshot, satisfaction_trace = trace_proof(db, user, run)
     from app.ai.document_extraction_storage import authorize_document_run, is_extraction_run
 
     document_trace = {}
-    if not charge and is_extraction_run(db, run):
+    if not charge and not satisfaction and is_extraction_run(db, run):
         snapshot, _, _ = authorize_document_run(db, user, run, current=False)
         document_trace = {"frozen_request_json": run.input_json, "frozen_evidence_json": run.evidence_json, "frozen_context_metadata_json": run.context_metadata_json}
-    else:
+    elif not satisfaction:
         snapshot = json.loads(run.input_json)
     from app.ai.coding_evidence_storage import is_coding_run
 
@@ -1040,12 +1082,13 @@ def inspect_run_trace(run_id: str, db: Session = Depends(get_db), user: User = D
 
         snapshot["payload"]["context"] = expand_context(db, snapshot["payload"]["context"])
     feedback = db.query(AIFeedback).filter_by(run_id=run_id).order_by(AIFeedback.create_time.desc(), AIFeedback.feedback_id).limit(101).all()
-    return {
+    response = {
         "code": 200,
         "msg": "success",
         "data": {
             **describe_run(run, user=user),
             **document_trace,
+            **satisfaction_trace,
             "requested_by": run.requested_by,
             "provider_id": run.provider_id,
             "frozen_request": snapshot,
@@ -1055,6 +1098,11 @@ def inspect_run_trace(run_id: str, db: Session = Depends(get_db), user: User = D
             "feedback_truncated": len(feedback) > 100,
         },
     }
+    if satisfaction:
+        from app.ai.satisfaction_views import TRACE_RESPONSE_BYTES, checked_response
+
+        return checked_response(response, TRACE_RESPONSE_BYTES)
+    return response
 
 
 def _write_provider(db: Session, req: ProviderWrite, user: User, provider: AIProvider | None) -> AIProvider:
@@ -1109,7 +1157,7 @@ def update_provider(provider_id: int, req: ProviderWrite, db: Session = Depends(
 @router.get("/ai/admin/prompts/{key}")
 def list_prompts(key: str, db: Session = Depends(get_db), user: User = Depends(require_roles("super_admin"))) -> dict:
     """Display the fixed system contract and immutable task prompt history."""
-    from app.ai.document_extraction_prompt import system_prompt_for
+    from app.ai.feature_prompts import system_prompt_for_feature
 
     _current_super_admin(db, user)
     spec = get_spec(key)
@@ -1119,7 +1167,7 @@ def list_prompts(key: str, db: Session = Depends(get_db), user: User = Depends(r
     return {
         "code": 200,
         "msg": "success",
-        "data": {"system_prompt": system_prompt_for({"document_binding": None} if spec.number == 71 else {"coding_binding": None} if spec.number == 68 else {}), "versions": [*data, baseline]},
+        "data": {"system_prompt": system_prompt_for_feature(spec), "versions": [*data, baseline]},
     }
 
 

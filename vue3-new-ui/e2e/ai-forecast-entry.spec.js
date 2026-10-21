@@ -50,7 +50,7 @@ async function session(page, options = {}) {
   });
   return state;
 }
-async function select(page, name, value, scope = page) { const control = scope.getByRole("combobox", { name, exact: true }); await control.press("ArrowDown"); await page.locator(`#${await control.getAttribute("aria-controls")}`).getByRole("option", { name: value, exact: true }).click(); }
+async function select(page, name, value, scope = page) { const control = scope.getByRole("combobox", { name, exact: true }); await expect(control).toBeEnabled(); await control.press("ArrowDown"); await page.locator(`#${await control.getAttribute("aria-controls")}`).getByRole("option", { name: value, exact: true }).click(); }
 async function management(page) { await page.goto("/#/ai/manage"); await page.getByRole("tab", { name: "挂号预测来源", exact: true }).click(); }
 async function newSource(page) {
   await page.getByRole("button", { name: "新建覆盖声明", exact: true }).click();

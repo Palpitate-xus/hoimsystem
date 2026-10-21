@@ -62,6 +62,7 @@ def test_actual_coding_and_charge_prompts_and_unique_charge_reference_are_export
     from app.ai.charge_reconciliation_prompt import CHARGE_RECONCILIATION_SYSTEM_PROMPT
     from app.ai.coding_evidence_prompt import CODING_SYSTEM_PROMPT
     from app.ai.document_extraction_contract import EXTRACTION_SYSTEM_PROMPT
+    from app.ai.satisfaction_prompt import SATISFACTION_SYSTEM_PROMPT
     from scripts.export_ai_catalog import artifacts
 
     exported = json.loads(artifacts()["ai-prompts.json"])
@@ -69,12 +70,14 @@ def test_actual_coding_and_charge_prompts_and_unique_charge_reference_are_export
     assert exported["system_prompt_overrides"] == {
         "drg_evidence_review": CODING_SYSTEM_PROMPT,
         "charge_reconciliation": CHARGE_RECONCILIATION_SYSTEM_PROMPT,
+        "feedback_analysis": SATISFACTION_SYSTEM_PROMPT,
         "guideline_ingestion": EXTRACTION_SYSTEM_PROMPT,
     }
     assert len(exported["features"]) == 80
     for spec, value in zip(FEATURES, exported["features"], strict=True):
         assert value == {**describe_feature(spec), "task_prompt": spec.task_prompt}
         assert ("charge_case_id" in value["source_reference_keys"]) == (spec.number == 69)
+        assert ("satisfaction_case_id" in value["source_reference_keys"]) == (spec.number == 70)
     assert "charge_reconciliation_draft_v1" in FEATURE_BY_KEY["charge_reconciliation"].task_prompt
     assert "sections 必须" not in FEATURE_BY_KEY["charge_reconciliation"].task_prompt
 
@@ -85,6 +88,7 @@ def test_export_declares_actual_distinct_fixed_system_prompts_for_closed_drafts(
     from app.ai.charge_reconciliation_prompt import CHARGE_RECONCILIATION_SYSTEM_PROMPT
     from app.ai.coding_evidence_prompt import CODING_SYSTEM_PROMPT
     from app.ai.document_extraction_contract import EXTRACTION_SYSTEM_PROMPT
+    from app.ai.satisfaction_prompt import SATISFACTION_SYSTEM_PROMPT
     from scripts.export_ai_catalog import artifacts
 
     payload = json.loads(artifacts()["ai-prompts.json"])
@@ -92,6 +96,7 @@ def test_export_declares_actual_distinct_fixed_system_prompts_for_closed_drafts(
     assert payload["system_prompt_overrides"] == {
         "drg_evidence_review": CODING_SYSTEM_PROMPT,
         "charge_reconciliation": CHARGE_RECONCILIATION_SYSTEM_PROMPT,
+        "feedback_analysis": SATISFACTION_SYSTEM_PROMPT,
         "guideline_ingestion": EXTRACTION_SYSTEM_PROMPT,
     }
     assert FEATURE_BY_KEY["guideline_ingestion"].default_roles == ("super_admin",)
@@ -104,12 +109,29 @@ def test_management_exposes_each_native_fixed_system_hash_and_input_mode(db_sess
     from app.ai.coding_evidence_prompt import CODING_SYSTEM_PROMPT
     from app.ai.document_extraction_contract import EXTRACTION_SYSTEM_PROMPT
     from app.ai.governance import describe_config, digest
+    from app.ai.satisfaction_prompt import SATISFACTION_SYSTEM_PROMPT
 
     for key, mode, system in (
         ("drg_evidence_review", "coding_evidence", CODING_SYSTEM_PROMPT),
         ("charge_reconciliation", "charge_reconciliation", CHARGE_RECONCILIATION_SYSTEM_PROMPT),
         ("guideline_ingestion", "document_extraction", EXTRACTION_SYSTEM_PROMPT),
+        ("feedback_analysis", "satisfaction_evidence", SATISFACTION_SYSTEM_PROMPT),
     ):
         value = describe_config(db_session, FEATURE_BY_KEY[key], None, management=True)
         assert value["input_mode"] == mode
         assert value["system_prompt_hash"] == digest(system)
+
+
+def test_actual_super_prompt_editor_uses_each_fixed_contract_and_actual_default_task(db_session, seed_data):
+    from app.ai.feature_prompts import SYSTEM_PROMPT_OVERRIDES, system_prompt_for_feature
+    from app.ai.satisfaction_prompt import SATISFACTION_TASK_PROMPT
+    from app.routers.ai_admin import list_prompts
+
+    for key in (*SYSTEM_PROMPT_OVERRIDES, "patient_summary"):
+        spec = FEATURE_BY_KEY[key]
+        data = list_prompts(key, db=db_session, user=seed_data["super_admin_user"])["data"]
+        assert data["system_prompt"] == system_prompt_for_feature(spec)
+        assert data["versions"][-1]["task_prompt"] == spec.task_prompt
+    assert SATISFACTION_TASK_PROMPT in FEATURE_BY_KEY["feedback_analysis"].task_prompt
+    assert "sections 必须" not in FEATURE_BY_KEY["feedback_analysis"].task_prompt
+    assert "投诉工单" in FEATURE_BY_KEY["feedback_analysis"].instruction

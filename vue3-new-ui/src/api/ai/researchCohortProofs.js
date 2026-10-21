@@ -58,3 +58,25 @@ export async function verifyResearchRegistryRecord(value,{kind='scope',expectedI
  const p=value.original;if(!await verifyProof(p,kind,current)||!current()||!same(p.identity,pick(value,[...IDENTITY,...d.extra]))||p.content_hash!==value.content_hash||p.governance_hash!==value.governance_hash||!same(p.governance,pick(value,GOV))||!same(p.authorization_review,kind==='scope'?pick(value,MANUAL):value.authorization_review))return null;
  return current()?{level:'full_registry_original',fullGovernanceVerified:true,selectable:false}:null;
 }catch{return null;}}
+
+export async function verifyResearchRegistryTransition(after,before,action,body,{kind='scope',beforeAuditOnly=false,afterAuditOnly=false,actorId=null,current=()=>true}={}){try{
+ if(!['authorization_review','review','revoke'].includes(action)||!current())return false;
+ const model=action==='authorization_review'?'AuthorizationReview':action==='review'?'SourceReview':'SourceRevoke';
+ if(!requestValid(model,body)||!await verifyResearchRegistryRecord(before,{kind,expectedId:before.source_record_id,auditOnly:beforeAuditOnly,current})||before.original===null||body.expected_revision!==before.revision)return false;
+ const checked=await verifyResearchRegistryRecord(after,{kind,expectedId:before.source_record_id,auditOnly:afterAuditOnly,allowRedacted:action==='revoke',current});
+ if(!checked||!current()||after.content_hash!==before.content_hash||!same(pick(after,[...IDENTITY,...definitions[kind].extra]),pick(before,[...IDENTITY,...definitions[kind].extra])))return false;
+ const old=before.original,g=old.governance,manual=old.authorization_review;
+ if(action==='authorization_review'){
+  if(kind==='acl'||before.status!=='draft'||before.revision!==1||manual?.authorization_review_status!=='unknown'||body.expected_content_hash!==before.content_hash||after.original===null||after.status!=='draft'||after.revision!==1||!same(after.original.governance,g))return false;
+  const m=after.original.authorization_review;
+  if(m.authorization_review_status!==body.decision||m.authorization_review_basis!==body.basis_note||actorId!==null&&m.authorization_reviewed_by!==actorId)return false;
+ }else if(action==='review'){
+  if(before.status!=='draft'||before.revision!==1||after.original===null||after.status!==(body.decision==='publish'?'published':'rejected')||after.revision!==2||after.review_basis_note!==body.basis_note||actorId!==null&&after.reviewed_by!==actorId||!same(after.original.authorization_review,manual))return false;
+ }else{
+  if(!['draft','published'].includes(before.status)||after.status!=='revoked'||after.revision!==before.revision+1||!positive(after.revoked_by)||!documentClock(after.revoked_at)||actorId!==null&&after.revoked_by!==actorId)return false;
+  const expected={...g,status:'revoked',revision:g.revision+1,revoked_by:after.revoked_by,revoked_at:after.revoked_at,revoke_reason:body.basis_note};
+  if(!governance(old.identity,expected,manual)||await digest({governance:expected,authorization_review:manual})!==after.governance_hash||!current())return false;
+  if(after.original!==null&&(!same(after.original.governance,expected)||!same(after.original.authorization_review,manual)))return false;
+ }
+ return current()&&(after.original===null||same(pick(after.original,['identity','payload','parent_binding','content_hash']),pick(old,['identity','payload','parent_binding','content_hash'])));
+}catch{return false;}}

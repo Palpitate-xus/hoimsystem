@@ -171,6 +171,10 @@ def _context_inspection(db: Session, user: User, key: str, patient_id: int, enco
         from app.ai.sofa_context import expand_context
 
         context = expand_context(db, context, user=user, current=True)
+    if context.get("coding_binding"):
+        from app.ai.coding_evidence_context import expand_context
+
+        context = expand_context(db, context, user=user, current=True)
     return {"code": 200, "msg": "success", "data": {"context": context, "metadata": context_metadata(bundle), "evidence": bundle.evidence}}
 
 
@@ -222,18 +226,45 @@ def list_runs(
     inventory_item_kind: str | None = Query(None, max_length=20),
     inventory_item_id: QueryPositiveInteger | None = Query(None, ge=1, le=2147483647),
     inventory_scenario_id: str | None = Query(None, max_length=36),
+    coding_case_id: str | None = Query(None, max_length=36),
     limit: int = Query(30, ge=1, le=100),
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user),
 ) -> dict:
     """List own tasks; super-admins can inspect global execution history."""
+    if feature_key == "drg_evidence_review" or coding_case_id is not None:
+        from app.ai.coding_evidence_sources import current_actor
+
+        user = current_actor(db, user)
     query = db.query(AIRun)
     if user.user_role != "super_admin":
         query = query.filter_by(requested_by=user.user_id)
     if feature_key:
         authorized_feature(db, user, feature_key)
         query = query.filter_by(feature_key=feature_key)
-    if any(value is not None for value in (inventory_item_kind, inventory_item_id, inventory_scenario_id)):
+    if coding_case_id is not None:
+        if feature_key != "drg_evidence_review" or any(
+            value is not None
+            for value in (
+                department_id,
+                roster_plan_id,
+                ward_id,
+                bed_series_id,
+                surgery_pool_id,
+                surgery_scenario_id,
+                supply_item_kind,
+                supply_item_id,
+                supply_series_id,
+                inventory_item_kind,
+                inventory_item_id,
+                inventory_scenario_id,
+            )
+        ):
+            raise HTTPException(422, "编码证据历史仅筛选同一实际患者住院的明确快照，不能与其他来源范围混用")
+        from app.ai.coding_evidence_history import filter_history
+
+        query = filter_history(db, user, query, coding_case_id=coding_case_id, patient_id=patient_id, encounter_ref=encounter_ref)
+    elif any(value is not None for value in (inventory_item_kind, inventory_item_id, inventory_scenario_id)):
         if feature_key != "inventory_optimization" or any(
             value is not None
             for value in (patient_id, encounter_ref, department_id, roster_plan_id, ward_id, bed_series_id, surgery_pool_id, surgery_scenario_id, supply_item_kind, supply_item_id, supply_series_id)
@@ -292,6 +323,11 @@ def list_runs(
                 continue
             if exc.status_code == 409 and any(is_document_evidence(db, entry) for entry in json.loads(item.evidence_json)):
                 continue
+            if exc.status_code == 409:
+                from app.ai.coding_evidence_storage import is_coding_run
+
+                if is_coding_run(db, item):
+                    continue
             if exc.status_code == 409 and item.feature_key == "surgery_scheduling":
                 continue
             if exc.status_code == 409 and item.feature_key == "inventory_optimization":
@@ -356,6 +392,11 @@ def review_result(run_id: str, req: FeedbackWrite, db: Session = Depends(get_db)
     authorize_run(db, user, run)
     if run.status != "succeeded":
         raise HTTPException(409, "只能复核已成功生成的建议")
+    from app.ai.coding_evidence_storage import expand_result as expand_coding_result
+    from app.ai.coding_evidence_storage import is_coding_run
+
+    if is_coding_run(db, run):
+        expand_coding_result(db, run)
     if run.feature_key == "roster_optimization":
         from app.ai.roster_storage import expand_result, is_roster_snapshot
 

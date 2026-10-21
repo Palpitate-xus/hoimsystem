@@ -3,7 +3,7 @@
 > 由 `fastapi_be/scripts/generate_rbac_matrix.py` 从源码自动生成，请勿手改。
 > `✓`=可访问 | `PUBLIC`=无需登录 | 留空=不可访问
 
-共 **829** 个接口（PUBLIC 18 个 / 需登录 811 个）。
+共 **843** 个接口（PUBLIC 18 个 / 需登录 825 个）。
 
 
 ### `admin.py`
@@ -163,6 +163,25 @@
 | POST | `/api/ai/bed-sources/{kind}/{source_record_id}/revoke` | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |
 | GET | `/api/ai/admin/bed-sources` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
 | GET | `/api/ai/admin/bed-sources/{source_record_id}` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+
+### `ai_coding_evidence.py`
+
+| 方法 | 路径 | admin | super_admin | director | doctor | nurse | cashier | pharmacist | guide | patient | lab_technician | registrar | PUBLIC |
+|------|------|------|------|------|------|------|------|------|------|------|------|------|------|
+| GET | `/api/ai/coding-evidence/options` | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/coding-evidence/homes` | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/coding-evidence/rules` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/coding-evidence/cases/preview` | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/coding-evidence/cases` | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/coding-evidence/cases` | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/coding-evidence/cases/{identifier}` | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/coding-evidence/cases/{identifier}/review` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/coding-evidence/cases/{identifier}/revoke` | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/coding-evidence/packages` | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/coding-evidence/packages` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/coding-evidence/packages/{identifier}` | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/coding-evidence/packages/{identifier}/review` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/coding-evidence/packages/{identifier}/revoke` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
 
 ### `ai_ecg.py`
 

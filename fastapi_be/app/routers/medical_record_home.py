@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy import func
 from sqlalchemy.orm import Session, joinedload
 
+from app.ai.coding_evidence_guard import lock_coding_write
 from app.database import get_db
 from app.dependencies import ADMIN_ROLES, CLINICAL_ROLES, User, require_roles
 from app.models import Admission, Doctor, InpatientCharge, MedicalRecordHome
@@ -44,7 +45,7 @@ def _serialize(item: MedicalRecordHome):
 def _owns(item: MedicalRecordHome, current_user: User, db: Session) -> bool:
     if current_user.user_role in ADMIN_ROLES:
         return True
-    doctor = db.query(Doctor).filter(Doctor.user_id == current_user.user_id, Doctor.doctor_id == item.doctor_id).first()
+    doctor = db.query(Doctor).filter(Doctor.user_id == current_user.user_id, Doctor.doctor_id == item.doctor_id).populate_existing().with_for_update(read=True).first()
     return doctor is not None
 
 
@@ -62,28 +63,34 @@ def list_medical_record_admissions(current_user: User = Depends(require_roles(*C
         query = query.filter(Admission.doctor_id == (doctor.doctor_id if doctor else -1))
     data = []
     for item, existing in query.all():
-        data.append({
-            "admission_id": item.admission_id,
-            "admission_no": item.admission_no,
-            "patient_id": item.patient_id,
-            "patient_name": item.patient.name if item.patient else "",
-            "doctor_name": item.doctor.name if item.doctor else "",
-            "admission_diagnosis": item.admission_diagnosis or "",
-            "status": item.status,
-            "status_text": "在院" if item.status == 1 else "已出院",
-            "home_id": existing.home_id if existing else None,
-            "home_status": existing.status if existing else None,
-        })
+        data.append(
+            {
+                "admission_id": item.admission_id,
+                "admission_no": item.admission_no,
+                "patient_id": item.patient_id,
+                "patient_name": item.patient.name if item.patient else "",
+                "doctor_name": item.doctor.name if item.doctor else "",
+                "admission_diagnosis": item.admission_diagnosis or "",
+                "status": item.status,
+                "status_text": "在院" if item.status == 1 else "已出院",
+                "home_id": existing.home_id if existing else None,
+                "home_status": existing.status if existing else None,
+            }
+        )
     return {"code": 200, "msg": "success", "data": data}
 
 
 @router.get("/medicalRecordHome/list")
 def list_medical_record_homes(admission_id: str | None = None, status: int | None = None, current_user: User = Depends(require_roles(*CLINICAL_ROLES)), db: Session = Depends(get_db)):
-    query = db.query(MedicalRecordHome).options(
-        joinedload(MedicalRecordHome.admission),
-        joinedload(MedicalRecordHome.patient),
-        joinedload(MedicalRecordHome.doctor),
-    ).order_by(MedicalRecordHome.update_time.desc())
+    query = (
+        db.query(MedicalRecordHome)
+        .options(
+            joinedload(MedicalRecordHome.admission),
+            joinedload(MedicalRecordHome.patient),
+            joinedload(MedicalRecordHome.doctor),
+        )
+        .order_by(MedicalRecordHome.update_time.desc())
+    )
     if admission_id:
         query = query.filter(MedicalRecordHome.admission_id == admission_id)
     if status is not None:
@@ -96,14 +103,30 @@ def list_medical_record_homes(admission_id: str | None = None, status: int | Non
 
 @router.post("/medicalRecordHome/create")
 def create_medical_record_home(req: MedicalRecordHomeCreateRequest, current_user: User = Depends(require_roles(*CLINICAL_ROLES)), db: Session = Depends(get_db)):
-    admission = db.query(Admission).filter(Admission.admission_id == req.admission_id).first()
+    current_user = lock_coding_write(db, current_user, allowed_roles=CLINICAL_ROLES)
+    admission = db.query(Admission).filter(Admission.admission_id == req.admission_id).populate_existing().with_for_update().first()
     if not admission:
         return {"code": 500, "msg": "入院记录不存在"}
-    if db.query(MedicalRecordHome).filter(MedicalRecordHome.admission_id == req.admission_id).first():
+    if db.query(MedicalRecordHome).filter(MedicalRecordHome.admission_id == req.admission_id).populate_existing().with_for_update().first():
         return {"code": 500, "msg": "该住院患者已有病案首页"}
-    doctor = db.query(Doctor).filter(Doctor.user_id == current_user.user_id).first()
+    doctor = db.query(Doctor).filter(Doctor.user_id == current_user.user_id).populate_existing().with_for_update(read=True).first()
     now = datetime.datetime.now()
-    item = MedicalRecordHome(admission_id=req.admission_id, patient_id=admission.patient_id, doctor_id=doctor.doctor_id if doctor else admission.doctor_id, admission_diagnosis=req.admission_diagnosis.strip(), discharge_diagnosis=req.discharge_diagnosis.strip(), other_diagnosis=req.other_diagnosis.strip(), operation_summary=req.operation_summary.strip(), complication=req.complication.strip(), discharge_status=req.discharge_status, total_fee=_total_fee(db, req.admission_id), status=0, creator_id=current_user.user_id, create_time=now, update_time=now)
+    item = MedicalRecordHome(
+        admission_id=req.admission_id,
+        patient_id=admission.patient_id,
+        doctor_id=doctor.doctor_id if doctor else admission.doctor_id,
+        admission_diagnosis=req.admission_diagnosis.strip(),
+        discharge_diagnosis=req.discharge_diagnosis.strip(),
+        other_diagnosis=req.other_diagnosis.strip(),
+        operation_summary=req.operation_summary.strip(),
+        complication=req.complication.strip(),
+        discharge_status=req.discharge_status,
+        total_fee=_total_fee(db, req.admission_id),
+        status=0,
+        creator_id=current_user.user_id,
+        create_time=now,
+        update_time=now,
+    )
     db.add(item)
     db.commit()
     return {"code": 200, "msg": "success", "data": _serialize(item)}
@@ -111,7 +134,8 @@ def create_medical_record_home(req: MedicalRecordHomeCreateRequest, current_user
 
 @router.put("/medicalRecordHome/update")
 def update_medical_record_home(req: MedicalRecordHomeUpdateRequest, current_user: User = Depends(require_roles(*CLINICAL_ROLES)), db: Session = Depends(get_db)):
-    item = db.query(MedicalRecordHome).filter(MedicalRecordHome.home_id == req.home_id).first()
+    current_user = lock_coding_write(db, current_user, allowed_roles=CLINICAL_ROLES)
+    item = db.query(MedicalRecordHome).filter(MedicalRecordHome.home_id == req.home_id).populate_existing().with_for_update().first()
     if not item:
         return {"code": 500, "msg": "病案首页不存在"}
     if not _owns(item, current_user, db):
@@ -130,7 +154,8 @@ def update_medical_record_home(req: MedicalRecordHomeUpdateRequest, current_user
 
 @router.post("/medicalRecordHome/submit")
 def submit_medical_record_home(req: MedicalRecordHomeUpdateRequest, current_user: User = Depends(require_roles(*CLINICAL_ROLES)), db: Session = Depends(get_db)):
-    item = db.query(MedicalRecordHome).filter(MedicalRecordHome.home_id == req.home_id).first()
+    current_user = lock_coding_write(db, current_user, allowed_roles=CLINICAL_ROLES)
+    item = db.query(MedicalRecordHome).filter(MedicalRecordHome.home_id == req.home_id).populate_existing().with_for_update().first()
     if not item:
         return {"code": 500, "msg": "病案首页不存在"}
     if not _owns(item, current_user, db):

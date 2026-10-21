@@ -224,6 +224,8 @@ class RunRequest(StrictRequest):
             raise ValueError("受审物资原量序列仅用于单品种申请、实际发出与确认消耗预测")
         if "inventory_scenario_id" in self.input and self.feature_key != "inventory_optimization":
             raise ValueError("受审完整库存场景仅用于明确有限采购候选比较")
+        if "coding_case_id" in self.input and self.feature_key != "drg_evidence_review":
+            raise ValueError("完整编码证据快照仅用于单次住院病案编码证据核对")
         return self
 
 

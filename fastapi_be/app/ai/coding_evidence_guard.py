@@ -56,6 +56,6 @@ def lock_coding_write(db, current_user, *, allowed_roles, home_ids=()):
         if actor is None or actor.user_role not in roles:
             raise HTTPException(403, "当前账户已无本项原业务权限")
         for home_id in sorted(ids):
-            if current_coding_rows(db.query(MedicalRecordHome).filter_by(home_id=home_id)).one_or_none() is None:
+            if current_coding_rows(db.query(MedicalRecordHome.home_id).filter_by(home_id=home_id)).one_or_none() is None:
                 raise HTTPException(409, "实际病案首页已不存在")
         return actor

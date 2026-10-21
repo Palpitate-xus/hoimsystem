@@ -3,7 +3,7 @@
 > 由 `fastapi_be/scripts/generate_rbac_matrix.py` 从源码自动生成，请勿手改。
 > `✓`=可访问 | `PUBLIC`=无需登录 | 留空=不可访问
 
-共 **934** 个接口（PUBLIC 18 个 / 需登录 916 个）。
+共 **961** 个接口（PUBLIC 18 个 / 需登录 943 个）。
 
 
 ### `admin.py`
@@ -196,6 +196,43 @@
 | GET | `/api/ai/coding-evidence/packages/{identifier}` | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |
 | POST | `/api/ai/coding-evidence/packages/{identifier}/review` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
 | POST | `/api/ai/coding-evidence/packages/{identifier}/revoke` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+
+### `ai_deidentification.py`
+
+| 方法 | 路径 | admin | super_admin | director | doctor | nurse | cashier | pharmacist | guide | patient | lab_technician | registrar | PUBLIC |
+|------|------|------|------|------|------|------|------|------|------|------|------|------|------|
+| POST | `/api/ai/deidentification/fields` | ✓ | ✓ | ✓ | ✓ |  |  | ✓ |  |  |  |  |  |
+| POST | `/api/ai/deidentification/cases/directory` | ✓ | ✓ | ✓ | ✓ |  |  | ✓ |  |  |  |  |  |
+| POST | `/api/ai/deidentification/cases/preview` | ✓ | ✓ | ✓ | ✓ |  |  | ✓ |  |  |  |  |  |
+| POST | `/api/ai/deidentification/cases` | ✓ | ✓ | ✓ | ✓ |  |  | ✓ |  |  |  |  |  |
+| GET | `/api/ai/deidentification/cases/{case_id}` | ✓ | ✓ | ✓ | ✓ |  |  | ✓ |  |  |  |  |  |
+| POST | `/api/ai/deidentification/cases/{case_id}/review` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/deidentification/cases/{case_id}/revoke` | ✓ | ✓ | ✓ | ✓ |  |  | ✓ |  |  |  |  |  |
+| POST | `/api/ai/deidentification/reviews` | ✓ | ✓ | ✓ | ✓ |  |  | ✓ |  |  |  |  |  |
+| GET | `/api/ai/deidentification/reviews/{review_id}` | ✓ | ✓ | ✓ | ✓ |  |  | ✓ |  |  |  |  |  |
+| POST | `/api/ai/deidentification/reviews/{review_id}/residual-review` | ✓ | ✓ | ✓ | ✓ |  |  | ✓ |  |  |  |  |  |
+| POST | `/api/ai/deidentification/reviews/{review_id}/review` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/deidentification/reviews/{review_id}/revoke` | ✓ | ✓ | ✓ | ✓ |  |  | ✓ |  |  |  |  |  |
+| POST | `/api/ai/deidentification/releases` | ✓ | ✓ | ✓ | ✓ |  |  | ✓ |  |  |  |  |  |
+| GET | `/api/ai/deidentification/releases/{release_id}` | ✓ | ✓ | ✓ | ✓ |  |  | ✓ |  |  |  |  |  |
+| POST | `/api/ai/deidentification/releases/{release_id}/authority-review` | ✓ | ✓ | ✓ | ✓ |  |  | ✓ |  |  |  |  |  |
+| POST | `/api/ai/deidentification/releases/{release_id}/review` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/deidentification/releases/{release_id}/revoke` | ✓ | ✓ | ✓ | ✓ |  |  | ✓ |  |  |  |  |  |
+| POST | `/api/ai/deidentification/releases/{release_id}/download` | ✓ | ✓ | ✓ | ✓ |  |  | ✓ |  |  |  |  |  |
+
+### `ai_deidentification_tasks.py`
+
+| 方法 | 路径 | admin | super_admin | director | doctor | nurse | cashier | pharmacist | guide | patient | lab_technician | registrar | PUBLIC |
+|------|------|------|------|------|------|------|------|------|------|------|------|------|------|
+| POST | `/api/ai/deidentification/tasks/context` | ✓ | ✓ | ✓ | ✓ |  |  | ✓ |  |  |  |  |  |
+| POST | `/api/ai/deidentification/tasks` | ✓ | ✓ | ✓ | ✓ |  |  | ✓ |  |  |  |  |  |
+| GET | `/api/ai/deidentification/tasks/{run_id}` | ✓ | ✓ | ✓ | ✓ |  |  | ✓ |  |  |  |  |  |
+| GET | `/api/ai/deidentification/tasks/{run_id}/technical` | ✓ | ✓ | ✓ | ✓ |  |  | ✓ |  |  |  |  |  |
+| GET | `/api/ai/deidentification/tasks/{run_id}/source` | ✓ | ✓ | ✓ | ✓ |  |  | ✓ |  |  |  |  |  |
+| GET | `/api/ai/deidentification/tasks/{run_id}/result` | ✓ | ✓ | ✓ | ✓ |  |  | ✓ |  |  |  |  |  |
+| GET | `/api/ai/deidentification/tasks/{run_id}/trace` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/deidentification/tasks/{run_id}/cancel` | ✓ | ✓ | ✓ | ✓ |  |  | ✓ |  |  |  |  |  |
+| GET | `/api/ai/deidentification/tasks/{run_id}/parts/{part}` | ✓ | ✓ | ✓ | ✓ |  |  | ✓ |  |  |  |  |  |
 
 ### `ai_document_change.py`
 

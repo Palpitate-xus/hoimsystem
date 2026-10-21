@@ -852,6 +852,7 @@ def list_global_runs(
     document_original_id: str | None = Query(None, max_length=36),
     drug_label_source_binding_id: str | None = None,
     document_change_scope_id: str | None = Query(None, max_length=36),
+    deidentification_case_id: str | None = Query(None, max_length=36),
     page: int = Query(1, ge=1, le=100000),
     page_size: int = Query(30, ge=1, le=100),
     db: Session = Depends(get_db),
@@ -865,6 +866,37 @@ def list_global_runs(
     lock_directory_gates(db)
     user = _current_super_admin(db, user)
     query = db.query(AIRun).options(*(defer(getattr(AIRun, key)) for key in ("input_json", "evidence_json", "context_metadata_json", "result_json")))
+    if feature_key == "deidentification" or deidentification_case_id is not None:
+        from app.ai.deidentification_shared import filter_history as filter_deidentification_history
+
+        user, query = filter_deidentification_history(
+            db,
+            user,
+            query,
+            feature_key=feature_key,
+            case_id=deidentification_case_id,
+            other_scope=(
+                patient_id,
+                encounter_ref,
+                department_id,
+                surgery_pool_id,
+                surgery_scenario_id,
+                supply_item_kind,
+                supply_item_id,
+                supply_series_id,
+                inventory_item_kind,
+                inventory_item_id,
+                inventory_scenario_id,
+                coding_case_id,
+                charge_case_id,
+                satisfaction_case_id,
+                True if satisfaction_native_only else None,
+                document_original_id,
+                drug_label_source_binding_id,
+                document_change_scope_id,
+            ),
+        )
+
     if feature_key == "guideline_change_review" or document_change_scope_id is not None:
         from app.ai.document_change_history import filter_history
 
@@ -1059,6 +1091,8 @@ def list_global_runs(
         .all()
     )
     counts = dict(db.query(AIFeedback.run_id, func.count(AIFeedback.feedback_id)).filter(AIFeedback.run_id.in_([item.run_id for item in rows])).group_by(AIFeedback.run_id).all()) if rows else {}
+    from app.ai.deidentification_shared import directory_metadata as deidentification_metadata
+    from app.ai.deidentification_shared import is_deidentification_task
     from app.ai.document_change_storage import is_document_change_run
     from app.ai.document_change_views import run_view
     from app.ai.research_cohort_shared import directory_metadata, is_research_task
@@ -1066,7 +1100,9 @@ def list_global_runs(
     data = [
         {
             **(
-                directory_metadata(db, user, item)
+                deidentification_metadata(db, user, item)
+                if is_deidentification_task(db, item)
+                else directory_metadata(db, user, item)
                 if is_research_task(db, item)
                 else run_view(db, user, item, False, current=False)
                 if is_document_change_run(db, item)
@@ -1093,7 +1129,12 @@ def inspect_run_trace(run_id: str, db: Session = Depends(get_db), user: User = D
     from app.ai.native_task_routing import locate_native_task
 
     identity = locate_native_task(db, run_id)  # Reject contradictory immutable anchors.
+    from app.ai.deidentification_shared import is_deidentification_task
+    from app.ai.deidentification_shared import split_trace as deidentification_trace
     from app.ai.research_cohort_shared import is_research_task, split_trace
+
+    if identity is not None and identity.domain == "deidentification" or identity is None and is_deidentification_task(db, run_id):
+        return {"code": 200, "msg": "success", "data": deidentification_trace(db, user, run_id)}
 
     if identity is not None and identity.domain == "research_cohort" or identity is None and is_research_task(db, run_id):
         return {"code": 200, "msg": "success", "data": split_trace(db, user, run_id)}

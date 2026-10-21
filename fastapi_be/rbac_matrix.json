@@ -1279,6 +1279,341 @@
  },
  {
   "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "fields",
+  "method": "POST",
+  "module": "ai_deidentification.py",
+  "path": "/api/ai/deidentification/fields"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "directory",
+  "method": "POST",
+  "module": "ai_deidentification.py",
+  "path": "/api/ai/deidentification/cases/directory"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "preview",
+  "method": "POST",
+  "module": "ai_deidentification.py",
+  "path": "/api/ai/deidentification/cases/preview"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "create_case",
+  "method": "POST",
+  "module": "ai_deidentification.py",
+  "path": "/api/ai/deidentification/cases"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "get_case",
+  "method": "GET",
+  "module": "ai_deidentification.py",
+  "path": "/api/ai/deidentification/cases/{case_id}"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "review_case",
+  "method": "POST",
+  "module": "ai_deidentification.py",
+  "path": "/api/ai/deidentification/cases/{case_id}/review"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "revoke_case",
+  "method": "POST",
+  "module": "ai_deidentification.py",
+  "path": "/api/ai/deidentification/cases/{case_id}/revoke"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "create_review",
+  "method": "POST",
+  "module": "ai_deidentification.py",
+  "path": "/api/ai/deidentification/reviews"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "get_review",
+  "method": "GET",
+  "module": "ai_deidentification.py",
+  "path": "/api/ai/deidentification/reviews/{review_id}"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "residual_review",
+  "method": "POST",
+  "module": "ai_deidentification.py",
+  "path": "/api/ai/deidentification/reviews/{review_id}/residual-review"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "publish_review",
+  "method": "POST",
+  "module": "ai_deidentification.py",
+  "path": "/api/ai/deidentification/reviews/{review_id}/review"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "revoke_review",
+  "method": "POST",
+  "module": "ai_deidentification.py",
+  "path": "/api/ai/deidentification/reviews/{review_id}/revoke"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "create_release",
+  "method": "POST",
+  "module": "ai_deidentification.py",
+  "path": "/api/ai/deidentification/releases"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "get_release",
+  "method": "GET",
+  "module": "ai_deidentification.py",
+  "path": "/api/ai/deidentification/releases/{release_id}"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "authority_review",
+  "method": "POST",
+  "module": "ai_deidentification.py",
+  "path": "/api/ai/deidentification/releases/{release_id}/authority-review"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "publish_release",
+  "method": "POST",
+  "module": "ai_deidentification.py",
+  "path": "/api/ai/deidentification/releases/{release_id}/review"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "revoke_release",
+  "method": "POST",
+  "module": "ai_deidentification.py",
+  "path": "/api/ai/deidentification/releases/{release_id}/revoke"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "download",
+  "method": "POST",
+  "module": "ai_deidentification.py",
+  "path": "/api/ai/deidentification/releases/{release_id}/download"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "preview",
+  "method": "POST",
+  "module": "ai_deidentification_tasks.py",
+  "path": "/api/ai/deidentification/tasks/context"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "create",
+  "method": "POST",
+  "module": "ai_deidentification_tasks.py",
+  "path": "/api/ai/deidentification/tasks"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "detail",
+  "method": "GET",
+  "module": "ai_deidentification_tasks.py",
+  "path": "/api/ai/deidentification/tasks/{run_id}"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "technical",
+  "method": "GET",
+  "module": "ai_deidentification_tasks.py",
+  "path": "/api/ai/deidentification/tasks/{run_id}/technical"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "source_part",
+  "method": "GET",
+  "module": "ai_deidentification_tasks.py",
+  "path": "/api/ai/deidentification/tasks/{run_id}/source"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "result_part",
+  "method": "GET",
+  "module": "ai_deidentification_tasks.py",
+  "path": "/api/ai/deidentification/tasks/{run_id}/result"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "trace",
+  "method": "GET",
+  "module": "ai_deidentification_tasks.py",
+  "path": "/api/ai/deidentification/tasks/{run_id}/trace"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "cancel",
+  "method": "POST",
+  "module": "ai_deidentification_tasks.py",
+  "path": "/api/ai/deidentification/tasks/{run_id}/cancel"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "split_part",
+  "method": "GET",
+  "module": "ai_deidentification_tasks.py",
+  "path": "/api/ai/deidentification/tasks/{run_id}/parts/{part}"
+ },
+ {
+  "auth": [
    "super_admin"
   ],
   "function": "options",

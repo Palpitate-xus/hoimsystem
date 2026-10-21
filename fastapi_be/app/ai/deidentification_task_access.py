@@ -38,20 +38,9 @@ def opaque_locator(db, run_id):
 
 
 def is_deidentification_run(db, run):
-    if db is not None and opaque_locator(db, run_identifier(run)) is not None:
-        return True
-    state = inspect(run, raiseerr=False)
-    loaded = state.dict if state is not None else getattr(run, "__dict__", {})
-    if loaded.get("feature_key") == "deidentification":
-        return True
-    for field in ("input_json", "result_json"):
-        try:
-            value = json.loads(loaded.get(field, "{}"))
-            if isinstance(value, dict) and (str(value.get("schema_version", "")).startswith("deidentification_") or "deidentification_case_id" in value or "deidentification_result" in value):
-                return True
-        except (ValueError, TypeError):
-            pass
-    return False
+    from app.ai.deidentification_shared import is_deidentification_task
+
+    return is_deidentification_task(db, run)
 
 
 def role_configuration(db, actor):

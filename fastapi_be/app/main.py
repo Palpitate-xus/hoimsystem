@@ -385,6 +385,8 @@ from app.routers import (
     ai_bed_sources,
     ai_charge_reconciliation,
     ai_coding_evidence,
+    ai_deidentification,
+    ai_deidentification_tasks,
     ai_document_change,
     ai_document_change_runs,
     ai_document_evidence,
@@ -554,6 +556,8 @@ app.include_router(ai_document_change_runs.router, prefix="/api")
 app.include_router(ai_coding_evidence.router, prefix="/api")
 app.include_router(ai_charge_reconciliation.router, prefix="/api")
 app.include_router(ai_satisfaction_sources.router, prefix="/api")
+app.include_router(ai_deidentification.router, prefix="/api")
+app.include_router(ai_deidentification_tasks.router, prefix="/api")
 app.include_router(ai_research_cohort_sources.router, prefix="/api")
 app.include_router(ai_research_cohort_tasks.router, prefix="/api")
 app.include_router(ai_supply_sources.router, prefix="/api")

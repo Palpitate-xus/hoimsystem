@@ -71,6 +71,11 @@ def guard_private_task_read(db, user, run_id):
     if identity is not None:
         # An actual immutable FK selects exactly one complete domain guard.
         # Only a task with no Artifact needs the orphan JSON-marker probes.
+        if identity.domain == "deidentification":
+            from app.ai.deidentification_shared import guard_task
+
+            guard_task(db, user, run_id)
+            return
         if identity.domain == "research_cohort":
             from app.ai.research_cohort_shared import guard_research_task
 
@@ -97,8 +102,13 @@ def guard_private_task_read(db, user, run_id):
 
             raise HTTPException(409, "原生任务的实际域锚点已改变，未降级读取")
         return
+    from app.ai.deidentification_shared import guard_task as guard_deidentification_task
+    from app.ai.deidentification_shared import is_deidentification_task
     from app.ai.research_cohort_shared import guard_research_task, is_research_task
 
+    if is_deidentification_task(db, run_id):
+        guard_deidentification_task(db, user, run_id)
+        return
     if is_research_task(db, run_id):
         guard_research_task(db, user, run_id)
         return

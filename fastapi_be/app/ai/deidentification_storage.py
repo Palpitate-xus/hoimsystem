@@ -174,8 +174,22 @@ def stage_source(db, run, body, create_event_id):
         instructions_digest=prompt["instructions_digest"],
         create_event_id=create_event_id,
     )
+    # Split task/frame has its actual final Run UUID and original raw3 here.
+    # Source/scope/result reads return canonical bodies without any envelope.
+    from app.ai.deidentification_shared import task_packet
+
+    task = original_json(run.input_json, 65535)
+    header = {key: getattr(row, key) for key in ("source_hash", "source_binding_hash", "source_projection_hash", *HASH_FIELDS)}
+    packet = task_packet(run.run_id, header, body, task, {field: getattr(run, field) for field in TEXT_FIELDS})
+    try:
+        bounded_json(packet)
+    except ValueError as exc:
+        raise HTTPException(413, "75完整Task分件超8MiB，未保存或截断") from exc
     db.add(row)
     db.flush()
+    from app.ai.native_task_routing import remember_staged_identity
+
+    remember_staged_identity(db, row)
     result = AIDeidentificationRunResult(run_id=run.run_id, schema_version=RESULT_SCHEMA, created_at=row.created_at)
     db.add(result)
     db.flush()

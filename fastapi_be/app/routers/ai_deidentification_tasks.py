@@ -1,4 +1,4 @@
-"""Dedicated75 task API. Root registers it in shared Main in a later phase."""
+"""Dedicated75 current-authorized tasks and canonical split bodies."""
 
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
@@ -105,3 +105,25 @@ def cancel(run_id: UUID, db: Session = Depends(get_db), user: User = Depends(req
         return runtime.technical_deidentification_status(db, user, run_id)
 
     return reply(db, operation)
+
+
+@router.get("/{run_id}/parts/{part}")
+def split_part(run_id: UUID, part: str, audit_only: bool = False, db: Session = Depends(get_db), user: User = Depends(require_roles(*SOURCE_ROLES))):
+    """No envelope: an accepted canonical8MiB body remains independently readable."""
+    from fastapi import HTTPException
+    from fastapi.responses import Response
+
+    from app.ai.deidentification_contract import MAX_BYTES
+    from app.ai.deidentification_shared import part_view
+    from app.ai.deidentification_spans import canonical, utf8
+
+    try:
+        value = part_view(db, user, run_id, part, audit_only=audit_only)
+        raw = utf8(canonical(value))
+        if len(raw) > MAX_BYTES:
+            raise HTTPException(413, "75完整分件超8MiB，未裁剪或截断")
+        db.commit()
+        return Response(content=raw, media_type="application/json")
+    except Exception:
+        db.rollback()
+        raise

@@ -1,8 +1,4 @@
-"""Actual main/JWT with75 routes mounted only for the test's duration.
-
-No claim of production main/catalog/runtime registration, external model call,
-MySQL locking, clinical certification or anonymous output is made here.
-"""
+"""Actual product Main/JWT with18 Source routes; no live model or MySQL proof."""
 
 import datetime as dt
 import json
@@ -31,13 +27,10 @@ def mounted_deidentification_router():
     from app.main import app
     from app.routers.ai_deidentification import router
 
-    previous = list(app.router.routes)
-    app.include_router(router, prefix="/api")
-    try:
-        yield
-    finally:
-        app.router.routes[:] = previous
-        app.openapi_schema = None
+    expected = {(tuple(sorted(route.methods)), "/api" + route.path) for route in router.routes}
+    actual = [(tuple(sorted(route.methods)), route.path) for route in app.routes if route.path.startswith("/api/ai/deidentification/") and "/tasks" not in route.path]
+    assert len(expected) == len(actual) == 18 and set(actual) == expected
+    yield
 
 
 @pytest.mark.asyncio

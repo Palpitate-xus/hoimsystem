@@ -32,7 +32,7 @@ def test_treatment_contract_requires_evidence_and_dedicated_models_stay_distinct
 def test_hospital_scope_does_not_advertise_access_to_unscoped_business_roles():
     for spec in FEATURES:
         if spec.scope == "hospital":
-            expected = {"super_admin", "admin", "director"} | ({"pharmacist"} if spec.number in {66, 67} else set())
+            expected = {"super_admin", "admin", "director"} | ({"pharmacist"} if spec.number in {66, 67} else {"doctor", "pharmacist"} if spec.number == 75 else set())
             assert set(spec.default_roles) <= expected
     assert FEATURE_BY_KEY["feedback_analysis"].requires_patient_data_permission
     assert FEATURE_BY_KEY["research_cohort"].requires_patient_data_permission
@@ -63,6 +63,7 @@ def test_actual_coding_and_charge_prompts_and_unique_charge_reference_are_export
 
     from app.ai.charge_reconciliation_prompt import CHARGE_RECONCILIATION_SYSTEM_PROMPT
     from app.ai.coding_evidence_prompt import CODING_SYSTEM_PROMPT
+    from app.ai.deidentification_prompt import SYSTEM_PROMPT as DEIDENTIFICATION_SYSTEM_PROMPT
     from app.ai.document_extraction_contract import EXTRACTION_SYSTEM_PROMPT
     from app.ai.drug_label_prompt import SYSTEM_PROMPT as DRUG_LABEL_SYSTEM_PROMPT
     from app.ai.satisfaction_prompt import SATISFACTION_SYSTEM_PROMPT
@@ -78,6 +79,7 @@ def test_actual_coding_and_charge_prompts_and_unique_charge_reference_are_export
         "guideline_change_review": DOCUMENT_CHANGE_SYSTEM_PROMPT,
         "drug_label_extraction": DRUG_LABEL_SYSTEM_PROMPT,
         "research_cohort": RESEARCH_SYSTEM_PROMPT,
+        "deidentification": DEIDENTIFICATION_SYSTEM_PROMPT,
     }
     assert len(exported["features"]) == 80
     for spec, value in zip(FEATURES, exported["features"], strict=True):
@@ -93,6 +95,7 @@ def test_export_declares_actual_distinct_fixed_system_prompts_for_closed_drafts(
 
     from app.ai.charge_reconciliation_prompt import CHARGE_RECONCILIATION_SYSTEM_PROMPT
     from app.ai.coding_evidence_prompt import CODING_SYSTEM_PROMPT
+    from app.ai.deidentification_prompt import SYSTEM_PROMPT as DEIDENTIFICATION_SYSTEM_PROMPT
     from app.ai.document_extraction_contract import EXTRACTION_SYSTEM_PROMPT
     from app.ai.drug_label_draft import SYSTEM_PROMPT as DRUG_LABEL_SYSTEM_PROMPT
     from app.ai.satisfaction_prompt import SATISFACTION_SYSTEM_PROMPT
@@ -108,6 +111,7 @@ def test_export_declares_actual_distinct_fixed_system_prompts_for_closed_drafts(
         "guideline_change_review": DOCUMENT_CHANGE_SYSTEM_PROMPT,
         "drug_label_extraction": DRUG_LABEL_SYSTEM_PROMPT,
         "research_cohort": RESEARCH_SYSTEM_PROMPT,
+        "deidentification": DEIDENTIFICATION_SYSTEM_PROMPT,
     }
     assert FEATURE_BY_KEY["guideline_ingestion"].default_roles == ("super_admin",)
     assert FEATURE_BY_KEY["guideline_ingestion"].requires_patient_data_permission
@@ -232,3 +236,16 @@ def test_document_change_current_configuration_cannot_expand_roles_or_omit_patie
     assert issues and any("资料" in item["message"] for item in issues)
     provider.allows_patient_data = 1
     assert provider_feature_issues(spec, provider) == []
+
+
+def test_deidentification_catalog_uses_its_fixed_literal_prompt_and_only_reviewed_case_reference():
+    from app.ai.deidentification_prompt import SYSTEM_PROMPT, TASK_PROMPT
+    from app.ai.feature_prompts import system_prompt_for_feature
+
+    spec = FEATURE_BY_KEY["deidentification"]
+    assert spec.number == 75 and spec.scope == "hospital" and spec.engine == "llm"
+    assert set(spec.default_roles) == {"super_admin", "admin", "director", "doctor", "pharmacist"}
+    assert describe_feature(spec)["source_reference_keys"] == ["deidentification_case_id"]
+    assert TASK_PROMPT in spec.task_prompt and "sections 必须" not in spec.task_prompt
+    assert system_prompt_for_feature(spec) == SYSTEM_PROMPT
+    assert all("deidentification_case_id" not in describe_feature(other)["source_reference_keys"] for other in FEATURES if other.number != 75)

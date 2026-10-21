@@ -23,15 +23,16 @@ from tests.test_ai_document_evidence_sources import cas
 ROOT = Path(__file__).resolve().parents[1]
 
 
-def test_expanded_histories_and_research_merge_preserve_all_six_artifact_domains():
+def test_expanded_histories_and_research_merge_preserve_all_seven_artifact_domains():
     scripts = ScriptDirectory.from_config(Config(str(ROOT / "alembic.ini")))
-    assert scripts.get_heads() == ["20261021_native_research_merge"]
-    assert set(scripts.get_revision(scripts.get_heads()[0]).down_revision) == {"20261021_native_expanded_merge", "20261021_research_dispatch"}
+    assert scripts.get_heads() == ["20261021_native_deid_merge"]
+    assert set(scripts.get_revision(scripts.get_heads()[0]).down_revision) == {"20261021_native_research_merge", "20261021_deid_dispatch"}
+    assert set(scripts.get_revision("20261021_native_research_merge").down_revision) == {"20261021_native_expanded_merge", "20261021_research_dispatch"}
     assert set(scripts.get_revision("20261021_native_expanded_merge").down_revision) == {"20261021_native_shared_merge", "20261021_document_change_runs"}
     chain = list(scripts.walk_revisions())
     assert len(chain) == len({row.revision for row in chain})
     assert {"20261021_charge_runs", "20261021_sat_usage_receipt", "20261021_doc_extraction_runs", "20261021_drug_label_runs", "20261021_document_change_runs"} <= {row.revision for row in chain}
-    assert [row[0] for row in routing._domains()] == ["charge", "satisfaction", "document", "drug_label", "document_change", "research_cohort"]
+    assert [row[0] for row in routing._domains()] == ["charge", "satisfaction", "document", "drug_label", "document_change", "research_cohort", "deidentification"]
 
 
 def test_document_change_pure_prompt_reexports_are_exact():

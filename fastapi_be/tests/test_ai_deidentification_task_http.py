@@ -1,4 +1,4 @@
-"""Actual Main JWT with only the dedicated router test-mounted; Mock model."""
+"""Actual product Main JWT dedicated75 Task routes, with MockTransport model."""
 
 import pytest
 from sqlalchemy import event
@@ -17,8 +17,9 @@ from tests.test_ai_research_cohort_sources import research_case as research_case
 
 @pytest.fixture(scope="module", autouse=True)
 def mount_dedicated_router_for_actual_main_only():
-    if not any(route.path == "/api/ai/deidentification/tasks/context" for route in app.routes):
-        app.include_router(router, prefix="/api")
+    expected = {(tuple(sorted(route.methods)), "/api" + route.path) for route in router.routes}
+    actual = [(tuple(sorted(route.methods)), route.path) for route in app.routes if route.path.startswith("/api/ai/deidentification/tasks")]
+    assert len(expected) == len(actual) == 9 and set(actual) == expected
 
 
 @pytest.mark.asyncio

@@ -95,6 +95,10 @@ def _check_run_storage_json(serialized: dict[str, str]) -> None:
 
 def create_run(db: Session, user: User, req: RunRequest) -> AIRun:
     """Freeze an authorized, source-linked request before a durable worker processes it."""
+    if req.feature_key == "deidentification":
+        from app.ai.deidentification_shared_dispatch import create_shared_run
+
+        return create_shared_run(db, user, req)
     if req.feature_key == "research_cohort":
         from app.ai.research_cohort_dispatch import create_shared_research_run
 
@@ -402,7 +406,13 @@ def create_run(db: Session, user: User, req: RunRequest) -> AIRun:
 
 def authorize_run(db: Session, user: User, run: AIRun) -> None:
     """Re-check current permissions, including revoked care access, on every result read."""
+    from app.ai.deidentification_shared import guard_task as guard_deidentification_task
+    from app.ai.deidentification_shared import is_deidentification_task
     from app.ai.research_cohort_shared import guard_research_task, is_research_task
+
+    if is_deidentification_task(db, run):
+        guard_deidentification_task(db, user, run.run_id)
+        return
 
     if is_research_task(db, run):
         guard_research_task(db, user, run.run_id)
@@ -584,8 +594,14 @@ def describe_run(run: AIRun, include_result: bool = True, *, user: User | None =
     from app.ai.charge_reconciliation_storage import is_charge_run
 
     db = object_session(run)
+    from app.ai.deidentification_shared import directory_metadata as deidentification_metadata
+    from app.ai.deidentification_shared import is_deidentification_task
     from app.ai.research_cohort_shared import is_research_task
 
+    if is_deidentification_task(db, run):
+        if db is None or user is None:
+            raise HTTPException(403, "75任务技术状态须在当前授权会话读取")
+        return deidentification_metadata(db, user, run)
     if is_research_task(db, run):
         if db is None or user is None:
             raise HTTPException(403, "科研技术状态须在当前授权会话读取")
@@ -901,7 +917,11 @@ def describe_run(run: AIRun, include_result: bool = True, *, user: User | None =
 
 def claim_next_run(db: Session):
     """Claim durable work without allowing two workers to execute the same queued task."""
-    from app.ai.native_task_routing import locate_native_task
+    from app.ai.deidentification_dispatch import claim_deidentification_run
+    from app.ai.deidentification_shared import is_deidentification_task
+    from app.ai.deidentification_shared_dispatch import quarantine_orphan as quarantine_deidentification_orphan
+    from app.ai.deidentification_shared_dispatch import queue_candidate_condition as deidentification_queue_condition
+    from app.ai.native_task_routing import locate_native_task, queue_identity_condition
     from app.ai.research_cohort_dispatch import quarantine_orphan_research_run, queue_candidate_condition
     from app.ai.research_cohort_execution import claim_research_run
     from app.ai.research_cohort_shared import is_research_task
@@ -912,12 +932,29 @@ def claim_next_run(db: Session):
     # inference and cannot monopolize the first queue position in this poll.
     for _ in range(128):
         candidate = (
-            db.query(AIRun.run_id, AIRun.feature_key).filter(AIRun.status == "queued", ~AIRun.run_id.in_(skipped), queue_candidate_condition(db)).order_by(AIRun.create_time, AIRun.run_id).first()
+            db.query(AIRun.run_id, AIRun.feature_key)
+            .filter(AIRun.status == "queued", ~AIRun.run_id.in_(skipped), queue_candidate_condition(db), deidentification_queue_condition(db), queue_identity_condition())
+            .order_by(AIRun.create_time, AIRun.run_id)
+            .first()
         )
         if candidate is None:
             return None
         identity = locate_native_task(db, candidate.run_id)
         domain = identity.domain if identity is not None else None
+        if domain == "deidentification":
+            claimed = claim_deidentification_run(db, candidate.run_id)
+            if claimed is not None:
+                return claimed
+            skipped.append(candidate.run_id)
+            continue
+        if domain is None and is_deidentification_task(db, candidate.run_id):
+            try:
+                quarantine_deidentification_orphan(db, candidate.run_id)
+            except HTTPException as exc:
+                if exc.status_code not in {403, 404, 409}:
+                    raise
+            skipped.append(candidate.run_id)
+            continue
         if domain == "research_cohort":
             claimed = claim_research_run(db, candidate.run_id)
             if claimed is not None:
@@ -962,6 +999,8 @@ def claim_next_run(db: Session):
 
 
 def _recheck_task(db: Session, run: AIRun) -> tuple[FeatureSpec, AIProvider, dict]:
+    if run.feature_key == "deidentification":
+        raise AIExecutionError("NATIVE_ARTIFACT_REQUIRED", "75任务只接受完整专用来源和具体claim回执，不沿用通用推理")
     if run.feature_key == "research_cohort":
         raise AIExecutionError("NATIVE_ARTIFACT_REQUIRED", "科研任务只接受完整专用来源和具体claim回执，不沿用通用推理")
     if run.feature_key == "feedback_analysis":
@@ -1045,10 +1084,12 @@ def _recheck_task(db: Session, run: AIRun) -> tuple[FeatureSpec, AIProvider, dic
     return spec, provider, snapshot
 
 
-async def execute_claimed(run_id: str, lease: str, *, transport=None, research_claim_event_id=None) -> None:
+async def execute_claimed(run_id: str, lease: str, *, transport=None, research_claim_event_id=None, deidentification_claim_event_id=None) -> None:
     """Release SQL connections during inference; recheck authorization before storing results."""
     from app import database
     from app.ai.charge_reconciliation_storage import is_charge_run
+    from app.ai.deidentification_dispatch import validate_delivery as validate_deidentification_delivery
+    from app.ai.deidentification_shared import is_deidentification_task
     from app.ai.document_change_access import has_native_identity
     from app.ai.document_extraction_storage import is_extraction_run
     from app.ai.native_task_routing import locate_native_task
@@ -1061,6 +1102,15 @@ async def execute_claimed(run_id: str, lease: str, *, transport=None, research_c
         header = routing_db.query(AIRun.run_id, AIRun.feature_key).filter(AIRun.run_id == run_id, AIRun.status.in_(["running", "cancelled"]), AIRun.lease_token == lease).one_or_none()
         identity = locate_native_task(routing_db, run_id)
         domain = identity.domain if identity is not None else None
+        deidentification_task = domain == "deidentification"
+        deidentification_orphan = domain is None and is_deidentification_task(routing_db, run_id)
+        deidentification_dispatch = False
+        if deidentification_task:
+            if research_claim_event_id is not None:
+                raise HTTPException(409, "75任务不能借用其他域claim回执")
+            deidentification_dispatch = validate_deidentification_delivery(routing_db, run_id, lease, deidentification_claim_event_id)
+        elif deidentification_claim_event_id is not None or deidentification_orphan:
+            raise HTTPException(409, "75原claim回执或持久域不一致，未改变任务或执行通用模型")
         research_task = domain == "research_cohort"
         research_orphan = domain is None and is_research_task(routing_db, run_id)
         research_dispatch = False
@@ -1079,13 +1129,21 @@ async def execute_claimed(run_id: str, lease: str, *, transport=None, research_c
         # read/dispatch contracts; no erased real Artifact can enter this path.
         routing_run = (
             routing_db.get(AIRun, run_id)
-            if header is not None and domain is None and not any((research_task, research_orphan, drug_label_task, satisfaction_task, document_task, change_task))
+            if header is not None
+            and domain is None
+            and not any((deidentification_task, deidentification_orphan, research_task, research_orphan, drug_label_task, satisfaction_task, document_task, change_task))
             else None
         )
         if routing_run is not None:
             charge = is_charge_run(routing_db, routing_run)
             satisfaction_task = not charge and is_satisfaction_run(routing_db, routing_run)
             document_task = not charge and not satisfaction_task and is_extraction_run(routing_db, routing_run)
+    if deidentification_task:
+        if deidentification_dispatch:
+            from app.ai.deidentification_runtime import execute_deidentification_claimed
+
+            await execute_deidentification_claimed(run_id, lease, deidentification_claim_event_id, transport=transport)
+        return
     if research_task:
         if research_dispatch:
             from app.ai.research_cohort_execution import execute_research_claimed
@@ -1499,6 +1557,7 @@ def expire_interrupted_runs(db: Session) -> int:
     """Mark abandoned inference failed without repeating potentially billable calls."""
     from app.ai.charge_reconciliation_execution import expire_interrupted_charge_runs
     from app.ai.charge_reconciliation_run_models import AIChargeRunArtifact
+    from app.ai.deidentification_run_models import AIDeidentificationRunSource
     from app.ai.document_change_run_models import AIDocumentChangeRunArtifact
     from app.ai.document_change_runtime import expire_interrupted_change_runs
     from app.ai.document_change_view_contract import FEATURE_KEY as CHANGE_FEATURE
@@ -1525,6 +1584,7 @@ def expire_interrupted_runs(db: Session) -> int:
             ~AIRun.run_id.in_(db.query(AISatisfactionRunArtifact.run_id)),
             ~AIRun.run_id.in_(db.query(AIDrugLabelRunArtifact.run_id)),
             ~AIRun.run_id.in_(db.query(AIResearchCohortRunArtifact.run_id)),
+            ~AIRun.run_id.in_(db.query(AIDeidentificationRunSource.run_id)),
         )
         .update({"status": "failed", "error_code": "WORKER_INTERRUPTED", "error_message": "执行进程中断，任务未自动重试，可检查后重新提交", "finish_time": utcnow()}, synchronize_session=False)
     )

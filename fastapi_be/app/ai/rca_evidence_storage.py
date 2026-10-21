@@ -105,7 +105,7 @@ def _grant_ids(db, identifier):
     )
 
 
-def _source_before_task(db, user, identity, *, frozen_audit=False):
+def _source_before_task_unchecked(db, user, identity, *, frozen_audit=False):
     grants.current_actor(db, user, grants.SOURCE_ROLES)
     if identity is None:
         raise HTTPException(404, "RCA原生任务锚不存在")
@@ -129,6 +129,15 @@ def _source_before_task(db, user, identity, *, frozen_audit=False):
     else:
         immutable, _current_governance = cases._body(db, row)
     return auth, immutable, original_grants
+
+
+def _source_before_task(db, user, identity, *, frozen_audit=False):
+    try:
+        return _source_before_task_unchecked(db, user, identity, frozen_audit=frozen_audit)
+    except (ValueError, TypeError, UnicodeError, KeyError) as exc:
+        # Invalid current Source clocks or complete stored records fail before
+        # Task TEXT. This does not relabel a clock or modify Source services.
+        raise HTTPException(409, "当前完整来源、时钟或受审签署无法核对，未读取任务正文") from exc
 
 
 def _actual_run_header(db, identifier, *, exclusive=False):

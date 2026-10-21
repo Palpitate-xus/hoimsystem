@@ -374,3 +374,11 @@
 - 当前私有断网MySQL验证100.981秒通过并清理：224旧表加Source5及Artifact2共231个当前注册表；真实增量up/down/up保持原DDL与行，非完整历史迁移回放。共享双协议及process_one保留具体回执、HTTP等待时无SQL连接、未知token保持null、撤研究后普通与超级管理员均不能恢复临床分件。MySQL的128件SQL腐坏Artifact负控不冒称128份独立受审正件；SQLite另有逐件实际创建的完整队列回归。
 - 47个Python文件Ruff及格式检查通过，目录.24的80份独立Task与7份真实固定System已重生成；934接口RBAC JSON及Markdown一致。四份Source recipe逐字保留。早期构造失败、队列饥饿真实RED、旧路由数量断言及各成功前版均保留原范围，不把重复定向数累计为全量通过。
 - 使用及证据见 `ai-research-cohort-shared-guide.md` 与 `ai-research-cohort-shared-verification.json`。默认不启用，不宣称完整后端/浏览器验收、规范生产构建、真实模型/临床验证、入组或导出完成；第74项完整验收及75—80专用实现继续推进。
+
+### 第75项共享病例去标识辅助集成阶段（定向验证）
+
+- 合入独立75来源与任务实现，接入共享创建、七域永久Artifact识别、队列与worker、具体claim/dispatch/accept/usage Audit主键、四份原canonical JSON分件、当前用途读取及超级管理员仅技术停止接收。输入仅`deidentification_case_id`与可选问题；当前项目、逐患者用途和模型许可均不以角色代替。74四份Source recipe及75原Source recipe逐字保留。
+- 同32个完整模块fresh第二轮一次1196通过，pytest1438.39秒、外层1448.776827秒，全部后端及四份生成物前后稳定，环境文件、共享PEM和socket尝试均为零。这是定向集合，不是完整默认后端。首轮1192通过/2失败保留：原测试夹具未恢复StaticPool连接的SQLite外键开关，影响后续故障注入与旧RBAC假引用；仅修复夹具并新增正常/异常恢复两例，未改产品或旧断言。
+- 当前独立断网MySQL第四轮96.442秒通过并清理：231旧表加75来源3表及Artifact2表共236表，实际增量up/down/up保持旧DDL和合成行，不称完整历史迁移回放。实际Main/JWT、共享双协议及process_one验证具体审计FK、HTTP等待无SQL、旧RR当前身份/新Artifact、付费独立NULL、撤权临床分件拒绝及Sup技术取消。审计钩子实际阻止一次`socket.bind`尝试，仅许可三次私有Unix socket连接，实际TCP/外网为零；没有把“无实际网络”写成“无socket尝试”。前三失败分别为真实MySQL依赖索引删除顺序、验证脚本列名、验证脚本误认cancel ACK，全部保留。
+- 新单域Source选择、Task API/Assistant/目录/Findings五完整浏览器文件80项一次通过，外层97.871219秒，594前端依赖稳定、无跳过/重试；随后问题编辑期间旧预览复弹的真实RED已修，两个专门边界通过。真实同案Main回执及独立分件保留UTF8与SHA，包括Python `1.0`字面量，不拼不同病例或补造成功DTO。公共Parent/History/管理入口仍在本独立树继续验证，未宣称完整浏览器或规范生产构建通过。
+- 证据及使用边界见`ai-deidentification-shared-verification.json`与`ai-deidentification-shared-guide.md`。当前MySQL own未提交SQL识别仍以已登记的同事务hint补充短RC；不将未登记的direct flush/expunge路径称已覆盖，待与Root79无hint SQL union增强合并后另验。默认不启用，未推送、部署、读取真实医院资料、调用真实远模型或完成匿名/伦理/导出认证。

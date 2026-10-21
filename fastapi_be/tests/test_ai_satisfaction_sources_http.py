@@ -1,11 +1,13 @@
 """Actual mounted app.main JWT/ASGI responses, including canonical UTC6 and privacy."""
 
 import copy
+import datetime
 import json
 
 import pytest
 from sqlalchemy import event, text
 
+from app.ai import satisfaction_sources as sources
 from app.ai.satisfaction_models import AISatisfactionCase
 from app.ai.satisfaction_sources import hash_content
 from app.models import Review
@@ -135,3 +137,20 @@ async def test_actual_main_postwrite_source_closure_change_rolls_back_publicatio
     finally:
         db.execute(text("DROP TRIGGER mutate_satisfaction_source"))
         db.commit()
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("microsecond", [0, 123456])
+async def test_actual_main_explicit_jsonresponse_preserves_zero_and_nonzero_utc6_and_body_lexemes(async_client, satisfaction_case, auth_headers, monkeypatch, microsecond):  # noqa: F811
+    fixed = datetime.datetime(2026, 10, 21, 12, 0, 0, microsecond)
+    monkeypatch.setattr(sources, "utcnow", lambda: fixed)
+    headers, body, _ = await actual_request(async_client, satisfaction_case, auth_headers)
+    body["basis_note"] = BASIS + "原依据时间字面量2026-10-20T10:00:00.123456Z必须完整保留。"
+    response = await async_client.post(BASE + "/cases", headers=headers, json=body)
+    assert response.status_code == 200, response.text
+    made = response.json()["data"]
+    assert made["created_at"] == fixed.isoformat(timespec="microseconds") + "Z"
+    audit = await async_client.get(BASE + f"/cases/{made['case_id']}?audit_only=true", headers=headers)
+    full = audit.json()["data"]
+    assert full["snapshot"]["request"]["basis_note"] == body["basis_note"]
+    assert hash_content(full["snapshot"]) == full["content_hash"]

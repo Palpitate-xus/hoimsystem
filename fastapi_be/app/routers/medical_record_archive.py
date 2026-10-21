@@ -3,6 +3,7 @@ import datetime
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
+from app.ai.coding_evidence_guard import lock_coding_write
 from app.database import get_db
 from app.dependencies import ADMIN_ROLES, CLINICAL_ROLES, User, require_roles
 from app.models import MedicalRecordArchive, MedicalRecordHome
@@ -71,17 +72,26 @@ def create_archive(req: MedicalRecordArchiveCreateRequest, current_user: User = 
 
 @router.post("/medicalRecordArchive/archive")
 def archive_record(req: MedicalRecordArchiveActionRequest, current_user: User = Depends(require_roles(*ARCHIVE_ADMIN_ROLES)), db: Session = Depends(get_db)):
-    item = db.query(MedicalRecordArchive).filter(MedicalRecordArchive.archive_id == req.archive_id).first()
+    current_user = lock_coding_write(db, current_user, allowed_roles=ARCHIVE_ADMIN_ROLES)
+    home_id = db.query(MedicalRecordArchive.home_id).filter(MedicalRecordArchive.archive_id == req.archive_id).with_for_update(read=True).scalar()
+    if home_id is not None:
+        db.query(MedicalRecordHome).filter(MedicalRecordHome.home_id == home_id).populate_existing().with_for_update().first()
+    item = db.query(MedicalRecordArchive).filter(MedicalRecordArchive.archive_id == req.archive_id).populate_existing().with_for_update().first()
     if not item:
         return {"code": 500, "msg": "归档记录不存在"}
     if item.status != 0:
         return {"code": 500, "msg": "当前状态不可归档"}
+    # Load the original Home explicitly: a relationship already in the identity
+    # map may predate the current transaction's locked read.
+    home = db.query(MedicalRecordHome).filter(MedicalRecordHome.home_id == item.home_id).populate_existing().with_for_update().first()
+    if home is None:
+        return {"code": 500, "msg": "病案首页不存在"}
     now = datetime.datetime.now()
     item.status = 1
     item.archived_by = current_user.user_id
     item.archive_time = now
     item.update_time = now
-    item.home.status = 2
+    home.status = 2
     db.commit()
     return {"code": 200, "msg": "success", "data": _serialize(item)}
 

@@ -36,8 +36,46 @@ test('canonical Babel loader remains directly discoverable by existing isolated 
  assert.deepEqual(rule.use.options.presets,['@babel/preset-env']);
  const hook=require('./public-interface-babel.cjs')();
  const emitted=[];const ctx={...context,cacheable(){},emitFile:(...args)=>emitted.push(args)};
- const changed=hook.result.call(ctx,{code:'module.exports='+JSON.stringify(literal)+';',map:null});
- assert.equal(emitted.length,1);assert(changed.code.includes('readSchemaDocumentData'));
+ const pool=require('../src/api/publicInterfaceTextPool.json');
+ const changed=hook.result.call(ctx,{code:'module.exports='+JSON.stringify(pool.values[0])+';',map:null});
+ assert.equal(emitted.length,0);assert(changed.code.includes('publicInterfaceText.cjs'));
  const original={code:'module.exports=1;',map:{unchanged:true}};
  assert.equal(hook.result.call({...ctx,resourcePath:path.join(root,'src/api/patient.js')},original),original);
+});
+
+test('shared text is callable before module initialization in a circular import',()=>{
+ const values=[literal],input=`function read(){return ${JSON.stringify(literal)}};require('cycle')(read);module.exports=read;`;
+ const result=transformPublicText(input,context,{values}),module={exports:{}},seen=[];
+ vm.runInNewContext(result.code,{module,require:name=>name==='cycle'?read=>seen.push(read()):index=>values[index]});
+ assert.deepEqual(seen,[literal]);assert.equal(module.exports(),literal);
+});
+
+test('a shared pool returns complete strings without coercion and leaves unknown compiled literals intact',()=>{
+ const values=[literal],unknown='未收录的 Vue 静态 HTML 必须保持原本编译结果 </div>';
+ const input=`module.exports={known:${JSON.stringify(literal)},unknown:${JSON.stringify(unknown)},key:{${JSON.stringify(literal)}:1}};`;
+ const result=transformPublicText(input,context,{values}),module={exports:{}};
+ vm.runInNewContext(result.code,{module,require:()=>index=>values[index]});
+ assert.equal(module.exports.known,literal);assert.equal(module.exports.unknown,unknown);assert.equal(module.exports.key[literal],1);
+ assert.deepEqual(result.values,[literal]);assert(result.code.includes(unknown));
+});
+
+test('module requests, URL assets and named module keys keep their static grammar',()=>{
+ const code=`const x=require(${JSON.stringify(literal)});const y=import(${JSON.stringify(literal)});new URL(${JSON.stringify(literal)},import.meta.url);export {x as ${JSON.stringify(literal)}};`;
+ assert.deepEqual(transformPublicText(code,context).values,[]);
+});
+
+test('API contract strings keep exact runtime values while Vue ASCII component names stay static',()=>{
+ const value='complete_public_contract_v1',pool={values:[value]},api={...context,resourcePath:path.join(root,'src/api/ai/documentEvidence.js')};
+ const code=`module.exports={value:${JSON.stringify(value)},${JSON.stringify(value)}:9};`;
+ const transformed=transformPublicText(code,api,pool),module={exports:{}};
+ vm.runInNewContext(transformed.code,{module,require:()=>index=>pool.values[index]});
+ assert.equal(module.exports.value,value);assert.equal(module.exports[value],9);assert.deepEqual(transformed.values,[value]);
+ const vue=transformPublicText(`module.exports=_resolveComponent(${JSON.stringify(value)});`,context,pool);
+ assert.deepEqual(vue.values,[]);assert(vue.code.includes(JSON.stringify(value)));
+});
+
+test('ASCII API import, require resolution and bundler URL dependencies keep literal arguments',()=>{
+ const value='public_module_resource_v1',api={...context,resourcePath:path.join(root,'src/api/ai/documentEvidence.js')};
+ const code=`require(${JSON.stringify(value)});require.resolve(${JSON.stringify(value)});require.context(${JSON.stringify(value)});import(${JSON.stringify(value)});import.meta.resolve(${JSON.stringify(value)});new URL(${JSON.stringify(value)},import.meta.url);`;
+ assert.deepEqual(transformPublicText(code,api,{values:[value]}).values,[]);
 });

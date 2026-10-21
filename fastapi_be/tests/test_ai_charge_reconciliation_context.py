@@ -178,3 +178,10 @@ def test_current_expansion_requires_explicit_actor(charge_case):
     with pytest.raises(HTTPException) as caught:
         context.expand_context(charge_case["db"], bound.data, current=True)
     assert caught.value.status_code == 409
+
+
+def test_task_clock_cannot_precede_its_complete_source_capture(charge_case):
+    value = published(charge_case)
+    bound = bundle(charge_case, value)
+    with pytest.raises(ValueError):
+        context.short_context(bound.data["charge_binding"], "2026-10-20T00:00:00.000000Z")

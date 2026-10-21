@@ -1,6 +1,5 @@
 """Short private admission binding and the sole verified model-visible projection."""
 
-from datetime import UTC, datetime
 from typing import Literal
 
 from fastapi import HTTPException
@@ -87,6 +86,8 @@ def charge_evidence(binding):
 def short_context(binding, snapshot_time):
     bound = ChargeContextBinding.model_validate(binding)
     TypeAdapter(UtcText).validate_python(snapshot_time, strict=True)
+    if snapshot_time < bound.captured_at:
+        raise ValueError("The task clock cannot precede its complete original capture")
     return {
         "scope": "patient",
         "source_domain": "single_admission_recorded_ledger",
@@ -101,14 +102,15 @@ def short_context(binding, snapshot_time):
 
 
 def charge_context(db, user, patient_id, encounter_ref, values):
-    from app.ai.charge_reconciliation_sources import case_current
+    from app.ai.charge_reconciliation_contract import utc_text
+    from app.ai.charge_reconciliation_sources import case_current, utcnow
     from app.ai.context import ContextBundle
 
     value = case_current(db, user, selection(values), execution=True)
     bound = binding_for(value)
     if type(patient_id) is not int or patient_id != bound["patient_id"] or type(encounter_ref) is not str or encounter_ref != bound["admission_id"]:
         raise HTTPException(403, "受审账目原件与当前实际患者和住院作用域不一致")
-    clock = datetime.now(UTC).isoformat(timespec="microseconds").replace("+00:00", "Z")
+    clock = utc_text(utcnow())
     return ContextBundle(data=short_context(bound, clock), evidence=[charge_evidence(bound)], department_ids=set(bound["department_ids"]))
 
 

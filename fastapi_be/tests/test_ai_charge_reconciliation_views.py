@@ -48,6 +48,9 @@ def test_ordinary_original_actor_reads_current_but_super_alone_can_audit_revoked
     actor, req, value, _, _ = configured(case, actor=case["admin_user"], preview=False)
     run = create_charge_run(db, actor, req)
     assert describe_charge_run(db, actor, run)["charge_findings"]["charge_source"] == value["public_source"]
+    ordinary_case = describe_charge_run(db, actor, run)["charge_findings"]["charge_case"]
+    assert ordinary_case["scope_current"] and ordinary_case["eligible"] and ordinary_case["audit_only"] is False
+    assert ordinary_case["can_record"] is ordinary_case["can_review"] is ordinary_case["can_revoke"] is False
     sources.revoke_case(db, case["super_admin_user"], value["case_snapshot_id"], {**cas(value), "basis_note": NOTE})
     db.commit()
     with pytest.raises(HTTPException) as caught:
@@ -56,6 +59,7 @@ def test_ordinary_original_actor_reads_current_but_super_alone_can_audit_revoked
     db.rollback()
     data = describe_charge_run(db, case["super_admin_user"], run)
     assert data["charge_findings"]["charge_case"]["status"] == "revoked"
+    assert data["charge_findings"]["charge_case"]["audit_only"] and data["charge_findings"]["charge_case"]["eligible"] is False
     assert data["charge_findings"]["charge_source"] == value["public_source"]
 
 

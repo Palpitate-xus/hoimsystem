@@ -4,7 +4,7 @@ from app.ai.charge_reconciliation_context import expand_context
 from app.ai.charge_reconciliation_contract import utc_text
 from app.ai.charge_reconciliation_receipts import load_terminal
 from app.ai.charge_reconciliation_run_models import AIChargeRunArtifact
-from app.ai.charge_reconciliation_runtime import authorize_charge_run
+from app.ai.charge_reconciliation_runtime import authorize_charge_run, current_actor
 from app.ai.charge_reconciliation_storage import ANCHOR_FIELDS
 from app.ai.charge_reconciliation_view_contract import ChargeArtifactRecord
 
@@ -54,7 +54,8 @@ def describe_charge_run(db, user, run, include_result=True):
             receipt_event_id=row.receipt_event_id,
             accepted_lease=row.accepted_lease,
         ).model_dump(mode="json")
-        expanded = expand_context(db, snapshot["payload"]["context"])
+        actor = current_actor(db, user)
+        expanded = expand_context(db, snapshot["payload"]["context"], user=actor, current=actor.user_role != "super_admin")
         data["charge_findings"] = {key: expanded[key] for key in ("charge_binding", "charge_source", "charge_case")}
         data["charge_findings"].update(input=snapshot["payload"]["input"], context=snapshot["payload"]["context"])
         data["result"], data["evidence"] = result, evidence

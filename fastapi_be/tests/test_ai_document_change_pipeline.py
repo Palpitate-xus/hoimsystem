@@ -14,7 +14,7 @@ from app.ai import runtime
 from app.ai.document_change_run_models import AIDocumentChangeRunArtifact, AIDocumentChangeRunResult
 from app.ai.models import AIFeedback, AIRun
 from app.ai.schemas import RunRequest
-from tests.test_ai_document_change_runtime import model_transport, request
+from tests.test_ai_document_change_runtime import model_transport, mutate_current, request
 from tests.test_ai_document_change_runtime import pipeline as pipeline  # noqa: F401
 from tests.test_ai_document_change_sources import change_case as change_case  # noqa: F401
 from tests.test_ai_document_change_storage import remove_prior_tasks as remove_prior_tasks  # noqa: F401
@@ -159,7 +159,7 @@ async def test_main_mixed_scope_request_is_rejected_before_queue(async_client, a
 
 
 @pytest.mark.asyncio
-async def test_main_history_rejects_foreign_scope_and_missing_artifact_never_becomes_generic(async_client, auth_headers, pipeline):
+async def test_main_history_rejects_foreign_scope_and_damaged_feature_markers_never_become_generic(async_client, auth_headers, pipeline):
     case, db = pipeline, pipeline["db"]
     auth = headers(auth_headers, case)
     queued = await create(async_client, auth, case)
@@ -195,3 +195,114 @@ async def test_unaccepted_model_body_and_unknown_status_cannot_be_displayed(asyn
     db.commit()
     response = await async_client.get(f"/api/ai/runs/{identifier}", headers=auth)
     assert response.status_code == 409 and "UNACCEPTED_PRIVATE_SENTINEL" not in response.text
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("mutation", ["scope", "role", "provider", "cancel"])
+async def test_main_paid_reply_lost_authority_or_explicit_cancel_has_receipt_but_no_body(async_client, auth_headers, pipeline, mutation):
+    case, db = pipeline, pipeline["db"]
+    auth = headers(auth_headers, case)
+    queued = await create(async_client, auth, case)
+    identifier = queued["data"]["run_id"]
+    claimed = runtime.claim_next_run(db)
+    assert claimed and claimed[0] == identifier
+    transport, packets, close = model_transport(case, mutate=lambda: mutate_current(case, mutation, identifier))
+    try:
+        await runtime.execute_claimed(*claimed, transport=transport)
+    finally:
+        close()
+    db.expire_all()
+    run = db.get(AIRun, identifier)
+    assert len(packets) == 1 and run.status == ("cancelled" if mutation == "cancel" else "failed")
+    assert run.result_json == "{}" and db.get(AIDocumentChangeRunResult, identifier) is None
+    usage = storage.usage_receipt(db, run)
+    assert (usage.input_tokens, usage.output_tokens, usage.complete, usage.model_call_attempted) == (11, 13, True, True)
+
+
+@pytest.mark.asyncio
+async def test_shared_claim_selects_only_header_and_pre_call_scope_loss_is_known_zero(async_client, auth_headers, pipeline):
+    case, db = pipeline, pipeline["db"]
+    auth = headers(auth_headers, case)
+    queued = await create(async_client, auth, case)
+    identifier = queued["data"]["run_id"]
+    mutate_current(case, "scope", identifier)
+    statements = []
+
+    def note(connection, cursor, statement, parameters, context, many):
+        if statement.lstrip().upper().startswith("SELECT"):
+            statements.append(statement)
+
+    event.listen(db.get_bind(), "before_cursor_execute", note)
+    try:
+        claim = runtime.claim_next_run(db)
+    finally:
+        event.remove(db.get_bind(), "before_cursor_execute", note)
+    assert claim[0] == identifier
+    no_task_text(statements)
+    transport, packets, close = model_transport(case)
+    try:
+        await runtime.execute_claimed(*claim, transport=transport)
+    finally:
+        close()
+    db.expire_all()
+    run = db.get(AIRun, identifier)
+    assert not packets and run.status == "failed"
+    assert storage.usage_receipt(db, run).model_dump(mode="json") == {"input_tokens": 0, "output_tokens": 0, "complete": True, "model_call_attempted": False}
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("cancelled", [False, True])
+async def test_abandoned_claim_recovery_uses_specific_unknown_receipt_and_never_retries(async_client, auth_headers, pipeline, monkeypatch, cancelled):
+    import datetime
+
+    case, db = pipeline, pipeline["db"]
+    queued = await create(async_client, headers(auth_headers, case), case)
+    identifier = queued["data"]["run_id"]
+    claim = runtime.claim_next_run(db)
+    run = db.get(AIRun, identifier)
+    if cancelled:
+        from app.ai.document_change_runtime import cancel_change_run
+
+        cancel_change_run(db, case["actor"], identifier)
+    future = sources.utcnow() + datetime.timedelta(minutes=11)
+    monkeypatch.setattr(sources, "utcnow", lambda: future)
+    assert runtime.expire_interrupted_runs(db) == 1
+    db.expire_all()
+    run = db.get(AIRun, identifier)
+    assert run.status == ("cancelled" if cancelled else "failed")
+    assert run.lease_token == claim[1] and run.error_code == "WORKER_INTERRUPTED" and run.result_json == "{}"
+    assert storage.usage_receipt(db, run).model_dump(mode="json") == {"input_tokens": None, "output_tokens": None, "complete": False, "model_call_attempted": None}
+    assert runtime.expire_interrupted_runs(db) == 0 and runtime.claim_next_run(db) is None
+
+
+@pytest.mark.parametrize("reader", ["list", "trace"])
+@pytest.mark.parametrize("change", ["role", "token"])
+def test_admin_reader_captures_loaded_request_epoch_before_orm_refresh(db_session, seed_data, reader, change):
+    from fastapi import HTTPException
+
+    from app.routers import ai_admin
+
+    actor = seed_data["super_admin_user"]
+    assert actor.user_role == "super_admin" and actor.token_invalid_before is None
+    db_session.execute(
+        text("UPDATE hoimsystem_users SET " + ("user_role='admin'" if change == "role" else "token_invalid_before='2030-01-01 00:00:00.123456'") + " WHERE user_id=:id"), {"id": actor.user_id}
+    )
+    statements = []
+
+    def note(connection, cursor, statement, parameters, context, many):
+        if statement.lstrip().upper().startswith("SELECT"):
+            statements.append(statement)
+
+    event.listen(db_session.get_bind(), "before_cursor_execute", note)
+    try:
+        with pytest.raises(HTTPException) as error:
+            if reader == "list":
+                ai_admin.list_global_runs(db=db_session, user=actor)
+            else:
+                ai_admin.inspect_run_trace("no-private-task-read", db=db_session, user=actor)
+        assert error.value.status_code == 403
+    finally:
+        event.remove(db_session.get_bind(), "before_cursor_execute", note)
+        db_session.rollback()
+    assert len(statements) == 1 and "hoimsystem_users" in statements[0]
+    no_task_text(statements)

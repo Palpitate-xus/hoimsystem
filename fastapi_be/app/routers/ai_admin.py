@@ -72,8 +72,13 @@ def _current_super_admin(db, user):
     """Recheck audit authority beyond a JWT-created MySQL RR snapshot."""
     state = inspect(user, raiseerr=False)
     user_id = state.identity[0] if state is not None and state.identity is not None else getattr(user, "user_id", None)
-    actor = db.query(User).filter_by(user_id=user_id).populate_existing().with_for_update(read=True).one_or_none()
-    if actor is None or actor.user_role != "super_admin":
+    # Preserve the already authenticated request's epoch before ORM refresh
+    # mutates that same instance. Expired attributes must not trigger an earlier
+    # unlocked SELECT; technical callers without loaded epochs get current SQL.
+    loaded = {key: state.dict[key] for key in ("user_role", "token_invalid_before") if state is not None and key in state.dict}
+    with db.no_autoflush:
+        actor = db.query(User).filter_by(user_id=user_id).populate_existing().with_for_update(read=True).one_or_none()
+    if actor is None or actor.user_role != "super_admin" or any(getattr(actor, key) != original for key, original in loaded.items()):
         raise HTTPException(403, "当前身份已无超级管理员审计权限")
     return actor
 

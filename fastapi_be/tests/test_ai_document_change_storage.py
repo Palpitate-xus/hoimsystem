@@ -18,7 +18,7 @@ from app.ai.context import context_metadata
 from app.ai.document_change_context import prepare_context
 from app.ai.document_change_draft import SYSTEM_PROMPT, TASK_PROMPT
 from app.ai.document_change_run_models import AIDocumentChangeRunArtifact, AIDocumentChangeRunResult
-from app.ai.models import AIAuditEvent, AIFeatureConfig, AIPromptVersion, AIProvider, AIRun
+from app.ai.models import AIAuditEvent, AIFeatureConfig, AIFeedback, AIPromptVersion, AIProvider, AIRun
 from app.models import User
 from tests.test_ai_document_change_sources import change_case as change_case  # noqa: F401
 from tests.test_ai_document_change_sources import link_request, published_scope
@@ -28,9 +28,15 @@ from tests.test_ai_document_evidence_sources import cas
 
 @pytest.fixture(autouse=True)
 def remove_prior_tasks(db_session):
+    # Keep the actual anchored IDs before deleting Artifact. A corruption test
+    # may deliberately change feature_key; that synthetic queued row must not
+    # leak into the next test's real shared durable claim.
+    identifiers = [row[0] for row in db_session.query(AIDocumentChangeRunArtifact.run_id).all()]
+    condition = (AIRun.feature_key == storage.FEATURE_KEY) | AIRun.run_id.in_(identifiers)
+    db_session.query(AIFeedback).filter(AIFeedback.run_id.in_(db_session.query(AIRun.run_id).filter(condition))).delete(synchronize_session=False)
     db_session.query(AIDocumentChangeRunResult).delete(synchronize_session=False)
     db_session.query(AIDocumentChangeRunArtifact).delete(synchronize_session=False)
-    db_session.query(AIRun).filter_by(feature_key=storage.FEATURE_KEY).delete(synchronize_session=False)
+    db_session.query(AIRun).filter(condition).delete(synchronize_session=False)
     db_session.query(AIFeatureConfig).filter_by(feature_key=storage.FEATURE_KEY).delete(synchronize_session=False)
     db_session.query(AIPromptVersion).filter_by(feature_key=storage.FEATURE_KEY).delete(synchronize_session=False)
     db_session.commit()

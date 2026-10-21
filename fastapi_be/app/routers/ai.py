@@ -94,6 +94,8 @@ def patient_options(feature_key: str, keyword: str = Query("", max_length=100), 
 def hospital_service_options(feature_key: str, db: Session = Depends(get_db), user: User = Depends(get_current_user)) -> dict:
     """Offer public hospital places or clinicians for the authorized service capability."""
     spec, _ = authorized_feature(db, user, feature_key)
+    if spec.number == 72:
+        raise HTTPException(422, "双原文版本核对只使用专用有限范围目录，不提供通用业务范围")
     data = operational_options(db, user, spec) if spec.scope == "hospital" else service_options(db, spec.number)
     return {"code": 200, "msg": "success", "data": data}
 

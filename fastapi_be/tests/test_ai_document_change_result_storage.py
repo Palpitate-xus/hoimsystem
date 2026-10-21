@@ -344,3 +344,33 @@ def test_read_verifies_full_utc6_acceptance_clock_not_only_legacy_audit_second(c
     db.commit()
     with pytest.raises(HTTPException):
         result_store.expand_result(db, actor, case["run"], current=False)
+
+
+def test_unknown_attempt_is_not_a_normal_technical_failure_receipt(change_case):
+    db, _, *_ = change_case
+    case = executing(change_case)
+    run = case["run"]
+    with pytest.raises(HTTPException):
+        storage.stage_terminal(
+            db,
+            run,
+            run.lease_token,
+            status="failed",
+            usage={"input_tokens": None, "output_tokens": None, "complete": False, "model_call_attempted": None},
+            latency_ms=0,
+            error_code="NORMAL_FAILURE_WITHOUT_FACTS",
+        )
+    db.refresh(run)
+    assert run.status == "running" and db.get(AIDocumentChangeRunArtifact, run.run_id).usage_event_id is None
+
+
+@pytest.mark.parametrize("field", ["finish_time", "start_time", "latency_ms", "error_message"])
+def test_accepted_mutable_run_state_tamper_cannot_pass_frozen_result_proof(change_case, field):
+    db, actor, *_ = change_case
+    case = accepted(change_case)
+    run = case["run"]
+    value = getattr(run, field)
+    setattr(run, field, value + dt.timedelta(microseconds=1) if field.endswith("time") else value + 1 if field == "latency_ms" else "UNBOUND_PRIVATE_ERROR")
+    db.commit()
+    with pytest.raises(HTTPException):
+        storage.expand_result(db, actor, run, current=False)

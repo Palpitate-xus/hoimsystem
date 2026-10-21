@@ -48,12 +48,24 @@ class Usage(c.e.StrictModel):
 
 
 class Receipt(c.e.StrictModel):
-    schema_version: Literal["document_change_usage_v1"]
+    schema_version: Literal["document_change_usage_v2"]
     lease_token: c.e.UUID | None
     usage: Usage
     status: Literal["succeeded", "failed", "cancelled"]
     result_hash: c.e.SHA256 | None
     error_code: str | None = Field(max_length=80)
+    run_state_hash: c.e.SHA256
+
+
+def _run_state_hash(run):
+    # Every actual Run column is bound except result_json, whose canonical
+    # pointer, full Blob, acceptance PK and complete proof are independently
+    # verified. Excluding that pointer avoids a hash/Audit-PK creation cycle.
+    values = {key: getattr(run, key) for key in WRITE_FIELDS if key != "result_json"}
+    for key in ("create_time", "start_time", "finish_time"):
+        if values[key] is not None:
+            values[key] = c.e.utc_text(values[key])
+    return c.e.digest(values)
 
 
 def _locked_run(db, run, lease, *, queued=False):
@@ -177,13 +189,15 @@ def _post_write(db, run, expected_run, expected_artifact, expected_usage, expect
 
 
 def _stage_usage(db, run, artifact, usage, status, result_hash, error_code, actor_id, now):
-    receipt = Receipt(schema_version="document_change_usage_v1", lease_token=run.lease_token, usage=usage, status=status, result_hash=result_hash, error_code=error_code)
-    if receipt.usage.model_call_attempted is None:
-        raise ValueError("An unknown interrupted call remains pending; it cannot invent a terminal receipt")
+    run.input_tokens = usage.input_tokens if usage.input_tokens is not None else 0
+    run.output_tokens = usage.output_tokens if usage.output_tokens is not None else 0
+    receipt = Receipt(
+        schema_version="document_change_usage_v2", lease_token=run.lease_token, usage=usage, status=status, result_hash=result_hash, error_code=error_code, run_state_hash=_run_state_hash(run)
+    )
+    if receipt.usage.model_call_attempted is None and not (status in {"failed", "cancelled"} and error_code == "WORKER_INTERRUPTED" and result_hash is None):
+        raise ValueError("Only interrupted lease recovery may record explicitly unknown call/usage, never a normal provider receipt")
     event = _event(db, actor_id, USAGE, run, receipt.model_dump(mode="json"), now)
     artifact.usage_event_id = event.event_id
-    run.input_tokens = receipt.usage.input_tokens if receipt.usage.input_tokens is not None else 0
-    run.output_tokens = receipt.usage.output_tokens if receipt.usage.output_tokens is not None else 0
     return event
 
 
@@ -215,6 +229,7 @@ def stage_result(db, user, run, lease, value, usage, *, latency_ms):
         raise ValueError("The actual acceptance clock predates task capture")
     if db.query(AIDocumentChangeRunResult.run_id).filter_by(run_id=run.run_id).first() is not None:
         raise ValueError("The complete accepted Result cannot be overwritten")
+    run.status, run.error_code, run.error_message, run.latency_ms, run.finish_time = "succeeded", None, None, latency_ms, now.replace(microsecond=0)
     receipt = _stage_usage(db, run, artifact, usage, "succeeded", content_hash, None, actor.user_id, now)
     detail = {
         "schema_version": "document_change_accept_v1",
@@ -292,8 +307,8 @@ def stage_terminal(db, run, lease, *, status, usage, latency_ms, error_code=None
     now = storage.sources.utcnow()
     if now < artifact.recorded_at:
         raise ValueError("The actual terminal clock predates task capture")
-    receipt = _stage_usage(db, run, artifact, usage, status, None, error_code, actor_id, now)
     run.status, run.result_json, run.error_code, run.error_message, run.latency_ms, run.finish_time = status, "{}", error_code, error_message, latency_ms, now.replace(microsecond=0)
+    receipt = _stage_usage(db, run, artifact, usage, status, None, error_code, actor_id, now)
     expected_run = {name: getattr(run, name) for name in WRITE_FIELDS}
     db.flush()
     expected_artifact["usage_event_id"] = receipt.event_id
@@ -317,7 +332,13 @@ def usage_receipt(db, run):
             raise ValueError("The exact actual usage audit PK differs")
         data = storage._json(row.detail_json)
         receipt = Receipt.model_validate(data)
-        if require_case_json(receipt) != row.detail_json or receipt.status != run.status or receipt.lease_token != run.lease_token or receipt.error_code != run.error_code:
+        if (
+            require_case_json(receipt) != row.detail_json
+            or receipt.status != run.status
+            or receipt.lease_token != run.lease_token
+            or receipt.error_code != run.error_code
+            or receipt.run_state_hash != _run_state_hash(run)
+        ):
             raise ValueError("The complete concrete receipt and Run differ")
         for name in ("input_tokens", "output_tokens"):
             value = getattr(receipt.usage, name)

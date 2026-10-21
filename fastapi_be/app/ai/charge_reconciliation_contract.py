@@ -5,6 +5,7 @@ import hashlib
 import hmac
 import json
 import math
+from copy import deepcopy
 from decimal import Decimal
 from types import SimpleNamespace
 from typing import Annotated, Literal
@@ -288,6 +289,19 @@ POLICY = {
     "line_level_execution_allocation": "not_provided",
     "billing_entitlement": "unknown",
     "legacy_clock_timezone": "unknown",
+    "recorded_status_legends": {
+        "charges": {"status": {"0": "未结算", "1": "已结算", "2": "已退费"}},
+        "orders": {
+            "status": {"0": "新开", "1": "已审核", "2": "执行中", "3": "已停止", "4": "已撤销"},
+            "order_type": {"0": "长期医嘱", "1": "临时医嘱"},
+            "priority": {"0": "常规", "1": "紧急", "2": "抢救"},
+        },
+        "executions": {"status": {"0": "待执行", "1": "已执行", "2": "已跳过", "3": "已停止"}},
+        "administrations": {"status": {"1": "核对通过", "2": "已给药", "3": "已取消"}},
+        "admission": {"status": {"0": "待入院", "1": "在院", "2": "已出院", "3": "已退院"}},
+        "null_or_unlisted": "unknown",
+        "interpretation": "recorded_state_only_not_cash_flow_billing_entitlement_or_clinical_confirmation",
+    },
     "float_semantics": "driver_fetched_value_and_explicit_same_statement_MySQL_DOUBLE_witness_are_distinct_not_original_decimal",
     "monetary_semantics": "stored_decimal_fields_only_no_implied_currency_rounding_tariff_or_cash_flow",
     "minimization": "known_direct_identifiers_in_explicit_display_fields_not_anonymity",
@@ -321,7 +335,7 @@ def project_snapshot(snapshot, metadata):
         "content_hash": metadata["content_hash"],
         "governance_hash": metadata["governance_hash"],
         "collection_digest": collection["collection_digest"],
-        "policy": dict(POLICY),
+        "policy": deepcopy(POLICY),
     }
     ids = {row["order_id"] for row in collection["orders"]}
     for key, kind, primary, fields in specs:

@@ -361,3 +361,23 @@ def test_internal_frozen_proof_is_distinct_from_current_execution_permission(cha
         with pytest.raises(HTTPException) as denied:
             s.case_current(db, case["super_admin_user"], value["case_snapshot_id"], **options)
         assert denied.value.status_code == 409
+
+
+def test_recorded_status_legends_preserve_original_unknowns_without_cash_claim(charge_case):
+    case, db = charge_case, charge_case["db"]
+    for row, state in zip(case["charges"], [None, -7, 17], strict=False):
+        db.execute(update(InpatientCharge).where(InpatientCharge.charge_id == row.charge_id).values(status=state))
+    db.commit()
+    value = published(case)
+    legends = value["public_source"]["policy"]["recorded_status_legends"]
+    assert legends["charges"]["status"] == {"0": "未结算", "1": "已结算", "2": "已退费"}
+    assert legends["admission"]["status"] == {"0": "待入院", "1": "在院", "2": "已出院", "3": "已退院"}
+    assert legends["administrations"]["status"]["1"] == "核对通过"
+    assert legends["null_or_unlisted"] == "unknown" and "not_cash_flow" in legends["interpretation"]
+    raw = {r["charge_id"]: r["status"] for r in value["snapshot"]["collection"]["charges"]}
+    assert [raw[r.charge_id] for r in case["charges"][:3]] == [None, -7, 17]
+    assert all(legends["charges"]["status"].get(str(v), "unknown") == "unknown" for v in [None, -7, 17])
+    assert value["public_source"]["policy"]["cash_receipt"] == "not_provided"
+    projected = c.project_snapshot(value["snapshot"], s.published_metadata(value))
+    projected["policy"]["recorded_status_legends"]["charges"]["status"]["0"] = "不能污染固定政策"
+    assert c.POLICY["recorded_status_legends"]["charges"]["status"]["0"] == "未结算"

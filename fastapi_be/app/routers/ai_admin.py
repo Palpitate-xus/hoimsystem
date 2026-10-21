@@ -32,7 +32,7 @@ from app.ai.governance import (
     validate_endpoint,
 )
 from app.ai.imaging_probe import inspect_imaging_capabilities
-from app.ai.knowledge_sources import is_document_source, source_is_current, source_state
+from app.ai.knowledge_sources import is_document_source, lock_manual_review_target, source_is_current, source_state
 from app.ai.models import AIAuditEvent, AIFeatureConfig, AIFeedback, AIKnowledgeDocument, AIPatientGrant, AIPromptVersion, AIProvider, AIRun, utcnow
 from app.ai.pathway_knowledge import PATHWAY_SOURCE_KIND, PATHWAY_URI_PREFIX, import_content, pathway_hash
 from app.ai.readiness import setup_reports
@@ -1133,10 +1133,7 @@ def review_knowledge(document_id: str, req: KnowledgeReview, db: Session = Depen
     # Document publication/revocation locks parents before knowledge. Reject
     # this alternate writer before taking a knowledge X lock, including when
     # mutable URI/kind markers were stripped from a still-bound row.
-    existing = db.get(AIKnowledgeDocument, document_id)
-    if existing is not None and is_document_source(db, existing):
-        raise HTTPException(409, "原文摘录须在原文证据治理中发布或撤销，请核对完整原件链")
-    item = db.query(AIKnowledgeDocument).filter_by(document_id=document_id).with_for_update().first()
+    item = lock_manual_review_target(db, document_id)
     if item is None:
         raise HTTPException(404, "知识文档不存在")
     if item.content_hash != req.content_hash:

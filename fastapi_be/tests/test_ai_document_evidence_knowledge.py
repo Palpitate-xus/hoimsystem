@@ -16,7 +16,7 @@ from app.ai.knowledge import evidence_is_current, retrieve_evidence
 from app.ai.knowledge_sources import source_state
 from app.ai.models import AIAuditEvent, AIFeatureConfig, AIFeedback, AIKnowledgeDocument, AIProvider, AIRun
 from app.ai.runtime import claim_next_run, create_run, execute_claimed
-from app.ai.schemas import RunRequest
+from app.ai.schemas import KnowledgeReview, RunRequest
 from app.routers import ai_admin
 from tests.test_ai_document_evidence_sources import (
     approved_original,
@@ -171,6 +171,36 @@ async def test_generic_knowledge_review_cannot_bypass_document_lineage(knowledge
     assert next(row for row in listed.json()["data"] if row["document_id"] == document.document_id)["document_evidence_bound"] is True
     if strip_markers:
         assert source_state(db, document) == "invalid_binding" and evidence(knowledge_case) == []
+
+
+@pytest.mark.parametrize("strip_markers", [False, True])
+def test_document_review_uses_current_nonwaiting_classification_before_any_exclusive_lock(knowledge_case, strip_markers):
+    db, actor, _, _, _, _, document = knowledge_case
+    if strip_markers:
+        document.source_kind = document.source_snapshot_hash = None
+        document.source_uri = "manual://forged"
+        db.commit()
+    document_id, content_hash = document.document_id, document.content_hash
+    statements = []
+
+    def observe(state):
+        if state.is_select:
+            statements.append(str(state.statement.compile(dialect=mysql.dialect())))
+
+    event.listen(db, "do_orm_execute", observe)
+    try:
+        with pytest.raises(HTTPException) as rejected:
+            ai_admin.review_knowledge(document_id, KnowledgeReview(content_hash=content_hash, status="retired"), db=db, user=actor)
+        assert rejected.value.status_code == 409
+    finally:
+        event.remove(db, "do_orm_execute", observe)
+        db.rollback()
+    knowledge = [statement for statement in statements if "FROM hoimsystem_ai_knowledge_document" in statement]
+    assert len(knowledge) == 1 and knowledge[0].rstrip().endswith("LOCK IN SHARE MODE NOWAIT")
+    assert all("FOR UPDATE" not in statement for statement in statements)
+    publication = [statement for statement in statements if "FROM hoimsystem_ai_document_knowledge_publication" in statement]
+    if strip_markers:
+        assert len(publication) == 1 and publication[0].rstrip().endswith("LOCK IN SHARE MODE NOWAIT")
 
 
 @pytest.mark.parametrize("uri", ["hoim://document-evidence/00000000-0000-0000-0000-000000000071", "HOIM://DOCUMENT-EVIDENCE/fake"])

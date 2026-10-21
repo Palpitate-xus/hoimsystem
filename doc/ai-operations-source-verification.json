@@ -1,0 +1,265 @@
+{
+  "schema_version": "operations_support_source_pure_evidence_v1",
+  "recorded_at_utc": "2026-10-21T17:48:44.295277+00:00",
+  "source_commit": "313c98d",
+  "scope": "Only the four pure Source contract/projection and meaningful test files for79. No SQL/current publication/roles/HTTP/worker/model/FE activation and no automatic credential or clinical-data detection. Existing79 catalog generic mode is not claimed converted by this phase.",
+  "current_once_whole_two_files78": {
+    "path": "/tmp/hoim-operations-projection-second-verification.json",
+    "bytes": 2496,
+    "sha256": "71f93a94b35f685ad00d3222058f90e2f52db4ebd8c419e1856d5176701ba1cd",
+    "value": {
+      "scope": "Both whole pure operations document/review contract and complete reviewed-derivative projection files; not SQL/current publication or permission proof. No actual SQL/current authority/publication/secret detection/HTTP/model/process execution. Actual complete4MiB text and8MiB whole boundaries are synthetic. Explicit codepoint masks preserve every unselected original byte; declarations alone do not grant access.",
+      "command": [
+        "--noconftest",
+        "-p",
+        "no:cacheprovider",
+        "-q",
+        "tests/test_ai_operations_support_contract.py",
+        "tests/test_ai_operations_support_projection.py"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 1.771,
+      "before": {
+        "app/ai/operations_support_contract.py": {
+          "bytes": 6904,
+          "sha256": "a583d071d6c8b8dbf3162203fe393f85cdf20dfd8e0082ed5823a3eb51e66e23"
+        },
+        "tests/test_ai_operations_support_contract.py": {
+          "bytes": 9084,
+          "sha256": "9de1647d0953d098989535b53eb7517773d9d3b4f15a302350d6e10870081403"
+        },
+        "app/ai/operations_support_projection.py": {
+          "bytes": 7440,
+          "sha256": "cff823c98037df362b525a933c3eb870aa269f5029a5b43925fbed3b57a7afbb"
+        },
+        "tests/test_ai_operations_support_projection.py": {
+          "bytes": 8606,
+          "sha256": "d5b2e3ea9ffc9190479c341765804b8fa947f370389a25822b914e0d9d766757"
+        }
+      },
+      "after": {
+        "app/ai/operations_support_contract.py": {
+          "bytes": 6904,
+          "sha256": "a583d071d6c8b8dbf3162203fe393f85cdf20dfd8e0082ed5823a3eb51e66e23"
+        },
+        "tests/test_ai_operations_support_contract.py": {
+          "bytes": 9084,
+          "sha256": "9de1647d0953d098989535b53eb7517773d9d3b4f15a302350d6e10870081403"
+        },
+        "app/ai/operations_support_projection.py": {
+          "bytes": 7440,
+          "sha256": "cff823c98037df362b525a933c3eb870aa269f5029a5b43925fbed3b57a7afbb"
+        },
+        "tests/test_ai_operations_support_projection.py": {
+          "bytes": 8606,
+          "sha256": "d5b2e3ea9ffc9190479c341765804b8fa947f370389a25822b914e0d9d766757"
+        }
+      },
+      "sources_stable": true,
+      "guards": {
+        "dotenv_reads": 0,
+        "forbidden_imports": [],
+        "external_socket_attempts": 0
+      },
+      "summary": [
+        "........................................................................ [ 92%]",
+        "......                                                                   [100%]",
+        "78 passed in 1.65s"
+      ],
+      "log": "/tmp/hoim-operations-projection-second-tests.log",
+      "log_sha256": "84b49d0d9fb712feb650e5aaac50eaa9cf2acd47732fca5564f69f8c9ef5e992"
+    }
+  },
+  "predecessors": [
+    {
+      "path": "/tmp/hoim-operations-contract-first-verification.json",
+      "bytes": 1606,
+      "sha256": "95f0ea7669520696158b85f1f207b9ee648d68cbf1f4316f4fde66997c5ecb45",
+      "value": {
+        "scope": "Pure operations document and declared-review contract only. No actual SQL/current authority/publication/secret detection/HTTP/model/process execution. Actual complete4MiB text and8MiB whole boundaries are synthetic. Explicit codepoint masks preserve every unselected original byte; declarations alone do not grant access.",
+        "command": [
+          "--noconftest",
+          "-p",
+          "no:cacheprovider",
+          "-q",
+          "tests/test_ai_operations_support_contract.py"
+        ],
+        "exit_code": 0,
+        "elapsed_seconds": 0.752,
+        "before": {
+          "app/ai/operations_support_contract.py": {
+            "bytes": 6655,
+            "sha256": "714a4f35dbd636ae482a818732dc6e78de8bd9ae8feb63ce19ce11fdefc49b90"
+          },
+          "tests/test_ai_operations_support_contract.py": {
+            "bytes": 7983,
+            "sha256": "b2b473f6b7a25b003ae2501efc3c1469236ea974ce225791ac3568cebe457a2b"
+          }
+        },
+        "after": {
+          "app/ai/operations_support_contract.py": {
+            "bytes": 6655,
+            "sha256": "714a4f35dbd636ae482a818732dc6e78de8bd9ae8feb63ce19ce11fdefc49b90"
+          },
+          "tests/test_ai_operations_support_contract.py": {
+            "bytes": 7983,
+            "sha256": "b2b473f6b7a25b003ae2501efc3c1469236ea974ce225791ac3568cebe457a2b"
+          }
+        },
+        "sources_stable": true,
+        "guards": {
+          "dotenv_reads": 0,
+          "forbidden_imports": [],
+          "external_socket_attempts": 0
+        },
+        "summary": [
+          "..................................................                       [100%]",
+          "50 passed in 0.64s"
+        ],
+        "log": "/tmp/hoim-operations-contract-first-tests.log",
+        "log_sha256": "46e40c4aa685aabf039937bae986ba0f4f4e33b06dcc97ea9ab1610192572116"
+      }
+    },
+    {
+      "path": "/tmp/hoim-operations-contract-second-verification.json",
+      "bytes": 1607,
+      "sha256": "47e9e9b3be27c6c2ea4591e018970e0eeb2946145ce29c4c4d9d7ef3ed71529e",
+      "value": {
+        "scope": "Pure operations document and declared-review contract only. No actual SQL/current authority/publication/secret detection/HTTP/model/process execution. Actual complete4MiB text and8MiB whole boundaries are synthetic. Explicit codepoint masks preserve every unselected original byte; declarations alone do not grant access.",
+        "command": [
+          "--noconftest",
+          "-p",
+          "no:cacheprovider",
+          "-q",
+          "tests/test_ai_operations_support_contract.py"
+        ],
+        "exit_code": 0,
+        "elapsed_seconds": 0.827,
+        "before": {
+          "app/ai/operations_support_contract.py": {
+            "bytes": 6904,
+            "sha256": "a583d071d6c8b8dbf3162203fe393f85cdf20dfd8e0082ed5823a3eb51e66e23"
+          },
+          "tests/test_ai_operations_support_contract.py": {
+            "bytes": 9084,
+            "sha256": "9de1647d0953d098989535b53eb7517773d9d3b4f15a302350d6e10870081403"
+          }
+        },
+        "after": {
+          "app/ai/operations_support_contract.py": {
+            "bytes": 6904,
+            "sha256": "a583d071d6c8b8dbf3162203fe393f85cdf20dfd8e0082ed5823a3eb51e66e23"
+          },
+          "tests/test_ai_operations_support_contract.py": {
+            "bytes": 9084,
+            "sha256": "9de1647d0953d098989535b53eb7517773d9d3b4f15a302350d6e10870081403"
+          }
+        },
+        "sources_stable": true,
+        "guards": {
+          "dotenv_reads": 0,
+          "forbidden_imports": [],
+          "external_socket_attempts": 0
+        },
+        "summary": [
+          ".........................................................                [100%]",
+          "57 passed in 0.71s"
+        ],
+        "log": "/tmp/hoim-operations-contract-second-tests.log",
+        "log_sha256": "c2fd4a760e39e015bc628d8a01655dd931410c2c2dead7f03792da348f240286"
+      }
+    },
+    {
+      "path": "/tmp/hoim-operations-projection-first-verification.json",
+      "bytes": 2495,
+      "sha256": "e2a4085fc6c4f7dbbc04e7082bee871c23ec213e34796f702c3408f0f3bdbd03",
+      "value": {
+        "scope": "Both whole pure operations document/review contract and complete reviewed-derivative projection files; not SQL/current publication or permission proof. No actual SQL/current authority/publication/secret detection/HTTP/model/process execution. Actual complete4MiB text and8MiB whole boundaries are synthetic. Explicit codepoint masks preserve every unselected original byte; declarations alone do not grant access.",
+        "command": [
+          "--noconftest",
+          "-p",
+          "no:cacheprovider",
+          "-q",
+          "tests/test_ai_operations_support_contract.py",
+          "tests/test_ai_operations_support_projection.py"
+        ],
+        "exit_code": 0,
+        "elapsed_seconds": 1.003,
+        "before": {
+          "app/ai/operations_support_contract.py": {
+            "bytes": 6904,
+            "sha256": "a583d071d6c8b8dbf3162203fe393f85cdf20dfd8e0082ed5823a3eb51e66e23"
+          },
+          "tests/test_ai_operations_support_contract.py": {
+            "bytes": 9084,
+            "sha256": "9de1647d0953d098989535b53eb7517773d9d3b4f15a302350d6e10870081403"
+          },
+          "app/ai/operations_support_projection.py": {
+            "bytes": 7428,
+            "sha256": "d6a5de63e12ad9b9fd49a276ea040ff0fe72fc9f7043191c68e463bb218baf9d"
+          },
+          "tests/test_ai_operations_support_projection.py": {
+            "bytes": 6905,
+            "sha256": "e42443c457389a05f75fdec826b55893f424d3415607966e7e034d4181d9ab00"
+          }
+        },
+        "after": {
+          "app/ai/operations_support_contract.py": {
+            "bytes": 6904,
+            "sha256": "a583d071d6c8b8dbf3162203fe393f85cdf20dfd8e0082ed5823a3eb51e66e23"
+          },
+          "tests/test_ai_operations_support_contract.py": {
+            "bytes": 9084,
+            "sha256": "9de1647d0953d098989535b53eb7517773d9d3b4f15a302350d6e10870081403"
+          },
+          "app/ai/operations_support_projection.py": {
+            "bytes": 7428,
+            "sha256": "d6a5de63e12ad9b9fd49a276ea040ff0fe72fc9f7043191c68e463bb218baf9d"
+          },
+          "tests/test_ai_operations_support_projection.py": {
+            "bytes": 6905,
+            "sha256": "e42443c457389a05f75fdec826b55893f424d3415607966e7e034d4181d9ab00"
+          }
+        },
+        "sources_stable": true,
+        "guards": {
+          "dotenv_reads": 0,
+          "forbidden_imports": [],
+          "external_socket_attempts": 0
+        },
+        "summary": [
+          "........................................................................ [ 94%]",
+          "....                                                                     [100%]",
+          "76 passed in 0.89s"
+        ],
+        "log": "/tmp/hoim-operations-projection-first-tests.log",
+        "log_sha256": "647fe31b9acfa3d27ac49e670872bc7d336aa81169d0ee5f813ee9f70b815ddc"
+      }
+    }
+  ],
+  "contracts": {
+    "private_text_utf8_bytes_max": 4194304,
+    "whole_private_and_public_utf8_bytes_max_each": 8388608,
+    "max_explicit_documents": 128,
+    "max_explicit_cp_redactions": 4096,
+    "source_coverage": "explicit_reviewed_derivatives_only_not_live_system_inventory",
+    "publication_proof": "not supplied by pure declared review models",
+    "automatic_execution": "no files, processes, settings, DB or network operations",
+    "raw_private_fields_excluded": [
+      "original text and title",
+      "source origin/path and original declared host/version",
+      "original ID",
+      "registrar/reviewer/requester IDs",
+      "private review basis",
+      "original content hash and redaction spans"
+    ]
+  },
+  "boundaries": [
+    "Original BOM/CRLF/non-BMP/NUL/spaces retained; explicit remove or fixed-mask codepoint spans preserve every other byte. No trim, unit conversion or automatic secret scanner.",
+    "All privacy/faithfulness/applicability declarations are actual booleans; independent declared actor and UTC6 order checked, but actual current server actors/AuditPKs/publication are still required in the next layer.",
+    "Constructed/copied Pydantic instances are revalidated rather than trusted as authorization or valid content.",
+    "All128 roots retained even with equal text;129, duplicate roots/reviews and overlapping/outside spans reject whole data.",
+    "Real synthetic4MiB text and exact8MiB pair/collection accepted; +1byte whole data rejected without clipping.",
+    "Public source carries only full reviewed derivatives and counts. No runbook means missing_reviewed_runbook; diagnostic logs do not become action authority. Script/command-like text stays inert scalar data."
+  ]
+}

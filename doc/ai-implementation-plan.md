@@ -374,3 +374,9 @@
 - 当前私有断网MySQL验证100.981秒通过并清理：224旧表加Source5及Artifact2共231个当前注册表；真实增量up/down/up保持原DDL与行，非完整历史迁移回放。共享双协议及process_one保留具体回执、HTTP等待时无SQL连接、未知token保持null、撤研究后普通与超级管理员均不能恢复临床分件。MySQL的128件SQL腐坏Artifact负控不冒称128份独立受审正件；SQLite另有逐件实际创建的完整队列回归。
 - 47个Python文件Ruff及格式检查通过，目录.24的80份独立Task与7份真实固定System已重生成；934接口RBAC JSON及Markdown一致。四份Source recipe逐字保留。早期构造失败、队列饥饿真实RED、旧路由数量断言及各成功前版均保留原范围，不把重复定向数累计为全量通过。
 - 使用及证据见 `ai-research-cohort-shared-guide.md` 与 `ai-research-cohort-shared-verification.json`。默认不启用，不宣称完整后端/浏览器验收、规范生产构建、真实模型/临床验证、入组或导出完成；第74项完整验收及75—80专用实现继续推进。
+
+## 第79项运维知识来源基础（纯合同阶段）
+
+- 新增运维原件、独立人工复核声明及完整公开衍生投影；单原文4MiB、private/public各8MiB、明确128件文档及4096个字符区间，超限完整拒绝。原文BOM/CRLF/emoji/NUL及空值保留；固定遮盖/移除按Unicode码点处理，不自动探测凭据、不执行命令、不读文件或真实环境。
+- 公开投影不含私有原文、路径/原主机版本、原件ID、审核依据及账户ID；有无受审手册显式区分，不把日志或人工版本声明当成当前系统探测或可执行授权。纯声明并非服务器实际发布，后续还需当前独立审核人/具体AuditPK/版本与撤销校验。
+- 两整文件78项纯测试一次通过（1.771秒，pytest1.65秒），4份源码前后稳定，应用settings/DB/client导入、dotenv和外部socket尝试均零。保留前版50/57/76的独立范围，不重复累计。完整Source和typed复制、字节边界、128原件及私有字段负控见 `ai-operations-source-verification.json`。尚未接SQL、HTTP、模型、界面或79原生模式，80项目标继续。

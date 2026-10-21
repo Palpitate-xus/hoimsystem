@@ -465,6 +465,8 @@ def validate_generation(
 
 
 def _request(provider: AIProvider, spec: FeatureSpec, task_prompt: str, data: dict) -> tuple[str, dict]:
+    if spec.number == 73 or any(key in data.get("context", {}) for key in ("drug_label_binding", "drug_label_source")) or "drug_label_source_binding_id" in data.get("input", {}):
+        raise AIExecutionError("DRUG_LABEL_NATIVE_REQUIRED", "说明书任务仅通过当前完整来源及专属协议执行")
     endpoint = validate_endpoint(provider.api_base)
     budget = min(provider.max_output_tokens, settings.AI_MAX_OUTPUT_TOKENS)
     if spec.number == 71 or any(key in data.get("context", {}) for key in ("document_binding", "document_source", "document_review")) or "document_original_id" in data.get("input", {}):

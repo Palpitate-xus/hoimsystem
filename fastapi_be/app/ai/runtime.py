@@ -95,6 +95,10 @@ def _check_run_storage_json(serialized: dict[str, str]) -> None:
 
 def create_run(db: Session, user: User, req: RunRequest) -> AIRun:
     """Freeze an authorized, source-linked request before a durable worker processes it."""
+    if req.feature_key == "drug_label_extraction":
+        from app.ai.drug_label_runtime import create_drug_label_run
+
+        return create_drug_label_run(db, user, req)
     if req.feature_key == "guideline_ingestion":
         from app.ai.document_extraction_runtime import create_document_run
 
@@ -382,6 +386,11 @@ def create_run(db: Session, user: User, req: RunRequest) -> AIRun:
 
 def authorize_run(db: Session, user: User, run: AIRun) -> None:
     """Re-check current permissions, including revoked care access, on every result read."""
+    from app.ai.drug_label_storage import authorize_drug_label_run, is_drug_label_run
+
+    if is_drug_label_run(db, run):
+        authorize_drug_label_run(db, user, run, frozen_audit=user.user_role == "super_admin")
+        return
     from app.ai.document_extraction_storage import authorize_document_run, is_extraction_run
 
     if is_extraction_run(db, run):
@@ -530,6 +539,15 @@ def authorize_run(db: Session, user: User, run: AIRun) -> None:
 def describe_run(run: AIRun, include_result: bool = True, *, user: User | None = None) -> dict:
     """Expose the user-facing result, not system instructions or provider secrets."""
     from sqlalchemy.orm import object_session
+
+    from app.ai.drug_label_storage import is_drug_label_run
+
+    if is_drug_label_run(object_session(run), run):
+        from app.ai.drug_label_views import run_view
+
+        if user is None or object_session(run) is None:
+            raise HTTPException(403, "完整说明书任务须在当前授权会话读取")
+        return run_view(object_session(run), user, run, include_result, frozen_audit=user.user_role == "super_admin")
 
     from app.ai.document_extraction_storage import is_extraction_run
 
@@ -802,7 +820,17 @@ def describe_run(run: AIRun, include_result: bool = True, *, user: User | None =
 
 def claim_next_run(db: Session) -> tuple[str, str] | None:
     """Claim durable work without allowing two workers to execute the same queued task."""
-    query = db.query(AIRun).filter_by(status="queued").order_by(AIRun.create_time)
+    from app.ai.drug_label_storage import _locator
+
+    candidate = db.query(AIRun.run_id, AIRun.feature_key).filter_by(status="queued").order_by(AIRun.create_time, AIRun.run_id).first()
+    if candidate is None:
+        return None
+    if _locator(db, candidate.run_id) is not None or candidate.feature_key == "drug_label_extraction":
+        from app.ai.drug_label_runtime import claim_drug_label_run
+
+        lease = claim_drug_label_run(db, candidate.run_id)
+        return (candidate.run_id, lease) if lease is not None else None
+    query = db.query(AIRun).filter_by(run_id=candidate.run_id, status="queued")
     if db.bind.dialect.name == "postgresql":
         query = query.with_for_update(skip_locked=True)
     run = query.first()
@@ -819,6 +847,8 @@ def claim_next_run(db: Session) -> tuple[str, str] | None:
 
 
 def _recheck_task(db: Session, run: AIRun) -> tuple[FeatureSpec, AIProvider, dict]:
+    if run.feature_key == "drug_label_extraction":
+        raise AIExecutionError("TASK_CONTRACT_CHANGED", "旧说明书任务缺少完整原件绑定，不能沿用通用推理")
     if utcnow() - run.create_time > datetime.timedelta(seconds=settings.AI_MAX_QUEUE_AGE_SECONDS):
         raise AIExecutionError("TASK_EXPIRED", "任务等待时间过长，请重新加载最新资料后提交")
     user = db.get(User, run.requested_by)
@@ -900,10 +930,18 @@ async def execute_claimed(run_id: str, lease: str, *, transport=None) -> None:
     """Release SQL connections during inference; recheck authorization before storing results."""
     from app import database
     from app.ai.document_extraction_storage import is_extraction_run
+    from app.ai.drug_label_storage import _locator
 
     with database.SessionLocal() as db:
-        candidate = db.query(AIRun).filter(AIRun.run_id == run_id, AIRun.status.in_(["running", "cancelled"]), AIRun.lease_token == lease).one_or_none()
+        header = db.query(AIRun.run_id, AIRun.feature_key).filter(AIRun.run_id == run_id, AIRun.status.in_(["running", "cancelled"]), AIRun.lease_token == lease).one_or_none()
+        drug_label_task = header is not None and (_locator(db, run_id) is not None or header.feature_key == "drug_label_extraction")
+        candidate = db.get(AIRun, run_id) if header is not None and not drug_label_task else None
         document_task = candidate is not None and is_extraction_run(db, candidate)
+    if drug_label_task:
+        from app.ai.drug_label_runtime import execute_drug_label_claimed
+
+        await execute_drug_label_claimed(run_id, lease, transport=transport)
+        return
     if document_task:
         from app.ai.document_extraction_runtime import execute_document_claimed
 
@@ -1289,11 +1327,15 @@ async def execute_claimed(run_id: str, lease: str, *, transport=None) -> None:
 
 def expire_interrupted_runs(db: Session) -> int:
     """Mark abandoned inference failed without repeating potentially billable calls."""
+    from app.ai.drug_label_run_models import AIDrugLabelRunArtifact
+    from app.ai.drug_label_runtime import expire_interrupted_drug_label_runs
+
+    native_count = expire_interrupted_drug_label_runs(db)
     deadline = utcnow() - datetime.timedelta(minutes=10)
     count = (
         db.query(AIRun)
-        .filter(AIRun.status == "running", AIRun.start_time < deadline)
+        .filter(AIRun.status == "running", AIRun.start_time < deadline, AIRun.feature_key != "drug_label_extraction", ~AIRun.run_id.in_(db.query(AIDrugLabelRunArtifact.run_id)))
         .update({"status": "failed", "error_code": "WORKER_INTERRUPTED", "error_message": "执行进程中断，任务未自动重试，可检查后重新提交", "finish_time": utcnow()}, synchronize_session=False)
     )
     db.commit()
-    return count
+    return native_count + count

@@ -665,70 +665,63 @@ def create_medical_record(req: MedicalRecordCreateRequest, current_user: User = 
 
 @router.post("/medicalRecord/update")
 def update_medical_record(req: MedicalRecordUpdateRequest, current_user: User = Depends(require_roles(*CLINICAL_ROLES)), db: Session = Depends(get_db)):
-    record = db.query(MedicalRecord).filter(MedicalRecord.medical_record_id == req.medical_record_id).first()
-    if not record:
-        return {"code": 500, "msg": "病历不存在"}
-    doctor_obj = db.query(Doctor).filter(Doctor.user_id == current_user.user_id).first()
-    if not doctor_obj or record.doctor_id != doctor_obj.doctor_id:
-        return {"code": 403, "msg": "无权修改他人病历"}
-    if record.status != 0:
-        return {"code": 403, "msg": "已签名病历不可修改"}
-    record.symptom = req.symptom
-    record.result = req.result
-    db.add(record)
-    db.commit()
-    return {"code": 200, "msg": "success"}
+    from app.medical_record_write_guard import current_owned_record, medical_record_transaction
+
+    with medical_record_transaction(db):
+        record, denial = current_owned_record(db, current_user, req.medical_record_id)
+        if denial is not None:
+            return denial
+        record.symptom = req.symptom
+        record.result = req.result
+        db.add(record)
+        db.commit()
+        return {"code": 200, "msg": "success"}
 
 
 @router.post("/medicalRecord/sign")
 def sign_medical_record(req: MedicalRecordSignRequest, current_user: User = Depends(require_roles(*CLINICAL_ROLES)), db: Session = Depends(get_db)):
-    record = db.query(MedicalRecord).filter(MedicalRecord.medical_record_id == req.medical_record_id).first()
-    if not record:
-        return {"code": 500, "msg": "病历不存在"}
-    doctor_obj = db.query(Doctor).filter(Doctor.user_id == current_user.user_id).first()
-    if not doctor_obj or record.doctor_id != doctor_obj.doctor_id:
-        return {"code": 403, "msg": "无权签名他人病历"}
-    if record.status != 0:
-        return {"code": 500, "msg": "病历已签名"}
-    now = datetime.datetime.now()
-    updated = (
-        db.query(MedicalRecord)
-        .filter(
-            MedicalRecord.medical_record_id == record.medical_record_id,
-            MedicalRecord.status == 0,
-        )
-        .update({MedicalRecord.status: 1, MedicalRecord.sign_time: now}, synchronize_session=False)
-    )
-    if updated != 1:
-        db.rollback()
-        return {"code": 500, "msg": "病历已签名"}
+    from app.medical_record_write_guard import current_owned_record, current_rows, medical_record_transaction
 
-    # 病历签名 = 就诊完成：联动收尾挂号/预约/队列状态
-    # （原缺陷：报到后预约永远停在 status=1，"已就诊"状态不可达）
-    from app.models import Queue, Registration
-
-    if record.registration_uuid:
-        db.query(Registration).filter(
-            Registration.registration_uuid == record.registration_uuid,
-            Registration.status == 0,
-        ).update({Registration.status: 1}, synchronize_session=False)
-    # 收尾当日该患者的候诊队列（过号/就诊完成语义：status=2）
-    queue_items = (
-        db.query(Queue)
-        .filter(
-            Queue.patient_id == record.patient_id,
-            Queue.doctor_id == record.doctor_id,
-            Queue.status.in_((0, 1)),
+    with medical_record_transaction(db):
+        record, denial = current_owned_record(db, current_user, req.medical_record_id, signing=True)
+        if denial is not None:
+            return denial
+        now = datetime.datetime.now()
+        updated = (
+            db.query(MedicalRecord)
+            .filter(
+                MedicalRecord.medical_record_id == record.medical_record_id,
+                MedicalRecord.status == 0,
+            )
+            .update({MedicalRecord.status: 1, MedicalRecord.sign_time: now}, synchronize_session=False)
         )
-        .all()
-        if record.patient_id and record.doctor_id
-        else []
-    )
-    for queue_item in queue_items:
-        queue_item.status = 2
-        db.add(queue_item)
-    db.commit()
-    return {"code": 200, "msg": "success"}
+        if updated != 1:
+            db.rollback()
+            return {"code": 500, "msg": "病历已签名"}
+
+        # Keep the existing completion behavior. The locked actual record, not
+        # a cached request object, supplies the Patient/Doctor/Registration.
+        from app.models import Queue, Registration
+
+        if record.registration_uuid:
+            db.query(Registration).filter(
+                Registration.registration_uuid == record.registration_uuid,
+                Registration.patient_id == record.patient_id,
+                Registration.doctor_id == record.doctor_id,
+                Registration.status == 0,
+            ).update({Registration.status: 1}, synchronize_session=False)
+        queue_items = current_rows(
+            db.query(Queue).filter(
+                Queue.patient_id == record.patient_id,
+                Queue.doctor_id == record.doctor_id,
+                Queue.status.in_((0, 1)),
+            )
+        ).all()
+        for queue_item in queue_items:
+            queue_item.status = 2
+            db.add(queue_item)
+        db.commit()
+        return {"code": 200, "msg": "success"}
 
 
 @router.post("/labOrder/create")

@@ -66,7 +66,7 @@ import AiSpeechFindings from "@/components/AISpeechFindings/index.vue";
 import AiImageFindings from "@/components/AIImageFindings/index.vue";
 import AiEcgFindings from "@/components/AIEcgFindings/index.vue";
 import { resolveSurgeryEvidence, verifySurgeryRun } from "@/api/ai/surgeryScenarios";
-import {resolveSupplyEvidence,verifySupplyRun} from "@/api/ai/supplyResults";
+import {resolveSupplyEvidence,verifySupplyRun,supplyAnalysisVersionSupported} from "@/api/ai/supplyResults";
 import { supportCanonical, supportId } from "@/api/inpatientSupport";
 const AiSupplyFindings=defineAsyncComponent(()=>import("@/components/SupplyFindings.vue"));
 const AiSurgeryFindings=defineAsyncComponent(()=>import("@/components/AISurgeryFindings.vue"));
@@ -98,7 +98,7 @@ async function load(reset = false) {
 async function inspect(row) {
   if(!allowed.value||!alive||wasDeactivated)return;
   const version = ++detailVersion,key=auth(); visible.value = true; detail.value = null; evidence.value=null;evidenceVisible.value=false;detailTab.value = "result"; detailLoading.value = true;
-  try { const response = await getAIAdminRunTrace(row.run_id);if(!current(key)||version!==detailVersion)return;const value=response.data;if(value?.run_id!==row.run_id||hasSupply(value)&&!await verifySupplyRun(value,{}, {auditOnly:true,current:()=>current(key)&&version===detailVersion})||hasSurgery(value)&&!await verifySurgeryRun(value)){if(current(key)&&version===detailVersion)ElMessage.warning('原任务或完整冻结来源及固定结果无法核对，暂不展示');return;}if(current(key)&&version===detailVersion)detail.value=value; }
+  try { const response = await getAIAdminRunTrace(row.run_id);if(!current(key)||version!==detailVersion)return;const value=response.data;if(value?.run_id!==row.run_id||hasSupply(value)&&!await verifySupplyRun(value,{}, {auditOnly:true,current:()=>current(key)&&version===detailVersion})||hasSurgery(value)&&!await verifySurgeryRun(value)){if(current(key)&&version===detailVersion)ElMessage.warning(hasSupply(value)&&value?.result?.supply_analysis&&!supplyAnalysisVersionSupported(value.result.supply_analysis)?'原运行版本当前无法重算，暂不展示旧预测正文':'原任务或完整冻结来源及固定结果无法核对，暂不展示');return;}if(current(key)&&version===detailVersion)detail.value=value; }
   catch { if(current(key)&&version===detailVersion){clear();ElMessage.warning('当前完整任务或审计权限无法重新核对，旧资料已清除');} }
   finally { if (current(key)&&version === detailVersion) detailLoading.value = false; }
 }

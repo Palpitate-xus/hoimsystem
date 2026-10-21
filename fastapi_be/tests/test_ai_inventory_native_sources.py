@@ -228,3 +228,34 @@ def test_audit_failure_rolls_back_original_governance_and_audit_without_committi
         s.create_source(db_session, case["admin"], source_request(case))
     assert db_session.query(AIInventoryNativeSource).count() == before and db_session.query(AIAuditEvent).count() == audit_before
     assert case["drug"].stock == 37
+
+
+def test_explicit_legacy_unit_mapping_cannot_silently_convert_conflicting_consumable_catalog(db_session, inventory_case):
+    case = inventory_case
+    body = unit_request(case, kind="consumable")
+    body["payload"]["original_unit_text"] = "原实盘计数组"
+    unit = units.create_unit(db_session, case["pharmacist"], body)
+    db_session.commit()
+    units.review_source(db_session, case["super"], "unit", unit.unit_definition_id, {"expected_revision": 1, "expected_content_hash": unit.content_hash, "decision": "publish", "basis_note": NOTE})
+    db_session.commit()
+    source = source_request(case, confirmed=True)
+    source.update(
+        item_kind="consumable",
+        item_id=case["consumable"].consumable_id,
+        unit_definition_id=unit.unit_definition_id,
+        expected_unit_content_hash=unit.content_hash,
+        expected_unit_governance_hash=units.hash_content(units.governance(unit)),
+    )
+    for q in s._all_quantities(source["payload"]):
+        q["original_unit_text"] = "原实盘计数组"
+    before = db_session.query(AIInventoryNativeSource).count()
+    with pytest.raises(HTTPException) as e:
+        s.create_source(db_session, case["pharmacist"], source)
+    assert e.value.status_code == 409 and db_session.query(AIInventoryNativeSource).count() == before
+    source["payload"]["legacy_quantity_unit_review"] = "unknown"
+    row = s.create_source(db_session, case["pharmacist"], source)
+    db_session.commit()
+    publish(db_session, case, row)
+    current = s.source_current(db_session, case["admin"], row.source_record_id)
+    assert current["payload"]["legacy_quantity_unit_review"] == "unknown" and current["parent_binding"]["legacy_snapshot"]["sku"]["projection"]["unit"] == "套"
+    assert current["parent_binding"]["unit_definition"]["payload"]["original_unit_text"] == "原实盘计数组"

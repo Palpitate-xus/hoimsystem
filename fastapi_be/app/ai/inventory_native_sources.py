@@ -150,6 +150,8 @@ def verify_original_proof(proof):
             expected_sku.update({"barcode": raw["barcode"]} if proof["item_kind"] == "pharmaceutical" else {"category": raw["category"], "catalog_unit": raw["unit"]})
             if expected_sku != sku["identity"]:
                 return False
+            if p["legacy_quantity_unit_review"] == "confirmed" and raw["unit"] is not None and raw["unit"] != unit["payload"]["original_unit_text"]:
+                return False
         elif legacy is not None:
             return False
         if proof["source_id"] != f"inventory_fact:{proof['source_record_id']}:{proof['content_hash'][:12]}":
@@ -391,3 +393,22 @@ def verify_source_wrapper(value, *, capture=False):
         return value["audit_only"] or value["eligible"] or value["status"] == "draft" and value["parent_current"]
     except (ValueError, TypeError, KeyError, AttributeError, OverflowError):
         return False
+
+
+def current_actor(db, user):
+    """All ordinary/audit decisions are actual current SHARE reads."""
+    return units.current_actor(db, user, locking=True)
+
+
+def row_metadata(row):
+    """Metadata only; full original validation is explicitly deferred to detail."""
+    value = {
+        **source_identity(row),
+        **governance(row),
+        "content_hash": row.content_hash,
+        "source_id": f"inventory_fact:{row.source_record_id}:{row.content_hash[:12]}",
+        "governance_hash": hash_content(governance(row)),
+    }
+    if not units._state_valid(value, value["recorded_at"]):
+        raise HTTPException(409, "原件治理元数据无法核对，不能伪装完整原件")
+    return source_metadata(value)

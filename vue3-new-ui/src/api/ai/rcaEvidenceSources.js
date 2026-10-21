@@ -1,5 +1,5 @@
 import request from '@/utils/request';
-import {rcaSchema,rcaBound,rcaReply,rcaBasis,rcaPositive,rcaId,rcaKeys,rcaSame,rcaClock,rcaDigest,rcaOriginalRequestValid,verifyRcaGrant,verifyRcaOriginal,verifyRcaCase} from './rcaEvidenceProofs';
+import {rcaSchema,rcaBound,rcaReply,parseRcaJson,rcaBasis,rcaPositive,rcaId,rcaKeys,rcaSame,rcaClock,rcaOriginalRequestValid,verifyRcaGrant,verifyRcaOriginal,verifyRcaCase} from './rcaEvidenceProofs';
 export * from './rcaEvidenceProofs';
 const base='ai/admin/rca-evidence',id=v=>{if(!rcaId(v))throw new Error('需要规范RCA原件UUID');return v;},event=v=>{if(!rcaPositive(v))throw new Error('需要明确实际事件PK');return v;};
 const read=async(url,params={})=>rcaReply(await request({url,params,method:'get',responseType:'arraybuffer',retry:0}));
@@ -14,6 +14,15 @@ export function rcaRequestValid(model,value){try{
  return true;
 }catch{return false;}}
 export const getRcaOptions=()=>read(base+'/options');
+export async function getRcaSuperUsers(page=1){
+ if(!Number.isSafeInteger(page)||page<1||page>4096)throw new Error('需要完整用户目录分页');
+ const raw=await request({url:'user/getList',params:{role:'super_admin',page,page_size:100},method:'get',responseType:'arraybuffer',retry:0});
+ if(!(raw instanceof ArrayBuffer)||raw.byteLength>8388608)throw new Error('完整实际用户目录超过字节预算');
+ const value=parseRcaJson(new TextDecoder('utf-8',{fatal:true,ignoreBOM:true}).decode(new Uint8Array(raw)));
+ if(!rcaKeys(value,['code','msg','data','total'])||value.code!==200||value.msg!=='success'||!Array.isArray(value.data)||!Number.isSafeInteger(value.total)||value.total<0||value.total>4096||value.data.length!==Math.max(0,Math.min(100,value.total-(page-1)*100)))throw new Error('完整实际用户目录无法核对');
+ let last=0;for(const user of value.data){if(!rcaKeys(user,['user_id','username','user_role'])||!rcaPositive(user.user_id)||user.user_id<=last||typeof user.username!=='string'||!user.username||Array.from(user.username).length>100||user.user_role!=='super_admin')throw new Error('实际用户身份目录不完整');last=user.user_id;}
+ return value;
+}
 export const getRcaCapture=eventId=>read(`${base}/events/${event(eventId)}/capture`);
 export const getRcaDirectory=(eventId,kind,{page=1,pageSize=20}={})=>{if(!['grants','originals','cases'].includes(kind)||!Number.isSafeInteger(page)||page<1||page>4096||!Number.isSafeInteger(pageSize)||pageSize<1||pageSize>100)throw new Error('需要明确RCA目录和完整分页');return read(`${base}/events/${event(eventId)}/directory/${kind}`,{page,page_size:pageSize});};
 export const getRcaLegacyWitness=(eventId,kind,recordId)=>{if(!['legacy_event','legacy_rca'].includes(kind))throw new Error('需要明确实际旧原件类型');return read(`${base}/events/${event(eventId)}/legacy-witness`,{kind,record_id:event(recordId)});};
@@ -45,10 +54,10 @@ export async function verifyRcaCreated(after,body,kind,{current=()=>true}={}){tr
  if(!model||!rcaRequestValid(model,body)||!await verify(after,{current}))return false;
  const s=kind==='grants'?after.identity:after.immutable;
  if(s.event_id!==body.event_id||(kind==='grants'?s.patient_id_at_grant:s.patient_id_at_capture)!==body.expected_event_patient_id||after.governance.revision!==1)return false;
- if(kind==='grants')return after.governance.status==='active'&&['grantee_id','permission_kind','purpose','valid_until','basis_note','explicit_scope_review'].every(k=>rcaSame(s[k],body[k]));
+ if(kind==='grants')return after.governance.status==='active'&&after.current_scope&&['grantee_id','permission_kind','purpose','valid_until','basis_note','explicit_scope_review'].every(k=>rcaSame(s[k],body[k]));
  if(after.governance.status!=='draft')return false;
- if(kind==='cases')return s.capture.collection_hash===body.expected_collection_hash&&s.basis_note===body.basis_note;
- return ['origin_kind','text','provenance','timeline'].every(k=>rcaSame(s[k],body[k]));
+ if(kind==='cases')return after.current_collection_matches&&s.capture.collection_hash===body.expected_collection_hash&&s.basis_note===body.basis_note;
+ return after.current_raw_witness_matches&&['origin_kind','text','provenance','timeline'].every(k=>rcaSame(s[k],body[k]));
 }catch{return false;}}
 export async function verifyRcaTransition(after,before,body,kind,action,{current=()=>true}={}){try{
  const verify=recordVerifier[kind],model=action==='review'?'SourceReview':'Revoke';

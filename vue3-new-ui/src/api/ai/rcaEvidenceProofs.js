@@ -14,7 +14,8 @@ export const rcaBytes=value=>documentUtf8(typeof value==='string'?value:supportC
 export const rcaHash=documentBytesHash,rcaDigest=supportDigest,rcaId=supportId,rcaSha=supportHash,rcaClock=documentClock;
 export const rcaPositive=value=>Number.isSafeInteger(value)&&value>=1&&value<=2147483647;
 export const rcaKeys=(v,names)=>v!==null&&typeof v==='object'&&!Array.isArray(v)&&Object.keys(v).sort().join(',')===[...names].sort().join(',');
-export const rcaBasis=value=>{try{return typeof value==='string'&&Array.from(value).length<=1000&&value.replace(/[\u0009-\u000d\u001c-\u0020\u0085\u00a0\u1680\u2000-\u200a\u2028\u2029\u202f\u205f\u3000]/gu,'').length>0&&rcaBytes(value)<=4000;}catch{return false;}};
+export const rcaPlain=(value,maxBytes)=>{try{return typeof value==='string'&&value.replace(/[\u0009-\u000d\u001c-\u0020\u0085\u00a0\u1680\u2000-\u200a\u2028\u2029\u202f\u205f\u3000]/gu,'').length>0&&rcaBytes(value)<=maxBytes;}catch{return false;}};
+export const rcaBasis=value=>rcaPlain(value,4000)&&Array.from(value).length<=1000;
 export function rcaBound(value){try{return scalarJsonValue(value)&&rcaBytes(value)<=RCA_WIRE;}catch{return false;}}
 export function parseRcaJson(raw){
  if(typeof raw!=='string'||!raw.length||rcaBytes(raw)>RCA_WIRE)throw new Error('完整RCA响应超过8MiB或UTF8无效');
@@ -23,6 +24,7 @@ export function parseRcaJson(raw){
  return parseOriginalJson(raw,RCA_WIRE);
 }
 export function rcaReply(value){
+ if(value instanceof ArrayBuffer&&value.byteLength>RCA_WIRE)throw new Error('完整RCA响应超过8MiB，未解码或裁剪');
  const raw=value instanceof ArrayBuffer?new TextDecoder('utf-8',{fatal:true,ignoreBOM:true}).decode(new Uint8Array(value)):value;
  if(typeof raw!=='string')throw new Error('需要保留原HTTP UTF8字节的RCA响应');
  const result=parseRcaJson(raw);if(!rcaKeys(result,['code','msg','data'])||result.code!==200||result.msg!=='success')throw new Error('RCA完整响应合同无效');return result;
@@ -58,7 +60,7 @@ export function rcaOriginalRequestValid(v){try{
  const p=v.provenance;
  if(p.method==='human_declared_derivative'?v.origin_kind!==p.witness_kind:!['manual_evidence','human_timeline'].includes(v.origin_kind))return false;
  if((v.origin_kind==='human_timeline')!==!!v.timeline.length||new Set(v.timeline.map(t=>t.entry_id)).size!==v.timeline.length||v.timeline.length+v.timeline.reduce((n,t)=>n+t.evidence.length,0)>4096)return false;
- return v.timeline.every(t=>rcaOccurrence(t.occurred_time)&&rcaBytes(t.statement)<=16000&&t.statement.trim().length>0&&v.text.includes(t.statement)&&t.evidence.every(q=>quote(q,v.text)));
+ return v.timeline.every(t=>rcaOccurrence(t.occurred_time)&&rcaPlain(t.statement,16000)&&v.text.includes(t.statement)&&t.evidence.every(q=>quote(q,v.text)));
 }catch{return false;}}
 export async function verifyRcaOriginal(v,{current=()=>true}={}){try{
  if(!current()||!checked('OriginalRecord',v))return false;const s=v.immutable,g=v.governance,p=s.provenance;
@@ -115,6 +117,6 @@ export async function verifyRcaPublic(v,{current=()=>true}={}){try{
  const members=new Map(v.members.map(m=>[m.member_id,m])),items=new Map(v.items.map(m=>[m.item_id,m]));
  if(!rcaSame(v.members.filter(m=>m.release_status==='released').map(m=>m.member_id).sort(),v.items.map(m=>m.item_id)))return false;
  for(const item of v.items){const m=members.get(item.item_id);if(!m||m.release_status!=='released'||m.kind!==item.kind||m.content_hash!==item.content_hash||m.governance_hash!==item.governance_hash||rcaBytes(item.text)>RCA_ORIGINAL||await rcaHash(item.text)!==item.text_hash||!rcaClock(item.available_at)||item.available_at>v.snapshot_time)return false;}
- for(const t of v.timeline){const item=items.get(t.source_item_id);if(!item||item.kind!=='human_timeline'||!item.text.includes(t.statement)||!t.statement.trim()||rcaBytes(t.statement)>16000||!rcaOccurrence(t.occurred_time)||!rcaClock(t.recorded_at)||t.recorded_at>v.snapshot_time||!t.evidence.every(q=>items.has(q.item_id)&&quote(q,items.get(q.item_id).text)))return false;}
+ for(const t of v.timeline){const item=items.get(t.source_item_id);if(!item||item.kind!=='human_timeline'||!item.text.includes(t.statement)||!rcaPlain(t.statement,16000)||!rcaOccurrence(t.occurred_time)||!rcaClock(t.recorded_at)||t.recorded_at>v.snapshot_time||!t.evidence.every(q=>items.has(q.item_id)&&quote(q,items.get(q.item_id).text)))return false;}
  return current();
 }catch{return false;}}

@@ -106,7 +106,6 @@ def _execution_epoch(actor, artifact):
 def _current_configuration(db, run, snapshot, metadata):
     """Current model/config/Prompt checks belong only to new acceptance, not audit."""
     from app.ai.catalog import CATALOG_VERSION, FEATURE_BY_KEY
-    from app.ai.document_change_draft import TASK_PROMPT
     from app.ai.governance import provider_feature_issues
     from app.ai.runtime import provider_snapshot
 
@@ -142,7 +141,7 @@ def _current_configuration(db, run, snapshot, metadata):
     ):
         raise ValueError("Actual catalog/model/configuration changed after capture")
     if config.active_prompt_id is None:
-        if run.prompt_version != 0 or snapshot["task_prompt"] != TASK_PROMPT:
+        if run.prompt_version != 0 or snapshot["task_prompt"] != FEATURE_BY_KEY[storage.FEATURE_KEY].task_prompt:
             raise ValueError("The actual packaged baseline Prompt differs")
     elif prompt is None or prompt.feature_key != storage.FEATURE_KEY or prompt.version != run.prompt_version or prompt.task_prompt != snapshot["task_prompt"]:
         raise ValueError("The actual frozen Prompt is no longer the configured Prompt")

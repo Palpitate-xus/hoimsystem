@@ -276,7 +276,8 @@ def test_failed_usage_postflush_cannot_change_actual_immutable_artifact(change_c
 
 
 def test_actual_packaged_baseline_prompt_version_zero_can_accept(change_case):
-    from app.ai.document_change_draft import TASK_PROMPT
+    from app.ai.catalog import FEATURE_BY_KEY
+    from app.ai.document_change_draft import SYSTEM_PROMPT
     from app.ai.models import AIFeatureConfig
 
     db, actor, *_ = change_case
@@ -284,13 +285,19 @@ def test_actual_packaged_baseline_prompt_version_zero_can_accept(change_case):
     run = case["run"]
     db.get(AIFeatureConfig, storage.FEATURE_KEY).active_prompt_id = None
     run.prompt_version = 0
+    packaged_prompt = FEATURE_BY_KEY[storage.FEATURE_KEY].task_prompt
+    case["snapshot"]["task_prompt"] = packaged_prompt
+    case["metadata"]["instructions_digest"] = c.e.bytes_hash(SYSTEM_PROMPT + "\n\n" + packaged_prompt)
+    run.input_json = c.e.canonical_json(case["snapshot"])
+    run.context_metadata_json = c.e.canonical_json(case["metadata"])
+    run.prompt_hash = c.e.digest([SYSTEM_PROMPT, packaged_prompt])
     storage.stage_artifact(db, actor, run)
     db.commit()
     run.status, run.lease_token, run.start_time = "running", str(uuid.uuid4()), run.create_time.replace(microsecond=0)
     db.commit()
     draft = build_draft({"changes": []}, case["source"], case["metadata"]["instructions_digest"])
     value = result_for_draft(draft, case["source"], case["metadata"]["instructions_digest"])
-    assert case["snapshot"]["task_prompt"] == TASK_PROMPT
+    assert case["snapshot"]["task_prompt"] == packaged_prompt
     storage.stage_result(db, actor, run, run.lease_token, value, KNOWN, latency_ms=5)
     db.commit()
     assert storage.expand_result(db, actor, run) == value

@@ -102,7 +102,7 @@ async function inspect(row) {
   catch { if(current(key)&&version===detailVersion){clear();ElMessage.warning('当前完整任务或审计权限无法重新核对，旧资料已清除');} }
   finally { if (current(key)&&version === detailVersion) detailLoading.value = false; }
 }
-async function showEvidence(id) { const key=auth(),version=detailVersion,original=detail.value;evidence.value=null;evidenceVisible.value=false;if(!current(key)||!original)return;const item=original.evidence?.find(value=>value.source_id===id),value=hasSupply(original)?await resolveSupplyEvidence(item,original.supply_findings,{}, {auditOnly:true,current:()=>current(key)&&version===detailVersion}):hasSurgery(original)?await resolveSurgeryEvidence(item,original.surgery_findings):item;if(current(key)&&version===detailVersion&&original===detail.value){evidence.value=value;evidenceVisible.value=!!value;} }
+async function showEvidence(id) { const key=auth(),version=detailVersion,original=detail.value;evidence.value=null;evidenceVisible.value=false;if(!current(key)||!visible.value||!original)return;const item=original.evidence?.find(value=>value.source_id===id),value=hasSupply(original)?await resolveSupplyEvidence(item,original.supply_findings,{}, {auditOnly:true,current:()=>current(key)&&version===detailVersion}):hasSurgery(original)?await resolveSurgeryEvidence(item,original.surgery_findings):item;if(current(key)&&visible.value&&version===detailVersion&&original===detail.value){evidence.value=value;evidenceVisible.value=!!value;} }
 async function cancel(row) {
   const key=auth();if(!current(key))return;
   try {
@@ -110,6 +110,8 @@ async function cancel(row) {
     if(!current(key))return;await cancelAIRun(row.run_id);if(!current(key))return;ElMessage.success("任务结果已取消接收"); await load();
   } catch (error) { if (error !== "cancel" && error !== "close"&&current(key)){clear();ElMessage.warning('当前任务或取消权限已经变化，请重新核对');} }
 }
+watch(visible,open=>{if(!open){++detailVersion;detail.value=null;evidence.value=null;evidenceVisible.value=false;detailLoading.value=false;}},{flush:'sync'});
+watch(evidenceVisible,open=>{if(!open)evidence.value=null;},{flush:'sync'});
 watch(()=>filters.value.feature_key,value=>{if(value!=='surgery_scheduling'){filters.value.department_id=undefined;filters.value.surgery_pool_id=filters.value.surgery_scenario_id='';}if(value!=='supply_forecast'){filters.value.supply_item_kind='';filters.value.supply_item_id=undefined;filters.value.supply_series_id='';}},{flush:'sync'});
 watch(filters,clear,{deep:true,flush:'sync'});
 watch(auth,()=>{clear();if(allowed.value&&!wasDeactivated)load();},{flush:'sync'});

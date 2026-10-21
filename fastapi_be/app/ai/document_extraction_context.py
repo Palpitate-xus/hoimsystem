@@ -24,6 +24,7 @@ class DocumentExtractionBinding(c.StrictModel):
 
 class DocumentExtractionContext(c.StrictModel):
     scope: Literal["document_extraction"]
+    snapshot_time: c.UtcText
     document_binding: DocumentExtractionBinding
     document_source: DocumentExtractionSource
     document_review: c.GovernedReview
@@ -37,9 +38,10 @@ def selection(values):
         raise HTTPException(422, "指南抽取仅接受明确原文ID和可选问题，请先核对当前已发布原件") from exc
 
 
-def _context(source, review):
+def _context(source, review, snapshot_time):
     return DocumentExtractionContext(
         scope="document_extraction",
+        snapshot_time=snapshot_time,
         document_binding=DocumentExtractionBinding(schema_version="document_extraction_binding_v1", feature_key="guideline_ingestion", original=source.original, source_digest=c.digest(source)),
         document_source=source,
         document_review=review,
@@ -64,7 +66,9 @@ def extraction_context(db, user, task_input):
     request = selection(task_input)
     original = sources.original_detail(db, user, request.document_original_id)
     try:
-        context = _context(build_extraction_source(original), original.governance)
+        context = _context(build_extraction_source(original), original.governance, c.utc_text(sources.utcnow()))
+        if c.clock(context.snapshot_time) < c.clock(original.governance.reviewed_at):
+            raise ValueError("A task capture cannot predate the actual original review")
     except (ValueError, TypeError, UnicodeError) as exc:
         raise HTTPException(409, "原文未完成当前审核或完整原件超过抽取任务容量，未裁剪原文") from exc
     return ContextBundle(data=context.model_dump(mode="json"), evidence=[_source_evidence(context)])
@@ -93,7 +97,9 @@ def verify_context(db, user, value, *, current=True):
                 codepoint_length=record.snapshot.codepoint_length,
                 text=record.snapshot.text,
             )
-        expected = _context(source, review)
+        expected = _context(source, review, context.snapshot_time)
+        if c.clock(context.snapshot_time) < c.clock(review.reviewed_at) or current and c.clock(context.snapshot_time) > sources.utcnow():
+            raise ValueError("The actual capture clock is outside its review/current clock bounds")
         if context != expected:
             raise ValueError("The exact original, review signature or source closure differs")
         return expected
@@ -109,7 +115,7 @@ def public_payload(payload):
     context = DocumentExtractionContext.model_validate(payload["context"])
     if context.document_binding.original.original_id != request.document_original_id or context.document_binding.source_digest != c.digest(context.document_source):
         raise ValueError("The selected original and exact outbound source differ")
-    if context != _context(context.document_source, context.document_review):
+    if context != _context(context.document_source, context.document_review, context.snapshot_time):
         raise ValueError("The frozen context is not the closed extraction proof")
     if context.document_review.status != "published" or c.digest(context.document_review) != context.document_source.original.governance_hash:
         raise ValueError("The original published review is unavailable")

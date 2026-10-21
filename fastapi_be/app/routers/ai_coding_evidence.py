@@ -8,10 +8,10 @@ from sqlalchemy.orm import Session
 
 from app.ai import coding_evidence_sources as s
 from app.ai.coding_evidence_guard import current_coding_rows
-from app.ai.coding_evidence_input import CaptureRequest, CaseCreate, RulePackageCreate, SourceReview, SourceRevoke
+from app.ai.coding_evidence_input import SOURCE_ROLES, CaptureRequest, CaseCreate, RulePackageCreate, SourceReview, SourceRevoke
 from app.ai.coding_evidence_models import AICodingCaseSnapshot, AICodingRulePackage
 from app.database import get_db
-from app.dependencies import User, get_current_user
+from app.dependencies import User, require_roles
 from app.models import DrgRule, MedicalRecordHome
 
 router = APIRouter(prefix="/ai/coding-evidence", default_response_class=JSONResponse)
@@ -57,7 +57,7 @@ def package_metadata(row):
 
 
 @router.get("/options")
-def options(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+def options(current_user: User = Depends(require_roles(*SOURCE_ROLES)), db: Session = Depends(get_db)):
     actor = s.current_actor(db, current_user)
     return response(
         {
@@ -78,7 +78,7 @@ def options(current_user: User = Depends(get_current_user), db: Session = Depend
 
 
 @router.get("/homes")
-def homes(patient_id: int, admission_id: str, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+def homes(patient_id: int, admission_id: str, current_user: User = Depends(require_roles(*SOURCE_ROLES)), db: Session = Depends(get_db)):
     actor, admission, _ = s.authorize_admission(db, current_user, patient_id, admission_id)
     rows = (
         current_coding_rows(
@@ -98,7 +98,7 @@ def homes(patient_id: int, admission_id: str, current_user: User = Depends(get_c
 
 
 @router.get("/rules")
-def rules(page: int = Query(1, ge=1), page_size: int = Query(20, ge=1, le=100), current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+def rules(page: int = Query(1, ge=1), page_size: int = Query(20, ge=1, le=100), current_user: User = Depends(require_roles("super_admin")), db: Session = Depends(get_db)):
     s.current_actor(db, current_user, {"super_admin"})
     query = db.query(DrgRule)
     total = current_coding_rows(query.with_entities(DrgRule.rule_id), shared=True).count()
@@ -134,7 +134,7 @@ def rules(page: int = Query(1, ge=1), page_size: int = Query(20, ge=1, le=100), 
 
 
 @router.post("/cases/preview")
-def preview(req: CaptureRequest, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+def preview(req: CaptureRequest, current_user: User = Depends(require_roles(*SOURCE_ROLES)), db: Session = Depends(get_db)):
     return response(s.capture_case(db, current_user, req))
 
 
@@ -146,7 +146,7 @@ def cases(
     audit_only: bool = False,
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=100),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_roles(*SOURCE_ROLES)),
     db: Session = Depends(get_db),
 ):
     s.current_actor(db, current_user, {"super_admin"} if audit_only else s.SOURCE_ROLES)
@@ -162,7 +162,7 @@ def cases(
 
 
 @router.post("/cases")
-def create(req: CaseCreate, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+def create(req: CaseCreate, current_user: User = Depends(require_roles(*SOURCE_ROLES)), db: Session = Depends(get_db)):
     def callback():
         row = s.create_case(db, current_user, req)
         return s.case_current(db, current_user, row.case_snapshot_id, audit_only=False)
@@ -171,12 +171,12 @@ def create(req: CaseCreate, current_user: User = Depends(get_current_user), db: 
 
 
 @router.get("/cases/{identifier}")
-def detail(identifier: str, audit_only: bool = False, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+def detail(identifier: str, audit_only: bool = False, current_user: User = Depends(require_roles(*SOURCE_ROLES)), db: Session = Depends(get_db)):
     return response(s.case_current(db, current_user, identifier, audit_only=audit_only))
 
 
 @router.post("/cases/{identifier}/review")
-def review_case(identifier: str, req: SourceReview, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+def review_case(identifier: str, req: SourceReview, current_user: User = Depends(require_roles("super_admin")), db: Session = Depends(get_db)):
     def callback():
         s.review(db, current_user, "case", identifier, req)
         return s.case_current(db, current_user, identifier, audit_only=True)
@@ -185,7 +185,7 @@ def review_case(identifier: str, req: SourceReview, current_user: User = Depends
 
 
 @router.post("/cases/{identifier}/revoke")
-def revoke_case(identifier: str, req: SourceRevoke, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+def revoke_case(identifier: str, req: SourceRevoke, current_user: User = Depends(require_roles(*SOURCE_ROLES)), db: Session = Depends(get_db)):
     def callback():
         s.review(db, current_user, "case", identifier, req, revoke=True)
         actor = s.current_actor(db, current_user)
@@ -195,7 +195,7 @@ def revoke_case(identifier: str, req: SourceRevoke, current_user: User = Depends
 
 
 @router.get("/packages")
-def packages(audit_only: bool = False, page: int = Query(1, ge=1), page_size: int = Query(20, ge=1, le=100), current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+def packages(audit_only: bool = False, page: int = Query(1, ge=1), page_size: int = Query(20, ge=1, le=100), current_user: User = Depends(require_roles(*SOURCE_ROLES)), db: Session = Depends(get_db)):
     s.current_actor(db, current_user, {"super_admin"} if audit_only else s.SOURCE_ROLES)
     query = db.query(AICodingRulePackage)
     if not audit_only:
@@ -204,7 +204,7 @@ def packages(audit_only: bool = False, page: int = Query(1, ge=1), page_size: in
 
 
 @router.post("/packages")
-def create_package(req: RulePackageCreate, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+def create_package(req: RulePackageCreate, current_user: User = Depends(require_roles("super_admin")), db: Session = Depends(get_db)):
     def callback():
         row = s.create_package(db, current_user, req)
         return s.package_current(db, current_user, row.package_id, audit_only=True)
@@ -213,12 +213,12 @@ def create_package(req: RulePackageCreate, current_user: User = Depends(get_curr
 
 
 @router.get("/packages/{identifier}")
-def package(identifier: str, audit_only: bool = False, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+def package(identifier: str, audit_only: bool = False, current_user: User = Depends(require_roles(*SOURCE_ROLES)), db: Session = Depends(get_db)):
     return response(s.package_current(db, current_user, identifier, audit_only=audit_only))
 
 
 @router.post("/packages/{identifier}/review")
-def review_package(identifier: str, req: SourceReview, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+def review_package(identifier: str, req: SourceReview, current_user: User = Depends(require_roles("super_admin")), db: Session = Depends(get_db)):
     def callback():
         s.review(db, current_user, "package", identifier, req)
         return s.package_current(db, current_user, identifier, audit_only=True)
@@ -227,7 +227,7 @@ def review_package(identifier: str, req: SourceReview, current_user: User = Depe
 
 
 @router.post("/packages/{identifier}/revoke")
-def revoke_package(identifier: str, req: SourceRevoke, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+def revoke_package(identifier: str, req: SourceRevoke, current_user: User = Depends(require_roles("super_admin")), db: Session = Depends(get_db)):
     def callback():
         s.review(db, current_user, "package", identifier, req, revoke=True)
         return s.package_current(db, current_user, identifier, audit_only=True)

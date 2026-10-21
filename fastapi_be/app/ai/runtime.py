@@ -95,6 +95,10 @@ def _check_run_storage_json(serialized: dict[str, str]) -> None:
 
 def create_run(db: Session, user: User, req: RunRequest) -> AIRun:
     """Freeze an authorized, source-linked request before a durable worker processes it."""
+    if req.feature_key == "guideline_change_review":
+        from app.ai.document_change_runtime import create_change_run
+
+        return create_change_run(db, user, req)
     if req.feature_key == "guideline_ingestion":
         from app.ai.document_extraction_runtime import create_document_run
 
@@ -382,6 +386,12 @@ def create_run(db: Session, user: User, req: RunRequest) -> AIRun:
 
 def authorize_run(db: Session, user: User, run: AIRun) -> None:
     """Re-check current permissions, including revoked care access, on every result read."""
+    from app.ai.document_change_storage import authorize_run as authorize_change_run
+    from app.ai.document_change_storage import is_document_change_run
+
+    if is_document_change_run(db, run):
+        authorize_change_run(db, user, run, current=True)
+        return
     from app.ai.document_extraction_storage import authorize_document_run, is_extraction_run
 
     if is_extraction_run(db, run):
@@ -531,6 +541,14 @@ def describe_run(run: AIRun, include_result: bool = True, *, user: User | None =
     """Expose the user-facing result, not system instructions or provider secrets."""
     from sqlalchemy.orm import object_session
 
+    from app.ai.document_change_storage import is_document_change_run
+
+    if is_document_change_run(object_session(run), run):
+        from app.ai.document_change_views import run_view
+
+        if user is None or object_session(run) is None:
+            raise HTTPException(403, "完整版本核对任务须在当前授权会话读取")
+        return run_view(object_session(run), user, run, include_result, current=True)
     from app.ai.document_extraction_storage import is_extraction_run
 
     if is_extraction_run(object_session(run), run):
@@ -802,7 +820,9 @@ def describe_run(run: AIRun, include_result: bool = True, *, user: User | None =
 
 def claim_next_run(db: Session) -> tuple[str, str] | None:
     """Claim durable work without allowing two workers to execute the same queued task."""
-    query = db.query(AIRun).filter_by(status="queued").order_by(AIRun.create_time)
+    # Claim is a technical header-only CAS, committed before any Source access.
+    # It never authorizes/loads Task TEXT and does not hold Run -> Source locks.
+    query = db.query(AIRun.run_id).filter_by(status="queued").order_by(AIRun.create_time, AIRun.run_id)
     if db.bind.dialect.name == "postgresql":
         query = query.with_for_update(skip_locked=True)
     run = query.first()
@@ -899,7 +919,18 @@ def _recheck_task(db: Session, run: AIRun) -> tuple[FeatureSpec, AIProvider, dic
 async def execute_claimed(run_id: str, lease: str, *, transport=None) -> None:
     """Release SQL connections during inference; recheck authorization before storing results."""
     from app import database
+    from app.ai.document_change_access import locate_artifact
+    from app.ai.document_change_view_contract import FEATURE_KEY as CHANGE_FEATURE
     from app.ai.document_extraction_storage import is_extraction_run
+
+    with database.SessionLocal() as db:
+        header = db.query(AIRun.feature_key).filter_by(run_id=run_id).one_or_none()
+        native_change = locate_artifact(db, run_id) is not None or header is not None and header.feature_key == CHANGE_FEATURE
+    if native_change:
+        from app.ai.document_change_runtime import execute_change_claimed
+
+        await execute_change_claimed(run_id, lease, transport=transport)
+        return
 
     with database.SessionLocal() as db:
         candidate = db.query(AIRun).filter(AIRun.run_id == run_id, AIRun.status.in_(["running", "cancelled"]), AIRun.lease_token == lease).one_or_none()
@@ -1289,11 +1320,16 @@ async def execute_claimed(run_id: str, lease: str, *, transport=None) -> None:
 
 def expire_interrupted_runs(db: Session) -> int:
     """Mark abandoned inference failed without repeating potentially billable calls."""
+    from app.ai.document_change_run_models import AIDocumentChangeRunArtifact
+    from app.ai.document_change_runtime import expire_interrupted_change_runs
+    from app.ai.document_change_view_contract import FEATURE_KEY as CHANGE_FEATURE
+
+    native_count = expire_interrupted_change_runs(db)
     deadline = utcnow() - datetime.timedelta(minutes=10)
     count = (
         db.query(AIRun)
-        .filter(AIRun.status == "running", AIRun.start_time < deadline)
+        .filter(AIRun.status == "running", AIRun.start_time < deadline, AIRun.feature_key != CHANGE_FEATURE, ~AIRun.run_id.in_(db.query(AIDocumentChangeRunArtifact.run_id)))
         .update({"status": "failed", "error_code": "WORKER_INTERRUPTED", "error_message": "执行进程中断，任务未自动重试，可检查后重新提交", "finish_time": utcnow()}, synchronize_session=False)
     )
     db.commit()
-    return count
+    return count + native_count

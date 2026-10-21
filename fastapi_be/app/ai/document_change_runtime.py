@@ -310,3 +310,35 @@ def cancel_change_run(db, user, run_id):
 
 
 usage_receipt = storage.usage_receipt
+
+
+def guard_change_run_id(db, user, run_id, *, current=True):
+    """Technical dispatch before the public handler loads any Task TEXT."""
+    with db.no_autoflush:
+        header = db.query(AIRun.feature_key).filter_by(run_id=run_id).one_or_none()
+    if storage.locate_artifact(db, run_id) is not None or header is not None and header.feature_key == FEATURE_KEY:
+        storage.authorize_run_id(db, user, run_id, current=current)
+        return True
+    return False
+
+
+def expire_interrupted_change_runs(db):
+    """No retry: trusted abandoned leases retain unknown actual usage."""
+    deadline = sources.utcnow() - dt.timedelta(minutes=10)
+    with db.no_autoflush:
+        headers = (
+            db.query(AIRun.run_id, AIRun.lease_token)
+            .filter(
+                AIRun.status.in_(["running", "cancelled"]),
+                AIRun.start_time < deadline,
+                AIRun.latency_ms.is_(None),
+                (AIRun.feature_key == FEATURE_KEY) | AIRun.run_id.in_(db.query(AIDocumentChangeRunArtifact.run_id)),
+            )
+            .all()
+        )
+    count = 0
+    for identifier, lease in headers:
+        if lease is not None:
+            _terminal(db, identifier, lease, _receipt(None, None, None), 0, ("WORKER_INTERRUPTED", "执行进程中断，实际用量未知，未自动重试或接收正文"))
+            count += 1
+    return count

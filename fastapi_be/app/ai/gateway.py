@@ -467,6 +467,12 @@ def validate_generation(
 def _request(provider: AIProvider, spec: FeatureSpec, task_prompt: str, data: dict) -> tuple[str, dict]:
     endpoint = validate_endpoint(provider.api_base)
     budget = min(provider.max_output_tokens, settings.AI_MAX_OUTPUT_TOKENS)
+    if (
+        spec.number == 72
+        or "document_change_scope_id" in data.get("input", {})
+        or any(key in data.get("context", {}) for key in ("document_change_binding", "document_change_source", "document_change_private_scope"))
+    ):
+        raise AIExecutionError("DOCUMENT_CHANGE_PROTOCOL_REQUIRED", "双原文完整来源仅可走独立版本核对协议，未降级通用输出")
     if spec.number == 71 or any(key in data.get("context", {}) for key in ("document_binding", "document_source", "document_review")) or "document_original_id" in data.get("input", {}):
         from app.ai.document_extraction_context import public_payload
         from app.ai.document_extraction_contract import EXTRACTION_SYSTEM_PROMPT, DocumentExtractionReply

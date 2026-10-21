@@ -323,6 +323,8 @@ def _selected_records(db: Session, user: User, patient_id: int, references: dict
 
 def patient_snapshot(db: Session, user: User, spec: FeatureSpec, patient_id: int, encounter_ref: str | None = None, source_refs: dict | None = None) -> ContextBundle:
     """Build a bounded snapshot without mixing historical diagnoses into confirmed current ones."""
+    if spec.number == 72 or "document_change_scope_id" in (source_refs or {}):
+        raise HTTPException(422, "双原文比较只接受独立有限范围，不使用患者快照")
     if "coding_case_id" in (source_refs or {}):
         if spec.number != 68:
             raise HTTPException(422, "受审编码证据仅用于单份实际病案与同次住院的证据核对")

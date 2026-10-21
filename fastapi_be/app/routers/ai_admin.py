@@ -841,6 +841,7 @@ def list_global_runs(
     inventory_scenario_id: str | None = Query(None, max_length=36),
     coding_case_id: str | None = Query(None, max_length=36),
     document_original_id: str | None = Query(None, max_length=36),
+    document_change_scope_id: str | None = Query(None, max_length=36),
     page: int = Query(1, ge=1, le=100000),
     page_size: int = Query(30, ge=1, le=100),
     db: Session = Depends(get_db),
@@ -849,6 +850,31 @@ def list_global_runs(
     """Inspect all users' task metadata and feedback counts without loading clinical payloads."""
     user = _current_super_admin(db, user)
     query = db.query(AIRun)
+    if feature_key == "guideline_change_review" or document_change_scope_id is not None:
+        from app.ai.document_change_history import filter_history
+
+        query = filter_history(
+            db,
+            user,
+            query,
+            feature_key=feature_key,
+            scope_id=document_change_scope_id,
+            other_scope=(
+                patient_id,
+                department_id,
+                surgery_pool_id,
+                surgery_scenario_id,
+                supply_item_kind,
+                supply_item_id,
+                supply_series_id,
+                inventory_item_kind,
+                inventory_item_id,
+                inventory_scenario_id,
+                coding_case_id,
+                document_original_id,
+            ),
+            frozen_audit=True,
+        )
     if feature_key == "guideline_ingestion" or document_original_id is not None:
         from app.ai.document_extraction_history import filter_document_history
 
@@ -917,14 +943,25 @@ def list_global_runs(
         query = query.filter(AIRun.run_id.in_(db.query(AIFeedback.run_id).filter(AIFeedback.outcome == outcome)))
     total = query.count()
     rows = (
-        query.options(defer(AIRun.input_json), defer(AIRun.result_json), defer(AIRun.evidence_json))
+        query.options(defer(AIRun.input_json), defer(AIRun.result_json), defer(AIRun.evidence_json), defer(AIRun.context_metadata_json))
         .order_by(AIRun.create_time.desc(), AIRun.run_id)
         .offset((page - 1) * page_size)
         .limit(page_size)
         .all()
     )
     counts = dict(db.query(AIFeedback.run_id, func.count(AIFeedback.feedback_id)).filter(AIFeedback.run_id.in_([item.run_id for item in rows])).group_by(AIFeedback.run_id).all()) if rows else {}
-    data = [{**describe_run(item, False, user=user), "requested_by": item.requested_by, "provider_id": item.provider_id, "feedback_count": counts.get(item.run_id, 0)} for item in rows]
+    from app.ai.document_change_storage import is_document_change_run
+    from app.ai.document_change_views import run_view
+
+    data = [
+        {
+            **(run_view(db, user, item, False, current=False) if is_document_change_run(db, item) else describe_run(item, False, user=user)),
+            "requested_by": item.requested_by,
+            "provider_id": item.provider_id,
+            "feedback_count": counts.get(item.run_id, 0),
+        }
+        for item in rows
+    ]
     return {"code": 200, "msg": "success", "data": data, "total": total, "page": page, "page_size": page_size}
 
 
@@ -932,6 +969,11 @@ def list_global_runs(
 def inspect_run_trace(run_id: str, db: Session = Depends(get_db), user: User = Depends(require_roles("super_admin"))) -> dict:
     """Read the frozen prompts, requested model, source payload and append-only review history."""
     user = _current_super_admin(db, user)
+    from app.ai.document_change_runtime import guard_change_run_id
+    from app.ai.document_change_views import trace_view
+
+    if guard_change_run_id(db, user, run_id, current=False):
+        return {"code": 200, "msg": "success", "data": trace_view(db, user, db.get(AIRun, run_id))}
     run = db.get(AIRun, run_id)
     if run is None:
         raise HTTPException(404, "AI 任务不存在")

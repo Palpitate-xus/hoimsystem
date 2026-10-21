@@ -5,7 +5,7 @@ import json
 from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import JSONResponse
 from sqlalchemy import JSON, type_coerce
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, defer
 
 from app.ai.catalog import FEATURES
 from app.ai.context import accessible_patients, authorize_patient, context_metadata, get_encounter, patient_snapshot
@@ -262,6 +262,7 @@ def list_runs(
     inventory_scenario_id: str | None = Query(None, max_length=36),
     coding_case_id: str | None = Query(None, max_length=36),
     document_original_id: str | None = Query(None, max_length=36),
+    document_change_scope_id: str | None = Query(None, max_length=36),
     limit: int = Query(30, ge=1, le=100),
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user),
@@ -271,7 +272,35 @@ def list_runs(
         from app.ai.coding_evidence_sources import current_actor
 
         user = current_actor(db, user)
-    query = db.query(AIRun)
+    query = db.query(AIRun).options(*(defer(getattr(AIRun, name)) for name in ("input_json", "result_json", "evidence_json", "context_metadata_json")))
+    if feature_key == "guideline_change_review" or document_change_scope_id is not None:
+        from app.ai.document_change_history import filter_history
+
+        query = filter_history(
+            db,
+            user,
+            query,
+            feature_key=feature_key,
+            scope_id=document_change_scope_id,
+            other_scope=(
+                patient_id,
+                encounter_ref,
+                department_id,
+                roster_plan_id,
+                ward_id,
+                bed_series_id,
+                surgery_pool_id,
+                surgery_scenario_id,
+                supply_item_kind,
+                supply_item_id,
+                supply_series_id,
+                inventory_item_kind,
+                inventory_item_id,
+                inventory_scenario_id,
+                coding_case_id,
+                document_original_id,
+            ),
+        )
     if feature_key == "guideline_ingestion" or document_original_id is not None:
         from app.ai.document_extraction_history import filter_document_history
 
@@ -381,6 +410,10 @@ def list_runs(
         try:
             authorize_run(db, user, item)
         except HTTPException as exc:
+            from app.ai.document_change_storage import is_document_change_run
+
+            if exc.status_code in {403, 404, 409} and is_document_change_run(db, item):
+                continue
             if exc.status_code in {403, 404}:
                 continue
             if exc.status_code == 409 and any(is_document_evidence(db, entry) for entry in json.loads(item.evidence_json)):
@@ -420,8 +453,10 @@ def list_runs(
 @router.get("/ai/runs/{run_id}")
 def run_detail(run_id: str, db: Session = Depends(get_db), user: User = Depends(get_current_user)) -> dict:
     """Recheck patient access before exposing a stored result or evidence."""
+    from app.ai.document_change_runtime import guard_change_run_id
     from app.ai.document_extraction_runtime import guard_document_run_id
 
+    guard_change_run_id(db, user, run_id)
     guard_document_run_id(db, user, run_id)
     run = db.get(AIRun, run_id)
     if run is None:
@@ -433,8 +468,18 @@ def run_detail(run_id: str, db: Session = Depends(get_db), user: User = Depends(
 @router.post("/ai/runs/{run_id}/cancel")
 def cancel_run(run_id: str, db: Session = Depends(get_db), user: User = Depends(get_current_user)) -> dict:
     """Stop accepting a result; an already sent provider call may still finish."""
+    from app.ai.document_change_access import locate_artifact
+    from app.ai.document_change_runtime import cancel_change_run
+    from app.ai.document_change_view_contract import FEATURE_KEY as CHANGE_FEATURE
+
+    header = db.query(AIRun.feature_key).filter_by(run_id=run_id).one_or_none()
+    if locate_artifact(db, run_id) is not None or header is not None and header.feature_key == CHANGE_FEATURE:
+        cancel_change_run(db, user, run_id)
+        return {"code": 200, "msg": "任务结果已取消接收"}
+    from app.ai.document_change_runtime import guard_change_run_id
     from app.ai.document_extraction_runtime import guard_document_run_id
 
+    guard_change_run_id(db, user, run_id)
     guard_document_run_id(db, user, run_id)
     run = db.get(AIRun, run_id)
     if run is None:
@@ -461,8 +506,10 @@ def cancel_run(run_id: str, db: Session = Depends(get_db), user: User = Depends(
 @router.post("/ai/runs/{run_id}/feedback")
 def review_result(run_id: str, req: FeedbackWrite, db: Session = Depends(get_db), user: User = Depends(get_current_user)) -> dict:
     """Append review without editing clinical records, orders or prescriptions."""
+    from app.ai.document_change_runtime import guard_change_run_id
     from app.ai.document_extraction_runtime import guard_document_run_id
 
+    guard_change_run_id(db, user, run_id)
     guard_document_run_id(db, user, run_id)
     run = db.get(AIRun, run_id)
     if run is None:
@@ -470,6 +517,11 @@ def review_result(run_id: str, req: FeedbackWrite, db: Session = Depends(get_db)
     authorize_run(db, user, run)
     if run.status != "succeeded":
         raise HTTPException(409, "只能复核已成功生成的建议")
+    from app.ai.document_change_storage import expand_result as expand_change_result
+    from app.ai.document_change_storage import is_document_change_run
+
+    if is_document_change_run(db, run):
+        expand_change_result(db, user, run, current=True)
     from app.ai.document_extraction_storage import is_extraction_run, load_result
 
     if is_extraction_run(db, run):

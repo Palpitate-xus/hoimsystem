@@ -143,6 +143,8 @@ def update_feature(key: str, req: FeatureWrite, db: Session = Depends(get_db), u
         if spec.clinical and config.validation_status != "validated":
             raise HTTPException(422, "临床功能完成验证后才能面向业务启用；超级管理员可先进行预览")
         if spec.requires_operational_validation and config.validation_status != "validated":
+            if spec.number == 80:
+                raise HTTPException(422, "培训AI反馈完成明确教学范围验证后才能启用；课程发布和本地评分不代表模型反馈效果验证")
             purpose = "优化" if spec.engine == "optimizer" else "预测"
             raise HTTPException(422, f"运营{purpose}完成指定目标与范围的验证后才能启用；超级管理员可先预览，来源确认不代表实际业务验证")
         if config.validation_status == "suspended":

@@ -1,6 +1,7 @@
 """Contract checks for the user-approved capability set and packaged prompts."""
 
 from app.ai.catalog import COMMON_SYSTEM_PROMPT, FEATURE_BY_KEY, FEATURES, describe_feature
+from app.ai.clinical_training_task_prompt import SYSTEM_PROMPT as TRAINING_SYSTEM_PROMPT
 from app.ai.document_change_prompt import SYSTEM_PROMPT as DOCUMENT_CHANGE_SYSTEM_PROMPT
 from app.ai.research_cohort_prompt import RESEARCH_SYSTEM_PROMPT
 from app.dependencies import VALID_USER_ROLES
@@ -78,6 +79,7 @@ def test_actual_coding_and_charge_prompts_and_unique_charge_reference_are_export
         "guideline_change_review": DOCUMENT_CHANGE_SYSTEM_PROMPT,
         "drug_label_extraction": DRUG_LABEL_SYSTEM_PROMPT,
         "research_cohort": RESEARCH_SYSTEM_PROMPT,
+        "clinical_training": TRAINING_SYSTEM_PROMPT,
     }
     assert len(exported["features"]) == 80
     for spec, value in zip(FEATURES, exported["features"], strict=True):
@@ -108,6 +110,7 @@ def test_export_declares_actual_distinct_fixed_system_prompts_for_closed_drafts(
         "guideline_change_review": DOCUMENT_CHANGE_SYSTEM_PROMPT,
         "drug_label_extraction": DRUG_LABEL_SYSTEM_PROMPT,
         "research_cohort": RESEARCH_SYSTEM_PROMPT,
+        "clinical_training": TRAINING_SYSTEM_PROMPT,
     }
     assert FEATURE_BY_KEY["guideline_ingestion"].default_roles == ("super_admin",)
     assert FEATURE_BY_KEY["guideline_ingestion"].requires_patient_data_permission
@@ -127,6 +130,7 @@ def test_management_exposes_each_native_fixed_system_hash_and_input_mode(db_sess
         ("guideline_ingestion", "document_extraction", EXTRACTION_SYSTEM_PROMPT),
         ("feedback_analysis", "satisfaction_evidence", SATISFACTION_SYSTEM_PROMPT),
         ("research_cohort", "research_cohort_evidence", RESEARCH_SYSTEM_PROMPT),
+        ("clinical_training", "clinical_training_evidence", TRAINING_SYSTEM_PROMPT),
     ):
         value = describe_config(db_session, FEATURE_BY_KEY[key], None, management=True)
         assert value["input_mode"] == mode
@@ -146,6 +150,29 @@ def test_actual_super_prompt_editor_uses_each_fixed_contract_and_actual_default_
     assert SATISFACTION_TASK_PROMPT in FEATURE_BY_KEY["feedback_analysis"].task_prompt
     assert "sections 必须" not in FEATURE_BY_KEY["feedback_analysis"].task_prompt
     assert "投诉工单" in FEATURE_BY_KEY["feedback_analysis"].instruction
+
+
+def test_training_catalog_requires_actual_submission_and_separate_educational_validation(db_session, seed_data):
+    from app.ai.clinical_training_task_prompt import TASK_PROMPT
+    from app.ai.governance import describe_config, digest
+    from app.ai.readiness import setup_reports
+    from app.routers.ai_admin import list_prompts
+
+    spec = FEATURE_BY_KEY["clinical_training"]
+    assert spec.scope == "input" and spec.engine == "llm"
+    assert not spec.requires_knowledge and not spec.requires_patient_data_permission and not spec.clinical
+    assert spec.requires_operational_validation
+    assert spec.default_roles == ("super_admin", "admin", "director", "doctor", "nurse", "pharmacist")
+    assert spec.task_prompt == TASK_PROMPT and spec.instruction in TASK_PROMPT
+    assert describe_feature(spec)["source_reference_keys"] == ["clinical_training_submission_id"]
+    for item in FEATURES:
+        assert ("clinical_training_submission_id" in describe_feature(item)["source_reference_keys"]) == (item.number == 80)
+    view = describe_config(db_session, spec, None, management=True)
+    assert view["input_mode"] == "clinical_training_evidence" and view["system_prompt_hash"] == digest(TRAINING_SYSTEM_PROMPT)
+    prompt = list_prompts(spec.key, user=seed_data["super_admin_user"], db=db_session)["data"]
+    assert prompt["system_prompt"] == TRAINING_SYSTEM_PROMPT and prompt["versions"][-1]["task_prompt"] == TASK_PROMPT
+    codes = {item["code"] for item in setup_reports(db_session, {})[spec.key]["issues"]}
+    assert "TRAINING_VALIDATION_REQUIRED" in codes and "KNOWLEDGE_NOT_PUBLISHED" not in codes
 
 
 def test_drug_label_source_mode_roles_data_purpose_and_actual_super_prompt_editor(db_session, seed_data):

@@ -60,6 +60,8 @@ def check_configuration(db: Session, user: User, spec: FeatureSpec, config: AIFe
     if not preview and spec.clinical and config.validation_status != "validated":
         raise HTTPException(409, "该临床功能尚未完成验证")
     if not preview and spec.requires_operational_validation and config.validation_status != "validated":
+        if spec.number == 80:
+            raise HTTPException(409, "培训AI反馈尚未完成明确教学范围验证，超级管理员可先预览自己的受审练习")
         purpose = "优化" if spec.engine == "optimizer" else "预测"
         raise HTTPException(409, f"该运营{purpose}尚未完成指定目标与范围的验证，超级管理员可先预览")
     provider = db.get(AIProvider, config.provider_id)

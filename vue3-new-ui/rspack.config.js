@@ -56,6 +56,13 @@ module.exports = {
   module: {
     rules: [
       {
+        // Lossless storage for complete generated schemas. The loader verifies
+        // every original UTF8 byte before emitting data; validators stay intact.
+        test: /[\\/]src[\\/]api[\\/](?:ai[\\/])?[A-Za-z]+Schemas\.json$/,
+        type: "javascript/auto",
+        use: [{ loader: resolve("scripts/schema-data-loader.cjs") }],
+      },
+      {
         test: /\.vue$/,
         use: [
           {
@@ -220,6 +227,16 @@ module.exports = {
       // 减小最小块大小，允许更细粒度的分割
       minSize: 20000,
       cacheGroups: {
+        schemaDataDecoderShared: {
+          name: "schema-data-decoder-shared",
+          test: /[\\/]src[\\/]api[\\/]schemaDataCodec\.cjs$/,
+          chunks: "async",
+          minChunks: 2,
+          minSize: 0,
+          minSizeReduction: 0,
+          reuseExistingChunk: true,
+          priority: 15,
+        },
         // Reuse actual small business API modules across lazy pages. Without
         // a zero-threshold shared group, the same module is emitted in up to
         // fourteen page chunks; chart registration is similarly shared.

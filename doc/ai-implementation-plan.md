@@ -443,3 +443,5 @@
 - 2026-10-21 第80项具体claim/dispatch阶段：19完整文件一次430通过/17既有SQLite提示，47.43s pytest、58.157s外层，1197输入稳定。创建/领取/发送三个不同实际AuditPK与原Source/指令锚、Artifact UTC6 claimed_at/lease及Run旧秒时钟绑定；同Session实际未提交SQL重复不重领/不重发，不靠内存标记。当前来源/epoch/config丢失及六类伪造claim均正文前拒绝；阶段UPDATE后参考突变由实际重读检测并随调用者事务回滚。仅发送预约不冒称HTTP已尝试；真实用量/接收/worker/Main/FE继续。
 
 - 2026-10-21 第80项完整结果接受/真实用量：20完整文件一次451通过/18既有SQLite提示，61.11s pytest、72.224s外层，1200输入稳定。五个不同实际创建/领取/发送/用量/接受AuditPK；完整逐字引用教学结果不改原服务端成绩，合法缺用量仍可接受且11/null等原样保留，旧Run0仅内部占位不当未知零费用。真实>65535字节结果独立表完整读回而旧Run只短引用；当前Source/owner/epoch/config失效正文前拒接，原实际dispatch仍可仅技术保留已用11/null。未领0/0与发送后崩溃unknown不同，三个after-result-insert变更整笔回滚。异步worker/Task Main/FE及Task实际MySQL继续。
+
+- 2026-10-21 第80项实际提交异步执行/取消/恢复：21完整文件一次467通过/18既有SQLite提示，73.76s pytest、85.065s外层，1204输入稳定。Chat/Responses四种真实/nullable用量，实际HTTP await前后worker Session全部关闭；重复claim/交付不重发。当前超管仅技术取消不恢复他人作答，未发送0/0、在途pending后原交付11/null保留且不收结果；await中撤回来源拒收但保留已知计数，503未知。受控时钟恢复已领未发送0与已预约后中断unknown分开，RC候选/自己实际SQL实现不冒称Task实际MySQL；统一队列/Main/FE继续，真实模型效力不在此证明。

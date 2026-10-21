@@ -278,7 +278,7 @@
     "feature": {
       "number": 69,
       "key": "charge_reconciliation",
-      "input_mode": "charge",
+      "input_mode": "charge_reconciliation",
       "scope": "patient",
       "source_reference": "charge_case_id",
       "roles": [

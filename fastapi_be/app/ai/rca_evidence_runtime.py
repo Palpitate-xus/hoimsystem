@@ -9,6 +9,7 @@ from app.ai import rca_evidence_attempts as attempts
 from app.ai import rca_evidence_configuration as configuration
 from app.ai import rca_evidence_context as context
 from app.ai import rca_evidence_grants as grants
+from app.ai import rca_evidence_receipts as receipts
 from app.ai import rca_evidence_storage as storage
 from app.ai import rca_evidence_task_contract as task_types
 from app.ai.models import AIRun
@@ -55,7 +56,16 @@ def claim_rca_run(db, identifier):
     if identity is None:
         raise HTTPException(409, "原生RCA任务缺少实际Artifact，不降级通用claim")
     actor = SimpleNamespace(user_id=identity[2])
-    configuration.for_execution(db, actor, identifier)
+    try:
+        configuration.for_execution(db, actor, identifier)
+    except HTTPException:
+        # Trusted queue processing can settle a never-claimed task at known
+        # zero without regaining Source/Task body rights. A concurrent claim
+        # makes this stale delivery inert inside the Run X stage.
+        db.rollback()
+        receipts.stage_unclaimed_terminal(db, identifier, status="failed", error_code="TASK_NO_LONGER_AUTHORIZED")
+        db.commit()
+        return None
     claim = attempts.stage_claim(db, actor, identifier)
     if claim is None:
         db.rollback()

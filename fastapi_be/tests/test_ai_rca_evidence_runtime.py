@@ -8,6 +8,8 @@ from pydantic import ValidationError
 from sqlalchemy import inspect, text
 
 from app.ai import gateway
+from app.ai import rca_evidence_grants as grants
+from app.ai import rca_evidence_receipts as receipts
 from app.ai import rca_evidence_runtime as runtime
 from app.ai import rca_evidence_storage as storage
 from app.ai.catalog import FEATURE_BY_KEY
@@ -16,6 +18,7 @@ from app.ai.rca_evidence_run_models import AIRcaEvidenceRunArtifact
 from app.ai.schemas import ClinicalContextRequest, OperationalContextRequest, RunRequest
 from app.config import settings
 from tests.test_ai_rca_evidence_configuration import configured
+from tests.test_ai_rca_evidence_grants import cas
 from tests.test_ai_rca_evidence_grants import grant_case as grant_case
 from tests.test_ai_rca_evidence_storage import no_task_text, task_counts
 
@@ -80,10 +83,30 @@ def test_claim_rechecks_frozen_provider_instead_of_turning_a_changed_task_runnin
     current.provider.model = "actual changed provider before claim"
     db.commit()
     before = task_counts(db)
-    with pytest.raises(HTTPException) as failure:
-        runtime.claim_rca_run(db, identifier)
-    assert failure.value.status_code == 409 and task_counts(db) == before
-    assert db.query(AIRun.status, AIRun.lease_token).filter_by(run_id=identifier).one() == ("queued", None)
+    assert runtime.claim_rca_run(db, identifier) is None
+    assert tuple(a - b for a, b in zip(task_counts(db), before, strict=True)) == (0, 0, 0, 1, 0)
+    assert db.query(AIRun.status, AIRun.lease_token).filter_by(run_id=identifier).one() == ("failed", None)
+    actual = receipts.read_receipt(db, receipts.technical_header(db, identifier))
+    assert actual.usage.model_call_attempted is False and actual.usage.complete is True
+
+
+@pytest.mark.parametrize("loss", ["role", "grant"])
+def test_queued_source_or_role_loss_is_known_zero_terminal_not_a_permanently_blocking_claim(grant_case, loss):
+    case, db = grant_case, grant_case["db"]
+    _, value, _ = configured(case)
+    run = runtime.create_rca_run(db, case["actor"], request(value))
+    identifier = inspect(run).identity[0]
+    if loss == "role":
+        db.execute(text("UPDATE hoimsystem_users SET user_role='admin' WHERE user_id=:id"), {"id": inspect(case["actor"]).identity[0]})
+    else:
+        original = grants.grant_detail(db, case["actor"], value.binding.event_grant.grant_id)
+        grants.revoke_grant(db, case["actor"], original.identity.grant_id, cas(original))
+    db.commit()
+    result, columns = no_task_text(db, lambda: runtime.claim_rca_run(db, identifier))
+    assert result is None and not columns
+    actual = receipts.read_receipt(db, receipts.technical_header(db, identifier))
+    assert actual.status == "failed" and actual.claim_event_id is None and actual.dispatch_event_id is None
+    assert actual.usage.input_tokens == actual.usage.output_tokens == 0 and actual.usage.model_call_attempted is False
 
 
 @pytest.mark.parametrize("input_value", [{}, {"rca_evidence_case_id": None}, {"rca_evidence_case_id": "x"}, {"rca_evidence_case_id": "00000000-0000-0000-0000-000000000001", "text": "不接自由原件"}])

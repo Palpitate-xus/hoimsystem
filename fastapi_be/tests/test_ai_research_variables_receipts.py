@@ -178,3 +178,34 @@ def test_actual_sql_receipt_audit_failure_or_postflush_tamper_rolls_back_entire_
     actual = receipts.technical_task(db_session, delivery.claim)
     assert actual.run.status == "running" and actual.run.finish_time is None
     assert actual.artifact.dispatch_event_id == delivery.dispatch_event_id and actual.artifact.usage_event_id is None
+
+
+def test_before_claim_source_loss_has_real_known_uncalled_usage_pk_without_fake_claim_or_any_body(db_session, actual_task):
+    case, permissions, _, staged = actual_task
+    identifier, create_pk = staged.run.run_id, staged.artifact.create_event_id
+    review_registry_original(db_session, case["super_admin_user"], "authorization", permissions[1]["source_record_id"], {"expected_revision": 2, "basis_note": BASIS}, revoke=True)
+    columns, sql, seen, emitted = observations(db_session)
+    try:
+        recorded = receipts.stage_queued_terminal(
+            db_session, identifier, expected_create_event_id=create_pk, status="failed", error_code="SOURCE_NO_LONGER_CURRENT", error_message="实际领取前来源失效，确定未调用。"
+        )
+        db_session.commit()
+    finally:
+        stop(db_session, seen, emitted)
+    assert recorded.claim_event_id is None and recorded.dispatch_event_id is None and recorded.claim_lease is None
+    assert recorded.receipt.model_call_attempted is False and (recorded.receipt.input_tokens, recorded.receipt.output_tokens) == (0, 0)
+    assert not any(key in TASK_TEXT for _, key in columns)
+    assert not any(key in statement for key in PRIVATE for statement in sql)
+
+
+def test_stale_queued_observation_after_actual_claim_cannot_cancel_or_replace_claim_with_fake_uncalled_zero(db_session, actual_task):
+    staged = actual_task[3]
+    identifier, create_pk = staged.run.run_id, staged.artifact.create_event_id
+    claim = claimed(db_session, actual_task)
+    before = db_session.query(AIAuditEvent).count()
+    assert (
+        receipts.stage_queued_terminal(db_session, identifier, expected_create_event_id=create_pk, status="cancelled", error_code="CANCELLED", error_message="原观察已过时，不能覆盖实际领取。") is None
+    )
+    assert db_session.query(AIAuditEvent).count() == before
+    current = receipts.technical_task(db_session, claim)
+    assert current.run.status == "running" and current.artifact.claim_event_id == claim.claim_event_id and current.artifact.usage_event_id is None

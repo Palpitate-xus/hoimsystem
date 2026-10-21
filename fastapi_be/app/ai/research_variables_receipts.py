@@ -192,3 +192,85 @@ def stage_terminal(db, claim, *, delivery, receipt, status, error_code, error_me
     except Exception:
         db.rollback()
         raise
+
+
+def stage_queued_terminal(db, identifier, *, expected_create_event_id, status, error_code, error_message):
+    """Internal known-uncalled stop: no invented claim, dispatch or data grant.
+
+    Public cancellation must obtain its separate current caller authorization
+    before invoking this helper. A trusted worker may use it after failed
+    Source/config proof, with the original concrete creation PK. An intervening
+    real claim makes this observation inert rather than stealing its delivery.
+    """
+    try:
+        if type(expected_create_event_id) is not int or expected_create_event_id <= 0 or status not in {"failed", "cancelled"}:
+            raise HTTPException(422, "未领取终态须有实际创建PK和明确终态")
+        if type(error_code) is not str or not error_code or len(error_code) > 64 or type(error_message) is not str or len(error_message) > 1000:
+            raise HTTPException(422, "完整未领取终态说明超限，未截断")
+        lock_research_gate(db)
+        identity = reader.locate_artifact(db, identifier)
+        if identity is None:
+            return None
+        header, artifact = reader._headers(db, identity, exclusive=True)
+        reader._creation_audit(db, header, artifact)
+        if artifact["create_event_id"] != expected_create_event_id:
+            raise HTTPException(409, "未领取观察不属于原任务具体创建PK")
+        if any(artifact[key] is not None for key in ("claim_event_id", "claim_lease", "claimed_at", "dispatch_event_id", "dispatched_at", "usage_event_id")) or header["status"] not in {
+            "queued",
+            "cancelled",
+        }:
+            return None
+        if header["lease_token"] is not None or header["start_time"] is not None:
+            raise HTTPException(409, "原任务无领取锚却持lease或开始时钟，未伪造未调用")
+        if current_research_rows(db.query(AIResearchVariableRunResult.run_id).filter_by(run_id=identifier), shared=True).one_or_none() is not None:
+            raise HTTPException(409, "未领取状态与完整接受件矛盾")
+        clock = utcnow()
+        if clock < artifact["recorded_at"]:
+            raise HTTPException(409, "未领取停止时钟早于实际登记")
+        final_status = "cancelled" if header["status"] == "cancelled" else status
+        db.query(AIRun).filter_by(run_id=identifier).update(
+            {
+                "status": final_status,
+                "result_json": "{}",
+                "finish_time": clock.replace(microsecond=0),
+                "error_code": error_code,
+                "error_message": error_message,
+                "latency_ms": 0,
+                "input_tokens": 0,
+                "output_tokens": 0,
+            },
+            synchronize_session=False,
+        )
+        event = AIAuditEvent(actor_id=identity[2], action="research_variable_run.usage", target=identifier, detail_json="{}", create_time=clock.replace(microsecond=0))
+        db.add(event)
+        db.flush()
+        db.query(AIResearchVariableRunArtifact).filter_by(run_id=identifier).update({"usage_event_id": event.event_id}, synchronize_session=False)
+        header, artifact = reader._headers(db, identity, exclusive=True)
+        task = SimpleNamespace(run=SimpleNamespace(**header), artifact=SimpleNamespace(**artifact))
+        uncalled = VariableUsageReceipt(input_tokens=0, output_tokens=0, complete=True, model_call_attempted=False)
+        event.detail_json = canonical(usage_record(task, uncalled, event.event_id, clock), MAX_RUN_TEXT_BYTES)
+        db.flush()
+        actual_header, actual_artifact = reader._headers(db, identity, exclusive=True)
+        reader._creation_audit(db, actual_header, actual_artifact)
+        if (
+            any(actual_artifact[key] is not None for key in ("claim_event_id", "claim_lease", "claimed_at", "dispatch_event_id", "dispatched_at"))
+            or actual_artifact["usage_event_id"] != event.event_id
+        ):
+            raise HTTPException(409, "未领取结算后实际phase发生变化，整事务回滚")
+        expected = {
+            "status": final_status,
+            "finish_time": clock.replace(microsecond=0),
+            "error_code": error_code,
+            "error_message": error_message,
+            "latency_ms": 0,
+            "input_tokens": 0,
+            "output_tokens": 0,
+            "lease_token": None,
+            "start_time": None,
+        }
+        if any(actual_header[key] != value for key, value in expected.items()):
+            raise HTTPException(409, "未领取结算后实际原任务头不同，整事务回滚")
+        return verify_receipt(db, SimpleNamespace(run=SimpleNamespace(**actual_header), artifact=SimpleNamespace(**actual_artifact)), expected=uncalled)
+    except Exception:
+        db.rollback()
+        raise

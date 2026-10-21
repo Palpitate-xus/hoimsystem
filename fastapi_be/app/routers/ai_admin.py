@@ -1520,9 +1520,12 @@ def revoke_grant(grant_id: int, db: Session = Depends(get_db), user: User = Depe
 @router.get("/ai/admin/audit")
 def list_audit(db: Session = Depends(get_db), user: User = Depends(require_roles("super_admin")), limit: int = Query(100, ge=1, le=300)) -> dict:
     """Review redacted configuration changes by their actual administrator identity."""
+    from app.ai.clinical_training_views import generic_audit_detail
+
+    _current_super_admin(db, user)
     items = db.query(AIAuditEvent).order_by(AIAuditEvent.event_id.desc()).limit(limit).all()
     names = ("event_id", "actor_id", "action", "target", "create_time")
-    return {"code": 200, "msg": "success", "data": [{**{name: getattr(item, name) for name in names}, "detail": json.loads(item.detail_json)} for item in items]}
+    return {"code": 200, "msg": "success", "data": [{**{name: getattr(item, name) for name in names}, "detail": generic_audit_detail(item.action, item.detail_json)} for item in items]}
 
 
 @router.get("/ai/admin/usage")

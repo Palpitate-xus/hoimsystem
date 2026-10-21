@@ -1,0 +1,345 @@
+{
+  "schema_version": "clinical_medical_record_current_write_verification_v1",
+  "source_commit": "7a181bcbcaabc37fd1600839e33091c3ab2e188e",
+  "scope": "Narrow current Doctor ownership, signature-state and finite lock acquisition fix for existing doctor.update_medical_record/sign_medical_record. Actual synthetic MySQL function calls and SQLite/Main Doctor target tests; no live hospital database, push, deployment or all-AI completion claim.",
+  "implementation_sha256": {
+    "fastapi_be/app/medical_record_write_guard.py": "2aea7275208f7db19d52811b5537719ccfba0f000b1536f7ddf96381b291c8ec",
+    "fastapi_be/app/routers/doctor.py": "50cc330db3d3fcaad996d5c0f6c69ef99c4e8f2881b4f2bb3e55e03e34f75868",
+    "fastapi_be/tests/test_medical_record_current_writes.py": "5005ffa5af573335d36f28ebac25d5ff6add063142a0bd90575af9a1ccc74856"
+  },
+  "final_summary": {
+    "schema_version": "clinical_note_current_writes_final_v1",
+    "tree": "/tmp/hoim-clinical-current-writes-20261021",
+    "branch": "feature/clinical-current-writes",
+    "base": "579aaa6",
+    "commit": "7a181bcbcaabc37fd1600839e33091c3ab2e188e",
+    "owned_files": [
+      {
+        "path": "/tmp/hoim-clinical-current-writes-20261021/fastapi_be/app/medical_record_write_guard.py",
+        "bytes": 3653,
+        "sha256": "2aea7275208f7db19d52811b5537719ccfba0f000b1536f7ddf96381b291c8ec"
+      },
+      {
+        "path": "/tmp/hoim-clinical-current-writes-20261021/fastapi_be/app/routers/doctor.py",
+        "bytes": 40376,
+        "sha256": "50cc330db3d3fcaad996d5c0f6c69ef99c4e8f2881b4f2bb3e55e03e34f75868"
+      },
+      {
+        "path": "/tmp/hoim-clinical-current-writes-20261021/fastapi_be/tests/test_medical_record_current_writes.py",
+        "bytes": 7190,
+        "sha256": "5005ffa5af573335d36f28ebac25d5ff6add063142a0bd90575af9a1ccc74856"
+      }
+    ],
+    "problem": "Old RR cached unsigned state permitted a real doctor.update_medical_record to rewrite a concurrently signed note.",
+    "red": {
+      "path": "/tmp/hoim-deidentification-legacy-signed-rr-mysql-second-attempt-6492bd305318.json",
+      "bytes": 9802,
+      "sha256": "3b202a94a5f29b29970e8e03ab3ec56d0d0d57921bee79d6efc35ab4d4b19779"
+    },
+    "validation": {
+      "sqlite_and_old_doctor_http": {
+        "passed": 34,
+        "new_permanent_cases": 14,
+        "original_doctor_cases": 20,
+        "pytest_seconds": 7.08,
+        "runner_seconds": 16.78257193788886,
+        "source_stable": true,
+        "warnings": 2,
+        "evidence": {
+          "path": "/tmp/hoim-clinical-current-writes-third-verification.json",
+          "bytes": 3424,
+          "sha256": "3cf69970785d0b462e9dc19004e50c45c38d163741b0f3c6d5740d6b59c28ba7"
+        }
+      },
+      "actual_mysql": {
+        "seconds": 16.646,
+        "source_stable": true,
+        "cleanup_verified": true,
+        "evidence": {
+          "path": "/tmp/hoim-clinical-current-writes-mysql-third-verification.json",
+          "bytes": 6657,
+          "sha256": "b4f83786c5578a56e3f8425b5c54f35d27201efbb7b9694d8f81e5e46501f047"
+        },
+        "checks": [
+          "actual_original_signed_rr_red_now_rejected_unchanged",
+          "actual_unsigned_update_sign_and_repeat_positive",
+          "actual_old_rr_role_denied_before_note_text",
+          "actual_old_rr_epoch_denied_before_note_text",
+          "actual_current_doctor_ownership_not_expanded",
+          "actual_parent_first_reverse_locator_no_wait_and_rollback",
+          "four_actual_update_sign_races_no_deadlock_or_signed_rewrite",
+          "actual_old_rr_queue_current_members_and_bound_registration_completed",
+          "actual_rr_doctor_binding_revocation_denied_before_body"
+        ],
+        "lock_conflicts": [
+          {
+            "point": "PatientX_parent_held",
+            "mysql_error": 3572,
+            "http": 409,
+            "seconds": 0.004
+          },
+          {
+            "point": "RecordX_locator_held",
+            "mysql_error": 3572,
+            "http": 409
+          }
+        ],
+        "race_rounds": 4,
+        "scope": "Actual current functions and SQL under RR, not HTTP/JWT in MySQL. Four races permit NOWAIT losers, including both racing requests needing retry, without accepting a signed rewrite."
+      }
+    },
+    "changes": [
+      "Only /medicalRecord/update and /medicalRecord/sign use the new helper; create and other clinical/billing/inventory APIs are unchanged.",
+      "Preserves exact CLINICAL_ROLES plus current actual original Doctor ownership; no technical Super/patient grant bypass added.",
+      "Current User SHARE preserves loaded role/token epoch before populate_existing; actual Doctor mapping and opaque Record patient/doctor locator current SHARE NOWAIT precede Patient X NOWAIT and exact-bound full Record X NOWAIT.",
+      "NOWAIT prevents waiting in reverse while retaining a child locator SHARE; explicit rollback maps only1205/1213/3572 to409, unrelated SQL errors are reraised.",
+      "Missing, other Doctor and signed legacy business codes preserved. Unknown patient binding is denied, not guessed.",
+      "Sign completion uses current actual Patient/Doctor-bound Registration DML and pending Queue current X reads."
+    ],
+    "failed_attempts_preserved": [
+      {
+        "path": "/tmp/hoim-clinical-current-writes-second-verification.json",
+        "bytes": 3428,
+        "sha256": "755a5f4ccc945d462c75949bddf5a4f40261b9082f8b690d39c46e4f25126a61"
+      },
+      {
+        "path": "/tmp/hoim-deidentification-legacy-signed-rr-mysql-first-attempt-48700f0887ce.json",
+        "bytes": 18279,
+        "sha256": "669dfb74c03c6308f812a3053a7896b81035d34645a2edb8f49d173b51540955"
+      }
+    ],
+    "failure_notes": [
+      "Two new child tests originally used later appended Doctor aliases in reused test users, while the original legacy policy uses the first alias; fixture corrected to a real original bound to that same original policy. Product authorization was not broadened.",
+      "Original RED first attempt stopped at synthetic username length1406 before probing; second attempt confirmed the actual signed RR bug."
+    ],
+    "limitations": [
+      "Narrow two-writer fix, not complete clinical currentness or all legacy writer audit.",
+      "SQLite does not establish lock behavior; actual private MySQL proof is separate.",
+      "No Source75/72/73 tree files edited, no hospital dotenv/DB/external model accessed; private containers/network none/socket/cleanup captured.",
+      "No push or deployment. /tmp evidence retained locally and addressed by paths+SHA, not claimed permanently bundled."
+    ],
+    "metadata_correction": {
+      "prior_summary_path": "/tmp/hoim-clinical-current-writes-final-verification.json",
+      "prior_summary_sha256": "5ebe93a5b5a1d65fcf596a4c5659d8ab76813e48dc914cd06d036131e76613ed",
+      "reason": "Correct the per-file split:6 new functions expand to14 cases; existing Doctor file has20 unparameterized cases; total34 unchanged. Prior verification/source bytes remain unchanged."
+    }
+  },
+  "final_summary_source_sha256": "2843808de1ef40b0d1f1fd7be7f7447e02a8c292bbf7f7b49c7e160af4de24c5",
+  "actual_mysql_final": {
+    "image": "mysql:8.0.39",
+    "container_name": "hoim-clinical-current-writes-mysql-third-39346d85b583",
+    "synthetic_only": true,
+    "network": "none",
+    "host_ports": [],
+    "source_mounts": false,
+    "existing_database_accessed": false,
+    "project_env_file_read": false,
+    "scope": "Actual MySQL function calls, real RR and exact MySQL lock codes. No JWT/HTTP, full legacy writer correctness, migration, remote model or hospital claim.",
+    "image_id": "sha256:01faea2cb286276923a223bdbf438b50468f3c4090f6b61e0b27aa871ca0dbac",
+    "isolation": {
+      "network_mode": "none",
+      "port_bindings": {},
+      "readonly_root": true,
+      "user": "999:999",
+      "cap_drop": [
+        "ALL"
+      ],
+      "tmpfs": {
+        "/tmp": "rw,nosuid,nodev,noexec,size=64m,uid=999,gid=999,mode=0700",
+        "/var/lib/mysql": "rw,nosuid,nodev,noexec,size=512m,uid=999,gid=999,mode=0700"
+      },
+      "mount_types": [
+        "bind"
+      ]
+    },
+    "waited_for_final_mysql_initialization": true,
+    "schema_version": "clinical_note_current_write_mysql_v1",
+    "source_hashes_before": {
+      "app/routers/doctor.py": "50cc330db3d3fcaad996d5c0f6c69ef99c4e8f2881b4f2bb3e55e03e34f75868",
+      "app/medical_record_write_guard.py": "2aea7275208f7db19d52811b5537719ccfba0f000b1536f7ddf96381b291c8ec",
+      "app/dependencies.py": "2f0340337885f96d833635f00727cc4beb900e1d44ae38fdcd2fd3981c8092f2",
+      "app/models.py": "0bda666ec4122d11585cdc4b65fc6ccc88acb7ae076a8242dd382320dc80de04",
+      "app/schemas.py": "1fbd955e5c7643d077231631f2c1904792bd1a2b8ec79dacdcedd66eba37340b",
+      "tests/test_medical_record_current_writes.py": "5005ffa5af573335d36f28ebac25d5ff6add063142a0bd90575af9a1ccc74856",
+      "tests/test_doctor.py": "baac386faa6bb1485fd7d9b960a5c3d793c58d5012cb59d9879eef27c8d9b53a"
+    },
+    "checks": [
+      "actual_original_signed_rr_red_now_rejected_unchanged",
+      "actual_unsigned_update_sign_and_repeat_positive",
+      "actual_old_rr_role_denied_before_note_text",
+      "actual_old_rr_epoch_denied_before_note_text",
+      "actual_current_doctor_ownership_not_expanded",
+      "actual_parent_first_reverse_locator_no_wait_and_rollback",
+      "four_actual_update_sign_races_no_deadlock_or_signed_rewrite",
+      "actual_old_rr_queue_current_members_and_bound_registration_completed",
+      "actual_rr_doctor_binding_revocation_denied_before_body"
+    ],
+    "lock_conflicts": [
+      {
+        "point": "PatientX_parent_held",
+        "mysql_error": 3572,
+        "http": 409,
+        "seconds": 0.004
+      },
+      {
+        "point": "RecordX_locator_held",
+        "mysql_error": 3572,
+        "http": 409
+      }
+    ],
+    "old_rr_signed": {
+      "observed_old_status": 0,
+      "actual_before": {
+        "status": 1,
+        "symptom": "原完整未签正文",
+        "result": "原结果",
+        "sign_time": "2026-10-21 13:08:39"
+      },
+      "denial": {
+        "code": 403,
+        "msg": "已签名病历不可修改"
+      },
+      "actual_after": {
+        "status": 1,
+        "symptom": "原完整未签正文",
+        "result": "原结果",
+        "sign_time": "2026-10-21 13:08:39"
+      }
+    },
+    "races": [
+      {
+        "round": 0,
+        "outcomes": [
+          {
+            "signing": false,
+            "http": 409,
+            "mysql_error": 3572
+          },
+          {
+            "signing": true,
+            "business": {
+              "code": 200,
+              "msg": "success"
+            }
+          }
+        ],
+        "actual_before_retry": {
+          "status": 1,
+          "symptom": "原完整未签正文",
+          "result": "原结果",
+          "sign_time": "2026-10-21 13:08:39"
+        },
+        "immutable_after_sign": true
+      },
+      {
+        "round": 1,
+        "outcomes": [
+          {
+            "signing": true,
+            "http": 409,
+            "mysql_error": 3572
+          },
+          {
+            "signing": false,
+            "http": 409,
+            "mysql_error": 3572
+          }
+        ],
+        "actual_before_retry": {
+          "status": 0,
+          "symptom": "原完整未签正文",
+          "result": "原结果",
+          "sign_time": "None"
+        },
+        "immutable_after_sign": true
+      },
+      {
+        "round": 2,
+        "outcomes": [
+          {
+            "signing": false,
+            "http": 409,
+            "mysql_error": 3572
+          },
+          {
+            "signing": true,
+            "business": {
+              "code": 200,
+              "msg": "success"
+            }
+          }
+        ],
+        "actual_before_retry": {
+          "status": 1,
+          "symptom": "原完整未签正文",
+          "result": "原结果",
+          "sign_time": "2026-10-21 13:08:39"
+        },
+        "immutable_after_sign": true
+      },
+      {
+        "round": 3,
+        "outcomes": [
+          {
+            "signing": false,
+            "http": 409,
+            "mysql_error": 3572
+          },
+          {
+            "signing": true,
+            "http": 409,
+            "mysql_error": 3572
+          }
+        ],
+        "actual_before_retry": {
+          "status": 0,
+          "symptom": "原完整未签正文",
+          "result": "原结果",
+          "sign_time": "None"
+        },
+        "immutable_after_sign": true
+      }
+    ],
+    "all_checks_passed": true,
+    "source_hashes_after": {
+      "app/routers/doctor.py": "50cc330db3d3fcaad996d5c0f6c69ef99c4e8f2881b4f2bb3e55e03e34f75868",
+      "app/medical_record_write_guard.py": "2aea7275208f7db19d52811b5537719ccfba0f000b1536f7ddf96381b291c8ec",
+      "app/dependencies.py": "2f0340337885f96d833635f00727cc4beb900e1d44ae38fdcd2fd3981c8092f2",
+      "app/models.py": "0bda666ec4122d11585cdc4b65fc6ccc88acb7ae076a8242dd382320dc80de04",
+      "app/schemas.py": "1fbd955e5c7643d077231631f2c1904792bd1a2b8ec79dacdcedd66eba37340b",
+      "tests/test_medical_record_current_writes.py": "5005ffa5af573335d36f28ebac25d5ff6add063142a0bd90575af9a1ccc74856",
+      "tests/test_doctor.py": "baac386faa6bb1485fd7d9b960a5c3d793c58d5012cb59d9879eef27c8d9b53a"
+    },
+    "source_stable": true,
+    "guards": {
+      "blocked": [
+        "socket.bind"
+      ],
+      "private_unix_connections": 2
+    },
+    "worker_seconds": 8.752,
+    "worker_exit_code": 0,
+    "worker_stdout": "",
+    "worker_stderr": "",
+    "verification_script_sha256": {
+      "/tmp/hoim-clinical-current-writes-mysql-third-runner.py": "4d3043ac8afd216958c7044930288d3493032387923e9400697b041070584bb2",
+      "/tmp/hoim-clinical-current-writes-mysql-third-worker.py": "b0708f4d832ec9d40cf93ab016c15bb5208690affee41f7ad5e4ce5da9964db0"
+    },
+    "own_container_absent_verified": true,
+    "own_container_and_volumes_removed": true,
+    "own_private_directory_removed": true,
+    "cleanup_verified": true,
+    "verification_scripts_retained_in_tmp": [
+      "/tmp/hoim-clinical-current-writes-mysql-third-runner.py",
+      "/tmp/hoim-clinical-current-writes-mysql-third-worker.py"
+    ],
+    "seconds": 16.646,
+    "completed_at_utc": "2026-10-21T13:08:40.361428+00:00"
+  },
+  "actual_mysql_source_sha256": "b4f83786c5578a56e3f8425b5c54f35d27201efbb7b9694d8f81e5e46501f047",
+  "limitations": [
+    "SQLite target tests do not prove lock behavior.",
+    "The MySQL evidence uses actual functions; it is not an HTTP/JWT validation.",
+    "No global clinical lock or new patient-access grant is added; only the two existing note write paths and their signature completion are covered."
+  ]
+}

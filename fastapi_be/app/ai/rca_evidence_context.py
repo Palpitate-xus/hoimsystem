@@ -15,7 +15,9 @@ from app.ai import rca_evidence_contract as c
 from app.ai import rca_evidence_grants as grants
 from app.ai import rca_evidence_input as i
 from app.ai import rca_evidence_task_contract as t
+from app.ai.rca_evidence_models import AIRcaPurposeGrant
 from app.ai.rca_evidence_task_views import RcaFrozenCase
+from app.ai.rca_evidence_write_guard import current_rows
 
 
 @dataclass(frozen=True)
@@ -77,6 +79,32 @@ def prepare_context(db, user, values):
         raise HTTPException(409, "完整当前RCA来源、用途、冻结正文或完整分件容量无法核对，未截断") from exc
 
 
+def current_task_grant(db, user, grant_id, *, event_id, patient_id, requested_by, permission_kind):
+    """Exact actual purpose metadata first, without taking another Event lock.
+
+    The caller holds this task Event X. A damaged immutable technical grant ID
+    must fail before a general grant reader could wait for a different Event.
+    """
+    columns = (
+        AIRcaPurposeGrant.grant_id,
+        AIRcaPurposeGrant.event_id,
+        AIRcaPurposeGrant.patient_id_at_grant,
+        AIRcaPurposeGrant.grantee_id,
+        AIRcaPurposeGrant.permission_kind,
+        AIRcaPurposeGrant.status,
+        AIRcaPurposeGrant.valid_until,
+    )
+    actual = current_rows(db.query(*columns).filter_by(grant_id=grant_id), shared=True).one_or_none()
+    if actual is None or tuple(actual[:5]) != (grant_id, event_id, patient_id, requested_by, permission_kind):
+        raise HTTPException(409, "任务原用途许可的实际事件、患者、用途或请求人身份不一致")
+    if actual.status != "active" or actual.valid_until <= grants.utcnow():
+        raise HTTPException(403, "任务原独立用途许可已撤销或过期")
+    record = grants.grant_detail(db, user, grant_id)
+    if not record.current_scope:
+        raise HTTPException(403, "任务原独立用途许可当前无效")
+    return record
+
+
 def authorize_binding(db, user, value, *, frozen_audit=False):
     """Source/current purpose first, before callers may load any Task TEXT.
 
@@ -96,7 +124,9 @@ def authorize_binding(db, user, value, *, frozen_audit=False):
     for anchor in (binding.event_grant, binding.patient_grant):
         if anchor is None:
             continue
-        actual = grants.grant_detail(db, auth.actor, anchor.grant_id)
+        actual = current_task_grant(
+            db, auth.actor, anchor.grant_id, event_id=binding.event_id, patient_id=binding.patient_id_at_capture, requested_by=binding.requested_by, permission_kind=anchor.permission_kind
+        )
         if not actual.current_scope or t.grant_anchor(actual) != anchor:
             raise HTTPException(403, "任务原独立用途许可已撤销、过期或变化；另一许可不能恢复原任务")
     record = cases._record(db, row, cases._capture(db, auth))

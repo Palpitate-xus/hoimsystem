@@ -147,3 +147,40 @@ def test_true_nullable_usage_is_separate_from_legacy_run_zero_fields(input_token
     else:
         with pytest.raises(ValueError):
             views.RcaUsageReceipt.model_validate(data)
+
+
+def test_damaged_task_grant_does_not_lock_or_read_another_events_grant_body(grant_case, monkeypatch):
+    from sqlalchemy import Select, event
+
+    from app.models import AdverseEvent
+
+    case, db = grant_case, grant_case["db"]
+    value, _ = prepared(case)
+    other_event = AdverseEvent(patient_id=case["patient_id"], reporter_id=case["users"]["doctor_user"].user_id, description="另一个事件的私有正文", severity=0, status=0)
+    db.add(other_event)
+    db.commit()
+    other_id = inspect(other_event).identity[0]
+    foreign = issue({**case, "event_id": other_id})
+    bound = value.binding.model_dump(mode="json")
+    bound["event_grant"]["grant_id"] = foreign.identity.grant_id
+    locked, forbidden_body = [], []
+    actual_lock = g.lock_event_identity
+
+    def observe_lock(db, identifier):
+        locked.append(identifier)
+        return actual_lock(db, identifier)
+
+    def observe_sql(state):
+        if state.is_select and isinstance(state.statement, Select) and any(col.key == "grant_json" for col in state.statement.selected_columns):
+            if foreign.identity.grant_id in state.statement.compile().params.values():
+                forbidden_body.append(True)
+
+    monkeypatch.setattr(g, "lock_event_identity", observe_lock)
+    event.listen(db, "do_orm_execute", observe_sql)
+    try:
+        with pytest.raises(HTTPException) as failure:
+            context.authorize_binding(db, case["actor"], bound)
+        assert failure.value.status_code == 409
+    finally:
+        event.remove(db, "do_orm_execute", observe_sql)
+    assert case["event_id"] in locked and other_id not in locked and not forbidden_body

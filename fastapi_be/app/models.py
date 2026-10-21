@@ -14,6 +14,8 @@ from app.ai import bed_series_models as _bed_series_models  # noqa: F401
 from app.ai import charge_reconciliation_models as _charge_reconciliation_models  # noqa: F401
 from app.ai import charge_reconciliation_run_models as _charge_reconciliation_run_models  # noqa: F401
 from app.ai import coding_evidence_models as _coding_evidence_models  # noqa: F401
+from app.ai import deidentification_models as _deidentification_models  # noqa: F401
+from app.ai import deidentification_run_models as _deidentification_run_models  # noqa: F401
 from app.ai import document_change_models as _document_change_models  # noqa: F401
 from app.ai import document_change_run_models as _document_change_run_models  # noqa: F401
 from app.ai import document_evidence_models as _document_evidence_models  # noqa: F401

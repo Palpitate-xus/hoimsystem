@@ -69,7 +69,7 @@ import AiImageFindings from "@/components/AIImageFindings/index.vue";
 import AiEcgFindings from "@/components/AIEcgFindings/index.vue";
 import { resolveSurgeryEvidence, verifySurgeryRun } from "@/api/ai/surgeryScenarios";
 import {resolveSupplyEvidence,verifySupplyRun,supplyAnalysisVersionSupported} from "@/api/ai/supplyResults";
-import {resolveInventoryEvidence,verifyInventoryRun,inventoryAnalysisVersionSupported} from "@/api/ai/inventoryResults";
+import {resolveInventoryEvidence,verifyInventoryRun,inventoryAnalysisVersionSupported,inventoryRunHasNativeMarkers} from "@/api/ai/inventoryResults";
 import { supportCanonical, supportId } from "@/api/inpatientSupport";
 const AiInventoryFindings=defineAsyncComponent(()=>import("@/components/ai/InventoryFindings.vue"));
 const AiSupplyFindings=defineAsyncComponent(()=>import("@/components/SupplyFindings.vue"));
@@ -87,7 +87,7 @@ let alive=true;
 const current=key=>alive&&!wasDeactivated&&allowed.value&&key===auth();
 const hasSurgery=value=>!!value?.surgery_findings||!!value?.result?.surgery_analysis||!!value?.frozen_request?.payload?.context?.surgery_binding||!!value?.frozen_request?.payload?.input?.surgery_scenario_id||String(value?.frozen_request?.provider_snapshot?.model||'').startsWith('surgery:');
 const hasSupply=value=>!!value?.supply_findings||!!value?.result?.supply_analysis||['supply_binding','supply_source','supply_series'].some(name=>!!value?.frozen_request?.payload?.context?.[name])||!!value?.frozen_request?.payload?.input?.supply_series_id||String(value?.frozen_request?.provider_snapshot?.model||'').startsWith('supply:');
-const hasInventory=value=>Object.hasOwn(value||{},'inventory_findings')||Object.hasOwn(value?.result||{},'inventory_analysis')||['inventory_binding','inventory_source','inventory_scenario'].some(name=>Object.hasOwn(value?.frozen_request?.payload?.context||{},name))||Object.hasOwn(value?.frozen_request?.payload?.input||{},'inventory_scenario_id')||String(value?.frozen_request?.provider_snapshot?.model||'').startsWith('inventory:');
+const hasInventory=inventoryRunHasNativeMarkers;
 function clear(){++listVersion;++detailVersion;rows.value=[];total.value=0;detail.value=null;evidence.value=null;visible.value=evidenceVisible.value=false;loading.value=detailLoading.value=false;}
 async function load(reset = false) {
   if(!allowed.value||!alive||wasDeactivated)return;

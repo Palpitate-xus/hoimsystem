@@ -13,6 +13,7 @@ from app.ai.models import AIAuditEvent
 from app.ai.rca_evidence_models import AIRcaPurposeGrant
 from app.database import Base
 from app.models import AdverseEvent, Patient, User
+from tests.rca_sqlite_test_support import preserve_foreign_key_mode
 
 NOW = dt.datetime(2026, 10, 21, 12, 0, 0, 123456)
 NOTE = "仅此实际事件与关联患者的本次RCA调查用途；不认证临床因果。"
@@ -21,17 +22,18 @@ NOTE = "仅此实际事件与关联患者的本次RCA调查用途；不认证临
 @pytest.fixture
 def grant_case(db_session, seed_data, monkeypatch):
     db = db_session
-    Base.metadata.create_all(db.get_bind())
-    patient = Patient(name="合成用途主体", identity="rca-synthetic-" + __import__("uuid").uuid4().hex, permission="allow")
-    db.add(patient)
-    db.flush()
-    original = AdverseEvent(
-        patient_id=patient.patient_id, reporter_id=seed_data["doctor_user"].user_id, description="尚未授权时不可读取的合成事件正文", handle_result="不能自动认定原因", severity=0, status=0
-    )
-    db.add(original)
-    db.commit()
-    monkeypatch.setattr(g, "utcnow", lambda: NOW)
-    return {"db": db, "actor": seed_data["super_admin_user"], "users": seed_data, "event_id": inspect(original).identity[0], "patient_id": inspect(patient).identity[0]}
+    with preserve_foreign_key_mode(db):
+        Base.metadata.create_all(db.get_bind())
+        patient = Patient(name="合成用途主体", identity="rca-synthetic-" + __import__("uuid").uuid4().hex, permission="allow")
+        db.add(patient)
+        db.flush()
+        original = AdverseEvent(
+            patient_id=patient.patient_id, reporter_id=seed_data["doctor_user"].user_id, description="尚未授权时不可读取的合成事件正文", handle_result="不能自动认定原因", severity=0, status=0
+        )
+        db.add(original)
+        db.commit()
+        monkeypatch.setattr(g, "utcnow", lambda: NOW)
+        yield {"db": db, "actor": seed_data["super_admin_user"], "users": seed_data, "event_id": inspect(original).identity[0], "patient_id": inspect(patient).identity[0]}
 
 
 def body(case, kind, **values):

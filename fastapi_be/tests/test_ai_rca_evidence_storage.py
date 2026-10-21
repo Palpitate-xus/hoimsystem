@@ -39,6 +39,7 @@ def stage(case, *, commit=True):
     db = case["db"]
     Base.metadata.create_all(db.get_bind())
     db.execute(text("PRAGMA foreign_keys=ON"))
+    assert db.execute(text("PRAGMA foreign_keys")).scalar_one() == 1
     value, _ = prepared(case)
     provider = AIProvider(
         name="synthetic-rca-storage-" + uuid.uuid4().hex[:8],

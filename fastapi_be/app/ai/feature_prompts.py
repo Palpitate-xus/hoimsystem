@@ -7,6 +7,7 @@ from app.ai.charge_reconciliation_prompt import CHARGE_RECONCILIATION_SYSTEM_PRO
 from app.ai.coding_evidence_prompt import CODING_SYSTEM_PROMPT
 from app.ai.document_extraction_prompt import EXTRACTION_SYSTEM_PROMPT
 from app.ai.drug_label_prompt import SYSTEM_PROMPT as DRUG_LABEL_SYSTEM_PROMPT
+from app.ai.rca_evidence_task_prompt import SYSTEM_PROMPT as RCA_EVIDENCE_SYSTEM_PROMPT
 from app.ai.satisfaction_prompt import SATISFACTION_SYSTEM_PROMPT
 
 SYSTEM_PROMPT_OVERRIDES = MappingProxyType(
@@ -16,6 +17,7 @@ SYSTEM_PROMPT_OVERRIDES = MappingProxyType(
         "feedback_analysis": SATISFACTION_SYSTEM_PROMPT,
         "guideline_ingestion": EXTRACTION_SYSTEM_PROMPT,
         "drug_label_extraction": DRUG_LABEL_SYSTEM_PROMPT,
+        "incident_rca": RCA_EVIDENCE_SYSTEM_PROMPT,
     }
 )
 

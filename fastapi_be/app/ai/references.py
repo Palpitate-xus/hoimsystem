@@ -45,5 +45,6 @@ SOURCE_REFERENCE_KEYS = frozenset(
         "satisfaction_case_id",
         "document_original_id",
         "drug_label_source_binding_id",
+        "rca_evidence_case_id",
     }
 )

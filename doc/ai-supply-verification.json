@@ -1,0 +1,959 @@
+{
+  "schema_version": "supply_native_engineering_verification_v1",
+  "recorded_at_utc": "2026-10-21T01:53:02.519840+00:00",
+  "baseline_commit": "4c07377b10e1003d3f83d3bd4348b932babd1a72",
+  "platform_commit_at_recording": "f75ae7f4072d6c7db5b7f7432ba82ad02d5f5155",
+  "recording_head_precedes_this_evidence_documentation_commit": true,
+  "goal_status": "active",
+  "scope": "Feature66 governed recorded-quantity forecasting, explicit original SKU/unit/day/target sources, six exact baselines, declared H7/H14 rolling-origin comparison, actual queue/native ASGI/blob/audit and Super-admin governance. Synthetic engineering checks only; the overall 80-feature goal continues.",
+  "real_patient_data_used": false,
+  "existing_hospital_database_accessed": false,
+  "existing_hospital_backend_contacted": false,
+  "production_deployment_performed": false,
+  "clinical_validation_performed": false,
+  "operational_validation_performed": false,
+  "stored_business_ai_configuration_changed": false,
+  "remote_model_inference_performed": false,
+  "version_management": {
+    "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+    "commits_this_batch_before_evidence_commit": [
+      {
+        "commit": "938efd7d3a538e3403a66b0e05f094fe90b71f12",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai): define strict recorded supply forecasting contract"
+      },
+      {
+        "commit": "8fbdc97162dbdb050a17d1cdda3df3802ece0d44",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai): calculate exact intermittent supply forecasts and rolling evidence"
+      },
+      {
+        "commit": "4200d5e488922cb5dc4a9879e81c8d8fbf440220",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "test(ai): verify standalone supply HTTP boundaries and isolated packaging"
+      },
+      {
+        "commit": "58128b103ca10df353ead1b67267bfe671c96981",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "test(ai): exercise complete supply capacity and early exact-budget refusal"
+      },
+      {
+        "commit": "7189257c480023571a1cce8412b6451b18133f93",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai-supply): add governed SKU unit and daily original schema"
+      },
+      {
+        "commit": "72ee1a2f78410b6af467eca4bdfdb3a62649ca23",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai): add immutable supply series and complete result tables"
+      },
+      {
+        "commit": "683f9215cf1cb6c41dd679553f337f82ecf63cb1",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai-supply): verify metadata and complete native forecast receipts"
+      },
+      {
+        "commit": "c672ecc88fb0234eb4b156a033decd341e770bcd",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai-supply): bind reviewed quantities and keep private originals local"
+      },
+      {
+        "commit": "f47ae783a1a410eded5cb6c8de8283973d88f317",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "fix(ai): bound supply task uploads while preserving the worker lease"
+      },
+      {
+        "commit": "a51aadce656537d2c360dbe3246ac16682af8baa",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai): require complete supply series declarations and exact parameters"
+      },
+      {
+        "commit": "01670fe2564ee664771be31055112fc167994d94",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai-supply): add dedicated prompts and isolate reviewed series references"
+      },
+      {
+        "commit": "cfd72bbed31167f46fb3ff900368ccf842d0749b",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai-ui): inspect supply provider metadata with current saved configuration"
+      },
+      {
+        "commit": "c8497c15f2f2d64347b525d4bbaa35c3913c285c",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai): freeze and govern complete supply series with private projections"
+      },
+      {
+        "commit": "95d0173380bcc47f24603b190978da93fe6bae2d",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai-supply): persist complete forecasts with original lease and audit anchors"
+      },
+      {
+        "commit": "d64d55b993577b0dc8df89bde5f8a7a6f3e5a3cb",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai-supply): recompute native forecasts before accepting gateway results"
+      },
+      {
+        "commit": "40808a94f8950cb05e3bbcb9c46b7f4c3a1c4400",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai-supply): govern service capabilities and frozen global audit access"
+      },
+      {
+        "commit": "eda4b8a84aab1cfe1f094ca4d6b97711a84f121a",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai): expose reviewed supply series through strict inventory APIs"
+      },
+      {
+        "commit": "a71dd17b6a03fee0d9ee3baf8c986f06ad138f1c",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "fix(ai): isolate supply unit and review hashes with per-series HMAC"
+      },
+      {
+        "commit": "42c9b09ef7fbc2267a0550a0447b597af9138155",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "fix(ai-supply): retain original governance text in authorized frozen views"
+      },
+      {
+        "commit": "9d3297b396758b3e67c6472a7b7108e776ef3cbc",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai-supply): govern immutable SKU units and professional daily originals"
+      },
+      {
+        "commit": "cfec270bbb64dd899ff649f9dd9eef4c35fd30dd",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai-supply): verify whole cutoff collections and atomic source APIs"
+      },
+      {
+        "commit": "a5105c80a2bbd48302d5864898a9a778ae9c45c7",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "fix(ai): retain complete governance only in authorized supply views"
+      },
+      {
+        "commit": "d38bc0a8408e11fbe60b81ac81805ad65c3fa39d",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "fix(ai-schema): preserve strict exclusive numeric bounds in closed validation"
+      },
+      {
+        "commit": "2654836d0eb7369af5bba87526e403a388ca4f63",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "fix(ai-supply): expose only the current pharmacist signing identity"
+      },
+      {
+        "commit": "3995ae6ecc4acb51bfd2936d734216587b2915a7",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai-supply): connect governed series to durable native tasks and scoped history"
+      },
+      {
+        "commit": "238547401da35391c53bf63c922e548a2952415c",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "fix(ai-supply): reject every native source marker before legacy fallback"
+      },
+      {
+        "commit": "f8d5095709823c522b152311e09bf774164baee0",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "docs(ai-supply): export dedicated prompts and actual source route permissions"
+      },
+      {
+        "commit": "3ffa6e957c80e9023da9f57d6575563c868c19e4",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai-supply): bind source APIs to actual originals and full capture proofs"
+      },
+      {
+        "commit": "9c1225b040959e1031b74dd2457cf19daf8a9bd4",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai): independently verify supply forecast exact native proofs"
+      },
+      {
+        "commit": "9605b955d691db3b317d0d51bdd655bbe43ceea0",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "merge: base supply integration on the complete surgery implementation"
+      },
+      {
+        "commit": "e94449156f6917695aeee0753a68e8d3b3bf4325",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai): verify complete governed supply series and exact private projections"
+      },
+      {
+        "commit": "1822a8f9ea8b7e57fe5ac6eb83d3e0996394de0f",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai-supply): add explicit unit and daily quantity original editor"
+      },
+      {
+        "commit": "9db479a73b4f95b41ccbb7d8dfd7ab18690c8242",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai-supply): govern actual SKU originals with scoped source review UI"
+      },
+      {
+        "commit": "e59222a195b2600cfb6a92945ed22491280ba95d",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai): add governed supply management and SKU business entries"
+      },
+      {
+        "commit": "ea58f6ebbf7e92e54212b5e711d8a00d3f0c21e8",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai): bind supply assistant and frozen audit to complete original proofs"
+      },
+      {
+        "commit": "f2b6629cdb69a1072033cffe8ba27bd8142052cb",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai): edit and govern complete supply quantity series with explicit parameters"
+      },
+      {
+        "commit": "4158144eb636ec2b122ede3c4093a5c2170202ca",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "test(ai): cover complete supply series forms and governance race boundaries"
+      },
+      {
+        "commit": "37d90a553958600bf38e3301e4f9802d6aee0253",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "style(ai): normalize supply source HTTP test module spacing"
+      },
+      {
+        "commit": "610cc157da40206d3ea701c69017e948b7740764",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "docs(ai): explain governed supply quantities and fixed forecast workflow"
+      },
+      {
+        "commit": "90d559051642624bc599be10d3de1ef74ba98cf5",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "docs(ai): retain final surgery engineering verification in supply worktree"
+      },
+      {
+        "commit": "c7348adbaa1c6e8635f9a5e76d162dfbb13d6deb",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "test(ai): verify supply input scope horizons and delayed private-proof isolation"
+      },
+      {
+        "commit": "7e142d13f6a216d64ec7ddd4a19122ad134adb63",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai): require actual SKU and complete reviewed series for supply forecasts"
+      },
+      {
+        "commit": "2ae9a2b4d4aa9cc9aa54f8c876cc7a0973b149fb",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai): display only fully bound supply forecasts and frozen audit evidence"
+      },
+      {
+        "commit": "423a4653d07caf6178b4a0d5d8dd29b6dbbce883",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "perf(ui): share repeated business API modules and unchanged inline assets"
+      },
+      {
+        "commit": "c375c678511ab55aea7c4c08ba51a2fba3d42e60",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "fix(ai): identify unsupported archived supply runtime before showing audit"
+      },
+      {
+        "commit": "13b8cf2f8e908ede44df76559443458b21865227",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "fix(ai): preserve exact supply decimals through production Babel transforms"
+      },
+      {
+        "commit": "c53b3b90474bef9041f1345ad23b19ab33927b7a",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "fix(ai): invalidate pending private evidence when its preview closes"
+      },
+      {
+        "commit": "f08bce291b94528769b597ab4402343dc8297d36",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "fix(ai): reject foreign findings and contradictory supply quantity states"
+      },
+      {
+        "commit": "3618a5a0b4410aa6c1041174ae9754c6d7026181",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "fix(ai): discard late private audit reads after trace dialog closes"
+      },
+      {
+        "commit": "55c7bf2eb1ed86c798f24908fef3708bdcdb96cb",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "test(ai): cover supply parent lifecycle with actual queued and terminal packets"
+      },
+      {
+        "commit": "7a9961521468a461a51aae1e9ff7ea81ddbab861",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "test(ai-supply): reject late private audit reads after close or account change"
+      },
+      {
+        "commit": "a6d1883cf21d41b8e7269cbd8f498ad5cb35e9d6",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "test(ai): retain exact production-entry supply lifecycle and complete native packets"
+      },
+      {
+        "commit": "c63592df298044078eb7afcd383ecba076609e13",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "fix(ai): preserve supply original bytes and UTC microseconds in the mounted app"
+      },
+      {
+        "commit": "5866185d7e1d3d36cb53776738648b809af07faa",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "test(ai): verify supply production entry and frozen audit flows"
+      },
+      {
+        "commit": "a6dc5ef537566dc53c1747cdc3cafd9839245a58",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "fix(ai): use current shared role reads for supply and administrator audits"
+      },
+      {
+        "commit": "54a6f015603855a5e28da1a852c3807a26fc175b",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "merge: require current identity for supply sources and administrator audits"
+      },
+      {
+        "commit": "50d122f7f0449213866cbd6aa78c14c04c163df7",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "fix(ai): verify native acceptance against actual task blob and audit rows"
+      },
+      {
+        "commit": "f75ae7f4072d6c7db5b7f7432ba82ad02d5f5155",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "merge: verify current native acceptance writes before commit"
+      }
+    ]
+  },
+  "implementation": {
+    "catalog_version": "2026.10.20.13",
+    "feature_count": 80,
+    "distinct_default_prompts": 80,
+    "source_reference_count": 37,
+    "native_schema_version": 13,
+    "model_prefix": "supply:",
+    "rule_id": "supply_recorded_quantity_v1",
+    "core_freeze_commit": "f47ae78",
+    "source_kinds": [
+      "independently reviewed quantity-unit definitions",
+      "original daily recorded quantities",
+      "complete governed series",
+      "full native result blobs"
+    ],
+    "scope": "One explicitly selected current real pharmaceutical/consumable SKU in hospital_inventory, 112..366 closed IANA business dates and three separately retained targets: requested, gross fulfilled, confirmed consumed. Recorded quantities are not latent demand.",
+    "methods": [
+      "Croston",
+      "SBA",
+      "TSB",
+      "prefix_mean",
+      "last28_mean",
+      "seasonal_naive7"
+    ],
+    "comparison": "28 rolling origins, explicit H7 or H14, comparable full-origin errors only. WAPE/MASE with zero denominator remain undefined. Intermittent methods require at least two positive originals; zero, NULL, unit, missing days and stock constraints remain distinct.",
+    "parameters": "Three explicit canonical fractions in (0,1], denominator <=1000. Exact rationals, no inferred unit conversion or stock-constrained demand imputation. Forecasts do not auto-create or select procurement.",
+    "governance": "Current pharmacist signs original quantities; a separate current Super-admin reviews/publishes technical originals and complete series. Frozen private originals, member collection, public projection, current actor and signer roles are checked before execution and result acceptance.",
+    "outbound": "Only typed public-source quantities and complete Prompt go to native process; private raw originals, author details, identity_secret, question and unrelated hospital/patient data do not.",
+    "storage": "Four new tables; bounded MEDIUMTEXT originals and immutable complete-series/result blobs. Full private/public sources and results are size checked before persistence; exceeding limits fails rather than truncates.",
+    "acceptance_repair": "After SQL flush, compare actual current AIRun task/lease/pointer/status/metadata to immutable pre-flush anchors, reload and recompute stored domain result, and verify the exact staged success-audit primary key. Recheck current Source/config/authority before commit; all writes roll back atomically on mismatch. Shared helper also covers existing Surgery.",
+    "guide": "doc/ai-guide.md",
+    "known_scope_gap": "No fitted clinical demand model, intervals, latent true demand, automatic ordering, external validation, hospital deployment or production enablement."
+  },
+  "backend_regression": {
+    "passed": 7193,
+    "skipped": 28,
+    "warnings": 2,
+    "pytest_seconds": 1997.65,
+    "outer_seconds": 2011.446,
+    "baseline_passed": 6670,
+    "net_additional_default_passes": 523,
+    "source_file_count": 793,
+    "all_source_files_unchanged": true,
+    "evidence": {
+      "path": "/tmp/hoim-supply-full-frozen-final5-pytest-execution.json",
+      "sha256": "3412d3675e29959a47581df4b143604dae7b5567df0f4b2009b2b691a49b6ca4",
+      "bytes": 2215
+    },
+    "source_freeze": {
+      "path": "/tmp/hoim-supply-backend-frozen-final5-source-freeze.json",
+      "sha256": "e2d9be3ba819b59664732cab67433789097f35ae6404e20e0a4bdb5d6f84787d",
+      "bytes": 128824
+    }
+  },
+  "python_static_checks": {
+    "files": 62,
+    "ruff_and_complete_format_passed": true,
+    "evidence": {
+      "path": "/tmp/hoim-supply-backend-frozen-final5-ruff-execution.json",
+      "sha256": "728413870c9764fa9f8921419838765f4fa0a8ccc52ccf595dfdcabe057d0743",
+      "bytes": 3296
+    }
+  },
+  "native_core": {
+    "targeted_distinct_tests": 92,
+    "seconds": 42.46,
+    "scope": "Four supply cores and four owned test files; contract/math/native ASGI checks, not additional full-suite passes.",
+    "evidence": {
+      "path": "/tmp/hoim-supply-core-upload-final-verification.json",
+      "sha256": "e163db77e8b02c1483e4aa1c9d26dcf36a340c2db517937e1f6af1af3377e4cd",
+      "bytes": 2385
+    },
+    "actual_process_capacity": {
+      "path": "/tmp/hoim-supply-process-upload-final-capacity-verification.json",
+      "sha256": "6e14d847d0fac430966ad41c62e1797bd338d1e512b18508a5b597e87b3dd219",
+      "bytes": 1964
+    },
+    "capacity_scope": "Actual fresh-process 366 days / three targets / 4096-root typed source; denominator10 complete accepted, denominator997 exactly refused at deterministic work limit, no partial output. Individual maxima do not promise arbitrary combinations fit.",
+    "actual_container": {
+      "path": "/tmp/hoim-supply-container-upload-final-verification.json",
+      "sha256": "23b67af5dfd374f5f7d507c890ced217fdf005aa5e908dc48be0862b5c544051",
+      "bytes": 23881
+    },
+    "container_scope": "31 actual internal HTTP responses, nonroot, network none, read-only root, 512MiB limit; no hospital mounts, DB or remote model. Includes real slow chunked uploads and full host-side math comparison. Container-local HTTP is not a clinical deployment.",
+    "read_only_audit_and_fix_lineage": {
+      "path": "/tmp/hoim-supply-readonly-audit-and-fix-lineage.json",
+      "sha256": "f9fb8821bc8d55387b5d00aecbd3871a26aadbbab57a669899946ee6d4181d82",
+      "bytes": 4238
+    }
+  },
+  "database": {
+    "migrations": [
+      "20261020_supply_sources",
+      "20261020_supply_series"
+    ],
+    "new_tables": 4,
+    "new_utc6_columns": 14,
+    "new_mediumtext_columns": 7,
+    "migration_sql": {
+      "path": "/tmp/hoim-supply-full-migration-mysql-final2-verification.json",
+      "sha256": "a4106918dab9543366602af7f87f8014cf48e1c39f2bc829907e8ed9bc215e02",
+      "bytes": 20103
+    },
+    "migration_scope": "Actual private MySQL8.0.39: reconstruct actual 195-table legacy metadata and seed rows, stamp surgery_scenarios parent, then real two-migration upgrade/downgrade/upgrade. Does not claim a full empty-database historical migration chain. Old DDL/rows remain byte-identical; actual governed336-day series, 8MiB Unicode SQL and constraints checked.",
+    "legacy_gate": {
+      "path": "/tmp/hoim-supply-sku-lock-mysql-final-verification.json",
+      "sha256": "6c3b1fd51ff716fd89ab637a55ccb9e694cd44a9b608e41c86d8a7d1020b5cc9",
+      "bytes": 19665
+    },
+    "legacy_scope": "Actual private MySQL RR current-read lock probes: seven same-SKU competitors wait/timeout, User SHARE before SKU UPDATE, different SKU can proceed, role change blocked while holding current authority, full collection detects nonwinner changes. Function/SQL level, not JWT or whole worker on MySQL.",
+    "isolation": "All database and native fixtures synthetic. Existing hospital DB/configuration/.env not accessed; task-owned private resources cleaned."
+  },
+  "actual_governance_worker_pipeline": {
+    "complete_both_horizons_export": {
+      "path": "/tmp/hoim-supply-production-complete-export-final-verification.json",
+      "sha256": "0a3f8427c120dcc9ab701d10cdecfa768f986d409c4d730a6174c30f5a1e1e92",
+      "bytes": 83543
+    },
+    "complete_public_packet": {
+      "path": "/tmp/hoim-supply-production-complete-actual-packets.json",
+      "sha256": "e98e822931cdf08a12a8c6f1e0b7a3edbee0abc6438989cd8fc929c227a62342",
+      "bytes": 24384101
+    },
+    "complete_scope": "One actual controlled-clock synthetic case: 336 originals, actual JWT/ASGI queue and durable worker, native ASGI, full blob/result/frozen audit; H7 and H14 retained, no stock/purchase mutation. Not a remote model or extra full-suite result.",
+    "current_acceptance_fix": {
+      "path": "/tmp/hoim-supply-current-acceptance-final-verification.json",
+      "sha256": "5d08bc0c8730177a0f34376e22eded05e01323f4c9ff90a1c16e83c557cce02f",
+      "bytes": 3120
+    },
+    "acceptance_targeted_result": "20 passed, 63 deselected in 88.27s; includes positive Supply/Surgery full pipelines and post-write fault injection. Not added to full count again.",
+    "independent_pre_fix_failure": {
+      "path": "/tmp/hoim-supply-postwrite-readonly-first-verification.json",
+      "sha256": "83e4f29fba0a25b449731a2945e2fdb6a06bfb5e0d69985b7917df9f95dd1fe7",
+      "bytes": 826
+    },
+    "independent_scope": "Read-only external test demonstrated SQL audit trigger could erase task metadata after flush and previously still succeed; actual failed assertion retained, then permanent source tests and shared fix. No source edits during the proof.",
+    "mounted_main_precision": {
+      "path": "/tmp/hoim-supply-main-precision-final-verification.json",
+      "sha256": "08e94b6c83f67ffe256b8c4f81e88ce0c16afe8501c497b0ce795a5440e21db1",
+      "bytes": 1724
+    },
+    "precision_scope": "Actual mounted app.main JWT/ASGI fixtures preserve .123456 UTC and literal clock strings through original full-hash responses. Original app serializer failure and final14 cases retained.",
+    "current_authority": {
+      "path": "/tmp/hoim-supply-current-authority-targeted-final-verification.json",
+      "sha256": "83aa8804954f14fecf5098546fa8ed6c2a18d675d99100711963ad5b3e679cb0",
+      "bytes": 3019
+    },
+    "mysql_authority_evidence": [
+      {
+        "path": "/tmp/hoim-inventory-current-role-mysql-verification.json",
+        "sha256": "98bfd41b38d8d61b6cb454e3370ed3ea1a9d0e8922230bffa6e64761bedd9705",
+        "bytes": 9414
+      },
+      {
+        "path": "/tmp/hoim-inventory-current-role-signer-mysql-verification.json",
+        "sha256": "e5db5d7f86b20862d3d3b2fe0e26fe9865c6d1e551dd2d39cd41dabbc9f19f44",
+        "bytes": 11010
+      },
+      {
+        "path": "/tmp/hoim-inventory-current-authority-mysql-verification.json",
+        "sha256": "cc770b15c7ceb4996521c287082ba088b538d792aa834e9a0d1607aeeb1f3b9d",
+        "bytes": 12663
+      },
+      {
+        "path": "/tmp/hoim-inventory-super-audit-authority-mysql-verification.json",
+        "sha256": "2e7b82f7482154552545cb07dc3cf87a5b11c42a1d493626e04c8772d6fb14de",
+        "bytes": 4975
+      }
+    ],
+    "authority_scope": "Independent actual private-MySQL probes first exposed old-role reads in an existing RR snapshot; shared actor/signer/audit helper now always locks current role even when populate_existing=False. These are function/SQL probes with explicit source bindings, not all HTTP/worker flows on MySQL."
+  },
+  "frontend_build": {
+    "command": [
+      "npm",
+      "run",
+      "verify"
+    ],
+    "exit_code": 0,
+    "audit_vulnerabilities": 0,
+    "elapsed_seconds": 36.449,
+    "source_inputs": 451,
+    "javascript_bytes": 5978186,
+    "all_assets_bytes": 6197622,
+    "largest_javascript_bytes": 647564,
+    "asset_files": 247,
+    "unchanged_budgets": {
+      "javascript": 6000000,
+      "all_assets": 7000000,
+      "largest_javascript": 700000
+    },
+    "dependency_and_browser_targets_unchanged": true,
+    "resolver_preload_used": false,
+    "existing_scss_warnings": 5,
+    "evidence": {
+      "path": "/tmp/hoim-supply-npm-frozen-final2-verify-execution.json",
+      "sha256": "a22999e0957621f562dda97083c76aada1bb1b6a88b64380c25b8696d17100cf",
+      "bytes": 1113
+    },
+    "production_input_freeze": {
+      "path": "/tmp/hoim-supply-frontend-frozen-final2-production-source-freeze.json",
+      "sha256": "cabe5c3ce317684ed6e81ee35ace7c2cb87436e6cf9d545e552ce8e450b8a934",
+      "bytes": 74362
+    },
+    "fix_lineage": "Retained failed budgets, reverted SWC experiment, actual Babel BigInt Math.pow crash and exact-string decimal repair. Shared API/chart/inline-asset reuse and DAG schema storage reduce duplication; no budget/target/dependency change. Concurrent product edits mean earlier size differences are not isolated savings benchmarks."
+  },
+  "frontend_browser": {
+    "total": 1117,
+    "baseline_total": 890,
+    "new_distinct_cases": 227,
+    "test_files": 89,
+    "categories": {
+      "isolated_mock": 916,
+      "production_mock": 180,
+      "real_synthetic_http": 21
+    },
+    "workers": 1,
+    "retries": 0,
+    "flaky": 0,
+    "skipped": 0,
+    "all_passed_in_one_full_run": true,
+    "elapsed_seconds": 3349.786,
+    "actual_test_duration_ms": 3338473.4899999998,
+    "source_inputs": 758,
+    "production_assets": 247,
+    "source_and_assets_unchanged": true,
+    "evidence": {
+      "path": "/tmp/hoim-supply-browser-frozen-final-execution.json",
+      "sha256": "95007acd9b90e0c5af624510442a7cc1f4e5812e490872895bd37806e013fab2",
+      "bytes": 770294
+    },
+    "classifier": {
+      "path": "/tmp/hoim-supply-browser-final-category-counts.json",
+      "sha256": "e7df10ce81aff52b234edb1900f83ae52dd175e0845caffaa5f571324c3c9157",
+      "bytes": 601786
+    },
+    "source_freeze": {
+      "path": "/tmp/hoim-supply-frontend-frozen-final-source-freeze.json",
+      "sha256": "dc284b5614e93a5eb1ce7a2c9fa28635b167a44eddfb4fbd746e4a08e82e070e",
+      "bytes": 126253
+    },
+    "scope": "Exactly the previous 77 AI-scoped files plus 12 new files; 25 unrelated legacy business test files remain outside this explicitly unchanged AI-suite scope. Counts are actual single executions, never added targeted reruns. 180 real production UI cases and916 isolated cases replay synthetic APIs; only21 designated cases use real synthetic loopback HTTP.",
+    "baseline_continuity": {
+      "path": "/tmp/hoim-surgery-browser-final2-category-counts.json",
+      "sha256": "9b8004ba773adf43bbbb378a61e6c2ba58aea0e446acb10669cea6a1e46103b7",
+      "total": 890,
+      "all_77_previous_file_counts_unchanged": true,
+      "unmodified_previous_test_files": 76,
+      "one_explicitly_reviewed_test_source_change": {
+        "path": "ai-sofa-independent-review.spec.js",
+        "baseline_sha256": "84e3081bcdf14652f31aa8afa79851c85bd6dcea675bf06be21ebc5eda991a27",
+        "current_sha256": "57a01721a430271477992529474e87255c26d13dc56105e81ef53b16883f4104",
+        "scope": "The previously unsupported exclusiveMaximum is now correctly supported for strict Supply parameter bounds; the existing unknown-key test now injects still-unsupported multipleOf. Exact two substitutions only, same test titles and count, no guard or assertion removed.",
+        "commit": "d38bc0a"
+      }
+    },
+    "owned_static_server": {
+      "origin": "http://127.0.0.1:43271",
+      "served_directory": "/tmp/hoim-supply-native-20261020/vue3-new-ui/dist",
+      "has_backend_or_proxy": false,
+      "api_requests_reaching_static_server": [],
+      "socket_closed": true,
+      "thread_stopped": true
+    }
+  },
+  "targeted_frontend_evidence_not_added_again": {
+    "math_findings_assistant": {
+      "path": "/tmp/hoim-supply-frontend-owned-final-verification.json",
+      "sha256": "66ba4a83c22a31ea865b5ba472fdeaf8352c3d29c7cf3abac53b739b0930f1b1",
+      "bytes": 4208
+    },
+    "scope_110": "35 math +56 Findings +19 actual parent isolated cases; all included in1117. Real five task states and unknown Source packets were exported from actual synthetic services, not fabricated terminal zeros.",
+    "series": {
+      "path": "/tmp/hoim-supply-series-ui-final-verification.json",
+      "sha256": "d74ffd5725f147d0b64761781ec6773a80c8dc19b77d0b46e37ed1dde3be2c6f",
+      "bytes": 842
+    },
+    "input": {
+      "path": "/tmp/hoim-supply-input-final-verification.json",
+      "sha256": "662453e72e173094a967565a8a7cd79f5ed98a291c7b818d4d1c78f4fa2d9748",
+      "bytes": 1833
+    },
+    "source": {
+      "path": "/tmp/hoim-supply-source-ui-frozen-verification.json",
+      "sha256": "0a09b1d7c9698c0aa107b43efe688102b768b8cadf8c6a0bcf7728cbe4498d9e",
+      "bytes": 15812
+    },
+    "provider_and_production": {
+      "path": "/tmp/hoim-supply-production-entry-final-verification.json",
+      "sha256": "7292056287df2fe6cf8d192bc23e60a45a213e488565a61a3f65a301a3510dd6",
+      "bytes": 31455
+    },
+    "independent_review": {
+      "path": "/tmp/hoim-supply-final-integration-independent-review.json",
+      "sha256": "f3ee655776a6821595bca414df3cdf12805055d85cbb059f3f89a6f826bfb4a4",
+      "bytes": 14299
+    },
+    "independent_permanent_four_cases": {
+      "path": "/tmp/hoim-supply-independent-integration-final2-execution.json",
+      "sha256": "f3cb79d81998a598ad2d3f82a30fa4586181e929f5a724b4d13007454c446281",
+      "bytes": 3165
+    },
+    "independent_sixteen_guard_leaves": {
+      "path": "/tmp/hoim-supply-mixed-mode-independent-final2-review.json",
+      "sha256": "9d520dff58e579e876a51e7c66cef819fa8fe7a6d860e58c792c4b1cd3c9b336",
+      "bytes": 2541
+    },
+    "scope": "49 Series/Input,38 Source/API/schema,18 Provider,8 actual production entry and4 independent permanent cases are subsets of final1117; in-page guard leaves and actual fixture-export pytest reruns are not additional case counts."
+  },
+  "node_tools": {
+    "passed": 44,
+    "failed": 0,
+    "includes_route_cases": 14,
+    "milliseconds": 363.632169,
+    "evidence": {
+      "path": "/tmp/hoim-supply-node-tools-final-verification.json",
+      "sha256": "f59b615afabdc26defe8b83428e44d6cefdc2275bf63e0e411854387248ec18a",
+      "bytes": 1551
+    },
+    "scope": "Existing four Node tooling files, not browser/model/HTTP cases."
+  },
+  "platform_inventory": {
+    "evidence": {
+      "path": "/tmp/hoim-supply-platform-final3-inventory.json",
+      "sha256": "8fb80a0a72f73bd0d89a4906df9e19321310d297d0e3dc33896765b0d534a31e",
+      "bytes": 156708
+    },
+    "business_routes": 810,
+    "all_api_routes_including_original_root": 811,
+    "router_modules": 108,
+    "orm_metadata_tables": 199,
+    "vue_views": 160,
+    "implementation_test_fixture_file_count": 139,
+    "implementation_sha256": {
+      "fastapi_be/Dockerfile.supply": "8b3086b4ce3e16cda52c7f6d428a9001dc0a66833cb2610fa69fa5698d6da2b3",
+      "fastapi_be/alembic/versions/20261020_supply_series.py": "414443690fbe747366e8c048e180c82bf2cd2244416f84ccc7c7552dfd593815",
+      "fastapi_be/alembic/versions/20261020_supply_sources.py": "4b2df8c70daa9d648a4792f564919008720aff6b083f281db46fac9b7b0f1830",
+      "fastapi_be/app/ai/catalog.py": "9897f32d35704c22b33042028705f308eec8bd41d8656f179dc807ef2d09c23f",
+      "fastapi_be/app/ai/context.py": "b92e6d5ebc222b52da259702f49a9c40c4dac2049f1156dad59eeb009a27c1a8",
+      "fastapi_be/app/ai/gateway.py": "f86279184d5a28f0bef0d179ef6b7b4537029779d34d2885a11ad8ec4012ea91",
+      "fastapi_be/app/ai/governance.py": "7288f02864f7f7d80ce2b3d3ccaa164d983c9770dc8c6e32b66ec9cf70e3c750",
+      "fastapi_be/app/ai/native_acceptance.py": "ebadd6404ff972e88cd2169016b73b3b69c00a94bf1f38c75c6e29aaf9f5dd24",
+      "fastapi_be/app/ai/operational_sources.py": "8649c4dad4f426c2afd08a0a631cf3bcca77b4b1835b09a26995c192d217ccc9",
+      "fastapi_be/app/ai/references.py": "2f677313a5284d8ac2f3042b50ff5bfc5673304eb12c8d0f66e503d67112945e",
+      "fastapi_be/app/ai/runtime.py": "fa895b82807aede717c5b65f27bc2ff3a9d253cc98bca7b2d285fa307f852315",
+      "fastapi_be/app/ai/schemas.py": "ca0bb14d64628c90dc497284b962ff08dcec4caa2ed3cc0b5b82b1f6732d9e47",
+      "fastapi_be/app/ai/supply_collection.py": "e13e42f26c846893da93432e4bd23c10b9d74ce35fa742b6a2df013c024bb582",
+      "fastapi_be/app/ai/supply_config.py": "c86e62e8ae7f6f3044e490ad4fb972845ad6ceed6d9f24bcfe761b96ba92f6d1",
+      "fastapi_be/app/ai/supply_context.py": "71bca1371a9cf019466aab7fc507c97a480b82a3a22cdb8bda5e7d402fd44760",
+      "fastapi_be/app/ai/supply_contract.py": "28a1cc3ec84f78eb559c80a1fdbdf4f9ee76845261ac3d682537bb252c3e6b44",
+      "fastapi_be/app/ai/supply_history.py": "351449f5cec6b64e7596c455a9f45a87d3dba53aa6255900e84d13d51110b15a",
+      "fastapi_be/app/ai/supply_model.py": "5aca6771f3f5a204292166880b5e1494c1b132cdcfe286126defa84c69d06ad9",
+      "fastapi_be/app/ai/supply_probe.py": "22823373f42dba44c098a91d51abea682ce5eb620d1c03cbb83e32e2931b4a52",
+      "fastapi_be/app/ai/supply_projection.py": "7323b85ca489cdc2e12b9d2905f58d1cdb93d4053b17fad4034ce7eecfdd3f71",
+      "fastapi_be/app/ai/supply_protocol.py": "7399c7fc716f55e122991cfd1389ed016f93d126f553c298372ef70df7511fe0",
+      "fastapi_be/app/ai/supply_series.py": "4f12d580efb63ddd932674ad0b121bf914cc3bf53fbff5a91367eeb3a8632331",
+      "fastapi_be/app/ai/supply_series_input.py": "9a1d30de485a2d726e521c67527e4d86a67dcdd9c69941ed4f4308c9860de7e4",
+      "fastapi_be/app/ai/supply_series_models.py": "eb0c3c50b85b323a1a53b1a7e9797aa0df6e7effcad0c5d7e403b7302eff980a",
+      "fastapi_be/app/ai/supply_server.py": "573190e1fc4aef4da6dfd6b3cdc1b92911b4d1ade7a359dd22b479dfbbd0b5a8",
+      "fastapi_be/app/ai/supply_snapshot.py": "cebcfef26b1d6c3e0d13af6db006a547c5290a52938f62a847258c27b9880400",
+      "fastapi_be/app/ai/supply_source_input.py": "9faad97c1ae20c37fe1b422f9e787b5bd72813dbf3ed3d7d1881d8699502c3de",
+      "fastapi_be/app/ai/supply_source_models.py": "7860317708b6a0e5fe7d00546d76b54b53343d6a8002dadb236484ce7240e680",
+      "fastapi_be/app/ai/supply_sources.py": "ba50225021f84c1c2bb19aedb05136b55ca40e22bf6bdbbe93442cea52c85a75",
+      "fastapi_be/app/ai/supply_storage.py": "c93d9a94e7be731a4e13686f6fe239471583b94ca8e660344392fe8309e297eb",
+      "fastapi_be/app/main.py": "0d35ce15cd993bf429fb1a47c80edee5f0aa560aea1ee31373fd6b86bc1731be",
+      "fastapi_be/app/models.py": "544de77854ab9ad76a28b77caef2614a27aa849193e5eacf3de2a467c3314e76",
+      "fastapi_be/app/routers/ai.py": "d7a7f5d33745cdb61ac85396866f5d3653e9fb4ebc89480652d57c525e0e41fe",
+      "fastapi_be/app/routers/ai_admin.py": "c164f8b884268ccd71689be4fc3309a0bb8f8fe007b753261bae4c4db7050e5c",
+      "fastapi_be/app/routers/ai_supply_series.py": "781ff2834b091a9837ac8185aa0166cdccb46634f82db3d1217c1047fa548824",
+      "fastapi_be/app/routers/ai_supply_sources.py": "183efb2610974feae321a7375b5ebb1531d5ffddc438da6830543c30c6879989",
+      "fastapi_be/requirements-supply.txt": "5e18296657436a1882857c589c0f2d883e3a86c01c35b9ebfb76ba2542f960be",
+      "fastapi_be/tests/test_ai_admin_current_authority.py": "6e1ca82749a4342b6976b8ab270bbc254a979718fb3050f9fb6257470f401432",
+      "fastapi_be/tests/test_ai_native_acceptance.py": "9e38b838436f3af779f0de204603fc1f8f840845644628c9ca95487d914a278e",
+      "fastapi_be/tests/test_ai_supply_admin.py": "4d2d79a0064ac06e9fb213c5dbbe638c0203755166bc9c1565b67020cec69599",
+      "fastapi_be/tests/test_ai_supply_capacity.py": "2f820a8a27b4c5fa2277a9d32d7e6f4ddcd34a75fcd472b1f7df9da053ed45a3",
+      "fastapi_be/tests/test_ai_supply_catalog.py": "b1247fb36539b2cddb57d5775fcf3927c80ba5c9bf60a9ddd5bd5d46d117a0d8",
+      "fastapi_be/tests/test_ai_supply_collection.py": "5ddf135afc74a20edd351146f4a3cdfd58e6d069677602949a616e57785d5fb4",
+      "fastapi_be/tests/test_ai_supply_context.py": "3e68d880496bf437e4ca38c5b951792479f09b4806c371464afcd482640d72b8",
+      "fastapi_be/tests/test_ai_supply_contract.py": "a362a5057aebd259c3d7bbcfff63179f367f34e001cf375f53103ef61dea0374",
+      "fastapi_be/tests/test_ai_supply_current_authority.py": "dcd4a772b8bc5c4b77afb6f97829c411e28f9857bcfe53294a60a8be7332ab75",
+      "fastapi_be/tests/test_ai_supply_gateway.py": "712b34af94b362c5604d42c46d2184fea8c47e0fd7fb2b8d40885cd69ec1b15a",
+      "fastapi_be/tests/test_ai_supply_history.py": "9a7afee1b67951d7aa50cac1018ec0b0b4d1a0b7997618d0954a9f715eb1967e",
+      "fastapi_be/tests/test_ai_supply_main_precision.py": "aa48581c812670056f19bed6916ec9ee4694747907f5fe69f5c0bc041d062516",
+      "fastapi_be/tests/test_ai_supply_model.py": "81a7bb47922ff4278f5d5d3b6f327aac9ab40e4a31509777b2af53cdd8e7bf7f",
+      "fastapi_be/tests/test_ai_supply_pipeline.py": "b923d987406dc906c58b925919f6a58d4cc4a80d347282cf2d53a3bb4d794470",
+      "fastapi_be/tests/test_ai_supply_probe.py": "15446f7b120560bb24ed434fd70703219ec68823821d8f5074f2d47c5154e31a",
+      "fastapi_be/tests/test_ai_supply_protocol.py": "29c83b95b0ef32283b42d2f29bd0cb62e8d04231bd16384ce4ada15e41ac5a52",
+      "fastapi_be/tests/test_ai_supply_series.py": "a12b4ba67f5b1eb9e868a3d6976dfcf8191a69abd94d7d53fc74bc47ee9c432c",
+      "fastapi_be/tests/test_ai_supply_series_api.py": "c6b6c24f1340228b6b0d91ca5798280c9fc3195178208fc08e82fc7119e5efad",
+      "fastapi_be/tests/test_ai_supply_series_input.py": "0a22bb78324083b7c89c680c7fde8a578dd9cc7ad8e9f355a241e98724eafd4b",
+      "fastapi_be/tests/test_ai_supply_series_migration.py": "9ef2f74176ea0ae448476d7fbd7c63408eacf62856ede63cdc9c4ca6d845daaf",
+      "fastapi_be/tests/test_ai_supply_server.py": "602139f10613e2d765fd56f5c6694f89a23d7bd226283648838d5c408914a826",
+      "fastapi_be/tests/test_ai_supply_source_input.py": "4952e2411826d2881e08e6b6ed7d97cb83e2c74050aeee68e5837506c6e9e7d2",
+      "fastapi_be/tests/test_ai_supply_source_migration.py": "03e66c182751a8a502f0ac5949d6a53803aac3186b0ee57c882099d279e33429",
+      "fastapi_be/tests/test_ai_supply_sources.py": "9fc625dec514785a8fb05a9d3e3fb348534b8fa4015b3702226d178ab31c4bc0",
+      "fastapi_be/tests/test_ai_supply_sources_http.py": "122e776f5ba0d2e7f6f529ea1258cc01161a2f7a5ba8bb73e89705f1f1b8f82c",
+      "fastapi_be/tests/test_ai_supply_storage.py": "b87bd0da3806a3fa83999f514a7dbc4d96a23ad0c149479ca0eeb08f7cb09feb",
+      "fastapi_be/tests/test_ai_surgery_pipeline.py": "31c67fbcebbcab9f8c19a7f1c3f478a8b91cbfdb6cd8d6d8c157f6f8f1816ff1",
+      "vue3-new-ui/e2e/ai-sofa-independent-review.spec.js": "57a01721a430271477992529474e87255c26d13dc56105e81ef53b16883f4104",
+      "vue3-new-ui/e2e/ai-supply-assistant.spec.js": "68fa9bac1e8c0a9cbe537fd3625b25476d265077594d2e080a118f76f563a95e",
+      "vue3-new-ui/e2e/ai-supply-findings.spec.js": "252a2c879e35e161d54bdf337fd9ff359bca82da9b84370bb18b2f9ffaa01210",
+      "vue3-new-ui/e2e/ai-supply-independent-integration.spec.js": "7da7ccbf58114ccc28041f111fc47efc294e21d4965f01592627906ca1c0e92c",
+      "vue3-new-ui/e2e/ai-supply-input.spec.js": "36ce45f7e2924b1967d436db16a3356472dd683feda405a1b93ea1f5a1443b22",
+      "vue3-new-ui/e2e/ai-supply-native-entry.spec.js": "6c6e491d894317982ce7600e5955fc5d348b2abcc37c3926323854b60fe21ef3",
+      "vue3-new-ui/e2e/ai-supply-provider.spec.js": "09a811784f7cf83b7461281645ba061d73d56ba711f4fc9dd2ce80463e008fd1",
+      "vue3-new-ui/e2e/ai-supply-results-math.spec.js": "59dab60bf57da627b2f531a0d24c057b467af207224b9fb6ed9b52ee6a5c0b90",
+      "vue3-new-ui/e2e/ai-supply-series-api.spec.js": "b439fc1862aa0b96bc08b1060db3aa9cc2c74ecc15c35cc9bb976771732952f4",
+      "vue3-new-ui/e2e/ai-supply-series.spec.js": "b6bcbe6b6a7846297620037ef8f19beab3484aab80a842a8401660d7ad2b9ba8",
+      "vue3-new-ui/e2e/ai-supply-source-api.spec.js": "163e7848712f55c9deab949ebb2f7217bdb0eea9ed774124244d55e2a9b76d0c",
+      "vue3-new-ui/e2e/ai-supply-sources.spec.js": "b3694f2e2f1d44d9f2f106b9c9aa6f81ff4a3dbc0282584c808a300768a54237",
+      "vue3-new-ui/e2e/fixtures/supply-assistant-harness.cjs": "01cf7edd20865ed89c7c4fbe60443740d32950b1fb3c662e45a50553ccf871dc",
+      "vue3-new-ui/e2e/fixtures/supply-assistant-ui.cjs": "760729f54ea49a4e227d8e727820c9df76b78e6672274e2acb42130030f19ceb",
+      "vue3-new-ui/e2e/fixtures/supply-input-ui.cjs": "5aa57686853347afb68910fc26ca647630479db2facf8423e36603d25c471237",
+      "vue3-new-ui/e2e/fixtures/supply-native/PRODUCTION-ENTRY.md": "a875a21e9f15aa5599399a14e388b522f5583500501443f45d356302cdf324c2",
+      "vue3-new-ui/e2e/fixtures/supply-native/capabilities.json": "3cf4a301191e6f322ff5f6e23c5e9823be3d85332032b13b1b6888c1b1fb7619",
+      "vue3-new-ui/e2e/fixtures/supply-native/complete-h14.json": "4048dbd89ddf2a917feb2b9bf5c88f3880c62323ba0bc9c31f2e79158d47010c",
+      "vue3-new-ui/e2e/fixtures/supply-native/native-manifest.json": "faaa79b76e543a6ff533ab7752c988362a214471c5101fd0adada7d697f3159c",
+      "vue3-new-ui/e2e/fixtures/supply-native/partial-h7.json": "19662ed1583b22e83fa205cfe1ada9685a73f74fb6363e924e24dfd313befa70",
+      "vue3-new-ui/e2e/fixtures/supply-native/pipeline-development.json": "a8eba2e87b0649308f50a5b8594828bbbf7110820c7368f4bf6b770fd9925a19",
+      "vue3-new-ui/e2e/fixtures/supply-native/pipeline-statuses.json": "c8410761890c3ed5e229b18a9e359a13c282cdf373162621e466a8fc87b658bd",
+      "vue3-new-ui/e2e/fixtures/supply-native/pipeline-unknown.json": "a8a3942aa0f4c1f85277f1388b22af778bae0c7eb146befb45c527ffe19694fb",
+      "vue3-new-ui/e2e/fixtures/supply-native/production-complete.json": "ec06baf60cfdb156e6ae2cd981b06ce3b4d998f4e0b9b558873e32ac9efccbc9",
+      "vue3-new-ui/e2e/fixtures/supply-native/production-entry.json": "0579f9d05b64e762b26e1cab44b97a946e88945a2277624292bf569ca5813d04",
+      "vue3-new-ui/e2e/fixtures/supply-native/split-parameters-h7.json": "6710c063c4730efb792cf242bba8607d7dddf43cf9be674771d1edc1c9a87a67",
+      "vue3-new-ui/e2e/fixtures/supply-native/unit-mismatch-h7.json": "09cd60c428afc5c703498d8ee78f9cf24d743c72e01b4b9874e2cba6d8a6d8f2",
+      "vue3-new-ui/e2e/fixtures/supply-native/unknown-h7.json": "75fb73501a3b081150e80cc5d67957d07f293e3372ebaef5e183962ae36a5406",
+      "vue3-new-ui/e2e/fixtures/supply-native/zero-h7.json": "ee2ba5f0371f6183272ea03bfb9b340542a9c7ce3c9b8c5b92d4caa31f51ce01",
+      "vue3-new-ui/e2e/fixtures/supply-pipeline-fixture.cjs": "16ff68138284a3ae5ceec3aaf576a567ec398b944399de4a989dead816a398cc",
+      "vue3-new-ui/e2e/fixtures/supply-production-complete.cjs": "04197910da22e2c3ff34477f0ec5f7ab64aa1f468dcb72bcc0aa47c43521ce83",
+      "vue3-new-ui/e2e/fixtures/supply-production-entry.cjs": "1782c4e05d54927ad6d1eb1b0eb1251d0ced362f7298af9eabc8d832af9c89cc",
+      "vue3-new-ui/e2e/fixtures/supply-result-harness.cjs": "ee0186dbcf7bbaefa6295be3bff8ce713b898444b0a700543c9946896340cbf3",
+      "vue3-new-ui/e2e/fixtures/supply-series-harness.cjs": "4e1cfe415a8081dae416d363279a8f0a9ce6b668b9dcb7e9e3630add27c17af9",
+      "vue3-new-ui/e2e/fixtures/supply-series-ui.cjs": "7e306d868f7a6a8b9c0fc46976fcd0b02b07f3b57a8a5324304f58ee7b6181f3",
+      "vue3-new-ui/e2e/fixtures/supply-series/complete.json": "a91da49bbe3de515b9e120682f6aa25aba32e8763750c610f7342d56bc44b0af",
+      "vue3-new-ui/e2e/fixtures/supply-series/input-complete.json": "c0048578dbbfcb37fec55509e93179b983654c317604a5e3b4cd7a325493786b",
+      "vue3-new-ui/e2e/fixtures/supply-series/input.json": "d76a4a1f510b3621e0fb6c338bfc2fea3b4c23dbc1ec743ef0134f94a46932ec",
+      "vue3-new-ui/e2e/fixtures/supply-series/partial.json": "e4517a1adc8954449634aeda4b88230a412ff461d35d1552acc8202764ad6858",
+      "vue3-new-ui/e2e/fixtures/supply-source-harness.cjs": "89d99f7c5b883fe59cf5d4e0c0968c87a86a9dba70bd4340bb5e12784676e931",
+      "vue3-new-ui/e2e/fixtures/supply-source-ui.cjs": "eb5ec4db20d154588e21a3dfb7b0ac67d8f76b788ec2612979e046d7bb577d7e",
+      "vue3-new-ui/e2e/fixtures/supply-sources/actual.json": "02cedad9dc97f48236c4cd4423917056d44b386482fad4b0c44028ed517dbac0",
+      "vue3-new-ui/e2e/fixtures/supply-sources/panel.json": "fe2d8b536535c1c4c0e010802e3050288ed56cd864983180cc7b0e1ddf20ed7d",
+      "vue3-new-ui/e2e/schema-exclusive-boundaries.spec.js": "90dd20a686be0b460a698f9949d19ee0cd7f7f65102459dec0db03e0883140a8",
+      "vue3-new-ui/rspack.config.js": "2367eb67e474d386333fd5c82ea573238bcdeaaab76779b66e22e012f38a6ac3",
+      "vue3-new-ui/scripts/extract-supply-input-fixtures.cjs": "7e1ad41bec28be0349bb302c9413e4278520369317f282018c8fb048ec13ee0c",
+      "vue3-new-ui/scripts/extract-supply-pipeline-fixtures.cjs": "39a9caee3c12c6696b15c1277e4badd65d3c3ce46971066060a2fd49db28c499",
+      "vue3-new-ui/scripts/extract-supply-series-fixtures.cjs": "78b900d4479a5c36bf510d6e5738f5739110267fc9059675c1494339c7af2071",
+      "vue3-new-ui/scripts/generate-supply-result-fixtures.cjs": "ed61f3a1da648e857065ca93a72f553262da20a958211996cbc412e83cdb10ac",
+      "vue3-new-ui/scripts/generate-supply-result-schemas.cjs": "1345f8dfded565e15abd27310abb58f1c5980b4cb90efe2f9dfb3da7edcda9f7",
+      "vue3-new-ui/scripts/generate-supply-series-schemas.cjs": "823c6d646a9304f484ebc20e54813b3cf663a556f9d37d68bb1fb6f2bfe6a0a0",
+      "vue3-new-ui/scripts/generate-supply-source-fixtures.cjs": "240fe2e29a09ae1d95fd0c3466c267f42fe985b284c182275f686b84c03e1574",
+      "vue3-new-ui/scripts/generate-supply-source-schemas.cjs": "164366e3c465e023fd3c71ea145a0fd62eb643a2d9939b002b29319ea0e752c4",
+      "vue3-new-ui/scripts/surgery-schema-storage.cjs": "1b3538f124da14dc02dca9494b5d7a91fd80ffa3b718bcea92f512d1d91244dc",
+      "vue3-new-ui/src/api/ai/supplyFixedPolicy.json": "9a1f91cf001cae5fe9accf8f2166b897bb4cc197033700c073398c33294f10ba",
+      "vue3-new-ui/src/api/ai/supplyProvider.js": "95906eead852cdaab3fc4df2473cf530c668056bc9dd9259d1b586e4cfaeaa80",
+      "vue3-new-ui/src/api/ai/supplyResultSchemas.json": "e3dbf939c0e423c9104eae720ec814f89229814fd12bec91d64786283c145a8f",
+      "vue3-new-ui/src/api/ai/supplyResults.js": "aecda673269fc50cd0ae0237e5fde6b451c378906dccf65d16639cc9ef2c0403",
+      "vue3-new-ui/src/api/ai/supplySeries.js": "52fea08fe1afabf55c4e7dc348f44f8ea28cbc67968d8be41dd91830b673f8e6",
+      "vue3-new-ui/src/api/ai/supplySeriesSchemas.json": "f2d201ad31b3884f99ff1ccfd30be52c31c5f557419ca065e738486ce530f913",
+      "vue3-new-ui/src/api/ai/supplySourceSchemas.json": "fe9642da2722aa6b004c713c786bd03ee360448da6f6238b1aadeccf1e088f4a",
+      "vue3-new-ui/src/api/ai/supplySources.js": "130533af3b671e3f4e8429f60324bb77be9b16452d993d919bf564b0bf119dbc",
+      "vue3-new-ui/src/api/sofaSchema.js": "4a37baa12b0e2be7d3414a6778f5f00f6649067f3c3e88eca4710b305068edfa",
+      "vue3-new-ui/src/components/AIAssistant/index.vue": "46f1c0931ba7dce5619aedec70dd0cff2b39ddb61803b838fc335dbec51c39f5",
+      "vue3-new-ui/src/components/AIRunHistory/index.vue": "64e6da72dd5e82101831a83791e19c4a3f5abf1d2280431ffe180bca8b279267",
+      "vue3-new-ui/src/components/SupplyFindings.vue": "d3a12f4ebff8470ccd53a1eb80ce29f56a29fc9208ebca7c2dcec2efd0903409",
+      "vue3-new-ui/src/components/SupplyInput.vue": "755e989d86b748d9a1c9d9e6f93f55996690fb7f4a8fe710710f0ea6847c9aaa",
+      "vue3-new-ui/src/components/SupplyProviderCapabilityCheck.vue": "f98f0f5f7862970d91fcdf2d2839f48a0a3c775bea18c17a4f0fd9b325fdf20a",
+      "vue3-new-ui/src/components/SupplySeriesFields.vue": "656d76a2c183c73d70a5259466f10f1e226dcff7a4b1c51b4c049cdac4cf9fc0",
+      "vue3-new-ui/src/components/SupplySeriesPanel.vue": "0394ec00808e02af27133454a895c1250c6066fad1da87191279776bfb85f819",
+      "vue3-new-ui/src/components/SupplySourceEditor.vue": "67c28f41cfce55073caff6ac4db3fc5a2ed007b14642168cbc2ff75307a75dba",
+      "vue3-new-ui/src/components/SupplySourcesPanel.vue": "b9919172967d3711d6b86dcea62784728585e7bb1aa0fb558f08c6c1dd849cc8",
+      "vue3-new-ui/src/views/pharmacy/consumable.vue": "3d0dec7ef6c3de54f9b99f36f4a6395367acc3b96b9ed7b1e5c784b8f3178301",
+      "vue3-new-ui/src/views/pharmacy/pharmaceutical.vue": "75e32e73674f47e50cf6279f86f2d11d011dc65bf4455d8fc4c17fdb9a7038ff",
+      "vue3-new-ui/src/views/system/aiManagement.vue": "3a7f8ca473b65b4550186cb1ebb86bb1a0133e0fa59031ffcf20711edf4f0493"
+    },
+    "generated_artifacts_sha256": {
+      "doc/ai-prompts.json": "c3ea777220edd1341d91419d327f6767939884d668a01a197cac4ea8dd317c43",
+      "doc/ai-capabilities.md": "b7784a3ea4750e06ae435573c7ccaaad402c0effc927a72165c1b7bcb9e9c197",
+      "doc/api-rbac-matrix.md": "7c2f85c2d89d7ba952f3fd25f53886794de5b53e1aec4cacb2b4c9c2a1e1b1d3",
+      "fastapi_be/rbac_matrix.json": "ad59fb9513901c081c8bd91127aff2d8f3efb787781b93a07e59a22991e61b1f"
+    },
+    "validation": {
+      "route_matrix_exact_multiset_match": true,
+      "new_route_actual_role_guards_match_matrix": true,
+      "all_implementation_hashes_and_file_set_stable_during_capture": true,
+      "all_generated_artifacts_stable_during_capture": true,
+      "all_selected_implementation_and_generated_bytes_match_captured_head": true,
+      "prompt_export_exact_match": true,
+      "catalog_numbering_complete_1_to_80": true,
+      "eighteen_historical_records_unchanged": true,
+      "four_new_tables_fourteen_utc6_and_seven_mediumtext_definitions": true,
+      "database_connections": 0,
+      "dotenv_reads": 0,
+      "asgi_lifecycle_calls": 0,
+      "repo_files_modified_by_inventory": false
+    },
+    "source_capture_limit": "Read-only actual imports and registered metadata, no DB/HTTP/ASGI startup. File maps bind the completed source before this documentation-only commit."
+  },
+  "historical_verification_records": {
+    "baseline_commit": "4c07377b10e1003d3f83d3bd4348b932babd1a72",
+    "count": 18,
+    "all_unchanged": true,
+    "records": [
+      {
+        "path": "doc/ai-aki-verification.json",
+        "baseline_sha256": "a2f8e928266ff16d46973db731329d4e96cbfe09e519ba9f5fcbc8ab384a897c",
+        "current_sha256": "a2f8e928266ff16d46973db731329d4e96cbfe09e519ba9f5fcbc8ab384a897c",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-bed-verification.json",
+        "baseline_sha256": "a1e678f1eee4ca5da36b38260a633e354a0b76a8a0d074a53c444ae1bcc13217",
+        "current_sha256": "a1e678f1eee4ca5da36b38260a633e354a0b76a8a0d074a53c444ae1bcc13217",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-ecg-classifier-smoke.json",
+        "baseline_sha256": "838b0305249698617bc475f7158dfbfbb9e6e22e6d6e84e51974bfcfebb90c61",
+        "current_sha256": "838b0305249698617bc475f7158dfbfbb9e6e22e6d6e84e51974bfcfebb90c61",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-ecg-verification.json",
+        "baseline_sha256": "1eedfa9eb918cf6e6b1ee1f201b7413760eeec501c128f4a73401741f0427f94",
+        "current_sha256": "1eedfa9eb918cf6e6b1ee1f201b7413760eeec501c128f4a73401741f0427f94",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-forecast-verification.json",
+        "baseline_sha256": "9b5683bca58efcf7fc460410529fd5aeeed91e2646eb47be24b836cbadc20d63",
+        "current_sha256": "9b5683bca58efcf7fc460410529fd5aeeed91e2646eb47be24b836cbadc20d63",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-frontend-dependencies-verification.json",
+        "baseline_sha256": "968757f4a75e921038133b3fa9a94947ab4d5607142dce8da964f2a13d00bb1d",
+        "current_sha256": "968757f4a75e921038133b3fa9a94947ab4d5607142dce8da964f2a13d00bb1d",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-imaging-classifier-smoke.json",
+        "baseline_sha256": "b2185a31ff66c4602c10136d5b15404199f50cf7d65ea4a8be4718778c6a9e89",
+        "current_sha256": "b2185a31ff66c4602c10136d5b15404199f50cf7d65ea4a8be4718778c6a9e89",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-imaging-verification.json",
+        "baseline_sha256": "63646b181dae4f531abe233708a24f9b9cc05037ef95d57e1e6f39c7f9880148",
+        "current_sha256": "63646b181dae4f531abe233708a24f9b9cc05037ef95d57e1e6f39c7f9880148",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-laboratory-verification.json",
+        "baseline_sha256": "646103e4874b4f895424987520c7adfb6fb8afdd9eb6e2c7104ed2095b72752f",
+        "current_sha256": "646103e4874b4f895424987520c7adfb6fb8afdd9eb6e2c7104ed2095b72752f",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-news2-verification.json",
+        "baseline_sha256": "363be8c61e2f36705dccc4604631e7d0e84aaa6cc922196ed36e48e740ca6570",
+        "current_sha256": "363be8c61e2f36705dccc4604631e7d0e84aaa6cc922196ed36e48e740ca6570",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-nursing-verification.json",
+        "baseline_sha256": "a04248f9de57ddd878c1b408da1833f53651cd3535d8385d2275874a7f6f9517",
+        "current_sha256": "a04248f9de57ddd878c1b408da1833f53651cd3535d8385d2275874a7f6f9517",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-observation-verification.json",
+        "baseline_sha256": "b75ab8c7ff94704cb823be59d51539f06a16a24edf0020b0e87edfd6cf6e6bee",
+        "current_sha256": "b75ab8c7ff94704cb823be59d51539f06a16a24edf0020b0e87edfd6cf6e6bee",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-organ-support-verification.json",
+        "baseline_sha256": "175b4d4b66960f623170aded7ca7dec32f462fc34278289411c1ddda3dbc653d",
+        "current_sha256": "175b4d4b66960f623170aded7ca7dec32f462fc34278289411c1ddda3dbc653d",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-qsofa-verification.json",
+        "baseline_sha256": "d3c4cea9a657527540d3c570512a00568f92a5381c066e9a0bcf204a2e3c7ba4",
+        "current_sha256": "d3c4cea9a657527540d3c570512a00568f92a5381c066e9a0bcf204a2e3c7ba4",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-roster-verification.json",
+        "baseline_sha256": "8ec5327889f81368e24755a8122f5b5c753a84a1e9a949ec3957b35a9ba13188",
+        "current_sha256": "8ec5327889f81368e24755a8122f5b5c753a84a1e9a949ec3957b35a9ba13188",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-sofa-verification.json",
+        "baseline_sha256": "20235fe055a6995be2b40270a52f67cba778d445cd10113e7f8185dbeab0cdca",
+        "current_sha256": "20235fe055a6995be2b40270a52f67cba778d445cd10113e7f8185dbeab0cdca",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-speech-smoke.json",
+        "baseline_sha256": "41ad522da4f04e2a6d75595660ecbc2549acdcd159450aa99602b495c8e690a0",
+        "current_sha256": "41ad522da4f04e2a6d75595660ecbc2549acdcd159450aa99602b495c8e690a0",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-surgery-verification.json",
+        "baseline_sha256": "302fc7655eda439297885b15c2b3f001f1e044fd2eaa5d559941dea5d1e89816",
+        "current_sha256": "302fc7655eda439297885b15c2b3f001f1e044fd2eaa5d559941dea5d1e89816",
+        "unchanged": true
+      }
+    ],
+    "all_stable_during_inventory": true
+  },
+  "preserved_attempts": {
+    "previous_full_backend_runs": [
+      {
+        "path": "/tmp/hoim-supply-full-frozen-pytest-execution.json",
+        "sha256": "fd46ec9cb4f4ae4d1211d47e91aa5de6909b0579d5ad328c59fd5cd103b26fd2",
+        "bytes": 2157
+      },
+      {
+        "path": "/tmp/hoim-supply-full-frozen-final2-pytest-execution.json",
+        "sha256": "6bce3a490ace2bcfe9081d755ea35dae0fb9ef0fc1d981e2ce5c245c6b37cd8c",
+        "bytes": 2215
+      },
+      {
+        "path": "/tmp/hoim-supply-full-frozen-final3-pytest-execution.json",
+        "sha256": "2037e3273b41dee3c51c7ac6e9a96d67eac19e4640ce80de4366da2da04bd69f",
+        "bytes": 2215
+      },
+      {
+        "path": "/tmp/hoim-supply-full-frozen-final4-pytest-execution.json",
+        "sha256": "f67834ec69ea9f47b0b204b2f17c93435e220c35749b71b9a20bba80eed78f75",
+        "bytes": 2181
+      }
+    ],
+    "full_lineage": "Initial full run interrupted for formatting only; final2 and final3 fully passed earlier source. Final4 intentionally interrupted after3778 passes/25 skips to repair independently proven post-flush acceptance bug. Only current final5 is the final-source whole-backend result.",
+    "initial_budget": "Original logs and size lineage retained under /tmp; see build/fix artifacts.",
+    "other_attempts": "Original first production8 failures (7 unmocked SSE plus real UTC6 loss), fixture-clock/export failures, targeted post-write test-trigger timing failures, first MySQL migration/role reports, source/model checks, wrong-cwd exit4, independent first timeout and math/Babel failures are retained under their original /tmp paths and specialist final reports. None is presented as final green evidence."
+  },
+  "artifact_retention": "This tracked JSON includes final source maps and hashes of external evidence. Large raw synthetic packets, logs, report JSON and temporary runners remain local /tmp artifacts and are not bundled in Git or guaranteed permanent; no raw credentials or real hospital/patient data are committed.",
+  "limitations": [
+    "No deployment, push, clinical/operational validation, remote inference or production enablement.",
+    "Recorded quantity baselines compare explicitly audited observations and fixed parameters; they do not establish latent demand, procurement optimality, causal effects or predictive accuracy at a real hospital.",
+    "Current private-MySQL proofs and synthetic SQLite/JWT/native pipeline checks have separately stated scopes; there is no claim that the complete HTTP/native worker chain was run on MySQL.",
+    "Source signatures, technical review and math consistency preserve provenance and declared unknowns; they do not establish clinical or operational truth.",
+    "Overall80-feature goal remains active after this batch."
+  ]
+}

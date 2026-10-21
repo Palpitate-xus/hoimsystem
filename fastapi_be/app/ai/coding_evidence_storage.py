@@ -64,9 +64,23 @@ def is_coding_snapshot(snapshot):
     return bool({"coding_binding", "coding_source", "coding_case"} & context.keys()) or "coding_case_id" in values
 
 
+def is_coding_run(db, run):
+    """Deleting optional JSON markers must not downgrade a governed coding run."""
+    if run.feature_key == "drg_evidence_review" or is_coding_snapshot(json.loads(run.input_json)):
+        return True
+    result = json.loads(run.result_json)
+    if isinstance(result, dict) and (result.get("schema_version") == "coding_result_ref_v1" or "coding_analysis" in result):
+        return True
+    if db is None:
+        return False
+    with db.no_autoflush:
+        return db.query(AICodingRunResult.run_id).filter_by(run_id=run.run_id).first() is not None
+
+
 def load_snapshot(run):
     """Reconstruct all short frozen anchors without trusting matching new hashes."""
     from app.ai.coding_evidence_context import CodingContextBinding, coding_evidence, selection, short_context
+    from app.ai.coding_evidence_frozen import CodingFrozenProvider, CodingFrozenValidation
     from app.ai.coding_evidence_prompt import CODING_SYSTEM_PROMPT
     from app.ai.governance import digest
 
@@ -122,6 +136,8 @@ def load_snapshot(run):
             if canonical_json(metadata[name]) != canonical_json(expected):
                 raise ValueError("Original metadata differs from frozen context")
         provider = snapshot["provider_snapshot"]
+        if canonical_json(CodingFrozenProvider.model_validate(provider).model_dump(mode="json")) != canonical_json(provider):
+            raise ValueError("The complete original provider fields or scalar types differ")
         if (
             type(provider["provider_id"]) is not int
             or provider["provider_id"] != run.provider_id
@@ -135,6 +151,8 @@ def load_snapshot(run):
         ):
             raise ValueError("Original provider identity differs")
         validation = snapshot["feature_validation"]
+        if canonical_json(CodingFrozenValidation.model_validate(validation).model_dump(mode="json")) != canonical_json(validation):
+            raise ValueError("The complete original feature-validation fields or scalar types differ")
         if type(validation["feature_revision"]) is not int or validation["feature_revision"] != metadata["feature_revision"] or validation["status"] != metadata["validation_status"]:
             raise ValueError("Original feature-validation revision differs")
         return snapshot, metadata, evidence, binding

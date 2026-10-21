@@ -888,9 +888,9 @@ def inspect_run_trace(run_id: str, db: Session = Depends(get_db), user: User = D
     if run is None:
         raise HTTPException(404, "AI 任务不存在")
     snapshot = json.loads(run.input_json)
-    from app.ai.coding_evidence_storage import is_coding_snapshot
+    from app.ai.coding_evidence_storage import is_coding_run
 
-    if is_coding_snapshot(snapshot):
+    if is_coding_run(db, run):
         from app.ai.coding_evidence_context import expand_context
         from app.ai.runtime import authorize_run
 

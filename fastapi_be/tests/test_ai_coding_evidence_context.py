@@ -25,7 +25,7 @@ def bundle_for(db, c, row):
 
 
 def draft_for(source, projection_hash):
-    document = source["documents"][0]
+    document = next((row for row in source["documents"] if row["field"] == "operation_summary"), source["documents"][0])
     return CodingEvidenceDraft(
         schema_version="coding_evidence_draft_v1",
         source_id=source["source_id"],
@@ -127,3 +127,17 @@ def test_extra_private_context_and_rehashed_public_projection_rejected(db_sessio
     expanded["coding_source"]["documents"][0]["text"] += "changed"
     with pytest.raises(ValueError):
         public_payload({"input": selected(row), "context": expanded})
+
+
+def test_coding_metadata_always_advertises_strict_evidence_input_and_actual_system_contract(db_session):
+    from app.ai.catalog import FEATURE_BY_KEY
+    from app.ai.coding_evidence_prompt import CODING_SYSTEM_PROMPT
+    from app.ai.governance import describe_config, digest
+
+    spec = FEATURE_BY_KEY["drg_evidence_review"]
+    ordinary = describe_config(db_session, spec, None)
+    management = describe_config(db_session, spec, None, management=True)
+    assert ordinary["input_mode"] == management["input_mode"] == "coding_evidence"
+    assert ordinary["source_reference_keys"] == ["coding_case_id"]
+    assert "doctor" in ordinary["allowed_roles"]
+    assert management["system_prompt_hash"] == digest(CODING_SYSTEM_PROMPT)

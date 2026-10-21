@@ -41,6 +41,8 @@ def pipeline_case(db_session, case, monkeypatch):
     monkeypatch.setattr(coding_evidence_context, "datetime", Clock)
     monkeypatch.setattr(models, "datetime", SimpleNamespace(datetime=Clock, UTC=datetime.UTC))
     monkeypatch.setattr(runtime, "utcnow", lambda: NOW)
+    case["home"].operation_summary = "\ufeff原文🧪\r\n仅合成操作说明，仍待人工核实。"
+    db_session.commit()
     row = published(db_session, case)
     provider, feature = configure(db_session, case, "drg_evidence_review")
     return {**case, "source": row, "provider": provider, "feature": feature}
@@ -111,6 +113,7 @@ async def test_actual_jwt_queue_complete_draft_history_feedback_and_frozen_super
     data = detail.json()["data"]
     assert set(data["coding_findings"]) == {"coding_source", "coding_case", "coding_binding"}
     assert data["result"]["coding_analysis"]["claims"] and "待复核" in data["result"]["summary"]
+    assert data["result"]["coding_analysis"]["claims"][0]["citations"][0]["quote"] == "\ufeff原文🧪\r\n仅合成操作说明，仍待人工核实。"
     blob = db.get(AICodingRunResult, claim[0])
     assert blob.content_hash == hash_content(data["result"]) and blob.result_bytes == len(blob.result_json.encode())
     assert json.loads(row.result_json)["schema_version"] == "coding_result_ref_v1"
@@ -208,3 +211,64 @@ async def test_actual_postwrite_fault_rolls_back_result_pointer_blob_and_success
         db.rollback()
         db.execute(text("DROP TRIGGER IF EXISTS synthetic_coding_fault"))
         db.commit()
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("variant", ["queued_feature", "succeeded_feature", "succeeded_blob_identity"])
+async def test_removing_coding_markers_cannot_downgrade_to_generic_read_or_execution(async_client, auth_headers, db_session, pipeline_case, variant):
+    db, c = db_session, pipeline_case
+    headers = auth_headers(c["doctor_user"].username)
+    claim, _ = await queue(async_client, headers, db, c)
+    if variant != "queued_feature":
+        transport, _ = draft_transport(c)
+        await execute_claimed(*claim, transport=transport)
+        db.expire_all()
+        assert db.get(AIRun, claim[0]).status == "succeeded"
+    review(db, c["super_admin_user"], "case", c["source"].case_snapshot_id, {"expected_revision": 2, "expected_content_hash": c["source"].content_hash, "basis_note": NOTE}, revoke=True)
+    row = db.get(AIRun, claim[0])
+    snapshot = json.loads(row.input_json)
+    snapshot["payload"]["input"].pop("coding_case_id")
+    for name in ("coding_binding", "coding_source", "coding_case", "selected_sources"):
+        snapshot["payload"]["context"].pop(name, None)
+    row.input_json = canonical_json(snapshot)
+    if variant != "queued_feature":
+        row.result_json = canonical_json({"summary": "此伪造通用说明绝不能显示", "sections": [], "warnings": [], "missing_data": []})
+    if variant == "succeeded_blob_identity":
+        row.feature_key = "patient_summary"
+    db.commit()
+    for actor in (c["doctor_user"], c["super_admin_user"]):
+        response = await async_client.get(f"/api/ai/runs/{claim[0]}", headers=auth_headers(actor.username))
+        assert response.status_code == 409 and "此伪造通用说明" not in response.text, response.text
+    trace = await async_client.get(f"/api/ai/admin/runs/{claim[0]}", headers=auth_headers(c["super_admin_user"].username))
+    assert trace.status_code == 409 and "此伪造通用说明" not in trace.text, trace.text
+    if variant == "queued_feature":
+        transport, packets = draft_transport(c)
+        await execute_claimed(*claim, transport=transport)
+        assert not packets and assert_unaccepted(db, claim[0]).status == "failed"
+    else:
+        feedback = await async_client.post(f"/api/ai/runs/{claim[0]}/feedback", headers=headers, json={"outcome": "accepted", "comment": "不能确认损坏任务"})
+        assert feedback.status_code == 409 and db.query(AIFeedback).filter_by(run_id=claim[0]).count() == 0
+
+
+@pytest.mark.asyncio
+async def test_every_original_provider_and_validation_field_is_required_for_complete_task_audit(async_client, auth_headers, db_session, pipeline_case):
+    db, c = db_session, pipeline_case
+    headers = auth_headers(c["doctor_user"].username)
+    claim, _ = await queue(async_client, headers, db, c)
+    row = db.get(AIRun, claim[0])
+    original = row.input_json
+    snapshot = json.loads(original)
+    count = 0
+    for container in ("provider_snapshot", "feature_validation"):
+        for key in snapshot[container]:
+            changed = json.loads(original)
+            del changed[container][key]
+            row.input_json = canonical_json(changed)
+            db.commit()
+            response = await async_client.get(f"/api/ai/runs/{claim[0]}", headers=headers)
+            assert response.status_code == 409, (container, key, response.text)
+            count += 1
+    row.input_json = original
+    db.commit()
+    control = await async_client.get(f"/api/ai/runs/{claim[0]}", headers=headers)
+    assert count == 17 and control.status_code == 200, control.text

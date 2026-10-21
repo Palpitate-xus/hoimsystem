@@ -320,10 +320,10 @@ def list_runs(
         except HTTPException as exc:
             if exc.status_code in {403, 404}:
                 continue
-            if exc.status_code == 409 and item.feature_key == "drg_evidence_review":
-                from app.ai.coding_evidence_storage import is_coding_snapshot
+            if exc.status_code == 409:
+                from app.ai.coding_evidence_storage import is_coding_run
 
-                if is_coding_snapshot(json.loads(item.input_json)):
+                if is_coding_run(db, item):
                     continue
             if exc.status_code == 409 and item.feature_key == "surgery_scheduling":
                 continue
@@ -390,9 +390,9 @@ def review_result(run_id: str, req: FeedbackWrite, db: Session = Depends(get_db)
     if run.status != "succeeded":
         raise HTTPException(409, "只能复核已成功生成的建议")
     from app.ai.coding_evidence_storage import expand_result as expand_coding_result
-    from app.ai.coding_evidence_storage import is_coding_snapshot
+    from app.ai.coding_evidence_storage import is_coding_run
 
-    if is_coding_snapshot(json.loads(run.input_json)):
+    if is_coding_run(db, run):
         expand_coding_result(db, run)
     if run.feature_key == "roster_optimization":
         from app.ai.roster_storage import expand_result, is_roster_snapshot

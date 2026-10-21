@@ -384,11 +384,11 @@ def authorize_run(db: Session, user: User, run: AIRun) -> None:
         surgery_snapshot = json.loads(run.input_json)
     except (ValueError, TypeError, RecursionError) as exc:
         raise HTTPException(409, "历史任务缺少有效完整JSON") from exc
-    from app.ai.coding_evidence_storage import is_coding_snapshot
+    from app.ai.coding_evidence_storage import is_coding_run
     from app.ai.inventory_storage import is_inventory_snapshot
     from app.ai.supply_storage import is_supply_snapshot
 
-    if is_coding_snapshot(surgery_snapshot):
+    if is_coding_run(db, run):
         from app.ai.coding_evidence_context import expand_context
         from app.ai.coding_evidence_sources import current_actor
         from app.ai.coding_evidence_storage import load_snapshot as load_coding_snapshot
@@ -511,13 +511,15 @@ def authorize_run(db: Session, user: User, run: AIRun) -> None:
 
 def describe_run(run: AIRun, include_result: bool = True) -> dict:
     """Expose the user-facing result, not system instructions or provider secrets."""
-    from app.ai.coding_evidence_storage import is_coding_snapshot
+    from sqlalchemy.orm import object_session
+
+    from app.ai.coding_evidence_storage import is_coding_run
     from app.ai.inventory_storage import is_inventory_snapshot
     from app.ai.roster_storage import is_roster_snapshot
     from app.ai.supply_storage import is_supply_snapshot
     from app.ai.surgery_storage import is_surgery_snapshot
 
-    if is_coding_snapshot(json.loads(run.input_json)):
+    if is_coding_run(object_session(run), run):
         from app.ai.coding_evidence_storage import run_binding
 
         run_binding(run)

@@ -169,3 +169,104 @@ async def test_unknown_actual_usage_remains_nullable_in_terminal_audit_and_api(a
     assert (data["input_tokens"], data["output_tokens"]) == expected
     assert data["usage_receipt"]["complete"] is False and data["result"] is None
     assert db.query(AIAuditEvent).filter_by(action=documents.ACCEPT, target=run.run_id).count() == 0
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("when", ["queued", "inflight"])
+@pytest.mark.parametrize("change", ["revoke", "role", "token", "provider", "feature", "prompt"])
+async def test_current_original_actor_model_or_prompt_change_prevents_acceptance(async_client, auth_headers, document_pipeline, when, change):
+    case, db = document_pipeline, document_pipeline["db"]
+    claim, _ = await queue(async_client, auth_headers(case["actor"].username), case)
+
+    def mutate():
+        if change == "revoke":
+            original = case["original"]
+            from tests.test_ai_document_evidence_sources import cas
+
+            sources.revoke_original(db, case["actor"], original.snapshot.original_id, {**cas(original), "basis_note": "本合成原件撤销，不能继续接收旧草稿。"})
+        elif change == "role":
+            case["actor"].user_role = "doctor"
+        elif change == "token":
+            case["actor"].token_invalid_before = case["now"] + datetime.timedelta(seconds=1)
+        elif change == "provider":
+            case["provider"].revision += 1
+        elif change == "feature":
+            case["config"].enabled = 0
+        elif change == "prompt":
+            case["config"].revision += 1
+        db.commit()
+
+    if when == "queued":
+        mutate()
+    transport, packets = model_transport(case, mutate=mutate if when == "inflight" else None)
+    await runtime.execute_claimed(*claim, transport=transport)
+    db.expire_all()
+    run = db.get(AIRun, claim[0])
+    assert run.status == "failed", (run.error_code, run.error_message)
+    assert run.result_json == "{}" and db.query(AIAuditEvent).filter_by(action=documents.ACCEPT, target=run.run_id).count() == 0
+    assert len(packets) == (1 if when == "inflight" else 0)
+    receipt = documents.usage_receipt(db, run)
+    assert receipt["complete"] is (when == "inflight")
+
+
+@pytest.mark.asyncio
+async def test_revoked_original_remains_truthfully_revoked_in_super_frozen_audit(async_client, auth_headers, document_pipeline):
+    from tests.test_ai_document_evidence_sources import cas
+
+    case, db = document_pipeline, document_pipeline["db"]
+    headers = auth_headers(case["actor"].username)
+    claim, _ = await queue(async_client, headers, case)
+    transport, _ = model_transport(case)
+    await runtime.execute_claimed(*claim, transport=transport)
+    original = case["original"]
+    sources.revoke_original(db, case["actor"], original.snapshot.original_id, {**cas(original), "basis_note": "合成原文撤销，保留已发布历史签署审计。"})
+    db.commit()
+    trace = await async_client.get(f"/api/ai/admin/runs/{claim[0]}", headers=headers)
+    assert trace.status_code == 200, trace.text
+    data = trace.json()["data"]
+    assert data["document_original"]["governance"]["status"] == "revoked"
+    assert data["document_original"]["eligible"] is False
+    assert data["document_extraction_findings"]["document_review"]["status"] == "published"
+    assert data["result"]["document_extraction"]["spans"][0]["quote"] == original.snapshot.text
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("change", [{"patient_id": 1}, {"encounter_ref": "wrong-encounter"}, {"input": {"text": "伪造原文"}}, {"input": {"document_original_id": None}}, {"input": {"question": " "}}])
+async def test_other_business_scopes_or_caller_originals_cannot_queue(async_client, auth_headers, document_pipeline, change):
+    case, db = document_pipeline, document_pipeline["db"]
+    req = {**request(case), **change}
+    if "input" in change:
+        req["input"] = {**request(case)["input"], **change["input"]}
+    response = await async_client.post("/api/ai/runs", headers=auth_headers(case["actor"].username), json=req)
+    assert response.status_code == 422, response.text
+    assert db.query(AIRun).count() == db.query(AIDocumentExtractionRunAnchor).count() == 0
+
+
+@pytest.mark.asyncio
+async def test_ordinary_doctor_cannot_preview_or_queue_private_original(async_client, auth_headers, document_pipeline):
+    case, db = document_pipeline, document_pipeline["db"]
+    headers = auth_headers(case["seed"]["doctor_user"].username)
+    for path, body in (("/api/ai/document-extraction/context", request(case)["input"]), ("/api/ai/runs", request(case))):
+        denied = await async_client.post(path, headers=headers, json=body)
+        assert denied.status_code == 403 and case["original"].snapshot.text not in denied.text
+    assert db.query(AIRun).count() == 0
+
+
+@pytest.mark.asyncio
+async def test_inflight_cancel_keeps_reported_usage_without_accepting_draft(async_client, auth_headers, document_pipeline):
+    case, db = document_pipeline, document_pipeline["db"]
+    headers = auth_headers(case["actor"].username)
+    claim, _ = await queue(async_client, headers, case)
+
+    def cancel():
+        db.query(AIRun).filter_by(run_id=claim[0]).update({"status": "cancelled"})
+        db.commit()
+
+    transport, _ = model_transport(case, mutate=cancel)
+    await runtime.execute_claimed(*claim, transport=transport)
+    detail = await async_client.get(f"/api/ai/runs/{claim[0]}", headers=headers)
+    assert detail.status_code == 200, detail.text
+    data = detail.json()["data"]
+    assert data["status"] == "cancelled" and data["result"] is None
+    assert (data["input_tokens"], data["output_tokens"]) == (11, 13)
+    assert db.query(AIAuditEvent).filter_by(action=documents.ACCEPT, target=claim[0]).count() == 0

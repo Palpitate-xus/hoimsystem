@@ -1025,9 +1025,9 @@ async def execute_claimed(run_id: str, lease: str, *, transport=None) -> None:
     # before the dedicated worker takes its own Source/current authority locks.
     with database.SessionLocal() as routing_db:
         header = routing_db.query(AIRun.run_id, AIRun.feature_key).filter(AIRun.run_id == run_id, AIRun.status.in_(["running", "cancelled"]), AIRun.lease_token == lease).one_or_none()
-        identity = locate_native_task(routing_db, run_id) if header is not None else None
+        identity = locate_native_task(routing_db, run_id)
         domain = identity.domain if identity is not None else None
-        rca_task = header is not None and (domain == "rca" or domain is None and header.feature_key == "incident_rca")
+        rca_task = domain == "rca" or header is not None and domain is None and header.feature_key == "incident_rca"
         if header is not None and domain is None:
             from app.ai.rca_evidence_dispatch import is_rca_task
 
@@ -1047,6 +1047,11 @@ async def execute_claimed(run_id: str, lease: str, *, transport=None) -> None:
         from app.ai.rca_evidence_execution import execute_rca_claimed
 
         await execute_rca_claimed(run_id, lease, transport=transport)
+        return
+    if header is None:
+        # A terminal, absent or wrong-lease delivery has no runnable task.
+        # In particular, it must not select a native task's private JSON as a
+        # generic fallback after its original Source authority was withdrawn.
         return
     if drug_label_task:
         from app.ai.drug_label_runtime import execute_drug_label_claimed

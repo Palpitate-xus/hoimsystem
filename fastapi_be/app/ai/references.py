@@ -42,5 +42,6 @@ SOURCE_REFERENCE_KEYS = frozenset(
         "inventory_scenario_id",
         "coding_case_id",
         "document_original_id",
+        "research_variable_batch_id",
     }
 )

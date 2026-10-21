@@ -75,6 +75,8 @@ def authorize_operational_snapshot(db, user: User, spec: FeatureSpec, context: d
 
 def operational_options(db, user: User, spec: FeatureSpec) -> dict:
     """Offer only valid filters inside this actor's independently verified scope."""
+    if spec.number == 76:
+        raise HTTPException(422, "科研变量任务只选择明确受审批次，不使用运营服务目录")
     departments = operational_scope(db, user, spec, {})
     start, end = operational_window({})
     data = {"default_window": [str(start), str(end)], "allow_hospital_scope": departments is None, "departments": [], "truncated": False}
@@ -100,6 +102,8 @@ def operational_options(db, user: User, spec: FeatureSpec) -> dict:
 
 
 def operational_context(db, user: User, spec: FeatureSpec, values: dict) -> ContextBundle:
+    if spec.number == 76 or "research_variable_batch_id" in values:
+        raise HTTPException(422, "科研变量批次不能混入通用运营范围；显式空引用同样不授来源权限")
     if "inventory_scenario_id" in values:
         if spec.number != 67:
             raise HTTPException(422, "受审库存场景仅用于独立物资有限采购候选比较")

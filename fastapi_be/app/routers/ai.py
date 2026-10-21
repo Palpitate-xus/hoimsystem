@@ -2,7 +2,7 @@
 
 import json
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from fastapi.responses import JSONResponse
 from sqlalchemy import JSON, type_coerce
 from sqlalchemy.orm import Session
@@ -91,8 +91,10 @@ def patient_options(feature_key: str, keyword: str = Query("", max_length=100), 
 
 
 @router.get("/ai/service-options")
-def hospital_service_options(feature_key: str, db: Session = Depends(get_db), user: User = Depends(get_current_user)) -> dict:
+def hospital_service_options(feature_key: str, request: Request = None, db: Session = Depends(get_db), user: User = Depends(get_current_user)) -> dict:
     """Offer public hospital places or clinicians for the authorized service capability."""
+    if feature_key == "research_extraction" or request is not None and "research_variable_batch_id" in request.query_params:
+        raise HTTPException(422, "科研变量批次仅使用专属项目来源入口，不混入通用服务目录")
     spec, _ = authorized_feature(db, user, feature_key)
     data = operational_options(db, user, spec) if spec.scope == "hospital" else service_options(db, spec.number)
     return {"code": 200, "msg": "success", "data": data}
@@ -101,6 +103,8 @@ def hospital_service_options(feature_key: str, db: Session = Depends(get_db), us
 @router.post("/ai/operational-context")
 def inspect_operational_context(req: OperationalContextRequest, db: Session = Depends(get_db), user: User = Depends(get_current_user)) -> dict:
     """Inspect the same scoped facts used by generation, without contacting a provider."""
+    if req.feature_key == "research_extraction" or "research_variable_batch_id" in req.input:
+        raise HTTPException(422, "科研变量批次仅用于独立用途授权上下文，未读取运营资料")
     spec, _ = authorized_feature(db, user, req.feature_key)
     if spec.scope != "hospital":
         raise HTTPException(422, "该功能不使用医院运营资料范围")
@@ -196,6 +200,8 @@ def pathway_options(
 
 
 def _context_inspection(db: Session, user: User, key: str, patient_id: int, encounter_ref: str | None, references: dict) -> dict:
+    if key == "research_extraction" or "research_variable_batch_id" in references:
+        raise HTTPException(422, "科研变量批次不进入诊疗患者快照，未扩大临床权限")
     spec, _ = authorized_feature(db, user, key)
     if spec.scope != "patient":
         raise HTTPException(422, "该能力无需加载患者临床资料")

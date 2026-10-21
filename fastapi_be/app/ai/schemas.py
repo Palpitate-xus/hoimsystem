@@ -202,6 +202,12 @@ class OperationalContextRequest(StrictRequest):
     feature_key: str = Field(min_length=1, max_length=64)
     input: dict[str, Any] = Field(default_factory=dict)
 
+    @model_validator(mode="after")
+    def no_variable_task_scope(self):
+        if self.feature_key == "research_extraction" or "research_variable_batch_id" in self.input:
+            raise ValueError("科研变量原文批次须走独立受授权上下文，不能混入通用运营输入")
+        return self
+
 
 class RunRequest(StrictRequest):
     """Business input cannot choose providers, system instructions or evidence IDs."""
@@ -212,8 +218,18 @@ class RunRequest(StrictRequest):
     input: dict[str, Any] = Field(default_factory=dict)
     preview: bool = False
 
+    @model_validator(mode="before")
+    @classmethod
+    def actual_variable_preview(cls, value):
+        if isinstance(value, dict) and type(value.get("feature_key")) is str and value["feature_key"].strip() == "research_extraction":
+            if "preview" in value and type(value["preview"]) is not bool:
+                raise ValueError("科研变量任务预览必须是实际布尔值，不接受整数或文本替代")
+        return value
+
     @model_validator(mode="after")
     def dedicated_roster_reference(self):
+        if "research_variable_batch_id" in self.input and self.feature_key != "research_extraction":
+            raise ValueError("科研变量原文批次仅用于其独立项目及逐患者用途授权任务")
         if "roster_plan_id" in self.input and self.feature_key != "roster_optimization":
             raise ValueError("受审排班计划仅用于排班与号源优化")
         if "bed_series_id" in self.input and self.feature_key != "bed_forecast":

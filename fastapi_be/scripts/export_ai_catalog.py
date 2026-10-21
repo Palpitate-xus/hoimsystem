@@ -40,7 +40,11 @@ def artifacts() -> dict[str, str]:
     payload = {
         "catalog_version": CATALOG_VERSION,
         "system_prompt": COMMON_SYSTEM_PROMPT,
-        "system_prompt_overrides": {"drg_evidence_review": system_prompt_for({"coding_binding": None}), "guideline_ingestion": system_prompt_for({"document_binding": None})},
+        "system_prompt_overrides": {
+            "drg_evidence_review": system_prompt_for({"coding_binding": None}),
+            "guideline_ingestion": system_prompt_for({"document_binding": None}),
+            "research_extraction": system_prompt_for({"research_variable_binding": None}),
+        },
         "features": [{**describe_feature(spec), "task_prompt": spec.task_prompt} for spec in FEATURES],
     }
     lines = [
@@ -53,7 +57,7 @@ def artifacts() -> dict[str, str]:
         "所有能力初始关闭。临床启用需要真实适用数据、审核知识和验证记录；专用能力还需要对应适配服务及验证报告。",
         "",
         "可直接审阅 [完整默认 Prompt JSON](ai-prompts.json)；管理台中的不可变 Prompt 版本可覆盖各任务默认文本，固定系统契约始终附加。",
-        "JSON 的 system_prompt_overrides 列出编码证据和指南区间提取的实际独立系统契约；其余能力使用 system_prompt。每项 task_prompt 为独立默认任务文本。",
+        "JSON 的 system_prompt_overrides 列出编码证据、指南区间提取和科研变量原文候选的实际独立系统契约；其余能力使用 system_prompt。每项 task_prompt 为独立默认任务文本。",
         "",
         "| 编号 | 能力 | 分类 | 优先级 | 运行接口 | 资料范围 | 审核知识要求 | 默认使用角色 |",
         "| --- | --- | --- | --- | --- | --- | --- | --- |",

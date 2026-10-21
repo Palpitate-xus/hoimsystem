@@ -465,6 +465,15 @@ def validate_generation(
 
 
 def _request(provider: AIProvider, spec: FeatureSpec, task_prompt: str, data: dict) -> tuple[str, dict]:
+    context = data.get("context", {})
+    if (
+        spec.number == 76
+        or "research_variable_batch_id" in data.get("input", {})
+        or any(key in context for key in ("research_variable_source", "research_variable_binding"))
+        or isinstance(context.get("scope"), dict)
+        and (context["scope"].get("source_domain") == "published_research_variable_literal_batch" or "research_variable_batch_id" in context["scope"].get("selected_sources", {}))
+    ):
+        raise AIExecutionError("VARIABLE_SOURCE_MODE", "科研变量原文只能由完整受授权专用快照与独立协议发送，未回落通用网关")
     endpoint = validate_endpoint(provider.api_base)
     budget = min(provider.max_output_tokens, settings.AI_MAX_OUTPUT_TOKENS)
     if spec.number == 71 or any(key in data.get("context", {}) for key in ("document_binding", "document_source", "document_review")) or "document_original_id" in data.get("input", {}):

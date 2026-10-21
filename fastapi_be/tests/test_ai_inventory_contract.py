@@ -196,6 +196,17 @@ def test_unbatched_consumable_has_no_invented_batch_zero():
     assert InventorySource.model_validate(value).observation.legacy_snapshot.batch_quantity_sum is None
 
 
+@pytest.mark.parametrize("kind,applicability", [("pharmaceutical", "not_applicable"), ("consumable", "applicable")])
+def test_actual_item_kind_cannot_erase_or_invent_the_legacy_batch_domain(kind, applicability):
+    value = make_source()
+    value["item_kind"] = kind
+    value["observation"]["legacy_snapshot"]["batch_applicability"] = applicability
+    if applicability == "not_applicable":
+        value["observation"]["legacy_snapshot"]["batch_quantity_sum"] = None
+    with pytest.raises(ValidationError):
+        InventorySource.model_validate(value)
+
+
 @pytest.mark.parametrize(
     "mutation",
     [

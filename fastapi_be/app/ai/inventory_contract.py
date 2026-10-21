@@ -445,6 +445,9 @@ class InventorySource(StrictModel):
             raise ValueError("Scenario source identity and original private content differ")
         if self.captured_at < self.as_of:
             raise ValueError("Scenario cannot capture a future original availability cutoff")
+        batch_domain = self.observation.legacy_snapshot.batch_applicability
+        if (self.item_kind == "pharmaceutical" and batch_domain == "not_applicable") or (self.item_kind == "consumable" and batch_domain == "applicable"):
+            raise ValueError("Legacy batch applicability must retain the actual SKU kind; unknown remains unknown")
         if self.recipe_digest != recipe_digest() or self.input_policy_digest != input_policy_digest():
             raise ValueError("A new execution requires this exact reviewed fixed recipe and policy")
         try:

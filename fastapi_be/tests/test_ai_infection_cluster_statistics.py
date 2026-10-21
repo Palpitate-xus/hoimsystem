@@ -2,6 +2,7 @@
 
 import copy
 import itertools
+import math
 from fractions import Fraction
 
 import pytest
@@ -255,3 +256,17 @@ def test_runtime_modules_have_no_database_settings_scipy_or_network_imports():
     script = "import sys;from app.ai import infection_cluster_statistics;assert 'app.database' not in sys.modules;assert 'app.config' not in sys.modules;assert 'scipy' not in sys.modules;assert 'httpx' not in sys.modules;assert 'sqlalchemy' not in sys.modules"
     result = subprocess.run([sys.executable, "-c", script], cwd=pathlib.Path(__file__).parents[1], capture_output=True, text=True)
     assert result.returncode == 0, result.stderr
+
+
+def test_extreme_4096_table_keeps_nonzero_exact_probability_without_float_underflow():
+    actual = engine.fisher_upper_tail(2048, 0, 0, 2048)
+    assert actual == Fraction(1, math.comb(4096, 2048)) and actual > 0
+    assert float(actual) == 0.0  # why wire exact numerator/denominator are retained
+    assert len(str(actual.denominator)) == 1232
+    assert k.Probability.model_validate(k.rational(actual)).numerator == "1"
+
+
+@pytest.mark.parametrize("cells", [(True, 0, 0, 1), (-1, 0, 0, 1), (4097, 0, 0, 0), (1.0, 0, 0, 1)])
+def test_fisher_primitive_rejects_noninteger_negative_and_over_domain_counts(cells):
+    with pytest.raises(ValueError):
+        engine.fisher_upper_tail(*cells)

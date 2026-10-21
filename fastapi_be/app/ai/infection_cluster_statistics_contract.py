@@ -42,6 +42,7 @@ LIMITATIONS = [
     "Adjustment applies only to this complete declared family. It does not control undisclosed data-dependent family selection or repeated analyses.",
     "Current independent technical publication proves a declaration before this execution, not that the plan was chosen without seeing data, professional competence, or local clinical validation.",
     "Case capture, reporting practices and classification changes can change the observed pattern. These comparisons do not distinguish those mechanisms from actual changes in infection.",
+    "Distinct subject tokens alone do not establish sampling independence; shared exposures, ascertainment and other dependencies still require domain validation.",
     "Repeated eligible subject tokens prevent the independence assumption for this record-level method. In that case all counts remain, and the whole inference is unavailable rather than deduplicated.",
     "Stored onset calendar dates are used literally; no UTC event-time or historical availability claim is added.",
     "This pure evaluator proves mechanical bindings and arithmetic only; it does not authorize Source reads, prove Department identity, publish a Scenario, or enable clinical use.",

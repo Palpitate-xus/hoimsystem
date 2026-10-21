@@ -482,3 +482,5 @@
 - 2026-10-21 新任意交付异常4项真实RED发现旧产品错误0/0/false后，精确SIGINT停止本域旧完整candidate；实际1687P/0skip/16warn，805.15s pytest/818.217s outer，源1216稳定，exit2。本轮无已执行assertion失败，但不能证明新修复；未执行后续用例不算pass/skip，全部raw/JUnit保留，修正完成后fresh完整重新开始。运维原JUnit额外一个中断entry不多算一P。
 
 - 2026-10-21 training任意交付异常修正7aca885：实际gateway/worker各RuntimeError/AssertionError四原始SQL RED复现错误0/0/false；最终六完整模块一次137P，70.32s pytest/81.342s outer，全部1217源稳定。gateway实际已尝试→true+null计数；worker自有dispatch后无真实回执→WORKER_INTERRUPTED+null/null/None；不放松具体PK/未知回执约束，已知未调用零与实际paid计数保留。中间未使用现有WORKER_INTERRUPTED策略的2个拒绝、运维一次错误测试路径无执行均完整保留。只声明Ruff check通过；完整format诊断仅旧长条件保留，不称全格式绿。新独立full及修正后的实际MySQL正在跑，旧partial/RED不重标。
+
+- 2026-10-21 training已修正7aca885实际私有MySQL一次87检查94.385s全部通过/清理，含原完整基线及六个未知RuntimeError/AssertionError（gateway/worker/撤Source后gateway）边界，同轮不相加重跑。已尝试true或worker未知None与null计数、原具体PK、无结果/无重发/撤权零BODY均保留；1215实际输入与对应fresh full一致（training另两JSON夹具单独桥接）。training第六轮78项后仅新验证脚本自己get整Result污染0BODY观察的RED保留，第七只改id投影缺行探针；产品未再变。所有原raw永久保存，无真实模型/医院DB/部署证明。

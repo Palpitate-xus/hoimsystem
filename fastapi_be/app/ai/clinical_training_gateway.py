@@ -217,3 +217,7 @@ async def generate_training_feedback(provider, source, selection, task_prompt, *
         raise TrainingCallError("PROVIDER_UNAVAILABLE", "培训模型连接失败；未自动重试", usage(None, None, True) if attempted else usage(0, 0, False)) from exc
     except (ValueError, TypeError, KeyError, AttributeError, UnicodeError, RecursionError) as exc:
         raise TrainingCallError("INVALID_TRAINING_RESPONSE", "培训模型未返回唯一键、有限数值和完整UTF8响应", usage(None, None, True) if attempted else usage(0, 0, False)) from exc
+    except Exception as exc:
+        # Preserve the actual HTTP-entry flag when an unexpected transport or
+        # response-processing exception has no independently reported usage.
+        raise TrainingCallError("TRAINING_DELIVERY_INTERRUPTED", "培训模型交付意外中断；实际未知用量保持未知，未自动重试", usage(None, None, True) if attempted else usage(0, 0, False)) from exc

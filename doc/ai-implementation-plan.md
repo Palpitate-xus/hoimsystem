@@ -474,3 +474,5 @@
 - 2026-10-21 第79项原版全量真实RED保留：11176通过/8失败/28可选跳过/7既有警告，4752.43s pytest、4765.711s外层、1203输入稳定；3项catalog原指令/System导出与5项严格Gate/验证scope旧断言，完整JUnit/失败索引/原日志保留。已继承Root6ac5a02缺失的6个历史硬化与MySQL/定向证据阶段，均保留原commit和范围。最新release60654e9全量1205输入及2922浏览器仍各自运行，暂不称全绿或Main准入。
 
 - 2026-10-21 第79项first-fixed完整默认后端结束：11186P/5F/28skip/7warn，11219实际收集，4740.49pytest/4753.901outer，1204BE/映射稳定。余下仅4DocPipeline严格六Gate SQL预期+1第79 operational-validation scope，已在独立79722cc两整模块77绿覆盖；本轮仍记RED不重标，final release含79722cc及f9c685c另行full冻结运行，原8F独立保留。全部本轮raw/JUnit/索引永久保存。
+
+- 2026-10-21 新任意交付异常4项真实RED发现旧产品错误0/0/false后，精确SIGINT停止本域旧完整candidate；实际6352P/25skip/2warn，2505.15s pytest/2517.867s outer，源1205稳定，exit2。本轮无已执行assertion失败，但不能证明新修复；未执行后续用例不算pass/skip，全部raw/JUnit保留，修正完成后fresh完整重新开始。运维原JUnit额外一个中断entry不多算一P。

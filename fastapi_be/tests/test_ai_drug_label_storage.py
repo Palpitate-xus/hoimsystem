@@ -368,14 +368,15 @@ def test_locator_share_exception_contains_only_opaque_columns_and_gate_first(tas
     assert users < source < first_full_run
 
 
-def test_artifact_trigger_seed_change_cannot_accept_a_queue(label_case):
+@pytest.mark.parametrize("assignment", ["mapping_seed='" + "ef" * 32 + "'", "created_at='2026-10-22 12:00:00.123456'"])
+def test_artifact_trigger_cannot_change_the_staged_seed_or_creation_clock(label_case, assignment):
     case = make_task(label_case, stage=False)
     case.db.commit()
     case.db.execute(
         text(
-            "CREATE TRIGGER label_seed_fault AFTER INSERT ON hoimsystem_ai_drug_label_run_artifact BEGIN UPDATE hoimsystem_ai_drug_label_run_artifact SET mapping_seed='"
-            + "ef" * 32
-            + "' WHERE run_id=NEW.run_id; END"
+            "CREATE TRIGGER label_seed_fault AFTER INSERT ON hoimsystem_ai_drug_label_run_artifact BEGIN UPDATE hoimsystem_ai_drug_label_run_artifact SET "
+            + assignment
+            + " WHERE run_id=NEW.run_id; END"
         )
     )
     case.db.commit()

@@ -294,7 +294,11 @@ def stage_artifact(db, run, *, mapping_seed, create_event_id):
                 **_hashes(run, binding),
             )
             db.add(artifact)
+            expected = {column.name: getattr(artifact, column.name) for column in artifact.__table__.columns}
             db.flush()
+            actual = db.query(*AIDrugLabelRunArtifact.__table__.columns).filter_by(run_id=run.run_id).with_for_update().one_or_none()
+            if actual is None or dict(actual._mapping) != expected:
+                raise ValueError("The actual inserted artifact differs from all staged fields")
             return load_snapshot(db, run)
     except (ValueError, TypeError, KeyError, UnicodeError) as exc:
         raise HTTPException(409, "完整说明书任务未能建立不可变原件、映射和具体创建审计") from exc

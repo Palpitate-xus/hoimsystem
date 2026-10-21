@@ -7,7 +7,13 @@ function encodeSchemaData(source) {
   if (!bytes.length || bytes.length > MAX_SCHEMA_BYTES) throw new Error('Complete static schema exceeds the build data limit');
   const text = new TextDecoder('utf-8', { fatal: true, ignoreBOM: true }).decode(bytes);
   const parsed = JSON.parse(text);
-  if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed) || Object.keys(parsed).sort().join(',') !== 'models,nodes' || !parsed.models || typeof parsed.models !== 'object' || Array.isArray(parsed.models) || !Array.isArray(parsed.nodes)) {
+  const object = value => value !== null && typeof value === 'object' && !Array.isArray(value);
+  const registry = value => object(value) && Object.keys(value).sort().join(',') === 'models,nodes' && object(value.models) && Array.isArray(value.nodes);
+  const wrapped = object(parsed) && (
+    Object.keys(parsed).sort().join(',') === 'policy,schemas' && object(parsed.policy) ||
+    Object.keys(parsed).sort().join(',') === 'constants,schemas' && object(parsed.constants)
+  ) && registry(parsed.schemas);
+  if (!registry(parsed) && !wrapped) {
     throw new Error('Expected an actual complete generated schema registry');
   }
   const output = [], literals = [], positions = new Map();

@@ -24,7 +24,7 @@
     <el-form v-if="run.status==='succeeded'" label-position="top"><el-form-item label="明确提交人工反馈"><el-select v-model="feedbackOutcome" aria-label="原文抽取反馈结论"><el-option label="接受草稿供后续复核" value="accepted"/><el-option label="拒绝草稿" value="rejected"/><el-option label="需要修改" value="modified"/></el-select><el-input v-model="feedbackComment" type="textarea" aria-label="原文抽取反馈说明" /></el-form-item><el-button :disabled="busy" @click="feedback">明确保存人工反馈</el-button></el-form>
    </template>
   </template>
-  <el-dialog v-model="previewOpen" title="完整原文抽取预览" width="760px" destroy-on-close>
+  <el-dialog v-model="previewOpen" title="完整原文抽取预览" width="760px" :before-close="closePreview" destroy-on-close>
    <template v-if="previewData&&active"><p>原文来源、版本与授权是提交方声明，不自动等于官方指南或临床验证。</p><p>{{ previewData.document_original.snapshot.metadata.title }}</p><p>本次查找问题：{{ previewData.model_preview.question??'未填写' }}</p><el-button @click="evidenceOpen=!evidenceOpen">{{ evidenceOpen?'收起原文证据':'展开原文证据' }}</el-button><pre v-if="evidenceOpen" aria-label="抽取预览完整原文">{{ previewData.context.document_source.text }}</pre><p v-for="item in previewData.evidence" :key="item.source_id">原件引用：{{ item.source_id }}</p></template><p v-else>正在核对原文，尚未展示资料。</p>
   </el-dialog>
  </section>
@@ -34,7 +34,7 @@ import DocumentExtractionInput from './DocumentExtractionInput.vue';
 import DocumentExtractionFindings from './DocumentExtractionFindings.vue';
 import {useDocumentExtractionAssistant} from './useDocumentExtractionAssistant';
 const props=defineProps({feature:{type:Object,default:null},featureKey:{type:String,required:true},initialInput:{type:Object,default:()=>({})},patientId:{type:Number,default:null},encounterRef:{type:String,default:''},active:{type:Boolean,default:true}});
-const {superUser,mode,scopeValid,initialValid,initialReferences,active,closed,inputKey,selection,question,preview,previewData,previewOpen,evidenceOpen,run,trace,history,busy,message,error,feedbackOutcome,feedbackComment,canGenerate,selected,inspect,submit,refresh,loadHistory,openRun,cancel,feedback,clearResult,close,reopen}=useDocumentExtractionAssistant(props);
+const {superUser,mode,scopeValid,initialValid,initialReferences,active,closed,inputKey,selection,question,preview,previewData,previewOpen,evidenceOpen,run,trace,history,busy,message,error,feedbackOutcome,feedbackComment,canGenerate,selected,inspect,closePreview,submit,refresh,loadHistory,openRun,cancel,feedback,clearResult,close,reopen}=useDocumentExtractionAssistant(props);
 const statuses={queued:'排队中',running:'执行中',succeeded:'已接收未审核草稿',failed:'失败',cancelled:'已取消'};
 </script>
 <style scoped>

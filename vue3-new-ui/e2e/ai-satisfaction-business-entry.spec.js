@@ -2,6 +2,7 @@ const{test,expect}=require('@playwright/test'),{profile}=require('./fixtures/sat
 test('canonical operations page selects a complete actual reviewed Case before previewing safe statistics',async({page})=>{
  const p=profile(),calls=[],errors=[],unknown=[];page.on('pageerror',e=>errors.push(String(e)));await page.addInitScript(()=>localStorage.setItem('hoim-token','synthetic-satisfaction-business-session'));
  await page.route('**/api/**',async route=>{const r=route.request(),u=new URL(r.url()),key=r.method()+' '+u.pathname;calls.push({key,body:r.postData()?r.postDataJSON():null,query:Object.fromEntries(u.searchParams)});let value;
+ if(key==='GET /api/events/stream'){await route.fulfill({status:200,contentType:'text/event-stream',body:': synthetic idle stream\n\n'});return;}
  if(u.pathname==='/api/userInfo')value={code:200,msg:'success',data:{username:'合成评价管理员',permissions:['admin'],avatar:''}};
  else if(key==='GET /api/analytics/operations')value={code:200,msg:'success',data:[]};
  else if(key==='GET /api/ai/features')value=p.features;else if(key==='GET /api/ai/satisfaction-sources/options')value=p.options;else if(key==='GET /api/ai/satisfaction-sources/doctors')value=p.doctors;else if(key==='GET /api/ai/satisfaction-sources/cases')value=p.directory;else if(key==='GET /api/ai/satisfaction-sources/cases/'+p.input.satisfaction_case_id)value=p.source;else if(key==='POST /api/ai/operational-context')value=p.preview;

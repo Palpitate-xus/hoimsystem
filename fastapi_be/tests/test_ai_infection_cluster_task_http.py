@@ -148,3 +148,96 @@ async def test_actual_main_queued_cancel_after_processing_withdrawal_never_needs
 def test_main_explicit_jsonresponse_and_six_new_mounted_routes():
     assert router.default_response_class.__name__ == "JSONResponse" and len(router.routes) == 6
     assert all(any(actual.path == "/api" + route.path for actual in app.routes) for route in router.routes)
+
+
+@pytest.mark.asyncio
+async def test_actual_main_all_local_states_keep_nullable_cpu_receipts_and_separate_complete_parts(async_client, task_case, auth_headers, monkeypatch, tmp_path):
+    import threading
+
+    from sqlalchemy.orm import sessionmaker
+
+    from app.ai import infection_cluster_statistics as statistical
+    from app.ai import infection_cluster_task_runtime as local
+
+    case, db = task_case, task_case["db"]
+    headers = auth_headers(case["author"].username)
+    frames, packets = {}, []
+
+    async def send(path, method="GET", body=None):
+        response = await async_client.request(method, path, headers=headers, json=body)
+        packets.append(dict(path=path, method=method, request=body, status=response.status_code, raw_utf8=response.text, bytes=len(response.content), sha256=c.text_digest(response.text)))
+        assert response.status_code == 200, response.text
+        return response.json()["data"]
+
+    async def create():
+        return await send("/api/ai/runs", "POST", dict(feature_key="infection_cluster", input={"infection_cluster_scenario_id": case["scenario"].scenario_id}, preview=False))
+
+    async def read(label, rid):
+        metadata = await send(ROOT + f"/tasks/{rid}")
+        parts = {name: await send(ROOT + f"/tasks/{rid}/parts/{name}") for name in ["task", "source", "result"]}
+        frames[label] = dict(metadata=metadata, parts=parts)
+        return metadata
+
+    ack = await create()
+    assert (await read("queued", ack["run_id"]))["usage"] is None
+    running = await create()
+    local.claim(db, running["run_id"])
+    db.commit()
+    assert (await read("running", running["run_id"]))["usage"] is None
+    complete = await create()
+    sessions = sessionmaker(bind=db.get_bind(), expire_on_commit=False, autoflush=False)
+    db.rollback()
+    await local.execute_run(sessions, complete["run_id"])
+    assert (await read("succeeded", complete["run_id"]))["usage"]["calculation_completed"] is True
+
+    failed = await create()
+    original = local._calculate
+    called = threading.Event()
+
+    def failed_cpu(value):
+        called.set()
+        raise RuntimeError("actual synthetic CPU observation failed, not an external model call")
+
+    monkeypatch.setattr(local, "_calculate", failed_cpu)
+    db.rollback()
+    await local.execute_run(sessions, failed["run_id"])
+    monkeypatch.setattr(local, "_calculate", original)
+    assert called.is_set()
+    failure = await read("failed", failed["run_id"])
+    assert failure["status"] == "failed" and failure["usage"]["calculation_attempted"] is None
+
+    cancel_zero = await create()
+    await send(f"/api/ai/runs/{cancel_zero['run_id']}/cancel", "POST")
+    assert (await read("cancelled_unattempted", cancel_zero["run_id"]))["usage"]["calculation_attempted"] is False
+    cancel_started = await create()
+    lease, source, _ = local.claim(db, cancel_started["run_id"])
+    db.commit()
+    await send(f"/api/ai/runs/{cancel_started['run_id']}/cancel", "POST")
+    pending = await read("cancelled_pending", cancel_started["run_id"])
+    assert pending["status"] == "cancelled" and pending["usage"] is None
+    result = statistical.evaluate(source)
+    local.terminal(db, cancel_started["run_id"], lease, status="succeeded", result=result, attempted=True, completed=True, milliseconds=0)
+    db.commit()
+    completed_cancel = await read("cancelled_completed", cancel_started["run_id"])
+    assert completed_cancel["status"] == "cancelled" and completed_cancel["usage"]["calculation_completed"] is True
+    assert frames["cancelled_pending"]["metadata"]["run_id"] == completed_cancel["run_id"]
+    for state, frame in frames.items():
+        meta, result_part = frame["metadata"], frame["parts"]["result"]
+        assert meta["result_available"] == (state == "succeeded")
+        if state != "succeeded":
+            assert result_part["value"] is None and meta["result_hash"] is meta["result_bytes"] is None
+        if meta["usage"] is not None:
+            assert meta["usage"]["input_tokens"] == meta["usage"]["output_tokens"] == 0 and meta["usage"]["model_call_attempted"] is False
+    (tmp_path / "actual-infection-local-task-all-states-main-http.json").write_text(
+        json.dumps(
+            dict(
+                scope="Actual Main JWT/ASGI seven states; real synthetic Source/config/current native claim/CPU/terminal; cancelled pending/completed are the same real run, no status flag editing or external model",
+                queued_ack=ack,
+                frames=frames,
+                packets=packets,
+            ),
+            ensure_ascii=False,
+            indent=2,
+        )
+        + "\n"
+    )

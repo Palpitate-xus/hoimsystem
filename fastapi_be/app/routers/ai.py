@@ -170,6 +170,10 @@ def _context_inspection(db: Session, user: User, key: str, patient_id: int, enco
         from app.ai.sofa_context import expand_context
 
         context = expand_context(db, context, user=user, current=True)
+    if context.get("charge_binding"):
+        from app.ai.charge_reconciliation_context import expand_context
+
+        context = expand_context(db, context, user=user, current=True)
     if context.get("coding_binding"):
         from app.ai.coding_evidence_context import expand_context
 
@@ -205,7 +209,7 @@ def inspect_context(
 def submit_run(req: RunRequest, db: Session = Depends(get_db), user: User = Depends(get_current_user)) -> dict:
     """Queue durable work; a separately deployed worker performs inference."""
     run = create_run(db, user, req)
-    return {"code": 200, "msg": "任务已排队", "data": describe_run(run, False)}
+    return {"code": 200, "msg": "任务已排队", "data": describe_run(run, False, user=user)}
 
 
 @router.get("/ai/runs")
@@ -226,11 +230,16 @@ def list_runs(
     inventory_item_id: QueryPositiveInteger | None = Query(None, ge=1, le=2147483647),
     inventory_scenario_id: str | None = Query(None, max_length=36),
     coding_case_id: str | None = Query(None, max_length=36),
+    charge_case_id: str | None = Query(None, max_length=36),
     limit: int = Query(30, ge=1, le=100),
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user),
 ) -> dict:
     """List own tasks; super-admins can inspect global execution history."""
+    if feature_key == "charge_reconciliation" or charge_case_id is not None:
+        from app.ai.charge_reconciliation_sources import current_actor
+
+        user = current_actor(db, user)
     if feature_key == "drg_evidence_review" or coding_case_id is not None:
         from app.ai.coding_evidence_sources import current_actor
 
@@ -241,7 +250,30 @@ def list_runs(
     if feature_key:
         authorized_feature(db, user, feature_key)
         query = query.filter_by(feature_key=feature_key)
-    if coding_case_id is not None:
+    if charge_case_id is not None:
+        if feature_key != "charge_reconciliation" or any(
+            value is not None
+            for value in (
+                department_id,
+                roster_plan_id,
+                ward_id,
+                bed_series_id,
+                surgery_pool_id,
+                surgery_scenario_id,
+                supply_item_kind,
+                supply_item_id,
+                supply_series_id,
+                inventory_item_kind,
+                inventory_item_id,
+                inventory_scenario_id,
+                coding_case_id,
+            )
+        ):
+            raise HTTPException(422, "账目历史须为本功能同一实际患者住院的单件完整快照，不得混用其他来源")
+        from app.ai.charge_reconciliation_history import filter_history
+
+        query = filter_history(db, user, query, charge_case_id=charge_case_id, patient_id=patient_id, encounter_ref=encounter_ref)
+    elif coding_case_id is not None:
         if feature_key != "drg_evidence_review" or any(
             value is not None
             for value in (
@@ -327,6 +359,11 @@ def list_runs(
                     continue
             if exc.status_code == 409 and item.feature_key == "surgery_scheduling":
                 continue
+            if exc.status_code == 409 and item.feature_key == "charge_reconciliation":
+                from app.ai.charge_reconciliation_storage import is_charge_run
+
+                if is_charge_run(db, item):
+                    continue
             if exc.status_code == 409 and item.feature_key == "inventory_optimization":
                 from app.ai.inventory_storage import is_inventory_snapshot
 
@@ -348,7 +385,7 @@ def list_runs(
                 if is_bed_snapshot(json.loads(item.input_json)):
                     continue
             raise
-        data.append(describe_run(item, False))
+        data.append(describe_run(item, False, user=user))
     return {"code": 200, "msg": "success", "data": data}
 
 
@@ -359,7 +396,7 @@ def run_detail(run_id: str, db: Session = Depends(get_db), user: User = Depends(
     if run is None:
         raise HTTPException(404, "AI 任务不存在")
     authorize_run(db, user, run)
-    return {"code": 200, "msg": "success", "data": describe_run(run)}
+    return {"code": 200, "msg": "success", "data": describe_run(run, user=user)}
 
 
 @router.post("/ai/runs/{run_id}/cancel")
@@ -368,6 +405,13 @@ def cancel_run(run_id: str, db: Session = Depends(get_db), user: User = Depends(
     run = db.get(AIRun, run_id)
     if run is None:
         raise HTTPException(404, "AI 任务不存在")
+    from app.ai.charge_reconciliation_storage import is_charge_run
+
+    if is_charge_run(db, run):
+        from app.ai.charge_reconciliation_execution import cancel_charge_run
+
+        cancel_charge_run(db, user, run_id)
+        return {"code": 200, "msg": "任务结果已取消接收"}
     authorize_run(db, user, run)
     if run.status not in {"queued", "running"}:
         raise HTTPException(409, "任务已结束")
@@ -389,6 +433,12 @@ def review_result(run_id: str, req: FeedbackWrite, db: Session = Depends(get_db)
     authorize_run(db, user, run)
     if run.status != "succeeded":
         raise HTTPException(409, "只能复核已成功生成的建议")
+    from app.ai.charge_reconciliation_storage import is_charge_run
+
+    if is_charge_run(db, run):
+        from app.ai.charge_reconciliation_receipts import load_terminal
+
+        load_terminal(db, run)
     from app.ai.coding_evidence_storage import expand_result as expand_coding_result
     from app.ai.coding_evidence_storage import is_coding_run
 

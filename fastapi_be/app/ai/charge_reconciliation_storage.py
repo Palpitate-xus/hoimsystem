@@ -149,7 +149,16 @@ def is_charge_run(db, run):
     from app.ai.charge_reconciliation_run_models import AIChargeRunArtifact
 
     if run.feature_key == FEATURE_KEY:
-        return True
+        try:
+            prior = json.loads(run.input_json)
+            prior_context = prior.get("payload", {}).get("context", {})
+            legacy = isinstance(prior_context, dict) and isinstance(prior_context.get("billing_scope"), dict) and not {"charge_binding", "charge_source", "charge_case"} & prior_context.keys()
+        except (ValueError, TypeError, AttributeError, RecursionError):
+            legacy = False
+        if not legacy:
+            return True
+        # Pre-native billing snapshots retain read-only historical access.
+        # A real new Artifact still overrides any forged legacy JSON below.
     try:
         if isinstance(run.input_json, str):
             snapshot = json.loads(run.input_json)

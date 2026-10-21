@@ -95,6 +95,10 @@ def _check_run_storage_json(serialized: dict[str, str]) -> None:
 
 def create_run(db: Session, user: User, req: RunRequest) -> AIRun:
     """Freeze an authorized, source-linked request before a durable worker processes it."""
+    if req.feature_key == "charge_reconciliation":
+        from app.ai.charge_reconciliation_runtime import create_charge_run
+
+        return create_charge_run(db, user, req)
     if req.feature_key == "drg_evidence_review":
         from app.ai.coding_evidence_context import selection
         from app.ai.coding_evidence_sources import current_actor
@@ -378,6 +382,13 @@ def create_run(db: Session, user: User, req: RunRequest) -> AIRun:
 
 def authorize_run(db: Session, user: User, run: AIRun) -> None:
     """Re-check current permissions, including revoked care access, on every result read."""
+    from app.ai.charge_reconciliation_storage import is_charge_run
+
+    if is_charge_run(db, run):
+        from app.ai.charge_reconciliation_runtime import authorize_charge_run
+
+        authorize_charge_run(db, user, run)
+        return
     from app.ai.surgery_storage import is_surgery_snapshot, load_snapshot
 
     try:
@@ -509,9 +520,19 @@ def authorize_run(db: Session, user: User, run: AIRun) -> None:
         raise HTTPException(403, "历史语音任务缺少原录音与患者引用，不能作为已核实转写读取")
 
 
-def describe_run(run: AIRun, include_result: bool = True) -> dict:
+def describe_run(run: AIRun, include_result: bool = True, *, user: User | None = None) -> dict:
     """Expose the user-facing result, not system instructions or provider secrets."""
     from sqlalchemy.orm import object_session
+
+    from app.ai.charge_reconciliation_storage import is_charge_run
+
+    db = object_session(run)
+    if is_charge_run(db, run):
+        if db is None or user is None:
+            raise HTTPException(409, "完整账目任务须在当前授权会话内展示")
+        from app.ai.charge_reconciliation_views import describe_charge_run
+
+        return describe_charge_run(db, user, run, include_result)
 
     from app.ai.coding_evidence_storage import is_coding_run
     from app.ai.inventory_storage import is_inventory_snapshot
@@ -872,6 +893,18 @@ def _recheck_task(db: Session, run: AIRun) -> tuple[FeatureSpec, AIProvider, dic
 async def execute_claimed(run_id: str, lease: str, *, transport=None) -> None:
     """Release SQL connections during inference; recheck authorization before storing results."""
     from app import database
+    from app.ai.charge_reconciliation_storage import is_charge_run
+
+    # Routing uses only the immutable identity, then closes that SQL session
+    # before the dedicated worker takes Billing Gate and current Run X.
+    with database.SessionLocal() as routing_db:
+        routing_run = routing_db.get(AIRun, run_id)
+        charge = routing_run is not None and is_charge_run(routing_db, routing_run)
+    if charge:
+        from app.ai.charge_reconciliation_execution import execute_charge_claimed
+
+        await execute_charge_claimed(run_id, lease, transport=transport)
+        return
 
     started = time.monotonic()
     error = result = None
@@ -1217,11 +1250,15 @@ async def execute_claimed(run_id: str, lease: str, *, transport=None) -> None:
 
 def expire_interrupted_runs(db: Session) -> int:
     """Mark abandoned inference failed without repeating potentially billable calls."""
+    from app.ai.charge_reconciliation_execution import expire_interrupted_charge_runs
+    from app.ai.charge_reconciliation_run_models import AIChargeRunArtifact
+
+    recovered = expire_interrupted_charge_runs(db)
     deadline = utcnow() - datetime.timedelta(minutes=10)
     count = (
         db.query(AIRun)
-        .filter(AIRun.status == "running", AIRun.start_time < deadline)
+        .filter(AIRun.status == "running", AIRun.start_time < deadline, ~AIRun.run_id.in_(db.query(AIChargeRunArtifact.run_id)))
         .update({"status": "failed", "error_code": "WORKER_INTERRUPTED", "error_message": "执行进程中断，任务未自动重试，可检查后重新提交", "finish_time": utcnow()}, synchronize_session=False)
     )
     db.commit()
-    return count
+    return count + recovered

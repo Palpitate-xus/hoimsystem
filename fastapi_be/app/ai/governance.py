@@ -191,6 +191,8 @@ def provider_feature_issues(spec: FeatureSpec, provider: AIProvider) -> list[dic
 def describe_config(db: Session, spec: FeatureSpec, config: AIFeatureConfig | None, management: bool = False) -> dict:
     """Keep configured, implementation and validation status independently visible."""
     data = describe_feature(spec)
+    if spec.number == 69:
+        data["input_mode"] = "charge_reconciliation"
     if spec.number == 68:
         data["input_mode"] = "coding_evidence"
     if spec.number == 63:

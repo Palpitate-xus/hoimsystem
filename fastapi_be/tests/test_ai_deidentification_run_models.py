@@ -107,7 +107,7 @@ def test_exact_two_tables_mysql_compile_utf8_bounds_real_fk_and_seconds():
     ddls = [str(CreateTable(model.__table__).compile(dialect=mysql.dialect())) for model in DEIDENTIFICATION_RUN_MODELS]
     assert sum(ddl.count("DATETIME(6)") for ddl in ddls) == 3
     assert sum(ddl.count("MEDIUMTEXT") for ddl in ddls) == 2
-    assert sum(isinstance(c, ForeignKeyConstraint) for model in DEIDENTIFICATION_RUN_MODELS for c in model.__table__.constraints) == 11
+    assert sum(isinstance(c, ForeignKeyConstraint) for model in DEIDENTIFICATION_RUN_MODELS for c in model.__table__.constraints) == 13
     assert all("8388608" in ddl and "CAST(" in ddl and " AS BINARY)" in ddl and "json_valid" in ddl for ddl in ddls)
     assert all("AUTO_INCREMENT" not in ddl and "REGEXP" not in ddl for ddl in ddls)
     assert all(len(c.name or "") <= 64 for model in DEIDENTIFICATION_RUN_MODELS for c in model.__table__.constraints)

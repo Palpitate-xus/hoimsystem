@@ -1,4 +1,8 @@
-"""Actual additive SQLite up/down/up; MySQL checks here compile DDL only."""
+"""Historical two-table SQLite migration, before the later dispatch extension.
+
+The frozen revision intentionally lacks the new claim/dispatch Audit columns.
+The additive extension has its own full current-ORM up/down/up regression.
+"""
 
 import ast
 import importlib.util
@@ -58,16 +62,16 @@ def test_actual_frozen_migration_up_down_up_preserves_every_preceding_ddl_and_ro
                 inspector = inspect(conn)
                 for model in DEIDENTIFICATION_RUN_MODELS:
                     table = model.__table__
-                    assert {column["name"] for column in inspector.get_columns(table.name)} == set(table.columns.keys())
+                    assert {column["name"] for column in inspector.get_columns(table.name)} == set(table.columns.keys()) - {"claim_event_id", "dispatch_event_id"}
                     expected_checks = {
                         constraint.name: normalize(str(constraint.sqltext.compile(dialect=sqlite.dialect(), compile_kwargs={"literal_binds": True})))
                         for constraint in table.constraints
-                        if constraint.__class__.__name__ == "CheckConstraint"
+                        if constraint.__class__.__name__ == "CheckConstraint" and constraint.name not in {"ck_deid_result_claim", "ck_deid_result_dispatch"}
                     }
                     actual_checks = {constraint["name"]: normalize(constraint["sqltext"]) for constraint in inspector.get_check_constraints(table.name)}
                     assert actual_checks == expected_checks
                     actual_fk = {(tuple(fk["constrained_columns"]), fk["referred_table"], tuple(fk["referred_columns"])) for fk in inspector.get_foreign_keys(table.name)}
-                    expected_fk = {(tuple(c.name for c in fk.columns), fk.referred_table.name, tuple(element.column.name for element in fk.elements)) for fk in table.foreign_key_constraints}
+                    expected_fk = {(tuple(c.name for c in fk.columns), fk.referred_table.name, tuple(element.column.name for element in fk.elements)) for fk in table.foreign_key_constraints if not {c.name for c in fk.columns} & {"claim_event_id", "dispatch_event_id"}}
                     assert actual_fk == expected_fk
                     assert {index["name"]: tuple(index["column_names"]) for index in inspector.get_indexes(table.name)} == {
                         index.name: tuple(column.name for column in index.columns) for index in table.indexes

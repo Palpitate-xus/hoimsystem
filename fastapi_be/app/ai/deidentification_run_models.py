@@ -6,7 +6,7 @@ it does not certify the source, a Prompt's content, an audit action or authority
 No credentials, clinical edits, manual Review or export permission are created.
 """
 
-from sqlalchemy import CheckConstraint, Column, ForeignKey, Index, Integer, String, column, func
+from sqlalchemy import CheckConstraint, Column, ForeignKey, Index, Integer, String, UniqueConstraint, column, func
 
 from app.ai.deidentification_models import BODY_BYTES, body, byte_length, hash_check, json_check, utc6
 from app.database import Base
@@ -94,6 +94,8 @@ class AIDeidentificationRunResult(Base):
     run_id = Column(String(36), ForeignKey("hoimsystem_ai_deidentification_run_source.run_id"), primary_key=True)
     schema_version = Column(String(48), nullable=False)
     created_at = Column(utc6(), nullable=False)
+    claim_event_id = Column(Integer, ForeignKey("hoimsystem_ai_audit_event.event_id", name="fk_deid_claim_audit"), nullable=True)
+    dispatch_event_id = Column(Integer, ForeignKey("hoimsystem_ai_audit_event.event_id", name="fk_deid_dispatch_audit"), nullable=True)
     usage_event_id = Column(Integer, ForeignKey("hoimsystem_ai_audit_event.event_id"), nullable=True)
     accept_event_id = Column(Integer, ForeignKey("hoimsystem_ai_audit_event.event_id"), nullable=True)
     result_json = Column(body(), nullable=True)
@@ -103,6 +105,10 @@ class AIDeidentificationRunResult(Base):
     accepted_at = Column(utc6(), nullable=True)
     __table_args__ = (
         CheckConstraint("HEX(schema_version)=HEX('deidentification_run_result_v1')", name="ck_deid_run_result_schema"),
+        CheckConstraint("claim_event_id IS NULL OR (claim_event_id>0 AND (usage_event_id IS NULL OR claim_event_id<>usage_event_id) AND (accept_event_id IS NULL OR claim_event_id<>accept_event_id))", name="ck_deid_result_claim"),
+        CheckConstraint("dispatch_event_id IS NULL OR (dispatch_event_id>0 AND claim_event_id IS NOT NULL AND dispatch_event_id<>claim_event_id AND (usage_event_id IS NULL OR dispatch_event_id<>usage_event_id) AND (accept_event_id IS NULL OR dispatch_event_id<>accept_event_id))", name="ck_deid_result_dispatch"),
+        UniqueConstraint("claim_event_id", name="uq_deid_claim_audit"),
+        UniqueConstraint("dispatch_event_id", name="uq_deid_dispatch_audit"),
         CheckConstraint("(usage_event_id IS NULL OR usage_event_id>0) AND (accept_event_id IS NULL OR accept_event_id>0)", name="ck_deid_run_result_audit_ids"),
         CheckConstraint("accept_event_id IS NULL OR (usage_event_id IS NOT NULL AND accept_event_id<>usage_event_id)", name="ck_deid_run_result_audit_distinct"),
         CheckConstraint(

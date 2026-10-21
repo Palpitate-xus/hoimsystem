@@ -1312,6 +1312,108 @@
    "admin",
    "director",
    "doctor",
+   "nurse",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "task_descriptor",
+  "method": "GET",
+  "module": "ai_clinical_training_tasks.py",
+  "path": "/api/ai/clinical-training/task-descriptor"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "nurse",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "create_task",
+  "method": "POST",
+  "module": "ai_clinical_training_tasks.py",
+  "path": "/api/ai/clinical-training/tasks"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "nurse",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "list_tasks",
+  "method": "GET",
+  "module": "ai_clinical_training_tasks.py",
+  "path": "/api/ai/clinical-training/tasks"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "nurse",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "task_metadata",
+  "method": "GET",
+  "module": "ai_clinical_training_tasks.py",
+  "path": "/api/ai/clinical-training/tasks/{run_id}"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "nurse",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "task_part",
+  "method": "GET",
+  "module": "ai_clinical_training_tasks.py",
+  "path": "/api/ai/clinical-training/tasks/{run_id}/parts/{part_name}"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "cancel_task",
+  "method": "POST",
+  "module": "ai_clinical_training_tasks.py",
+  "path": "/api/ai/clinical-training/tasks/{run_id}/cancel"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "nurse",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "review_task",
+  "method": "POST",
+  "module": "ai_clinical_training_tasks.py",
+  "path": "/api/ai/clinical-training/tasks/{run_id}/feedback"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "task_trace",
+  "method": "GET",
+  "module": "ai_clinical_training_tasks.py",
+  "path": "/api/ai/clinical-training/tasks/{run_id}/trace"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
    "super_admin"
   ],
   "function": "options",

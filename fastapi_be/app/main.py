@@ -386,6 +386,7 @@ from app.routers import (
     ai_bed_sources,
     ai_charge_reconciliation,
     ai_clinical_training_sources,
+    ai_clinical_training_tasks,
     ai_coding_evidence,
     ai_document_change,
     ai_document_change_runs,
@@ -556,6 +557,7 @@ app.include_router(ai_document_change_runs.router, prefix="/api")
 app.include_router(ai_coding_evidence.router, prefix="/api")
 app.include_router(ai_charge_reconciliation.router, prefix="/api")
 app.include_router(ai_clinical_training_sources.router, prefix="/api")
+app.include_router(ai_clinical_training_tasks.router, prefix="/api")
 app.include_router(ai_satisfaction_sources.router, prefix="/api")
 app.include_router(ai_research_cohort_sources.router, prefix="/api")
 app.include_router(ai_research_cohort_tasks.router, prefix="/api")

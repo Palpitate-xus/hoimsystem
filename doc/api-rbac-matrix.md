@@ -3,7 +3,7 @@
 > 由 `fastapi_be/scripts/generate_rbac_matrix.py` 从源码自动生成，请勿手改。
 > `✓`=可访问 | `PUBLIC`=无需登录 | 留空=不可访问
 
-共 **951** 个接口（PUBLIC 18 个 / 需登录 933 个）。
+共 **959** 个接口（PUBLIC 18 个 / 需登录 941 个）。
 
 
 ### `admin.py`
@@ -199,6 +199,19 @@
 | GET | `/api/ai/clinical-training/submission-management` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
 | GET | `/api/ai/clinical-training/submissions/{submission_id}` | ✓ | ✓ | ✓ | ✓ | ✓ |  | ✓ |  |  |  |  |  |
 | GET | `/api/ai/clinical-training/submissions/{submission_id}/parts/{part_name}` | ✓ | ✓ | ✓ | ✓ | ✓ |  | ✓ |  |  |  |  |  |
+
+### `ai_clinical_training_tasks.py`
+
+| 方法 | 路径 | admin | super_admin | director | doctor | nurse | cashier | pharmacist | guide | patient | lab_technician | registrar | PUBLIC |
+|------|------|------|------|------|------|------|------|------|------|------|------|------|------|
+| GET | `/api/ai/clinical-training/task-descriptor` | ✓ | ✓ | ✓ | ✓ | ✓ |  | ✓ |  |  |  |  |  |
+| POST | `/api/ai/clinical-training/tasks` | ✓ | ✓ | ✓ | ✓ | ✓ |  | ✓ |  |  |  |  |  |
+| GET | `/api/ai/clinical-training/tasks` | ✓ | ✓ | ✓ | ✓ | ✓ |  | ✓ |  |  |  |  |  |
+| GET | `/api/ai/clinical-training/tasks/{run_id}` | ✓ | ✓ | ✓ | ✓ | ✓ |  | ✓ |  |  |  |  |  |
+| GET | `/api/ai/clinical-training/tasks/{run_id}/parts/{part_name}` | ✓ | ✓ | ✓ | ✓ | ✓ |  | ✓ |  |  |  |  |  |
+| POST | `/api/ai/clinical-training/tasks/{run_id}/cancel` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/clinical-training/tasks/{run_id}/feedback` | ✓ | ✓ | ✓ | ✓ | ✓ |  | ✓ |  |  |  |  |  |
+| GET | `/api/ai/clinical-training/tasks/{run_id}/trace` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
 
 ### `ai_coding_evidence.py`
 

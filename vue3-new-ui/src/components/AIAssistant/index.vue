@@ -107,7 +107,8 @@
       </template>
       <el-empty v-else-if="!loading" description="当前角色暂无可用 AI 能力" />
     </el-form>
-    <document-extraction-assistant v-if="documentLifecycle" :feature="configuredFeature||null" :feature-key="featureKey" :initial-input="props.initialInput" :patient-id="props.patientId" :encounter-ref="props.encounterRef" :active="viewActive" />
+    <document-extraction-assistant v-if="documentLifecycle&&!showDocumentChange" :feature="configuredFeature||null" :feature-key="featureKey" :initial-input="props.initialInput" :patient-id="props.patientId" :encounter-ref="props.encounterRef" :active="viewActive" />
+    <document-change-assistant v-if="documentLifecycle&&showDocumentChange" :feature="configuredFeature||null" :feature-key="featureKey" :initial-input="props.initialInput" :patient-id="props.patientId" :encounter-ref="props.encounterRef" :active="viewActive" />
 
     <template v-if="!documentLifecycle">
     <el-card v-if="run" shadow="never" class="spaced" aria-label="AI任务结果">
@@ -254,6 +255,7 @@ import AiEcgInput from "@/components/AIEcgInput/index.vue";
 import AiEcgFindings from "@/components/AIEcgFindings/index.vue";
 
 const DocumentExtractionAssistant=defineAsyncComponent(()=>import("@/components/ai/DocumentExtractionAssistant.vue"));
+const DocumentChangeAssistant=defineAsyncComponent(()=>import("@/components/ai/DocumentChangeAssistant.vue"));
 const CodingEvidenceInput=defineAsyncComponent(()=>import("@/components/CodingEvidenceInput.vue"));
 const CodingFindings=defineAsyncComponent(()=>import("@/components/ai/CodingFindings.vue"));
 const AiRosterInput=defineAsyncComponent(()=>import("@/components/AIRosterInput/index.vue"));
@@ -289,8 +291,10 @@ const patientId = ref(null), encounterRef = ref(""), prescriptionId = ref(null),
 const question = ref(""), codingQuery = ref(""), extraInput = ref(""), preview = ref(false), run = ref(null), history = ref([]);
 const contextDialog = ref(false), contextData = ref(null), evidenceDialog = ref(false), evidence = ref(null), feedbackDialog = ref(false), feedback = ref({ outcome: "accepted", comment: "" });
 const configuredFeature = computed(() => features.value.find(item => item.key === featureKey.value));
-const documentWasBound=ref(false),documentLifecycle=computed(()=>documentWasBound.value||featureKey.value==='guideline_ingestion'||Object.hasOwn(props.initialInput,'document_original_id'));
+const documentWasBound=ref(false),documentChangeWasBound=ref(false),documentLifecycle=computed(()=>documentWasBound.value||documentChangeWasBound.value||featureKey.value==='guideline_ingestion'||featureKey.value==='guideline_change_review'||Object.hasOwn(props.initialInput,'document_original_id')||Object.hasOwn(props.initialInput,'document_change_scope_id'));
+const showDocumentChange=computed(()=>featureKey.value==='guideline_change_review'||featureKey.value!=='guideline_ingestion'&&(documentChangeWasBound.value||Object.hasOwn(props.initialInput,'document_change_scope_id')));
 watch([featureKey,()=>Object.hasOwn(props.initialInput,'document_original_id')],([key,bound])=>{if(key==='guideline_ingestion'||bound)documentWasBound.value=true;},{immediate:true,flush:'sync'});
+watch([featureKey,()=>Object.hasOwn(props.initialInput,'document_change_scope_id')],([key,bound])=>{if(key==='guideline_change_review'||bound)documentChangeWasBound.value=true;},{immediate:true,flush:'sync'});
 const selected = computed(() => documentLifecycle.value?null:configuredFeature.value);
 const needsRoster=computed(()=>featureKey.value==='roster_optimization'&&selected.value?.input_mode==='roster'),rosterSelection=ref(null),rosterReady=ref(false),rosterWasBound=ref(false),rosterInputKey=ref(0);
 const rosterInitialReferences=computed(()=>props.initialInput.roster_plan_id==null?null:{roster_plan_id:props.initialInput.roster_plan_id});

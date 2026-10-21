@@ -54,3 +54,18 @@ def test_risk_metadata_advertises_its_independent_supported_source_modes():
         support_keys = {"support_source_id", "support_source_kind"}
         advertised = set(describe_feature(spec)["source_reference_keys"])
         assert support_keys <= advertised if spec.number == 47 else not support_keys & advertised
+
+
+def test_export_declares_actual_distinct_fixed_system_prompts_for_closed_drafts():
+    import json
+
+    from app.ai.coding_evidence_prompt import CODING_SYSTEM_PROMPT
+    from app.ai.document_extraction_contract import EXTRACTION_SYSTEM_PROMPT
+    from scripts.export_ai_catalog import artifacts
+
+    payload = json.loads(artifacts()["ai-prompts.json"])
+    assert payload["system_prompt"] == COMMON_SYSTEM_PROMPT
+    assert payload["system_prompt_overrides"] == {"drg_evidence_review": CODING_SYSTEM_PROMPT, "guideline_ingestion": EXTRACTION_SYSTEM_PROMPT}
+    assert FEATURE_BY_KEY["guideline_ingestion"].default_roles == ("super_admin",)
+    assert FEATURE_BY_KEY["guideline_ingestion"].requires_patient_data_permission
+    assert describe_feature(FEATURE_BY_KEY["guideline_ingestion"])["source_reference_keys"] == ["document_original_id"]

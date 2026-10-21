@@ -8,8 +8,8 @@ import pytest
 from fastapi import HTTPException
 from sqlalchemy import text
 
-from app.models import Consumable, PharmaceuticalStockLedger, PurchaseOrder, PurchaseOrderItem
-from app.routers import consumable, doctor, emar, purchase
+from app.models import Consumable, Doctor, PharmaceuticalStockLedger, PrePha, Prescription, PurchaseOrder, PurchaseOrderItem
+from app.routers import consumable, doctor, drug_damage, emar, inpatient_order, inventory_adjustment, pharmacy, purchase, special_drug
 
 WRITERS = [
     (purchase.create_purchase, "admin_user"),
@@ -24,6 +24,16 @@ WRITERS = [
     (doctor.delete_pharmaceutical, "pharmacist_user"),
     (doctor.restore_pharmaceutical, "pharmacist_user"),
     (emar.set_medication_barcode, "admin_user"),
+    (doctor.prescription_register, "doctor_user"),
+    (doctor.cancel_prescription, "doctor_user"),
+    (pharmacy.dispense_prescription, "pharmacist_user"),
+    (pharmacy.return_medicine, "pharmacist_user"),
+    (pharmacy.stock_check, "pharmacist_user"),
+    (inpatient_order.create_inpatient_order, "doctor_user"),
+    (inpatient_order.cancel_inpatient_order, "doctor_user"),
+    (inventory_adjustment.approve_inventory_adjustment, "admin_user"),
+    (drug_damage.approve_drug_damage, "admin_user"),
+    (special_drug.approve_special_drug, "admin_user"),
 ]
 
 
@@ -34,7 +44,8 @@ def test_each_writer_rechecks_actual_role_before_request_or_business_reads(db_se
     db_session.execute(text("UPDATE hoimsystem_users SET user_role='patient' WHERE user_id=:pk"), {"pk": actor.user_id})
     assert actor.user_role == original_role  # Deliberately stale ORM identity.
     with pytest.raises(HTTPException) as error:
-        writer(SimpleNamespace(), current_user=actor, db=db_session)
+        kwargs = {"background_tasks": None} if writer is doctor.prescription_register else {}
+        writer(SimpleNamespace(), current_user=actor, db=db_session, **kwargs)
     assert error.value.status_code == 403
     assert actor.user_role == "patient"
     db_session.rollback()
@@ -97,3 +108,46 @@ def test_soft_restore_refreshes_disabled_state_instead_of_accepting_cached_activ
     assert response == {"code": 200, "msg": "药品已启用"}
     db.refresh(drug)
     assert drug.status == 0
+
+
+def test_prescription_cancel_restores_current_child_quantity_and_current_stock(db_session, seed_data):
+    db, drug = db_session, seed_data["pharmaceutical"]
+    pre = Prescription(
+        patient_id=seed_data["patient"].patient_id, doctor_id=db.query(Doctor).filter_by(user_id=seed_data["doctor_user"].user_id).first().doctor_id, status=0, create_time=datetime.datetime.now()
+    )
+    db.add(pre)
+    db.flush()
+    line = PrePha(prescription_id=pre.prescription_id, pharmaceutical_id=drug.pharmaceutical_id, number=2)
+    db.add(line)
+    db.commit()
+    assert pre.pre_phas == [line] and line.number == 2
+    cached_stock = drug.stock
+    db.execute(text("UPDATE hoimsystem_pre_pha SET number=5 WHERE prescription_id=:pk"), {"pk": pre.prescription_id})
+    db.execute(text("UPDATE hoimsystem_pharmaceutical SET stock=30 WHERE pharmaceutical_id=:pk"), {"pk": drug.pharmaceutical_id})
+    assert line.number == 2 and drug.stock == cached_stock
+    response = doctor.cancel_prescription(SimpleNamespace(prescription_id=pre.prescription_id), current_user=seed_data["doctor_user"], db=db)
+    assert response["code"] == 200
+    db.refresh(drug)
+    db.refresh(line)
+    db.refresh(pre)
+    assert drug.stock == 35 and line.number == 5 and pre.status == 3
+
+
+def test_dispense_inventory_parent_loader_replaces_cached_children_and_sku_facts(db_session, seed_data):
+    db, drug = db_session, seed_data["pharmaceutical"]
+    pre = Prescription(
+        patient_id=seed_data["patient"].patient_id, doctor_id=db.query(Doctor).filter_by(user_id=seed_data["doctor_user"].user_id).first().doctor_id, status=1, create_time=datetime.datetime.now()
+    )
+    db.add(pre)
+    db.commit()
+    assert pre.pre_phas == []
+    line = PrePha(prescription_id=pre.prescription_id, pharmaceutical_id=drug.pharmaceutical_id, number=4)
+    db.add(line)
+    db.flush()
+    cached_stock = drug.stock
+    db.execute(text("UPDATE hoimsystem_pharmaceutical SET stock=31 WHERE pharmaceutical_id=:pk"), {"pk": drug.pharmaceutical_id})
+    assert pre.pre_phas == [] and drug.stock == cached_stock
+    current = pharmacy._current_inventory_prescription(db, pre.prescription_id)
+    assert current is pre and current.pre_phas == [line]
+    assert line.pharmaceutical is drug and drug.stock == 31
+    db.rollback()

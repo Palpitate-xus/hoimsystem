@@ -329,6 +329,8 @@ def patient_snapshot(db: Session, user: User, spec: FeatureSpec, patient_id: int
         raise HTTPException(422, "受审床位序列仅用于独立病区预测，不接受患者资料")
     if "surgery_scenario_id" in (source_refs or {}):
         raise HTTPException(422, "受审手术场景仅用于独立运营排程，不接受患者资料")
+    if "inventory_scenario_id" in (source_refs or {}):
+        raise HTTPException(422, "受审库存场景仅用于独立物资候选比较，不接受患者资料")
     if "supply_series_id" in (source_refs or {}):
         raise HTTPException(422, "受审物资原量序列仅用于独立库存范围预测，不接受患者资料")
     if any(key in (source_refs or {}) for key in ("sofa_assessment_id", "sofa_change_assessment_id")):

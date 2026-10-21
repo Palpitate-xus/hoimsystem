@@ -2,20 +2,21 @@ const fs=require('node:fs/promises'),http=require('node:http'),os=require('node:
 const {rspack}=require('@rspack/core'),{VueLoaderPlugin}=require('vue-loader');
 // Compiles actual source with the real request client and the exact production JS Babel rule.
 // Dependencies are resolved read-only; no application dist/backend is used.
-async function startInventoryHarness({results=true}={}){
+async function startInventoryHarness({results=true,findings=false}={}){
  const root=path.resolve(__dirname,'../..'),dependencies=path.dirname(path.dirname(require.resolve('vue/package.json'))),directory=await fs.mkdtemp(path.join(os.tmpdir(),'hoim-inventory-results-ui-')),unhandled=[];let compiler,server;
  try{
-  await fs.writeFile(path.join(directory,'store.js'),`import {createStore} from 'vuex';export default createStore({modules:{user:{namespaced:true,state:()=>({accessToken:'synthetic-inventory-session',username:'synthetic-inventory-author',permissions:['admin']}),getters:{permissions:s=>s.permissions},mutations:{permissions(s,v){s.permissions=v;},token(s,v){s.accessToken=v;}},actions:{resetAccessToken({state}){state.accessToken='';state.permissions=[];}}}}});`);
+  await fs.writeFile(path.join(directory,'store.js'),`import {createStore} from 'vuex';export default createStore({modules:{user:{namespaced:true,state:()=>({accessToken:'synthetic-inventory-session',username:'synthetic-inventory-author',permissions:['admin']}),getters:{permissions:s=>s.permissions},mutations:{permissions(s,v){s.permissions=v;},token(s,v){s.accessToken=v;},username(s,v){s.username=v;}},actions:{resetAccessToken({state}){state.accessToken='';state.permissions=[];}}}}});`);
   await fs.writeFile(path.join(directory,'router.js'),`export default {push(){return Promise.resolve();}};`);
   await fs.writeFile(path.join(directory,'entry.js'),`
 import {createApp,h,reactive,KeepAlive} from 'vue';import ElementPlus from 'element-plus';import 'element-plus/dist/index.css';import store from '@/store';
 
 
-${results?`import * as results from ${JSON.stringify(path.join(root,'src/api/ai/inventoryResults.js'))};`:''}
+${results?`import * as results from ${JSON.stringify(path.join(root,'src/api/ai/inventoryResults.js'))};import * as scenarios from ${JSON.stringify(path.join(root,'src/api/ai/inventoryScenarios.js'))};`:''}
+${findings?`import InventoryFindings from ${JSON.stringify(path.join(root,'src/components/ai/InventoryFindings.vue'))};`:''}
 import {supportCanonical,supportDigest} from ${JSON.stringify(path.join(root,'src/api/inpatientSupport.js'))};
-const scope=reactive({target:null,providers:[],mounted:true,destroyed:false,mode:${JSON.stringify(results?'api':'provider')},run:null,context:null,receipt:null,expectedItemKind:null,expectedItemId:null,expectedSeriesId:null,horizonDays:null,references:null,active:true,auditOnly:false}),events=[];
-window.__inventoryProbe={scope,events,store,supportCanonical,supportDigest${results?',results':''}};
-createApp({render:()=>h('p','真实库存方案计算API检查')}).use(store).use(ElementPlus).mount('#app');`);
+const scope=reactive({target:null,providers:[],mounted:true,destroyed:false,mode:${JSON.stringify(results?'api':'provider')},run:null,context:null,receipt:null,expectedItemKind:null,expectedItemId:null,expectedScenarioId:null,references:null,active:true,auditOnly:false}),events=[];
+window.__inventoryProbe={scope,events,store,supportCanonical,supportDigest${results?',results,scenarios':''}};
+createApp({render:()=>scope.destroyed?h('p','已卸载'):${findings?`h(KeepAlive,null,{default:()=>scope.mounted?h(InventoryFindings,{run:scope.run,context:scope.context,receipt:scope.receipt,expectedItemKind:scope.expectedItemKind,expectedItemId:scope.expectedItemId,expectedScenarioId:scope.expectedScenarioId,references:scope.references,active:scope.active,auditOnly:scope.auditOnly,onInspect:value=>events.push(value)}):null})`:`h('p','真实库存方案计算API检查')`}}).use(store).use(ElementPlus).mount('#app');`);
   compiler=rspack({context:root,mode:'development',target:'web',devtool:false,entry:path.join(directory,'entry.js'),output:{path:directory,filename:'probe.js'},resolve:{modules:[path.join(root,'node_modules'),dependencies,'node_modules'],alias:{'@/store$':path.join(directory,'store.js'),'@/router$':path.join(directory,'router.js'),'@':path.join(root,'src')}},module:{rules:[{...require(path.join(root,'rspack.config.js')).module.rules.find(rule=>rule.use?.loader==='babel-loader'),use:{...require(path.join(root,'rspack.config.js')).module.rules.find(rule=>rule.use?.loader==='babel-loader').use,loader:require.resolve('babel-loader')}},{test:/\.vue$/,loader:require.resolve('vue-loader')},{test:/\.s[ac]ss$/,use:[require.resolve('style-loader'),require.resolve('css-loader'),require.resolve('sass-loader')]},{test:/\.css$/,use:[require.resolve('style-loader'),require.resolve('css-loader')]}]},plugins:[new VueLoaderPlugin(),new rspack.DefinePlugin({__VUE_OPTIONS_API__:'true',__VUE_PROD_DEVTOOLS__:'false',__VUE_PROD_HYDRATION_MISMATCH_DETAILS__:'false'})],optimization:{minimize:false}});
   await new Promise((resolve,reject)=>compiler.run((error,stats)=>error?reject(error):stats.hasErrors()?reject(new Error(stats.toString({all:false,errors:true}))):resolve()));await new Promise((resolve,reject)=>compiler.close(error=>error?reject(error):resolve()));compiler=null;
   const emitted=new Map(await Promise.all((await fs.readdir(directory)).filter(name=>name.endsWith('.js')&&!['entry.js','store.js','router.js'].includes(name)).map(async name=>['/'+name,await fs.readFile(path.join(directory,name))])));

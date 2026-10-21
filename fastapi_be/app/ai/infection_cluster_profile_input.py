@@ -119,6 +119,7 @@ class ProfileRecord(c.StrictModel):
     governance: scenario.ScenarioGovernance
     governance_hash: c.SHA
     eligible: bool = Field(strict=True)
+    current_issues: list[Literal["not_published", "author_epoch_changed", "reviewer_epoch_changed", "installed_implementation_changed", "definition_changed", "department_directory_changed"]]
     publication_does_not_enable_execution: Literal[True]
     authority_basis: Literal["current_independent_super_exact_audit_pk_and_installed_identity_not_verified_clinical_validity"]
 
@@ -128,6 +129,8 @@ class ProfileRecord(c.StrictModel):
             raise ValueError("The whole immutable profile differs")
         if (self.payload.created_by, self.payload.recorded_at) != (self.governance.created_by, self.governance.recorded_at):
             raise ValueError("Actual author/clock anchors differ")
+        if self.eligible != (not self.current_issues) or len(set(self.current_issues)) != len(self.current_issues):
+            raise ValueError("Current eligibility and explicit issues differ")
         return self
 
 

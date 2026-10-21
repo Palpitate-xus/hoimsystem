@@ -213,7 +213,7 @@ def _terminal(db, stored, *, inputs, outputs, attempted, result, started):
     result_hash = storage.text_hash(raw, MAX_JSON_BYTES) if raw is not None else None
     run.input_tokens = inputs if inputs is not None else 0
     run.output_tokens = outputs if outputs is not None else 0
-    run.latency_ms = max(0, int((time.monotonic() - started) * 1000))
+    run.latency_ms = None if started is None else max(0, int((time.monotonic() - started) * 1000))
     run.finish_time = _second(sources.utcnow())
     receipt = DrugLabelUsageReceipt(
         schema_version="drug_label_usage_receipt_v1",
@@ -376,6 +376,73 @@ async def execute_drug_label_claimed(run_id, lease, *, transport=None):
             except Exception:
                 db.rollback()
                 raise
+
+
+def expire_interrupted_drug_label_runs(db):
+    """Trusted recovery only; never retries a possibly billable model call.
+
+    Current opaque Artifact keysets are the one permitted pre-parent locator:
+    Gate → run/source/owner hints only → sorted Users/Source → Run/full Artifact.
+    Each actual terminal receipt commits independently. Missing/corrupt complete
+    proof or a failed exact write guard rolls back that task and raises; it is
+    never silently rewritten by generic recovery. No private Source authority
+    is restored when an owner/signature/source has since become unavailable.
+    """
+    from app.ai.drug_label_run_models import AIDrugLabelRunArtifact
+    from app.ai.inventory_write_guard import lock_inventory_gate
+
+    count, cursor = 0, None
+    while True:
+        try:
+            with db.no_autoflush:
+                lock_inventory_gate(db)
+                query = db.query(AIDrugLabelRunArtifact.run_id, AIDrugLabelRunArtifact.source_binding_id, AIDrugLabelRunArtifact.requested_by).filter(AIDrugLabelRunArtifact.receipt_event_id.is_(None))
+                if cursor is not None:
+                    query = query.filter(AIDrugLabelRunArtifact.run_id > cursor)
+                hints = current_inventory_rows(query.order_by(AIDrugLabelRunArtifact.run_id).limit(64), shared=True).all()
+            if not hints:
+                db.rollback()
+                return count
+            for hint in hints:
+                stored = storage.load_snapshot(db, hint.run_id, writing=True)
+                run, artifact = stored.run, stored.artifact
+                now = sources.utcnow()
+                if artifact.receipt_event_id is not None or run.status not in {"queued", "running", "cancelled"}:
+                    db.rollback()
+                    continue
+                if run.status == "queued":
+                    if artifact.created_at >= now - datetime.timedelta(seconds=settings.AI_MAX_QUEUE_AGE_SECONDS):
+                        db.rollback()
+                        continue
+                    if (
+                        any(getattr(run, field) is not None for field in ("lease_token", "start_time", "finish_time", "latency_ms", "error_code", "error_message"))
+                        or run.result_json != "{}"
+                        or run.input_tokens != 0
+                        or run.output_tokens != 0
+                    ):
+                        raise HTTPException(409, "过期排队任务已有执行痕迹，不能声明模型未调用")
+                    inputs, outputs, attempted = 0, 0, False
+                    run.status, run.error_code, run.error_message = "failed", "QUEUE_EXPIRED", "排队超时，已确认模型未调用；请重新明确读取来源后提交"
+                else:
+                    # Existing recovery convention is ten minutes. A started
+                    # or cancelled lease proves neither a call nor its tokens.
+                    if run.start_time is None or run.lease_token is None:
+                        raise HTTPException(409, "中断任务缺少真实开始时钟或租约，未伪造调用状态")
+                    sources._key(run.lease_token)
+                    if run.start_time >= now - datetime.timedelta(minutes=10):
+                        db.rollback()
+                        continue
+                    inputs = outputs = attempted = None
+                    run.status = "cancelled" if run.status == "cancelled" else "failed"
+                    run.error_code, run.error_message = "WORKER_INTERRUPTED", "执行进程或取消回执中断，实际调用及用量未知；任务未自动重试，草稿未接受"
+                expected = _terminal(db, stored, inputs=inputs, outputs=outputs, attempted=attempted, result=None, started=None)
+                _verify(db, run, expected)
+                db.commit()
+                count += 1
+            cursor = hints[-1].run_id
+        except Exception:
+            db.rollback()
+            raise
 
 
 def guard_drug_label_run_id(db, user, run_id, *, frozen_audit=False):

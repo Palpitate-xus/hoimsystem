@@ -474,3 +474,5 @@
 - 2026-10-21 第80项实际私有MySQL Task第二轮55检查66.323s全部通过并清理：六表12UTC6/11MEDIUM，Task两表up/down/up保持235旧表DDL/行；双协议×四种真实nullable用量、UUID Prompt、5具体AuditPK/.123456Z claim、同轮66 Task Main HTTP及独立21 Source HTTP。1214实际MySQL collector与Root1216对应项逐字一致，额外2 JSON夹具单独比SHA，不改称MySQL1216。首轮新harness SessionLocal误用contextmanager的29项后真实失败/清理完整保留；只修harness。物理大TEXT不冒称语义大结果，后者及在途取消/撤权/事务故障继续补验，无真实模型/医院DB/部署。
 
 - 2026-10-21 第80项MySQL第四轮一次80检查85.480s全部绿并清理，重复原55+新增25机制在同一新实例，非相加重跑。真实395176B语义结果/386B原Run短指针、在途取消11/null及撤review/role/epoch/config结算、503真实unknown、取消已知零/中断未知、旧RR新完整result、own未提交null marker，以及四阶段×三种权威触发变更共12次整事务回滚通过，1214collector稳定/guards0。第三轮48项后新增harness把模型与dict错误比较的真实RED和未执行的错误orphan脚本一起保留；只修harness，产品仍ee3ce3b。旧RR全局目录count/rows当前只有SQL/SQLite证据，额外MySQL检查随后补齐。
+
+- 2026-10-21 第80项MySQL第五轮一次81检查88.031s全部绿并清理：同轮重跑80机制，再实证旧RR在新任务commit后全局mixed及training筛选的当前SHARE总数=列表完整实际集合、新Task可见、Sup binding全null。1214源逐字同ee3/前轮且稳定、guard0；不将80+独立1相加、不泛化到其它新域，全部runner/worker/phase/extra及报告无损保存。

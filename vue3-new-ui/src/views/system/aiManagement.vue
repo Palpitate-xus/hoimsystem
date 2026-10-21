@@ -75,6 +75,7 @@
         <el-tab-pane label="库存原观察与采购候选治理" name="inventory_sources" lazy><ai-inventory-sources v-if="tab==='inventory_sources'" audit-only /></el-tab-pane>
         <el-tab-pane label="完整库存候选场景治理" name="inventory_scenarios" lazy><ai-inventory-scenarios v-if="tab==='inventory_scenarios'" audit-only /></el-tab-pane>
         <el-tab-pane v-if="canCheckForecast" label="指南原文与摘录治理" name="document_evidence" lazy><document-evidence-panel v-if="tab==='document_evidence' && canCheckForecast" :active="tab==='document_evidence' && canCheckForecast" @knowledge-published="refresh" /></el-tab-pane>
+        <el-tab-pane v-if="canManageDrugLabels" label="说明书原文与独立签署治理" name="drug_label_sources" lazy><template v-if="tab==='drug_label_sources'&&canManageDrugLabels"><el-checkbox v-model="drugLabelAuditOnly">明确只读冻结说明书来源</el-checkbox><drug-label-source-panel :key="String(drugLabelAuditOnly)" :active="tab==='drug_label_sources'&&canManageDrugLabels" :audit-only="drugLabelAuditOnly" /></template></el-tab-pane>
         <el-tab-pane v-if="canCheckForecast" label="病案编码证据与本地规则治理" name="coding_evidence" lazy><ai-coding-evidence-sources v-if="tab==='coding_evidence'&&canCheckForecast" audit-only /></el-tab-pane>
         <el-tab-pane label="完整手术排程场景治理" name="surgery_scenarios" lazy><ai-surgery-scenarios v-if="tab==='surgery_scenarios'" governance /></el-tab-pane>
         <el-tab-pane label="SOFA独立规则与全院评估" name="sofa" lazy><ai-sofa-management v-if="tab==='sofa'" /></el-tab-pane>
@@ -334,6 +335,10 @@ const AiInventoryProviderCheck=defineAsyncComponent(()=>import("@/components/Inv
 const AiInventorySources=defineAsyncComponent(()=>import("@/components/InventorySources.vue"));
 const AiInventoryScenarios=defineAsyncComponent(()=>import("@/components/InventoryScenarios.vue"));
 const DocumentEvidencePanel=defineAsyncComponent(()=>import("@/components/ai/DocumentEvidencePanel.vue"));
+const DrugLabelSourcePanel=defineAsyncComponent(()=>import("@/components/ai/DrugLabelSources.vue"));
+const drugLabelAuditOnly=ref(false);
+const canManageDrugLabels=computed(()=>typeof store.state.user.accessToken==='string'&&store.state.user.accessToken.length>0&&Array.isArray(store.state.user.permissions)&&store.state.user.permissions.includes('super_admin'));
+watch([()=>store.state.user.accessToken,()=>JSON.stringify(store.state.user.permissions)],()=>{drugLabelAuditOnly.value=false;},{flush:'sync'});
 const AiCodingEvidenceSources=defineAsyncComponent(()=>import("@/components/CodingEvidenceSources.vue"));
 const AiSurgerySources=defineAsyncComponent(()=>import("@/components/AISurgerySources.vue"));
 const AiSurgeryScenarios=defineAsyncComponent(()=>import("@/components/AISurgeryScenarios.vue"));

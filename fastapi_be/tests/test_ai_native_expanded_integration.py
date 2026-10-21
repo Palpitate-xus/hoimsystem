@@ -23,7 +23,7 @@ from tests.test_ai_document_evidence_sources import cas
 ROOT = Path(__file__).resolve().parents[1]
 
 
-def test_expanded_histories_and_research_merge_preserve_all_six_artifact_domains():
+def test_expanded_histories_and_operations_extension_preserve_all_seven_artifact_domains():
     scripts = ScriptDirectory.from_config(Config(str(ROOT / "alembic.ini")))
     assert scripts.get_heads() == ["20261021_ops_runs"]
     assert scripts.get_revision("20261021_ops_runs").down_revision == "20261021_ops_sources"
@@ -33,7 +33,7 @@ def test_expanded_histories_and_research_merge_preserve_all_six_artifact_domains
     chain = list(scripts.walk_revisions())
     assert len(chain) == len({row.revision for row in chain})
     assert {"20261021_charge_runs", "20261021_sat_usage_receipt", "20261021_doc_extraction_runs", "20261021_drug_label_runs", "20261021_document_change_runs"} <= {row.revision for row in chain}
-    assert [row[0] for row in routing._domains()] == ["charge", "satisfaction", "document", "drug_label", "document_change", "research_cohort"]
+    assert [row[0] for row in routing._domains()] == ["charge", "satisfaction", "document", "drug_label", "document_change", "research_cohort", "operations_support"]
 
 
 def test_document_change_pure_prompt_reexports_are_exact():

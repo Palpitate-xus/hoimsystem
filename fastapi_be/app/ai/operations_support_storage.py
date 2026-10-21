@@ -407,8 +407,12 @@ def stage_run(db, user, value, *, preview=False):
     values["run_header_hash"] = c.content_hash(original)
     receipt = {"schema_version": "operations_artifact_created_v1", "artifact": _identity(values), "requester_role": context.actor.user_role, "original_run_header": original}
     values["created_audit_event_id"] = registry.audit_event(db, context.actor.user_id, CREATION_ACTION, identifier, receipt, clock)
-    db.add(AIOperationsRunArtifact(**values))
+    artifact = AIOperationsRunArtifact(**values)
+    db.add(artifact)
     db.flush()
+    from app.ai.native_task_routing import remember_staged_identity
+
+    remember_staged_identity(db, artifact)
     # Current actual receipt/header/source/body/config proof after every SQL trigger.
     saved = load_artifact(db, context.actor, identifier, execution=True)
     if encoded_header({column.name: getattr(saved[0], column.name) for column in AIRun.__table__.columns}) != original or current_rows(count_query, shared=True).scalar() != used + 1:

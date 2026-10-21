@@ -49,7 +49,7 @@
             <el-button v-if="row.status===0" size="small" type="primary" @click="openPayDialog(row)">收费</el-button>
             <el-button v-if="row.status===1" size="small" type="danger" @click="refund(row)">退费</el-button>
             <el-button size="small" link type="primary" @click="showDetail(row)">详情</el-button>
-            <ai-action v-if="row.patient_id" label="AI 账务核对" title="AI 门诊账目与支付票据核对" :patient-id="row.patient_id" :encounter-ref="row.registration_uuid || ''" :initial-input="{ outpatient_charge_id: row.id }" :feature-keys="['charge_reconciliation']" initial-feature="charge_reconciliation" />
+            <span v-if="row.patient_id" class="charge-ai-scope-note">AI 完整账目核对请从住院收费记录进入</span>
           </template>
         </el-table-column>
       </el-table>
@@ -140,7 +140,6 @@ import { ref, onMounted, computed } from "vue";
 import { ElMessage } from "element-plus";
 import { getChargeList, commitCharge, refundCharge, createPayment, queryPayment, mockPaymentNotify } from "@/api/charge";
 import QrcodeVue from "qrcode.vue";
-import AiAction from "@/components/AIAction/index.vue";
 
 const list = ref([]);
 const searchQuery = ref("");

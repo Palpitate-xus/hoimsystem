@@ -54,7 +54,8 @@ def candidate(case, proof, *, many=1):
 
 
 def accept(case, proof, value=None, **changes):
-    return storage.stage_result(case["db"], case["actor"], proof, value or candidate(case, proof), **{"usage": usage(), "latency_ms": 35, **changes})
+    dispatch_id = case["db"].query(AIRcaEvidenceRunArtifact.dispatch_event_id).filter_by(run_id=proof.run_id).scalar()
+    return storage.stage_result(case["db"], case["actor"], proof, value or candidate(case, proof), **{"dispatch_event_id": dispatch_id, "usage": usage(), "latency_ms": 35, **changes})
 
 
 def test_actual_large_result_is_split_with_five_different_audit_pks_and_exact_utc6_readback(grant_case):
@@ -95,6 +96,15 @@ def test_false_semantic_claim_remains_nested_unreviewed_and_exact_bom_emoji_crlf
     assert "责任已经确认" in hypothesis.hypothesis and "未核实" in accepted.summary
     assert "责任已经确认" not in accepted.summary and "责任已经确认" not in "".join(section.content for section in accepted.sections)
     assert accepted.rca_evidence_draft.coverage == c.COVERAGE
+
+
+def test_same_claim_with_another_dispatch_pk_cannot_accept_its_returned_content(grant_case):
+    case, db = grant_case, grant_case["db"]
+    proof, _ = dispatched(case)
+    value = candidate(case, proof)
+    before = task_counts(db)
+    assert accept(case, proof, value, dispatch_event_id=2147483647) is None
+    assert task_counts(db) == before and db.query(AIRun.status).filter_by(run_id=proof.run_id).scalar() == "running"
 
 
 @pytest.mark.parametrize("fault", ["fixed_summary", "quote", "source_hash", "instructions", "foreign_result", "usage_missing", "usage_false"])

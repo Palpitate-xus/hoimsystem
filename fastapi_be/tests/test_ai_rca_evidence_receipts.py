@@ -40,7 +40,9 @@ def usage(inputs=11, outputs=13, attempted=True):
 
 
 def settle(db, proof, **changes):
-    return receipts.stage_terminal(db, proof, **{"usage": usage(), "status": "failed", "error_code": "RCA_PROVIDER_ERROR", "latency_ms": 27, **changes})
+    identifier = proof["run_id"] if isinstance(proof, dict) else proof.run_id
+    dispatched_id = db.query(AIRcaEvidenceRunArtifact.dispatch_event_id).filter_by(run_id=identifier).scalar()
+    return receipts.stage_terminal(db, proof, **{"dispatch_event_id": dispatched_id, "usage": usage(), "status": "failed", "error_code": "RCA_PROVIDER_ERROR", "latency_ms": 27, **changes})
 
 
 @pytest.mark.parametrize("loss", ["event_grant", "role", "token", "patient_association", "new_rca"])
@@ -143,6 +145,32 @@ def test_actual_clock_reversal_is_rejected_instead_of_fabricating_an_end_time(gr
     monkeypatch.setattr(grants, "utcnow", lambda: NOW - dt.timedelta(microseconds=1))
     with pytest.raises(HTTPException) as failure:
         settle(db, proof)
+    assert failure.value.status_code == 409 and task_counts(db) == before
+
+
+@pytest.mark.parametrize("duplicate_dispatch", [None, 2147483647])
+def test_second_delivery_source_failure_cannot_settle_the_original_dispatch_even_with_same_claim_lease(grant_case, duplicate_dispatch):
+    case, db = grant_case, grant_case["db"]
+    proof, value = dispatched(case)
+    original_dispatch_id = db.query(AIRcaEvidenceRunArtifact.dispatch_event_id).filter_by(run_id=proof.run_id).scalar()
+    record = grants.grant_detail(db, case["actor"], value.binding.event_grant.grant_id)
+    grants.revoke_grant(db, case["actor"], record.identity.grant_id, cas(record))
+    db.commit()
+    before = task_counts(db)
+    result, columns = no_task_text(db, lambda: settle(db, proof, dispatch_event_id=duplicate_dispatch, usage=usage(0, 0, False), error_code="RCA_SOURCE_CHANGED"))
+    assert result is None and not columns and task_counts(db) == before
+    assert db.query(AIRun.status).filter_by(run_id=proof.run_id).scalar() == "running"
+    assert db.query(AIRcaEvidenceRunArtifact.usage_event_id).filter_by(run_id=proof.run_id).scalar() is None
+    actual = settle(db, proof, dispatch_event_id=original_dispatch_id)
+    assert actual.usage.model_dump(mode="json") == usage() and actual.status == "failed"
+
+
+def test_dispatch_marker_is_an_actual_pk_not_a_bool(grant_case):
+    case, db = grant_case, grant_case["db"]
+    proof, _ = dispatched(case)
+    before = task_counts(db)
+    with pytest.raises(HTTPException) as failure:
+        settle(db, proof, dispatch_event_id=True)
     assert failure.value.status_code == 409 and task_counts(db) == before
 
 

@@ -124,14 +124,18 @@ def result_piece(db, user, identifier, *, frozen_audit=False):
 
 
 @grants._write
-def stage_result(db, user, proof, result, *, usage, latency_ms):
+def stage_result(db, user, proof, result, *, dispatch_event_id, usage, latency_ms):
     """Stage Source-bound content plus two exact terminal audit PKs atomically."""
     proof = attempts.RcaClaimProof.model_validate(proof)
+    if type(dispatch_event_id) is not int or dispatch_event_id < 1:
+        raise ValueError("Only the caller's actual committed dispatch PK can accept its content")
     stored = storage.load_task(db, user, proof.run_id, exclusive=True)
     run, artifact = stored.run, stored.artifact
     if attempts.claim_proof(db, stored) != proof or artifact.dispatch_event_id is None:
         raise HTTPException(409, "成功结果不是原实际claim与dispatch")
     attempts.dispatch_proof(db, stored)
+    if artifact.dispatch_event_id != dispatch_event_id:
+        return None
     if run.status != "running" or artifact.usage_event_id is not None or run.result_json != "{}":
         raise HTTPException(409, "原任务已取消、结束或已有结果，不能再次接受正文")
     if db.scalar(select(AIRcaEvidenceRunResult.run_id).where(AIRcaEvidenceRunResult.run_id == run.run_id)) is not None:

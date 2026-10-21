@@ -140,7 +140,7 @@ def _terminal_values(header, usage, status, error_code, latency_ms, when):
 
 
 @grants._write
-def stage_terminal(db, proof, *, usage, status, error_code, latency_ms):
+def stage_terminal(db, proof, *, dispatch_event_id, usage, status, error_code, latency_ms):
     """Only the trusted original worker/lease may settle its real paid attempt.
 
     Current Source/role loss is intentionally not bypassed for content: this
@@ -148,8 +148,15 @@ def stage_terminal(db, proof, *, usage, status, error_code, latency_ms):
     private pieces. The caller must not expose this worker API as a user route.
     """
     usage = RcaUsageReceipt.model_validate(usage)
+    if dispatch_event_id is not None and (type(dispatch_event_id) is not int or dispatch_event_id < 1):
+        raise ValueError("The caller's actual committed dispatch PK or explicit None is required")
     attempt = technical_attempt(db, proof, exclusive=True)
     header, row = attempt.header, attempt.artifact
+    if row["dispatch_event_id"] != dispatch_event_id:
+        # Another delivery may have committed a dispatch after our initial
+        # precheck while this delivery waited for Source/permissions. The same
+        # lease is not permission to settle that other in-flight delivery.
+        return None
     if row["usage_event_id"] is not None:
         read_receipt(db, attempt)
         return None

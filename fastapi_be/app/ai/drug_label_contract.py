@@ -23,7 +23,8 @@ UNKNOWN_EVIDENCE = (
 Review = Literal["confirmed", "not_confirmed", "unknown"]
 
 
-def bounded(value, maximum=MAX_SOURCE_BYTES):
+def bounded(value, maximum=None):
+    maximum = MAX_SOURCE_BYTES if maximum is None else maximum
     if len(d.utf8(d.canonical_json(value))) > maximum:
         raise ValueError("Complete drug-label object exceeds its UTF8 budget; not truncated")
     return value

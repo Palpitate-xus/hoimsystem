@@ -1,0 +1,4 @@
+const fs=require('node:fs'),path=require('node:path'),zlib=require('node:zlib'),crypto=require('node:crypto');
+let cached;
+function actual(){if(!cached){const p=JSON.parse(fs.readFileSync(path.join(__dirname,'deidentification/actual-first.packed.json'),'utf8')),raw=zlib.gunzipSync(Buffer.from(p.gzip_base64,'base64'));if(raw.length!==p.original_bytes||crypto.createHash('sha256').update(raw).digest('hex')!==p.original_sha256)throw new Error('Actual packet bytes differ');cached=JSON.parse(raw.toString('utf8'));for(const v of Object.values(cached.raw_http_responses))if(crypto.createHash('sha256').update(v.body_utf8,'utf8').digest('hex')!==v.sha256)throw new Error('Actual response bytes differ');}return structuredClone(cached);}
+module.exports={actual};

@@ -178,3 +178,20 @@ async def test_main_history_rejects_foreign_scope_and_missing_artifact_never_bec
 def test_scope_reference_cannot_enter_another_feature(feature):
     with pytest.raises(ValueError):
         RunRequest(feature_key=feature, input={"document_change_scope_id": "00000000-0000-0000-0000-000000000001"})
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("mutation", ["queued_result", "unknown_status"])
+async def test_unaccepted_model_body_and_unknown_status_cannot_be_displayed(async_client, auth_headers, pipeline, mutation):
+    case, db = pipeline, pipeline["db"]
+    auth = headers(auth_headers, case)
+    queued = await create(async_client, auth, case)
+    identifier = queued["data"]["run_id"]
+    run = db.get(AIRun, identifier)
+    if mutation == "queued_result":
+        run.result_json = c.e.canonical_json({"summary": "UNACCEPTED_PRIVATE_SENTINEL"})
+    else:
+        run.status = "unknown_status"
+    db.commit()
+    response = await async_client.get(f"/api/ai/runs/{identifier}", headers=auth)
+    assert response.status_code == 409 and "UNACCEPTED_PRIVATE_SENTINEL" not in response.text

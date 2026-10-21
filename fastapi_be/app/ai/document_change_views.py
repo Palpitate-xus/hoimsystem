@@ -1,5 +1,6 @@
 """Short Run/trace views. Large original, private Scope and result stay split."""
 
+from fastapi import HTTPException
 from fastapi.encoders import jsonable_encoder
 
 from app.ai import document_change_storage as storage
@@ -27,6 +28,8 @@ RUN_FIELDS = (
 
 def run_view(db, user, run, include_result=True, *, current=True):
     snapshot, metadata, evidence, binding, _, _ = storage.authorize_run(db, user, run, current=current)
+    if run.status not in {"queued", "running", "succeeded", "failed", "cancelled"}:
+        raise HTTPException(409, "实际任务状态不在闭合协议内")
     receipt = storage.usage_receipt(db, run)
     data = {key: getattr(run, key) for key in RUN_FIELDS}
     data.update(
@@ -40,8 +43,8 @@ def run_view(db, user, run, include_result=True, *, current=True):
         usage_receipt_status="pending" if run.latency_ms is None and run.status in {"queued", "running", "cancelled"} else "interrupted" if run.error_code == "WORKER_INTERRUPTED" else "recorded",
     )
     if include_result:
-        if run.status == "succeeded":
-            storage.expand_result(db, user, run, current=current)
+        # Unsuccessful states must also prove the absence of an accepted body.
+        storage.expand_result(db, user, run, current=current)
         data.update(
             document_change_findings=snapshot["payload"]["context"],
             document_change_artifact=storage.artifact_record(db, user, run, current=current).model_dump(mode="json"),

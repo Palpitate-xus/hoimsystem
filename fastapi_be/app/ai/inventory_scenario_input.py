@@ -233,10 +233,7 @@ def validate_selections(collection, values):
     actual = {
         original["source_record_id"]
         for (kind, _), original in originals.items()
-        if kind == "purchase_candidate_plan"
-        and original["status"] == "published"
-        and original["payload"] is not None
-        and all(original["payload"][key] == getattr(req, key) for key in ("timezone", "date_from", "date_to"))
+        if kind == "purchase_candidate_plan" and original["status"] == "published" and all(original[key] == getattr(req, key) for key in ("timezone", "date_from", "date_to"))
     }
     if actual != {r.source_record_id for r in req.candidates}:
         raise HTTPException(409, "须纳入同范围同日域的全部已发布候选，未知或不利方案不能被排除")
@@ -374,13 +371,24 @@ def legacy_frozen_conflict(selected):
     raw_unit = legacy["sku"]["projection"]["unit"]
     if raw_unit is not None and raw_unit != original_unit:
         return None
+    invalid = []
     actual = 0
     for row in legacy["batches"]:
         stock, status = row["projection"]["stock"], row["projection"]["status"]
         if type(stock) is not int or stock < 0 or type(status) is not int or status not in (0, 1):
-            return None
-        if status == 1:
+            invalid.append(
+                {
+                    "source_id": row["source_id"],
+                    "stock": stock,
+                    "stock_type": "integer" if type(stock) is int else "null" if stock is None else "unsupported",
+                    "status": status,
+                    "reason": "negative_legacy_batch_stock" if type(stock) is int and stock < 0 else "legacy_batch_frozen_state_unknown",
+                }
+            )
+        elif status == 1:
             actual += stock
+    if invalid:
+        return {"invalid_legacy_batches": invalid, "legacy_collection_digest": legacy["collection_digest"]}
     claimed = Fraction(0)
     for row in p["lots"]:
         q = row["frozen_quantity"]

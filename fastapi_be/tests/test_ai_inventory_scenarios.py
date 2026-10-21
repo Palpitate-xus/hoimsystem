@@ -171,7 +171,7 @@ def inventory_case(seed_data, db_session, monkeypatch, request):
     batch = PharmaceuticalBatch(
         pharmaceutical_id=drug.pharmaceutical_id,
         batch_no=uuid.uuid4().hex,
-        stock=10,
+        stock=12 if getattr(request, "param", None) == "negative_batch" else 10,
         status=1 if getattr(request, "param", None) in {"frozen_batch", "frozen_batch_matching"} else 0,
         expiry_date=datetime.date(2027, 12, 31),
         create_time=NOW,
@@ -180,6 +180,13 @@ def inventory_case(seed_data, db_session, monkeypatch, request):
     db_session.add(batch)
     db_session.commit()
     case.update(drug=drug, batch=batch)
+    if getattr(request, "param", None) == "negative_batch":
+        invalid_batch = PharmaceuticalBatch(
+            pharmaceutical_id=drug.pharmaceutical_id, batch_no=uuid.uuid4().hex, stock=-2, status=0, expiry_date=datetime.date(2027, 12, 31), create_time=NOW, update_time=NOW
+        )
+        db_session.add(invalid_batch)
+        db_session.commit()
+        case["invalid_batch"] = invalid_batch
     unit = units.create_unit(
         db_session,
         case["pharmacist"],
@@ -568,3 +575,43 @@ def test_known_legacy_frozen_conflict_cannot_be_hidden_by_professional_or_contin
         assert result.unknown_count == 2 and not result.best_among_declared_candidates
     else:
         assert result.unknown_count == 0 and result.all_declared_candidates_proven_infeasible
+
+
+@pytest.mark.parametrize("inventory_case", ["negative_batch"], indirect=True)
+def test_actual_negative_batch_cannot_be_washed_out_by_positive_batch_or_signed_count(db_session, inventory_case):
+    from app.ai.inventory_config import runtime_descriptor, runtime_from_descriptor
+    from app.ai.inventory_model import compute_inventory
+
+    case = inventory_case
+    assert case["drug"].stock == 10 and case["batch"].stock == 12 and case["invalid_batch"].stock == -2
+    row = published(db_session, case)
+    snapshot, source = scenes.scenario_proof(row)
+    original = next(r["source"] for r in snapshot["collection"]["source_records"] if r["source"]["source_record_id"] == case["observation"].source_record_id)
+    assert sorted(r["projection"]["stock"] for r in original["parent_binding"]["legacy_snapshot"]["batches"]) == [-2, 12]
+    assert source["observation"]["legacy_snapshot"]["batch_quantity_sum"]["value"] == "10"
+    assert source["observation"]["declared_total_quantity"]["value"] == "10"
+    assert source["scenario"]["assumptions"]["frozen_quantities_unchanged"] == "unknown"
+    evidence = inputs.legacy_frozen_conflict(original)
+    assert evidence["invalid_legacy_batches"][0]["reason"] == "negative_legacy_batch_stock"
+    assert evidence["invalid_legacy_batches"][0]["stock"] == -2 and evidence["invalid_legacy_batches"][0]["stock_type"] == "integer"
+    result = compute_inventory(source, "a" * 64, runtime_from_descriptor(runtime_descriptor()))
+    assert result.unknown_count == 2 and not result.best_among_declared_candidates and not result.all_declared_candidates_proven_infeasible
+
+
+def test_published_same_period_candidate_with_invalid_signer_cannot_disappear_from_required_set(db_session, inventory_case):
+    case = inventory_case
+    signer = User(username="inventory-pharm-" + uuid.uuid4().hex, user_role="pharmacist")
+    db_session.add(signer)
+    db_session.commit()
+    payload = candidate(case)
+    payload["professional_attestation"] = {"status": "confirmed", "signer_user_id": signer.user_id, "basis_note": NOTE}
+    extra = publish_source(db_session, case, payload, actor=signer)
+    signer.user_role = "nurse"
+    db_session.commit()
+    refresh_cutoff(case)
+    values = create_request(db_session, case)
+    member = next(r for r in values["request"]["member_reviews"] if r["source_record_id"] == extra.source_record_id)
+    assert member["use"] == "excluded"
+    with pytest.raises(HTTPException) as caught:
+        scenes.create_scenario(db_session, case["admin"], values)
+    assert caught.value.status_code == 409 and "全部已发布候选" in caught.value.detail

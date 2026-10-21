@@ -94,6 +94,9 @@ const outcomes = { accepted: "采纳", rejected: "驳回", modified: "修改后�
 const rows = ref([]), loading = ref(false), page = ref(1), total = ref(0), filters = ref({ feature_key: "", status: "", outcome: "", requested_by: undefined, patient_id: undefined, department_id: undefined, surgery_pool_id:'',surgery_scenario_id:'',supply_item_kind:'',supply_item_id:undefined,supply_series_id:'',inventory_item_kind:'',inventory_item_id:undefined,inventory_scenario_id:'',coding_case_id:'',charge_case_id:'',document_original_id:'' });
 const visible = ref(false), detail = ref(null), chargeRun = ref(null), detailLoading = ref(false), detailTab = ref("result"), evidenceVisible = ref(false), evidence = ref(null);
 let listVersion = 0, detailVersion = 0;
+// The accepted directory query is an independent native-scope anchor. A
+// damaged row/trace cannot erase the Case that selected this list.
+let listedChargeCase = null;
 let wasDeactivated = false;
 let alive=true;
 const current=key=>alive&&!wasDeactivated&&allowed.value&&key===auth();
@@ -103,7 +106,7 @@ const hasInventory=inventoryRunHasNativeMarkers,hasCoding=codingRunHasMarkers,ha
 const hasCharge=value=>value!==null&&typeof value==='object'&&(['charge_artifact','charge_findings','charge_case_id'].some(name=>Object.hasOwn(value,name))||Object.hasOwn(value.result||{},'charge_analysis')||Object.hasOwn(value.frozen_request?.payload?.context||{},'charge_binding')||Object.hasOwn(value.frozen_request?.payload?.input||{},'charge_case_id'));
 function reportedTokens(row){const known=value=>Number.isSafeInteger(value)&&value>=0;return hasCharge(row)||hasDocument(row)?[row.input_tokens,row.output_tokens].map(value=>known(value)?String(value):'未报告').join(' / '):row.input_tokens||row.output_tokens?(row.input_tokens||0)+' / '+(row.output_tokens||0):'未报告';}
 function closeTrace(done){++detailVersion;detail.value=chargeRun.value=null;evidence.value=null;detailLoading.value=false;visible.value=evidenceVisible.value=false;if(typeof done==='function')done();}
-function clear(){++listVersion;++detailVersion;rows.value=[];total.value=0;detail.value=chargeRun.value=null;evidence.value=null;visible.value=evidenceVisible.value=false;loading.value=detailLoading.value=false;}
+function clear(){++listVersion;++detailVersion;listedChargeCase=null;rows.value=[];total.value=0;detail.value=chargeRun.value=null;evidence.value=null;visible.value=evidenceVisible.value=false;loading.value=detailLoading.value=false;}
 async function load(reset = false) {
   if(!allowed.value||!alive||wasDeactivated)return;
   if (reset) page.value = 1;
@@ -114,20 +117,20 @@ async function load(reset = false) {
   if(params.document_original_id&&params.feature_key!=='guideline_ingestion'||params.feature_key==='guideline_ingestion'&&['charge_case_id','patient_id','department_id','coding_case_id','inventory_scenario_id','inventory_item_kind','inventory_item_id','supply_series_id','supply_item_kind','supply_item_id','surgery_pool_id','surgery_scenario_id'].some(name=>params[name]!==undefined)){loading.value=false;ElMessage.warning('原文审计须明确选择原文提取能力及原件范围');return;}
   if((!!params.supply_item_kind)!==(params.supply_item_id!==undefined)||params.supply_item_kind&&!['pharmaceutical','consumable'].includes(params.supply_item_kind)||params.supply_item_id!==undefined&&(!Number.isSafeInteger(params.supply_item_id)||params.supply_item_id<1)){loading.value=false;ElMessage.warning('物资审计须同时明确有效类型与整数标识');return;}
   if((!!params.inventory_item_kind)!==(params.inventory_item_id!==undefined)||params.inventory_item_kind&&!['pharmaceutical','consumable'].includes(params.inventory_item_kind)||params.inventory_item_id!==undefined&&(!/^[1-9][0-9]*$/.test(String(params.inventory_item_id))||!Number.isSafeInteger(Number(params.inventory_item_id))||Number(params.inventory_item_id)>2147483647)){loading.value=false;ElMessage.warning('库存审计须同时明确有效类型与规范正整数品种标识');return;}
-  try { const response = await getAIAdminRuns({ ...params, page: page.value, page_size: 30 }); if (current(key)&&version === listVersion) { rows.value = response.data || []; total.value = response.total || 0; } }
+  try { const response = await getAIAdminRuns({ ...params, page: page.value, page_size: 30 }); if (current(key)&&version === listVersion) { listedChargeCase=params.feature_key==='charge_reconciliation'&&params.charge_case_id?params.charge_case_id:null;rows.value = response.data || []; total.value = response.total || 0; } }
   catch { if(current(key)&&version===listVersion){clear();ElMessage.warning('当前任务目录或审计权限无法重新核对，旧资料已清除');} }
   finally { if (current(key)&&version === listVersion) loading.value = false; }
 }
 async function inspect(row) {
   if(!allowed.value||!alive||wasDeactivated)return;
-  const version=++detailVersion,key=auth(),isCurrent=()=>current(key)&&version===detailVersion&&visible.value;
+  const version=++detailVersion,key=auth(),expectedChargeCase=listedChargeCase,isCurrent=()=>current(key)&&version===detailVersion&&visible.value;
   visible.value=true;detail.value=chargeRun.value=null;evidence.value=null;evidenceVisible.value=false;detailTab.value="result";detailLoading.value=true;
   try {
     const response=await getAIAdminRunTrace(row.run_id);if(!isCurrent())return;const value=response.data;
     let verified=value?.run_id===row.run_id&&value?.feature_key===row.feature_key,full=null;
-    if(verified&&(hasCharge(row)||hasCharge(value))){
+    if(verified&&(expectedChargeCase!==null||hasCharge(row)||hasCharge(value))){
       full=(await getAIRun(row.run_id)).data;if(!isCurrent())return;
-      verified=(!filters.value.charge_case_id||value.charge_case_id===filters.value.charge_case_id)&&(!filters.value.patient_id||value.patient_id===filters.value.patient_id)&&(!row.charge_case_id||row.charge_case_id===value.charge_case_id)&&await verifyChargeTrace(value,full,{runId:row.run_id},{auditOnly:true,allowFrozenAudit:true,current:isCurrent});
+      verified=(expectedChargeCase===null||value.charge_case_id===expectedChargeCase)&&(!filters.value.patient_id||value.patient_id===filters.value.patient_id)&&(!row.charge_case_id||row.charge_case_id===value.charge_case_id)&&await verifyChargeTrace(value,full,{runId:row.run_id},{auditOnly:true,allowFrozenAudit:true,current:isCurrent});
     }
     if(verified&&(row.feature_key==='guideline_ingestion'||hasDocument(value)))verified=await verifyDocumentExtractionRun(value,value,{runId:row.run_id,originalId:filters.value.document_original_id||null,auditOnly:true,current:isCurrent});
     if(verified&&(row.feature_key==='drg_evidence_review'||hasCoding(value)))verified=await verifyCodingRun(value,{}, {auditOnly:true,current:isCurrent});

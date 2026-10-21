@@ -52,3 +52,26 @@ test('closing trace while real WebCrypto is pending clears before transition and
 });
 test('ordinary admin never loads Super history endpoints',async({page})=>{const s=await setup(page,{role:'admin'});await expect(page.getByRole('button',{name:'查询任务',exact:true})).toHaveCount(0);expect(s.calls).toEqual([]);expect(s.errors).toEqual([]);});
 test('legacy stored zero metadata remains unreported without a native receipt',async({page})=>{const p=load('chat'),row={...p.admin_history.data.find(r=>r.run_id===p.states.succeeded.detail.data.run_id),input_tokens:0,output_tokens:0};delete row.charge_case_id;delete row.usage_receipt;delete row.usage_receipt_status;await setup(page,{row});await expect(page.locator('.el-table__body-wrapper').first()).toContainText('未报告');await expect(page.locator('.el-table__body-wrapper').first()).not.toContainText('0 / 0');});
+
+async function selectCaseDirectory(page,state){
+ const id=state.packet.request.input.charge_case_id;
+ await page.evaluate(id=>{const a=window.__chargeParentProbe.target.$.setupState;a.filters.feature_key='charge_reconciliation';a.filters.charge_case_id=id;},id);
+ await page.getByRole('button',{name:'查询任务',exact:true}).click();
+ await expect.poll(()=>state.calls.filter(c=>c.path==='/api/ai/admin/runs'&&c.query.charge_case_id===id).length).toBe(1);
+ await expect(page.getByRole('button',{name:'执行溯源',exact:true})).toBeVisible();
+}
+test('a directory selected by actual Case keeps full native proof before exposing its retained result',async({page})=>{
+ const s=await setup(page);await selectCaseDirectory(page,s);await inspect(page);await accepted(page);
+ expect(s.calls.filter(c=>c.path==='/api/ai/runs/'+s.row.run_id)).toHaveLength(1);expect(s.errors).toEqual([]);
+});
+for(const variant of ['removed','null'])test(`known native Case directory rejects ${variant} proof markers instead of generic summary`,async({page})=>{
+ const p=load('chat'),trace=structuredClone(p.states.succeeded.trace.data),row=structuredClone(p.admin_history.data.find(r=>r.run_id===trace.run_id)),sentinel='UNVERIFIED_NATIVE_CHARGE_DOWNGRADE_SENTINEL';
+ // Intentional corruptions of actual native DTOs, never a claimed legacy DTO.
+ for(const item of [row,trace])for(const key of ['charge_case_id','charge_artifact','charge_findings']){if(variant==='null')item[key]=null;else delete item[key];}
+ if(variant==='null'){trace.result.charge_analysis=null;trace.frozen_request.payload.context.charge_binding=null;trace.frozen_request.payload.input.charge_case_id=null;}
+ else{delete trace.result.charge_analysis;delete trace.frozen_request;delete trace.raw_frozen_json;delete trace.context_metadata;delete trace.evidence;}
+ trace.result.summary=sentinel;
+ const s=await setup(page,{row,trace});await selectCaseDirectory(page,s);await inspect(page);
+ await expect(page.getByText('原任务或完整冻结来源及固定结果无法核对，暂不展示',{exact:true})).toBeVisible();await expect(page.getByText(sentinel,{exact:true})).toHaveCount(0);
+ expect(await page.evaluate(()=>window.__chargeParentProbe.target.$.setupState.detail)).toBeNull();expect(s.calls.filter(c=>c.path==='/api/ai/runs/'+s.row.run_id)).toHaveLength(1);expect(s.errors).toEqual([]);
+});

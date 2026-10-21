@@ -11,7 +11,7 @@ from fastapi import HTTPException
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from app.ai.catalog import COMMON_SYSTEM_PROMPT, FEATURE_BY_KEY, FeatureSpec, describe_feature
+from app.ai.catalog import FEATURE_BY_KEY, FeatureSpec, describe_feature
 from app.ai.models import AIAuditEvent, AIFeatureConfig, AIPromptVersion, AIProvider
 from app.config import settings
 
@@ -191,6 +191,8 @@ def provider_feature_issues(spec: FeatureSpec, provider: AIProvider) -> list[dic
 def describe_config(db: Session, spec: FeatureSpec, config: AIFeatureConfig | None, management: bool = False) -> dict:
     """Keep configured, implementation and validation status independently visible."""
     data = describe_feature(spec)
+    if spec.number == 68:
+        data["input_mode"] = "coding_evidence"
     if spec.number == 63:
         provider = db.get(AIProvider, config.provider_id) if config and config.provider_id else None
         data["input_mode"] = "roster" if provider and provider.kind == "specialist" and provider.model.startswith("roster:") else "external_optimizer"
@@ -227,6 +229,8 @@ def describe_config(db: Session, spec: FeatureSpec, config: AIFeatureConfig | No
         }
     )
     if management:
+        from app.ai.coding_evidence_prompt import system_prompt_for
+
         data.update(
             {
                 "provider_id": config.provider_id if config else None,
@@ -234,7 +238,7 @@ def describe_config(db: Session, spec: FeatureSpec, config: AIFeatureConfig | No
                 "validation_note": config.validation_note if config else "",
                 "validated_by": config.validated_by if config else None,
                 "validated_at": config.validated_at if config else None,
-                "system_prompt_hash": digest(COMMON_SYSTEM_PROMPT),
+                "system_prompt_hash": digest(system_prompt_for({"coding_binding": None} if spec.number == 68 else {})),
             }
         )
     return data

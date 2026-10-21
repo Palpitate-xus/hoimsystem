@@ -74,6 +74,7 @@
         <el-tab-pane label="完整物资原量序列治理" name="supply_series" lazy><ai-supply-series v-if="tab==='supply_series'" governance /></el-tab-pane>
         <el-tab-pane label="库存原观察与采购候选治理" name="inventory_sources" lazy><ai-inventory-sources v-if="tab==='inventory_sources'" audit-only /></el-tab-pane>
         <el-tab-pane label="完整库存候选场景治理" name="inventory_scenarios" lazy><ai-inventory-scenarios v-if="tab==='inventory_scenarios'" audit-only /></el-tab-pane>
+        <el-tab-pane v-if="canCheckForecast" label="病案编码证据与本地规则治理" name="coding_evidence" lazy><ai-coding-evidence-sources v-if="tab==='coding_evidence'&&canCheckForecast" audit-only /></el-tab-pane>
         <el-tab-pane label="完整手术排程场景治理" name="surgery_scenarios" lazy><ai-surgery-scenarios v-if="tab==='surgery_scenarios'" governance /></el-tab-pane>
         <el-tab-pane label="SOFA独立规则与全院评估" name="sofa" lazy><ai-sofa-management v-if="tab==='sofa'" /></el-tab-pane>
         <el-tab-pane label="器官支持来源与映射" name="organ_support" lazy><ai-organ-support-management v-if="tab === 'organ_support'" /></el-tab-pane>
@@ -330,6 +331,7 @@ const AiSupplyProviderCheck=defineAsyncComponent(()=>import("@/components/Supply
 const AiInventoryProviderCheck=defineAsyncComponent(()=>import("@/components/InventoryProviderCapabilityCheck.vue"));
 const AiInventorySources=defineAsyncComponent(()=>import("@/components/InventorySources.vue"));
 const AiInventoryScenarios=defineAsyncComponent(()=>import("@/components/InventoryScenarios.vue"));
+const AiCodingEvidenceSources=defineAsyncComponent(()=>import("@/components/CodingEvidenceSources.vue"));
 const AiSurgerySources=defineAsyncComponent(()=>import("@/components/AISurgerySources.vue"));
 const AiSurgeryScenarios=defineAsyncComponent(()=>import("@/components/AISurgeryScenarios.vue"));
 const AiSurgeryProviderCheck=defineAsyncComponent(()=>import("@/components/AISurgeryProviderCheck.vue"));

@@ -14,7 +14,7 @@ from app.ai.adr_sources import ADR_SOURCE_FEATURES
 from app.ai.aki_context import authorize_aki_snapshot
 from app.ai.audio_assets import authorize_audio_snapshot
 from app.ai.audio_files import open_verified_audio
-from app.ai.catalog import CATALOG_VERSION, COMMON_SYSTEM_PROMPT, FeatureSpec
+from app.ai.catalog import CATALOG_VERSION, FeatureSpec
 from app.ai.context import ContextBundle, authorize_patient, context_metadata, minimize_identifiers, patient_snapshot
 from app.ai.ecg_assets import authorize_ecg_snapshot
 from app.ai.ecg_files import open_verified_ecg
@@ -95,6 +95,15 @@ def _check_run_storage_json(serialized: dict[str, str]) -> None:
 
 def create_run(db: Session, user: User, req: RunRequest) -> AIRun:
     """Freeze an authorized, source-linked request before a durable worker processes it."""
+    if req.feature_key == "drg_evidence_review":
+        from app.ai.coding_evidence_context import selection
+        from app.ai.coding_evidence_sources import current_actor
+
+        selection(req.input)
+        user = current_actor(db, user)
+        config = db.query(AIFeatureConfig).filter_by(feature_key=req.feature_key).populate_existing().with_for_update().one_or_none()
+        if config is not None and config.provider_id is not None:
+            db.query(AIProvider).filter_by(provider_id=config.provider_id).populate_existing().with_for_update().one_or_none()
     if req.feature_key == "inventory_optimization" and "inventory_scenario_id" in req.input:
         from app.ai.inventory_context import selection
         from app.ai.inventory_scenarios import current_actor, lock_scope, scenario_row
@@ -227,7 +236,7 @@ def create_run(db: Session, user: User, req: RunRequest) -> AIRun:
             raise HTTPException(409, "原心电没有可用采样，只能查看原记录，不能创建候选判读任务")
     patient = db.get(Patient, req.patient_id) if req.patient_id else None
     clean_input = minimize_identifiers(req.input, patient)
-    fixed_native = bool(bundle.data.get("surgery_binding") or bundle.data.get("supply_binding") or bundle.data.get("inventory_binding"))
+    fixed_native = bool(bundle.data.get("surgery_binding") or bundle.data.get("supply_binding") or bundle.data.get("inventory_binding") or bundle.data.get("coding_binding"))
     tools, tool_evidence = ({}, []) if fixed_native else business_tools(db, spec, user, req.patient_id, clean_input, bundle)
     query = retrieval_query(spec, clean_input, bundle.data, tools)
     pathway_ids = selected_pathway_ids(bundle.data)
@@ -242,6 +251,9 @@ def create_run(db: Session, user: User, req: RunRequest) -> AIRun:
         raise HTTPException(409, "未检索到本任务可用的已审核知识，请先录入并审核相关资料")
     evidence = [*bundle.evidence, *tool_evidence, *knowledge]
     prompt, version = active_prompt(db, spec, config)
+    from app.ai.coding_evidence_prompt import system_prompt_for
+
+    system_prompt = system_prompt_for(bundle.data)
     config = db.query(AIFeatureConfig).filter_by(feature_key=spec.key).populate_existing().with_for_update().one()
     if config.revision != original_revision:
         raise HTTPException(409, "功能配置在准备资料时已改变，请重新提交")
@@ -256,7 +268,7 @@ def create_run(db: Session, user: User, req: RunRequest) -> AIRun:
         "input_json": encode_json(
             {
                 "catalog_version": CATALOG_VERSION,
-                "system_prompt": COMMON_SYSTEM_PROMPT,
+                "system_prompt": system_prompt,
                 "task_prompt": prompt,
                 "payload": payload,
                 "provider_snapshot": provider_snapshot(provider),
@@ -277,8 +289,8 @@ def create_run(db: Session, user: User, req: RunRequest) -> AIRun:
                 "validation_status": config.validation_status,
                 "tool_fingerprint": digest(tools),
                 **(
-                    {"instructions_digest": hashlib.sha256((COMMON_SYSTEM_PROMPT + "\n\n" + prompt).encode("utf-8")).hexdigest(), "model_version": provider.model}
-                    if bundle.data.get("inventory_binding")
+                    {"instructions_digest": hashlib.sha256((system_prompt + "\n\n" + prompt).encode("utf-8")).hexdigest(), "model_version": provider.model}
+                    if bundle.data.get("inventory_binding") or bundle.data.get("coding_binding")
                     else {}
                 ),
             }
@@ -290,7 +302,7 @@ def create_run(db: Session, user: User, req: RunRequest) -> AIRun:
         provider_id=provider.provider_id,
         provider_revision=provider.revision,
         prompt_version=version,
-        prompt_hash=digest([COMMON_SYSTEM_PROMPT, prompt]),
+        prompt_hash=digest([system_prompt, prompt]),
         context_digest=digest(bundle.data),
         patient_id=req.patient_id,
         encounter_ref=req.encounter_ref,
@@ -301,6 +313,16 @@ def create_run(db: Session, user: User, req: RunRequest) -> AIRun:
     )
     db.add(run)
     db.flush()
+    if bundle.data.get("coding_binding"):
+        from app.ai.coding_evidence_context import expand_context
+        from app.ai.coding_evidence_storage import run_binding
+
+        try:
+            run_binding(run)
+            expand_context(db, bundle.data, user=user, current=True)
+        except Exception:
+            db.rollback()
+            raise
     if bundle.data.get("roster_binding"):
         from app.ai.roster_plans import authorize_plan
 
@@ -362,9 +384,22 @@ def authorize_run(db: Session, user: User, run: AIRun) -> None:
         surgery_snapshot = json.loads(run.input_json)
     except (ValueError, TypeError, RecursionError) as exc:
         raise HTTPException(409, "历史任务缺少有效完整JSON") from exc
+    from app.ai.coding_evidence_storage import is_coding_run
     from app.ai.inventory_storage import is_inventory_snapshot
     from app.ai.supply_storage import is_supply_snapshot
 
+    if is_coding_run(db, run):
+        from app.ai.coding_evidence_context import expand_context
+        from app.ai.coding_evidence_sources import current_actor
+        from app.ai.coding_evidence_storage import load_snapshot as load_coding_snapshot
+
+        user = current_actor(db, user)
+        if user.user_role != "super_admin" and run.requested_by != user.user_id:
+            raise HTTPException(403, "不能访问其他用户的 AI 任务")
+        snapshot, _, _, _ = load_coding_snapshot(run)
+        authorized_feature(db, user, run.feature_key)
+        expand_context(db, snapshot["payload"]["context"], user=user, current=user.user_role != "super_admin")
+        return
     if is_inventory_snapshot(surgery_snapshot):
         from app.ai.inventory_context import authorize_inventory_snapshot
         from app.ai.inventory_scenarios import current_actor
@@ -476,11 +511,18 @@ def authorize_run(db: Session, user: User, run: AIRun) -> None:
 
 def describe_run(run: AIRun, include_result: bool = True) -> dict:
     """Expose the user-facing result, not system instructions or provider secrets."""
+    from sqlalchemy.orm import object_session
+
+    from app.ai.coding_evidence_storage import is_coding_run
     from app.ai.inventory_storage import is_inventory_snapshot
     from app.ai.roster_storage import is_roster_snapshot
     from app.ai.supply_storage import is_supply_snapshot
     from app.ai.surgery_storage import is_surgery_snapshot
 
+    if is_coding_run(object_session(run), run):
+        from app.ai.coding_evidence_storage import run_binding
+
+        run_binding(run)
     if is_inventory_snapshot(json.loads(run.input_json)):
         from app.ai.inventory_storage import run_binding
 
@@ -535,6 +577,21 @@ def describe_run(run: AIRun, include_result: bool = True) -> dict:
     if include_result:
         context = json.loads(run.input_json).get("payload", {}).get("context", {})
         result = json.loads(run.result_json)
+        if "coding_binding" in context:
+            from sqlalchemy.orm import object_session
+
+            from app.ai.coding_evidence_context import expand_context
+            from app.ai.coding_evidence_storage import expand_result
+
+            db = object_session(run)
+            if db is None:
+                raise HTTPException(409, "完整编码证据任务须在授权数据库会话内展开")
+            expanded = expand_context(db, context)
+            if run.status == "succeeded" or result.get("schema_version") == "coding_result_ref_v1":
+                result = expand_result(db, run)
+            data["coding_findings"] = {key: expanded[key] for key in ("coding_source", "coding_case", "coding_binding")}
+        elif result.get("schema_version") == "coding_result_ref_v1":
+            raise HTTPException(409, "完整编码草稿引用不能由其他模式读取")
         if context.get("inventory_binding"):
             from sqlalchemy.orm import object_session
 
@@ -740,6 +797,12 @@ def _recheck_task(db: Session, run: AIRun) -> tuple[FeatureSpec, AIProvider, dic
     user = db.get(User, run.requested_by)
     if user is None:
         raise HTTPException(403, "任务用户已失效")
+    if run.feature_key == "drg_evidence_review":
+        from app.ai.coding_evidence_sources import current_actor
+
+        user = current_actor(db, user)
+        db.query(AIFeatureConfig).filter_by(feature_key=run.feature_key).populate_existing().with_for_update(read=True).one_or_none()
+        db.query(AIProvider).filter_by(provider_id=run.provider_id).populate_existing().with_for_update(read=True).one_or_none()
     if run.feature_key == "inventory_optimization":
         from app.ai.inventory_scenarios import current_actor
 
@@ -767,7 +830,9 @@ def _recheck_task(db: Session, run: AIRun) -> tuple[FeatureSpec, AIProvider, dic
     if config.revision != metadata["feature_revision"]:
         raise HTTPException(409, "功能或 Prompt 配置已改变，请重新创建任务")
     snapshot = json.loads(run.input_json)
-    if snapshot.get("catalog_version") != CATALOG_VERSION or snapshot.get("system_prompt") != COMMON_SYSTEM_PROMPT:
+    from app.ai.coding_evidence_prompt import system_prompt_for
+
+    if snapshot.get("catalog_version") != CATALOG_VERSION or snapshot.get("system_prompt") != system_prompt_for(snapshot["payload"]["context"]):
         raise AIExecutionError("TASK_CONTRACT_CHANGED", "任务目录或系统契约已改变，请重新创建任务")
     if digest(provider_snapshot(provider)) != digest(snapshot.get("provider_snapshot")):
         raise AIExecutionError("TASK_MODEL_CHANGED", "模型参数或输出限制已改变，请重新创建任务")
@@ -777,7 +842,7 @@ def _recheck_task(db: Session, run: AIRun) -> tuple[FeatureSpec, AIProvider, dic
         "evidence"
     ) != json.loads(run.evidence_json):
         raise AIExecutionError("TASK_EVIDENCE_CHANGED", "任务原支持资料引用与冻结证据不一致，请重新创建任务")
-    if digest([COMMON_SYSTEM_PROMPT, snapshot["task_prompt"]]) != run.prompt_hash:
+    if digest([snapshot["system_prompt"], snapshot["task_prompt"]]) != run.prompt_hash:
         raise HTTPException(409, "任务系统契约已改变，请重新创建任务")
     if not evidence_is_current(db, json.loads(run.evidence_json)):
         raise HTTPException(409, "任务引用的知识已停用或过期，请重新创建任务")
@@ -796,7 +861,7 @@ def _recheck_task(db: Session, run: AIRun) -> tuple[FeatureSpec, AIProvider, dic
         raise AIExecutionError("TASK_DEPARTMENT_SCOPE_CHANGED", "任务适用的科室范围已变化，请按当前就诊或医生资料重新准备依据")
     current_tools, _ = (
         ({}, [])
-        if any(snapshot["payload"]["context"].get(key) for key in ("surgery_binding", "supply_binding", "inventory_binding"))
+        if any(snapshot["payload"]["context"].get(key) for key in ("surgery_binding", "supply_binding", "inventory_binding", "coding_binding"))
         else business_tools(db, spec, user, run.patient_id, snapshot["payload"]["input"], current_bundle)
     )
     if digest(current_tools) != metadata.get("tool_fingerprint"):
@@ -821,6 +886,7 @@ async def execute_claimed(run_id: str, lease: str, *, transport=None) -> None:
     surgery_run = False
     supply_run = False
     inventory_run = False
+    coding_run = False
     try:
         with database.SessionLocal() as db:
             run = db.get(AIRun, run_id)
@@ -833,6 +899,11 @@ async def execute_claimed(run_id: str, lease: str, *, transport=None) -> None:
             surgery_run = spec.number == 65 and bool(snapshot["payload"]["context"].get("surgery_binding"))
             supply_run = spec.number == 66 and bool(snapshot["payload"]["context"].get("supply_binding"))
             inventory_run = spec.number == 67 and bool(snapshot["payload"]["context"].get("inventory_binding"))
+            coding_run = spec.number == 68 and bool(snapshot["payload"]["context"].get("coding_binding"))
+            if coding_run:
+                from app.ai.coding_evidence_context import expand_context
+
+                snapshot["payload"]["context"] = expand_context(db, snapshot["payload"]["context"], user=db.get(User, run.requested_by), current=True)
             if inventory_run:
                 from app.ai.inventory_context import expand_context
 
@@ -894,7 +965,11 @@ async def execute_claimed(run_id: str, lease: str, *, transport=None) -> None:
             result.warnings.insert(0, triage["emergency_message"])
         serialized_result = encode_json(result.model_dump())
         try:
-            if inventory_run:
+            if coding_run:
+                from app.ai.coding_evidence_storage import bounded_result
+
+                bounded_result(result.model_dump(mode="json"))
+            elif inventory_run:
                 from app.ai.inventory_storage import bounded_result
 
                 bounded_result(result.model_dump(mode="json"))
@@ -943,6 +1018,30 @@ async def execute_claimed(run_id: str, lease: str, *, transport=None) -> None:
         # Read frozen markers before any AIRun/User row lock. A corrupted
         # feature discriminator must not bypass the surgery first-lock order.
         original = db.query(AIRun.feature_key, AIRun.input_json).filter_by(run_id=run_id).one_or_none()
+        coding_feature = coding_run or original is not None and original.feature_key == "drg_evidence_review"
+        coding_snapshot = coding_run
+        if original is not None:
+            from app.ai.coding_evidence_storage import is_coding_snapshot
+
+            try:
+                coding_snapshot = is_coding_snapshot(json.loads(original.input_json)) or coding_snapshot
+                coding_feature = coding_feature or coding_snapshot
+            except (HTTPException, ValueError, TypeError, RecursionError):
+                pass
+        if coding_feature:
+            from app.ai.coding_evidence_guard import lock_coding_gate
+
+            with db.no_autoflush:
+                lock_coding_gate(db)
+            if coding_snapshot and original is not None and error is None:
+                from app.ai.coding_evidence_storage import lock_run_scope
+
+                try:
+                    lock_run_scope(db, db.query(AIRun).filter_by(run_id=run_id).one_or_none())
+                except HTTPException as exc:
+                    error = ("TASK_NO_LONGER_AUTHORIZED", str(exc.detail))
+                except (ValueError, TypeError, RecursionError):
+                    error = ("TASK_SNAPSHOT_INVALID", "任务冻结编码原件结构已经失效")
         surgery_feature = surgery_run or original is not None and original.feature_key == "surgery_scheduling"
         if original is not None:
             from app.ai.surgery_storage import is_surgery_snapshot
@@ -1022,7 +1121,11 @@ async def execute_claimed(run_id: str, lease: str, *, transport=None) -> None:
                 run.status = "failed"
                 run.error_code, run.error_message = error
             else:
-                if inventory_run:
+                if coding_run:
+                    from app.ai.coding_evidence_storage import stage_result
+
+                    run.result_json = stage_result(db, run, lease, result.model_dump(mode="json"))
+                elif inventory_run:
                     from app.ai.inventory_storage import stage_result
 
                     run.result_json = stage_result(db, run, lease, result.model_dump(mode="json"))
@@ -1049,16 +1152,22 @@ async def execute_claimed(run_id: str, lease: str, *, transport=None) -> None:
                 else:
                     run.result_json = serialized_result
                 run.status = "succeeded"
-                if surgery_run or supply_run or inventory_run:
+                if surgery_run or supply_run or inventory_run or coding_run:
                     # Acceptance audit/blob SQL can itself expose a trigger or
                     # same-transaction change. Recheck the current entire
                     # source/config/care after their actual writes, still
                     # holding Gate and the original lease/parent locks.
                     from app.ai.native_acceptance import acceptance_state, verify_accepted_result
 
-                    acceptance = acceptance_state(db, run, "run.inventory_result.accept" if inventory_run else "run.supply_result.accept" if supply_run else "run.surgery_result.accept")
+                    acceptance = acceptance_state(
+                        db,
+                        run,
+                        "run.coding_result.accept" if coding_run else "run.inventory_result.accept" if inventory_run else "run.supply_result.accept" if supply_run else "run.surgery_result.accept",
+                    )
                     db.flush()
-                    if inventory_run:
+                    if coding_run:
+                        from app.ai.coding_evidence_storage import expand_result
+                    elif inventory_run:
                         from app.ai.inventory_storage import expand_result
                     elif supply_run:
                         from app.ai.supply_storage import expand_result
@@ -1069,9 +1178,12 @@ async def execute_claimed(run_id: str, lease: str, *, transport=None) -> None:
             db.commit()
         except Exception:
             db.rollback()
-            if not sofa_run and not roster_run and not bed_run and not surgery_run and not supply_run and not inventory_run:
+            if not sofa_run and not roster_run and not bed_run and not surgery_run and not supply_run and not inventory_run and not coding_run:
                 raise
             # A rejected blob or audit transaction must never leave an accepted pointer.
+            if coding_feature:
+                with db.no_autoflush:
+                    lock_coding_gate(db)
             if inventory_feature:
                 with db.no_autoflush:
                     lock_inventory_gate(db)
@@ -1083,7 +1195,9 @@ async def execute_claimed(run_id: str, lease: str, *, transport=None) -> None:
                 failed.status = "failed"
                 failed.error_code = "RESULT_STORAGE_ERROR"
                 failed.error_message = (
-                    "完整库存候选比较结果与审计未能原子保存，结果未接收"
+                    "完整编码草稿与审计未能原子保存，结果未接收"
+                    if coding_run
+                    else "完整库存候选比较结果与审计未能原子保存，结果未接收"
                     if inventory_run
                     else "完整物资预测结果与审计未能原子保存，结果未接收"
                     if supply_run

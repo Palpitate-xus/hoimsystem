@@ -54,3 +54,24 @@ def test_risk_metadata_advertises_its_independent_supported_source_modes():
         support_keys = {"support_source_id", "support_source_kind"}
         advertised = set(describe_feature(spec)["source_reference_keys"])
         assert support_keys <= advertised if spec.number == 47 else not support_keys & advertised
+
+
+def test_prompt_export_preserves_actual_coding_system_and_independent_tasks():
+    import json
+    import runpy
+    from pathlib import Path
+
+    from app.ai.coding_evidence_prompt import CODING_SYSTEM_PROMPT
+
+    exporter = runpy.run_path(str(Path(__file__).resolve().parents[1] / "scripts/export_ai_catalog.py"))
+    artifacts = exporter["artifacts"]()
+    payload = json.loads(artifacts["ai-prompts.json"])
+    assert payload["system_prompt"] == COMMON_SYSTEM_PROMPT
+    assert payload["system_prompt_overrides"] == {"drg_evidence_review": CODING_SYSTEM_PROMPT}
+    assert CODING_SYSTEM_PROMPT.startswith(COMMON_SYSTEM_PROMPT) and CODING_SYSTEM_PROMPT != COMMON_SYSTEM_PROMPT
+    assert len(payload["features"]) == len({row["task_prompt"] for row in payload["features"]}) == 80
+    coding = next(row for row in payload["features"] if row["number"] == 68)
+    assert coding["source_reference_keys"] == ["coding_case_id"]
+    assert set(coding["default_roles"]) == {"admin", "super_admin", "director", "doctor"}
+    assert coding["task_prompt"] == FEATURE_BY_KEY["drg_evidence_review"].task_prompt
+    assert "system_prompt_overrides" in artifacts["ai-capabilities.md"]

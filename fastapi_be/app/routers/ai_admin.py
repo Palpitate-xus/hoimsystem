@@ -10,7 +10,7 @@ from sqlalchemy import func, inspect
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, defer
 
-from app.ai.catalog import COMMON_SYSTEM_PROMPT, FEATURES
+from app.ai.catalog import FEATURES
 from app.ai.ecg_probe import inspect_ecg_capabilities
 from app.ai.forecast_probe import inspect_forecast_capabilities
 from app.ai.gateway import AIExecutionError
@@ -815,6 +815,7 @@ def list_global_runs(
     inventory_item_kind: str | None = Query(None, max_length=20),
     inventory_item_id: QueryPositiveInteger | None = Query(None, ge=1, le=2147483647),
     inventory_scenario_id: str | None = Query(None, max_length=36),
+    coding_case_id: str | None = Query(None, max_length=36),
     page: int = Query(1, ge=1, le=100000),
     page_size: int = Query(30, ge=1, le=100),
     db: Session = Depends(get_db),
@@ -823,7 +824,16 @@ def list_global_runs(
     """Inspect all users' task metadata and feedback counts without loading clinical payloads."""
     user = _current_super_admin(db, user)
     query = db.query(AIRun)
-    if any(value is not None for value in (inventory_item_kind, inventory_item_id, inventory_scenario_id)):
+    if coding_case_id is not None:
+        if feature_key != "drg_evidence_review" or any(
+            value is not None
+            for value in (department_id, surgery_pool_id, surgery_scenario_id, supply_item_kind, supply_item_id, supply_series_id, inventory_item_kind, inventory_item_id, inventory_scenario_id)
+        ):
+            raise HTTPException(422, "编码证据管理历史仅筛选明确病案快照及其实际患者")
+        from app.ai.coding_evidence_history import filter_history
+
+        query = filter_history(db, user, query, coding_case_id=coding_case_id, patient_id=patient_id)
+    elif any(value is not None for value in (inventory_item_kind, inventory_item_id, inventory_scenario_id)):
         if feature_key != "inventory_optimization" or any(
             value is not None for value in (patient_id, department_id, surgery_pool_id, surgery_scenario_id, supply_item_kind, supply_item_id, supply_series_id)
         ):
@@ -878,6 +888,14 @@ def inspect_run_trace(run_id: str, db: Session = Depends(get_db), user: User = D
     if run is None:
         raise HTTPException(404, "AI 任务不存在")
     snapshot = json.loads(run.input_json)
+    from app.ai.coding_evidence_storage import is_coding_run
+
+    if is_coding_run(db, run):
+        from app.ai.coding_evidence_context import expand_context
+        from app.ai.runtime import authorize_run
+
+        authorize_run(db, user, run)
+        snapshot["payload"]["context"] = expand_context(db, snapshot["payload"]["context"])
     from app.ai.inventory_storage import is_inventory_snapshot
 
     if is_inventory_snapshot(snapshot):
@@ -990,11 +1008,14 @@ def update_provider(provider_id: int, req: ProviderWrite, db: Session = Depends(
 @router.get("/ai/admin/prompts/{key}")
 def list_prompts(key: str, db: Session = Depends(get_db), user: User = Depends(require_roles("super_admin"))) -> dict:
     """Display the fixed system contract and immutable task prompt history."""
+    from app.ai.coding_evidence_prompt import system_prompt_for
+
+    _current_super_admin(db, user)
     spec = get_spec(key)
     versions = db.query(AIPromptVersion).filter_by(feature_key=key).order_by(AIPromptVersion.version.desc()).all()
     baseline = {"prompt_id": None, "version": 0, "task_prompt": spec.task_prompt, "change_note": "项目默认任务 Prompt"}
     data = [{name: getattr(item, name) for name in ("prompt_id", "version", "task_prompt", "change_note", "created_by", "create_time")} for item in versions]
-    return {"code": 200, "msg": "success", "data": {"system_prompt": COMMON_SYSTEM_PROMPT, "versions": [*data, baseline]}}
+    return {"code": 200, "msg": "success", "data": {"system_prompt": system_prompt_for({"coding_binding": None} if spec.number == 68 else {}), "versions": [*data, baseline]}}
 
 
 @router.post("/ai/admin/prompts/{key}")

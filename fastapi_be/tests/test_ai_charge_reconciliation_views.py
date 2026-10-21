@@ -36,6 +36,9 @@ def test_pending_full_view_anchors_exact_retained_raw_json_and_complete_projecti
         assert proof[anchor] == hashlib.sha256(getattr(run, raw).encode("utf-8")).hexdigest()
     assert proof["created_at"].endswith(".123456Z") and ChargeArtifactRecord.model_validate(proof).run_id == run.run_id
     assert data["charge_findings"]["charge_source"] == value["public_source"]
+    assert data["charge_findings"]["input"] == req.input
+    assert sources.c.digest(data["charge_findings"]["context"]) == data["context_digest"]
+    assert {"system_prompt", "task_prompt", "provider_snapshot"}.isdisjoint(data["charge_findings"])
     assert data["charge_findings"]["charge_case"]["can_record"] is False
     assert describe_charge_run(db, actor, run, False).keys().isdisjoint({"result", "charge_artifact", "charge_findings"})
 

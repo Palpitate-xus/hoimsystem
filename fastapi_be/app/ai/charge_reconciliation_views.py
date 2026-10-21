@@ -56,5 +56,6 @@ def describe_charge_run(db, user, run, include_result=True):
         ).model_dump(mode="json")
         expanded = expand_context(db, snapshot["payload"]["context"])
         data["charge_findings"] = {key: expanded[key] for key in ("charge_binding", "charge_source", "charge_case")}
+        data["charge_findings"].update(input=snapshot["payload"]["input"], context=snapshot["payload"]["context"])
         data["result"], data["evidence"] = result, evidence
     return data

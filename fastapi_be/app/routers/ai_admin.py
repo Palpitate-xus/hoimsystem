@@ -823,7 +823,7 @@ def list_global_runs(
     db: Session = Depends(get_db),
     user: User = Depends(require_roles("super_admin")),
 ) -> dict:
-    """Inspect all users' task metadata and feedback counts without loading clinical payloads."""
+    """Return all users' audited task metadata and feedback counts without exposing full payloads."""
     from app.ai.charge_reconciliation_write_guard import lock_charge_gate
 
     # A global directory may contain native charge tasks. Billing precedes

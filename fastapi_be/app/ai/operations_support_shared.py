@@ -56,6 +56,29 @@ def is_operations_task(db, value):
     return found is not None and found[0] is True
 
 
+def is_located_operations_task(db, value):
+    """Own opaque three-column precheck only; grants no part/stop authority.
+
+    Negative classification must not query another domain before its original
+    Gate. Current short RC and actual same-transaction SQL are both required;
+    no process-local hint can stand in for a persisted Artifact.
+    """
+    identifier = opaque_run_id(value)
+    if db is None or type(identifier) is not str:
+        return False
+    statement = select(AIOperationsRunArtifact.run_id, AIOperationsRunArtifact.case_id, AIOperationsRunArtifact.requested_by).where(AIOperationsRunArtifact.run_id == identifier)
+    with db.no_autoflush:
+        found = set()
+        bind = db.get_bind()
+        if bind.dialect.name in {"mysql", "mariadb"}:
+            with getattr(bind, "engine", bind).connect().execution_options(isolation_level="READ COMMITTED") as connection:
+                found.update(tuple(row) for row in connection.execute(statement))
+        found.update(tuple(row) for row in db.execute(statement))
+    if len(found) > 1:
+        raise HTTPException(409, "运维实际同事务与当前分件身份不一致，未猜测域或读取正文")
+    return bool(found)
+
+
 def guard_operations_task(db, user, identifier):
     identity = locate_native_task(db, identifier)
     if identity is None or identity.domain != FEATURE:

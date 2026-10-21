@@ -36,6 +36,7 @@ def test_actual_expired_native_identity_without_hint_never_returns_task_body(con
     actual = capture_without_body(db, lambda: routing.locate_native_task(db, run))
     assert actual.domain == "operations_support" and actual.run_id == identifier and actual.source_id == configured[3]["case_id"]
     assert capture_without_body(db, lambda: shared.is_operations_task(db, run)) is True
+    assert capture_without_body(db, lambda: shared.is_located_operations_task(db, run)) is True
     assert inspect(run).expired_attributes
 
 
@@ -76,6 +77,7 @@ def test_marker_only_orphan_is_never_generic_or_body_readable(configured, marker
             values["input_json"] = '{"operations_case_id":null}'
         db.execute(update(AIRun).where(AIRun.run_id == identifier).values(**values), execution_options={"synchronize_session": False})
     assert capture_without_body(db, lambda: shared.is_operations_task(db, identifier)) is True
+    assert capture_without_body(db, lambda: shared.is_located_operations_task(db, identifier)) is False
     assert capture_without_body(db, lambda: routing.locate_native_task(db, identifier)) is None
     no_body(db, lambda: access.guard_private_task_read(db, registrar, identifier), 409)
     before = db.query(AIAuditEvent).count()

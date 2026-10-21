@@ -670,7 +670,11 @@ def list_runs(
 @router.get("/ai/runs/{run_id}")
 def run_detail(run_id: str, db: Session = Depends(get_db), user: User = Depends(get_current_user)) -> dict:
     """Recheck patient access before exposing a stored result or evidence."""
-    from app.ai.operations_support_shared import is_operations_task
+    from app.ai.native_task_access import lock_directory_gates
+    from app.ai.operations_support_shared import is_located_operations_task, is_operations_task
+
+    if not is_located_operations_task(db, run_id):
+        lock_directory_gates(db)
 
     if is_operations_task(db, run_id):
         from app.ai.operations_support_views import describe_task
@@ -691,10 +695,13 @@ def cancel_run(run_id: str, db: Session = Depends(get_db), user: User = Depends(
     """Stop accepting a result; an already sent provider call may still finish."""
     from app.ai.document_change_access import has_native_identity
     from app.ai.document_change_runtime import cancel_change_run
+    from app.ai.native_task_access import lock_directory_gates
     from app.ai.native_task_routing import locate_native_task
+    from app.ai.operations_support_shared import is_located_operations_task, is_operations_task
 
+    if not is_located_operations_task(db, run_id):
+        lock_directory_gates(db)
     identity = locate_native_task(db, run_id)
-    from app.ai.operations_support_shared import is_operations_task
 
     if identity is not None and identity.domain == "operations_support":
         from app.ai.operations_support_runtime import cancel_operations_run
@@ -759,7 +766,11 @@ def cancel_run(run_id: str, db: Session = Depends(get_db), user: User = Depends(
 @router.post("/ai/runs/{run_id}/feedback")
 def review_result(run_id: str, req: FeedbackWrite, db: Session = Depends(get_db), user: User = Depends(get_current_user)) -> dict:
     """Append review without editing clinical records, orders or prescriptions."""
-    from app.ai.operations_support_shared import is_operations_task
+    from app.ai.native_task_access import lock_directory_gates
+    from app.ai.operations_support_shared import is_located_operations_task, is_operations_task
+
+    if not is_located_operations_task(db, run_id):
+        lock_directory_gates(db)
 
     if is_operations_task(db, run_id):
         from app.ai.operations_support_feedback import stage_feedback

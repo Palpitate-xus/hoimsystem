@@ -435,3 +435,38 @@
 - 2026-10-21 第80项完整送模协议/真实用量：两个纯完整文件一次68通过，1.73s pytest、2.037s外层，全部后端/映射/同案fixture稳定且零配置/DB/网络。完整Source恰8MiB-1000与合法65535字节Task分别成立但完整wire超8MiB真实拒绝，固定System/schema也计入且无截断；未尝试0/0、已尝试部分已知、崩溃未知分开，bool/负数/越界不能变伪未知或零费用。实际网关与Task继续。
 
 - 2026-10-21 第80项实际受审来源文本网关：16完整文件一次356通过/13既有SQLite提示，28.61s pytest、39.678s外层，1188输入稳定。真实当前SQL来源准备后关闭事务，Chat/Responses各一次隔离HTTP传输期间零SQL；完整原Task/System/Source送出，固定成绩和逐字引用校验，store=false且无tools/跳转/重试/环境代理。无用量/部分已知/总数单独分开，坏计数拒绝但另一实际计数保留；503/超时/坏UTF8/重复键/完整响应8MiB+1等真实模拟拒绝。此为MockTransport非真实模型效力；Task/claim/worker/持久化与FE继续。
+
+- 2026-10-21 第80项原生Task两增量表：17完整文件一次388通过/13既有SQLite提示，36.07s pytest、47.515s外层，1191输入稳定。Artifact/Result共5MEDIUM/4UTC6，完整Source/结果各8MiB，绑定/Prompt/执行快照各256KiB；原Lesson/Review/Submission实际Audit锚和五阶段Audit字段，结果复合FK绑定原lease/Source/System指令摘要。真实SQLite含NUL/emoji容量/+1/FK/角色目标/claim闭合与独立up/down/up保持235旧表DDL/行/Gate；物理合成Audit动作不冒称运行回执，MySQL此处仅编译，当前Task服务/worker继续。
+
+- 2026-10-21 第80项真实Task入队/原始审计与来源前置重读：18完整文件一次412通过/15既有SQLite提示，44.13s pytest、55.481s外层，1195后端/映射/两原同案fixture输入稳定。完整Source/绑定/Prompt/执行帧、65535 raw3及原25字段Run与独立具体创建Audit绑定；当前owner/role/epoch/独立模型复核/全部参考元数据/原回执先于任意任务答案正文，执行另核当前版本。额度及3类after-insert来源/owner/config变化均整笔回滚，超管自己的UUID预览不启用。首轮411P/1F仅新测试误把原撤回403写409，改精确既有403与消息后重跑，原失败保留；claim/dispatch/真实用量/接收和Task Main/FE继续。
+
+- 2026-10-21 第80项具体claim/dispatch阶段：19完整文件一次430通过/17既有SQLite提示，47.43s pytest、58.157s外层，1197输入稳定。创建/领取/发送三个不同实际AuditPK与原Source/指令锚、Artifact UTC6 claimed_at/lease及Run旧秒时钟绑定；同Session实际未提交SQL重复不重领/不重发，不靠内存标记。当前来源/epoch/config丢失及六类伪造claim均正文前拒绝；阶段UPDATE后参考突变由实际重读检测并随调用者事务回滚。仅发送预约不冒称HTTP已尝试；真实用量/接收/worker/Main/FE继续。
+
+- 2026-10-21 第80项完整结果接受/真实用量：20完整文件一次451通过/18既有SQLite提示，61.11s pytest、72.224s外层，1200输入稳定。五个不同实际创建/领取/发送/用量/接受AuditPK；完整逐字引用教学结果不改原服务端成绩，合法缺用量仍可接受且11/null等原样保留，旧Run0仅内部占位不当未知零费用。真实>65535字节结果独立表完整读回而旧Run只短引用；当前Source/owner/epoch/config失效正文前拒接，原实际dispatch仍可仅技术保留已用11/null。未领0/0与发送后崩溃unknown不同，三个after-result-insert变更整笔回滚。异步worker/Task Main/FE及Task实际MySQL继续。
+
+- 2026-10-21 第80项实际提交异步执行/取消/恢复：21完整文件一次467通过/18既有SQLite提示，73.76s pytest、85.065s外层，1204输入稳定。Chat/Responses四种真实/nullable用量，实际HTTP await前后worker Session全部关闭；重复claim/交付不重发。当前超管仅技术取消不恢复他人作答，未发送0/0、在途pending后原交付11/null保留且不收结果；await中撤回来源拒收但保留已知计数，503未知。受控时钟恢复已领未发送0与已预约后中断unknown分开，RC候选/自己实际SQL实现不冒称Task实际MySQL；统一队列/Main/FE继续，真实模型效力不在此证明。
+
+- 2026-10-21 第80项初始共享域识别/孤立任务隔离：22完整文件一次474通过/18既有SQLite提示，77.55s pytest、89.719s外层，1206输入稳定。实际training Artifact不透明submission/owner三列与本事务实际SQL作为第七native域；无hint/expunge后的真实未提交记录可识别，rollback后即消失，分类不代授权。显式null等剩余marker仅SQL布尔识别缺件，技术隔离不读正文且不补造历史调用/费用；候选条件仅元数据过滤，公共queue/runtime/router/trace/feedback仍待接线，不冒称正式Main已完成。
+
+- 2026-10-21 第80项原提交人四分件与超管技术审计：26完整文件（含既有3个admin套件）一次502通过/19既有SQLite提示，87.78s pytest、99.243s外层、1209输入稳定。当前原学员可取完整task/source/binding/result；未成功的合法状态结果为null并核实际pointer/blob缺席。其他当前超管仅bodyless状态/真实nullable用量且trace无parts，不泄露作答/反馈/Source指纹；实际Main通用审计隐藏培训学员私件细节，原始具体Audit仍完整且非培训decimal不变。原role/epoch先于审计正文，统一Task路由/队列与FE继续。
+- 2026-10-21：第74项集成后的完整AI浏览器175文件/2818用例一次全绿（实际Playwright6216321.163ms/外层6228.268秒），2575隔离mock+222生产mock+21真实合成HTTP，0skip/retry/flaky/error。1199源码/测试/夹具/构建输入与375实际dist全程SHA不变，660生产输入匹配canonical；旧161个spec字节及2484收集数均保持，新增14spec/334用例在本次完整运行内完成。完整原始证据永久保存ai-research-native-browser-verification.json。生产目标已明确为Chrome/Edge85、Firefox79、Safari14.1，本轮仅实际当前Chromium，不称这些历史浏览器实测；25无关旧非AI spec不在范围。后端fresh全套仍在运行，主工作分支尚未接纳74。
+
+### 第74项完整后端与整套浏览器验收完成（2026-10-21）
+
+- 新的完整默认后端一次10687通过、28可选模型测试跳过、7条既有负控/适配器提示，10715实际收集；pytest4352.78秒/外层4365.394秒，全部1150 BE与四映射输入前后及永久保存时稳定。未把202/46/5/8等独立组相加，也不覆盖75–80新树。第一完整12失败与主动中断第二188通过的原记录完整保留。
+- 此前175文件2818项完整浏览器同次全部通过、无skip/retry/flaky/error；此时再核1199 FE/spec/fixture/build与375实际dist精确匹配原冻结。完整证据见ai-research-native-backend-verification.json与ai-research-native-browser-verification.json。
+- 本地主工作树合并及精确字节/正式构建准入随后执行；不是新MySQL/远端模型/医院或临床验证/部署证明，现代浏览器目标的明确记录保持。
+
+### 第74项进入主工作树（2026-10-21）
+
+- 本地merge0320876f（原e317e7d+研究652ba8e）已将完整验收69–74纳入feature/ai-hospital-platform；1150 BE/四映射和1199 FE/spec/fixture/build逐字等于上游完整10687P/28skip/7warn与2818浏览器对应冻结。没有重新执行或加总这些全量。
+- Main正式npm run verify一次29.745秒、审计0、660生产输入稳定；JS5,364,118/全资源6,439,013/最大646,853，原6M/7M/700k限制不变。Main实际新产物与上游dist并非逐字相同，不臆断原因；额外完整12文件Node163全绿6.440秒、6文件实际生产20全绿47.767秒，零skip/retry/flaky/error，1199源核验与375实际dist稳定，独立静态服务关闭且无未mock API。
+- 独立Python再核Main实际HTML44记录：28完整schema/43完整源JSON与许可SVG精确相等；934接口RBAC与80能力Prompt导出check通过。详见ai-research-main-admission.json，全部原runner/report/log无损保存。未push/部署/重启、医院DB/远端模型或临床验证；75–80继续独立开发，既有明确现代浏览器目标不变。
+
+- 2026-10-21 第80项原生目录/Prompt/教学启用范围：28完整文件一次546通过/19既有SQLite提示，88.19s pytest、99.444s外层、1209输入稳定。唯一已提交练习UUID、clinical_training_evidence模式、真实独立System/Task及原catalog指令导出，六固定staff含护士；不沿用通用知识检索或患者权限。超管版本编辑固定System与完整Task一致，AI反馈启用另需教学范围验证且本地评分不冒称模型验证；公共Task路由/队列和FE继续。
+
+- 2026-10-21 第80项正式培训Task/四分件/目录/人工反馈：31完整文件一次619通过/19既有SQLite提示，125.82s pytest、137.761s外层、1213输入稳定，8新增Main端点/959 RBAC。两协议真实提交的native service+注入HTTP在await零worker SQL，固定原成绩、缺失/部分用量、六状态null结果、当前课程撤回零BODY、超管技术目录/trace不开放别人作答；人工复核独立第六Audit绑定原接受PK和用量PK。四同案真实HTTP包各自保留；首轮604P/15setup E由测试commit后唯一配置残留导致，明确teardown后重跑全绿，原失败保留。统一公共queue/runtime/trace/FE及Task实际MySQL继续。
+
+- 2026-10-21 第80项统一Main/队列/worker/历史/超管接线：38完整文件一次729通过/20既有提示，220.86s pytest、232.709s外层、1215输入稳定。两协议四种nullable用量走真实公共create→专用具体claim→await零worker SQL→当前读取/绑定接受PK人工复核，重复交付不重发；超管全局含无筛选目录/trace仅技术状态无他人作答指纹。已领/未领取消保持已知未尝试0，普通取消拒绝；损坏创建锚不饿死后续合法任务，擦除功能和expired ORM不提前刷新Task，外来UUID/null通用预览拒绝。五Gate→User严格顺序及既有Runtime/运营/账目/科研expired/双原文完整套件同轮通过；真实Task MySQL/同案全Source+公共任务UI包与FE继续，不把旧Run占位0当全局实际账单。
+
+- 2026-10-21 第80项同案界面数据：3完整Main/common/packet文件一次32通过，45.48s pytest、56.745s外层、1216输入稳定。一个SQL课程/独立复核案例，经实际Main题面/新作答POST/三分件后进入公共Task，63原HTTP包完整保留七种真实任务状态及每态4裸分件，含在途取消pending→原交付11/null、503未知、课程撤回与超管仅技术200。无跨案拼接，不与既有729重复加总；真实MySQL与前端继续。

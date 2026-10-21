@@ -94,8 +94,10 @@ def setup_reports(db, configs: dict) -> dict:
             optimization = spec.engine == "optimizer"
             issues.append(
                 {
-                    "code": "OPTIMIZATION_VALIDATION_REQUIRED" if optimization else "PREDICTION_VALIDATION_REQUIRED",
-                    "message": "运营优化尚未完成指定目标与范围的验证；原件审核、约束算例和服务能力核对不代替实际业务验证"
+                    "code": "TRAINING_VALIDATION_REQUIRED" if spec.number == 80 else "OPTIMIZATION_VALIDATION_REQUIRED" if optimization else "PREDICTION_VALIDATION_REQUIRED",
+                    "message": "培训AI反馈尚未完成明确教学范围验证；课程发布和本地评分不代表模型反馈效果验证"
+                    if spec.number == 80
+                    else "运营优化尚未完成指定目标与范围的验证；原件审核、约束算例和服务能力核对不代替实际业务验证"
                     if optimization
                     else "运营预测尚未完成指定目标与范围的验证；历史覆盖确认和服务能力检查不代替预测效果验证",
                 }

@@ -94,6 +94,8 @@ def patient_options(feature_key: str, keyword: str = Query("", max_length=100), 
 def hospital_service_options(feature_key: str, db: Session = Depends(get_db), user: User = Depends(get_current_user)) -> dict:
     """Offer public hospital places or clinicians for the authorized service capability."""
     spec, _ = authorized_feature(db, user, feature_key)
+    if spec.number == 80:
+        raise HTTPException(422, "培训仅使用独立已提交练习目录，不提供通用医院服务候选")
     if spec.number == 72:
         raise HTTPException(422, "双原文版本核对只使用专用有限范围目录，不提供通用业务范围")
     data = operational_options(db, user, spec) if spec.scope == "hospital" else service_options(db, spec.number)
@@ -653,6 +655,15 @@ def list_runs(
 @router.get("/ai/runs/{run_id}")
 def run_detail(run_id: str, db: Session = Depends(get_db), user: User = Depends(get_current_user)) -> dict:
     """Recheck patient access before exposing a stored result or evidence."""
+    from app.ai.clinical_training_shared import is_located_training_task, is_training_task
+    from app.ai.native_task_access import lock_directory_gates
+
+    if not is_located_training_task(db, run_id):
+        lock_directory_gates(db)
+    if is_training_task(db, run_id):
+        from app.ai.clinical_training_views import describe_task
+
+        return {"code": 200, "msg": "success", "data": describe_task(db, user, run_id).model_dump(mode="json")}
     from app.ai.native_task_access import guard_private_task_read
 
     guard_private_task_read(db, user, run_id)
@@ -666,11 +677,21 @@ def run_detail(run_id: str, db: Session = Depends(get_db), user: User = Depends(
 @router.post("/ai/runs/{run_id}/cancel")
 def cancel_run(run_id: str, db: Session = Depends(get_db), user: User = Depends(get_current_user)) -> dict:
     """Stop accepting a result; an already sent provider call may still finish."""
+    from app.ai.clinical_training_shared import is_located_training_task, is_training_task
     from app.ai.document_change_access import has_native_identity
     from app.ai.document_change_runtime import cancel_change_run
+    from app.ai.native_task_access import lock_directory_gates
     from app.ai.native_task_routing import locate_native_task
 
+    if not is_located_training_task(db, run_id):
+        lock_directory_gates(db)
     identity = locate_native_task(db, run_id)
+    if identity is not None and identity.domain == "clinical_training":
+        from app.ai.clinical_training_runtime import cancel_training_run
+
+        return {"code": 200, "msg": "任务结果已取消接收", "data": cancel_training_run(db, user, run_id).model_dump(mode="json")}
+    if identity is None and is_training_task(db, run_id):
+        raise HTTPException(409, "培训任务缺少完整持久分件，未降级取消或推断用量")
     if identity is not None and identity.domain == "research_cohort":
         from app.ai.research_cohort_execution import cancel_research_run
 
@@ -728,6 +749,16 @@ def cancel_run(run_id: str, db: Session = Depends(get_db), user: User = Depends(
 @router.post("/ai/runs/{run_id}/feedback")
 def review_result(run_id: str, req: FeedbackWrite, db: Session = Depends(get_db), user: User = Depends(get_current_user)) -> dict:
     """Append review without editing clinical records, orders or prescriptions."""
+    from app.ai.clinical_training_shared import is_located_training_task, is_training_task
+    from app.ai.native_task_access import lock_directory_gates
+
+    if not is_located_training_task(db, run_id):
+        lock_directory_gates(db)
+    if is_training_task(db, run_id):
+        from app.ai.clinical_training_feedback import stage_feedback
+        from app.routers.ai_clinical_training_sources import commit_reply
+
+        return commit_reply(db, lambda: stage_feedback(db, user, run_id, req))
     from app.ai.native_task_access import guard_private_task_read
 
     guard_private_task_read(db, user, run_id)

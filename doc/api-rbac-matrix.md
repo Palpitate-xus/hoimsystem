@@ -3,7 +3,7 @@
 > 由 `fastapi_be/scripts/generate_rbac_matrix.py` 从源码自动生成，请勿手改。
 > `✓`=可访问 | `PUBLIC`=无需登录 | 留空=不可访问
 
-共 **860** 个接口（PUBLIC 18 个 / 需登录 842 个）。
+共 **869** 个接口（PUBLIC 18 个 / 需登录 851 个）。
 
 
 ### `admin.py`
@@ -204,6 +204,20 @@
 | GET | `/api/ai/admin/document-evidence/publications` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
 | GET | `/api/ai/admin/document-evidence/publications/{publication_id}` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
 | POST | `/api/ai/admin/document-evidence/publications/{publication_id}/revoke` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+
+### `ai_drug_label_sources.py`
+
+| 方法 | 路径 | admin | super_admin | director | doctor | nurse | cashier | pharmacist | guide | patient | lab_technician | registrar | PUBLIC |
+|------|------|------|------|------|------|------|------|------|------|------|------|------|------|
+| GET | `/api/ai/drug-label-sources/options` |  | ✓ |  |  |  |  | ✓ |  |  |  |  |  |
+| GET | `/api/ai/drug-label-sources/catalog` |  | ✓ |  |  |  |  | ✓ |  |  |  |  |  |
+| GET | `/api/ai/drug-label-sources` |  | ✓ |  |  |  |  | ✓ |  |  |  |  |  |
+| POST | `/api/ai/drug-label-sources` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/drug-label-sources/{binding_id}` |  | ✓ |  |  |  |  | ✓ |  |  |  |  |  |
+| POST | `/api/ai/drug-label-sources/{binding_id}/professional-review` |  |  |  |  |  |  | ✓ |  |  |  |  |  |
+| POST | `/api/ai/drug-label-sources/{binding_id}/professional-review/revoke` |  | ✓ |  |  |  |  | ✓ |  |  |  |  |  |
+| POST | `/api/ai/drug-label-sources/{binding_id}/review` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/drug-label-sources/{binding_id}/revoke` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
 
 ### `ai_ecg.py`
 

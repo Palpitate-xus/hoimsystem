@@ -10744,5 +10744,195 @@
     },
     "actual_bug_and_narrow_fix": "First actual MySQL run failed at original readback: existing AIAuditEvent.create_time is legacy DATETIME(0) and did not preserve Source UTC6. Old table/column/migrations remain unchanged. New operations audit writes explicitly store the whole second in that existing column; the actual specific PK/action/actor/target and complete closed detail still bind the exact Source UTC6 clocks. Reader verifies the explicit coarse column plus exact full detail. Four permanent microsecond cases0/123456/654321/999999 were added before the188 once execution. No UTC6 precision loss in the seven new Source clocks and no permissive time window or altered expectation masking the mismatch.",
     "isolation": "Both actual runners created fresh tmpfs-only, network-none, no host ports MySQL containers over a new Unix socket, did not mount source or access any existing DB/dotenv/shared PEM, and verified container/volume/private-dir cleanup even for the RED first run."
+  },
+  "pure_task_result_prompt_phase": {
+    "source_commit": "f9ab1e2",
+    "recorded_at_utc": "2026-10-21T18:33:40.172406+00:00",
+    "scope": "Final one execution of three whole pure files passed107 (29 Task/result cases plus78 immutable Source cases), with seven pure product/test inputs unchanged. Fixed dedicated Prompt module added but not yet registered or used by a real model/native Task. Source selection permits only explicit operations_case_id and one of three fixed objectives, no free question/environment/patient fields. Results bind exact whole public Source SHA and objective, preserve unverified/environment-not-observed/compatibility-unverified states, and every quote must match the exact actual document scalar-codepoint slice. Manual instructions must be exact runbook quotes, only for reviewed-checks objective, never generated commands/tools. Actual full typed result8MiB exact/+1 was exercised; no helper-only budget substitution. Unknown/private Source/duplicate JSON/fractional offsets/copied typed model and invented refs are rejected. This verifies structure/binding only, not semantic correctness of model prose, actual current permission, instruction-injection resistance of a live model, clinical safety or current component compatibility.",
+    "current_once_whole_three_files107": {
+      "path": "/tmp/hoim-operations-task-contract-second-verification.json",
+      "bytes": 3673,
+      "sha256": "a69c62e797352b3c4986331dc3682624ca1a6dd3b0b77badccea052e024be182",
+      "value": {
+        "scope": "Three whole pure operations Task/result/source contract and projection files plus fixed Prompt module; exact Source/objective/hash/codepoint references and runbook-only action citations; no SQL/current publication, actual Prompt registration, gateway, Task execution or FE proof. No actual SQL/current authority/publication/secret detection/HTTP/model/process execution. Actual complete4MiB text and8MiB whole boundaries are synthetic. Explicit codepoint masks preserve every unselected original byte; declarations alone do not grant access.",
+        "command": [
+          "--noconftest",
+          "-p",
+          "no:cacheprovider",
+          "-q",
+          "tests/test_ai_operations_support_task_contract.py",
+          "tests/test_ai_operations_support_contract.py",
+          "tests/test_ai_operations_support_projection.py"
+        ],
+        "exit_code": 0,
+        "elapsed_seconds": 2.287,
+        "before": {
+          "app/ai/operations_support_task_contract.py": {
+            "bytes": 4807,
+            "sha256": "7587f63b20a649b2a37290436074e61395fa78aca5d57797c95ede25d9d7d003"
+          },
+          "app/ai/operations_support_task_prompt.py": {
+            "bytes": 2455,
+            "sha256": "56be422b5f6f5a5a325e95e3dac95801519052d00e6e67e7fbe33d9c8109e151"
+          },
+          "tests/test_ai_operations_support_task_contract.py": {
+            "bytes": 9766,
+            "sha256": "01e7e1f6664a953857b5308794b1c7b75835e05ab90a1184ce5d025c0eee4ea3"
+          },
+          "app/ai/operations_support_contract.py": {
+            "bytes": 6904,
+            "sha256": "a583d071d6c8b8dbf3162203fe393f85cdf20dfd8e0082ed5823a3eb51e66e23"
+          },
+          "tests/test_ai_operations_support_contract.py": {
+            "bytes": 9084,
+            "sha256": "9de1647d0953d098989535b53eb7517773d9d3b4f15a302350d6e10870081403"
+          },
+          "app/ai/operations_support_projection.py": {
+            "bytes": 7440,
+            "sha256": "cff823c98037df362b525a933c3eb870aa269f5029a5b43925fbed3b57a7afbb"
+          },
+          "tests/test_ai_operations_support_projection.py": {
+            "bytes": 8606,
+            "sha256": "d5b2e3ea9ffc9190479c341765804b8fa947f370389a25822b914e0d9d766757"
+          }
+        },
+        "after": {
+          "app/ai/operations_support_task_contract.py": {
+            "bytes": 4807,
+            "sha256": "7587f63b20a649b2a37290436074e61395fa78aca5d57797c95ede25d9d7d003"
+          },
+          "app/ai/operations_support_task_prompt.py": {
+            "bytes": 2455,
+            "sha256": "56be422b5f6f5a5a325e95e3dac95801519052d00e6e67e7fbe33d9c8109e151"
+          },
+          "tests/test_ai_operations_support_task_contract.py": {
+            "bytes": 9766,
+            "sha256": "01e7e1f6664a953857b5308794b1c7b75835e05ab90a1184ce5d025c0eee4ea3"
+          },
+          "app/ai/operations_support_contract.py": {
+            "bytes": 6904,
+            "sha256": "a583d071d6c8b8dbf3162203fe393f85cdf20dfd8e0082ed5823a3eb51e66e23"
+          },
+          "tests/test_ai_operations_support_contract.py": {
+            "bytes": 9084,
+            "sha256": "9de1647d0953d098989535b53eb7517773d9d3b4f15a302350d6e10870081403"
+          },
+          "app/ai/operations_support_projection.py": {
+            "bytes": 7440,
+            "sha256": "cff823c98037df362b525a933c3eb870aa269f5029a5b43925fbed3b57a7afbb"
+          },
+          "tests/test_ai_operations_support_projection.py": {
+            "bytes": 8606,
+            "sha256": "d5b2e3ea9ffc9190479c341765804b8fa947f370389a25822b914e0d9d766757"
+          }
+        },
+        "sources_stable": true,
+        "guards": {
+          "dotenv_reads": 0,
+          "forbidden_imports": [],
+          "external_socket_attempts": 0
+        },
+        "summary": [
+          "........................................................................ [ 67%]",
+          "...................................                                      [100%]",
+          "107 passed in 2.17s"
+        ],
+        "log": "/tmp/hoim-operations-task-contract-second-tests.log",
+        "log_sha256": "1451490ea33a067afd4228dd7e295dfef1a1c3a7702da2a0eb29e3563d6a9793"
+      }
+    },
+    "prior_once108": {
+      "path": "/tmp/hoim-operations-task-contract-first-verification.json",
+      "bytes": 3674,
+      "sha256": "3c7bbb507dc0a8a9ee253ec4b391f8eed0c572c44c08be83da2daee7ec765e49",
+      "value": {
+        "scope": "Three whole pure operations Task/result/source contract and projection files plus fixed Prompt module; exact Source/objective/hash/codepoint references and runbook-only action citations; no SQL/current publication, actual Prompt registration, gateway, Task execution or FE proof. No actual SQL/current authority/publication/secret detection/HTTP/model/process execution. Actual complete4MiB text and8MiB whole boundaries are synthetic. Explicit codepoint masks preserve every unselected original byte; declarations alone do not grant access.",
+        "command": [
+          "--noconftest",
+          "-p",
+          "no:cacheprovider",
+          "-q",
+          "tests/test_ai_operations_support_task_contract.py",
+          "tests/test_ai_operations_support_contract.py",
+          "tests/test_ai_operations_support_projection.py"
+        ],
+        "exit_code": 0,
+        "elapsed_seconds": 2.206,
+        "before": {
+          "app/ai/operations_support_task_contract.py": {
+            "bytes": 4807,
+            "sha256": "7587f63b20a649b2a37290436074e61395fa78aca5d57797c95ede25d9d7d003"
+          },
+          "app/ai/operations_support_task_prompt.py": {
+            "bytes": 2455,
+            "sha256": "56be422b5f6f5a5a325e95e3dac95801519052d00e6e67e7fbe33d9c8109e151"
+          },
+          "tests/test_ai_operations_support_task_contract.py": {
+            "bytes": 10299,
+            "sha256": "7c25e89c238ce1b69aa0011c56d8f0c2d87a5af777a8091817c3e81fc2bdbc3f"
+          },
+          "app/ai/operations_support_contract.py": {
+            "bytes": 6904,
+            "sha256": "a583d071d6c8b8dbf3162203fe393f85cdf20dfd8e0082ed5823a3eb51e66e23"
+          },
+          "tests/test_ai_operations_support_contract.py": {
+            "bytes": 9084,
+            "sha256": "9de1647d0953d098989535b53eb7517773d9d3b4f15a302350d6e10870081403"
+          },
+          "app/ai/operations_support_projection.py": {
+            "bytes": 7440,
+            "sha256": "cff823c98037df362b525a933c3eb870aa269f5029a5b43925fbed3b57a7afbb"
+          },
+          "tests/test_ai_operations_support_projection.py": {
+            "bytes": 8606,
+            "sha256": "d5b2e3ea9ffc9190479c341765804b8fa947f370389a25822b914e0d9d766757"
+          }
+        },
+        "after": {
+          "app/ai/operations_support_task_contract.py": {
+            "bytes": 4807,
+            "sha256": "7587f63b20a649b2a37290436074e61395fa78aca5d57797c95ede25d9d7d003"
+          },
+          "app/ai/operations_support_task_prompt.py": {
+            "bytes": 2455,
+            "sha256": "56be422b5f6f5a5a325e95e3dac95801519052d00e6e67e7fbe33d9c8109e151"
+          },
+          "tests/test_ai_operations_support_task_contract.py": {
+            "bytes": 10299,
+            "sha256": "7c25e89c238ce1b69aa0011c56d8f0c2d87a5af777a8091817c3e81fc2bdbc3f"
+          },
+          "app/ai/operations_support_contract.py": {
+            "bytes": 6904,
+            "sha256": "a583d071d6c8b8dbf3162203fe393f85cdf20dfd8e0082ed5823a3eb51e66e23"
+          },
+          "tests/test_ai_operations_support_contract.py": {
+            "bytes": 9084,
+            "sha256": "9de1647d0953d098989535b53eb7517773d9d3b4f15a302350d6e10870081403"
+          },
+          "app/ai/operations_support_projection.py": {
+            "bytes": 7440,
+            "sha256": "cff823c98037df362b525a933c3eb870aa269f5029a5b43925fbed3b57a7afbb"
+          },
+          "tests/test_ai_operations_support_projection.py": {
+            "bytes": 8606,
+            "sha256": "d5b2e3ea9ffc9190479c341765804b8fa947f370389a25822b914e0d9d766757"
+          }
+        },
+        "sources_stable": true,
+        "guards": {
+          "dotenv_reads": 0,
+          "forbidden_imports": [],
+          "external_socket_attempts": 0
+        },
+        "summary": [
+          "........................................................................ [ 66%]",
+          "....................................                                     [100%]",
+          "108 passed in 2.10s"
+        ],
+        "log": "/tmp/hoim-operations-task-contract-first-tests.log",
+        "log_sha256": "300c3c98cac4a64e5e43e59963640534f129ae538fd9d7fea86f58d69e7a0700"
+      }
+    },
+    "history_note": "Both actual runs green. A one-test string-presence Prompt assertion was removed as uninformative before the final107 execution; no product behavior or input contract was relaxed and no RED is claimed. Actual dedicated Prompt registration/provider/worker/native UI are still pending."
   }
 }

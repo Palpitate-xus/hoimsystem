@@ -374,3 +374,10 @@
 - 当前私有断网MySQL验证100.981秒通过并清理：224旧表加Source5及Artifact2共231个当前注册表；真实增量up/down/up保持原DDL与行，非完整历史迁移回放。共享双协议及process_one保留具体回执、HTTP等待时无SQL连接、未知token保持null、撤研究后普通与超级管理员均不能恢复临床分件。MySQL的128件SQL腐坏Artifact负控不冒称128份独立受审正件；SQLite另有逐件实际创建的完整队列回归。
 - 47个Python文件Ruff及格式检查通过，目录.24的80份独立Task与7份真实固定System已重生成；934接口RBAC JSON及Markdown一致。四份Source recipe逐字保留。早期构造失败、队列饥饿真实RED、旧路由数量断言及各成功前版均保留原范围，不把重复定向数累计为全量通过。
 - 使用及证据见 `ai-research-cohort-shared-guide.md` 与 `ai-research-cohort-shared-verification.json`。默认不启用，不宣称完整后端/浏览器验收、规范生产构建、真实模型/临床验证、入组或导出完成；第74项完整验收及75—80专用实现继续推进。
+
+## 科研队列共享前端规范构建（2026-10-21）
+
+- 正式共享集成2669584的 `npm run verify` 一次通过（29.502秒）：audit零告警，JS5364204、全部资源6439099、最大646975字节；660份实际生产输入前后稳定，原6M/7M/700k限额保留。12个完整Node文件163项一次通过（7.210秒）；独立Python解码实际44份HTML惰性数据，完整28份schema、15份其他JSON及完整授权SVG逐字/原生SHA一致，没有把可执行逻辑藏入数据。
+- 此处有意声明生产Babel兼容下限Chrome/Edge85、Firefox79、Safari14.1，依据[现用Element Plus兼容文档](https://element-plus.org/en-US/guide/installation.html)；原Babel7无targets的ES5降级不再作为生产目标。依赖、lock及既有polyfill不变，开发测试仍保持既有Babel发现契约。实际旧版本浏览器矩阵尚未测试，当前Chromium测试不能代替它。
+- 独立候选第一轮53.741秒实际超预算（JS6058127/全部7133021）保留；声明目标后候选第二轮31.304秒通过，候选6完整生产页面20项一次通过45.237秒。此20项只绑定候选产物，正式全量浏览器另行验证；三轮均保留29条既有样式/SCSS提示，不抬预算或压制提示。
+- 具体范围、完整输入/产物摘要、失败谱系和兼容声明见 `ai-research-native-build-verification.json`。正式175文件2818项AI浏览器与10710项后端收集的完整运行此时仍进行，已知后端旧契约失败在独立修复树定向处理；不宣称整轮成功、真实推理或80项完成。

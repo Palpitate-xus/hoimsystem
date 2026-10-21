@@ -36,6 +36,6 @@ def downgrade():
         batch.drop_constraint("ck_deid_result_dispatch", type_="check")
         batch.drop_constraint("ck_deid_result_claim", type_="check")
         for short in ("dispatch", "claim"):
-            batch.drop_constraint("uq_deid_" + short + "_audit", type_="unique")
             batch.drop_constraint("fk_deid_" + short + "_audit", type_="foreignkey")
+            batch.drop_constraint("uq_deid_" + short + "_audit", type_="unique")
             batch.drop_column(short + "_event_id")

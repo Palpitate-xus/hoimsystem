@@ -472,3 +472,5 @@
 - 2026-10-21 第80项同案界面数据：3完整Main/common/packet文件一次32通过，45.48s pytest、56.745s外层、1216输入稳定。一个SQL课程/独立复核案例，经实际Main题面/新作答POST/三分件后进入公共Task，63原HTTP包完整保留七种真实任务状态及每态4裸分件，含在途取消pending→原交付11/null、503未知、课程撤回与超管仅技术200。无跨案拼接，不与既有729重复加总；真实MySQL与前端继续。
 
 - 2026-10-21 第80项实际私有MySQL Task第二轮55检查66.323s全部通过并清理：六表12UTC6/11MEDIUM，Task两表up/down/up保持235旧表DDL/行；双协议×四种真实nullable用量、UUID Prompt、5具体AuditPK/.123456Z claim、同轮66 Task Main HTTP及独立21 Source HTTP。1214实际MySQL collector与Root1216对应项逐字一致，额外2 JSON夹具单独比SHA，不改称MySQL1216。首轮新harness SessionLocal误用contextmanager的29项后真实失败/清理完整保留；只修harness。物理大TEXT不冒称语义大结果，后者及在途取消/撤权/事务故障继续补验，无真实模型/医院DB/部署。
+
+- 2026-10-21 第80项MySQL第四轮一次80检查85.480s全部绿并清理，重复原55+新增25机制在同一新实例，非相加重跑。真实395176B语义结果/386B原Run短指针、在途取消11/null及撤review/role/epoch/config结算、503真实unknown、取消已知零/中断未知、旧RR新完整result、own未提交null marker，以及四阶段×三种权威触发变更共12次整事务回滚通过，1214collector稳定/guards0。第三轮48项后新增harness把模型与dict错误比较的真实RED和未执行的错误orphan脚本一起保留；只修harness，产品仍ee3ce3b。旧RR全局目录count/rows当前只有SQL/SQLite证据，额外MySQL检查随后补齐。

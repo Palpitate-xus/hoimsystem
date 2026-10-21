@@ -4,7 +4,7 @@ import datetime
 import json
 
 import pytest
-from sqlalchemy import event
+from sqlalchemy import Select, event
 from sqlalchemy.dialects import mysql, sqlite
 from sqlalchemy.orm import Session
 
@@ -141,7 +141,7 @@ async def test_executed_sqlite_json_predicates_and_compiled_mysql_json_members_p
     captured = []
 
     def statement(state):
-        if state.is_select and AIRun.__table__ in state.statement.get_final_froms():
+        if state.is_select and isinstance(state.statement, Select) and AIRun.__table__ in state.statement.get_final_froms():
             captured.append(state.statement)
 
     event.listen(Session, "do_orm_execute", statement)

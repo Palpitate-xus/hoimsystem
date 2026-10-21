@@ -31,10 +31,11 @@ class BoundedOperationsRoute(APIRoute):
                         raise HTTPException(413, "完整运维请求超过8MiB，未截断解析")
                     chunks.append(chunk)
                 body = b"".join(chunks)
-                try:
-                    _value(body)
-                except (ValueError, TypeError, UnicodeError) as exc:
-                    raise HTTPException(422, "运维请求须为完整UTF8 JSON，不允许重复键、分数或非有限数") from exc
+                if body:
+                    try:
+                        _value(body)
+                    except (ValueError, TypeError, UnicodeError) as exc:
+                        raise HTTPException(422, "运维请求须为完整UTF8 JSON，不允许重复键、分数或非有限数") from exc
                 request._body = body
             return await handler(request)
 

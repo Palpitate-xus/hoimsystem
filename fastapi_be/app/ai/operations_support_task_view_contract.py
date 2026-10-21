@@ -90,7 +90,7 @@ class OperationsBindingPart(c.StrictModel):
     provider_id: c.ActorId
     provider_revision: c.ActorId
     config_revision: c.ActorId
-    prompt_id: c.ActorId | None
+    prompt_id: c.Identifier | None
     prompt_version: Annotated[int, Field(strict=True, ge=0)]
     created_audit_event_id: c.ActorId
     claim_event_id: c.ActorId | None

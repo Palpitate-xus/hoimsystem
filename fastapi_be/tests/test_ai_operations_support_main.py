@@ -258,3 +258,92 @@ async def test_main_route_registration_and_foreign_scope_rejects_before_task_wri
     assert response.status_code == 422
     with value["factory"]() as db:
         assert db.query(AIRun).count() == before
+
+
+@pytest.mark.asyncio
+async def test_actual_super_management_directory_descriptor_native_trace_and_queued_stop_are_bodyless(configured, pipeline, async_client):
+    value = pipeline
+    body = selection(configured)
+    configured[0][0].commit()
+    configured[0][0].close()
+    response = await async_client.post(BASE + "/tasks", headers=value["headers"][3], json=body)
+    assert response.status_code == 200, response.text
+    identifier = response.json()["data"]["run_id"]
+    response = await async_client.get(BASE + f"/tasks/{identifier}/trace", headers=value["headers"][0])
+    assert response.status_code == 200 and set(response.json()["data"]["parts"]) == {"task", "source", "binding", "result"}
+    response = await async_client.get(BASE + f"/tasks/{identifier}", headers=value["headers"][3])
+    assert response.status_code == 200 and response.json()["data"]["binding"]["operations_case_id"] == value["case_id"]
+    value["state"]["authority_lost"] = True  # Observe body columns even though this Source is current.
+    for path in ["/api/ai/admin/runs?feature_key=operations_support", BASE + f"/tasks?case_id={value['case_id']}"]:
+        response = await async_client.get(path, headers=value["headers"][0])
+        assert response.status_code == 200, response.text
+        assert response.json()["data"]
+    response = await async_client.get(BASE + "/task-descriptor", headers=value["headers"][3])
+    assert response.status_code == 200 and len(response.json()["data"]["objectives"]) == 3
+    assert value["reads"] == []
+    response = await async_client.post(BASE + f"/tasks/{identifier}/cancel", headers=value["headers"][3])
+    assert response.status_code == 403
+    response = await async_client.post(BASE + f"/tasks/{identifier}/cancel", headers=value["headers"][0])
+    assert response.status_code == 200, response.text
+    assert response.json()["data"]["receipt_pending"] is False
+    with value["factory"]() as db:
+        actual = attempts.technical_header(db, identifier)
+        paid = receipts.read_receipt(db, actual)
+        assert actual.claim is None and actual.header["start_time"] is None and actual.header["lease_token"] is None
+        assert paid.usage.model_dump() == usage(0, 0, False)
+    assert value["reads"] == []
+
+
+@pytest.mark.asyncio
+async def test_actual_super_prompt_version_preview_and_revalidation_bind_database_uuid(configured, pipeline, async_client, monkeypatch, tmp_path):
+    from app.ai.operations_support_task_prompt import SYSTEM_PROMPT, TASK_PROMPT
+
+    value = pipeline
+    chosen = selection(configured)
+    configured[0][0].commit()
+    configured[0][0].close()
+    response = await async_client.get("/api/ai/admin/prompts/operations_support", headers=value["headers"][0])
+    assert response.status_code == 200
+    assert response.json()["data"]["system_prompt"] == SYSTEM_PROMPT
+    assert response.json()["data"]["versions"][-1]["task_prompt"] == TASK_PROMPT
+    custom = "明确当前独立受审资料，不扩大范围，保留实际逐字引用与所有未知项。\r\n😀  不推定实时兼容或执行权限。"
+    response = await async_client.post("/api/ai/admin/prompts/operations_support", headers=value["headers"][0], json=dict(expected_revision=1, task_prompt=custom, change_note="仅合成资料验证范围", activate=True))
+    assert response.status_code == 200, response.text
+    prompt_id = response.json()["data"]["prompt_id"]
+    assert registry.identifier(prompt_id) == prompt_id
+    response = await async_client.post(BASE + "/tasks", headers=value["headers"][3], json=chosen)
+    assert response.status_code == 409
+    response = await async_client.put("/api/ai/admin/features/operations_support", headers=value["headers"][0], json=dict(expected_revision=2, enabled=True))
+    assert response.status_code == 422 and "验证" in response.text
+    response = await async_client.post(BASE + "/tasks", headers=value["headers"][0], json={**chosen, "preview": True})
+    assert response.status_code == 200, response.text
+    identifier = response.json()["data"]["run_id"]
+    response = await async_client.get(BASE + f"/tasks/{identifier}/parts/binding", headers=value["headers"][0])
+    assert response.status_code == 200, response.text
+    assert response.json()["prompt_id"] == prompt_id and response.json()["prompt_version"] == 1
+    response = await async_client.get(BASE + f"/tasks/{identifier}/parts/task", headers=value["headers"][0])
+    snapshot = json.loads(response.json()["prompt_snapshot_json"])
+    assert snapshot["prompt_id"] == prompt_id and snapshot["task_prompt"] == custom and snapshot["system_prompt"] == SYSTEM_PROMPT
+    response = await async_client.post(BASE + f"/tasks/{identifier}/cancel", headers=value["headers"][0])
+    assert response.status_code == 200
+    response = await async_client.put("/api/ai/admin/features/operations_support", headers=value["headers"][0], json=dict(expected_revision=2, enabled=True, validation_status="validated", validation_note="只验证当前合成审核资料三种任务目标，不代表环境兼容性验证"))
+    assert response.status_code == 200 and response.json()["data"]["enabled"] is True
+    assert response.json()["data"]["input_mode"] == "operations_support_evidence"
+    response = await async_client.post(BASE + "/tasks", headers=value["headers"][3], json=chosen)
+    assert response.status_code == 200, response.text
+    value["identifier"] = response.json()["data"]["run_id"]
+    with value["factory"]() as db:
+        claimed = shared.claim_next_run(db)
+    assert claimed[0] == value["identifier"]
+    value["lease"] = claimed[1]
+    monkeypatch.setattr("tests.test_ai_operations_support_execution.TASK_PROMPT", custom)
+    transport, calls = provider_service(value)
+    await shared.execute_claimed(value["identifier"], value["lease"], transport=transport)
+    assert len(calls) == 1 and receipt(value).status == "succeeded"
+    packets = []
+    for part in ("task", "source", "binding", "result"):
+        path = BASE + f"/tasks/{value['identifier']}/parts/{part}"
+        response = await async_client.get(path, headers=value["headers"][3])
+        assert response.status_code == 200, response.text
+        packets.append(dict(method="GET", path=path, status=response.status_code, body=response.text, parts_wire=response.headers["X-AI-Parts-Wire"]))
+    (tmp_path / "actual-main-custom-prompt-task-packets.json").write_text(json.dumps(packets, ensure_ascii=False, indent=2))

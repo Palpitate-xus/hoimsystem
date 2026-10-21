@@ -24,9 +24,12 @@ async function frozenSource(snapshot,publication,source,expected,current){
 }
 async function binding(source){return{case_id:source.source_id.split(':')[1],source_id:source.source_id,content_hash:source.source_content_hash,governance_hash:source.source_governance_hash,collection_digest:null,projection_hash:await digest(source)};}
 async function actualBinding(body){const b=await binding(body.public_source);b.collection_digest=body.source_snapshot.capture.collection_digest;return b;}
+export async function verifyDeidentificationFrozenSourceRecord(body,expected={},options={}){const{current=()=>true}=options;try{
+ return current()&&schema('TaskSourceRecord',body)&&whole(body)&&providerValid(body.provider)&&validationValid(body.validation)&&executionValid(body.execution)&&body.validation.feature_revision===body.execution.feature_revision&&await verifyDeidentificationFrozenPrompt(body.prompt,{current})&&await frozenSource(body.source_snapshot,body.publication,body.public_source,expected,current)&&current();
+}catch{return false;}}
 export async function verifyDeidentificationSourcePart(value,expected={},options={}){const{current=()=>true}=options;try{
  const wire=deidentificationWireValue(value),v=wire.data;if(!current()||!keys(v,['run_id','source_artifact','source_hash','proof_scope'])||!uuid(v.run_id)||expected.runId!==undefined&&v.run_id!==expected.runId||v.proof_scope!=='currently_authorized_complete_frozen_source_not_anonymity'||!sha(v.source_hash)||wire.sourceRaw===null||await textHash(wire.sourceRaw)!==v.source_hash)return false;
- const b=v.source_artifact;if(!schema('TaskSourceRecord',b)||!whole(b)||!providerValid(b.provider)||!validationValid(b.validation)||!executionValid(b.execution)||b.validation.feature_revision!==b.execution.feature_revision||!await verifyDeidentificationFrozenPrompt(b.prompt,{current})||!await frozenSource(b.source_snapshot,b.publication,b.public_source,expected,current))return false;
+ const b=v.source_artifact;if(!await verifyDeidentificationFrozenSourceRecord(b,expected,{current}))return false;
  return current();
 }catch{return false;}}
 function token(n){return n===null||Number.isSafeInteger(n)&&n>=0&&n<=2000000;}

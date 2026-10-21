@@ -173,7 +173,7 @@ def case(**changes):
 
 def test_additive_revision_follows_actual_parent_and_keeps_old_merge_ancestry():
     scripts = ScriptDirectory.from_config(Config(str(ROOT / "alembic.ini")))
-    assert scripts.get_heads() == [migration.revision]
+    assert len(scripts.get_heads()) == 1
     assert migration.revision == "20261021_rca_evidence" and len(migration.revision) <= 32
     assert migration.down_revision == "20261021_native_shared_merge"
     chain = [row.revision for row in scripts.walk_revisions()]

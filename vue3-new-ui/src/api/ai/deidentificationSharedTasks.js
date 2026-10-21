@@ -86,7 +86,7 @@ export async function verifyDeidentificationSharedParts(metadata,parts,expected=
  const sourceRaw=canonicalObject({schema_version:JSON.stringify(body.schema_version),source_snapshot:decoded.scope.raw,public_source:decoded.source.raw,publication:raw('publication'),prompt:raw('frozen_prompt'),provider:raw('provider'),validation:raw('validation'),execution:raw('execution')});
  if(bytes(sourceRaw)>MAX||await textHash(sourceRaw)!==h.source_hash)return false;
  const parsed={};for(let i=0;i<rawNames.length;i++){const k=rawNames[i];if(!jsonText(t.raw_frozen_json[k])||bytes(t.raw_frozen_json[k])>65535||await textHash(t.raw_frozen_json[k])!==h[rawHashes[i]]||!current())return false;parsed[k]=parseDeidentificationJson(t.raw_frozen_json[k],{maxBytes:65535}).value;}
- const input=parsed.input_json;if(!schema('FrozenTaskRecord',input)||!deidentificationTaskInputValid(input.input)||input.input.deidentification_case_id!==b.case_id)return false;
+ const input=parsed.input_json;if(!schema('FrozenTaskRecord',input)||!deidentificationTaskInputValid(input.input)||input.input.deidentification_case_id!==b.case_id||expected.input!==undefined&&(!deidentificationTaskInputValid(expected.input)||!same(input.input,expected.input)))return false;
  const expectedInput=canonicalObject({schema_version:JSON.stringify('deidentification_task_v1'),catalog_version:JSON.stringify(t.frozen_prompt.catalog_version),input:canonical(input.input),context:canonical(b),provider:raw('provider'),validation:raw('validation'),execution:raw('execution'),prompt:canonical(pick(t.frozen_prompt,promptKeys))});
  const evidence=[{source_id:b.source_id,kind:'complete_selected_fields_only',projection_hash:b.projection_hash}];
  const context={schema_version:'deidentification_task_metadata_v1',binding:b,snapshot_time:t.execution.snapshot_time,instructions_digest:t.frozen_prompt.instructions_digest,model_version:t.provider.model,feature_revision:t.execution.feature_revision};
@@ -94,3 +94,33 @@ export async function verifyDeidentificationSharedParts(metadata,parts,expected=
  if(metadata.status==='succeeded'){if(!await verifyDeidentificationResult(result,s,t.frozen_prompt.instructions_digest,{current}))return false;}else if(result!==null)return false;
  return current();
 }catch{return false;}}
+export async function verifyDeidentificationSharedDirectoryRow(row,{auditOnly=false,current=()=>true}={}){try{
+ let value=row;
+ if(auditOnly){if(!['requested_by','provider_id','feedback_count'].every(k=>Object.hasOwn(row,k))||!positive(row.requested_by)||row.provider_id!==null&&!positive(row.provider_id)||!Number.isSafeInteger(row.feedback_count)||row.feedback_count<0)return false;value=Object.fromEntries(Object.entries(row).filter(([k])=>!['requested_by','provider_id','feedback_count'].includes(k)));}
+ return current()&&(verifyDeidentificationIncompleteMetadata(value)||await verifyDeidentificationSharedMetadata(value,{current}));
+}catch{return false;}}
+export function getDeidentificationSharedTasks({auditOnly=false,caseId=null,page=1,pageSize=30}={}){
+ if(typeof auditOnly!=='boolean'||caseId!==null&&!uuid(caseId)||!positive(page)||page>100000||!positive(pageSize)||pageSize>100||!auditOnly&&page!==1)throw new Error('请明确技术目录读取方式与有界分页');
+ const params={feature_key:'deidentification',...(caseId===null?{}:{deidentification_case_id:caseId}),...(auditOnly?{page,page_size:pageSize}:{limit:pageSize})};
+ return request({url:auditOnly?'/ai/admin/runs':'/ai/runs',method:'get',params,responseType:'arraybuffer',retry:0}).then(raw=>{
+  const value=parseDeidentificationJson(rawText(raw)).value,expected=auditOnly?['code','msg','data','page','page_size','total']:['code','msg','data'];
+  if(!keys(value,expected)||value.code!==200||!jsonText(value.msg)||!Array.isArray(value.data)||value.data.length>pageSize||new Set(value.data.map(x=>x.run_id)).size!==value.data.length||auditOnly&&(value.page!==page||value.page_size!==pageSize||!Number.isSafeInteger(value.total)||value.total<value.data.length))throw new Error('技术目录外层闭集无法核对');
+  return value;
+ });
+}
+export async function loadDeidentificationSharedBundle(runId,{auditOnly=false,expected={},current=()=>true}={}){
+ if(typeof auditOnly!=='boolean'||!current())throw new Error('当前任务读取已失效');
+ const metadata=(await getDeidentificationSharedTask(id(runId))).data;
+ if(!current()||!await verifyDeidentificationSharedMetadata(metadata,{runId,current}))throw new Error('当前任务技术状态无法核对');
+ if(!metadata.clinical_parts_available)return{metadata,parts:null,trace:null};
+ let trace=null;
+ if(auditOnly){trace=(await getDeidentificationSharedTrace(runId)).data;if(!current()||!await verifyDeidentificationSharedTrace(trace,{runId},{current})||!same(trace.run,metadata))throw new Error('当前审计元数据变化，请重新读取');}
+ if(!current())throw new Error('当前读取已关闭');
+ const parts=Object.fromEntries(await Promise.all(deidentificationSharedParts.map(async part=>[part,await getDeidentificationSharedPart(runId,part,{auditOnly})])));
+ if(!current()||!await verifyDeidentificationSharedParts(metadata,parts,{...expected,runId},{current}))throw new Error('完整独立分件或当前绑定无法核对');
+ return{metadata,parts,trace};
+}
+export function feedbackDeidentificationSharedTask(runId,outcome,comment=''){
+ if(!['accepted','modified','rejected'].includes(outcome)||!jsonText(comment)||Array.from(comment).length>2000||bytes(comment)>8000)throw new Error('人工反馈须为明确状态与完整原样文字');
+ return request({url:'/ai/runs/'+id(runId)+'/feedback',method:'post',data:JSON.stringify({outcome,comment}),headers:{'Content-Type':'application/json'},responseType:'arraybuffer',retry:0}).then(raw=>{const value=decodeDeidentificationSharedResponse(raw);if(!keys(value.data,['feedback_id'])||!uuid(value.data.feedback_id))throw new Error('人工反馈回执无法核对');return value;});
+}

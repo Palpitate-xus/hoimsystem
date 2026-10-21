@@ -30,7 +30,7 @@ def identity(user):
     return state.identity[0] if state is not None and state.identity is not None else user.user_id
 
 
-def lock_infection_write(db, user, *, allowed_roles, patient_ids=()):
+def lock_infection_write(db, user, *, allowed_roles, patient_ids=(), related_user_ids=()):
     """Gate X → current User SHARE → sorted actual Patient X; caller owns transaction.
 
     Preserve a loaded request's role/token epoch before populate_existing mutates
@@ -52,7 +52,8 @@ def lock_infection_write(db, user, *, allowed_roles, patient_ids=()):
     uid = identity(user)
     with db.no_autoflush:
         lock_gate(db)
-        actor = current(db.query(User).filter_by(user_id=uid), shared=True).one_or_none()
+        users = {row.user_id: row for row in current(db.query(User).filter(User.user_id.in_(sorted({uid, *related_user_ids}))).order_by(User.user_id), shared=True).all()}
+        actor = users.get(uid)
         if actor is None or actor.user_role not in roles or epoch is not None and epoch != (actor.user_role, actor.token_invalid_before):
             raise HTTPException(403, "当前账户角色或令牌时段已变化")
         for pid in ids:

@@ -263,3 +263,27 @@ def test_backwards_clock_rejects_before_run_or_audit_insert(configured, monkeypa
     with pytest.raises(HTTPException) as exc:
         stage(configured)
     assert exc.value.status_code == 409 and (db.query(AIRun).count(), db.query(AIAuditEvent).count()) == counts
+
+
+def test_actual_legal_case_can_exceed_nested_provider_wire_and_creates_no_task_or_receipt(configured):
+    from app.ai.operations_support_gateway import OperationsCallError
+
+    actors, original, release, case, provider, config = configured
+    db, registrar, creator, reviewer, admin = actors
+    body = "\\" * (2**21 - 1024)
+    original = registry.register_original(db, registrar, {**request(), "content_text": body})
+    release = releases.create_release(
+        db,
+        creator,
+        dict(original_id=original["original_id"], original_full_sha256=original["content_hash"], released_title="完整合成字符预算资料", released_component=None, released_version=None, redactions=[]),
+    )
+    releases.review_release(db, reviewer, release["release_id"], review(model_processing_allowed=True))
+    made = cases.create_case(db, admin, {"release_ids": [release["release_id"]]})
+    source = cases.get_case_part(db, admin, made["case_id"], "source")
+    private = cases.get_case_part(db, registrar, made["case_id"], "private")
+    assert len(c.canonical_json(source).encode()) < c.MAX_WHOLE_BYTES and len(c.canonical_json(private).encode()) < c.MAX_WHOLE_BYTES
+    before = db.query(AIRun).count(), db.query(AIOperationsRunArtifact).count(), db.query(AIAuditEvent).count()
+    with pytest.raises(OperationsCallError) as exc:
+        storage.stage_run(db, admin, {"operations_case_id": made["case_id"], "objective": "explain_observations"})
+    assert exc.value.code == "OPERATIONS_REQUEST_LIMIT"
+    assert (db.query(AIRun).count(), db.query(AIOperationsRunArtifact).count(), db.query(AIAuditEvent).count()) == before

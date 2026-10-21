@@ -24,7 +24,8 @@ def reviewed_case(reference_case):
 
 
 def proposal(metadata, **changes):
-    return dict(expected_lesson_revision=metadata["revision"], expected_private_sha256=metadata["private_hash"], expected_public_sha256=metadata["public_hash"], expected_references_sha256=metadata["references_hash"], decision="publish", synthetic_material_checked=True, answer_key_checked=True, reference_applicability_checked=True, model_processing_allowed=False, basis="合成资料的实际独立声明复核；不代表真实医学效力", **changes) if not changes else {**proposal(metadata), **changes}
+    value = dict(expected_lesson_revision=metadata["revision"], expected_private_sha256=metadata["private_hash"], expected_public_sha256=metadata["public_hash"], expected_references_sha256=metadata["references_hash"], decision="publish", synthetic_material_checked=True, answer_key_checked=True, reference_applicability_checked=True, model_processing_allowed=False, basis="合成资料的实际独立声明复核；不代表真实医学效力")
+    return {**value, **changes}
 
 
 def publish(case, **changes):

@@ -2,7 +2,7 @@
 
 from typing import Annotated, Literal
 
-from pydantic import Field, model_validator
+from pydantic import AfterValidator, Field, model_validator
 
 from app.ai import clinical_training_contract as c
 
@@ -47,7 +47,7 @@ class TrainingLessonReview(c.StrictModel):
 
 class TrainingSourceRevoke(c.StrictModel):
     revision: Annotated[int, Field(strict=True, ge=1, le=1)]
-    reason: Annotated[str, Field(strict=True, min_length=1, max_length=1000)]
+    reason: Annotated[str, Field(strict=True, min_length=1, max_length=1000), AfterValidator(c.scalar)]
 
 
 class TrainingReviewedLesson(c.StrictModel):

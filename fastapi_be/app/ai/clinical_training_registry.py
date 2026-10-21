@@ -15,7 +15,7 @@ from app.ai import clinical_training_contract as c
 from app.ai import clinical_training_reference_contract as refs
 from app.ai import clinical_training_references as references
 from app.ai.clinical_training_models import AITrainingLesson
-from app.ai.clinical_training_registry_contract import TrainingLessonCreate
+from app.ai.clinical_training_registry_contract import TrainingLessonCreate, TrainingSourceRevoke
 from app.ai.clinical_training_write_guard import current_rows, lock_training_write
 from app.ai.models import AIAuditEvent
 from app.models import User
@@ -197,3 +197,29 @@ def get_lesson(db, user, lesson_id, *, include_body=False):
         return metadata(header)
     private, public, frozen = _read_current(db, header, actor.user_id)
     return dict(private=private.model_dump(mode="json"), public=public.model_dump(mode="json"), references=frozen.model_dump(mode="json"))
+
+
+def revoke_lesson(db, user, lesson_id, value):
+    try:
+        actor = lock_training_write(db, user, governance=True)
+        request = typed(TrainingSourceRevoke, value)
+        h = lesson_header(db, lesson_id, require_active=False, require_author=False)
+        if h["status"] != "active" or h["revision"] != request.revision:
+            raise HTTPException(409, "培训课程状态已变化，请刷新后重试")
+        clock = utcnow()
+        if clock < h["created_at"]:
+            raise HTTPException(409, "课程撤回时刻早于实际登记")
+        values = dict(status="revoked", revision=2, revoked_by=actor.user_id, revoked_at=clock, revoke_reason=request.reason)
+        event_id = audit_event(db, actor.user_id, "training_lesson_revoke", h["lesson_id"], revoke_detail({**h, **values}, "lesson_id", "private_hash"), clock)
+        with db.no_autoflush:
+            count = db.query(AITrainingLesson).filter_by(lesson_id=h["lesson_id"], status="active", revision=request.revision).update({**values, "revocation_event_id": event_id}, synchronize_session=False)
+        if count != 1:
+            raise HTTPException(409, "培训课程当前版本已经变化")
+        db.flush()
+        stored = lesson_header(db, h["lesson_id"], require_active=False, require_author=False)
+        if any(stored[key] != value for key, value in {**values, "revocation_event_id": event_id}.items()):
+            raise HTTPException(409, "课程撤回实际读回与独立具体审计不一致")
+        return metadata(stored)
+    except Exception:
+        db.rollback()
+        raise

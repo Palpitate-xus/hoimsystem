@@ -9,7 +9,7 @@ from app.ai import clinical_training_contract as c
 from app.ai import clinical_training_references as refs
 from app.ai import clinical_training_registry as r
 from app.ai.clinical_training_models import AITrainingReview
-from app.ai.clinical_training_registry_contract import TrainingLessonReview, TrainingReviewedLesson
+from app.ai.clinical_training_registry_contract import TrainingLessonReview, TrainingReviewedLesson, TrainingSourceRevoke
 from app.ai.clinical_training_write_guard import current_rows, lock_training_write
 
 FLAGS = ("synthetic_material_checked", "answer_key_checked", "reference_applicability_checked", "model_processing_allowed")
@@ -118,3 +118,29 @@ def get_review(db, user, review_id, *, include_body=False):
     if not include_body:
         return metadata(header)
     return _read_current(db, header, lesson, actor.user_id)[0].model_dump(mode="json")
+
+
+def revoke_review(db, user, review_id, value):
+    try:
+        actor = lock_training_write(db, user, governance=True)
+        request = r.typed(TrainingSourceRevoke, value)
+        h, lesson = review_header(db, review_id, require_current=False)
+        if h["status"] not in {"published", "rejected"} or h["revision"] != request.revision:
+            raise HTTPException(409, "课程复核状态已经变化，请刷新后重试")
+        clock = r.utcnow()
+        if clock < h["reviewed_at"]:
+            raise HTTPException(409, "复核撤回时刻早于实际复核")
+        values = dict(status="revoked", revision=2, revoked_by=actor.user_id, revoked_at=clock, revoke_reason=request.reason)
+        event_id = r.audit_event(db, actor.user_id, "training_review_revoke", h["review_id"], r.revoke_detail({**h, **values}, "review_id", "review_hash"), clock)
+        with db.no_autoflush:
+            count = db.query(AITrainingReview).filter_by(review_id=h["review_id"], status=h["status"], revision=request.revision).update({**values, "revocation_event_id": event_id}, synchronize_session=False)
+        if count != 1:
+            raise HTTPException(409, "课程复核当前版本已经变化")
+        db.flush()
+        stored, lesson = review_header(db, h["review_id"], require_current=False)
+        if any(stored[key] != value for key, value in {**values, "revocation_event_id": event_id}.items()):
+            raise HTTPException(409, "课程复核撤回实际读回与具体审计不一致")
+        return metadata(stored)
+    except Exception:
+        db.rollback()
+        raise

@@ -3,7 +3,7 @@
 > 由 `fastapi_be/scripts/generate_rbac_matrix.py` 从源码自动生成，请勿手改。
 > `✓`=可访问 | `PUBLIC`=无需登录 | 留空=不可访问
 
-共 **867** 个接口（PUBLIC 18 个 / 需登录 849 个）。
+共 **875** 个接口（PUBLIC 18 个 / 需登录 857 个）。
 
 
 ### `admin.py`
@@ -378,6 +378,19 @@
 | POST | `/api/ai/roster-sources/{kind}/{source_record_id}/revoke` | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |
 | GET | `/api/ai/admin/roster-sources` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
 | GET | `/api/ai/admin/roster-sources/{source_record_id}` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+
+### `ai_satisfaction_sources.py`
+
+| 方法 | 路径 | admin | super_admin | director | doctor | nurse | cashier | pharmacist | guide | patient | lab_technician | registrar | PUBLIC |
+|------|------|------|------|------|------|------|------|------|------|------|------|------|------|
+| GET | `/api/ai/satisfaction-sources/options` | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/satisfaction-sources/doctors` | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/satisfaction-sources/cases/preview` | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/satisfaction-sources/cases` | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/satisfaction-sources/cases` | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/satisfaction-sources/cases/{identifier}` | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/satisfaction-sources/cases/{identifier}/review` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/satisfaction-sources/cases/{identifier}/revoke` | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |
 
 ### `ai_sofa.py`
 

@@ -95,6 +95,10 @@ def _check_run_storage_json(serialized: dict[str, str]) -> None:
 
 def create_run(db: Session, user: User, req: RunRequest) -> AIRun:
     """Freeze an authorized, source-linked request before a durable worker processes it."""
+    if req.feature_key == "feedback_analysis":
+        from app.ai.satisfaction_runtime import create_satisfaction_run
+
+        return create_satisfaction_run(db, user, req)
     if req.feature_key == "charge_reconciliation":
         from app.ai.charge_reconciliation_runtime import create_charge_run
 
@@ -394,6 +398,13 @@ def authorize_run(db: Session, user: User, run: AIRun) -> None:
 
         authorize_charge_run(db, user, run)
         return
+    from app.ai.satisfaction_storage import is_satisfaction_run
+
+    if is_satisfaction_run(db, run):
+        from app.ai.satisfaction_runtime import authorize_satisfaction_run
+
+        authorize_satisfaction_run(db, user, run, audit_only=user.user_role == "super_admin")
+        return
     from app.ai.document_extraction_storage import authorize_document_run, is_extraction_run
 
     if is_extraction_run(db, run):
@@ -552,6 +563,14 @@ def describe_run(run: AIRun, include_result: bool = True, *, user: User | None =
         from app.ai.charge_reconciliation_views import describe_charge_run
 
         return describe_charge_run(db, user, run, include_result)
+    from app.ai.satisfaction_storage import is_satisfaction_run
+
+    if is_satisfaction_run(db, run):
+        if db is None or user is None:
+            raise HTTPException(409, "完整评价任务须在当前授权会话内展示")
+        from app.ai.satisfaction_views import describe_satisfaction_run
+
+        return describe_satisfaction_run(db, user, run, include_result=include_result)
     from app.ai.document_extraction_storage import is_extraction_run
 
     if is_extraction_run(object_session(run), run):
@@ -622,6 +641,13 @@ def describe_run(run: AIRun, include_result: bool = True, *, user: User | None =
     )
     data = {name: getattr(run, name) for name in fields}
     data.update({"feature_name": spec.name, "requires_human_review": True, "context_metadata": json.loads(run.context_metadata_json)})
+    if spec.number == 70:
+        # Only the exact pre-Case classifier above reaches this branch. The
+        # explicit marker permits historical display, never another inference.
+        if db is None or user is None:
+            raise HTTPException(409, "旧评价历史须先核对当前完整范围权限")
+        authorize_run(db, user, run)
+        data["legacy_feedback_read_only"] = True
     if include_result:
         context = json.loads(run.input_json).get("payload", {}).get("context", {})
         result = json.loads(run.result_json)
@@ -823,12 +849,21 @@ def describe_run(run: AIRun, include_result: bool = True, *, user: User | None =
 
 def claim_next_run(db: Session) -> tuple[str, str] | None:
     """Claim durable work without allowing two workers to execute the same queued task."""
-    query = db.query(AIRun).filter_by(status="queued").order_by(AIRun.create_time)
+    query = db.query(AIRun.run_id, AIRun.feature_key).filter_by(status="queued").order_by(AIRun.create_time)
     if db.bind.dialect.name == "postgresql":
         query = query.with_for_update(skip_locked=True)
     run = query.first()
     if run is None:
         return None
+    from app.ai.satisfaction_artifact_models import AISatisfactionRunArtifact
+
+    with db.no_autoflush:
+        satisfaction = db.query(AISatisfactionRunArtifact.run_id).filter_by(run_id=run.run_id).first()
+    if satisfaction is not None:
+        from app.ai.satisfaction_execution import claim_satisfaction_run
+
+        lease = claim_satisfaction_run(db, run.run_id)
+        return (run.run_id, lease) if lease is not None else None
     lease = str(uuid.uuid4())
     changed = db.query(AIRun).filter_by(run_id=run.run_id, status="queued").update({"status": "running", "start_time": utcnow(), "lease_token": lease}, synchronize_session=False)
     if changed != 1:
@@ -840,6 +875,8 @@ def claim_next_run(db: Session) -> tuple[str, str] | None:
 
 
 def _recheck_task(db: Session, run: AIRun) -> tuple[FeatureSpec, AIProvider, dict]:
+    if run.feature_key == "feedback_analysis":
+        raise AIExecutionError("TASK_CONTRACT_CHANGED", "旧评价任务仅可读取历史；须明确选择受审完整原件后新建任务")
     if utcnow() - run.create_time > datetime.timedelta(seconds=settings.AI_MAX_QUEUE_AGE_SECONDS):
         raise AIExecutionError("TASK_EXPIRED", "任务等待时间过长，请重新加载最新资料后提交")
     user = db.get(User, run.requested_by)
@@ -922,17 +959,31 @@ async def execute_claimed(run_id: str, lease: str, *, transport=None) -> None:
     from app import database
     from app.ai.charge_reconciliation_storage import is_charge_run
     from app.ai.document_extraction_storage import is_extraction_run
+    from app.ai.satisfaction_storage import is_satisfaction_run
 
     # Only locate native identities here; release this short session before
     # either dedicated worker acquires its own current authorization locks.
     with database.SessionLocal() as routing_db:
         routing_run = routing_db.get(AIRun, run_id)
         charge = routing_run is not None and is_charge_run(routing_db, routing_run)
-        document_task = not charge and routing_run is not None and routing_run.status in {"running", "cancelled"} and routing_run.lease_token == lease and is_extraction_run(routing_db, routing_run)
+        satisfaction_task = not charge and routing_run is not None and is_satisfaction_run(routing_db, routing_run)
+        document_task = (
+            not charge
+            and not satisfaction_task
+            and routing_run is not None
+            and routing_run.status in {"running", "cancelled"}
+            and routing_run.lease_token == lease
+            and is_extraction_run(routing_db, routing_run)
+        )
     if charge:
         from app.ai.charge_reconciliation_execution import execute_charge_claimed
 
         await execute_charge_claimed(run_id, lease, transport=transport)
+        return
+    if satisfaction_task:
+        from app.ai.satisfaction_execution import execute_satisfaction_claimed
+
+        await execute_satisfaction_claimed(run_id, lease, transport=transport)
         return
     if document_task:
         from app.ai.document_extraction_runtime import execute_document_claimed
@@ -1321,12 +1372,15 @@ def expire_interrupted_runs(db: Session) -> int:
     """Mark abandoned inference failed without repeating potentially billable calls."""
     from app.ai.charge_reconciliation_execution import expire_interrupted_charge_runs
     from app.ai.charge_reconciliation_run_models import AIChargeRunArtifact
+    from app.ai.satisfaction_artifact_models import AISatisfactionRunArtifact
+    from app.ai.satisfaction_execution import expire_interrupted_satisfaction_runs
 
     recovered = expire_interrupted_charge_runs(db)
+    recovered += expire_interrupted_satisfaction_runs(db)
     deadline = utcnow() - datetime.timedelta(minutes=10)
     count = (
         db.query(AIRun)
-        .filter(AIRun.status == "running", AIRun.start_time < deadline, ~AIRun.run_id.in_(db.query(AIChargeRunArtifact.run_id)))
+        .filter(AIRun.status == "running", AIRun.start_time < deadline, ~AIRun.run_id.in_(db.query(AIChargeRunArtifact.run_id)), ~AIRun.run_id.in_(db.query(AISatisfactionRunArtifact.run_id)))
         .update({"status": "failed", "error_code": "WORKER_INTERRUPTED", "error_message": "执行进程中断，任务未自动重试，可检查后重新提交", "finish_time": utcnow()}, synchronize_session=False)
     )
     db.commit()

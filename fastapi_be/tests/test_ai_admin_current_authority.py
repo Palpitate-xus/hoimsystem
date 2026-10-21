@@ -30,11 +30,30 @@ def test_audit_readers_recheck_stale_super_before_any_run_read(db_session, seed_
     finally:
         event.remove(db_session, "do_orm_execute", observe)
         db_session.rollback()
-    # Billing Gate precedes actor locks for the global directory, which may
-    # contain native charge tasks. It carries no private Run or source body.
-    assert len(sql) == 2
+    # Mixed directories take Billing then Satisfaction before the actor lock;
+    # neither Gate carries private Run or Source text.
+    assert len(sql) == 3
     assert "hoimsystem_ai_charge_write_gate" in sql[0] and sql[0].rstrip().endswith("FOR UPDATE")
-    assert "hoimsystem_users" in sql[1] and sql[1].rstrip().endswith("LOCK IN SHARE MODE")
+    assert "hoimsystem_ai_satisfaction_write_gate" in sql[1] and sql[1].rstrip().endswith("FOR UPDATE")
+    assert "hoimsystem_users" in sql[2] and sql[2].rstrip().endswith("LOCK IN SHARE MODE")
+
+
+def test_audit_actor_rejects_changed_loaded_token_epoch_before_task_reads(db_session, seed_data):
+    import datetime
+
+    actor = seed_data["super_admin_user"]
+    assert actor.user_role == "super_admin"
+    assert actor.token_invalid_before is None
+    db_session.execute(
+        text("UPDATE hoimsystem_users SET token_invalid_before=:stamp WHERE user_id=:pk"), {"stamp": datetime.datetime(2026, 10, 21, 12, 30, 0, 123456).isoformat(sep=" "), "pk": actor.user_id}
+    )
+    assert actor.token_invalid_before is None
+    try:
+        with pytest.raises(HTTPException) as error:
+            ai_admin._current_super_admin(db_session, actor)
+        assert error.value.status_code == 403
+    finally:
+        db_session.rollback()
 
 
 def test_expired_audit_actor_has_exactly_one_current_shared_read(db_session, seed_data):

@@ -920,6 +920,12 @@ async def generate(
         if audio is not None or ecg is not None or image is not None:
             raise AIExecutionError("UNEXPECTED_CHARGE_ATTACHMENT", "完整账目核对不接受影像、心电或音频附件")
         return await generate_charge(provider, spec, task_prompt, data, transport=transport)
+    from app.ai.satisfaction_gateway import generate_satisfaction, matches_satisfaction_request
+
+    if matches_satisfaction_request(spec, data):
+        if audio is not None or ecg is not None or image is not None:
+            raise AIExecutionError("UNEXPECTED_SATISFACTION_ATTACHMENT", "完整评价证据不接受影像、心电或音频附件")
+        return await generate_satisfaction(provider, spec, task_prompt, data, transport=transport)
     inputs = outputs = None
     coding_mode = bool({"coding_binding", "coding_source", "coding_case"} & data.get("context", {}).keys()) or "coding_case_id" in data.get("input", {})
     try:

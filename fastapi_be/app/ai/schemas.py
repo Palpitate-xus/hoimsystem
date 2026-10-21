@@ -223,6 +223,11 @@ class RunRequest(StrictRequest):
     @model_validator(mode="before")
     @classmethod
     def native_charge_scope(cls, value):
+        if isinstance(value, dict) and isinstance(value.get("feature_key"), str) and value["feature_key"].strip() == "feedback_analysis":
+            if value.get("patient_id") is not None or value.get("encounter_ref") is not None:
+                raise ValueError("完整评价任务不接受患者或就诊范围")
+            if "preview" in value and type(value["preview"]) is not bool:
+                raise ValueError("完整评价任务的预览状态须为布尔值")
         if isinstance(value, dict) and value.get("feature_key") == "charge_reconciliation":
             if type(value.get("patient_id")) is not int or value["patient_id"] < 1:
                 raise ValueError("完整账目任务须使用真实正整数患者ID，不接受布尔、字符串或浮点转换")
@@ -246,6 +251,8 @@ class RunRequest(StrictRequest):
             raise ValueError("完整编码证据快照仅用于单次住院病案编码证据核对")
         if "charge_case_id" in self.input and self.feature_key != "charge_reconciliation":
             raise ValueError("完整账目原件仅用于同次实际住院的收费记录核对")
+        if "satisfaction_case_id" in self.input and self.feature_key != "feedback_analysis":
+            raise ValueError("受审完整评价原件仅用于满意度与评价证据分析")
         return self
 
 

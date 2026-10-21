@@ -2444,6 +2444,92 @@
   "auth": [
    "admin",
    "director",
+   "super_admin"
+  ],
+  "function": "options",
+  "method": "GET",
+  "module": "ai_satisfaction_sources.py",
+  "path": "/api/ai/satisfaction-sources/options"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "super_admin"
+  ],
+  "function": "doctors",
+  "method": "GET",
+  "module": "ai_satisfaction_sources.py",
+  "path": "/api/ai/satisfaction-sources/doctors"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "super_admin"
+  ],
+  "function": "preview",
+  "method": "POST",
+  "module": "ai_satisfaction_sources.py",
+  "path": "/api/ai/satisfaction-sources/cases/preview"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "super_admin"
+  ],
+  "function": "create",
+  "method": "POST",
+  "module": "ai_satisfaction_sources.py",
+  "path": "/api/ai/satisfaction-sources/cases"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "super_admin"
+  ],
+  "function": "cases",
+  "method": "GET",
+  "module": "ai_satisfaction_sources.py",
+  "path": "/api/ai/satisfaction-sources/cases"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "super_admin"
+  ],
+  "function": "detail",
+  "method": "GET",
+  "module": "ai_satisfaction_sources.py",
+  "path": "/api/ai/satisfaction-sources/cases/{identifier}"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "review",
+  "method": "POST",
+  "module": "ai_satisfaction_sources.py",
+  "path": "/api/ai/satisfaction-sources/cases/{identifier}/review"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "super_admin"
+  ],
+  "function": "revoke",
+  "method": "POST",
+  "module": "ai_satisfaction_sources.py",
+  "path": "/api/ai/satisfaction-sources/cases/{identifier}/revoke"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
    "doctor",
    "nurse",
    "super_admin"

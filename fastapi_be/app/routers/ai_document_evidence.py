@@ -92,6 +92,7 @@ def options(db: Session = Depends(get_db), user: User = Depends(SUPER)):
             "automatic_publication": False,
             "declaration_status": c.DECLARATION,
             "clinical_validation": "not_provided",
+            "knowledge_features": [{"key": key, "name": spec.name} for key, spec in sources.FEATURE_BY_KEY.items()],
         },
     }
 

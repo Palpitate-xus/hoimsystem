@@ -4,6 +4,7 @@ import base64
 import datetime as dt
 import hashlib
 import json
+import math
 import re
 import uuid
 from typing import Annotated, Literal
@@ -102,6 +103,8 @@ def parse_json(text: str):
                 raise ValueError("JSON structural budget exceeded")
             if isinstance(value, str):
                 utf8(value)
+            elif isinstance(value, float) and not math.isfinite(value):
+                raise ValueError("Nonfinite JSON numbers are not accepted")
             elif isinstance(value, dict):
                 for key, child in value.items():
                     utf8(key)
@@ -490,6 +493,7 @@ class PublicationRecord(StrictModel):
     content_hash: SHA256
     governance: PublicationGovernance
     governance_hash: SHA256
+    knowledge_current: "KnowledgeCurrent"
     eligible: bool
     ineligibility_reasons: list[Ineligibility]
     clinical_validation: Literal["not_provided"]
@@ -503,6 +507,42 @@ class PublicationRecord(StrictModel):
         if self.eligible != (not self.ineligibility_reasons) or len(self.ineligibility_reasons) != len(set(self.ineligibility_reasons)):
             raise ValueError("Eligibility and all current source gates must agree")
         return self
+
+
+class KnowledgeCurrent(StrictModel):
+    """The actual current row, not a reconstruction pretending to be a DB read."""
+
+    document_id: UUID
+    title: str = Field(min_length=2, max_length=200)
+    version: str = Field(min_length=1, max_length=80)
+    source_uri: str = Field(min_length=3, max_length=2000)
+    source_kind: str | None = Field(max_length=40)
+    source_reference_id: Positive | None
+    source_snapshot_hash: SHA256 | None
+    category: Category
+    content: str = Field(min_length=1, max_length=MAX_KNOWLEDGE_BYTES)
+    content_hash: SHA256
+    feature_keys_json: str = Field(min_length=2, max_length=16384)
+    department_id: Positive | None
+    effective_from: UtcText | None
+    effective_to: UtcText | None
+    status: Literal["draft", "published", "retired"]
+    reviewed_by: Positive | None
+    reviewed_at: UtcText | None
+    created_by: Positive
+    create_time: UtcText
+
+    @model_validator(mode="after")
+    def exact_current_storage(self):
+        if len(utf8(self.content)) > MAX_KNOWLEDGE_BYTES:
+            raise ValueError("Actual knowledge text exceeds MySQL TEXT capacity")
+        for value in (self.effective_from, self.effective_to, self.reviewed_at, self.create_time):
+            if value is not None:
+                clock(value)
+        return self
+
+
+PublicationRecord.model_rebuild()
 
 
 def check_review_clocks(recorded_at: str, governance: GovernedReview):

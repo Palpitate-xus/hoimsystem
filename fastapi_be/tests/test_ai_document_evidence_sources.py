@@ -194,7 +194,9 @@ def test_entire_published_knowledge_identity_is_checked_not_only_sha(document_ca
     db.query(AIKnowledgeDocument).filter_by(document_id=knowledge.document_id).update({field: changes[field]}, synchronize_session=False)
     db.commit()
     assert not s.published_bound_source_is_current(db, knowledge)
-    assert s.publication_detail(db, actor, publication.snapshot.publication_id).snapshot.quote == original.snapshot.text
+    audited = s.publication_detail(db, actor, publication.snapshot.publication_id)
+    assert audited.snapshot.quote == original.snapshot.text
+    assert getattr(audited.knowledge_current, field) == (c.utc_text(changes[field]) if field == "reviewed_at" else changes[field])
 
 
 def test_stripping_both_uri_and_kind_does_not_hide_the_publication_fk(document_case):
@@ -204,6 +206,19 @@ def test_stripping_both_uri_and_kind_does_not_hide_the_publication_fk(document_c
     db.refresh(knowledge)
     assert not s.is_document_bound_source(knowledge) and s.document_binding_exists(db, knowledge)
     assert s.bound_source_state(db, knowledge) == "invalid_binding"
+
+
+def test_candidate_registration_cannot_predate_actual_original_publication(document_case, monkeypatch):
+    db, actor, _ = document_case
+    original = s.create_original(db, actor, request())
+    db.commit()
+    monkeypatch.setattr(s, "utcnow", lambda: c.clock(NOW) + dt.timedelta(hours=1))
+    original = s.review_original(db, actor, original.snapshot.original_id, review(original))
+    db.commit()
+    monkeypatch.setattr(s, "utcnow", lambda: c.clock(NOW) + dt.timedelta(minutes=30))
+    with pytest.raises(HTTPException) as denied:
+        s.create_candidate(db, actor, candidate_request(original))
+    assert denied.value.status_code == 409 and db.query(AIDocumentSpanCandidate).count() == 0
 
 
 @pytest.mark.parametrize("target", ["original", "candidate", "publication"])

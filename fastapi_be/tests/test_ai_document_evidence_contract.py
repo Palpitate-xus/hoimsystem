@@ -158,7 +158,7 @@ def test_candidate_65535_utf8_boundary_is_not_a_character_limit():
         c.CandidateCreate.model_validate(proposal)
 
 
-@pytest.mark.parametrize("body", ['{"a":1,"a":2}', '{"outer":{"x":1,"x":2}}', '{"x":NaN}', '{"x":Infinity}', '{"x":"\\ud800"}'])
+@pytest.mark.parametrize("body", ['{"a":1,"a":2}', '{"outer":{"x":1,"x":2}}', '{"x":NaN}', '{"x":Infinity}', '{"x":1e999}', '{"x":"\\ud800"}'])
 def test_duplicate_nonfinite_and_escaped_surrogate_json_are_rejected(body):
     with pytest.raises(ValueError):
         c.parse_json(body)

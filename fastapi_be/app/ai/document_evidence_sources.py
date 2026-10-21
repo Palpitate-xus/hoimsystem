@@ -145,7 +145,7 @@ def _candidate_record(db, row, original):
         raise ValueError("Candidate indexed facts differ from the complete immutable proposal")
     if proposal.end > original.snapshot.codepoint_length or original.snapshot.text[proposal.start : proposal.end] != proposal.quote:
         raise ValueError("Candidate quote is not the exact original codepoint span")
-    if proposal.original.content_hash != original.content_hash or snapshot.recorded_at < original.snapshot.recorded_at:
+    if proposal.original.content_hash != original.content_hash or snapshot.recorded_at < (original.governance.reviewed_at or original.snapshot.recorded_at):
         raise ValueError("Candidate original identity or chronology has changed")
     original_current = original.eligible and proposal.original.governance_hash == original.governance_hash
     governance = _governance(row)
@@ -441,12 +441,17 @@ def _publication_record(db, original_row, candidate_row, row, knowledge):
     )
     if actual != expected:
         reasons.append("knowledge_changed")
+    current = {name: getattr(knowledge, name) for name in c.KnowledgeCurrent.model_fields}
+    for name in ("effective_from", "effective_to", "reviewed_at", "create_time"):
+        if current[name] is not None:
+            current[name] = c.utc_text(current[name])
     return c.PublicationRecord(
         schema_version="document_knowledge_publication_record_v1",
         snapshot=snapshot,
         content_hash=row.content_hash,
         governance=governance,
         governance_hash=c.digest(governance),
+        knowledge_current=c.KnowledgeCurrent.model_validate(current),
         eligible=not reasons,
         ineligibility_reasons=reasons,
         clinical_validation="not_provided",

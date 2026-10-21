@@ -59,6 +59,7 @@ async def test_actual_jwt_original_span_publish_evidence_and_revocation_http(doc
         assert result.status_code == 200, result.text
         publication = c.PublicationRecord.model_validate(result.json()["data"])
         assert publication.eligible
+        assert publication.knowledge_current.content == original.snapshot.text and publication.knowledge_current.status == "published"
         knowledge = db.get(AIKnowledgeDocument, publication.snapshot.knowledge_document_id)
         assert s.published_bound_source_is_current(db, knowledge)
         for path in (f"/originals/{oid}", f"/candidates/{cid}", f"/publications/{publication.snapshot.publication_id}"):

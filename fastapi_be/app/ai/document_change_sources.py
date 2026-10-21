@@ -11,6 +11,7 @@ from fastapi import HTTPException
 from app.ai import document_change_contract as c
 from app.ai import document_evidence_sources as originals
 from app.ai.document_change_collection import collect_locked, lock_originals, original_ref, preflight_row, target_from_columns
+from app.ai.document_change_json import parse_case_json, require_case_json
 from app.ai.document_change_models import AIDocumentChangeScope, AIDocumentRuleLink
 from app.ai.document_change_targets import CaseBudget, sql_octets, target_snapshot
 from app.ai.models import AIAuditEvent, utcnow
@@ -27,9 +28,16 @@ def governance(row):
     return c.Governance.model_validate(values)
 
 
+def _stored(model, raw):
+    value = model.model_validate(parse_case_json(raw))
+    if require_case_json(value) != raw:
+        raise ValueError("Stored comparison JSON must be exact canonical complete content")
+    return value
+
+
 def stored(row, kind):
     _, key, model, field = MODELS[kind]
-    snapshot = originals._stored(model, getattr(row, field))
+    snapshot = _stored(model, getattr(row, field))
     if (getattr(snapshot, key), snapshot.created_by, snapshot.recorded_at, c.e.digest(snapshot)) != (getattr(row, key), row.created_by, c.e.utc_text(row.recorded_at), row.content_hash):
         raise ValueError("Immutable identity, clock, whole content and indexed facts differ")
     if kind == "link":
@@ -160,6 +168,7 @@ def create_link(db, user, values):
     if c.e.utc_text(now) < original.governance.reviewed_at:
         raise ValueError("Link creation predates original publication")
     snapshot = c.LinkImmutable(schema_version="document_rule_link_immutable_v1", link_id=identifier, created_by=actor.user_id, recorded_at=c.e.utc_text(now), proposal=request, target_snapshot=target)
+    raw_snapshot = require_case_json(snapshot)
     event_id = _audit(db, actor, "link", "created", identifier, c.e.digest(snapshot), 1, now)
     row = AIDocumentRuleLink(
         link_id=identifier,
@@ -172,7 +181,7 @@ def create_link(db, user, values):
         target_snapshot_hash=request.expected_target_hash,
         span_start=request.span.start,
         span_end=request.span.end,
-        link_json=c.e.canonical_json(snapshot),
+        link_json=raw_snapshot,
         content_hash=c.e.digest(snapshot),
         created_by=actor.user_id,
         recorded_at=now,
@@ -220,7 +229,7 @@ def _open(db, user, kind, identifier, *, writing=False):
             raw = db.query(getattr(model, field)).filter(getattr(model, key) == identifier).scalar()
         # Immutable-only hint is not locked before targets. Authorized writers
         # never update this JSON; the final current row must match it exactly.
-        snapshot = originals._stored(c.ScopeImmutable, raw)
+        snapshot = _stored(c.ScopeImmutable, raw)
         current_inventory = collect_locked(db, snapshot.request, parents, budget, validate_references=False)
     row = preflight_row(db, model, key, identifier, (field,), CaseBudget(), writing=writing)
     current_snapshot = stored(row, kind)
@@ -307,6 +316,7 @@ def create_scope(db, user, values):
         inventory_hash=request.expected_inventory_hash,
         inventory=inventory,
     )
+    raw_snapshot = require_case_json(snapshot)
     event_id = _audit(db, actor, "scope", "created", identifier, c.e.digest(snapshot), 1, now)
     row = AIDocumentChangeScope(
         scope_id=identifier,
@@ -318,7 +328,7 @@ def create_scope(db, user, values):
         candidate_original_governance_hash=capture.candidate_original.governance_hash,
         inventory_hash=request.expected_inventory_hash,
         member_count=inventory.member_count,
-        scope_json=c.e.canonical_json(snapshot),
+        scope_json=raw_snapshot,
         content_hash=c.e.digest(snapshot),
         created_by=actor.user_id,
         recorded_at=now,

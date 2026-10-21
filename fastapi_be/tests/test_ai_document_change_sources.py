@@ -339,3 +339,29 @@ def test_target_deleted_is_retained_missing_in_current_set_and_frozen_audit_surv
     assert s.link_detail(db, actor, link.snapshot.link_id).ineligibility_reasons == ["link_not_published", "target_changed"]
     with pytest.raises(HTTPException):
         s.capture_scope(db, actor, scope_request(change_case))
+
+
+def test_actual_600_complete_link_sql_scope_publish_and_stored_read_use_same_budget(change_case):
+    db, actor, *_ = change_case
+    request = link_request(change_case)
+    for _ in range(600):
+        s.create_link(db, actor, request)
+    db.commit()
+    body = scope_request(change_case)
+    capture = s.capture_scope(db, actor, body)
+    assert capture["member_count"] == 603
+    draft = s.create_scope(db, actor, {**body, "expected_inventory_hash": capture["inventory_hash"]})
+    db.commit()
+    row = db.get(AIDocumentChangeScope, draft.snapshot.scope_id)
+    assert 65535 < len(row.scope_json.encode()) < c.MAX_CASE_BYTES
+    # The inherited single-original parser cannot read this valid larger Case;
+    # the independent comparison parser is required on both write and read.
+    with pytest.raises(ValueError, match="structural budget"):
+        c.e.parse_json(row.scope_json)
+    published = s.review_scope(db, actor, draft.snapshot.scope_id, change_review(draft))
+    db.commit()
+    db.expire_all()
+    read = s.scope_detail(db, actor, draft.snapshot.scope_id)
+    assert read == published and read.eligible
+    assert len(read.snapshot.inventory.rule_links) == 600
+    assert s.authorize_scope(db, actor, draft.snapshot.scope_id)[1].member_count == 603

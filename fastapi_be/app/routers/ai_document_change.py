@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session, load_only
 from app.ai import document_change_contract as c
 from app.ai import document_change_sources as sources
 from app.ai import document_evidence_sources as originals
+from app.ai.document_change_json import MAX_JSON_DEPTH, MAX_JSON_NODES
 from app.ai.document_change_targets import target_snapshot
 from app.database import get_db
 from app.dependencies import User, require_roles
@@ -47,6 +48,8 @@ def options(db: Session = Depends(get_db), user: User = Depends(require_roles("s
             "span_coordinate_space": "unicode_codepoint_half_open",
             "maximum_case_utf8_bytes": c.MAX_CASE_BYTES,
             "maximum_combined_members": c.MAX_MEMBERS,
+            "maximum_json_nodes": MAX_JSON_NODES,
+            "maximum_json_depth": MAX_JSON_DEPTH,
             "maximum_declared_targets": c.MAX_DECLARED_TARGETS,
             "hospital_wide_rule_inventory": "not_provided",
             "automatic_supersession": False,

@@ -61,11 +61,55 @@ def test_export_declares_actual_distinct_fixed_system_prompts_for_closed_drafts(
 
     from app.ai.coding_evidence_prompt import CODING_SYSTEM_PROMPT
     from app.ai.document_extraction_contract import EXTRACTION_SYSTEM_PROMPT
+    from app.ai.drug_label_draft import SYSTEM_PROMPT as DRUG_LABEL_SYSTEM_PROMPT
     from scripts.export_ai_catalog import artifacts
 
     payload = json.loads(artifacts()["ai-prompts.json"])
     assert payload["system_prompt"] == COMMON_SYSTEM_PROMPT
-    assert payload["system_prompt_overrides"] == {"drg_evidence_review": CODING_SYSTEM_PROMPT, "guideline_ingestion": EXTRACTION_SYSTEM_PROMPT}
+    assert payload["system_prompt_overrides"] == {"drg_evidence_review": CODING_SYSTEM_PROMPT, "guideline_ingestion": EXTRACTION_SYSTEM_PROMPT, "drug_label_extraction": DRUG_LABEL_SYSTEM_PROMPT}
     assert FEATURE_BY_KEY["guideline_ingestion"].default_roles == ("super_admin",)
     assert FEATURE_BY_KEY["guideline_ingestion"].requires_patient_data_permission
     assert describe_feature(FEATURE_BY_KEY["guideline_ingestion"])["source_reference_keys"] == ["document_original_id"]
+
+
+def test_drug_label_source_mode_roles_data_purpose_and_actual_super_prompt_editor(db_session, seed_data):
+    from app.ai.drug_label_draft import SYSTEM_PROMPT, TASK_PROMPT
+    from app.ai.governance import describe_config, digest
+    from app.routers.ai_admin import list_prompts
+
+    spec = FEATURE_BY_KEY["drug_label_extraction"]
+    assert spec.default_roles == ("super_admin", "pharmacist")
+    assert spec.requires_patient_data_permission and not spec.requires_knowledge
+    assert TASK_PROMPT in spec.task_prompt and spec.instruction in spec.task_prompt
+    assert describe_feature(spec)["source_reference_keys"] == ["drug_label_source_binding_id"]
+    assert all(("drug_label_source_binding_id" in describe_feature(item)["source_reference_keys"]) == (item.number == 73) for item in FEATURES)
+    view = describe_config(db_session, spec, None, management=True)
+    assert view["input_mode"] == "drug_label_evidence" and view["system_prompt_hash"] == digest(SYSTEM_PROMPT)
+    prompt = list_prompts(spec.key, user=seed_data["super_admin_user"], db=db_session)["data"]
+    assert prompt["system_prompt"] == SYSTEM_PROMPT
+    assert prompt["versions"][-1]["task_prompt"] == spec.task_prompt
+
+
+def test_drug_label_current_configuration_cannot_expand_roles_or_omit_patient_data_permission(db_session, seed_data):
+    import pytest
+    from fastapi import HTTPException
+
+    from app.ai.governance import provider_feature_issues
+    from app.ai.models import AIFeatureConfig, AIProvider
+    from app.ai.runtime import authorized_feature
+
+    spec = FEATURE_BY_KEY["drug_label_extraction"]
+    config = AIFeatureConfig(feature_key=spec.key, allowed_roles_json='["admin","pharmacist"]', updated_by=seed_data["super_admin_user"].user_id)
+    db_session.add(config)
+    db_session.commit()
+    for role in ("pharmacist", "super_admin"):
+        assert authorized_feature(db_session, seed_data[role + "_user"], spec.key)[0] is spec
+    for role in ("admin", "director", "doctor", "patient"):
+        with pytest.raises(HTTPException) as error:
+            authorized_feature(db_session, seed_data[role + "_user"], spec.key)
+        assert error.value.status_code == 403
+    provider = AIProvider(kind="chat", model="synthetic-raw-original", allows_patient_data=0)
+    issues = provider_feature_issues(spec, provider)
+    assert issues and any("资料" in item["message"] for item in issues)
+    provider.allows_patient_data = 1
+    assert provider_feature_issues(spec, provider) == []

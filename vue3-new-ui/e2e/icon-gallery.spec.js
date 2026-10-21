@@ -21,7 +21,7 @@ test('canonical public vector preserves all 293 installed original paths and exa
   const xml=new XMLSerializer();
   for(const {name,node}of expected){
    const symbol=sprite.querySelector('#icon-'+name);
-   if(!symbol||symbol.getAttribute('viewBox')!==node.getAttribute('viewBox')||symbol.getAttribute('xml:space')!==node.getAttribute('xml:space')||symbol.innerHTML!==node.innerHTML)throw Error('Original geometry differs: '+name);
+   if(!symbol||symbol.getAttribute('viewBox')!==node.getAttribute('viewBox')||symbol.getAttribute('xml:space')!==node.getAttribute('xml:space')||symbol.childNodes.length!==node.childNodes.length||Array.from(symbol.childNodes).some((child,i)=>!child.isEqualNode(node.childNodes[i])))throw Error('Original geometry differs: '+name);
   }
   const originalBody=expected.map(({node},i)=>{node.setAttribute('x',String(i%16*32));node.setAttribute('y',String(Math.floor(i/16)*32));node.setAttribute('width','32');node.setAttribute('height','32');return xml.serializeToString(node)}).join('');
   const actualBody='<defs>'+Array.from(sprite.querySelectorAll('symbol')).map(node=>xml.serializeToString(node)).join('')+'</defs>'+expected.map(({name},i)=>`<svg x="${i%16*32}" y="${Math.floor(i/16)*32}" width="32" height="32" viewBox="0 0 1024 1024"><use href="#icon-${name}"/></svg>`).join('');

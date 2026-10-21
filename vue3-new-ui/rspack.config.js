@@ -2,6 +2,7 @@ const path = require("path");
 const { Configuration, CopyRspackPlugin, DefinePlugin, CssExtractRspackPlugin } = require("@rspack/core");
 const HtmlRspackPlugin = require("html-rspack-plugin");
 const { VueLoaderPlugin } = require("vue-loader");
+const {PUBLIC_CONTRACTS} = require("./scripts/static-contract-data-loader.cjs");
 const { SchemaHtmlDataPlugin } = require("./scripts/schema-html-data-plugin.cjs");
 const Components = require("unplugin-vue-components/rspack");
 const { ElementPlusResolver } = require("unplugin-vue-components/resolvers");
@@ -37,7 +38,7 @@ module.exports = {
   context: __dirname,
   entry: {
     // One library stylesheet fixes its order across independently loaded pages.
-    app: mode === "production" ? ["element-plus/dist/index.css", "./src/main.js"] : "./src/main.js",
+    app: mode === "production" ? ["./src/elementPlusUsedStyles.js", "./src/main.js"] : "./src/main.js",
   },
   output: {
     path: resolve(outputDir),
@@ -56,6 +57,12 @@ module.exports = {
   },
   module: {
     rules: [
+      ...(mode === "production" ? [{test: /element-plus-icon-gallery\.svg$/,type:"javascript/auto",use:[{loader:resolve("scripts/icon-sprite-data-loader.cjs"),options:{documentData:true}}]}] : []),
+      {
+        test: resource => PUBLIC_CONTRACTS.some(file => resolve(file) === resource),
+        type: "javascript/auto",
+        use: [{loader: resolve("scripts/static-contract-data-loader.cjs"), options: {documentData: mode === "production"}}],
+      },
       {
         // Lossless storage for complete generated schemas. The loader verifies
         // every original UTF8 byte before emitting data; validators stay intact.
@@ -80,14 +87,17 @@ module.exports = {
       {
         test: /\.js$/,
         exclude: /node_modules/,
-        use: {
+        use: [
+          ...(mode === "production" ? [{loader: resolve("scripts/public-interface-text-loader.cjs"), options: {documentData:true}}] : []),
+          {
           loader: "babel-loader",
           options: {
             presets: ["@babel/preset-env"],
             // Reuse Babel helpers across async views while preserving the preset's targets.
             plugins: [["@babel/plugin-transform-runtime", { version: require("@babel/runtime/package.json").version }]],
           },
-        },
+          },
+        ],
       },
       {
         test: /\.css$/,
@@ -131,6 +141,7 @@ module.exports = {
       },
       {
         test: /\.(png|jpe?g|gif|svg)$/,
+        exclude: mode === "production" ? /element-plus-icon-gallery\.svg$/ : undefined,
         type: "asset",
         parser: {
           dataUrlCondition: {
@@ -157,6 +168,7 @@ module.exports = {
     extensions: [".js", ".vue", ".json"],
     alias: {
       "@": resolve("src"),
+      ...(mode === "production" ? {"@element-plus/icons-vue$": resolve("src/components/sharedIconComponents.js")} : {}),
       // SFC templates are compiled by vue-loader; omit the unused browser compiler.
       vue$: "vue/dist/vue.runtime.esm-bundler.js",
       path: "path-browserify",
@@ -246,7 +258,7 @@ module.exports = {
         // two screens each. Share their code without changing global limits.
         smallEvidenceShared: {
           name: "small-evidence-shared",
-          test: /[\\/]src[\\/](?:components[\\/](?:DiagnosisReview[\\/]index|AISurgerySources[\\/]ProtectedEditor)\.vue(?:\?.*)?$|api[\\/]ai[\\/]nativeOriginalJson\.js$)/,
+          test: /[\\/]src[\\/](?:components[\\/](?:DiagnosisReview[\\/]index|AISurgerySources[\\/]ProtectedEditor|ai[\\/]DocumentChangeFindings)\.vue(?:\?.*)?$|(?:api[\\/]ai[\\/]nativeOriginalJson|components[\\/]ai[\\/]useDocumentExtractionInput)\.js$)/,
           chunks: "async",
           minChunks: 2,
           minSize: 0,

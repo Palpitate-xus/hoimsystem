@@ -12,13 +12,21 @@ logger = logging.getLogger("ai.worker")
 async def process_one() -> bool:
     """Claim work transactionally and call the provider outside the SQL session."""
     from app import database
+    from app.ai.research_cohort_execution import ResearchClaim, recover_interrupted_research_runs
 
+    # Research recovery requires a genuinely fresh RR view, not the generic
+    # expiry Session which may already have read another native domain.
+    with database.SessionLocal() as recovery_db:
+        recover_interrupted_research_runs(recovery_db)
     with database.SessionLocal() as db:
         expire_interrupted_runs(db)
         claim = claim_next_run(db)
     if claim is None:
         return False
-    await execute_claimed(*claim)
+    if isinstance(claim, ResearchClaim):
+        await execute_claimed(claim.run_id, claim.lease_token, research_claim_event_id=claim.claim_event_id)
+    else:
+        await execute_claimed(*claim)
     return True
 
 

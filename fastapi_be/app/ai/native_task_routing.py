@@ -27,6 +27,7 @@ def _domains():
     from app.ai.document_change_run_models import AIDocumentChangeRunArtifact
     from app.ai.document_extraction_models import AIDocumentExtractionRunAnchor
     from app.ai.drug_label_run_models import AIDrugLabelRunArtifact
+    from app.ai.research_cohort_artifact_models import AIResearchCohortRunArtifact
     from app.ai.satisfaction_artifact_models import AISatisfactionRunArtifact
 
     return (
@@ -35,6 +36,7 @@ def _domains():
         ("document", AIDocumentExtractionRunAnchor, "original_id"),
         ("drug_label", AIDrugLabelRunArtifact, "source_binding_id"),
         ("document_change", AIDocumentChangeRunArtifact, "scope_id"),
+        ("research_cohort", AIResearchCohortRunArtifact, "case_id"),
     )
 
 

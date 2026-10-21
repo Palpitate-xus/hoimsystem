@@ -588,6 +588,14 @@ def list_runs(
             guard_private_task_read(db, user, item.run_id)
             authorize_run(db, user, item)
         except HTTPException as exc:
+            from app.ai.native_task_routing import locate_native_task
+
+            identity = locate_native_task(db, item.run_id)
+            if exc.status_code in {403, 404, 409}:
+                from app.ai.research_cohort_shared import is_research_task
+
+                if identity is not None and identity.domain == "research_cohort" or identity is None and is_research_task(db, item):
+                    continue
             from app.ai.document_change_storage import is_document_change_run
 
             if exc.status_code in {403, 404, 409} and is_document_change_run(db, item):
@@ -663,6 +671,11 @@ def cancel_run(run_id: str, db: Session = Depends(get_db), user: User = Depends(
     from app.ai.native_task_routing import locate_native_task
 
     identity = locate_native_task(db, run_id)
+    if identity is not None and identity.domain == "research_cohort":
+        from app.ai.research_cohort_execution import cancel_research_run
+
+        cancel_research_run(db, user, run_id)
+        return {"code": 200, "msg": "任务结果已取消接收"}
     if identity is not None and identity.domain == "document_change" or identity is None and has_native_identity(db, run_id):
         cancel_change_run(db, user, run_id)
         return {"code": 200, "msg": "任务结果已取消接收"}
@@ -724,6 +737,12 @@ def review_result(run_id: str, req: FeedbackWrite, db: Session = Depends(get_db)
     authorize_run(db, user, run)
     if run.status != "succeeded":
         raise HTTPException(409, "只能复核已成功生成的建议")
+    from app.ai.research_cohort_shared import is_research_task
+
+    if is_research_task(db, run):
+        from app.ai.research_cohort_result_storage import load_result as load_research_result
+
+        load_research_result(db, user, run_id)
     from app.ai.charge_reconciliation_storage import is_charge_run
 
     charge = is_charge_run(db, run)

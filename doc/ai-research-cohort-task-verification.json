@@ -1,0 +1,968 @@
+{
+  "schema_version": "research_cohort_independent_task_verification_v1",
+  "feature_number": 74,
+  "feature_key": "research_cohort",
+  "recorded_at_utc": "2026-10-21T16:01:54.326648+00:00",
+  "status": "independent_targeted_stage_verified_shared_integration_blocked",
+  "implementation_commit_before_documentation": "4b1a99d1fdcb272446a22117a00345b294fa9d79",
+  "scope": {
+    "dedicated_models_storage_runtime_main_task_routes_and_isolated_frontend": true,
+    "shared_dispatch_integrated": false,
+    "production_dist_verified": false,
+    "full_backend_suite_verified": false,
+    "full_browser_suite_verified": false,
+    "feature_activated": false,
+    "merged_to_main": false,
+    "pushed_or_deployed": false,
+    "no_new_clinical_enrollment_sql_or_export": true,
+    "counts_are_separate_targeted_runs_not_added_or_deduplicated_full_suite": true
+  },
+  "source_stage": {
+    "existing_ledger": {
+      "path": "/tmp/hoim-research-cohort-20261021/doc/ai-research-source-verification.json",
+      "bytes": 122603,
+      "sha256": "d6e35d4c81c76656e16e063d2d6832a217ff08bf8b7357416bed010a4ec04cda"
+    },
+    "unchanged_fixed_recipe_modules": {
+      "fastapi_be/app/ai/research_cohort_contract.py": {
+        "sha256": "52267988ae6ba8f2d0ebcdf882a76820c2f98ea06b46668a509587b2b2276e4f",
+        "byte_equal_to_source_stage_commit": "00422a4"
+      },
+      "fastapi_be/app/ai/research_cohort_collection.py": {
+        "sha256": "69c42c82e280fca82765ced005eca8a36b85506ed9b61a3e2e6fd944979920cb",
+        "byte_equal_to_source_stage_commit": "00422a4"
+      },
+      "fastapi_be/app/ai/research_cohort_evaluator.py": {
+        "sha256": "aec13f946a54a79c7e5a96a0d77c778f09a8431e7d6293221df1aa13d216ed33",
+        "byte_equal_to_source_stage_commit": "00422a4"
+      },
+      "fastapi_be/app/ai/research_cohort_snapshot.py": {
+        "sha256": "1dff4fb56c43cb7251bc4c0e59ed7ee09289036a1ee5d01ddc12e60db77e1de4",
+        "byte_equal_to_source_stage_commit": "00422a4"
+      }
+    },
+    "source_stage_counts_not_added_to_task_stage": true
+  },
+  "contract": {
+    "task_reference_keys": [
+      "research_cohort_case_id",
+      "question?"
+    ],
+    "question_max_codepoints": 2000,
+    "question_max_utf8_bytes": 8000,
+    "source_scope_result_task_independent_max_utf8_bytes": 8388608,
+    "each_original_run_text_max_utf8_bytes": 65535,
+    "task_routes_prefix": "/api/ai/research-cohort/tasks",
+    "source_routes_preserved": 23,
+    "dedicated_task_routes": 5,
+    "short_metadata_keys": 21,
+    "artifact_technical_columns": 24,
+    "source_binding_keys": 12,
+    "prompt_snapshot_keys": 9,
+    "execution_snapshot_keys": 6,
+    "task_part_keys": 13,
+    "clinical_authorization": "Every Source/Scope/Result/task read, dispatch and acceptance requires current ProjectACL and every Patient research authorization for the declared purpose; Super has no frozen clinical bypass. Current Source local eligibility is distinct from external-model permission.",
+    "directory": "Technical metadata only; no Task/Artifact/clinical TEXT, ordinary owner restriction, Super explicit technical audit. History reads never implicitly select a new execution Source.",
+    "lock_and_dispatch": "Gate X -> current User SHARE/loaded epoch -> opaque Artifact locator current SHARE -> current Scope/Patient authorization before private Task TEXT; exact receipt/accept/dispatch AuditPK, no Audit range scan. Durable dispatch CAS committed and all SQL released before HTTP. Duplicate delivery does not replay or terminate first worker.",
+    "prompt_origins": {
+      "packaged_catalog": "version0, real nullable PromptVersion FK null, frozen full packaged Task/System",
+      "database_version": "positive immutable version, actual non-null PromptVersion FK, frozen full custom Task and fixed System"
+    },
+    "nullable_usage": "Only genuine unattempted cancellation is known 0/0 false. Running pending/interrupted reservation remains unknown; paid partial actual counts retain null. No paid retry.",
+    "draft": "At most128 partial review questions, exact CP quotations of real public source strings; no generated SQL, cohort expansion, enrollment, export or clinical conclusions. Server independently rebuilds all deterministic counts/outcomes/limitations."
+  },
+  "targeted_verification": {
+    "tasks-http-second": {
+      "path": "/tmp/hoim-research-tasks-http-second-verification.json",
+      "bytes": 11946,
+      "sha256": "a8ec9b494dc65a687fa56e8e4982b0be5cb15976e3806390a16991004a341822",
+      "scope": "Feature74 actual mounted product Main/JWT dedicated Task5+Source23 with real SQL create/claim/execute via HTTP MockTransport, four independent bounded parts and current permissions even Super; no shared dispatcher, real model, enrollment or export.",
+      "exit_code": 0,
+      "elapsed_seconds": 190.710732,
+      "source_stable": true,
+      "guards": {
+        "dotenv_open_attempts": 0,
+        "shared_key_open_attempts": 0,
+        "socket_attempts": 0,
+        "engine_urls": [
+          "sqlite:///:memory:",
+          "sqlite:///:memory:"
+        ],
+        "transport_key": "fresh_synthetic_process_memory_only"
+      },
+      "log": "/tmp/hoim-research-tasks-http-second-tests.log",
+      "log_sha256": "4ee31e24e45cffb14517b20466586ae7f4c9b607a94d50762a660c2543fd5ca3"
+    },
+    "tasks-http-third": {
+      "path": "/tmp/hoim-research-tasks-http-third-verification.json",
+      "bytes": 11772,
+      "sha256": "6a408ad3ba8c0d33e7dd32c5deb649af76eed192e9689ac81395fee8bf4ed416",
+      "scope": "Feature74 actual mounted product Main/JWT dedicated Task5+Source23 with real SQL create/claim/execute via HTTP MockTransport, four independent bounded parts and current permissions even Super; no shared dispatcher, real model, enrollment or export.",
+      "exit_code": 0,
+      "elapsed_seconds": 72.22117,
+      "source_stable": true,
+      "guards": {
+        "dotenv_open_attempts": 0,
+        "shared_key_open_attempts": 0,
+        "socket_attempts": 0,
+        "engine_urls": [
+          "sqlite:///:memory:",
+          "sqlite:///:memory:"
+        ],
+        "transport_key": "fresh_synthetic_process_memory_only"
+      },
+      "log": "/tmp/hoim-research-tasks-http-third-tests.log",
+      "log_sha256": "330908a69b03c6a13d268e1191530ff46b70ca5f60e97d3d3ab6ac988c8306bd"
+    },
+    "tasks-states-http-first": {
+      "path": "/tmp/hoim-research-tasks-states-http-first-verification.json",
+      "bytes": 12046,
+      "sha256": "2598847b39d89ea00cb2e2c3814b54996aaf3f0ef02f733b12388fa0e9cfb1dd",
+      "scope": "Feature74 actual mounted product Main/JWT dedicated Task5+Source23 with real SQL create/claim/execute via HTTP MockTransport, four independent bounded parts and current permissions even Super; no shared dispatcher, real model, enrollment or export.",
+      "exit_code": 0,
+      "elapsed_seconds": 39.198902,
+      "source_stable": true,
+      "guards": {
+        "dotenv_open_attempts": 0,
+        "shared_key_open_attempts": 0,
+        "socket_attempts": 0,
+        "engine_urls": [
+          "sqlite:///:memory:",
+          "sqlite:///:memory:"
+        ],
+        "transport_key": "fresh_synthetic_process_memory_only"
+      },
+      "log": "/tmp/hoim-research-tasks-states-http-first-tests.log",
+      "log_sha256": "7a513c4301eb51b9e2c83f5014a0674d49d9f8bdfdb19fc87fb8ad42a1b14793"
+    },
+    "tasks-joint-fourth": {
+      "path": "/tmp/hoim-research-tasks-joint-fourth-verification.json",
+      "bytes": 127995,
+      "sha256": "0649d45e6b72a4b3397af15e09c6d8fa96c6145043fd021cf41bf3ea153717cd",
+      "scope": "47 joint isolated_mock API31+DOM16 boundary cases;  Task API/source-private-proof/result/citation boundary cases. Fixtures are unchanged actual Main/JWT same-case HTTP packets with dedicated real SQLite claim/execute and HTTPMock model, not shared dispatcher/native provider or production-dist. Actual project Babel and Root unique Source mapper/evaluator are used without guard stubs.",
+      "exit_code": 0,
+      "elapsed_seconds": 51.684,
+      "source_stable": true,
+      "stats": {
+        "startTime": "2026-10-21T15:45:51.878Z",
+        "duration": 50532.757,
+        "expected": 47,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "final_verified": true,
+      "all_passed_once_no_retry_skip": true,
+      "log": "/tmp/hoim-research-tasks-joint-fourth-tests.log",
+      "report": "/tmp/hoim-research-tasks-joint-fourth-report.json",
+      "report_sha256": "39d3f3c6a7b0b283ce0cff3eababb970d563cb8c4da857a2619ea368b9d0e0c0"
+    },
+    "runtime_mysql_fourth": {
+      "path": "/tmp/hoim-research-runtime-mysql-fourth-attempt-3726a5c50cc4.json",
+      "bytes": 23690,
+      "sha256": "aaf8a9a07ec286fe502dc68d7ee28685270875a3d52b44fce21258b45d02dccd",
+      "scope": "Feature74 isolated actual MySQL Source + current218 table additive Artifact/Prompt/dispatch migrations, dedicated queue/claim/MockTransport complete Result/nullable usage. Actual product Main/JWT Source23 only; Task routes/shared dispatch not yet mounted. No real model/IRB/export.",
+      "seconds": 83.962,
+      "worker_seconds": 75.317,
+      "source_stable": true,
+      "all_checks_passed": true,
+      "cleanup_verified": true,
+      "guards": {
+        "blocked": [
+          "socket.bind"
+        ],
+        "private_unix_connections": 2
+      },
+      "isolation": {
+        "network_mode": "none",
+        "port_bindings": {},
+        "readonly_root": true,
+        "user": "999:999",
+        "cap_drop": [
+          "ALL"
+        ],
+        "tmpfs": {
+          "/tmp": "rw,nosuid,nodev,noexec,size=64m,uid=999,gid=999,mode=0700",
+          "/var/lib/mysql": "rw,nosuid,nodev,noexec,size=512m,uid=999,gid=999,mode=0700"
+        },
+        "mount_types": [
+          "bind"
+        ]
+      },
+      "migration": {
+        "actual_additive_up_down_up": true,
+        "old_table_count": 211,
+        "new_table_count": 5,
+        "current_tables": 216,
+        "old_ddl_rows_unchanged": true,
+        "utc6_columns": 20,
+        "mediumtext_columns": 8,
+        "full_historical_alembic_replay": false,
+        "revision_head": "20261021_research_cohort",
+        "parent": "20261021_doc_extraction_runs"
+      },
+      "artifact_migration": {
+        "current_unique_head": "20261021_research_dispatch",
+        "actual_up_down_up": true,
+        "prior_tables": 216,
+        "new_tables": 2,
+        "current_tables": 218,
+        "prior_ddl_and_rows_unchanged": true,
+        "database_prompt_only_revision_preserved": "20261021_research_runs",
+        "no_fabricated_prompt_table": true
+      },
+      "checks": [
+        "actual_rr_current_role_rejected",
+        "actual_rr_current_epoch_rejected",
+        "actual_rr_permission_revocation_rejected",
+        "current_capture_holds_real_parent_and_existing_member_locks",
+        "two_connection_same_value_gate_x_serialization"
+      ],
+      "blocking": [
+        {
+          "label": "new_registration_real_patient_fk",
+          "mysql_error": 1205,
+          "seconds": 1.003
+        },
+        {
+          "label": "new_medical_record_real_patient_fk",
+          "mysql_error": 1205,
+          "seconds": 1.002
+        },
+        {
+          "label": "existing_medical_record_body_update",
+          "mysql_error": 1205,
+          "seconds": 1.002
+        },
+        {
+          "label": "scope_child_new_acl_fk",
+          "mysql_error": 1205,
+          "seconds": 1.005
+        },
+        {
+          "label": "outside_window_existing_row_moves_into_selected_date_range",
+          "mysql_error": 1205,
+          "seconds": 1.002
+        }
+      ],
+      "metadata_hash_projection": [
+        {
+          "microseconds": 0,
+          "note_sha256": "30ebf9c17b4418c912b4f2395ba7ef3d588452ea8435187e0841ad01b5eb18b7",
+          "canonical_note_and_governance_equal": true
+        },
+        {
+          "microseconds": 0,
+          "note_sha256": "468f8812eac8306493b9a296eac33078c3fdfe0c4e87ef4a823b4d54e8f2c2e0",
+          "canonical_note_and_governance_equal": true
+        },
+        {
+          "microseconds": 0,
+          "note_sha256": "e033178c69ddac719a3c6c7101795b4a1591f81a05ad8e38cae6388bc0da0a34",
+          "canonical_note_and_governance_equal": true
+        },
+        {
+          "microseconds": 123456,
+          "note_sha256": "30ebf9c17b4418c912b4f2395ba7ef3d588452ea8435187e0841ad01b5eb18b7",
+          "canonical_note_and_governance_equal": true
+        },
+        {
+          "microseconds": 123456,
+          "note_sha256": "468f8812eac8306493b9a296eac33078c3fdfe0c4e87ef4a823b4d54e8f2c2e0",
+          "canonical_note_and_governance_equal": true
+        },
+        {
+          "microseconds": 123456,
+          "note_sha256": "e033178c69ddac719a3c6c7101795b4a1591f81a05ad8e38cae6388bc0da0a34",
+          "canonical_note_and_governance_equal": true
+        }
+      ],
+      "sql_atomicity": [
+        {
+          "fault": "receipt",
+          "actual_mysql_trigger": true,
+          "case_audit_counts_before": [
+            1,
+            11
+          ],
+          "after": [
+            1,
+            11
+          ],
+          "actor_restored": true
+        },
+        {
+          "fault": "body",
+          "actual_mysql_trigger": true,
+          "case_audit_counts_before": [
+            1,
+            11
+          ],
+          "after": [
+            1,
+            11
+          ],
+          "actor_restored": true
+        },
+        {
+          "fault": "actor",
+          "actual_mysql_trigger": true,
+          "case_audit_counts_before": [
+            1,
+            11
+          ],
+          "after": [
+            1,
+            11
+          ],
+          "actor_restored": true
+        }
+      ],
+      "care_patient_order_negative_control": {
+        "actual_current_care_or_grant": true,
+        "writer_patient_x_then_bound_registration_x_completed": true,
+        "collector_patient_share_before_care_sql": true,
+        "care_rows_before_writer_release": 0,
+        "capture_after_release": {
+          "capture_ok": true
+        },
+        "no_global_deadlock_absence_claim": true
+      },
+      "artifact_rr_current_locator": {
+        "reader_plain_rr_view_preceded_new_case_run_artifact": true,
+        "actual_current_locator_found_later_artifact": true,
+        "source_current_authorized_before_run_text": true,
+        "no_generic_downgrade": true
+      },
+      "artifact_packaged": {
+        "source_bytes": 7147,
+        "source_sha256": "67c5760987c8ea46b764e678584e66ee5ce74baf63497ead9724ed062f06c150",
+        "short_raw3_bytes": {
+          "input_json": 517,
+          "evidence_json": 298,
+          "context_metadata_json": 528
+        },
+        "no_prompt_governance_write": true,
+        "created_concrete_audit_pk": 36,
+        "usage_event_id": null,
+        "actual_model_calls": 0,
+        "queue_worker_claimed": false
+      },
+      "artifact_database_prompt": {
+        "actual_fk": true,
+        "version": 1,
+        "custom_full_task_preserved": true
+      },
+      "dedicated_chat": {
+        "status": "succeeded",
+        "full_result_bytes": 2074,
+        "full_result_sha256": "94163418d37f59e6c51ef264ca9b2a830dc1fdb08798651b2f41055beffd1c00",
+        "source_bytes": 7147,
+        "raw3_bytes": {
+          "input_json": 528,
+          "evidence_json": 298,
+          "context_metadata_json": 528
+        },
+        "five_actual_distinct_audit_pks": [
+          38,
+          39,
+          40,
+          42,
+          41
+        ],
+        "duplicate_same_claim_actual_http_requests": 1,
+        "no_real_model": true
+      },
+      "dedicated_responses": {
+        "status": "succeeded",
+        "original_nullable_usage": {
+          "input_tokens": 41,
+          "output_tokens": null,
+          "complete": false,
+          "model_call_attempted": true
+        },
+        "no_zero_imputation": true
+      },
+      "dedicated_http": [
+        {
+          "run_id": "5c9226de-b1c2-49bf-b60a-a501838f4597",
+          "kind": "chat",
+          "path": "/v1/chat/completions",
+          "request_bytes": 17562,
+          "request_sha256": "c6f876f654ecb3b69c36010d91676ecf2a149066d125092e1aa74df23c7c0bd2",
+          "worker_sessions_all_released": true,
+          "checked_out_sql_connections": 0
+        },
+        {
+          "run_id": "87cc5a68-3a32-4b9b-a544-154f2e6e062f",
+          "kind": "responses",
+          "path": "/v1/responses",
+          "request_bytes": 17248,
+          "request_sha256": "e69d78a7cb16ffd6765b13b04c9856ea468a748d573627aeafef3c16abd87970",
+          "worker_sessions_all_released": true,
+          "checked_out_sql_connections": 0
+        }
+      ],
+      "dispatch_atomic_faults": [
+        {
+          "fault": "audit",
+          "actual_mysql_trigger": true,
+          "dispatch_audit_and_fk_both_rolled_back": true,
+          "http_requests": 0
+        },
+        {
+          "fault": "fk",
+          "actual_mysql_trigger": true,
+          "dispatch_audit_and_fk_both_rolled_back": true,
+          "http_requests": 0
+        }
+      ],
+      "dedicated_withdrawal": {
+        "inflight_result_rejected_paid_retained": true,
+        "ordinary_and_super_all_four_clinical_parts_denied": true,
+        "private_task_artifact_result_text_selects_by_read_apis": 0,
+        "original_usage": {
+          "input_tokens": 41,
+          "output_tokens": null,
+          "complete": false,
+          "model_call_attempted": true
+        },
+        "technical_metadata_opaque_only": true
+      },
+      "artifact_source_before_private_text": {
+        "ordinary_and_super_after_research_withdrawal_denied": true,
+        "private_task_or_artifact_text_selects": 0,
+        "no_super_raw_escape": true,
+        "actual_mysql": true
+      }
+    }
+  },
+  "observed_counts": {
+    "main_sql_and_rbac_targeted_second": {
+      "passed": 716,
+      "pytest_seconds": 180.57,
+      "scope": "TaskHTTP8 + runtime17 + packaged1 + mounted RBAC690; not whole backend"
+    },
+    "main_task_http_with_nonempty_clinical_citations_third": {
+      "passed": 8,
+      "pytest_seconds": 62.11
+    },
+    "same_case_five_actual_states_and_withdrawal": {
+      "passed": 1,
+      "pytest_seconds": 29.77,
+      "separate_terminal_tasks_not_fabricated_single_status_sequence": true
+    },
+    "latest_frontend": {
+      "isolated_mock": 47,
+      "api": 31,
+      "dom": 16,
+      "production_mock": 0,
+      "real_synthetic_http_in_browser": 0,
+      "workers": 1,
+      "retries": 0,
+      "skip": 0
+    }
+  },
+  "mysql_scope_limits": [
+    "Current218table inventory: old211 + Source5 then Artifact2. Additive up/down/up, prior DDL/rows preserved, not full historical Alembic replay.",
+    "Source23 Main/JWT routes were real; dedicated Task execution used actual MySQL/helpers + HTTPMock. This predates mounted Task5 and enriched Task-part proof; those are covered by later actual SQLite Main/JWT tests.",
+    "One blocked socket.bind guard attempt retained; actual TCP/model/hospital connections0. Private Unix connections2.",
+    "Three earlier runtime attempts retained: actual MySQL1553 FK/index-order product failure fixed eec4ef4; second temporary missing canonical_json import; third temporary DBAPI subclass catch mismatch after successful Chat/Responses. Fourth green is not a rewrite of old evidence."
+  ],
+  "static_checks": {
+    "path": "/tmp/hoim-research-task-static-final.json",
+    "bytes": 16881,
+    "sha256": "e30222977018e81aaca09e9e096ae6eb221d16221c3f201cb50262f66583b9a4"
+  },
+  "retained_failed_or_invalid_attempt_reports": [
+    {
+      "path": "/tmp/hoim-research-artifact-first-verification.json",
+      "bytes": 8864,
+      "sha256": "7cdcf9ac678c9cd5b12966939b3beb47b82b038f0f0f78619e6fdf2b55ea53fb",
+      "scope": "Feature74 split Artifact/Result ORM constraints and independently additive SQLite migration up/down/up, using actual governed Case. MySQL DDL compilation only here. No worker/runtime/model/terminal acceptance claim.",
+      "exit_code": 1,
+      "elapsed_seconds": 48.127457,
+      "source_stable": true,
+      "guards": {
+        "dotenv_open_attempts": 0,
+        "socket_attempts": 0,
+        "engine_urls": [
+          "sqlite:///:memory:",
+          "sqlite:///:memory:",
+          "sqlite:///:memory:"
+        ]
+      },
+      "log": "/tmp/hoim-research-artifact-first-tests.log",
+      "log_sha256": "23ab3da64db60777a3f2e0d74f8cf598d27444572413bdcde9b4253767886f2b"
+    },
+    {
+      "path": "/tmp/hoim-research-artifact-second-verification.json",
+      "bytes": 8866,
+      "sha256": "47d5eee4d295bb17752136f9220ec62120bc56b45c32a7977089695872268c7a",
+      "scope": "Feature74 split Artifact/Result ORM constraints and independently additive SQLite migration up/down/up, using actual governed Case. MySQL DDL compilation only here. No worker/runtime/model/terminal acceptance claim.",
+      "exit_code": 1,
+      "elapsed_seconds": 46.799959,
+      "source_stable": true,
+      "guards": {
+        "dotenv_open_attempts": 0,
+        "socket_attempts": 0,
+        "engine_urls": [
+          "sqlite:///:memory:",
+          "sqlite:///:memory:",
+          "sqlite:///:memory:"
+        ]
+      },
+      "log": "/tmp/hoim-research-artifact-second-tests.log",
+      "log_sha256": "0b052e2eb7dece2f9f82a1a8257405b7f7680e24e3bfe576dd974137740b65cb"
+    },
+    {
+      "path": "/tmp/hoim-research-execution-first-verification.json",
+      "bytes": 11574,
+      "sha256": "66ed405dad0c8d9059753d1ed1434c6c4b08e9f14980016e07978dd3b773fd3b",
+      "scope": "Feature74 dedicated actual synthetic SQLite create/claim/execute via HTTP MockTransport, not shared platform dispatch/JWT or real provider; exact transaction release and duplicate delivery check.",
+      "exit_code": 1,
+      "elapsed_seconds": 32.748502,
+      "source_stable": true,
+      "guards": {
+        "dotenv_open_attempts": 0,
+        "socket_attempts": 0,
+        "engine_urls": [
+          "sqlite:///:memory:",
+          "sqlite:///:memory:"
+        ]
+      },
+      "log": "/tmp/hoim-research-execution-first-tests.log",
+      "log_sha256": "c4632616aafaa94989afc17b180c6ef8c3185aadc8a88036bd5b7a9803b085b8"
+    },
+    {
+      "path": "/tmp/hoim-research-foundation-first-verification.json",
+      "bytes": 2078,
+      "sha256": "22857ea6b56c77b4c5f2e59f4916bb2404f0f5b1d17b99d8f3c48d6aaf440258",
+      "scope": "Actual isolated SQLite research project/ACL/patient authorization tables, independent recorded review and technical governance, UTF8 storage/FKs, additive up/down/up. MySQL DDL compilation only; no runtime/IRB/clinical efficacy claim.",
+      "exit_code": 1,
+      "elapsed_seconds": 14.958728,
+      "source_stable": true,
+      "guards": {
+        "dotenv_open_attempts": 0,
+        "socket_attempts": 0,
+        "engine_urls": [
+          "sqlite:///:memory:",
+          "sqlite:///:memory:",
+          "sqlite:///:memory:"
+        ]
+      },
+      "log": "/tmp/hoim-research-foundation-first-tests.log",
+      "log_sha256": "58a319b56f20dfe4dfe53ec18ef28bd377a41fae637bebdcc7da80e663e55bfb"
+    },
+    {
+      "path": "/tmp/hoim-research-gateway-first-verification.json",
+      "bytes": 10887,
+      "sha256": "b2945e866cdf35a816512df456a76c19d89ead03280f4e5ccc15a8e8ffa7de10",
+      "scope": "Feature74 actual governed synthetic SQLite Source + isolated HTTP MockTransport Chat/Responses; complete wire/strict replies/nullable usage, no real provider or queue worker/shared dispatch.",
+      "exit_code": 1,
+      "elapsed_seconds": 45.201499,
+      "source_stable": true,
+      "guards": {
+        "dotenv_open_attempts": 0,
+        "socket_attempts": 0,
+        "engine_urls": [
+          "sqlite:///:memory:",
+          "sqlite:///:memory:"
+        ]
+      },
+      "log": "/tmp/hoim-research-gateway-first-tests.log",
+      "log_sha256": "ea9ce8d6e5d88c22c415f6a807ee9730a7f2bbf976c7eed5f712385ae00ff795"
+    },
+    {
+      "path": "/tmp/hoim-research-generic-staging-private-first-verification.json",
+      "bytes": 12129,
+      "sha256": "157d3498da3ac8cfbf1f607c86c051aef605bbdacb57c48c2f162784271fde5a",
+      "scope": "Read-only red staging probe of old generic Main task/trace routes after actual dedicated research permission withdrawal; Feature74 actual mounted product Main/JWT dedicated Task5+Source23 with real SQL create/claim/execute via HTTP MockTransport, four independent bounded parts and current permissions even Super; no shared dispatcher, real model, enrollment or export.",
+      "exit_code": 1,
+      "elapsed_seconds": 4.414047,
+      "source_stable": true,
+      "guards": {
+        "dotenv_open_attempts": 0,
+        "shared_key_open_attempts": 0,
+        "socket_attempts": 0,
+        "engine_urls": [
+          "sqlite:///:memory:"
+        ],
+        "transport_key": "fresh_synthetic_process_memory_only"
+      },
+      "log": "/tmp/hoim-research-generic-staging-private-first-tests.log",
+      "log_sha256": "e5360f60170ac08fc1a36a802c630ba8dad48f7f4f15900eadee50ced21124de"
+    },
+    {
+      "path": "/tmp/hoim-research-generic-staging-private-second-verification.json",
+      "bytes": 12181,
+      "sha256": "413cd1c9e4a7d1d7ef1e1bc98f1a04867fe1291e67fda2f59fa5fcce037c2559",
+      "scope": "Read-only red staging probe of old generic Main task/trace routes after actual dedicated research permission withdrawal; Feature74 actual mounted product Main/JWT dedicated Task5+Source23 with real SQL create/claim/execute via HTTP MockTransport, four independent bounded parts and current permissions even Super; no shared dispatcher, real model, enrollment or export.",
+      "exit_code": 1,
+      "elapsed_seconds": 42.141989,
+      "source_stable": true,
+      "guards": {
+        "dotenv_open_attempts": 0,
+        "shared_key_open_attempts": 0,
+        "socket_attempts": 0,
+        "engine_urls": [
+          "sqlite:///:memory:",
+          "sqlite:///:memory:"
+        ],
+        "transport_key": "fresh_synthetic_process_memory_only"
+      },
+      "log": "/tmp/hoim-research-generic-staging-private-second-tests.log",
+      "log_sha256": "bf14d4914904f3b475f93c11136b7f28004190484e8e3d20bc90db4764c7972b"
+    },
+    {
+      "path": "/tmp/hoim-research-management-first-verification.json",
+      "bytes": 221095,
+      "sha256": "f29c44f2b2b8cdb5745b0cd10708eedaafe81974e5ed07ded8236f40ca899b57",
+      "scope": "One whole10-case isolated actual Super-admin Management Source entry suite: six actual Main ASGI HTTP/JWT bootstrap bodies replayed verbatim plus independently provenanced V4 SQL Source packets. Current product and all selected spec/fixture/manifest bytes are frozen across execution. Canonical Babel/request, SQL router-function V1/V2/V4 provenance with explicitly labeled derived math/metadata scenarios; isolated browser interception. No production dist, actual Main HTTP/JWT transport, MySQL, model or clinical correctness claim. Frontend Source availability is distinct from model permission. B-owned backend Pure/Artifact development is outside execution inputs.",
+      "exit_code": 1,
+      "elapsed_seconds": 68.614,
+      "source_stable": true,
+      "stats": {
+        "startTime": "2026-10-21T13:32:47.637Z",
+        "duration": 67253.468,
+        "expected": 8,
+        "skipped": 0,
+        "unexpected": 2,
+        "flaky": 0
+      },
+      "final_verified": false,
+      "all_passed_once_no_retry_skip": false,
+      "log": "/tmp/hoim-research-management-first-tests.log",
+      "report": "/tmp/hoim-research-management-first-report.json",
+      "report_sha256": "357f88bb7320ef4ed9aebfb450550c11b07f8e850a62706bd7fad2758663a0b0"
+    },
+    {
+      "path": "/tmp/hoim-research-minimization-red-first-verification.json",
+      "bytes": 6501,
+      "sha256": "506c4fdeae97e960d46dfade2a30d1eba65f4628b281b287a257624d028bca19",
+      "scope": "Whole current feature74 Source targeted suite: actual isolated SQLite/JWT, project/ACL/patient permission and finite whole clinical family Case, deterministic HMAC/three-valued proof, additive migration. No runtime/model execution, IRB or clinical efficacy claim; MySQL here compile-only.",
+      "exit_code": 1,
+      "elapsed_seconds": 18.917738,
+      "source_stable": true,
+      "guards": {
+        "dotenv_open_attempts": 0,
+        "socket_attempts": 0,
+        "engine_urls": [
+          "sqlite:///:memory:",
+          "sqlite:///:memory:"
+        ]
+      },
+      "log": "/tmp/hoim-research-minimization-red-first-tests.log",
+      "log_sha256": "4eeb7b7763b8d642eda07e35f26ca7f8ec4d328523239a1176b66e81c588d6b4"
+    },
+    {
+      "path": "/tmp/hoim-research-runtime-boundaries-first-verification.json",
+      "bytes": 12117,
+      "sha256": "d53e5f22008dde0a4a7aeaca3b45238eb9b494419093ba02ed8114434b66f5ad",
+      "scope": "Feature74 dedicated actual synthetic SQLite create/claim/execute via HTTP MockTransport, not shared platform dispatch/JWT or real provider; exact transaction release and duplicate delivery check.",
+      "exit_code": 1,
+      "elapsed_seconds": 191.907682,
+      "source_stable": true,
+      "guards": {
+        "dotenv_open_attempts": 0,
+        "socket_attempts": 0,
+        "engine_urls": [
+          "sqlite:///:memory:",
+          "sqlite:///:memory:"
+        ]
+      },
+      "log": "/tmp/hoim-research-runtime-boundaries-first-tests.log",
+      "log_sha256": "432faaac8567d6587621085667e18685159c10efd55e7f6f69fb839111529ab0"
+    },
+    {
+      "path": "/tmp/hoim-research-storage-epoch-red-verification.json",
+      "bytes": 9567,
+      "sha256": "481d12ebd23f0521721845056a2b70677bcbd641c25131474605a4d5e021172b",
+      "scope": "Feature74 actual SQL Source-before-task-TEXT artifact freeze/read, current permission, packaged vs DB Prompt and concrete audit postwrite rollback. No queue/worker/HTTP/model/result-acceptance claim; SQLite only.",
+      "exit_code": 1,
+      "elapsed_seconds": 25.383704,
+      "source_stable": true,
+      "guards": {
+        "dotenv_open_attempts": 0,
+        "socket_attempts": 0,
+        "engine_urls": [
+          "sqlite:///:memory:",
+          "sqlite:///:memory:"
+        ]
+      },
+      "log": "/tmp/hoim-research-storage-epoch-red-tests.log",
+      "log_sha256": "7aa54f906e2cfcf997a69e613e62c62ce68855fe85ae37407963305e2b252612"
+    },
+    {
+      "path": "/tmp/hoim-research-storage-first-verification.json",
+      "bytes": 9527,
+      "sha256": "8d899f4feb4cc2499d3b712a0a4c188613c4c861261c79f4b1788bcaf057a3f4",
+      "scope": "Feature74 actual SQL Source-before-task-TEXT artifact freeze/read, current permission, packaged vs DB Prompt and concrete audit postwrite rollback. No queue/worker/HTTP/model/result-acceptance claim; SQLite only.",
+      "exit_code": 1,
+      "elapsed_seconds": 86.652161,
+      "source_stable": true,
+      "guards": {
+        "dotenv_open_attempts": 0,
+        "socket_attempts": 0,
+        "engine_urls": [
+          "sqlite:///:memory:",
+          "sqlite:///:memory:"
+        ]
+      },
+      "log": "/tmp/hoim-research-storage-first-tests.log",
+      "log_sha256": "b220d24ec79619a6b89b4127e6df18e5599468a238a76da917382926066eaaad"
+    },
+    {
+      "path": "/tmp/hoim-research-storage-header-red-verification.json",
+      "bytes": 9563,
+      "sha256": "7848163047cfecbded416333fba71fdc2cad79e4ec790f8ea95696b1bd83692e",
+      "scope": "Feature74 actual SQL Source-before-task-TEXT artifact freeze/read, current permission, packaged vs DB Prompt and concrete audit postwrite rollback. No queue/worker/HTTP/model/result-acceptance claim; SQLite only.",
+      "exit_code": 1,
+      "elapsed_seconds": 19.01738,
+      "source_stable": true,
+      "guards": {
+        "dotenv_open_attempts": 0,
+        "socket_attempts": 0,
+        "engine_urls": [
+          "sqlite:///:memory:",
+          "sqlite:///:memory:"
+        ]
+      },
+      "log": "/tmp/hoim-research-storage-header-red-tests.log",
+      "log_sha256": "a7309dc4dd2daae6b18553df6e80a81af5c39c48975e6431f19520f2efc26267"
+    },
+    {
+      "path": "/tmp/hoim-research-tasks-http-first-verification.json",
+      "bytes": 11773,
+      "sha256": "eed146b021c6f497e50fc4d0c9c40d9a8fb84fcf728682585eef04f15312eec7",
+      "scope": "Feature74 actual mounted product Main/JWT dedicated Task5+Source23 with real SQL create/claim/execute via HTTP MockTransport, four independent bounded parts and current permissions even Super; no shared dispatcher, real model, enrollment or export.",
+      "exit_code": 1,
+      "elapsed_seconds": 69.914783,
+      "source_stable": true,
+      "guards": {
+        "dotenv_open_attempts": 0,
+        "shared_key_open_attempts": 0,
+        "socket_attempts": 0,
+        "engine_urls": [
+          "sqlite:///:memory:",
+          "sqlite:///:memory:"
+        ],
+        "transport_key": "fresh_synthetic_process_memory_only"
+      },
+      "log": "/tmp/hoim-research-tasks-http-first-tests.log",
+      "log_sha256": "41905a23b118a5cd935dd81f8e0f03ae6e43efadf98e4b447d4662e6d4293e1c"
+    },
+    {
+      "path": "/tmp/hoim-research-tasks-joint-first-verification.json",
+      "bytes": 127994,
+      "sha256": "a8f8c7990e716aeeb0a4882763a8a86eafd00e17ce4b2fd13908b23b4566a472",
+      "scope": "43 joint isolated_mock API31+DOM12 boundary cases;  Task API/source-private-proof/result/citation boundary cases. Fixtures are unchanged actual Main/JWT same-case HTTP packets with dedicated real SQLite claim/execute and HTTPMock model, not shared dispatcher/native provider or production-dist. Actual project Babel and Root unique Source mapper/evaluator are used without guard stubs.",
+      "exit_code": 1,
+      "elapsed_seconds": 53.241,
+      "source_stable": true,
+      "stats": {
+        "startTime": "2026-10-21T15:32:49.159Z",
+        "duration": 52128.312,
+        "expected": 42,
+        "skipped": 0,
+        "unexpected": 1,
+        "flaky": 0
+      },
+      "final_verified": false,
+      "all_passed_once_no_retry_skip": false,
+      "log": "/tmp/hoim-research-tasks-joint-first-tests.log",
+      "report": "/tmp/hoim-research-tasks-joint-first-report.json",
+      "report_sha256": "9209d48aa7f98c3b598824d10873887cea402b990ae769d1670818d79e8dbd2f"
+    },
+    {
+      "path": "/tmp/hoim-research-tasks-ui-first-verification.json",
+      "bytes": 127178,
+      "sha256": "f718502eb7ec4753c33d9ba6a0a3782cffb7f7ae7c8a7e27853a3a8b54e5a9bc",
+      "scope": "10 isolated_mock Vue/ElementPlus Assistant/Input/Findings/Tasks DOM boundary cases;  Task API/source-private-proof/result/citation boundary cases. Fixtures are unchanged actual Main/JWT same-case HTTP packets with dedicated real SQLite claim/execute and HTTPMock model, not shared dispatcher/native provider or production-dist. Actual project Babel and Root unique Source mapper/evaluator are used without guard stubs.",
+      "exit_code": 1,
+      "elapsed_seconds": 119.83,
+      "source_stable": true,
+      "stats": {
+        "startTime": "2026-10-21T15:23:57.922Z",
+        "duration": 118760.37700000001,
+        "expected": 2,
+        "skipped": 0,
+        "unexpected": 8,
+        "flaky": 0
+      },
+      "final_verified": false,
+      "all_passed_once_no_retry_skip": false,
+      "log": "/tmp/hoim-research-tasks-ui-first-tests.log",
+      "report": "/tmp/hoim-research-tasks-ui-first-report.json",
+      "report_sha256": "6db538d74c61ad60f43d1822633d4f31b0054e3bbe860134c58c7266b6fa7786"
+    },
+    {
+      "path": "/tmp/hoim-research-artifact-mysql-first-attempt-95395ea3fb69.json",
+      "bytes": 24621,
+      "sha256": "27ed9ab59755ad1093970db335b97f72d9c4e79fccfe9d86f8ab4faa5c87eaa6",
+      "scope": "Feature74 isolated actual MySQL migration/source/current permissions and explicit test-router main/JWT. No runtime/model/native/provider/IRB/export claim. Root source not modified.",
+      "seconds": 45.557,
+      "worker_seconds": 34.319,
+      "source_stable": true,
+      "all_checks_passed": false,
+      "cleanup_verified": true,
+      "guards": {
+        "blocked": [
+          "socket.bind"
+        ],
+        "private_unix_connections": 2
+      }
+    },
+    {
+      "path": "/tmp/hoim-research-runtime-mysql-first-attempt-a5f2aef50bff.json",
+      "bytes": 27765,
+      "sha256": "2afc0b06e9e45a2e869fdb2d43227a65e3197b31b07cdabbd9419c0eb41dca0a",
+      "scope": "Feature74 isolated actual MySQL Source + current218 table additive Artifact/Prompt/dispatch migrations, dedicated queue/claim/MockTransport complete Result/nullable usage. Actual product Main/JWT Source23 only; Task routes/shared dispatch not yet mounted. No real model/IRB/export.",
+      "seconds": 43.253,
+      "worker_seconds": 33.654,
+      "source_stable": true,
+      "all_checks_passed": false,
+      "cleanup_verified": true,
+      "guards": {
+        "blocked": [
+          "socket.bind"
+        ],
+        "private_unix_connections": 2
+      }
+    },
+    {
+      "path": "/tmp/hoim-research-runtime-mysql-second-attempt-a0afc38186e1.json",
+      "bytes": 22146,
+      "sha256": "95a068fa3f35339df7103125abd653c8bdc85959276d53cdda3314057fe9d6bb",
+      "scope": "Feature74 isolated actual MySQL Source + current218 table additive Artifact/Prompt/dispatch migrations, dedicated queue/claim/MockTransport complete Result/nullable usage. Actual product Main/JWT Source23 only; Task routes/shared dispatch not yet mounted. No real model/IRB/export.",
+      "seconds": 59.698,
+      "worker_seconds": 50.673,
+      "source_stable": true,
+      "all_checks_passed": false,
+      "cleanup_verified": true,
+      "guards": {
+        "blocked": [
+          "socket.bind"
+        ],
+        "private_unix_connections": 2
+      }
+    },
+    {
+      "path": "/tmp/hoim-research-runtime-mysql-third-attempt-85aba0006675.json",
+      "bytes": 31331,
+      "sha256": "0466b5705bf8dd0a8d206980deac5d8c24f8d6ae964fec3335b2dcdeb7953b49",
+      "scope": "Feature74 isolated actual MySQL Source + current218 table additive Artifact/Prompt/dispatch migrations, dedicated queue/claim/MockTransport complete Result/nullable usage. Actual product Main/JWT Source23 only; Task routes/shared dispatch not yet mounted. No real model/IRB/export.",
+      "seconds": 78.232,
+      "worker_seconds": 67.277,
+      "source_stable": true,
+      "all_checks_passed": false,
+      "cleanup_verified": true,
+      "guards": {
+        "blocked": [
+          "socket.bind"
+        ],
+        "private_unix_connections": 2
+      }
+    }
+  ],
+  "failed_lineage_notes": [
+    "Artifact original origin migration MySQL1832 was fixed by98efc7f with actual FK drop/alter/recreate; original historical revision remains.",
+    "First UI had8 safe-rejection failures from VueProxy structuredClone; adapter now passes original JSON-compatible copy to unchanged unique Source proof/evaluator.",
+    "Joint first test URL matcher failed because actual request includes audit_only=false; only test pathname matching was corrected.",
+    "Generic staging probe first fixture import invalid and second escaped-JSON assertion invalid are retained; third recursive actual-string probe confirms security RED.",
+    "Previously misstated 00422a4 contains98efc7f is explicitly corrected: that Source-stage ancestor does not contain later origin fix. Sibling76 must preserve its own migration evidence and inherit98 during later merge."
+  ],
+  "shared_integration_blockers": [
+    {
+      "kind": "confirmed_security_red",
+      "description": "After actual per-patient authorization withdrawal, dedicated eight clinical part reads reject, but old generic admin trace200 exposes frozen original question; old generic ordinary GET200 plus admin trace cause2 private Task TEXT reads before ResearchSource authorization. Passing probe asserts existence of RED, not secure product success.",
+      "verification": {
+        "path": "/tmp/hoim-research-generic-staging-private-third-verification.json",
+        "bytes": 12176,
+        "sha256": "8c552a28bcc63e911bed068d3235866d34a665b3936c9c85626e41a5176afaf8",
+        "scope": "Read-only red staging probe of old generic Main task/trace routes after actual dedicated research permission withdrawal; Feature74 actual mounted product Main/JWT dedicated Task5+Source23 with real SQL create/claim/execute via HTTP MockTransport, four independent bounded parts and current permissions even Super; no shared dispatcher, real model, enrollment or export.",
+        "exit_code": 0,
+        "elapsed_seconds": 42.698973,
+        "source_stable": true,
+        "guards": {
+          "dotenv_open_attempts": 0,
+          "shared_key_open_attempts": 0,
+          "socket_attempts": 0,
+          "engine_urls": [
+            "sqlite:///:memory:",
+            "sqlite:///:memory:"
+          ],
+          "transport_key": "fresh_synthetic_process_memory_only"
+        },
+        "log": "/tmp/hoim-research-generic-staging-private-third-tests.log",
+        "log_sha256": "678e471c63735afad9cf7fa2674b49ea9b5525fdc2f9db6f78ee8a00e1e2580f"
+      },
+      "actual_response_evidence": {
+        "path": "/tmp/hoim-research-generic-staging-private-probe-third-result.json",
+        "bytes": 5369,
+        "sha256": "11179a2a4b60a1b80a71547d84eb60e2316908e611325a64f694c55c086e6f88"
+      },
+      "required_before_merge_activation": "Durable Artifact/current Source-before-TEXT classification for all shared get/list/trace/cancel/feedback/worker and marker/feature damage; no Super clinical bypass."
+    },
+    {
+      "kind": "confirmed_static_staging_blocker",
+      "description": "Old generic claim_next_run selects any queued AIRun and expects generic feature_revision/payload. Dedicated research queue is not registered with shared worker.",
+      "required_before_merge_activation": "Durable Artifact dispatch to dedicated claim/execute or exclusion from generic worker, plus shared catalog/input/Prompt/Provider integration and complete union verification."
+    }
+  ],
+  "current_source_hashes": {
+    "fastapi_be/app/ai/research_cohort_artifact_models.py": "3b5bac02ae2e3f2287c409ae6270390d36fbb71b2f8a2683c4cb6467f038975d",
+    "fastapi_be/app/ai/research_cohort_draft.py": "9005e25f227fc22eaba8e58edb415c54873afebff7b1b4128e901d346fc4d016",
+    "fastapi_be/app/ai/research_cohort_prompt.py": "c637874ec7d1cf71688d4b585e0cf20039ebffc076e99b95c64b1709910b6cd8",
+    "fastapi_be/app/ai/research_cohort_protocol.py": "b556869c6466ee70eac06a0cf9c1e9aa95451fed6608e4351aca1a0d93214c34",
+    "fastapi_be/app/ai/research_cohort_result.py": "b167d2ffccdc3a3b05870a60caf4ac6d9dfc1e7a2ff47de6886abd6873483d8a",
+    "fastapi_be/app/ai/research_cohort_storage.py": "24aaaa5f9b46f09324117fd4c0c0021ff7ac0b44562896f0fca4870e87775ead",
+    "fastapi_be/app/ai/research_cohort_receipts.py": "86a7b9c084fba94e0fd2fb7545f5b9a8d056728a10f56556b95dbaf147d88321",
+    "fastapi_be/app/ai/research_cohort_result_storage.py": "4707a57aaff930b9a9e6841e3994b48c52c4cd7c89d293e5ae30b450d15006cb",
+    "fastapi_be/app/ai/research_cohort_gateway.py": "d0a0c2428add69b1ca86eaaf5953ecf923ae144210ceb0ffa01bb1a75370a47c",
+    "fastapi_be/app/ai/research_cohort_runtime.py": "28c02152ea18d8d491248c21bad67641bb2bba41fd3141c141f04499da88e9e2",
+    "fastapi_be/app/ai/research_cohort_execution.py": "086d6b05201a327acf4f12759a640cb420db88e08febe577b69059a9e0653bb7",
+    "fastapi_be/app/routers/ai_research_cohort_tasks.py": "3793ff6bfc91df2bc0d18c5175f38a95bbd10c4d40691a04283026cfbd6aac3f",
+    "fastapi_be/alembic/versions/20261021_research_runs.py": "20a269aa19c45bf215cb22faa0b4a49255b7e4b6d0a73affa00322727e5fc021",
+    "fastapi_be/alembic/versions/20261021_research_prompt_origin.py": "2727a7742a259d3f8e9df039522cdfeeaea997382ed0d75d14745cf83bc5ff25",
+    "fastapi_be/alembic/versions/20261021_research_dispatch.py": "5f260d2f8f0e233b16b9b2f4080dcada37ddcee6be79de62dd03afeb7f2ba6df",
+    "fastapi_be/tests/test_ai_research_cohort_draft.py": "71f8c50bc894fb446cf3768845470ec1c2f87f774b73385cd46e1a562aef3307",
+    "fastapi_be/tests/test_ai_research_cohort_artifact_models.py": "243b1deb394bf56c385eab12898eb1699baec382057de806c54d5872b95fcab9",
+    "fastapi_be/tests/test_ai_research_cohort_storage.py": "e6781ea2a8e7bf34c9ef77a456ee53611eea578e787b6b7cf2269dff71a888ae",
+    "fastapi_be/tests/test_ai_research_cohort_prompt_origin_migration.py": "04314e2147546b947479a2f20eb8a94ccc303f9168f5c45ce0fb3e4107d8a311",
+    "fastapi_be/tests/test_ai_research_cohort_receipts.py": "5f3ea5810f6b0bbdc332c9d2c2cd51b36fe77f4e341524fb21dbbd0444387a51",
+    "fastapi_be/tests/test_ai_research_cohort_result_storage.py": "df588c70c9d271a8fdc3be92d53f53c76bdc76f5bb31c4760ff6a13d24d56157",
+    "fastapi_be/tests/test_ai_research_cohort_gateway.py": "4bd60a640bc44ee774e8e69583bd65ddf818333765ba15262e38d65a993ffddf",
+    "fastapi_be/tests/test_ai_research_cohort_runtime.py": "8bf15c3c3b132c34b2a67897d8ee5b02b9d5a2473a553a2f99b76831a97f63a1",
+    "fastapi_be/tests/test_ai_research_cohort_execution.py": "75330fe134e97eb44fad3da67793bd1e1db95c56c5af8822cd13292a3e1198c3",
+    "fastapi_be/tests/test_ai_research_cohort_packaged_runtime.py": "351e9f6786174d46c8b3b4ec6303281ec21deb56110d13e4bd5a4ae0024dfb6e",
+    "fastapi_be/tests/test_ai_research_cohort_dispatch_migration.py": "59c009d44e861bad9ce5b69018290a20d6c74a1801c11b408e6c446b50c1212b",
+    "fastapi_be/tests/test_ai_research_cohort_tasks_http.py": "c0060864aca0b00b457978b9fbb3c8074d988a30e2a7c899d127be3d2e19b177",
+    "fastapi_be/tests/test_ai_research_cohort_tasks_states_http.py": "74424811702b5f3e20f88dba9bde6fe124380bebce6bc2cf14a5e9f2b4058b6c",
+    "vue3-new-ui/scripts/generate-research-cohort-result-schemas.cjs": "5f5140a50b4351df2bbc7b2f61db812029ae3d8290542829c80646e4ac98bda3",
+    "vue3-new-ui/src/api/ai/researchCohortResultSchemas.json": "a472f410aef2ab0e1243cb6484e664cc361c579a94e2af7bdc484bec1f93da54",
+    "vue3-new-ui/src/api/ai/researchCohortResultPolicy.json": "240c85fde290eaacadc1bac433c47a1fc0c2da43f79cbf51add8b4aa5879c59e",
+    "vue3-new-ui/src/api/ai/researchCohortResults.js": "1be724bb2fd2b06a7f838cb03d0170d6c28fb2ea5cdd5b6ed34a3e1c323b4f73",
+    "vue3-new-ui/src/api/ai/researchCohortTasks.js": "f91a7aba45d8bcfd6560c2c8969062ad26eba4dc919956c800d0f9b8c74e2bd8",
+    "vue3-new-ui/src/components/ai/ResearchCohortAssistant.vue": "f2000579b5c40bbd1dc17948650a0f39576e2213c3ce3696de6f7a380e171ba5",
+    "vue3-new-ui/src/components/ai/useResearchCohortAssistant.js": "c2664a9fa2a096b0dcddade5694c930a65f65dbf6573a2b77fa8a2da7c9b3aa4",
+    "vue3-new-ui/src/components/ai/ResearchCohortTasks.vue": "a606d45957e03039f6d373424344b51f4a3de441322dcc4a73deea7523470d25",
+    "vue3-new-ui/src/components/ai/ResearchCohortFindings.vue": "5cd182f4ca2736fd80321dd3af73ad24b13aa591dad2330b8111f37933325972",
+    "vue3-new-ui/e2e/ai-research-cohort-tasks-api.spec.js": "d1cd7b3fc79009e16fed4711027f0921120a362feb82a48e5a4630928be7e661",
+    "vue3-new-ui/e2e/ai-research-cohort-tasks-ui.spec.js": "3048068ff98799e342b0f69c5460eb05bba6857ad41f090cdb999af2d8847178",
+    "vue3-new-ui/e2e/fixtures/research-cohort-task-harness.cjs": "322d8b87c1ba958c60d3af3acb6904f9e3533ccc9f029dff7bbf693e4c317140",
+    "vue3-new-ui/e2e/fixtures/research-cohort-task-ui-harness.cjs": "7724680edcba85d11c5ee3bf613475935d1538101ecc90eb46de154bd46741b8",
+    "vue3-new-ui/e2e/fixtures/research-cohort-tasks/chat.json": "fa6d5839ec7fa2d163c662d868749b25e46d0bffd02e3e8cd597b3cedbc692ac",
+    "vue3-new-ui/e2e/fixtures/research-cohort-tasks/responses.json": "694dcb8b7d09b3b54f81987175c138fd6bffb56fc21c390e15ef3e4a7ebe08b3",
+    "vue3-new-ui/e2e/fixtures/research-cohort-tasks/five-states.json": "01c93b62d859fe73b55e55320043187db7abb54a52e947085522f9eff2831685",
+    "vue3-new-ui/e2e/fixtures/research-cohort-tasks/manifest.json": "8a1edda87653979cf78e779a70241f7dd745323c2d8cd5a44af3040f0821f868",
+    "fastapi_be/app/main.py": "07efb59e68366cfa8293bc0700f9b0db98c413fec757b8bd62d83cc4613c3b9b",
+    "fastapi_be/app/models.py": "4865fcaaffac2329202dfc3751e04fc79d4029d03555015d1a79174616b0b9dd",
+    "doc/ai-research-cohort-task-guide.md": "e167107232e19b6e5a4112f049f8b8df028b6ff43991ef2fd1a69d011f8e39d4"
+  },
+  "guide": {
+    "path": "doc/ai-research-cohort-task-guide.md",
+    "sha256": "e167107232e19b6e5a4112f049f8b8df028b6ff43991ef2fd1a69d011f8e39d4"
+  },
+  "evidence_policy": "Actual persisted SQL/HTTP responses are unchanged and per-case; no stitched case IDs, fabricated successful DTOs, test counts added across repeated runs, or production/native provider success claims."
+}

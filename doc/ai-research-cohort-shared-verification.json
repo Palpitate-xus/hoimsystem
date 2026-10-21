@@ -1,0 +1,1351 @@
+{
+  "schema_version": "research_cohort_shared_stage_verification_v1",
+  "created_at_utc": "2026-10-21T17:26:17.653992+00:00",
+  "status": "targeted_shared_integration_complete_full_acceptance_pending",
+  "code_commit": "fd0dfc69d44f2cbdbdc567b4e6929fae68a7a221",
+  "scope": "Feature74 current authorized finite Research Case shared create/claim/execute/recovery and Source-first metadata/detail/list/trace integration; engineered synthetic data, isolated model transports only. Default disabled. This is an incremental stage record, not final whole-platform acceptance.",
+  "interfaces": {
+    "shared_create": "runtime.create_run(db,user,RunRequest(feature_key=research_cohort,input={research_cohort_case_id,question?})) -> attached AIRun identity; shared describe is short split metadata",
+    "claim": "runtime.claim_next_run(db) -> ResearchClaim(run_id,lease_token,claim_event_id) for durable74; existing other call sites retain tuple2",
+    "execute": "await runtime.execute_claimed(run_id,lease_token,research_claim_event_id=exact_positive_int,transport=MockTransport?); missing/bool/wrong original PK raises409 without mutation/HTTP; valid duplicate no replay/no first-worker termination",
+    "worker": "worker.process_one: fresh recovery Session closed, separate generic expiry/claim Session closed, exact research claim forwarded; no held SQL across model await",
+    "routing": "Six actual Artifact domains take priority over mutable feature/allJSON markers. Feature-only research orphan cannot generic read/infer; noArtifact technical quarantine, unknown role rows retained; known impossible durable queue headers excluded before limit without changing artifact or usage. Source/config/business roles remain current dedicated execution checks",
+    "read": "Source/project/eachpatient/currentpurpose precede Task/Artifact/Result TEXT even currentSup; short technical metadata may expose only paid usage+opaque anchors after clinical loss; no clinical frozen bypass for withdrawn grants",
+    "catalog": {
+      "version": "2026.10.21.24",
+      "engine": "llm",
+      "scope": "hospital",
+      "input_mode": "research_cohort_evidence",
+      "source_reference_keys": [
+        "research_cohort_case_id"
+      ],
+      "default_roles": [
+        "super_admin",
+        "admin",
+        "director"
+      ],
+      "system_overrides": 7,
+      "distinct_default_tasks": 80
+    },
+    "migration": "New noop only: native_research_merge parents native_expanded_merge and research_dispatch, one current graph head; no historical revision rewrite"
+  },
+  "implementation_manifest": {
+    "schema_version": "research_native_backend_handoff_v1",
+    "worktree": "/tmp/hoim-research-native-integration-20261021",
+    "base_head": "d55fb344a8060c98b3455cc0478c6c83a7a6990b",
+    "branch": "feature/ai-research-native-integration",
+    "no_stage_or_commit_by_B": true,
+    "backend_frozen": true,
+    "scope": "All BE new/modified paths relative to current HEAD including existing Source/Task index and unstaged shared integration; generated catalog and existing RBAC map separately. C frontend product/tests deliberately excluded.",
+    "backend_files": [
+      {
+        "path": "/tmp/hoim-research-native-integration-20261021/fastapi_be/alembic/versions/20261021_native_research_merge.py",
+        "bytes": 300,
+        "sha256": "c7d78d3b8d258296d058ff8ebe6289be7d217a90527b5f1ecebbdab98ae78939",
+        "relative_path": "fastapi_be/alembic/versions/20261021_native_research_merge.py",
+        "git_status": "untracked"
+      },
+      {
+        "path": "/tmp/hoim-research-native-integration-20261021/fastapi_be/alembic/versions/20261021_research_cohort.py",
+        "bytes": 13743,
+        "sha256": "e044e5d5fb93f6d8eaf3d903eeb493a2ead78053276362a6c0592827238e2f46",
+        "relative_path": "fastapi_be/alembic/versions/20261021_research_cohort.py",
+        "git_status": "A"
+      },
+      {
+        "path": "/tmp/hoim-research-native-integration-20261021/fastapi_be/alembic/versions/20261021_research_dispatch.py",
+        "bytes": 1609,
+        "sha256": "5f260d2f8f0e233b16b9b2f4080dcada37ddcee6be79de62dd03afeb7f2ba6df",
+        "relative_path": "fastapi_be/alembic/versions/20261021_research_dispatch.py",
+        "git_status": "A"
+      },
+      {
+        "path": "/tmp/hoim-research-native-integration-20261021/fastapi_be/alembic/versions/20261021_research_prompt_origin.py",
+        "bytes": 3872,
+        "sha256": "2727a7742a259d3f8e9df039522cdfeeaea997382ed0d75d14745cf83bc5ff25",
+        "relative_path": "fastapi_be/alembic/versions/20261021_research_prompt_origin.py",
+        "git_status": "A"
+      },
+      {
+        "path": "/tmp/hoim-research-native-integration-20261021/fastapi_be/alembic/versions/20261021_research_runs.py",
+        "bytes": 7187,
+        "sha256": "20a269aa19c45bf215cb22faa0b4a49255b7e4b6d0a73affa00322727e5fc021",
+        "relative_path": "fastapi_be/alembic/versions/20261021_research_runs.py",
+        "git_status": "A"
+      },
+      {
+        "path": "/tmp/hoim-research-native-integration-20261021/fastapi_be/app/ai/catalog.py",
+        "bytes": 71214,
+        "sha256": "c7ab981b267870248ef2bfa93c67ae6c94494758c5344f808b065e0981834846",
+        "relative_path": "fastapi_be/app/ai/catalog.py",
+        "git_status": "M"
+      },
+      {
+        "path": "/tmp/hoim-research-native-integration-20261021/fastapi_be/app/ai/feature_prompts.py",
+        "bytes": 1262,
+        "sha256": "9328b29490258099fab9b5b2b39e9150ddbac23e4e26f2b5107375ddf9860a7f",
+        "relative_path": "fastapi_be/app/ai/feature_prompts.py",
+        "git_status": "M"
+      },
+      {
+        "path": "/tmp/hoim-research-native-integration-20261021/fastapi_be/app/ai/governance.py",
+        "bytes": 14040,
+        "sha256": "12078b0192c91b81929013fe53f70e06c6519ce24a55c4c6b9470a10e511fb69",
+        "relative_path": "fastapi_be/app/ai/governance.py",
+        "git_status": "M"
+      },
+      {
+        "path": "/tmp/hoim-research-native-integration-20261021/fastapi_be/app/ai/native_task_access.py",
+        "bytes": 5789,
+        "sha256": "9c023d85670df4f7a88a029b897866edde0e29a111af3f9cf5954088cae190a0",
+        "relative_path": "fastapi_be/app/ai/native_task_access.py",
+        "git_status": "M"
+      },
+      {
+        "path": "/tmp/hoim-research-native-integration-20261021/fastapi_be/app/ai/native_task_routing.py",
+        "bytes": 4955,
+        "sha256": "d3dd80abd2923059066c387aad0f5a627f22cd0d460ad2db254e1027f34bbc63",
+        "relative_path": "fastapi_be/app/ai/native_task_routing.py",
+        "git_status": "M"
+      },
+      {
+        "path": "/tmp/hoim-research-native-integration-20261021/fastapi_be/app/ai/operational_sources.py",
+        "bytes": 16965,
+        "sha256": "eeee64b3b9e33a8f25e8723caf7406a03c7e37dc450203bffae63eff2c123133",
+        "relative_path": "fastapi_be/app/ai/operational_sources.py",
+        "git_status": "M"
+      },
+      {
+        "path": "/tmp/hoim-research-native-integration-20261021/fastapi_be/app/ai/references.py",
+        "bytes": 1427,
+        "sha256": "b1a8abd9f006e75ea2a49eeca3a9f94d6e077e480d126b0594a5841d900357ab",
+        "relative_path": "fastapi_be/app/ai/references.py",
+        "git_status": "M"
+      },
+      {
+        "path": "/tmp/hoim-research-native-integration-20261021/fastapi_be/app/ai/research_cohort_artifact_models.py",
+        "bytes": 6717,
+        "sha256": "3b5bac02ae2e3f2287c409ae6270390d36fbb71b2f8a2683c4cb6467f038975d",
+        "relative_path": "fastapi_be/app/ai/research_cohort_artifact_models.py",
+        "git_status": "A"
+      },
+      {
+        "path": "/tmp/hoim-research-native-integration-20261021/fastapi_be/app/ai/research_cohort_cases.py",
+        "bytes": 19755,
+        "sha256": "db57b46c36f745a204fab70af967219e33daa93356919e0c17cdda62c528ff9b",
+        "relative_path": "fastapi_be/app/ai/research_cohort_cases.py",
+        "git_status": "A"
+      },
+      {
+        "path": "/tmp/hoim-research-native-integration-20261021/fastapi_be/app/ai/research_cohort_collection.py",
+        "bytes": 25350,
+        "sha256": "69c42c82e280fca82765ced005eca8a36b85506ed9b61a3e2e6fd944979920cb",
+        "relative_path": "fastapi_be/app/ai/research_cohort_collection.py",
+        "git_status": "A"
+      },
+      {
+        "path": "/tmp/hoim-research-native-integration-20261021/fastapi_be/app/ai/research_cohort_contract.py",
+        "bytes": 19912,
+        "sha256": "52267988ae6ba8f2d0ebcdf882a76820c2f98ea06b46668a509587b2b2276e4f",
+        "relative_path": "fastapi_be/app/ai/research_cohort_contract.py",
+        "git_status": "A"
+      },
+      {
+        "path": "/tmp/hoim-research-native-integration-20261021/fastapi_be/app/ai/research_cohort_directories.py",
+        "bytes": 3525,
+        "sha256": "185a426ea942d293d7be6b3db9445d845c7f2eb172be84a763519d4af92899a9",
+        "relative_path": "fastapi_be/app/ai/research_cohort_directories.py",
+        "git_status": "A"
+      },
+      {
+        "path": "/tmp/hoim-research-native-integration-20261021/fastapi_be/app/ai/research_cohort_dispatch.py",
+        "bytes": 6644,
+        "sha256": "ba1b1b345bc870c1825e925b1b5699a990f0808c2eaf6b501c6c11987395a99e",
+        "relative_path": "fastapi_be/app/ai/research_cohort_dispatch.py",
+        "git_status": "untracked"
+      },
+      {
+        "path": "/tmp/hoim-research-native-integration-20261021/fastapi_be/app/ai/research_cohort_draft.py",
+        "bytes": 7515,
+        "sha256": "9005e25f227fc22eaba8e58edb415c54873afebff7b1b4128e901d346fc4d016",
+        "relative_path": "fastapi_be/app/ai/research_cohort_draft.py",
+        "git_status": "A"
+      },
+      {
+        "path": "/tmp/hoim-research-native-integration-20261021/fastapi_be/app/ai/research_cohort_evaluator.py",
+        "bytes": 5428,
+        "sha256": "aec13f946a54a79c7e5a96a0d77c778f09a8431e7d6293221df1aa13d216ed33",
+        "relative_path": "fastapi_be/app/ai/research_cohort_evaluator.py",
+        "git_status": "A"
+      },
+      {
+        "path": "/tmp/hoim-research-native-integration-20261021/fastapi_be/app/ai/research_cohort_execution.py",
+        "bytes": 17691,
+        "sha256": "93c2a1703c6ef5c0a95420c325603317fcec147f353373bc13b814189b844865",
+        "relative_path": "fastapi_be/app/ai/research_cohort_execution.py",
+        "git_status": "A"
+      },
+      {
+        "path": "/tmp/hoim-research-native-integration-20261021/fastapi_be/app/ai/research_cohort_gateway.py",
+        "bytes": 11073,
+        "sha256": "d0a0c2428add69b1ca86eaaf5953ecf923ae144210ceb0ffa01bb1a75370a47c",
+        "relative_path": "fastapi_be/app/ai/research_cohort_gateway.py",
+        "git_status": "A"
+      },
+      {
+        "path": "/tmp/hoim-research-native-integration-20261021/fastapi_be/app/ai/research_cohort_metadata.py",
+        "bytes": 8500,
+        "sha256": "e1b10530073ffb9d0fe7280757d7fadaf27bc07fbb081108261c6b0ad106159d",
+        "relative_path": "fastapi_be/app/ai/research_cohort_metadata.py",
+        "git_status": "A"
+      },
+      {
+        "path": "/tmp/hoim-research-native-integration-20261021/fastapi_be/app/ai/research_cohort_models.py",
+        "bytes": 11534,
+        "sha256": "8d8e15cb6a72210bab08b6bc7a9e48d21b82fc0d6a11af7d4662bef02230fb7b",
+        "relative_path": "fastapi_be/app/ai/research_cohort_models.py",
+        "git_status": "A"
+      },
+      {
+        "path": "/tmp/hoim-research-native-integration-20261021/fastapi_be/app/ai/research_cohort_prompt.py",
+        "bytes": 2443,
+        "sha256": "c637874ec7d1cf71688d4b585e0cf20039ebffc076e99b95c64b1709910b6cd8",
+        "relative_path": "fastapi_be/app/ai/research_cohort_prompt.py",
+        "git_status": "A"
+      },
+      {
+        "path": "/tmp/hoim-research-native-integration-20261021/fastapi_be/app/ai/research_cohort_protocol.py",
+        "bytes": 2912,
+        "sha256": "b556869c6466ee70eac06a0cf9c1e9aa95451fed6608e4351aca1a0d93214c34",
+        "relative_path": "fastapi_be/app/ai/research_cohort_protocol.py",
+        "git_status": "A"
+      },
+      {
+        "path": "/tmp/hoim-research-native-integration-20261021/fastapi_be/app/ai/research_cohort_receipts.py",
+        "bytes": 16577,
+        "sha256": "86a7b9c084fba94e0fd2fb7545f5b9a8d056728a10f56556b95dbaf147d88321",
+        "relative_path": "fastapi_be/app/ai/research_cohort_receipts.py",
+        "git_status": "A"
+      },
+      {
+        "path": "/tmp/hoim-research-native-integration-20261021/fastapi_be/app/ai/research_cohort_registry.py",
+        "bytes": 24428,
+        "sha256": "ec65614b780ccd64093c77efa7dd6a893dd49b80fd071a98eb2e30246dc415c1",
+        "relative_path": "fastapi_be/app/ai/research_cohort_registry.py",
+        "git_status": "A"
+      },
+      {
+        "path": "/tmp/hoim-research-native-integration-20261021/fastapi_be/app/ai/research_cohort_result.py",
+        "bytes": 2383,
+        "sha256": "b167d2ffccdc3a3b05870a60caf4ac6d9dfc1e7a2ff47de6886abd6873483d8a",
+        "relative_path": "fastapi_be/app/ai/research_cohort_result.py",
+        "git_status": "A"
+      },
+      {
+        "path": "/tmp/hoim-research-native-integration-20261021/fastapi_be/app/ai/research_cohort_result_storage.py",
+        "bytes": 7505,
+        "sha256": "6572001a3ecda9b9da11aad330c35aa3823e8c07e10f98dfb33ba118edf8390d",
+        "relative_path": "fastapi_be/app/ai/research_cohort_result_storage.py",
+        "git_status": "A"
+      },
+      {
+        "path": "/tmp/hoim-research-native-integration-20261021/fastapi_be/app/ai/research_cohort_runtime.py",
+        "bytes": 13680,
+        "sha256": "28c02152ea18d8d491248c21bad67641bb2bba41fd3141c141f04499da88e9e2",
+        "relative_path": "fastapi_be/app/ai/research_cohort_runtime.py",
+        "git_status": "A"
+      },
+      {
+        "path": "/tmp/hoim-research-native-integration-20261021/fastapi_be/app/ai/research_cohort_shared.py",
+        "bytes": 4521,
+        "sha256": "470fb01fffd74d860c03b62657d286b4fcfeca7318f8b932fd638c5162cffa89",
+        "relative_path": "fastapi_be/app/ai/research_cohort_shared.py",
+        "git_status": "untracked"
+      },
+      {
+        "path": "/tmp/hoim-research-native-integration-20261021/fastapi_be/app/ai/research_cohort_snapshot.py",
+        "bytes": 10699,
+        "sha256": "1dff4fb56c43cb7251bc4c0e59ed7ee09289036a1ee5d01ddc12e60db77e1de4",
+        "relative_path": "fastapi_be/app/ai/research_cohort_snapshot.py",
+        "git_status": "A"
+      },
+      {
+        "path": "/tmp/hoim-research-native-integration-20261021/fastapi_be/app/ai/research_cohort_sources.py",
+        "bytes": 23491,
+        "sha256": "728ddee40ecd0d8d5c3b5ffd0917b709e9c810ca5bd9e20c262e56259d082168",
+        "relative_path": "fastapi_be/app/ai/research_cohort_sources.py",
+        "git_status": "A"
+      },
+      {
+        "path": "/tmp/hoim-research-native-integration-20261021/fastapi_be/app/ai/research_cohort_storage.py",
+        "bytes": 25149,
+        "sha256": "8c3e4c3e6e29336940064af441d30ad293925da67c325b8528e13bf2ebd96a04",
+        "relative_path": "fastapi_be/app/ai/research_cohort_storage.py",
+        "git_status": "A"
+      },
+      {
+        "path": "/tmp/hoim-research-native-integration-20261021/fastapi_be/app/ai/research_cohort_write_guard.py",
+        "bytes": 3503,
+        "sha256": "ce0b7a1414bc5d714fe67fb311112098f7b901b2c8eded6b14c6ca89285d849c",
+        "relative_path": "fastapi_be/app/ai/research_cohort_write_guard.py",
+        "git_status": "A"
+      },
+      {
+        "path": "/tmp/hoim-research-native-integration-20261021/fastapi_be/app/ai/runtime.py",
+        "bytes": 85545,
+        "sha256": "324b5d17ede6d0a98de0869384fb2b9769efbea55c0ef7e32ddef8a7ca7c7a08",
+        "relative_path": "fastapi_be/app/ai/runtime.py",
+        "git_status": "M"
+      },
+      {
+        "path": "/tmp/hoim-research-native-integration-20261021/fastapi_be/app/ai/schemas.py",
+        "bytes": 29485,
+        "sha256": "f3cac8a863724639a6324d92f02f8aabf0274839b31fc54420af7bdb4446053f",
+        "relative_path": "fastapi_be/app/ai/schemas.py",
+        "git_status": "M"
+      },
+      {
+        "path": "/tmp/hoim-research-native-integration-20261021/fastapi_be/app/ai/worker.py",
+        "bytes": 2108,
+        "sha256": "319942c765a478cc637203497e6cf05d5b2e51254ff2f8dc8526ae72bed01648",
+        "relative_path": "fastapi_be/app/ai/worker.py",
+        "git_status": "M"
+      },
+      {
+        "path": "/tmp/hoim-research-native-integration-20261021/fastapi_be/app/main.py",
+        "bytes": 22975,
+        "sha256": "47d9aec21566874834b1591885828af8072a9d87462315fb3d5d4316430196f9",
+        "relative_path": "fastapi_be/app/main.py",
+        "git_status": "M"
+      },
+      {
+        "path": "/tmp/hoim-research-native-integration-20261021/fastapi_be/app/models.py",
+        "bytes": 150410,
+        "sha256": "05312f6a45b710a861605004e00f7d8f9e1d80074cd6708725007046196b91b5",
+        "relative_path": "fastapi_be/app/models.py",
+        "git_status": "M"
+      },
+      {
+        "path": "/tmp/hoim-research-native-integration-20261021/fastapi_be/app/routers/ai.py",
+        "bytes": 40254,
+        "sha256": "5f9ca4f9758b8808299e1f8881aaa36030d6e4874c7343bd4179d7e0622e9e8a",
+        "relative_path": "fastapi_be/app/routers/ai.py",
+        "git_status": "M"
+      },
+      {
+        "path": "/tmp/hoim-research-native-integration-20261021/fastapi_be/app/routers/ai_admin.py",
+        "bytes": 81162,
+        "sha256": "27b45ebd4f7829d6901ab8ece1063bc9c81ce2265c8dfa08133672998e5f96cc",
+        "relative_path": "fastapi_be/app/routers/ai_admin.py",
+        "git_status": "M"
+      },
+      {
+        "path": "/tmp/hoim-research-native-integration-20261021/fastapi_be/app/routers/ai_research_cohort_sources.py",
+        "bytes": 7666,
+        "sha256": "8182406f3461093ca227e5f79e887148da7a848628c851119f2309b78e8a2403",
+        "relative_path": "fastapi_be/app/routers/ai_research_cohort_sources.py",
+        "git_status": "A"
+      },
+      {
+        "path": "/tmp/hoim-research-native-integration-20261021/fastapi_be/app/routers/ai_research_cohort_tasks.py",
+        "bytes": 2958,
+        "sha256": "3793ff6bfc91df2bc0d18c5175f38a95bbd10c4d40691a04283026cfbd6aac3f",
+        "relative_path": "fastapi_be/app/routers/ai_research_cohort_tasks.py",
+        "git_status": "A"
+      },
+      {
+        "path": "/tmp/hoim-research-native-integration-20261021/fastapi_be/rbac_matrix.json",
+        "bytes": 177811,
+        "sha256": "5c8a08831fa33e509752139b8eda761ba66027a9b2a4ec79b86d9e2f610f43bd",
+        "relative_path": "fastapi_be/rbac_matrix.json",
+        "git_status": "M"
+      },
+      {
+        "path": "/tmp/hoim-research-native-integration-20261021/fastapi_be/scripts/export_ai_catalog.py",
+        "bytes": 4415,
+        "sha256": "9183dc90f34cc70face77534b9b9093cff7614f39803d4e3029ac37598232743",
+        "relative_path": "fastapi_be/scripts/export_ai_catalog.py",
+        "git_status": "M"
+      },
+      {
+        "path": "/tmp/hoim-research-native-integration-20261021/fastapi_be/tests/test_ai_catalog.py",
+        "bytes": 13539,
+        "sha256": "2b76a79ba93801d72b669b86f8b10d9b44e5f823fd406297d568d3a7e58756f3",
+        "relative_path": "fastapi_be/tests/test_ai_catalog.py",
+        "git_status": "M"
+      },
+      {
+        "path": "/tmp/hoim-research-native-integration-20261021/fastapi_be/tests/test_ai_native_expanded_integration.py",
+        "bytes": 6270,
+        "sha256": "37ec61a2be2d724373631302b7dc4ea2478264dc30fb249b56f5282e44bdca29",
+        "relative_path": "fastapi_be/tests/test_ai_native_expanded_integration.py",
+        "git_status": "M"
+      },
+      {
+        "path": "/tmp/hoim-research-native-integration-20261021/fastapi_be/tests/test_ai_native_integration.py",
+        "bytes": 9504,
+        "sha256": "16de925f9b8d9c23a3eb4cba9fcded1d7dee5e60669d6afcd322c1063b09efcf",
+        "relative_path": "fastapi_be/tests/test_ai_native_integration.py",
+        "git_status": "M"
+      },
+      {
+        "path": "/tmp/hoim-research-native-integration-20261021/fastapi_be/tests/test_ai_research_cohort_artifact_models.py",
+        "bytes": 12961,
+        "sha256": "243b1deb394bf56c385eab12898eb1699baec382057de806c54d5872b95fcab9",
+        "relative_path": "fastapi_be/tests/test_ai_research_cohort_artifact_models.py",
+        "git_status": "A"
+      },
+      {
+        "path": "/tmp/hoim-research-native-integration-20261021/fastapi_be/tests/test_ai_research_cohort_cases.py",
+        "bytes": 14026,
+        "sha256": "8bdb826043fc1f254469e6d3400e2a4f6f0b97c04f10114d52145809b6355255",
+        "relative_path": "fastapi_be/tests/test_ai_research_cohort_cases.py",
+        "git_status": "A"
+      },
+      {
+        "path": "/tmp/hoim-research-native-integration-20261021/fastapi_be/tests/test_ai_research_cohort_cases_http.py",
+        "bytes": 7433,
+        "sha256": "ac7bce984c794d4b38caf5174609dfa8b534cc66bb5c7d0e989bd581ab32cfde",
+        "relative_path": "fastapi_be/tests/test_ai_research_cohort_cases_http.py",
+        "git_status": "A"
+      },
+      {
+        "path": "/tmp/hoim-research-native-integration-20261021/fastapi_be/tests/test_ai_research_cohort_collection.py",
+        "bytes": 9149,
+        "sha256": "c59b8649167c038b05aeba5458d7a0231658b81e3a5111a6eac9099f10de7ee3",
+        "relative_path": "fastapi_be/tests/test_ai_research_cohort_collection.py",
+        "git_status": "A"
+      },
+      {
+        "path": "/tmp/hoim-research-native-integration-20261021/fastapi_be/tests/test_ai_research_cohort_contract.py",
+        "bytes": 6690,
+        "sha256": "727e864a10288c13239bc8e8369cb09b4f1543d0ce15e06bb8b8b116f70050c1",
+        "relative_path": "fastapi_be/tests/test_ai_research_cohort_contract.py",
+        "git_status": "A"
+      },
+      {
+        "path": "/tmp/hoim-research-native-integration-20261021/fastapi_be/tests/test_ai_research_cohort_directories.py",
+        "bytes": 7145,
+        "sha256": "7ce3f8cee053fdcc06eac1b29f89d0aeb9e7273b09e718ca8d5bdef316be5148",
+        "relative_path": "fastapi_be/tests/test_ai_research_cohort_directories.py",
+        "git_status": "A"
+      },
+      {
+        "path": "/tmp/hoim-research-native-integration-20261021/fastapi_be/tests/test_ai_research_cohort_dispatch_migration.py",
+        "bytes": 4988,
+        "sha256": "59c009d44e861bad9ce5b69018290a20d6c74a1801c11b408e6c446b50c1212b",
+        "relative_path": "fastapi_be/tests/test_ai_research_cohort_dispatch_migration.py",
+        "git_status": "A"
+      },
+      {
+        "path": "/tmp/hoim-research-native-integration-20261021/fastapi_be/tests/test_ai_research_cohort_draft.py",
+        "bytes": 9945,
+        "sha256": "71f8c50bc894fb446cf3768845470ec1c2f87f774b73385cd46e1a562aef3307",
+        "relative_path": "fastapi_be/tests/test_ai_research_cohort_draft.py",
+        "git_status": "A"
+      },
+      {
+        "path": "/tmp/hoim-research-native-integration-20261021/fastapi_be/tests/test_ai_research_cohort_evaluator.py",
+        "bytes": 3571,
+        "sha256": "8ab35b7281a1e77e8ce24c4e07a594bc5b28980b51ae722303cd1ad3d2bcbd0b",
+        "relative_path": "fastapi_be/tests/test_ai_research_cohort_evaluator.py",
+        "git_status": "A"
+      },
+      {
+        "path": "/tmp/hoim-research-native-integration-20261021/fastapi_be/tests/test_ai_research_cohort_execution.py",
+        "bytes": 16380,
+        "sha256": "75330fe134e97eb44fad3da67793bd1e1db95c56c5af8822cd13292a3e1198c3",
+        "relative_path": "fastapi_be/tests/test_ai_research_cohort_execution.py",
+        "git_status": "A"
+      },
+      {
+        "path": "/tmp/hoim-research-native-integration-20261021/fastapi_be/tests/test_ai_research_cohort_gateway.py",
+        "bytes": 8137,
+        "sha256": "4bd60a640bc44ee774e8e69583bd65ddf818333765ba15262e38d65a993ffddf",
+        "relative_path": "fastapi_be/tests/test_ai_research_cohort_gateway.py",
+        "git_status": "A"
+      },
+      {
+        "path": "/tmp/hoim-research-native-integration-20261021/fastapi_be/tests/test_ai_research_cohort_guard.py",
+        "bytes": 6826,
+        "sha256": "fb5ad46b925d8e66420b1e57cf55997e5e1da9ff0164f8b9031f13eec6d21bfe",
+        "relative_path": "fastapi_be/tests/test_ai_research_cohort_guard.py",
+        "git_status": "A"
+      },
+      {
+        "path": "/tmp/hoim-research-native-integration-20261021/fastapi_be/tests/test_ai_research_cohort_migration.py",
+        "bytes": 3097,
+        "sha256": "4fa843bce68f89774a97d934397167b542726a1871ce83390608435d3cf4536a",
+        "relative_path": "fastapi_be/tests/test_ai_research_cohort_migration.py",
+        "git_status": "A"
+      },
+      {
+        "path": "/tmp/hoim-research-native-integration-20261021/fastapi_be/tests/test_ai_research_cohort_models.py",
+        "bytes": 8504,
+        "sha256": "6c0b33b773607c8260b4c79bf4be003f395ed3c6a47a29ad4e55b423e6dea189",
+        "relative_path": "fastapi_be/tests/test_ai_research_cohort_models.py",
+        "git_status": "A"
+      },
+      {
+        "path": "/tmp/hoim-research-native-integration-20261021/fastapi_be/tests/test_ai_research_cohort_packaged_runtime.py",
+        "bytes": 5773,
+        "sha256": "351e9f6786174d46c8b3b4ec6303281ec21deb56110d13e4bd5a4ae0024dfb6e",
+        "relative_path": "fastapi_be/tests/test_ai_research_cohort_packaged_runtime.py",
+        "git_status": "A"
+      },
+      {
+        "path": "/tmp/hoim-research-native-integration-20261021/fastapi_be/tests/test_ai_research_cohort_prompt_origin_migration.py",
+        "bytes": 3401,
+        "sha256": "04314e2147546b947479a2f20eb8a94ccc303f9168f5c45ce0fb3e4107d8a311",
+        "relative_path": "fastapi_be/tests/test_ai_research_cohort_prompt_origin_migration.py",
+        "git_status": "A"
+      },
+      {
+        "path": "/tmp/hoim-research-native-integration-20261021/fastapi_be/tests/test_ai_research_cohort_queue_progress.py",
+        "bytes": 5196,
+        "sha256": "839cab644e064c2a8ae74c902b2f0187d5b4dceb0a2ecc1d1898f24aa215b771",
+        "relative_path": "fastapi_be/tests/test_ai_research_cohort_queue_progress.py",
+        "git_status": "untracked"
+      },
+      {
+        "path": "/tmp/hoim-research-native-integration-20261021/fastapi_be/tests/test_ai_research_cohort_receipts.py",
+        "bytes": 6900,
+        "sha256": "5f3ea5810f6b0bbdc332c9d2c2cd51b36fe77f4e341524fb21dbbd0444387a51",
+        "relative_path": "fastapi_be/tests/test_ai_research_cohort_receipts.py",
+        "git_status": "A"
+      },
+      {
+        "path": "/tmp/hoim-research-native-integration-20261021/fastapi_be/tests/test_ai_research_cohort_registry.py",
+        "bytes": 12286,
+        "sha256": "4457c797c1e5de7f782f558ccbfe8e48a9236326572ac60d866737bb16cc751f",
+        "relative_path": "fastapi_be/tests/test_ai_research_cohort_registry.py",
+        "git_status": "A"
+      },
+      {
+        "path": "/tmp/hoim-research-native-integration-20261021/fastapi_be/tests/test_ai_research_cohort_registry_http.py",
+        "bytes": 4744,
+        "sha256": "79e7c7db3e632a5374840bd6b576aa0bbfd3eb9a1fdb4ec7eb08f99ffd9ab54f",
+        "relative_path": "fastapi_be/tests/test_ai_research_cohort_registry_http.py",
+        "git_status": "A"
+      },
+      {
+        "path": "/tmp/hoim-research-native-integration-20261021/fastapi_be/tests/test_ai_research_cohort_result_storage.py",
+        "bytes": 7253,
+        "sha256": "df588c70c9d271a8fdc3be92d53f53c76bdc76f5bb31c4760ff6a13d24d56157",
+        "relative_path": "fastapi_be/tests/test_ai_research_cohort_result_storage.py",
+        "git_status": "A"
+      },
+      {
+        "path": "/tmp/hoim-research-native-integration-20261021/fastapi_be/tests/test_ai_research_cohort_runtime.py",
+        "bytes": 7768,
+        "sha256": "8bf15c3c3b132c34b2a67897d8ee5b02b9d5a2473a553a2f99b76831a97f63a1",
+        "relative_path": "fastapi_be/tests/test_ai_research_cohort_runtime.py",
+        "git_status": "A"
+      },
+      {
+        "path": "/tmp/hoim-research-native-integration-20261021/fastapi_be/tests/test_ai_research_cohort_shared_access.py",
+        "bytes": 4579,
+        "sha256": "d46e75f03e9265092f16009bb206c4b3c3bf6bfe14d3b330270353e669688d65",
+        "relative_path": "fastapi_be/tests/test_ai_research_cohort_shared_access.py",
+        "git_status": "untracked"
+      },
+      {
+        "path": "/tmp/hoim-research-native-integration-20261021/fastapi_be/tests/test_ai_research_cohort_shared_directory.py",
+        "bytes": 4029,
+        "sha256": "f9ec067f2df525c53803e87dba94720475bda1cec1ac2e2da35d5c91f356587a",
+        "relative_path": "fastapi_be/tests/test_ai_research_cohort_shared_directory.py",
+        "git_status": "untracked"
+      },
+      {
+        "path": "/tmp/hoim-research-native-integration-20261021/fastapi_be/tests/test_ai_research_cohort_shared_integrity.py",
+        "bytes": 5496,
+        "sha256": "1d4c0f3be5a8373ef42210eae68ec6520b1d20139541dcb28b117ca8c722de9f",
+        "relative_path": "fastapi_be/tests/test_ai_research_cohort_shared_integrity.py",
+        "git_status": "untracked"
+      },
+      {
+        "path": "/tmp/hoim-research-native-integration-20261021/fastapi_be/tests/test_ai_research_cohort_shared_packets.py",
+        "bytes": 8737,
+        "sha256": "544e73aadb496e278673943407dbe14d457adcb87ed23a1a365ad8033279bcf7",
+        "relative_path": "fastapi_be/tests/test_ai_research_cohort_shared_packets.py",
+        "git_status": "untracked"
+      },
+      {
+        "path": "/tmp/hoim-research-native-integration-20261021/fastapi_be/tests/test_ai_research_cohort_shared_worker.py",
+        "bytes": 16420,
+        "sha256": "cdca2986c44f6214aede3ead33ab496c411511b2a3e74da370eea24adf055ff6",
+        "relative_path": "fastapi_be/tests/test_ai_research_cohort_shared_worker.py",
+        "git_status": "untracked"
+      },
+      {
+        "path": "/tmp/hoim-research-native-integration-20261021/fastapi_be/tests/test_ai_research_cohort_sources.py",
+        "bytes": 11724,
+        "sha256": "69811ce04f9beeddddc27766823b03485a60a9eab19547e4a6de322bb5fbf755",
+        "relative_path": "fastapi_be/tests/test_ai_research_cohort_sources.py",
+        "git_status": "A"
+      },
+      {
+        "path": "/tmp/hoim-research-native-integration-20261021/fastapi_be/tests/test_ai_research_cohort_sources_http.py",
+        "bytes": 4664,
+        "sha256": "bfa5dec1b418fb4ebed85592ca78ad8a55a5ceab81df45ade65ecc8004c04827",
+        "relative_path": "fastapi_be/tests/test_ai_research_cohort_sources_http.py",
+        "git_status": "A"
+      },
+      {
+        "path": "/tmp/hoim-research-native-integration-20261021/fastapi_be/tests/test_ai_research_cohort_storage.py",
+        "bytes": 16945,
+        "sha256": "e6781ea2a8e7bf34c9ef77a456ee53611eea578e787b6b7cf2269dff71a888ae",
+        "relative_path": "fastapi_be/tests/test_ai_research_cohort_storage.py",
+        "git_status": "A"
+      },
+      {
+        "path": "/tmp/hoim-research-native-integration-20261021/fastapi_be/tests/test_ai_research_cohort_tasks_http.py",
+        "bytes": 12098,
+        "sha256": "c0060864aca0b00b457978b9fbb3c8074d988a30e2a7c899d127be3d2e19b177",
+        "relative_path": "fastapi_be/tests/test_ai_research_cohort_tasks_http.py",
+        "git_status": "A"
+      },
+      {
+        "path": "/tmp/hoim-research-native-integration-20261021/fastapi_be/tests/test_ai_research_cohort_tasks_states_http.py",
+        "bytes": 7720,
+        "sha256": "74424811702b5f3e20f88dba9bde6fe124380bebce6bc2cf14a5e9f2b4058b6c",
+        "relative_path": "fastapi_be/tests/test_ai_research_cohort_tasks_states_http.py",
+        "git_status": "A"
+      }
+    ],
+    "generated_files": [
+      {
+        "path": "/tmp/hoim-research-native-integration-20261021/doc/ai-capabilities.md",
+        "bytes": 14972,
+        "sha256": "95c65b5649614e3b7ce5abdbf311abd60af7559aa4c50e8bb9616fd56e35705f",
+        "relative_path": "doc/ai-capabilities.md"
+      },
+      {
+        "path": "/tmp/hoim-research-native-integration-20261021/doc/ai-prompts.json",
+        "bytes": 213730,
+        "sha256": "fd02b52eb0c489dfe15b6f09fc2c61831094fcee8c2c7fbc82b1a78fa13efefa",
+        "relative_path": "doc/ai-prompts.json"
+      },
+      {
+        "path": "/tmp/hoim-research-native-integration-20261021/fastapi_be/rbac_matrix.json",
+        "bytes": 177811,
+        "sha256": "5c8a08831fa33e509752139b8eda761ba66027a9b2a4ec79b86d9e2f610f43bd",
+        "relative_path": "fastapi_be/rbac_matrix.json"
+      },
+      {
+        "path": "/tmp/hoim-research-native-integration-20261021/doc/api-rbac-matrix.md",
+        "bytes": 119113,
+        "sha256": "cc0b4e90cf2ca62acb052be028cfd89a94b82a9cdf646042c364295c5bf7f06a",
+        "relative_path": "doc/api-rbac-matrix.md"
+      }
+    ],
+    "source_four_recipe_unchanged_sha256": {
+      "research_cohort_contract.py": "52267988ae6ba8f2d0ebcdf882a76820c2f98ea06b46668a509587b2b2276e4f",
+      "research_cohort_collection.py": "69c42c82e280fca82765ced005eca8a36b85506ed9b61a3e2e6fd944979920cb",
+      "research_cohort_evaluator.py": "aec13f946a54a79c7e5a96a0d77c778f09a8431e7d6293221df1aa13d216ed33",
+      "research_cohort_snapshot.py": "1dff4fb56c43cb7251bc4c0e59ed7ee09289036a1ee5d01ddc12e60db77e1de4"
+    },
+    "generated_rbac_markdown_correction": {
+      "previous_markdown_count": 906,
+      "current_interfaces": 934,
+      "json_sha256_unchanged": "5c8a08831fa33e509752139b8eda761ba66027a9b2a4ec79b86d9e2f610f43bd",
+      "generator_stdout": "生成 934 个接口 -> doc/api-rbac-matrix.md, fastapi_be/rbac_matrix.json\n",
+      "check_stdout": "OK: RBAC 矩阵与代码一致（934 个接口）\n",
+      "preceding_manifest": {
+        "path": "/tmp/hoim-research-shared-backend-final-manifest-three-generated-predecessor.json",
+        "bytes": 28861,
+        "sha256": "e5874775889d8aa4c3959f9e631f6997dec6cbeb075ab6aba3af7315d76835a5"
+      }
+    }
+  },
+  "targeted_evidence": [
+    {
+      "path": "/tmp/hoim-research-shared-routing-final-first-verification.json",
+      "bytes": 245806,
+      "sha256": "33d9c69bef8fc02c7253e721d17aa35f1788312dd3c11df88932bcbcdf50a7b6",
+      "scope": "Current89 targeted native mix/runtime/catalog/shared worker; not full BE suite",
+      "exit_code": 0,
+      "pytest_log": "/tmp/hoim-research-shared-routing-final-first-tests.log",
+      "elapsed_seconds": 197.014226,
+      "source_stable_in_own_run": true,
+      "matches_current_BE_inputs": true,
+      "different_current_BE_paths": [],
+      "pytest_summary": "89 passed in 186.30s (0:03:06)",
+      "log_sha256": "55cd2bee048be8f228f23c3c4ded601d3f02d48c49a48bbedc67b9b7adb533a2",
+      "guards": {
+        "dotenv_open_attempts": 0,
+        "shared_key_open_attempts": 0,
+        "socket_attempts": 0,
+        "engine_urls": [
+          "sqlite:///:memory:",
+          "sqlite:///:memory:",
+          "sqlite:///:memory:",
+          "sqlite:///:memory:",
+          "sqlite:///:memory:",
+          "sqlite:///:memory:",
+          "sqlite:///:memory:"
+        ],
+        "transport_key": "fresh_synthetic_process_memory_only"
+      },
+      "command": [
+        "tests/test_ai_native_integration.py",
+        "tests/test_ai_native_expanded_integration.py",
+        "tests/test_ai_research_cohort_shared_worker.py",
+        "tests/test_ai_catalog.py",
+        "tests/test_ai_runtime.py",
+        "-q",
+        "-p",
+        "pytest_asyncio.plugin",
+        "-p",
+        "no:cacheprovider",
+        "--basetemp=/tmp/hoim-research-shared-routing-final-first-pytest"
+      ]
+    },
+    {
+      "path": "/tmp/hoim-research-queue-progress-green-first-verification.json",
+      "bytes": 245565,
+      "sha256": "452dfeb476ad874b3aa1ab3d46980ab9556602a34af47eb7673a925ce7dcad35",
+      "scope": "Current4 actual queue progress and correct staleSource technical directory regression; includes128 independently governed real native artifacts and two later real creates, plus128 orphan SQL rows",
+      "exit_code": 0,
+      "pytest_log": "/tmp/hoim-research-queue-progress-green-first-tests.log",
+      "elapsed_seconds": 305.866198,
+      "source_stable_in_own_run": true,
+      "matches_current_BE_inputs": true,
+      "different_current_BE_paths": [],
+      "pytest_summary": "4 passed in 295.06s (0:04:55)",
+      "log_sha256": "686d923fd31ccbf209f3d2e9e0d73fcbaa404a258dfae033a23c7a1570a4da2f",
+      "guards": {
+        "dotenv_open_attempts": 0,
+        "shared_key_open_attempts": 0,
+        "socket_attempts": 0,
+        "engine_urls": [
+          "sqlite:///:memory:",
+          "sqlite:///:memory:"
+        ],
+        "transport_key": "fresh_synthetic_process_memory_only"
+      },
+      "command": [
+        "tests/test_ai_research_cohort_queue_progress.py",
+        "tests/test_ai_research_cohort_shared_directory.py",
+        "-q",
+        "-p",
+        "pytest_asyncio.plugin",
+        "-p",
+        "no:cacheprovider",
+        "--basetemp=/tmp/hoim-research-queue-progress-green-first-pytest"
+      ]
+    },
+    {
+      "path": "/tmp/hoim-research-shared-worker-mysql-third-verification.json",
+      "bytes": 256650,
+      "sha256": "ba239236a0666cf0f34425ffb079f82ef502e64bfe102cce3561ecbeae3e0fa1",
+      "scope": "Current actual privateMySQL shared runtime231 registered tables/incremental updownup, two protocols/process_one/specific PK/noSQLawait/withdrawal; 128 SQL-corrupt FK backed artifacts are negative fixtures, not128 positive governed creates",
+      "exit_code": 0,
+      "pytest_log": null,
+      "elapsed_seconds": 100.981,
+      "source_stable_in_own_run": true,
+      "matches_current_BE_inputs": true,
+      "different_current_BE_paths": [],
+      "guards": {
+        "blocked": [
+          "socket.bind"
+        ],
+        "private_unix_connections": 2
+      }
+    },
+    {
+      "path": "/tmp/hoim-research-shared-proof-second-verification.json",
+      "bytes": 245291,
+      "sha256": "aa7fd6fb6810c3e145dbc6e91132de6a6b43a0cef150c7befc1a481edd3058ca",
+      "scope": "Earlier65 before technicalqueue filter: Root shared source/integrity/storage/result43 failure fixes plus19 existing generic runtime; preserve preceding SHA scope",
+      "exit_code": 0,
+      "pytest_log": "/tmp/hoim-research-shared-proof-second-tests.log",
+      "elapsed_seconds": 402.931267,
+      "source_stable_in_own_run": true,
+      "matches_current_BE_inputs": false,
+      "different_current_BE_paths": [
+        "alembic/versions/20261021_native_research_merge.py",
+        "app/ai/research_cohort_dispatch.py",
+        "app/ai/research_cohort_shared.py",
+        "app/ai/runtime.py",
+        "tests/test_ai_native_expanded_integration.py",
+        "tests/test_ai_native_integration.py"
+      ],
+      "pytest_summary": "65 passed in 392.07s (0:06:32)",
+      "log_sha256": "bfff85bcc42a3abef9cdd656a345825a3a995b16db7a850f04881da3ca2795b3",
+      "guards": {
+        "dotenv_open_attempts": 0,
+        "shared_key_open_attempts": 0,
+        "socket_attempts": 0,
+        "engine_urls": [
+          "sqlite:///:memory:",
+          "sqlite:///:memory:"
+        ],
+        "transport_key": "fresh_synthetic_process_memory_only"
+      },
+      "command": [
+        "tests/test_ai_runtime.py",
+        "tests/test_ai_research_cohort_shared_access.py",
+        "tests/test_ai_research_cohort_shared_integrity.py",
+        "tests/test_ai_research_cohort_shared_packets.py",
+        "tests/test_ai_research_cohort_storage.py",
+        "tests/test_ai_research_cohort_result_storage.py",
+        "-q",
+        "-p",
+        "pytest_asyncio.plugin",
+        "-p",
+        "no:cacheprovider",
+        "--basetemp=/tmp/hoim-research-shared-proof-second-pytest"
+      ]
+    },
+    {
+      "path": "/tmp/hoim-research-shared-packets-second-verification.json",
+      "bytes": 244785,
+      "sha256": "f47e70371e6ccc52576c6483c4497a78c22c2e6f646aeeb7b29dd003606d39ad",
+      "scope": "Actual Main/JWT two protocol authorized Sup split metadata+4parts/withdrawal; dedicated claim entry before shared worker activation",
+      "exit_code": 0,
+      "pytest_log": "/tmp/hoim-research-shared-packets-second-tests.log",
+      "elapsed_seconds": 72.14931,
+      "source_stable_in_own_run": true,
+      "matches_current_BE_inputs": false,
+      "different_current_BE_paths": [
+        "alembic/versions/20261021_native_research_merge.py",
+        "app/ai/catalog.py",
+        "app/ai/feature_prompts.py",
+        "app/ai/governance.py",
+        "app/ai/operational_sources.py",
+        "app/ai/references.py",
+        "app/ai/research_cohort_execution.py",
+        "app/ai/research_cohort_shared.py",
+        "app/ai/runtime.py",
+        "app/ai/schemas.py",
+        "app/ai/worker.py",
+        "scripts/export_ai_catalog.py",
+        "tests/test_ai_catalog.py",
+        "tests/test_ai_native_expanded_integration.py",
+        "tests/test_ai_native_integration.py"
+      ],
+      "pytest_summary": "3 passed in 62.07s (0:01:02)",
+      "log_sha256": "74a3bef994c95c67829c349138abc9a091db40c4b2de576ed588d014dfa3b1c3",
+      "guards": {
+        "dotenv_open_attempts": 0,
+        "shared_key_open_attempts": 0,
+        "socket_attempts": 0,
+        "engine_urls": [
+          "sqlite:///:memory:",
+          "sqlite:///:memory:"
+        ],
+        "transport_key": "fresh_synthetic_process_memory_only"
+      },
+      "command": [
+        "tests/test_ai_research_cohort_shared_packets.py",
+        "tests/test_ai_research_cohort_shared_integrity.py::test_changed_short_headers_and_creation_receipt_reject_before_private_task_text[source_bytes]",
+        "-q",
+        "-p",
+        "pytest_asyncio.plugin",
+        "-p",
+        "no:cacheprovider",
+        "--basetemp=/tmp/hoim-research-shared-packets-second-pytest"
+      ]
+    },
+    {
+      "path": "/tmp/hoim-research-shared-worker-second-verification.json",
+      "bytes": 245031,
+      "sha256": "85edf64d9d4dc1de0ecdaa3219c4527f17290a3225a0a23e60d85e28203773dd",
+      "scope": "Earlier38 shared worker and catalog green before queueprogress filter",
+      "exit_code": 0,
+      "pytest_log": "/tmp/hoim-research-shared-worker-second-tests.log",
+      "elapsed_seconds": 182.686445,
+      "source_stable_in_own_run": true,
+      "matches_current_BE_inputs": false,
+      "different_current_BE_paths": [
+        "alembic/versions/20261021_native_research_merge.py",
+        "app/ai/research_cohort_dispatch.py",
+        "app/ai/research_cohort_shared.py",
+        "app/ai/runtime.py",
+        "tests/test_ai_native_expanded_integration.py",
+        "tests/test_ai_native_integration.py"
+      ],
+      "pytest_summary": "38 passed in 171.47s (0:02:51)",
+      "log_sha256": "5e5f1f753e924b36b0b35dced274d761f736747109f31952eb655c7527cf9878",
+      "guards": {
+        "dotenv_open_attempts": 0,
+        "shared_key_open_attempts": 0,
+        "socket_attempts": 0,
+        "engine_urls": [
+          "sqlite:///:memory:",
+          "sqlite:///:memory:"
+        ],
+        "transport_key": "fresh_synthetic_process_memory_only"
+      },
+      "command": [
+        "tests/test_ai_research_cohort_shared_worker.py",
+        "tests/test_ai_catalog.py",
+        "-q",
+        "-p",
+        "pytest_asyncio.plugin",
+        "-p",
+        "no:cacheprovider",
+        "--basetemp=/tmp/hoim-research-shared-worker-second-pytest"
+      ]
+    },
+    {
+      "path": "/tmp/hoim-research-shared-feature-second-verification.json",
+      "bytes": 245034,
+      "sha256": "84d9c13505eabf065017855675d8dfd01f03f0c5e8011eeb999f2ac330986e9d",
+      "scope": "ActualMain feature registry .24 independent read only",
+      "exit_code": 0,
+      "pytest_log": "/tmp/hoim-research-shared-feature-second-tests.log",
+      "elapsed_seconds": 22.393663,
+      "source_stable_in_own_run": true,
+      "matches_current_BE_inputs": false,
+      "different_current_BE_paths": [
+        "alembic/versions/20261021_native_research_merge.py",
+        "app/ai/research_cohort_dispatch.py",
+        "app/ai/research_cohort_execution.py",
+        "app/ai/research_cohort_shared.py",
+        "app/ai/runtime.py",
+        "tests/test_ai_native_expanded_integration.py",
+        "tests/test_ai_native_integration.py",
+        "tests/test_ai_research_cohort_shared_worker.py"
+      ],
+      "pytest_summary": "1 passed, 1 warning in 11.74s",
+      "log_sha256": "15419f4bd7c720b63295050fd6b7c1beb220a84a006a28b8b1b442b0e56a14b9",
+      "guards": {
+        "dotenv_open_attempts": 0,
+        "shared_key_open_attempts": 0,
+        "socket_attempts": 0,
+        "engine_urls": [
+          "sqlite:///:memory:",
+          "sqlite:///:memory:"
+        ],
+        "transport_key": "fresh_synthetic_process_memory_only"
+      },
+      "command": [
+        "/tmp/test_hoim_research_shared_feature_export.py",
+        "-q",
+        "-p",
+        "tests.conftest",
+        "-p",
+        "pytest_asyncio.plugin",
+        "-p",
+        "no:cacheprovider",
+        "--basetemp=/tmp/hoim-research-shared-feature-second-pytest"
+      ]
+    },
+    {
+      "path": "/tmp/hoim-research-super-config-role-second-verification.json",
+      "bytes": 245036,
+      "sha256": "acd7ac3f1cea719440465f4bafeced41c7e00c0c166424283c74a5f6137c8372",
+      "scope": "ActualMain Sup role-config exemption with real ProjectACL/newCase; withdrawal denies409 without newRun",
+      "exit_code": 0,
+      "pytest_log": "/tmp/hoim-research-super-config-role-second-tests.log",
+      "elapsed_seconds": 28.748744,
+      "source_stable_in_own_run": true,
+      "matches_current_BE_inputs": false,
+      "different_current_BE_paths": [
+        "alembic/versions/20261021_native_research_merge.py",
+        "app/ai/research_cohort_dispatch.py",
+        "app/ai/research_cohort_shared.py",
+        "app/ai/runtime.py",
+        "tests/test_ai_native_expanded_integration.py",
+        "tests/test_ai_native_integration.py"
+      ],
+      "pytest_summary": "1 passed, 1 warning in 18.40s",
+      "log_sha256": "25d79eaedb5955009eb9b0f14574e2713358595cab73616e366e733bffbc0971",
+      "guards": {
+        "dotenv_open_attempts": 0,
+        "shared_key_open_attempts": 0,
+        "socket_attempts": 0,
+        "engine_urls": [
+          "sqlite:///:memory:",
+          "sqlite:///:memory:"
+        ],
+        "transport_key": "fresh_synthetic_process_memory_only"
+      },
+      "command": [
+        "/tmp/test_hoim_research_super_config_role.py",
+        "-q",
+        "-p",
+        "tests.conftest",
+        "-p",
+        "pytest_asyncio.plugin",
+        "-p",
+        "no:cacheprovider",
+        "--basetemp=/tmp/hoim-research-super-config-role-second-pytest"
+      ]
+    },
+    {
+      "path": "/tmp/hoim-research-stale-source-directory-control-second-verification.json",
+      "bytes": 245075,
+      "sha256": "0207bc42af81f1957f2ed7b2ffd5557fc4a553d2d1e98f7472fa8c950e2134b4",
+      "scope": "ActualMain real Doctor writer ordinary source current loss403/safe Supmetadata andglobal200; no catch409 broadening",
+      "exit_code": 0,
+      "pytest_log": "/tmp/hoim-research-stale-source-directory-control-second-tests.log",
+      "elapsed_seconds": 30.661823,
+      "source_stable_in_own_run": true,
+      "matches_current_BE_inputs": false,
+      "different_current_BE_paths": [
+        "alembic/versions/20261021_native_research_merge.py",
+        "app/ai/research_cohort_dispatch.py",
+        "app/ai/research_cohort_shared.py",
+        "app/ai/runtime.py",
+        "tests/test_ai_native_expanded_integration.py",
+        "tests/test_ai_native_integration.py"
+      ],
+      "pytest_summary": "1 passed, 1 warning in 19.84s",
+      "log_sha256": "e7fdd6655b9677b7867da167df121e57c94ac4e05e6972965be8001dbc7fbcdc",
+      "guards": {
+        "dotenv_open_attempts": 0,
+        "shared_key_open_attempts": 0,
+        "socket_attempts": 0,
+        "engine_urls": [
+          "sqlite:///:memory:",
+          "sqlite:///:memory:"
+        ],
+        "transport_key": "fresh_synthetic_process_memory_only"
+      },
+      "command": [
+        "/tmp/test_hoim_research_stale_source_directory_control.py",
+        "-q",
+        "-p",
+        "tests.conftest",
+        "-p",
+        "pytest_asyncio.plugin",
+        "-p",
+        "no:cacheprovider",
+        "--basetemp=/tmp/hoim-research-stale-source-directory-control-second-pytest"
+      ]
+    }
+  ],
+  "actual_private_mysql_current": {
+    "image": "mysql:8.0.39",
+    "image_id": "sha256:01faea2cb286276923a223bdbf438b50468f3c4090f6b61e0b27aa871ca0dbac",
+    "network": "none",
+    "host_ports": [],
+    "isolation": {
+      "network_mode": "none",
+      "port_bindings": {},
+      "readonly_root": true,
+      "user": "999:999",
+      "cap_drop": [
+        "ALL"
+      ],
+      "tmpfs": {
+        "/tmp": "rw,nosuid,nodev,noexec,size=64m,uid=999,gid=999,mode=0700",
+        "/var/lib/mysql": "rw,nosuid,nodev,noexec,size=512m,uid=999,gid=999,mode=0700"
+      },
+      "mount_types": [
+        "bind"
+      ]
+    },
+    "migration": {
+      "actual_additive_up_down_up": true,
+      "old_table_count": 224,
+      "new_table_count": 5,
+      "current_tables": 229,
+      "old_ddl_rows_unchanged": true,
+      "utc6_columns": 20,
+      "mediumtext_columns": 8,
+      "full_historical_alembic_replay": false,
+      "revision_head": "20261021_research_cohort",
+      "parent": "20261021_doc_extraction_runs"
+    },
+    "artifact_migration": {
+      "feature74_incremental_artifact_head": "20261021_research_dispatch",
+      "actual_up_down_up": true,
+      "prior_tables": 229,
+      "new_tables": 2,
+      "current_tables": 231,
+      "prior_ddl_and_rows_unchanged": true,
+      "database_prompt_only_revision_preserved": "20261021_research_runs",
+      "no_fabricated_prompt_table": true
+    },
+    "whole_current_revision_graph": {
+      "head": "20261021_native_research_merge",
+      "no_op_merge_only": true,
+      "full_historical_database_replay": false
+    },
+    "artifact_rr_current_locator": {
+      "reader_plain_rr_view_preceded_new_case_run_artifact": true,
+      "actual_current_locator_found_later_artifact": true,
+      "source_current_authorized_before_run_text": true,
+      "no_generic_downgrade": true
+    },
+    "artifact_packaged": {
+      "source_bytes": 7147,
+      "source_sha256": "9b53b9fec08f5fe1a9ba0a205ea010f1976dbe9f4c797cde8bc524cfb1ca04e6",
+      "short_raw3_bytes": {
+        "input_json": 517,
+        "evidence_json": 298,
+        "context_metadata_json": 528
+      },
+      "no_prompt_governance_write": true,
+      "created_concrete_audit_pk": 36,
+      "usage_event_id": null,
+      "actual_model_calls": 0,
+      "queue_worker_claimed": false
+    },
+    "artifact_database_prompt": {
+      "actual_fk": true,
+      "version": 1,
+      "custom_full_task_preserved": true
+    },
+    "shared_chat": {
+      "status": "succeeded",
+      "full_result_bytes": 2074,
+      "full_result_sha256": "6630bd15ccf5c7cc9e535821775d40248b80a9976905abfd6cc7f2f43ab8a245",
+      "source_bytes": 7147,
+      "raw3_bytes": {
+        "input_json": 528,
+        "evidence_json": 298,
+        "context_metadata_json": 528
+      },
+      "five_actual_distinct_audit_pks": [
+        42,
+        43,
+        44,
+        46,
+        45
+      ],
+      "duplicate_same_claim_actual_http_requests": 1,
+      "no_real_model": true
+    },
+    "shared_responses": {
+      "status": "succeeded",
+      "original_nullable_usage": {
+        "input_tokens": 41,
+        "output_tokens": null,
+        "complete": false,
+        "model_call_attempted": true
+      },
+      "no_zero_imputation": true
+    },
+    "actual_shared_process_one": {
+      "concrete_claim_event_id": 53,
+      "actual_http_with_no_checkedout_sql": true,
+      "fresh_recovery_session": true
+    },
+    "shared_exact_claim_negatives": {
+      "invalid_count": 6,
+      "zero_http": true,
+      "zero_state_or_audit_changes": true
+    },
+    "shared_queue_sql_corruption_progress": {
+      "retained_fk_backed_corrupt_artifacts": 128,
+      "two_polls_claimed_two_later_actual_native_creates": true,
+      "corrupt_rows_not_terminated_or_given_usage": true,
+      "synthetic_sql_negative_not_128_governed_positive_claim": true
+    },
+    "shared_withdrawal": {
+      "inflight_result_rejected_paid_retained": true,
+      "ordinary_and_super_all_four_clinical_parts_denied": true,
+      "private_task_artifact_result_text_selects_by_read_apis": 0,
+      "original_usage": {
+        "input_tokens": 41,
+        "output_tokens": null,
+        "complete": false,
+        "model_call_attempted": true
+      },
+      "technical_metadata_opaque_only": true
+    },
+    "dispatch_atomic_faults": [
+      {
+        "fault": "audit",
+        "actual_mysql_trigger": true,
+        "dispatch_audit_and_fk_both_rolled_back": true,
+        "http_requests": 0
+      },
+      {
+        "fault": "fk",
+        "actual_mysql_trigger": true,
+        "dispatch_audit_and_fk_both_rolled_back": true,
+        "http_requests": 0
+      }
+    ],
+    "dispatch_downgrade_refusal_before_ddl": true,
+    "checks": [
+      "actual_rr_current_role_rejected",
+      "actual_rr_current_epoch_rejected",
+      "actual_rr_permission_revocation_rejected",
+      "current_capture_holds_real_parent_and_existing_member_locks",
+      "two_connection_same_value_gate_x_serialization"
+    ],
+    "blocking": [
+      {
+        "label": "new_registration_real_patient_fk",
+        "mysql_error": 1205,
+        "seconds": 1.003
+      },
+      {
+        "label": "new_medical_record_real_patient_fk",
+        "mysql_error": 1205,
+        "seconds": 1.002
+      },
+      {
+        "label": "existing_medical_record_body_update",
+        "mysql_error": 1205,
+        "seconds": 1.002
+      },
+      {
+        "label": "scope_child_new_acl_fk",
+        "mysql_error": 1205,
+        "seconds": 1.004
+      },
+      {
+        "label": "outside_window_existing_row_moves_into_selected_date_range",
+        "mysql_error": 1205,
+        "seconds": 1.002
+      }
+    ],
+    "sql_atomicity": [
+      {
+        "fault": "receipt",
+        "actual_mysql_trigger": true,
+        "case_audit_counts_before": [
+          1,
+          11
+        ],
+        "after": [
+          1,
+          11
+        ],
+        "actor_restored": true
+      },
+      {
+        "fault": "body",
+        "actual_mysql_trigger": true,
+        "case_audit_counts_before": [
+          1,
+          11
+        ],
+        "after": [
+          1,
+          11
+        ],
+        "actor_restored": true
+      },
+      {
+        "fault": "actor",
+        "actual_mysql_trigger": true,
+        "case_audit_counts_before": [
+          1,
+          11
+        ],
+        "after": [
+          1,
+          11
+        ],
+        "actor_restored": true
+      }
+    ],
+    "artifact_source_before_private_text": {
+      "ordinary_and_super_after_research_withdrawal_denied": true,
+      "private_task_or_artifact_text_selects": 0,
+      "no_super_raw_escape": true,
+      "actual_mysql": true
+    },
+    "guards": {
+      "blocked": [
+        "socket.bind"
+      ],
+      "private_unix_connections": 2
+    },
+    "cleanup_verified": true,
+    "own_container_absent_verified": true,
+    "own_private_directory_removed": true,
+    "source_stable": true,
+    "seconds": 100.981,
+    "verification_script_sha256": {
+      "/tmp/hoim-research-shared-worker-mysql-third-runner.py": "8246106e96c2a4e503b2e32cacaab806fa46d8d6177bdce849a1df10ed86711b",
+      "/tmp/hoim-research-shared-worker-mysql-third-worker.py": "5b3adc176b4e9869a1d3aad3b2111582044485f3809f7b44df41acdac27ca7ab"
+    }
+  },
+  "preserved_attempts": [
+    {
+      "path": "/tmp/hoim-research-shared-proof-first-verification.json",
+      "bytes": 244843,
+      "sha256": "7817d39ccd9718ee4eaeba35aaa8c854bffbfafe7c65bbc198b2c43307ced970",
+      "reason": "43pass3fail: SQLCHECK negative test and missing independent Sup ProjectACL setup; actual source proof never weakened"
+    },
+    {
+      "path": "/tmp/hoim-research-shared-packet-diagnostic-first-verification.json",
+      "bytes": 244661,
+      "sha256": "ef703eb10c801a11f84fd49e66354dabf43c45fb0d0c3a87876668bb37346b08",
+      "reason": "Sup missing project authorization diagnostic; valid denial, test construction"
+    },
+    {
+      "path": "/tmp/hoim-research-shared-worker-first-verification.json",
+      "bytes": 245029,
+      "sha256": "8946611a5e61162bf7ae399e5fa84bafd007c038203f51c902ec754394eb1432",
+      "reason": "30pass2fail: test queue time not ordered and generic test lacked required non-null hashes"
+    },
+    {
+      "path": "/tmp/hoim-research-queue-starvation-red-first-verification.json",
+      "bytes": 245044,
+      "sha256": "0a3a4a58cefecf6eaf0029050b66f333b8989eb562246157bb39d29671474472",
+      "reason": "Actual queue starvation product RED: two polls None after128 real governed artifacts had discriminator erased; corrected with pre-limit SQL technical predicate"
+    },
+    {
+      "path": "/tmp/hoim-research-shared-worker-mysql-first-attempt-329e1460cad8.json",
+      "bytes": 250163,
+      "sha256": "d3ff9a629f1bb66e57262d58b7963fb277e0e5a293d107f885c730f863b74a69",
+      "reason": "Script expected old23research routes; actual23Source+5Task=28. Cleanup verified, sharedworker not reached"
+    },
+    {
+      "path": "/tmp/hoim-research-shared-feature-first-verification.json",
+      "bytes": 244970,
+      "sha256": "f3c132cbd7cdecc571dd64e7dd18c8d5db38d7797f8aff9e610cd68999aef699",
+      "reason": "Temporary test outside tests/ did not load db_session conftest: setup error"
+    },
+    {
+      "path": "/tmp/hoim-research-super-config-role-first-verification.json",
+      "bytes": 245033,
+      "sha256": "9791f4408e3a0ea52b40947c6fdf752a993068f472047f47e2f9694e088c7f18",
+      "reason": "Temporary negative wrongly expected403; current Case invalidation correctly409. Positive Sup role exemption200 already observed"
+    },
+    {
+      "path": "/tmp/hoim-research-stale-source-directory-red-first-verification.json",
+      "bytes": 245061,
+      "sha256": "921d9623206aeabf5c09aabdd75494d0e98ff59d1ccb3b7165923b4388601946",
+      "reason": "Hypothesis test construction insufficient; actual metadata/global already200, no product RED. Correct actual Doctor writer control later green"
+    }
+  ],
+  "additional_predecessor_mysql": [
+    {
+      "path": "/tmp/hoim-research-shared-worker-mysql-second-verification.json",
+      "bytes": 255696,
+      "sha256": "4f44f6af93605e2ae351286412fc4ecec5cb47e8c7f3d73a71d1e88d6bfe6299",
+      "scope": "Previous current shared runtime94.076s green before queue qualification/noop parent correction. Preserve preceding SHA, do not claim current queue coverage."
+    }
+  ],
+  "tool_checks": {
+    "ruff_check": "47 paths green",
+    "ruff_format_check": "47 files already formatted",
+    "catalog_export_and_check": "80capabilities/80distinctTasks/7actualFixedSystems",
+    "rbac_check": "934 routes matches current matrix; no map drift",
+    "rbac_markdown_regenerated": "934 interfaces; JSON bytes identical; generate/check green"
+  },
+  "prior_stages": [
+    {
+      "path": "doc/ai-research-source-verification.json",
+      "scope": "Source-only published registry/Case and FE stage retained unchanged"
+    },
+    {
+      "path": "doc/ai-research-cohort-task-verification.json",
+      "scope": "Independent dedicated Task stage retained unchanged, including old shared staging RED blockers. This new stage closes the shared routing/worker and generic clinical-read paths under its own current targeted evidence."
+    }
+  ],
+  "counting_rule": "89/4/65/38/3 and privateMySQL are separate overlapping targeted runs, never added to a full-suite or independent-case count. Current routing89 and queue4 are distinct final target files; prior65 preserves earlier product/source-hash scope. Temporary export tests and UI mockedAPI are not native network verification.",
+  "remaining_acceptance": [
+    "Root whole default backend suite and unified browser suite are not claimed",
+    "Canonical integrated research production build and budgets remain Root-owned pending work",
+    "No real hospital data, live provider, enrollment, SQL generation, automatic export, IRB/legal authorization or anonymization certification",
+    "No implementation or permission extension for75/76 from this stage"
+  ],
+  "repository_mutations_in_this_docs_commit": [
+    "doc/ai-research-cohort-shared-guide.md",
+    "doc/ai-research-cohort-shared-verification.json",
+    "doc/ai-implementation-plan.md"
+  ]
+}

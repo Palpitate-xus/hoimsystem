@@ -194,6 +194,8 @@ class ClinicalContextRequest(StrictRequest):
         if isinstance(value, dict) and isinstance(value.get("source_refs"), dict) and "charge_case_id" in value["source_refs"]:
             if type(value.get("patient_id")) is not int or value["patient_id"] < 1:
                 raise ValueError("完整账目来源须使用真实正整数患者ID，不接受布尔、字符串或浮点转换")
+        if isinstance(value, dict) and isinstance(value.get("source_refs"), dict) and "research_cohort_case_id" in value["source_refs"]:
+            raise ValueError("科研来源使用独立有限Case，不使用患者临床上下文替代研究授权")
         return value
 
     @field_validator("source_refs")
@@ -223,6 +225,11 @@ class RunRequest(StrictRequest):
     @model_validator(mode="before")
     @classmethod
     def native_charge_scope(cls, value):
+        if isinstance(value, dict) and isinstance(value.get("feature_key"), str) and value["feature_key"].strip() == "research_cohort":
+            if value.get("patient_id") is not None or value.get("encounter_ref") is not None:
+                raise ValueError("科研任务只使用明确研究Case，不接受患者或就诊替代范围")
+            if "preview" in value and type(value["preview"]) is not bool:
+                raise ValueError("科研任务预览标记须为明确布尔值")
         if isinstance(value, dict) and isinstance(value.get("feature_key"), str) and value["feature_key"].strip() == "feedback_analysis":
             if value.get("patient_id") is not None or value.get("encounter_ref") is not None:
                 raise ValueError("完整评价任务不接受患者或就诊范围")
@@ -244,6 +251,19 @@ class RunRequest(StrictRequest):
 
     @model_validator(mode="after")
     def dedicated_roster_reference(self):
+        if "research_cohort_case_id" in self.input and self.feature_key != "research_cohort":
+            raise ValueError("完整研究Case仅用于固定研究队列原记录核对")
+        if self.feature_key == "research_cohort":
+            from fastapi import HTTPException
+
+            from app.ai.research_cohort_runtime import selection
+
+            try:
+                selection(self.input)
+            except HTTPException as exc:
+                if exc.status_code != 422:
+                    raise
+                raise ValueError(exc.detail) from exc
         if "drug_label_source_binding_id" in self.input and self.feature_key != "drug_label_extraction":
             raise ValueError("完整说明书来源仅用于说明书逐字字段复核")
         if self.feature_key == "drug_label_extraction":

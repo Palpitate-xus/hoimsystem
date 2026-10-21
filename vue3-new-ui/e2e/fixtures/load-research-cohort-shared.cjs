@@ -1,0 +1,5 @@
+const fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto');
+const root=path.join(__dirname,'research-cohort-shared'),manifest=require('./research-cohort-shared/manifest.json'),sha=v=>crypto.createHash('sha256').update(v).digest('hex');
+function load(kind='chat'){const record=manifest.packets[kind];if(!record)throw Error('Unknown actual research profile');const raw=fs.readFileSync(path.join(root,record.file));if(raw.length!==record.bytes||sha(raw)!==record.sha256)throw Error('Original same-case packet changed');const value=JSON.parse(raw);for(const h of value.actual_http){if(Buffer.byteLength(h.raw_utf8)!==h.bytes||sha(h.raw_utf8)!==h.sha256)throw Error('Original Main HTTP bytes changed');}return value;}
+function http(packet,path,{status=200,method='GET',last=false}={}){const found=packet.actual_http.filter(v=>v.path===path&&v.method===method&&v.status===status);const v=last?found.at(-1):found[0];if(!v)throw Error('Missing actual HTTP '+method+' '+path+' '+status);return v;}
+module.exports={load,http,manifest};

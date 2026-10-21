@@ -1,0 +1,26 @@
+{
+  "scope": "Actual Main ASGI/JWT Sup technical config role exemption requires current independent ProjectACL and newly captured/published Case; ACL withdrawal denies new Task. No worker/model call.",
+  "allowed_roles": [
+    "admin",
+    "doctor"
+  ],
+  "case_id": "af255065-6ce5-4289-8f65-d00198526eaa",
+  "responses": [
+    {
+      "method": "POST",
+      "path": "/api/ai/research-cohort/tasks",
+      "status": 200,
+      "raw_utf8": "{\"code\":200,\"msg\":\"success\",\"data\":{\"run_id\":\"e681c6d2-6652-4b4a-9030-96cfd04142c2\",\"feature_key\":\"research_cohort\",\"status\":\"queued\",\"preview\":false,\"error_code\":null,\"error_message\":null,\"latency_ms\":null,\"create_time\":\"2026-10-21T16:54:16.000000Z\",\"start_time\":null,\"finish_time\":null,\"schema_version\":\"research_cohort_task_metadata_v1\",\"split_artifacts\":true,\"research_cohort_case_id\":\"af255065-6ce5-4289-8f65-d00198526eaa\",\"scope_id\":\"07c45a77-f488-4123-9570-a22a78c50eaf\",\"source_projection_hash\":\"51801f9f3cc6c0d4af3c26edc23e955a7831f24a5e8a43b854f63a4659526a3e\",\"source_binding_hash\":\"54a4321ab777b962d45259c4215e2bde97211272694854fcb14beaff3b294725\",\"binding\":{\"case_id\":\"af255065-6ce5-4289-8f65-d00198526eaa\",\"collection_digest\":\"3f554970d1602c892214a91fa346832a40e0ecbcf058e38c725cd24025530c96\",\"content_hash\":\"4e2e4b8626693c928f165c519cab91847122f874ca96bc32b0298115cf003025\",\"governance_hash\":\"15c527230a65a801d8af2408609ce64ebc7e921f76b5b33a6d77c6d1a109e0c6\",\"member_manifest_hash\":\"3e48d447f44b536402bb6f5e719a3d03415c8228ebba2b78d8d8863b151ede09\",\"projection_hash\":\"51801f9f3cc6c0d4af3c26edc23e955a7831f24a5e8a43b854f63a4659526a3e\",\"public_manifest_hash\":\"f841b4135a3b5b99bcc52ec41e8c55c91da4010b7e171b8b7b41707d5671a488\",\"rule_id\":\"research_recorded_predicates_kleene_v1\",\"scope_binding_hash\":\"9af0a1ddbef48de84a81e997af3b0ba3ccba24253e1912fcd66593cf6a79f78c\",\"scope_id\":\"07c45a77-f488-4123-9570-a22a78c50eaf\",\"scope_token\":\"57595eceee41c17f85a9a32e0aaf6c8de0e03f555ea3c9ac0dcd9b319fb28cb8\",\"source_id\":\"research_cohort:af255065-6ce5-4289-8f65-d00198526eaa:4e2e4b862669\"},\"clinical_parts_available\":true,\"protected_hashes_are_opaque\":false,\"cancellation_pending\":false,\"usage\":{\"input_tokens\":0,\"output_tokens\":0,\"complete\":true,\"model_call_attempted\":false}}}",
+      "bytes": 1777,
+      "sha256": "bb331c95460e3e3740628c7835af25e742981e95c389640f83e586852cba9bb2"
+    },
+    {
+      "method": "POST",
+      "path": "/api/ai/research-cohort/tasks",
+      "status": 409,
+      "raw_utf8": "{\"detail\":\"研究病例未发布、来源已变化或当前逐患者权限不足\"}",
+      "bytes": 82,
+      "sha256": "2c9580f531479a4439b83d8fabd2ed3a75e924f82f21e24dbc9dcc33d178f191"
+    }
+  ]
+}

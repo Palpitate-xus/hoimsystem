@@ -1,0 +1,19 @@
+{
+  "scope": "Actual Main/JWT original same-case shared trace/ordinary and real independently authorized Super split parts plus withdrawal; dedicated actual SQLite claim/HTTPMock, not shared worker yet.",
+  "packets": {
+    "responses": {
+      "source_path": "/tmp/hoim-research-shared-packets-second-pytest/test_actual_current_shared_tra1/actual-research-shared-main-responses.json",
+      "file": "responses.json",
+      "bytes": 340748,
+      "sha256": "9c8676140f5b077a5fcb64f28215103b767d3e90816e7952ddb5c5dbfb43e664",
+      "actual_main_http_responses": 24
+    },
+    "chat": {
+      "source_path": "/tmp/hoim-research-shared-packets-second-pytest/test_actual_current_shared_tra0/actual-research-shared-main-chat.json",
+      "file": "chat.json",
+      "bytes": 282538,
+      "sha256": "115fd86087e5369901f1718219cf39ffe18a8fbf9805d05b1cda88bff5a775ab",
+      "actual_main_http_responses": 24
+    }
+  }
+}

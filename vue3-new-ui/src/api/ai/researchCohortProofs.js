@@ -80,3 +80,11 @@ export async function verifyResearchRegistryTransition(after,before,action,body,
  }
  return current()&&(after.original===null||same(pick(after.original,['identity','payload','parent_binding','content_hash']),pick(old,['identity','payload','parent_binding','content_hash'])));
 }catch{return false;}}
+
+export async function verifyResearchRegistryCreated(value,body,{kind='scope',parent=null,auditOnly=false,actorId=null,current=()=>true}={}){try{
+ const d=definitions[kind];if(!d||!requestValid(d.model,body)||!current()||!await verifyResearchRegistryRecord(value,{kind,auditOnly,current})||!current())return false;
+ const p=value.original;if(p===null||!same(p.payload,body)||value.status!=='draft'||value.revision!==1||actorId!==null&&value.created_by!==actorId)return false;
+ if(kind==='scope')return parent===null&&p.authorization_review.authorization_review_status==='unknown'&&current();
+ if(!parent||!await verifyResearchRegistryRecord(parent,{kind:'scope',auditOnly:parent.audit_only,current})||parent.original===null||parent.status!=='published'||!same(p.parent_binding.scope,parent.original))return false;
+ return current()&&(kind==='acl'?p.authorization_review===null:p.authorization_review.authorization_review_status==='unknown');
+}catch{return false;}}

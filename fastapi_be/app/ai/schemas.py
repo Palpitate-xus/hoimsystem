@@ -254,9 +254,16 @@ class RunRequest(StrictRequest):
         if "research_cohort_case_id" in self.input and self.feature_key != "research_cohort":
             raise ValueError("完整研究Case仅用于固定研究队列原记录核对")
         if self.feature_key == "research_cohort":
+            from fastapi import HTTPException
+
             from app.ai.research_cohort_runtime import selection
 
-            selection(self.input)
+            try:
+                selection(self.input)
+            except HTTPException as exc:
+                if exc.status_code != 422:
+                    raise
+                raise ValueError(exc.detail) from exc
         if "drug_label_source_binding_id" in self.input and self.feature_key != "drug_label_extraction":
             raise ValueError("完整说明书来源仅用于说明书逐字字段复核")
         if self.feature_key == "drug_label_extraction":

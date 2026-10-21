@@ -258,6 +258,8 @@ def inspect_context(
 def submit_run(req: RunRequest, db: Session = Depends(get_db), user: User = Depends(get_current_user)) -> dict:
     """Queue durable work; a separately deployed worker performs inference."""
     run = create_run(db, user, req)
+    if req.feature_key == "infection_cluster":
+        return {"code": 200, "msg": "任务已排队", "data": vars(run)}
     value = {"code": 200, "msg": "任务已排队", "data": describe_run(run, False, user=user)}
     if req.feature_key == "feedback_analysis":
         from app.ai.satisfaction_views import checked_response
@@ -582,6 +584,17 @@ def list_runs(
         query = query.filter_by(encounter_ref=encounter_ref)
     data = []
     for item in query.order_by(AIRun.create_time.desc()).limit(limit).all():
+        from app.ai.native_task_routing import locate_native_task
+
+        identity = locate_native_task(db, item.run_id)
+        if identity is not None and identity.domain == "infection":
+            from app.ai.infection_cluster_task_views import metadata
+
+            data.append(metadata(db, user, item.run_id))
+            continue
+        if item.feature_key == "infection_cluster":
+            # Unverifiable old generic78 rows never acquire new Source rights.
+            continue
         try:
             from app.ai.native_task_access import guard_private_task_read
 
@@ -645,8 +658,13 @@ def list_runs(
 @router.get("/ai/runs/{run_id}")
 def run_detail(run_id: str, db: Session = Depends(get_db), user: User = Depends(get_current_user)) -> dict:
     """Recheck patient access before exposing a stored result or evidence."""
+    from app.ai.infection_cluster_task_access import is_own_task
     from app.ai.native_task_access import guard_private_task_read
 
+    if is_own_task(db, run_id):
+        from app.ai.infection_cluster_task_views import metadata
+
+        return {"code": 200, "msg": "success", "data": metadata(db, user, run_id)}
     guard_private_task_read(db, user, run_id)
     run = db.get(AIRun, run_id)
     if run is None:
@@ -660,10 +678,15 @@ def cancel_run(run_id: str, db: Session = Depends(get_db), user: User = Depends(
     """Stop accepting a result; an already sent provider call may still finish."""
     from app.ai.document_change_access import has_native_identity
     from app.ai.document_change_runtime import cancel_change_run
-    from app.ai.native_task_routing import locate_native_task
+    from app.ai.infection_cluster_task_access import is_own_task
 
-    identity = locate_native_task(db, run_id)
-    if identity is not None and identity.domain == "document_change" or identity is None and has_native_identity(db, run_id):
+    if is_own_task(db, run_id):
+        from app.ai.infection_cluster_task_runtime import cancel
+
+        result = cancel(db, user, run_id)
+        db.commit()
+        return {"code": 200, "msg": "success", "data": result}
+    if has_native_identity(db, run_id):
         cancel_change_run(db, user, run_id)
         return {"code": 200, "msg": "任务结果已取消接收"}
     from app.ai.native_task_access import guard_private_task_read

@@ -89,7 +89,7 @@ def locator(db, value):
 
 
 def is_infection_run(db, value):
-    if locator(db, value) is not None:
+    if db is not None and locator(db, value) is not None:
         return True
     if type(value) is str:
         return False
@@ -331,3 +331,21 @@ def verify_technical_run(db, rid):
     ):
         raise HTTPException(409, "本地任务完整技术锚/22字段或原始三JSON字节摘要已改变")
     return artifact, run
+
+
+def guard_run_id(db, user, rid):
+    """Raw current native locator before any generic private Task SELECT."""
+    if locator(db, rid) is not None:
+        authorize(db, user, rid)
+        return True
+    # Orphan native markers are checked as scalar SQL booleans only, never by
+    # loading the whole old Task TEXT. They cannot establish Source authority.
+    from sqlalchemy import func, or_
+
+    markers = ("infection_local_frozen_task_v1", "infection_statistics_result_pointer_v1", "infection_cluster_scenario_id")
+    terms = [AIRun.feature_key == t.FEATURE_KEY]
+    terms.extend(func.instr(getattr(AIRun, field), mark) > 0 for field in t.RAW_FIELDS for mark in markers)
+    marked = db.query(AIRun.run_id).filter(AIRun.run_id == rid, or_(*terms)).populate_existing().with_for_update(read=True).one_or_none()
+    if marked is not None:
+        raise HTTPException(409, "旧或损坏78任务缺少真实完整Artifact，不允许通用正文或模型降级")
+    return False

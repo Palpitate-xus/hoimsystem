@@ -44,7 +44,7 @@ def _guard_charge_identity(db, user, identity):
 
 
 def lock_directory_gates(db):
-    """Billing -> Satisfaction -> Inventory; never acquire them after User/Run."""
+    """Billing -> Satisfaction -> Inventory -> Infection, before User/Run."""
     from app.ai.charge_reconciliation_write_guard import lock_charge_gate
     from app.ai.inventory_write_guard import lock_inventory_gate
     from app.ai.satisfaction_write_guard import lock_satisfaction_gate
@@ -52,6 +52,9 @@ def lock_directory_gates(db):
     lock_charge_gate(db)
     lock_satisfaction_gate(db)
     lock_inventory_gate(db)
+    from app.ai.infection_cluster_write_guard import lock_gate
+
+    lock_gate(db)
 
 
 def guard_private_task_read(db, user, run_id):
@@ -68,6 +71,11 @@ def guard_private_task_read(db, user, run_id):
     if identity is not None:
         # An actual immutable FK selects exactly one complete domain guard.
         # Only a task with no Artifact needs the orphan JSON-marker probes.
+        if identity.domain == "infection":
+            from app.ai.infection_cluster_task_storage import guard_run_id
+
+            guard_run_id(db, user, run_id)
+            return
         if identity.domain == "charge":
             _guard_charge_identity(db, user, identity)
             return
@@ -88,6 +96,10 @@ def guard_private_task_read(db, user, run_id):
             from fastapi import HTTPException
 
             raise HTTPException(409, "原生任务的实际域锚点已改变，未降级读取")
+        return
+    from app.ai.infection_cluster_task_storage import guard_run_id
+
+    if guard_run_id(db, user, run_id):
         return
     if guard_change_run_id(db, user, run_id, current=True):
         return

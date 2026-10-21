@@ -95,6 +95,17 @@ def _check_run_storage_json(serialized: dict[str, str]) -> None:
 
 def create_run(db: Session, user: User, req: RunRequest) -> AIRun:
     """Freeze an authorized, source-linked request before a durable worker processes it."""
+    if req.feature_key == "infection_cluster":
+        from types import SimpleNamespace
+
+        from app.ai.infection_cluster_task_runtime import create_run as create_local
+
+        if req.patient_id is not None or req.encounter_ref is not None:
+            raise HTTPException(422, "本地有限病例统计仅接受完整方案引用，不接受单患者/就诊范围")
+        ack = create_local(db, user, {**req.input, "preview": req.preview})
+        db.commit()
+        return SimpleNamespace(**ack)
+
     if req.feature_key == "feedback_analysis":
         from app.ai.satisfaction_runtime import create_satisfaction_run
 
@@ -398,6 +409,13 @@ def create_run(db: Session, user: User, req: RunRequest) -> AIRun:
 
 def authorize_run(db: Session, user: User, run: AIRun) -> None:
     """Re-check current permissions, including revoked care access, on every result read."""
+    from app.ai.infection_cluster_task_access import is_own_task
+    from app.ai.infection_cluster_task_storage import authorize
+
+    if is_own_task(db, run):
+        authorize(db, user, run.run_id)
+        return
+
     from app.ai.charge_reconciliation_storage import is_charge_run
 
     if is_charge_run(db, run):
@@ -575,6 +593,15 @@ def describe_run(run: AIRun, include_result: bool = True, *, user: User | None =
     from app.ai.charge_reconciliation_storage import is_charge_run
 
     db = object_session(run)
+
+    from app.ai.infection_cluster_task_access import is_own_task
+
+    if is_own_task(db, run):
+        if db is None or user is None:
+            raise HTTPException(409, "原生本地统计任务须在当前身份会话内读取")
+        from app.ai.infection_cluster_task_views import metadata
+
+        return metadata(db, user, run.run_id)
     if is_charge_run(db, run):
         if db is None or user is None:
             raise HTTPException(409, "完整账目任务须在当前授权会话内展示")
@@ -891,6 +918,11 @@ def claim_next_run(db: Session) -> tuple[str, str] | None:
         return None
     identity = locate_native_task(db, candidate.run_id)
     domain = identity.domain if identity is not None else None
+    if domain == "infection" or domain is None and candidate.feature_key == "infection_cluster":
+        from app.ai.infection_cluster_task_runtime import claim_for_shared
+
+        lease = claim_for_shared(db, candidate.run_id)
+        return (candidate.run_id, lease) if lease is not None else None
     if domain == "drug_label" or domain is None and candidate.feature_key == "drug_label_extraction":
         from app.ai.drug_label_runtime import claim_drug_label_run
 
@@ -1019,13 +1051,19 @@ async def execute_claimed(run_id: str, lease: str, *, transport=None) -> None:
         document_task = header is not None and (domain == "document" or domain is None and header.feature_key == "guideline_ingestion")
         change_task = header is not None and (domain == "document_change" or domain is None and has_native_identity(routing_db, run_id))
         charge = domain == "charge"
+        infection_task = header is not None and (domain == "infection" or domain is None and header.feature_key == "infection_cluster")
         # Legacy tasks without a durable native identity retain their original
         # read/dispatch contracts; no erased real Artifact can enter this path.
-        routing_run = routing_db.get(AIRun, run_id) if header is not None and domain is None and not any((drug_label_task, satisfaction_task, document_task, change_task)) else None
+        routing_run = routing_db.get(AIRun, run_id) if header is not None and domain is None and not any((drug_label_task, satisfaction_task, document_task, change_task, infection_task)) else None
         if routing_run is not None:
             charge = is_charge_run(routing_db, routing_run)
             satisfaction_task = not charge and is_satisfaction_run(routing_db, routing_run)
             document_task = not charge and not satisfaction_task and is_extraction_run(routing_db, routing_run)
+    if infection_task:
+        from app.ai.infection_cluster_task_runtime import execute_claimed as execute_local
+
+        await execute_local(database.SessionLocal, run_id, lease)
+        return
     if drug_label_task:
         from app.ai.drug_label_runtime import execute_drug_label_claimed
 
@@ -1438,10 +1476,13 @@ def expire_interrupted_runs(db: Session) -> int:
     from app.ai.document_change_view_contract import FEATURE_KEY as CHANGE_FEATURE
     from app.ai.drug_label_run_models import AIDrugLabelRunArtifact
     from app.ai.drug_label_runtime import expire_interrupted_drug_label_runs
+    from app.ai.infection_cluster_run_models import AIInfectionRunArtifact
+    from app.ai.infection_cluster_task_runtime import expire_interrupted_runs as expire_local
     from app.ai.satisfaction_artifact_models import AISatisfactionRunArtifact
     from app.ai.satisfaction_execution import expire_interrupted_satisfaction_runs
 
-    recovered = expire_interrupted_change_runs(db)
+    recovered = expire_local(db)
+    recovered += expire_interrupted_change_runs(db)
     recovered += expire_interrupted_charge_runs(db)
     recovered += expire_interrupted_satisfaction_runs(db)
     recovered += expire_interrupted_drug_label_runs(db)
@@ -1452,6 +1493,8 @@ def expire_interrupted_runs(db: Session) -> int:
             AIRun.status == "running",
             AIRun.start_time < deadline,
             AIRun.feature_key != "drug_label_extraction",
+            AIRun.feature_key != "infection_cluster",
+            ~AIRun.run_id.in_(db.query(AIInfectionRunArtifact.run_id)),
             AIRun.feature_key != CHANGE_FEATURE,
             ~AIRun.run_id.in_(db.query(AIDocumentChangeRunArtifact.run_id)),
             ~AIRun.run_id.in_(db.query(AIChargeRunArtifact.run_id)),

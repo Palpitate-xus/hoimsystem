@@ -10,7 +10,6 @@ from types import SimpleNamespace
 from fastapi import HTTPException
 
 from app.ai import infection_cluster_contract as c
-from app.ai import infection_cluster_input as source_input
 from app.ai import infection_cluster_registry as r
 from app.ai import infection_cluster_statistics as engine
 from app.ai import infection_cluster_task_context as context
@@ -132,6 +131,9 @@ def create_run(db, user, value):
     db.add(artifact)
     _verify(db, rid, expected_run, expected_artifact, [expected_event])
     storage.authorize(db, actor, rid, execution=True)
+    from app.ai.native_task_routing import remember_staged_identity
+
+    remember_staged_identity(db, artifact)
     return dict(run_id=rid, feature_key=t.FEATURE_KEY, status="queued", result_available=False)
 
 
@@ -257,7 +259,9 @@ def cancel(db, user, rid):
     opaque = storage.locator(db, rid)
     if opaque is None:
         raise HTTPException(404, "本地任务不存在")
-    actor = r._start(db, user, roles=source_input.SOURCE_ROLES, related_user_ids={opaque.requested_by})
+    from app.dependencies import VALID_USER_ROLES
+
+    actor = r._start(db, user, roles=VALID_USER_ROLES, related_user_ids={opaque.requested_by})
     if actor.user_id != opaque.requested_by and actor.user_role != "super_admin":
         raise HTTPException(403, "仅本人或当前Super可技术取消，不授予正文权限")
     artifact, before = storage.verify_technical_run(db, rid)

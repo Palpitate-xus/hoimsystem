@@ -1089,7 +1089,22 @@ def inspect_run_trace(run_id: str, db: Session = Depends(get_db), user: User = D
     from app.ai.document_change_views import trace_view
     from app.ai.native_task_routing import locate_native_task
 
-    locate_native_task(db, run_id)  # Reject contradictory immutable anchors.
+    identity = locate_native_task(db, run_id)  # Reject contradictory immutable anchors.
+    if identity is not None and identity.domain == "infection":
+        from app.ai.infection_cluster_task_views import metadata
+
+        return {
+            "code": 200,
+            "msg": "success",
+            "data": {
+                "schema_version": "infection_local_split_trace_v1",
+                "run": metadata(db, user, run_id),
+                "parts": {part: f"/api/ai/infection-cluster/tasks/{run_id}/parts/{part}" for part in ("task", "source", "result")},
+                "clinical_body_included": False,
+                "current_patient_purpose_required_even_for_super": True,
+            },
+        }
+
     if guard_change_run_id(db, user, run_id, current=False):
         return {"code": 200, "msg": "success", "data": trace_view(db, user, db.get(AIRun, run_id))}
     guard_private_task_read(db, user, run_id)

@@ -141,8 +141,8 @@ class RcaUsageEvent(c.StrictModel):
         if self.usage.model_call_attempted is None and self.error_code != "WORKER_INTERRUPTED":
             raise ValueError("Only actual process interruption retains an unknown call state")
         if self.status == "succeeded":
-            if not self.usage.complete or self.usage.model_call_attempted is not True or self.result_hash is None:
-                raise ValueError("Accepted success requires independent complete actual usage")
+            if self.usage.model_call_attempted is not True or self.result_hash is None or self.error_code is not None:
+                raise ValueError("Accepted content requires its actual attempt and result identity; unknown usage stays unknown")
         elif self.result_hash is not None:
             raise ValueError("Failure or cancellation cannot carry an accepted result hash")
         return self

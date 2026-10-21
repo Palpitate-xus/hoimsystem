@@ -138,6 +138,9 @@ def test_paid_rejected_partial_receipt_and_interrupted_unknown_do_not_create_suc
     assert storage.RcaUsageEvent.model_validate(unknown).usage.model_call_attempted is None
     succeeded = receipt(status="succeeded", error_code=None, result_hash="d" * 64, usage={"input_tokens": 11, "output_tokens": 13, "complete": True, "model_call_attempted": True})
     assert storage.RcaUsageEvent.model_validate(succeeded).result_hash == "d" * 64
+    partial = receipt(status="succeeded", error_code=None, result_hash="d" * 64)
+    accepted = storage.RcaUsageEvent.model_validate(partial)
+    assert accepted.usage.complete is False and accepted.usage.output_tokens is None and accepted.result_hash == "d" * 64
 
 
 @pytest.mark.parametrize(

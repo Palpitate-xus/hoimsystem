@@ -31,20 +31,28 @@ class RcaEvidenceReplyError(ValueError):
 
 
 def parse_provider_draft(kind, value, source, instructions_digest):
-    counts = None
+    counts = (None, None)
     try:
         if not isinstance(value, dict) or kind not in {"chat", "responses"}:
             raise ValueError("A configured text-provider envelope is required")
         usage = value.get("usage")
-        if not isinstance(usage, dict):
-            raise ValueError("Original usage is required")
+        if usage is None:
+            usage = {}
+        if type(usage) is not dict:
+            raise ValueError("Reported usage must be an object or remain absent/unknown")
         names = ("prompt_tokens", "completion_tokens") if kind == "chat" else ("input_tokens", "output_tokens")
         receipt = tuple(usage.get(key) for key in names)
         counts = tuple(number if type(number) is int and 0 <= number <= MAX_USAGE_TOKENS else None for number in receipt)
-        if any(number is None for number in counts):
-            raise ValueError("The actual nonnegative token counts must be explicit integers")
-        if "total_tokens" in usage and (type(usage["total_tokens"]) is not int or usage["total_tokens"] != sum(counts)):
-            raise ValueError("An optional total token receipt must be an actual consistent integer")
+        if any(original is not None and known is None for original, known in zip(receipt, counts, strict=True)):
+            raise ValueError("An explicitly reported count must be an actual bounded integer; no coercion")
+        if "total_tokens" in usage:
+            total = usage["total_tokens"]
+            if type(total) is not int or not 0 <= total <= 2 * MAX_USAGE_TOKENS or all(number is not None for number in counts) and total != sum(counts):
+                raise ValueError("An optional total token receipt must be an actual consistent integer")
+            if any(number is not None and total < number for number in counts):
+                raise ValueError("A declared total cannot be less than an independently reported component")
+            # A total never supplies a missing input/output component. Content
+            # acceptance and knowledge of its billing counts are independent.
         bounded_json(value)
         if not isinstance(source, c.RcaEvidenceSource):
             raise ValueError("The complete server-built typed public Source is required")

@@ -41,8 +41,8 @@ def test_one_completed_literal_assistant_retains_real_usage_and_partial_coverage
 
 
 @pytest.mark.parametrize("kind", ["chat", "responses"])
-@pytest.mark.parametrize("number", [None, False, "0", 0.0, -1, 2000001])
-def test_unknown_or_invalid_usage_never_becomes_zero_and_companion_is_retained(kind, number):
+@pytest.mark.parametrize("number", [False, "0", 0.0, -1, 2000001])
+def test_explicit_invalid_usage_is_rejected_without_coercion_and_companion_is_retained(kind, number):
     value = envelope(kind)
     value["usage"].pop("total_tokens")
     value["usage"]["prompt_tokens" if kind == "chat" else "input_tokens"] = number
@@ -55,9 +55,22 @@ def test_unknown_or_invalid_usage_never_becomes_zero_and_companion_is_retained(k
 def test_absent_usage_retains_none_without_fabricated_counts(kind):
     value = envelope(kind)
     del value["usage"]
-    with pytest.raises(p.RcaEvidenceReplyError) as failure:
-        p.parse_provider_draft(kind, value, c.validate_source(source_dict()), PROMPT)
-    assert failure.value.input_tokens is failure.value.output_tokens is None
+    result, inputs, outputs = p.parse_provider_draft(kind, value, c.validate_source(source_dict()), PROMPT)
+    assert result.coverage == c.COVERAGE and inputs is outputs is None
+
+
+@pytest.mark.parametrize("kind", ["chat", "responses"])
+@pytest.mark.parametrize("shape", ["null", "empty", "partial", "partial_with_total", "null_component"])
+def test_legal_unknown_usage_is_independent_of_complete_literal_content_and_total_does_not_fill_missing(kind, shape):
+    value = envelope(kind)
+    inputs_key, outputs_key = ("prompt_tokens", "completion_tokens") if kind == "chat" else ("input_tokens", "output_tokens")
+    value["usage"] = None if shape == "null" else {} if shape == "empty" else {inputs_key: 11}
+    if shape == "partial_with_total":
+        value["usage"]["total_tokens"] = 24
+    elif shape == "null_component":
+        value["usage"][outputs_key] = None
+    result, inputs, outputs = p.parse_provider_draft(kind, value, c.validate_source(source_dict()), PROMPT)
+    assert result.coverage == c.COVERAGE and inputs == (None if shape in {"null", "empty"} else 11) and outputs is None
 
 
 @pytest.mark.parametrize("kind", ["chat", "responses"])

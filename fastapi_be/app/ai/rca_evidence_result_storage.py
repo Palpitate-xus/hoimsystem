@@ -141,8 +141,8 @@ def stage_result(db, user, proof, result, *, dispatch_event_id, usage, latency_m
     if db.scalar(select(AIRcaEvidenceRunResult.run_id).where(AIRcaEvidenceRunResult.run_id == run.run_id)) is not None:
         raise HTTPException(409, "原任务已有完整结果行，不能覆盖或重放")
     usage = RcaUsageReceipt.model_validate(usage)
-    if not usage.complete or usage.model_call_attempted is not True:
-        raise ValueError("Accepted content needs both independently received actual token counts")
+    if usage.model_call_attempted is not True:
+        raise ValueError("Accepted content requires an actually attempted call, not invented or inferred usage")
     result = result_types.validate_result(result, stored.source, artifact.instructions_digest)
     cases.wire(result)  # The actual entire split wire, not only the inner JSON.
     raw = c.canonical(result)
@@ -151,7 +151,8 @@ def stage_result(db, user, proof, result, *, dispatch_event_id, usage, latency_m
         raise ValueError("The actual bounded latency and non-reversed UTC6 acceptance clock are required")
     run.status, run.finish_time, run.latency_ms = "succeeded", when.replace(microsecond=0), latency_ms
     run.error_code = run.error_message = None
-    run.input_tokens, run.output_tokens = usage.input_tokens, usage.output_tokens
+    run.input_tokens = usage.input_tokens if usage.input_tokens is not None else 0
+    run.output_tokens = usage.output_tokens if usage.output_tokens is not None else 0
     header = {key: getattr(run, key) for key in storage.RUN_HEADER}
     artifact_header = {key: getattr(artifact, key) for key in storage.ART_COLUMNS if key not in storage.ART_TEXT}
     result_header = {

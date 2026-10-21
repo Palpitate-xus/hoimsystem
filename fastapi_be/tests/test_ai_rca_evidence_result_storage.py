@@ -107,7 +107,7 @@ def test_same_claim_with_another_dispatch_pk_cannot_accept_its_returned_content(
     assert task_counts(db) == before and db.query(AIRun.status).filter_by(run_id=proof.run_id).scalar() == "running"
 
 
-@pytest.mark.parametrize("fault", ["fixed_summary", "quote", "source_hash", "instructions", "foreign_result", "usage_missing", "usage_false"])
+@pytest.mark.parametrize("fault", ["fixed_summary", "quote", "source_hash", "instructions", "foreign_result", "usage_false"])
 def test_full_result_binding_fixed_explanation_literal_quotes_and_actual_usage_are_required(grant_case, fault):
     case, db = grant_case, grant_case["db"]
     proof, _ = dispatched(case)
@@ -123,8 +123,6 @@ def test_full_result_binding_fixed_explanation_literal_quotes_and_actual_usage_a
         value["rca_evidence_draft"]["instructions_digest"] = "f" * 64
     elif fault == "foreign_result":
         value["document_extraction"] = {}
-    elif fault == "usage_missing":
-        extra["usage"] = usage(11, None)
     else:
         extra["usage"] = usage(0, 0, False)
     before = task_counts(db)
@@ -132,6 +130,19 @@ def test_full_result_binding_fixed_explanation_literal_quotes_and_actual_usage_a
         accept(case, proof, value, **extra)
     assert failure.value.status_code == 409 and task_counts(db) == before
     assert db.query(AIRun.status).filter_by(run_id=proof.run_id).scalar() == "running"
+
+
+@pytest.mark.parametrize("inputs,outputs", [(None, None), (11, None), (None, 13), (0, 0)])
+def test_valid_content_success_keeps_actual_nullable_usage_without_inventing_individual_counts(grant_case, inputs, outputs):
+    case, db = grant_case, grant_case["db"]
+    proof, _ = dispatched(case)
+    value = accept(case, proof, usage=usage(inputs, outputs))
+    db.commit()
+    assert storage.read_result(db, case["actor"], proof.run_id) == value
+    actual = receipts.read_receipt(db, receipts.technical_attempt(db, proof))
+    assert actual.status == "succeeded" and actual.usage.model_dump(mode="json") == usage(inputs, outputs)
+    assert actual.usage.complete is (inputs is not None and outputs is not None)
+    assert db.query(AIRun.input_tokens, AIRun.output_tokens).filter_by(run_id=proof.run_id).one() == (inputs or 0, outputs or 0)
 
 
 @pytest.mark.parametrize("fault", ["pointer_whitespace", "pointer_duplicate", "blob_hash", "blob_self_rehash", "accept_pk", "usage_pk", "accepted_clock"])

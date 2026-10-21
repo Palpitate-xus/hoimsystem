@@ -129,11 +129,11 @@ async def test_preflight_rejection_makes_no_http_attempt_and_never_truncates(pro
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize("axis", ["partial_usage", "bad_quote", "tool", "duplicate", "nonfinite", "invalid_utf8", "redirect", "oversize"])
+@pytest.mark.parametrize("axis", ["invalid_usage", "bad_quote", "tool", "duplicate", "nonfinite", "invalid_utf8", "redirect", "oversize"])
 async def test_actual_response_rejection_keeps_only_real_paid_usage_and_one_attempt(provider, axis):
     body = envelope("chat")
-    if axis == "partial_usage":
-        del body["usage"]["completion_tokens"]
+    if axis == "invalid_usage":
+        body["usage"]["completion_tokens"] = False
         body["usage"].pop("total_tokens")
     elif axis == "bad_quote":
         raw = json.loads(body["choices"][0]["message"]["content"])
@@ -164,8 +164,28 @@ async def test_actual_response_rejection_keeps_only_real_paid_usage_and_one_atte
     with pytest.raises(g.RcaEvidenceGatewayError) as failure:
         await g.generate_rca_evidence(provider, TASK_PROMPT, data(), transport=transport)
     assert len(seen) == 1 and failure.value.model_call_attempted is True
-    expected = (11, None) if axis == "partial_usage" else (11, 13) if axis in {"bad_quote", "tool"} else (None, None)
+    expected = (11, None) if axis == "invalid_usage" else (11, 13) if axis in {"bad_quote", "tool"} else (None, None)
     assert (failure.value.input_tokens, failure.value.output_tokens) == expected
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("kind", ["chat", "responses"])
+@pytest.mark.parametrize("shape", ["missing", "null", "partial", "partial_with_total"])
+async def test_real_asgi_complete_literal_draft_can_succeed_with_legal_unknown_or_partial_usage(provider, kind, shape):
+    provider.kind = kind
+    body = envelope(kind)
+    if shape == "missing":
+        del body["usage"]
+    elif shape == "null":
+        body["usage"] = None
+    else:
+        body["usage"] = {("prompt_tokens" if kind == "chat" else "input_tokens"): 11}
+        if shape == "partial_with_total":
+            body["usage"]["total_tokens"] = 24
+    transport, seen = service(lambda request, raw: JSONResponse(body))
+    result, inputs, outputs = await g.generate_rca_evidence(provider, TASK_PROMPT, data(), transport=transport)
+    assert len(seen) == 1 and result.rca_evidence_draft.coverage == c.COVERAGE
+    assert inputs == (11 if shape.startswith("partial") else None) and outputs is None
 
 
 @pytest.mark.asyncio

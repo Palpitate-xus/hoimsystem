@@ -3,6 +3,7 @@
 from typing import Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi.responses import JSONResponse
 from sqlalchemy import or_
 from sqlalchemy.exc import IntegrityError, OperationalError
 from sqlalchemy.orm import Session
@@ -16,7 +17,7 @@ from app.dependencies import require_roles
 from app.models import Consumable, Pharmaceutical, User
 from app.routers.inpatient_support import QueryPositiveInteger
 
-router = APIRouter(tags=["AI医院单SKU计数单位与原始数量"])
+router = APIRouter(tags=["AI医院单SKU计数单位与原始数量"], default_response_class=JSONResponse)
 
 
 def write(db, user, operation, kind):

@@ -291,3 +291,23 @@ def test_prompt_origin_sql_rejects_null_positive_and_nonnull_zero_versions(confi
             db.execute(text("UPDATE hoimsystem_ai_research_cohort_run_artifact SET " + command + " WHERE run_id=:id"), {"id": run_id})
         db.rollback()
     assert load_artifact(db, actor, run_id)[1].prompt_id == values["prompt_id"]
+
+
+@pytest.mark.parametrize("change", ["role", "token_epoch"])
+def test_worker_id_only_actor_cannot_execute_queued_artifact_after_creation_epoch_change(configured, change):
+    from types import SimpleNamespace
+
+    db, actor, run_id, _, values, _ = configured
+    identifier = actor.user_id
+    freeze_artifact(db, actor, run_id, values["case_id"])
+    db.commit()
+    db.execute(text("UPDATE hoimsystem_users SET " + ("user_role='doctor'" if change == "role" else "token_invalid_before='2030-01-01 00:00:00'") + " WHERE user_id=:id"), {"id": identifier})
+    db.commit()
+    # A worker resolves only the actual requester PK. It must compare against
+    # the creation epoch stored in the artifact, not just today's allowed role.
+    with pytest.raises(HTTPException) as error:
+        load_artifact(db, SimpleNamespace(user_id=identifier), run_id, execution=True)
+    assert error.value.status_code == 409
+    # A separately authorized current session may still inspect its old task;
+    # the frozen creation epoch blocks dispatch, not all historical reading.
+    assert load_artifact(db, SimpleNamespace(user_id=identifier), run_id, execution=False)[0].run_id == run_id

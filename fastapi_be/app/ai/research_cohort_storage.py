@@ -10,10 +10,11 @@ import json
 import math
 
 from fastapi import HTTPException
+from pydantic import TypeAdapter
 
 from app.ai.research_cohort_artifact_models import ARTIFACT_SCHEMA, BINDING_BYTES, FRAME_BYTES, AIResearchCohortRunArtifact
 from app.ai.research_cohort_cases import authorize_case, binding_for, case_current
-from app.ai.research_cohort_contract import canonical_json
+from app.ai.research_cohort_contract import UTC, canonical_json
 from app.ai.research_cohort_draft import MAX_BYTES, checked_source, digest
 from app.ai.research_cohort_prompt import RESEARCH_SYSTEM_PROMPT, RESEARCH_TASK_VERSION, instructions_for, packaged_task_prompt
 from app.ai.research_cohort_protocol import _nonfinite, _object, model_wire
@@ -95,6 +96,7 @@ def _configuration(db, actor, *, preview):
     execution = {
         "schema_version": "research_execution_snapshot_v1",
         "feature_key": FEATURE,
+        "requester_epoch": {"user_id": actor.user_id, "user_role": actor.user_role, "token_invalid_before": utc_text(actor.token_invalid_before)},
         "configuration": {"revision": config.revision, "enabled": config.enabled, "allowed_roles": roles, "daily_limit": config.daily_limit, "active_prompt_id": config.active_prompt_id},
         "provider_snapshot": provider_snapshot,
         "feature_validation": {
@@ -149,7 +151,7 @@ def _frame_proof_impl(artifact):
     if type(binding) is not dict or type(prompt) is not dict or type(execution) is not dict:
         raise HTTPException(409, "研究分件冻结证明须为完整闭集对象")
     expected_prompt = {"schema_version", "prompt_id", "prompt_version", "origin", "catalog_version", "native_task_version", "system_prompt", "task_prompt", "instructions_digest"}
-    expected_execution = {"schema_version", "feature_key", "configuration", "provider_snapshot", "feature_validation"}
+    expected_execution = {"schema_version", "feature_key", "requester_epoch", "configuration", "provider_snapshot", "feature_validation"}
     if (
         set(prompt) != expected_prompt
         or set(execution) != expected_execution
@@ -158,6 +160,24 @@ def _frame_proof_impl(artifact):
         or execution["feature_key"] != FEATURE
     ):
         raise HTTPException(409, "研究Prompt或执行快照不是原闭集协议")
+    from app.dependencies import VALID_USER_ROLES
+
+    epoch = execution["requester_epoch"]
+    if (
+        type(epoch) is not dict
+        or set(epoch) != {"user_id", "user_role", "token_invalid_before"}
+        or type(epoch["user_id"]) is not int
+        or epoch["user_id"] != artifact.requested_by
+        or type(epoch["user_role"]) is not str
+        or epoch["user_role"] not in VALID_USER_ROLES
+    ):
+        raise HTTPException(409, "科研创建时请求者身份时钟不是原闭集")
+    if epoch["token_invalid_before"] is not None:
+        TypeAdapter(UTC).validate_python(epoch["token_invalid_before"], strict=True)
+    if (prompt["origin"], prompt["prompt_id"], prompt["prompt_version"]) != ("packaged_catalog", None, 0) and not (
+        prompt["origin"] == "database_version" and type(prompt["prompt_id"]) is str and type(prompt["prompt_version"]) is int and prompt["prompt_version"] > 0
+    ):
+        raise HTTPException(409, "科研Prompt来源须为真实packaged空FK或数据库版本FK")
     if (
         prompt["system_prompt"] != RESEARCH_SYSTEM_PROMPT
         or prompt["instructions_digest"] != _sha(instructions_for(prompt["task_prompt"]))
@@ -258,7 +278,7 @@ def load_artifact(db, user, run_id, *, audit_only=False, execution=False):
     if created is None or created.actor_id != artifact.requested_by or created.target != run_id or created.action != "research.task.artifact.create" or created.detail_json != detail:
         raise HTTPException(409, "科研创建回执不是原具体AuditPK或内容已变")
     if execution:
-        if _configuration(db, actor, preview=bool(run.preview)) != (prompt, frozen_execution):
+        if canonical_json(_configuration(db, actor, preview=bool(run.preview))) != canonical_json((prompt, frozen_execution)):
             raise HTTPException(409, "科研当前配置、Provider或Prompt版本已变化，未继续旧冻结执行")
         model_wire(source, parsed["input_json"]["question"], prompt["task_prompt"])
     return run, artifact, case, source

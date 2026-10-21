@@ -116,3 +116,8 @@ export async function resolveOperationsCitation(span,source,{current=()=>true}={
  const document=source.documents.find(v=>v.source_id===span.source_id),text=document&&Array.from(document.text);if(!text||span.end_codepoint>text.length||text.slice(span.start_codepoint,span.end_codepoint).join('')!==span.quote||!current())return null;
  return{...span,document};
 }catch{return null;}}
+
+export function verifyOperationsSharedDirectoryRow(value,{current=()=>true}={}){try{
+ const names=['schema_version','run_id','feature_key','status','requested_by','preview','create_time','start_time','finish_time','finish_clock_basis','split_artifacts','input_mode','parts_wire','parts_state','binding','usage','usage_event_id','receipt_pending','error_code','error_message'];
+ return current()&&keys(value,[...names,'provider_id','feedback_count'])&&verifyOperationsTaskMetadata(pick(value,names),{current})&&value.parts_state!=='available'&&nullable(value.provider_id,positive)&&count(value.feedback_count);
+}catch{return false;}}

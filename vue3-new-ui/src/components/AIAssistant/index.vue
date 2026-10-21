@@ -114,6 +114,7 @@
 
     <drug-label-assistant v-else-if="dedicatedPanel==='drug_label'" :feature="configuredFeature||null" :feature-key="featureKey" :initial-input="props.initialInput" :patient-id="props.patientId" :encounter-ref="props.encounterRef" :pharmaceutical-id="props.pharmaceuticalId" :active="viewActive" />
     <research-cohort-panel v-else-if="dedicatedPanel==='research_cohort'" :feature="configuredFeature||null" :feature-key="featureKey" :initial-input="props.initialInput" :patient-id="props.patientId" :encounter-ref="props.encounterRef" :pharmaceutical-id="props.pharmaceuticalId" :active="viewActive" />
+    <operations-support-assistant v-else-if="dedicatedPanel==='operations'" :feature="configuredFeature||null" :feature-key="featureKey" :initial-input="props.initialInput" :patient-id="props.patientId" :encounter-ref="props.encounterRef" :pharmaceutical-id="props.pharmaceuticalId" :active="viewActive" />
 
     <template v-if="!dedicatedLifecycle">
     <el-card v-if="run" shadow="never" class="spaced" aria-label="AI任务结果">
@@ -260,6 +261,7 @@ import AiImageFindings from "@/components/AIImageFindings/index.vue";
 import AiEcgInput from "@/components/AIEcgInput/index.vue";
 import AiEcgFindings from "@/components/AIEcgFindings/index.vue";
 
+const OperationsSupportAssistant=defineAsyncComponent(()=>import("@/components/ai/OperationsSupportAssistant.vue"));
 const ChargeReconciliationAssistant=defineAsyncComponent(()=>import("@/components/ai/ChargeReconciliationAssistant.vue"));
 const DocumentExtractionAssistant=defineAsyncComponent(()=>import("@/components/ai/DocumentExtractionAssistant.vue"));
 const DocumentChangeAssistant=defineAsyncComponent(()=>import("@/components/ai/DocumentChangeAssistant.vue"));
@@ -313,9 +315,11 @@ const documentChangeWasBound=ref(false),documentChangeLifecycle=computed(()=>doc
 watch([featureKey,()=>hasInitialReference('document_change_scope_id')],([key,bound])=>{if(key==='guideline_change_review'||bound)documentChangeWasBound.value=true;},{immediate:true,flush:'sync'});
 const researchWasBound=ref(false),researchLifecycle=computed(()=>researchWasBound.value||featureKey.value==='research_cohort'||hasInitialReference('research_cohort_case_id'));
 watch([featureKey,()=>hasInitialReference('research_cohort_case_id')],([key,bound])=>{if(key==='research_cohort'||bound)researchWasBound.value=true;},{immediate:true,flush:'sync'});
-const dedicatedLifecycle=computed(()=>chargeLifecycle.value||documentLifecycle.value||satisfactionLifecycle.value||drugLabelLifecycle.value||documentChangeLifecycle.value||researchLifecycle.value);
+const operationsWasBound=ref(false),operationsLifecycle=computed(()=>operationsWasBound.value||featureKey.value==='operations_support'||hasInitialReference('operations_case_id'));
+watch([featureKey,()=>hasInitialReference('operations_case_id')],([key,bound])=>{if(key==='operations_support'||bound)operationsWasBound.value=true;},{immediate:true,flush:'sync'});
+const dedicatedLifecycle=computed(()=>chargeLifecycle.value||documentLifecycle.value||satisfactionLifecycle.value||drugLabelLifecycle.value||documentChangeLifecycle.value||researchLifecycle.value||operationsLifecycle.value);
 const dedicatedPanel=ref(null);
-watch([featureKey,()=>hasInitialReference('charge_case_id'),()=>hasInitialReference('document_original_id'),()=>hasInitialReference('satisfaction_case_id'),()=>hasInitialReference('drug_label_source_binding_id'),()=>hasInitialReference('document_change_scope_id'),()=>hasInitialReference('research_cohort_case_id')],([key,charge,document,satisfaction,drugLabel,documentChange,research])=>{const explicit={charge_reconciliation:'charge',guideline_ingestion:'document',feedback_analysis:'satisfaction',drug_label_extraction:'drug_label',guideline_change_review:'document_change',research_cohort:'research_cohort'}[key];if(explicit){dedicatedPanel.value=explicit;return;}const bound=[charge?'charge':null,document?'document':null,satisfaction?'satisfaction':null,drugLabel?'drug_label':null,documentChange?'document_change':null,research?'research_cohort':null].filter(Boolean);if(bound.length===1||!dedicatedPanel.value&&bound.length)dedicatedPanel.value=bound[0];},{immediate:true,flush:'sync'});
+watch([featureKey,()=>hasInitialReference('charge_case_id'),()=>hasInitialReference('document_original_id'),()=>hasInitialReference('satisfaction_case_id'),()=>hasInitialReference('drug_label_source_binding_id'),()=>hasInitialReference('document_change_scope_id'),()=>hasInitialReference('research_cohort_case_id'),()=>hasInitialReference('operations_case_id')],([key,charge,document,satisfaction,drugLabel,documentChange,research,operations])=>{const explicit={charge_reconciliation:'charge',guideline_ingestion:'document',feedback_analysis:'satisfaction',drug_label_extraction:'drug_label',guideline_change_review:'document_change',research_cohort:'research_cohort',operations_support:'operations'}[key];if(explicit){dedicatedPanel.value=explicit;return;}const bound=[charge?'charge':null,document?'document':null,satisfaction?'satisfaction':null,drugLabel?'drug_label':null,documentChange?'document_change':null,research?'research_cohort':null,operations?'operations':null].filter(Boolean);if(bound.length===1||!dedicatedPanel.value&&bound.length)dedicatedPanel.value=bound[0];},{immediate:true,flush:'sync'});
 const selected = computed(() => dedicatedLifecycle.value?null:configuredFeature.value);
 const needsRoster=computed(()=>featureKey.value==='roster_optimization'&&selected.value?.input_mode==='roster'),rosterSelection=ref(null),rosterReady=ref(false),rosterWasBound=ref(false),rosterInputKey=ref(0);
 const rosterInitialReferences=computed(()=>props.initialInput?.roster_plan_id==null?null:{roster_plan_id:props.initialInput?.roster_plan_id});

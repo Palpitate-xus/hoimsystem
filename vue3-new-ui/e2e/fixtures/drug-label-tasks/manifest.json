@@ -1,0 +1,19 @@
+{
+  "inputs": {
+    "chat": {
+      "path": "/tmp/hoim-drug-label-task-views-first-pytest/test_actual_task_views_all_sta0/actual-drug-label-task-chat.json",
+      "bytes": 505947,
+      "sha256": "a5b28f9c1546950648b557cf8dc15d35630a933eb89f9b246df55f84fd3157df",
+      "scope": "Actual SQLite governed Source and dedicated Task functions/MockTransport. Trace is from authorized SQL functions, not mounted HTTP/JWT or a real model."
+    },
+    "responses": {
+      "path": "/tmp/hoim-drug-label-task-views-first-pytest/test_actual_task_views_all_sta1/actual-drug-label-task-responses.json",
+      "bytes": 506042,
+      "sha256": "c76cf3d000272fedb57d262aed6dff0a3e37cb0415dfa5c56fd64814a578a138",
+      "scope": "Actual SQLite governed Source and dedicated Task functions/MockTransport. Trace is from authorized SQL functions, not mounted HTTP/JWT or a real model."
+    }
+  },
+  "bytes": 135785,
+  "sha256": "edb681e695a5a9bbc16a102f0fb8feb4cfc91ba597d728e05d7a9e8a7449bb7d",
+  "scope": "Lossless actual governed SQLite Source and dedicated task functions/MockTransport. Authorized traces are SQL function outputs; not mounted HTTP/JWT or an external model."
+}

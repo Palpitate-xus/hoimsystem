@@ -52,7 +52,6 @@ class BoundedDocumentRoute(APIRoute):
 
 
 router = APIRouter(route_class=BoundedDocumentRoute)
-SUPER = require_roles("super_admin")
 
 
 def _commit(db, operation):
@@ -72,7 +71,7 @@ def _commit(db, operation):
 
 
 @router.get("/ai/admin/document-evidence/options")
-def options(db: Session = Depends(get_db), user: User = Depends(SUPER)):
+def options(db: Session = Depends(get_db), user: User = Depends(require_roles("super_admin"))):
     sources.current_super(db, user)
     return {
         "code": 200,
@@ -98,12 +97,12 @@ def options(db: Session = Depends(get_db), user: User = Depends(SUPER)):
 
 
 @router.post("/ai/admin/document-evidence/originals")
-def create_original(req: c.OriginalCreate, db: Session = Depends(get_db), user: User = Depends(SUPER)):
+def create_original(req: c.OriginalCreate, db: Session = Depends(get_db), user: User = Depends(require_roles("super_admin"))):
     return _commit(db, lambda: sources.create_original(db, user, req))
 
 
 @router.get("/ai/admin/document-evidence/originals")
-def originals(page: int = Query(1, ge=1, le=1000000), page_size: int = Query(20, ge=1, le=100), db: Session = Depends(get_db), user: User = Depends(SUPER)):
+def originals(page: int = Query(1, ge=1, le=1000000), page_size: int = Query(20, ge=1, le=100), db: Session = Depends(get_db), user: User = Depends(require_roles("super_admin"))):
     sources.current_super(db, user)
     query = db.query(AIDocumentOriginal)
     total = query.with_entities(AIDocumentOriginal.original_id).count()
@@ -136,27 +135,29 @@ def originals(page: int = Query(1, ge=1, le=1000000), page_size: int = Query(20,
 
 
 @router.get("/ai/admin/document-evidence/originals/{original_id}")
-def original_detail(original_id: str, db: Session = Depends(get_db), user: User = Depends(SUPER)):
+def original_detail(original_id: str, db: Session = Depends(get_db), user: User = Depends(require_roles("super_admin"))):
     return {"code": 200, "msg": "success", "data": sources.original_detail(db, user, original_id).model_dump(mode="json")}
 
 
 @router.post("/ai/admin/document-evidence/originals/{original_id}/review")
-def review_original(original_id: str, req: c.ReviewRequest, db: Session = Depends(get_db), user: User = Depends(SUPER)):
+def review_original(original_id: str, req: c.ReviewRequest, db: Session = Depends(get_db), user: User = Depends(require_roles("super_admin"))):
     return _commit(db, lambda: sources.review_original(db, user, original_id, req))
 
 
 @router.post("/ai/admin/document-evidence/originals/{original_id}/revoke")
-def revoke_original(original_id: str, req: c.RevokeRequest, db: Session = Depends(get_db), user: User = Depends(SUPER)):
+def revoke_original(original_id: str, req: c.RevokeRequest, db: Session = Depends(get_db), user: User = Depends(require_roles("super_admin"))):
     return _commit(db, lambda: sources.revoke_original(db, user, original_id, req))
 
 
 @router.post("/ai/admin/document-evidence/candidates")
-def create_candidate(req: c.CandidateCreate, db: Session = Depends(get_db), user: User = Depends(SUPER)):
+def create_candidate(req: c.CandidateCreate, db: Session = Depends(get_db), user: User = Depends(require_roles("super_admin"))):
     return _commit(db, lambda: sources.create_candidate(db, user, req))
 
 
 @router.get("/ai/admin/document-evidence/candidates")
-def candidates(original_id: str | None = None, page: int = Query(1, ge=1, le=1000000), page_size: int = Query(20, ge=1, le=100), db: Session = Depends(get_db), user: User = Depends(SUPER)):
+def candidates(
+    original_id: str | None = None, page: int = Query(1, ge=1, le=1000000), page_size: int = Query(20, ge=1, le=100), db: Session = Depends(get_db), user: User = Depends(require_roles("super_admin"))
+):
     sources.current_super(db, user)
     query = db.query(AIDocumentSpanCandidate)
     if original_id is not None:
@@ -189,27 +190,27 @@ def candidates(original_id: str | None = None, page: int = Query(1, ge=1, le=100
 
 
 @router.get("/ai/admin/document-evidence/candidates/{candidate_id}")
-def candidate_detail(candidate_id: str, db: Session = Depends(get_db), user: User = Depends(SUPER)):
+def candidate_detail(candidate_id: str, db: Session = Depends(get_db), user: User = Depends(require_roles("super_admin"))):
     return {"code": 200, "msg": "success", "data": sources.candidate_detail(db, user, candidate_id).model_dump(mode="json")}
 
 
 @router.post("/ai/admin/document-evidence/candidates/{candidate_id}/review")
-def review_candidate(candidate_id: str, req: c.ReviewRequest, db: Session = Depends(get_db), user: User = Depends(SUPER)):
+def review_candidate(candidate_id: str, req: c.ReviewRequest, db: Session = Depends(get_db), user: User = Depends(require_roles("super_admin"))):
     return _commit(db, lambda: sources.review_candidate(db, user, candidate_id, req))
 
 
 @router.post("/ai/admin/document-evidence/candidates/{candidate_id}/revoke")
-def revoke_candidate(candidate_id: str, req: c.RevokeRequest, db: Session = Depends(get_db), user: User = Depends(SUPER)):
+def revoke_candidate(candidate_id: str, req: c.RevokeRequest, db: Session = Depends(get_db), user: User = Depends(require_roles("super_admin"))):
     return _commit(db, lambda: sources.revoke_candidate(db, user, candidate_id, req))
 
 
 @router.post("/ai/admin/document-evidence/candidates/{candidate_id}/publish")
-def publish_candidate(candidate_id: str, req: c.PublishRequest, db: Session = Depends(get_db), user: User = Depends(SUPER)):
+def publish_candidate(candidate_id: str, req: c.PublishRequest, db: Session = Depends(get_db), user: User = Depends(require_roles("super_admin"))):
     return _commit(db, lambda: sources.publish_candidate(db, user, candidate_id, req))
 
 
 @router.get("/ai/admin/document-evidence/publications")
-def publications(page: int = Query(1, ge=1, le=1000000), page_size: int = Query(20, ge=1, le=100), db: Session = Depends(get_db), user: User = Depends(SUPER)):
+def publications(page: int = Query(1, ge=1, le=1000000), page_size: int = Query(20, ge=1, le=100), db: Session = Depends(get_db), user: User = Depends(require_roles("super_admin"))):
     sources.current_super(db, user)
     model = AIDocumentKnowledgePublication
     query = db.query(model)
@@ -221,10 +222,10 @@ def publications(page: int = Query(1, ge=1, le=1000000), page_size: int = Query(
 
 
 @router.get("/ai/admin/document-evidence/publications/{publication_id}")
-def publication_detail(publication_id: str, db: Session = Depends(get_db), user: User = Depends(SUPER)):
+def publication_detail(publication_id: str, db: Session = Depends(get_db), user: User = Depends(require_roles("super_admin"))):
     return {"code": 200, "msg": "success", "data": sources.publication_detail(db, user, publication_id).model_dump(mode="json")}
 
 
 @router.post("/ai/admin/document-evidence/publications/{publication_id}/revoke")
-def revoke_publication(publication_id: str, req: c.RevokeRequest, db: Session = Depends(get_db), user: User = Depends(SUPER)):
+def revoke_publication(publication_id: str, req: c.RevokeRequest, db: Session = Depends(get_db), user: User = Depends(require_roles("super_admin"))):
     return _commit(db, lambda: sources.revoke_publication(db, user, publication_id, req))

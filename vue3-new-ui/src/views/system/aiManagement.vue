@@ -77,6 +77,7 @@
         <el-tab-pane v-if="canCheckForecast" label="指南原文与摘录治理" name="document_evidence" lazy><document-evidence-panel v-if="tab==='document_evidence' && canCheckForecast" :active="tab==='document_evidence' && canCheckForecast" @knowledge-published="refresh" /></el-tab-pane>
         <el-tab-pane v-if="canManageDrugLabels" label="说明书原文与独立签署治理" name="drug_label_sources" lazy><template v-if="tab==='drug_label_sources'&&canManageDrugLabels"><el-checkbox v-model="drugLabelAuditOnly">明确只读冻结说明书来源</el-checkbox><drug-label-source-panel :key="String(drugLabelAuditOnly)" :active="tab==='drug_label_sources'&&canManageDrugLabels" :audit-only="drugLabelAuditOnly" /></template></el-tab-pane>
         <el-tab-pane v-if="canCheckForecast" label="双原文范围与规则关联" name="document_change" lazy><document-change-sources v-if="tab==='document_change' && canCheckForecast" :active="tab==='document_change' && canCheckForecast" /></el-tab-pane>
+        <el-tab-pane v-if="canCheckForecast" label="合成教学课程与独立复核治理" name="clinical_training_sources" lazy><clinical-training-sources v-if="tab==='clinical_training_sources'&&canCheckForecast" :active="tab==='clinical_training_sources'&&canCheckForecast" /></el-tab-pane>
         <el-tab-pane v-if="canManageResearchSources" label="科研来源治理" name="research_cohort_sources" lazy>
           <template v-if="tab==='research_cohort_sources'&&canManageResearchSources">
             <el-checkbox v-model="researchSourcesAuditOnly" aria-label="只读核对冻结科研来源">只读核对冻结科研来源</el-checkbox>
@@ -132,9 +133,9 @@
         <el-form-item label="模型服务"><el-select v-model="featureForm.provider_id" clearable placeholder="选择已配置的服务"><el-option v-for="item in providers" :key="item.provider_id" :label="item.name" :value="item.provider_id" /></el-select></el-form-item>
         <el-form-item label="使用角色"><el-checkbox-group v-model="featureForm.allowed_roles"><el-checkbox v-for="role in selectedFeature.default_roles" :key="role" :value="role">{{ roles[role] || role }}</el-checkbox></el-checkbox-group></el-form-item>
         <el-form-item label="验证状态"><el-select v-model="featureForm.validation_status"><el-option v-for="(label, value) in validations" :key="value" :label="label" :value="value" /></el-select></el-form-item>
-        <el-form-item label="验证记录"><el-input v-model="featureForm.validation_note" type="textarea" :rows="4" maxlength="5000" :placeholder="selectedFeature.requires_operational_validation ? '记录实际科室、输入覆盖、离线回放与边界验证结果、负责人和依据；普通运营执行与启用前须完成验证' : '记录适用范围、病例验证结果、负责人和依据；临床启用前需要完成验证'" /></el-form-item>
+        <el-form-item label="验证记录"><el-input v-model="featureForm.validation_note" type="textarea" :rows="4" maxlength="5000" :placeholder="selectedFeature.key==='clinical_training'?'记录明确合成教学材料、本人提交、独立模型处理许可、逐字引用与未知用量的教学反馈适用范围；不代表临床能力或资质认证':selectedFeature.requires_operational_validation ? '记录实际科室、输入覆盖、离线回放与边界验证结果、负责人和依据；普通运营执行与启用前须完成验证' : '记录适用范围、病例验证结果、负责人和依据；临床启用前需要完成验证'" /></el-form-item>
         <el-form-item label="每日调用上限"><el-input-number v-model="featureForm.daily_limit" :min="1" :max="10000" /></el-form-item>
-        <el-form-item label="面向业务启用"><el-switch v-model="featureForm.enabled" :disabled="selectedFeature.requires_operational_validation && !featureForm.enabled && featureForm.validation_status!=='validated'" /><p v-if="selectedFeature.requires_operational_validation">此运营能力须完成实际范围验证后才能面向业务启用和普通执行；管理员预览不代表本地验证、候选获批或实际排班已改变。</p></el-form-item>
+        <el-form-item label="面向业务启用"><el-switch v-model="featureForm.enabled" :disabled="selectedFeature.requires_operational_validation && !featureForm.enabled && featureForm.validation_status!=='validated'" /><p v-if="selectedFeature.key==='clinical_training'">教学AI须明确验证本次教学反馈适用范围；本地固定集合匹配不要求模型启用，预览不代替独立复核、模型处理许可或临床能力认证。</p><p v-else-if="selectedFeature.requires_operational_validation">此运营能力须完成实际范围验证后才能面向业务启用和普通执行；管理员预览不代表本地验证、候选获批或实际排班已改变。</p></el-form-item>
       </el-form>
       <template #footer><el-button @click="featureDialog = false">取消</el-button><el-button type="primary" :loading="saving" @click="submitFeature">保存配置</el-button></template>
     </el-dialog>
@@ -353,6 +354,7 @@ const DocumentChangeSources=defineAsyncComponent(()=>import("@/components/ai/Doc
 const AiCodingEvidenceSources=defineAsyncComponent(()=>import("@/components/CodingEvidenceSources.vue"));
 const ChargeReconciliationSourcePanel=defineAsyncComponent(()=>import("@/components/ai/ChargeReconciliationSourcePanel.vue"));
 const SatisfactionSourcePanel=defineAsyncComponent(()=>import("@/components/ai/SatisfactionSourcePanel.vue"));
+const ClinicalTrainingSources=defineAsyncComponent(()=>import("@/components/ai/ClinicalTrainingSources.vue"));
 const ResearchCohortSources=defineAsyncComponent(()=>import("@/components/ai/ResearchCohortSources.vue"));
 const AiSurgerySources=defineAsyncComponent(()=>import("@/components/AISurgerySources.vue"));
 const AiSurgeryScenarios=defineAsyncComponent(()=>import("@/components/AISurgeryScenarios.vue"));

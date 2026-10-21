@@ -425,3 +425,5 @@
 - 2026-10-21 第80项实际独立MySQL：首轮30机制28.937s一次通过，1176后端/映射输入前后稳定并与Root80逐字相同；4新增表8UTC6/6MEDIUM，up/down/up保持231旧注册表DDL/行及5合成用户。真实课程/独立复核/提交3PK与撤回总5PK、完整字节/FK/旧RR/同Session expunge、1205锁/NOWAIT409/3种after-insert整笔回滚和失权零BODY实证。断网无端口/源码挂载、进程RSA、guard零违规、清理完成；只覆盖Source/本地练习，尚不称HTTP/AI Task/模型/FE或临床效力。
 
 - 2026-10-21 第80项正式Main/JWT Source练习：17真实路由/951接口RBAC，14完整文件一次893通过/12既有SQLite提示，75.11s pytest、86.551s外层、1179输入稳定。不同超管独立课程复核、无答案公开题面SHA/复核头、实际提交先commit再GET答案反馈、3完整bare分件、当前撤回/epoch/owner否决、bodyless目录与敏感GET操作审计均实际验证；参数闭合和8MiB请求边界保留。当前MySQL30只绑定早前Source/Practice版，正式Main/目录MySQL另测；AI Task/gateway/Prompt执行与FE继续。
+
+- 2026-10-21 第80项正式Main独立MySQL第二轮：实际32机制40.738s一次通过，1179输入逐字同893验收版且前后稳定，21真实Main请求/响应包无JWT保留。原30来源/练习机制同轮重跑，再核旧RR当前bodyless目录、真实JWT不同作者/复核者/学员、提交commit先于反馈、完整分件/owner拒绝/撤回及敏感GET日志。清理真，未使用真实医院数据/模型；AI Task/gateway/worker和FE继续。

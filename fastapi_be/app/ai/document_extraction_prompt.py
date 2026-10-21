@@ -2,12 +2,13 @@
 
 import hashlib
 
-from app.ai.catalog import COMMON_SYSTEM_PROMPT
 from app.ai.document_extraction_contract import EXTRACTION_SYSTEM_PROMPT
 
 
 def system_prompt_for(context):
-    return EXTRACTION_SYSTEM_PROMPT if "document_binding" in context else COMMON_SYSTEM_PROMPT
+    from app.ai.coding_evidence_prompt import system_prompt_for as coding_system_prompt_for
+
+    return EXTRACTION_SYSTEM_PROMPT if "document_binding" in context else coding_system_prompt_for(context)
 
 
 def instructions_digest(task_prompt):

@@ -95,6 +95,10 @@ def _check_run_storage_json(serialized: dict[str, str]) -> None:
 
 def create_run(db: Session, user: User, req: RunRequest) -> AIRun:
     """Freeze an authorized, source-linked request before a durable worker processes it."""
+    if req.feature_key == "guideline_ingestion":
+        from app.ai.document_extraction_runtime import create_document_run
+
+        return create_document_run(db, user, req)
     if req.feature_key == "drg_evidence_review":
         from app.ai.coding_evidence_context import selection
         from app.ai.coding_evidence_sources import current_actor
@@ -378,6 +382,11 @@ def create_run(db: Session, user: User, req: RunRequest) -> AIRun:
 
 def authorize_run(db: Session, user: User, run: AIRun) -> None:
     """Re-check current permissions, including revoked care access, on every result read."""
+    from app.ai.document_extraction_storage import authorize_document_run, is_extraction_run
+
+    if is_extraction_run(db, run):
+        authorize_document_run(db, user, run, current=False)
+        return
     from app.ai.surgery_storage import is_surgery_snapshot, load_snapshot
 
     try:
@@ -518,9 +527,18 @@ def authorize_run(db: Session, user: User, run: AIRun) -> None:
             raise HTTPException(409, "任务引用的原文证据已撤销或变化，请重新核对当前来源")
 
 
-def describe_run(run: AIRun, include_result: bool = True) -> dict:
+def describe_run(run: AIRun, include_result: bool = True, *, user: User | None = None) -> dict:
     """Expose the user-facing result, not system instructions or provider secrets."""
     from sqlalchemy.orm import object_session
+
+    from app.ai.document_extraction_storage import is_extraction_run
+
+    if is_extraction_run(object_session(run), run):
+        from app.ai.document_extraction_runtime import describe_document_run
+
+        if user is None or object_session(run) is None:
+            raise HTTPException(403, "完整原文任务须在当前超级管理员授权会话读取")
+        return describe_document_run(object_session(run), user, run, include_result)
 
     from app.ai.coding_evidence_storage import is_coding_run
     from app.ai.inventory_storage import is_inventory_snapshot
@@ -881,6 +899,16 @@ def _recheck_task(db: Session, run: AIRun) -> tuple[FeatureSpec, AIProvider, dic
 async def execute_claimed(run_id: str, lease: str, *, transport=None) -> None:
     """Release SQL connections during inference; recheck authorization before storing results."""
     from app import database
+    from app.ai.document_extraction_storage import is_extraction_run
+
+    with database.SessionLocal() as db:
+        candidate = db.query(AIRun).filter_by(run_id=run_id, status="running", lease_token=lease).one_or_none()
+        document_task = candidate is not None and is_extraction_run(db, candidate)
+    if document_task:
+        from app.ai.document_extraction_runtime import execute_document_claimed
+
+        await execute_document_claimed(run_id, lease, transport=transport)
+        return
 
     started = time.monotonic()
     error = result = None

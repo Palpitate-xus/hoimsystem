@@ -30,6 +30,32 @@ from app.routers.inpatient_support import QueryPositiveInteger
 router = APIRouter(tags=["AI 业务助手"], default_response_class=JSONResponse)
 
 
+from app.ai.document_extraction_contract import DocumentExtractionRequest
+
+
+@router.post("/ai/document-extraction/context")
+def inspect_document_extraction_context(req: DocumentExtractionRequest, db: Session = Depends(get_db), user: User = Depends(get_current_user)) -> dict:
+    """Inspect one current complete original without contacting the model."""
+    from app.ai import document_evidence_sources as sources
+    from app.ai.document_extraction_context import extraction_context, public_payload
+
+    user = sources.current_super(db, user)
+    values = req.model_dump(mode="json", exclude_unset=True)
+    bundle = extraction_context(db, user, values)
+    preview = public_payload({"input": values, "context": bundle.data, "tools": {}, "evidence": bundle.evidence})
+    return {
+        "code": 200,
+        "msg": "success",
+        "data": {
+            "context": bundle.data,
+            "metadata": context_metadata(bundle),
+            "evidence": bundle.evidence,
+            "document_original": sources.original_detail(db, user, req.document_original_id).model_dump(mode="json"),
+            "model_preview": preview,
+        },
+    }
+
+
 @router.get("/ai/features")
 def available_features(db: Session = Depends(get_db), user: User = Depends(get_current_user)) -> dict:
     """Show authorized capabilities without disclosing provider configuration."""
@@ -206,7 +232,7 @@ def inspect_context(
 def submit_run(req: RunRequest, db: Session = Depends(get_db), user: User = Depends(get_current_user)) -> dict:
     """Queue durable work; a separately deployed worker performs inference."""
     run = create_run(db, user, req)
-    return {"code": 200, "msg": "任务已排队", "data": describe_run(run, False)}
+    return {"code": 200, "msg": "任务已排队", "data": describe_run(run, False, user=user)}
 
 
 @router.get("/ai/runs")
@@ -351,7 +377,7 @@ def list_runs(
                 if is_bed_snapshot(json.loads(item.input_json)):
                     continue
             raise
-        data.append(describe_run(item, False))
+        data.append(describe_run(item, False, user=user))
     return {"code": 200, "msg": "success", "data": data}
 
 
@@ -362,7 +388,7 @@ def run_detail(run_id: str, db: Session = Depends(get_db), user: User = Depends(
     if run is None:
         raise HTTPException(404, "AI 任务不存在")
     authorize_run(db, user, run)
-    return {"code": 200, "msg": "success", "data": describe_run(run)}
+    return {"code": 200, "msg": "success", "data": describe_run(run, user=user)}
 
 
 @router.post("/ai/runs/{run_id}/cancel")

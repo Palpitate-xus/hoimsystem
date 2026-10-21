@@ -900,7 +900,7 @@ def list_global_runs(
         .all()
     )
     counts = dict(db.query(AIFeedback.run_id, func.count(AIFeedback.feedback_id)).filter(AIFeedback.run_id.in_([item.run_id for item in rows])).group_by(AIFeedback.run_id).all()) if rows else {}
-    data = [{**describe_run(item, False), "requested_by": item.requested_by, "provider_id": item.provider_id, "feedback_count": counts.get(item.run_id, 0)} for item in rows]
+    data = [{**describe_run(item, False, user=user), "requested_by": item.requested_by, "provider_id": item.provider_id, "feedback_count": counts.get(item.run_id, 0)} for item in rows]
     return {"code": 200, "msg": "success", "data": data, "total": total, "page": page, "page_size": page_size}
 
 
@@ -969,7 +969,7 @@ def inspect_run_trace(run_id: str, db: Session = Depends(get_db), user: User = D
         "code": 200,
         "msg": "success",
         "data": {
-            **describe_run(run),
+            **describe_run(run, user=user),
             "requested_by": run.requested_by,
             "provider_id": run.provider_id,
             "frozen_request": snapshot,
@@ -1032,14 +1032,18 @@ def update_provider(provider_id: int, req: ProviderWrite, db: Session = Depends(
 @router.get("/ai/admin/prompts/{key}")
 def list_prompts(key: str, db: Session = Depends(get_db), user: User = Depends(require_roles("super_admin"))) -> dict:
     """Display the fixed system contract and immutable task prompt history."""
-    from app.ai.coding_evidence_prompt import system_prompt_for
+    from app.ai.document_extraction_prompt import system_prompt_for
 
     _current_super_admin(db, user)
     spec = get_spec(key)
     versions = db.query(AIPromptVersion).filter_by(feature_key=key).order_by(AIPromptVersion.version.desc()).all()
     baseline = {"prompt_id": None, "version": 0, "task_prompt": spec.task_prompt, "change_note": "项目默认任务 Prompt"}
     data = [{name: getattr(item, name) for name in ("prompt_id", "version", "task_prompt", "change_note", "created_by", "create_time")} for item in versions]
-    return {"code": 200, "msg": "success", "data": {"system_prompt": system_prompt_for({"coding_binding": None} if spec.number == 68 else {}), "versions": [*data, baseline]}}
+    return {
+        "code": 200,
+        "msg": "success",
+        "data": {"system_prompt": system_prompt_for({"document_binding": None} if spec.number == 71 else {"coding_binding": None} if spec.number == 68 else {}), "versions": [*data, baseline]},
+    }
 
 
 @router.post("/ai/admin/prompts/{key}")

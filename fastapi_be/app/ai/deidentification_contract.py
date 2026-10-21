@@ -139,3 +139,9 @@ class ReleaseCreate(StrictModel):
         if (self.valid_from is None) != (self.valid_until is None) or self.valid_from is not None and self.valid_until <= self.valid_from:
             raise ValueError("Unknown validity stays null; a stated interval must be positive")
         return self
+
+
+class ReleaseAuthorityReview(ResidualReview):
+    # A reviewer explicitly checks the recorded authority, recipient and period,
+    # in addition to the selected output. Neither signature certifies legality.
+    review_scope: Literal["recorded_authority_recipient_period_and_selected_output_not_legal_certification"]

@@ -107,7 +107,7 @@ def verify_manual(row):
         if any(getattr(row, key) is not None for key in ("manual_reviewed_by", "manual_reviewed_at", "manual_review_json")):
             raise HTTPException(409, "未确认人工复核不得带有伪造签署")
         return None
-    from app.ai.deidentification_contract import ResidualReview
+    from app.ai.deidentification_contract import ReleaseAuthorityReview, ResidualReview
     from app.ai.research_cohort_sources import _typed
 
     value = _original_json(row.manual_review_json, 65535)
@@ -120,7 +120,7 @@ def verify_manual(row):
         or value["actor"]["user_role"] not in SOURCE_ROLES
     ):
         raise HTTPException(409, "明确原签署身份锚缺失")
-    request = _typed(ResidualReview, value["request"])
+    request = _typed(ReleaseAuthorityReview if row.schema_version == "deidentification_release_v1" else ResidualReview, value["request"])
     if (request.expected_content_hash, request.expected_revision, request.decision, value["actor"]["user_id"], value["recorded_at"]) != (
         row.content_hash,
         1,
@@ -175,7 +175,7 @@ def governance_updates(actor, header, request, *, revoke):
     return dict(status="published" if request.decision == "publish" else "rejected", revision=2, reviewed_by=actor.user_id, reviewed_at=utcnow(), review_basis_note=request.basis_note)
 
 
-def finish(db, actor, row, key, kind, action, validate):
+def finish(db, actor, row, key, kind, action, validate, *, response=None):
     """Capture all columns before flush, then check actual rows and one Audit PK."""
     before = expected(row)
     identifier = before[key]
@@ -190,8 +190,12 @@ def finish(db, actor, row, key, kind, action, validate):
     if actual != before or audit is None or (audit.actor_id, audit.action, audit.target, audit.detail_json) != (actor.user_id, action, identifier, detail):
         raise HTTPException(409, "原件完整列/正文SHA或精确审计PK写后核验失败")
     validate(actor)
+    value = metadata(actual, kind) if response is None else response(actor)
+    from app.ai.deidentification_http import response_bytes
+
+    response_bytes(value)
     db.commit()
-    return metadata(actual, kind)
+    return value
 
 
 def stop(db, actor, model, key, identifier, header, updates, kind):

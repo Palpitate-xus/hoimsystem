@@ -67,10 +67,10 @@ def build_request(snapshot, binding, source):
 
 
 async def generate_research_variables(snapshot, binding, source, *, credential, transport=None):
-    endpoint, raw, source, instructions, provider = build_request(snapshot, binding, source)
     attempted = False
     inputs = outputs = None
     try:
+        endpoint, raw, source, instructions, provider = build_request(snapshot, binding, source)
         if type(credential) is not str or len(credential.encode("utf-8", errors="strict")) > 8192 or any(ord(char) < 32 or ord(char) == 127 for char in credential):
             raise ValueError("An actual bounded header-safe credential must be resolved before dispatch without logging it")
         credential.encode("ascii", errors="strict")
@@ -99,3 +99,7 @@ async def generate_research_variables(snapshot, binding, source, *, credential, 
         raise
     except (httpx.HTTPError, HTTPException, ValueError, TypeError, KeyError, UnicodeError, TimeoutError) as exc:
         raise VariableGatewayError("VARIABLE_PROVIDER_ERROR", "本次模型请求或完整草稿未能接受；未知用量保持未知", inputs=inputs, outputs=outputs, attempted=attempted) from exc
+    except Exception as exc:
+        # Preserve this layer's observed call flag instead of leaking an
+        # untyped service/transport error into the worker's initial0/0 state.
+        raise VariableGatewayError("VARIABLE_PROVIDER_ERROR", "本次模型请求发生未分类异常；实际未知用量保持未知", inputs=inputs, outputs=outputs, attempted=attempted) from exc

@@ -5,6 +5,7 @@ state is deliberately controlled here; formal Main cancel tests follow later.
 """
 
 import json
+from contextlib import contextmanager
 from types import SimpleNamespace
 
 import httpx
@@ -102,21 +103,78 @@ async def test_actual_current_sql_dispatch_has_zero_sql_connections_during_provi
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize("error_type", [RuntimeError, AssertionError])
-async def test_unclassified_transport_exception_after_committed_dispatch_records_unknown_attempt_and_counts_never_initial_fake_zero(db_session, actual_task, error_type):
+@pytest.mark.parametrize("layer", ["gateway", "worker"])
+async def test_unclassified_transport_exception_after_committed_dispatch_records_unknown_attempt_and_counts_never_initial_fake_zero(db_session, actual_task, monkeypatch, error_type, layer):
+    case, permissions, _, _ = actual_task
+    super_id = inspect(case["super_admin_user"]).identity[0]
     claim = claimed(db_session, actual_task)
-    factory = sessionmaker(bind=db_session.bind, expire_on_commit=False)
+    sessions = sessionmaker(bind=db_session.bind, expire_on_commit=False)
     db_session.rollback()
-    calls = []
+    calls, reads, state = [], [], {"lost": False}
+
+    @contextmanager
+    def factory():
+        with sessions() as db:
+
+            def observed(event):
+                if state["lost"] and event.is_select and hasattr(event.statement, "selected_columns"):
+                    reads.extend(
+                        str(column.key)
+                        for column in event.statement.selected_columns
+                        if column.key in {"input_json", "result_json", "evidence_json", "context_metadata_json", "source_json", "binding_json"}
+                    )
+
+            event.listen(db, "do_orm_execute", observed)
+            yield db
 
     async def transport(request):
         calls.append(request.url.path)
-        raise error_type("controlled actual transport exception after the original dispatch commit")
+        with factory() as db:
+            review_registry_original(db, SimpleNamespace(user_id=super_id), "authorization", permissions[1]["source_record_id"], {"expected_revision": 2, "basis_note": BASIS}, revoke=True)
+        state["lost"] = True
+        if layer == "gateway":
+            raise error_type("controlled actual transport exception after the original dispatch commit")
+        source = VariableTaskSource.model_validate(json.loads(json.loads(request.content)["messages"][1]["content"])["research_variable_source"])
+        return httpx.Response(200, json=envelope("chat", canonical(draft(source))))
+
+    if layer == "worker":
+        actual_gateway = execution.generate_research_variables
+
+        async def lost_typed_receipt(*args, **kwargs):
+            await actual_gateway(*args, **kwargs)
+            raise error_type("controlled missing typed receipt after an actual HTTP reply")
+
+        monkeypatch.setattr(execution, "generate_research_variables", lost_typed_receipt)
 
     await execution.execute_research_variables_claimed(claim.run_id, claim.lease, session_factory=factory, transport=httpx.MockTransport(transport))
     task = receipts.technical_task(db_session, claim)
     recorded = receipts.verify_receipt(db_session, task)
     assert calls == ["/v1/chat/completions"] and task.run.status == "failed"
-    assert task.artifact.dispatch_event_id is not None and task.run.error_code == "WORKER_INTERRUPTED"
-    assert (recorded.receipt.input_tokens, recorded.receipt.output_tokens, recorded.receipt.model_call_attempted) == (None, None, None)
+    assert task.artifact.dispatch_event_id is not None and task.run.error_code == ("VARIABLE_PROVIDER_ERROR" if layer == "gateway" else "WORKER_INTERRUPTED")
+    assert (recorded.receipt.input_tokens, recorded.receipt.output_tokens, recorded.receipt.model_call_attempted) == (None, None, True if layer == "gateway" else None)
     assert recorded.receipt.complete is False
+    assert not reads
     assert db_session.query(AIResearchVariableRunResult).filter_by(run_id=claim.run_id).count() == 0
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("error_type", [RuntimeError, AssertionError])
+async def test_unknown_pre_dispatch_credential_failure_has_no_http_no_dispatch_and_real_known_uncalled_zero(db_session, actual_task, monkeypatch, error_type):
+    claim = claimed(db_session, actual_task)
+    factory = sessionmaker(bind=db_session.bind, expire_on_commit=False)
+    db_session.rollback()
+    calls = []
+
+    def unavailable(_provider):
+        raise error_type("controlled failure before a dispatch commit")
+
+    async def transport(_request):
+        calls.append(1)
+        return httpx.Response(200)
+
+    monkeypatch.setattr(execution, "provider_credential", unavailable)
+    await execution.execute_research_variables_claimed(claim.run_id, claim.lease, session_factory=factory, transport=httpx.MockTransport(transport))
+    task = receipts.technical_task(db_session, claim)
+    recorded = receipts.verify_receipt(db_session, task)
+    assert not calls and task.artifact.dispatch_event_id is None and task.run.status == "failed"
+    assert (recorded.receipt.input_tokens, recorded.receipt.output_tokens, recorded.receipt.model_call_attempted) == (0, 0, False)

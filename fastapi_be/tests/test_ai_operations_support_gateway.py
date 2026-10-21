@@ -226,3 +226,25 @@ async def test_one_attempt_response_failure_remains_unknown_and_never_retries(pr
 def test_usage_cannot_convert_unknown_or_paid_count_to_proven_zero(change):
     with pytest.raises(ValueError):
         OperationsUsage.model_validate({**usage(11, 13, True), **change}, strict=True)
+
+
+@pytest.mark.parametrize("kind", ["chat", "responses"])
+@pytest.mark.parametrize("reported_inputs", [11, None])
+def test_valid_optional_total_never_infers_missing_components_or_invalidates_complete_content(kind, reported_inputs):
+    source, selection = setup_source()
+    counts = {"total_tokens": 99}
+    if reported_inputs is not None:
+        counts["prompt_tokens" if kind == "chat" else "input_tokens"] = reported_inputs
+    packet = envelope(kind, result(source, selection), counts)
+    draft, receipt = gateway.parse_reply(kind, packet, source, selection)
+    assert draft.model_dump() == result(source, selection) and receipt == usage(reported_inputs, None, True)
+
+
+@pytest.mark.parametrize("kind", ["chat", "responses"])
+@pytest.mark.parametrize("total", [False, -1, 24.0])
+def test_explicit_invalid_total_rejects_but_retains_known_companion_count(kind, total):
+    source, selection = setup_source()
+    packet = envelope(kind, result(source, selection), {"prompt_tokens" if kind == "chat" else "input_tokens": 11, "total_tokens": total})
+    with pytest.raises(gateway.OperationsCallError) as exc:
+        gateway.parse_reply(kind, packet, source, selection)
+    assert exc.value.usage == usage(11, None, True)

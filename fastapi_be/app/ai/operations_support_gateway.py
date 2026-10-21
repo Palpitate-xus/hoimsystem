@@ -55,8 +55,12 @@ def parse_reply(kind, value, source, selection):
         ):
             raise ValueError("A single completed text response is required")
         reported = value.get("usage")
-        if type(reported) is dict and "total_tokens" in reported and (inputs is None or outputs is None or type(reported["total_tokens"]) is not int or reported["total_tokens"] != inputs + outputs):
-            raise ValueError("Optional total must agree with two independently known counts")
+        if type(reported) is dict and "total_tokens" in reported:
+            total = reported["total_tokens"]
+            if type(total) is not int or total < 0 or inputs is not None and outputs is not None and total != inputs + outputs:
+                raise ValueError("An optional valid total must agree when both actual component counts are known")
+            # A total never manufactures an omitted component count. Valid
+            # content and independently nullable actual usage are separate.
         if kind == "chat":
             choices = value.get("choices")
             if type(choices) is not list or len(choices) != 1 or type(choices[0]) is not dict:

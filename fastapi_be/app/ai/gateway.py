@@ -12,7 +12,7 @@ from pydantic import ValidationError
 
 from app.ai.audio_files import AUDIO_FORMATS
 from app.ai.bed_protocol import BedGenerationResult
-from app.ai.catalog import COMMON_SYSTEM_PROMPT, FeatureSpec
+from app.ai.catalog import FeatureSpec
 from app.ai.ecg_model import LABELS, LEADS, PREPROCESSING, RELEASE_FILES, ECGModelManifest, canonical_json
 from app.ai.governance import encode_json, provider_credential, validate_endpoint
 from app.ai.inventory_protocol import InventoryGenerationResult, InventoryText
@@ -61,9 +61,9 @@ class AIExecutionError(Exception):
         super().__init__(message)
 
 
-def result_json_schema() -> dict:
+def result_json_schema(schema_type=GenerationResult) -> dict:
     """Make all output properties required for strict Structured Outputs."""
-    schema = copy.deepcopy(GenerationResult.model_json_schema())
+    schema = copy.deepcopy(schema_type.model_json_schema())
 
     def visit(node: object) -> None:
         if isinstance(node, dict):
@@ -467,7 +467,19 @@ def validate_generation(
 def _request(provider: AIProvider, spec: FeatureSpec, task_prompt: str, data: dict) -> tuple[str, dict]:
     endpoint = validate_endpoint(provider.api_base)
     budget = min(provider.max_output_tokens, settings.AI_MAX_OUTPUT_TOKENS)
-    instructions = COMMON_SYSTEM_PROMPT + "\n\n" + task_prompt
+    from app.ai.coding_evidence_prompt import system_prompt_for
+
+    instructions = system_prompt_for(data.get("context", {})) + "\n\n" + task_prompt
+    coding_mode = bool({"coding_binding", "coding_source", "coding_case"} & data.get("context", {}).keys()) or "coding_case_id" in data.get("input", {})
+    if coding_mode:
+        from app.ai.coding_evidence_context import public_payload
+
+        if spec.number != 68 or provider.kind not in {"chat", "responses"}:
+            raise AIExecutionError("CODING_TEXT_PROVIDER_REQUIRED", "完整编码证据仅由本功能登记的文本模型处理")
+        try:
+            data = public_payload(data)
+        except (HTTPException, ValueError, TypeError, KeyError, UnicodeError) as exc:
+            raise AIExecutionError("CODING_SOURCE_REQUIRED", "须选择受审完整编码证据并核对原文投影和冻结绑定") from exc
     if data.get("context", {}).get("support_source") is not None:
         from app.ai.support_context import outbound_support_payload
 
@@ -677,13 +689,22 @@ def _request(provider: AIProvider, spec: FeatureSpec, task_prompt: str, data: di
             raise AIExecutionError("FORECAST_SOURCE_REQUIRED", "须提供已确认的完整原日序列和明确7或14天预测跨度") from exc
         specialist_input = {"context": {"forecast_source": source}, "horizon_days": horizon}
     if provider.kind == "responses":
+        from app.ai.coding_evidence_contract import CodingEvidenceDraft
+
         return endpoint + "/responses", {
             "model": provider.model,
             "instructions": instructions,
             "input": [{"role": "user", "content": encode_json(data)}],
             "max_output_tokens": budget,
             "store": False,
-            "text": {"format": {"type": "json_schema", "name": "hoim_assistance", "strict": True, "schema": result_json_schema()}},
+            "text": {
+                "format": {
+                    "type": "json_schema",
+                    "name": "hoim_coding_draft" if coding_mode else "hoim_assistance",
+                    "strict": True,
+                    "schema": result_json_schema(CodingEvidenceDraft if coding_mode else GenerationResult),
+                }
+            },
         }
     if provider.kind == "chat":
         return endpoint + "/chat/completions", {
@@ -846,6 +867,7 @@ async def generate(
 ) -> tuple[GenerationResult, int, int]:
     """Call only a configured endpoint; never retry billable tasks or follow redirects."""
     inputs = outputs = None
+    coding_mode = bool({"coding_binding", "coding_source", "coding_case"} & data.get("context", {}).keys()) or "coding_case_id" in data.get("input", {})
     try:
         endpoint, payload = _request(provider, spec, task_prompt, data)
         credential = provider_credential(provider)
@@ -875,6 +897,12 @@ async def generate(
     supply_mode = spec.number == 66 and provider.kind == "specialist" and provider.model.startswith("supply:")
     supply_source = data.get("context", {}).get("supply_source") if supply_mode else None
     response_limit = MAX_RESPONSE_BYTES
+    if coding_mode:
+        from app.ai.coding_evidence_contract import OUTPUT_BYTES
+
+        response_limit = OUTPUT_BYTES
+        if len(encode_json(payload).encode("utf-8")) > OUTPUT_BYTES:
+            raise AIExecutionError("CODING_REQUEST_LIMIT", "完整编码证据投影及Prompt超过8MiB请求上限，未发送或截断")
     if inventory_mode:
         from app.ai.inventory_contract import MAX_BYTES
 
@@ -948,6 +976,12 @@ async def generate(
         parsed = json.loads(body, object_pairs_hook=_unique_response_pairs, parse_constant=_finite_response_constant)
         if not isinstance(parsed, dict):
             raise ValueError("response must be an object")
+        if coding_mode:
+            from app.ai.coding_evidence_protocol import parse_provider_draft
+            from app.ai.coding_evidence_result import result_for_draft
+
+            draft, inputs, outputs = parse_provider_draft(provider.kind, parsed)
+            return result_for_draft(data["context"]["coding_source"], draft, data["context"]["coding_binding"]["projection_hash"]), inputs, outputs
         output, inputs, outputs = _parse_response(provider, spec, parsed)
         if min(inputs, outputs) < 0 or max(inputs, outputs) > 2000000:
             raise ValueError("invalid token accounting")

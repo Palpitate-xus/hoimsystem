@@ -100,3 +100,8 @@ def test_mysql_ddl_is_two_tables_one_mediumtext_five_utc6():
     assert "ON DELETE CASCADE" not in compiled
     assert "fk_drug_label_original" in compiled and "fk_drug_label_prof_source" in compiled
     assert migration.down_revision == "20261021_doc_extraction_runs"
+
+
+def test_professional_governance_boolean_revision_is_not_integer_one():
+    with pytest.raises(ValidationError):
+        c.ProfessionalGovernance(status="signed", revision=True, revoked_by=None, revoked_at=None, revoke_reason="")

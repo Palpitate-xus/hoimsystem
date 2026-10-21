@@ -135,6 +135,13 @@ class ProfessionalGovernance(d.StrictModel):
     revoked_at: d.UtcText | None
     revoke_reason: str = Field(max_length=1000)
 
+    @field_validator("revision", mode="before")
+    @classmethod
+    def strict_revision(cls, value):
+        if type(value) is not int:
+            raise ValueError("Professional revision must be an actual integer, not a boolean")
+        return value
+
     @model_validator(mode="after")
     def actual_revocation(self):
         if self.status == "signed":

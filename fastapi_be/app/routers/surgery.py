@@ -3,6 +3,7 @@ import datetime
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
+from app.ai.charge_reconciliation_write_guard import lock_charge_write
 from app.ai.surgery_write_guard import current_surgery_rows, lock_surgery_write
 from app.database import get_db
 from app.dependencies import CLINICAL_ROLES, NURSING_ROLES, User, require_roles
@@ -391,7 +392,7 @@ def start_surgery(req: dict, current_user: User = Depends(require_roles(*CLINICA
 
 @router.post("/surgerySchedule/complete")
 def complete_surgery(req: dict, current_user: User = Depends(require_roles(*CLINICAL_ROLES)), db: Session = Depends(get_db)):
-    lock_surgery_write(db, current_user)
+    current_user = lock_charge_write(db, current_user, allowed_roles=CLINICAL_ROLES, legacy_gate="surgery")
     schedule = current_surgery_rows(db.query(SurgerySchedule).filter(SurgerySchedule.schedule_id == req.get("schedule_id"))).first()
     if not schedule:
         return {"code": 500, "msg": "排台记录不存在"}
@@ -470,7 +471,7 @@ def get_anesthesia_record_list(schedule_id: str | None = None, current_user: Use
 
 @router.post("/anesthesiaRecord/create")
 def create_anesthesia_record(req: dict, current_user: User = Depends(require_roles(*CLINICAL_ROLES)), db: Session = Depends(get_db)):
-    lock_surgery_write(db, current_user)
+    current_user = lock_charge_write(db, current_user, allowed_roles=CLINICAL_ROLES, legacy_gate="surgery")
     schedule = current_surgery_rows(db.query(SurgerySchedule).filter(SurgerySchedule.schedule_id == req.get("schedule_id"))).first()
     if not schedule:
         return {"code": 500, "msg": "手术排台不存在"}

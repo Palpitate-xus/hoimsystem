@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
+from app.ai.charge_reconciliation_write_guard import current_charge_rows, lock_charge_write
 from app.database import get_db
 from app.dependencies import NURSING_ROLES, User, require_roles
 from app.models import (
@@ -22,8 +23,9 @@ router = APIRouter()
 
 @router.post("/discharge/doDischarge")
 def do_discharge(req: dict, current_user: User = Depends(require_roles(*NURSING_ROLES)), db: Session = Depends(get_db)):
+    current_user = lock_charge_write(db, current_user, allowed_roles=NURSING_ROLES)
     admission_id = req.get("admission_id")
-    admission = db.query(Admission).filter(Admission.admission_id == admission_id).first()
+    admission = current_charge_rows(db.query(Admission)).filter(Admission.admission_id == admission_id).first()
     if not admission:
         return {"code": 500, "msg": "入院记录不存在"}
     if admission.status != 1:
@@ -36,39 +38,40 @@ def do_discharge(req: dict, current_user: User = Depends(require_roles(*NURSING_
         if days < 1:
             days = 1
         charged_days = (
-            db.query(func.coalesce(func.sum(InpatientCharge.quantity), 0))
+            current_charge_rows(db.query(func.coalesce(func.sum(InpatientCharge.quantity), 0)))
             .filter(InpatientCharge.admission_id == admission_id, InpatientCharge.item_type == "bed", InpatientCharge.status != 2)
             .scalar()
         ) or 0
         remaining_days = days - charged_days
         if remaining_days > 0:
-            db.add(InpatientCharge(
-                admission_id=admission_id,
-                patient_id=admission.patient_id,
-                item_name=f"床位费({bed.bed_type})住院补记",
-                item_type="bed",
-                quantity=remaining_days,
-                unit_price=bed.price_per_day,
-                total_amount=bed.price_per_day * int(remaining_days),
-                charge_date=datetime.datetime.now().date(),
-                status=0,
-                create_time=datetime.datetime.now(),
-            ))
+            db.add(
+                InpatientCharge(
+                    admission_id=admission_id,
+                    patient_id=admission.patient_id,
+                    item_name=f"床位费({bed.bed_type})住院补记",
+                    item_type="bed",
+                    quantity=remaining_days,
+                    unit_price=bed.price_per_day,
+                    total_amount=bed.price_per_day * int(remaining_days),
+                    charge_date=datetime.datetime.now().date(),
+                    status=0,
+                    create_time=datetime.datetime.now(),
+                )
+            )
             db.flush()
 
     # 计算费用（含补记床位费）
-    total_amount = (
-        db.query(func.sum(InpatientCharge.total_amount))
-        .filter(InpatientCharge.admission_id == admission_id, InpatientCharge.status != 2)
-        .scalar()
-        or 0
-    )
+    total_amount = current_charge_rows(db.query(func.sum(InpatientCharge.total_amount))).filter(InpatientCharge.admission_id == admission_id, InpatientCharge.status != 2).scalar() or 0
 
     # 自动结算未结算费用
-    charges = db.query(InpatientCharge).filter(
-        InpatientCharge.admission_id == admission_id,
-        InpatientCharge.status == 0,
-    ).all()
+    charges = (
+        current_charge_rows(db.query(InpatientCharge))
+        .filter(
+            InpatientCharge.admission_id == admission_id,
+            InpatientCharge.status == 0,
+        )
+        .all()
+    )
     for c in charges:
         c.status = 1
         db.add(c)
@@ -76,11 +79,7 @@ def do_discharge(req: dict, current_user: User = Depends(require_roles(*NURSING_
     # 更新入院记录
     # 停止所有未完结医嘱（0 新开 / 1 已审核 / 2 执行中），防止出院后仍被执行；
     # 并同步取消全部待执行计划，避免护士执行清单残留脏数据
-    active_orders = (
-        db.query(InpatientOrder)
-        .filter(InpatientOrder.admission_id == admission_id, InpatientOrder.status.in_([0, 1, 2]))
-        .all()
-    )
+    active_orders = current_charge_rows(db.query(InpatientOrder)).filter(InpatientOrder.admission_id == admission_id, InpatientOrder.status.in_([0, 1, 2])).all()
     now = datetime.datetime.now()
     for order in active_orders:
         order.status = 3  # 已停止
@@ -139,20 +138,26 @@ def do_discharge(req: dict, current_user: User = Depends(require_roles(*NURSING_
             unit = m.group(2)
             days = n * 30 if unit == "月" else n * 7 if unit == "周" else n
             plan_date = datetime.date.today() + datetime.timedelta(days=days)
-        dup = db.query(FollowUp).filter(
-            FollowUp.patient_id == admission.patient_id,
-            FollowUp.plan_date == plan_date,
-            FollowUp.content == plan_text,
-        ).first()
+        dup = (
+            db.query(FollowUp)
+            .filter(
+                FollowUp.patient_id == admission.patient_id,
+                FollowUp.plan_date == plan_date,
+                FollowUp.content == plan_text,
+            )
+            .first()
+        )
         if not dup:
-            db.add(FollowUp(
-                patient_id=admission.patient_id,
-                doctor_id=admission.doctor_id,
-                plan_date=plan_date,
-                content=plan_text,
-                status=0,
-                create_time=datetime.datetime.now(),
-            ))
+            db.add(
+                FollowUp(
+                    patient_id=admission.patient_id,
+                    doctor_id=admission.doctor_id,
+                    plan_date=plan_date,
+                    content=plan_text,
+                    status=0,
+                    create_time=datetime.datetime.now(),
+                )
+            )
 
     db.commit()
     return {
@@ -246,12 +251,7 @@ def get_discharged_list(
     data = []
     for item in records:
         # 计算总费用
-        total = (
-            db.query(func.sum(InpatientCharge.total_amount))
-            .filter(InpatientCharge.admission_id == item.admission_id, InpatientCharge.status != 2)
-            .scalar()
-            or 0
-        )
+        total = db.query(func.sum(InpatientCharge.total_amount)).filter(InpatientCharge.admission_id == item.admission_id, InpatientCharge.status != 2).scalar() or 0
         data.append(
             {
                 "admission_id": item.admission_id,

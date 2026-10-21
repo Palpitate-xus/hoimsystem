@@ -6,6 +6,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, joinedload
 
+from app.ai.charge_reconciliation_write_guard import current_charge_rows, lock_charge_administration, lock_charge_execution, lock_charge_order, lock_charge_write
 from app.ai.inventory_write_guard import current_inventory_rows, lock_inventory_write
 from app.database import get_db
 from app.dependencies import ADMIN_ROLES, CLINICAL_ROLES, NURSING_ROLES, PHARMACY_ROLES, User, require_roles
@@ -39,15 +40,7 @@ class MedicationBarcodeRequest(BaseModel):
 
 
 def _execution_query(db: Session, execution_id: int):
-    return (
-        db.query(OrderExecution)
-        .options(
-            joinedload(OrderExecution.order).joinedload(InpatientOrder.patient),
-            joinedload(OrderExecution.order).selectinload(InpatientOrder.items),
-        )
-        .filter(OrderExecution.execution_id == execution_id)
-        .first()
-    )
+    return lock_charge_execution(db, execution_id)
 
 
 @router.post("/emar/verify")
@@ -56,6 +49,7 @@ def verify_medication(
     current_user: User = Depends(require_roles(*NURSING_ROLES)),
     db: Session = Depends(get_db),
 ):
+    current_user = lock_charge_write(db, current_user, allowed_roles=NURSING_ROLES)
     execution = _execution_query(db, req.execution_id)
     if not execution or not execution.order:
         return {"code": 404, "msg": "医嘱执行记录不存在"}
@@ -79,7 +73,7 @@ def verify_medication(
     if scanned_barcodes != expected_barcodes:
         return {"code": 400, "msg": "扫描药品与医嘱不匹配，请核对药名、剂量和给药途径"}
 
-    existing = db.query(MedicationAdministration).filter_by(execution_id=execution.execution_id).first()
+    existing = current_charge_rows(db.query(MedicationAdministration)).filter_by(execution_id=execution.execution_id).first()
     if existing:
         if existing.status == 2:
             return {"code": 409, "msg": "该次给药已完成"}
@@ -124,7 +118,8 @@ def administer_medication(
     current_user: User = Depends(require_roles(*NURSING_ROLES)),
     db: Session = Depends(get_db),
 ):
-    administration = db.get(MedicationAdministration, req.administration_id)
+    current_user = lock_charge_write(db, current_user, allowed_roles=NURSING_ROLES)
+    administration = lock_charge_administration(db, req.administration_id)
     if not administration:
         return {"code": 404, "msg": "给药核对记录不存在"}
     if administration.status != 1:
@@ -151,7 +146,7 @@ def administer_medication(
     administration.status = 2
     administration.administration_time = now
     administration.note = req.note.strip()
-    order = db.get(InpatientOrder, administration.order_id)
+    order = lock_charge_order(db, administration.order_id)
     if order and order.status == 1:
         order.status = 2
     db.commit()

@@ -34,11 +34,16 @@ def current_actor(db, user, *, allowed_roles):
     if not roles or not roles.issubset(VALID_USER_ROLES):
         raise ValueError("Exact nonempty original business role set required")
     state = inspect(user, raiseerr=False)
+    # A current read refreshes this same identity-map object. Preserve only
+    # already loaded request fields before it does so; never load expired ones.
+    epoch = {key: state.dict[key] for key in ("user_role", "token_invalid_before") if key in state.dict} if state is not None else {}
     uid = state.identity[0] if state is not None and state.identity is not None else getattr(user, "user_id", None)
     with db.no_autoflush:
         actor = current_satisfaction_rows(db.query(User).filter_by(user_id=uid), shared=True).one_or_none()
     if actor is None or actor.user_role not in roles:
         raise HTTPException(403, "当前账户已无本项原业务权限")
+    if any(getattr(actor, key) != value for key, value in epoch.items()):
+        raise HTTPException(403, "本次请求原角色或登录授权已变化")
     return actor
 
 

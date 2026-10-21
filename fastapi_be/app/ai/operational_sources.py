@@ -75,6 +75,8 @@ def authorize_operational_snapshot(db, user: User, spec: FeatureSpec, context: d
 
 def operational_options(db, user: User, spec: FeatureSpec) -> dict:
     """Offer only valid filters inside this actor's independently verified scope."""
+    if spec.number == 78:
+        raise HTTPException(422, "病例集关联统计仅使用专用受审场景，不提供通用运营范围或默认日期")
     departments = operational_scope(db, user, spec, {})
     start, end = operational_window({})
     data = {"default_window": [str(start), str(end)], "allow_hospital_scope": departments is None, "departments": [], "truncated": False}
@@ -100,6 +102,8 @@ def operational_options(db, user: User, spec: FeatureSpec) -> dict:
 
 
 def operational_context(db, user: User, spec: FeatureSpec, values: dict) -> ContextBundle:
+    if spec.number == 78 or "infection_cluster_scenario_id" in values:
+        raise HTTPException(422, "病例集关联统计须使用专用本地场景预览，不以通用运营空资料替代")
     if "satisfaction_case_id" in values:
         if spec.number != 70:
             raise HTTPException(422, "受审完整评价原件仅用于满意度与评价证据分析")

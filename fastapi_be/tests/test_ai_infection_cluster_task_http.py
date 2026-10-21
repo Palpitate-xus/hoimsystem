@@ -22,6 +22,15 @@ ROOT = "/api/ai/infection-cluster"
 
 
 @pytest.mark.asyncio
+async def test_actual_main_legacy_operational_preview_and_options_cannot_replace_reviewed_local_scenario(async_client, task_case, auth_headers):
+    headers = auth_headers(task_case["author"].username)
+    for path, body in [("/api/ai/operational-context", {"feature_key": "infection_cluster", "input": {}}), ("/api/ai/service-options?feature_key=infection_cluster", None)]:
+        response = await async_client.request("POST" if body is not None else "GET", path, headers=headers, json=body)
+        assert response.status_code == 422, response.text
+    assert task_case["db"].query(Artifact).count() == 0
+
+
+@pytest.mark.asyncio
 async def test_actual_main_full_local_queue_shared_claim_worker_split_trace_and_withdrawal_even_super(async_client, task_case, auth_headers, monkeypatch, tmp_path):
     case, db = task_case, task_case["db"]
     own, sup = auth_headers(case["author"].username), auth_headers(case["reviewer"].username)

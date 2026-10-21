@@ -1,0 +1,1091 @@
+{
+  "schema_version": "inventory_native_engineering_verification_v1",
+  "recorded_at_utc": "2026-10-21T04:24:49.213075+00:00",
+  "baseline_commit": "328d37f86549c2bb550d52d00693b838de2490a5",
+  "platform_commit_at_recording": "4b5e68d35f68a77bf1e577bc13d89576e880fd58",
+  "recording_head_precedes_this_evidence_documentation_commit": true,
+  "goal_status": "active",
+  "scope": "Feature67 complete governed finite inventory candidate comparison and existing inventory-write currentness; synthetic engineering delivery only, all80 goal continues.",
+  "real_patient_data_used": false,
+  "existing_hospital_database_accessed": false,
+  "existing_hospital_backend_contacted": false,
+  "production_deployment_performed": false,
+  "clinical_validation_performed": false,
+  "operational_validation_performed": false,
+  "stored_business_ai_configuration_changed": false,
+  "remote_model_inference_performed": false,
+  "version_management": {
+    "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+    "commits_this_batch_before_evidence_commit": [
+      {
+        "commit": "28a39a47a978550a2afcc144ec5e19f225c4b955",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai-inventory): add stock write gate and governed source storage"
+      },
+      {
+        "commit": "f51265cba421463bb014059b20d99ef03b51ef40",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai): define exact finite inventory candidate contract"
+      },
+      {
+        "commit": "9c11f96c41debeeb658db6f6b90345df60d2f2fa",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "fix(inventory): serialize catalog and purchase writers with current stock reads"
+      },
+      {
+        "commit": "f017c7e9ab4fafd7c94e4365c97fdbba35915542",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai-inventory): validate explicit stock observations and whole candidate originals"
+      },
+      {
+        "commit": "9e6af2cd373e3ca2bbbf2441ddd408df270f9f80",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "fix(ai-inventory): keep singleton gate compatible with MySQL checks"
+      },
+      {
+        "commit": "c1f39b83a1c193ba2602b4716e7a80601fe35a1d",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai): compare declared inventory plans with exact daily ledgers"
+      },
+      {
+        "commit": "55509f6e1bd2e35d8c46f89f537856904dc890b4",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "test(ai): exercise full inventory snapshot and candidate caps"
+      },
+      {
+        "commit": "7ed67ae59d6cf1611cb2491e371f9cda05733656",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "fix(inventory): lock clinical stock mutations and reload complete current children"
+      },
+      {
+        "commit": "0dc83a9e4c42c8017111000449b783a54a4e6726",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai): store governed inventory scenarios and complete results"
+      },
+      {
+        "commit": "a0a1ea8613e0abfea655ae4e8ba30d93ceb7a65b",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai): validate native inventory comparison receipts and runtime capabilities"
+      },
+      {
+        "commit": "fa292dfcc38c64c6abbe001b53705b148f8e241e",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai): bind inventory tasks to exact reviewed scenarios and public-only sources"
+      },
+      {
+        "commit": "46728362c5919b922bda25d7b09c60290027a673",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai): publish dedicated inventory comparison prompts and isolated references"
+      },
+      {
+        "commit": "226c28009c7317bf095b9e5e1dcdf1609e0d0f5d",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai): route and recompute complete native inventory comparison proofs"
+      },
+      {
+        "commit": "7da9379261aba455c8106d30f9c25db1c0c55ed5",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai): store full inventory proofs behind lease-bound atomic result references"
+      },
+      {
+        "commit": "02ba5b99dd8fd1d1cb1122c1abd5de37bcd25663",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai): require explicit inventory scenario policy and full candidates"
+      },
+      {
+        "commit": "f58cbad96c4b5840e6040dab0007b7af992b913a",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai-inventory): capture bounded complete legacy stock capsules and explicit unit reviews"
+      },
+      {
+        "commit": "b19569a8c73de5557514d0fce14464278c21e858",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai): expose super-administrator inventory runtime inspection and configuration"
+      },
+      {
+        "commit": "23787e53a701c96d8a6d647a5b8bc38cf05739b0",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "merge: include verified current-role supply and audit authority fixes"
+      },
+      {
+        "commit": "449a703fcd7e5d09470ae3a0ca7897eb14ddcede",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai): verify every inventory candidate ledger in the browser"
+      },
+      {
+        "commit": "87c73067f4b8868d90b00eed42bce632971b50e6",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai-inventory): govern immutable stock observations and complete purchase candidates"
+      },
+      {
+        "commit": "f5a6e8e0c9c2f812dde2cc8abec7d67c65ae036c",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai-inventory): bind every same-SKU source and late governance in complete captures"
+      },
+      {
+        "commit": "15d31632a6d72729544e8d68ff6fe574c338eb17",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "fix(ai-inventory): retain conflicting raw consumable units instead of confirming conversion"
+      },
+      {
+        "commit": "35d03ec10772df0444dd19dc107095ce4e2a79db",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai-inventory): expose governed sources with exact UTC6 JSON responses and metadata pages"
+      },
+      {
+        "commit": "46048c23ff990e60d28b126c0247d6f2e2dda733",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "fix(ai): bind inventory result metadata to the frozen prompt digest"
+      },
+      {
+        "commit": "06a47b8457773be8c281e67ad1666df7cc37dcfa",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai): govern whole inventory scenario proofs and conflict review"
+      },
+      {
+        "commit": "1a2093a3db8eeda5ecd4b368b65eca2d877d4ba2",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai): expose inventory capability schema for strict provider checks"
+      },
+      {
+        "commit": "d715d3306e017b74e19d4de5e4f431f18e4e5472",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "refactor(ai): expose existing immutable supply proof for inventory unit bindings"
+      },
+      {
+        "commit": "7d6c4a04ceb96d6d7ef888c1141faf845f25c268",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai): persist governed inventory comparisons with current acceptance and frozen audits"
+      },
+      {
+        "commit": "4b7ef8bb25c548b826061165094a6673f946a10e",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai): expose and verify the frozen inventory provider model anchor"
+      },
+      {
+        "commit": "fefef95aa3d5a18206a21ec6574650a60611a609",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "fix(ai): preserve invalid inventory batch evidence in scenarios"
+      },
+      {
+        "commit": "d0d19b6fdb41ebd853d0cc9bb2a024c924c6a866",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai): expose governed inventory scenarios with exact HTTP proofs"
+      },
+      {
+        "commit": "2f6a0223a1ab3dadbac400ed4dc3a6b3d52ee416",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "merge: share current native acceptance verification with inventory"
+      },
+      {
+        "commit": "6686b3b1badbbc2a43e3f4b5b810b58a71983816",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "fix(ai-inventory): bind pharmacist reconciliation to the actually reviewed stock digest"
+      },
+      {
+        "commit": "50033f30bf3d3beeeb5cd62af0f88eec63d28c90",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai): verify inventory scenario original and public proofs in browser"
+      },
+      {
+        "commit": "3fa033aaf18bfcb7f0026b42c495383f8fe3d2b5",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai): mount governed inventory originals and scenario administration"
+      },
+      {
+        "commit": "4b378f4b7317f3f32cfdcc6b40854bae522cc8ca",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "style(ai): normalize inventory integration changes without altering Python ASTs"
+      },
+      {
+        "commit": "ea70d954ec2447a069cf199ae97839175565b864",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai): verify and render complete governed inventory task proofs"
+      },
+      {
+        "commit": "0ede41442fb00ff5c43cda60b29a5d17d4cecd6b",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai): edit and govern complete inventory candidate scenarios"
+      },
+      {
+        "commit": "7cede20b4cdd5bec9aa010c8e5ce2d44998f94e7",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai): add administrator inventory capability checks with current identity guards"
+      },
+      {
+        "commit": "919b32f171b027cb6733676345cc496c5e990f09",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "test(ai): cover complete inventory scenario forms and late responses"
+      },
+      {
+        "commit": "6694d127b144bb464501475afbd980319303269b",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "test(ai): verify actual inventory input scope and late response isolation"
+      },
+      {
+        "commit": "5992b7a97759eaa43e2d496dc87b6f5809aa4ac1",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai): require explicit inventory scope and reviewed scenario selection"
+      },
+      {
+        "commit": "c81cc57b027c32846e572078a3ec9e74e8743da4",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "test(ai): exercise inventory parent and frozen history lifecycle"
+      },
+      {
+        "commit": "58ceb5a32d18a34d10d6d155c19b734d415b1fb2",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai): integrate verified inventory runs and scoped history"
+      },
+      {
+        "commit": "9c6b2b3ffccab4e298a1375f3a44727502571e1c",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai-inventory): verify complete source originals and collection bindings"
+      },
+      {
+        "commit": "5b357de05188b3e1ac7101d8112f7fca8407bf3c",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "perf(ui): extract production CSS with stable library style ordering"
+      },
+      {
+        "commit": "c562d8b5336aac85ddf01ed7cf69c38a37374a1b",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "docs(ai): inherit completed supply forecasting evidence"
+      },
+      {
+        "commit": "78e391c4a439ca4160c667cf3deea39cc670a9b5",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "fix(forms): retain explicitly selected constants and scoped field labels"
+      },
+      {
+        "commit": "e9dd77d74c7b142291bc8015c294d767f0760425",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai-inventory): record and govern complete stock planning originals"
+      },
+      {
+        "commit": "d134db0e10dc2bbbcef5d5da9956635c0605b6ec",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "test(ai-inventory): exercise source proof, governance and original entry lifecycle"
+      },
+      {
+        "commit": "a19efd8129ed318259ed7b405f818f708f5f3532",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "docs(ai): explain reviewed inventory candidates and super-admin controls"
+      },
+      {
+        "commit": "7cbf3640f3def3adc328b11a030a6ce6efa00101",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai): expose governed inventory sources and provider checks to super-admins"
+      },
+      {
+        "commit": "f20081a579622fdfe1961ca6fe3efd6f00813518",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(pharmacy): bind inventory AI actions to original pharmaceutical and consumable rows"
+      },
+      {
+        "commit": "a69c30b9d0c3e23fc2174422770f73a4c6ca7194",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "fix(ai): require full inventory proof for every native task marker"
+      },
+      {
+        "commit": "3408f547df90d97f3460d3a1c3fc754aae453338",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "docs(ai): clarify physical totals, order fees and captured inventory scope"
+      },
+      {
+        "commit": "a6f0ee6e01a3d2b93a5bd3356cd5c565a515eb3e",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "fix(ai): keep native inventory scope in its verified result cards"
+      },
+      {
+        "commit": "d2a942db930526c88a2588d1e3b5b0369101f45c",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "test(ai): verify canonical inventory production entries and exact proofs"
+      },
+      {
+        "commit": "4b5e68d35f68a77bf1e577bc13d89576e880fd58",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "fix(ai-inventory): preserve legacy SKU entry and prevent native protocol downgrade"
+      }
+    ]
+  },
+  "implementation": {
+    "catalog_version": "2026.10.21.14",
+    "feature_count": 80,
+    "distinct_default_prompts": 80,
+    "source_reference_count": 38,
+    "native_schema_version": 14,
+    "model_prefix": "inventory:",
+    "rule_id": "inventory_declared_candidate_plans_v1",
+    "core_freeze_commit": "c1f39b8",
+    "fixed_policy": {
+      "core_sha256": {
+        "inventory_config": "f8b0fab270e940de6c7f042e7475a2185ff2a8e082db95bb39fdc6801e83695d",
+        "inventory_contract": "8299c364547a104e0414aeaea1423e4950549900b233814819cf8084a2ae664b",
+        "inventory_model": "3ff1d71fbacb2706fba9b303e64747cdab59c9c670fc3be3df75b4f33c2668c4",
+        "inventory_server": "f560fc24fcf8c975243a41458841dc7067404aea2d15015f4e29301703294e1d"
+      },
+      "input_policy": {
+        "conflicts": "preserve_raw_catalog_batch_count_frozen_and_unit_conflicts_as_unknown_never_choose_or_reconcile_automatically_signed_legacy_negative_preserved_but_invalid_for_inventory",
+        "cost": "same_explicit_cost_unit_unit_price_per_one_reviewed_quantity_unit_plus_order_and_plan_fees_no_inferred_catalog_price",
+        "expiry": "reviewed_valid_through_inclusive_or_explicit_non_expiring_unknown_never_normalized",
+        "future": "reviewed_daily_physical_drawdown_scenario_not_latent_demand_no_other_changes_and_static_frozen_quantity_explicit",
+        "limits": {
+          "candidates": 256,
+          "days": 31,
+          "initial_lots": 4096,
+          "integer_bits": 4096,
+          "orders_total": 8192,
+          "receipt_lots_total": 8192,
+          "utf8_bytes": 8388608,
+          "work_units": 20000000
+        },
+        "numbers": "nonnegative_original_decimal_text_18_integer_6_fraction_digits_exact_no_conversion_zero_not_null",
+        "opening": "independent_count_actual_observed_clock_professional_review_complete_legacy_reconciliation_and_explicit_carry_forward_required_database_capture_alone_unknown",
+        "plans": "explicit_finite_indivisible_complete_candidates_shared_scenario_budget_no_line_recombination",
+        "privacy": "opaque_scenario_tokens_closed_typed_facts_actual_source_sha_no_free_text_names_or_raw_unit_currency",
+        "scope": "single_sku_single_reviewed_physical_scope_quantity_unit_and_cost_unit",
+        "unknown": "unknown_candidate_blocks_proven_best_or_infeasible_for_declared_set_known_feasible_subset_only"
+      },
+      "input_policy_digest": "f6edf49f0bd86d7f999ace9d610b80c507c2dc8b1e83831a87f1dfd13e3da584",
+      "missing_data": [
+        "仅比较单物资、明确物理范围及数量与成本计量单位下的完整声明采购候选；逐日核对受审未来数量情景、效期、冻结量、约束和明确采购成本，不自动下单或改变库存",
+        "零、未知、单位不符及原账冲突分别保留；最优或不可行证明仅限完整声明候选集合，未知候选阻断全集证明，不代表所有可能采购组合或真实运营效果验证。"
+      ],
+      "recipe": {
+        "balance": "opening_plus_receipts_equals_allocated_plus_projected_expired_plus_closing_and_closing_equals_usable_plus_frozen",
+        "cost": "all_ordered_quantity_times_unit_price_plus_every_declared_order_fixed_fee_plus_plan_fixed_fee_including_unused_and_expired_receipts",
+        "event_order": [
+          "expire_existing_valid_through_before_date",
+          "receive_then_immediately_remove_expired_arrivals",
+          "fefo_drawdown_excludes_frozen",
+          "check_daily_residual_and_shared_budget_constraints"
+        ],
+        "expiry": "valid_through_inclusive_non_expiring_after_all_dated_lots",
+        "feasibility": "all_reviewed_daily_drawdown_met_and_all_explicit_shared_budget_minimum_end_usable_maximum_end_total_rules_satisfied",
+        "input_policy": {
+          "conflicts": "preserve_raw_catalog_batch_count_frozen_and_unit_conflicts_as_unknown_never_choose_or_reconcile_automatically_signed_legacy_negative_preserved_but_invalid_for_inventory",
+          "cost": "same_explicit_cost_unit_unit_price_per_one_reviewed_quantity_unit_plus_order_and_plan_fees_no_inferred_catalog_price",
+          "expiry": "reviewed_valid_through_inclusive_or_explicit_non_expiring_unknown_never_normalized",
+          "future": "reviewed_daily_physical_drawdown_scenario_not_latent_demand_no_other_changes_and_static_frozen_quantity_explicit",
+          "limits": {
+            "candidates": 256,
+            "days": 31,
+            "initial_lots": 4096,
+            "integer_bits": 4096,
+            "orders_total": 8192,
+            "receipt_lots_total": 8192,
+            "utf8_bytes": 8388608,
+            "work_units": 20000000
+          },
+          "numbers": "nonnegative_original_decimal_text_18_integer_6_fraction_digits_exact_no_conversion_zero_not_null",
+          "opening": "independent_count_actual_observed_clock_professional_review_complete_legacy_reconciliation_and_explicit_carry_forward_required_database_capture_alone_unknown",
+          "plans": "explicit_finite_indivisible_complete_candidates_shared_scenario_budget_no_line_recombination",
+          "privacy": "opaque_scenario_tokens_closed_typed_facts_actual_source_sha_no_free_text_names_or_raw_unit_currency",
+          "scope": "single_sku_single_reviewed_physical_scope_quantity_unit_and_cost_unit",
+          "unknown": "unknown_candidate_blocks_proven_best_or_infeasible_for_declared_set_known_feasible_subset_only"
+        },
+        "objective": "minimum_exact_declared_purchase_cost_among_feasible_whole_candidates_return_all_ties_no_automatic_selection",
+        "projection_only": true,
+        "prompt_handling": "provenance_only",
+        "proof_scope": "only_complete_explicit_finite_declared_candidates_not_all_possible_procurement_combinations",
+        "rule_id": "inventory_declared_candidate_plans_v1",
+        "tie_break": "canonical_lot_uuid",
+        "version": "inventory_declared_candidate_plans_v1"
+      },
+      "recipe_digest": "d651a74bf06fa30edbcef09f485f2d8987cf261a06ac4464532891d4b98bfb56",
+      "runtime_fields": [
+        "engine",
+        "python_version",
+        "engine_versions",
+        "core_sha256",
+        "recipe_digest",
+        "input_policy_digest",
+        "timezone_database_digest",
+        "clinical_validation",
+        "operational_validation",
+        "prompt_handling",
+        "coverage_guarantee",
+        "runtime_digest",
+        "model_version"
+      ],
+      "scope_note": "仅比较单物资、明确物理范围及数量与成本计量单位下的完整声明采购候选；逐日核对受审未来数量情景、效期、冻结量、约束和明确采购成本，不自动下单或改变库存"
+    },
+    "scope": "One actual pharmaceutical/consumable SKU and hospital_inventory physical scope, independently reviewed original quantity unit, complete explicit future1..31 business-date drawdown scenario and finite indivisible candidate plans. Public original and current case/recipe/private-member closure are not interchangeable with latent true demand.",
+    "event_order": "Per day remove expired lots, receive original dated receipts, FEFO by inclusive valid_through and stable lot ID, allocate original drawdown and evaluate shared end-of-day constraints. Frozen quantities remain unavailable; this is not an intraday availability guarantee or physical disposal.",
+    "cost": "Exact original unit price times every ordered quantity, every order fixed fee and plan fixed fee, including unused/expired ordered quantity. Unknown/zero/unit/currency remain distinct; no implicit conversion/FX or full-economic-cost claim.",
+    "finite_conclusion": "Only a confirmed complete candidate set with every candidate closed can prove best_among_declared_candidates (all minimum ties) or all_declared_candidates_proven_infeasible. A single unknown blocks the whole-set proof while preserving known candidate findings. No automatic candidate choice, ordering, transfers, dispensing or stock writes.",
+    "originals": "Independent pharmacist self-confirmed physical total/frozen quantity and real batch/expiry observation; original current legacy capture has observed_at=NULL and cannot become a retrospective physical count. Raw catalog/batch/physical/frozen conflicts, individual negative lots and current invalid signer/unit are retained as unknown rather than filtered or canceled by a sum.",
+    "legacy_scope": "Actual SKU, all real pharmaceutical batches/ledgers and unresolved purchase items; consumed/canceled purchases are outside pending obligations. Consumables have no invented batch/ledger table. Professional confirmed reconciliation binds a digest actually inspected before the atomic current capture; same catalog total with changed frozen/expiry invalidates old review.",
+    "unit": "Missing original pharmaceutical unit remains None. An independent explicit one-to-one legacy-unit review/basis is required to interpret old quantities; no fabricated original unit or conversion.",
+    "governance": "Current professional pharmacist signs stock observations, separate current Super-admin technically publishes originals/scenarios; whole same-SKU/scope/exact-period member closure retains unknown and invalid nonwinner candidates. Case publication requires a real zero-order/explicit-zero-plan-fee baseline.",
+    "outbound": "Only typed anonymous inventory_source and complete frozen Prompt; no private raw rows, identity secret, patient/prescription/operator IDs, question, tools or unrelated hospital data. Ordinary readers check frozen Prompt/model anchors; Super additionally checks full frozen Prompt/provider, without claiming independent observation of service internals.",
+    "limits": "256 candidates,4096 initial lots,8192 order lines,31 days,20M work units,4096-bit exact arithmetic, whole8MiB budgets; individual maxima do not guarantee arbitrary combinations fit. Whole failure, no partial optimum/truncation.",
+    "result_storage": "Short Run references, immutable complete Case/Source and lease-bound8MiB result blob. Actual post-flush task/metadata/lease/pointer/blob/exact-success-audit plus current source/authority/config are checked before atomic commit; real SQL fault injection covered.",
+    "guide": "doc/ai-guide.md#受审有限采购候选与库存守恒比较第67项"
+  },
+  "backend_regression": {
+    "passed": 7882,
+    "skipped": 28,
+    "warnings": 2,
+    "pytest_seconds": 2230.44,
+    "outer_seconds": 2243.94,
+    "baseline_passed": 7193,
+    "net_additional_default_passes": 689,
+    "source_file_count": 845,
+    "all_source_files_unchanged": true,
+    "evidence": {
+      "path": "/tmp/hoim-inventory-full-frozen-final-pytest-execution.json",
+      "sha256": "9fc9e9eb49d8a9ab4fe0e2b3d6a8e7910125f446b745673fe6edc7abb74df5d1",
+      "bytes": 2223
+    },
+    "source_freeze": {
+      "path": "/tmp/hoim-inventory-backend-frozen-final-source-freeze.json",
+      "sha256": "c0acd6096f96ff13f4ee47a3df65a99190f2406e7c7be01bafe16e5b29bd0c60",
+      "bytes": 137549
+    }
+  },
+  "python_static_checks": {
+    "files": 124,
+    "scope": "All Python changes relative to completed65, including inherited66 and new67, not claimed as124 new67 files.",
+    "ruff_and_complete_format_passed": true,
+    "evidence": {
+      "path": "/tmp/hoim-inventory-backend-frozen-final-ruff-execution.json",
+      "sha256": "0cb405cdf40938f1e2caea9a6f8db459e6ddbab85068a738240a786c3055ea52",
+      "bytes": 15254
+    }
+  },
+  "native_core": {
+    "distinct_targeted_tests": 131,
+    "breakdown": {
+      "contract": 42,
+      "model": 57,
+      "asgi": 29,
+      "capacity": 3
+    },
+    "pytest_seconds": 15.61,
+    "evidence": {
+      "path": "/tmp/hoim-inventory-core-final-verification.json",
+      "sha256": "7e73b4f94405d87a40e6523b0764f23bab5701e081b4b37e51f33a2c91e80a50",
+      "bytes": 2445
+    },
+    "actual_process_capacity": {
+      "path": "/tmp/hoim-inventory-process-first-capacity-verification.json",
+      "sha256": "7b1165c8b0a78d5cd64953b2103622f3386fd210c8ad9fae234b79bff8f38b85",
+      "bytes": 1968
+    },
+    "actual_container": {
+      "path": "/tmp/hoim-inventory-container-first-verification.json",
+      "sha256": "fc9145874e9bd1649c0df0db6c4caf95934e67ea9597f9897884789a54becfd4",
+      "bytes": 30534
+    },
+    "container_scope": "34 actual HTTP responses (29 main and5 slow-upload checks),12 successful POSTs including11 full math comparisons plus1 Prompt provenance case; nonroot/readonly/network none,512MiB limit. Not remote inference, deployment, clinical or operational validation.",
+    "process_scope": "Actual4096 lots/31days complete2.767MB source and642672B proof within resource limit; separate combined maximum candidate case refused20M deterministic work budget, no partial conclusion."
+  },
+  "database": {
+    "migrations": [
+      "20261021_inventory_gate",
+      "20261021_inventory_sources",
+      "20261021_inventory_scenarios"
+    ],
+    "new_tables": 4,
+    "new_utc6_columns": 8,
+    "new_mediumtext_columns": 5,
+    "actual_migration": {
+      "path": "/tmp/hoim-inventory-full-migration-mysql-verification.json",
+      "sha256": "e9e965667716e235126e5de54b518f14dccd1623131186a4924627af21c9fc7a",
+      "bytes": 20564
+    },
+    "migration_scope": "Actual private MySQL8.0.39: reconstruct199-table actual legacy metadata and seed rows, stamp supply_series parent, then3 real migrations up/down/up; all old DDL/rows remain exact. Initial10 populated tables14 rows;13 populated tables36 rows before down. Four actual source originals+one governed scenario and8MiB Unicode SQL result seed. Not full historical empty-DB chain, JWT or native worker on MySQL.",
+    "legacy_currentness": {
+      "path": "/tmp/hoim-inventory-source-legacy-anchor-mysql-verification.json",
+      "sha256": "9332be1478415d554e4fb7222f6582371bdab436070a7d29238af4a96d9eb217",
+      "bytes": 6751
+    },
+    "legacy_scope": "Actual private MySQL three RR connections:6 Gate competitors incl source create/publish/revoke/capture and real storage/stock-check functions; stale cached canceled purchase rejected, updated receipt children and current stock used, same-total frozen/expiry changes reject old reconciliation digest with no Source/audit write. Function/SQL-level proof, not all23 writers on MySQL.",
+    "source_sql_summary": {
+      "path": "/tmp/hoim-inventory-source-sql-final-verification.json",
+      "sha256": "3b6b2a467e66fd835557325f23811226dacbf6adeb1c70d05e6eabcc3be383aa",
+      "bytes": 5341
+    },
+    "legacy_format_lineage": {
+      "path": "/tmp/hoim-inventory-format-only-source-equivalence.json",
+      "sha256": "7c37c7fa0148d6e919852e13b6060861046f81a299be85a0806d584adddc86d0",
+      "bytes": 2285
+    },
+    "lineage_limit": "Earlier Gate/legacy SQL report binds pre-format source; later eight-file repair has AST identity with separate before/after hashes. This is not a claim that the earlier SQL test reran on final formatted bytes. Final migration separately binds22 final source files."
+  },
+  "actual_governance_worker_pipeline": {
+    "integration": {
+      "path": "/tmp/hoim-inventory-runtime-integration-first-verification.json",
+      "sha256": "e5542bbbf6f399bf9d3b04e46e6ee0f19ae0d5959b3ee22a963bc85fde65fb4f",
+      "bytes": 4310
+    },
+    "integration_scope": "Actual synthetic SQLite/JWT full Source→Scenario→Super publish→Preview/queue/durable worker/native ASGI/full blob/trace/feedback and source/role/provider/config/cancel/SQL post-write faults;47 pipeline+17 history+29 storage=93 targeted checks. Final metadata anchors added subsequently and covered by separate32 target plus final7882.",
+    "frozen_model_prompt_anchor": {
+      "path": "/tmp/hoim-inventory-frozen-model-anchor-verification.json",
+      "sha256": "f18d05c96296ae14aa7e9f5d2fd7e53e390b82b21ef760bb1d083e2f216d3c0c",
+      "bytes": 878
+    },
+    "history_and_sql_faults": {
+      "path": "/tmp/hoim-inventory-pipeline-boundaries-second-final-verification.json",
+      "sha256": "3b6283058d5214b76010795e7d9ed5f82f069412513943697fe9dad49c7cbf6c",
+      "bytes": 879
+    },
+    "five_real_states": {
+      "path": "/tmp/hoim-inventory-findings-state-export-first-verification.json",
+      "sha256": "2c15bf2b4f590610d52f5a2142b2e0ca7b21aaefc37207167bfaee84468e26d2",
+      "bytes": 6306
+    },
+    "actual_states_packet": {
+      "path": "/tmp/hoim-inventory-findings-actual-state-packets-first.json",
+      "sha256": "3b82981a9dad61416d0c2dd76d5f47dd28e8ae97560c81efbd6f4cb6b784fcf2",
+      "bytes": 796496
+    },
+    "actual_unknown_packet": {
+      "path": "/tmp/hoim-inventory-findings-actual-unknown-packet-first.json",
+      "sha256": "ee7a5eabe8a965a331d09a17f40f234d5705c3c3d3d8acb60c041ff924424273",
+      "bytes": 93564
+    },
+    "state_scope": "Queued/running/succeeded same actual run; failed503 and canceled are separate real tasks, never stitched IDs or fabricated zero outcomes. All actual exported data synthetic.",
+    "legacy_first12": {
+      "path": "/tmp/hoim-inventory-legacy-first-final-verification.json",
+      "sha256": "7b7be4bdb1779c62b887ea6a41fbc7588a49e14a9c1e94e529673d043e4b8b79",
+      "bytes": 2258
+    },
+    "legacy_remaining11": {
+      "path": "/tmp/hoim-inventory-legacy-clinical-final-verification.json",
+      "sha256": "9113233aa84d41e7ac2fe357522876d26331c8da936e7bb6c1240b207817b20e",
+      "bytes": 3074
+    },
+    "legacy_write_scope": "23 existing stock mutation paths across purchase/consumable/doctor/eMAR/pharmacy/inpatient/adjustment/damage/special/import use the shared Gate,current role and current rows, preserving FEFO/return/cancel semantics. Directed SQLite tests are not23 independent MySQL writer executions.",
+    "source_backend": {
+      "path": "/tmp/hoim-inventory-source-backend-final-verification.json",
+      "sha256": "72993abd7c3755a536c42ad7d7ed39b9864ece1f818de17734a5479c92fcc706",
+      "bytes": 1211
+    },
+    "source_scope": "137 actual synthetic source/collection/strict-input/main-JWT/gate/migration tests, including expected legacy digest, not added again to7882. New source10routes, scenario8routes and provider1route are19 actual endpoints;13 sourceHTTP cases are not13 endpoints."
+  },
+  "frontend_build": {
+    "command": [
+      "npm",
+      "run",
+      "verify"
+    ],
+    "exit_code": 0,
+    "audit_vulnerabilities": 0,
+    "elapsed_seconds": 36.424,
+    "source_inputs": 467,
+    "javascript_bytes": 5687115,
+    "all_assets_bytes": 6472818,
+    "largest_javascript_bytes": 644905,
+    "asset_files": 405,
+    "unchanged_budgets": {
+      "javascript": 6000000,
+      "all_assets": 7000000,
+      "largest_javascript": 700000
+    },
+    "dependencies_and_browser_targets_unchanged": true,
+    "resolver_preload_used": false,
+    "existing_scss_warnings": 5,
+    "new_css_order_warnings": 0,
+    "evidence": {
+      "path": "/tmp/hoim-inventory-npm-frozen-second-verify-execution.json",
+      "sha256": "85243d107974edbd3b899e8e796372bf05472401b047b07f8ee59b67fe42ed2e",
+      "bytes": 1187
+    },
+    "production_input_freeze": {
+      "path": "/tmp/hoim-inventory-frontend-frozen-second-production-source-freeze.json",
+      "sha256": "edffc233fcc26aadf9a0e23756cf447af640300a472a8ff9abb2745343338214",
+      "bytes": 77237
+    },
+    "production_css_lineage": {
+      "path": "/tmp/hoim-inventory-production-css-final-verification.json",
+      "sha256": "6f11f31b5c6ed7c3d13b2a08e09706a90d95da36e220b207d3c592d4931c95d9",
+      "bytes": 3072
+    },
+    "css_scope": "Installed Rspack production CSS extraction and one library stylesheet resolve real duplicate loading/order. Development style-loader HMR remains; final real loopback browser HMR checked. Prior6.259MB budget failure and48 intermediate CSS-order warnings retained; no suppressing warnings/raising limits/changing targets."
+  },
+  "frontend_browser": {
+    "total": 1401,
+    "baseline_total": 1117,
+    "new_distinct_cases": 284,
+    "test_files": 100,
+    "categories": {
+      "isolated_mock": 1190,
+      "production_mock": 190,
+      "real_synthetic_http": 21
+    },
+    "workers": 1,
+    "retries": 0,
+    "flaky": 0,
+    "skipped": 0,
+    "all_passed_in_one_full_run": true,
+    "elapsed_seconds": 3757.168,
+    "actual_test_duration_ms": 3748229.506,
+    "source_inputs": 833,
+    "production_assets": 405,
+    "source_and_assets_unchanged": true,
+    "evidence": {
+      "path": "/tmp/hoim-inventory-browser-frozen-second-execution.json",
+      "sha256": "7662f77facbf3a9cef9cd4a61e7debae5c11927f2a9fbb22d42631ad9fa96cde",
+      "bytes": 951667
+    },
+    "classifier": {
+      "path": "/tmp/hoim-inventory-browser-second-category-counts.json",
+      "sha256": "3b9e3cbf827dc036da789d9a55731258a849e9c9ad9f581331c7e3469bdf9951",
+      "bytes": 749679
+    },
+    "source_freeze": {
+      "path": "/tmp/hoim-inventory-frontend-frozen-second-source-freeze.json",
+      "sha256": "0ed551a0a97f1b25cec265e297d81615796d2258615ae919e89fbdb13c45aa99",
+      "bytes": 139440
+    },
+    "baseline_continuity": {
+      "path": "/tmp/hoim-supply-browser-final-category-counts.json",
+      "sha256": "e7df10ce81aff52b234edb1900f83ae52dd175e0845caffaa5f571324c3c9157",
+      "total": 1117,
+      "all_89_previous_file_counts_unchanged": true,
+      "unmodified_previous_test_files": 89,
+      "all_previous_test_source_bytes_unchanged": true
+    },
+    "scope": "Previous89 explicit AI files plus11 new Inventory files, not unrelated legacy business suite.190 production and1190 isolated cases replay synthetic APIs; only21 designated tests use actual synthetic loopback HTTP. Single execution counts; directed reruns and in-page guard leaves are never added again.",
+    "owned_static_server": {
+      "origin": "http://127.0.0.1:38827",
+      "served_directory": "/tmp/hoim-inventory-native-20261021/vue3-new-ui/dist",
+      "has_backend_or_proxy": false,
+      "api_requests_reaching_static_server": [],
+      "socket_closed": true,
+      "thread_stopped": true
+    }
+  },
+  "targeted_frontend_evidence_not_added_again": {
+    "owned_core_and_ui": {
+      "path": "/tmp/hoim-inventory-native-owned-final2-summary.json",
+      "sha256": "9bc167cddb7c36e5f2eb52f9ccb236af876a9c29db85330e14e2c994c18ee2c3",
+      "bytes": 3731
+    },
+    "math_findings": {
+      "path": "/tmp/hoim-inventory-results-findings-final-verification.json",
+      "sha256": "c704c46a6642b70cbbad28da654e1faca80218f3d106313ec6922ff6e87339c0",
+      "bytes": 10495
+    },
+    "parent_marker": {
+      "path": "/tmp/hoim-inventory-parent-marker-final-verification.json",
+      "sha256": "f3d474fe669e50453fbed4920807f7a390850fa60da21660c3dbae061282c62b",
+      "bytes": 7298
+    },
+    "legacy_compatibility": {
+      "path": "/tmp/hoim-inventory-legacy-compatibility-final-verification.json",
+      "sha256": "7a0bae4cac71ee1b4c94ede95e355116c8d72310c0de732fe2a1e1a2a96eee49",
+      "bytes": 4712
+    },
+    "last_display_change": {
+      "path": "/tmp/hoim-inventory-display-final-verification.json",
+      "sha256": "7a619ad23c1eb8150cd468d02f921e78a53fb9fe9fd50708fc4647f0c0964a62",
+      "bytes": 7026
+    },
+    "input": {
+      "path": "/tmp/hoim-inventory-input-final-verification.json",
+      "sha256": "3c8ce2a91ad3c1e0abc45c7f1749761ce5f5a5dd38557a4cd570a8a01434db12",
+      "bytes": 3049
+    },
+    "scenarios": {
+      "path": "/tmp/hoim-inventory-scenario-ui-verification.json",
+      "sha256": "137a6179866e6eb5b519e2afe70ac5a7efa399bff1c6212dbaf70c4f0d601812",
+      "bytes": 2415
+    },
+    "source": {
+      "path": "/tmp/hoim-inventory-source-ui-final-verification.json",
+      "sha256": "5b76c4f9b8ee6c333008734bcf4e613f97c8e92bad60391ad3eedd3bc17863f6",
+      "bytes": 10262
+    },
+    "provider": {
+      "path": "/tmp/hoim-inventory-provider-second-verification.json",
+      "sha256": "df4a4438f0ec000bc1dab237f8d641b6dda0b4320afcf7fdffbf81567e75f93e",
+      "bytes": 2658
+    },
+    "production": {
+      "path": "/tmp/hoim-inventory-production-final-verification.json",
+      "sha256": "bc3edfdcc81f6c1506463738791927ea12179a385372c4286df0791993ddca73",
+      "bytes": 222251
+    },
+    "guide_audit": {
+      "path": "/tmp/hoim-inventory-guide-readonly-review.json",
+      "sha256": "88e22d85c3a14b37ab11ea88fb9c7ea360335178bde958c07165e4cc0116f84e",
+      "bytes": 4323
+    },
+    "unique_new_case_ownership": {
+      "core_math_findings_parent_marker": 148,
+      "scenario_input_api_and_production": 73,
+      "source_api_and_ui": 43,
+      "provider": 20
+    },
+    "scope": "148+73+43+20=284 unique new cases. Final marker46 overlaps parent29; display2 is an existing-positive subset; old Surgery3 regressions remain baseline cases. Earlier99/29 reports bind earlier dependencies and are not claimed to cover subsequent source/helper/CSS changes; the final1401 run unifies final sources."
+  },
+  "node_tools": {
+    "passed": 44,
+    "failed": 0,
+    "includes_route_cases": 14,
+    "milliseconds": 376.128035,
+    "evidence": {
+      "path": "/tmp/hoim-inventory-node-tools-final-verification.json",
+      "sha256": "b5d206322801470becc8976212760c997b6e402970275f24201d990c337326fb",
+      "bytes": 1632
+    },
+    "scope": "Existing four Node tooling files, distinct from browser/model/HTTP counts."
+  },
+  "platform_inventory": {
+    "evidence": {
+      "path": "/tmp/hoim-inventory-platform-second-inventory.json",
+      "sha256": "862fd70b259fc51a246eaf3460d67de0f5bf629bf6686f937771fa46a7c08291",
+      "bytes": 173299
+    },
+    "business_routes": 829,
+    "all_api_routes_including_original_root": 830,
+    "router_modules": 110,
+    "orm_metadata_tables": 203,
+    "vue_views": 160,
+    "new_actual_route_role_guard_closures": 19,
+    "implementation_test_fixture_file_count": 160,
+    "implementation_sha256": {
+      "fastapi_be/Dockerfile.inventory": "991a716fb4bc833d103087172e28e33a563ec94aab585c33ec4564077e51663a",
+      "fastapi_be/alembic/versions/20261021_inventory_gate.py": "ffe7f34a298d0302d55abe4f77973a39e447d8224d2207bcd064030f9ceb33e2",
+      "fastapi_be/alembic/versions/20261021_inventory_scenarios.py": "0f534677fd45b7029a6be1c47085404a05906d6367bac446f54c4a38bed129ff",
+      "fastapi_be/alembic/versions/20261021_inventory_sources.py": "cb8cc46c7beb49304ece8fa594f7b8399366e639d3d3714832bb0c94fd76dbce",
+      "fastapi_be/app/ai/catalog.py": "e5afb44ec93b354f1c0c4538cc26fad690f9fd89bf399a14dd1b1f2d87a406f7",
+      "fastapi_be/app/ai/context.py": "f95974b6f57193ca4a855edc3fa488607611d3219c61055e9a9ed44f5be99470",
+      "fastapi_be/app/ai/gateway.py": "721a43885729badac4d85cf1631537f1252f3014eaac2a5108d69a8dce548a49",
+      "fastapi_be/app/ai/governance.py": "33a5f5cfd7069c46a75c6687acd739454eb2afa8115ccadcf122a7507c24b32b",
+      "fastapi_be/app/ai/inventory_config.py": "f8b0fab270e940de6c7f042e7475a2185ff2a8e082db95bb39fdc6801e83695d",
+      "fastapi_be/app/ai/inventory_context.py": "144177bc2619b9cb55c98fe9e5f894884c41c812c338edb6cd8516f2f3d92030",
+      "fastapi_be/app/ai/inventory_contract.py": "8299c364547a104e0414aeaea1423e4950549900b233814819cf8084a2ae664b",
+      "fastapi_be/app/ai/inventory_history.py": "dd15724713c87284d6b6794dca25b787448405543d60f9d0612d1fee82385814",
+      "fastapi_be/app/ai/inventory_model.py": "3ff1d71fbacb2706fba9b303e64747cdab59c9c670fc3be3df75b4f33c2668c4",
+      "fastapi_be/app/ai/inventory_native_collection.py": "42ece3d2ca31fefb531a7236d0d173dad1f839b7bd81ae89500b7433d31f58e5",
+      "fastapi_be/app/ai/inventory_native_source_input.py": "c0ae30824ad6d1270dbbbf6b6a218958e158fb4d3109b6bf062830ce859c8dc1",
+      "fastapi_be/app/ai/inventory_native_source_models.py": "69ac416d3d6da15c71b50613e83ab3101f99b433b9a5ebaa9e914e327517d6ea",
+      "fastapi_be/app/ai/inventory_native_sources.py": "1d9d803e288fecb71d8f9dc7f6e880ebcfa0ca232b42ed52c709227afb791efc",
+      "fastapi_be/app/ai/inventory_probe.py": "36f961fae40b281e3804685aa56f828d5dd1ded353a89cb476c32a3589efdef8",
+      "fastapi_be/app/ai/inventory_projection.py": "52f02c97e81fd91ffcd5bacb2100906f9b8654d845d7554d96b8117287d8672c",
+      "fastapi_be/app/ai/inventory_protocol.py": "71bc497e0fe72f9430ee0783c447009511493521ac328465ee6f64a324c81ca9",
+      "fastapi_be/app/ai/inventory_scenario_input.py": "fe95f4619d193a67b9672a96e3fa66208243c4a52314458db18dfdf831539632",
+      "fastapi_be/app/ai/inventory_scenario_models.py": "f5670672466a1132ed4ac46bac17e33e245b4d7193158a39cc9abf6ac1884381",
+      "fastapi_be/app/ai/inventory_scenarios.py": "b6b12862823b86f0128f7973140f753727e55ed15195d5134daf80572fed3966",
+      "fastapi_be/app/ai/inventory_server.py": "f560fc24fcf8c975243a41458841dc7067404aea2d15015f4e29301703294e1d",
+      "fastapi_be/app/ai/inventory_snapshot.py": "16b2d7703832cf1ee699dadfbf867e34adfafd1322fc1086c283463a607b688f",
+      "fastapi_be/app/ai/inventory_storage.py": "9c27f96009ee82ca845a69edb8a4c807751508ec2d26e83f16439f1db038de8c",
+      "fastapi_be/app/ai/inventory_write_guard.py": "f200a60e88950fc4e732f7b57d0e787b3880e54b62d4882ac0053231605166f2",
+      "fastapi_be/app/ai/operational_sources.py": "b7e2d59705f269acbe405d9de73e896da029bce47f16eb9e73360ea487d822f9",
+      "fastapi_be/app/ai/references.py": "7fe4b33d348e5f09bec26a32677bc8fcedc0a3d65f068c6056bff744df29757e",
+      "fastapi_be/app/ai/runtime.py": "6cef4b0cc5d2030a7141a3b1d6ec0bcb2b36d1a51768b7d72fa1f95b218607fc",
+      "fastapi_be/app/ai/schemas.py": "e7f86f824e06eae00f8d0f593e3f83c3b9aa58fffef7d8d09013c75f9bae2056",
+      "fastapi_be/app/main.py": "1ed96a531b01918af2f2b8da0b38476cf5cb137668d63e37078c23101da3fa56",
+      "fastapi_be/app/models.py": "9f7ca475f46ecce7c78be5aeb32ecd8dc107a994071772c342abe42b56f2b97b",
+      "fastapi_be/app/pharmacy_safety.py": "5beff1bf84a7a84485eed4439d8fe0ffe502fdc82f19289a732f2039ca76fade",
+      "fastapi_be/app/routers/ai.py": "39fc93fc0da0f510f149bf5e4166e9ae3ac04236980ba14b64d44b37103f5108",
+      "fastapi_be/app/routers/ai_admin.py": "ef3ce5459bf9910f926f050af5e6f9c1fddc8f5b6f51cf3cef1283ae4b5df7f5",
+      "fastapi_be/app/routers/ai_inventory_native_sources.py": "97cb743287406487560319dd8f7ae7f1df8e6d437fed11b8f3ca138d929d7312",
+      "fastapi_be/app/routers/ai_inventory_scenarios.py": "9eec3009e1d89597463993eb1d303893b3539c6c5ba6361d059a86bacc318105",
+      "fastapi_be/app/routers/consumable.py": "b4addad8a6464ba94f31a1aac446272cd6ee14a38f71fb9bffe42daeca18449e",
+      "fastapi_be/app/routers/data_import_export.py": "2c43ec93532560c9b08006a0575720e6fac60a7cb1eaeb0e2d23a1751b953941",
+      "fastapi_be/app/routers/doctor.py": "545bbb3365b22b189094fca54a71b3ee2ebcd4dd4aa69bcce57f05239f50d0c4",
+      "fastapi_be/app/routers/drug_damage.py": "3d603c3cb7e27ec8c7da8b09a0919e1f5790c8101e234596ce76fa124c6b2ff7",
+      "fastapi_be/app/routers/emar.py": "7a9b7304c823d89b4b0d3e5262c921bf06212f4b7f8f7f4092d513c3e63b6587",
+      "fastapi_be/app/routers/inpatient_order.py": "aa5e66818a0a5fb145bcda7599bdd9e28e3d67bee955141c8407ab2b236ac881",
+      "fastapi_be/app/routers/inventory_adjustment.py": "1cb5bb49dadc79371c38f5828f0fe100db7d1c40cfafa8d8f6808cd92773f987",
+      "fastapi_be/app/routers/pharmacy.py": "51465cfdc230123daf7b2e2dab37f5c59eae6c4e17894ec96e86e0e005e81a6a",
+      "fastapi_be/app/routers/purchase.py": "db88f51fde36ebeca623ea4bf89ae2ff318353590569ce267c8b2cd6f47c2dd5",
+      "fastapi_be/app/routers/special_drug.py": "b19c7091b4c69819822adfd29c9289078e5b38b27f05f9e7cbdd928993d49005",
+      "fastapi_be/requirements-inventory.txt": "fc610b7b6f9c3c589f324c60307fdea4a87748580116b141d187cabd960510d4",
+      "fastapi_be/tests/test_ai_inventory_admin.py": "917ad205d810951a93c38a61763c9f04c488592a004e289d8e29502ff5f98be8",
+      "fastapi_be/tests/test_ai_inventory_capacity.py": "b9772bada50b403008b70efedd5400103801caea80a07e2d8b57bbe7295367d6",
+      "fastapi_be/tests/test_ai_inventory_catalog.py": "1025d206a2ada864aff28cd0b6adaacb237cc7f1cbb3dbf81d8375b90fe70703",
+      "fastapi_be/tests/test_ai_inventory_context.py": "86b321bf10c70250e37bc1b8b44465db35a1542dbe40011b28b7754d98ca3396",
+      "fastapi_be/tests/test_ai_inventory_contract.py": "3ea664bb7066865b45e86f33bde25eb8266187a09480dc519fea7a1bf90010a3",
+      "fastapi_be/tests/test_ai_inventory_gateway.py": "c5ba1f50f65812cde71055e18c5b2387fe16126e1e74367f89e090ac35fc3229",
+      "fastapi_be/tests/test_ai_inventory_history.py": "ad9b94f019dbdb078fb432bdd5fb03ce2a8a4d76bfcff18cec4cce275d7d796e",
+      "fastapi_be/tests/test_ai_inventory_import_guard.py": "218c49349b4e70cbdf2aa81362a90dff86e3e6102f107e1d21a1e299e8658923",
+      "fastapi_be/tests/test_ai_inventory_legacy_capture.py": "7e32118e16790bbb0f96f2d0e922604f7e959ba82ae76fac29b128856a92c321",
+      "fastapi_be/tests/test_ai_inventory_legacy_writers.py": "d45345a29d355d71c02747f2c3a7171e9e3af468b11b9d735aaa97de04bde918",
+      "fastapi_be/tests/test_ai_inventory_model.py": "3752a66580fe75e7c24dd4baadbc27f9754adabc9a8367fe704e4c5f7b2be52a",
+      "fastapi_be/tests/test_ai_inventory_native_collection.py": "db8eb588f6fe6abb791983f8bd9517c329f46e8f447402b0b173526a692ce992",
+      "fastapi_be/tests/test_ai_inventory_native_source_input.py": "754a91723b1eaf923979a682a01c1d8428802894386b20ccfa5eea6b43d8ed4f",
+      "fastapi_be/tests/test_ai_inventory_native_sources.py": "9b43ee187cbba53fbd3de7b8177bd5ba41bd340b970a50a20d249994d82bafca",
+      "fastapi_be/tests/test_ai_inventory_native_sources_http.py": "50d87a6ed1891e39e5fdf894e3a8207aa510518fc31ccf28a72493f1093a2fdf",
+      "fastapi_be/tests/test_ai_inventory_pipeline.py": "07347b0212f436b96ea47b94a67e18eacca502b61652e5dd7feb69f2339a41e5",
+      "fastapi_be/tests/test_ai_inventory_probe.py": "fe93c529349e9131e39bc4251cc9986d9dc918af2d821e56465f493a75d8ebdc",
+      "fastapi_be/tests/test_ai_inventory_protocol.py": "a536c51578842178a52e464d94abe63c38c25b3d779506f9c79c909a1d4f05be",
+      "fastapi_be/tests/test_ai_inventory_scenario_guards.py": "9d94e61b37ba219703e59a20363f715a8405f2c8c3574951247a3a760202e9fe",
+      "fastapi_be/tests/test_ai_inventory_scenario_input.py": "0392fe5a96c869a61bee0036b4b42cc4a4a1039e4c649e1218b42fa2249039fc",
+      "fastapi_be/tests/test_ai_inventory_scenario_migration.py": "f46f9dc59d6359b14c78b9f738e57e6f6c1f1e77cd4640990f6720a11cc1d660",
+      "fastapi_be/tests/test_ai_inventory_scenarios.py": "78fbe4591a41213bab3dccfb28b0179923dd34ac05dceeaaaf1ab40f22da881e",
+      "fastapi_be/tests/test_ai_inventory_scenarios_http.py": "a188069717d9a324480b4366bdd6c971644dddf92bc0d59969f57676f5793805",
+      "fastapi_be/tests/test_ai_inventory_server.py": "53e28181fb183162ab6b9bb3691845271e87f323067c2e3837b4363e0df1170c",
+      "fastapi_be/tests/test_ai_inventory_source_migrations.py": "654848bfe8871a502dceeeb5c3186b739a7b3aa8590d3300f1f5bb9d2cc54998",
+      "fastapi_be/tests/test_ai_inventory_storage.py": "8bc50ba1c99abdfc6093dc0e0d2c18858b571eda289caaf3350241c992a6de51",
+      "fastapi_be/tests/test_ai_inventory_write_guard.py": "b5aa43ce9908d9d5bf251743db59a9811526fefed765ee00d8c362f91630f09b",
+      "vue3-new-ui/e2e/ai-inventory-assistant.spec.js": "ef13cf0f897dc8e4a258696e3722bd68178f511c0760f26be56e00d956380755",
+      "vue3-new-ui/e2e/ai-inventory-findings.spec.js": "00689424a6290ea3917e5eef54049e677858821426b6704da07e9f55dba1eb09",
+      "vue3-new-ui/e2e/ai-inventory-independent-entry-review.spec.js": "d14989731a10baa0a3045ef81258d0210ae912b86ad447c4fe22faa5849b40c5",
+      "vue3-new-ui/e2e/ai-inventory-input.spec.js": "9be2beaad16039c4bd115df65c3d07e12a804cc9b11e0ce30c18d75f56dd65f9",
+      "vue3-new-ui/e2e/ai-inventory-native-entry.spec.js": "51dfe2f815c4b7035089ba2acbadf5394cb1e7de8789b367354ab6317073a775",
+      "vue3-new-ui/e2e/ai-inventory-provider.spec.js": "f9c8cf8e0cc8683b1543850e983be39599f4201704232084e7bd8efe0f24a649",
+      "vue3-new-ui/e2e/ai-inventory-results-math.spec.js": "ea9468e560ffd616184097836f17c3eb1334617e98dc044ab0e2f79c6b3e35f7",
+      "vue3-new-ui/e2e/ai-inventory-scenario-api.spec.js": "d4e8ea2c560ff3ed7c2d85b189210fe5e9ff9cc574c0afe3bb1249454e0f1dda",
+      "vue3-new-ui/e2e/ai-inventory-scenarios.spec.js": "67661fd3d977ec18388d91db115fa53ab1110687c7b012076aecd974c7443f14",
+      "vue3-new-ui/e2e/ai-inventory-source-api.spec.js": "d10e0835f3c982edd9335f93b6991c97ab36a16e6fc471bd2e1857b586553dd5",
+      "vue3-new-ui/e2e/ai-inventory-sources.spec.js": "f14091393cf6d93ab8e703d0557fb123c278c7d1a99344c2cb6cf30749622859",
+      "vue3-new-ui/e2e/fixtures/inventory-assistant-harness.cjs": "617e14dd53f050da1b973ce7d1c570fdece620ffc350ba1441c1786e6f2cbb94",
+      "vue3-new-ui/e2e/fixtures/inventory-assistant-ui.cjs": "dc40ac97e803e8d5abdcdf36b46104c266532c819d1614ac59ce6547cab7a46d",
+      "vue3-new-ui/e2e/fixtures/inventory-input-harness.cjs": "6510a0ab60e673660e4c6ada66f52677f5b2b70d7a29e97a2f9e727c8dcab249",
+      "vue3-new-ui/e2e/fixtures/inventory-input-ui.cjs": "319b245cf8ad9795080759b43f4ce6875fc455919bd249fd8f6ffc59ec3ac19e",
+      "vue3-new-ui/e2e/fixtures/inventory-input/README.md": "023daf3c5b19e9b3761f382d3892b017da371eaec10f5462e5bf72d0b1ed8f9c",
+      "vue3-new-ui/e2e/fixtures/inventory-input/actual.json": "703ab045c1f3a2028ca9e3cb273fb747a635afa3be3558803d1f70b07105be13",
+      "vue3-new-ui/e2e/fixtures/inventory-native/all-ties.json": "19acb64fd5c9503d209654e7a3813ce37642852dbebc55c697b5a2286c1eee79",
+      "vue3-new-ui/e2e/fixtures/inventory-native/capabilities.json": "2290cdcde2f014bb79cb72d6ed421726aa664fa16341e2ece7ba365b4bfebf7b",
+      "vue3-new-ui/e2e/fixtures/inventory-native/complete.json": "4db04499422e3018bacef4ce101eef3dbd80df4ea5083bda9b057962e1156bd0",
+      "vue3-new-ui/e2e/fixtures/inventory-native/cost-unit-mismatch.json": "bb33d478becf16ea77a77115a94df9820e089a7f95911b925f33b18b25ee5f0b",
+      "vue3-new-ui/e2e/fixtures/inventory-native/expiry-frozen.json": "45d1c6a4c3a7efdb92a0eeacf3a696b930dd13d36ebac2066a5492d5b0926995",
+      "vue3-new-ui/e2e/fixtures/inventory-native/fees-budget-constraints.json": "a0a643808ebc25baeedc5c66dcf79c3c63c9ccea07f2f5f45b30942ea78d2e95",
+      "vue3-new-ui/e2e/fixtures/inventory-native/fefo-lot-tie.json": "4bd92c87ba8f15cb53deabeb9757e67ebf1247b8818dc8303871b341e3f74994",
+      "vue3-new-ui/e2e/fixtures/inventory-native/incomplete-plan.json": "ba6d1ece12391757d468bdbcfb6498798b206e6506e49662c1722a147afb19a2",
+      "vue3-new-ui/e2e/fixtures/inventory-native/legacy-capture.json": "c4e9b1dc893183cd34332f63b9167102d48c576bc057f1c827a627fb71ae3f15",
+      "vue3-new-ui/e2e/fixtures/inventory-native/manifest.json": "6d9f610b3d6d2a0778389508143c2848cb8e27b3b3e4868e71509d1c65da6aa8",
+      "vue3-new-ui/e2e/fixtures/inventory-native/max-precision-31days.json": "4584695100433225a4fdd68d9442d2486fc996f8310fa12fcdb14ffed24dd45e",
+      "vue3-new-ui/e2e/fixtures/inventory-native/negative-legacy.json": "b695e14724dc07915ad148de56784b4ce2297efe47f577772bdec89914e2c68f",
+      "vue3-new-ui/e2e/fixtures/inventory-native/stock-unit-mismatch.json": "9a3a76532edc08522a91427f742a1f189a16b2b0bc6caa4436d5be165e6bb475",
+      "vue3-new-ui/e2e/fixtures/inventory-native/unknown-constraint.json": "0c9b490ff796c0e85edcc039b5b2e4516909dda0d973ed3339fd26d4c97c7061",
+      "vue3-new-ui/e2e/fixtures/inventory-native/unknown-plan.json": "1f3046f6fa61b9c2811bc09b9679afcb38c591fba814cb11390125a61a1a30b6",
+      "vue3-new-ui/e2e/fixtures/inventory-native/zero.json": "9bfa369423c7ebc03619b5e872ce707b9bb5cbe813f7d10f0cea4082b48c70c2",
+      "vue3-new-ui/e2e/fixtures/inventory-pipeline/actual-feature-directory.json": "8dbd62f0b069a9e7c932c4ffee6a90b964ac505246c4d060ed9154be504a043b",
+      "vue3-new-ui/e2e/fixtures/inventory-pipeline/actual-states.json": "3c806c7444b2592c8401aacc0db757d372aa96e9bf041250483f830752cef704",
+      "vue3-new-ui/e2e/fixtures/inventory-pipeline/actual-unknown.json": "fc75e551cc5c9da9322e25e380d73ad032fee45eed7867d9dbeb47593aa0ec17",
+      "vue3-new-ui/e2e/fixtures/inventory-pipeline/manifest.json": "3fd7fe852e86fa0dab4498a799d47d50dad67a2d0fbd2956efc76a6f23709da8",
+      "vue3-new-ui/e2e/fixtures/inventory-production-entry.cjs": "2debdae6a16f8af378e64151f49f8e2c0c820626d61dd9d003bde6be558edf33",
+      "vue3-new-ui/e2e/fixtures/inventory-production-packets.cjs": "0151c8f6650dd105a69d3c3f8c3356a2b4f059ad11ab5f8c4a00a2a7198103a2",
+      "vue3-new-ui/e2e/fixtures/inventory-production/README.md": "36b259374aeffb762f0df39210576b2dc7a645794423077386a9d9105a275d2b",
+      "vue3-new-ui/e2e/fixtures/inventory-production/packets.json": "4348c8eb9e2870d931c74c83a9218269397ceacdd743e9668a3fabfa4df6926a",
+      "vue3-new-ui/e2e/fixtures/inventory-provider-harness.cjs": "3baa9b99b57e5195e0d58fda41a38c4b0939b74199716154a6c2856ccc38e3e2",
+      "vue3-new-ui/e2e/fixtures/inventory-provider/actual.json": "e5e24133f4260ac0ea9646b1c1ff3bda640a939bb55b9a534bd35c0ea9f94340",
+      "vue3-new-ui/e2e/fixtures/inventory-result-harness.cjs": "5aea3b24b702be58b310406fb49af21755073039fca36064c9115daef9fb9b91",
+      "vue3-new-ui/e2e/fixtures/inventory-scenario-harness.cjs": "1f42a71a941ca60ab9e2742079d994b3665ee2f810bbda56a84d63fdaa5b7ea8",
+      "vue3-new-ui/e2e/fixtures/inventory-scenario/README.md": "0c4aecdef030b487158fd8ed59ae910dba5f9e53680ac85024ac461235231fc8",
+      "vue3-new-ui/e2e/fixtures/inventory-scenario/actual.json": "c217b0c07088d7b300864b5c9baca3c771179393a176b4987815a2c80ab9dafb",
+      "vue3-new-ui/e2e/fixtures/inventory-source-harness.cjs": "bf3bfc6deb89796b9591cc810386d981f486f931d414e732d87e5b761ac4c184",
+      "vue3-new-ui/e2e/fixtures/inventory-source-ui.cjs": "967b8a59babd94f50b735723846a9ddea9bb38ac0b2a151e68a2ee73af1b037a",
+      "vue3-new-ui/e2e/fixtures/inventory-source/actual.json": "9b7c280367e268dcca77747eaece70b90643bfacf9a4975ecc9016cf90837687",
+      "vue3-new-ui/rspack.config.js": "43682395597131e339ec4491c8371fed9a52f89fc72f9664e7536e13757c471e",
+      "vue3-new-ui/scripts/capture-inventory-pipeline-fixtures.cjs": "3d8f0b6e4f4b96ae72765ba74bc08534903a2361f181a9cd9065ed378f516b33",
+      "vue3-new-ui/scripts/extract-inventory-provider-fixture.cjs": "9d64451fbebc00a9e7a7c58d17d1497d77d2686806e13e1f4a408bd248a2af73",
+      "vue3-new-ui/scripts/generate-inventory-input-fixtures.cjs": "6a19e0f8e612d8ff9f1f1f58ff0b0ea7d1a4fe28821b071533fd8ea6b709ee84",
+      "vue3-new-ui/scripts/generate-inventory-result-fixtures.cjs": "49f16d6ea4da64b70e6e00ef1a39152199b3659c95b6c9cb300f292a087d32a7",
+      "vue3-new-ui/scripts/generate-inventory-result-schemas.cjs": "29a15e1aba0db3c1a646a31fdde82d0ccdb71a73da4cb5fde9e6043718a3237a",
+      "vue3-new-ui/scripts/generate-inventory-scenario-fixtures.cjs": "d5c767167b1bcff47b0fd44fa7f020e7074aaa56ec7e0b0192f2f5c06b1a23bc",
+      "vue3-new-ui/scripts/generate-inventory-scenario-schemas.cjs": "cb597327595c82cdb14ae818637f245b7e795a3cbe80863b5663f6fb8dd2e561",
+      "vue3-new-ui/scripts/generate-inventory-source-fixtures.cjs": "6f6d558e4b8c2dccb8716d060f65468388099ba3dd9a931a4dca43d1d6ae3ced",
+      "vue3-new-ui/scripts/generate-inventory-source-schemas.cjs": "cbf2d50e35cd107d3e38b605d135d3a360ae3c16a1b4fd68f51bae14bc7eb7e3",
+      "vue3-new-ui/src/api/ai/inventoryFixedPolicy.json": "e6b60867944e33b1e537359809c51d66c445dd3c12a455223d65acb04957248f",
+      "vue3-new-ui/src/api/ai/inventoryProvider.js": "9b7786e3506f6e1477cd4a08b738119b265f7dbe06e5268bcb63f30c21544673",
+      "vue3-new-ui/src/api/ai/inventoryResultSchemas.json": "dd607121f209c701fe171e72fa95c7af63b0097b782b5c4fce6314d554b38652",
+      "vue3-new-ui/src/api/ai/inventoryResults.js": "e11063fd7e4e5d773756791f1328f75aa79bff368ef37808219fd335e64da41d",
+      "vue3-new-ui/src/api/ai/inventoryScenarioSchemas.json": "800f69f45ac399db4138351c919d37385b402ce6a1a24d1357f7a57be54eb3ba",
+      "vue3-new-ui/src/api/ai/inventoryScenarios.js": "2e4210a1ae63a45c00bbf24858145cbb8568479690adf4fa90430b895a932aa8",
+      "vue3-new-ui/src/api/ai/inventorySourceSchemas.json": "0f083a99940b98a502008fd629545d0e7c46d7fcb54ad82bb95fbe93ee874805",
+      "vue3-new-ui/src/api/ai/inventorySources.js": "4240be6b2dd9efe9f37475942b8ddb939b0a8074c082e700a1703d26f389c784",
+      "vue3-new-ui/src/api/ai/supplySources.js": "f23b270acfdaddd63b357847bf9ab5ed6fd3539face418eac75f7f9ea51f23d5",
+      "vue3-new-ui/src/components/AIAssistant/index.vue": "49e7ede27c7db1ba5bfdd2c1a65a2d1de09ad05a96c316571c3214d5b0dd4efa",
+      "vue3-new-ui/src/components/AIRunHistory/index.vue": "2ed9c29db726280fd9ce83af71dcf8df7d15866741b687cd78c49fd8f0760f4c",
+      "vue3-new-ui/src/components/AISurgerySources/SurgeryFields.vue": "4aeea520bfc6a7fcbdcb1108856c06584df7c5b34398ef445f1ad39a6c080944",
+      "vue3-new-ui/src/components/InventoryConstraintField.vue": "b0b73bb1b936c61fbf79568757d999c1f9b3162f4df34f0ee4f31a3ec183d96b",
+      "vue3-new-ui/src/components/InventoryInput.vue": "0ff65d2733ae01b418679233da393c6057b97ab7e5a5d3797bd441c366a7b73d",
+      "vue3-new-ui/src/components/InventoryProviderCapabilityCheck.vue": "3799f0c1d900589b2ef6c5f5963afbb94148e092b773f9b255740222af3e84f2",
+      "vue3-new-ui/src/components/InventoryScenarioFields.vue": "4115df4e4f4ae1635323a63512089b702887cc6c80e2990eaac6fcd39e560d02",
+      "vue3-new-ui/src/components/InventoryScenarios.vue": "ffcdf4200307428b35491aa68f386bbbcf8582db1ee97fac685528f62054b231",
+      "vue3-new-ui/src/components/InventorySourceEditor.vue": "72278101f68a3013ffac8d45453397713400a118b5a6a4c3e91263c2674ab214",
+      "vue3-new-ui/src/components/InventorySources.vue": "eec4e355e81fe070b5aa768925423451dfdda4c82027abad9a20e835c4e4643c",
+      "vue3-new-ui/src/components/ai/InventoryFindings.vue": "a2837fe9c83023e35780e2c26c6fb4ff397c5bb2b6e6c472a169d8ef50a73158",
+      "vue3-new-ui/src/views/pharmacy/consumable.vue": "a82a307bc1c358cacf333e8d7c0a4e95ee459ea06e8194afbe432a1ef97c7aff",
+      "vue3-new-ui/src/views/pharmacy/pharmaceutical.vue": "f4b77af6ca349d264e47b68a4ce287b90fc61d67ee0aabefe3634c2f07f37c72",
+      "vue3-new-ui/src/views/pharmacy/stockAlert.vue": "31dd42002a0ce6e407ed1191c7e9e810a6808d9cb19ba215c01142f5c533b418",
+      "vue3-new-ui/src/views/system/aiManagement.vue": "a899e51deb99b8fd582ea6ff41cf7606578ada5b8ba2505334ed5b86ea47a44f"
+    },
+    "generated_artifacts_sha256": {
+      "doc/ai-prompts.json": "2bef19b03071a49031c584eacc43ebf376f7ca0d3094eb0b5e6de84dce1d4998",
+      "doc/ai-capabilities.md": "b7784a3ea4750e06ae435573c7ccaaad402c0effc927a72165c1b7bcb9e9c197",
+      "doc/api-rbac-matrix.md": "c3fb73ebb56573217ac32406ebbfe5f7688dc65e0509187bdf7c81039dde191a",
+      "fastapi_be/rbac_matrix.json": "6b71abe291525d36b083c9c55371c2aee93114a3a876be68cb6972661e306485"
+    },
+    "validation": {
+      "route_matrix_exact_multiset_match": true,
+      "new_route_actual_role_guards_match_matrix": true,
+      "all_implementation_hashes_and_file_set_stable_during_capture": true,
+      "all_generated_artifacts_stable_during_capture": true,
+      "all_selected_implementation_and_generated_bytes_match_captured_head": true,
+      "prompt_export_exact_match": true,
+      "catalog_numbering_complete_1_to_80": true,
+      "nineteen_historical_records_unchanged": true,
+      "four_new_tables_eight_utc6_and_five_mediumtext_definitions": true,
+      "database_connections": 0,
+      "dotenv_reads": 0,
+      "asgi_lifecycle_calls": 0,
+      "repo_files_modified_by_inventory": false
+    },
+    "scope": "Read-only mounted metadata, no DB/HTTP/ASGI startup. Exact source maps bind committed final implementation before this documentation-only commit."
+  },
+  "historical_verification_records": {
+    "baseline_commit": "328d37f86549c2bb550d52d00693b838de2490a5",
+    "count": 19,
+    "all_unchanged": true,
+    "records": [
+      {
+        "path": "doc/ai-aki-verification.json",
+        "baseline_sha256": "a2f8e928266ff16d46973db731329d4e96cbfe09e519ba9f5fcbc8ab384a897c",
+        "current_sha256": "a2f8e928266ff16d46973db731329d4e96cbfe09e519ba9f5fcbc8ab384a897c",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-bed-verification.json",
+        "baseline_sha256": "a1e678f1eee4ca5da36b38260a633e354a0b76a8a0d074a53c444ae1bcc13217",
+        "current_sha256": "a1e678f1eee4ca5da36b38260a633e354a0b76a8a0d074a53c444ae1bcc13217",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-ecg-classifier-smoke.json",
+        "baseline_sha256": "838b0305249698617bc475f7158dfbfbb9e6e22e6d6e84e51974bfcfebb90c61",
+        "current_sha256": "838b0305249698617bc475f7158dfbfbb9e6e22e6d6e84e51974bfcfebb90c61",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-ecg-verification.json",
+        "baseline_sha256": "1eedfa9eb918cf6e6b1ee1f201b7413760eeec501c128f4a73401741f0427f94",
+        "current_sha256": "1eedfa9eb918cf6e6b1ee1f201b7413760eeec501c128f4a73401741f0427f94",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-forecast-verification.json",
+        "baseline_sha256": "9b5683bca58efcf7fc460410529fd5aeeed91e2646eb47be24b836cbadc20d63",
+        "current_sha256": "9b5683bca58efcf7fc460410529fd5aeeed91e2646eb47be24b836cbadc20d63",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-frontend-dependencies-verification.json",
+        "baseline_sha256": "968757f4a75e921038133b3fa9a94947ab4d5607142dce8da964f2a13d00bb1d",
+        "current_sha256": "968757f4a75e921038133b3fa9a94947ab4d5607142dce8da964f2a13d00bb1d",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-imaging-classifier-smoke.json",
+        "baseline_sha256": "b2185a31ff66c4602c10136d5b15404199f50cf7d65ea4a8be4718778c6a9e89",
+        "current_sha256": "b2185a31ff66c4602c10136d5b15404199f50cf7d65ea4a8be4718778c6a9e89",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-imaging-verification.json",
+        "baseline_sha256": "63646b181dae4f531abe233708a24f9b9cc05037ef95d57e1e6f39c7f9880148",
+        "current_sha256": "63646b181dae4f531abe233708a24f9b9cc05037ef95d57e1e6f39c7f9880148",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-laboratory-verification.json",
+        "baseline_sha256": "646103e4874b4f895424987520c7adfb6fb8afdd9eb6e2c7104ed2095b72752f",
+        "current_sha256": "646103e4874b4f895424987520c7adfb6fb8afdd9eb6e2c7104ed2095b72752f",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-news2-verification.json",
+        "baseline_sha256": "363be8c61e2f36705dccc4604631e7d0e84aaa6cc922196ed36e48e740ca6570",
+        "current_sha256": "363be8c61e2f36705dccc4604631e7d0e84aaa6cc922196ed36e48e740ca6570",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-nursing-verification.json",
+        "baseline_sha256": "a04248f9de57ddd878c1b408da1833f53651cd3535d8385d2275874a7f6f9517",
+        "current_sha256": "a04248f9de57ddd878c1b408da1833f53651cd3535d8385d2275874a7f6f9517",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-observation-verification.json",
+        "baseline_sha256": "b75ab8c7ff94704cb823be59d51539f06a16a24edf0020b0e87edfd6cf6e6bee",
+        "current_sha256": "b75ab8c7ff94704cb823be59d51539f06a16a24edf0020b0e87edfd6cf6e6bee",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-organ-support-verification.json",
+        "baseline_sha256": "175b4d4b66960f623170aded7ca7dec32f462fc34278289411c1ddda3dbc653d",
+        "current_sha256": "175b4d4b66960f623170aded7ca7dec32f462fc34278289411c1ddda3dbc653d",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-qsofa-verification.json",
+        "baseline_sha256": "d3c4cea9a657527540d3c570512a00568f92a5381c066e9a0bcf204a2e3c7ba4",
+        "current_sha256": "d3c4cea9a657527540d3c570512a00568f92a5381c066e9a0bcf204a2e3c7ba4",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-roster-verification.json",
+        "baseline_sha256": "8ec5327889f81368e24755a8122f5b5c753a84a1e9a949ec3957b35a9ba13188",
+        "current_sha256": "8ec5327889f81368e24755a8122f5b5c753a84a1e9a949ec3957b35a9ba13188",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-sofa-verification.json",
+        "baseline_sha256": "20235fe055a6995be2b40270a52f67cba778d445cd10113e7f8185dbeab0cdca",
+        "current_sha256": "20235fe055a6995be2b40270a52f67cba778d445cd10113e7f8185dbeab0cdca",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-speech-smoke.json",
+        "baseline_sha256": "41ad522da4f04e2a6d75595660ecbc2549acdcd159450aa99602b495c8e690a0",
+        "current_sha256": "41ad522da4f04e2a6d75595660ecbc2549acdcd159450aa99602b495c8e690a0",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-supply-verification.json",
+        "baseline_sha256": "12ff22420c62a264aa94975a2f54d669b9752be2757537d46b755d92b6e32414",
+        "current_sha256": "12ff22420c62a264aa94975a2f54d669b9752be2757537d46b755d92b6e32414",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-surgery-verification.json",
+        "baseline_sha256": "302fc7655eda439297885b15c2b3f001f1e044fd2eaa5d559941dea5d1e89816",
+        "current_sha256": "302fc7655eda439297885b15c2b3f001f1e044fd2eaa5d559941dea5d1e89816",
+        "unchanged": true
+      }
+    ],
+    "all_stable_during_inventory": true
+  },
+  "preserved_attempts": {
+    "first_full_browser_1397_passed_1_failed": {
+      "path": "/tmp/hoim-inventory-browser-frozen-final-execution.json",
+      "sha256": "bbbf1e471316d599f9308820febd5d90ce15ba40f0300ca8fd34e27e485015b8",
+      "bytes": 950492
+    },
+    "first_full_browser_scope": "Original frozen run executed1398 cases with one genuine old external SKU entry regression. Fix4b5e68d separates SKU business scope from sticky native protocol binding and adds three strict compatibility cases. Final1401 is a separate new frozen full run; no established89 spec bytes changed.",
+    "initial_backend_interrupt": {
+      "path": "/tmp/hoim-inventory-full-frozen-first-pytest-execution.json",
+      "sha256": "db9a1d0230a3b0e12021226015269a6ef384d06c32928e264f24f05284806df0",
+      "bytes": 2125
+    },
+    "initial_format_check": {
+      "path": "/tmp/hoim-inventory-backend-frozen-first-ruff-execution.json",
+      "sha256": "b58b45017fcfbe39d1ad6883ac0d49e1a8b9c121dc9138cfcc8e8c63eb6ef2d1",
+      "bytes": 6962
+    },
+    "initial_format_scope": "329passed/1warning interrupted solely to format8 files; all8 Python ASTs equal, original log retained, current final7882 is the final source run.",
+    "native_marker_real_failure": {
+      "path": "/tmp/hoim-inventory-native-marker-independent-review.json",
+      "sha256": "71f1c508f2600e92f56f5eb561efb641bfbb939e232e58e1f5d06bce47773f6c",
+      "bytes": 1732
+    },
+    "other_attempts": "Retain original negative-batch aggregation bug, provider initialization watcher race, manual-clear initial-reference rebind, missing Source schema import, nullable literal editor failure, pre-merge syntax collection failure, exported clock/owner/fixture failures, production2assertion failures, earlier budget/HMR/CSS-order runs and metadata/lease SQL-trigger timing tests. These are not final green evidence; specialist reports retain exact original paths and scopes."
+  },
+  "artifact_retention": "Tracked evidence stores full final source maps plus hashes/paths of external synthetic packets/logs/reports. Large raw packets and temporary runners remain local /tmp and are not guaranteed permanent or bundled in Git. No real hospital/patient/credential content committed.",
+  "limitations": [
+    "No deployment/push/production enablement, real clinical or operational validation or remote paid inference.",
+    "Finite declared candidate proof is not global procurement optimality, latent demand, qualified clinical evidence or real-world effectiveness.",
+    "Current private MySQL migration/locking/function proofs and synthetic SQLite/JWT/native worker proofs have separate explicit scopes.",
+    "Ordinary source currentness and Super frozen audit differ; coherent SHA/math proves declared provenance/consistency, not professional truth or independent observation of service internals.",
+    "All80-feature goal remains active; coding evidence and original-document foundations continue separately."
+  ]
+}

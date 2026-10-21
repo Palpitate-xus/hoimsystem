@@ -462,3 +462,5 @@
 - 本地merge0320876f（原e317e7d+研究652ba8e）已将完整验收69–74纳入feature/ai-hospital-platform；1150 BE/四映射和1199 FE/spec/fixture/build逐字等于上游完整10687P/28skip/7warn与2818浏览器对应冻结。没有重新执行或加总这些全量。
 - Main正式npm run verify一次29.745秒、审计0、660生产输入稳定；JS5,364,118/全资源6,439,013/最大646,853，原6M/7M/700k限制不变。Main实际新产物与上游dist并非逐字相同，不臆断原因；额外完整12文件Node163全绿6.440秒、6文件实际生产20全绿47.767秒，零skip/retry/flaky/error，1199源核验与375实际dist稳定，独立静态服务关闭且无未mock API。
 - 独立Python再核Main实际HTML44记录：28完整schema/43完整源JSON与许可SVG精确相等；934接口RBAC与80能力Prompt导出check通过。详见ai-research-main-admission.json，全部原runner/report/log无损保存。未push/部署/重启、医院DB/远端模型或临床验证；75–80继续独立开发，既有明确现代浏览器目标不变。
+
+- 2026-10-21 第80项原生目录/Prompt/教学启用范围：28完整文件一次546通过/19既有SQLite提示，88.19s pytest、99.444s外层、1209输入稳定。唯一已提交练习UUID、clinical_training_evidence模式、真实独立System/Task及原catalog指令导出，六固定staff含护士；不沿用通用知识检索或患者权限。超管版本编辑固定System与完整Task一致，AI反馈启用另需教学范围验证且本地评分不冒称模型验证；公共Task路由/队列和FE继续。

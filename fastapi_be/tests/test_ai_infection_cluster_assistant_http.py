@@ -47,6 +47,8 @@ async def test_actual_main_same_case_feature_source_explicit_local_task_split_su
         await send(ROOT + f"/tasks/{rid}/parts/{part}")
     await send(f"/api/ai/admin/runs/{rid}")
     cancel = await send(ROOT + "/tasks", "POST", case["task_request"])
+    before_cancel = await send(ROOT + f"/tasks/{cancel['run_id']}")
+    assert before_cancel["status"] == "queued" and before_cancel["usage"] is None
     cancelled = await send(ROOT + f"/tasks/{cancel['run_id']}/cancel", "POST", {})
     assert cancelled == dict(run_id=cancel["run_id"], feature_key="infection_cluster", status="cancelled", result_available=False)
     stopped_metadata = await send(ROOT + f"/tasks/{cancel['run_id']}")

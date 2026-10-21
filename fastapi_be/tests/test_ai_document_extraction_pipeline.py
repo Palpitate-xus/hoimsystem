@@ -270,3 +270,74 @@ async def test_inflight_cancel_keeps_reported_usage_without_accepting_draft(asyn
     assert data["status"] == "cancelled" and data["result"] is None
     assert (data["input_tokens"], data["output_tokens"]) == (11, 13)
     assert db.query(AIAuditEvent).filter_by(action=documents.ACCEPT, target=claim[0]).count() == 0
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("fault", ["tokens", "error", "audit", "metadata", "result"])
+async def test_actual_postflush_accept_faults_rollback_draft_and_preserve_real_usage(async_client, auth_headers, document_pipeline, fault):
+    case, db = document_pipeline, document_pipeline["db"]
+    claim, _ = await queue(async_client, auth_headers(case["actor"].username), case)
+    if fault in {"tokens", "error", "result"}:
+        assignment = "input_tokens=999" if fault == "tokens" else "result_json='{}'" if fault == "result" else "error_code='unexpected-success-error'"
+        sql = f"CREATE TRIGGER document_accept_fault AFTER UPDATE ON hoimsystem_ai_run WHEN NEW.status='succeeded' BEGIN UPDATE hoimsystem_ai_run SET {assignment} WHERE run_id=NEW.run_id; END"
+    else:
+        effect = (
+            "DELETE FROM hoimsystem_ai_audit_event WHERE event_id=NEW.event_id"
+            if fault == "audit"
+            else "UPDATE hoimsystem_ai_run SET " + ("context_metadata_json='{}'" if fault == "metadata" else "result_json='{}'") + " WHERE run_id=NEW.target"
+        )
+        sql = f"CREATE TRIGGER document_accept_fault AFTER INSERT ON hoimsystem_ai_audit_event WHEN NEW.action='run.document_extraction.accept' BEGIN {effect}; END"
+    db.execute(text(sql))
+    db.commit()
+    transport, packets = model_transport(case)
+    await runtime.execute_claimed(*claim, transport=transport)
+    db.expire_all()
+    run = db.get(AIRun, claim[0])
+    assert run.status == "failed" and run.error_code == "RESULT_STORAGE_ERROR" and run.result_json == "{}"
+    assert (run.input_tokens, run.output_tokens) == (11, 13) and len(packets) == 1
+    assert db.query(AIAuditEvent).filter_by(action=documents.ACCEPT, target=run.run_id).count() == 0
+    assert documents.usage_receipt(db, run)["complete"] is True
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("terminal", ["fail", "cancel"])
+async def test_actual_deleted_terminal_receipt_refuses_initial_and_fallback_transactions(async_client, auth_headers, document_pipeline, terminal):
+    from fastapi import HTTPException
+
+    case, db = document_pipeline, document_pipeline["db"]
+    claim, _ = await queue(async_client, auth_headers(case["actor"].username), case)
+    db.execute(
+        text(
+            f"CREATE TRIGGER document_accept_fault AFTER INSERT ON hoimsystem_ai_audit_event WHEN NEW.action='run.document_extraction.{terminal}' BEGIN DELETE FROM hoimsystem_ai_audit_event WHERE event_id=NEW.event_id; END"
+        )
+    )
+    db.commit()
+
+    def cancel():
+        db.query(AIRun).filter_by(run_id=claim[0]).update({"status": "cancelled"})
+        db.commit()
+
+    transport, packets = model_transport(case, usage="input_only" if terminal == "fail" else "complete", mutate=cancel if terminal == "cancel" else None)
+    with pytest.raises(HTTPException) as rejected:
+        await runtime.execute_claimed(*claim, transport=transport)
+    assert rejected.value.status_code == 409
+    db.expire_all()
+    run = db.get(AIRun, claim[0])
+    assert run.status == ("running" if terminal == "fail" else "cancelled")
+    assert run.result_json == "{}" and run.latency_ms is None and len(packets) == 1
+    assert db.query(AIAuditEvent).filter(AIAuditEvent.target == run.run_id, AIAuditEvent.action.in_(documents.FINAL_ACTIONS)).count() == 0
+    assert documents.usage_receipt(db, run) == {"input_tokens": None, "output_tokens": None, "complete": False, "model_call_attempted": None}
+
+
+@pytest.mark.asyncio
+async def test_actual_create_audit_trigger_cannot_add_fake_usage_to_queue(async_client, auth_headers, document_pipeline):
+    case, db = document_pipeline, document_pipeline["db"]
+    db.execute(
+        text(
+            "CREATE TRIGGER document_create_fault AFTER INSERT ON hoimsystem_ai_audit_event WHEN NEW.action='run.create' BEGIN UPDATE hoimsystem_ai_run SET input_tokens=999 WHERE run_id=NEW.target; END"
+        )
+    )
+    db.commit()
+    response = await async_client.post("/api/ai/runs", headers=auth_headers(case["actor"].username), json=request(case))
+    assert response.status_code == 409, response.text
+    assert db.query(AIRun).count() == db.query(AIDocumentExtractionRunAnchor).count() == 0

@@ -22,6 +22,21 @@ from app.models import User
 
 ACCEPT = "run.document_extraction.accept"
 FINAL_ACTIONS = (ACCEPT, "run.document_extraction.fail", "run.document_extraction.cancel")
+WRITE_FIELDS = (*RUN_FIELDS, "input_tokens", "output_tokens", "error_code", "error_message", "latency_ms")
+
+
+def _write_state(db, run, action):
+    expected = acceptance_state(db, run, action)
+    expected["run"] = {key: getattr(run, key) for key in WRITE_FIELDS}
+    return expected
+
+
+def _verify_write(db, run, expected):
+    actual = db.query(*(getattr(AIRun, key) for key in WRITE_FIELDS)).filter_by(run_id=run.run_id).with_for_update().one_or_none()
+    event = db.query(*(getattr(AIAuditEvent, key) for key in AUDIT_FIELDS)).filter_by(event_id=expected["event"].event_id).with_for_update(read=True).one_or_none()
+    if actual is None or dict(actual._mapping) != expected["run"] or event is None or dict(event._mapping) != expected["audit"]:
+        raise HTTPException(409, "原文任务、真实用量或本次具体审计实际写入不一致")
+    db.refresh(run)
 
 
 def _configuration(db, actor, preview, *, writing=False):
@@ -119,13 +134,9 @@ def create_document_run(db, user, req):
         db.flush()
         stage_anchor(db, run)
         audit(db, actor.user_id, "run.create", run.run_id, {"feature_key": FEATURE_KEY, "preview": req.preview})
-        expected = acceptance_state(db, run, "run.create")
+        expected = _write_state(db, run, "run.create")
         db.flush()
-        actual = db.query(*(getattr(AIRun, key) for key in RUN_FIELDS)).filter_by(run_id=run.run_id).with_for_update().one_or_none()
-        event = db.query(*(getattr(AIAuditEvent, key) for key in AUDIT_FIELDS)).filter_by(event_id=expected["event"].event_id).with_for_update(read=True).one_or_none()
-        if actual is None or dict(actual._mapping) != expected["run"] or event is None or dict(event._mapping) != expected["audit"]:
-            raise HTTPException(409, "原件任务实际写入与本次完整入队审计不符")
-        db.refresh(run)
+        _verify_write(db, run, expected)
         recheck(db, run, expected_epoch=epoch)
         db.commit()
         return run
@@ -211,29 +222,42 @@ async def execute_document_claimed(run_id, lease, *, transport=None):
                 run.status = "succeeded"
                 action = ACCEPT
             _final_audit(db, run, action, receipt)
-            expected = acceptance_state(db, run, action)
+            expected = _write_state(db, run, action)
             db.flush()
+            _verify_write(db, run, expected)
+            usage_receipt(db, run)
             if action == ACCEPT:
-                verify_accepted_result(db, run, lease, expected, result.model_dump(mode="json"), result_reader=load_result)
+                accepted = {**expected, "run": {key: expected["run"][key] for key in RUN_FIELDS}}
+                verify_accepted_result(db, run, lease, accepted, result.model_dump(mode="json"), result_reader=load_result)
                 recheck(db, run, expected_epoch=epoch)
             db.commit()
         except Exception:
             db.rollback()
-            failed = db.query(AIRun).filter_by(run_id=run_id, status="running", lease_token=lease).populate_existing().with_for_update().one_or_none()
+            failed = db.query(AIRun).filter(AIRun.run_id == run_id, AIRun.status.in_(["running", "cancelled"]), AIRun.lease_token == lease).populate_existing().with_for_update().one_or_none()
             if failed is not None:
-                failed.status = "failed"
+                cancelled = failed.status == "cancelled"
+                failed.status = "cancelled" if cancelled else "failed"
                 failed.result_json = "{}"
                 failed.error_code = "RESULT_STORAGE_ERROR"
                 failed.error_message = "完整原文、结果与接收审计未能原子保存，草稿未接收"
                 _account(failed, receipt, started)
-                _final_audit(db, failed, "run.document_extraction.fail", receipt)
-                db.commit()
+                action = "run.document_extraction.cancel" if cancelled else "run.document_extraction.fail"
+                _final_audit(db, failed, action, receipt)
+                expected = _write_state(db, failed, action)
+                try:
+                    db.flush()
+                    _verify_write(db, failed, expected)
+                    usage_receipt(db, failed)
+                    db.commit()
+                except Exception:
+                    db.rollback()
+                    raise
 
 
 def usage_receipt(db, run):
     rows = db.query(AIAuditEvent).filter(AIAuditEvent.target == run.run_id, AIAuditEvent.action.in_(FINAL_ACTIONS)).populate_existing().with_for_update(read=True).all()
     if not rows:
-        if run.status in {"queued", "running", "cancelled"} or run.error_code == "WORKER_INTERRUPTED":
+        if run.status in {"queued", "running"} or run.status == "cancelled" and run.latency_ms is None or run.error_code == "WORKER_INTERRUPTED":
             return _receipt(sent=None)
         raise HTTPException(409, "原文提取最终用量及接收审计缺失")
     try:
@@ -303,6 +327,7 @@ def describe_document_run(db, user, run, include_result=True):
         input_tokens=receipt["input_tokens"],
         output_tokens=receipt["output_tokens"],
         document_original_id=context.document_binding.original.original_id,
+        usage_receipt_status="pending" if run.latency_ms is None and run.status in {"queued", "running", "cancelled"} else "interrupted" if run.error_code == "WORKER_INTERRUPTED" else "recorded",
     )
     if include_result:
         data["result"] = load_result(db, run)

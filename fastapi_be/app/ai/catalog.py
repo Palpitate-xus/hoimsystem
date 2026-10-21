@@ -87,7 +87,7 @@ class FeatureSpec:
         if self.number == 71:
             from app.ai.document_extraction_contract import EXTRACTION_TASK_PROMPT
 
-            return EXTRACTION_TASK_PROMPT
+            return f"任务编号：71，能力：{self.name}（{self.key}）。\n任务目标与方法：{self.instruction}\n" + EXTRACTION_TASK_PROMPT
         inputs = "、".join(self.inputs)
         outputs = "；".join(self.deliverables)
         if self.number == 68:

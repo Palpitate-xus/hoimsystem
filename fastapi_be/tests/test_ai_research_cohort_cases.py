@@ -203,3 +203,38 @@ def test_super_can_technically_review_current_draft_without_being_given_patient_
     assert technical["can_review"] and technical["parent_current"] and not technical["eligible"]
     assert technical["snapshot"] is None and technical["public_source"] is None and technical["local_resolution"] is None
     assert "否认胸痛" not in canonical_json(technical)
+
+
+def test_actual_unknown_text_record_never_publishes_its_unmatched_whole_clinical_field(db_session, research_case):
+    db, case = db_session, research_case
+    _, _, _, _, made = published(db, case)
+    source = made["public_source"]
+    assert "未知日期完整原文" in canonical_json(made["snapshot"])
+    assert "未知日期完整原文" not in canonical_json(source)
+    unknown = [proof for proof in source["outcomes"][0]["leaves"][0]["evidence"] if proof["truth"] == "unknown"]
+    assert unknown and all(p["recorded_value"] is None and p["quote"] is None for p in unknown)
+
+
+def test_actual_public_source_closed_model_rejects_missing_members_false_counts_and_unknown_raw_text(db_session, research_case):
+    from pydantic import ValidationError
+
+    from app.ai.research_cohort_contract import ResearchCohortSource
+
+    db, case = db_session, research_case
+    _, _, _, _, made = published(db, case)
+    original = made["public_source"]
+    assert ResearchCohortSource.model_validate(original).model_dump() == original
+    for damage in ("extra", "count", "evidence", "raw_unknown_text", "calendar"):
+        value = copy.deepcopy(original)
+        if damage == "extra":
+            value["patient_id"] = case["patient"].patient_id
+        elif damage == "count":
+            value["counts"]["recorded_true"] = 0
+        elif damage == "evidence":
+            value["outcomes"][0]["leaves"][0]["evidence"].pop()
+        elif damage == "raw_unknown_text":
+            value["outcomes"][0]["leaves"][0]["evidence"][0]["recorded_value"] = "不能投影未匹配原全文"
+        else:
+            value["record_window"]["date_to"] = "2026-02-30"
+        with pytest.raises(ValidationError):
+            ResearchCohortSource.model_validate(value)

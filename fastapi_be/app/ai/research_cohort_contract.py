@@ -279,3 +279,175 @@ def canonical_json(value):
     serialized = json.dumps(value, ensure_ascii=False, allow_nan=False, separators=(",", ":"), sort_keys=True)
     serialized.encode("utf-8", errors="strict")
     return serialized
+
+
+Truth = Literal["true", "false", "unknown"]
+LeafPredicate = Annotated[RecordedScalarEqual | RecordedDateCompare | RecordedTextContains, Field(discriminator="op")]
+
+
+class PublicRecordedEvidence(StrictModel):
+    family: Family
+    field: str
+    record_token: SHA
+    original_hash: SHA
+    field_hash: SHA
+    start: Annotated[int, Field(strict=True, ge=0)] | None
+    end: Annotated[int, Field(strict=True, ge=0)] | None
+    quote: Annotated[str, Field(strict=True, min_length=1, max_length=2000), AfterValidator(scalar)] | None
+    recorded_value: Annotated[int, Field(strict=True)] | Annotated[str, Field(strict=True), AfterValidator(scalar)] | None
+    reason: Literal["record_scope_or_parent_unknown", "original_field_missing", "recorded_predicate_only"]
+    truth: Truth
+
+    @model_validator(mode="after")
+    def original_field_minimization(self):
+        if self.field in TEXT_FIELDS.get(self.family, set()):
+            if self.recorded_value is not None:
+                raise ValueError("A whole original text field is not a minimized public quotation")
+            if self.quote is not None:
+                if self.start is None or self.end is None or self.end - self.start != len(self.quote) or self.truth != "true":
+                    raise ValueError("Exact codepoint quotation bounds required")
+            elif self.start is not None or self.end is not None or self.truth == "true":
+                raise ValueError("A true recorded text predicate must carry its exact quotation")
+        else:
+            if self.quote is not None or self.start is not None or self.end is not None:
+                raise ValueError("Scalar/date evidence does not invent a text quote")
+            if self.field in SCALAR_FIELDS.get(self.family, set()):
+                if self.recorded_value is not None and type(self.recorded_value) is not int:
+                    raise ValueError("Recorded integer required")
+            elif self.field in DATE_FIELDS.get(self.family, set()):
+                if self.recorded_value is not None:
+                    if type(self.recorded_value) is not str:
+                        raise ValueError("Original calendar lexeme required")
+                    date(self.recorded_value[:10])
+                    if self.field != "birthday" and (
+                        dt.datetime.fromisoformat(self.recorded_value).isoformat(timespec="microseconds") != self.recorded_value or dt.datetime.fromisoformat(self.recorded_value).tzinfo is not None
+                    ):
+                        raise ValueError("Original naive clock required")
+            else:
+                raise ValueError("Unimplemented evidence field")
+        if self.reason != "recorded_predicate_only" and self.truth != "unknown":
+            raise ValueError("Unresolved original evidence stays unknown")
+        return self
+
+
+class PublicRecordedLeaf(StrictModel):
+    path: Annotated[str, Field(strict=True, pattern=r"^root(?:\.(?:[0-9]+|not))*$")]
+    predicate: LeafPredicate
+    truth: Truth
+    reason: Literal["no_recorded_members", "whole_declared_recorded_family"]
+    evidence: Annotated[list[PublicRecordedEvidence], Field(max_length=8192)]
+
+    @model_validator(mode="after")
+    def complete_leaf(self):
+        if (not self.evidence) != (self.reason == "no_recorded_members") or not self.evidence and self.truth != "unknown":
+            raise ValueError("An empty recorded family is explicitly unknown")
+        for evidence in self.evidence:
+            if (evidence.family, evidence.field) != (self.predicate.family, self.predicate.field):
+                raise ValueError("Predicate evidence identity differs")
+            if isinstance(self.predicate, RecordedTextContains) and evidence.quote is not None and evidence.quote != self.predicate.literal:
+                raise ValueError("Text evidence must be the exact user-declared literal")
+        return self
+
+
+class PublicRecordedOutcome(StrictModel):
+    patient_token: SHA
+    truth: Truth
+    interpretation: Literal["recorded_criteria_only_not_clinical_eligibility"]
+    leaves: Annotated[list[PublicRecordedLeaf], Field(min_length=1, max_length=64)]
+
+
+class PublicResearchMember(StrictModel):
+    family: Family
+    patient_token: SHA
+    record_token: SHA
+    original_hash: SHA
+    parent_binding_hash: SHA
+    window_status: Literal["unknown_clock", "recorded_calendar_in_scope"]
+
+
+class ResearchRecipe(StrictModel):
+    rule_id: Literal["research_recorded_predicates_kleene_v1"]
+    implementation_sha256: dict[str, SHA]
+
+    @model_validator(mode="after")
+    def exact_modules(self):
+        if set(self.implementation_sha256) != {"research_cohort_contract.py", "research_cohort_collection.py", "research_cohort_evaluator.py", "research_cohort_snapshot.py"}:
+            raise ValueError("Every frozen algorithm module is declared exactly")
+        return self
+
+
+class PublicResearchCounts(StrictModel):
+    declared_patients: Annotated[int, Field(strict=True, ge=1, le=256)]
+    recorded_true: Annotated[int, Field(strict=True, ge=0, le=256)]
+    recorded_false: Annotated[int, Field(strict=True, ge=0, le=256)]
+    unknown: Annotated[int, Field(strict=True, ge=0, le=256)]
+
+
+class ResearchCohortSource(StrictModel):
+    schema_version: Literal["research_cohort_source_v1"]
+    source_id: Annotated[str, Field(strict=True, pattern=r"^research_cohort:[a-f0-9-]{36}:[a-f0-9]{12}$")]
+    content_hash: SHA
+    governance_hash: SHA
+    captured_at: UTC
+    scope_token: SHA
+    authorization_binding_hash: SHA
+    collection_digest: SHA
+    data_families: Annotated[list[Family], Field(min_length=1, max_length=5), AfterValidator(ordered)]
+    record_window: RecordWindow
+    member_manifest: Annotated[list[PublicResearchMember], Field(max_length=8192)]
+    member_manifest_hash: SHA
+    recipe: ResearchRecipe
+    criteria: CohortCriteria
+    outcomes: Annotated[list[PublicRecordedOutcome], Field(min_length=1, max_length=256)]
+    counts: PublicResearchCounts
+    limitations: Annotated[list[Annotated[str, Field(min_length=1, max_length=2000), AfterValidator(scalar)]], Field(min_length=1, max_length=16)]
+    privacy_basis: Literal["project_authorized_identifier_minimization_not_anonymity"]
+    external_model_use: Literal["unknown", "recorded_permitted", "not_permitted"]
+
+    @model_validator(mode="after")
+    def full_declared_source(self):
+        import hashlib
+
+        parts = self.source_id.split(":")
+        canonical_uuid(parts[1])
+        if parts[2] != self.content_hash[:12]:
+            raise ValueError("Complete private original anchor differs")
+        members = [m.model_dump() for m in self.member_manifest]
+        if hashlib.sha256(canonical_json(members).encode("utf-8")).hexdigest() != self.member_manifest_hash:
+            raise ValueError("Complete public manifest SHA differs")
+        by_token = {m.record_token: m for m in self.member_manifest}
+        patients = {o.patient_token for o in self.outcomes}
+        if len(by_token) != len(self.member_manifest) or len(patients) != len(self.outcomes) or len(self.outcomes) != self.counts.declared_patients:
+            raise ValueError("Distinct whole original/member/patient closure required")
+        if any(m.patient_token not in patients or m.family not in self.data_families for m in self.member_manifest):
+            raise ValueError("Original is outside the explicit declared source")
+        for truth, count in (("true", self.counts.recorded_true), ("false", self.counts.recorded_false), ("unknown", self.counts.unknown)):
+            if sum(o.truth == truth for o in self.outcomes) != count:
+                raise ValueError("Recorded deterministic counts differ")
+        expected_paths = {}
+
+        def leaf_paths(node, path):
+            if node.op in {"all", "any"}:
+                for index, child in enumerate(node.children):
+                    leaf_paths(child, f"{path}.{index}")
+            elif node.op == "not":
+                leaf_paths(node.child, path + ".not")
+            else:
+                if node.family not in self.data_families:
+                    raise ValueError("A predicate cannot grow the project family scope")
+                expected_paths[path] = node.model_dump()
+
+        leaf_paths(self.criteria.root, "root")
+        for outcome in self.outcomes:
+            if {leaf.path: leaf.predicate.model_dump() for leaf in outcome.leaves} != expected_paths or len(outcome.leaves) != len(expected_paths):
+                raise ValueError("Every finite criteria leaf is accounted exactly once")
+            for leaf in outcome.leaves:
+                expected = {m.record_token for m in self.member_manifest if m.patient_token == outcome.patient_token and m.family == leaf.predicate.family}
+                actual = {e.record_token for e in leaf.evidence}
+                if expected != actual or len(actual) != len(leaf.evidence):
+                    raise ValueError("No original member may be dropped from a recorded predicate")
+                for evidence in leaf.evidence:
+                    member = by_token[evidence.record_token]
+                    if evidence.original_hash != member.original_hash:
+                        raise ValueError("Evidence original hash differs from whole manifest")
+        return self

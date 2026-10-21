@@ -14,7 +14,7 @@ from fastapi import HTTPException
 from pydantic import TypeAdapter
 
 from app.ai.research_cohort_collection import MAX_BYTES, verify_capture
-from app.ai.research_cohort_contract import SHA, UTC, UUID, Basis, CaptureRequest, Positive, canonical_json
+from app.ai.research_cohort_contract import SHA, UTC, UUID, Basis, CaptureRequest, Positive, ResearchCohortSource, canonical_json
 from app.ai.research_cohort_evaluator import evaluate_criteria
 from app.ai.research_cohort_sources import hash_content
 
@@ -181,6 +181,8 @@ def project_snapshot(snapshot, publication_governance_hash, *, validate_current_
         "scope_token": opaque(snapshot, "scope", snapshot["scope_id"]),
         "authorization_binding_hash": opaque(snapshot, "authorization_binding", snapshot["scope_binding_hash"]),
         "collection_digest": opaque(snapshot, "collection", snapshot["collection_digest"]),
+        "data_families": captured["scope_original"]["payload"]["data_families"],
+        "record_window": captured["scope_original"]["payload"]["record_window"],
         "member_manifest": manifest,
         "member_manifest_hash": hash_content(manifest),
         "recipe": snapshot["recipe"],
@@ -193,4 +195,4 @@ def project_snapshot(snapshot, publication_governance_hash, *, validate_current_
     }
     if len(canonical_json(result).encode("utf-8")) > MAX_BYTES:
         raise HTTPException(413, "完整研究最小化证据投影超过8MiB，未删除不利结果")
-    return result
+    return ResearchCohortSource.model_validate(result).model_dump()

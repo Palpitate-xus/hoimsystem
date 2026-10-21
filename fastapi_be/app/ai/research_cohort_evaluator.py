@@ -42,7 +42,7 @@ def _atom(node, record):
         "start": None,
         "end": None,
         "quote": None,
-        "recorded_value": value,
+        "recorded_value": None if node.op == "recorded_text_contains" else value,
     }
     if record["window_status"] == "unknown_clock" or record["parent_binding"]["status"] != "patient_bound":
         return None, {**evidence, "reason": "record_scope_or_parent_unknown"}

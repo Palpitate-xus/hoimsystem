@@ -1,5 +1,8 @@
 """Incremental anti-replay FK migration; preserve all earlier revision meaning."""
 
+import io
+from types import SimpleNamespace
+
 import pytest
 from alembic.migration import MigrationContext
 from alembic.operations import Operations
@@ -20,6 +23,20 @@ def test_dispatch_fk_and_unique_identity_are_in_actual_mysql_compiled_model():
     assert "fk_rcr_dispatch_audit" in ddl and "uq_rcr_dispatch_audit" in ddl and "ck_rcr_artifact_dispatch" in ddl
     assert "dispatch_event_id IS NULL" in ddl and "dispatch_event_id<>usage_event_id" in ddl
     assert migration("20261021_research_dispatch.py").down_revision == "20261021_research_prompt_origin"
+
+
+def test_actual_mysql_downgrade_ddl_releases_foreign_key_before_its_supporting_unique_index():
+    change = migration("20261021_research_dispatch.py")
+    output = io.StringIO()
+    operations = Operations(MigrationContext.configure(dialect_name="mysql", opts={"as_sql": True, "output_buffer": output}))
+    change.op = SimpleNamespace(
+        get_bind=lambda: SimpleNamespace(execute=lambda statement: SimpleNamespace(first=lambda: None)),
+        batch_alter_table=operations.batch_alter_table,
+    )
+    change.downgrade()
+    ddl = output.getvalue()
+    assert ddl.index("DROP FOREIGN KEY fk_rcr_dispatch_audit") < ddl.index("DROP INDEX uq_rcr_dispatch_audit")
+    assert ddl.index("DROP INDEX uq_rcr_dispatch_audit") < ddl.index("DROP COLUMN dispatch_event_id")
 
 
 def test_actual_incremental_down_up_down_up_preserves_prior_source_artifact_rows_and_every_other_ddl(storage_rows):

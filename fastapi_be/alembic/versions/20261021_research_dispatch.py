@@ -31,6 +31,6 @@ def downgrade():
         raise RuntimeError("Dispatched research tasks cannot lose their durable non-replay audit identity")
     with op.batch_alter_table(TABLE) as batch:
         batch.drop_constraint("ck_rcr_artifact_dispatch", type_="check")
-        batch.drop_constraint("uq_rcr_dispatch_audit", type_="unique")
         batch.drop_constraint("fk_rcr_dispatch_audit", type_="foreignkey")
+        batch.drop_constraint("uq_rcr_dispatch_audit", type_="unique")
         batch.drop_column("dispatch_event_id")

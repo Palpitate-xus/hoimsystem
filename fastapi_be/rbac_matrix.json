@@ -1028,6 +1028,87 @@
  {
   "auth": [
    "admin",
+   "cashier",
+   "director",
+   "super_admin"
+  ],
+  "function": "options",
+  "method": "GET",
+  "module": "ai_charge_reconciliation.py",
+  "path": "/api/ai/charge-reconciliation/options"
+ },
+ {
+  "auth": [
+   "admin",
+   "cashier",
+   "director",
+   "super_admin"
+  ],
+  "function": "preview",
+  "method": "POST",
+  "module": "ai_charge_reconciliation.py",
+  "path": "/api/ai/charge-reconciliation/cases/preview"
+ },
+ {
+  "auth": [
+   "admin",
+   "cashier",
+   "director",
+   "super_admin"
+  ],
+  "function": "create",
+  "method": "POST",
+  "module": "ai_charge_reconciliation.py",
+  "path": "/api/ai/charge-reconciliation/cases"
+ },
+ {
+  "auth": [
+   "admin",
+   "cashier",
+   "director",
+   "super_admin"
+  ],
+  "function": "list_cases",
+  "method": "GET",
+  "module": "ai_charge_reconciliation.py",
+  "path": "/api/ai/charge-reconciliation/cases"
+ },
+ {
+  "auth": [
+   "admin",
+   "cashier",
+   "director",
+   "super_admin"
+  ],
+  "function": "detail",
+  "method": "GET",
+  "module": "ai_charge_reconciliation.py",
+  "path": "/api/ai/charge-reconciliation/cases/{identifier}"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "review",
+  "method": "POST",
+  "module": "ai_charge_reconciliation.py",
+  "path": "/api/ai/charge-reconciliation/cases/{identifier}/review"
+ },
+ {
+  "auth": [
+   "admin",
+   "cashier",
+   "director",
+   "super_admin"
+  ],
+  "function": "revoke",
+  "method": "POST",
+  "module": "ai_charge_reconciliation.py",
+  "path": "/api/ai/charge-reconciliation/cases/{identifier}/revoke"
+ },
+ {
+  "auth": [
+   "admin",
    "director",
    "doctor",
    "super_admin"

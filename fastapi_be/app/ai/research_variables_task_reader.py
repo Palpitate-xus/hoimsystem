@@ -16,7 +16,7 @@ from app.ai import research_variables_storage as storage
 from app.ai import research_variables_storage_contract as types
 from app.ai.models import AIAuditEvent, AIRun
 from app.ai.research_cohort_contract import UUID
-from app.ai.research_cohort_sources import utc_text
+from app.ai.research_cohort_sources import utc_text, utcnow
 from app.ai.research_cohort_write_guard import current_research_rows, lock_research_write
 from app.ai.research_variables_batches import _authorized_row
 from app.ai.research_variables_configuration import current_configuration
@@ -209,6 +209,12 @@ def load_task(db, user, value, *, frozen_audit=False, exclusive=False, for_execu
         if any(artifact[key] != original[key] for key in original if key != "preview") or header["preview"] != original["preview"]:
             raise HTTPException(409, "实际Artifact原授权与Source前技术头不一致")
         _creation_audit(db, header, artifact)
+        if for_execution:
+            from app.config import settings
+
+            elapsed = utcnow() - artifact["recorded_at"]
+            if elapsed < dt.timedelta(0) or elapsed > dt.timedelta(seconds=settings.AI_MAX_QUEUE_AGE_SECONDS):
+                raise HTTPException(409, "实际变量任务时钟或等待期限已失效，未读取旧Task正文或重放调用")
         # No Task/Artifact BODY has been selected before the independent Source
         # authority, technical headers and exact creation Audit all pass.
         run = current_research_rows(db.query(AIRun).filter_by(run_id=identity[0]), shared=not exclusive).one()

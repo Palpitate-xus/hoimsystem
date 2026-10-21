@@ -6,6 +6,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, joinedload
 
+from app.ai.inventory_write_guard import current_inventory_rows, lock_inventory_write
 from app.database import get_db
 from app.dependencies import ADMIN_ROLES, CLINICAL_ROLES, NURSING_ROLES, PHARMACY_ROLES, User, require_roles
 from app.event_bus import patient_user_ids, publish_event
@@ -225,14 +226,19 @@ def set_medication_barcode(
     current_user: User = Depends(require_roles(*PHARMACY_ROLES, *ADMIN_ROLES)),
     db: Session = Depends(get_db),
 ):
-    pharmaceutical = db.get(Pharmaceutical, req.pharmaceutical_id)
+    current_user = lock_inventory_write(db, current_user, allowed_roles=PHARMACY_ROLES | ADMIN_ROLES)
+    pharmaceutical = current_inventory_rows(db.query(Pharmaceutical).filter(Pharmaceutical.pharmaceutical_id == req.pharmaceutical_id)).first()
     if not pharmaceutical:
         return {"code": 404, "msg": "药品不存在"}
     barcode = req.barcode.strip()
-    duplicate = db.query(Pharmaceutical).filter(
-        Pharmaceutical.barcode == barcode,
-        Pharmaceutical.pharmaceutical_id != pharmaceutical.pharmaceutical_id,
-    ).first()
+    duplicate = (
+        current_inventory_rows(db.query(Pharmaceutical))
+        .filter(
+            Pharmaceutical.barcode == barcode,
+            Pharmaceutical.pharmaceutical_id != pharmaceutical.pharmaceutical_id,
+        )
+        .first()
+    )
     if duplicate:
         return {"code": 409, "msg": "该药品条码已绑定其他药品"}
     pharmaceutical.barcode = barcode

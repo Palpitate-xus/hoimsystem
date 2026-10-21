@@ -3,6 +3,7 @@ import datetime
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
+from app.ai.inventory_write_guard import current_inventory_rows, lock_inventory_write
 from app.database import get_db
 from app.dependencies import PHARMACY_ROLES, User, require_roles
 from app.models import Consumable
@@ -42,6 +43,7 @@ def get_consumable_list(keyword: str | None = None, page: int | None = None, pag
 
 @router.post("/consumable/create")
 def create_consumable(req: dict, current_user: User = Depends(require_roles(*PHARMACY_ROLES)), db: Session = Depends(get_db)):
+    current_user = lock_inventory_write(db, current_user, allowed_roles=PHARMACY_ROLES)
     c = Consumable(
         name=req.get("name", ""),
         category=req.get("category", ""),
@@ -60,7 +62,8 @@ def create_consumable(req: dict, current_user: User = Depends(require_roles(*PHA
 
 @router.post("/consumable/update")
 def update_consumable(req: dict, current_user: User = Depends(require_roles(*PHARMACY_ROLES)), db: Session = Depends(get_db)):
-    c = db.query(Consumable).filter(Consumable.consumable_id == req.get("consumable_id")).first()
+    current_user = lock_inventory_write(db, current_user, allowed_roles=PHARMACY_ROLES)
+    c = current_inventory_rows(db.query(Consumable)).filter(Consumable.consumable_id == req.get("consumable_id")).first()
     if not c:
         return {"code": 500, "msg": "耗材不存在"}
     c.name = req.get("name", c.name)
@@ -77,7 +80,8 @@ def update_consumable(req: dict, current_user: User = Depends(require_roles(*PHA
 
 @router.post("/consumable/delete")
 def delete_consumable(req: dict, current_user: User = Depends(require_roles(*PHARMACY_ROLES)), db: Session = Depends(get_db)):
-    c = db.query(Consumable).filter(Consumable.consumable_id == req.get("consumable_id")).first()
+    current_user = lock_inventory_write(db, current_user, allowed_roles=PHARMACY_ROLES)
+    c = current_inventory_rows(db.query(Consumable)).filter(Consumable.consumable_id == req.get("consumable_id")).first()
     if not c:
         return {"code": 500, "msg": "耗材不存在"}
     db.delete(c)

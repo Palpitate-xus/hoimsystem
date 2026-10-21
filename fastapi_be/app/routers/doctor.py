@@ -7,6 +7,7 @@ from fastapi import APIRouter, BackgroundTasks, Depends
 from sqlalchemy import func
 from sqlalchemy.orm import Session, joinedload, selectinload
 
+from app.ai.inventory_write_guard import current_inventory_rows, lock_inventory_write
 from app.database import get_db
 from app.dependencies import ADMIN_ROLES, CLINICAL_ROLES, PHARMACY_ROLES, get_current_user, require_roles
 from app.diagnosis_review import DiagnosisReviewWrite, describe_review_source, load_review_source, record_diagnosis_review
@@ -181,6 +182,7 @@ def parse_date_str(val):
 
 @router.post("/pharmaceuticalManagement/create")
 def pharmaceutical_register(req: PharmaceuticalCreateRequest, current_user: User = Depends(require_roles(*PHARMACY_ROLES)), db: Session = Depends(get_db)):
+    current_user = lock_inventory_write(db, current_user, allowed_roles=PHARMACY_ROLES)
     pha = Pharmaceutical(
         name=req.name,
         stock=req.stock,
@@ -224,7 +226,8 @@ def get_pharmaceutical_list(keyword: str | None = None, current_user: User = Dep
 
 @router.post("/pharmaceuticalManagement/update")
 def update_pharmaceutical(req: PharmaceuticalUpdateRequest, current_user: User = Depends(require_roles(*PHARMACY_ROLES)), db: Session = Depends(get_db)):
-    pha = db.query(Pharmaceutical).filter(Pharmaceutical.pharmaceutical_id == req.pharmaceutical_id).first()
+    current_user = lock_inventory_write(db, current_user, allowed_roles=PHARMACY_ROLES)
+    pha = current_inventory_rows(db.query(Pharmaceutical)).filter(Pharmaceutical.pharmaceutical_id == req.pharmaceutical_id).first()
     if not pha:
         return {"code": 500, "msg": "药品不存在"}
     pha.name = req.name
@@ -242,7 +245,8 @@ def update_pharmaceutical(req: PharmaceuticalUpdateRequest, current_user: User =
 
 @router.post("/pharmaceuticalManagement/delete")
 def delete_pharmaceutical(req: PharmaceuticalDeleteRequest, current_user: User = Depends(require_roles(*PHARMACY_ROLES)), db: Session = Depends(get_db)):
-    pha = db.query(Pharmaceutical).filter(Pharmaceutical.pharmaceutical_id == req.pharmaceutical_id).first()
+    current_user = lock_inventory_write(db, current_user, allowed_roles=PHARMACY_ROLES)
+    pha = current_inventory_rows(db.query(Pharmaceutical)).filter(Pharmaceutical.pharmaceutical_id == req.pharmaceutical_id).first()
     if not pha:
         return {"code": 500, "msg": "药品不存在"}
     if pha.status == 1:
@@ -255,7 +259,8 @@ def delete_pharmaceutical(req: PharmaceuticalDeleteRequest, current_user: User =
 
 @router.post("/pharmaceuticalManagement/restore")
 def restore_pharmaceutical(req: PharmaceuticalDeleteRequest, current_user: User = Depends(require_roles(*PHARMACY_ROLES)), db: Session = Depends(get_db)):
-    pha = db.query(Pharmaceutical).filter(Pharmaceutical.pharmaceutical_id == req.pharmaceutical_id).first()
+    current_user = lock_inventory_write(db, current_user, allowed_roles=PHARMACY_ROLES)
+    pha = current_inventory_rows(db.query(Pharmaceutical)).filter(Pharmaceutical.pharmaceutical_id == req.pharmaceutical_id).first()
     if not pha:
         return {"code": 500, "msg": "药品不存在"}
     if pha.status == 0:

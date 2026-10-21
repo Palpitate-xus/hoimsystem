@@ -4,6 +4,7 @@ from types import SimpleNamespace
 
 from fastapi import HTTPException
 from sqlalchemy import and_, case, exists, func, or_, select, update
+from sqlalchemy.orm import load_only
 
 from app.ai import operations_support_attempts as attempts
 from app.ai import operations_support_registry as registry
@@ -13,6 +14,17 @@ from app.ai.native_task_routing import _domains, locate_native_task, opaque_run_
 from app.ai.operations_support_configuration import FEATURE
 from app.ai.operations_support_run_models import AIOperationsRunArtifact
 from app.ai.operations_support_write_guard import current_actor
+
+
+def create_shared_run(db, user, request):
+    from app.ai.operations_support_runtime import create_operations_run
+    from app.ai.operations_support_task_contract import OperationsTaskSelection
+
+    if request.feature_key != FEATURE or request.patient_id is not None or request.encounter_ref is not None or type(request.preview) is not bool:
+        raise HTTPException(422, "运维任务只接受明确受审资料集和目标，不接受患者、就诊或其它功能范围")
+    registry.typed(OperationsTaskSelection, request.input)
+    identifier = create_operations_run(db, user, request.input, preview=request.preview)
+    return db.query(AIRun).options(load_only(AIRun.run_id, AIRun.feature_key)).filter_by(run_id=identifier).one()
 
 
 def marker_expression(*, mysql):

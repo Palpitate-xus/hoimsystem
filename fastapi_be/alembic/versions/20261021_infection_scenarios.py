@@ -103,5 +103,7 @@ def upgrade():
 
 
 def downgrade():
-    op.drop_index("idx_inf_scenario_snapshot", table_name="hoimsystem_ai_infection_scenario")
+    # MySQL may use this exact leading index to support the Snapshot FK. Drop
+    # the new table with its own constraints/indexes atomically, not that index
+    # first (which actual MySQL rejects with1553).
     op.drop_table("hoimsystem_ai_infection_scenario")

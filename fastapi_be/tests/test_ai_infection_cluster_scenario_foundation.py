@@ -128,3 +128,7 @@ def test_actual_migration_mysql_offline_sql_uses_binary_bytes_not_sqlite_blob_ca
     sql = output.getvalue()
     assert "CAST(payload_json AS BINARY)" in sql and " AS BLOB" not in sql
     assert "implementation_hash VARCHAR(64) NOT NULL" in sql
+    output = io.StringIO()
+    with Operations.context(MigrationContext.configure(dialect_name="mysql", opts={"as_sql": True, "output_buffer": output})):
+        migration.downgrade()
+    assert "DROP TABLE hoimsystem_ai_infection_scenario" in output.getvalue() and "DROP INDEX" not in output.getvalue()

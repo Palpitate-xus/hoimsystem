@@ -1,0 +1,88 @@
+{
+  "schema_version": "clinical_training_pure_foundation_verification_v1",
+  "recorded_at_utc": "2026-10-21T18:50:01.630492+00:00",
+  "source_commit": "8f44ac3",
+  "scope": "Feature80 pure complete synthetic lesson/private answer-key projection and structured-submission exact-set practice feedback plus dedicated educational Prompt only. One whole43-case execution passed with4 source/test/Prompt inputs stable and no dotenv/settings/DB/client/network imports or socket attempts. No actual server source registry/current roles, independent review/publication, actual submission/score persistence, reference-document currentness, model worker/Prompt registry/native UI or clinical/curriculum/competency validation is claimed. Existing80 generic catalog entry is not claimed converted to native by this phase.",
+  "verification": {
+    "path": "/tmp/hoim-clinical-training-contract-first-verification.json",
+    "bytes": 2462,
+    "sha256": "badbfd5f5ad79dd7329fbdfd66a9c69a7c2087d0fa17e21eaa3337c0f3ce1d7d",
+    "value": {
+      "scope": "Whole pure80 synthetic lesson/public projection/structured submissions and deterministic exact-set practice matching only. Full original4MiB and private8MiB boundary tests and complete64-question/16-option sets. No Source registry/current publication or independent reviewer proof, actual server submission, SQL/HTTP/model/native frontend or clinical competency validation. Public SHA intentionally does not expose private low-entropy answer-key hashes; actual immutable private version and audit binding remain future server responsibility.",
+      "command": [
+        "--noconftest",
+        "-p",
+        "no:cacheprovider",
+        "-q",
+        "tests/test_ai_clinical_training_contract.py"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.996,
+      "before": {
+        "app/ai/clinical_training_contract.py": {
+          "bytes": 7596,
+          "sha256": "d25b2be70bf57203c1dcf913f2f0f19f7fb5a93a854f5904a916106ff212720f"
+        },
+        "app/ai/clinical_training_scoring.py": {
+          "bytes": 5164,
+          "sha256": "aaec9dd89b36241ed3b75fd52ae48a5f94edbdab13c1747bb054a3700ee9c2dc"
+        },
+        "app/ai/clinical_training_task_prompt.py": {
+          "bytes": 1783,
+          "sha256": "e30c928beeeeada92e278f90a9c2617b8e82d2b036a40d5483aad9672e11e59a"
+        },
+        "tests/test_ai_clinical_training_contract.py": {
+          "bytes": 11828,
+          "sha256": "9da4f46435796f93cb9d9ff191a7eb9837a144c2b86213ae56ffa9d599c37982"
+        }
+      },
+      "after": {
+        "app/ai/clinical_training_contract.py": {
+          "bytes": 7596,
+          "sha256": "d25b2be70bf57203c1dcf913f2f0f19f7fb5a93a854f5904a916106ff212720f"
+        },
+        "app/ai/clinical_training_scoring.py": {
+          "bytes": 5164,
+          "sha256": "aaec9dd89b36241ed3b75fd52ae48a5f94edbdab13c1747bb054a3700ee9c2dc"
+        },
+        "app/ai/clinical_training_task_prompt.py": {
+          "bytes": 1783,
+          "sha256": "e30c928beeeeada92e278f90a9c2617b8e82d2b036a40d5483aad9672e11e59a"
+        },
+        "tests/test_ai_clinical_training_contract.py": {
+          "bytes": 11828,
+          "sha256": "9da4f46435796f93cb9d9ff191a7eb9837a144c2b86213ae56ffa9d599c37982"
+        }
+      },
+      "sources_stable": true,
+      "guards": {
+        "dotenv_reads": 0,
+        "forbidden_imports": [],
+        "external_socket_attempts": 0
+      },
+      "summary": [
+        "...........................................                              [100%]",
+        "43 passed in 0.86s"
+      ],
+      "log": "/tmp/hoim-clinical-training-contract-first-tests.log",
+      "log_sha256": "debb63b50472329e1e2fa7b8cc4286674bc841b945051fe2be0d5b2adfc62c0c"
+    }
+  },
+  "original_protected_runner": {
+    "path": "/tmp/hoim-clinical-training-contract-first-runner.py",
+    "bytes": 3436,
+    "sha256": "66a87542b97677ae37cd3c8089ff89d8e18ede5d46d65132de30917e77405e96",
+    "text": "import builtins,hashlib,importlib.abc,io,json,os,socket,sys,time\nfrom pathlib import Path\nroot=Path('/tmp/hoim-clinical-training-20261021/fastapi_be');os.chdir(root);sys.path.insert(0,str(root));sys.dont_write_bytecode=True\nallowed={k:os.environ[k] for k in ['PATH','LANG','LC_ALL','TZ'] if k in os.environ};os.environ.clear();os.environ.update(allowed);os.environ['PYTEST_DISABLE_PLUGIN_AUTOLOAD']='1'\ncounts={'dotenv_reads':0,'forbidden_imports':[],'external_socket_attempts':0}\nclass Guard(importlib.abc.MetaPathFinder):\n def find_spec(self,fullname,path=None,target=None):\n  if fullname in {'app.main','app.models','app.database','app.config','app.core.config','sqlalchemy','httpx','requests'} or fullname.startswith('app.routers'):\n   counts['forbidden_imports'].append(fullname);raise RuntimeError('Pure source cannot import application settings, DB or clients')\nsys.meta_path.insert(0,Guard())\ndef guarded(fn):\n def call(file,*args,**kwargs):\n  if not isinstance(file,int) and Path(os.fsdecode(file)).name.startswith('.env') and not any(c in str(args[0] if args else kwargs.get('mode','r')) for c in 'wax'):\n   counts['dotenv_reads']+=1;raise RuntimeError('No dotenv reads')\n  return fn(file,*args,**kwargs)\n return call\nbuiltins.open=guarded(builtins.open);io.open=guarded(io.open)\ndef blocked(*args,**kwargs):counts['external_socket_attempts']+=1;raise RuntimeError('No sockets')\nsocket.socket.connect=blocked;socket.socket.connect_ex=blocked;socket.create_connection=blocked;socket.getaddrinfo=blocked\nprefix='/tmp/hoim-clinical-training-contract-first';out=Path(prefix+'-verification.json');log=Path(prefix+'-tests.log');assert not out.exists() and not log.exists()\npaths=['app/ai/clinical_training_contract.py','app/ai/clinical_training_scoring.py','app/ai/clinical_training_task_prompt.py','tests/test_ai_clinical_training_contract.py']\ndef hashes():return {n:{'bytes':(root/n).stat().st_size,'sha256':hashlib.sha256((root/n).read_bytes()).hexdigest()} for n in paths}\nbefore=hashes();import pytest\ncommand=['--noconftest','-p','no:cacheprovider','-q','tests/test_ai_clinical_training_contract.py'];start=time.monotonic()\nwith log.open('x') as stream:\n oldout,olderr=sys.stdout,sys.stderr\n try:sys.stdout=sys.stderr=stream;code=pytest.main(command)\n finally:sys.stdout,sys.stderr=oldout,olderr\nafter=hashes();v={'scope':'Whole pure80 synthetic lesson/public projection/structured submissions and deterministic exact-set practice matching only. Full original4MiB and private8MiB boundary tests and complete64-question/16-option sets. No Source registry/current publication or independent reviewer proof, actual server submission, SQL/HTTP/model/native frontend or clinical competency validation. Public SHA intentionally does not expose private low-entropy answer-key hashes; actual immutable private version and audit binding remain future server responsibility.','command':command,'exit_code':int(code),'elapsed_seconds':round(time.monotonic()-start,3),'before':before,'after':after,'sources_stable':before==after,'guards':counts,'summary':log.read_text(errors='replace').splitlines()[-15:],'log':str(log),'log_sha256':hashlib.sha256(log.read_bytes()).hexdigest()};out.write_text(json.dumps(v,ensure_ascii=False,indent=2)+'\\n');print(json.dumps({k:v[k] for k in ['exit_code','elapsed_seconds','sources_stable','guards','summary','log']},ensure_ascii=False));raise SystemExit(code or before!=after or any(counts.values()))\n"
+  },
+  "verified_boundaries": [
+    "All64 distinct questions and16 options each retained,65th/17th reject with no truncation.",
+    "Actual non-BMP4MiB scenario and complete private8MiB boundary accept/+1 reject; literal BOM/CRLF/NUL/whitespace preserved.",
+    "Every actual question needs an explicit submitted answer; empty choices mean explicitly_unanswered, absent/foreign/duplicate choices reject completely.",
+    "Single-choice count enforced; multiple-choice exact set comparison has no partial credit or order penalty. Matching/differing/unanswered are separate actual counts.",
+    "Feedback is fully rebuilt from actual provided lesson and submitted selection; invented scores/rationales/references/assessment claims/hash changes reject.",
+    "Public lesson excludes correct keys, rationales, private author/capture metadata, reference IDs and private answer-key digest; public lesson SHA intentionally cannot prove a private key version.",
+    "Actual future server publication/submission must bind the immutable private version and specific Audit PK without exposing a brute-forceable low-entropy answer-key hash. A new private answer version must receive an actual new version identity.",
+    "Fixed Prompt describes practice only and cannot grade, confer credentialing or write patient orders. It has not yet been registered or executed by a real model."
+  ],
+  "history": "All43 passed on the first actual execution. Routine Ruff formatting/import cleanup happened before tests; no product RED or semantically validated clinical answer set is fabricated."
+}

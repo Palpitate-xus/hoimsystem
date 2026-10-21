@@ -262,3 +262,17 @@ def test_real_model_mysql_types_and_composite_capture_grantee_fks(monkeypatch):
         assert "AUTO_INCREMENT" not in ddl
     captured = models.AIRcaEvidenceCase.__table__
     assert {tuple(constraint.column_keys) for constraint in captured.foreign_key_constraints} >= {("event_grant_id", "event_id", "created_by"), ("patient_grant_id", "event_id", "created_by")}
+
+
+def test_mysql_downgrade_removes_only_owned_tables_with_dependents_before_grants():
+    import io
+
+    stream = io.StringIO()
+    context = MigrationContext.configure(dialect_name="mysql", opts={"as_sql": True, "output_buffer": stream})
+    with Operations.context(context):
+        migration.downgrade()
+    statements = [line.strip() for line in stream.getvalue().splitlines() if line.strip()]
+    assert statements == ["DROP TABLE hoimsystem_ai_rca_evidence_case;", "DROP TABLE hoimsystem_ai_rca_evidence_original;", "DROP TABLE hoimsystem_ai_rca_purpose_grant;"]
+    # InnoDB event FKs can require the explicit event-prefix indexes. Whole
+    # owned-table removal does not transiently drop their supporting indexes.
+    assert all(name not in stream.getvalue() for name in LEGACY)

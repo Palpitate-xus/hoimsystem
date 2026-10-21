@@ -153,9 +153,9 @@ def upgrade():
 
 
 def downgrade():
-    op.drop_index("idx_rca_case_event", table_name="hoimsystem_ai_rca_evidence_case")
+    # InnoDB may reuse each explicit event-prefix index to enforce its FK.
+    # Dropping that index first fails1553. DROP TABLE removes its own indexes
+    # and FKs atomically; dependents are dropped before the grant parent.
     op.drop_table("hoimsystem_ai_rca_evidence_case")
-    op.drop_index("idx_rca_original_event", table_name="hoimsystem_ai_rca_evidence_original")
     op.drop_table("hoimsystem_ai_rca_evidence_original")
-    op.drop_index("idx_rca_grant_current_scope", table_name="hoimsystem_ai_rca_purpose_grant")
     op.drop_table("hoimsystem_ai_rca_purpose_grant")

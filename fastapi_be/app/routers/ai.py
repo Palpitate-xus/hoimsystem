@@ -12,6 +12,7 @@ from app.ai.context import accessible_patients, authorize_patient, context_metad
 from app.ai.ecg_assets import authorize_ecg_patient
 from app.ai.governance import audit, describe_config, encode_json
 from app.ai.image_assets import authorize_image_patient
+from app.ai.knowledge import is_document_evidence
 from app.ai.models import AIFeatureConfig, AIFeedback, AIRun, utcnow
 from app.ai.operational_sources import operational_context, operational_options
 from app.ai.pathway_knowledge import eligible_pathway_documents
@@ -288,6 +289,8 @@ def list_runs(
             authorize_run(db, user, item)
         except HTTPException as exc:
             if exc.status_code in {403, 404}:
+                continue
+            if exc.status_code == 409 and any(is_document_evidence(db, entry) for entry in json.loads(item.evidence_json)):
                 continue
             if exc.status_code == 409 and item.feature_key == "surgery_scheduling":
                 continue

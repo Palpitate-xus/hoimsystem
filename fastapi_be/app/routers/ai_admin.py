@@ -5,7 +5,9 @@ import json
 from typing import Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
+from fastapi.routing import APIRoute
 from sqlalchemy import func, inspect
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, defer
@@ -30,8 +32,9 @@ from app.ai.governance import (
     validate_endpoint,
 )
 from app.ai.imaging_probe import inspect_imaging_capabilities
+from app.ai.knowledge_sources import is_document_source, source_is_current, source_state
 from app.ai.models import AIAuditEvent, AIFeatureConfig, AIFeedback, AIKnowledgeDocument, AIPatientGrant, AIPromptVersion, AIProvider, AIRun, utcnow
-from app.ai.pathway_knowledge import PATHWAY_SOURCE_KIND, PATHWAY_URI_PREFIX, import_content, pathway_hash, source_is_current, source_state
+from app.ai.pathway_knowledge import PATHWAY_SOURCE_KIND, PATHWAY_URI_PREFIX, import_content, pathway_hash
 from app.ai.readiness import setup_reports
 from app.ai.runtime import describe_run
 from app.ai.schemas import FeatureWrite, KnowledgeReview, KnowledgeWrite, PathwayKnowledgeImport, PatientGrantWrite, PromptActivate, PromptWrite, ProviderCheck, ProviderWrite
@@ -41,7 +44,28 @@ from app.dependencies import require_roles
 from app.models import ClinicalPathway, Department, Patient, User
 from app.routers.inpatient_support import QueryPositiveInteger
 
-router = APIRouter(tags=["AI 超级管理员"], default_response_class=JSONResponse)
+
+class AIAdminRoute(APIRoute):
+    """Reject invalid requests without echoing document text or credentials."""
+
+    def get_route_handler(self):
+        handler = super().get_route_handler()
+
+        async def validated(request):
+            try:
+                return await handler(request)
+            except RequestValidationError as exc:
+
+                def safe(value):
+                    return value.encode("utf-8", errors="backslashreplace").decode("utf-8") if isinstance(value, str) else value
+
+                details = [{"type": safe(item["type"]), "loc": [safe(part) for part in item["loc"]], "msg": safe(item["msg"])} for item in exc.errors()]
+                raise HTTPException(422, details) from exc
+
+        return validated
+
+
+router = APIRouter(tags=["AI 超级管理员"], default_response_class=JSONResponse, route_class=AIAdminRoute)
 
 
 def _current_super_admin(db, user):
@@ -1077,6 +1101,13 @@ def knowledge_detail(document_id: str, db: Session = Depends(get_db), user: User
 @router.post("/ai/admin/knowledge")
 def create_knowledge(req: KnowledgeWrite, db: Session = Depends(get_db), user: User = Depends(require_roles("super_admin"))) -> dict:
     """Create an immutable draft without fetching arbitrary external URLs."""
+    _current_super_admin(db, user)
+    try:
+        content_bytes = len(req.content.encode("utf-8", errors="strict"))
+    except UnicodeError as exc:
+        raise HTTPException(422, "知识正文须为有效UTF8，未登记或替换字符") from exc
+    if content_bytes > 65535:
+        raise HTTPException(422, "完整知识正文超过65535个UTF8字节，未截断或登记")
     for key in req.feature_keys:
         get_spec(key)
     if req.effective_from and req.effective_to and req.effective_from >= req.effective_to:
@@ -1094,6 +1125,13 @@ def create_knowledge(req: KnowledgeWrite, db: Session = Depends(get_db), user: U
 @router.post("/ai/admin/knowledge/{document_id}/review")
 def review_knowledge(document_id: str, req: KnowledgeReview, db: Session = Depends(get_db), user: User = Depends(require_roles("super_admin"))) -> dict:
     """Publish exactly the reviewed version or retire it without deleting evidence history."""
+    _current_super_admin(db, user)
+    # Document publication/revocation locks parents before knowledge. Reject
+    # this alternate writer before taking a knowledge X lock, including when
+    # mutable URI/kind markers were stripped from a still-bound row.
+    existing = db.get(AIKnowledgeDocument, document_id)
+    if existing is not None and is_document_source(db, existing):
+        raise HTTPException(409, "原文摘录须在原文证据治理中发布或撤销，请核对完整原件链")
     item = db.query(AIKnowledgeDocument).filter_by(document_id=document_id).with_for_update().first()
     if item is None:
         raise HTTPException(404, "知识文档不存在")

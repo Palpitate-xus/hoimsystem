@@ -23,7 +23,7 @@ from app.ai.gateway import AIExecutionError, generate
 from app.ai.governance import active_prompt, audit, digest, encode_json, get_spec, provider_credential, provider_feature_issues
 from app.ai.image_assets import authorize_image_patient, authorize_image_snapshot
 from app.ai.image_files import open_verified_image
-from app.ai.knowledge import evidence_is_current, retrieval_query, retrieve_evidence
+from app.ai.knowledge import evidence_is_current, is_document_evidence, retrieval_query, retrieve_evidence
 from app.ai.models import AIAudioAsset, AIECGAsset, AIFeatureConfig, AIImageAsset, AIProvider, AIRun, utcnow
 from app.ai.news2_context import authorize_news2_snapshot
 from app.ai.nursing_sources import authorize_nursing_snapshot, has_frozen_nursing_sources
@@ -472,6 +472,15 @@ def authorize_run(db: Session, user: User, run: AIRun) -> None:
             authorize_feedback_snapshot(db, context)
     elif spec.number == 21 and user.user_role != "super_admin":
         raise HTTPException(403, "历史语音任务缺少原录音与患者引用，不能作为已核实转写读取")
+    frozen_evidence = surgery_snapshot.get("payload", {}).get("evidence", [])
+    task_evidence = json.loads(run.evidence_json)
+    if any(is_document_evidence(db, item) for item in [*frozen_evidence, *task_evidence]):
+        if frozen_evidence != task_evidence:
+            raise HTTPException(409, "任务原文摘录与冻结证据不一致")
+        # Super audit can retain a revoked frozen excerpt. An ordinary result
+        # read or feedback must recheck every current publication dependency.
+        if user.user_role != "super_admin" and not evidence_is_current(db, task_evidence):
+            raise HTTPException(409, "任务引用的原文证据已撤销或变化，请重新核对当前来源")
 
 
 def describe_run(run: AIRun, include_result: bool = True) -> dict:
@@ -821,6 +830,7 @@ async def execute_claimed(run_id: str, lease: str, *, transport=None) -> None:
     surgery_run = False
     supply_run = False
     inventory_run = False
+    document_run = False
     try:
         with database.SessionLocal() as db:
             run = db.get(AIRun, run_id)
@@ -833,6 +843,7 @@ async def execute_claimed(run_id: str, lease: str, *, transport=None) -> None:
             surgery_run = spec.number == 65 and bool(snapshot["payload"]["context"].get("surgery_binding"))
             supply_run = spec.number == 66 and bool(snapshot["payload"]["context"].get("supply_binding"))
             inventory_run = spec.number == 67 and bool(snapshot["payload"]["context"].get("inventory_binding"))
+            document_run = any(is_document_evidence(db, item) for item in snapshot["payload"]["evidence"])
             if inventory_run:
                 from app.ai.inventory_context import expand_context
 
@@ -1066,10 +1077,41 @@ async def execute_claimed(run_id: str, lease: str, *, transport=None) -> None:
                         from app.ai.surgery_storage import expand_result
                     verify_accepted_result(db, run, lease, acceptance, result.model_dump(mode="json"), result_reader=expand_result)
                     _recheck_task(db, run)
+                if document_run:
+                    from app.ai.native_acceptance import acceptance_state, verify_accepted_result
+
+                    audit(
+                        db,
+                        run.requested_by,
+                        "run.document_evidence.accept",
+                        run.run_id,
+                        {"source_ids": [item["source_id"] for item in snapshot["payload"]["evidence"] if is_document_evidence(db, item)]},
+                    )
+                    acceptance = acceptance_state(db, run, "run.document_evidence.accept")
+                    db.flush()
+                    if inventory_run:
+                        from app.ai.inventory_storage import expand_result as read_document_result
+                    elif supply_run:
+                        from app.ai.supply_storage import expand_result as read_document_result
+                    elif surgery_run:
+                        from app.ai.surgery_storage import expand_result as read_document_result
+                    elif bed_run:
+                        from app.ai.bed_storage import expand_result as read_document_result
+                    elif roster_run:
+                        from app.ai.roster_storage import expand_result as read_document_result
+                    elif sofa_run:
+                        from app.ai.sofa_storage import expand_result as read_document_result
+                    else:
+
+                        def read_document_result(_db, current):
+                            return json.loads(current.result_json)
+
+                    verify_accepted_result(db, run, lease, acceptance, result.model_dump(mode="json"), result_reader=read_document_result)
+                    _recheck_task(db, run)
             db.commit()
         except Exception:
             db.rollback()
-            if not sofa_run and not roster_run and not bed_run and not surgery_run and not supply_run and not inventory_run:
+            if not sofa_run and not roster_run and not bed_run and not surgery_run and not supply_run and not inventory_run and not document_run:
                 raise
             # A rejected blob or audit transaction must never leave an accepted pointer.
             if inventory_feature:
@@ -1093,6 +1135,8 @@ async def execute_claimed(run_id: str, lease: str, *, transport=None) -> None:
                     if bed_run
                     else "完整排班结果与审计未能原子保存，结果未接收"
                     if roster_run
+                    else "原文摘录依据、完整结果与接收审计未能原子保存，结果未接收"
+                    if document_run
                     else "完整SOFA结果与审计未能原子保存，结果未接收"
                 )
                 failed.input_tokens, failed.output_tokens = inputs, outputs

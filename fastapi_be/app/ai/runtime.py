@@ -60,6 +60,8 @@ def check_configuration(db: Session, user: User, spec: FeatureSpec, config: AIFe
     if not preview and spec.clinical and config.validation_status != "validated":
         raise HTTPException(409, "该临床功能尚未完成验证")
     if not preview and spec.requires_operational_validation and config.validation_status != "validated":
+        if spec.number == 79:
+            raise HTTPException(409, "运维模型尚未完成明确受审资料与任务使用范围验证，超级管理员可先预览")
         purpose = "优化" if spec.engine == "optimizer" else "预测"
         raise HTTPException(409, f"该运营{purpose}尚未完成指定目标与范围的验证，超级管理员可先预览")
     provider = db.get(AIProvider, config.provider_id)
@@ -97,6 +99,10 @@ def create_run(db: Session, user: User, req: RunRequest) -> AIRun:
     """Freeze an authorized, source-linked request before a durable worker processes it."""
     if req.feature_key == "deidentification":
         from app.ai.deidentification_shared_dispatch import create_shared_run
+
+        return create_shared_run(db, user, req)
+    if req.feature_key == "operations_support":
+        from app.ai.operations_support_shared import create_shared_run
 
         return create_shared_run(db, user, req)
     if req.feature_key == "research_cohort":
@@ -409,12 +415,16 @@ def authorize_run(db: Session, user: User, run: AIRun) -> None:
     from app.ai.deidentification_shared import guard_task as guard_deidentification_task
     from app.ai.deidentification_shared import is_deidentification_task
     from app.ai.native_task_routing import opaque_run_id
+    from app.ai.operations_support_shared import guard_operations_task, is_operations_task
     from app.ai.research_cohort_shared import guard_research_task, is_research_task
 
     if is_deidentification_task(db, run):
         guard_deidentification_task(db, user, opaque_run_id(run))
         return
 
+    if is_operations_task(db, run):
+        guard_operations_task(db, user, opaque_run_id(run))
+        return
     if is_research_task(db, run):
         guard_research_task(db, user, opaque_run_id(run))
         return
@@ -598,12 +608,19 @@ def describe_run(run: AIRun, include_result: bool = True, *, user: User | None =
     from app.ai.deidentification_shared import directory_metadata as deidentification_metadata
     from app.ai.deidentification_shared import is_deidentification_task
     from app.ai.native_task_routing import opaque_run_id
+    from app.ai.operations_support_shared import is_operations_task
     from app.ai.research_cohort_shared import is_research_task
 
     if is_deidentification_task(db, run):
         if db is None or user is None:
             raise HTTPException(403, "75任务技术状态须在当前授权会话读取")
         return deidentification_metadata(db, user, run)
+    if is_operations_task(db, run):
+        if db is None or user is None:
+            raise HTTPException(403, "运维任务元数据须在当前授权会话读取")
+        from app.ai.operations_support_views import describe_task
+
+        return describe_task(db, user, opaque_run_id(run)).model_dump(mode="json")
     if is_research_task(db, run):
         if db is None or user is None:
             raise HTTPException(403, "科研技术状态须在当前授权会话读取")
@@ -924,6 +941,9 @@ def claim_next_run(db: Session):
     from app.ai.deidentification_shared_dispatch import quarantine_orphan as quarantine_deidentification_orphan
     from app.ai.deidentification_shared_dispatch import queue_candidate_condition as deidentification_queue_condition
     from app.ai.native_task_routing import locate_native_task, queue_identity_condition
+    from app.ai.operations_support_runtime import claim_operations_run
+    from app.ai.operations_support_shared import is_operations_task, quarantine_orphan
+    from app.ai.operations_support_shared import queue_candidate_condition as operations_condition
     from app.ai.research_cohort_dispatch import quarantine_orphan_research_run, queue_candidate_condition
     from app.ai.research_cohort_execution import claim_research_run
     from app.ai.research_cohort_shared import is_research_task
@@ -935,7 +955,7 @@ def claim_next_run(db: Session):
     for _ in range(128):
         candidate = (
             db.query(AIRun.run_id, AIRun.feature_key)
-            .filter(AIRun.status == "queued", ~AIRun.run_id.in_(skipped), queue_candidate_condition(db), deidentification_queue_condition(db), queue_identity_condition())
+            .filter(AIRun.status == "queued", ~AIRun.run_id.in_(skipped), queue_candidate_condition(db), deidentification_queue_condition(db), operations_condition(db), queue_identity_condition())
             .order_by(AIRun.create_time, AIRun.run_id)
             .first()
         )
@@ -952,6 +972,20 @@ def claim_next_run(db: Session):
         if domain is None and is_deidentification_task(db, candidate.run_id):
             try:
                 quarantine_deidentification_orphan(db, candidate.run_id)
+            except HTTPException as exc:
+                if exc.status_code not in {403, 404, 409}:
+                    raise
+            skipped.append(candidate.run_id)
+            continue
+        if domain == "operations_support":
+            lease = claim_operations_run(db, candidate.run_id)
+            if lease is not None:
+                return candidate.run_id, lease
+            skipped.append(candidate.run_id)
+            continue
+        if domain is None and is_operations_task(db, candidate.run_id):
+            try:
+                quarantine_orphan(db, candidate.run_id)
             except HTTPException as exc:
                 if exc.status_code not in {403, 404, 409}:
                     raise
@@ -1003,6 +1037,8 @@ def claim_next_run(db: Session):
 def _recheck_task(db: Session, run: AIRun) -> tuple[FeatureSpec, AIProvider, dict]:
     if run.feature_key == "deidentification":
         raise AIExecutionError("NATIVE_ARTIFACT_REQUIRED", "75任务只接受完整专用来源和具体claim回执，不沿用通用推理")
+    if run.feature_key == "operations_support":
+        raise AIExecutionError("NATIVE_ARTIFACT_REQUIRED", "运维任务必须使用完整受审资料及具体原领取回执，未降级通用模型")
     if run.feature_key == "research_cohort":
         raise AIExecutionError("NATIVE_ARTIFACT_REQUIRED", "科研任务只接受完整专用来源和具体claim回执，不沿用通用推理")
     if run.feature_key == "feedback_analysis":
@@ -1095,6 +1131,7 @@ async def execute_claimed(run_id: str, lease: str, *, transport=None, research_c
     from app.ai.document_change_access import has_native_identity
     from app.ai.document_extraction_storage import is_extraction_run
     from app.ai.native_task_routing import locate_native_task
+    from app.ai.operations_support_shared import is_operations_task
     from app.ai.research_cohort_shared import is_research_task
     from app.ai.satisfaction_storage import is_satisfaction_run
 
@@ -1113,6 +1150,8 @@ async def execute_claimed(run_id: str, lease: str, *, transport=None, research_c
             deidentification_dispatch = validate_deidentification_delivery(routing_db, run_id, lease, deidentification_claim_event_id)
         elif deidentification_claim_event_id is not None or deidentification_orphan:
             raise HTTPException(409, "75原claim回执或持久域不一致，未改变任务或执行通用模型")
+        operations_task = domain == "operations_support"
+        operations_orphan = domain is None and is_operations_task(routing_db, run_id)
         research_task = domain == "research_cohort"
         research_orphan = domain is None and is_research_task(routing_db, run_id)
         research_dispatch = False
@@ -1133,7 +1172,7 @@ async def execute_claimed(run_id: str, lease: str, *, transport=None, research_c
             routing_db.get(AIRun, run_id)
             if header is not None
             and domain is None
-            and not any((deidentification_task, deidentification_orphan, research_task, research_orphan, drug_label_task, satisfaction_task, document_task, change_task))
+            and not any((deidentification_task, deidentification_orphan, operations_task, operations_orphan, research_task, research_orphan, drug_label_task, satisfaction_task, document_task, change_task))
             else None
         )
         if routing_run is not None:
@@ -1145,6 +1184,13 @@ async def execute_claimed(run_id: str, lease: str, *, transport=None, research_c
             from app.ai.deidentification_runtime import execute_deidentification_claimed
 
             await execute_deidentification_claimed(run_id, lease, deidentification_claim_event_id, transport=transport)
+        return
+    if operations_orphan:
+        raise HTTPException(409, "运维任务缺少完整持久分件，未读取正文或执行通用模型")
+    if operations_task:
+        from app.ai.operations_support_execution import execute_operations_claimed
+
+        await execute_operations_claimed(run_id, lease, transport=transport)
         return
     if research_task:
         if research_dispatch:
@@ -1565,11 +1611,15 @@ def expire_interrupted_runs(db: Session) -> int:
     from app.ai.document_change_view_contract import FEATURE_KEY as CHANGE_FEATURE
     from app.ai.drug_label_run_models import AIDrugLabelRunArtifact
     from app.ai.drug_label_runtime import expire_interrupted_drug_label_runs
+    from app.ai.operations_support_run_models import AIOperationsRunArtifact
+    from app.ai.operations_support_runtime import expire_interrupted_operations_runs
+    from app.ai.operations_support_shared import marker_expression as operations_marker
     from app.ai.research_cohort_artifact_models import AIResearchCohortRunArtifact
     from app.ai.satisfaction_artifact_models import AISatisfactionRunArtifact
     from app.ai.satisfaction_execution import expire_interrupted_satisfaction_runs
 
-    recovered = expire_interrupted_change_runs(db)
+    recovered = expire_interrupted_operations_runs(db)
+    recovered += expire_interrupted_change_runs(db)
     recovered += expire_interrupted_charge_runs(db)
     recovered += expire_interrupted_satisfaction_runs(db)
     recovered += expire_interrupted_drug_label_runs(db)
@@ -1581,6 +1631,8 @@ def expire_interrupted_runs(db: Session) -> int:
             AIRun.start_time < deadline,
             AIRun.feature_key != "drug_label_extraction",
             AIRun.feature_key != CHANGE_FEATURE,
+            ~operations_marker(mysql=db.get_bind().dialect.name in {"mysql", "mariadb"}),
+            ~AIRun.run_id.in_(db.query(AIOperationsRunArtifact.run_id)),
             ~AIRun.run_id.in_(db.query(AIDocumentChangeRunArtifact.run_id)),
             ~AIRun.run_id.in_(db.query(AIChargeRunArtifact.run_id)),
             ~AIRun.run_id.in_(db.query(AISatisfactionRunArtifact.run_id)),

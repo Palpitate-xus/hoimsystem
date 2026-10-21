@@ -3,7 +3,7 @@
 > 由 `fastapi_be/scripts/generate_rbac_matrix.py` 从源码自动生成，请勿手改。
 > `✓`=可访问 | `PUBLIC`=无需登录 | 留空=不可访问
 
-共 **961** 个接口（PUBLIC 18 个 / 需登录 943 个）。
+共 **985** 个接口（PUBLIC 18 个 / 需登录 967 个）。
 
 
 ### `admin.py`
@@ -417,6 +417,40 @@
 | POST | `/api/ai/observation-windows/{window_id}/revoke` | ✓ | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |
 | GET | `/api/ai/admin/observation-windows` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
 | GET | `/api/ai/admin/observation-windows/{window_id}` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+
+### `ai_operations_support_sources.py`
+
+| 方法 | 路径 | admin | super_admin | director | doctor | nurse | cashier | pharmacist | guide | patient | lab_technician | registrar | PUBLIC |
+|------|------|------|------|------|------|------|------|------|------|------|------|------|------|
+| GET | `/api/ai/operations-support/originals` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/operations-support/originals` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/operations-support/originals/{original_id}` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/operations-support/originals/{original_id}/body` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/operations-support/originals/{original_id}/revoke` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/operations-support/releases` | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/operations-support/releases` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/operations-support/releases/{release_id}` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/operations-support/releases/{release_id}/draft` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/operations-support/releases/{release_id}/source` | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/operations-support/releases/{release_id}/review` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/operations-support/releases/{release_id}/revoke` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/operations-support/cases` | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/operations-support/cases` | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/operations-support/cases/{case_id}` | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/operations-support/cases/{case_id}/parts/{part_name}` | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/operations-support/cases/{case_id}/revoke` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+
+### `ai_operations_support_tasks.py`
+
+| 方法 | 路径 | admin | super_admin | director | doctor | nurse | cashier | pharmacist | guide | patient | lab_technician | registrar | PUBLIC |
+|------|------|------|------|------|------|------|------|------|------|------|------|------|------|
+| GET | `/api/ai/operations-support/task-descriptor` | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/operations-support/tasks` | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/operations-support/tasks` | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/operations-support/tasks/{run_id}` | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/operations-support/tasks/{run_id}/parts/{part_name}` | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/operations-support/tasks/{run_id}/cancel` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/operations-support/tasks/{run_id}/trace` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
 
 ### `ai_qsofa.py`
 

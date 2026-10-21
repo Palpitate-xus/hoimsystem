@@ -28,6 +28,7 @@ def _domains():
     from app.ai.document_change_run_models import AIDocumentChangeRunArtifact
     from app.ai.document_extraction_models import AIDocumentExtractionRunAnchor
     from app.ai.drug_label_run_models import AIDrugLabelRunArtifact
+    from app.ai.operations_support_run_models import AIOperationsRunArtifact
     from app.ai.research_cohort_artifact_models import AIResearchCohortRunArtifact
     from app.ai.satisfaction_artifact_models import AISatisfactionRunArtifact
 
@@ -39,6 +40,7 @@ def _domains():
         ("document_change", AIDocumentChangeRunArtifact, "scope_id"),
         ("research_cohort", AIResearchCohortRunArtifact, "case_id"),
         ("deidentification", AIDeidentificationRunSource, "case_id"),
+        ("operations_support", AIOperationsRunArtifact, "case_id"),
     )
 
 
@@ -68,9 +70,10 @@ def locate_native_task(db, value):
     """Detect erased markers and ambiguous cross-domain anchors without authority.
 
     SQLite reuses the caller connection. An extra StaticPool Session could roll
-    back its transaction. A writer's own uncommitted anchor is accepted only in
-    the exact registered transaction and re-read as the same three SQL columns;
-    a rolled-back savepoint or a completed transaction cannot leave a fake hint.
+    back its transaction. MySQL unions that fresh independent view with this
+    Session's actual SQL, including direct flushed inserts without a process
+    hint. Registered writer hints are additionally checked against actual SQL;
+    a rolled-back savepoint or completed transaction cannot invent an anchor.
     """
     identifier = opaque_run_id(value)
     if db is None or type(identifier) is not str:
@@ -87,6 +90,8 @@ def locate_native_task(db, value):
         else:
             rows = db.execute(statement).all()
         found = {NativeTaskIdentity(*tuple(row)) for row in rows}
+        if bind.dialect.name in {"mysql", "mariadb"}:
+            found.update(NativeTaskIdentity(*tuple(row)) for row in db.execute(statement).all())
         for domain, model, key in domains:
             own = db.info.get(_STAGED, {}).get((domain, identifier))
             if own is None or own[0] is not db.get_transaction() or own[0] is None:

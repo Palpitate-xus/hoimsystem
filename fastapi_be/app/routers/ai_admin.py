@@ -143,6 +143,8 @@ def update_feature(key: str, req: FeatureWrite, db: Session = Depends(get_db), u
         if spec.clinical and config.validation_status != "validated":
             raise HTTPException(422, "临床功能完成验证后才能面向业务启用；超级管理员可先进行预览")
         if spec.requires_operational_validation and config.validation_status != "validated":
+            if spec.number == 79:
+                raise HTTPException(422, "运维资料模型完成指定受审资料、任务目标与使用范围的验证后才能启用；超级管理员可先预览")
             purpose = "优化" if spec.engine == "optimizer" else "预测"
             raise HTTPException(422, f"运营{purpose}完成指定目标与范围的验证后才能启用；超级管理员可先预览，来源确认不代表实际业务验证")
         if config.validation_status == "suspended":
@@ -1095,6 +1097,8 @@ def list_global_runs(
     from app.ai.deidentification_shared import is_deidentification_task
     from app.ai.document_change_storage import is_document_change_run
     from app.ai.document_change_views import run_view
+    from app.ai.operations_support_shared import is_operations_task
+    from app.ai.operations_support_views import technical_metadata as operations_metadata
     from app.ai.research_cohort_shared import directory_metadata, is_research_task
 
     data = [
@@ -1102,6 +1106,8 @@ def list_global_runs(
             **(
                 deidentification_metadata(db, user, item)
                 if is_deidentification_task(db, item)
+                else operations_metadata(db, user, item.run_id).model_dump(mode="json")
+                if is_operations_task(db, item)
                 else directory_metadata(db, user, item)
                 if is_research_task(db, item)
                 else run_view(db, user, item, False, current=False)
@@ -1131,6 +1137,11 @@ def inspect_run_trace(run_id: str, db: Session = Depends(get_db), user: User = D
     identity = locate_native_task(db, run_id)  # Reject contradictory immutable anchors.
     from app.ai.deidentification_shared import is_deidentification_task
     from app.ai.deidentification_shared import split_trace as deidentification_trace
+    from app.ai.operations_support_shared import is_operations_task
+    from app.ai.operations_support_views import split_trace as operations_trace
+
+    if identity is not None and identity.domain == "operations_support" or identity is None and is_operations_task(db, run_id):
+        return {"code": 200, "msg": "success", "data": operations_trace(db, user, run_id)}
     from app.ai.research_cohort_shared import is_research_task, split_trace
 
     if identity is not None and identity.domain == "deidentification" or identity is None and is_deidentification_task(db, run_id):

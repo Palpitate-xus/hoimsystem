@@ -48,5 +48,6 @@ SOURCE_REFERENCE_KEYS = frozenset(
         "document_change_scope_id",
         "research_cohort_case_id",
         "deidentification_case_id",
+        "operations_case_id",
     }
 )

@@ -387,6 +387,61 @@
 - 47个Python文件Ruff及格式检查通过，目录.24的80份独立Task与7份真实固定System已重生成；934接口RBAC JSON及Markdown一致。四份Source recipe逐字保留。早期构造失败、队列饥饿真实RED、旧路由数量断言及各成功前版均保留原范围，不把重复定向数累计为全量通过。
 - 使用及证据见 `ai-research-cohort-shared-guide.md` 与 `ai-research-cohort-shared-verification.json`。默认不启用，不宣称完整后端/浏览器验收、规范生产构建、真实模型/临床验证、入组或导出完成；第74项完整验收及75—80专用实现继续推进。
 
+## 第79项运维知识来源基础（纯合同阶段）
+
+- 新增运维原件、独立人工复核声明及完整公开衍生投影；单原文4MiB、private/public各8MiB、明确128件文档及4096个字符区间，超限完整拒绝。原文BOM/CRLF/emoji/NUL及空值保留；固定遮盖/移除按Unicode码点处理，不自动探测凭据、不执行命令、不读文件或真实环境。
+- 公开投影仅含明确审核的衍生版，不另附原件正文/标题、私有路径/原主机版本、原件ID、审核依据及账户ID；有无受审手册显式区分，不把日志或人工版本声明当成当前系统探测或可执行授权。纯声明并非服务器实际发布，后续还需当前独立审核人/具体AuditPK/版本与撤销校验。
+- 两整文件78项纯测试一次通过（1.771秒，pytest1.65秒），4份源码前后稳定，应用settings/DB/client导入、dotenv和外部socket尝试均零。保留前版50/57/76的独立范围，不重复累计。完整Source和typed复制、字节边界、128原件及私有字段负控见 `ai-operations-source-verification.json`。尚未接SQL、HTTP、模型、界面或79原生模式，80项目标继续。
+
+- 2026-10-21：第79项运维来源新增4张隔离表与自包含增量迁移（e772b71）；三个完整基础文件一次97项通过，1156个后端及映射输入全程不变。已验证SQLite物理约束/增量往返与离线MySQL DDL；真实当前权限、独立发布及模型任务尚待本项服务阶段，完整原始证据见 ai-operations-source-verification.json。
+
+- 2026-10-21：第79项真实超级管理员原件登记/撤回与具体审计绑定已提交4e7dfa5；四个完整测试文件一次120项通过，1160个后端及映射输入全程不变。原角色/登录epoch失效、撤回与错审计主键均在原件BODY读取前拒绝；当前仅Source服务阶段，尚未接HTTP、独立发布或模型任务。
+
+- 2026-10-21：第79项独立超级管理员发布/拒绝/撤回已提交ae79e60；五个完整测试文件一次140项通过，1162个输入不变。模型处理明确单独许可，内部发布可保留false；全文草稿分件无叠加原件包裹。Source有限材料集、HTTP和Task等后续继续接入，未称本项全部完成。
+
+- 2026-10-21：第79项完整有限运维材料集已提交e3d712c；六个完整测试文件一次162项通过，1164个后端及映射输入不变。所有成员当前发布、原始审计、原件/Draft/审核全文和冻结投影均逐项验证，撤回/账号失效/错技术锚在正文前拒绝。普通管理员仅可读自己材料集的审核投影；HTTP/native Task/模型等继续实施。
+
+- 2026-10-21：第79项17个正式Main/JWT来源API与4表正式注册已提交be54977，RBAC951自动生成/检查通过；八个完整测试文件一次184项通过，1167输入稳定。首轮真实2失败/181通过（HTTP未提交事务）及精确修复均永久保存；现七个写接口先验证完整响应再原子提交，响应超限实际全回滚。尚未接native79任务、模型调用与管理FE；隔离MySQL验证继续。
+
+- 2026-10-21：第79项隔离MySQL发现并修复真实旧审计DATETIME(0)与新Source UTC6兼容问题（e74e119），未改旧表/旧迁移；具体审计详情仍绑定完整微秒时间。八文件一次188通过，1167输入稳定；独立MySQL22机制全部通过，231旧表+4新表增量往返与全部旧DDL/行哈希保持，明确仅5条User合成旧数据、非全历史迁移重放。原MySQL失败及两版runner/worker完整保存，全部隔离资源清理已核验。native79 Task/专用Prompt执行和FE仍继续。
+
+- 2026-10-21：第79项专用固定Prompt及纯Task/Result合同已提交f9ab1e2；三个纯文件一次107项通过（含29项Task/结果绑定与78项Source），7输入稳定，无配置/DB/网络导入。任务仅明确材料集+三选一目标；结果逐字码点引用，人工检查只引用审核runbook，完整8MiB/+1实测，全部为待管理员复核草稿。专用Prompt尚未注册执行，未把结构验证宣称模型语义可靠性或临床验证。
+
+- 2026-10-21：第79项分离Artifact/Result两表与自包含增量迁移已提交cd1d5dd；十文件一次234通过，1173输入稳定，17项新物理约束/完整容量/SQLite增量往返与离线MySQL DDL。原Case私/公SHA和原创建人由复合FK固定，实际事件PK独立；这只是Task存储基础，实际claim/dispatch/接受结果/专用Prompt执行与FE继续实施，不复用前Source-only MySQL结论覆盖新Task表。
+
+- 2026-10-21：第79项当前资料与配置授权阶段已完成；十一整文件一次260通过（24.72秒pytest/35.286秒外层），1176输入稳定。全部Source当前模型许可先于配置读取，当前Config/Provider/不可变Prompt及完整frame容量先于私有正文，Super预览不能恢复撤回资料。首轮夹具重复配置导致25 setup error/235通过原记录保留；此阶段尚无Task入队、HTTP调用或commit，后续实际执行链继续。
+
+- 2026-10-21：第79项专用Chat/Responses完整文本适配器已提交；十二整文件一次311通过（26.14秒pytest/37.243秒外层），1180输入稳定。51项新MockTransport/协议/用量测试覆盖实际完整wire双重JSON转义超限在HTTP前拒绝、仅单次调用、工具/拒答/截断/错误引文/重复键拒收、未知与实际零/部分用量不混淆。固定System+原版本Task完整发送，未连接外部模型。实际Task入队/claim/dispatch/接受与共享FE仍继续，适配器测试不替代该生命周期。
+
+- 2026-10-21：第79项真实staged Run/Artifact+具体创建审计与当前源前置核验已提交；十三整文件一次342通过（32.55秒pytest/43.329秒外层），1182输入稳定。具体Audit绑定原25字段/全部不可变技术锚/原角色与UTC6登录epoch；Config/Provider/Prompt冻结SHA在受保护正文前比较，按Config X的当前每日COUNT控制额度。首轮1个产品读取顺序负控+6个SQLite触发器清理失败、333通过均保留并修复；七类实际SQL触发器证明Run/Artifact/Audit/Source整体回滚。仍是无commit的staged创建，未称真实shared claim/worker、MySQL Task或79FE完成。
+
+- 2026-10-21：第79项新增实际合法Case的provider双重转义预算负控，单独完整storage32项一次通过（16.59秒pytest/27.896秒外层），不是与前342累加为单次374。真实隔离MySQL六表Source→Task增量往返全部通过（39.237秒）：231旧表/5条合成User行逐步DDL与行哈希不变，10UTC6/10MEDIUM、完整容量/+1、旧RR当前具体审计/Task定位、实际Source/Task触发器回滚与三类Task锁1205，单剩额度双writer一成一429无1213。首MySQL因脚本普通Audit get沿旧RR返回None而失败，已改实际当前SHARE核对；产品不改，失败与双runner/worker完整保留，均cleanup真。shared执行链和FE继续。
+
+- 2026-10-21：第79项合法缺失用量与有效内容分开：optional total不能反推出缺失组件，完整有效草稿仍可接收；显式非法total或与两个实际已知组件矛盾则拒并保留已知同伴用量。三个完整gateway61/storage32/config26文件一次119全绿（20.54秒pytest/31.058秒外层），1182输入稳定；这只改响应Envelope，不把先前MySQL阶段重标为当前最终版本。下一步实际claim/dispatch/终态回执。
+
+- 2026-10-21：第79项实际claim/dispatch与独立具体审计证明已提交；四整文件一次138通过（26.13秒pytest/37.131秒外层），1184输入稳定，新增19项。来源/原epoch/配置重新核对，dispatch原claim实际PK在受保护正文前核验；三实际不同创建/claim/dispatch主键、原lease、完整UTC6及旧表秒钟分明。来源撤回后重复交付纯skip不终结原owner，六种实际phase审计写入触发器失败整体回滚。可信technical reader不读取Source/Task正文，也不授数据权限；尚无commit/HTTP/终态/结果接受/共享worker和FE，继续。
+
+- 2026-10-21：第79项原claim本delivery的终态nullable用量回执已提交；五整文件一次160通过（33.60秒pytest/44.234秒外层），1186输入稳定，新增22项。Source撤回后实际用量照实保存而0 Source/Task正文；第二delivery无自身dispatch PK不能终结在途owner；实际零/未调用零/部分/未知与兼容Run占位0严格区分。三种usage审计SQLtrigger故障整体回滚，另Source变化允许纯技术结算并验证caller回滚。取消状态为测试直接设置，实际cancel API、未claim结算、完整结果接受、共享async worker/FE仍继续，未冒称成功分支已验证。
+
+- 2026-10-21：第79项完整结果的实际原子接受与授权重算读取已提交；六整文件一次182通过（41.71秒pytest/51.831秒外层），1188输入稳定，新增22项。实际创建/claim/dispatch/accept/usage五独立PK，>65535字节完整结果blob+短pointer无裁剪，Source/Prompt/目标/Unicode逐字引用重验；缺失/部分用量仍可成功且未知保null。八类实际结果/终态SQLtrigger证明blob/pointer/两审计/Run/Artifact/Source整体回滚，Source撤回前置拒正文而原delivery可保paid。实际cancel、共享async worker/Main Task API/FE及MySQL接受继续实施，未称端到端完成。
+
+- 2026-10-21：第79项隔离MySQL的实际claim/dispatch/完整结果接受阶段46项检查通过（41.671秒，25产品/迁移输入稳定）；231旧表+6新表升级/回退/再升级及全部旧DDL/行哈希保持，10UTC6/10MEDIUM与完整容量/+1实测。四种完整/缺失/部分用量均可成功，五个实际不同Audit PK、>65k结果与短pointer、错误接受PK/自重算SHA拒绝、真实Result INSERT后Source改变整体回滚均实证。Source撤回后第二无dispatch交付不改owner，原dispatch保11/null paid且0正文返回。第三轮脚本收尾变量覆盖导致报告失败，原失败与双脚本完整保留；仅修probe的第四轮通过，产品未改。尚无79实际cancel handler/shared async/Main Task API/FE，继续。
+
+- 2026-10-21：第79项实际Super技术取消与未领取失败结算已提交；七整文件一次202通过（48.07秒pytest/58.801秒外层，1190输入稳定）。排队未领取保null claim/lease/start且已证明0/0未调用，已领未发同样0；已发取消等待原dispatch11/null paid且不接受结果。Source撤回及原owner失权仍仅可技术停止，普通admin无此特权；六类实际cancel/usage审计SQLtrigger验证整件回滚。这里是实际staged服务，尚非Main/JWT cancel API或FE；前MySQL46不覆盖本次新增分支，继续shared执行。
+
+- 2026-10-21：第79项专用实际异步执行已提交；八整文件一次227通过（58.03秒pytest/69.212秒外层，1193输入稳定，新增25项）。真实SQL创建/领取/发送独立commit，local ASGI Chat/Responses×完整/缺失/部分/partial+total回包，provider等待前后SQL Session与checked-out connection均0；回包后重验Source/config和原dispatch再完整接受。heldHTTP重复交付/撤回/原角色epoch失效保实际paid而0正文，真实取消保cancelled+11/null，接受SQL失败及拒收None仍独立结算paid。十分钟中断仅未知/未调用结算且不重放；实际shared Main/JWT/native队列/FE继续，未声称远端模型可靠性或本阶段MySQL端到端已验证。
+
+- 2026-10-21：第79项第七专用任务域、当前源读取前置及技术队列候选过滤已提交；六整文件一次112通过（46.79秒pytest/57.503秒外层，1195输入稳定）。实际Artifact优先于擦除feature/raw3，过期Run不提前刷新正文；Source/原epoch在普通与Super读取前重验。四类孤立marker含null保留键均拒正文，技术隔离不作调用用量断言；128损坏克隆锚+128未知角色孤立任务的SQL候选跳过保留后方合法任务。首轮旧测试仅固定六域导致1F111P，更新精确七域清单后重跑通过，原记录完整保留。MySQL无hint本事务SQL∪短RC正在独立验证，不以SQLite替代；catalog/共享Task API/worker接入继续。
+
+- 2026-10-21：第79项shared识别的实际MySQL第五轮53项检查一次通过（42.248秒，全部1195 BE/四映射输入稳定）：旧RR经独立短RC见新分件，真实Core直接删/重插Artifact+expunge+清hint仍经本Session SQL定位，擦除feature/raw3不降级且409先于正文，savepoint回滚不留假身份；四种孤立marker含null保留键只技术隔离，无调用用量断言。含前46项Source/Task增量往返/实际接受/部分用量/撤回检查，新增7机制单独实测；不把这里称Main/JWT、MySQL异步worker/cancel或FE完成。全部临时容器与私有目录已清理，原report/脚本完整无损保存。
+
+- 2026-10-21：第79项Task/Source/Binding/Result四独立完整视图及纯闭集schema已提交；四整文件一次74通过（30.76秒pytest/42.004秒外层，1198输入稳定，新增10项）。Task保原frame/raw3字节，公开输出无私有Case SHA/原件ID/审核依据/凭据引用；每个part独立当前源授权，Sup技术目录与撤回后实际paid元数据均0正文且不开放parts/Trace。首1F73P仅测试把模型列表交给只转换顶层模型的既有canonical encoder，改测试逐item model_dump，产品不改；完整失败与green保留。尚非正式Main/JWT端点、shared目录或FE，继续。
+
+- 2026-10-21 第79项正式Main任务与共享worker：91504f6，5完整文件一次87通过（45.85s/外层57.074s），1202后端及生成映射输入稳定；真实JWT→SQL→两协议本地合成ASGI→完整四part与五个具体审计主键，合法缺失/部分token保持null，实际在途撤回/取消保留11/null付费用量。人工反馈绑定实际已接受结果并用真实SQL触发器核对整体回滚。首轮11失败/76通过与测试夹具修正完整保存在既有JSON，产品源码两轮相同；尚不代表前端、最终MySQL或主分支准入。
+
+- 2026-10-21：第79项来源/输入/草稿四分件前端及共享助手、历史、Super治理入口已完成定向交付（0fb0907、e273167）；七文件96项isolated_mock一次通过（207.637679秒浏览器/209.109329秒外层），真实构建产物8项production_mock另一次通过（23.267938/24.570990秒）。两组都严格使用同案实际Main/JWT/共享worker/MockTransport原HTTP回执，保留原TEXT及BOM/CRLF/emoji码点引文，不接真实后台或模型；Super预览创建真实排队任务而不自动启用/保存，撤回后仅技术状态与实际nullable用量。旧科研共享四文件65项兼容回归另一次通过，原200个spec/2908个案例的文件字节保持；全树208文件3012项只是实际收集数，并非全套执行成功数。
+
+- 2026-10-21：本分支规范npm verify通过34.073秒，673实际生产输入及381件dist前后SHA保持，JS5,456,136/全部资源6,538,240/最大646,975，原6M/7M/700k预算、依赖和已声明浏览器下限不变、audit0；完整12文件Node164项与三个生成器check通过。原80件ElementPlus CSS导入逐字不变，仅更新派生审计指纹；编译仍保留24项组件CSS顺序及5项SCSS提示，真实页面核对CSS加载和控件样式。f9c685c另修foreign operations_case_id（含null）进入通用运营空预览的边界，三完整后端文件37项通过，不扩大为临床正文泄漏或完整BE结论。永久证据见[第79项前端定向验证](ai-operations-frontend-verification.json)，含所有失败/构造失败谱系、同案实际包、源与dist摘要及原基线保持；Root两轮完整后端和后续主分支准入另记。旧超管总览仍使用legacy Token聚合且未标未知分母，不能当作完整实际付费用量或费用；每Task独立nullable回执不受此限制替代。
 ## 科研队列共享前端规范构建（2026-10-21）
 
 - 正式共享集成2669584的 `npm run verify` 一次通过（29.502秒）：audit零告警，JS5364204、全部资源6439099、最大646975字节；660份实际生产输入前后稳定，原6M/7M/700k限额保留。12个完整Node文件163项一次通过（7.210秒）；独立Python解码实际44份HTML惰性数据，完整28份schema、15份其他JSON及完整授权SVG逐字/原生SHA一致，没有把可执行逻辑藏入数据。
@@ -443,3 +498,19 @@
 - 2026-10-21 NEWS2只等待loading结束的整文件第二诊断真实30P/1timeout，122.961s，原30s/0retry、产品/dist未变；新增trace证明该次点击仍在collapse展开动画中，实际没有candidates回执，loading原本未开始。因此不声称异步GET已复现根因；下一步仅同步展开动画再真实点击，旧full与本次RED及zip trace无损保留，Main75未准入。
 
 - 2026-10-21 NEWS2第三诊断仅test draft helper等待包含按钮的collapse enter结束后真实点击、再等loading结束，原31整文件一次全绿96.325s、30s/0retry。产品689/dist及测试正文和行号未改；修复本次trace已观察的未发GET交互，不声称原full根因已复现。准备fresh完整186文件3015轮次，旧174spec逐字保持，唯一旧NEWS2改helper、31case身份全部保持，不重标首full RED。
+
+- 2026-10-21 第79项原版全量真实RED保留：11176通过/8失败/28可选跳过/7既有警告，4752.43s pytest、4765.711s外层、1203输入稳定；3项catalog原指令/System导出与5项严格Gate/验证scope旧断言，完整JUnit/失败索引/原日志保留。已继承Root6ac5a02缺失的6个历史硬化与MySQL/定向证据阶段，均保留原commit和范围。最新release60654e9全量1205输入及2922浏览器仍各自运行，暂不称全绿或Main准入。
+
+- 2026-10-21 第79项first-fixed完整默认后端结束：11186P/5F/28skip/7warn，11219实际收集，4740.49pytest/4753.901outer，1204BE/映射稳定。余下仅4DocPipeline严格六Gate SQL预期+1第79 operational-validation scope，已在独立79722cc两整模块77绿覆盖；本轮仍记RED不重标，final release含79722cc及f9c685c另行full冻结运行，原8F独立保留。全部本轮raw/JUnit/索引永久保存。
+
+- 2026-10-21 新任意交付异常4项真实RED发现旧产品错误0/0/false后，精确SIGINT停止本域旧完整candidate；实际6352P/25skip/2warn，2505.15s pytest/2517.867s outer，源1205稳定，exit2。本轮无已执行assertion失败，但不能证明新修复；未执行后续用例不算pass/skip，全部raw/JUnit保留，修正完成后fresh完整重新开始。运维原JUnit额外一个中断entry不多算一P。
+
+- 2026-10-21 operations任意交付异常修正f0dad33：实际gateway/worker各RuntimeError/AssertionError四原始SQL RED复现错误0/0/false；最终六完整模块一次144P，51.43s pytest/64.488s outer，全部1206源稳定。gateway实际已尝试→true+null计数；worker自有dispatch后无真实回执→WORKER_INTERRUPTED+null/null/None；不放松具体PK/未知回执约束，已知未调用零与实际paid计数保留。中间未使用现有WORKER_INTERRUPTED策略的2个拒绝、运维一次错误测试路径无执行均完整保留。只声明Ruff check通过；完整format诊断仅旧长条件保留，不称全格式绿。新独立full及修正后的实际MySQL正在跑，旧partial/RED不重标。
+
+- 2026-10-21 operations已修正f0dad33实际私有MySQL一次92检查75.388s全部通过/清理，含原完整基线及六个未知RuntimeError/AssertionError（gateway/worker/撤Source后gateway）边界，同轮不相加重跑。已尝试true或worker未知None与null计数、原具体PK、无结果/无重发/撤权零BODY均保留；1206实际输入与对应fresh full一致（training另两JSON夹具单独桥接）。training第六轮78项后仅新验证脚本自己get整Result污染0BODY观察的RED保留，第七只改id投影缺行探针；产品未再变。所有原raw永久保存，无真实模型/医院DB/部署证明。
+
+### 全部80项的最终集成：75与79首轮联合
+
+- 在独立final工作树合并75与79，保留两域全部Source、Task、精确回执、固定Prompt与独立前后端入口；新增空迁移合并节点接通两条历史。实际生成80项Prompt与985条RBAC。
+- 首8个完整后端共享文件158项通过，1263个后端/映射输入稳定；完整12个Node文件166项通过。两域原始契约和Prompt与各自上游逐字相等。
+- 原生75共享四文件、22文件联合浏览器及规范构建仍在运行，此提交只表示阶段集成。未进入主工作树，全部80项的最终验收尚未完成。后续还需修复运维材料集管理筛选和全局nullable用量统计。证据见`ai-final-integration-verification.json`。

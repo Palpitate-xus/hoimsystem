@@ -100,7 +100,8 @@ async def test_explicit_validated_scope_can_activate_without_source_confirmation
 
 
 def test_scope_validation_policy_covers_all_operational_prediction_and_optimization():
-    assert {spec.number for spec in FEATURES if spec.requires_operational_validation} == set(range(62, 68))
+    assert {spec.number for spec in FEATURES if spec.requires_operational_validation} == set(range(62, 68)) | {79}
+    assert FEATURE_BY_KEY["operations_support"].requires_operational_validation
     assert not FEATURE_BY_KEY["research_cohort"].requires_operational_validation
     from app.ai.catalog import describe_feature
 

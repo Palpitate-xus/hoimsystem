@@ -257,6 +257,10 @@ def inspect_context(
 @router.post("/ai/runs")
 def submit_run(req: RunRequest, db: Session = Depends(get_db), user: User = Depends(get_current_user)) -> dict:
     """Queue durable work; a separately deployed worker performs inference."""
+    if req.feature_key == "operations_support":
+        from app.routers.ai_operations_support_tasks import OperationsTaskCreate, create_task
+
+        return create_task(OperationsTaskCreate(**req.input, preview=req.preview), db, user)
     run = create_run(db, user, req)
     value = {"code": 200, "msg": "任务已排队", "data": describe_run(run, False, user=user)}
     if req.feature_key == "feedback_analysis":
@@ -292,11 +296,20 @@ def list_runs(
     drug_label_source_binding_id: str | None = None,
     document_change_scope_id: str | None = Query(None, max_length=36),
     deidentification_case_id: str | None = Query(None, max_length=36),
+    operations_case_id: str | None = Query(None, max_length=36),
     limit: int = Query(30, ge=1, le=100),
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user),
 ) -> dict:
     """List own tasks; super-admins can inspect global execution history."""
+    if feature_key == "operations_support" or operations_case_id is not None:
+        scope = locals().copy()
+        if feature_key != "operations_support" or any(value is not None and value is not False for key, value in scope.items() if key not in {"feature_key", "operations_case_id", "limit", "db", "user"}):
+            raise HTTPException(422, "运维任务历史只接受本功能与明确运维Case，不接受其它范围")
+        from app.ai.operations_support_task_directory import list_tasks
+
+        page = list_tasks(db, user, case_id=operations_case_id, size=limit)
+        return {"code": 200, "msg": "success", "data": page["items"], "pagination": {key: value for key, value in page.items() if key != "items"}}
     from app.ai.native_task_access import lock_directory_gates
 
     lock_directory_gates(db)
@@ -633,6 +646,10 @@ def list_runs(
             identity = locate_native_task(db, item.run_id)
             if exc.status_code in {403, 404, 409}:
                 from app.ai.deidentification_shared import is_deidentification_task
+                from app.ai.operations_support_shared import is_operations_task
+
+                if identity is not None and identity.domain == "operations_support" or identity is None and is_operations_task(db, item):
+                    continue
                 from app.ai.research_cohort_shared import is_research_task
 
                 if identity is not None and identity.domain == "deidentification" or identity is None and is_deidentification_task(db, item):
@@ -696,6 +713,16 @@ def list_runs(
 @router.get("/ai/runs/{run_id}")
 def run_detail(run_id: str, db: Session = Depends(get_db), user: User = Depends(get_current_user)) -> dict:
     """Recheck patient access before exposing a stored result or evidence."""
+    from app.ai.native_task_access import lock_directory_gates
+    from app.ai.operations_support_shared import is_located_operations_task, is_operations_task
+
+    if not is_located_operations_task(db, run_id):
+        lock_directory_gates(db)
+
+    if is_operations_task(db, run_id):
+        from app.ai.operations_support_views import describe_task
+
+        return {"code": 200, "msg": "success", "data": describe_task(db, user, run_id).model_dump(mode="json")}
     from app.ai.native_task_access import guard_private_task_read
 
     guard_private_task_read(db, user, run_id)
@@ -711,14 +738,25 @@ def cancel_run(run_id: str, db: Session = Depends(get_db), user: User = Depends(
     """Stop accepting a result; an already sent provider call may still finish."""
     from app.ai.document_change_access import has_native_identity
     from app.ai.document_change_runtime import cancel_change_run
+    from app.ai.native_task_access import lock_directory_gates
     from app.ai.native_task_routing import locate_native_task
+    from app.ai.operations_support_shared import is_located_operations_task, is_operations_task
 
+    if not is_located_operations_task(db, run_id):
+        lock_directory_gates(db)
     identity = locate_native_task(db, run_id)
     if identity is not None and identity.domain == "deidentification":
         from app.ai.deidentification_runtime import cancel_deidentification_run
 
         cancel_deidentification_run(db, user, run_id, audit_only=user.user_role == "super_admin")
         return {"code": 200, "msg": "任务结果已取消接收"}
+
+    if identity is not None and identity.domain == "operations_support":
+        from app.ai.operations_support_runtime import cancel_operations_run
+
+        return {"code": 200, "msg": "任务结果已取消接收", "data": cancel_operations_run(db, user, run_id).model_dump(mode="json")}
+    if identity is None and is_operations_task(db, run_id):
+        raise HTTPException(409, "运维任务缺少完整持久分件，未降级取消或推断用量")
     if identity is not None and identity.domain == "research_cohort":
         from app.ai.research_cohort_execution import cancel_research_run
 
@@ -776,6 +814,17 @@ def cancel_run(run_id: str, db: Session = Depends(get_db), user: User = Depends(
 @router.post("/ai/runs/{run_id}/feedback")
 def review_result(run_id: str, req: FeedbackWrite, db: Session = Depends(get_db), user: User = Depends(get_current_user)) -> dict:
     """Append review without editing clinical records, orders or prescriptions."""
+    from app.ai.native_task_access import lock_directory_gates
+    from app.ai.operations_support_shared import is_located_operations_task, is_operations_task
+
+    if not is_located_operations_task(db, run_id):
+        lock_directory_gates(db)
+
+    if is_operations_task(db, run_id):
+        from app.ai.operations_support_feedback import stage_feedback
+        from app.routers.ai_operations_support_sources import commit_reply
+
+        return commit_reply(db, lambda: stage_feedback(db, user, run_id, req))
     from app.ai.native_task_access import guard_private_task_read
 
     guard_private_task_read(db, user, run_id)

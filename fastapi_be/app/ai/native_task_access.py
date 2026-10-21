@@ -44,7 +44,7 @@ def _guard_charge_identity(db, user, identity):
 
 
 def lock_directory_gates(db):
-    """Billing -> Satisfaction -> Inventory -> Research; never acquire them after User/Run."""
+    """Billing -> Satisfaction -> Inventory -> Research -> Operations, before User/Run."""
     from app.ai.charge_reconciliation_write_guard import lock_charge_gate
     from app.ai.inventory_write_guard import lock_inventory_gate
     from app.ai.satisfaction_write_guard import lock_satisfaction_gate
@@ -55,6 +55,13 @@ def lock_directory_gates(db):
     from app.ai.research_cohort_write_guard import lock_research_gate
 
     lock_research_gate(db)
+    from app.ai.operations_support_models import AIOperationsWriteGate
+
+    # A mixed legacy directory creates no new gate. Actual operations readers
+    # and writers separately require the gate seeded by their migration. If it
+    # is present, always take it in the common order before any User/Run lock.
+    with db.no_autoflush:
+        db.query(AIOperationsWriteGate).filter_by(gate_id=1).populate_existing().with_for_update().one_or_none()
 
 
 def guard_private_task_read(db, user, run_id):
@@ -75,6 +82,11 @@ def guard_private_task_read(db, user, run_id):
             from app.ai.deidentification_shared import guard_task
 
             guard_task(db, user, run_id)
+            return
+        if identity.domain == "operations_support":
+            from app.ai.operations_support_shared import guard_operations_task
+
+            guard_operations_task(db, user, run_id)
             return
         if identity.domain == "research_cohort":
             from app.ai.research_cohort_shared import guard_research_task
@@ -104,6 +116,11 @@ def guard_private_task_read(db, user, run_id):
         return
     from app.ai.deidentification_shared import guard_task as guard_deidentification_task
     from app.ai.deidentification_shared import is_deidentification_task
+    from app.ai.operations_support_shared import guard_operations_task, is_operations_task
+
+    if is_operations_task(db, run_id):
+        guard_operations_task(db, user, run_id)
+        return
     from app.ai.research_cohort_shared import guard_research_task, is_research_task
 
     if is_deidentification_task(db, run_id):

@@ -196,6 +196,8 @@ class ClinicalContextRequest(StrictRequest):
                 raise ValueError("完整账目来源须使用真实正整数患者ID，不接受布尔、字符串或浮点转换")
         if isinstance(value, dict) and isinstance(value.get("source_refs"), dict) and {"research_cohort_case_id", "deidentification_case_id"} & set(value["source_refs"]):
             raise ValueError("科研来源使用独立有限Case，不使用患者临床上下文替代研究授权")
+        if isinstance(value, dict) and isinstance(value.get("source_refs"), dict) and "operations_case_id" in value["source_refs"]:
+            raise ValueError("运维审核资料使用专用有限Case，不接受患者临床上下文替代范围")
         return value
 
     @field_validator("source_refs")
@@ -225,6 +227,11 @@ class RunRequest(StrictRequest):
     @model_validator(mode="before")
     @classmethod
     def native_charge_scope(cls, value):
+        if isinstance(value, dict) and isinstance(value.get("feature_key"), str) and value["feature_key"].strip() == "operations_support":
+            if value.get("patient_id") is not None or value.get("encounter_ref") is not None:
+                raise ValueError("运维任务只使用明确受审资料集，不接受患者或就诊范围")
+            if "preview" in value and type(value["preview"]) is not bool:
+                raise ValueError("运维预览标记须为明确布尔值")
         if isinstance(value, dict) and isinstance(value.get("feature_key"), str) and value["feature_key"].strip() in {"research_cohort", "deidentification"}:
             if value.get("patient_id") is not None or value.get("encounter_ref") is not None:
                 raise ValueError("科研任务只使用明确研究Case，不接受患者或就诊替代范围")
@@ -257,6 +264,12 @@ class RunRequest(StrictRequest):
             from app.ai.deidentification_task_contract import selection
 
             selection(self.input)
+        if "operations_case_id" in self.input and self.feature_key != "operations_support":
+            raise ValueError("运维受审资料集只用于运维知识任务")
+        if self.feature_key == "operations_support":
+            from app.ai.operations_support_task_contract import OperationsTaskSelection
+
+            OperationsTaskSelection.model_validate(self.input, strict=True)
         if "research_cohort_case_id" in self.input and self.feature_key != "research_cohort":
             raise ValueError("完整研究Case仅用于固定研究队列原记录核对")
         if self.feature_key == "research_cohort":

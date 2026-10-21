@@ -2761,6 +2761,233 @@
  },
  {
   "auth": [
+   "super_admin"
+  ],
+  "function": "list_originals",
+  "method": "GET",
+  "module": "ai_operations_support_sources.py",
+  "path": "/api/ai/operations-support/originals"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "register_original",
+  "method": "POST",
+  "module": "ai_operations_support_sources.py",
+  "path": "/api/ai/operations-support/originals"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "original_metadata",
+  "method": "GET",
+  "module": "ai_operations_support_sources.py",
+  "path": "/api/ai/operations-support/originals/{original_id}"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "original_body",
+  "method": "GET",
+  "module": "ai_operations_support_sources.py",
+  "path": "/api/ai/operations-support/originals/{original_id}/body"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "revoke_original",
+  "method": "POST",
+  "module": "ai_operations_support_sources.py",
+  "path": "/api/ai/operations-support/originals/{original_id}/revoke"
+ },
+ {
+  "auth": [
+   "admin",
+   "super_admin"
+  ],
+  "function": "list_releases",
+  "method": "GET",
+  "module": "ai_operations_support_sources.py",
+  "path": "/api/ai/operations-support/releases"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "create_release",
+  "method": "POST",
+  "module": "ai_operations_support_sources.py",
+  "path": "/api/ai/operations-support/releases"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "release_metadata",
+  "method": "GET",
+  "module": "ai_operations_support_sources.py",
+  "path": "/api/ai/operations-support/releases/{release_id}"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "release_draft",
+  "method": "GET",
+  "module": "ai_operations_support_sources.py",
+  "path": "/api/ai/operations-support/releases/{release_id}/draft"
+ },
+ {
+  "auth": [
+   "admin",
+   "super_admin"
+  ],
+  "function": "preview_release",
+  "method": "GET",
+  "module": "ai_operations_support_sources.py",
+  "path": "/api/ai/operations-support/releases/{release_id}/source"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "review_release",
+  "method": "POST",
+  "module": "ai_operations_support_sources.py",
+  "path": "/api/ai/operations-support/releases/{release_id}/review"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "revoke_release",
+  "method": "POST",
+  "module": "ai_operations_support_sources.py",
+  "path": "/api/ai/operations-support/releases/{release_id}/revoke"
+ },
+ {
+  "auth": [
+   "admin",
+   "super_admin"
+  ],
+  "function": "list_cases",
+  "method": "GET",
+  "module": "ai_operations_support_sources.py",
+  "path": "/api/ai/operations-support/cases"
+ },
+ {
+  "auth": [
+   "admin",
+   "super_admin"
+  ],
+  "function": "create_case",
+  "method": "POST",
+  "module": "ai_operations_support_sources.py",
+  "path": "/api/ai/operations-support/cases"
+ },
+ {
+  "auth": [
+   "admin",
+   "super_admin"
+  ],
+  "function": "case_metadata",
+  "method": "GET",
+  "module": "ai_operations_support_sources.py",
+  "path": "/api/ai/operations-support/cases/{case_id}"
+ },
+ {
+  "auth": [
+   "admin",
+   "super_admin"
+  ],
+  "function": "read_case_part",
+  "method": "GET",
+  "module": "ai_operations_support_sources.py",
+  "path": "/api/ai/operations-support/cases/{case_id}/parts/{part_name}"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "revoke_case",
+  "method": "POST",
+  "module": "ai_operations_support_sources.py",
+  "path": "/api/ai/operations-support/cases/{case_id}/revoke"
+ },
+ {
+  "auth": [
+   "admin",
+   "super_admin"
+  ],
+  "function": "task_descriptor",
+  "method": "GET",
+  "module": "ai_operations_support_tasks.py",
+  "path": "/api/ai/operations-support/task-descriptor"
+ },
+ {
+  "auth": [
+   "admin",
+   "super_admin"
+  ],
+  "function": "create_task",
+  "method": "POST",
+  "module": "ai_operations_support_tasks.py",
+  "path": "/api/ai/operations-support/tasks"
+ },
+ {
+  "auth": [
+   "admin",
+   "super_admin"
+  ],
+  "function": "list_tasks",
+  "method": "GET",
+  "module": "ai_operations_support_tasks.py",
+  "path": "/api/ai/operations-support/tasks"
+ },
+ {
+  "auth": [
+   "admin",
+   "super_admin"
+  ],
+  "function": "task_metadata",
+  "method": "GET",
+  "module": "ai_operations_support_tasks.py",
+  "path": "/api/ai/operations-support/tasks/{run_id}"
+ },
+ {
+  "auth": [
+   "admin",
+   "super_admin"
+  ],
+  "function": "task_part",
+  "method": "GET",
+  "module": "ai_operations_support_tasks.py",
+  "path": "/api/ai/operations-support/tasks/{run_id}/parts/{part_name}"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "cancel_task",
+  "method": "POST",
+  "module": "ai_operations_support_tasks.py",
+  "path": "/api/ai/operations-support/tasks/{run_id}/cancel"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "task_trace",
+  "method": "GET",
+  "module": "ai_operations_support_tasks.py",
+  "path": "/api/ai/operations-support/tasks/{run_id}/trace"
+ },
+ {
+  "auth": [
    "admin",
    "director",
    "doctor",

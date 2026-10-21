@@ -76,8 +76,10 @@ def terminal_hash(header, artifact):
 
 def _no_accepted_result(db, identifier):
     # SQL returns only a boolean and an opaque PK. No result TEXT is selected.
-    empty = db.scalar(select((AIRun.result_json == "{}").label("operations_result_is_empty")).where(AIRun.run_id == identifier))
-    found = db.scalar(select(AIOperationsRunResult.run_id).where(AIOperationsRunResult.run_id == identifier))
+    # Current SHARE reads must not reuse an earlier MySQL RR snapshot.
+    with db.no_autoflush:
+        empty = db.scalar(select((AIRun.result_json == "{}").label("operations_result_is_empty")).where(AIRun.run_id == identifier).with_for_update(read=True))
+        found = db.scalar(select(AIOperationsRunResult.run_id).where(AIOperationsRunResult.run_id == identifier).with_for_update(read=True))
     if empty is not True or found is not None:
         raise HTTPException(409, "失败或取消的运维任务不能保留已接受结果")
 

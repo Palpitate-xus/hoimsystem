@@ -3,6 +3,7 @@
 import json
 import subprocess
 import sys
+import uuid
 from pathlib import Path
 
 import pytest
@@ -13,7 +14,8 @@ from app.ai import operations_support_contract as c
 from app.ai import operations_support_receipts as receipts
 from app.ai import operations_support_registry as registry
 from app.ai import operations_support_views as views
-from app.ai.models import AIRun
+from app.ai.models import AIAuditEvent, AIRun
+from app.ai.operations_support_run_models import RESULT_SCHEMA, AIOperationsRunResult
 from app.ai.operations_support_task_view_contract import OperationsTaskMetadata
 from app.ai.operations_support_usage_contract import usage
 from tests.test_ai_operations_support_receipts import capture_without_body
@@ -43,9 +45,7 @@ def test_real_current_queued_metadata_separate_full_parts_and_no_private_origina
     wire = c.canonical_json([item.model_dump(mode="json") for item in (metadata, task, binding, source)])
     assert configured[1]["original_id"] not in wire and configured[3]["private_hash"] not in wire
     assert not any('"' + field + '"' in wire for field in ("case_private_hash", "case_membership_hash", "review_basis", "origin_note", "api_key_env", "api_key_encrypted"))
-    with pytest.raises(HTTPException) as exc:
-        views.read_part(db, admin, identifier, "result")
-    assert exc.value.status_code == 409
+    assert views.read_part(db, admin, identifier, "result") is None
 
 
 def test_super_directory_is_bodyless_even_while_source_is_current(queued):
@@ -128,6 +128,28 @@ def test_split_trace_contains_only_metadata_and_four_independent_bare_part_urls(
     assert set(value["parts"]) == set(views.PARTS) and all(url.endswith("/" + part) for part, url in value["parts"].items())
     assert "prompt_snapshot_json" not in c.canonical_json(value) and "documents" not in c.canonical_json(value)
     OperationsTaskMetadata.model_validate(value["run"], strict=True)
+
+
+@pytest.mark.parametrize("fault", ["pointer", "unexpected_blob", "queued_terminal_trace"])
+def test_non_success_null_never_hides_unexpected_blob_pointer_or_corrupt_phase(queued, fault):
+    configured, identifier = queued
+    db, registrar, creator, reviewer, admin = configured[0]
+    if fault == "pointer":
+        db.execute(update(AIRun).where(AIRun.run_id == identifier).values(result_json='{"invented":true}'), execution_options={"synchronize_session": False})
+    elif fault == "queued_terminal_trace":
+        db.execute(update(AIRun).where(AIRun.run_id == identifier).values(latency_ms=99), execution_options={"synchronize_session": False})
+    else:
+        from app.ai import operations_support_attempts as attempts
+
+        header = attempts.phase_header(db, identifier)
+        audit = AIAuditEvent(actor_id=admin.user_id, action="synthetic_invalid_result_fixture", target=identifier, detail_json="{}")
+        db.add(audit)
+        db.flush()
+        db.add(AIOperationsRunResult(run_id=identifier, schema_version=RESULT_SCHEMA, lease_token=str(uuid.uuid4()), accepted_at=registry.utcnow(), result_json="{}", result_bytes=2, result_hash=registry.raw_sha("{}"), source_binding_hash=header["source_binding_hash"], instructions_digest=header["instructions_digest"], accept_audit_event_id=audit.event_id))
+        db.flush()
+    with pytest.raises(HTTPException) as error:
+        views.read_part(db, admin, identifier, "result")
+    assert error.value.status_code == 409
 
 
 def test_task_view_schema_import_is_pure_and_has_no_database_or_configuration_dependency():

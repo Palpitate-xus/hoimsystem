@@ -186,6 +186,9 @@ async def test_actual_main_held_worker_duplicate_source_loss_or_cancel_keeps_par
             response = await async_client.post(f"/api/ai/runs/{value['identifier']}/cancel", headers=value["headers"][0])
             assert response.status_code == 200, response.text
             assert response.json()["data"]["receipt_pending"] is True
+            pending_result = await async_client.get(BASE + f"/tasks/{value['identifier']}/parts/result", headers=value["headers"][3])
+            assert pending_result.status_code == 200 and pending_result.content == b"null"
+            assert pending_result.headers["X-AI-Parts-Wire"] == "canonical_json_body_no_envelope"
     finally:
         release.set()
         await first

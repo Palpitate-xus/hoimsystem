@@ -103,7 +103,27 @@ def read_part(db, user, identifier, part):
     if part == "source":
         return source
     if part == "result":
-        return results.load_result(db, user, identifier)
+        actual = attempts.technical_header(db, identifier, exclusive=False)
+        receipt = receipts.read_receipt(db, actual)
+        header = actual.header
+        if header["status"] == "succeeded":
+            return results.load_result(db, user, identifier)
+        if header["status"] not in {"queued", "running", "failed", "cancelled"}:
+            raise HTTPException(409, "运维任务状态不能构成明确的未接受结果")
+        receipts._no_accepted_result(db, identifier)
+        if header["status"] == "queued":
+            original = storage._verify_created(db, actual.artifact, header)["original_run_header"]
+            if actual.claim is not None or receipt is not None or any(value != original[key] for key, value in storage.encoded_header(header).items()):
+                raise HTTPException(409, "排队运维任务与原实际创建状态不一致")
+        elif header["status"] == "running":
+            if actual.claim is None or receipt is not None or any(header[key] is not None for key in ("finish_time", "latency_ms", "error_code", "error_message")) or header["input_tokens"] != 0 or header["output_tokens"] != 0:
+                raise HTTPException(409, "在途运维任务的原claim或未结束状态损坏")
+        elif receipt is None:
+            # Actual in-flight cancellation can await its original delivery's
+            # paid receipt. Null is no accepted draft, never a zero-use claim.
+            if header["status"] != "cancelled" or actual.dispatch is None or header["error_code"] != "TASK_CANCELLED" or header["finish_time"] is None or header["latency_ms"] is not None or header["input_tokens"] != 0 or header["output_tokens"] != 0:
+                raise HTTPException(409, "运维终态缺少实际用量回执或原在途取消阶段")
+        return None
     header = attempts.phase_header(db, identifier)
     binding = _binding(header)
     if part == "task":

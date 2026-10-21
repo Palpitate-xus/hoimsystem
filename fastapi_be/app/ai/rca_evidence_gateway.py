@@ -73,10 +73,10 @@ def build_request(provider, task_prompt, data):
 
 
 async def generate_rca_evidence(provider, task_prompt, data, *, transport=None):
-    endpoint, raw, source, instructions = build_request(provider, task_prompt, data)
     attempted = False
     inputs = outputs = None
     try:
+        endpoint, raw, source, instructions = build_request(provider, task_prompt, data)
         credential = provider_credential(provider)
         headers = {"Accept": "application/json", "Content-Type": "application/json"}
         if credential:
@@ -106,3 +106,8 @@ async def generate_rca_evidence(provider, task_prompt, data, *, transport=None):
         raise
     except (httpx.HTTPError, HTTPException, ValueError, TypeError, KeyError, UnicodeError, TimeoutError) as exc:
         raise RcaEvidenceGatewayError("RCA_PROVIDER_ERROR", "本次模型请求或完整结果无法接受；实际未知用量保持未知", inputs=inputs, outputs=outputs, attempted=attempted) from exc
+    except Exception as exc:
+        # An unexpected transport/service exception is not evidence of an
+        # uncalled model. Preserve this layer's actual attempted flag and any
+        # independently received counters; never leave the worker's initial0.
+        raise RcaEvidenceGatewayError("RCA_PROVIDER_ERROR", "本次模型请求发生未分类异常；实际未知用量保持未知", inputs=inputs, outputs=outputs, attempted=attempted) from exc

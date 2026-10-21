@@ -111,7 +111,14 @@ async def execute_rca_claimed(identifier, lease, *, session_factory=None, transp
     except HTTPException:
         error = "RCA_CURRENT_STATE_CHANGED"
     except Exception:
-        error = "RCA_EXECUTION_ERROR"
+        if dispatch_id is not None:
+            # This worker observed its own dispatch commit but received no
+            # typed gateway receipt. A dropped/unknown exception cannot prove
+            # that the call was unattempted or charged zero tokens.
+            receipt = usage(None, None, None)
+            error = "WORKER_INTERRUPTED"
+        else:
+            error = "RCA_EXECUTION_ERROR"
     if result is not None and error is None:
         try:
             with factory() as db:

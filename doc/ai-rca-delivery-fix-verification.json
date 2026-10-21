@@ -1,0 +1,152 @@
+{
+  "schema_version": "rca_delivery_uncertainty_fix_verification_v1",
+  "feature_key": "incident_rca",
+  "base_head": "521af50",
+  "stage": "scoped_backend_fix_final_full_pending_root_release",
+  "predecessor_full_backend": {
+    "path": "doc/ai-rca-backend-verification.json",
+    "sha256": "87bb3a4f3d3398141586f7f66b2551491ea7604770e92f6754a8bd4e6d841be7",
+    "actual_passed": 10622,
+    "skipped": 28,
+    "warnings": 7,
+    "scope_unchanged_not_relabelled_as_fix_full": true
+  },
+  "actual_red": {
+    "report": {
+      "path": "/tmp/hoim-rca-delivery-fix-first-verification.json",
+      "sha256": "001604d1cb97b1301132a53e8e2b4dc821a81ffbc6e0f9c4da91b338d38ca965",
+      "bytes": 3919
+    },
+    "log": {
+      "path": "/tmp/hoim-rca-delivery-fix-first-tests.log",
+      "sha256": "cc39fef18a6772166e2b811e5c332bd0ecbc055faf2614ee2a20b060d3d96dbc",
+      "bytes": 13155
+    },
+    "junit": {
+      "path": "/tmp/hoim-rca-delivery-fix-first-junit.xml",
+      "sha256": "37d94f2789baeed15ba69e98434dda3fb087914772308775d7de310b072771fe",
+      "bytes": 14963
+    },
+    "status_counts": {
+      "passed": 0,
+      "failed": 4,
+      "errors": 0,
+      "skipped": 0
+    },
+    "pytest_seconds": 12.32,
+    "outer_seconds": 23.750127227976918,
+    "sources_stable": true,
+    "source_count_including_four_maps": 1114,
+    "source_freeze": {
+      "path": "/tmp/hoim-rca-delivery-fix-first-source-freeze.json",
+      "sha256": "1d7e0ba36c9a08b2fee96f457c7da886fa67d1bab96a7fb2b39353ccae268c00",
+      "bytes": 132673
+    },
+    "guards": {
+      "dotenv_open_attempts": 0,
+      "shared_transport_pem_attempts": 0,
+      "socket_attempts": 0
+    },
+    "command": [
+      "-p",
+      "pytest_asyncio.plugin",
+      "-p",
+      "no:cacheprovider",
+      "-q",
+      "--basetemp=/tmp/hoim-rca-delivery-fix-first-pytest",
+      "--junitxml=/tmp/hoim-rca-delivery-fix-first-junit.xml",
+      "tests/test_ai_rca_evidence_unclassified_delivery.py"
+    ]
+  },
+  "actual_scoped_green": {
+    "report": {
+      "path": "/tmp/hoim-rca-delivery-fix-second-verification.json",
+      "sha256": "fe228c360458b124c4c392baebc8a04f1d0b95acbe38efd6262589b17babf052",
+      "bytes": 2479
+    },
+    "log": {
+      "path": "/tmp/hoim-rca-delivery-fix-second-tests.log",
+      "sha256": "e8e7660fb44bbdabb77758e22eb506b8b04f869fe44c61edfd01fdec99d19d2f",
+      "bytes": 272
+    },
+    "junit": {
+      "path": "/tmp/hoim-rca-delivery-fix-second-junit.xml",
+      "sha256": "79e38b69041e8e88dedaeaa7ba4cfae72d47db8c214a13e994a51f0713670964",
+      "bytes": 27396
+    },
+    "status_counts": {
+      "passed": 153,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "pytest_seconds": 123.25,
+    "outer_seconds": 136.70372018124908,
+    "sources_stable": true,
+    "source_count_including_four_maps": 1114,
+    "source_freeze": {
+      "path": "/tmp/hoim-rca-delivery-fix-second-source-freeze.json",
+      "sha256": "4d08ba564b1b813ca36c76590b1a36830bd70265f8421678b6b687b0339d8e05",
+      "bytes": 132673
+    },
+    "guards": {
+      "dotenv_open_attempts": 0,
+      "shared_transport_pem_attempts": 0,
+      "socket_attempts": 0
+    },
+    "command": [
+      "-p",
+      "pytest_asyncio.plugin",
+      "-p",
+      "no:cacheprovider",
+      "-q",
+      "--basetemp=/tmp/hoim-rca-delivery-fix-second-pytest",
+      "--junitxml=/tmp/hoim-rca-delivery-fix-second-junit.xml",
+      "tests/test_ai_rca_evidence_unclassified_delivery.py",
+      "tests/test_ai_rca_evidence_gateway.py",
+      "tests/test_ai_rca_evidence_execution.py",
+      "tests/test_ai_rca_evidence_receipts.py",
+      "tests/test_ai_rca_evidence_runtime.py",
+      "tests/test_ai_rca_evidence_result_storage.py",
+      "tests/test_ai_rca_evidence_cancellation.py"
+    ]
+  },
+  "mechanism": {
+    "old_bug": "Unclassified RuntimeError/AssertionError from actual provider HTTP, or a lost typed receipt after actual HTTP, escaped the narrow gateway catch and left the worker initial uncalled0/0 unchanged after its own dispatch commit.",
+    "gateway_fix": "Initialize actual attempted flag before building the request; unexpected exceptions are converted to a sanitized typed error retaining independently received nullable counts and actual attempted flag. Known failures before HTTP remain known uncalled0/0.",
+    "worker_fix": "If this call observed its own dispatch commit but received no typed gateway receipt, record WORKER_INTERRUPTED with input/output/model_call_attempted allNone; do not retain initial0/0. Before a dispatch commit the known uncalled path remains unchanged.",
+    "injection_cases": [
+      "Actual gateway HTTP RuntimeError after original dispatch and current Source revoke",
+      "Actual gateway HTTP AssertionError after original dispatch and current Source revoke",
+      "Worker RuntimeError discarding typed reply after actual HTTP and Source revoke",
+      "Worker AssertionError discarding typed reply after actual HTTP and Source revoke",
+      "Unexpected pre-HTTP credential RuntimeError remains typed known uncalled0/0",
+      "Unexpected pre-HTTP credential AssertionError remains typed known uncalled0/0"
+    ],
+    "final_checks": [
+      "One actual controlled ASGI HTTP call per post-dispatch case, no retained worker SQL Session across HTTP",
+      "No post-Source-loss Task/Artifact BODY SQL projections",
+      "Exact original create/claim/dispatch/usage AuditPKs; no accepted result",
+      "Repeat delivery inert, no HTTP replay or usage PK replacement",
+      "Complete related gateway/execution/receipts/runtime/result/cancellation files retain existing success/partial/missing usage, Source/current role and cancellation tests"
+    ]
+  },
+  "source_binding_delta_from_old_full": {
+    "fastapi_be/app/ai/rca_evidence_execution.py": {
+      "old_10622_scope": "f4f3e1e84a0ed7f8a7350df0b331197d2b58cc1b97c7792fb55d75aa554ebcf4",
+      "delivery_fix": "ff566d103b68acc4fc3ca39eaefb5bc6f4cd05550ba52d05cd7d8a77c10524bd"
+    },
+    "fastapi_be/app/ai/rca_evidence_gateway.py": {
+      "old_10622_scope": "5b8f5e05e1af0c3e16135848812eba2edbc7a293423770ed88e725132005a0f0",
+      "delivery_fix": "e653d66f6f586bc3c5b1c5166d64251fad69266f6108896b91d555ded7f2640e"
+    },
+    "fastapi_be/tests/test_ai_rca_evidence_unclassified_delivery.py": {
+      "old_10622_scope": null,
+      "delivery_fix": "3abde9c56f72f54a4cf90a515d0abd5fca3f00f4e560b328f2ffbd5b69fb9f28"
+    }
+  },
+  "all_other_1111_existing_inputs_unchanged": true,
+  "prior_mysql_not_relabelled": "The earlier standalone MySQL Task report retains its original version. This patch changes gateway/execution code and is demonstrated here with synthetic SQLite/ASGI, not a fresh MySQL run. Root release full backend and frontend remain pending.",
+  "guard_scope": "No hospital DB, dotenv/shared PEM, real credential or external socket; no clinical/causal validity or remote-model result claim.",
+  "counts_not_added_to_prior_full": true
+}

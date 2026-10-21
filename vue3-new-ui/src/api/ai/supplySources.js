@@ -94,3 +94,5 @@ export async function verifySupplyCapture(v){try{
  manifest.sort((a,b)=>a.record_kind.localeCompare(b.record_kind)||a.source_record_id.localeCompare(b.source_record_id));if(!same(manifest,v.member_manifest)||v.max_available_at!==(clocks.length?clocks.sort().at(-1):null))return false;
  return await supportDigest(pick(v,['request','scope_binding','unit_definitions','source_records','member_manifest']))===v.historical_collection_digest&&await supportDigest({scope_binding:v.scope_binding,current_sku_state_hash:await supportDigest(v.sku_binding),members:manifest})===v.current_membership_digest&&await supportDigest(Object.fromEntries(Object.entries(v).filter(([k])=>!['captured_at','collection_digest'].includes(k))))===v.collection_digest;
 }catch{return false;}}
+
+export const verifySupplyOriginalProof = originalProof;

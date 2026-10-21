@@ -1,0 +1,36 @@
+<template>
+ <section aria-label="有限病例集本地关联统计详情">
+  <p>病例集内科室×时间条件关联；没有人群分母，不是感染发生率、个人风险、院感暴发诊断或处置指令。</p>
+  <el-button :disabled="!readable||busy" @click="verify">核对并查看本次完整统计</el-button><el-button @click="close">关闭统计并清除来源</el-button><p v-if="error" role="alert">{{error}}</p>
+  <template v-if="verified">
+   <p aria-label="实际本地任务状态">任务{{verified.metadata.run_id}} · {{statusLabel(verified.metadata.status)}} · 本地统计，不调用外部模型。</p>
+   <p>只核对已获准读取的完整拆分件、SHA及精确整数统计。隐去的SQL私钥、原始Task审计与来源当前权限由服务端核验，浏览器不宣称独立重建HMAC或匿名保证。</p>
+   <p aria-label="实际本地计算用量">外部输入/输出tokens均为0；模型调用明确否。CPU尝试：{{tri(verified.metadata.usage?.calculation_attempted)}}；CPU完成：{{tri(verified.metadata.usage?.calculation_completed)}}；耗时：{{verified.metadata.usage?.calculation_ms===null||!verified.metadata.usage?'未知':verified.metadata.usage.calculation_ms+'毫秒'}}；收据{{verified.metadata.usage_receipt_status==='recorded'?'已记录实际审计PK '+verified.metadata.receipt_event_id:'尚待实际记录'}}。</p>
+   <p>原日期范围{{source.source.scope.window.date_from}}至{{source.source.scope.window.date_to}}（含首末日，事件时区未知）；病原代码{{source.scenario.pathogen_code}}；明确alpha原文{{source.scenario.alpha_decimal}}。</p>
+   <p aria-label="完整病例计数">全部原上报{{source.source.reports.length}}根；有记录的独立患者{{source.source.counts.distinct_subjects_with_records}}；人工符合{{source.source.counts.meets_definition}}、人工不符合{{source.source.counts.does_not_meet}}、未确定{{source.source.counts.undetermined}}、未评估{{source.source.counts.not_assessed}}。明确选择患者数不是监测人群分母。</p>
+   <template v-if="analysis">
+    <p aria-label="完整预声明比较族">全族M={{analysis.family_size}}；纳入{{analysis.eligible_records}}、明确排除{{analysis.excluded_records}}、未知{{analysis.unknown_records}}。全部候选保留，分页仅控制显示。</p>
+    <p v-if="analysis.status==='inference_unavailable_repeated_eligible_subject'" role="alert">同一患者存在多个可纳入记录，独立性不成立，本次全部推断不可用；原记录和计数全部保留，没有自动去重。</p>
+    <el-table :data="visibleCandidates" row-key="candidate_id" aria-label="完整比较族分页"><el-table-column prop="department_token" label="服务端不透明科室token"/><el-table-column label="原日期窗口"><template #default="{row}">{{row.window.date_from}} 至 {{row.window.date_to}}</template></el-table-column><el-table-column label="窗口内本科室"><template #default="{row}">{{row.table.window_in_department}}</template></el-table-column><el-table-column label="窗口内其它科室"><template #default="{row}">{{row.table.window_in_other}}</template></el-table-column><el-table-column label="窗口外本科室"><template #default="{row}">{{row.table.window_out_department}}</template></el-table-column><el-table-column label="窗口外其它科室"><template #default="{row}">{{row.table.window_out_other}}</template></el-table-column><el-table-column label="精确单侧p"><template #default="{row}">{{fraction(row.exact_p)}}</template></el-table-column><el-table-column label="min(1,M×p)"><template #default="{row}">{{fraction(row.bonferroni_p)}}</template></el-table-column><el-table-column label="推断状态"><template #default="{row}">{{row.status==='no_information'?'无信息（不是阴性）':row.status==='inference_unavailable'?'无法推断':row.nominal_declared_family_threshold_met?'达到本次预声明族的名义阈值':'未达到本次预声明族的名义阈值'}}</template></el-table-column></el-table>
+    <el-pagination v-if="analysis.candidates.length>20" v-model:current-page="candidatePage" :page-size="20" :total="analysis.candidates.length" layout="prev,pager,next,total"/>
+    <el-button @click="ledgerOpen=!ledgerOpen">{{ledgerOpen?'收起逐根纳入与未知原因':'展开全部逐根纳入与未知原因'}}</el-button>
+    <template v-if="ledgerOpen"><el-table :data="visibleLedger" row-key="case_token" aria-label="逐根完整分类账"><el-table-column prop="case_token" label="服务端不透明原根token"/><el-table-column prop="disposition" label="本次纳入分类"/><el-table-column label="完整原因"><template #default="{row}">{{row.reasons.length?row.reasons.join('；'):'本次符合纳入条件'}}</template></el-table-column></el-table><el-pagination v-if="analysis.record_dispositions.length>20" v-model:current-page="ledgerPage" :page-size="20" :total="analysis.record_dispositions.length" layout="prev,pager,next,total"/></template>
+   </template>
+   <p v-else>本任务没有已接受的成功结果；未知计算尝试不解释为未计算。</p>
+   <p>Bonferroni只针对本次完整声明族；没有控制看过数据后选族、重复监测、采集变化或共同暴露。实际临床使用仍需本地验证。</p>
+   <el-button @click="sourceOpen=!sourceOpen">{{sourceOpen?'收起完整公开来源及参数':'显式展开完整公开来源及参数'}}</el-button><pre v-if="sourceOpen" aria-label="本次完整公开统计来源">{{JSON.stringify(source,null,2)}}</pre>
+   <el-button @click="resultOpen=!resultOpen">{{resultOpen?'收起完整结果与固定边际期望':'展开完整结果与固定边际期望'}}</el-button><pre v-if="resultOpen" aria-label="完整统计结果">{{JSON.stringify(analysis,null,2)}}</pre>
+  </template>
+ </section>
+</template>
+<script setup>
+import{computed,onBeforeUnmount,onDeactivated,ref,watch}from'vue';import{useStore}from'vuex';import{canonical}from'@/api/ai/infectionClusterProofs';import{verifyInfectionTaskParts}from'@/api/ai/infectionClusterTasks';
+const props=defineProps({value:{type:Object,default:null},active:{type:Boolean,default:true}}),emit=defineEmits(['invalidate','closed']),store=useStore(),verified=ref(null),error=ref(''),busy=ref(false),candidatePage=ref(1),ledgerPage=ref(1),ledgerOpen=ref(false),sourceOpen=ref(false),resultOpen=ref(false),boundIdentity=ref(null);let ticket=0;
+const identity=computed(()=>canonical({active:props.active,token:store.state.user?.accessToken??null,name:store.state.user?.username??null,roles:store.getters['user/permissions']??store.state.user?.permissions??[]})),readable=computed(()=>props.active&&!!store.state.user?.accessToken&&(store.getters['user/permissions']??store.state.user?.permissions??[]).some(r=>['super_admin','admin','director'].includes(r))&&boundIdentity.value===identity.value&&props.value!==null),source=computed(()=>verified.value?.parts.source.value),analysis=computed(()=>verified.value?.parts.result.value),visibleCandidates=computed(()=>analysis.value?.candidates.slice((candidatePage.value-1)*20,candidatePage.value*20)??[]),visibleLedger=computed(()=>analysis.value?.record_dispositions.slice((ledgerPage.value-1)*20,ledgerPage.value*20)??[]);
+function clear(){++ticket;verified.value=null;busy.value=false;sourceOpen.value=false;resultOpen.value=false;ledgerOpen.value=false;candidatePage.value=ledgerPage.value=1;error.value='';}
+function close(){clear();boundIdentity.value=null;emit('closed');emit('invalidate');}
+async function verify(){if(!readable.value)return;clear();const t=++ticket,v=props.value,i=identity.value;busy.value=true;const current=()=>t===ticket&&props.value===v&&identity.value===i&&readable.value;try{if(!await verifyInfectionTaskParts(v.metadata,v.parts,{current})||!current())throw Error();verified.value=JSON.parse(canonical(v));}catch{if(current())error.value='完整任务、来源或精确统计核对失败，请重新获得当前授权并显式读取。';}finally{if(current())busy.value=false;}}
+const fraction=v=>v===null?'不可推断':v.denominator==='1'?v.numerator:v.numerator+'/'+v.denominator,tri=v=>v===true?'是':v===false?'否':'未知',statusLabel=v=>({queued:'排队',running:'正在本地计算',succeeded:'完整结果已接受',failed:'失败',cancelled:'已取消'}[v]??'未知');
+watch(identity,()=>{clear();boundIdentity.value=null;emit('invalidate');},{flush:'sync'});watch(()=>props.value,()=>{clear();boundIdentity.value=identity.value;},{immediate:true,flush:'sync'});onDeactivated(close);onBeforeUnmount(clear);
+</script>
+<style scoped>p{line-height:1.7;overflow-wrap:anywhere}.el-button{margin:5px}pre{white-space:pre-wrap;overflow-wrap:anywhere;max-height:60vh;overflow:auto}.el-table{font-size:12px}</style>

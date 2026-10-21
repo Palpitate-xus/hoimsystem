@@ -5,6 +5,7 @@ const ROOT = path.resolve(__dirname, '..');
 const PUBLIC_CONTRACTS = Object.freeze([
   "src/api/bedFixedPolicy.json",
   "src/api/iconGallery.json",
+  "src/api/publicInterfaceTextPool.json",
   "src/api/ai/chargeReconciliationFixedPolicy.json",
   "src/api/ai/chargeReconciliationUiFixed.json",
   "src/api/ai/codingFixedPolicy.json",

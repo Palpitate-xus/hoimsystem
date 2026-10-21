@@ -194,3 +194,12 @@ def test_corrupt_own_case_blocks_super_audit_not_silently_opaque_success(db_sess
     with pytest.raises(HTTPException) as error:
         case_current(db, case["super_admin_user"], made["case_id"], audit_only=True)
     assert error.value.status_code == 409
+
+
+def test_super_can_technically_review_current_draft_without_being_given_patient_clinical_body(db_session, research_case):
+    db, case = db_session, research_case
+    _, _, _, _, made = prepared(db, case)
+    technical = case_current(db, case["super_admin_user"], made["case_id"], audit_only=True)
+    assert technical["can_review"] and technical["parent_current"] and not technical["eligible"]
+    assert technical["snapshot"] is None and technical["public_source"] is None and technical["local_resolution"] is None
+    assert "否认胸痛" not in canonical_json(technical)

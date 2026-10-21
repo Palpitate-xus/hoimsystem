@@ -294,6 +294,15 @@ def case_current(db, user, identifier, *, audit_only=False):
     if not permitted:
         result["exclusion_reasons"] = ["current_research_permission_missing"]
         result["can_revoke"] = row.status in {"draft", "published"}
+        # Technical governance may verify the original capture actor's live
+        # closure internally; it still grants the Super no clinical body.
+        try:
+            _current(db, row, snapshot)
+            result["parent_current"] = True
+            result["can_review"] = row.status == "draft" and snapshot["recipe"] == current_recipe()
+        except HTTPException as exc:
+            if exc.status_code not in {403, 404, 409}:
+                raise
         return result
     current = True
     try:

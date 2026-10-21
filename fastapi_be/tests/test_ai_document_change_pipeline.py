@@ -307,10 +307,11 @@ def test_admin_reader_captures_loaded_request_epoch_before_orm_refresh(db_sessio
     # Mixed native directories acquire their common canonical Gate order
     # before refreshing the authenticated actor. No private task read follows.
     from app.ai.charge_reconciliation_models import AIChargeWriteGate
+    from app.ai.infection_cluster_models import AIInfectionWriteGate
     from app.ai.inventory_native_source_models import AIInventoryWriteGate
     from app.ai.satisfaction_models import AISatisfactionWriteGate
 
-    tables = [AIChargeWriteGate.__tablename__, AISatisfactionWriteGate.__tablename__, AIInventoryWriteGate.__tablename__, "hoimsystem_users"]
+    tables = [AIChargeWriteGate.__tablename__, AISatisfactionWriteGate.__tablename__, AIInventoryWriteGate.__tablename__, AIInfectionWriteGate.__tablename__, "hoimsystem_users"]
     assert len(statements) == len(tables)
     assert all(("FROM " + table) in statement for table, statement in zip(tables, statements, strict=True))
     no_task_text(statements)

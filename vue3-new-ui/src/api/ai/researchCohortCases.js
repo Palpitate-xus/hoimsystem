@@ -65,3 +65,22 @@ export async function verifyResearchPreview(value,request,{current=()=>true}={})
  if(!current()||!keys(value,['schema_version','request','capture','evaluation','expected_collection_digest','can_create','no_business_write'])||value.schema_version!=='research_cohort_preview_v1'||!requestValid('CaptureRequest',request)||!same(request,value.request)||value.can_create!==true||value.no_business_write!==true||documentUtf8(canonical(value)).length>33554432||!await verifyResearchCapture(value.capture,{current})||!same(pick(request,['scope_id','scope_content_hash','scope_governance_hash']),value.capture.request)||value.expected_collection_digest!==value.capture.collection_digest)return false;
  return same(value.evaluation,await evaluateResearchCriteria(value.capture,request.criteria,{current}))&&current();
 }catch{return false;}}
+// A technical-only transition verifies recorded columns and the submitted basis
+// commitment. It never asserts that inaccessible clinical originals were read.
+export async function verifyResearchCaseTransition(after,before,action,body,{beforeAuditOnly=false,afterAuditOnly=false,current=()=>true}={}){try{
+ if(!['review','revoke'].includes(action)||!requestValid(action==='review'?'SourceReview':'SourceRevoke',body)||body.expected_revision!==before.revision||!current())return null;
+ const oldProof=await verifyResearchCase(before,{caseId:before.case_id,auditOnly:beforeAuditOnly,allowMetadata:true,current}),nextProof=await verifyResearchCase(after,{caseId:before.case_id,auditOnly:afterAuditOnly,allowMetadata:true,current});
+ if(!oldProof||!nextProof||!current()||!same(pick(before,['case_id','scope_id','schema_version','created_by','created_at','content_hash','collection_digest','scope_binding_hash','member_manifest_hash']),pick(after,['case_id','scope_id','schema_version','created_by','created_at','content_hash','collection_digest','scope_binding_hash','member_manifest_hash'])))return null;
+ let g=null;
+ if(action==='review'){
+  if(before.status!=='draft'||before.revision!==1||after.status!==(body.decision==='publish'?'published':'rejected')||after.revision!==2||!positive(after.reviewed_by)||!documentClock(after.reviewed_at)||after.reviewed_at<before.created_at||after.revoked_by!==null||after.revoked_at!==null||after.review_basis_hash!==await digest(body.basis_note)||after.revoke_reason_hash!==await digest(''))return null;
+  g={status:after.status,revision:2,reviewed_by:after.reviewed_by,reviewed_at:after.reviewed_at,review_basis_note:body.basis_note,revoked_by:null,revoked_at:null,revoke_reason:''};
+ }else{
+  if(!['draft','published'].includes(before.status)||after.status!=='revoked'||after.revision!==before.revision+1||!same(pick(before,['reviewed_by','reviewed_at','review_basis_hash','projection_hash']),pick(after,['reviewed_by','reviewed_at','review_basis_hash','projection_hash']))||!positive(after.revoked_by)||!documentClock(after.revoked_at)||after.revoked_at<(before.reviewed_at||before.created_at)||after.revoke_reason_hash!==await digest(body.basis_note))return null;
+  if(before.governance!==null)g={...before.governance,status:'revoked',revision:after.revision,revoked_by:after.revoked_by,revoked_at:after.revoked_at,revoke_reason:body.basis_note};
+  else if(before.status==='draft'&&before.review_basis_hash===await digest(''))g={status:'revoked',revision:2,reviewed_by:null,reviewed_at:null,review_basis_note:'',revoked_by:after.revoked_by,revoked_at:after.revoked_at,revoke_reason:body.basis_note};
+ }
+ if(g!==null&&await digest({case_id:after.case_id,content_hash:after.content_hash,governance:g})!==after.governance_hash||!current())return null;
+ if(before.snapshot!==null&&after.snapshot!==null&&!same(before.snapshot,after.snapshot))return null;
+ return {level:g!==null?'complete_governance_transition':'technical_governance_columns',fullOriginalVerified:oldProof.fullOriginalVerified&&nextProof.fullOriginalVerified,fullGovernanceVerified:g!==null,basisCommitmentVerified:true,selectable:false};
+}catch{return null;}}

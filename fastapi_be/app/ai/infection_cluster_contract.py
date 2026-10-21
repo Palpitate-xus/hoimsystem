@@ -147,6 +147,7 @@ class DefinitionPayload(StrictModel):
 class DefinitionGovernance(StrictModel):
     status: Literal["published"]
     revision: Annotated[int, Field(strict=True, ge=2, le=2)]
+    definition_content_hash: SHA
     published_by: PositiveId
     published_at: str
     publication_basis_note: str = Field(min_length=1, max_length=4000)
@@ -169,6 +170,8 @@ class PublishedDefinition(StrictModel):
 
     @model_validator(mode="after")
     def declared_independent_publication(self):
+        if self.governance.definition_content_hash != self.content_hash:
+            raise ValueError("The publication declaration binds the exact complete definition content hash")
         if digest(self.payload) != self.content_hash or digest(self.governance) != self.governance_hash:
             raise ValueError("The complete definition/version or governance hash differs")
         if self.payload.authored_by == self.governance.published_by or clock(self.governance.published_at) < clock(self.payload.recorded_at):

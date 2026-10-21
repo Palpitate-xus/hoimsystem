@@ -59,6 +59,7 @@ def definition():
     governance = {
         "status": "published",
         "revision": 2,
+        "definition_content_hash": c.digest(payload),
         "published_by": 6,
         "published_at": "2026-10-21T10:00:00.123456Z",
         "publication_basis_note": BASIS,
@@ -285,3 +286,12 @@ def test_import_is_pure_without_database_models_settings_or_network_clients():
     p = subprocess.run([sys.executable, "-c", code], capture_output=True, text=True, check=False)
     assert p.returncode == 0, p.stderr
     assert json.loads(c.canonical(c.verify_private_collection(collection())))["schema_version"] == "infection_cluster_private_collection_v1"
+
+
+def test_rehashed_definition_and_case_review_cannot_reuse_old_publication_content_binding():
+    value = collection()
+    value["definition"]["payload"]["definition_text"] += "changed definition"
+    value["definition"]["content_hash"] = c.digest(value["definition"]["payload"])
+    value["reviews"][0]["definition_content_hash"] = value["definition"]["content_hash"]
+    with pytest.raises(ValueError, match="publication declaration binds"):
+        c.verify_private_collection(value)

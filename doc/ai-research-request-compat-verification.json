@@ -1,0 +1,225 @@
+{
+  "schema_version": "research_request_and_observer_compatibility_v1",
+  "recorded_at_utc": "2026-10-21T17:47:44.525485+00:00",
+  "product_commit": "8d67822",
+  "observer_test_commit": "55b7d66",
+  "scope": "Independent minimal repair branch; original full Research backend execution remains frozen and ongoing on pre-fix product. This artifact records two separate complete targeted runs on their exact input versions, not one whole backend or a summed green count.",
+  "changes": [
+    "At the Research RunRequest Pydantic boundary only selection HTTP422 becomes ValueError/ValidationError, preserving actual runtime HTTP422 and propagating every non422 error. Existing validation rules are not relaxed.",
+    "Stale Super readers still reject before Run/private Source; two old SQL observers now require the actual four Gates followed by current User.",
+    "Only the shared-claim observer inspects actual returned cursor columns: exactly Run run_id/feature_key and zero private body names/suffixes. SQL marker predicates remain permitted; all other no_task_text Source withdrawal checks remain unchanged."
+  ],
+  "diagnostics": [
+    {
+      "temporary_path": "/tmp/hoim-research-native-old-contract-diagnostic-first-verification.json",
+      "bytes": 3336,
+      "sha256": "27bffa8be4a912dcab88187f1ea53973a7571c17143cf8f85d2fc1fe220b4dc9",
+      "report": {
+        "exit_code": 1,
+        "elapsed_seconds": 17.096117517910898,
+        "command": [
+          "tests/test_ai_admin_current_authority.py",
+          "tests/test_ai_bed_catalog.py",
+          "-p",
+          "pytest_asyncio.plugin",
+          "-p",
+          "no:cacheprovider",
+          "-q",
+          "--basetemp=/tmp/hoim-research-native-old-contract-diagnostic-first-pytest"
+        ],
+        "guards": {
+          "dotenv_open_attempts": 0,
+          "shared_transport_pem_attempts": 0,
+          "socket_attempts": 0,
+          "engine_urls": [
+            "sqlite:///:memory:",
+            "sqlite:///:memory:"
+          ]
+        },
+        "source_freeze_file": "/tmp/hoim-research-native-backend-old-contract-diagnostic-first-source-freeze.json",
+        "source_freeze_sha256": "82ec9898c72bad05aebdccb3701abbb0eb38f878495fe12793e59f1326af669e",
+        "source_file_count": 1149,
+        "source_files_changed": [],
+        "sources_stable": true,
+        "log": "/tmp/hoim-research-native-old-contract-diagnostic-first-tests.log",
+        "log_sha256": "c776e09e1826aaa13ea0c659f356a834c935132ff48b7dc7ed22a77c8a7dc5c8",
+        "summary_lines": [
+          "value = {'bed_series_id': 'c1182817-e1d3-4e36-a39f-abb7941708db'}",
+          "",
+          "    def selection(value):",
+          "        try:",
+          "            selected = ResearchRunInput.model_validate(value, strict=True)",
+          "            if selected.question is not None and len(selected.question.encode(\"utf-8\", errors=\"strict\")) > 8000:",
+          "                raise ValueError(\"The whole question must fit 8000 UTF8 bytes\")",
+          "            return selected",
+          "        except (ValueError, TypeError, UnicodeError) as exc:",
+          ">           raise HTTPException(422, \"科研任务仅接受规范Case引用与2000码点/8000UTF8原问题\") from exc",
+          "E           fastapi.exceptions.HTTPException: 422: 科研任务仅接受规范Case引用与2000码点/8000UTF8原问题",
+          "",
+          "app/ai/research_cohort_runtime.py:39: HTTPException",
+          "=========================== short test summary info ============================",
+          "FAILED tests/test_ai_admin_current_authority.py::test_audit_readers_recheck_stale_super_before_any_run_read[list]",
+          "FAILED tests/test_ai_admin_current_authority.py::test_audit_readers_recheck_stale_super_before_any_run_read[trace]",
+          "FAILED tests/test_ai_bed_catalog.py::test_all_other_capabilities_reject_bed_reference_and_do_not_advertise_it",
+          "3 failed, 4 passed in 6.18s"
+        ],
+        "transport_key_basis": "fresh process-only RSA2048 env; secret key material never written to report",
+        "environment_basis": "Inherited environment cleared except PATH/LANG/LC_ALL/TZ, synthetic DATABASE_URL/SECRET_KEY and transport PEM only",
+        "scope": "Two whole old authority and bed-catalog files diagnostic while the independent full suite continues; not a whole backend run. Committed Main+native69/70/71/72/73/74 integration after fd0dfc6 + C three frontend commits97b08ab, including the prior roster observer compatibility and clinical write fix, with fresh process-only RSA and an allowlisted environment with synthetic SQLite and explicit plugin. Main-process dotenv reads, external socket connects/DNS and non-test SQLAlchemy engines blocked; temporary synthetic dotenv writes used by existing server tests remain permitted. Optional real-weight tests keep their explicit skip prerequisites. This is not MySQL, remote model inference, hospital DB, deployment or clinical validation."
+      }
+    },
+    {
+      "temporary_path": "/tmp/hoim-research-native-document-diagnostic-first-verification.json",
+      "bytes": 3788,
+      "sha256": "4be151b5fbcaf8f8b34cfab538abbe14f64dbaf1936b4b10d43765555546f428",
+      "report": {
+        "exit_code": 1,
+        "elapsed_seconds": 40.60448600817472,
+        "command": [
+          "tests/test_ai_document_change_pipeline.py",
+          "-p",
+          "pytest_asyncio.plugin",
+          "-p",
+          "no:cacheprovider",
+          "-q",
+          "--basetemp=/tmp/hoim-research-native-document-diagnostic-first-pytest"
+        ],
+        "guards": {
+          "dotenv_open_attempts": 0,
+          "shared_transport_pem_attempts": 0,
+          "socket_attempts": 0,
+          "engine_urls": [
+            "sqlite:///:memory:",
+            "sqlite:///:memory:"
+          ]
+        },
+        "source_freeze_file": "/tmp/hoim-research-native-backend-document-diagnostic-first-source-freeze.json",
+        "source_freeze_sha256": "82ec9898c72bad05aebdccb3701abbb0eb38f878495fe12793e59f1326af669e",
+        "source_file_count": 1149,
+        "source_files_changed": [],
+        "sources_stable": true,
+        "log": "/tmp/hoim-research-native-document-diagnostic-first-tests.log",
+        "log_sha256": "20b88015f0deffb6957ae86f2c456eae5532aa546fb97052dc19c0aba18e9341",
+        "summary_lines": [
+          "        from app.ai.charge_reconciliation_models import AIChargeWriteGate",
+          "        from app.ai.inventory_native_source_models import AIInventoryWriteGate",
+          "        from app.ai.satisfaction_models import AISatisfactionWriteGate",
+          "    ",
+          "        tables = [AIChargeWriteGate.__tablename__, AISatisfactionWriteGate.__tablename__, AIInventoryWriteGate.__tablename__, \"hoimsystem_users\"]",
+          ">       assert len(statements) == len(tables)",
+          "E       AssertionError: assert 5 == 4",
+          "E        +  where 5 = len(['SELECT hoimsystem_ai_charge_write_gate.gate_id AS hoimsystem_ai_charge_write_gate_gate_id, hoimsystem_ai_charge_writ..._invalid_before AS hoimsystem_users_token_invalid_before \\nFROM hoimsystem_users \\nWHERE hoimsystem_users.user_id = ?'])",
+          "E        +  and   4 = len(['hoimsystem_ai_charge_write_gate', 'hoimsystem_ai_satisfaction_write_gate', 'hoimsystem_ai_inventory_write_gate', 'hoimsystem_users'])",
+          "",
+          "tests/test_ai_document_change_pipeline.py:314: AssertionError",
+          "=========================== short test summary info ============================",
+          "FAILED tests/test_ai_document_change_pipeline.py::test_shared_claim_selects_only_header_and_pre_call_scope_loss_is_known_zero",
+          "FAILED tests/test_ai_document_change_pipeline.py::test_admin_reader_captures_loaded_request_epoch_before_orm_refresh[role-list]",
+          "FAILED tests/test_ai_document_change_pipeline.py::test_admin_reader_captures_loaded_request_epoch_before_orm_refresh[role-trace]",
+          "FAILED tests/test_ai_document_change_pipeline.py::test_admin_reader_captures_loaded_request_epoch_before_orm_refresh[token-list]",
+          "FAILED tests/test_ai_document_change_pipeline.py::test_admin_reader_captures_loaded_request_epoch_before_orm_refresh[token-trace]",
+          "5 failed, 41 passed in 29.53s"
+        ],
+        "transport_key_basis": "fresh process-only RSA2048 env; secret key material never written to report",
+        "environment_basis": "Inherited environment cleared except PATH/LANG/LC_ALL/TZ, synthetic DATABASE_URL/SECRET_KEY and transport PEM only",
+        "scope": "One whole legacy document-change pipeline file diagnostic while the independent full suite continues; not a whole backend run. Committed Main+native69/70/71/72/73/74 integration after fd0dfc6 + C three frontend commits97b08ab, including the prior roster observer compatibility and clinical write fix, with fresh process-only RSA and an allowlisted environment with synthetic SQLite and explicit plugin. Main-process dotenv reads, external socket connects/DNS and non-test SQLAlchemy engines blocked; temporary synthetic dotenv writes used by existing server tests remain permitted. Optional real-weight tests keep their explicit skip prerequisites. This is not MySQL, remote model inference, hospital DB, deployment or clinical validation."
+      }
+    }
+  ],
+  "seven_whole_target_files202": {
+    "temporary_path": "/tmp/hoim-research-compat-target-first-verification.json",
+    "bytes": 2443,
+    "sha256": "013b6c4f388e054077f75ce8e57bd20d9693d485d98a256729f6be6aaee9f227",
+    "report": {
+      "exit_code": 0,
+      "elapsed_seconds": 242.51841551065445,
+      "command": [
+        "tests/test_ai_admin_current_authority.py",
+        "tests/test_ai_bed_catalog.py",
+        "tests/test_ai_roster_catalog.py",
+        "tests/test_ai_supply_catalog.py",
+        "tests/test_ai_inventory_catalog.py",
+        "tests/test_ai_research_cohort_shared_packets.py",
+        "tests/test_ai_research_cohort_shared_worker.py",
+        "-p",
+        "pytest_asyncio.plugin",
+        "-p",
+        "no:cacheprovider",
+        "-q",
+        "--basetemp=/tmp/hoim-research-compat-target-first-pytest"
+      ],
+      "guards": {
+        "dotenv_open_attempts": 0,
+        "shared_transport_pem_attempts": 0,
+        "socket_attempts": 0,
+        "engine_urls": [
+          "sqlite:///:memory:",
+          "sqlite:///:memory:"
+        ]
+      },
+      "source_freeze_file": "/tmp/hoim-research-compat-backend-target-first-source-freeze.json",
+      "source_freeze_sha256": "ebfd52d3209f19a89acc427743182a6c961178ad3c690e7a584d3058357697de",
+      "source_file_count": 1149,
+      "source_files_changed": [],
+      "sources_stable": true,
+      "log": "/tmp/hoim-research-compat-target-first-tests.log",
+      "log_sha256": "9860127a9d150c3063b6809245591bbda56de4b1653ee10085a44237171e2e13",
+      "summary_lines": [
+        "........................................................................ [ 35%]",
+        "........................................................................ [ 71%]",
+        "..........................................................               [100%]",
+        "202 passed in 231.60s (0:03:51)"
+      ],
+      "transport_key_basis": "fresh process-only RSA2048 env; secret key material never written to report",
+      "environment_basis": "Inherited environment cleared except PATH/LANG/LC_ALL/TZ, synthetic DATABASE_URL/SECRET_KEY and transport PEM only",
+      "scope": "Seven complete targeted files on the independent minimal request-validation/audit-observer repair; not a full backend run. Current Research74 integration plus the two-path compatibility fix, including the prior roster observer compatibility and clinical write fix, with fresh process-only RSA and an allowlisted environment with synthetic SQLite and explicit plugin. Main-process dotenv reads, external socket connects/DNS and non-test SQLAlchemy engines blocked; temporary synthetic dotenv writes used by existing server tests remain permitted. Optional real-weight tests keep their explicit skip prerequisites. This is not MySQL, remote model inference, hospital DB, deployment or clinical validation."
+    }
+  },
+  "one_whole_document_pipeline46": {
+    "temporary_path": "/tmp/hoim-research-compat-document-second-verification.json",
+    "bytes": 2079,
+    "sha256": "6e2acfc747c245344cc36c68dd2eb77190f57064135ecee79faa82478505a561",
+    "report": {
+      "exit_code": 0,
+      "elapsed_seconds": 40.01868525054306,
+      "command": [
+        "tests/test_ai_document_change_pipeline.py",
+        "-p",
+        "pytest_asyncio.plugin",
+        "-p",
+        "no:cacheprovider",
+        "-q",
+        "--basetemp=/tmp/hoim-research-compat-document-second-pytest"
+      ],
+      "guards": {
+        "dotenv_open_attempts": 0,
+        "shared_transport_pem_attempts": 0,
+        "socket_attempts": 0,
+        "engine_urls": [
+          "sqlite:///:memory:",
+          "sqlite:///:memory:"
+        ]
+      },
+      "source_freeze_file": "/tmp/hoim-research-compat-backend-document-second-source-freeze.json",
+      "source_freeze_sha256": "33a7d5810d88636e25b5f0706937c2c14d9177d57c5df768843e7a19b3001657",
+      "source_file_count": 1149,
+      "source_files_changed": [],
+      "sources_stable": true,
+      "log": "/tmp/hoim-research-compat-document-second-tests.log",
+      "log_sha256": "8f3afd2a35709e5f57049b79997d863e315f9cf444b03dc6e606952aa13170b6",
+      "summary_lines": [
+        "..............................................                           [100%]",
+        "46 passed in 28.93s"
+      ],
+      "transport_key_basis": "fresh process-only RSA2048 env; secret key material never written to report",
+      "environment_basis": "Inherited environment cleared except PATH/LANG/LC_ALL/TZ, synthetic DATABASE_URL/SECRET_KEY and transport PEM only",
+      "scope": "One whole legacy document-change pipeline file after exact returned-column and fourth-Gate observer adaptation in independent committed55b7d66; not a whole backend run. Committed Main+native69/70/71/72/73/74 integration after fd0dfc6 + C three frontend commits97b08ab, including the prior roster observer compatibility and clinical write fix, with fresh process-only RSA and an allowlisted environment with synthetic SQLite and explicit plugin. Main-process dotenv reads, external socket connects/DNS and non-test SQLAlchemy engines blocked; temporary synthetic dotenv writes used by existing server tests remain permitted. Optional real-weight tests keep their explicit skip prerequisites. This is not MySQL, remote model inference, hospital DB, deployment or clinical validation."
+    }
+  },
+  "version_boundary": "The202 run preceded the test-only55b7d66 document observer change. Product schemas/runtime/gates are identical across these two green versions; neither green is re-labelled a single full execution.",
+  "original_full_suite_at_capture": "Still running with its original1149 hashes; known failures retain original outcomes until that execution ends. Current fixed full validation must run independently after integration.",
+  "limitations": [
+    "Synthetic SQLite/Main/JWT/ASGI packets only within target scopes; not MySQL/hospital/remote model or clinical validation.",
+    "No frozen input bytes modified in the ongoing original full run."
+  ]
+}

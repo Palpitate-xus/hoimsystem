@@ -1,0 +1,4 @@
+const zlib=require('node:zlib'),crypto=require('node:crypto'),assert=require('node:assert/strict'),packed=require('./drug-label-business-main/actual.packed.json');
+const hash=v=>crypto.createHash('sha256').update(v).digest('hex');
+function load(kind='chat'){assert(['chat','responses'].includes(kind));const p=packed[kind],gz=Buffer.from(p.gzip_base64,'base64');assert.equal(hash(gz),p.gzip_sha256);const raw=zlib.gunzipSync(gz);assert.equal(raw.length,p.raw_bytes);assert.equal(hash(raw),p.raw_sha256);const packet=JSON.parse(raw);for(const[k,w]of Object.entries(packet.raw_http_responses)){const body=Buffer.from(w.body_utf8,'utf8');assert.equal(body.length,w.body_bytes);assert.equal(hash(body),w.body_sha256);assert.equal(w.status_code,200);assert.deepEqual(JSON.parse(body),packet[k]);}return packet;}
+module.exports={load};

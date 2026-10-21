@@ -1068,9 +1068,9 @@ def list_global_runs(
 @router.get("/ai/admin/runs/{run_id}")
 def inspect_run_trace(run_id: str, db: Session = Depends(get_db), user: User = Depends(require_roles("super_admin"))) -> dict:
     """Read the frozen prompts, requested model, source payload and append-only review history."""
-    from app.ai.rca_evidence_dispatch import is_rca_task
+    from app.ai.rca_evidence_dispatch import is_located_rca_task
 
-    if is_rca_task(db, run_id):
+    if is_located_rca_task(db, run_id):
         from app.ai.rca_evidence_views import response, trace_view
 
         return response(trace_view(db, user, run_id))

@@ -73,3 +73,15 @@ def guard_rca_task(db, user, value, *, frozen_audit=False):
 
     load_task(db, user, value, frozen_audit=frozen_audit)
     return True
+
+
+def is_located_rca_task(db, value):
+    """Route own technical exceptions without probing unrelated anchors first.
+
+    A missing own anchor is not a generic authorization. The caller must still
+    enter the existing directory Gates and private-read guard, which rejects
+    orphan RCA markers before reading any Task body.
+    """
+    from app.ai.rca_evidence_storage import locate_artifact
+
+    return locate_artifact(db, value) is not None and is_rca_task(db, value)

@@ -665,9 +665,9 @@ def run_detail(run_id: str, db: Session = Depends(get_db), user: User = Depends(
 @router.post("/ai/runs/{run_id}/cancel")
 def cancel_run(run_id: str, db: Session = Depends(get_db), user: User = Depends(get_current_user)) -> dict:
     """Stop accepting a result; an already sent provider call may still finish."""
-    from app.ai.rca_evidence_dispatch import is_rca_task
+    from app.ai.rca_evidence_dispatch import is_located_rca_task
 
-    if is_rca_task(db, run_id):
+    if is_located_rca_task(db, run_id):
         from app.ai.rca_evidence_cancellation import stage_cancel
         from app.ai.rca_evidence_views import response
 
@@ -723,9 +723,9 @@ def cancel_run(run_id: str, db: Session = Depends(get_db), user: User = Depends(
 @router.post("/ai/runs/{run_id}/feedback")
 def review_result(run_id: str, req: FeedbackWrite, db: Session = Depends(get_db), user: User = Depends(get_current_user)) -> dict:
     """Append review without editing clinical records, orders or prescriptions."""
-    from app.ai.rca_evidence_dispatch import is_rca_task
+    from app.ai.rca_evidence_dispatch import is_located_rca_task
 
-    if is_rca_task(db, run_id):
+    if is_located_rca_task(db, run_id):
         from app.ai.rca_evidence_feedback import stage_feedback
         from app.ai.rca_evidence_views import response
 

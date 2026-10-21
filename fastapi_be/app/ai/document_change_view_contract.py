@@ -19,13 +19,12 @@ MISSING_DATA = (
 
 class DocumentChangeRequest(c.e.StrictModel):
     document_change_scope_id: c.e.UUID
-    question: str | None = Field(default=None, min_length=1, max_length=2000)
+    question: str | None = Field(default=None, max_length=2000)
 
     @field_validator("question")
     @classmethod
     def exact_question(cls, value):
         if value is not None:
-            c.e.meaningful(value, maximum=8000, minimum=1)
             if len(c.e.utf8(value)) > 8000:
                 raise ValueError("The unchanged question exceeds 8000 UTF8 bytes")
         return value

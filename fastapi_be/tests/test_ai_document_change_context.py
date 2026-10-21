@@ -64,7 +64,6 @@ def test_actual_complete_scope_short_context_and_public_only_wire(change_case):
         {"document_change_scope_id": None},
         {"document_change_scope_id": RUN_ID, "patient_id": 1},
         {"document_change_scope_id": RUN_ID, "question": False},
-        {"document_change_scope_id": RUN_ID, "question": " "},
         {"document_change_scope_id": RUN_ID, "question": "x" * 2001},
         {"document_change_scope_id": RUN_ID, "question": "\ud800"},
     ],
@@ -179,3 +178,14 @@ def test_source_packet_refuses_changed_governance_or_boolean_member_count(change
     bound["member_count"] = True
     with pytest.raises(ValueError):
         source_packet(RUN_ID, bound, source)
+
+
+@pytest.mark.parametrize("question", ["", " \u0085\u001c\u3000\r\n"])
+def test_actual_empty_or_unicode_whitespace_question_preserved(change_case, question):
+    db, actor, *_ = change_case
+    scope = published_scope(change_case)
+    values = {"document_change_scope_id": scope.snapshot.scope_id, "question": question}
+    bundle, _, source = context.prepare_context(db, actor, values)
+    value = context.public_payload({"input": values, "context": bundle.data, "tools": {}, "evidence": bundle.evidence}, source)
+    assert value["question"] == question
+    assert c.e.utf8(value["question"]) == c.e.utf8(question)

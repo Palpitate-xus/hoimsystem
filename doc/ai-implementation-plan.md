@@ -435,3 +435,5 @@
 - 2026-10-21 第80项完整送模协议/真实用量：两个纯完整文件一次68通过，1.73s pytest、2.037s外层，全部后端/映射/同案fixture稳定且零配置/DB/网络。完整Source恰8MiB-1000与合法65535字节Task分别成立但完整wire超8MiB真实拒绝，固定System/schema也计入且无截断；未尝试0/0、已尝试部分已知、崩溃未知分开，bool/负数/越界不能变伪未知或零费用。实际网关与Task继续。
 
 - 2026-10-21 第80项实际受审来源文本网关：16完整文件一次356通过/13既有SQLite提示，28.61s pytest、39.678s外层，1188输入稳定。真实当前SQL来源准备后关闭事务，Chat/Responses各一次隔离HTTP传输期间零SQL；完整原Task/System/Source送出，固定成绩和逐字引用校验，store=false且无tools/跳转/重试/环境代理。无用量/部分已知/总数单独分开，坏计数拒绝但另一实际计数保留；503/超时/坏UTF8/重复键/完整响应8MiB+1等真实模拟拒绝。此为MockTransport非真实模型效力；Task/claim/worker/持久化与FE继续。
+
+- 2026-10-21 第80项原生Task两增量表：17完整文件一次388通过/13既有SQLite提示，36.07s pytest、47.515s外层，1191输入稳定。Artifact/Result共5MEDIUM/4UTC6，完整Source/结果各8MiB，绑定/Prompt/执行快照各256KiB；原Lesson/Review/Submission实际Audit锚和五阶段Audit字段，结果复合FK绑定原lease/Source/System指令摘要。真实SQLite含NUL/emoji容量/+1/FK/角色目标/claim闭合与独立up/down/up保持235旧表DDL/行/Gate；物理合成Audit动作不冒称运行回执，MySQL此处仅编译，当前Task服务/worker继续。

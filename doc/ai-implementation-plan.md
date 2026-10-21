@@ -410,3 +410,5 @@
 - 2026-10-21：第79项实际claim/dispatch与独立具体审计证明已提交；四整文件一次138通过（26.13秒pytest/37.131秒外层），1184输入稳定，新增19项。来源/原epoch/配置重新核对，dispatch原claim实际PK在受保护正文前核验；三实际不同创建/claim/dispatch主键、原lease、完整UTC6及旧表秒钟分明。来源撤回后重复交付纯skip不终结原owner，六种实际phase审计写入触发器失败整体回滚。可信technical reader不读取Source/Task正文，也不授数据权限；尚无commit/HTTP/终态/结果接受/共享worker和FE，继续。
 
 - 2026-10-21：第79项原claim本delivery的终态nullable用量回执已提交；五整文件一次160通过（33.60秒pytest/44.234秒外层），1186输入稳定，新增22项。Source撤回后实际用量照实保存而0 Source/Task正文；第二delivery无自身dispatch PK不能终结在途owner；实际零/未调用零/部分/未知与兼容Run占位0严格区分。三种usage审计SQLtrigger故障整体回滚，另Source变化允许纯技术结算并验证caller回滚。取消状态为测试直接设置，实际cancel API、未claim结算、完整结果接受、共享async worker/FE仍继续，未冒称成功分支已验证。
+
+- 2026-10-21：第79项完整结果的实际原子接受与授权重算读取已提交；六整文件一次182通过（41.71秒pytest/51.831秒外层），1188输入稳定，新增22项。实际创建/claim/dispatch/accept/usage五独立PK，>65535字节完整结果blob+短pointer无裁剪，Source/Prompt/目标/Unicode逐字引用重验；缺失/部分用量仍可成功且未知保null。八类实际结果/终态SQLtrigger证明blob/pointer/两审计/Run/Artifact/Source整体回滚，Source撤回前置拒正文而原delivery可保paid。实际cancel、共享async worker/Main Task API/FE及MySQL接受继续实施，未称端到端完成。

@@ -527,6 +527,15 @@
   "auth": [
    "super_admin"
   ],
+  "function": "check_inventory_provider",
+  "method": "POST",
+  "module": "ai_admin.py",
+  "path": "/api/ai/admin/providers/{provider_id}/inventory-capabilities"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
   "function": "list_global_runs",
   "method": "GET",
   "module": "ai_admin.py",
@@ -1337,6 +1346,204 @@
   "method": "POST",
   "module": "ai_images.py",
   "path": "/api/ai/admin/image-assets/{asset_id}/purge"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "options",
+  "method": "GET",
+  "module": "ai_inventory_native_sources.py",
+  "path": "/api/ai/inventory-native-sources/options"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "legacy_capture",
+  "method": "POST",
+  "module": "ai_inventory_native_sources.py",
+  "path": "/api/ai/inventory-native-sources/legacy-capture"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "preview",
+  "method": "POST",
+  "module": "ai_inventory_native_sources.py",
+  "path": "/api/ai/inventory-native-sources/preview"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "admin_list",
+  "method": "GET",
+  "module": "ai_inventory_native_sources.py",
+  "path": "/api/ai/admin/inventory-native-sources"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "admin_detail",
+  "method": "GET",
+  "module": "ai_inventory_native_sources.py",
+  "path": "/api/ai/admin/inventory-native-sources/{record_id}"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "source_list",
+  "method": "GET",
+  "module": "ai_inventory_native_sources.py",
+  "path": "/api/ai/inventory-native-sources/{kind}"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "source_create",
+  "method": "POST",
+  "module": "ai_inventory_native_sources.py",
+  "path": "/api/ai/inventory-native-sources/{kind}"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "source_detail",
+  "method": "GET",
+  "module": "ai_inventory_native_sources.py",
+  "path": "/api/ai/inventory-native-sources/{kind}/{record_id}"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "source_review",
+  "method": "POST",
+  "module": "ai_inventory_native_sources.py",
+  "path": "/api/ai/inventory-native-sources/{kind}/{record_id}/review"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "source_revoke",
+  "method": "POST",
+  "module": "ai_inventory_native_sources.py",
+  "path": "/api/ai/inventory-native-sources/{kind}/{record_id}/revoke"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "preview",
+  "method": "POST",
+  "module": "ai_inventory_scenarios.py",
+  "path": "/api/ai/inventory-scenarios/preview"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "scenario_list",
+  "method": "GET",
+  "module": "ai_inventory_scenarios.py",
+  "path": "/api/ai/inventory-scenarios"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "create",
+  "method": "POST",
+  "module": "ai_inventory_scenarios.py",
+  "path": "/api/ai/inventory-scenarios"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "detail",
+  "method": "GET",
+  "module": "ai_inventory_scenarios.py",
+  "path": "/api/ai/inventory-scenarios/{scenario_id}"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "review",
+  "method": "POST",
+  "module": "ai_inventory_scenarios.py",
+  "path": "/api/ai/inventory-scenarios/{scenario_id}/review"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "revoke",
+  "method": "POST",
+  "module": "ai_inventory_scenarios.py",
+  "path": "/api/ai/inventory-scenarios/{scenario_id}/revoke"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "admin_list",
+  "method": "GET",
+  "module": "ai_inventory_scenarios.py",
+  "path": "/api/ai/admin/inventory-scenarios"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "admin_detail",
+  "method": "GET",
+  "module": "ai_inventory_scenarios.py",
+  "path": "/api/ai/admin/inventory-scenarios/{scenario_id}"
  },
  {
   "auth": [

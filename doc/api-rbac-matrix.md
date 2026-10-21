@@ -3,7 +3,7 @@
 > 由 `fastapi_be/scripts/generate_rbac_matrix.py` 从源码自动生成，请勿手改。
 > `✓`=可访问 | `PUBLIC`=无需登录 | 留空=不可访问
 
-共 **810** 个接口（PUBLIC 18 个 / 需登录 792 个）。
+共 **829** 个接口（PUBLIC 18 个 / 需登录 811 个）。
 
 
 ### `admin.py`
@@ -93,6 +93,7 @@
 | POST | `/api/ai/admin/providers/{provider_id}/bed-capabilities` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
 | POST | `/api/ai/admin/providers/{provider_id}/surgery-capabilities` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
 | POST | `/api/ai/admin/providers/{provider_id}/supply-capabilities` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/admin/providers/{provider_id}/inventory-capabilities` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
 | GET | `/api/ai/admin/runs` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
 | GET | `/api/ai/admin/runs/{run_id}` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
 | POST | `/api/ai/admin/providers` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
@@ -213,6 +214,34 @@
 | POST | `/api/ai/image-assets/{asset_id}/withdraw` |  | ✓ | ✓ | ✓ |  |  |  |  |  | ✓ |  |  |
 | GET | `/api/ai/admin/image-assets` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
 | POST | `/api/ai/admin/image-assets/{asset_id}/purge` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+
+### `ai_inventory_native_sources.py`
+
+| 方法 | 路径 | admin | super_admin | director | doctor | nurse | cashier | pharmacist | guide | patient | lab_technician | registrar | PUBLIC |
+|------|------|------|------|------|------|------|------|------|------|------|------|------|------|
+| GET | `/api/ai/inventory-native-sources/options` | ✓ | ✓ | ✓ |  |  |  | ✓ |  |  |  |  |  |
+| POST | `/api/ai/inventory-native-sources/legacy-capture` | ✓ | ✓ | ✓ |  |  |  | ✓ |  |  |  |  |  |
+| POST | `/api/ai/inventory-native-sources/preview` | ✓ | ✓ | ✓ |  |  |  | ✓ |  |  |  |  |  |
+| GET | `/api/ai/admin/inventory-native-sources` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/admin/inventory-native-sources/{record_id}` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/inventory-native-sources/{kind}` | ✓ | ✓ | ✓ |  |  |  | ✓ |  |  |  |  |  |
+| POST | `/api/ai/inventory-native-sources/{kind}` | ✓ | ✓ | ✓ |  |  |  | ✓ |  |  |  |  |  |
+| GET | `/api/ai/inventory-native-sources/{kind}/{record_id}` | ✓ | ✓ | ✓ |  |  |  | ✓ |  |  |  |  |  |
+| POST | `/api/ai/inventory-native-sources/{kind}/{record_id}/review` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/inventory-native-sources/{kind}/{record_id}/revoke` | ✓ | ✓ | ✓ |  |  |  | ✓ |  |  |  |  |  |
+
+### `ai_inventory_scenarios.py`
+
+| 方法 | 路径 | admin | super_admin | director | doctor | nurse | cashier | pharmacist | guide | patient | lab_technician | registrar | PUBLIC |
+|------|------|------|------|------|------|------|------|------|------|------|------|------|------|
+| POST | `/api/ai/inventory-scenarios/preview` | ✓ | ✓ | ✓ |  |  |  | ✓ |  |  |  |  |  |
+| GET | `/api/ai/inventory-scenarios` | ✓ | ✓ | ✓ |  |  |  | ✓ |  |  |  |  |  |
+| POST | `/api/ai/inventory-scenarios` | ✓ | ✓ | ✓ |  |  |  | ✓ |  |  |  |  |  |
+| GET | `/api/ai/inventory-scenarios/{scenario_id}` | ✓ | ✓ | ✓ |  |  |  | ✓ |  |  |  |  |  |
+| POST | `/api/ai/inventory-scenarios/{scenario_id}/review` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/inventory-scenarios/{scenario_id}/revoke` | ✓ | ✓ | ✓ |  |  |  | ✓ |  |  |  |  |  |
+| GET | `/api/ai/admin/inventory-scenarios` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/admin/inventory-scenarios/{scenario_id}` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
 
 ### `ai_lab_mappings.py`
 

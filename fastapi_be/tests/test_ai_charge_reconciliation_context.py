@@ -27,6 +27,10 @@ def bundle(case, value, **overrides):
     )
 
 
+def payload(expanded, values):
+    return {"context": expanded, "input": values, "tools": {}, "evidence": [context.charge_evidence(expanded["charge_binding"])]}
+
+
 def test_actual_case_short_binding_and_sole_public_outbound_projection(charge_case):
     case = charge_case
     value = published(case)
@@ -36,7 +40,7 @@ def test_actual_case_short_binding_and_sole_public_outbound_projection(charge_ca
     assert bound.department_ids == {case["department"].department_id}
     assert "snapshot" not in bound.data and "charge_source" not in bound.data
     expanded = context.expand_context(case["db"], bound.data, user=case["super_admin_user"], current=True)
-    request = context.public_payload({"context": expanded, "input": selected(case, value)})
+    request = context.public_payload(payload(expanded, selected(case, value)))
     assert request == {"charge_source": value["public_source"], "source_projection_hash": value["projection_hash"], "question": selected(case, value)["question"]}
     encoded = json.dumps(request, ensure_ascii=False)
     for private in (
@@ -96,7 +100,7 @@ def test_mixed_private_context_rejected_before_outbound(charge_case, key):
     expanded = context.expand_context(case["db"], bound.data, user=case["super_admin_user"], current=True)
     expanded[key] = "synthetic private injected value"
     with pytest.raises(ValueError):
-        context.public_payload({"context": expanded, "input": selected(case, value)})
+        context.public_payload(payload(expanded, selected(case, value)))
     with pytest.raises(HTTPException) as caught:
         context.expand_context(case["db"], {**bound.data, key: "foreign"}, user=case["super_admin_user"], current=True)
     assert caught.value.status_code == 409
@@ -109,7 +113,7 @@ def test_any_uncited_source_field_change_cannot_reuse_model_binding(charge_case)
     expanded = context.expand_context(case["db"], bound.data, user=case["super_admin_user"], current=True)
     expanded["charge_source"]["charges"][0]["total_amount"] = "999.00"
     with pytest.raises(ValueError):
-        context.public_payload({"context": expanded, "input": selected(case, value)})
+        context.public_payload(payload(expanded, selected(case, value)))
 
 
 def test_current_changes_reject_execution_but_retain_complete_frozen_audit(charge_case):
@@ -125,7 +129,7 @@ def test_current_changes_reject_execution_but_retain_complete_frozen_audit(charg
     assert frozen["charge_case"]["snapshot"] == value["snapshot"]
     assert context.binding_for(frozen["charge_case"]) == bound.data["charge_binding"]
     with pytest.raises(ValueError):
-        context.public_payload({"context": frozen, "input": selected(case, value)})
+        context.public_payload(payload(frozen, selected(case, value)))
 
 
 def test_revocation_retains_original_publication_only_for_super_frozen_audit(charge_case):
@@ -145,7 +149,7 @@ def test_revocation_retains_original_publication_only_for_super_frozen_audit(cha
     internal = context.expand_context(db, bound.data)
     assert internal["charge_case"]["snapshot"] == value["snapshot"]
     with pytest.raises(ValueError):
-        context.public_payload({"context": internal, "input": selected(case, value)})
+        context.public_payload(payload(internal, selected(case, value)))
 
 
 def test_missing_case_or_corrupt_frozen_whole_original_cannot_be_audited(charge_case):

@@ -139,6 +139,8 @@ def expand_context(db, context, *, user=None, current=False):
 
 def public_payload(data):
     """Send only the mechanically checked public projection and explicit question."""
+    if not isinstance(data, dict) or set(data) != {"input", "context", "tools", "evidence"} or data["tools"] != {}:
+        raise ValueError("Only the complete source-bound payload with no tools is allowed")
     context = data["context"]
     bound = ChargeContextBinding.model_validate(context["charge_binding"])
     expected = short_context(bound.model_dump(mode="json"), context["snapshot_time"])
@@ -147,6 +149,7 @@ def public_payload(data):
     source = context["charge_source"]
     if (
         selection(data["input"]) != bound.case_snapshot_id
+        or data["evidence"] != [charge_evidence(bound.model_dump(mode="json"))]
         or context["charge_case"].get("eligible") is not True
         or context["charge_case"].get("audit_only") is not False
         or binding_for(context["charge_case"]) != bound.model_dump(mode="json")

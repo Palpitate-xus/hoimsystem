@@ -54,3 +54,21 @@ def test_risk_metadata_advertises_its_independent_supported_source_modes():
         support_keys = {"support_source_id", "support_source_kind"}
         advertised = set(describe_feature(spec)["source_reference_keys"])
         assert support_keys <= advertised if spec.number == 47 else not support_keys & advertised
+
+
+def test_actual_coding_and_charge_prompts_and_unique_charge_reference_are_exported():
+    import json
+
+    from app.ai.charge_reconciliation_prompt import CHARGE_RECONCILIATION_SYSTEM_PROMPT
+    from app.ai.coding_evidence_prompt import CODING_SYSTEM_PROMPT
+    from scripts.export_ai_catalog import artifacts
+
+    exported = json.loads(artifacts()["ai-prompts.json"])
+    assert exported["system_prompt"] == COMMON_SYSTEM_PROMPT
+    assert exported["system_prompt_overrides"] == {"drg_evidence_review": CODING_SYSTEM_PROMPT, "charge_reconciliation": CHARGE_RECONCILIATION_SYSTEM_PROMPT}
+    assert len(exported["features"]) == 80
+    for spec, value in zip(FEATURES, exported["features"], strict=True):
+        assert value == {**describe_feature(spec), "task_prompt": spec.task_prompt}
+        assert ("charge_case_id" in value["source_reference_keys"]) == (spec.number == 69)
+    assert "charge_reconciliation_draft_v1" in FEATURE_BY_KEY["charge_reconciliation"].task_prompt
+    assert "sections 必须" not in FEATURE_BY_KEY["charge_reconciliation"].task_prompt

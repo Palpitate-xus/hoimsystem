@@ -398,3 +398,5 @@
 - 2026-10-21：第79项分离Artifact/Result两表与自包含增量迁移已提交cd1d5dd；十文件一次234通过，1173输入稳定，17项新物理约束/完整容量/SQLite增量往返与离线MySQL DDL。原Case私/公SHA和原创建人由复合FK固定，实际事件PK独立；这只是Task存储基础，实际claim/dispatch/接受结果/专用Prompt执行与FE继续实施，不复用前Source-only MySQL结论覆盖新Task表。
 
 - 2026-10-21：第79项当前资料与配置授权阶段已完成；十一整文件一次260通过（24.72秒pytest/35.286秒外层），1176输入稳定。全部Source当前模型许可先于配置读取，当前Config/Provider/不可变Prompt及完整frame容量先于私有正文，Super预览不能恢复撤回资料。首轮夹具重复配置导致25 setup error/235通过原记录保留；此阶段尚无Task入队、HTTP调用或commit，后续实际执行链继续。
+
+- 2026-10-21：第79项专用Chat/Responses完整文本适配器已提交；十二整文件一次311通过（26.14秒pytest/37.243秒外层），1180输入稳定。51项新MockTransport/协议/用量测试覆盖实际完整wire双重JSON转义超限在HTTP前拒绝、仅单次调用、工具/拒答/截断/错误引文/重复键拒收、未知与实际零/部分用量不混淆。固定System+原版本Task完整发送，未连接外部模型。实际Task入队/claim/dispatch/接受与共享FE仍继续，适配器测试不替代该生命周期。

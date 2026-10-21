@@ -1,0 +1,5 @@
+The actual packet was exported from the mounted main-app JWT/ASGI routes over a dedicated synthetic in-memory SQLite case. Source file `/tmp/hoim-inventory-input-actual-packets-first.json` SHA-256: `41081683633497d8352e8563c5084368e2a36e85a24cb6eb51379f5069b706d7`.
+
+`actual.json` preserves every value from the source packet. It contains four real read-only catalogs (no type: 0 items; pharmaceutical: 2 items; selected SKU: 1 item; consumable: 0 items), the same-case published ordinary Scenario and its technical directory. No identity, raw Source, governance field or checksum is patched. The generator checks this exact provenance; it does not combine data from another case.
+
+The Input tests run isolated mocked API responses around real Vue, Element Plus, the request client, full Scenario/Source guards, WebCrypto and the actual production Babel rule. HTTP failures, held requests and user identity changes are explicit UI test setup. The tests do not contact hospital services, call native inference or claim a production build. Source-management dialogs remain closed unless a test explicitly exercises them.

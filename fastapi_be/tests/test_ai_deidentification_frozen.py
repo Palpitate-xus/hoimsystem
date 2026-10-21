@@ -3,7 +3,10 @@
 import copy
 import hashlib
 import json
+import subprocess
+import sys
 import uuid
+from pathlib import Path
 
 import pytest
 
@@ -13,6 +16,14 @@ from app.ai.models import AIPromptVersion
 from tests.test_ai_deidentification_run_models import artifact
 
 TASK = "实际完整任务前段说明\ufeff\r\n😀é2026-10-21T12:34:56.123456Z\n\n" + TASK_PROMPT
+
+
+def test_packaged_prompt_exports_under_isolated_standard_library_only_python():
+    path = Path(__file__).resolve().parents[1] / "app/ai/deidentification_prompt.py"
+    command = "import runpy,json,sys;v=runpy.run_path(sys.argv[1]);print(json.dumps({k:v[k] for k in ['SYSTEM_PROMPT','TASK_PROMPT','TASK_VERSION']}));assert 'pydantic' not in sys.modules"
+    value = subprocess.run([sys.executable, "-I", "-S", "-c", command, str(path)], check=True, capture_output=True, text=True)
+    original = json.loads(value.stdout)
+    assert original["SYSTEM_PROMPT"] == SYSTEM_PROMPT and original["TASK_PROMPT"] == TASK_PROMPT
 
 
 def database_snapshot():

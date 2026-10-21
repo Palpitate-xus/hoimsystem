@@ -30,8 +30,12 @@ def test_audit_readers_recheck_stale_super_before_any_run_read(db_session, seed_
     finally:
         event.remove(db_session, "do_orm_execute", observe)
         db_session.rollback()
-    assert len(sql) == 1 and "hoimsystem_users" in sql[0]
-    assert sql[0].rstrip().endswith("LOCK IN SHARE MODE")
+    # Native mixed directories acquire their nonprivate Gate before any User
+    # or Run locks. A stale Super must then stop at the current actor read.
+    assert len(sql) == 2
+    assert "hoimsystem_ai_inventory_write_gate" in sql[0] and sql[0].rstrip().endswith("FOR UPDATE")
+    assert "hoimsystem_users" in sql[1] and sql[1].rstrip().endswith("LOCK IN SHARE MODE")
+    assert not any("hoimsystem_ai_run" in statement or "hoimsystem_ai_drug_label" in statement for statement in sql)
 
 
 def test_expired_audit_actor_has_exactly_one_current_shared_read(db_session, seed_data):

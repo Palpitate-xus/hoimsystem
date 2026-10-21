@@ -418,3 +418,5 @@
 - 2026-10-21：第79项实际Super技术取消与未领取失败结算已提交；七整文件一次202通过（48.07秒pytest/58.801秒外层，1190输入稳定）。排队未领取保null claim/lease/start且已证明0/0未调用，已领未发同样0；已发取消等待原dispatch11/null paid且不接受结果。Source撤回及原owner失权仍仅可技术停止，普通admin无此特权；六类实际cancel/usage审计SQLtrigger验证整件回滚。这里是实际staged服务，尚非Main/JWT cancel API或FE；前MySQL46不覆盖本次新增分支，继续shared执行。
 
 - 2026-10-21：第79项专用实际异步执行已提交；八整文件一次227通过（58.03秒pytest/69.212秒外层，1193输入稳定，新增25项）。真实SQL创建/领取/发送独立commit，local ASGI Chat/Responses×完整/缺失/部分/partial+total回包，provider等待前后SQL Session与checked-out connection均0；回包后重验Source/config和原dispatch再完整接受。heldHTTP重复交付/撤回/原角色epoch失效保实际paid而0正文，真实取消保cancelled+11/null，接受SQL失败及拒收None仍独立结算paid。十分钟中断仅未知/未调用结算且不重放；实际shared Main/JWT/native队列/FE继续，未声称远端模型可靠性或本阶段MySQL端到端已验证。
+
+- 2026-10-21：第79项第七专用任务域、当前源读取前置及技术队列候选过滤已提交；六整文件一次112通过（46.79秒pytest/57.503秒外层，1195输入稳定）。实际Artifact优先于擦除feature/raw3，过期Run不提前刷新正文；Source/原epoch在普通与Super读取前重验。四类孤立marker含null保留键均拒正文，技术隔离不作调用用量断言；128损坏克隆锚+128未知角色孤立任务的SQL候选跳过保留后方合法任务。首轮旧测试仅固定六域导致1F111P，更新精确七域清单后重跑通过，原记录完整保留。MySQL无hint本事务SQL∪短RC正在独立验证，不以SQLite替代；catalog/共享Task API/worker接入继续。

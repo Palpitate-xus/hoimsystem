@@ -11,7 +11,7 @@ async function startRcaEvidenceHarness({results=true,findings=false,input=false}
 import {createApp,h,reactive,KeepAlive} from 'vue';import ElementPlus from 'element-plus';import 'element-plus/dist/index.css';import store from '@/store';
 
 
-${results?`import * as results from ${JSON.stringify(path.join(root,'src/api/ai/rcaEvidenceSources.js'))};`:''}
+${results?`import * as sourceApi from ${JSON.stringify(path.join(root,'src/api/ai/rcaEvidenceSources.js'))};import * as taskApi from ${JSON.stringify(path.join(root,'src/api/ai/rcaEvidenceTasks.js'))};import * as resultApi from ${JSON.stringify(path.join(root,'src/api/ai/rcaEvidenceResults.js'))};const results={...sourceApi,...taskApi,...resultApi};`:''}
 ${input?`import RcaEvidenceSourceInput from ${JSON.stringify(path.join(root,'src/components/ai/RcaEvidenceSourceInput.vue'))};`:''}
 ${findings?`import RcaEvidenceSources from ${JSON.stringify(path.join(root,'src/components/ai/RcaEvidenceSources.vue'))};`:''}
 import {supportCanonical,supportDigest} from ${JSON.stringify(path.join(root,'src/api/inpatientSupport.js'))};

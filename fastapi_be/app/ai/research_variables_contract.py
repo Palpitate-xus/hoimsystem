@@ -55,3 +55,11 @@ class BatchCapture(ScopeReference):
     dictionary_content_hash: SHA
     dictionary_governance_hash: SHA
     patient_ids: Annotated[list[Positive], Field(min_length=1, max_length=256), AfterValidator(ordered)]
+
+
+class DefinitionReview(StrictModel):
+    expected_revision: Annotated[int, Field(strict=True, ge=1, le=1)]
+    expected_content_hash: SHA
+    decision: Literal["recorded_reviewed", "not_confirmed"]
+    review_scope: Literal["recorded_variable_definition_review_not_scientific_validation"]
+    basis_note: Basis

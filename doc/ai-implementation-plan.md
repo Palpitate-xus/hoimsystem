@@ -447,3 +447,5 @@
 - 2026-10-21 第80项实际提交异步执行/取消/恢复：21完整文件一次467通过/18既有SQLite提示，73.76s pytest、85.065s外层，1204输入稳定。Chat/Responses四种真实/nullable用量，实际HTTP await前后worker Session全部关闭；重复claim/交付不重发。当前超管仅技术取消不恢复他人作答，未发送0/0、在途pending后原交付11/null保留且不收结果；await中撤回来源拒收但保留已知计数，503未知。受控时钟恢复已领未发送0与已预约后中断unknown分开，RC候选/自己实际SQL实现不冒称Task实际MySQL；统一队列/Main/FE继续，真实模型效力不在此证明。
 
 - 2026-10-21 第80项初始共享域识别/孤立任务隔离：22完整文件一次474通过/18既有SQLite提示，77.55s pytest、89.719s外层，1206输入稳定。实际training Artifact不透明submission/owner三列与本事务实际SQL作为第七native域；无hint/expunge后的真实未提交记录可识别，rollback后即消失，分类不代授权。显式null等剩余marker仅SQL布尔识别缺件，技术隔离不读正文且不补造历史调用/费用；候选条件仅元数据过滤，公共queue/runtime/router/trace/feedback仍待接线，不冒称正式Main已完成。
+
+- 2026-10-21 第80项原提交人四分件与超管技术审计：26完整文件（含既有3个admin套件）一次502通过/19既有SQLite提示，87.78s pytest、99.243s外层、1209输入稳定。当前原学员可取完整task/source/binding/result；未成功的合法状态结果为null并核实际pointer/blob缺席。其他当前超管仅bodyless状态/真实nullable用量且trace无parts，不泄露作答/反馈/Source指纹；实际Main通用审计隐藏培训学员私件细节，原始具体Audit仍完整且非培训decimal不变。原role/epoch先于审计正文，统一Task路由/队列与FE继续。

@@ -24,6 +24,7 @@ class NativeTaskIdentity:
 
 def _domains():
     from app.ai.charge_reconciliation_run_models import AIChargeRunArtifact
+    from app.ai.deidentification_run_models import AIDeidentificationRunSource
     from app.ai.document_change_run_models import AIDocumentChangeRunArtifact
     from app.ai.document_extraction_models import AIDocumentExtractionRunAnchor
     from app.ai.drug_label_run_models import AIDrugLabelRunArtifact
@@ -37,6 +38,7 @@ def _domains():
         ("drug_label", AIDrugLabelRunArtifact, "source_binding_id"),
         ("document_change", AIDocumentChangeRunArtifact, "scope_id"),
         ("research_cohort", AIResearchCohortRunArtifact, "case_id"),
+        ("deidentification", AIDeidentificationRunSource, "case_id"),
     )
 
 
@@ -104,3 +106,16 @@ def locate_native_task(db, value):
     if identity.run_id != identifier or type(identity.source_id) is not str or not identity.source_id or type(identity.requested_by) is not int or identity.requested_by < 1:
         raise HTTPException(409, "原生任务技术身份损坏，未分派或降级")
     return identity
+
+
+def queue_identity_condition():
+    """Retain ambiguous anchors without letting them monopolize every poll.
+
+    This is only a technical SQL qualification, not Source authorization or a
+    claim that an interrupted/corrupt task incurred no paid model usage.
+    """
+    from sqlalchemy import case, exists
+
+    from app.ai.models import AIRun
+
+    return sum(case((exists().where(model.run_id == AIRun.run_id).correlate(AIRun), 1), else_=0) for _, model, _ in _domains()) <= 1

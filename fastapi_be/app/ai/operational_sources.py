@@ -102,6 +102,8 @@ def operational_options(db, user: User, spec: FeatureSpec) -> dict:
 
 
 def operational_context(db, user: User, spec: FeatureSpec, values: dict) -> ContextBundle:
+    if spec.number == 75 or "deidentification_case_id" in values:
+        raise HTTPException(422, "75任务须明确核对独立受控Case；通用运营或临床范围不代授项目用途权限")
     if spec.number == 74 or "research_cohort_case_id" in values:
         raise HTTPException(422, "科研任务请明确核对独立完整Case；通用运营或临床范围不代授科研权限")
     if "satisfaction_case_id" in values:

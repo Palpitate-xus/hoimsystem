@@ -291,6 +291,7 @@ def list_runs(
     document_original_id: str | None = Query(None, max_length=36),
     drug_label_source_binding_id: str | None = None,
     document_change_scope_id: str | None = Query(None, max_length=36),
+    deidentification_case_id: str | None = Query(None, max_length=36),
     limit: int = Query(30, ge=1, le=100),
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user),
@@ -314,6 +315,41 @@ def list_runs(
     # The per-item native guard below must run before any deferred task TEXT is
     # fetched. This also keeps an unfiltered mixed directory safe to classify.
     query = db.query(AIRun).options(*(defer(getattr(AIRun, key)) for key in ("input_json", "evidence_json", "context_metadata_json", "result_json")))
+    if feature_key == "deidentification" or deidentification_case_id is not None:
+        from app.ai.deidentification_shared import filter_history as filter_deidentification_history
+
+        user, query = filter_deidentification_history(
+            db,
+            user,
+            query,
+            feature_key=feature_key,
+            case_id=deidentification_case_id,
+            other_scope=(
+                patient_id,
+                encounter_ref,
+                department_id,
+                roster_plan_id,
+                ward_id,
+                bed_series_id,
+                surgery_pool_id,
+                surgery_scenario_id,
+                supply_item_kind,
+                supply_item_id,
+                supply_series_id,
+                inventory_item_kind,
+                inventory_item_id,
+                inventory_scenario_id,
+                coding_case_id,
+                charge_case_id,
+                True if charge_native_only else None,
+                satisfaction_case_id,
+                True if satisfaction_native_only else None,
+                document_original_id,
+                drug_label_source_binding_id,
+                document_change_scope_id,
+            ),
+        )
+
     if feature_key == "guideline_change_review" or document_change_scope_id is not None:
         from app.ai.document_change_history import filter_history
 
@@ -449,7 +485,11 @@ def list_runs(
     if user.user_role != "super_admin":
         query = query.filter_by(requested_by=user.user_id)
     if feature_key:
-        if feature_key == "feedback_analysis":
+        if feature_key == "deidentification":
+            # Current role/config was checked by the narrow history helper;
+            # Super technical directories do not parse malformed live roles.
+            pass
+        elif feature_key == "feedback_analysis":
             from app.ai.satisfaction_history import authorize_history
 
             user = authorize_history(db, user)
@@ -592,8 +632,11 @@ def list_runs(
 
             identity = locate_native_task(db, item.run_id)
             if exc.status_code in {403, 404, 409}:
+                from app.ai.deidentification_shared import is_deidentification_task
                 from app.ai.research_cohort_shared import is_research_task
 
+                if identity is not None and identity.domain == "deidentification" or identity is None and is_deidentification_task(db, item):
+                    continue
                 if identity is not None and identity.domain == "research_cohort" or identity is None and is_research_task(db, item):
                     continue
             from app.ai.document_change_storage import is_document_change_run
@@ -671,6 +714,11 @@ def cancel_run(run_id: str, db: Session = Depends(get_db), user: User = Depends(
     from app.ai.native_task_routing import locate_native_task
 
     identity = locate_native_task(db, run_id)
+    if identity is not None and identity.domain == "deidentification":
+        from app.ai.deidentification_runtime import cancel_deidentification_run
+
+        cancel_deidentification_run(db, user, run_id, audit_only=user.user_role == "super_admin")
+        return {"code": 200, "msg": "任务结果已取消接收"}
     if identity is not None and identity.domain == "research_cohort":
         from app.ai.research_cohort_execution import cancel_research_run
 
@@ -737,8 +785,13 @@ def review_result(run_id: str, req: FeedbackWrite, db: Session = Depends(get_db)
     authorize_run(db, user, run)
     if run.status != "succeeded":
         raise HTTPException(409, "只能复核已成功生成的建议")
+    from app.ai.deidentification_shared import is_deidentification_task
     from app.ai.research_cohort_shared import is_research_task
 
+    if is_deidentification_task(db, run):
+        from app.ai.deidentification_storage import load_result as load_deidentification_result
+
+        load_deidentification_result(db, user, run_id)
     if is_research_task(db, run):
         from app.ai.research_cohort_result_storage import load_result as load_research_result
 

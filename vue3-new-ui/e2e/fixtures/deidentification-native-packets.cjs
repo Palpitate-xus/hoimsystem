@@ -1,0 +1,3 @@
+const fs=require('node:fs'),path=require('node:path'),zlib=require('node:zlib'),crypto=require('node:crypto');
+let cached;
+module.exports.actual=function(){if(!cached){const p=JSON.parse(fs.readFileSync(path.join(__dirname,'deidentification/native-fourth.packed.json'),'utf8')),raw=zlib.gunzipSync(Buffer.from(p.gzip_base64,'base64'));if(raw.length!==p.original_bytes||crypto.createHash('sha256').update(raw).digest('hex')!==p.original_sha256)throw new Error('Native actual packet bytes differ');cached=JSON.parse(raw.toString('utf8'));for(const x of Object.values(cached.raw_http_responses))if(crypto.createHash('sha256').update(x.body_utf8,'utf8').digest('hex')!==x.sha256)throw new Error('Native actual HTTP bytes differ');}return structuredClone(cached);};

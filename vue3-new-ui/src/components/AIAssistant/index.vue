@@ -113,6 +113,7 @@
     <satisfaction-assistant v-else-if="dedicatedPanel==='satisfaction'" :feature="configuredFeature||null" :feature-key="featureKey" :initial-input="props.initialInput" :patient-id="props.patientId" :encounter-ref="props.encounterRef" :active="viewActive" />
 
     <drug-label-assistant v-else-if="dedicatedPanel==='drug_label'" :feature="configuredFeature||null" :feature-key="featureKey" :initial-input="props.initialInput" :patient-id="props.patientId" :encounter-ref="props.encounterRef" :pharmaceutical-id="props.pharmaceuticalId" :active="viewActive" />
+    <deidentification-panel v-else-if="dedicatedPanel==='deidentification'" :feature="configuredFeature||null" :feature-key="featureKey" :initial-input="props.initialInput" :patient-id="props.patientId" :encounter-ref="props.encounterRef" :pharmaceutical-id="props.pharmaceuticalId" :active="viewActive" />
     <research-cohort-panel v-else-if="dedicatedPanel==='research_cohort'" :feature="configuredFeature||null" :feature-key="featureKey" :initial-input="props.initialInput" :patient-id="props.patientId" :encounter-ref="props.encounterRef" :pharmaceutical-id="props.pharmaceuticalId" :active="viewActive" />
 
     <template v-if="!dedicatedLifecycle">
@@ -230,6 +231,7 @@
 
 <script setup>
 import ResearchCohortPanel from '@/components/ai/ResearchCohortPanel.vue';
+import DeidentificationPanel from '@/components/ai/DeidentificationPanel.vue';
 import { computed, defineAsyncComponent, onActivated, onBeforeUnmount, onDeactivated, onMounted, ref, watch } from "vue";
 import { useStore } from "vuex";
 import { ElMessage } from "element-plus";
@@ -313,9 +315,11 @@ const documentChangeWasBound=ref(false),documentChangeLifecycle=computed(()=>doc
 watch([featureKey,()=>hasInitialReference('document_change_scope_id')],([key,bound])=>{if(key==='guideline_change_review'||bound)documentChangeWasBound.value=true;},{immediate:true,flush:'sync'});
 const researchWasBound=ref(false),researchLifecycle=computed(()=>researchWasBound.value||featureKey.value==='research_cohort'||hasInitialReference('research_cohort_case_id'));
 watch([featureKey,()=>hasInitialReference('research_cohort_case_id')],([key,bound])=>{if(key==='research_cohort'||bound)researchWasBound.value=true;},{immediate:true,flush:'sync'});
-const dedicatedLifecycle=computed(()=>chargeLifecycle.value||documentLifecycle.value||satisfactionLifecycle.value||drugLabelLifecycle.value||documentChangeLifecycle.value||researchLifecycle.value);
+const deidentificationWasBound=ref(false),deidentificationLifecycle=computed(()=>deidentificationWasBound.value||featureKey.value==='deidentification'||hasInitialReference('deidentification_case_id'));
+watch([featureKey,()=>hasInitialReference('deidentification_case_id')],([key,bound])=>{if(key==='deidentification'||bound)deidentificationWasBound.value=true;},{immediate:true,flush:'sync'});
+const dedicatedLifecycle=computed(()=>deidentificationLifecycle.value||chargeLifecycle.value||documentLifecycle.value||satisfactionLifecycle.value||drugLabelLifecycle.value||documentChangeLifecycle.value||researchLifecycle.value);
 const dedicatedPanel=ref(null);
-watch([featureKey,()=>hasInitialReference('charge_case_id'),()=>hasInitialReference('document_original_id'),()=>hasInitialReference('satisfaction_case_id'),()=>hasInitialReference('drug_label_source_binding_id'),()=>hasInitialReference('document_change_scope_id'),()=>hasInitialReference('research_cohort_case_id')],([key,charge,document,satisfaction,drugLabel,documentChange,research])=>{const explicit={charge_reconciliation:'charge',guideline_ingestion:'document',feedback_analysis:'satisfaction',drug_label_extraction:'drug_label',guideline_change_review:'document_change',research_cohort:'research_cohort'}[key];if(explicit){dedicatedPanel.value=explicit;return;}const bound=[charge?'charge':null,document?'document':null,satisfaction?'satisfaction':null,drugLabel?'drug_label':null,documentChange?'document_change':null,research?'research_cohort':null].filter(Boolean);if(bound.length===1||!dedicatedPanel.value&&bound.length)dedicatedPanel.value=bound[0];},{immediate:true,flush:'sync'});
+watch([featureKey,()=>hasInitialReference('charge_case_id'),()=>hasInitialReference('document_original_id'),()=>hasInitialReference('satisfaction_case_id'),()=>hasInitialReference('drug_label_source_binding_id'),()=>hasInitialReference('document_change_scope_id'),()=>hasInitialReference('research_cohort_case_id'),()=>hasInitialReference('deidentification_case_id')],([key,charge,document,satisfaction,drugLabel,documentChange,research,deidentification])=>{const explicit={charge_reconciliation:'charge',guideline_ingestion:'document',feedback_analysis:'satisfaction',drug_label_extraction:'drug_label',guideline_change_review:'document_change',research_cohort:'research_cohort',deidentification:'deidentification'}[key];if(explicit){dedicatedPanel.value=explicit;return;}const bound=[charge?'charge':null,document?'document':null,satisfaction?'satisfaction':null,drugLabel?'drug_label':null,documentChange?'document_change':null,research?'research_cohort':null,deidentification?'deidentification':null].filter(Boolean);if(bound.length===1||!dedicatedPanel.value&&bound.length)dedicatedPanel.value=bound[0];},{immediate:true,flush:'sync'});
 const selected = computed(() => dedicatedLifecycle.value?null:configuredFeature.value);
 const needsRoster=computed(()=>featureKey.value==='roster_optimization'&&selected.value?.input_mode==='roster'),rosterSelection=ref(null),rosterReady=ref(false),rosterWasBound=ref(false),rosterInputKey=ref(0);
 const rosterInitialReferences=computed(()=>props.initialInput?.roster_plan_id==null?null:{roster_plan_id:props.initialInput?.roster_plan_id});

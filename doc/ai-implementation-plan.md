@@ -415,3 +415,19 @@
 - 本地merge0320876f（原e317e7d+研究652ba8e）已将完整验收69–74纳入feature/ai-hospital-platform；1150 BE/四映射和1199 FE/spec/fixture/build逐字等于上游完整10687P/28skip/7warn与2818浏览器对应冻结。没有重新执行或加总这些全量。
 - Main正式npm run verify一次29.745秒、审计0、660生产输入稳定；JS5,364,118/全资源6,439,013/最大646,853，原6M/7M/700k限制不变。Main实际新产物与上游dist并非逐字相同，不臆断原因；额外完整12文件Node163全绿6.440秒、6文件实际生产20全绿47.767秒，零skip/retry/flaky/error，1199源核验与375实际dist稳定，独立静态服务关闭且无未mock API。
 - 独立Python再核Main实际HTML44记录：28完整schema/43完整源JSON与许可SVG精确相等；934接口RBAC与80能力Prompt导出check通过。详见ai-research-main-admission.json，全部原runner/report/log无损保存。未push/部署/重启、医院DB/远端模型或临床验证；75–80继续独立开发，既有明确现代浏览器目标不变。
+### 第75项共享病例去标识辅助集成阶段（定向验证）
+
+- 合入独立75来源与任务实现，接入共享创建、七域永久Artifact识别、队列与worker、具体claim/dispatch/accept/usage Audit主键、四份原canonical JSON分件、当前用途读取及超级管理员仅技术停止接收。输入仅`deidentification_case_id`与可选问题；当前项目、逐患者用途和模型许可均不以角色代替。74四份Source recipe及75原Source recipe逐字保留。
+- 同32个完整模块fresh第二轮一次1196通过，pytest1438.39秒、外层1448.776827秒，全部后端及四份生成物前后稳定，环境文件、共享PEM和socket尝试均为零。这是定向集合，不是完整默认后端。首轮1192通过/2失败保留：原测试夹具未恢复StaticPool连接的SQLite外键开关，影响后续故障注入与旧RBAC假引用；仅修复夹具并新增正常/异常恢复两例，未改产品或旧断言。
+- 当前独立断网MySQL第四轮96.442秒通过并清理：231旧表加75来源3表及Artifact2表共236表，实际增量up/down/up保持旧DDL和合成行，不称完整历史迁移回放。实际Main/JWT、共享双协议及process_one验证具体审计FK、HTTP等待无SQL、旧RR当前身份/新Artifact、付费独立NULL、撤权临床分件拒绝及Sup技术取消。审计钩子实际阻止一次`socket.bind`尝试，仅许可三次私有Unix socket连接，实际TCP/外网为零；没有把“无实际网络”写成“无socket尝试”。前三失败分别为真实MySQL依赖索引删除顺序、验证脚本列名、验证脚本误认cancel ACK，全部保留。
+- 新单域Source选择、Task API/Assistant/目录/Findings五完整浏览器文件80项一次通过，外层97.871219秒，594前端依赖稳定、无跳过/重试；随后问题编辑期间旧预览复弹的真实RED已修，两个专门边界通过。真实同案Main回执及独立分件保留UTF8与SHA，包括Python `1.0`字面量，不拼不同病例或补造成功DTO。公共Parent/History/管理入口已接入并完成后述当前版本联合定向验证，未宣称完整浏览器验收。
+- 证据及使用边界见`ai-deidentification-shared-verification.json`与`ai-deidentification-shared-guide.md`。当前MySQL own未提交SQL识别仍以已登记的同事务hint补充短RC；不将未登记的direct flush/expunge路径称已覆盖，待与Root79无hint SQL union增强合并后另验。默认不启用，未推送、部署、读取真实医院资料、调用真实远模型或完成匿名/伦理/导出认证。
+
+
+#### 第75项共享页面与规范构建补充（同独立树，定向验收）
+
+- 公共Parent、History及超级管理员来源治理入口已接入：原生75绑定不能降级普通LLM；当前元数据先行，撤用途后只保留付费/未知用量和opaque SHA，不自动读取临床四分件。业务patient/Scope精确绑定，普通无全院患者目录，Sup仍须逐患者用途与外发授权；反馈和技术取消不等于人工发布、隐私放行或导出。
+- 原75全部11个浏览器文件加74共享入口3个完整文件，本次同版本14文件261项一次通过，零跳过、重试、不稳定结果及全局异常；完整前端/fixture输入前后稳定。分类为isolated_mock：真实Vue/ElementPlus/request/canonical Babel与原始同案Main/JWT回执，HTTP回放不冒称真实远模型或生产页面验证。旧80项、专门2项及Root12项不累计为261之外的通过数。
+- 本树正式`npm run verify`29.221883秒通过，审计0、生产输入与dist SHA已绑定；JS5,519,692字节、全部资源6,604,594、最大JS646,975，原6M/7M/700k及依赖/targets不变。33条实际提示（28条CSS顺序、5条既有SCSS）保留。既有派生文案池只按原生成器刷新JSON，完整两Node文件13项通过6.715480秒，未包含临床运行时文本。
+- 首次规范构建因管理页源码与旧派生池SHA不匹配而编译拒绝，原失败保留。一次联合重跑在池生成结束前过早冻结，精确中断为exit130/26已完成、235未执行；不把这些未执行项作为验收跳过或产品失败。当前第三轮才绑定最终池字节。可选格式诊断已恢复所有1196后端/四生成物原SHA，不为cosmetic改写已验证代码。
+- 证据继续集中在`ai-deidentification-shared-verification.json`。尚未运行本版本完整默认后端、全域浏览器或生产页面浏览器验收；未默认启用、推送、部署或读取真实医院数据。Root79无hint own-SQL union增强仍待后续合并另验，本阶段不扩大原MySQL声明。

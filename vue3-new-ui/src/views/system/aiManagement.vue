@@ -77,6 +77,7 @@
         <el-tab-pane v-if="canCheckForecast" label="指南原文与摘录治理" name="document_evidence" lazy><document-evidence-panel v-if="tab==='document_evidence' && canCheckForecast" :active="tab==='document_evidence' && canCheckForecast" @knowledge-published="refresh" /></el-tab-pane>
         <el-tab-pane v-if="canManageDrugLabels" label="说明书原文与独立签署治理" name="drug_label_sources" lazy><template v-if="tab==='drug_label_sources'&&canManageDrugLabels"><el-checkbox v-model="drugLabelAuditOnly">明确只读冻结说明书来源</el-checkbox><drug-label-source-panel :key="String(drugLabelAuditOnly)" :active="tab==='drug_label_sources'&&canManageDrugLabels" :audit-only="drugLabelAuditOnly" /></template></el-tab-pane>
         <el-tab-pane v-if="canCheckForecast" label="双原文范围与规则关联" name="document_change" lazy><document-change-sources v-if="tab==='document_change' && canCheckForecast" :active="tab==='document_change' && canCheckForecast" /></el-tab-pane>
+        <el-tab-pane v-if="canManageResearchSources" label="病例去标识来源与人工复核治理" name="deidentification_sources" lazy><deidentification-shared-input v-if="tab==='deidentification_sources'&&canManageResearchSources" :key="deidentificationSourceIdentity" :active="tab==='deidentification_sources'&&canManageResearchSources" /></el-tab-pane>
         <el-tab-pane v-if="canManageResearchSources" label="科研来源治理" name="research_cohort_sources" lazy>
           <template v-if="tab==='research_cohort_sources'&&canManageResearchSources">
             <el-checkbox v-model="researchSourcesAuditOnly" aria-label="只读核对冻结科研来源">只读核对冻结科研来源</el-checkbox>
@@ -353,6 +354,7 @@ const DocumentChangeSources=defineAsyncComponent(()=>import("@/components/ai/Doc
 const AiCodingEvidenceSources=defineAsyncComponent(()=>import("@/components/CodingEvidenceSources.vue"));
 const ChargeReconciliationSourcePanel=defineAsyncComponent(()=>import("@/components/ai/ChargeReconciliationSourcePanel.vue"));
 const SatisfactionSourcePanel=defineAsyncComponent(()=>import("@/components/ai/SatisfactionSourcePanel.vue"));
+const DeidentificationSharedInput=defineAsyncComponent(()=>import('@/components/ai/DeidentificationSharedInput.vue'));
 const ResearchCohortSources=defineAsyncComponent(()=>import("@/components/ai/ResearchCohortSources.vue"));
 const AiSurgerySources=defineAsyncComponent(()=>import("@/components/AISurgerySources.vue"));
 const AiSurgeryScenarios=defineAsyncComponent(()=>import("@/components/AISurgeryScenarios.vue"));
@@ -393,12 +395,13 @@ const providerDialog = ref(false), providerId = ref(null), providerForm = ref({}
 const forecastCheckTarget = ref(null);
 const news2CheckTarget = ref(null);
 const canCheckForecast = computed(() => typeof store.state.user.accessToken === "string" && store.state.user.accessToken.trim().length > 0 && Array.isArray(store.state.user.permissions) && store.state.user.permissions.includes("super_admin"));
+const deidentificationSourceIdentity=computed(()=>JSON.stringify([store.state.user.accessToken,store.state.user.username,store.state.user.permissions]));
 const researchSourcesAuditOnly = ref(false);
 const canManageResearchSources = computed(() => {
   const user=store.state.user, permissions=user.permissions;
   return typeof user.accessToken==='string' && user.accessToken.length>0 && Array.isArray(permissions) && permissions.length>0 && new Set(permissions).size===permissions.length && permissions.every(role=>typeof role==='string'&&Object.hasOwn(roles,role)) && permissions.includes('super_admin');
 });
-function resetResearchSources() { researchSourcesAuditOnly.value=false; if(tab.value==='research_cohort_sources')tab.value='features'; }
+function resetResearchSources() { researchSourcesAuditOnly.value=false; if(['research_cohort_sources','deidentification_sources'].includes(tab.value))tab.value='features'; }
 watch([()=>store.state.user.accessToken,()=>store.state.user.username,()=>JSON.stringify(store.state.user.permissions)],resetResearchSources);
 onDeactivated(resetResearchSources);
 onBeforeUnmount(resetResearchSources);

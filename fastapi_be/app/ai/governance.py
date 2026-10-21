@@ -193,6 +193,8 @@ def describe_config(db: Session, spec: FeatureSpec, config: AIFeatureConfig | No
     data = describe_feature(spec)
     if spec.number == 74:
         data["input_mode"] = "research_cohort_evidence"
+    elif spec.number == 75:
+        data["input_mode"] = "deidentification_evidence"
     if spec.number == 69:
         data["input_mode"] = "charge_reconciliation"
     if spec.number == 70:

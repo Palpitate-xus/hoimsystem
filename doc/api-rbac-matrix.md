@@ -3,7 +3,7 @@
 > 由 `fastapi_be/scripts/generate_rbac_matrix.py` 从源码自动生成，请勿手改。
 > `✓`=可访问 | `PUBLIC`=无需登录 | 留空=不可访问
 
-共 **906** 个接口（PUBLIC 18 个 / 需登录 888 个）。
+共 **937** 个接口（PUBLIC 18 个 / 需登录 919 个）。
 
 
 ### `admin.py`
@@ -318,6 +318,57 @@
 | POST | `/api/ai/image-assets/{asset_id}/withdraw` |  | ✓ | ✓ | ✓ |  |  |  |  |  | ✓ |  |  |
 | GET | `/api/ai/admin/image-assets` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
 | POST | `/api/ai/admin/image-assets/{asset_id}/purge` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+
+### `ai_infection_cluster_profiles.py`
+
+| 方法 | 路径 | admin | super_admin | director | doctor | nurse | cashier | pharmacist | guide | patient | lab_technician | registrar | PUBLIC |
+|------|------|------|------|------|------|------|------|------|------|------|------|------|------|
+| POST | `/api/ai/infection-cluster/local-profiles` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/infection-cluster/local-profiles` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/infection-cluster/local-profiles/{profile_id}` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/infection-cluster/local-profiles/{profile_id}/review` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/infection-cluster/local-profiles/{profile_id}/revoke` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/infection-cluster/local-configuration` | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |
+| PUT | `/api/ai/infection-cluster/local-configuration` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+
+### `ai_infection_cluster_scenarios.py`
+
+| 方法 | 路径 | admin | super_admin | director | doctor | nurse | cashier | pharmacist | guide | patient | lab_technician | registrar | PUBLIC |
+|------|------|------|------|------|------|------|------|------|------|------|------|------|------|
+| GET | `/api/ai/infection-cluster/local-implementation` | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/infection-cluster/departments` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/infection-cluster/scenarios` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/infection-cluster/scenarios` | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/infection-cluster/scenarios/{scenario_id}` | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/infection-cluster/scenarios/{scenario_id}/review` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/infection-cluster/scenarios/{scenario_id}/revoke` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+
+### `ai_infection_cluster_sources.py`
+
+| 方法 | 路径 | admin | super_admin | director | doctor | nurse | cashier | pharmacist | guide | patient | lab_technician | registrar | PUBLIC |
+|------|------|------|------|------|------|------|------|------|------|------|------|------|------|
+| POST | `/api/ai/infection-cluster/grants` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/infection-cluster/definitions` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/infection-cluster/case-reviews` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/infection-cluster/registry/{kind}` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/infection-cluster/registry/{kind}/{record_id}` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/infection-cluster/registry/{kind}/{record_id}/review` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/infection-cluster/registry/{kind}/{record_id}/revoke` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/infection-cluster/roots/preview` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/infection-cluster/snapshots` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/infection-cluster/snapshots` | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/infection-cluster/snapshots/{snapshot_id}/parts/{part}` | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |
+
+### `ai_infection_cluster_tasks.py`
+
+| 方法 | 路径 | admin | super_admin | director | doctor | nurse | cashier | pharmacist | guide | patient | lab_technician | registrar | PUBLIC |
+|------|------|------|------|------|------|------|------|------|------|------|------|------|------|
+| POST | `/api/ai/infection-cluster/context` | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/infection-cluster/tasks` | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/infection-cluster/tasks` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
+| GET | `/api/ai/infection-cluster/tasks/{run_id}` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
+| GET | `/api/ai/infection-cluster/tasks/{run_id}/parts/{part}` | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/infection-cluster/tasks/{run_id}/cancel` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
 
 ### `ai_inventory_native_sources.py`
 

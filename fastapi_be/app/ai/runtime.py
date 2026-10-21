@@ -95,6 +95,10 @@ def _check_run_storage_json(serialized: dict[str, str]) -> None:
 
 def create_run(db: Session, user: User, req: RunRequest) -> AIRun:
     """Freeze an authorized, source-linked request before a durable worker processes it."""
+    if req.feature_key == "research_cohort":
+        from app.ai.research_cohort_dispatch import create_shared_research_run
+
+        return create_shared_research_run(db, user, req)
     if req.feature_key == "feedback_analysis":
         from app.ai.satisfaction_runtime import create_satisfaction_run
 
@@ -398,6 +402,11 @@ def create_run(db: Session, user: User, req: RunRequest) -> AIRun:
 
 def authorize_run(db: Session, user: User, run: AIRun) -> None:
     """Re-check current permissions, including revoked care access, on every result read."""
+    from app.ai.research_cohort_shared import guard_research_task, is_research_task
+
+    if is_research_task(db, run):
+        guard_research_task(db, user, run.run_id)
+        return
     from app.ai.charge_reconciliation_storage import is_charge_run
 
     if is_charge_run(db, run):
@@ -575,6 +584,14 @@ def describe_run(run: AIRun, include_result: bool = True, *, user: User | None =
     from app.ai.charge_reconciliation_storage import is_charge_run
 
     db = object_session(run)
+    from app.ai.research_cohort_shared import is_research_task
+
+    if is_research_task(db, run):
+        if db is None or user is None:
+            raise HTTPException(403, "科研技术状态须在当前授权会话读取")
+        from app.ai.research_cohort_runtime import describe_research_run
+
+        return describe_research_run(db, user, run.run_id)
     if is_charge_run(db, run):
         if db is None or user is None:
             raise HTTPException(409, "完整账目任务须在当前授权会话内展示")
@@ -882,15 +899,42 @@ def describe_run(run: AIRun, include_result: bool = True, *, user: User | None =
     return data
 
 
-def claim_next_run(db: Session) -> tuple[str, str] | None:
+def claim_next_run(db: Session):
     """Claim durable work without allowing two workers to execute the same queued task."""
     from app.ai.native_task_routing import locate_native_task
+    from app.ai.research_cohort_dispatch import quarantine_orphan_research_run, queue_candidate_condition
+    from app.ai.research_cohort_execution import claim_research_run
+    from app.ai.research_cohort_shared import is_research_task
 
-    candidate = db.query(AIRun.run_id, AIRun.feature_key).filter_by(status="queued").order_by(AIRun.create_time, AIRun.run_id).first()
-    if candidate is None:
+    skipped = []
+    # Bound technical maintenance per poll. Each quarantined orphan leaves the
+    # queue; unresolved corrupt rows never force the next valid job into generic
+    # inference and cannot monopolize the first queue position in this poll.
+    for _ in range(128):
+        candidate = (
+            db.query(AIRun.run_id, AIRun.feature_key).filter(AIRun.status == "queued", ~AIRun.run_id.in_(skipped), queue_candidate_condition(db)).order_by(AIRun.create_time, AIRun.run_id).first()
+        )
+        if candidate is None:
+            return None
+        identity = locate_native_task(db, candidate.run_id)
+        domain = identity.domain if identity is not None else None
+        if domain == "research_cohort":
+            claimed = claim_research_run(db, candidate.run_id)
+            if claimed is not None:
+                return claimed
+            skipped.append(candidate.run_id)
+            continue
+        if domain is None and is_research_task(db, candidate.run_id):
+            try:
+                quarantine_orphan_research_run(db, candidate.run_id)
+            except HTTPException as exc:
+                if exc.status_code not in {403, 404, 409}:
+                    raise
+            skipped.append(candidate.run_id)
+            continue
+        break
+    else:
         return None
-    identity = locate_native_task(db, candidate.run_id)
-    domain = identity.domain if identity is not None else None
     if domain == "drug_label" or domain is None and candidate.feature_key == "drug_label_extraction":
         from app.ai.drug_label_runtime import claim_drug_label_run
 
@@ -918,6 +962,8 @@ def claim_next_run(db: Session) -> tuple[str, str] | None:
 
 
 def _recheck_task(db: Session, run: AIRun) -> tuple[FeatureSpec, AIProvider, dict]:
+    if run.feature_key == "research_cohort":
+        raise AIExecutionError("NATIVE_ARTIFACT_REQUIRED", "科研任务只接受完整专用来源和具体claim回执，不沿用通用推理")
     if run.feature_key == "feedback_analysis":
         raise AIExecutionError("TASK_CONTRACT_CHANGED", "旧评价任务仅可读取历史；须明确选择受审完整原件后新建任务")
     if run.feature_key == "drug_label_extraction":
@@ -999,21 +1045,31 @@ def _recheck_task(db: Session, run: AIRun) -> tuple[FeatureSpec, AIProvider, dic
     return spec, provider, snapshot
 
 
-async def execute_claimed(run_id: str, lease: str, *, transport=None) -> None:
+async def execute_claimed(run_id: str, lease: str, *, transport=None, research_claim_event_id=None) -> None:
     """Release SQL connections during inference; recheck authorization before storing results."""
     from app import database
     from app.ai.charge_reconciliation_storage import is_charge_run
     from app.ai.document_change_access import has_native_identity
     from app.ai.document_extraction_storage import is_extraction_run
     from app.ai.native_task_routing import locate_native_task
+    from app.ai.research_cohort_shared import is_research_task
     from app.ai.satisfaction_storage import is_satisfaction_run
 
     # Locate only immutable technical identities, then return the connection
     # before the dedicated worker takes its own Source/current authority locks.
     with database.SessionLocal() as routing_db:
         header = routing_db.query(AIRun.run_id, AIRun.feature_key).filter(AIRun.run_id == run_id, AIRun.status.in_(["running", "cancelled"]), AIRun.lease_token == lease).one_or_none()
-        identity = locate_native_task(routing_db, run_id) if header is not None else None
+        identity = locate_native_task(routing_db, run_id)
         domain = identity.domain if identity is not None else None
+        research_task = domain == "research_cohort"
+        research_orphan = domain is None and is_research_task(routing_db, run_id)
+        research_dispatch = False
+        if research_task:
+            from app.ai.research_cohort_dispatch import validate_shared_research_claim
+
+            research_dispatch = validate_shared_research_claim(routing_db, run_id, lease, research_claim_event_id)
+        elif research_claim_event_id is not None or research_orphan:
+            raise HTTPException(409, "科研原claim回执或持久域不一致，未改变任务或执行通用模型")
         drug_label_task = header is not None and (domain == "drug_label" or domain is None and header.feature_key == "drug_label_extraction")
         satisfaction_task = header is not None and (domain == "satisfaction" or domain is None and header.feature_key == "feedback_analysis")
         document_task = header is not None and (domain == "document" or domain is None and header.feature_key == "guideline_ingestion")
@@ -1021,11 +1077,21 @@ async def execute_claimed(run_id: str, lease: str, *, transport=None) -> None:
         charge = domain == "charge"
         # Legacy tasks without a durable native identity retain their original
         # read/dispatch contracts; no erased real Artifact can enter this path.
-        routing_run = routing_db.get(AIRun, run_id) if header is not None and domain is None and not any((drug_label_task, satisfaction_task, document_task, change_task)) else None
+        routing_run = (
+            routing_db.get(AIRun, run_id)
+            if header is not None and domain is None and not any((research_task, research_orphan, drug_label_task, satisfaction_task, document_task, change_task))
+            else None
+        )
         if routing_run is not None:
             charge = is_charge_run(routing_db, routing_run)
             satisfaction_task = not charge and is_satisfaction_run(routing_db, routing_run)
             document_task = not charge and not satisfaction_task and is_extraction_run(routing_db, routing_run)
+    if research_task:
+        if research_dispatch:
+            from app.ai.research_cohort_execution import execute_research_claimed
+
+            await execute_research_claimed(run_id, lease, claim_event_id=research_claim_event_id, transport=transport)
+        return
     if drug_label_task:
         from app.ai.drug_label_runtime import execute_drug_label_claimed
 
@@ -1438,6 +1504,7 @@ def expire_interrupted_runs(db: Session) -> int:
     from app.ai.document_change_view_contract import FEATURE_KEY as CHANGE_FEATURE
     from app.ai.drug_label_run_models import AIDrugLabelRunArtifact
     from app.ai.drug_label_runtime import expire_interrupted_drug_label_runs
+    from app.ai.research_cohort_artifact_models import AIResearchCohortRunArtifact
     from app.ai.satisfaction_artifact_models import AISatisfactionRunArtifact
     from app.ai.satisfaction_execution import expire_interrupted_satisfaction_runs
 
@@ -1457,6 +1524,7 @@ def expire_interrupted_runs(db: Session) -> int:
             ~AIRun.run_id.in_(db.query(AIChargeRunArtifact.run_id)),
             ~AIRun.run_id.in_(db.query(AISatisfactionRunArtifact.run_id)),
             ~AIRun.run_id.in_(db.query(AIDrugLabelRunArtifact.run_id)),
+            ~AIRun.run_id.in_(db.query(AIResearchCohortRunArtifact.run_id)),
         )
         .update({"status": "failed", "error_code": "WORKER_INTERRUPTED", "error_message": "执行进程中断，任务未自动重试，可检查后重新提交", "finish_time": utcnow()}, synchronize_session=False)
     )

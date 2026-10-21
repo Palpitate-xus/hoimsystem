@@ -8,6 +8,7 @@ from app.ai.coding_evidence_prompt import CODING_SYSTEM_PROMPT
 from app.ai.document_change_prompt import SYSTEM_PROMPT as DOCUMENT_CHANGE_SYSTEM_PROMPT
 from app.ai.document_extraction_prompt import EXTRACTION_SYSTEM_PROMPT
 from app.ai.drug_label_prompt import SYSTEM_PROMPT as DRUG_LABEL_SYSTEM_PROMPT
+from app.ai.research_cohort_prompt import RESEARCH_SYSTEM_PROMPT
 from app.ai.satisfaction_prompt import SATISFACTION_SYSTEM_PROMPT
 
 SYSTEM_PROMPT_OVERRIDES = MappingProxyType(
@@ -18,6 +19,7 @@ SYSTEM_PROMPT_OVERRIDES = MappingProxyType(
         "guideline_ingestion": EXTRACTION_SYSTEM_PROMPT,
         "drug_label_extraction": DRUG_LABEL_SYSTEM_PROMPT,
         "guideline_change_review": DOCUMENT_CHANGE_SYSTEM_PROMPT,
+        "research_cohort": RESEARCH_SYSTEM_PROMPT,
     }
 )
 

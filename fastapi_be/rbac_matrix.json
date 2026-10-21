@@ -2508,6 +2508,202 @@
   "path": "/api/ai/admin/qsofa-assessments/{assessment_id}"
  },
  {
+  "auth": "ANY",
+  "function": "create_scope",
+  "method": "POST",
+  "module": "ai_research_cohort_sources.py",
+  "path": "/api/ai/research-cohort/scopes"
+ },
+ {
+  "auth": "ANY",
+  "function": "get_scope",
+  "method": "GET",
+  "module": "ai_research_cohort_sources.py",
+  "path": "/api/ai/research-cohort/scopes/{scope_id}"
+ },
+ {
+  "auth": "ANY",
+  "function": "review_authorization",
+  "method": "POST",
+  "module": "ai_research_cohort_sources.py",
+  "path": "/api/ai/research-cohort/scopes/{scope_id}/authorization-review"
+ },
+ {
+  "auth": "ANY",
+  "function": "review_scope",
+  "method": "POST",
+  "module": "ai_research_cohort_sources.py",
+  "path": "/api/ai/research-cohort/scopes/{scope_id}/review"
+ },
+ {
+  "auth": "ANY",
+  "function": "revoke_scope",
+  "method": "POST",
+  "module": "ai_research_cohort_sources.py",
+  "path": "/api/ai/research-cohort/scopes/{scope_id}/revoke"
+ },
+ {
+  "auth": "ANY",
+  "function": "create_acl",
+  "method": "POST",
+  "module": "ai_research_cohort_sources.py",
+  "path": "/api/ai/research-cohort/project-acls"
+ },
+ {
+  "auth": "ANY",
+  "function": "get_acl",
+  "method": "GET",
+  "module": "ai_research_cohort_sources.py",
+  "path": "/api/ai/research-cohort/project-acls/{record_id}"
+ },
+ {
+  "auth": "ANY",
+  "function": "review_acl",
+  "method": "POST",
+  "module": "ai_research_cohort_sources.py",
+  "path": "/api/ai/research-cohort/project-acls/{record_id}/review"
+ },
+ {
+  "auth": "ANY",
+  "function": "revoke_acl",
+  "method": "POST",
+  "module": "ai_research_cohort_sources.py",
+  "path": "/api/ai/research-cohort/project-acls/{record_id}/revoke"
+ },
+ {
+  "auth": "ANY",
+  "function": "create_patient_authorization",
+  "method": "POST",
+  "module": "ai_research_cohort_sources.py",
+  "path": "/api/ai/research-cohort/patient-authorizations"
+ },
+ {
+  "auth": "ANY",
+  "function": "get_patient_authorization",
+  "method": "GET",
+  "module": "ai_research_cohort_sources.py",
+  "path": "/api/ai/research-cohort/patient-authorizations/{record_id}"
+ },
+ {
+  "auth": "ANY",
+  "function": "sign_patient_authorization",
+  "method": "POST",
+  "module": "ai_research_cohort_sources.py",
+  "path": "/api/ai/research-cohort/patient-authorizations/{record_id}/authorization-review"
+ },
+ {
+  "auth": "ANY",
+  "function": "review_patient_authorization",
+  "method": "POST",
+  "module": "ai_research_cohort_sources.py",
+  "path": "/api/ai/research-cohort/patient-authorizations/{record_id}/review"
+ },
+ {
+  "auth": "ANY",
+  "function": "revoke_patient_authorization",
+  "method": "POST",
+  "module": "ai_research_cohort_sources.py",
+  "path": "/api/ai/research-cohort/patient-authorizations/{record_id}/revoke"
+ },
+ {
+  "auth": "ANY",
+  "function": "preview_case",
+  "method": "POST",
+  "module": "ai_research_cohort_sources.py",
+  "path": "/api/ai/research-cohort/cases/preview"
+ },
+ {
+  "auth": "ANY",
+  "function": "create_case",
+  "method": "POST",
+  "module": "ai_research_cohort_sources.py",
+  "path": "/api/ai/research-cohort/cases"
+ },
+ {
+  "auth": "ANY",
+  "function": "list_cases",
+  "method": "GET",
+  "module": "ai_research_cohort_sources.py",
+  "path": "/api/ai/research-cohort/cases"
+ },
+ {
+  "auth": "ANY",
+  "function": "get_case",
+  "method": "GET",
+  "module": "ai_research_cohort_sources.py",
+  "path": "/api/ai/research-cohort/cases/{case_id}"
+ },
+ {
+  "auth": "ANY",
+  "function": "review_case",
+  "method": "POST",
+  "module": "ai_research_cohort_sources.py",
+  "path": "/api/ai/research-cohort/cases/{case_id}/review"
+ },
+ {
+  "auth": "ANY",
+  "function": "revoke_case",
+  "method": "POST",
+  "module": "ai_research_cohort_sources.py",
+  "path": "/api/ai/research-cohort/cases/{case_id}/revoke"
+ },
+ {
+  "auth": "ANY",
+  "function": "list_scopes",
+  "method": "GET",
+  "module": "ai_research_cohort_sources.py",
+  "path": "/api/ai/research-cohort/scopes"
+ },
+ {
+  "auth": "ANY",
+  "function": "list_project_acls",
+  "method": "GET",
+  "module": "ai_research_cohort_sources.py",
+  "path": "/api/ai/research-cohort/project-acls"
+ },
+ {
+  "auth": "ANY",
+  "function": "list_patient_authorizations",
+  "method": "GET",
+  "module": "ai_research_cohort_sources.py",
+  "path": "/api/ai/research-cohort/patient-authorizations"
+ },
+ {
+  "auth": "ANY",
+  "function": "create_task",
+  "method": "POST",
+  "module": "ai_research_cohort_tasks.py",
+  "path": "/api/ai/research-cohort/tasks"
+ },
+ {
+  "auth": "ANY",
+  "function": "list_tasks",
+  "method": "GET",
+  "module": "ai_research_cohort_tasks.py",
+  "path": "/api/ai/research-cohort/tasks"
+ },
+ {
+  "auth": "ANY",
+  "function": "get_task",
+  "method": "GET",
+  "module": "ai_research_cohort_tasks.py",
+  "path": "/api/ai/research-cohort/tasks/{run_id}"
+ },
+ {
+  "auth": "ANY",
+  "function": "cancel_task",
+  "method": "POST",
+  "module": "ai_research_cohort_tasks.py",
+  "path": "/api/ai/research-cohort/tasks/{run_id}/cancel"
+ },
+ {
+  "auth": "ANY",
+  "function": "get_part",
+  "method": "GET",
+  "module": "ai_research_cohort_tasks.py",
+  "path": "/api/ai/research-cohort/tasks/{run_id}/parts/{part}"
+ },
+ {
   "auth": [
    "super_admin"
   ],

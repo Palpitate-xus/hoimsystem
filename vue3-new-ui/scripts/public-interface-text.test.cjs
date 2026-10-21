@@ -28,3 +28,16 @@ test('import sources, export sources and object keys retain static grammar',()=>
 test('other source and clinical modules cannot use the interface loader',()=>{
  assert.throws(()=>transformPublicText('module.exports={};',{...context,resourcePath:path.join(root,'src/api/patient.js')}),/not allowlisted/);
 });
+
+test('canonical Babel loader remains directly discoverable by existing isolated harnesses',()=>{
+ const config=require('../rspack.config.js');
+ const rule=config.module.rules.find(rule=>rule.use?.loader==='babel-loader');
+ assert(rule);assert.deepEqual(rule.options,undefined);
+ assert.deepEqual(rule.use.options.presets,['@babel/preset-env']);
+ const hook=require('./public-interface-babel.cjs')();
+ const emitted=[];const ctx={...context,cacheable(){},emitFile:(...args)=>emitted.push(args)};
+ const changed=hook.result.call(ctx,{code:'module.exports='+JSON.stringify(literal)+';',map:null});
+ assert.equal(emitted.length,1);assert(changed.code.includes('readSchemaDocumentData'));
+ const original={code:'module.exports=1;',map:{unchanged:true}};
+ assert.equal(hook.result.call({...ctx,resourcePath:path.join(root,'src/api/patient.js')},original),original);
+});

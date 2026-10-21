@@ -1,0 +1,9 @@
+{
+  "schema_version": "research_source_router_function_fixtures_v1",
+  "source": {
+    "path": "/tmp/hoim-research-source-ui-first-real-packets.json",
+    "bytes": 140363,
+    "sha256": "57add25894f897b4809e3589581735bb0622a77a5ac42a087dfebe466884686f"
+  },
+  "scope": "Unmodified real synthetic SQL/router-function lifecycle DTOs. Not actual mounted HTTP, not a browser backend, not clinical validation. Browser network transports wrap these DTOs as synthetic intercepted responses explicitly. Case wrapper is previous Source stage before the forthcoming full governance and directory phase; no claim that it is latest after that change."
+}

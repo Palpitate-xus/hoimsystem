@@ -46,5 +46,6 @@ SOURCE_REFERENCE_KEYS = frozenset(
         "document_original_id",
         "drug_label_source_binding_id",
         "document_change_scope_id",
+        "research_cohort_case_id",
     }
 )

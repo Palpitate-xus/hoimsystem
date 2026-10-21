@@ -1061,10 +1061,17 @@ def list_global_runs(
     counts = dict(db.query(AIFeedback.run_id, func.count(AIFeedback.feedback_id)).filter(AIFeedback.run_id.in_([item.run_id for item in rows])).group_by(AIFeedback.run_id).all()) if rows else {}
     from app.ai.document_change_storage import is_document_change_run
     from app.ai.document_change_views import run_view
+    from app.ai.research_cohort_shared import directory_metadata, is_research_task
 
     data = [
         {
-            **(run_view(db, user, item, False, current=False) if is_document_change_run(db, item) else describe_run(item, False, user=user)),
+            **(
+                directory_metadata(db, user, item)
+                if is_research_task(db, item)
+                else run_view(db, user, item, False, current=False)
+                if is_document_change_run(db, item)
+                else describe_run(item, False, user=user)
+            ),
             "requested_by": item.requested_by,
             "provider_id": item.provider_id,
             "feedback_count": counts.get(item.run_id, 0),
@@ -1085,7 +1092,11 @@ def inspect_run_trace(run_id: str, db: Session = Depends(get_db), user: User = D
     from app.ai.document_change_views import trace_view
     from app.ai.native_task_routing import locate_native_task
 
-    locate_native_task(db, run_id)  # Reject contradictory immutable anchors.
+    identity = locate_native_task(db, run_id)  # Reject contradictory immutable anchors.
+    from app.ai.research_cohort_shared import is_research_task, split_trace
+
+    if identity is not None and identity.domain == "research_cohort" or identity is None and is_research_task(db, run_id):
+        return {"code": 200, "msg": "success", "data": split_trace(db, user, run_id)}
     if guard_change_run_id(db, user, run_id, current=False):
         return {"code": 200, "msg": "success", "data": trace_view(db, user, db.get(AIRun, run_id))}
     guard_private_task_read(db, user, run_id)

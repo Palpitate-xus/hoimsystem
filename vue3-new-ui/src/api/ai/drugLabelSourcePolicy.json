@@ -1,0 +1,1 @@
+{"comparison_fields":["pharmaceutical_id","name","barcode","status"],"missing_evidence":["manufacturer","approval_number","dosage_form","strength","ingredient","quantity_unit","official_version_authority","pharmacist_licensure","complete_official_leaflet_coverage"],"source_max_utf8_bytes":8388608}

@@ -18,6 +18,7 @@ from app.ai import inventory_native_source_models as _inventory_native_source_mo
 from app.ai import inventory_scenario_models as _inventory_scenario_models  # noqa: F401
 from app.ai import models as _ai_models  # noqa: F401
 from app.ai import research_cohort_models as _research_cohort_models  # noqa: F401
+from app.ai import research_variables_models as _research_variables_models  # noqa: F401
 from app.ai import roster_models as _roster_models  # noqa: F401
 from app.ai import roster_plan_models as _roster_plan_models  # noqa: F401
 from app.ai import sofa_models as _sofa_models  # noqa: F401

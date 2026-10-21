@@ -406,3 +406,5 @@
 - 2026-10-21：第79项新增实际合法Case的provider双重转义预算负控，单独完整storage32项一次通过（16.59秒pytest/27.896秒外层），不是与前342累加为单次374。真实隔离MySQL六表Source→Task增量往返全部通过（39.237秒）：231旧表/5条合成User行逐步DDL与行哈希不变，10UTC6/10MEDIUM、完整容量/+1、旧RR当前具体审计/Task定位、实际Source/Task触发器回滚与三类Task锁1205，单剩额度双writer一成一429无1213。首MySQL因脚本普通Audit get沿旧RR返回None而失败，已改实际当前SHARE核对；产品不改，失败与双runner/worker完整保留，均cleanup真。shared执行链和FE继续。
 
 - 2026-10-21：第79项合法缺失用量与有效内容分开：optional total不能反推出缺失组件，完整有效草稿仍可接收；显式非法total或与两个实际已知组件矛盾则拒并保留已知同伴用量。三个完整gateway61/storage32/config26文件一次119全绿（20.54秒pytest/31.058秒外层），1182输入稳定；这只改响应Envelope，不把先前MySQL阶段重标为当前最终版本。下一步实际claim/dispatch/终态回执。
+
+- 2026-10-21：第79项实际claim/dispatch与独立具体审计证明已提交；四整文件一次138通过（26.13秒pytest/37.131秒外层），1184输入稳定，新增19项。来源/原epoch/配置重新核对，dispatch原claim实际PK在受保护正文前核验；三实际不同创建/claim/dispatch主键、原lease、完整UTC6及旧表秒钟分明。来源撤回后重复交付纯skip不终结原owner，六种实际phase审计写入触发器失败整体回滚。可信technical reader不读取Source/Task正文，也不授数据权限；尚无commit/HTTP/终态/结果接受/共享worker和FE，继续。

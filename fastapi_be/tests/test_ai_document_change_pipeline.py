@@ -315,10 +315,11 @@ def test_admin_reader_captures_loaded_request_epoch_before_orm_refresh(db_sessio
     # before refreshing the authenticated actor. No private task read follows.
     from app.ai.charge_reconciliation_models import AIChargeWriteGate
     from app.ai.inventory_native_source_models import AIInventoryWriteGate
+    from app.ai.operations_support_models import AIOperationsWriteGate
     from app.ai.research_cohort_models import AIResearchWriteGate
     from app.ai.satisfaction_models import AISatisfactionWriteGate
 
-    tables = [AIChargeWriteGate.__tablename__, AISatisfactionWriteGate.__tablename__, AIInventoryWriteGate.__tablename__, AIResearchWriteGate.__tablename__, "hoimsystem_users"]
+    tables = [AIChargeWriteGate.__tablename__, AISatisfactionWriteGate.__tablename__, AIInventoryWriteGate.__tablename__, AIResearchWriteGate.__tablename__, AIOperationsWriteGate.__tablename__, "hoimsystem_users"]
     assert len(statements) == len(tables)
     assert all(("FROM " + table) in statement for table, statement in zip(tables, statements, strict=True))
     no_task_text(statements)

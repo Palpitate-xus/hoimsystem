@@ -110,7 +110,7 @@
       <el-alert v-if="busy" type="info" :closable="false" title="任务已保存，正在等待处理或生成结果。" />
       <el-alert v-if="run.status === 'failed'" type="error" :closable="false" :title="run.error_message || '生成失败，请联系管理员检查服务状态'" />
       <ai-service-findings :findings="run.tool_findings" @inspect="inspectEvidence" />
-      <ai-operational-findings :findings="run.operational_findings" @inspect="inspectEvidence" />
+      <ai-operational-findings v-if="!run.inventory_findings" :findings="run.operational_findings" @inspect="inspectEvidence" />
       <ai-forecast-findings v-if="run.feature_key === 'visit_forecast'" :findings="run.forecast_findings" :analysis="run.result?.forecast_analysis" @inspect="inspectEvidence" />
       <ai-incident-findings :findings="run.incident_findings" @inspect="inspectEvidence" />
       <ai-consultation-findings :findings="run.consultation_findings" @inspect="inspectEvidence" />
@@ -183,7 +183,7 @@
     </el-collapse>
     <el-dialog v-model="contextDialog" :title="needsOperations ? '本次提供给 AI 的运营资料' : '本次提供给 AI 的患者资料'" width="min(1000px, 96vw)">
       <el-alert type="info" :closable="false" title="资料保留时间和状态，缺失信息会单独标记。" />
-      <ai-operational-findings v-if="needsOperations && !needsForecast && !needsRoster && !needsBed && !needsSurgery && !needsSupply" :findings="contextData?.context" @inspect="inspectPreviewEvidence" />
+      <ai-operational-findings v-if="needsOperations && !needsForecast && !needsRoster && !needsBed && !needsSurgery && !needsSupply && !needsNativeInventory" :findings="contextData?.context" @inspect="inspectPreviewEvidence" />
       <ai-forecast-findings v-if="needsForecast && contextDialog" :findings="contextData?.context" @inspect="inspectPreviewEvidence" />
       <ai-incident-findings v-if="needsIncident" :findings="contextData?.context" @inspect="inspectPreviewEvidence" />
       <ai-consultation-findings :findings="contextData?.context?.consultation_sources" @inspect="inspectPreviewEvidence" />

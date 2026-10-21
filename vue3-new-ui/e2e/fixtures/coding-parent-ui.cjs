@@ -1,7 +1,7 @@
 const{expect}=require('@playwright/test'),actual=require('./coding-parent-actual.json');
 const scope=actual.actual_scope,refs={coding_case_id:actual.live_case.data.case_snapshot_id};
 async function setupCodingParent(page,harness,config={}){
- const state={mode:'assistant',role:'doctor',status:'succeeded',reads:[],writes:[],errors:[],releases:{},completed:[],...config};state.feature=structuredClone(actual.features.data.find(f=>f.key==='drg_evidence_review'));page.__codingParentState=state;page.on('pageerror',e=>state.errors.push(e.message));
+ const state={mode:'assistant',role:'doctor',status:'succeeded',reads:[],writes:[],errors:[],releases:{},completed:[],...config};state.feature=structuredClone(actual.features.data.find(f=>f.key===(state.featureKey||'drg_evidence_review')));page.__codingParentState=state;page.on('pageerror',e=>state.errors.push(e.message));
  await page.context().route('**/*',route=>new URL(route.request().url()).origin===harness.origin?route.continue():route.abort());
  await page.route('**/api/**',async route=>{const req=route.request(),u=new URL(req.url()),p=u.pathname,m=req.method();let response;
  if(m==='GET'){
@@ -29,7 +29,7 @@ async function setupCodingParent(page,harness,config={}){
  const value=structuredClone(response);if(state.mutate)value.data=state.mutate(value.data,p,m)||value.data;const held=state.hold?.(m,p,req);if(held)await new Promise(resolve=>state.releases[held]=resolve);const failed=state.failure?.(m,p,req);try{await route.fulfill(failed?{status:failed,json:{code:failed,msg:'Synthetic current authorization or original unavailable'}}:{json:value});}finally{if(held)state.completed.push(held);}
  });
  await page.goto(harness.origin);await page.waitForFunction(()=>!!window.__codingParentProbe);
- await page.evaluate(({mode,role,initialInput,feature,scope})=>{const p=window.__codingParentProbe;p.store.commit('user/permissions',[role]);Object.assign(p.scope,{mode,patientId:scope.patient_id,encounterRef:scope.admission_id,initialInput,features:[feature],ready:true});},{mode:state.mode,role:state.role,initialInput:state.initialInput??{home_id:scope.home_id,...refs},feature:state.feature,scope});return state;
+ await page.evaluate(({mode,role,initialInput,feature,scope})=>{const p=window.__codingParentProbe;p.store.commit('user/permissions',[role]);Object.assign(p.scope,{mode,featureKeys:[feature.key],initialFeature:feature.key,patientId:scope.patient_id,encounterRef:scope.admission_id,initialInput,features:[feature],ready:true});},{mode:state.mode,role:state.role,initialInput:state.initialInput??{home_id:scope.home_id,...refs},feature:state.feature,scope});return state;
 }
 async function ready(page){await expect(page.getByRole('button',{name:'生成辅助建议',exact:true})).toBeEnabled({timeout:20000});}
 async function showHistory(page){await ready(page);await page.getByText('最近任务',{exact:true}).click();await page.getByRole('button',{name:'查看',exact:true}).first().click();await expect(page.getByLabel('AI任务结果',{exact:true})).toBeVisible({timeout:15000});}

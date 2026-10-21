@@ -316,7 +316,7 @@ function invalidateSurgery(){if(!surgeryLifecycle.value)return;surgerySelection.
 const needsCodingEvidence=computed(()=>featureKey.value==='drg_evidence_review'&&selected.value?.input_mode==='coding_evidence');
 const codingSelection=ref(null),codingReady=ref(false),codingInputKey=ref(0),codingHome=ref(null);
 const codingInitialReferences=computed(()=>Object.hasOwn(props.initialInput,'coding_case_id')?{coding_case_id:props.initialInput.coding_case_id}:null);
-const codingWasBound=computed(()=>Object.hasOwn(props.initialInput,'coding_case_id')||Object.hasOwn(props.initialInput,'home_id'));
+const codingWasBound=computed(()=>Object.hasOwn(props.initialInput,'coding_case_id')||featureKey.value==='drg_evidence_review'&&Object.hasOwn(props.initialInput,'home_id'));
 const codingLifecycle=computed(()=>featureKey.value==='drg_evidence_review'||codingRunHasMarkers(run.value)||!!contextData.value?.context?.coding_binding);
 const codingAuthorized=computed(()=>needsCodingEvidence.value&&viewActive.value&&!!store.state.user.accessToken&&(canPreview.value||(store.getters['user/permissions']||[]).some(role=>selected.value?.allowed_roles?.includes(role))));
 const codingModeReady=computed(()=>codingAuthorized.value&&codingReady.value&&codingScopeValid({patient_id:patientId.value,admission_id:encounterRef.value,home_id:codingHome.value})&&codingCaseReferencesValid(codingSelection.value)&&(codingInitialReferences.value===null||codingCaseReferencesValid(codingInitialReferences.value)&&supportCanonical(codingInitialReferences.value)===supportCanonical(codingSelection.value))&&(selected.value?.enabled&&selected.value?.validation_status==='validated'||canPreview.value&&preview.value));

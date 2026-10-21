@@ -403,3 +403,9 @@
 - 2026-10-21：第74项原完整后端首轮实际结束：10670通过/12失败/28真实权重前置skip/7warnings，1149输入稳定；完整RED与原freeze永久保留。schema异常类型/旧SQL观察规则修复已有202与46分组验证，最后手术整文件8项另行通过；新增真实expired主键刷新正文边界由b7da4b0精确修复，Root74-only整文件5项通过。修复全量第二轮因新缺陷确认在188通过后SIGINT（exit2），明确未完成；后续将启动fresh第三完整回归。FE1199输入仍冻结无改。
 
 - 2026-10-21：第74项集成后的完整AI浏览器175文件/2818用例一次全绿（实际Playwright6216321.163ms/外层6228.268秒），2575隔离mock+222生产mock+21真实合成HTTP，0skip/retry/flaky/error。1199源码/测试/夹具/构建输入与375实际dist全程SHA不变，660生产输入匹配canonical；旧161个spec字节及2484收集数均保持，新增14spec/334用例在本次完整运行内完成。完整原始证据永久保存ai-research-native-browser-verification.json。生产目标已明确为Chrome/Edge85、Firefox79、Safari14.1，本轮仅实际当前Chromium，不称这些历史浏览器实测；25无关旧非AI spec不在范围。后端fresh全套仍在运行，主工作分支尚未接纳74。
+
+### 第74项完整后端与整套浏览器验收完成（2026-10-21）
+
+- 新的完整默认后端一次10687通过、28可选模型测试跳过、7条既有负控/适配器提示，10715实际收集；pytest4352.78秒/外层4365.394秒，全部1150 BE与四映射输入前后及永久保存时稳定。未把202/46/5/8等独立组相加，也不覆盖75–80新树。第一完整12失败与主动中断第二188通过的原记录完整保留。
+- 此前175文件2818项完整浏览器同次全部通过、无skip/retry/flaky/error；此时再核1199 FE/spec/fixture/build与375实际dist精确匹配原冻结。完整证据见ai-research-native-backend-verification.json与ai-research-native-browser-verification.json。
+- 本地主工作树合并及精确字节/正式构建准入随后执行；不是新MySQL/远端模型/医院或临床验证/部署证明，现代浏览器目标的明确记录保持。

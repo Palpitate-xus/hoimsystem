@@ -11,7 +11,7 @@ export function useChargeReconciliationInput(props,emit){
  function invalidate(notify=true){sequence++;selected.value=null;checking.value=false;emit('selection',null);emit('availability',false);if(notify)emit('invalidate');}
  function reset(notify=true){epoch++;childKey.value++;error.value='';invalidate(notify);emit('scope-change',null);}
  function clearSelection(){initialConsumed=true;childKey.value++;invalidate();}
- function fail(message){invalidate();error.value=message||'当前完整账目或真实住院已无法核对，旧选择已清除。';}
+ function fail(message){childKey.value++;invalidate();error.value=message||'当前完整账目或真实住院已无法核对，旧选择已清除。';}
  async function select(value){invalidate();const t=ticket(),version=sequence;if(!current(t)||!scopeReady.value)return;checking.value=true;error.value='';initialConsumed=true;
   try{const refs=value?.case_snapshot_id?{charge_case_id:value.case_snapshot_id}:value;if(!chargeCaseReferencesValid(refs))throw new Error('账目引用须只包含一个规范完整账目原件标识。');
    const row=(await getChargeReconciliationCase(refs.charge_case_id,{auditOnly:false})).data;if(!current(t)||version!==sequence)return;

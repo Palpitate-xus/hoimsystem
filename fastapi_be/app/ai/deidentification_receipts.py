@@ -153,7 +153,22 @@ def usage_receipt(db, run, *, source=None):
     source = source or opaque_artifact(db, run.run_id)
     header = result_header(db, run.run_id)
     if header["usage_event_id"] is None:
-        if run.status not in {"queued", "running", "cancelled"} or run.status == "cancelled" and (run.lease_token is None or run.latency_ms is not None):
+        # A running cancellation can retain the durable pre-call reservation
+        # (latency_ms=0) while its one-shot worker is still awaiting HTTP. It is
+        # not a completed zero-cost call. Completed/corrupt terminal writes must
+        # still have their specific usage PK; do not downgrade them to pending.
+        pending_result = all(header[key] is None for key in ("result_hash", "result_bytes", "accepted_lease", "accepted_at", "accept_event_id", "stored_result_hash"))
+        pending_cancel = (
+            run.status == "cancelled"
+            and run.lease_token is not None
+            and run.start_time is not None
+            and run.latency_ms in (None, 0)
+            and run.error_code is None
+            and run.error_message is None
+            and (run.input_tokens, run.output_tokens) == (0, 0)
+            and pending_result
+        )
+        if run.status not in {"queued", "running"} and not pending_cancel:
             raise HTTPException(409, "终态实际用量回执缺失")
         return usage()
     event = current_research_rows(db.query(AIAuditEvent).filter_by(event_id=header["usage_event_id"]), shared=True).one_or_none()

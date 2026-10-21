@@ -83,3 +83,67 @@ async def test_main_foreign_or_direct_scope_cannot_be_added_to_case_only_task_in
     before = task_case["db"].query(AIRun).count()
     response = await async_client.post("/api/ai/deidentification/tasks", headers=auth_headers(task_case["actor"].username), json={"input": {**task_case["input"], **extra}})
     assert response.status_code == 422 and task_case["db"].query(AIRun).count() == before
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("kind", ["chat", "responses"])
+async def test_main_inflight_cancel_is_pending_unknown_until_the_original_worker_records_actual_paid_usage(task_case, async_client, auth_headers, kind):
+    import asyncio
+
+    import httpx
+
+    case, db = task_case, task_case["db"]
+    case["provider"].kind = kind
+    db.commit()
+    headers = auth_headers(case["actor"].username)
+    queued = await async_client.post("/api/ai/deidentification/tasks", headers=headers, json={"input": case["input"]})
+    assert queued.status_code == 200, queued.text
+    identifier = queued.json()["data"]["run_id"]
+    claimed = runtime.claim_deidentification_run(db, identifier)
+    db.rollback()
+    entered, released = asyncio.Event(), asyncio.Event()
+    actual_reply = model(case, partial=kind == "responses")
+
+    async def held(request):
+        entered.set()
+        await released.wait()
+        return actual_reply.handle_request(request)
+
+    worker = asyncio.create_task(runtime.execute_deidentification_claimed(*claimed, transport=httpx.MockTransport(held)))
+    try:
+        await asyncio.wait_for(entered.wait(), 10)
+        cancelled = await async_client.post("/api/ai/deidentification/tasks/" + identifier + "/cancel", headers=headers, json={})
+        assert cancelled.status_code == 200, cancelled.text
+        pending = cancelled.json()["data"]
+        assert pending["status"] == "cancelled" and pending["source"] is pending["result"] is pending["raw_frozen_json"] is None
+        assert pending["usage_receipt"] == {"input_tokens": None, "output_tokens": None, "complete": False, "model_call_attempted": None}
+        detail = await async_client.get("/api/ai/deidentification/tasks/" + identifier, headers=headers)
+        assert detail.status_code == 200, detail.text
+        assert detail.json()["data"]["result"] is None
+        assert detail.json()["data"]["usage_receipt"] == pending["usage_receipt"]
+    finally:
+        released.set()
+        await worker
+    paid = await async_client.get("/api/ai/deidentification/tasks/" + identifier, headers=headers)
+    assert paid.status_code == 200, paid.text
+    value = paid.json()["data"]
+    assert value["status"] == "cancelled" and value["result"] is None
+    assert value["usage_receipt"] == {"input_tokens": 11, "output_tokens": None if kind == "responses" else 13, "complete": kind == "chat", "model_call_attempted": True}
+
+
+@pytest.mark.asyncio
+async def test_main_completed_cancel_with_removed_specific_receipt_never_degrades_to_pending_unknown(task_case, async_client, auth_headers):
+    from app.ai.deidentification_run_models import AIDeidentificationRunResult
+
+    case, db = task_case, task_case["db"]
+    run = runtime.create_deidentification_run(db, case["actor"], case["input"])
+    identifier = run.run_id
+    claimed = runtime.claim_deidentification_run(db, identifier)
+    db.rollback()
+    await runtime.execute_deidentification_claimed(*claimed, transport=model(case, mutate=lambda: runtime.cancel_deidentification_run(db, case["actor"], identifier)))
+    # Actual durable paid terminal state remains; remove only the actual PK link.
+    db.expire_all()
+    db.get(AIDeidentificationRunResult, identifier).usage_event_id = None
+    db.commit()
+    response = await async_client.get("/api/ai/deidentification/tasks/" + identifier + "/technical", headers=auth_headers(case["actor"].username))
+    assert response.status_code == 409 and "终态实际用量回执缺失" in response.text

@@ -13,10 +13,17 @@ def current_charge_rows(query, *, shared=False):
     return query.populate_existing().with_for_update(read=shared)
 
 
+def _mysql_gate_statement():
+    # Duplicate INSERT IGNORE takes S before our later X read and permits two
+    # new callers to deadlock while upgrading. An unchanged duplicate UPDATE
+    # acquires X atomically, including metadata-bootstrap databases.
+    return mysql_insert(AIChargeWriteGate).values(gate_id=1, revision=1).on_duplicate_key_update(gate_id=1)
+
+
 def lock_charge_gate(db):
     dialect = db.get_bind().dialect.name
     if dialect == "mysql":
-        statement = mysql_insert(AIChargeWriteGate).values(gate_id=1, revision=1).prefix_with("IGNORE")
+        statement = _mysql_gate_statement()
     elif dialect == "sqlite":
         statement = sqlite_insert(AIChargeWriteGate).values(gate_id=1, revision=1).on_conflict_do_nothing(index_elements=["gate_id"])
     else:

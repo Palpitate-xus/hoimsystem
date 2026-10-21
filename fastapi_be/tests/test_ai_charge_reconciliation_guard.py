@@ -55,3 +55,12 @@ def test_cached_role_does_not_authorize_after_actual_database_demotion(db_sessio
     with pytest.raises(HTTPException) as denied:
         lock_charge_write(db, actor, allowed_roles=ADMIN_ROLES)
     assert denied.value.status_code == 403
+
+
+def test_mysql_first_gate_uses_atomic_duplicate_update_instead_of_shared_upgrade():
+    from app.ai.charge_reconciliation_write_guard import _mysql_gate_statement
+
+    sql = str(_mysql_gate_statement().compile(dialect=mysql.dialect()))
+    assert "ON DUPLICATE KEY UPDATE gate_id =" in sql and "IGNORE" not in sql
+    assert sql.startswith("INSERT INTO hoimsystem_ai_charge_write_gate")
+    assert "revision =" not in sql

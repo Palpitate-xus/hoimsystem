@@ -1,4 +1,5 @@
-import{infectionHttp,infectionReferencesValid}from'./infectionClusterSources';
+import request from'@/utils/request';
+import{decodeInfectionResponse,infectionHttp,infectionReferencesValid}from'./infectionClusterSources';
 import{bytes,clock,digest,fixed,hash,keys,modelValid,same,unique,uuid,verifyStatisticsInput}from'./infectionClusterProofs';
 import{verifyInfectionAnalysis}from'./infectionClusterStatistics';
 const id=v=>{if(!uuid(v))throw Error('须明确当前本地任务UUID');return v;};
@@ -6,6 +7,8 @@ export const infectionTaskRequestValid=v=>modelValid('TaskCreate',v)&&infectionR
 export const previewInfectionTask=v=>{if(!infectionTaskRequestValid(v))throw Error('须完整明确有限统计场景与预览模式');return infectionHttp('/context',{method:'post',data:v});};
 export const createInfectionTask=v=>{if(!infectionTaskRequestValid(v))throw Error('须完整明确有限统计场景与预览模式');return infectionHttp('/tasks',{method:'post',data:v});};
 export const getInfectionTask=v=>infectionHttp('/tasks/'+id(v));
+export const getInfectionTaskTrace=async v=>decodeInfectionResponse(await request({url:'/ai/admin/runs/'+id(v),method:'get',responseType:'arraybuffer',retry:0}));
+export const infectionRunHasMarkers=v=>!!v&&(v.feature_key==='infection_cluster'||String(v.schema_version??'').startsWith('infection_local_')||v.result?.schema_version==='infection_statistics_result_pointer_v1'||Object.hasOwn(v,'infection_cluster_scenario_id'));
 export const getInfectionTaskPart=(v,part)=>{if(!['task','source','result'].includes(part))throw Error('只接受明确完整拆分件');return infectionHttp('/tasks/'+id(v)+'/parts/'+part);};
 export const cancelInfectionTask=v=>infectionHttp('/tasks/'+id(v)+'/cancel',{method:'post',data:{}});
 export const getInfectionTasks=({scenarioId=null,page=1,size=20}={})=>{if(!Number.isSafeInteger(page)||page<1||!Number.isSafeInteger(size)||size<1||size>100)throw Error('须明确完整分页');return infectionHttp('/tasks',{params:{page,size,...(scenarioId===null?{}:{scenario_id:id(scenarioId)})}});};
@@ -18,6 +21,10 @@ export function verifyInfectionTaskMetadata(v,{runId=null,scenarioId=null,curren
  if(recorded){const u=v.usage;if(u.run_id!==v.run_id||u.terminal_status!==v.status||u.result_hash!==v.result_hash||u.calculation_completed===true&&u.calculation_attempted!==true||u.calculation_attempted===false&&(u.calculation_completed!==false||u.calculation_ms!==null)||success&&u.calculation_completed!==true)return false;}
  return current();
 }catch{return false;}}
+// Global Super directory adds only these three bodyless technical columns.
+// Reject every other extension; this does not widen the dedicated Task DTO.
+export function infectionGlobalTaskMetadata(v){try{const{requested_by,provider_id,feedback_count,...metadata}=v;if(!Object.hasOwn(v,'requested_by')||!Object.hasOwn(v,'provider_id')||!Object.hasOwn(v,'feedback_count')||!Number.isSafeInteger(requested_by)||requested_by<1||requested_by>2147483647||provider_id!==null||!Number.isSafeInteger(feedback_count)||feedback_count<0||feedback_count>2147483647||!verifyInfectionTaskMetadata(metadata))return null;return metadata;}catch{return null;}}
+export function verifyInfectionSplitTrace(v,{runId=null,metadata=null,current=()=>true}={}){try{return current()&&keys(v,['schema_version','run','parts','clinical_body_included','current_patient_purpose_required_even_for_super'])&&v.schema_version==='infection_local_split_trace_v1'&&v.clinical_body_included===false&&v.current_patient_purpose_required_even_for_super===true&&verifyInfectionTaskMetadata(v.run,{runId,current})&&(metadata===null||same(v.run,metadata))&&keys(v.parts,['task','source','result'])&&['task','source','result'].every(k=>v.parts[k]==='/api/ai/infection-cluster/tasks/'+v.run.run_id+'/parts/'+k);}catch{return false;}}
 export function infectionTaskDirectoryValid(v,{page=1,size=20,scenarioId=null}={}){try{return modelValid('TaskDirectory',v)&&v.page===page&&v.size===size&&v.items.length===Math.min(size,Math.max(0,v.total-(page-1)*size))&&unique(v.items.map(r=>r.run_id))&&v.items.every(r=>verifyInfectionTaskMetadata(r,{scenarioId}));}catch{return false;}}
 async function verifyPart(v,name,rid,current){if(!current()||!modelValid('TaskPart',v)||v.part!==name||v.run_id!==rid||v.value_hash!==await digest(v.value)||!current()||v.value_bytes!==bytes(v.value))return false;return current();}
 export async function verifyInfectionTaskParts(metadata,parts,{current=()=>true}={}){try{

@@ -119,7 +119,11 @@ def test_single_revision_fits_existing_version_column_and_follows_document_sourc
     config = Config(str(PATH.parents[2] / "alembic.ini"))
     config.set_main_option("script_location", str(PATH.parent.parent))
     script = ScriptDirectory.from_config(config)
-    assert script.get_heads() == [migration.revision]
+    assert len(script.get_heads()) == 1
+    ancestry = [row.revision for row in script.walk_revisions()]
+    assert len(ancestry) == len(set(ancestry))
+    assert migration.revision in ancestry and migration.down_revision in ancestry
+    assert ancestry.index(migration.revision) < ancestry.index(migration.down_revision)
 
 
 def test_actual_up_down_up_preserves_every_old_table_ddl_and_complete_seed_rows(anchor_db):

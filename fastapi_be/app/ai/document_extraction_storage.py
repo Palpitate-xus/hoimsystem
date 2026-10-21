@@ -13,6 +13,7 @@ from app.ai.document_extraction_contract import EXTRACTION_SYSTEM_PROMPT, requir
 from app.ai.document_extraction_models import ANCHOR_HASH_FIELDS, ANCHOR_SCHEMA, AIDocumentExtractionRunAnchor
 from app.ai.document_extraction_prompt import instructions_digest
 from app.ai.document_extraction_result import validate_result
+from app.ai.document_extraction_run_record import parse_record, record_marker
 from app.ai.document_extraction_view_contract import DocumentFrozenProvider, DocumentFrozenValidation
 from app.ai.governance import digest
 
@@ -50,7 +51,7 @@ def is_extraction_run(db, run):
         return True
     if isinstance(run.result_json, str):
         result = json.loads(run.result_json)
-        if isinstance(result, dict) and "document_extraction" in result:
+        if isinstance(result, dict) and ("document_extraction" in result or record_marker(result)):
             return True
     if db is None or not run.run_id:
         return False
@@ -152,11 +153,21 @@ def authorize_document_run(db, user, run, *, current=False):
 
 def load_result(db, run):
     snapshot, context, metadata = load_snapshot(db, run)
-    if run.status != "succeeded":
-        if run.result_json != "{}":
-            raise HTTPException(409, "未成功任务不能携带已接收的条款草稿")
-        return None
     try:
-        return validate_result(run.result_json, context.document_source, metadata["instructions_digest"]).model_dump(mode="json")
+        value = c.parse_json(run.result_json)
+        if record_marker(value):
+            record = parse_record(run.result_json)
+            if run.status not in {"succeeded", "failed", "cancelled"} or (record.result is not None) != (run.status == "succeeded"):
+                raise ValueError("The complete record and actual terminal state differ")
+            value = record.result.model_dump(mode="json") if record.result is not None else None
+        elif run.status == "succeeded":
+            # Literal-storage compatibility only. Runtime/API/save callers also
+            # require the actual receipt reference through usage_receipt.
+            value = run.result_json
+        elif run.result_json == "{}":
+            value = None
+        else:
+            raise ValueError("An unsuccessful task cannot carry an accepted draft")
+        return validate_result(value, context.document_source, metadata["instructions_digest"]).model_dump(mode="json") if value is not None else None
     except (ValueError, TypeError, KeyError, UnicodeError) as exc:
         raise HTTPException(409, "已存结果与完整原文或Prompt不一致，未展示草稿") from exc

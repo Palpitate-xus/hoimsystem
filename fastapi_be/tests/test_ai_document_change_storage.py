@@ -12,6 +12,7 @@ from app.ai import document_change_contract as c
 from app.ai import document_change_sources as sources
 from app.ai import document_change_storage as storage
 from app.ai import document_evidence_sources as originals
+from app.ai.catalog import CATALOG_VERSION
 from app.ai.context import context_metadata
 from app.ai.document_change_context import prepare_context
 from app.ai.document_change_draft import SYSTEM_PROMPT, TASK_PROMPT
@@ -94,7 +95,7 @@ def task(case, *, stage=True, kind="chat"):
         "model_version": provider.model,
     }
     snapshot = {
-        "catalog_version": "synthetic-version-contract-v1",
+        "catalog_version": CATALOG_VERSION,
         "system_prompt": SYSTEM_PROMPT,
         "task_prompt": TASK_PROMPT,
         "payload": {"input": values, "context": bundle.data, "tools": {}, "evidence": bundle.evidence},
@@ -145,7 +146,7 @@ def test_actual_artifact_short_run_raw_anchor_and_all_split_packets(change_case,
     assert storage.is_document_change_run(db, run)
 
 
-@pytest.mark.parametrize("change", ["question", "prompt", "provider", "validation", "evidence", "metadata"])
+@pytest.mark.parametrize("change", ["question", "prompt", "provider", "validation", "evidence", "metadata", "prompt_version", "preview"])
 def test_rehashed_short_json_cannot_replace_independent_sql_anchors(change_case, change):
     db, actor, *_ = change_case
     case = task(change_case)
@@ -162,6 +163,10 @@ def test_rehashed_short_json_cannot_replace_independent_sql_anchors(change_case,
         metadata["model_version"] = snapshot["provider_snapshot"]["model"]
     elif change == "validation":
         snapshot["feature_validation"]["note"] += "changed"
+    elif change == "prompt_version":
+        run.prompt_version += 1
+    elif change == "preview":
+        run.preview = 0
     elif change == "evidence":
         snapshot["payload"]["evidence"][0]["inventory_hash"] = "a" * 64
         run.evidence_json = c.e.canonical_json(snapshot["payload"]["evidence"])

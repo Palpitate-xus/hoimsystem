@@ -185,8 +185,23 @@ def _project_frozen(snapshot, published, audit_ids):
     return checked_source(sources.public_source(historical))
 
 
-def _created_detail(bound):
-    return {"schema_version": "document_change_artifact_created_v1", "scope_id": bound.scope.scope_id, "source_digest": bound.source_digest, "source_binding_hash": c.e.digest(bound)}
+def _created_detail(bound, run):
+    return {
+        "schema_version": "document_change_artifact_created_v1",
+        "scope_id": bound.scope.scope_id,
+        "source_digest": bound.source_digest,
+        "source_binding_hash": c.e.digest(bound),
+        "run_header": {
+            "feature_key": run.feature_key,
+            "provider_id": run.provider_id,
+            "provider_revision": run.provider_revision,
+            "prompt_version": run.prompt_version,
+            "requested_by": run.requested_by,
+            "preview": run.preview,
+            "create_time": str(run.create_time.replace(microsecond=0)),
+            "clock_basis": "legacy_utc_second_storage",
+        },
+    }
 
 
 def _load_locked(db, run, task):
@@ -219,7 +234,7 @@ def _load_locked(db, run, task):
         raise ValueError("The complete raw public source or unique private projection differs")
     with db.no_autoflush:
         audit = db.query(AIAuditEvent).filter_by(event_id=row.created_audit_event_id).populate_existing().with_for_update(read=True).one_or_none()
-    expected = (run.requested_by, ARTIFACT_CREATED, run.run_id, c.e.canonical_json(_created_detail(bound)), row.recorded_at.replace(microsecond=0))
+    expected = (run.requested_by, ARTIFACT_CREATED, run.run_id, c.e.canonical_json(_created_detail(bound, run)), row.recorded_at.replace(microsecond=0))
     if audit is None or tuple(getattr(audit, name) for name in ("actor_id", "action", "target", "detail_json", "create_time")) != expected:
         raise ValueError("The exact task creation audit is unavailable")
     public_payload(snapshot["payload"], source)
@@ -228,24 +243,32 @@ def _load_locked(db, run, task):
     return snapshot, metadata, evidence, bound, row, source
 
 
-def authorize_run(db, user, run, *, current=True):
+def authorize_run(db, user, run, *, current=True, execution=False):
     try:
-        originals.current_super(db, user)
+        actor = originals.current_super(db, user)
         task = _task(run)
         if current:
             verify_current_context(db, user, task[1].model_dump(mode="json"))
-        return _load_locked(db, run, task)
+        loaded = _load_locked(db, run, task)
+        if execution:
+            if not current:
+                raise ValueError("Frozen audit cannot authorize a new model execution")
+            from app.ai.document_change_result_storage import _current_configuration, _execution_epoch
+
+            _execution_epoch(actor, loaded[4])
+            _current_configuration(db, run, loaded[0], loaded[1])
+        return loaded
     except (ValueError, TypeError, KeyError, UnicodeError, RecursionError) as exc:
         raise HTTPException(409, "指南版本任务的完整Scope、原文、Prompt或独立SQL锚不一致") from exc
 
 
-def load_snapshot(db, run, *, user=None, current=True):
+def load_snapshot(db, run, *, user=None, current=True, execution=False):
     if user is None:
         with db.no_autoflush:
             user = db.query(User).filter_by(user_id=run.requested_by).populate_existing().with_for_update(read=True).one_or_none()
         if user is None:
             raise HTTPException(403, "当前原任务超级管理员已失效")
-    return authorize_run(db, user, run, current=current)
+    return authorize_run(db, user, run, current=current, execution=execution)
 
 
 @originals._write
@@ -264,7 +287,7 @@ def stage_artifact(db, user, run):
     with db.no_autoflush:
         if db.query(AIDocumentChangeRunArtifact.run_id).filter_by(run_id=run.run_id).with_for_update(read=True).first() is not None:
             raise ValueError("An immutable task Artifact cannot be overwritten")
-    audit = AIAuditEvent(actor_id=actor.user_id, action=ARTIFACT_CREATED, target=run.run_id, detail_json=c.e.canonical_json(_created_detail(bound)), create_time=now.replace(microsecond=0))
+    audit = AIAuditEvent(actor_id=actor.user_id, action=ARTIFACT_CREATED, target=run.run_id, detail_json=c.e.canonical_json(_created_detail(bound, run)), create_time=now.replace(microsecond=0))
     db.add(audit)
     db.flush()
     row = AIDocumentChangeRunArtifact(
@@ -353,3 +376,41 @@ def is_document_change_run(db, run):
         return identity[1] is not None
     except (ValueError, TypeError, KeyError, UnicodeError, RecursionError) as exc:
         raise HTTPException(409, "任务原生身份不完整，未降级为通用任务") from exc
+
+
+def bounded_result(value):
+    """Complete body capacity only; stage_result also checks its whole wire packet."""
+    if isinstance(value, str | bytes):
+        value = parse_case_json(value)
+    raw = require_case_json(value)
+    return raw, c.e.bytes_hash(raw), len(c.e.utf8(raw))
+
+
+def stage_result(db, user, run, lease, value, usage, *, latency_ms):
+    from app.ai.document_change_result_storage import stage_result as stage
+
+    return stage(db, user, run, lease, value, usage, latency_ms=latency_ms)
+
+
+def stage_terminal(db, run, lease, **values):
+    from app.ai.document_change_result_storage import stage_terminal as stage
+
+    return stage(db, run, lease, **values)
+
+
+def cancel_unclaimed(db, user, run):
+    from app.ai.document_change_result_storage import cancel_unclaimed as cancel
+
+    return cancel(db, user, run)
+
+
+def usage_receipt(db, run):
+    from app.ai.document_change_result_storage import usage_receipt as receipt
+
+    return receipt(db, run)
+
+
+def expand_result(db, user, run, *, current=True):
+    from app.ai.document_change_result_storage import expand_result as expand
+
+    return expand(db, user, run, current=current)

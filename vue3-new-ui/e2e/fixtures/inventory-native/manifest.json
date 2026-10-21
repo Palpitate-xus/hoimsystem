@@ -1,0 +1,71 @@
+{
+  "scope": "actual independent native calculation only, synthetic no hospital data",
+  "core_sha256": {
+    "inventory_config": "f8b0fab270e940de6c7f042e7475a2185ff2a8e082db95bb39fdc6801e83695d",
+    "inventory_contract": "8299c364547a104e0414aeaea1423e4950549900b233814819cf8084a2ae664b",
+    "inventory_model": "3ff1d71fbacb2706fba9b303e64747cdab59c9c670fc3be3df75b4f33c2668c4",
+    "inventory_server": "f560fc24fcf8c975243a41458841dc7067404aea2d15015f4e29301703294e1d"
+  },
+  "files": {
+    "all-ties.json": {
+      "bytes": 24422,
+      "sha256": "19acb64fd5c9503d209654e7a3813ce37642852dbebc55c697b5a2286c1eee79"
+    },
+    "complete.json": {
+      "bytes": 17913,
+      "sha256": "4db04499422e3018bacef4ce101eef3dbd80df4ea5083bda9b057962e1156bd0"
+    },
+    "cost-unit-mismatch.json": {
+      "bytes": 17896,
+      "sha256": "bb33d478becf16ea77a77115a94df9820e089a7f95911b925f33b18b25ee5f0b"
+    },
+    "expiry-frozen.json": {
+      "bytes": 18173,
+      "sha256": "45d1c6a4c3a7efdb92a0eeacf3a696b930dd13d36ebac2066a5492d5b0926995"
+    },
+    "fees-budget-constraints.json": {
+      "bytes": 18903,
+      "sha256": "a0a643808ebc25baeedc5c66dcf79c3c63c9ccea07f2f5f45b30942ea78d2e95"
+    },
+    "fefo-lot-tie.json": {
+      "bytes": 17941,
+      "sha256": "4bd92c87ba8f15cb53deabeb9757e67ebf1247b8818dc8303871b341e3f74994"
+    },
+    "incomplete-plan.json": {
+      "bytes": 14981,
+      "sha256": "ba6d1ece12391757d468bdbcfb6498798b206e6506e49662c1722a147afb19a2"
+    },
+    "legacy-capture.json": {
+      "bytes": 15042,
+      "sha256": "c4e9b1dc893183cd34332f63b9167102d48c576bc057f1c827a627fb71ae3f15"
+    },
+    "max-precision-31days.json": {
+      "bytes": 51557,
+      "sha256": "4584695100433225a4fdd68d9442d2486fc996f8310fa12fcdb14ffed24dd45e"
+    },
+    "negative-legacy.json": {
+      "bytes": 15090,
+      "sha256": "b695e14724dc07915ad148de56784b4ce2297efe47f577772bdec89914e2c68f"
+    },
+    "stock-unit-mismatch.json": {
+      "bytes": 15050,
+      "sha256": "9a3a76532edc08522a91427f742a1f189a16b2b0bc6caa4436d5be165e6bb475"
+    },
+    "unknown-constraint.json": {
+      "bytes": 17917,
+      "sha256": "0c9b490ff796c0e85edcc039b5b2e4516909dda0d973ed3339fd26d4c97c7061"
+    },
+    "unknown-plan.json": {
+      "bytes": 24335,
+      "sha256": "1f3046f6fa61b9c2811bc09b9679afcb38c591fba814cb11390125a61a1a30b6"
+    },
+    "zero.json": {
+      "bytes": 16271,
+      "sha256": "9bfa369423c7ebc03619b5e872ce707b9bb5cbe813f7d10f0cea4082b48c70c2"
+    },
+    "capabilities.json": {
+      "bytes": 5315,
+      "sha256": "2290cdcde2f014bb79cb72d6ed421726aa664fa16341e2ece7ba365b4bfebf7b"
+    }
+  }
+}

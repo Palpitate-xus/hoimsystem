@@ -109,6 +109,7 @@
     </el-form>
     <charge-reconciliation-assistant v-if="dedicatedPanel==='charge'" :feature="configuredFeature||null" :feature-key="featureKey" :initial-input="props.initialInput" :patient-id="props.patientId" :encounter-ref="props.encounterRef" :active="viewActive" />
     <document-extraction-assistant v-else-if="dedicatedPanel==='document'" :feature="configuredFeature||null" :feature-key="featureKey" :initial-input="props.initialInput" :patient-id="props.patientId" :encounter-ref="props.encounterRef" :active="viewActive" />
+    <document-change-assistant v-else-if="dedicatedPanel==='document_change'" :feature="configuredFeature||null" :feature-key="featureKey" :initial-input="props.initialInput" :patient-id="props.patientId" :encounter-ref="props.encounterRef" :active="viewActive" />
     <satisfaction-assistant v-else-if="dedicatedPanel==='satisfaction'" :feature="configuredFeature||null" :feature-key="featureKey" :initial-input="props.initialInput" :patient-id="props.patientId" :encounter-ref="props.encounterRef" :active="viewActive" />
 
     <drug-label-assistant v-else-if="dedicatedPanel==='drug_label'" :feature="configuredFeature||null" :feature-key="featureKey" :initial-input="props.initialInput" :patient-id="props.patientId" :encounter-ref="props.encounterRef" :pharmaceutical-id="props.pharmaceuticalId" :active="viewActive" />
@@ -259,6 +260,7 @@ import AiEcgFindings from "@/components/AIEcgFindings/index.vue";
 
 const ChargeReconciliationAssistant=defineAsyncComponent(()=>import("@/components/ai/ChargeReconciliationAssistant.vue"));
 const DocumentExtractionAssistant=defineAsyncComponent(()=>import("@/components/ai/DocumentExtractionAssistant.vue"));
+const DocumentChangeAssistant=defineAsyncComponent(()=>import("@/components/ai/DocumentChangeAssistant.vue"));
 const SatisfactionAssistant=defineAsyncComponent(()=>import("@/components/ai/SatisfactionAssistant.vue"));
 const DrugLabelAssistant=defineAsyncComponent(()=>import("@/components/ai/DrugLabelAssistant.vue"));
 const CodingEvidenceInput=defineAsyncComponent(()=>import("@/components/CodingEvidenceInput.vue"));
@@ -304,9 +306,11 @@ const satisfactionWasBound=ref(false),satisfactionLifecycle=computed(()=>satisfa
 watch([featureKey,()=>Object.hasOwn(props.initialInput,'satisfaction_case_id')],([key,bound])=>{if(key==='feedback_analysis'||bound)satisfactionWasBound.value=true;},{immediate:true,flush:'sync'});
 const drugLabelWasBound=ref(false),drugLabelLifecycle=computed(()=>drugLabelWasBound.value||featureKey.value==='drug_label_extraction'||Object.hasOwn(props.initialInput,'drug_label_source_binding_id'));
 watch([featureKey,()=>Object.hasOwn(props.initialInput,'drug_label_source_binding_id')],([key,bound])=>{if(key==='drug_label_extraction'||bound)drugLabelWasBound.value=true;},{immediate:true,flush:'sync'});
-const dedicatedLifecycle=computed(()=>chargeLifecycle.value||documentLifecycle.value||satisfactionLifecycle.value||drugLabelLifecycle.value);
+const documentChangeWasBound=ref(false),documentChangeLifecycle=computed(()=>documentChangeWasBound.value||featureKey.value==='guideline_change_review'||Object.hasOwn(props.initialInput,'document_change_scope_id'));
+watch([featureKey,()=>Object.hasOwn(props.initialInput,'document_change_scope_id')],([key,bound])=>{if(key==='guideline_change_review'||bound)documentChangeWasBound.value=true;},{immediate:true,flush:'sync'});
+const dedicatedLifecycle=computed(()=>chargeLifecycle.value||documentLifecycle.value||satisfactionLifecycle.value||drugLabelLifecycle.value||documentChangeLifecycle.value);
 const dedicatedPanel=ref(null);
-watch([featureKey,()=>Object.hasOwn(props.initialInput,'charge_case_id'),()=>Object.hasOwn(props.initialInput,'document_original_id'),()=>Object.hasOwn(props.initialInput,'satisfaction_case_id'),()=>Object.hasOwn(props.initialInput,'drug_label_source_binding_id')],([key,charge,document,satisfaction,drugLabel])=>{const explicit={charge_reconciliation:'charge',guideline_ingestion:'document',feedback_analysis:'satisfaction',drug_label_extraction:'drug_label'}[key];if(explicit){dedicatedPanel.value=explicit;return;}const bound=[charge?'charge':null,document?'document':null,satisfaction?'satisfaction':null,drugLabel?'drug_label':null].filter(Boolean);if(bound.length===1||!dedicatedPanel.value&&bound.length)dedicatedPanel.value=bound[0];},{immediate:true,flush:'sync'});
+watch([featureKey,()=>Object.hasOwn(props.initialInput,'charge_case_id'),()=>Object.hasOwn(props.initialInput,'document_original_id'),()=>Object.hasOwn(props.initialInput,'satisfaction_case_id'),()=>Object.hasOwn(props.initialInput,'drug_label_source_binding_id'),()=>Object.hasOwn(props.initialInput,'document_change_scope_id')],([key,charge,document,satisfaction,drugLabel,documentChange])=>{const explicit={charge_reconciliation:'charge',guideline_ingestion:'document',feedback_analysis:'satisfaction',drug_label_extraction:'drug_label',guideline_change_review:'document_change'}[key];if(explicit){dedicatedPanel.value=explicit;return;}const bound=[charge?'charge':null,document?'document':null,satisfaction?'satisfaction':null,drugLabel?'drug_label':null,documentChange?'document_change':null].filter(Boolean);if(bound.length===1||!dedicatedPanel.value&&bound.length)dedicatedPanel.value=bound[0];},{immediate:true,flush:'sync'});
 const selected = computed(() => dedicatedLifecycle.value?null:configuredFeature.value);
 const needsRoster=computed(()=>featureKey.value==='roster_optimization'&&selected.value?.input_mode==='roster'),rosterSelection=ref(null),rosterReady=ref(false),rosterWasBound=ref(false),rosterInputKey=ref(0);
 const rosterInitialReferences=computed(()=>props.initialInput.roster_plan_id==null?null:{roster_plan_id:props.initialInput.roster_plan_id});

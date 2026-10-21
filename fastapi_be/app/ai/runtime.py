@@ -107,6 +107,10 @@ def create_run(db: Session, user: User, req: RunRequest) -> AIRun:
         from app.ai.drug_label_runtime import create_drug_label_run
 
         return create_drug_label_run(db, user, req)
+    if req.feature_key == "guideline_change_review":
+        from app.ai.document_change_runtime import create_change_run
+
+        return create_change_run(db, user, req)
     if req.feature_key == "guideline_ingestion":
         from app.ai.document_extraction_runtime import create_document_run
 
@@ -413,6 +417,12 @@ def authorize_run(db: Session, user: User, run: AIRun) -> None:
     if is_drug_label_run(db, run):
         authorize_drug_label_run(db, user, run, frozen_audit=user.user_role == "super_admin")
         return
+    from app.ai.document_change_storage import authorize_run as authorize_change_run
+    from app.ai.document_change_storage import is_document_change_run
+
+    if is_document_change_run(db, run):
+        authorize_change_run(db, user, run, current=True)
+        return
     from app.ai.document_extraction_storage import authorize_document_run, is_extraction_run
 
     if is_extraction_run(db, run):
@@ -588,6 +598,14 @@ def describe_run(run: AIRun, include_result: bool = True, *, user: User | None =
             raise HTTPException(403, "完整说明书任务须在当前授权会话读取")
         return run_view(object_session(run), user, run, include_result, frozen_audit=user.user_role == "super_admin")
 
+    from app.ai.document_change_storage import is_document_change_run
+
+    if is_document_change_run(object_session(run), run):
+        from app.ai.document_change_views import run_view
+
+        if user is None or object_session(run) is None:
+            raise HTTPException(403, "完整版本核对任务须在当前授权会话读取")
+        return run_view(object_session(run), user, run, include_result, current=True)
     from app.ai.document_extraction_storage import is_extraction_run
 
     if is_extraction_run(object_session(run), run):
@@ -985,6 +1003,7 @@ async def execute_claimed(run_id: str, lease: str, *, transport=None) -> None:
     """Release SQL connections during inference; recheck authorization before storing results."""
     from app import database
     from app.ai.charge_reconciliation_storage import is_charge_run
+    from app.ai.document_change_access import has_native_identity
     from app.ai.document_extraction_storage import is_extraction_run
     from app.ai.native_task_routing import locate_native_task
     from app.ai.satisfaction_storage import is_satisfaction_run
@@ -998,10 +1017,11 @@ async def execute_claimed(run_id: str, lease: str, *, transport=None) -> None:
         drug_label_task = header is not None and (domain == "drug_label" or domain is None and header.feature_key == "drug_label_extraction")
         satisfaction_task = header is not None and (domain == "satisfaction" or domain is None and header.feature_key == "feedback_analysis")
         document_task = header is not None and (domain == "document" or domain is None and header.feature_key == "guideline_ingestion")
+        change_task = header is not None and (domain == "document_change" or domain is None and has_native_identity(routing_db, run_id))
         charge = domain == "charge"
         # Legacy tasks without a durable native identity retain their original
         # read/dispatch contracts; no erased real Artifact can enter this path.
-        routing_run = routing_db.get(AIRun, run_id) if header is not None and domain is None and not any((drug_label_task, satisfaction_task, document_task)) else None
+        routing_run = routing_db.get(AIRun, run_id) if header is not None and domain is None and not any((drug_label_task, satisfaction_task, document_task, change_task)) else None
         if routing_run is not None:
             charge = is_charge_run(routing_db, routing_run)
             satisfaction_task = not charge and is_satisfaction_run(routing_db, routing_run)
@@ -1020,6 +1040,11 @@ async def execute_claimed(run_id: str, lease: str, *, transport=None) -> None:
         from app.ai.satisfaction_execution import execute_satisfaction_claimed
 
         await execute_satisfaction_claimed(run_id, lease, transport=transport)
+        return
+    if change_task:
+        from app.ai.document_change_runtime import execute_change_claimed
+
+        await execute_change_claimed(run_id, lease, transport=transport)
         return
     if document_task:
         from app.ai.document_extraction_runtime import execute_document_claimed
@@ -1408,12 +1433,16 @@ def expire_interrupted_runs(db: Session) -> int:
     """Mark abandoned inference failed without repeating potentially billable calls."""
     from app.ai.charge_reconciliation_execution import expire_interrupted_charge_runs
     from app.ai.charge_reconciliation_run_models import AIChargeRunArtifact
+    from app.ai.document_change_run_models import AIDocumentChangeRunArtifact
+    from app.ai.document_change_runtime import expire_interrupted_change_runs
+    from app.ai.document_change_view_contract import FEATURE_KEY as CHANGE_FEATURE
     from app.ai.drug_label_run_models import AIDrugLabelRunArtifact
     from app.ai.drug_label_runtime import expire_interrupted_drug_label_runs
     from app.ai.satisfaction_artifact_models import AISatisfactionRunArtifact
     from app.ai.satisfaction_execution import expire_interrupted_satisfaction_runs
 
-    recovered = expire_interrupted_charge_runs(db)
+    recovered = expire_interrupted_change_runs(db)
+    recovered += expire_interrupted_charge_runs(db)
     recovered += expire_interrupted_satisfaction_runs(db)
     recovered += expire_interrupted_drug_label_runs(db)
     deadline = utcnow() - datetime.timedelta(minutes=10)
@@ -1423,6 +1452,8 @@ def expire_interrupted_runs(db: Session) -> int:
             AIRun.status == "running",
             AIRun.start_time < deadline,
             AIRun.feature_key != "drug_label_extraction",
+            AIRun.feature_key != CHANGE_FEATURE,
+            ~AIRun.run_id.in_(db.query(AIDocumentChangeRunArtifact.run_id)),
             ~AIRun.run_id.in_(db.query(AIChargeRunArtifact.run_id)),
             ~AIRun.run_id.in_(db.query(AISatisfactionRunArtifact.run_id)),
             ~AIRun.run_id.in_(db.query(AIDrugLabelRunArtifact.run_id)),

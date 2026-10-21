@@ -94,6 +94,8 @@ def patient_options(feature_key: str, keyword: str = Query("", max_length=100), 
 def hospital_service_options(feature_key: str, db: Session = Depends(get_db), user: User = Depends(get_current_user)) -> dict:
     """Offer public hospital places or clinicians for the authorized service capability."""
     spec, _ = authorized_feature(db, user, feature_key)
+    if spec.number == 72:
+        raise HTTPException(422, "双原文版本核对只使用专用有限范围目录，不提供通用业务范围")
     data = operational_options(db, user, spec) if spec.scope == "hospital" else service_options(db, spec.number)
     return {"code": 200, "msg": "success", "data": data}
 
@@ -288,6 +290,7 @@ def list_runs(
     satisfaction_native_only: bool = False,
     document_original_id: str | None = Query(None, max_length=36),
     drug_label_source_binding_id: str | None = None,
+    document_change_scope_id: str | None = Query(None, max_length=36),
     limit: int = Query(30, ge=1, le=100),
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user),
@@ -311,6 +314,39 @@ def list_runs(
     # The per-item native guard below must run before any deferred task TEXT is
     # fetched. This also keeps an unfiltered mixed directory safe to classify.
     query = db.query(AIRun).options(*(defer(getattr(AIRun, key)) for key in ("input_json", "evidence_json", "context_metadata_json", "result_json")))
+    if feature_key == "guideline_change_review" or document_change_scope_id is not None:
+        from app.ai.document_change_history import filter_history
+
+        query = filter_history(
+            db,
+            user,
+            query,
+            feature_key=feature_key,
+            scope_id=document_change_scope_id,
+            other_scope=(
+                patient_id,
+                encounter_ref,
+                department_id,
+                roster_plan_id,
+                ward_id,
+                bed_series_id,
+                surgery_pool_id,
+                surgery_scenario_id,
+                supply_item_kind,
+                supply_item_id,
+                supply_series_id,
+                inventory_item_kind,
+                inventory_item_id,
+                inventory_scenario_id,
+                coding_case_id,
+                document_original_id,
+                charge_case_id,
+                True if charge_native_only else None,
+                satisfaction_case_id,
+                True if satisfaction_native_only else None,
+                drug_label_source_binding_id,
+            ),
+        )
     if drug_label_source_binding_id is not None:
         from app.ai.drug_label_history import filter_history
 
@@ -341,6 +377,7 @@ def list_runs(
                 satisfaction_case_id,
                 True if satisfaction_native_only else None,
                 document_original_id,
+                document_change_scope_id,
             ),
         )
     if satisfaction_case_id is not None or satisfaction_native_only:
@@ -373,6 +410,7 @@ def list_runs(
                 True if charge_native_only else None,
                 document_original_id,
                 drug_label_source_binding_id,
+                document_change_scope_id,
             ),
         )
     if feature_key == "guideline_ingestion" or document_original_id is not None:
@@ -405,6 +443,7 @@ def list_runs(
                 inventory_scenario_id,
                 coding_case_id,
                 drug_label_source_binding_id,
+                document_change_scope_id,
             ),
         )
     if user.user_role != "super_admin":
@@ -549,6 +588,10 @@ def list_runs(
             guard_private_task_read(db, user, item.run_id)
             authorize_run(db, user, item)
         except HTTPException as exc:
+            from app.ai.document_change_storage import is_document_change_run
+
+            if exc.status_code in {403, 404, 409} and is_document_change_run(db, item):
+                continue
             if exc.status_code in {403, 404}:
                 continue
             if exc.status_code == 409:
@@ -615,6 +658,14 @@ def run_detail(run_id: str, db: Session = Depends(get_db), user: User = Depends(
 @router.post("/ai/runs/{run_id}/cancel")
 def cancel_run(run_id: str, db: Session = Depends(get_db), user: User = Depends(get_current_user)) -> dict:
     """Stop accepting a result; an already sent provider call may still finish."""
+    from app.ai.document_change_access import has_native_identity
+    from app.ai.document_change_runtime import cancel_change_run
+    from app.ai.native_task_routing import locate_native_task
+
+    identity = locate_native_task(db, run_id)
+    if identity is not None and identity.domain == "document_change" or identity is None and has_native_identity(db, run_id):
+        cancel_change_run(db, user, run_id)
+        return {"code": 200, "msg": "任务结果已取消接收"}
     from app.ai.native_task_access import guard_private_task_read
 
     guard_private_task_read(db, user, run_id)
@@ -693,6 +744,11 @@ def review_result(run_id: str, req: FeedbackWrite, db: Session = Depends(get_db)
         from app.ai.drug_label_views import run_view
 
         run_view(db, user, run, frozen_audit=user.user_role == "super_admin")
+    from app.ai.document_change_storage import expand_result as expand_change_result
+    from app.ai.document_change_storage import is_document_change_run
+
+    if is_document_change_run(db, run):
+        expand_change_result(db, user, run, current=True)
     from app.ai.document_extraction_storage import is_extraction_run, load_result
 
     if not charge and not satisfaction and is_extraction_run(db, run):

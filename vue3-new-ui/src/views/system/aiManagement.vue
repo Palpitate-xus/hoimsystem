@@ -76,6 +76,7 @@
         <el-tab-pane label="完整库存候选场景治理" name="inventory_scenarios" lazy><ai-inventory-scenarios v-if="tab==='inventory_scenarios'" audit-only /></el-tab-pane>
         <el-tab-pane v-if="canCheckForecast" label="指南原文与摘录治理" name="document_evidence" lazy><document-evidence-panel v-if="tab==='document_evidence' && canCheckForecast" :active="tab==='document_evidence' && canCheckForecast" @knowledge-published="refresh" /></el-tab-pane>
         <el-tab-pane v-if="canManageDrugLabels" label="说明书原文与独立签署治理" name="drug_label_sources" lazy><template v-if="tab==='drug_label_sources'&&canManageDrugLabels"><el-checkbox v-model="drugLabelAuditOnly">明确只读冻结说明书来源</el-checkbox><drug-label-source-panel :key="String(drugLabelAuditOnly)" :active="tab==='drug_label_sources'&&canManageDrugLabels" :audit-only="drugLabelAuditOnly" /></template></el-tab-pane>
+        <el-tab-pane v-if="canCheckForecast" label="双原文范围与规则关联" name="document_change" lazy><document-change-sources v-if="tab==='document_change' && canCheckForecast" :active="tab==='document_change' && canCheckForecast" /></el-tab-pane>
         <el-tab-pane v-if="canCheckForecast" label="病案编码证据与本地规则治理" name="coding_evidence" lazy><ai-coding-evidence-sources v-if="tab==='coding_evidence'&&canCheckForecast" audit-only /></el-tab-pane>
         <el-tab-pane v-if="canCheckForecast" label="完整住院账目来源治理" name="charge_sources" lazy><charge-reconciliation-source-panel v-if="tab==='charge_sources'&&canCheckForecast" :active="tab==='charge_sources'&&canCheckForecast" audit-only /></el-tab-pane>
         <el-tab-pane v-if="canCheckForecast" label="完整评价与人工摘录治理" name="satisfaction_sources" lazy><satisfaction-source-panel v-if="tab==='satisfaction_sources'&&canCheckForecast" :active="tab==='satisfaction_sources'&&canCheckForecast" audit-only /></el-tab-pane>
@@ -341,6 +342,7 @@ const DrugLabelSourcePanel=defineAsyncComponent(()=>import("@/components/ai/Drug
 const drugLabelAuditOnly=ref(false);
 const canManageDrugLabels=computed(()=>typeof store.state.user.accessToken==='string'&&store.state.user.accessToken.length>0&&Array.isArray(store.state.user.permissions)&&store.state.user.permissions.includes('super_admin'));
 watch([()=>store.state.user.accessToken,()=>JSON.stringify(store.state.user.permissions)],()=>{drugLabelAuditOnly.value=false;},{flush:'sync'});
+const DocumentChangeSources=defineAsyncComponent(()=>import("@/components/ai/DocumentChangeSources.vue"));
 const AiCodingEvidenceSources=defineAsyncComponent(()=>import("@/components/CodingEvidenceSources.vue"));
 const ChargeReconciliationSourcePanel=defineAsyncComponent(()=>import("@/components/ai/ChargeReconciliationSourcePanel.vue"));
 const SatisfactionSourcePanel=defineAsyncComponent(()=>import("@/components/ai/SatisfactionSourcePanel.vue"));
@@ -382,7 +384,7 @@ const selectedFeature = ref(null), featureForm = ref({}), featureDialog = ref(fa
 const providerDialog = ref(false), providerId = ref(null), providerForm = ref({});
 const forecastCheckTarget = ref(null);
 const news2CheckTarget = ref(null);
-const canCheckForecast = computed(() => !!store.state.user.accessToken && store.state.user.permissions.includes("super_admin"));
+const canCheckForecast = computed(() => typeof store.state.user.accessToken === "string" && store.state.user.accessToken.trim().length > 0 && Array.isArray(store.state.user.permissions) && store.state.user.permissions.includes("super_admin"));
 function openNews2Check(row) {
   if (!canCheckForecast.value) return;
   news2CheckTarget.value = { provider_id: row.provider_id, revision: row.revision, model: row.model, name: row.name, session: store.state.user.accessToken };
@@ -457,7 +459,7 @@ watch(ecgCheckDialog, visible => { if (!visible) { ecgCheckRequest += 1; ecgChec
 function clearEcgCheck() { ecgCheckRequest += 1; ecgCheckDialog.value = false; ecgCheckResult.value = null; ecgCheckLoading.value = false; }
 onDeactivated(clearEcgCheck);
 onBeforeUnmount(clearEcgCheck);
-const canCheckImage = computed(() => !!store.state.user.accessToken && store.state.user.permissions.includes("super_admin"));
+const canCheckImage = computed(() => canCheckForecast.value);
 const imageCheckDialog = ref(false), imageCheckLoading = ref(false), imageCheckResult = ref(null), imageCheckName = ref("");
 let imageCheckRequest = 0, imageCheckTarget = null;
 function clearImageCheck() { imageCheckRequest++; imageCheckTarget = null; imageCheckDialog.value = false; imageCheckResult.value = null; imageCheckLoading.value = false; }

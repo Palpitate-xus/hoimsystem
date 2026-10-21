@@ -851,6 +851,7 @@ def list_global_runs(
     encounter_ref: str | None = Query(None, max_length=64),
     document_original_id: str | None = Query(None, max_length=36),
     drug_label_source_binding_id: str | None = None,
+    document_change_scope_id: str | None = Query(None, max_length=36),
     page: int = Query(1, ge=1, le=100000),
     page_size: int = Query(30, ge=1, le=100),
     db: Session = Depends(get_db),
@@ -864,6 +865,36 @@ def list_global_runs(
     lock_directory_gates(db)
     user = _current_super_admin(db, user)
     query = db.query(AIRun).options(*(defer(getattr(AIRun, key)) for key in ("input_json", "evidence_json", "context_metadata_json", "result_json")))
+    if feature_key == "guideline_change_review" or document_change_scope_id is not None:
+        from app.ai.document_change_history import filter_history
+
+        query = filter_history(
+            db,
+            user,
+            query,
+            feature_key=feature_key,
+            scope_id=document_change_scope_id,
+            other_scope=(
+                patient_id,
+                encounter_ref,
+                department_id,
+                surgery_pool_id,
+                surgery_scenario_id,
+                supply_item_kind,
+                supply_item_id,
+                supply_series_id,
+                inventory_item_kind,
+                inventory_item_id,
+                inventory_scenario_id,
+                coding_case_id,
+                charge_case_id,
+                document_original_id,
+                satisfaction_case_id,
+                True if satisfaction_native_only else None,
+                drug_label_source_binding_id,
+            ),
+            frozen_audit=True,
+        )
     if drug_label_source_binding_id is not None:
         from app.ai.drug_label_history import filter_history
 
@@ -890,6 +921,7 @@ def list_global_runs(
                 document_original_id,
                 satisfaction_case_id,
                 True if satisfaction_native_only else None,
+                document_change_scope_id,
             ),
         )
     if satisfaction_case_id is not None or satisfaction_native_only:
@@ -918,6 +950,7 @@ def list_global_runs(
                 charge_case_id,
                 document_original_id,
                 drug_label_source_binding_id,
+                document_change_scope_id,
             ),
         )
     if feature_key == "guideline_ingestion" or document_original_id is not None:
@@ -946,6 +979,7 @@ def list_global_runs(
                 inventory_item_id,
                 inventory_scenario_id,
                 coding_case_id,
+                document_change_scope_id,
             ),
         )
     if encounter_ref is not None and feature_key != "charge_reconciliation":
@@ -1018,14 +1052,25 @@ def list_global_runs(
         query = query.filter(AIRun.encounter_ref == encounter_ref)
     total = query.with_entities(func.count(AIRun.run_id)).with_for_update(read=True).scalar() if feature_key == "charge_reconciliation" else query.count()
     rows = (
-        query.options(defer(AIRun.input_json), defer(AIRun.result_json), defer(AIRun.evidence_json))
+        query.options(defer(AIRun.input_json), defer(AIRun.result_json), defer(AIRun.evidence_json), defer(AIRun.context_metadata_json))
         .order_by(AIRun.create_time.desc(), AIRun.run_id)
         .offset((page - 1) * page_size)
         .limit(page_size)
         .all()
     )
     counts = dict(db.query(AIFeedback.run_id, func.count(AIFeedback.feedback_id)).filter(AIFeedback.run_id.in_([item.run_id for item in rows])).group_by(AIFeedback.run_id).all()) if rows else {}
-    data = [{**describe_run(item, False, user=user), "requested_by": item.requested_by, "provider_id": item.provider_id, "feedback_count": counts.get(item.run_id, 0)} for item in rows]
+    from app.ai.document_change_storage import is_document_change_run
+    from app.ai.document_change_views import run_view
+
+    data = [
+        {
+            **(run_view(db, user, item, False, current=False) if is_document_change_run(db, item) else describe_run(item, False, user=user)),
+            "requested_by": item.requested_by,
+            "provider_id": item.provider_id,
+            "feedback_count": counts.get(item.run_id, 0),
+        }
+        for item in rows
+    ]
     return {"code": 200, "msg": "success", "data": data, "total": total, "page": page, "page_size": page_size}
 
 
@@ -1036,6 +1081,13 @@ def inspect_run_trace(run_id: str, db: Session = Depends(get_db), user: User = D
 
     lock_directory_gates(db)
     user = _current_super_admin(db, user)
+    from app.ai.document_change_runtime import guard_change_run_id
+    from app.ai.document_change_views import trace_view
+    from app.ai.native_task_routing import locate_native_task
+
+    locate_native_task(db, run_id)  # Reject contradictory immutable anchors.
+    if guard_change_run_id(db, user, run_id, current=False):
+        return {"code": 200, "msg": "success", "data": trace_view(db, user, db.get(AIRun, run_id))}
     guard_private_task_read(db, user, run_id)
     run = db.get(AIRun, run_id)
     if run is None:

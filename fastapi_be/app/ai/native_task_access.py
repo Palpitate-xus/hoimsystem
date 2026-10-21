@@ -55,6 +55,7 @@ def lock_directory_gates(db):
 
 
 def guard_private_task_read(db, user, run_id):
+    from app.ai.document_change_runtime import guard_change_run_id
     from app.ai.drug_label_runtime import guard_drug_label_run_id
     from app.ai.satisfaction_storage import guard_satisfaction_run_id
 
@@ -64,8 +65,31 @@ def guard_private_task_read(db, user, run_id):
     from app.ai.native_task_routing import locate_native_task
 
     identity = locate_native_task(db, run_id)  # Reject contradictory cross-domain anchors.
-    if identity is not None and identity.domain == "charge":
-        _guard_charge_identity(db, user, identity)
+    if identity is not None:
+        # An actual immutable FK selects exactly one complete domain guard.
+        # Only a task with no Artifact needs the orphan JSON-marker probes.
+        if identity.domain == "charge":
+            _guard_charge_identity(db, user, identity)
+            return
+        if identity.domain == "document_change":
+            accepted = guard_change_run_id(db, user, run_id, current=True)
+        elif identity.domain == "satisfaction":
+            accepted = guard_satisfaction_run_id(db, user, run_id, audit_only=user.user_role == "super_admin")
+        elif identity.domain == "drug_label":
+            accepted = guard_drug_label_run_id(db, user, run_id, frozen_audit=user.user_role == "super_admin")
+        elif identity.domain == "document":
+            from app.ai.document_extraction_runtime import guard_document_run_id
+
+            guard_document_run_id(db, user, run_id)
+            return
+        else:
+            accepted = False
+        if not accepted:
+            from fastapi import HTTPException
+
+            raise HTTPException(409, "原生任务的实际域锚点已改变，未降级读取")
+        return
+    if guard_change_run_id(db, user, run_id, current=True):
         return
     if guard_satisfaction_run_id(db, user, run_id, audit_only=user.user_role == "super_admin"):
         return

@@ -1,0 +1,23 @@
+const {test,expect}=require('@playwright/test');
+const {startDocumentChangeParentHarness}=require('./fixtures/document-change-parent-harness.cjs');
+const {fixture,scopeId,setupDocumentChangeParent}=require('./fixtures/document-change-parent-ui.cjs');
+let harness;test.beforeAll(async()=>{harness=await startDocumentChangeParentHarness();});test.afterAll(async()=>{await harness?.close();});
+async function open(page,options={}){const errors=[];page.on('pageerror',e=>errors.push(e.message));const result=await setupDocumentChangeParent(page,harness.origin,options);return {...result,errors};}
+async function choose(page){await page.getByRole('row').filter({hasText:scopeId}).getByRole('button',{name:'读取完整件并选择',exact:true}).click();await expect(page.getByLabel('已核对完整双原文范围')).toBeVisible();await page.getByText('明确以超级管理员试运行',{exact:true}).click();await expect(page.getByRole('button',{name:'生成未核实核对问题',exact:true})).toBeEnabled();}
+async function ready(page,options={}){const result=await open(page,options);await choose(page);await page.getByRole('button',{name:'生成未核实核对问题',exact:true}).click();await expect(page.getByText('请人工核对原文适用性？',{exact:true})).toBeVisible();return result;}
+async function noGeneric(page){await expect(page.getByRole('button',{name:'生成辅助建议',exact:true})).toHaveCount(0);await expect(page.getByText('补充资料或问题',{exact:true})).toHaveCount(0);await expect(page.getByPlaceholder('搜索有访问权限的患者',{exact:true})).toHaveCount(0);await expect(page.getByText('补充 JSON（可选）',{exact:true})).toHaveCount(0);}
+test('actual shared Parent chooses only dedicated paired Source/preview/queue and complete split task',async({page})=>{
+ const {calls,errors}=await open(page);await noGeneric(page);await choose(page);await page.getByRole('button',{name:'预览双原文与有限范围',exact:true}).click();await expect(page.getByText('只有完整公开双原文投影与该问题发送给模型；私有目标原件保留院内。',{exact:true})).toBeVisible();await page.locator('.el-dialog__headerbtn').click();await page.getByRole('button',{name:'生成未核实核对问题',exact:true}).click();await expect(page.getByText('请人工核对原文适用性？',{exact:true})).toBeVisible();await noGeneric(page);expect(calls.filter(c=>c.method==='POST').map(c=>c.path)).toEqual(['/api/ai/document-change/context','/api/ai/runs']);expect(errors).toEqual([]);
+});
+for(const id of [scopeId,null])test(`wrong feature with own Scope marker ${id} stays native and performs no Source or generic requests`,async({page})=>{
+ const {calls,errors}=await open(page,{initial:{featureKey:'patient_summary',featureKeys:['guideline_change_review','patient_summary'],initialInput:{document_change_scope_id:id}}});await expect(page.getByText('请恢复第72项双原文核对模式；此面板不会降级为通用问答。',{exact:true})).toBeVisible();await noGeneric(page);expect(calls.map(c=>c.path)).toEqual(['/api/ai/features']);expect(errors).toEqual([]);
+});
+for(const mutation of ['feature','removed_mode','other_mode'])test(`sticky paired task clears on ${mutation} and cannot reactivate generic services`,async({page})=>{
+ const {calls}=await ready(page),before=calls.length;await page.evaluate(m=>{const s=window.__documentChangeAssistantProbe.scope.target.$.setupState;if(m==='feature')s.featureKey='patient_summary';else{const f=s.features.find(f=>f.key==='guideline_change_review');if(m==='removed_mode')delete f.input_mode;else f.input_mode='llm';}},mutation);await expect(page.getByText('请恢复第72项双原文核对模式；此面板不会降级为通用问答。',{exact:true})).toBeVisible();await expect(page.getByText('请人工核对原文适用性？',{exact:true})).toHaveCount(0);await noGeneric(page);expect(calls.slice(before)).toEqual([]);
+});
+for(const [key,value]of [['patientId',1],['encounterRef','foreign-admission'],['initialInput',{document_change_scope_id:null}],['initialInput',{document_change_scope_id:scopeId,document_original_id:fixture.live.baseline_original.data.snapshot.original_id}]])test(`Parent preserves invalid raw scope ${key}=${JSON.stringify(value)} for the dedicated guard`,async({page})=>{
+ const {calls}=await open(page,{initial:{[key]:value}});await expect(page.getByText('有限范围输入无效：不接受患者、就诊或其它业务字段。',{exact:true})).toBeVisible();await noGeneric(page);expect(calls.map(c=>c.path)).toEqual(['/api/ai/features']);
+});
+test('switching between both document features never mounts both native panels or returns to generic',async({page})=>{
+ const {calls}=await ready(page,{initial:{featureKeys:['guideline_change_review','guideline_ingestion'],initialInput:fixture.requests.create.input}}),before=calls.length;await page.evaluate(()=>window.__documentChangeAssistantProbe.scope.target.$.setupState.featureKey='guideline_ingestion');await expect(page.getByText('原文引用范围无效：不接受患者、就诊或其他业务字段。',{exact:true})).toBeVisible();await expect(page.locator('.document-change-assistant')).toHaveCount(0);await noGeneric(page);expect(calls.slice(before)).toEqual([]);
+});

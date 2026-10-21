@@ -42,8 +42,8 @@ print(json.dumps({'features':len(p['features']),'version':p['catalog_version'],'
     value = subprocess.run([sys.executable, "-I", "-S", "-c", script], cwd=ROOT, capture_output=True, text=True, check=True)
     assert json.loads(value.stdout) == {
         "features": 80,
-        "version": "2026.10.21.22",
-        "overrides": ["charge_reconciliation", "drg_evidence_review", "drug_label_extraction", "feedback_analysis", "guideline_ingestion"],
+        "version": "2026.10.21.23",
+        "overrides": ["charge_reconciliation", "drg_evidence_review", "drug_label_extraction", "feedback_analysis", "guideline_change_review", "guideline_ingestion"],
     }
 
 
@@ -58,8 +58,8 @@ def test_prompt_reexports_remain_equal_to_actual_typed_protocol_constants():
 
 def test_additive_merge_has_one_head_and_preserves_both_parent_histories():
     scripts = ScriptDirectory.from_config(Config(str(ROOT / "alembic.ini")))
-    assert scripts.get_heads() == ["20261021_native_shared_merge"]
-    assert set(scripts.get_revision(scripts.get_heads()[0]).down_revision) == {"20261021_charge_sat_merge", "20261021_drug_label_runs"}
+    assert len(scripts.get_heads()) == 1
+    assert set(scripts.get_revision("20261021_native_shared_merge").down_revision) == {"20261021_charge_sat_merge", "20261021_drug_label_runs"}
     chain = list(scripts.walk_revisions())
     assert len(chain) == len({row.revision for row in chain})
     assert {"20261021_charge_sat_merge", "20261021_drug_label_runs", "20261021_doc_extraction_runs", "20261021_charge_runs", "20261021_sat_usage_receipt"} <= {row.revision for row in chain}
@@ -168,3 +168,23 @@ def test_unrelated_non_uuid_generic_claim_acquires_no_native_gate(db_session, se
     assert routing.locate_native_task(db_session, row) is None
     identifier, lease = claim_next_run(db_session)
     assert identifier == row.run_id and lease and db_session.get(AIRun, identifier).status == "running"
+
+
+@pytest.mark.parametrize("actual_native", ["charge", "satisfaction", "document", "drug_label"], indirect=True)
+@pytest.mark.parametrize("marker", ["document_change_scope_id", "inventory_scenario_id"])
+def test_known_actual_domain_cannot_accept_foreign_native_input_markers(actual_native, marker):
+    from app.models import User
+    from app.routers import ai
+
+    domain, db, row = actual_native
+    identifier = inspect(row).identity[0]
+    actor = db.get(User, row.requested_by)
+    snapshot = json.loads(row.input_json)
+    snapshot["payload"]["input"][marker] = None
+    row.input_json = json.dumps(snapshot, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+    db.commit()
+    with pytest.raises(HTTPException) as error:
+        ai.run_detail(identifier, db=db, user=actor)
+    # Preserve each real domain's closed input/anchor rejection semantics.
+    expected = 422 if domain == "charge" or (domain == "document" and marker == "inventory_scenario_id") else 409
+    assert error.value.status_code == expected

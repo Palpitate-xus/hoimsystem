@@ -1283,6 +1283,195 @@
   ],
   "function": "options",
   "method": "GET",
+  "module": "ai_document_change.py",
+  "path": "/api/ai/admin/document-changes/options"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "target",
+  "method": "POST",
+  "module": "ai_document_change.py",
+  "path": "/api/ai/admin/document-changes/target-snapshot"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "capture",
+  "method": "POST",
+  "module": "ai_document_change.py",
+  "path": "/api/ai/admin/document-changes/capture"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "create_link",
+  "method": "POST",
+  "module": "ai_document_change.py",
+  "path": "/api/ai/admin/document-changes/links"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "link_detail",
+  "method": "GET",
+  "module": "ai_document_change.py",
+  "path": "/api/ai/admin/document-changes/links/{link_id}"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "review_link",
+  "method": "POST",
+  "module": "ai_document_change.py",
+  "path": "/api/ai/admin/document-changes/links/{link_id}/review"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "revoke_link",
+  "method": "POST",
+  "module": "ai_document_change.py",
+  "path": "/api/ai/admin/document-changes/links/{link_id}/revoke"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "create_scope",
+  "method": "POST",
+  "module": "ai_document_change.py",
+  "path": "/api/ai/admin/document-changes/scopes"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "scope_detail",
+  "method": "GET",
+  "module": "ai_document_change.py",
+  "path": "/api/ai/admin/document-changes/scopes/{scope_id}"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "scope_public_source",
+  "method": "GET",
+  "module": "ai_document_change.py",
+  "path": "/api/ai/admin/document-changes/scopes/{scope_id}/public-source"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "review_scope",
+  "method": "POST",
+  "module": "ai_document_change.py",
+  "path": "/api/ai/admin/document-changes/scopes/{scope_id}/review"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "revoke_scope",
+  "method": "POST",
+  "module": "ai_document_change.py",
+  "path": "/api/ai/admin/document-changes/scopes/{scope_id}/revoke"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "links",
+  "method": "GET",
+  "module": "ai_document_change.py",
+  "path": "/api/ai/admin/document-changes/links"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "scopes",
+  "method": "GET",
+  "module": "ai_document_change.py",
+  "path": "/api/ai/admin/document-changes/scopes"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "inspect_context",
+  "method": "POST",
+  "module": "ai_document_change_runs.py",
+  "path": "/api/ai/document-change/context"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "source",
+  "method": "GET",
+  "module": "ai_document_change_runs.py",
+  "path": "/api/ai/runs/{run_id}/document-change/source"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "scope",
+  "method": "GET",
+  "module": "ai_document_change_runs.py",
+  "path": "/api/ai/runs/{run_id}/document-change/scope"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "result",
+  "method": "GET",
+  "module": "ai_document_change_runs.py",
+  "path": "/api/ai/runs/{run_id}/document-change/result"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "frozen_source",
+  "method": "GET",
+  "module": "ai_document_change_runs.py",
+  "path": "/api/ai/admin/runs/{run_id}/document-change/source"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "frozen_scope",
+  "method": "GET",
+  "module": "ai_document_change_runs.py",
+  "path": "/api/ai/admin/runs/{run_id}/document-change/scope"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "frozen_result",
+  "method": "GET",
+  "module": "ai_document_change_runs.py",
+  "path": "/api/ai/admin/runs/{run_id}/document-change/result"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "options",
+  "method": "GET",
   "module": "ai_document_evidence.py",
   "path": "/api/ai/admin/document-evidence/options"
  },

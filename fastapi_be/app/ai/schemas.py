@@ -252,6 +252,16 @@ class RunRequest(StrictRequest):
             selection(self.input)
             if self.patient_id is not None or self.encounter_ref is not None:
                 raise ValueError("说明书任务不接受患者或就诊范围")
+        if "document_change_scope_id" in self.input and self.feature_key != "guideline_change_review":
+            raise ValueError("双原文有限范围仅用于版本逐字问题核对")
+        if "document_original_id" in self.input and self.feature_key != "guideline_ingestion":
+            raise ValueError("原文摘录引用仅用于指南原文提取")
+        if self.feature_key == "guideline_change_review":
+            from app.ai.document_change_view_contract import DocumentChangeRequest
+
+            DocumentChangeRequest.model_validate(self.input)
+            if self.patient_id is not None or self.encounter_ref is not None:
+                raise ValueError("版本核对不接受患者或就诊引用")
         if "roster_plan_id" in self.input and self.feature_key != "roster_optimization":
             raise ValueError("受审排班计划仅用于排班与号源优化")
         if "bed_series_id" in self.input and self.feature_key != "bed_forecast":

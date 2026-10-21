@@ -468,3 +468,5 @@
 - 2026-10-21 第80项正式培训Task/四分件/目录/人工反馈：31完整文件一次619通过/19既有SQLite提示，125.82s pytest、137.761s外层、1213输入稳定，8新增Main端点/959 RBAC。两协议真实提交的native service+注入HTTP在await零worker SQL，固定原成绩、缺失/部分用量、六状态null结果、当前课程撤回零BODY、超管技术目录/trace不开放别人作答；人工复核独立第六Audit绑定原接受PK和用量PK。四同案真实HTTP包各自保留；首轮604P/15setup E由测试commit后唯一配置残留导致，明确teardown后重跑全绿，原失败保留。统一公共queue/runtime/trace/FE及Task实际MySQL继续。
 
 - 2026-10-21 第80项统一Main/队列/worker/历史/超管接线：38完整文件一次729通过/20既有提示，220.86s pytest、232.709s外层、1215输入稳定。两协议四种nullable用量走真实公共create→专用具体claim→await零worker SQL→当前读取/绑定接受PK人工复核，重复交付不重发；超管全局含无筛选目录/trace仅技术状态无他人作答指纹。已领/未领取消保持已知未尝试0，普通取消拒绝；损坏创建锚不饿死后续合法任务，擦除功能和expired ORM不提前刷新Task，外来UUID/null通用预览拒绝。五Gate→User严格顺序及既有Runtime/运营/账目/科研expired/双原文完整套件同轮通过；真实Task MySQL/同案全Source+公共任务UI包与FE继续，不把旧Run占位0当全局实际账单。
+
+- 2026-10-21 第80项同案界面数据：3完整Main/common/packet文件一次32通过，45.48s pytest、56.745s外层、1216输入稳定。一个SQL课程/独立复核案例，经实际Main题面/新作答POST/三分件后进入公共Task，63原HTTP包完整保留七种真实任务状态及每态4裸分件，含在途取消pending→原交付11/null、503未知、课程撤回与超管仅技术200。无跨案拼接，不与既有729重复加总；真实MySQL与前端继续。

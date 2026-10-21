@@ -500,3 +500,10 @@ def execution_configuration(db, user, *, preview=False):
     if config.validation_status == "suspended" or profile.payload.validation_status == "suspended":
         raise HTTPException(409, "当前功能或Profile已暂停")
     return actor, config, selection, profile
+
+
+@r.atomic
+def reject_generic_configuration(db, user):
+    """78 has no external Provider or mutable LLM Prompt activation branch."""
+    _start(db, user)
+    raise HTTPException(409, "病例关联统计须经专用本地Profile/配置双CAS治理；不能由外部Provider或LLM Prompt接口替换")

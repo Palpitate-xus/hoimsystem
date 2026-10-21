@@ -103,6 +103,10 @@ def list_features(db: Session = Depends(get_db), user: User = Depends(require_ro
 @router.put("/ai/admin/features/{key}")
 def update_feature(key: str, req: FeatureWrite, db: Session = Depends(get_db), user: User = Depends(require_roles("super_admin"))) -> dict:
     """Configure roles, model, activation and explicit validation with optimistic locking."""
+    if key == "infection_cluster":
+        from app.ai.infection_cluster_profiles import reject_generic_configuration
+
+        reject_generic_configuration(db, user)
     spec = get_spec(key)
     config = feature_config(db, key, user.user_id, req.expected_revision)
     if "provider_id" in req.model_fields_set:
@@ -1266,6 +1270,10 @@ def list_prompts(key: str, db: Session = Depends(get_db), user: User = Depends(r
 @router.post("/ai/admin/prompts/{key}")
 def create_prompt(key: str, req: PromptWrite, db: Session = Depends(get_db), user: User = Depends(require_roles("super_admin"))) -> dict:
     """Save a new revision; never modify historical prompt content."""
+    if key == "infection_cluster":
+        from app.ai.infection_cluster_profiles import reject_generic_configuration
+
+        reject_generic_configuration(db, user)
     config = feature_config(db, key, user.user_id, req.expected_revision)
     version = (db.query(func.max(AIPromptVersion.version)).filter_by(feature_key=key).scalar() or 0) + 1
     prompt = AIPromptVersion(feature_key=key, version=version, task_prompt=req.task_prompt, change_note=req.change_note, created_by=user.user_id)
@@ -1284,6 +1292,10 @@ def create_prompt(key: str, req: PromptWrite, db: Session = Depends(get_db), use
 @router.post("/ai/admin/prompts/{key}/activate")
 def activate_prompt(key: str, req: PromptActivate, db: Session = Depends(get_db), user: User = Depends(require_roles("super_admin"))) -> dict:
     """Activate a historical version or revert to the baseline, then require revalidation."""
+    if key == "infection_cluster":
+        from app.ai.infection_cluster_profiles import reject_generic_configuration
+
+        reject_generic_configuration(db, user)
     config = feature_config(db, key, user.user_id, req.expected_revision)
     if req.prompt_id:
         prompt = db.get(AIPromptVersion, req.prompt_id)

@@ -7,9 +7,11 @@ from fastapi import HTTPException
 from app.ai import rca_evidence_cases as cases
 from app.ai import rca_evidence_configuration as configuration
 from app.ai import rca_evidence_context as context
+from app.ai import rca_evidence_contract as c
 from app.ai import rca_evidence_input as i
 from app.ai import rca_evidence_receipts as receipts
 from app.ai import rca_evidence_result_storage as results
+from app.ai import rca_evidence_sources as originals
 from app.ai import rca_evidence_storage as storage
 from app.ai import rca_evidence_storage_contract as s
 from app.ai import rca_evidence_task_wire_contract as v
@@ -129,7 +131,12 @@ def trace_view(db, user, identifier):
         if pk is not None and audit is None:
             raise HTTPException(409, "原任务具体阶段审计PK缺失，未返回不完整证明")
         audits[phase] = {key: i.utc_text(getattr(audit, key)) if key == "create_time" else getattr(audit, key) for key in v.RcaAuditRecord.model_fields} if audit is not None else None
+    _auth, current_case = cases._load(db, user, stored.binding.case_id)
+    current_governance = originals._governance(current_case)
     value.update(
+        current_case_governance=current_governance,
+        current_case_governance_hash=c.digest({"case_id": stored.binding.case_id, "content_hash": stored.binding.case_content_hash, "governance": current_governance}),
+        current_source_execution_qualification="not_evaluated_or_regranted_by_frozen_audit",
         requested_by=stored.artifact.requested_by,
         provider_id=stored.run.provider_id,
         snapshot_complete=True,

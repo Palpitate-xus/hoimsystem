@@ -3,7 +3,7 @@
 > 由 `fastapi_be/scripts/generate_rbac_matrix.py` 从源码自动生成，请勿手改。
 > `✓`=可访问 | `PUBLIC`=无需登录 | 留空=不可访问
 
-共 **885** 个接口（PUBLIC 18 个 / 需登录 867 个）。
+共 **910** 个接口（PUBLIC 18 个 / 需登录 892 个）。
 
 
 ### `admin.py`
@@ -361,6 +361,41 @@
 | POST | `/api/ai/qsofa-assessments/{assessment_id}/revoke` | ✓ | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |
 | GET | `/api/ai/admin/qsofa-assessments` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
 | GET | `/api/ai/admin/qsofa-assessments/{assessment_id}` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+
+### `ai_rca_evidence.py`
+
+| 方法 | 路径 | admin | super_admin | director | doctor | nurse | cashier | pharmacist | guide | patient | lab_technician | registrar | PUBLIC |
+|------|------|------|------|------|------|------|------|------|------|------|------|------|------|
+| GET | `/api/ai/admin/rca-evidence/options` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/admin/rca-evidence/grants` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/admin/rca-evidence/grants/{grant_id}` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/admin/rca-evidence/grants/{grant_id}/revoke` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/admin/rca-evidence/events/{event_id}/directory/{kind}` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/admin/rca-evidence/events/{event_id}/capture` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/admin/rca-evidence/events/{event_id}/legacy-witness` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/admin/rca-evidence/originals` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/admin/rca-evidence/originals/{original_id}` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/admin/rca-evidence/originals/{original_id}/review` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/admin/rca-evidence/originals/{original_id}/revoke` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/admin/rca-evidence/cases` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/admin/rca-evidence/cases/{case_id}` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/admin/rca-evidence/cases/{case_id}/public-source` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/admin/rca-evidence/cases/{case_id}/review` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/admin/rca-evidence/cases/{case_id}/revoke` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+
+### `ai_rca_evidence_tasks.py`
+
+| 方法 | 路径 | admin | super_admin | director | doctor | nurse | cashier | pharmacist | guide | patient | lab_technician | registrar | PUBLIC |
+|------|------|------|------|------|------|------|------|------|------|------|------|------|------|
+| POST | `/api/ai/rca-evidence/context` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/runs/{run_id}/rca-evidence/source` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/runs/{run_id}/rca-evidence/case` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/runs/{run_id}/rca-evidence/result` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/runs/{run_id}/rca-evidence/receipt` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/admin/runs/{run_id}/rca-evidence/source` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/admin/runs/{run_id}/rca-evidence/case` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/admin/runs/{run_id}/rca-evidence/result` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/admin/runs/{run_id}/rca-evidence/receipt` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
 
 ### `ai_risk_rules.py`
 

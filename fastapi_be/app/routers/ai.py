@@ -94,6 +94,8 @@ def patient_options(feature_key: str, keyword: str = Query("", max_length=100), 
 def hospital_service_options(feature_key: str, db: Session = Depends(get_db), user: User = Depends(get_current_user)) -> dict:
     """Offer public hospital places or clinicians for the authorized service capability."""
     spec, _ = authorized_feature(db, user, feature_key)
+    if spec.number == 77:
+        raise HTTPException(422, "RCA原生任务仅明确选择受审Case，不使用通用业务目录")
     data = operational_options(db, user, spec) if spec.scope == "hospital" else service_options(db, spec.number)
     return {"code": 200, "msg": "success", "data": data}
 
@@ -149,6 +151,8 @@ def inspect_operational_context(req: OperationalContextRequest, db: Session = De
 def encounter_options(feature_key: str, patient_id: int, db: Session = Depends(get_db), user: User = Depends(get_current_user)) -> dict:
     """Offer authorized encounters without widening access to another doctor's current case."""
     spec, _ = authorized_feature(db, user, feature_key)
+    if spec.number == 77:
+        raise HTTPException(422, "RCA调查不加载通用患者诊次")
     if spec.number == 36:
         authorize_image_patient(db, user, patient_id, authorize_patient)
     elif spec.number == 37:
@@ -288,11 +292,46 @@ def list_runs(
     satisfaction_native_only: bool = False,
     document_original_id: str | None = Query(None, max_length=36),
     drug_label_source_binding_id: str | None = None,
+    rca_evidence_case_id: str | None = None,
     limit: int = Query(30, ge=1, le=100),
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user),
 ) -> dict:
     """List own tasks; super-admins can inspect global execution history."""
+    if feature_key == "incident_rca" or rca_evidence_case_id is not None:
+        from app.ai.rca_evidence_history import history
+
+        if feature_key not in {None, "incident_rca"}:
+            raise HTTPException(422, "RCA Case不用于其它功能历史")
+        return history(
+            db,
+            user,
+            case_id=rca_evidence_case_id,
+            page_size=limit,
+            other_scope=(
+                patient_id,
+                encounter_ref,
+                department_id,
+                roster_plan_id,
+                ward_id,
+                bed_series_id,
+                surgery_pool_id,
+                surgery_scenario_id,
+                supply_item_kind,
+                supply_item_id,
+                supply_series_id,
+                inventory_item_kind,
+                inventory_item_id,
+                inventory_scenario_id,
+                coding_case_id,
+                charge_case_id,
+                charge_native_only,
+                satisfaction_case_id,
+                satisfaction_native_only,
+                document_original_id,
+                drug_label_source_binding_id,
+            ),
+        )
     from app.ai.native_task_access import lock_directory_gates
 
     lock_directory_gates(db)
@@ -543,6 +582,17 @@ def list_runs(
         query = query.filter_by(encounter_ref=encounter_ref)
     data = []
     for item in query.order_by(AIRun.create_time.desc()).limit(limit).all():
+        from app.ai.rca_evidence_dispatch import is_rca_task
+        from app.ai.rca_evidence_views import run_view
+
+        try:
+            if is_rca_task(db, item):
+                data.append(run_view(db, user, item, False).model_dump(mode="json"))
+                continue
+        except HTTPException as exc:
+            if exc.status_code in {403, 404, 409}:
+                continue
+            raise
         try:
             from app.ai.native_task_access import guard_private_task_read
 
@@ -615,6 +665,15 @@ def run_detail(run_id: str, db: Session = Depends(get_db), user: User = Depends(
 @router.post("/ai/runs/{run_id}/cancel")
 def cancel_run(run_id: str, db: Session = Depends(get_db), user: User = Depends(get_current_user)) -> dict:
     """Stop accepting a result; an already sent provider call may still finish."""
+    from app.ai.rca_evidence_dispatch import is_rca_task
+
+    if is_rca_task(db, run_id):
+        from app.ai.rca_evidence_cancellation import stage_cancel
+        from app.ai.rca_evidence_views import response
+
+        value = stage_cancel(db, user, run_id)
+        db.commit()
+        return response(value)
     from app.ai.native_task_access import guard_private_task_read
 
     guard_private_task_read(db, user, run_id)
@@ -664,6 +723,15 @@ def cancel_run(run_id: str, db: Session = Depends(get_db), user: User = Depends(
 @router.post("/ai/runs/{run_id}/feedback")
 def review_result(run_id: str, req: FeedbackWrite, db: Session = Depends(get_db), user: User = Depends(get_current_user)) -> dict:
     """Append review without editing clinical records, orders or prescriptions."""
+    from app.ai.rca_evidence_dispatch import is_rca_task
+
+    if is_rca_task(db, run_id):
+        from app.ai.rca_evidence_feedback import stage_feedback
+        from app.ai.rca_evidence_views import response
+
+        value = stage_feedback(db, user, run_id, req)
+        db.commit()
+        return response(value)
     from app.ai.native_task_access import guard_private_task_read
 
     guard_private_task_read(db, user, run_id)

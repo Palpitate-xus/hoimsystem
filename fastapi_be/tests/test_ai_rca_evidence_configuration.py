@@ -25,7 +25,7 @@ from tests.test_ai_rca_evidence_storage import no_task_text
 def configured(case, *, preview=True, enabled=0, kind="chat"):
     db = case["db"]
     Base.metadata.create_all(db.get_bind())
-    actor = User(username="rca_config_" + uuid.uuid4().hex[:12], password="synthetic-unused", user_role="super_admin")
+    actor = User(username="rcac_" + uuid.uuid4().hex[:12], password="synthetic-unused", user_role="super_admin")
     db.add(actor)
     db.commit()
     case["actor"] = actor

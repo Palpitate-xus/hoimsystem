@@ -220,6 +220,7 @@ class OperationLogMiddleware(BaseHTTPMiddleware):
         "/api/ai/runs",
         "/api/ai/admin/runs",
         "/api/ai/admin/review-sources",
+        "/api/ai/admin/rca-evidence",
         "/api/ai/admin/review-excerpts",
         "/api/ai/audio-assets",
         "/api/ai/admin/audio-assets",
@@ -398,6 +399,8 @@ from app.routers import (
     ai_news2,
     ai_observation_windows,
     ai_qsofa,
+    ai_rca_evidence,
+    ai_rca_evidence_tasks,
     ai_risk_rules,
     ai_roster_plans,
     ai_roster_sources,
@@ -548,6 +551,8 @@ app.include_router(ai_drug_label_tasks.router, prefix="/api")
 app.include_router(ai_coding_evidence.router, prefix="/api")
 app.include_router(ai_charge_reconciliation.router, prefix="/api")
 app.include_router(ai_satisfaction_sources.router, prefix="/api")
+app.include_router(ai_rca_evidence.router, prefix="/api")
+app.include_router(ai_rca_evidence_tasks.router, prefix="/api")
 app.include_router(ai_supply_sources.router, prefix="/api")
 app.include_router(ai_supply_series.router, prefix="/api")
 app.include_router(inpatient_gcs.router, prefix="/api")

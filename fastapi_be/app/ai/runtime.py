@@ -573,6 +573,14 @@ def describe_run(run: AIRun, include_result: bool = True, *, user: User | None =
     from app.ai.charge_reconciliation_storage import is_charge_run
 
     db = object_session(run)
+    from app.ai.rca_evidence_dispatch import is_rca_task
+
+    if is_rca_task(db, run):
+        if db is None or user is None:
+            raise HTTPException(409, "RCA任务须在当前独立用途授权会话读取")
+        from app.ai.rca_evidence_views import run_view
+
+        return run_view(db, user, run, include_result).model_dump(mode="json")
     if is_charge_run(db, run):
         if db is None or user is None:
             raise HTTPException(409, "完整账目任务须在当前授权会话内展示")

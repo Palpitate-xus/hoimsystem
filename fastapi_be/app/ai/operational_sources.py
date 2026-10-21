@@ -100,6 +100,8 @@ def operational_options(db, user: User, spec: FeatureSpec) -> dict:
 
 
 def operational_context(db, user: User, spec: FeatureSpec, values: dict) -> ContextBundle:
+    if spec.number == 77 or "rca_evidence_case_id" in values:
+        raise HTTPException(422, "RCA受审Case不使用通用医院运营资料范围")
     if "satisfaction_case_id" in values:
         if spec.number != 70:
             raise HTTPException(422, "受审完整评价原件仅用于满意度与评价证据分析")

@@ -57,11 +57,16 @@ def lock_directory_gates(db):
 def guard_private_task_read(db, user, run_id):
     from app.ai.drug_label_runtime import guard_drug_label_run_id
     from app.ai.rca_evidence_dispatch import guard_rca_task
+    from app.ai.rca_evidence_storage import locate_artifact
     from app.ai.satisfaction_storage import guard_satisfaction_run_id
 
     # This domain has no global Gate. Only opaque immutable identities precede
     # its current Actor -> Event -> original purposes -> Task body authority.
-    if guard_rca_task(db, user, run_id):
+    # Probe only this domain before the existing directory Gates. Calling its
+    # all-domain classifier here would query legacy document anchors before
+    # Billing -> Satisfaction -> Inventory on unrelated tasks.
+    if locate_artifact(db, run_id) is not None:
+        guard_rca_task(db, user, run_id)
         return
     # Locators identify a native domain; its complete authority proof follows
     # before loading Task TEXT. Gates remain in the same mixed-directory order.
@@ -69,6 +74,11 @@ def guard_private_task_read(db, user, run_id):
     from app.ai.native_task_routing import locate_native_task
 
     identity = locate_native_task(db, run_id)  # Reject contradictory cross-domain anchors.
+    if identity is None or identity.domain == "rca":
+        # Also reject orphan RCA markers, including JSON null, before any
+        # legacy guard can load a damaged package as a generic task.
+        if guard_rca_task(db, user, run_id):
+            return
     if identity is not None and identity.domain == "charge":
         _guard_charge_identity(db, user, identity)
         return

@@ -6,6 +6,7 @@ from pydantic import Field, model_validator
 
 from app.ai import rca_evidence_contract as c
 from app.ai import rca_evidence_input as i
+from app.ai import rca_evidence_source_contract as source_types
 from app.ai import rca_evidence_storage_contract as s
 from app.ai import rca_evidence_task_contract as t
 from app.ai.rca_evidence_task_views import RcaResultReference, RcaUsageReceipt
@@ -152,6 +153,16 @@ class RcaRunSummary(c.StrictModel):
         return self
 
 
+class RcaHistoryResponse(c.StrictModel):
+    code: Literal[200]
+    msg: Literal["success"]
+    data: list[RcaRunSummary] = Field(max_length=100)
+    total: Nonnegative
+    total_basis: Literal["current_artifact_metadata_candidates_not_authorized_body_count"]
+    page: Annotated[int, Field(strict=True, ge=1, le=100000)]
+    page_size: Annotated[int, Field(strict=True, ge=1, le=100)]
+
+
 class RcaRunDetail(RcaRunSummary):
     result: None
     result_reference: RcaResultReference | None
@@ -214,3 +225,14 @@ class RcaRunTrace(RcaRunDetail):
     frozen_request: s.RcaTaskSnapshot
     raw_frozen_json: RcaRawFrozenJson
     phase_audits: RcaPhaseAudits
+    current_case_governance: source_types.SourceGovernance
+    current_case_governance_hash: c.SHA
+    current_source_execution_qualification: Literal["not_evaluated_or_regranted_by_frozen_audit"]
+
+    @model_validator(mode="after")
+    def independent_current_governance(self):
+        binding = self.rca_evidence_findings.rca_evidence_binding
+        expected = c.digest({"case_id": binding.case_id, "content_hash": binding.case_content_hash, "governance": self.current_case_governance})
+        if self.current_case_governance_hash != expected:
+            raise ValueError("Current Case governance remains independent of the original frozen publication")
+        return self

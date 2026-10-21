@@ -42,3 +42,4 @@ test('cancelled verification does not accept a late full mathematical proof',asy
  await open(page);const f=read('complete-h14');
  expect(await page.evaluate(async f=>{let checks=0;return window.__supplyProbe.results.verifySupplyAnalysis(f.source,f.analysis,{current:()=>++checks<3});},f)).toBe(false);
 });
+for(const quantity of [{value:'2',absent_reason:'unknown'},{value:null,absent_reason:null}])test('known zero and absence remain an exclusive native Quantity '+JSON.stringify(quantity),async({page})=>{await open(page);const{source}=read('complete-h14');source.observations[0].quantity=quantity;expect(await page.evaluate(s=>window.__supplyProbe.results.verifySupplySource(s),source)).toBe(false)});

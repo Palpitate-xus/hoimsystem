@@ -158,7 +158,7 @@ def expand_context(db, context, *, user=None, current=False, execution=True):
 
 
 def authorize_inventory_snapshot(db, user, context):
-    from app.ai.inventory_native_sources import current_actor
+    from app.ai.inventory_scenarios import current_actor
 
     actor = current_actor(db, user)
     expand_context(db, context, user=actor, current=actor.user_role != "super_admin", execution=False)

@@ -272,7 +272,7 @@ def _read_blob(db, run):
         or reference.source_binding_hash != hash_content(binding)
     ):
         raise ValueError("Original result status, lease, scenario or binding differs")
-    row = db.query(AIInventoryRunResult).filter_by(run_id=run.run_id).populate_existing().one_or_none()
+    row = db.query(AIInventoryRunResult).filter_by(run_id=run.run_id).populate_existing().with_for_update(read=True).one_or_none()
     if (
         row is None
         or row.schema_version != "inventory_complete_result_v1"

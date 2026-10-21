@@ -812,6 +812,9 @@ def list_global_runs(
     supply_item_kind: str | None = Query(None, max_length=20),
     supply_item_id: QueryPositiveInteger | None = Query(None, ge=1, le=2147483647),
     supply_series_id: str | None = Query(None, max_length=36),
+    inventory_item_kind: str | None = Query(None, max_length=20),
+    inventory_item_id: QueryPositiveInteger | None = Query(None, ge=1, le=2147483647),
+    inventory_scenario_id: str | None = Query(None, max_length=36),
     page: int = Query(1, ge=1, le=100000),
     page_size: int = Query(30, ge=1, le=100),
     db: Session = Depends(get_db),
@@ -820,7 +823,15 @@ def list_global_runs(
     """Inspect all users' task metadata and feedback counts without loading clinical payloads."""
     user = _current_super_admin(db, user)
     query = db.query(AIRun)
-    if any(value is not None for value in (supply_item_kind, supply_item_id, supply_series_id)):
+    if any(value is not None for value in (inventory_item_kind, inventory_item_id, inventory_scenario_id)):
+        if feature_key != "inventory_optimization" or any(
+            value is not None for value in (patient_id, department_id, surgery_pool_id, surgery_scenario_id, supply_item_kind, supply_item_id, supply_series_id)
+        ):
+            raise HTTPException(422, "库存比较管理历史仅筛选明确品种与原场景，不能与其他运营或患者范围混用")
+        from app.ai.inventory_history import filter_history
+
+        query = filter_history(db, user, query, inventory_item_kind=inventory_item_kind, inventory_item_id=inventory_item_id, inventory_scenario_id=inventory_scenario_id)
+    elif any(value is not None for value in (supply_item_kind, supply_item_id, supply_series_id)):
         if feature_key != "supply_forecast" or any(value is not None for value in (patient_id, department_id, surgery_pool_id, surgery_scenario_id)):
             raise HTTPException(422, "物资管理历史仅筛选明确品种与原序列，不能与科室、其他运营或患者范围混用")
         from app.ai.supply_history import filter_history
@@ -867,6 +878,14 @@ def inspect_run_trace(run_id: str, db: Session = Depends(get_db), user: User = D
     if run is None:
         raise HTTPException(404, "AI 任务不存在")
     snapshot = json.loads(run.input_json)
+    from app.ai.inventory_storage import is_inventory_snapshot
+
+    if is_inventory_snapshot(snapshot):
+        from app.ai.inventory_context import expand_context
+        from app.ai.runtime import authorize_run
+
+        authorize_run(db, user, run)
+        snapshot["payload"]["context"] = expand_context(db, snapshot["payload"]["context"])
     from app.ai.supply_storage import is_supply_snapshot
 
     if is_supply_snapshot(snapshot):

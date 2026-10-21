@@ -35,7 +35,22 @@ def artifact_constraints(columns):
         CheckConstraint(
             f"HEX(schema_version)=HEX('{ARTIFACT_SCHEMA}') AND requested_by>0 AND event_id>0 AND (patient_id_at_capture IS NULL OR patient_id_at_capture>0)", name="ck_rca_task_scope_schema"
         ),
-        CheckConstraint(uuid_sql("run_id") + " AND " + uuid_sql("case_id"), name="ck_rca_task_uuids"),
+        CheckConstraint(uuid_sql("run_id") + " AND " + uuid_sql("case_id") + " AND " + uuid_sql("event_grant_id"), name="ck_rca_task_uuids"),
+        CheckConstraint("patient_grant_id IS NULL OR (" + uuid_sql("patient_grant_id") + ")", name="ck_rca_task_patient_grant_uuid"),
+        CheckConstraint(
+            "(patient_id_at_capture IS NULL AND patient_grant_id IS NULL) OR (patient_id_at_capture IS NOT NULL AND patient_grant_id IS NOT NULL AND patient_grant_id<>event_grant_id)",
+            name="ck_rca_task_independent_purposes",
+        ),
+        ForeignKeyConstraint(
+            ["event_grant_id", "event_id", "requested_by"],
+            ["hoimsystem_ai_rca_purpose_grant.grant_id", "hoimsystem_ai_rca_purpose_grant.event_id", "hoimsystem_ai_rca_purpose_grant.grantee_id"],
+            name="fk_rca_task_event_grantee",
+        ),
+        ForeignKeyConstraint(
+            ["patient_grant_id", "event_id", "requested_by"],
+            ["hoimsystem_ai_rca_purpose_grant.grant_id", "hoimsystem_ai_rca_purpose_grant.event_id", "hoimsystem_ai_rca_purpose_grant.grantee_id"],
+            name="fk_rca_task_patient_grantee",
+        ),
         *(CheckConstraint(hex_sql(name), name="ck_rca_task_" + name) for name in ANCHOR_FIELDS),
         CheckConstraint(
             (columns.source_bytes >= 1) & (columns.source_bytes <= 8388608) & (func.length(cast(columns.source_json, LargeBinary)) == columns.source_bytes), name="ck_rca_task_source_bytes"
@@ -79,6 +94,8 @@ class AIRcaEvidenceRunArtifact(Base):
     event_id = Column(Integer, ForeignKey("hoimsystem_adverse_event.event_id"), nullable=False)
     patient_id_at_capture = Column(Integer, ForeignKey("hoimsystem_patient.patient_id"), nullable=True)
     requested_by = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=False)
+    event_grant_id = Column(String(36), ForeignKey("hoimsystem_ai_rca_purpose_grant.grant_id"), nullable=False)
+    patient_grant_id = Column(String(36), ForeignKey("hoimsystem_ai_rca_purpose_grant.grant_id"), nullable=True)
     schema_version = Column(String(48), nullable=False)
     recorded_at = Column(utc6(), nullable=False)
     source_json = Column(whole_json(), nullable=False)

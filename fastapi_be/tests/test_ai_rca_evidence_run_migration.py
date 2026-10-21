@@ -62,6 +62,8 @@ def artifact(**changes):
         "event_id": 1,
         "patient_id_at_capture": 1,
         "requested_by": 1,
+        "event_grant_id": source.grant(1)["grant_id"],
+        "patient_grant_id": source.grant(2)["grant_id"],
         "schema_version": "rca_evidence_run_artifact_v1",
         "recorded_at": NOW,
         "source_json": raw,
@@ -136,6 +138,13 @@ def test_actual_up_down_up_and_complete_unicode_readback_keep_existing_ddl_and_r
     [
         {"schema_version": "RCA_evidence_run_artifact_v1"},
         {"requested_by": 0},
+        {"requested_by": 2},
+        {"event_id": 2},
+        {"event_grant_id": "00000000-0000-0000-0000-000000000099"},
+        {"event_grant_id": None},
+        {"patient_grant_id": None},
+        {"patient_grant_id": source.grant(1)["grant_id"]},
+        {"patient_id_at_capture": None},
         {"patient_id_at_capture": 0},
         {"source_bytes": 0},
         {"source_bytes": 8388609},
@@ -239,6 +248,8 @@ def test_independent_models_match_actual_migration_mysql_mediumtext_utc6_and_con
         migration.upgrade()
     assert sum("MEDIUMTEXT" in statement for statement in sql) == 2
     assert "\n".join(sql).count("DATETIME(6)") == 4
+    assert "FOREIGN KEY(event_grant_id, event_id, requested_by)" in "\n".join(sql)
+    assert "FOREIGN KEY(patient_grant_id, event_id, requested_by)" in "\n".join(sql)
     assert "FOREIGN KEY(run_id, accepted_lease)" in "\n".join(sql)
     assert "FOREIGN KEY(run_id, source_hash, instructions_digest)" in "\n".join(sql)
     assert "AUTO_INCREMENT" not in "\n".join(sql)

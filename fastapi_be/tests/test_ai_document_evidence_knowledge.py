@@ -5,7 +5,9 @@ import json
 
 import httpx
 import pytest
-from sqlalchemy import text
+from fastapi import HTTPException
+from sqlalchemy import event, text
+from sqlalchemy.dialects import mysql
 
 from app.ai import document_evidence_sources as s
 from app.ai.catalog import FEATURE_BY_KEY
@@ -15,6 +17,7 @@ from app.ai.knowledge_sources import source_state
 from app.ai.models import AIAuditEvent, AIFeatureConfig, AIFeedback, AIKnowledgeDocument, AIProvider, AIRun
 from app.ai.runtime import claim_next_run, create_run, execute_claimed
 from app.ai.schemas import RunRequest
+from app.routers import ai_admin
 from tests.test_ai_document_evidence_sources import (
     approved_original,
     candidate_request,
@@ -160,6 +163,12 @@ async def test_generic_knowledge_review_cannot_bypass_document_lineage(knowledge
     db.refresh(document)
     assert document.status == "published"
     assert db.query(AIAuditEvent).filter_by(action="knowledge.review", target=document.document_id).count() == audit_count
+    headers = auth_headers(actor.username)
+    detail = await async_client.get("/api/ai/admin/knowledge/" + document.document_id, headers=headers)
+    listed = await async_client.get("/api/ai/admin/knowledge", headers=headers)
+    assert detail.status_code == listed.status_code == 200
+    assert detail.json()["data"]["document_evidence_bound"] is True
+    assert next(row for row in listed.json()["data"] if row["document_id"] == document.document_id)["document_evidence_bound"] is True
     if strip_markers:
         assert source_state(db, document) == "invalid_binding" and evidence(knowledge_case) == []
 
@@ -182,7 +191,9 @@ async def test_manual_knowledge_complete_utf8_capacity_is_enforced_before_sql(se
     request = {"title": "UTF8容量合成测试", "version": "v1", "source_uri": "synthetic://capacity", "content": content, "feature_keys": ["guideline_qa"]}
     reply = await async_client.post("/api/ai/admin/knowledge", headers={**auth_headers("super01"), "Content-Type": "application/json"}, content=json.dumps(request).encode())
     assert reply.status_code == 422 and db_session.query(AIKnowledgeDocument).count() == count
-    assert "input" not in reply.json().get("detail", [{}])[0] if isinstance(reply.json().get("detail"), list) else True
+    details = reply.json().get("detail")
+    if isinstance(details, list):
+        assert all("input" not in item for item in details)
 
 
 @pytest.mark.asyncio
@@ -190,6 +201,31 @@ async def test_document_routes_are_mounted_in_real_main_with_super_only_role(see
     path = "/api/ai/admin/document-evidence/options"
     assert (await async_client.get(path, headers=auth_headers("super01"))).status_code == 200
     assert (await async_client.get(path, headers=auth_headers(seed_data["doctor_user"].username))).status_code == 403
+
+
+@pytest.mark.parametrize("reader", ["list", "detail"])
+def test_generic_knowledge_readers_recheck_stale_super_before_private_body(db_session, seed_data, reader):
+    actor = seed_data["super_admin_user"]
+    db_session.execute(text("UPDATE hoimsystem_users SET user_role='doctor' WHERE user_id=:pk"), {"pk": actor.user_id})
+    assert actor.user_role == "super_admin"
+    statements = []
+
+    def observe(state):
+        if state.is_select:
+            statements.append(str(state.statement.compile(dialect=mysql.dialect())))
+
+    event.listen(db_session, "do_orm_execute", observe)
+    try:
+        with pytest.raises(HTTPException) as rejected:
+            if reader == "list":
+                ai_admin.list_knowledge(db=db_session, user=actor)
+            else:
+                ai_admin.knowledge_detail("no-private-body-read", db=db_session, user=actor)
+        assert rejected.value.status_code == 403
+    finally:
+        event.remove(db_session, "do_orm_execute", observe)
+        db_session.rollback()
+    assert len(statements) == 1 and "hoimsystem_users" in statements[0] and statements[0].rstrip().endswith("LOCK IN SHARE MODE")
 
 
 @pytest.mark.parametrize("fault", ["metadata", "result", "audit", "source"])

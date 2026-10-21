@@ -1059,6 +1059,7 @@ def activate_prompt(key: str, req: PromptActivate, db: Session = Depends(get_db)
 @router.get("/ai/admin/knowledge")
 def list_knowledge(db: Session = Depends(get_db), user: User = Depends(require_roles("super_admin")), limit: int = Query(100, ge=1, le=300)) -> dict:
     """List version metadata; full text is retrieved only when explicitly inspected."""
+    _current_super_admin(db, user)
     items = db.query(AIKnowledgeDocument).order_by(AIKnowledgeDocument.create_time.desc()).limit(limit).all()
     names = ("document_id", "title", "version", "source_uri", "category", "status", "content_hash", "department_id", "effective_from", "effective_to", "reviewed_by", "reviewed_at", "create_time")
     data = [
@@ -1068,6 +1069,7 @@ def list_knowledge(db: Session = Depends(get_db), user: User = Depends(require_r
             "source_kind": item.source_kind,
             "source_reference_id": item.source_reference_id,
             "source_state": source_state(db, item),
+            "document_evidence_bound": is_document_source(db, item),
         }
         for item in items
     ]
@@ -1077,6 +1079,7 @@ def list_knowledge(db: Session = Depends(get_db), user: User = Depends(require_r
 @router.get("/ai/admin/knowledge/{document_id}")
 def knowledge_detail(document_id: str, db: Session = Depends(get_db), user: User = Depends(require_roles("super_admin"))) -> dict:
     """Inspect exact text and its hash before a publication decision."""
+    _current_super_admin(db, user)
     item = db.get(AIKnowledgeDocument, document_id)
     if item is None:
         raise HTTPException(404, "知识文档不存在")
@@ -1094,6 +1097,7 @@ def knowledge_detail(document_id: str, db: Session = Depends(get_db), user: User
             "source_reference_id": item.source_reference_id,
             "source_snapshot_hash": item.source_snapshot_hash,
             "source_state": source_state(db, item),
+            "document_evidence_bound": is_document_source(db, item),
         },
     }
 

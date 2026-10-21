@@ -10,7 +10,7 @@ const pick=(v,ks)=>Object.fromEntries(ks.map(k=>[k,v[k]])),keys=(v,ks)=>object(v
 const positive=v=>Number.isSafeInteger(v)&&v>0&&v<=2147483647,bytes=v=>encoder.encode(typeof v==='string'?v:canonical(v)).length;
 const scalar=v=>typeof v==='string'&&!/[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]/u.test(v);
 function allScalars(v){return typeof v==='string'?scalar(v):Array.isArray(v)?v.every(allScalars):object(v)?Object.entries(v).every(([k,x])=>scalar(k)&&allScalars(x)):v===null||typeof v==='boolean'||Number.isSafeInteger(v);}
-const model=(name,v)=>generatedSchemaMatches(schemas,name,v)&&allScalars(v)&&bytes(v)<=8388608;
+const model=(name,v,maxBytes=8388608)=>generatedSchemaMatches(schemas,name,v)&&allScalars(v)&&bytes(v)<=maxBytes;
 export const satisfactionSchema=name=>Object.hasOwn(schemas,name)?structuredClone(schemas[name]):null;
 const basis=(v,max)=>scalar(v)&&Array.from(v).length>=20&&Array.from(v).length<=max&&!!pythonStrip(v)&&bytes(v)<=4000;
 export const satisfactionBasis=v=>basis(v,4000);
@@ -95,7 +95,9 @@ export async function projectSatisfactionSnapshot(snapshot,publishedMetadata){tr
 
 function governanceState(r,{full=false}={}){if(!clock(r.created_at)||r.source_id!==`satisfaction_case:${r.case_id}:${r.content_hash.slice(0,12)}`||!date(r.date_from)||!date(r.date_to))return false;const reviewed=r.reviewed_at!==null,revoked=r.revoked_at!==null;if(reviewed?(!positive(r.reviewed_by)||!clock(r.reviewed_at)||r.reviewed_at<r.created_at):r.reviewed_by!==null)return false;if(revoked?(!positive(r.revoked_by)||!clock(r.revoked_at)||r.revoked_at<(r.reviewed_at||r.created_at)):r.revoked_by!==null)return false;if(full&&(reviewed?!satisfactionBasis(r.review_basis_note):r.review_basis_note!==''))return false;if(full&&(revoked?!satisfactionRevokeBasis(r.revoke_reason):r.revoke_reason!==''))return false;return r.status==='draft'?r.revision===1&&!reviewed&&!revoked:['published','rejected'].includes(r.status)?r.revision===2&&reviewed&&!revoked:r.status==='revoked'&&revoked&&r.revision===(reviewed?3:2);}
 export async function verifySatisfactionCase(row,{auditOnly=false}={}){try{
- if(!model('CaseWrapper',row)||row.audit_only!==auditOnly||!governanceState(row,{full:auditOnly})||row.can_record!==false||row.can_review&&(row.status!=='draft'||!row.parent_current)||row.can_revoke&&!['draft','published'].includes(row.status)||row.eligible!==(row.status==='published'&&row.parent_current&&row.exclusion_reasons.length===0))return false;
+ // The live DTO repeats the complete safe projection, and Super adds the
+ // protected original. Each original below keeps its independent8MiB bound.
+ if(!model('CaseWrapper',row,33554432)||row.audit_only!==auditOnly||!governanceState(row,{full:auditOnly})||row.can_record!==false||row.can_review&&(row.status!=='draft'||!row.parent_current)||row.can_revoke&&!['draft','published'].includes(row.status)||row.eligible!==(row.status==='published'&&row.parent_current&&row.exclusion_reasons.length===0))return false;
  if(!auditOnly&&(row.snapshot!==null||row.review_basis_note!==null||row.revoke_reason!==null))return false;
  const visible=auditOnly||['draft','published'].includes(row.status)&&row.parent_current;
  if(!visible)return row.safe_snapshot===null&&row.safe_projection_hash===null&&row.public_source===null;

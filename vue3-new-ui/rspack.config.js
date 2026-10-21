@@ -87,17 +87,15 @@ module.exports = {
       {
         test: /\.js$/,
         exclude: /node_modules/,
-        use: [
-          ...(mode === "production" ? [{loader: resolve("scripts/public-interface-text-loader.cjs"), options: {documentData:true}}] : []),
-          {
+        use: {
           loader: "babel-loader",
           options: {
             presets: ["@babel/preset-env"],
-            // Reuse Babel helpers across async views while preserving the preset's targets.
-            plugins: [["@babel/plugin-transform-runtime", { version: require("@babel/runtime/package.json").version }]],
+            ...(mode === "production" ? {customize: resolve("scripts/public-interface-babel.cjs")} : {}),
+            // Reuse Babel helpers while retaining the original targets and loader contract.
+            plugins: [["@babel/plugin-transform-runtime", {version: require("@babel/runtime/package.json").version}]],
           },
-          },
-        ],
+        },
       },
       {
         test: /\.css$/,

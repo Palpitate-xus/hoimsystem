@@ -11,8 +11,8 @@ from app.ai.inventory_contract import hash_content
 from tests.test_ai_inventory_contract import make_source, uid
 
 
-def bundle():
-    source = make_source()
+def bundle(source=None):
+    source = make_source() if source is None else source
     public_keys = (
         "scenario_id",
         "item_kind",

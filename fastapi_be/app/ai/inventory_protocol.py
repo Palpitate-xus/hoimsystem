@@ -4,15 +4,20 @@ from typing import Literal
 
 from pydantic import Field, model_validator
 
-from app.ai.inventory_contract import InventoryAnalysis, StrictModel
+from app.ai.inventory_contract import MAX_CANDIDATES, InventoryAnalysis, StrictModel
 from app.ai.schemas import GenerationResult
 
 
-class InventoryGenerationResult(GenerationResult):
+class InventoryText(GenerationResult):
+    # Every declared unknown candidate and the candidate-set gap must survive.
+    missing_data: list[str] = Field(default_factory=list, max_length=MAX_CANDIDATES + 1)
+
+
+class InventoryGenerationResult(InventoryText):
     inventory_analysis: InventoryAnalysis
 
 
-class InventoryExplanation(GenerationResult):
+class InventoryExplanation(InventoryText):
     @model_validator(mode="before")
     @classmethod
     def explicit_explanation(cls, value):

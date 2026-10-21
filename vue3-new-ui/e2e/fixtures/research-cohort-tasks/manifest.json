@@ -12,6 +12,13 @@
       "actual_export": "/tmp/hoim-research-tasks-http-third-pytest/test_actual_main_jwt_task_rece1/actual-research-main-task-responses.json",
       "bytes": 211532,
       "sha256": "694dcb8b7d09b3b54f81987175c138fd6bffb56fc21c390e15ef3e4a7ebe08b3"
+    },
+    {
+      "file": "five-states.json",
+      "actual_export": "/tmp/hoim-research-tasks-states-http-first-pytest/test_actual_main_same_case_all0/actual-research-main-five-states.json",
+      "bytes": 350053,
+      "sha256": "01c93b62d859fe73b55e55320043187db7abb54a52e947085522f9eff2831685",
+      "scope": "Actual same-Case Main HTTP 5 states; failed/cancelled are distinct tasks, not rewritten statuses. Includes directory20 and withdrawn permission metadata/denials."
     }
   ]
 }

@@ -328,7 +328,7 @@ async def test_inflight_receipt_or_configuration_change_cannot_accept_old_proof(
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize("fault", ["sql_audit_failure", "audit_role_change", "audit_parent_change"])
+@pytest.mark.parametrize("fault", ["sql_audit_failure", "audit_role_change", "audit_parent_change", "audit_task_metadata", "audit_result_body"])
 async def test_real_acceptance_audit_sql_and_postwrite_authority_failure_roll_back_complete_acceptance(fault, db_session, pipeline_case):
     db, case = db_session, pipeline_case
     run = create_run(db, case["director"], request_for(case))
@@ -336,17 +336,22 @@ async def test_real_acceptance_audit_sql_and_postwrite_authority_failure_roll_ba
     triggered = []
 
     def audit_inserted(connection, cursor, statement, parameters, context, executemany):
-        if not statement.lower().startswith("insert into hoimsystem_ai_audit_event") or triggered:
+        table = "hoimsystem_ai_surgery_run_result" if fault == "audit_result_body" else "hoimsystem_ai_audit_event"
+        if not statement.lower().startswith("insert into " + table) or triggered:
             return
-        if not any(values.get("action") == "run.surgery_result.accept" for values in context.compiled_parameters):
+        if fault != "audit_result_body" and not any(values.get("action") == "run.surgery_result.accept" for values in context.compiled_parameters):
             return
         triggered.append(fault)
         if fault == "sql_audit_failure":
             cursor.execute("INSERT INTO hoimsystem_ai_audit_event(actor_id,action,target,detail_json,create_time) VALUES(1,NULL,'synthetic-failure','{}','2026-10-20 12:00:00')")
         elif fault == "audit_role_change":
             connection.execute(text("UPDATE hoimsystem_users SET user_role='nurse' WHERE user_id=:id"), {"id": case["director"].user_id})
-        else:
+        elif fault == "audit_parent_change":
             connection.execute(text("UPDATE hoimsystem_surgery_application SET surgery_name='synthetic-parent-changed' WHERE application_id=:id"), {"id": case["application"].application_id})
+        elif fault == "audit_task_metadata":
+            connection.execute(text("UPDATE hoimsystem_ai_run SET context_metadata_json='{}' WHERE run_id=:id"), {"id": run.run_id})
+        else:
+            connection.execute(text("UPDATE hoimsystem_ai_surgery_run_result SET result_json='{}' WHERE run_id=:id"), {"id": run.run_id})
 
     engine = db.get_bind()
     event.listen(engine, "after_cursor_execute", audit_inserted)

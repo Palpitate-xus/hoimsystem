@@ -46,9 +46,15 @@ def source_request(case, payload, *, unit=True):
 
 
 def publish_source(db, case, payload, *, unit=True, actor=None):
+    from app.ai import inventory_native_collection as collection
     from app.ai import inventory_native_sources as facts
 
-    row = facts.create_source(db, actor or case["pharmacist"], source_request(case, payload, unit=unit))
+    values = source_request(case, payload, unit=unit)
+    if payload["kind"] == "inventory_observation" and payload["legacy_reconciliation"] == "confirmed":
+        # The synthetic pharmacist reviews this complete capture before submitting.
+        reviewed_legacy = collection.capture_legacy_inventory(db, values["item_kind"], values["item_id"])
+        values["expected_legacy_digest"] = reviewed_legacy["collection_digest"]
+    row = facts.create_source(db, actor or case["pharmacist"], values)
     db.commit()
     facts.review_source(db, case["super"], row.source_record_id, {"expected_revision": row.revision, "expected_content_hash": row.content_hash, "decision": "publish", "basis_note": NOTE})
     db.commit()

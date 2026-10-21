@@ -89,6 +89,8 @@ def _locator(db, identifier):
 
 
 def _load(db, user, identifier):
+    # Writers and reads preserve Actor -> technical locator -> Event parent.
+    g.current_actor(db, user, g.SOURCE_ROLES)
     identity = _locator(db, identifier)
     if identity is None:
         raise HTTPException(404, "人工调查原件不存在")

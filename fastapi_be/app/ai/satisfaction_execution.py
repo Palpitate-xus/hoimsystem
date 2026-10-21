@@ -110,7 +110,7 @@ def cancel_satisfaction_run(db, user, run_id):
         run = locked_run(db, run_id)
         if run is None:
             raise HTTPException(404, "评价任务不存在")
-        authorize_satisfaction_run(db, actor, run)
+        authorize_satisfaction_run(db, actor, run, audit_only=actor.user_role == "super_admin")
         receipts.load_terminal(db, run)
         if run.status not in {"queued", "running"}:
             raise HTTPException(409, "评价任务已结束")
@@ -135,7 +135,7 @@ def cancel_satisfaction_run(db, user, run_id):
         expected = _event(db, run, actor.user_id, "run.satisfaction.cancel")
         if terminal is not None:
             receipts.readback(db, run, terminal)
-        authorize_satisfaction_run(db, actor, run)
+        authorize_satisfaction_run(db, actor, run, audit_only=actor.user_role == "super_admin")
         current_actor(db, actor, expected=epoch)
         receipts.readback(db, run, expected)
         db.commit()

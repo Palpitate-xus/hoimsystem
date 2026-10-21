@@ -9,8 +9,8 @@ const keys=(v,ks)=>object(v)&&same(Object.keys(v).sort(),[...ks].sort()),positiv
 const encoder=new TextEncoder(),bytes=v=>encoder.encode(typeof v==='string'?v:canonical(v)).length;
 const scalar=s=>typeof s==='string'&&!/[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]/u.test(s);
 const clock=v=>{try{return typeof v==='string'&&/^[1-9]\d{3}-\d\d-\d\dT\d\d:\d\d:\d\d\.\d{6}Z$/.test(v)&&new Date(v.slice(0,23)+'Z').toISOString()===v.slice(0,23)+'Z';}catch{return false;}};
-export const codingEvidenceBasis=v=>supplySourceBasis(v);
-export const codingEvidenceRevokeBasis=v=>supplySourceBasis(v,1000);
+export const codingEvidenceBasis=v=>scalar(v)&&supplySourceBasis(v);
+export const codingEvidenceRevokeBasis=v=>scalar(v)&&supplySourceBasis(v,1000);
 export const codingCaseReferencesValid=v=>keys(v,['coding_case_id'])&&uuid(v.coding_case_id);
 export const codingScopeValid=v=>keys(v,['patient_id','admission_id','home_id'])&&positive(v.patient_id)&&uuid(v.admission_id)&&uuid(v.home_id);
 export const codingEvidenceSchema=n=>Object.hasOwn(schemas,n)?structuredClone(schemas[n]):null;
@@ -102,12 +102,12 @@ function wrapperState(row,kind,auditOnly){
  return true;
 }
 export async function verifyCodingEvidencePackage(row,{auditOnly=false}={}){try{
- if(!generatedSchemaMatches(schemas,'PackageWrapper',row)||!wrapperState(row,'package',auditOnly)||!clock(row.created_at)||row.source_id!==`coding_package:${row.package_id}:${row.content_hash.slice(0,12)}`)return false;
+ if(!generatedSchemaMatches(schemas,'PackageWrapper',row)||!metadataValid(pick(row,[...packageIdentity,...governanceKeys.filter(k=>!['review_basis_note','revoke_reason'].includes(k)),'content_hash','source_id','governance_hash']),'package')||!wrapperState(row,'package',auditOnly)||!clock(row.created_at)||row.source_id!==`coding_package:${row.package_id}:${row.content_hash.slice(0,12)}`)return false;
  if(row.snapshot===null)return !auditOnly&&!(row.parent_current&&['draft','published'].includes(row.status))&&row.review_basis_note===null&&row.revoke_reason===null;
  return await verifyCodingEvidenceOriginal(pick(row,proofKeys('package')),'package');
 }catch{return false;}}
 export async function verifyCodingEvidenceCase(row,{patientId=null,admissionId=null,homeId=null,auditOnly=false}={}){try{
- if(!generatedSchemaMatches(schemas,'CaseWrapper',row)||!scopeMatches(row,{patientId,admissionId,homeId})||!wrapperState(row,'case',auditOnly)||!clock(row.created_at)||row.source_id!==`coding_case:${row.case_snapshot_id}:${row.content_hash.slice(0,12)}`)return false;
+ if(!generatedSchemaMatches(schemas,'CaseWrapper',row)||!metadataValid(pick(row,[...caseIdentity,...governanceKeys.filter(k=>!['review_basis_note','revoke_reason'].includes(k)),'content_hash','source_id','governance_hash']),'case')||!scopeMatches(row,{patientId,admissionId,homeId})||!wrapperState(row,'case',auditOnly)||!clock(row.created_at)||row.source_id!==`coding_case:${row.case_snapshot_id}:${row.content_hash.slice(0,12)}`)return false;
  if(row.snapshot===null)return !auditOnly&&!(row.parent_current&&['draft','published'].includes(row.status))&&row.public_source===null&&row.review_basis_note===null&&row.revoke_reason===null;
  if(!await verifyCodingEvidenceOriginal(pick(row,proofKeys('case')),'case'))return false;
  const published=row.status==='published'||row.status==='revoked'&&row.revision===3;
@@ -120,7 +120,7 @@ export async function verifyCodingEvidenceCase(row,{patientId=null,admissionId=n
 export async function verifyCodingEvidenceTransition(after,before,action,body,kind='case'){try{
  const verify=kind==='package'?verifyCodingEvidencePackage:verifyCodingEvidenceCase,idKey=kind==='package'?'package_id':'case_snapshot_id';
  if(!['publish','reject','revoke'].includes(action)||!await verify(after,{auditOnly:after.audit_only})||after[idKey]!==before[idKey]||after.content_hash!==before.content_hash||body.expected_content_hash!==before.content_hash||body.expected_revision!==before.revision||after.revision!==before.revision+1)return false;
- if(action==='revoke')return after.status==='revoked'&&after.revoke_reason===body.basis_note&&same(pick(after,['reviewed_at','reviewed_by','review_basis_note']),pick(before,['reviewed_at','reviewed_by','review_basis_note']));
+ if(action==='revoke'){if(after.status!=='revoked'||!same(pick(after,['reviewed_at','reviewed_by']),pick(before,['reviewed_at','reviewed_by']))||after.revoke_reason!==null&&after.revoke_reason!==body.basis_note||after.review_basis_note!==null&&after.review_basis_note!==before.review_basis_note)return false;const expected={...pick(after,governanceKeys),review_basis_note:before.review_basis_note,revoke_reason:body.basis_note};return await digest(expected)===after.governance_hash;}
  return after.status===(action==='publish'?'published':'rejected')&&after.review_basis_note===body.basis_note&&body.decision===action;
 }catch{return false;}}
 export const getCodingEvidenceRules=params=>read('/ai/coding-evidence/rules',params);

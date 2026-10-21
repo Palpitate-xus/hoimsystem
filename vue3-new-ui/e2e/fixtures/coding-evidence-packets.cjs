@@ -20,7 +20,7 @@ function expand(bundle){
 }
 function actual(){return expand(JSON.parse(fs.readFileSync(target,'utf8')));}
 if(require.main===module){
- const source='/tmp/hoim-coding-evidence-ui-real-fixtures-third.json',bytes=fs.readFileSync(source),raw=JSON.parse(bytes),parts={},original=canonical(raw);
+ const source='/tmp/hoim-coding-evidence-ui-real-fixtures-fourth.json',bytes=fs.readFileSync(source),raw=JSON.parse(bytes),parts={},original=canonical(raw);
  function pack(v){
   if(v===null||typeof v!=='object')return v;if(!Array.isArray(v)&&Object.hasOwn(v,'$coding_ref'))throw new Error('Original packet collides with storage reference namespace');
   const text=canonical(v),body=Array.isArray(v)?v.map(pack):Object.fromEntries(Object.entries(v).map(([k,x])=>[k,pack(x)]));

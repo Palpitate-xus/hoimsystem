@@ -231,6 +231,7 @@ def list_runs(
     inventory_scenario_id: str | None = Query(None, max_length=36),
     coding_case_id: str | None = Query(None, max_length=36),
     charge_case_id: str | None = Query(None, max_length=36),
+    charge_native_only: bool = False,
     limit: int = Query(30, ge=1, le=100),
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user),
@@ -250,6 +251,29 @@ def list_runs(
     if feature_key:
         authorized_feature(db, user, feature_key)
         query = query.filter_by(feature_key=feature_key)
+    if charge_native_only:
+        if feature_key != "charge_reconciliation" or any(
+            value is not None
+            for value in (
+                department_id,
+                roster_plan_id,
+                ward_id,
+                bed_series_id,
+                surgery_pool_id,
+                surgery_scenario_id,
+                supply_item_kind,
+                supply_item_id,
+                supply_series_id,
+                inventory_item_kind,
+                inventory_item_id,
+                inventory_scenario_id,
+                coding_case_id,
+            )
+        ):
+            raise HTTPException(422, "新版账目历史筛选仅支持本次真实住院的完整账目任务")
+        from app.ai.charge_reconciliation_history import filter_native_history
+
+        query = filter_native_history(db, user, query, patient_id=patient_id, encounter_ref=encounter_ref)
     if charge_case_id is not None:
         if feature_key != "charge_reconciliation" or any(
             value is not None

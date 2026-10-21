@@ -3,10 +3,20 @@
 from fastapi import HTTPException
 from pydantic import TypeAdapter
 
-from app.ai.charge_reconciliation_contract import UUID
+from app.ai.charge_reconciliation_contract import UUID, CaptureRequest
 from app.ai.charge_reconciliation_run_models import AIChargeRunArtifact
-from app.ai.charge_reconciliation_sources import case_current, current_actor
+from app.ai.charge_reconciliation_sources import authorize_scope, case_current, current_actor
 from app.ai.models import AIRun
+
+
+def filter_native_history(db, user, query, *, patient_id, encounter_ref):
+    """New native panels opt into FK membership; legacy callers keep their view."""
+    try:
+        scope = CaptureRequest.model_validate({"patient_id": patient_id, "admission_id": encounter_ref})
+    except (ValueError, TypeError) as exc:
+        raise HTTPException(422, "新版账目历史须明确真实患者与规范住院UUID") from exc
+    authorize_scope(db, user, scope)
+    return query.filter(AIRun.run_id.in_(db.query(AIChargeRunArtifact.run_id)))
 
 
 def filter_history(db, user, query, *, charge_case_id, patient_id, encounter_ref):

@@ -6,11 +6,13 @@ import httpx
 import pytest
 from sqlalchemy import text
 
-from app.ai import document_extraction_runtime as documents
 from app.ai import runtime
 from app.ai.document_extraction_run_record import parse_record
 from app.ai.models import AIAuditEvent, AIRun
-from tests.test_ai_document_extraction_pipeline import document_pipeline, model_transport, request  # noqa: F401
+from tests.test_ai_document_extraction_pipeline import document_pipeline as _document_pipeline
+from tests.test_ai_document_extraction_pipeline import model_transport, request
+
+document_pipeline = _document_pipeline
 
 
 async def queued(client, headers, case):

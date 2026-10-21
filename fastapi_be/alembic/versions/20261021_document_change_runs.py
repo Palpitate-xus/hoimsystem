@@ -104,5 +104,5 @@ def upgrade():
 
 def downgrade():
     op.drop_table("hoimsystem_ai_document_change_run_result")
-    op.drop_index("idx_dcr_artifact_scope", table_name="hoimsystem_ai_document_change_run_artifact")
+    # InnoDB uses the scope index for its FK; DROP TABLE removes both safely.
     op.drop_table("hoimsystem_ai_document_change_run_artifact")

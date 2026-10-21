@@ -2,6 +2,7 @@
 
 import datetime as dt
 import importlib.util
+import io
 from pathlib import Path
 
 import pytest
@@ -13,6 +14,7 @@ from alembic.script import ScriptDirectory
 from sqlalchemy.dialects import mysql
 from sqlalchemy.schema import CreateTable
 
+from app.ai import document_change_models as document_change_models  # noqa: F401 -- explicit parent registration for isolated collection
 from app.ai.document_change_run_models import ANCHOR_HASH_FIELDS, DOCUMENT_CHANGE_RUN_MODELS, SOURCE_HASH_FIELDS
 
 PATH = Path(__file__).resolve().parents[1] / "alembic/versions/20261021_document_change_runs.py"
@@ -187,3 +189,16 @@ def test_model_and_migration_columns_checks_and_relational_identity_match(databa
         assert actual_fks == expected_fks
         ddl = str(CreateTable(table).compile(dialect=mysql.dialect()))
         assert "MEDIUMTEXT" in ddl and "DATETIME(6)" in ddl and "AUTO_INCREMENT" not in ddl
+
+
+def test_mysql_downgrade_preserves_foreign_key_support_index_until_owner_table_drop():
+    # Real MySQL8 first rejected DROP INDEX with1553 because this scope index
+    # supports the Artifact scope FK. Removing its owner table also removes the
+    # FK/index; detaching that live index first is not portable SQL.
+    output = io.StringIO()
+    context = MigrationContext.configure(dialect_name="mysql", opts={"as_sql": True, "output_buffer": output})
+    with Operations.context(context):
+        migration.downgrade()
+    statements = output.getvalue()
+    assert "DROP INDEX" not in statements
+    assert statements.index("DROP TABLE " + RESULT) < statements.index("DROP TABLE " + ARTIFACT)

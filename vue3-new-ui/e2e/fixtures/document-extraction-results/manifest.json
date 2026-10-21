@@ -1,0 +1,19 @@
+{
+  "scope": "Actual synthetic SQLite/JWT durable worker to native provider MockTransport, stored result, SQL anchor and explicit ordinal candidate response; replay is isolated API mocking, not production HTTP or clinical validation.",
+  "inputs": [
+    {
+      "file": "actual-document-pipeline-chat.json",
+      "sha256": "a7fb544f6c727b7e9cd2cc2ba707e4941159dbfa9ccfb11e597162e167c4034e",
+      "bytes": 49513
+    },
+    {
+      "file": "actual-document-pipeline-responses.json",
+      "sha256": "9966af6e25ce28a707990ff81b455c7ded7f128626ced4fd9d8ade6ec9ad5fe0",
+      "bytes": 51571
+    }
+  ],
+  "output": {
+    "sha256": "2fe0e762066966166fb75934e0a38d3a2df525325fe18a8995a3112aedf864dd",
+    "bytes": 83520
+  }
+}

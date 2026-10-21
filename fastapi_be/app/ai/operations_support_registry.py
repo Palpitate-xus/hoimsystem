@@ -209,6 +209,8 @@ def register_original(db, user, value):
         captured_by=actor.user_id,
         clock_basis="capture_only_not_verified_incident_occurrence",
     )
+    # Reject whole canonical-wire expansion too, before any receipt/row is staged.
+    bounded_json(original)
     header = dict(
         original_id=original.original_id,
         content_hash=c.content_hash(original),

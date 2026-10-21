@@ -23,6 +23,7 @@ from app.ai import drug_label_run_models as _drug_label_run_models  # noqa: F401
 from app.ai import inventory_native_source_models as _inventory_native_source_models  # noqa: F401
 from app.ai import inventory_scenario_models as _inventory_scenario_models  # noqa: F401
 from app.ai import models as _ai_models  # noqa: F401
+from app.ai import operations_support_models as _operations_support_models  # noqa: F401
 from app.ai import research_cohort_artifact_models as _research_cohort_artifact_models  # noqa: F401
 from app.ai import research_cohort_models as _research_cohort_models  # noqa: F401
 from app.ai import roster_models as _roster_models  # noqa: F401

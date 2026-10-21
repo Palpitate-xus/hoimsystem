@@ -451,3 +451,49 @@ def test_original_task_text_utf8_limit_not_codepoint_or_truncated_parse(task):
     task.run.input_json = " " * 65536
     task.db.commit()
     refused(lambda: storage.load_snapshot(task.db, task.run))
+
+
+@pytest.mark.parametrize("axis", ["source", "professional", "role", "signer_role"])
+def test_public_source_permission_precedes_every_task_text_even_when_immutable_internal_proof_still_exists(label_case, axis, monkeypatch):
+    from app.ai import drug_label_runtime as runtime
+    from app.ai.schemas import RunRequest
+    from app.config import settings
+
+    monkeypatch.setattr(settings, "AI_PROVIDER_ALLOWED_HOSTS", "synthetic.invalid")
+    case = make_task(label_case)
+    actor = case.actor
+    identifier = case.run.run_id
+    if axis == "signer_role":
+        actor = case.users["super_admin_user"]
+        created = runtime.create_drug_label_run(case.db, actor, RunRequest(feature_key=storage.FEATURE_KEY, input={"drug_label_source_binding_id": case.source.snapshot.source_binding_id}))
+        identifier = created.run_id
+    if axis == "source":
+        sources.revoke_source(case.db, case.users["super_admin_user"], case.source.snapshot.source_binding_id, {**cas(case.source), "basis_note": NOTE})
+    elif axis == "professional":
+        sources.revoke_professional(case.db, case.actor, case.source.snapshot.source_binding_id, {**cas(case.source.professional_review), "basis_note": NOTE})
+    else:
+        case.db.query(User).filter_by(user_id=case.actor.user_id).update({"user_role": "patient"}, synchronize_session=False)
+    case.db.commit()
+    selected = []
+
+    def observe(conn, cursor, statement, parameters, context, many):
+        if "hoimsystem_ai_run.input_json" in statement:
+            selected.append(statement)
+
+    event.listen(case.db.get_bind(), "before_cursor_execute", observe)
+    try:
+        with pytest.raises(HTTPException) as denied:
+            storage.load_snapshot(case.db, identifier, user=actor)
+        assert denied.value.status_code in {403, 409}
+        assert selected == []
+        case.db.rollback()
+        # Trusted terminal accounting retains the complete immutable proof;
+        # no current execution authority is conferred by this internal read.
+        assert storage.load_snapshot(case.db, identifier).run.run_id == identifier
+        assert selected
+        case.db.rollback()
+        selected.clear()
+        frozen = storage.load_snapshot(case.db, identifier, user=case.users["super_admin_user"], frozen_audit=True)
+        assert selected and frozen.source_record.audit_only and not frozen.source_record.eligible
+    finally:
+        event.remove(case.db.get_bind(), "before_cursor_execute", observe)

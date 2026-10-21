@@ -260,12 +260,20 @@ def _loaded(db, run, artifact, record):
 def load_snapshot(db, run, *, user=None, frozen_audit=False, writing=False):
     """Internal integrity by default; user mode checks role before private rows."""
     try:
+        if type(frozen_audit) is not bool:
+            raise ValueError("Frozen audit must be an explicit boolean")
         identifier = _run_id(run)
         with db.no_autoflush:
             hint = _locator(db, identifier)
             if hint is None:
                 raise ValueError("A real immutable task artifact is required")
             record, _ = _source_locked(db, hint.source_binding_id, hint.requested_by, user=user, frozen_audit=frozen_audit)
+            if user is not None:
+                # The internal audit-shaped immutable proof above intentionally
+                # survives Source/owner loss for trusted terminal accounting.
+                # It is not a public read grant: actual Source authorization
+                # must precede any Run TEXT or complete Artifact SELECT.
+                record = sources.source_current(db, user, hint.source_binding_id, audit_only=frozen_audit, execution=not frozen_audit)
             actual = current_inventory_rows(db.query(AIRun).filter_by(run_id=identifier), shared=not writing).one_or_none()
             artifact = current_inventory_rows(db.query(AIDrugLabelRunArtifact).filter_by(run_id=identifier), shared=not writing).one_or_none()
             if actual is None or artifact is None or (artifact.run_id, artifact.source_binding_id, artifact.requested_by) != tuple(hint):

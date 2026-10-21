@@ -424,3 +424,5 @@
 - 2026-10-21：第79项shared识别的实际MySQL第五轮53项检查一次通过（42.248秒，全部1195 BE/四映射输入稳定）：旧RR经独立短RC见新分件，真实Core直接删/重插Artifact+expunge+清hint仍经本Session SQL定位，擦除feature/raw3不降级且409先于正文，savepoint回滚不留假身份；四种孤立marker含null保留键只技术隔离，无调用用量断言。含前46项Source/Task增量往返/实际接受/部分用量/撤回检查，新增7机制单独实测；不把这里称Main/JWT、MySQL异步worker/cancel或FE完成。全部临时容器与私有目录已清理，原report/脚本完整无损保存。
 
 - 2026-10-21：第79项Task/Source/Binding/Result四独立完整视图及纯闭集schema已提交；四整文件一次74通过（30.76秒pytest/42.004秒外层，1198输入稳定，新增10项）。Task保原frame/raw3字节，公开输出无私有Case SHA/原件ID/审核依据/凭据引用；每个part独立当前源授权，Sup技术目录与撤回后实际paid元数据均0正文且不开放parts/Trace。首1F73P仅测试把模型列表交给只转换顶层模型的既有canonical encoder，改测试逐item model_dump，产品不改；完整失败与green保留。尚非正式Main/JWT端点、shared目录或FE，继续。
+
+- 2026-10-21 第79项正式Main任务与共享worker：91504f6，5完整文件一次87通过（45.85s/外层57.074s），1202后端及生成映射输入稳定；真实JWT→SQL→两协议本地合成ASGI→完整四part与五个具体审计主键，合法缺失/部分token保持null，实际在途撤回/取消保留11/null付费用量。人工反馈绑定实际已接受结果并用真实SQL触发器核对整体回滚。首轮11失败/76通过与测试夹具修正完整保存在既有JSON，产品源码两轮相同；尚不代表前端、最终MySQL或主分支准入。

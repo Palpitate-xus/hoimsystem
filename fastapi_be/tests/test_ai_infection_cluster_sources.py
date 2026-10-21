@@ -245,3 +245,182 @@ def test_audit_trigger_payload_change_rolls_back_registry_write(infection_case):
     finally:
         db.execute(text("DROP TRIGGER infection_bad_definition"))
         db.commit()
+
+
+def test_transfer_permission_is_independent_before_clinical_body(infection_case):
+    db, author, _, _, _ = infection_case
+    request, _, _, _ = ready(infection_case)
+    meta = s.create_snapshot(db, author, request)
+    db.commit()
+    statements = []
+
+    def capture(conn, cursor, sql, parameters, context, executemany):
+        statements.append(sql)
+
+    event.listen(db.get_bind(), "before_cursor_execute", capture)
+    try:
+        with pytest.raises(HTTPException) as denied:
+            s.snapshot_part(db, author, meta["snapshot_id"], "public", external_model=True)
+    finally:
+        event.remove(db.get_bind(), "before_cursor_execute", capture)
+    assert denied.value.status_code == 403
+    assert not any("hoimsystem_ai_infection_snapshot.private_json" in sql or "hoimsystem_infection_case.description" in sql for sql in statements)
+
+
+def test_independent_review_author_role_change_and_audit_deleted_are_not_publication(infection_case):
+    db, author, reviewer, _, _ = infection_case
+    request, grants, _, _ = ready(infection_case)
+    db.query(User).filter_by(user_id=reviewer.user_id).update({"user_role": "doctor"}, synchronize_session=False)
+    db.commit()
+    with pytest.raises(HTTPException):
+        s.preview_roots(db, author, request)
+    db.query(User).filter_by(user_id=reviewer.user_id).update({"user_role": "super_admin"}, synchronize_session=False)
+    db.commit()
+    db.execute(text("DELETE FROM hoimsystem_ai_audit_event WHERE event_id=:key"), {"key": grants[0].governance.review_event_id})
+    db.commit()
+    with pytest.raises(HTTPException):
+        s.preview_roots(db, author, request)
+
+
+def test_exact_root_cannot_get_a_second_or_missing_published_review(infection_case):
+    db, author, reviewer, _, _ = infection_case
+    request, _, _, review = ready(infection_case)
+    proposal = review.payload.model_dump(mode="json")
+    for key in ("review_id", "created_by", "recorded_at"):
+        proposal.pop(key)
+    with pytest.raises(HTTPException):
+        r.create_case_review(db, author, proposal)
+    r.revoke_record(db, reviewer, "review", review.record_id, cas(review))
+    db.commit()
+    with pytest.raises(HTTPException):
+        s.create_snapshot(db, author, request)
+
+
+def test_own_staged_root_is_flushed_and_cannot_escape_review(infection_case):
+    db, author, _, _, row = infection_case
+    request, _, _, _ = ready(infection_case)
+    values = {column.name: getattr(row, column.name) for column in row.__table__.columns}
+    values["case_id"] = str(uuid.uuid4())
+    staged = InfectionCase(**values)
+    db.add(staged)
+    with pytest.raises(HTTPException):
+        s.create_snapshot(db, author, request)
+    assert db.query(InfectionCase).count() == 1
+    assert db.query(AIInfectionSnapshot).count() == 0
+
+
+def test_snapshot_after_audit_new_root_trigger_rolls_back_whole_acceptance(infection_case):
+    db, author, _, _, row = infection_case
+    request, _, _, _ = ready(infection_case)
+    rid = str(uuid.uuid4())
+    db.execute(
+        text(
+            f"CREATE TRIGGER infection_new_root AFTER INSERT ON hoimsystem_ai_infection_snapshot BEGIN INSERT INTO hoimsystem_infection_case SELECT '{rid}', patient_id, department_id, infection_type, pathogen, onset_date, severity, status, description, reporter_id, create_time, update_time FROM hoimsystem_infection_case LIMIT 1; END"
+        )
+    )
+    db.commit()
+    before = db.query(AIAuditEvent).count()
+    try:
+        with pytest.raises(HTTPException):
+            s.create_snapshot(db, author, request)
+        assert db.query(AIInfectionSnapshot).count() == 0
+        assert db.query(InfectionCase).count() == 1
+        assert db.query(AIAuditEvent).count() == before
+    finally:
+        db.execute(text("DROP TRIGGER infection_new_root"))
+        db.commit()
+
+
+@pytest.mark.parametrize("roles", ["[{}]", '["super_admin","super_admin"]', "null", '["doctor"]'])
+def test_execution_role_config_is_strict_and_sup_has_no_role_bypass(infection_case, roles):
+    from app.ai.models import AIFeatureConfig
+
+    db, author, _, _, _ = infection_case
+    request, _, _, _ = ready(infection_case)
+    config = db.get(AIFeatureConfig, "infection_cluster")
+    if config is None:
+        config = AIFeatureConfig(feature_key="infection_cluster", allowed_roles_json=roles, updated_by=author.user_id)
+        db.add(config)
+    else:
+        config.allowed_roles_json = roles
+    db.commit()
+    with pytest.raises(HTTPException) as denied:
+        r.authorize_patients(db, author, request["patient_ids"], require_config=True)
+    assert denied.value.status_code == (403 if roles == '["doctor"]' else 409)
+    db.rollback()
+
+
+def test_actual_4097_sql_roots_are_rejected_without_clipping(infection_case):
+    db, author, _, _, row = infection_case
+    request, _, _, _ = ready(infection_case)
+    values = {column.name: getattr(row, column.name) for column in row.__table__.columns}
+    values["description"] = "synthetic bounded SQL root"
+    db.bulk_insert_mappings(InfectionCase, [{**values, "case_id": str(uuid.uuid4())} for _ in range(4096)])
+    db.commit()
+    with pytest.raises(HTTPException) as overflow:
+        s.preview_roots(db, author, request)
+    assert overflow.value.status_code == 413
+    assert db.query(InfectionCase).count() == 4097
+    assert db.query(AIInfectionSnapshot).count() == 0
+
+
+def grant_second_patient(db, author, reviewer, patient_id):
+    full = r.create_grant(
+        db,
+        author,
+        {
+            "patient_id": patient_id,
+            "user_id": author.user_id,
+            "purpose": "infection_surveillance_processing",
+            "valid_from": "2026-10-01T00:00:00.000000Z",
+            "valid_to": "2026-11-01T00:00:00.000000Z",
+            "basis_note": NOTE,
+        },
+    )
+    db.commit()
+    return publish(db, reviewer, full)
+
+
+def test_changed_snapshot_scope_locator_rejected_before_private_text(infection_case, seed_data):
+    db, author, reviewer, _, _ = infection_case
+    request, _, _, _ = ready(infection_case)
+    grant_second_patient(db, author, reviewer, seed_data["patient2"].patient_id)
+    meta = s.create_snapshot(db, author, request)
+    db.commit()
+    forged = {**request, "patient_ids": [seed_data["patient2"].patient_id]}
+    db.execute(text("UPDATE hoimsystem_ai_infection_snapshot SET scope_json=:scope WHERE snapshot_id=:id"), {"scope": c.canonical(forged), "id": meta["snapshot_id"]})
+    db.commit()
+    statements = []
+
+    def record(conn, cursor, sql, parameters, context, executemany):
+        statements.append(sql)
+
+    event.listen(db.get_bind(), "before_cursor_execute", record)
+    try:
+        with pytest.raises(HTTPException) as denied:
+            s.snapshot_part(db, author, meta["snapshot_id"], "private")
+    finally:
+        event.remove(db.get_bind(), "before_cursor_execute", record)
+    assert denied.value.status_code == 409
+    assert not any("hoimsystem_ai_infection_snapshot.private_json" in sql or "hoimsystem_infection_case.description" in sql for sql in statements)
+
+
+def test_changed_review_patient_header_rejected_before_payload_text(infection_case, seed_data):
+    db, author, reviewer, _, _ = infection_case
+    _, _, _, full = ready(infection_case)
+    grant_second_patient(db, author, reviewer, seed_data["patient2"].patient_id)
+    db.execute(text("UPDATE hoimsystem_ai_infection_case_review SET patient_id=:pid WHERE review_id=:id"), {"pid": seed_data["patient2"].patient_id, "id": full.record_id})
+    db.commit()
+    statements = []
+
+    def record(conn, cursor, sql, parameters, context, executemany):
+        statements.append(sql)
+
+    event.listen(db.get_bind(), "before_cursor_execute", record)
+    try:
+        with pytest.raises(HTTPException) as denied:
+            r.detail(db, author, "review", full.record_id)
+    finally:
+        event.remove(db.get_bind(), "before_cursor_execute", record)
+    assert denied.value.status_code == 409
+    assert not any("hoimsystem_ai_infection_case_review.payload_json" in sql or "hoimsystem_infection_case.description" in sql for sql in statements)

@@ -186,12 +186,15 @@ def _actual(db, model, key):
     return current(db.query(*model.__table__.columns).filter(primary == key), shared=True).one_or_none()
 
 
-def audit_detail(kind, rid, action, content_hash, revision):
-    return c.canonical({"schema_version": "infection_registry_audit_v1", "kind": kind, "record_id": rid, "action": action, "content_hash": content_hash, "revision": revision})
+def audit_detail(kind, rid, action, content_hash, revision, *, anchors=None):
+    value = {"schema_version": "infection_registry_audit_v1", "kind": kind, "record_id": rid, "action": action, "content_hash": content_hash, "revision": revision}
+    if anchors is not None:
+        value["anchors"] = anchors
+    return c.canonical(value)
 
 
-def _audit(db, actor, kind, rid, action, content_hash, revision):
-    detail = audit_detail(kind, rid, action, content_hash, revision)
+def _audit(db, actor, kind, rid, action, content_hash, revision, *, anchors=None):
+    detail = audit_detail(kind, rid, action, content_hash, revision, anchors=anchors)
     event = AIAuditEvent(actor_id=actor.user_id, action=f"infection.{kind}.{action}", target=rid, detail_json=detail, create_time=utcnow().replace(microsecond=0))
     db.add(event)
     db.flush()
@@ -261,10 +264,15 @@ def record(db, row, kind, *, require_current=False):
 
 def _authorize_record_patient(db, actor, kind, rid):
     if kind == "review":
-        locator = current(db.query(AIInfectionCaseReview.patient_id).filter_by(review_id=rid), shared=True).one_or_none()
+        from app.models import InfectionCase
+
+        locator = current(db.query(AIInfectionCaseReview.patient_id, AIInfectionCaseReview.case_id).filter_by(review_id=rid), shared=True).one_or_none()
         if locator is None:
             raise HTTPException(404, "复核不存在")
-        authorize_patients(db, actor, [locator.patient_id])
+        root = current(db.query(InfectionCase.patient_id).filter_by(case_id=locator.case_id), shared=True).one_or_none()
+        if root is None or root.patient_id != locator.patient_id:
+            raise HTTPException(409, "复核与实际原上报患者绑定已改变")
+        authorize_patients(db, actor, [root.patient_id])
 
 
 def _row(db, kind, rid, *, shared=False):
@@ -375,6 +383,26 @@ def revoke_record(db, user, kind, rid, value):
     return record(db, row, kind)
 
 
+def governed_rows(db, model, *filters):
+    """Small PK batches + cumulative whole-row budget, never an unbounded BODY all()."""
+    primary = sa_inspect(model).primary_key[0]
+    last, count, size = None, 0, 0
+    while True:
+        query = db.query(model).filter(*filters)
+        if last is not None:
+            query = query.filter(primary > last)
+        batch = current(query.order_by(primary), shared=True).limit(8).all()
+        for row in batch:
+            count += 1
+            size += len(c.utf8(row.payload_json)) + len(c.utf8(row.review_basis)) + len(c.utf8(row.revoke_basis))
+            if count > c.MAX_ROOTS or size > c.MAX_BYTES:
+                raise HTTPException(413, "完整治理原件集合超限，拒绝截断")
+            yield row
+        if len(batch) < 8:
+            break
+        last = getattr(batch[-1], primary.name)
+
+
 def authorize_patients(db, user, patient_ids, *, external_model=False, require_config=False):
     from app.ai.models import AIFeatureConfig
     from app.dependencies import VALID_USER_ROLES
@@ -386,7 +414,7 @@ def authorize_patients(db, user, patient_ids, *, external_model=False, require_c
             roles = json.loads(config.allowed_roles_json) if config else None
         except (ValueError, TypeError) as exc:
             raise HTTPException(409, "当前配置角色不可核对") from exc
-        if type(roles) is not list or len(set(roles)) != len(roles) or any(type(role) is not str or role not in VALID_USER_ROLES for role in roles):
+        if type(roles) is not list or any(type(role) is not str or role not in VALID_USER_ROLES for role in roles) or len(set(roles)) != len(roles):
             raise HTTPException(409, "当前配置角色不是完整合法闭集")
         if actor.user_role not in roles:
             raise HTTPException(403, "当前角色未获本项执行配置许可")
@@ -395,7 +423,7 @@ def authorize_patients(db, user, patient_ids, *, external_model=False, require_c
     now = utcnow()
     for pid in patient_ids:
         for purpose in purposes:
-            rows = current(db.query(AIInfectionPurposeGrant).filter_by(patient_id=pid, user_id=actor.user_id, purpose=purpose).order_by(AIInfectionPurposeGrant.grant_id), shared=True).all()
+            rows = governed_rows(db, AIInfectionPurposeGrant, AIInfectionPurposeGrant.patient_id == pid, AIInfectionPurposeGrant.user_id == actor.user_id, AIInfectionPurposeGrant.purpose == purpose)
             eligible = []
             for row in rows:
                 full = record(db, row, "grant")

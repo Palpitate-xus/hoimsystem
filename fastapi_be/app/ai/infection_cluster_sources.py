@@ -8,6 +8,7 @@ import secrets
 import uuid
 
 from fastapi import HTTPException
+from sqlalchemy import inspect
 
 from app.ai import infection_cluster_contract as c
 from app.ai import infection_cluster_input as i
@@ -21,10 +22,22 @@ def _roots(db, req):
     from app.models import InfectionCase
 
     roots, last, size = [], None, 0
+    index_hint = None
+    if db.get_bind().dialect.name == "mysql":
+        # Discover a real current FK-leading index; do not assume its generated
+        # name or let a tiny-table optimizer choose a global PK scan/lock.
+        indexes = inspect(db.connection()).get_indexes(InfectionCase.__tablename__)
+        names = sorted(item["name"] for item in indexes if item["column_names"] and item["column_names"][0] == "patient_id")
+        if not names:
+            raise HTTPException(409, "实际Patient前缀索引缺失，无法证明有限范围当前锁")
+        quoted = db.get_bind().dialect.identifier_preparer.quote(names[0])
+        index_hint = f"FORCE INDEX ({quoted})"
     while True:
         query = db.query(InfectionCase).filter(
             InfectionCase.patient_id.in_(req.patient_ids), InfectionCase.onset_date >= c.day(req.window.date_from), InfectionCase.onset_date <= c.day(req.window.date_to)
         )
+        if index_hint is not None:
+            query = query.with_hint(InfectionCase, index_hint, "mysql")
         if last is not None:
             query = query.filter(InfectionCase.case_id > last)
         rows = current(query.order_by(InfectionCase.case_id)).limit(128).all()
@@ -47,10 +60,7 @@ def _current_grants(db, actor, req):
     result = []
     # Bind the complete applicable permission-root set, including draft,
     # rejected/withdrawn roots and transfer grants not used for this local read.
-    query = (
-        db.query(AIInfectionPurposeGrant).filter(AIInfectionPurposeGrant.patient_id.in_(req.patient_ids), AIInfectionPurposeGrant.user_id == actor.user_id).order_by(AIInfectionPurposeGrant.grant_id)
-    )
-    for row in current(query, shared=True).all():
+    for row in r.governed_rows(db, AIInfectionPurposeGrant, AIInfectionPurposeGrant.patient_id.in_(req.patient_ids), AIInfectionPurposeGrant.user_id == actor.user_id):
         full = r.record(db, row, "grant")
         result.append({"record_id": full.record_id, "content_hash": full.content_hash, "governance_hash": full.governance_hash})
         if len(result) > c.MAX_ROOTS or len(c.utf8(c.canonical(result))) > c.MAX_BYTES:
@@ -64,12 +74,7 @@ def _review_rows(db, req, roots):
     # Bounded PK batches avoid a huge driver IN list. All relevant review
     # versions/states are retained; no latest-row selection is made.
     for offset in range(0, len(ids), 128):
-        query = (
-            db.query(AIInfectionCaseReview)
-            .filter(AIInfectionCaseReview.definition_id == req.definition_id, AIInfectionCaseReview.case_id.in_(ids[offset : offset + 128]))
-            .order_by(AIInfectionCaseReview.review_id)
-        )
-        for row in current(query, shared=True).all():
+        for row in r.governed_rows(db, AIInfectionCaseReview, AIInfectionCaseReview.definition_id == req.definition_id, AIInfectionCaseReview.case_id.in_(ids[offset : offset + 128])):
             full = r.record(db, row, "review")
             proposal = full.payload
             if (row.case_id, row.patient_id, row.definition_id, row.original_content_hash, row.definition_content_hash, row.definition_governance_hash) != (
@@ -194,7 +199,8 @@ def create_snapshot(db, user, value):
     )
     public = p.project_source(private, key)
     private_json, public_json, witness_json = c.canonical(private), c.canonical(public), c.canonical(witness)
-    event, expected = r._audit(db, actor, "snapshot", rid, "create", c.digest(private), 1)
+    anchors = {"scope_hash": c.digest(req), "definition_id": req.definition_id, "captured_at": private.captured_at, "public_hash": c.digest(public), "witness_hash": c.digest(witness)}
+    event, expected = r._audit(db, actor, "snapshot", rid, "create", c.digest(private), 1, anchors=anchors)
     row = AIInfectionSnapshot(
         snapshot_id=rid,
         definition_id=req.definition_id,
@@ -237,7 +243,18 @@ def metadata(row):
 
 def _snapshot_locator(db, rid):
     return current(
-        db.query(AIInfectionSnapshot.snapshot_id, AIInfectionSnapshot.created_by, AIInfectionSnapshot.definition_id, AIInfectionSnapshot.scope_json).filter_by(snapshot_id=rid), shared=True
+        db.query(
+            AIInfectionSnapshot.snapshot_id,
+            AIInfectionSnapshot.created_by,
+            AIInfectionSnapshot.definition_id,
+            AIInfectionSnapshot.scope_json,
+            AIInfectionSnapshot.create_event_id,
+            AIInfectionSnapshot.private_hash,
+            AIInfectionSnapshot.public_hash,
+            AIInfectionSnapshot.witness_hash,
+            AIInfectionSnapshot.captured_at,
+        ).filter_by(snapshot_id=rid),
+        shared=True,
     ).one_or_none()
 
 
@@ -254,11 +271,20 @@ def snapshot_part(db, user, rid, part, *, external_model=False, execution=False)
     if locator is None:
         raise HTTPException(404, "快照不存在")
     req = i.SnapshotCreate.model_validate_json(locator.scope_json)
+    if c.canonical(req) != locator.scope_json or locator.definition_id != req.definition_id:
+        raise HTTPException(409, "快照技术范围原字节或定义定位不一致")
+    anchors = {"scope_hash": c.digest(req), "definition_id": req.definition_id, "captured_at": r.utc(locator.captured_at), "public_hash": locator.public_hash, "witness_hash": locator.witness_hash}
+    expected_audit = r.audit_detail("snapshot", rid, "create", locator.private_hash, 1, anchors=anchors)
+    audit = r._actual(db, r.AIAuditEvent, locator.create_event_id)
+    if audit is None or (audit.actor_id, audit.action, audit.target, audit.detail_json) != (locator.created_by, "infection.snapshot.create", rid, expected_audit):
+        raise HTTPException(409, "原始技术范围与具体创建审计PK不一致")
     r.authorize_patients(db, actor, req.patient_ids, external_model=external_model, require_config=execution)
     owner = current(db.query(User).filter_by(user_id=locator.created_by), shared=True).one_or_none()
     if owner is None:
         raise HTTPException(409, "原捕获账户不存在")
     _, _, _, _, witness = collect_current(db, owner, req, external_model=external_model, require_config=False)
+    if c.digest(witness) != locator.witness_hash:
+        raise HTTPException(409, "当前完整来源集合已变化，未读取快照正文")
     row = current(db.query(AIInfectionSnapshot).filter_by(snapshot_id=rid), shared=True).one()
     if row.definition_id != req.definition_id or c.canonical(req) != row.scope_json or row.witness_json != c.canonical(witness) or row.witness_hash != c.digest(witness):
         raise HTTPException(409, "当前完整来源集合与原快照不一致")
@@ -277,13 +303,7 @@ def snapshot_part(db, user, rid, part, *, external_model=False, execution=False)
     ):
         raise HTTPException(409, "完整来源/投影/SQL私钥锚不一致")
     audit = r._actual(db, r.AIAuditEvent, row.create_event_id)
-    if (
-        audit is None
-        or audit.actor_id != row.created_by
-        or audit.action != "infection.snapshot.create"
-        or audit.target != rid
-        or audit.detail_json != r.audit_detail("snapshot", rid, "create", row.private_hash, 1)
-    ):
+    if audit is None or audit.actor_id != row.created_by or audit.action != "infection.snapshot.create" or audit.target != rid or audit.detail_json != expected_audit:
         raise HTTPException(409, "实际快照创建审计PK不一致")
     # The immutable private original rows are compared too, not merely a public
     # digest someone could rehash. The fresh capture clock itself is not a

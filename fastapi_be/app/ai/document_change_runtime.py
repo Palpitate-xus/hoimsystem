@@ -174,7 +174,22 @@ def _receipt(inputs, outputs, attempted):
 def _fresh_run(db, run_id, lease, *, locking=False):
     with db.no_autoflush:
         query = db.query(AIRun).filter(AIRun.run_id == run_id, AIRun.feature_key == FEATURE_KEY, AIRun.lease_token == lease, AIRun.status.in_(["running", "cancelled"])).populate_existing()
-        return query.with_for_update().one_or_none() if locking else query.one_or_none()
+        if locking:
+            # Trusted lease receipt only: no Source or task body is returned.
+            return query.with_for_update().one_or_none()
+        header = db.query(AIRun.status, AIRun.latency_ms).filter(AIRun.run_id == run_id, AIRun.lease_token == lease).one_or_none()
+        if header is None or header.latency_ms is not None:
+            return None
+        if header.status == "cancelled":
+            return query.one_or_none()
+        identity = storage.locate_artifact(db, run_id)
+        if identity is None:
+            raise HTTPException(409, "版本任务缺少完整实际Source身份")
+        actor = db.query(User).filter_by(user_id=identity[2]).populate_existing().with_for_update(read=True).one_or_none()
+        if actor is None:
+            raise HTTPException(403, "当前原任务用户已失效")
+        storage.authorize_run_id(db, actor, run_id, current=True)
+        return query.one_or_none()
 
 
 def _terminal(db, run_id, lease, receipt, elapsed, error):

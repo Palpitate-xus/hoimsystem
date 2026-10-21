@@ -6,13 +6,16 @@ and never subsequently waits on live Original/target state.
 """
 
 import hashlib
+import json
 
 from fastapi import HTTPException
+from sqlalchemy import inspect
 
 from app.ai import document_change_contract as c
 from app.ai import document_change_sources as sources
 from app.ai import document_evidence_sources as originals
 from app.ai.context import ContextBundle, context_metadata
+from app.ai.document_change_access import locate_artifact, opaque_run_id, remember_staged_identity
 from app.ai.document_change_context import change_evidence, public_payload, selection, verify_current_context
 from app.ai.document_change_draft import SYSTEM_PROMPT, checked_source
 from app.ai.document_change_json import parse_case_json, require_case_json
@@ -28,7 +31,7 @@ from app.ai.document_change_view_contract import (
 )
 from app.ai.document_extraction_view_contract import DocumentFrozenProvider, DocumentFrozenValidation
 from app.ai.governance import digest
-from app.ai.models import AIAuditEvent
+from app.ai.models import AIAuditEvent, AIRun
 from app.models import User
 
 TEXT_BYTES = 65535
@@ -244,8 +247,40 @@ def _load_locked(db, run, task):
     return snapshot, metadata, evidence, bound, row, source
 
 
+def authorize_run_id(db, user, identifier, *, current=True):
+    """Current Source authorization BEFORE every private Run/Artifact text read.
+
+    The locator is technical only. Recheck its exact immutable triple against
+    the current Run and Artifact after acquiring all Source parents. Explicit
+    frozen audit does not revive Source eligibility or authorize execution.
+    """
+    identity = locate_artifact(db, identifier)
+    if identity is None:
+        raise HTTPException(409, "版本任务缺少独立实际Artifact身份，未降级通用任务")
+    actor = originals.current_super(db, user)
+    if current:
+        sources.authorize_scope(db, actor, identity[1])
+    else:
+        with db.no_autoflush:
+            row = db.query(AIDocumentChangeScope.scope_id).filter_by(scope_id=identity[1]).with_for_update(read=True).one_or_none()
+        if row is None:
+            raise HTTPException(409, "原任务的冻结Scope不存在")
+    with db.no_autoflush:
+        run = db.query(AIRun).filter_by(run_id=identifier).populate_existing().with_for_update(read=True).one_or_none()
+        actual = (
+            db.query(AIDocumentChangeRunArtifact.run_id, AIDocumentChangeRunArtifact.scope_id, AIDocumentChangeRunArtifact.requested_by)
+            .filter_by(run_id=identifier)
+            .with_for_update(read=True)
+            .one_or_none()
+        )
+    if run is None or actual is None or tuple(actual) != identity or (run.run_id, run.requested_by, run.feature_key) != (identity[0], identity[2], FEATURE_KEY):
+        raise HTTPException(409, "实际任务与Source外键身份已改变，未读取Artifact正文")
+    return run
+
+
 def authorize_run(db, user, run, *, current=True, execution=False):
     try:
+        run = authorize_run_id(db, user, opaque_run_id(run), current=current)
         actor = originals.current_super(db, user)
         task = _task(run)
         if current:
@@ -265,8 +300,11 @@ def authorize_run(db, user, run, *, current=True, execution=False):
 
 def load_snapshot(db, run, *, user=None, current=True, execution=False):
     if user is None:
+        identity = locate_artifact(db, opaque_run_id(run))
+        if identity is None:
+            raise HTTPException(409, "版本任务缺少独立实际Artifact身份")
         with db.no_autoflush:
-            user = db.query(User).filter_by(user_id=run.requested_by).populate_existing().with_for_update(read=True).one_or_none()
+            user = db.query(User).filter_by(user_id=identity[2]).populate_existing().with_for_update(read=True).one_or_none()
         if user is None:
             raise HTTPException(403, "当前原任务超级管理员已失效")
     return authorize_run(db, user, run, current=current, execution=execution)
@@ -308,6 +346,7 @@ def stage_artifact(db, user, run):
     )
     db.add(row)
     db.flush()
+    remember_staged_identity(db, row)
     originals.current_super(db, actor, expected=epoch)
     load_snapshot(db, run, user=actor, current=True)
     return row
@@ -336,47 +375,40 @@ def expanded_source(db, user, run, *, current=True):
 
 
 def expanded_private_scope(db, user, run, *, current=True):
-    _, context, _, _ = _task(run)
     authorize_run(db, user, run, current=current)
+    _, context, _, _ = _task(run)
     snapshot, published, audits = _scope_frozen(db, context)
     return private_scope_packet(run.run_id, context.document_change_binding, snapshot, published, audits)
 
 
 def is_document_change_run(db, run):
-    """Nonlocking immutable identity dispatch only; never an authorization result.
+    """Current opaque identity first; inspect only already-loaded JSON markers.
 
-    Run and Artifact are created atomically. An old RR view may see neither; it
-    must fail closed rather than obtain Artifact locks before Original locks.
+    This dispatch result grants no permission. A damaged native feature or task
+    envelope cannot hide its current Artifact behind an older RR snapshot.
     """
-    from app.ai.models import AIRun
-
-    if run.feature_key == FEATURE_KEY:
+    if locate_artifact(db, opaque_run_id(run)) is not None:
         return True
-    try:
-        snapshot = _json(run.input_json)
-        payload = snapshot.get("payload")
-        if type(payload) is not dict:
-            raise ValueError("The retained task envelope cannot be classified")
-        values, context = payload.get("input"), payload.get("context")
-        if type(values) is not dict or type(context) is not dict:
-            raise ValueError("The retained task references cannot be classified")
-        if "document_change_scope_id" in values or {"document_change_binding", "document_change_source", "document_change_private_scope"} & context.keys():
+    state = inspect(run, raiseerr=False)
+    values = state.dict if state is not None else vars(run) if hasattr(run, "__dict__") else {}
+    if values.get("feature_key") == FEATURE_KEY:
+        return True
+    for field in ("input_json", "evidence_json", "context_metadata_json", "result_json"):
+        try:
+            value = json.loads(values.get(field, "null"))
+        except (ValueError, TypeError, RecursionError):
+            continue
+        if type(value) is not dict:
+            continue
+        markers = {"document_change", "document_change_binding", "document_change_source", "document_change_private_scope", "document_change_scope_id"}
+        if markers & value.keys() or value.get("schema_version") == "document_change_result_ref_v1" or value.get("source_domain") == "document_change_review":
             return True
-        result = _json(run.result_json)
-        if "document_change" in result or result.get("schema_version") == "document_change_result_ref_v1":
+        payload = value.get("payload", {})
+        if type(payload) is dict and any(
+            type(payload.get(key)) is dict and bool(markers & payload[key].keys() or payload[key].get("scope") == "document_change_review") for key in ("input", "context")
+        ):
             return True
-        with db.no_autoflush:
-            identity = (
-                db.query(AIRun.feature_key, AIDocumentChangeRunArtifact.run_id)
-                .outerjoin(AIDocumentChangeRunArtifact, AIRun.run_id == AIDocumentChangeRunArtifact.run_id)
-                .filter(AIRun.run_id == run.run_id)
-                .one_or_none()
-            )
-        if identity is None or identity.feature_key != run.feature_key:
-            raise ValueError("The immutable Run/Artifact identity cannot be classified")
-        return identity[1] is not None
-    except (ValueError, TypeError, KeyError, UnicodeError, RecursionError) as exc:
-        raise HTTPException(409, "任务原生身份不完整，未降级为通用任务") from exc
+    return False
 
 
 def bounded_result(value):

@@ -191,6 +191,7 @@ def _stage_usage(db, run, artifact, usage, status, result_hash, error_code, acto
 def stage_result(db, user, run, lease, value, usage, *, latency_ms):
     actor = originals.current_super(db, user)
     epoch = originals._epoch(actor)
+    run = storage.authorize_run_id(db, actor, storage.opaque_run_id(run), current=True)
     task = storage._task(run)
     verify_current_context(db, actor, task[1].model_dump(mode="json"))
     _current_configuration(db, run, task[0], task[2])

@@ -374,3 +374,5 @@
 - 当前私有断网MySQL验证100.981秒通过并清理：224旧表加Source5及Artifact2共231个当前注册表；真实增量up/down/up保持原DDL与行，非完整历史迁移回放。共享双协议及process_one保留具体回执、HTTP等待时无SQL连接、未知token保持null、撤研究后普通与超级管理员均不能恢复临床分件。MySQL的128件SQL腐坏Artifact负控不冒称128份独立受审正件；SQLite另有逐件实际创建的完整队列回归。
 - 47个Python文件Ruff及格式检查通过，目录.24的80份独立Task与7份真实固定System已重生成；934接口RBAC JSON及Markdown一致。四份Source recipe逐字保留。早期构造失败、队列饥饿真实RED、旧路由数量断言及各成功前版均保留原范围，不把重复定向数累计为全量通过。
 - 使用及证据见 `ai-research-cohort-shared-guide.md` 与 `ai-research-cohort-shared-verification.json`。默认不启用，不宣称完整后端/浏览器验收、规范生产构建、真实模型/临床验证、入组或导出完成；第74项完整验收及75—80专用实现继续推进。
+
+- 2026-10-21：第74项原完整后端首轮实际结束：10670通过/12失败/28真实权重前置skip/7warnings，1149输入稳定；完整RED与原freeze永久保留。schema异常类型/旧SQL观察规则修复已有202与46分组验证，最后手术整文件8项另行通过；新增真实expired主键刷新正文边界由b7da4b0精确修复，Root74-only整文件5项通过。修复全量第二轮因新缺陷确认在188通过后SIGINT（exit2），明确未完成；后续将启动fresh第三完整回归。FE1199输入仍冻结无改。

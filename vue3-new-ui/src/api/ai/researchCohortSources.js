@@ -84,3 +84,13 @@ export function getResearchCases(params){
  if(params.page!==undefined&&(!Number.isSafeInteger(params.page)||params.page<1||params.page>100000)||params.size!==undefined&&(!Number.isSafeInteger(params.size)||params.size<1||params.size>100))throw new Error('科研病例目录分页必须明确且有界');
  return read(`${base}/cases`,params);
 }
+
+function registryPage(params,scoped){
+ query(params,scoped?['scope_id','page','size']:['page','size']);
+ if(scoped)id(params.scope_id);
+ if(params.page!==undefined&&(!Number.isSafeInteger(params.page)||params.page<1||params.page>100000)||params.size!==undefined&&(!Number.isSafeInteger(params.size)||params.size<1||params.size>100))throw new Error('科研治理目录分页须明确且有界');
+ return params;
+}
+export const getResearchScopes=(params={})=>read(`${base}/scopes`,registryPage(params,false));
+export const getResearchProjectACLs=params=>read(`${base}/project-acls`,registryPage(params,true));
+export const getResearchPatientAuthorizations=params=>read(`${base}/patient-authorizations`,registryPage(params,true));

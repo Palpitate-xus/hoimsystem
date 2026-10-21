@@ -313,8 +313,8 @@
     "feature": {
       "number": 71,
       "key": "guideline_ingestion",
-      "input_mode": "input",
-      "scope": "hospital",
+      "input_mode": "document_extraction",
+      "scope": "input",
       "roles": [
         "super_admin"
       ],

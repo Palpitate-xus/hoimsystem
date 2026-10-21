@@ -1,7 +1,5 @@
 """Super-authorized complete originals and private frozen review proofs."""
 
-from typing import Literal
-
 from fastapi import HTTPException
 
 from app.ai import document_evidence_contract as c
@@ -13,22 +11,7 @@ from app.ai.document_extraction_contract import (
     DocumentExtractionSource,
     build_extraction_source,
 )
-
-
-class DocumentExtractionBinding(c.StrictModel):
-    schema_version: Literal["document_extraction_binding_v1"]
-    feature_key: Literal["guideline_ingestion"]
-    original: c.OriginalReference
-    source_digest: c.SHA256
-
-
-class DocumentExtractionContext(c.StrictModel):
-    scope: Literal["document_extraction"]
-    snapshot_time: c.UtcText
-    document_binding: DocumentExtractionBinding
-    document_source: DocumentExtractionSource
-    document_review: c.GovernedReview
-    missing_data: list[str]
+from app.ai.document_extraction_view_contract import DocumentExtractionBinding, DocumentExtractionContext
 
 
 def selection(values):

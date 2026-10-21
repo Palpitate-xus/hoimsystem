@@ -1,12 +1,9 @@
 """Complete TEXT task proofs and immutable actual-SQL extraction anchors."""
 
-import datetime
 import hashlib
 import json
-from typing import Literal
 
 from fastapi import HTTPException
-from pydantic import Field, model_validator
 
 from app.ai import document_evidence_contract as c
 from app.ai import document_evidence_sources as sources
@@ -16,48 +13,10 @@ from app.ai.document_extraction_contract import EXTRACTION_SYSTEM_PROMPT, requir
 from app.ai.document_extraction_models import ANCHOR_HASH_FIELDS, ANCHOR_SCHEMA, AIDocumentExtractionRunAnchor
 from app.ai.document_extraction_prompt import instructions_digest
 from app.ai.document_extraction_result import validate_result
+from app.ai.document_extraction_view_contract import DocumentFrozenProvider, DocumentFrozenValidation
 from app.ai.governance import digest
 
 FEATURE_KEY = "guideline_ingestion"
-
-
-class DocumentFrozenProvider(c.StrictModel):
-    provider_id: c.Positive
-    revision: c.Positive
-    name: str = Field(min_length=1, max_length=100)
-    kind: Literal["chat", "responses"]
-    api_base: str = Field(min_length=1, max_length=2000)
-    model: str = Field(min_length=1, max_length=200)
-    timeout_seconds: int = Field(strict=True, ge=3, le=120)
-    max_output_tokens: int = Field(strict=True, ge=256, le=16000)
-    validation_report: str = Field(max_length=5000)
-    temperature: float = Field(ge=0, le=1, allow_inf_nan=False)
-    allows_patient_data: Literal[True]
-    effective_output_limit: int = Field(strict=True, ge=1, le=16000)
-
-    @model_validator(mode="after")
-    def actual_limit(self):
-        if self.effective_output_limit > self.max_output_tokens:
-            raise ValueError("Effective output exceeds its actual provider limit")
-        return self
-
-
-class DocumentFrozenValidation(c.StrictModel):
-    status: Literal["unreviewed", "pilot", "validated", "suspended"]
-    note: str = Field(max_length=5000)
-    validated_by: c.Positive | None
-    validated_at: str | None = Field(max_length=64)
-    feature_revision: c.Positive
-
-    @model_validator(mode="after")
-    def original_clock(self):
-        if self.validated_at is not None:
-            clock = datetime.datetime.fromisoformat(self.validated_at)
-            if clock.tzinfo is not None or str(clock) != self.validated_at:
-                raise ValueError("Preserve the original naive UTC validation clock without relabeling")
-        if (self.validated_at is None) != (self.validated_by is None):
-            raise ValueError("The actual validation signer and clock form one signature")
-        return self
 
 
 def text_hash(value):

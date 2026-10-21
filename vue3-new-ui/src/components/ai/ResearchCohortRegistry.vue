@@ -13,7 +13,7 @@
     <el-table-column prop="created_at" label="登记UTC" />
     <el-table-column v-if="kind==='acl'" prop="user_id" label="明确成员ID" />
     <el-table-column v-if="kind==='authorization'" prop="patient_id" label="明确患者ID" />
-    <el-table-column label="操作"><template #default="{row}"><el-button :disabled="v.busy" @click="v.inspect(row)">读取本件完整依据</el-button><el-button v-if="kind==='scope'&&!auditOnly" :disabled="v.busy" @click="v.chooseProject(row)">明确选择本项目</el-button></template></el-table-column>
+    <el-table-column label="操作"><template #default="{row}"><el-button :disabled="v.busy" @click="v.inspect(row)">读取本件完整依据</el-button><el-button v-if="kind==='scope'" :disabled="v.busy" @click="v.chooseProject(row)">明确选择本项目</el-button></template></el-table-column>
    </el-table>
    <p>目录仅供定位本件，尚未核对完整原件；明确选择项目也不会建立患者读取或AI执行权限。</p>
    <el-button :disabled="v.busy||v.page<=1" @click="v.refresh(v.page-1)">上一页</el-button><span>第{{ v.page }}页，共{{ v.total }}件</span><el-button :disabled="v.busy||v.page*100>=v.total" @click="v.refresh(v.page+1)">下一页</el-button>

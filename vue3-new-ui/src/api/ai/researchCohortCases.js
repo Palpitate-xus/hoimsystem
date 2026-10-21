@@ -84,3 +84,12 @@ export async function verifyResearchCaseTransition(after,before,action,body,{bef
  if(before.snapshot!==null&&after.snapshot!==null&&!same(before.snapshot,after.snapshot))return null;
  return {level:g!==null?'complete_governance_transition':'technical_governance_columns',fullOriginalVerified:oldProof.fullOriginalVerified&&nextProof.fullOriginalVerified,fullGovernanceVerified:g!==null,basisCommitmentVerified:true,selectable:false};
 }catch{return null;}}
+export async function verifyResearchCaseCreated(value,body,{auditOnly=false,current=()=>true}={}){try{
+ if(!requestValid('CaseCreate',body)||!await verifyResearchCase(value,{auditOnly,current})||value.snapshot===null||value.status!=='draft'||value.revision!==1)return false;
+ return current()&&same(value.snapshot.request,body.request)&&value.snapshot.creation_basis_note===body.basis_note&&value.collection_digest===body.expected_collection_digest;
+}catch{return false;}}
+export function researchCaseAnchors(row){
+ if(!row?.public_source)throw new Error('完整已发布研究来源不存在');const s=row.public_source;
+ return {case_id:row.case_id,scope_id:row.scope_id,content_hash:row.content_hash,governance_hash:s.governance_hash,projection_hash:row.projection_hash,collection_digest:row.collection_digest,scope_binding_hash:row.scope_binding_hash,member_manifest_hash:row.member_manifest_hash,public_manifest_hash:s.member_manifest_hash,scope_token:s.scope_token,source_id:s.source_id,rule_id:policy.recipe.rule_id};
+}
+export function researchCaseAnchorsValid(value){try{return keys(value,['case_id','scope_id','content_hash','governance_hash','projection_hash','collection_digest','scope_binding_hash','member_manifest_hash','public_manifest_hash','scope_token','source_id','rule_id'])&&uuid(value.case_id)&&uuid(value.scope_id)&&['content_hash','governance_hash','projection_hash','collection_digest','scope_binding_hash','member_manifest_hash','public_manifest_hash','scope_token'].every(k=>hash(value[k]))&&value.source_id===`research_cohort:${value.case_id}:${value.content_hash.slice(0,12)}`&&value.rule_id===policy.recipe.rule_id;}catch{return false;}}

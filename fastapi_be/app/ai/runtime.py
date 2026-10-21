@@ -932,7 +932,15 @@ async def execute_claimed(run_id: str, lease: str, *, transport=None) -> None:
                     # same-transaction change. Recheck the current entire
                     # source/config/care after their actual writes, still
                     # holding Gate and the original lease/parent locks.
+                    from app.ai.native_acceptance import acceptance_state, verify_accepted_result
+
+                    acceptance = acceptance_state(db, run, "run.supply_result.accept" if supply_run else "run.surgery_result.accept")
                     db.flush()
+                    if supply_run:
+                        from app.ai.supply_storage import expand_result
+                    else:
+                        from app.ai.surgery_storage import expand_result
+                    verify_accepted_result(db, run, lease, acceptance, result.model_dump(mode="json"), result_reader=expand_result)
                     _recheck_task(db, run)
             db.commit()
         except Exception:

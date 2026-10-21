@@ -103,6 +103,7 @@ def request(payload=None):
         "unit_definition_id": None,
         "expected_unit_content_hash": None,
         "expected_unit_governance_hash": None,
+        "expected_legacy_digest": None,
         "payload": payload or observation(),
     }
 

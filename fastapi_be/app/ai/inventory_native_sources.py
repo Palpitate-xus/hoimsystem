@@ -100,6 +100,7 @@ def verify_original_proof(proof):
                 "unit_definition_id": proof["unit_definition_id"],
                 "expected_unit_content_hash": None if unit is None else unit["content_hash"],
                 "expected_unit_governance_hash": None if unit is None else unit["governance_hash"],
+                "expected_legacy_digest": parent["legacy_snapshot"]["collection_digest"] if proof["source_kind"] == "inventory_observation" else None,
                 "payload": proof["payload"],
             }
         )
@@ -269,6 +270,14 @@ def create_source(db, user, request):
         "unit_definition": unit,
         "legacy_snapshot": capture_legacy_inventory(db, req.item_kind, req.item_id) if p["kind"] == "inventory_observation" else None,
     }
+    if p["kind"] == "inventory_observation":
+        if (
+            p["legacy_reconciliation"] == "confirmed"
+            and req.expected_legacy_digest is None
+            or req.expected_legacy_digest is not None
+            and req.expected_legacy_digest != parent["legacy_snapshot"]["collection_digest"]
+        ):
+            raise HTTPException(409, "药师实际审阅的完整原库存集合已变化或未明确绑定，请重新核对后签署")
     now = utcnow()
     recorded = utc_text(now)
     if p.get("observed_at") is not None and p["observed_at"] > recorded:

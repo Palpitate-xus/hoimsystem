@@ -259,3 +259,51 @@ def test_explicit_legacy_unit_mapping_cannot_silently_convert_conflicting_consum
     current = s.source_current(db_session, case["admin"], row.source_record_id)
     assert current["payload"]["legacy_quantity_unit_review"] == "unknown" and current["parent_binding"]["legacy_snapshot"]["sku"]["projection"]["unit"] == "套"
     assert current["parent_binding"]["unit_definition"]["payload"]["original_unit_text"] == "原实盘计数组"
+
+
+@pytest.mark.parametrize("change", ["missing_anchor", "frozen_same_total", "expiry_same_total"])
+def test_professional_legacy_reconciliation_binds_actually_reviewed_full_snapshot(db_session, inventory_case, change):
+    from app.models import PharmaceuticalBatch
+
+    case = inventory_case
+    batch = PharmaceuticalBatch(
+        pharmaceutical_id=case["drug"].pharmaceutical_id, batch_no="actual-reconciliation-source", stock=37, status=0, expiry_date=datetime.date(2027, 1, 1), create_time=NOW, update_time=NOW
+    )
+    db_session.add(batch)
+    db_session.commit()
+    shown = collection.capture_legacy_inventory(db_session, "pharmaceutical", case["drug"].pharmaceutical_id)
+    body = source_request(case, confirmed=True)
+    body["payload"]["legacy_reconciliation"] = "confirmed"
+    body["expected_legacy_digest"] = None if change == "missing_anchor" else shown["collection_digest"]
+    if change == "frozen_same_total":
+        batch.status = 1
+    if change == "expiry_same_total":
+        batch.expiry_date = datetime.date(2026, 10, 20)
+    db_session.commit()
+    before = db_session.query(AIInventoryNativeSource).count(), db_session.query(AIAuditEvent).count()
+    with pytest.raises(HTTPException) as failure:
+        s.create_source(db_session, case["pharmacist"], body)
+    assert failure.value.status_code == 409
+    assert (db_session.query(AIInventoryNativeSource).count(), db_session.query(AIAuditEvent).count()) == before
+    assert case["drug"].stock == 37 and batch.stock == 37
+    fresh = collection.capture_legacy_inventory(db_session, "pharmaceutical", case["drug"].pharmaceutical_id)
+    body["expected_legacy_digest"] = fresh["collection_digest"]
+    row = s.create_source(db_session, case["pharmacist"], body)
+    db_session.commit()
+    actual = s.source_proof(row)
+    assert actual["parent_binding"]["legacy_snapshot"]["collection_digest"] == fresh["collection_digest"]
+    assert actual["parent_binding"]["legacy_snapshot"]["batches"][0]["projection"]["stock"] == 37
+
+
+def test_later_capture_clock_alone_does_not_reject_explicit_legacy_digest(db_session, inventory_case, monkeypatch):
+    case = inventory_case
+    shown = collection.capture_legacy_inventory(db_session, "pharmaceutical", case["drug"].pharmaceutical_id)
+    body = source_request(case, confirmed=True)
+    body["payload"]["legacy_reconciliation"] = "confirmed"
+    body["expected_legacy_digest"] = shown["collection_digest"]
+    monkeypatch.setattr(s, "utcnow", lambda: NOW + datetime.timedelta(seconds=1))
+    monkeypatch.setattr(collection, "utcnow", lambda: NOW + datetime.timedelta(seconds=1))
+    row = s.create_source(db_session, case["pharmacist"], body)
+    db_session.commit()
+    frozen = s.source_proof(row)["parent_binding"]["legacy_snapshot"]
+    assert frozen["captured_at"] != shown["captured_at"] and frozen["collection_digest"] == shown["collection_digest"]

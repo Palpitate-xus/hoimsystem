@@ -232,6 +232,7 @@ class SourceCreate(StrictModel):
     unit_definition_id: UUID | None
     expected_unit_content_hash: SHA256 | None
     expected_unit_governance_hash: SHA256 | None
+    expected_legacy_digest: SHA256 | None = None
     payload: Payload
 
     @model_validator(mode="after")
@@ -240,6 +241,8 @@ class SourceCreate(StrictModel):
         if absent != (self.expected_unit_content_hash is None) or absent != (self.expected_unit_governance_hash is None):
             raise ValueError("Original unit requires its actual identity/content/governance together, or all unknown")
         values = self.payload.model_dump(mode="json")
+        if values["kind"] != "inventory_observation" and self.expected_legacy_digest is not None:
+            raise ValueError("Only an actual inventory observation binds an explicitly reviewed legacy snapshot")
 
         def quantities(value):
             if isinstance(value, dict):

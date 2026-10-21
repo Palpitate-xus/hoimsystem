@@ -210,3 +210,60 @@ def test_actual_allowed_to_allowed_requester_role_change_rejects_id_only_worker_
     finally:
         event.remove(db.get_bind(), "before_cursor_execute", capture)
     assert task_text_queries(queries) == []
+
+
+@pytest.mark.parametrize("status", ["queued", "running", "cancelled"])
+def test_interrupted_tasks_close_technical_receipts_after_purpose_withdrawal_without_task_body_or_retry(task_case, monkeypatch, status):
+    import datetime as dt
+
+    case, db = task_case, task_case["db"]
+    rid = stage(case)
+    if status != "queued":
+        runtime.claim(db, rid)
+        db.commit()
+    if status == "cancelled":
+        runtime.cancel(db, case["author"], rid)
+        db.commit()
+    grant = case["grants"][0]
+    registry.revoke_record(db, case["reviewer"], "grant", grant.record_id, cas(grant))
+    db.commit()
+    original = registry.utcnow()
+    monkeypatch.setattr(registry, "utcnow", lambda: original + dt.timedelta(days=2))
+    queries = []
+
+    def capture(conn, cursor, sql, params, ctx, many):
+        queries.append(sql)
+
+    event.listen(db.get_bind(), "before_cursor_execute", capture)
+    try:
+        assert runtime.expire_interrupted_runs(db) == 1
+        assert runtime.expire_interrupted_runs(db) == 0
+    finally:
+        event.remove(db.get_bind(), "before_cursor_execute", capture)
+    assert task_text_queries(queries) == []
+    artifact, raw = storage.verify_technical_run(db, rid)
+    from types import SimpleNamespace
+
+    usage = storage.usage(db, artifact, SimpleNamespace(**{key: value for key, value in raw.items() if key not in runtime.t.RAW_FIELDS}))
+    assert usage.terminal_status == ("cancelled" if status == "cancelled" else "failed")
+    assert usage.calculation_attempted is (False if status == "queued" else None)
+    assert usage.model_call_attempted is False and usage.input_tokens == usage.output_tokens == 0
+
+
+@pytest.mark.asyncio
+async def test_cancel_after_actual_claim_before_dispatch_records_known_no_cpu_and_does_not_calculate(task_case, monkeypatch):
+    case, db = task_case, task_case["db"]
+    rid = stage(case)
+    lease = runtime.claim_for_shared(db, rid)
+    assert lease is not None
+    runtime.cancel(db, case["author"], rid)
+    db.commit()
+
+    def forbidden(value):
+        raise AssertionError("Cancelled-before-dispatch task attempted CPU calculation")
+
+    monkeypatch.setattr(runtime, "_calculate", forbidden)
+    await runtime.execute_claimed(factory(case), rid, lease)
+    artifact, run = db.get(Artifact, rid), db.get(AIRun, rid)
+    receipt = storage.usage(db, artifact, run)
+    assert run.status == "cancelled" and receipt.calculation_attempted is False and receipt.calculation_completed is False

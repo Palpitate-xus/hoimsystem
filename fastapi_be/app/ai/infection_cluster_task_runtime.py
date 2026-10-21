@@ -279,31 +279,56 @@ def _calculate(value):
     return result.model_dump(mode="json"), max(0, int((time.monotonic() - start) * 1000))
 
 
-async def execute_run(session_factory, rid):
-    """No SQL transaction/connection remains open during local CPU await."""
+@r.atomic
+def claim_for_shared(db, rid):
+    """Dedicated claim adapter; never lets an invalid78 enter generic inference."""
+    try:
+        lease, _, _ = claim(db, rid)
+        db.commit()
+        return lease
+    except HTTPException:
+        db.rollback()
+        if storage.locator(db, rid) is not None:
+            state = storage.actual_run_state(db, rid)
+            if state["status"] == "queued":
+                terminal(db, rid, None, status="failed", attempted=False, completed=False, error_code="CURRENT_AUTHORITY_CHANGED")
+                db.commit()
+        db.rollback()
+        return None
+
+
+async def execute_claimed(session_factory, rid, lease):
+    """Recheck dispatch, close SQL, calculate once, then recheck acceptance."""
+    from app.models import User
+
     with session_factory() as db:
-        try:
-            lease, source, frozen = claim(db, rid)
+        artifact, before = storage.verify_technical_run(db, rid)
+        if before["lease_token"] != lease or before["status"] not in {"running", "cancelled"} or artifact.usage_event_id is not None:
+            db.rollback()
+            return
+        if before["status"] == "cancelled":
+            terminal(db, rid, lease, status="cancelled", attempted=False, completed=False, error_code="CANCELLED")
             db.commit()
+            return
+        try:
+            actor = current(db.query(User).filter_by(user_id=artifact.requested_by), shared=True).one_or_none()
+            if actor is None:
+                raise HTTPException(403, "原请求账户已不存在")
+            authorized = storage.authorize(db, actor, rid, execution=True)
+            source = authorized[4].model_dump(mode="json")
+            db.rollback()
         except HTTPException:
             db.rollback()
-            try:
-                row = storage.locator(db, rid)
-                state = storage.actual_run_state(db, rid) if row is not None else None
-                if state is not None and state["status"] == "queued":
-                    terminal(db, rid, None, status="failed", attempted=False, completed=False, error_code="CURRENT_AUTHORITY_CHANGED")
-                    db.commit()
-            finally:
-                db.rollback()
+            terminal(db, rid, lease, status="failed", attempted=False, completed=False, error_code="CURRENT_AUTHORITY_CHANGED")
+            db.commit()
             return
-    # The session is closed, including on failure; no retry of calculation.
+    # Session and transaction are closed. A reservation/lease is not an observed
+    # CPU entry; an interrupted/unknown thread attempt stays nullable.
     result, elapsed, attempted, completed = None, None, True, False
     try:
         result, elapsed = await asyncio.to_thread(_calculate, source)
         completed = True
     except Exception:
-        # Entering the worker thread is not a proof of completed calculation.
-        # If dispatch/thread failure obscures entry, retain an unknown attempt.
         attempted = None
     with session_factory() as db:
         try:
@@ -321,7 +346,53 @@ async def execute_run(session_factory, rid):
             db.commit()
         except HTTPException:
             db.rollback()
-            # Permission/config/source loss discards the result but preserves
-            # observed genuine CPU completion and zero external-model usage.
+            # Authority loss discards the result while preserving genuine CPU
+            # completion and actual zero external tokens; no calculation retry.
             terminal(db, rid, lease, status="failed", attempted=attempted, completed=completed if attempted is not None else None, milliseconds=elapsed, error_code="CURRENT_AUTHORITY_CHANGED")
             db.commit()
+
+
+async def execute_run(session_factory, rid):
+    with session_factory() as db:
+        lease = claim_for_shared(db, rid)
+    if lease is not None:
+        await execute_claimed(session_factory, rid, lease)
+
+
+def expire_interrupted_runs(db):
+    """Technical source-free closure, never a retry or restored clinical read."""
+    from sqlalchemy import and_, or_
+
+    from app.config import settings
+
+    lock_gate(db)
+    now = r.utcnow()
+    deadline = now - dt.timedelta(minutes=10)
+    queue_deadline = now - dt.timedelta(seconds=settings.AI_MAX_QUEUE_AGE_SECONDS)
+    count = 0
+    query = (
+        db.query(Artifact.run_id, AIRun.status, AIRun.lease_token)
+        .join(AIRun, AIRun.run_id == Artifact.run_id)
+        .filter(
+            Artifact.usage_event_id.is_(None),
+            or_(
+                and_(AIRun.status == "queued", AIRun.create_time < queue_deadline),
+                and_(AIRun.status == "running", AIRun.start_time < deadline),
+                and_(AIRun.status == "cancelled", AIRun.finish_time < deadline),
+            ),
+        )
+    )
+    for row in current(query.order_by(Artifact.run_id), shared=True).all():
+        queued = row.status == "queued"
+        terminal(
+            db,
+            row.run_id,
+            row.lease_token,
+            status="cancelled" if row.status == "cancelled" else "failed",
+            attempted=False if queued else None,
+            completed=False if queued else None,
+            error_code="WORKER_INTERRUPTED",
+        )
+        count += 1
+    db.commit()
+    return count

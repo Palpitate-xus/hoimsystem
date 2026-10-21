@@ -2,6 +2,7 @@
 
 import base64
 import hashlib
+import subprocess
 import sys
 
 import pytest
@@ -54,7 +55,13 @@ def test_exact_original_preserves_bom_crlf_combining_emoji_and_separate_byte_has
     assert value.raw_bytes_hash == hashlib.sha256(raw.encode()).hexdigest()
     assert c.digest(value) != value.raw_bytes_hash
     assert c.OriginalImmutable.model_validate_json(value.model_dump_json()) == value
-    assert all(name not in sys.modules for name in ("app.config", "app.database", "app.models", "sqlalchemy"))
+    checked = subprocess.run(
+        [sys.executable, "-c", "import sys; import app.ai.document_evidence_contract; assert not any(n in sys.modules for n in ('app.config','app.database','app.models','sqlalchemy'))"],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert checked.returncode == 0, checked.stderr
 
 
 @pytest.mark.parametrize("extension", ["txt", "md", "TXT"])

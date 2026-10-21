@@ -31,27 +31,40 @@ from app.ai.rca_evidence_write_guard import current_rows
 class RcaTechnicalAttempt:
     header: dict
     artifact: dict
-    claim: attempts.RcaClaimProof
+    claim: attempts.RcaClaimProof | None
     dispatch: attempts.RcaDispatchProof | None
+
+
+def technical_header(db, identifier, *, exclusive=False):
+    """Internal technical cancellation/settlement; never a body-read grant."""
+    identity = storage.locate_artifact(db, identifier)
+    if identity is None:
+        raise HTTPException(409, "原生任务实际技术Artifact已缺失")
+    header = storage._actual_run_header(db, identity[0], exclusive=exclusive)
+    row = storage._artifact_metadata(db, identity[0], exclusive=exclusive)
+    storage._exact_creation_audit(db, header, row)
+    if (row["run_id"], row["case_id"], row["requested_by"]) != identity or header["requested_by"] != identity[2]:
+        raise HTTPException(409, "本次技术回执的实际Run/Artifact归属不同")
+    value = SimpleNamespace(run=SimpleNamespace(**header), artifact=SimpleNamespace(**row))
+    actual = attempts.claim_proof(db, value) if row["claim_event_id"] is not None else None
+    if actual is None and (
+        header["status"] not in {"queued", "failed", "cancelled"}
+        or any(row[key] is not None for key in ("claim_lease", "claimed_at", "dispatch_event_id", "dispatched_at"))
+        or header["lease_token"] is not None
+        or header["start_time"] is not None
+    ):
+        raise HTTPException(409, "未claim任务已出现执行或不完整阶段痕迹，不能声明零调用")
+    dispatch = attempts.dispatch_proof(db, value) if row["dispatch_event_id"] is not None else None
+    return RcaTechnicalAttempt(header, row, actual, dispatch)
 
 
 def technical_attempt(db, proof, *, exclusive=False):
     """Trusted one-lease settlement exception: no Source or Task body read."""
     proof = attempts.RcaClaimProof.model_validate(proof)
-    identity = storage.locate_artifact(db, proof.run_id)
-    if identity != (proof.run_id, proof.case_id, proof.requested_by):
-        raise HTTPException(409, "本次技术回执与实际任务身份不同")
-    header = storage._actual_run_header(db, proof.run_id, exclusive=exclusive)
-    row = storage._artifact_metadata(db, proof.run_id, exclusive=exclusive)
-    storage._exact_creation_audit(db, header, row)
-    if (row["run_id"], row["case_id"], row["requested_by"]) != identity or header["requested_by"] != identity[2]:
-        raise HTTPException(409, "本次技术回执的实际Run/Artifact归属不同")
-    value = SimpleNamespace(run=SimpleNamespace(**header), artifact=SimpleNamespace(**row))
-    actual = attempts.claim_proof(db, value)
-    if proof != actual:
+    actual = technical_header(db, proof.run_id, exclusive=exclusive)
+    if actual.claim != proof:
         raise HTTPException(409, "回执不是原claim实际PK与原租约")
-    dispatch = attempts.dispatch_proof(db, value) if row["dispatch_event_id"] is not None else None
-    return RcaTechnicalAttempt(header, row, actual, dispatch)
+    return actual
 
 
 def terminal_state_hash(header, artifact):
@@ -107,7 +120,7 @@ def read_receipt(db, attempt):
         when.replace(microsecond=0),
     ):
         raise HTTPException(409, "具体用量审计、原租约或实际终态头无法核对")
-    if header["finish_time"] != when.replace(microsecond=0) or when < (row["dispatched_at"] or row["claimed_at"]):
+    if header["finish_time"] != when.replace(microsecond=0) or when < (row["dispatched_at"] or row["claimed_at"] or row["recorded_at"]):
         raise HTTPException(409, "本次实际用量回执与真实结束时钟不同")
     if (header["input_tokens"], header["output_tokens"]) != (receipt.usage.input_tokens or 0, receipt.usage.output_tokens or 0):
         raise HTTPException(409, "旧Run整数计数与独立nullable回执不同")
@@ -162,8 +175,13 @@ def stage_terminal(db, proof, *, dispatch_event_id, usage, status, error_code, l
         return None
     if header["status"] not in {"running", "cancelled"}:
         raise HTTPException(409, "本次原租约已不是可结算的执行或取消任务")
+    return _write_terminal(db, attempt, usage=usage, status=status, error_code=error_code, latency_ms=latency_ms)
+
+
+def _write_terminal(db, attempt, *, usage, status, error_code, latency_ms):
+    header, row = attempt.header, attempt.artifact
     when = grants.utcnow()
-    if when < (row["dispatched_at"] or row["claimed_at"]):
+    if when < (row["dispatched_at"] or row["claimed_at"] or row["recorded_at"]):
         raise HTTPException(409, "终态真实钟点早于实际claim/dispatch，未改写时钟或结算")
     values = _terminal_values(header, usage, status, error_code, latency_ms, when)
     expected_header = {**header, **values, "bytes_result_json": 2}
@@ -189,7 +207,7 @@ def stage_terminal(db, proof, *, dispatch_event_id, usage, status, error_code, l
     audit_id, expected_audit = grants._audit(db, actor, "rca_run.usage", row["run_id"], receipt.model_dump(mode="json"), when)
     db.execute(update(AIRcaEvidenceRunArtifact).where(AIRcaEvidenceRunArtifact.run_id == row["run_id"]).values(usage_event_id=audit_id), execution_options={"synchronize_session": False})
     db.flush()
-    actual = technical_attempt(db, proof, exclusive=True)
+    actual = technical_header(db, row["run_id"], exclusive=True)
     expected_artifact = {**row, "usage_event_id": audit_id}
     if actual.header != expected_header or actual.artifact != expected_artifact:
         raise HTTPException(409, "实际终态安全头或完整Artifact技术锚在写回后改变")
@@ -199,7 +217,25 @@ def stage_terminal(db, proof, *, dispatch_event_id, usage, status, error_code, l
     return receipt
 
 
+@grants._write
+def stage_unclaimed_terminal(db, identifier, *, status, error_code):
+    """Trusted queue worker or an already-authorized cancellation stage only.
+
+    No claim/dispatch means a definitely unattempted call. A claim that raced
+    ahead makes this stale delivery inert; it never terminates that new owner.
+    """
+    attempt = technical_header(db, identifier, exclusive=True)
+    if attempt.claim is not None:
+        return None
+    if attempt.artifact["usage_event_id"] is not None:
+        read_receipt(db, attempt)
+        return None
+    if attempt.header["status"] not in {"queued", "cancelled"}:
+        raise HTTPException(409, "未claim任务已经终止，不能重复结算")
+    usage = RcaUsageReceipt(input_tokens=0, output_tokens=0, complete=True, model_call_attempted=False)
+    return _write_terminal(db, attempt, usage=usage, status=status, error_code=error_code, latency_ms=0)
+
+
 def receipt_piece(db, user, identifier, *, frozen_audit=False):
-    stored = storage.load_task(db, user, identifier, frozen_audit=frozen_audit)
-    proof = attempts.claim_proof(db, stored)
-    return cases.wire(read_receipt(db, technical_attempt(db, proof)))
+    storage.load_task(db, user, identifier, frozen_audit=frozen_audit)
+    return cases.wire(read_receipt(db, technical_header(db, identifier)))

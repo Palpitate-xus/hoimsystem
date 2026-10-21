@@ -67,6 +67,8 @@ class RcaTaskSnapshot(c.StrictModel):
             raise ValueError("The entire original signature differs from the bound Case governance")
         if self.source_case_governance.reviewed_at != binding.source_snapshot_time:
             raise ValueError("The actual frozen Source publication clock differs")
+        if self.actor_epoch.token_invalid_before is not None and c.clock(self.actor_epoch.token_invalid_before) > c.clock(self.payload.context["snapshot_time"]):
+            raise ValueError("The actual original login epoch cannot lie after task creation")
         t.text_json(self)
         return self
 

@@ -81,6 +81,7 @@ def artifact_constraints(columns):
             "(claim_event_id IS NULL AND claim_lease IS NULL AND claimed_at IS NULL) OR (claim_event_id IS NOT NULL AND claim_lease IS NOT NULL AND claimed_at IS NOT NULL AND claimed_at>=recorded_at)",
             name="ck_rca_task_claim_tuple",
         ),
+        sa.CheckConstraint("actor_token_invalid_before IS NULL OR actor_token_invalid_before<=recorded_at", name="ck_rca_task_original_epoch"),
         sa.CheckConstraint("claim_lease IS NULL OR (" + uuid_sql("claim_lease") + ")", name="ck_rca_task_claim_lease"),
         sa.CheckConstraint(
             "(dispatch_event_id IS NULL AND dispatched_at IS NULL) OR (dispatch_event_id IS NOT NULL AND dispatched_at IS NOT NULL AND claim_event_id IS NOT NULL AND dispatched_at>=claimed_at)",
@@ -118,6 +119,7 @@ def upgrade():
         sa.Column("patient_grant_id", sa.String(36), sa.ForeignKey("hoimsystem_ai_rca_purpose_grant.grant_id"), nullable=True),
         sa.Column("schema_version", sa.String(48), nullable=False),
         sa.Column("recorded_at", utc6(), nullable=False),
+        sa.Column("actor_token_invalid_before", utc6(), nullable=True),
         sa.Column("source_json", whole_json(), nullable=False),
         sa.Column("source_bytes", sa.Integer, nullable=False),
         sa.Column("binding_json", sa.Text, nullable=False),

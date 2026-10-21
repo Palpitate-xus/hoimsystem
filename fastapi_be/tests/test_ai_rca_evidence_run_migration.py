@@ -66,6 +66,7 @@ def artifact(**changes):
         "patient_grant_id": source.grant(2)["grant_id"],
         "schema_version": "rca_evidence_run_artifact_v1",
         "recorded_at": NOW,
+        "actor_token_invalid_before": NOW - dt.timedelta(days=1),
         "source_json": raw,
         "source_bytes": len(raw.encode()),
         "binding_json": "{}",
@@ -138,6 +139,7 @@ def test_actual_up_down_up_and_complete_unicode_readback_keep_existing_ddl_and_r
     [
         {"schema_version": "RCA_evidence_run_artifact_v1"},
         {"requested_by": 0},
+        {"actor_token_invalid_before": NOW + dt.timedelta(microseconds=1)},
         {"requested_by": 2},
         {"event_id": 2},
         {"event_grant_id": "00000000-0000-0000-0000-000000000099"},
@@ -247,7 +249,7 @@ def test_independent_models_match_actual_migration_mysql_mediumtext_utc6_and_con
     with Operations.context(__import__("alembic.migration", fromlist=["MigrationContext"]).MigrationContext.configure(engine)):
         migration.upgrade()
     assert sum("MEDIUMTEXT" in statement for statement in sql) == 2
-    assert "\n".join(sql).count("DATETIME(6)") == 4
+    assert "\n".join(sql).count("DATETIME(6)") == 5
     assert "FOREIGN KEY(event_grant_id, event_id, requested_by)" in "\n".join(sql)
     assert "FOREIGN KEY(patient_grant_id, event_id, requested_by)" in "\n".join(sql)
     assert "FOREIGN KEY(run_id, accepted_lease)" in "\n".join(sql)

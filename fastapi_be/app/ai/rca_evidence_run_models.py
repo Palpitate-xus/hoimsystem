@@ -65,6 +65,7 @@ def artifact_constraints(columns):
             "(claim_event_id IS NOT NULL AND claim_lease IS NOT NULL AND claimed_at IS NOT NULL AND claimed_at>=recorded_at)",
             name="ck_rca_task_claim_tuple",
         ),
+        CheckConstraint("actor_token_invalid_before IS NULL OR actor_token_invalid_before<=recorded_at", name="ck_rca_task_original_epoch"),
         CheckConstraint("claim_lease IS NULL OR (" + uuid_sql("claim_lease") + ")", name="ck_rca_task_claim_lease"),
         CheckConstraint(
             "(dispatch_event_id IS NULL AND dispatched_at IS NULL) OR (dispatch_event_id IS NOT NULL AND dispatched_at IS NOT NULL AND claim_event_id IS NOT NULL AND dispatched_at>=claimed_at)",
@@ -98,6 +99,7 @@ class AIRcaEvidenceRunArtifact(Base):
     patient_grant_id = Column(String(36), ForeignKey("hoimsystem_ai_rca_purpose_grant.grant_id"), nullable=True)
     schema_version = Column(String(48), nullable=False)
     recorded_at = Column(utc6(), nullable=False)
+    actor_token_invalid_before = Column(utc6(), nullable=True)
     source_json = Column(whole_json(), nullable=False)
     source_bytes = Column(Integer, nullable=False)
     binding_json = Column(Text, nullable=False)

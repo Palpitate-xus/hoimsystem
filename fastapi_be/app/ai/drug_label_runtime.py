@@ -379,11 +379,14 @@ async def execute_drug_label_claimed(run_id, lease, *, transport=None):
 
 
 def guard_drug_label_run_id(db, user, run_id, *, frozen_audit=False):
-    hint = storage._locator(db, sources._key(run_id))
+    identifier = storage._opaque_run_id(run_id)
+    hint = storage._locator(db, identifier)
     if hint is not None:
-        storage.load_snapshot(db, run_id, user=user, frozen_audit=frozen_audit)
+        storage.load_snapshot(db, sources._key(identifier), user=user, frozen_audit=frozen_audit)
         return True
-    feature = db.query(AIRun.feature_key).filter_by(run_id=run_id).one_or_none()
+    # Only a nonlocking feature locator follows an absent opaque Artifact. Do
+    # not lock/read a generic or Doc Run before its own domain authorization.
+    feature = db.query(AIRun.feature_key).filter_by(run_id=identifier).one_or_none()
     if feature is not None and feature[0] == FEATURE_KEY:
         raise HTTPException(409, "旧说明书任务缺少完整Artifact，不能降级读取")
     return False

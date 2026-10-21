@@ -62,12 +62,16 @@ def instructions_digest(system, task):
     return hashlib.sha256(d.utf8(system + "\n\n" + task)).hexdigest()
 
 
-def _run_id(run):
+def _opaque_run_id(run):
+    """Raw locator only: legacy generic IDs are not subjected to 73 UUID rules."""
     if isinstance(run, str):
-        return sources._key(run)
+        return run
     state = inspect(run, raiseerr=False)
-    identifier = (state.identity[0] if state.identity else state.dict.get("run_id")) if state is not None else getattr(run, "run_id", None)
-    return sources._key(identifier)
+    return (state.identity[0] if state.identity else state.dict.get("run_id")) if state is not None else getattr(run, "run_id", None)
+
+
+def _run_id(run):
+    return sources._key(_opaque_run_id(run))
 
 
 def _locator(db, identifier):
@@ -79,8 +83,14 @@ def _locator(db, identifier):
 
 
 def is_drug_label_run(db, run):
+    if db is not None:
+        with db.no_autoflush:
+            # Exact current SQL classification precedes every Task JSON read.
+            # A generic/non-UUID locator is still valid input to this lookup.
+            if _locator(db, _opaque_run_id(run)) is not None:
+                return True
     state = inspect(run, raiseerr=False)
-    data = state.dict if state is not None else vars(run)
+    data = state.dict if state is not None else vars(run) if hasattr(run, "__dict__") else {}
     if data.get("feature_key") == FEATURE_KEY:
         return True
     for field in ("input_json", "evidence_json", "context_metadata_json", "result_json"):
@@ -98,10 +108,7 @@ def is_drug_label_run(db, run):
                 isinstance(payload.get(k), dict) and bool({"drug_label_binding", "drug_label_source", "drug_label_source_binding_id"} & payload[k].keys()) for k in ("input", "context")
             ):
                 return True
-    if db is None:
-        return False
-    with db.no_autoflush:
-        return _locator(db, _run_id(run)) is not None
+    return False
 
 
 def _source_locked(db, binding_id, owner_id, user=None, frozen_audit=False):

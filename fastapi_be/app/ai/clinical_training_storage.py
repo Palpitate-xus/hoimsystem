@@ -226,6 +226,9 @@ def _stage_run(db, user, value, *, preview=False):
     artifact = AITrainingRunArtifact(**values)
     db.add(artifact)
     db.flush()
+    from app.ai.native_task_routing import remember_staged_identity
+
+    remember_staged_identity(db, artifact)
     saved = load_artifact(db, context.actor, run_id, execution=True)
     if encoded_header({column.name: getattr(saved[0], column.name) for column in AIRun.__table__.columns}) != original or current_rows(count_query, shared=True).scalar() != used + 1:
         raise HTTPException(409, "培训真实Run、Artifact或当前额度读回不同")

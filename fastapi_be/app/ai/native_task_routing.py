@@ -24,6 +24,7 @@ class NativeTaskIdentity:
 
 def _domains():
     from app.ai.charge_reconciliation_run_models import AIChargeRunArtifact
+    from app.ai.clinical_training_run_models import AITrainingRunArtifact
     from app.ai.document_change_run_models import AIDocumentChangeRunArtifact
     from app.ai.document_extraction_models import AIDocumentExtractionRunAnchor
     from app.ai.drug_label_run_models import AIDrugLabelRunArtifact
@@ -37,6 +38,7 @@ def _domains():
         ("drug_label", AIDrugLabelRunArtifact, "source_binding_id"),
         ("document_change", AIDocumentChangeRunArtifact, "scope_id"),
         ("research_cohort", AIResearchCohortRunArtifact, "case_id"),
+        ("clinical_training", AITrainingRunArtifact, "submission_id"),
     )
 
 
@@ -66,9 +68,9 @@ def locate_native_task(db, value):
     """Detect erased markers and ambiguous cross-domain anchors without authority.
 
     SQLite reuses the caller connection. An extra StaticPool Session could roll
-    back its transaction. A writer's own uncommitted anchor is accepted only in
-    the exact registered transaction and re-read as the same three SQL columns;
-    a rolled-back savepoint or a completed transaction cannot leave a fake hint.
+    back its transaction. The caller's actual SQL is included even without a
+    remembered identity. A remembered writer's anchor is additionally checked
+    in its original transaction; a hint never replaces a real SQL row.
     """
     identifier = opaque_run_id(value)
     if db is None or type(identifier) is not str:
@@ -85,6 +87,8 @@ def locate_native_task(db, value):
         else:
             rows = db.execute(statement).all()
         found = {NativeTaskIdentity(*tuple(row)) for row in rows}
+        if bind.dialect.name in {"mysql", "mariadb"}:
+            found.update(NativeTaskIdentity(*tuple(row)) for row in db.execute(statement).all())
         for domain, model, key in domains:
             own = db.info.get(_STAGED, {}).get((domain, identifier))
             if own is None or own[0] is not db.get_transaction() or own[0] is None:

@@ -563,6 +563,10 @@ def get_visit_records(current_user: User = Depends(get_current_user), keyword: s
 
 @router.post("/review/create")
 def create_review(req: ReviewCreateRequest, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    from app.ai.satisfaction_write_guard import lock_satisfaction_write
+    from app.dependencies import VALID_USER_ROLES
+
+    current_user = lock_satisfaction_write(db, current_user, allowed_roles=VALID_USER_ROLES)
     patient_ids = [item[0] for item in db.query(Patient.patient_id).filter(Patient.identity == current_user.username).all()]
     if not patient_ids:
         return {"code": 500, "msg": "病人信息不存在"}

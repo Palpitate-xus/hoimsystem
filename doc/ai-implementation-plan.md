@@ -427,3 +427,5 @@
 - 2026-10-21 第80项正式Main/JWT Source练习：17真实路由/951接口RBAC，14完整文件一次893通过/12既有SQLite提示，75.11s pytest、86.551s外层、1179输入稳定。不同超管独立课程复核、无答案公开题面SHA/复核头、实际提交先commit再GET答案反馈、3完整bare分件、当前撤回/epoch/owner否决、bodyless目录与敏感GET操作审计均实际验证；参数闭合和8MiB请求边界保留。当前MySQL30只绑定早前Source/Practice版，正式Main/目录MySQL另测；AI Task/gateway/Prompt执行与FE继续。
 
 - 2026-10-21 第80项正式Main独立MySQL第二轮：实际32机制40.738s一次通过，1179输入逐字同893验收版且前后稳定，21真实Main请求/响应包无JWT保留。原30来源/练习机制同轮重跑，再核旧RR当前bodyless目录、真实JWT不同作者/复核者/学员、提交commit先于反馈、完整分件/owner拒绝/撤回及敏感GET日志。清理真，未使用真实医院数据/模型；AI Task/gateway/worker和FE继续。
+
+- 2026-10-21 第80项AI反馈纯合同与Prompt：仅实际提交UUID/三有限目标，真实同案HTTP派生完整Source与固定成绩，模型JSON不能新增评分/答案键/临床动作，逐题解析或该题参考的Unicode码点逐字引用与原题复习闭合。最终整文件39一次通过1.01s/1.289s，全部BE/映射/两fixture稳定、无DB/settings/网络导入；自洽改答案与重hash仍不能代替独立实际反馈锚，分别合法4MiB题面+64×65535参考合成whole>8MiB真实拒绝。实际Provider/版本Prompt/Task SQL与执行继续，纯合同不授予当前Source权限。

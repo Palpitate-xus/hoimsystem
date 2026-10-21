@@ -267,3 +267,30 @@ async def test_cancel_after_actual_claim_before_dispatch_records_known_no_cpu_an
     artifact, run = db.get(Artifact, rid), db.get(AIRun, rid)
     receipt = storage.usage(db, artifact, run)
     assert run.status == "cancelled" and receipt.calculation_attempted is False and receipt.calculation_completed is False
+
+
+@pytest.mark.parametrize("status", ["queued", "running"])
+def test_actual_cancel_request_specific_audit_deleted_after_insert_rolls_back_the_status(task_case, status):
+    case, db = task_case, task_case["db"]
+    rid = stage(case)
+    if status == "running":
+        runtime.claim(db, rid)
+        db.commit()
+    before = db.query(AIAuditEvent).count()
+    db.execute(
+        text(
+            "CREATE TRIGGER remove_infection_cancel_audit AFTER INSERT ON hoimsystem_ai_audit_event WHEN NEW.action='run.infection_cluster.cancel_request' BEGIN DELETE FROM hoimsystem_ai_audit_event WHERE event_id=NEW.event_id; END"
+        )
+    )
+    db.commit()
+    try:
+        with pytest.raises(HTTPException) as exc:
+            runtime.cancel(db, case["author"], rid)
+        assert exc.value.status_code == 409
+        db.expire_all()
+        assert db.get(AIRun, rid).status == status and db.get(Artifact, rid).usage_event_id is None
+        assert db.query(AIAuditEvent).count() == before
+    finally:
+        db.rollback()
+        db.execute(text("DROP TRIGGER remove_infection_cancel_audit"))
+        db.commit()

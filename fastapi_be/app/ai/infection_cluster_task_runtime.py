@@ -265,15 +265,20 @@ def cancel(db, user, rid):
     if actor.user_id != opaque.requested_by and actor.user_role != "super_admin":
         raise HTTPException(403, "仅本人或当前Super可技术取消，不授予正文权限")
     artifact, before = storage.verify_technical_run(db, rid)
-    if before["status"] == "queued":
-        return terminal(db, rid, None, status="cancelled", attempted=False, completed=False, error_code="CANCELLED")
-    if before["status"] != "running":
+    if before["status"] not in {"queued", "running"}:
         raise HTTPException(409, "任务已终止")
+    _, cancellation = _audit(
+        db, actor.user_id, "run.infection_cluster.cancel_request", rid, {"run_id": rid, "prior_status": before["status"], "lease": before["lease_token"], "clinical_body_access": False}
+    )
+    if before["status"] == "queued":
+        value = terminal(db, rid, None, status="cancelled", attempted=False, completed=False, error_code="CANCELLED")
+        r._verify_audit(db, cancellation)
+        return value
     changes = dict(status="cancelled", error_code="CANCELLED", error_message="已请求停止，真实本地计算尝试待原租约回执", finish_time=r.utcnow().replace(microsecond=0))
     expected = deepcopy(before)
     expected.update(changes)
     db.query(AIRun).filter_by(run_id=rid).update(changes, synchronize_session=False)
-    _verify(db, rid, expected, {key: getattr(artifact, key) for key in storage.TECHNICAL}, [])
+    _verify(db, rid, expected, {key: getattr(artifact, key) for key in storage.TECHNICAL}, [cancellation])
     return dict(run_id=rid, feature_key=t.FEATURE_KEY, status="cancelled", result_available=False)
 
 

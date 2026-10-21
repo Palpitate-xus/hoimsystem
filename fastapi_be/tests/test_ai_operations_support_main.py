@@ -300,8 +300,48 @@ async def test_actual_super_prompt_version_preview_and_revalidation_bind_databas
 
     value = pipeline
     chosen = selection(configured)
+    packets = []
+
+    class CapturingClient:
+        def __init__(self, client):
+            self.client = client
+
+        async def record(self, method, path, **kwargs):
+            response = await self.client.request(method, path, **kwargs)
+            packets.append(dict(method=method, path=path, status=response.status_code, body=response.text, request_body=kwargs.get("json"), actor_role="super_admin" if kwargs.get("headers") == value["headers"][0] else "admin", parts_wire=response.headers.get("X-AI-Parts-Wire")))
+            return response
+
+        async def get(self, path, **kwargs):
+            return await self.record("GET", path, **kwargs)
+
+        async def post(self, path, **kwargs):
+            return await self.record("POST", path, **kwargs)
+
+        async def put(self, path, **kwargs):
+            return await self.record("PUT", path, **kwargs)
+
+    async_client = CapturingClient(async_client)
+    original_id = configured[1]["original_id"]
+    release_id = configured[2]["release_id"]
     configured[0][0].commit()
     configured[0][0].close()
+    for path, who in [
+        ("/api/ai/admin/features", 0),
+        (BASE + "/task-descriptor", 3),
+        (BASE + "/originals", 0),
+        (BASE + f"/originals/{original_id}", 0),
+        (BASE + f"/originals/{original_id}/body", 0),
+        (BASE + "/releases", 0),
+        (BASE + f"/releases/{release_id}", 0),
+        (BASE + f"/releases/{release_id}/draft", 0),
+        (BASE + f"/releases/{release_id}/source", 3),
+        (BASE + "/cases", 3),
+        (BASE + f"/cases/{value['case_id']}", 3),
+        (BASE + f"/cases/{value['case_id']}/parts/source", 3),
+        (BASE + f"/cases/{value['case_id']}/parts/private", 0),
+    ]:
+        response = await async_client.get(path, headers=value["headers"][who])
+        assert response.status_code == 200, response.text
     response = await async_client.get("/api/ai/admin/prompts/operations_support", headers=value["headers"][0])
     assert response.status_code == 200
     assert response.json()["data"]["system_prompt"] == SYSTEM_PROMPT
@@ -332,18 +372,30 @@ async def test_actual_super_prompt_version_preview_and_revalidation_bind_databas
     response = await async_client.post(BASE + "/tasks", headers=value["headers"][3], json=chosen)
     assert response.status_code == 200, response.text
     value["identifier"] = response.json()["data"]["run_id"]
+    response = await async_client.get(BASE + f"/tasks/{value['identifier']}", headers=value["headers"][3])
+    assert response.status_code == 200 and response.json()["data"]["status"] == "queued"
     with value["factory"]() as db:
         claimed = shared.claim_next_run(db)
     assert claimed[0] == value["identifier"]
     value["lease"] = claimed[1]
+    response = await async_client.get(BASE + f"/tasks/{value['identifier']}", headers=value["headers"][3])
+    assert response.status_code == 200 and response.json()["data"]["status"] == "running"
     monkeypatch.setattr("tests.test_ai_operations_support_execution.TASK_PROMPT", custom)
     transport, calls = provider_service(value)
     await shared.execute_claimed(value["identifier"], value["lease"], transport=transport)
     assert len(calls) == 1 and receipt(value).status == "succeeded"
-    packets = []
     for part in ("task", "source", "binding", "result"):
         path = BASE + f"/tasks/{value['identifier']}/parts/{part}"
         response = await async_client.get(path, headers=value["headers"][3])
         assert response.status_code == 200, response.text
-        packets.append(dict(method="GET", path=path, status=response.status_code, body=response.text, parts_wire=response.headers["X-AI-Parts-Wire"]))
+    for path, who in [
+        (BASE + f"/tasks/{value['identifier']}", 3),
+        (BASE + f"/tasks/{value['identifier']}/trace", 0),
+        (BASE + f"/tasks?case_id={value['case_id']}", 3),
+        (BASE + f"/tasks?case_id={value['case_id']}", 0),
+        (f"/api/ai/runs?feature_key=operations_support&operations_case_id={value['case_id']}", 3),
+        ("/api/ai/admin/runs?feature_key=operations_support", 0),
+    ]:
+        response = await async_client.get(path, headers=value["headers"][who])
+        assert response.status_code == 200, response.text
     (tmp_path / "actual-main-custom-prompt-task-packets.json").write_text(json.dumps(packets, ensure_ascii=False, indent=2))

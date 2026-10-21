@@ -25,6 +25,7 @@ from app.ai import supply_source_models as _supply_source_models  # noqa: F401
 from app.ai import surgery_models as _surgery_models  # noqa: F401
 from app.ai import surgery_scenario_models as _surgery_scenario_models  # noqa: F401
 from app.ai import drug_label_models as _drug_label_models  # noqa: F401
+from app.ai import drug_label_run_models as _drug_label_run_models  # noqa: F401
 from app.clinical_observations import ObservationDecimal
 from app.database import Base
 

@@ -1,12 +1,12 @@
 const{expect}=require('@playwright/test'),{load}=require('./load-charge-assistant.cjs');
 async function setupBillingEntry(page,{harness=null,mode='inpatient'}={}){
- const p=load('chat'),calls=[],writes=[],unhandled=[],errors=[],name=p.source.ordinary.data.snapshot.collection.patient_binding.name;
+ const p=load('chat'),calls=[],writes=[],authenticationReads=[],unhandled=[],errors=[],name=p.source.ordinary.data.snapshot.collection.patient_binding.name;
  page.on('pageerror',e=>errors.push(e.message));await page.addInitScript(()=>localStorage.setItem('hoim-token','synthetic-native-billing-entry'));
  if(harness)await page.context().route('**/*',route=>new URL(route.request().url()).origin===harness.origin?route.continue():route.abort());
  await page.route('**/api/**',async route=>{
-  const req=route.request(),u=new URL(req.url()),path=u.pathname,method=req.method();calls.push({path,method,query:Object.fromEntries(u.searchParams),body:req.postData()?req.postDataJSON():null});if(method!=='GET')writes.push(calls.at(-1));
+  const req=route.request(),u=new URL(req.url()),path=u.pathname,method=req.method();calls.push({path,method,query:Object.fromEntries(u.searchParams),body:req.postData()?req.postDataJSON():null});if(path==='/api/userInfo'&&method==='POST')authenticationReads.push(calls.at(-1));else if(method!=='GET')writes.push(calls.at(-1));
   let response={code:200,msg:'Explicit synthetic entry reply',data:[]};
-  if(path==='/api/userInfo')response.data={username:'合成收费入口用户',permissions:['admin'],avatar:''};
+  if(path==='/api/userInfo'&&method==='POST')response.data={username:'合成收费入口用户',permissions:['admin'],avatar:''};
   else if(path==='/api/admission/getInpatientList')response.data=[{admission_id:p.request.encounter_ref,patient_id:p.request.patient_id,patient_name:name,bed_no:'01'}];
   else if(path==='/api/inpatientCharge/getList')response.data=p.source.ordinary.data.snapshot.collection.charges;
   else if(path==='/api/inpatientCharge/getDailyBill')response.data={total_amount:0,deposit_amount:0,balance:0,unsettled_amount:0,daily_list:[]};
@@ -22,7 +22,7 @@ async function setupBillingEntry(page,{harness=null,mode='inpatient'}={}){
  });
  await page.goto(harness?harness.origin:mode==='inpatient'?'/#/inpatient/inpatientCharge':'/#/charge/chargeList');
  if(harness){await page.waitForFunction(()=>!!window.__chargeBusinessProbe);await page.evaluate(()=>{const p=window.__chargeBusinessProbe;p.store.commit('user/permissions',['admin']);p.scope.ready=true;});}
- return{packet:p,name,calls,writes,unhandled,errors};
+ return{packet:p,name,calls,writes,authenticationReads,unhandled,errors};
 }
 async function checkInpatientBillingEntry(page,options={}){
  const s=await setupBillingEntry(page,{...options,mode:'inpatient'});await page.getByRole('cell',{name:s.name,exact:true}).click();await page.getByRole('button',{name:'AI 收费核对',exact:true}).click();const drawer=page.getByRole('dialog',{name:'AI 住院账目与执行核对',exact:true});

@@ -1,0 +1,17 @@
+{
+  "scope": "Actual product Main/JWT 28 source/task routes, dedicated real SQLite claim and HTTP MockTransport model; not shared dispatcher or real model. Each file is one unchanged original same-case packet.",
+  "files": [
+    {
+      "file": "chat.json",
+      "actual_export": "/tmp/hoim-research-tasks-http-third-pytest/test_actual_main_jwt_task_rece0/actual-research-main-task-chat.json",
+      "bytes": 173327,
+      "sha256": "fa6d5839ec7fa2d163c662d868749b25e46d0bffd02e3e8cd597b3cedbc692ac"
+    },
+    {
+      "file": "responses.json",
+      "actual_export": "/tmp/hoim-research-tasks-http-third-pytest/test_actual_main_jwt_task_rece1/actual-research-main-task-responses.json",
+      "bytes": 211532,
+      "sha256": "694dcb8b7d09b3b54f81987175c138fd6bffb56fc21c390e15ef3e4a7ebe08b3"
+    }
+  ]
+}

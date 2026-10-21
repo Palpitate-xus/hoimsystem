@@ -42,10 +42,10 @@ def artifact(db, seed_data, *, database_prompt=False):
     db.flush()
     prompt = None
     if database_prompt:
-        version = db.query(AIPromptVersion).filter_by(feature_key="data_deidentification").count() + 1
+        version = db.query(AIPromptVersion).filter_by(feature_key="deidentification").count() + 1
         prompt = AIPromptVersion(
             prompt_id=str(uuid.uuid4()),
-            feature_key="data_deidentification",
+            feature_key="deidentification",
             version=version,
             task_prompt="actual saved synthetic task",
             change_note="synthetic explicit saved version",
@@ -54,7 +54,7 @@ def artifact(db, seed_data, *, database_prompt=False):
         db.add(prompt)
         db.flush()
     run = AIRun(
-        run_id=str(uuid.uuid4()), feature_key="data_deidentification", provider_id=provider.provider_id, requested_by=actor, patient_id=case.patient_id, prompt_hash="a" * 64, context_digest="b" * 64
+        run_id=str(uuid.uuid4()), feature_key="deidentification", provider_id=provider.provider_id, requested_by=actor, patient_id=case.patient_id, prompt_hash="a" * 64, context_digest="b" * 64
     )
     db.add(run)
     db.flush()

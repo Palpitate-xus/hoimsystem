@@ -396,6 +396,7 @@ from app.routers import (
     ai_observation_windows,
     ai_qsofa,
     ai_research_cohort_sources,
+    ai_research_cohort_tasks,
     ai_risk_rules,
     ai_roster_plans,
     ai_roster_sources,
@@ -542,6 +543,7 @@ app.include_router(ai_inventory_scenarios.router, prefix="/api")
 app.include_router(ai_document_evidence.router, prefix="/api")
 app.include_router(ai_coding_evidence.router, prefix="/api")
 app.include_router(ai_research_cohort_sources.router, prefix="/api")
+app.include_router(ai_research_cohort_tasks.router, prefix="/api")
 app.include_router(ai_supply_sources.router, prefix="/api")
 app.include_router(ai_supply_series.router, prefix="/api")
 app.include_router(inpatient_gcs.router, prefix="/api")

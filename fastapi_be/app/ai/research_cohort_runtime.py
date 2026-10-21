@@ -169,6 +169,60 @@ def describe_research_run(db, user, run_id, *, audit_only=False):
     return value
 
 
+def list_research_runs(db, user, *, case_id=None, status=None, page=1, size=20, audit_only=False):
+    """Technical headers only; a directory row grants no clinical part access."""
+    from app.ai.models import AIFeatureConfig, AIRun
+    from app.ai.research_cohort_storage import _roles
+
+    if (
+        type(page) is not int
+        or not 1 <= page <= 100000
+        or type(size) is not int
+        or not 1 <= size <= 100
+        or status is not None
+        and status not in {"queued", "running", "succeeded", "failed", "cancelled"}
+    ):
+        raise HTTPException(422, "科研任务目录须使用明确分页和状态")
+    actor = lock_research_write(db, user)
+    if type(audit_only) is not bool or audit_only and actor.user_role != "super_admin":
+        raise HTTPException(403, "技术审计须为当前超级管理员显式操作")
+    if actor.user_role != "super_admin":
+        _fixed_role(actor)
+        config = current_research_rows(db.query(AIFeatureConfig.allowed_roles_json).filter_by(feature_key=FEATURE), shared=True).one_or_none()
+        if config is None or actor.user_role not in _roles(config.allowed_roles_json):
+            raise HTTPException(403, "当前身份没有科研任务目录权限")
+    artifact = AIResearchCohortRunArtifact
+    fields = (
+        AIRun.run_id,
+        AIRun.feature_key,
+        AIRun.status,
+        AIRun.preview,
+        AIRun.create_time,
+        AIRun.finish_time,
+        artifact.case_id,
+        artifact.scope_id,
+        artifact.source_projection_hash,
+        artifact.source_binding_hash,
+    )
+    query = db.query(*fields).join(artifact, artifact.run_id == AIRun.run_id).filter(AIRun.feature_key == FEATURE)
+    if actor.user_role != "super_admin":
+        query = query.filter(artifact.requested_by == actor.user_id, AIRun.requested_by == actor.user_id)
+    if case_id is not None:
+        query = query.filter(artifact.case_id == case_id)
+    if status is not None:
+        query = query.filter(AIRun.status == status)
+    total = current_research_rows(query.with_entities(func.count(AIRun.run_id)), shared=True).scalar()
+    rows = current_research_rows(query.order_by(AIRun.create_time.desc(), AIRun.run_id).offset((page - 1) * size).limit(size), shared=True).all()
+    items = []
+    for row in rows:
+        item = dict(row._mapping)
+        item["preview"] = bool(item["preview"])
+        item["create_time"], item["finish_time"] = utc_text(item["create_time"]), utc_text(item["finish_time"])
+        item.update(schema_version="research_cohort_task_directory_item_v1", detail_required=True, no_clinical_body_in_directory=True)
+        items.append(item)
+    return {"items": items, "page": page, "size": size, "total": total}
+
+
 def read_research_part(db, user, run_id, part, *, audit_only=False):
     """Each requested whole object is <=8MiB, never a duplicated full wrapper."""
     if part not in {"source", "scope", "result", "task"} or type(part) is not str:
@@ -188,6 +242,20 @@ def read_research_part(db, user, run_id, part, *, audit_only=False):
             "input_hash": artifact.input_hash,
             "evidence_hash": artifact.evidence_hash,
             "metadata_hash": artifact.metadata_hash,
+            "schema_version": "research_cohort_task_part_v1",
+            "run_id": run_id,
+            "artifact": {
+                column.name: utc_text(getattr(artifact, column.name)) if column.name == "recorded_at" else getattr(artifact, column.name)
+                for column in artifact.__table__.columns
+                if column.name not in {"source_json", "source_binding_json", "prompt_snapshot_json", "execution_snapshot_json"}
+            },
+            "source_binding": _json(artifact.source_binding_json, 32768),
+            "prompt_snapshot": _json(artifact.prompt_snapshot_json, 262144),
+            "execution_snapshot": _json(artifact.execution_snapshot_json, 262144),
+            # These are actual current/audit Case fields, not manufactured
+            # eligibility flags. Scope/Source independently supply two large
+            # fields to the same closed Case proof in the client.
+            "case_metadata": {key: value for key, value in case.items() if key not in {"snapshot", "public_source"}},
         }
     if len(canonical_json(value).encode("utf-8")) > MAX_BYTES:
         raise HTTPException(413, "完整科研独立分件超过8MiB，未拼接或裁剪")

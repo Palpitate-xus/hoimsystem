@@ -2303,6 +2303,41 @@
   "path": "/api/ai/research-cohort/patient-authorizations"
  },
  {
+  "auth": "ANY",
+  "function": "create_task",
+  "method": "POST",
+  "module": "ai_research_cohort_tasks.py",
+  "path": "/api/ai/research-cohort/tasks"
+ },
+ {
+  "auth": "ANY",
+  "function": "list_tasks",
+  "method": "GET",
+  "module": "ai_research_cohort_tasks.py",
+  "path": "/api/ai/research-cohort/tasks"
+ },
+ {
+  "auth": "ANY",
+  "function": "get_task",
+  "method": "GET",
+  "module": "ai_research_cohort_tasks.py",
+  "path": "/api/ai/research-cohort/tasks/{run_id}"
+ },
+ {
+  "auth": "ANY",
+  "function": "cancel_task",
+  "method": "POST",
+  "module": "ai_research_cohort_tasks.py",
+  "path": "/api/ai/research-cohort/tasks/{run_id}/cancel"
+ },
+ {
+  "auth": "ANY",
+  "function": "get_part",
+  "method": "GET",
+  "module": "ai_research_cohort_tasks.py",
+  "path": "/api/ai/research-cohort/tasks/{run_id}/parts/{part}"
+ },
+ {
   "auth": [
    "super_admin"
   ],

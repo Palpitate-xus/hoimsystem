@@ -90,6 +90,20 @@ def published_chain(case):
     return db, actor, original, candidate, publication, db.get(AIKnowledgeDocument, publication.snapshot.knowledge_document_id)
 
 
+def test_publication_preserves_actual_microseconds_and_explicit_legacy_knowledge_seconds(document_case):
+    db, actor, original, candidate, publication, knowledge = published_chain(document_case)
+    assert publication.snapshot.published_at == NOW
+    assert publication.snapshot.knowledge_recorded_at == "2026-10-21T12:00:00.000000Z"
+    assert publication.snapshot.knowledge_clock_basis == "legacy_utc_second_storage"
+    assert knowledge.reviewed_at == knowledge.create_time == c.clock(publication.snapshot.knowledge_recorded_at)
+    db.expire_all()
+    assert s.publication_detail(db, actor, publication.snapshot.publication_id).eligible
+    changed = publication.snapshot.model_dump(mode="json")
+    changed["knowledge_recorded_at"] = NOW
+    with pytest.raises(ValueError, match="whole-second"):
+        c.PublicationImmutable.model_validate(changed)
+
+
 def test_original_candidate_approval_does_not_auto_publish_and_exact_codepoints(document_case):
     db, actor, _ = document_case
     draft = s.create_original(db, actor, request())

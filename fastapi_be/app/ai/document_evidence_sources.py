@@ -412,9 +412,9 @@ def _publication_record(db, original_row, candidate_row, row, knowledge):
         c.clock(km.effective_from) if km.effective_from else None,
         c.clock(km.effective_to) if km.effective_to else None,
         snapshot.published_by,
-        c.clock(snapshot.published_at),
+        c.clock(snapshot.knowledge_recorded_at),
         snapshot.published_by,
-        c.clock(snapshot.published_at),
+        c.clock(snapshot.knowledge_recorded_at),
     )
     actual = tuple(
         getattr(knowledge, name)
@@ -484,6 +484,8 @@ def publish_candidate(db, user, candidate_id, values):
         candidate=c.CandidateReference(candidate_id=row.candidate_id, content_hash=candidate.content_hash, governance_hash=candidate.governance_hash),
         published_by=actor.user_id,
         published_at=published_at,
+        knowledge_recorded_at=c.utc_text(c.clock(published_at).replace(microsecond=0)),
+        knowledge_clock_basis=c.KNOWLEDGE_CLOCK_BASIS,
         publication_basis_note=request.basis_note,
         knowledge_document_id=str(uuid.uuid4()),
         knowledge=request.knowledge,
@@ -509,9 +511,9 @@ def publish_candidate(db, user, candidate_id, values):
         effective_to=c.clock(km.effective_to) if km.effective_to else None,
         status="published",
         reviewed_by=actor.user_id,
-        reviewed_at=c.clock(published_at),
+        reviewed_at=c.clock(snapshot.knowledge_recorded_at),
         created_by=actor.user_id,
-        create_time=c.clock(published_at),
+        create_time=c.clock(snapshot.knowledge_recorded_at),
     )
     db.add(knowledge)
     db.flush()

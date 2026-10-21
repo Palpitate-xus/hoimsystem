@@ -21,6 +21,7 @@ UPLOAD_TIMEOUT_SECONDS = 15
 SOURCE_KIND = "document_span"
 URI_PREFIX = "hoim://document-evidence/"
 DECLARATION = "submitter_declared_not_authority_or_clinical_validation"
+KNOWLEDGE_CLOCK_BASIS = "legacy_utc_second_storage"
 
 SHA256 = Annotated[str, Field(pattern=r"^[a-f0-9]{64}$", strict=True)]
 UUID = Annotated[str, Field(pattern=r"^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$", strict=True)]
@@ -359,7 +360,8 @@ class KnowledgeMetadata(StrictModel):
             raise ValueError("Explicit unique capability keys are required")
         for value in (self.effective_from, self.effective_to):
             if value is not None:
-                clock(value)
+                if clock(value).microsecond:
+                    raise ValueError("The legacy knowledge table supports UTC whole-second effective times only; nonzero microseconds are not rounded")
         if self.effective_from is not None and self.effective_to is not None and self.effective_from >= self.effective_to:
             raise ValueError("Effective times must be an ordered half-open interval")
         return self
@@ -391,6 +393,8 @@ class PublicationImmutable(StrictModel):
     candidate: CandidateReference
     published_by: Positive
     published_at: UtcText
+    knowledge_recorded_at: UtcText
+    knowledge_clock_basis: Literal["legacy_utc_second_storage"]
     publication_basis_note: str = Field(min_length=10, max_length=4000)
     knowledge_document_id: UUID
     knowledge: KnowledgeMetadata
@@ -400,6 +404,8 @@ class PublicationImmutable(StrictModel):
     @model_validator(mode="after")
     def exact_quote(self):
         clock(self.published_at)
+        if self.knowledge_recorded_at != utc_text(clock(self.published_at).replace(microsecond=0)):
+            raise ValueError("Legacy knowledge registration uses explicit whole-second storage while actual publication retains UTC microseconds")
         meaningful(self.publication_basis_note)
         if len(utf8(self.quote)) > MAX_KNOWLEDGE_BYTES or bytes_hash(self.quote) != self.quote_bytes_hash:
             raise ValueError("The complete exact quote must fit MySQL TEXT; no truncation")

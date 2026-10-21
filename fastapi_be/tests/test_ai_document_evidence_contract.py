@@ -178,3 +178,13 @@ def test_approval_requires_two_actual_review_decisions_and_complete_cas():
 def test_reserved_publication_uri_requires_exact_uuid_and_no_query(suffix):
     with pytest.raises(ValueError):
         c.publication_id_from_uri(c.URI_PREFIX + suffix)
+
+
+@pytest.mark.parametrize("field", ["effective_from", "effective_to"])
+def test_legacy_knowledge_effective_range_rejects_subsecond_claims_without_rounding(field):
+    metadata = dict(title="合成知识", version="v1", category="clinical", feature_keys=["guideline_ingestion"], department_id=None, effective_from=None, effective_to=None)
+    metadata[field] = "2026-10-21T12:00:00.000001Z"
+    with pytest.raises(ValidationError, match="whole-second"):
+        c.KnowledgeMetadata.model_validate(metadata)
+    metadata[field] = "2026-10-21T12:00:00.000000Z"
+    assert c.KnowledgeMetadata.model_validate(metadata).model_dump()[field] == metadata[field]

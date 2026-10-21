@@ -6,6 +6,7 @@ from sqlalchemy import case, func
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, joinedload
 
+from app.ai.coding_evidence_guard import lock_coding_write
 from app.config import settings
 from app.database import get_db
 from app.dependencies import ADMIN_ROLES, CASHIER_ROLES, CLINICAL_ROLES, ROLE_DIRECTOR, ROLE_PATIENT, User, get_current_user, require_roles
@@ -47,7 +48,14 @@ def list_insurance_catalog(keyword: str | None = None, current_user: User = Depe
     query = db.query(InsuranceCatalog).filter(InsuranceCatalog.status == 1)
     if keyword:
         query = query.filter((InsuranceCatalog.name.ilike(f"%{keyword}%")) | (InsuranceCatalog.code.ilike(f"%{keyword}%")))
-    return {"code": 200, "msg": "success", "data": [{"catalog_id": item.catalog_id, "code": item.code, "name": item.name, "category": item.category or "", "reimbursement_ratio": item.reimbursement_ratio} for item in query.order_by(InsuranceCatalog.name).all()]}
+    return {
+        "code": 200,
+        "msg": "success",
+        "data": [
+            {"catalog_id": item.catalog_id, "code": item.code, "name": item.name, "category": item.category or "", "reimbursement_ratio": item.reimbursement_ratio}
+            for item in query.order_by(InsuranceCatalog.name).all()
+        ],
+    }
 
 
 @router.post("/insurance/catalog/save")
@@ -70,19 +78,26 @@ def save_insurance_catalog(req: dict, current_user: User = Depends(require_roles
 @router.get("/insurance/settlement/list")
 def list_insurance_settlement(current_user: User = Depends(require_roles(*MANAGE_ROLES)), db: Session = Depends(get_db)):
     items = db.query(InsuranceSettlement).order_by(InsuranceSettlement.settlement_time.desc()).all()
-    return {"code": 200, "msg": "success", "data": [{
-        "settlement_id": item.settlement_id,
-        "patient_name": item.patient.name if item.patient else "",
-        "insurance_no": item.insurance_no,
-        "total_amount": item.total_amount,
-        "covered_amount": item.covered_amount,
-        "self_amount": item.self_amount,
-        "status": item.status,
-        "status_text": {0: "处理中", 1: "成功", 2: "失败"}.get(item.status, ""),
-        "integration_status": item.integration_status or "local",
-        "external_settlement_id": item.external_settlement_id or "",
-        "settlement_time": item.settlement_time.strftime("%Y-%m-%d %H:%M:%S"),
-    } for item in items]}
+    return {
+        "code": 200,
+        "msg": "success",
+        "data": [
+            {
+                "settlement_id": item.settlement_id,
+                "patient_name": item.patient.name if item.patient else "",
+                "insurance_no": item.insurance_no,
+                "total_amount": item.total_amount,
+                "covered_amount": item.covered_amount,
+                "self_amount": item.self_amount,
+                "status": item.status,
+                "status_text": {0: "处理中", 1: "成功", 2: "失败"}.get(item.status, ""),
+                "integration_status": item.integration_status or "local",
+                "external_settlement_id": item.external_settlement_id or "",
+                "settlement_time": item.settlement_time.strftime("%Y-%m-%d %H:%M:%S"),
+            }
+            for item in items
+        ],
+    }
 
 
 @router.post("/insurance/settlement/create")
@@ -98,11 +113,15 @@ def create_insurance_settlement(req: dict, current_user: User = Depends(require_
     if integration_mode not in ("local", "external"):
         return {"code": 400, "msg": "结算模式不合法"}
     item = InsuranceSettlement(
-        patient_id=patient.patient_id, insurance_no=req["insurance_no"], total_amount=total,
-        covered_amount=covered, self_amount=round(total - covered, 2),
+        patient_id=patient.patient_id,
+        insurance_no=req["insurance_no"],
+        total_amount=total,
+        covered_amount=covered,
+        self_amount=round(total - covered, 2),
         status=0 if integration_mode == "external" else 1,
         integration_status="pending" if integration_mode == "external" else "local",
-        operator_id=current_user.user_id, settlement_time=datetime.datetime.now(),
+        operator_id=current_user.user_id,
+        settlement_time=datetime.datetime.now(),
     )
     db.add(item)
     db.flush()
@@ -124,7 +143,11 @@ def create_insurance_settlement(req: dict, current_user: User = Depends(require_
             },
         )
     db.commit()
-    return {"code": 200, "msg": "已提交医保平台" if integration_mode == "external" else "结算成功", "data": {"settlement_id": item.settlement_id, "self_amount": item.self_amount, "status": item.status}}
+    return {
+        "code": 200,
+        "msg": "已提交医保平台" if integration_mode == "external" else "结算成功",
+        "data": {"settlement_id": item.settlement_id, "self_amount": item.self_amount, "status": item.status},
+    }
 
 
 @router.post("/integration/insurance/settlement")
@@ -167,14 +190,31 @@ def list_chronic(current_user: User = Depends(get_current_user), db: Session = D
         patient = db.query(Patient).filter(Patient.identity == current_user.username).first()
         query = query.filter(ChronicDiseaseRegistration.patient_id == patient.patient_id if patient else -1)
     items = query.order_by(ChronicDiseaseRegistration.create_time.desc()).all()
-    return {"code": 200, "msg": "success", "data": [{"registration_id": item.registration_id, "patient_name": item.patient.name if item.patient else "", "disease_name": item.disease_name, "card_no": item.card_no or "", "limit_amount": item.limit_amount, "status": item.status, "create_time": item.create_time.strftime("%Y-%m-%d %H:%M:%S")} for item in items]}
+    return {
+        "code": 200,
+        "msg": "success",
+        "data": [
+            {
+                "registration_id": item.registration_id,
+                "patient_name": item.patient.name if item.patient else "",
+                "disease_name": item.disease_name,
+                "card_no": item.card_no or "",
+                "limit_amount": item.limit_amount,
+                "status": item.status,
+                "create_time": item.create_time.strftime("%Y-%m-%d %H:%M:%S"),
+            }
+            for item in items
+        ],
+    }
 
 
 @router.post("/insurance/chronic/create")
 def create_chronic(req: dict, current_user: User = Depends(require_roles(*CLINICAL_ROLES)), db: Session = Depends(get_db)):
     if not req.get("patient_id") or not req.get("disease_name"):
         return {"code": 400, "msg": "患者和慢病名称不能为空"}
-    item = ChronicDiseaseRegistration(patient_id=req["patient_id"], disease_name=req["disease_name"], card_no=req.get("card_no"), limit_amount=req.get("limit_amount"), doctor_id=None, create_time=datetime.datetime.now())
+    item = ChronicDiseaseRegistration(
+        patient_id=req["patient_id"], disease_name=req["disease_name"], card_no=req.get("card_no"), limit_amount=req.get("limit_amount"), doctor_id=None, create_time=datetime.datetime.now()
+    )
     db.add(item)
     db.commit()
     return {"code": 200, "msg": "success"}
@@ -182,12 +222,21 @@ def create_chronic(req: dict, current_user: User = Depends(require_roles(*CLINIC
 
 @router.post("/insurance/drg/group")
 def create_drg_group(req: dict, current_user: User = Depends(require_roles(*MANAGE_ROLES)), db: Session = Depends(get_db)):
-    patient = db.query(Patient).filter(Patient.patient_id == req.get("patient_id")).first()
+    current_user = lock_coding_write(db, current_user, allowed_roles=MANAGE_ROLES)
+    patient = db.query(Patient).filter(Patient.patient_id == req.get("patient_id")).populate_existing().with_for_update(read=True).first()
     if not patient or not req.get("group_code") or not req.get("diagnosis"):
         return {"code": 400, "msg": "患者、分组编码和诊断不能为空"}
     expected = float(req.get("expected_amount", 0))
     actual = float(req.get("actual_amount", 0))
-    item = DrgGrouping(patient_id=patient.patient_id, group_code=req["group_code"], diagnosis=req["diagnosis"], expected_amount=expected, actual_amount=actual, profit=round(expected - actual, 2), create_time=datetime.datetime.now())
+    item = DrgGrouping(
+        patient_id=patient.patient_id,
+        group_code=req["group_code"],
+        diagnosis=req["diagnosis"],
+        expected_amount=expected,
+        actual_amount=actual,
+        profit=round(expected - actual, 2),
+        create_time=datetime.datetime.now(),
+    )
     db.add(item)
     db.commit()
     return {"code": 200, "msg": "success", "data": {"grouping_id": item.grouping_id, "profit": item.profit}}
@@ -195,6 +244,7 @@ def create_drg_group(req: dict, current_user: User = Depends(require_roles(*MANA
 
 @router.post("/insurance/drg/rule")
 def save_drg_rule(req: dict, current_user: User = Depends(require_roles(*ADMIN_ROLES, ROLE_DIRECTOR)), db: Session = Depends(get_db)):
+    current_user = lock_coding_write(db, current_user, allowed_roles=ADMIN_ROLES | {ROLE_DIRECTOR})
     method = str(req.get("payment_method") or "DRG").upper()
     if method not in ("DRG", "DIP"):
         return {"code": 400, "msg": "支付方式必须为 DRG 或 DIP"}
@@ -209,9 +259,13 @@ def save_drg_rule(req: dict, current_user: User = Depends(require_roles(*ADMIN_R
         return {"code": 400, "msg": "规则生效期必须为 YYYY-MM-DD"}
     if effective_from and effective_to and effective_from > effective_to:
         return {"code": 400, "msg": "失效日期不能早于生效日期"}
-    rule = db.get(DrgRule, req.get("rule_id")) if req.get("rule_id") else DrgRule(
-        creator_id=current_user.user_id,
-        create_time=datetime.datetime.now(),
+    rule = (
+        db.query(DrgRule).filter(DrgRule.rule_id == req.get("rule_id")).populate_existing().with_for_update().first()
+        if req.get("rule_id")
+        else DrgRule(
+            creator_id=current_user.user_id,
+            create_time=datetime.datetime.now(),
+        )
     )
     if not rule:
         return {"code": 404, "msg": "分组规则不存在"}
@@ -248,40 +302,60 @@ def list_drg_rules(
     if payment_method:
         query = query.filter(DrgRule.payment_method == payment_method.upper())
     rows, total = paginate(query.order_by(DrgRule.priority.desc(), DrgRule.rule_id.desc()), page, page_size)
-    return {"code": 200, "msg": "success", "data": [{
-        "rule_id": row.rule_id, "payment_method": row.payment_method, "group_code": row.group_code,
-        "group_name": row.group_name, "diagnosis_prefix": row.diagnosis_prefix,
-        "procedure_prefix": row.procedure_prefix or "", "expected_amount": row.expected_amount,
-        "priority": row.priority, "version": row.version, "effective_from": row.effective_from,
-        "effective_to": row.effective_to, "status": row.status,
-    } for row in rows], "total": total}
+    return {
+        "code": 200,
+        "msg": "success",
+        "data": [
+            {
+                "rule_id": row.rule_id,
+                "payment_method": row.payment_method,
+                "group_code": row.group_code,
+                "group_name": row.group_name,
+                "diagnosis_prefix": row.diagnosis_prefix,
+                "procedure_prefix": row.procedure_prefix or "",
+                "expected_amount": row.expected_amount,
+                "priority": row.priority,
+                "version": row.version,
+                "effective_from": row.effective_from,
+                "effective_to": row.effective_to,
+                "status": row.status,
+            }
+            for row in rows
+        ],
+        "total": total,
+    }
 
 
 @router.post("/insurance/drg/autoGroup")
 def automatic_drg_group(req: dict, current_user: User = Depends(require_roles(*MANAGE_ROLES)), db: Session = Depends(get_db)):
-    home = db.query(MedicalRecordHome).options(joinedload(MedicalRecordHome.patient)).filter(
-        MedicalRecordHome.home_id == req.get("home_id")
-    ).first()
+    current_user = lock_coding_write(db, current_user, allowed_roles=MANAGE_ROLES)
+    home = db.query(MedicalRecordHome).options(joinedload(MedicalRecordHome.patient)).filter(MedicalRecordHome.home_id == req.get("home_id")).populate_existing().with_for_update().first()
     if not home or home.status not in (1, 2):
         return {"code": 400, "msg": "仅已提交或已归档的病案首页可自动分组"}
-    existing = db.query(DrgGrouping).filter(DrgGrouping.home_id == home.home_id).first()
+    existing = db.query(DrgGrouping).filter(DrgGrouping.home_id == home.home_id).populate_existing().with_for_update().first()
     if existing and not req.get("force"):
         return {"code": 200, "msg": "该病案已完成分组", "data": {"grouping_id": existing.grouping_id, "group_code": existing.group_code, "idempotent": True}}
-    bindings = db.query(HomeIcdBinding).filter(HomeIcdBinding.home_id == home.home_id).all()
+    bindings = db.query(HomeIcdBinding).filter(HomeIcdBinding.home_id == home.home_id).populate_existing().with_for_update(read=True).all()
     diagnosis_codes = [row.icd_code.upper() for row in bindings if row.kind == "diagnosis"]
     procedure_codes = [row.icd_code.upper() for row in bindings if row.kind == "operation"]
     primary = next((row.icd_code.upper() for row in bindings if row.kind == "diagnosis" and row.is_primary == 1), None)
     if not primary:
         return {"code": 400, "msg": "病案首页尚未设置主要诊断 ICD 编码"}
     today = datetime.date.today()
-    rules = db.query(DrgRule).filter(
-        DrgRule.status == 1,
-        (DrgRule.effective_from.is_(None)) | (DrgRule.effective_from <= today),
-        (DrgRule.effective_to.is_(None)) | (DrgRule.effective_to >= today),
-    ).all()
-    matched = [rule for rule in rules if primary.startswith(rule.diagnosis_prefix.upper()) and (
-        not rule.procedure_prefix or any(code.startswith(rule.procedure_prefix.upper()) for code in procedure_codes)
-    )]
+    rules = (
+        db.query(DrgRule)
+        .filter(
+            DrgRule.status == 1,
+            (DrgRule.effective_from.is_(None)) | (DrgRule.effective_from <= today),
+            (DrgRule.effective_to.is_(None)) | (DrgRule.effective_to >= today),
+        )
+        .populate_existing()
+        .with_for_update(read=True)
+        .all()
+    )
+    matched = [
+        rule for rule in rules if primary.startswith(rule.diagnosis_prefix.upper()) and (not rule.procedure_prefix or any(code.startswith(rule.procedure_prefix.upper()) for code in procedure_codes))
+    ]
     if not matched:
         return {"code": 404, "msg": f"主要诊断 {primary} 未匹配到有效 DRG/DIP 规则"}
     rule = max(matched, key=lambda item: (item.priority, len(item.diagnosis_prefix), len(item.procedure_prefix or ""), item.rule_id))
@@ -302,12 +376,21 @@ def automatic_drg_group(req: dict, current_user: User = Depends(require_roles(*M
     grouping.create_time = datetime.datetime.now()
     db.add(grouping)
     db.commit()
-    return {"code": 200, "msg": "自动分组完成", "data": {
-        "grouping_id": grouping.grouping_id, "payment_method": grouping.payment_method,
-        "group_code": grouping.group_code, "group_name": rule.group_name,
-        "expected_amount": grouping.expected_amount, "actual_amount": grouping.actual_amount,
-        "profit": grouping.profit, "rule_version": rule.version, "idempotent": False,
-    }}
+    return {
+        "code": 200,
+        "msg": "自动分组完成",
+        "data": {
+            "grouping_id": grouping.grouping_id,
+            "payment_method": grouping.payment_method,
+            "group_code": grouping.group_code,
+            "group_name": rule.group_name,
+            "expected_amount": grouping.expected_amount,
+            "actual_amount": grouping.actual_amount,
+            "profit": grouping.profit,
+            "rule_version": rule.version,
+            "idempotent": False,
+        },
+    }
 
 
 @router.get("/insurance/drg/analysis")
@@ -325,4 +408,18 @@ def drg_analysis(current_user: User = Depends(require_roles(*MANAGE_ROLES)), db:
 @router.get("/insurance/control/warnings")
 def insurance_cost_warnings(threshold: float = 10000, current_user: User = Depends(require_roles(*MANAGE_ROLES)), db: Session = Depends(get_db)):
     rows = db.query(DrgGrouping).filter(DrgGrouping.actual_amount > threshold).order_by(DrgGrouping.actual_amount.desc()).all()
-    return {"code": 200, "msg": "success", "data": [{"grouping_id": item.grouping_id, "patient_name": item.patient.name if item.patient else "", "group_code": item.group_code, "actual_amount": item.actual_amount, "expected_amount": item.expected_amount, "over_amount": round(item.actual_amount - item.expected_amount, 2)} for item in rows]}
+    return {
+        "code": 200,
+        "msg": "success",
+        "data": [
+            {
+                "grouping_id": item.grouping_id,
+                "patient_name": item.patient.name if item.patient else "",
+                "group_code": item.group_code,
+                "actual_amount": item.actual_amount,
+                "expected_amount": item.expected_amount,
+                "over_amount": round(item.actual_amount - item.expected_amount, 2),
+            }
+            for item in rows
+        ],
+    }

@@ -60,7 +60,10 @@ async def test_actual_http_finite_capture_link_scope_governance_private_and_publ
         assert detailed.status_code == 200, detailed.text
         value = detailed.json()
         assert c.ScopeRecord.model_validate(value["data"]) == scope
-        public = c.DocumentChangeSource.model_validate(value["public_source"])
+        assert set(value) == {"code", "msg", "data"}
+        projected = await client.get(f"{ROOT}/scopes/{scope.snapshot.scope_id}/public-source", headers=headers)
+        assert projected.status_code == 200, projected.text
+        public = c.DocumentChangeSource.model_validate(projected.json()["data"])
         assert public.scope.scope_id == scope.snapshot.scope_id
         assert pathway.name not in c.e.canonical_json(public) and NOTE not in c.e.canonical_json(public)
         for kind, forbidden in (("links", "link_json"), ("scopes", "scope_json")):
@@ -119,3 +122,38 @@ async def test_source_scope_and_target_fields_fail_closed_without_writes(change_
             result = await client.post(ROOT + path, headers=auth_headers(actor.username), json=body)
     assert result.status_code == (409 if mutation == "false_link_hash" else 422), result.text
     assert db.query(AIDocumentRuleLink).count() == db.query(AIDocumentChangeScope).count() == 0
+
+
+def test_entire_response_budget_counts_envelope_without_truncation(monkeypatch):
+    from fastapi import HTTPException
+
+    from app.routers.ai_document_change import _response
+
+    original = c.byte_bound
+    value = {"original": "😀" * 100}
+    exact = len(c.e.utf8(c.e.canonical_json(value)))
+    monkeypatch.setattr(c, "byte_bound", lambda payload: original(payload, exact))
+    with pytest.raises(HTTPException) as error:
+        _response(value)
+    assert error.value.status_code == 413 and value["original"] == "😀" * 100
+
+
+def test_all_actual_new_routes_and_static_matrix_agree_super_only():
+    import importlib.util
+    import inspect
+    from pathlib import Path
+
+    script = Path(__file__).resolve().parents[1] / "scripts/generate_rbac_matrix.py"
+    spec = importlib.util.spec_from_file_location("document_change_rbac_generator", script)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    source = Path(__file__).resolve().parents[1] / "app/routers/ai_document_change.py"
+    rows = module.analyze_router(str(source))
+    actual = {(method, "/api" + route.path) for route in router.routes for method in route.methods}
+    assert len(actual) == len(rows) == 14
+    assert {(row["method"], row["path"]) for row in rows} == actual
+    assert all(row["auth"] == ["super_admin"] for row in rows)
+    for route in router.routes:
+        guards = [dependency.call for dependency in route.dependant.dependencies if dependency.name == "user"]
+        assert len(guards) == 1
+        assert inspect.getclosurevars(guards[0]).nonlocals["allowed_roles"] == {"super_admin"}

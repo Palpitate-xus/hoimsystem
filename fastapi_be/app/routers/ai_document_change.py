@@ -2,7 +2,7 @@
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import JSONResponse
-from pydantic import TypeAdapter
+from pydantic import TypeAdapter, ValidationError
 from sqlalchemy.orm import Session, load_only
 
 from app.ai import document_change_contract as c
@@ -14,11 +14,29 @@ from app.dependencies import User, require_roles
 from app.routers.ai_document_evidence import BoundedDocumentRoute, _commit
 
 router = APIRouter(route_class=BoundedDocumentRoute, default_response_class=JSONResponse)
-SUPER = Depends(require_roles("super_admin"))
+
+
+def _response(value):
+    data = value.model_dump(mode="json") if hasattr(value, "model_dump") else value
+    payload = {"code": 200, "msg": "success", "data": data}
+    try:
+        c.byte_bound(payload)
+    except ValueError as exc:
+        raise HTTPException(413, "完整响应超过8MiB，未截断或接受部分内容") from exc
+    return payload
+
+
+def _commit_bounded(db, operation):
+    def complete():
+        value = operation()
+        _response(value)
+        return value
+
+    return _commit(db, complete)
 
 
 @router.get("/ai/admin/document-changes/options")
-def options(db: Session = Depends(get_db), user: User = SUPER):
+def options(db: Session = Depends(get_db), user: User = Depends(require_roles("super_admin"))):
     originals.current_super(db, user)
     return {
         "code": 200,
@@ -39,7 +57,7 @@ def options(db: Session = Depends(get_db), user: User = SUPER):
 
 
 @router.post("/ai/admin/document-changes/target-snapshot")
-def target(req: c.TargetReference, db: Session = Depends(get_db), user: User = SUPER):
+def target(req: c.TargetReference, db: Session = Depends(get_db), user: User = Depends(require_roles("super_admin"))):
     actor = originals.current_super(db, user)
     epoch = originals._epoch(actor)
     try:
@@ -47,63 +65,71 @@ def target(req: c.TargetReference, db: Session = Depends(get_db), user: User = S
         originals.current_super(db, actor, expected=epoch)
     except ValueError as exc:
         raise HTTPException(409, "完整目标超过限制或当前原量无法核对") from exc
-    return {"code": 200, "msg": "success", "data": {"snapshot": value.model_dump(mode="json"), "snapshot_hash": c.e.digest(value)}}
+    return _response({"snapshot": value.model_dump(mode="json"), "snapshot_hash": c.e.digest(value)})
 
 
 @router.post("/ai/admin/document-changes/capture")
-def capture(req: c.ScopeCaptureRequest, db: Session = Depends(get_db), user: User = SUPER):
+def capture(req: c.ScopeCaptureRequest, db: Session = Depends(get_db), user: User = Depends(require_roles("super_admin"))):
     value = sources.capture_scope(db, user, req)
-    c.byte_bound(value)
-    return {"code": 200, "msg": "success", "data": value}
+    return _response(value)
 
 
 @router.post("/ai/admin/document-changes/links")
-def create_link(req: c.LinkCreate, db: Session = Depends(get_db), user: User = SUPER):
-    return _commit(db, lambda: sources.create_link(db, user, req))
+def create_link(req: c.LinkCreate, db: Session = Depends(get_db), user: User = Depends(require_roles("super_admin"))):
+    return _commit_bounded(db, lambda: sources.create_link(db, user, req))
 
 
 @router.get("/ai/admin/document-changes/links/{link_id}")
-def link_detail(link_id: str, db: Session = Depends(get_db), user: User = SUPER):
+def link_detail(link_id: str, db: Session = Depends(get_db), user: User = Depends(require_roles("super_admin"))):
     value = sources.link_detail(db, user, link_id)
-    return {"code": 200, "msg": "success", "data": value.model_dump(mode="json")}
+    return _response(value)
 
 
 @router.post("/ai/admin/document-changes/links/{link_id}/review")
-def review_link(link_id: str, req: c.ReviewRequest, db: Session = Depends(get_db), user: User = SUPER):
-    return _commit(db, lambda: sources.review_link(db, user, link_id, req))
+def review_link(link_id: str, req: c.ReviewRequest, db: Session = Depends(get_db), user: User = Depends(require_roles("super_admin"))):
+    return _commit_bounded(db, lambda: sources.review_link(db, user, link_id, req))
 
 
 @router.post("/ai/admin/document-changes/links/{link_id}/revoke")
-def revoke_link(link_id: str, req: c.e.RevokeRequest, db: Session = Depends(get_db), user: User = SUPER):
-    return _commit(db, lambda: sources.revoke_link(db, user, link_id, req))
+def revoke_link(link_id: str, req: c.e.RevokeRequest, db: Session = Depends(get_db), user: User = Depends(require_roles("super_admin"))):
+    return _commit_bounded(db, lambda: sources.revoke_link(db, user, link_id, req))
 
 
 @router.post("/ai/admin/document-changes/scopes")
-def create_scope(req: c.ScopeCreate, db: Session = Depends(get_db), user: User = SUPER):
-    return _commit(db, lambda: sources.create_scope(db, user, req))
+def create_scope(req: c.ScopeCreate, db: Session = Depends(get_db), user: User = Depends(require_roles("super_admin"))):
+    return _commit_bounded(db, lambda: sources.create_scope(db, user, req))
 
 
 @router.get("/ai/admin/document-changes/scopes/{scope_id}")
-def scope_detail(scope_id: str, db: Session = Depends(get_db), user: User = SUPER):
+def scope_detail(scope_id: str, db: Session = Depends(get_db), user: User = Depends(require_roles("super_admin"))):
     value = sources.scope_detail(db, user, scope_id)
-    return {"code": 200, "msg": "success", "data": value.model_dump(mode="json"), "public_source": sources.public_source(value).model_dump(mode="json")}
+    return _response(value)
+
+
+@router.get("/ai/admin/document-changes/scopes/{scope_id}/public-source")
+def scope_public_source(scope_id: str, db: Session = Depends(get_db), user: User = Depends(require_roles("super_admin"))):
+    _, value = sources.authorize_scope(db, user, scope_id)
+    return _response(value)
 
 
 @router.post("/ai/admin/document-changes/scopes/{scope_id}/review")
-def review_scope(scope_id: str, req: c.ReviewRequest, db: Session = Depends(get_db), user: User = SUPER):
-    return _commit(db, lambda: sources.review_scope(db, user, scope_id, req))
+def review_scope(scope_id: str, req: c.ReviewRequest, db: Session = Depends(get_db), user: User = Depends(require_roles("super_admin"))):
+    return _commit_bounded(db, lambda: sources.review_scope(db, user, scope_id, req))
 
 
 @router.post("/ai/admin/document-changes/scopes/{scope_id}/revoke")
-def revoke_scope(scope_id: str, req: c.e.RevokeRequest, db: Session = Depends(get_db), user: User = SUPER):
-    return _commit(db, lambda: sources.revoke_scope(db, user, scope_id, req))
+def revoke_scope(scope_id: str, req: c.e.RevokeRequest, db: Session = Depends(get_db), user: User = Depends(require_roles("super_admin"))):
+    return _commit_bounded(db, lambda: sources.revoke_scope(db, user, scope_id, req))
 
 
 def _directory(db, user, kind, original_id, page, page_size):
     actor = originals.current_super(db, user)
     epoch = originals._epoch(actor)
     if original_id is not None:
-        TypeAdapter(c.e.UUID).validate_python(original_id)
+        try:
+            TypeAdapter(c.e.UUID).validate_python(original_id)
+        except ValidationError as exc:
+            raise HTTPException(422, "原文标识须为规范UUID") from exc
     model, key, _, _ = sources.MODELS[kind]
     query = db.query(model)
     if original_id is not None:
@@ -134,14 +160,18 @@ def _directory(db, user, kind, original_id, page, page_size):
             }
         )
     originals.current_super(db, actor, expected=epoch)
-    return {"code": 200, "msg": "success", "data": {"items": items, "page": page, "page_size": page_size, "total": len(identifiers)}}
+    return _response({"items": items, "page": page, "page_size": page_size, "total": len(identifiers)})
 
 
 @router.get("/ai/admin/document-changes/links")
-def links(original_id: str | None = None, page: int = Query(1, ge=1, le=1000000), page_size: int = Query(20, ge=1, le=100), db: Session = Depends(get_db), user: User = SUPER):
+def links(
+    original_id: str | None = None, page: int = Query(1, ge=1, le=1000000), page_size: int = Query(20, ge=1, le=100), db: Session = Depends(get_db), user: User = Depends(require_roles("super_admin"))
+):
     return _directory(db, user, "link", original_id, page, page_size)
 
 
 @router.get("/ai/admin/document-changes/scopes")
-def scopes(original_id: str | None = None, page: int = Query(1, ge=1, le=1000000), page_size: int = Query(20, ge=1, le=100), db: Session = Depends(get_db), user: User = SUPER):
+def scopes(
+    original_id: str | None = None, page: int = Query(1, ge=1, le=1000000), page_size: int = Query(20, ge=1, le=100), db: Session = Depends(get_db), user: User = Depends(require_roles("super_admin"))
+):
     return _directory(db, user, "scope", original_id, page, page_size)

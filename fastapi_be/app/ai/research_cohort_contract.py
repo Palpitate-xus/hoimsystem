@@ -51,6 +51,8 @@ Basis = Annotated[str, Field(strict=True, min_length=20, max_length=4000), After
 Label = Annotated[str, Field(strict=True, min_length=1, max_length=200), AfterValidator(scalar)]
 Family = Literal["patient_demographics", "registrations", "admissions", "medical_records", "structured_medical_records"]
 ReviewStatus = Literal["unknown", "recorded_reviewed", "not_confirmed"]
+ResearchUse = Literal["cohort_criteria_review", "deidentification_review", "research_variable_extraction"]
+PROTECTED_CASE_ACCESS_POLICY = "研究临床正文读取和新捕获包括超级管理员在内均须当前项目ACL及逐患者明确研究授权；权限失效仅安全manifest和opaque SHA，不借技术审计恢复患者正文。"
 AUTHORIZATION_LIMITATION = "仅记录独立人工核查的项目用途与逐患者授权声明，不自动证明伦理审批、同意法律效力、研究者资格或数据匿名。"
 
 
@@ -83,6 +85,7 @@ class ScopeCreate(StrictModel):
     patient_ids: Annotated[list[Positive], Field(min_length=1, max_length=256), AfterValidator(ordered)]
     proposed_user_ids: Annotated[list[Positive], Field(min_length=1, max_length=64), AfterValidator(ordered)]
     data_families: Annotated[list[Family], Field(min_length=1, max_length=5), AfterValidator(ordered)]
+    permitted_uses: Annotated[list[ResearchUse], Field(min_length=1, max_length=3), AfterValidator(ordered)]
     record_window: RecordWindow
     valid_from: UTC
     valid_until: UTC

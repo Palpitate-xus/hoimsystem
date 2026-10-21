@@ -102,7 +102,7 @@ def _verify_governance(identity, governance, manual):
         by, at = governance[prefix + "_by"], governance[prefix + "_at"]
         note = governance["review_basis_note" if prefix == "reviewed" else "revoke_reason"]
         if present:
-            if type(by) is not int or by < 1 or type(note) is not str or not note.strip() or len(note.encode("utf-8")) > 4000:
+            if type(by) is not int or by < 1 or type(note) is not str or not note.strip() or not 20 <= len(note) <= (1000 if prefix == "revoked" else 4000) or len(note.encode("utf-8")) > 4000:
                 raise ValueError("Incomplete actual governance signature")
             TypeAdapter(UTC).validate_python(at, strict=True)
             if at < identity["created_at"]:
@@ -415,3 +415,38 @@ def review_scope(db, user, identifier, values, *, revoke=False):
     except Exception:
         db.rollback()
         raise
+
+
+def verify_scope_proof(value):
+    """Pure own-proof reconstruction; it grants no current project access."""
+    from types import SimpleNamespace
+
+    try:
+        if (
+            type(value) is not dict
+            or set(value) != {"schema_version", "identity", "payload", "parent_binding", "content_hash", "governance", "authorization_review", "governance_hash"}
+            or value["schema_version"] != "research_scope_original_proof_v1"
+        ):
+            raise ValueError("Closed complete project original required")
+        identity = value["identity"]
+        if type(identity) is not dict or set(identity) != {"source_kind", "source_record_id", "scope_id", "schema_version", "created_by", "created_at", "valid_from", "valid_until"}:
+            raise ValueError("Closed project identity required")
+        fields = {key: dt.datetime.strptime(identity[key], "%Y-%m-%dT%H:%M:%S.%fZ") for key in ("created_at", "valid_from", "valid_until")}
+        for group in (value["governance"], value["authorization_review"]):
+            for key, child in group.items():
+                fields[key] = dt.datetime.strptime(child, "%Y-%m-%dT%H:%M:%S.%fZ") if key.endswith("_at") and child is not None else child
+        row = SimpleNamespace(
+            scope_id=identity["scope_id"],
+            schema_version=identity["schema_version"],
+            created_by=identity["created_by"],
+            scope_json=_bounded(value["payload"], SOURCE_BYTES),
+            parent_binding_json=_bounded(value["parent_binding"], PARENT_BYTES),
+            content_hash=value["content_hash"],
+            **fields,
+        )
+        proof = scope_proof(row)
+        if canonical_json(proof) != canonical_json(value):
+            raise ValueError("Original technical identity, body or full governance differs")
+        return proof
+    except (HTTPException, ValueError, TypeError, KeyError, AttributeError, UnicodeError) as exc:
+        raise HTTPException(409, "完整科研项目原件证明无效，未据局部哈希恢复权限") from exc

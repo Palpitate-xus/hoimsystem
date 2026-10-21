@@ -28,6 +28,7 @@ def research_case(db_session, seed_data):
         patient_ids=[seed_data["patient"].patient_id],
         proposed_user_ids=sorted([seed_data["admin_user"].user_id, seed_data["super_admin_user"].user_id, reviewer.user_id]),
         data_families=["medical_records", "patient_demographics"],
+        permitted_uses=["cohort_criteria_review"],
         record_window={"date_from": "2026-10-01", "date_to": "2026-10-21", "time_basis": "legacy_naive_calendar_dates_timezone_unknown"},
         valid_from=utc_text(now - dt.timedelta(days=1)),
         valid_until=utc_text(now + dt.timedelta(days=1)),

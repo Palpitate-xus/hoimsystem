@@ -18,6 +18,7 @@ def scope_request():
         patient_ids=[1, 2],
         proposed_user_ids=[1, 2],
         data_families=["medical_records", "patient_demographics"],
+        permitted_uses=["cohort_criteria_review"],
         record_window={"date_from": "2026-10-01", "date_to": "2026-10-21", "time_basis": "legacy_naive_calendar_dates_timezone_unknown"},
         valid_from="2026-10-21T00:00:00.000000Z",
         valid_until="2026-10-22T00:00:00.000000Z",

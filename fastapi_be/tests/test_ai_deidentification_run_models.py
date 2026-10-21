@@ -6,9 +6,10 @@ import json
 import uuid
 
 import pytest
-from sqlalchemy import ForeignKeyConstraint, text
+from sqlalchemy import ForeignKeyConstraint, create_engine, text
 from sqlalchemy.dialects import mysql
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import Session
 from sqlalchemy.schema import CreateTable
 
 from app.ai.deidentification_run_models import BODY_BYTES, DEIDENTIFICATION_RUN_MODELS, RESULT_SCHEMA, SOURCE_HASH_FIELDS, SOURCE_SCHEMA, AIDeidentificationRunResult, AIDeidentificationRunSource
@@ -20,10 +21,36 @@ NOW = dt.datetime(2026, 10, 21, 12, 34, 56, 123456)
 
 @pytest.fixture(autouse=True)
 def actual_foreign_keys(db_session):
+    previous = db_session.execute(text("PRAGMA foreign_keys")).scalar_one()
     db_session.execute(text("PRAGMA foreign_keys=ON"))
     assert db_session.execute(text("PRAGMA foreign_keys")).scalar_one() == 1
-    yield
-    db_session.rollback()
+    try:
+        yield
+    finally:
+        db_session.rollback()
+        db_session.execute(text("PRAGMA foreign_keys=" + str(previous)))
+        db_session.commit()
+
+
+@pytest.mark.parametrize("previous", [0, 1])
+def test_actual_fk_fixture_preserves_prior_connection_policy_on_normal_and_exceptional_exit(previous):
+    engine = create_engine("sqlite:///:memory:")
+    try:
+        with Session(engine) as isolated:
+            for exceptional in (False, True):
+                isolated.execute(text("PRAGMA foreign_keys=" + str(previous)))
+                actual = actual_foreign_keys.__wrapped__(isolated)
+                next(actual)
+                assert isolated.execute(text("PRAGMA foreign_keys")).scalar_one() == 1
+                if exceptional:
+                    with pytest.raises(RuntimeError, match="synthetic fixture body failure"):
+                        actual.throw(RuntimeError("synthetic fixture body failure"))
+                else:
+                    with pytest.raises(StopIteration):
+                        next(actual)
+                assert isolated.execute(text("PRAGMA foreign_keys")).scalar_one() == previous
+    finally:
+        engine.dispose()
 
 
 def audit(db, actor, run_id, action):

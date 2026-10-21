@@ -1,0 +1,9 @@
+{
+  "schema_version": "document_extraction_input_fixture_v1",
+  "synthetic_only": true,
+  "actual_export_path": "/tmp/hoim-document-extraction-input-actual-v1.json",
+  "actual_export_sha256": "143e7f8174443715a048911f001d50e44eefd5e5d38650dd87598a0ad87d278a",
+  "fixture_sha256": "0897f095b082dfef27b615e507ab430998d921dbfa603aee6a203e4dbdf7a34d",
+  "fixture_bytes": 88019,
+  "provenance": "Exact subtrees from one actual synthetic independent router/JWT/SQLite lifecycle, no hand-authored positive DTOs"
+}

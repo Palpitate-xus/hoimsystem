@@ -82,7 +82,7 @@ test("事件行固定患者与事件，原闭环和RCA文本不显示为独立�
   await expect(preview.locator(".incident-findings img")).toHaveCount(0);
   await preview.getByText("已保存RCA #8 · 核验状态未记录", { exact: true }).click();
   await expect(preview).toContainText("原分析待证据核实");
-  await preview.getByRole("button", { name: "查看已保存RCA依据", exact: true }).click();
+  await expect(preview.getByRole("region", { name: "已保存RCA #8 · 核验状态未记录", exact: true })).not.toHaveClass(/el-collapse-transition-enter-active/); await preview.getByRole("button", { name: "查看已保存RCA依据", exact: true }).click();
   const source = page.getByRole("dialog", { name: "核查引用依据", exact: true });
   await expect(source).toContainText("不是已核实根因");
   await source.locator("button.el-dialog__headerbtn").click();

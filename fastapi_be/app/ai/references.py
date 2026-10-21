@@ -41,5 +41,7 @@ SOURCE_REFERENCE_KEYS = frozenset(
         "supply_series_id",
         "inventory_scenario_id",
         "coding_case_id",
+        "charge_case_id",
+        "document_original_id",
     }
 )

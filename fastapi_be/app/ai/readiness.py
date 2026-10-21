@@ -8,8 +8,8 @@ from sqlalchemy.orm import defer
 
 from app.ai.catalog import FEATURES
 from app.ai.governance import provider_credential, provider_feature_issues, validate_endpoint
+from app.ai.knowledge_sources import source_is_current
 from app.ai.models import AIKnowledgeDocument, AIProvider, AIRiskRuleProfile, utcnow
-from app.ai.pathway_knowledge import source_is_current
 from app.models import ClinicalPathway
 
 

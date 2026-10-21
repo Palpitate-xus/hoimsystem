@@ -1,0 +1,1196 @@
+{
+  "schema_version": "document_evidence_engineering_verification_v1",
+  "recorded_at_utc": "2026-10-21T07:56:20.145783+00:00",
+  "baseline_commit": "5eba64343419b2f69a1285a233105dcf2af85b10",
+  "platform_commit_at_recording": "44ff5d23e48eb28cb2bb2cfd8962be1317984234",
+  "recording_head_precedes_this_evidence_documentation_commit": true,
+  "goal_status": "active_all80_not_complete",
+  "scope": "Feature71 guideline_ingestion complete supplied UTF8 Original -> literal draft -> explicit candidate -> independent human review -> explicit Knowledge publication; dedicated Super-only source, task, history and audit engineering. Complete backend and canonical build passed. Browser evidence is explicitly composed by whole file after two failed complete executions; no single all-green1782 run is claimed.",
+  "real_patient_data_used": false,
+  "existing_hospital_database_accessed": false,
+  "existing_hospital_backend_contacted": false,
+  "production_deployment_performed": false,
+  "clinical_validation_performed": false,
+  "stored_business_ai_configuration_changed": false,
+  "remote_model_inference_performed": false,
+  "version_management": {
+    "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+    "reachable_batch_commits_not_in_completed68_main": [
+      {
+        "commit": "fca44d3c2642b4d067a2eb77c5d4f0d7003a95df",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai): define exact UTF8 document and reviewed span contracts"
+      },
+      {
+        "commit": "baef2b40208749640770e5bf753567299e5f02dd",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "build(ai): inherit coding evidence migration parent for document sources"
+      },
+      {
+        "commit": "8f19166cfe454cf74d1fa8c90a5a16b78aba4cda",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai): govern exact document originals and bound quote publications"
+      },
+      {
+        "commit": "23d120e0cb32c607736afd408767a810cbcfc0d1",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(db): add document evidence originals spans and publication lineage"
+      },
+      {
+        "commit": "4961f232eaa046fe4578edccfe95e64ad4a2263b",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(api): expose bounded superadmin document evidence lifecycle"
+      },
+      {
+        "commit": "b5981c579c9d574226042a8dc1057ee2f9099805",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "fix(ai): bind current knowledge fields and parent publication clocks"
+      },
+      {
+        "commit": "de0d31cebed32c10d3afa56b404402ebc6468c20",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ui): verify complete document lineage and current knowledge projection"
+      },
+      {
+        "commit": "b7ea44b20830981cd642589fd64f7ad977950373",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai-knowledge): bind reviewed excerpts to current document lineage"
+      },
+      {
+        "commit": "4994065c7bed78806f0aeb21655f60fa3145ef33",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai-admin): expose document governance and preserve lineage review boundaries"
+      },
+      {
+        "commit": "71a3a262008d93f9272054e80180e67af0680676",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai): define strictly bound unverified document extraction drafts"
+      },
+      {
+        "commit": "3cbbe8354a8653e0402b4fc8cc4b7cdc70239df6",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai): add independently verified document evidence governance UI"
+      },
+      {
+        "commit": "0d6ca3dee1130f2ce6dfcfd3fdae8c5103225af6",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai-documents): authorize complete extraction sources and frozen review proofs"
+      },
+      {
+        "commit": "dda6ca1db1f5dfab8b181d9279ea94a8cf46b0b9",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai): bind extraction drafts to fixed server explanations"
+      },
+      {
+        "commit": "49a62c088a465dfc398c0886f3696275c53a898b",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "fix(ai): preserve explicit legacy knowledge clock precision"
+      },
+      {
+        "commit": "ff52066c3c33b6907b44a4c8cc99be6887754274",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "fix(ai): verify explicit knowledge clock policy in document UI"
+      },
+      {
+        "commit": "cea0fc06be64350d43f353a226e2305032d7a8da",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "fix(ai-knowledge): classify current document bindings before generic review locks"
+      },
+      {
+        "commit": "cf05baaf1af7c178494013d8b6252f0e37fac982",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai-documents): retain immutable extraction task anchors"
+      },
+      {
+        "commit": "d4805c63bafc85316f67d64c33eea8797b423634",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai-documents): register durable extraction task anchors"
+      },
+      {
+        "commit": "50577c73ddbe958c62607dcbcf61cde1992117b3",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "fix(ai-documents): validate anchor hashes independently of SQL padding"
+      },
+      {
+        "commit": "a564066d6c310e1841103c8416b63bfb9d14d13a",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "test(ai): retain document migration ancestry under extraction successor"
+      },
+      {
+        "commit": "789fdf046871237344ed13b9056e01d783b3a8c7",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai): strictly decode document provider drafts with actual usage"
+      },
+      {
+        "commit": "1c99137970f80c4e3a532f7716e99afed6cea5c9",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai-documents): request literal span drafts with fixed prompts and usage receipts"
+      },
+      {
+        "commit": "72ecc7d48d9292073e2e2ad92f92a3c0d779d998",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai-documents): bind complete task storage to durable SQL anchors"
+      },
+      {
+        "commit": "1372ba5bb79b1249701968f98fcffe9900085edf",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "merge(ai): integrate coding evidence with document source governance"
+      },
+      {
+        "commit": "5293497c495f46696d3acf6c658894f44db27501",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "test(ai-documents): independently verify extraction storage and immutable anchors"
+      },
+      {
+        "commit": "a6178447e6503215a38fb23c7ae22661adbdeaf9",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai): add current verified original selection for document drafts"
+      },
+      {
+        "commit": "873130be0a1e292669fca19ba63ce15c4d42f050",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai-documents): queue governed original extraction with explicit actual usage"
+      },
+      {
+        "commit": "f77ec94f3a56f9ae8e5703ab31b4bf75c584a801",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "test(ai-documents): reject stale originals and authority during extraction"
+      },
+      {
+        "commit": "fee3c7e2a7e442c758045f5b76bb721fd01963f3",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "fix(ai-documents): atomically verify actual usage and every terminal audit"
+      },
+      {
+        "commit": "1d9aa394f455d9b081a31eab6d5b51966ecc9299",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "docs(ai): export actual fixed coding and document system prompts"
+      },
+      {
+        "commit": "e953c2d08273deb267d178d32f12362d3c931d47",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "docs(ai-inventory): record final governed candidate verification and scope"
+      },
+      {
+        "commit": "5d0595d183c0d099b139f317b766af5fbd76b8a6",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "refactor(ai): extract pure document view contracts and anchor DTO"
+      },
+      {
+        "commit": "a344ffe632c525abcae23bd9e06ebf968a8eb1bd",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai-documents): save explicit draft candidates with source and audit verification"
+      },
+      {
+        "commit": "390ae7f823473e34fc5ab91a662a25d5287dd1dc",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai): generate pure document extraction view schemas and fixed explanation"
+      },
+      {
+        "commit": "b85ec6e9e55ada6eebb00b6776321b5090e2bbef",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "fix(ai-documents): expose exact Super role guards to the access matrix"
+      },
+      {
+        "commit": "0718a22860df57f4f00edfac4c8cd9350b422f3d",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai): verify frozen document drafts and save explicit candidate ordinals"
+      },
+      {
+        "commit": "4ab3527fbc6b1f613c1ee1d4306f6c4b6a12cd98",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai-documents): retain closed extraction receipt references in complete task records"
+      },
+      {
+        "commit": "7fce64d32edb010d46f21160eb53eb337a9f1005",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "fix(ai): bind immutable document result across full and audit reads"
+      },
+      {
+        "commit": "86ce6025bc0534cc98cc86f51c4913c4645ef460",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "fix(ai-documents): verify terminal receipts through exact audit references"
+      },
+      {
+        "commit": "39f1edc3976932e30dcdeeec5dd051a716226875",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "fix(ai-documents): serialize explicit draft saves with referenced audit records"
+      },
+      {
+        "commit": "0fd5391d2cd2d371ecc61276c4c96e25cf245804",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "test(ai-documents): reject corrupted saved ordinal audit associations"
+      },
+      {
+        "commit": "d0806f7152bfb6ed7c475292fa68955a059e74df",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai): verify original-bound document extraction in administrator history"
+      },
+      {
+        "commit": "36bd96cb042c2d47a6e4c1efc61e1cb3f6028212",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai): add explicit document task workflow and preview receipt guards"
+      },
+      {
+        "commit": "db58b00d81ac7866e469a2c42cc83651fbb6d84e",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "fix(ai-documents): retain truthful receipts for tasks cancelled before inference"
+      },
+      {
+        "commit": "511f2d3ee52ff1741ecadd2874d4cddae5185a01",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "test(ai-documents): register cancellation fixtures without import shadowing"
+      },
+      {
+        "commit": "a1d1165655aefcbf14cea63d54913481af66b1fd",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai): route original document extraction through its governed assistant"
+      },
+      {
+        "commit": "f79e4614da37eee56e0be0c5b1656b2e3b913fcd",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "style(api): keep AI router registrations in canonical import order"
+      },
+      {
+        "commit": "c7efe8101dc6109ae18c756f5f93566b20a24f74",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "fix(ai-documents): preserve original bytes through mounted source APIs"
+      },
+      {
+        "commit": "14fee3dfec2da5bf928bc9730c04d5d8ca669b3a",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "docs: explain governed coding evidence review and task provenance"
+      },
+      {
+        "commit": "5db7f1d1622be797968b86a66d4c5f9e8b03fd53",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "docs(ai-documents): explain literal extraction and explicit publication workflow"
+      },
+      {
+        "commit": "92f07c088aab3014c12a7e882b5095dc228003d9",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "docs(ui): describe explicit document extraction from governance panel"
+      },
+      {
+        "commit": "26e1dd9f419bf830470dc08cf50d56ada05aac4c",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "docs: record frozen coding evidence delivery and verification scope"
+      },
+      {
+        "commit": "403c9ccef4377f9fb02ff5ac42bbf4c1f3251a3f",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "docs(ai-documents): clarify independent source and result clearing controls"
+      },
+      {
+        "commit": "2b3e58a6269c779ebfc5b8f22bc6e45e248ac34f",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "fix(ai): preserve document task privacy across lifecycle transitions"
+      },
+      {
+        "commit": "1d0b8eb81004b08ad5f6d2026d3185b6e4a29994",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "test(ai-documents): verify canonical workbench and Super governance entries"
+      },
+      {
+        "commit": "2e42caa650cc84a745d1653dfb95e4becf3c9dd5",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "fix(audit): wait for request cleanup before opening the audit session"
+      },
+      {
+        "commit": "3bb8312908c9bd55d5f26f35d40bd4807d16a68b",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "test(ai): include frozen feature identity in legacy management trace"
+      },
+      {
+        "commit": "44ff5d23e48eb28cb2bb2cfd8962be1317984234",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "test(ai): wait for RCA collapse transition before one evidence click"
+      }
+    ],
+    "push_performed": false
+  },
+  "implementation": {
+    "feature": {
+      "number": 71,
+      "key": "guideline_ingestion",
+      "input_mode": "document_extraction",
+      "scope": "input",
+      "roles": [
+        "super_admin"
+      ],
+      "native_contract": "document_original_id closed literal document extraction"
+    },
+    "source": "Immutable complete supplied txt/md/direct UTF8 up to4MiB. Preserve BOM/CRLF/emoji/combining codepoints and literal timestamp text. Full Source wire bound8MiB; exact SHA256 and Unicode CP coordinates. Supplied file completeness, metadata version and privacy/fidelity review are explicit human declarations, not external authenticity.",
+    "draft_and_review": "Closed provider reply with <=64 literal spans, exact half-open CP coordinates, quote<=4000CP. No automatic Knowledge publication or ClinicalRule changes. Explicit saved candidate is idempotently bound to the original task/draft index; separate explicit human review and Knowledge publication remain required.",
+    "task": "Closed input document_original_id plus optional question, no patient. Exact raw3 JSON UTF8 bytes <=65535 each retain original hashes, duplicate keys/nonfinite/unsafe scalars refused. RunAnchor binds6 original hashes + source content/governance. Run result envelope contains specific terminal receipt audit PK and individual saved candidate audit PKs; no range-lock audit scan.",
+    "runtime": "Current actual actor/token epoch, Source governance, provider/config/prompt and quota are checked before and after model await with no database connection held across network. Complete single Chat/Responses reply, no tools; attempted and actual nullable usage retained independently. Queued cancellation reports known zero; paid partial/in-flight or interrupted unknown usage is not fabricated as zero.",
+    "frontend": "Dedicated Source/Input/Assistant/Findings, sticky shared Parent native mode and strict separate fullRun+sameRun/sameFeature Super trace history. Auth/role/config/scope/close/keepalive and late result changes clear private evidence. Generic result/history form cannot replace the native document contract.",
+    "governance": "All Source/candidate/publication and source-bound tasks are actual super_admin-only routes with current SQL checks; all80 feature/config/provider/Prompt governance remains. Technical Source publication is separate from feature validation and does not validate future model meaning.",
+    "timestamp_compatibility": "New Source fields use UTC6; legacy Knowledge.recorded_at is explicitly floored to existing UTC-second storage. Main Source endpoints use JSONResponse so the legacy global timestamp regex cannot alter original text or digests.",
+    "audit_lifecycle_fix": "OperationLogMiddleware awaits the complete inner ASGI task group and dependency cleanup before the scoped audit write. Held-cleanup regressions prove the prior background SQLite overlap. This is not a general shared SQLite concurrency guarantee.",
+    "implementation_file_count": 107,
+    "implementation_sha256": {
+      "fastapi_be/alembic/versions/20261021_document_evidence.py": "077f6568dd5c784341c1a844955ab9818d77b6a674fb7101c845f0aa70b1d3a4",
+      "fastapi_be/alembic/versions/20261021_document_extraction_runs.py": "efc60dba60c1bfc58d422eeaac02fdde8869dcc2f4e2979e1c089f16d0815951",
+      "fastapi_be/app/ai/catalog.py": "a714abe13e137b0fb84e6aac932d1630da8c6f1e0e78e33afd3a9d4a453dbfb1",
+      "fastapi_be/app/ai/document_evidence_contract.py": "3c26616b8ffa538b982e47400f0d1d38557f0c618d1689e1f88a20708e9de546",
+      "fastapi_be/app/ai/document_evidence_input.py": "33d99158d60d703f587153b85e82e0f2c5ac7cc7f876a4b6b563d807e3cbbe2c",
+      "fastapi_be/app/ai/document_evidence_models.py": "3b6e408aa6ef969b29d4f7d03c8a7bd24a69cffb42cd4e0e130cae62c44125b2",
+      "fastapi_be/app/ai/document_evidence_sources.py": "39715e897df4b76a588428cc0525e1a27576f4597c5ca06c63e376ca0df9ab65",
+      "fastapi_be/app/ai/document_extraction_candidates.py": "eb6e1007e44f0414db32c74fac499dfa132200eadb4db1326babc09dbca0a508",
+      "fastapi_be/app/ai/document_extraction_context.py": "fd72ab5a5d6637fea4b2859b62dcb1ee33ad84161fd707389f5e23c5452af279",
+      "fastapi_be/app/ai/document_extraction_contract.py": "0ee0ddc0a75509aa2220e3b8bdd9d095f84bfccd1eda16663e0da7d4e774b148",
+      "fastapi_be/app/ai/document_extraction_history.py": "e9377c1488c069aa0e66c75493a800f20d8158d9b3766b69f80053b08f0c2c9b",
+      "fastapi_be/app/ai/document_extraction_models.py": "0eb796337371fb2e7c2102b05fe633a79418a29c4100f3b0055cc4343cf6816d",
+      "fastapi_be/app/ai/document_extraction_prompt.py": "6ed8f00d7f9d102ebb558aa398480da7c2fc144d16f92637fefd5578d1c8c7dc",
+      "fastapi_be/app/ai/document_extraction_protocol.py": "0dcc495f4403ea5b24d74a76d81990c49bfabf8e0d97fd7cc6fbb065ee1506ae",
+      "fastapi_be/app/ai/document_extraction_result.py": "5fd0af3fcfd8aaa5ce118dd5a02c99d8e9f28d63ae61e0310ecaf47f3ed029d0",
+      "fastapi_be/app/ai/document_extraction_run_record.py": "20376d949d58aca62f402614c3852a2e7a7a5ec5ebe47a7bf89e0548eb8be0b8",
+      "fastapi_be/app/ai/document_extraction_runtime.py": "57cb2ad3e332d80340d97ee5a627e08216482143f8588c755aef57e40490bcfd",
+      "fastapi_be/app/ai/document_extraction_storage.py": "cec04f1b97f81d528dca200cb67bdabe163fe115f2064fecb60f6a1070cd86bc",
+      "fastapi_be/app/ai/document_extraction_view_contract.py": "c3775745ce97f57328b61a6ec572d2bb6e463164b4021099e1f82c7a3ca261cb",
+      "fastapi_be/app/ai/gateway.py": "ceee83e661598af8c63938cf6071c9bc8e356653898520fb74b80047bbab1338",
+      "fastapi_be/app/ai/governance.py": "c84152eb8785e8c844e9c39a072c873850bb5687b51a1e42dbe9e2af3a30c8c6",
+      "fastapi_be/app/ai/knowledge.py": "1f665b6d4a24664391f33faa8d045eaa2fe28be079534d64042ed8a670c5b262",
+      "fastapi_be/app/ai/knowledge_sources.py": "02618aee77e69136c4b383f7d73e5db8d5aab9bc63d26daf3a4acaef072a555d",
+      "fastapi_be/app/ai/readiness.py": "8852fbe9b330b0e44cca750becff330bd21dbd2243e6d8d1e9c1553224d09992",
+      "fastapi_be/app/ai/references.py": "7938a3dcb1846c5f6e461c6f33c932bf6d34d68803be85377ef96d892c3d51ae",
+      "fastapi_be/app/ai/runtime.py": "c5cc9aebe7f043ba72a433ed2df8205b94178624c0234c22623957d0efc8b1e7",
+      "fastapi_be/app/ai/schemas.py": "8f9fd47047ff2b059e5f06d0e3ca6a0853c829f66f0089b25689bdfc1c07feed",
+      "fastapi_be/app/main.py": "d6dbf95682fa67054e22f413f665ab27e4ae1fdac1e395741968928c79e41a32",
+      "fastapi_be/app/models.py": "a5cc47d3c970f01ad569fa3098ce40d66f971c7feea0112447d47f4f7a0157ba",
+      "fastapi_be/app/routers/ai.py": "f44a869b89bc2cad3e94372433c30f9ea88315075dfa1da29196e4fbaaa4d639",
+      "fastapi_be/app/routers/ai_admin.py": "75c28fefef9dedc1879a9bd62dec91464ad9ad8e06a542350c62193281ff1f21",
+      "fastapi_be/app/routers/ai_document_evidence.py": "598faffa7f3964682421cac75495c34303b4222760f1031bb908be71160ba012",
+      "fastapi_be/scripts/export_ai_catalog.py": "68c1b98f03156d5faf351e09edc76d7c0a0d63343d6d6ee87f8a0d46282f9a11",
+      "fastapi_be/tests/test_ai_catalog.py": "6aedc01aaa63b4e00cfd843c4429bf8deeb007a401d0c9815f6d100fa327b47c",
+      "fastapi_be/tests/test_ai_document_evidence_contract.py": "3dbf4edb5f9f0978a4e5d8b496f8434929247bb7a7952850bfbec7c3718b1eb4",
+      "fastapi_be/tests/test_ai_document_evidence_http.py": "9a4fcfaa41fc1c59e0214add683f4fbfd4286846482703d941955de6e5233b6c",
+      "fastapi_be/tests/test_ai_document_evidence_knowledge.py": "c3ee2c9b55f4e6a93fdf1ad0ad3bc83e6ecca40fb6bf90057f6f9e24daa061bd",
+      "fastapi_be/tests/test_ai_document_evidence_main_http.py": "69ea364b722b2f96b2403ed38f26c956691fad58675e19de42b9221cfa620f48",
+      "fastapi_be/tests/test_ai_document_evidence_migration.py": "222b2599890599fb91acfb1fbdebd88ab8ac62c83a44c793700255863c88ccbc",
+      "fastapi_be/tests/test_ai_document_evidence_sources.py": "1dd4f94f518988181c47d4090fb15184b6f179ac6758419096fb0fc89b6c2c0c",
+      "fastapi_be/tests/test_ai_document_extraction_cancel.py": "8c348346580616e8487e7cf6c398cc8dec1fc499b34dde6d29cbe457fe02920c",
+      "fastapi_be/tests/test_ai_document_extraction_context.py": "999f0261bd57c3a7a982e696bd84aea0a1d6f4ddd726fe5225d125c49c4b938c",
+      "fastapi_be/tests/test_ai_document_extraction_contract.py": "6d34ae56baa11b40ea7673492d113c893f64478b0261865e1667f138735f67cd",
+      "fastapi_be/tests/test_ai_document_extraction_gateway.py": "b8ab0ef750b68e25019f46807872675a53a2a5062f8114094a9f6bfa7243b5ac",
+      "fastapi_be/tests/test_ai_document_extraction_migration.py": "ee1735bdaf6a2e6835d1193d5dbf48bb6b397c2b0365216299f82c74215685e4",
+      "fastapi_be/tests/test_ai_document_extraction_pipeline.py": "e608aa3db975a88d2ed60159e27f5cb5f40dd044491d5044092773463054e818",
+      "fastapi_be/tests/test_ai_document_extraction_protocol.py": "54d14f28fe4276f8cf82eb9ba2b9dbca8a456d71e2f97d27a0ae51d17d695ead",
+      "fastapi_be/tests/test_ai_document_extraction_receipt_references.py": "2818f57142e2f035d8fef0af9dfe843dee011dfe084a7c4d3996c1e8636e7758",
+      "fastapi_be/tests/test_ai_document_extraction_result.py": "422bf8fc3c9f5c8ca6ed90f715d496000975986380ed73ce164414aac84100fb",
+      "fastapi_be/tests/test_ai_document_extraction_run_record.py": "32adb18dbca92f115c6deb52ccaf4b48b708a57ff012d8c69cfbed19b705a490",
+      "fastapi_be/tests/test_ai_document_extraction_storage.py": "e26aa0c3ec282460152fa3f33c4d6c83f93db015acd945ccc5d7699fac97cb40",
+      "fastapi_be/tests/test_ai_document_extraction_view_contract.py": "5ec92340789864b703d2e24f568aa1a57f98b586ab5b294a120a6403bdc882ef",
+      "fastapi_be/tests/test_operation_log_lifecycle.py": "dfc4e80e7b9ee9cb9d4e05a9a99e9b2616953094081eb49532d5a4518617ee0d",
+      "vue3-new-ui/e2e/ai-document-evidence-api.spec.js": "05d7028f9b6586c716f36c3e96a9841ef62c73e532dfc5dff1a49a9f0eb0b199",
+      "vue3-new-ui/e2e/ai-document-evidence-panel.spec.js": "50ca6709c353be9ccd223475a87d8eecb9ba3c86d51cfa0976deddce75168792",
+      "vue3-new-ui/e2e/ai-document-extraction-assistant.spec.js": "22eeeed794141995af6074e2d3a2940d708f3a42626a825a75733385e704fa9d",
+      "vue3-new-ui/e2e/ai-document-extraction-findings.spec.js": "21c3f8e2632f4dd4c374ae8a8ed513686ca9ad0258c6d88c2638b7e95eb86731",
+      "vue3-new-ui/e2e/ai-document-extraction-history.spec.js": "0f6f305044ae96f8895197280ad10c9dc31d95757ad4df5c28a4e8bd17608a20",
+      "vue3-new-ui/e2e/ai-document-extraction-input.spec.js": "9b7ebb71db3701b8bc4c8a3e5fab0a6507af18c3764cdbd72bb304a49dd31d12",
+      "vue3-new-ui/e2e/ai-document-extraction-native-entry.spec.js": "2471539401b3449b7004f6f9eef10592d629fbb367dda224cefe6420a8e7b758",
+      "vue3-new-ui/e2e/ai-document-extraction-parent.spec.js": "597a1e09d8864af44574d6407f8e2ebbe6619bfe209b2dfedb84128eab44ef22",
+      "vue3-new-ui/e2e/ai-document-extraction-results.spec.js": "b71092d265d63017cc643927da9b30c9375b29df23506479b441a45c6aa52ea3",
+      "vue3-new-ui/e2e/ai-document-extraction-tasks-api.spec.js": "43a8fc1f4a767d6cf0ea0cc54189bc960855cf664d53d79ec2eea02f5fa9b3f4",
+      "vue3-new-ui/e2e/ai-management.spec.js": "8f0b49fd901d691550fb2c64840b47ca51d90ad41a4ae5a06acb2368f3c09632",
+      "vue3-new-ui/e2e/ai-quality-resource-entry.spec.js": "dae44dba635888882f5459ba9827645fc12aec65129ce394b88e44512d42ee6c",
+      "vue3-new-ui/e2e/fixtures/document-evidence-harness.cjs": "88ff45ec69e770b781d24d3ab0aa4269db511dc264281a40bd0b403f4176814b",
+      "vue3-new-ui/e2e/fixtures/document-evidence-ui.cjs": "4f7f8412e2d2f543c6b3589c0031e6d42cb5061370d5ceb5e18a9c5ff58fa958",
+      "vue3-new-ui/e2e/fixtures/document-evidence/actual.json": "a368d6139b5ba066cd91d58171cb90e4915da55b1cc6072de92235ba20519a51",
+      "vue3-new-ui/e2e/fixtures/document-evidence/manifest.json": "7881386160f382abb631626ce944a55e0b1f52ece235c3a90da5e3282d70631a",
+      "vue3-new-ui/e2e/fixtures/document-extraction-assistant-harness.cjs": "7e3142f22a9294e3e7dc604cf8cdc5a08ecd29bbee0d683181c6c68a20ba35ff",
+      "vue3-new-ui/e2e/fixtures/document-extraction-assistant-ui.cjs": "88ce8084e795a83f728311acd43ebb994c838995ae208c1167da45ec5a11c049",
+      "vue3-new-ui/e2e/fixtures/document-extraction-assistant/actual.json": "61905f214c8b9ce2b3e8fb9f7a47be1e053c33f5f8540f7fbbfe5f4e5ee576a7",
+      "vue3-new-ui/e2e/fixtures/document-extraction-assistant/manifest.json": "fac408e05320389a274c92b78b33ff6cd115fa0efa0702a01a47e721a9dcb393",
+      "vue3-new-ui/e2e/fixtures/document-extraction-findings-harness.cjs": "10c85f005f99820d27ae1d943658256f5c7519503c015cf296a9aa22b808bc1a",
+      "vue3-new-ui/e2e/fixtures/document-extraction-history-harness.cjs": "80431b26469e96e15ee6c2d3707448cc1e189d97f4310f678e756fe9e4be34d8",
+      "vue3-new-ui/e2e/fixtures/document-extraction-input-harness.cjs": "71a92183f4920a1406f734e46d63d22c3219a6aa783858deb7feb0ee504a07be",
+      "vue3-new-ui/e2e/fixtures/document-extraction-input-ui.cjs": "bac71e40943b95963ea3c989698c4b26da119f0715a66053b24551570ce67cee",
+      "vue3-new-ui/e2e/fixtures/document-extraction-input/actual.json": "0897f095b082dfef27b615e507ab430998d921dbfa603aee6a203e4dbdf7a34d",
+      "vue3-new-ui/e2e/fixtures/document-extraction-input/manifest.json": "82cdfbf6552b88b51d5b7c6931bb82eb47a7ef98c0cd00b115b3de9277925d7a",
+      "vue3-new-ui/e2e/fixtures/document-extraction-production-entry.cjs": "e892e83eb55a4e4e6222b3ad1a4c89fe9db225f3d1c3d74402a209227441f1b6",
+      "vue3-new-ui/e2e/fixtures/document-extraction-results-ui.cjs": "7f47ea527f298927c3e4c7b89a100eac1d340daa9af2b877a2c66d241d8d842c",
+      "vue3-new-ui/e2e/fixtures/document-extraction-results/actual.json": "2fe0e762066966166fb75934e0a38d3a2df525325fe18a8995a3112aedf864dd",
+      "vue3-new-ui/e2e/fixtures/document-extraction-results/manifest.json": "c50d5bd919012d158f42425c3ea2885c367fe61856a97760e75cdac5e56f4bfb",
+      "vue3-new-ui/e2e/fixtures/document-extraction-results/states-manifest.json": "a789563eee29683b265dd2fda863f73a809d2bcc6845102cce2fe3c4c91056de",
+      "vue3-new-ui/e2e/fixtures/document-extraction-results/states.json": "1f4c60d2fcffe37ff09e13fc23087a172ce648238f540c4b857bfe0ba99dbe38",
+      "vue3-new-ui/scripts/capture-document-evidence-fixtures.cjs": "757f5e67ef4354e75f367421f65d07141f6e0d1e47486abb092f16cc531e6c1c",
+      "vue3-new-ui/scripts/capture-document-extraction-assistant-fixtures.cjs": "9dda62da6b616d10f854ec1b6119a4a0b7cbc6237feead5ae14d05b0bb99f293",
+      "vue3-new-ui/scripts/capture-document-extraction-result-fixtures.cjs": "4d1166af431313dea38c4d7759919a0967ee5ec851e07ce13b8f539e43819b5b",
+      "vue3-new-ui/scripts/generate-document-evidence-schemas.cjs": "f9bbf2bbe6035a1dfe6a4e0eec450545a1c77fabeedaba6d4229de6bff0e0b9f",
+      "vue3-new-ui/scripts/generate-document-extraction-result-schemas.cjs": "602477942d81b27ddaf4898cd68914f0259348fc29327e8cfd3ec3c8c3ce1083",
+      "vue3-new-ui/src/api/ai/documentEvidence.js": "4a278f7625c6437db31028fbab2b269f269de69ae4ad54b7acd8b0a90dfd637d",
+      "vue3-new-ui/src/api/ai/documentEvidenceSchemas.json": "81bddf55ee84e2702acee18cb084f827cda993dcd57f376ccd3df1dec392510f",
+      "vue3-new-ui/src/api/ai/documentExtractionFixed.json": "fc708fed4722cf349b55898f430d1d8170a0e888a51644eecd7379568ed72a34",
+      "vue3-new-ui/src/api/ai/documentExtractionResults.js": "06a6ec81c7973cc43a57b89fec75e2ae1d88d124160db30d63b136c8db2ab000",
+      "vue3-new-ui/src/api/ai/documentExtractionSchemas.json": "3c4f17d462407a1229281a87ce047929f22cd689429fc57abad4ef4c7073b803",
+      "vue3-new-ui/src/api/ai/documentExtractionTasks.js": "1a39876c612cf52b184aef1b790551d29844f6c9659e659a8b3e4cc6b4ef097f",
+      "vue3-new-ui/src/components/AIAssistant/index.vue": "3f54895371af16f976d43edf446ae619253a514bd80fe5afa6fb15b0ce6bc663",
+      "vue3-new-ui/src/components/AIRunHistory/index.vue": "9c7fa967bcc9f38ef579b547010c0fb31aabdd2a65d916480f043d631949c81e",
+      "vue3-new-ui/src/components/ai/DocumentEvidencePanel.vue": "1e3f195e4ed7a54c7dd06f1d468812e31c2be3049b90ed9c3cec51cd52ddebb3",
+      "vue3-new-ui/src/components/ai/DocumentExtractionAssistant.vue": "e73152d9a5c975eb4afe8271c98954168744ffc440e0df9d3edda091abcda53f",
+      "vue3-new-ui/src/components/ai/DocumentExtractionFindings.vue": "5660026ee3659adbb0194903eda1b1ed7158814d3ea3b77ba6d2585fd6c14360",
+      "vue3-new-ui/src/components/ai/DocumentExtractionInput.vue": "11746459d90a4c25b2968192db630588173716e84eaf26b9155e51d5fdb5b517",
+      "vue3-new-ui/src/components/ai/useDocumentEvidence.js": "c90aac2ef39257d4dd161627c129bb4b6f16b765990ae9d3a346bbde392fe390",
+      "vue3-new-ui/src/components/ai/useDocumentExtractionAssistant.js": "6957cb76feeb299207b4dbecb12b31e7b5772073d7f1f16fa99a5ac14fa4dc00",
+      "vue3-new-ui/src/components/ai/useDocumentExtractionFindings.js": "3c2053759868de06c9e693a3ec615fc750895b02d0b7669feee374230372bf8d",
+      "vue3-new-ui/src/components/ai/useDocumentExtractionInput.js": "6fb6de02cd8612be9922d58fbd005195efdec097a7b8114b4c9ceb61c4629c81",
+      "vue3-new-ui/src/views/system/aiManagement.vue": "650e8035e23fa4e2c01a759c23c847045c82faf0d7dbca037f8cef4bea2e614d"
+    },
+    "generated_artifacts_sha256": {
+      "doc/ai-prompts.json": "367a31e79f5daa3e8825850440bfb51e26c7bf2bb1d85a48a9f5edae84a6480e",
+      "doc/ai-capabilities.md": "40b3fb31b8e715dfe8944d83ded39d342e32ea62087d6de559002ab0849a2eaf",
+      "doc/api-rbac-matrix.md": "c32df67cc1acdd2175ec3ef5cc933bb1b7ce6a752a100845bfe5bd2bcf3810c1",
+      "fastapi_be/rbac_matrix.json": "f4328601798a9a06e1b5f918648205f51743d4f4ddf80bdc5f6ed5640f5c0d58"
+    }
+  },
+  "backend_regression": {
+    "passed": 8644,
+    "skipped": 28,
+    "warnings": 1,
+    "pytest_seconds": 2226.23,
+    "outer_seconds": 2236.501354455948,
+    "source_file_count": 912,
+    "source_stable": true,
+    "all_frozen_backend_inputs_still_match_recorded_head": true,
+    "warning": "Existing synthetic pydicom DS NaN rejection fixture warning.",
+    "skips": "Existing optional real-weight prerequisites; not silently counted as passed.",
+    "guards": {
+      "dotenv_open_attempts": 0,
+      "socket_attempts": 0,
+      "engine_urls": [
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:////tmp/hoim-document-full-frozen-second-pytest/test_migration_does_not_infer_0/adr-resolution.db",
+        "sqlite:////tmp/hoim-document-full-frozen-second-pytest/test_aki_extension_up_down_up_0/aki-extension.sqlite",
+        "sqlite:////tmp/hoim-document-full-frozen-second-pytest/test_aki_extension_up_down_up_0/aki-extension.sqlite",
+        "sqlite:////tmp/hoim-document-full-frozen-second-pytest/test_audio_migration_roundtrip0/audio-migration.db",
+        "sqlite:////tmp/hoim-document-full-frozen-second-pytest/test_both_actual_migrations_ro0/bed-originals.sqlite",
+        "sqlite:////tmp/hoim-document-full-frozen-second-pytest/test_both_actual_migrations_ro0/bed-originals.sqlite",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:////tmp/hoim-document-full-frozen-second-pytest/test_actual_additive_up_down_u0/inventory-additive.sqlite",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:////tmp/hoim-document-full-frozen-second-pytest/test_ecg_migration_roundtrip_p0/ecg-migration.sqlite",
+        "sqlite:////tmp/hoim-document-full-frozen-second-pytest/test_ecg_migration_roundtrip_p0/ecg-migration.sqlite",
+        "sqlite:////tmp/hoim-document-full-frozen-second-pytest/test_ecg_migration_roundtrip_p0/ecg-migration.sqlite",
+        "sqlite:////tmp/hoim-document-full-frozen-second-pytest/test_migration_real_upgrade_do0/forecast-migration.sqlite",
+        "sqlite:////tmp/hoim-document-full-frozen-second-pytest/test_migration_real_upgrade_do0/forecast-migration.sqlite",
+        "sqlite:////tmp/hoim-document-full-frozen-second-pytest/test_image_migration_roundtrip0/image-migration.sqlite",
+        "sqlite:////tmp/hoim-document-full-frozen-second-pytest/test_image_migration_roundtrip0/image-migration.sqlite",
+        "sqlite:////tmp/hoim-document-full-frozen-second-pytest/test_image_migration_roundtrip0/image-migration.sqlite",
+        "sqlite:////tmp/hoim-document-full-frozen-second-pytest/test_additive_real_up_down_up_0/controlled-inventory-scenario.sqlite",
+        "sqlite:////tmp/hoim-document-full-frozen-second-pytest/test_actual_additive_up_down_u1/inventory-additive.sqlite",
+        "sqlite:////tmp/hoim-document-full-frozen-second-pytest/test_actual_mapping_migration_0/mapping-only.sqlite",
+        "sqlite:////tmp/hoim-document-full-frozen-second-pytest/test_ai_upgrade_and_rollback_p0/ai-upgrade.db",
+        "sqlite:////tmp/hoim-document-full-frozen-second-pytest/test_news2_extension_up_down_u0/news2-extension.sqlite",
+        "sqlite:////tmp/hoim-document-full-frozen-second-pytest/test_news2_extension_up_down_u0/news2-extension.sqlite",
+        "sqlite:////tmp/hoim-document-full-frozen-second-pytest/test_migration_preserves_unlin0/pathway-knowledge.db",
+        "sqlite:////tmp/hoim-document-full-frozen-second-pytest/test_source_revision_migration0/pathway-revision.db",
+        "sqlite:////tmp/hoim-document-full-frozen-second-pytest/test_qsofa_extension_up_down_u0/qsofa-extension.sqlite",
+        "sqlite:////tmp/hoim-document-full-frozen-second-pytest/test_qsofa_extension_up_down_u0/qsofa-extension.sqlite",
+        "sqlite:////tmp/hoim-document-full-frozen-second-pytest/test_excerpt_migration_upgrade0/review-excerpt.db",
+        "sqlite:////tmp/hoim-document-full-frozen-second-pytest/test_actual_migration_up_down_0/roster-plans.sqlite",
+        "sqlite:////tmp/hoim-document-full-frozen-second-pytest/test_actual_migration_up_down_0/roster-plans.sqlite",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:////tmp/hoim-document-full-frozen-second-pytest/test_workforce_migration_up_do0/roster.sqlite",
+        "sqlite:////tmp/hoim-document-full-frozen-second-pytest/test_workforce_migration_up_do0/roster.sqlite",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:////tmp/hoim-document-full-frozen-second-pytest/test_actual_sqlite_up_down_up_0/sofa.sqlite",
+        "sqlite:////tmp/hoim-document-full-frozen-second-pytest/test_actual_sqlite_up_down_up_0/sofa.sqlite",
+        "sqlite:///:memory:",
+        "sqlite:////tmp/hoim-document-full-frozen-second-pytest/test_additive_real_up_down_up_1/controlled-supply-series.sqlite",
+        "sqlite:////tmp/hoim-document-full-frozen-second-pytest/test_additive_real_up_down_up_2/controlled-supply-originals.sqlite",
+        "sqlite:////tmp/hoim-document-full-frozen-second-pytest/test_actual_up_down_up_preserv0/surgery-scenarios.sqlite",
+        "sqlite:////tmp/hoim-document-full-frozen-second-pytest/test_actual_up_down_up_preserv0/surgery-scenarios.sqlite",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:////tmp/hoim-document-full-frozen-second-pytest/test_actual_up_down_up_preserv1/surgery-originals.sqlite",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:////tmp/hoim-document-full-frozen-second-pytest/test_migrate_bootstraps_fresh_0/fresh.db",
+        "sqlite:////tmp/hoim-document-full-frozen-second-pytest/test_migrate_bootstraps_fresh_0/fresh.db",
+        "sqlite:////tmp/hoim-document-full-frozen-second-pytest/test_migrate_refuses_unversion0/legacy.db",
+        "sqlite:////tmp/hoim-document-full-frozen-second-pytest/test_migrate_refuses_unversion0/legacy.db",
+        "sqlite:////tmp/hoim-document-full-frozen-second-pytest/test_diagnosis_review_migratio0/diagnosis-reviews.db",
+        "sqlite:////tmp/hoim-document-full-frozen-second-pytest/test_unit_migration_keeps_hist0/dose-rule-unit.db",
+        "sqlite:////tmp/hoim-document-full-frozen-second-pytest/test_actual_extension_upgrade_0/inpatient-laboratory.sqlite",
+        "sqlite:////tmp/hoim-document-full-frozen-second-pytest/test_actual_extension_upgrade_0/inpatient-laboratory.sqlite",
+        "sqlite:////tmp/hoim-document-full-frozen-second-pytest/test_new_extension_migration_p0/inpatient-observations-only.sqlite",
+        "sqlite:////tmp/hoim-document-full-frozen-second-pytest/test_new_extension_migration_p0/inpatient-observations-only.sqlite",
+        "sqlite:////tmp/hoim-document-full-frozen-second-pytest/test_actual_sqlite_up_down_up_1/organ-support.sqlite",
+        "sqlite:////tmp/hoim-document-full-frozen-second-pytest/test_actual_sqlite_up_down_up_1/organ-support.sqlite",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:////tmp/hoim-document-full-frozen-second-pytest/test_observation_migration_pre0/lab-observations.db",
+        "sqlite:////tmp/hoim-document-full-frozen-second-pytest/test_nursing_migration_preserv0/nursing-migration.sqlite",
+        "sqlite:////tmp/hoim-document-full-frozen-second-pytest/test_nursing_migration_preserv0/nursing-migration.sqlite",
+        "sqlite:////tmp/hoim-document-full-frozen-second-pytest/test_nursing_migration_preserv0/nursing-migration.sqlite",
+        "sqlite:////tmp/hoim-document-full-frozen-second-pytest/test_nursing_migration_preserv0/nursing-migration.sqlite",
+        "sqlite:////tmp/hoim-document-full-frozen-second-pytest/test_downgrade_refuses_unknown0/nursing-migration.sqlite",
+        "sqlite:////tmp/hoim-document-full-frozen-second-pytest/test_downgrade_refuses_unknown0/nursing-migration.sqlite",
+        "sqlite:////tmp/hoim-document-full-frozen-second-pytest/test_downgrade_refuses_unknown1/nursing-migration.sqlite",
+        "sqlite:////tmp/hoim-document-full-frozen-second-pytest/test_downgrade_refuses_unknown1/nursing-migration.sqlite",
+        "sqlite:////tmp/hoim-document-full-frozen-second-pytest/test_downgrade_refuses_even_on0/nursing-migration.sqlite",
+        "sqlite:////tmp/hoim-document-full-frozen-second-pytest/test_downgrade_refuses_even_on0/nursing-migration.sqlite",
+        "sqlite:////tmp/hoim-document-full-frozen-second-pytest/test_downgrade_refuses_even_on1/nursing-migration.sqlite",
+        "sqlite:////tmp/hoim-document-full-frozen-second-pytest/test_downgrade_refuses_even_on1/nursing-migration.sqlite",
+        "sqlite:////tmp/hoim-document-full-frozen-second-pytest/test_downgrade_refuses_even_on2/nursing-migration.sqlite",
+        "sqlite:////tmp/hoim-document-full-frozen-second-pytest/test_downgrade_refuses_even_on2/nursing-migration.sqlite",
+        "sqlite:////tmp/hoim-document-full-frozen-second-pytest/test_instruction_migration_doe0/instructions.db",
+        "sqlite:///:memory:"
+      ]
+    },
+    "report": {
+      "path": "/tmp/hoim-document-full-frozen-second-verification.json",
+      "bytes": 15955,
+      "sha256": "4a56bb29eb3e8008920e1854530082873237ef1b0f750f77216512984664a681"
+    },
+    "source_freeze": {
+      "path": "/tmp/hoim-document-backend-frozen-second-source-freeze.json",
+      "bytes": 107608,
+      "sha256": "a7c0d30afbdf30a1fab26f4aa1726e6e41675235cd9b065620e50aa3b393eefa"
+    },
+    "log": {
+      "path": "/tmp/hoim-document-full-frozen-second-tests.log",
+      "bytes": 10265,
+      "sha256": "5b60840497fb74bb43fe9ecc65e5061c73b4584d55185708860b965685a6f33c"
+    },
+    "first_attempt": "First complete backend8640pass/1failed/28skip: an operation-audit background write overlapped dependency transaction cleanup. Product lifecycle fix2e42caa and three held-cleanup regressions precede this complete8644-pass second execution."
+  },
+  "python_static_checks": {
+    "files": 53,
+    "lint_and_whole_file_format_passed": true,
+    "report": {
+      "path": "/tmp/hoim-document-backend-frozen-third-ruff-execution.json",
+      "bytes": 11990,
+      "sha256": "fb1f8828e183e5b6de4c7beb89cb067b4a0be9e36c6711313fc00d2b7edb1061"
+    }
+  },
+  "prompt_export": {
+    "catalog_version": "2026.10.21.16",
+    "features": 80,
+    "distinct_task_prompts": 80,
+    "fixed_system_override_keys": [
+      "drg_evidence_review",
+      "guideline_ingestion"
+    ],
+    "dedicated_document_system_and_task_prompt": true,
+    "report": {
+      "path": "/tmp/hoim-document-prompt-export-first-verification.json",
+      "bytes": 729,
+      "sha256": "2d01b720e977ec92b949724bd2e5792e6b3867222b5eec795b3c31ac600a0f5c"
+    },
+    "current_inventory_checks_export_exactly_again": true
+  },
+  "database": {
+    "new_tables": 4,
+    "new_utc6_fields": 9,
+    "new_mediumtext_fields": 3,
+    "migrations": [
+      "20261021_document_evidence",
+      "20261021_doc_extraction_runs"
+    ],
+    "legacy_knowledge_table_temporal_and_text_columns_unchanged": true,
+    "actual_mysql": "Isolated mysql8.0.39 synthetic schema only, private Unix socket, no host ports/network, read-only root/nonroot/temporary private storage. Source3-table207+3 and anchor210+1 additive up/down/up verified independently, not a claim of running the historical blank full migration chain.",
+    "current_locks": "Three actual REPEATABLE READ sessions verify current Source/Candidate/Publication/Knowledge and five real lock conflicts; three actual audit-trigger faults roll back the entire transaction.",
+    "adjacent_terminal_and_candidate_concurrency": "Two distinct adjacent fixed Run UUIDs and different Originals execute concurrently. Both terminal outcomes and two explicit candidate saves pass, using exact receipt audit PK with existing primary key/actor FK index. No global shared audit scan or added index. These are actual SQL service tests with mocked transport, not main JWT/concurrency for every runtime.",
+    "source_migration": {
+      "path": "/tmp/hoim-document-full-migration-mysql-verification.json",
+      "bytes": 17890,
+      "sha256": "783fb38ea48e4e11d1e0b0871266d8bc89bca54b3965ec404bcdf4b577e0cbd0"
+    },
+    "source_current_locks": {
+      "path": "/tmp/hoim-document-current-lock-final-mysql-verification.json",
+      "bytes": 8843,
+      "sha256": "2a79c7f73327ea74e1dbc707bdd1e0633c9eb3a19b9475a60f2817c43e1efe75"
+    },
+    "anchor_migration": {
+      "path": "/tmp/hoim-document-extraction-anchor-final2-mysql-verification.json",
+      "bytes": 18010,
+      "sha256": "0f924db842bd47ad0542400721ea9eb9c776dd489554838a1848f6d24ed7a808"
+    },
+    "terminal_adjacent_runs": {
+      "path": "/tmp/hoim-document-extraction-terminal-pk-final4-mysql-verification.json",
+      "bytes": 14578,
+      "sha256": "102ecf4900bb07f1047dc8a01d2e9f2a7147707599c8ef07ea8ca870507836b2"
+    },
+    "candidate_adjacent_runs": {
+      "path": "/tmp/hoim-document-extraction-candidate-pk-final4-mysql-verification.json",
+      "bytes": 20349,
+      "sha256": "4f6e045a4698a49b7b4f97254e2fa30b238f4b94f042bf25def03646bde752f8"
+    },
+    "blocked_optional_bind_probe": "Some guarded MySQL workers recorded one blocked socket.bind attempt before system I/O, likely optional IPv6 library probing; no claim of zero attempted socket operations.",
+    "own_containers_and_private_directories_removed": true
+  },
+  "actual_governance_worker_pipeline": {
+    "synthetic_only": true,
+    "main_source": "Actual mounted main JWT/ASGI direct and file full Source lifecycle preserves raw text and UTC6 plus old21 isolated Source HTTP and pipeline/cancel regressions.",
+    "report": {
+      "path": "/tmp/hoim-document-main-source-third-verification.json",
+      "bytes": 215947,
+      "sha256": "9be6a7841a2e24a7616b322f5852156d7628527c0f553d9a2cc7f4d880d14c41"
+    },
+    "audit_lifecycle_report": {
+      "path": "/tmp/hoim-document-operation-lifecycle-second-verification.json",
+      "bytes": 217955,
+      "sha256": "e156412946998be2262f637b17ddfa3e9df6b29b3623c130b2e5e7081ccbf344"
+    },
+    "audit_independent_review": {
+      "path": "/tmp/hoim-document-audit-cleanup-independent-review.json",
+      "bytes": 1515,
+      "sha256": "7ebb5ab713e817c74c9d7b1daa8f67be84e606252fd1302a49bcbeb0c8801fb9"
+    },
+    "task_fixture": "Actual same-case main Chat/Responses request and lifecycle DTOs; outbound HTTP MockTransport only. Frontend Source full GET wrapper explicitly reconstructed from actual Source fields, not an actual same-case full GET claim.",
+    "fixture": {
+      "path": "vue3-new-ui/e2e/fixtures/document-extraction-assistant/actual.json",
+      "bytes": 918944,
+      "sha256": "61905f214c8b9ce2b3e8fb9f7a47be1e053c33f5f8540f7fbbfe5f4e5ee576a7"
+    }
+  },
+  "frontend_build": {
+    "command": "npm run verify",
+    "exit_code": 0,
+    "seconds": 53.18,
+    "production_inputs": 489,
+    "source_stable": true,
+    "asset_files": 418,
+    "javascript_bytes": 5968195,
+    "all_asset_bytes": 6756538,
+    "maximum_asset_bytes": 644905,
+    "unchanged_budget": {
+      "javascript": 6000000,
+      "all_assets": 7000000,
+      "maximum_asset": 700000
+    },
+    "audit_vulnerabilities": 0,
+    "existing_scss_deprecation_messages": 5,
+    "dependencies_build_config_browser_targets_or_budgets_changed": false,
+    "report": {
+      "path": "/tmp/hoim-document-npm-frozen-first-verify-execution.json",
+      "bytes": 1184,
+      "sha256": "786ae08ad3b401b0834b9b4fda014d367800b8bbd1d279968c2c022faa1b7865"
+    },
+    "log": {
+      "path": "/tmp/hoim-document-npm-frozen-first-verify.log",
+      "bytes": 52860,
+      "sha256": "4857c52b9051cf10b5361ded50bfb663aeec62f4544f4769b3b7235e87b0e7c5"
+    },
+    "production_source_freeze": {
+      "path": "/tmp/hoim-document-frontend-frozen-first-production-source-freeze.json",
+      "bytes": 81046,
+      "sha256": "a39237a5033f7231c8ae5ca852ab3300a28f52ee3494803f4d84576c869d8b2d"
+    }
+  },
+  "frontend_browser": {
+    "suite_scope": "Explicit inherited107 AI specs plus10 new document specs; not all repository browser specs.",
+    "single_complete_all_green_execution": false,
+    "first_complete": {
+      "passed": 1781,
+      "failed": 1,
+      "cases": 1782,
+      "files": 117,
+      "seconds": 4400.005,
+      "report": {
+        "path": "/tmp/hoim-document-browser-frozen-first-execution.json",
+        "bytes": 1464034,
+        "sha256": "dde089d4941d3eb1720bfaa08174a2f2cc19727814181c774fc19707e2523e95"
+      },
+      "failure": "Old management trace mock omitted actual required feature_key; strict product same-feature guard correctly refused it. Only fixture field added; no product/build change."
+    },
+    "second_complete": {
+      "passed": 1781,
+      "failed": 1,
+      "cases": 1782,
+      "files": 117,
+      "seconds": 4415.696,
+      "report": {
+        "path": "/tmp/hoim-document-browser-frozen-second-execution.json",
+        "bytes": 1466206,
+        "sha256": "c2d89058fbda431c78afb9ad855343645d1ba8780885940b59e84300c809aa7b"
+      },
+      "failure": "Old RCA production test clicked during expanding collapse transition. Actual pointerdown/up could land at different DOM targets; no handler delivery. Controlled original reproduction and rect/gesture probes retained."
+    },
+    "current_source_coverage": {
+      "passed_by_whole_file_composition": true,
+      "unique_cases": 1782,
+      "files": 117,
+      "unchanged_second_complete_files": 116,
+      "unchanged_second_complete_passed_cases": 1779,
+      "changed_rca_entire_file_passed_cases": 3,
+      "changed_file_targeted_outer_seconds": 14.812,
+      "categories": {
+        "production_mock": 207,
+        "isolated_mock": 1554,
+        "real_synthetic_http": 21
+      },
+      "not_a_new_full_execution": true,
+      "report": {
+        "path": "/tmp/hoim-document-browser-scoped-final-category-counts.json",
+        "bytes": 1241506,
+        "sha256": "0952a550941345b984c965c0135bb75459bbdd1c4f3167d6e836bc92bd623576"
+      },
+      "changed_file_report": {
+        "path": "/tmp/hoim-document-rca-transition-final-targeted-verification.json",
+        "bytes": 432722,
+        "sha256": "4957c8cb82f9f6658715211db3fc1b3889875a0d182fedc8e909781970f55fa8"
+      },
+      "controlled_after_fix": {
+        "path": "/tmp/hoim-document-rca-after-transition-wait-controlled.json",
+        "bytes": 11708,
+        "sha256": "f61567987397851201152474705ed7f118fa3911d45ab2ae9584fdd802458d53"
+      }
+    },
+    "skip_retry_flaky_global_errors": 0,
+    "source_files": 914,
+    "production_inputs": 489,
+    "dist_files": 418,
+    "source_and_dist_stable_for_each_used_execution": true,
+    "current914_source_files_match_scoped_manifest": true,
+    "old107_case_counts_and_identities_unchanged": true,
+    "old_spec_bytes_unchanged": 105,
+    "reviewed_old_spec_byte_exceptions": [
+      "vue3-new-ui/e2e/ai-management.spec.js",
+      "vue3-new-ui/e2e/ai-quality-resource-entry.spec.js"
+    ],
+    "rca_amendment": "One same-line observable wait for collapse enter-active to end before one normal click; no force, retry, longer timeout, product or dist modification. Diagnostic8 probes and targeted3 are not added again as distinct unique tests.",
+    "new_document_cases_included_not_added_again": 245,
+    "scope": "1554 isolated_mock plus207 production_mock use synthetic intercepted DTOs;21 real_synthetic_http are existing synthetic loopback tests. No hospital/remote model/clinical effectiveness claim."
+  },
+  "targeted_frontend_evidence_not_added_again": {
+    "production_native9": {
+      "path": "/tmp/hoim-document-production-native-first-verification.json",
+      "bytes": 55752,
+      "sha256": "e42b4be4759252fe5c6d435598d2750e8b36758e036facfe8231c00b5c4ebb57"
+    },
+    "management_fixture5": {
+      "path": "/tmp/hoim-document-management-recheck-first-verification.json",
+      "bytes": 433930,
+      "sha256": "c285fa3f6c83c530c57581ef99889e4693da0702545d524985e4701d4b95993d"
+    }
+  },
+  "node_tools": {
+    "passed": 44,
+    "seconds": 0.444,
+    "report": {
+      "path": "/tmp/hoim-document-node-tools-final-verification.json",
+      "bytes": 1536,
+      "sha256": "c4a631a3f114e6a5581bdda4ac1d12237546df413cbde3389971b668d365e2ef"
+    }
+  },
+  "platform_inventory": {
+    "report": {
+      "path": "/tmp/hoim-document-platform-fourth-inventory.json",
+      "bytes": 135929,
+      "sha256": "c0be163dbb8c0dee0f313c68546303c0b89fa0bb58935bfe70a688a62e1e1391"
+    },
+    "business_routes": 860,
+    "all_api_routes": 861,
+    "router_modules": 112,
+    "tables": 211,
+    "vue_views": 160,
+    "catalog_version": "2026.10.21.16",
+    "features": 80,
+    "source_reference_keys": 40,
+    "new_source_and_save_candidate_routes": 17,
+    "actual_role_guards_and_matrix_exact": true,
+    "alembic": {
+      "heads": [
+        "20261021_doc_extraction_runs"
+      ],
+      "single_head": true,
+      "new_migrations_in_upgrade_order": [
+        {
+          "revision": "20261021_document_evidence",
+          "down_revision": "20261021_coding_evidence",
+          "path": "fastapi_be/alembic/versions/20261021_document_evidence.py"
+        },
+        {
+          "revision": "20261021_doc_extraction_runs",
+          "down_revision": "20261021_document_evidence",
+          "path": "fastapi_be/alembic/versions/20261021_document_extraction_runs.py"
+        }
+      ],
+      "migration_files_total": 120
+    },
+    "read_only_guards": {
+      "route_matrix_exact_multiset_match": true,
+      "new_route_actual_role_guards_match_matrix": true,
+      "all_implementation_hashes_and_file_set_stable_during_capture": true,
+      "all_generated_artifacts_stable_during_capture": true,
+      "all_selected_implementation_and_generated_bytes_match_captured_head": true,
+      "prompt_export_exact_match": true,
+      "catalog_numbering_complete_1_to_80": true,
+      "twenty_one_historical_records_unchanged": true,
+      "four_new_tables_nine_utc6_and_three_mediumtext_definitions": true,
+      "database_connections": 0,
+      "dotenv_reads": 0,
+      "asgi_lifecycle_calls": 0,
+      "repo_files_modified_by_inventory": false
+    },
+    "implementation107_and_generated4_match_committed_head": true
+  },
+  "historical_verification_records": {
+    "baseline_commit": "5eba64343419b2f69a1285a233105dcf2af85b10",
+    "count": 21,
+    "all_unchanged": true,
+    "records": [
+      {
+        "path": "doc/ai-aki-verification.json",
+        "baseline_sha256": "a2f8e928266ff16d46973db731329d4e96cbfe09e519ba9f5fcbc8ab384a897c",
+        "current_sha256": "a2f8e928266ff16d46973db731329d4e96cbfe09e519ba9f5fcbc8ab384a897c",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-bed-verification.json",
+        "baseline_sha256": "a1e678f1eee4ca5da36b38260a633e354a0b76a8a0d074a53c444ae1bcc13217",
+        "current_sha256": "a1e678f1eee4ca5da36b38260a633e354a0b76a8a0d074a53c444ae1bcc13217",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-coding-evidence-verification.json",
+        "baseline_sha256": "fa6234a4334762a9c99e70ba1af2e7fd61585c6348514af6449da905d84d6bbf",
+        "current_sha256": "fa6234a4334762a9c99e70ba1af2e7fd61585c6348514af6449da905d84d6bbf",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-ecg-classifier-smoke.json",
+        "baseline_sha256": "838b0305249698617bc475f7158dfbfbb9e6e22e6d6e84e51974bfcfebb90c61",
+        "current_sha256": "838b0305249698617bc475f7158dfbfbb9e6e22e6d6e84e51974bfcfebb90c61",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-ecg-verification.json",
+        "baseline_sha256": "1eedfa9eb918cf6e6b1ee1f201b7413760eeec501c128f4a73401741f0427f94",
+        "current_sha256": "1eedfa9eb918cf6e6b1ee1f201b7413760eeec501c128f4a73401741f0427f94",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-forecast-verification.json",
+        "baseline_sha256": "9b5683bca58efcf7fc460410529fd5aeeed91e2646eb47be24b836cbadc20d63",
+        "current_sha256": "9b5683bca58efcf7fc460410529fd5aeeed91e2646eb47be24b836cbadc20d63",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-frontend-dependencies-verification.json",
+        "baseline_sha256": "968757f4a75e921038133b3fa9a94947ab4d5607142dce8da964f2a13d00bb1d",
+        "current_sha256": "968757f4a75e921038133b3fa9a94947ab4d5607142dce8da964f2a13d00bb1d",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-imaging-classifier-smoke.json",
+        "baseline_sha256": "b2185a31ff66c4602c10136d5b15404199f50cf7d65ea4a8be4718778c6a9e89",
+        "current_sha256": "b2185a31ff66c4602c10136d5b15404199f50cf7d65ea4a8be4718778c6a9e89",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-imaging-verification.json",
+        "baseline_sha256": "63646b181dae4f531abe233708a24f9b9cc05037ef95d57e1e6f39c7f9880148",
+        "current_sha256": "63646b181dae4f531abe233708a24f9b9cc05037ef95d57e1e6f39c7f9880148",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-inventory-verification.json",
+        "baseline_sha256": "afee2f2dc7228d6c0ded2b5e5643a2c6a50d8aad8e03207d9925cf5b70a68ab3",
+        "current_sha256": "afee2f2dc7228d6c0ded2b5e5643a2c6a50d8aad8e03207d9925cf5b70a68ab3",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-laboratory-verification.json",
+        "baseline_sha256": "646103e4874b4f895424987520c7adfb6fb8afdd9eb6e2c7104ed2095b72752f",
+        "current_sha256": "646103e4874b4f895424987520c7adfb6fb8afdd9eb6e2c7104ed2095b72752f",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-news2-verification.json",
+        "baseline_sha256": "363be8c61e2f36705dccc4604631e7d0e84aaa6cc922196ed36e48e740ca6570",
+        "current_sha256": "363be8c61e2f36705dccc4604631e7d0e84aaa6cc922196ed36e48e740ca6570",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-nursing-verification.json",
+        "baseline_sha256": "a04248f9de57ddd878c1b408da1833f53651cd3535d8385d2275874a7f6f9517",
+        "current_sha256": "a04248f9de57ddd878c1b408da1833f53651cd3535d8385d2275874a7f6f9517",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-observation-verification.json",
+        "baseline_sha256": "b75ab8c7ff94704cb823be59d51539f06a16a24edf0020b0e87edfd6cf6e6bee",
+        "current_sha256": "b75ab8c7ff94704cb823be59d51539f06a16a24edf0020b0e87edfd6cf6e6bee",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-organ-support-verification.json",
+        "baseline_sha256": "175b4d4b66960f623170aded7ca7dec32f462fc34278289411c1ddda3dbc653d",
+        "current_sha256": "175b4d4b66960f623170aded7ca7dec32f462fc34278289411c1ddda3dbc653d",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-qsofa-verification.json",
+        "baseline_sha256": "d3c4cea9a657527540d3c570512a00568f92a5381c066e9a0bcf204a2e3c7ba4",
+        "current_sha256": "d3c4cea9a657527540d3c570512a00568f92a5381c066e9a0bcf204a2e3c7ba4",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-roster-verification.json",
+        "baseline_sha256": "8ec5327889f81368e24755a8122f5b5c753a84a1e9a949ec3957b35a9ba13188",
+        "current_sha256": "8ec5327889f81368e24755a8122f5b5c753a84a1e9a949ec3957b35a9ba13188",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-sofa-verification.json",
+        "baseline_sha256": "20235fe055a6995be2b40270a52f67cba778d445cd10113e7f8185dbeab0cdca",
+        "current_sha256": "20235fe055a6995be2b40270a52f67cba778d445cd10113e7f8185dbeab0cdca",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-speech-smoke.json",
+        "baseline_sha256": "41ad522da4f04e2a6d75595660ecbc2549acdcd159450aa99602b495c8e690a0",
+        "current_sha256": "41ad522da4f04e2a6d75595660ecbc2549acdcd159450aa99602b495c8e690a0",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-supply-verification.json",
+        "baseline_sha256": "12ff22420c62a264aa94975a2f54d669b9752be2757537d46b755d92b6e32414",
+        "current_sha256": "12ff22420c62a264aa94975a2f54d669b9752be2757537d46b755d92b6e32414",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-surgery-verification.json",
+        "baseline_sha256": "302fc7655eda439297885b15c2b3f001f1e044fd2eaa5d559941dea5d1e89816",
+        "current_sha256": "302fc7655eda439297885b15c2b3f001f1e044fd2eaa5d559941dea5d1e89816",
+        "unchanged": true
+      }
+    ],
+    "all_stable_during_inventory": true
+  },
+  "preserved_attempts": {
+    "backend_full_first": {
+      "path": "/tmp/hoim-document-full-frozen-first-verification.json",
+      "bytes": 15682,
+      "sha256": "334852934dcb79077347204575dc87ef48e9e9865f98affedf877ab449fd1cc8"
+    },
+    "browser_complete_first_and_second_remain_failed": true,
+    "management_visual_reproduction": {
+      "path": "/tmp/hoim-document-management-visual-reproduction.json",
+      "bytes": 2043,
+      "sha256": "130072aac833ec7aae345c805fff22df0848304da971d5df080463dd56dc595a"
+    },
+    "management_fixture_diff": {
+      "path": "/tmp/hoim-document-management-fixture-recheck.json",
+      "bytes": 1004,
+      "sha256": "e9e837f33b16332a2b30f54b50e51d2613b82c2b8e563bfeced470329feeadde"
+    },
+    "rca_independent_original": {
+      "path": "/tmp/hoim-document-rca-independent-reproduction.json",
+      "bytes": 403561,
+      "sha256": "8602f08736061d70f6afb1e35ac90e65c566aef080465c1b402c8c8fb729fc69"
+    },
+    "rca_cpu_original": {
+      "path": "/tmp/hoim-document-rca-controlled-cpu-reproduction.json",
+      "bytes": 17319,
+      "sha256": "2b0d75696ff5dc1c34b873b5ad939bd78d905e472c22676bc98c4383689536c3"
+    },
+    "rca_target_rects": {
+      "path": "/tmp/hoim-document-rca-click-target-reproduction.json",
+      "bytes": 97880,
+      "sha256": "63ba9e7190ee6ebae53d831e32ab864f50e63146e262b9ed0350c311f49eee17"
+    },
+    "rca_gesture": {
+      "path": "/tmp/hoim-document-rca-hover-gesture-reproduction.json",
+      "bytes": 171836,
+      "sha256": "c0e4bc3b12d0f6c11740f673359b447dc58fdb51b5337704b05f48eead7e8597"
+    },
+    "early_atomic_cancel_candidate_and_mysql_reports": "Earlier failure/interruption reports remain local /tmp under distinct attempt names; no overwrite and not summed into final pass totals."
+  },
+  "artifact_retention": "Committed ledger preserves exact implementation/generated/history hashes and external report/log/source-freeze references. Large synthetic packets/runners/logs remain local/tmp; not promised permanent or bundled. No real hospital data or credentials committed.",
+  "limitations": [
+    "This is engineering verification of supplied-document integrity and explicit human workflow; no medical guideline applicability, authenticity, clinical correctness, professional efficacy, deployment or all80 completion.",
+    "Literal quotes and structural hashes do not prove model interpretation or that a supplied object contains every official page. Human candidate review and publication remain explicit.",
+    "Source technical publication and role authorization do not enable a clinically validated feature automatically.",
+    "Browser full first and second each contain one preserved failure. Current source has composed whole-file coverage, explicitly not an all-green single1782 execution.",
+    "New UTC6 fields do not change legacy Knowledge second storage. Original text is never normalized to fit timestamp serialization.",
+    "No push/deploy/hospital DB/.env/real credentials/paid remote inference. All80 goal remains active with69/70/72/73 onward still under implementation."
+  ]
+}

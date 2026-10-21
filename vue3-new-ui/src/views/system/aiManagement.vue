@@ -56,7 +56,7 @@
             <el-table-column prop="title" label="标题" min-width="180" /><el-table-column prop="version" label="版本" width="100" />
             <el-table-column prop="source_uri" label="来源" min-width="180" show-overflow-tooltip />
             <el-table-column label="状态" width="90"><template #default="{ row }">{{ knowledgeStatuses[row.status] }}</template></el-table-column>
-            <el-table-column label="原路径核对" min-width="150"><template #default="{ row }">{{ row.source_kind ? pathwaySourceStates[row.source_state] || '来源待核对' : '独立知识文档' }}</template></el-table-column>
+            <el-table-column label="原来源核对" min-width="150"><template #default="{ row }">{{ row.document_evidence_bound ? documentSourceStates[row.source_state] || '原文证据链待核对' : row.source_kind ? pathwaySourceStates[row.source_state] || '来源待核对' : '独立知识文档' }}</template></el-table-column>
             <el-table-column label="操作" width="170"><template #default="{ row }"><el-button size="small" @click="inspectKnowledge(row)">查看与审核</el-button></template></el-table-column>
           </el-table>
         </el-tab-pane>
@@ -74,7 +74,9 @@
         <el-tab-pane label="完整物资原量序列治理" name="supply_series" lazy><ai-supply-series v-if="tab==='supply_series'" governance /></el-tab-pane>
         <el-tab-pane label="库存原观察与采购候选治理" name="inventory_sources" lazy><ai-inventory-sources v-if="tab==='inventory_sources'" audit-only /></el-tab-pane>
         <el-tab-pane label="完整库存候选场景治理" name="inventory_scenarios" lazy><ai-inventory-scenarios v-if="tab==='inventory_scenarios'" audit-only /></el-tab-pane>
+        <el-tab-pane v-if="canCheckForecast" label="指南原文与摘录治理" name="document_evidence" lazy><document-evidence-panel v-if="tab==='document_evidence' && canCheckForecast" :active="tab==='document_evidence' && canCheckForecast" @knowledge-published="refresh" /></el-tab-pane>
         <el-tab-pane v-if="canCheckForecast" label="病案编码证据与本地规则治理" name="coding_evidence" lazy><ai-coding-evidence-sources v-if="tab==='coding_evidence'&&canCheckForecast" audit-only /></el-tab-pane>
+        <el-tab-pane v-if="canCheckForecast" label="完整住院账目来源治理" name="charge_sources" lazy><charge-reconciliation-source-panel v-if="tab==='charge_sources'&&canCheckForecast" :active="tab==='charge_sources'&&canCheckForecast" audit-only /></el-tab-pane>
         <el-tab-pane label="完整手术排程场景治理" name="surgery_scenarios" lazy><ai-surgery-scenarios v-if="tab==='surgery_scenarios'" governance /></el-tab-pane>
         <el-tab-pane label="SOFA独立规则与全院评估" name="sofa" lazy><ai-sofa-management v-if="tab==='sofa'" /></el-tab-pane>
         <el-tab-pane label="器官支持来源与映射" name="organ_support" lazy><ai-organ-support-management v-if="tab === 'organ_support'" /></el-tab-pane>
@@ -285,10 +287,11 @@
 
     <el-dialog v-model="reviewDialog" :title="(reviewDocument?.title || '文档') + '：知识审核'" width="800px">
       <p>版本：{{ reviewDocument?.version }} · 状态：{{ knowledgeStatuses[reviewDocument?.status] }}</p>
-      <p v-if="reviewDocument?.source_kind">原路径 #{{ reviewDocument.source_reference_id }}：{{ pathwaySourceStates[reviewDocument.source_state] || '来源待核对' }}。审核时须核对完整纳入、排除条件和步骤依据。</p>
+      <p v-if="reviewDocument?.document_evidence_bound">原文证据：{{ documentSourceStates[reviewDocument.source_state] || '原文证据链待核对' }}。发布和撤销须在“指南原文与摘录治理”中核对原件、条款和审核版本。</p>
+      <p v-else-if="reviewDocument?.source_kind">原路径 #{{ reviewDocument.source_reference_id }}：{{ pathwaySourceStates[reviewDocument.source_state] || '来源待核对' }}。审核时须核对完整纳入、排除条件和步骤依据。</p>
       <pre class="prompt-text knowledge-text">{{ reviewDocument?.content }}</pre>
-      <p v-if="reviewDocument?.source_kind && !canPublishDocument && reviewDocument.status !== 'published'">来源失效或版本已停用，须重新导入当前原路径后审核。</p>
-      <template #footer><el-button @click="reviewDialog = false">关闭</el-button><el-button v-if="reviewDocument?.status !== 'retired'" :loading="saving" @click="reviewDocumentAs('retired')">停用此版本</el-button><el-button v-if="reviewDocument?.status !== 'published'" type="primary" :disabled="!canPublishDocument" :loading="saving" @click="reviewDocumentAs('published')">确认审核并发布此版本</el-button></template>
+      <p v-if="!reviewDocument?.document_evidence_bound && reviewDocument?.source_kind && !canPublishDocument && reviewDocument.status !== 'published'">来源失效或版本已停用，须重新导入当前原路径后审核。</p>
+      <template #footer><el-button @click="reviewDialog = false">关闭</el-button><el-button v-if="reviewDocument?.document_evidence_bound && canCheckForecast" @click="reviewDialog=false; tab='document_evidence'">核对原文证据链</el-button><el-button v-if="!reviewDocument?.document_evidence_bound && reviewDocument?.status !== 'retired'" :loading="saving" @click="reviewDocumentAs('retired')">停用此版本</el-button><el-button v-if="!reviewDocument?.document_evidence_bound && reviewDocument?.status !== 'published'" type="primary" :disabled="!canPublishDocument" :loading="saving" @click="reviewDocumentAs('published')">确认审核并发布此版本</el-button></template>
     </el-dialog>
 
     <el-dialog v-model="grantDialog" title="新增限时患者访问授权" width="580px">
@@ -331,7 +334,9 @@ const AiSupplyProviderCheck=defineAsyncComponent(()=>import("@/components/Supply
 const AiInventoryProviderCheck=defineAsyncComponent(()=>import("@/components/InventoryProviderCapabilityCheck.vue"));
 const AiInventorySources=defineAsyncComponent(()=>import("@/components/InventorySources.vue"));
 const AiInventoryScenarios=defineAsyncComponent(()=>import("@/components/InventoryScenarios.vue"));
+const DocumentEvidencePanel=defineAsyncComponent(()=>import("@/components/ai/DocumentEvidencePanel.vue"));
 const AiCodingEvidenceSources=defineAsyncComponent(()=>import("@/components/CodingEvidenceSources.vue"));
+const ChargeReconciliationSourcePanel=defineAsyncComponent(()=>import("@/components/ai/ChargeReconciliationSourcePanel.vue"));
 const AiSurgerySources=defineAsyncComponent(()=>import("@/components/AISurgerySources.vue"));
 const AiSurgeryScenarios=defineAsyncComponent(()=>import("@/components/AISurgeryScenarios.vue"));
 const AiSurgeryProviderCheck=defineAsyncComponent(()=>import("@/components/AISurgeryProviderCheck.vue"));
@@ -351,6 +356,7 @@ const categories = { cdss: "临床 CDSS", pharmacy: "用药与药房", records: 
 const validations = { unreviewed: "未评审", pilot: "试点评估", validated: "已验证", suspended: "已暂停" };
 const knowledgeStatuses = { draft: "草稿", published: "已发布", retired: "已停用" };
 const pathwaySourceStates = { current: "与当前原路径一致", changed: "原路径已变更，须重新导入", disabled: "原路径已停用", missing: "原路径不存在", invalid_link: "来源关联异常" };
+const documentSourceStates = { current: "当前原文、摘录及审核版本一致", original_not_current: "原文或原审核版本失效", candidate_not_approved: "条款候选审核失效", publication_revoked: "原文发布件已撤销", knowledge_not_published: "知识版本已停用", knowledge_changed: "知识内容或元数据已改变", invalid_binding: "完整原文证据链核对失败" };
 const roles = { super_admin: "超级管理员", admin: "管理员", doctor: "医生", director: "科室主任", pharmacist: "药师", nurse: "护士", patient: "患者", guide: "导诊员", lab_technician: "检验技师", cashier: "收费员" };
 const loading = ref(false), saving = ref(false), tab = ref("features");
 const features = ref([]), providers = ref([]), knowledge = ref([]), grants = ref([]), auditEvents = ref([]), usage = ref([]);
@@ -456,7 +462,7 @@ const promptDialog = ref(false), promptVersions = ref([]), promptSelection = ref
 const knowledgeDialog = ref(false), knowledgeForm = ref({}), reviewDialog = ref(false), reviewDocument = ref(null);
 const pathwayImportDialog = ref(false), pathwaySourcesLoading = ref(false), pathwaySources = ref({}), pathwayImportForm = ref({});
 const selectedPathwaySource = computed(() => pathwaySources.value.items?.find(item => item.pathway_id === pathwayImportForm.value.pathway_id));
-const canPublishDocument = computed(() => !!reviewDocument.value && (!reviewDocument.value.source_kind || (reviewDocument.value.status === "draft" && reviewDocument.value.source_state === "current")));
+const canPublishDocument = computed(() => !!reviewDocument.value && !reviewDocument.value.document_evidence_bound && (!reviewDocument.value.source_kind || (reviewDocument.value.status === "draft" && reviewDocument.value.source_state === "current")));
 let pathwaySourceRequest = 0, knowledgeInspection = 0;
 watch(pathwayImportDialog, visible => { if (!visible) pathwaySourceRequest += 1; });
 const grantDialog = ref(false), grantForm = ref({});
@@ -636,6 +642,7 @@ async function submitPathwayImport() {
 }
 async function inspectKnowledge(row) { const version = ++knowledgeInspection; const response = await getAIKnowledgeDetail(row.document_id); if (version === knowledgeInspection) { reviewDocument.value = response.data; reviewDialog.value = true; } }
 async function reviewDocumentAs(status) {
+  if (reviewDocument.value?.document_evidence_bound) { reviewDialog.value=false; tab.value='document_evidence'; return; }
   saving.value = true;
   try { await reviewAIKnowledge(reviewDocument.value.document_id, { status, content_hash: reviewDocument.value.content_hash }); reviewDialog.value = false; await refresh(); ElMessage.success("知识状态已更新"); }
   finally { saving.value = false; }

@@ -465,8 +465,56 @@ def validate_generation(
 
 
 def _request(provider: AIProvider, spec: FeatureSpec, task_prompt: str, data: dict) -> tuple[str, dict]:
+    from app.ai.charge_reconciliation_gateway import matches_charge_request
+
+    if matches_charge_request(spec, data):
+        from app.ai.charge_reconciliation_gateway import request
+
+        return request(provider, spec, task_prompt, data)
     endpoint = validate_endpoint(provider.api_base)
     budget = min(provider.max_output_tokens, settings.AI_MAX_OUTPUT_TOKENS)
+    if spec.number == 71 or any(key in data.get("context", {}) for key in ("document_binding", "document_source", "document_review")) or "document_original_id" in data.get("input", {}):
+        from app.ai.document_extraction_context import public_payload
+        from app.ai.document_extraction_contract import EXTRACTION_SYSTEM_PROMPT, DocumentExtractionReply
+
+        if spec.number != 71 or provider.kind not in {"chat", "responses"} or not provider.allows_patient_data:
+            raise AIExecutionError("DOCUMENT_SOURCE_MODE", "原文抽取仅接受指定文字服务和完整已审核原件")
+        try:
+            public = public_payload(data)
+        except (HTTPException, ValueError, TypeError, KeyError, UnicodeError) as exc:
+            raise AIExecutionError("DOCUMENT_SOURCE_REQUIRED", "须核对当前完整原文及审核后再提取未核实区间草稿") from exc
+        instructions = EXTRACTION_SYSTEM_PROMPT + "\n\n" + task_prompt
+        if provider.kind == "responses":
+            schema = copy.deepcopy(DocumentExtractionReply.model_json_schema())
+
+            def close(node):
+                if isinstance(node, dict):
+                    node.pop("default", None)
+                    if node.get("type") == "object":
+                        node["required"] = list(node.get("properties", {}))
+                        node["additionalProperties"] = False
+                    for child in node.values():
+                        close(child)
+                elif isinstance(node, list):
+                    for child in node:
+                        close(child)
+
+            close(schema)
+            return endpoint + "/responses", {
+                "model": provider.model,
+                "instructions": instructions,
+                "input": [{"role": "user", "content": encode_json(public)}],
+                "max_output_tokens": budget,
+                "store": False,
+                "text": {"format": {"type": "json_schema", "name": "hoim_document_spans", "strict": True, "schema": schema}},
+            }
+        return endpoint + "/chat/completions", {
+            "model": provider.model,
+            "messages": [{"role": "system", "content": instructions}, {"role": "user", "content": encode_json(public)}],
+            "max_tokens": budget,
+            "temperature": float(provider.temperature),
+            "response_format": {"type": "json_object"},
+        }
     from app.ai.coding_evidence_prompt import system_prompt_for
 
     instructions = system_prompt_for(data.get("context", {})) + "\n\n" + task_prompt
@@ -866,6 +914,12 @@ async def generate(
     image: BinaryIO | None = None,
 ) -> tuple[GenerationResult, int, int]:
     """Call only a configured endpoint; never retry billable tasks or follow redirects."""
+    from app.ai.charge_reconciliation_gateway import generate_charge, matches_charge_request
+
+    if matches_charge_request(spec, data):
+        if audio is not None or ecg is not None or image is not None:
+            raise AIExecutionError("UNEXPECTED_CHARGE_ATTACHMENT", "完整账目核对不接受影像、心电或音频附件")
+        return await generate_charge(provider, spec, task_prompt, data, transport=transport)
     inputs = outputs = None
     coding_mode = bool({"coding_binding", "coding_source", "coding_case"} & data.get("context", {}).keys()) or "coding_case_id" in data.get("input", {})
     try:
@@ -883,6 +937,7 @@ async def generate(
     news2_source = data.get("context", {}).get("news2_source") if spec.number == 41 and provider.model.startswith("news2:") else None
     aki_source = data.get("context", {}).get("aki_source") if spec.number == 43 and provider.model.startswith("aki:") else None
     qsofa_source = data.get("context", {}).get("qsofa_source") if spec.number == 42 and provider.model.startswith("qsofa:") else None
+    extraction_mode = spec.number == 71
     sofa_mode = spec.number == 42 and provider.kind == "specialist" and provider.model.startswith("sofa1:")
     sofa_source = data.get("context", {}).get("sofa_source") if sofa_mode else None
     sofa_change_source = data.get("context", {}).get("sofa_change_source") if sofa_mode else None
@@ -962,6 +1017,8 @@ async def generate(
         raise AIExecutionError("UNEXPECTED_ECG_FILE", "该任务不接受原始心电附件")
     if image is not None and spec.number != 36:
         raise AIExecutionError("UNEXPECTED_IMAGE_FILE", "该任务不接受原始影像附件")
+    if extraction_mode and len(encode_json(payload).encode("utf-8")) > MAX_RESPONSE_BYTES:
+        raise AIExecutionError("DOCUMENT_REQUEST_LIMIT", "完整抽取原文及Prompt超过请求容量，未发送或裁剪")
     try:
         timeout = httpx.Timeout(provider.timeout_seconds, connect=min(provider.timeout_seconds, 10))
         async with httpx.AsyncClient(timeout=timeout, follow_redirects=False, trust_env=False, transport=transport) as client:
@@ -976,6 +1033,24 @@ async def generate(
         parsed = json.loads(body, object_pairs_hook=_unique_response_pairs, parse_constant=_finite_response_constant)
         if not isinstance(parsed, dict):
             raise ValueError("response must be an object")
+        if extraction_mode:
+            from app.ai.document_extraction_contract import DocumentExtractionSource
+            from app.ai.document_extraction_prompt import instructions_digest
+            from app.ai.document_extraction_protocol import DocumentReplyError, parse_provider_draft
+            from app.ai.document_extraction_result import result_for_draft
+
+            document_source = DocumentExtractionSource.model_validate(data["context"]["document_source"])
+            try:
+                draft, inputs, outputs = parse_provider_draft(provider.kind, parsed, document_source, instructions_digest(task_prompt))
+            except DocumentReplyError as exc:
+                inputs, outputs = exc.input_tokens, exc.output_tokens
+                error = AIExecutionError("DOCUMENT_PROVIDER_REPLY_INVALID", "模型未返回完整可核对的原文区间草稿，未保存候选或发布知识")
+                error.usage_receipt = {"input_tokens": inputs, "output_tokens": outputs, "complete": inputs is not None and outputs is not None}
+                raise error from exc
+            try:
+                return result_for_draft(draft, document_source, instructions_digest(task_prompt)), inputs, outputs
+            except (ValueError, TypeError, KeyError, UnicodeError) as exc:
+                raise AIExecutionError("DOCUMENT_RESULT_REJECTED", "完整草稿及说明无法核对或超过原TEXT容量，未保存或截断") from exc
         if coding_mode:
             from app.ai.coding_evidence_protocol import parse_provider_draft
             from app.ai.coding_evidence_result import result_for_draft

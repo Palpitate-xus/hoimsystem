@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy import func
 from sqlalchemy.orm import Session, joinedload
 
+from app.ai.charge_reconciliation_write_guard import current_charge_rows, lock_charge_entry, lock_charge_write
 from app.database import get_db
 from app.dependencies import CASHIER_ROLES, NURSING_ROLES, User, require_roles
 from app.models import Admission, InpatientCharge
@@ -32,6 +33,7 @@ def get_inpatient_charge_list(
     if charge_date:
         try:
             from datetime import date as dt_date
+
             d = dt_date.fromisoformat(charge_date)
             query = query.filter(InpatientCharge.charge_date == d)
         except ValueError:
@@ -67,8 +69,7 @@ def get_inpatient_charge_list(
 
 
 @router.get("/inpatientCharge/getDailyBill")
-def get_daily_bill(admission_id: str, current_user: User = Depends(require_roles(*INPATIENT_FINANCE_ROLES)),
-    db: Session = Depends(get_db)):
+def get_daily_bill(admission_id: str, current_user: User = Depends(require_roles(*INPATIENT_FINANCE_ROLES)), db: Session = Depends(get_db)):
     admission = db.query(Admission).filter(Admission.admission_id == admission_id).first()
     if not admission:
         return {"code": 500, "msg": "入院记录不存在"}
@@ -85,19 +86,9 @@ def get_daily_bill(admission_id: str, current_user: User = Depends(require_roles
         .all()
     )
 
-    total_amount = (
-        db.query(func.sum(InpatientCharge.total_amount))
-        .filter(InpatientCharge.admission_id == admission_id, InpatientCharge.status != 2)
-        .scalar()
-        or 0
-    )
+    total_amount = db.query(func.sum(InpatientCharge.total_amount)).filter(InpatientCharge.admission_id == admission_id, InpatientCharge.status != 2).scalar() or 0
 
-    settled_amount = (
-        db.query(func.sum(InpatientCharge.total_amount))
-        .filter(InpatientCharge.admission_id == admission_id, InpatientCharge.status == 1)
-        .scalar()
-        or 0
-    )
+    settled_amount = db.query(func.sum(InpatientCharge.total_amount)).filter(InpatientCharge.admission_id == admission_id, InpatientCharge.status == 1).scalar() or 0
 
     data = {
         "admission_id": admission_id,
@@ -108,26 +99,28 @@ def get_daily_bill(admission_id: str, current_user: User = Depends(require_roles
         "settled_amount": round(settled_amount, 2),
         "unsettled_amount": round(total_amount - settled_amount, 2),
         "balance": round(admission.deposit_amount - total_amount, 2),
-        "daily_list": [
-            {"charge_date": str(d.charge_date), "amount": round(d.daily_total, 2)} for d in daily
-        ],
+        "daily_list": [{"charge_date": str(d.charge_date), "amount": round(d.daily_total, 2)} for d in daily],
     }
     return {"code": 200, "msg": "success", "data": data}
 
 
 @router.post("/inpatientCharge/settle")
-def settle_charges(req: dict, current_user: User = Depends(require_roles(*CASHIER_ROLES)),
-    db: Session = Depends(get_db)):
+def settle_charges(req: dict, current_user: User = Depends(require_roles(*CASHIER_ROLES)), db: Session = Depends(get_db)):
+    current_user = lock_charge_write(db, current_user, allowed_roles=CASHIER_ROLES)
     admission_id = req.get("admission_id")
-    admission = db.query(Admission).filter(Admission.admission_id == admission_id).first()
+    admission = current_charge_rows(db.query(Admission)).filter(Admission.admission_id == admission_id).first()
     if not admission:
         return {"code": 500, "msg": "入院记录不存在"}
 
     # 结算所有未结算的费用，并记录实际操作人和时间；重复结算保持幂等。
-    charges = db.query(InpatientCharge).filter(
-        InpatientCharge.admission_id == admission_id,
-        InpatientCharge.status == 0,
-    ).all()
+    charges = (
+        current_charge_rows(db.query(InpatientCharge))
+        .filter(
+            InpatientCharge.admission_id == admission_id,
+            InpatientCharge.status == 0,
+        )
+        .all()
+    )
     settled_time = datetime.datetime.now()
     for c in charges:
         c.status = 1
@@ -140,10 +133,10 @@ def settle_charges(req: dict, current_user: User = Depends(require_roles(*CASHIE
 
 
 @router.post("/inpatientCharge/refund")
-def refund_charge(req: dict, current_user: User = Depends(require_roles(*CASHIER_ROLES)),
-    db: Session = Depends(get_db)):
+def refund_charge(req: dict, current_user: User = Depends(require_roles(*CASHIER_ROLES)), db: Session = Depends(get_db)):
+    current_user = lock_charge_write(db, current_user, allowed_roles=CASHIER_ROLES)
     charge_id = req.get("charge_id")
-    charge = db.query(InpatientCharge).filter(InpatientCharge.charge_id == charge_id).first()
+    charge = lock_charge_entry(db, charge_id)
     if not charge:
         return {"code": 500, "msg": "费用记录不存在"}
     if charge.status == 2:
@@ -153,17 +146,21 @@ def refund_charge(req: dict, current_user: User = Depends(require_roles(*CASHIER
     reason = str(req.get("reason") or "").strip()
     if not reason:
         return {"code": 500, "msg": "退费原因不能为空"}
-    updated = db.query(InpatientCharge).filter(
-        InpatientCharge.charge_id == charge_id,
-        InpatientCharge.status == 1,
-    ).update(
-        {
-            InpatientCharge.status: 2,
-            InpatientCharge.refunded_by: current_user.user_id,
-            InpatientCharge.refunded_time: datetime.datetime.now(),
-            InpatientCharge.refund_reason: reason[:200],
-        },
-        synchronize_session=False,
+    updated = (
+        current_charge_rows(db.query(InpatientCharge))
+        .filter(
+            InpatientCharge.charge_id == charge_id,
+            InpatientCharge.status == 1,
+        )
+        .update(
+            {
+                InpatientCharge.status: 2,
+                InpatientCharge.refunded_by: current_user.user_id,
+                InpatientCharge.refunded_time: datetime.datetime.now(),
+                InpatientCharge.refund_reason: reason[:200],
+            },
+            synchronize_session=False,
+        )
     )
     if updated != 1:
         db.rollback()
@@ -173,25 +170,14 @@ def refund_charge(req: dict, current_user: User = Depends(require_roles(*CASHIER
 
 
 @router.get("/inpatientCharge/getSummary")
-def get_charge_summary(current_user: User = Depends(require_roles(*INPATIENT_FINANCE_ROLES)),
-    db: Session = Depends(get_db)):
+def get_charge_summary(current_user: User = Depends(require_roles(*INPATIENT_FINANCE_ROLES)), db: Session = Depends(get_db)):
     today = datetime.datetime.now().date()
 
-    today_income = (
-        db.query(func.sum(InpatientCharge.total_amount))
-        .filter(InpatientCharge.charge_date == today, InpatientCharge.status != 2)
-        .scalar()
-        or 0
-    )
+    today_income = db.query(func.sum(InpatientCharge.total_amount)).filter(InpatientCharge.charge_date == today, InpatientCharge.status != 2).scalar() or 0
 
     total_inpatient = db.query(Admission).filter(Admission.status == 1).count()
 
-    total_deposit = (
-        db.query(func.sum(Admission.deposit_amount))
-        .filter(Admission.status == 1)
-        .scalar()
-        or 0
-    )
+    total_deposit = db.query(func.sum(Admission.deposit_amount)).filter(Admission.status == 1).scalar() or 0
 
     return {
         "code": 200,
@@ -205,14 +191,14 @@ def get_charge_summary(current_user: User = Depends(require_roles(*INPATIENT_FIN
 
 
 @router.post("/inpatientCharge/depositRecharge")
-def deposit_recharge(req: dict, current_user: User = Depends(require_roles(*INPATIENT_FINANCE_ROLES)),
-    db: Session = Depends(get_db)):
+def deposit_recharge(req: dict, current_user: User = Depends(require_roles(*INPATIENT_FINANCE_ROLES)), db: Session = Depends(get_db)):
+    current_user = lock_charge_write(db, current_user, allowed_roles=INPATIENT_FINANCE_ROLES)
     """预缴金充值/补缴。
 
     amount 必须为正数；充值成功返回最新余额（已缴-已计费）。
     原缺陷：预缴金仅入院时写入一次，无充值/余额接口。
     """
-    admission = db.query(Admission).filter(Admission.admission_id == req.get("admission_id")).first()
+    admission = current_charge_rows(db.query(Admission)).filter(Admission.admission_id == req.get("admission_id")).first()
     if not admission:
         return {"code": 500, "msg": "住院记录不存在"}
     if admission.status != 1:
@@ -224,12 +210,7 @@ def deposit_recharge(req: dict, current_user: User = Depends(require_roles(*INPA
     if amount <= 0:
         return {"code": 400, "msg": "充值金额必须大于0"}
 
-    charged = (
-        db.query(func.sum(InpatientCharge.total_amount))
-        .filter(InpatientCharge.admission_id == admission.admission_id, InpatientCharge.status != 2)
-        .scalar()
-        or 0
-    )
+    charged = current_charge_rows(db.query(func.sum(InpatientCharge.total_amount))).filter(InpatientCharge.admission_id == admission.admission_id, InpatientCharge.status != 2).scalar() or 0
     from decimal import Decimal
 
     admission.deposit_amount = Decimal(str(admission.deposit_amount or 0)) + Decimal(str(amount))
@@ -249,18 +230,12 @@ def deposit_recharge(req: dict, current_user: User = Depends(require_roles(*INPA
 
 
 @router.get("/inpatientCharge/depositBalance")
-def deposit_balance(admission_id: str, current_user: User = Depends(require_roles(*INPATIENT_FINANCE_ROLES)),
-    db: Session = Depends(get_db)):
+def deposit_balance(admission_id: str, current_user: User = Depends(require_roles(*INPATIENT_FINANCE_ROLES)), db: Session = Depends(get_db)):
     """预缴金余额查询（已缴、已计费、余额、是否低于预警线）。"""
     admission = db.query(Admission).filter(Admission.admission_id == admission_id).first()
     if not admission:
         return {"code": 500, "msg": "住院记录不存在"}
-    charged = (
-        db.query(func.sum(InpatientCharge.total_amount))
-        .filter(InpatientCharge.admission_id == admission.admission_id, InpatientCharge.status != 2)
-        .scalar()
-        or 0
-    )
+    charged = db.query(func.sum(InpatientCharge.total_amount)).filter(InpatientCharge.admission_id == admission.admission_id, InpatientCharge.status != 2).scalar() or 0
     deposit = float(admission.deposit_amount or 0)
     balance = deposit - float(charged)
     from app.config_service import get_config_float

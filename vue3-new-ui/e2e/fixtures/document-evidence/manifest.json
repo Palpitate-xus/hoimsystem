@@ -1,0 +1,8 @@
+{
+  "scope": "Actual synthetic independent router/JWT/SQLite lifecycle, no model extraction or main mounting",
+  "origin_artifact": "/tmp/hoim-document-evidence-ui-actual-v4.json",
+  "origin_bytes": 47382,
+  "origin_sha256": "a368d6139b5ba066cd91d58171cb90e4915da55b1cc6072de92235ba20519a51",
+  "fixture_bytes": 47382,
+  "fixture_sha256": "a368d6139b5ba066cd91d58171cb90e4915da55b1cc6072de92235ba20519a51"
+}

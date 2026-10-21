@@ -1,0 +1,19 @@
+{
+  "scope": "Actual synthetic main JWT SQLite queue/claim/MockTransport worker, complete source HTTP DTOs, explicit candidate/feedback/cancel and truthful terminal states. Browser replay is isolated mocks, not production HTTP or real model/clinical validation.",
+  "inputs": [
+    {
+      "file": "hoim-document-extraction-assistant-actual-states-v5-chat.json",
+      "bytes": 662994,
+      "sha256": "4c9c421b69ef0185cca634c424202e4b85c183d744cd74a4b3055351545f2807"
+    },
+    {
+      "file": "hoim-document-extraction-assistant-actual-states-v5-responses.json",
+      "bytes": 670290,
+      "sha256": "755b50e4a9b821fac3093099bf50aa04495ccac0b205347d7c40998f72ed844f"
+    }
+  ],
+  "output": {
+    "bytes": 918944,
+    "sha256": "61905f214c8b9ce2b3e8fb9f7a47be1e053c33f5f8540f7fbbfe5f4e5ee576a7"
+  }
+}

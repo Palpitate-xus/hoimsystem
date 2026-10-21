@@ -9,9 +9,12 @@ from sqlalchemy.orm import Session
 
 from app.ai.catalog import FEATURES
 from app.ai.context import accessible_patients, authorize_patient, context_metadata, get_encounter, patient_snapshot
+from app.ai.document_extraction_candidates import SaveDocumentCandidate
+from app.ai.document_extraction_contract import DocumentExtractionRequest
 from app.ai.ecg_assets import authorize_ecg_patient
 from app.ai.governance import audit, describe_config, encode_json
 from app.ai.image_assets import authorize_image_patient
+from app.ai.knowledge import is_document_evidence
 from app.ai.models import AIFeatureConfig, AIFeedback, AIRun, utcnow
 from app.ai.operational_sources import operational_context, operational_options
 from app.ai.pathway_knowledge import eligible_pathway_documents
@@ -21,12 +24,44 @@ from app.ai.schemas import ClinicalContextRequest, FeedbackWrite, OperationalCon
 from app.ai.service_sources import service_options
 from app.config import settings
 from app.database import get_db
-from app.dependencies import get_current_user
+from app.dependencies import get_current_user, require_roles
 from app.models import Admission, ClinicalPathway, Prescription, Registration, User
 from app.routers.inpatient_support import QueryPositiveInteger
 
 # Evidence text must bypass the legacy response formatter that truncates timestamps.
 router = APIRouter(tags=["AI 业务助手"], default_response_class=JSONResponse)
+
+
+@router.post("/ai/document-extraction/context")
+def inspect_document_extraction_context(req: DocumentExtractionRequest, db: Session = Depends(get_db), user: User = Depends(require_roles("super_admin"))) -> dict:
+    """Inspect one current complete original without contacting the model."""
+    from app.ai import document_evidence_sources as sources
+    from app.ai.document_extraction_context import extraction_context, public_payload
+
+    user = sources.current_super(db, user)
+    values = req.model_dump(mode="json", exclude_unset=True)
+    bundle = extraction_context(db, user, values)
+    preview = public_payload({"input": values, "context": bundle.data, "tools": {}, "evidence": bundle.evidence})
+    return {
+        "code": 200,
+        "msg": "success",
+        "data": {
+            "context": bundle.data,
+            "metadata": context_metadata(bundle),
+            "evidence": bundle.evidence,
+            "document_original": sources.original_detail(db, user, req.document_original_id).model_dump(mode="json"),
+            "model_preview": preview,
+        },
+    }
+
+
+@router.post("/ai/runs/{run_id}/document-candidates")
+def save_document_extraction_candidate(run_id: str, req: SaveDocumentCandidate, db: Session = Depends(get_db), user: User = Depends(require_roles("super_admin"))) -> dict:
+    """Save one explicitly selected real draft span; review/publication stay separate."""
+    from app.ai.document_extraction_candidates import save_candidate
+
+    record = save_candidate(db, user, run_id, req.ordinal)
+    return {"code": 200, "msg": "已保存为未审核候选，尚未发布知识", "data": record.model_dump(mode="json")}
 
 
 @router.get("/ai/features")
@@ -170,6 +205,10 @@ def _context_inspection(db: Session, user: User, key: str, patient_id: int, enco
         from app.ai.sofa_context import expand_context
 
         context = expand_context(db, context, user=user, current=True)
+    if context.get("charge_binding"):
+        from app.ai.charge_reconciliation_context import expand_context
+
+        context = expand_context(db, context, user=user, current=True)
     if context.get("coding_binding"):
         from app.ai.coding_evidence_context import expand_context
 
@@ -205,7 +244,7 @@ def inspect_context(
 def submit_run(req: RunRequest, db: Session = Depends(get_db), user: User = Depends(get_current_user)) -> dict:
     """Queue durable work; a separately deployed worker performs inference."""
     run = create_run(db, user, req)
-    return {"code": 200, "msg": "任务已排队", "data": describe_run(run, False)}
+    return {"code": 200, "msg": "任务已排队", "data": describe_run(run, False, user=user)}
 
 
 @router.get("/ai/runs")
@@ -226,22 +265,106 @@ def list_runs(
     inventory_item_id: QueryPositiveInteger | None = Query(None, ge=1, le=2147483647),
     inventory_scenario_id: str | None = Query(None, max_length=36),
     coding_case_id: str | None = Query(None, max_length=36),
+    charge_case_id: str | None = Query(None, max_length=36),
+    charge_native_only: bool = False,
+    document_original_id: str | None = Query(None, max_length=36),
     limit: int = Query(30, ge=1, le=100),
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user),
 ) -> dict:
     """List own tasks; super-admins can inspect global execution history."""
+    if feature_key == "charge_reconciliation" or charge_case_id is not None:
+        from app.ai.charge_reconciliation_sources import current_actor
+
+        user = current_actor(db, user)
     if feature_key == "drg_evidence_review" or coding_case_id is not None:
         from app.ai.coding_evidence_sources import current_actor
 
         user = current_actor(db, user)
     query = db.query(AIRun)
+    if feature_key == "guideline_ingestion" or document_original_id is not None:
+        from app.ai.document_extraction_history import filter_document_history
+
+        query = filter_document_history(
+            db,
+            user,
+            query,
+            feature_key=feature_key,
+            original_id=document_original_id,
+            other_scope=(
+                patient_id,
+                charge_case_id,
+                True if charge_native_only else None,
+                encounter_ref,
+                department_id,
+                roster_plan_id,
+                ward_id,
+                bed_series_id,
+                surgery_pool_id,
+                surgery_scenario_id,
+                supply_item_kind,
+                supply_item_id,
+                supply_series_id,
+                inventory_item_kind,
+                inventory_item_id,
+                inventory_scenario_id,
+                coding_case_id,
+            ),
+        )
     if user.user_role != "super_admin":
         query = query.filter_by(requested_by=user.user_id)
     if feature_key:
         authorized_feature(db, user, feature_key)
         query = query.filter_by(feature_key=feature_key)
-    if coding_case_id is not None:
+    if charge_native_only:
+        if feature_key != "charge_reconciliation" or any(
+            value is not None
+            for value in (
+                department_id,
+                roster_plan_id,
+                ward_id,
+                bed_series_id,
+                surgery_pool_id,
+                surgery_scenario_id,
+                supply_item_kind,
+                supply_item_id,
+                supply_series_id,
+                inventory_item_kind,
+                inventory_item_id,
+                inventory_scenario_id,
+                coding_case_id,
+                document_original_id,
+            )
+        ):
+            raise HTTPException(422, "新版账目历史筛选仅支持本次真实住院的完整账目任务")
+        from app.ai.charge_reconciliation_history import filter_native_history
+
+        query = filter_native_history(db, user, query, patient_id=patient_id, encounter_ref=encounter_ref)
+    if charge_case_id is not None:
+        if feature_key != "charge_reconciliation" or any(
+            value is not None
+            for value in (
+                department_id,
+                roster_plan_id,
+                ward_id,
+                bed_series_id,
+                surgery_pool_id,
+                surgery_scenario_id,
+                supply_item_kind,
+                supply_item_id,
+                supply_series_id,
+                inventory_item_kind,
+                inventory_item_id,
+                inventory_scenario_id,
+                coding_case_id,
+                document_original_id,
+            )
+        ):
+            raise HTTPException(422, "账目历史须为本功能同一实际患者住院的单件完整快照，不得混用其他来源")
+        from app.ai.charge_reconciliation_history import filter_history
+
+        query = filter_history(db, user, query, charge_case_id=charge_case_id, patient_id=patient_id, encounter_ref=encounter_ref)
+    elif coding_case_id is not None:
         if feature_key != "drg_evidence_review" or any(
             value is not None
             for value in (
@@ -320,6 +443,8 @@ def list_runs(
         except HTTPException as exc:
             if exc.status_code in {403, 404}:
                 continue
+            if exc.status_code == 409 and any(is_document_evidence(db, entry) for entry in json.loads(item.evidence_json)):
+                continue
             if exc.status_code == 409:
                 from app.ai.coding_evidence_storage import is_coding_run
 
@@ -327,6 +452,11 @@ def list_runs(
                     continue
             if exc.status_code == 409 and item.feature_key == "surgery_scheduling":
                 continue
+            if exc.status_code == 409 and item.feature_key == "charge_reconciliation":
+                from app.ai.charge_reconciliation_storage import is_charge_run
+
+                if is_charge_run(db, item):
+                    continue
             if exc.status_code == 409 and item.feature_key == "inventory_optimization":
                 from app.ai.inventory_storage import is_inventory_snapshot
 
@@ -348,27 +478,47 @@ def list_runs(
                 if is_bed_snapshot(json.loads(item.input_json)):
                     continue
             raise
-        data.append(describe_run(item, False))
+        data.append(describe_run(item, False, user=user))
     return {"code": 200, "msg": "success", "data": data}
 
 
 @router.get("/ai/runs/{run_id}")
 def run_detail(run_id: str, db: Session = Depends(get_db), user: User = Depends(get_current_user)) -> dict:
     """Recheck patient access before exposing a stored result or evidence."""
+    from app.ai.native_task_access import guard_private_task_read
+
+    guard_private_task_read(db, user, run_id)
     run = db.get(AIRun, run_id)
     if run is None:
         raise HTTPException(404, "AI 任务不存在")
     authorize_run(db, user, run)
-    return {"code": 200, "msg": "success", "data": describe_run(run)}
+    return {"code": 200, "msg": "success", "data": describe_run(run, user=user)}
 
 
 @router.post("/ai/runs/{run_id}/cancel")
 def cancel_run(run_id: str, db: Session = Depends(get_db), user: User = Depends(get_current_user)) -> dict:
     """Stop accepting a result; an already sent provider call may still finish."""
+    from app.ai.native_task_access import guard_private_task_read
+
+    guard_private_task_read(db, user, run_id)
     run = db.get(AIRun, run_id)
     if run is None:
         raise HTTPException(404, "AI 任务不存在")
+    from app.ai.charge_reconciliation_storage import is_charge_run
+
+    if is_charge_run(db, run):
+        from app.ai.charge_reconciliation_execution import cancel_charge_run
+
+        cancel_charge_run(db, user, run_id)
+        return {"code": 200, "msg": "任务结果已取消接收"}
     authorize_run(db, user, run)
+    from app.ai.document_extraction_storage import is_extraction_run
+
+    if is_extraction_run(db, run):
+        from app.ai.document_extraction_runtime import cancel_document_run
+
+        cancel_document_run(db, user, run_id)
+        return {"code": 200, "msg": "任务结果已取消接收"}
     if run.status not in {"queued", "running"}:
         raise HTTPException(409, "任务已结束")
     changed = db.query(AIRun).filter(AIRun.run_id == run_id, AIRun.status.in_(["queued", "running"])).update({"status": "cancelled", "finish_time": utcnow()}, synchronize_session=False)
@@ -383,12 +533,29 @@ def cancel_run(run_id: str, db: Session = Depends(get_db), user: User = Depends(
 @router.post("/ai/runs/{run_id}/feedback")
 def review_result(run_id: str, req: FeedbackWrite, db: Session = Depends(get_db), user: User = Depends(get_current_user)) -> dict:
     """Append review without editing clinical records, orders or prescriptions."""
+    from app.ai.native_task_access import guard_private_task_read
+
+    guard_private_task_read(db, user, run_id)
     run = db.get(AIRun, run_id)
     if run is None:
         raise HTTPException(404, "AI 任务不存在")
     authorize_run(db, user, run)
     if run.status != "succeeded":
         raise HTTPException(409, "只能复核已成功生成的建议")
+    from app.ai.charge_reconciliation_storage import is_charge_run
+
+    charge = is_charge_run(db, run)
+    if charge:
+        from app.ai.charge_reconciliation_receipts import load_terminal
+
+        load_terminal(db, run)
+    from app.ai.document_extraction_storage import is_extraction_run, load_result
+
+    if not charge and is_extraction_run(db, run):
+        load_result(db, run)
+        from app.ai.document_extraction_runtime import usage_receipt
+
+        usage_receipt(db, run)
     from app.ai.coding_evidence_storage import expand_result as expand_coding_result
     from app.ai.coding_evidence_storage import is_coding_run
 

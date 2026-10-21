@@ -30,8 +30,11 @@ def test_audit_readers_recheck_stale_super_before_any_run_read(db_session, seed_
     finally:
         event.remove(db_session, "do_orm_execute", observe)
         db_session.rollback()
-    assert len(sql) == 1 and "hoimsystem_users" in sql[0]
-    assert sql[0].rstrip().endswith("LOCK IN SHARE MODE")
+    # Billing Gate precedes actor locks for the global directory, which may
+    # contain native charge tasks. It carries no private Run or source body.
+    assert len(sql) == 2
+    assert "hoimsystem_ai_charge_write_gate" in sql[0] and sql[0].rstrip().endswith("FOR UPDATE")
+    assert "hoimsystem_users" in sql[1] and sql[1].rstrip().endswith("LOCK IN SHARE MODE")
 
 
 def test_expired_audit_actor_has_exactly_one_current_shared_read(db_session, seed_data):

@@ -119,7 +119,9 @@ def test_single_revision_fits_existing_version_column_and_follows_document_sourc
     config = Config(str(PATH.parents[2] / "alembic.ini"))
     config.set_main_option("script_location", str(PATH.parent.parent))
     script = ScriptDirectory.from_config(config)
-    assert script.get_heads() == [migration.revision]
+    heads = script.get_heads()
+    assert len(heads) == 1
+    assert migration.revision in {value.revision for value in script.walk_revisions(base="base", head=heads[0])}
 
 
 def test_actual_up_down_up_preserves_every_old_table_ddl_and_complete_seed_rows(anchor_db):

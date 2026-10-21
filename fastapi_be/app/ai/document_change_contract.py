@@ -402,3 +402,100 @@ def check_clocks(recorded_at, governance):
     for value in (governance.reviewed_at, governance.revoked_at):
         if value is not None and value < recorded_at:
             raise ValueError("Review/revocation cannot predate actual registration")
+
+
+class DocumentChangeOriginal(e.StrictModel):
+    schema_version: Literal["document_change_original_source_v1"]
+    original: e.OriginalReference
+    raw_bytes_hash: e.SHA256
+    raw_bytes_length: int = Field(strict=True, ge=1, le=e.MAX_ORIGINAL_BYTES)
+    codepoint_length: int = Field(strict=True, ge=1, le=e.MAX_ORIGINAL_BYTES)
+    text: str = Field(min_length=1, max_length=e.MAX_ORIGINAL_BYTES)
+
+    @model_validator(mode="after")
+    def exact_bytes(self):
+        if self.raw_bytes_length != len(e.utf8(self.text)) or self.codepoint_length != len(self.text) or self.raw_bytes_hash != e.bytes_hash(self.text):
+            raise ValueError("The complete original UTF8 bytes and codepoint counts must match")
+        byte_bound(self)
+        return self
+
+
+class ScopeReference(e.StrictModel):
+    scope_id: e.UUID
+    content_hash: e.SHA256
+    governance_hash: e.SHA256
+
+
+class PublicTarget(e.StrictModel):
+    target: TargetReference
+    snapshot_hash: e.SHA256
+    state: Literal["current", "inactive", "stale", "unknown", "missing"]
+    within_declared_scope: bool = Field(strict=True)
+
+
+class PublicRuleLink(e.StrictModel):
+    link_id: e.UUID
+    content_hash: e.SHA256
+    governance_hash: e.SHA256
+    original: e.OriginalReference
+    start: int = Field(strict=True, ge=0, le=e.MAX_ORIGINAL_BYTES)
+    end: int = Field(strict=True, ge=1, le=e.MAX_ORIGINAL_BYTES)
+    quote_bytes_hash: e.SHA256
+    target: TargetReference
+    target_snapshot_hash: e.SHA256
+    dependency_kind: Literal["declared_support", "declared_implementation", "requires_human_review"]
+    current: bool = Field(strict=True)
+    within_declared_scope: bool = Field(strict=True)
+
+
+class PublicPublication(e.StrictModel):
+    publication_id: e.UUID
+    content_hash: e.SHA256
+    governance_hash: e.SHA256
+    original: e.OriginalReference
+    candidate: e.CandidateReference
+    knowledge_document_id: e.UUID
+    knowledge_content_hash: e.SHA256
+    bound_source_current: bool = Field(strict=True)
+    ineligibility_reasons: list[e.Ineligibility] = Field(max_length=6)
+
+
+class DocumentChangeSource(e.StrictModel):
+    schema_version: Literal["document_change_source_v1"]
+    scope: ScopeReference
+    baseline: DocumentChangeOriginal
+    candidate: DocumentChangeOriginal
+    relationship_kind: Literal["declared_successor", "comparison_only"]
+    same_guideline_family: Review
+    rule_link_coverage: Literal["complete_within_declared_scope", "incomplete", "unknown"]
+    targets: list[PublicTarget] = Field(max_length=MAX_MEMBERS)
+    rule_links: list[PublicRuleLink] = Field(max_length=MAX_MEMBERS)
+    publications: list[PublicPublication] = Field(max_length=MAX_MEMBERS)
+    member_count: int = Field(strict=True, ge=2, le=MAX_MEMBERS)
+    inventory_hash: e.SHA256
+    hospital_wide_rule_inventory: Literal["not_provided"]
+    clinical_validation: Literal["not_provided"]
+
+    @model_validator(mode="after")
+    def complete_originals_and_refs(self):
+        baseline = self.baseline
+        candidate = self.candidate
+        if baseline.original.original_id == candidate.original.original_id:
+            raise ValueError("The exact two public original identities must remain distinct")
+        originals = {value.original.original_id: value.original for value in (baseline, candidate)}
+        targets = [target_key(value.target) for value in self.targets]
+        links = [value.link_id for value in self.rule_links]
+        publications = [value.publication_id for value in self.publications]
+        if targets != sorted(set(targets)) or links != sorted(set(links)) or publications != sorted(set(publications)):
+            raise ValueError("The complete public dependency sets are canonical and unique")
+        if self.member_count != 2 + len(targets) + len(links) + 3 * len(publications):
+            raise ValueError("The public and private dependency member counts must agree")
+        if any(
+            value.original.original_id not in originals or value.original != originals[value.original.original_id] or target_key(value.target) not in targets or value.start >= value.end
+            for value in self.rule_links
+        ):
+            raise ValueError("Public links may only reference the two exact originals and retained targets")
+        if any(value.original.original_id not in originals or value.original != originals[value.original.original_id] for value in self.publications):
+            raise ValueError("Publications may only reference the two exact originals")
+        byte_bound(self)
+        return self

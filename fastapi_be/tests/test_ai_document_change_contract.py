@@ -212,3 +212,18 @@ def test_whole_utf8_budget_counts_escaped_json_and_never_truncates():
     original = "😀" * 25
     assert c.byte_bound({"text": original}, maximum=120) is None
     assert len(original) == 25
+
+
+def test_comparison_original_has_independent_four_mib_registration_limit_not_the_old_65k_task_type():
+    text = "字" * 24000
+    value = c.DocumentChangeOriginal(
+        schema_version="document_change_original_source_v1",
+        original=reference(original(71)),
+        raw_bytes_hash=e.bytes_hash(text),
+        raw_bytes_length=len(text.encode()),
+        codepoint_length=len(text),
+        text=text,
+    )
+    assert value.raw_bytes_length == 72000 and value.text == text
+    with pytest.raises(ValidationError):
+        c.DocumentChangeOriginal.model_validate({**value.model_dump(), "raw_bytes_hash": "f" * 64})

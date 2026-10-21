@@ -5,6 +5,7 @@ import json
 import pytest
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy import event
+from sqlalchemy.dialects import mysql
 
 from app.ai import charge_reconciliation_sources as s
 from app.ai.charge_reconciliation_models import AIChargeCaseSnapshot
@@ -96,3 +97,25 @@ async def test_actual_main_scope_privacy_role_and_utf8_fail_closed(source_app, c
         assert response.status_code == (422 if kind in {"surrogate_note", "unknown_field"} else 403), response.text
         assert db.query(AIChargeCaseSnapshot).filter_by(admission_id=case["admission"].admission_id).count() == 0
         assert LITERAL not in response.text
+
+
+@pytest.mark.asyncio
+async def test_metadata_count_is_current_locking_read_even_after_an_old_rr_snapshot(source_app, charge_case, auth_headers):
+    case, db = charge_case, charge_case["db"]
+    statements = []
+
+    def observe(state):
+        if state.is_select:
+            sql = str(state.statement.compile(dialect=mysql.dialect()))
+            if "count(" in sql.lower() and "hoimsystem_ai_charge_case_snapshot" in sql:
+                statements.append(sql)
+
+    event.listen(db, "do_orm_execute", observe)
+    try:
+        async with AsyncClient(transport=ASGITransport(app=source_app), base_url="http://synthetic") as client:
+            response = await client.get("/api/ai/charge-reconciliation/cases", headers=auth_headers(case["super_admin_user"].username), params=request(case))
+        assert response.status_code == 200
+        assert len(statements) == 1 and "LOCK IN SHARE MODE" in statements[0]
+        assert "snapshot_json" not in statements[0] and "projection_json" not in statements[0]
+    finally:
+        event.remove(db, "do_orm_execute", observe)

@@ -84,7 +84,7 @@ def list_cases(
     query = db.query(AIChargeCaseSnapshot)
     if patient_id is not None:
         query = query.filter_by(patient_id=patient_id, admission_id=admission_id)
-    total = query.with_entities(func.count(AIChargeCaseSnapshot.case_snapshot_id)).scalar()
+    total = current_charge_rows(query.with_entities(func.count(AIChargeCaseSnapshot.case_snapshot_id)), shared=True).scalar()
     columns = ("case_snapshot_id", "patient_id", "admission_id", "schema_version", "created_at", "created_by", "collection_digest", "content_hash", "status", "revision", "reviewed_at", "revoked_at")
     rows = (
         current_charge_rows(query.with_entities(*(getattr(AIChargeCaseSnapshot, key) for key in columns)), shared=True)

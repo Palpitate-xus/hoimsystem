@@ -13,6 +13,14 @@ const positive=v=>Number.isSafeInteger(v)&&v>0&&v<=2147483647,nonnegative=v=>Num
 const bytes=v=>encoder.encode(typeof v==='string'?v:canonical(v)).length;
 const valid=(name,v)=>scalarJsonValue(v)&&generatedSchemaMatches(schemas,name,v);
 const current=options=>!options.current||options.current()===true;
+// A surviving native identity is a dispatch requirement, never proof of validity.
+// Own-key checks intentionally retain damaged/null native markers for strict rejection.
+export function chargeRunHasNativeMarkers(value){
+ if(!object(value))return false;
+ if(['charge_artifact','charge_findings','charge_case_id'].some(name=>Object.hasOwn(value,name))||Object.hasOwn(value.result||{},'charge_analysis')||Object.hasOwn(value.frozen_request?.payload?.input||{},'charge_case_id'))return true;
+ return [value,value.frozen_request?.payload?.context,value.operational_findings].some(context=>object(context)&&(Object.hasOwn(context,'charge_binding')||context.source_domain==='single_admission_recorded_ledger'||object(context.selected_sources)&&Object.hasOwn(context.selected_sources,'charge_case_id')));
+}
+
 const metadataNames=['snapshot_time','source_count','department_ids','context_digest','clinical_context_fingerprint','missing_data'];
 const extraMetadata=['feature_revision','validation_status','tool_fingerprint','instructions_digest','model_version'];
 const shortNames=['scope','source_domain','department_ids','selected_sources','charge_binding','scope_note','missing_data','truncated_sources','snapshot_time'];

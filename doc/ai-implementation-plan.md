@@ -476,3 +476,5 @@
 - 2026-10-21 第80项MySQL第四轮一次80检查85.480s全部绿并清理，重复原55+新增25机制在同一新实例，非相加重跑。真实395176B语义结果/386B原Run短指针、在途取消11/null及撤review/role/epoch/config结算、503真实unknown、取消已知零/中断未知、旧RR新完整result、own未提交null marker，以及四阶段×三种权威触发变更共12次整事务回滚通过，1214collector稳定/guards0。第三轮48项后新增harness把模型与dict错误比较的真实RED和未执行的错误orphan脚本一起保留；只修harness，产品仍ee3ce3b。旧RR全局目录count/rows当前只有SQL/SQLite证据，额外MySQL检查随后补齐。
 
 - 2026-10-21 第80项MySQL第五轮一次81检查88.031s全部绿并清理：同轮重跑80机制，再实证旧RR在新任务commit后全局mixed及training筛选的当前SHARE总数=列表完整实际集合、新Task可见、Sup binding全null。1214源逐字同ee3/前轮且稳定、guard0；不将80+独立1相加、不泛化到其它新域，全部runner/worker/phase/extra及报告无损保存。
+
+- 2026-10-21 第80项同案配置补包：原Main packet整文件1P12.44pytest/23.501outer，1216输入稳定；同一次新案例真实GET learner features/Sup features/Prompt/provider四包+其Source/Practice/七态原63=完整67 HTTP，419954B SHA d0eaeb4b14fc36e193082466c4e92bba6701b906fe43fdd4ea63b493999ac772。旧63逐字保留，全部新67同案不跨包拼接。前两新plugin在cancel commit后读取过期ORM用户名而打开test fixture Session，触发零测试SQL断言/次生export缺失；只缓存真实headers提前，诊断原件保留，不说产品SQL跨await。原contextmanager工厂导致通用OperationLog警告不证明审计行持久化，私有MySQL另证。另四独立SQL故障已复现产品未知异常被误结算0/0/false，当前修复并重新验证，不属本67已绿范围。

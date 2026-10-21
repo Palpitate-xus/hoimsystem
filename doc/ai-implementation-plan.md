@@ -478,3 +478,5 @@
 - 2026-10-21 第80项MySQL第五轮一次81检查88.031s全部绿并清理：同轮重跑80机制，再实证旧RR在新任务commit后全局mixed及training筛选的当前SHARE总数=列表完整实际集合、新Task可见、Sup binding全null。1214源逐字同ee3/前轮且稳定、guard0；不将80+独立1相加、不泛化到其它新域，全部runner/worker/phase/extra及报告无损保存。
 
 - 2026-10-21 第80项同案配置补包：原Main packet整文件1P12.44pytest/23.501outer，1216输入稳定；同一次新案例真实GET learner features/Sup features/Prompt/provider四包+其Source/Practice/七态原63=完整67 HTTP，419954B SHA d0eaeb4b14fc36e193082466c4e92bba6701b906fe43fdd4ea63b493999ac772。旧63逐字保留，全部新67同案不跨包拼接。前两新plugin在cancel commit后读取过期ORM用户名而打开test fixture Session，触发零测试SQL断言/次生export缺失；只缓存真实headers提前，诊断原件保留，不说产品SQL跨await。原contextmanager工厂导致通用OperationLog警告不证明审计行持久化，私有MySQL另证。另四独立SQL故障已复现产品未知异常被误结算0/0/false，当前修复并重新验证，不属本67已绿范围。
+
+- 2026-10-21 新任意交付异常4项真实RED发现旧产品错误0/0/false后，精确SIGINT停止本域旧完整candidate；实际1687P/0skip/16warn，805.15s pytest/818.217s outer，源1216稳定，exit2。本轮无已执行assertion失败，但不能证明新修复；未执行后续用例不算pass/skip，全部raw/JUnit保留，修正完成后fresh完整重新开始。运维原JUnit额外一个中断entry不多算一P。

@@ -450,25 +450,69 @@ def expand_result(db, run, *, user=None):
 
 
 def is_satisfaction_run(db, run):
-    """Immutable Artifact routing identity survives deleted optional JSON markers."""
-    if run.feature_key == FEATURE_KEY:
-        return True
+    """Keep only explicitly identified pre-Case feedback history read-only.
+
+    This classifier grants no authority or execution. Root's shared recheck
+    rejects legacy inference. An immutable Artifact or any retained dedicated
+    marker always overrides a forged legacy body.
+    """
+    from app.ai.catalog import COMMON_SYSTEM_PROMPT
+
+    def pairs(items):
+        value = {}
+        for key, child in items:
+            if key in value:
+                raise ValueError("Duplicate retained task JSON member")
+            value[key] = child
+        return value
+
+    def finite(_):
+        raise ValueError("Nonfinite retained task JSON")
+
+    def parse(raw):
+        text_hash(raw)
+        value = json.loads(raw, object_pairs_hook=pairs, parse_constant=finite)
+        canonical_json(value).encode("utf-8", errors="strict")
+        return value
+
+    def markers(value):
+        if isinstance(value, dict):
+            return (
+                bool({"satisfaction_binding", "satisfaction_source", "satisfaction_case", "satisfaction_case_id", "satisfaction_analysis"} & value.keys())
+                or value.get("schema_version") == REFERENCE_SCHEMA
+                or any(markers(child) for child in value.values())
+            )
+        return isinstance(value, list) and any(markers(child) for child in value)
+
     try:
-        if isinstance(run.input_json, str):
-            snapshot = json.loads(run.input_json)
-            payload = snapshot.get("payload") if isinstance(snapshot, dict) else None
-            context = payload.get("context") if isinstance(payload, dict) else None
-            values = payload.get("input") if isinstance(payload, dict) else None
-            if isinstance(context, dict) and {"satisfaction_binding", "satisfaction_source", "satisfaction_case"} & context.keys() or isinstance(values, dict) and "satisfaction_case_id" in values:
-                return True
-        if isinstance(run.result_json, str):
-            result = json.loads(run.result_json)
-            if isinstance(result, dict) and (result.get("schema_version") == REFERENCE_SCHEMA or "satisfaction_analysis" in result):
-                return True
+        snapshot = parse(run.input_json) if isinstance(run.input_json, str) else None
+        result = parse(run.result_json) if isinstance(run.result_json, str) else None
+        if markers(snapshot) or markers(result):
+            return True
     except (ValueError, TypeError, UnicodeError, RecursionError) as exc:
+        if run.feature_key == FEATURE_KEY:
+            return True
         raise HTTPException(409, "已存评价任务JSON无效，不能降级读取") from exc
-    if db is None or not run.run_id:
+    state = inspect(run, raiseerr=False)
+    identifier = state.identity[0] if state is not None and state.identity is not None else getattr(run, "run_id", None)
+    if db is not None and identifier:
+        with db.no_autoflush:
+            # Immutable routing locator only; no Artifact S lock before Gate.
+            if db.query(AISatisfactionRunArtifact.run_id).filter_by(run_id=identifier).first() is not None:
+                return True
+    if run.feature_key != FEATURE_KEY:
         return False
-    with db.no_autoflush:
-        # Immutable routing locator only. Actual reads take Gate before Artifact.
-        return db.query(AISatisfactionRunArtifact.run_id).filter_by(run_id=run.run_id).first() is not None
+    payload = snapshot.get("payload") if isinstance(snapshot, dict) else None
+    context = payload.get("context") if isinstance(payload, dict) else None
+    values = payload.get("input") if isinstance(payload, dict) else None
+    legacy = (
+        db is not None
+        and identifier
+        and isinstance(snapshot, dict)
+        and snapshot.get("system_prompt") == COMMON_SYSTEM_PROMPT
+        and isinstance(context, dict)
+        and context.get("source_domain") == "feedback"
+        and isinstance(values, dict)
+        and isinstance(result, dict)
+    )
+    return not bool(legacy)

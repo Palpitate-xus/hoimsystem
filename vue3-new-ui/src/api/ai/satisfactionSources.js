@@ -1,7 +1,6 @@
 import request from '@/utils/request';
 import {supportCanonical as canonical,supportDigest as digest,supportHash as sha,supportId as uuid} from '@/api/inpatientSupport';
 import {decodeGeneratedSchemas,generatedSchemaMatches} from '@/api/sofaSchema';
-import {supplySourceBasis} from './supplySources';
 import packed from './satisfactionSchemas.json';
 
 const schemas=decodeGeneratedSchemas(packed.schemas),encoder=new TextEncoder();
@@ -13,8 +12,9 @@ const scalar=v=>typeof v==='string'&&!/[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\
 function allScalars(v){return typeof v==='string'?scalar(v):Array.isArray(v)?v.every(allScalars):object(v)?Object.entries(v).every(([k,x])=>scalar(k)&&allScalars(x)):v===null||typeof v==='boolean'||Number.isSafeInteger(v);}
 const model=(name,v)=>generatedSchemaMatches(schemas,name,v)&&allScalars(v)&&bytes(v)<=8388608;
 export const satisfactionSchema=name=>Object.hasOwn(schemas,name)?structuredClone(schemas[name]):null;
-export const satisfactionBasis=v=>scalar(v)&&supplySourceBasis(v);
-export const satisfactionRevokeBasis=v=>scalar(v)&&supplySourceBasis(v,1000);
+const basis=(v,max)=>scalar(v)&&Array.from(v).length>=20&&Array.from(v).length<=max&&!!pythonStrip(v)&&bytes(v)<=4000;
+export const satisfactionBasis=v=>basis(v,4000);
+export const satisfactionRevokeBasis=v=>basis(v,1000);
 export const satisfactionReferencesValid=v=>keys(v,['satisfaction_case_id'])&&uuid(v.satisfaction_case_id);
 const date=v=>{try{return typeof v==='string'&&/^\d{4}-\d\d-\d\d$/.test(v)&&!v.startsWith('0000-')&&new Date(v+'T00:00:00.000Z').toISOString()===v+'T00:00:00.000Z';}catch{return false;}};
 const clock=v=>{try{return typeof v==='string'&&/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d\.\d{6}Z$/.test(v)&&!v.startsWith('0000-')&&new Date(v.slice(0,23)+'Z').toISOString()===v.slice(0,23)+'Z';}catch{return false;}};
@@ -64,7 +64,8 @@ function parentMaps(c){return Object.fromEntries([['doctors','doctor_id'],['pati
 function parentState(c,r,p){const d=p.doctors.get(r.doctor_id),patient=p.patients.get(r.patient_id),v=p.visits.get(r.visit_id),reg=v?p.registrations.get(v.registration_uuid):null;if(!d||!patient||!v||v.patient_id!==r.patient_id||v.doctor_id!==r.doctor_id)return null;if(v.registration_uuid!==null&&(!reg||reg.patient_id!==r.patient_id||reg.doctor_id!==r.doctor_id))return null;const department=reg?reg.department_id:d.department_id;return c.parents.department_ids.includes(department)?[d,patient,v,reg||null,department]:null;}
 async function legacyFingerprint(c,r,p){const state=parentState(c,r,p),time=legacy(r.review_time);if(!state||!time||!['null','integer'].includes(r.score.kind))return null;const[d,patient,v,reg,department]=state,pythonTime=time.slice(0,19).replace('T',' ')+(time.slice(20)==='000000'?'':'.'+time.slice(20));return digest({review:{...pick(r,['review_id','patient_id','doctor_id','visit_id','comment']),review_time:pythonTime,score:r.score.kind==='null'?null:Number(r.score.text)},visit:v,registration:reg,department_id:department,patient_identifiers:['name','identity','phone','address'].map(k=>patient[k]),doctor_identifiers:[d.name,d.phone]});}
 function minimize(text,p,d){for(const k of ['name','identity','phone','address'])if(p[k]&&Array.from(p[k]).length>=2)text=text.split(p[k]).join('[已隐藏直接标识]');text=text.replace(/(?<!\p{Decimal_Number})\p{Decimal_Number}{17}[\p{Decimal_Number}Xx](?!\p{Decimal_Number})/gu,'[证件号已隐藏]').replace(/(?<!\p{Decimal_Number})1[3-9]\p{Decimal_Number}{9}(?!\p{Decimal_Number})/gu,'[手机号已隐藏]');for(const value of [d.name,d.phone])if(value&&Array.from(value).length>=2)text=text.split(value).join('[已隐藏医务人员标识]');return text;}
-const pythonStrip=v=>v.replace(/^[\s\u0085\u001c-\u001f]+|[\s\u0085\u001c-\u001f]+$/gu,'');
+// Python str.strip uses this exact whitespace set; BOM is an original scalar.
+const pythonStrip=v=>v.replace(/^[\u0009-\u000d\u001c-\u0020\u0085\u00a0\u1680\u2000-\u200a\u2028\u2029\u202f\u205f\u3000]+|[\u0009-\u000d\u001c-\u0020\u0085\u00a0\u1680\u2000-\u200a\u2028\u2029\u202f\u205f\u3000]+$/gu,'');
 async function originalOptions(c){
  const p=parentMaps(c),reviews=new Map(c.reviews.map(r=>[r.review_id,r])),options=[],counts=new Map();
  for(const e of c.excerpts){const r=reviews.get(e.review_id),state=parentState(c,r,p),reasons=[];if(e.status!=='published')reasons.push('excerpt_not_published');if(!state)reasons.push('unresolved_actual_parent');if(await legacyFingerprint(c,r,p)!==e.source_hash)reasons.push('legacy_source_fingerprint_changed');if(await digest(e.redacted_text)!==e.text_hash)reasons.push('legacy_text_hash_changed');if(e.privacy_checked!==1)reasons.push('privacy_not_explicitly_checked');if(e.faithfulness_checked!==1)reasons.push('faithfulness_not_explicitly_checked');if(p.reviewers.get(e.reviewed_by)?.user_role!=='super_admin')reasons.push('reviewer_not_current_super_admin');const created=legacy(e.create_time),reviewed=legacy(e.reviewed_at);if(!created||!reviewed||reviewed<created)reasons.push('legacy_review_clock_unresolved');if(!pythonStrip(e.review_note)||!pythonStrip(e.change_note)||!pythonStrip(e.redacted_text)||e.version===null||e.version<1||e.revision===null||e.revision<2)reasons.push('manual_review_basis_incomplete');if(state){if(e.department_id!==state[4])reasons.push('legacy_parent_department_changed');if(minimize(e.redacted_text,state[1],state[0])!==e.redacted_text)reasons.push('known_direct_identifier_retained');}const content=await digest(pick(e,excerptBody)),governance=await digest(pick(e,excerptGov));options.push({e,reasons,content,governance,reviewToken:await digest(['satisfaction_capture_review',c.collection_digest,r.review_id,await digest(r)])});if(!reasons.length)counts.set(e.review_id,(counts.get(e.review_id)||0)+1);}

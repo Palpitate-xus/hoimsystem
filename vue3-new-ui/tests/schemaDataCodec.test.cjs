@@ -47,6 +47,21 @@ test('whole static source boundary; malformed registry and UTF8 refuse', () => {
   for (const invalid of ['null', '[]', '{"models":[],"nodes":[]}', '{"models":{},"nodes":[],"extra":0}']) assert.throws(() => loader.encodeSchemaData(invalid));
   assert.throws(() => loader.encodeSchemaData(Buffer.from([255])));
 });
+test('wrapped complete registries retain literal metadata and reject partial or unknown wrappers', () => {
+  const registry = JSON.parse(source);
+  for (const name of ['policy', 'constants']) {
+    const original = JSON.stringify({ schemas: registry, [name]: { text: '\ufeff\r\n🧪e\u0301', nested: [0, null, false] } });
+    const encoded = loader.encodeSchemaData(original);
+    assert.equal(decodeSchemaText(encoded.encoded, encoded.byteLength), original);
+    assert.deepEqual(decodeSchemaData(encoded.encoded, encoded.byteLength), JSON.parse(original));
+  }
+  for (const invalid of [
+    { schemas: registry }, { schemas: registry, extra: {} },
+    { schemas: registry, policy: {}, constants: {} }, { schemas: registry, policy: null },
+    { schemas: registry, constants: [] }, { schemas: { models: {} }, policy: {} },
+    { schemas: { models: {}, nodes: [], extra: 1 }, constants: {} },
+  ]) assert.throws(() => loader.encodeSchemaData(JSON.stringify(invalid)));
+});
 test('loader emits only data decoding; source modules and validation are retained', () => {
   const emitted = loader.call({ cacheable() {}, context: root, utils: { contextify: (_, value) => value } }, source);
   assert.ok(emitted.startsWith('module.exports = require('));

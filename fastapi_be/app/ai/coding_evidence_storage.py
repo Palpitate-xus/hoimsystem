@@ -10,6 +10,7 @@ from typing import Literal
 
 from fastapi import HTTPException
 from pydantic import Field, field_validator
+from sqlalchemy import inspect
 
 from app.ai.coding_evidence_input import SHA as SHA256
 from app.ai.coding_evidence_input import StrictModel
@@ -68,7 +69,15 @@ def is_coding_run(db, run):
     """Deleting optional JSON markers must not downgrade a governed coding run."""
     if run.feature_key == "drg_evidence_review" or is_coding_snapshot(json.loads(run.input_json)):
         return True
-    result = json.loads(run.result_json)
+    if run.result_json is None:
+        state = inspect(run, raiseerr=False)
+        if run.run_id is not None or state is None or not state.transient:
+            raise HTTPException(409, "已存任务缺少完整结果状态，不能降级读取")
+        # SQL insert defaults have not run for an unsaved legacy authorization
+        # object. It has no result marker yet; still retain the actual FK test.
+        result = {}
+    else:
+        result = json.loads(run.result_json)
     if isinstance(result, dict) and (result.get("schema_version") == "coding_result_ref_v1" or "coding_analysis" in result):
         return True
     if db is None:

@@ -272,3 +272,16 @@ async def test_every_original_provider_and_validation_field_is_required_for_comp
     db.commit()
     control = await async_client.get(f"/api/ai/runs/{claim[0]}", headers=headers)
     assert count == 17 and control.status_code == 200, control.text
+
+
+def test_unsaved_legacy_run_default_absence_preserves_strict_coding_markers(db_session):
+    from app.ai.coding_evidence_storage import is_coding_run
+
+    legacy = AIRun(feature_key="charge_reconciliation", input_json='{"payload":{"input":{},"context":{}}}')
+    assert legacy.run_id is None and legacy.result_json is None
+    assert is_coding_run(db_session, legacy) is False
+    legacy.input_json = '{"payload":{"input":{"coding_case_id":null},"context":{}}}'
+    assert is_coding_run(db_session, legacy) is True
+    legacy.input_json = '{"payload":{"input":{},"context":{}}}'
+    legacy.feature_key = "drg_evidence_review"
+    assert is_coding_run(db_session, legacy) is True

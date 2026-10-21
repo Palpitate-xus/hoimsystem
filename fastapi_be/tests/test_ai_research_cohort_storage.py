@@ -134,7 +134,7 @@ def test_actual_stale_request_epoch_is_rejected_before_any_task_text(configured,
     assert not task_body_selects(statements)
 
 
-@pytest.mark.parametrize("fault", ["audit_action", "audit_detail", "source_body", "provider", "actor"])
+@pytest.mark.parametrize("fault", ["audit_action", "audit_detail", "source_body", "provider", "actor", "run_clock"])
 def test_real_sql_postwrite_faults_rollback_exact_artifact_audit_and_run_without_new_business_writes(configured, fault):
     db, actor, run_id, _, values, _ = configured
     before = db.query(AIAuditEvent).count()
@@ -147,6 +147,8 @@ def test_real_sql_postwrite_faults_rollback_exact_artifact_audit_and_run_without
         command = "UPDATE hoimsystem_medical_record SET symptom='已知原来源在具体回执后变化' WHERE patient_id=" + str(configured[5]["patient"].patient_id) + ";"
     elif fault == "provider":
         command = "UPDATE hoimsystem_ai_provider SET enabled=0 WHERE provider_id=" + str(values["provider_id"]) + ";"
+    elif fault == "run_clock":
+        command = "UPDATE hoimsystem_ai_run SET create_time='2000-01-01 00:00:00' WHERE run_id=NEW.target;"
     else:
         command = "UPDATE hoimsystem_users SET user_role='patient' WHERE user_id=NEW.actor_id;"
     db.execute(text("CREATE TRIGGER research_artifact_fault AFTER INSERT ON hoimsystem_ai_audit_event WHEN NEW.action='research.task.artifact.create' BEGIN " + command + " END"))

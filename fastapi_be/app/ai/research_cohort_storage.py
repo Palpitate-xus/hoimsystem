@@ -143,6 +143,24 @@ def opaque_locator(db, run_id):
     ).one_or_none()
 
 
+def _created_detail(artifact, run):
+    get = artifact.__getitem__ if type(artifact) is dict else lambda key: getattr(artifact, key)
+    header = {
+        key: getattr(run, key)
+        for key in ("run_id", "feature_key", "requested_by", "patient_id", "encounter_ref", "preview", "provider_id", "provider_revision", "prompt_version", "prompt_hash", "context_digest")
+    }
+    header["create_time"] = utc_text(run.create_time)
+    return {
+        "schema_version": "research_artifact_created_v1",
+        "recorded_at": utc_text(get("recorded_at")),
+        "run_header": header,
+        **{
+            key: get(key)
+            for key in ("case_id", "source_projection_hash", "source_binding_hash", "prompt_snapshot_hash", "execution_snapshot_hash", "context_digest", "input_hash", "evidence_hash", "metadata_hash")
+        },
+    }
+
+
 def _frame_proof_impl(artifact):
     source = checked_source(_json(artifact.source_json, MAX_BYTES))
     binding = _json(artifact.source_binding_json, BINDING_BYTES)
@@ -190,6 +208,7 @@ def _frame_proof_impl(artifact):
         or artifact.source_bytes != len(artifact.source_json.encode("utf-8"))
         or artifact.source_projection_hash != digest(source)
         or artifact.source_projection_hash != _sha(artifact.source_json)
+        or utc_text(artifact.recorded_at) < source["captured_at"]
     ):
         raise HTTPException(409, "完整研究Source的原UTF8字节或公开投影SHA不一致")
     hashes = {"source_binding_hash": binding, "prompt_snapshot_hash": prompt, "execution_snapshot_hash": execution}
@@ -269,12 +288,7 @@ def load_artifact(db, user, run_id, *, audit_only=False, execution=False):
     if any(getattr(artifact, hash_key) != _sha(raw[field]) for hash_key, field in zip(("input_hash", "evidence_hash", "metadata_hash"), RAW_FIELDS, strict=True)):
         raise HTTPException(409, "科研短任务原始TEXT SHA不一致")
     created = current_research_rows(db.query(AIAuditEvent).filter_by(event_id=artifact.created_audit_event_id), shared=True).one_or_none()
-    detail = canonical_json(
-        {
-            key: getattr(artifact, key)
-            for key in ("case_id", "source_projection_hash", "source_binding_hash", "prompt_snapshot_hash", "execution_snapshot_hash", "context_digest", "input_hash", "evidence_hash", "metadata_hash")
-        }
-    )
+    detail = canonical_json(_created_detail(artifact, run))
     if created is None or created.actor_id != artifact.requested_by or created.target != run_id or created.action != "research.task.artifact.create" or created.detail_json != detail:
         raise HTTPException(409, "科研创建回执不是原具体AuditPK或内容已变")
     if execution:
@@ -350,12 +364,7 @@ def freeze_artifact(db, user, run_id, case_id, *, question=None):
         **{key: _sha(raw[field]) for key, field in zip(("input_hash", "evidence_hash", "metadata_hash"), RAW_FIELDS, strict=True)},
         "usage_event_id": None,
     }
-    detail = canonical_json(
-        {
-            key: values[key]
-            for key in ("case_id", "source_projection_hash", "source_binding_hash", "prompt_snapshot_hash", "execution_snapshot_hash", "context_digest", "input_hash", "evidence_hash", "metadata_hash")
-        }
-    )
+    detail = canonical_json(_created_detail(values, run))
     audit = AIAuditEvent(actor_id=actor.user_id, action="research.task.artifact.create", target=run_id, detail_json=detail)
     db.add(audit)
     db.flush()

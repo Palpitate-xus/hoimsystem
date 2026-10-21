@@ -371,6 +371,9 @@ def stage_run(db, user, run, prepared, snapshot):
     if dict(actual_run._mapping) != expected_run or dict(actual_artifact._mapping) != expected_artifact:
         raise HTTPException(409, "实际Run全部字段、完整Artifact或创建指针在写回后发生变化")
     grants._exact_audit(db, audit_id, audit_expected)
+    from app.ai.native_task_routing import remember_staged_identity
+
+    remember_staged_identity(db, stored.artifact)
     return stored
 
 

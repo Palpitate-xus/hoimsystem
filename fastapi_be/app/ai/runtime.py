@@ -95,6 +95,10 @@ def _check_run_storage_json(serialized: dict[str, str]) -> None:
 
 def create_run(db: Session, user: User, req: RunRequest) -> AIRun:
     """Freeze an authorized, source-linked request before a durable worker processes it."""
+    if req.feature_key == "incident_rca":
+        from app.ai.rca_evidence_runtime import create_rca_run
+
+        return create_rca_run(db, user, req)
     if req.feature_key == "feedback_analysis":
         from app.ai.satisfaction_runtime import create_satisfaction_run
 
@@ -394,6 +398,10 @@ def create_run(db: Session, user: User, req: RunRequest) -> AIRun:
 
 def authorize_run(db: Session, user: User, run: AIRun) -> None:
     """Re-check current permissions, including revoked care access, on every result read."""
+    from app.ai.rca_evidence_dispatch import guard_rca_task
+
+    if guard_rca_task(db, user, run):
+        return
     from app.ai.charge_reconciliation_storage import is_charge_run
 
     if is_charge_run(db, run):
@@ -873,6 +881,18 @@ def claim_next_run(db: Session) -> tuple[str, str] | None:
         return None
     identity = locate_native_task(db, candidate.run_id)
     domain = identity.domain if identity is not None else None
+    if identity is None:
+        from app.ai.rca_evidence_dispatch import is_rca_task
+
+        is_rca_task(db, candidate.run_id)  # Reject orphan/null markers before any generic claim write.
+    if domain == "rca" or domain is None and candidate.feature_key == "incident_rca":
+        from app.ai.rca_evidence_dispatch import is_rca_task
+        from app.ai.rca_evidence_runtime import claim_rca_run
+
+        if not is_rca_task(db, candidate.run_id):
+            raise HTTPException(409, "RCA任务缺少实际Artifact，未通用claim")
+        lease = claim_rca_run(db, candidate.run_id)
+        return (candidate.run_id, lease) if lease is not None else None
     if domain == "drug_label" or domain is None and candidate.feature_key == "drug_label_extraction":
         from app.ai.drug_label_runtime import claim_drug_label_run
 
@@ -900,6 +920,10 @@ def claim_next_run(db: Session) -> tuple[str, str] | None:
 
 
 def _recheck_task(db: Session, run: AIRun) -> tuple[FeatureSpec, AIProvider, dict]:
+    from app.ai.rca_evidence_dispatch import is_rca_task
+
+    if is_rca_task(db, run):
+        raise AIExecutionError("TASK_CONTRACT_CHANGED", "RCA原生任务须使用独立claim、dispatch与Source合同")
     if run.feature_key == "feedback_analysis":
         raise AIExecutionError("TASK_CONTRACT_CHANGED", "旧评价任务仅可读取历史；须明确选择受审完整原件后新建任务")
     if run.feature_key == "drug_label_extraction":
@@ -995,17 +1019,27 @@ async def execute_claimed(run_id: str, lease: str, *, transport=None) -> None:
         header = routing_db.query(AIRun.run_id, AIRun.feature_key).filter(AIRun.run_id == run_id, AIRun.status.in_(["running", "cancelled"]), AIRun.lease_token == lease).one_or_none()
         identity = locate_native_task(routing_db, run_id) if header is not None else None
         domain = identity.domain if identity is not None else None
+        rca_task = header is not None and (domain == "rca" or domain is None and header.feature_key == "incident_rca")
+        if header is not None and domain is None:
+            from app.ai.rca_evidence_dispatch import is_rca_task
+
+            is_rca_task(routing_db, run_id)  # Orphan markers reject before generic Task TEXT.
         drug_label_task = header is not None and (domain == "drug_label" or domain is None and header.feature_key == "drug_label_extraction")
         satisfaction_task = header is not None and (domain == "satisfaction" or domain is None and header.feature_key == "feedback_analysis")
         document_task = header is not None and (domain == "document" or domain is None and header.feature_key == "guideline_ingestion")
         charge = domain == "charge"
         # Legacy tasks without a durable native identity retain their original
         # read/dispatch contracts; no erased real Artifact can enter this path.
-        routing_run = routing_db.get(AIRun, run_id) if header is not None and domain is None and not any((drug_label_task, satisfaction_task, document_task)) else None
+        routing_run = routing_db.get(AIRun, run_id) if header is not None and domain is None and not any((rca_task, drug_label_task, satisfaction_task, document_task)) else None
         if routing_run is not None:
             charge = is_charge_run(routing_db, routing_run)
             satisfaction_task = not charge and is_satisfaction_run(routing_db, routing_run)
             document_task = not charge and not satisfaction_task and is_extraction_run(routing_db, routing_run)
+    if rca_task:
+        from app.ai.rca_evidence_execution import execute_rca_claimed
+
+        await execute_rca_claimed(run_id, lease, transport=transport)
+        return
     if drug_label_task:
         from app.ai.drug_label_runtime import execute_drug_label_claimed
 
@@ -1410,10 +1444,13 @@ def expire_interrupted_runs(db: Session) -> int:
     from app.ai.charge_reconciliation_run_models import AIChargeRunArtifact
     from app.ai.drug_label_run_models import AIDrugLabelRunArtifact
     from app.ai.drug_label_runtime import expire_interrupted_drug_label_runs
+    from app.ai.rca_evidence_execution import expire_interrupted_rca_runs
+    from app.ai.rca_evidence_run_models import AIRcaEvidenceRunArtifact
     from app.ai.satisfaction_artifact_models import AISatisfactionRunArtifact
     from app.ai.satisfaction_execution import expire_interrupted_satisfaction_runs
 
-    recovered = expire_interrupted_charge_runs(db)
+    recovered = expire_interrupted_rca_runs(db)
+    recovered += expire_interrupted_charge_runs(db)
     recovered += expire_interrupted_satisfaction_runs(db)
     recovered += expire_interrupted_drug_label_runs(db)
     deadline = utcnow() - datetime.timedelta(minutes=10)
@@ -1422,7 +1459,8 @@ def expire_interrupted_runs(db: Session) -> int:
         .filter(
             AIRun.status == "running",
             AIRun.start_time < deadline,
-            AIRun.feature_key != "drug_label_extraction",
+            AIRun.feature_key.notin_(["drug_label_extraction", "incident_rca"]),
+            ~AIRun.run_id.in_(db.query(AIRcaEvidenceRunArtifact.run_id)),
             ~AIRun.run_id.in_(db.query(AIChargeRunArtifact.run_id)),
             ~AIRun.run_id.in_(db.query(AISatisfactionRunArtifact.run_id)),
             ~AIRun.run_id.in_(db.query(AIDrugLabelRunArtifact.run_id)),

@@ -56,8 +56,13 @@ def lock_directory_gates(db):
 
 def guard_private_task_read(db, user, run_id):
     from app.ai.drug_label_runtime import guard_drug_label_run_id
+    from app.ai.rca_evidence_dispatch import guard_rca_task
     from app.ai.satisfaction_storage import guard_satisfaction_run_id
 
+    # This domain has no global Gate. Only opaque immutable identities precede
+    # its current Actor -> Event -> original purposes -> Task body authority.
+    if guard_rca_task(db, user, run_id):
+        return
     # Locators identify a native domain; its complete authority proof follows
     # before loading Task TEXT. Gates remain in the same mixed-directory order.
     lock_directory_gates(db)

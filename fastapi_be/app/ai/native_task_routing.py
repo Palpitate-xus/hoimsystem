@@ -26,6 +26,7 @@ def _domains():
     from app.ai.charge_reconciliation_run_models import AIChargeRunArtifact
     from app.ai.document_extraction_models import AIDocumentExtractionRunAnchor
     from app.ai.drug_label_run_models import AIDrugLabelRunArtifact
+    from app.ai.rca_evidence_run_models import AIRcaEvidenceRunArtifact
     from app.ai.satisfaction_artifact_models import AISatisfactionRunArtifact
 
     return (
@@ -33,6 +34,7 @@ def _domains():
         ("satisfaction", AISatisfactionRunArtifact, "case_id"),
         ("document", AIDocumentExtractionRunAnchor, "original_id"),
         ("drug_label", AIDrugLabelRunArtifact, "source_binding_id"),
+        ("rca", AIRcaEvidenceRunArtifact, "case_id"),
     )
 
 

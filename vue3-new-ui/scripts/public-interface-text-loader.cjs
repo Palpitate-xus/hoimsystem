@@ -23,7 +23,7 @@ function transformPublicText(source, context, pool = null) {
     }},
     StringLiteral(p){
       const value=p.node.value;
-      if (!isValueLiteral(p)) return;
+      if (!isValueLiteral(p, relative)) return;
       let i=index.get(value);
       // Vue may combine static HTML differently under its scoped compiler.
       // An unpooled literal retains its original executable-source value.

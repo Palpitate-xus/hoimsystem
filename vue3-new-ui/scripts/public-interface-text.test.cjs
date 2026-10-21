@@ -63,3 +63,19 @@ test('module requests, URL assets and named module keys keep their static gramma
  const code=`const x=require(${JSON.stringify(literal)});const y=import(${JSON.stringify(literal)});new URL(${JSON.stringify(literal)},import.meta.url);export {x as ${JSON.stringify(literal)}};`;
  assert.deepEqual(transformPublicText(code,context).values,[]);
 });
+
+test('API contract strings keep exact runtime values while Vue ASCII component names stay static',()=>{
+ const value='complete_public_contract_v1',pool={values:[value]},api={...context,resourcePath:path.join(root,'src/api/ai/documentEvidence.js')};
+ const code=`module.exports={value:${JSON.stringify(value)},${JSON.stringify(value)}:9};`;
+ const transformed=transformPublicText(code,api,pool),module={exports:{}};
+ vm.runInNewContext(transformed.code,{module,require:()=>index=>pool.values[index]});
+ assert.equal(module.exports.value,value);assert.equal(module.exports[value],9);assert.deepEqual(transformed.values,[value]);
+ const vue=transformPublicText(`module.exports=_resolveComponent(${JSON.stringify(value)});`,context,pool);
+ assert.deepEqual(vue.values,[]);assert(vue.code.includes(JSON.stringify(value)));
+});
+
+test('ASCII API import, require resolution and bundler URL dependencies keep literal arguments',()=>{
+ const value='public_module_resource_v1',api={...context,resourcePath:path.join(root,'src/api/ai/documentEvidence.js')};
+ const code=`require(${JSON.stringify(value)});require.resolve(${JSON.stringify(value)});require.context(${JSON.stringify(value)});import(${JSON.stringify(value)});import.meta.resolve(${JSON.stringify(value)});new URL(${JSON.stringify(value)},import.meta.url);`;
+ assert.deepEqual(transformPublicText(code,api,{values:[value]}).values,[]);
+});

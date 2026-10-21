@@ -227,18 +227,25 @@ async def test_shared_claim_selects_only_header_and_pre_call_scope_loss_is_known
     identifier = queued["data"]["run_id"]
     mutate_current(case, "scope", identifier)
     statements = []
+    returned_columns = []
 
     def note(connection, cursor, statement, parameters, context, many):
         if statement.lstrip().upper().startswith("SELECT"):
             statements.append(statement)
+            returned_columns.extend(column[0] for column in cursor.description or ())
 
-    event.listen(db.get_bind(), "before_cursor_execute", note)
+    event.listen(db.get_bind(), "after_cursor_execute", note)
     try:
         claim = runtime.claim_next_run(db)
     finally:
-        event.remove(db.get_bind(), "before_cursor_execute", note)
+        event.remove(db.get_bind(), "after_cursor_execute", note)
     assert claim[0] == identifier
-    no_task_text(statements)
+    # The queue may test JSON markers in SQL predicates. Only the two Run
+    # header columns reach Python; no private Task/Source body may be returned.
+    assert statements and returned_columns
+    assert {name for name in returned_columns if name.startswith("hoimsystem_ai_run_")} == {"hoimsystem_ai_run_run_id", "hoimsystem_ai_run_feature_key"}
+    private = {"input_json", "evidence_json", "context_metadata_json", "result_json", "source_json", "scope_json"}
+    assert not any(name == field or name.endswith("_" + field) for name in returned_columns for field in private)
     transport, packets, close = model_transport(case)
     try:
         await runtime.execute_claimed(*claim, transport=transport)
@@ -308,9 +315,10 @@ def test_admin_reader_captures_loaded_request_epoch_before_orm_refresh(db_sessio
     # before refreshing the authenticated actor. No private task read follows.
     from app.ai.charge_reconciliation_models import AIChargeWriteGate
     from app.ai.inventory_native_source_models import AIInventoryWriteGate
+    from app.ai.research_cohort_models import AIResearchWriteGate
     from app.ai.satisfaction_models import AISatisfactionWriteGate
 
-    tables = [AIChargeWriteGate.__tablename__, AISatisfactionWriteGate.__tablename__, AIInventoryWriteGate.__tablename__, "hoimsystem_users"]
+    tables = [AIChargeWriteGate.__tablename__, AISatisfactionWriteGate.__tablename__, AIInventoryWriteGate.__tablename__, AIResearchWriteGate.__tablename__, "hoimsystem_users"]
     assert len(statements) == len(tables)
     assert all(("FROM " + table) in statement for table, statement in zip(tables, statements, strict=True))
     no_task_text(statements)

@@ -497,3 +497,37 @@ def test_public_source_permission_precedes_every_task_text_even_when_immutable_i
         assert selected and frozen.source_record.audit_only and not frozen.source_record.eligible
     finally:
         event.remove(case.db.get_bind(), "before_cursor_execute", observe)
+
+
+@pytest.mark.parametrize(
+    "raw,expected",
+    [('["super_admin"]', 403), ("{invalid-json", 409), ("null", 409), ('"pharmacist"', 409), ("[true]", 409), ("[1]", 409), ('["pharmacist","pharmacist"]', 409), ("[]", 403), (None, 409)],
+)
+def test_current_feature_role_scope_rejects_cached_revoked_or_broken_configuration_before_task_text_but_frozen_super_bypasses(task, raw, expected):
+    db, identifier = task.db, task.run.run_id
+    # Populate the old identity-map config deliberately, then mutate SQL only.
+    assert db.get(AIFeatureConfig, storage.FEATURE_KEY).allowed_roles_json == '["pharmacist","super_admin"]'
+    if raw is None:
+        db.query(AIFeatureConfig).filter_by(feature_key=storage.FEATURE_KEY).delete(synchronize_session=False)
+    else:
+        db.query(AIFeatureConfig).filter_by(feature_key=storage.FEATURE_KEY).update({"allowed_roles_json": raw}, synchronize_session=False)
+    db.flush()
+    selected = []
+
+    def observe(conn, cursor, statement, parameters, context, many):
+        if "hoimsystem_ai_run.input_json" in statement:
+            selected.append(statement)
+
+    event.listen(db.get_bind(), "before_cursor_execute", observe)
+    try:
+        with pytest.raises(HTTPException) as failure:
+            storage.load_snapshot(db, identifier, user=task.actor)
+        assert failure.value.status_code == expected and selected == []
+        internal = storage.load_snapshot(db, identifier)
+        assert internal.run.run_id == identifier
+        selected.clear()
+        frozen = storage.load_snapshot(db, identifier, user=task.users["super_admin_user"], frozen_audit=True)
+        assert selected and frozen.source_record.audit_only and not frozen.source_record.eligible
+    finally:
+        event.remove(db.get_bind(), "before_cursor_execute", observe)
+        db.rollback()

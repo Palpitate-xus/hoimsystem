@@ -37,7 +37,7 @@ from app.ai.drug_label_run_contract import (
 )
 from app.ai.drug_label_run_models import ARTIFACT_SCHEMA, AIDrugLabelRunArtifact
 from app.ai.inventory_write_guard import current_inventory_rows, lock_inventory_gate
-from app.ai.models import AIAuditEvent, AIRun
+from app.ai.models import AIAuditEvent, AIFeatureConfig, AIRun
 from app.models import Pharmaceutical, User
 
 FEATURE_KEY = "drug_label_extraction"
@@ -80,6 +80,35 @@ def _locator(db, identifier):
     return current_inventory_rows(
         db.query(AIDrugLabelRunArtifact.run_id, AIDrugLabelRunArtifact.source_binding_id, AIDrugLabelRunArtifact.requested_by).filter_by(run_id=identifier), shared=True
     ).one_or_none()
+
+
+def authorize_task_reader(db, user, *, frozen_audit=False):
+    """Current Task role boundary, before private text or history expansion.
+
+    Explicit current Super frozen audit does not depend on a damaged/deleted
+    live feature configuration. Normal reads require a strict current role
+    list intersected with the fixed Pharmacist/Super scope. Source access and
+    ownership remain independently mandatory at the calling read boundary.
+    """
+    if type(frozen_audit) is not bool:
+        raise HTTPException(409, "冻结审计必须明确选择")
+    with db.no_autoflush:
+        lock_inventory_gate(db)
+        actor = sources.current_actor(db, user)
+        if frozen_audit:
+            if actor.user_role != "super_admin":
+                raise HTTPException(403, "仅当前Super可明确读取冻结任务")
+            return actor
+        config = current_inventory_rows(db.query(AIFeatureConfig).filter_by(feature_key=FEATURE_KEY), shared=True).one_or_none()
+        try:
+            roles = d.parse_json(config.allowed_roles_json) if config is not None else None
+            if not isinstance(roles, list) or len(roles) > 64 or any(type(role) is not str or not role or len(role) > 64 for role in roles) or len(set(roles)) != len(roles):
+                raise ValueError("An actual closed role list is required")
+        except (ValueError, TypeError, UnicodeError, RecursionError) as exc:
+            raise HTTPException(409, "当前说明书功能角色配置缺失或损坏，未读取私有任务") from exc
+        if actor.user_role not in set(roles) & sources.c.SOURCE_ROLES:
+            raise HTTPException(403, "当前配置已撤回本账户的说明书任务读取权限")
+        return actor
 
 
 def is_drug_label_run(db, run):
@@ -269,6 +298,7 @@ def load_snapshot(db, run, *, user=None, frozen_audit=False, writing=False):
                 raise ValueError("A real immutable task artifact is required")
             record, _ = _source_locked(db, hint.source_binding_id, hint.requested_by, user=user, frozen_audit=frozen_audit)
             if user is not None:
+                authorize_task_reader(db, user, frozen_audit=frozen_audit)
                 # The internal audit-shaped immutable proof above intentionally
                 # survives Source/owner loss for trusted terminal accounting.
                 # It is not a public read grant: actual Source authorization

@@ -12,7 +12,7 @@ from app.ai.deidentification_dispatch import stage_dispatch, validate_delivery
 from app.ai.deidentification_gateway import DeidentificationExecutionError, generate, prepare_request
 from app.ai.deidentification_receipts import CREATE, audit_expected, result_header, run_state, stage_terminal, usage, usage_receipt, verify_audit, verify_run_state
 from app.ai.deidentification_spans import canonical, digest
-from app.ai.deidentification_task_access import actor_for_lease, authorize_locator, opaque_locator, safe_task_metadata
+from app.ai.deidentification_task_access import actor_for_lease, authorize_cancel, opaque_locator, safe_task_metadata
 from app.ai.deidentification_task_config import configuration
 from app.ai.governance import provider_credential
 from app.ai.models import AIAuditEvent, AIRun
@@ -203,14 +203,18 @@ async def execute_deidentification_claimed(run_id, lease, claim_event_id=None, *
 
 def cancel_deidentification_run(db, user, run_id, *, audit_only=False):
     try:
-        actor, locator = authorize_locator(db, user, run_id, audit_only=audit_only)
-        # Cancellation needs current research permission, but not current model
-        # transfer permission or a still-executable publication.
+        actor, locator = authorize_cancel(db, user, run_id, audit_only=audit_only)
+        # Ordinary cancellation still needs current purpose. Explicit actual
+        # Super audit-only may stop acceptance with opaque technical proof only.
         run = storage.technical_run(db, run_id, writing=True)
         if run is None or run.status not in {"queued", "running"}:
             raise HTTPException(409, "任务已结束")
+        usage_receipt(db, run)
         queued = run.status == "queued"
-        if queued and (run.lease_token is not None or run.start_time is not None or run.latency_ms is not None):
+        receipt_header = result_header(db, run_id)
+        if queued and (
+            run.lease_token is not None or run.start_time is not None or run.latency_ms is not None or receipt_header["claim_event_id"] is not None or receipt_header["dispatch_event_id"] is not None
+        ):
             raise HTTPException(409, "排队任务存在调用痕迹，不能补假0")
         run.status, run.finish_time = "cancelled", utcnow()
         # Current-read helpers deliberately reload SQL. Persist and verify the
@@ -221,10 +225,10 @@ def cancel_deidentification_run(db, user, run_id, *, audit_only=False):
         verify_run_state(db, run_id, expected, source)
         if queued:
             _terminal(db, run_id, None, usage(0, 0, False), None, ("TASK_CANCELLED", "任务发送前已停止"), time.monotonic(), commit=False)
-            authorize_locator(db, actor, run_id, audit_only=audit_only)
+            authorize_cancel(db, actor, run_id, audit_only=audit_only)
             db.commit()
         else:
-            authorize_locator(db, actor, run_id, audit_only=audit_only)
+            authorize_cancel(db, actor, run_id, audit_only=audit_only)
             db.commit()
     except Exception:
         db.rollback()

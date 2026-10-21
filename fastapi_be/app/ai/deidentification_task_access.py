@@ -104,3 +104,25 @@ def safe_task_metadata(db, user, run_id):
 def actor_for_lease(db, locator):
     """ID-only is allowed for locating, never for bypassing frozen execution epoch."""
     return actor_now(db, SimpleNamespace(user_id=locator["requested_by"]))
+
+
+def authorize_cancel(db, user, run_id, *, audit_only=False):
+    """Current Super may stop a durable task without reviving clinical access."""
+    if type(audit_only) is not bool:
+        raise HTTPException(403, "75技术停止须明确布尔审计模式")
+    if not audit_only:
+        return authorize_locator(db, user, run_id, audit_only=False)
+    locator = opaque_locator(db, run_id)
+    actor = actor_now(db, user)
+    if type(audit_only) is not bool or actor.user_role != "super_admin":
+        raise HTTPException(403, "技术停止须明确audit-only及实际当前Super")
+    from app.ai.models import AIRun
+    from app.ai.native_task_routing import locate_native_task
+
+    identity = locate_native_task(db, run_id)
+    if locator is None or identity is None or identity.domain != "deidentification":
+        raise HTTPException(409, "技术停止须唯一真实75持久域，不沿用伪造marker")
+    row = current_research_rows(db.query(AIRun.feature_key, AIRun.requested_by, AIRun.patient_id).filter_by(run_id=run_id), shared=True).one_or_none()
+    if row is None or (row.feature_key, row.requested_by, row.patient_id) != ("deidentification", locator["requested_by"], locator["patient_id"]):
+        raise HTTPException(409, "技术停止的原Run与永久FK已变化")
+    return actor, locator

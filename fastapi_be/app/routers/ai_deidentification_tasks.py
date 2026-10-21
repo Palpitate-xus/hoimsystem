@@ -7,7 +7,6 @@ from app.ai import deidentification_runtime as runtime
 from app.ai import deidentification_storage as storage
 from app.ai.deidentification_contract import SOURCE_ROLES, UUID, StrictModel
 from app.ai.deidentification_http import BoundedDeidentificationResponse, BoundedDeidentificationRoute
-from app.ai.deidentification_task_access import authorize_locator
 from app.ai.deidentification_task_contract import TaskInput
 from app.database import get_db
 from app.dependencies import User, require_roles
@@ -100,8 +99,7 @@ def trace(run_id: UUID, db: Session = Depends(get_db), user: User = Depends(requ
 @router.post("/{run_id}/cancel")
 def cancel(run_id: UUID, db: Session = Depends(get_db), user: User = Depends(require_roles(*SOURCE_ROLES))):
     def operation():
-        authorize_locator(db, user, run_id)
-        runtime.cancel_deidentification_run(db, user, run_id)
+        runtime.cancel_deidentification_run(db, user, run_id, audit_only=user.user_role == "super_admin")
         return runtime.technical_deidentification_status(db, user, run_id)
 
     return reply(db, operation)

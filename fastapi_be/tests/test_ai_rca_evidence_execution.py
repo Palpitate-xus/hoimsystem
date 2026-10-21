@@ -292,3 +292,19 @@ async def test_actual_recovery_has_known_zero_only_without_dispatch_otherwise_un
     transport, calls = provider_service("chat", None, active)
     await execution.execute_rca_claimed(identifier, lease, session_factory=factory, transport=transport)
     assert calls == []
+
+
+@pytest.mark.asyncio
+async def test_storage_refusal_without_exception_still_settles_this_deliveries_actual_paid_usage(grant_case, monkeypatch):
+    identifier, lease, _owner, _value, factory, active, _state, _reads = setup(grant_case)
+    transport, calls = provider_service("chat", None, active)
+    # Explicitly simulate the result stage declining acceptance. The real
+    # technical settlement still verifies the original dispatch and SQL audit.
+    monkeypatch.setattr(result_storage, "stage_result", lambda *args, **kwargs: None)
+    await execution.execute_rca_claimed(identifier, lease, session_factory=factory, transport=transport)
+    assert len(calls) == 1
+    with factory() as db:
+        actual = receipts.read_receipt(db, receipts.technical_header(db, identifier))
+        assert actual.status == "failed" and actual.error_code == "RCA_RESULT_NOT_ACCEPTED"
+        assert (actual.usage.input_tokens, actual.usage.output_tokens, actual.usage.model_call_attempted) == (11, 13, True)
+        assert db.query(AIRcaEvidenceRunResult).filter_by(run_id=identifier).count() == 0

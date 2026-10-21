@@ -126,8 +126,10 @@ async def execute_rca_claimed(identifier, lease, *, session_factory=None, transp
                     latency_ms=min(2147483647, max(0, int((time.monotonic() - started) * 1000))),
                 )
                 if accepted is None:
-                    db.rollback()
-                    return
+                    # A storage refusal is not evidence of an unbilled call.
+                    # The terminal stage independently checks this delivery's
+                    # exact dispatch PK; another owner still remains inert.
+                    raise HTTPException(409, "本次完整正文未接受，仍按原dispatch核对实际用量")
                 configuration.for_execution(db, actor, identifier)
                 db.commit()
             return

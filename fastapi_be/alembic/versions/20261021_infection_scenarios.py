@@ -28,6 +28,7 @@ def upgrade():
         sa.Column("reviewer_epoch_hash", sa.String(length=64), nullable=True),
         sa.Column("plan_hash", sa.String(length=64), nullable=False),
         sa.Column("recipe_hash", sa.String(length=64), nullable=False),
+        sa.Column("implementation_hash", sa.String(length=64), nullable=False),
         sa.Column("parameters_review", sa.String(length=20), nullable=False),
         sa.Column("payload_json", sa.Text().with_variant(mysql.MEDIUMTEXT(), "mysql"), nullable=False),
         sa.Column("content_hash", sa.String(length=64), nullable=False),
@@ -59,12 +60,12 @@ def upgrade():
             "(reviewed_at IS NULL OR reviewed_at>=recorded_at) AND (revoked_at IS NULL OR revoked_at>=recorded_at) AND (reviewed_at IS NULL OR revoked_at IS NULL OR revoked_at>=reviewed_at)",
             name="ck_inf_scenario_clock",
         ),
-        sa.CheckConstraint("length(CAST(payload_json AS BLOB)) <= 8388608", name="ck_inf_scenario_utf8"),
+        sa.CheckConstraint(sa.func.length(sa.cast(sa.column("payload_json"), sa.LargeBinary())) <= 8388608, name="ck_inf_scenario_utf8"),
         sa.CheckConstraint(
             "length(payload_json)>0 AND length(payload_json)<=8388608 AND length(content_hash)=64 AND length(review_basis)<=4000 AND length(revoke_basis)<=4000", name="ck_inf_scenario_bounds"
         ),
         sa.CheckConstraint(
-            "length(source_private_hash)=64 AND length(source_public_hash)=64 AND length(source_witness_hash)=64 AND length(directory_hash)=64 AND length(author_epoch_hash)=64 AND length(plan_hash)=64 AND length(recipe_hash)=64 AND length(department_ids_json)<=4096",
+            "length(source_private_hash)=64 AND length(source_public_hash)=64 AND length(source_witness_hash)=64 AND length(directory_hash)=64 AND length(author_epoch_hash)=64 AND length(plan_hash)=64 AND length(recipe_hash)=64 AND length(implementation_hash)=64 AND length(department_ids_json)<=4096",
             name="ck_inf_scenario_anchors",
         ),
         sa.ForeignKeyConstraint(

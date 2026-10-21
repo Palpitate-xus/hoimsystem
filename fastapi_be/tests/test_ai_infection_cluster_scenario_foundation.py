@@ -113,3 +113,18 @@ def test_actual_sqlite_incremental_up_down_up_preserves_parent():
             migration.upgrade()
         assert conn.exec_driver_sql("SELECT * FROM parent_source").all() == before
     engine.dispose()
+
+
+def test_actual_migration_mysql_offline_sql_uses_binary_bytes_not_sqlite_blob_cast():
+    import io
+
+    path = Path(__file__).parents[1] / "alembic/versions/20261021_infection_scenarios.py"
+    spec = importlib.util.spec_from_file_location("infection_scenario_mysql_migration", path)
+    migration = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(migration)
+    output = io.StringIO()
+    with Operations.context(MigrationContext.configure(dialect_name="mysql", opts={"as_sql": True, "output_buffer": output})):
+        migration.upgrade()
+    sql = output.getvalue()
+    assert "CAST(payload_json AS BINARY)" in sql and " AS BLOB" not in sql
+    assert "implementation_hash VARCHAR(64) NOT NULL" in sql

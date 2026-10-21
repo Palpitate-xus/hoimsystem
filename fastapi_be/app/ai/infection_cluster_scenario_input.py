@@ -1,5 +1,6 @@
 """Closed explicit comparison declarations; these types grant no Source authority."""
 
+import datetime as dt
 from typing import Literal
 
 from pydantic import Field, model_validator
@@ -13,6 +14,14 @@ class ActorEpoch(c.StrictModel):
     user_id: c.PositiveId
     user_role: Literal["super_admin"]
     token_invalid_before: str | None
+
+    @model_validator(mode="after")
+    def literal_actor_clock(self):
+        if self.token_invalid_before is not None:
+            clock = dt.datetime.fromisoformat(self.token_invalid_before)
+            if clock.tzinfo is not None or clock.isoformat() != self.token_invalid_before:
+                raise ValueError("The original User token epoch is a literal stored naive clock, not an invented UTC clock")
+        return self
 
 
 class ScenarioCreate(i.Basis):
@@ -48,6 +57,10 @@ class DepartmentBinding(c.StrictModel):
         return self
 
 
+def directory_digest(departments):
+    return c.digest([item.model_dump(mode="json") for item in departments])
+
+
 class ScenarioPayload(c.StrictModel):
     schema_version: Literal["infection_comparison_scenario_payload_v1"]
     scenario_id: c.UUID
@@ -60,6 +73,7 @@ class ScenarioPayload(c.StrictModel):
     plan: k.ScenarioPlan
     plan_hash: c.SHA
     recipe_hash: c.SHA
+    implementation_hash: c.SHA
     basis_note: str
     limitations: list[str]
 
@@ -71,7 +85,7 @@ class ScenarioPayload(c.StrictModel):
             raise ValueError("The exact author and unique Department declarations differ")
         if self.plan.scenario_id != self.scenario_id or self.plan.source_binding != self.source_binding or self.plan.department_tokens != [d.department_token for d in self.departments]:
             raise ValueError("The full public family and private Department bindings differ")
-        if self.directory_hash != c.digest(self.departments) or self.plan_hash != c.digest(self.plan) or self.recipe_hash != c.digest(k.RECIPE):
+        if self.directory_hash != directory_digest(self.departments) or self.plan_hash != c.digest(self.plan) or self.recipe_hash != c.digest(k.RECIPE):
             raise ValueError("Whole directory/plan/installed recipe anchors differ")
         if self.limitations != k.LIMITATIONS:
             raise ValueError("The fixed method limitations cannot be dropped")

@@ -15,7 +15,7 @@ class AIInfectionScenario(Governed, Base):
             name="ck_inf_scenario_parameters",
         ),
         CheckConstraint(
-            "length(source_private_hash)=64 AND length(source_public_hash)=64 AND length(source_witness_hash)=64 AND length(directory_hash)=64 AND length(author_epoch_hash)=64 AND length(plan_hash)=64 AND length(recipe_hash)=64 AND length(department_ids_json)<=4096",
+            "length(source_private_hash)=64 AND length(source_public_hash)=64 AND length(source_witness_hash)=64 AND length(directory_hash)=64 AND length(author_epoch_hash)=64 AND length(plan_hash)=64 AND length(recipe_hash)=64 AND length(implementation_hash)=64 AND length(department_ids_json)<=4096",
             name="ck_inf_scenario_anchors",
         ),
         Index("idx_inf_scenario_snapshot", "snapshot_id", "recorded_at", "scenario_id"),
@@ -33,4 +33,5 @@ class AIInfectionScenario(Governed, Base):
     reviewer_epoch_hash = Column(String(64), nullable=True)
     plan_hash = Column(String(64), nullable=False)
     recipe_hash = Column(String(64), nullable=False)
+    implementation_hash = Column(String(64), nullable=False)
     parameters_review = Column(String(20), nullable=False)

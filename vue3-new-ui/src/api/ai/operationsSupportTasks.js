@@ -87,10 +87,11 @@ export function createOperationsTask(value,{preview=false}={}){if(!operationsReq
 export const cancelOperationsTask=runId=>request({url:BASE+'/tasks/'+id(runId)+'/cancel',method:'post',responseType:'arraybuffer',retry:0}).then(decodeOperationsResponse);
 export function getOperationsTasks({caseId=null,page=1,size=20}={}){if(caseId!==null&&!uuid(caseId)||!positive(page)||page>1000000||!positive(size)||size>50)throw new Error('请明确有界技术目录与可选材料集');return request({url:BASE+'/tasks',method:'get',params:{...(caseId===null?{}:{case_id:caseId}),page,size},responseType:'arraybuffer',retry:0}).then(decodeOperationsResponse);}
 export function verifyOperationsTaskDirectory(value,{page=1,size=20,current=()=>true}={}){try{return current()&&keys(value,['items','page','size','has_more','pagination_basis'])&&value.page===page&&value.size===size&&typeof value.has_more==='boolean'&&Array.isArray(value.items)&&value.items.length<=size&&new Set(value.items.map(x=>x.run_id)).size===value.items.length&&value.items.every(x=>verifyOperationsTaskMetadata(x,{current}))&&value.pagination_basis==='committed_opaque_task_candidates_before_independent_current_part_authorization';}catch{return false;}}
-export async function loadOperationsTaskBundle(runId,{selection=null,auditOnly=false,current=()=>true}={}){
- if(!current()||typeof auditOnly!=='boolean')throw new Error('当前读取已关闭');
+export async function loadOperationsTaskBundle(runId,{caseId=null,selection=null,auditOnly=false,current=()=>true}={}){
+ if(!current()||typeof auditOnly!=='boolean'||caseId!==null&&!uuid(caseId))throw new Error('当前读取已关闭');
  const metadata=(await getOperationsTask(runId)).data;if(!verifyOperationsTaskMetadata(metadata,{runId,current}))throw new Error('技术状态无法核对');
  if(metadata.parts_state!=='available')return{metadata,parts:null,caseMetadata:null,trace:null};
+ if(caseId!==null&&metadata.binding.operations_case_id!==caseId)throw new Error('当前任务不属于原目录明确材料集');
  if(selection!==null&&!verifyOperationsTaskMetadata(metadata,{runId,selection,current}))throw new Error('任务与本次明确选择不同');
  const caseMetadata=(await getOperationsCase(metadata.binding.operations_case_id)).data;if(!current()||!verifyOperationsCaseMetadata(caseMetadata)||!caseMetadata.source_accessible)throw new Error('当前受审材料集已失效');
  let trace=null;if(auditOnly){trace=(await getOperationsTaskTrace(runId)).data;if(!verifyOperationsTrace(trace,{runId,current})||!same(trace.run,metadata))throw new Error('审计目录与当前任务状态已变化');}

@@ -144,6 +144,40 @@ def original_proof(kind, row):
         raise HTTPException(409, "项目ACL或逐患者研究授权原件自身SHA、真实父件或独立签署已损坏") from exc
 
 
+def verify_registry_proof(kind, value):
+    """Rebuild a closed frozen registry original; this grants no live access."""
+    from types import SimpleNamespace
+
+    try:
+        keys = {"schema_version", "identity", "payload", "parent_binding", "content_hash", "governance", "authorization_review", "governance_hash"}
+        if type(value) is not dict or set(value) != keys or value["schema_version"] != "research_registry_original_proof_v1":
+            raise ValueError("Closed original required")
+        identity = value["identity"]
+        base = {"source_kind", "source_record_id", "scope_id", "schema_version", "created_by", "created_at", "valid_from", "valid_until"}
+        expected = base | ({"user_id", "permission"} if kind == "acl" else {"patient_id", "authorization_kind", "access_basis"})
+        if type(identity) is not dict or set(identity) != expected or identity["source_kind"] != kind:
+            raise ValueError("Closed actual identity required")
+        fields = {k: v for k, v in identity.items() if k not in {"source_kind", "source_record_id"}}
+        _, pk, _, _ = _model(kind)
+        fields[pk] = identity["source_record_id"]
+        fields.update(value["governance"])
+        if kind == "authorization":
+            fields.update(value["authorization_review"])
+        elif value["authorization_review"] is not None:
+            raise ValueError("ACL has no invented professional signer")
+        for name in ("created_at", "valid_from", "valid_until", "reviewed_at", "revoked_at", "authorization_reviewed_at"):
+            if name in fields and fields[name] is not None:
+                TypeAdapter(UTC).validate_python(fields[name], strict=True)
+                fields[name] = dt.datetime.strptime(fields[name], "%Y-%m-%dT%H:%M:%S.%fZ")
+        fields.update(payload_json=canonical_json(value["payload"]), parent_binding_json=canonical_json(value["parent_binding"]), content_hash=value["content_hash"])
+        checked = original_proof(kind, SimpleNamespace(**fields))
+        if canonical_json(checked) != canonical_json(value):
+            raise ValueError("Original reconstruction differs")
+        return checked
+    except (HTTPException, ValueError, TypeError, KeyError, AttributeError, UnicodeError) as exc:
+        raise HTTPException(409, "冻结研究授权原件闭集或完整SHA已损坏") from exc
+
+
 def _scope_eligible(db, row, proof):
     return (
         row.status == "published"

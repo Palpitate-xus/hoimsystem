@@ -402,3 +402,5 @@
 - 2026-10-21：第79项专用Chat/Responses完整文本适配器已提交；十二整文件一次311通过（26.14秒pytest/37.243秒外层），1180输入稳定。51项新MockTransport/协议/用量测试覆盖实际完整wire双重JSON转义超限在HTTP前拒绝、仅单次调用、工具/拒答/截断/错误引文/重复键拒收、未知与实际零/部分用量不混淆。固定System+原版本Task完整发送，未连接外部模型。实际Task入队/claim/dispatch/接受与共享FE仍继续，适配器测试不替代该生命周期。
 
 - 2026-10-21：第79项真实staged Run/Artifact+具体创建审计与当前源前置核验已提交；十三整文件一次342通过（32.55秒pytest/43.329秒外层），1182输入稳定。具体Audit绑定原25字段/全部不可变技术锚/原角色与UTC6登录epoch；Config/Provider/Prompt冻结SHA在受保护正文前比较，按Config X的当前每日COUNT控制额度。首轮1个产品读取顺序负控+6个SQLite触发器清理失败、333通过均保留并修复；七类实际SQL触发器证明Run/Artifact/Audit/Source整体回滚。仍是无commit的staged创建，未称真实shared claim/worker、MySQL Task或79FE完成。
+
+- 2026-10-21：第79项新增实际合法Case的provider双重转义预算负控，单独完整storage32项一次通过（16.59秒pytest/27.896秒外层），不是与前342累加为单次374。真实隔离MySQL六表Source→Task增量往返全部通过（39.237秒）：231旧表/5条合成User行逐步DDL与行哈希不变，10UTC6/10MEDIUM、完整容量/+1、旧RR当前具体审计/Task定位、实际Source/Task触发器回滚与三类Task锁1205，单剩额度双writer一成一429无1213。首MySQL因脚本普通Audit get沿旧RR返回None而失败，已改实际当前SHARE核对；产品不改，失败与双runner/worker完整保留，均cleanup真。shared执行链和FE继续。

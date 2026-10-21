@@ -114,7 +114,21 @@ class TrainingContext:
     execution: dict
 
     def binding(self):
-        return dict(schema_version="clinical_training_source_binding_v1", submission_id=self.submission["submission_id"], submission_creation_event_id=self.submission["creation_event_id"], submitted_at=current_references.utc_text(self.submission["submitted_at"]), requested_by=self.submission["actor_id"], submission_actor_role=self.submission["actor_role"], submission_actor_epoch=current_references.utc_text(self.submission["actor_epoch"]) if self.submission["actor_epoch"] is not None else None, submission_hash=self.submission["submission_hash"], feedback_hash=self.submission["feedback_hash"], review_id=self.review["review_id"], review_hash=self.review["review_hash"], review_creation_event_id=self.review["creation_event_id"], lesson_id=self.lesson["lesson_id"], lesson_private_hash=self.lesson["private_hash"], lesson_public_hash=self.lesson["public_hash"], lesson_references_hash=self.lesson["references_hash"], lesson_creation_event_id=self.lesson["creation_event_id"], reference_state_hash=self.lesson["reference_state_hash"], objective=self.selection.objective)
+        return source_binding(self.submission, self.review, self.lesson, self.selection.objective)
+
+
+def source_binding(submitted, review, lesson, objective):
+    return dict(schema_version="clinical_training_source_binding_v1", submission_id=submitted["submission_id"], submission_creation_event_id=submitted["creation_event_id"], submitted_at=current_references.utc_text(submitted["submitted_at"]), requested_by=submitted["actor_id"], submission_actor_role=submitted["actor_role"], submission_actor_epoch=current_references.utc_text(submitted["actor_epoch"]) if submitted["actor_epoch"] is not None else None, submission_hash=submitted["submission_hash"], feedback_hash=submitted["feedback_hash"], review_id=review["review_id"], review_hash=review["review_hash"], review_creation_event_id=review["creation_event_id"], lesson_id=lesson["lesson_id"], lesson_private_hash=lesson["private_hash"], lesson_public_hash=lesson["public_hash"], lesson_references_hash=lesson["references_hash"], lesson_creation_event_id=lesson["creation_event_id"], reference_state_hash=lesson["reference_state_hash"], objective=objective)
+
+
+def read_source(db, actor, submitted):
+    selected, feedback, private, public, frozen = practice._read_current(db, actor, submitted)
+    try:
+        source = TrainingFeedbackSource(schema_version="clinical_training_feedback_source_v1", source_id=submitted["submission_id"], lesson=public, submission=selected, feedback=feedback, references=references.model_projection(frozen), intended_use="explain_actual_recorded_practice_not_patient_treatment_or_credentialing")
+        c.whole(source)
+    except (ValueError, TypeError, UnicodeError, ValidationError) as exc:
+        raise HTTPException(422, "完整课程、作答、反馈与参考合计超过AI请求范围；本地完整练习仍可用，未截断送模") from exc
+    return source
 
 
 def prepare_context(db, user, value, *, preview=False, exclusive_config=False):
@@ -126,10 +140,5 @@ def prepare_context(db, user, value, *, preview=False, exclusive_config=False):
         raise HTTPException(403, "该实际提交所绑定的课程复核未单独允许模型处理")
     current_references._capture_current(db, actor.user_id, lesson["lesson_id"], c.parse_packet(lesson["reference_ids_json"]), expected_state_hash=lesson["reference_state_hash"], metadata_only=True)
     config, provider, prompt, execution = configuration(db, actor, preview=preview, exclusive=exclusive_config)
-    selected, feedback, private, public, frozen = practice._read_current(db, actor, submitted)
-    try:
-        source = TrainingFeedbackSource(schema_version="clinical_training_feedback_source_v1", source_id=submitted["submission_id"], lesson=public, submission=selected, feedback=feedback, references=references.model_projection(frozen), intended_use="explain_actual_recorded_practice_not_patient_treatment_or_credentialing")
-        c.whole(source)
-    except (ValueError, TypeError, UnicodeError, ValidationError) as exc:
-        raise HTTPException(422, "完整课程、作答、反馈与参考合计超过AI请求范围；本地完整练习仍可用，未截断送模") from exc
+    source = read_source(db, actor, submitted)
     return TrainingContext(actor, selection, submitted, review, lesson, source, config, provider, prompt, execution)

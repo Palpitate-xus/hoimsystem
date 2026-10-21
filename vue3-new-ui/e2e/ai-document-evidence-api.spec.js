@@ -15,6 +15,16 @@ test('actual publication mechanically maps every current knowledge field',async(
  expect(await page.evaluate(async f=>{const p=window.__documentProbe;return p.supportCanonical(await p.api.projectDocumentKnowledge(f.publication_active))===p.supportCanonical(f.publication_active.knowledge_current);},fixture)).toBe(true);
 });
 
+test('actual publication preserves microseconds and explicitly binds legacy knowledge whole seconds',async({page})=>{
+ const values=await page.evaluate(async f=>{const p=window.__documentProbe,a=p.api,s=f.publication_active.snapshot,results=[s.published_at.endsWith('.123456Z'),s.knowledge_recorded_at.endsWith('.000000Z'),s.knowledge_clock_basis==='legacy_utc_second_storage'];for(const mutation of ['stored_microseconds','publication_truncated','basis']){const row=structuredClone(f.publication_active);if(mutation==='stored_microseconds')row.snapshot.knowledge_recorded_at=row.snapshot.published_at;if(mutation==='publication_truncated')row.snapshot.published_at=row.snapshot.knowledge_recorded_at;if(mutation==='basis')row.snapshot.knowledge_clock_basis='assumed_same_precision';row.content_hash=await p.supportDigest(row.snapshot);row.knowledge_current.source_snapshot_hash=row.content_hash;results.push(await a.verifyDocumentPublication(row,f.candidate_approved,f.original_published));}return results;},fixture);
+ expect(values).toEqual([true,true,true,false,false,false]);
+});
+
+test('declared effective ranges require exact legacy whole seconds without implicit flooring',async({page})=>{
+ const values=await page.evaluate(async f=>{const results=[];for(const field of ['effective_from','effective_to']){const body=structuredClone(f.requests.publish);body.knowledge[field]='2026-10-21T12:00:00.000001Z';results.push(await window.__documentProbe.api.documentEvidenceRequestValid('PublishRequest',body));body.knowledge[field]='2026-10-21T12:00:00.000000Z';results.push(await window.__documentProbe.api.documentEvidenceRequestValid('PublishRequest',body));}return results;},fixture);
+ expect(values).toEqual([false,true,false,true]);
+});
+
 for(const mutation of ['text','raw_hash','codepoint','bad_calendar','wrong_method','privacy','extra','surrogate'])test(`original rejects ${mutation}`,async({page})=>{
  expect(await page.evaluate(async({f,mutation})=>{const p=window.__documentProbe,v=structuredClone(f.original_published);if(mutation==='text')v.snapshot.text=v.snapshot.text.replace('\r\n','\n');if(mutation==='raw_hash')v.snapshot.raw_bytes_hash='f'.repeat(64);if(mutation==='codepoint')v.snapshot.codepoint_length++;if(mutation==='bad_calendar'){v.snapshot.recorded_at='2026-02-30T00:00:00.000000Z';v.snapshot.metadata.source_available_at=null;v.governance.reviewed_at=v.snapshot.recorded_at;v.content_hash=await p.supportDigest(v.snapshot);v.governance_hash=await p.supportDigest(v.governance);v.source_id=`document_original:${v.snapshot.original_id}:${v.content_hash.slice(0,12)}`;}if(mutation==='wrong_method')v.snapshot.filename='not-original.pdf';if(mutation==='privacy')v.governance.privacy_review='unknown';if(mutation==='extra')v.patient_name='unknown-private';if(mutation==='surrogate')v.snapshot.text='\ud800';return p.api.verifyDocumentOriginal(v);},{f:fixture,mutation})).toBe(false);
 });

@@ -21,6 +21,7 @@ from app.ai import document_extraction_models as _document_extraction_models  # 
 from app.ai import drug_label_models as _drug_label_models  # noqa: F401
 from app.ai import drug_label_run_models as _drug_label_run_models  # noqa: F401
 from app.ai import infection_cluster_models as _infection_cluster_models  # noqa: F401
+from app.ai import infection_cluster_profile_models as _infection_cluster_profile_models  # noqa: F401
 from app.ai import infection_cluster_scenario_models as _infection_cluster_scenario_models  # noqa: F401
 from app.ai import inventory_native_source_models as _inventory_native_source_models  # noqa: F401
 from app.ai import inventory_scenario_models as _inventory_scenario_models  # noqa: F401

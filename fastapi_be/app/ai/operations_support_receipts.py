@@ -7,7 +7,7 @@ content. Ordinary/public reads must separately authorize the current Source.
 from typing import Annotated, Literal
 
 from fastapi import HTTPException
-from pydantic import Field
+from pydantic import Field, model_validator
 from sqlalchemy import select
 
 from app.ai import operations_support_attempts as attempts
@@ -28,9 +28,9 @@ class OperationsUsageEvent(c.StrictModel):
     case_id: c.Identifier
     requested_by: c.ActorId
     created_audit_event_id: c.ActorId
-    claim_event_id: c.ActorId
+    claim_event_id: c.ActorId | None
     dispatch_event_id: c.ActorId | None
-    lease_token: c.Identifier
+    lease_token: c.Identifier | None
     source_projection_hash: c.Digest
     source_binding_hash: c.Digest
     instructions_digest: c.Digest
@@ -42,6 +42,22 @@ class OperationsUsageEvent(c.StrictModel):
     result_reference_hash: c.Digest
     terminal_header_hash: c.Digest
     recorded_at: c.Clock
+
+    @model_validator(mode="after")
+    def actual_claim_or_proven_unclaimed_zero(self):
+        if (self.claim_event_id is None) != (self.lease_token is None):
+            raise ValueError("Actual claim and lease must both exist or both be absent")
+        if self.claim_event_id is None and (self.dispatch_event_id is not None or self.status == "succeeded" or self.usage.model_call_attempted is not False):
+            raise ValueError("An unclaimed task can only record proven unattempted zero")
+        return self
+
+
+def phase_beginning(attempt):
+    if attempt.dispatch is not None:
+        return attempts.clock(attempt.dispatch.dispatched_at)
+    if attempt.claim is not None:
+        return attempts.clock(attempt.claim.claimed_at)
+    return attempt.artifact["recorded_at"]
 
 
 def terminal_hash(header, artifact):
@@ -156,8 +172,7 @@ def read_receipt(db, attempt):
     if any(getattr(receipt, key) != value for key, value in expected.items()):
         raise HTTPException(409, "运维具体用量回执、原租约或实际终态头不一致")
     when = attempts.clock(receipt.recorded_at)
-    beginning = attempt.dispatch.dispatched_at if attempt.dispatch is not None else attempt.claim.claimed_at
-    if when < attempts.clock(beginning) or header["finish_time"] != when.replace(microsecond=0):
+    if when < phase_beginning(attempt) or header["finish_time"] != when.replace(microsecond=0):
         raise HTTPException(409, "运维实际结束钟与原阶段UTC6不一致")
     if (header["input_tokens"], header["output_tokens"]) != (
         receipt.usage.input_tokens if receipt.usage.input_tokens is not None else 0,
@@ -201,6 +216,14 @@ def stage_terminal(db, claim, *, dispatch_event_id, usage, status, error_code, l
         return None
     if artifact["usage_event_id"] is not None or header["status"] not in {"running", "cancelled"}:
         return None
+    return _write_terminal(db, attempt, usage=actual_usage, status=status, error_code=error_code, latency_ms=latency_ms)
+
+
+def _write_terminal(db, attempt, *, usage, status, error_code, latency_ms):
+    """Trusted locked actual metadata; callers own rollback and final commit."""
+    header, artifact = attempt.header, attempt.artifact
+    actual_usage = OperationsUsage.model_validate(usage, strict=True)
+    dispatch_event_id = artifact["dispatch_event_id"]
     if dispatch_event_id is None and actual_usage.model_call_attempted is not False:
         raise HTTPException(409, "未实际dispatch的任务只能记录已证明未调用的0/0")
     if actual_usage.model_call_attempted is None and (dispatch_event_id is None or error_code != "WORKER_INTERRUPTED"):
@@ -209,8 +232,7 @@ def stage_terminal(db, claim, *, dispatch_event_id, usage, status, error_code, l
         status = "cancelled"
         error_code = "WORKER_INTERRUPTED" if actual_usage.model_call_attempted is None else "TASK_CANCELLED"
     when = registry.utcnow()
-    beginning = attempt.dispatch.dispatched_at if attempt.dispatch is not None else attempt.claim.claimed_at
-    if when < attempts.clock(beginning):
+    if when < phase_beginning(attempt):
         raise HTTPException(409, "运维终态钟早于原实际领取或发送")
     _no_accepted_result(db, header["run_id"])
     values = {
@@ -254,7 +276,23 @@ def stage_terminal(db, claim, *, dispatch_event_id, usage, status, error_code, l
     )
     if changed != 1 or saved != 1:
         raise HTTPException(409, "运维本交付终态CAS失败")
-    checked = attempts.technical_attempt(db, claim, exclusive=True)
+    checked = attempts.technical_header(db, header["run_id"], exclusive=True)
     if checked.header != planned or checked.artifact != {**artifact, "usage_event_id": event_id} or read_receipt(db, checked) != receipt:
         raise HTTPException(409, "实际运维终态、具体回执或完整技术字段读回变化")
     return receipt
+
+
+def stage_unclaimed_failure(db, identifier, *, error_code):
+    """Trusted queue worker: fail an actual unclaimed run without Source TEXT.
+
+    This cannot settle a claimed/in-flight delivery. No ordinary API exposes
+    this operation, and no claim/dispatch or model usage is manufactured.
+    """
+    attempt = attempts.technical_header(db, identifier, exclusive=True)
+    header, artifact = attempt.header, attempt.artifact
+    if header["status"] != "queued" or artifact["claim_event_id"] is not None or artifact["usage_event_id"] is not None:
+        return None
+    original = storage._verify_created(db, artifact, header)["original_run_header"]
+    if any(value != original[key] for key, value in storage.encoded_header(header).items()):
+        raise HTTPException(409, "未领取运维任务已有非原始技术状态，不能补造未调用回执")
+    return _write_terminal(db, attempt, usage=OperationsUsage(input_tokens=0, output_tokens=0, complete=True, model_call_attempted=False), status="failed", error_code=error_code, latency_ms=0)

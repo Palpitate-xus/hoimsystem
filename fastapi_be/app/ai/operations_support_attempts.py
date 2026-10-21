@@ -146,8 +146,30 @@ def dispatch_from_headers(db, header, run):
 class TechnicalAttempt:
     header: dict
     artifact: dict
-    claim: OperationsClaim
+    claim: OperationsClaim | None
     dispatch: OperationsDispatch | None
+
+
+def technical_header(db, identifier, *, exclusive=True):
+    """Trusted stop/accounting metadata, including a genuinely unclaimed run.
+
+    No actor or Source authority is restored by this helper. A queued task has
+    no synthetic claim event, lease or start clock manufactured for accounting.
+    """
+    lock_gate(db)
+    artifact = phase_header(db, identifier, exclusive=exclusive)
+    run = storage.run_header(db, identifier, shared=not exclusive)
+    if artifact is None:
+        raise HTTPException(409, "原运维任务分件不存在")
+    storage._verify_created(db, artifact, run)
+    if artifact["claim_event_id"] is None:
+        if artifact["dispatch_event_id"] is not None or run["lease_token"] is not None or run["start_time"] is not None or run["status"] not in {"queued", "failed", "cancelled"}:
+            raise HTTPException(409, "未领取运维任务出现发送、租约或执行状态，不能伪称未调用")
+        claim, dispatch = None, None
+    else:
+        claim = claim_from_headers(db, artifact, run)
+        dispatch = dispatch_from_headers(db, artifact, run) if artifact["dispatch_event_id"] is not None else None
+    return TechnicalAttempt(run, artifact, claim, dispatch)
 
 
 def technical_attempt(db, value, *, exclusive=True):
@@ -156,17 +178,10 @@ def technical_attempt(db, value, *, exclusive=True):
         proof = OperationsClaim.model_validate(value, strict=True)
     except (ValueError, TypeError, UnicodeError) as exc:
         raise HTTPException(409, "原运维任务claim闭集证明无效") from exc
-    lock_gate(db)
-    artifact = phase_header(db, proof.run_id, exclusive=exclusive)
-    run = storage.run_header(db, proof.run_id, shared=not exclusive)
-    if artifact is None:
-        raise HTTPException(409, "原运维任务分件不存在")
-    storage._verify_created(db, artifact, run)
-    actual = claim_from_headers(db, artifact, run)
-    if actual != proof:
+    actual = technical_header(db, proof.run_id, exclusive=exclusive)
+    if actual.claim != proof:
         raise HTTPException(409, "本交付不是原实际claim主键与租约")
-    dispatch = dispatch_from_headers(db, artifact, run) if artifact["dispatch_event_id"] is not None else None
-    return TechnicalAttempt(run, artifact, actual, dispatch)
+    return actual
 
 
 def _phase_seen(db, identifier, fields):

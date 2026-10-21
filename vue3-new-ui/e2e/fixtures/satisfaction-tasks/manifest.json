@@ -1,10 +1,16 @@
 {
   "schema_version": "satisfaction_task_actual_wire_fixture_v1",
-  "upstream_file": "/tmp/hoim-satisfaction-main-inflight-first-actual-http-packet.json",
-  "upstream_sha256": "906ff1de1b53a304203bbabfc220af6c69670c5f4a1499badb0633e5a0f80e9a",
-  "raw_bytes": 1928368,
-  "gzip_sha256": "cec7b650518dc427ed708843ae669f97c84a4686699fc866300048af1e2ee898",
-  "gzip_bytes": 223455,
-  "response_count": 54,
-  "scope": "Unmodified actual Main ASGI/JWT responses from seven permanent SQL/native shared worker tests. Only model HTTP uses MockTransport. No authorization headers, no real model or hospital database. Kept raw outer UTF8 responses and parsed JSON; embedded frozen raw3 strings retain their original bytes."
+  "upstream_file": "/tmp/hoim-satisfaction-main-business-wire-first-actual-http-packet.json",
+  "upstream_sha256": "0e013ffaf36a8fd882c05e61e3d814274d88e7897dc1aae12159746d8a45b013",
+  "raw_bytes": 1941393,
+  "gzip_sha256": "2ae0fd028ba95e34d877108916aff7df6252eaa9ae029a3f940ccb7cc6e07937",
+  "gzip_bytes": 225167,
+  "response_count": 60,
+  "scope": "Unmodified actual Main ASGI/JWT responses from seven permanent synthetic SQL/native shared-worker tests plus six same-Case Source options/current doctor/exact-scope directory responses requested by a temporary exporter; no permanent tests or product changed. Model HTTP only MockTransport, no tokens, external model or hospital DB. Original raw UTF8 HTTP bodies and embedded frozen raw3 preserved.",
+  "previous_export": {
+    "upstream_file": "/tmp/hoim-satisfaction-main-inflight-first-actual-http-packet.json",
+    "upstream_sha256": "906ff1de1b53a304203bbabfc220af6c69670c5f4a1499badb0633e5a0f80e9a",
+    "response_count": 54,
+    "scope": "Original seven permanent Main test responses, retained in first verification reports."
+  }
 }

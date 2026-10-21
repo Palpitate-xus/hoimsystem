@@ -7,6 +7,7 @@
       <el-form-item label="发起用户ID"><el-input-number v-model="filters.requested_by" :min="1" :controls="false" style="width: 130px" /></el-form-item>
       <el-form-item v-if="filters.feature_key==='drg_evidence_review'" label="原编码证据"><el-input v-model="filters.coding_case_id" placeholder="原完整编码证据规范UUID" aria-label="审计编码证据" /></el-form-item>
       <el-form-item v-if="filters.feature_key==='guideline_ingestion'" label="原文原件"><el-input v-model="filters.document_original_id" placeholder="原文原件规范UUID" aria-label="审计原文原件" /></el-form-item>
+      <el-form-item v-if="filters.feature_key==='drug_label_extraction'" label="说明书完整来源"><el-input v-model="filters.drug_label_source_binding_id" placeholder="原完整说明书来源规范UUID" aria-label="审计说明书来源" /></el-form-item>
       <el-form-item v-if="filters.feature_key!=='guideline_ingestion'" label="患者ID"><el-input-number v-model="filters.patient_id" :min="1" :controls="false" style="width: 130px" /></el-form-item>
       <template v-if="filters.feature_key==='surgery_scheduling'"><el-form-item label="原手术科室"><el-input-number v-model="filters.department_id" :min="1" :controls="false" /></el-form-item><el-form-item label="原手术资源池"><el-input v-model="filters.surgery_pool_id" placeholder="原资源池规范UUID" /></el-form-item><el-form-item label="原受审手术场景"><el-input v-model="filters.surgery_scenario_id" placeholder="原场景规范UUID" /></el-form-item></template>
       <template v-if="filters.feature_key==='supply_forecast'"><el-form-item label="原物资类型"><el-select v-model="filters.supply_item_kind" clearable aria-label="审计物资类型"><el-option value="pharmaceutical" label="药品" /><el-option value="consumable" label="耗材" /></el-select></el-form-item><el-form-item label="原物资标识"><el-input-number v-model="filters.supply_item_id" :min="1" :controls="false" :precision="0" aria-label="审计物资标识" /></el-form-item><el-form-item label="原物资序列"><el-input v-model="filters.supply_series_id" placeholder="原受审序列规范UUID" aria-label="审计物资序列" /></el-form-item></template>
@@ -35,6 +36,7 @@
           <el-alert v-if="!detail.snapshot_complete" type="info" :closable="false" title="旧任务按实际留存内容展示，部分执行快照字段未保存。" class="spaced" />
           <el-tabs v-model="detailTab" class="spaced">
             <el-tab-pane label="结果与引用" name="result">
+              <drug-label-findings v-if="visible&&drugLabelRun" :run="drugLabelRun" :trace="detail" :references="{drug_label_source_binding_id:drugLabelRun.drug_label_source_binding_id}" :expected-run-id="drugLabelRun.run_id" :active="allowed&&visible" audit-only @invalidate="closeTrace" @reload="closeTrace" />
               <document-extraction-findings v-if="visible&&detail.feature_key==='guideline_ingestion'" :run="detail" :trace="detail" :expected-run-id="detail.run_id" :expected-original-id="detail.document_original_id" :active="allowed&&visible" audit-only @cleared="closeTrace" />
               <coding-findings v-if="visible&&detail.feature_key==='drg_evidence_review'" :run="detail" :active="allowed&&visible" audit-only @inspect="showEvidence" />
               <ai-supply-findings v-if="visible&&detail.supply_findings" :run="detail" :active="allowed&&visible" audit-only @inspect="showEvidence" />
@@ -49,12 +51,14 @@
               <section v-for="(item, i) in detail.result?.sections || []" :key="i"><h4>{{ item.title }}</h4><p class="plain-text">{{ item.content }}</p><el-button v-for="id in item.source_ids" :key="id" link @click="showEvidence(id)">查看依据 {{ id }}</el-button></section>
             </el-tab-pane>
             <el-tab-pane label="人工反馈" name="feedback">
-              <el-table :data="detail.feedback || []" empty-text="尚无人工反馈"><el-table-column prop="reviewer_id" label="复核用户ID" width="110" /><el-table-column label="反馈" width="110"><template #default="{ row }">{{ outcomes[row.outcome] }}</template></el-table-column><el-table-column prop="comment" label="说明" min-width="240" /><el-table-column prop="create_time" label="时间" width="180" /></el-table>
+              <p v-if="drugLabelRun">说明书任务的人工反馈可在管理台反馈记录中查看。</p>
+              <el-table v-else :data="detail.feedback || []" empty-text="尚无人工反馈"><el-table-column prop="reviewer_id" label="复核用户ID" width="110" /><el-table-column label="反馈" width="110"><template #default="{ row }">{{ outcomes[row.outcome] }}</template></el-table-column><el-table-column prop="comment" label="说明" min-width="240" /><el-table-column prop="create_time" label="时间" width="180" /></el-table>
               <p v-if="detail.feedback_truncated">仅展示最近 100 条反馈。</p>
             </el-tab-pane>
             <el-tab-pane label="调用时 Prompt" name="prompt"><h4>固定系统 Prompt</h4><pre class="plain-text">{{ detail.frozen_request?.system_prompt || '未保存原文' }}</pre><h4>任务 Prompt</h4><pre class="plain-text">{{ detail.frozen_request?.task_prompt }}</pre></el-tab-pane>
             <el-tab-pane label="模型与验证快照" name="model"><el-descriptions :column="1" border><el-descriptions-item label="请求模型">{{ detail.frozen_request?.provider_snapshot?.model || '未保存' }}</el-descriptions-item><el-descriptions-item label="服务地址">{{ detail.frozen_request?.provider_snapshot?.api_base || '未保存' }}</el-descriptions-item><el-descriptions-item label="输出上限">{{ detail.frozen_request?.provider_snapshot?.effective_output_limit ?? '未保存' }}</el-descriptions-item><el-descriptions-item label="当时验证记录">{{ detail.frozen_request?.feature_validation?.note || '未保存' }}</el-descriptions-item><el-descriptions-item label="适配器验证记录">{{ detail.frozen_request?.provider_snapshot?.validation_report || '未登记' }}</el-descriptions-item></el-descriptions></el-tab-pane>
             <el-tab-pane label="调用时资料与工具" name="input"><pre class="plain-text">{{ JSON.stringify(detail.frozen_request?.payload || {}, null, 2) }}</pre></el-tab-pane>
+            <el-tab-pane v-if="drugLabelRun" label="说明书原始任务 JSON" name="drug_label_raw"><section v-for="(raw,key) in detail.raw_frozen_json" :key="key"><h4>{{ key }}</h4><pre class="plain-text">{{ raw }}</pre></section></el-tab-pane>
           </el-tabs>
         </template>
       </div>
@@ -67,7 +71,7 @@
 import { computed, defineAsyncComponent, onActivated, onBeforeUnmount, onDeactivated, onMounted, ref, watch } from "vue";
 import { useStore } from "vuex";
 import { ElMessage, ElMessageBox } from "element-plus";
-import { cancelAIRun, getAIAdminRuns, getAIAdminRunTrace } from "@/api/ai";
+import { cancelAIRun, getAIRun, getAIAdminRuns, getAIAdminRunTrace } from "@/api/ai";
 import AiSpeechFindings from "@/components/AISpeechFindings/index.vue";
 import AiImageFindings from "@/components/AIImageFindings/index.vue";
 import AiEcgFindings from "@/components/AIEcgFindings/index.vue";
@@ -76,9 +80,12 @@ import {resolveSupplyEvidence,verifySupplyRun,supplyAnalysisVersionSupported} fr
 import {resolveInventoryEvidence,verifyInventoryRun,inventoryAnalysisVersionSupported,inventoryRunHasNativeMarkers} from "@/api/ai/inventoryResults";
 import {codingRunHasMarkers,verifyCodingRun,resolveCodingEvidence} from "@/api/ai/codingResults";
 import {documentExtractionRunHasMarkers,verifyDocumentExtractionRun} from "@/api/ai/documentExtractionResults";
+import {verifyDrugLabelRun,verifyDrugLabelTrace} from "@/api/ai/drugLabelResults";
+import {drugLabelRunHasNativeMarkers} from "@/api/ai/drugLabelHistory";
 import { supportCanonical, supportId } from "@/api/inpatientSupport";
 const CodingFindings=defineAsyncComponent(()=>import("@/components/ai/CodingFindings.vue"));
 const DocumentExtractionFindings=defineAsyncComponent(()=>import("@/components/ai/DocumentExtractionFindings.vue"));
+const DrugLabelFindings=defineAsyncComponent(()=>import("@/components/ai/DrugLabelFindings.vue"));
 const AiInventoryFindings=defineAsyncComponent(()=>import("@/components/ai/InventoryFindings.vue"));
 const AiSupplyFindings=defineAsyncComponent(()=>import("@/components/SupplyFindings.vue"));
 const AiSurgeryFindings=defineAsyncComponent(()=>import("@/components/AISurgeryFindings.vue"));
@@ -87,8 +94,9 @@ const store=useStore(),roles=computed(()=>store.getters['user/permissions']||[])
 const auth=()=>supportCanonical([props.active,store.state.user.accessToken,store.state.user.username,roles.value]);
 const states = { queued: "排队中", running: "生成中", succeeded: "待业务复核", failed: "失败", cancelled: "已取消" };
 const outcomes = { accepted: "采纳", rejected: "驳回", modified: "修改后采纳" };
-const rows = ref([]), loading = ref(false), page = ref(1), total = ref(0), filters = ref({ feature_key: "", status: "", outcome: "", requested_by: undefined, patient_id: undefined, department_id: undefined, surgery_pool_id:'',surgery_scenario_id:'',supply_item_kind:'',supply_item_id:undefined,supply_series_id:'',inventory_item_kind:'',inventory_item_id:undefined,inventory_scenario_id:'',coding_case_id:'',document_original_id:'' });
+const rows = ref([]), loading = ref(false), page = ref(1), total = ref(0), filters = ref({ feature_key: "", status: "", outcome: "", requested_by: undefined, patient_id: undefined, department_id: undefined, surgery_pool_id:'',surgery_scenario_id:'',supply_item_kind:'',supply_item_id:undefined,supply_series_id:'',inventory_item_kind:'',inventory_item_id:undefined,inventory_scenario_id:'',coding_case_id:'',document_original_id:'',drug_label_source_binding_id:'' });
 const visible = ref(false), detail = ref(null), detailLoading = ref(false), detailTab = ref("result"), evidenceVisible = ref(false), evidence = ref(null);
+const drugLabelRun=ref(null),listedDrugLabelScope=ref(null);
 let listVersion = 0, detailVersion = 0;
 let wasDeactivated = false;
 let alive=true;
@@ -98,38 +106,48 @@ const hasSupply=value=>!!value?.supply_findings||!!value?.result?.supply_analysi
 const hasInventory=inventoryRunHasNativeMarkers,hasCoding=codingRunHasMarkers,hasDocument=documentExtractionRunHasMarkers;
 function reportedTokens(row){
   const known=value=>Number.isSafeInteger(value)&&value>=0;
-  if(hasDocument(row))return [row.input_tokens,row.output_tokens].map(value=>known(value)?String(value):'未报告').join(' / ');
+  if(hasDocument(row)||drugLabelRunHasNativeMarkers(row))return [row.input_tokens,row.output_tokens].map(value=>known(value)?String(value):'未报告').join(' / ');
   return row.input_tokens||row.output_tokens?(row.input_tokens||0)+' / '+(row.output_tokens||0):'未报告';
 }
-function closeTrace(done){++detailVersion;detail.value=null;evidence.value=null;detailLoading.value=false;visible.value=evidenceVisible.value=false;if(typeof done==='function')done();}
-function clear(){++listVersion;++detailVersion;rows.value=[];total.value=0;detail.value=null;evidence.value=null;visible.value=evidenceVisible.value=false;loading.value=detailLoading.value=false;}
+function closeTrace(done){++detailVersion;detail.value=null;drugLabelRun.value=null;evidence.value=null;detailLoading.value=false;visible.value=evidenceVisible.value=false;if(typeof done==='function')done();}
+function clear(){listedDrugLabelScope.value=null;++listVersion;++detailVersion;rows.value=[];total.value=0;detail.value=null;drugLabelRun.value=null;evidence.value=null;visible.value=evidenceVisible.value=false;loading.value=detailLoading.value=false;}
 async function load(reset = false) {
   if(!allowed.value||!alive||wasDeactivated)return;
   if (reset) page.value = 1;
   const version = ++listVersion,key=auth(); loading.value = true;
   const params = Object.fromEntries(Object.entries(filters.value).filter(([, value]) => value !== "" && value != null));
-  if(['document_original_id','coding_case_id','inventory_scenario_id','supply_series_id','surgery_pool_id','surgery_scenario_id'].some(name=>params[name]&&!supportId(params[name]))){loading.value=false;ElMessage.warning('原序列、资源池与场景过滤须为明确规范UUID');return;}
+  if(['drug_label_source_binding_id','document_original_id','coding_case_id','inventory_scenario_id','supply_series_id','surgery_pool_id','surgery_scenario_id'].some(name=>params[name]&&!supportId(params[name]))){loading.value=false;ElMessage.warning('原序列、资源池与场景过滤须为明确规范UUID');return;}
   if(params.document_original_id&&params.feature_key!=='guideline_ingestion'||params.feature_key==='guideline_ingestion'&&['patient_id','department_id','coding_case_id','inventory_scenario_id','inventory_item_kind','inventory_item_id','supply_series_id','supply_item_kind','supply_item_id','surgery_pool_id','surgery_scenario_id'].some(name=>params[name]!==undefined)){loading.value=false;ElMessage.warning('原文审计须明确选择原文提取能力及原件范围');return;}
+  if(params.drug_label_source_binding_id&&params.feature_key!=='drug_label_extraction'||params.feature_key==='drug_label_extraction'&&['patient_id','department_id','document_original_id','coding_case_id','inventory_scenario_id','inventory_item_kind','inventory_item_id','supply_series_id','supply_item_kind','supply_item_id','surgery_pool_id','surgery_scenario_id'].some(name=>params[name]!==undefined)){loading.value=false;ElMessage.warning('说明书审计只接受明确完整来源范围');return;}
   if((!!params.supply_item_kind)!==(params.supply_item_id!==undefined)||params.supply_item_kind&&!['pharmaceutical','consumable'].includes(params.supply_item_kind)||params.supply_item_id!==undefined&&(!Number.isSafeInteger(params.supply_item_id)||params.supply_item_id<1)){loading.value=false;ElMessage.warning('物资审计须同时明确有效类型与整数标识');return;}
   if((!!params.inventory_item_kind)!==(params.inventory_item_id!==undefined)||params.inventory_item_kind&&!['pharmaceutical','consumable'].includes(params.inventory_item_kind)||params.inventory_item_id!==undefined&&(!/^[1-9][0-9]*$/.test(String(params.inventory_item_id))||!Number.isSafeInteger(Number(params.inventory_item_id))||Number(params.inventory_item_id)>2147483647)){loading.value=false;ElMessage.warning('库存审计须同时明确有效类型与规范正整数品种标识');return;}
-  try { const response = await getAIAdminRuns({ ...params, page: page.value, page_size: 30 }); if (current(key)&&version === listVersion) { rows.value = response.data || []; total.value = response.total || 0; } }
+  try { const response = await getAIAdminRuns({ ...params, page: page.value, page_size: 30 }); if (current(key)&&version === listVersion) { rows.value = response.data || []; total.value = response.total || 0;listedDrugLabelScope.value=params.feature_key==='drug_label_extraction'?{bindingId:params.drug_label_source_binding_id||null}:null; } }
   catch { if(current(key)&&version===listVersion){clear();ElMessage.warning('当前任务目录或审计权限无法重新核对，旧资料已清除');} }
   finally { if (current(key)&&version === listVersion) loading.value = false; }
 }
 async function inspect(row) {
   if(!allowed.value||!alive||wasDeactivated)return;
   const version=++detailVersion,key=auth(),isCurrent=()=>current(key)&&version===detailVersion&&visible.value;
-  visible.value=true;detail.value=null;evidence.value=null;evidenceVisible.value=false;detailTab.value="result";detailLoading.value=true;
+  visible.value=true;detail.value=null;drugLabelRun.value=null;evidence.value=null;evidenceVisible.value=false;detailTab.value="result";detailLoading.value=true;
   try {
     const response=await getAIAdminRunTrace(row.run_id);if(!isCurrent())return;const value=response.data;
-    let verified=value?.run_id===row.run_id&&value?.feature_key===row.feature_key;
+    const nativeDrugLabel=listedDrugLabelScope.value!==null||drugLabelRunHasNativeMarkers(row)||drugLabelRunHasNativeMarkers(value);
+    let verified=typeof row.feature_key==='string'&&value?.run_id===row.run_id&&value?.feature_key===row.feature_key;
+    let fullDrugLabel=null;
+    if(nativeDrugLabel){
+      const full=(await getAIRun(row.run_id)).data;if(!isCurrent())return;
+      const expected={runId:row.run_id,references:listedDrugLabelScope.value?.bindingId?{drug_label_source_binding_id:listedDrugLabelScope.value.bindingId}:null};
+      const options={auditOnly:true,allowFrozenAudit:true,current:isCurrent};
+      verified=verified&&await verifyDrugLabelRun(full,expected,options)&&await verifyDrugLabelTrace(value,full,expected,options);
+      if(verified)fullDrugLabel=full;
+    }
     if(verified&&(row.feature_key==='guideline_ingestion'||hasDocument(value)))verified=await verifyDocumentExtractionRun(value,value,{runId:row.run_id,originalId:filters.value.document_original_id||null,auditOnly:true,current:isCurrent});
     if(verified&&(row.feature_key==='drg_evidence_review'||hasCoding(value)))verified=await verifyCodingRun(value,{}, {auditOnly:true,current:isCurrent});
     if(verified&&hasInventory(value))verified=await verifyInventoryRun(value,{}, {auditOnly:true,current:isCurrent});
     if(verified&&hasSupply(value))verified=await verifySupplyRun(value,{}, {auditOnly:true,current:isCurrent});
     if(verified&&hasSurgery(value))verified=await verifySurgeryRun(value);
     if(!verified){if(isCurrent())ElMessage.warning(hasInventory(value)&&value?.result?.inventory_analysis&&!inventoryAnalysisVersionSupported(value.result.inventory_analysis)?'原运行版本当前无法重算，暂不展示旧库存比较正文':hasSupply(value)&&value?.result?.supply_analysis&&!supplyAnalysisVersionSupported(value.result.supply_analysis)?'原运行版本当前无法重算，暂不展示旧预测正文':'原任务或完整冻结来源及固定结果无法核对，暂不展示');return;}
-    if(isCurrent())detail.value=value;
+    if(isCurrent()){drugLabelRun.value=fullDrugLabel;detail.value=value;}
   }catch{if(isCurrent()){clear();ElMessage.warning('当前完整任务或审计权限无法重新核对，旧资料已清除');}}
   finally{if(current(key)&&version===detailVersion)detailLoading.value=false;}
 }
@@ -141,9 +159,9 @@ async function cancel(row) {
     if(!current(key))return;await cancelAIRun(row.run_id);if(!current(key))return;ElMessage.success("任务结果已取消接收"); await load();
   } catch (error) { if (error !== "cancel" && error !== "close"&&current(key)){clear();ElMessage.warning('当前任务或取消权限已经变化，请重新核对');} }
 }
-watch(visible,open=>{if(!open){++detailVersion;detail.value=null;evidence.value=null;evidenceVisible.value=false;detailLoading.value=false;}},{flush:'sync'});
+watch(visible,open=>{if(!open){++detailVersion;detail.value=null;drugLabelRun.value=null;evidence.value=null;evidenceVisible.value=false;detailLoading.value=false;}},{flush:'sync'});
 watch(evidenceVisible,open=>{if(!open)evidence.value=null;},{flush:'sync'});
-watch(()=>filters.value.feature_key,value=>{if(value!=='guideline_ingestion')filters.value.document_original_id='';else filters.value.patient_id=undefined;if(value!=='drg_evidence_review')filters.value.coding_case_id='';if(value!=='surgery_scheduling'){filters.value.department_id=undefined;filters.value.surgery_pool_id=filters.value.surgery_scenario_id='';}if(value!=='supply_forecast'){filters.value.supply_item_kind='';filters.value.supply_item_id=undefined;filters.value.supply_series_id='';}if(value!=='inventory_optimization'){filters.value.inventory_item_kind='';filters.value.inventory_item_id=undefined;filters.value.inventory_scenario_id='';}else filters.value.patient_id=undefined;},{flush:'sync'});
+watch(()=>filters.value.feature_key,value=>{if(value!=='drug_label_extraction')filters.value.drug_label_source_binding_id='';else filters.value.patient_id=undefined;if(value!=='guideline_ingestion')filters.value.document_original_id='';else filters.value.patient_id=undefined;if(value!=='drg_evidence_review')filters.value.coding_case_id='';if(value!=='surgery_scheduling'){filters.value.department_id=undefined;filters.value.surgery_pool_id=filters.value.surgery_scenario_id='';}if(value!=='supply_forecast'){filters.value.supply_item_kind='';filters.value.supply_item_id=undefined;filters.value.supply_series_id='';}if(value!=='inventory_optimization'){filters.value.inventory_item_kind='';filters.value.inventory_item_id=undefined;filters.value.inventory_scenario_id='';}else filters.value.patient_id=undefined;},{flush:'sync'});
 watch(filters,clear,{deep:true,flush:'sync'});
 watch(auth,()=>{clear();if(allowed.value&&!wasDeactivated)load();},{flush:'sync'});
 onMounted(() => { if (allowed.value) load(); });

@@ -306,3 +306,80 @@ def test_admin_reader_captures_loaded_request_epoch_before_orm_refresh(db_sessio
         db_session.rollback()
     assert len(statements) == 1 and "hoimsystem_users" in statements[0]
     no_task_text(statements)
+
+
+MARKERS = [
+    ("input_json", {"payload": {"input": {"document_change_scope_id": None}, "context": {}}}),
+    ("input_json", {"payload": {"input": {}, "context": {"document_change_binding": None}}}),
+    ("input_json", {"payload": {"input": {}, "context": {"document_change_source": None}}}),
+    ("input_json", {"payload": {"input": {}, "context": {"document_change_private_scope": None}}}),
+    ("input_json", {"payload": {"input": {}, "context": {"scope": "document_change_review"}}}),
+    ("input_json", {"payload": {"input": {}, "context": {"source_domain": "document_change_review"}}}),
+    ("input_json", {"payload": {"input": {}, "context": {"selected_sources": {"document_change_scope_id": None}}}}),
+    ("context_metadata_json", {"selected_sources": {"document_change_scope_id": None}}),
+    ("result_json", {"document_change": None}),
+    ("result_json", {"schema_version": "document_change_result_ref_v1"}),
+    ("evidence_json", [{"kind": "document_change_scope"}]),
+]
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("field,marker", MARKERS)
+async def test_missing_artifact_rewritten_feature_each_remaining_native_marker_returns409_without_text(async_client, auth_headers, pipeline, field, marker):
+    case, db = pipeline, pipeline["db"]
+    auth = headers(auth_headers, case)
+    queued = await create(async_client, auth, case)
+    identifier = queued["data"]["run_id"]
+    db.query(AIDocumentChangeRunArtifact).filter_by(run_id=identifier).delete(synchronize_session=False)
+    db.execute(
+        text("UPDATE hoimsystem_ai_run SET feature_key='patient_summary', input_json='{}', context_metadata_json='{}', evidence_json='[]', result_json='{}' WHERE run_id=:id"), {"id": identifier}
+    )
+    db.execute(text("UPDATE hoimsystem_ai_run SET " + field + "=:marker WHERE run_id=:id"), {"id": identifier, "marker": c.e.canonical_json(marker)})
+    db.commit()
+    result_columns = []
+
+    def note(connection, cursor, statement, parameters, context, many):
+        if statement.lstrip().upper().startswith("SELECT") and context.compiled is not None:
+            result_columns.extend(item.keyname for item in context.compiled._result_columns)
+
+    event.listen(db.get_bind(), "before_cursor_execute", note)
+    try:
+        response = await async_client.get(f"/api/ai/runs/{identifier}", headers=auth)
+        assert response.status_code == 409, response.text
+    finally:
+        event.remove(db.get_bind(), "before_cursor_execute", note)
+        db.query(AIRun).filter_by(run_id=identifier).delete(synchronize_session=False)
+        db.commit()
+    assert not {"input_json", "evidence_json", "context_metadata_json", "result_json", "source_json"} & set(result_columns)
+    assert "document_change_marker" in result_columns
+
+
+@pytest.mark.parametrize("raw", ["{", "null", "[]", '{"unrelated":null}', '{"summary":"ordinary generic"}'])
+def test_marker_metadata_probe_handles_invalid_scalar_json_without_native_false_positive(pipeline, raw):
+    from app.ai.document_change_access import has_native_identity
+
+    case, db = pipeline, pipeline["db"]
+    identifier = "ordinary-non-uuid-marker-probe"
+    run = AIRun(
+        run_id=identifier,
+        feature_key="patient_summary",
+        requested_by=case["actor_id"],
+        provider_id=case["provider_id"],
+        provider_revision=1,
+        prompt_version=0,
+        prompt_hash="0" * 64,
+        context_digest="0" * 64,
+        preview=1,
+        status="failed",
+        input_json=raw,
+        evidence_json=raw,
+        context_metadata_json=raw,
+        result_json=raw,
+    )
+    db.add(run)
+    db.commit()
+    try:
+        assert has_native_identity(db, identifier) is False
+    finally:
+        db.delete(run)
+        db.commit()

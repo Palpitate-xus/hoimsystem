@@ -919,13 +919,11 @@ def _recheck_task(db: Session, run: AIRun) -> tuple[FeatureSpec, AIProvider, dic
 async def execute_claimed(run_id: str, lease: str, *, transport=None) -> None:
     """Release SQL connections during inference; recheck authorization before storing results."""
     from app import database
-    from app.ai.document_change_access import locate_artifact
-    from app.ai.document_change_view_contract import FEATURE_KEY as CHANGE_FEATURE
+    from app.ai.document_change_access import has_native_identity
     from app.ai.document_extraction_storage import is_extraction_run
 
     with database.SessionLocal() as db:
-        header = db.query(AIRun.feature_key).filter_by(run_id=run_id).one_or_none()
-        native_change = locate_artifact(db, run_id) is not None or header is not None and header.feature_key == CHANGE_FEATURE
+        native_change = has_native_identity(db, run_id)
     if native_change:
         from app.ai.document_change_runtime import execute_change_claimed
 

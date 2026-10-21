@@ -470,12 +470,10 @@ def run_detail(run_id: str, db: Session = Depends(get_db), user: User = Depends(
 @router.post("/ai/runs/{run_id}/cancel")
 def cancel_run(run_id: str, db: Session = Depends(get_db), user: User = Depends(get_current_user)) -> dict:
     """Stop accepting a result; an already sent provider call may still finish."""
-    from app.ai.document_change_access import locate_artifact
+    from app.ai.document_change_access import has_native_identity
     from app.ai.document_change_runtime import cancel_change_run
-    from app.ai.document_change_view_contract import FEATURE_KEY as CHANGE_FEATURE
 
-    header = db.query(AIRun.feature_key).filter_by(run_id=run_id).one_or_none()
-    if locate_artifact(db, run_id) is not None or header is not None and header.feature_key == CHANGE_FEATURE:
+    if has_native_identity(db, run_id):
         cancel_change_run(db, user, run_id)
         return {"code": 200, "msg": "任务结果已取消接收"}
     from app.ai.document_change_runtime import guard_change_run_id

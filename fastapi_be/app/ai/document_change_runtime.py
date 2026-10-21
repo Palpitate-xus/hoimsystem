@@ -314,9 +314,9 @@ usage_receipt = storage.usage_receipt
 
 def guard_change_run_id(db, user, run_id, *, current=True):
     """Technical dispatch before the public handler loads any Task TEXT."""
-    with db.no_autoflush:
-        header = db.query(AIRun.feature_key).filter_by(run_id=run_id).one_or_none()
-    if storage.locate_artifact(db, run_id) is not None or header is not None and header.feature_key == FEATURE_KEY:
+    from app.ai.document_change_access import has_native_identity
+
+    if has_native_identity(db, run_id):
         storage.authorize_run_id(db, user, run_id, current=current)
         return True
     return False

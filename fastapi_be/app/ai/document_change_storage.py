@@ -15,7 +15,7 @@ from app.ai import document_change_contract as c
 from app.ai import document_change_sources as sources
 from app.ai import document_evidence_sources as originals
 from app.ai.context import ContextBundle, context_metadata
-from app.ai.document_change_access import locate_artifact, opaque_run_id, remember_staged_identity
+from app.ai.document_change_access import has_native_identity, locate_artifact, opaque_run_id, remember_staged_identity
 from app.ai.document_change_context import change_evidence, public_payload, selection, verify_current_context
 from app.ai.document_change_draft import SYSTEM_PROMPT, checked_source
 from app.ai.document_change_json import parse_case_json, require_case_json
@@ -387,7 +387,7 @@ def is_document_change_run(db, run):
     This dispatch result grants no permission. A damaged native feature or task
     envelope cannot hide its current Artifact behind an older RR snapshot.
     """
-    if locate_artifact(db, opaque_run_id(run)) is not None:
+    if has_native_identity(db, run):
         return True
     state = inspect(run, raiseerr=False)
     values = state.dict if state is not None else vars(run) if hasattr(run, "__dict__") else {}

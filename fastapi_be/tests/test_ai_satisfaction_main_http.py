@@ -1,12 +1,13 @@
 """Actual mounted JWT/native worker pipeline with isolated model HTTP replies."""
 
+import asyncio
 import copy
 import hashlib
 import json
 
 import httpx
 import pytest
-from sqlalchemy import event
+from sqlalchemy import event, text
 
 from app.ai.models import AIRun
 from app.ai.runtime import claim_next_run, execute_claimed
@@ -31,6 +32,7 @@ def shared_case(runtime_case):
     db.delete(sample)
     db.commit()
     case["actor_name"] = case["admin_user"].username
+    case["actor_id"] = case["admin_user"].user_id
     case["super_name"] = case["super_admin_user"].username
     case["private_comment"] = case["review"].comment
     case["private_identity"] = case["patient"].identity
@@ -162,3 +164,86 @@ async def test_actual_main_queued_cancellation_has_specific_known_zero_receipt_a
     case["db"].rollback()
     assert claim_next_run(case["db"]) is None
     assert (await async_client.post(f"/api/ai/runs/{identifier}/feedback", headers=headers, json={"outcome": "accepted", "comment": ""})).status_code == 409
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("change", ["cancel", "source", "role", "source_then_super_cancel"])
+async def test_actual_main_inflight_changes_preserve_paid_usage_without_accepting_a_result(async_client, shared_case, auth_headers, change):
+    case, db = shared_case, shared_case["db"]
+    headers, super_headers = auth_headers(case["actor_name"]), auth_headers(case["super_name"])
+    made = await async_client.post("/api/ai/runs", headers=headers, json=case["req"])
+    assert made.status_code == 200, made.text
+    identifier = made.json()["data"]["run_id"]
+    db.rollback()
+    claimed = claim_next_run(db)
+    assert claimed is not None and claimed[0] == identifier
+    db.rollback()
+    entered, release = asyncio.Event(), asyncio.Event()
+    calls, checkouts = [], []
+
+    def checkout(*_):
+        checkouts.append(1)
+
+    def checkin(*_):
+        checkouts.pop()
+
+    async def handle(request):
+        assert not checkouts
+        calls.append(request)
+        entered.set()
+        await release.wait()
+        assert not checkouts
+        return httpx.Response(200, json=envelope("chat", case["result"]["satisfaction_analysis"]))
+
+    engine = db.get_bind()
+    event.listen(engine, "checkout", checkout)
+    event.listen(engine, "checkin", checkin)
+    worker = asyncio.create_task(execute_claimed(*claimed, transport=httpx.MockTransport(handle)))
+    try:
+        await asyncio.wait_for(entered.wait(), timeout=10)
+        running = await async_client.get(f"/api/ai/runs/{identifier}", headers=headers)
+        assert running.status_code == 200, running.text
+        assert running.json()["data"]["status"] == "running"
+        assert running.json()["data"]["usage"] == {"input_tokens": None, "output_tokens": None, "complete": False, "model_call_attempted": None}
+        if change in {"source", "source_then_super_cancel"}:
+            revoked = await async_client.post(
+                f"/api/ai/satisfaction-sources/cases/{case['made']['case_id']}/revoke",
+                headers=super_headers,
+                json={"expected_revision": 2, "basis_note": "合成测试：请求进行中撤销来源，原付费用量仍须记录。"},
+            )
+            assert revoked.status_code == 200, revoked.text
+        if change == "role":
+            db.execute(text("UPDATE hoimsystem_users SET user_role='patient' WHERE user_id=:id"), {"id": case["actor_id"]})
+            db.commit()
+        if change in {"cancel", "source_then_super_cancel"}:
+            stopped = await async_client.post(f"/api/ai/runs/{identifier}/cancel", headers=super_headers if change == "source_then_super_cancel" else headers)
+            assert stopped.status_code == 200, stopped.text
+            pending = await async_client.get(f"/api/ai/runs/{identifier}", headers=super_headers)
+            assert pending.status_code == 200, pending.text
+            assert pending.json()["data"]["status"] == "cancelled" and pending.json()["data"]["result"] == {}
+            assert pending.json()["data"]["usage"] == {"input_tokens": None, "output_tokens": None, "complete": False, "model_call_attempted": None}
+        assert not checkouts
+        release.set()
+        await worker
+        assert len(calls) == 1 and not checkouts
+        full = await async_client.get(f"/api/ai/runs/{identifier}", headers=super_headers)
+        assert full.status_code == 200, full.text
+        value = full.json()["data"]
+        assert value["status"] == ("cancelled" if change in {"cancel", "source_then_super_cancel"} else "failed")
+        assert value["result"] == {} and value["usage"] == {"input_tokens": 13, "output_tokens": 7, "complete": True, "model_call_attempted": True}
+        ordinary = await async_client.get(f"/api/ai/runs/{identifier}", headers=headers)
+        assert ordinary.status_code == (200 if change == "cancel" else 403 if change == "role" else 409), ordinary.text
+        trace = await async_client.get(f"/api/ai/admin/runs/{identifier}", headers=super_headers)
+        assert trace.status_code == 200, trace.text
+        artifact = trace.json()["data"]["satisfaction_artifact"]
+        assert artifact["usage_event_id"] > 0
+        assert all(artifact[key] is None for key in ("result_hash", "result_bytes", "receipt_event_id", "accepted_lease", "accepted_at"))
+        assert (await async_client.post(f"/api/ai/runs/{identifier}/feedback", headers=super_headers, json={"outcome": "accepted", "comment": ""})).status_code == 409
+    finally:
+        release.set()
+        await worker
+        event.remove(engine, "checkout", checkout)
+        event.remove(engine, "checkin", checkin)
+        if change == "role":
+            db.execute(text("UPDATE hoimsystem_users SET user_role='admin' WHERE user_id=:id"), {"id": case["actor_id"]})
+            db.commit()

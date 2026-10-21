@@ -10,7 +10,7 @@ from sqlalchemy import event
 from app.ai import drug_label_storage as storage
 from app.ai import runtime
 from app.ai.drug_label_run_models import AIDrugLabelRunArtifact
-from app.ai.models import AIRun
+from app.ai.models import AIFeatureConfig, AIRun
 from tests.test_ai_drug_label_gateway import envelope
 from tests.test_ai_drug_label_runtime import case as _case
 from tests.test_ai_drug_label_runtime import revoke
@@ -55,6 +55,11 @@ async def test_actual_main_full_source_preview_submit_shared_claim_worker_trace_
     assert feature["input_mode"] == "drug_label_evidence"
     source = await async_client.get(f"/api/ai/drug-label-sources/{binding_id}", headers=headers)
     assert source.status_code == 200, source.text
+    options = await async_client.get("/api/ai/drug-label-sources/options", headers=headers)
+    catalog = await async_client.get("/api/ai/drug-label-sources/catalog", headers=headers)
+    directory = await async_client.get("/api/ai/drug-label-sources", headers=headers, params={"pharmaceutical_id": source.json()["data"]["snapshot"]["identity"]["pharmaceutical_id"]})
+    for response in (options, catalog, directory):
+        assert response.status_code == 200, response.text
     preview = await async_client.post("/api/ai/drug-label/context", headers=headers, json=values)
     assert preview.status_code == 200, preview.text
     assert set(preview.json()["data"]) == {"context", "metadata", "evidence", "drug_label_source_record"}
@@ -107,6 +112,9 @@ async def test_actual_main_full_source_preview_submit_shared_claim_worker_trace_
     detail = full.json()["data"]
     assert detail["status"] == "succeeded"
     assert detail["result"]["drug_label_extraction"]["fields"][0]["spans"][0]["quote"] == quote
+    super_full = await async_client.get(f"/api/ai/runs/{c.id}", headers=super_headers)
+    assert super_full.status_code == 200, super_full.text
+    assert super_full.json()["data"]["drug_label_findings"]["drug_label_source_record"]["audit_only"] is True
     trace = await async_client.get(f"/api/ai/admin/runs/{c.id}", headers=super_headers)
     assert trace.status_code == 200, trace.text
     audit = trace.json()["data"]
@@ -126,10 +134,14 @@ async def test_actual_main_full_source_preview_submit_shared_claim_worker_trace_
     if getattr(c, "export_wire", None):
         packets = {
             "feature": feature,
+            "options": options.json(),
+            "catalog": catalog.json(),
+            "directory": directory.json(),
             "source": source.json(),
             "preview": preview.json(),
             "queued": created.json(),
             "full": full.json(),
+            "super_full": super_full.json(),
             "trace": trace.json(),
             "history": history.json(),
             "admin_history": global_history.json(),
@@ -137,7 +149,19 @@ async def test_actual_main_full_source_preview_submit_shared_claim_worker_trace_
         }
         packets["raw_http_responses"] = {
             name: {"body_utf8": value.text, "body_sha256": hashlib.sha256(value.content).hexdigest(), "body_bytes": len(value.content), "status_code": value.status_code}
-            for name, value in {"source": source, "preview": preview, "queued": created, "full": full, "trace": trace, "history": history, "admin_history": global_history}.items()
+            for name, value in {
+                "source": source,
+                "options": options,
+                "catalog": catalog,
+                "directory": directory,
+                "preview": preview,
+                "queued": created,
+                "full": full,
+                "super_full": super_full,
+                "trace": trace,
+                "history": history,
+                "admin_history": global_history,
+            }.items()
         }
         c.export_wire(kind, packets)
 
@@ -173,3 +197,36 @@ async def test_actual_main_source_withdrawal_rejects_before_any_private_task_tex
     db.expire_all()
     actual = db.get(AIRun, c.id)
     assert actual.status == "failed" and actual.input_tokens == actual.output_tokens == 0
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(("roles", "expected"), [("[" + '"super_admin"' + "]", 403), ("{invalid-json", 409)])
+async def test_actual_main_current_feature_role_revocation_precedes_private_task_text(async_client, auth_headers, shared_case, roles, expected):
+    c, db = shared_case, shared_case.db
+    headers, super_headers = auth_headers(c.actor.username), auth_headers(c.users["super_admin_user"].username)
+    created = await async_client.post("/api/ai/runs", headers=headers, json=c.request.model_dump())
+    assert created.status_code == 200, created.text
+    c.id = created.json()["data"]["run_id"]
+    db.query(AIFeatureConfig).filter_by(feature_key="drug_label_extraction").update({"allowed_roles_json": roles}, synchronize_session=False)
+    db.commit()
+    private_selects = []
+
+    def observe(_, __, statement, ___, ____, _____):
+        lowered = statement.lower()
+        if lowered.lstrip().startswith("select") and any("ai_run." + key in lowered for key in ("input_json", "evidence_json", "context_metadata_json", "result_json")):
+            private_selects.append(statement)
+
+    event.listen(db.get_bind(), "before_cursor_execute", observe)
+    try:
+        denied = await async_client.get(f"/api/ai/runs/{c.id}", headers=headers)
+        assert denied.status_code == expected, denied.text
+        assert private_selects == []
+    finally:
+        event.remove(db.get_bind(), "before_cursor_execute", observe)
+    frozen = await async_client.get(f"/api/ai/admin/runs/{c.id}", headers=super_headers)
+    assert frozen.status_code == 200, frozen.text
+    history = await async_client.get(
+        "/api/ai/runs", headers=super_headers, params={"feature_key": "drug_label_extraction", "drug_label_source_binding_id": c.request.input["drug_label_source_binding_id"]}
+    )
+    assert history.status_code == 200, history.text
+    assert [row["run_id"] for row in history.json()["data"]] == [c.id]

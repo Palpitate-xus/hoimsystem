@@ -374,7 +374,12 @@ def list_runs(
     if user.user_role != "super_admin":
         query = query.filter_by(requested_by=user.user_id)
     if feature_key:
-        authorized_feature(db, user, feature_key)
+        if feature_key == "feedback_analysis":
+            from app.ai.satisfaction_history import authorize_history
+
+            user = authorize_history(db, user)
+        else:
+            authorized_feature(db, user, feature_key)
         query = query.filter_by(feature_key=feature_key)
     if charge_native_only:
         if feature_key != "charge_reconciliation" or any(

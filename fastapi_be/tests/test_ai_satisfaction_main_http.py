@@ -167,6 +167,25 @@ async def test_actual_main_queued_cancellation_has_specific_known_zero_receipt_a
 
 
 @pytest.mark.asyncio
+async def test_current_super_frozen_history_ignores_malformed_live_roles_while_ordinary_history_refuses(async_client, shared_case, auth_headers):
+    case, db = shared_case, shared_case["db"]
+    headers, super_headers = auth_headers(case["actor_name"]), auth_headers(case["super_name"])
+    created = await async_client.post("/api/ai/runs", headers=headers, json=case["req"])
+    assert created.status_code == 200, created.text
+    identifier = created.json()["data"]["run_id"]
+    db.execute(text("UPDATE hoimsystem_ai_feature_config SET allowed_roles_json='malformed live JSON' WHERE feature_key='feedback_analysis'"))
+    db.commit()
+    params = {"feature_key": "feedback_analysis", "satisfaction_case_id": case["made"]["case_id"], "satisfaction_native_only": True}
+    ordinary = await async_client.get("/api/ai/runs", headers=headers, params=params)
+    assert ordinary.status_code == 409, ordinary.text
+    frozen = await async_client.get("/api/ai/runs", headers=super_headers, params=params)
+    assert frozen.status_code == 200, frozen.text
+    assert [row["run_id"] for row in frozen.json()["data"]] == [identifier]
+    trace = await async_client.get(f"/api/ai/admin/runs/{identifier}", headers=super_headers)
+    assert trace.status_code == 200 and trace.json()["data"]["frozen_satisfaction_audit"] is True, trace.text
+
+
+@pytest.mark.asyncio
 @pytest.mark.parametrize("change", ["cancel", "source", "role", "source_then_super_cancel"])
 async def test_actual_main_inflight_changes_preserve_paid_usage_without_accepting_a_result(async_client, shared_case, auth_headers, change):
     case, db = shared_case, shared_case["db"]

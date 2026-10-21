@@ -4,6 +4,7 @@ import asyncio
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
 from fastapi.routing import APIRoute
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session, load_only
@@ -51,7 +52,7 @@ class BoundedDocumentRoute(APIRoute):
         return bounded
 
 
-router = APIRouter(route_class=BoundedDocumentRoute)
+router = APIRouter(route_class=BoundedDocumentRoute, default_response_class=JSONResponse)
 
 
 def _commit(db, operation):

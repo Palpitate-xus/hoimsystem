@@ -416,3 +416,5 @@
 - 2026-10-21：第79项隔离MySQL的实际claim/dispatch/完整结果接受阶段46项检查通过（41.671秒，25产品/迁移输入稳定）；231旧表+6新表升级/回退/再升级及全部旧DDL/行哈希保持，10UTC6/10MEDIUM与完整容量/+1实测。四种完整/缺失/部分用量均可成功，五个实际不同Audit PK、>65k结果与短pointer、错误接受PK/自重算SHA拒绝、真实Result INSERT后Source改变整体回滚均实证。Source撤回后第二无dispatch交付不改owner，原dispatch保11/null paid且0正文返回。第三轮脚本收尾变量覆盖导致报告失败，原失败与双脚本完整保留；仅修probe的第四轮通过，产品未改。尚无79实际cancel handler/shared async/Main Task API/FE，继续。
 
 - 2026-10-21：第79项实际Super技术取消与未领取失败结算已提交；七整文件一次202通过（48.07秒pytest/58.801秒外层，1190输入稳定）。排队未领取保null claim/lease/start且已证明0/0未调用，已领未发同样0；已发取消等待原dispatch11/null paid且不接受结果。Source撤回及原owner失权仍仅可技术停止，普通admin无此特权；六类实际cancel/usage审计SQLtrigger验证整件回滚。这里是实际staged服务，尚非Main/JWT cancel API或FE；前MySQL46不覆盖本次新增分支，继续shared执行。
+
+- 2026-10-21：第79项专用实际异步执行已提交；八整文件一次227通过（58.03秒pytest/69.212秒外层，1193输入稳定，新增25项）。真实SQL创建/领取/发送独立commit，local ASGI Chat/Responses×完整/缺失/部分/partial+total回包，provider等待前后SQL Session与checked-out connection均0；回包后重验Source/config和原dispatch再完整接受。heldHTTP重复交付/撤回/原角色epoch失效保实际paid而0正文，真实取消保cancelled+11/null，接受SQL失败及拒收None仍独立结算paid。十分钟中断仅未知/未调用结算且不重放；实际shared Main/JWT/native队列/FE继续，未声称远端模型可靠性或本阶段MySQL端到端已验证。

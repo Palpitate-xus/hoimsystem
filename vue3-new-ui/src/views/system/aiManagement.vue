@@ -81,7 +81,7 @@
           <template v-if="tab==='research_cohort_sources'&&canManageResearchSources">
             <el-checkbox v-model="researchSourcesAuditOnly" aria-label="只读核对冻结科研来源">只读核对冻结科研来源</el-checkbox>
             <p>技术发布、项目成员登记与患者研究授权分别核对。冻结核对不恢复临床原文、模型使用或执行权限。</p>
-            <research-cohort-sources :active="tab==='research_cohort_sources'&&canManageResearchSources" :audit-only="researchSourcesAuditOnly" />
+            <research-cohort-sources :key="String(researchSourcesAuditOnly)" :active="tab==='research_cohort_sources'&&canManageResearchSources" :audit-only="researchSourcesAuditOnly" />
           </template>
         </el-tab-pane>
         <el-tab-pane v-if="canCheckForecast" label="病案编码证据与本地规则治理" name="coding_evidence" lazy><ai-coding-evidence-sources v-if="tab==='coding_evidence'&&canCheckForecast" audit-only /></el-tab-pane>

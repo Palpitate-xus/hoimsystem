@@ -1,6 +1,7 @@
 """Complete actual SQL acceptance/receipts, without provider or worker execution."""
 
 import copy
+import datetime as dt
 import uuid
 
 import pytest
@@ -18,7 +19,7 @@ from app.ai.models import AIAuditEvent, AIRun
 from tests.test_ai_document_change_sources import change_case as change_case  # noqa: F401
 from tests.test_ai_document_change_storage import remove_prior_tasks as remove_prior_tasks  # noqa: F401
 from tests.test_ai_document_change_storage import task
-from tests.test_ai_document_evidence_contract import NOTE
+from tests.test_ai_document_evidence_contract import NOTE, NOW
 from tests.test_ai_document_evidence_sources import cas
 
 KNOWN = {"input_tokens": 11, "output_tokens": 13, "complete": True, "model_call_attempted": True}
@@ -136,7 +137,7 @@ def test_failed_lease_preserves_partial_actual_usage_after_role_loss(change_case
         result_store.expand_result(db, actor, run, current=False)
 
 
-@pytest.mark.parametrize("trigger", ["usage_audit", "accept_audit", "blob", "run_update", "artifact_usage"])
+@pytest.mark.parametrize("trigger", ["usage_audit", "accept_audit", "blob", "run_update", "artifact_usage", "accepted_clock"])
 def test_actual_sql_failures_or_postflush_mutations_roll_back_complete_acceptance(change_case, trigger):
     db, actor, *_ = change_case
     case = executing(change_case)
@@ -148,6 +149,9 @@ def test_actual_sql_failures_or_postflush_mutations_roll_back_complete_acceptanc
         "blob": "AFTER INSERT ON hoimsystem_ai_document_change_run_result BEGIN UPDATE hoimsystem_ai_document_change_run_result SET result_json='{}' WHERE run_id=NEW.run_id; END",
         "run_update": "AFTER UPDATE ON hoimsystem_ai_run WHEN NEW.status='succeeded' BEGIN UPDATE hoimsystem_ai_run SET input_tokens=999 WHERE run_id=NEW.run_id; END",
         "artifact_usage": "AFTER UPDATE ON hoimsystem_ai_document_change_run_artifact WHEN NEW.usage_event_id IS NOT NULL BEGIN UPDATE hoimsystem_ai_document_change_run_artifact SET usage_event_id=NEW.created_audit_event_id WHERE run_id=NEW.run_id; END",
+        "accepted_clock": "AFTER INSERT ON hoimsystem_ai_document_change_run_result BEGIN UPDATE hoimsystem_ai_document_change_run_result SET accepted_at='"
+        + str(c.e.clock(NOW) + dt.timedelta(microseconds=1))
+        + "' WHERE run_id=NEW.run_id; END",
     }[trigger]
     db.execute(text("CREATE TRIGGER break_change_accept " + sql))
     db.commit()
@@ -321,3 +325,15 @@ def test_prior_same_second_token_reset_uses_exact_artifact_clock_not_run_floor(c
     storage.stage_result(db, actor, run, run.lease_token, case["result"], KNOWN, latency_ms=5)
     db.commit()
     assert storage.expand_result(db, actor, run) == case["result"]
+
+
+def test_read_verifies_full_utc6_acceptance_clock_not_only_legacy_audit_second(change_case):
+    db, actor, *_ = change_case
+    case = accepted(change_case)
+    blob = db.get(AIDocumentChangeRunResult, case["run"].run_id)
+    original_clock = blob.accepted_at
+    blob.accepted_at += dt.timedelta(microseconds=1)
+    assert blob.accepted_at.replace(microsecond=0) == original_clock.replace(microsecond=0)
+    db.commit()
+    with pytest.raises(HTTPException):
+        result_store.expand_result(db, actor, case["run"], current=False)

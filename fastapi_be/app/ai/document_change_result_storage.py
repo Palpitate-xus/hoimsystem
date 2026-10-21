@@ -223,6 +223,7 @@ def stage_result(db, user, run, lease, value, usage, *, latency_ms):
         "source_binding_hash": c.e.digest(bound),
         "result_hash": content_hash,
         "result_bytes": len(c.e.utf8(raw)),
+        "accepted_at": c.e.utc_text(now),
         "usage_event_id": receipt.event_id,
     }
     acceptance = _event(db, actor.user_id, ACCEPT, run, detail, now)
@@ -372,10 +373,12 @@ def expand_result(db, user, run, *, current=True):
             "source_binding_hash": c.e.digest(bound),
             "result_hash": reference.content_hash,
             "result_bytes": reference.result_bytes,
+            "accepted_at": c.e.utc_text(row.accepted_at),
             "usage_event_id": artifact.usage_event_id,
         }
         if (
             audit is None
+            or row.accepted_at < artifact.recorded_at
             or _audit_value(audit)
             != {"actor_id": run.requested_by, "action": ACCEPT, "target": run.run_id, "detail_json": require_case_json(detail), "create_time": row.accepted_at.replace(microsecond=0)}
             or artifact.usage_event_id == reference.accept_audit_event_id

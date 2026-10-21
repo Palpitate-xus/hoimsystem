@@ -100,6 +100,14 @@ def operational_options(db, user: User, spec: FeatureSpec) -> dict:
 
 
 def operational_context(db, user: User, spec: FeatureSpec, values: dict) -> ContextBundle:
+    if "satisfaction_case_id" in values:
+        if spec.number != 70:
+            raise HTTPException(422, "受审完整评价原件仅用于满意度与评价证据分析")
+        from app.ai.satisfaction_context import satisfaction_context
+
+        return satisfaction_context(db, user, values)
+    if spec.number == 72 or "document_change_scope_id" in values:
+        raise HTTPException(422, "双原文比较不使用通用运营快照，请使用专用有限范围原件预览")
     if "inventory_scenario_id" in values:
         if spec.number != 67:
             raise HTTPException(422, "受审库存场景仅用于独立物资有限采购候选比较")

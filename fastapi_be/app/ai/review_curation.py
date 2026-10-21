@@ -9,6 +9,7 @@ from sqlalchemy import and_, case, func, or_
 from app.ai.context import minimize_identifiers
 from app.ai.governance import audit, digest, ensure_revision, flush_or_conflict
 from app.ai.models import AIReviewExcerpt, utcnow
+from app.ai.satisfaction_write_guard import lock_satisfaction_write
 from app.models import Department, Doctor, MedicalRecord, Patient, Registration, Review
 
 
@@ -177,6 +178,7 @@ def authorize_feedback_snapshot(db, context):
 
 
 def create_excerpt(db, user, req):
+    user = lock_satisfaction_write(db, user, allowed_roles={"super_admin"})
     # All version writers lock the same original row before allocating or publishing.
     review = db.query(Review).filter_by(review_id=req.review_id).with_for_update().populate_existing().first()
     if review is None:
@@ -206,6 +208,7 @@ def create_excerpt(db, user, req):
 
 
 def review_excerpt(db, user, excerpt_id, req):
+    user = lock_satisfaction_write(db, user, allowed_roles={"super_admin"})
     item = db.get(AIReviewExcerpt, excerpt_id)
     if item is None:
         raise HTTPException(404, "脱敏稿版本不存在")

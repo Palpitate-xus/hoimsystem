@@ -124,6 +124,9 @@ def stage_anchor(db, run):
     )
     db.add(anchor)
     db.flush()
+    from app.ai.native_task_routing import remember_staged_identity
+
+    remember_staged_identity(db, anchor)
     load_snapshot(db, run)
     return snapshot
 

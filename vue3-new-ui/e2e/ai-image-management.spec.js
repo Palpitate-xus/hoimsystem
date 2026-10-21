@@ -34,8 +34,8 @@ async function session(page, { failFirstPurge = false, withdrawn = false } = {})
       if (failFirstPurge && state.purges.length === 1) { state.status = "purge_pending"; state.revision = 3; await route.fulfill({ status: 503, contentType: "application/json", body: JSON.stringify({ detail: "隔离测试存储暂不可用，原请求保留" }) }); return; }
       state.status = "purged"; state.revision = 4; data = metadata();
     }
-    if (path === "/api/ai/admin/runs") { data = [{ run_id: "image-frozen-run", feature_name: "医学影像辅助识别", status: "succeeded", patient_id: 1, requested_by: 3, create_time: "2026-10-20T10:01:00" }]; total = 1; }
-    if (path === "/api/ai/admin/runs/image-frozen-run") data = { run_id: "image-frozen-run", feature_name: "医学影像辅助识别", status: "succeeded", patient_id: 1, requested_by: 3, snapshot_complete: true, image_findings: findings, result: { summary: "冻结候选仅供原任务审计", sections: [], warnings: [], missing_data: [], image_analysis: analysis }, evidence: [] };
+    if (path === "/api/ai/admin/runs") { data = [{ run_id: "image-frozen-run", feature_key: "imaging_detection", feature_name: "医学影像辅助识别", status: "succeeded", patient_id: 1, requested_by: 3, create_time: "2026-10-20T10:01:00" }]; total = 1; }
+    if (path === "/api/ai/admin/runs/image-frozen-run") data = { run_id: "image-frozen-run", feature_key: "imaging_detection", feature_name: "医学影像辅助识别", status: "succeeded", patient_id: 1, requested_by: 3, snapshot_complete: true, image_findings: findings, result: { summary: "冻结候选仅供原任务审计", sections: [], warnings: [], missing_data: [], image_analysis: analysis }, evidence: [] };
     if (path === "/api/ai/runs" && method === "POST") state.runs.push(request.postDataJSON());
     if (method !== "GET" && /^\/api\/(imaging|medicalRecord|prescription|inpatient|admission|lab)(\/|$)/.test(path)) state.writes.push(path);
     await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ code: 200, msg: "success", data, ...(total == null ? {} : { total }) }) });

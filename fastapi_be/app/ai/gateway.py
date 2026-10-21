@@ -465,6 +465,8 @@ def validate_generation(
 
 
 def _request(provider: AIProvider, spec: FeatureSpec, task_prompt: str, data: dict) -> tuple[str, dict]:
+    if spec.number == 73 or any(key in data.get("context", {}) for key in ("drug_label_binding", "drug_label_source")) or "drug_label_source_binding_id" in data.get("input", {}):
+        raise AIExecutionError("DRUG_LABEL_NATIVE_REQUIRED", "说明书任务仅通过当前完整来源及专属协议执行")
     from app.ai.charge_reconciliation_gateway import matches_charge_request
 
     if matches_charge_request(spec, data):
@@ -473,6 +475,12 @@ def _request(provider: AIProvider, spec: FeatureSpec, task_prompt: str, data: di
         return request(provider, spec, task_prompt, data)
     endpoint = validate_endpoint(provider.api_base)
     budget = min(provider.max_output_tokens, settings.AI_MAX_OUTPUT_TOKENS)
+    if (
+        spec.number == 72
+        or "document_change_scope_id" in data.get("input", {})
+        or any(key in data.get("context", {}) for key in ("document_change_binding", "document_change_source", "document_change_private_scope"))
+    ):
+        raise AIExecutionError("DOCUMENT_CHANGE_PROTOCOL_REQUIRED", "双原文完整来源仅可走独立版本核对协议，未降级通用输出")
     if spec.number == 71 or any(key in data.get("context", {}) for key in ("document_binding", "document_source", "document_review")) or "document_original_id" in data.get("input", {}):
         from app.ai.document_extraction_context import public_payload
         from app.ai.document_extraction_contract import EXTRACTION_SYSTEM_PROMPT, DocumentExtractionReply
@@ -920,6 +928,12 @@ async def generate(
         if audio is not None or ecg is not None or image is not None:
             raise AIExecutionError("UNEXPECTED_CHARGE_ATTACHMENT", "完整账目核对不接受影像、心电或音频附件")
         return await generate_charge(provider, spec, task_prompt, data, transport=transport)
+    from app.ai.satisfaction_gateway import generate_satisfaction, matches_satisfaction_request
+
+    if matches_satisfaction_request(spec, data):
+        if audio is not None or ecg is not None or image is not None:
+            raise AIExecutionError("UNEXPECTED_SATISFACTION_ATTACHMENT", "完整评价证据不接受影像、心电或音频附件")
+        return await generate_satisfaction(provider, spec, task_prompt, data, transport=transport)
     inputs = outputs = None
     coding_mode = bool({"coding_binding", "coding_source", "coding_case"} & data.get("context", {}).keys()) or "coding_case_id" in data.get("input", {})
     try:

@@ -8,9 +8,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from app.ai.catalog import CATALOG_VERSION, COMMON_SYSTEM_PROMPT, FEATURES, describe_feature
-from app.ai.charge_reconciliation_prompt import CHARGE_RECONCILIATION_SYSTEM_PROMPT
-from app.ai.coding_evidence_prompt import CODING_SYSTEM_PROMPT
-from app.ai.document_extraction_contract import EXTRACTION_SYSTEM_PROMPT
+from app.ai.feature_prompts import SYSTEM_PROMPT_OVERRIDES
 
 CATEGORIES = {
     "cdss": "临床决策",
@@ -42,7 +40,7 @@ def artifacts() -> dict[str, str]:
     payload = {
         "catalog_version": CATALOG_VERSION,
         "system_prompt": COMMON_SYSTEM_PROMPT,
-        "system_prompt_overrides": {"drg_evidence_review": CODING_SYSTEM_PROMPT, "charge_reconciliation": CHARGE_RECONCILIATION_SYSTEM_PROMPT, "guideline_ingestion": EXTRACTION_SYSTEM_PROMPT},
+        "system_prompt_overrides": dict(SYSTEM_PROMPT_OVERRIDES),
         "features": [{**describe_feature(spec), "task_prompt": spec.task_prompt} for spec in FEATURES],
     }
     lines = [
@@ -55,9 +53,7 @@ def artifacts() -> dict[str, str]:
         "所有能力初始关闭。临床启用需要真实适用数据、审核知识和验证记录；专用能力还需要对应适配服务及验证报告。",
         "",
         "可直接审阅 [完整默认 Prompt JSON](ai-prompts.json)；管理台中的不可变 Prompt 版本可覆盖各任务默认文本，固定系统契约始终附加。",
-        "JSON 的 system_prompt_overrides 列出编码证据、完整住院账目核对和指南区间提取的实际独立系统契约；其余能力使用 system_prompt。每项 task_prompt 为独立默认任务文本。",
-        "",
-        "使用独立输出契约的能力，其实际固定System Prompt单列于JSON的system_prompt_overrides；其余能力使用system_prompt。",
+        "JSON 的 system_prompt_overrides 列出编码证据、完整住院账目核对、受审评价主题、指南区间提取、双原文变更核对和药品说明书字段定位的实际独立系统契约；其余能力使用 system_prompt。每项 task_prompt 为独立默认任务文本。",
         "",
         "| 编号 | 能力 | 分类 | 优先级 | 运行接口 | 资料范围 | 审核知识要求 | 默认使用角色 |",
         "| --- | --- | --- | --- | --- | --- | --- | --- |",

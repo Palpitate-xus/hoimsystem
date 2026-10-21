@@ -3,7 +3,7 @@
 > 由 `fastapi_be/scripts/generate_rbac_matrix.py` 从源码自动生成，请勿手改。
 > `✓`=可访问 | `PUBLIC`=无需登录 | 留空=不可访问
 
-共 **867** 个接口（PUBLIC 18 个 / 需登录 849 个）。
+共 **906** 个接口（PUBLIC 18 个 / 需登录 888 个）。
 
 
 ### `admin.py`
@@ -197,6 +197,37 @@
 | POST | `/api/ai/coding-evidence/packages/{identifier}/review` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
 | POST | `/api/ai/coding-evidence/packages/{identifier}/revoke` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
 
+### `ai_document_change.py`
+
+| 方法 | 路径 | admin | super_admin | director | doctor | nurse | cashier | pharmacist | guide | patient | lab_technician | registrar | PUBLIC |
+|------|------|------|------|------|------|------|------|------|------|------|------|------|------|
+| GET | `/api/ai/admin/document-changes/options` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/admin/document-changes/target-snapshot` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/admin/document-changes/capture` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/admin/document-changes/links` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/admin/document-changes/links/{link_id}` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/admin/document-changes/links/{link_id}/review` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/admin/document-changes/links/{link_id}/revoke` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/admin/document-changes/scopes` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/admin/document-changes/scopes/{scope_id}` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/admin/document-changes/scopes/{scope_id}/public-source` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/admin/document-changes/scopes/{scope_id}/review` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/admin/document-changes/scopes/{scope_id}/revoke` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/admin/document-changes/links` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/admin/document-changes/scopes` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+
+### `ai_document_change_runs.py`
+
+| 方法 | 路径 | admin | super_admin | director | doctor | nurse | cashier | pharmacist | guide | patient | lab_technician | registrar | PUBLIC |
+|------|------|------|------|------|------|------|------|------|------|------|------|------|------|
+| POST | `/api/ai/document-change/context` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/runs/{run_id}/document-change/source` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/runs/{run_id}/document-change/scope` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/runs/{run_id}/document-change/result` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/admin/runs/{run_id}/document-change/source` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/admin/runs/{run_id}/document-change/scope` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/admin/runs/{run_id}/document-change/result` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+
 ### `ai_document_evidence.py`
 
 | 方法 | 路径 | admin | super_admin | director | doctor | nurse | cashier | pharmacist | guide | patient | lab_technician | registrar | PUBLIC |
@@ -216,6 +247,26 @@
 | GET | `/api/ai/admin/document-evidence/publications` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
 | GET | `/api/ai/admin/document-evidence/publications/{publication_id}` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
 | POST | `/api/ai/admin/document-evidence/publications/{publication_id}/revoke` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+
+### `ai_drug_label_sources.py`
+
+| 方法 | 路径 | admin | super_admin | director | doctor | nurse | cashier | pharmacist | guide | patient | lab_technician | registrar | PUBLIC |
+|------|------|------|------|------|------|------|------|------|------|------|------|------|------|
+| GET | `/api/ai/drug-label-sources/options` |  | ✓ |  |  |  |  | ✓ |  |  |  |  |  |
+| GET | `/api/ai/drug-label-sources/catalog` |  | ✓ |  |  |  |  | ✓ |  |  |  |  |  |
+| GET | `/api/ai/drug-label-sources` |  | ✓ |  |  |  |  | ✓ |  |  |  |  |  |
+| POST | `/api/ai/drug-label-sources` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/drug-label-sources/{binding_id}` |  | ✓ |  |  |  |  | ✓ |  |  |  |  |  |
+| POST | `/api/ai/drug-label-sources/{binding_id}/professional-review` |  |  |  |  |  |  | ✓ |  |  |  |  |  |
+| POST | `/api/ai/drug-label-sources/{binding_id}/professional-review/revoke` |  | ✓ |  |  |  |  | ✓ |  |  |  |  |  |
+| POST | `/api/ai/drug-label-sources/{binding_id}/review` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/drug-label-sources/{binding_id}/revoke` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+
+### `ai_drug_label_tasks.py`
+
+| 方法 | 路径 | admin | super_admin | director | doctor | nurse | cashier | pharmacist | guide | patient | lab_technician | registrar | PUBLIC |
+|------|------|------|------|------|------|------|------|------|------|------|------|------|------|
+| POST | `/api/ai/drug-label/context` |  | ✓ |  |  |  |  | ✓ |  |  |  |  |  |
 
 ### `ai_ecg.py`
 
@@ -378,6 +429,19 @@
 | POST | `/api/ai/roster-sources/{kind}/{source_record_id}/revoke` | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |
 | GET | `/api/ai/admin/roster-sources` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
 | GET | `/api/ai/admin/roster-sources/{source_record_id}` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+
+### `ai_satisfaction_sources.py`
+
+| 方法 | 路径 | admin | super_admin | director | doctor | nurse | cashier | pharmacist | guide | patient | lab_technician | registrar | PUBLIC |
+|------|------|------|------|------|------|------|------|------|------|------|------|------|------|
+| GET | `/api/ai/satisfaction-sources/options` | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/satisfaction-sources/doctors` | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/satisfaction-sources/cases/preview` | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/satisfaction-sources/cases` | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/satisfaction-sources/cases` | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/satisfaction-sources/cases/{identifier}` | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/satisfaction-sources/cases/{identifier}/review` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/satisfaction-sources/cases/{identifier}/revoke` | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |
 
 ### `ai_sofa.py`
 

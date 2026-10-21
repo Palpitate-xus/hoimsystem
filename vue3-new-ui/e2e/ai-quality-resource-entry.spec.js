@@ -96,21 +96,14 @@ test("事件行固定患者与事件，原闭环和RCA文本不显示为独立�
   expect(businessWrites).toEqual([]);
 });
 
-test("运营页的评价分析保留未知均分和评论未提供说明", async ({ page }) => {
+test("运营页旧评价配置要求完整原件模式，不创建通用评价任务", async ({ page }) => {
   const { submissions, previews, businessWrites } = await setup(page, "ratings");
   await page.goto("/#/report/operations");
-  await page.getByRole("button", { name: "AI 运营分析", exact: true }).click();
-  const drawer = page.getByRole("dialog", { name: "AI 运营事实与预测辅助", exact: true });
-  await drawer.getByRole("button", { name: "查看本次运营资料", exact: true }).click();
-  const preview = page.getByRole("dialog", { name: "本次提供给 AI 的运营资料", exact: true });
-  await expect(preview).toContainText("原评论未读取、未发送");
-  await expect(preview).toContainText("不能生成投诉主题");
-  await expect(preview.locator(".el-descriptions__cell").filter({ hasText: "有效评分均值" })).toBeVisible();
-  await preview.getByText("原评分日期分组", { exact: true }).click();
-  await expect(preview.getByRole("region", { name: "原评分日期分组", exact: true }).getByRole("cell", { name: "未知", exact: true })).toBeVisible();
-  await preview.locator("button.el-dialog__headerbtn").click();
-  await drawer.getByRole("button", { name: "生成辅助建议", exact: true }).click();
-  await expect.poll(() => submissions.length).toBe(1);
-  expect(previews[0].input).toEqual(submissions[0].input);
+  await page.getByRole("button", { name: "AI 评价证据分析", exact: true }).click();
+  const drawer = page.getByRole("dialog", { name: "AI 完整评价证据分析", exact: true });
+  await expect(drawer.getByText("请由超级管理员配置完整评价证据分析模式。", { exact: true })).toBeVisible();
+  await expect(drawer.getByRole("button", { name: "生成辅助建议", exact: true })).toHaveCount(0);
+  expect(submissions).toEqual([]);
+  expect(previews).toEqual([]);
   expect(businessWrites).toEqual([]);
 });

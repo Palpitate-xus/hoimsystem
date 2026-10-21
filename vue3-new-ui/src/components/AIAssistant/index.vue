@@ -109,6 +109,10 @@
     </el-form>
     <charge-reconciliation-assistant v-if="dedicatedPanel==='charge'" :feature="configuredFeature||null" :feature-key="featureKey" :initial-input="props.initialInput" :patient-id="props.patientId" :encounter-ref="props.encounterRef" :active="viewActive" />
     <document-extraction-assistant v-else-if="dedicatedPanel==='document'" :feature="configuredFeature||null" :feature-key="featureKey" :initial-input="props.initialInput" :patient-id="props.patientId" :encounter-ref="props.encounterRef" :active="viewActive" />
+    <document-change-assistant v-else-if="dedicatedPanel==='document_change'" :feature="configuredFeature||null" :feature-key="featureKey" :initial-input="props.initialInput" :patient-id="props.patientId" :encounter-ref="props.encounterRef" :active="viewActive" />
+    <satisfaction-assistant v-else-if="dedicatedPanel==='satisfaction'" :feature="configuredFeature||null" :feature-key="featureKey" :initial-input="props.initialInput" :patient-id="props.patientId" :encounter-ref="props.encounterRef" :active="viewActive" />
+
+    <drug-label-assistant v-else-if="dedicatedPanel==='drug_label'" :feature="configuredFeature||null" :feature-key="featureKey" :initial-input="props.initialInput" :patient-id="props.patientId" :encounter-ref="props.encounterRef" :pharmaceutical-id="props.pharmaceuticalId" :active="viewActive" />
 
     <template v-if="!dedicatedLifecycle">
     <el-card v-if="run" shadow="never" class="spaced" aria-label="AI任务结果">
@@ -256,6 +260,9 @@ import AiEcgFindings from "@/components/AIEcgFindings/index.vue";
 
 const ChargeReconciliationAssistant=defineAsyncComponent(()=>import("@/components/ai/ChargeReconciliationAssistant.vue"));
 const DocumentExtractionAssistant=defineAsyncComponent(()=>import("@/components/ai/DocumentExtractionAssistant.vue"));
+const DocumentChangeAssistant=defineAsyncComponent(()=>import("@/components/ai/DocumentChangeAssistant.vue"));
+const SatisfactionAssistant=defineAsyncComponent(()=>import("@/components/ai/SatisfactionAssistant.vue"));
+const DrugLabelAssistant=defineAsyncComponent(()=>import("@/components/ai/DrugLabelAssistant.vue"));
 const CodingEvidenceInput=defineAsyncComponent(()=>import("@/components/CodingEvidenceInput.vue"));
 const CodingFindings=defineAsyncComponent(()=>import("@/components/ai/CodingFindings.vue"));
 const AiRosterInput=defineAsyncComponent(()=>import("@/components/AIRosterInput/index.vue"));
@@ -282,7 +289,7 @@ const AiSofaInput = defineAsyncComponent(() => import("@/components/AISofaInput/
 const AiSofaFindings = defineAsyncComponent(() => import("@/components/AISofaFindings/index.vue"));
 const AiQsofaFindings = defineAsyncComponent(() => import("@/components/AIQsofaFindings/index.vue"));
 
-const props = defineProps({ featureKeys: { type: Array, default: () => [] }, initialFeature: { type: String, default: "" }, patientId: { type: Number, default: null }, encounterRef: { type: String, default: "" }, initialInput: { type: Object, default: () => ({}) } });
+const props = defineProps({ featureKeys: { type: Array, default: () => [] }, initialFeature: { type: String, default: "" }, patientId: { type: Number, default: null }, encounterRef: { type: String, default: "" }, pharmaceuticalId: { type: Number, default: null }, initialInput: { type: Object, default: () => ({}) } });
 const store = useStore();
 const canPreview = computed(() => Array.isArray(store.getters["user/permissions"])&&store.getters["user/permissions"].includes("super_admin"));
 const statuses = { queued: "已排队", running: "生成中", succeeded: "待复核", failed: "失败", cancelled: "已取消" };
@@ -295,9 +302,15 @@ const chargeWasBound=ref(false),chargeLifecycle=computed(()=>chargeWasBound.valu
 watch([featureKey,()=>Object.hasOwn(props.initialInput,'charge_case_id')],([key,bound])=>{if(key==='charge_reconciliation'||bound)chargeWasBound.value=true;},{immediate:true,flush:'sync'});
 const documentWasBound=ref(false),documentLifecycle=computed(()=>documentWasBound.value||featureKey.value==='guideline_ingestion'||Object.hasOwn(props.initialInput,'document_original_id'));
 watch([featureKey,()=>Object.hasOwn(props.initialInput,'document_original_id')],([key,bound])=>{if(key==='guideline_ingestion'||bound)documentWasBound.value=true;},{immediate:true,flush:'sync'});
-const dedicatedLifecycle=computed(()=>chargeLifecycle.value||documentLifecycle.value);
+const satisfactionWasBound=ref(false),satisfactionLifecycle=computed(()=>satisfactionWasBound.value||featureKey.value==='feedback_analysis'||Object.hasOwn(props.initialInput,'satisfaction_case_id'));
+watch([featureKey,()=>Object.hasOwn(props.initialInput,'satisfaction_case_id')],([key,bound])=>{if(key==='feedback_analysis'||bound)satisfactionWasBound.value=true;},{immediate:true,flush:'sync'});
+const drugLabelWasBound=ref(false),drugLabelLifecycle=computed(()=>drugLabelWasBound.value||featureKey.value==='drug_label_extraction'||Object.hasOwn(props.initialInput,'drug_label_source_binding_id'));
+watch([featureKey,()=>Object.hasOwn(props.initialInput,'drug_label_source_binding_id')],([key,bound])=>{if(key==='drug_label_extraction'||bound)drugLabelWasBound.value=true;},{immediate:true,flush:'sync'});
+const documentChangeWasBound=ref(false),documentChangeLifecycle=computed(()=>documentChangeWasBound.value||featureKey.value==='guideline_change_review'||Object.hasOwn(props.initialInput,'document_change_scope_id'));
+watch([featureKey,()=>Object.hasOwn(props.initialInput,'document_change_scope_id')],([key,bound])=>{if(key==='guideline_change_review'||bound)documentChangeWasBound.value=true;},{immediate:true,flush:'sync'});
+const dedicatedLifecycle=computed(()=>chargeLifecycle.value||documentLifecycle.value||satisfactionLifecycle.value||drugLabelLifecycle.value||documentChangeLifecycle.value);
 const dedicatedPanel=ref(null);
-watch([featureKey,()=>Object.hasOwn(props.initialInput,'charge_case_id'),()=>Object.hasOwn(props.initialInput,'document_original_id')],([key,charge,document])=>{if(key==='charge_reconciliation')dedicatedPanel.value='charge';else if(key==='guideline_ingestion')dedicatedPanel.value='document';else if(charge&&!document)dedicatedPanel.value='charge';else if(document&&!charge)dedicatedPanel.value='document';else if(!dedicatedPanel.value&&(charge||document))dedicatedPanel.value=charge?'charge':'document';},{immediate:true,flush:'sync'});
+watch([featureKey,()=>Object.hasOwn(props.initialInput,'charge_case_id'),()=>Object.hasOwn(props.initialInput,'document_original_id'),()=>Object.hasOwn(props.initialInput,'satisfaction_case_id'),()=>Object.hasOwn(props.initialInput,'drug_label_source_binding_id'),()=>Object.hasOwn(props.initialInput,'document_change_scope_id')],([key,charge,document,satisfaction,drugLabel,documentChange])=>{const explicit={charge_reconciliation:'charge',guideline_ingestion:'document',feedback_analysis:'satisfaction',drug_label_extraction:'drug_label',guideline_change_review:'document_change'}[key];if(explicit){dedicatedPanel.value=explicit;return;}const bound=[charge?'charge':null,document?'document':null,satisfaction?'satisfaction':null,drugLabel?'drug_label':null,documentChange?'document_change':null].filter(Boolean);if(bound.length===1||!dedicatedPanel.value&&bound.length)dedicatedPanel.value=bound[0];},{immediate:true,flush:'sync'});
 const selected = computed(() => dedicatedLifecycle.value?null:configuredFeature.value);
 const needsRoster=computed(()=>featureKey.value==='roster_optimization'&&selected.value?.input_mode==='roster'),rosterSelection=ref(null),rosterReady=ref(false),rosterWasBound=ref(false),rosterInputKey=ref(0);
 const rosterInitialReferences=computed(()=>props.initialInput.roster_plan_id==null?null:{roster_plan_id:props.initialInput.roster_plan_id});
@@ -632,6 +645,7 @@ async function inspectOperationalContext() {
 function buildTaskInput() {
   if(chargeLifecycle.value)throw new Error("收费核对须在独立完整账目面板提交");
   if(documentLifecycle.value)throw new Error("原文提取须在独立原件面板提交");
+  if(satisfactionLifecycle.value)throw new Error("评价主题分析须在独立完整原件面板提交");
   if(needsCodingEvidence.value||codingWasBound.value||codingLifecycle.value){if(!codingModeReady.value){ElMessage.warning('请在编码证据复核模式下核对原患者、住院与首页，并明确选择一件当前完整受审证据');return;}return{...codingSelection.value,question:question.value};}
   if(needsNativeInventory.value||nativeInventoryWasBound.value){if(!nativeInventoryModeReady.value){ElMessage.warning('请在本地库存比较模式下明确选择真实品种与当前完整受审候选场景');return;}return{...nativeInventorySelection.value,question:question.value};}
   if(needsSupply.value||supplyWasBound.value){if(!supplyModeReady.value){ElMessage.warning('请在本地物资预测模式下明确选择真实品种、当前完整受审序列及7或14天期限');return;}return{...supplySelection.value,question:question.value};}

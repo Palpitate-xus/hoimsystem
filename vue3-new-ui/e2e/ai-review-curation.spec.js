@@ -47,7 +47,7 @@ async function openTab(page) {
   await page.getByRole("tab", { name: "反馈脱敏审核", exact: true }).click();
 }
 
-test("超级管理员整理、对照审核、发布及停用片段，业务分析只展示审核文本与独立依据", async ({ page }) => {
+test("超级管理员整理、对照审核、发布及停用片段，业务分析另须完整原件", async ({ page }) => {
   const { state } = await session(page);
   await openTab(page);
   await page.getByRole("button", { name: "整理脱敏稿", exact: true }).first().click();
@@ -74,21 +74,12 @@ test("超级管理员整理、对照审核、发布及停用片段，业务分�
   expect(state.writes[1].body).toMatchObject({ expected_revision: 1, privacy_checked: true, faithfulness_checked: true, status: "published" });
   await review.getByRole("button", { name: "关闭", exact: true }).click();
   await page.goto("/#/report/operations");
-  await page.getByRole("button", { name: "AI 运营分析", exact: true }).click();
-  const drawer = page.getByRole("dialog", { name: "AI 运营事实与预测辅助", exact: true });
-  await drawer.getByRole("button", { name: "查看本次运营资料", exact: true }).click();
-  const preview = page.getByRole("dialog", { name: "本次提供给 AI 的运营资料", exact: true });
-  await expect(preview).toContainText("候诊较久，希望了解顺序。");
-  await expect(preview).not.toContainText("13800138000");
-  await preview.getByRole("button", { name: "查看片段依据", exact: true }).click();
-  const source = page.getByRole("dialog", { name: "核查引用依据", exact: true });
-  await expect(source).toContainText("原评价未发给模型");
-  await source.locator("button.el-dialog__headerbtn").click();
-  await preview.locator("button.el-dialog__headerbtn").click();
-  await drawer.getByRole("button", { name: "生成辅助建议", exact: true }).click();
-  await expect.poll(() => state.submissions.length).toBe(1);
-  expect(JSON.stringify(state.submissions[0])).not.toContain("13800138000");
-  await expect(drawer.getByText("等待较久，流程原因仍待调查", { exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "AI 评价证据分析", exact: true }).click();
+  const drawer = page.getByRole("dialog", { name: "AI 完整评价证据分析", exact: true });
+  await expect(drawer.getByText("请由超级管理员配置完整评价证据分析模式。", { exact: true })).toBeVisible();
+  await expect(drawer.getByRole("button", { name: "生成辅助建议", exact: true })).toHaveCount(0);
+  expect(state.previews).toEqual([]);
+  expect(state.submissions).toEqual([]);
   await drawer.locator("button.el-drawer__close-btn").click();
   await page.goto("/#/ai/manage");
   await page.getByRole("tab", { name: "反馈脱敏审核", exact: true }).click();

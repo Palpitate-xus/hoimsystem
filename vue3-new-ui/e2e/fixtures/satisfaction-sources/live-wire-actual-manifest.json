@@ -1,0 +1,18 @@
+{
+  "scope": "Actual synthetic memory SQLite full8192root capture, immutable Case create, Super publish and real source_current ordinary/Super service calls. No HTTP, production browser, model or hospital claim. No wrapper/body/hash edited. gzip is lossless transport of exact canonical JSON.",
+  "root_count": 8192,
+  "sizes_utf8": {
+    "safe_snapshot": 6235534,
+    "public_source": 6236069,
+    "protected_snapshot": 1337378,
+    "ordinary": 12472833,
+    "audit": 13810333
+  },
+  "packet_canonical_sha256": "3f0c0cd11e061e868e4101a8012813e4b3b6fa3776d8b729523ad0e86ffe1d5a",
+  "gzip_sha256": "8cb330b807fbdcd905aa611afc0c38b4b8c1b083f5a9aa234513757c1e86f585",
+  "gzip_bytes": 5522789,
+  "case_id": "4d70c7f4-fb26-4d42-99b8-47438e1e5b99",
+  "storage": "Lossless factoring of exact duplicate safe_snapshot/public_source subtrees, gzip; reconstructed full packet canonical bytes equal original packet SHA. Full ordinary/audit original bodies were not modified.",
+  "factored_gzip_sha256": "0d38e04db065514d290de261f5f4068861c3af3c819c8e192bd002b9065a86a1",
+  "factored_gzip_bytes": 1401430
+}

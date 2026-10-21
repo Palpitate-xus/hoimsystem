@@ -2,6 +2,8 @@ const path = require("path");
 const { Configuration, CopyRspackPlugin, DefinePlugin, CssExtractRspackPlugin } = require("@rspack/core");
 const HtmlRspackPlugin = require("html-rspack-plugin");
 const { VueLoaderPlugin } = require("vue-loader");
+const {PUBLIC_CONTRACTS} = require("./scripts/static-contract-data-loader.cjs");
+const { SchemaHtmlDataPlugin } = require("./scripts/schema-html-data-plugin.cjs");
 const Components = require("unplugin-vue-components/rspack");
 const { ElementPlusResolver } = require("unplugin-vue-components/resolvers");
 const {
@@ -36,7 +38,7 @@ module.exports = {
   context: __dirname,
   entry: {
     // One library stylesheet fixes its order across independently loaded pages.
-    app: mode === "production" ? ["element-plus/dist/index.css", "./src/main.js"] : "./src/main.js",
+    app: mode === "production" ? ["./src/elementPlusUsedStyles.js", "./src/main.js"] : "./src/main.js",
   },
   output: {
     path: resolve(outputDir),
@@ -55,12 +57,18 @@ module.exports = {
   },
   module: {
     rules: [
+      ...(mode === "production" ? [{test: /element-plus-icon-gallery\.svg$/,type:"javascript/auto",use:[{loader:resolve("scripts/icon-sprite-data-loader.cjs"),options:{documentData:true}}]}] : []),
+      {
+        test: resource => PUBLIC_CONTRACTS.some(file => resolve(file) === resource),
+        type: "javascript/auto",
+        use: [{loader: resolve("scripts/static-contract-data-loader.cjs"), options: {documentData: mode === "production"}}],
+      },
       {
         // Lossless storage for complete generated schemas. The loader verifies
         // every original UTF8 byte before emitting data; validators stay intact.
         test: /[\\/]src[\\/]api[\\/](?:ai[\\/])?[A-Za-z]+Schemas\.json$/,
         type: "javascript/auto",
-        use: [{ loader: resolve("scripts/schema-data-loader.cjs") }],
+        use: [{ loader: resolve("scripts/schema-data-loader.cjs"), options: {documentData: mode === "production"} }],
       },
       {
         test: /\.vue$/,
@@ -83,8 +91,9 @@ module.exports = {
           loader: "babel-loader",
           options: {
             presets: ["@babel/preset-env"],
-            // Reuse Babel helpers across async views while preserving the preset's targets.
-            plugins: [["@babel/plugin-transform-runtime", { version: require("@babel/runtime/package.json").version }]],
+            ...(mode === "production" ? {customize: resolve("scripts/public-interface-babel.cjs")} : {}),
+            // Reuse Babel helpers while retaining the original targets and loader contract.
+            plugins: [["@babel/plugin-transform-runtime", {version: require("@babel/runtime/package.json").version}]],
           },
         },
       },
@@ -130,6 +139,7 @@ module.exports = {
       },
       {
         test: /\.(png|jpe?g|gif|svg)$/,
+        exclude: mode === "production" ? /element-plus-icon-gallery\.svg$/ : undefined,
         type: "asset",
         parser: {
           dataUrlCondition: {
@@ -156,6 +166,7 @@ module.exports = {
     extensions: [".js", ".vue", ".json"],
     alias: {
       "@": resolve("src"),
+      ...(mode === "production" ? {"@element-plus/icons-vue$": resolve("src/components/sharedIconComponents.js")} : {}),
       // SFC templates are compiled by vue-loader; omit the unused browser compiler.
       vue$: "vue/dist/vue.runtime.esm-bundler.js",
       path: "path-browserify",
@@ -166,6 +177,7 @@ module.exports = {
     },
   },
   plugins: [
+    ...(mode === "production" ? [new SchemaHtmlDataPlugin()] : []),
     ...(mode === "production" ? [new CssExtractRspackPlugin({
       filename: "css/[name].[contenthash:8].css",
       chunkFilename: "css/[name].[contenthash:8].css",
@@ -227,6 +239,31 @@ module.exports = {
       // 减小最小块大小，允许更细粒度的分割
       minSize: 20000,
       cacheGroups: {
+        // Reuse the exact scoped style module across lazy screens. The normal
+        // CSS filename rule does not match SFC resource queries.
+        sharedComponentStyles: {
+          name: "shared-component-styles",
+          test: module => module.type === "css/mini-extract",
+          chunks: "async",
+          minChunks: 2,
+          minSize: 0,
+          minSizeReduction: 0,
+          enforce: true,
+          reuseExistingChunk: true,
+          priority: 41,
+        },
+        // Actual production chunks copied these unchanged small modules across
+        // two screens each. Share their code without changing global limits.
+        smallEvidenceShared: {
+          name: "small-evidence-shared",
+          test: /[\\/]src[\\/](?:components[\\/](?:DiagnosisReview[\\/]index|AISurgerySources[\\/]ProtectedEditor|ai[\\/]DocumentChangeFindings)\.vue(?:\?.*)?$|(?:api[\\/]ai[\\/]nativeOriginalJson|components[\\/]ai[\\/]useDocumentExtractionInput)\.js$)/,
+          chunks: "async",
+          minChunks: 2,
+          minSize: 0,
+          minSizeReduction: 0,
+          reuseExistingChunk: true,
+          priority: 15,
+        },
         schemaDataDecoderShared: {
           name: "schema-data-decoder-shared",
           test: /[\\/]src[\\/]api[\\/]schemaDataCodec\.cjs$/,

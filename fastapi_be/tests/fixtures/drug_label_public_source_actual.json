@@ -1,0 +1,76 @@
+{
+  "scope": "Pure projector of actual main/JWT synthetic Source publication; not a remote model or clinical validation.",
+  "upstream_fixture_sha256": "b9d5dcc92ce76ccd8a49de26c18b8b49d3c5545258d56447347a60ee8a4742e6",
+  "source": {
+    "schema_version": "drug_label_extraction_source_v1",
+    "source_id": "drug_label_source:9085bf13-22c2-44b5-bfb7-1f189c71044c:511e2e83431d",
+    "binding": {
+      "source_binding_id": "9085bf13-22c2-44b5-bfb7-1f189c71044c",
+      "content_hash": "511e2e83431d9321c508e9218383445159b427e3b4947259fbc32f2b88f942a5",
+      "governance_hash": "21d4a34b67d312092df6245e61ceada453e5223648908a309b212d0647c7341c",
+      "identity_hash": "f51439fef7df0100c1cd82903316da8f7b0b3faf2554a9861e4793a3ace82a33",
+      "original": {
+        "original_id": "4727f659-fb53-4a10-9623-b07d4ccaed02",
+        "content_hash": "fe133f87ab74a9c7f53aba87a9d313688e76028ab586b9cdebc9540f28279c0f",
+        "governance_hash": "d4f93b53a0139fe621ded73a9fc409432f8fdb84b1db08462a0683d3c486cfd1"
+      },
+      "professional": {
+        "professional_review_id": "d81ed3fb-b189-4ba6-91cf-138a6f17ce22",
+        "content_hash": "2d151f0177c908b45f41a4c9776f1282266b6d43384de30ec65cc161e2e0f556",
+        "governance_hash": "d033790220d277212c09c84512c645a37e4b1ba20546ddb826f874a6a8563dc1"
+      }
+    },
+    "sku": {
+      "sku_token": "drug_label_sku:30c8bd1d9d41730ef571ca230e9e879ddbb09bc4c0c0aa952c5ed92244675f49",
+      "name": "合成药品73",
+      "barcode": null,
+      "status": 0,
+      "comparison_fields": [
+        "name",
+        "barcode",
+        "status"
+      ],
+      "private_identity_basis": "actual_pharmaceutical_id_name_barcode_status"
+    },
+    "text": "﻿成分：合成成分。\r\n规格：未提供。😀é\n2026-10-21T12:00:00.123456Z",
+    "raw_bytes_hash": "1a0e3643312f29cabc1d7888f64db2a63782806db1d7ffb85e9a83b47d4061fe",
+    "raw_bytes_length": 85,
+    "codepoint_length": 49,
+    "declared_version": "v1",
+    "version_basis": "submitter_declared_not_independently_verified",
+    "professional_scope": {
+      "signature_basis": "current_application_pharmacist_role",
+      "catalog_match_review": "confirmed",
+      "provided_text_version_review": "confirmed",
+      "basis_digest": "0108365b76664c5568555fa29fba8033cf05da8432a5465ff66ba760aec08f3a",
+      "scope_note": "Only the explicitly compared catalog identity and the complete submitted text/version were reviewed; official identity, complete official leaflet coverage and clinical meaning remain unverified.",
+      "licensure_status": "unknown"
+    },
+    "release_basis_digest": "938cf1e704b8ab5af58361e316a34ac6871155c51454e26f388efd953b85cb82",
+    "technical_review_basis_digest": "938cf1e704b8ab5af58361e316a34ac6871155c51454e26f388efd953b85cb82",
+    "clocks": {
+      "original_recorded_at": "2026-10-21T12:00:00.123456Z",
+      "original_published_at": "2026-10-21T12:00:00.123456Z",
+      "source_recorded_at": "2026-10-21T12:00:00.123456Z",
+      "professional_signed_at": "2026-10-21T12:00:00.123456Z",
+      "source_published_at": "2026-10-21T12:00:00.123456Z"
+    },
+    "missing_catalog_or_authority_evidence": [
+      "manufacturer",
+      "approval_number",
+      "dosage_form",
+      "strength",
+      "ingredient",
+      "quantity_unit",
+      "official_version_authority",
+      "pharmacist_licensure",
+      "complete_official_leaflet_coverage"
+    ],
+    "clinical_validation": "not_provided",
+    "privacy_basis": "technical_identifiers_are_pseudonymous_original_text_not_guaranteed_anonymous",
+    "span_coordinate_space": "unicode_codepoint_half_open",
+    "normalization": "none",
+    "automatic_clinical_rule": false
+  },
+  "projection_hash": "8ec5cc3226120d0099e6e0d131327c3aacde479a04b8b59ba36ddd92d29f14b0"
+}

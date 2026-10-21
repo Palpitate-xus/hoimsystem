@@ -19,7 +19,7 @@
           <el-card class="icon-card" shadow="hover">
             <div class="icon-item">
               <el-icon class="icon-display">
-                <component :is="icon" />
+                <svg viewBox="0 0 1024 1024" aria-hidden="true"><use :href="iconSprite + '#icon-' + icon" /></svg>
               </el-icon>
               <div class="icon-name">{{ icon }}</div>
             </div>
@@ -31,17 +31,15 @@
 </template>
 
 <script>
-import * as ElIcons from "@element-plus/icons-vue";
-import { getIconList } from "@/api/icon";
+import gallery from "@/api/iconGallery.json";
+import iconSprite from "@/assets/element-plus-icon-gallery.svg";
 
 export default {
   name: "Icon",
-  components: {
-    ...ElIcons,
-  },
   data() {
     return {
-      iconList: [],
+      iconList: gallery.names,
+      iconSprite: iconSprite ? iconSprite + '?v=' + gallery.sprite_sha256 : '',
       searchText: "",
     };
   },
@@ -53,21 +51,6 @@ export default {
       return this.iconList.filter((icon) =>
         icon.toLowerCase().includes(this.searchText.toLowerCase())
       );
-    },
-  },
-  async created() {
-    await this.getIcons();
-  },
-  methods: {
-    async getIcons() {
-      try {
-        // 使用 Element Plus 提供的图标
-        this.iconList = Object.keys(ElIcons);
-      } catch (error) {
-        console.error("获取图标列表失败:", error);
-        // 使用 Element Plus 提供的图标作为备选
-        this.iconList = Object.keys(ElIcons);
-      }
     },
   },
 };

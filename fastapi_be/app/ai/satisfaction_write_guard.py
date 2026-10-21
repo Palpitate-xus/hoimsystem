@@ -1,0 +1,54 @@
+"""First lock for the three review/excerpt writers and frozen satisfaction cases."""
+
+from fastapi import HTTPException
+from sqlalchemy import inspect
+from sqlalchemy.dialects.mysql import insert as mysql_insert
+from sqlalchemy.dialects.sqlite import insert as sqlite_insert
+
+from app.ai.satisfaction_models import AISatisfactionWriteGate
+
+
+def current_satisfaction_rows(query, *, shared=False):
+    """Use an actual current read even inside an older MySQL RR snapshot."""
+    return query.populate_existing().with_for_update(read=shared)
+
+
+def lock_satisfaction_gate(db):
+    dialect = db.get_bind().dialect.name
+    if dialect == "mysql":
+        statement = mysql_insert(AISatisfactionWriteGate).values(gate_id=1, revision=1).on_duplicate_key_update(revision=AISatisfactionWriteGate.revision)
+    elif dialect == "sqlite":
+        statement = sqlite_insert(AISatisfactionWriteGate).values(gate_id=1, revision=1).on_conflict_do_nothing(index_elements=["gate_id"])
+    else:
+        raise RuntimeError("Satisfaction gate requires an explicitly supported SQL dialect")
+    with db.no_autoflush:
+        db.execute(statement)
+        return current_satisfaction_rows(db.query(AISatisfactionWriteGate).filter_by(gate_id=1)).one()
+
+
+def current_actor(db, user, *, allowed_roles):
+    from app.dependencies import VALID_USER_ROLES
+    from app.models import User
+
+    roles = frozenset(allowed_roles)
+    if not roles or not roles.issubset(VALID_USER_ROLES):
+        raise ValueError("Exact nonempty original business role set required")
+    state = inspect(user, raiseerr=False)
+    # A current read refreshes this same identity-map object. Preserve only
+    # already loaded request fields before it does so; never load expired ones.
+    epoch = {key: state.dict[key] for key in ("user_role", "token_invalid_before") if key in state.dict} if state is not None else {}
+    uid = state.identity[0] if state is not None and state.identity is not None else getattr(user, "user_id", None)
+    with db.no_autoflush:
+        actor = current_satisfaction_rows(db.query(User).filter_by(user_id=uid), shared=True).one_or_none()
+    if actor is None or actor.user_role not in roles:
+        raise HTTPException(403, "当前账户已无本项原业务权限")
+    if any(getattr(actor, key) != value for key, value in epoch.items()):
+        raise HTTPException(403, "本次请求原角色或登录授权已变化")
+    return actor
+
+
+def lock_satisfaction_write(db, user, *, allowed_roles):
+    """Gate UPDATE -> actor SHARE; caller retains original authorization and transaction."""
+    with db.no_autoflush:
+        lock_satisfaction_gate(db)
+        return current_actor(db, user, allowed_roles=allowed_roles)

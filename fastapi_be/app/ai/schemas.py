@@ -223,6 +223,11 @@ class RunRequest(StrictRequest):
     @model_validator(mode="before")
     @classmethod
     def native_charge_scope(cls, value):
+        if isinstance(value, dict) and isinstance(value.get("feature_key"), str) and value["feature_key"].strip() == "feedback_analysis":
+            if value.get("patient_id") is not None or value.get("encounter_ref") is not None:
+                raise ValueError("完整评价任务不接受患者或就诊范围")
+            if "preview" in value and type(value["preview"]) is not bool:
+                raise ValueError("完整评价任务的预览状态须为布尔值")
         if isinstance(value, dict) and value.get("feature_key") == "charge_reconciliation":
             if type(value.get("patient_id")) is not int or value["patient_id"] < 1:
                 raise ValueError("完整账目任务须使用真实正整数患者ID，不接受布尔、字符串或浮点转换")
@@ -230,8 +235,33 @@ class RunRequest(StrictRequest):
                 raise ValueError("完整账目任务的预览状态须为布尔值")
         return value
 
+    @field_validator("preview", mode="before")
+    @classmethod
+    def exact_drug_label_preview_flag(cls, value, info):
+        if info.data.get("feature_key") == "drug_label_extraction" and type(value) is not bool:
+            raise ValueError("说明书任务预览标记须为明确布尔值")
+        return value
+
     @model_validator(mode="after")
     def dedicated_roster_reference(self):
+        if "drug_label_source_binding_id" in self.input and self.feature_key != "drug_label_extraction":
+            raise ValueError("完整说明书来源仅用于说明书逐字字段复核")
+        if self.feature_key == "drug_label_extraction":
+            from app.ai.drug_label_context_contract import selection
+
+            selection(self.input)
+            if self.patient_id is not None or self.encounter_ref is not None:
+                raise ValueError("说明书任务不接受患者或就诊范围")
+        if "document_change_scope_id" in self.input and self.feature_key != "guideline_change_review":
+            raise ValueError("双原文有限范围仅用于版本逐字问题核对")
+        if "document_original_id" in self.input and self.feature_key != "guideline_ingestion":
+            raise ValueError("原文摘录引用仅用于指南原文提取")
+        if self.feature_key == "guideline_change_review":
+            from app.ai.document_change_view_contract import DocumentChangeRequest
+
+            DocumentChangeRequest.model_validate(self.input)
+            if self.patient_id is not None or self.encounter_ref is not None:
+                raise ValueError("版本核对不接受患者或就诊引用")
         if "roster_plan_id" in self.input and self.feature_key != "roster_optimization":
             raise ValueError("受审排班计划仅用于排班与号源优化")
         if "bed_series_id" in self.input and self.feature_key != "bed_forecast":
@@ -246,6 +276,8 @@ class RunRequest(StrictRequest):
             raise ValueError("完整编码证据快照仅用于单次住院病案编码证据核对")
         if "charge_case_id" in self.input and self.feature_key != "charge_reconciliation":
             raise ValueError("完整账目原件仅用于同次实际住院的收费记录核对")
+        if "satisfaction_case_id" in self.input and self.feature_key != "feedback_analysis":
+            raise ValueError("受审完整评价原件仅用于满意度与评价证据分析")
         return self
 
 

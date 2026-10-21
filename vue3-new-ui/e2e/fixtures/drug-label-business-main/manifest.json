@@ -1,0 +1,21 @@
+{
+  "schema_version": "drug_label_business_actual_main_fixtures_v1",
+  "source": {
+    "path": "/tmp/hoim-drug-label-business-wire-third-actual-http-packet.json",
+    "bytes": 533639,
+    "sha256": "b88a6627c0a9fb6623a5259a5e4e263394b6308610565261368150198df232f6"
+  },
+  "scope": "Two actual mounted Main JWT Chat/Responses positive full pipelines. A temporary fixture-only LF textarea question is set before real HTTP; original Source text remains BOM/CRLF/emoji/UTC6. Catalog query uses actual same-case SKU minus1/page_size1 (chat2/responses4), never a constant across parametrized cases. Fourteen unmodified HTTP bodies and all SHA/bytes/status per protocol; loader checks every body. Browser API transport is intercepted on canonical production pages, with a synthetic drug-list row reconstructed from exact Source identity. No actual browser/backend/remote/clinical claim; no negative Source/role denial is asserted by this two-case export. Earlier pagination/catalog mismatches and browser failures remain separate immutable reports.",
+  "cases": {
+    "chat": {
+      "raw_bytes": 227335,
+      "raw_sha256": "90bd7b312d823de0b6e1b2745d362601007531acd634c22cbfc65ecf9f9f6e2e",
+      "gzip_sha256": "fe8a0bbf084757b4894b099cdd85b4dcfd7d0092660cf3758ab19691999546f5"
+    },
+    "responses": {
+      "raw_bytes": 228544,
+      "raw_sha256": "f2bf67faa8dc08c7f3b8d6fbc74416222e4a8ffb612f25d69706bf28e23075fd",
+      "gzip_sha256": "51364bf072592037d9819fca9a9211377393a39cff9448331f44dec805060d67"
+    }
+  }
+}

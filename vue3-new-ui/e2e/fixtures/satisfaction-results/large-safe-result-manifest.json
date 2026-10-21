@@ -1,0 +1,18 @@
+{
+  "scope": "Actual synthetic memory SQLite full8192root capture, immutable Case create, Super publish, real frozen_case_proof/binding and pure validate_draft/result_for_draft. Source/result children are independently bounded; composite Findings repeats safe proofs. No HTTP, model response, production browser or hospital claim. No wrapper/body/hash edited. gzip is lossless transport of exact canonical JSON.",
+  "root_count": 8192,
+  "sizes_utf8": {
+    "safe_snapshot": 6235534,
+    "public_source": 6236069,
+    "protected_snapshot": 1337378,
+    "findings": 18709721,
+    "result": 3509
+  },
+  "packet_canonical_sha256": "ccc1522c2d74e7453fe4dfb1052347bbacc6dfd4ebb9c9a893861c8f8e22fcc6",
+  "gzip_sha256": "89963c32ae9f6be40595188c4b23c78eafbebaf55b0a402b192feeb1eeaa133e",
+  "gzip_bytes": 4122542,
+  "case_id": "c4256970-f1b5-4ecf-b13d-1d2b7c472260",
+  "factored_gzip_sha256": "93f8aae07de38155ff16f4e46bb826295a68a9b477016bb6ff1d33d6dcf124b7",
+  "factored_gzip_bytes": 1375927,
+  "storage": "Only exact duplicate Source/safeSnapshot fields factored, whole original canonical SHA checked after reconstruction."
+}

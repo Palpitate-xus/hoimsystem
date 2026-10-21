@@ -135,9 +135,12 @@ def create_profile(db, user, values):
     return row
 
 
-def profile_detail(db, row_or_id):
+def profile_detail(db, row_or_id, *, locking=False):
     identifier = canonical_id(row_or_id.rule_profile_id if isinstance(row_or_id, AIRiskRuleProfile) else row_or_id)
-    row = db.query(AIRiskRuleProfile).filter_by(rule_profile_id=identifier).populate_existing().one_or_none()
+    query = db.query(AIRiskRuleProfile).filter_by(rule_profile_id=identifier).populate_existing()
+    if locking:
+        query = query.with_for_update(read=True)
+    row = query.one_or_none()
     if row is None:
         raise HTTPException(404, "风险规则实施版本不存在")
     try:

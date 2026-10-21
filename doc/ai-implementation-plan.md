@@ -408,3 +408,5 @@
 - 2026-10-21：第79项合法缺失用量与有效内容分开：optional total不能反推出缺失组件，完整有效草稿仍可接收；显式非法total或与两个实际已知组件矛盾则拒并保留已知同伴用量。三个完整gateway61/storage32/config26文件一次119全绿（20.54秒pytest/31.058秒外层），1182输入稳定；这只改响应Envelope，不把先前MySQL阶段重标为当前最终版本。下一步实际claim/dispatch/终态回执。
 
 - 2026-10-21：第79项实际claim/dispatch与独立具体审计证明已提交；四整文件一次138通过（26.13秒pytest/37.131秒外层），1184输入稳定，新增19项。来源/原epoch/配置重新核对，dispatch原claim实际PK在受保护正文前核验；三实际不同创建/claim/dispatch主键、原lease、完整UTC6及旧表秒钟分明。来源撤回后重复交付纯skip不终结原owner，六种实际phase审计写入触发器失败整体回滚。可信technical reader不读取Source/Task正文，也不授数据权限；尚无commit/HTTP/终态/结果接受/共享worker和FE，继续。
+
+- 2026-10-21：第79项原claim本delivery的终态nullable用量回执已提交；五整文件一次160通过（33.60秒pytest/44.234秒外层），1186输入稳定，新增22项。Source撤回后实际用量照实保存而0 Source/Task正文；第二delivery无自身dispatch PK不能终结在途owner；实际零/未调用零/部分/未知与兼容Run占位0严格区分。三种usage审计SQLtrigger故障整体回滚，另Source变化允许纯技术结算并验证caller回滚。取消状态为测试直接设置，实际cancel API、未claim结算、完整结果接受、共享async worker/FE仍继续，未冒称成功分支已验证。

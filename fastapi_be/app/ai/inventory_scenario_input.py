@@ -348,3 +348,45 @@ def capture_input(db, user, request, scenario_id, *, expected_collection_digest=
     }
     bounded_json(snapshot)
     return snapshot
+
+
+def legacy_frozen_conflict(selected):
+    """Only compare already reviewed, same-unit whole physical frozen totals.
+
+    A legacy frozen flag never fills a physical-count field. The explicit new
+    continuation declaration loses certainty when its own disclosed originals
+    already contain a known contradiction.
+    """
+    p = selected["payload"]
+    parent = selected["parent_binding"]
+    legacy, unit = parent["legacy_snapshot"], parent["unit_definition"]
+    if (
+        selected["item_kind"] != "pharmaceutical"
+        or selected["professional_status"] != "confirmed"
+        or p["method"] != "independent_count"
+        or p["coverage"] != "attested_complete"
+        or p["scope_review"] != "confirmed"
+        or p["legacy_quantity_unit_review"] != "confirmed"
+        or unit is None
+    ):
+        return None
+    original_unit = unit["payload"]["original_unit_text"]
+    raw_unit = legacy["sku"]["projection"]["unit"]
+    if raw_unit is not None and raw_unit != original_unit:
+        return None
+    actual = 0
+    for row in legacy["batches"]:
+        stock, status = row["projection"]["stock"], row["projection"]["status"]
+        if type(stock) is not int or stock < 0 or type(status) is not int or status not in (0, 1):
+            return None
+        if status == 1:
+            actual += stock
+    claimed = Fraction(0)
+    for row in p["lots"]:
+        q = row["frozen_quantity"]
+        if q["value"] is None or q["unit_review"] != "confirmed" or q["original_unit_text"] != original_unit or row["frozen_review"] != "confirmed":
+            return None
+        claimed += Fraction(q["value"])
+    if claimed == actual:
+        return None
+    return {"legacy_frozen_quantity": core.rational(actual), "physical_frozen_quantity": core.rational(claimed), "legacy_collection_digest": legacy["collection_digest"]}

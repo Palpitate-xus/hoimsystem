@@ -12,7 +12,7 @@ from app.ai.models import AIAuditEvent
 from app.ai.research_cohort_contract import canonical_json
 from app.ai.research_cohort_registry import review_registry_original
 from app.ai.research_cohort_sources import hash_content
-from app.ai.research_variables_batches import create_batch
+from app.ai.research_variables_batches import create_batch, review_batch
 from app.ai.research_variables_dictionary import create_dictionary, review_dictionary, verify_dictionary_proof
 from app.ai.research_variables_models import MAX_BYTES, AIResearchVariableBatch, AIResearchVariableDictionary
 from app.models import MedicalRecord, Patient, Registration
@@ -267,7 +267,9 @@ async def test_actual_boolean_cas_and_extra_patient_or_model_arguments_never_wri
 
 
 @pytest.mark.asyncio
-async def test_actual_large_batch_source_and_snapshot_each_fit_8m_while_old_combined_packet_exceeds_it(db_session, variable_capture_case, async_client, auth_headers, mounted_variable_router):
+async def test_actual_large_batch_source_and_snapshot_each_fit_8m_while_old_combined_packet_exceeds_it(
+    db_session, variable_capture_case, async_client, auth_headers, mounted_variable_router, tmp_path
+):
     case, _, request, _, _ = variable_capture_case
     literal = "原" * 19000 + "\ufeff\r\n🧪否定"
     for _ in range(80):
@@ -284,13 +286,23 @@ async def test_actual_large_batch_source_and_snapshot_each_fit_8m_while_old_comb
         )
     db_session.commit()
     made = create_batch(db_session, case["admin_user"], {**request, "basis_note": BASIS})
-    assert len(canonical_json(made).encode("utf-8")) > MAX_BYTES
+    made = review_batch(db_session, case["super_admin_user"], made["batch_id"], technical_review())
+    combined_bytes = len(canonical_json(made).encode("utf-8"))
+    assert made["eligible"] is True and combined_bytes > MAX_BYTES
+    sizes = {"actual_published_combined_internal_packet_bytes": combined_bytes, "parts": {}}
     headers = auth_headers(case["admin_user"].username)
     for part in ("source", "snapshot"):
         response = await async_client.get(BASE + "/batches/" + made["batch_id"] + "/parts/" + part, headers=headers)
         assert response.status_code == 200 and len(response.content) <= MAX_BYTES, (part, response.status_code, len(response.content))
         value = response.json()["data"]["value"]
+        assert response.json()["data"]["current_validation"]["eligible"] is True
         assert hash_content(value if part == "source" else value["snapshot"]) == made["projection_hash" if part == "source" else "content_hash"]
+        import hashlib
+
+        sizes["parts"][part] = {"whole_http_response_bytes": len(response.content), "sha256": hashlib.sha256(response.content).hexdigest()}
+    import json
+
+    (tmp_path / "actual-large-variable-source-capacity.json").write_text(json.dumps(sizes, ensure_ascii=False, indent=2) + "\n")
 
 
 @pytest.mark.parametrize("technical,change", [(False, "role"), (False, "epoch"), (True, "role"), (True, "epoch")])
@@ -304,7 +316,7 @@ def test_loaded_original_role_or_token_epoch_change_rejects_before_any_variable_
     if change == "role":
         db_session.execute(text("UPDATE hoimsystem_users SET user_role='director' WHERE user_id=:id"), {"id": actor_id})
     else:
-        db_session.execute(text("UPDATE hoimsystem_users SET token_invalid_before=:clock WHERE user_id=:id"), {"id": actor_id, "clock": dt.datetime(2099, 1, 1)})
+        db_session.execute(text("UPDATE hoimsystem_users SET token_invalid_before=:clock WHERE user_id=:id"), {"id": actor_id, "clock": "2099-01-01 00:00:00.000000"})
     assert actor.__dict__["user_role"] == old_role and actor.__dict__["token_invalid_before"] == old_epoch
     statements, record = observe(db_session)
     try:

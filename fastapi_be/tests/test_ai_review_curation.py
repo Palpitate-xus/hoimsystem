@@ -1,7 +1,6 @@
 """Feedback text has immutable versions, explicit review and source-bound publication."""
 
 import datetime
-import json
 from pathlib import Path
 
 import httpx
@@ -19,13 +18,17 @@ from app.ai.models import AIAuditEvent, AIFeatureConfig, AIFeedback, AIProvider,
 from app.ai.operational_sources import operational_context
 from app.ai.review_curation import create_excerpt, describe_excerpt, load_review_source, review_excerpt, source_state
 from app.ai.runtime import authorize_run, claim_next_run, create_run, describe_run, execute_claimed
+from app.ai.satisfaction_artifact_models import AISatisfactionRunArtifact
+from app.ai.satisfaction_models import AISatisfactionCase
+from app.ai.satisfaction_sources import create_case, preview_input, review_case
 from app.ai.schemas import ReviewExcerptReview, ReviewExcerptWrite, RunRequest
 from app.models import Department, MedicalRecord, Registration, Review
+from tests.test_ai_satisfaction_gateway import envelope
 
 
 @pytest.fixture
 def source_case(seed_data, db_session):
-    for model in (AIFeedback, AIRun, AIFeatureConfig, AIProvider, AIReviewExcerpt, AIAuditEvent, Review):
+    for model in (AISatisfactionRunArtifact, AISatisfactionCase, AIFeedback, AIRun, AIFeatureConfig, AIProvider, AIReviewExcerpt, AIAuditEvent, Review):
         db_session.query(model).delete()
     now = datetime.datetime.now()
     registration = Registration(patient_id=seed_data["patient"].patient_id, doctor_id=seed_data["doctor"].doctor_id, department_id=seed_data["department"].department_id, time=now)
@@ -259,7 +262,7 @@ def feedback_context(db_session, seed_data):
 
 
 @pytest.mark.asyncio
-async def test_public_context_contains_only_reviewed_current_scoped_text_and_individual_citations(seed_data, db_session, source_case, async_client, auth_headers):
+async def test_legacy_context_keeps_scoped_reviewed_citations_but_http_requires_a_complete_reviewed_case(seed_data, db_session, source_case, async_client, auth_headers):
     review, _, _ = source_case
     published = decide(db_session, seed_data, draft(db_session, seed_data, review))
     draft(db_session, seed_data, review, redacted_text="尚未审核的稿件不得发送")
@@ -281,8 +284,11 @@ async def test_public_context_contains_only_reviewed_current_scoped_text_and_ind
         headers=auth_headers(seed_data["director_user"].username),
         json={"feature_key": "feedback_analysis", "input": {"department_id": seed_data["department"].department_id}},
     )
-    assert response.status_code == 200, response.text
-    data = response.json()["data"]
+    # Retain the legacy source helper for old read-only tasks. New HTTP tasks
+    # require a complete reviewed Case rather than a clipped department list.
+    assert response.status_code == 422, response.text
+    bundle = feedback_context(db_session, seed_data)
+    data = {"context": bundle.data, "evidence": bundle.evidence}
     rows = data["context"]["reviewed_feedback_excerpts"]["items"]
     assert len(rows) == 1 and rows[0]["excerpt_ref"] == published.excerpt_id
     assert rows[0]["verification_status"] == "reported_feedback_only"
@@ -330,6 +336,10 @@ def configure_feedback(db_session, seed_data):
             enabled=1,
             provider_id=provider.provider_id,
             allowed_roles_json=encode_json(FEATURE_BY_KEY["feedback_analysis"].default_roles),
+            validation_status="validated",
+            validation_note="隔离合成完整评价及逐字引文工程测试，不代表医院真实验证。",
+            validated_by=seed_data["super_admin_user"].user_id,
+            validated_at=datetime.datetime.now(datetime.UTC).replace(tzinfo=None),
             updated_by=seed_data["super_admin_user"].user_id,
         )
     )
@@ -338,7 +348,44 @@ def configure_feedback(db_session, seed_data):
 
 def create_feedback_task(db_session, seed_data):
     configure_feedback(db_session, seed_data)
-    return create_run(db_session, seed_data["admin_user"], RunRequest(feature_key="feedback_analysis", input={"department_id": seed_data["department"].department_id}))
+    item = db_session.query(AIReviewExcerpt).filter_by(status="published").one()
+    review = db_session.get(Review, item.review_id)
+    period = {"scope_kind": "explicit_doctor_cohort", "doctor_ids": [review.doctor_id], "date_from": review.review_time.date().isoformat(), "date_to": review.review_time.date().isoformat()}
+    captured = preview_input(db_session, seed_data["super_admin_user"], period)
+    selected = next(value for value in captured["excerpt_options"] if value["excerpt_id"] == item.excerpt_id)
+    basis = "隔离合成完整评价范围、人工隐私和原意核查声明，不代表医院真实验证。"
+    made = create_case(
+        db_session,
+        seed_data["super_admin_user"],
+        {
+            "request": period,
+            "expected_collection_digest": captured["collection_digest"],
+            "selected_excerpts": [{key: selected[key] for key in ("excerpt_id", "review_token", "content_hash", "governance_hash")}],
+            "basis_note": basis,
+        },
+    )
+    reviewed = review_case(db_session, seed_data["super_admin_user"], made["case_id"], {"expected_revision": 1, "decision": "publish", "basis_note": basis})
+    return create_run(db_session, seed_data["admin_user"], RunRequest(feature_key="feedback_analysis", input={"satisfaction_case_id": reviewed["case_id"]}))
+
+
+def feedback_model_draft(db_session, seed_data, run):
+    source = describe_run(run, user=seed_data["admin_user"])["satisfaction_findings"]["satisfaction_source"]
+    selected = source["safe_snapshot"]["selected_excerpts"][0]
+    return {
+        "schema_version": "satisfaction_evidence_draft_v1",
+        "satisfaction_source_id": source["source_id"],
+        "safe_projection_hash": source["safe_projection_hash"],
+        "coverage": "partial_themes_no_population_or_causality_claim",
+        "themes": [
+            {
+                "title": "候诊反馈待核查",
+                "observation": "原摘录提及等候，实际流程原因尚未核实。",
+                "clarification_question": "能否补充可核实的候诊顺序说明？",
+                "cited_excerpt_tokens": [selected["excerpt_token"]],
+                "citations": [{"excerpt_token": selected["excerpt_token"], "text_hash": selected["text_hash"], "start": 0, "end": len(selected["text"]), "quote": selected["text"]}],
+            }
+        ],
+    }
 
 
 @pytest.mark.asyncio
@@ -353,10 +400,10 @@ async def test_withdrawal_stops_queued_call_and_revokes_ordinary_history_but_pre
     assert calls == [] and run.status == "failed" and run.error_code == "TASK_NO_LONGER_AUTHORIZED"
     with pytest.raises(HTTPException) as error:
         authorize_run(db_session, seed_data["admin_user"], run)
-    assert error.value.status_code == 403
+    assert error.value.status_code == 409
     authorize_run(db_session, seed_data["super_admin_user"], run)
     assert run.input_json == original_input
-    assert describe_run(run)["operational_findings"]["reviewed_feedback_excerpts"]["items"][0]["text"] == item.redacted_text
+    assert describe_run(run, user=seed_data["super_admin_user"])["satisfaction_findings"]["satisfaction_source"]["safe_snapshot"]["selected_excerpts"][0]["text"] == item.redacted_text
 
 
 @pytest.mark.asyncio
@@ -364,6 +411,7 @@ async def test_withdrawal_during_inference_discards_result_without_changing_froz
     item = decide(db_session, seed_data, draft(db_session, seed_data, source_case[0]))
     run = create_feedback_task(db_session, seed_data)
     original_input = run.input_json
+    model_draft = feedback_model_draft(db_session, seed_data, run)
     calls = []
 
     def reply(request):
@@ -373,8 +421,9 @@ async def test_withdrawal_during_inference_discards_result_without_changing_froz
             current.status = "retired"
             current.revision += 1
             session.commit()
-        result = {"summary": "旧片段分析应作废", "sections": [], "warnings": [], "missing_data": []}
-        return httpx.Response(200, json={"choices": [{"finish_reason": "stop", "message": {"content": encode_json(result)}}], "usage": {"prompt_tokens": 4, "completion_tokens": 5}})
+        reply = envelope("chat", model_draft)
+        reply["usage"] = {"prompt_tokens": 4, "completion_tokens": 5}
+        return httpx.Response(200, json=reply)
 
     await execute_claimed(*claim_next_run(db_session), transport=httpx.MockTransport(reply))
     db_session.refresh(run)
@@ -386,8 +435,8 @@ async def test_withdrawal_during_inference_discards_result_without_changing_froz
 async def test_model_receives_reviewed_citation_and_replacement_revokes_old_business_result(seed_data, db_session, source_case):
     decide(db_session, seed_data, draft(db_session, seed_data, source_case[0]))
     run = create_feedback_task(db_session, seed_data)
-    frozen = json.loads(run.input_json)
-    source_id = frozen["payload"]["context"]["reviewed_feedback_excerpts"]["items"][0]["source_id"]
+    model_draft = feedback_model_draft(db_session, seed_data, run)
+    source_id = model_draft["satisfaction_source_id"]
     calls = []
 
     def reply(request):
@@ -395,13 +444,7 @@ async def test_model_receives_reviewed_citation_and_replacement_revokes_old_busi
         assert "13800138000" not in payload and source_id in payload
         assert "尚未审核" not in payload
         calls.append(request)
-        result = {
-            "summary": "所载反馈提到候诊问题，未核实流程原因",
-            "sections": [{"title": "所载片段主题", "content": "一条审核片段提到等待较久，不代表全体意见", "source_ids": [source_id]}],
-            "warnings": [],
-            "missing_data": ["全体就诊分母未知"],
-        }
-        return httpx.Response(200, json={"choices": [{"finish_reason": "stop", "message": {"content": encode_json(result)}}]})
+        return httpx.Response(200, json=envelope("chat", model_draft))
 
     await execute_claimed(*claim_next_run(db_session), transport=httpx.MockTransport(reply))
     db_session.refresh(run)

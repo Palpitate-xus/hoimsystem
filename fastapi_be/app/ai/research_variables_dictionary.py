@@ -1,12 +1,14 @@
 """Immutable76 variable definitions, independent review and exact audit receipts."""
 
+import datetime as dt
 import uuid
+from types import SimpleNamespace
 
 from fastapi import HTTPException
 from pydantic import TypeAdapter
 
 from app.ai.models import AIAuditEvent
-from app.ai.research_cohort_contract import UUID, SourceReview, SourceRevoke, canonical_json
+from app.ai.research_cohort_contract import UTC, UUID, SourceReview, SourceRevoke, canonical_json
 from app.ai.research_cohort_sources import _bounded, _governance, _original_json, _typed, _verify_governance, hash_content, utc_text, utcnow, verify_scope_proof
 from app.ai.research_cohort_write_guard import current_research_rows, lock_research_write
 from app.ai.research_variables_authority import authorize_variable_scope, validate_dictionary_scope
@@ -82,6 +84,35 @@ def dictionary_proof(row):
         }
     except (HTTPException, ValueError, TypeError, KeyError, AttributeError, UnicodeError) as exc:
         raise HTTPException(409, "变量字典完整SHA、原项目、闭集定义或独立签署已损坏") from exc
+
+
+def verify_dictionary_proof(value):
+    """Reconstruct a frozen dictionary, never grant current data/model authority."""
+    try:
+        expected = {"schema_version", "identity", "payload", "parent_binding", "content_hash", "governance", "definition_review", "last_event_id", "governance_hash"}
+        if type(value) is not dict or set(value) != expected or value["schema_version"] != "research_variable_dictionary_proof_v1":
+            raise ValueError("Closed frozen dictionary required")
+        fields = {key: item for key, item in value["identity"].items() if key != "schema_version"}
+        fields.update(value["governance"])
+        fields.update(value["definition_review"])
+        for key in ("created_at", "reviewed_at", "revoked_at", "definition_reviewed_at"):
+            if fields.get(key) is not None:
+                TypeAdapter(UTC).validate_python(fields[key], strict=True)
+                fields[key] = dt.datetime.strptime(fields[key], "%Y-%m-%dT%H:%M:%S.%fZ")
+        fields.update(
+            dictionary_json=canonical_json(value["payload"]),
+            parent_binding_json=canonical_json(value["parent_binding"]),
+            content_hash=value["content_hash"],
+            last_event_id=value["last_event_id"],
+            scope_content_hash=value["payload"]["scope_content_hash"],
+            scope_governance_hash=value["payload"]["scope_governance_hash"],
+        )
+        checked = dictionary_proof(SimpleNamespace(**fields))
+        if canonical_json(checked) != canonical_json(value):
+            raise ValueError("Whole frozen dictionary reconstruction differs")
+        return checked
+    except (HTTPException, ValueError, TypeError, KeyError, AttributeError, UnicodeError) as exc:
+        raise HTTPException(409, "冻结变量字典闭集、实际身份、签署或完整SHA无法核对") from exc
 
 
 def _header(db, identifier):

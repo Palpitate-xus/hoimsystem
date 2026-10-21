@@ -8,7 +8,7 @@ from sqlalchemy import event, text
 
 from app.ai.models import AIAuditEvent
 from app.ai.research_cohort_registry import create_registry_original, review_registry_original
-from app.ai.research_variables_dictionary import create_dictionary, dictionary_current, review_dictionary
+from app.ai.research_variables_dictionary import create_dictionary, dictionary_current, review_dictionary, verify_dictionary_proof
 from app.ai.research_variables_models import AIResearchVariableDictionary
 from tests.test_ai_research_cohort_contract import BASIS
 from tests.test_ai_research_cohort_registry import acl_request, anchors, permitted, publish
@@ -66,6 +66,34 @@ def test_technical_publish_cannot_invent_independent_definition_review(db_sessio
     assert value["original"]["definition_review"]["definition_reviewed_by"] is None
     with pytest.raises(HTTPException) as error:
         review_dictionary(db_session, case["reviewer"], made["dictionary_id"], definition_review(made), definition=True)
+    assert error.value.status_code == 409
+
+
+@pytest.mark.parametrize("damage", [None, "extra", "literal", "identity", "utc", "review_self", "parent", "event_bool"])
+def test_actual_frozen_dictionary_independently_reconstructs_and_never_invents_current_authority(db_session, variable_dictionary_case, damage):
+    case, _, _, request = variable_dictionary_case
+    made = create_dictionary(db_session, case["admin_user"], request)
+    reviewed = review_dictionary(db_session, case["reviewer"], made["dictionary_id"], definition_review(made), definition=True)
+    value = copy.deepcopy(reviewed["original"])
+    if damage is None:
+        assert verify_dictionary_proof(value) == value
+        return
+    if damage == "extra":
+        value["eligible"] = True
+    elif damage == "literal":
+        value["payload"]["variables"][0]["extraction_instruction"] += "错误追加"
+    elif damage == "identity":
+        value["identity"]["dictionary_id"] = "00000000-0000-4000-8000-000000000001"
+    elif damage == "utc":
+        value["identity"]["created_at"] = value["identity"]["created_at"].replace("Z", "+00:00")
+    elif damage == "review_self":
+        value["definition_review"]["definition_reviewed_by"] = value["identity"]["created_by"]
+    elif damage == "parent":
+        value["parent_binding"]["scope"]["payload"]["permitted_uses"] = ["cohort_criteria_review"]
+    else:
+        value["last_event_id"] = True
+    with pytest.raises(HTTPException) as error:
+        verify_dictionary_proof(value)
     assert error.value.status_code == 409
 
 

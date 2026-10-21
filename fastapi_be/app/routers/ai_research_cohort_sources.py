@@ -7,6 +7,7 @@ from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 
 from app.ai import research_cohort_cases as cases
+from app.ai import research_cohort_directories as directories
 from app.ai import research_cohort_registry as registry
 from app.ai import research_cohort_sources as sources
 from app.ai.research_cohort_contract import UUID, AuthorizationReview, CaptureRequest, CaseCreate, PatientAuthorizationCreate, ProjectACLCreate, ScopeCreate, SourceReview, SourceRevoke
@@ -130,3 +131,35 @@ def review_case(case_id: UUID, body: SourceReview, db: Session = Depends(get_db)
 @router.post("/cases/{case_id}/revoke")
 def revoke_case(case_id: UUID, body: SourceRevoke, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
     return reply(cases.review_case(db, user, case_id, body, revoke=True))
+
+
+@router.get("/scopes")
+def list_scopes(
+    page: Annotated[QueryPositiveInteger, Query(ge=1, le=100000)] = 1,
+    size: Annotated[QueryPositiveInteger, Query(ge=1, le=100)] = 20,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    return reply(directories.list_registry(db, user, "scope", page=page, size=size))
+
+
+@router.get("/project-acls")
+def list_project_acls(
+    scope_id: UUID,
+    page: Annotated[QueryPositiveInteger, Query(ge=1, le=100000)] = 1,
+    size: Annotated[QueryPositiveInteger, Query(ge=1, le=100)] = 20,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    return reply(directories.list_registry(db, user, "acl", scope_id=scope_id, page=page, size=size))
+
+
+@router.get("/patient-authorizations")
+def list_patient_authorizations(
+    scope_id: UUID,
+    page: Annotated[QueryPositiveInteger, Query(ge=1, le=100000)] = 1,
+    size: Annotated[QueryPositiveInteger, Query(ge=1, le=100)] = 20,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    return reply(directories.list_registry(db, user, "authorization", scope_id=scope_id, page=page, size=size))

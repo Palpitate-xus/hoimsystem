@@ -14,6 +14,7 @@ from sqlalchemy.orm import defer
 
 from app.ai.research_cohort_collection import capture_sources
 from app.ai.research_cohort_contract import UUID, CaptureRequest, CaseCreate, ScopeReference, SourceReview, SourceRevoke, canonical_json
+from app.ai.research_cohort_metadata import case_metadata_query, metadata_namespace
 from app.ai.research_cohort_models import SNAPSHOT_BYTES, AIResearchCohortCase
 from app.ai.research_cohort_registry import authorize_patient_research, authorize_project_acl
 from app.ai.research_cohort_snapshot import current_recipe, opaque, project_snapshot, verify_snapshot
@@ -47,10 +48,10 @@ def metadata(row):
         "revision": row.revision,
         "reviewed_by": row.reviewed_by,
         "reviewed_at": utc_text(row.reviewed_at),
-        "review_basis_hash": hash_content(row.review_basis_note),
+        "review_basis_hash": row.review_basis_hash if hasattr(row, "review_basis_hash") else hash_content(row.review_basis_note),
         "revoked_by": row.revoked_by,
         "revoked_at": utc_text(row.revoked_at),
-        "revoke_reason_hash": hash_content(row.revoke_reason),
+        "revoke_reason_hash": row.revoke_reason_hash if hasattr(row, "revoke_reason_hash") else hash_content(row.revoke_reason),
         "projection_hash": row.projection_hash,
     }
 
@@ -249,7 +250,10 @@ def case_current(db, user, identifier, *, audit_only=False):
     actor = lock_research_write(db, user)
     if audit_only and actor.user_role != "super_admin":
         raise HTTPException(403, "技术冻结审计仅限当前超级管理员，不代授患者正文")
-    header = _row(db, identifier, body=False)
+    raw_header = current_research_rows(case_metadata_query(db).filter(AIResearchCohortCase.case_id == identifier), shared=True).one_or_none()
+    if raw_header is None:
+        raise HTTPException(404, "明确研究队列病例不存在")
+    header = metadata_namespace(raw_header)
     permitted = True
     try:
         _reader_permission(db, actor, header.scope_id)
@@ -263,7 +267,8 @@ def case_current(db, user, identifier, *, audit_only=False):
         authorize_project_acl(db, actor, header.scope_id)
     result = {
         **metadata(header),
-        "governance_hash": governance_hash(header),
+        "governance_hash": header.governance_hash,
+        "governance": None,
         "snapshot": None,
         "public_source": None,
         "local_resolution": None,
@@ -324,6 +329,7 @@ def case_current(db, user, identifier, *, audit_only=False):
     result["can_revoke"] = actor.user_role == "super_admin" and row.status in {"draft", "published"}
     if current and row.status in {"draft", "published"} or audit_only:
         result["snapshot"], result["public_source"] = snapshot, projected
+        result["governance"] = _governance(row)
         result["local_resolution"] = {
             "patients": [{"patient_token": opaque(snapshot, "patient", patient_id), "patient_id": patient_id} for patient_id in snapshot["capture"]["scope_original"]["payload"]["patient_ids"]]
         }
@@ -376,17 +382,13 @@ def list_cases(db, user, scope_id, *, page=1, size=20):
         from app.ai.research_cohort_sources import _registry_authority
 
         _registry_authority(db, actor, scope_id)
-    query = db.query(AIResearchCohortCase).filter_by(scope_id=scope_id)
     from sqlalchemy import func
 
-    total = db.query(func.count(AIResearchCohortCase.case_id)).filter_by(scope_id=scope_id).scalar()
+    total = current_research_rows(db.query(func.count(AIResearchCohortCase.case_id)).filter_by(scope_id=scope_id), shared=True).scalar()
     rows = (
-        current_research_rows(
-            query.options(defer(AIResearchCohortCase.snapshot_json), defer(AIResearchCohortCase.projection_json)).order_by(AIResearchCohortCase.created_at.desc(), AIResearchCohortCase.case_id),
-            shared=True,
-        )
+        current_research_rows(case_metadata_query(db).filter(AIResearchCohortCase.scope_id == scope_id).order_by(AIResearchCohortCase.created_at.desc(), AIResearchCohortCase.case_id), shared=True)
         .offset((page - 1) * size)
         .limit(size)
         .all()
     )
-    return {"items": [{**metadata(row), "detail_required": True, "no_clinical_body_in_directory": True} for row in rows], "total": total, "page": page, "size": size}
+    return {"items": [{**metadata(metadata_namespace(row)), "detail_required": True, "no_clinical_body_in_directory": True} for row in rows], "total": total, "page": page, "size": size}

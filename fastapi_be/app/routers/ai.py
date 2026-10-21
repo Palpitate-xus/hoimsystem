@@ -440,6 +440,13 @@ def cancel_run(run_id: str, db: Session = Depends(get_db), user: User = Depends(
     if run is None:
         raise HTTPException(404, "AI 任务不存在")
     authorize_run(db, user, run)
+    from app.ai.document_extraction_storage import is_extraction_run
+
+    if is_extraction_run(db, run):
+        from app.ai.document_extraction_runtime import cancel_document_run
+
+        cancel_document_run(db, user, run_id)
+        return {"code": 200, "msg": "任务结果已取消接收"}
     if run.status not in {"queued", "running"}:
         raise HTTPException(409, "任务已结束")
     changed = db.query(AIRun).filter(AIRun.run_id == run_id, AIRun.status.in_(["queued", "running"])).update({"status": "cancelled", "finish_time": utcnow()}, synchronize_session=False)

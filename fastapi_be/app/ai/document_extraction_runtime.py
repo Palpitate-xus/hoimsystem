@@ -193,6 +193,52 @@ def _account(run, receipt, started):
     run.finish_time = utcnow()
 
 
+def cancel_document_run(db, user, run_id):
+    """Close unclaimed work with actual zero usage; preserve in-flight unknowns."""
+    from app.ai.document_extraction_storage import authorize_document_run
+
+    try:
+        actor = sources.current_super(db, user)
+        epoch = sources._epoch(actor)
+        run = db.query(AIRun).filter_by(run_id=run_id).populate_existing().with_for_update().one_or_none()
+        if run is None:
+            raise HTTPException(404, "AI 任务不存在")
+        authorize_document_run(db, actor, run, current=False)
+        if run.status not in {"queued", "running"}:
+            raise HTTPException(409, "任务已结束")
+        queued = run.status == "queued"
+        if queued and (
+            run.lease_token is not None
+            or run.start_time is not None
+            or run.latency_ms is not None
+            or run.finish_time is not None
+            or run.result_json != "{}"
+            or run.input_tokens != 0
+            or run.output_tokens != 0
+            or run.error_code is not None
+            or run.error_message is not None
+        ):
+            raise HTTPException(409, "排队任务已有执行痕迹，不能声明未调用模型")
+        run.status, run.finish_time = "cancelled", utcnow()
+        terminal = None
+        if queued:
+            run.latency_ms = 0
+            terminal = _stage_terminal_record(db, run, "run.document_extraction.cancel", _receipt(0, 0, False), None)
+        audit(db, actor.user_id, "run.cancel", run.run_id)
+        expected = _write_state(db, run, "run.cancel")
+        db.flush()
+        _verify_write(db, run, expected)
+        if terminal is not None:
+            _verify_write(db, run, terminal)
+            usage_receipt(db, run)
+        authorize_document_run(db, actor, run, current=False)
+        sources.current_super(db, actor, expected=epoch)
+        db.commit()
+    except Exception:
+        db.rollback()
+        raise
+
+
 async def execute_document_claimed(run_id, lease, *, transport=None):
     from app import database
 
@@ -200,15 +246,22 @@ async def execute_document_claimed(run_id, lease, *, transport=None):
     receipt = _receipt()
     try:
         with database.SessionLocal() as db:
-            run = db.query(AIRun).filter_by(run_id=run_id, status="running", lease_token=lease).one_or_none()
+            run = db.query(AIRun).filter(AIRun.run_id == run_id, AIRun.status.in_(["running", "cancelled"]), AIRun.lease_token == lease).one_or_none()
             if run is None:
                 return
-            spec, provider, snapshot, epoch = recheck(db, run)
-            db.expunge(provider)
-        receipt["model_call_attempted"] = True
-        result, inputs, outputs = await generate(provider, spec, snapshot["task_prompt"], snapshot["payload"], transport=transport)
-        receipt = _receipt(inputs, outputs, True)
-        require_text_capacity(result.model_dump(mode="json"))
+            cancelled_before_call = run.status == "cancelled"
+            if cancelled_before_call:
+                if run.latency_ms is not None or run.result_json != "{}":
+                    return
+                receipt = _receipt(0, 0, False)
+            else:
+                spec, provider, snapshot, epoch = recheck(db, run)
+                db.expunge(provider)
+        if not cancelled_before_call:
+            receipt["model_call_attempted"] = True
+            result, inputs, outputs = await generate(provider, spec, snapshot["task_prompt"], snapshot["payload"], transport=transport)
+            receipt = _receipt(inputs, outputs, True)
+            require_text_capacity(result.model_dump(mode="json"))
     except AIExecutionError as exc:
         receipt = _receipt(exc.input_tokens, exc.output_tokens, receipt["model_call_attempted"])
         error = (exc.code, exc.message)

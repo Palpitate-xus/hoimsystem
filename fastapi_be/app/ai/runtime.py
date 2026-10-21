@@ -902,7 +902,7 @@ async def execute_claimed(run_id: str, lease: str, *, transport=None) -> None:
     from app.ai.document_extraction_storage import is_extraction_run
 
     with database.SessionLocal() as db:
-        candidate = db.query(AIRun).filter_by(run_id=run_id, status="running", lease_token=lease).one_or_none()
+        candidate = db.query(AIRun).filter(AIRun.run_id == run_id, AIRun.status.in_(["running", "cancelled"]), AIRun.lease_token == lease).one_or_none()
         document_task = candidate is not None and is_extraction_run(db, candidate)
     if document_task:
         from app.ai.document_extraction_runtime import execute_document_claimed

@@ -185,9 +185,10 @@ def _project_frozen(snapshot, published, audit_ids):
     return checked_source(sources.public_source(historical))
 
 
-def _created_detail(bound, run):
+def _created_detail(bound, run, recorded_at):
     return {
         "schema_version": "document_change_artifact_created_v1",
+        "recorded_at": c.e.utc_text(recorded_at),
         "scope_id": bound.scope.scope_id,
         "source_digest": bound.source_digest,
         "source_binding_hash": c.e.digest(bound),
@@ -234,7 +235,7 @@ def _load_locked(db, run, task):
         raise ValueError("The complete raw public source or unique private projection differs")
     with db.no_autoflush:
         audit = db.query(AIAuditEvent).filter_by(event_id=row.created_audit_event_id).populate_existing().with_for_update(read=True).one_or_none()
-    expected = (run.requested_by, ARTIFACT_CREATED, run.run_id, c.e.canonical_json(_created_detail(bound, run)), row.recorded_at.replace(microsecond=0))
+    expected = (run.requested_by, ARTIFACT_CREATED, run.run_id, c.e.canonical_json(_created_detail(bound, run, row.recorded_at)), row.recorded_at.replace(microsecond=0))
     if audit is None or tuple(getattr(audit, name) for name in ("actor_id", "action", "target", "detail_json", "create_time")) != expected:
         raise ValueError("The exact task creation audit is unavailable")
     public_payload(snapshot["payload"], source)
@@ -287,7 +288,7 @@ def stage_artifact(db, user, run):
     with db.no_autoflush:
         if db.query(AIDocumentChangeRunArtifact.run_id).filter_by(run_id=run.run_id).with_for_update(read=True).first() is not None:
             raise ValueError("An immutable task Artifact cannot be overwritten")
-    audit = AIAuditEvent(actor_id=actor.user_id, action=ARTIFACT_CREATED, target=run.run_id, detail_json=c.e.canonical_json(_created_detail(bound, run)), create_time=now.replace(microsecond=0))
+    audit = AIAuditEvent(actor_id=actor.user_id, action=ARTIFACT_CREATED, target=run.run_id, detail_json=c.e.canonical_json(_created_detail(bound, run, now)), create_time=now.replace(microsecond=0))
     db.add(audit)
     db.flush()
     row = AIDocumentChangeRunArtifact(

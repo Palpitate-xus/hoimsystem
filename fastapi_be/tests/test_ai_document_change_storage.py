@@ -1,6 +1,7 @@
 """Actual SQL Artifact closure; no worker/network/real MySQL claim."""
 
 import copy
+import datetime as dt
 import json
 import uuid
 
@@ -281,3 +282,17 @@ def test_durable_dispatch_never_takes_artifact_or_original_locks(change_case):
     assert len(statements) >= 1 and not any("FOR UPDATE" in statement.upper() or "FOR SHARE" in statement.upper() for statement in statements)
     with pytest.raises(HTTPException):
         storage.load_snapshot(db, run, user=actor, current=False)
+
+
+def test_same_second_capture_clock_tamper_cannot_bypass_actual_token_invalidation(change_case):
+    db, actor, *_ = change_case
+    case = task(change_case)
+    run = case["run"]
+    row = db.get(AIDocumentChangeRunArtifact, run.run_id)
+    actual_capture = row.recorded_at
+    actor.token_invalid_before = actual_capture + dt.timedelta(microseconds=1)
+    row.recorded_at = actual_capture + dt.timedelta(microseconds=2)
+    assert row.recorded_at.replace(microsecond=0) == actual_capture.replace(microsecond=0)
+    db.commit()
+    with pytest.raises(HTTPException):
+        storage.authorize_run(db, actor, run, current=True, execution=True)

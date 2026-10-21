@@ -89,6 +89,7 @@ class AITrainingReview(Base):
     reviewer_role = Column(String(32), nullable=False)
     reviewer_epoch = Column(utc6(), nullable=True)
     reviewed_at = Column(utc6(), nullable=False)
+    review_decision = Column(String(16), nullable=False)
     synthetic_material_checked = Column(Integer, nullable=False)
     answer_key_checked = Column(Integer, nullable=False)
     reference_applicability_checked = Column(Integer, nullable=False)
@@ -103,6 +104,7 @@ class AITrainingReview(Base):
     __table_args__ = (
         ForeignKeyConstraint(["lesson_id", "lesson_private_hash", "lesson_public_hash", "lesson_references_hash"], ["hoimsystem_ai_training_lesson.lesson_id", "hoimsystem_ai_training_lesson.private_hash", "hoimsystem_ai_training_lesson.public_hash", "hoimsystem_ai_training_lesson.references_hash"], name="fk_training_review_exact_lesson"),
         CheckConstraint("reviewer_role='super_admin' AND length(review_hash)=64", name="ck_training_review_origin"),
+        CheckConstraint("review_decision IN ('published','rejected') AND (status=review_decision OR status='revoked')", name="ck_training_review_decision"),
         CheckConstraint("synthetic_material_checked IN (0,1) AND answer_key_checked IN (0,1) AND reference_applicability_checked IN (0,1) AND model_processing_allowed IN (0,1)", name="ck_training_review_flags"),
         CheckConstraint("status<>'published' OR (synthetic_material_checked=1 AND answer_key_checked=1 AND reference_applicability_checked=1)", name="ck_training_review_publication"),
         CheckConstraint("status<>'rejected' OR model_processing_allowed=0", name="ck_training_rejected_no_model"),

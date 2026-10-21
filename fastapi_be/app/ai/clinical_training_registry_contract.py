@@ -48,3 +48,12 @@ class TrainingLessonReview(c.StrictModel):
 class TrainingSourceRevoke(c.StrictModel):
     revision: Annotated[int, Field(strict=True, ge=1, le=1)]
     reason: Annotated[str, Field(strict=True, min_length=1, max_length=1000)]
+
+
+class TrainingReviewedLesson(c.StrictModel):
+    schema_version: Literal["clinical_training_independent_review_v1"]
+    review_id: c.Identifier
+    lesson_id: c.Identifier
+    reviewed_by: c.ActorId
+    reviewed_at: c.Clock
+    proposal: TrainingLessonReview

@@ -87,7 +87,7 @@ def test_review_compound_lesson_identity_and_independent_flags_are_physical_cons
     audit = AIAuditEvent(actor_id=actor.user_id, action="training.physical.review.only", target=lesson_row.lesson_id, detail_json="{}")
     db.add(audit)
     db.flush()
-    values = dict(review_id=str(uuid.uuid4()), lesson_id=lesson_row.lesson_id, lesson_private_hash=lesson_row.private_hash, lesson_public_hash=lesson_row.public_hash, lesson_references_hash=lesson_row.references_hash, review_json="{}", review_hash="0" * 64, reviewed_by=actor.user_id, reviewer_role="super_admin", reviewer_epoch=None, reviewed_at=when, synthetic_material_checked=1, answer_key_checked=1, reference_applicability_checked=1, model_processing_allowed=0, creation_event_id=audit.event_id, status="published", revision=1, revoke_reason="")
+    values = dict(review_id=str(uuid.uuid4()), lesson_id=lesson_row.lesson_id, lesson_private_hash=lesson_row.private_hash, lesson_public_hash=lesson_row.public_hash, lesson_references_hash=lesson_row.references_hash, review_json="{}", review_hash="0" * 64, reviewed_by=actor.user_id, reviewer_role="super_admin", reviewer_epoch=None, reviewed_at=when, review_decision="published", synthetic_material_checked=1, answer_key_checked=1, reference_applicability_checked=1, model_processing_allowed=0, creation_event_id=audit.event_id, status="published", revision=1, revoke_reason="")
     for change in [dict(lesson_private_hash="f" * 64), dict(answer_key_checked=0), dict(model_processing_allowed=2), dict(status="rejected", model_processing_allowed=1)]:
         with pytest.raises(IntegrityError), db.begin_nested():
             db.add(AITrainingReview(**{**values, **change}))

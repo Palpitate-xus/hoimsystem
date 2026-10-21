@@ -69,6 +69,19 @@ def load_snapshot(run):
     try:
         snapshot = _canonical_value(run.input_json, TEXT_BYTES)
         metadata = _canonical_value(run.context_metadata_json, TEXT_BYTES)
+        if set(metadata) != {
+            "context_digest",
+            "clinical_context_fingerprint",
+            "tool_fingerprint",
+            "source_count",
+            "department_ids",
+            "missing_data",
+            "snapshot_time",
+            "feature_revision",
+            "validation_status",
+            "instructions_digest",
+        }:
+            raise ValueError("Frozen inventory metadata must preserve its complete closed contract")
         evidence = _canonical_value(run.evidence_json, TEXT_BYTES)
         payload = snapshot["payload"]
         context = payload["context"]
@@ -81,6 +94,9 @@ def load_snapshot(run):
             raise ValueError("Inventory candidate scenario cannot mix individual patient/task scope")
         if type(snapshot["system_prompt"]) is not str or type(snapshot["task_prompt"]) is not str:
             raise ValueError("Complete original prompts must be text")
+        instructions_digest = hashlib.sha256((snapshot["system_prompt"] + "\n\n" + snapshot["task_prompt"]).encode("utf-8")).hexdigest()
+        if metadata.get("instructions_digest") != instructions_digest:
+            raise ValueError("Frozen Prompt summary differs from its original complete text")
         if digest([snapshot["system_prompt"], snapshot["task_prompt"]]) != run.prompt_hash or digest(context) != run.context_digest or metadata["context_digest"] != run.context_digest:
             raise ValueError("Original prompts or context digest differs")
         if digest({key: value for key, value in context.items() if key != "snapshot_time"}) != metadata["clinical_context_fingerprint"] or digest(payload["tools"]) != metadata["tool_fingerprint"]:

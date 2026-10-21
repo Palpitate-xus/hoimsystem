@@ -11,6 +11,7 @@ from app.ai.models import AIFeatureConfig, AIPromptVersion, AIProvider, AIRun
 from app.ai.research_cohort_artifact_models import AIResearchCohortRunArtifact
 from app.ai.research_cohort_cases import case_current
 from app.ai.research_cohort_contract import canonical_json
+from app.ai.research_cohort_draft import citation_catalog
 from app.ai.research_cohort_execution import claim_research_run, execute_research_claimed
 from app.ai.research_cohort_registry import review_registry_original
 from app.models import MedicalRecord, Patient, Registration
@@ -70,7 +71,26 @@ async def test_actual_main_jwt_task_receipt_claim_complete_separate_whole_parts_
     def model(incoming):
         assert all(not session.in_transaction() for session in case["sessions"])
         outgoing.append({"method": incoming.method, "path": incoming.url.path, "raw_utf8": incoming.content.decode("utf-8"), "raw_sha256": hashlib.sha256(incoming.content).hexdigest()})
-        return httpx.Response(200, json=reply(case["source"], kind))
+        response = reply(case["source"], kind)
+        target = next(t for t in citation_catalog(case["source"])["targets"] if t["category"] == "recorded_evidence_quote")
+        # A genuine isolated model reply, then accepted by the production
+        # protocol/SQL path. Source or Task DTO fields are never hand-edited.
+        text = response["choices"][0]["message"]["content"] if kind == "chat" else response["output"][0]["content"][0]["text"]
+        draft = json.loads(text)
+        draft["questions"] = [
+            {
+                "category": "recorded_evidence_question",
+                "title": "核对已有原文证据",
+                "observation": "已有原记录只代表本次受审有限范围。",
+                "clarification_question": "是否需要按固定条件人工核查此条原文？",
+                "citations": [{"target_token": target["target_token"], "text_hash": target["text_hash"], "start": 0, "end": len(target["text"]), "quote": target["text"]}],
+            }
+        ]
+        if kind == "chat":
+            response["choices"][0]["message"]["content"] = canonical_json(draft)
+        else:
+            response["output"][0]["content"][0]["text"] = canonical_json(draft)
+        return httpx.Response(200, json=response)
 
     assert await execute_research_claimed(identifier, claim.lease_token, claim_event_id=claim.claim_event_id, transport=httpx.MockTransport(model), session_factory=case["factory"])
     succeeded = await call("GET", BASE + "/" + identifier)
@@ -85,6 +105,7 @@ async def test_actual_main_jwt_task_receipt_claim_complete_separate_whole_parts_
     for name, key in (("input_json", "input_hash"), ("evidence_json", "evidence_hash"), ("context_metadata_json", "metadata_hash")):
         assert task[key] == hashlib.sha256(task[name].encode("utf-8")).hexdigest()
     assert parts["result"]["deterministic_evaluation"]["counts"] == parts["source"]["counts"]
+    assert len(parts["result"]["question_draft"]["questions"]) == 1
     assert all(len(canonical_json(value).encode("utf-8")) <= 8 * 1024 * 1024 for value in parts.values())
     statements, close = capture_sql(db)
     try:

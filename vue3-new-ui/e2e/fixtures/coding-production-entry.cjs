@@ -1,0 +1,38 @@
+const fs=require('node:fs/promises'),path=require('node:path'),http=require('node:http'),crypto=require('node:crypto');
+const actual=require('./coding-production-actual.json'),sha=b=>crypto.createHash('sha256').update(b).digest('hex');
+async function filesIn(root,dir=root){const files=new Map();for(const e of await fs.readdir(dir,{withFileTypes:true})){const p=path.join(dir,e.name);if(e.isDirectory())for(const[k,v]of await filesIn(root,p))files.set(k,v);else if(e.isFile())files.set('/'+path.relative(root,p).split(path.sep).join('/'),await fs.readFile(p));}return files;}
+async function startCodingProductionServer(){const root=path.resolve(__dirname,'../../dist'),files=await filesIn(root),unhandled=[];if(!files.has('/index.html'))throw new Error('Use canonical dist only; never build from this helper');const types={'.html':'text/html','.js':'text/javascript','.css':'text/css','.json':'application/json','.svg':'image/svg+xml','.png':'image/png','.ico':'image/x-icon','.woff2':'font/woff2','.woff':'font/woff'};const server=http.createServer((req,res)=>{const p=new URL(req.url,'http://static.invalid').pathname;if(p.startsWith('/api/')){unhandled.push({method:req.method,path:p});res.writeHead(503);res.end('No backend or proxy');return;}if(!['GET','HEAD'].includes(req.method)){res.writeHead(405);res.end();return;}const key=p==='/'?'/index.html':decodeURIComponent(p),body=files.get(key);if(!body){res.writeHead(404);res.end();return;}res.writeHead(200,{'Content-Type':types[path.extname(key)]||'application/octet-stream','Cache-Control':'no-store'});res.end(req.method==='HEAD'?undefined:body);});await new Promise((r,j)=>{server.once('error',j);server.listen(0,'127.0.0.1',r);});const manifest=Object.fromEntries([...files].sort(([a],[b])=>a.localeCompare(b)).map(([p,b])=>[p,sha(b)]));return{origin:`http://127.0.0.1:${server.address().port}`,manifest,unhandled,get listening(){return server.listening;},async close(){await new Promise(r=>{server.close(r);server.closeAllConnections();});const after=await filesIn(root);if(after.size!==files.size||[...after].some(([p,b])=>manifest[p]!==sha(b)))throw new Error('Canonical dist changed');}};}
+async function setupCodingProduction(page,server,{role='doctor'}={}){const state={bootstrap:[],reads:[],writes:[],errors:[],unexpected:[],cssErrors:[],external:[],denyCurrent:false,getStatus:'succeeded',releases:{},completed:[]},f=actual;page.__codingProductionState=state;page.on('pageerror',e=>state.errors.push(e.message));page.on('response',r=>{if(new URL(r.url()).pathname.endsWith('.css')&&r.status()>=400)state.cssErrors.push({url:r.url(),status:r.status()});});await page.addInitScript(()=>localStorage.setItem('hoim-token','synthetic-coding-production-entry'));await page.context().route('**/*',route=>{if(new URL(route.request().url()).origin===server.origin)return route.continue();state.external.push({method:route.request().method(),url:route.request().url()});return route.abort('blockedbyclient');});await page.route('**/api/**',async route=>{const req=route.request(),u=new URL(req.url()),p=u.pathname,m=req.method(),q=Object.fromEntries(u.searchParams);let reply;
+ if(p==='/api/userInfo'){state.bootstrap.push({method:m,path:p,body:req.postDataJSON()});reply={code:200,data:{username:'合成编码生产入口',permissions:role==='super_admin'?['super_admin','admin']:[role],avatar:''}};}else if(m==='GET')state.reads.push({path:p,query:q});else state.writes.push({method:m,path:p,body:req.postDataJSON()});
+ if(p==='/api/events/stream'&&m==='GET')return route.fulfill({status:204,body:''});
+ if(p==='/api/medicalRecordHome/list'&&m==='GET')reply=f.legacy_homes;
+ else if(p==='/api/medicalRecordHome/admissions'&&m==='GET')reply=f.legacy_admissions;
+ else if(p==='/api/ai/features'&&m==='GET')reply=role==='super_admin'?f.features_super:f.features;
+ else if(p==='/api/ai/patients'&&m==='GET')reply=f.patients;
+ else if(p==='/api/ai/encounters'&&m==='GET')reply=f.encounters;
+ else if(p==='/api/ai/coding-evidence/options'&&m==='GET')reply=q.audit_only==='true'?f.source_options_super:f.options;
+ else if(p==='/api/ai/coding-evidence/homes'&&m==='GET')reply=f.homes;
+ else if(p==='/api/ai/coding-evidence/cases'&&m==='GET')reply=q.audit_only==='true'?f.case_directory_super:f.case_directory;
+ else if(p==='/api/ai/coding-evidence/cases/'+f.live_case.data.case_snapshot_id&&m==='GET'){if(state.denyCurrent)return route.fulfill({status:409,json:{code:409,msg:'Synthetic current complete Case changed'}});reply=q.audit_only==='true'?f.case_revoked_super:f.live_case;}
+ else if(p==='/api/ai/coding-evidence/packages'&&m==='GET')reply=q.audit_only==='true'?f.package_directory_super:f.package_directory;
+ else if(p==='/api/ai/coding-evidence/rules'&&m==='GET')reply=f.rules_super;
+ else if(p==='/api/ai/context'&&m==='POST')reply=f.preview;
+ else if(p==='/api/ai/runs'&&m==='POST')reply=f.queued;
+ else if(p==='/api/ai/runs'&&m==='GET')reply=f.history;
+ else if(p==='/api/ai/runs/'+f.detail.data.run_id&&m==='GET')reply=state.getStatus==='running'?f.running:f.detail;
+ else if(p==='/api/ai/runs/'+f.detail.data.run_id+'/feedback'&&m==='POST')reply={code:200,msg:'success',data:{recorded:true}}; // Explicit synthetic acknowledgement only, not clinical confirmation.
+ else if(p==='/api/ai/admin/features'&&m==='GET')reply=f.admin_features;
+ else if(p==='/api/ai/admin/providers'&&m==='GET')reply=f.providers;
+ else if(p==='/api/ai/admin/knowledge'&&m==='GET')reply=f.admin_knowledge;
+ else if(p==='/api/ai/admin/grants'&&m==='GET')reply=f.admin_grants;
+ else if(p==='/api/ai/admin/audit'&&m==='GET')reply=f.admin_audit;
+ else if(p==='/api/ai/admin/usage'&&m==='GET')reply=f.admin_usage;
+ else if(p==='/api/ai/admin/runs'&&m==='GET')reply=f.admin_history;
+ else if(p==='/api/ai/admin/runs/'+f.detail.data.run_id&&m==='GET')reply=f.audit;
+ if(!reply){state.unexpected.push({method:m,path:p,query:q});return route.fulfill({status:599,json:{code:599,msg:'No explicit synthetic endpoint'}});}
+ const value=structuredClone(reply);if(state.mutate)value.data=state.mutate(value.data,p,m)||value.data;const held=state.hold?.(m,p);if(held)await new Promise(r=>state.releases[held]=r);try{return await route.fulfill({json:value});}finally{if(held)state.completed.push(held);}
+ });return state;}
+async function openCodingBusiness(page,server){await page.goto(server.origin+'/#/inpatient/medicalRecordHome');const row=page.getByRole('row').filter({hasText:actual.legacy_homes.data[0].admission_diagnosis});await row.getByRole('button',{name:'AI 编码证据',exact:true}).click();return page.getByRole('dialog',{name:'AI 完整编码证据核对',exact:true});}
+async function chooseCodingCase(page,drawer){await drawer.getByRole('row').filter({hasText:actual.live_case.data.case_snapshot_id}).getByRole('button',{name:'核对完整原件',exact:true}).click();const raw=drawer.getByRole('article',{name:'已核对编码依据完整原件',exact:true});await raw.getByRole('button',{name:'选择本条受审编码快照',exact:true}).click();const{expect}=require('@playwright/test');await expect(drawer.getByRole('button',{name:'生成辅助建议',exact:true})).toBeEnabled();return raw;}
+async function styles(page,button){const{expect}=require('@playwright/test');await expect(button).toBeVisible();expect(['inline-flex','flex']).toContain(await button.evaluate(e=>getComputedStyle(e).display));expect(await button.evaluate(e=>getComputedStyle(e).borderTopStyle)).toBe('solid');expect(await page.evaluate(()=>Array.from(document.styleSheets).some(s=>s.href&&new URL(s.href).origin===location.origin&&new URL(s.href).pathname.endsWith('.css')))).toBe(true);}
+module.exports={actual,startCodingProductionServer,setupCodingProduction,openCodingBusiness,chooseCodingCase,styles};

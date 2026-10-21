@@ -40,5 +40,6 @@ SOURCE_REFERENCE_KEYS = frozenset(
         "surgery_scenario_id",
         "supply_series_id",
         "inventory_scenario_id",
+        "coding_case_id",
     }
 )

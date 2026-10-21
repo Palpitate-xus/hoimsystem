@@ -439,3 +439,7 @@
 - 2026-10-21 第75项浏览器全量首轮真实RED：186文件3015用例，3014通过/1个旧NEWS2下拉选择30s超时，0跳过/重试/flaky/global错误，6660.18s外层；1257界面输入与689生产输入及dist全程不变。失败发生在role迟到登记用例的前置原点选择，尚未进入迟到POST或角色切换，不据此推断根因；全部原始报告/失败索引/上下文保留，当前只读原字节整NEWS2文件诊断，暂不准入Main75。已完成后端11068绿保持独立范围。
 
 - 2026-10-21 第75项原字节NEWS2诊断：整31用例一次全绿94.634s外层，原30s/0retry，全部UI/production/dist与失败full相同；只证明这一独立范围，不重标3014/1 full RED。源码发现draft helper在异步候选可能仍清空/替换时按ArrowDown，正做可控延迟实证；目前未改产品/测试/Main。
+
+- 2026-10-21 NEWS2只等待loading结束的整文件第二诊断真实30P/1timeout，122.961s，原30s/0retry、产品/dist未变；新增trace证明该次点击仍在collapse展开动画中，实际没有candidates回执，loading原本未开始。因此不声称异步GET已复现根因；下一步仅同步展开动画再真实点击，旧full与本次RED及zip trace无损保留，Main75未准入。
+
+- 2026-10-21 NEWS2第三诊断仅test draft helper等待包含按钮的collapse enter结束后真实点击、再等loading结束，原31整文件一次全绿96.325s、30s/0retry。产品689/dist及测试正文和行号未改；修复本次trace已观察的未发GET交互，不声称原full根因已复现。准备fresh完整186文件3015轮次，旧174spec逐字保持，唯一旧NEWS2改helper、31case身份全部保持，不重标首full RED。

@@ -7,7 +7,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
-from starlette.background import BackgroundTasks
+from starlette.concurrency import run_in_threadpool
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import JSONResponse
 
@@ -230,6 +230,18 @@ class OperationLogMiddleware(BaseHTTPMiddleware):
         "/api/clinicalDiagnosis/review",
     }
 
+    async def __call__(self, scope, receive, send):
+        if scope["type"] != "http":
+            return await super().__call__(scope, receive, send)
+        try:
+            await super().__call__(scope, receive, send)
+        finally:
+            # BaseHTTPMiddleware's task group has now awaited the inner app,
+            # including request-yield cleanup and existing response background.
+            callback = scope.pop("_hoim_operation_audit", None)
+            if callback is not None:
+                await run_in_threadpool(callback)
+
     async def dispatch(self, request, call_next):
         started_at = time.perf_counter()
         # 登录/注册请求体需在 call_next 之前缓存（之后流已被消费），
@@ -298,8 +310,7 @@ class OperationLogMiddleware(BaseHTTPMiddleware):
         status_code = response.status_code
         result = "成功" if 200 <= status_code < 400 else "失败"
 
-        # 写入数据库（挂到响应后台任务：响应发送完毕、请求级依赖均已释放后再写，
-        # 避免与处理器会话争用同一连接导致审计丢失；失败只记日志不影响主请求）
+        # 在整个内层请求和依赖清理完成后写入；响应后台任务本身不保证该顺序。
         def _write_audit_log() -> None:
             try:
                 from app.database import SessionLocal
@@ -333,15 +344,7 @@ class OperationLogMiddleware(BaseHTTPMiddleware):
 
                 logging.getLogger("audit").warning("写入审计日志失败", exc_info=True)
 
-        # 合并已有 background（如依赖注入的清理任务），保证不互相覆盖
-        existing_background = getattr(response, "background", None)
-        tasks = BackgroundTasks()
-        if isinstance(existing_background, BackgroundTasks):
-            tasks = existing_background
-        elif existing_background is not None:
-            tasks.add_task(existing_background.run)
-        tasks.add_task(_write_audit_log)
-        response.background = tasks
+        request.scope["_hoim_operation_audit"] = _write_audit_log
         return response
 
 

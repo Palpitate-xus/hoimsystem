@@ -60,6 +60,13 @@ async def test_actual_main_full_source_preview_submit_shared_claim_worker_trace_
     directory = await async_client.get("/api/ai/drug-label-sources", headers=headers, params={"pharmaceutical_id": source.json()["data"]["snapshot"]["identity"]["pharmaceutical_id"]})
     for response in (options, catalog, directory):
         assert response.status_code == 200, response.text
+    options_super = await async_client.get("/api/ai/drug-label-sources/options", headers=super_headers)
+    source_super = await async_client.get(f"/api/ai/drug-label-sources/{binding_id}", headers=super_headers, params={"audit_only": False})
+    directory_super_audit = await async_client.get("/api/ai/drug-label-sources", headers=super_headers, params={"audit_only": True})
+    for response in (options_super, source_super, directory_super_audit):
+        assert response.status_code == 200, response.text
+    assert options_super.json()["data"]["can_release"] is True
+    assert source_super.json()["data"]["audit_only"] is False and source_super.json()["data"]["eligible"] is True
     preview = await async_client.post("/api/ai/drug-label/context", headers=headers, json=values)
     assert preview.status_code == 200, preview.text
     assert set(preview.json()["data"]) == {"context", "metadata", "evidence", "drug_label_source_record"}
@@ -137,6 +144,9 @@ async def test_actual_main_full_source_preview_submit_shared_claim_worker_trace_
             "options": options.json(),
             "catalog": catalog.json(),
             "directory": directory.json(),
+            "options_super": options_super.json(),
+            "source_super": source_super.json(),
+            "directory_super_audit": directory_super_audit.json(),
             "source": source.json(),
             "preview": preview.json(),
             "queued": created.json(),
@@ -154,6 +164,9 @@ async def test_actual_main_full_source_preview_submit_shared_claim_worker_trace_
                 "options": options,
                 "catalog": catalog,
                 "directory": directory,
+                "options_super": options_super,
+                "source_super": source_super,
+                "directory_super_audit": directory_super_audit,
                 "preview": preview,
                 "queued": created,
                 "full": full,

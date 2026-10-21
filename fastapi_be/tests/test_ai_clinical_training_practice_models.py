@@ -80,9 +80,11 @@ def test_mysql_compilation_has_two_complete_mediumtext_two_utc6_and_exact_six_fi
 def test_actual_submission_migration_up_down_up_preserves_all_registered_old_ddl_rows_and_gate_seed():
     engine = create_engine("sqlite:///:memory:")
     new_name = AITrainingSubmission.__tablename__
+    from app.ai.clinical_training_run_models import TRAINING_RUN_MODELS
+    later_names = {model.__tablename__ for model in TRAINING_RUN_MODELS}
     old = MetaData()
     for name, table in Base.metadata.tables.items():
-        if name != new_name:
+        if name != new_name and name not in later_names:
             table.to_metadata(old)
     old.create_all(engine)
     with engine.begin() as connection:

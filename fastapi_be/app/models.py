@@ -15,6 +15,7 @@ from app.ai import charge_reconciliation_models as _charge_reconciliation_models
 from app.ai import charge_reconciliation_run_models as _charge_reconciliation_run_models  # noqa: F401
 from app.ai import clinical_training_models as _clinical_training_models  # noqa: F401
 from app.ai import clinical_training_practice_models as _clinical_training_practice_models  # noqa: F401
+from app.ai import clinical_training_run_models as _clinical_training_run_models  # noqa: F401
 from app.ai import coding_evidence_models as _coding_evidence_models  # noqa: F401
 from app.ai import document_change_models as _document_change_models  # noqa: F401
 from app.ai import document_change_run_models as _document_change_run_models  # noqa: F401

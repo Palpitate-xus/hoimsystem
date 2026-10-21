@@ -61,12 +61,24 @@ class ResearchUsage(StrictModel):
         return self
 
 
+class ResearchDispatchEvent(StrictModel):
+    schema_version: Literal["research_dispatch_reserved_v1"]
+    run_id: UUID
+    lease_token: UUID
+    claim_event_id: Annotated[int, Field(strict=True, ge=1)]
+    source_binding_hash: SHA
+    instructions_digest: SHA
+    execution_snapshot_hash: SHA
+    reserved_at: UTC
+
+
 class ResearchUsageEvent(StrictModel):
     schema_version: Literal["research_usage_event_v1"]
     run_id: UUID
     lease_token: UUID | None
     source_binding_hash: SHA
     usage: ResearchUsage
+    dispatch_event_id: Annotated[int, Field(strict=True, ge=1)] | None
     status: Literal["succeeded", "failed", "cancelled"]
     error_code: Annotated[str, Field(strict=True, min_length=1, max_length=80)] | None
     result_hash: SHA | None
@@ -92,7 +104,12 @@ def _encoded_header(header):
 
 def _locator(db, run_id, *, shared=False):
     return current_research_rows(
-        db.query(*(getattr(AIResearchCohortRunArtifact, key) for key in ("run_id", "requested_by", "source_binding_hash", "created_audit_event_id", "usage_event_id"))).filter_by(run_id=run_id),
+        db.query(
+            *(
+                getattr(AIResearchCohortRunArtifact, key)
+                for key in ("run_id", "requested_by", "source_binding_hash", "instructions_digest", "execution_snapshot_hash", "created_audit_event_id", "usage_event_id", "dispatch_event_id")
+            )
+        ).filter_by(run_id=run_id),
         shared=shared,
     ).one_or_none()
 
@@ -113,10 +130,50 @@ def _accepted_result_header(db, locator, lease_token, result_hash):
         or row.lease_token != lease_token
         or row.content_hash != result_hash
         or row.source_binding_hash != locator.source_binding_hash
-        or row.accept_audit_event_id in {locator.created_audit_event_id, locator.usage_event_id}
+        or row.accept_audit_event_id in {locator.created_audit_event_id, locator.usage_event_id, locator.dispatch_event_id}
     ):
         raise HTTPException(409, "研究成功须有独立具体接受回执和原完整结果身份")
     return row
+
+
+def read_dispatch_event(db, run_id):
+    """Current Gate is required; opaque fields and exact two Audit PKs only."""
+    from app.ai.models import AIAuditEvent
+    from app.ai.research_cohort_storage import _json
+
+    locator = _locator(db, run_id, shared=True)
+    header = _header(db, run_id, shared=True)
+    if locator is None or header is None or locator.dispatch_event_id is None:
+        raise HTTPException(409, "科研模型调用缺少持久dispatch回执FK，不能推定已调用")
+    event = current_research_rows(db.query(AIAuditEvent).filter_by(event_id=locator.dispatch_event_id), shared=True).one_or_none()
+    try:
+        value = ResearchDispatchEvent.model_validate(_json(event.detail_json, 65535), strict=True).model_dump(mode="json") if event is not None else None
+        if (
+            value is None
+            or event.action != "research.task.dispatch.reserve"
+            or event.target != run_id
+            or event.actor_id != locator.requested_by
+            or value["run_id"] != run_id
+            or value["lease_token"] != header["lease_token"]
+            or value["source_binding_hash"] != locator.source_binding_hash
+            or value["instructions_digest"] != locator.instructions_digest
+            or value["execution_snapshot_hash"] != locator.execution_snapshot_hash
+            or locator.dispatch_event_id in {locator.created_audit_event_id, locator.usage_event_id, value["claim_event_id"]}
+        ):
+            raise ValueError("The durable dispatch reservation differs")
+        claim = current_research_rows(db.query(AIAuditEvent).filter_by(event_id=value["claim_event_id"]), shared=True).one_or_none()
+        expected = {
+            "schema_version": "research_claim_v1",
+            "run_id": run_id,
+            "lease_token": value["lease_token"],
+            "start_time": utc_text(header["start_time"]),
+            "source_binding_hash": locator.source_binding_hash,
+        }
+        if claim is None or claim.action != "research.task.claim" or claim.actor_id != locator.requested_by or claim.target != run_id or claim.detail_json != canonical_json(expected):
+            raise ValueError("The original concrete claim receipt differs")
+        return value
+    except (ValueError, TypeError, KeyError, AttributeError) as exc:
+        raise HTTPException(409, "科研原dispatch/claim具体AuditPK证明损坏，不允许重放") from exc
 
 
 def read_usage_event(db, run_id):
@@ -139,6 +196,7 @@ def read_usage_event(db, run_id):
             or row.actor_id != locator.requested_by
             or value["run_id"] != run_id
             or value["source_binding_hash"] != locator.source_binding_hash
+            or value["dispatch_event_id"] != locator.dispatch_event_id
             or value["status"] != header["status"]
             or value["lease_token"] != header["lease_token"]
             or value["error_code"] != header["error_code"]
@@ -152,6 +210,10 @@ def read_usage_event(db, run_id):
         if value["result_reference_hash"] != digest(expected_reference) or current_research_rows(db.query(AIRun.result_json == raw).filter_by(run_id=run_id), shared=True).scalar() is not True:
             raise ValueError("The original short result reference differs")
         receipt = value["usage"]
+        if locator.dispatch_event_id is not None:
+            read_dispatch_event(db, run_id)
+        elif receipt["model_call_attempted"] is not False:
+            raise ValueError("An attempted or uncertain call needs its durable reservation")
         if header["input_tokens"] != (receipt["input_tokens"] if receipt["input_tokens"] is not None else 0) or header["output_tokens"] != (
             receipt["output_tokens"] if receipt["output_tokens"] is not None else 0
         ):
@@ -207,6 +269,10 @@ def stage_terminal_receipt(db, run_id, lease_token, receipt, *, status, error_co
         if (old["lease_token"], old["usage"], old["status"], old["error_code"], old["result_hash"]) != (lease_token, checked, status, error_code, result_hash):
             raise HTTPException(409, "同一科研任务不能覆盖第一次实际usage回执")
         return locator.usage_event_id
+    if locator.dispatch_event_id is not None:
+        read_dispatch_event(db, run_id)
+    elif checked["model_call_attempted"] is not False:
+        raise HTTPException(409, "没有持久dispatch原件不能声称已调用或用量未知")
     if header["lease_token"] != lease_token:
         raise HTTPException(409, "科研worker原租约已变化，不接收旧回执")
     queued_zero = header["status"] == "queued" and lease_token is None and status == "cancelled" and checked == usage(0, 0, False)
@@ -235,6 +301,7 @@ def stage_terminal_receipt(db, run_id, lease_token, receipt, *, status, error_co
         lease_token=lease_token,
         source_binding_hash=locator.source_binding_hash,
         usage=checked,
+        dispatch_event_id=locator.dispatch_event_id,
         status=status,
         error_code=error_code,
         result_hash=result_hash,

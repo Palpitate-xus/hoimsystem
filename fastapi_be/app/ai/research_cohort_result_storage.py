@@ -11,7 +11,7 @@ from pydantic import TypeAdapter
 from app.ai.research_cohort_artifact_models import RESULT_SCHEMA, AIResearchCohortRunArtifact, AIResearchCohortRunResult
 from app.ai.research_cohort_contract import UUID, canonical_json
 from app.ai.research_cohort_draft import MAX_BYTES, digest
-from app.ai.research_cohort_receipts import ResearchUsage, read_usage_event, stage_terminal_receipt
+from app.ai.research_cohort_receipts import ResearchUsage, read_dispatch_event, read_usage_event, stage_terminal_receipt
 from app.ai.research_cohort_result import result_for_draft, validate_result
 from app.ai.research_cohort_sources import utc_text, utcnow
 from app.ai.research_cohort_storage import _json, _sha, load_artifact
@@ -52,7 +52,7 @@ def load_result(db, user, run_id, *, audit_only=False):
         or run.lease_token != row.lease_token
         or run.finish_time is None
         or row.accepted_at.replace(microsecond=0) > run.finish_time
-        or row.accept_audit_event_id in {artifact.created_audit_event_id, artifact.usage_event_id}
+        or row.accept_audit_event_id in {artifact.created_audit_event_id, artifact.usage_event_id, artifact.dispatch_event_id}
     ):
         raise HTTPException(409, "科研完整结果与原租约、Source绑定或独立接受回执身份不一致")
     result = validate_result(_json(row.result_json, MAX_BYTES), source)
@@ -95,6 +95,9 @@ def stage_result(db, user, run_id, lease_token, draft, receipt, *, latency_ms=No
         raise HTTPException(409, "只接受当前running原租约的第一次模型结果")
     if current_research_rows(db.query(AIResearchCohortRunResult.run_id).filter_by(run_id=run_id)).one_or_none() is not None:
         raise HTTPException(409, "科研完整结果不能被重复接受或覆盖")
+    dispatched = read_dispatch_event(db, run_id)
+    if dispatched["lease_token"] != lease_token:
+        raise HTTPException(409, "科研接受结果须绑定原持久dispatch租约")
     result = result_for_draft(draft, source)
     raw = canonical_json(result)
     row = AIResearchCohortRunResult(

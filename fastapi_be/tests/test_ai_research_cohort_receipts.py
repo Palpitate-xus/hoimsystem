@@ -7,7 +7,7 @@ from fastapi import HTTPException
 from pydantic import ValidationError
 from sqlalchemy import text
 
-from app.ai.models import AIAuditEvent, AIRun
+from app.ai.models import AIAuditEvent, AIProvider, AIRun
 from app.ai.research_cohort_artifact_models import AIResearchCohortRunArtifact
 from app.ai.research_cohort_cases import case_current
 from app.ai.research_cohort_receipts import ResearchUsage, read_usage_event, stage_terminal_receipt, usage
@@ -26,11 +26,17 @@ from tests.test_ai_research_cohort_storage import storage_rows as storage_rows  
 @pytest.fixture
 def claimed(configured):
     db, actor, run_id, _, values, _ = configured
-    freeze_artifact(db, actor, run_id, values["case_id"])
-    lease = str(uuid.uuid4())
-    db.get(AIRun, run_id).status, db.get(AIRun, run_id).lease_token = "running", lease
+    from app.ai.research_cohort_execution import claim_research_run, reserve_research_dispatch
+
+    db.get(AIProvider, values["provider_id"]).api_base = "http://127.0.0.1:8825/v1"
     db.commit()
-    return configured, lease
+    freeze_artifact(db, actor, run_id, values["case_id"])
+    db.commit()
+    claim = claim_research_run(db, run_id)
+    assert claim is not None
+    reserve_research_dispatch(db, run_id, claim.lease_token, claim.claim_event_id)
+    db.commit()
+    return configured, claim.lease_token
 
 
 @pytest.mark.parametrize(

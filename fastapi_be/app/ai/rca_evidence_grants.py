@@ -16,6 +16,7 @@ from sqlalchemy import select
 from sqlalchemy.exc import SQLAlchemyError
 
 from app.ai import rca_evidence_contract as c
+from app.ai import rca_evidence_current as current_keys
 from app.ai import rca_evidence_input as i
 from app.ai.models import AIAuditEvent
 from app.ai.rca_evidence_models import AIRcaPurposeGrant
@@ -231,6 +232,7 @@ def create_grant(db, user, values):
     expected = {column.name: getattr(row, column.name) for column in AIRcaPurposeGrant.__table__.columns}
     db.add(row)
     db.flush()
+    current_keys.remember_flushed(db, row)
     db.expire(row)
     current = current_rows(db.query(AIRcaPurposeGrant).filter_by(grant_id=identity.grant_id)).one()
     if {column.name: getattr(current, column.name) for column in AIRcaPurposeGrant.__table__.columns} != expected:
@@ -288,26 +290,22 @@ def authorize_event(db, user, event_id):
     if parent is None:
         raise HTTPException(404, "实际不良事件不存在")
     now = utcnow()
-    columns = (AIRcaPurposeGrant.grant_id, AIRcaPurposeGrant.permission_kind)
-    candidates = (
-        current_rows(
-            db.query(*columns)
-            .filter(
-                AIRcaPurposeGrant.event_id == parent.event_id,
-                AIRcaPurposeGrant.patient_id_at_grant == parent.patient_id,
-                AIRcaPurposeGrant.grantee_id == actor.user_id,
-                AIRcaPurposeGrant.purpose == "incident_rca",
-                AIRcaPurposeGrant.status == "active",
-                AIRcaPurposeGrant.valid_until > now,
-            )
-            .order_by(AIRcaPurposeGrant.grant_id),
-            shared=True,
-        )
-        .limit(c.MAX_MEMBERS + 1)
-        .all()
+    identities = current_keys.discover(db, AIRcaPurposeGrant, "grant_id", parent.event_id, filters=(AIRcaPurposeGrant.grantee_id == actor.user_id,))
+    columns = (
+        AIRcaPurposeGrant.grant_id,
+        AIRcaPurposeGrant.event_id,
+        AIRcaPurposeGrant.permission_kind,
+        AIRcaPurposeGrant.patient_id_at_grant,
+        AIRcaPurposeGrant.grantee_id,
+        AIRcaPurposeGrant.purpose,
+        AIRcaPurposeGrant.status,
+        AIRcaPurposeGrant.valid_until,
     )
-    if len(candidates) > c.MAX_MEMBERS:
-        raise HTTPException(409, "该事件当前用途许可超过完整核对上限，未截断授权")
+    candidates = []
+    for identifier in identities:
+        row = current_keys.current_metadata(db, AIRcaPurposeGrant, "grant_id", identifier, parent.event_id, columns)
+        if (row.patient_id_at_grant, row.grantee_id, row.purpose, row.status) == (parent.patient_id, actor.user_id, "incident_rca", "active") and row.valid_until > now:
+            candidates.append(row)
     chosen = {}
     for row in candidates:
         chosen.setdefault(row.permission_kind, row.grant_id)

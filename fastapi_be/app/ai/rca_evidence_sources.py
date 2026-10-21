@@ -12,6 +12,7 @@ from fastapi import HTTPException
 from sqlalchemy import LargeBinary, cast, func, select
 
 from app.ai import rca_evidence_contract as c
+from app.ai import rca_evidence_current as current_keys
 from app.ai import rca_evidence_grants as g
 from app.ai import rca_evidence_input as i
 from app.ai import rca_evidence_source_contract as s
@@ -221,6 +222,7 @@ def _values(row):
 
 def _postflush(db, auth, row, expected, audit_id, audit_value, *, require_matching_witness=True):
     db.flush()
+    current_keys.remember_flushed(db, row)
     identifier = expected["original_id"]
     db.expire(row)
     current_auth = g.authorize_event(db, auth.actor, auth.identity.event_id)

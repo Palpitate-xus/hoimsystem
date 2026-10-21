@@ -16,6 +16,7 @@ from sqlalchemy import select
 
 from app.ai import rca_evidence_case_contract as k
 from app.ai import rca_evidence_contract as c
+from app.ai import rca_evidence_current as current_keys
 from app.ai import rca_evidence_grants as g
 from app.ai import rca_evidence_input as i
 from app.ai import rca_evidence_sources as originals
@@ -61,28 +62,31 @@ def _capture(db, auth):
     event = originals._legacy_snapshot(db, "legacy_event", auth.identity.event_id, auth.identity.event_id)
     # Current locking IDs/byte sizes are necessary even when the caller has an
     # older RR view. Event X serializes the exact three legacy/new writers.
-    with db.no_autoflush:
-        rca_columns = [column for column in AdverseEventRca.__table__.columns if column.type.python_type is str]
-        rcas = (
-            current_rows(
-                db.query(AdverseEventRca.rca_id, *[originals._bytes_expression(db, column) for column in rca_columns]).filter_by(event_id=event.event_id).order_by(AdverseEventRca.rca_id), shared=True
-            )
-            .limit(c.MAX_MEMBERS + 1)
-            .all()
+    rca_columns = [column for column in AdverseEventRca.__table__.columns if column.type.python_type is str]
+    rca_ids = current_keys.discover(db, AdverseEventRca, "rca_id", event.event_id)
+    original_ids = current_keys.discover(db, AIRcaEvidenceOriginal, "original_id", event.event_id)
+    if 1 + len(rca_ids) + len(original_ids) > c.MAX_MEMBERS:
+        raise HTTPException(413, "完整同事件根件超过合并4096上限，未选赢家或截断")
+    rcas = [
+        current_keys.current_metadata(
+            db, AdverseEventRca, "rca_id", identifier, event.event_id, (AdverseEventRca.rca_id, AdverseEventRca.event_id, *[originals._bytes_expression(db, column) for column in rca_columns])
         )
-        rows = (
-            current_rows(
-                db.query(*[getattr(AIRcaEvidenceOriginal, key) for key in TECH_FIELDS], originals._bytes_expression(db, AIRcaEvidenceOriginal.original_json))
-                .filter_by(event_id=event.event_id)
-                .order_by(AIRcaEvidenceOriginal.original_id),
-                shared=True,
-            )
-            .limit(c.MAX_MEMBERS + 1)
-            .all()
+        for identifier in rca_ids
+    ]
+    rows = [
+        current_keys.current_metadata(
+            db,
+            AIRcaEvidenceOriginal,
+            "original_id",
+            identifier,
+            event.event_id,
+            (*[getattr(AIRcaEvidenceOriginal, key) for key in TECH_FIELDS], originals._bytes_expression(db, AIRcaEvidenceOriginal.original_json)),
         )
+        for identifier in original_ids
+    ]
     if 1 + len(rcas) + len(rows) > c.MAX_MEMBERS:
         raise HTTPException(413, "完整同事件根件超过合并4096上限，未选赢家或截断")
-    if sum(value or 0 for row in rcas for value in row[1:]) + sum(row[-1] or 0 for row in rows if row.patient_id_at_capture == event.patient_id) > c.MAX_WIRE_BYTES:
+    if sum(value or 0 for row in rcas for value in row[2:]) + sum(row[-1] or 0 for row in rows if row.patient_id_at_capture == event.patient_id) > c.MAX_WIRE_BYTES:
         raise HTTPException(413, "完整同事件已授权正文超过8MiB，未加载大正文或截断")
     rca_records = [originals._legacy_snapshot(db, "legacy_rca", row.rca_id, event.event_id) for row in rcas]
     members = []
@@ -345,6 +349,7 @@ def public_source(db, user, identifier):
 
 def _postflush(db, auth, row, expected, audit_id, audit_value, *, require_current):
     db.flush()
+    current_keys.remember_flushed(db, row)
     db.expire(row)
     current_auth = g.authorize_event(db, auth.actor, auth.identity.event_id)
     if tuple(current_auth.identity) != tuple(auth.identity):

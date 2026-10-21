@@ -6,11 +6,12 @@ from fastapi import HTTPException
 from pydantic import Field
 
 from app.ai import rca_evidence_contract as c
+from app.ai import rca_evidence_current as current_keys
 from app.ai import rca_evidence_grants as g
 from app.ai import rca_evidence_input as i
 from app.ai.rca_evidence_cases import wire
 from app.ai.rca_evidence_models import AIRcaEvidenceCase, AIRcaEvidenceOriginal, AIRcaPurposeGrant
-from app.ai.rca_evidence_write_guard import current_rows, lock_event_identity
+from app.ai.rca_evidence_write_guard import lock_event_identity
 
 
 class OriginalMetadata(c.StrictModel):
@@ -86,12 +87,10 @@ def directory(db, user, event_id, kind, *, page=1, page_size=20):
             "created_by",
             "patient_id_at_capture",
         )
-    # Current-lock metadata rows, including all statuses; never ordinary RR
-    # COUNT paired with a different current page. Event X blocks our writers.
-    with db.no_autoflush:
-        rows = current_rows(db.query(*[getattr(model, key) for key in fields]).filter_by(event_id=event_id).order_by(getattr(model, fields[0])), shared=True).limit(c.MAX_MEMBERS + 1).all()
-    if len(rows) > c.MAX_MEMBERS:
-        raise HTTPException(413, "完整同事件目录超过4096上限，未返回截断总数")
+    # Parent X closes every supported writer; current opaque discovery plus
+    # exact PK metadata avoids RR next-key gaps on unrelated events.
+    identifiers = current_keys.discover(db, model, fields[0], event_id)
+    rows = [current_keys.current_metadata(db, model, fields[0], identifier, event_id, tuple(getattr(model, key) for key in fields)) for identifier in identifiers]
     items = []
     for row in rows[(page - 1) * page_size : page * page_size]:
         values = dict(zip(fields, row, strict=True))

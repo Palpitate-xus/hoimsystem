@@ -380,3 +380,31 @@ def test_current_actor_role_epoch_is_checked_before_private_source_locator(grant
     assert error.value.status_code == 403
     assert not {"original_id", "case_id", "original_json", "case_json"}.intersection(fields)
     db.rollback()
+
+
+@pytest.mark.parametrize("phase", ["create", "publish"])
+def test_actual_after_case_sql_trigger_new_legacy_root_cannot_escape_postflush_closure(grant_case, phase):
+    case, db = grant_case, grant_case["db"]
+    both(case)
+    record = create_case(case) if phase == "publish" else None
+    operation = "INSERT" if phase == "create" else "UPDATE"
+    db.execute(
+        text(
+            f"CREATE TRIGGER rca_case_fault AFTER {operation} ON hoimsystem_ai_rca_evidence_case BEGIN INSERT INTO hoimsystem_adverse_event_rca(event_id,event_summary,root_cause,corrective_actions,pdca_cycle,create_time) VALUES(NEW.event_id,'trigger new root','unverified','not_completed','P','2026-10-21 12:00:00'); END"
+        )
+    )
+    db.commit()
+    before = db.query(AIAuditEvent).count()
+    from app.models import AdverseEventRca
+
+    old = db.query(AdverseEventRca).filter_by(event_id=case["event_id"]).count()
+    with pytest.raises(HTTPException) as error:
+        if phase == "create":
+            create_case(case)
+        else:
+            publish(case, record)
+    assert error.value.status_code == 409
+    assert db.query(AIAuditEvent).count() == before
+    assert db.query(AdverseEventRca).filter_by(event_id=case["event_id"]).count() == old
+    if record is not None:
+        assert k.case_detail(db, case["actor"], record.immutable.case_id).governance.status == "draft"

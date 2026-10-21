@@ -1,6 +1,7 @@
 """Narrow current child identity discovery after the actual Event parent X.
 
-The immediately closed RC connection returns only child PK/event ID. It is
+The immediately closed RC connection and the same-session nonlocking query
+return only child PK/event ID; their union also sees real SQL/trigger inserts. It is
 not authorization and cannot read narrative, grant, review or Case text.
 Current main-transaction PK reads must verify both columns before any body.
 """
@@ -72,6 +73,11 @@ def discover(db, model, key, event_id, *, filters=()):
             engine = getattr(bind, "engine", bind)
             with engine.connect().execution_options(isolation_level="READ COMMITTED") as connection:
                 rows = connection.execute(statement).all()
+            # Own SQL/trigger inserts are visible only to the main transaction,
+            # even when no ORM writer could register their generated keys.
+            # An old RR residual ID is never trusted: the exact current PK/event
+            # read must fail409 if it was deleted or moved. No range lock/TEXT.
+            rows += db.execute(statement).all()
         else:
             rows = db.execute(statement).all()
     identities = {row[0] for row in rows}

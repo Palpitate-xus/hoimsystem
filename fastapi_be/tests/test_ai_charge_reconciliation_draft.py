@@ -15,9 +15,7 @@ def example():
     source = {
         "schema_version": "charge_ledger_source_v1",
         "source_id": "charge_case:synthetic",
-        "charges": [
-            {"source_id": identifier, "item_name": "\ufeff合成🙂\r\n服务名称", "quantity": {"value_text": "0.1"}, "total_amount": "12.00", "status": "settled", "order_association": "not_recorded"}
-        ],
+        "charges": [{"source_id": identifier, "item_name": "\ufeff合成🙂\r\n服务名称", "quantity": {"value_text": "0.1"}, "total_amount": "12.00", "status": 2, "order_association": "not_recorded"}],
         "orders": [],
         "order_items": [],
         "executions": [],
@@ -176,7 +174,7 @@ def test_insufficient_basis_still_requires_actual_members_and_explicit_question(
     assert accept(source, reply).observations[0].kind == "insufficient_evidence"
 
 
-@pytest.mark.parametrize("field,value", [("quantity.value_text", "0.1"), ("total_amount", "12.00"), ("status", "settled")])
+@pytest.mark.parametrize("field,value", [("quantity.value_text", "0.1"), ("total_amount", "12.00"), ("order_association", "not_recorded")])
 def test_exact_stored_string_reference_does_not_prove_cash_or_decimal_precision(field, value):
     source, reply = example()
     reply["observations"][0]["citations"][0].update(field=field, start=0, end=len(value), quote=value)

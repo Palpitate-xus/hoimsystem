@@ -10,7 +10,7 @@ from fastapi import HTTPException
 from pydantic import ValidationError
 from sqlalchemy import text
 
-from app.ai.models import AIAuditEvent
+from app.ai.models import AIAuditEvent, AIReviewExcerpt
 from app.ai.review_curation import create_excerpt, load_review_source, review_excerpt
 from app.ai.satisfaction_contract import CaptureRequest, CaseCreate, SourceReview, SourceRevoke
 from app.ai.satisfaction_models import AISatisfactionCase
@@ -274,3 +274,23 @@ def test_notes_unicode_bytes_and_revoke_codepoint_limits_are_exact():
         SourceReview(expected_revision=1, decision="publish", basis_note="🧪" * 1001)
     with pytest.raises(ValidationError):
         CaseCreate.model_validate({})
+
+
+def test_actual_unknown_legacy_status_and_zero_negative_version_metadata_stay_unknown_and_private(db_session, satisfaction_case):
+    db, case = db_session, satisfaction_case
+    source = load_review_source(db, case["review"].review_id)
+    draft = create_excerpt(
+        db,
+        case["super_admin_user"],
+        ReviewExcerptWrite(review_id=case["review"].review_id, expected_source_hash=source.fingerprint, redacted_text="合成无效技术版本原文不外发", change_note="合成异常技术元数据保留测试"),
+    )
+    db.commit()
+    db.query(AIReviewExcerpt).filter_by(excerpt_id=draft.excerpt_id).update({"version": 0, "revision": -3, "status": "patient_secret_hint"}, synchronize_session=False)
+    db.commit()
+    made = published(db, case)
+    manifest = made["public_source"]["safe_snapshot"]["member_manifest"]
+    invalid = next(r for r in manifest if r["kind"] == "excerpt" and r["version"] == 0)
+    assert invalid["status"] == "unknown" and invalid["revision"] == -3 and not invalid["selected"]
+    assert invalid["eligibility"] == "ineligible_manual_claim"
+    assert "patient_secret_hint" not in canonical_json(made["public_source"])
+    assert next(e for e in made["snapshot"]["collection"]["excerpts"] if e["excerpt_id"] == draft.excerpt_id)["status"] == "patient_secret_hint"

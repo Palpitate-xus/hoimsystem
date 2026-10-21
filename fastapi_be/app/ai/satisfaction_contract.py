@@ -118,14 +118,14 @@ class ReviewOriginal(StrictModel):
 class ExcerptOriginal(StrictModel):
     excerpt_id: UUID
     review_id: Positive
-    version: int
+    version: int | None
     source_hash: str
     department_id: Positive
     redacted_text: str
     text_hash: str
     change_note: str
-    status: str
-    revision: int
+    status: str | None
+    revision: int | None
     privacy_checked: int
     faithfulness_checked: int
     review_note: str
@@ -238,6 +238,9 @@ class PublicMember(StrictModel):
     review_token: SHA
     content_hash: SHA
     governance_hash: SHA | None
+    status: Literal["not_applicable", "draft", "published", "rejected", "retired", "unknown"]
+    version: int | None
+    revision: int | None
     selected: bool
     eligibility: Literal["original_record", "eligible_manual_claim", "ineligible_manual_claim"]
     exclusion_reasons: list[str]
@@ -306,8 +309,8 @@ class SatisfactionSource(StrictModel):
 
 
 class ExcerptOption(ExcerptSelection):
-    status: str
-    version: int
+    status: Literal["draft", "published", "rejected", "retired", "unknown"]
+    version: int | None
     eligible: bool
     exclusion_reasons: list[str]
     reviewed_text: str | None

@@ -319,7 +319,15 @@ def _excerpt_reasons(c, row, parents=None, reviews=None):
     created, reviewed = legacy_clock(row["create_time"]), legacy_clock(row["reviewed_at"])
     if created is None or reviewed is None or reviewed < created:
         reasons.append("legacy_review_clock_unresolved")
-    if not row["review_note"].strip() or not row["change_note"].strip() or not row["redacted_text"].strip() or row["version"] < 1 or row["revision"] < 2:
+    if (
+        not row["review_note"].strip()
+        or not row["change_note"].strip()
+        or not row["redacted_text"].strip()
+        or row["version"] is None
+        or row["version"] < 1
+        or row["revision"] is None
+        or row["revision"] < 2
+    ):
         reasons.append("manual_review_basis_incomplete")
     if state is not None:
         doctor, patient, _, _, department = state
@@ -363,7 +371,7 @@ def selection_options(c):
                 "review_token": review_token(c, originals[e["review_id"]]),
                 "content_hash": content,
                 "governance_hash": governance,
-                "status": e["status"],
+                "status": e["status"] if e["status"] in {"draft", "published", "rejected", "retired"} else "unknown",
                 "version": e["version"],
                 "eligible": not reasons,
                 "exclusion_reasons": reasons,
@@ -436,6 +444,9 @@ def safe_snapshot(snapshot):
                 "review_token": review_tokens[r["review_id"]],
                 "content_hash": source_hash,
                 "governance_hash": None,
+                "status": "not_applicable",
+                "version": None,
+                "revision": None,
                 "selected": False,
                 "eligibility": "original_record",
                 "exclusion_reasons": [],
@@ -451,6 +462,9 @@ def safe_snapshot(snapshot):
                 "review_token": review_tokens[e["review_id"]],
                 "content_hash": option["content_hash"],
                 "governance_hash": option["governance_hash"],
+                "status": option["status"],
+                "version": e["version"],
+                "revision": e["revision"],
                 "selected": e["excerpt_id"] in selected,
                 "eligibility": "eligible_manual_claim" if option["eligible"] else "ineligible_manual_claim",
                 "exclusion_reasons": option["exclusion_reasons"],

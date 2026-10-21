@@ -840,13 +840,20 @@ def list_global_runs(
     inventory_item_id: QueryPositiveInteger | None = Query(None, ge=1, le=2147483647),
     inventory_scenario_id: str | None = Query(None, max_length=36),
     coding_case_id: str | None = Query(None, max_length=36),
+    charge_case_id: str | None = Query(None, max_length=36),
+    encounter_ref: str | None = Query(None, max_length=64),
     document_original_id: str | None = Query(None, max_length=36),
     page: int = Query(1, ge=1, le=100000),
     page_size: int = Query(30, ge=1, le=100),
     db: Session = Depends(get_db),
     user: User = Depends(require_roles("super_admin")),
 ) -> dict:
-    """Inspect all users' task metadata and feedback counts without loading clinical payloads."""
+    """Return all users' audited task metadata and feedback counts without exposing full payloads."""
+    from app.ai.charge_reconciliation_write_guard import lock_charge_gate
+
+    # A global directory may contain native charge tasks. Billing precedes
+    # current User/Run/Artifact locks even when no feature filter was supplied.
+    lock_charge_gate(db)
     user = _current_super_admin(db, user)
     query = db.query(AIRun)
     if feature_key == "guideline_ingestion" or document_original_id is not None:
@@ -860,6 +867,8 @@ def list_global_runs(
             original_id=document_original_id,
             other_scope=(
                 patient_id,
+                encounter_ref,
+                charge_case_id,
                 department_id,
                 surgery_pool_id,
                 surgery_scenario_id,
@@ -872,7 +881,30 @@ def list_global_runs(
                 coding_case_id,
             ),
         )
-    if coding_case_id is not None:
+    if encounter_ref is not None and feature_key != "charge_reconciliation":
+        raise HTTPException(422, "该管理历史的住院筛选仅用于完整账目功能")
+    if charge_case_id is not None:
+        if feature_key != "charge_reconciliation" or any(
+            value is not None
+            for value in (
+                document_original_id,
+                department_id,
+                surgery_pool_id,
+                surgery_scenario_id,
+                supply_item_kind,
+                supply_item_id,
+                supply_series_id,
+                inventory_item_kind,
+                inventory_item_id,
+                inventory_scenario_id,
+                coding_case_id,
+            )
+        ):
+            raise HTTPException(422, "账目管理历史仅筛选一件完整住院账目及其实际患者住院")
+        from app.ai.charge_reconciliation_history import filter_history
+
+        query = filter_history(db, user, query, charge_case_id=charge_case_id, patient_id=patient_id, encounter_ref=encounter_ref)
+    elif coding_case_id is not None:
         if feature_key != "drg_evidence_review" or any(
             value is not None
             for value in (department_id, surgery_pool_id, surgery_scenario_id, supply_item_kind, supply_item_id, supply_series_id, inventory_item_kind, inventory_item_id, inventory_scenario_id)
@@ -915,7 +947,9 @@ def list_global_runs(
         query = query.filter(AIRun.patient_id == patient_id)
     if outcome:
         query = query.filter(AIRun.run_id.in_(db.query(AIFeedback.run_id).filter(AIFeedback.outcome == outcome)))
-    total = query.count()
+    if encounter_ref is not None:
+        query = query.filter(AIRun.encounter_ref == encounter_ref)
+    total = query.with_entities(func.count(AIRun.run_id)).with_for_update(read=True).scalar() if feature_key == "charge_reconciliation" else query.count()
     rows = (
         query.options(defer(AIRun.input_json), defer(AIRun.result_json), defer(AIRun.evidence_json))
         .order_by(AIRun.create_time.desc(), AIRun.run_id)
@@ -931,14 +965,24 @@ def list_global_runs(
 @router.get("/ai/admin/runs/{run_id}")
 def inspect_run_trace(run_id: str, db: Session = Depends(get_db), user: User = Depends(require_roles("super_admin"))) -> dict:
     """Read the frozen prompts, requested model, source payload and append-only review history."""
+    from app.ai.charge_reconciliation_write_guard import lock_charge_gate
+
+    lock_charge_gate(db)
     user = _current_super_admin(db, user)
     run = db.get(AIRun, run_id)
     if run is None:
         raise HTTPException(404, "AI 任务不存在")
+    from app.ai.charge_reconciliation_storage import is_charge_run
+
+    charge = is_charge_run(db, run)
+    if charge:
+        from app.ai.charge_reconciliation_runtime import authorize_charge_run
+
+        authorize_charge_run(db, user, run)
     from app.ai.document_extraction_storage import authorize_document_run, is_extraction_run
 
     document_trace = {}
-    if is_extraction_run(db, run):
+    if not charge and is_extraction_run(db, run):
         snapshot, _, _ = authorize_document_run(db, user, run, current=False)
         document_trace = {"frozen_request_json": run.input_json, "frozen_evidence_json": run.evidence_json, "frozen_context_metadata_json": run.context_metadata_json}
     else:
@@ -1005,6 +1049,7 @@ def inspect_run_trace(run_id: str, db: Session = Depends(get_db), user: User = D
             "requested_by": run.requested_by,
             "provider_id": run.provider_id,
             "frozen_request": snapshot,
+            **({"raw_frozen_json": {"input_json": run.input_json, "evidence_json": run.evidence_json, "context_metadata_json": run.context_metadata_json}} if charge else {}),
             "snapshot_complete": all(key in snapshot for key in ("system_prompt", "provider_snapshot", "catalog_version")),
             "feedback": [{name: getattr(item, name) for name in ("feedback_id", "reviewer_id", "outcome", "comment", "create_time")} for item in feedback[:100]],
             "feedback_truncated": len(feedback) > 100,

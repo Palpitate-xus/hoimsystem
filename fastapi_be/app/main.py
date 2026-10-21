@@ -383,6 +383,7 @@ from app.routers import (
     ai_audio,
     ai_bed_series,
     ai_bed_sources,
+    ai_charge_reconciliation,
     ai_coding_evidence,
     ai_document_evidence,
     ai_ecg,
@@ -540,6 +541,7 @@ app.include_router(ai_inventory_native_sources.router, prefix="/api")
 app.include_router(ai_inventory_scenarios.router, prefix="/api")
 app.include_router(ai_document_evidence.router, prefix="/api")
 app.include_router(ai_coding_evidence.router, prefix="/api")
+app.include_router(ai_charge_reconciliation.router, prefix="/api")
 app.include_router(ai_supply_sources.router, prefix="/api")
 app.include_router(ai_supply_series.router, prefix="/api")
 app.include_router(inpatient_gcs.router, prefix="/api")

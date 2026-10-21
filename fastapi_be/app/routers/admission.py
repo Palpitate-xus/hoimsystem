@@ -3,6 +3,7 @@ import datetime
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session, joinedload
 
+from app.ai.charge_reconciliation_write_guard import current_charge_rows, lock_charge_write
 from app.database import get_db
 from app.dependencies import NURSING_ROLES, User, require_roles
 from app.models import (
@@ -26,7 +27,6 @@ def _generate_admission_no(db: Session) -> str:
         us = datetime.datetime.now().strftime("%f")
         candidate = f"ZY{today}{count + 1:03d}{us}"
     return candidate
-
 
 
 @router.get("/admission/getList")
@@ -57,10 +57,12 @@ def get_admission_list(
 
         kw = f"%{keyword}%"
         query = query.outerjoin(_Patient, Admission.patient_id == _Patient.patient_id).filter(
-            db.query(_Patient).filter(
+            db.query(_Patient)
+            .filter(
                 _Patient.patient_id == Admission.patient_id,
                 (_Patient.name.like(kw)) | (_Patient.identity.like(kw)) | (_Patient.phone.like(kw)),
-            ).exists()
+            )
+            .exists()
             | Admission.admission_no.like(kw)
             | Admission.admission_diagnosis.like(kw)
         )
@@ -119,11 +121,7 @@ def create_admission(req: AdmissionCreateRequest, current_user: User = Depends(r
         return {"code": 500, "msg": "该床位已禁用"}
 
     # 检查是否已有在院记录
-    existing = (
-        db.query(Admission)
-        .filter(Admission.patient_id == req.patient_id, Admission.status == 1)
-        .first()
-    )
+    existing = db.query(Admission).filter(Admission.patient_id == req.patient_id, Admission.status == 1).first()
     if existing:
         return {"code": 500, "msg": "该病人已有在院记录"}
 
@@ -238,7 +236,8 @@ def get_admission_detail(admission_id: str, current_user: User = Depends(require
 
 @router.post("/admission/update")
 def update_admission(req: AdmissionUpdateRequest, current_user: User = Depends(require_roles(*NURSING_ROLES)), db: Session = Depends(get_db)):
-    admission = db.query(Admission).filter(Admission.admission_id == req.admission_id).first()
+    current_user = lock_charge_write(db, current_user, allowed_roles=NURSING_ROLES)
+    admission = current_charge_rows(db.query(Admission)).filter(Admission.admission_id == req.admission_id).first()
     if not admission:
         return {"code": 500, "msg": "入院记录不存在"}
     if req.bed_id is not None and req.bed_id != admission.bed_id:
@@ -292,13 +291,17 @@ def get_available_beds(ward_id: int | None = None, current_user: User = Depends(
 
 @router.get("/admission/getInpatientList")
 def get_inpatient_list(ward_id: int | None = None, doctor_id: int | None = None, current_user: User = Depends(require_roles(*NURSING_ROLES)), db: Session = Depends(get_db)):
-    query = db.query(Admission).options(
-        joinedload(Admission.patient),
-        joinedload(Admission.doctor),
-        joinedload(Admission.department),
-        joinedload(Admission.ward),
-        joinedload(Admission.bed),
-    ).filter(Admission.status == 1)
+    query = (
+        db.query(Admission)
+        .options(
+            joinedload(Admission.patient),
+            joinedload(Admission.doctor),
+            joinedload(Admission.department),
+            joinedload(Admission.ward),
+            joinedload(Admission.bed),
+        )
+        .filter(Admission.status == 1)
+    )
     if ward_id:
         query = query.filter(Admission.ward_id == ward_id)
     if doctor_id:

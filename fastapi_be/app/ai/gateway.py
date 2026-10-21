@@ -465,6 +465,12 @@ def validate_generation(
 
 
 def _request(provider: AIProvider, spec: FeatureSpec, task_prompt: str, data: dict) -> tuple[str, dict]:
+    from app.ai.charge_reconciliation_gateway import matches_charge_request
+
+    if matches_charge_request(spec, data):
+        from app.ai.charge_reconciliation_gateway import request
+
+        return request(provider, spec, task_prompt, data)
     endpoint = validate_endpoint(provider.api_base)
     budget = min(provider.max_output_tokens, settings.AI_MAX_OUTPUT_TOKENS)
     if spec.number == 71 or any(key in data.get("context", {}) for key in ("document_binding", "document_source", "document_review")) or "document_original_id" in data.get("input", {}):
@@ -908,6 +914,12 @@ async def generate(
     image: BinaryIO | None = None,
 ) -> tuple[GenerationResult, int, int]:
     """Call only a configured endpoint; never retry billable tasks or follow redirects."""
+    from app.ai.charge_reconciliation_gateway import generate_charge, matches_charge_request
+
+    if matches_charge_request(spec, data):
+        if audio is not None or ecg is not None or image is not None:
+            raise AIExecutionError("UNEXPECTED_CHARGE_ATTACHMENT", "完整账目核对不接受影像、心电或音频附件")
+        return await generate_charge(provider, spec, task_prompt, data, transport=transport)
     inputs = outputs = None
     coding_mode = bool({"coding_binding", "coding_source", "coding_case"} & data.get("context", {}).keys()) or "coding_case_id" in data.get("input", {})
     try:

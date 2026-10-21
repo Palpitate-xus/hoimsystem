@@ -95,6 +95,11 @@ def _check_run_storage_json(serialized: dict[str, str]) -> None:
 
 def create_run(db: Session, user: User, req: RunRequest) -> AIRun:
     """Freeze an authorized, source-linked request before a durable worker processes it."""
+    if req.feature_key == "charge_reconciliation":
+        from app.ai.charge_reconciliation_runtime import create_charge_run
+
+        return create_charge_run(db, user, req)
+        return
     if req.feature_key == "guideline_ingestion":
         from app.ai.document_extraction_runtime import create_document_run
 
@@ -382,6 +387,13 @@ def create_run(db: Session, user: User, req: RunRequest) -> AIRun:
 
 def authorize_run(db: Session, user: User, run: AIRun) -> None:
     """Re-check current permissions, including revoked care access, on every result read."""
+    from app.ai.charge_reconciliation_storage import is_charge_run
+
+    if is_charge_run(db, run):
+        from app.ai.charge_reconciliation_runtime import authorize_charge_run
+
+        authorize_charge_run(db, user, run)
+        return
     from app.ai.document_extraction_storage import authorize_document_run, is_extraction_run
 
     if is_extraction_run(db, run):
@@ -531,6 +543,15 @@ def describe_run(run: AIRun, include_result: bool = True, *, user: User | None =
     """Expose the user-facing result, not system instructions or provider secrets."""
     from sqlalchemy.orm import object_session
 
+    from app.ai.charge_reconciliation_storage import is_charge_run
+
+    db = object_session(run)
+    if is_charge_run(db, run):
+        if db is None or user is None:
+            raise HTTPException(409, "完整账目任务须在当前授权会话内展示")
+        from app.ai.charge_reconciliation_views import describe_charge_run
+
+        return describe_charge_run(db, user, run, include_result)
     from app.ai.document_extraction_storage import is_extraction_run
 
     if is_extraction_run(object_session(run), run):
@@ -899,11 +920,20 @@ def _recheck_task(db: Session, run: AIRun) -> tuple[FeatureSpec, AIProvider, dic
 async def execute_claimed(run_id: str, lease: str, *, transport=None) -> None:
     """Release SQL connections during inference; recheck authorization before storing results."""
     from app import database
+    from app.ai.charge_reconciliation_storage import is_charge_run
     from app.ai.document_extraction_storage import is_extraction_run
 
-    with database.SessionLocal() as db:
-        candidate = db.query(AIRun).filter(AIRun.run_id == run_id, AIRun.status.in_(["running", "cancelled"]), AIRun.lease_token == lease).one_or_none()
-        document_task = candidate is not None and is_extraction_run(db, candidate)
+    # Only locate native identities here; release this short session before
+    # either dedicated worker acquires its own current authorization locks.
+    with database.SessionLocal() as routing_db:
+        routing_run = routing_db.get(AIRun, run_id)
+        charge = routing_run is not None and is_charge_run(routing_db, routing_run)
+        document_task = not charge and routing_run is not None and routing_run.status in {"running", "cancelled"} and routing_run.lease_token == lease and is_extraction_run(routing_db, routing_run)
+    if charge:
+        from app.ai.charge_reconciliation_execution import execute_charge_claimed
+
+        await execute_charge_claimed(run_id, lease, transport=transport)
+        return
     if document_task:
         from app.ai.document_extraction_runtime import execute_document_claimed
 
@@ -1289,11 +1319,15 @@ async def execute_claimed(run_id: str, lease: str, *, transport=None) -> None:
 
 def expire_interrupted_runs(db: Session) -> int:
     """Mark abandoned inference failed without repeating potentially billable calls."""
+    from app.ai.charge_reconciliation_execution import expire_interrupted_charge_runs
+    from app.ai.charge_reconciliation_run_models import AIChargeRunArtifact
+
+    recovered = expire_interrupted_charge_runs(db)
     deadline = utcnow() - datetime.timedelta(minutes=10)
     count = (
         db.query(AIRun)
-        .filter(AIRun.status == "running", AIRun.start_time < deadline)
+        .filter(AIRun.status == "running", AIRun.start_time < deadline, ~AIRun.run_id.in_(db.query(AIChargeRunArtifact.run_id)))
         .update({"status": "failed", "error_code": "WORKER_INTERRUPTED", "error_message": "执行进程中断，任务未自动重试，可检查后重新提交", "finish_time": utcnow()}, synchronize_session=False)
     )
     db.commit()
-    return count
+    return count + recovered

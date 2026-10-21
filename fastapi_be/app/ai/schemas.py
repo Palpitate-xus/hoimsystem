@@ -188,6 +188,14 @@ class ClinicalContextRequest(StrictRequest):
     encounter_ref: str | None = Field(default=None, max_length=64)
     source_refs: dict[str, str] = Field(default_factory=dict, max_length=12)
 
+    @model_validator(mode="before")
+    @classmethod
+    def native_charge_scope(cls, value):
+        if isinstance(value, dict) and isinstance(value.get("source_refs"), dict) and "charge_case_id" in value["source_refs"]:
+            if type(value.get("patient_id")) is not int or value["patient_id"] < 1:
+                raise ValueError("完整账目来源须使用真实正整数患者ID，不接受布尔、字符串或浮点转换")
+        return value
+
     @field_validator("source_refs")
     @classmethod
     def supported_references(cls, value: dict) -> dict:
@@ -212,6 +220,16 @@ class RunRequest(StrictRequest):
     input: dict[str, Any] = Field(default_factory=dict)
     preview: bool = False
 
+    @model_validator(mode="before")
+    @classmethod
+    def native_charge_scope(cls, value):
+        if isinstance(value, dict) and value.get("feature_key") == "charge_reconciliation":
+            if type(value.get("patient_id")) is not int or value["patient_id"] < 1:
+                raise ValueError("完整账目任务须使用真实正整数患者ID，不接受布尔、字符串或浮点转换")
+            if "preview" in value and type(value["preview"]) is not bool:
+                raise ValueError("完整账目任务的预览状态须为布尔值")
+        return value
+
     @model_validator(mode="after")
     def dedicated_roster_reference(self):
         if "roster_plan_id" in self.input and self.feature_key != "roster_optimization":
@@ -226,6 +244,8 @@ class RunRequest(StrictRequest):
             raise ValueError("受审完整库存场景仅用于明确有限采购候选比较")
         if "coding_case_id" in self.input and self.feature_key != "drg_evidence_review":
             raise ValueError("完整编码证据快照仅用于单次住院病案编码证据核对")
+        if "charge_case_id" in self.input and self.feature_key != "charge_reconciliation":
+            raise ValueError("完整账目原件仅用于同次实际住院的收费记录核对")
         return self
 
 

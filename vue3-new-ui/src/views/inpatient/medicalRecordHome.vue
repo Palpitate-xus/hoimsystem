@@ -28,7 +28,7 @@
           <template #default="{ row }">
             <el-button size="small" @click="openEdit(row)">查看/编辑</el-button>
             <el-button v-if="row.status === 0" size="small" type="success" @click="submitRecord(row)">提交</el-button>
-            <ai-action title="AI 首页与病历核对" :patient-id="row.patient_id" :encounter-ref="row.admission_id" :initial-input="{ home_id: row.home_id }" :feature-keys="['record_home_review', 'icd_candidates', 'clinical_consistency', 'charge_reconciliation']" initial-feature="record_home_review" />
+            <ai-action title="AI 首页与病历核对" :patient-id="row.patient_id" :encounter-ref="row.admission_id" :initial-input="{ home_id: row.home_id }" :feature-keys="['record_home_review', 'icd_candidates', 'clinical_consistency']" initial-feature="record_home_review" />
             <ai-action v-if="codingEntryAllowed" label="AI 编码证据" title="AI 完整编码证据核对" :disabled="!codingRowValid(row)" :patient-id="row.patient_id" :encounter-ref="row.admission_id" :initial-input="{home_id:row.home_id}" :feature-keys="['drg_evidence_review']" initial-feature="drg_evidence_review" />
           </template>
         </el-table-column>

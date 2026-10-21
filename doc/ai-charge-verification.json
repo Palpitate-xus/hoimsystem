@@ -1,0 +1,1641 @@
+{
+  "schema_version": "charge_reconciliation_engineering_verification_v1",
+  "recorded_at_utc": "2026-10-21T11:58:20.152626+00:00",
+  "baseline_commit": "7e12b44c29412bca4833125f86bd64e85cbc9628",
+  "platform_commit_at_recording": "ded0162fc99cdf54aa4e57ae7b51a910c342a687",
+  "recording_head_precedes_documentation_commit": true,
+  "goal_status": "active_all80_not_complete",
+  "scope": "Feature69 complete single-admission recorded-ledger Source, bounded literal questions, dedicated task/results/history and Super governance. Complete native69+71 backend, canonical production build and one complete1972-case browser execution verified. Engineering only.",
+  "existing_hospital_database_accessed": false,
+  "real_patient_data_used": false,
+  "project_env_file_read": false,
+  "remote_model_inference_performed": false,
+  "production_deployment_performed": false,
+  "stored_business_ai_configuration_changed": false,
+  "clinical_or_financial_effectiveness_validated": false,
+  "version_management": {
+    "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+    "batch_commits": [
+      {
+        "commit": "440b5d2b02388681d8a0b50a50e8a84fd57022f7",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai-billing): add complete ledger case storage and first-write gate"
+      },
+      {
+        "commit": "27ee96c4101fc6d31b1e9a77484fc80fac8c07ef",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "fix(billing): serialize ledger writers before existing business gates"
+      },
+      {
+        "commit": "b684c6d3363a50b773365aa9938c48141cf09ef2",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai-charge): add literal record-question contract and dedicated Prompt"
+      },
+      {
+        "commit": "b5a9ebda1ad66968bc1c10eb9699c2b1ac0df43d",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai-charge): freeze complete authorized ledger originals and exact quantity witnesses"
+      },
+      {
+        "commit": "d39475800a751fa917ddac81bd6523ab620920e4",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai-charge): expose scoped ledger governance with literal-safe main responses"
+      },
+      {
+        "commit": "4be06efea71520ab9b0cde8a5b6594cb536e66a3",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai-charge): validate provider completion and preserve actual usage receipts"
+      },
+      {
+        "commit": "2809f266f58bf5ed6b490adb3d44e5800b891dd7",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai-charge): separate current execution eligibility from frozen proof rebuilding"
+      },
+      {
+        "commit": "8df3eb9a6431a89786de8efdf4b88afbcb675674",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai-charge): bind full admission evidence to a minimal model payload"
+      },
+      {
+        "commit": "8fc32e4b5392342b05c6a03a61ac491624d6a3bc",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "fix(ai-charge): count metadata through the current locking collection"
+      },
+      {
+        "commit": "a5da11cd6f3c9e53fa5ab6dd2d45e70976330dc1",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai-charge): retain complete task anchors and bounded UTF8 result artifacts"
+      },
+      {
+        "commit": "036a4f3c4e2b43b5f163da66ce4f93058bd5d1fc",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "docs(api): inventory governed charge evidence endpoints and exact roles"
+      },
+      {
+        "commit": "b84dc547afcec31231816c522e0688ed9e6ed248",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai-charge): retain exact task bytes in durable SQL source anchors"
+      },
+      {
+        "commit": "b874c815e066e4aa1719c78adc9b2720b98770e2",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "fix(ai-charge): validate artifact ASCII hashes without MySQL collation coercion"
+      },
+      {
+        "commit": "f2b914a3583e5f5f137084b758a75f4b20b35c48",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai-charge): connect the bounded text gateway and export exact Prompts"
+      },
+      {
+        "commit": "b5c8f508cf6c2588c97c27bf7c5222780aebfb1b",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "fix(audit): wait for request cleanup before opening the audit session"
+      },
+      {
+        "commit": "7222174855f6daa8c20f2f57e939cf2cd1e1c765",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "fix(ai-charge): acquire the first MySQL gate through an atomic exclusive upsert"
+      },
+      {
+        "commit": "c5d647c07f9b6bc8eb72019eae31ea698927e2dc",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai-charge): bind complete terminal results and nullable usage to exact audit receipts"
+      },
+      {
+        "commit": "47cf68c1401ef153e43533dfa382148df9a5d596",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "fix(ai-charge): retain whether a provider call was actually attempted"
+      },
+      {
+        "commit": "c965b8a94c1c8037bc67a0fcd5b967f82e60c6b7",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai-charge): explain recorded status codes without implying cash or clinical truth"
+      },
+      {
+        "commit": "171c042e3694be057a4648132b1b38e3a931f6a6",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai-charge): queue complete source-bound tasks with current configuration and Prompt checks"
+      },
+      {
+        "commit": "ddc715f191090681d796b0ef8101d0a443f157bd",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "fix(ai-charge): preserve unknown call state after an interrupted worker"
+      },
+      {
+        "commit": "432ef397d9c242f062a46807cf788440fd441de8",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai-charge): execute and cancel durable ledger tasks with atomic paid receipts"
+      },
+      {
+        "commit": "523419c9843bf71ab509f531b07b05608b23d3af",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "fix(ai-charge): route immutable run identities before taking current source locks"
+      },
+      {
+        "commit": "9be48251023fac2d9d9ec8cf247a3a74be5d08c0",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai-charge): expose complete task artifacts and case-scoped audit history"
+      },
+      {
+        "commit": "2a71a3bf60843273609c6a410fe5427dce36522a",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "fix(ai-charge): require current configuration rows instead of retained ORM identities"
+      },
+      {
+        "commit": "5b38ea5744e7dca720eca2d7c5c6fed81464fba5",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai-charge): connect durable ledger tasks to JWT context and audit APIs"
+      },
+      {
+        "commit": "f2a3ddbfa2ba1c4cde154bc49b00eea4e967eb7b",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai-charge): expose frozen business input and export actual assistant state receipts"
+      },
+      {
+        "commit": "ed40af01e1124af0970e3aa02a9084879996eb65",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai-charge): verify complete governed ledger sources and exact public projections"
+      },
+      {
+        "commit": "8693a80ac3f3c2e409efaf22f04a945d0d3009a5",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "refactor(ai-charge): expose unchanged receipt contracts for schema generation"
+      },
+      {
+        "commit": "09393e690a910797302314cdeb60b049f97df43b",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai-charge): govern complete case captures with private scope isolation"
+      },
+      {
+        "commit": "b21e52fb505648c0dde8bbe4f5c2683d20f44065",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai-charge): require an explicit current ledger case for patient inputs"
+      },
+      {
+        "commit": "66ba09ad10c5d10962a84622ed32be4420488dfe",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "fix(ai-charge): discard child private originals when parent authorization fails"
+      },
+      {
+        "commit": "77be30673556a45bede5a7c768b6ba4197471142",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "fix(ai): expose current charge task reading qualifications"
+      },
+      {
+        "commit": "a03b684d7bd13af85318d424e16e8afbc7e609d9",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "test(ai): retain exact charge task packets and generate closed view schemas"
+      },
+      {
+        "commit": "547bc912031ebf1b11562ed52d28ac35849ca2e5",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai): verify complete charge task results and original trace bytes"
+      },
+      {
+        "commit": "b847c4a6bb292ada3f7d77a9c29d0b174639652a",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai-charge): present verified partial questions and exact source citations"
+      },
+      {
+        "commit": "00469f9001e9e41b84189787119e021dc148b38d",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "test(ai): cover charge trace tampering and task state receipt boundaries"
+      },
+      {
+        "commit": "a1aa87b16b15fade213e8d7bc65a993cf411a659",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai): pair charge history audits with full task records and clear stale views"
+      },
+      {
+        "commit": "2bf876ecc23c7c5960fd6c60c57b8798794c3c0a",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai): expose complete charge source governance to super administrators"
+      },
+      {
+        "commit": "4febde6990a155443c7c7ef97b1ff5cccf6b1354",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai-charge): bind task transport to current whole-case source references"
+      },
+      {
+        "commit": "2dc394124120950fc5978c6c04efa92265ee05ca",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai-charge): isolate complete ledger task lifecycle and explicit user actions"
+      },
+      {
+        "commit": "4ada79ebb5652ae93e574e39719ada8b858ccc1d",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "feat(ai): route admission charge tasks through the dedicated complete-case assistant"
+      },
+      {
+        "commit": "ea72e8ce5e9ae65e470b63bf49359c7f0fb6b4db",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "fix(ai): align billing entries with the complete inpatient charge contract"
+      },
+      {
+        "commit": "9103710b569f2f39bc926c1e772b1b486e4a8e0e",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "fix(ai): isolate native charge history while preserving legacy runs"
+      },
+      {
+        "commit": "ad078f5afbd579bbd29b4ccfe065caffcf8821ba",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "merge(ai): combine charge originals with governed document platform"
+      },
+      {
+        "commit": "cad9dc2bdcf15b70d2619b93a1b3018cf2d41241",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "docs(ai): explain complete admission charge evidence and governed review"
+      },
+      {
+        "commit": "51056300ebb77edf886d731e9243b57549f1ddd4",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "perf(ui): encode complete static schemas without changing validation"
+      },
+      {
+        "commit": "294e6b06cb2a76e149d196b0383a4073427427c7",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "test(ai): distinguish authentication reads from billing writes"
+      },
+      {
+        "commit": "78252d84a0ab7bfd05013ebd70ff3ebac3b64a57",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "fix(ai): bind charge history proof to its selected Case directory"
+      },
+      {
+        "commit": "f381b6783b125aa81036e5cc39c737df9a623239",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "test(ai): assert native-only charge task history request"
+      },
+      {
+        "commit": "ded0162fc99cdf54aa4e57ae7b51a910c342a687",
+        "author": "Palpitate-xus <palpitate.xus@outlook.com>",
+        "subject": "fix(ai): prevent charge history downgrade from surviving native anchors"
+      }
+    ],
+    "push_performed": false
+  },
+  "implementation": {
+    "feature": {
+      "number": 69,
+      "key": "charge_reconciliation",
+      "input_mode": "charge_reconciliation",
+      "scope": "patient",
+      "source_reference": "charge_case_id",
+      "roles": [
+        "super_admin",
+        "admin",
+        "director",
+        "cashier"
+      ]
+    },
+    "source": "Actual Patient/Admission, all charges including reversed/unknown states, complete order/item/execution/eMAR roots. Billing Gate before current Patient/Admission and current full members; 8192 roots and whole8MiB all-or-refuse. Explicit independent human source review/publication and immutable six-hash projection proof.",
+    "amount_and_quantity": "Existing recorded amount decimal strings are preserved. Existing Float driver value and same-query MySQL DOUBLE/binary witnesses are recorded separately; neither recovers the exact originally entered decimal. No rounding to claim equivalence, assumed currency, historical price or invented per-line execution allocation.",
+    "model_output": "Dedicated System and Task Prompt; closed <=128 partial literal questions with exact Unicode-codepoint quotes. BOM/CRLF/emoji/combining characters retained. Empty output does not prove correctness, completeness, missing charges, duplicate charges or payment eligibility.",
+    "task_storage": "Three raw Task JSON TEXT bodies each<=65535 bytes plus separate whole8MiB Source/Result Artifact. Six SHA bindings, exact Run identity/lease and specific terminal usage/accept AuditPK; all22 terminal Run fields read back atomically. Individual nullable paid usage retained; known queued zero is distinct from unknown interrupted usage.",
+    "privacy_and_runtime": "Current actor/token/source/provider/config/Prompt/quota checks before and after a single Chat/Responses MockTransport call; no SQL connection held over model await. Public technical projection minimizes identifiers but is not an anonymity guarantee. Actual legacy billing writers serialize at the common Billing Gate.",
+    "frontend": "Dedicated Source/Input/Assistant/Findings, sticky native Parent and separately validated fullRun plus sameRun Super trace. Accepted Source-filter scope and residual uniqueDomain/selected_sources anchors cannot downgrade to a generic result when tags disappear. Role/session/scope/close/KeepAlive and late results clear private material.",
+    "legacy_boundary": "Native-only listing is opt-in and used by dedicated new UI; true historical generic69 entries remain readable under existing authorization. Native artifacts/markers are classified strictly, including explicit null markers. This does not retroactively turn old clipped feedback or legacy generic output into a native verified result.",
+    "financial_boundary": "No new charge, price/quantity edit, refund, payment, settlement or automatic billing action. Settled/refunded and deposit aggregates are recorded states rather than actual cash-flow evidence.",
+    "implementation_file_count": 118,
+    "implementation_sha256": {
+      "fastapi_be/alembic/versions/20261021_charge_cases.py": "eb51f82855897b35ba6b07f884d94f722b1dc4151f104632d379a27560b37bf2",
+      "fastapi_be/alembic/versions/20261021_charge_document_merge.py": "45dbf12ebb61df5623205f56d7718ab4a782292b41fb09b95f0735dba2c27b8c",
+      "fastapi_be/alembic/versions/20261021_charge_gate.py": "2497a7758cd1f8e37a26c92a6b6626c0bd7e6b3e93590a6b7982eeb70aa5400f",
+      "fastapi_be/alembic/versions/20261021_charge_runs.py": "9ff954f1eef70713f7907fa522a40c6d756d160af46ffa6b68b337e95932eb82",
+      "fastapi_be/app/ai/catalog.py": "74516492035687ad58959f4dcedbb18b6191472268d13d71348208dcf2926880",
+      "fastapi_be/app/ai/charge_reconciliation_context.py": "b33fe52639886bde3be92a6d2928f86b0a783a373591e110b2971cf25989c9a7",
+      "fastapi_be/app/ai/charge_reconciliation_contract.py": "c6db4d01135ed80ac8ee96e1d3543b8184f86ccf16451d371404f01d9a0731b6",
+      "fastapi_be/app/ai/charge_reconciliation_draft.py": "c5e47c8a3bbd5cb06539a23a1a4afe9b668eb3dc3b2dda4543c7fc93a28d6e71",
+      "fastapi_be/app/ai/charge_reconciliation_execution.py": "748e2c4d1562b4146a63518d2535b967c9624576154fc54d42c5f247d9157b54",
+      "fastapi_be/app/ai/charge_reconciliation_frozen.py": "b69a1157e19d6c0f7b94f1d835388004fbc883cb4f62a60ec293d5483a8e9ed2",
+      "fastapi_be/app/ai/charge_reconciliation_gateway.py": "ac648f76e78be89999732b25b8211c9150d8ce593e0de6b28f8e2ed8bee6fbd1",
+      "fastapi_be/app/ai/charge_reconciliation_history.py": "3d2bd69e421ea697654b254104c9b16b547bba1cbf542fee9f1dc1e9699b88de",
+      "fastapi_be/app/ai/charge_reconciliation_models.py": "83079c194a920bda534ecdb169f846f5294b6481e638dd873b8f81076cee95cf",
+      "fastapi_be/app/ai/charge_reconciliation_prompt.py": "f75ed00412d90b881070f9080cb708f9fd11174c8c5547479c592f3b3f79d3f1",
+      "fastapi_be/app/ai/charge_reconciliation_protocol.py": "97a064c46cc438986e2b52234ec302ad67662d6386b2c69798318e293a85ed1f",
+      "fastapi_be/app/ai/charge_reconciliation_receipts.py": "818d2120d4ab98f33c17d4765d80cd37a0fbd7b82c6d419f9f2e8d55530e1a49",
+      "fastapi_be/app/ai/charge_reconciliation_result.py": "a5128cb7d39de4e3b7749ec40977fdc3c3f76c1c2160fda822756cf095f87732",
+      "fastapi_be/app/ai/charge_reconciliation_run_models.py": "cf09b73ba42adf5755e37a32933169d3598f6c9812f968f997326623be23e15d",
+      "fastapi_be/app/ai/charge_reconciliation_runtime.py": "b8c5ac0bef81bc6cd1fc94efdbbf4e94dcd32848d6d8e36102dc037f1bd6ebc1",
+      "fastapi_be/app/ai/charge_reconciliation_sources.py": "1771ae6e1729cfffd9524bc1a82354f66343a8e84398f547cfca27112a25a96c",
+      "fastapi_be/app/ai/charge_reconciliation_storage.py": "6433232af3bb58d8e85727090650846da0658024736d6b2f76e0d8ac14b2fdca",
+      "fastapi_be/app/ai/charge_reconciliation_view_contract.py": "2d7948df0d81a1289da2b1433e53dcc06abdc2517b918355db729e0a3ea3144d",
+      "fastapi_be/app/ai/charge_reconciliation_views.py": "669c5e9d32e597e14ab39add634d640d9b8277ba562c3f8630f3554944805820",
+      "fastapi_be/app/ai/charge_reconciliation_write_guard.py": "02f910560e65f5d60c127fda8526a0558659770e3ab95a1e7784d20172144f54",
+      "fastapi_be/app/ai/context.py": "2c24e21d24f271e8a8d47cdcccc47c26deda091cc24ba185f50952b219f7fc9a",
+      "fastapi_be/app/ai/gateway.py": "24b3f0317e503c1d09ffb3c9aa3bbd6635096694ec68360e33f1d0c9226b11f1",
+      "fastapi_be/app/ai/governance.py": "eb8a0f112bb4488a7ad51195a380deef03612f7b72a5e69b2f5bd84b73773f36",
+      "fastapi_be/app/ai/native_task_access.py": "e5d900478da217f64231fc2d52a4a3644362f011b9ce6b5d490e3df9e935fbe6",
+      "fastapi_be/app/ai/references.py": "daa6fe45463def740906460e763dc12403ccec2091d1f794d3d8dfd6b92bb3f3",
+      "fastapi_be/app/ai/runtime.py": "1f2ca8ff11184f44479e97d6794e1235f57841a476c8aee0e5564578686f93f0",
+      "fastapi_be/app/ai/schemas.py": "fbe152f2b895f09646b6628f35aa95554883bc87fd757c3f0e0c50dc4544b325",
+      "fastapi_be/app/main.py": "ee8f6c6538d935de0cb548ef267dc1408bc24d62133305b364d6d81acb1ecf7e",
+      "fastapi_be/app/models.py": "0bda666ec4122d11585cdc4b65fc6ccc88acb7ae076a8242dd382320dc80de04",
+      "fastapi_be/app/routers/admission.py": "488544625f8e37690ab2d22dca8d142df3d27297a6dd028b35f46ca4f5a02431",
+      "fastapi_be/app/routers/ai.py": "ad17932fdd86e76b1a78553ff58f03630a8143f60577795f4033cd6d8b51c6c4",
+      "fastapi_be/app/routers/ai_admin.py": "1cfed727ad5570105375ab408b5c363f37b74018eb99b7b4dfb053f8c231fe62",
+      "fastapi_be/app/routers/ai_charge_reconciliation.py": "fed503b9df9372698417034281d7945e163f459b4e7a3660ca412b7818794670",
+      "fastapi_be/app/routers/discharge.py": "74fa8ae6b408001b46e510a42ed1ffd8a7f1c13b2e4b2062acf07c4c4b430ac6",
+      "fastapi_be/app/routers/emar.py": "eea49bc6735032aae5cfb995712dce79e207fe2fb530546ad73fe0bab43c6537",
+      "fastapi_be/app/routers/inpatient_charge.py": "1d8ae2a1d531f309fc2c3e93909154c0153ca57e2a948bba2c05b66f433d9f7a",
+      "fastapi_be/app/routers/inpatient_order.py": "148f322846a84ea96c54b3a72027a7eb749fae84e44932dc10725517e7b7d30c",
+      "fastapi_be/app/routers/surgery.py": "804cece73f70c296ec4afb1ca0e5ae39f88ab256e9f8200a196941d57a3338f2",
+      "fastapi_be/scripts/export_ai_catalog.py": "4ade69381cf4e57f3a4b8c8ca2c555558572e7006f0e7bd5570daeda8c3e8792",
+      "fastapi_be/tests/test_ai_admin_current_authority.py": "4e0f90cb9404a71b2b0e9dd1ea4259f751f592bbe84e897071d16c960db333ef",
+      "fastapi_be/tests/test_ai_catalog.py": "d58414caab725040b49c7a5d30653438f3559bb78e3dcb6a14a90d2895080f7e",
+      "fastapi_be/tests/test_ai_charge_history_native_filter_http.py": "fc25d717b3355a8660da4876e9c42be3fa5c29a002cc798647e7ac84a74bb61f",
+      "fastapi_be/tests/test_ai_charge_reconciliation_assistant_exports.py": "74f1644f00c8a4331757e87ce0a24c4289245318d3054dc608520d10b2c549df",
+      "fastapi_be/tests/test_ai_charge_reconciliation_context.py": "5915ed90e4c40184b32c791659d5716e7370d032aab894a74b0adc998c5557fe",
+      "fastapi_be/tests/test_ai_charge_reconciliation_draft.py": "06b5c8a3aed948a04ca399547cc3d305ac48e5691523570fdc67ac7705b4016f",
+      "fastapi_be/tests/test_ai_charge_reconciliation_execution.py": "709f91e67a7d573fd0e7ac0ae02faed40fc558f2a11af922a19928aa3d25a12a",
+      "fastapi_be/tests/test_ai_charge_reconciliation_gateway.py": "fa04aa083be130e5e2cfa5e3557bd764a9df0c448570b891064e68721abbfa30",
+      "fastapi_be/tests/test_ai_charge_reconciliation_guard.py": "e2bf5caa47455df3cdd77fa49cee8345f1a9ce9a06977fec230376bdd78f260e",
+      "fastapi_be/tests/test_ai_charge_reconciliation_main_http.py": "2da0c643824e54a59fb3d48c9d6a26a30418fbd08077dd5e8f5e8541b0db74ed",
+      "fastapi_be/tests/test_ai_charge_reconciliation_migration.py": "712093e723b36d25730726e35668a8d2ec957e9f09ab2469559d37db8d276619",
+      "fastapi_be/tests/test_ai_charge_reconciliation_protocol.py": "95defea410977339acf4ba3ae2e3977821266742755a98e70f2a9e3586812d52",
+      "fastapi_be/tests/test_ai_charge_reconciliation_receipts.py": "810ef618428522e84d43be17ceaf08860f7a06f637e6647b4fc414ac0bb35b24",
+      "fastapi_be/tests/test_ai_charge_reconciliation_run_migration.py": "43c79f1ac83b467b98365bfa28c141a13c213655eef54cb6c90a3c7d9e8c5f5d",
+      "fastapi_be/tests/test_ai_charge_reconciliation_runtime.py": "ef3fac74413bef038dfdd218845336da52ae1590c7faee1eff214a0297d33c18",
+      "fastapi_be/tests/test_ai_charge_reconciliation_sources.py": "b79259d7a316b4080ac32412ae652e051503d042fe5d7d79bfe99aaa59950c9e",
+      "fastapi_be/tests/test_ai_charge_reconciliation_sources_http.py": "08189c76259d8b7a7e91ec22e607d5af9e2cdad7c2795d845d105caa447e5e4a",
+      "fastapi_be/tests/test_ai_charge_reconciliation_storage.py": "8f03b8cbf2f9c8bfb78ca371e77c2e43ef756491fa1e31a8713dbd507528097a",
+      "fastapi_be/tests/test_ai_charge_reconciliation_views.py": "79525770f310851326b418232f0f1178587150d7f36d9eb8483313c18d71325b",
+      "fastapi_be/tests/test_ai_document_extraction_migration.py": "72c67407d1e60baadf12c67346aa804bdf7fa0725a9b15f9493527768d0c0e8f",
+      "fastapi_be/tests/test_charge_reconciliation_legacy_writes.py": "4c49ec405eeff23fb9b135457f12c8de44a946cfe3ad211fd07e4557e6680ad3",
+      "vue3-new-ui/e2e/ai-billing-entry.spec.js": "e40c7934a81f24caf124dc46f55efd973354cae6e0678c3fa5523cd4ecd2382f",
+      "vue3-new-ui/e2e/ai-charge-assistant.spec.js": "2085f5e1755c993199bae07b5ac0831031cffeebec7b36379ebbe87dc1decad4",
+      "vue3-new-ui/e2e/ai-charge-business-entry.spec.js": "0ea6c22774355843c47d5b2fcace08bfb43c1106cc8221e44b0a2a12fa5ca620",
+      "vue3-new-ui/e2e/ai-charge-findings.spec.js": "d2c7c09d5fe064e28bb0877bd7a94d29ab0322ea28dbd193b945c485bc4b733d",
+      "vue3-new-ui/e2e/ai-charge-history.spec.js": "e0630e45eb98352de82ef54483b9ee4e282ffbfcffc5f8577e520385f9c3522d",
+      "vue3-new-ui/e2e/ai-charge-input.spec.js": "203a2645d32818de85fed09c950b4af23b1412e78a70db5149e55e93b8f4d76b",
+      "vue3-new-ui/e2e/ai-charge-management.spec.js": "8010368abaa1f65cfbef11a02faf3310cddfafc80d96b61df56d275857884b70",
+      "vue3-new-ui/e2e/ai-charge-parent.spec.js": "e1cefd4d499d30eb333f5a8a32337c1714af541b650b7d2e4486630d6b657086",
+      "vue3-new-ui/e2e/ai-charge-results-api.spec.js": "f0fc3e6a3ff7c464756269e59bee07700c90c74c32e85d569a91c4fd7960ea67",
+      "vue3-new-ui/e2e/ai-charge-source-api.spec.js": "a54d67fb947b196e25f31e8a0c19984eb36db96a0ec47d8553bbdad9dffe2149",
+      "vue3-new-ui/e2e/ai-charge-sources.spec.js": "70bf5b086feedf0b19709ec4ca4f7f8935295c6bd104088fe4671bb9faa486f0",
+      "vue3-new-ui/e2e/fixtures/charge-assistant-harness.cjs": "b738d868eb5e3f58cf7a5b1fe2fcab1374d080b09d7c2bc08ed08cf38a64a9f0",
+      "vue3-new-ui/e2e/fixtures/charge-assistant-ui.cjs": "63ec7a3d2f7a7cec70e84383e304326abba7b61233f0f0f35798ab91da2cf47b",
+      "vue3-new-ui/e2e/fixtures/charge-assistant/actual.packed.json": "6aa3d194cf2e4c4069c4307d5ad60bbe9e7faa148341e6bdb3d3e13ca9b3c1d7",
+      "vue3-new-ui/e2e/fixtures/charge-business-entry-harness.cjs": "8802ece58561e6d9f9cb6fec14cb05866fde3e8672f2ca0346ab219c5daaf440",
+      "vue3-new-ui/e2e/fixtures/charge-business-entry.cjs": "2571f65fe98550abf5b6244a7892823c71fc73fd6f98ebb289c46f12252991fa",
+      "vue3-new-ui/e2e/fixtures/charge-findings-harness.cjs": "2ce271aaf576b9f6f894c67bef386516449aee3fd05101f0c7ee9893759aa478",
+      "vue3-new-ui/e2e/fixtures/charge-parent-harness.cjs": "659e00085154d32766f778618491f3bdb814cbbee4b9b25549744ded9b73da4c",
+      "vue3-new-ui/e2e/fixtures/charge-parent-ui.cjs": "ce3d3ba908032de632125f0136ecf147fbf7fe5c31258d24e276a99b0d88f315",
+      "vue3-new-ui/e2e/fixtures/charge-source-harness.cjs": "4e0473e9e14fed04700169f42f109587149b692b4812bab9f88d0a3f96475ff0",
+      "vue3-new-ui/e2e/fixtures/charge-source-ui.cjs": "448f38932823ae03d05da45d6b6a6a5a8505c6e624ac181d7da4a16a176aed18",
+      "vue3-new-ui/e2e/fixtures/charge-sources/actual-mysql.json": "191b3d28344ccb235a54f86b5fe034295356cb3132531fd2f6bdaed64604ac27",
+      "vue3-new-ui/e2e/fixtures/charge-sources/actual-redacted-revoke.json": "3af650ff80d6f25c2da50b90d75391ce5fa03e5f1c83454761bfa06348621959",
+      "vue3-new-ui/e2e/fixtures/charge-sources/actual.json": "068c7119d51f0bebcc457980a9fe0e7de5a6556b3b9c436d5f830ef1d6518393",
+      "vue3-new-ui/e2e/fixtures/load-charge-assistant.cjs": "be85b48e4b4685139d363dbfe04f60b0c26b9e213e3a33ad94971ff20ddc39f4",
+      "vue3-new-ui/rspack.config.js": "4873e32275287f864caebc570c94f67b8f6ef62acbaff6837c35fe2a43ab21bf",
+      "vue3-new-ui/scripts/generate-charge-assistant-fixtures.cjs": "e79bc5a305c63c94143f12d2fc8a13d66ea5bfb70ae238f682dbdd01e1834f1d",
+      "vue3-new-ui/scripts/generate-charge-result-schemas.cjs": "ed42b48f27782efc3e9df0f22eed4de7d5f4c1d76d71b18b1bc0bc6d3053b63c",
+      "vue3-new-ui/scripts/generate-charge-source-fixtures.cjs": "2bcc0c0f47b3bba921cc2e0cdd6beae6979cb88d482758bfaaa8bbdfce7047c0",
+      "vue3-new-ui/scripts/generate-charge-source-schemas.cjs": "91fb477fd42f000fcd97887226a4c4f07f386af2c8b350c129580f7b4cf37ad1",
+      "vue3-new-ui/scripts/schema-data-loader.cjs": "e36a9de7197bf8c1da3ddc3d380e27a2965971b123b1b886799d8439dc8e403c",
+      "vue3-new-ui/src/api/ai/chargeReconciliationFixedPolicy.json": "6925a868c892f05f6f64ef18ead9bf015af0b1fd2b920f81f3b26f1924d304dd",
+      "vue3-new-ui/src/api/ai/chargeReconciliationResultSchemas.json": "fa63ea5511130a27e51aa5ebd7de4c6b5f5f8af4113a241fd65bfbe3bc3c0f09",
+      "vue3-new-ui/src/api/ai/chargeReconciliationResults.js": "7ba60c4c2e128bb40a2b0f6cb929e0537c5b90216650a87831b9f1325c803d13",
+      "vue3-new-ui/src/api/ai/chargeReconciliationSourceSchemas.json": "2e1983968e772ef755850f45fc36aaef48920ffeedfb4e44eb677a657fc129ef",
+      "vue3-new-ui/src/api/ai/chargeReconciliationSources.js": "73c1b5f2b3dfaa5decb9b00d6c59ff29c998a6d9b6da330fe687b2b881a28daa",
+      "vue3-new-ui/src/api/ai/chargeReconciliationTasks.js": "2423a0f21a3861f1355ae28d759bc5d715652e43db5a2df11625ad5414e46ccc",
+      "vue3-new-ui/src/api/ai/chargeReconciliationUiFixed.json": "fed66a0a2e592b9ad24097c300e1cdb86605af0c5d48bfa6b9920541b9c7074a",
+      "vue3-new-ui/src/api/ai/nativeOriginalJson.js": "6ef0199939bf7f7d1972b961f184103a9de81a73c9e35b280ef975f042c72353",
+      "vue3-new-ui/src/api/schemaDataCodec.cjs": "02325f3c2a4ee703c324851999e1911c68e83a283408ef29fe5b2de25a2834ae",
+      "vue3-new-ui/src/components/AIAssistant/index.vue": "b13c9e2be3f66fee49d88dfa6eb1824ebcf3c0a202c28ac94ead16a20ef7169d",
+      "vue3-new-ui/src/components/AIRunHistory/index.vue": "d7cc7887fcaaf25978a29ea886e7192ad1d7a0ef9d03263c31c9af95ef75dc96",
+      "vue3-new-ui/src/components/ai/ChargeReconciliationAssistant.vue": "ca9b3303617d6e7dae5a310e5bea3034b22a4ed23086ffee280050f58aaf9a7e",
+      "vue3-new-ui/src/components/ai/ChargeReconciliationFindings.vue": "4aee3fe0619ec19df0440e08e16e42451550b5df314e482c077cd0e66e3cdbad",
+      "vue3-new-ui/src/components/ai/ChargeReconciliationInput.vue": "f5e7fbfd2adb24eefc74b9c3a21c4d1b5cbd807e2e5ed0d6a84a2dcf0ff202a4",
+      "vue3-new-ui/src/components/ai/ChargeReconciliationSourcePanel.vue": "83088f3b0e7115d7938f8aa02d8a4b66fea15105cd3afdc4e5701686aa6864c4",
+      "vue3-new-ui/src/components/ai/useChargeReconciliationAssistant.js": "a64a8c9b680b028b1f262d318d43d595060c86b57c39cdcffb77e910516a659d",
+      "vue3-new-ui/src/components/ai/useChargeReconciliationFindings.js": "4f742c529b06ef0e4a09a6d1f489ba15bdc219bad8b905189793f3a8c5c1d405",
+      "vue3-new-ui/src/components/ai/useChargeReconciliationInput.js": "d25a114ec45ac110a6d32ae38cc00d09fa002b1f8aadecc819e8cea7d1bee2a2",
+      "vue3-new-ui/src/components/ai/useChargeReconciliationSources.js": "edd4f462e5c768b3c680e82e02968aa8356d52e7368f6b62d52de86174752720",
+      "vue3-new-ui/src/views/charge/chargeList.vue": "0bc88f89a509760e421a9b31a10aaa700df679337009d2184cafe2cc2360f755",
+      "vue3-new-ui/src/views/inpatient/medicalRecordHome.vue": "29aeedaff8e98befafec87dd5d00a4ca5815452834bde9f6834c231ce0bb45f5",
+      "vue3-new-ui/src/views/system/aiManagement.vue": "f291ed16656531110cedb8f2d1c5a3139bddfdad396ded75a7e6e609a4745807",
+      "vue3-new-ui/tests/schemaDataCodec.test.cjs": "3f0854ce6b219283c5a67ffb57ac5fe159e3fdadf0a959538dc16db72a40bf6e"
+    },
+    "generated_artifacts_sha256": {
+      "doc/ai-prompts.json": "076c2572abebc931cbb5f40051b89acea02fccea38d215f3e7f5505a38583718",
+      "doc/ai-capabilities.md": "873d68676bbd152fcf9a78c9ffd50402168bfff3ff7681f62ef750b40c288912",
+      "doc/api-rbac-matrix.md": "fa883064b8ae00a9031bb8ac1f7a435105022d3b9e64736285945b7b82c7d8da",
+      "fastapi_be/rbac_matrix.json": "cdd51362b76b27847a8430719452b31e71ba28c788bb56b7cb236ca0ededef05"
+    }
+  },
+  "backend_regression": {
+    "passed": 9031,
+    "skipped": 28,
+    "warnings": 1,
+    "pytest_seconds": 2468.19,
+    "outer_seconds": 2479.8443348230794,
+    "source_inputs": 955,
+    "all_inputs_match_current": true,
+    "guards": {
+      "dotenv_open_attempts": 0,
+      "socket_attempts": 0,
+      "engine_urls": [
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:////tmp/hoim-charge-full-frozen-first-pytest/test_migration_does_not_infer_0/adr-resolution.db",
+        "sqlite:////tmp/hoim-charge-full-frozen-first-pytest/test_aki_extension_up_down_up_0/aki-extension.sqlite",
+        "sqlite:////tmp/hoim-charge-full-frozen-first-pytest/test_aki_extension_up_down_up_0/aki-extension.sqlite",
+        "sqlite:////tmp/hoim-charge-full-frozen-first-pytest/test_audio_migration_roundtrip0/audio-migration.db",
+        "sqlite:////tmp/hoim-charge-full-frozen-first-pytest/test_both_actual_migrations_ro0/bed-originals.sqlite",
+        "sqlite:////tmp/hoim-charge-full-frozen-first-pytest/test_both_actual_migrations_ro0/bed-originals.sqlite",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:////tmp/hoim-charge-full-frozen-first-pytest/test_actual_additive_up_down_u0/inventory-additive.sqlite",
+        "sqlite:////tmp/hoim-charge-full-frozen-first-pytest/test_actual_artifact_upgrade_d0/charge-artifact.sqlite",
+        "sqlite:////tmp/hoim-charge-full-frozen-first-pytest/test_actual_additive_up_down_u1/inventory-additive.sqlite",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:////tmp/hoim-charge-full-frozen-first-pytest/test_ecg_migration_roundtrip_p0/ecg-migration.sqlite",
+        "sqlite:////tmp/hoim-charge-full-frozen-first-pytest/test_ecg_migration_roundtrip_p0/ecg-migration.sqlite",
+        "sqlite:////tmp/hoim-charge-full-frozen-first-pytest/test_ecg_migration_roundtrip_p0/ecg-migration.sqlite",
+        "sqlite:////tmp/hoim-charge-full-frozen-first-pytest/test_migration_real_upgrade_do0/forecast-migration.sqlite",
+        "sqlite:////tmp/hoim-charge-full-frozen-first-pytest/test_migration_real_upgrade_do0/forecast-migration.sqlite",
+        "sqlite:////tmp/hoim-charge-full-frozen-first-pytest/test_image_migration_roundtrip0/image-migration.sqlite",
+        "sqlite:////tmp/hoim-charge-full-frozen-first-pytest/test_image_migration_roundtrip0/image-migration.sqlite",
+        "sqlite:////tmp/hoim-charge-full-frozen-first-pytest/test_image_migration_roundtrip0/image-migration.sqlite",
+        "sqlite:////tmp/hoim-charge-full-frozen-first-pytest/test_additive_real_up_down_up_0/controlled-inventory-scenario.sqlite",
+        "sqlite:////tmp/hoim-charge-full-frozen-first-pytest/test_actual_additive_up_down_u2/inventory-additive.sqlite",
+        "sqlite:////tmp/hoim-charge-full-frozen-first-pytest/test_actual_mapping_migration_0/mapping-only.sqlite",
+        "sqlite:////tmp/hoim-charge-full-frozen-first-pytest/test_ai_upgrade_and_rollback_p0/ai-upgrade.db",
+        "sqlite:////tmp/hoim-charge-full-frozen-first-pytest/test_news2_extension_up_down_u0/news2-extension.sqlite",
+        "sqlite:////tmp/hoim-charge-full-frozen-first-pytest/test_news2_extension_up_down_u0/news2-extension.sqlite",
+        "sqlite:////tmp/hoim-charge-full-frozen-first-pytest/test_migration_preserves_unlin0/pathway-knowledge.db",
+        "sqlite:////tmp/hoim-charge-full-frozen-first-pytest/test_source_revision_migration0/pathway-revision.db",
+        "sqlite:////tmp/hoim-charge-full-frozen-first-pytest/test_qsofa_extension_up_down_u0/qsofa-extension.sqlite",
+        "sqlite:////tmp/hoim-charge-full-frozen-first-pytest/test_qsofa_extension_up_down_u0/qsofa-extension.sqlite",
+        "sqlite:////tmp/hoim-charge-full-frozen-first-pytest/test_excerpt_migration_upgrade0/review-excerpt.db",
+        "sqlite:////tmp/hoim-charge-full-frozen-first-pytest/test_actual_migration_up_down_0/roster-plans.sqlite",
+        "sqlite:////tmp/hoim-charge-full-frozen-first-pytest/test_actual_migration_up_down_0/roster-plans.sqlite",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:////tmp/hoim-charge-full-frozen-first-pytest/test_workforce_migration_up_do0/roster.sqlite",
+        "sqlite:////tmp/hoim-charge-full-frozen-first-pytest/test_workforce_migration_up_do0/roster.sqlite",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:////tmp/hoim-charge-full-frozen-first-pytest/test_actual_sqlite_up_down_up_0/sofa.sqlite",
+        "sqlite:////tmp/hoim-charge-full-frozen-first-pytest/test_actual_sqlite_up_down_up_0/sofa.sqlite",
+        "sqlite:///:memory:",
+        "sqlite:////tmp/hoim-charge-full-frozen-first-pytest/test_additive_real_up_down_up_1/controlled-supply-series.sqlite",
+        "sqlite:////tmp/hoim-charge-full-frozen-first-pytest/test_additive_real_up_down_up_2/controlled-supply-originals.sqlite",
+        "sqlite:////tmp/hoim-charge-full-frozen-first-pytest/test_actual_up_down_up_preserv0/surgery-scenarios.sqlite",
+        "sqlite:////tmp/hoim-charge-full-frozen-first-pytest/test_actual_up_down_up_preserv0/surgery-scenarios.sqlite",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:////tmp/hoim-charge-full-frozen-first-pytest/test_actual_up_down_up_preserv1/surgery-originals.sqlite",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:////tmp/hoim-charge-full-frozen-first-pytest/test_migrate_bootstraps_fresh_0/fresh.db",
+        "sqlite:////tmp/hoim-charge-full-frozen-first-pytest/test_migrate_bootstraps_fresh_0/fresh.db",
+        "sqlite:////tmp/hoim-charge-full-frozen-first-pytest/test_migrate_refuses_unversion0/legacy.db",
+        "sqlite:////tmp/hoim-charge-full-frozen-first-pytest/test_migrate_refuses_unversion0/legacy.db",
+        "sqlite:////tmp/hoim-charge-full-frozen-first-pytest/test_diagnosis_review_migratio0/diagnosis-reviews.db",
+        "sqlite:////tmp/hoim-charge-full-frozen-first-pytest/test_unit_migration_keeps_hist0/dose-rule-unit.db",
+        "sqlite:////tmp/hoim-charge-full-frozen-first-pytest/test_actual_extension_upgrade_0/inpatient-laboratory.sqlite",
+        "sqlite:////tmp/hoim-charge-full-frozen-first-pytest/test_actual_extension_upgrade_0/inpatient-laboratory.sqlite",
+        "sqlite:////tmp/hoim-charge-full-frozen-first-pytest/test_new_extension_migration_p0/inpatient-observations-only.sqlite",
+        "sqlite:////tmp/hoim-charge-full-frozen-first-pytest/test_new_extension_migration_p0/inpatient-observations-only.sqlite",
+        "sqlite:////tmp/hoim-charge-full-frozen-first-pytest/test_actual_sqlite_up_down_up_1/organ-support.sqlite",
+        "sqlite:////tmp/hoim-charge-full-frozen-first-pytest/test_actual_sqlite_up_down_up_1/organ-support.sqlite",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:////tmp/hoim-charge-full-frozen-first-pytest/test_observation_migration_pre0/lab-observations.db",
+        "sqlite:////tmp/hoim-charge-full-frozen-first-pytest/test_nursing_migration_preserv0/nursing-migration.sqlite",
+        "sqlite:////tmp/hoim-charge-full-frozen-first-pytest/test_nursing_migration_preserv0/nursing-migration.sqlite",
+        "sqlite:////tmp/hoim-charge-full-frozen-first-pytest/test_nursing_migration_preserv0/nursing-migration.sqlite",
+        "sqlite:////tmp/hoim-charge-full-frozen-first-pytest/test_nursing_migration_preserv0/nursing-migration.sqlite",
+        "sqlite:////tmp/hoim-charge-full-frozen-first-pytest/test_downgrade_refuses_unknown0/nursing-migration.sqlite",
+        "sqlite:////tmp/hoim-charge-full-frozen-first-pytest/test_downgrade_refuses_unknown0/nursing-migration.sqlite",
+        "sqlite:////tmp/hoim-charge-full-frozen-first-pytest/test_downgrade_refuses_unknown1/nursing-migration.sqlite",
+        "sqlite:////tmp/hoim-charge-full-frozen-first-pytest/test_downgrade_refuses_unknown1/nursing-migration.sqlite",
+        "sqlite:////tmp/hoim-charge-full-frozen-first-pytest/test_downgrade_refuses_even_on0/nursing-migration.sqlite",
+        "sqlite:////tmp/hoim-charge-full-frozen-first-pytest/test_downgrade_refuses_even_on0/nursing-migration.sqlite",
+        "sqlite:////tmp/hoim-charge-full-frozen-first-pytest/test_downgrade_refuses_even_on1/nursing-migration.sqlite",
+        "sqlite:////tmp/hoim-charge-full-frozen-first-pytest/test_downgrade_refuses_even_on1/nursing-migration.sqlite",
+        "sqlite:////tmp/hoim-charge-full-frozen-first-pytest/test_downgrade_refuses_even_on2/nursing-migration.sqlite",
+        "sqlite:////tmp/hoim-charge-full-frozen-first-pytest/test_downgrade_refuses_even_on2/nursing-migration.sqlite",
+        "sqlite:////tmp/hoim-charge-full-frozen-first-pytest/test_instruction_migration_doe0/instructions.db",
+        "sqlite:///:memory:"
+      ]
+    },
+    "report": {
+      "path": "/tmp/hoim-charge-full-frozen-first-verification.json",
+      "bytes": 15991,
+      "sha256": "9ef935596d72e2561082870c02a230a9dc93f3b3e91b62520f35f0afe65261b7"
+    },
+    "source_freeze": {
+      "path": "/tmp/hoim-charge-backend-frozen-first-source-freeze.json",
+      "bytes": 113196,
+      "sha256": "519f5653778d06df6c31db36b053decda97fce3ebf8dc4355aa1f706a4cc3dcd"
+    },
+    "note": "Existing optional real-weight prerequisites remain skipped; one existing synthetic pydicom NaN warning. Later changes are frontend-only and do not invalidate frozen backend bytes."
+  },
+  "python_static_checks": {
+    "files": 64,
+    "lint_and_whole_file_format_passed": true,
+    "all_checked_files_current": true,
+    "report": {
+      "path": "/tmp/hoim-charge-backend-final-ruff-verification.json",
+      "bytes": 13881,
+      "sha256": "bee2638e8daf2d71adf1d7e8bc73d7c0382949b01381d1eed7ca1b3070130f00"
+    }
+  },
+  "database": {
+    "new_tables": 3,
+    "migrations": {
+      "heads": [
+        "20261021_charge_doc_merge"
+      ],
+      "single_head": true,
+      "new_migrations_in_upgrade_order": [
+        {
+          "revision": "20261021_charge_gate",
+          "down_revision": "20261021_coding_evidence",
+          "path": "fastapi_be/alembic/versions/20261021_charge_gate.py"
+        },
+        {
+          "revision": "20261021_charge_cases",
+          "down_revision": "20261021_charge_gate",
+          "path": "fastapi_be/alembic/versions/20261021_charge_cases.py"
+        },
+        {
+          "revision": "20261021_charge_runs",
+          "down_revision": "20261021_charge_cases",
+          "path": "fastapi_be/alembic/versions/20261021_charge_runs.py"
+        },
+        {
+          "revision": "20261021_charge_doc_merge",
+          "down_revision": [
+            "20261021_doc_extraction_runs",
+            "20261021_charge_runs"
+          ],
+          "path": "fastapi_be/alembic/versions/20261021_charge_document_merge.py"
+        }
+      ],
+      "migration_files_total": 124
+    },
+    "actual_private_mysql_evidence": [
+      {
+        "artifact": {
+          "path": "/tmp/hoim-charge-gate-upgrade-final3-mysql-verification.json",
+          "bytes": 3789,
+          "sha256": "34069ddf9839ebccc53fa8a18f49ded9ddccefb9971bb3392bf9b411db8340b1"
+        },
+        "scope": "Actual private MySQL two concurrent first BillingGate helpers in existing-row and metadata-bootstrap modes. Pause immediately after first atomic upsert X; prove second SQL cannot complete before release and both transactions commit. No business writes, HTTP, worker or migration claim.",
+        "seconds": 9.283,
+        "checks": null,
+        "source_bindings": {
+          "app/ai/charge_reconciliation_write_guard.py": "02f910560e65f5d60c127fda8526a0558659770e3ab95a1e7784d20172144f54",
+          "app/ai/charge_reconciliation_models.py": "83079c194a920bda534ecdb169f846f5294b6481e638dd873b8f81076cee95cf",
+          "app/models.py": "a141b4876a1e011b1f9642a781bf9b9f87b19133dd63573c451099aa477c2bcd"
+        },
+        "note": "Point-in-time scoped SQL evidence; later shared catalog/router merges are separately covered by final backend and mounted inventory. Not every old report binds every current file."
+      },
+      {
+        "artifact": {
+          "path": "/tmp/hoim-charge-current-gate-final2-mysql-verification.json",
+          "bytes": 13998,
+          "sha256": "d5c5f2997bbf49c8699ba6cfd01fc946e3810811b9d70c03bf81099c3ff05fc4"
+        },
+        "scope": "Actual synthetic private REPEATABLE READ MySQL functions using three independent connections. Fourteen writer entry points are blocked before business execution, not fourteen successful business transactions. Actual settle/refund and Source detail/review operations exercised separately. Not JWT/HTTP, LLM, hospital or migration evidence.",
+        "seconds": 34.376,
+        "checks": [
+          {
+            "name": "all14_legacy_writers_block_at_BillingGate_before_request_or_business_write",
+            "passed": true
+          },
+          {
+            "name": "actual_Billing_before_Inventory_or_Surgery_gate_order",
+            "passed": true
+          },
+          {
+            "name": "actual_detail_review_contention_Gate_first_and_successful_retry_no_deadlock",
+            "passed": true
+          },
+          {
+            "name": "actual_old_RR_current_actor_SHARE_denies_role_demotion_including_expired_actor",
+            "passed": true
+          },
+          {
+            "name": "actual_old_RR_current_patient_grant_revocation_denied_before_ledger",
+            "passed": true
+          },
+          {
+            "name": "actual_old_RR_complete_member_and_cached_children_refresh_same_total_change",
+            "passed": true
+          },
+          {
+            "name": "actual_legacy_settle_refund_functions_change_complete_collection_not_cash_evidence",
+            "passed": true
+          },
+          {
+            "name": "actual_directory_count_and_metadata_same_current_RR_collection",
+            "passed": true
+          }
+        ],
+        "source_bindings": {
+          "app/models.py": "a141b4876a1e011b1f9642a781bf9b9f87b19133dd63573c451099aa477c2bcd",
+          "app/routers/ai_charge_reconciliation.py": "fed503b9df9372698417034281d7945e163f459b4e7a3660ca412b7818794670",
+          "app/ai/context.py": "76af40aa71f8efc54cf4c423e87fe23f2760b7a45c82fcb4672705f871730e98",
+          "app/ai/charge_reconciliation_write_guard.py": "02f910560e65f5d60c127fda8526a0558659770e3ab95a1e7784d20172144f54",
+          "app/ai/charge_reconciliation_models.py": "83079c194a920bda534ecdb169f846f5294b6481e638dd873b8f81076cee95cf",
+          "app/ai/charge_reconciliation_contract.py": "2844b03157686e221496f8230b5fedb80a8d6a793379013379b7f406e2b9c08c",
+          "app/ai/charge_reconciliation_sources.py": "1771ae6e1729cfffd9524bc1a82354f66343a8e84398f547cfca27112a25a96c",
+          "app/ai/inventory_write_guard.py": "f200a60e88950fc4e732f7b57d0e787b3880e54b62d4882ac0053231605166f2",
+          "app/ai/surgery_facts.py": "fe0140e373472902c695756e35dfb1f3776a4ce5e34ae5cb1e7daac9680f194c",
+          "app/routers/admission.py": "488544625f8e37690ab2d22dca8d142df3d27297a6dd028b35f46ca4f5a02431",
+          "app/routers/discharge.py": "74fa8ae6b408001b46e510a42ed1ffd8a7f1c13b2e4b2062acf07c4c4b430ac6",
+          "app/routers/emar.py": "eea49bc6735032aae5cfb995712dce79e207fe2fb530546ad73fe0bab43c6537",
+          "app/routers/inpatient_order.py": "148f322846a84ea96c54b3a72027a7eb749fae84e44932dc10725517e7b7d30c",
+          "app/routers/inpatient_charge.py": "1d8ae2a1d531f309fc2c3e93909154c0153ca57e2a948bba2c05b66f433d9f7a",
+          "app/routers/surgery.py": "804cece73f70c296ec4afb1ca0e5ae39f88ab256e9f8200a196941d57a3338f2",
+          "tests/test_charge_reconciliation_legacy_writes.py": "4c49ec405eeff23fb9b135457f12c8de44a946cfe3ad211fd07e4557e6680ad3",
+          "tests/test_ai_charge_reconciliation_sources.py": "82d7d156ca4fbfa81acbb49a291589341b151e2c1b9b39825119b9b20bfd0cf2"
+        },
+        "note": "Point-in-time scoped SQL evidence; later shared catalog/router merges are separately covered by final backend and mounted inventory. Not every old report binds every current file."
+      },
+      {
+        "artifact": {
+          "path": "/tmp/hoim-charge-source-final2-mysql-verification.json",
+          "bytes": 11862,
+          "sha256": "e1eee162d7090250e08768ddb82b9cc9c508f727fe27225359bab7d7d62337fe"
+        },
+        "scope": "Actual private MySQL incremental two-migration up/down/up and synthetic governed Source SQL functions with full Float witnesses. No JWT/HTTP, LLM, worker, payment proof, hospital DB or full historical blank migration-chain claim.",
+        "seconds": 23.65,
+        "checks": [
+          {
+            "name": "both_actual_migrations_upgrade_preserve_every_legacy_DDL_and_row",
+            "passed": true,
+            "old_tables": 207,
+            "seeded_tables": 10,
+            "seeded_rows": 81
+          },
+          {
+            "name": "actual_UTC6_MEDIUMTEXT_columns",
+            "passed": true,
+            "clocks": [
+              [
+                "hoimsystem_ai_charge_case_snapshot",
+                "created_at",
+                6
+              ],
+              [
+                "hoimsystem_ai_charge_case_snapshot",
+                "reviewed_at",
+                6
+              ],
+              [
+                "hoimsystem_ai_charge_case_snapshot",
+                "revoked_at",
+                6
+              ]
+            ],
+            "blobs": [
+              [
+                "hoimsystem_ai_charge_case_snapshot",
+                "projection_json",
+                "mediumtext"
+              ],
+              [
+                "hoimsystem_ai_charge_case_snapshot",
+                "snapshot_json",
+                "mediumtext"
+              ]
+            ]
+          },
+          {
+            "name": "actual_columns_FKs_indexes_checks_match_models",
+            "passed": true
+          },
+          {
+            "name": "actual_complete_original_capture_SQL_float_witness_and_distinct_clock_bases",
+            "passed": true,
+            "members": 74,
+            "driver_basis": "mysql_same_statement_double_promotion",
+            "captured_at": "2026-10-21T12:30:00.123456Z"
+          },
+          {
+            "name": "actual_create_review_publish_and_normal_current_fullproof",
+            "passed": true,
+            "case_snapshot_id": "0fa639ee-f82f-4ebb-8bcf-6bbff1aeb2bb",
+            "content_hash": "c4618d5b942f4f1cc9ed0bb4f4ce0564b0acc71f71416ea741c0570e1ae91f73",
+            "projection_hash": "cfe40695cf50cfc7e51fcc73920970647c56b2b5e488fc89fc0a5e47bdac8084"
+          },
+          {
+            "name": "actual_Source_digest_detects_adjacent_stored_FLOAT_despite_equal_driver_repr",
+            "passed": true,
+            "values": [
+              {
+                "original_input_text": "0.10000000149011612",
+                "quantity": {
+                  "state": "finite",
+                  "value_text": "0.1",
+                  "binary_hex": "0x1.999999999999ap-4",
+                  "precision_basis": "fetched_ORM_float_not_original_decimal_or_SQLite_MySQL_precision_equivalence",
+                  "storage_witness": {
+                    "method": "mysql_CAST_AS_DOUBLE_in_same_current_statement",
+                    "value_text": "0.10000000149011612",
+                    "binary_hex": "0x1.99999a0000000p-4"
+                  }
+                },
+                "digest": "6c576aeda5a7e3c8a053f58cc058aba13773291adfd964703fa064130f305e2d"
+              },
+              {
+                "original_input_text": "0.10000000894069672",
+                "quantity": {
+                  "state": "finite",
+                  "value_text": "0.1",
+                  "binary_hex": "0x1.999999999999ap-4",
+                  "precision_basis": "fetched_ORM_float_not_original_decimal_or_SQLite_MySQL_precision_equivalence",
+                  "storage_witness": {
+                    "method": "mysql_CAST_AS_DOUBLE_in_same_current_statement",
+                    "value_text": "0.10000000894069672",
+                    "binary_hex": "0x1.99999c0000000p-4"
+                  }
+                },
+                "digest": "4cee907cfd46067c9b40022e8685a9b31785c8873800a35f0dc681426174e8cf"
+              }
+            ]
+          },
+          {
+            "name": "actual_revoke_CAS_frozen_audit_UTF8_1000_ascii_and_emoji",
+            "passed": true
+          },
+          {
+            "name": "actual_SQL_UTF8_8MiB_roundtrip_only_not_typed_original",
+            "passed": true,
+            "bytes": 8388608,
+            "sha256": "4418f356bb9a5950cceaaf009268cee521e4cf1e925e69f07bbcafcfec9dba85"
+          },
+          {
+            "name": "actual_SQL_constraint_rejections",
+            "passed": true,
+            "mysql_codes": {
+              "over_blob_cap": 3819,
+              "gate_two": 3819,
+              "invalid_case_governance": 3819,
+              "missing_admission_FK": 1452
+            }
+          },
+          {
+            "name": "actual_two_migrations_downgrade_preserves_every_legacy_DDL_row",
+            "passed": true
+          },
+          {
+            "name": "actual_two_migrations_reupgrade_preserves_every_legacy_DDL_row_and_empty_case_table",
+            "passed": true
+          }
+        ],
+        "source_bindings": {
+          "app/models.py": "a141b4876a1e011b1f9642a781bf9b9f87b19133dd63573c451099aa477c2bcd",
+          "app/database.py": "74f053e5bc70a95bfafe750adba216079bc0023a24fc620849fe6b6d42acfa68",
+          "app/config.py": "3fc4a8051ca93f8fbff9cb9de3dcd6f143cb2c4140b13958b6307b6ec6ef07bc",
+          "app/ai/models.py": "b0ab84f20c2f6b74d89dade050350c1dab87b3b18aa3f4ad5f94a4f462dd5739",
+          "app/ai/charge_reconciliation_write_guard.py": "02f910560e65f5d60c127fda8526a0558659770e3ab95a1e7784d20172144f54",
+          "app/ai/charge_reconciliation_models.py": "83079c194a920bda534ecdb169f846f5294b6481e638dd873b8f81076cee95cf",
+          "app/ai/charge_reconciliation_contract.py": "2844b03157686e221496f8230b5fedb80a8d6a793379013379b7f406e2b9c08c",
+          "app/ai/charge_reconciliation_sources.py": "1771ae6e1729cfffd9524bc1a82354f66343a8e84398f547cfca27112a25a96c",
+          "app/ai/context.py": "76af40aa71f8efc54cf4c423e87fe23f2760b7a45c82fcb4672705f871730e98",
+          "app/ai/governance.py": "7c30f4c5a4d41d4fc367f32468d0094a6c5407a3e0d5b527377d69b1ac6ce4dc",
+          "app/ai/native_acceptance.py": "ebadd6404ff972e88cd2169016b73b3b69c00a94bf1f38c75c6e29aaf9f5dd24",
+          "alembic/env.py": "d81c5e65f670e4806899f49523bf1acfdb2736ff4cefe82405328e2fd185dd16",
+          "alembic/versions/20261021_charge_gate.py": "2497a7758cd1f8e37a26c92a6b6626c0bd7e6b3e93590a6b7982eeb70aa5400f",
+          "alembic/versions/20261021_charge_cases.py": "eb51f82855897b35ba6b07f884d94f722b1dc4151f104632d379a27560b37bf2",
+          "tests/test_ai_charge_reconciliation_sources.py": "82d7d156ca4fbfa81acbb49a291589341b151e2c1b9b39825119b9b20bfd0cf2"
+        },
+        "note": "Point-in-time scoped SQL evidence; later shared catalog/router merges are separately covered by final backend and mounted inventory. Not every old report binds every current file."
+      },
+      {
+        "artifact": {
+          "path": "/tmp/hoim-charge-source-legends-mysql-verification.json",
+          "bytes": 6181,
+          "sha256": "77e6115da1edc84e90aeee0b844c35e5e9208cfc2825b2a545bfe66e2843ac7f"
+        },
+        "scope": "Actual private MySQL Source create/review/publish, final recorded-status legends and complete projection proof with real SQL FLOAT witnesses. Metadata-backed synthetic tables; no migration, JWT/HTTP/model/worker/payment or hospital claim.",
+        "seconds": 17.272,
+        "checks": [
+          {
+            "name": "actual_current_MySQL_complete_source_publication_with_final_legends_and_FLOAT_witness",
+            "passed": true
+          }
+        ],
+        "source_bindings": {
+          "app/models.py": "a141b4876a1e011b1f9642a781bf9b9f87b19133dd63573c451099aa477c2bcd",
+          "app/database.py": "74f053e5bc70a95bfafe750adba216079bc0023a24fc620849fe6b6d42acfa68",
+          "app/config.py": "3fc4a8051ca93f8fbff9cb9de3dcd6f143cb2c4140b13958b6307b6ec6ef07bc",
+          "app/ai/models.py": "b0ab84f20c2f6b74d89dade050350c1dab87b3b18aa3f4ad5f94a4f462dd5739",
+          "app/ai/charge_reconciliation_models.py": "83079c194a920bda534ecdb169f846f5294b6481e638dd873b8f81076cee95cf",
+          "app/ai/charge_reconciliation_run_models.py": "cf09b73ba42adf5755e37a32933169d3598f6c9812f968f997326623be23e15d",
+          "app/ai/charge_reconciliation_contract.py": "c6db4d01135ed80ac8ee96e1d3543b8184f86ccf16451d371404f01d9a0731b6",
+          "app/ai/charge_reconciliation_sources.py": "1771ae6e1729cfffd9524bc1a82354f66343a8e84398f547cfca27112a25a96c",
+          "app/ai/charge_reconciliation_write_guard.py": "02f910560e65f5d60c127fda8526a0558659770e3ab95a1e7784d20172144f54",
+          "app/ai/context.py": "76af40aa71f8efc54cf4c423e87fe23f2760b7a45c82fcb4672705f871730e98",
+          "app/ai/governance.py": "7c30f4c5a4d41d4fc367f32468d0094a6c5407a3e0d5b527377d69b1ac6ce4dc",
+          "app/ai/native_acceptance.py": "ebadd6404ff972e88cd2169016b73b3b69c00a94bf1f38c75c6e29aaf9f5dd24",
+          "alembic/env.py": "d81c5e65f670e4806899f49523bf1acfdb2736ff4cefe82405328e2fd185dd16",
+          "alembic/versions/20261021_charge_runs.py": "9ff954f1eef70713f7907fa522a40c6d756d160af46ffa6b68b337e95932eb82",
+          "tests/test_ai_charge_reconciliation_sources.py": "b79259d7a316b4080ac32412ae652e051503d042fe5d7d79bfe99aaa59950c9e",
+          "tests/test_ai_charge_reconciliation_run_migration.py": "43c79f1ac83b467b98365bfa28c141a13c213655eef54cb6c90a3c7d9e8c5f5d"
+        },
+        "note": "Point-in-time scoped SQL evidence; later shared catalog/router merges are separately covered by final backend and mounted inventory. Not every old report binds every current file."
+      },
+      {
+        "artifact": {
+          "path": "/tmp/hoim-charge-artifact-final2-mysql-verification.json",
+          "bytes": 17746,
+          "sha256": "b56ec6ccf6ea3b49e55f1b59502e44e1adbbc21717ce47d1643186c741e2ca1f"
+        },
+        "scope": "Actual private MySQL third incremental migration only, existing metadata and real synthetic Source/Run/audit parents, exact UTF8 8MiB SQL artifact storage. No runtime/worker/typed model result acceptance/JWT/HTTP/hospital or full historical blank-chain reconstruction.",
+        "seconds": 21.729,
+        "checks": [
+          {
+            "name": "actual_third_migration_preserves_every_existing_table_DDL_and_row",
+            "passed": true,
+            "old_tables": 209,
+            "old_populated_tables": 14,
+            "old_seeded_rows": 85
+          },
+          {
+            "name": "actual_one_UTC6_one_MEDIUMTEXT_four_FKs_checks_and_nullability",
+            "passed": true,
+            "clocks": [
+              [
+                "created_at",
+                6
+              ]
+            ],
+            "blobs": [
+              [
+                "result_json",
+                "mediumtext"
+              ]
+            ],
+            "foreign_keys": 4,
+            "actual_DDL": "CREATE TABLE `hoimsystem_ai_charge_run_artifact` (\n  `run_id` varchar(36) COLLATE utf8mb4_general_ci NOT NULL,\n  `case_snapshot_id` varchar(36) COLLATE utf8mb4_general_ci NOT NULL,\n  `requested_by` int NOT NULL,\n  `schema_version` varchar(48) COLLATE utf8mb4_general_ci NOT NULL,\n  `created_at` datetime(6) NOT NULL,\n  `input_hash` varchar(64) COLLATE utf8mb4_general_ci NOT NULL,\n  `evidence_hash` varchar(64) COLLATE utf8mb4_general_ci NOT NULL,\n  `metadata_hash` varchar(64) COLLATE utf8mb4_general_ci NOT NULL,\n  `prompt_hash` varchar(64) COLLATE utf8mb4_general_ci NOT NULL,\n  `context_digest` varchar(64) COLLATE utf8mb4_general_ci NOT NULL,\n  `source_binding_hash` varchar(64) COLLATE utf8mb4_general_ci NOT NULL,\n  `result_json` mediumtext COLLATE utf8mb4_general_ci,\n  `result_hash` varchar(64) COLLATE utf8mb4_general_ci DEFAULT NULL,\n  `result_bytes` int DEFAULT NULL,\n  `receipt_event_id` int DEFAULT NULL,\n  `accepted_lease` varchar(36) COLLATE utf8mb4_general_ci DEFAULT NULL,\n  PRIMARY KEY (`run_id`),\n  KEY `case_snapshot_id` (`case_snapshot_id`),\n  KEY `requested_by` (`requested_by`),\n  KEY `receipt_event_id` (`receipt_event_id`),\n  CONSTRAINT `hoimsystem_ai_charge_run_artifact_ibfk_1` FOREIGN KEY (`run_id`) REFERENCES `hoimsystem_ai_run` (`run_id`),\n  CONSTRAINT `hoimsystem_ai_charge_run_artifact_ibfk_2` FOREIGN KEY (`case_snapshot_id`) REFERENCES `hoimsystem_ai_charge_case_snapshot` (`case_snapshot_id`),\n  CONSTRAINT `hoimsystem_ai_charge_run_artifact_ibfk_3` FOREIGN KEY (`requested_by`) REFERENCES `hoimsystem_users` (`user_id`),\n  CONSTRAINT `hoimsystem_ai_charge_run_artifact_ibfk_4` FOREIGN KEY (`receipt_event_id`) REFERENCES `hoimsystem_ai_audit_event` (`event_id`),\n  CONSTRAINT `ck_charge_artifact_context_digest` CHECK (((length(`context_digest`) = 64) and (length(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(`context_digest`,_utf8mb4'0',_utf8mb4''),_utf8mb4'1',_utf8mb4''),_utf8mb4'2',_utf8mb4''),_utf8mb4'3',_utf8mb4''),_utf8mb4'4',_utf8mb4''),_utf8mb4'5',_utf8mb4''),_utf8mb4'6',_utf8mb4''),_utf8mb4'7',_utf8mb4''),_utf8mb4'8',_utf8mb4''),_utf8mb4'9',_utf8mb4''),_utf8mb4'a',_utf8mb4''),_utf8mb4'b',_utf8mb4''),_utf8mb4'c',_utf8mb4''),_utf8mb4'd',_utf8mb4''),_utf8mb4'e',_utf8mb4''),_utf8mb4'f',_utf8mb4'')) = 0))),\n  CONSTRAINT `ck_charge_artifact_evidence_hash` CHECK (((length(`evidence_hash`) = 64) and (length(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(`evidence_hash`,_utf8mb4'0',_utf8mb4''),_utf8mb4'1',_utf8mb4''),_utf8mb4'2',_utf8mb4''),_utf8mb4'3',_utf8mb4''),_utf8mb4'4',_utf8mb4''),_utf8mb4'5',_utf8mb4''),_utf8mb4'6',_utf8mb4''),_utf8mb4'7',_utf8mb4''),_utf8mb4'8',_utf8mb4''),_utf8mb4'9',_utf8mb4''),_utf8mb4'a',_utf8mb4''),_utf8mb4'b',_utf8mb4''),_utf8mb4'c',_utf8mb4''),_utf8mb4'd',_utf8mb4''),_utf8mb4'e',_utf8mb4''),_utf8mb4'f',_utf8mb4'')) = 0))),\n  CONSTRAINT `ck_charge_artifact_exact_bytes` CHECK (((`result_json` is null) or ((`result_bytes` >= 1) and (`result_bytes` <= 8388608) and (length(cast(`result_json` as char charset binary)) = `result_bytes`)))),\n  CONSTRAINT `ck_charge_artifact_input_hash` CHECK (((length(`input_hash`) = 64) and (length(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(`input_hash`,_utf8mb4'0',_utf8mb4''),_utf8mb4'1',_utf8mb4''),_utf8mb4'2',_utf8mb4''),_utf8mb4'3',_utf8mb4''),_utf8mb4'4',_utf8mb4''),_utf8mb4'5',_utf8mb4''),_utf8mb4'6',_utf8mb4''),_utf8mb4'7',_utf8mb4''),_utf8mb4'8',_utf8mb4''),_utf8mb4'9',_utf8mb4''),_utf8mb4'a',_utf8mb4''),_utf8mb4'b',_utf8mb4''),_utf8mb4'c',_utf8mb4''),_utf8mb4'd',_utf8mb4''),_utf8mb4'e',_utf8mb4''),_utf8mb4'f',_utf8mb4'')) = 0))),\n  CONSTRAINT `ck_charge_artifact_lease` CHECK (((`accepted_lease` is null) or ((length(`accepted_lease`) = 36) and (substr(`accepted_lease`,9,1) = _utf8mb4'-') and (substr(`accepted_lease`,14,1) = _utf8mb4'-') and (substr(`accepted_lease`,19,1) = _utf8mb4'-') and (substr(`accepted_lease`,24,1) = _utf8mb4'-') and (length(replace(`accepted_lease`,_utf8mb4'-',_utf8mb4'')) = 32) and (length(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(`accepted_lease`,_utf8mb4'-',_utf8mb4''),_utf8mb4'0',_utf8mb4''),_utf8mb4'1',_utf8mb4''),_utf8mb4'2',_utf8mb4''),_utf8mb4'3',_utf8mb4''),_utf8mb4'4',_utf8mb4''),_utf8mb4'5',_utf8mb4''),_utf8mb4'6',_utf8mb4''),_utf8mb4'7',_utf8mb4''),_utf8mb4'8',_utf8mb4''),_utf8mb4'9',_utf8mb4''),_utf8mb4'a',_utf8mb4''),_utf8mb4'b',_utf8mb4''),_utf8mb4'c',_utf8mb4''),_utf8mb4'd',_utf8mb4''),_utf8mb4'e',_utf8mb4''),_utf8mb4'f',_utf8mb4'')) = 0)))),\n  CONSTRAINT `ck_charge_artifact_metadata_hash` CHECK (((length(`metadata_hash`) = 64) and (length(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(`metadata_hash`,_utf8mb4'0',_utf8mb4''),_utf8mb4'1',_utf8mb4''),_utf8mb4'2',_utf8mb4''),_utf8mb4'3',_utf8mb4''),_utf8mb4'4',_utf8mb4''),_utf8mb4'5',_utf8mb4''),_utf8mb4'6',_utf8mb4''),_utf8mb4'7',_utf8mb4''),_utf8mb4'8',_utf8mb4''),_utf8mb4'9',_utf8mb4''),_utf8mb4'a',_utf8mb4''),_utf8mb4'b',_utf8mb4''),_utf8mb4'c',_utf8mb4''),_utf8mb4'd',_utf8mb4''),_utf8mb4'e',_utf8mb4''),_utf8mb4'f',_utf8mb4'')) = 0))),\n  CONSTRAINT `ck_charge_artifact_prompt_hash` CHECK (((length(`prompt_hash`) = 64) and (length(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(`prompt_hash`,_utf8mb4'0',_utf8mb4''),_utf8mb4'1',_utf8mb4''),_utf8mb4'2',_utf8mb4''),_utf8mb4'3',_utf8mb4''),_utf8mb4'4',_utf8mb4''),_utf8mb4'5',_utf8mb4''),_utf8mb4'6',_utf8mb4''),_utf8mb4'7',_utf8mb4''),_utf8mb4'8',_utf8mb4''),_utf8mb4'9',_utf8mb4''),_utf8mb4'a',_utf8mb4''),_utf8mb4'b',_utf8mb4''),_utf8mb4'c',_utf8mb4''),_utf8mb4'd',_utf8mb4''),_utf8mb4'e',_utf8mb4''),_utf8mb4'f',_utf8mb4'')) = 0))),\n  CONSTRAINT `ck_charge_artifact_receipt` CHECK (((`receipt_event_id` is null) or (`receipt_event_id` > 0))),\n  CONSTRAINT `ck_charge_artifact_result_hash` CHECK (((`result_hash` is null) or ((length(`result_hash`) = 64) and (length(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(`result_hash`,_utf8mb4'0',_utf8mb4''),_utf8mb4'1',_utf8mb4''),_utf8mb4'2',_utf8mb4''),_utf8mb4'3',_utf8mb4''),_utf8mb4'4',_utf8mb4''),_utf8mb4'5',_utf8mb4''),_utf8mb4'6',_utf8mb4''),_utf8mb4'7',_utf8mb4''),_utf8mb4'8',_utf8mb4''),_utf8mb4'9',_utf8mb4''),_utf8mb4'a',_utf8mb4''),_utf8mb4'b',_utf8mb4''),_utf8mb4'c',_utf8mb4''),_utf8mb4'd',_utf8mb4''),_utf8mb4'e',_utf8mb4''),_utf8mb4'f',_utf8mb4'')) = 0)))),\n  CONSTRAINT `ck_charge_artifact_result_tuple` CHECK ((((`result_json` is null) and (`result_hash` is null) and (`result_bytes` is null)) or ((`result_json` is not null) and (`result_hash` is not null) and (`result_bytes` is not null)))),\n  CONSTRAINT `ck_charge_artifact_schema_actor` CHECK (((hex(`schema_version`) = hex(_utf8mb4'charge_run_artifact_v1')) and (`requested_by` > 0))),\n  CONSTRAINT `ck_charge_artifact_source_binding_hash` CHECK (((length(`source_binding_hash`) = 64) and (length(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(`source_binding_hash`,_utf8mb4'0',_utf8mb4''),_utf8mb4'1',_utf8mb4''),_utf8mb4'2',_utf8mb4''),_utf8mb4'3',_utf8mb4''),_utf8mb4'4',_utf8mb4''),_utf8mb4'5',_utf8mb4''),_utf8mb4'6',_utf8mb4''),_utf8mb4'7',_utf8mb4''),_utf8mb4'8',_utf8mb4''),_utf8mb4'9',_utf8mb4''),_utf8mb4'a',_utf8mb4''),_utf8mb4'b',_utf8mb4''),_utf8mb4'c',_utf8mb4''),_utf8mb4'd',_utf8mb4''),_utf8mb4'e',_utf8mb4''),_utf8mb4'f',_utf8mb4'')) = 0)))\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci"
+          },
+          {
+            "name": "actual_queue_anchor_with_all_optional_terminal_fields_null",
+            "passed": true,
+            "created_at": "2026-10-21T12:30:00.123456"
+          },
+          {
+            "name": "actual_Unicode_8MiB_full_SQL_roundtrip_capacity_only_not_model_acceptance",
+            "passed": true,
+            "bytes": 8388608,
+            "sha256": "4418f356bb9a5950cceaaf009268cee521e4cf1e925e69f07bbcafcfec9dba85"
+          },
+          {
+            "name": "actual_SQL_constraints_lowerhex_even_on_CI_collation_UTF8_tuple_lease_FKs",
+            "passed": true,
+            "mysql_rejections": {
+              "uppercase_input_hash": 3819,
+              "uppercase_evidence_hash": 3819,
+              "uppercase_metadata_hash": 3819,
+              "uppercase_prompt_hash": 3819,
+              "uppercase_context_digest": 3819,
+              "uppercase_source_binding_hash": 3819,
+              "nonhex_input": 3819,
+              "uppercase_schema": 3819,
+              "Unicode_char_count_is_not_bytes": 3819,
+              "above_8MiB": 3819,
+              "partial_tuple": 3819,
+              "invalid_result_hash": 3819,
+              "empty_body": 3819,
+              "invalid_lease": 3819,
+              "uppercase_lease": 3819,
+              "wrong_case_FK": 1452,
+              "wrong_receipt_FK": 1452
+            }
+          },
+          {
+            "name": "actual_result_null_terminal_receipt_with_no_accepted_model_draft_SQL_shape",
+            "passed": true
+          },
+          {
+            "name": "actual_single_artifact_migration_downgrade_preserves_every_old_DDL_and_row",
+            "passed": true
+          },
+          {
+            "name": "actual_single_artifact_migration_reupgrade_preserves_every_old_DDL_and_row",
+            "passed": true
+          }
+        ],
+        "source_bindings": {
+          "app/models.py": "a141b4876a1e011b1f9642a781bf9b9f87b19133dd63573c451099aa477c2bcd",
+          "app/database.py": "74f053e5bc70a95bfafe750adba216079bc0023a24fc620849fe6b6d42acfa68",
+          "app/config.py": "3fc4a8051ca93f8fbff9cb9de3dcd6f143cb2c4140b13958b6307b6ec6ef07bc",
+          "app/ai/models.py": "b0ab84f20c2f6b74d89dade050350c1dab87b3b18aa3f4ad5f94a4f462dd5739",
+          "app/ai/charge_reconciliation_models.py": "83079c194a920bda534ecdb169f846f5294b6481e638dd873b8f81076cee95cf",
+          "app/ai/charge_reconciliation_run_models.py": "cf09b73ba42adf5755e37a32933169d3598f6c9812f968f997326623be23e15d",
+          "app/ai/charge_reconciliation_contract.py": "2844b03157686e221496f8230b5fedb80a8d6a793379013379b7f406e2b9c08c",
+          "app/ai/charge_reconciliation_sources.py": "1771ae6e1729cfffd9524bc1a82354f66343a8e84398f547cfca27112a25a96c",
+          "app/ai/charge_reconciliation_write_guard.py": "985a748b04cf84cde57b8484115f5f8d66744b7687a04ef320a5461e31dee3e4",
+          "app/ai/context.py": "76af40aa71f8efc54cf4c423e87fe23f2760b7a45c82fcb4672705f871730e98",
+          "app/ai/governance.py": "7c30f4c5a4d41d4fc367f32468d0094a6c5407a3e0d5b527377d69b1ac6ce4dc",
+          "app/ai/native_acceptance.py": "ebadd6404ff972e88cd2169016b73b3b69c00a94bf1f38c75c6e29aaf9f5dd24",
+          "alembic/env.py": "d81c5e65f670e4806899f49523bf1acfdb2736ff4cefe82405328e2fd185dd16",
+          "alembic/versions/20261021_charge_runs.py": "9ff954f1eef70713f7907fa522a40c6d756d160af46ffa6b68b337e95932eb82",
+          "tests/test_ai_charge_reconciliation_sources.py": "82d7d156ca4fbfa81acbb49a291589341b151e2c1b9b39825119b9b20bfd0cf2",
+          "tests/test_ai_charge_reconciliation_run_migration.py": "43c79f1ac83b467b98365bfa28c141a13c213655eef54cb6c90a3c7d9e8c5f5d"
+        },
+        "note": "Point-in-time scoped SQL evidence; later shared catalog/router merges are separately covered by final backend and mounted inventory. Not every old report binds every current file."
+      },
+      {
+        "artifact": {
+          "path": "/tmp/hoim-charge-runtime-document-merge-mysql-verification.json",
+          "bytes": 22770,
+          "sha256": "4057abeaa8205b8afc703087102be9faac46855fc1f0fd7f61d9a8752e3a1d4f"
+        },
+        "scope": "Actual private MySQL metadata-backed synthetic schema, real charge Source publication, native task creation and two actual workers with MockTransport. Simultaneous mocked HTTP proves both release SQL connections; terminal writes are correctly serialized by Billing Gate. Real exact audit PK/full result/nullable usage, old RR immutable locator and current quota/Prompt reads. Additional combined native guard and real trace/feedback controllers against MySQL are exercised directly; no migration, mounted JWT/HTTP, remote model, payment or hospital validation.",
+        "seconds": 25.372,
+        "checks": [
+          {
+            "name": "two_real_workers_release_SQL_during_HTTP_and_accept_once_with_exact_receipt_PK",
+            "passed": true,
+            "actual_model_calls": 2,
+            "terminal_writes": "serialized_by_Billing_Gate"
+          },
+          {
+            "name": "combined_charge_document_guard_Gate_before_DocumentAnchor_no_blob_and_real_trace_feedback_controllers",
+            "passed": true,
+            "cases": 2,
+            "asgi_jwt_http": false
+          },
+          {
+            "name": "old_RR_snapshot_retains_atomic_immutable_routing_identity_after_current_marker_strip_without_reversed_Artifact_lock",
+            "passed": true
+          },
+          {
+            "name": "old_RR_cannot_see_new_Run_but_current_quota_refuses_the_fourth_and_true_queued_cancel_records_zero",
+            "passed": true
+          },
+          {
+            "name": "old_RR_current_Prompt_pointer_and_new_Prompt_body_not_replaced_by_cached_baseline",
+            "passed": true,
+            "prompt_id": "20c11023-58b4-41c2-8775-ae82ed115ba8"
+          }
+        ],
+        "source_bindings": {
+          "app/ai/catalog.py": "74516492035687ad58959f4dcedbb18b6191472268d13d71348208dcf2926880",
+          "app/ai/charge_reconciliation_context.py": "b33fe52639886bde3be92a6d2928f86b0a783a373591e110b2971cf25989c9a7",
+          "app/ai/charge_reconciliation_contract.py": "c6db4d01135ed80ac8ee96e1d3543b8184f86ccf16451d371404f01d9a0731b6",
+          "app/ai/charge_reconciliation_draft.py": "c5e47c8a3bbd5cb06539a23a1a4afe9b668eb3dc3b2dda4543c7fc93a28d6e71",
+          "app/ai/charge_reconciliation_execution.py": "748e2c4d1562b4146a63518d2535b967c9624576154fc54d42c5f247d9157b54",
+          "app/ai/charge_reconciliation_frozen.py": "b69a1157e19d6c0f7b94f1d835388004fbc883cb4f62a60ec293d5483a8e9ed2",
+          "app/ai/charge_reconciliation_gateway.py": "ac648f76e78be89999732b25b8211c9150d8ce593e0de6b28f8e2ed8bee6fbd1",
+          "app/ai/charge_reconciliation_history.py": "3d2bd69e421ea697654b254104c9b16b547bba1cbf542fee9f1dc1e9699b88de",
+          "app/ai/charge_reconciliation_models.py": "83079c194a920bda534ecdb169f846f5294b6481e638dd873b8f81076cee95cf",
+          "app/ai/charge_reconciliation_prompt.py": "f75ed00412d90b881070f9080cb708f9fd11174c8c5547479c592f3b3f79d3f1",
+          "app/ai/charge_reconciliation_protocol.py": "97a064c46cc438986e2b52234ec302ad67662d6386b2c69798318e293a85ed1f",
+          "app/ai/charge_reconciliation_receipts.py": "818d2120d4ab98f33c17d4765d80cd37a0fbd7b82c6d419f9f2e8d55530e1a49",
+          "app/ai/charge_reconciliation_result.py": "a5128cb7d39de4e3b7749ec40977fdc3c3f76c1c2160fda822756cf095f87732",
+          "app/ai/charge_reconciliation_run_models.py": "cf09b73ba42adf5755e37a32933169d3598f6c9812f968f997326623be23e15d",
+          "app/ai/charge_reconciliation_runtime.py": "b8c5ac0bef81bc6cd1fc94efdbbf4e94dcd32848d6d8e36102dc037f1bd6ebc1",
+          "app/ai/charge_reconciliation_sources.py": "1771ae6e1729cfffd9524bc1a82354f66343a8e84398f547cfca27112a25a96c",
+          "app/ai/charge_reconciliation_storage.py": "6433232af3bb58d8e85727090650846da0658024736d6b2f76e0d8ac14b2fdca",
+          "app/ai/charge_reconciliation_view_contract.py": "2d7948df0d81a1289da2b1433e53dcc06abdc2517b918355db729e0a3ea3144d",
+          "app/ai/charge_reconciliation_views.py": "669c5e9d32e597e14ab39add634d640d9b8277ba562c3f8630f3554944805820",
+          "app/ai/charge_reconciliation_write_guard.py": "02f910560e65f5d60c127fda8526a0558659770e3ab95a1e7784d20172144f54",
+          "app/ai/context.py": "2c24e21d24f271e8a8d47cdcccc47c26deda091cc24ba185f50952b219f7fc9a",
+          "app/ai/document_evidence_contract.py": "3c26616b8ffa538b982e47400f0d1d38557f0c618d1689e1f88a20708e9de546",
+          "app/ai/document_evidence_input.py": "33d99158d60d703f587153b85e82e0f2c5ac7cc7f876a4b6b563d807e3cbbe2c",
+          "app/ai/document_evidence_models.py": "3b6e408aa6ef969b29d4f7d03c8a7bd24a69cffb42cd4e0e130cae62c44125b2",
+          "app/ai/document_evidence_sources.py": "39715e897df4b76a588428cc0525e1a27576f4597c5ca06c63e376ca0df9ab65",
+          "app/ai/document_extraction_candidates.py": "eb6e1007e44f0414db32c74fac499dfa132200eadb4db1326babc09dbca0a508",
+          "app/ai/document_extraction_context.py": "fd72ab5a5d6637fea4b2859b62dcb1ee33ad84161fd707389f5e23c5452af279",
+          "app/ai/document_extraction_contract.py": "0ee0ddc0a75509aa2220e3b8bdd9d095f84bfccd1eda16663e0da7d4e774b148",
+          "app/ai/document_extraction_history.py": "e9377c1488c069aa0e66c75493a800f20d8158d9b3766b69f80053b08f0c2c9b",
+          "app/ai/document_extraction_models.py": "0eb796337371fb2e7c2102b05fe633a79418a29c4100f3b0055cc4343cf6816d",
+          "app/ai/document_extraction_prompt.py": "6ed8f00d7f9d102ebb558aa398480da7c2fc144d16f92637fefd5578d1c8c7dc",
+          "app/ai/document_extraction_protocol.py": "0dcc495f4403ea5b24d74a76d81990c49bfabf8e0d97fd7cc6fbb065ee1506ae",
+          "app/ai/document_extraction_result.py": "5fd0af3fcfd8aaa5ce118dd5a02c99d8e9f28d63ae61e0310ecaf47f3ed029d0",
+          "app/ai/document_extraction_run_record.py": "20376d949d58aca62f402614c3852a2e7a7a5ec5ebe47a7bf89e0548eb8be0b8",
+          "app/ai/document_extraction_runtime.py": "57cb2ad3e332d80340d97ee5a627e08216482143f8588c755aef57e40490bcfd",
+          "app/ai/document_extraction_storage.py": "cec04f1b97f81d528dca200cb67bdabe163fe115f2064fecb60f6a1070cd86bc",
+          "app/ai/document_extraction_view_contract.py": "c3775745ce97f57328b61a6ec572d2bb6e463164b4021099e1f82c7a3ca261cb",
+          "app/ai/gateway.py": "24b3f0317e503c1d09ffb3c9aa3bbd6635096694ec68360e33f1d0c9226b11f1",
+          "app/ai/governance.py": "eb8a0f112bb4488a7ad51195a380deef03612f7b72a5e69b2f5bd84b73773f36",
+          "app/ai/models.py": "b0ab84f20c2f6b74d89dade050350c1dab87b3b18aa3f4ad5f94a4f462dd5739",
+          "app/ai/native_acceptance.py": "ebadd6404ff972e88cd2169016b73b3b69c00a94bf1f38c75c6e29aaf9f5dd24",
+          "app/ai/native_task_access.py": "e5d900478da217f64231fc2d52a4a3644362f011b9ce6b5d490e3df9e935fbe6",
+          "app/ai/runtime.py": "1f2ca8ff11184f44479e97d6794e1235f57841a476c8aee0e5564578686f93f0",
+          "app/ai/schemas.py": "fbe152f2b895f09646b6628f35aa95554883bc87fd757c3f0e0c50dc4544b325",
+          "app/models.py": "0bda666ec4122d11585cdc4b65fc6ccc88acb7ae076a8242dd382320dc80de04",
+          "app/routers/ai.py": "ad17932fdd86e76b1a78553ff58f03630a8143f60577795f4033cd6d8b51c6c4",
+          "app/routers/ai_admin.py": "1cfed727ad5570105375ab408b5c363f37b74018eb99b7b4dfb053f8c231fe62",
+          "tests/test_ai_charge_reconciliation_runtime.py": "ef3fac74413bef038dfdd218845336da52ae1590c7faee1eff214a0297d33c18",
+          "tests/test_ai_charge_reconciliation_sources.py": "b79259d7a316b4080ac32412ae652e051503d042fe5d7d79bfe99aaa59950c9e"
+        },
+        "note": "Point-in-time scoped SQL evidence; later shared catalog/router merges are separately covered by final backend and mounted inventory. Not every old report binds every current file."
+      }
+    ],
+    "scope": "Private MySQL8.0.39 Unix socket, synthetic metadata/parents and incremental up/down/up. Fourteen old writer entry points actually block at Gate; this is not fourteen complete JWT business transactions. Two adjacent real workers and trace/feedback controller functions use MockTransport; those SQL checks are not mounted JWT. No historical blank-chain migration, real payment or hospital claim.",
+    "own_temporary_resources_cleaned": true
+  },
+  "frontend_build": {
+    "command": "npm run verify",
+    "exit_code": 0,
+    "seconds": 38.681,
+    "production_inputs": 507,
+    "asset_files": 425,
+    "javascript_bytes": 5951199,
+    "all_asset_bytes": 6738031,
+    "maximum_javascript_bytes": 644906,
+    "unchanged_budgets": {
+      "javascript": 6000000,
+      "all_assets": 7000000,
+      "maximum_javascript": 700000
+    },
+    "audit_vulnerabilities": 0,
+    "existing_scss_warnings": 5,
+    "dependency_or_browser_target_change": false,
+    "schema_codec": "Complete original20 generated schemas are losslessly encoded by bounded strict UTF8/LZ77 data loader; original JSON/validators/generators and262144-byte source bound remain unchanged. No eval, schema omission or budget increase.",
+    "report": {
+      "path": "/tmp/hoim-charge-npm-frozen-fourth-verify-execution.json",
+      "bytes": 1319,
+      "sha256": "9a9ad1095e149ae6175d19062329aa5fc048469c81ee49e9798d62aceeed0f23"
+    },
+    "freeze": {
+      "path": "/tmp/hoim-charge-frontend-frozen-fourth-production-source-freeze.json",
+      "bytes": 84248,
+      "sha256": "2ddacbb88bd6e780c8fac7546a4f830a175f8b36db62ab12a465c674a267b611"
+    }
+  },
+  "frontend_browser": {
+    "single_complete_all_green_execution": true,
+    "unique_cases": 1972,
+    "files": 127,
+    "seconds": 4893.535,
+    "categories": {
+      "production_mock": 207,
+      "isolated_mock": 1744,
+      "real_synthetic_http": 21
+    },
+    "stats": {
+      "startTime": "2026-10-21T10:36:36.932Z",
+      "duration": 4882216.399,
+      "expected": 1972,
+      "skipped": 0,
+      "unexpected": 0,
+      "flaky": 0
+    },
+    "skip_retry_flaky_global_errors": 0,
+    "source_files": 961,
+    "source_and_dist_stable": true,
+    "report": {
+      "path": "/tmp/hoim-charge-browser-frozen-third-execution.json",
+      "bytes": 1610069,
+      "sha256": "9b0db1bd30d21fd4a88973514c7ee39798d017dda176472be19f07cbdbf5ce83"
+    },
+    "category_report": {
+      "path": "/tmp/hoim-charge-browser-frozen-third-category-counts.json",
+      "bytes": 1223707,
+      "sha256": "af3789d8a10ca75c9d0ff3c0438d4792f2aa6d3800b7e2fe9e5784034dc2e1e1"
+    },
+    "predecessor_note": "Native71 had composed whole-file1782 coverage after two failed full runs. This native69+71 third run is a new complete1972 execution, not inherited71 all-green or a sum of targets.",
+    "intercepted_scope": "1744 isolated Vue/ElementPlus mock API cases;207 actual production page/mock API cases;21 established actual synthetic loopback HTTP cases. No real remote/hospital/clinical proof.",
+    "partial_attempts_preserved": [
+      {
+        "artifact": {
+          "path": "/tmp/hoim-charge-browser-frozen-first-aborted-final-summary.json",
+          "bytes": 3178,
+          "sha256": "6b280473a8b359f07909d66b487f0f24ba115fcb1a83ef0255fbfa148cf353b7"
+        },
+        "actual_summary": {
+          "schema_version": "charge_browser_explicit_abort_v2",
+          "scope": "Incomplete execution intentionally stopped after a reproduced product proof bypass. Retains one independently reported fixture assertion failure and one SIGINT-interrupted test. Never a complete1961 execution or final green.",
+          "reason": "Root authorized obsolete-source stop before required selectedCase History proof fix.",
+          "execution": "/tmp/hoim-charge-browser-frozen-first-execution.json",
+          "execution_sha256": "d541363d22e45d0f2afd1e69a1acca0c7003ed66a845e143d448ec66b4587567",
+          "exit_code": 130,
+          "completed_passed_once": 1416,
+          "completed_failed": 1,
+          "interrupted": 1,
+          "not_started_count": 543,
+          "result_status_counts": {
+            "passed": 1416,
+            "failed": 1,
+            "interrupted": 1
+          },
+          "report_outcomes": {
+            "expected": 1416,
+            "unexpected": 1,
+            "skipped": 544
+          },
+          "failed_cases": [
+            {
+              "id": "f301ed05f0e4470c0826-b27864bdab307001582b",
+              "file": "ai-charge-assistant.spec.js",
+              "line": 5,
+              "column": 1,
+              "title": "empty initial refs list recent scope metadata; opening history verifies Case and Run without enabling new submit",
+              "describe_path": [
+                "ai-charge-assistant.spec.js"
+              ],
+              "project_id": "",
+              "outcome": "unexpected",
+              "expected_status": "passed",
+              "results": [
+                {
+                  "status": "failed",
+                  "retry": 0,
+                  "duration_ms": 1692,
+                  "has_error": true
+                }
+              ]
+            }
+          ],
+          "interrupted_cases": [
+            {
+              "id": "e33bf3869931a84e6502-283b42f7c853ce40dea5",
+              "file": "ai-sofa-clinical-source.spec.js",
+              "line": 26,
+              "column": 120,
+              "title": "SOFA实际纯模型视图numeric_exact_protocol_partial分别保留小计、下界、完整0与全部并列证明",
+              "describe_path": [
+                "ai-sofa-clinical-source.spec.js"
+              ],
+              "project_id": "",
+              "outcome": "skipped",
+              "expected_status": "passed",
+              "results": [
+                {
+                  "status": "interrupted",
+                  "retry": 0,
+                  "duration_ms": 415,
+                  "has_error": true
+                }
+              ]
+            }
+          ],
+          "failure_explanation": "Actual native history request correctly adds charge_native_only=true; ai-charge-assistant.spec.js:5 exact query fixture lacked that required field. This is preserved as a real failed assertion, not excused as passed.",
+          "last_started_log_identity": [
+            "1418",
+            "e2e/ai-sofa-clinical-source.spec.js:26:120 › SOFA实际纯模型视图numeric_exact_protocol_partial分别保留小计、下界、完整0与全部并列证明"
+          ],
+          "source_count": 961,
+          "sources_stable": true,
+          "dist_count": 425,
+          "dist_stable": true,
+          "static": {
+            "origin": "http://127.0.0.1:34845",
+            "served_directory": "/tmp/hoim-charge-reconciliation-20261021/vue3-new-ui/dist",
+            "has_backend_or_proxy": false,
+            "api_requests_reaching_static_server": [],
+            "socket_closed": true,
+            "thread_stopped": true
+          },
+          "port34845_connect_ex_after_finally": 111,
+          "supersedes_summary_only": "/tmp/hoim-charge-browser-frozen-first-aborted-summary.json",
+          "all_evidence_preserved": true,
+          "final_verification_passed": false
+        }
+      },
+      {
+        "artifact": {
+          "path": "/tmp/hoim-charge-browser-frozen-second-aborted-final-summary.json",
+          "bytes": 1345,
+          "sha256": "e26687750904aea17852acf20a723ebf04f3a75bc7cf5d8ce1b4f02a5223f55e"
+        },
+        "actual_summary": {
+          "schema_version": "charge_browser_deliberate_abort_summary_v1",
+          "reason": "Root authorized SIGINT after independently reproduced native history downgrade; not a complete green run or an assertion failure of this partial run",
+          "total_collected": 1964,
+          "actual_result_status_counts": {
+            "passed": 1124,
+            "interrupted": 1
+          },
+          "not_started": 839,
+          "last_started": {
+            "file": "ai-laboratory-entry.spec.js",
+            "line": 149,
+            "title": "风险v2窗口成员缺少投影标识拒绝选中，不把元数据当完整有效检验",
+            "test_status": "skipped",
+            "results": [
+              [
+                "interrupted",
+                0,
+                "2026-10-21T10:23:16.837Z",
+                808
+              ]
+            ]
+          },
+          "source_stable": true,
+          "dist_stable": true,
+          "static_port": 38117,
+          "port_closed_verified": true,
+          "execution_sha256": "7777e3403ea2c2c98d9261797bcdae5db4d28c3354fdf714acbcb9da495b90f4",
+          "report_sha256": "556d4f3112c551ab99ce5ee09a4cc8bb767f8310c67656a237035934ce2bde03",
+          "probe": "/tmp/hoim-charge-history-downgrade-domain-review.json",
+          "execution_cleanup": {
+            "origin": "http://127.0.0.1:38117",
+            "served_directory": "/tmp/hoim-charge-reconciliation-20261021/vue3-new-ui/dist",
+            "has_backend_or_proxy": false,
+            "api_requests_reaching_static_server": [],
+            "socket_closed": true,
+            "thread_stopped": true
+          }
+        }
+      }
+    ],
+    "targeted_followups_not_added_again": [
+      {
+        "path": "/tmp/hoim-charge-history-scope-final-verification.json",
+        "bytes": 460598,
+        "sha256": "cc93b7117b11705d97467072392d167573ec8064dfee78ef1ae3fa85611dba5f"
+      },
+      {
+        "path": "/tmp/hoim-charge-history-residual-anchors-final-verification.json",
+        "bytes": 477342,
+        "sha256": "b2068df5fffe160e015b0fa3330ba1a2c5d26c113d2b80c71c20ec001f462deb"
+      }
+    ],
+    "fixed_boundaries": "First partial retained a missing nativeOnly fixture and a reproduced selected Source history downgrade. Second partial was deliberately stopped after an independently reproduced global residual uniqueDomain/reference downgrade. Permanent strict classifier fixes and whole target files preceded this third full run."
+  },
+  "node_tools": {
+    "passed": 86,
+    "seconds": 0.506,
+    "report": {
+      "path": "/tmp/hoim-charge-node-tools-final-verification.json",
+      "bytes": 9507,
+      "sha256": "56c4a07df2d5c8e8a1490010a5f573511a57a53223ede826771756fd4778ec21"
+    }
+  },
+  "platform_inventory": {
+    "report": {
+      "path": "/tmp/hoim-charge-platform-final-inventory.json",
+      "bytes": 137976,
+      "sha256": "28c24b84577f11f8ef6bf081e12393bd1159635ef1cb09f5b2921b50d0660bb1"
+    },
+    "business_routes": 867,
+    "all_api_routes": 868,
+    "router_modules": 113,
+    "tables": 214,
+    "vue_views": 160,
+    "catalog_version": "2026.10.21.18",
+    "features": 80,
+    "distinct_task_prompts": 80,
+    "source_reference_keys": 41,
+    "actual_guard_and_matrix_exact": true,
+    "read_only_checks": {
+      "route_matrix_exact_multiset_match": true,
+      "new_route_actual_role_guards_match_matrix": true,
+      "all_implementation_hashes_and_file_set_stable_during_capture": true,
+      "all_generated_artifacts_stable_during_capture": true,
+      "all_selected_implementation_and_generated_bytes_match_captured_head": true,
+      "prompt_export_exact_match": true,
+      "catalog_numbering_complete_1_to_80": true,
+      "twenty_two_historical_records_unchanged": true,
+      "three_new_tables_four_utc6_and_three_mediumtext_definitions": true,
+      "database_connections": 0,
+      "dotenv_reads": 0,
+      "asgi_lifecycle_calls": 0,
+      "repo_files_modified_by_inventory": false
+    }
+  },
+  "historical_verification_records": {
+    "baseline_commit": "7e12b44c29412bca4833125f86bd64e85cbc9628",
+    "count": 22,
+    "all_unchanged": true,
+    "records": [
+      {
+        "path": "doc/ai-aki-verification.json",
+        "baseline_sha256": "a2f8e928266ff16d46973db731329d4e96cbfe09e519ba9f5fcbc8ab384a897c",
+        "current_sha256": "a2f8e928266ff16d46973db731329d4e96cbfe09e519ba9f5fcbc8ab384a897c",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-bed-verification.json",
+        "baseline_sha256": "a1e678f1eee4ca5da36b38260a633e354a0b76a8a0d074a53c444ae1bcc13217",
+        "current_sha256": "a1e678f1eee4ca5da36b38260a633e354a0b76a8a0d074a53c444ae1bcc13217",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-coding-evidence-verification.json",
+        "baseline_sha256": "fa6234a4334762a9c99e70ba1af2e7fd61585c6348514af6449da905d84d6bbf",
+        "current_sha256": "fa6234a4334762a9c99e70ba1af2e7fd61585c6348514af6449da905d84d6bbf",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-document-verification.json",
+        "baseline_sha256": "58bf8864e18adc3df418a9c917eb4dba4f196956fe222f0a1688b021920c739f",
+        "current_sha256": "58bf8864e18adc3df418a9c917eb4dba4f196956fe222f0a1688b021920c739f",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-ecg-classifier-smoke.json",
+        "baseline_sha256": "838b0305249698617bc475f7158dfbfbb9e6e22e6d6e84e51974bfcfebb90c61",
+        "current_sha256": "838b0305249698617bc475f7158dfbfbb9e6e22e6d6e84e51974bfcfebb90c61",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-ecg-verification.json",
+        "baseline_sha256": "1eedfa9eb918cf6e6b1ee1f201b7413760eeec501c128f4a73401741f0427f94",
+        "current_sha256": "1eedfa9eb918cf6e6b1ee1f201b7413760eeec501c128f4a73401741f0427f94",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-forecast-verification.json",
+        "baseline_sha256": "9b5683bca58efcf7fc460410529fd5aeeed91e2646eb47be24b836cbadc20d63",
+        "current_sha256": "9b5683bca58efcf7fc460410529fd5aeeed91e2646eb47be24b836cbadc20d63",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-frontend-dependencies-verification.json",
+        "baseline_sha256": "968757f4a75e921038133b3fa9a94947ab4d5607142dce8da964f2a13d00bb1d",
+        "current_sha256": "968757f4a75e921038133b3fa9a94947ab4d5607142dce8da964f2a13d00bb1d",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-imaging-classifier-smoke.json",
+        "baseline_sha256": "b2185a31ff66c4602c10136d5b15404199f50cf7d65ea4a8be4718778c6a9e89",
+        "current_sha256": "b2185a31ff66c4602c10136d5b15404199f50cf7d65ea4a8be4718778c6a9e89",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-imaging-verification.json",
+        "baseline_sha256": "63646b181dae4f531abe233708a24f9b9cc05037ef95d57e1e6f39c7f9880148",
+        "current_sha256": "63646b181dae4f531abe233708a24f9b9cc05037ef95d57e1e6f39c7f9880148",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-inventory-verification.json",
+        "baseline_sha256": "afee2f2dc7228d6c0ded2b5e5643a2c6a50d8aad8e03207d9925cf5b70a68ab3",
+        "current_sha256": "afee2f2dc7228d6c0ded2b5e5643a2c6a50d8aad8e03207d9925cf5b70a68ab3",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-laboratory-verification.json",
+        "baseline_sha256": "646103e4874b4f895424987520c7adfb6fb8afdd9eb6e2c7104ed2095b72752f",
+        "current_sha256": "646103e4874b4f895424987520c7adfb6fb8afdd9eb6e2c7104ed2095b72752f",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-news2-verification.json",
+        "baseline_sha256": "363be8c61e2f36705dccc4604631e7d0e84aaa6cc922196ed36e48e740ca6570",
+        "current_sha256": "363be8c61e2f36705dccc4604631e7d0e84aaa6cc922196ed36e48e740ca6570",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-nursing-verification.json",
+        "baseline_sha256": "a04248f9de57ddd878c1b408da1833f53651cd3535d8385d2275874a7f6f9517",
+        "current_sha256": "a04248f9de57ddd878c1b408da1833f53651cd3535d8385d2275874a7f6f9517",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-observation-verification.json",
+        "baseline_sha256": "b75ab8c7ff94704cb823be59d51539f06a16a24edf0020b0e87edfd6cf6e6bee",
+        "current_sha256": "b75ab8c7ff94704cb823be59d51539f06a16a24edf0020b0e87edfd6cf6e6bee",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-organ-support-verification.json",
+        "baseline_sha256": "175b4d4b66960f623170aded7ca7dec32f462fc34278289411c1ddda3dbc653d",
+        "current_sha256": "175b4d4b66960f623170aded7ca7dec32f462fc34278289411c1ddda3dbc653d",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-qsofa-verification.json",
+        "baseline_sha256": "d3c4cea9a657527540d3c570512a00568f92a5381c066e9a0bcf204a2e3c7ba4",
+        "current_sha256": "d3c4cea9a657527540d3c570512a00568f92a5381c066e9a0bcf204a2e3c7ba4",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-roster-verification.json",
+        "baseline_sha256": "8ec5327889f81368e24755a8122f5b5c753a84a1e9a949ec3957b35a9ba13188",
+        "current_sha256": "8ec5327889f81368e24755a8122f5b5c753a84a1e9a949ec3957b35a9ba13188",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-sofa-verification.json",
+        "baseline_sha256": "20235fe055a6995be2b40270a52f67cba778d445cd10113e7f8185dbeab0cdca",
+        "current_sha256": "20235fe055a6995be2b40270a52f67cba778d445cd10113e7f8185dbeab0cdca",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-speech-smoke.json",
+        "baseline_sha256": "41ad522da4f04e2a6d75595660ecbc2549acdcd159450aa99602b495c8e690a0",
+        "current_sha256": "41ad522da4f04e2a6d75595660ecbc2549acdcd159450aa99602b495c8e690a0",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-supply-verification.json",
+        "baseline_sha256": "12ff22420c62a264aa94975a2f54d669b9752be2757537d46b755d92b6e32414",
+        "current_sha256": "12ff22420c62a264aa94975a2f54d669b9752be2757537d46b755d92b6e32414",
+        "unchanged": true
+      },
+      {
+        "path": "doc/ai-surgery-verification.json",
+        "baseline_sha256": "302fc7655eda439297885b15c2b3f001f1e044fd2eaa5d559941dea5d1e89816",
+        "current_sha256": "302fc7655eda439297885b15c2b3f001f1e044fd2eaa5d559941dea5d1e89816",
+        "unchanged": true
+      }
+    ],
+    "all_stable_during_inventory": true
+  },
+  "scope_corrections": {
+    "artifact": {
+      "path": "/tmp/hoim-charge-report-scope-clarifications-second.json",
+      "bytes": 859,
+      "sha256": "982da310fbae0a8e392f20bab1c404eda440b81f69a74b88ab2551a9c871a1db"
+    },
+    "details": {
+      "scope": "Correction to descriptive prose only; original run artifacts remain unchanged.",
+      "report": "/tmp/hoim-charge-document-integration-final-target-verification.json",
+      "actual_passed": 38,
+      "inaccurate_descriptive_wording": "Final targeted39",
+      "correct_scope": "38 actual targeted catalog/main charge/native-history and current Super audit tests; see authoritative pytest summary and command.",
+      "third_wider_run": "246 passed,1 test setup failure: accessing expired run.run_id inside the SQL observer caused its own full ORM refresh. Permanent test now obtains run_id via inspect(run).identity before installing the observer. Product native guard unchanged for this correction.",
+      "merge_whitespace": "The inherited71 input spec retains its already-tested final blank line and exact bytes; all other staged diff whitespace checks clean."
+    }
+  },
+  "artifact_retention": "Committed ledger preserves exact implementation/generated/history hashes, report sizes and digests. Large synthetic raw packets/runners/logs remain local/tmp and are not promised permanent or bundled. Earlier failed/development reports remain separate and are not counted as green.",
+  "limitations": [
+    "Engineering scope only; no real clinical/financial validation, deployment, default enablement or all80 completion.",
+    "No billing action or treatment recommendation is authorized by a literal question; an exact quote does not validate model meaning.",
+    "Stored source completeness is the declared captured record collection, not proof all real services/payment records exist.",
+    "Native70/72/73 and subsequent work continue in separate worktrees; this ledger does not claim their integration."
+  ]
+}

@@ -57,7 +57,7 @@ Position = Annotated[int, Field(strict=True, ge=0, le=MAX_TEXT_BYTES)]
 
 
 class StrictModel(BaseModel):
-    model_config = ConfigDict(extra="forbid", strict=True, str_strip_whitespace=False)
+    model_config = ConfigDict(extra="forbid", strict=True, str_strip_whitespace=False, frozen=True, revalidate_instances="always")
 
 
 def canonical_json(value: BaseModel | dict) -> str:
@@ -105,6 +105,7 @@ def apply_redactions(original: str, spans: list[Redaction]) -> str:
         raise ValueError("A bounded explicit list of typed redactions is required")
     result, previous_end = [], 0
     for span in spans:
+        span = Redaction.model_validate(span, strict=True)
         if span.start_codepoint < previous_end or span.end_codepoint > len(original):
             raise ValueError("Redactions must be ordered, disjoint and within the complete original")
         result.extend([original[previous_end : span.start_codepoint], "" if span.method == "remove" else MASK_TEXT])
@@ -139,6 +140,8 @@ class DeclaredOperationsReview(StrictModel):
 
 
 def verify_declared_review(original: OperationsOriginal, review: DeclaredOperationsReview) -> None:
+    original = OperationsOriginal.model_validate(original, strict=True)
+    review = DeclaredOperationsReview.model_validate(review, strict=True)
     if review.original_id != original.original_id or review.original_full_sha256 != content_hash(original):
         raise ValueError("The declaration must bind the entire exact original and its metadata")
     if review.reviewed_by == original.captured_by:

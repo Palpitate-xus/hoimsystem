@@ -180,3 +180,26 @@ def test_identity_and_capture_metadata_are_strict_without_coercion(field, value)
 def test_unknown_metadata_is_not_silently_accepted():
     with pytest.raises(ValidationError):
         OperationsOriginal.model_validate({**original().model_dump(), "patient_id": 1})
+
+
+@pytest.mark.parametrize("field,value", [("captured_at", "unverified-clock"), ("captured_by", True), ("content_text", "")])
+def test_cached_constructed_originals_are_revalidated_at_the_binding_boundary(field, value):
+    source = original()
+    forged = source.model_copy(update={field: value})
+    declared = review(source).model_copy(update={"original_full_sha256": content_hash(forged)})
+    with pytest.raises(ValidationError):
+        verify_declared_review(forged, declared)
+
+
+@pytest.mark.parametrize("field", ["privacy_reviewed", "faithfulness_reviewed", "applicability_declaration_reviewed"])
+def test_copied_review_models_cannot_bypass_the_actual_boolean_contract(field):
+    source = original()
+    forged = review(source).model_copy(update={field: 1})
+    with pytest.raises(ValidationError):
+        verify_declared_review(source, forged)
+
+
+def test_constructed_span_cannot_bypass_integer_validation():
+    forged = Redaction.model_construct(start_codepoint=True, end_codepoint=2, method="mask")
+    with pytest.raises(ValidationError):
+        apply_redactions("原😀文", [forged])

@@ -107,7 +107,9 @@
       </template>
       <el-empty v-else-if="!loading" description="当前角色暂无可用 AI 能力" />
     </el-form>
+    <document-extraction-assistant v-if="documentLifecycle" :feature="configuredFeature||null" :feature-key="featureKey" :initial-input="props.initialInput" :patient-id="props.patientId" :encounter-ref="props.encounterRef" :active="viewActive" />
 
+    <template v-if="!documentLifecycle">
     <el-card v-if="run" shadow="never" class="spaced" aria-label="AI任务结果">
       <template #header><div class="result-header"><strong>{{ run.feature_name }}</strong><el-tag>{{ statuses[run.status] || run.status }}</el-tag><el-tag v-if="run.patient_id" type="info">患者 #{{ run.patient_id }}</el-tag><el-tag v-if="run.preview" type="warning">评估预览</el-tag><el-button v-if="busy" link @click="refreshRun">刷新状态</el-button></div></template>
       <el-alert v-if="busy" type="info" :closable="false" title="任务已保存，正在等待处理或生成结果。" />
@@ -216,6 +218,7 @@
     </el-dialog>
     <el-dialog v-model="evidenceDialog" title="核查引用依据" width="760px"><template v-if="evidence"><p><strong>{{ evidence.title }}</strong> {{ evidence.version ? '· ' + evidence.version : '' }}</p><p v-if="evidence.source_uri" class="plain-text">来源：{{ evidence.source_uri }}</p><p v-if="evidence.observed_at">记录时间：{{ evidence.observed_at }}</p><pre class="plain-text">{{ evidence.content }}</pre></template></el-dialog>
     <el-dialog v-model="feedbackDialog" title="人工复核反馈" width="540px"><el-radio-group v-model="feedback.outcome"><el-radio value="accepted">采纳</el-radio><el-radio value="rejected">驳回</el-radio><el-radio value="modified">修改后采纳</el-radio></el-radio-group><el-input v-model="feedback.comment" type="textarea" :rows="4" maxlength="2000" placeholder="说明核查结果或修改内容；反馈不会自动写入病历、处方或医嘱" class="spaced" /><template #footer><el-button @click="feedbackDialog = false">取消</el-button><el-button type="primary" @click="submitFeedback">保存反馈</el-button></template></el-dialog>
+    </template>
   </div>
 </template>
 
@@ -250,6 +253,7 @@ import AiImageFindings from "@/components/AIImageFindings/index.vue";
 import AiEcgInput from "@/components/AIEcgInput/index.vue";
 import AiEcgFindings from "@/components/AIEcgFindings/index.vue";
 
+const DocumentExtractionAssistant=defineAsyncComponent(()=>import("@/components/ai/DocumentExtractionAssistant.vue"));
 const CodingEvidenceInput=defineAsyncComponent(()=>import("@/components/CodingEvidenceInput.vue"));
 const CodingFindings=defineAsyncComponent(()=>import("@/components/ai/CodingFindings.vue"));
 const AiRosterInput=defineAsyncComponent(()=>import("@/components/AIRosterInput/index.vue"));
@@ -278,13 +282,16 @@ const AiQsofaFindings = defineAsyncComponent(() => import("@/components/AIQsofaF
 
 const props = defineProps({ featureKeys: { type: Array, default: () => [] }, initialFeature: { type: String, default: "" }, patientId: { type: Number, default: null }, encounterRef: { type: String, default: "" }, initialInput: { type: Object, default: () => ({}) } });
 const store = useStore();
-const canPreview = computed(() => store.getters["user/permissions"].includes("super_admin"));
+const canPreview = computed(() => Array.isArray(store.getters["user/permissions"])&&store.getters["user/permissions"].includes("super_admin"));
 const statuses = { queued: "已排队", running: "生成中", succeeded: "待复核", failed: "失败", cancelled: "已取消" };
 const loading = ref(false), submitting = ref(false), patientLoading = ref(false), features = ref([]), featureKey = ref("");
 const patientId = ref(null), encounterRef = ref(""), prescriptionId = ref(null), patients = ref([]), encounters = ref([]), prescriptions = ref([]);
 const question = ref(""), codingQuery = ref(""), extraInput = ref(""), preview = ref(false), run = ref(null), history = ref([]);
 const contextDialog = ref(false), contextData = ref(null), evidenceDialog = ref(false), evidence = ref(null), feedbackDialog = ref(false), feedback = ref({ outcome: "accepted", comment: "" });
-const selected = computed(() => features.value.find(item => item.key === featureKey.value));
+const configuredFeature = computed(() => features.value.find(item => item.key === featureKey.value));
+const documentWasBound=ref(false),documentLifecycle=computed(()=>documentWasBound.value||featureKey.value==='guideline_ingestion'||Object.hasOwn(props.initialInput,'document_original_id'));
+watch([featureKey,()=>Object.hasOwn(props.initialInput,'document_original_id')],([key,bound])=>{if(key==='guideline_ingestion'||bound)documentWasBound.value=true;},{immediate:true,flush:'sync'});
+const selected = computed(() => documentLifecycle.value?null:configuredFeature.value);
 const needsRoster=computed(()=>featureKey.value==='roster_optimization'&&selected.value?.input_mode==='roster'),rosterSelection=ref(null),rosterReady=ref(false),rosterWasBound=ref(false),rosterInputKey=ref(0);
 const rosterInitialReferences=computed(()=>props.initialInput.roster_plan_id==null?null:{roster_plan_id:props.initialInput.roster_plan_id});
 watch(rosterInitialReferences,value=>{if(value)rosterWasBound.value=true;},{immediate:true,flush:'sync'});
@@ -399,7 +406,9 @@ let timer = null, pollVersion = 0, formVersion = 0, patientLoadVersion = 0, hist
 
 function supportIdentity() { return JSON.stringify([codingSelection.value,codingInitialReferences.value,codingHome.value,props.initialInput.home_id,nativeInventorySelection.value,nativeInventoryInitialReferences.value,nativeInventoryScope.value,supplySelection.value,supplyInitialReferences.value,supplyScope.value,featureKey.value, patientId.value, encounterRef.value, supportReferences.value, selected.value?.input_mode, sofaSelection.value, sofaInitialReferences.value, rosterSelection.value,rosterInitialReferences.value,bedSelection.value,bedInitialReferences.value,surgerySelection.value,surgeryInitialReferences.value,surgeryApplicationIds.value,surgeryCaseCohortBound.value,surgeryCohortValid.value,serviceDepartment.value,serviceSurgeryPool.value,serviceWard.value,(codingLifecycle.value||rosterLifecycle.value||bedLifecycle.value||surgeryLifecycle.value||supplyLifecycle.value||nativeInventoryLifecycle.value)?selected.value:null,store.state.user.username,store.state.user.accessToken, store.getters["user/permissions"]]); }
 function captureSupport(requireSofaSelection=false) { return {codingMode:needsCodingEvidence.value,codingBound:codingWasBound.value,codingHome:codingHome.value,codingReferences:codingInitialReferences.value||codingSelection.value?{...(codingInitialReferences.value||codingSelection.value)}:null,inventoryMode:needsNativeInventory.value,inventoryBound:nativeInventoryWasBound.value,inventoryScope:nativeInventoryScope.value?{...nativeInventoryScope.value}:null,inventoryReferences:nativeInventoryInitialReferences.value||nativeInventorySelection.value?{...(nativeInventoryInitialReferences.value||nativeInventorySelection.value)}:null,supplyMode:needsSupply.value,supplyBound:supplyWasBound.value,supplyScope:supplyScope.value?{...supplyScope.value}:null,supplyReferences:supplyInitialReferences.value||supplySelection.value?{...(supplyInitialReferences.value||supplySelection.value)}:null,surgeryMode:needsSurgery.value,surgeryBound:surgeryWasBound.value||surgeryCaseCohortBound.value,surgeryCohortValid:surgeryCohortValid.value,surgeryApplications:surgeryApplicationIds.value?[...surgeryApplicationIds.value]:null,pool:serviceSurgeryPool.value,surgeryReferences:surgeryInitialReferences.value||surgerySelection.value?{...(surgeryInitialReferences.value||surgerySelection.value)}:null,bedMode:needsBed.value,bedBound:bedWasBound.value,ward:serviceWard.value,bedReferences:bedInitialReferences.value||bedSelection.value?{...(bedInitialReferences.value||bedSelection.value)}:null,rosterMode:needsRoster.value,rosterBound:rosterWasBound.value,department:serviceDepartment.value,rosterReferences:rosterInitialReferences.value||rosterSelection.value?{...(rosterInitialReferences.value||rosterSelection.value)}:null, sofaMode:needsSofa.value, sofaBound:sofaWasBound.value, sofaReferences:sofaWasBound.value?{...sofaInitialReferences.value}:requireSofaSelection&&sofaSelection.value?{...sofaSelection.value}:null, key: supportIdentity(), version: selectionVersion, mode: needsSupport.value, patient: patientId.value, admission: encounterRef.value, references: needsSupport.value ? { ...supportReferences.value } : null }; }
-const supportCurrent = ticket => viewActive.value && ticket.version === selectionVersion && ticket.key === supportIdentity();
+const supportCurrent = ticket => !documentLifecycle.value && viewActive.value && ticket.version === selectionVersion && ticket.key === supportIdentity();
+watch(documentLifecycle,value=>{if(!value)return;selectionVersion++;historyVersion++;patientLoadVersion++;formVersion++;stopPolling();run.value=null;history.value=[];contextData.value=null;contextDialog.value=false;evidence.value=null;evidenceDialog.value=false;feedbackDialog.value=false;patients.value=[];encounters.value=[];prescriptions.value=[];patientId.value=null;encounterRef.value='';prescriptionId.value=null;question.value='';extraInput.value='';preview.value=false;},{flush:'sync'});
+
 async function acceptSupportRun(value, ticket) {
   if(ticket.codingMode||ticket.codingBound||codingRunHasMarkers(value)){
     if(!supportCurrent(ticket))return false;
@@ -478,6 +487,7 @@ function startPolling() {
   timer = setTimeout(poll, 1200);
 }
 async function searchPatients(keyword = "") {
+  if(documentLifecycle.value)return;
   if (selected.value?.scope !== "patient" || needsSupport.value && !supportModeReady.value && !(store.getters["user/permissions"] || []).some(role => selected.value?.allowed_roles?.includes(role))) return;
   const version = formVersion;
   const response = await getAIPatients({ feature_key: featureKey.value, keyword });
@@ -489,6 +499,7 @@ watch(featureKey, async () => {
   formVersion += 1; stopPolling(); run.value = null; contextData.value = null;
   const featureVersion = formVersion;
   patientId.value = null; encounters.value = []; prescriptions.value = []; encounterRef.value = ""; prescriptionId.value = null;
+  if(documentLifecycle.value){question.value="";codingQuery.value="";extraInput.value="";return;}
   question.value = props.initialInput.question || ""; codingQuery.value = props.initialInput.icd_query || ""; extraInput.value = "";
   incidentId.value = props.initialInput.adverse_event_id == null ? "" : String(props.initialInput.adverse_event_id);
   pathwayId.value = props.initialInput.pathway_id == null ? null : String(props.initialInput.pathway_id);
@@ -512,6 +523,7 @@ watch(featureKey, async () => {
   }
 });
 watch(patientId, async id => {
+  if(documentLifecycle.value){patientLoading.value=false;return;}
   const patientVersion = ++patientLoadVersion;
   patientLoading.value = !!id;
   riskWindowSelection.value = null; riskWindowReady.value = false;
@@ -537,9 +549,9 @@ watch(patientId, async id => {
 watch(encounterRef, () => { if(codingLifecycle.value){codingHome.value=null;invalidateCoding();} sofaSelection.value=null;sofaReady.value=false;stopPolling(); run.value = null; contextData.value = null; riskWindowSelection.value = null; riskWindowReady.value = false; });
 watch(()=>[selected.value?.input_mode,selected.value?.revision,selected.value?.provider_id,selected.value?.provider_revision,selected.value?.validation_status,selected.value?.enabled,supportCanonical(selected.value?.allowed_roles||[]),supportCanonical(codingInitialReferences.value),props.initialInput.home_id],()=>{if(codingLifecycle.value||codingWasBound.value){codingInputKey.value++;codingHome.value=null;invalidateCoding();}},{flush:'sync'});
 watch(()=>selected.value?.input_mode,()=>{sofaSelection.value=null;sofaReady.value=false;},{flush:"sync"});
-watch(()=>selected.value?.input_mode,async(mode,previous)=>{if(previous!=='roster'||mode==='roster'||featureKey.value!=='roster_optimization'||rosterWasBound.value)return;const version=++formVersion;serviceOptionsLoading.value=true;try{const response=await getAIServiceOptions({feature_key:featureKey.value});if(version!==formVersion||needsRoster.value||!viewActive.value)return;serviceOptions.value=response.data||{};if(!operationsRange.value.length)operationsRange.value=serviceOptions.value.default_window||[];if(!operationsPlanRange.value.length)operationsPlanRange.value=serviceOptions.value.default_planning_window||[];}finally{if(version===formVersion)serviceOptionsLoading.value=false;}},{flush:'post'});
+watch(()=>selected.value?.input_mode,async(mode,previous)=>{if(documentLifecycle.value)return;if(previous!=='roster'||mode==='roster'||featureKey.value!=='roster_optimization'||rosterWasBound.value)return;const version=++formVersion;serviceOptionsLoading.value=true;try{const response=await getAIServiceOptions({feature_key:featureKey.value});if(version!==formVersion||needsRoster.value||!viewActive.value)return;serviceOptions.value=response.data||{};if(!operationsRange.value.length)operationsRange.value=serviceOptions.value.default_window||[];if(!operationsPlanRange.value.length)operationsPlanRange.value=serviceOptions.value.default_planning_window||[];}finally{if(version===formVersion)serviceOptionsLoading.value=false;}},{flush:'post'});
 watch(()=>[selected.value?.input_mode,selected.value?.revision,selected.value?.provider_id,selected.value?.provider_revision,selected.value?.validation_status,selected.value?.enabled,JSON.stringify(selected.value?.allowed_roles),serviceDepartment.value,supportCanonical(rosterInitialReferences.value)],()=>{if(rosterLifecycle.value){rosterInputKey.value++;invalidateRoster();}},{flush:'sync'});
-watch(()=>selected.value?.input_mode,async(mode,previous)=>{if(previous!=='bed'||mode==='bed'||featureKey.value!=='bed_forecast'||bedWasBound.value)return;const version=++formVersion;serviceOptionsLoading.value=true;try{const response=await getAIServiceOptions({feature_key:featureKey.value});if(version!==formVersion||needsBed.value||!viewActive.value)return;serviceOptions.value=response.data||{};if(!operationsRange.value.length)operationsRange.value=serviceOptions.value.default_window||[];}finally{if(version===formVersion)serviceOptionsLoading.value=false;}},{flush:'post'});
+watch(()=>selected.value?.input_mode,async(mode,previous)=>{if(documentLifecycle.value)return;if(previous!=='bed'||mode==='bed'||featureKey.value!=='bed_forecast'||bedWasBound.value)return;const version=++formVersion;serviceOptionsLoading.value=true;try{const response=await getAIServiceOptions({feature_key:featureKey.value});if(version!==formVersion||needsBed.value||!viewActive.value)return;serviceOptions.value=response.data||{};if(!operationsRange.value.length)operationsRange.value=serviceOptions.value.default_window||[];}finally{if(version===formVersion)serviceOptionsLoading.value=false;}},{flush:'post'});
 watch(()=>[selected.value?.input_mode,selected.value?.revision,selected.value?.provider_id,selected.value?.provider_revision,selected.value?.validation_status,selected.value?.enabled,JSON.stringify(selected.value?.allowed_roles),supportCanonical(bedInitialReferences.value)],()=>{if(bedLifecycle.value){bedInputKey.value++;invalidateBed();}},{flush:'sync'});
 watch([serviceDepartment,serviceWard],()=>{if(bedLifecycle.value)invalidateBed();},{flush:'sync'});
 watch(()=>props.initialInput.department_id,value=>{if(surgeryLifecycle.value)serviceDepartment.value=value??null;else if(bedLifecycle.value)serviceDepartment.value=value||null;},{flush:'sync'});
@@ -548,11 +560,11 @@ watch(()=>props.initialInput.ward_id,value=>{if(bedLifecycle.value)serviceWard.v
 watch(()=>[selected.value?.input_mode,selected.value?.revision,selected.value?.provider_id,selected.value?.provider_revision,selected.value?.validation_status,selected.value?.enabled,supportCanonical(selected.value?.allowed_roles||[]),supportCanonical(surgeryInitialReferences.value)],()=>{if(surgeryLifecycle.value){surgeryInputKey.value++;invalidateSurgery();}},{flush:'sync'});
 watch([serviceDepartment,serviceSurgeryPool],()=>{if(surgeryLifecycle.value)invalidateSurgery();},{flush:'sync'});
 watch(()=>[supportCanonical(props.initialInput.surgery_application_ids??null),props.initialInput.surgery_application_id],()=>{if(surgeryLifecycle.value){surgeryInputKey.value++;invalidateSurgery();}},{flush:'sync'});
-watch(()=>selected.value?.input_mode,async(mode,previous)=>{if(previous!=='surgery'||mode==='surgery'||featureKey.value!=='surgery_scheduling'||surgeryWasBound.value)return;const version=++formVersion;serviceOptionsLoading.value=true;try{const response=await getAIServiceOptions({feature_key:featureKey.value});if(version!==formVersion||needsSurgery.value||!viewActive.value)return;serviceOptions.value=response.data||{};if(!operationsRange.value.length)operationsRange.value=serviceOptions.value.default_window||[];if(!operationsPlanRange.value.length)operationsPlanRange.value=serviceOptions.value.default_planning_window||[];}finally{if(version===formVersion)serviceOptionsLoading.value=false;}},{flush:'post'});
+watch(()=>selected.value?.input_mode,async(mode,previous)=>{if(documentLifecycle.value)return;if(previous!=='surgery'||mode==='surgery'||featureKey.value!=='surgery_scheduling'||surgeryWasBound.value)return;const version=++formVersion;serviceOptionsLoading.value=true;try{const response=await getAIServiceOptions({feature_key:featureKey.value});if(version!==formVersion||needsSurgery.value||!viewActive.value)return;serviceOptions.value=response.data||{};if(!operationsRange.value.length)operationsRange.value=serviceOptions.value.default_window||[];if(!operationsPlanRange.value.length)operationsPlanRange.value=serviceOptions.value.default_planning_window||[];}finally{if(version===formVersion)serviceOptionsLoading.value=false;}},{flush:'post'});
 watch(()=>[selected.value?.input_mode,selected.value?.revision,selected.value?.provider_id,selected.value?.provider_revision,selected.value?.validation_status,selected.value?.enabled,supportCanonical(selected.value?.allowed_roles||[]),supportCanonical(nativeInventoryInitialReferences.value),props.initialInput.item_kind,props.initialInput.item_id],()=>{if(nativeInventoryLifecycle.value){nativeInventoryInputKey.value++;nativeInventoryScope.value=null;invalidateNativeInventory();}},{flush:'sync'});
-watch(()=>selected.value?.input_mode,async(mode,previous)=>{if(previous!=='inventory'||mode==='inventory'||featureKey.value!=='inventory_optimization'||nativeInventoryWasBound.value)return;const version=++formVersion;serviceOptionsLoading.value=true;try{const response=await getAIServiceOptions({feature_key:featureKey.value});if(version!==formVersion||needsNativeInventory.value||!viewActive.value)return;serviceOptions.value=response.data||{};if(!operationsRange.value.length)operationsRange.value=serviceOptions.value.default_window||[];}finally{if(version===formVersion)serviceOptionsLoading.value=false;}},{flush:'post'});
+watch(()=>selected.value?.input_mode,async(mode,previous)=>{if(documentLifecycle.value)return;if(previous!=='inventory'||mode==='inventory'||featureKey.value!=='inventory_optimization'||nativeInventoryWasBound.value)return;const version=++formVersion;serviceOptionsLoading.value=true;try{const response=await getAIServiceOptions({feature_key:featureKey.value});if(version!==formVersion||needsNativeInventory.value||!viewActive.value)return;serviceOptions.value=response.data||{};if(!operationsRange.value.length)operationsRange.value=serviceOptions.value.default_window||[];}finally{if(version===formVersion)serviceOptionsLoading.value=false;}},{flush:'post'});
 watch(()=>[selected.value?.input_mode,selected.value?.revision,selected.value?.provider_id,selected.value?.provider_revision,selected.value?.validation_status,selected.value?.enabled,supportCanonical(selected.value?.allowed_roles||[]),supportCanonical(supplyInitialReferences.value),props.initialInput.item_kind,props.initialInput.item_id],()=>{if(supplyLifecycle.value){supplyInputKey.value++;supplyScope.value=null;invalidateSupply();}},{flush:'sync'});
-watch(()=>selected.value?.input_mode,async(mode,previous)=>{if(previous!=='supply'||mode==='supply'||featureKey.value!=='supply_forecast'||supplyWasBound.value)return;const version=++formVersion;serviceOptionsLoading.value=true;try{const response=await getAIServiceOptions({feature_key:featureKey.value});if(version!==formVersion||needsSupply.value||!viewActive.value)return;serviceOptions.value=response.data||{};if(!operationsRange.value.length)operationsRange.value=serviceOptions.value.default_window||[];}finally{if(version===formVersion)serviceOptionsLoading.value=false;}},{flush:'post'});
+watch(()=>selected.value?.input_mode,async(mode,previous)=>{if(documentLifecycle.value)return;if(previous!=='supply'||mode==='supply'||featureKey.value!=='supply_forecast'||supplyWasBound.value)return;const version=++formVersion;serviceOptionsLoading.value=true;try{const response=await getAIServiceOptions({feature_key:featureKey.value});if(version!==formVersion||needsSupply.value||!viewActive.value)return;serviceOptions.value=response.data||{};if(!operationsRange.value.length)operationsRange.value=serviceOptions.value.default_window||[];}finally{if(version===formVersion)serviceOptionsLoading.value=false;}},{flush:'post'});
 watch([needsNews2, () => riskWindowSelection.value?.observation_window_id, () => riskWindowSelection.value?.content_hash, riskWindowReady], () => { news2Selection.value = null; news2Ready.value = false; });
 watch([needsAki, () => riskWindowSelection.value?.observation_window_id, () => riskWindowSelection.value?.content_hash, riskWindowReady], () => { akiSelection.value = null; akiReady.value = false; });
 watch([needsQsofa, () => riskWindowSelection.value?.observation_window_id, () => riskWindowSelection.value?.content_hash, riskWindowReady], () => { qsofaSelection.value = null; qsofaReady.value = false; });
@@ -566,8 +578,8 @@ watch(() => run.value?.run_id, () => { evidence.value=null; evidenceDialog.value
 watch(serviceDepartment, id => { const doctor = serviceOptions.value.doctors?.find(item => item.doctor_id === serviceDoctor.value); if (id && doctor && doctor.department_id !== id) serviceDoctor.value = null; });
 watch([()=>codingLifecycle.value?supportCanonical(codingSelection.value):null,()=>codingLifecycle.value?codingHome.value:null,()=>nativeInventoryLifecycle.value?supportCanonical(nativeInventoryScope.value):null,()=>nativeInventoryLifecycle.value?supportCanonical(nativeInventorySelection.value):null,()=>supplyLifecycle.value?supportCanonical(supplyScope.value):null,()=>supplyLifecycle.value?supportCanonical(supplySelection.value):null,featureKey, patientId, encounterRef,()=>(rosterLifecycle.value||bedLifecycle.value||surgeryLifecycle.value||supplyLifecycle.value||nativeInventoryLifecycle.value)?serviceDepartment.value:null,()=>surgeryLifecycle.value?serviceSurgeryPool.value:null,()=>surgeryLifecycle.value?supportCanonical(surgerySelection.value):'',()=>bedLifecycle.value?serviceWard.value:null,()=>bedLifecycle.value?JSON.stringify(bedSelection.value):'',()=>rosterLifecycle.value?JSON.stringify(rosterSelection.value):'',()=>(rosterLifecycle.value||bedLifecycle.value||surgeryLifecycle.value||supplyLifecycle.value||nativeInventoryLifecycle.value)?JSON.stringify(selected.value):''], () => { historyVersion += 1; history.value = []; if (historyOpen) loadHistory(); });
 watch(() => props.initialFeature, key => { if (features.value.some(item => item.key === key)) featureKey.value = key; });
-watch(() => props.patientId, id => { formVersion += 1; patientId.value = id; });
-watch(() => props.encounterRef, value => { encounterRef.value = needsIncident.value ? "" : value; });
+watch(() => props.patientId, id => { formVersion += 1; patientId.value = documentLifecycle.value?null:id; });
+watch(() => props.encounterRef, value => { encounterRef.value = documentLifecycle.value||needsIncident.value ? "" : value; });
 watch(() => props.initialInput.adverse_event_id, value => { incidentId.value = value == null ? "" : String(value); });
 watch(() => props.initialInput.pathway_id, value => { pathwayId.value = value == null ? null : String(value); });
 watch(() => props.initialInput.audio_asset_id, value => { audioAssetId.value = value == null ? "" : String(value); });
@@ -585,6 +597,7 @@ watch([featureKey, patientId, encounterRef], async () => {
   finally { if (version === pathwayOptionsVersion) pathwayOptionsLoading.value = false; }
 }, { flush: "post" });
 async function inspectContext() {
+  if(documentLifecycle.value)return;
   const input = buildTaskInput(); if (!input) return;
   const version = selectionVersion, supportTicket = captureSupport();
   const sourceKeys = needsSofa.value ? ["sofa_assessment_id","sofa_change_assessment_id"] : needsSupport.value ? ["support_source_id", "support_source_kind"] : needsRiskWindow.value ? ["observation_window_id", "news2_assessment_id", "aki_assessment_id", "qsofa_assessment_id"] : selected.value?.source_reference_keys || ["record_id", "structured_record_id", "prescription_id", "lab_result_id", "imaging_report_id"];
@@ -597,6 +610,7 @@ async function inspectContext() {
   contextData.value = response.data; contextDialog.value = true;
 }
 async function inspectOperationalContext() {
+  if(documentLifecycle.value)return;
   const input = buildTaskInput(); if (!input) return;
   const version = selectionVersion,ticket=captureSupport();
   let response;try{response=await getAIOperationalContext({feature_key:featureKey.value,input});}catch(failure){if(rosterLifecycle.value||bedLifecycle.value||surgeryLifecycle.value||supplyLifecycle.value||nativeInventoryLifecycle.value){clearUnavailableSupport(ticket);return;}throw failure;}
@@ -609,6 +623,7 @@ async function inspectOperationalContext() {
   contextData.value = response.data; contextDialog.value = true;
 }
 function buildTaskInput() {
+  if(documentLifecycle.value)throw new Error("原文提取须在独立原件面板提交");
   if(needsCodingEvidence.value||codingWasBound.value||codingLifecycle.value){if(!codingModeReady.value){ElMessage.warning('请在编码证据复核模式下核对原患者、住院与首页，并明确选择一件当前完整受审证据');return;}return{...codingSelection.value,question:question.value};}
   if(needsNativeInventory.value||nativeInventoryWasBound.value){if(!nativeInventoryModeReady.value){ElMessage.warning('请在本地库存比较模式下明确选择真实品种与当前完整受审候选场景');return;}return{...nativeInventorySelection.value,question:question.value};}
   if(needsSupply.value||supplyWasBound.value){if(!supplyModeReady.value){ElMessage.warning('请在本地物资预测模式下明确选择真实品种、当前完整受审序列及7或14天期限');return;}return{...supplySelection.value,question:question.value};}
@@ -683,6 +698,7 @@ async function expandQueuedReply(value,request,ticket){
   return response.data;
 }
 async function submit() {
+  if(documentLifecycle.value)return;
   const input = buildTaskInput(); if (!input) return;
   submitting.value = true;
   stopPolling(); const selection = selectionVersion, view = pollVersion, supportTicket = captureSupport(true);
@@ -699,11 +715,13 @@ async function submit() {
   } finally { submitting.value = false; }
 }
 async function refreshRun() {
+  if(documentLifecycle.value)return;
   if(!run.value)return;stopPolling();const id=run.value.run_id,selection=selectionVersion,view=pollVersion,supportTicket=captureSupport();
   try{const response=await getAIRun(id);if(selection!==selectionVersion||view!==pollVersion||id!==run.value?.run_id||!requestedRunMatches(response.data,id,supportTicket)||!await acceptSupportRun(response.data,supportTicket)||selection!==selectionVersion||view!==pollVersion)return;run.value=response.data;startPolling();}
   catch(failure){if(codingLifecycle.value||supportLifecycle.value||sofaLifecycle.value||rosterLifecycle.value||bedLifecycle.value||surgeryLifecycle.value||supplyLifecycle.value||nativeInventoryLifecycle.value){clearUnavailableSupport(supportTicket);return;}throw failure;}
 }
 async function openRun(id) {
+  if(documentLifecycle.value)return;
   if((codingLifecycle.value&&(!codingAuthorized.value||!codingHistoryScopeReady.value))||(nativeInventoryLifecycle.value&&!nativeInventoryAuthorized.value)||(supplyLifecycle.value&&!supplyAuthorized.value)||(surgeryLifecycle.value&&(!surgeryAuthorized.value||!surgeryCohortValid.value))||(rosterLifecycle.value&&!rosterAuthorized.value)||(bedLifecycle.value&&!bedAuthorized.value))return;
   stopPolling();const selection=selectionVersion,view=pollVersion,supportTicket=captureSupport();
   try{const response=await getAIRun(id);if(selection!==selectionVersion||view!==pollVersion||!requestedRunMatches(response.data,id,supportTicket)||!await acceptSupportRun(response.data,supportTicket)||selection!==selectionVersion||view!==pollVersion)return;run.value=response.data;startPolling();}
@@ -711,6 +729,7 @@ async function openRun(id) {
 }
 async function cancel() { const ticket=captureSupport(),id=run.value?.run_id;if(!id)return;try{await cancelAIRun(id);if(!supportCurrent(ticket)||run.value?.run_id!==id)return;await refreshRun();}catch(failure){if(codingLifecycle.value||supplyLifecycle.value||nativeInventoryLifecycle.value){clearUnavailableSupport(ticket);return;}throw failure;} }
 async function loadHistory(activeNames) {
+  if(documentLifecycle.value)return;
   if (activeNames !== undefined) historyOpen = activeNames.length > 0;
   if((codingLifecycle.value&&(!codingAuthorized.value||!codingHistoryScopeReady.value))||(nativeInventoryLifecycle.value&&!nativeInventoryAuthorized.value)||(supplyLifecycle.value&&!supplyAuthorized.value)||(surgeryLifecycle.value&&(!surgeryAuthorized.value||!surgeryCohortValid.value))||(rosterLifecycle.value&&!rosterAuthorized.value)||(bedLifecycle.value&&!bedAuthorized.value))return;
   if((needsSurgery.value||surgeryWasBound.value||surgeryCaseCohortBound.value)&&(!needsSurgery.value||!serviceSurgeryPool.value&&!(surgeryInitialReferences.value||surgerySelection.value)?.surgery_scenario_id)){history.value=[];return;}

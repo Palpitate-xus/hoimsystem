@@ -55,11 +55,16 @@ class AIResearchCohortRunArtifact(Base):
     metadata_hash = Column(String(64), nullable=False)
     created_audit_event_id = Column(Integer, ForeignKey("hoimsystem_ai_audit_event.event_id"), nullable=False)
     usage_event_id = Column(Integer, ForeignKey("hoimsystem_ai_audit_event.event_id"), nullable=True)
+    dispatch_event_id = Column(Integer, ForeignKey("hoimsystem_ai_audit_event.event_id", name="fk_rcr_dispatch_audit"), nullable=True)
     __table_args__ = (
         CheckConstraint(f"HEX(schema_version)=HEX('{ARTIFACT_SCHEMA}')", name="ck_rcr_artifact_schema"),
         CheckConstraint(
             "requested_by>0 AND prompt_version>=0 AND provider_revision>0 AND config_revision>0 AND created_audit_event_id>0 AND (usage_event_id IS NULL OR (usage_event_id>0 AND usage_event_id<>created_audit_event_id))",
             name="ck_rcr_artifact_positive",
+        ),
+        CheckConstraint(
+            "dispatch_event_id IS NULL OR (dispatch_event_id>0 AND dispatch_event_id<>created_audit_event_id AND (usage_event_id IS NULL OR dispatch_event_id<>usage_event_id))",
+            name="ck_rcr_artifact_dispatch",
         ),
         CheckConstraint("(prompt_id IS NULL AND prompt_version=0) OR (prompt_id IS NOT NULL AND prompt_version>0)", name="ck_rcr_artifact_prompt_origin"),
         CheckConstraint(f"source_bytes>0 AND source_bytes<={SNAPSHOT_BYTES}", name="ck_rcr_artifact_source_bytes"),
@@ -71,6 +76,7 @@ class AIResearchCohortRunArtifact(Base):
         *(_hash_constraint(field, "ck_rcr_artifact_" + field) for field in ANCHOR_HASHES),
         UniqueConstraint("created_audit_event_id", name="uq_rcr_created_audit"),
         UniqueConstraint("usage_event_id", name="uq_rcr_usage_audit"),
+        UniqueConstraint("dispatch_event_id", name="uq_rcr_dispatch_audit"),
         Index("idx_rcr_artifact_case_actor", "case_id", "requested_by", "recorded_at"),
     )
 

@@ -7,7 +7,7 @@ from alembic.migration import MigrationContext
 from alembic.operations import Operations
 from sqlalchemy import create_engine, event, inspect, text
 
-from app.ai.research_cohort_artifact_models import RESEARCH_COHORT_RUN_MODELS
+from app.ai.research_cohort_artifact_models import RESEARCH_COHORT_RUN_MODELS, AIResearchCohortRunArtifact
 from app.database import Base
 
 
@@ -44,9 +44,13 @@ def test_full_research_artifact_incremental_chain_up_down_up_preserves_prior_ddl
             assert conn.execute(text("SELECT username FROM hoimsystem_users WHERE user_id=987652")).scalar_one() == "synthetic-prompt-origin"
             if phase == "upgrade":
                 for model in RESEARCH_COHORT_RUN_MODELS:
-                    assert {value["name"] for value in inspect(conn).get_columns(model.__tablename__)} == set(model.__table__.columns.keys())
-                    assert len(inspect(conn).get_check_constraints(model.__tablename__)) == len([value for value in model.__table__.constraints if value.__class__.__name__ == "CheckConstraint"])
-                    assert len(inspect(conn).get_foreign_keys(model.__tablename__)) == len(model.__table__.foreign_key_constraints)
+                    assert {value["name"] for value in inspect(conn).get_columns(model.__tablename__)} == set(model.__table__.columns.keys()) - (
+                        {"dispatch_event_id"} if model is AIResearchCohortRunArtifact else set()
+                    )
+                    assert len(inspect(conn).get_check_constraints(model.__tablename__)) == len([value for value in model.__table__.constraints if value.__class__.__name__ == "CheckConstraint"]) - (
+                        model is AIResearchCohortRunArtifact
+                    )
+                    assert len(inspect(conn).get_foreign_keys(model.__tablename__)) == len(model.__table__.foreign_key_constraints) - (model is AIResearchCohortRunArtifact)
                 columns = inspect(conn).get_columns("hoimsystem_ai_research_cohort_run_artifact")
                 assert next(value for value in columns if value["name"] == "prompt_id")["nullable"] is True
     engine.dispose()

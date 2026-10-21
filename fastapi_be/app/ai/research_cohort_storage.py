@@ -363,6 +363,7 @@ def freeze_artifact(db, user, run_id, case_id, *, question=None):
         "context_digest": context,
         **{key: _sha(raw[field]) for key, field in zip(("input_hash", "evidence_hash", "metadata_hash"), RAW_FIELDS, strict=True)},
         "usage_event_id": None,
+        "dispatch_event_id": None,
     }
     detail = canonical_json(_created_detail(values, run))
     audit = AIAuditEvent(actor_id=actor.user_id, action="research.task.artifact.create", target=run_id, detail_json=detail)

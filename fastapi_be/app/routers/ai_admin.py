@@ -1064,7 +1064,7 @@ def update_provider(provider_id: int, req: ProviderWrite, db: Session = Depends(
 @router.get("/ai/admin/prompts/{key}")
 def list_prompts(key: str, db: Session = Depends(get_db), user: User = Depends(require_roles("super_admin"))) -> dict:
     """Display the fixed system contract and immutable task prompt history."""
-    from app.ai.document_extraction_prompt import system_prompt_for
+    from app.ai.feature_prompts import system_prompt_for_feature
 
     _current_super_admin(db, user)
     spec = get_spec(key)
@@ -1074,7 +1074,7 @@ def list_prompts(key: str, db: Session = Depends(get_db), user: User = Depends(r
     return {
         "code": 200,
         "msg": "success",
-        "data": {"system_prompt": system_prompt_for({"document_binding": None} if spec.number == 71 else {"coding_binding": None} if spec.number == 68 else {}), "versions": [*data, baseline]},
+        "data": {"system_prompt": system_prompt_for_feature(spec), "versions": [*data, baseline]},
     }
 
 

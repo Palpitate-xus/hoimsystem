@@ -2,7 +2,7 @@
 
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 
@@ -20,7 +20,10 @@ router = APIRouter(prefix="/ai/research-cohort", tags=["Research cohort source r
 def reply(value):
     # Exact Source UTC6 strings and literal original text never pass through a
     # response model which could rewrite their original serialized bytes.
-    return JSONResponse({"code": 200, "msg": "success", "data": value})
+    response = JSONResponse({"code": 200, "msg": "success", "data": value})
+    if len(response.body) > 32 * 1024 * 1024:
+        raise HTTPException(413, "组合科研来源回执超过32MiB；单件原件和公开投影仍各限8MiB")
+    return response
 
 
 @router.post("/scopes")

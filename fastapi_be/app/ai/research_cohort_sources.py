@@ -13,7 +13,7 @@ import uuid
 from fastapi import HTTPException
 from pydantic import TypeAdapter, ValidationError
 
-from app.ai.research_cohort_contract import UTC, UUID, AuthorizationReview, ScopeCreate, SourceReview, SourceRevoke, canonical_json
+from app.ai.research_cohort_contract import UTC, UUID, AuthorizationReview, Basis, ScopeCreate, SourceReview, SourceRevoke, canonical_json
 from app.ai.research_cohort_models import PARENT_BYTES, SOURCE_BYTES, AIResearchStudyScope
 from app.ai.research_cohort_write_guard import RESEARCH_SOURCE_ROLES, current_actor, current_research_rows, lock_research_write
 
@@ -119,6 +119,7 @@ def _verify_governance(identity, governance, manual):
         by, at, note = (manual[key] for key in ("authorization_reviewed_by", "authorization_reviewed_at", "authorization_review_basis"))
         if type(by) is not int or by < 1 or by == identity["created_by"] or type(note) is not str or not note.strip() or len(note.encode("utf-8")) > 4000:
             raise ValueError("Actual independent manual signature required")
+        TypeAdapter(Basis).validate_python(note, strict=True)
         TypeAdapter(UTC).validate_python(at, strict=True)
         if at < identity["created_at"] or reviewed and at > governance["reviewed_at"]:
             raise ValueError("Manual review clock differs")

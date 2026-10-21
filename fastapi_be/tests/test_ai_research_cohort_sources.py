@@ -210,3 +210,14 @@ def test_own_original_corruption_is_not_bypassed_by_super_frozen_registry_audit(
     with pytest.raises(HTTPException) as error:
         scope_current(db, case["super_admin_user"], made["scope_id"], audit_only=True)
     assert error.value.status_code == 409
+
+
+@pytest.mark.parametrize("note", ["x", "\ufeff" * 20])
+def test_scope_own_manual_signature_rejects_raw_sql_short_or_meaningless_basis_even_super(db_session, research_case, note):
+    db, case = db_session, research_case
+    _, _, made = complete_scope(db, case)
+    db.execute(text("UPDATE hoimsystem_ai_research_study_scope SET authorization_review_basis=:note WHERE scope_id=:id"), {"note": note, "id": made["scope_id"]})
+    db.commit()
+    with pytest.raises(HTTPException) as error:
+        scope_current(db, case["super_admin_user"], made["scope_id"], audit_only=True)
+    assert error.value.status_code == 409

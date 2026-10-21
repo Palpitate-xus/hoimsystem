@@ -5,7 +5,7 @@ import uuid
 
 import pytest
 from fastapi import HTTPException
-from sqlalchemy import event, func, update
+from sqlalchemy import delete, event, func, update
 
 from app.ai import charge_reconciliation_runtime as runtime
 from app.ai import charge_reconciliation_sources as sources
@@ -204,3 +204,22 @@ def test_actual_creation_audit_post_insert_fault_rolls_back_task_and_artifact(ch
         event.remove(connection, "after_cursor_execute", fault)
         db.rollback()
     assert (db.query(AIRun).count(), db.query(AIChargeRunArtifact).count()) == before
+
+
+@pytest.mark.parametrize("model_name", ["config", "provider", "prompt"])
+def test_deleted_current_configuration_cannot_reuse_a_retained_identity_cache(charge_case, model_name):
+    case, db = charge_case, charge_case["db"]
+    actor, req, _, provider, config = configured(case, custom_prompt=True)
+    run = runtime.create_charge_run(db, actor, req)
+    prompt = db.get(AIPromptVersion, config.active_prompt_id)
+    model, identifier = {"config": (AIFeatureConfig, config.feature_key), "provider": (AIProvider, provider.provider_id), "prompt": (AIPromptVersion, prompt.prompt_id)}[model_name]
+    row = db.get(model, identifier)
+    primary = tuple(model.__table__.primary_key.columns)[0]
+    # Actual SQL removes the row without expiring the already-retained ORM object.
+    # Missing foreign parents are fault injection here, not a MySQL FK claim.
+    db.connection().execute(delete(model).where(primary == identifier))
+    assert db.get(model, identifier) is row
+    with pytest.raises(HTTPException) as caught:
+        runtime.recheck(db, run)
+    assert caught.value.status_code == 409
+    db.rollback()

@@ -38,10 +38,15 @@ def _configuration(db, actor, preview, *, writing=False):
     from app.ai.runtime import authorized_feature, check_configuration
 
     config = db.query(AIFeatureConfig).filter_by(feature_key=FEATURE_KEY).populate_existing().with_for_update(read=not writing).one_or_none()
-    if config is not None and config.provider_id is not None:
-        db.query(AIProvider).filter_by(provider_id=config.provider_id).populate_existing().with_for_update(read=True).one_or_none()
-    if config is not None and config.active_prompt_id is not None:
-        db.query(AIPromptVersion).filter_by(prompt_id=config.active_prompt_id).populate_existing().with_for_update(read=True).one_or_none()
+    if config is None or config.provider_id is None:
+        raise HTTPException(409, "完整账目功能的当前模型配置不可用")
+    current_provider = db.query(AIProvider).filter_by(provider_id=config.provider_id).populate_existing().with_for_update(read=True).one_or_none()
+    if current_provider is None:
+        raise HTTPException(409, "完整账目功能的当前模型服务不存在")
+    if config.active_prompt_id is not None:
+        current_prompt = db.query(AIPromptVersion).filter_by(prompt_id=config.active_prompt_id).populate_existing().with_for_update(read=True).one_or_none()
+        if current_prompt is None or current_prompt.feature_key != FEATURE_KEY:
+            raise HTTPException(409, "完整账目功能的当前Prompt不存在或不属于本功能")
     spec, config = authorized_feature(db, actor, FEATURE_KEY)
     provider = check_configuration(db, actor, spec, config, preview)
     if provider.kind not in {"chat", "responses"}:

@@ -72,7 +72,9 @@ def identifier(value):
 
 
 def audit_event(db, actor_id, action, target, detail, clock):
-    event = AIAuditEvent(actor_id=actor_id, action=action, target=target, detail_json=bounded_json(detail, 65535), create_time=clock)
+    # The legacy audit column is MySQL DATETIME(0). Bind exact UTC6 in the
+    # closed detail; explicitly store its whole second without DB rounding.
+    event = AIAuditEvent(actor_id=actor_id, action=action, target=target, detail_json=bounded_json(detail, 65535), create_time=clock.replace(microsecond=0))
     db.add(event)
     db.flush()
     if type(event.event_id) is not int or event.event_id < 1:
@@ -86,7 +88,7 @@ def verify_event(db, event_id, actor_id, action, target, detail, clock):
     with db.no_autoflush:
         event = current_rows(db.query(AIAuditEvent).filter_by(event_id=event_id), shared=True).one_or_none()
     try:
-        if event is None or event.actor_id != actor_id or event.action != action or event.target != target or event.create_time != clock:
+        if event is None or event.actor_id != actor_id or event.action != action or event.target != target or event.create_time != clock.replace(microsecond=0):
             raise ValueError("The specific stored event differs")
         if c.canonical_json(_value(event.detail_json)) != c.canonical_json(detail):
             raise ValueError("The specific event does not bind this complete technical identity")

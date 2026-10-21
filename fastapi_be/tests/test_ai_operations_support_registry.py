@@ -176,3 +176,18 @@ def test_internal_publication_can_explicitly_deny_model_processing():
         revision=1, decision="publish", privacy_reviewed=True, faithfulness_reviewed=True, applicability_reviewed=True, model_processing_allowed=False, basis="明确内部适用性核查，未批准模型处理"
     )
     assert value.model_processing_allowed is False
+
+
+@pytest.mark.parametrize("microsecond", [0, 123456, 654321, 999999])
+def test_exact_source_utc6_uses_explicit_whole_second_in_unchanged_legacy_audit_column(source, monkeypatch, microsecond):
+    db, actor, _ = source
+    clock = dt.datetime(2026, 10, 21, 18, 0, 0, microsecond)
+    monkeypatch.setattr(registry, "utcnow", lambda: clock)
+    made = registry.register_original(db, actor, request())
+    db.commit()
+    db.expire_all()
+    original = registry.get_original(db, actor, made["original_id"], include_body=True)
+    actual = db.get(AIAuditEvent, made["creation_event_id"])
+    assert actual.create_time == clock.replace(microsecond=0)
+    assert original["captured_at"] == registry.utc_text(clock)
+    assert json.loads(actual.detail_json)["captured_at"] == original["captured_at"]

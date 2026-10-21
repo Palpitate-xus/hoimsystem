@@ -167,6 +167,39 @@ async def test_actual_main_queued_cancellation_has_specific_known_zero_receipt_a
 
 
 @pytest.mark.asyncio
+async def test_actual_main_withdrawn_source_refuses_before_selecting_private_task_text(async_client, shared_case, auth_headers):
+    case, db = shared_case, shared_case["db"]
+    headers, super_headers = auth_headers(case["actor_name"]), auth_headers(case["super_name"])
+    created = await async_client.post("/api/ai/runs", headers=headers, json=case["req"])
+    assert created.status_code == 200, created.text
+    identifier = created.json()["data"]["run_id"]
+    revoked = await async_client.post(
+        f"/api/ai/satisfaction-sources/cases/{case['made']['case_id']}/revoke",
+        headers=super_headers,
+        json={"expected_revision": 2, "basis_note": "合成测试：先撤销来源，再确认任务私有正文没有提前读取。"},
+    )
+    assert revoked.status_code == 200, revoked.text
+    statements = []
+
+    def capture(_connection, _cursor, statement, _parameters, _context, _many):
+        if statement.lstrip().upper().startswith("SELECT"):
+            statements.append(statement)
+
+    engine = db.get_bind()
+    event.listen(engine, "before_cursor_execute", capture)
+    try:
+        refused = await async_client.get(f"/api/ai/runs/{identifier}", headers=headers)
+    finally:
+        event.remove(engine, "before_cursor_execute", capture)
+    assert refused.status_code == 409, refused.text
+    assert statements
+    private_reads = [
+        statement for statement in statements if any(f"hoimsystem_ai_run.{column}" in statement.split("\nFROM", 1)[0] for column in ("input_json", "evidence_json", "context_metadata_json"))
+    ]
+    assert private_reads == [], private_reads
+
+
+@pytest.mark.asyncio
 async def test_current_super_frozen_history_ignores_malformed_live_roles_while_ordinary_history_refuses(async_client, shared_case, auth_headers):
     case, db = shared_case, shared_case["db"]
     headers, super_headers = auth_headers(case["actor_name"]), auth_headers(case["super_name"])

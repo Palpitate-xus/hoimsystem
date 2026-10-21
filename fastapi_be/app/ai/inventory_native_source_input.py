@@ -112,6 +112,8 @@ class InventoryObservation(OriginalPayload):
     reconciliation_basis_note: Basis
     legacy_reconciliation: Review
     legacy_reconciliation_basis_note: Basis
+    legacy_quantity_unit_review: Review
+    legacy_quantity_unit_basis_note: Basis
 
     @model_validator(mode="after")
     def actual_observation(self):
@@ -119,7 +121,7 @@ class InventoryObservation(OriginalPayload):
             raise ValueError("Only independent counting has an actual physical observed_at; database capture never invents one")
         if len({row.lot_id for row in self.lots}) != len(self.lots):
             raise ValueError("Original physical lot identities must be unique")
-        for note in (self.coverage_basis_note, self.reconciliation_basis_note, self.legacy_reconciliation_basis_note):
+        for note in (self.coverage_basis_note, self.reconciliation_basis_note, self.legacy_reconciliation_basis_note, self.legacy_quantity_unit_basis_note):
             check_basis(note)
         # Numeric catalog/lot/frozen contradictions are retained as originals.
         # They prevent a known native inventory result, not original recording.
@@ -249,7 +251,7 @@ class SourceCreate(StrictModel):
                 for child in value:
                     yield from quantities(child)
 
-        if absent and any(value["unit_review"] == "confirmed" for value in quantities(values)):
+        if absent and (any(value["unit_review"] == "confirmed" for value in quantities(values)) or values.get("legacy_quantity_unit_review") == "confirmed"):
             raise ValueError("A confirmed inventory quantity requires the original governed unit reference")
         return self
 
@@ -258,3 +260,92 @@ class SourceCreate(StrictModel):
 # semantics: review<=4000UTF8 bytes; revoke<=1000codepoints and4000UTF8 bytes.
 SOURCE_REVIEW = SourceReview
 SOURCE_REVOKE = SourceRevoke
+
+
+class FrozenIdentity(StrictModel):
+    source_record_id: UUID
+    source_kind: SourceKind
+    item_kind: ItemKind
+    item_id: Positive
+    scope: Literal["hospital_inventory"]
+    unit_definition_id: UUID | None
+    date_from: DateText | None
+    date_to: DateText | None
+    timezone: str | None = Field(max_length=100)
+    schema_version: Literal["inventory_native_source_v1"]
+    recorded_at: UtcText
+    created_by: Positive
+
+    @model_validator(mode="after")
+    def exact_period_header(self):
+        absent = [self.date_from is None, self.date_to is None, self.timezone is None]
+        if self.source_kind == "inventory_observation":
+            if not all(absent):
+                raise ValueError("A physical observation does not invent a future-period header")
+        elif any(absent):
+            raise ValueError("A future original requires all of its typed period header")
+        else:
+            period(self)
+        return self
+
+
+class SourceMetadata(FrozenIdentity):
+    source_id: str = Field(max_length=110)
+    content_hash: SHA256
+    governance_hash: SHA256
+    status: Literal["draft", "published", "rejected", "revoked"]
+    revision: int = Field(strict=True, ge=1, le=3)
+    reviewed_by: Positive | None
+    reviewed_at: UtcText | None
+    revoked_by: Positive | None
+    revoked_at: UtcText | None
+
+
+class EligibilityBasis(StrictModel):
+    schema_version: Literal["inventory_current_eligibility_v1"]
+    current_parent_state_hash: SHA256
+    not_professional_or_operational_validation: Literal[True]
+
+
+class SourceWrapper(SourceMetadata):
+    review_basis_note: str | None = Field(max_length=4000)
+    revoke_reason: str | None = Field(max_length=1000)
+    payload: Payload | None
+    parent_binding: dict[str, object] | None
+    professional_status: Literal["confirmed", "unknown"]
+    signer_user_id: Positive | None
+    signed_at: UtcText | None
+    parent_current: bool
+    eligible: bool
+    exclusion_reasons: list[
+        Literal["source_not_published", "original_sku_changed", "original_sku_unavailable", "professional_signature_changed", "unit_definition_changed", "legacy_inventory_changed"]
+    ] = Field(max_length=6)
+    can_record: bool
+    can_review: bool
+    can_revoke: bool
+    audit_only: bool
+    eligibility_basis: EligibilityBasis
+
+
+class CaptureSourceWrapper(SourceWrapper):
+    capture_view: Literal[True]
+
+
+class CapturePeriod(StrictModel):
+    item_kind: ItemKind
+    item_id: Positive
+    scope: Literal["hospital_inventory"]
+    timezone: str = Field(min_length=1, max_length=100)
+    date_from: DateText
+    date_to: DateText
+    as_of: UtcText
+
+    @model_validator(mode="after")
+    def exact_future_domain(self):
+        from datetime import datetime
+        from zoneinfo import ZoneInfo
+
+        period(self)
+        if self.date_from <= datetime.fromisoformat(self.as_of.replace("Z", "+00:00")).astimezone(ZoneInfo(self.timezone)).date().isoformat():
+            raise ValueError("An inventory comparison begins on an explicitly future business date")
+        return self

@@ -33,6 +33,11 @@ class AIInventoryNativeSource(Base):
             name="ck_inventory_source_kind",
         ),
         CheckConstraint(
+            "(source_kind = 'inventory_observation' AND date_from IS NULL AND date_to IS NULL AND timezone IS NULL) OR "
+            "(source_kind IN ('future_quantity_scenario','purchase_candidate_plan') AND date_from IS NOT NULL AND date_to IS NOT NULL AND timezone IS NOT NULL AND date_from <= date_to)",
+            name="ck_inventory_source_period_header",
+        ),
+        CheckConstraint(
             "(status = 'draft' AND revision = 1 AND reviewed_by IS NULL AND reviewed_at IS NULL AND review_basis_note = '' AND revoked_by IS NULL AND revoked_at IS NULL AND revoke_reason = '') OR "
             "(status IN ('published','rejected') AND revision = 2 AND reviewed_by IS NOT NULL AND reviewed_at IS NOT NULL AND review_basis_note <> '' AND revoked_by IS NULL AND revoked_at IS NULL AND revoke_reason = '') OR "
             "(status = 'revoked' AND revoked_by IS NOT NULL AND revoked_at IS NOT NULL AND revoke_reason <> '' AND ((revision = 2 AND reviewed_by IS NULL AND reviewed_at IS NULL AND review_basis_note = '') OR (revision = 3 AND reviewed_by IS NOT NULL AND reviewed_at IS NOT NULL AND review_basis_note <> '')))",
@@ -67,6 +72,9 @@ class AIInventoryNativeSource(Base):
     item_id = Column(Integer, nullable=False)
     scope = Column(String(32), nullable=False)
     unit_definition_id = Column(String(36), nullable=True)
+    date_from = Column(String(10), nullable=True)
+    date_to = Column(String(10), nullable=True)
+    timezone = Column(String(100), nullable=True)
     schema_version = Column(String(48), nullable=False)
     recorded_at = Column(utc6(), nullable=False)
     created_by = Column(Integer, ForeignKey("hoimsystem_users.user_id"), nullable=False)

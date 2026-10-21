@@ -59,6 +59,8 @@ def observation():
         "reconciliation_basis_note": NOTE,
         "legacy_reconciliation": "unknown",
         "legacy_reconciliation_basis_note": NOTE,
+        "legacy_quantity_unit_review": "unknown",
+        "legacy_quantity_unit_basis_note": NOTE,
     }
 
 
@@ -240,6 +242,25 @@ def test_confirmed_quantity_requires_complete_governed_unit_reference():
         SourceCreate.model_validate(values)
     values.update(unit_definition_id=RID, expected_unit_content_hash=HASH, expected_unit_governance_hash=HASH)
     assert SourceCreate.model_validate(values).unit_definition_id == RID
+
+
+def test_legacy_numeric_count_unit_requires_its_own_actual_pharmacist_claim_and_unit_closure():
+    values = request()
+    values["payload"]["legacy_quantity_unit_review"] = "confirmed"
+    with pytest.raises(ValidationError):
+        SourceCreate.model_validate(values)
+    values["payload"]["professional_attestation"] = {"status": "confirmed", "signer_user_id": 67, "basis_note": NOTE}
+    with pytest.raises(ValidationError):
+        SourceCreate.model_validate(values)
+    values.update(unit_definition_id=RID, expected_unit_content_hash=HASH, expected_unit_governance_hash=HASH)
+    assert SourceCreate.model_validate(values).payload.legacy_quantity_unit_review == "confirmed"
+
+
+def test_general_reconciliation_does_not_implicitly_confirm_legacy_quantity_unit():
+    values = request()
+    values["payload"]["professional_attestation"] = {"status": "confirmed", "signer_user_id": 67, "basis_note": NOTE}
+    values["payload"]["legacy_reconciliation"] = "confirmed"
+    assert SourceCreate.model_validate(values).payload.legacy_quantity_unit_review == "unknown"
 
 
 def test_governance_notes_preserve_unicode_codepoints_and_utf8_distinction():

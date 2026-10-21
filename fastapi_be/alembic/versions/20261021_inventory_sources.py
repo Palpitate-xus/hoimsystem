@@ -22,6 +22,9 @@ def upgrade():
         sa.Column("item_id", sa.Integer(), nullable=False),
         sa.Column("scope", sa.String(32), nullable=False),
         sa.Column("unit_definition_id", sa.String(36), nullable=True),
+        sa.Column("date_from", sa.String(10), nullable=True),
+        sa.Column("date_to", sa.String(10), nullable=True),
+        sa.Column("timezone", sa.String(100), nullable=True),
         sa.Column("schema_version", sa.String(48), nullable=False),
         sa.Column("recorded_at", clock, nullable=False),
         sa.Column("created_by", sa.Integer(), sa.ForeignKey("hoimsystem_users.user_id"), nullable=False),
@@ -38,6 +41,11 @@ def upgrade():
         sa.Column("revoke_reason", sa.String(1000), nullable=False),
         sa.CheckConstraint("item_kind IN ('pharmaceutical','consumable') AND item_id > 0 AND scope = 'hospital_inventory'", name="ck_inventory_source_scope"),
         sa.CheckConstraint("source_kind IN ('inventory_observation','future_quantity_scenario','purchase_candidate_plan')", name="ck_inventory_source_kind"),
+        sa.CheckConstraint(
+            "(source_kind = 'inventory_observation' AND date_from IS NULL AND date_to IS NULL AND timezone IS NULL) OR "
+            "(source_kind IN ('future_quantity_scenario','purchase_candidate_plan') AND date_from IS NOT NULL AND date_to IS NOT NULL AND timezone IS NOT NULL AND date_from <= date_to)",
+            name="ck_inventory_source_period_header",
+        ),
         sa.CheckConstraint(
             "(status = 'draft' AND revision = 1 AND reviewed_by IS NULL AND reviewed_at IS NULL AND review_basis_note = '' AND revoked_by IS NULL AND revoked_at IS NULL AND revoke_reason = '') OR "
             "(status IN ('published','rejected') AND revision = 2 AND reviewed_by IS NOT NULL AND reviewed_at IS NOT NULL AND review_basis_note <> '' AND revoked_by IS NULL AND revoked_at IS NULL AND revoke_reason = '') OR "

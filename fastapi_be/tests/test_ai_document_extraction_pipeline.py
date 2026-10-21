@@ -14,6 +14,7 @@ from app.ai import document_extraction_runtime as documents
 from app.ai import models, runtime
 from app.ai.document_evidence_models import AIDocumentOriginal, AIDocumentSpanCandidate
 from app.ai.document_extraction_models import AIDocumentExtractionRunAnchor
+from app.ai.document_extraction_run_record import parse_record
 from app.ai.models import AIAuditEvent, AIFeatureConfig, AIFeedback, AIKnowledgeDocument, AIProvider, AIRun
 from tests.test_ai_document_evidence_contract import NOW
 from tests.test_ai_document_evidence_sources import approved_original
@@ -187,7 +188,7 @@ async def test_unknown_actual_usage_remains_nullable_in_terminal_audit_and_api(a
     await runtime.execute_claimed(*claim, transport=transport)
     db.expire_all()
     run = db.get(AIRun, claim[0])
-    assert run.status == "failed" and run.result_json == "{}"
+    assert run.status == "failed" and parse_record(run.result_json).result is None
     assert run.error_code == "DOCUMENT_PROVIDER_REPLY_INVALID"
     result = await async_client.get(f"/api/ai/runs/{claim[0]}", headers=headers)
     assert result.status_code == 200, result.text
@@ -229,7 +230,7 @@ async def test_current_original_actor_model_or_prompt_change_prevents_acceptance
     db.expire_all()
     run = db.get(AIRun, claim[0])
     assert run.status == "failed", (run.error_code, run.error_message)
-    assert run.result_json == "{}" and db.query(AIAuditEvent).filter_by(action=documents.ACCEPT, target=run.run_id).count() == 0
+    assert parse_record(run.result_json).result is None and db.query(AIAuditEvent).filter_by(action=documents.ACCEPT, target=run.run_id).count() == 0
     assert len(packets) == (1 if when == "inflight" else 0)
     receipt = documents.usage_receipt(db, run)
     assert receipt["complete"] is (when == "inflight")
@@ -319,7 +320,7 @@ async def test_actual_postflush_accept_faults_rollback_draft_and_preserve_real_u
     await runtime.execute_claimed(*claim, transport=transport)
     db.expire_all()
     run = db.get(AIRun, claim[0])
-    assert run.status == "failed" and run.error_code == "RESULT_STORAGE_ERROR" and run.result_json == "{}"
+    assert run.status == "failed" and run.error_code == "RESULT_STORAGE_ERROR" and parse_record(run.result_json).result is None
     assert (run.input_tokens, run.output_tokens) == (11, 13) and len(packets) == 1
     assert db.query(AIAuditEvent).filter_by(action=documents.ACCEPT, target=run.run_id).count() == 0
     assert documents.usage_receipt(db, run)["complete"] is True

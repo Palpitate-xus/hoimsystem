@@ -12,6 +12,7 @@ from app.ai.context import context_metadata
 from app.ai.document_extraction_context import extraction_context, verify_context
 from app.ai.document_extraction_contract import EXTRACTION_SYSTEM_PROMPT, require_text_capacity
 from app.ai.document_extraction_prompt import instructions_digest
+from app.ai.document_extraction_run_record import encode_record, parse_record
 from app.ai.document_extraction_storage import FEATURE_KEY, load_result, load_snapshot, stage_anchor
 from app.ai.gateway import AIExecutionError, generate
 from app.ai.governance import active_prompt, audit, digest, encode_json
@@ -149,7 +150,7 @@ def _receipt(inputs=None, outputs=None, sent=False):
     return {"input_tokens": inputs, "output_tokens": outputs, "complete": inputs is not None and outputs is not None, "model_call_attempted": sent}
 
 
-def _final_audit(db, run, action, receipt):
+def _final_audit(db, run, action, receipt, result):
     audit(
         db,
         run.requested_by,
@@ -159,10 +160,28 @@ def _final_audit(db, run, action, receipt):
             "schema_version": "document_extraction_receipt_v1",
             "lease_token": run.lease_token,
             "usage": receipt,
-            "result_hash": c.bytes_hash(run.result_json) if action == ACCEPT else None,
+            "result_hash": c.digest(result) if action == ACCEPT else None,
             "error_code": run.error_code,
         },
     )
+
+
+def _stage_terminal_record(db, run, action, receipt, result):
+    """Verify the first flush before changing only the envelope's result field.
+
+    The first readback prevents an audit INSERT trigger from being hidden by
+    the subsequent record UPDATE. Both writes retain the same exact audit PK.
+    """
+    _final_audit(db, run, action, receipt, result)
+    expected = _write_state(db, run, action)
+    db.flush()
+    _verify_write(db, run, expected)
+    run.result_json = encode_record(result, expected["event"].event_id)
+    expected["run"]["result_json"] = run.result_json
+    db.flush()
+    _verify_write(db, run, expected)
+    usage_receipt(db, run)
+    return expected
 
 
 def _account(run, receipt, started):
@@ -221,11 +240,7 @@ async def execute_document_claimed(run_id, lease, *, transport=None):
                 run.result_json = encode_json(result.model_dump(mode="json"))
                 run.status = "succeeded"
                 action = ACCEPT
-            _final_audit(db, run, action, receipt)
-            expected = _write_state(db, run, action)
-            db.flush()
-            _verify_write(db, run, expected)
-            usage_receipt(db, run)
+            expected = _stage_terminal_record(db, run, action, receipt, result.model_dump(mode="json") if action == ACCEPT else None)
             if action == ACCEPT:
                 accepted = {**expected, "run": {key: expected["run"][key] for key in RUN_FIELDS}}
                 verify_accepted_result(db, run, lease, accepted, result.model_dump(mode="json"), result_reader=load_result)
@@ -242,12 +257,8 @@ async def execute_document_claimed(run_id, lease, *, transport=None):
                 failed.error_message = "完整原文、结果与接收审计未能原子保存，草稿未接收"
                 _account(failed, receipt, started)
                 action = "run.document_extraction.cancel" if cancelled else "run.document_extraction.fail"
-                _final_audit(db, failed, action, receipt)
-                expected = _write_state(db, failed, action)
                 try:
-                    db.flush()
-                    _verify_write(db, failed, expected)
-                    usage_receipt(db, failed)
+                    _stage_terminal_record(db, failed, action, receipt, None)
                     db.commit()
                 except Exception:
                     db.rollback()
@@ -255,15 +266,17 @@ async def execute_document_claimed(run_id, lease, *, transport=None):
 
 
 def usage_receipt(db, run):
-    rows = db.query(AIAuditEvent).filter(AIAuditEvent.target == run.run_id, AIAuditEvent.action.in_(FINAL_ACTIONS)).populate_existing().with_for_update(read=True).all()
-    if not rows:
+    if run.result_json == "{}":
         if run.status in {"queued", "running"} or run.status == "cancelled" and run.latency_ms is None or run.error_code == "WORKER_INTERRUPTED":
             return _receipt(sent=None)
         raise HTTPException(409, "原文提取最终用量及接收审计缺失")
     try:
-        if len(rows) != 1:
-            raise ValueError("A task has exactly one terminal receipt")
-        row = rows[0]
+        record = parse_record(run.result_json)
+        if run.status not in {"succeeded", "failed", "cancelled"} or (record.result is not None) != (run.status == "succeeded"):
+            raise ValueError("The actual terminal status and receipt record differ")
+        row = db.query(AIAuditEvent).filter_by(event_id=record.receipt_event_id).populate_existing().with_for_update(read=True).one_or_none()
+        if row is None:
+            raise ValueError("The exact terminal audit primary key is unavailable")
         detail = c.parse_json(row.detail_json)
         if not isinstance(detail, dict) or set(detail) != {"schema_version", "lease_token", "usage", "result_hash", "error_code"}:
             raise ValueError("Closed final receipt required")
@@ -282,9 +295,10 @@ def usage_receipt(db, run):
         ):
             raise ValueError("Actual completeness/call attempt must be explicit")
         expected_action = ACCEPT if run.status == "succeeded" else "run.document_extraction.cancel" if run.status == "cancelled" else "run.document_extraction.fail" if run.status == "failed" else None
-        expected_hash = c.bytes_hash(run.result_json) if run.status == "succeeded" else None
+        expected_hash = c.digest(record.result) if run.status == "succeeded" else None
         if (
             row.action != expected_action
+            or row.target != run.run_id
             or row.actor_id != run.requested_by
             or detail != {"schema_version": "document_extraction_receipt_v1", "lease_token": run.lease_token, "usage": receipt, "result_hash": expected_hash, "error_code": run.error_code}
         ):

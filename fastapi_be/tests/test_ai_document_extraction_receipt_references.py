@@ -117,6 +117,32 @@ async def test_two_explicit_ordinals_retain_result_hash_and_only_read_actual_aud
 
 
 @pytest.mark.asyncio
+@pytest.mark.parametrize("mutation", ["deleted_audit", "foreign_target", "boolean_ordinal", "changed_result_hash"])
+async def test_existing_saved_ordinal_requires_its_actual_association_before_duplicate_rejection(async_client, auth_headers, document_pipeline, mutation):
+    case, db = document_pipeline, document_pipeline["db"]
+    headers = auth_headers(case["actor"].username)
+    row = await succeeded(async_client, headers, case)
+    saved = await async_client.post(f"/api/ai/runs/{row.run_id}/document-candidates", headers=headers, json={"ordinal": 0})
+    assert saved.status_code == 200, saved.text
+    db.expire_all()
+    record = parse_record(db.get(AIRun, row.run_id).result_json)
+    association = db.get(AIAuditEvent, record.saved_candidates["0"].audit_event_id)
+    if mutation == "deleted_audit":
+        db.delete(association)
+    elif mutation == "foreign_target":
+        association.target = case["original"].snapshot.original_id
+    else:
+        details = c.parse_json(association.detail_json)
+        details["ordinal" if mutation == "boolean_ordinal" else "result_hash"] = False if mutation == "boolean_ordinal" else c.bytes_hash(row.result_json)
+        association.detail_json = c.canonical_json(details)
+    db.commit()
+    denied = await async_client.post(f"/api/ai/runs/{row.run_id}/document-candidates", headers=headers, json={"ordinal": 0})
+    assert denied.status_code == 409, denied.text
+    assert "具体关联审计" in denied.json()["detail"]
+    assert db.query(AIDocumentSpanCandidate).count() == 1
+
+
+@pytest.mark.asyncio
 @pytest.mark.parametrize("field", ["input_tokens", "error_code", "feature_key", "result_json"])
 async def test_save_checks_all_actual_run_fields_and_the_second_record_write(async_client, auth_headers, document_pipeline, field):
     case, db = document_pipeline, document_pipeline["db"]

@@ -57,6 +57,10 @@ class BatchCapture(ScopeReference):
     patient_ids: Annotated[list[Positive], Field(min_length=1, max_length=256), AfterValidator(ordered)]
 
 
+class BatchCreate(BatchCapture):
+    basis_note: Basis
+
+
 class DefinitionReview(StrictModel):
     expected_revision: Annotated[int, Field(strict=True, ge=1, le=1)]
     expected_content_hash: SHA

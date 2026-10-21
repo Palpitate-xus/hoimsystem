@@ -8,9 +8,10 @@ from pydantic import TypeAdapter
 from app.ai.models import AIAuditEvent
 from app.ai.research_cohort_contract import UUID, SourceReview, SourceRevoke, canonical_json
 from app.ai.research_cohort_sources import _bounded, _governance, _original_json, _typed, _verify_governance, hash_content, utc_text, utcnow, verify_scope_proof
-from app.ai.research_cohort_write_guard import RESEARCH_SOURCE_ROLES, current_research_rows, lock_research_write
+from app.ai.research_cohort_write_guard import current_research_rows, lock_research_write
 from app.ai.research_variables_authority import authorize_variable_scope, validate_dictionary_scope
 from app.ai.research_variables_contract import DefinitionReview, DictionaryCreate
+from app.ai.research_variables_fields import VARIABLE_SOURCE_ROLES
 from app.ai.research_variables_models import MAX_BYTES, AIResearchVariableDictionary
 
 DEFINITION_FIELDS = ("definition_review_status", "definition_reviewed_by", "definition_reviewed_at", "definition_review_basis")
@@ -111,7 +112,7 @@ def _scope_reference(header):
 
 
 def _authorized_row(db, user, identifier, *, writing=False):
-    actor = lock_research_write(db, user)
+    actor = lock_research_write(db, user, allowed_roles=VARIABLE_SOURCE_ROLES)
     header = _header(db, identifier)
     actor, scope, _, _ = authorize_variable_scope(db, actor, _scope_reference(header), capture=writing)
     with db.no_autoflush:
@@ -169,7 +170,7 @@ def _packet(db, row, proof):
         from app.models import User
 
         reviewer = current_research_rows(db.query(User.user_id, User.user_role).filter_by(user_id=row.definition_reviewed_by), shared=True).one_or_none()
-        reviewer_current = reviewer is not None and reviewer.user_role in RESEARCH_SOURCE_ROLES
+        reviewer_current = reviewer is not None and reviewer.user_role in VARIABLE_SOURCE_ROLES
     reasons = []
     if row.status != "published":
         reasons.append("dictionary_not_published")

@@ -39,6 +39,7 @@ VARIABLE_FIELDS = {
     },
 }
 MAX_VARIABLES = 64
+VARIABLE_SOURCE_ROLES = frozenset({"super_admin", "admin", "director", "doctor", "pharmacist"})
 VARIABLE_USE = "research_variable_extraction"
 VARIABLE_SCHEMA_VERSION = "research_variable_dictionary_v1"
 LIMITATIONS = (

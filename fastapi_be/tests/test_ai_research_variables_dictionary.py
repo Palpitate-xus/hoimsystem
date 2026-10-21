@@ -19,6 +19,7 @@ from tests.test_ai_research_variables_contract import definition
 @pytest.fixture
 def variable_dictionary_case(db_session, research_case):
     case = research_case
+    case["scope_request"]["proposed_user_ids"] = sorted(set(case["scope_request"]["proposed_user_ids"] + [case["pharmacist_user"].user_id]))
     case["scope_request"]["permitted_uses"] = ["research_variable_extraction"]
     scope, _, permission = permitted(db_session, case)
     for actor in (case["super_admin_user"], case["reviewer"]):
@@ -97,6 +98,22 @@ def test_regular_admin_cannot_technically_publish_or_read_super_archive(db_sessi
         with pytest.raises(HTTPException) as error:
             call()
         assert error.value.status_code == 403
+
+
+def test_pharmacist_needs_explicit_project_patient_and_variable_purpose_before_authoring_dictionary(db_session, variable_dictionary_case):
+    case, scope, _, request = variable_dictionary_case
+    pharmacist = case["pharmacist_user"]
+    with pytest.raises(HTTPException) as error:
+        create_dictionary(db_session, pharmacist, request)
+    assert error.value.status_code == 403
+    body = {**acl_request(case, scope), "user_id": pharmacist.user_id}
+    publish(db_session, case, "acl", create_registry_original(db_session, case["super_admin_user"], "acl", body))
+    made = create_dictionary(db_session, pharmacist, request)
+    assert made["original"]["identity"]["created_by"] == pharmacist.user_id
+    assert made["status"] == "draft" and not made["eligible"]
+    with pytest.raises(HTTPException) as error:
+        review_dictionary(db_session, pharmacist, made["dictionary_id"], definition_review(made), definition=True)
+    assert error.value.status_code == 409
 
 
 def test_withdrawn_patient_permission_blocks_dictionary_body_even_super_but_keeps_safe_technical_metadata(db_session, variable_dictionary_case):

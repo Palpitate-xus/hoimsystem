@@ -7,7 +7,7 @@ from app.ai.research_cohort_registry import authorize_patient_research, authoriz
 from app.ai.research_cohort_sources import _typed, scope_proof, scope_row
 from app.ai.research_cohort_write_guard import current_actor, lock_research_write
 from app.ai.research_variables_contract import DictionaryCreate
-from app.ai.research_variables_fields import VARIABLE_USE
+from app.ai.research_variables_fields import VARIABLE_SOURCE_ROLES, VARIABLE_USE
 
 
 def authorize_variable_scope(db, user, values, *, patient_ids=None, capture=False, external_model=False):
@@ -20,7 +20,7 @@ def authorize_variable_scope(db, user, values, *, patient_ids=None, capture=Fals
     request = _typed(ScopeReference, values)
     if type(capture) is not bool or type(external_model) is not bool:
         raise HTTPException(422, "明确捕获和模型处理开关须为布尔值")
-    actor = lock_research_write(db, user)
+    actor = lock_research_write(db, user, allowed_roles=VARIABLE_SOURCE_ROLES)
     original_epoch = (actor.user_id, actor.user_role, actor.token_invalid_before)
     actor, acl = authorize_project_acl(db, actor, request.scope_id, capture=capture)
     scope = acl["parent_binding"]["scope"]
@@ -45,14 +45,14 @@ def authorize_variable_scope(db, user, values, *, patient_ids=None, capture=Fals
         if fresh_acl != acl:
             raise HTTPException(409, "完整变量批次逐患者核验期间项目访问原件变化")
         permissions.append(permission)
-    actor = lock_research_write(db, actor, scope_ids=(request.scope_id,), patient_ids=selected)
+    actor = lock_research_write(db, actor, allowed_roles=VARIABLE_SOURCE_ROLES, scope_ids=(request.scope_id,), patient_ids=selected)
     if scope_proof(scope_row(db, request.scope_id)) != scope:
         raise HTTPException(409, "变量项目在当前父锁后变化")
     for index, patient_id in enumerate(selected):
         actor, fresh_acl, fresh_permission = authorize_patient_research(db, actor, request.scope_id, patient_id, capture=capture, use=VARIABLE_USE, external_model=external_model)
         if fresh_acl != acl or fresh_permission != permissions[index]:
             raise HTTPException(409, "变量批次当前父锁后逐患者研究授权变化")
-    actor = current_actor(db, actor)
+    actor = current_actor(db, actor, allowed_roles=VARIABLE_SOURCE_ROLES)
     if (actor.user_id, actor.user_role, actor.token_invalid_before) != original_epoch:
         raise HTTPException(403, "变量来源操作原请求角色或登录授权已变化")
     return actor, scope, acl, permissions

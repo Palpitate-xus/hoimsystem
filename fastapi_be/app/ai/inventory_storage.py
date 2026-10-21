@@ -80,6 +80,7 @@ def load_snapshot(run):
             "feature_revision",
             "validation_status",
             "instructions_digest",
+            "model_version",
         }:
             raise ValueError("Frozen inventory metadata must preserve its complete closed contract")
         evidence = _canonical_value(run.evidence_json, TEXT_BYTES)
@@ -124,6 +125,7 @@ def load_snapshot(run):
             or provider["kind"] != "specialist"
             or type(provider["model"]) is not str
             or re.fullmatch(r"inventory:[a-f0-9]{64}", provider["model"]) is None
+            or metadata["model_version"] != provider["model"]
         ):
             raise ValueError("Original provider identity differs")
         validation = snapshot["feature_validation"]

@@ -127,6 +127,7 @@ def storage_case(db_session, seed_data):
         "feature_validation": {"status": "validated", "note": "synthetic", "validated_by": actor.user_id, "validated_at": CLOCK, "feature_revision": 1},
     }
     metadata = {
+        "model_version": provider.model,
         "instructions_digest": hashlib.sha256((snapshot["system_prompt"] + "\n\n" + snapshot["task_prompt"]).encode()).hexdigest(),
         "context_digest": digest(context),
         "clinical_context_fingerprint": digest({key: value for key, value in context.items() if key != "snapshot_time"}),
@@ -212,7 +213,7 @@ def test_short_binding_corruption_cannot_be_restored_by_normal_loading(storage_c
     assert error.value.status_code == 409
 
 
-@pytest.mark.parametrize("change", ["missing", "altered", "extra", "changed_prompt_and_task_hash"])
+@pytest.mark.parametrize("change", ["missing", "altered", "extra", "changed_prompt_and_task_hash", "missing_model", "altered_model"])
 def test_frozen_prompt_summary_is_anchored_to_the_original_complete_prompt(storage_case, change):
     case = storage_case
     run, snapshot, metadata = case["run"], copy.deepcopy(case["snapshot"]), copy.deepcopy(case["metadata"])
@@ -222,6 +223,10 @@ def test_frozen_prompt_summary_is_anchored_to_the_original_complete_prompt(stora
         metadata["instructions_digest"] = "a" * 64
     elif change == "extra":
         metadata["unbound_inventory_data"] = {"quantity": "999"}
+    elif change == "missing_model":
+        metadata.pop("model_version")
+    elif change == "altered_model":
+        metadata["model_version"] = "inventory:" + "a" * 64
     else:
         snapshot["task_prompt"] += "changed after freeze"
         run.prompt_hash = digest([snapshot["system_prompt"], snapshot["task_prompt"]])

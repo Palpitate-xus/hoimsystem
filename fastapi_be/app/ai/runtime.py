@@ -276,7 +276,11 @@ def create_run(db: Session, user: User, req: RunRequest) -> AIRun:
                 "feature_revision": config.revision,
                 "validation_status": config.validation_status,
                 "tool_fingerprint": digest(tools),
-                **({"instructions_digest": hashlib.sha256((COMMON_SYSTEM_PROMPT + "\n\n" + prompt).encode("utf-8")).hexdigest()} if bundle.data.get("inventory_binding") else {}),
+                **(
+                    {"instructions_digest": hashlib.sha256((COMMON_SYSTEM_PROMPT + "\n\n" + prompt).encode("utf-8")).hexdigest(), "model_version": provider.model}
+                    if bundle.data.get("inventory_binding")
+                    else {}
+                ),
             }
         ),
     }

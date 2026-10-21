@@ -178,3 +178,30 @@ def test_accepted_artifact_cannot_be_overwritten(charge_case):
 def test_impossible_or_coerced_receipts_rejected(receipt):
     with pytest.raises(ValueError):
         receipts.ChargeUsage.model_validate(receipt)
+
+
+@pytest.mark.parametrize("state", ["failed", "cancelled"])
+def test_interrupted_worker_retains_unknown_attempt_and_counts_with_an_actual_receipt(charge_case, state):
+    case, db = charge_case, charge_case["db"]
+    run, _, _ = running(case)
+    sources.current_actor(db, case["super_admin_user"])
+    run = db.query(AIRun).filter_by(run_id=run.run_id).populate_existing().with_for_update().one()
+    run.status, run.error_code, run.error_message = state, "WORKER_INTERRUPTED", "合成进程中断，实际调用和用量未知"
+    run.input_tokens = run.output_tokens = 0
+    run.latency_ms = 600000
+    run.finish_time = sources.utcnow()
+    receipts.stage_terminal(db, run, receipts.usage())
+    db.commit()
+    result, receipt = receipts.load_terminal(db, run)
+    assert result is None and receipt == {"input_tokens": None, "output_tokens": None, "complete": False, "model_call_attempted": None}
+    event = db.get(AIAuditEvent, db.get(AIChargeRunArtifact, run.run_id).receipt_event_id)
+    assert event.action == (receipts.FAIL if state == "failed" else receipts.CANCEL)
+
+
+def test_unknown_attempt_is_not_a_normal_terminal_receipt(charge_case):
+    run, _, _ = running(charge_case)
+    run.status, run.error_code = "failed", "OTHER_FAILURE"
+    with pytest.raises(HTTPException) as caught:
+        receipts.stage_terminal(charge_case["db"], run, receipts.usage())
+    assert caught.value.status_code == 409
+    charge_case["db"].rollback()

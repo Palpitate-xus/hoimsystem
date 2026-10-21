@@ -111,3 +111,8 @@ async def generate_charge(provider, spec, task_prompt, data, *, transport=None):
         error.input_tokens, error.output_tokens = inputs, outputs
         error.model_call_attempted = attempted
         raise error from exc
+    except Exception as exc:
+        error = AIExecutionError("CHARGE_GATEWAY_ERROR", "完整账目模型调用未能正常完成，请联系管理员核对状态")
+        error.input_tokens, error.output_tokens = inputs, outputs
+        error.model_call_attempted = attempted
+        raise error from exc

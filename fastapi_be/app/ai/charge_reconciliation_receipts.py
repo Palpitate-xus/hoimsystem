@@ -127,6 +127,7 @@ def load_terminal(db, run):
             or detail.source_binding_hash != c.digest(binding)
             or detail.error_code != run.error_code
             or detail.usage.model_call_attempted is None
+            and not (run.status in {"failed", "cancelled"} and run.error_code == "WORKER_INTERRUPTED")
         ):
             raise ValueError("The closed original receipt differs from its actual task")
         for name in ("input_tokens", "output_tokens"):
@@ -164,7 +165,7 @@ def stage_terminal(db, run, receipt, result=None):
     if run.result_json != "{}" or any(getattr(row, key) is not None for key in ("result_json", "result_hash", "result_bytes", "receipt_event_id", "accepted_lease")):
         raise HTTPException(409, "本任务已接收完整结果或回执，不能覆盖")
     checked = ChargeUsage.model_validate(receipt)
-    if checked.model_call_attempted is None:
+    if checked.model_call_attempted is None and not (run.status in {"failed", "cancelled"} and run.error_code == "WORKER_INTERRUPTED"):
         raise HTTPException(409, "终态须保留明确的实际调用状态")
     action = ACCEPT if run.status == "succeeded" else FAIL if run.status == "failed" else CANCEL if run.status == "cancelled" else None
     if action is None or (result is not None) != (action == ACCEPT):

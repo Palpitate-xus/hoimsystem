@@ -213,25 +213,56 @@ def lock_run_scope(db, run):
         return lock_satisfaction_write(db, SimpleNamespace(user_id=run.requested_by), allowed_roles=SOURCE_ROLES)
 
 
-def authorize_run_scope(db, user, run, *, execution=False, audit_only=False):
-    """Current role/Run owner before task JSON, then exact Source scope before blob."""
+def _run_identifier(run):
+    if isinstance(run, str):
+        return run
+    state = inspect(run, raiseerr=False)
+    return state.identity[0] if state is not None and state.identity is not None else getattr(run, "run_id", None)
+
+
+def _routing_locator(db, run_id):
+    """Only opaque immutable identity, always a current read after the Gate."""
+    with db.no_autoflush:
+        return (
+            db.query(AISatisfactionRunArtifact.run_id, AISatisfactionRunArtifact.case_id, AISatisfactionRunArtifact.requested_by)
+            .filter_by(run_id=run_id)
+            .populate_existing()
+            .with_for_update(read=True)
+            .one_or_none()
+        )
+
+
+def guard_satisfaction_run_id(db, user, run_id, *, audit_only=False):
+    """Current Source authority before any private task TEXT or whole Artifact.
+
+    False means there is no durable satisfaction Artifact, not that a legacy
+    task is authorized. The caller must retain its original legacy authorizer.
+    """
     from app.ai.catalog import FEATURE_BY_KEY
     from app.ai.models import AIFeatureConfig, AIRun
+    from app.ai.satisfaction_context import binding_for_value
     from app.ai.satisfaction_contract import SOURCE_ROLES
+    from app.ai.satisfaction_sources import authorize_case, frozen_case_proof
     from app.ai.satisfaction_write_guard import lock_satisfaction_write
+    from app.dependencies import VALID_USER_ROLES
 
-    actor = lock_satisfaction_write(db, user, allowed_roles=SOURCE_ROLES)
-    state = inspect(run, raiseerr=False)
-    identifier = state.identity[0] if state is not None and state.identity is not None else getattr(run, "run_id", None)
+    actor = lock_satisfaction_write(db, user, allowed_roles=VALID_USER_ROLES)
     with db.no_autoflush:
-        header = db.query(AIRun.run_id, AIRun.requested_by).filter_by(run_id=identifier).with_for_update(read=True).one_or_none()
-    if header is None:
-        raise HTTPException(404, "评价任务不存在")
-    if actor.user_role != "super_admin" and header.requested_by != actor.user_id:
-        raise HTTPException(403, "没有读取该评价任务的权限")
-    if audit_only and (actor.user_role != "super_admin" or execution):
-        raise HTTPException(403, "冻结任务审计仅限当前超级管理员，不能替代新执行授权")
-    if actor.user_role != "super_admin":
+        # Routing hint only. Locking an unrelated Run here would invert that
+        # feature's Source -> Run order; an old RR view may also miss this row.
+        header = db.query(AIRun.run_id, AIRun.feature_key, AIRun.requested_by).filter_by(run_id=run_id).one_or_none()
+
+    def authority(owner):
+        if actor.user_role not in SOURCE_ROLES:
+            raise HTTPException(403, "当前账户已无本项评价任务权限")
+        if actor.user_role != "super_admin" and owner != actor.user_id:
+            raise HTTPException(403, "没有读取该评价任务的权限")
+        if audit_only and actor.user_role != "super_admin":
+            raise HTTPException(403, "冻结任务审计仅限当前超级管理员，不能替代新执行授权")
+
+    def configured_roles():
+        if actor.user_role == "super_admin":
+            return
         with db.no_autoflush:
             config = db.query(AIFeatureConfig).filter_by(feature_key=FEATURE_KEY).populate_existing().with_for_update(read=True).one_or_none()
         try:
@@ -242,10 +273,50 @@ def authorize_run_scope(db, user, run, *, execution=False, audit_only=False):
             raise HTTPException(409, "评价任务当前适用角色配置无法核对") from exc
         if actor.user_role not in roles or actor.user_role not in FEATURE_BY_KEY[FEATURE_KEY].default_roles:
             raise HTTPException(403, "当前账户已无该评价任务的适用权限")
-    # A current Super's own frozen audit depends on actual authority and original
-    # proofs, not on a later malformed live role configuration. New acceptance
-    # still validates every live configuration field in _current_configuration.
-    snapshot = load_snapshot(db, run, execution=execution)[0]
+
+    if header is not None and header.feature_key == FEATURE_KEY:
+        authority(header.requested_by)
+        configured_roles()
+    locator = _routing_locator(db, run_id)
+    if locator is None:
+        return False
+    try:
+        TypeAdapter(UUID).validate_python(run_id, strict=True)
+    except (ValueError, TypeError) as exc:
+        raise HTTPException(409, "评价任务的持久技术标识已损坏") from exc
+    # Only an actual current Artifact identifies native authority under an old
+    # read view or a forged feature/JSON body. It contains no task/source text.
+    authority(locator.requested_by)
+    if header is None or header.feature_key != FEATURE_KEY:
+        configured_roles()
+    if audit_only:
+        # This internal no-user proof is reachable only after actual current
+        # Super authority. It verifies frozen own bytes, never new execution.
+        binding_for_value(frozen_case_proof(db, locator.case_id))
+    else:
+        authorize_case(db, actor, locator.case_id, execution=False)
+    # Current Run ownership is checked only after Source authority, never before
+    # another feature's Source lock. The immutable locator is re-bound exactly.
+    with db.no_autoflush:
+        current = db.query(AIRun.run_id, AIRun.feature_key, AIRun.requested_by).filter_by(run_id=run_id).with_for_update(read=True).one_or_none()
+    if current is None or current.requested_by != locator.requested_by or current.feature_key != FEATURE_KEY:
+        raise HTTPException(409, "评价任务的持久来源、功能或原申请账户不一致")
+
+    return True
+
+
+def authorize_run_scope(db, user, run, *, execution=False, audit_only=False):
+    """Current role/owner/opaque locator/Source scope before private task JSON."""
+    from app.ai.satisfaction_contract import SOURCE_ROLES
+    from app.ai.satisfaction_write_guard import lock_satisfaction_write
+
+    if audit_only and execution:
+        raise HTTPException(403, "冻结任务审计不能替代新执行授权")
+    identifier = _run_identifier(run)
+    if not guard_satisfaction_run_id(db, user, identifier, audit_only=audit_only):
+        raise HTTPException(409, "评价任务缺少持久原件锚点，未降级读取")
+    actor = lock_satisfaction_write(db, user, allowed_roles=SOURCE_ROLES)
+    snapshot = load_snapshot(db, SimpleNamespace(run_id=identifier), execution=execution)[0]
     expanded = expand_context(db, snapshot["payload"]["context"], user=None if audit_only else actor, current=execution, locking=execution)
     return actor, expanded
 
@@ -478,12 +549,24 @@ def is_satisfaction_run(db, run):
     def markers(value):
         if isinstance(value, dict):
             return (
-                bool({"satisfaction_binding", "satisfaction_source", "satisfaction_case", "satisfaction_case_id", "satisfaction_analysis"} & value.keys())
+                bool(
+                    {"satisfaction_binding", "satisfaction_source", "satisfaction_case", "satisfaction_case_id", "satisfaction_analysis", "satisfaction_artifact", "frozen_satisfaction_audit"}
+                    & value.keys()
+                )
+                or value.get("source_domain") == "recorded_satisfaction_review_case"
                 or value.get("schema_version") == REFERENCE_SCHEMA
                 or any(markers(child) for child in value.values())
             )
         return isinstance(value, list) and any(markers(child) for child in value)
 
+    identifier = _run_identifier(run)
+    if db is not None and identifier:
+        from app.ai.satisfaction_write_guard import lock_satisfaction_gate
+
+        with db.no_autoflush:
+            lock_satisfaction_gate(db)
+            if _routing_locator(db, identifier) is not None:
+                return True
     try:
         snapshot = parse(run.input_json) if isinstance(run.input_json, str) else None
         result = parse(run.result_json) if isinstance(run.result_json, str) else None
@@ -493,13 +576,6 @@ def is_satisfaction_run(db, run):
         if run.feature_key == FEATURE_KEY:
             return True
         raise HTTPException(409, "已存评价任务JSON无效，不能降级读取") from exc
-    state = inspect(run, raiseerr=False)
-    identifier = state.identity[0] if state is not None and state.identity is not None else getattr(run, "run_id", None)
-    if db is not None and identifier:
-        with db.no_autoflush:
-            # Immutable routing locator only; no Artifact S lock before Gate.
-            if db.query(AISatisfactionRunArtifact.run_id).filter_by(run_id=identifier).first() is not None:
-                return True
     if run.feature_key != FEATURE_KEY:
         return False
     payload = snapshot.get("payload") if isinstance(snapshot, dict) else None

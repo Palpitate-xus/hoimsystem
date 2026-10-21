@@ -20,7 +20,7 @@ from app.ai.satisfaction_draft import canonical_json, source_hash
 from app.ai.satisfaction_prompt import SATISFACTION_SYSTEM_PROMPT
 from app.ai.satisfaction_receipts import ARTIFACT_FIELDS, WRITE_FIELDS, load_terminal, readback
 from app.ai.satisfaction_sources import utcnow
-from app.ai.satisfaction_storage import authorize_run_scope, load_snapshot, stage_anchor
+from app.ai.satisfaction_storage import _run_identifier, authorize_run_scope, load_snapshot, stage_anchor
 from app.ai.satisfaction_write_guard import lock_satisfaction_write
 from app.config import settings
 
@@ -195,10 +195,10 @@ def run_row(db, run_id, *, locking=False):
 
 
 def authorize_satisfaction_run(db, user, run, *, execution=False, audit_only=False):
-    run = run_row(db, run) if isinstance(run, str) else run
-    _, expanded = authorize_run_scope(db, user, run, execution=execution, audit_only=audit_only)
+    identifier = _run_identifier(run)
+    _, expanded = authorize_run_scope(db, user, identifier, execution=execution, audit_only=audit_only)
     # Original JSON is read only after current role/ownership/whole Source scope.
-    run = db.query(AIRun).filter_by(run_id=run.run_id).populate_existing().with_for_update(read=True).one()
+    run = db.query(AIRun).filter_by(run_id=identifier).populate_existing().with_for_update(read=True).one()
     snapshot, binding, metadata, evidence = load_snapshot(db, run, execution=execution)
     return run, snapshot, binding, metadata, evidence, expanded
 

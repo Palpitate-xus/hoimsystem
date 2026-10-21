@@ -340,3 +340,24 @@ def test_arbitrary_legacy_category_text_is_never_promoted_to_public_enum(charge_
     order = next(row for row in source["orders"] if row["original_category_hash"] == c.digest(private))
     assert charge["item_type"] == order["category"] == "unknown"
     assert private not in c.canonical_json(source)
+
+
+def test_internal_frozen_proof_is_distinct_from_current_execution_permission(charge_case):
+    case, db = charge_case, charge_case["db"]
+    value = draft(case)
+    with pytest.raises(HTTPException) as denied:
+        s.case_current(db, case["super_admin_user"], value["case_snapshot_id"], execution=True)
+    assert denied.value.status_code == 409
+    value = s.review_case(db, case["super_admin_user"], value["case_snapshot_id"], {**cas(value), "decision": "publish", "basis_note": NOTE})
+    db.commit()
+    assert s.case_current(db, case["super_admin_user"], value["case_snapshot_id"], execution=True)["eligible"]
+    published_governance = value["governance_hash"]
+    value = s.revoke_case(db, case["super_admin_user"], value["case_snapshot_id"], {**cas(value), "basis_note": NOTE})
+    db.commit()
+    proof = s.frozen_case_proof(db, value["case_snapshot_id"])
+    assert s.verify_original(proof) and proof["status"] == "revoked"
+    assert proof["public_source"]["governance_hash"] == published_governance != proof["governance_hash"]
+    for options in ({"execution": True}, {"execution": True, "audit_only": True}):
+        with pytest.raises(HTTPException) as denied:
+            s.case_current(db, case["super_admin_user"], value["case_snapshot_id"], **options)
+        assert denied.value.status_code == 409

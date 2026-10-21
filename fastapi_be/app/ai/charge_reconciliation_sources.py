@@ -356,7 +356,22 @@ def original_proof(row):
     return result
 
 
-def case_current(db, user, identifier, *, audit_only=False):
+def frozen_case_proof(db, identifier):
+    """Internal current SQL proof only; the caller must authorize the full Case.
+
+    This retains the original publication projection after revocation and does
+    not claim the captured ledger is still current or eligible for a new run.
+    No patient authorization is performed by this deliberately userless helper.
+    """
+    row = current_charge_rows(db.query(AIChargeCaseSnapshot).filter_by(case_snapshot_id=identifier), shared=True).one_or_none()
+    if row is None:
+        raise HTTPException(404, "住院账目原件不存在")
+    return original_proof(row)
+
+
+def case_current(db, user, identifier, *, audit_only=False, execution=False):
+    if audit_only and execution:
+        raise HTTPException(409, "冻结审计原件不能用于创建新任务")
     actor = current_actor(db, user, {"super_admin"} if audit_only else c.SOURCE_ROLES)
     locator = current_charge_rows(db.query(AIChargeCaseSnapshot.patient_id, AIChargeCaseSnapshot.admission_id).filter_by(case_snapshot_id=identifier), shared=True).one_or_none()
     if locator is None:
@@ -376,6 +391,8 @@ def case_current(db, user, identifier, *, audit_only=False):
             # Scope authorization must never be downgraded to a redacted success.
             authorize_scope(db, actor, c.CaptureRequest(patient_id=row.patient_id, admission_id=row.admission_id))
     eligible = row.status == "published" and same and not audit_only
+    if execution and not eligible:
+        raise HTTPException(409, "仅当前完整且已发布的住院账目原件可用于新任务")
     full = audit_only or same and row.status in {"draft", "published"}
     return {
         **value,

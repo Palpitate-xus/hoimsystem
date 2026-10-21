@@ -76,3 +76,13 @@ test('original JSON parser rejects duplicate decoded keys, unsafe integers, forb
  for(const raw of ['{"a":1,"a":2}','{"a":1,"\\u0061":2}','{"__proto__":{}}','{"constructor":1}','[NaN]','[Infinity]','[9007199254740993]','["\\ud800"]','[1,]','{"x":1} trailing','```json\n{}\n```'])expect(()=>parseOriginalJson(raw)).toThrow();
  expect(()=>parseOriginalJson('{"a":"🙂"}',5)).toThrow();expect(scalarJsonValue(new Date())).toBe(false);expect(scalarJsonValue({text:String.fromCharCode(0xD800)})).toBe(false);
 });
+
+test('native dispatch keeps every own-key null marker and unique source identity while legacy stays separate',async({page})=>{
+ await open(page);const result=await page.evaluate(p=>{
+  const has=window.__chargeFindingsProbe.api.chargeRunHasNativeMarkers,id=p.request.input.charge_case_id;
+  const markers=[...['charge_artifact','charge_findings','charge_case_id'].flatMap(key=>[{[key]:null},{[key]:{}}]),{result:{charge_analysis:null}},{result:{charge_analysis:{}}},{frozen_request:{payload:{input:{charge_case_id:null}}}},{frozen_request:{payload:{input:{charge_case_id:id}}}},{frozen_request:{payload:{context:{charge_binding:null}}}},{frozen_request:{payload:{context:{charge_binding:{}}}}}];
+  for(const context of [{source_domain:'single_admission_recorded_ledger'},{selected_sources:{charge_case_id:id}},{selected_sources:{charge_case_id:null}}])for(const wrap of [v=>v,v=>({frozen_request:{payload:{context:v}}}),v=>({operational_findings:v})])markers.push(wrap(context));
+  return {native:markers.map(has),legacy:[null,{},[],{feature_key:'charge_reconciliation',frozen_request:{payload:{context:{source_domain:'operations',selected_sources:{}}}}},{source_domain:null,selected_sources:{}},{source_domain:'operations',selected_sources:{unrelated:null}}].map(has),actual:[has(p.states.succeeded.detail.data),has(p.states.succeeded.trace.data)]};
+ },load('chat'));
+ expect(result.native.length).toBe(21);expect(result.native.every(Boolean)).toBe(true);expect(result.legacy).toEqual([false,false,false,false,false,false]);expect(result.actual).toEqual([true,true]);
+});

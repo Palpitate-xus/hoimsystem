@@ -75,3 +75,29 @@ for(const variant of ['removed','null'])test(`known native Case directory reject
  await expect(page.getByText('原任务或完整冻结来源及固定结果无法核对，暂不展示',{exact:true})).toBeVisible();await expect(page.getByText(sentinel,{exact:true})).toHaveCount(0);
  expect(await page.evaluate(()=>window.__chargeParentProbe.target.$.setupState.detail)).toBeNull();expect(s.calls.filter(c=>c.path==='/api/ai/runs/'+s.row.run_id)).toHaveLength(1);expect(s.errors).toEqual([]);
 });
+
+function stripChargeMarkers(value){
+ for(const key of ['charge_case_id','charge_artifact','charge_findings'])delete value[key];
+ if(value.result)delete value.result.charge_analysis;
+ delete value.frozen_request;delete value.raw_frozen_json;
+}
+for(const placement of ['row','trace'])for(const anchor of ['native_domain','selected_case','null_selected_case'])test(`unfiltered history ${placement} ${anchor} independently prevents native proof downgrade`,async({page})=>{
+ const p=load('chat'),trace=structuredClone(p.states.succeeded.trace.data),row=structuredClone(p.admin_history.data.find(r=>r.run_id===trace.run_id)),sentinel='RESIDUAL_NATIVE_CHARGE_ANCHOR_MUST_NOT_SHOW';
+ for(const value of [row,trace])stripChargeMarkers(value);
+ const context=anchor==='native_domain'?{source_domain:'single_admission_recorded_ledger'}:{selected_sources:{charge_case_id:anchor==='null_selected_case'?null:p.request.input.charge_case_id}};
+ (placement==='row'?row:trace).frozen_request={payload:{context}};
+ trace.result.summary=sentinel;
+ const s=await setup(page,{row,trace});await inspect(page);
+ await expect(page.getByText('原任务或完整冻结来源及固定结果无法核对，暂不展示',{exact:true})).toBeVisible();
+ await expect(page.getByText(sentinel,{exact:true})).toHaveCount(0);
+ expect(await page.evaluate(()=>window.__chargeParentProbe.target.$.setupState.detail)).toBeNull();
+ expect(s.calls.filter(c=>c.path==='/api/ai/runs/'+s.row.run_id)).toHaveLength(1);expect(s.errors).toEqual([]);
+});
+test('unfiltered synthetic legacy operations contract remains read-only without any native identity',async({page})=>{
+ // A synthetic legacy contract, not a claim that a stripped native DTO is valid native proof.
+ const p=load('chat'),base=p.states.succeeded.trace.data,runId=base.run_id;
+ const row={run_id:runId,feature_key:'charge_reconciliation',status:'succeeded',feature_name:'旧只读账目任务',requested_by:base.requested_by,patient_id:null,preview:0,prompt_version:0,provider_revision:1,input_tokens:0,output_tokens:0};
+ const trace={...row,provider_id:base.provider_id,snapshot_complete:true,frozen_request:{payload:{context:{source_domain:'operations',selected_sources:{}}}},result:{summary:'SYNTHETIC_LEGACY_OPERATIONS_READ_ONLY',sections:[],warnings:[],missing_data:[]},evidence:[],feedback:[]};
+ const s=await setup(page,{row,trace});await inspect(page);await expect(page.getByText(trace.result.summary,{exact:true})).toBeVisible();
+ expect(s.calls.filter(c=>c.path==='/api/ai/runs/'+runId)).toHaveLength(0);expect(s.errors).toEqual([]);
+});

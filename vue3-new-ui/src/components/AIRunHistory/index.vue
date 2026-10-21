@@ -80,7 +80,7 @@ import { resolveSurgeryEvidence, verifySurgeryRun } from "@/api/ai/surgeryScenar
 import {resolveSupplyEvidence,verifySupplyRun,supplyAnalysisVersionSupported} from "@/api/ai/supplyResults";
 import {resolveInventoryEvidence,verifyInventoryRun,inventoryAnalysisVersionSupported,inventoryRunHasNativeMarkers} from "@/api/ai/inventoryResults";
 import {codingRunHasMarkers,verifyCodingRun,resolveCodingEvidence} from "@/api/ai/codingResults";
-import {verifyChargeTrace} from "@/api/ai/chargeReconciliationResults";
+import {verifyChargeTrace,chargeRunHasNativeMarkers} from "@/api/ai/chargeReconciliationResults";
 import { supportCanonical, supportId } from "@/api/inpatientSupport";
 const CodingFindings=defineAsyncComponent(()=>import("@/components/ai/CodingFindings.vue"));
 const ChargeReconciliationFindings=defineAsyncComponent(()=>import("@/components/ai/ChargeReconciliationFindings.vue"));
@@ -109,7 +109,7 @@ const current=key=>alive&&!wasDeactivated&&allowed.value&&key===auth();
 const hasSurgery=value=>!!value?.surgery_findings||!!value?.result?.surgery_analysis||!!value?.frozen_request?.payload?.context?.surgery_binding||!!value?.frozen_request?.payload?.input?.surgery_scenario_id||String(value?.frozen_request?.provider_snapshot?.model||'').startsWith('surgery:');
 const hasSupply=value=>!!value?.supply_findings||!!value?.result?.supply_analysis||['supply_binding','supply_source','supply_series'].some(name=>!!value?.frozen_request?.payload?.context?.[name])||!!value?.frozen_request?.payload?.input?.supply_series_id||String(value?.frozen_request?.provider_snapshot?.model||'').startsWith('supply:');
 const hasInventory=inventoryRunHasNativeMarkers,hasCoding=codingRunHasMarkers,hasDocument=documentExtractionRunHasMarkers;
-const hasCharge=value=>value!==null&&typeof value==='object'&&(['charge_artifact','charge_findings','charge_case_id'].some(name=>Object.hasOwn(value,name))||Object.hasOwn(value.result||{},'charge_analysis')||Object.hasOwn(value.frozen_request?.payload?.context||{},'charge_binding')||Object.hasOwn(value.frozen_request?.payload?.input||{},'charge_case_id'));
+const hasCharge=chargeRunHasNativeMarkers;
 const hasSatisfaction=satisfactionRunHasMarkers;
 const legacySatisfaction=value=>value?.feature_key==='feedback_analysis'&&value?.legacy_feedback_read_only===true&&!hasSatisfaction({...value,feature_key:''});
 function reportedTokens(row){const known=value=>Number.isSafeInteger(value)&&value>=0;if(hasSatisfaction(row)&&!legacySatisfaction(row))return [row.usage?.input_tokens,row.usage?.output_tokens].map(value=>known(value)?String(value):'未报告').join(' / ');return hasCharge(row)||hasDocument(row)?[row.input_tokens,row.output_tokens].map(value=>known(value)?String(value):'未报告').join(' / '):row.input_tokens||row.output_tokens?(row.input_tokens||0)+' / '+(row.output_tokens||0):'未报告';}

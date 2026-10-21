@@ -44,7 +44,7 @@ def _guard_charge_identity(db, user, identity):
 
 
 def lock_directory_gates(db):
-    """Billing -> Satisfaction -> Inventory -> Research; never acquire them after User/Run."""
+    """Billing -> Satisfaction -> Inventory -> Research -> Training, before User/Run."""
     from app.ai.charge_reconciliation_write_guard import lock_charge_gate
     from app.ai.inventory_write_guard import lock_inventory_gate
     from app.ai.satisfaction_write_guard import lock_satisfaction_gate
@@ -55,6 +55,12 @@ def lock_directory_gates(db):
     from app.ai.research_cohort_write_guard import lock_research_gate
 
     lock_research_gate(db)
+    from app.ai.clinical_training_models import AITrainingWriteGate
+
+    # A mixed directory creates no gate. Dedicated native operations require
+    # the actual seeded training gate; when present, lock it before any User.
+    with db.no_autoflush:
+        db.query(AITrainingWriteGate).filter_by(gate_id=1).populate_existing().with_for_update().one_or_none()
 
 
 def guard_private_task_read(db, user, run_id):
@@ -71,6 +77,11 @@ def guard_private_task_read(db, user, run_id):
     if identity is not None:
         # An actual immutable FK selects exactly one complete domain guard.
         # Only a task with no Artifact needs the orphan JSON-marker probes.
+        if identity.domain == "clinical_training":
+            from app.ai.clinical_training_shared import guard_training_task
+
+            guard_training_task(db, user, run_id)
+            return
         if identity.domain == "research_cohort":
             from app.ai.research_cohort_shared import guard_research_task
 
@@ -96,6 +107,11 @@ def guard_private_task_read(db, user, run_id):
             from fastapi import HTTPException
 
             raise HTTPException(409, "原生任务的实际域锚点已改变，未降级读取")
+        return
+    from app.ai.clinical_training_shared import guard_training_task, is_training_task
+
+    if is_training_task(db, run_id):
+        guard_training_task(db, user, run_id)
         return
     from app.ai.research_cohort_shared import guard_research_task, is_research_task
 

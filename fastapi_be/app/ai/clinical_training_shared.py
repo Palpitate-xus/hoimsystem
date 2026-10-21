@@ -48,12 +48,12 @@ def is_training_task(db, value):
     mysql = db.get_bind().dialect.name in {"mysql", "mariadb"}
     statement = select(marker_expression(mysql=mysql).label("training_native_marker")).where(AIRun.run_id == identifier)
     with db.no_autoflush:
+        found = []
         if mysql:
             with getattr(db.get_bind(), "engine", db.get_bind()).connect().execution_options(isolation_level="READ COMMITTED") as connection:
-                found = connection.execute(statement).one_or_none()
-        else:
-            found = db.execute(statement).one_or_none()
-    return found is not None and found[0] is True
+                found.extend(connection.execute(statement))
+        found.extend(db.execute(statement))
+    return any(row[0] is True for row in found)
 
 
 def is_located_training_task(db, value):

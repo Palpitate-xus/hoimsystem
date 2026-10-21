@@ -256,6 +256,12 @@ class SourceCreate(StrictModel):
         return self
 
 
+class LegacyCaptureRequest(StrictModel):
+    item_kind: ItemKind
+    item_id: Positive
+    scope: Literal["hospital_inventory"]
+
+
 # Exact existing governance inputs deliberately retain their code-point/UTF8
 # semantics: review<=4000UTF8 bytes; revoke<=1000codepoints and4000UTF8 bytes.
 SOURCE_REVIEW = SourceReview

@@ -420,9 +420,12 @@ async def test_actual_anchor_protects_private_run_loading_after_all_markers_are_
     db.query(AIRun).filter_by(run_id=claim[0]).update({"feature_key": "operations_qa", "input_json": "{}", "result_json": "{}", "context_metadata_json": "{}", "evidence_json": "[]"})
     db.commit()
     statements = []
+    selected_columns = []
 
     def observed(conn, cursor, statement, parameters, context, many):
         statements.append(statement)
+        if context.compiled is not None:
+            selected_columns.extend(item.keyname for item in context.compiled._result_columns)
 
     connection = db.get_bind()
     event.listen(connection, "before_cursor_execute", observed)
@@ -431,7 +434,10 @@ async def test_actual_anchor_protects_private_run_loading_after_all_markers_are_
     finally:
         event.remove(connection, "before_cursor_execute", observed)
     assert denied.status_code == 403, denied.text
-    assert not any("hoimsystem_ai_run.input_json" in sql for sql in statements)
+    # The #72 closed-path probe returns only one SQL boolean, not Task TEXT.
+    # Check actual result-column names, including ORM table-prefixed aliases.
+    private = {"input_json", "evidence_json", "context_metadata_json", "result_json", "source_json"}
+    assert not any(name == field or name.endswith("_" + field) for name in selected_columns for field in private)
     closed = await async_client.get(f"/api/ai/runs/{claim[0]}", headers=auth_headers(case["actor"].username))
     assert closed.status_code == 409, closed.text
 

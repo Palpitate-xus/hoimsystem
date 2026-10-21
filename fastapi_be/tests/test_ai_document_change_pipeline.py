@@ -350,7 +350,8 @@ async def test_missing_artifact_rewritten_feature_each_remaining_native_marker_r
         event.remove(db.get_bind(), "before_cursor_execute", note)
         db.query(AIRun).filter_by(run_id=identifier).delete(synchronize_session=False)
         db.commit()
-    assert not {"input_json", "evidence_json", "context_metadata_json", "result_json", "source_json"} & set(result_columns)
+    private = {"input_json", "evidence_json", "context_metadata_json", "result_json", "source_json"}
+    assert not any(name == field or name.endswith("_" + field) for name in result_columns for field in private)
     assert "document_change_marker" in result_columns
 
 

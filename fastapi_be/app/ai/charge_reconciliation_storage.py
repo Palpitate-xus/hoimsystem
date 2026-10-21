@@ -167,4 +167,9 @@ def is_charge_run(db, run):
     if db is None or not run.run_id:
         return False
     with db.no_autoflush:
-        return db.query(AIChargeRunArtifact.run_id).filter_by(run_id=run.run_id).with_for_update(read=True).first() is not None
+        # This is only an immutable routing locator. The Artifact is inserted
+        # atomically with its Run, so any consistent snapshot that can see the
+        # actual Run can also see this identity. Do not take Artifact S before
+        # the dedicated caller's Billing Gate; authorization/load_snapshot
+        # subsequently lock and verify every current original anchor.
+        return db.query(AIChargeRunArtifact.run_id).filter_by(run_id=run.run_id).first() is not None

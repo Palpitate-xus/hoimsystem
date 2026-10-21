@@ -15,7 +15,7 @@ from sqlalchemy import or_
 
 from app.ai.research_cohort_contract import ScopeReference, canonical_json
 from app.ai.research_cohort_models import AIResearchPatientAuthorization, AIResearchProjectACL
-from app.ai.research_cohort_registry import _row, authorize_patient_research, original_proof
+from app.ai.research_cohort_registry import _row, authorize_patient_research, authorize_project_acl, original_proof
 from app.ai.research_cohort_sources import _typed, hash_content, scope_proof, scope_row, utc_text, utcnow
 from app.ai.research_cohort_write_guard import current_research_rows, lock_research_write
 
@@ -178,7 +178,8 @@ def capture_sources(db, user, values, *, locking=False):
     # All captures use current locks. The flag requests exclusive original
     # member reads for a same-transaction Case write; it never permits old RR.
     actor = lock_research_write(db, user)
-    scope = scope_proof(scope_row(db, request.scope_id))
+    actor, initial_acl = authorize_project_acl(db, actor, request.scope_id, capture=True)
+    scope = initial_acl["parent_binding"]["scope"]
     if (scope["content_hash"], scope["governance_hash"]) != (request.scope_content_hash, request.scope_governance_hash):
         raise HTTPException(409, "明确研究项目三锚已变化，请重新核对原件")
     patient_ids = scope["payload"]["patient_ids"]

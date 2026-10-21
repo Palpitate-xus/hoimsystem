@@ -118,6 +118,18 @@ def _current(db, row, snapshot):
 def preview_input(db, user, values):
     request = _typed(CaptureRequest, values)
     captured = capture_sources(db, user, ScopeReference.model_validate(request.model_dump(exclude={"criteria"})), locking=True)
+    allowed = captured["scope_original"]["payload"]["data_families"]
+
+    def allowed_nodes(node):
+        if node.op in {"all", "any"}:
+            for child in node.children:
+                allowed_nodes(child)
+        elif node.op == "not":
+            allowed_nodes(node.child)
+        elif node.family not in allowed:
+            raise HTTPException(422, "谓词记录族不在项目明确授权的数据范围内")
+
+    allowed_nodes(request.criteria.root)
     from app.ai.research_cohort_evaluator import evaluate_criteria
 
     return {
@@ -295,7 +307,10 @@ def case_current(db, user, identifier, *, audit_only=False):
         result["exclusion_reasons"].append("case_not_published")
     if not current:
         result["exclusion_reasons"].append("original_sources_or_permissions_not_current")
-    result["eligible"] = row.status == "published" and current
+    recipe_current = snapshot["recipe"] == current_recipe()
+    if not recipe_current:
+        result["exclusion_reasons"].append("frozen_recipe_not_current_for_new_execution")
+    result["eligible"] = row.status == "published" and current and recipe_current
     result["can_review"] = actor.user_role == "super_admin" and row.status == "draft" and current
     result["can_revoke"] = actor.user_role == "super_admin" and row.status in {"draft", "published"}
     if current and row.status in {"draft", "published"} or audit_only:
@@ -339,3 +354,30 @@ def binding_for(row, source):
 
 
 from app.ai.research_cohort_snapshot import RULE_ID  # noqa: E402
+
+
+def list_cases(db, user, scope_id, *, page=1, size=20):
+    TypeAdapter(UUID).validate_python(scope_id, strict=True)
+    if type(page) is not int or not 1 <= page <= 100000 or type(size) is not int or not 1 <= size <= 100:
+        raise HTTPException(422, "技术目录页码须为明确有界整数")
+    actor = lock_research_write(db, user)
+    if actor.user_role != "super_admin":
+        authorize_project_acl(db, actor, scope_id)
+    else:
+        from app.ai.research_cohort_sources import _registry_authority
+
+        _registry_authority(db, actor, scope_id)
+    query = db.query(AIResearchCohortCase).filter_by(scope_id=scope_id)
+    from sqlalchemy import func
+
+    total = db.query(func.count(AIResearchCohortCase.case_id)).filter_by(scope_id=scope_id).scalar()
+    rows = (
+        current_research_rows(
+            query.options(defer(AIResearchCohortCase.snapshot_json), defer(AIResearchCohortCase.projection_json)).order_by(AIResearchCohortCase.created_at.desc(), AIResearchCohortCase.case_id),
+            shared=True,
+        )
+        .offset((page - 1) * size)
+        .limit(size)
+        .all()
+    )
+    return {"items": [{**metadata(row), "detail_required": True, "no_clinical_body_in_directory": True} for row in rows], "total": total, "page": page, "size": size}

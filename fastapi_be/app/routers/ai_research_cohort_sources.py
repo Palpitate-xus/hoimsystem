@@ -1,14 +1,18 @@
 """Bounded project registry only; no cohort execution or export endpoint."""
 
-from fastapi import APIRouter, Depends
+from typing import Annotated
+
+from fastapi import APIRouter, Depends, Query
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 
+from app.ai import research_cohort_cases as cases
 from app.ai import research_cohort_registry as registry
 from app.ai import research_cohort_sources as sources
-from app.ai.research_cohort_contract import UUID, AuthorizationReview, PatientAuthorizationCreate, ProjectACLCreate, ScopeCreate, SourceReview, SourceRevoke
+from app.ai.research_cohort_contract import UUID, AuthorizationReview, CaptureRequest, CaseCreate, PatientAuthorizationCreate, ProjectACLCreate, ScopeCreate, SourceReview, SourceRevoke
 from app.database import get_db
 from app.dependencies import User, get_current_user
+from app.routers.inpatient_support import QueryPositiveInteger
 
 router = APIRouter(prefix="/ai/research-cohort", tags=["Research cohort source registry"])
 
@@ -87,3 +91,39 @@ def review_patient_authorization(record_id: UUID, body: SourceReview, db: Sessio
 @router.post("/patient-authorizations/{record_id}/revoke")
 def revoke_patient_authorization(record_id: UUID, body: SourceRevoke, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
     return reply(registry.review_registry_original(db, user, "authorization", record_id, body, revoke=True))
+
+
+@router.post("/cases/preview")
+def preview_case(body: CaptureRequest, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
+    return reply(cases.preview_input(db, user, body))
+
+
+@router.post("/cases")
+def create_case(body: CaseCreate, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
+    return reply(cases.create_case(db, user, body))
+
+
+@router.get("/cases")
+def list_cases(
+    scope_id: UUID,
+    page: Annotated[QueryPositiveInteger, Query(ge=1, le=100000)] = 1,
+    size: Annotated[QueryPositiveInteger, Query(ge=1, le=100)] = 20,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    return reply(cases.list_cases(db, user, scope_id, page=page, size=size))
+
+
+@router.get("/cases/{case_id}")
+def get_case(case_id: UUID, audit_only: bool = False, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
+    return reply(cases.case_current(db, user, case_id, audit_only=audit_only))
+
+
+@router.post("/cases/{case_id}/review")
+def review_case(case_id: UUID, body: SourceReview, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
+    return reply(cases.review_case(db, user, case_id, body))
+
+
+@router.post("/cases/{case_id}/revoke")
+def revoke_case(case_id: UUID, body: SourceRevoke, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
+    return reply(cases.review_case(db, user, case_id, body, revoke=True))

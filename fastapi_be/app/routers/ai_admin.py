@@ -95,9 +95,13 @@ def _commit(db: Session) -> None:
 @router.get("/ai/admin/features")
 def list_features(db: Session = Depends(get_db), user: User = Depends(require_roles("super_admin"))) -> dict:
     """List all 80 capabilities, including disabled and unvalidated ones."""
+    from app.ai.native_task_access import lock_directory_gates
+
+    lock_directory_gates(db)
+    user = _current_super_admin(db, user)
     configs = {item.feature_key: item for item in db.query(AIFeatureConfig).all()}
-    reports = setup_reports(db, configs)
-    return {"code": 200, "msg": "success", "data": [{**describe_config(db, spec, configs.get(spec.key), True), "setup_check": reports[spec.key]} for spec in FEATURES]}
+    reports = setup_reports(db, configs, user=user)
+    return {"code": 200, "msg": "success", "data": [{**describe_config(db, spec, configs.get(spec.key), True, user=user), "setup_check": reports[spec.key]} for spec in FEATURES]}
 
 
 @router.put("/ai/admin/features/{key}")
@@ -1270,6 +1274,23 @@ def list_prompts(key: str, db: Session = Depends(get_db), user: User = Depends(r
     """Display the fixed system contract and immutable task prompt history."""
     from app.ai.feature_prompts import system_prompt_for_feature
 
+    if key == "infection_cluster":
+        from app.ai.infection_cluster_profiles import _start
+        from app.ai.infection_cluster_task_contract import LOCAL_PROMPT_HASH, LOCAL_TASK_TEXT
+
+        _start(db, user)
+        return {
+            "code": 200,
+            "msg": "本地固定配方只读溯源，不发送模型",
+            "data": {
+                "system_prompt": "",
+                "versions": [{"prompt_id": None, "version": 0, "task_prompt": LOCAL_TASK_TEXT, "change_note": "local_fixed_recipe"}],
+                "prompt_hash": LOCAL_PROMPT_HASH,
+                "read_only": True,
+                "execution": "local_exact_statistics",
+                "external_model_transfer": False,
+            },
+        }
     _current_super_admin(db, user)
     spec = get_spec(key)
     versions = db.query(AIPromptVersion).filter_by(feature_key=key).order_by(AIPromptVersion.version.desc()).all()

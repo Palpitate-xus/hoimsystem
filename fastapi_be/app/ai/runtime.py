@@ -42,6 +42,10 @@ from app.models import Doctor, Patient, User
 def authorized_feature(db: Session, user: User, key: str) -> tuple[FeatureSpec, AIFeatureConfig | None]:
     """Intersect configured authorization with the fixed capability role boundary."""
     spec = get_spec(key)
+    if spec.number == 78:
+        from app.ai.infection_cluster_management import authorize_feature
+
+        return spec, authorize_feature(db, user)[1]
     config = db.get(AIFeatureConfig, key)
     roles = set(json.loads(config.allowed_roles_json)) if config else set(spec.default_roles)
     if user.user_role != "super_admin" and (user.user_role not in roles or user.user_role not in spec.default_roles):

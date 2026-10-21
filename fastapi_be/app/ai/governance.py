@@ -188,8 +188,12 @@ def provider_feature_issues(spec: FeatureSpec, provider: AIProvider) -> list[dic
     return issues
 
 
-def describe_config(db: Session, spec: FeatureSpec, config: AIFeatureConfig | None, management: bool = False) -> dict:
+def describe_config(db: Session, spec: FeatureSpec, config: AIFeatureConfig | None, management: bool = False, *, user=None) -> dict:
     """Keep configured, implementation and validation status independently visible."""
+    if spec.number == 78:
+        from app.ai.infection_cluster_management import describe_configuration
+
+        return describe_configuration(db, spec, user=user, management=management)
     data = describe_feature(spec)
     if spec.number == 69:
         data["input_mode"] = "charge_reconciliation"

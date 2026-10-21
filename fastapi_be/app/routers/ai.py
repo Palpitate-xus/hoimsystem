@@ -76,7 +76,7 @@ def available_features(db: Session = Depends(get_db), user: User = Depends(get_c
             if exc.status_code == 403:
                 continue
             raise
-        data.append(describe_config(db, spec, configs.get(spec.key)))
+        data.append(describe_config(db, spec, configs.get(spec.key), user=user))
     return {"code": 200, "msg": "success", "data": data}
 
 

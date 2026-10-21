@@ -402,10 +402,11 @@ def create_run(db: Session, user: User, req: RunRequest) -> AIRun:
 
 def authorize_run(db: Session, user: User, run: AIRun) -> None:
     """Re-check current permissions, including revoked care access, on every result read."""
+    from app.ai.native_task_routing import opaque_run_id
     from app.ai.research_cohort_shared import guard_research_task, is_research_task
 
     if is_research_task(db, run):
-        guard_research_task(db, user, run.run_id)
+        guard_research_task(db, user, opaque_run_id(run))
         return
     from app.ai.charge_reconciliation_storage import is_charge_run
 
@@ -584,6 +585,7 @@ def describe_run(run: AIRun, include_result: bool = True, *, user: User | None =
     from app.ai.charge_reconciliation_storage import is_charge_run
 
     db = object_session(run)
+    from app.ai.native_task_routing import opaque_run_id
     from app.ai.research_cohort_shared import is_research_task
 
     if is_research_task(db, run):
@@ -591,7 +593,7 @@ def describe_run(run: AIRun, include_result: bool = True, *, user: User | None =
             raise HTTPException(403, "科研技术状态须在当前授权会话读取")
         from app.ai.research_cohort_runtime import describe_research_run
 
-        return describe_research_run(db, user, run.run_id)
+        return describe_research_run(db, user, opaque_run_id(run))
     if is_charge_run(db, run):
         if db is None or user is None:
             raise HTTPException(409, "完整账目任务须在当前授权会话内展示")

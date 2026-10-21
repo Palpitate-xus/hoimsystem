@@ -21,7 +21,7 @@ async function managementSession(page, role = "super_admin") {
     if (path === "/api/ai/admin/features") data = features;
     if (path === "/api/ai/admin/runs") data = [{ run_id: "history-test", feature_key: "patient_summary", feature_name: "患者全景摘要", requested_by: 42, patient_id: 1, status: "succeeded", input_tokens: 12, output_tokens: 20, feedback_count: 1 }];
     if (path === "/api/ai/admin/runs/history-test") data = {
-      run_id: "history-test", feature_name: "患者全景摘要", requested_by: 42, patient_id: 1, status: "succeeded", prompt_version: 0, provider_revision: 1,
+      run_id: "history-test", feature_key: "patient_summary", feature_name: "患者全景摘要", requested_by: 42, patient_id: 1, status: "succeeded", prompt_version: 0, provider_revision: 1,
       snapshot_complete: true, result: { summary: "已留存的测试结果", sections: [], warnings: [], missing_data: [] },
       frozen_request: { system_prompt: "冻结的原始系统 Prompt", task_prompt: "冻结的原始任务 Prompt", provider_snapshot: { model: "original-requested-model-v1", api_base: "http://localhost:11434/v1" }, feature_validation: { note: "当时的隔离验证说明" }, payload: { input: { question: "原始测试问题" } } },
       feedback: [{ reviewer_id: 42, outcome: "rejected", comment: "<img src=x onerror=alert(1)> 测试复核意见" }],

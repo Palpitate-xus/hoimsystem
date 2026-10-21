@@ -5,7 +5,9 @@ import json
 from typing import Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
+from fastapi.routing import APIRoute
 from sqlalchemy import func, inspect
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, defer
@@ -30,8 +32,9 @@ from app.ai.governance import (
     validate_endpoint,
 )
 from app.ai.imaging_probe import inspect_imaging_capabilities
+from app.ai.knowledge_sources import is_document_source, lock_manual_review_target, source_is_current, source_state
 from app.ai.models import AIAuditEvent, AIFeatureConfig, AIFeedback, AIKnowledgeDocument, AIPatientGrant, AIPromptVersion, AIProvider, AIRun, utcnow
-from app.ai.pathway_knowledge import PATHWAY_SOURCE_KIND, PATHWAY_URI_PREFIX, import_content, pathway_hash, source_is_current, source_state
+from app.ai.pathway_knowledge import PATHWAY_SOURCE_KIND, PATHWAY_URI_PREFIX, import_content, pathway_hash
 from app.ai.readiness import setup_reports
 from app.ai.runtime import describe_run
 from app.ai.schemas import FeatureWrite, KnowledgeReview, KnowledgeWrite, PathwayKnowledgeImport, PatientGrantWrite, PromptActivate, PromptWrite, ProviderCheck, ProviderWrite
@@ -41,7 +44,28 @@ from app.dependencies import require_roles
 from app.models import ClinicalPathway, Department, Patient, User
 from app.routers.inpatient_support import QueryPositiveInteger
 
-router = APIRouter(tags=["AI 超级管理员"], default_response_class=JSONResponse)
+
+class AIAdminRoute(APIRoute):
+    """Reject invalid requests without echoing document text or credentials."""
+
+    def get_route_handler(self):
+        handler = super().get_route_handler()
+
+        async def validated(request):
+            try:
+                return await handler(request)
+            except RequestValidationError as exc:
+
+                def safe(value):
+                    return value.encode("utf-8", errors="backslashreplace").decode("utf-8") if isinstance(value, str) else value
+
+                details = [{"type": safe(item["type"]), "loc": [safe(part) for part in item["loc"]], "msg": safe(item["msg"])} for item in exc.errors()]
+                raise HTTPException(422, details) from exc
+
+        return validated
+
+
+router = APIRouter(tags=["AI 超级管理员"], default_response_class=JSONResponse, route_class=AIAdminRoute)
 
 
 def _current_super_admin(db, user):
@@ -816,6 +840,7 @@ def list_global_runs(
     inventory_item_id: QueryPositiveInteger | None = Query(None, ge=1, le=2147483647),
     inventory_scenario_id: str | None = Query(None, max_length=36),
     coding_case_id: str | None = Query(None, max_length=36),
+    document_original_id: str | None = Query(None, max_length=36),
     page: int = Query(1, ge=1, le=100000),
     page_size: int = Query(30, ge=1, le=100),
     db: Session = Depends(get_db),
@@ -824,6 +849,29 @@ def list_global_runs(
     """Inspect all users' task metadata and feedback counts without loading clinical payloads."""
     user = _current_super_admin(db, user)
     query = db.query(AIRun)
+    if feature_key == "guideline_ingestion" or document_original_id is not None:
+        from app.ai.document_extraction_history import filter_document_history
+
+        query = filter_document_history(
+            db,
+            user,
+            query,
+            feature_key=feature_key,
+            original_id=document_original_id,
+            other_scope=(
+                patient_id,
+                department_id,
+                surgery_pool_id,
+                surgery_scenario_id,
+                supply_item_kind,
+                supply_item_id,
+                supply_series_id,
+                inventory_item_kind,
+                inventory_item_id,
+                inventory_scenario_id,
+                coding_case_id,
+            ),
+        )
     if coding_case_id is not None:
         if feature_key != "drg_evidence_review" or any(
             value is not None
@@ -876,7 +924,7 @@ def list_global_runs(
         .all()
     )
     counts = dict(db.query(AIFeedback.run_id, func.count(AIFeedback.feedback_id)).filter(AIFeedback.run_id.in_([item.run_id for item in rows])).group_by(AIFeedback.run_id).all()) if rows else {}
-    data = [{**describe_run(item, False), "requested_by": item.requested_by, "provider_id": item.provider_id, "feedback_count": counts.get(item.run_id, 0)} for item in rows]
+    data = [{**describe_run(item, False, user=user), "requested_by": item.requested_by, "provider_id": item.provider_id, "feedback_count": counts.get(item.run_id, 0)} for item in rows]
     return {"code": 200, "msg": "success", "data": data, "total": total, "page": page, "page_size": page_size}
 
 
@@ -887,7 +935,14 @@ def inspect_run_trace(run_id: str, db: Session = Depends(get_db), user: User = D
     run = db.get(AIRun, run_id)
     if run is None:
         raise HTTPException(404, "AI 任务不存在")
-    snapshot = json.loads(run.input_json)
+    from app.ai.document_extraction_storage import authorize_document_run, is_extraction_run
+
+    document_trace = {}
+    if is_extraction_run(db, run):
+        snapshot, _, _ = authorize_document_run(db, user, run, current=False)
+        document_trace = {"frozen_request_json": run.input_json, "frozen_evidence_json": run.evidence_json, "frozen_context_metadata_json": run.context_metadata_json}
+    else:
+        snapshot = json.loads(run.input_json)
     from app.ai.coding_evidence_storage import is_coding_run
 
     if is_coding_run(db, run):
@@ -945,7 +1000,8 @@ def inspect_run_trace(run_id: str, db: Session = Depends(get_db), user: User = D
         "code": 200,
         "msg": "success",
         "data": {
-            **describe_run(run),
+            **describe_run(run, user=user),
+            **document_trace,
             "requested_by": run.requested_by,
             "provider_id": run.provider_id,
             "frozen_request": snapshot,
@@ -1008,14 +1064,18 @@ def update_provider(provider_id: int, req: ProviderWrite, db: Session = Depends(
 @router.get("/ai/admin/prompts/{key}")
 def list_prompts(key: str, db: Session = Depends(get_db), user: User = Depends(require_roles("super_admin"))) -> dict:
     """Display the fixed system contract and immutable task prompt history."""
-    from app.ai.coding_evidence_prompt import system_prompt_for
+    from app.ai.document_extraction_prompt import system_prompt_for
 
     _current_super_admin(db, user)
     spec = get_spec(key)
     versions = db.query(AIPromptVersion).filter_by(feature_key=key).order_by(AIPromptVersion.version.desc()).all()
     baseline = {"prompt_id": None, "version": 0, "task_prompt": spec.task_prompt, "change_note": "项目默认任务 Prompt"}
     data = [{name: getattr(item, name) for name in ("prompt_id", "version", "task_prompt", "change_note", "created_by", "create_time")} for item in versions]
-    return {"code": 200, "msg": "success", "data": {"system_prompt": system_prompt_for({"coding_binding": None} if spec.number == 68 else {}), "versions": [*data, baseline]}}
+    return {
+        "code": 200,
+        "msg": "success",
+        "data": {"system_prompt": system_prompt_for({"document_binding": None} if spec.number == 71 else {"coding_binding": None} if spec.number == 68 else {}), "versions": [*data, baseline]},
+    }
 
 
 @router.post("/ai/admin/prompts/{key}")
@@ -1056,6 +1116,7 @@ def activate_prompt(key: str, req: PromptActivate, db: Session = Depends(get_db)
 @router.get("/ai/admin/knowledge")
 def list_knowledge(db: Session = Depends(get_db), user: User = Depends(require_roles("super_admin")), limit: int = Query(100, ge=1, le=300)) -> dict:
     """List version metadata; full text is retrieved only when explicitly inspected."""
+    _current_super_admin(db, user)
     items = db.query(AIKnowledgeDocument).order_by(AIKnowledgeDocument.create_time.desc()).limit(limit).all()
     names = ("document_id", "title", "version", "source_uri", "category", "status", "content_hash", "department_id", "effective_from", "effective_to", "reviewed_by", "reviewed_at", "create_time")
     data = [
@@ -1065,6 +1126,7 @@ def list_knowledge(db: Session = Depends(get_db), user: User = Depends(require_r
             "source_kind": item.source_kind,
             "source_reference_id": item.source_reference_id,
             "source_state": source_state(db, item),
+            "document_evidence_bound": is_document_source(db, item),
         }
         for item in items
     ]
@@ -1074,6 +1136,7 @@ def list_knowledge(db: Session = Depends(get_db), user: User = Depends(require_r
 @router.get("/ai/admin/knowledge/{document_id}")
 def knowledge_detail(document_id: str, db: Session = Depends(get_db), user: User = Depends(require_roles("super_admin"))) -> dict:
     """Inspect exact text and its hash before a publication decision."""
+    _current_super_admin(db, user)
     item = db.get(AIKnowledgeDocument, document_id)
     if item is None:
         raise HTTPException(404, "知识文档不存在")
@@ -1091,6 +1154,7 @@ def knowledge_detail(document_id: str, db: Session = Depends(get_db), user: User
             "source_reference_id": item.source_reference_id,
             "source_snapshot_hash": item.source_snapshot_hash,
             "source_state": source_state(db, item),
+            "document_evidence_bound": is_document_source(db, item),
         },
     }
 
@@ -1098,6 +1162,13 @@ def knowledge_detail(document_id: str, db: Session = Depends(get_db), user: User
 @router.post("/ai/admin/knowledge")
 def create_knowledge(req: KnowledgeWrite, db: Session = Depends(get_db), user: User = Depends(require_roles("super_admin"))) -> dict:
     """Create an immutable draft without fetching arbitrary external URLs."""
+    _current_super_admin(db, user)
+    try:
+        content_bytes = len(req.content.encode("utf-8", errors="strict"))
+    except UnicodeError as exc:
+        raise HTTPException(422, "知识正文须为有效UTF8，未登记或替换字符") from exc
+    if content_bytes > 65535:
+        raise HTTPException(422, "完整知识正文超过65535个UTF8字节，未截断或登记")
     for key in req.feature_keys:
         get_spec(key)
     if req.effective_from and req.effective_to and req.effective_from >= req.effective_to:
@@ -1115,7 +1186,11 @@ def create_knowledge(req: KnowledgeWrite, db: Session = Depends(get_db), user: U
 @router.post("/ai/admin/knowledge/{document_id}/review")
 def review_knowledge(document_id: str, req: KnowledgeReview, db: Session = Depends(get_db), user: User = Depends(require_roles("super_admin"))) -> dict:
     """Publish exactly the reviewed version or retire it without deleting evidence history."""
-    item = db.query(AIKnowledgeDocument).filter_by(document_id=document_id).with_for_update().first()
+    _current_super_admin(db, user)
+    # Document publication/revocation locks parents before knowledge. Reject
+    # this alternate writer before taking a knowledge X lock, including when
+    # mutable URI/kind markers were stripped from a still-bound row.
+    item = lock_manual_review_target(db, document_id)
     if item is None:
         raise HTTPException(404, "知识文档不存在")
     if item.content_hash != req.content_hash:

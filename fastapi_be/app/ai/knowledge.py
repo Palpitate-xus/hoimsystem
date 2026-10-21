@@ -8,9 +8,12 @@ from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
 from app.ai.catalog import FeatureSpec
+from app.ai.document_evidence_contract import SOURCE_KIND as DOCUMENT_SOURCE_KIND
+from app.ai.document_evidence_contract import URI_PREFIX as DOCUMENT_URI_PREFIX
 from app.ai.governance import digest
+from app.ai.knowledge_sources import is_document_source, source_is_current
 from app.ai.models import AIKnowledgeDocument, utcnow
-from app.ai.pathway_knowledge import eligible_pathway_documents, source_is_current
+from app.ai.pathway_knowledge import eligible_pathway_documents
 from app.ai.references import SOURCE_REFERENCE_KEYS
 from app.models import ClinicalPathway
 
@@ -136,13 +139,28 @@ def retrieve_evidence(db: Session, spec: FeatureSpec, query: str, department_ids
     return [item[4] for item in ranked[:limit]]
 
 
+def is_document_evidence(db: Session, item: dict) -> bool:
+    """Recognize any retained origin marker, including the real publication FK."""
+    if item.get("source_kind") == DOCUMENT_SOURCE_KIND or isinstance(item.get("source_uri"), str) and item["source_uri"].lower().startswith(DOCUMENT_URI_PREFIX):
+        return True
+    document = db.get(AIKnowledgeDocument, item["document_id"]) if isinstance(item.get("document_id"), str) else None
+    return document is not None and is_document_source(db, document)
+
+
 def evidence_is_current(db: Session, evidence: list[dict], at: datetime.datetime | None = None) -> bool:
     """Recheck publication after queuing so retired evidence cannot silently be reused."""
     now = at or utcnow()
     for item in evidence:
         if item.get("kind") != "knowledge":
+            if is_document_evidence(db, item):
+                return False
             continue
         document = db.get(AIKnowledgeDocument, item["document_id"])
+        # The full original -> candidate -> publication -> knowledge chain uses
+        # current SHARE reads. Check it before trusting an identity-map row.
+        document_bound = document is not None and is_document_source(db, document)
+        if document_bound and not source_is_current(db, document):
+            return False
         if not document or document.status != "published" or document.content_hash != item["content_hash"]:
             return False
         if not document.reviewed_by or not document.reviewed_at or not source_is_current(db, document) or digest(document.content) != document.content_hash:
@@ -153,4 +171,20 @@ def evidence_is_current(db: Session, evidence: list[dict], at: datetime.datetime
             return False
         if (document.effective_from and document.effective_from > now) or (document.effective_to and document.effective_to <= now):
             return False
+        if document_bound:
+            # A valid publication hash does not authenticate arbitrary task
+            # prose. Reconstruct the exact published chunk and its metadata.
+            matches = [(index, text) for index, text in enumerate(_chunks(document.content)) if item.get("source_id") == f"knowledge:{document.document_id}:{document.content_hash[:12]}:{index}"]
+            if len(matches) != 1 or any(
+                item.get(key) != value
+                for key, value in {
+                    "title": document.title,
+                    "version": document.version,
+                    "source_uri": document.source_uri,
+                    "reviewed_at": str(document.reviewed_at),
+                    "content": matches[0][1],
+                    "chunk_hash": digest(matches[0][1]),
+                }.items()
+            ):
+                return False
     return True

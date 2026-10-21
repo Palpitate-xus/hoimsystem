@@ -116,6 +116,8 @@ class KnowledgeWrite(StrictRequest):
     def reserve_bound_pathway_sources(cls, value: str) -> str:
         if value.lower().startswith("hoim://clinical-pathway/"):
             raise ValueError("院内路径来源须通过路径快照导入，不能手工填写来源地址")
+        if value.lower().startswith("hoim://document-evidence/"):
+            raise ValueError("原文证据来源须由已审核摘录发布，不能手工填写来源地址")
         return value
 
     @field_validator("effective_from", "effective_to")

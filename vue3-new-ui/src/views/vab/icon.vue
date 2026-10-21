@@ -39,7 +39,7 @@ export default {
   data() {
     return {
       iconList: gallery.names,
-      iconSprite: iconSprite + '?v=' + gallery.sprite_sha256,
+      iconSprite: iconSprite ? iconSprite + '?v=' + gallery.sprite_sha256 : '',
       searchText: "",
     };
   },

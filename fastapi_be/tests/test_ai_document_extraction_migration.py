@@ -151,7 +151,7 @@ def test_actual_columns_constraints_three_foreign_keys_and_indexes_match_model(a
 
 
 @pytest.mark.parametrize("field", ANCHOR_HASH_FIELDS)
-@pytest.mark.parametrize("invalid", ["g" * 64, "A" * 64, "a" * 63, "a" * 65])
+@pytest.mark.parametrize("invalid", ["g" * 64, "A" * 64, " " * 64, "a" * 63, "a" * 65])
 def test_all_eight_hashes_reject_nonhex_uppercase_or_wrong_length(anchor_db, field, invalid):
     connection, values = anchor_db
     apply(connection, "upgrade")

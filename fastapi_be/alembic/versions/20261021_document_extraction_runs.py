@@ -28,7 +28,7 @@ def hash_constraint(field):
     remainder = field
     for character in "0123456789abcdef":
         remainder = f"replace({remainder}, '{character}', '')"
-    return sa.CheckConstraint(f"length({field}) = 64 AND {remainder} = ''", name=f"ck_doc_extract_{field}")
+    return sa.CheckConstraint(f"length({field}) = 64 AND length({remainder}) = 0", name=f"ck_doc_extract_{field}")
 
 
 def upgrade():

@@ -291,6 +291,24 @@
   "path": "/api/adverseReaction/updateStatus"
  },
  {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "inspect_document_extraction_context",
+  "method": "POST",
+  "module": "ai.py",
+  "path": "/api/ai/document-extraction/context"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "save_document_extraction_candidate",
+  "method": "POST",
+  "module": "ai.py",
+  "path": "/api/ai/runs/{run_id}/document-candidates"
+ },
+ {
   "auth": "ANY",
   "function": "available_features",
   "method": "GET",
@@ -1177,6 +1195,111 @@
   "method": "POST",
   "module": "ai_coding_evidence.py",
   "path": "/api/ai/coding-evidence/packages/{identifier}/revoke"
+ },
+ {
+  "auth": "PUBLIC",
+  "function": "options",
+  "method": "GET",
+  "module": "ai_document_evidence.py",
+  "path": "/api/ai/admin/document-evidence/options"
+ },
+ {
+  "auth": "PUBLIC",
+  "function": "create_original",
+  "method": "POST",
+  "module": "ai_document_evidence.py",
+  "path": "/api/ai/admin/document-evidence/originals"
+ },
+ {
+  "auth": "PUBLIC",
+  "function": "originals",
+  "method": "GET",
+  "module": "ai_document_evidence.py",
+  "path": "/api/ai/admin/document-evidence/originals"
+ },
+ {
+  "auth": "PUBLIC",
+  "function": "original_detail",
+  "method": "GET",
+  "module": "ai_document_evidence.py",
+  "path": "/api/ai/admin/document-evidence/originals/{original_id}"
+ },
+ {
+  "auth": "PUBLIC",
+  "function": "review_original",
+  "method": "POST",
+  "module": "ai_document_evidence.py",
+  "path": "/api/ai/admin/document-evidence/originals/{original_id}/review"
+ },
+ {
+  "auth": "PUBLIC",
+  "function": "revoke_original",
+  "method": "POST",
+  "module": "ai_document_evidence.py",
+  "path": "/api/ai/admin/document-evidence/originals/{original_id}/revoke"
+ },
+ {
+  "auth": "PUBLIC",
+  "function": "create_candidate",
+  "method": "POST",
+  "module": "ai_document_evidence.py",
+  "path": "/api/ai/admin/document-evidence/candidates"
+ },
+ {
+  "auth": "PUBLIC",
+  "function": "candidates",
+  "method": "GET",
+  "module": "ai_document_evidence.py",
+  "path": "/api/ai/admin/document-evidence/candidates"
+ },
+ {
+  "auth": "PUBLIC",
+  "function": "candidate_detail",
+  "method": "GET",
+  "module": "ai_document_evidence.py",
+  "path": "/api/ai/admin/document-evidence/candidates/{candidate_id}"
+ },
+ {
+  "auth": "PUBLIC",
+  "function": "review_candidate",
+  "method": "POST",
+  "module": "ai_document_evidence.py",
+  "path": "/api/ai/admin/document-evidence/candidates/{candidate_id}/review"
+ },
+ {
+  "auth": "PUBLIC",
+  "function": "revoke_candidate",
+  "method": "POST",
+  "module": "ai_document_evidence.py",
+  "path": "/api/ai/admin/document-evidence/candidates/{candidate_id}/revoke"
+ },
+ {
+  "auth": "PUBLIC",
+  "function": "publish_candidate",
+  "method": "POST",
+  "module": "ai_document_evidence.py",
+  "path": "/api/ai/admin/document-evidence/candidates/{candidate_id}/publish"
+ },
+ {
+  "auth": "PUBLIC",
+  "function": "publications",
+  "method": "GET",
+  "module": "ai_document_evidence.py",
+  "path": "/api/ai/admin/document-evidence/publications"
+ },
+ {
+  "auth": "PUBLIC",
+  "function": "publication_detail",
+  "method": "GET",
+  "module": "ai_document_evidence.py",
+  "path": "/api/ai/admin/document-evidence/publications/{publication_id}"
+ },
+ {
+  "auth": "PUBLIC",
+  "function": "revoke_publication",
+  "method": "POST",
+  "module": "ai_document_evidence.py",
+  "path": "/api/ai/admin/document-evidence/publications/{publication_id}/revoke"
  },
  {
   "auth": [

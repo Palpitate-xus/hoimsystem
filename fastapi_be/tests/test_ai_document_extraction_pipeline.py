@@ -101,10 +101,11 @@ async def queue(client, headers, case):
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize("kind", ["chat", "responses"])
-async def test_actual_current_context_queue_worker_full_trace_feedback_without_candidate_or_knowledge_writes(async_client, auth_headers, document_pipeline, kind, tmp_path):
+async def test_actual_current_context_queue_worker_trace_and_explicit_unreviewed_candidate(async_client, auth_headers, document_pipeline, kind, tmp_path):
     case, db = document_pipeline, document_pipeline["db"]
     headers = auth_headers(case["actor"].username)
     case["provider"].kind = kind
+    case["provider"].temperature = 0.0 if kind == "chat" else 1.0
     db.commit()
     before = (db.query(AIDocumentSpanCandidate).count(), db.query(AIKnowledgeDocument).count())
     preview = await async_client.post("/api/ai/document-extraction/context", headers=headers, json=request(case)["input"])
@@ -132,6 +133,29 @@ async def test_actual_current_context_queue_worker_full_trace_feedback_without_c
     assert trace.json()["data"]["frozen_request"]["payload"]["context"] == data["document_extraction_findings"]
     assert before == (db.query(AIDocumentSpanCandidate).count(), db.query(AIKnowledgeDocument).count())
     assert len(packets) == 1 and "document_review" not in str(packets[0]) and "authorization_note" not in str(packets[0])
+    anchor = data["document_extraction_anchor"]
+    trace_data = trace.json()["data"]
+    for raw_key, expected, hash_key in (
+        ("frozen_request_json", trace_data["frozen_request"], "input_hash"),
+        ("frozen_evidence_json", data["evidence"], "evidence_hash"),
+        ("frozen_context_metadata_json", data["context_metadata"], "metadata_hash"),
+    ):
+        assert c.parse_json(trace_data[raw_key]) == expected
+        assert c.bytes_hash(trace_data[raw_key]) == anchor[hash_key]
+    assert '"temperature":' + ("0.0" if kind == "chat" else "1.0") in trace_data["frozen_request_json"]
+    for route in ("/api/ai/runs", "/api/ai/admin/runs"):
+        history = await async_client.get(route, headers=headers, params={"feature_key": "guideline_ingestion", "document_original_id": case["original"].snapshot.original_id})
+        assert history.status_code == 200 and [item["run_id"] for item in history.json()["data"]] == [claim[0]], history.text
+    saved = await async_client.post(f"/api/ai/runs/{claim[0]}/document-candidates", headers=headers, json={"ordinal": 0})
+    assert saved.status_code == 200, saved.text
+    candidate = saved.json()["data"]
+    assert candidate["governance"]["status"] == "draft" and candidate["governance"]["revision"] == 1
+    assert candidate["governance"]["privacy_review"] == candidate["governance"]["faithfulness_review"] == "unknown"
+    assert candidate["snapshot"]["proposal"]["quote"] == case["original"].snapshot.text
+    assert candidate["snapshot"]["proposal"]["provenance"] == "unverified_submission"
+    assert db.query(AIKnowledgeDocument).count() == before[1]
+    duplicate = await async_client.post(f"/api/ai/runs/{claim[0]}/document-candidates", headers=headers, json={"ordinal": 0})
+    assert duplicate.status_code == 409 and db.query(AIDocumentSpanCandidate).count() == before[0] + 1
     (tmp_path / f"actual-document-pipeline-{kind}.json").write_text(
         json.dumps(
             {
@@ -141,6 +165,8 @@ async def test_actual_current_context_queue_worker_full_trace_feedback_without_c
                 "detail": detail.json(),
                 "trace": trace.json(),
                 "outbound": packets[0],
+                "saved_candidate": saved.json(),
+                "save_request": {"ordinal": 0},
             },
             ensure_ascii=False,
             indent=2,
@@ -341,3 +367,86 @@ async def test_actual_create_audit_trigger_cannot_add_fake_usage_to_queue(async_
     response = await async_client.post("/api/ai/runs", headers=auth_headers(case["actor"].username), json=request(case))
     assert response.status_code == 409, response.text
     assert db.query(AIRun).count() == db.query(AIDocumentExtractionRunAnchor).count() == 0
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("ordinal", [-1, 64, True, 0.0, 1])
+async def test_only_a_real_strict_ordinal_can_explicitly_create_a_candidate(async_client, auth_headers, document_pipeline, ordinal):
+    case, db = document_pipeline, document_pipeline["db"]
+    headers = auth_headers(case["actor"].username)
+    claim, _ = await queue(async_client, headers, case)
+    transport, _ = model_transport(case)
+    await runtime.execute_claimed(*claim, transport=transport)
+    before = db.query(AIDocumentSpanCandidate).count()
+    rejected = await async_client.post(f"/api/ai/runs/{claim[0]}/document-candidates", headers=headers, json={"ordinal": ordinal})
+    assert rejected.status_code == 422, rejected.text
+    assert db.query(AIDocumentSpanCandidate).count() == before
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("fault", ["audit", "candidate", "result", "anchor"])
+async def test_actual_save_audit_fault_rolls_back_candidate_and_run_link(async_client, auth_headers, document_pipeline, fault):
+    case, db = document_pipeline, document_pipeline["db"]
+    headers = auth_headers(case["actor"].username)
+    claim, _ = await queue(async_client, headers, case)
+    transport, _ = model_transport(case)
+    await runtime.execute_claimed(*claim, transport=transport)
+    db.expire_all()
+    original_result = db.get(AIRun, claim[0]).result_json
+    before = db.query(AIDocumentSpanCandidate).count()
+    actions = {
+        "audit": "DELETE FROM hoimsystem_ai_audit_event WHERE event_id=NEW.event_id",
+        "candidate": "UPDATE hoimsystem_ai_document_span_candidate SET candidate_json='{}' WHERE candidate_id=json_extract(NEW.detail_json,'$.candidate_id')",
+        "result": "UPDATE hoimsystem_ai_run SET result_json='{}' WHERE run_id=NEW.target",
+        "anchor": "UPDATE hoimsystem_ai_document_extraction_run_anchor SET input_hash='" + "0" * 64 + "' WHERE run_id=NEW.target",
+    }
+    db.execute(text("CREATE TRIGGER document_accept_fault AFTER INSERT ON hoimsystem_ai_audit_event WHEN NEW.action='run.document_extraction.candidate' BEGIN " + actions[fault] + "; END"))
+    db.commit()
+    rejected = await async_client.post(f"/api/ai/runs/{claim[0]}/document-candidates", headers=headers, json={"ordinal": 0})
+    assert rejected.status_code == 409, rejected.text
+    db.expire_all()
+    assert db.get(AIRun, claim[0]).result_json == original_result
+    assert db.query(AIDocumentSpanCandidate).count() == before
+    assert db.query(AIAuditEvent).filter_by(action="run.document_extraction.candidate", target=claim[0]).count() == 0
+
+
+@pytest.mark.asyncio
+async def test_actual_anchor_protects_private_run_loading_after_all_markers_are_stripped(async_client, auth_headers, document_pipeline):
+    from sqlalchemy import event
+
+    case, db = document_pipeline, document_pipeline["db"]
+    claim, _ = await queue(async_client, auth_headers(case["actor"].username), case)
+    db.query(AIRun).filter_by(run_id=claim[0]).update({"feature_key": "operations_qa", "input_json": "{}", "result_json": "{}", "context_metadata_json": "{}", "evidence_json": "[]"})
+    db.commit()
+    statements = []
+
+    def observed(conn, cursor, statement, parameters, context, many):
+        statements.append(statement)
+
+    connection = db.get_bind()
+    event.listen(connection, "before_cursor_execute", observed)
+    try:
+        denied = await async_client.get(f"/api/ai/runs/{claim[0]}", headers=auth_headers(case["seed"]["doctor_user"].username))
+    finally:
+        event.remove(connection, "before_cursor_execute", observed)
+    assert denied.status_code == 403, denied.text
+    assert not any("hoimsystem_ai_run.input_json" in sql for sql in statements)
+    closed = await async_client.get(f"/api/ai/runs/{claim[0]}", headers=auth_headers(case["actor"].username))
+    assert closed.status_code == 409, closed.text
+
+
+@pytest.mark.asyncio
+async def test_revoked_source_cannot_save_a_new_candidate_from_frozen_audit(async_client, auth_headers, document_pipeline):
+    from tests.test_ai_document_evidence_sources import cas
+
+    case, db = document_pipeline, document_pipeline["db"]
+    headers = auth_headers(case["actor"].username)
+    claim, _ = await queue(async_client, headers, case)
+    transport, _ = model_transport(case)
+    await runtime.execute_claimed(*claim, transport=transport)
+    original = case["original"]
+    sources.revoke_original(db, case["actor"], original.snapshot.original_id, {**cas(original), "basis_note": "此原件撤销，仅保留历史审计，不再接受新候选。"})
+    db.commit()
+    before = db.query(AIDocumentSpanCandidate).count()
+    denied = await async_client.post(f"/api/ai/runs/{claim[0]}/document-candidates", headers=headers, json={"ordinal": 0})
+    assert denied.status_code == 409 and db.query(AIDocumentSpanCandidate).count() == before

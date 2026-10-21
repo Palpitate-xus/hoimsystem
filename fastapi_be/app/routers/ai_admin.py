@@ -840,6 +840,7 @@ def list_global_runs(
     inventory_item_id: QueryPositiveInteger | None = Query(None, ge=1, le=2147483647),
     inventory_scenario_id: str | None = Query(None, max_length=36),
     coding_case_id: str | None = Query(None, max_length=36),
+    document_original_id: str | None = Query(None, max_length=36),
     page: int = Query(1, ge=1, le=100000),
     page_size: int = Query(30, ge=1, le=100),
     db: Session = Depends(get_db),
@@ -848,6 +849,29 @@ def list_global_runs(
     """Inspect all users' task metadata and feedback counts without loading clinical payloads."""
     user = _current_super_admin(db, user)
     query = db.query(AIRun)
+    if feature_key == "guideline_ingestion" or document_original_id is not None:
+        from app.ai.document_extraction_history import filter_document_history
+
+        query = filter_document_history(
+            db,
+            user,
+            query,
+            feature_key=feature_key,
+            original_id=document_original_id,
+            other_scope=(
+                patient_id,
+                department_id,
+                surgery_pool_id,
+                surgery_scenario_id,
+                supply_item_kind,
+                supply_item_id,
+                supply_series_id,
+                inventory_item_kind,
+                inventory_item_id,
+                inventory_scenario_id,
+                coding_case_id,
+            ),
+        )
     if coding_case_id is not None:
         if feature_key != "drg_evidence_review" or any(
             value is not None
@@ -911,7 +935,14 @@ def inspect_run_trace(run_id: str, db: Session = Depends(get_db), user: User = D
     run = db.get(AIRun, run_id)
     if run is None:
         raise HTTPException(404, "AI 任务不存在")
-    snapshot = json.loads(run.input_json)
+    from app.ai.document_extraction_storage import authorize_document_run, is_extraction_run
+
+    document_trace = {}
+    if is_extraction_run(db, run):
+        snapshot, _, _ = authorize_document_run(db, user, run, current=False)
+        document_trace = {"frozen_request_json": run.input_json, "frozen_evidence_json": run.evidence_json, "frozen_context_metadata_json": run.context_metadata_json}
+    else:
+        snapshot = json.loads(run.input_json)
     from app.ai.coding_evidence_storage import is_coding_run
 
     if is_coding_run(db, run):
@@ -970,6 +1001,7 @@ def inspect_run_trace(run_id: str, db: Session = Depends(get_db), user: User = D
         "msg": "success",
         "data": {
             **describe_run(run, user=user),
+            **document_trace,
             "requested_by": run.requested_by,
             "provider_id": run.provider_id,
             "frozen_request": snapshot,

@@ -330,8 +330,30 @@ def describe_document_run(db, user, run, include_result=True):
         usage_receipt_status="pending" if run.latency_ms is None and run.status in {"queued", "running", "cancelled"} else "interrupted" if run.error_code == "WORKER_INTERRUPTED" else "recorded",
     )
     if include_result:
+        from app.ai.document_extraction_models import ANCHOR_HASH_FIELDS, AIDocumentExtractionRunAnchor
+        from app.ai.document_extraction_view_contract import DocumentExtractionAnchorRecord
+
+        anchor = db.query(AIDocumentExtractionRunAnchor).filter_by(run_id=run.run_id).populate_existing().with_for_update(read=True).one()
+        data["document_extraction_anchor"] = DocumentExtractionAnchorRecord(
+            run_id=anchor.run_id,
+            original_id=anchor.original_id,
+            requested_by=anchor.requested_by,
+            schema_version=anchor.schema_version,
+            recorded_at=c.utc_text(anchor.recorded_at),
+            **{key: getattr(anchor, key) for key in ANCHOR_HASH_FIELDS},
+        ).model_dump(mode="json")
         data["result"] = load_result(db, run)
         data["evidence"] = snapshot["payload"]["evidence"]
         data["document_extraction_findings"] = context.model_dump(mode="json")
         data["document_original"] = sources.original_detail(db, user, context.document_binding.original.original_id).model_dump(mode="json")
     return data
+
+
+def guard_document_run_id(db, user, run_id):
+    """Check actual task/FK metadata before loading a private original in Run TEXT."""
+    from app.ai.document_extraction_models import AIDocumentExtractionRunAnchor
+
+    row = db.query(AIRun.feature_key).filter_by(run_id=run_id).one_or_none()
+    anchor = db.query(AIDocumentExtractionRunAnchor.run_id).filter_by(run_id=run_id).with_for_update(read=True).first()
+    if row is not None and row.feature_key == FEATURE_KEY or anchor is not None:
+        sources.current_super(db, user)

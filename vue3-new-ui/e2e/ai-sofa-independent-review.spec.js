@@ -65,9 +65,9 @@ test("独立闭集schema拒原型root、继承必填值、污染键与未知约�
       return validator.sofaSchemaMatches("SofaSource", copy);
     });
     const quantity = validator.sofaSchemaDefinition("SofaSource", "Quantity");
-    quantity.exclusiveMaximum = 0;
+    quantity.multipleOf = 2;
     const unknownConstraint = validator.sofaSchemaMatches("SofaSource", source);
-    delete quantity.exclusiveMaximum;
+    delete quantity.multipleOf;
     return { unknown, inheritedResult, pollution, unknownConstraint, restored: validator.sofaSchemaMatches("SofaSource", source), polluted: Object.hasOwn(Object.prototype, "sofa_independent_polluted") };
   }, actual.specialist_source);
   expect(result).toEqual({ unknown: Array(4).fill([null, false]), inheritedResult: false, pollution: [false, false, false], unknownConstraint: false, restored: true, polluted: false });

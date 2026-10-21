@@ -218,6 +218,8 @@ class RunRequest(StrictRequest):
             raise ValueError("受审床位序列仅用于病区实占及流转事件预测")
         if "surgery_scenario_id" in self.input and self.feature_key != "surgery_scheduling":
             raise ValueError("受审手术场景仅用于明确病例与共享阶段资源排程")
+        if "supply_series_id" in self.input and self.feature_key != "supply_forecast":
+            raise ValueError("受审物资原量序列仅用于单品种申请、实际发出与确认消耗预测")
         return self
 
 

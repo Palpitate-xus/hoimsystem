@@ -1,4 +1,4 @@
-const allowed = new Set(['$defs','$ref','additionalProperties','anyOf','const','discriminator','enum','items','maxItems','minItems','maxProperties','minProperties','maxLength','maximum','minLength','minimum','oneOf','pattern','properties','propertyNames','required','type']);
+const allowed = new Set(['$defs','$ref','additionalProperties','anyOf','const','discriminator','enum','exclusiveMinimum','exclusiveMaximum','items','maxItems','minItems','maxProperties','minProperties','maxLength','maximum','minLength','minimum','oneOf','pattern','properties','propertyNames','required','type']);
 function compact(schema) {
   if (typeof schema === 'boolean') return schema;
   if (!schema || typeof schema !== 'object' || Array.isArray(schema)) throw new Error('Invalid actual schema');

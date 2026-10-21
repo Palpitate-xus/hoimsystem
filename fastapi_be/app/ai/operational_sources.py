@@ -100,6 +100,12 @@ def operational_options(db, user: User, spec: FeatureSpec) -> dict:
 
 
 def operational_context(db, user: User, spec: FeatureSpec, values: dict) -> ContextBundle:
+    if "supply_series_id" in values:
+        if spec.number != 66:
+            raise HTTPException(422, "受审物资原量序列仅用于单品种申请、实际发出与确认消耗预测")
+        from app.ai.supply_context import supply_context
+
+        return supply_context(db, user, values)
     if "surgery_scenario_id" in values:
         if spec.number != 65:
             raise HTTPException(422, "受审手术场景仅用于明确病例与共享阶段资源排程")

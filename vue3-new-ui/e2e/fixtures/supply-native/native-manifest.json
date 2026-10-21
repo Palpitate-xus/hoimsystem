@@ -1,0 +1,35 @@
+{
+  "scope": "actual native pure calculation fixtures; no patient data, database, network, HTTP or authorization claim",
+  "core_sha256": {
+    "supply_config": "c86e62e8ae7f6f3044e490ad4fb972845ad6ceed6d9f24bcfe761b96ba92f6d1",
+    "supply_contract": "28a1cc3ec84f78eb559c80a1fdbdf4f9ee76845261ac3d682537bb252c3e6b44",
+    "supply_model": "5aca6771f3f5a204292166880b5e1494c1b132cdcfe286126defa84c69d06ad9",
+    "supply_server": "573190e1fc4aef4da6dfd6b3cdc1b92911b4d1ade7a359dd22b479dfbbd0b5a8"
+  },
+  "files": {
+    "complete-h14.json": {
+      "bytes": 1167029,
+      "sha256": "4048dbd89ddf2a917feb2b9bf5c88f3880c62323ba0bc9c31f2e79158d47010c"
+    },
+    "partial-h7.json": {
+      "bytes": 1248256,
+      "sha256": "19662ed1583b22e83fa205cfe1ada9685a73f74fb6363e924e24dfd313befa70"
+    },
+    "split-parameters-h7.json": {
+      "bytes": 1116780,
+      "sha256": "6710c063c4730efb792cf242bba8607d7dddf43cf9be674771d1edc1c9a87a67"
+    },
+    "unit-mismatch-h7.json": {
+      "bytes": 948996,
+      "sha256": "09cd60c428afc5c703498d8ee78f9cf24d743c72e01b4b9874e2cba6d8a6d8f2"
+    },
+    "unknown-h7.json": {
+      "bytes": 948990,
+      "sha256": "75fb73501a3b081150e80cc5d67957d07f293e3372ebaef5e183962ae36a5406"
+    },
+    "zero-h7.json": {
+      "bytes": 1000621,
+      "sha256": "ee2ba5f0371f6183272ea03bfb9b340542a9c7ce3c9b8c5b92d4caa31f51ce01"
+    }
+  }
+}

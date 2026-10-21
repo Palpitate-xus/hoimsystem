@@ -87,6 +87,10 @@ def inspect_operational_context(req: OperationalContextRequest, db: Session = De
         from app.ai.surgery_context import expand_context
 
         context = expand_context(db, context, user=user, current=True)
+    if context.get("supply_binding"):
+        from app.ai.supply_context import expand_context
+
+        context = expand_context(db, context, user=user, current=True)
     return {"code": 200, "msg": "success", "data": {"context": context, "metadata": context_metadata(bundle), "evidence": bundle.evidence}}
 
 
@@ -207,6 +211,9 @@ def list_runs(
     bed_series_id: str | None = Query(None, max_length=36),
     surgery_pool_id: str | None = Query(None, max_length=36),
     surgery_scenario_id: str | None = Query(None, max_length=36),
+    supply_item_kind: str | None = Query(None, max_length=20),
+    supply_item_id: QueryPositiveInteger | None = Query(None, ge=1, le=2147483647),
+    supply_series_id: str | None = Query(None, max_length=36),
     limit: int = Query(30, ge=1, le=100),
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user),
@@ -218,7 +225,15 @@ def list_runs(
     if feature_key:
         authorized_feature(db, user, feature_key)
         query = query.filter_by(feature_key=feature_key)
-    if surgery_pool_id is not None or surgery_scenario_id is not None or feature_key == "surgery_scheduling" and department_id is not None:
+    if any(value is not None for value in (supply_item_kind, supply_item_id, supply_series_id)):
+        if feature_key != "supply_forecast" or any(
+            value is not None for value in (patient_id, encounter_ref, department_id, roster_plan_id, ward_id, bed_series_id, surgery_pool_id, surgery_scenario_id)
+        ):
+            raise HTTPException(422, "物资历史仅筛选明确品种与原序列，不能与科室、其他运营或患者范围混用")
+        from app.ai.supply_history import filter_history
+
+        query = filter_history(db, user, query, supply_item_kind=supply_item_kind, supply_item_id=supply_item_id, supply_series_id=supply_series_id)
+    elif surgery_pool_id is not None or surgery_scenario_id is not None or feature_key == "surgery_scheduling" and department_id is not None:
         if feature_key != "surgery_scheduling" or any(value is not None for value in (patient_id, encounter_ref, roster_plan_id, ward_id, bed_series_id)):
             raise HTTPException(422, "手术历史筛选仅用于明确科室、资源池或原场景，不能与其他运营或个体就诊范围混用")
         from app.ai.surgery_history import filter_history
@@ -260,6 +275,11 @@ def list_runs(
                 continue
             if exc.status_code == 409 and item.feature_key == "surgery_scheduling":
                 continue
+            if exc.status_code == 409 and item.feature_key == "supply_forecast":
+                from app.ai.supply_storage import is_supply_snapshot
+
+                if is_supply_snapshot(json.loads(item.input_json)):
+                    continue
             if exc.status_code == 409 and item.feature_key == "roster_optimization":
                 from app.ai.roster_storage import is_roster_snapshot
 
@@ -326,6 +346,11 @@ def review_result(run_id: str, req: FeedbackWrite, db: Session = Depends(get_db)
         from app.ai.surgery_storage import expand_result, is_surgery_snapshot
 
         if is_surgery_snapshot(json.loads(run.input_json)):
+            expand_result(db, run)
+    if run.feature_key == "supply_forecast":
+        from app.ai.supply_storage import expand_result, is_supply_snapshot
+
+        if is_supply_snapshot(json.loads(run.input_json)):
             expand_result(db, run)
     if run.feature_key == "sepsis_risk":
         from app.ai.sofa_storage import expand_result, is_sofa_snapshot

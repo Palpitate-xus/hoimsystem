@@ -213,6 +213,41 @@ module.exports = {
       // 减小最小块大小，允许更细粒度的分割
       minSize: 20000,
       cacheGroups: {
+        // Reuse actual small business API modules across lazy pages. Without
+        // a zero-threshold shared group, the same module is emitted in up to
+        // fourteen page chunks; chart registration is similarly shared.
+        businessApiShared: {
+          name: "business-api-shared",
+          test: /[\\/]src[\\/]api[\\/][^\\/]+\.js$/,
+          chunks: "async",
+          minChunks: 2,
+          minSize: 0,
+          minSizeReduction: 0,
+          reuseExistingChunk: true,
+          priority: 14,
+        },
+        chartRegistrationShared: {
+          name: "chart-registration-shared",
+          test: /[\\/]src[\\/]utils[\\/]echarts\.js$/,
+          chunks: "async",
+          minChunks: 2,
+          minSize: 0,
+          minSizeReduction: 0,
+          reuseExistingChunk: true,
+          priority: 15,
+        },
+        // The same CSS data-URI icon occurs in over a hundred async chunks.
+        // Share its unchanged inline module instead of copying the SVG text.
+        inlineAssetsShared: {
+          name: "inline-assets-shared",
+          test: module => module.type === "asset/inline",
+          chunks: "async",
+          minChunks: 2,
+          minSize: 0,
+          minSizeReduction: 0,
+          reuseExistingChunk: true,
+          priority: 15,
+        },
         // Keep this API in one small lazy chunk across business screens.
         adminApiShared: {
           name: "admin-api-shared",

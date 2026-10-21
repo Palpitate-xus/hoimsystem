@@ -60,7 +60,9 @@ def current_actor(db, user, *, locking=False):
     state = inspect(user, raiseerr=False)
     user_id = state.identity[0] if state is not None and state.identity is not None else getattr(user, "user_id", None)
     query = db.query(User).filter_by(user_id=user_id).populate_existing()
-    row = (query.with_for_update(read=True) if locking else query).one_or_none()
+    # A normal SELECT may reuse the JWT-created MySQL RR snapshot.
+    # Both read and write authorization require the actual current role.
+    row = query.with_for_update(read=True).one_or_none()
     if row is None or row.user_role not in SOURCE_ROLES:
         raise HTTPException(403, "当前账户不具有医院库存原件范围权限")
     return row
@@ -101,7 +103,8 @@ def _signer(db, attestation, actor=None, *, locking=False):
     if attestation["status"] == "unknown":
         return None
     query = db.query(User).filter_by(user_id=attestation["signer_user_id"]).populate_existing()
-    signer = (query.with_for_update(read=True) if locking else query).one_or_none()
+    # Professional signing authority is also current in metadata/read paths.
+    signer = query.with_for_update(read=True).one_or_none()
     if signer is None or signer.user_role != "pharmacist" or actor is not None and actor.user_id != signer.user_id:
         raise HTTPException(403, "专业确认必须由当前实际药师账户本人完成，技术角色不能代签")
     return {"user_id": signer.user_id, "user_role": "pharmacist"}

@@ -6,7 +6,7 @@ from typing import Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import JSONResponse
-from sqlalchemy import func
+from sqlalchemy import func, inspect
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, defer
 
@@ -42,6 +42,16 @@ from app.models import ClinicalPathway, Department, Patient, User
 from app.routers.inpatient_support import QueryPositiveInteger
 
 router = APIRouter(tags=["AI 超级管理员"], default_response_class=JSONResponse)
+
+
+def _current_super_admin(db, user):
+    """Recheck audit authority beyond a JWT-created MySQL RR snapshot."""
+    state = inspect(user, raiseerr=False)
+    user_id = state.identity[0] if state is not None and state.identity is not None else getattr(user, "user_id", None)
+    actor = db.query(User).filter_by(user_id=user_id).populate_existing().with_for_update(read=True).one_or_none()
+    if actor is None or actor.user_role != "super_admin":
+        raise HTTPException(403, "当前身份已无超级管理员审计权限")
+    return actor
 
 
 def _commit(db: Session) -> None:
@@ -808,6 +818,7 @@ def list_global_runs(
     user: User = Depends(require_roles("super_admin")),
 ) -> dict:
     """Inspect all users' task metadata and feedback counts without loading clinical payloads."""
+    user = _current_super_admin(db, user)
     query = db.query(AIRun)
     if any(value is not None for value in (supply_item_kind, supply_item_id, supply_series_id)):
         if feature_key != "supply_forecast" or any(value is not None for value in (patient_id, department_id, surgery_pool_id, surgery_scenario_id)):
@@ -851,6 +862,7 @@ def list_global_runs(
 @router.get("/ai/admin/runs/{run_id}")
 def inspect_run_trace(run_id: str, db: Session = Depends(get_db), user: User = Depends(require_roles("super_admin"))) -> dict:
     """Read the frozen prompts, requested model, source payload and append-only review history."""
+    user = _current_super_admin(db, user)
     run = db.get(AIRun, run_id)
     if run is None:
         raise HTTPException(404, "AI 任务不存在")

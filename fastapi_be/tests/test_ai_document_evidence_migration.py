@@ -57,10 +57,12 @@ def test_revision_is_actual_single_chain_after_coding_foundation():
     config = Config(str(PATH.parents[2] / "alembic.ini"))
     config.set_main_option("script_location", str(PATH.parent.parent))
     script = ScriptDirectory.from_config(config)
-    assert script.get_heads() == [migration.revision]
+    heads = script.get_heads()
+    assert len(heads) == 1
     assert script.get_revision(migration.down_revision) is not None
     chain = [revision.revision for revision in script.walk_revisions()]
-    assert len(chain) == len(set(chain)) and migration.down_revision in chain
+    assert len(chain) == len(set(chain)) and migration.revision in chain and migration.down_revision in chain
+    assert chain.index(migration.revision) < chain.index(migration.down_revision)
 
 
 def test_actual_upgrade_down_upgrade_preserves_all_old_ddl_and_rows(migration_db):

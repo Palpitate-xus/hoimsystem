@@ -130,6 +130,7 @@ async def test_unaccepted_model_draft_retains_paid_usage_without_financial_outpu
         await generate(provider(kind), SPEC, SPEC.task_prompt, data, transport=httpx.MockTransport(handle))
     assert len(calls) == 1 and caught.value.code == "INVALID_PROVIDER_RESPONSE"
     assert (caught.value.input_tokens, caught.value.output_tokens) == (13, 7)
+    assert caught.value.model_call_attempted is True
 
 
 @pytest.mark.asyncio
@@ -141,6 +142,7 @@ async def test_missing_companion_usage_remains_unknown_with_actual_input_preserv
     with pytest.raises(AIExecutionError) as caught:
         await generate(provider(kind), SPEC, SPEC.task_prompt, data, transport=httpx.MockTransport(lambda _: httpx.Response(200, json=response)))
     assert (caught.value.input_tokens, caught.value.output_tokens) == (13, None)
+    assert caught.value.model_call_attempted is True
 
 
 @pytest.mark.asyncio
@@ -164,6 +166,7 @@ async def test_mixed_or_unverified_payload_makes_zero_provider_calls(charge_case
     with pytest.raises(AIExecutionError) as caught:
         await generate(provider(), SPEC, SPEC.task_prompt, data, transport=httpx.MockTransport(lambda req: calls.append(req)))
     assert not calls and caught.value.code == "CHARGE_SOURCE_REQUIRED"
+    assert caught.value.model_call_attempted is False
     assert caught.value.input_tokens is caught.value.output_tokens is None
 
 
@@ -198,6 +201,7 @@ async def test_provider_transport_faults_are_bounded_and_never_automatically_ret
     with pytest.raises(AIExecutionError) as caught:
         await generate(provider(), SPEC, SPEC.task_prompt, data, transport=httpx.MockTransport(handle))
     assert len(calls) == 1
+    assert caught.value.model_call_attempted is True
     assert caught.value.input_tokens is caught.value.output_tokens is None
     assert caught.value.code == {"redirect": "PROVIDER_HTTP_ERROR", "timeout": "PROVIDER_TIMEOUT", "invalid_utf8": "INVALID_PROVIDER_RESPONSE", "oversize": "RESPONSE_TOO_LARGE"}[fault]
 

@@ -63,6 +63,7 @@ def request(provider, spec, task_prompt, data):
 
 async def generate_charge(provider, spec, task_prompt, data, *, transport=None):
     inputs = outputs = None
+    attempted = False
     try:
         endpoint, payload = request(provider, spec, task_prompt, data)
         credential = provider_credential(provider)
@@ -71,6 +72,7 @@ async def generate_charge(provider, spec, task_prompt, data, *, transport=None):
             headers["Authorization"] = "Bearer " + credential
         timeout = httpx.Timeout(provider.timeout_seconds, connect=min(provider.timeout_seconds, 10))
         async with httpx.AsyncClient(timeout=timeout, follow_redirects=False, trust_env=False, transport=transport) as client:
+            attempted = True
             async with client.stream("POST", endpoint, json=payload, headers=headers) as response:
                 if response.status_code != 200:
                     raise AIExecutionError("PROVIDER_HTTP_ERROR", f"模型服务返回HTTP {response.status_code}，请联系管理员检查配置")
@@ -85,18 +87,27 @@ async def generate_charge(provider, spec, task_prompt, data, *, transport=None):
         return result, inputs, outputs
     except AIExecutionError as exc:
         exc.input_tokens, exc.output_tokens = inputs, outputs
+        exc.model_call_attempted = attempted
         raise
     except ChargeReplyError as exc:
         error = AIExecutionError("INVALID_PROVIDER_RESPONSE", "模型未返回完整可核对的账目草稿，未生成可用结果")
         error.input_tokens, error.output_tokens = exc.input_tokens, exc.output_tokens
+        error.model_call_attempted = attempted
         raise error from exc
     except HTTPException as exc:
-        raise AIExecutionError("PROVIDER_CONFIGURATION", str(exc.detail)) from exc
+        error = AIExecutionError("PROVIDER_CONFIGURATION", str(exc.detail))
+        error.model_call_attempted = attempted
+        raise error from exc
     except httpx.TimeoutException as exc:
-        raise AIExecutionError("PROVIDER_TIMEOUT", "模型服务响应超时，未自动重试") from exc
+        error = AIExecutionError("PROVIDER_TIMEOUT", "模型服务响应超时，未自动重试")
+        error.model_call_attempted = attempted
+        raise error from exc
     except httpx.HTTPError as exc:
-        raise AIExecutionError("PROVIDER_UNAVAILABLE", "无法连接模型服务，请联系管理员检查部署") from exc
+        error = AIExecutionError("PROVIDER_UNAVAILABLE", "无法连接模型服务，请联系管理员检查部署")
+        error.model_call_attempted = attempted
+        raise error from exc
     except (ValueError, TypeError, KeyError, UnicodeError, RecursionError) as exc:
         error = AIExecutionError("INVALID_PROVIDER_RESPONSE", "模型返回了无法核对的完整账目响应，未生成可用结果")
         error.input_tokens, error.output_tokens = inputs, outputs
+        error.model_call_attempted = attempted
         raise error from exc

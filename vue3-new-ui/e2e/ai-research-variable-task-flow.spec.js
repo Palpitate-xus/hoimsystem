@@ -73,3 +73,14 @@ test('actual native history stays Batch scoped and exposes no generic summary be
  const errors=await open(page),calls=await serve(page,F.states.queued);expect(await page.evaluate(async id=>(await window.__researchVariableFlow.readResearchVariableHistory(id)).map(x=>x.run_id),F.selection.research_variable_batch_id)).toEqual(F.history.data.map(x=>x.run_id));
  expect(calls.map(x=>x.path)).toEqual(['/ai/runs']);expect(errors).toEqual([]);
 });
+test('a received succeeded receipt cannot be replaced by an older actual queued snapshot of the same Run',async({page})=>{
+ const errors=await open(page);await serve(page,F.states.queued);expect(await page.evaluate(async fixture=>{
+  try{await window.__researchVariableFlow.readVerifiedResearchVariableTask(fixture.states.queued.detail.run_id,{batchId:fixture.selection.research_variable_batch_id,receipt:fixture.states.succeeded_partial.detail,selection:fixture.selection});return false;}catch{return true;}
+ },F)).toBe(true);expect(errors).toEqual([]);
+});
+test('known claim, dispatch, terminal and metering anchors only advance along the actual same Run observations',async({page})=>{
+ const errors=await open(page);expect(await page.evaluate(fixture=>{
+  const check=window.__researchVariableFlow.researchVariableReceiptContinues,s=fixture.states;
+  return {forward:[[s.queued,s.running],[s.running,s.succeeded_partial],[s.cancelled_pending,s.cancelled_paid],[s.failed_paid,s.failed_paid]].map(([a,b])=>check(a.detail,b.detail)),backward:[[s.running,s.queued],[s.succeeded_partial,s.running],[s.cancelled_paid,s.cancelled_pending]].map(([a,b])=>check(a.detail,b.detail))};
+ },F)).toEqual({forward:[true,true,true,true],backward:[false,false,false]});expect(errors).toEqual([]);
+});

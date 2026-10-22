@@ -42,7 +42,7 @@
 </template>
 <script setup>
 import {useResearchVariableFindings} from './useResearchVariableFindings';
-const props=defineProps({run:{type:Object,default:null},parts:{type:Object,default:null},trace:{type:Object,default:null},expectedRunId:{type:String,default:null},expectedBatchId:{type:String,default:null},active:{type:Boolean,default:true},auditOnly:{type:Boolean,default:false}}),emit=defineEmits(['cleared','reload-requested']);
+const props=defineProps({run:{type:Object,default:null},parts:{type:Object,default:null},trace:{type:Object,default:null},expectedRunId:{type:String,default:null},expectedBatchId:{type:String,default:null},active:{type:Boolean,default:true},auditOnly:{type:Boolean,default:false}}),emit=defineEmits(['cleared','close-requested','reload-requested']);
 const {proof,busy,error,closed,sessionAllowed,authorized,close,requestReload,source,candidates,records,visibleRecords,original,originalOpen,recordPage,selectOriginal,variable}=useResearchVariableFindings(props,emit);
 const states={queued:'排队中',running:'执行中',succeeded:'草稿已接收，未审核',failed:'任务失败',cancelled:'已取消'},shown=v=>v===null?'未知':String(v);
 const classes={value_quote_candidate:'原值引文候选',not_measured_quote_candidate:'未测陈述候选（未核实）',not_applicable_quote_candidate:'不适用陈述候选（未核实）',conflict_quote_candidate:'冲突陈述候选（未核实）'},kinds={verbatim_text:'原文',original_integer:'原整数字面值',original_calendar_date:'原日历日期',original_naive_clock:'原无时区钟点'};

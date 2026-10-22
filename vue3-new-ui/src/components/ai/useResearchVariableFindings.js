@@ -29,7 +29,7 @@ export function useResearchVariableFindings(props,emit){
   if(changed){clear({block:true,notify:true});return;}
   if(props.run!==blockedRun)closed.value=false;verify();
  },{deep:true,flush:'sync',immediate:true});
- function close(){clear({block:true,notify:true});}
+ function close(){clear({block:true,notify:true});emit('close-requested');}
  function requestReload(){emit('reload-requested');}
  onDeactivated(()=>{live.value=false;clear({block:true,notify:true});});onActivated(()=>{live.value=true;});onBeforeUnmount(()=>clear({block:true,notify:true}));
  const source=computed(()=>proof.value?.parts.source.source||null),candidates=computed(()=>proof.value?.parts.result?.result.research_variable_extraction.literal_draft.candidates||[]),records=computed(()=>proof.value?.parts.scope.private_scope.snapshot.capture.records||[]);

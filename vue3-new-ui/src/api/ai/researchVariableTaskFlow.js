@@ -49,13 +49,23 @@ function selectedContextMatches(run,selection){
  return {scope:{source_domain:fixed.source_domain,selected_sources:{research_variable_batch_id:selection.research_variable_batch_id}},snapshot_time:run.context_metadata.snapshot_time,research_variable_binding:run.research_variable_findings.binding,question:selection.question??null,missing_data:fixed.limitations};
 }
 
+export function researchVariableReceiptContinues(receipt,run){try{
+ const batchId=receipt.research_variable_batch_id;
+ if(!researchVariableTaskReceiptValid(receipt,{batchId})||!researchVariableTaskReceiptValid(run,{batchId})||run.run_id!==receipt.run_id||['context_digest','prompt_version','provider_revision','preview'].some(key=>run[key]!==receipt[key]))return false;
+ const prior=receipt.research_variable_artifact,next=run.research_variable_artifact,phases=['claim_event_id','claim_lease','claimed_at','dispatch_event_id','dispatched_at','usage_event_id'];
+ if(!same(omit(prior,phases),omit(next,phases))||phases.some(key=>prior[key]!==null&&prior[key]!==next[key])||!same(run.research_variable_findings.binding,receipt.research_variable_findings.binding))return false;
+ if(receipt.status==='running'&&run.status==='queued'||['succeeded','failed','cancelled'].includes(receipt.status)&&run.status!==receipt.status)return false;
+ if(receipt.usage_receipt_status==='recorded'&&(run.usage_receipt_status!=='recorded'||!same(run.usage_receipt,receipt.usage_receipt)||!same(run.result_reference,receipt.result_reference)))return false;
+ return true;
+}catch{return false;}}
+
 export async function readVerifiedResearchVariableTask(runId,{batchId,receipt=null,selection=null,preview=null,withTrace=false,auditOnly=false,current=()=>true}={}){
  if(!current())return null;
  if(!uuid(runId)||!uuid(batchId)||typeof withTrace!=='boolean'||typeof auditOnly!=='boolean'||auditOnly&&!withTrace||receipt!==null&&(receipt.run_id!==runId||!researchVariableTaskReceiptValid(receipt,{batchId,preview})))throw new Error('原任务回执或明确审计方式无效');
  let trace=null,run;
  if(auditOnly){trace=await getResearchVariableTrace(runId);run=trace.run;}else run=await getResearchVariableTask(runId);
  if(!current())return null;
- if(run?.run_id!==runId||run.research_variable_batch_id!==batchId||preview!==null&&run.preview!==Number(preview)||receipt!==null&&['context_digest','prompt_version','provider_revision','preview'].some(key=>run[key]!==receipt[key])||receipt!==null&&!same(run.research_variable_findings?.binding,receipt.research_variable_findings.binding))throw new Error('完整任务与所请求ID、原批次或短回执不符');
+ if(run?.run_id!==runId||run.research_variable_batch_id!==batchId||preview!==null&&run.preview!==Number(preview)||receipt!==null&&!researchVariableReceiptContinues(receipt,run))throw new Error('完整任务与所请求ID、原批次或短回执不符');
  const context=selectedContextMatches(run,selection);if(context===false||context!==true&&(await digest(context)!==run.context_digest||await digest(omit(context,['snapshot_time']))!==run.context_metadata.clinical_context_fingerprint))throw new Error('完整任务未绑定原样提交问题');
  if(!current())return null;
  const partNames=['binding','source','scope','receipt',...(run.status==='succeeded'?['result']:[])];

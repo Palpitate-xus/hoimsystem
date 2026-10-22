@@ -78,6 +78,7 @@
         <el-tab-pane v-if="canManageDrugLabels" label="说明书原文与独立签署治理" name="drug_label_sources" lazy><template v-if="tab==='drug_label_sources'&&canManageDrugLabels"><el-checkbox v-model="drugLabelAuditOnly">明确只读冻结说明书来源</el-checkbox><drug-label-source-panel :key="String(drugLabelAuditOnly)" :active="tab==='drug_label_sources'&&canManageDrugLabels" :audit-only="drugLabelAuditOnly" /></template></el-tab-pane>
         <el-tab-pane v-if="canCheckForecast" label="病案编码证据与本地规则治理" name="coding_evidence" lazy><ai-coding-evidence-sources v-if="tab==='coding_evidence'&&canCheckForecast" audit-only /></el-tab-pane>
         <el-tab-pane v-if="canCheckForecast" label="完整住院账目来源治理" name="charge_sources" lazy><charge-reconciliation-source-panel v-if="tab==='charge_sources'&&canCheckForecast" :active="tab==='charge_sources'&&canCheckForecast" audit-only /></el-tab-pane>
+        <el-tab-pane v-if="canCheckForecast" label="完整事件RCA来源治理" name="rca_evidence" lazy><template v-if="tab==='rca_evidence'&&canCheckForecast"><p>本项不读取全院事件正文目录。请从实际不良事件业务行进入，绑定原事件及其实际患者，先登记独立用途，再管理完整来源与Case。</p><rca-evidence-sources :active="tab==='rca_evidence'&&canCheckForecast"/></template></el-tab-pane>
         <el-tab-pane v-if="canCheckForecast" label="完整评价与人工摘录治理" name="satisfaction_sources" lazy><satisfaction-source-panel v-if="tab==='satisfaction_sources'&&canCheckForecast" :active="tab==='satisfaction_sources'&&canCheckForecast" audit-only /></el-tab-pane>
         <el-tab-pane label="完整手术排程场景治理" name="surgery_scenarios" lazy><ai-surgery-scenarios v-if="tab==='surgery_scenarios'" governance /></el-tab-pane>
         <el-tab-pane label="SOFA独立规则与全院评估" name="sofa" lazy><ai-sofa-management v-if="tab==='sofa'" /></el-tab-pane>
@@ -310,6 +311,8 @@
 </template>
 
 <script setup>
+import RcaEvidenceSources from '@/components/ai/RcaEvidenceSources.vue';
+
 import { computed, defineAsyncComponent, onMounted, onBeforeUnmount, onDeactivated, ref, watch } from "vue";
 import { ElMessage } from "element-plus";
 import store from "@/store";

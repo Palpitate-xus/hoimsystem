@@ -1,7 +1,7 @@
 const {isDeepStrictEqual}=require('node:util');
 const {expect}=require('@playwright/test'),{load}=require('./load-rca-evidence.cjs');
-async function openRcaTask(page,harness,{kind='chat',state='succeeded',role='super_admin',scope={},hold=null,status=null,mutate=null,fallback=null,waitForView=true,shared=false}={}){
- let activeState=state;const failures=new Map();const packet=load((shared?'shared-':'tasks-')+kind),reads=[],writes=[],feature=packet.features.data.find(v=>v.key==='incident_rca'),defaultInput=packet.states.succeeded.detail.data.rca_evidence_findings.input;
+async function openRcaTask(page,harness,{kind='chat',state='succeeded',role='super_admin',scope={},hold=null,status=null,mutate=null,fallback=null,waitForView=true,shared=false,packetName=null}={}){
+ let activeState=state;const failures=new Map();const packet=load(packetName||(shared?'shared-':'tasks-')+kind),reads=[],writes=[],feature=packet.features.data.find(v=>v.key==='incident_rca'),defaultInput=packet.states.succeeded.detail.data.rca_evidence_findings.input;
  await page.addInitScript(({scope,role})=>{window.__rcaEvidenceScope=scope;window.__rcaEvidenceRole=role;},{scope:{feature,initialInput:defaultInput,...scope},role});
  await page.route('**/api/**',async route=>{const req=route.request(),u=new URL(req.url()),path=u.pathname;let name=null,value=null;
   if(req.method()==='POST'){
@@ -13,7 +13,7 @@ async function openRcaTask(page,harness,{kind='chat',state='succeeded',role='sup
    reads.push(path+u.search);
    if(path==='/api/ai/features'){name='features';value=packet.features;}
    if(path===`/api/ai/admin/rca-evidence/cases/${packet.current_case.data.immutable.case_id}`){name='case';value=packet.current_case;}
-   if(['/api/ai/runs','/api/ai/admin/runs'].includes(path)){name='history';value=packet.history[path.includes('/admin/')?'admin':'ordinary'];}
+   if(['/api/ai/runs','/api/ai/admin/runs'].includes(path)){name='history';value=packet.pending_directory&&activeState==='cancelled_pending'&&!path.includes('/admin/')?packet.pending_directory:packet.history[path.includes('/admin/')?'admin':'ordinary'];}
    let selected=packet.states[activeState];if(selected.detail.data.run_id!==path.split('/')[path.includes('/admin/')?5:4]){const candidate=Object.values(packet.states).find(s=>path.includes(s.detail.data.run_id));if(candidate)selected=candidate;}
    const id=selected.detail.data.run_id,admin=path.startsWith('/api/ai/admin/'),root=`/api/ai/${admin?'admin/':''}runs/${id}`;
    if(path===root){name='detail';value=admin?selected.trace:selected.detail;}

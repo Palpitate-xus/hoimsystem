@@ -55,6 +55,7 @@ function variable(v){
  const staticField=v.family==='patient_demographics';
  return staticField===(v.record_window===null)&&staticField===(v.temporal_policy==='static_subject_field_without_event_clock')&&(v.declared_unit===null||v.value_kind==='verbatim_text')&&(v.record_window===null||day(v.record_window.date_from)&&day(v.record_window.date_to)&&v.record_window.date_from<=v.record_window.date_to&&(Date.parse(v.record_window.date_to+'T00:00:00Z')-Date.parse(v.record_window.date_from+'T00:00:00Z'))/86400000<366);
 }
+export const researchVariableDefinitionValid=variable;
 const GOV=['status','revision','reviewed_by','reviewed_at','review_basis_note','revoked_by','revoked_at','revoke_reason'];
 function governance(identity,g,manual=null){
  if(!keys(g,GOV)||!['draft','published','rejected','revoked'].includes(g.status))return false;

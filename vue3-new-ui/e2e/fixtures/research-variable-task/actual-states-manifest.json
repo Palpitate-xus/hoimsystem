@@ -1,0 +1,198 @@
+{
+  "schema_version": "research_variable_actual_state_fixture_v1",
+  "source_path": "/tmp/hoim-research-variable-actual-state-v2-packets.json",
+  "source_sha256": "1ba5981d2abc8bb6d5c70d62d0b4b9a9ff3165e0eb016747d756f76628260e58",
+  "source_bytes": 838845,
+  "fixture_sha256": "ce0df45ad3a1bbd28a763ab79d26ca6827e2eaa44c52ad89b4be5dff69db491a",
+  "fixture_bytes": 606761,
+  "export_report": "/tmp/hoim-research-variable-actual-state-v2-verification.json",
+  "scope": {
+    "code": 200,
+    "msg": "success",
+    "data": {
+      "source_kind": "study_scope",
+      "source_record_id": "8c0cbf41-7595-4e4d-965c-c89c6c98e03b",
+      "scope_id": "8c0cbf41-7595-4e4d-965c-c89c6c98e03b",
+      "schema_version": "research_study_scope_v1",
+      "created_by": 4,
+      "created_at": "2026-10-22T01:36:20.694881Z",
+      "valid_from": "2026-10-21T01:36:20.664362Z",
+      "valid_until": "2026-10-23T01:36:20.664362Z",
+      "source_id": "research_scope:8c0cbf41-7595-4e4d-965c-c89c6c98e03b:0fdbb993646a",
+      "content_hash": "0fdbb993646a691f3b700c9a177bcbb4f0d43bfaa12adeca9f228f5270ce4193",
+      "status": "published",
+      "revision": 2,
+      "reviewed_by": 4,
+      "reviewed_at": "2026-10-22T01:36:20.777357Z",
+      "review_basis_note": "隔离合成项目目的和人工授权记录核查依据，非真实患者许可或医院伦理验证。",
+      "revoked_by": null,
+      "revoked_at": null,
+      "revoke_reason": "",
+      "authorization_review_status": "recorded_reviewed",
+      "authorization_reviewed_by": 13,
+      "authorization_reviewed_at": "2026-10-22T01:36:20.736183Z",
+      "authorization_review_basis": "隔离合成项目目的和人工授权记录核查依据，非真实患者许可或医院伦理验证。",
+      "governance_hash": "265e85034cb298ba440a2c2a88095391f08ce52a39296c7b761fa330a3ff7a50",
+      "original": {
+        "schema_version": "research_scope_original_proof_v1",
+        "identity": {
+          "source_kind": "study_scope",
+          "source_record_id": "8c0cbf41-7595-4e4d-965c-c89c6c98e03b",
+          "scope_id": "8c0cbf41-7595-4e4d-965c-c89c6c98e03b",
+          "schema_version": "research_study_scope_v1",
+          "created_by": 4,
+          "created_at": "2026-10-22T01:36:20.694881Z",
+          "valid_from": "2026-10-21T01:36:20.664362Z",
+          "valid_until": "2026-10-23T01:36:20.664362Z"
+        },
+        "payload": {
+          "authority_reference": null,
+          "authorization_basis": "隔离合成项目目的和人工授权记录核查依据，非真实患者许可或医院伦理验证。",
+          "data_families": [
+            "medical_records",
+            "patient_demographics"
+          ],
+          "external_model_use": "recorded_permitted",
+          "external_model_use_basis": "隔离合成项目目的和人工授权记录核查依据，非真实患者许可或医院伦理验证。",
+          "patient_ids": [
+            1,
+            2
+          ],
+          "permitted_uses": [
+            "research_variable_extraction"
+          ],
+          "proposed_user_ids": [
+            1,
+            4,
+            13
+          ],
+          "protocol_key": "synthetic-bounded-protocol",
+          "purpose": "隔离合成项目目的和人工授权记录核查依据，非真实患者许可或医院伦理验证。",
+          "record_window": {
+            "date_from": "2026-10-01",
+            "date_to": "2026-10-21",
+            "time_basis": "legacy_naive_calendar_dates_timezone_unknown"
+          },
+          "title": "仅合成项目登记与独立授权记录",
+          "valid_from": "2026-10-21T01:36:20.664362Z",
+          "valid_until": "2026-10-23T01:36:20.664362Z"
+        },
+        "parent_binding": {
+          "declared_patients": [
+            {
+              "patient_id": 1
+            },
+            {
+              "patient_id": 2
+            }
+          ],
+          "declared_users": [
+            {
+              "user_id": 1
+            },
+            {
+              "user_id": 4
+            },
+            {
+              "user_id": 13
+            }
+          ]
+        },
+        "content_hash": "0fdbb993646a691f3b700c9a177bcbb4f0d43bfaa12adeca9f228f5270ce4193",
+        "governance": {
+          "status": "published",
+          "revision": 2,
+          "reviewed_by": 4,
+          "reviewed_at": "2026-10-22T01:36:20.777357Z",
+          "review_basis_note": "隔离合成项目目的和人工授权记录核查依据，非真实患者许可或医院伦理验证。",
+          "revoked_by": null,
+          "revoked_at": null,
+          "revoke_reason": ""
+        },
+        "authorization_review": {
+          "authorization_review_status": "recorded_reviewed",
+          "authorization_reviewed_by": 13,
+          "authorization_reviewed_at": "2026-10-22T01:36:20.736183Z",
+          "authorization_review_basis": "隔离合成项目目的和人工授权记录核查依据，非真实患者许可或医院伦理验证。"
+        },
+        "governance_hash": "265e85034cb298ba440a2c2a88095391f08ce52a39296c7b761fa330a3ff7a50"
+      },
+      "parent_current": true,
+      "authorization_reviewer_current": true,
+      "eligible": true,
+      "exclusion_reasons": [],
+      "can_record": false,
+      "can_authorization_review": false,
+      "can_review": false,
+      "can_revoke": true,
+      "audit_only": false,
+      "eligibility_basis": "project_registry_only_not_patient_collection_permission"
+    }
+  },
+  "states": {
+    "queued": {
+      "run_id": "b5409ace-d432-4180-abd2-16de3ee53617",
+      "status": "queued",
+      "usage_receipt": null,
+      "receipt_status": "pending"
+    },
+    "running": {
+      "run_id": "b5409ace-d432-4180-abd2-16de3ee53617",
+      "status": "running",
+      "usage_receipt": null,
+      "receipt_status": "pending"
+    },
+    "succeeded_partial": {
+      "run_id": "b5409ace-d432-4180-abd2-16de3ee53617",
+      "status": "succeeded",
+      "usage_receipt": {
+        "input_tokens": 11,
+        "output_tokens": null,
+        "complete": false,
+        "model_call_attempted": true
+      },
+      "receipt_status": "recorded"
+    },
+    "failed_paid": {
+      "run_id": "493f8f08-a1b8-4fa8-b007-c0577189e09e",
+      "status": "failed",
+      "usage_receipt": {
+        "input_tokens": 11,
+        "output_tokens": null,
+        "complete": false,
+        "model_call_attempted": true
+      },
+      "receipt_status": "recorded"
+    },
+    "cancelled_uncalled": {
+      "run_id": "5de345cc-c14d-4b8b-bd8f-2d41c6ddd7c5",
+      "status": "cancelled",
+      "usage_receipt": {
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "complete": true,
+        "model_call_attempted": false
+      },
+      "receipt_status": "recorded"
+    },
+    "cancelled_pending": {
+      "run_id": "8c4cb593-8a96-40b3-9770-dab638673138",
+      "status": "cancelled",
+      "usage_receipt": null,
+      "receipt_status": "pending"
+    },
+    "cancelled_paid": {
+      "run_id": "8c4cb593-8a96-40b3-9770-dab638673138",
+      "status": "cancelled",
+      "usage_receipt": {
+        "input_tokens": 11,
+        "output_tokens": null,
+        "complete": false,
+        "model_call_attempted": true
+      },
+      "receipt_status": "recorded"
+    }
+  },
+  "prior_export": "v1 retained RED because auxiliary raw Scope GET by admin role correctly403; v2 requests that one owner/Super-controlled registry GET explicitly as currentSuper. No role/purpose guards changed.",
+  "source_recipes": "All original12Source modules unchanged; recipe in actualpublic Source contains10explicit hashes. Positive DTOs never hand-forged."
+}

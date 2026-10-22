@@ -1,0 +1,182 @@
+{
+  "schema_version": "research_variable_foreign_document_dispatch_verification_v1",
+  "status": "targeted_candidate_fix_not_full_release",
+  "implementation_parent": "9be48bc",
+  "source_tree": "/tmp/hoim-research-variable-doc-guard-20261022",
+  "scope": "Only independent76 classifier now recognizes genuine71 opaque identity before unrelated76 orphan JSON predicate. Existing71 Super/current guard and all literal/current-purpose checks are unchanged. The original76 first default full runs in another immutable tree and remains a known-RED attempt; no full suite success is claimed here.",
+  "real_red": {
+    "report": "/tmp/hoim-research-variables-doc-anchor-first-verification.json",
+    "sha256": "33f744d6180cb3ff3cfbf5f430e23f65b2beae087efedb3cf2d9d1c6d69bc5aa",
+    "result": "Original unchanged DocAnchor-stripped-run case1F5.92pytest/16.403outer,403 remained but SQL referenced input_json before the original currentSuper guard. No response BODY disclosure claimed.",
+    "input_count": 1051,
+    "sources_stable": true
+  },
+  "changes": [
+    "Native76 and genuine71 anchors are located through exact3opaque FK columns, short READ COMMITTED current committed rows union actual same-session own-SQL, with every separate connection returned before permission/Source locks.",
+    "Any same Run with both physical artifacts is409; no arbitrary priority or generic fallback.",
+    "A known71 anchor skips76 orphan JSON probe and reaches its existing currentSuper guard. Only when both known immutable anchors miss may76 issue its existing one-bool marker probe.",
+    "No global transaction isolation change, Source/Run lock, Task JSON, clinical BODY or permission is obtained by locator. Genuine non-UUID ASCII historical IDs keep zero domain SQL."
+  ],
+  "sqlite_whole_files": {
+    "report": "/tmp/hoim-research-variables-doc-anchor-second-verification.json",
+    "sha256": "3d54f20407c658cf16fa85a31792d8fcaa816061c8bc02f461bcb2bdad312e7d",
+    "result": "99passed281.36pytest/291.687outer; DocPipeline47+VarRouting32+VarReader18+newphysicalSQL2",
+    "input_count": 1052,
+    "sources_stable": true,
+    "guards": {
+      "dotenv_open_attempts": 0,
+      "shared_transport_pem_attempts": 0,
+      "socket_attempts": 0,
+      "engine_urls": [
+        "sqlite:///:memory:",
+        "sqlite:///:memory:"
+      ]
+    }
+  },
+  "actual_private_mysql": {
+    "report": "/tmp/hoim-research-variables-task-mysql-twelfth-attempt-5d180688ff85.json",
+    "sha256": "1550e2b8bbb76876a2d8cf595e6776a6b6d73716be8372d905507f73540e061c",
+    "seconds": 364.918,
+    "input_count": 1023,
+    "sources_stable": true,
+    "cleanup_verified": true,
+    "checks": [
+      {
+        "name": "actual_Main_JWT_shared_chat_split_large_blob_and_nullable_usage_trace_feedback",
+        "run_id": "d6208502-603c-43ae-946a-d7439bf3a350",
+        "provider_calls": 1,
+        "result_bytes": 84102,
+        "usage": {
+          "input_tokens": null,
+          "output_tokens": null,
+          "complete": false,
+          "model_call_attempted": true
+        }
+      },
+      {
+        "name": "actual_Main_JWT_shared_responses_split_large_blob_and_nullable_usage_trace_feedback",
+        "run_id": "79aa1f75-62c1-4938-8564-08d7f319360f",
+        "provider_calls": 1,
+        "result_bytes": 84102,
+        "usage": {
+          "input_tokens": 11,
+          "output_tokens": null,
+          "complete": false,
+          "model_call_attempted": true
+        }
+      },
+      {
+        "name": "old_RR_new_committed_Artifact_3opaque_locator_then_full_current_Source_authorized_detail"
+      },
+      {
+        "name": "paid_current_purpose_loss_shared_terminal_repeat_wrong_lease_no_BODY_no_second_HTTP_or_meter",
+        "usage": [
+          11,
+          null
+        ],
+        "body_columns_read": 0
+      },
+      {
+        "name": "actual_uncommitted_flush_expunge_nohint_ownSQL_3column_locator_and_rollback"
+      },
+      {
+        "name": "old_RR_current_role_reject_before_Task_BODY",
+        "body_columns_read": 0
+      },
+      {
+        "name": "old_RR_current_epoch_reject_before_Task_BODY",
+        "body_columns_read": 0
+      },
+      {
+        "name": "actual_old_RR_new71_Anchor_opaque_current_dispatch_before_variable_orphan_JSON_with_DocRunX_held",
+        "all_Task_JSON_column_mentions": 0,
+        "rejected_status": 403
+      },
+      {
+        "name": "actual71_Source_and_Anchor_backed_running_DocRun_X_does_not_block_variable_quota_queue_claim_full_detail_or_worker",
+        "short_lock_timeout_seconds": 1
+      },
+      {
+        "name": "actual_MySQL_sameRun_dual71_and76_Artifact_conflict_409_before_any_Task_JSON_probe",
+        "all_Task_JSON_column_mentions": 0
+      },
+      {
+        "name": "adjacent_shared_duplicate_same_claim_during_actual_paid_HTTP_after_Source_loss_is_inert_and_first_delivery_alone_settles",
+        "http_calls": 1,
+        "usage_events": 1
+      }
+    ],
+    "migration": {
+      "revision": "20261021_research_variable_runs",
+      "parent": "20261021_research_variables",
+      "up_down_up": true,
+      "old_tables_ddl_and_seed_rows_unchanged": 220,
+      "new_tables": [
+        "hoimsystem_ai_research_variable_run_artifact",
+        "hoimsystem_ai_research_variable_run_result"
+      ],
+      "utc6": [
+        [
+          "hoimsystem_ai_research_variable_run_artifact",
+          "actor_token_invalid_before",
+          "datetime",
+          6
+        ],
+        [
+          "hoimsystem_ai_research_variable_run_artifact",
+          "recorded_at",
+          "datetime",
+          6
+        ],
+        [
+          "hoimsystem_ai_research_variable_run_artifact",
+          "claimed_at",
+          "datetime",
+          6
+        ],
+        [
+          "hoimsystem_ai_research_variable_run_artifact",
+          "dispatched_at",
+          "datetime",
+          6
+        ],
+        [
+          "hoimsystem_ai_research_variable_run_result",
+          "accepted_at",
+          "datetime",
+          6
+        ]
+      ],
+      "mediumtext": [
+        [
+          "hoimsystem_ai_research_variable_run_artifact",
+          "source_json",
+          "mediumtext",
+          null
+        ],
+        [
+          "hoimsystem_ai_research_variable_run_artifact",
+          "binding_json",
+          "mediumtext",
+          null
+        ],
+        [
+          "hoimsystem_ai_research_variable_run_result",
+          "result_json",
+          "mediumtext",
+          null
+        ]
+      ],
+      "full_historical_replay": false
+    },
+    "scope": "Independent76 Task stage: synthetic Main/JWT, controlled ASGI, actual incremental MySQL Task2 schema, source/current/claim/exact receipt and split-body boundaries. Old Source proof not reused as Task proof; no real model/clinical matrix/export."
+  },
+  "scope_limits": [
+    "Private MySQL report11 named mechanisms are one actual run, not reused old SQL pass. Includes fresh oldRR-before-newDocAnchor, heldDocRunX and exact no Task JSON mentions403; actual sameRun dual71/76 anchor409.",
+    "Task2 incremental up/down/up from20261021_research_variables preserves all220 prior model table DDL/seedrows and total222. This is not a replay of every historical Alembic step.",
+    "The SQL source count1023 uses Python/config/requirements plus4maps; SQLite1052 additionally freezes tracked packaging/data. Counts are separate exact contracts.",
+    "Source12 modules and existingSource recipe implementation files remain unchanged; no hospital DB/.env/sharedPEM/remote model/deployment or clinical validation.",
+    "Other later integrated69/70/73/74/75/77/79/80 domains are not present in this standalone76 branch and are not proved here.",
+    "Original first full suite still finishes on original1051 source bytes; followup release full validation required after integrating this fix."
+  ]
+}

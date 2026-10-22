@@ -73,12 +73,42 @@ def _marker_statement(db, identifier):
     return select(marker_predicate(db)).where(AIRun.run_id == identifier)
 
 
+def _current_document_identity(db, identifier):
+    """Foreign opaque dispatch only: no Source/Run locks, JSON or authority.
+
+    A known71 anchor must reach its original Super guard before an unrelated76
+    orphan JSON probe. Current RC plus actual own-SQL also sees a new committed
+    or same-transaction anchor under the caller's older consistent snapshot.
+    """
+    from app.ai.document_extraction_models import AIDocumentExtractionRunAnchor
+
+    model = AIDocumentExtractionRunAnchor
+    statement = select(model.run_id, model.original_id, model.requested_by).where(model.run_id == identifier)
+    with db.no_autoflush:
+        rows = set()
+        bind = db.get_bind()
+        if bind.dialect.name in {"mysql", "mariadb"}:
+            engine = getattr(bind, "engine", bind)
+            with engine.connect().execution_options(isolation_level="READ COMMITTED") as connection:
+                rows.update(tuple(row) for row in connection.execute(statement))
+        rows.update(tuple(row) for row in db.execute(statement))
+    if len(rows) > 1:
+        raise HTTPException(409, "原文任务技术身份与本事务实际记录矛盾，未探测或读取任务正文")
+    return next(iter(rows), None)
+
+
 def is_variable_task(db, value):
     identifier = identifier_for(value)
     if identifier is None:
         return False
-    if _current_opaque_identity(db, identifier) is not None:
+    native = _current_opaque_identity(db, identifier)
+    document = _current_document_identity(db, identifier)
+    if native is not None and document is not None:
+        raise HTTPException(409, "同一任务同时绑定科研变量和原文锚，未优先任一域或降级读取")
+    if native is not None:
         return True
+    if document is not None:
+        return False
     statement = _marker_statement(db, identifier)
     with db.no_autoflush:
         found = False

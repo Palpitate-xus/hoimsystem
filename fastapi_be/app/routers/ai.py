@@ -1,6 +1,7 @@
 """Role-scoped business entry points for authorized AI tasks and human review."""
 
 import json
+from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from fastapi.responses import JSONResponse
@@ -268,7 +269,7 @@ def list_runs(
     inventory_scenario_id: str | None = Query(None, max_length=36),
     coding_case_id: str | None = Query(None, max_length=36),
     document_original_id: str | None = Query(None, max_length=36),
-    research_variable_batch_id: str | None = Query(None, max_length=36),
+    research_variable_batch_id: Annotated[str | None, Query(max_length=36)] = None,
     limit: int = Query(30, ge=1, le=100),
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user),

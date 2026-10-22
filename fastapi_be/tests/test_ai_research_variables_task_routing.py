@@ -107,3 +107,55 @@ def test_mysql_boolean_probe_uses_valid_json_case_and_exact_presence_not_like():
     assert "CASE WHEN" in sql and "json_valid" in sql and " LIKE " not in sql and "FOR UPDATE" not in sql and "FOR SHARE" not in sql
     assert "json_contains_path" in sql and "json_unquote" in sql
     assert len(statement.selected_columns) == 1
+
+
+def test_uppercase_standard_uuid_still_discovers_actual_native_artifact_without_body_or_generic_fallback(db_session, actual_task):
+    _, _, _, staged = actual_task
+    identifier = inspect(staged.run).identity[0]
+    columns, _, seen, emitted = observations(db_session)
+    try:
+        assert routing.is_variable_task(db_session, identifier.upper()) is True
+    finally:
+        stop(db_session, seen, emitted)
+    assert not any(name in TASK_TEXT for _, name in columns)
+
+
+@pytest.mark.parametrize("identifier", ["not-read", "0123456789abcdef0123456789abcdef", "{01234567-89ab-cdef-0123-456789abcdef}"])
+def test_nonstandard_generic_identifier_is_not_uuid_rewritten_or_queried(db_session, identifier):
+    columns, statements, seen, emitted = observations(db_session)
+    try:
+        assert routing.is_variable_task(db_session, identifier) is False
+    finally:
+        stop(db_session, seen, emitted)
+    assert not columns and not statements
+
+
+@pytest.mark.parametrize("alias", ["á0000000-0000-0000-0000-000000000001", "00000000-0000-0000-0000-000000000001\x00", "æ000000-0000-0000-0000-000000000001"])
+def test_unicode_and_control_alias_discovery_uses_raw_bounded_three_columns_under_db_comparator_not_private_body(db_session, alias):
+    statements = []
+
+    def seen(state):
+        if state.is_select:
+            statements.append(state.statement)
+
+    event.listen(db_session, "do_orm_execute", seen)
+    try:
+        assert routing.identifier_for(alias) == alias
+        assert routing.is_variable_task(db_session, alias) is False
+    finally:
+        event.remove(db_session, "do_orm_execute", seen)
+    assert [column.key for column in statements[0].selected_columns] == ["run_id", "batch_id", "requested_by"]
+    assert next(iter(statements[0].compile().params.values())) == alias
+    assert all(column.key not in TASK_TEXT for statement in statements for column in statement.selected_columns)
+
+
+@pytest.mark.parametrize("alias", ["é" * 200, "a" * 257, "a\ud800"])
+def test_unrepresentable_or_oversized_technical_alias_is_rejected_before_sql(db_session, alias):
+    columns, statements, seen, emitted = observations(db_session)
+    try:
+        with pytest.raises(HTTPException) as error:
+            routing.is_variable_task(db_session, alias)
+        assert error.value.status_code == 422
+    finally:
+        stop(db_session, seen, emitted)
+    assert not columns and not statements

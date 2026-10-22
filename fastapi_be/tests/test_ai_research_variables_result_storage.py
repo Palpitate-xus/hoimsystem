@@ -67,7 +67,7 @@ def test_complete_valid_literal_result_succeeds_with_full_partial_or_absent_actu
     assert db_session.query(AIResearchVariableRunResult).filter_by(run_id=delivery.claim.run_id).count() == 1
 
 
-def test_actual_legacy_text_fields_with_whole_published_batch_produce_over65k_result_in_separate_blob_not_run_text(db_session, research_case, configured, task_factory):
+def test_actual_bounded_legacy_fields_with_whole_published_batch_produce_over65k_result_in_separate_blob_not_run_text(db_session, research_case, configured, task_factory):
     case = research_case
     db_session.add_all(
         [
@@ -75,11 +75,11 @@ def test_actual_legacy_text_fields_with_whole_published_batch_produce_over65k_re
                 medical_record_id=str(uuid.uuid4()),
                 patient_id=case["patient"].patient_id,
                 doctor_id=case["doctor"].doctor_id,
-                consultation_time=dt.datetime(2026, 10, 11, 9, index),
-                symptom="🧪" * 4000,
+                consultation_time=dt.datetime(2026, 10, 11, 9) + dt.timedelta(minutes=index),
+                symptom="🧪" * 100,
                 status=1,
             )
-            for index in range(5)
+            for index in range(100)
         ]
     )
     db_session.commit()

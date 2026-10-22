@@ -1334,14 +1334,23 @@ async def execute_claimed(run_id: str, lease: str, *, transport=None) -> None:
 def expire_interrupted_runs(db: Session) -> int:
     """Mark abandoned inference failed without repeating potentially billable calls."""
     deadline = utcnow() - datetime.timedelta(minutes=10)
+    from sqlalchemy import func
+
     from app.ai.research_variables_run_models import AIResearchVariableRunArtifact
     from app.ai.research_variables_runtime import recover_variable_tasks
+    from app.ai.research_variables_task_routing import marker_predicate
 
     native_count = recover_variable_tasks(db, deadline)
 
     count = (
         db.query(AIRun)
-        .filter(AIRun.status == "running", AIRun.start_time < deadline, AIRun.feature_key != "research_extraction", ~AIRun.run_id.in_(db.query(AIResearchVariableRunArtifact.run_id)))
+        .filter(
+            AIRun.status == "running",
+            AIRun.start_time < deadline,
+            AIRun.feature_key != "research_extraction",
+            ~AIRun.run_id.in_(db.query(AIResearchVariableRunArtifact.run_id)),
+            ~func.coalesce(marker_predicate(db), False),
+        )
         .update({"status": "failed", "error_code": "WORKER_INTERRUPTED", "error_message": "执行进程中断，任务未自动重试，可检查后重新提交", "finish_time": utcnow()}, synchronize_session=False)
     )
     db.commit()

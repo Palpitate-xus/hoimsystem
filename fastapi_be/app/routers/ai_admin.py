@@ -2,7 +2,7 @@
 
 import datetime
 import json
-from typing import Literal
+from typing import Annotated, Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.exceptions import RequestValidationError
@@ -844,7 +844,7 @@ def list_global_runs(
     inventory_scenario_id: str | None = Query(None, max_length=36),
     coding_case_id: str | None = Query(None, max_length=36),
     document_original_id: str | None = Query(None, max_length=36),
-    research_variable_batch_id: str | None = Query(None, max_length=36),
+    research_variable_batch_id: Annotated[str | None, Query(max_length=36)] = None,
     page: int = Query(1, ge=1, le=100000),
     page_size: int = Query(30, ge=1, le=100),
     db: Session = Depends(get_db),

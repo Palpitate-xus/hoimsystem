@@ -48,6 +48,15 @@ def locate_artifact(db, value):
         TypeAdapter(UUID).validate_python(identifier, strict=True)
     except (ValueError, TypeError):
         return None
+    return _current_opaque_identity(db, identifier)
+
+
+def _current_opaque_identity(db, identifier):
+    """Bound exact PK comparison under the real DB collation, three columns.
+
+    Only technical dispatch may supply a noncanonical alias here. This returns
+    actual immutable FK values, never a permission or private-row lock/body.
+    """
     statement = select(AIResearchVariableRunArtifact.run_id, AIResearchVariableRunArtifact.batch_id, AIResearchVariableRunArtifact.requested_by).where(
         AIResearchVariableRunArtifact.run_id == identifier
     )

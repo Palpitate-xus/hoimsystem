@@ -72,8 +72,8 @@ export async function verifyRcaTaskParts(row,parts,expected={},options={}){try{
  return parts.result===null&&(receipt===null||receipt.result_hash===null)&&current();
 }catch{return false;}}
 export function verifyRcaCancelAck(v,runId){return rcaSchema('RcaCancelAcknowledgement',v)&&v.run_id===runId&&v.receipt_pending===(v.usage_event_id===null)&&v.cancel_event_id!==v.usage_event_id;}
-export async function verifyRcaQueuedAck(v,row,{current=()=>true}={}){try{
- if(!summaryValid(v,{runId:row.run_id,caseId:row.rca_evidence_case_id})||v.status!=='queued'||!await verifyRcaTask(row,{}, {current}))return false;
+export async function verifyRcaQueuedAck(v,row,{current=()=>true,auditOnly=false}={}){try{
+ if(!summaryValid(v,{runId:row.run_id,caseId:row.rca_evidence_case_id})||v.status!=='queued'||!await verifyRcaTask(row,{}, {current,auditOnly}))return false;
  const fields=['run_id','feature_key','feature_name','preview','prompt_version','provider_revision','context_digest','patient_id','encounter_ref','create_time','run_clock_basis','requires_human_review','context_metadata','rca_evidence_case_id'];return fields.every(k=>rcaSame(v[k],row[k]))&&current();
 }catch{return false;}}
 export async function verifyRcaTrace(v,parts,expected={}, {current=()=>true}={}){try{

@@ -35,7 +35,19 @@ exec(compile(ast.Module(body=[n for n in tree.body if isinstance(n,ast.ClassDef)
 models['RcaCancelAcknowledgement']=namespace['RcaCancelAcknowledgement'].model_json_schema()
 assert not any(n in sys.modules for n in ('app.config','app.database','app.models','sqlalchemy'))
 from app.ai.rca_evidence_task_prompt import SYSTEM_PROMPT
-print(json.dumps({'models':models,'fixed':{'system_prompt':SYSTEM_PROMPT,'scope_note':t.SCOPE_NOTE,'missing_data':t.MISSING_DATA,'coverage':c.COVERAGE,'source_domain':t.SOURCE_DOMAIN}},ensure_ascii=False,sort_keys=True,separators=(',',':')))
+# Export only literal role constants and their finite set, without importing
+# dependencies/settings/database. No function or arbitrary assignment executes.
+roles_tree=ast.parse(Path('app/dependencies.py').read_text())
+role_ns={}
+for node in roles_tree.body:
+ if isinstance(node,ast.Assign) and len(node.targets)==1 and isinstance(node.targets[0],ast.Name):
+  name=node.targets[0].id
+  if name.startswith('ROLE_') and isinstance(node.value,ast.Constant) and type(node.value.value) is str:
+   role_ns[name]=node.value.value
+  elif name=='VALID_USER_ROLES':
+   assert isinstance(node.value,ast.Set) and all(isinstance(v,ast.Name) and v.id in role_ns for v in node.value.elts)
+   platform_roles=sorted(role_ns[v.id] for v in node.value.elts)
+print(json.dumps({'models':models,'fixed':{'platform_roles':platform_roles,'system_prompt':SYSTEM_PROMPT,'scope_note':t.SCOPE_NOTE,'missing_data':t.MISSING_DATA,'coverage':c.COVERAGE,'source_domain':t.SOURCE_DOMAIN}},ensure_ascii=False,sort_keys=True,separators=(',',':')))
 `;
 const {models:schemas,fixed}=JSON.parse(execFileSync(process.env.HOIM_TEST_PYTHON||'/home/xusheng/miniconda3/bin/python',['-c',code],{cwd:path.join(root,'../fastapi_be'),encoding:'utf8',maxBuffer:8388608}));
 const target=path.join(root,'src/api/ai/rcaEvidenceSchemas.json'),content=JSON.stringify(pack(schemas))+'\n';

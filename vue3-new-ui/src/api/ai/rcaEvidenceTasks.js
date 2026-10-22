@@ -16,7 +16,7 @@ export const cancelRcaTask=value=>write(`ai/runs/${id(value)}/cancel`,{});
 // A changed status/configuration/source during the read is rejected; no model retry.
 export async function readVerifiedRcaTask(value,{caseId=null,auditOnly=false,trace=false,receipt=null,input=null,current=()=>true}={}){
  const expected={runId:id(value),...(caseId?{caseId}:{})},row=(await getRcaTask(value,{auditOnly})).data;
- if(!current()||!await verifyRcaTask(row,expected,{auditOnly,current})||receipt&&!await verifyRcaQueuedAck(receipt,row,{current})||input&&!rcaSame(row.rca_evidence_findings.input,input))throw new Error('实际任务与明确请求或范围不符');
+ if(!current()||!await verifyRcaTask(row,expected,{auditOnly,current})||receipt&&!await verifyRcaQueuedAck(receipt,row,{current,auditOnly})||input&&!rcaSame(row.rca_evidence_findings.input,input))throw new Error('实际任务与明确请求或范围不符');
  const parts={};for(const part of ['source','case','result','receipt']){if(!current())return null;parts[part]=(await getRcaTaskPart(value,part,{auditOnly})).data;}
  if(!current()||!await verifyRcaTaskParts(row,parts,expected,{auditOnly,current}))throw new Error('完整分件无法核对');
  let audit=null;if(trace){audit=auditOnly?row:(await getRcaTask(value,{auditOnly:true})).data;if(!await verifyRcaTrace(audit,parts,expected,{current})||['run_id','status','rca_evidence_artifact','rca_evidence_findings','usage_receipt','result_reference','context_metadata'].some(k=>!rcaSame(audit[k],row[k])))throw new Error('实际审计与本任务不符');}

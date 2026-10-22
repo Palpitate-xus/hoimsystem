@@ -1,0 +1,53 @@
+{
+  "schema_version": "research_variable_standalone_full_backend_verification_v1",
+  "scope": "Standalone76 Task plus inherited71/68 baseline; later Main69/70/73/74/75/77/79/80 integration is outside this report.",
+  "first": {
+    "status": "failed",
+    "passed": 9455,
+    "failed": 1,
+    "skipped": 28,
+    "warnings": 3,
+    "pytest_seconds": 5591.11,
+    "outer_seconds": 5603.578788622282,
+    "source_file_count": 1051,
+    "sources_stable": true,
+    "environment_open_attempts": 0,
+    "shared_pem_attempts": 0,
+    "socket_attempts": 0,
+    "report": "/tmp/hoim-research-variables-full-frozen-first-verification.json",
+    "report_sha256": "c15c9bb04671588c13a9f8c8e216e55c8fe5b21ec1371fc3af2c5293ce892447",
+    "source_freeze": "/tmp/hoim-research-variables-backend-frozen-first-source-freeze.json",
+    "source_freeze_sha256": "eb0e59e61e4d9fd103ab2f69d08138f02775841f271afc72ffd292b4ad69f5f8",
+    "junit": "/tmp/hoim-research-variables-full-frozen-first-junit.xml",
+    "log": "/tmp/hoim-research-variables-full-frozen-first-tests.log",
+    "log_sha256": "8ea4fcf7afdec047d16fe0dea1873f6f0c439a2ab0d7f412b879ffe3ba33cd58",
+    "failure": "tests/test_ai_document_extraction_pipeline.py::test_actual_anchor_protects_private_run_loading_after_all_markers_are_stripped",
+    "cause": "Var opaque locator miss performed a boolean Task-JSON orphan probe before actualDoc-anchor current-role guard;403 remained correct but original0JSON assertion correctly failed. No response BODY disclosure was demonstrated.",
+    "preservation": "Complete original9484 outcomes and original1051source freeze kept; first run remains RED, never composed or relabeled green."
+  },
+  "correction": {
+    "separate_commit": "a904e82",
+    "same_original_guard_unchanged": true,
+    "independent_whole_sql": {
+      "passed": 99,
+      "pytest_seconds": 281.36,
+      "outer_seconds": 291.687,
+      "source_file_count": 1052,
+      "stable": true,
+      "report": "/tmp/hoim-research-variables-doc-anchor-second-verification.json"
+    },
+    "independent_private_mysql": {
+      "checks": 11,
+      "seconds": 364.918,
+      "source_file_count": 1023,
+      "separate_generated_maps": 4,
+      "cleanup": true,
+      "report": "/tmp/hoim-research-variables-task-mysql-twelfth-attempt-5d180688ff85.json"
+    },
+    "scope": "Current three-column Var andDoc opaque identities are only dispatch, never authority. Contradictory physical dual anchors409; genuineDoc identity goes to its original strict guard before TaskJSON. Private MySQL is incremental own2table up/down/up220old→222 and actual11mechanisms, not a replay of all historical migrations."
+  },
+  "second": {
+    "status": "pending_new_full_after_exact_correction",
+    "scope": "Will preserve a fresh unique runner/log/freeze/report; no first pass totals borrowed."
+  }
+}

@@ -26,7 +26,9 @@ function encodeCompleteBytes(bytes, text) {
     if (index + 4 > bytes.length) return;
     const key = keyAt(index), candidates = positions.get(key) || [];
     candidates.push(index);
-    if (candidates.length > 16) candidates.shift();
+    // A fixed64-candidate search improves storage only; the decoder/window
+    // and every original byte remain unchanged.
+    if (candidates.length > 64) candidates.shift();
     positions.set(key, candidates);
   }
   function flush() {

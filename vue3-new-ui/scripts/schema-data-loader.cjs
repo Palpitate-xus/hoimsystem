@@ -16,6 +16,10 @@ function encodeSchemaData(source) {
   if (!registry(parsed) && !wrapped) {
     throw new Error('Expected an actual complete generated schema registry');
   }
+  return encodeCompleteBytes(bytes, text);
+}
+
+function encodeCompleteBytes(bytes, text) {
   const output = [], literals = [], positions = new Map();
   const keyAt = index => bytes.readUInt32LE(index);
   function record(index) {
@@ -59,12 +63,41 @@ function encodeSchemaData(source) {
   return { encoded, byteLength: bytes.length };
 }
 
+const PUBLIC_FIXED_PATHS = ['iconGallery.json', 'bedFixedPolicy.json', 'ai/documentExtractionFixed.json', 'ai/inventoryFixedPolicy.json', 'ai/researchVariableTaskFixed.json', 'ai/supplyFixedPolicy.json', 'ai/surgeryFixedPolicy.json'].map(name => path.resolve(__dirname, '../src/api', name));
+const MAX_FIXED_NODES = 100000, MAX_FIXED_DEPTH = 32;
+function encodePublicFixedData(source) {
+  const bytes = Buffer.isBuffer(source) ? source : Buffer.from(source, 'utf8');
+  if (!bytes.length || bytes.length > MAX_SCHEMA_BYTES) throw new Error('Complete public fixed data exceeds the build data limit');
+  const text = new TextDecoder('utf-8', { fatal: true, ignoreBOM: true }).decode(bytes), parsed = JSON.parse(text);
+  if (parsed === null || typeof parsed !== 'object' || Array.isArray(parsed)) throw new Error('Expected complete public fixed object');
+  const stack = [[parsed, 0]]; let nodes = 0;
+  const validText = value => { for (const point of value) { const code = point.codePointAt(0); if (code >= 0xD800 && code <= 0xDFFF) throw new Error('Invalid public fixed Unicode'); } };
+  while (stack.length) {
+    const [value, depth] = stack.pop();
+    if (++nodes > MAX_FIXED_NODES || depth > MAX_FIXED_DEPTH) throw new Error('Complete public fixed structure exceeds the build node/depth limit');
+    if (typeof value === 'number' && !Number.isFinite(value)) throw new Error('Invalid public fixed number');
+    if (typeof value === 'string') validText(value);
+    if (value !== null && typeof value === 'object') for (const key of Object.keys(value)) {
+      validText(key); if (['__proto__', 'constructor', 'prototype'].includes(key)) throw new Error('Invalid public fixed object key');
+      stack.push([value[key], depth + 1]);
+    }
+  }
+  return encodeCompleteBytes(bytes, text);
+}
+
 function schemaDataLoader(source) {
   this.cacheable();
-  const value = encodeSchemaData(source);
+  const options = this.getOptions ? this.getOptions() : {};
+  if (Object.keys(options).some(key => key !== 'kind') || options.kind !== undefined && options.kind !== 'public_fixed') throw new Error('Unknown complete public build data mode');
+  if (options.kind === 'public_fixed' && !PUBLIC_FIXED_PATHS.includes(this.resourcePath)) throw new Error('Public fixed build data path is not allowlisted');
+  const value = options.kind === 'public_fixed' ? encodePublicFixedData(source) : encodeSchemaData(source);
   const decoder = this.utils.contextify(this.context, path.resolve(__dirname, '../src/api/schemaDataCodec.cjs'));
   return `module.exports = require(${JSON.stringify(decoder)}).decodeSchemaData(${JSON.stringify(value.encoded)}, ${value.byteLength});`;
 }
 schemaDataLoader.raw = true;
 schemaDataLoader.encodeSchemaData = encodeSchemaData;
+schemaDataLoader.encodePublicFixedData = encodePublicFixedData;
+schemaDataLoader.PUBLIC_FIXED_PATHS = PUBLIC_FIXED_PATHS;
+schemaDataLoader.MAX_FIXED_NODES = MAX_FIXED_NODES;
+schemaDataLoader.MAX_FIXED_DEPTH = MAX_FIXED_DEPTH;
 module.exports = schemaDataLoader;

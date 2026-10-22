@@ -56,6 +56,14 @@ module.exports = {
   module: {
     rules: [
       {
+        // Complete public generated policies use the same byte-preserving data
+        // decoder. The loader separately rejects every non-allowlisted path.
+        test: /\.json$/,
+        include: require("./scripts/schema-data-loader.cjs").PUBLIC_FIXED_PATHS,
+        type: "javascript/auto",
+        use: [{ loader: resolve("scripts/schema-data-loader.cjs"), options: { kind: "public_fixed" } }],
+      },
+      {
         // Lossless storage for complete generated schemas. The loader verifies
         // every original UTF8 byte before emitting data; validators stay intact.
         test: /[\\/]src[\\/]api[\\/](?:ai[\\/])?[A-Za-z]+Schemas\.json$/,
@@ -232,6 +240,18 @@ module.exports = {
         smallEvidenceShared: {
           name: "small-evidence-shared",
           test: /[\\/]src[\\/](?:components[\\/](?:DiagnosisReview[\\/]index|AISurgerySources[\\/]ProtectedEditor)\.vue(?:\?.*)?$|api[\\/]ai[\\/]nativeOriginalJson\.js$)/,
+          chunks: "async",
+          minChunks: 2,
+          minSize: 0,
+          minSizeReduction: 0,
+          reuseExistingChunk: true,
+          priority: 15,
+        },
+        // The complete production stats show this unchanged directory module
+        // copied in two async groups below the global 20k threshold.
+        researchRegistryDirectoryShared: {
+          name: "research-registry-directory-shared",
+          test: /[\\/]src[\\/]api[\\/]ai[\\/]researchCohortDirectory\.js$/,
           chunks: "async",
           minChunks: 2,
           minSize: 0,

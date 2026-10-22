@@ -1,0 +1,150 @@
+{
+  "schema_version": "research_variable_source_lifecycle_provenance_v1",
+  "root": "/tmp/hoim-research-variable-source-frontend-20261022",
+  "head_at_verification": "be6d5a291e6bd3ac23a9309878cc4cdc60e0500d",
+  "packet": {
+    "path": "/tmp/hoim-research-variable-source-lifecycle-second-packets.json",
+    "bytes": 611675,
+    "sha256": "f7ef87446099d5a2ac08936ed636f82104f69b35726109605d65b9b59432b45d"
+  },
+  "actual_main_http_response_count": 73,
+  "http_status_counts": {
+    "200": 51,
+    "422": 2,
+    "403": 20
+  },
+  "stage_index": {
+    "scope.admin_candidates": 0,
+    "scope.super_current": 1,
+    "dictionary.create": 2,
+    "dictionary.draft.metadata": 3,
+    "dictionary.draft.definition": 4,
+    "dictionary.draft.scope": 5,
+    "dictionary.definition_review": 6,
+    "dictionary.definition_reviewed.metadata": 7,
+    "dictionary.definition_reviewed.definition": 8,
+    "dictionary.definition_reviewed.scope": 9,
+    "dictionary.publish": 10,
+    "dictionary.published.metadata": 11,
+    "dictionary.published.definition": 12,
+    "dictionary.published.scope": 13,
+    "batch.preview": 14,
+    "batch.create": 15,
+    "batch.draft.metadata": 16,
+    "batch.draft.source": 17,
+    "batch.draft.snapshot": 18,
+    "batch.publish": 19,
+    "batch.published.metadata": 20,
+    "batch.published.source": 21,
+    "batch.published.snapshot": 22,
+    "directory.dictionaries.current": 23,
+    "technical.dictionaries.published": 24,
+    "directory.batches.current": 25,
+    "technical.batches.published": 26,
+    "rejected_dictionary.create": 27,
+    "rejected_dictionary.draft.metadata": 28,
+    "rejected_dictionary.draft.definition": 29,
+    "rejected_dictionary.draft.scope": 30,
+    "rejected_dictionary.definition_not_confirmed": 31,
+    "rejected_dictionary.reject": 32,
+    "rejected_dictionary.rejected.metadata": 33,
+    "rejected_dictionary.rejected.definition": 34,
+    "rejected_dictionary.rejected.scope": 35,
+    "batch.revoke": 36,
+    "batch.revoked.metadata": 37,
+    "batch.revoked.source": 38,
+    "batch.revoked.snapshot": 39,
+    "dictionary.revoke": 40,
+    "dictionary.revoked.metadata": 41,
+    "dictionary.revoked.definition": 42,
+    "dictionary.revoked.scope": 43,
+    "directory.dictionaries.terminal": 44,
+    "directory.dictionaries.missing_anchors": 45,
+    "directory.batches.terminal": 46,
+    "directory.batches.missing_anchors": 47,
+    "authorization.withdraw": 48,
+    "withdrawn.admin_user.dictionaries.directory": 49,
+    "withdrawn.admin_user.dictionaries.metadata": 50,
+    "withdrawn.admin_user.dictionaries.definition": 51,
+    "withdrawn.admin_user.dictionaries.scope": 52,
+    "withdrawn.admin_user.technical.dictionaries.directory": 53,
+    "withdrawn.admin_user.technical.dictionaries.metadata": 54,
+    "withdrawn.admin_user.batches.directory": 55,
+    "withdrawn.admin_user.batches.metadata": 56,
+    "withdrawn.admin_user.batches.source": 57,
+    "withdrawn.admin_user.batches.snapshot": 58,
+    "withdrawn.admin_user.technical.batches.directory": 59,
+    "withdrawn.admin_user.technical.batches.metadata": 60,
+    "withdrawn.super_admin_user.dictionaries.directory": 61,
+    "withdrawn.super_admin_user.dictionaries.metadata": 62,
+    "withdrawn.super_admin_user.dictionaries.definition": 63,
+    "withdrawn.super_admin_user.dictionaries.scope": 64,
+    "withdrawn.super_admin_user.technical.dictionaries.directory": 65,
+    "withdrawn.super_admin_user.technical.dictionaries.metadata": 66,
+    "withdrawn.super_admin_user.batches.directory": 67,
+    "withdrawn.super_admin_user.batches.metadata": 68,
+    "withdrawn.super_admin_user.batches.source": 69,
+    "withdrawn.super_admin_user.batches.snapshot": 70,
+    "withdrawn.super_admin_user.technical.batches.directory": 71,
+    "withdrawn.super_admin_user.technical.batches.metadata": 72
+  },
+  "every_body_original_utf8_hash_verified": true,
+  "source_report": {
+    "path": "/tmp/hoim-research-variable-source-lifecycle-second-verification.json",
+    "bytes": 2545,
+    "sha256": "d97742b56c1001ff2a3c2fabad1e6c00528d762ea107dc81d9dba04902bfab3b"
+  },
+  "source_freeze": {
+    "path": "/tmp/hoim-research-variable-source-lifecycle-second-source-freeze.json",
+    "bytes": 124989,
+    "sha256": "d5bbe12a1ffd069db9883a681b4693c2d1879226dfd533f8e9adbb4b7cff86bb"
+  },
+  "log": {
+    "path": "/tmp/hoim-research-variable-source-lifecycle-second-tests.log",
+    "bytes": 99,
+    "sha256": "1a9b1b9a1a3a0f43362cb7278beabc42e8fd62d4ed9a2f290a692bed7a8383dd"
+  },
+  "temporary_test": {
+    "path": "/tmp/hoim_research_variable_source_lifecycle_export_second.py",
+    "bytes": 11461,
+    "sha256": "286eb76416f7a632d0167fd2d18f670eb50542f58e324826757a24ef4c128d68"
+  },
+  "runner": {
+    "path": "/tmp/hoim-research-variable-source-lifecycle-second-runner.py",
+    "bytes": 6528,
+    "sha256": "583d22612c6947c2e9e35962e0b97c1168e53f3b6fa5e9f51d403ff9cb27ae57"
+  },
+  "guards": {
+    "dotenv_open_attempts": 0,
+    "shared_transport_pem_attempts": 0,
+    "socket_attempts": 0,
+    "engine_urls": [
+      "sqlite:///:memory:",
+      "sqlite:///:memory:"
+    ]
+  },
+  "source_input_count": 1051,
+  "source_stable": true,
+  "actual_result": "1 passed in26.92s; outer36.87944272067398s",
+  "scope": "Fresh independent Source-only case. Product Main16Source routes already mounted; no test-only router replacement, fake get_db/auth/current helpers, DTO mutation or existing seven-state packet splicing. Explicit real ProjectACL/all-Scope/per-patient purpose fixtures precede clinical fixture rows; Source lifecycle requests and responses are actual Main/JWT. No model/Task/queue/export/real MySQL or hospital I/O.",
+  "fixture_authorization_scope": "Existing fixture variable_dictionary_case creates reviewed/published Scope, actual Admin/Sup/independent-reviewer ACLs and reviewed per-patient research_variable_extraction authorization through real SQL service helpers. Clinical records seeded with existing clinical_case before business-count snapshot. Exported lifecycle mutations never change these clinical rows.",
+  "client_hash_boundary": "Short ordinary metadata deliberately has no full governance_hash. Batch dictionary3anchor must come from actual authorized definition proof after metadata+definition/scope crosscheck. Do not infer original HMAC key or claim independent client mechanical re-projection.",
+  "predecessors": [
+    {
+      "path": "/tmp/hoim-research-variable-source-lifecycle-first-verification.json",
+      "bytes": 4179,
+      "sha256": "cda97afb606adcc8a7b11f42ee09a616905a7d0b42836399888eb2a7410260ef"
+    },
+    {
+      "path": "/tmp/hoim-research-variable-source-lifecycle-first-partial.json",
+      "bytes": 94652,
+      "sha256": "dce4dae1f19487bdc5be9ab170e269f4d62f7fd1ea3c7a236b2dd8754718790c"
+    },
+    {
+      "path": "/tmp/hoim_research_variable_source_lifecycle_export_first_precompile_invalid.py",
+      "bytes": 11390,
+      "sha256": "39161376067344ab54b55ca4965ec8f78d729a0cbb08a9da10445df01c1570c0"
+    }
+  ],
+  "predecessor_disposition": "First pytest1F at harness KeyError governance_hash after successful actual dictionary publication; correct privacy-aware full-part anchor read in fresh second, no product change. Prior syntax typo caught compile before pytest/resources; preserved, not a product test failure."
+}

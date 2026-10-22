@@ -95,6 +95,12 @@ def _check_run_storage_json(serialized: dict[str, str]) -> None:
 
 def create_run(db: Session, user: User, req: RunRequest) -> AIRun:
     """Freeze an authorized, source-linked request before a durable worker processes it."""
+    if req.feature_key == "research_extraction":
+        from app.ai.research_variables_runtime import create_variable_run
+
+        return create_variable_run(db, user, req)
+    if "research_variable_batch_id" in req.input:
+        raise HTTPException(422, "科研变量批次不能混入其它任务，未读取患者或运营资料")
     if req.feature_key == "guideline_ingestion":
         from app.ai.document_extraction_runtime import create_document_run
 
@@ -382,6 +388,13 @@ def create_run(db: Session, user: User, req: RunRequest) -> AIRun:
 
 def authorize_run(db: Session, user: User, run: AIRun) -> None:
     """Re-check current permissions, including revoked care access, on every result read."""
+    from app.ai.research_variables_task_routing import is_variable_task
+
+    if is_variable_task(db, run):
+        from app.ai.research_variables_task_reader import load_task
+
+        load_task(db, user, run)
+        return
     from app.ai.document_extraction_storage import authorize_document_run, is_extraction_run
 
     if is_extraction_run(db, run):
@@ -531,6 +544,17 @@ def describe_run(run: AIRun, include_result: bool = True, *, user: User | None =
     """Expose the user-facing result, not system instructions or provider secrets."""
     from sqlalchemy.orm import object_session
 
+    from app.ai.research_variables_task_routing import is_variable_task
+
+    session = object_session(run)
+    if session is not None and is_variable_task(session, run):
+        from app.ai.research_variables_task_views import describe_variable_run
+
+        if user is None:
+            raise HTTPException(403, "科研变量任务需明确当前项目及逐患者用途授权")
+        return describe_variable_run(session, user, run, include_result)
+    if session is None and getattr(run, "feature_key", None) == "research_extraction":
+        raise HTTPException(403, "科研变量任务不能脱离当前授权会话展示")
     from app.ai.document_extraction_storage import is_extraction_run
 
     if is_extraction_run(object_session(run), run):
@@ -802,12 +826,21 @@ def describe_run(run: AIRun, include_result: bool = True, *, user: User | None =
 
 def claim_next_run(db: Session) -> tuple[str, str] | None:
     """Claim durable work without allowing two workers to execute the same queued task."""
-    query = db.query(AIRun).filter_by(status="queued").order_by(AIRun.create_time)
+    # No private Task TEXT is selected to decide which worker owns this domain.
+    query = db.query(AIRun.run_id).filter_by(status="queued").order_by(AIRun.create_time)
     if db.bind.dialect.name == "postgresql":
         query = query.with_for_update(skip_locked=True)
     run = query.first()
     if run is None:
         return None
+    from app.ai.research_variables_task_routing import is_variable_task
+
+    if is_variable_task(db, run.run_id):
+        from app.ai.research_variables_runtime import claim_variable_run
+
+        identifier = run.run_id
+        lease = claim_variable_run(db, identifier)
+        return (identifier, lease) if lease is not None else None
     lease = str(uuid.uuid4())
     changed = db.query(AIRun).filter_by(run_id=run.run_id, status="queued").update({"status": "running", "start_time": utcnow(), "lease_token": lease}, synchronize_session=False)
     if changed != 1:
@@ -899,6 +932,17 @@ def _recheck_task(db: Session, run: AIRun) -> tuple[FeatureSpec, AIProvider, dic
 async def execute_claimed(run_id: str, lease: str, *, transport=None) -> None:
     """Release SQL connections during inference; recheck authorization before storing results."""
     from app import database
+    from app.ai.research_variables_task_routing import is_variable_task
+
+    with database.SessionLocal() as db:
+        variable_task = is_variable_task(db, run_id)
+    if variable_task:
+        # Actual Artifact identity survives terminal states and wrong leases.
+        # The dedicated precheck is inert; never fall back to generic TEXT.
+        from app.ai.research_variables_execution import execute_research_variables_claimed
+
+        await execute_research_variables_claimed(run_id, lease, transport=transport)
+        return
     from app.ai.document_extraction_storage import is_extraction_run
 
     with database.SessionLocal() as db:
@@ -1290,10 +1334,15 @@ async def execute_claimed(run_id: str, lease: str, *, transport=None) -> None:
 def expire_interrupted_runs(db: Session) -> int:
     """Mark abandoned inference failed without repeating potentially billable calls."""
     deadline = utcnow() - datetime.timedelta(minutes=10)
+    from app.ai.research_variables_run_models import AIResearchVariableRunArtifact
+    from app.ai.research_variables_runtime import recover_variable_tasks
+
+    native_count = recover_variable_tasks(db, deadline)
+
     count = (
         db.query(AIRun)
-        .filter(AIRun.status == "running", AIRun.start_time < deadline)
+        .filter(AIRun.status == "running", AIRun.start_time < deadline, AIRun.feature_key != "research_extraction", ~AIRun.run_id.in_(db.query(AIResearchVariableRunArtifact.run_id)))
         .update({"status": "failed", "error_code": "WORKER_INTERRUPTED", "error_message": "执行进程中断，任务未自动重试，可检查后重新提交", "finish_time": utcnow()}, synchronize_session=False)
     )
     db.commit()
-    return count
+    return count + native_count

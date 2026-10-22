@@ -82,8 +82,7 @@ def _reference_and_receipt(db, task):
             raise HTTPException(409, "非终态变量任务不能冒充已有最终用量")
         record = receipts.verify_receipt(db, task)
         return None, record.receipt.model_dump(mode="json"), "recorded"
-    if task.run.status not in {"queued", "running", "cancelled"}:
-        raise HTTPException(409, "变量终态缺具体用量PK，不能以物理0补造回执")
+    receipts.verify_pending_receipt(db, task)
     return None, None, "pending"
 
 
@@ -112,7 +111,8 @@ def describe_task(db, task, *, include_result=True):
         automatic_export=False,
         frozen_audit=task.frozen_audit,
     )
-    fields["parts"] = {name: f"/ai/runs/{task.run.run_id}/research-variables/{name}" for name in ("binding", "source", "scope", "result", "receipt")}
+    prefix = "/ai/admin/runs" if task.frozen_audit else "/ai/runs"
+    fields["parts"] = {name: f"{prefix}/{task.run.run_id}/research-variables/{name}" for name in ("binding", "source", "scope", "result", "receipt")}
     return bounded(fields)
 
 

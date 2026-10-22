@@ -5,7 +5,7 @@ import json
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from fastapi.responses import JSONResponse
 from sqlalchemy import JSON, type_coerce
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, defer
 
 from app.ai.catalog import FEATURES
 from app.ai.context import accessible_patients, authorize_patient, context_metadata, get_encounter, patient_snapshot
@@ -268,11 +268,41 @@ def list_runs(
     inventory_scenario_id: str | None = Query(None, max_length=36),
     coding_case_id: str | None = Query(None, max_length=36),
     document_original_id: str | None = Query(None, max_length=36),
+    research_variable_batch_id: str | None = Query(None, max_length=36),
     limit: int = Query(30, ge=1, le=100),
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user),
 ) -> dict:
     """List own tasks; super-admins can inspect global execution history."""
+    if feature_key == "research_extraction" or research_variable_batch_id is not None:
+        from app.ai.research_variables_history import list_variable_history
+
+        data, _ = list_variable_history(
+            db,
+            user,
+            feature_key=feature_key,
+            batch_id=research_variable_batch_id,
+            limit=limit,
+            other_scope=(
+                patient_id,
+                encounter_ref,
+                department_id,
+                roster_plan_id,
+                ward_id,
+                bed_series_id,
+                surgery_pool_id,
+                surgery_scenario_id,
+                supply_item_kind,
+                supply_item_id,
+                supply_series_id,
+                inventory_item_kind,
+                inventory_item_id,
+                inventory_scenario_id,
+                coding_case_id,
+                document_original_id,
+            ),
+        )
+        return {"code": 200, "msg": "success", "data": data}
     if feature_key == "drg_evidence_review" or coding_case_id is not None:
         from app.ai.coding_evidence_sources import current_actor
 
@@ -383,12 +413,17 @@ def list_runs(
     if encounter_ref:
         query = query.filter_by(encounter_ref=encounter_ref)
     data = []
-    for item in query.order_by(AIRun.create_time.desc()).limit(limit).all():
+    for item in query.options(*(defer(getattr(AIRun, key)) for key in ("input_json", "result_json", "evidence_json", "context_metadata_json"))).order_by(AIRun.create_time.desc()).limit(limit).all():
         try:
             authorize_run(db, user, item)
         except HTTPException as exc:
             if exc.status_code in {403, 404}:
                 continue
+            if exc.status_code == 409:
+                from app.ai.research_variables_task_routing import is_variable_task
+
+                if is_variable_task(db, item):
+                    continue
             if exc.status_code == 409 and any(is_document_evidence(db, entry) for entry in json.loads(item.evidence_json)):
                 continue
             if exc.status_code == 409:
@@ -426,6 +461,13 @@ def list_runs(
 @router.get("/ai/runs/{run_id}")
 def run_detail(run_id: str, db: Session = Depends(get_db), user: User = Depends(get_current_user)) -> dict:
     """Recheck patient access before exposing a stored result or evidence."""
+    from app.ai.research_variables_task_routing import guard_variable_task_read
+
+    variable = guard_variable_task_read(db, user, run_id)
+    if variable is not None:
+        from app.ai.research_variables_task_views import describe_task
+
+        return {"code": 200, "msg": "success", "data": describe_task(db, variable)}
     from app.ai.document_extraction_runtime import guard_document_run_id
 
     guard_document_run_id(db, user, run_id)
@@ -439,6 +481,12 @@ def run_detail(run_id: str, db: Session = Depends(get_db), user: User = Depends(
 @router.post("/ai/runs/{run_id}/cancel")
 def cancel_run(run_id: str, db: Session = Depends(get_db), user: User = Depends(get_current_user)) -> dict:
     """Stop accepting a result; an already sent provider call may still finish."""
+    from app.ai.research_variables_task_routing import is_variable_task
+
+    if is_variable_task(db, run_id):
+        from app.ai.research_variables_cancellation import cancel_variable_run
+
+        return {"code": 200, "msg": "已停止接收研究变量结果，实际用量独立结算", "data": cancel_variable_run(db, user, run_id)}
     from app.ai.document_extraction_runtime import guard_document_run_id
 
     guard_document_run_id(db, user, run_id)
@@ -467,6 +515,13 @@ def cancel_run(run_id: str, db: Session = Depends(get_db), user: User = Depends(
 @router.post("/ai/runs/{run_id}/feedback")
 def review_result(run_id: str, req: FeedbackWrite, db: Session = Depends(get_db), user: User = Depends(get_current_user)) -> dict:
     """Append review without editing clinical records, orders or prescriptions."""
+    from app.ai.research_variables_task_routing import guard_variable_task_read
+
+    variable = guard_variable_task_read(db, user, run_id)
+    if variable is not None:
+        from app.ai.research_variables_feedback import review_variable_result
+
+        return {"code": 200, "msg": "人工复核已记录，未生成已审核矩阵或导出", "data": review_variable_result(db, user, run_id, req)}
     from app.ai.document_extraction_runtime import guard_document_run_id
 
     guard_document_run_id(db, user, run_id)

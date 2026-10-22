@@ -10,7 +10,7 @@ import uuid
 from types import SimpleNamespace
 
 from fastapi import HTTPException
-from sqlalchemy import func
+from sqlalchemy import func, select
 
 from app.ai import research_variables_attempts as attempts
 from app.ai import research_variables_receipts as receipts
@@ -21,6 +21,8 @@ from app.ai.research_cohort_sources import utcnow
 from app.ai.research_cohort_write_guard import lock_research_gate
 from app.ai.research_variables_configuration import current_configuration
 from app.ai.research_variables_gateway import VariableGatewayError, build_request
+from app.ai.research_variables_run_models import AIResearchVariableRunArtifact
+from app.ai.research_variables_storage_contract import VariableUsageReceipt
 from app.ai.research_variables_task_context import prepare_context
 from app.ai.research_variables_task_contract import FEATURE_KEY
 
@@ -127,3 +129,64 @@ def claim_variable_run(db, identifier):
     except Exception:
         db.rollback()
         raise
+
+
+def recover_variable_tasks(db, deadline):
+    """Trusted body-free interrupted settlement; never replay an HTTP call.
+
+    The bounded polling batch is a queue mechanism, not a claim that omitted
+    jobs were checked. RC current committed IDs union own actual-SQL IDs are
+    only candidates; every selected row repeats exact current phase proof.
+    Each settlement commits before unrelated generic recovery can wait Run X.
+    """
+    statement = (
+        select(AIResearchVariableRunArtifact.run_id)
+        .join(AIRun, AIRun.run_id == AIResearchVariableRunArtifact.run_id)
+        .where(AIRun.status.in_(["running", "cancelled"]), AIRun.start_time < deadline, AIResearchVariableRunArtifact.usage_event_id.is_(None))
+        .order_by(AIResearchVariableRunArtifact.run_id)
+        .limit(100)
+    )
+    with db.no_autoflush:
+        identifiers = set()
+        bind = db.get_bind()
+        if bind.dialect.name in {"mysql", "mariadb"}:
+            engine = getattr(bind, "engine", bind)
+            with engine.connect().execution_options(isolation_level="READ COMMITTED") as connection:
+                identifiers.update(connection.execute(statement).scalars())
+        identifiers.update(db.execute(statement).scalars())
+    count = 0
+    for identifier in sorted(identifiers):
+        try:
+            lock_research_gate(db)
+            identity = reader.locate_artifact(db, identifier)
+            if identity is None:
+                raise HTTPException(409, "恢复候选已失去原始Artifact，不处理为通用任务")
+            header, artifact = reader._headers(db, identity, exclusive=True)
+            reader._creation_audit(db, header, artifact)
+            if artifact["usage_event_id"] is not None or header["status"] not in {"running", "cancelled"} or header["start_time"] is None or header["start_time"] >= deadline:
+                db.rollback()
+                continue
+            task = SimpleNamespace(run=SimpleNamespace(**header), artifact=SimpleNamespace(**artifact))
+            claim = attempts.verify_claim(db, task)
+            delivery = attempts.verify_delivery(db, task) if artifact["dispatch_event_id"] is not None else None
+            usage = (
+                VariableUsageReceipt(input_tokens=None, output_tokens=None, complete=False, model_call_attempted=None)
+                if delivery is not None
+                else VariableUsageReceipt(input_tokens=0, output_tokens=0, complete=True, model_call_attempted=False)
+            )
+            record = receipts.stage_terminal(
+                db,
+                claim,
+                delivery=delivery,
+                receipt=usage,
+                status="failed",
+                error_code="WORKER_INTERRUPTED",
+                error_message="实际原领取中断；原分派是否调用及用量未知时保留未知，未重放模型、恢复来源读取或导出。",
+                latency_ms=0,
+            )
+            db.commit()
+            count += int(record is not None)
+        except Exception:
+            db.rollback()
+            raise
+    return count

@@ -43,7 +43,11 @@ def mounted_variable_router():
     from app.routers.ai_research_variables_sources import router
 
     original = list(app.router.routes)
-    assert not any(isinstance(r, APIRoute) and r.endpoint.__module__ == "app.routers.ai_research_variables_sources" for r in original)
+    existing = [r for r in original if isinstance(r, APIRoute) and r.endpoint.__module__ == "app.routers.ai_research_variables_sources"]
+    if existing:
+        assert len(existing) == 16 and len({(m, r.path) for r in existing for m in r.methods}) == 16
+        yield
+        return
     source_routes = [r for r in original if isinstance(r, APIRoute) and r.endpoint.__module__ == "app.routers.ai_research_cohort_sources"]
     assert len(source_routes) == 23
     app.include_router(router, prefix="/api")

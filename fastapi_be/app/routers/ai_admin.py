@@ -71,10 +71,13 @@ router = APIRouter(tags=["AI 超级管理员"], default_response_class=JSONRespo
 def _current_super_admin(db, user):
     """Recheck audit authority beyond a JWT-created MySQL RR snapshot."""
     state = inspect(user, raiseerr=False)
+    epoch = {key: state.dict[key] for key in ("user_role", "token_invalid_before") if key in state.dict} if state is not None else {}
     user_id = state.identity[0] if state is not None and state.identity is not None else getattr(user, "user_id", None)
     actor = db.query(User).filter_by(user_id=user_id).populate_existing().with_for_update(read=True).one_or_none()
     if actor is None or actor.user_role != "super_admin":
         raise HTTPException(403, "当前身份已无超级管理员审计权限")
+    if any(getattr(actor, key) != value for key, value in epoch.items()):
+        raise HTTPException(403, "本次请求原超级管理员角色或登录授权已变化")
     return actor
 
 
@@ -841,12 +844,43 @@ def list_global_runs(
     inventory_scenario_id: str | None = Query(None, max_length=36),
     coding_case_id: str | None = Query(None, max_length=36),
     document_original_id: str | None = Query(None, max_length=36),
+    research_variable_batch_id: str | None = Query(None, max_length=36),
     page: int = Query(1, ge=1, le=100000),
     page_size: int = Query(30, ge=1, le=100),
     db: Session = Depends(get_db),
     user: User = Depends(require_roles("super_admin")),
 ) -> dict:
     """Inspect all users' task metadata and feedback counts without loading clinical payloads."""
+    if feature_key == "research_extraction" or research_variable_batch_id is not None:
+        from app.ai.research_variables_history import list_variable_history
+
+        data, total = list_variable_history(
+            db,
+            user,
+            feature_key=feature_key,
+            batch_id=research_variable_batch_id,
+            admin=True,
+            status=status,
+            requested_by=requested_by,
+            limit=page_size,
+            offset=(page - 1) * page_size,
+            other_scope=(
+                patient_id,
+                department_id,
+                surgery_pool_id,
+                surgery_scenario_id,
+                supply_item_kind,
+                supply_item_id,
+                supply_series_id,
+                inventory_item_kind,
+                inventory_item_id,
+                inventory_scenario_id,
+                coding_case_id,
+                document_original_id,
+                outcome,
+            ),
+        )
+        return {"code": 200, "msg": "success", "data": data, "total": total, "page": page, "page_size": page_size}
     user = _current_super_admin(db, user)
     query = db.query(AIRun)
     if feature_key == "guideline_ingestion" or document_original_id is not None:
@@ -917,20 +951,41 @@ def list_global_runs(
         query = query.filter(AIRun.run_id.in_(db.query(AIFeedback.run_id).filter(AIFeedback.outcome == outcome)))
     total = query.count()
     rows = (
-        query.options(defer(AIRun.input_json), defer(AIRun.result_json), defer(AIRun.evidence_json))
+        query.options(defer(AIRun.input_json), defer(AIRun.result_json), defer(AIRun.evidence_json), defer(AIRun.context_metadata_json))
         .order_by(AIRun.create_time.desc(), AIRun.run_id)
         .offset((page - 1) * page_size)
         .limit(page_size)
         .all()
     )
     counts = dict(db.query(AIFeedback.run_id, func.count(AIFeedback.feedback_id)).filter(AIFeedback.run_id.in_([item.run_id for item in rows])).group_by(AIFeedback.run_id).all()) if rows else {}
-    data = [{**describe_run(item, False, user=user), "requested_by": item.requested_by, "provider_id": item.provider_id, "feedback_count": counts.get(item.run_id, 0)} for item in rows]
+    from app.ai.research_variables_task_routing import is_variable_task
+
+    data = []
+    for item in rows:
+        if is_variable_task(db, item):
+            from app.ai.research_variables_task_views import describe_variable_run
+
+            try:
+                record = describe_variable_run(db, user, item, False, frozen_audit=True)
+            except HTTPException as exc:
+                if exc.status_code not in {403, 404, 409}:
+                    raise
+                continue
+        else:
+            record = describe_run(item, False, user=user)
+        data.append({**record, "requested_by": item.requested_by, "provider_id": item.provider_id, "feedback_count": counts.get(item.run_id, 0)})
     return {"code": 200, "msg": "success", "data": data, "total": total, "page": page, "page_size": page_size}
 
 
 @router.get("/ai/admin/runs/{run_id}")
 def inspect_run_trace(run_id: str, db: Session = Depends(get_db), user: User = Depends(require_roles("super_admin"))) -> dict:
     """Read the frozen prompts, requested model, source payload and append-only review history."""
+    from app.ai.research_variables_task_routing import is_variable_task
+
+    if is_variable_task(db, run_id):
+        from app.ai.research_variables_task_views import trace_variable_run
+
+        return {"code": 200, "msg": "success", "data": trace_variable_run(db, user, run_id)}
     user = _current_super_admin(db, user)
     run = db.get(AIRun, run_id)
     if run is None:

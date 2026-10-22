@@ -2304,6 +2304,233 @@
  },
  {
   "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "list_dictionaries",
+  "method": "GET",
+  "module": "ai_research_variables_sources.py",
+  "path": "/api/ai/research-variables/dictionaries"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "make_dictionary",
+  "method": "POST",
+  "module": "ai_research_variables_sources.py",
+  "path": "/api/ai/research-variables/dictionaries"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "get_dictionary",
+  "method": "GET",
+  "module": "ai_research_variables_sources.py",
+  "path": "/api/ai/research-variables/dictionaries/{dictionary_id}"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "get_dictionary_part",
+  "method": "GET",
+  "module": "ai_research_variables_sources.py",
+  "path": "/api/ai/research-variables/dictionaries/{dictionary_id}/parts/{part}"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "sign_dictionary",
+  "method": "POST",
+  "module": "ai_research_variables_sources.py",
+  "path": "/api/ai/research-variables/dictionaries/{dictionary_id}/definition-review"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "publish_dictionary",
+  "method": "POST",
+  "module": "ai_research_variables_sources.py",
+  "path": "/api/ai/research-variables/dictionaries/{dictionary_id}/review"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "revoke_dictionary",
+  "method": "POST",
+  "module": "ai_research_variables_sources.py",
+  "path": "/api/ai/research-variables/dictionaries/{dictionary_id}/revoke"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "preview_batch",
+  "method": "POST",
+  "module": "ai_research_variables_sources.py",
+  "path": "/api/ai/research-variables/batches/preview"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "list_batches",
+  "method": "GET",
+  "module": "ai_research_variables_sources.py",
+  "path": "/api/ai/research-variables/batches"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "make_batch",
+  "method": "POST",
+  "module": "ai_research_variables_sources.py",
+  "path": "/api/ai/research-variables/batches"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "get_batch",
+  "method": "GET",
+  "module": "ai_research_variables_sources.py",
+  "path": "/api/ai/research-variables/batches/{batch_id}"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "get_batch_part",
+  "method": "GET",
+  "module": "ai_research_variables_sources.py",
+  "path": "/api/ai/research-variables/batches/{batch_id}/parts/{part}"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "publish_batch",
+  "method": "POST",
+  "module": "ai_research_variables_sources.py",
+  "path": "/api/ai/research-variables/batches/{batch_id}/review"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "revoke_batch",
+  "method": "POST",
+  "module": "ai_research_variables_sources.py",
+  "path": "/api/ai/research-variables/batches/{batch_id}/revoke"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "list_technical",
+  "method": "GET",
+  "module": "ai_research_variables_sources.py",
+  "path": "/api/ai/research-variables/technical/{directory}"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "get_technical",
+  "method": "GET",
+  "module": "ai_research_variables_sources.py",
+  "path": "/api/ai/research-variables/technical/{directory}/{record_id}"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "inspect_variable_context",
+  "method": "POST",
+  "module": "ai_research_variables_tasks.py",
+  "path": "/api/ai/research-variables/context"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "read_current_variable_part",
+  "method": "GET",
+  "module": "ai_research_variables_tasks.py",
+  "path": "/api/ai/runs/{run_id}/research-variables/{part}"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "read_frozen_variable_part",
+  "method": "GET",
+  "module": "ai_research_variables_tasks.py",
+  "path": "/api/ai/admin/runs/{run_id}/research-variables/{part}"
+ },
+ {
+  "auth": [
    "super_admin"
   ],
   "function": "options",

@@ -122,6 +122,35 @@ def technical_task(db, claim):
     return task
 
 
+def verify_pending_receipt(db, task):
+    """Only a real unfinished phase may await its original settlement.
+
+    Non-null latency is written with the concrete usage PK. Its disappearance
+    must not turn a paid cancelled/failed task back into a pending receipt or
+    permit a second usage event. This check reads technical rows/audits only.
+    """
+    run, artifact = task.run, task.artifact
+    if artifact.usage_event_id is not None or run.latency_ms is not None:
+        raise HTTPException(409, "已结算技术时钟或用量PK与待结算声明矛盾")
+    if run.status == "queued":
+        if any(getattr(artifact, key) is not None for key in ("claim_event_id", "claim_lease", "claimed_at", "dispatch_event_id", "dispatched_at")) or any(
+            getattr(run, key) is not None for key in ("lease_token", "start_time", "finish_time", "error_code", "error_message")
+        ):
+            raise HTTPException(409, "原排队技术头与未领取待结算状态不同")
+    elif run.status == "running":
+        if any(getattr(run, key) is not None for key in ("finish_time", "error_code", "error_message")):
+            raise HTTPException(409, "原运行技术头已有终态痕迹，不能降为待结算")
+        attempts.verify_claim(db, task)
+        if artifact.dispatch_event_id is not None:
+            attempts.verify_delivery(db, task)
+    elif run.status == "cancelled":
+        if artifact.dispatch_event_id is None or run.finish_time is None or run.error_code != "TASK_CANCELLED":
+            raise HTTPException(409, "仅真实已分派且尚未结算的明确取消可等待原付费用量")
+        attempts.verify_delivery(db, task)
+    else:
+        raise HTTPException(409, "已结束变量任务缺具体用量PK，不能降为待结算或重复计量")
+
+
 def stage_terminal(db, claim, *, delivery, receipt, status, error_code, error_message, latency_ms):
     """Settle only this actual delivery; no Task text or Source reauthorization.
 
@@ -140,6 +169,12 @@ def stage_terminal(db, claim, *, delivery, receipt, status, error_code, error_me
         task = technical_task(db, claim)
         if task is None or task.artifact.usage_event_id is not None or task.run.status == "succeeded":
             return None
+        # Internal atomic cancellation may already have written cancelled
+        # before its same-transaction known-uncalled receipt. That transient
+        # state is never a public pending receipt. Original claim/delivery PKs
+        # below still bind settlement, and paid terminal state cannot reopen.
+        if task.run.status not in {"running", "cancelled"} or task.run.latency_ms is not None:
+            raise HTTPException(409, "原领取已终结却缺具体用量PK，不能重计或降为待结算")
         if delivery is None:
             if task.artifact.dispatch_event_id is not None:
                 return None

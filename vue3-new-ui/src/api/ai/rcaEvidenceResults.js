@@ -3,6 +3,7 @@ import {supportCanonical} from '../inpatientSupport';
 import {rcaSchema,rcaSchemaDefinition,rcaBound,rcaKeys,rcaSame,rcaClock,rcaDigest,rcaBytes,rcaHash,rcaPlain,rcaQuoteValid,rcaGovernance,verifyRcaPublic,verifyRcaCase,projectRcaCase,parseRcaJson} from './rcaEvidenceProofs';
 const floor=value=>value.slice(0,19)+'.000000Z',emptyHash=()=>rcaDigest({});
 const chosen=(value,expected={})=>(!expected.runId||value.run_id===expected.runId)&&(!expected.caseId||(value.rca_evidence_case_id||value.case_id)===expected.caseId);
+export function rcaRunHasMarkers(v){if(!v||typeof v!=='object'||Array.isArray(v))return false;const has=(x,k)=>x!==null&&typeof x==='object'&&Object.prototype.hasOwnProperty.call(x,k);return v.feature_key==='incident_rca'||['rca_evidence_case_id','rca_evidence_findings','rca_evidence_artifact'].some(k=>has(v,k))||has(v.result,'rca_evidence_draft')||has(v.frozen_request?.payload?.input,'rca_evidence_case_id')||has(v.frozen_request?.payload?.context,'rca_evidence_binding')||typeof v.result_reference?.schema_version==='string'&&v.result_reference.schema_version.startsWith('rca_evidence_');}
 export function rcaBindingValid(v){try{
  if(!rcaSchema('RcaTaskBinding',v)||v.source_id!==`rca_case:${v.case_id}:${v.case_content_hash.slice(0,12)}`||!rcaClock(v.source_snapshot_time)||(v.patient_grant===null)!==(v.patient_id_at_capture===null))return false;
  for(const [grant,kind]of [[v.event_grant,'event_investigation'],[v.patient_grant,'associated_patient_processing']]){if(grant===null)continue;if(grant.event_id!==v.event_id||grant.patient_id_at_grant!==v.patient_id_at_capture||grant.grantee_id!==v.requested_by||grant.permission_kind!==kind||!rcaClock(grant.issued_at)||!rcaClock(grant.valid_until)||grant.issued_at>=grant.valid_until)return false;}
@@ -22,13 +23,15 @@ export async function verifyRcaPreview(v,expected={}, {current=()=>true}={}){try
  return (!expected.caseId||b.case_id===expected.caseId)&&v.source_url===`/api/ai/admin/rca-evidence/cases/${b.case_id}/public-source`&&v.case_url===`/api/ai/admin/rca-evidence/cases/${b.case_id}`&&await metadataValid(v.metadata,v.context)&&await evidenceValid(v.evidence,b)&&current();
 }catch{return false;}}
 export function rcaUsageValid(v){return rcaSchema('RcaUsageReceipt',v)&&v.complete===(v.input_tokens!==null&&v.output_tokens!==null)&&(v.model_call_attempted!==false||v.input_tokens===0&&v.output_tokens===0)&&(v.model_call_attempted!==null||v.input_tokens===null&&v.output_tokens===null);}
-function summaryValid(v,expected){
+export function rcaSummaryValid(v,expected={}){
  if(!rcaSchema('RcaRunSummary',v)||!rcaBound(v)||!chosen(v,expected)||![v.create_time,v.start_time,v.finish_time].every(t=>t===null||rcaClock(t)&&t.endsWith('.000000Z')))return false;
  if(v.start_time!==null&&v.start_time<v.create_time||v.finish_time!==null&&v.finish_time<(v.start_time||v.create_time))return false;
  const usage=v.usage_receipt;
  if(usage!==null&&!rcaUsageValid(usage)||v.input_tokens!==(usage?.input_tokens??null)||v.output_tokens!==(usage?.output_tokens??null)||(v.usage_receipt_status==='recorded')!==(usage!==null))return false;
  return rcaClock(v.context_metadata.snapshot_time)&&rcaSame(v.context_metadata.missing_data,fixed.missing_data);
 }
+const summaryValid=rcaSummaryValid;
+export function rcaSummaryCanAdvance(before,after){if(!summaryValid(before,{})||!summaryValid(after,{}))return false;const fields=['run_id','feature_key','feature_name','preview','prompt_version','provider_revision','context_digest','patient_id','encounter_ref','create_time','run_clock_basis','requires_human_review','context_metadata','rca_evidence_case_id'];if(fields.some(k=>!rcaSame(before[k],after[k]))||before.start_time!==null&&before.start_time!==after.start_time||before.usage_receipt!==null&&before.finish_time!==null&&before.finish_time!==after.finish_time||before.usage_receipt!==null&&!rcaSame(before.usage_receipt,after.usage_receipt))return false;return before.status==='queued'||before.status==='running'&&after.status!=='queued'||before.status===after.status;}
 export function rcaHistoryValid(v,{caseId=null,page=1,pageSize=20}={}){try{
  if(!rcaSchema('RcaHistoryResponse',v)||!rcaBound(v)||v.page!==page||v.page_size!==pageSize||v.data.length>pageSize||v.data.length>Math.max(0,v.total-(page-1)*pageSize)||new Set(v.data.map(x=>x.run_id)).size!==v.data.length)return false;
  return v.data.every(row=>summaryValid(row,{caseId}));

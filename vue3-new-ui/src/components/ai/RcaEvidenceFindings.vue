@@ -1,6 +1,6 @@
 <template>
  <section aria-label="事件RCA未核实假设与完整证明">
-  <p v-if="v.error" role="alert">{{v.error}}</p><el-button v-if="v.closed&&active" @click="v.reopen">显式重新核对RCA结果</el-button><p v-if="v.busy" role="status">正在核对全部分件与原任务锚。</p>
+  <p v-if="v.error" role="alert">{{v.error}}</p><el-button v-if="v.closed&&active" @click="v.reopen">显式重新核对RCA结果</el-button><p v-if="v.busy" role="status">正在核对全部分件与原任务锚。</p><el-button v-if="v.busy" @click="v.close">关闭RCA核验并清除</el-button>
   <template v-if="v.value&&v.authorized"><el-button @click="v.close">关闭并清除RCA结果</el-button><p>本任务 {{v.value.run.run_id}}：{{v.value.run.status}}。仅部分待调查假设，不确认因果、责任、调查完整或整改成效，不自动写回RCA或PDCA。</p>
    <p aria-label="RCA实际用量">输入 {{shown(v.value.run.input_tokens)}} / 输出 {{shown(v.value.run.output_tokens)}}；回执 {{v.value.run.usage_receipt_status}}；模型调用 {{attempt(v.value.run.usage_receipt?.model_call_attempted)}}。未知不补零。</p>
    <p>完整发布文字 {{v.value.parts.source.items.length}} 件；人工时间线 {{v.value.parts.source.timeline.length}} 条；完整成员 {{v.value.parts.source.members.length}} 根。已核对完整Case与可见投影；原终态22字段摘要仅作为服务端锚，未声称浏览器重建不可见字段。</p>

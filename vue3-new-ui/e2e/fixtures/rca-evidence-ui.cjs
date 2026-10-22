@@ -1,6 +1,6 @@
 const {isDeepStrictEqual}=require('node:util');
 const {expect}=require('@playwright/test'),{load}=require('./load-rca-evidence.cjs');
-async function openRcaSource(page,harness,{scope={},role='super_admin',hold=null,status=null,mutate=null}={}){
+async function openRcaSource(page,harness,{scope={},role='super_admin',hold=null,status=null,mutate=null,input=false}={}){
  const fixture=load('source'),reads=[],writes=[];
  await page.addInitScript(({scope,role})=>{window.__rcaEvidenceScope=scope;window.__rcaEvidenceRole=role;},{scope:{eventId:fixture.event_id,expectedPatientId:fixture.patient_id,...scope},role});
  const base='/api/ai/admin/rca-evidence';
@@ -27,7 +27,7 @@ async function openRcaSource(page,harness,{scope={},role='super_admin',hold=null
   let body=fixture.packets[name].raw_utf8;if(mutate)body=await mutate(name,body);
   await route.fulfill({contentType:'application/json',body});
  });
- await page.goto(harness.origin);await expect(page.getByRole('region',{name:'事件RCA来源治理',exact:true})).toBeVisible();
+ await page.goto(harness.origin);await expect(page.getByRole('region',{name:input?'事件RCA明确Case选择':'事件RCA来源治理',exact:true})).toBeVisible();
  return {fixture,reads,writes};
 }
 async function choose(page,label,value){const select=page.getByRole('combobox',{name:label,exact:true});await select.locator('xpath=ancestor::div[contains(@class,"el-select__wrapper")][1]').click();const id=await select.getAttribute('aria-controls');await page.locator('[id="'+id+'"]').getByRole('option',{name:value,exact:true}).click();}

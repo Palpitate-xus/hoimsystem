@@ -1,0 +1,27 @@
+{
+  "schema_version": "research_variable_actual_production_state_fixture_v1",
+  "scope": "One fresh real Main/JWT synthetic SQLite/controlled MockTransport same-case export on immutable35ee810 backend. Single-line question is a new actual request, not modification of V2 question/hash/proof. Seven actual states retain their actual separate IDs; no terminal rewind. No hospital, remote model or deployment.",
+  "actual_pretty_path": "/tmp/hoim-research-variable-production-state-v3-packets.json",
+  "actual_pretty_bytes": 1133320,
+  "actual_pretty_sha256": "fad1adecedfac9b67d31687b39f38b2cb7995736609e592ac2d9be7b6d943a99",
+  "compact_fixture": "vue3-new-ui/e2e/fixtures/research-variable-task/production-states.json",
+  "compact_bytes": 781629,
+  "compact_sha256": "4d26117432aa3a8b64207f7fdaa4f8b440373838309010626c99e62f8335f9fa",
+  "verification_report": "/tmp/hoim-research-variable-production-state-v3-verification.json",
+  "verification_sha256": "dcd4c84174a9666fc84ad33f9d49de6532ee7c507a23490299506d9616d72f77",
+  "source_freeze_file": "/tmp/hoim-research-variable-production-state-v3-source-freeze.json",
+  "source_freeze_sha256": "0e4e6122cb49fc9d6a302b8e14f0c9906122b136a4767ea0f1d66403184f10ec",
+  "source_file_count": 1052,
+  "source_stable": true,
+  "elapsed_seconds": 178.0007506813854,
+  "guards": {
+    "dotenv_open_attempts": 0,
+    "shared_transport_pem_attempts": 0,
+    "socket_attempts": 0,
+    "engine_urls": [
+      "sqlite:///:memory:",
+      "sqlite:///:memory:"
+    ]
+  },
+  "response_provenance": "All bodies are actual GET/preview/feedback/cancel Main responses. Source metadata/directory/management6 bootstrap are actual same case. queued metadata is the actual pre-claim GET, not captured original POST response bytes; any test replaying it as POST must explicitly label derived transport wrapper and cannot claim real POST HTTP."
+}

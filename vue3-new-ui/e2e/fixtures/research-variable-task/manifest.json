@@ -1,0 +1,34 @@
+{
+  "schema_version": "research_variable_actual_main_pipeline_fixture_manifest_v1",
+  "scope": "Unaltered actual synthetic Main JWT->shared durable worker->controlled local ASGI->SQL split blob/trace/history/feedback from earlier main-third source freeze; not final current-source full suite or remote inference. Four positive protocols/usage forms retained byte-equivalent as parsed JSON, only compact packaging. No manually forged success proof.",
+  "sources": [
+    {
+      "key": "chat_full",
+      "path": "/tmp/hoim-research-variables-main-third-pytest/test_actual_main_jwt_shared_qu0/actual-research-variable-pipeline-chat-full.json",
+      "bytes": 138772,
+      "sha256": "b39c61c3eced6fa4446a50f271caff33dc9a595b55047f9fd620bb4840e30d45"
+    },
+    {
+      "key": "responses_full",
+      "path": "/tmp/hoim-research-variables-main-third-pytest/test_actual_main_jwt_shared_qu1/actual-research-variable-pipeline-responses-full.json",
+      "bytes": 153209,
+      "sha256": "08678a5d2023cfbb95c1a8782343fb0f0b4a4f5c579b7644fd230245b6b823ee"
+    },
+    {
+      "key": "chat_absent",
+      "path": "/tmp/hoim-research-variables-main-third-pytest/test_actual_main_jwt_shared_qu2/actual-research-variable-pipeline-chat-absent.json",
+      "bytes": 160375,
+      "sha256": "05c1bca7cd4d90e4436c45f50d0d63cc84ef99d8d99f0abeac7afd8e83573d83"
+    },
+    {
+      "key": "responses_partial",
+      "path": "/tmp/hoim-research-variables-main-third-pytest/test_actual_main_jwt_shared_qu3/actual-research-variable-pipeline-responses-partial.json",
+      "bytes": 174798,
+      "sha256": "ace70a5c4285d2c5ae0136f13d48c375c514d75729a68bcc0d3bd82bf5674695"
+    }
+  ],
+  "fixture": "e2e/fixtures/research-variable-task/actual-development.json",
+  "fixture_sha256": "b5022cd2b826d2aaabe041dc839262eec85b3c09533da8277c2e8614f70da756",
+  "source_binding_report": "/tmp/hoim-research-variables-main-third-verification.json",
+  "source_binding_report_sha256": "5fbee54212f370fd43f57cfeb3826236af6ee61ef41ea7cb27f7dbae81e08651"
+}

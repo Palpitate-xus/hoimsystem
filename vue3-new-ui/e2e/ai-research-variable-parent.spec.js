@@ -9,6 +9,7 @@ async function open(page,initial={},mutateFeatures=value=>value){
  await page.route('**/api/**',async route=>{
   const path=new URL(route.request().url()).pathname.replace(/^\/api/u,''),method=route.request().method();calls.push({method,path});
   if(path==='/ai/features')return route.fulfill({json:mutateFeatures(structuredClone(F.features))});
+  if(path===`/ai/research-variables/batches/${batch}`)return route.fulfill({json:{code:200,msg:'success',data:F.source_parts.source.data.metadata}});
   if(path==='/ai/research-variables/context')return route.fulfill({json:F.preview});
   if(path===`/ai/research-variables/batches/${batch}/parts/source`)return route.fulfill({json:F.source_parts.source});
   if(path===`/ai/research-variables/batches/${batch}/parts/snapshot`)return route.fulfill({json:F.source_parts.snapshot});
@@ -20,7 +21,7 @@ async function open(page,initial={},mutateFeatures=value=>value){
  await page.goto(harness.origin);await page.waitForFunction(()=>!!window.__researchVariableAssistantProbe?.assistant);return {calls,errors};
 }
 async function noGeneric(page){await expect(page.getByRole('button',{name:'生成辅助建议',exact:true})).toHaveCount(0);await expect(page.getByText('补充 JSON（可选）',{exact:true})).toHaveCount(0);await expect(page.getByPlaceholder('搜索有访问权限的患者',{exact:true})).toHaveCount(0);}
-async function ready(page){await page.getByTestId('variable-inspect').click();await expect(page.getByTestId('variable-preview')).toBeVisible();await page.getByTestId('variable-submit').click();await expect(page.getByRole('region',{name:'科研变量逐字草稿核对'})).toBeVisible();}
+async function ready(page){await page.getByRole('button',{name:'显式重新读取引用完整批次',exact:true}).click();await expect(page.getByRole('button',{name:'清除本次选择',exact:true})).toBeVisible();await page.getByTestId('variable-inspect').click();await expect(page.getByTestId('variable-preview')).toBeVisible();await page.getByTestId('variable-submit').click();await expect(page.getByRole('region',{name:'科研变量逐字草稿核对'})).toBeVisible();}
 test('real shared Parent delegates76 to the actual complete-proof child and never generic patient/JSON/service routes',async({page})=>{
  const {calls,errors}=await open(page);await noGeneric(page);await ready(page);await noGeneric(page);expect(calls.filter(x=>x.method==='POST').map(x=>x.path)).toEqual(['/ai/research-variables/context','/ai/runs']);expect(calls.some(x=>/service-options|patients|operational-context/u.test(x.path))).toBe(false);expect(errors).toEqual([]);
 });

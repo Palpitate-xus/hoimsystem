@@ -13,7 +13,7 @@ function validInitial(value){try{
 const fingerprint=value=>{try{return canonical(value);}catch{return 'invalid';}};
 
 export function useResearchVariableAssistant(props,emit){
- const store=useStore(),batchId=ref(''),question=ref(''),questionPresent=ref(false),previewMode=ref(false),busy=ref(false),error=ref(''),notice=ref(''),preview=shallowRef(null),bundle=shallowRef(null),history=shallowRef([]),evidenceOpen=ref(false),closed=ref(false),live=ref(true),feedbackOutcome=ref('accepted'),feedbackComment=ref('');
+ const store=useStore(),batchId=ref(''),sourceEpoch=ref(0),sourceInitialReferences=shallowRef({}),sourceReady=ref(false),question=ref(''),questionPresent=ref(false),previewMode=ref(false),busy=ref(false),error=ref(''),notice=ref(''),preview=shallowRef(null),bundle=shallowRef(null),history=shallowRef([]),evidenceOpen=ref(false),closed=ref(false),live=ref(true),feedbackOutcome=ref('accepted'),feedbackComment=ref('');
  let version=0,timer=null,mutating=false,initialSeedAllowed=true,receipt=null,expectedSelection=null,expectedPreview=null;
  const token=computed(()=>store.state.user.accessToken),username=computed(()=>store.state.user.username),roles=computed(()=>store.getters['user/permissions']);
  const sessionKey=computed(()=>fingerprint([token.value,username.value,roles.value]));
@@ -24,18 +24,18 @@ export function useResearchVariableAssistant(props,emit){
  const scopeValid=computed(()=>props.patientId===null&&props.encounterRef===''&&initialValid.value);
  const available=computed(()=>sessionAllowed.value&&modeReady.value&&scopeValid.value&&props.active&&live.value&&!closed.value);
  const selection=computed(()=>({research_variable_batch_id:batchId.value,...(questionPresent.value?{question:question.value}:{})}));
- const selectionValid=computed(()=>researchVariableSelectionValid(selection.value));
+ const selectionValid=computed(()=>sourceReady.value&&researchVariableSelectionValid(selection.value));
  const queueAllowed=computed(()=>available.value&&selectionValid.value&&preview.value!==null&&props.feature.provider_configured&&(props.feature.enabled||isSuper.value&&previewMode.value)&&(!previewMode.value||isSuper.value));
  const polling=computed(()=>bundle.value!==null&&(['queued','running'].includes(bundle.value.run.status)||bundle.value.run.status==='cancelled'&&bundle.value.run.usage_receipt_status==='pending'));
 
  function stopPolling(){if(timer!==null){clearTimeout(timer);timer=null;}}
  function clear({wipeInputs=false,notify=false}={}){
   version++;stopPolling();busy.value=false;error.value='';notice.value='';preview.value=null;bundle.value=null;history.value=[];evidenceOpen.value=false;feedbackComment.value='';receipt=null;expectedSelection=null;expectedPreview=null;
-  if(wipeInputs){mutating=true;batchId.value='';question.value='';questionPresent.value=false;previewMode.value=false;mutating=false;}
+  if(wipeInputs){sourceEpoch.value++;sourceReady.value=false;sourceInitialReferences.value={};mutating=true;batchId.value='';question.value='';questionPresent.value=false;previewMode.value=false;mutating=false;}
   if(notify)emit('cleared');
  }
  function seedInitial(){
-  if(!scopeValid.value||!available.value)return;mutating=true;batchId.value=props.initialInput.research_variable_batch_id??'';question.value=own(props.initialInput,'question')?props.initialInput.question:'';questionPresent.value=own(props.initialInput,'question');mutating=false;
+  if(!scopeValid.value||!available.value)return;mutating=true;sourceInitialReferences.value=own(props.initialInput,'research_variable_batch_id')?{research_variable_batch_id:props.initialInput.research_variable_batch_id}:{};batchId.value='';sourceReady.value=false;question.value=own(props.initialInput,'question')?props.initialInput.question:'';questionPresent.value=own(props.initialInput,'question');mutating=false;
  }
  const configKey=computed(()=>fingerprint(props.feature)),initialKey=computed(()=>fingerprint(props.initialInput));
  watch(()=>[sessionKey.value,props.active,props.featureKey,configKey.value,props.patientId,props.encounterRef,initialKey.value],(next,previous)=>{
@@ -48,6 +48,14 @@ export function useResearchVariableAssistant(props,emit){
  },{immediate:true,flush:'sync'});
  watch(question,()=>{if(!mutating){questionPresent.value=true;clear({notify:true});}},{flush:'sync'});
  watch(()=>[batchId.value,previewMode.value],()=>{if(!mutating)clear({notify:true});},{flush:'sync'});
+ function sourceChanged(value){
+  // A replaced Input emits null while unmounting and again on mount. Once the
+  // Source is already cleared, those notifications must not erase a new error.
+  if(value===null&&!sourceReady.value&&batchId.value==='')return;
+  clear({notify:true});sourceReady.value=false;mutating=true;batchId.value='';
+  if(available.value&&object(value)&&value.ready===true&&object(value.references)&&Object.keys(value.references).length===1&&uuid(value.references.research_variable_batch_id)&&value.batch?.metadata?.record_id===value.references.research_variable_batch_id&&value.batch.metadata.record_kind==='batch'&&value.batch.metadata.status==='published'&&value.batch.currentValidation?.eligible===true){batchId.value=value.references.research_variable_batch_id;sourceReady.value=true;}
+  mutating=false;
+ }
  const currentFor=ticket=>()=>ticket===version&&available.value;
  function fail(message){clear({wipeInputs:true,notify:true});error.value=message;}
 
@@ -111,5 +119,5 @@ export function useResearchVariableAssistant(props,emit){
  function childCleared(){bundle.value=null;stopPolling();}
  function closeEvidence(done){evidenceOpen.value=false;done?.();}
  onDeactivated(()=>{initialSeedAllowed=false;live.value=false;close();});onActivated(()=>{live.value=true;});onBeforeUnmount(()=>{live.value=false;close();});
- return {batchId,question,previewMode,busy,error,notice,preview,bundle,history,evidenceOpen,closed,sessionAllowed,isSuper,modeReady,scopeValid,available,selectionValid,queueAllowed,polling,feedbackOutcome,feedbackComment,inspect,submit,loadHistory,openHistory,refresh,cancel,feedback,close,reopen,childCleared,closeEvidence};
+ return {batchId,sourceEpoch,sourceInitialReferences,sourceChanged,question,previewMode,busy,error,notice,preview,bundle,history,evidenceOpen,closed,sessionAllowed,isSuper,modeReady,scopeValid,available,selectionValid,queueAllowed,polling,feedbackOutcome,feedbackComment,inspect,submit,loadHistory,openHistory,refresh,cancel,feedback,close,reopen,childCleared,closeEvidence};
 }

@@ -82,6 +82,12 @@
             <research-cohort-sources :active="tab==='research_cohort_sources'&&canManageResearchSources" :audit-only="researchSourcesAuditOnly" />
           </template>
         </el-tab-pane>
+        <el-tab-pane v-if="canManageResearchSources" label="科研变量字典与完整批次治理" name="research_variable_sources" lazy>
+          <template v-if="tab==='research_variable_sources'&&canManageResearchSources">
+            <el-checkbox v-model="variableSourcesTechnicalOnly" aria-label="科研变量仅技术元数据">仅技术元数据目录（不恢复正文或执行权限）</el-checkbox>
+            <research-variable-sources :active="tab==='research_variable_sources'&&canManageResearchSources" :audit-only="variableSourcesTechnicalOnly" />
+          </template>
+        </el-tab-pane>
         <el-tab-pane v-if="canCheckForecast" label="病案编码证据与本地规则治理" name="coding_evidence" lazy><ai-coding-evidence-sources v-if="tab==='coding_evidence'&&canCheckForecast" audit-only /></el-tab-pane>
         <el-tab-pane label="完整手术排程场景治理" name="surgery_scenarios" lazy><ai-surgery-scenarios v-if="tab==='surgery_scenarios'" governance /></el-tab-pane>
         <el-tab-pane label="SOFA独立规则与全院评估" name="sofa" lazy><ai-sofa-management v-if="tab==='sofa'" /></el-tab-pane>
@@ -343,6 +349,7 @@ const AiInventoryScenarios=defineAsyncComponent(()=>import("@/components/Invento
 const DocumentEvidencePanel=defineAsyncComponent(()=>import("@/components/ai/DocumentEvidencePanel.vue"));
 const AiCodingEvidenceSources=defineAsyncComponent(()=>import("@/components/CodingEvidenceSources.vue"));
 const ResearchCohortSources=defineAsyncComponent(()=>import("@/components/ai/ResearchCohortSources.vue"));
+const ResearchVariableSources=defineAsyncComponent(()=>import("@/components/ai/ResearchVariableSources.vue"));
 const AiSurgerySources=defineAsyncComponent(()=>import("@/components/AISurgerySources.vue"));
 const AiSurgeryScenarios=defineAsyncComponent(()=>import("@/components/AISurgeryScenarios.vue"));
 const AiSurgeryProviderCheck=defineAsyncComponent(()=>import("@/components/AISurgeryProviderCheck.vue"));
@@ -382,12 +389,12 @@ const providerDialog = ref(false), providerId = ref(null), providerForm = ref({}
 const forecastCheckTarget = ref(null);
 const news2CheckTarget = ref(null);
 const canCheckForecast = computed(() => !!store.state.user.accessToken && store.state.user.permissions.includes("super_admin"));
-const researchSourcesAuditOnly = ref(false);
+const researchSourcesAuditOnly = ref(false), variableSourcesTechnicalOnly = ref(false);
 const canManageResearchSources = computed(() => {
   const user=store.state.user, permissions=user.permissions;
-  return typeof user.accessToken==='string' && user.accessToken.length>0 && Array.isArray(permissions) && permissions.length>0 && new Set(permissions).size===permissions.length && permissions.every(role=>typeof role==='string'&&Object.hasOwn(roles,role)) && permissions.includes('super_admin');
+  return typeof user.accessToken==='string' && user.accessToken.trim().length>0 && typeof user.username==='string' && user.username.trim().length>0 && Array.isArray(permissions) && permissions.length>0 && new Set(permissions).size===permissions.length && permissions.every(role=>typeof role==='string'&&Object.hasOwn(roles,role)) && permissions.includes('super_admin');
 });
-function resetResearchSources() { researchSourcesAuditOnly.value=false; if(tab.value==='research_cohort_sources')tab.value='features'; }
+function resetResearchSources() { researchSourcesAuditOnly.value=false; variableSourcesTechnicalOnly.value=false; if(['research_cohort_sources','research_variable_sources'].includes(tab.value))tab.value='features'; }
 watch([()=>store.state.user.accessToken,()=>store.state.user.username,()=>JSON.stringify(store.state.user.permissions)],resetResearchSources);
 onDeactivated(resetResearchSources);
 onBeforeUnmount(resetResearchSources);

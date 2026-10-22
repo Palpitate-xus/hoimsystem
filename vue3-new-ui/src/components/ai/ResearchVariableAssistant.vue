@@ -8,9 +8,7 @@
     <el-button v-if="closed" data-testid="variable-reopen" @click="reopen">重新选择来源</el-button>
     <template v-else-if="available">
       <el-form label-position="top">
-        <el-form-item label="明确已发布变量批次 UUID">
-          <el-input v-model="batchId" data-testid="variable-batch" placeholder="从受权来源目录明确选择后填写批次UUID，不自动选首条" autocomplete="off" />
-        </el-form-item>
+        <research-variable-input :key="sourceEpoch" :active="available" :initial-references="sourceInitialReferences" @selection-change="sourceChanged" />
         <el-form-item label="可选问题（原样保存，最多2000码点 / 8000 UTF8字节）">
           <el-input v-model="question" data-testid="variable-question" type="textarea" :rows="3" autocomplete="off" />
         </el-form-item>
@@ -61,10 +59,11 @@
 </template>
 <script setup>
 import ResearchVariableFindings from './ResearchVariableFindings.vue';
+import ResearchVariableInput from './ResearchVariableInput.vue';
 import {useResearchVariableAssistant} from './useResearchVariableAssistant';
 const props=defineProps({feature:{type:Object,default:null},featureKey:{type:String,default:''},initialInput:{type:Object,default:()=>({})},patientId:{type:Number,default:null},encounterRef:{type:String,default:''},active:{type:Boolean,default:true}});
 const emit=defineEmits(['cleared']);
-const {batchId,question,previewMode,busy,error,notice,preview,bundle,history,evidenceOpen,closed,sessionAllowed,isSuper,modeReady,scopeValid,available,selectionValid,queueAllowed,polling,feedbackOutcome,feedbackComment,inspect,submit,loadHistory,openHistory,refresh,cancel,feedback,close,reopen,childCleared,closeEvidence}=useResearchVariableAssistant(props,emit);
+const {batchId,sourceEpoch,sourceInitialReferences,sourceChanged,question,previewMode,busy,error,notice,preview,bundle,history,evidenceOpen,closed,sessionAllowed,isSuper,modeReady,scopeValid,available,selectionValid,queueAllowed,polling,feedbackOutcome,feedbackComment,inspect,submit,loadHistory,openHistory,refresh,cancel,feedback,close,reopen,childCleared,closeEvidence}=useResearchVariableAssistant(props,emit);
 </script>
 <style scoped>
 .research-variable-assistant{display:grid;gap:12px}.actions,.task-actions{display:flex;flex-wrap:wrap;gap:8px}.task-actions{display:block}.task-actions>.el-button{margin-bottom:10px}.history-row{display:block;margin:8px 0}pre{white-space:pre-wrap;overflow-wrap:anywhere;max-height:48vh;overflow:auto}article{border:1px solid var(--el-border-color);padding:12px;border-radius:4px}

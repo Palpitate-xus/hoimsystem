@@ -12,6 +12,7 @@ from sqlalchemy import func
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, defer
 
+from app.ai.admin_usage_summary import usage_summary as exact_usage_summary
 from app.ai.admin_write_authority import admin_write, capture_authority, checked_capability_probe, current_super_admin, verify_admin_write_before_commit
 from app.ai.catalog import FEATURES
 from app.ai.ecg_probe import inspect_ecg_capabilities
@@ -171,6 +172,7 @@ def update_feature(key: str, req: FeatureWrite, db: Session = Depends(get_db), u
 @router.get("/ai/admin/providers")
 def list_providers(db: Session = Depends(get_db), user: User = Depends(require_roles("super_admin"))) -> dict:
     """Never return plaintext or encrypted API keys."""
+    _current_super_admin(db, user)
     return {"code": 200, "msg": "success", "data": [describe_provider(item) for item in db.query(AIProvider).order_by(AIProvider.provider_id).all()]}
 
 
@@ -1670,6 +1672,7 @@ def review_knowledge(document_id: str, req: KnowledgeReview, db: Session = Depen
 @router.get("/ai/admin/pathway-sources")
 def list_pathway_sources(db: Session = Depends(get_db), user: User = Depends(require_roles("super_admin")), limit: int = Query(100, ge=1, le=300)) -> dict:
     """Offer source metadata without treating an active business template as reviewed knowledge."""
+    _current_super_admin(db, user)
     rows = db.query(ClinicalPathway).order_by(ClinicalPathway.pathway_id.desc()).limit(limit + 1).all()
     items = []
     for row in rows[:limit]:
@@ -1743,6 +1746,7 @@ def import_pathway_knowledge(pathway_id: int, req: PathwayKnowledgeImport, db: S
 @router.get("/ai/admin/grants")
 def list_grants(db: Session = Depends(get_db), user: User = Depends(require_roles("super_admin")), limit: int = Query(100, ge=1, le=300)) -> dict:
     """Inspect explicit care access without returning patient direct identifiers."""
+    _current_super_admin(db, user)
     items = db.query(AIPatientGrant).order_by(AIPatientGrant.create_time.desc()).limit(limit).all()
     names = ("grant_id", "user_id", "patient_id", "category", "reason", "expires_at", "revoked", "created_by")
     return {"code": 200, "msg": "success", "data": [{name: getattr(item, name) for name in names} for item in items]}
@@ -1796,10 +1800,5 @@ def list_audit(db: Session = Depends(get_db), user: User = Depends(require_roles
 
 @router.get("/ai/admin/usage")
 def usage_summary(db: Session = Depends(get_db), user: User = Depends(require_roles("super_admin"))) -> dict:
-    """Return aggregate usage without exposing patient inputs or model output."""
-    rows = db.query(AIRun.feature_key, AIRun.status, func.count(AIRun.run_id), func.sum(AIRun.input_tokens), func.sum(AIRun.output_tokens)).group_by(AIRun.feature_key, AIRun.status).all()
-    return {
-        "code": 200,
-        "msg": "success",
-        "data": [{"feature_key": key, "status": status, "count": count, "input_tokens": inputs or 0, "output_tokens": outputs or 0} for key, status, count, inputs, outputs in rows],
-    }
+    """Specific nullable usage events; physical legacy counters stay unverified."""
+    return exact_usage_summary(db, user)

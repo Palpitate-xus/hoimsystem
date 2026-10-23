@@ -584,3 +584,16 @@
 - 独立final工作树现合入80完整前后端，保留75去标识与79运维的全部增量；32个training专属后端模块逐字等于已交付822b4f9，不改变固定本地成绩、隐藏答案或独立模型使用授权。
 - 15个完整共享后端文件213项通过，1330后端/映射输入稳定；12个Node文件168项通过。新增空迁移合并节点，实际80项Prompt/1010条RBAC重新生成。
 - 本阶段未声称统一UI浏览器或全部80项验收；继续合入77、78、76并统一核验。
+- 2026-10-21 第80项实际私有MySQL Task第二轮55检查66.323s全部通过并清理：六表12UTC6/11MEDIUM，Task两表up/down/up保持235旧表DDL/行；双协议×四种真实nullable用量、UUID Prompt、5具体AuditPK/.123456Z claim、同轮66 Task Main HTTP及独立21 Source HTTP。1214实际MySQL collector与Root1216对应项逐字一致，额外2 JSON夹具单独比SHA，不改称MySQL1216。首轮新harness SessionLocal误用contextmanager的29项后真实失败/清理完整保留；只修harness。物理大TEXT不冒称语义大结果，后者及在途取消/撤权/事务故障继续补验，无真实模型/医院DB/部署。
+
+- 2026-10-21 第80项MySQL第四轮一次80检查85.480s全部绿并清理，重复原55+新增25机制在同一新实例，非相加重跑。真实395176B语义结果/386B原Run短指针、在途取消11/null及撤review/role/epoch/config结算、503真实unknown、取消已知零/中断未知、旧RR新完整result、own未提交null marker，以及四阶段×三种权威触发变更共12次整事务回滚通过，1214collector稳定/guards0。第三轮48项后新增harness把模型与dict错误比较的真实RED和未执行的错误orphan脚本一起保留；只修harness，产品仍ee3ce3b。旧RR全局目录count/rows当前只有SQL/SQLite证据，额外MySQL检查随后补齐。
+
+- 2026-10-21 第80项MySQL第五轮一次81检查88.031s全部绿并清理：同轮重跑80机制，再实证旧RR在新任务commit后全局mixed及training筛选的当前SHARE总数=列表完整实际集合、新Task可见、Sup binding全null。1214源逐字同ee3/前轮且稳定、guard0；不将80+独立1相加、不泛化到其它新域，全部runner/worker/phase/extra及报告无损保存。
+
+- 2026-10-21 第80项同案配置补包：原Main packet整文件1P12.44pytest/23.501outer，1216输入稳定；同一次新案例真实GET learner features/Sup features/Prompt/provider四包+其Source/Practice/七态原63=完整67 HTTP，419954B SHA d0eaeb4b14fc36e193082466c4e92bba6701b906fe43fdd4ea63b493999ac772。旧63逐字保留，全部新67同案不跨包拼接。前两新plugin在cancel commit后读取过期ORM用户名而打开test fixture Session，触发零测试SQL断言/次生export缺失；只缓存真实headers提前，诊断原件保留，不说产品SQL跨await。原contextmanager工厂导致通用OperationLog警告不证明审计行持久化，私有MySQL另证。另四独立SQL故障已复现产品未知异常被误结算0/0/false，当前修复并重新验证，不属本67已绿范围。
+
+- 2026-10-21 新任意交付异常4项真实RED发现旧产品错误0/0/false后，精确SIGINT停止本域旧完整candidate；实际1687P/0skip/16warn，805.15s pytest/818.217s outer，源1216稳定，exit2。本轮无已执行assertion失败，但不能证明新修复；未执行后续用例不算pass/skip，全部raw/JUnit保留，修正完成后fresh完整重新开始。运维原JUnit额外一个中断entry不多算一P。
+
+- 2026-10-21 training任意交付异常修正7aca885：实际gateway/worker各RuntimeError/AssertionError四原始SQL RED复现错误0/0/false；最终六完整模块一次137P，70.32s pytest/81.342s outer，全部1217源稳定。gateway实际已尝试→true+null计数；worker自有dispatch后无真实回执→WORKER_INTERRUPTED+null/null/None；不放松具体PK/未知回执约束，已知未调用零与实际paid计数保留。中间未使用现有WORKER_INTERRUPTED策略的2个拒绝、运维一次错误测试路径无执行均完整保留。只声明Ruff check通过；完整format诊断仅旧长条件保留，不称全格式绿。新独立full及修正后的实际MySQL正在跑，旧partial/RED不重标。
+
+- 2026-10-21 training已修正7aca885实际私有MySQL一次87检查94.385s全部通过/清理，含原完整基线及六个未知RuntimeError/AssertionError（gateway/worker/撤Source后gateway）边界，同轮不相加重跑。已尝试true或worker未知None与null计数、原具体PK、无结果/无重发/撤权零BODY均保留；1215实际输入与对应fresh full一致（training另两JSON夹具单独桥接）。training第六轮78项后仅新验证脚本自己get整Result污染0BODY观察的RED保留，第七只改id投影缺行探针；产品未再变。所有原raw永久保存，无真实模型/医院DB/部署证明。

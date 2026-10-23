@@ -326,3 +326,5 @@
 - 实际SQL及Main/JWT/本地ASGI先复现6失败：已付费failed/cancelled和真实0调用cancelled的usage审计FK擦除后，曾被错误返回为pending。
 - Pending现在必须保留真实未结算阶段；已终止任务缺少具体用量审计明确409。终态写入同时拒绝既有结算痕迹，防止擦引用后重新计量。真正dispatched cancel_pending、未dispatch原子0结算及原请求的partial支付均保留。
 - 新负控加原receipts/cancellation/pipeline/execution/shared完整6文件共96项通过，1116输入稳定。原BE整轮/FE217、旧MySQL7保持其原版本范围，未据此宣称本修复或全部80项完整验收。证据见`ai-rca-receipt-integrity-verification.json`。
+
+- 77引用修复的实际私有MySQL第8轮已完整通过194.794秒：24项Main机制、3项真实锁竞争、4项审计触发回滚，1116输入稳定、I/O守卫0、容器与私有目录清理已核实。新增4项只擦实际usage FK，paid与known0终态均409且不能重计，验证器恢复原PK后完整真实回执仍可读。旧第5/6轮失败及前置第7轮各保原范围。

@@ -38,6 +38,7 @@
           <el-pagination v-model:current-page="page" :page-size="15" :total="filteredFeatures.length" layout="total, prev, pager, next" class="pagination-wrapper" />
         </el-tab-pane>
 
+        <el-tab-pane label="全局技术任务" name="technical_tasks" lazy><task-technical-directory v-if="tab==='technical_tasks'" :features="features" :active="tab==='technical_tasks'" /></el-tab-pane>
         <el-tab-pane label="模型服务" name="providers">
           <div class="page-toolbar"><el-button type="primary" @click="editProvider()">新增模型服务</el-button><span>模型地址、密钥和患者数据使用范围由超级管理员配置。</span></div>
           <el-table :data="providers" empty-text="尚未配置模型服务">
@@ -372,6 +373,7 @@ const OperationsSupportSources=defineAsyncComponent(()=>import("@/components/ai/
 const ClinicalTrainingSources=defineAsyncComponent(()=>import("@/components/ai/ClinicalTrainingSources.vue"));
 const ResearchCohortSources=defineAsyncComponent(()=>import("@/components/ai/ResearchCohortSources.vue"));
 const ResearchVariableSources=defineAsyncComponent(()=>import("@/components/ai/ResearchVariableSources.vue"));
+const TaskTechnicalDirectory=defineAsyncComponent(()=>import("@/components/ai/TaskTechnicalDirectory.vue"));
 const AiSurgerySources=defineAsyncComponent(()=>import("@/components/AISurgerySources.vue"));
 const AiSurgeryScenarios=defineAsyncComponent(()=>import("@/components/AISurgeryScenarios.vue"));
 const AiSurgeryProviderCheck=defineAsyncComponent(()=>import("@/components/AISurgeryProviderCheck.vue"));

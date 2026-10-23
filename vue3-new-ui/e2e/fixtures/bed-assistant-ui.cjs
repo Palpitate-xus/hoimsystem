@@ -1,3 +1,5 @@
+// Complete H14 source/result verification took4.9s in the retained trace.
+// Wait for this same verified result within15s; rejection/held-response assertions keep their original limits.
 const {expect}=require('@playwright/test');
 const frozen=require('./bed-synthetic/assistant-frozen.json'),brief=require('./bed-synthetic/assistant-queued-serializer.json'),H7=require('./bed-synthetic/pipeline-7.json'),H14=require('./bed-synthetic/pipeline-14.json'),options=require('./bed-synthetic/series-options.json');
 const {choose,fill,metadata}=require('./bed-series-ui.cjs');
@@ -31,7 +33,7 @@ async function setupBedAssistant(page,harness,config={}){
  await page.goto(harness.origin);await page.waitForFunction(()=>!!window.__bedAssistantProbe);await page.evaluate(({role,initialInput})=>{const p=window.__bedAssistantProbe;p.store.commit('user/permissions',[role]);p.scope.initialInput=initialInput||{};p.scope.ready=true;},{role:state.role,initialInput:state.initialInput});return state;
 }
 async function nativeScope(page,days=14){await choose(page,'床位预测期限',`完整${days}个业务日`);await choose(page,'床位预测科室','内科 · #1');await choose(page,'床位预测病区','合成病区 · #1');await page.getByRole('button',{name:'核对完整床位序列',exact:true}).first().click();const d=page.getByRole('dialog',{name:'完整床位序列冻结核对与治理',exact:true});await d.getByRole('button',{name:'选择此已发布床位序列',exact:true}).click();await expect(page.getByRole('button',{name:'生成辅助建议',exact:true})).toBeEnabled();await d.locator('.el-dialog__headerbtn').click();}
-async function history(page,h=14){await page.getByText('最近任务',{exact:true}).click();const index=frozen.history.findIndex(r=>r.run_id===packets[h].run.run_id);await page.getByRole('button',{name:'查看',exact:true}).nth(index).click();await expect(page.getByLabel('AI任务结果',{exact:true})).toBeVisible();}
+async function history(page,h=14){await page.getByText('最近任务',{exact:true}).click();const index=frozen.history.findIndex(r=>r.run_id===packets[h].run.run_id);await page.getByRole('button',{name:'查看',exact:true}).nth(index).click();await expect(page.getByLabel('AI任务结果',{exact:true})).toBeVisible({timeout:15000});}
 async function evidence(page){await page.getByRole('button',{name:'核对完整受审床位序列原件',exact:true}).click();await expect(page.getByRole('dialog',{name:'核查引用依据',exact:true})).toContainText('bed_series_private_v1');}
 async function cleared(page,held=false){await expect(page.getByLabel('AI任务结果',{exact:true})).toHaveCount(0);await expect(page.getByRole('dialog',{name:'核查引用依据',exact:true})).toHaveCount(0);expect(await page.evaluate(held=>{const p=window.__bedAssistantProbe,s=(held?p.heldAssistant:p.assistant).$.setupState;return{run:s.run,context:s.contextData,evidence:s.evidence,dialog:s.evidenceDialog};},held)).toEqual({run:null,context:null,evidence:null,dialog:false});}
 module.exports={setupBedAssistant,nativeScope,history,evidence,cleared,choose,fill,metadata,packets,series,frozen,brief};

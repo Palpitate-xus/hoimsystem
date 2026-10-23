@@ -1,8 +1,8 @@
 {
   "schema_version": "ai_final_integration_verification_v1",
-  "recorded_at_utc": "2026-10-23T13:27:44.787121+00:00",
+  "recorded_at_utc": "2026-10-23T13:51:36.239095+00:00",
   "status": "staging_integration_in_progress_not_main_admission",
-  "current_phase": "all80_final_default_backend_and_complete_classified_browser_running",
+  "current_phase": "all80_release_final_default_and_complete_browser_suites_running",
   "goal_scope": "All80 AI capabilities, dedicated Prompts and complete current super_admin management remain in progress; no goal completion, model clinical validation, deployment or push is claimed.",
   "parents": [
     "451111e",
@@ -94580,5 +94580,49 @@
       "failed": 2,
       "basis": "Original Node log counters; both stale directory and usage fixture binding controls failed before the stopped refresh was corrected. Original record script literal225P1F was a reporting error corrected here; original raw script/log retained."
     }
+  },
+  "phase_all80_release_bed_wait_and_format": {
+    "verification_owner": {
+      "path": "doc/ai-all80-build-verification.json",
+      "sha256": "40cc4f083026dc060e13386ff78895fd07ea1c20d8ff8fad2466fa4294bd41be",
+      "phase": "phase_all80_release_bed_wait_and_format"
+    },
+    "base": "d6f67c2",
+    "problem": "First still-frozen complete browser run actually failed the bedH14 positive verified-result wait at5s. Original exact case separately passed once and five repetitions with complete traces, not counted as extra distinct cases or borrowed into full acceptance. Exact trace waits were4897,4838,5016,5035,5145,4768ms; original5s bound races complete independent verification.",
+    "changes": [
+      "Only eight positive bed result waits plus the original history helper use15s; all negative/late-result clearing, evidence/horizon/byte/proof/private-data assertions remain unchanged. No retry or global error suppression.",
+      "Remove inherited one blank EOF line in deidentificationAuthority.js. Regenerate only its source fingerprint in public extension data; every public runtime value byte is identical, base253634B/extension63686B, bounds unchanged.69 direct Element requirements/81 modules/80 CSS334037B and original fingerprint unchanged."
+    ],
+    "whole_bed": {
+      "path": "/tmp/hoim-all80-release-bed-whole-first-report.json",
+      "sha256": "cbc257d088424b6c971dbfce98e7f1801d0f4e390a9a6ddcdf4476dbc8550109",
+      "cases": 36,
+      "seconds": 299.227,
+      "passed_once_no_errors_skips_flaky_or_retries": true
+    },
+    "canonical": {
+      "path": "/tmp/hoim-all80-release-canonical-first-verification.json",
+      "sha256": "361dc1e03ca7174e4e66f83b0cbe003c7c3f67c826074d82ea76de7b45437e14",
+      "seconds": 40.114,
+      "inputs": 780,
+      "metrics": {
+        "totalJavaScript": 5957689,
+        "totalAssets": 6985948,
+        "maximumJavaScript": 646975
+      },
+      "limits": {
+        "totalJavaScript": 6000000,
+        "totalAssets": 7000000,
+        "maximumJavaScript": 700000
+      },
+      "stable": true,
+      "note": "Original template description retains historical module-count prose; actual current60-module list, complete780 manifest and producer/Node results govern this stage. Same asset byte counts as prior canonical do NOT imply identical dist hashes; this current dist is separately frozen."
+    },
+    "node": {
+      "path": "/tmp/hoim-all80-release-node-first-verification.json",
+      "sha256": "05b58a0dacec9a7e4928b47439e944632905f016d68f77e860da1d1ae8e048a4",
+      "result": "18 whole suites226P8.632seconds, current actual backend bindings, all public text/source/schema/codec/icon/style/route controls."
+    },
+    "acceptance": "Second complete238-file3908-case browser run already started on exactly these frontend bytes and fresh780 canonical dist, with live line log and separate raw JSON. Original first browser and first default backend continue on unchanged independent management tree; second default backend on committed test-clock fix also continues. Full final acceptance not yet claimed."
   }
 }

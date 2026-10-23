@@ -36,4 +36,3 @@ async function verifyProof(value,kind,current){
  return await digest({governance:g,authorization_review:manual})===value.governance_hash&&current();
 }
 export async function verifyDeidentificationAuthority(value,{kind='scope',current=()=>true}={}){try{return await verifyProof(value,kind,current);}catch{return false;}}
-

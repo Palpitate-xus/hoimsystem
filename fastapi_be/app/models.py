@@ -32,6 +32,8 @@ from app.ai import operations_support_models as _operations_support_models  # no
 from app.ai import operations_support_run_models as _operations_support_run_models  # noqa: F401
 from app.ai import research_cohort_artifact_models as _research_cohort_artifact_models  # noqa: F401
 from app.ai import research_cohort_models as _research_cohort_models  # noqa: F401
+from app.ai import rca_evidence_models as _rca_evidence_models  # noqa: F401
+from app.ai import rca_evidence_run_models as _rca_evidence_run_models  # noqa: F401
 from app.ai import roster_models as _roster_models  # noqa: F401
 from app.ai import roster_plan_models as _roster_plan_models  # noqa: F401
 from app.ai import satisfaction_artifact_models as _satisfaction_artifact_models  # noqa: F401

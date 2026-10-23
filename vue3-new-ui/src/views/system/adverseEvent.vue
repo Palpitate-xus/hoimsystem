@@ -13,7 +13,7 @@
         <el-table-column prop="status_text" label="状态" />
         <el-table-column label="操作" width="310">
           <template #default="scope">
-            <ai-action v-if="scope.row.patient_id" label="AI 事件复盘" title="AI 所选不良事件RCA辅助" :patient-id="scope.row.patient_id" :initial-input="{ adverse_event_id: String(scope.row.event_id) }" :feature-keys="['incident_rca']" initial-feature="incident_rca" />
+            <el-button v-if="rcaAllowed" @click="openRca(scope.row)">完整RCA来源与调查草稿</el-button>
             <el-button
               v-if="scope.row.status === 1"
               size="small"
@@ -30,6 +30,10 @@
         </el-table-column>
       </el-table>
     </el-card>
+
+    <el-dialog v-model="rcaVisible" title="本事件完整RCA来源与调查草稿" width="90%" :close-on-click-modal="false" destroy-on-close>
+      <template v-if="rcaScope&&rcaAllowed"><p>实际事件 {{rcaScope.eventId}}；本行原患者关联 {{rcaScope.expectedPatientId===null?'明确未记录患者':rcaScope.expectedPatientId}}。技术角色不能代替本件独立事件和患者用途。</p><el-tabs v-model="rcaTab"><el-tab-pane label="完整来源与独立用途" name="source"><RcaEvidenceSources v-if="rcaTab==='source'" :key="rcaKey" :event-id="rcaScope.eventId" :expected-patient-id="rcaScope.expectedPatientId" :active="rcaVisible&&rcaAllowed" selectable @select="selectRca" @invalidate="rcaReferences=null"/></el-tab-pane><el-tab-pane label="本件未核实调查任务" name="task" :disabled="!rcaReferences"><AiAssistant v-if="rcaTab==='task'&&rcaReferences" :key="rcaKey" :feature-keys="['incident_rca']" initial-feature="incident_rca" :initial-input="rcaReferences" :rca-event-id="rcaScope.eventId" :rca-expected-patient-id="rcaScope.expectedPatientId"/></el-tab-pane></el-tabs></template>
+    </el-dialog>
 
     <el-dialog v-model="dialogVisible" title="新增不良事件" width="500px">
       <el-form :model="form" label-width="100px" class="dialog-form">
@@ -66,11 +70,20 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref,computed,watch,onBeforeUnmount,onDeactivated, onMounted } from "vue";
 import { ElMessage } from "element-plus";
-import AiAction from "@/components/AIAction/index.vue";
+import {useStore} from 'vuex';
+import RcaEvidenceSources from '@/components/ai/RcaEvidenceSources.vue';
+import AiAssistant from '@/components/AIAssistant/index.vue';
+import {rcaPositive} from '@/api/ai/rcaEvidenceSources';
 import { createAdverseEvent, getAdverseEventList, updateEventStatus } from "@/api/adverseEvent";
 
+const store=useStore(),rcaAllowed=computed(()=>!!store.state.user?.accessToken&&(store.state.user?.permissions||[]).includes('super_admin')),rcaScope=ref(null),rcaVisible=ref(false),rcaReferences=ref(null),rcaTab=ref('source'),rcaKey=ref(0);
+function clearRca(){rcaVisible.value=false;rcaScope.value=null;rcaReferences.value=null;rcaTab.value='source';rcaKey.value++;}
+function openRca(row){clearRca();if(!rcaAllowed.value||!rcaPositive(row?.event_id)||row.patient_id!==null&&!rcaPositive(row.patient_id))return;rcaScope.value={eventId:row.event_id,expectedPatientId:row.patient_id};rcaVisible.value=true;}
+function selectRca(row){if(!rcaAllowed.value||!rcaVisible.value||!row?.eligible||row.immutable.event_id!==rcaScope.value?.eventId||row.immutable.patient_id_at_capture!==rcaScope.value?.expectedPatientId)return;rcaReferences.value={rca_evidence_case_id:row.immutable.case_id};rcaTab.value='task';}
+watch(rcaVisible,value=>{if(!value)clearRca();},{flush:'sync'});
+watch(()=>JSON.stringify([store.state.user?.accessToken,store.state.user?.permissions,store.state.user?.username]),clearRca,{flush:'sync'});onDeactivated(clearRca);onBeforeUnmount(clearRca);
 const tableData = ref([]);
 const loading = ref(false);
 const dialogVisible = ref(false);

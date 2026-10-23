@@ -114,6 +114,8 @@ def operational_context(db, user: User, spec: FeatureSpec, values: dict) -> Cont
         raise HTTPException(422, "培训已提交练习须使用独立原生任务，不接受通用运营预览或外来来源标记")
     if spec.number == 74 or "research_cohort_case_id" in values:
         raise HTTPException(422, "科研任务请明确核对独立完整Case；通用运营或临床范围不代授科研权限")
+    if spec.number == 77 or "rca_evidence_case_id" in values:
+        raise HTTPException(422, "RCA受审Case不使用通用医院运营资料范围")
     if "satisfaction_case_id" in values:
         if spec.number != 70:
             raise HTTPException(422, "受审完整评价原件仅用于满意度与评价证据分析")

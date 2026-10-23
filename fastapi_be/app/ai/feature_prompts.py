@@ -11,6 +11,7 @@ from app.ai.document_change_prompt import SYSTEM_PROMPT as DOCUMENT_CHANGE_SYSTE
 from app.ai.document_extraction_prompt import EXTRACTION_SYSTEM_PROMPT
 from app.ai.drug_label_prompt import SYSTEM_PROMPT as DRUG_LABEL_SYSTEM_PROMPT
 from app.ai.operations_support_task_prompt import SYSTEM_PROMPT as OPERATIONS_SYSTEM_PROMPT
+from app.ai.rca_evidence_task_prompt import SYSTEM_PROMPT as RCA_EVIDENCE_SYSTEM_PROMPT
 from app.ai.research_cohort_prompt import RESEARCH_SYSTEM_PROMPT
 from app.ai.satisfaction_prompt import SATISFACTION_SYSTEM_PROMPT
 
@@ -26,6 +27,7 @@ SYSTEM_PROMPT_OVERRIDES = MappingProxyType(
         "deidentification": DEIDENTIFICATION_SYSTEM_PROMPT,
         "operations_support": OPERATIONS_SYSTEM_PROMPT,
         "clinical_training": TRAINING_SYSTEM_PROMPT,
+        "incident_rca": RCA_EVIDENCE_SYSTEM_PROMPT,
     }
 )
 

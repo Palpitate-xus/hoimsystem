@@ -209,6 +209,8 @@ def describe_config(db: Session, spec: FeatureSpec, config: AIFeatureConfig | No
         data["input_mode"] = "document_change_evidence"
     if spec.number == 71:
         data["input_mode"] = "document_extraction"
+    if spec.number == 77:
+        data["input_mode"] = "rca_evidence"
     if spec.number == 68:
         data["input_mode"] = "coding_evidence"
     if spec.number == 63:

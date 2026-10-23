@@ -3355,6 +3355,231 @@
   "path": "/api/ai/admin/qsofa-assessments/{assessment_id}"
  },
  {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "options",
+  "method": "GET",
+  "module": "ai_rca_evidence.py",
+  "path": "/api/ai/admin/rca-evidence/options"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "create_grant",
+  "method": "POST",
+  "module": "ai_rca_evidence.py",
+  "path": "/api/ai/admin/rca-evidence/grants"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "grant_detail",
+  "method": "GET",
+  "module": "ai_rca_evidence.py",
+  "path": "/api/ai/admin/rca-evidence/grants/{grant_id}"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "revoke_grant",
+  "method": "POST",
+  "module": "ai_rca_evidence.py",
+  "path": "/api/ai/admin/rca-evidence/grants/{grant_id}/revoke"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "directory",
+  "method": "GET",
+  "module": "ai_rca_evidence.py",
+  "path": "/api/ai/admin/rca-evidence/events/{event_id}/directory/{kind}"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "capture",
+  "method": "GET",
+  "module": "ai_rca_evidence.py",
+  "path": "/api/ai/admin/rca-evidence/events/{event_id}/capture"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "legacy_witness",
+  "method": "GET",
+  "module": "ai_rca_evidence.py",
+  "path": "/api/ai/admin/rca-evidence/events/{event_id}/legacy-witness"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "create_original",
+  "method": "POST",
+  "module": "ai_rca_evidence.py",
+  "path": "/api/ai/admin/rca-evidence/originals"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "original_detail",
+  "method": "GET",
+  "module": "ai_rca_evidence.py",
+  "path": "/api/ai/admin/rca-evidence/originals/{original_id}"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "review_original",
+  "method": "POST",
+  "module": "ai_rca_evidence.py",
+  "path": "/api/ai/admin/rca-evidence/originals/{original_id}/review"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "revoke_original",
+  "method": "POST",
+  "module": "ai_rca_evidence.py",
+  "path": "/api/ai/admin/rca-evidence/originals/{original_id}/revoke"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "create_case",
+  "method": "POST",
+  "module": "ai_rca_evidence.py",
+  "path": "/api/ai/admin/rca-evidence/cases"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "case_detail",
+  "method": "GET",
+  "module": "ai_rca_evidence.py",
+  "path": "/api/ai/admin/rca-evidence/cases/{case_id}"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "public_source",
+  "method": "GET",
+  "module": "ai_rca_evidence.py",
+  "path": "/api/ai/admin/rca-evidence/cases/{case_id}/public-source"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "review_case",
+  "method": "POST",
+  "module": "ai_rca_evidence.py",
+  "path": "/api/ai/admin/rca-evidence/cases/{case_id}/review"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "revoke_case",
+  "method": "POST",
+  "module": "ai_rca_evidence.py",
+  "path": "/api/ai/admin/rca-evidence/cases/{case_id}/revoke"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "inspect_rca_context",
+  "method": "POST",
+  "module": "ai_rca_evidence_tasks.py",
+  "path": "/api/ai/rca-evidence/context"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "task_source",
+  "method": "GET",
+  "module": "ai_rca_evidence_tasks.py",
+  "path": "/api/ai/runs/{run_id}/rca-evidence/source"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "task_case",
+  "method": "GET",
+  "module": "ai_rca_evidence_tasks.py",
+  "path": "/api/ai/runs/{run_id}/rca-evidence/case"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "task_result",
+  "method": "GET",
+  "module": "ai_rca_evidence_tasks.py",
+  "path": "/api/ai/runs/{run_id}/rca-evidence/result"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "task_receipt",
+  "method": "GET",
+  "module": "ai_rca_evidence_tasks.py",
+  "path": "/api/ai/runs/{run_id}/rca-evidence/receipt"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "frozen_source",
+  "method": "GET",
+  "module": "ai_rca_evidence_tasks.py",
+  "path": "/api/ai/admin/runs/{run_id}/rca-evidence/source"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "frozen_case",
+  "method": "GET",
+  "module": "ai_rca_evidence_tasks.py",
+  "path": "/api/ai/admin/runs/{run_id}/rca-evidence/case"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "frozen_result",
+  "method": "GET",
+  "module": "ai_rca_evidence_tasks.py",
+  "path": "/api/ai/admin/runs/{run_id}/rca-evidence/result"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "frozen_receipt",
+  "method": "GET",
+  "module": "ai_rca_evidence_tasks.py",
+  "path": "/api/ai/admin/runs/{run_id}/rca-evidence/receipt"
+ },
+ {
   "auth": "ANY",
   "function": "create_scope",
   "method": "POST",

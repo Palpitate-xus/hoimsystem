@@ -191,6 +191,8 @@ class ClinicalContextRequest(StrictRequest):
     @model_validator(mode="before")
     @classmethod
     def native_charge_scope(cls, value):
+        if isinstance(value, dict) and isinstance(value.get("feature_key"), str) and value["feature_key"].strip() == "incident_rca":
+            raise ValueError("事件调查只能使用专属Case预览，不接受通用患者资料接口")
         if isinstance(value, dict) and isinstance(value.get("source_refs"), dict) and "charge_case_id" in value["source_refs"]:
             if type(value.get("patient_id")) is not int or value["patient_id"] < 1:
                 raise ValueError("完整账目来源须使用真实正整数患者ID，不接受布尔、字符串或浮点转换")
@@ -203,7 +205,7 @@ class ClinicalContextRequest(StrictRequest):
     @field_validator("source_refs")
     @classmethod
     def supported_references(cls, value: dict) -> dict:
-        if set(value) - SOURCE_REFERENCE_KEYS or any(not item.strip() or len(item) > 50 for item in value.values()):
+        if "rca_evidence_case_id" in value or set(value) - SOURCE_REFERENCE_KEYS or any(not item.strip() or len(item) > 50 for item in value.values()):
             raise ValueError("资料引用类型或标识无效")
         return value
 
@@ -213,6 +215,12 @@ class OperationalContextRequest(StrictRequest):
 
     feature_key: str = Field(min_length=1, max_length=64)
     input: dict[str, Any] = Field(default_factory=dict)
+
+    @model_validator(mode="after")
+    def no_rca_fallback(self):
+        if self.feature_key == "incident_rca" or "rca_evidence_case_id" in self.input:
+            raise ValueError("事件调查Case不得进入通用运营资料接口")
+        return self
 
 
 class RunRequest(StrictRequest):
@@ -237,6 +245,11 @@ class RunRequest(StrictRequest):
                 raise ValueError("科研任务只使用明确研究Case，不接受患者或就诊替代范围")
             if "preview" in value and type(value["preview"]) is not bool:
                 raise ValueError("科研任务预览标记须为明确布尔值")
+        if isinstance(value, dict) and isinstance(value.get("feature_key"), str) and value["feature_key"].strip() == "incident_rca":
+            if value.get("patient_id") is not None or value.get("encounter_ref") is not None:
+                raise ValueError("事件调查任务仅接受明确Case，不接受通用患者或就诊范围")
+            if "preview" in value and type(value["preview"]) is not bool:
+                raise ValueError("事件调查任务预览须为显式布尔值")
         if isinstance(value, dict) and isinstance(value.get("feature_key"), str) and value["feature_key"].strip() == "feedback_analysis":
             if value.get("patient_id") is not None or value.get("encounter_ref") is not None:
                 raise ValueError("完整评价任务不接受患者或就诊范围")
@@ -283,6 +296,12 @@ class RunRequest(StrictRequest):
                 if exc.status_code != 422:
                     raise
                 raise ValueError(exc.detail) from exc
+        if "rca_evidence_case_id" in self.input and self.feature_key != "incident_rca":
+            raise ValueError("受审事件调查Case不能混入其它功能")
+        if self.feature_key == "incident_rca":
+            from app.ai.rca_evidence_task_contract import RcaTaskSelection
+
+            RcaTaskSelection.model_validate(self.input)
         if "drug_label_source_binding_id" in self.input and self.feature_key != "drug_label_extraction":
             raise ValueError("完整说明书来源仅用于说明书逐字字段复核")
         if self.feature_key == "drug_label_extraction":

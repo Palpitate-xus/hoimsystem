@@ -858,6 +858,7 @@ def list_global_runs(
     document_change_scope_id: str | None = Query(None, max_length=36),
     deidentification_case_id: str | None = Query(None, max_length=36),
     operations_case_id: Annotated[str | None, Query(max_length=36)] = None,
+    rca_evidence_case_id: str | None = None,
     page: int = Query(1, ge=1, le=100000),
     page_size: int = Query(30, ge=1, le=100),
     db: Session = Depends(get_db),
@@ -873,6 +874,44 @@ def list_global_runs(
             from app.ai.operations_support_registry import identifier
 
             identifier(operations_case_id)
+    if feature_key == "incident_rca" or rca_evidence_case_id is not None:
+        from app.ai.rca_evidence_history import history
+
+        if feature_key not in {None, "incident_rca"}:
+            raise HTTPException(422, "RCA Case不用于其它功能历史")
+        return history(
+            db,
+            user,
+            case_id=rca_evidence_case_id,
+            status=status,
+            requested_by=requested_by,
+            outcome=outcome,
+            page=page,
+            page_size=page_size,
+            audit_only=True,
+            other_scope=(
+                patient_id,
+                department_id,
+                surgery_pool_id,
+                surgery_scenario_id,
+                supply_item_kind,
+                supply_item_id,
+                supply_series_id,
+                inventory_item_kind,
+                inventory_item_id,
+                inventory_scenario_id,
+                coding_case_id,
+                charge_case_id,
+                satisfaction_case_id,
+                satisfaction_native_only,
+                encounter_ref,
+                document_original_id,
+                drug_label_source_binding_id,
+                document_change_scope_id,
+                deidentification_case_id,
+                operations_case_id,
+            ),
+        )
     from app.ai.native_task_access import lock_directory_gates
 
     # A global directory may contain native charge tasks. Billing precedes
@@ -1147,6 +1186,12 @@ def list_global_runs(
 @router.get("/ai/admin/runs/{run_id}")
 def inspect_run_trace(run_id: str, db: Session = Depends(get_db), user: User = Depends(require_roles("super_admin"))) -> dict:
     """Read the frozen prompts, requested model, source payload and append-only review history."""
+    from app.ai.rca_evidence_dispatch import is_located_rca_task
+
+    if is_located_rca_task(db, run_id):
+        from app.ai.rca_evidence_views import response, trace_view
+
+        return response(trace_view(db, user, run_id))
     from app.ai.native_task_access import guard_private_task_read, lock_directory_gates
 
     lock_directory_gates(db)

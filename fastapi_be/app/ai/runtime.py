@@ -115,6 +115,10 @@ def create_run(db: Session, user: User, req: RunRequest) -> AIRun:
         from app.ai.research_cohort_dispatch import create_shared_research_run
 
         return create_shared_research_run(db, user, req)
+    if req.feature_key == "incident_rca":
+        from app.ai.rca_evidence_runtime import create_rca_run
+
+        return create_rca_run(db, user, req)
     if req.feature_key == "feedback_analysis":
         from app.ai.satisfaction_runtime import create_satisfaction_run
 
@@ -418,6 +422,10 @@ def create_run(db: Session, user: User, req: RunRequest) -> AIRun:
 
 def authorize_run(db: Session, user: User, run: AIRun) -> None:
     """Re-check current permissions, including revoked care access, on every result read."""
+    from app.ai.rca_evidence_dispatch import guard_rca_task
+
+    if guard_rca_task(db, user, run):
+        return
     from app.ai.clinical_training_shared import guard_training_task, is_training_task
     from app.ai.deidentification_shared import guard_task as guard_deidentification_task
     from app.ai.deidentification_shared import is_deidentification_task
@@ -646,6 +654,14 @@ def describe_run(run: AIRun, include_result: bool = True, *, user: User | None =
         from app.ai.research_cohort_runtime import describe_research_run
 
         return describe_research_run(db, user, opaque_run_id(run))
+    from app.ai.rca_evidence_dispatch import is_rca_task
+
+    if is_rca_task(db, run):
+        if db is None or user is None:
+            raise HTTPException(409, "RCA任务须在当前独立用途授权会话读取")
+        from app.ai.rca_evidence_views import run_view
+
+        return run_view(db, user, run, include_result).model_dump(mode="json")
     if is_charge_run(db, run):
         if db is None or user is None:
             raise HTTPException(409, "完整账目任务须在当前授权会话内展示")
@@ -1050,6 +1066,20 @@ def claim_next_run(db: Session):
         break
     else:
         return None
+    identity = locate_native_task(db, candidate.run_id)
+    domain = identity.domain if identity is not None else None
+    if identity is None:
+        from app.ai.rca_evidence_dispatch import is_rca_task
+
+        is_rca_task(db, candidate.run_id)  # Reject orphan/null markers before any generic claim write.
+    if domain == "rca" or domain is None and candidate.feature_key == "incident_rca":
+        from app.ai.rca_evidence_dispatch import is_rca_task
+        from app.ai.rca_evidence_runtime import claim_rca_run
+
+        if not is_rca_task(db, candidate.run_id):
+            raise HTTPException(409, "RCA任务缺少实际Artifact，未通用claim")
+        lease = claim_rca_run(db, candidate.run_id)
+        return (candidate.run_id, lease) if lease is not None else None
     if domain == "drug_label" or domain is None and candidate.feature_key == "drug_label_extraction":
         from app.ai.drug_label_runtime import claim_drug_label_run
 
@@ -1085,6 +1115,10 @@ def _recheck_task(db: Session, run: AIRun) -> tuple[FeatureSpec, AIProvider, dic
         raise AIExecutionError("NATIVE_ARTIFACT_REQUIRED", "培训任务须使用实际已提交练习和原具体领取回执，未降级通用推理")
     if run.feature_key == "research_cohort":
         raise AIExecutionError("NATIVE_ARTIFACT_REQUIRED", "科研任务只接受完整专用来源和具体claim回执，不沿用通用推理")
+    from app.ai.rca_evidence_dispatch import is_rca_task
+
+    if is_rca_task(db, run):
+        raise AIExecutionError("TASK_CONTRACT_CHANGED", "RCA原生任务须使用独立claim、dispatch与Source合同")
     if run.feature_key == "feedback_analysis":
         raise AIExecutionError("TASK_CONTRACT_CHANGED", "旧评价任务仅可读取历史；须明确选择受审完整原件后新建任务")
     if run.feature_key == "drug_label_extraction":
@@ -1208,6 +1242,11 @@ async def execute_claimed(run_id: str, lease: str, *, transport=None, research_c
             research_dispatch = validate_shared_research_claim(routing_db, run_id, lease, research_claim_event_id)
         elif research_claim_event_id is not None or research_orphan:
             raise HTTPException(409, "科研原claim回执或持久域不一致，未改变任务或执行通用模型")
+        rca_task = domain == "rca" or header is not None and domain is None and header.feature_key == "incident_rca"
+        if header is not None and domain is None:
+            from app.ai.rca_evidence_dispatch import is_rca_task
+
+            is_rca_task(routing_db, run_id)  # Orphan markers reject before generic Task TEXT.
         drug_label_task = header is not None and (domain == "drug_label" or domain is None and header.feature_key == "drug_label_extraction")
         satisfaction_task = header is not None and (domain == "satisfaction" or domain is None and header.feature_key == "feedback_analysis")
         document_task = header is not None and (domain == "document" or domain is None and header.feature_key == "guideline_ingestion")
@@ -1219,7 +1258,7 @@ async def execute_claimed(run_id: str, lease: str, *, transport=None, research_c
             routing_db.get(AIRun, run_id)
             if header is not None
             and domain is None
-            and not any((training_task, training_orphan, deidentification_task, deidentification_orphan, operations_task, operations_orphan, research_task, research_orphan, drug_label_task, satisfaction_task, document_task, change_task))
+            and not any((rca_task, training_task, training_orphan, deidentification_task, deidentification_orphan, operations_task, operations_orphan, research_task, research_orphan, drug_label_task, satisfaction_task, document_task, change_task))
             else None
         )
         if routing_run is not None:
@@ -1251,6 +1290,16 @@ async def execute_claimed(run_id: str, lease: str, *, transport=None, research_c
             from app.ai.research_cohort_execution import execute_research_claimed
 
             await execute_research_claimed(run_id, lease, claim_event_id=research_claim_event_id, transport=transport)
+        return
+    if rca_task:
+        from app.ai.rca_evidence_execution import execute_rca_claimed
+
+        await execute_rca_claimed(run_id, lease, transport=transport)
+        return
+    if header is None:
+        # A terminal, absent or wrong-lease delivery has no runnable task.
+        # In particular, it must not select a native task's private JSON as a
+        # generic fallback after its original Source authority was withdrawn.
         return
     if drug_label_task:
         from app.ai.drug_label_runtime import execute_drug_label_claimed
@@ -1671,6 +1720,8 @@ def expire_interrupted_runs(db: Session) -> int:
     from app.ai.operations_support_run_models import AIOperationsRunArtifact
     from app.ai.operations_support_runtime import expire_interrupted_operations_runs
     from app.ai.operations_support_shared import marker_expression as operations_marker
+    from app.ai.rca_evidence_execution import expire_interrupted_rca_runs
+    from app.ai.rca_evidence_run_models import AIRcaEvidenceRunArtifact
     from app.ai.research_cohort_artifact_models import AIResearchCohortRunArtifact
     from app.ai.satisfaction_artifact_models import AISatisfactionRunArtifact
     from app.ai.satisfaction_execution import expire_interrupted_satisfaction_runs
@@ -1678,6 +1729,7 @@ def expire_interrupted_runs(db: Session) -> int:
     recovered = expire_interrupted_operations_runs(db)
     recovered += expire_interrupted_training_runs(db)
     recovered += expire_interrupted_change_runs(db)
+    recovered += expire_interrupted_rca_runs(db)
     recovered += expire_interrupted_charge_runs(db)
     recovered += expire_interrupted_satisfaction_runs(db)
     recovered += expire_interrupted_drug_label_runs(db)
@@ -1694,6 +1746,8 @@ def expire_interrupted_runs(db: Session) -> int:
             ~training_marker(mysql=db.get_bind().dialect.name in {"mysql", "mariadb"}),
             ~AIRun.run_id.in_(db.query(AITrainingRunArtifact.run_id)),
             ~AIRun.run_id.in_(db.query(AIDocumentChangeRunArtifact.run_id)),
+            AIRun.feature_key.notin_(["drug_label_extraction", "incident_rca"]),
+            ~AIRun.run_id.in_(db.query(AIRcaEvidenceRunArtifact.run_id)),
             ~AIRun.run_id.in_(db.query(AIChargeRunArtifact.run_id)),
             ~AIRun.run_id.in_(db.query(AISatisfactionRunArtifact.run_id)),
             ~AIRun.run_id.in_(db.query(AIDrugLabelRunArtifact.run_id)),

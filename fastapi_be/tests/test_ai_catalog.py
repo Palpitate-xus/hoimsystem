@@ -68,6 +68,7 @@ def test_actual_coding_and_charge_prompts_and_unique_charge_reference_are_export
     from app.ai.deidentification_prompt import SYSTEM_PROMPT as DEIDENTIFICATION_SYSTEM_PROMPT
     from app.ai.document_extraction_contract import EXTRACTION_SYSTEM_PROMPT
     from app.ai.drug_label_prompt import SYSTEM_PROMPT as DRUG_LABEL_SYSTEM_PROMPT
+    from app.ai.rca_evidence_task_prompt import SYSTEM_PROMPT as RCA_EVIDENCE_SYSTEM_PROMPT
     from app.ai.satisfaction_prompt import SATISFACTION_SYSTEM_PROMPT
     from scripts.export_ai_catalog import artifacts
 
@@ -84,6 +85,7 @@ def test_actual_coding_and_charge_prompts_and_unique_charge_reference_are_export
         "deidentification": DEIDENTIFICATION_SYSTEM_PROMPT,
         "operations_support": OPERATIONS_SYSTEM_PROMPT,
         "clinical_training": TRAINING_SYSTEM_PROMPT,
+        "incident_rca": RCA_EVIDENCE_SYSTEM_PROMPT,
     }
     assert len(exported["features"]) == 80
     for spec, value in zip(FEATURES, exported["features"], strict=True):
@@ -102,6 +104,7 @@ def test_export_declares_actual_distinct_fixed_system_prompts_for_closed_drafts(
     from app.ai.deidentification_prompt import SYSTEM_PROMPT as DEIDENTIFICATION_SYSTEM_PROMPT
     from app.ai.document_extraction_contract import EXTRACTION_SYSTEM_PROMPT
     from app.ai.drug_label_draft import SYSTEM_PROMPT as DRUG_LABEL_SYSTEM_PROMPT
+    from app.ai.rca_evidence_task_prompt import SYSTEM_PROMPT as RCA_EVIDENCE_SYSTEM_PROMPT
     from app.ai.satisfaction_prompt import SATISFACTION_SYSTEM_PROMPT
     from scripts.export_ai_catalog import artifacts
 
@@ -118,6 +121,7 @@ def test_export_declares_actual_distinct_fixed_system_prompts_for_closed_drafts(
         "deidentification": DEIDENTIFICATION_SYSTEM_PROMPT,
         "operations_support": OPERATIONS_SYSTEM_PROMPT,
         "clinical_training": TRAINING_SYSTEM_PROMPT,
+        "incident_rca": RCA_EVIDENCE_SYSTEM_PROMPT,
     }
     assert FEATURE_BY_KEY["guideline_ingestion"].default_roles == ("super_admin",)
     assert FEATURE_BY_KEY["guideline_ingestion"].requires_patient_data_permission

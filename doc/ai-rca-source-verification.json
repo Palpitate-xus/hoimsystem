@@ -1,0 +1,440 @@
+{
+  "schema_version": "rca_source_foundation_verification_v1",
+  "feature_number": 77,
+  "feature_key": "incident_rca",
+  "stage": "standalone_source_foundation_only",
+  "source_head": "8105bb852c282c581e96e66bd8200797435212ae",
+  "standalone_base": "a4701e4",
+  "not_a_full_platform_or_model_task_verification": true,
+  "owned_changed_file_count": 25,
+  "owned_changed_file_sha256": {
+    "fastapi_be/alembic/versions/20261021_rca_evidence.py": "8ef6ee4e989b8744af0d9263b3a95b6324daab5028091dd9859a98eae16a6315",
+    "fastapi_be/app/ai/rca_evidence_case_contract.py": "7cf8bda3ca7dc48c9dbf7a77233cf0f2f5249744fd14dc0caf879422ad5b604f",
+    "fastapi_be/app/ai/rca_evidence_cases.py": "13c3f4dbc6d8fb48a3a567e2d6ad4166037bee36afa0ce097b7d1b6383cc79cf",
+    "fastapi_be/app/ai/rca_evidence_contract.py": "e264b17f9ab40e49e0f9bcf6385cf3d50626870e801eed66bce9b389ca361792",
+    "fastapi_be/app/ai/rca_evidence_current.py": "28a3f9d222a263c1ec2dbaecbaf44a650a5a293cc13b494e9a067a8df228cd45",
+    "fastapi_be/app/ai/rca_evidence_directory.py": "d6a7b053b75bb1b787860dfc99058d4b58e2fc55f9c7cf04ce2a438ed9441494",
+    "fastapi_be/app/ai/rca_evidence_grants.py": "daca6fdfcc1108ae43027e689028db1fa6e2e49467bbaf5689fbb820e27a12d0",
+    "fastapi_be/app/ai/rca_evidence_input.py": "a34a8d7047c9d4436a5264f02a104703f8465a976212ba06ed562306443edc28",
+    "fastapi_be/app/ai/rca_evidence_models.py": "cc17807125c48140c802258a50e263844a04b72c252da561b2e400e200edadcc",
+    "fastapi_be/app/ai/rca_evidence_prompt.py": "d09379abe77adf2eefcf178ac13e0a0120417c12282ca7a22cb8f9fbfc7c03c4",
+    "fastapi_be/app/ai/rca_evidence_source_contract.py": "8d27be758d24d6ed4048f287475b3ab9b9202064789edd2b7dd35023c9ee9477",
+    "fastapi_be/app/ai/rca_evidence_sources.py": "80397d59145525865d8799166bff0d1e18b3be40cd30c400a2a2b99a8ccf8325",
+    "fastapi_be/app/ai/rca_evidence_write_guard.py": "7e8a417b97a795a4598c99e067a116056e9311f177482ca04ce593b6a719ab58",
+    "fastapi_be/app/routers/adverse_event.py": "af67bb0af7bd811d0cc692acb8cf3ac7b66ebb89286217e98c5476b8348f7050",
+    "fastapi_be/app/routers/ai_rca_evidence.py": "ff6ae3e7f5a1354a8113135cea2dcfc2e628c69e6435ada71487043400757a41",
+    "fastapi_be/app/routers/quality_management.py": "516a63fe5c40ef819fdef7ade3a00cd90c099b4f2bdacf21cf169ecaf3bdb01a",
+    "fastapi_be/tests/test_ai_rca_evidence_cases.py": "1ded831eab00bec9266e5ac24127682e143d95f2d95980527a72e23d27383abc",
+    "fastapi_be/tests/test_ai_rca_evidence_contract.py": "2c055cd0c998ded025b28086c5ecbf87fe7e108c6d773132949ee5cdf2e9b7bd",
+    "fastapi_be/tests/test_ai_rca_evidence_current.py": "f937a9948677335458d144b7ada34ed1696df682ee78643d953b69f95c32d3c8",
+    "fastapi_be/tests/test_ai_rca_evidence_grants.py": "efd34cfe791c7afbe24d41393f70f9666c055df29bd37b660e525b8e8f8e086a",
+    "fastapi_be/tests/test_ai_rca_evidence_http.py": "b7170da2916c4268cde89acbaeb12a1f830d707c0cd03f204091127565ad8844",
+    "fastapi_be/tests/test_ai_rca_evidence_input.py": "24e2941ff7c03097ef7128db583f96dd3a194c510c9006bb42a430829615ed84",
+    "fastapi_be/tests/test_ai_rca_evidence_migration.py": "c6698dec5e0c9a8dc0ac89b44097e0d37b3a955ac1f3e7f4031901cec2adf77b",
+    "fastapi_be/tests/test_ai_rca_evidence_sources.py": "a56cb5ac62de954a7fc9cf43e83bd6da317d98122e4d63504d405f2dbdf32ec7",
+    "fastapi_be/tests/test_ai_rca_evidence_write_guard.py": "3f38ce11d97d89c99bc700426704cf884c9314968956a06a16b201845c20bfd9"
+  },
+  "source_interfaces": {
+    "authority": "app.ai.rca_evidence_grants.authorize_event(db,user,event_id): current Super actor, Event X and independent current event/patient-purpose grants before any source TEXT",
+    "capture": "app.ai.rca_evidence_cases.capture_event(db,user,event_id)",
+    "case_create": "app.ai.rca_evidence_cases.create_case(db,user,values)",
+    "case_detail": "app.ai.rca_evidence_cases.case_detail(db,user,identifier)",
+    "public_source": "app.ai.rca_evidence_cases.public_source(db,user,identifier): current whole governed Case and released public projection",
+    "directory": "app.ai.rca_evidence_directory.directory(db,user,event_id,kind,page=1,page_size=20)",
+    "router": "app.routers.ai_rca_evidence.router, dedicated JSONResponse; 16 routes not yet mounted in shared Main",
+    "model_registration": "3 Source model classes remain unregistered in shared app.models at this stage"
+  },
+  "contract_boundaries": [
+    "Sup-only v1; event-investigation and associated-patient processing are separate current purposes, absent by default; patientless events do not invent patient/encounter.",
+    "Current Event patient must match Original/Case captured patient before private TEXT; a newly granted current-patient purpose does not authorize an Original bound to a different patient.",
+    "Full Event, all same-event legacy RCA and all declared Original statuses remain in the finite Case; published privacy/faithfulness/provenance reviewed human derivatives alone enter released model text.",
+    "Old report/create clocks retain stored_naive_no_timezone, raw signed workflow states and independent human occurrence statements; no causal approval, fault finding, clinical recommendation or efficacy proof follows.",
+    "Exact UTF8 text, Unicode codepoint spans, per-Case opaque HMAC IDs, complete original/hash/governance and exact AuditPK anchors; no truncation or winner selection.",
+    "4MiB Original; private Case and separate public Source and each complete response wrapper each have whole 8MiB limits. A combined wrapper or provider wire is not promised to fit by virtue of these individual limits.",
+    "4096 combined closed members/dependencies, 256 released items, 512 human timeline entries, explicit preparse depth32/token200000 limits; whole-refuse on excess.",
+    "No global Gate or claim that arbitrary clinical SQL writers serialize. Exactly updateStatus, rca.create and rca.advance use current Actor then Event X; all new legitimate Source writers use the same event parent.",
+    "Current directory is short independent READ COMMITTED opaque PK/event union caller same-Session nonlocking opaque PK/event union actual-flush transaction-bound hints; these candidates never grant authority. Main RR remains unchanged; each actual PK is current SHARE verified before body, changed/deleted remnants reject."
+  ],
+  "final_scoped_tests": {
+    "path": "/tmp/hoim-rca-source-final-verification.json",
+    "sha256": "a4fa9a6bdedcdc0abb4e1c917d7c06f6395040f570c54cf09c058ae0b7c667c3",
+    "bytes": 1915,
+    "passed": 121,
+    "pytest_seconds": 23.01,
+    "outer_seconds": 33.510598104447126,
+    "source_binding_count": 1068,
+    "sources_stable": true,
+    "dotenv_open_attempts": 0,
+    "external_socket_attempts": 0,
+    "command": [
+      "-p",
+      "pytest_asyncio.plugin",
+      "-p",
+      "no:cacheprovider",
+      "-q",
+      "--basetemp=/tmp/hoim-rca-source-final-pytest",
+      "tests/test_ai_rca_evidence_current.py",
+      "tests/test_ai_rca_evidence_http.py",
+      "tests/test_ai_rca_evidence_cases.py",
+      "tests/test_ai_rca_evidence_sources.py",
+      "tests/test_ai_rca_evidence_grants.py",
+      "tests/test_ai_rca_evidence_write_guard.py",
+      "tests/test_his_modules.py",
+      "tests/test_ai_incident_sources.py"
+    ],
+    "full_suite": false,
+    "overlapping_scoped_runs_not_added": true
+  },
+  "actual_mysql": {
+    "path": "/tmp/hoim-rca-source-mysql-fifth-verification.json",
+    "sha256": "0c02bbfe5c8a6db2d4d2254f94941e3636b4c777209ef1b07355cc7dd19ad79a",
+    "bytes": 263229,
+    "seconds": 36.298,
+    "checks": [
+      {
+        "name": "actual_revision_up_down_up_preserves_all_old_DDL_and_rows",
+        "legacy_tables": 220,
+        "new_tables": [
+          "hoimsystem_ai_rca_evidence_case",
+          "hoimsystem_ai_rca_evidence_original",
+          "hoimsystem_ai_rca_purpose_grant"
+        ],
+        "utc6_columns": [
+          [
+            "hoimsystem_ai_rca_evidence_case",
+            "recorded_at",
+            "datetime",
+            6
+          ],
+          [
+            "hoimsystem_ai_rca_evidence_case",
+            "reviewed_at",
+            "datetime",
+            6
+          ],
+          [
+            "hoimsystem_ai_rca_evidence_case",
+            "revoked_at",
+            "datetime",
+            6
+          ],
+          [
+            "hoimsystem_ai_rca_evidence_original",
+            "recorded_at",
+            "datetime",
+            6
+          ],
+          [
+            "hoimsystem_ai_rca_evidence_original",
+            "reviewed_at",
+            "datetime",
+            6
+          ],
+          [
+            "hoimsystem_ai_rca_evidence_original",
+            "revoked_at",
+            "datetime",
+            6
+          ],
+          [
+            "hoimsystem_ai_rca_purpose_grant",
+            "issued_at",
+            "datetime",
+            6
+          ],
+          [
+            "hoimsystem_ai_rca_purpose_grant",
+            "valid_until",
+            "datetime",
+            6
+          ],
+          [
+            "hoimsystem_ai_rca_purpose_grant",
+            "revoked_at",
+            "datetime",
+            6
+          ]
+        ],
+        "mediumtext_columns": [
+          [
+            "hoimsystem_ai_rca_evidence_case",
+            "case_json",
+            "mediumtext",
+            null
+          ],
+          [
+            "hoimsystem_ai_rca_evidence_original",
+            "original_json",
+            "mediumtext",
+            null
+          ]
+        ]
+      },
+      {
+        "name": "current_Super_without_independent_purposes_denied_before_any_source_TEXT",
+        "status": 403
+      },
+      {
+        "name": "actual4MiB_UTF8_original_whole_case_and_publicSource_MEDIUMTEXT_UTC6_readback",
+        "original_json_bytes": 4194975,
+        "case_json_bytes": 4198594,
+        "public_wire_bytes": 4196350,
+        "original_text_sha256": "aa86883dbd3245790d1a19444f005b7216c14b9093956539ca13a73de7b075b5",
+        "source_sha256": "fc6d403909b880b8e9b48c3ef10a848a9f3ee0567a4240f4b14e974c5c021eaf",
+        "legacy_audit_second_clock_explicit": true
+      },
+      {
+        "name": "actual_old_RR_current_collection_and_directory_see_new_committed_legacy_RCA_and_manual_original",
+        "old_rca_count": 0,
+        "current_rca_count": 1,
+        "current_original_count": 1,
+        "directory_total": 1
+      },
+      {
+        "name": "held_EventX_does_not_block_actual_different_event_original_writer"
+      },
+      {
+        "name": "exact3_legacy_writers_succeed_after_EventX_release_with_original_business_transitions"
+      },
+      {
+        "name": "old_RR_current_actor_role_loss_denied_before_Case_TEXT",
+        "status": 403
+      },
+      {
+        "name": "old_RR_current_patient_association_change_denies_old_case_before_TEXT",
+        "status": 403
+      },
+      {
+        "name": "actual_outer_transaction_staged2_grants_original_and_Case_discovered_then_all_audits_and_keys_rollback",
+        "main_isolation_remains": "REPEATABLE-READ"
+      },
+      {
+        "name": "actual_MySQL_savepoint_rollback_commit_and_outer_rollback_leave_no_ghost_and_retain_real_outer_root"
+      },
+      {
+        "name": "actual_new_draft_original_invalidates_published_Case_and_executionSource_without_winner_filter",
+        "status": 409
+      }
+    ],
+    "contention": [
+      {
+        "name": "adverseEvent.updateStatus",
+        "actual_mysql_error": 1205,
+        "seconds": 1.003,
+        "held_lock": "actual_capture_Event_parent_X"
+      },
+      {
+        "name": "rca.create",
+        "actual_mysql_error": 1205,
+        "seconds": 1.005,
+        "held_lock": "actual_capture_Event_parent_X"
+      },
+      {
+        "name": "rca.advance",
+        "actual_mysql_error": 1205,
+        "seconds": 1.007,
+        "held_lock": "actual_capture_Event_parent_X"
+      },
+      {
+        "name": "original.create",
+        "actual_mysql_error": 1205,
+        "seconds": 1.007,
+        "held_lock": "actual_capture_Event_parent_X"
+      },
+      {
+        "name": "original.review",
+        "actual_mysql_error": 1205,
+        "seconds": 1.007,
+        "held_lock": "actual_capture_Event_parent_X"
+      },
+      {
+        "name": "case.create",
+        "actual_mysql_error": 1205,
+        "seconds": 1.005,
+        "held_lock": "actual_capture_Event_parent_X"
+      }
+    ],
+    "atomicity": [
+      {
+        "name": "reject_audit",
+        "actual_mysql_trigger": true,
+        "counts_unchanged": true,
+        "parent_side_effect_rolled_back": true
+      },
+      {
+        "name": "rewrite_case_content",
+        "actual_mysql_trigger": true,
+        "counts_unchanged": true,
+        "parent_side_effect_rolled_back": true
+      },
+      {
+        "name": "change_parent_after_case",
+        "actual_mysql_trigger": true,
+        "counts_unchanged": true,
+        "parent_side_effect_rolled_back": true
+      },
+      {
+        "name": "new_member_after_case",
+        "actual_mysql_trigger": true,
+        "counts_unchanged": true,
+        "parent_side_effect_rolled_back": true
+      },
+      {
+        "name": "rewrite_original_content",
+        "actual_mysql_trigger": true,
+        "counts_unchanged": true,
+        "parent_side_effect_rolled_back": true
+      },
+      {
+        "name": "new_member_after_review",
+        "actual_mysql_trigger": true,
+        "counts_unchanged": true,
+        "parent_side_effect_rolled_back": true
+      }
+    ],
+    "independent_connection_ids": [
+      9,
+      14
+    ],
+    "source_binding_count": 1068,
+    "sources_stable": true,
+    "all_checks_passed": true,
+    "cleanup_verified": true,
+    "image": "mysql:8.0.39",
+    "image_id": "sha256:01faea2cb286276923a223bdbf438b50468f3c4090f6b61e0b27aa871ca0dbac",
+    "isolation": {
+      "network_mode": "none",
+      "port_bindings": {},
+      "readonly_root": true,
+      "user": "999:999",
+      "cap_drop": [
+        "ALL"
+      ],
+      "tmpfs": {
+        "/tmp": "rw,nosuid,nodev,noexec,size=64m,uid=999,gid=999,mode=0700",
+        "/var/lib/mysql": "rw,nosuid,nodev,noexec,size=512m,uid=999,gid=999,mode=0700"
+      },
+      "mount_types": [
+        "bind"
+      ]
+    },
+    "scope": "Fresh MySQL8.0.39 synthetic schema/rows, actual Source functions and exactly3 legacy writers; no Main/JWT/worker/model call, no hospital I/O, no global Gate or all-clinical-writer serialization claim.",
+    "forbidden_io_attempts": [],
+    "not_pytest_case_counts": "11 mechanisms + 6 contention mechanisms + 6 SQL-trigger mechanisms are not 23 additional pytest cases."
+  },
+  "development_reports": [
+    {
+      "label": "pure_contract",
+      "path": "/tmp/hoim-rca-pure-final-verification.json",
+      "sha256": "0b5bad19969aa705f2bafa0c6309ddfe79e4c71681a78479457f28e8faea80c6",
+      "bytes": 1451,
+      "scope": "49 pure checks; earlier contract stage, not the final Source SQL scope"
+    },
+    {
+      "label": "foundation",
+      "path": "/tmp/hoim-rca-foundation-second-verification.json",
+      "sha256": "560f42b8543b1ac3f8d64f8e5a4d8694b3e02b078f72b6bf083c3152c24fb9b9",
+      "bytes": 3330,
+      "scope": "93 pure/input/migration checks at the initial foundation stage"
+    },
+    {
+      "label": "legacy_writers",
+      "path": "/tmp/hoim-rca-writer-third-verification.json",
+      "sha256": "27eeaffb8bd920f4bde193e94562f9f795db83a2ff7e6de00bcaf40564714b75",
+      "bytes": 1570,
+      "scope": "31 checks at the initial legacy-writer stage"
+    },
+    {
+      "label": "grant_stage",
+      "path": "/tmp/hoim-rca-grants-first-verification.json",
+      "sha256": "3caae701ab4a2ddf9570e07c811e93a8b204ae25df20c2433165593911c3be27",
+      "bytes": 2174,
+      "scope": "76 scoped checks at the grant stage"
+    },
+    {
+      "label": "original_stage",
+      "path": "/tmp/hoim-rca-originals-second-verification.json",
+      "sha256": "87af6b3672d66190720261132a971b307dd6cdb0282c3527bd8bee17fee6a890",
+      "bytes": 1627,
+      "scope": "70 scoped checks at the Original stage"
+    },
+    {
+      "label": "case_stage",
+      "path": "/tmp/hoim-rca-cases-third-verification.json",
+      "sha256": "628813e8f57f7ae1485937399399080d65fd9b4b25a41aacad351f76c5e9b8d3",
+      "bytes": 1614,
+      "scope": "68 scoped checks at the Case stage"
+    },
+    {
+      "label": "http_stage",
+      "path": "/tmp/hoim-rca-http-third-verification.json",
+      "sha256": "b81f8c630ce752e90ae18bb038484596723cdc66a58818d0e448524b52bc9a8b",
+      "bytes": 1863,
+      "scope": "113 scoped checks at the dedicated-router stage"
+    },
+    {
+      "label": "migration_fix",
+      "path": "/tmp/hoim-rca-migration-third-verification.json",
+      "sha256": "7efa7898a53ba28b3b3007c17f3650908d445f2b3dff95f51ecacd65e543321b",
+      "bytes": 1960,
+      "scope": "18 whole-file checks after the actual InnoDB downgrade fix"
+    },
+    {
+      "label": "predecessor_current_stage",
+      "path": "/tmp/hoim-rca-current-second-verification.json",
+      "sha256": "838f4f97b9fbde2cecc413776d694c75f41eb7e7483064f3d5f65ed8dfc4be7c",
+      "bytes": 1921,
+      "scope": "119 scoped checks before the final same-transaction opaque-directory union"
+    },
+    {
+      "label": "final_affected_current_case",
+      "path": "/tmp/hoim-rca-current-third-verification.json",
+      "sha256": "dad1819e7315e2245be743498c93412758925a1a9d5768b60599f7fa48cf347d",
+      "bytes": 1576,
+      "scope": "33 affected whole-file checks including two real SQL-trigger member-insertion regressions"
+    },
+    {
+      "label": "final_whole_source_scope",
+      "path": "/tmp/hoim-rca-source-final-verification.json",
+      "sha256": "a4fa9a6bdedcdc0abb4e1c917d7c06f6395040f570c54cf09c058ae0b7c667c3",
+      "bytes": 1915,
+      "scope": "121 checks in the same eight Source/current/legacy-related files, after the final directory union"
+    }
+  ],
+  "retained_mysql_failed_attempts": [
+    {
+      "path": "/tmp/hoim-rca-source-mysql-first-attempt-8b9adcd9cc2a.json",
+      "sha256": "d0ed7b723fa9c59170750ced17f8f30bed0abb0898d9879556460973182f0638",
+      "bytes": 266535,
+      "result": "failed",
+      "all_checks_passed": false
+    },
+    {
+      "path": "/tmp/hoim-rca-source-mysql-second-attempt-0050323e0380.json",
+      "sha256": "463c577b864fa1347ed5d558c40668cfcb72fec439be4903d32f93ff5205ab86",
+      "bytes": 268094,
+      "result": "failed",
+      "all_checks_passed": false
+    },
+    {
+      "path": "/tmp/hoim-rca-source-mysql-third-attempt-4fc11cd01131.json",
+      "sha256": "673af03964f2d724543e5f99cf2ff9c918c898ddc85ca20ae40dd01d7822f8fb",
+      "bytes": 273860,
+      "result": "failed",
+      "all_checks_passed": false
+    },
+    {
+      "path": "/tmp/hoim-rca-source-mysql-fourth-attempt-ba773c89ecb6.json",
+      "sha256": "4c3900721825db99c5c709e29a7f0057188c4af39a10e7420421cb6398b13643",
+      "bytes": 263050,
+      "result": "failed",
+      "all_checks_passed": false
+    }
+  ],
+  "predecessor_scope": "First synthetic identity fixture exceeded legacyVARCHAR18; second actual MySQL downgrade failed1553 by dropping a FK-supporting index. Both retained. Third proved migration/readback/oldRR/6parent waits then exposed real RR next-key gap blocking an unrelated-event Original INSERT. Fourth proved adjacent Event independence and own staged/savepoint closure but its after-case SQL trigger inserted an unregistered same-TX RCA invisible to RC and incorrectly accepted a draft. Fifth unions real main-session opaque IDs and tests both creation and publication triggers; all predecessor RED retained.",
+  "remaining_work": [
+    "Shared Main/model registration, catalog native mode and shared authorization/queue dispatch are not part of this Source foundation.",
+    "No new model Task/claim/worker/provider call, run Artifact, result receipt, shared history or UI is claimed verified here.",
+    "No real hospital data, real credentials, deployment, clinical causal validity or operational effectiveness evidence."
+  ]
+}

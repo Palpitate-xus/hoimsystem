@@ -597,3 +597,29 @@
 - 2026-10-21 training任意交付异常修正7aca885：实际gateway/worker各RuntimeError/AssertionError四原始SQL RED复现错误0/0/false；最终六完整模块一次137P，70.32s pytest/81.342s outer，全部1217源稳定。gateway实际已尝试→true+null计数；worker自有dispatch后无真实回执→WORKER_INTERRUPTED+null/null/None；不放松具体PK/未知回执约束，已知未调用零与实际paid计数保留。中间未使用现有WORKER_INTERRUPTED策略的2个拒绝、运维一次错误测试路径无执行均完整保留。只声明Ruff check通过；完整format诊断仅旧长条件保留，不称全格式绿。新独立full及修正后的实际MySQL正在跑，旧partial/RED不重标。
 
 - 2026-10-21 training已修正7aca885实际私有MySQL一次87检查94.385s全部通过/清理，含原完整基线及六个未知RuntimeError/AssertionError（gateway/worker/撤Source后gateway）边界，同轮不相加重跑。已尝试true或worker未知None与null计数、原具体PK、无结果/无重发/撤权零BODY均保留；1215实际输入与对应fresh full一致（training另两JSON夹具单独桥接）。training第六轮78项后仅新验证脚本自己get整Result污染0BODY观察的RED保留，第七只改id投影缺行探针；产品未再变。所有原raw永久保存，无真实模型/医院DB/部署证明。
+## 第77项：独立事件调查来源基础（尚未接模型任务）
+
+- 在独立分支增加三张来源表、独立用途授权、完整事件/RCA/人工原件捕获、三项人工审核与发布撤销，以及16条专用服务接口。v1明确收窄为超级管理员；事件调查与关联患者处理分别取得当前权限。患者关联变化或权限失效在私有正文读取前拒绝，旧原件不会因取得另一患者权限而获准读取。
+- 原文逐字保留，旧无时区时间不补UTC，发生时间仅来自独立人工声明。模型可用资料只来自经过隐私、原意、来源审核的发布稿；旧根因文字、PDCA状态及逐字引文都不认证因果或责任。完整来源、未知、未发布与冲突根件不按最新赢家丢弃。原件4MiB，完整私有Case、独立公开Source与各完整响应分别8MiB，超限整件拒绝。
+- 最终Source相关八文件共121项通过（23.01秒，外层33.511秒），1068份输入前后相同；不把相互重叠的中间测试累加，也不称全平台后端完成。实际隔离MySQL8.0.39第五轮36.298秒通过11项读取/迁移机制、6项真实父锁竞争及6项SQL触发器回滚机制，220个旧表DDL与行数在up/down/up后不变；三张新表实际9个UTC6字段、2个MEDIUMTEXT。当前目录同时纳入已提交根与同事务真实SQL根，未在无关事件上扩大范围锁。
+- 前四次MySQL失败均保留：合成身份长度错误、InnoDB外键支持索引降级错误、RR间隙锁误阻无关事件，以及同事务触发器新增根未进入目录；最终源码均已针对修正并重新验证。共享Main/models、专用Task/Artifact/worker、模型调用及前端尚未在本阶段接入；下一阶段另行验证。精确版本、源码SHA与证据范围见[来源验证记录](ai-rca-source-verification.json)。
+
+### 77 共享终态重复交付的独立修复
+
+- 实际共享入口复现4失败/2通过：原用途撤销后，同一已失败任务重复交付会读取四列Task JSON。未发生第二次模型HTTP，但正文读取边界确有缺陷。
+- 分派改为先定位真实不透明Artifact；77终态只走专属惰性前检，其他无可运行header的交付在通用正文读取前返回。新13项及原共享/dispatch两文件26项均通过；格式桥仅调整新测试导入与排版，非导入AST相等。
+- 新MySQL第五、第六次的失败及完整脚本原样留存。第五是队列前置条件，第六复现真实共享重复交付读取问题；不把旧MySQL或旧全量结果重标为此修复的通过。证据见`ai-rca-terminal-delivery-verification.json`。
+
+### 77 已结算用量引用完整性
+
+- 实际SQL及Main/JWT/本地ASGI先复现6失败：已付费failed/cancelled和真实0调用cancelled的usage审计FK擦除后，曾被错误返回为pending。
+- Pending现在必须保留真实未结算阶段；已终止任务缺少具体用量审计明确409。终态写入同时拒绝既有结算痕迹，防止擦引用后重新计量。真正dispatched cancel_pending、未dispatch原子0结算及原请求的partial支付均保留。
+- 新负控加原receipts/cancellation/pipeline/execution/shared完整6文件共96项通过，1116输入稳定。原BE整轮/FE217、旧MySQL7保持其原版本范围，未据此宣称本修复或全部80项完整验收。证据见`ai-rca-receipt-integrity-verification.json`。
+
+- 77引用修复的实际私有MySQL第8轮已完整通过194.794秒：24项Main机制、3项真实锁竞争、4项审计触发回滚，1116输入稳定、I/O守卫0、容器与私有目录清理已核实。新增4项只擦实际usage FK，paid与known0终态均409且不能重计，验证器恢复原PK后完整真实回执仍可读。旧第5/6轮失败及前置第7轮各保原范围。
+
+### 全部80项最终集成：合入RCA77及用量引用修复
+
+- 独立final工作树合入1162d89（含77完整FE、共享终态交付修复、已结算具体用量FK修复及真实MySQL8证明）；34个专属RCA模块逐字保持上游，保留75/79/80等所有专用分支。空迁移节点接通77历史，实际80项Prompt/1035条RBAC生成。
+- 首15完整后端文件228通过/2失败；两失败是旧authority测试尚未计入77的三列无锁任务标识前检。仅补精确列名、PK条件和无锁断言后，原DocChange/currentSuper两完整文件50项通过；不相加冒称230项同轮绿。12个Node文件170项通过。
+- 全部80项仍未验收完成：78/76待合并，全局nullable统计、混合目录的RCA无正文技术视图、76药师Scope入口及行政配置当前身份检查需继续实证；随后统一后端、浏览器、规范构建、MySQL与主工作树准入。

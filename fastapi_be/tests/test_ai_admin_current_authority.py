@@ -14,10 +14,12 @@ def test_audit_readers_recheck_stale_super_before_any_run_read(db_session, seed_
     db_session.execute(text("UPDATE hoimsystem_users SET user_role='pharmacist' WHERE user_id=:pk"), {"pk": actor.user_id})
     assert actor.user_role == "super_admin"
     sql = []
+    columns = []
 
     def observe(state):
         if state.is_select:
             sql.append(str(state.statement.compile(dialect=mysql.dialect())))
+            columns.append(tuple((column.table.name, column.key) for column in state.statement.selected_columns))
 
     event.listen(db_session, "do_orm_execute", observe)
     try:
@@ -30,7 +32,15 @@ def test_audit_readers_recheck_stale_super_before_any_run_read(db_session, seed_
     finally:
         event.remove(db_session, "do_orm_execute", observe)
         db_session.rollback()
-    # All five mixed-directory gates precede the actor; none reads Run/Source text.
+    # Mixed directories take Billing, Satisfaction and Inventory before actor;
+    # neither Gate carries private Run or Source text.
+    if reader == "trace":
+        assert len(sql) == 8
+        assert columns[0] == tuple(("hoimsystem_ai_rca_evidence_run_artifact", name) for name in ("run_id", "case_id", "requested_by"))
+        assert "WHERE hoimsystem_ai_rca_evidence_run_artifact.run_id =" in sql[0]
+        assert "FOR UPDATE" not in sql[0] and "LOCK IN SHARE MODE" not in sql[0]
+        sql = sql[1:]
+    assert not {"input_json", "result_json", "evidence_json", "context_metadata_json", "source_json", "binding_json", "case_json"}.intersection(name for row in columns for _, name in row)
     assert len(sql) == 7
     assert "hoimsystem_ai_charge_write_gate" in sql[0] and sql[0].rstrip().endswith("FOR UPDATE")
     assert "hoimsystem_ai_satisfaction_write_gate" in sql[1] and sql[1].rstrip().endswith("FOR UPDATE")

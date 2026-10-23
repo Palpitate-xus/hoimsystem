@@ -10,6 +10,7 @@ const PUBLIC_CONTRACTS = Object.freeze([
   "src/api/ai/chargeReconciliationUiFixed.json",
   "src/api/ai/codingFixedPolicy.json",
   "src/api/ai/documentChangeFixed.json",
+  "src/api/ai/rcaEvidenceFixed.json",
   "src/api/ai/documentExtractionFixed.json",
   "src/api/ai/drugLabelSourcePolicy.json",
   "src/api/ai/drugLabelTaskFixed.json",

@@ -51,7 +51,12 @@ def get_event_list(current_user: User = Depends(require_roles(*ADMIN_ROLES)), db
 
 @router.post("/adverseEvent/updateStatus")
 def update_event_status(req: dict, current_user: User = Depends(require_roles(*ADMIN_ROLES)), db: Session = Depends(get_db)):
-    ev = db.query(AdverseEvent).filter(AdverseEvent.event_id == req.get("event_id")).first()
+    from app.ai.rca_evidence_write_guard import current_rows, lock_actor_event
+
+    current_user, identity = lock_actor_event(db, current_user, req.get("event_id"), allowed_roles=ADMIN_ROLES)
+    if identity is None:
+        return {"code": 500, "msg": "记录不存在"}
+    ev = current_rows(db.query(AdverseEvent).filter_by(event_id=identity.event_id)).one_or_none()
     if not ev:
         return {"code": 500, "msg": "记录不存在"}
     status = req.get("status")

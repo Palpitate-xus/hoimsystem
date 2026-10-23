@@ -58,10 +58,15 @@ def list_rca(event_id: int | None = None, pdca_cycle: str | None = None, current
 
 @router.post("/rca/create")
 def create_rca(req: dict, current_user: User = Depends(require_roles(*QM_ROLES)), db: Session = Depends(get_db)):
-    event = db.query(AdverseEvent).filter(AdverseEvent.event_id == req.get("event_id")).first()
+    from app.ai.rca_evidence_write_guard import current_rows, lock_actor_event
+
+    current_user, identity = lock_actor_event(db, current_user, req.get("event_id"), allowed_roles=QM_ROLES)
+    if identity is None:
+        return {"code": 500, "msg": "关联不良事件不存在"}
+    event = current_rows(db.query(AdverseEvent).filter_by(event_id=identity.event_id)).one_or_none()
     if not event:
         return {"code": 500, "msg": "关联不良事件不存在"}
-    existing = db.query(AdverseEventRca).filter(AdverseEventRca.event_id == event.event_id).first()
+    existing = current_rows(db.query(AdverseEventRca).filter_by(event_id=event.event_id)).first()
     if existing:
         return {"code": 500, "msg": "该事件已有 RCA 分析记录"}
     if not (req.get("root_cause") or "").strip() or not (req.get("corrective_actions") or "").strip():
@@ -79,15 +84,23 @@ def create_rca(req: dict, current_user: User = Depends(require_roles(*QM_ROLES))
         create_time=datetime.datetime.now(),
     )
     db.add(item)
+    db.flush()
+    identifier = item.rca_id
     db.commit()
-    return {"code": 200, "msg": "success", "data": {"rca_id": item.rca_id}}
+    return {"code": 200, "msg": "success", "data": {"rca_id": identifier}}
 
 
 @router.post("/rca/advance")
 def advance_rca(req: dict, current_user: User = Depends(require_roles(*QM_ROLES)), db: Session = Depends(get_db)):
     """PDCA 推进：P→D→C→A。A 阶段必须填效果评价与完成日期。"""
-    item = db.query(AdverseEventRca).filter(AdverseEventRca.rca_id == req.get("rca_id")).first()
-    if not item:
+    from app.ai.rca_evidence_write_guard import current_actor, current_rows, locate_rca_event, lock_event_identity
+
+    current_user = current_actor(db, current_user, QM_ROLES)
+    locator = locate_rca_event(db, req.get("rca_id"))
+    if locator is None or lock_event_identity(db, locator[1]) is None:
+        return {"code": 500, "msg": "RCA 记录不存在"}
+    item = current_rows(db.query(AdverseEventRca).filter_by(rca_id=locator[0])).one_or_none()
+    if item is None or item.event_id != locator[1]:
         return {"code": 500, "msg": "RCA 记录不存在"}
     target = (req.get("pdca_cycle") or "").strip().upper()
     flow = {"P": "D", "D": "C", "C": "A"}

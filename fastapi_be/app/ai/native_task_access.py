@@ -73,8 +73,18 @@ def lock_directory_gates(db):
 def guard_private_task_read(db, user, run_id):
     from app.ai.document_change_runtime import guard_change_run_id
     from app.ai.drug_label_runtime import guard_drug_label_run_id
+    from app.ai.rca_evidence_dispatch import guard_rca_task
+    from app.ai.rca_evidence_storage import locate_artifact
     from app.ai.satisfaction_storage import guard_satisfaction_run_id
 
+    # This domain has no global Gate. Only opaque immutable identities precede
+    # its current Actor -> Event -> original purposes -> Task body authority.
+    # Probe only this domain before the existing directory Gates. Calling its
+    # all-domain classifier here would query legacy document anchors before
+    # Billing -> Satisfaction -> Inventory on unrelated tasks.
+    if locate_artifact(db, run_id) is not None:
+        guard_rca_task(db, user, run_id)
+        return
     # Locators identify a native domain; its complete authority proof follows
     # before loading Task TEXT. Gates remain in the same mixed-directory order.
     lock_directory_gates(db)
@@ -82,6 +92,9 @@ def guard_private_task_read(db, user, run_id):
 
     identity = locate_native_task(db, run_id)  # Reject contradictory cross-domain anchors.
     if identity is not None:
+        if identity.domain == "rca":
+            guard_rca_task(db, user, run_id)
+            return
         # An actual immutable FK selects exactly one complete domain guard.
         # Only a task with no Artifact needs the orphan JSON-marker probes.
         if identity.domain == "deidentification":
@@ -124,6 +137,8 @@ def guard_private_task_read(db, user, run_id):
             from fastapi import HTTPException
 
             raise HTTPException(409, "原生任务的实际域锚点已改变，未降级读取")
+        return
+    if guard_rca_task(db, user, run_id):
         return
     from app.ai.deidentification_shared import guard_task as guard_deidentification_task
     from app.ai.deidentification_shared import is_deidentification_task

@@ -321,9 +321,17 @@ def test_admin_reader_captures_loaded_request_epoch_before_orm_refresh(db_sessio
     from app.ai.satisfaction_models import AISatisfactionWriteGate
 
     tables = [AIChargeWriteGate.__tablename__, AISatisfactionWriteGate.__tablename__, AIInventoryWriteGate.__tablename__, AIResearchWriteGate.__tablename__, AIOperationsWriteGate.__tablename__, AITrainingWriteGate.__tablename__, "hoimsystem_users"]
+    no_task_text(statements)
+    if reader == "trace":
+        assert len(statements) == len(tables) + 1
+        opaque = statements[0]
+        expected = ["hoimsystem_ai_rca_evidence_run_artifact." + field for field in ("run_id", "case_id", "requested_by")]
+        assert [part.strip() for part in opaque.split("FROM", 1)[0].removeprefix("SELECT").strip().split(",")] == expected
+        assert "WHERE hoimsystem_ai_rca_evidence_run_artifact.run_id =" in opaque
+        assert "FOR UPDATE" not in opaque and "LOCK IN SHARE MODE" not in opaque
+        statements = statements[1:]
     assert len(statements) == len(tables)
     assert all(("FROM " + table) in statement for table, statement in zip(tables, statements, strict=True))
-    no_task_text(statements)
 
 
 MARKERS = [

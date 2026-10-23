@@ -42,8 +42,8 @@ print(json.dumps({'features':len(p['features']),'version':p['catalog_version'],'
     value = subprocess.run([sys.executable, "-I", "-S", "-c", script], cwd=ROOT, capture_output=True, text=True, check=True)
     assert json.loads(value.stdout) == {
         "features": 80,
-        "version": "2026.10.23.29",
-        "overrides": ["charge_reconciliation", "clinical_training", "deidentification", "drg_evidence_review", "drug_label_extraction", "feedback_analysis", "guideline_change_review", "guideline_ingestion", "operations_support", "research_cohort"],
+        "version": "2026.10.23.30",
+        "overrides": ["charge_reconciliation", "clinical_training", "deidentification", "drg_evidence_review", "drug_label_extraction", "feedback_analysis", "guideline_change_review", "guideline_ingestion", "incident_rca", "operations_support", "research_cohort"],
     }
 
 
@@ -62,7 +62,9 @@ def test_additive_merge_has_one_head_and_preserves_both_parent_histories():
     assert set(scripts.get_revision("20261021_native_shared_merge").down_revision) == {"20261021_charge_sat_merge", "20261021_drug_label_runs"}
     chain = list(scripts.walk_revisions())
     assert len(chain) == len({row.revision for row in chain})
-    assert {"20261021_charge_sat_merge", "20261021_drug_label_runs", "20261021_doc_extraction_runs", "20261021_charge_runs", "20261021_sat_usage_receipt"} <= {row.revision for row in chain}
+    assert {"20261021_native_shared_merge", "20261021_charge_sat_merge", "20261021_drug_label_runs", "20261021_doc_extraction_runs", "20261021_charge_runs", "20261021_sat_usage_receipt"} <= {
+        row.revision for row in chain
+    }
 
 
 @pytest.fixture

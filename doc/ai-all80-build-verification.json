@@ -1,8 +1,8 @@
 {
   "schema_version": "ai_all80_build_verification_v1",
-  "recorded_at_utc": "2026-10-23T16:27:03.853035+00:00",
+  "recorded_at_utc": "2026-10-23T16:47:54.721586+00:00",
   "base_commit": "66fdb2c",
-  "scope": "All80 staging public-build optimization only, not final Main admission or full default backend/whole-AI-browser/clinical validation. Complete goal remains active. No push/deploy/hospital DB/model calls.",
+  "scope": "Current complete browser file acceptance and canonical build passed; original Main admission/39production smoke still pending. Distinct closed whole-file acceptance, not one fully green3908 invocation. No deployment or clinical validation.",
   "behavior": [
     "56 explicitly reviewed75/76/79/80 public API/UI modules use a second independently bounded exact-text record; existing186-source base bindings and all per-record256KiB limits remain. Both complete source manifests remain checked in and verified before transformation.",
     "Native API and actually repeated native Vue modules are shared across lazy Source/Task/history/governance views. Decoders/readers share their exact module; no global request or budget limits are raised.",
@@ -85612,10 +85612,7 @@
     }
   ],
   "pending": [
-    "Finish accepted eight whole-file backend groups and verify exact14075 identities once, preserving replaced RED/infrastructure attempts and declared one-test source bridge.",
-    "Finish full fourth browser and verify complete238-file3908 identity coverage with entire two-file13case replacement, explicit RED original, exact unchanged780 production/dist and declared two-test source bridge.",
-    "After genuine gates, fast-forward unchanged user branch preserving all requested-identity commits, copy exact accepted dist, verify actual original Main39 production cases, and commit final evidence. No push/deploy/restart/hospital DB.",
-    "Actual credentials/models, operational rollout and independent clinical validation remain explicit external prerequisites; implementation/testing does not automatically enable real clinical use."
+    "Guarded fast-forward to original clean user branch, exact validated dist copy, actual Main39 production cases and final evidence commit."
   ],
   "phase_html85_public_static_transport": {
     "base": "967933d; current global technical UI candidate is separately pending its own commit, all inputs bound below",
@@ -149186,5 +149183,119 @@
       "interpretation": "A genuine complete RED invocation3889P19F, no skip/retry/flaky. All19 old waiting/bootstrap/legacy-RCA expectations already identified and updated. Never relabeled green or counted in current acceptance."
     },
     "canonical_780_unchanged": true
-  }
+  },
+  "phase_all80_complete_current_engineering_acceptance": {
+    "verification_owner": {
+      "path": "doc/ai-final-integration-verification.json",
+      "sha256": "14a40deaf7409b66b62fc159506f5a0e679c1c7456508f3e301f78450cef2b11",
+      "phase": "phase_all80_complete_current_engineering_acceptance"
+    },
+    "browser": {
+      "files": 238,
+      "cases": 3908,
+      "actual_counts": {
+        "passed": 3908,
+        "failed": 0,
+        "skipped": 0
+      },
+      "categories": {
+        "production_mock": 253,
+        "isolated_mock": 3634,
+        "real_synthetic_http": 21
+      },
+      "scope": "Complete current238-file3908-case browser acceptance assembled by whole spec files: the fresh full fourth execution supplies236 unchanged files, while two entire infection integration files13 cases are replaced by one fresh passing execution after per-file shared-harness test-only changes. Every accepted identity appears exactly once. This is NOT one3908-pass invocation, NOT a zero-failure claim for the fourth invocation, and no original passing case inside the two replaced files is counted. Original full fourth failures remain raw independent evidence. All production780 inputs and built dist are identical; exactly two test files differ. No hospital backend, remote model, real credentials or clinical validation.",
+      "full_fourth_genuine_result": {
+        "path": "/tmp/hoim-all80-full-browser-fourth-verification.json",
+        "sha256": "4a882300fb3f665a6745f1350cef8e0c428ab682fe20d54dc3c32c364eaeefd2",
+        "exit_code": 1,
+        "stats": {
+          "startTime": "2026-10-23T15:50:01.994Z",
+          "duration": 3073210.284,
+          "expected": 3904,
+          "skipped": 0,
+          "unexpected": 4,
+          "flaky": 0
+        },
+        "genuine_failed_cases": [
+          {
+            "file": "ai-infection-cluster-management.spec.js",
+            "title": "current Super management lazily opens full finite Source governance and clears body on role loss"
+          },
+          {
+            "file": "ai-infection-cluster-management.spec.js",
+            "title": "ordinary admin has no Source governance tab or private registry request"
+          },
+          {
+            "file": "ai-infection-cluster-management.spec.js",
+            "title": "native 78 configuration and Prompt buttons route to real local Profile governance instead of fake Provider/LLM edits"
+          },
+          {
+            "file": "ai-infection-cluster-parent.spec.js",
+            "title": "real shared Parent uses actual feature/Scenario and local Task with no generic operational/model entry"
+          }
+        ]
+      },
+      "two_whole_file_replacement": {
+        "path": "/tmp/hoim-all80-infection-browser-fifth-verification.json",
+        "sha256": "dca5864eec05210a177ab1f52a8115fd3d858ef034f62448a4cdd2f5047fc0f7",
+        "files": [
+          "ai-infection-cluster-management.spec.js",
+          "ai-infection-cluster-parent.spec.js"
+        ],
+        "case_count": 13,
+        "stats": {
+          "startTime": "2026-10-23T16:23:51.162Z",
+          "duration": 51288.854,
+          "expected": 13,
+          "skipped": 0,
+          "unexpected": 0,
+          "flaky": 0
+        }
+      },
+      "test_only_source_bridge": {
+        "vue3-new-ui/e2e/ai-infection-cluster-management.spec.js": {
+          "before": {
+            "bytes": 3023,
+            "sha256": "92961ebf2f925653853e23ebb4e1859df37ad34fb14ea42f2e7f9b65964a65dc"
+          },
+          "after": {
+            "bytes": 3065,
+            "sha256": "f7636d954acbf6c0c81494185778f40270fb3b9193e8b899d153e425baf1d0ea"
+          }
+        },
+        "vue3-new-ui/e2e/ai-infection-cluster-parent.spec.js": {
+          "before": {
+            "bytes": 3548,
+            "sha256": "d4742dac61736ef59d2e417aa3f843cfe93048776d2d14e7826584ae4bbc7fff"
+          },
+          "after": {
+            "bytes": 3590,
+            "sha256": "b442bcbab1d2ec0acdbd19fe60ec2424d083d38e6478ca39829ebdb1a368c74e"
+          }
+        }
+      }
+    },
+    "node": {
+      "passed": 226,
+      "whole_test_files": 18,
+      "seconds": 7.117,
+      "all178_inputs_current": true
+    },
+    "canonical": {
+      "production_inputs": 780,
+      "seconds": 40.114,
+      "original_limits": "6,000,000 total JS /7,000,000 all assets /700,000 largest JS; original256KiB source512KiB packed code bounds",
+      "actual_bytes": {
+        "js": 5957689,
+        "assets": 6985948,
+        "largest_js": 646975
+      },
+      "source_and_actual_dist_current": true
+    }
+  },
+  "external_activation_prerequisites": [
+    "Actual deployment model credentials and available verified model services",
+    "Independent real-data quality and clinical applicability validation, controlled rollout and operational monitoring; no automatic clinical enablement",
+    "Publishing/pushing/deployment/service restart and real hospital migrations were not performed by this authorized local implementation"
+  ]
 }

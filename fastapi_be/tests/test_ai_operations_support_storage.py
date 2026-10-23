@@ -4,9 +4,6 @@ import datetime as dt
 import json
 
 import pytest
-from fastapi import HTTPException
-from sqlalchemy import event, text, update
-
 from app.ai import operations_support_cases as cases
 from app.ai import operations_support_contract as c
 from app.ai import operations_support_registry as registry
@@ -17,6 +14,8 @@ from app.ai.operations_support_models import AIOperationsOriginal
 from app.ai.operations_support_run_models import AIOperationsRunArtifact
 from app.ai.operations_support_task_prompt import TASK_PROMPT
 from app.models import User
+from fastapi import HTTPException
+from sqlalchemy import event, text, update
 from tests.test_ai_operations_support_configuration import actors as actors
 from tests.test_ai_operations_support_configuration import configured as configured
 from tests.test_ai_operations_support_configuration import source as source
@@ -76,7 +75,7 @@ def test_stage_actual_original_25_fields_full_frames_raw3_and_specific_audit_nev
 
 @pytest.mark.parametrize("microseconds", [0, 123456, 654321, 999999])
 def test_new_artifact_utc6_and_explicit_legacy_seconds_are_both_exact(configured, monkeypatch, microseconds):
-    clock = dt.datetime(2026, 10, 22, 10, 0, 0, microseconds)
+    clock = (cases.case_header(configured[0][0], configured[0][-1], configured[3]["case_id"])["assembled_at"] + dt.timedelta(seconds=1)).replace(microsecond=microseconds)
     monkeypatch.setattr(registry, "utcnow", lambda: clock)
     identifier = stage(configured)
     db = configured[0][0]

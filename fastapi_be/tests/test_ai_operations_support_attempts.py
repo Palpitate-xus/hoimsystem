@@ -4,15 +4,14 @@ import datetime as dt
 import uuid
 
 import pytest
-from fastapi import HTTPException
-from sqlalchemy import text
-
 from app.ai import operations_support_attempts as attempts
 from app.ai import operations_support_registry as registry
 from app.ai import operations_support_storage as storage
 from app.ai.models import AIAuditEvent, AIRun
 from app.ai.operations_support_models import AIOperationsOriginal
 from app.ai.operations_support_run_models import AIOperationsRunArtifact
+from fastapi import HTTPException
+from sqlalchemy import text
 from tests.test_ai_operations_support_configuration import actors as actors
 from tests.test_ai_operations_support_configuration import configured as configured
 from tests.test_ai_operations_support_configuration import source as source
@@ -97,7 +96,7 @@ def test_utc6_claim_dispatch_audit_and_legacy_start_seconds_are_exact(queued, mo
     configured, identifier = queued
     db = configured[0][0]
     admin = configured[0][-1]
-    when = dt.datetime(2026, 10, 22, 11, 12, 13, 654321)
+    when = (db.get(AIOperationsRunArtifact, identifier).recorded_at + dt.timedelta(seconds=1)).replace(microsecond=654321)
     monkeypatch.setattr(registry, "utcnow", lambda: when)
     claim = attempts.stage_claim(db, admin, identifier)
     if phase == "dispatch":

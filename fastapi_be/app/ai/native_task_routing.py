@@ -121,14 +121,22 @@ def locate_native_task(db, value):
     return identity
 
 
-def queue_identity_condition():
-    """Retain ambiguous anchors without letting them monopolize every poll.
+def queue_identity_condition(db):
+    """Retain ambiguous/orphan anchors without letting them block every poll.
 
     This is only a technical SQL qualification, not Source authorization or a
     claim that an interrupted/corrupt task incurred no paid model usage.
     """
-    from sqlalchemy import case, exists
+    from sqlalchemy import and_, case, exists, func, or_
 
     from app.ai.models import AIRun
+    from app.ai.rca_evidence_dispatch import marker_predicate as rca_marker
+    from app.ai.research_variables_task_routing import marker_predicate as variable_marker
 
-    return sum(case((exists().where(model.run_id == AIRun.run_id).correlate(AIRun), 1), else_=0) for _, model, _ in _domains()) <= 1
+    anchors = sum(case((exists().where(model.run_id == AIRun.run_id).correlate(AIRun), 1), else_=0) for _, model, _ in _domains())
+    # The actual unique anchor retains priority even if a mutable marker now
+    # names another domain. No anchor plus a native76/77 marker is never a
+    # generic candidate: keep it intact for technical inspection, without
+    # inventing a terminal state, usage receipt or repeated maintenance cost.
+    no_orphan = and_(~func.coalesce(variable_marker(db), False), ~func.coalesce(rca_marker(db), False))
+    return and_(anchors <= 1, or_(anchors == 1, no_orphan))

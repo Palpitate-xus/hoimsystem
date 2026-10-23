@@ -1049,7 +1049,7 @@ def claim_next_run(db: Session):
     for _ in range(128):
         candidate = (
             db.query(AIRun.run_id, AIRun.feature_key)
-            .filter(AIRun.status == "queued", ~AIRun.run_id.in_(skipped), queue_candidate_condition(db), deidentification_queue_condition(db), operations_condition(db), training_condition(db), queue_identity_condition())
+            .filter(AIRun.status == "queued", ~AIRun.run_id.in_(skipped), queue_candidate_condition(db), deidentification_queue_condition(db), operations_condition(db), training_condition(db), queue_identity_condition(db))
             .order_by(AIRun.create_time, AIRun.run_id)
             .first()
         )

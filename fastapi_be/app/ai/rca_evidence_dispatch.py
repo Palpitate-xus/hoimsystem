@@ -19,7 +19,8 @@ INPUT_PATHS = (
 RESULT_PATHS = ("$.rca_evidence_draft", "$.rca_evidence_binding")
 
 
-def marker_statement(db, identifier):
+def marker_predicate(db):
+    """The same body-free marker expression qualifies queue candidates."""
     def safe(column):
         return case((func.json_valid(column) == 1, column), else_="{}")
 
@@ -40,7 +41,11 @@ def marker_statement(db, identifier):
         extract(AIRun.result_json, "$.schema_version") == "rca_evidence_result_ref_v1",
         extract(AIRun.evidence_json, "$[0].kind") == "rca_evidence_case",
     )
-    return select(case((marker, True), else_=False)).where(AIRun.run_id == identifier)
+    return case((marker, True), else_=False)
+
+
+def marker_statement(db, identifier):
+    return select(marker_predicate(db)).where(AIRun.run_id == identifier)
 
 
 def is_rca_task(db, value):

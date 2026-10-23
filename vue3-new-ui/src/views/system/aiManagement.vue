@@ -126,13 +126,7 @@
         </el-tab-pane>
         <el-tab-pane label="任务与反馈" name="runs" lazy><ai-run-history :features="features" :active="tab === 'runs'" /></el-tab-pane>
         <el-tab-pane label="反馈脱敏审核" name="review_excerpts" lazy><ai-review-curation :active="tab === 'review_excerpts'" /></el-tab-pane>
-        <el-tab-pane label="调用统计" name="usage">
-          <el-table :data="usage" empty-text="暂无调用记录">
-            <el-table-column label="功能"><template #default="{ row }">{{ featureName(row.feature_key) }}</template></el-table-column>
-            <el-table-column prop="status" label="执行状态" /><el-table-column prop="count" label="次数" />
-            <el-table-column prop="input_tokens" label="输入Token" /><el-table-column prop="output_tokens" label="输出Token" />
-          </el-table>
-        </el-tab-pane>
+        <el-tab-pane label="调用统计" name="usage" lazy><ai-usage-summary :features="features" :active="tab === 'usage'" /></el-tab-pane>
       </el-tabs>
     </el-card>
 
@@ -374,6 +368,7 @@ const ClinicalTrainingSources=defineAsyncComponent(()=>import("@/components/ai/C
 const ResearchCohortSources=defineAsyncComponent(()=>import("@/components/ai/ResearchCohortSources.vue"));
 const ResearchVariableSources=defineAsyncComponent(()=>import("@/components/ai/ResearchVariableSources.vue"));
 const TaskTechnicalDirectory=defineAsyncComponent(()=>import("@/components/ai/TaskTechnicalDirectory.vue"));
+const AiUsageSummary=defineAsyncComponent(()=>import("@/components/ai/UsageSummary.vue"));
 const AiSurgerySources=defineAsyncComponent(()=>import("@/components/AISurgerySources.vue"));
 const AiSurgeryScenarios=defineAsyncComponent(()=>import("@/components/AISurgeryScenarios.vue"));
 const AiSurgeryProviderCheck=defineAsyncComponent(()=>import("@/components/AISurgeryProviderCheck.vue"));
@@ -385,7 +380,7 @@ const AiRiskRuleManagement = defineAsyncComponent(() => import("@/views/system/A
 import {
   activateAIPrompt, createAIKnowledge, createAIPatientGrant, createAIPrompt,
   getAIAdminFeatures, getAIAudit, getAIKnowledge, getAIKnowledgeDetail, getAIPatientGrants, getAIPathwaySources, importAIPathway,
-  getAIPrompts, getAIProviders, getAIUsage, reviewAIKnowledge, revokeAIPatientGrant,
+  getAIPrompts, getAIProviders, reviewAIKnowledge, revokeAIPatientGrant,
   saveAIFeature, saveAIProvider, checkAISpeechProvider, checkAIEcgProvider, checkAIImageProvider,
 } from "@/api/ai";
 
@@ -396,7 +391,7 @@ const pathwaySourceStates = { current: "与当前原路径一致", changed: "原
 const documentSourceStates = { current: "当前原文、摘录及审核版本一致", original_not_current: "原文或原审核版本失效", candidate_not_approved: "条款候选审核失效", publication_revoked: "原文发布件已撤销", knowledge_not_published: "知识版本已停用", knowledge_changed: "知识内容或元数据已改变", invalid_binding: "完整原文证据链核对失败" };
 const roles = { super_admin: "超级管理员", admin: "管理员", doctor: "医生", director: "科室主任", pharmacist: "药师", nurse: "护士", patient: "患者", guide: "导诊员", lab_technician: "检验技师", cashier: "收费员" };
 const loading = ref(false), saving = ref(false), tab = ref("features");
-const features = ref([]), providers = ref([]), knowledge = ref([]), grants = ref([]), auditEvents = ref([]), usage = ref([]);
+const features = ref([]), providers = ref([]), knowledge = ref([]), grants = ref([]), auditEvents = ref([]);
 const search = ref(""), category = ref(""), setupFilter = ref("all"), page = ref(1);
 const summary = computed(() => [
   { label: "规划能力", value: features.value.length },
@@ -518,8 +513,8 @@ const grantDialog = ref(false), grantForm = ref({});
 async function refresh() {
   loading.value = true;
   try {
-    const results = await Promise.all([getAIAdminFeatures(), getAIProviders(), getAIKnowledge(), getAIPatientGrants(), getAIAudit(), getAIUsage()]);
-    [features.value, providers.value, knowledge.value, grants.value, auditEvents.value, usage.value] = results.map(item => item.data || []);
+    const results = await Promise.all([getAIAdminFeatures(), getAIProviders(), getAIKnowledge(), getAIPatientGrants(), getAIAudit()]);
+    [features.value, providers.value, knowledge.value, grants.value, auditEvents.value] = results.map(item => item.data || []);
     if (selectedFeature.value) selectedFeature.value = features.value.find(item => item.key === selectedFeature.value.key);
   } finally { loading.value = false; }
 }

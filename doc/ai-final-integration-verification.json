@@ -1,8 +1,8 @@
 {
   "schema_version": "ai_final_integration_verification_v1",
-  "recorded_at_utc": "2026-10-23T11:32:24.739674+00:00",
+  "recorded_at_utc": "2026-10-23T11:39:19.565357+00:00",
   "status": "staging_integration_in_progress_not_main_admission",
-  "current_phase": "all80_exact_nullable_usage_main_wired_frontend_acceptance_next",
+  "current_phase": "all80_nullable_usage_management_wired_pharmacist_reachability_next",
   "goal_scope": "All80 AI capabilities, dedicated Prompts and complete current super_admin management remain in progress; no goal completion, model clinical validation, deployment or push is claimed.",
   "parents": [
     "451111e",
@@ -13390,6 +13390,20 @@
       "sha256": "a67d4f3e4060a4c81a1f9f648deab93de3018a9e01f773fea7823d4926bf480b",
       "encoding": "gzip-base64",
       "data": "H4sIAAAAAAAC/41V23LbNhB9z1fs6FkSLyJ1y/RBdTVtp06bkd2HtuPBgMBSQkICDADaVjP59y5I3Zo6Vl8oiHt2sZezh5/fAAzwWXkmjMTBErJh96bijUPJHAqjpaP3STqeL+I8S5Npms/TdDbvgMLUNdeSAH/RX3rh0XkXhSfjinFZK81ax7fIaq70uNkPhteArqWYdv869kok22p3BeK5+8iksii8uXYbe7LKI+Ot3xk6XUM31jwqiZaaqp1yHrX4tovmXj0iU9rj1tLZ6GtQfG6o5yi/iTMN9pHcIaFSVR7tBX7UHE/Nvvdyey2UGTdVu1X6vzBtloKLHR5LOyE+nU6jgjv0WDffRb5uop1R9YhX1TwedXMduR23KEf9hWevD61W/rmuXvfqUGOCDcjvoePetuW24+bnPpQ01OjHULxm3IdEfLDGh5v6QMxbrl1jrGcN1i/ijPiI/iULamoNstZW7kT44PCpInIsoyha1lgTl5aH4l62daYHen7pqnCmtQJZaRH/xjCosIWDV3tRcMpQy1GprPOjPsCoDzD+4Ew/va8Ck2uaT0PouMTZtEymkzhOco75PEaZCslnc1zM8ylP4ilO8niWL+YFZhlfxLGYFlMuZRnPRCL/HZ3yJZa32geNoFhfGx0TO6632EnEw4XVMed50VXrbYudpTLbq8UffvraO9qPg9vR/7JQ5NNc8onIi0m6wAJLuShFFiezIkmnGcdJmk2yrEA5EciTJE5EXGAhZb4osrwsD4X2asQqGv157IPzXkCXBBCtQGmIx3Hujsb1ZvPbZgmhD2AsnMQGtPFQUtfkEv7vhp95f2bwR9wzWjoV8hrQoN0OaD+pt25kdLWHzd0qjbM50Fq8BdJyix7IB2pOaqB4BRof0UIQN1od8AYshsB95eSlrNE1an++5We9w6CFEi7MICoMUwF8Fth4eL+6/ym6Xf36Y3R7w1a3t9H9n0MggfE79ErAD6v71feruzX7fXMb3a1vNut79sv6D6CS4VQcvF+/g1DFYQyC9jokcE+JPu0MdVTjUyRaa0MC9BEijoRchnCUKLhQ3yGctHsIQfnPw6DMOkpB33u4EOIuo7OYQi+jUBvZErPHcHO4HZ+58KDbqgqMhnf0pYOOtEBy6mj0ioSD2n3M9q5tqNNcurfEBCjJDySWvK18RIwvrHlyIf2Kq3o8ePPlH/JcgpqlBwAA"
+    },
+    {
+      "path": "/tmp/hoim-ai-all80-management-20261023/vue3-new-ui/e2e/fixtures/task-technical-directory-main.json",
+      "bytes": 77299,
+      "sha256": "3f06481fe23ce2a15bfc3a90eb8c05490f6133cbaabc6ea99a70d95ed265d65a",
+      "encoding": "gzip-base64",
+      "data": "H4sIAAAAAAAC/+2dW4tkR3KA3/UrinlWzOQl8jb75AeDMTa20YAfzFJEZkaqy+qp6q2qnt2REOziB+HbCsN67QXjXQzGYLC8T2bxYv8azUj6F45T3V3dmunRjLRHWkuKZujpqnPJPHnyi0tmROY7ry0Wd3bthB/S8hFvd6vN+s79xZ03TzeVTpd72r213HM7Wa+afKS2P5f/HtJqvTyj9hbvd8tH9s7r0z3q9Hndl43O9udbXp4w9elO5LhF9hQH+uRqCdnkzuhqKoNywWpryq7mT99ltznfNl6OLfPbvNydkAtxupsZnOKw0RtjA7HcjLtrnVLmkkMka6SsYFIouTIiFWNarJF6HyY12y9K2bXNGU+3e3AiBSwuHmvxh/JY937/Tx8szja71X71iBd9teW232wfLxrtePf6YrXufCb14/V+8cb52eL7q/3JYr1J8V5Ki4s6L87Ot3ID3n1nsdmu3lyt5c5ju3mb11cn7LfUeLfY8tSOaPzdxe/+QKqwkEpKsRu5wBvYrd7mfqjS4ozePJz+vXPe7eXLzfr08aI+XuxPVrvFZXPLxfIHb+8u3ni83p/wftUWnfZ0OPl1qeLi4abz6b2Tze5stZcqUZM67O5etMflu5QW+TP5uFi8c/h9OLA/mdrpHp2t7pH86w+ljaZeAce2OdzicLZUUD7eP14uXx1rvazTEesvD717vGjLu7PNesefvq5JbeUbZ8zr118+3L05VWZ3fqj7nRtHpkc91v7i550bf39WF6fVs738skffuHh7vl6uDr3ZNSwdvYdWUwKMNKAWShBC8N2ZlKLPz149mA5EvMVTE9yRrrel6T3vlt+jF527poeHDvrkb379yc/+5enf//Lp337wyT988NF//OTZK3Z7uWJ6dVPzn3N/9viapq687Juptx1e8XdvP2M19erV/vFyuuOh8PP12XbziNcvuOWnn2t9fnr6god5SHtp/d3y8rq2WU8I7G+/6Lke88zxqUpS1e3FC7nlBscTtvxodfmybz/t4dn+Rocwz50g1/P35cig0x0/c7Rt5eF4uV9dvCdnXARrwPkH1t538X5Id4O3Cc0t72u7v7rutkZbrVe7k886gblPYlLa8Xy9v6Xi5zsRGNODrYb05/1ld19v9pffPd9HVuuzc6nTRkTv7vZCN+f75065cca7x79vdK47+41Imukd3vhu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"
+    },
+    {
+      "path": "/tmp/hoim-ai-all80-management-20261023/vue3-new-ui/e2e/fixtures/usage-summary-main.json",
+      "bytes": 16216,
+      "sha256": "f472bac5ca1fd7b7c9cffae2843d0b987f6f9494b03f072de76bf1d8c4edc0b4",
+      "encoding": "gzip-base64",
+      "data": "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"
     }
   ],
   "operations_filter_fix": {
@@ -16324,8 +16338,8 @@
   },
   "source_manifest_limits": "Earlier targeted Python collectors bind .py/.txt/.ini/.toml and four maps only. The current78 joint21-module collector binds all1490 tracked/untracked non-secret backend/test/config/fixture files plus four maps, including all four JSON fixtures. Final full verification must retain this all-input coverage and independently classify optional skips.",
   "required_remaining_work": [
-    "Complete exact nullable usage UI/browser acceptance,76 pharmacist source reachability, specialized governance inventory, final all80/default/backend/classified-browser/MySQL/migration/Main admission. Current internal90, Main/shared271 and private33 proofs remain scoped, not a full release acceptance.",
-    "Finish nullable usage frontend/read-only current Sup acceptance; current actual12-adapter service is wired to Main and legacy non-receipt counts explicitly remain unverified. Audit whether future generic non-native executions need their own exact usage-event persistence rather than manufacturing certification from legacy counters.",
+    "Nullable usage UI/Main now wired with actual12-domain90, shared271, private33, Node226, isolated28 and production38 scoped proofs. Continue76 pharmacist scope/dictionary/batch reachability, specialized governance inventory, damaged native queue audit and final all80/full default/classified browser/MySQL/migration/Main admission.",
+    "Audit future generic non-native execution exact usage-event persistence. Current summary classifies all80 records; no legacy physical counter is treated as a certified receipt.",
     "Extend final actual12-native-domain management/receipt matrix; current global directory covers all12 opaque tables and has actual76/77 no-Source Sup controls,70 backend and13 private MySQL checks, current14 isolated/36 production cases. Do not infer Source permission or verified usage from technical identity.",
     "Verify declared76 pharmacist reachability for scope/batch governance and close any real UI/API gap",
     "Finish specialized governance endpoint inventory and any actual missing current-authority paths; all23 generic administration writes now close role/epoch/username, current Config/Provider, post-await and post-SQL atomicity with private MySQL proof",
@@ -92046,6 +92060,80 @@
       "path": "vue3-new-ui/e2e/fixtures/usage-summary-main.json",
       "bytes": 16216,
       "sha256": "f472bac5ca1fd7b7c9cffae2843d0b987f6f9494b03f072de76bf1d8c4edc0b4"
+    }
+  },
+  "phase_nullable_usage_super_admin_interface": {
+    "base": "fbd3048",
+    "scope": "Sup-only lazy AI management usage tab, closed versioned summary client, independent token unknown labels, explicit receipt/attempt/local CPU accounting and full session/lifecycle invalidation. Exact Main usage and refreshed original task-directory fixture responses; separate78 service aggregate remains explicitly not HTTP. No private Source/Task/result detail UI request or clinical/model validation claim.",
+    "changes": [
+      "Input/output known sums and unknown item counts remain independent; no unknown-to-zero formatting. Recorded/pending/invalid/legacy-unverified and called/uncalled/unknown counts visible.78 external0 and actual CPU observations separate.",
+      "Closed envelope/coverage/row arithmetic validation, complete-population counts and owned response clone; current Sup token/name/typed roles checked before/after await. Role/token/name/deactivation/unmount clear old rows and deny held replies.",
+      "Lazy usage tab reads only when active; initial management refresh no longer retrieves legacy stats. Two public extension modules added (60 total); complete generated pools and audited Element CSS entry regenerated. Original byte bounds, exact source data, dependencies, target floors and budgets unchanged.",
+      "Original technical harness accepts only explicit technical/usage component choices; previous14 directory controls are rerun together with14 new usage controls. Original directory fixtures re-exported through real Main/service requests after router change, not simply rebound by hash."
+    ],
+    "results": {
+      "canonical": "Actual npm verify36.678s green on780 stable production inputs, JS5956582/assets6984811/max646975. Original6M/7M/700k and256KiB source/512KiB packed bounds remain.",
+      "node": "First18 whole Node225P7.056s (four synthetic arithmetic/await controls); second same18 whole226P7.538s adds seven actual Main/JWT response bindings plus separate actual78 service aggregate, current nine-file backend contract SHA bindings. Overlap not summed.",
+      "isolated_first": "27P1F37.667s: denied refresh correctly cleared old data, but global getByRole(alert) selected both correct paragraph and existing request error toast. Original failure retained.",
+      "isolated_current": "Same28 whole cases28P35.723s after narrowing only alert locator to actual usage section; no product or retry change.14 old directory +14 usage scenarios, no skipped/retried/flaky/global error/unhandledAPI/alive owned process; compiled temp dirs and loopback servers removed.",
+      "production": "Same9 whole production files first38P91.280s and final38P86.970s. Final execution is on the exact complete frontend set as isolated28, with exact780-input canonical source/dist. Includes original27 workflow/pixel cases,5 management/Prompt cases,2 technical directory+2 usage cases,2 independent browser SHA/static tamper cases. No skips/retries/flakes/global errors/alive owned process; extra static parent closed.",
+      "limits": "Current installed Chromium and synthetic session/HTTP boundary with exact actual backend responses. No historical floor, live provider model, all-default/backend/full classified AI browser, clinical effectiveness, migration or final Main admission claim."
+    },
+    "verification_owner": {
+      "path": "doc/ai-all80-build-verification.json",
+      "sha256": "8ded21eb9d5a1d909a6adbfb1366e471685d3e7223f2f977b3f18d586309ab2c",
+      "phase": "phase_nullable_usage_super_admin_interface"
+    },
+    "current_production_reference": {
+      "path": "/tmp/hoim-all80-usage-production-second-verification.json",
+      "sha256": "00f3344dbe00ebcdd7ff575688a310ddb8d725a12787b31078c437ee3547a90e",
+      "exit_code": 0,
+      "elapsed_seconds": 86.96960439998657,
+      "all_checks_passed": true,
+      "collected_count": 38,
+      "collected_by_file": {
+        "ai-clinical-training-native-entry.spec.js": 8,
+        "ai-infection-cluster-production.spec.js": 2,
+        "ai-management.spec.js": 5,
+        "ai-operations-native-entry.spec.js": 8,
+        "ai-rca-evidence-production.spec.js": 2,
+        "ai-research-variable-native-entry.spec.js": 6,
+        "ai-task-technical-production.spec.js": 4,
+        "icon-gallery.spec.js": 1,
+        "schema-document-production.spec.js": 2
+      },
+      "stats": {
+        "startTime": "2026-10-23T11:34:05.694Z",
+        "duration": 85132.31099999999,
+        "expected": 38,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "sources_stable": true,
+      "dist_stable": true,
+      "production_matches_canonical": true,
+      "canonical_source_count": 780,
+      "owned_processes_alive_after": []
+    },
+    "current_isolated_reference": {
+      "path": "/tmp/hoim-all80-usage-isolated-second-verification.json",
+      "sha256": "53cbd355a8deb7f35bd0a0b2b8b59eb75d1c09b72339a56ffad6f0a87d473f84",
+      "exit_code": 0,
+      "elapsed_seconds": 35.72266799584031,
+      "all_checks_passed": true,
+      "collected_count": 28,
+      "stats": {
+        "startTime": "2026-10-23T11:32:38.886Z",
+        "duration": 34228.398,
+        "expected": 28,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "sources_stable": true,
+      "owned_processes_alive_after": [],
+      "global_errors": []
     }
   }
 }

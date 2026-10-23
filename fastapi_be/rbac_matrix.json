@@ -554,6 +554,15 @@
   "auth": [
    "super_admin"
   ],
+  "function": "list_technical_tasks",
+  "method": "GET",
+  "module": "ai_admin.py",
+  "path": "/api/ai/admin/task-directory"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
   "function": "list_global_runs",
   "method": "GET",
   "module": "ai_admin.py",

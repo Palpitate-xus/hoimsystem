@@ -4,7 +4,7 @@ import datetime
 import json
 from typing import Annotated, Literal
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from fastapi.routing import APIRoute
@@ -853,6 +853,28 @@ async def check_inventory_provider(provider_id: int, req: ProviderCheck, db: Ses
             "scope_note": "只核对完整有限采购候选、逐日效期与冻结量守恒、明确采购成本、共同约束政策、四个核心文件、时区数据库及实际运行版本；不发送库存或采购原件，不执行比较或采购，不证明实际运营效果，不改变功能启停与验证状态。",
         },
     }
+
+
+@router.get("/ai/admin/task-directory")
+def list_technical_tasks(
+    request: Request,
+    feature_key: Annotated[str | None, Query(max_length=64)] = None,
+    status: Literal["queued", "running", "succeeded", "failed", "cancelled"] | None = None,
+    requested_by: Annotated[int | None, Query(ge=1)] = None,
+    outcome: Literal["accepted", "rejected", "modified"] | None = None,
+    page: Annotated[int, Query(ge=1, le=100000)] = 1,
+    page_size: Annotated[int, Query(ge=1, le=100)] = 30,
+    db: Session = Depends(get_db),
+    user: User = Depends(require_roles("super_admin")),
+) -> dict:
+    """List every task's technical metadata without granting Source or Task text access."""
+    from app.ai.admin_task_directory import task_directory
+
+    accepted = {"feature_key", "status", "requested_by", "outcome", "page", "page_size"}
+    keys = [key for key, _ in request.query_params.multi_items()]
+    if set(keys) - accepted or len(keys) != len(set(keys)):
+        raise HTTPException(422, "全局技术目录只接受单个功能、状态、申请人、反馈与分页筛选；未忽略其他或重复条件")
+    return task_directory(db, user, feature_key=feature_key, status=status, requested_by=requested_by, outcome=outcome, page=page, page_size=page_size)
 
 
 @router.get("/ai/admin/runs")

@@ -3,7 +3,6 @@
 import hashlib
 
 import pytest
-
 from app.ai.research_cohort_cases import case_current, create_case, preview_input, review_case
 from app.ai.research_cohort_registry import create_registry_original, review_registry_original
 from app.ai.research_cohort_runtime import create_research_run
@@ -17,7 +16,7 @@ from tests.test_ai_research_cohort_tasks_http import actual_task_routes as actua
 
 
 @pytest.mark.asyncio
-async def test_actual_new_acl_root_cannot_block_global_super_technical_directory(runtime_case, async_client, auth_headers, actual_task_routes):
+async def test_actual_new_acl_root_cannot_block_global_super_technical_directory(runtime_case, async_client, auth_headers, actual_task_routes, monkeypatch):
     case, db = runtime_case, runtime_case["db"]
     before = case_current(db, case["actor"], case["case_id"])
     scope = before["snapshot"]["capture"]["scope_original"]
@@ -43,14 +42,29 @@ async def test_actual_new_acl_root_cannot_block_global_super_technical_directory
     case["case_id"] = made["case_id"]
     assert case_current(db, case["actor"], case["case_id"])["eligible"]
     identifier = create_research_run(db, case["actor"], {"research_cohort_case_id": case["case_id"], "question": "旧Task临床原问题不得因技术目录而外显。"})
+    import datetime as dt
+    from types import SimpleNamespace
+
+    from app.routers import doctor
     from app.routers.doctor import create_medical_record
     from app.schemas import MedicalRecordCreateRequest
 
-    actual = create_medical_record(
-        MedicalRecordCreateRequest(patient_id=case["identities"]["patient"].patient_id, symptom="通过实际旧Doctor writer新增完整记录，不修改Case DTO。", result="待原医生核对"),
-        current_user=case["identities"]["doctor_user"],
-        db=db,
-    )
+    when = dt.datetime.combine(dt.date.fromisoformat(scope["payload"]["record_window"]["date_to"]), dt.time(12))
+
+    class WriterClock:
+        @staticmethod
+        def now():
+            return when
+
+    # Isolate the real legacy writer's clock; leave every Source/ACL clock
+    # and the captured project DTO unchanged.
+    with monkeypatch.context() as writer_clock:
+        writer_clock.setattr(doctor, "datetime", SimpleNamespace(datetime=WriterClock))
+        actual = create_medical_record(
+            MedicalRecordCreateRequest(patient_id=case["identities"]["patient"].patient_id, symptom="通过实际旧Doctor writer新增完整记录，不修改Case DTO。", result="待原医生核对"),
+            current_user=case["identities"]["doctor_user"],
+            db=db,
+        )
     assert actual["code"] == 200, actual
     assert case_current(db, case["actor"], case["case_id"])["eligible"] is False
     paths = [

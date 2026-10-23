@@ -3,7 +3,6 @@
 import datetime as dt
 
 import pytest
-
 from app.ai import research_cohort_sources as sources
 from app.ai.models import AIAuditEvent
 from app.ai.research_cohort_models import AIResearchStudyScope
@@ -30,7 +29,8 @@ async def test_actual_main_jwt_five_registry_routes_keep_utc6_and_literal_origin
     db_session, research_case, async_client, auth_headers, mounted_research_router, monkeypatch, microsecond
 ):
     db, case = db_session, research_case
-    monkeypatch.setattr(sources, "utcnow", lambda: dt.datetime(2026, 10, 21, 12, 0, 0, microsecond))
+    within = dt.datetime.fromisoformat(case["scope_request"]["valid_from"].replace("Z", "+00:00")) + dt.timedelta(days=1)
+    monkeypatch.setattr(sources, "utcnow", lambda: within.replace(tzinfo=None, microsecond=microsecond))
     headers = auth_headers(case["super_admin_user"].username)
     reviewer = auth_headers(case["reviewer"].username)
     counts = {model: db.query(model).count() for model in (Patient, MedicalRecord, Registration)}

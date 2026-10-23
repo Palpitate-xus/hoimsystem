@@ -41,9 +41,18 @@ def state(db, ids):
     ]
 
 
-def test_129_actual_claimed_variable_tasks_with_damaged_queued_status_cannot_starve_later_work(db_session, configured, task_factory):
+def test_129_actual_claimed_variable_tasks_with_damaged_queued_status_cannot_starve_later_work(db_session, configured, task_factory, monkeypatch):
+    from app.ai import research_variables_task_reader as reader
+
     db = db_session
     case, _, _, prepared, snapshot = prepare(db, configured, task_factory)
+    # All 129 tasks intentionally reuse one authentic Source snapshot. Keep
+    # claim time inside its real queue window regardless of test-host load.
+    # The production age check, original recorded_at and Source checks stay on.
+    recorded = dt.datetime.strptime(snapshot.payload.context.snapshot_time, "%Y-%m-%dT%H:%M:%S.%fZ")
+    clock = recorded + dt.timedelta(seconds=1)
+    monkeypatch.setattr(reader, "utcnow", lambda: clock)
+    monkeypatch.setattr(attempts, "utcnow", lambda: clock)
     ids = []
     for _ in range(129):
         task = storage.stage_run(db, case["admin_user"], AIRun(run_id=str(uuid.uuid4()), preview=0), prepared, snapshot)

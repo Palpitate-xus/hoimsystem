@@ -2,7 +2,7 @@
 
 import datetime
 import json
-from typing import Literal
+from typing import Annotated, Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.exceptions import RequestValidationError
@@ -855,12 +855,22 @@ def list_global_runs(
     drug_label_source_binding_id: str | None = None,
     document_change_scope_id: str | None = Query(None, max_length=36),
     deidentification_case_id: str | None = Query(None, max_length=36),
+    operations_case_id: Annotated[str | None, Query(max_length=36)] = None,
     page: int = Query(1, ge=1, le=100000),
     page_size: int = Query(30, ge=1, le=100),
     db: Session = Depends(get_db),
     user: User = Depends(require_roles("super_admin")),
 ) -> dict:
     """Return all users' audited task metadata and feedback counts without exposing full payloads."""
+    request_scope = dict(locals())
+    if feature_key == "operations_support" or operations_case_id is not None:
+        permitted = {"feature_key", "status", "outcome", "requested_by", "operations_case_id", "page", "page_size", "db", "user"}
+        if feature_key != "operations_support" or any(value is not None and value is not False for key, value in request_scope.items() if key not in permitted):
+            raise HTTPException(422, "运维任务管理目录只接受明确材料集与通用技术筛选")
+        if operations_case_id is not None:
+            from app.ai.operations_support_registry import identifier
+
+            identifier(operations_case_id)
     from app.ai.native_task_access import lock_directory_gates
 
     # A global directory may contain native charge tasks. Billing precedes
@@ -868,6 +878,10 @@ def list_global_runs(
     lock_directory_gates(db)
     user = _current_super_admin(db, user)
     query = db.query(AIRun).options(*(defer(getattr(AIRun, key)) for key in ("input_json", "evidence_json", "context_metadata_json", "result_json")))
+    if operations_case_id is not None:
+        from app.ai.operations_support_run_models import AIOperationsRunArtifact
+
+        query = query.filter(AIRun.run_id.in_(db.query(AIOperationsRunArtifact.run_id).filter(AIOperationsRunArtifact.case_id == operations_case_id)))
     if feature_key == "deidentification" or deidentification_case_id is not None:
         from app.ai.deidentification_shared import filter_history as filter_deidentification_history
 

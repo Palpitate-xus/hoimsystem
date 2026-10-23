@@ -36,7 +36,7 @@ def current_actor(db, user, *, allowed_roles=RESEARCH_SOURCE_ROLES):
     if not roles or not roles.issubset(VALID_USER_ROLES):
         raise ValueError("Exact nonempty platform role set required")
     state = inspect(user, raiseerr=False)
-    epoch = {key: state.dict[key] for key in ("user_role", "token_invalid_before") if key in state.dict} if state is not None else {}
+    epoch = {key: state.dict[key] for key in ("username", "user_role", "token_invalid_before") if key in state.dict} if state is not None else {}
     identifier = state.identity[0] if state is not None and state.identity is not None else getattr(user, "user_id", None)
     with db.no_autoflush:
         actor = current_research_rows(db.query(User).filter_by(user_id=identifier), shared=True).one_or_none()

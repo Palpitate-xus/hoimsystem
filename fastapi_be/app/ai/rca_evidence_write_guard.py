@@ -23,7 +23,7 @@ def current_actor(db, user, allowed_roles):
         raise ValueError("Explicit actual business roles are required")
     state = inspect(user, raiseerr=False)
     identifier = state.identity[0] if state is not None and state.identity else getattr(user, "user_id", None)
-    epoch = {key: state.dict[key] for key in ("user_role", "token_invalid_before") if state is not None and key in state.dict}
+    epoch = {key: state.dict[key] for key in ("username", "user_role", "token_invalid_before") if state is not None and key in state.dict}
     with db.no_autoflush:
         actor = current_rows(db.query(User).filter_by(user_id=identifier), shared=True).one_or_none()
     if actor is None or actor.user_role not in roles or any(getattr(actor, key) != value for key, value in epoch.items()):

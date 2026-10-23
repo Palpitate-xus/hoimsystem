@@ -36,7 +36,7 @@ def current_actor(db, user, *, allowed_roles):
     state = inspect(user, raiseerr=False)
     # A current read refreshes this same identity-map object. Preserve only
     # already loaded request fields before it does so; never load expired ones.
-    epoch = {key: state.dict[key] for key in ("user_role", "token_invalid_before") if key in state.dict} if state is not None else {}
+    epoch = {key: state.dict[key] for key in ("username", "user_role", "token_invalid_before") if key in state.dict} if state is not None else {}
     uid = state.identity[0] if state is not None and state.identity is not None else getattr(user, "user_id", None)
     with db.no_autoflush:
         actor = current_satisfaction_rows(db.query(User).filter_by(user_id=uid), shared=True).one_or_none()

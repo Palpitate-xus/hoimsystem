@@ -58,6 +58,8 @@ def _user_hint(user):
 
 
 def _actors(db, user, additional=(), *, roles=c.SOURCE_ROLES):
+    request_state = inspect(user, raiseerr=False)
+    names = {"username": request_state.dict["username"]} if request_state is not None and "username" in request_state.dict else {}
     identifier, epoch = _user_hint(user)
     actual = {}
     with db.no_autoflush:
@@ -66,7 +68,13 @@ def _actors(db, user, additional=(), *, roles=c.SOURCE_ROLES):
             if row is not None:
                 actual[user_id] = row
     actor = actual.get(identifier)
-    if actor is None or actor.user_role not in roles or epoch is not None and epoch != (actor.user_role, actor.token_invalid_before):
+    if (
+        actor is None
+        or actor.user_role not in roles
+        or epoch is not None
+        and epoch != (actor.user_role, actor.token_invalid_before)
+        or any(getattr(actor, key) != value for key, value in names.items())
+    ):
         raise HTTPException(403, "当前账户角色或会话已改变，请重新核对说明书权限")
     return actor, actual, (actor.user_role, actor.token_invalid_before)
 

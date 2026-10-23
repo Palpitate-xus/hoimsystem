@@ -10,6 +10,7 @@ from functools import wraps
 
 from fastapi import HTTPException
 from pydantic import ValidationError
+from sqlalchemy import inspect
 from sqlalchemy.exc import SQLAlchemyError
 
 from app.ai import document_evidence_contract as c
@@ -42,13 +43,21 @@ def _epoch(user):
 
 
 def current_super(db, user, *, expected=None, locking=True):
+    request_state = inspect(user, raiseerr=False)
+    names = {"username": request_state.dict["username"]} if request_state is not None and "username" in request_state.dict else {}
     expected = _epoch(user) if expected is None else expected
     with db.no_autoflush:
         query = db.query(User).filter_by(user_id=expected[0]).populate_existing()
         if locking:
             query = query.with_for_update(read=True)
         actual = query.one_or_none()
-    if actual is None or actual.user_role != "super_admin" or expected[1] != "super_admin" or actual.token_invalid_before != expected[2]:
+    if (
+        actual is None
+        or actual.user_role != "super_admin"
+        or expected[1] != "super_admin"
+        or actual.token_invalid_before != expected[2]
+        or any(getattr(actual, key) != value for key, value in names.items())
+    ):
         raise HTTPException(403, "当前会话不再具有原文证据超级管理员权限，请重新登录核对")
     return actual
 

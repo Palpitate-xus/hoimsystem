@@ -41,10 +41,11 @@ def current_charge_actor(db, user, allowed_roles):
     if not roles or not roles <= VALID_USER_ROLES:
         raise ValueError("Exact original business roles required")
     state = inspect(user, raiseerr=False)
+    original = {key: state.dict[key] for key in ("username", "user_role", "token_invalid_before") if state is not None and key in state.dict}
     uid = state.identity[0] if state is not None and state.identity is not None else getattr(user, "user_id", None)
     with db.no_autoflush:
         actor = current_charge_rows(db.query(User).filter_by(user_id=uid), shared=True).one_or_none()
-    if actor is None or actor.user_role not in roles:
+    if actor is None or actor.user_role not in roles or any(getattr(actor, key) != value for key, value in original.items()):
         raise HTTPException(403, "当前账户已无本项原业务权限")
     return actor
 

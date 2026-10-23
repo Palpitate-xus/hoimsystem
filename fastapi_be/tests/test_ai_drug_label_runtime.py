@@ -25,6 +25,7 @@ from app.ai.models import AIAuditEvent, AIFeatureConfig, AIPromptVersion, AIRun
 from app.ai.schemas import RunRequest
 from app.config import settings
 from app.models import User
+from tests.ai_admin_usage_assertions import assert_exact_usage_event
 from tests.test_ai_drug_label_gateway import envelope
 from tests.test_ai_drug_label_sources import NOTE, cas
 from tests.test_ai_drug_label_sources import label_case as _label_case
@@ -139,6 +140,7 @@ async def test_actual_task_source_seed_prompt_two_digests_wire_and_three_exact_a
     assert dto["input_tokens"] == 13 and dto["output_tokens"] == 7 and dto["usage_receipt"]["model_call_attempted"] is True
     assert after.artifact.mapping_seed not in d.canonical_json(jsonable_encoder(dto))
     assert "accepted_lease" not in dto["drug_label_artifact"]
+    assert_exact_usage_event(case.db, case.id, "drug_label", dto["usage_receipt"])
 
 
 @pytest.mark.parametrize("question", [None, "", " \t\r\n\u2003"])

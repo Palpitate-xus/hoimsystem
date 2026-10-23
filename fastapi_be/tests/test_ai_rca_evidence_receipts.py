@@ -13,6 +13,7 @@ from app.ai import rca_evidence_receipts as receipts
 from app.ai import rca_evidence_storage as storage
 from app.ai.models import AIAuditEvent, AIRun
 from app.ai.rca_evidence_run_models import AIRcaEvidenceRunArtifact, AIRcaEvidenceRunResult
+from tests.ai_admin_usage_assertions import assert_exact_usage_event
 from tests.test_ai_rca_evidence_attempts import claimed
 from tests.test_ai_rca_evidence_grants import NOW, cas
 from tests.test_ai_rca_evidence_grants import grant_case as grant_case
@@ -70,6 +71,7 @@ def test_original_lease_records_actual_paid_usage_after_loss_without_reading_tas
     assert not columns
     loaded, columns = no_task_text(db, lambda: receipts.read_receipt(db, actual))
     assert not columns and loaded == result
+    assert_exact_usage_event(db, proof.run_id, "rca", result.usage.model_dump(mode="json"))
     assert db.query(AIRcaEvidenceRunResult).count() == 0
     row = db.get(AIRcaEvidenceRunArtifact, proof.run_id)
     assert row.usage_event_id not in {row.create_event_id, row.claim_event_id, row.dispatch_event_id}

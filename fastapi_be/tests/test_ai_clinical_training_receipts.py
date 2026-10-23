@@ -15,6 +15,7 @@ from app.ai import clinical_training_storage as s
 from app.ai.clinical_training_run_models import AITrainingRunResult
 from app.ai.clinical_training_usage_contract import usage
 from app.ai.models import AIAuditEvent, AIRun
+from tests.ai_admin_usage_assertions import assert_exact_usage_event
 from tests.test_ai_clinical_training_configuration import configured as configured
 from tests.test_ai_clinical_training_practice import practice_case as practice_case
 from tests.test_ai_clinical_training_reference_sql import reference_case as reference_case
@@ -46,6 +47,7 @@ def test_actual_full_result_five_specific_phase_pks_and_partial_usage_never_regr
     actual = a.technical_attempt(db, claim)
     receipt = r.read_receipt(db, actual)
     assert receipt.usage.model_dump(mode="json") == known and receipt.status == "succeeded"
+    assert_exact_usage_event(db, key, "clinical_training", known)
     row = db.get(AITrainingRunResult, key)
     assert len({actual.artifact["created_audit_event_id"], actual.artifact["claim_event_id"], actual.artifact["dispatch_event_id"], actual.artifact["usage_event_id"], row.accept_audit_event_id}) == 5
     assert db.get(AIAuditEvent, row.accept_audit_event_id).action == results.ACCEPT_ACTION
@@ -169,7 +171,13 @@ def test_actual_after_result_insert_mutation_rolls_back_result_accept_usage_and_
     db = case["db"]
     before = counts(db)
     document_id, owner_id = case["documents"][0].document_id, case["actor"].user_id
-    change = "UPDATE hoimsystem_ai_knowledge_document SET status='retired' WHERE document_id='" + document_id + "';" if fault == "reference" else "UPDATE hoimsystem_users SET user_role='admin' WHERE user_id=" + str(owner_id) + ";" if fault == "owner" else "UPDATE hoimsystem_ai_feature_config SET enabled=0 WHERE feature_key='clinical_training';"
+    change = (
+        "UPDATE hoimsystem_ai_knowledge_document SET status='retired' WHERE document_id='" + document_id + "';"
+        if fault == "reference"
+        else "UPDATE hoimsystem_users SET user_role='admin' WHERE user_id=" + str(owner_id) + ";"
+        if fault == "owner"
+        else "UPDATE hoimsystem_ai_feature_config SET enabled=0 WHERE feature_key='clinical_training';"
+    )
     trigger = "training_after_result_insert_" + fault
     db.execute(text("CREATE TEMP TRIGGER " + trigger + " AFTER INSERT ON hoimsystem_ai_training_run_result BEGIN " + change + " END"))
     db.commit()

@@ -22,6 +22,7 @@ from app.ai import runtime
 from app.ai.document_change_run_models import AIDocumentChangeRunArtifact, AIDocumentChangeRunResult
 from app.ai.models import AIAuditEvent, AIFeatureConfig, AIProvider, AIRun
 from app.models import User
+from tests.ai_admin_usage_assertions import assert_exact_usage_event
 from tests.test_ai_document_change_protocol import envelope
 from tests.test_ai_document_change_sources import change_case as change_case  # noqa: F401
 from tests.test_ai_document_change_storage import remove_prior_tasks as remove_prior_tasks  # noqa: F401
@@ -142,6 +143,7 @@ async def test_actual_complete_source_short_queue_claim_asgi_blob_and_current_fr
     assert case["source"].baseline.text not in run.input_json and len(c.e.utf8(run.input_json)) < 65535
     assert storage.artifact_record(db, case["actor"], run).recorded_at == NOW
     assert storage.expanded_private_scope(db, case["actor"], run).scope_snapshot == case["scope"].snapshot
+    assert_exact_usage_event(db, run_id, "document_change", storage.usage_receipt(db, run).model_dump(mode="json"))
 
 
 @pytest.mark.asyncio

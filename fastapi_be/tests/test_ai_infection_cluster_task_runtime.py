@@ -18,6 +18,7 @@ from app.ai.infection_cluster_models import AIInfectionPurposeGrant
 from app.ai.infection_cluster_run_models import AIInfectionRunArtifact as Artifact
 from app.ai.models import AIAuditEvent, AIRun
 from app.models import User
+from tests.ai_admin_usage_assertions import assert_exact_usage_event
 from tests.test_ai_infection_cluster_sources import NOTE, cas
 from tests.test_ai_infection_cluster_task_storage import finish, profile_case, stage, task_case, task_text_queries  # noqa: F401
 
@@ -62,6 +63,7 @@ async def test_actual_async_local_worker_releases_all_sql_before_cpu_and_accepts
         run, artifact = current.get(AIRun, rid), current.get(Artifact, rid)
         assert run.status == "succeeded" and artifact.result_json is not None
         assert storage.load_result(current, current.get(User, case["author"].user_id), rid).family_size == 2
+        assert_exact_usage_event(current, rid, "infection", storage.usage(current, artifact, run).model_dump(mode="json"))
 
 
 @pytest.mark.asyncio

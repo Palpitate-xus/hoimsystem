@@ -17,6 +17,7 @@ from app.ai.deidentification_run_models import AIDeidentificationRunResult, AIDe
 from app.ai.deidentification_spans import digest
 from app.ai.models import AIAuditEvent, AIRun
 from app.ai.research_cohort_registry import review_registry_original
+from tests.ai_admin_usage_assertions import assert_exact_usage_event
 from tests.test_ai_deidentification_storage import body_sql
 from tests.test_ai_deidentification_storage import task_case as task_case  # noqa: F401
 from tests.test_ai_research_cohort_contract import BASIS
@@ -122,6 +123,7 @@ async def test_actual_whole_source_queue_claim_one_call_result_nullable_usage_an
     assert len({source.create_event_id, result.usage_event_id, result.accept_event_id}) == 3
     assert json.loads(run.result_json)["schema_version"] == "deidentification_result_pointer_v1"
     assert db.query(AIDeidentificationReview).count() == db.query(AIDeidentificationExportRelease).count() == 0
+    assert_exact_usage_event(db, identifier, "deidentification", shown["usage_receipt"])
     db.rollback()
     await runtime.execute_deidentification_claimed(*claimed, transport=model(case, packets=packets))
     assert len(packets) == 1

@@ -14,6 +14,7 @@ from app.ai.models import AIAuditEvent, AIRun
 from app.ai.operations_support_models import AIOperationsOriginal
 from app.ai.operations_support_run_models import AIOperationsRunArtifact
 from app.ai.operations_support_usage_contract import usage
+from tests.ai_admin_usage_assertions import assert_exact_usage_event
 from tests.test_ai_operations_support_attempts import actors as actors
 from tests.test_ai_operations_support_attempts import configured as configured
 from tests.test_ai_operations_support_attempts import queued as queued
@@ -76,6 +77,7 @@ def test_actual_paid_or_unknown_components_survive_source_withdrawal_without_any
     before = db.query(AIAuditEvent).count()
     value = capture_without_body(db, lambda: settle(db, claim, dispatch.dispatch_event_id, reported))
     assert value.usage.model_dump() == reported and value.status == "failed"
+    assert_exact_usage_event(db, claim.run_id, "operations_support", reported)
     attempt = attempts.technical_attempt(db, claim)
     assert capture_without_body(db, lambda: receipts.read_receipt(db, attempt)) == value
     assert attempt.header["input_tokens"] == (reported["input_tokens"] if reported["input_tokens"] is not None else 0)

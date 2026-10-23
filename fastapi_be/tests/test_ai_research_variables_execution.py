@@ -22,6 +22,7 @@ from app.ai.models import AIAuditEvent
 from app.ai.research_cohort_registry import review_registry_original
 from app.ai.research_variables_run_models import AIResearchVariableRunResult
 from app.ai.research_variables_task_contract import VariableTaskSource, canonical
+from tests.ai_admin_usage_assertions import assert_exact_usage_event
 from tests.test_ai_research_cohort_contract import BASIS
 from tests.test_ai_research_variables_attempts import claimed
 from tests.test_ai_research_variables_configuration import configured as configured
@@ -91,6 +92,7 @@ async def test_actual_current_sql_dispatch_has_zero_sql_connections_during_provi
     assert (result_row is not None) is accepted
     recorded = receipts.verify_receipt(db_session, task, accept_event_id=result_row.accept_audit_event_id if accepted else None)
     assert recorded.receipt.model_call_attempted is True
+    assert_exact_usage_event(db_session, claim.run_id, "research_variables", recorded.receipt.model_dump(mode="json"))
     assert (recorded.receipt.input_tokens, recorded.receipt.output_tokens) == ((None, None) if outcome == "absent_usage" else (11, None) if outcome == "partial_usage" else (11, 13))
     if accepted:
         part = results.result_piece(db_session, case["admin_user"], claim.run_id)

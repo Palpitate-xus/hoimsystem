@@ -11,6 +11,7 @@ from app.ai.models import AIProvider
 from app.ai.research_cohort_contract import canonical_json
 from app.ai.research_cohort_execution import claim_research_run, execute_research_claimed
 from app.ai.research_cohort_runtime import create_research_run, read_research_part
+from tests.ai_admin_usage_assertions import assert_exact_usage_event
 from tests.test_ai_research_cohort_result_storage import draft_for
 from tests.test_ai_research_cohort_storage import artifact_foreign_keys as artifact_foreign_keys  # noqa: F401
 from tests.test_ai_research_cohort_storage import configured as configured  # noqa: F401
@@ -69,6 +70,7 @@ async def test_actual_dedicated_create_claim_http_complete_result_uses_no_sql_tr
     assert await execute_research_claimed(run_id, claim.lease_token, claim_event_id=claim.claim_event_id, transport=httpx.MockTransport(handler), session_factory=case["factory"])
     result = read_research_part(case["db"], SimpleNamespace(user_id=case["actor_id"]), run_id, "result")
     assert result["deterministic_evaluation"]["counts"] == case["source"]["counts"] and len(calls) == 1
+    assert_exact_usage_event(case["db"], run_id, "research_cohort", {"input_tokens": 32, "output_tokens": 6, "model_call_attempted": True})
 
 
 @pytest.mark.asyncio

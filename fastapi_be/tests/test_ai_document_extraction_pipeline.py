@@ -16,6 +16,7 @@ from app.ai.document_evidence_models import AIDocumentOriginal, AIDocumentSpanCa
 from app.ai.document_extraction_models import AIDocumentExtractionRunAnchor
 from app.ai.document_extraction_run_record import parse_record
 from app.ai.models import AIAuditEvent, AIFeatureConfig, AIFeedback, AIKnowledgeDocument, AIProvider, AIRun
+from tests.ai_admin_usage_assertions import assert_exact_usage_event
 from tests.test_ai_document_evidence_contract import NOW
 from tests.test_ai_document_evidence_sources import approved_original
 from tests.test_ai_document_extraction_gateway import envelope
@@ -195,6 +196,7 @@ async def test_unknown_actual_usage_remains_nullable_in_terminal_audit_and_api(a
     data = result.json()["data"]
     assert (data["input_tokens"], data["output_tokens"]) == expected
     assert data["usage_receipt"]["complete"] is False and data["result"] is None
+    assert_exact_usage_event(db, claim[0], "document", data["usage_receipt"])
     assert db.query(AIAuditEvent).filter_by(action=documents.ACCEPT, target=run.run_id).count() == 0
 
 

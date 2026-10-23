@@ -18,6 +18,7 @@ from app.ai.satisfaction_artifact_models import AISatisfactionRunArtifact
 from app.ai.satisfaction_sources import revoke_case, utcnow
 from app.ai.satisfaction_storage import RECEIPT_ACTION, load_snapshot
 from app.models import Review, User
+from tests.ai_admin_usage_assertions import assert_exact_usage_event
 from tests.test_ai_satisfaction_gateway import envelope
 from tests.test_ai_satisfaction_sources import BASIS
 from tests.test_ai_satisfaction_sources import satisfaction_case as satisfaction_case  # noqa: F401
@@ -206,6 +207,7 @@ async def test_failed_paid_calls_preserve_independent_actual_nullable_usage(runt
 
     await execution.execute_satisfaction_claimed(item["run_id"], item["lease"], transport=httpx.MockTransport(handle), session_factory=case["factory"])
     run, result, receipt = saved(case, item)
+    assert_exact_usage_event(case["db"], item["run_id"], "satisfaction", receipt)
     assert len(calls) == 1 and run.status == "failed" and result is None and run.result_json == "{}"
     assert (
         receipt == receipts.usage(13, None, True) if fault == "partial_usage" else receipt == receipts.usage(13, 7, True) if fault == "invalid_draft" else receipt == receipts.usage(None, None, True)

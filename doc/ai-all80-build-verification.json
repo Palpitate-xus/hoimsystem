@@ -1,6 +1,6 @@
 {
   "schema_version": "ai_all80_build_verification_v1",
-  "recorded_at_utc": "2026-10-23T15:17:02.971958+00:00",
+  "recorded_at_utc": "2026-10-23T16:27:03.853035+00:00",
   "base_commit": "66fdb2c",
   "scope": "All80 staging public-build optimization only, not final Main admission or full default backend/whole-AI-browser/clinical validation. Complete goal remains active. No push/deploy/hospital DB/model calls.",
   "behavior": [
@@ -85612,10 +85612,10 @@
     }
   ],
   "pending": [
-    "Finish the running default complete backend execution on committed final implementation, address concrete failures and preserve raw evidence.",
-    "Finish the running complete238-file3908-case classified AI browser execution on canonical780 sources/dist and current actual Main fixtures; address concrete failures without borrowing predecessor pass totals.",
-    "Perform final admission to the unchanged user worktree after gates; preserve410+ small commits and requested Git identity. No push, deployment, restart or real hospital database work.",
-    "Real deployment credentials/models, operational rollout and independent clinical validation remain explicitly unperformed external prerequisites; no feature enabled merely because its adapter/configuration is implemented."
+    "Finish accepted eight whole-file backend groups and verify exact14075 identities once, preserving replaced RED/infrastructure attempts and declared one-test source bridge.",
+    "Finish full fourth browser and verify complete238-file3908 identity coverage with entire two-file13case replacement, explicit RED original, exact unchanged780 production/dist and declared two-test source bridge.",
+    "After genuine gates, fast-forward unchanged user branch preserving all requested-identity commits, copy exact accepted dist, verify actual original Main39 production cases, and commit final evidence. No push/deploy/restart/hospital DB.",
+    "Actual credentials/models, operational rollout and independent clinical validation remain explicit external prerequisites; implementation/testing does not automatically enable real clinical use."
   ],
   "phase_html85_public_static_transport": {
     "base": "967933d; current global technical UI candidate is separately pending its own commit, all inputs bound below",
@@ -149135,5 +149135,56 @@
     },
     "results": "25 whole three-file isolated cases191.266seconds; one whole production3 cases9.086seconds;18 whole Node226P7.117seconds after the final four test-file changes. Earlier Node226P10.335 on only bootstrap changes retained, not added. Original780 production source/dist, canonical40.114s and6M/7M/700k limits unchanged; no production code, actual packets, dependency or browser floor change.",
     "remaining": "Fresh third complete238-file3908-case classified browser on these final test inputs; full backend first/third still frozen, first13 old-calendar/expectation failures have external copied-file fixes validated and await unified application after broad audit. Main remains unchanged."
+  },
+  "phase_all80_parallel_acceptance_checkpoint": {
+    "verification_owner": {
+      "path": "doc/ai-final-integration-verification.json",
+      "sha256": "6128ad796d1a6a6b91bd0e633aefce74ad6411f3c1015e534e6aa2301d3829fc",
+      "phase": "phase_all80_parallel_acceptance_checkpoint"
+    },
+    "browser": {
+      "fourth_full": "Fresh238-file3908-case invocation,4 ordinary workers0retries, still running. Four genuine timeouts observed in two infection integration files, including beforeAll rspack build timeout; original first serial execution had passed these cases. Keep fourth RED if these remain.",
+      "test_only_change": "Two infection spec files explicitly use per-file default mode so their beforeAll compiler/harness is shared once per file under original fullyParallel config. All13 cases and assertions unchanged; no timeout increase, no case exclusion, no production/config/dependency change.",
+      "actual_whole_file_rerun": {
+        "path": "/tmp/hoim-all80-infection-browser-fifth-verification.json",
+        "sha256": "dca5864eec05210a177ab1f52a8115fd3d858ef034f62448a4cdd2f5047fc0f7",
+        "count": 13,
+        "elapsed_seconds": 53.55130134616047,
+        "stats": {
+          "startTime": "2026-10-23T16:23:51.162Z",
+          "duration": 51288.854,
+          "expected": 13,
+          "skipped": 0,
+          "unexpected": 0,
+          "flaky": 0
+        },
+        "sources_stable": true,
+        "dist_stable": true,
+        "parent_closed": true,
+        "owned_children_alive": []
+      },
+      "acceptance_contract": "Final acceptance uses exact complete whole-file coverage:236 unaffected files from fourth plus both entire replacement files13cases, after fourth finishes and ONLY if every other case passed. Exact3908 identity union, production253/isolated3634/controlledHTTP21, source bridge two test files only, unchanged780 production/dist,0retries in each accepted file execution, all own servers/processes closed. Never describe this as one3908-pass invocation; no passing case from replaced files is borrowed."
+    },
+    "original_full_browser": {
+      "path": "/tmp/hoim-all80-full-browser-first-verification.json",
+      "stats": {
+        "startTime": "2026-10-23T13:21:21.779Z",
+        "duration": 8837423.749,
+        "expected": 3889,
+        "skipped": 0,
+        "unexpected": 19,
+        "flaky": 0
+      },
+      "elapsed_seconds": 8839.797500443645,
+      "failure_file_counts": {
+        "ai-bed-assistant.spec.js": 1,
+        "ai-operations-integration.spec.js": 1,
+        "ai-quality-resource-entry.spec.js": 1,
+        "ai-research-cohort-management.spec.js": 10,
+        "ai-research-cohort-root-management.spec.js": 6
+      },
+      "interpretation": "A genuine complete RED invocation3889P19F, no skip/retry/flaky. All19 old waiting/bootstrap/legacy-RCA expectations already identified and updated. Never relabeled green or counted in current acceptance."
+    },
+    "canonical_780_unchanged": true
   }
 }

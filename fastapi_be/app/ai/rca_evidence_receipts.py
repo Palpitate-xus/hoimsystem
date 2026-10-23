@@ -98,6 +98,18 @@ def read_receipt(db, attempt):
     """Internal metadata-only reader, called only after exact claim validation."""
     header, row = attempt.header, attempt.artifact
     if row["usage_event_id"] is None:
+        # Missing is pending only while this actual attempt is unfinished.
+        # A settled paid or known-zero terminal may not lose its concrete FK
+        # and silently become unknown, nor receive another usage settlement.
+        unfinished = header["latency_ms"] is None and (header["input_tokens"], header["output_tokens"]) == (0, 0)
+        active = header["status"] in {"queued", "running"} and header["finish_time"] is None and header["error_code"] is None and header["error_message"] is None
+        cancel_pending = header["status"] == "cancelled" and attempt.dispatch is not None and header["error_code"] == "TASK_CANCELLED" and header["finish_time"] is not None
+        if not unfinished or not (active or cancel_pending):
+            raise HTTPException(409, "已结算或终止任务缺少原具体用量审计，不能降级为等待回执")
+        empty = db.scalar(select((AIRun.result_json == "{}").label("pending_result_is_empty")).where(AIRun.run_id == row["run_id"]))
+        present = db.scalar(select(AIRcaEvidenceRunResult.run_id).where(AIRcaEvidenceRunResult.run_id == row["run_id"]))
+        if empty is not True or present is not None:
+            raise HTTPException(409, "等待用量回执的任务不能已接收结果")
         return None
     event, receipt = _usage_body(db, row["usage_event_id"])
     when = c.clock(receipt.recorded_at).replace(tzinfo=None)
@@ -180,6 +192,8 @@ def stage_terminal(db, proof, *, dispatch_event_id, usage, status, error_code, l
 
 def _write_terminal(db, attempt, *, usage, status, error_code, latency_ms):
     header, row = attempt.header, attempt.artifact
+    if row["usage_event_id"] is not None or header["latency_ms"] is not None or (header["input_tokens"], header["output_tokens"]) != (0, 0):
+        raise HTTPException(409, "原交付已有结算痕迹，不能因回执引用丢失而重新计量")
     when = grants.utcnow()
     if when < (row["dispatched_at"] or row["claimed_at"] or row["recorded_at"]):
         raise HTTPException(409, "终态真实钟点早于实际claim/dispatch，未改写时钟或结算")

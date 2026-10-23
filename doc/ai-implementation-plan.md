@@ -320,3 +320,9 @@
 - 实际共享入口复现4失败/2通过：原用途撤销后，同一已失败任务重复交付会读取四列Task JSON。未发生第二次模型HTTP，但正文读取边界确有缺陷。
 - 分派改为先定位真实不透明Artifact；77终态只走专属惰性前检，其他无可运行header的交付在通用正文读取前返回。新13项及原共享/dispatch两文件26项均通过；格式桥仅调整新测试导入与排版，非导入AST相等。
 - 新MySQL第五、第六次的失败及完整脚本原样留存。第五是队列前置条件，第六复现真实共享重复交付读取问题；不把旧MySQL或旧全量结果重标为此修复的通过。证据见`ai-rca-terminal-delivery-verification.json`。
+
+### 77 已结算用量引用完整性
+
+- 实际SQL及Main/JWT/本地ASGI先复现6失败：已付费failed/cancelled和真实0调用cancelled的usage审计FK擦除后，曾被错误返回为pending。
+- Pending现在必须保留真实未结算阶段；已终止任务缺少具体用量审计明确409。终态写入同时拒绝既有结算痕迹，防止擦引用后重新计量。真正dispatched cancel_pending、未dispatch原子0结算及原请求的partial支付均保留。
+- 新负控加原receipts/cancellation/pipeline/execution/shared完整6文件共96项通过，1116输入稳定。原BE整轮/FE217、旧MySQL7保持其原版本范围，未据此宣称本修复或全部80项完整验收。证据见`ai-rca-receipt-integrity-verification.json`。

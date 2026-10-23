@@ -78,9 +78,9 @@ test('production exact inert icon record preserves all293 actual geometries with
  const records=index.match(/<script id="hoim-schema-data" type="application\/json">(.*?)<\/script>/u);
  expect(records).not.toBeNull();
  const envelope=JSON.parse(records[1]);expect(envelope.schema_version).toBe('hoim_static_schema_document_v1');
- const {decodeSchemaText}=require('../src/api/schemaDataCodec.cjs');
+ const {decodeSchemaText,decodeStaticCodeBytes}=require('../src/api/schemaDataCodec.cjs');
  for(const [digest,record]of Object.entries(envelope.entries)){
-  const packed=Buffer.from(record.encoded,'base64');expect(crypto.createHash('sha256').update(packed).digest('hex')).toBe(digest);expect(packed.length).toBe(record.packedBytes);
+  const packed=Buffer.from(decodeStaticCodeBytes(record.encoded,record.packedBytes),'binary');expect(crypto.createHash('sha256').update(packed).digest('hex')).toBe(digest);expect(packed.length).toBe(record.packedBytes);
   const decoded=JSON.parse(decodeSchemaText(record.encoded,record.byteLength));
   if(decoded&&Object.keys(decoded).join(',')==='svg'&&typeof decoded.svg==='string'&&crypto.createHash('sha256').update(decoded.svg).digest('hex')===manifest.sprite_sha256)candidates.push(decoded.svg);
  }

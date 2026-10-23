@@ -1,3 +1,4 @@
+const {decodeStaticCodeBytes}=require('../src/api/schemaDataCodec.cjs');
 const {test, expect} = require('@playwright/test');
 const fs = require('node:fs');
 const path = require('node:path');
@@ -14,7 +15,23 @@ test('canonical business page uses one inert complete schema registry with indep
     const value = JSON.parse(node.textContent);
     if (value.schema_version !== 'hoim_static_schema_document_v1') throw new Error('Wrong generated schema document');
     return Promise.all(Object.entries(value.entries).map(async ([sha, entry]) => {
-      const bytes = Uint8Array.from(atob(entry.encoded), char => char.charCodeAt(0));
+      let bytes;
+      if (entry.encoded.startsWith('~1')) {
+        // Independent BigInt word arithmetic verifies the browser transport;
+        // the application decoder uses bounded Number arithmetic instead.
+        const alphabet = '!#$%()*+,-./0123456789:;=?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[]^_abcdefghijklmnopqrstuvwxyz{|';
+        const encoded = entry.encoded, padding = Number(encoded[2]);
+        if (!/^[0-3]$/.test(encoded[2]) || (encoded.length - 3) % 5 || encoded.length > 3 + 5 * Math.ceil(524288 / 4)) throw new Error('Invalid bounded radix85 frame');
+        const full = new Uint8Array((encoded.length - 3) / 5 * 4);
+        for (let cursor = 3, offset = 0; cursor < encoded.length; cursor += 5, offset += 4) {
+          let word = 0n;
+          for (const char of encoded.slice(cursor, cursor + 5)) {const digit = alphabet.indexOf(char); if (digit < 0) throw new Error('Invalid radix85 digit'); word = word * 85n + BigInt(digit);}
+          if (word > 4294967295n) throw new Error('Invalid radix85 word');
+          for (let position = 3; position >= 0; position--) {full[offset + position] = Number(word & 255n); word >>= 8n;}
+        }
+        if (padding && full.slice(-padding).some(byte => byte !== 0)) throw new Error('Nonzero radix85 padding');
+        bytes = full.subarray(0, full.length - padding);
+      } else bytes = Uint8Array.from(atob(entry.encoded), char => char.charCodeAt(0));
       const actual = Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', bytes)), byte => byte.toString(16).padStart(2, '0')).join('');
       return {valid: actual === sha && bytes.length === entry.packedBytes, byteLength: entry.byteLength};
     }));
@@ -32,7 +49,7 @@ test('damaged complete schema data stops the canonical business module before an
   expect(match).not.toBeNull();
   const value = JSON.parse(match[2]);
   for (const entry of Object.values(value.entries)) {
-    const bytes = Buffer.from(entry.encoded, 'base64');
+    const bytes = Buffer.from(decodeStaticCodeBytes(entry.encoded, entry.packedBytes), 'binary');
     bytes[bytes.length - 1] ^= 1;
     entry.encoded = bytes.toString('base64');
   }

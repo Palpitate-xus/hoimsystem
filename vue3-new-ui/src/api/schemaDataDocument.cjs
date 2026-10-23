@@ -1,5 +1,5 @@
 /* Read inert generated validation contracts, never clinical data or executable code. */
-const {MAX_SCHEMA_BYTES, decodeSchemaData} = require('./schemaDataCodec.cjs');
+const {MAX_SCHEMA_BYTES, decodeSchemaData, decodeStaticCodeBytes} = require('./schemaDataCodec.cjs');
 const {schemaDataHash} = require('./schemaDataHash.cjs');
 let entries;
 const checked = new Map();
@@ -18,9 +18,9 @@ function readSchemaDocumentData(sha256, byteLength, packedBytes) {
   const key = JSON.stringify([sha256, byteLength, packedBytes]);
   if (checked.has(key)) return checked.get(key);
   const value = entries[sha256];
-  if (!value || Array.isArray(value) || Object.keys(value).sort().join(',') !== 'byteLength,encoded,packedBytes' || value.byteLength !== byteLength || value.packedBytes !== packedBytes || typeof value.encoded !== 'string' || value.encoded.length !== 4 * Math.ceil(packedBytes / 3) || !/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(value.encoded)) throw new Error('Incomplete generated static schema record');
-  const binary = atob(value.encoded);
-  if (binary.length !== packedBytes || btoa(binary) !== value.encoded) throw new Error('Invalid original static schema code bytes');
+  if (!value || Array.isArray(value) || Object.keys(value).sort().join(',') !== 'byteLength,encoded,packedBytes' || value.byteLength !== byteLength || value.packedBytes !== packedBytes || typeof value.encoded !== 'string') throw new Error('Incomplete generated static schema record');
+  const binary = decodeStaticCodeBytes(value.encoded, packedBytes);
+  if (binary.length !== packedBytes) throw new Error('Invalid original static schema code bytes');
   const bytes = Uint8Array.from(binary, char => char.charCodeAt(0));
   if (schemaDataHash(bytes) !== sha256) throw new Error('Generated static schema SHA differs');
   const result = decodeSchemaData(value.encoded, byteLength);

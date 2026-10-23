@@ -3,7 +3,7 @@
 > 由 `fastapi_be/scripts/generate_rbac_matrix.py` 从源码自动生成，请勿手改。
 > `✓`=可访问 | `PUBLIC`=无需登录 | 留空=不可访问
 
-共 **1086** 个接口（PUBLIC 18 个 / 需登录 1068 个）。
+共 **1087** 个接口（PUBLIC 18 个 / 需登录 1069 个）。
 
 
 ### `admin.py`
@@ -628,6 +628,7 @@
 
 | 方法 | 路径 | admin | super_admin | director | doctor | nurse | cashier | pharmacist | guide | patient | lab_technician | registrar | PUBLIC |
 |------|------|------|------|------|------|------|------|------|------|------|------|------|------|
+| GET | `/api/ai/research-variables/scopes/{scope_id}` | ✓ | ✓ | ✓ | ✓ |  |  | ✓ |  |  |  |  |  |
 | GET | `/api/ai/research-variables/dictionaries` | ✓ | ✓ | ✓ | ✓ |  |  | ✓ |  |  |  |  |  |
 | POST | `/api/ai/research-variables/dictionaries` | ✓ | ✓ | ✓ | ✓ |  |  | ✓ |  |  |  |  |  |
 | GET | `/api/ai/research-variables/dictionaries/{dictionary_id}` | ✓ | ✓ | ✓ | ✓ |  |  | ✓ |  |  |  |  |  |

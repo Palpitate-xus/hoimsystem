@@ -1,7 +1,7 @@
 """76 source registry: current purpose authority, metadata and bounded parts.
 
-This router is intentionally test-mounted before shared production integration.
-It neither runs extraction models nor writes clinical/queue/export records.
+These Main source endpoints neither run extraction models nor write
+clinical/queue/export records.
 """
 
 from typing import Annotated, Literal
@@ -38,6 +38,19 @@ def exact_query(request, allowed):
     pairs = list(request.query_params.multi_items())
     if any(key not in allowed for key, _ in pairs) or len({key for key, _ in pairs}) != len(pairs):
         raise HTTPException(422, "来源查询须使用无重复的闭集参数")
+
+
+@router.get("/scopes/{scope_id}")
+def get_variable_scope_context(
+    scope_id: UUID,
+    request: Request,
+    db: Session = Depends(get_db),
+    user: User = Depends(require_roles("super_admin", "admin", "director", "doctor", "pharmacist")),
+):
+    from app.ai.research_variables_scope_context import scope_context
+
+    exact_query(request, set())
+    return reply(scope_context(db, user, scope_id))
 
 
 @router.get("/dictionaries")

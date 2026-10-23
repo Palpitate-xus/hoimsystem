@@ -58,7 +58,9 @@ def test_scope_candidates_from_recorded_acl_do_not_require_or_disclose_original_
 @pytest.mark.parametrize("microsecond", [0, 123456])
 def test_product_sqlite_udf_canonical_note_hashes_and_case_governance_preserve_original_json_escaping(db_session, research_case, monkeypatch, microsecond):
     db, case = db_session, research_case
-    clock = dt.datetime(2026, 10, 21, 12, 0, 0, microsecond)
+    # The fixture grants a window around its actual capture date. Retain both
+    # exact microsecond cases without moving the reader outside that window.
+    clock = (dt.datetime.fromisoformat(case["scope_request"]["valid_from"]).replace(tzinfo=None) + dt.timedelta(days=1)).replace(microsecond=microsecond)
     for module in (cases, collection, registry, sources):
         monkeypatch.setattr(module, "utcnow", lambda: clock)
     _, _, _, _, made = prepared(db, case)

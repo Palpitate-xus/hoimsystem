@@ -45,7 +45,8 @@ def mounted_variable_router():
     original = list(app.router.routes)
     existing = [r for r in original if isinstance(r, APIRoute) and r.endpoint.__module__ == "app.routers.ai_research_variables_sources"]
     if existing:
-        assert len(existing) == 16 and len({(m, r.path) for r in existing for m in r.methods}) == 16
+        assert len(existing) == 17 and len({(m, r.path) for r in existing for m in r.methods}) == 17
+        assert ("GET", "/api/ai/research-variables/scopes/{scope_id}") in {(m, r.path) for r in existing for m in r.methods}
         yield
         return
     source_routes = [r for r in original if isinstance(r, APIRoute) and r.endpoint.__module__ == "app.routers.ai_research_cohort_sources"]
@@ -53,7 +54,7 @@ def mounted_variable_router():
     app.include_router(router, prefix="/api")
     try:
         mounted = [r for r in app.router.routes if isinstance(r, APIRoute) and r.endpoint.__module__ == "app.routers.ai_research_variables_sources"]
-        assert len(mounted) == 16 and len({(m, r.path) for r in mounted for m in r.methods}) == 16
+        assert len(mounted) == 17 and len({(m, r.path) for r in mounted for m in r.methods}) == 17
         yield
     finally:
         app.router.routes[:] = original

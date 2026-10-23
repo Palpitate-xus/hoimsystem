@@ -39,7 +39,7 @@ async def test_main_usage_is_super_only_and_legacy_counts_remain_unknown(async_c
 async def test_main_independent_super_reads_actual_receipt_counts_without_original_source_purposes(async_client, charge_case, auth_headers, inputs, outputs, attempted):
     db = charge_case["db"]
     terminal(charge_case, state="cancelled", inputs=inputs, outputs=outputs, attempted=attempted)
-    actor = User(username="usage_main_" + uuid.uuid4().hex[:16], password="synthetic-only", user_role="super_admin")
+    actor = User(username="usg_main_" + uuid.uuid4().hex[:10], password="synthetic-only", user_role="super_admin")
     db.add(actor)
     db.commit()
     response = await async_client.get("/api/ai/admin/usage", headers=auth_headers(actor.username))

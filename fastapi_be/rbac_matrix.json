@@ -4083,6 +4083,19 @@
    "pharmacist",
    "super_admin"
   ],
+  "function": "get_variable_scope_context",
+  "method": "GET",
+  "module": "ai_research_variables_sources.py",
+  "path": "/api/ai/research-variables/scopes/{scope_id}"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "pharmacist",
+   "super_admin"
+  ],
   "function": "list_dictionaries",
   "method": "GET",
   "module": "ai_research_variables_sources.py",

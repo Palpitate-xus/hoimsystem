@@ -13,7 +13,7 @@ from app.models import User
 
 def assert_exact_usage_event(db, run_id, domain, expected):
     # This independent Super has no patient, event, study or Source purposes.
-    actor = User(username="usage_" + uuid.uuid4().hex[:20], password="synthetic-only", user_role="super_admin")
+    actor = User(username="usg_" + uuid.uuid4().hex[:12], password="synthetic-only", user_role="super_admin")
     db.add(actor)
     db.flush()
     returned = []

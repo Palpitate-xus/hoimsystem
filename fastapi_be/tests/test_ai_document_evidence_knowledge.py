@@ -174,18 +174,21 @@ async def test_generic_knowledge_review_cannot_bypass_document_lineage(knowledge
 
 
 @pytest.mark.parametrize("strip_markers", [False, True])
-def test_document_review_uses_current_nonwaiting_classification_before_any_exclusive_lock(knowledge_case, strip_markers):
+def test_document_review_uses_current_nonwaiting_classification_before_any_knowledge_exclusive_lock(knowledge_case, strip_markers):
     db, actor, _, _, _, _, document = knowledge_case
     if strip_markers:
         document.source_kind = document.source_snapshot_hash = None
         document.source_uri = "manual://forged"
         db.commit()
     document_id, content_hash = document.document_id, document.content_hash
-    statements = []
+    statements, exclusive_tables = [], []
 
     def observe(state):
         if state.is_select:
-            statements.append(str(state.statement.compile(dialect=mysql.dialect())))
+            sql = str(state.statement.compile(dialect=mysql.dialect()))
+            statements.append(sql)
+            if "FOR UPDATE" in sql:
+                exclusive_tables.append(tuple(getattr(table, "name", None) for table in state.statement.get_final_froms()))
 
     event.listen(db, "do_orm_execute", observe)
     try:
@@ -197,7 +200,18 @@ def test_document_review_uses_current_nonwaiting_classification_before_any_exclu
         db.rollback()
     knowledge = [statement for statement in statements if "FROM hoimsystem_ai_knowledge_document" in statement]
     assert len(knowledge) == 1 and knowledge[0].rstrip().endswith("LOCK IN SHARE MODE NOWAIT")
-    assert all("FOR UPDATE" not in statement for statement in statements)
+    # Shared management authority takes technical Gates before User. The
+    # document/publication classifier must still never take a business X lock.
+    technical_gates = {
+        "hoimsystem_ai_charge_write_gate",
+        "hoimsystem_ai_satisfaction_write_gate",
+        "hoimsystem_ai_inventory_write_gate",
+        "hoimsystem_ai_infection_write_gate",
+        "hoimsystem_ai_research_write_gate",
+        "hoimsystem_ai_operations_write_gate",
+        "hoimsystem_ai_training_write_gate",
+    }
+    assert all(len(tables) == 1 and tables[0] in technical_gates for tables in exclusive_tables)
     publication = [statement for statement in statements if "FROM hoimsystem_ai_document_knowledge_publication" in statement]
     if strip_markers:
         assert len(publication) == 1 and publication[0].rstrip().endswith("LOCK IN SHARE MODE NOWAIT")

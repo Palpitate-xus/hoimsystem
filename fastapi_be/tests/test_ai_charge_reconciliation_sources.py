@@ -193,7 +193,12 @@ def test_cashier_requires_current_actual_operations_grant_and_cannot_technically
     assert denied.value.status_code == 403
     assert not any("hoimsystem_inpatient_charge" in query for query in statements)
     grant = AIPatientGrant(
-        user_id=cashier.user_id, patient_id=case["patient"].patient_id, category="operations", reason=NOTE, expires_at=NOW + dt.timedelta(days=1), created_by=case["super_admin_user"].user_id
+        user_id=cashier.user_id,
+        patient_id=case["patient"].patient_id,
+        category="operations",
+        reason=NOTE,
+        expires_at=dt.datetime.now(dt.UTC).replace(tzinfo=None) + dt.timedelta(days=1),
+        created_by=case["super_admin_user"].user_id,
     )
     db.add(grant)
     db.commit()

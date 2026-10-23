@@ -19,7 +19,7 @@ async function open(page,{roles=['super_admin'],token='synthetic-research-regist
   else{p.unexpected.push({method:req.method(),path,query});return route.fulfill({status:503,json:{detail:'unexpected research management request'}});}
   await route.fulfill({status:200,json:{code:200,msg:'synthetic replay',data}});
  });
- await page.goto(harness.origin);await page.waitForFunction(()=>!!window.__researchManagementProbe?.component);await expect.poll(()=>p.calls.filter(v=>B.packets.some(b=>b.path===v.path)).length).toBe(6);return p;
+ await page.goto(harness.origin);await page.waitForFunction(()=>!!window.__researchManagementProbe?.component);await expect.poll(()=>p.calls.filter(v=>B.packets.some(b=>b.path===v.path)).map(v=>v.path).sort()).toEqual(['/api/ai/admin/features','/api/ai/admin/providers','/api/ai/admin/knowledge','/api/ai/admin/grants','/api/ai/admin/audit'].sort());expect(p.calls.some(v=>v.path==='/api/ai/admin/usage')).toBe(false);return p;
 }
 async function enter(page){await page.getByRole('tab',{name:'科研来源治理',exact:true}).click();await expect(page.getByRole('button',{name:'明确选择本项目',exact:true})).toBeVisible();}
 const sourceReads=p=>p.calls.filter(v=>v.path.startsWith('/api/ai/research-cohort/'));

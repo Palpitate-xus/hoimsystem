@@ -65,34 +65,18 @@ test("排台入口分别绑定历史及计划区间，独立展示缺失时间�
   expect(businessWrites).toEqual([]);
 });
 
-test("事件行固定患者与事件，原闭环和RCA文本不显示为独立核实结论", async ({ page }) => {
+test("普通管理员不进入完整RCA来源，也不回退已替换的通用事件任务", async ({ page }) => {
   const { submissions, previews, businessWrites } = await setup(page, "incident");
+  const aiCalls = [];
+  page.on("request", request => { if (new URL(request.url()).pathname.startsWith("/api/ai/")) aiCalls.push(request.url()); });
   await page.goto("/#/system/adverseEvent");
-  await expect(page.getByRole("button", { name: "AI 事件复盘", exact: true })).toHaveCount(1);
-  await page.getByRole("button", { name: "AI 事件复盘", exact: true }).click();
-  const drawer = page.getByRole("dialog", { name: "AI 所选不良事件RCA辅助", exact: true });
-  await expect(drawer.getByRole("combobox", { name: "患者", exact: true })).toBeDisabled();
-  await expect(drawer.getByRole("textbox", { name: "不良事件标识", exact: true })).toHaveValue("7");
-  await expect(drawer.getByRole("textbox", { name: "不良事件标识", exact: true })).toBeDisabled();
-  await expect(drawer.getByRole("combobox", { name: "本次就诊", exact: true })).toHaveCount(0);
-  await drawer.getByRole("button", { name: "查看本次资料", exact: true }).click();
-  const preview = page.getByRole("dialog", { name: "本次提供给 AI 的患者资料", exact: true });
-  await expect(preview).toContainText("独立根因核验状态：未记录");
-  await expect(preview).toContainText("<img src=x onerror=alert(1)>");
-  await expect(preview.locator(".incident-findings img")).toHaveCount(0);
-  await preview.getByText("已保存RCA #8 · 核验状态未记录", { exact: true }).click();
-  await expect(preview).toContainText("原分析待证据核实");
-  await expect(preview.getByRole("region", { name: "已保存RCA #8 · 核验状态未记录", exact: true })).not.toHaveClass(/el-collapse-transition-enter-active/); await preview.getByRole("button", { name: "查看已保存RCA依据", exact: true }).click();
-  const source = page.getByRole("dialog", { name: "核查引用依据", exact: true });
-  await expect(source).toContainText("不是已核实根因");
-  await source.locator("button.el-dialog__headerbtn").click();
-  await preview.locator("button.el-dialog__headerbtn").click();
-  await drawer.getByRole("button", { name: "生成辅助建议", exact: true }).click();
-  await expect.poll(() => submissions.length).toBe(1);
-  expect(previews[0].source_refs).toEqual({ adverse_event_id: "7" });
-  expect(submissions[0]).toMatchObject({ patient_id: 1, input: { adverse_event_id: "7" } });
-  expect(submissions[0].encounter_ref ?? null).toBeNull();
-  await expect(drawer.locator(".incident-findings")).toContainText("事件标识：7");
+  await expect(page.getByRole("cell", { name: "测试患者", exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "AI 事件复盘", exact: true })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "完整RCA来源与调查草稿", exact: true })).toHaveCount(0);
+  await expect(page.getByRole("dialog", { name: "本事件完整RCA来源与调查草稿", exact: true })).toHaveCount(0);
+  expect(aiCalls).toEqual([]);
+  expect(submissions).toEqual([]);
+  expect(previews).toEqual([]);
   expect(businessWrites).toEqual([]);
 });
 

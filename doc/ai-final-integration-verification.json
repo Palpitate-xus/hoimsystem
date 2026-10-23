@@ -1,8 +1,8 @@
 {
   "schema_version": "ai_final_integration_verification_v1",
-  "recorded_at_utc": "2026-10-23T14:14:29.842406+00:00",
+  "recorded_at_utc": "2026-10-23T15:17:02.971958+00:00",
   "status": "staging_integration_in_progress_not_main_admission",
-  "current_phase": "all80_final_third_backend_and_second_complete_browser_acceptance",
+  "current_phase": "all80_final_backend_audit_and_third_complete_browser",
   "goal_scope": "All80 AI capabilities, dedicated Prompts and complete current super_admin management remain in progress; no goal completion, model clinical validation, deployment or push is claimed.",
   "parents": [
     "451111e",
@@ -94768,5 +94768,86 @@
       "interruption_scope": "Only exact owned verifier PID83877 signaled SIGINT; no user app, goal, hospital database, or browser process paused/stopped."
     },
     "collection": "Complete default collection14075 tests20.80seconds, no runtime/pass claim;1584 current sources stable. Third complete backend starts fresh after this test-only commit; full second browser remains frozen and unaffected by backend test code."
+  },
+  "phase_all80_current_bootstrap_and_rca_entry_tests": {
+    "verification_owner": {
+      "path": "doc/ai-all80-build-verification.json",
+      "sha256": "550fccde2bb17d1f9760d96335e14691dbe0145e99054cdc0d18a564b1ff10da",
+      "phase": "phase_all80_current_bootstrap_and_rca_entry_tests"
+    },
+    "base": "03d438a",
+    "second_full_interrupted": {
+      "path": "/tmp/hoim-all80-full-browser-second-verification.json",
+      "sha256": "9fb33a7c90ed6839c1fb18848fafc6f621bf4997261fdef23171aee589c867fd",
+      "exit_code": 130,
+      "elapsed_seconds": 4913.863699229434,
+      "stats": {
+        "startTime": "2026-10-23T13:48:36.366Z",
+        "duration": 4911653.295,
+        "expected": 2258,
+        "skipped": 1648,
+        "unexpected": 2,
+        "flaky": 0
+      },
+      "actual_failures": [
+        "operations integration ordinary admin bootstrap: expected old6, actual current5",
+        "quality/resource legacy RCA positive: expected old AI button for admin, replaced by dedicated Super-only complete source workflow"
+      ],
+      "clarification": "Both unexpected results were actual failed assertions before interruption, NOT one failure plus an interrupted test. Original helper runner scope assumed the latter; actual raw JSON/this summary correct that interpretation.2258P2F1648skipped, no full pass or borrowed sum. Only owned CLI signaled, parent closed, no live owned children; current frontend/dist remained stable."
+    },
+    "changes": [
+      "Three management tests/helpers expect exact current five feature/provider/knowledge/grant/audit GET paths and explicitly no eager usage; original recorded6-packet fixtures kept unchanged. Ordinary role/source rejection, immutable Prompt, held identity and no-write checks retained.",
+      "One legacy quality RCA case now checks current ordinary-admin negative: business event still visible, neither removed generic AI nor dedicated Super entry/dialog is available, no AI calls/previews/submissions/business writes. Original surgery/feedback cases retained. Native Super event/patient binding, full current source/task/trace behavior stays in existing dedicated RCA business/production suites; no legacy fallback restored."
+    ],
+    "gates": {
+      "hoim-all80-bootstrap-isolated-first": {
+        "path": "/tmp/hoim-all80-bootstrap-isolated-first-verification.json",
+        "sha256": "3f67ef3091a99663b1cca8c400ae80a4d3d3fd96a6fa47e7caee250390b4535b",
+        "elapsed_seconds": 191.26646743062884,
+        "count": 25,
+        "result": {
+          "startTime": "2026-10-23T15:11:20.012Z",
+          "duration": 189372.627,
+          "expected": 25,
+          "skipped": 0,
+          "unexpected": 0,
+          "flaky": 0
+        }
+      },
+      "hoim-all80-quality-entry-production-first": {
+        "path": "/tmp/hoim-all80-quality-entry-production-first-verification.json",
+        "sha256": "55d8f35a323ba6a5d001286fc61437c57455c29e17bc2afa20e4bd06f3e7e406",
+        "elapsed_seconds": 9.085603921674192,
+        "count": 3,
+        "result": {
+          "startTime": "2026-10-23T15:15:20.190Z",
+          "duration": 7234.81,
+          "expected": 3,
+          "skipped": 0,
+          "unexpected": 0,
+          "flaky": 0
+        }
+      },
+      "hoim-all80-bootstrap-node-second": {
+        "path": "/tmp/hoim-all80-bootstrap-node-second-verification.json",
+        "sha256": "0c40cc2b9ac865bea17121df13b968ce452713ea6d824f1bc7ba00d448711c78",
+        "elapsed_seconds": 7.117,
+        "count": null,
+        "result": [
+          "✔ original512KiB code bound remains exact for both binary transports (100.460451ms)",
+          "✔ every real public JSON retains full UTF8 and SHA in the actual inert HTML envelope (754.380023ms)",
+          "ℹ tests 226",
+          "ℹ suites 0",
+          "ℹ pass 226",
+          "ℹ fail 0",
+          "ℹ cancelled 0",
+          "ℹ skipped 0",
+          "ℹ todo 0",
+          "ℹ duration_ms 7028.340145"
+        ]
+      }
+    },
+    "results": "25 whole three-file isolated cases191.266seconds; one whole production3 cases9.086seconds;18 whole Node226P7.117seconds after the final four test-file changes. Earlier Node226P10.335 on only bootstrap changes retained, not added. Original780 production source/dist, canonical40.114s and6M/7M/700k limits unchanged; no production code, actual packets, dependency or browser floor change.",
+    "remaining": "Fresh third complete238-file3908-case classified browser on these final test inputs; full backend first/third still frozen, first13 old-calendar/expectation failures have external copied-file fixes validated and await unified application after broad audit. Main remains unchanged."
   }
 }

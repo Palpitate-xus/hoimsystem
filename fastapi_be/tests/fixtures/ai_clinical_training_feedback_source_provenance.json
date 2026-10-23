@@ -1,0 +1,11 @@
+{
+  "schema_version": "clinical_training_actual_source_fixture_provenance_v1",
+  "source_http_packet_file": "/tmp/hoim-training-main-http-first-pytest/test_actual_main_jwt_complete_0/actual-main-training-source-practice-packets.json",
+  "source_http_packet_bytes": 28461,
+  "source_http_packet_sha256": "6773a9f8c00fa8fb2e0a1590ce32b1ebf0dd75d82ea7797558f754eec9ea4c2d",
+  "fixture_file": "fastapi_be/tests/fixtures/ai_clinical_training_feedback_source.json",
+  "fixture_bytes": 3803,
+  "fixture_sha256": "b3e4a141c3ad7c30ef79f2a6c99388ea77289892def6a5d048b8231f82e930ff",
+  "selection": "One exact actual Main/JWT same-course public lesson, committed learner structured submission, deterministic feedback and current public reference parts; no field or publication/status edits",
+  "authority_boundary": "Fixture/hash/internal consistency is not current SQL permission or independent private-key authenticity; runtime still needs actual submission Audit/current source/model permission"
+}

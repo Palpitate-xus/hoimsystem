@@ -24,6 +24,7 @@ class NativeTaskIdentity:
 
 def _domains():
     from app.ai.charge_reconciliation_run_models import AIChargeRunArtifact
+    from app.ai.clinical_training_run_models import AITrainingRunArtifact
     from app.ai.deidentification_run_models import AIDeidentificationRunSource
     from app.ai.document_change_run_models import AIDocumentChangeRunArtifact
     from app.ai.document_extraction_models import AIDocumentExtractionRunAnchor
@@ -41,6 +42,7 @@ def _domains():
         ("research_cohort", AIResearchCohortRunArtifact, "case_id"),
         ("deidentification", AIDeidentificationRunSource, "case_id"),
         ("operations_support", AIOperationsRunArtifact, "case_id"),
+        ("clinical_training", AITrainingRunArtifact, "submission_id"),
     )
 
 

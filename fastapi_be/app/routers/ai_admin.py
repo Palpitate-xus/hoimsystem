@@ -145,6 +145,8 @@ def update_feature(key: str, req: FeatureWrite, db: Session = Depends(get_db), u
         if spec.requires_operational_validation and config.validation_status != "validated":
             if spec.number == 79:
                 raise HTTPException(422, "运维资料模型完成指定受审资料、任务目标与使用范围的验证后才能启用；超级管理员可先预览")
+            if spec.number == 80:
+                raise HTTPException(422, "培训AI反馈完成明确教学范围验证后才能启用；课程发布和本地评分不代表模型反馈效果验证")
             purpose = "优化" if spec.engine == "optimizer" else "预测"
             raise HTTPException(422, f"运营{purpose}完成指定目标与范围的验证后才能启用；超级管理员可先预览，来源确认不代表实际业务验证")
         if config.validation_status == "suspended":
@@ -1098,15 +1100,18 @@ def list_global_runs(
         query = query.filter(AIRun.run_id.in_(db.query(AIFeedback.run_id).filter(AIFeedback.outcome == outcome)))
     if encounter_ref is not None:
         query = query.filter(AIRun.encounter_ref == encounter_ref)
-    total = query.with_entities(func.count(AIRun.run_id)).with_for_update(read=True).scalar() if feature_key == "charge_reconciliation" else query.count()
-    rows = (
+    current_directory = feature_key in {None, "charge_reconciliation", "clinical_training"}
+    total = query.with_entities(func.count(AIRun.run_id)).with_for_update(read=True).scalar() if current_directory else query.count()
+    rows_query = (
         query.options(defer(AIRun.input_json), defer(AIRun.result_json), defer(AIRun.evidence_json), defer(AIRun.context_metadata_json))
         .order_by(AIRun.create_time.desc(), AIRun.run_id)
         .offset((page - 1) * page_size)
         .limit(page_size)
-        .all()
     )
+    rows = (rows_query.with_for_update(read=True) if current_directory else rows_query).all()
     counts = dict(db.query(AIFeedback.run_id, func.count(AIFeedback.feedback_id)).filter(AIFeedback.run_id.in_([item.run_id for item in rows])).group_by(AIFeedback.run_id).all()) if rows else {}
+    from app.ai.clinical_training_shared import is_training_task
+    from app.ai.clinical_training_views import technical_metadata as training_metadata
     from app.ai.deidentification_shared import directory_metadata as deidentification_metadata
     from app.ai.deidentification_shared import is_deidentification_task
     from app.ai.document_change_storage import is_document_change_run
@@ -1122,6 +1127,8 @@ def list_global_runs(
                 if is_deidentification_task(db, item)
                 else operations_metadata(db, user, item.run_id).model_dump(mode="json")
                 if is_operations_task(db, item)
+                else training_metadata(db, user, item.run_id).model_dump(mode="json")
+                if is_training_task(db, item)
                 else directory_metadata(db, user, item)
                 if is_research_task(db, item)
                 else run_view(db, user, item, False, current=False)
@@ -1156,6 +1163,11 @@ def inspect_run_trace(run_id: str, db: Session = Depends(get_db), user: User = D
 
     if identity is not None and identity.domain == "operations_support" or identity is None and is_operations_task(db, run_id):
         return {"code": 200, "msg": "success", "data": operations_trace(db, user, run_id)}
+    from app.ai.clinical_training_shared import is_training_task
+    from app.ai.clinical_training_views import split_trace as training_trace
+
+    if identity is not None and identity.domain == "clinical_training" or identity is None and is_training_task(db, run_id):
+        return {"code": 200, "msg": "success", "data": training_trace(db, user, run_id)}
     from app.ai.research_cohort_shared import is_research_task, split_trace
 
     if identity is not None and identity.domain == "deidentification" or identity is None and is_deidentification_task(db, run_id):
@@ -1586,9 +1598,12 @@ def revoke_grant(grant_id: int, db: Session = Depends(get_db), user: User = Depe
 @router.get("/ai/admin/audit")
 def list_audit(db: Session = Depends(get_db), user: User = Depends(require_roles("super_admin")), limit: int = Query(100, ge=1, le=300)) -> dict:
     """Review redacted configuration changes by their actual administrator identity."""
+    from app.ai.clinical_training_views import generic_audit_detail
+
+    _current_super_admin(db, user)
     items = db.query(AIAuditEvent).order_by(AIAuditEvent.event_id.desc()).limit(limit).all()
     names = ("event_id", "actor_id", "action", "target", "create_time")
-    return {"code": 200, "msg": "success", "data": [{**{name: getattr(item, name) for name in names}, "detail": json.loads(item.detail_json)} for item in items]}
+    return {"code": 200, "msg": "success", "data": [{**{name: getattr(item, name) for name in names}, "detail": generic_audit_detail(item.action, item.detail_json)} for item in items]}
 
 
 @router.get("/ai/admin/usage")

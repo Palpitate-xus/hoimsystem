@@ -3,7 +3,7 @@
 > 由 `fastapi_be/scripts/generate_rbac_matrix.py` 从源码自动生成，请勿手改。
 > `✓`=可访问 | `PUBLIC`=无需登录 | 留空=不可访问
 
-共 **985** 个接口（PUBLIC 18 个 / 需登录 967 个）。
+共 **1010** 个接口（PUBLIC 18 个 / 需登录 992 个）。
 
 
 ### `admin.py`
@@ -177,6 +177,41 @@
 | GET | `/api/ai/charge-reconciliation/cases/{identifier}` | ✓ | ✓ | ✓ |  |  | ✓ |  |  |  |  |  |  |
 | POST | `/api/ai/charge-reconciliation/cases/{identifier}/review` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
 | POST | `/api/ai/charge-reconciliation/cases/{identifier}/revoke` | ✓ | ✓ | ✓ |  |  | ✓ |  |  |  |  |  |  |
+
+### `ai_clinical_training_sources.py`
+
+| 方法 | 路径 | admin | super_admin | director | doctor | nurse | cashier | pharmacist | guide | patient | lab_technician | registrar | PUBLIC |
+|------|------|------|------|------|------|------|------|------|------|------|------|------|------|
+| GET | `/api/ai/clinical-training/lessons` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/clinical-training/lessons` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/clinical-training/lessons/{lesson_id}` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/clinical-training/lessons/{lesson_id}/parts/{part_name}` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/clinical-training/lessons/{lesson_id}/reviews` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/clinical-training/lessons/{lesson_id}/revoke` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/clinical-training/reviews` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/clinical-training/reviews/{review_id}` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/clinical-training/reviews/{review_id}/body` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/clinical-training/reviews/{review_id}/revoke` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/clinical-training/published-lessons` | ✓ | ✓ | ✓ | ✓ | ✓ |  | ✓ |  |  |  |  |  |
+| GET | `/api/ai/clinical-training/published-lessons/{review_id}` | ✓ | ✓ | ✓ | ✓ | ✓ |  | ✓ |  |  |  |  |  |
+| POST | `/api/ai/clinical-training/submissions` | ✓ | ✓ | ✓ | ✓ | ✓ |  | ✓ |  |  |  |  |  |
+| GET | `/api/ai/clinical-training/submissions` | ✓ | ✓ | ✓ | ✓ | ✓ |  | ✓ |  |  |  |  |  |
+| GET | `/api/ai/clinical-training/submission-management` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/clinical-training/submissions/{submission_id}` | ✓ | ✓ | ✓ | ✓ | ✓ |  | ✓ |  |  |  |  |  |
+| GET | `/api/ai/clinical-training/submissions/{submission_id}/parts/{part_name}` | ✓ | ✓ | ✓ | ✓ | ✓ |  | ✓ |  |  |  |  |  |
+
+### `ai_clinical_training_tasks.py`
+
+| 方法 | 路径 | admin | super_admin | director | doctor | nurse | cashier | pharmacist | guide | patient | lab_technician | registrar | PUBLIC |
+|------|------|------|------|------|------|------|------|------|------|------|------|------|------|
+| GET | `/api/ai/clinical-training/task-descriptor` | ✓ | ✓ | ✓ | ✓ | ✓ |  | ✓ |  |  |  |  |  |
+| POST | `/api/ai/clinical-training/tasks` | ✓ | ✓ | ✓ | ✓ | ✓ |  | ✓ |  |  |  |  |  |
+| GET | `/api/ai/clinical-training/tasks` | ✓ | ✓ | ✓ | ✓ | ✓ |  | ✓ |  |  |  |  |  |
+| GET | `/api/ai/clinical-training/tasks/{run_id}` | ✓ | ✓ | ✓ | ✓ | ✓ |  | ✓ |  |  |  |  |  |
+| GET | `/api/ai/clinical-training/tasks/{run_id}/parts/{part_name}` | ✓ | ✓ | ✓ | ✓ | ✓ |  | ✓ |  |  |  |  |  |
+| POST | `/api/ai/clinical-training/tasks/{run_id}/cancel` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/clinical-training/tasks/{run_id}/feedback` | ✓ | ✓ | ✓ | ✓ | ✓ |  | ✓ |  |  |  |  |  |
+| GET | `/api/ai/clinical-training/tasks/{run_id}/trace` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
 
 ### `ai_coding_evidence.py`
 

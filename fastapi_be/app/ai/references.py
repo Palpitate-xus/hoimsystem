@@ -49,5 +49,6 @@ SOURCE_REFERENCE_KEYS = frozenset(
         "research_cohort_case_id",
         "deidentification_case_id",
         "operations_case_id",
+        "clinical_training_submission_id",
     }
 )

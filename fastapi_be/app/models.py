@@ -13,6 +13,9 @@ from app.ai import bed_models as _bed_models  # noqa: F401
 from app.ai import bed_series_models as _bed_series_models  # noqa: F401
 from app.ai import charge_reconciliation_models as _charge_reconciliation_models  # noqa: F401
 from app.ai import charge_reconciliation_run_models as _charge_reconciliation_run_models  # noqa: F401
+from app.ai import clinical_training_models as _clinical_training_models  # noqa: F401
+from app.ai import clinical_training_practice_models as _clinical_training_practice_models  # noqa: F401
+from app.ai import clinical_training_run_models as _clinical_training_run_models  # noqa: F401
 from app.ai import coding_evidence_models as _coding_evidence_models  # noqa: F401
 from app.ai import deidentification_models as _deidentification_models  # noqa: F401
 from app.ai import deidentification_run_models as _deidentification_run_models  # noqa: F401

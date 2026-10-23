@@ -62,6 +62,8 @@ def check_configuration(db: Session, user: User, spec: FeatureSpec, config: AIFe
     if not preview and spec.requires_operational_validation and config.validation_status != "validated":
         if spec.number == 79:
             raise HTTPException(409, "运维模型尚未完成明确受审资料与任务使用范围验证，超级管理员可先预览")
+        if spec.number == 80:
+            raise HTTPException(409, "培训AI反馈尚未完成明确教学范围验证，超级管理员可先预览自己的受审练习")
         purpose = "优化" if spec.engine == "optimizer" else "预测"
         raise HTTPException(409, f"该运营{purpose}尚未完成指定目标与范围的验证，超级管理员可先预览")
     provider = db.get(AIProvider, config.provider_id)
@@ -103,6 +105,10 @@ def create_run(db: Session, user: User, req: RunRequest) -> AIRun:
         return create_shared_run(db, user, req)
     if req.feature_key == "operations_support":
         from app.ai.operations_support_shared import create_shared_run
+
+        return create_shared_run(db, user, req)
+    if req.feature_key == "clinical_training":
+        from app.ai.clinical_training_shared import create_shared_run
 
         return create_shared_run(db, user, req)
     if req.feature_key == "research_cohort":
@@ -412,10 +418,15 @@ def create_run(db: Session, user: User, req: RunRequest) -> AIRun:
 
 def authorize_run(db: Session, user: User, run: AIRun) -> None:
     """Re-check current permissions, including revoked care access, on every result read."""
+    from app.ai.clinical_training_shared import guard_training_task, is_training_task
     from app.ai.deidentification_shared import guard_task as guard_deidentification_task
     from app.ai.deidentification_shared import is_deidentification_task
     from app.ai.native_task_routing import opaque_run_id
     from app.ai.operations_support_shared import guard_operations_task, is_operations_task
+
+    if is_training_task(db, run):
+        guard_training_task(db, user, opaque_run_id(run))
+        return
     from app.ai.research_cohort_shared import guard_research_task, is_research_task
 
     if is_deidentification_task(db, run):
@@ -605,10 +616,18 @@ def describe_run(run: AIRun, include_result: bool = True, *, user: User | None =
     from app.ai.charge_reconciliation_storage import is_charge_run
 
     db = object_session(run)
+    from app.ai.clinical_training_shared import is_training_task
     from app.ai.deidentification_shared import directory_metadata as deidentification_metadata
     from app.ai.deidentification_shared import is_deidentification_task
     from app.ai.native_task_routing import opaque_run_id
     from app.ai.operations_support_shared import is_operations_task
+
+    if is_training_task(db, run):
+        if db is None or user is None:
+            raise HTTPException(403, "培训任务元数据须在当前授权会话读取")
+        from app.ai.clinical_training_views import describe_task
+
+        return describe_task(db, user, opaque_run_id(run)).model_dump(mode="json")
     from app.ai.research_cohort_shared import is_research_task
 
     if is_deidentification_task(db, run):
@@ -936,6 +955,10 @@ def describe_run(run: AIRun, include_result: bool = True, *, user: User | None =
 
 def claim_next_run(db: Session):
     """Claim durable work without allowing two workers to execute the same queued task."""
+    from app.ai.clinical_training_runtime import claim_training_run
+    from app.ai.clinical_training_shared import is_training_task
+    from app.ai.clinical_training_shared import quarantine_orphan as quarantine_training_orphan
+    from app.ai.clinical_training_shared import queue_candidate_condition as training_condition
     from app.ai.deidentification_dispatch import claim_deidentification_run
     from app.ai.deidentification_shared import is_deidentification_task
     from app.ai.deidentification_shared_dispatch import quarantine_orphan as quarantine_deidentification_orphan
@@ -955,7 +978,7 @@ def claim_next_run(db: Session):
     for _ in range(128):
         candidate = (
             db.query(AIRun.run_id, AIRun.feature_key)
-            .filter(AIRun.status == "queued", ~AIRun.run_id.in_(skipped), queue_candidate_condition(db), deidentification_queue_condition(db), operations_condition(db), queue_identity_condition())
+            .filter(AIRun.status == "queued", ~AIRun.run_id.in_(skipped), queue_candidate_condition(db), deidentification_queue_condition(db), operations_condition(db), training_condition(db), queue_identity_condition())
             .order_by(AIRun.create_time, AIRun.run_id)
             .first()
         )
@@ -983,9 +1006,28 @@ def claim_next_run(db: Session):
                 return candidate.run_id, lease
             skipped.append(candidate.run_id)
             continue
+        if domain == "clinical_training":
+            try:
+                lease = claim_training_run(db, candidate.run_id)
+            except HTTPException as exc:
+                if exc.status_code not in {403, 404, 409}:
+                    raise
+                lease = None
+            if lease is not None:
+                return candidate.run_id, lease
+            skipped.append(candidate.run_id)
+            continue
         if domain is None and is_operations_task(db, candidate.run_id):
             try:
                 quarantine_orphan(db, candidate.run_id)
+            except HTTPException as exc:
+                if exc.status_code not in {403, 404, 409}:
+                    raise
+            skipped.append(candidate.run_id)
+            continue
+        if domain is None and is_training_task(db, candidate.run_id):
+            try:
+                quarantine_training_orphan(db, candidate.run_id)
             except HTTPException as exc:
                 if exc.status_code not in {403, 404, 409}:
                     raise
@@ -1039,6 +1081,8 @@ def _recheck_task(db: Session, run: AIRun) -> tuple[FeatureSpec, AIProvider, dic
         raise AIExecutionError("NATIVE_ARTIFACT_REQUIRED", "75任务只接受完整专用来源和具体claim回执，不沿用通用推理")
     if run.feature_key == "operations_support":
         raise AIExecutionError("NATIVE_ARTIFACT_REQUIRED", "运维任务必须使用完整受审资料及具体原领取回执，未降级通用模型")
+    if run.feature_key == "clinical_training":
+        raise AIExecutionError("NATIVE_ARTIFACT_REQUIRED", "培训任务须使用实际已提交练习和原具体领取回执，未降级通用推理")
     if run.feature_key == "research_cohort":
         raise AIExecutionError("NATIVE_ARTIFACT_REQUIRED", "科研任务只接受完整专用来源和具体claim回执，不沿用通用推理")
     if run.feature_key == "feedback_analysis":
@@ -1126,6 +1170,7 @@ async def execute_claimed(run_id: str, lease: str, *, transport=None, research_c
     """Release SQL connections during inference; recheck authorization before storing results."""
     from app import database
     from app.ai.charge_reconciliation_storage import is_charge_run
+    from app.ai.clinical_training_shared import is_training_task
     from app.ai.deidentification_dispatch import validate_delivery as validate_deidentification_delivery
     from app.ai.deidentification_shared import is_deidentification_task
     from app.ai.document_change_access import has_native_identity
@@ -1152,6 +1197,8 @@ async def execute_claimed(run_id: str, lease: str, *, transport=None, research_c
             raise HTTPException(409, "75原claim回执或持久域不一致，未改变任务或执行通用模型")
         operations_task = domain == "operations_support"
         operations_orphan = domain is None and is_operations_task(routing_db, run_id)
+        training_task = domain == "clinical_training"
+        training_orphan = domain is None and is_training_task(routing_db, run_id)
         research_task = domain == "research_cohort"
         research_orphan = domain is None and is_research_task(routing_db, run_id)
         research_dispatch = False
@@ -1172,7 +1219,7 @@ async def execute_claimed(run_id: str, lease: str, *, transport=None, research_c
             routing_db.get(AIRun, run_id)
             if header is not None
             and domain is None
-            and not any((deidentification_task, deidentification_orphan, operations_task, operations_orphan, research_task, research_orphan, drug_label_task, satisfaction_task, document_task, change_task))
+            and not any((training_task, training_orphan, deidentification_task, deidentification_orphan, operations_task, operations_orphan, research_task, research_orphan, drug_label_task, satisfaction_task, document_task, change_task))
             else None
         )
         if routing_run is not None:
@@ -1191,6 +1238,13 @@ async def execute_claimed(run_id: str, lease: str, *, transport=None, research_c
         from app.ai.operations_support_execution import execute_operations_claimed
 
         await execute_operations_claimed(run_id, lease, transport=transport)
+        return
+    if training_orphan:
+        raise HTTPException(409, "培训任务缺少完整持久分件，未读取正文或执行通用模型")
+    if training_task:
+        from app.ai.clinical_training_execution import execute_training_claimed
+
+        await execute_training_claimed(run_id, lease, transport=transport)
         return
     if research_task:
         if research_dispatch:
@@ -1605,6 +1659,9 @@ def expire_interrupted_runs(db: Session) -> int:
     """Mark abandoned inference failed without repeating potentially billable calls."""
     from app.ai.charge_reconciliation_execution import expire_interrupted_charge_runs
     from app.ai.charge_reconciliation_run_models import AIChargeRunArtifact
+    from app.ai.clinical_training_run_models import AITrainingRunArtifact
+    from app.ai.clinical_training_runtime import expire_interrupted_training_runs
+    from app.ai.clinical_training_shared import marker_expression as training_marker
     from app.ai.deidentification_run_models import AIDeidentificationRunSource
     from app.ai.document_change_run_models import AIDocumentChangeRunArtifact
     from app.ai.document_change_runtime import expire_interrupted_change_runs
@@ -1619,6 +1676,7 @@ def expire_interrupted_runs(db: Session) -> int:
     from app.ai.satisfaction_execution import expire_interrupted_satisfaction_runs
 
     recovered = expire_interrupted_operations_runs(db)
+    recovered += expire_interrupted_training_runs(db)
     recovered += expire_interrupted_change_runs(db)
     recovered += expire_interrupted_charge_runs(db)
     recovered += expire_interrupted_satisfaction_runs(db)
@@ -1633,6 +1691,8 @@ def expire_interrupted_runs(db: Session) -> int:
             AIRun.feature_key != CHANGE_FEATURE,
             ~operations_marker(mysql=db.get_bind().dialect.name in {"mysql", "mariadb"}),
             ~AIRun.run_id.in_(db.query(AIOperationsRunArtifact.run_id)),
+            ~training_marker(mysql=db.get_bind().dialect.name in {"mysql", "mariadb"}),
+            ~AIRun.run_id.in_(db.query(AITrainingRunArtifact.run_id)),
             ~AIRun.run_id.in_(db.query(AIDocumentChangeRunArtifact.run_id)),
             ~AIRun.run_id.in_(db.query(AIChargeRunArtifact.run_id)),
             ~AIRun.run_id.in_(db.query(AISatisfactionRunArtifact.run_id)),

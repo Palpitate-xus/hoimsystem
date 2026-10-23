@@ -227,6 +227,7 @@ class OperationLogMiddleware(BaseHTTPMiddleware):
         "/api/ai/admin/image-assets",
         "/api/ai/ecg-assets",
         "/api/ai/admin/ecg-assets",
+        "/api/ai/clinical-training",
         "/api/clinicalDiagnosis/review",
     }
 
@@ -384,6 +385,8 @@ from app.routers import (
     ai_bed_series,
     ai_bed_sources,
     ai_charge_reconciliation,
+    ai_clinical_training_sources,
+    ai_clinical_training_tasks,
     ai_coding_evidence,
     ai_deidentification,
     ai_deidentification_tasks,
@@ -557,6 +560,8 @@ app.include_router(ai_document_change.router, prefix="/api")
 app.include_router(ai_document_change_runs.router, prefix="/api")
 app.include_router(ai_coding_evidence.router, prefix="/api")
 app.include_router(ai_charge_reconciliation.router, prefix="/api")
+app.include_router(ai_clinical_training_sources.router, prefix="/api")
+app.include_router(ai_clinical_training_tasks.router, prefix="/api")
 app.include_router(ai_satisfaction_sources.router, prefix="/api")
 app.include_router(ai_deidentification.router, prefix="/api")
 app.include_router(ai_deidentification_tasks.router, prefix="/api")

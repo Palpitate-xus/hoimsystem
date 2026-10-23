@@ -1126,6 +1126,291 @@
  },
  {
   "auth": [
+   "super_admin"
+  ],
+  "function": "list_lessons",
+  "method": "GET",
+  "module": "ai_clinical_training_sources.py",
+  "path": "/api/ai/clinical-training/lessons"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "create_lesson",
+  "method": "POST",
+  "module": "ai_clinical_training_sources.py",
+  "path": "/api/ai/clinical-training/lessons"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "lesson_metadata",
+  "method": "GET",
+  "module": "ai_clinical_training_sources.py",
+  "path": "/api/ai/clinical-training/lessons/{lesson_id}"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "lesson_part",
+  "method": "GET",
+  "module": "ai_clinical_training_sources.py",
+  "path": "/api/ai/clinical-training/lessons/{lesson_id}/parts/{part_name}"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "review_lesson",
+  "method": "POST",
+  "module": "ai_clinical_training_sources.py",
+  "path": "/api/ai/clinical-training/lessons/{lesson_id}/reviews"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "revoke_lesson",
+  "method": "POST",
+  "module": "ai_clinical_training_sources.py",
+  "path": "/api/ai/clinical-training/lessons/{lesson_id}/revoke"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "list_reviews",
+  "method": "GET",
+  "module": "ai_clinical_training_sources.py",
+  "path": "/api/ai/clinical-training/reviews"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "review_metadata",
+  "method": "GET",
+  "module": "ai_clinical_training_sources.py",
+  "path": "/api/ai/clinical-training/reviews/{review_id}"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "review_body",
+  "method": "GET",
+  "module": "ai_clinical_training_sources.py",
+  "path": "/api/ai/clinical-training/reviews/{review_id}/body"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "revoke_review",
+  "method": "POST",
+  "module": "ai_clinical_training_sources.py",
+  "path": "/api/ai/clinical-training/reviews/{review_id}/revoke"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "nurse",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "published_lessons",
+  "method": "GET",
+  "module": "ai_clinical_training_sources.py",
+  "path": "/api/ai/clinical-training/published-lessons"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "nurse",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "public_lesson",
+  "method": "GET",
+  "module": "ai_clinical_training_sources.py",
+  "path": "/api/ai/clinical-training/published-lessons/{review_id}"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "nurse",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "submit_practice",
+  "method": "POST",
+  "module": "ai_clinical_training_sources.py",
+  "path": "/api/ai/clinical-training/submissions"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "nurse",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "own_submissions",
+  "method": "GET",
+  "module": "ai_clinical_training_sources.py",
+  "path": "/api/ai/clinical-training/submissions"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "managed_submissions",
+  "method": "GET",
+  "module": "ai_clinical_training_sources.py",
+  "path": "/api/ai/clinical-training/submission-management"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "nurse",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "submission_metadata",
+  "method": "GET",
+  "module": "ai_clinical_training_sources.py",
+  "path": "/api/ai/clinical-training/submissions/{submission_id}"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "nurse",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "submission_part",
+  "method": "GET",
+  "module": "ai_clinical_training_sources.py",
+  "path": "/api/ai/clinical-training/submissions/{submission_id}/parts/{part_name}"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "nurse",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "task_descriptor",
+  "method": "GET",
+  "module": "ai_clinical_training_tasks.py",
+  "path": "/api/ai/clinical-training/task-descriptor"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "nurse",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "create_task",
+  "method": "POST",
+  "module": "ai_clinical_training_tasks.py",
+  "path": "/api/ai/clinical-training/tasks"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "nurse",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "list_tasks",
+  "method": "GET",
+  "module": "ai_clinical_training_tasks.py",
+  "path": "/api/ai/clinical-training/tasks"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "nurse",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "task_metadata",
+  "method": "GET",
+  "module": "ai_clinical_training_tasks.py",
+  "path": "/api/ai/clinical-training/tasks/{run_id}"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "nurse",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "task_part",
+  "method": "GET",
+  "module": "ai_clinical_training_tasks.py",
+  "path": "/api/ai/clinical-training/tasks/{run_id}/parts/{part_name}"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "cancel_task",
+  "method": "POST",
+  "module": "ai_clinical_training_tasks.py",
+  "path": "/api/ai/clinical-training/tasks/{run_id}/cancel"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "doctor",
+   "nurse",
+   "pharmacist",
+   "super_admin"
+  ],
+  "function": "review_task",
+  "method": "POST",
+  "module": "ai_clinical_training_tasks.py",
+  "path": "/api/ai/clinical-training/tasks/{run_id}/feedback"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "task_trace",
+  "method": "GET",
+  "module": "ai_clinical_training_tasks.py",
+  "path": "/api/ai/clinical-training/tasks/{run_id}/trace"
+ },
+ {
+  "auth": [
    "admin",
    "director",
    "doctor",

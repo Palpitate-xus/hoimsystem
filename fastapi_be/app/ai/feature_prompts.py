@@ -4,6 +4,7 @@ from types import MappingProxyType
 
 from app.ai.catalog import COMMON_SYSTEM_PROMPT
 from app.ai.charge_reconciliation_prompt import CHARGE_RECONCILIATION_SYSTEM_PROMPT
+from app.ai.clinical_training_task_prompt import SYSTEM_PROMPT as TRAINING_SYSTEM_PROMPT
 from app.ai.coding_evidence_prompt import CODING_SYSTEM_PROMPT
 from app.ai.deidentification_prompt import SYSTEM_PROMPT as DEIDENTIFICATION_SYSTEM_PROMPT
 from app.ai.document_change_prompt import SYSTEM_PROMPT as DOCUMENT_CHANGE_SYSTEM_PROMPT
@@ -24,6 +25,7 @@ SYSTEM_PROMPT_OVERRIDES = MappingProxyType(
         "research_cohort": RESEARCH_SYSTEM_PROMPT,
         "deidentification": DEIDENTIFICATION_SYSTEM_PROMPT,
         "operations_support": OPERATIONS_SYSTEM_PROMPT,
+        "clinical_training": TRAINING_SYSTEM_PROMPT,
     }
 )
 

@@ -31,13 +31,14 @@ def test_audit_readers_recheck_stale_super_before_any_run_read(db_session, seed_
         event.remove(db_session, "do_orm_execute", observe)
         db_session.rollback()
     # All five mixed-directory gates precede the actor; none reads Run/Source text.
-    assert len(sql) == 6
+    assert len(sql) == 7
     assert "hoimsystem_ai_charge_write_gate" in sql[0] and sql[0].rstrip().endswith("FOR UPDATE")
     assert "hoimsystem_ai_satisfaction_write_gate" in sql[1] and sql[1].rstrip().endswith("FOR UPDATE")
     assert "hoimsystem_ai_inventory_write_gate" in sql[2] and sql[2].rstrip().endswith("FOR UPDATE")
     assert "hoimsystem_ai_research_write_gate" in sql[3] and sql[3].rstrip().endswith("FOR UPDATE")
     assert "hoimsystem_ai_operations_write_gate" in sql[4] and sql[4].rstrip().endswith("FOR UPDATE")
-    assert "hoimsystem_users" in sql[5] and sql[5].rstrip().endswith("LOCK IN SHARE MODE")
+    assert "hoimsystem_ai_training_write_gate" in sql[5] and sql[5].rstrip().endswith("FOR UPDATE")
+    assert "hoimsystem_users" in sql[6] and sql[6].rstrip().endswith("LOCK IN SHARE MODE")
 
 
 def test_audit_actor_rejects_changed_loaded_token_epoch_before_task_reads(db_session, seed_data):

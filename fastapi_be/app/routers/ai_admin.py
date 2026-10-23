@@ -87,6 +87,12 @@ def _commit(db: Session) -> None:
         raise
 
 
+def _current_provider(db, provider_id):
+    """Use current SQL and refresh an already cached provider after Config X."""
+    with db.no_autoflush:
+        return db.query(AIProvider).filter_by(provider_id=provider_id).populate_existing().with_for_update(read=True).one_or_none()
+
+
 @router.get("/ai/admin/features")
 def list_features(db: Session = Depends(get_db), user: User = Depends(require_roles("super_admin"))) -> dict:
     """List all 80 capabilities, including disabled and unvalidated ones."""
@@ -110,7 +116,7 @@ def update_feature(key: str, req: FeatureWrite, db: Session = Depends(get_db), u
     spec = get_spec(key)
     config = feature_config(db, key, user.user_id, req.expected_revision)
     if "provider_id" in req.model_fields_set:
-        if req.provider_id is not None and db.get(AIProvider, req.provider_id) is None:
+        if req.provider_id is not None and _current_provider(db, req.provider_id) is None:
             raise HTTPException(404, "模型配置不存在")
         if config.provider_id != req.provider_id:
             invalidate_feature(config)
@@ -138,7 +144,7 @@ def update_feature(key: str, req: FeatureWrite, db: Session = Depends(get_db), u
     if req.enabled is not None:
         config.enabled = int(req.enabled)
     if config.enabled:
-        provider = db.get(AIProvider, config.provider_id) if config.provider_id else None
+        provider = _current_provider(db, config.provider_id) if config.provider_id else None
         if not provider or not provider.enabled:
             raise HTTPException(422, "启用前请选择已启用的模型")
         issues = provider_feature_issues(spec, provider)
@@ -172,7 +178,7 @@ def list_providers(db: Session = Depends(get_db), user: User = Depends(require_r
 @admin_write
 async def check_speech_provider(provider_id: int, req: ProviderCheck, db: Session = Depends(get_db), user: User = Depends(require_roles("super_admin"))) -> dict:
     """Inspect the saved endpoint only; never turn a connectivity check into clinical validation."""
-    provider = db.get(AIProvider, provider_id)
+    provider = _current_provider(db, provider_id)
     if provider is None:
         raise HTTPException(404, "模型配置不存在")
     ensure_revision(provider.revision, req.expected_revision)
@@ -187,7 +193,7 @@ async def check_speech_provider(provider_id: int, req: ProviderCheck, db: Sessio
     except AIExecutionError as exc:
         error = exc
     db.expire_all()
-    actor, current = db.get(User, actor_id), db.get(AIProvider, provider_id)
+    actor, current = db.get(User, actor_id), _current_provider(db, provider_id)
     if actor is None or actor.user_role != "super_admin":
         raise HTTPException(403, "当前用户不再具备AI管理权限")
     if current is None:
@@ -223,7 +229,7 @@ async def check_speech_provider(provider_id: int, req: ProviderCheck, db: Sessio
 @admin_write
 async def check_ecg_provider(provider_id: int, req: ProviderCheck, db: Session = Depends(get_db), user: User = Depends(require_roles("super_admin"))) -> dict:
     """Inspect only the saved ECG endpoint; never enable, save a model or approve clinical use."""
-    provider = db.get(AIProvider, provider_id)
+    provider = _current_provider(db, provider_id)
     if provider is None:
         raise HTTPException(404, "模型配置不存在")
     ensure_revision(provider.revision, req.expected_revision)
@@ -238,7 +244,7 @@ async def check_ecg_provider(provider_id: int, req: ProviderCheck, db: Session =
     except AIExecutionError as exc:
         error = exc
     db.expire_all()
-    actor, current = db.get(User, actor_id), db.get(AIProvider, provider_id)
+    actor, current = db.get(User, actor_id), _current_provider(db, provider_id)
     if actor is None or actor.user_role != "super_admin":
         raise HTTPException(403, "当前用户不再具备AI管理权限")
     if current is None:
@@ -274,7 +280,7 @@ async def check_ecg_provider(provider_id: int, req: ProviderCheck, db: Session =
 @admin_write
 async def check_image_provider(provider_id: int, req: ProviderCheck, db: Session = Depends(get_db), user: User = Depends(require_roles("super_admin"))) -> dict:
     """Inspect only the saved image endpoint; no pixels, inference, enabling or clinical approval."""
-    provider = db.get(AIProvider, provider_id)
+    provider = _current_provider(db, provider_id)
     if provider is None:
         raise HTTPException(404, "模型配置不存在")
     ensure_revision(provider.revision, req.expected_revision)
@@ -289,7 +295,7 @@ async def check_image_provider(provider_id: int, req: ProviderCheck, db: Session
     except AIExecutionError as exc:
         error = exc
     db.expire_all()
-    actor, current = db.get(User, actor_id), db.get(AIProvider, provider_id)
+    actor, current = db.get(User, actor_id), _current_provider(db, provider_id)
     if actor is None or actor.user_role != "super_admin":
         raise HTTPException(403, "当前用户不再具备AI管理权限")
     if current is None:
@@ -325,7 +331,7 @@ async def check_image_provider(provider_id: int, req: ProviderCheck, db: Session
 @admin_write
 async def check_forecast_provider(provider_id: int, req: ProviderCheck, db: Session = Depends(get_db), user: User = Depends(require_roles("super_admin"))) -> dict:
     """Read saved adapter metadata; do not send records, predict or change validation."""
-    provider = db.get(AIProvider, provider_id)
+    provider = _current_provider(db, provider_id)
     if provider is None:
         raise HTTPException(404, "模型配置不存在")
     ensure_revision(provider.revision, req.expected_revision)
@@ -340,7 +346,7 @@ async def check_forecast_provider(provider_id: int, req: ProviderCheck, db: Sess
     except AIExecutionError as exc:
         error = exc
     db.expire_all()
-    actor, current = db.get(User, actor_id), db.get(AIProvider, provider_id)
+    actor, current = db.get(User, actor_id), _current_provider(db, provider_id)
     if actor is None or actor.user_role != "super_admin":
         raise HTTPException(403, "当前用户不再具备AI管理权限")
     if current is None:
@@ -378,7 +384,7 @@ async def check_news2_provider(provider_id: int, req: ProviderCheck, db: Session
     """Inspect actual rule/runtime metadata without sending observations or scoring."""
     from app.ai.news2_probe import inspect_news2_capabilities
 
-    provider = db.get(AIProvider, provider_id)
+    provider = _current_provider(db, provider_id)
     if provider is None:
         raise HTTPException(404, "模型配置不存在")
     ensure_revision(provider.revision, req.expected_revision)
@@ -393,7 +399,7 @@ async def check_news2_provider(provider_id: int, req: ProviderCheck, db: Session
     except AIExecutionError as exc:
         error = exc
     db.expire_all()
-    actor, current = db.get(User, actor_id), db.get(AIProvider, provider_id)
+    actor, current = db.get(User, actor_id), _current_provider(db, provider_id)
     if actor is None or actor.user_role != "super_admin":
         raise HTTPException(403, "当前用户不再具备AI管理权限")
     if current is None:
@@ -431,7 +437,7 @@ async def check_aki_provider(provider_id: int, req: ProviderCheck, db: Session =
     """Inspect actual rule/runtime metadata without sending observations or scoring."""
     from app.ai.aki_probe import inspect_aki_capabilities
 
-    provider = db.get(AIProvider, provider_id)
+    provider = _current_provider(db, provider_id)
     if provider is None:
         raise HTTPException(404, "模型配置不存在")
     ensure_revision(provider.revision, req.expected_revision)
@@ -446,7 +452,7 @@ async def check_aki_provider(provider_id: int, req: ProviderCheck, db: Session =
     except AIExecutionError as exc:
         error = exc
     db.expire_all()
-    actor, current = db.get(User, actor_id), db.get(AIProvider, provider_id)
+    actor, current = db.get(User, actor_id), _current_provider(db, provider_id)
     if actor is None or actor.user_role != "super_admin":
         raise HTTPException(403, "当前用户不再具备AI管理权限")
     if current is None:
@@ -484,7 +490,7 @@ async def check_qsofa_provider(provider_id: int, req: ProviderCheck, db: Session
     """Inspect actual rule/runtime metadata without sending observations or scoring."""
     from app.ai.qsofa_probe import inspect_qsofa_capabilities
 
-    provider = db.get(AIProvider, provider_id)
+    provider = _current_provider(db, provider_id)
     if provider is None:
         raise HTTPException(404, "模型配置不存在")
     ensure_revision(provider.revision, req.expected_revision)
@@ -499,7 +505,7 @@ async def check_qsofa_provider(provider_id: int, req: ProviderCheck, db: Session
     except AIExecutionError as exc:
         error = exc
     db.expire_all()
-    actor, current = db.get(User, actor_id), db.get(AIProvider, provider_id)
+    actor, current = db.get(User, actor_id), _current_provider(db, provider_id)
     if actor is None or actor.user_role != "super_admin":
         raise HTTPException(403, "当前用户不再具备AI管理权限")
     if current is None:
@@ -537,7 +543,7 @@ async def check_sofa_provider(provider_id: int, req: ProviderCheck, db: Session 
     """Inspect actual rule/runtime metadata without sending observations or scoring."""
     from app.ai.sofa_probe import inspect_sofa_capabilities
 
-    provider = db.get(AIProvider, provider_id)
+    provider = _current_provider(db, provider_id)
     if provider is None:
         raise HTTPException(404, "模型配置不存在")
     ensure_revision(provider.revision, req.expected_revision)
@@ -552,7 +558,7 @@ async def check_sofa_provider(provider_id: int, req: ProviderCheck, db: Session 
     except AIExecutionError as exc:
         error = exc
     db.expire_all()
-    actor, current = db.get(User, actor_id), db.get(AIProvider, provider_id)
+    actor, current = db.get(User, actor_id), _current_provider(db, provider_id)
     if actor is None or actor.user_role != "super_admin":
         raise HTTPException(403, "当前用户不再具备AI管理权限")
     if current is None:
@@ -590,7 +596,7 @@ async def check_roster_provider(provider_id: int, req: ProviderCheck, db: Sessio
     """Inspect schema10 metadata, without personnel, demand or optimization."""
     from app.ai.roster_probe import inspect_roster_capabilities
 
-    provider = db.get(AIProvider, provider_id)
+    provider = _current_provider(db, provider_id)
     if provider is None:
         raise HTTPException(404, "模型配置不存在")
     ensure_revision(provider.revision, req.expected_revision)
@@ -605,7 +611,7 @@ async def check_roster_provider(provider_id: int, req: ProviderCheck, db: Sessio
     except AIExecutionError as exc:
         error = exc
     db.expire_all()
-    actor, current = db.get(User, actor_id), db.get(AIProvider, provider_id)
+    actor, current = db.get(User, actor_id), _current_provider(db, provider_id)
     if actor is None or actor.user_role != "super_admin":
         raise HTTPException(403, "当前用户不再具备AI管理权限")
     if current is None:
@@ -643,7 +649,7 @@ async def check_bed_provider(provider_id: int, req: ProviderCheck, db: Session =
     """Inspect schema11 metadata without Ward originals, capacity or forecasting."""
     from app.ai.bed_probe import inspect_bed_capabilities
 
-    provider = db.get(AIProvider, provider_id)
+    provider = _current_provider(db, provider_id)
     if provider is None:
         raise HTTPException(404, "模型配置不存在")
     ensure_revision(provider.revision, req.expected_revision)
@@ -658,7 +664,7 @@ async def check_bed_provider(provider_id: int, req: ProviderCheck, db: Session =
     except AIExecutionError as exc:
         error = exc
     db.expire_all()
-    actor, current = db.get(User, actor_id), db.get(AIProvider, provider_id)
+    actor, current = db.get(User, actor_id), _current_provider(db, provider_id)
     if actor is None or actor.user_role != "super_admin":
         raise HTTPException(403, "当前用户不再具备AI管理权限")
     if current is None:
@@ -696,7 +702,7 @@ async def check_surgery_provider(provider_id: int, req: ProviderCheck, db: Sessi
     """Inspect schema12 metadata without cases, resource facts or scheduling."""
     from app.ai.surgery_probe import inspect_surgery_capabilities
 
-    provider = db.get(AIProvider, provider_id)
+    provider = _current_provider(db, provider_id)
     if provider is None:
         raise HTTPException(404, "模型配置不存在")
     ensure_revision(provider.revision, req.expected_revision)
@@ -711,7 +717,7 @@ async def check_surgery_provider(provider_id: int, req: ProviderCheck, db: Sessi
     except AIExecutionError as exc:
         error = exc
     db.expire_all()
-    actor, current = db.get(User, actor_id), db.get(AIProvider, provider_id)
+    actor, current = db.get(User, actor_id), _current_provider(db, provider_id)
     if actor is None or actor.user_role != "super_admin":
         raise HTTPException(403, "当前用户不再具备AI管理权限")
     if current is None:
@@ -749,7 +755,7 @@ async def check_supply_provider(provider_id: int, req: ProviderCheck, db: Sessio
     """Inspect schema13 metadata without SKU originals, quantities or forecasting."""
     from app.ai.supply_probe import inspect_supply_capabilities
 
-    provider = db.get(AIProvider, provider_id)
+    provider = _current_provider(db, provider_id)
     if provider is None:
         raise HTTPException(404, "模型配置不存在")
     ensure_revision(provider.revision, req.expected_revision)
@@ -764,7 +770,7 @@ async def check_supply_provider(provider_id: int, req: ProviderCheck, db: Sessio
     except AIExecutionError as exc:
         error = exc
     db.expire_all()
-    actor, current = db.get(User, actor_id), db.get(AIProvider, provider_id)
+    actor, current = db.get(User, actor_id), _current_provider(db, provider_id)
     if actor is None or actor.user_role != "super_admin":
         raise HTTPException(403, "当前用户不再具备AI管理权限")
     if current is None:
@@ -802,7 +808,7 @@ async def check_inventory_provider(provider_id: int, req: ProviderCheck, db: Ses
     """Inspect schema14 metadata without SKU originals, quantities or comparison."""
     from app.ai.inventory_probe import inspect_inventory_capabilities
 
-    provider = db.get(AIProvider, provider_id)
+    provider = _current_provider(db, provider_id)
     if provider is None:
         raise HTTPException(404, "模型配置不存在")
     ensure_revision(provider.revision, req.expected_revision)
@@ -817,7 +823,7 @@ async def check_inventory_provider(provider_id: int, req: ProviderCheck, db: Ses
     except AIExecutionError as exc:
         error = exc
     db.expire_all()
-    actor, current = db.get(User, actor_id), db.get(AIProvider, provider_id)
+    actor, current = db.get(User, actor_id), _current_provider(db, provider_id)
     if actor is None or actor.user_role != "super_admin":
         raise HTTPException(403, "当前用户不再具备AI管理权限")
     if current is None:
@@ -1409,7 +1415,7 @@ def inspect_run_trace(run_id: str, db: Session = Depends(get_db), user: User = D
     return response
 
 
-def _write_provider(db: Session, req: ProviderWrite, user: User, provider: AIProvider | None) -> AIProvider:
+def _write_provider(db: Session, req: ProviderWrite, user: User, provider: AIProvider | None, dependent_configs=()) -> AIProvider:
     endpoint = validate_endpoint(req.api_base)
     ensure_revision(provider.revision if provider else 0, req.expected_revision)
     for key in req.supported_features:
@@ -1420,7 +1426,7 @@ def _write_provider(db: Session, req: ProviderWrite, user: User, provider: AIPro
         provider = AIProvider(created_by=user.user_id, revision=0)
         db.add(provider)
     else:
-        for config in db.query(AIFeatureConfig).filter_by(provider_id=provider.provider_id).with_for_update().all():
+        for config in dependent_configs:
             invalidate_feature(config)
             config.revision += 1
             config.updated_by = user.user_id
@@ -1454,10 +1460,13 @@ def create_provider(req: ProviderWrite, db: Session = Depends(get_db), user: Use
 @admin_write
 def update_provider(provider_id: int, req: ProviderWrite, db: Session = Depends(get_db), user: User = Depends(require_roles("super_admin"))) -> dict:
     """Changing a provider invalidates activation of its dependent capabilities."""
-    provider = db.query(AIProvider).filter_by(provider_id=provider_id).with_for_update().first()
+    # All generic writers already hold the common Gates. Config precedes
+    # Provider, matching native claims that take Config X then Provider SHARE.
+    configs = db.query(AIFeatureConfig).filter_by(provider_id=provider_id).order_by(AIFeatureConfig.feature_key).populate_existing().with_for_update().all()
+    provider = db.query(AIProvider).filter_by(provider_id=provider_id).populate_existing().with_for_update().first()
     if provider is None:
         raise HTTPException(404, "模型配置不存在")
-    return {"code": 200, "msg": "success", "data": describe_provider(_write_provider(db, req, user, provider))}
+    return {"code": 200, "msg": "success", "data": describe_provider(_write_provider(db, req, user, provider, configs))}
 
 
 @router.get("/ai/admin/prompts/{key}")

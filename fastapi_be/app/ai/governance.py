@@ -57,7 +57,7 @@ def flush_or_conflict(db: Session) -> None:
 def feature_config(db: Session, key: str, actor_id: int, expected: int) -> AIFeatureConfig:
     """Lock or create a configuration only in an explicit management mutation."""
     spec = get_spec(key)
-    config = db.query(AIFeatureConfig).filter_by(feature_key=key).with_for_update().first()
+    config = db.query(AIFeatureConfig).filter_by(feature_key=key).populate_existing().with_for_update().first()
     ensure_revision(config.revision if config else 0, expected)
     if config is None:
         config = AIFeatureConfig(feature_key=key, allowed_roles_json=encode_json(spec.default_roles), updated_by=actor_id, revision=0)

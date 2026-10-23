@@ -1,5 +1,6 @@
 /* Lossless build storage for allowlisted public static JSON; never runtime input. */
 const path = require('node:path');
+const zlib=require('node:zlib');
 const crypto = require('node:crypto');
 const { MAX_SCHEMA_BYTES, decodeSchemaText } = require('../src/api/schemaDataCodec.cjs');
 
@@ -46,7 +47,12 @@ function encodeStaticJson(source) {
     }
   }
   flush();
-  const encoded = Buffer.from(output).toString('base64');
+  var packed=Buffer.from(output);
+  for(const strategy of [zlib.constants.Z_DEFAULT_STRATEGY,zlib.constants.Z_FILTERED,zlib.constants.Z_FIXED]){
+    const compressed=Buffer.concat([Buffer.from([255,0,0,1]),zlib.deflateRawSync(bytes,{level:9,memLevel:9,strategy})]);
+    if(compressed.length<packed.length)packed=compressed;
+  }
+  const encoded=packed.toString('base64');
   if (decodeSchemaText(encoded, bytes.length) !== text) throw new Error('Static schema UTF8 round trip changed the original bytes');
   return { encoded, byteLength: bytes.length };
 }

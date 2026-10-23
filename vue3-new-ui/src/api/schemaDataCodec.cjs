@@ -7,6 +7,14 @@ function decodeSchemaText(encoded, byteLength) {
   }
   var raw = atob(encoded);
   if (!raw.length || btoa(raw) !== encoded) throw new Error('Invalid static schema code bytes');
+  // The old codec forbids the zero-distance ff0000 prefix. It unambiguously
+  // marks a bounded DEFLATE record; all original literal/reference records remain readable.
+  if(raw.charCodeAt(0)===255&&raw.charCodeAt(1)===0&&raw.charCodeAt(2)===0){
+    if(raw.length<5||raw.charCodeAt(3)!==1)throw new Error('Invalid static deflate record version');
+    var compressed=Uint8Array.from(raw.slice(4),function(char){return char.charCodeAt(0);});
+    var restored=require('./staticDeflate.cjs').inflateStatic(compressed,byteLength);
+    return new TextDecoder('utf-8',{fatal:true,ignoreBOM:true}).decode(restored);
+  }
   var output = new Uint8Array(byteLength);
   var position = 0;
   for (var cursor = 0; cursor < raw.length;) {

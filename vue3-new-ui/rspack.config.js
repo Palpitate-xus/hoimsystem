@@ -267,9 +267,35 @@ module.exports = {
           reuseExistingChunk: true,
           priority: 15,
         },
+        // Reuse the same native contract modules across independently lazy
+        // Source, Task and management screens, including modules below20kB.
+        nativeApiShared: {
+          name: "native-api-shared",
+          test: /[\\/]src[\\/]api[\\/]ai[\\/][^\\/]+\.js$/,
+          chunks: "async",
+          minChunks: 2,
+          minSize: 0,
+          minSizeReduction: 0,
+          maxSize: 262144,
+          reuseExistingChunk: true,
+          priority: 16,
+        },
+        // Share actual repeated native Vue modules across lazy assistants,
+        // task history and source governance, retaining their existing state.
+        nativeComponentsShared: {
+          name: "native-components-shared",
+          test: /[\\/]src[\\/]components[\\/]ai[\\/].*\.(?:vue|js)(?:\?.*)?$/,
+          chunks: "async",
+          minChunks: 2,
+          minSize: 0,
+          minSizeReduction: 0,
+          maxSize: 262144,
+          reuseExistingChunk: true,
+          priority: 17,
+        },
         schemaDataDecoderShared: {
           name: "schema-data-decoder-shared",
-          test: /[\\/]src[\\/]api[\\/]schemaDataCodec\.cjs$/,
+          test: /[\\/]src[\\/]api[\\/](?:schemaDataCodec|staticDeflate|schemaDataDocument|schemaDataHash|publicInterfaceText|publicInterfaceExtensionText)\.cjs$/,
           chunks: "async",
           minChunks: 2,
           minSize: 0,

@@ -1,4 +1,4 @@
-/* Exact checked-in public contracts only; no patient data, remote data or arbitrary JSON. */
+/* Checked public contracts and exact UI text; source bindings stay build-only. */
 const path = require('node:path');
 const {encodeStaticJson, emitStaticJson} = require('./public-static-data.cjs');
 const {MAX_SCHEMA_BYTES}=require('../src/api/schemaDataCodec.cjs');
@@ -9,6 +9,7 @@ const PUBLIC_CONTRACTS = Object.freeze([
   "src/api/ai/researchVariableTaskFixed.json",
   "src/api/ai/researchVariableSourceColumns.json",
   "src/api/publicInterfaceTextPool.json",
+  "src/api/publicInterfaceExtensionTextPool.json",
   "src/api/ai/chargeReconciliationFixedPolicy.json",
   "src/api/ai/chargeReconciliationUiFixed.json",
   "src/api/ai/codingFixedPolicy.json",
@@ -48,6 +49,18 @@ function staticContractDataLoader(source) {
   const relative = path.relative(ROOT, this.resourcePath).replace(/\\/g, '/');
   if (!PUBLIC_CONTRACTS.includes(relative)) throw new Error('Static contract file is not allowlisted');
   this.cacheable();
+  const {GROUPS,checkBindings}=require('./generate-public-interface-text-pool.cjs');
+  const group=GROUPS.find(value=>value.output===relative);
+  if(group){
+    const raw=Buffer.isBuffer(source)?source:Buffer.from(source,'utf8');
+    if(!raw.length||raw.length>MAX_SCHEMA_BYTES)throw new Error('Complete public text source exceeds its original limit');
+    const pool=JSON.parse(new TextDecoder('utf-8',{fatal:true,ignoreBOM:true}).decode(raw));
+    checkBindings(pool,ROOT,group);
+    for(const name of Object.keys(pool.sources))this.addDependency?.(path.resolve(ROOT,name));
+    // Every value and index remains exact. Source paths/hashes are verified
+    // build evidence; no runtime lookup reads or needs that metadata.
+    source=JSON.stringify({schema_version:'hoim_runtime_interface_text_v1',values:pool.values});
+  }
   return emitStaticJson(this, encodePublicFixedData(source));
 }
 staticContractDataLoader.raw = true;

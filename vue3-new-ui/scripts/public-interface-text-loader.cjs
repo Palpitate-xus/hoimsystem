@@ -2,9 +2,11 @@
 const path = require('node:path');
 const babel = require('@babel/core');
 const {encodeStaticJson, emitStaticJson} = require('./public-static-data.cjs');
-const {FILES, isValueLiteral, checkBindings} = require('./generate-public-interface-text-pool.cjs');
+const {FILES:BASE_FILES, DEFAULT_GROUP, EXTENSION_GROUP, isValueLiteral, checkBindings} = require('./generate-public-interface-text-pool.cjs');
 const ROOT = path.resolve(__dirname, '..');
-let sharedPool;
+const FILES=Object.freeze([...BASE_FILES,...EXTENSION_GROUP.files]);
+const groupFor=filename=>EXTENSION_GROUP.files.includes(filename)?EXTENSION_GROUP:DEFAULT_GROUP;
+const sharedPools=new Map();
 function transformPublicText(source, context, pool = null) {
   const relative = path.relative(ROOT, context.resourcePath).replace(/\\/g,'/');
   if (!FILES.includes(relative)) throw new Error('Public interface text module is not allowlisted');
@@ -15,7 +17,7 @@ function transformPublicText(source, context, pool = null) {
     Program:{enter(p){binding=p.scope.generateUidIdentifier('publicInterfaceText');},exit(p){
       if (!values.length) return;
       const argument=p.scope.generateUidIdentifier('textIndex');
-      const reader=context.utils.contextify(context.context,path.resolve(__dirname,'../src/api/publicInterfaceText.cjs'));
+      const reader=context.utils.contextify(context.context,path.resolve(ROOT,groupFor(relative).reader));
       const expression=pool ? `require(${JSON.stringify(reader)})` : emitStaticJson(context,encodeStaticJson(JSON.stringify(values))).replace(/^module\.exports = /,'').replace(/;$/,'');
       const lookup=babel.parseSync(expression,{configFile:false,babelrc:false}).program.body[0].expression;
       const result=pool ? t.callExpression(lookup,[t.cloneNode(argument)]) : t.memberExpression(lookup,t.cloneNode(argument),true);
@@ -38,7 +40,9 @@ function transformPublicText(source, context, pool = null) {
 function publicInterfaceTextLoader(source){
   this.cacheable();const relative=path.relative(ROOT,this.resourcePath).replace(/\\/g,'/');
   if (!FILES.includes(relative)) return source;
-  if (!sharedPool) {sharedPool=require('../src/api/publicInterfaceTextPool.json');checkBindings(sharedPool);}
+  const group=groupFor(relative);
+  if(!sharedPools.has(group)){const value=require(path.resolve(ROOT,group.output));checkBindings(value,ROOT,group);sharedPools.set(group,value);}
+  const sharedPool=sharedPools.get(group);
   for (const name of Object.keys(sharedPool.sources)) this.addDependency?.(path.resolve(ROOT,name));
   return transformPublicText(source,this,sharedPool).code;
 }

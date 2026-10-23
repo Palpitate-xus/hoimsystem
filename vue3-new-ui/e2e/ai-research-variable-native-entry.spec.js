@@ -68,25 +68,33 @@ test('production ordinary doctor management route is rejected before any admin o
  expect(state.reads.some(row=>row.path.startsWith('/api/ai/admin/')||row.path.includes('/research-variables/')||row.path.includes('/research-cohort/'))).toBe(false);expect(state.writes).toEqual([]);checked(state);
 });
 
-test('production emitted icon sprite preserves all293 actual geometries with real static CSS and SVG loading',async({page})=>{
+test('production exact inert icon record preserves all293 actual geometries with real static CSS',async({page})=>{
  // Minimal same-origin synthetic HTML only: no app route, API call, or invented
  // product gallery endpoint. Glyph bytes and CSS are the canonical dist assets.
  const state=await setupResearchVariableProduction(page,server);
  const manifest=require('../src/api/iconGallery.json'),fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto');
  const dist=path.join(__dirname,'../dist'),candidates=[];
- function scan(dir){for(const entry of fs.readdirSync(dir,{withFileTypes:true})){const name=path.join(dir,entry.name);if(entry.isDirectory())scan(name);else if(entry.name.endsWith('.svg')){const bytes=fs.readFileSync(name);if(crypto.createHash('sha256').update(bytes).digest('hex')===manifest.sprite_sha256)candidates.push(name);}}}scan(dist);
+ const index=fs.readFileSync(path.join(dist,'index.html'),'utf8');
+ const records=index.match(/<script id="hoim-schema-data" type="application\/json">(.*?)<\/script>/u);
+ expect(records).not.toBeNull();
+ const envelope=JSON.parse(records[1]);expect(envelope.schema_version).toBe('hoim_static_schema_document_v1');
+ const {decodeSchemaText}=require('../src/api/schemaDataCodec.cjs');
+ for(const [digest,record]of Object.entries(envelope.entries)){
+  const packed=Buffer.from(record.encoded,'base64');expect(crypto.createHash('sha256').update(packed).digest('hex')).toBe(digest);expect(packed.length).toBe(record.packedBytes);
+  const decoded=JSON.parse(decodeSchemaText(record.encoded,record.byteLength));
+  if(decoded&&Object.keys(decoded).join(',')==='svg'&&typeof decoded.svg==='string'&&crypto.createHash('sha256').update(decoded.svg).digest('hex')===manifest.sprite_sha256)candidates.push(decoded.svg);
+ }
  expect(candidates).toHaveLength(1);expect(manifest.names).toHaveLength(293);
- const url=filename=>server.origin+'/'+path.relative(dist,filename).split(path.sep).join('/'),sprite=url(candidates[0]);
+ const sprite='',originalSprite=candidates[0].replace('<svg ','<svg style="position:absolute;width:0;height:0;overflow:hidden" ');
  // Preserve only the actual initial document stylesheet tags and their order.
  // Do not inject unrelated lazy-page CSS or assert an invented card border.
- const index=fs.readFileSync(path.join(dist,'index.html'),'utf8');
  const cssTags=[...index.matchAll(/<link\b[^>]*>/gu)].map(match=>match[0]).filter(tag=>/\brel\s*=\s*(?:"stylesheet"|'stylesheet'|stylesheet)(?=\s|\/?>)/u.test(tag));
  expect(cssTags.length).toBeGreaterThan(0);
  const cssUrls=cssTags.map(tag=>{const match=tag.match(/\bhref\s*=\s*(?:"([^"]+)"|'([^']+)'|([^\s>]+))/u);expect(match).not.toBeNull();const value=new URL(match[1]||match[2]||match[3],server.origin+'/');expect(value.origin).toBe(server.origin);expect(fs.existsSync(path.join(dist,decodeURIComponent(value.pathname)))).toBe(true);return value.href;});
  const links=cssTags.join('');
  const icons=manifest.names.map(name=>'<div><i class="el-icon" style="font-size:24px;color:rgb(20,60,100)"><svg viewBox="0 0 1024 1024" width="24" height="24" aria-label="'+name+'"><use href="'+sprite+'#icon-'+name+'"></use></svg></i></div>').join('');
  const entry=server.origin+'/__research_variable_static_gallery.html';
- await page.route(entry,route=>route.fulfill({contentType:'text/html; charset=utf-8',body:'<!doctype html><meta charset="utf-8">'+links+'<section aria-label="生产静态图标完整资产核对" style="display:grid;grid-template-columns:repeat(12,1fr)">'+icons+'</section>'}));
+ await page.route(entry,route=>route.fulfill({contentType:'text/html; charset=utf-8',body:'<!doctype html><meta charset="utf-8">'+links+originalSprite+'<section aria-label="生产静态图标完整资产核对" style="display:grid;grid-template-columns:repeat(12,1fr)">'+icons+'</section>'}));
  await page.goto(entry);const gallery=page.getByRole('region',{name:'生产静态图标完整资产核对',exact:true});await expect(gallery.locator('svg')).toHaveCount(293);
  await expect.poll(()=>gallery.locator('svg').evaluateAll(nodes=>nodes.filter(node=>{try{const b=node.getBBox();return b.width>0&&b.height>0;}catch{return false;}}).length)).toBe(293);
  const loaded=await gallery.locator('svg').evaluateAll(nodes=>nodes.map(node=>({width:node.getBoundingClientRect().width,height:node.getBoundingClientRect().height,viewBox:node.getAttribute('viewBox'),use:node.querySelector('use').getAttribute('href')})));

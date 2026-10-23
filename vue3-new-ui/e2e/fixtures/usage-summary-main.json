@@ -1,8 +1,8 @@
 {
   "schema_version": "global_ai_usage_actual_packets_v1",
   "scope": "Seven exact positive actual Main/JWT usage HTTP responses and original role-denial status controls from whole16-case API/current-read suite; one separate actual78 local worker/service aggregate, explicitly not HTTP. Synthetic controlled data only. No result/Source content certification.",
-  "backend_capture_head": "a2ec6e3a6f4372b95808de42b79fa894b1b782b8",
-  "backend_source_freeze_sha256": "0fe76f1630015ae580ed2cda78e9856a106e3507598be44a900c6b6addf07c1d",
+  "backend_capture_head": "ffe01a0d90ecce8b1b4eca99f262df7fd63adea3",
+  "backend_source_freeze_sha256": "9706d2805139400cef8c66120d8c8ee65e3577467a3cef0f6d9f75240b207e8f",
   "backend_bindings": {
     "fastapi_be/app/routers/ai_admin.py": "ead16f22bdbbb6a867bf9c284d656bf32e58eab40d74fcec830e4cd4486ef54f",
     "fastapi_be/app/ai/admin_read_snapshot.py": "6b46463d6ccfa2cea4c635bdf05cfe39289f02c03a65b9e35c1310e533a34e62",
@@ -11,8 +11,8 @@
     "fastapi_be/app/ai/models.py": "b0ab84f20c2f6b74d89dade050350c1dab87b3b18aa3f4ad5f94a4f462dd5739",
     "fastapi_be/app/ai/native_task_routing.py": "dbbb10d7584cd8b41ba3f100462fe17a6511257a2b8ce8a424dc292e49324334",
     "fastapi_be/app/dependencies.py": "2f0340337885f96d833635f00727cc4beb900e1d44ae38fdcd2fd3981c8092f2",
-    "fastapi_be/tests/test_ai_admin_usage_main.py": "9db736595f302c67d61cd33e0b475da0b8ef81759e9a184ba9a0662bab3eec5a",
-    "fastapi_be/tests/ai_admin_usage_assertions.py": "3a94fdafac1066a722f5eff30bd0a82ede6a7b12ab2f46f0c1b22276090861ba"
+    "fastapi_be/tests/test_ai_admin_usage_main.py": "e069e7e1d8902482880b5a944f443335255624ad34171f1bfe4d5dd0c0b30648",
+    "fastapi_be/tests/ai_admin_usage_assertions.py": "694482b2e9b3373ba442aef47ab1cb1af00f2ffde9ee772da58054c56d96feeb"
   },
   "packets": [
     {
@@ -460,7 +460,7 @@
             "local_calculation_attempted_count": 1,
             "local_calculation_unattempted_count": 0,
             "local_calculation_unknown_count": 0,
-            "local_calculation_ms_known_sum": 7,
+            "local_calculation_ms_known_sum": 6,
             "local_calculation_ms_known_count": 1
           }
         ]

@@ -3,7 +3,7 @@
   <el-alert title="只核对明确项目、原字段变量定义和有限患者批次。技术发布不代表科学或临床验证；逐患者研究与模型处理权限须独立满足，包括超级管理员。" type="info" :closable="false" />
   <p v-if="!v.authorized" role="status">当前会话、角色或模式不满足本项条件。</p>
   <template v-else>
-   <template v-if="!auditOnly"><p v-if="v.role==='pharmacist'">当前项目目录不向本角色开放；请在来源输入使用明确已授权批次引用。不会扩大项目目录权限。</p><el-button :disabled="v.busy||v.role==='pharmacist'" @click="v.refreshProjects(1)">读取明确项目目录</el-button>
+   <template v-if="!auditOnly"><el-input v-model="v.manualScopeId" :disabled="v.busy" aria-label="已授权变量项目标识" placeholder="明确已授权的科研项目标识" /><el-button :disabled="v.busy||!v.scopeIdentifierValid" @click="v.chooseScopeIdentifier">读取授权变量项目</el-button><p>须具备本项目访问权、变量抽取用途及全部声明患者的当前研究许可。</p><el-button v-if="v.role!=='pharmacist'" :disabled="v.busy" @click="v.refreshProjects(1)">读取明确项目目录</el-button>
     <el-table v-if="v.projects.length" :data="v.projects" aria-label="明确项目候选目录"><el-table-column prop="scope_id" label="项目标识" /><el-table-column prop="status" label="原记录状态" /><el-table-column label="操作"><template #default="{row}"><el-button :disabled="v.busy" @click="v.chooseProject(row)">核对并明确本项目</el-button></template></el-table-column></el-table>
     <template v-if="v.scopeTotal"><el-button :disabled="v.busy||v.scopePage<=1" @click="v.refreshProjects(v.scopePage-1)">项目上一页</el-button><span>项目第{{ v.scopePage }}页，共{{ v.scopeTotal }}件</span><el-button :disabled="v.busy||v.scopePage*20>=v.scopeTotal" @click="v.refreshProjects(v.scopePage+1)">项目下一页</el-button></template>
     <p v-if="v.project">明确项目 {{ v.project.scope_id }}；用途已记录 research_variable_extraction。登记条件不授予患者正文或出站模型读取权限。</p><p v-else>请先核对并明确选择项目；不会自动选择第一项。</p>

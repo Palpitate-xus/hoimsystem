@@ -104,3 +104,14 @@ test('production exact inert icon record preserves all293 actual geometries with
  expect(await gallery.locator('svg').evaluateAll(nodes=>nodes.every(node=>getComputedStyle(node).fill==='rgb(20, 60, 100)'&&getComputedStyle(node).color==='rgb(20, 60, 100)'))).toBe(true);
  expect(state.bootstrap).toEqual([]);expect(state.reads).toEqual([]);expect(state.writes).toEqual([]);checked(state,{authentication:false});
 });
+
+
+test('production pharmacist under an explicit synthetic five-role configuration reads the actual76 project context without the74 registry',async({page})=>{
+ const state=await setupResearchVariableProduction(page,server,{role:'pharmacist'}),actual=require('./fixtures/research-variable-pharmacist-fixture.cjs').loadPharmacistLifecycle();
+ const features=structuredClone(state.fixture.features),feature=features.data.find(row=>row.key==='research_extraction');feature.allowed_roles=[...feature.default_roles];
+ // Explicit UI configuration declaration; the original actual feature response
+ // is preserved in its fixture. The Source context body below is unchanged Main.
+ await page.route('**/api/ai/features',route=>{state.reads.push({method:'GET',path:'/api/ai/features',query:{}});return route.fulfill({json:features});});
+ await page.route('**/api/ai/research-variables/scopes/*',route=>{const q=route.request(),url=new URL(q.url());state.reads.push({method:q.method(),path:url.pathname,query:Object.fromEntries(url.searchParams)});expect(url.pathname).toBe('/api/ai/research-variables/scopes/'+actual.id);const row=actual.byStage['scope.context'];return route.fulfill({status:row.status,body:row.body,headers:row.response_headers});});
+ const panel=await openResearchVariableWorkbench(page,server);await panel.getByRole('button',{name:'打开完整变量来源目录',exact:true}).click();await expect(page.getByRole('button',{name:'读取明确项目目录',exact:true})).toHaveCount(0);await page.getByLabel('已授权变量项目标识',{exact:true}).fill(actual.id);await page.getByRole('button',{name:'读取授权变量项目',exact:true}).click();await expect(page.getByRole('button',{name:'登记明确变量字典',exact:true})).toBeVisible();expect(state.reads.map(row=>row.path)).toEqual(['/api/ai/features','/api/ai/research-variables/scopes/'+actual.id]);expect(state.writes).toEqual([]);checked(state);
+});

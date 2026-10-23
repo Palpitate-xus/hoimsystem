@@ -13,6 +13,7 @@ const schemas=decodeGeneratedSchemas(registry),base='/ai/research-variables',obj
 const pick=(v,n)=>Object.fromEntries(n.map(k=>[k,v[k]])),positive=v=>Number.isSafeInteger(v)&&v>0&&v<=2147483647,statuses=['draft','published','rejected','revoked'];
 const ordered=v=>Array.isArray(v)&&same(v,[...new Set(v)].sort((a,b)=>typeof a==='number'?a-b:a<b?-1:a>b?1:0));
 export const researchVariableSourceBasis=basis;
+export const researchVariableScopeIdentifierValid=value=>uuid(value);
 export const researchVariableSourceSchema=name=>Object.hasOwn(schemas,name)?structuredClone(schemas[name]):null;
 export function researchVariableSourceRequestValid(name,value){try{
  if(!Object.hasOwn(schemas,name)||!generatedSchemaMatches(schemas,name,value)||!whole(value))return false;
@@ -66,6 +67,7 @@ export function getResearchVariableSources(recordKind,{scopeReference=null,techn
  kind(recordKind);if(typeof technical!=='boolean'||!Number.isSafeInteger(page)||page<1||page>100000||!Number.isSafeInteger(size)||size<1||size>100||status!==null&&!statuses.includes(status)||(technical?scopeReference!==null||scopeId!==null&&!uuid(scopeId):scopeId!==null||!researchVariableSourceRequestValid('ScopeReference',scopeReference)))throw Error('目录须明确项目三锚或独立技术范围及有界分页');
  return read(`${base}/${technical?'technical/':''}${routeKind(recordKind)}`,{...(technical?(scopeId===null?{}:{scope_id:scopeId}):scopeReference),...(status===null?{}:{status}),page,size});
 }
+export const getResearchVariableScope=id=>read(`${base}/scopes/${segment(id)}`);
 export const getResearchVariableSourceMetadata=(recordKind,id,{technical=false}={})=>{kind(recordKind);if(typeof technical!=='boolean')throw Error('技术目录须明确布尔状态');return read(`${base}/${technical?'technical/':''}${routeKind(recordKind)}/${segment(id)}`);};
 export const getResearchVariableSourcePart=(recordKind,id,part)=>{kind(recordKind);if(!(recordKind==='dictionary'?['definition','scope']:['source','snapshot']).includes(part))throw Error('须按本件固定完整分件读取');return read(`${base}/${routeKind(recordKind)}/${segment(id)}/parts/${part}`);};
 async function readVerified(recordKind,id,{current=()=>true}={}){

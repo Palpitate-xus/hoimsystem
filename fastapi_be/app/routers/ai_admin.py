@@ -1234,9 +1234,9 @@ def list_global_runs(
 @router.get("/ai/admin/runs/{run_id}")
 def inspect_run_trace(run_id: str, db: Session = Depends(get_db), user: User = Depends(require_roles("super_admin"))) -> dict:
     """Read the frozen prompts, requested model, source payload and append-only review history."""
-    from app.ai.research_variables_task_routing import is_variable_task
+    from app.ai.research_variables_task_routing import is_located_variable_task
 
-    if is_variable_task(db, run_id):
+    if is_located_variable_task(db, run_id):
         from app.ai.research_variables_task_views import trace_variable_run
 
         return {"code": 200, "msg": "success", "data": trace_variable_run(db, user, run_id)}

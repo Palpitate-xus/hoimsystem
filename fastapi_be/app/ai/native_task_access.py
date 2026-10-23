@@ -87,7 +87,7 @@ def guard_private_task_read(db, user, run_id):
     from app.ai.research_variables_task_routing import guard_variable_task_read
     from app.ai.satisfaction_storage import guard_satisfaction_run_id
 
-    if guard_variable_task_read(db, user, run_id, frozen_audit=user.user_role == "super_admin") is not None:
+    if guard_variable_task_read(db, user, run_id, frozen_audit=user.user_role == "super_admin", located_only=True) is not None:
         return
     if locate_artifact(db, run_id) is not None:
         guard_rca_task(db, user, run_id)
@@ -98,6 +98,9 @@ def guard_private_task_read(db, user, run_id):
     from app.ai.native_task_routing import locate_native_task
 
     identity = locate_native_task(db, run_id)  # Reject contradictory cross-domain anchors.
+    if identity is None or identity.domain == "research_variables":
+        if guard_variable_task_read(db, user, run_id, frozen_audit=user.user_role == "super_admin") is not None:
+            return
     if identity is not None:
         if identity.domain == "rca":
             guard_rca_task(db, user, run_id)

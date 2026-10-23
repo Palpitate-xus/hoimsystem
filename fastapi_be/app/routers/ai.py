@@ -825,7 +825,7 @@ def run_detail(run_id: str, db: Session = Depends(get_db), user: User = Depends(
     """Recheck patient access before exposing a stored result or evidence."""
     from app.ai.research_variables_task_routing import guard_variable_task_read
 
-    variable = guard_variable_task_read(db, user, run_id)
+    variable = guard_variable_task_read(db, user, run_id, located_only=True)
     if variable is not None:
         from app.ai.research_variables_task_views import describe_task
 
@@ -863,9 +863,9 @@ def run_detail(run_id: str, db: Session = Depends(get_db), user: User = Depends(
 @router.post("/ai/runs/{run_id}/cancel")
 def cancel_run(run_id: str, db: Session = Depends(get_db), user: User = Depends(get_current_user)) -> dict:
     """Stop accepting a result; an already sent provider call may still finish."""
-    from app.ai.research_variables_task_routing import is_variable_task
+    from app.ai.research_variables_task_routing import is_located_variable_task
 
-    if is_variable_task(db, run_id):
+    if is_located_variable_task(db, run_id):
         from app.ai.research_variables_cancellation import cancel_variable_run
 
         return {"code": 200, "msg": "已停止接收研究变量结果，实际用量独立结算", "data": cancel_variable_run(db, user, run_id)}
@@ -973,7 +973,7 @@ def review_result(run_id: str, req: FeedbackWrite, db: Session = Depends(get_db)
     """Append review without editing clinical records, orders or prescriptions."""
     from app.ai.research_variables_task_routing import guard_variable_task_read
 
-    variable = guard_variable_task_read(db, user, run_id)
+    variable = guard_variable_task_read(db, user, run_id, located_only=True)
     if variable is not None:
         from app.ai.research_variables_feedback import review_variable_result
 

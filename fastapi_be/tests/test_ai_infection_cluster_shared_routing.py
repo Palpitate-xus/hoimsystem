@@ -14,8 +14,8 @@ from tests.test_ai_charge_reconciliation_runtime import configured
 from tests.test_ai_charge_reconciliation_sources import charge_case  # noqa: F401
 
 
-@pytest.mark.parametrize("path", ["cancel", "feedback", "trace"])
-def test_existing_charge_gate_precedes_foreign_document_anchor_queries_on_all_three_shared_routes(charge_case, path):
+@pytest.mark.parametrize("path", ["detail", "cancel", "feedback", "trace"])
+def test_existing_charge_gate_precedes_foreign_document_anchor_queries_on_all_four_shared_routes(charge_case, path):
     actor, request, *_ = configured(charge_case)
     db = charge_case["db"]
     run = create_charge_run(db, actor, request)
@@ -29,7 +29,9 @@ def test_existing_charge_gate_precedes_foreign_document_anchor_queries_on_all_th
     event.listen(db, "do_orm_execute", capture)
     try:
         try:
-            if path == "cancel":
+            if path == "detail":
+                ai.run_detail(rid, db=db, user=actor)
+            elif path == "cancel":
                 ai.cancel_run(rid, db=db, user=actor)
             elif path == "feedback":
                 ai.review_result(rid, FeedbackWrite(outcome="accepted"), db=db, user=actor)

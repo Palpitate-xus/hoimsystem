@@ -124,8 +124,18 @@ def is_variable_task(db, value):
     return False
 
 
-def guard_variable_task_read(db, user, identifier, *, frozen_audit=False):
-    if not is_variable_task(db, identifier):
+def is_located_variable_task(db, value):
+    """Only the own three-column locator precedes foreign-domain Gates.
+
+    A missing own anchor grants no generic access. Mixed private readers must
+    still run the full orphan-marker guard after the original directory Gates.
+    """
+    identifier = identifier_for(value)
+    return identifier is not None and _current_opaque_identity(db, identifier) is not None and is_variable_task(db, value)
+
+
+def guard_variable_task_read(db, user, identifier, *, frozen_audit=False, located_only=False):
+    if not (is_located_variable_task(db, identifier) if located_only else is_variable_task(db, identifier)):
         return None
     from app.ai.research_variables_task_reader import load_task
 

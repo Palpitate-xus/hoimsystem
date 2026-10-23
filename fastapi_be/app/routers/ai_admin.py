@@ -8,10 +8,11 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from fastapi.routing import APIRoute
-from sqlalchemy import func, inspect
+from sqlalchemy import func
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, defer
 
+from app.ai.admin_write_authority import admin_write, capture_authority, checked_capability_probe, current_super_admin, verify_admin_write_before_commit
 from app.ai.catalog import FEATURES
 from app.ai.ecg_probe import inspect_ecg_capabilities
 from app.ai.forecast_probe import inspect_forecast_capabilities
@@ -69,27 +70,21 @@ router = APIRouter(tags=["AI 超级管理员"], default_response_class=JSONRespo
 
 
 def _current_super_admin(db, user):
-    """Recheck audit authority beyond a JWT-created MySQL RR snapshot."""
-    state = inspect(user, raiseerr=False)
-    user_id = state.identity[0] if state is not None and state.identity is not None else getattr(user, "user_id", None)
-    # Preserve the already authenticated request's epoch before ORM refresh
-    # mutates that same instance. Expired attributes must not trigger an earlier
-    # unlocked SELECT; technical callers without loaded epochs get current SQL.
-    loaded = {key: state.dict[key] for key in ("user_role", "token_invalid_before") if state is not None and key in state.dict}
-    with db.no_autoflush:
-        actor = db.query(User).filter_by(user_id=user_id).populate_existing().with_for_update(read=True).one_or_none()
-    if actor is None or actor.user_role != "super_admin" or any(getattr(actor, key) != original for key, original in loaded.items()):
-        raise HTTPException(403, "当前身份已无超级管理员审计权限")
-    return actor
+    """Recheck the original subject beyond a JWT-created MySQL RR snapshot."""
+    return current_super_admin(db, capture_authority(user))
 
 
 def _commit(db: Session) -> None:
     """Return a useful conflict instead of leaking database error details."""
     try:
+        verify_admin_write_before_commit(db)
         db.commit()
     except IntegrityError as exc:
         db.rollback()
         raise HTTPException(409, "名称、版本或配置已存在，请刷新后重试") from exc
+    except BaseException:
+        db.rollback()
+        raise
 
 
 @router.get("/ai/admin/features")
@@ -105,6 +100,7 @@ def list_features(db: Session = Depends(get_db), user: User = Depends(require_ro
 
 
 @router.put("/ai/admin/features/{key}")
+@admin_write
 def update_feature(key: str, req: FeatureWrite, db: Session = Depends(get_db), user: User = Depends(require_roles("super_admin"))) -> dict:
     """Configure roles, model, activation and explicit validation with optimistic locking."""
     if key == "infection_cluster":
@@ -173,6 +169,7 @@ def list_providers(db: Session = Depends(get_db), user: User = Depends(require_r
 
 
 @router.post("/ai/admin/providers/{provider_id}/speech-capabilities")
+@admin_write
 async def check_speech_provider(provider_id: int, req: ProviderCheck, db: Session = Depends(get_db), user: User = Depends(require_roles("super_admin"))) -> dict:
     """Inspect the saved endpoint only; never turn a connectivity check into clinical validation."""
     provider = db.get(AIProvider, provider_id)
@@ -186,7 +183,7 @@ async def check_speech_provider(provider_id: int, req: ProviderCheck, db: Sessio
     db.commit()  # Release the read transaction before the network request.
     error = None
     try:
-        capabilities = await inspect_speech_capabilities(provider)
+        capabilities = await checked_capability_probe(db, inspect_speech_capabilities, provider)
     except AIExecutionError as exc:
         error = exc
     db.expire_all()
@@ -223,6 +220,7 @@ async def check_speech_provider(provider_id: int, req: ProviderCheck, db: Sessio
 
 
 @router.post("/ai/admin/providers/{provider_id}/ecg-capabilities")
+@admin_write
 async def check_ecg_provider(provider_id: int, req: ProviderCheck, db: Session = Depends(get_db), user: User = Depends(require_roles("super_admin"))) -> dict:
     """Inspect only the saved ECG endpoint; never enable, save a model or approve clinical use."""
     provider = db.get(AIProvider, provider_id)
@@ -236,7 +234,7 @@ async def check_ecg_provider(provider_id: int, req: ProviderCheck, db: Session =
     db.commit()  # Release the read transaction before the network request.
     error = None
     try:
-        capabilities = await inspect_ecg_capabilities(provider)
+        capabilities = await checked_capability_probe(db, inspect_ecg_capabilities, provider)
     except AIExecutionError as exc:
         error = exc
     db.expire_all()
@@ -273,6 +271,7 @@ async def check_ecg_provider(provider_id: int, req: ProviderCheck, db: Session =
 
 
 @router.post("/ai/admin/providers/{provider_id}/image-capabilities")
+@admin_write
 async def check_image_provider(provider_id: int, req: ProviderCheck, db: Session = Depends(get_db), user: User = Depends(require_roles("super_admin"))) -> dict:
     """Inspect only the saved image endpoint; no pixels, inference, enabling or clinical approval."""
     provider = db.get(AIProvider, provider_id)
@@ -286,7 +285,7 @@ async def check_image_provider(provider_id: int, req: ProviderCheck, db: Session
     db.commit()  # Release the read transaction before the metadata-only request.
     error = None
     try:
-        capabilities = await inspect_imaging_capabilities(provider)
+        capabilities = await checked_capability_probe(db, inspect_imaging_capabilities, provider)
     except AIExecutionError as exc:
         error = exc
     db.expire_all()
@@ -323,6 +322,7 @@ async def check_image_provider(provider_id: int, req: ProviderCheck, db: Session
 
 
 @router.post("/ai/admin/providers/{provider_id}/forecast-capabilities")
+@admin_write
 async def check_forecast_provider(provider_id: int, req: ProviderCheck, db: Session = Depends(get_db), user: User = Depends(require_roles("super_admin"))) -> dict:
     """Read saved adapter metadata; do not send records, predict or change validation."""
     provider = db.get(AIProvider, provider_id)
@@ -336,7 +336,7 @@ async def check_forecast_provider(provider_id: int, req: ProviderCheck, db: Sess
     db.commit()
     error = None
     try:
-        capabilities = await inspect_forecast_capabilities(provider)
+        capabilities = await checked_capability_probe(db, inspect_forecast_capabilities, provider)
     except AIExecutionError as exc:
         error = exc
     db.expire_all()
@@ -373,6 +373,7 @@ async def check_forecast_provider(provider_id: int, req: ProviderCheck, db: Sess
 
 
 @router.post("/ai/admin/providers/{provider_id}/news2-capabilities")
+@admin_write
 async def check_news2_provider(provider_id: int, req: ProviderCheck, db: Session = Depends(get_db), user: User = Depends(require_roles("super_admin"))) -> dict:
     """Inspect actual rule/runtime metadata without sending observations or scoring."""
     from app.ai.news2_probe import inspect_news2_capabilities
@@ -388,7 +389,7 @@ async def check_news2_provider(provider_id: int, req: ProviderCheck, db: Session
     db.commit()
     error = None
     try:
-        capabilities = await inspect_news2_capabilities(provider)
+        capabilities = await checked_capability_probe(db, inspect_news2_capabilities, provider)
     except AIExecutionError as exc:
         error = exc
     db.expire_all()
@@ -425,6 +426,7 @@ async def check_news2_provider(provider_id: int, req: ProviderCheck, db: Session
 
 
 @router.post("/ai/admin/providers/{provider_id}/aki-capabilities")
+@admin_write
 async def check_aki_provider(provider_id: int, req: ProviderCheck, db: Session = Depends(get_db), user: User = Depends(require_roles("super_admin"))) -> dict:
     """Inspect actual rule/runtime metadata without sending observations or scoring."""
     from app.ai.aki_probe import inspect_aki_capabilities
@@ -440,7 +442,7 @@ async def check_aki_provider(provider_id: int, req: ProviderCheck, db: Session =
     db.commit()
     error = None
     try:
-        capabilities = await inspect_aki_capabilities(provider)
+        capabilities = await checked_capability_probe(db, inspect_aki_capabilities, provider)
     except AIExecutionError as exc:
         error = exc
     db.expire_all()
@@ -477,6 +479,7 @@ async def check_aki_provider(provider_id: int, req: ProviderCheck, db: Session =
 
 
 @router.post("/ai/admin/providers/{provider_id}/qsofa-capabilities")
+@admin_write
 async def check_qsofa_provider(provider_id: int, req: ProviderCheck, db: Session = Depends(get_db), user: User = Depends(require_roles("super_admin"))) -> dict:
     """Inspect actual rule/runtime metadata without sending observations or scoring."""
     from app.ai.qsofa_probe import inspect_qsofa_capabilities
@@ -492,7 +495,7 @@ async def check_qsofa_provider(provider_id: int, req: ProviderCheck, db: Session
     db.commit()
     error = None
     try:
-        capabilities = await inspect_qsofa_capabilities(provider)
+        capabilities = await checked_capability_probe(db, inspect_qsofa_capabilities, provider)
     except AIExecutionError as exc:
         error = exc
     db.expire_all()
@@ -529,6 +532,7 @@ async def check_qsofa_provider(provider_id: int, req: ProviderCheck, db: Session
 
 
 @router.post("/ai/admin/providers/{provider_id}/sofa-capabilities")
+@admin_write
 async def check_sofa_provider(provider_id: int, req: ProviderCheck, db: Session = Depends(get_db), user: User = Depends(require_roles("super_admin"))) -> dict:
     """Inspect actual rule/runtime metadata without sending observations or scoring."""
     from app.ai.sofa_probe import inspect_sofa_capabilities
@@ -544,7 +548,7 @@ async def check_sofa_provider(provider_id: int, req: ProviderCheck, db: Session 
     db.commit()
     error = None
     try:
-        capabilities = await inspect_sofa_capabilities(provider)
+        capabilities = await checked_capability_probe(db, inspect_sofa_capabilities, provider)
     except AIExecutionError as exc:
         error = exc
     db.expire_all()
@@ -581,6 +585,7 @@ async def check_sofa_provider(provider_id: int, req: ProviderCheck, db: Session 
 
 
 @router.post("/ai/admin/providers/{provider_id}/roster-capabilities")
+@admin_write
 async def check_roster_provider(provider_id: int, req: ProviderCheck, db: Session = Depends(get_db), user: User = Depends(require_roles("super_admin"))) -> dict:
     """Inspect schema10 metadata, without personnel, demand or optimization."""
     from app.ai.roster_probe import inspect_roster_capabilities
@@ -596,7 +601,7 @@ async def check_roster_provider(provider_id: int, req: ProviderCheck, db: Sessio
     db.commit()
     error = None
     try:
-        capabilities = await inspect_roster_capabilities(provider)
+        capabilities = await checked_capability_probe(db, inspect_roster_capabilities, provider)
     except AIExecutionError as exc:
         error = exc
     db.expire_all()
@@ -633,6 +638,7 @@ async def check_roster_provider(provider_id: int, req: ProviderCheck, db: Sessio
 
 
 @router.post("/ai/admin/providers/{provider_id}/bed-capabilities")
+@admin_write
 async def check_bed_provider(provider_id: int, req: ProviderCheck, db: Session = Depends(get_db), user: User = Depends(require_roles("super_admin"))) -> dict:
     """Inspect schema11 metadata without Ward originals, capacity or forecasting."""
     from app.ai.bed_probe import inspect_bed_capabilities
@@ -648,7 +654,7 @@ async def check_bed_provider(provider_id: int, req: ProviderCheck, db: Session =
     db.commit()
     error = None
     try:
-        capabilities = await inspect_bed_capabilities(provider)
+        capabilities = await checked_capability_probe(db, inspect_bed_capabilities, provider)
     except AIExecutionError as exc:
         error = exc
     db.expire_all()
@@ -685,6 +691,7 @@ async def check_bed_provider(provider_id: int, req: ProviderCheck, db: Session =
 
 
 @router.post("/ai/admin/providers/{provider_id}/surgery-capabilities")
+@admin_write
 async def check_surgery_provider(provider_id: int, req: ProviderCheck, db: Session = Depends(get_db), user: User = Depends(require_roles("super_admin"))) -> dict:
     """Inspect schema12 metadata without cases, resource facts or scheduling."""
     from app.ai.surgery_probe import inspect_surgery_capabilities
@@ -700,7 +707,7 @@ async def check_surgery_provider(provider_id: int, req: ProviderCheck, db: Sessi
     db.commit()
     error = None
     try:
-        capabilities = await inspect_surgery_capabilities(provider)
+        capabilities = await checked_capability_probe(db, inspect_surgery_capabilities, provider)
     except AIExecutionError as exc:
         error = exc
     db.expire_all()
@@ -737,6 +744,7 @@ async def check_surgery_provider(provider_id: int, req: ProviderCheck, db: Sessi
 
 
 @router.post("/ai/admin/providers/{provider_id}/supply-capabilities")
+@admin_write
 async def check_supply_provider(provider_id: int, req: ProviderCheck, db: Session = Depends(get_db), user: User = Depends(require_roles("super_admin"))) -> dict:
     """Inspect schema13 metadata without SKU originals, quantities or forecasting."""
     from app.ai.supply_probe import inspect_supply_capabilities
@@ -752,7 +760,7 @@ async def check_supply_provider(provider_id: int, req: ProviderCheck, db: Sessio
     db.commit()
     error = None
     try:
-        capabilities = await inspect_supply_capabilities(provider)
+        capabilities = await checked_capability_probe(db, inspect_supply_capabilities, provider)
     except AIExecutionError as exc:
         error = exc
     db.expire_all()
@@ -789,6 +797,7 @@ async def check_supply_provider(provider_id: int, req: ProviderCheck, db: Sessio
 
 
 @router.post("/ai/admin/providers/{provider_id}/inventory-capabilities")
+@admin_write
 async def check_inventory_provider(provider_id: int, req: ProviderCheck, db: Session = Depends(get_db), user: User = Depends(require_roles("super_admin"))) -> dict:
     """Inspect schema14 metadata without SKU originals, quantities or comparison."""
     from app.ai.inventory_probe import inspect_inventory_capabilities
@@ -804,7 +813,7 @@ async def check_inventory_provider(provider_id: int, req: ProviderCheck, db: Ses
     db.commit()
     error = None
     try:
-        capabilities = await inspect_inventory_capabilities(provider)
+        capabilities = await checked_capability_probe(db, inspect_inventory_capabilities, provider)
     except AIExecutionError as exc:
         error = exc
     db.expire_all()
@@ -1434,6 +1443,7 @@ def _write_provider(db: Session, req: ProviderWrite, user: User, provider: AIPro
 
 
 @router.post("/ai/admin/providers")
+@admin_write
 def create_provider(req: ProviderWrite, db: Session = Depends(get_db), user: User = Depends(require_roles("super_admin"))) -> dict:
     """Create a deployment-approved endpoint with write-only credentials."""
     provider = _write_provider(db, req, user, None)
@@ -1441,6 +1451,7 @@ def create_provider(req: ProviderWrite, db: Session = Depends(get_db), user: Use
 
 
 @router.put("/ai/admin/providers/{provider_id}")
+@admin_write
 def update_provider(provider_id: int, req: ProviderWrite, db: Session = Depends(get_db), user: User = Depends(require_roles("super_admin"))) -> dict:
     """Changing a provider invalidates activation of its dependent capabilities."""
     provider = db.query(AIProvider).filter_by(provider_id=provider_id).with_for_update().first()
@@ -1484,6 +1495,7 @@ def list_prompts(key: str, db: Session = Depends(get_db), user: User = Depends(r
 
 
 @router.post("/ai/admin/prompts/{key}")
+@admin_write
 def create_prompt(key: str, req: PromptWrite, db: Session = Depends(get_db), user: User = Depends(require_roles("super_admin"))) -> dict:
     """Save a new revision; never modify historical prompt content."""
     if key == "infection_cluster":
@@ -1506,6 +1518,7 @@ def create_prompt(key: str, req: PromptWrite, db: Session = Depends(get_db), use
 
 
 @router.post("/ai/admin/prompts/{key}/activate")
+@admin_write
 def activate_prompt(key: str, req: PromptActivate, db: Session = Depends(get_db), user: User = Depends(require_roles("super_admin"))) -> dict:
     """Activate a historical version or revert to the baseline, then require revalidation."""
     if key == "infection_cluster":
@@ -1573,6 +1586,7 @@ def knowledge_detail(document_id: str, db: Session = Depends(get_db), user: User
 
 
 @router.post("/ai/admin/knowledge")
+@admin_write
 def create_knowledge(req: KnowledgeWrite, db: Session = Depends(get_db), user: User = Depends(require_roles("super_admin"))) -> dict:
     """Create an immutable draft without fetching arbitrary external URLs."""
     _current_super_admin(db, user)
@@ -1597,6 +1611,7 @@ def create_knowledge(req: KnowledgeWrite, db: Session = Depends(get_db), user: U
 
 
 @router.post("/ai/admin/knowledge/{document_id}/review")
+@admin_write
 def review_knowledge(document_id: str, req: KnowledgeReview, db: Session = Depends(get_db), user: User = Depends(require_roles("super_admin"))) -> dict:
     """Publish exactly the reviewed version or retire it without deleting evidence history."""
     _current_super_admin(db, user)
@@ -1649,6 +1664,7 @@ def list_pathway_sources(db: Session = Depends(get_db), user: User = Depends(req
 
 
 @router.post("/ai/admin/pathway-sources/{pathway_id}/import")
+@admin_write
 def import_pathway_knowledge(pathway_id: int, req: PathwayKnowledgeImport, db: Session = Depends(get_db), user: User = Depends(require_roles("super_admin"))) -> dict:
     """Freeze the exact hospital template; publication remains a separate review action."""
     row = db.query(ClinicalPathway).filter_by(pathway_id=pathway_id).with_for_update().populate_existing().first()
@@ -1702,6 +1718,7 @@ def list_grants(db: Session = Depends(get_db), user: User = Depends(require_role
 
 
 @router.post("/ai/admin/grants")
+@admin_write
 def create_grant(req: PatientGrantWrite, db: Session = Depends(get_db), user: User = Depends(require_roles("super_admin"))) -> dict:
     """Authorize a care role for one category and patient for at most 90 days."""
     categories = {spec.category for spec in FEATURES}
@@ -1723,6 +1740,7 @@ def create_grant(req: PatientGrantWrite, db: Session = Depends(get_db), user: Us
 
 
 @router.delete("/ai/admin/grants/{grant_id}")
+@admin_write
 def revoke_grant(grant_id: int, db: Session = Depends(get_db), user: User = Depends(require_roles("super_admin"))) -> dict:
     """Revoke care access while preserving who granted it and why."""
     grant = db.get(AIPatientGrant, grant_id)

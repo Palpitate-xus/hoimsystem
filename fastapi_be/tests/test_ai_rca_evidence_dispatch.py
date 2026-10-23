@@ -3,10 +3,6 @@
 import json
 
 import pytest
-from fastapi import HTTPException
-from sqlalchemy import inspect, text
-from sqlalchemy.dialects import mysql
-
 from app.ai import native_task_access, native_task_routing, runtime
 from app.ai import rca_evidence_dispatch as dispatch
 from app.ai import rca_evidence_grants as grants
@@ -14,6 +10,9 @@ from app.ai import rca_evidence_receipts as receipts
 from app.ai.models import AIRun
 from app.ai.rca_evidence_run_models import AIRcaEvidenceRunArtifact
 from app.database import Base
+from fastapi import HTTPException
+from sqlalchemy import inspect, text
+from sqlalchemy.dialects import mysql
 from tests.test_ai_rca_evidence_configuration import configured
 from tests.test_ai_rca_evidence_execution import provider_service, setup
 from tests.test_ai_rca_evidence_execution import synthetic_host as synthetic_host
@@ -163,19 +162,33 @@ def test_rca_and_other_real_artifacts_cannot_both_claim_one_run(grant_case, monk
     assert failure.value.status_code == 409
 
 
-def test_orphan_null_marker_is_rejected_before_shared_generic_claim_changes_any_state(grant_case):
+def test_orphan_null_marker_is_retained_while_shared_queue_claims_later_ordinary_work(grant_case):
     db = grant_case["db"]
     stored, _, _ = configured(grant_case)
     identifier = inspect(stored.run).identity[0]
     db.execute(text("DELETE FROM hoimsystem_ai_rca_evidence_run_artifact WHERE run_id=:id"), {"id": identifier})
-    # This module retains earlier synthetic queues. Make the deliberate orphan
-    # the actual first queue candidate, rather than claiming an unrelated row.
+    # Keep the deliberate orphan older than every ordinary synthetic queue.
+    # Fair polling must retain it and claim the explicit later ordinary job.
     db.execute(
         text("UPDATE hoimsystem_ai_run SET feature_key='patient_summary',input_json=:body,evidence_json='[]',create_time='1900-01-01 00:00:00' WHERE run_id=:id"),
         {"id": identifier, "body": '{"payload":{"input":{"rca_evidence_case_id":null}}}'},
     )
+    import datetime as dt
+    import uuid
+
+    later = AIRun(
+        run_id=str(uuid.uuid4()),
+        feature_key="operations_qa",
+        requested_by=inspect(grant_case["actor"]).identity[0],
+        prompt_hash="a" * 64,
+        context_digest="b" * 64,
+        create_time=dt.datetime(1900, 1, 1, 0, 0, 1),
+    )
+    db.add(later)
     db.commit()
-    with pytest.raises(HTTPException) as failure:
-        runtime.claim_next_run(db)
-    assert failure.value.status_code == 409
+    later_id = later.run_id
+    before = tuple(db.query(*AIRun.__table__.columns).filter_by(run_id=identifier).one())
+    claim = runtime.claim_next_run(db)
+    assert claim is not None and claim[0] == later_id
+    assert tuple(db.query(*AIRun.__table__.columns).filter_by(run_id=identifier).one()) == before
     assert db.query(AIRun.status, AIRun.lease_token).filter_by(run_id=identifier).one() == ("queued", None)

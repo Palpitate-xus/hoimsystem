@@ -95,14 +95,22 @@ def _commit(db: Session) -> None:
 @router.get("/ai/admin/features")
 def list_features(db: Session = Depends(get_db), user: User = Depends(require_roles("super_admin"))) -> dict:
     """List all 80 capabilities, including disabled and unvalidated ones."""
+    from app.ai.native_task_access import lock_directory_gates
+
+    lock_directory_gates(db)
+    user = _current_super_admin(db, user)
     configs = {item.feature_key: item for item in db.query(AIFeatureConfig).all()}
-    reports = setup_reports(db, configs)
-    return {"code": 200, "msg": "success", "data": [{**describe_config(db, spec, configs.get(spec.key), True), "setup_check": reports[spec.key]} for spec in FEATURES]}
+    reports = setup_reports(db, configs, user=user)
+    return {"code": 200, "msg": "success", "data": [{**describe_config(db, spec, configs.get(spec.key), True, user=user), "setup_check": reports[spec.key]} for spec in FEATURES]}
 
 
 @router.put("/ai/admin/features/{key}")
 def update_feature(key: str, req: FeatureWrite, db: Session = Depends(get_db), user: User = Depends(require_roles("super_admin"))) -> dict:
     """Configure roles, model, activation and explicit validation with optimistic locking."""
+    if key == "infection_cluster":
+        from app.ai.infection_cluster_profiles import reject_generic_configuration
+
+        reject_generic_configuration(db, user)
     spec = get_spec(key)
     config = feature_config(db, key, user.user_id, req.expected_revision)
     if "provider_id" in req.model_fields_set:
@@ -1220,6 +1228,21 @@ def inspect_run_trace(run_id: str, db: Session = Depends(get_db), user: User = D
 
     if identity is not None and identity.domain == "research_cohort" or identity is None and is_research_task(db, run_id):
         return {"code": 200, "msg": "success", "data": split_trace(db, user, run_id)}
+    if identity is not None and identity.domain == "infection":
+        from app.ai.infection_cluster_task_views import metadata
+
+        return {
+            "code": 200,
+            "msg": "success",
+            "data": {
+                "schema_version": "infection_local_split_trace_v1",
+                "run": metadata(db, user, run_id),
+                "parts": {part: f"/api/ai/infection-cluster/tasks/{run_id}/parts/{part}" for part in ("task", "source", "result")},
+                "clinical_body_included": False,
+                "current_patient_purpose_required_even_for_super": True,
+            },
+        }
+
     if guard_change_run_id(db, user, run_id, current=False):
         return {"code": 200, "msg": "success", "data": trace_view(db, user, db.get(AIRun, run_id))}
     guard_private_task_read(db, user, run_id)
@@ -1385,6 +1408,23 @@ def list_prompts(key: str, db: Session = Depends(get_db), user: User = Depends(r
     """Display the fixed system contract and immutable task prompt history."""
     from app.ai.feature_prompts import system_prompt_for_feature
 
+    if key == "infection_cluster":
+        from app.ai.infection_cluster_profiles import _start
+        from app.ai.infection_cluster_task_contract import LOCAL_PROMPT_HASH, LOCAL_TASK_TEXT
+
+        _start(db, user)
+        return {
+            "code": 200,
+            "msg": "本地固定配方只读溯源，不发送模型",
+            "data": {
+                "system_prompt": "",
+                "versions": [{"prompt_id": None, "version": 0, "task_prompt": LOCAL_TASK_TEXT, "change_note": "local_fixed_recipe"}],
+                "prompt_hash": LOCAL_PROMPT_HASH,
+                "read_only": True,
+                "execution": "local_exact_statistics",
+                "external_model_transfer": False,
+            },
+        }
     _current_super_admin(db, user)
     spec = get_spec(key)
     versions = db.query(AIPromptVersion).filter_by(feature_key=key).order_by(AIPromptVersion.version.desc()).all()
@@ -1400,6 +1440,10 @@ def list_prompts(key: str, db: Session = Depends(get_db), user: User = Depends(r
 @router.post("/ai/admin/prompts/{key}")
 def create_prompt(key: str, req: PromptWrite, db: Session = Depends(get_db), user: User = Depends(require_roles("super_admin"))) -> dict:
     """Save a new revision; never modify historical prompt content."""
+    if key == "infection_cluster":
+        from app.ai.infection_cluster_profiles import reject_generic_configuration
+
+        reject_generic_configuration(db, user)
     config = feature_config(db, key, user.user_id, req.expected_revision)
     version = (db.query(func.max(AIPromptVersion.version)).filter_by(feature_key=key).scalar() or 0) + 1
     prompt = AIPromptVersion(feature_key=key, version=version, task_prompt=req.task_prompt, change_note=req.change_note, created_by=user.user_id)
@@ -1418,6 +1462,10 @@ def create_prompt(key: str, req: PromptWrite, db: Session = Depends(get_db), use
 @router.post("/ai/admin/prompts/{key}/activate")
 def activate_prompt(key: str, req: PromptActivate, db: Session = Depends(get_db), user: User = Depends(require_roles("super_admin"))) -> dict:
     """Activate a historical version or revert to the baseline, then require revalidation."""
+    if key == "infection_cluster":
+        from app.ai.infection_cluster_profiles import reject_generic_configuration
+
+        reject_generic_configuration(db, user)
     config = feature_config(db, key, user.user_id, req.expected_revision)
     if req.prompt_id:
         prompt = db.get(AIPromptVersion, req.prompt_id)

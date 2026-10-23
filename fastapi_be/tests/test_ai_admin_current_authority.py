@@ -32,23 +32,24 @@ def test_audit_readers_recheck_stale_super_before_any_run_read(db_session, seed_
     finally:
         event.remove(db_session, "do_orm_execute", observe)
         db_session.rollback()
-    # Mixed directories take Billing, Satisfaction and Inventory before actor;
+    # Mixed directories take Billing, Satisfaction, Inventory and Infection before actor;
     # neither Gate carries private Run or Source text.
     if reader == "trace":
-        assert len(sql) == 8
+        assert len(sql) == 9
         assert columns[0] == tuple(("hoimsystem_ai_rca_evidence_run_artifact", name) for name in ("run_id", "case_id", "requested_by"))
         assert "WHERE hoimsystem_ai_rca_evidence_run_artifact.run_id =" in sql[0]
         assert "FOR UPDATE" not in sql[0] and "LOCK IN SHARE MODE" not in sql[0]
         sql = sql[1:]
     assert not {"input_json", "result_json", "evidence_json", "context_metadata_json", "source_json", "binding_json", "case_json"}.intersection(name for row in columns for _, name in row)
-    assert len(sql) == 7
+    assert len(sql) == 8
     assert "hoimsystem_ai_charge_write_gate" in sql[0] and sql[0].rstrip().endswith("FOR UPDATE")
     assert "hoimsystem_ai_satisfaction_write_gate" in sql[1] and sql[1].rstrip().endswith("FOR UPDATE")
     assert "hoimsystem_ai_inventory_write_gate" in sql[2] and sql[2].rstrip().endswith("FOR UPDATE")
-    assert "hoimsystem_ai_research_write_gate" in sql[3] and sql[3].rstrip().endswith("FOR UPDATE")
-    assert "hoimsystem_ai_operations_write_gate" in sql[4] and sql[4].rstrip().endswith("FOR UPDATE")
-    assert "hoimsystem_ai_training_write_gate" in sql[5] and sql[5].rstrip().endswith("FOR UPDATE")
-    assert "hoimsystem_users" in sql[6] and sql[6].rstrip().endswith("LOCK IN SHARE MODE")
+    assert "hoimsystem_ai_infection_write_gate" in sql[3] and sql[3].rstrip().endswith("FOR UPDATE")
+    assert "hoimsystem_ai_research_write_gate" in sql[4] and sql[4].rstrip().endswith("FOR UPDATE")
+    assert "hoimsystem_ai_operations_write_gate" in sql[5] and sql[5].rstrip().endswith("FOR UPDATE")
+    assert "hoimsystem_ai_training_write_gate" in sql[6] and sql[6].rstrip().endswith("FOR UPDATE")
+    assert "hoimsystem_users" in sql[7] and sql[7].rstrip().endswith("LOCK IN SHARE MODE")
 
 
 def test_audit_actor_rejects_changed_loaded_token_epoch_before_task_reads(db_session, seed_data):

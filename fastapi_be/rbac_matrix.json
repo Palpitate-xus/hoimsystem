@@ -2641,6 +2641,297 @@
  },
  {
   "auth": [
+   "super_admin"
+  ],
+  "function": "create",
+  "method": "POST",
+  "module": "ai_infection_cluster_profiles.py",
+  "path": "/api/ai/infection-cluster/local-profiles"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "directory",
+  "method": "GET",
+  "module": "ai_infection_cluster_profiles.py",
+  "path": "/api/ai/infection-cluster/local-profiles"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "detail",
+  "method": "GET",
+  "module": "ai_infection_cluster_profiles.py",
+  "path": "/api/ai/infection-cluster/local-profiles/{profile_id}"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "review",
+  "method": "POST",
+  "module": "ai_infection_cluster_profiles.py",
+  "path": "/api/ai/infection-cluster/local-profiles/{profile_id}/review"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "revoke",
+  "method": "POST",
+  "module": "ai_infection_cluster_profiles.py",
+  "path": "/api/ai/infection-cluster/local-profiles/{profile_id}/revoke"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "super_admin"
+  ],
+  "function": "configuration",
+  "method": "GET",
+  "module": "ai_infection_cluster_profiles.py",
+  "path": "/api/ai/infection-cluster/local-configuration"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "configure",
+  "method": "PUT",
+  "module": "ai_infection_cluster_profiles.py",
+  "path": "/api/ai/infection-cluster/local-configuration"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "super_admin"
+  ],
+  "function": "local_implementation",
+  "method": "GET",
+  "module": "ai_infection_cluster_scenarios.py",
+  "path": "/api/ai/infection-cluster/local-implementation"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "departments",
+  "method": "GET",
+  "module": "ai_infection_cluster_scenarios.py",
+  "path": "/api/ai/infection-cluster/departments"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "create",
+  "method": "POST",
+  "module": "ai_infection_cluster_scenarios.py",
+  "path": "/api/ai/infection-cluster/scenarios"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "super_admin"
+  ],
+  "function": "directory",
+  "method": "GET",
+  "module": "ai_infection_cluster_scenarios.py",
+  "path": "/api/ai/infection-cluster/scenarios"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "super_admin"
+  ],
+  "function": "detail",
+  "method": "GET",
+  "module": "ai_infection_cluster_scenarios.py",
+  "path": "/api/ai/infection-cluster/scenarios/{scenario_id}"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "review",
+  "method": "POST",
+  "module": "ai_infection_cluster_scenarios.py",
+  "path": "/api/ai/infection-cluster/scenarios/{scenario_id}/review"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "revoke",
+  "method": "POST",
+  "module": "ai_infection_cluster_scenarios.py",
+  "path": "/api/ai/infection-cluster/scenarios/{scenario_id}/revoke"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "grant_create",
+  "method": "POST",
+  "module": "ai_infection_cluster_sources.py",
+  "path": "/api/ai/infection-cluster/grants"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "definition_create",
+  "method": "POST",
+  "module": "ai_infection_cluster_sources.py",
+  "path": "/api/ai/infection-cluster/definitions"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "case_review_create",
+  "method": "POST",
+  "module": "ai_infection_cluster_sources.py",
+  "path": "/api/ai/infection-cluster/case-reviews"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "registry_directory",
+  "method": "GET",
+  "module": "ai_infection_cluster_sources.py",
+  "path": "/api/ai/infection-cluster/registry/{kind}"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "registry_detail",
+  "method": "GET",
+  "module": "ai_infection_cluster_sources.py",
+  "path": "/api/ai/infection-cluster/registry/{kind}/{record_id}"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "registry_review",
+  "method": "POST",
+  "module": "ai_infection_cluster_sources.py",
+  "path": "/api/ai/infection-cluster/registry/{kind}/{record_id}/review"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "registry_revoke",
+  "method": "POST",
+  "module": "ai_infection_cluster_sources.py",
+  "path": "/api/ai/infection-cluster/registry/{kind}/{record_id}/revoke"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "roots_preview",
+  "method": "POST",
+  "module": "ai_infection_cluster_sources.py",
+  "path": "/api/ai/infection-cluster/roots/preview"
+ },
+ {
+  "auth": [
+   "super_admin"
+  ],
+  "function": "snapshot_create",
+  "method": "POST",
+  "module": "ai_infection_cluster_sources.py",
+  "path": "/api/ai/infection-cluster/snapshots"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "super_admin"
+  ],
+  "function": "snapshots",
+  "method": "GET",
+  "module": "ai_infection_cluster_sources.py",
+  "path": "/api/ai/infection-cluster/snapshots"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "super_admin"
+  ],
+  "function": "snapshot_part",
+  "method": "GET",
+  "module": "ai_infection_cluster_sources.py",
+  "path": "/api/ai/infection-cluster/snapshots/{snapshot_id}/parts/{part}"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "super_admin"
+  ],
+  "function": "preview",
+  "method": "POST",
+  "module": "ai_infection_cluster_tasks.py",
+  "path": "/api/ai/infection-cluster/context"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "super_admin"
+  ],
+  "function": "create",
+  "method": "POST",
+  "module": "ai_infection_cluster_tasks.py",
+  "path": "/api/ai/infection-cluster/tasks"
+ },
+ {
+  "auth": "ANY",
+  "function": "directory",
+  "method": "GET",
+  "module": "ai_infection_cluster_tasks.py",
+  "path": "/api/ai/infection-cluster/tasks"
+ },
+ {
+  "auth": "ANY",
+  "function": "metadata",
+  "method": "GET",
+  "module": "ai_infection_cluster_tasks.py",
+  "path": "/api/ai/infection-cluster/tasks/{run_id}"
+ },
+ {
+  "auth": [
+   "admin",
+   "director",
+   "super_admin"
+  ],
+  "function": "part",
+  "method": "GET",
+  "module": "ai_infection_cluster_tasks.py",
+  "path": "/api/ai/infection-cluster/tasks/{run_id}/parts/{part}"
+ },
+ {
+  "auth": "ANY",
+  "function": "cancel",
+  "method": "POST",
+  "module": "ai_infection_cluster_tasks.py",
+  "path": "/api/ai/infection-cluster/tasks/{run_id}/cancel"
+ },
+ {
+  "auth": [
    "admin",
    "director",
    "pharmacist",

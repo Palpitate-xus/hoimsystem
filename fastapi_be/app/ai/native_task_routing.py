@@ -29,6 +29,7 @@ def _domains():
     from app.ai.document_change_run_models import AIDocumentChangeRunArtifact
     from app.ai.document_extraction_models import AIDocumentExtractionRunAnchor
     from app.ai.drug_label_run_models import AIDrugLabelRunArtifact
+    from app.ai.infection_cluster_run_models import AIInfectionRunArtifact
     from app.ai.operations_support_run_models import AIOperationsRunArtifact
     from app.ai.rca_evidence_run_models import AIRcaEvidenceRunArtifact
     from app.ai.research_cohort_artifact_models import AIResearchCohortRunArtifact
@@ -45,6 +46,7 @@ def _domains():
         ("operations_support", AIOperationsRunArtifact, "case_id"),
         ("clinical_training", AITrainingRunArtifact, "submission_id"),
         ("rca", AIRcaEvidenceRunArtifact, "case_id"),
+        ("infection", AIInfectionRunArtifact, "scenario_id"),
     )
 
 

@@ -400,6 +400,10 @@ from app.routers import (
     ai_feedback_admin,
     ai_forecast,
     ai_images,
+    ai_infection_cluster_profiles,
+    ai_infection_cluster_scenarios,
+    ai_infection_cluster_sources,
+    ai_infection_cluster_tasks,
     ai_inventory_native_sources,
     ai_inventory_scenarios,
     ai_lab_mappings,
@@ -557,6 +561,10 @@ app.include_router(ai_surgery_scenarios.router, prefix="/api")
 app.include_router(ai_inventory_native_sources.router, prefix="/api")
 app.include_router(ai_inventory_scenarios.router, prefix="/api")
 app.include_router(ai_document_evidence.router, prefix="/api")
+app.include_router(ai_infection_cluster_sources.router, prefix="/api")
+app.include_router(ai_infection_cluster_scenarios.router, prefix="/api")
+app.include_router(ai_infection_cluster_profiles.router, prefix="/api")
+app.include_router(ai_infection_cluster_tasks.router, prefix="/api")
 app.include_router(ai_drug_label_sources.router, prefix="/api")
 app.include_router(ai_drug_label_tasks.router, prefix="/api")
 app.include_router(ai_document_change.router, prefix="/api")

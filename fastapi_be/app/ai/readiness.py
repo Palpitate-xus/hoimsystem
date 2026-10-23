@@ -13,7 +13,7 @@ from app.ai.models import AIKnowledgeDocument, AIProvider, AIRiskRuleProfile, ut
 from app.models import ClinicalPathway
 
 
-def setup_reports(db, configs: dict) -> dict:
+def setup_reports(db, configs: dict, *, user=None) -> dict:
     """Inspect provider, data-purpose, knowledge and validation prerequisites in a bounded batch."""
     now = utcnow()
     providers = {item.provider_id: item for item in db.query(AIProvider).all()}
@@ -52,6 +52,11 @@ def setup_reports(db, configs: dict) -> dict:
     reports = {}
     rule_profile_ready = {}
     for spec in FEATURES:
+        if spec.number == 78:
+            from app.ai.infection_cluster_management import readiness
+
+            reports[spec.key] = readiness(db, spec, user=user)
+            continue
         config = configs.get(spec.key)
         provider = providers.get(config.provider_id) if config and config.provider_id else None
         issues = []

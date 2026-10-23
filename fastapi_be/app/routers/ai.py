@@ -76,7 +76,7 @@ def available_features(db: Session = Depends(get_db), user: User = Depends(get_c
             if exc.status_code == 403:
                 continue
             raise
-        data.append(describe_config(db, spec, configs.get(spec.key)))
+        data.append(describe_config(db, spec, configs.get(spec.key), user=user))
     return {"code": 200, "msg": "success", "data": data}
 
 
@@ -268,6 +268,8 @@ def submit_run(req: RunRequest, db: Session = Depends(get_db), user: User = Depe
 
         return create_task(OperationsTaskCreate(**req.input, preview=req.preview), db, user)
     run = create_run(db, user, req)
+    if req.feature_key == "infection_cluster":
+        return {"code": 200, "msg": "任务已排队", "data": vars(run)}
     value = {"code": 200, "msg": "任务已排队", "data": describe_run(run, False, user=user)}
     if req.feature_key == "feedback_analysis":
         from app.ai.satisfaction_views import checked_response
@@ -690,6 +692,17 @@ def list_runs(
             if exc.status_code in {403, 404, 409}:
                 continue
             raise
+        from app.ai.native_task_routing import locate_native_task
+
+        identity = locate_native_task(db, item.run_id)
+        if identity is not None and identity.domain == "infection":
+            from app.ai.infection_cluster_task_views import metadata
+
+            data.append(metadata(db, user, item.run_id))
+            continue
+        if item.feature_key == "infection_cluster":
+            # Unverifiable old generic78 rows never acquire new Source rights.
+            continue
         try:
             from app.ai.native_task_access import guard_private_task_read
 
@@ -783,8 +796,13 @@ def run_detail(run_id: str, db: Session = Depends(get_db), user: User = Depends(
         from app.ai.clinical_training_views import describe_task
 
         return {"code": 200, "msg": "success", "data": describe_task(db, user, run_id).model_dump(mode="json")}
+    from app.ai.infection_cluster_task_access import is_own_task
     from app.ai.native_task_access import guard_private_task_read
 
+    if is_own_task(db, run_id):
+        from app.ai.infection_cluster_task_views import metadata
+
+        return {"code": 200, "msg": "success", "data": metadata(db, user, run_id)}
     guard_private_task_read(db, user, run_id)
     run = db.get(AIRun, run_id)
     if run is None:
@@ -808,6 +826,14 @@ def cancel_run(run_id: str, db: Session = Depends(get_db), user: User = Depends(
     from app.ai.clinical_training_shared import is_located_training_task, is_training_task
     from app.ai.document_change_access import has_native_identity
     from app.ai.document_change_runtime import cancel_change_run
+    from app.ai.infection_cluster_task_access import is_own_task
+
+    if is_own_task(db, run_id):
+        from app.ai.infection_cluster_task_runtime import cancel
+
+        result = cancel(db, user, run_id)
+        db.commit()
+        return {"code": 200, "msg": "success", "data": result}
     from app.ai.native_task_access import lock_directory_gates
     from app.ai.native_task_routing import locate_native_task
     from app.ai.operations_support_shared import is_located_operations_task, is_operations_task

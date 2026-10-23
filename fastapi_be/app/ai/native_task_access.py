@@ -44,7 +44,7 @@ def _guard_charge_identity(db, user, identity):
 
 
 def lock_directory_gates(db):
-    """Billing -> Satisfaction -> Inventory -> Research -> Operations -> Training, before User/Run."""
+    """Billing -> Satisfaction -> Inventory -> Infection -> Research -> Operations -> Training, before User/Run."""
     from app.ai.charge_reconciliation_write_guard import lock_charge_gate
     from app.ai.inventory_write_guard import lock_inventory_gate
     from app.ai.satisfaction_write_guard import lock_satisfaction_gate
@@ -52,6 +52,9 @@ def lock_directory_gates(db):
     lock_charge_gate(db)
     lock_satisfaction_gate(db)
     lock_inventory_gate(db)
+    from app.ai.infection_cluster_write_guard import lock_gate
+
+    lock_gate(db)
     from app.ai.research_cohort_write_guard import lock_research_gate
 
     lock_research_gate(db)
@@ -117,6 +120,11 @@ def guard_private_task_read(db, user, run_id):
 
             guard_research_task(db, user, run_id)
             return
+        if identity.domain == "infection":
+            from app.ai.infection_cluster_task_storage import guard_run_id
+
+            guard_run_id(db, user, run_id)
+            return
         if identity.domain == "charge":
             _guard_charge_identity(db, user, identity)
             return
@@ -159,6 +167,10 @@ def guard_private_task_read(db, user, run_id):
         return
     if is_research_task(db, run_id):
         guard_research_task(db, user, run_id)
+        return
+    from app.ai.infection_cluster_task_storage import guard_run_id
+
+    if guard_run_id(db, user, run_id):
         return
     if guard_change_run_id(db, user, run_id, current=True):
         return

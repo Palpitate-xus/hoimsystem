@@ -81,6 +81,8 @@ def operational_options(db, user: User, spec: FeatureSpec) -> dict:
         raise HTTPException(422, "培训任务只使用原学员已提交练习目录，不以通用医院运营资料替代")
     if spec.number == 74:
         raise HTTPException(422, "科研项目候选须使用独立项目授权目录，不以医院科室运营范围替代")
+    if spec.number == 78:
+        raise HTTPException(422, "病例集关联统计仅使用专用受审场景，不提供通用运营范围或默认日期")
     departments = operational_scope(db, user, spec, {})
     start, end = operational_window({})
     data = {"default_window": [str(start), str(end)], "allow_hospital_scope": departments is None, "departments": [], "truncated": False}
@@ -116,6 +118,8 @@ def operational_context(db, user: User, spec: FeatureSpec, values: dict) -> Cont
         raise HTTPException(422, "科研任务请明确核对独立完整Case；通用运营或临床范围不代授科研权限")
     if spec.number == 77 or "rca_evidence_case_id" in values:
         raise HTTPException(422, "RCA受审Case不使用通用医院运营资料范围")
+    if spec.number == 78 or "infection_cluster_scenario_id" in values:
+        raise HTTPException(422, "病例集关联统计须使用专用本地场景预览，不以通用运营空资料替代")
     if "satisfaction_case_id" in values:
         if spec.number != 70:
             raise HTTPException(422, "受审完整评价原件仅用于满意度与评价证据分析")

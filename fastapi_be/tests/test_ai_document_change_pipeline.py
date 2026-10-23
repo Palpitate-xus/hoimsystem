@@ -315,12 +315,13 @@ def test_admin_reader_captures_loaded_request_epoch_before_orm_refresh(db_sessio
     # before refreshing the authenticated actor. No private task read follows.
     from app.ai.charge_reconciliation_models import AIChargeWriteGate
     from app.ai.clinical_training_models import AITrainingWriteGate
+    from app.ai.infection_cluster_models import AIInfectionWriteGate
     from app.ai.inventory_native_source_models import AIInventoryWriteGate
     from app.ai.operations_support_models import AIOperationsWriteGate
     from app.ai.research_cohort_models import AIResearchWriteGate
     from app.ai.satisfaction_models import AISatisfactionWriteGate
 
-    tables = [AIChargeWriteGate.__tablename__, AISatisfactionWriteGate.__tablename__, AIInventoryWriteGate.__tablename__, AIResearchWriteGate.__tablename__, AIOperationsWriteGate.__tablename__, AITrainingWriteGate.__tablename__, "hoimsystem_users"]
+    tables = [AIChargeWriteGate.__tablename__, AISatisfactionWriteGate.__tablename__, AIInventoryWriteGate.__tablename__, AIInfectionWriteGate.__tablename__, AIResearchWriteGate.__tablename__, AIOperationsWriteGate.__tablename__, AITrainingWriteGate.__tablename__, "hoimsystem_users"]
     no_task_text(statements)
     if reader == "trace":
         assert len(statements) == len(tables) + 1

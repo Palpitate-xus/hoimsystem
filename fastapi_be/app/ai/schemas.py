@@ -250,6 +250,15 @@ class RunRequest(StrictRequest):
                 raise ValueError("事件调查任务仅接受明确Case，不接受通用患者或就诊范围")
             if "preview" in value and type(value["preview"]) is not bool:
                 raise ValueError("事件调查任务预览须为显式布尔值")
+        if isinstance(value, dict) and value.get("feature_key") == "infection_cluster":
+            if value.get("patient_id") is not None or value.get("encounter_ref") is not None or "preview" in value and type(value["preview"]) is not bool:
+                raise ValueError("本地统计仅接受完整方案引用与明确布尔预览状态，无单患者/就诊范围")
+            raw = value.get("input")
+            if type(raw) is not dict or set(raw) != {"infection_cluster_scenario_id"}:
+                raise ValueError("本地统计新任务须且仅须完整统计方案引用，不能覆盖参数/目的或降级资料")
+            from app.ai.infection_cluster_task_contract import TaskCreate
+
+            TaskCreate.model_validate({**raw, "preview": value.get("preview", False)})
         if isinstance(value, dict) and isinstance(value.get("feature_key"), str) and value["feature_key"].strip() == "feedback_analysis":
             if value.get("patient_id") is not None or value.get("encounter_ref") is not None:
                 raise ValueError("完整评价任务不接受患者或就诊范围")

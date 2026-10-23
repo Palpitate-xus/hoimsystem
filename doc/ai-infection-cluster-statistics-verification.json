@@ -1,0 +1,421 @@
+{
+  "schema_version": "infection_cluster_statistics_verification_v1",
+  "source_head": "4d5a179a7b5378c24fbfba7f36219d4df3f815d6",
+  "scope": "Feature78 pure finite-family typed statistics/arithmetic and synthetic host capacity only. No Scenario server publication, Task worker, MySQL of statistics, hospital surveillance coverage or clinical validation.",
+  "final_source_freeze": {
+    "fastapi_be/app/ai/infection_cluster_statistics_contract.py": {
+      "bytes": 12824,
+      "sha256": "129a543ebec979933b3558b389a973266e638799303f2d172180c7ba10d9c06f"
+    },
+    "fastapi_be/app/ai/infection_cluster_statistics.py": {
+      "bytes": 8224,
+      "sha256": "ceee37dbd22e61eba01db4770aa752ead0def7497c6ae860e647d2c9a04ae6e6"
+    },
+    "fastapi_be/app/ai/infection_cluster_contract.py": {
+      "bytes": 15118,
+      "sha256": "b80120a6c5b01f5055013aaf2ace6b93b0b2786960b6bb555fa76e395d4aeed4"
+    },
+    "fastapi_be/app/ai/infection_cluster_projection.py": {
+      "bytes": 14164,
+      "sha256": "547e6ffa812754ebc9d16d3220be7bc1f724817e398e9025759698c7c849e262"
+    },
+    "fastapi_be/tests/test_ai_infection_cluster_statistics.py": {
+      "bytes": 13834,
+      "sha256": "8807c49f7cac7beb6cfbb21c3b9bee1f41676d04c4c96d28f458db35418d18cd"
+    },
+    "fastapi_be/tests/test_ai_infection_cluster_statistics_capacity.py": {
+      "bytes": 4977,
+      "sha256": "34b67dc66a8635ee98b040bf320f11eb9e4e6dec2c9bfba0f403d1b2dbb26456"
+    },
+    "fastapi_be/tests/test_ai_infection_cluster_contract.py": {
+      "bytes": 13813,
+      "sha256": "169037be8936b3be3b2cd3d715d6b0dd9a5290edb20d354f84b2f97adade0fb3"
+    }
+  },
+  "source_four_recipe_unchanged": {
+    "fastapi_be/app/ai/infection_cluster_contract.py": {
+      "bytes": 15118,
+      "sha256": "b80120a6c5b01f5055013aaf2ace6b93b0b2786960b6bb555fa76e395d4aeed4"
+    },
+    "fastapi_be/app/ai/infection_cluster_projection.py": {
+      "bytes": 14164,
+      "sha256": "547e6ffa812754ebc9d16d3220be7bc1f724817e398e9025759698c7c849e262"
+    },
+    "fastapi_be/tests/test_ai_infection_cluster_contract.py": {
+      "bytes": 13813,
+      "sha256": "169037be8936b3be3b2cd3d715d6b0dd9a5290edb20d354f84b2f97adade0fb3"
+    },
+    "fastapi_be/tests/test_ai_infection_cluster_projection.py": {
+      "bytes": 13365,
+      "sha256": "6e4baea9b85c0eae47e0a7ea2ab76ed8fa754a06e4856c490435790976ddec86"
+    }
+  },
+  "final_target_report": {
+    "scope": "pure finite-family typed/statistical arithmetic and actual4096×256 rawJSON capacity; no server publication/Task/model clinical validation",
+    "command": [
+      "/home/xusheng/miniconda3/bin/python",
+      "-m",
+      "pytest",
+      "--noconftest",
+      "-p",
+      "hoim_infection_statistics_guard",
+      "tests/test_ai_infection_cluster_statistics.py",
+      "tests/test_ai_infection_cluster_statistics_capacity.py",
+      "-q",
+      "-o",
+      "junit_family=legacy",
+      "--junitxml=/tmp/hoim-infection-statistics-final-junit.xml"
+    ],
+    "exit_code": 0,
+    "outer_seconds": 12.586569,
+    "junit": {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "47",
+      "time": "11.988",
+      "timestamp": "2026-10-21T18:34:14.355846+00:00",
+      "hostname": "gpu-4x3090-133"
+    },
+    "mathematical_properties": {
+      "independent_labeled_assignments_tables": "251",
+      "independent_scipy_small_tables": "1296",
+      "typed_full_input_bytes": "5507310",
+      "whole_result_bytes": "1467075",
+      "full_candidate_table_record_visits": "1048576",
+      "actual_hypergeometric_tail_terms": "524288"
+    },
+    "sources_stable": true,
+    "source_count": 7,
+    "io_guard": {
+      "dotenv_read_attempts": 0,
+      "network_connect_attempts": 0,
+      "dns_attempts": 0
+    },
+    "artifacts": {
+      "/tmp/hoim-infection-statistics-final-sources-before.json": {
+        "sha256": "8aa03fc7bdaf507217d936b099a8c120b03a93dc4e6d10bae313b4db85b1a1b6",
+        "bytes": 1177
+      },
+      "/tmp/hoim-infection-statistics-final-sources-after.json": {
+        "sha256": "8aa03fc7bdaf507217d936b099a8c120b03a93dc4e6d10bae313b4db85b1a1b6",
+        "bytes": 1177
+      },
+      "/tmp/hoim-infection-statistics-final-tests.log": {
+        "sha256": "1edd4e361e8745353df004ab2c8d8c1028e8770a5b3f8863ede06b7afa8338cb",
+        "bytes": 100
+      },
+      "/tmp/hoim-infection-statistics-final-junit.xml": {
+        "sha256": "d37db1bcbd250b76f7e27570f7a43e39f04a6ceec22c948bde289377b1630d38",
+        "bytes": 11025
+      }
+    }
+  },
+  "scientific_scope": {
+    "schema_version": "infection_statistics_scientific_scope_v1",
+    "verified_primary_sources": [
+      {
+        "url": "https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.fisher_exact.html",
+        "basis": "Fixed margins hypergeometric null and greater upper-tail example [[6,2],[1,4]] = 0.08624708624708627. Runtime uses exact stdlib integer arithmetic; installed SciPy 1.17.1 is an independent test oracle only."
+      },
+      {
+        "url": "https://www.itl.nist.gov/div898/handbook/prc/section4/prc463.htm",
+        "basis": "General Bonferroni inequality for a finite preselected family. Applying min(1,M*p) here is our mathematical implementation; the source does not validate this hospital application."
+      },
+      {
+        "url": "https://wwwnc.cdc.gov/eid/article/27/5/20-3583_article",
+        "basis": "Case-only surveillance research illustrates reporting/ascertainment and changing testing limitations. This implementation is not the cited scan method, SaTScan, a surveillance definition, or clinical validation."
+      }
+    ],
+    "design_inferences": [
+      "A real pre-execution publication does not prove selection independent of already observed data.",
+      "One declared family does not control undisclosed post-hoc selection or repeated analyses.",
+      "Distinct subject tokens are not proof of independent sampling.",
+      "Selected patients are not a surveillance population denominator.",
+      "No statistical or clinical activation is authorized by pure typed declarations."
+    ]
+  },
+  "capacity": {
+    "rows": 4096,
+    "family_size": 256,
+    "table_record_visits": 1048576,
+    "actual_tail_terms": 524288,
+    "work_upper_bound": 2102272,
+    "work_limit": 2110000,
+    "raw_input_bytes": 5507310,
+    "result_bytes": 1467075,
+    "first_rss_observation": {
+      "bytes": 6881783808,
+      "status": "anomalous uncorroborated resource.getrusage observation; retained exactly, not asserted as current memory cap",
+      "artifact": "/tmp/hoim-infection-statistics-capacity-final-probe.json"
+    },
+    "fresh_second": {
+      "scope": "fresh host process actual typed private declarations→HMAC public Source→raw JSON parse→exact bounded full family. Synthetic pure data, no SQL/server publication/runtime container or epidemiologic validation.",
+      "record_count": 4096,
+      "family_size": 256,
+      "input_bytes": 5507310,
+      "result_bytes": 1467075,
+      "fixture_construction_seconds": 6.729799,
+      "raw_json_validation_and_evaluation_seconds": 3.330146,
+      "total_seconds": 10.126968,
+      "max_rss_bytes": 202829824,
+      "proc_memory_status": {
+        "VmHWM": "198076 kB",
+        "VmRSS": "100076 kB"
+      },
+      "case_table_visits": 1048576,
+      "hypergeometric_tail_terms": 524288,
+      "work_upper_bound": 2102272,
+      "work_limit": 2110000,
+      "table_every_candidate": {
+        "window_in_department": 1,
+        "window_in_other": 2048,
+        "window_out_department": 2047,
+        "window_out_other": 0
+      },
+      "all_exact_p_one": true,
+      "exact_p_one_is_not_normal": true,
+      "recipe_hash": "f7001dd6715807770e4d9ac9228488b39f2735f701252627b9377a768b9ddd27",
+      "source_sha256": {
+        "fastapi_be/app/ai/infection_cluster_statistics.py": "ceee37dbd22e61eba01db4770aa752ead0def7497c6ae860e647d2c9a04ae6e6",
+        "fastapi_be/app/ai/infection_cluster_statistics_contract.py": "129a543ebec979933b3558b389a973266e638799303f2d172180c7ba10d9c06f",
+        "fastapi_be/tests/test_ai_infection_cluster_statistics_capacity.py": "34b67dc66a8635ee98b040bf320f11eb9e4e6dec2c9bfba0f403d1b2dbb26456"
+      }
+    },
+    "fresh_third": {
+      "scope": "fresh host process actual typed private declarations→HMAC public Source→raw JSON parse→exact bounded full family. Synthetic pure data, no SQL/server publication/runtime container or epidemiologic validation.",
+      "record_count": 4096,
+      "family_size": 256,
+      "input_bytes": 5507310,
+      "result_bytes": 1467075,
+      "fixture_construction_seconds": 6.131396,
+      "raw_json_validation_and_evaluation_seconds": 3.58555,
+      "total_seconds": 9.788446,
+      "max_rss_bytes": 203304960,
+      "proc_memory_status": {
+        "VmHWM": "198540 kB",
+        "VmRSS": "102056 kB"
+      },
+      "case_table_visits": 1048576,
+      "hypergeometric_tail_terms": 524288,
+      "work_upper_bound": 2102272,
+      "work_limit": 2110000,
+      "table_every_candidate": {
+        "window_in_department": 1,
+        "window_in_other": 2048,
+        "window_out_department": 2047,
+        "window_out_other": 0
+      },
+      "all_exact_p_one": true,
+      "exact_p_one_is_not_normal": true,
+      "recipe_hash": "f7001dd6715807770e4d9ac9228488b39f2735f701252627b9377a768b9ddd27",
+      "source_sha256": {
+        "fastapi_be/app/ai/infection_cluster_statistics.py": "ceee37dbd22e61eba01db4770aa752ead0def7497c6ae860e647d2c9a04ae6e6",
+        "fastapi_be/app/ai/infection_cluster_statistics_contract.py": "129a543ebec979933b3558b389a973266e638799303f2d172180c7ba10d9c06f",
+        "fastapi_be/tests/test_ai_infection_cluster_statistics_capacity.py": "34b67dc66a8635ee98b040bf320f11eb9e4e6dec2c9bfba0f403d1b2dbb26456"
+      }
+    },
+    "measurement_limit": "Host process RSS checked against /usr/bin/time and /proc/self/status in two fresh repeats; not a Docker memory cap or production concurrency measurement."
+  },
+  "independent_oracles": {
+    "labeled_fixed_margin_assignment_enumerations": 251,
+    "scipy_small_tables": 1296,
+    "scipy_runtime_dependency": false,
+    "exact_extreme_tail": "1/comb(4096,2048), denominator 1232 decimal digits; positive exact rational preserved even though binary64 conversion underflows to 0."
+  },
+  "failure_and_predecessor_lineage": {
+    "first_and_second_small_targets": "Original development outputs are preserved separately and do not replace final47 source binding.",
+    "first_capacity_target": "1 passed; JUnit xunit2 record_property compatibility warning retained. Final47 uses legacy JUnit with no warning.",
+    "first_capacity_rss": "Actual anomalous 6.88GB resource result is retained, not rewritten or silently replaced.",
+    "unlogged_errors": "No additional scientific failure is invented or replayed as original evidence."
+  },
+  "permanent_evidence": {
+    "storage": "Each original artifact is losslessly embedded; original /tmp paths are provenance, not required storage. Decode base64 then gzip and verify original byte length and SHA256.",
+    "artifact_count": 24,
+    "original_total_bytes": 123818,
+    "artifacts": [
+      {
+        "original_path": "/tmp/hoim-infection-statistics-capacity-final-probe.json",
+        "original_bytes": 1348,
+        "sha256": "d5021c1dbf4626c83b859c13383700e5e5b33dcdc5247b94fdf2ff869ed48412",
+        "encoding": "gzip_base64_original_bytes",
+        "gzip_base64": "H4sIAAAAAAAC/51US27kNhDd+xREr41uiqJIaXZBNkGQDwIfgCiSpWkmkiiQlO3OYLY5QI6Yk6REObGdBLOIgBbQ9YqvXr0q6tMdY6fs4oqnD+w0JsxXdo25sDVFhzkzcGWDiZXbip6C4REKMo9uggQlxCX/8dvv33z/1dds3ewUHHuIW3JIwQRP7NuHH39gK6S8B/CZuJiN2+KJatymiY0wh+l2Zg+3pVyx0PF1S0QPBe7ZEtnDT99dMqZHTC/0teQlbUsJMzIXlwJhITQmhmvwOIc4xY/E8whT8DX7fLrfe0zoYvLGUflCrUo+qBo/JJgcft0dEN0RDcu6FWNvBTNFu47rtuEvPHmbXqFGKjU03UEVngvJpxpLLmlze3WTqe7iK8t54L3gzUEDT+bnTPirUAOLN0j/N/jHyfbMW9VrXU+WWGB6Aw5nzjveH7QzPJuU89/yVN83um973lfYQUZTwE5oHkMOpXbAZd/po+0rTTl9xDhjScFRZphMwTRX+UKK/qB5iukXs62Ua+o4d+MaLoQWr/AU5lAq0HB6Dum1MtI4b8ZRt3vju+ufCNzPhcXHJxMW45GWpsxYR1U7ewdHWpa0c5P092Ckqb07TCn63yl/EXBCPldpME2mLqhZTVx2UTRBrNCbsAnZLLHQL80wvU2i9Qormivka71ImvPGe6Wbrudaa47SD+AGIXrZ97YdRqHbjrIa0QkltB1arUGr3g7ee6GPnc31Lpl8BdrLV59GyAXWYCxeYF0vEC5hGfFYNzdtmSZmKKOETDcqn9fbrsghYqu99UKgatAC6bOSlAHoTiB47nHUctBOAfaKo5LaCzcAl4AK1en+/xTf70JJ5N+LCmx0y0cB4FC0OHCwTjiib6W2nmPfSMvtKB0fJXopukbuzjWdBM3JHfEfKmjRS65vA8F8WQys4EK5vYhppVXaO6WgV22HOPSWSyrfCj42ZNGAEhV96sgFO5Jho+Stb6zw1golaSL79tx9vvsTDhUP6UQFAAA="
+      },
+      {
+        "original_path": "/tmp/hoim-infection-statistics-capacity-final-probe.log",
+        "original_bytes": 1283,
+        "sha256": "2bee83e9d7717b1dcdbb41652dfb39488753fee23af72ba1c561b22cd3d19c50",
+        "encoding": "gzip_base64_original_bytes",
+        "gzip_base64": "H4sIAAAAAAAC/5VUTY/bNhC991cQPgc2RVEklVvQSxEkKYq9FiCG5ChmK4sCSa3XDfa/d6jdxEkOBSrAAjxv+N6bD+rLofi04uEtO0wZy5mdU6lszcljKQx83WBm9bZioGB8hIosoJ8hQ41pKX9uohvFbx/f/crWzc3Rs4e0ZY8v8QxX9v7h909shVxeY/hEpMylbQnEOW3zzCa4xPl2ZA+3pZ6xEsm6ZdKBCm/YktjDHx9OBfMj5leRXfuUt6XGCzKflgpxITRlhmsMeIlpTp+J5xHmGPbs4+ENO2T0KQfrSbxSxZKPiqIv8rbEf1obxNBicVm3at2tYqHYMHDdd3xnKNt8Bzqp1NgNjSQ+VTJN3EupefNN0xbSW8LOcBy5EbxrFHC1fxVC7+YsLMEi/d/gp3P9kffKaE3naqowfweNR84HbhrlBZ5sLuWbLWVMp01vuCHQQ0Fbwc1oH2OJdffNpRl0K/RMo82fMV2w5ugpL862Yr7spoUUplFcU/7bbitl2n1wrU0dF0KLr+AcL7Hu4Y7T0+zuikhDu1lP9bVSW3+/HK5xCelq42ID0mLUC+7TaIXcoUSbkBshOb0DiYbywyGC9Y/w14P8meIwz3ZfOLvatDR5mg0S8F3QxmKXVOmXLzDfU2hZ4or2DOW83w7NeReC0t1guNaaowwj+FEII41x/TgJ3Q+U1YlBKKHd2GsNWhk3hhCEbvtX9rthyxloy/ZeTFAqrNE6PMG6niCe4jLhy/b4eSs0CksZNRa6FuW43poVj4i9Di4IgapDB2TMSbIEoAeBEHjASctRewVoFEcldRB+BC4BFarDvvT/R7itdc3UslcH2OmeTwLAo+hx5OC88ETdS+0CR9NJx90kPZ8kBimGTrZ2dYMEzakl4icHtLW17G8L0f63EVjBx3p7NdJLp3TwSoFR/YA4GsclSfeCTx21ZkSJij5YVL2bqFGT5H3onAjOCSVpCM/Pv/wL+rj68AMFAAA="
+      },
+      {
+        "original_path": "/tmp/hoim-infection-statistics-capacity-first-junit.xml",
+        "original_bytes": 696,
+        "sha256": "ad9c2b025c4fdfaa7d3e84fcfa490ef0a9a7ed64779cc4a9d749809bb10f2300",
+        "encoding": "gzip_base64_original_bytes",
+        "gzip_base64": "H4sIAAAAAAAC/21SXXPbIBD8KxpeO7JBX5Y8UfIn+n5DELaZIKHhDjf69z3LTqO2fkELx+7erXh5+xx9drURXZh6oXZSZHYyYXDTuReJTnkr3l5fyCJhcvzJJj3aXszL7Shbz8Wm/leZpWIMEXvBqiftfIr2vsEPN892WPHKZWtG7sZVcld0jx2SHudeFLJociXzQv1U7bE4HOtuVx5aJesfUh4li1wC0t36PKe8+ixlJ3NVlo/ejEabGa8R75dWz91tBe3ATSdriAMA4xOSjcC+5JCcQTB61sbRIrJvKmhDSXughYeAU/IeirqB9wUq2TWgpwF8mM5w4Xo82zBais4AcQS4GVPKivubY+Bb5Cz+wcuX17e+m+ZE7MD2Irtqn7hc1/JQKp5+/x/z1yV4Cxx38v+yVNU0naqfsVYnw+27QZPlft9XERPiAFeHjjYqsmrrQ/NM5RHOk+GBsx03/RdV0barxH6bwv7rlz3g+rK2GF9/A64jVxe4AgAA"
+      },
+      {
+        "original_path": "/tmp/hoim-infection-statistics-capacity-first-tests.log",
+        "original_bytes": 638,
+        "sha256": "e3c13771affce67b2a8730d6a92c29dc301fd8719bb65cc0e50110eca7c39dee",
+        "encoding": "gzip_base64_original_bytes",
+        "gzip_base64": "H4sIAAAAAAAC/62Rz0oEMQzG732KXGR2wfmLruyANx/AmweRUDudmUqnLU2GtW9vh3UvHhTUHAIhfPnySyr4p3hum+bqRdx/H3CS0Rk3EdC6LDIm+EEgWBNTvWWUBo0btWLjHSq7EuuIxJINsVGESgapDKcqpL4/KxSv0iKnoAccV2uxuz3ga8Kb5nhA6Qa03k04536ctF80R6OQpbEkAH5pfdf18Jg22dMZtoeolY8DhuizEScwBMYpv4Q84NVqOBme4W11hnGUi7EJivet6grYraShsHqSKhXg42enLfZiO/ugR/gr6u7LevteiLKEB6+oh5k5UF/XQ64y3eZV+TjV2tWZPy9fz/5Usq/zCXiNurx8uJp5saKFIIn0cA3t5fcZHdqm6o4kPgCDdZTafgIAAA=="
+      },
+      {
+        "original_path": "/tmp/hoim-infection-statistics-capacity-second-probe.json",
+        "original_bytes": 1430,
+        "sha256": "bba33a9ca03d89f6103848531d49af14e4231b0a0b2f4d14dc51d5f22c40a042",
+        "encoding": "gzip_base64_original_bytes",
+        "gzip_base64": "H4sIAAAAAAAC/5VUwY7cNgy971cYe17MyLItWb01uQRF06IdoD0KlERn1NiWIcm7Ow1y7Qf0E/slpeVJZpMWBXqwAfNR5NPjoz/cVdV9smHB+2+q+yFiOlfnkHK1xGAxpQpsXmGs8mVBR0H/CBkrh3aECNmHOf31x59v3n77ulpWM3pbncIaLVIwwlP13enHH6oFYtoC+Ey1KhPW2VGpYR3HaoDJj5dDdbrM+YyZji9rpPKQ4aGaQ3X66ftjwviI8Vq+tDzGdc5+wsqGOYOfCQ2xwsU7nHwYwzuq8wijdyX7cP+w3TGiDdFpS+0zXbVlSpT4TkEn//umAO/2qJ+XNWtzyZgo2nVMNjW71knreIPqVkgmu72Uf85En3rMKcfVbt11or6z21LFQXIlldrLwJP+LRF+I6phdhrpe4WvTjaHpmHUqZzMIcP4AqzZoeZCib6gEzzrmNJnfpzxnquetwXdhqonnEKkG2fI65bygRDCfpne/Pp2M0GteiZF9f5VEa4gP59OBWHsihDwsVS0kFBnMCPqR5983hm1fSd3tmfyTXyHYcIcvaVMP+qMcSqy8pb3O+2nEN/rdaFcXQyyMa8Z55Lf4NFPPhdg47FPY++MZJCLtqTfJiXe7vTkZxeetJ+1Q7JhnrAMv374Gg5kv1jkavsvwUA++OIwpch/pnwqwD4rA+Ooi+X1osO8kSJPYIFehLVPeg6ZnjjB+DKJDOsX1GdI57KakrHaOSHrjsYjJcPWKbCK877te9Oogcumo6yad1xwaVQjJUjRG+Wc43LfglS2U6czkNNvOg1Abli8NniEZTmCP/p5wN3AdlwTTaz4xSfa0XRYLhsji4iNdMZxjqJGA8TPtMQMQHYcwTGHg2yVtAKwFwxFKx23ClgLKFB8stf/a75tV46k35VFzRV0bYMG7bZcTWOariM9egVKNlxQo6bfANYM3NWS1z2z0kDNnLJMDP/CgjYnp/LW4PV/k4EFrM+XK5mmNUI6KwT0oukQVW9Yy8zQcDbUJJHCFgX9PEkFM5BgQ8saVxvujOGipYls7rn7ePc36PeKVpYFAAA="
+      },
+      {
+        "original_path": "/tmp/hoim-infection-statistics-capacity-second-probe.log",
+        "original_bytes": 2421,
+        "sha256": "5fd1317173d1840dfea19b31f64055cb6f632bf83b7456d56953e4b4fe34c0fc",
+        "encoding": "gzip_base64_original_bytes",
+        "gzip_base64": "H4sIAAAAAAAC/5VWbW/bNhD+bP8KwsCQFGhsinqhmG9dsaEb1rWb0e7LAIESTzEbSdRIKrZX5L/vSDlJkxZB98E2cPfc+8M7y9aDrXQ/GuvJ57OP/Zu/3p5dkrMsF4KR6x/PXhIU/rndPhLekiwTrFzKaN3qg58sfGmeiJLy4qm9YCktZ/sZcHJg5f57jHmWfcMYbmQ3Sf8d4RNKT9J7F59XrjEjrC7JqrXgdmRnnCejNQ04R2TjJ9kRfxxBoVDfhDAKmk5a6bUZ3N8TSwR78/bVazJOdacbsjWTbWCWh7J+3b77nYzSupMMDuiU1GYaFPpsp64jrex1d1yT7XHwO/DoZAzdVNLLl2QwZPvHbxsH9gbsKUiMvbHT4HUPpDGDl3pArbEERq2g16YzV+gHO6NVRK9XL8nKQmOsqhoM7rHijIoCpXP4yul/QxtYHmR6GCdf1UcPDmV5Tnma0OjBTd2DIskKTnkenMwUQN+D83ZqQszKYbxBBWCx5kxwIYILua8+OdQ+JFfJQd2N8bFduk5TilHQzhsvuy9UCV0nrBBFibpeHirr3H1ejLKSiZJlqAuzrHrojcUavfRTAHxeRaqEsd9TJXQoUiVK76iyukVxIx1UXtYdVDfaaT/Hz8qch8x2SA97BaYHb3WDON1VSMw+to5lrAwp7o29rqYRkVUcfsgyoYxxdqfsdK99FIfgodtzRMDBH6sGexTaBTH7vR6U2Vd6qBQguXwPcaJJ8HWvMsgmG7uRlQ8Kg4N9ZIRq/lh9Z0hD7bLrqkjaaqzMEMLjfAEVXwgr7arBePzYXnYPECScHqHaSbeLL4xTmihV8CTHnnNOIVNCNoKxMivLOhUt42mOqITlrGC8FinnkhdlLZRSjIcJufi+KreTyNTYi1biWEdd1bCR47iReqOHFmYGNt3kwo4Ig9cOn5Zbj8eQSgMAKVe1YgyKBGqJidUZpiQlzxlIRRW0PBO8KSSUBYUi44o1QtJMQgHFKj6c/xM4PA1vsWWnDBImZJ6lUEMTXkaa1mmeYxNKIQVPWYFB0jIoaNoylXCWlLThtUyoEg0t2icZIPG9i9+V1NXzichRNtofT4mkWV1w1RSFLIs0BxBlTTNatymjbYKtEZBBgUsPq69bbFSb0VQlNVN1zYoMh3B7u1y8Nn2PDCU16OGKhL2k0PVmh49ic5jcDoarTa8HHV6vTDe1Hjbj0e/MQDa+HxGn+4v7pC8ekr24S/ZifvkX4amADakvFx9wK8ZY5Py0F17EvUDL5WJ7xLL7r7R0neXLxXtADg2emJa8fv+B+J125JOpyZXxl0SIH5aLnzo5OlzQ53vkP2k601y/ODnbXfb9JR4H3LbhNzi9xKA5Xy5e4VOVV0CQnRaNPRw8CXuVnF/H1RSwD6hpOOHCpn8Gh91orp/Rx834Df1bedD91BNc2ngUsFwHX6VzOoP3vp7DRpefsOxzC/9M2oZJ/7J59wLPG1q2Ei+Dm1F6mFF4KHGpIUyS1soenkCTgqdCLBcfTYcXSdpjvGWxaXvtmx0gBtf4cvHLcPMMJMWQ2z3OKwb/WXfYsnn68Yx9LcYdN8uLDC1xtFhrj/cec3NY+OCjxVMFlgP6JvA6KPXVIDuHfwY6lNmT9H0cV+zaXdPCkUU6HbQn8/UJwP8AgqSWtHUJAAA="
+      },
+      {
+        "original_path": "/tmp/hoim-infection-statistics-capacity-second-worker.py",
+        "original_bytes": 2723,
+        "sha256": "a510370d08761c1e71be53f29837749ba6c97ae9b635f85a1d2ddc0724f6e49e",
+        "encoding": "gzip_base64_original_bytes",
+        "gzip_base64": "H4sIAAAAAAAC/6VWzXIjNRC++yl008wylp1USC0OcwhbWRbYkCUOLFRwqeSZHltEM1JJmjhmK1cegEfkSWiNbMd2UimyHPxTrdbXre7va0nWRltPjPBzJaeZW7pMu8zLGjILTre2gOwPp5tsLlzw6F1eXFzlK3f2AX8TOvC1Gcy1rPuyqaDwUjf9QrXOg+0fDg+PD4aHBzQ9QWwWNjLZOLA+GWbO2yTgDWglnBdG8inQNO1VVtfEg/OOhW8uJN8g8xUyxw1eOi8LxwthRCH9ksh4mlrcyVoo3GRaH9GEMUzItcNjtEI33orCE+FIkT0XLXhAM5MNZM8ntYV40yuhIjXU2i4TJaag0lGPBOfW7RfTWF0MHKhqENdpyiyIknu480l6YqxsfMTIPinMgjmjpE/oiKbXw8lo33QwYVhmaZKUVNqSsIzHX8WOjsHmcF1WJO72wnq3kJhOQn+pL8fjEc3wz7uP54iY3m+YwWbgbevEDJKN6fLn8em3Z3x89v4tJt5y7IV1LquwQPP8yraQ9lZ1oKIKJYstCfwIYfNAPVbrRnvdyAIPfCtUC/lOS9G6i1HJO99a5M6JFYu8YK2vXicFK0QTQIRKOpA0PcGmYDXawkP5ONIuJiIFPHCt8nlsOIOAIzweVyz2/ddrNESpjYInY+jW4wGeSjFGwhwDH1x+vS+MAVJ4IOTgOdIxs6TZ52zcsPVphE6LgxdpMQBNehZCc/NP1BXaABKywmPOyVw7nDlIdHCop8K3QhG/NFCiUd5iEUkJhRJWhCjun7/+fnd++oaYdqpkQcYd0dCITSDfjy9+xOllXTDAXdDbVLdNiVBVqxSpRC3VkpHxsvFzwAwRxSK88CIjjSbjn96j2Owt2BV8F3Jg2ya0joSyCOy8JagdMLKEWmqlZ4iD7ZZl581QHRYKbUssI26kIwVNpNw1jbKgk2saa+HoJM1oTIs7+ScWJXaebdky2vGcT5dY8wgXGBfCBNdteyRUgIwa4BuKhwY5TKsp0dWGoiRb9O93csuOA6hY8DDj+cORuGjKNaOfxFkRvL+F2GF57VGle+77KtiKjbrmOB/WJ3r5ZHmFt8tRRgOZeBQkX83N0f8Yjy+ayZ85RWkhHHAvpgr4rXQSqTE6Gn51/Orwy+OMzlEOdga6xkLIAt2kwnC2RqfD4dHr6LTQ9oa3Bj15x/oNl4yFSsnZ3PN9l9UmJWuJRL1h56e/8o8Xlz9g67pMAKWwRBU3ZaDCAzs3FodlZJ0vtrQExcu2xvJlVCjFOwVyw3WDO9GQSA81W1l3/HMcCk1bA2pcW2zFARanhEbXstlY7rueBIjQk0eJYMyteFw6jgzDj8WLgo7CXdPpUhrg4fVCRwUr5QyHWHLDLs/efPfhDBEiubibC6wocia8SQx2VyHxb7E9unuhpOlo9QBi0bPzQQZ0vE3SlM3hbgUemWTWNHL39z3hwouHxAlwvSPuydd4GYQmfPPb1dmY4OE2bjtif8Zvv/CTndXtUTPJc8y9F9L6D2+4h6neX0/1flR2HwUxBRaGBo0XFltY7FMURDCz0GWXxCQyaFwYTcIVUuZvhXLh7YTd9vlh+gX9vQPp3jWPtuJr8F/Vx2tkowoAAA=="
+      },
+      {
+        "original_path": "/tmp/hoim-infection-statistics-capacity-third-probe.json",
+        "original_bytes": 1428,
+        "sha256": "0d7e050e7491eef664b2d3fc30b5af7ea1beb71978340d49c4b382c07ca31c91",
+        "encoding": "gzip_base64_original_bytes",
+        "gzip_base64": "H4sIAAAAAAAC/5VUwY7bNhC971cIe154KZIipd6aXIKiadEaaI/EkBzFbCRRIKnddYNc+wH9xH5JR7ST3aRFgRqwAc8bzXt8fKMPN01zm11c8fab5nZMmE/NKebSrCk6zLkBVzaYmnJe0VMxPEDBxqObIEEJccl//fHnm7ffvm7WzU7BNce4JYdUTPDYfHf88YdmhZT3Aj7RrMbGbfE0atymqRlhDtP50BzPSzlhocfXLdF4KHDXLLE5/vT9fcb0gOk6vlLep20pYcbGxaVAWAiNqcE1eJxDnOI7mvMAU/C1+3B7t58xoYvJG0f0hY4q2aBq/SLB5PD77gDvLtWwrFsx9lwwU7XrmBYtu87J2/QMtVJpprvLqPBUSD5xLLmkze3sJhPv4vdWdWhFK6605I75LRP+LNTA4g3S/w2+elIcur7rLiQlFpheYMNB972Ul6kzPJmU82d1nAnB5KAu0vcrNTPOMdF5C5Rtb/lACGG/zG9+fbtHoB36TrLm/atqW0V+Ph4rwjjr1I4Q8LFOdJDRFLATmoeQQ6mOMNl3+qLnRKlJ7zDOWFJw1BkmUzDN1VQued/XtseY3pttpV5T47ErJzau+TM8hTmUCrSMPhcvKjNSPM7GkXu7kfh8psew+PhowmI8UgjLjPXq27uv4UjhS9Uu2X8JRkrBFw9Ti/5ny6cB7LMzME2mBt6sJi67KEoEVuhF2YRslljom2aYXjZRXMOK5gT5VBdTM9Z6r3Tb9UxrzVD6AdzAeS/73oph5Fp01NXyjiuu7SC0Bq16O3jvub7sQK67afIJKOfPPo1AaViDsXgP63oP4T4sI17i66Yt043VvIRMG5oP63lX5BBRaG8956hatED6rCRlALrjCJ55HLUctFOAvWKopPbcDcAkoEL1KV7/j3zfrZLIv6uKlg/QSYEW3aCHQQgruo786AcYtOCKiES/A0yM3Leatz1z2kLL/OCYGv9FBW1OyfXXQDD/LQZWcKGcr2KEtEp7pxT0SnSIQ2+ZZHYUnI0tWTSgREWvTnLBjmTYKJnwreXeWq4k3cienpuPN38Drl681ZQFAAA="
+      },
+      {
+        "original_path": "/tmp/hoim-infection-statistics-capacity-third-probe.log",
+        "original_bytes": 2418,
+        "sha256": "c2b79ba968650c33737b7d644500c43967a2065d123edd5ee72cd400c71eb946",
+        "encoding": "gzip_base64_original_bytes",
+        "gzip_base64": "H4sIAAAAAAAC/5VWbW/bNhD+bP8KwsCQFGhsinqhlG9dsaEb1rWb0e7LAIISTzYbSdRIKrZX5L/vSNtJkxZBZyAOcPfc+8M7y9aDFbofjfXk88XH/s1fby+uyUWWl2VGbn68eElQ+Od6/Uh4R7Kc0XIuo3Wr936y8KV5UpV5Rp/aVyk72x8BJwdW7r7HmDP6DWO4ld0k/XeETyijefHIxeeFa8wIi2uyaC24Ldka58loTQPOEdn4SXbEH0ZQKNS3IYyCppNWem0G9/fEkoq9efvqNRmnutMNWZvJNnCUh7J+Xb/7nYzSupMM9uiU1GYaFPpsp64jrex1d1iS9WHwW/DoZAzdVNLLl2QwZP3HbysH9hbsKUiMvbLT4HUPpDGDl3pArbEERq2g16YzG/SDndEqopeLl2RhoTFWiQaDe6w4o1WB0mN44fS/oQ0sDzI9jJMX9cGDQ1meU54mNHpwU/egSLKCU54HJ0cKoO/BeTs1IaZwGG9QAVgskzRJYzhsivjkUPuQnJCDOo/xsV26zMs8DwG88bL7QlMtOXIxCx57uRfWufusGE1TmlVFSDhMUvTQG4sVeumnAPi8iEQJQ78nSuhPJEqUnomyuENxIx0IL+sOxK122sfKaVbmPETfIjnsBkwP3uoGcboTSMs+No5lrCwRtDP2RkwjIkUcfcgSgzDOzspO99pHcULxEyqOEQHHfhANdig0C2L2Oz0osxN6EAqQWr6HOM8k+LpXGeSSjd3IygeFwbE+MkI1f6w+G9JQu+w6ESkrRmGGEB6nC6j4Qii0E4Px+Gd72T1AkG56BLGVbhvfF6c0UargSV5SzjmFTFWyqRjuhLKs06plPM0RlbCcFYzX+OC55EVZV0opxsOEXHxdwm0l8jT2opU41lGLGlZyHFdSr/TQwpF/TTe5sCHC4LXDh+WW4yGk0gBAylWtGIMigVpiYnWGKUnJcwZSUQUtzyreFBLKgkKRccWaStJMQgHFIj6b/xM4PAxvsWWnDBJWyTxLoYam4lWVpnWa59iEspIVT1mBQdIyKGjaMpVwlpS04bVMqKoaWrRPMkDiexe/hdTi+UTkKBvtD6dE0qwuuGqKQpZFmgNUZU0zWrcpo22CrakggwJXHlZft9ioNqOpSmqm6poVGQ7h7m4+e236HhlKatDDhoStpND1aouPYrWf3BaGzarXgw6PV6arWg+r8eC3ZiAr34+I0/3VfdJXD8lenZO98ltt1VV4KWBD5vPZB1yJMRS5PG2FF2ErlMV8tj5g0f1XSrrEhT97D8igwRPTktfvPxB07MgnU5ON8Whf/TCf/dTJ0eFyvtwh+0nTmebmxcnZ9rrvr/Ew4KYN/4PT64QuU/T7Ch+q3ABBblo09rD3JOxUcnkTF1PAPqCm4YQLW/4ZHPaiuXlGH9fiN/Rv5V73U09wYeNBwHIdfJXO6QTe+3oOG11+wrIvLfwzaRvm/Mvq3Qs8bWjZSrwK7ojSwxGFRxJXGsIkaa3s4Qk0wYNQZvPZR9PhNZL2EO9YbNpO+2YLLtwiPp/9Mtw+AymSMO8dDixG/1l32LPj+OMN+1qMK+4oj5Y4Wyy2x2OPyTmsfPDR4qkC6wF9G2gdlHozyM7hL4EOZfYkfR/nFdt27lq4sMinvfbkeHwC8D+5QspecgkAAA=="
+      },
+      {
+        "original_path": "/tmp/hoim-infection-statistics-capacity-third-worker.py",
+        "original_bytes": 2722,
+        "sha256": "6b8a8ac22126761c348e8537bbf573cc930faecac7b134a54941acfea1e1adeb",
+        "encoding": "gzip_base64_original_bytes",
+        "gzip_base64": "H4sIAAAAAAAC/6VWzXIjNRC++yl008wylp1USC0OcwhbWRbYkCUOLFRwqeSZHltEM1JJmjhmK1cegEfkSWiNbMd2UimyHPxTrdbXre7va0nWRltPjPBzJaeZW7pMu8zLGjILTre2gOwPp5tsLlzw6F1eXFzlK3f2AX8TOvC1Gcy1rPuyqaDwUjf9QrXOg+0fDg+PD4aHBzQ9QWwWNjLZOLA+GWbO2yTgDWglnBdG8inQNO1VVtfEg/OOhW8uJN8g8xUyxw1eOi8LxwthRCH9ksh4mlrcyVoo3GRaH9GEMUzItcNjtEI33orCE+FIkT0XLXhAM5MNZM8ntYV40yuhIjXU2i4TJaag0lGPBOfW7RfTWF0MHKhqENdpyiyIknu480l6YqxsfMTIPinMgjmjpE/oiKbXw8lo33QwYVhmaZKUVNqSsIzHX8WOjsHmcF1WJO72wnq3kJhOQn+pL8fjEc3wz7uP54iY3m+YwWbgbevEDJKN6fLn8em3Z3x89v4tJt5y7IV1LquwQPP8yraQ9lZ1oKIKJYstCfwIYfNAPVbrRnvdyAIPfCtUC/lOS9G6i1HJO99a5M6JFYu8YK2vXicFK0QTQIRKOpA0PcGmYDXawkP5ONIuJiIFPHCt8nlsOIOAIzweVyz2/ddrNESpjYInY+jW4wGeSjFGwhwDH1x+vS+MAVJ4IOTgOdIxs6TZ52zcsPVphE6LgxdpMQBNehZCc/NP1BXaABKywmPOyVw7nDlIdHCop8K3QhG/NFCiUd5iEUkJhRJWhCjun7/+fnd++oaYdqpkQcYd0dCITSDfjy9+xOllXTDAXdDbVLdNiVBVqxSpRC3VkpHxsvFzwAwRxSK88CIjjSbjn96j2Owt2BV8F3Jg2ya0joSyCOy8JagdMLKEWmqlZ4iD7ZZl581QHRYKbUssI26kIwVNpNw1jbKgk2saa+HoJM1oTIs7+ScWJXaebdky2vGcT5dY8wgXGBfCBNdteyRUgIwa4BuKhwY5TKsp0dWGoiRb9O93csuOA6hY8DDj+cORuGjKNaOfxFkRvL+F2GF57VGle+77KtiKjbrmOB/WJ3r5ZHmFt8tRRgOZeBQkX83N0f8Yjy+ayZ85RWkhHHAvpgr4rXQSqTE6Gn51/Orwy+OMzlEOdga6xkLIAt2kwnC2RqfD4dHr6LTQ9oa3Bj15x/oNl4yFSsnZ3PN9l9UmJWuJRL1h56e/8o8Xlz9g67pMAKWwRBU3ZaDCAzs3FodlZJ0vtrQExcu2xvJlVCjFOwVyw3WDO9GQSA81W1l3/HMcCk1bA2pcW2zFARanhEbXstlY7rueBIjQk0eJYMyteFw6jgzDj8WLgo7CXdPpUhrg4fVCRwUr5QyHWHLDLs/efPfhDBEiubibC6wocia8SQx2VyHxb7E9unuhpOlo9QBi0bPzQQZ0vE3SlM3hbgUemWTWNHL39z3hwouHxAlwvSPuydd4GYQmfPPb1dmY4OE2bjtif8Zvv/CTndXtUTPJc8y9F9L6D2+4h6neX0/1vp9LW/ZRD1NgYWbQeF+xhcU2RT0EMwtNdknMIYPGhckkXCFl/lYoF55O2GyfH6Zf0N87kO5Z82grPgb/BfKXr3yiCgAA"
+      },
+      {
+        "original_path": "/tmp/hoim-infection-statistics-capacity-worker.py",
+        "original_bytes": 2182,
+        "sha256": "fdebb626566aaa77910a705fa381c062c080320e2c01a1493bb748fee9e4cf8a",
+        "encoding": "gzip_base64_original_bytes",
+        "gzip_base64": "H4sIAAAAAAAC/51V224bNxB911fwjbvpipIF10jl7oMbOL0ldWq5aAtXICjuSGLNJQmSa0sJ/JoP6Cf2SzrclWVJNoy2D5KA0ZnD4ZkzQ1U76yNxIi61mhVhHQobiqhqKDwE23gJxZ/BmmIpQkL0Li8ursoNnH3A34wOYu0GS6vqvjJzkFFZ05e6CRF8fzQcnRwNR0c0P0VulhKZMgF8zIZFiD5LfAM6FyEKp/gMaJ735t7WJEKIgaVvLhTfMvMNM8eEqEJUMnApnJAqronqblOLlaqFxiTXxI5NOMeEegA8ZZPWRC9kJCIQWbx0WkKAWSgDxctF7TDe9PAPH8ukK6utsdEaJbP89FboBsq9ejHqxV0pWRPnrzPJpDAJLHTWgvP8FJlRuUZGqJ4yYtcaHcuuQgYpR0TIkDIl1k7Ds2m2iXj2c6d2hHhs6l0orw8bNkBpB0INXhKDuTUt/k/iVsXnGVqPDP6TRxLRtOch+aD8RIO0DuiYzvGaS7K0AWfBWwkB+yxjIzSJawcVBtUt6kgqkFp4kU4Jf3/+67v3Z2+Ia2ZaSTJppwWDqDX5YXLxE06VDykAq+SDmW1MhVTzRmsyF7XSa0YmaxOXgBUii0d6EUVBjCWTn98NcEpuwW/o2yMHvjGpdSTJIrDBnlhPwKkKamW1XSAPdlxVLZrRgnqQ1lcoIybSsQbTueiadrNNp9e00yLQaV7Qriwe1EcUpes824kVtLUon61R844uGSsdk6C78c5QiVKtIl6Nb12bGhSwLFMh1CdRsh1H99tJKU4SqbjjaffwxytxYSq+MfWzPBuD93cYW65oIw7YAfxwCnbOxpHkPoSHGz3sQrYAZA1iAdk2dPnL5Ozbcz45f/c2Z77hmIqZr3DrHRdUigA8ipkGfquCQpnHx8OvTl6Nvjwp6BKt5RdgayRVEmFKc7RtjaDR8Ph1B7qz/oY3DpG8ddC2L87DXKvFMvJDyCZJq1ph02/Y+7Pf+K8Xlz+iDG0lgLZa40SYKsn62OltJFwPp6zFojwVaF41tctQFqE1b93MHbcGMzGQqQg120T38CUOmGlqwHmxHofsCA1ZgbG1MtvIPZmjhRMFbmXypBA8c+c8rgLHbuHH476k4yvfQOtx5YCnF4qOJavUAhdCdsMuz998/+EcGbpG8bAUqCgdf0rvjmMeNJroFttj21coz8ebR451yBYjqs4DWZ6zJaw25HlbtUslt2vx/r4nQnrVSDdN13uDMv0aF2tqwje/X51PCF5uC9sbnBdwh8JP9/7dHdtpWWLtvVTWv3inHzdk/2FD9ufYHt3HNTgDluaPdruf3XlsExp0FbMUZqnJIetqKMCENOUiSKXKt0KH9Dxis2M5yr+gf7QkXplnUvHB/weW7XDmhggAAA=="
+      },
+      {
+        "original_path": "/tmp/hoim-infection-statistics-final-contract.json",
+        "original_bytes": 82006,
+        "sha256": "f77315c9983d92c62b32836d1e658b91710826d489b4732b4b3532dd9b06f1a7",
+        "encoding": "gzip_base64_original_bytes",
+        "gzip_base64": "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"
+      },
+      {
+        "original_path": "/tmp/hoim-infection-statistics-final-io-guard.json",
+        "original_bytes": 86,
+        "sha256": "9509a1a95599b19c9d675fa3c131493589fdc9040921a6242c4ce7ba43e1d3ea",
+        "encoding": "gzip_base64_original_bytes",
+        "gzip_base64": "H4sIAAAAAAAC/6vmUlBQSskvSc0riy9KTUyJTywpSc0tKClWslIw0AFJ5qWWlOcXZccn5+flpSaXYCpIyStGEeSq5QIAmT5UQFYAAAA="
+      },
+      {
+        "original_path": "/tmp/hoim-infection-statistics-final-junit.xml",
+        "original_bytes": 11025,
+        "sha256": "d37db1bcbd250b76f7e27570f7a43e39f04a6ceec22c948bde289377b1630d38",
+        "encoding": "gzip_base64_original_bytes",
+        "gzip_base64": "H4sIAAAAAAAC/+WaWXPbNhCA/4pGD31pLfMW5cbJP8hT39wOBgKXEmIQYHHoSKf/vQtCB53xZDIlbUuOHigeOPZbHLsA9sOnXSMmG9CGK3k/jWfRdAKSqYrL1f3U2fqmnH76+MGCscZx/JtI2sD9tN37V5Pu/bT3/clnLEprpc39FEutKRdOQ3gwj7xtoeruu7z302yOt9xnjuPZoizDk7G0ae+nSZQUN3F0k8R/xOVdmt3F2SzN8zIrfo2iuwhLWStjQ92r1t1kuzRaRDdxmh6EY9TAhAlqTEjUVTrzV0I54bIGZlEDhAlnLGiC9VpuLGdmOjnnIK3mDdV7UinmGpAWKgI7lFCA/2dYmKyI0nzFJRXEMI5peM0Z3qoWUAlcHCu//ZHKZ+1+OhFcYqZ5etRPNIsyfLgdlcw0VAhi6VKAIcs9ZqygBbxIS0AirKZdMaomgi5BIHnNd3hFfSAtwfr5SnqdmEGY5byHGRXYfK1G1WnLwZzu9wfJ+0IepeoJcsCZTjZUOEye5HGnttt+kbdHJY6rTsbbPVFSPNVk901pyrDDSGWJdtLDkmMKth+kvDhKToNoFpfZj2svyNvvBCetxcmieC211Q7rr2nDUW+0+oJpfUMSDZZyachX0IowHGO8oha6wXZIbPjXYcMrjvNex0uisccXNK3dB4l7w8YQqsEXonTTjS9UvOl6hoQVvtjAAwMhTPTXMLik6I+q9LLg4jHh4uyy4JJR4ZLLgksvG07j9EY7Gy3QIuOkRoxbfsG8+KV2Bg2dN89IepxxUA0tuiigN/hNA1O6MoQpN9SoxWnfqsWLsUGdfJRqK9EHwYQVAiu7xtQaNhy2+Ij+XJgtt0o/1kJtu/bt2tO3sBgG563qeeaMx4aTCs1jTZ3wlvMgMM72aOlFu6YPn5WEgd1wnvRbp3xlAKwzHxVg/toAVy19fN26n42q/Tx9ffn7v6tuixxukivvTPnksgGY8mttdP2ZUAblbgWVwXvxC4clrmi4XB2sO2mc7ZwX8wA7q+lAsrJv5eLiQsgOnkvlWsEZ+jrvEnKLH9BneRnI+WVBKmcNr8ZFLC8EMcnn77LpjHKaAVlTs36ffAwk1Vy9X0Jc6/H2fQ46XMMDX0nSgF2r6rLtg6Zbsl0r4fceWueX6X61bs4zP/ossuaSW59ig85LRZytS+/NGKe1WmGah39++dsp+3sYleH+Lv7tmZfJv8PUkURlf1stvmh10AP0Z/r5Z8QOf3/u6jrcjauD6Jp04Koyil5CC6P3BAOiRnRvdggPG5D0NNO1Wqn6odudG0jh94zPG1jzN6CoNe2KunoQu9ZgsN9Wo5KUb0BSadWez5pGxSneCidsaV89y8HfRlfn6scLdVb5IxZGwgRgLpsoBDmEUAAqTlYJbZGGyjG/k+QdUqGoJd3x8bBzkyQtXtS+BAu79MEqneAVtHZNlq5agQ1nYGwN7BGxluD9aGLwuaGkpdpgGw5jy9KnkQ5jexCH0IJGVc7HdKzpBroNQGrpEqvA3mktQphjrIImEqw/ICK8aZUeeOSV5NEZL1mMf3C5sxoQL4sWRYhYII8AbdcXuzCB0FVxlC3pkgtu92TLcQWEvlTonk5WoP1Z2DDMIuq34uiYNTf+JM/HHXF/7tofclxaWIE+ncmG4KMNvqlwTuHycHI5SgRBUryspzcaZ/yTcCajckYXy5leHCc6hS1lOKE8AcbJxqFFtPsWDjsySV74QLpugvKEQqHVX+N3vQLVgNVo9C3l4n/MsycR+vGBp62ZxSyL5t8P/eqJGdaXnQ08hXzleTRP46Csb3IGk4lOvj9Eeporzop5NM+fy9XVdA7cCvN18EbJhhtue6VEWZnPi+dKOej4GR0S1E/Tkz/JkrL8btDa7SlktX9vPv4HAXQe0hErAAA="
+      },
+      {
+        "original_path": "/tmp/hoim-infection-statistics-final-runner.log",
+        "original_bytes": 1750,
+        "sha256": "6423632ae35004cc5ba3d22c318be81c45ed4d8db7cb3240d395991a7d532831",
+        "encoding": "gzip_base64_original_bytes",
+        "gzip_base64": "H4sIAAAAAAAC/81UzW7kNgy+9ykMX1uPJcu27BT7Aj20h+6tLQz90DPayJIryUkGQd69lL2ZJHvavfVCgH/ix4+knsuo/ArlXVGuW4BiNs4kqGaxGHst0nUFXcckkonJKGELEUy6LIBKIZwuhEqbsC0Z+783QjRvur4I4vG3P//4vVBiFcqk66+F80WE8AChWDdp8Z1kvKs/i3hfL16DLZTFsvn5B2GN3t3lL0Wp/LJgFQT3V1lf/AL10xYv4M71kuO904LV0rh6vabLkVItWaIOMe165TwGzjd9zfLizTIZN4PKpaZbg3E6byLoHJITYp3lJMy7WGW3mCC8yzmt1x9LmF6Z+ZpZ/btLn+WXDfmfDvo/WTgLdYRUu+NpsZ/qtKx1bqC61aje3q5wgMIe0ScML//BbHjCNxUyjUwS1P22A4LMYEQbbU7d0Hf9+AoAbc+lE8uxFzcyIQQfckJJsjoLY3Fn3gzx3qy4MDd9pyRrLd9VczxI6WkchlcLYl/WbG5I01eUVA39TIc71t7R9sS6bmj7nwm5I+QYXEyvuM7rVrVPjIykooyVL+heRLoAirxL0xpwsUMyO8Dn0jgNK6BwabJCggU9iRjN2S1oilMS0h69NB3Ntd4nRGXW6xQXYe27QNqM/d5GPpNp3tBp3LqlSWbKckTXEc7oDv3x4i1MSNdm3wXQtueEdzudOV/hvucLgKMMxisf9PRgojmopKQdOr6XPY5vumD1cAY8jxSMwjyDGCEsB4CmbZDrTE70W1AQ8yLiy+hMYYObHfdjc3nwPLfuvx5CJk77BO4BkQgkLCVY1h1JXiQH6dGHe8x1DlfxW7d28YMpoxA4kRmRH0P5rmX+CrySMPsApy8RTz0nx4vA/yZ3OQhB2Ky41GJGxhvK9ch6ScZRDIo2RBImRqZVC72mRApglMlWy6GTVFC5s/k6Eko5z0B/CJrADyb8r5Dtt3ey/vwNIApat8B6CgNvO9YxPRPSCtmoQSMi0gzo4ER0ks3D0DPQQHrJxSwGxgYlPwAi5LvxvP1IH/FoxrWkUknddETyfubQ8I6TmYuWARtnBNcrANU0amwHqaEZRsa5pD0jmg0fCSJN9/Ly8tN/53g9U9YGAAA="
+      },
+      {
+        "original_path": "/tmp/hoim-infection-statistics-final-runner.py",
+        "original_bytes": 2663,
+        "sha256": "f1eb6868594b54c268cce05682c4becbe3ff063b4ed0e78a799bf607eb4abcdf",
+        "encoding": "gzip_base64_original_bytes",
+        "gzip_base64": "H4sIAAAAAAAC/5WW3W7rNgyA7/0UvpOF+qfttgJz4IsWzdnpUDTFaQpsyAJDsZVEnSxpktwmK/Ice6C92CjZbdKe9GcX8Q9NkRT5kQprlNQ2VMQuOZvFS2L8/c5IEUsTm3amtKyoMbFlDY1XDU+p1ZSmQ04bKuwYnkNiwuE4+DYajYveUHoN9whltlHZUrImYWJOK8ukSCreGkt1cnx4fHJ0eHyE8OBsWLjFGZoTY4li5YyiwfW34ZeL34q9NkDLMmNZZZI5E4SjwPk1xeRsmCGiVEYYylQ4lzpUIRPhBD2vLXv/5dZGWUlhNalsqtYoflf1LY2PLEAS7zqR05hOD3yklhprXgXqZCVh5cdRfEazrIgiFbPrj5bsbmA6DWo6D40gKsK5prbVInw0Vkcq1ZSD7XtaWhm5mmGcP6LZGgyjXKXOcYThVhr2N42RWZLjn05Q3mOVdu/eDKlLvyzCOF3SVc0WEFuEN9tc+JJughkFCS26aAYv+OoQOUCJka0GSJNON3X0Ipw+aGYhULqykZOkddsoE3U6MRM14Fsc4wP0BygPqLgvpEnhxjToVlKtIy9NW1UTS6Pr38fDm3F5fnFzenY5LK8vb3+5uCpPb8ejy9HpeYGOUAwqX0dX16fjrx22CAeKtwsm3mqLnUJ4jstFS3TtaoC7FPng3bPipKIRet0Hft9dDyRMJn451PmDdtmqvkro3sh2aNoJbye53R5xUDV1MUGwvKHZqjVLKhZZwwQDtmryQzZjIlNru4TaxChp4KIcANa9JUKC1vzpVfV7eCeKnmaT/b+G+Zz+q7ZJ/nIXCZe7VjBbzknD+LrgdEEq/z3xchiOBTp4htLLUhCi6QBMa1u4EZo2UkgrISsRDh6YXYZSUbFF2QeZcrkAuw8Iu9k6z3WxHcSpbkUEqY6rh7o4G8YOXPjFxtaytcXcPVD9YsXN+Hx0O8YBgQTrz3WSV32/kbzKd33kd10Mx6ki2tBoTzbwwLRgr+gkCzhOpHSQA5p11BXJfXd6UBBT1KyykRelxFrNZhC7lsoUj6oXTJAgDUXTfCu4J7wFyXaadN6cD8J5hNIsc0aotgDzZgANBsdg8YgMND5FOVKtpiFog9ekK3do14rW2TMkhIcE8rJsKLyERNQhjM+W8B8Pfz759x8Yc6EmD7/ejK7CJ5gGoZChofqeQkztjIMNx182JubPrJE15WHFXb+AaYif1f4zcFDJpgEHKHdlR3QFCFagjnKddtPZvcUIyu8opq7fYBxr2UJCXzOXeBTjE9zDjHKf5Rg1wAGFi3Nf9rlhfqy7ZMMs78hwXTLj4Lufy0WHQf8Z4moF2OSAdKcAfpjsWzb39HBJahN9/Efhzan1hOXOhAQvsCs2hxJAxI+bTeALD7b9qbqP9RX2cKy6Y3fvERLv7Yf4ZZPu9vk070Ca7EQznfiTEzzjqQPsjSMRvr99KsbPR6xTe3nKboL9nQyUsXmP2PuN3MUMg8QA9CUxFWPFF8LN94ek0kzsWYpxoAkzNLxZwyBthgBotIsmDv4DdIGvlWcKAAA="
+      },
+      {
+        "original_path": "/tmp/hoim-infection-statistics-final-sources-after.json",
+        "original_bytes": 1177,
+        "sha256": "8aa03fc7bdaf507217d936b099a8c120b03a93dc4e6d10bae313b4db85b1a1b6",
+        "encoding": "gzip_base64_original_bytes",
+        "gzip_base64": "H4sIAAAAAAAC/6XUzW7bMAwH8Hufosi5WClSIqW9TMAvYR6GNmi8Q1H03ae1xwQFsl0MiBbon+i//XZ3f3+Yet71tB0tH/V0etTtcXua6fv2/HT0X7/Pe74c1459O++bn4/+/LS/qO/fTq+H7/dvq8PqYa97nteyYMf68Fk7/1BsvIqHgkNbpbT0IWMQGbXWjfrQIYTMydT/3gCaGEWwdHAxLRDDgedhNXx/uN16ldjxitAzkyQsEJNLmkIJqyKgKg1TAyKn1CHOmp0huUqgD4Wqufi3Cb8eYSulXwCtQ0FQ9mZQZoPWoJDqRPVkG2RgKJ0Hg7FZa22qcNJosYAZ9Tbg6eX552fpOrEWvpxhq5I8p/aC0mqajygchAiWYl6mYO1FFqrnAGzSBo/u4r2ORMarxPXA/fxxPep2vPllF+p0Ke0dxOuY4rpilsY+zbA42bDMMtfxhAOqVx8c2GdtPVZma+lRusd/So+uJ/Vtf71KXiGTCzFVYwln1s7UMkc3qGCTEGZZeR1ZkyN9RdLmSu+sQFEMY52La+N/En8dU+qFLr90HkBrpH0QG1mSoQeFlBZsELH+AzggwxBizXP2ajiHaGgkTKMP59373R+/63ipmQQAAA=="
+      },
+      {
+        "original_path": "/tmp/hoim-infection-statistics-final-sources-before.json",
+        "original_bytes": 1177,
+        "sha256": "8aa03fc7bdaf507217d936b099a8c120b03a93dc4e6d10bae313b4db85b1a1b6",
+        "encoding": "gzip_base64_original_bytes",
+        "gzip_base64": "H4sIAAAAAAAC/6XUzW7bMAwH8Hufosi5WClSIqW9TMAvYR6GNmi8Q1H03ae1xwQFsl0MiBbon+i//XZ3f3+Yet71tB0tH/V0etTtcXua6fv2/HT0X7/Pe74c1459O++bn4/+/LS/qO/fTq+H7/dvq8PqYa97nteyYMf68Fk7/1BsvIqHgkNbpbT0IWMQGbXWjfrQIYTMydT/3gCaGEWwdHAxLRDDgedhNXx/uN16ldjxitAzkyQsEJNLmkIJqyKgKg1TAyKn1CHOmp0huUqgD4Wqufi3Cb8eYSulXwCtQ0FQ9mZQZoPWoJDqRPVkG2RgKJ0Hg7FZa22qcNJosYAZ9Tbg6eX552fpOrEWvpxhq5I8p/aC0mqajygchAiWYl6mYO1FFqrnAGzSBo/u4r2ORMarxPXA/fxxPep2vPllF+p0Ke0dxOuY4rpilsY+zbA42bDMMtfxhAOqVx8c2GdtPVZma+lRusd/So+uJ/Vtf71KXiGTCzFVYwln1s7UMkc3qGCTEGZZeR1ZkyN9RdLmSu+sQFEMY52La+N/En8dU+qFLr90HkBrpH0QG1mSoQeFlBZsELH+AzggwxBizXP2ajiHaGgkTKMP59373R+/63ipmQQAAA=="
+      },
+      {
+        "original_path": "/tmp/hoim-infection-statistics-final-tests.log",
+        "original_bytes": 100,
+        "sha256": "1edd4e361e8745353df004ab2c8d8c1028e8770a5b3f8863ede06b7afa8338cb",
+        "encoding": "gzip_base64_original_bytes",
+        "gzip_base64": "H4sIAAAAAAAC/9PTIwko4ATRhgYGqrFcJuYKBYnFxakpCpl5CoaGepaWxVwAg1haA2QAAAA="
+      },
+      {
+        "original_path": "/tmp/hoim-infection-statistics-final-verification.json",
+        "original_bytes": 1992,
+        "sha256": "2983a67ddcd52cbadfa5919e88ba70e8ea8a0d02b1103d0533a9b14dfb915833",
+        "encoding": "gzip_base64_original_bytes",
+        "gzip_base64": "H4sIAAAAAAAC/9VUS27kNhDd+xRCbzNqkaIkSg7mAlkki8wuCAR+St0cU5+QlO3GwOfIgXKxFKWW3A14MZNdNgL1WJ9Xr6r47SFJDl6NExwek8M0O0g6M5gAaSd6Yy9JuEygMx9EMD4YJWwinAnnHvAnEYNOhAqzsAVpqn/+zssqceLll99/+zVRYhLKhMvPyTAmHtwzuGSapcUYwYxD9kX4p6wfNdhEWUwZQz8La/RyffgUiamx7zEHUvsDfxHIzmMP2evszzCcsj66jYMWLJNmyKZLOF890TTttxPi4MOOp8OITt0dNm2n82j61gwdqMii3ev27WkWTm9m0dln8dsKc2Ov7OwDuBu/43T5cad2E+/GO/1rP43b6euMrWrXTn22cBLq3TxdLl97+zkL/ZTFwtI9Z/qeK8V+C7taH9H8gP5/LurDKwZX2CHUnyzIOC88IYruEaX5sayrsmqW2yUEot9WBoPo16G6kx+cG130PZAN6oSxOHj3oH8yE07eHbYIGJGC75BZk1B6bOr6FsUK+yle5SSvUkrSnH6h9SMrHmlxZGVZF9VPhDwS8t56HzbOp2lOi1dGGpJSxqIkb0uJvQhnwE+c1nZyuDYumIX5tWgzaJgAP0NorZBgQbfCe3MaeoR8G4S0a6V5SbfMt05emenS+l5Ye2NM86bai4sb2XYzGphhmkMro8DRqiwJZ3Qv6OU8WmhR2NneGNGi4oSXu/gxjsIli4sHa0r0UaPT7bPxZhWckqIu+U5h3fn2jEzcCXAlgzMKfQ1yBtevZPIix47s0vlxdgp8nHJMgRbBzXBzg5M2D3F8+AKa8bpxu7R6DDA8IzeBkoYA/bRwI1dOA4SX0T1hmGHAIf/IRA/+Dt65Cexih0XdNPK7luZaUyqhGx0cv3p8frYIsbCzwBcxilELQVinuNSiwybllOuGVZI0jagVzYkkTDRMqwIqTYkUwCiThZZ1KamgchMeY259pJTzBXv79B8IC3z+3P+A77LxRzuePqZJQesCWEWh5kXJSqY7Qgohc1Vr5EnyGi84EaVkXV1XDDSQSnLRiZqxWskPaBLy4yzf384PWWrGtaRSSZ2XRPKq45DzkpOOi4IBazqkXCkAleeqKWqpIa8bxrmkFSOa1R+JSfJy5Rln+OHt4V8uDP0gyAcAAA=="
+      },
+      {
+        "original_path": "/tmp/hoim-infection-statistics-first-tests.log",
+        "original_bytes": 99,
+        "sha256": "60a5742fb70df0aea1bab947bf6ccc71a8652491441b28852372e303c228d38d",
+        "encoding": "gzip_base64_original_bytes",
+        "gzip_base64": "H4sIAAAAAAAC/9PTIwooEATRhgYGqrFcxpYKBYnFxakpCpl5CkZ65ubFXACCTAlIYwAAAA=="
+      },
+      {
+        "original_path": "/tmp/hoim-infection-statistics-scientific-scope.json",
+        "original_bytes": 1501,
+        "sha256": "70d641f539df8f2b0d88c42a5ab0e6989d24e120eef5250373836cc70fed66fc",
+        "encoding": "gzip_base64_original_bytes",
+        "gzip_base64": "H4sIAAAAAAAC/41UwW4bNxS8+ysedEqL1a5lO7aboIe0RXJqU9S5GcKCIp92X8MlWZIrexPk3ztcy5JSBEEBgxbJ5bx5M0N+PiNaJN3zoNodxyTeLV7RQtyWdcakTVllSVl0apMWdlm2ovHTB253q0VVzuMgVtm0Icqg4tQmP0bNCUj32Cf6PI/4coy2wPc5h/SqaYzXqQZsmGofuzJt5lkTecuRneamY8dRZTZPO3Xhk+qtpJ5jy49K57rPg52JzCU2KkmpvHgrj2wIfDpxifopcOzYD5yjaHKjtaScoS4y0CONAfvLrMQSUIdgme7vr6uLdXW/qq7Wa/qZzuvz2+uLq5vjeFPTXyMkGZjGxIlmPpSysbIhcZk7IKsouUdZ0a+xBv7Wgtedlj8nWtWrm3pFksAFm4YDY3CZMqdMPioNHt7ZqV7M/X2pvqvnw8NDLdnWDo7Vnd81Rna3P902PTrdeP+xCREKPzl7VSZX15dFvm+o927W3dIvHlGI0TsBP/5nVFbyRFuPvmgrTjJTiJzYAhVtbdUgYEtvQrCTuI4GcS9W1e8/hh8IjnFpFeGALblkDqKghhS5B7StCrHXhC16ihAZD1mdz7RDYQOnsAmI3qcgUJIU6gCjnPvfEjlda6NnfVhMoyJYWG4ubpqXzcX58vLl7WW7X/yGML+qxMtiCaUx7lisVcgpFQ1U1D1hYUy5RDZhMXgAua5RSXNEulxpcw6ehildUahYXf5bGeRJgVTTh9Ll17oU6YoSRR0tReykkRokq/emojv14Q7zCr58RczwbBMAKgSKtMWsiL4X9EQ4jOv5PhtO0rm2PALzJTxe5MUb9ITDsHzJj6zHmVgYN88mHA0L0e9g4xyMmf1Juv2WlAWQmchvEoOtIXBR9V7vxXtXiGur4iFTR2TtXY7e0uiMJG19wjfBp7zsvT4piGahf7ndBoIrO+GGHgr8Vt40Vy7ruPkbByj7j4xnAgWf2YMk/k5pp/IuwKoDyt1z7AOaxxfH8/8xIfgw2r1A7Dwuhco+HnD+8HR4Z6HuqU14UGR38F+NMDvKJ5TcTNAd1TIeNrMXa5+e4uf67MvZvwdMJQrdBQAA"
+      },
+      {
+        "original_path": "/tmp/hoim-infection-statistics-second-tests.log",
+        "original_bytes": 99,
+        "sha256": "6d413c4267797c386dd322236bebf80abc23019aff11650fc7111209498bed47",
+        "encoding": "gzip_base64_original_bytes",
+        "gzip_base64": "H4sIAAAAAAAC/9PTIxIoEADRhgYGqrFcJoYKBYnFxakpCpl5CkZ6pkbFXAAUHKzaYwAAAA=="
+      },
+      {
+        "original_path": "/tmp/hoim_infection_statistics_guard.py",
+        "original_bytes": 854,
+        "sha256": "df8874c00d4b6bad2bbb73143339947010f344b7f5258b1d6de9ab72aa370f51",
+        "encoding": "gzip_base64_original_bytes",
+        "gzip_base64": "H4sIAAAAAAAC/4VSwW7bMAy95ysEX2SjttLtmCK37bBLO2zHrggUiU64xKIh0kmDYf8+2snWBei6kyTyieR7j0VRPKwZ8gGMAEvTZwrAbFrKa4wRkvk0f7gziYzv+z0GL0jJMA05gOkGmd6uKIoZdj1lMXzimrj+zpTq3st2j+tZoCEJL3/YSALpsMrg48qLQNcL28VtbRPIkfJuFSglCHKdjIn/DvycRWiNHyJKCQdIUvu84WoxM9iaKbBcWuohWeNTNGNyuiBjYvEpQDnGHm+f6pIl1+uTMq+qCXOZ2H3WsyR2LUcIFP/8qCqXfAdO62ThIyrKOqVkx/bmzPPxdZpPN8t3d9kjg/miMOzgY86US3tP5vzBoCp7SrIFwaBMUOUPYKsrYkxhB+IuQtnF757/VPCtvvAskJPfm3PV6wEuJivTDWidV8fQjI8xY2rpZZQrv95q/+H+639a6jY5bTCZvSXaldOtmjagH32TFeu66g62mJC35eVVwzOKmiTDtBhXttq5dP18S9g1OrdqpfhmxCLrDNxoJb9vkJrN4HN04ybbyh0zCqxEFSvHiItD13N5plxjiqMs76sb+03Bs18H3WHkVgMAAA=="
+      }
+    ]
+  },
+  "limitations": [
+    "Conditional associations concern only this finite explicit case-record set and reviewed pathogen stratum, not infection incidence, individual risk, an outbreak diagnosis, or an intervention instruction.",
+    "No population denominator was supplied. Selected or observed patient counts are not a surveillance population denominator.",
+    "Records not meeting the declared eligibility requirements remain individually listed, with unknown and excluded categories separated; they are not normal or negative observations.",
+    "The entire declared department by window family is retained, including empty and fixed-margin comparisons. No candidate is dropped according to its observed count or p-value.",
+    "Adjustment applies only to this complete declared family. It does not control undisclosed data-dependent family selection or repeated analyses.",
+    "Current independent technical publication proves a declaration before this execution, not that the plan was chosen without seeing data, professional competence, or local clinical validation.",
+    "Case capture, reporting practices and classification changes can change the observed pattern. These comparisons do not distinguish those mechanisms from actual changes in infection.",
+    "Distinct subject tokens alone do not establish sampling independence; shared exposures, ascertainment and other dependencies still require domain validation.",
+    "Repeated eligible subject tokens prevent the independence assumption for this record-level method. In that case all counts remain, and the whole inference is unavailable rather than deduplicated.",
+    "Stored onset calendar dates are used literally; no UTC event-time or historical availability claim is added.",
+    "This pure evaluator proves mechanical bindings and arithmetic only; it does not authorize Source reads, prove Department identity, publish a Scenario, or enable clinical use."
+  ]
+}

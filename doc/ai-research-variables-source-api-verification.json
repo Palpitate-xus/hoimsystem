@@ -1,0 +1,506 @@
+{
+  "schema_version": "research_variables_independent_source_api_verification_v1",
+  "feature_number": 76,
+  "recorded_at_utc": "2026-10-21T16:23:04.630726+00:00",
+  "status": "targeted_source_api_stage_verified_private_main_testmount_only",
+  "implementation_head_before_documentation": "88c70c1aa7da9b34e4b235f694613bc189d760a1",
+  "scope": {
+    "new_source_view_router_and_permanent_tests_only": true,
+    "product_main_router_mounted": false,
+    "actual_product_main_with_private_test_mount": true,
+    "catalog_or_shared_runtime_activated": false,
+    "frontend_or_production_dist_verified": false,
+    "full_backend_suite_verified": false,
+    "model_called": false,
+    "business_records_written": false,
+    "project_clinical_permission_bypass_for_super": false,
+    "previous_targeted_counts_not_added": true
+  },
+  "changes": [
+    {
+      "commit": "058dd6a",
+      "scope": "Two new metadata/split Source API modules and permanent tests; existing recipe/service untouched."
+    },
+    {
+      "commit": "e6c8101",
+      "origin_commit": "98efc7f4b90abd0ecb3cd17def9fd191162687ce",
+      "scope": "Whole inherited real MySQL Prompt FK-nullability fix. Only original migration file; no76migration rewrite. Root third MySQL result remains its earlier-byte scope."
+    },
+    {
+      "commit": "88c70c1",
+      "scope": "Test-only explicit published large Source capacity witness and raw SQLite epoch literal without deprecated adapter."
+    }
+  ],
+  "existing_source_modules_byte_equal_to_08e104d": {
+    "fastapi_be/app/ai/research_variables_authority.py": "757438ee01242d85407e78eb3d4f3e30c535fc4d97be81c2966c9b5600a21aea",
+    "fastapi_be/app/ai/research_variables_fields.py": "01cfaf6736dea03f1f9799679b29d9fe542b7f476ae33efccdf966acff635b3c",
+    "fastapi_be/app/ai/research_variables_contract.py": "4743f2399c2405f78c2157c89e4d3bef23eaa0838aebb1ded66ded9f636a851b",
+    "fastapi_be/app/ai/research_variables_dictionary.py": "f40eed69475524cf5c547ee9f8a5d1955c6ed31acacdfec7d834281b1fa4eace",
+    "fastapi_be/app/ai/research_variables_batches.py": "90a9568d342a328225d1313377e3cc7a9412020f406d05ae69700ed29abe2687",
+    "fastapi_be/app/ai/research_variables_collection.py": "7b4a65ffb1ff3cd52a9541c9bfb98f219e4cbf7007813a27902e871359826647",
+    "fastapi_be/app/ai/research_variables_capture_proof.py": "45cfab7b8580122e2edf054a51764605c6719de5c1183fb88e4f834970e45351",
+    "fastapi_be/app/ai/research_variables_snapshot.py": "c0089f2b7c82a0995d18cf9f50a8fee50e6f437c13e641449fbe5561e637e029",
+    "fastapi_be/app/ai/research_variables_batch_proof.py": "34f322cae6fb322d368d04138edf6f72828c40b010d3043e4dc5a33a64c6332b",
+    "fastapi_be/app/ai/research_variables_models.py": "7f79071e63e2cab6220576964082d543f0682951966384575f63771e511fa91e",
+    "fastapi_be/app/ai/research_variables_draft.py": "181961fdf59d679b4f721f8e686dc28899a3f025daae29bbcb0125384d4b16c4",
+    "fastapi_be/app/ai/research_variables_prompt.py": "d15eff388a383a5983eb4232668238cf5b34ef166ee74c0f529d3a35117e6a7f"
+  },
+  "authorization": "GateX -> current User SHARE with original loaded epoch -> opaque short Source header -> current explicit Scope3anchors/purpose/ACL/allScope patient authority before any Dict/Batch TEXT. Super technical read has no clinical original or notes and cannot select Source.",
+  "interface": {
+    "schema_version": "research_variables_source_api_interface_v1",
+    "implementation_head": "88c70c1",
+    "phase": "private_main_testmount_only_no_shared_activation",
+    "prefix": "/api/ai/research-variables",
+    "routes": [
+      [
+        "GET",
+        "/dictionaries",
+        "scope3anchors,status?,page?,size? -> bodyless metadata directory"
+      ],
+      [
+        "POST",
+        "/dictionaries",
+        "DictionaryCreate -> short ACK"
+      ],
+      [
+        "GET",
+        "/dictionaries/{id}",
+        "allScope current authority -> bodyless short metadata"
+      ],
+      [
+        "GET",
+        "/dictionaries/{id}/parts/definition",
+        "whole verified dictionary proof without parent_binding"
+      ],
+      [
+        "GET",
+        "/dictionaries/{id}/parts/scope",
+        "whole parent_binding {scope:actualScopeProof}"
+      ],
+      [
+        "POST",
+        "/dictionaries/{id}/definition-review",
+        "DefinitionReview -> short ACK"
+      ],
+      [
+        "POST",
+        "/dictionaries/{id}/review",
+        "SourceReview currentSuper -> short ACK"
+      ],
+      [
+        "POST",
+        "/dictionaries/{id}/revoke",
+        "SourceRevoke -> short ACK"
+      ],
+      [
+        "POST",
+        "/batches/preview",
+        "BatchCapture -> whole current capture, no audit/source write"
+      ],
+      [
+        "GET",
+        "/batches",
+        "scope3anchors,status?,page?,size? -> bodyless metadata directory"
+      ],
+      [
+        "POST",
+        "/batches",
+        "BatchCreate -> short ACK"
+      ],
+      [
+        "GET",
+        "/batches/{id}",
+        "allScope current authority -> bodyless short metadata"
+      ],
+      [
+        "GET",
+        "/batches/{id}/parts/source",
+        "whole server-rebuilt literal public Source"
+      ],
+      [
+        "GET",
+        "/batches/{id}/parts/snapshot",
+        "whole private Snapshot and thin proof excluding Source"
+      ],
+      [
+        "POST",
+        "/batches/{id}/review",
+        "SourceReview currentSuper -> short ACK"
+      ],
+      [
+        "POST",
+        "/batches/{id}/revoke",
+        "SourceRevoke -> short ACK"
+      ],
+      [
+        "GET",
+        "/technical/{dictionaries|batches}",
+        "currentSuper only, optional scope_id/status/page/size, bodyless"
+      ],
+      [
+        "GET",
+        "/technical/{dictionaries|batches}/{id}",
+        "currentSuper only bodyless, no eligibility"
+      ]
+    ],
+    "route_decorators": 16,
+    "concrete_kind_alternatives_not_extra_router_decorators": true,
+    "constants": {
+      "normal_source_roles": [
+        "super_admin",
+        "admin",
+        "director",
+        "doctor",
+        "pharmacist"
+      ],
+      "technical_roles": [
+        "super_admin"
+      ],
+      "normal_list_requires": [
+        "scope_id",
+        "scope_content_hash",
+        "scope_governance_hash"
+      ],
+      "metadata_keys": {
+        "dictionary": [
+          "body_included",
+          "content_hash",
+          "created_at",
+          "created_by",
+          "created_event_id",
+          "definition_review_basis",
+          "definition_review_status",
+          "definition_reviewed_at",
+          "definition_reviewed_by",
+          "detail_required",
+          "dictionary_id",
+          "last_event_id",
+          "original",
+          "record_id",
+          "record_kind",
+          "review_basis_note",
+          "reviewed_at",
+          "reviewed_by",
+          "revision",
+          "revoke_reason",
+          "revoked_at",
+          "revoked_by",
+          "schema_version",
+          "scope_content_hash",
+          "scope_governance_hash",
+          "scope_id",
+          "status",
+          "technical_only"
+        ],
+        "batch": [
+          "batch_id",
+          "body_included",
+          "collection_digest",
+          "content_hash",
+          "created_at",
+          "created_by",
+          "created_event_id",
+          "detail_required",
+          "dictionary_content_hash",
+          "dictionary_governance_hash",
+          "dictionary_id",
+          "last_event_id",
+          "member_manifest_hash",
+          "original",
+          "projection_hash",
+          "record_id",
+          "record_kind",
+          "review_basis_note",
+          "reviewed_at",
+          "reviewed_by",
+          "revision",
+          "revoke_reason",
+          "revoked_at",
+          "revoked_by",
+          "schema_version",
+          "scope_content_hash",
+          "scope_governance_hash",
+          "scope_id",
+          "status",
+          "technical_only"
+        ]
+      },
+      "actual_response_outer_keys": {
+        "research_variable_source_ack_v1": [
+          "fresh_parts_required",
+          "metadata",
+          "schema_version"
+        ],
+        "research_variable_source_part_v1": [
+          "current_validation",
+          "metadata",
+          "part",
+          "schema_version",
+          "value"
+        ],
+        "research_variable_source_metadata_v1": [
+          "batch_id",
+          "body_included",
+          "collection_digest",
+          "content_hash",
+          "created_at",
+          "created_by",
+          "created_event_id",
+          "detail_required",
+          "dictionary_content_hash",
+          "dictionary_governance_hash",
+          "dictionary_id",
+          "last_event_id",
+          "member_manifest_hash",
+          "original",
+          "projection_hash",
+          "record_id",
+          "record_kind",
+          "review_basis_note",
+          "reviewed_at",
+          "reviewed_by",
+          "revision",
+          "revoke_reason",
+          "revoked_at",
+          "revoked_by",
+          "schema_version",
+          "scope_content_hash",
+          "scope_governance_hash",
+          "scope_id",
+          "status",
+          "technical_only"
+        ],
+        "research_variable_capture_v1": [
+          "actor_acl",
+          "actor_id",
+          "authorization_manifest",
+          "captured_at",
+          "collection_digest",
+          "dictionary_original",
+          "member_manifest",
+          "member_manifest_hash",
+          "missingness_basis",
+          "patient_authorizations",
+          "privacy_basis",
+          "purpose",
+          "records",
+          "request",
+          "schema_version",
+          "scope_original",
+          "time_basis"
+        ],
+        "research_variable_source_directory_v1": [
+          "items",
+          "metadata_page_not_complete_source",
+          "page",
+          "schema_version",
+          "size",
+          "total"
+        ]
+      },
+      "maximum_complete_response_bytes": 8388608,
+      "directory_max_size": 100,
+      "no_metadata_eligibility": true,
+      "technical_original_and_notes": null,
+      "all_scope_patients_required_even_batch_selects_subset": true,
+      "hmac_key_externalized": false,
+      "client_proof_boundary": "Canonical whole Snapshot/Source UTF8 SHA and matching actual short metadata/Scope/dictionary bindings; HMAC mapping is revalidated only by server holding the private key. No full independent JS projection claim."
+    },
+    "request_schemas": "/tmp/hoim-research-variables-source-api-private-request-schemas-first.json",
+    "actual_http_packet": {
+      "path": "/tmp/hoim-research-variables-sources-http-fourth-actual-packets.json",
+      "bytes": 330315,
+      "sha256": "729596d506d8b1e0f6f89f29ada7f29971bdd9997dfc16c09a8075fe3e131bc0"
+    },
+    "closed_query": "Unknown or repeated params rejected. UUID/SHA strict; page1..100000,size1..100. Normal routes do not accept audit_only to bypass purpose.",
+    "parts_join": "Every fresh part must match entire metadata including actual last_event_id, independent-review status and clock, revision and all hashes. Independent definition review changes actual auditPK before revision2. Both parts must be current eligible before selection; a short ACK/directory/header never suffices.",
+    "raw_hashes": "Whole HTTP response_utf8 SHA in export is a transport witness, distinct from canonical-JSON Snapshot/Source content SHA. Original literals and UTC6 are not normalized.",
+    "known_staging_limits": [
+      "No product Main mount/catalog/runtime/shared task/model activation in this phase.",
+      "Older private MySQL third covers existing models/service before new API; no claim new HTTP API was run on MySQL.",
+      "Prompt origin98 fix inherited whole commit as e6c8101; current SourceHTTP runner verifies SQLite origin up/down/up, not new historical MySQL full replay."
+    ],
+    "guards": {
+      "dotenv": 0,
+      "socket": 0
+    }
+  },
+  "request_schema_and_outer_contract": {
+    "path": "/tmp/hoim-research-variables-source-api-private-request-schemas-first.json",
+    "bytes": 16526,
+    "sha256": "e4dd302e87472f3d6f49c123247d701796fc36ec71b712d363d3d5d9f2476741"
+  },
+  "actual_http_packet": {
+    "path": "/tmp/hoim-research-variables-sources-http-fourth-actual-packets.json",
+    "bytes": 330315,
+    "sha256": "729596d506d8b1e0f6f89f29ada7f29971bdd9997dfc16c09a8075fe3e131bc0"
+  },
+  "actual_http_packet_scope": "27 original HTTP responses across3 independent synthetic test cases (dictionary UTC6=0, UTC6=123456, same-Batch create/govern/revoke); each case is separate, never stitched. Each keeps original response_utf8, SHA, parsed JSON and actual request path/body but no token/headers. Not production network or model I/O.",
+  "latest_frozen_target": {
+    "path": "/tmp/hoim-research-variables-sources-http-fourth-verification.json",
+    "bytes": 206073,
+    "sha256": "b72021566f71843a8a704c8a87576fe9cf9ec38d228789b4343510035a1bb41c",
+    "scope": "76 actual product Main with test-only Source router mount, real JWT, current all-Scope purpose/ACL/per-Patient SQL authority, bodyless metadata, whole independent8MiB parts and short write ACK. Synthetic SQLite/process-memory RSA; no shared native task/catalog activation, real model/MySQL/hospital I/O.",
+    "exit_code": 0,
+    "elapsed_seconds": 93.04778,
+    "guards": {
+      "dotenv_open_attempts": 0,
+      "shared_key_open_attempts": 0,
+      "socket_attempts": 0,
+      "engine_urls": [
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:"
+      ],
+      "transport_key": "fresh_synthetic_process_memory_only"
+    },
+    "source_stable": true,
+    "log": "/tmp/hoim-research-variables-sources-http-fourth-tests.log",
+    "log_sha256": "de5bcd2c0d36cd5b04bed877b051cf562ea79fecf0c5fc4309eea7ebe713a5ff"
+  },
+  "latest_counts": {
+    "total_passed": 30,
+    "source_api_cases": 29,
+    "main_asgi_jwt_cases": 24,
+    "direct_loaded_actor_epoch_sql_cases": 4,
+    "whole_wire_envelope_boundary_case": 1,
+    "inherited_origin_sqlite_up_down_up_case": 1,
+    "pytest_seconds": 83.51,
+    "outer_seconds": 93.04778,
+    "warnings": 0,
+    "retries": 0,
+    "not_full_backend": true
+  },
+  "actual_published_large_capacity": {
+    "path": "/tmp/hoim-research-variables-sources-http-fourth-pytest/test_actual_large_batch_source0/actual-large-variable-source-capacity.json",
+    "bytes": 384,
+    "sha256": "765a79d5c14d958e23bc695c6c24a71f7be9a6214bacc5ff7f70ca4a917d7b94",
+    "observed": {
+      "actual_published_combined_internal_packet_bytes": 9356680,
+      "parts": {
+        "source": {
+          "whole_http_response_bytes": 4672728,
+          "sha256": "007ea254eb1aff708bff8c00685ef8ee5bfec47afa865d6053a6962a4119dc77"
+        },
+        "snapshot": {
+          "whole_http_response_bytes": 4686650,
+          "sha256": "92d84c6c0692feffeaf70dd6ab6e55855a2471adb913fd4453f2d7d07a7da33e"
+        }
+      }
+    },
+    "whole_source_or_snapshot_plus_envelope_max_bytes": 8388608,
+    "no_original_truncation": true
+  },
+  "checks": [
+    "All16router decorators test-mounted uniquely in actual Main, original23Source routes retained.",
+    "Real JWT and SQL Dictionary manual independent review/pub/revoke and Batch preview/create/pub/revoke; ACK short/bodyless then fresh split GET.",
+    "Definition/scope recombine to exact existing frozen dictionary verifier; Source/Snapshot canonical full SHA match persisted actual anchors.",
+    "Microsecond0/123456, original BOM/CRLF/emoji, NULL/zero/unknown/lifecycle text retained.",
+    "Normal list/detail SELECT only projected short metadata; no Dict/Batch JSONTEXT or free basis columns.",
+    "Patient authorization withdrawal denies all normal metadata and4parts evenSuper before Dict/Batch TEXT; Sup technical metadata remains no body/notes/eligible.",
+    "Unselected Scope patient withdrawal also denies Batch summary/parts to both requester andSuper.",
+    "Loaded role changes to another allowed role and token epoch changes fail before body; trusted user authority not inferred from role labels.",
+    "Closed duplicate/unknown query, canonical UUID/SHA/pagination, extra body andboolean CAS rejects; no audit/source write.",
+    "Complete8MiB HTTP envelope accepted,1byte overflow413 whole refusal.",
+    "Published genuine9.356MB internal combined packet split into two complete sub8MB actual HTTP parts.",
+    "No new HMAC private-key output; server unique mapper still owns opaque token reconstruction."
+  ],
+  "retained_prior_attempts": [
+    {
+      "path": "/tmp/hoim-research-variables-sources-http-first-verification.json",
+      "bytes": 205917,
+      "sha256": "076ebd28dbc58b0b504b467c6ea031f851a94052dbb40618ff7eff26631c0af7",
+      "scope": "76 actual product Main with test-only Source router mount, real JWT, current all-Scope purpose/ACL/per-Patient SQL authority, bodyless metadata, whole independent8MiB parts and short write ACK. Synthetic SQLite/process-memory RSA; no shared native task/catalog activation, real model/MySQL/hospital I/O.",
+      "exit_code": 1,
+      "elapsed_seconds": 78.386545,
+      "guards": {
+        "dotenv_open_attempts": 0,
+        "shared_key_open_attempts": 0,
+        "socket_attempts": 0,
+        "engine_urls": [
+          "sqlite:///:memory:",
+          "sqlite:///:memory:"
+        ],
+        "transport_key": "fresh_synthetic_process_memory_only"
+      },
+      "source_stable": true,
+      "log": "/tmp/hoim-research-variables-sources-http-first-tests.log",
+      "log_sha256": "52715ee39e5006c15e4e5ec037de760b4dc703fad6a450c7432e2ac65141dfbd"
+    },
+    {
+      "path": "/tmp/hoim-research-variables-sources-http-second-verification.json",
+      "bytes": 205919,
+      "sha256": "99b44060941cb3035bc3fddba76ddda4b98faf366a4044ff80c0fd0cd783ec74",
+      "scope": "76 actual product Main with test-only Source router mount, real JWT, current all-Scope purpose/ACL/per-Patient SQL authority, bodyless metadata, whole independent8MiB parts and short write ACK. Synthetic SQLite/process-memory RSA; no shared native task/catalog activation, real model/MySQL/hospital I/O.",
+      "exit_code": 0,
+      "elapsed_seconds": 92.291327,
+      "guards": {
+        "dotenv_open_attempts": 0,
+        "shared_key_open_attempts": 0,
+        "socket_attempts": 0,
+        "engine_urls": [
+          "sqlite:///:memory:",
+          "sqlite:///:memory:"
+        ],
+        "transport_key": "fresh_synthetic_process_memory_only"
+      },
+      "source_stable": true,
+      "log": "/tmp/hoim-research-variables-sources-http-second-tests.log",
+      "log_sha256": "58d1a9dbe125e2f0dda3ce8cca399c1b6b7131d82d947e6b0bf1b3ed06761464"
+    },
+    {
+      "path": "/tmp/hoim-research-variables-sources-http-third-verification.json",
+      "bytes": 206043,
+      "sha256": "049325db0fe628c26343a93d397ca58bc36baa24995519709edb0a254ad5d0da",
+      "scope": "76 actual product Main with test-only Source router mount, real JWT, current all-Scope purpose/ACL/per-Patient SQL authority, bodyless metadata, whole independent8MiB parts and short write ACK. Synthetic SQLite/process-memory RSA; no shared native task/catalog activation, real model/MySQL/hospital I/O.",
+      "exit_code": 2,
+      "elapsed_seconds": 17.660823,
+      "guards": {
+        "dotenv_open_attempts": 0,
+        "shared_key_open_attempts": 0,
+        "socket_attempts": 0,
+        "engine_urls": [
+          "sqlite:///:memory:",
+          "sqlite:///:memory:"
+        ],
+        "transport_key": "fresh_synthetic_process_memory_only"
+      },
+      "source_stable": true,
+      "log": "/tmp/hoim-research-variables-sources-http-third-tests.log",
+      "log_sha256": "282ffddb6867327d90f1d997b9ed3b7100ece1172cac5986d3c6c1d5f3ec153a"
+    }
+  ],
+  "prior_attempt_interpretation": [
+    "First23:15pass8fail because test supplied httpx params which replaced its bad URL query, so malformed queries were not sent. Query tests corrected to explicit combined URL. No product change.",
+    "Second29passed81.76s,2SQLite deprecated raw datetime adapter warnings; actual tests later bind literal lexical clock.",
+    "Third was voluntarily SIGINT after discovering missing tmp_path fixture argument for new capacity report;17.660823outer,no tests completed,exit2. Not product RED or success.",
+    "Fourth30complete green with original source modules unchanged; no sums across repeats."
+  ],
+  "prior_private_mysql": {
+    "report": {
+      "path": "/tmp/hoim-research-variables-mysql-third-verification.json",
+      "bytes": 208348,
+      "sha256": "3f6c29b9dbcb859664a4197c5dd6182af0726ca261077664e894fd069b2d584a"
+    },
+    "scope": "Earlier08e104d models/services, actual218prior(including inherited Artifact2)+2new=220, incremental up/down/up preserving old DDL/rows,48.431s. Predates new HTTP API and e6FK inheritance; not a current API-on-MySQL or full historical migration replay claim.",
+    "blocked_bind_attempt_retained": true,
+    "no_actual_tcp": true
+  },
+  "current_changed_file_sha256": {
+    "fastapi_be/app/ai/research_variables_views.py": "6114f885013a70d80486058069bab18ea7b5d3cb129ab7aca53f45d16bf00f48",
+    "fastapi_be/app/routers/ai_research_variables_sources.py": "67b7a15d700a5c356cd7238c68bfb0900bb27e40e45c23cb3090769fb426e98a",
+    "fastapi_be/tests/test_ai_research_variables_sources_http.py": "cd6b241c5a43a2139f2eb9892c2b90c9bf682f70a860988b90eb138f37912685",
+    "fastapi_be/alembic/versions/20261021_research_prompt_origin.py": "2727a7742a259d3f8e9df039522cdfeeaea997382ed0d75d14745cf83bc5ff25"
+  },
+  "guide": {
+    "path": "/tmp/hoim-research-variables-20261021/doc/ai-research-variables-source-api-guide.md",
+    "bytes": 4968,
+    "sha256": "e23e045d0876c896d7cf98018aaaa834d2a505cae9bad4858e8c142153f52ae8"
+  },
+  "limits": [
+    "Private Source API stage only; Root must separately mount product Main/record RBAC and integrate future native tasks.",
+    "Only existing supported declared record families/columns. No automatic latest/favorable record or inferred clinical absence, missingness, research validity, normalization, enrollment or export.",
+    "Metadata safe references and server-rebuilt Source HMAC are not independent frontend full projection proof or anonymous data.",
+    "Each full part8MiB includes HTTP envelope; no aggregate16MiB response. Page100 is only directory, never a truncated Source collection."
+  ]
+}

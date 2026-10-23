@@ -105,12 +105,14 @@ def test_export_declares_actual_distinct_fixed_system_prompts_for_closed_drafts(
     from app.ai.document_extraction_contract import EXTRACTION_SYSTEM_PROMPT
     from app.ai.drug_label_draft import SYSTEM_PROMPT as DRUG_LABEL_SYSTEM_PROMPT
     from app.ai.rca_evidence_task_prompt import SYSTEM_PROMPT as RCA_EVIDENCE_SYSTEM_PROMPT
+    from app.ai.research_variables_prompt import SYSTEM_PROMPT as VARIABLE_SYSTEM_PROMPT
     from app.ai.satisfaction_prompt import SATISFACTION_SYSTEM_PROMPT
     from scripts.export_ai_catalog import artifacts
 
     payload = json.loads(artifacts()["ai-prompts.json"])
     assert payload["system_prompt"] == COMMON_SYSTEM_PROMPT
     assert payload["system_prompt_overrides"] == {
+        "research_extraction": VARIABLE_SYSTEM_PROMPT,
         "drg_evidence_review": CODING_SYSTEM_PROMPT,
         "charge_reconciliation": CHARGE_RECONCILIATION_SYSTEM_PROMPT,
         "feedback_analysis": SATISFACTION_SYSTEM_PROMPT,

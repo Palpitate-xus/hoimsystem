@@ -218,6 +218,8 @@ class OperationalContextRequest(StrictRequest):
 
     @model_validator(mode="after")
     def no_rca_fallback(self):
+        if self.feature_key == "research_extraction" or "research_variable_batch_id" in self.input:
+            raise ValueError("科研变量原文批次须走独立受授权上下文，不能混入通用运营输入")
         if self.feature_key == "incident_rca" or "rca_evidence_case_id" in self.input:
             raise ValueError("事件调查Case不得进入通用运营资料接口")
         return self
@@ -235,6 +237,9 @@ class RunRequest(StrictRequest):
     @model_validator(mode="before")
     @classmethod
     def native_charge_scope(cls, value):
+        if isinstance(value, dict) and type(value.get("feature_key")) is str and value["feature_key"].strip() == "research_extraction":
+            if "preview" in value and type(value["preview"]) is not bool:
+                raise ValueError("科研变量任务预览必须是实际布尔值，不接受整数或文本替代")
         if isinstance(value, dict) and isinstance(value.get("feature_key"), str) and value["feature_key"].strip() == "operations_support":
             if value.get("patient_id") is not None or value.get("encounter_ref") is not None:
                 raise ValueError("运维任务只使用明确受审资料集，不接受患者或就诊范围")
@@ -280,6 +285,8 @@ class RunRequest(StrictRequest):
 
     @model_validator(mode="after")
     def dedicated_roster_reference(self):
+        if "research_variable_batch_id" in self.input and self.feature_key != "research_extraction":
+            raise ValueError("科研变量原文批次仅用于其独立项目及逐患者用途授权任务")
         if "deidentification_case_id" in self.input and self.feature_key != "deidentification":
             raise ValueError("完整去标识Case仅用于固定去标识逐字候选核查")
         if self.feature_key == "deidentification":

@@ -1,8 +1,9 @@
 """Role-scoped business entry points for authorized AI tasks and human review."""
 
 import json
+from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from fastapi.responses import JSONResponse
 from sqlalchemy import JSON, type_coerce
 from sqlalchemy.orm import Session, defer
@@ -91,8 +92,10 @@ def patient_options(feature_key: str, keyword: str = Query("", max_length=100), 
 
 
 @router.get("/ai/service-options")
-def hospital_service_options(feature_key: str, db: Session = Depends(get_db), user: User = Depends(get_current_user)) -> dict:
+def hospital_service_options(feature_key: str, request: Request = None, db: Session = Depends(get_db), user: User = Depends(get_current_user)) -> dict:
     """Offer public hospital places or clinicians for the authorized service capability."""
+    if feature_key == "research_extraction" or request is not None and "research_variable_batch_id" in request.query_params:
+        raise HTTPException(422, "科研变量批次仅使用专属项目来源入口，不混入通用服务目录")
     spec, _ = authorized_feature(db, user, feature_key)
     if spec.number == 80:
         raise HTTPException(422, "培训仅使用独立已提交练习目录，不提供通用医院服务候选")
@@ -107,6 +110,8 @@ def hospital_service_options(feature_key: str, db: Session = Depends(get_db), us
 @router.post("/ai/operational-context")
 def inspect_operational_context(req: OperationalContextRequest, db: Session = Depends(get_db), user: User = Depends(get_current_user)) -> dict:
     """Inspect the same scoped facts used by generation, without contacting a provider."""
+    if req.feature_key == "research_extraction" or "research_variable_batch_id" in req.input:
+        raise HTTPException(422, "科研变量批次仅用于独立用途授权上下文，未读取运营资料")
     if req.feature_key == "feedback_analysis":
         from app.ai.satisfaction_context import selection
         from app.ai.satisfaction_runtime import current_actor
@@ -216,6 +221,8 @@ def pathway_options(
 
 
 def _context_inspection(db: Session, user: User, key: str, patient_id: int, encounter_ref: str | None, references: dict) -> dict:
+    if key == "research_extraction" or "research_variable_batch_id" in references:
+        raise HTTPException(422, "科研变量批次不进入诊疗患者快照，未扩大临床权限")
     spec, _ = authorized_feature(db, user, key)
     if spec.scope != "patient":
         raise HTTPException(422, "该能力无需加载患者临床资料")
@@ -306,11 +313,46 @@ def list_runs(
     deidentification_case_id: str | None = Query(None, max_length=36),
     operations_case_id: str | None = Query(None, max_length=36),
     rca_evidence_case_id: str | None = None,
+    research_variable_batch_id: Annotated[str | None, Query(max_length=36)] = None,
     limit: int = Query(30, ge=1, le=100),
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user),
 ) -> dict:
     """List own tasks; super-admins can inspect global execution history."""
+    if feature_key == "research_extraction" or research_variable_batch_id is not None:
+        from app.ai.research_variables_history import list_variable_history
+
+        data, _ = list_variable_history(
+            db,
+            user,
+            feature_key=feature_key,
+            batch_id=research_variable_batch_id,
+            limit=limit,
+            other_scope=(
+                patient_id,
+                encounter_ref,
+                department_id,
+                roster_plan_id,
+                ward_id,
+                bed_series_id,
+                surgery_pool_id,
+                surgery_scenario_id,
+                supply_item_kind,
+                supply_item_id,
+                supply_series_id,
+                inventory_item_kind,
+                inventory_item_id,
+                inventory_scenario_id,
+                coding_case_id,
+                document_original_id,
+                drug_label_source_binding_id,
+                document_change_scope_id,
+                deidentification_case_id,
+                operations_case_id,
+                rca_evidence_case_id,
+            ),
+        )
+        return {"code": 200, "msg": "success", "data": data}
     if feature_key == "operations_support" or operations_case_id is not None:
         scope = locals().copy()
         if feature_key != "operations_support" or any(value is not None and value is not False for key, value in scope.items() if key not in {"feature_key", "operations_case_id", "limit", "db", "user"}):
@@ -781,6 +823,13 @@ def list_runs(
 @router.get("/ai/runs/{run_id}")
 def run_detail(run_id: str, db: Session = Depends(get_db), user: User = Depends(get_current_user)) -> dict:
     """Recheck patient access before exposing a stored result or evidence."""
+    from app.ai.research_variables_task_routing import guard_variable_task_read
+
+    variable = guard_variable_task_read(db, user, run_id)
+    if variable is not None:
+        from app.ai.research_variables_task_views import describe_task
+
+        return {"code": 200, "msg": "success", "data": describe_task(db, variable)}
     from app.ai.clinical_training_shared import is_located_training_task, is_training_task
     from app.ai.native_task_access import lock_directory_gates
     from app.ai.operations_support_shared import is_located_operations_task, is_operations_task
@@ -814,6 +863,12 @@ def run_detail(run_id: str, db: Session = Depends(get_db), user: User = Depends(
 @router.post("/ai/runs/{run_id}/cancel")
 def cancel_run(run_id: str, db: Session = Depends(get_db), user: User = Depends(get_current_user)) -> dict:
     """Stop accepting a result; an already sent provider call may still finish."""
+    from app.ai.research_variables_task_routing import is_variable_task
+
+    if is_variable_task(db, run_id):
+        from app.ai.research_variables_cancellation import cancel_variable_run
+
+        return {"code": 200, "msg": "已停止接收研究变量结果，实际用量独立结算", "data": cancel_variable_run(db, user, run_id)}
     from app.ai.rca_evidence_dispatch import is_located_rca_task
 
     if is_located_rca_task(db, run_id):
@@ -916,6 +971,13 @@ def cancel_run(run_id: str, db: Session = Depends(get_db), user: User = Depends(
 @router.post("/ai/runs/{run_id}/feedback")
 def review_result(run_id: str, req: FeedbackWrite, db: Session = Depends(get_db), user: User = Depends(get_current_user)) -> dict:
     """Append review without editing clinical records, orders or prescriptions."""
+    from app.ai.research_variables_task_routing import guard_variable_task_read
+
+    variable = guard_variable_task_read(db, user, run_id)
+    if variable is not None:
+        from app.ai.research_variables_feedback import review_variable_result
+
+        return {"code": 200, "msg": "人工复核已记录，未生成已审核矩阵或导出", "data": review_variable_result(db, user, run_id, req)}
     from app.ai.rca_evidence_dispatch import is_located_rca_task
 
     if is_located_rca_task(db, run_id):

@@ -1,0 +1,149 @@
+{
+  "schema_version": "research_variable_task_main_targeted_verification_v1",
+  "status": "development_stage_targeted_not_full_release",
+  "synthetic_only": true,
+  "no_real_model_or_hospital_io": true,
+  "reports": {
+    "initial_main_pipeline": {
+      "path": "/tmp/hoim-research-variables-pipeline-first-verification.json",
+      "sha256": "0f2c850208dd4d180186dbd7049b0d4c1ae418387c5b416442bca62f55c10b2a",
+      "exit_code": 1,
+      "outer_seconds": 286.5004081102088,
+      "source_count": 1020,
+      "sources_stable": true,
+      "summary": "1 failed, 4 passed in 274.57s (0:04:34)",
+      "guards": {
+        "dotenv_open_attempts": 0,
+        "shared_transport_pem_attempts": 0,
+        "socket_attempts": 0,
+        "engine_urls": [
+          "sqlite:///:memory:",
+          "sqlite:///:memory:"
+        ]
+      }
+    },
+    "receipt_erasure_red": {
+      "path": "/tmp/hoim-research-variables-receipt-erasure-first-verification.json",
+      "sha256": "26623baecef984c8b62de447391fa0599ef51c2cbeb701a33008cf7c158cb240",
+      "exit_code": 1,
+      "outer_seconds": 65.34886012878269,
+      "source_count": 1021,
+      "sources_stable": true,
+      "summary": "1 failed, 1 passed in 54.24s",
+      "guards": {
+        "dotenv_open_attempts": 0,
+        "shared_transport_pem_attempts": 0,
+        "socket_attempts": 0,
+        "engine_urls": [
+          "sqlite:///:memory:",
+          "sqlite:///:memory:"
+        ]
+      }
+    },
+    "proactively_interrupted_test_fixture_attempt": {
+      "path": "/tmp/hoim-research-variables-main-second-verification.json",
+      "sha256": "90051bb30109c120d85cbddc0f7fa7bb9372684fafd0178164b790bae76ae33b",
+      "exit_code": 2,
+      "outer_seconds": 34.92511479649693,
+      "source_count": 1021,
+      "sources_stable": true,
+      "summary": "no tests ran in 23.86s",
+      "guards": {
+        "dotenv_open_attempts": 0,
+        "shared_transport_pem_attempts": 0,
+        "socket_attempts": 0,
+        "engine_urls": [
+          "sqlite:///:memory:",
+          "sqlite:///:memory:"
+        ]
+      }
+    },
+    "main_transient_cancellation_red": {
+      "path": "/tmp/hoim-research-variables-main-third-verification.json",
+      "sha256": "5fbee54212f370fd43f57cfeb3826236af6ee61ef41ea7cb27f7dbae81e08651",
+      "exit_code": 1,
+      "outer_seconds": 536.4641434047371,
+      "source_count": 1021,
+      "sources_stable": true,
+      "summary": "2 failed, 13 passed in 525.18s (0:08:45)",
+      "guards": {
+        "dotenv_open_attempts": 0,
+        "shared_transport_pem_attempts": 0,
+        "socket_attempts": 0,
+        "engine_urls": [
+          "sqlite:///:memory:",
+          "sqlite:///:memory:"
+        ]
+      }
+    },
+    "post_fix_whole_modules": {
+      "path": "/tmp/hoim-research-variables-main-fourth-verification.json",
+      "sha256": "9a3215360a5321ac142895712e5c9bc86a2624c21f407530dcc260da796b24ed",
+      "exit_code": 0,
+      "outer_seconds": 616.878494521603,
+      "source_count": 1021,
+      "sources_stable": true,
+      "summary": "31 passed in 605.59s (0:10:05)",
+      "guards": {
+        "dotenv_open_attempts": 0,
+        "shared_transport_pem_attempts": 0,
+        "socket_attempts": 0,
+        "engine_urls": [
+          "sqlite:///:memory:",
+          "sqlite:///:memory:"
+        ]
+      }
+    }
+  },
+  "actual_post_fix_passes": {
+    "new_main_cancellation_receipt_erasure_feedback_rollback_and_recovery": 10,
+    "original_receipts_whole_file": 13,
+    "original_cancellation_whole_file": 8,
+    "unique_in_this_run": 31,
+    "pytest_seconds": 605.59
+  },
+  "predecessors": {
+    "pipeline_first": "4 complete Chat/Responses/full/missing/partial accepted examples passed; source-loss observer incorrectly counted length probes as BODY and was corrected to direct selected columns",
+    "receipt_erasure_first": "paid failed refused correctly; paid cancelled with erased usage FK incorrectly returned pending and was fixed",
+    "main_second": "proactively interrupted before any completed case after noticing negative corruption fixture must restore its original concrete FK in finally",
+    "main_third": "13 passed, claimed-no-dispatch cancel refused by overly strict public-pending proof reused internally; the leftover authentic running task caused recovery to count two. Fixed only internal settlement to preserve atomic known-uncalled cancellation; public pending remains strict"
+  },
+  "current_phase_boundary": "The31 report freezes1021 Python/config/test/generated inputs before a subsequent deterministic two-file RBAC refresh. Main third5 complete pipeline cases are predecessor development proof, not a single fresh pass for the latest product. A full default backend and real MySQL Task stage remain pending.",
+  "original_source_modules_byte_equal": {
+    "fastapi_be/app/ai/research_variables_authority.py": "757438ee01242d85407e78eb3d4f3e30c535fc4d97be81c2966c9b5600a21aea",
+    "fastapi_be/app/ai/research_variables_fields.py": "01cfaf6736dea03f1f9799679b29d9fe542b7f476ae33efccdf966acff635b3c",
+    "fastapi_be/app/ai/research_variables_contract.py": "4743f2399c2405f78c2157c89e4d3bef23eaa0838aebb1ded66ded9f636a851b",
+    "fastapi_be/app/ai/research_variables_dictionary.py": "f40eed69475524cf5c547ee9f8a5d1955c6ed31acacdfec7d834281b1fa4eace",
+    "fastapi_be/app/ai/research_variables_batches.py": "90a9568d342a328225d1313377e3cc7a9412020f406d05ae69700ed29abe2687",
+    "fastapi_be/app/ai/research_variables_collection.py": "7b4a65ffb1ff3cd52a9541c9bfb98f219e4cbf7007813a27902e871359826647",
+    "fastapi_be/app/ai/research_variables_capture_proof.py": "45cfab7b8580122e2edf054a51764605c6719de5c1183fb88e4f834970e45351",
+    "fastapi_be/app/ai/research_variables_snapshot.py": "c0089f2b7c82a0995d18cf9f50a8fee50e6f437c13e641449fbe5561e637e029",
+    "fastapi_be/app/ai/research_variables_batch_proof.py": "34f322cae6fb322d368d04138edf6f72828c40b010d3043e4dc5a33a64c6332b",
+    "fastapi_be/app/ai/research_variables_models.py": "7f79071e63e2cab6220576964082d543f0682951966384575f63771e511fa91e",
+    "fastapi_be/app/ai/research_variables_draft.py": "181961fdf59d679b4f721f8e686dc28899a3f025daae29bbcb0125384d4b16c4",
+    "fastapi_be/app/ai/research_variables_prompt.py": "d15eff388a383a5983eb4232668238cf5b34ef166ee74c0f529d3a35117e6a7f"
+  },
+  "static_generated_checks": {
+    "rbac_stdlib_generate_then_check": 902,
+    "catalog_stdlib_check": 80,
+    "scope": "Actual902 mounted business endpoints; permissions unchanged by generated matrix. No settings/DB imports for these static tools."
+  },
+  "privacy_and_output_limits": {
+    "current_project_and_all_scope_patient_model_purposes_before_task_body": true,
+    "scope_subset_not_permission_subset": true,
+    "explicit_super_frozen_audit_still_has_own_current_purposes": true,
+    "task_source_scope_result_are_independent_complete_pieces": true,
+    "piece_bytes_limit": 8388608,
+    "run_text_limit": 65535,
+    "full_binding_limit": 262144,
+    "no_automatic_matrix_export_or_clinical_write": true
+  },
+  "not_claimed": [
+    "complete default backend release",
+    "real MySQL Task currentness/contention/atomicity pass",
+    "real provider inference",
+    "frontend completion",
+    "IRB approval or scientific validity",
+    "all registered8MiB Sources fit complete provider wire"
+  ]
+}

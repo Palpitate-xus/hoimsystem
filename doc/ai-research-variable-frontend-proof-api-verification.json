@@ -1,0 +1,42 @@
+{
+  "schema_version": "research_variable_frontend_proof_api_verification_v1",
+  "status": "targeted_development_not_full_frontend_release",
+  "report": {
+    "path": "/tmp/hoim-research-variable-proof-api-frozen-second-verification.json",
+    "sha256": "307ef5571278e5ea69e0ac9576b3668919012af8e9793d5cb3f3c60be4dff584"
+  },
+  "actual_cases": 66,
+  "classification": "66isolated_mock; 0production; 0realHTTP in this browser suite",
+  "elapsed_seconds": 47.72561174072325,
+  "source_input_count": 551,
+  "sources_stable": true,
+  "scope": "Actual Vue/request-related modules and canonical Babel rule in isolated Rspack/browser harness. Actual SQLite/JWT/native-ASGI worker packets from earlier development-source capture are replayed; no real API/model/server HTTP called by this suite. All cases isolated_mock, not production/dist or hospital validation. Source hashes freeze all FE src/layouts/scripts and the exact2 specs/ownfixture tree/package/config.",
+  "limits": "HMAC identities remain server-frozen anchors; client independently reconstructs ordered literal originals, hashes, schemas and CP spans. Ordinary Task views use server-frozen Prompt/SQL anchors; explicit Super trace additionally hashes3 raw persisted JSONs and complete fixed System/Task/provider/validation. No clinical/scientific validity, matrix, CSV or export.",
+  "predecessors": [
+    {
+      "path": "/tmp/hoim-research-variable-proof-first-tests.log",
+      "scope": "22P4F; positive private scope guard wrongly used original_v1 instead of actual identity_v1; corrected guard literal, kept strict proof."
+    },
+    {
+      "path": "/tmp/hoim-research-variable-proof-second-tests.log",
+      "scope": "26P development wholeproof at then-source."
+    },
+    {
+      "path": "/tmp/hoim-research-variable-task-api-first-tests.log",
+      "scope": "31P1F; test assumedtemperature0.0 but actual packet0.2. Product positive wholeproof passed. Test corrected to actual0.2 and raw-equivalent0.20 rejection."
+    },
+    {
+      "path": "/tmp/hoim-research-variable-task-api-second-tests.log",
+      "scope": "36P development wholeAPI at then-source."
+    }
+  ],
+  "fixture_manifest": "vue3-new-ui/e2e/fixtures/research-variable-task/manifest.json",
+  "backend_full": "Current default76 backend full first still running on9be48bc;1known DocAnchor0JSON-probe boundary failure is retained, no backend fix in this frontend commit. No full-backend pass claim.",
+  "implementation_files": {
+    "vue3-new-ui/scripts/generate-research-variable-task-schemas.cjs": "0a917447df604aa0bfe8e943ab85b01747454b61bddd72f8cb7bca128bac1c6d",
+    "vue3-new-ui/src/api/ai/researchVariableProofs.js": "3ba4e205b5d2f581b942c5a48552466f0a4020b53ecb918df74a987a619925dc",
+    "vue3-new-ui/src/api/ai/researchVariableTasks.js": "b31e61cc657574c966326b530938fe21cfb7d3262cba37c66810f7c5629b1447",
+    "vue3-new-ui/src/api/ai/researchVariableTaskFixed.json": "165b4d80081f1acea766103d16b550a15243f670b008db888855aabe402edcee",
+    "vue3-new-ui/src/api/ai/researchVariableTaskSchemas.json": "ffb8989cbafe40c5a1b88dee6e5576e638ced148f2ecfe0b063d36f0733b3429"
+  }
+}

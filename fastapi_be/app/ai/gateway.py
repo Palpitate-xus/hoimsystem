@@ -465,6 +465,15 @@ def validate_generation(
 
 
 def _request(provider: AIProvider, spec: FeatureSpec, task_prompt: str, data: dict) -> tuple[str, dict]:
+    context = data.get("context", {})
+    if (
+        spec.number == 76
+        or "research_variable_batch_id" in data.get("input", {})
+        or any(key in context for key in ("research_variable_source", "research_variable_binding"))
+        or isinstance(context.get("scope"), dict)
+        and (context["scope"].get("source_domain") == "published_research_variable_literal_batch" or "research_variable_batch_id" in context["scope"].get("selected_sources", {}))
+    ):
+        raise AIExecutionError("VARIABLE_SOURCE_MODE", "科研变量原文只能由完整受授权专用快照与独立协议发送，未回落通用网关")
     if spec.number == 73 or any(key in data.get("context", {}) for key in ("drug_label_binding", "drug_label_source")) or "drug_label_source_binding_id" in data.get("input", {}):
         raise AIExecutionError("DRUG_LABEL_NATIVE_REQUIRED", "说明书任务仅通过当前完整来源及专属协议执行")
     from app.ai.charge_reconciliation_gateway import matches_charge_request

@@ -1,0 +1,10 @@
+{
+  "source_artifact": "/tmp/hoim-research-variables-sources-http-fourth-actual-packets.json",
+  "source_artifact_sha256": "729596d506d8b1e0f6f89f29ada7f29971bdd9997dfc16c09a8075fe3e131bc0",
+  "selected_case": "tests/test_ai_research_variables_sources_http.py::test_actual_main_preview_create_publish_split_source_snapshot_and_revoke_are_same_original_not_aggregate",
+  "selected_response_index": 4,
+  "selected_response_path": "/api/ai/research-variables/batches/faeb0a32-6762-4955-b9b1-582e40fc634c/parts/source",
+  "whole_response_utf8_sha256": "1c9d0b9ae25fcc45644534bee9dd265f6b6b7a45a1c672d7843908016cbd30ab",
+  "public_source_canonical_sha256": "43fcab1e198f26c0811db098eb4a30a0f2617b91d44555eafc65e76b8dd160cd",
+  "scope": "Exact published eligible public Source from actual synthetic Main/JWT SQL Source API test, unmodified values. Original external_model_use is unknown: this proves literal data shape only and never authorizes a model task. Dedicated Task context must separately require actual external_model permissions and full current actor/Scope/patient proofs."
+}

@@ -1,5 +1,8 @@
 /* Complete generated schema registries retain their original closed build contract. */
 const {encodeStaticJson, emitStaticJson} = require('./public-static-data.cjs');
+const path=require('node:path');
+const publicFixed=require('./static-contract-data-loader.cjs');
+const PUBLIC_FIXED_PATHS=Object.freeze(publicFixed.PUBLIC_CONTRACTS.map(name=>path.resolve(__dirname,'..',name)));
 const {decodeSchemaText} = require('../src/api/schemaDataCodec.cjs');
 
 function encodeSchemaData(source) {
@@ -19,8 +22,15 @@ function encodeSchemaData(source) {
 }
 function schemaDataLoader(source) {
   this.cacheable();
-  return emitStaticJson(this, encodeSchemaData(source));
+  const options=this.getOptions?.()||{};
+  if(Object.keys(options).some(key=>!['kind','documentData'].includes(key))||options.kind!==undefined&&options.kind!=='public_fixed'||options.documentData!==undefined&&typeof options.documentData!=='boolean')throw new Error('Unknown complete public build data mode');
+  if(options.kind==='public_fixed'&&!PUBLIC_FIXED_PATHS.includes(this.resourcePath))throw new Error('Public fixed build data path is not allowlisted');
+  return emitStaticJson(this,options.kind==='public_fixed'?publicFixed.encodePublicFixedData(source):encodeSchemaData(source));
 }
 schemaDataLoader.raw = true;
 schemaDataLoader.encodeSchemaData = encodeSchemaData;
+schemaDataLoader.PUBLIC_FIXED_PATHS=PUBLIC_FIXED_PATHS;
+schemaDataLoader.encodePublicFixedData=publicFixed.encodePublicFixedData;
+schemaDataLoader.MAX_FIXED_NODES=publicFixed.MAX_FIXED_NODES;
+schemaDataLoader.MAX_FIXED_DEPTH=publicFixed.MAX_FIXED_DEPTH;
 module.exports = schemaDataLoader;

@@ -3,7 +3,7 @@
 > 由 `fastapi_be/scripts/generate_rbac_matrix.py` 从源码自动生成，请勿手改。
 > `✓`=可访问 | `PUBLIC`=无需登录 | 留空=不可访问
 
-共 **1066** 个接口（PUBLIC 18 个 / 需登录 1048 个）。
+共 **1085** 个接口（PUBLIC 18 个 / 需登录 1067 个）。
 
 
 ### `admin.py`
@@ -622,6 +622,35 @@
 | GET | `/api/ai/research-cohort/tasks/{run_id}` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
 | POST | `/api/ai/research-cohort/tasks/{run_id}/cancel` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
 | GET | `/api/ai/research-cohort/tasks/{run_id}/parts/{part}` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
+
+### `ai_research_variables_sources.py`
+
+| 方法 | 路径 | admin | super_admin | director | doctor | nurse | cashier | pharmacist | guide | patient | lab_technician | registrar | PUBLIC |
+|------|------|------|------|------|------|------|------|------|------|------|------|------|------|
+| GET | `/api/ai/research-variables/dictionaries` | ✓ | ✓ | ✓ | ✓ |  |  | ✓ |  |  |  |  |  |
+| POST | `/api/ai/research-variables/dictionaries` | ✓ | ✓ | ✓ | ✓ |  |  | ✓ |  |  |  |  |  |
+| GET | `/api/ai/research-variables/dictionaries/{dictionary_id}` | ✓ | ✓ | ✓ | ✓ |  |  | ✓ |  |  |  |  |  |
+| GET | `/api/ai/research-variables/dictionaries/{dictionary_id}/parts/{part}` | ✓ | ✓ | ✓ | ✓ |  |  | ✓ |  |  |  |  |  |
+| POST | `/api/ai/research-variables/dictionaries/{dictionary_id}/definition-review` | ✓ | ✓ | ✓ | ✓ |  |  | ✓ |  |  |  |  |  |
+| POST | `/api/ai/research-variables/dictionaries/{dictionary_id}/review` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/research-variables/dictionaries/{dictionary_id}/revoke` | ✓ | ✓ | ✓ | ✓ |  |  | ✓ |  |  |  |  |  |
+| POST | `/api/ai/research-variables/batches/preview` | ✓ | ✓ | ✓ | ✓ |  |  | ✓ |  |  |  |  |  |
+| GET | `/api/ai/research-variables/batches` | ✓ | ✓ | ✓ | ✓ |  |  | ✓ |  |  |  |  |  |
+| POST | `/api/ai/research-variables/batches` | ✓ | ✓ | ✓ | ✓ |  |  | ✓ |  |  |  |  |  |
+| GET | `/api/ai/research-variables/batches/{batch_id}` | ✓ | ✓ | ✓ | ✓ |  |  | ✓ |  |  |  |  |  |
+| GET | `/api/ai/research-variables/batches/{batch_id}/parts/{part}` | ✓ | ✓ | ✓ | ✓ |  |  | ✓ |  |  |  |  |  |
+| POST | `/api/ai/research-variables/batches/{batch_id}/review` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| POST | `/api/ai/research-variables/batches/{batch_id}/revoke` | ✓ | ✓ | ✓ | ✓ |  |  | ✓ |  |  |  |  |  |
+| GET | `/api/ai/research-variables/technical/{directory}` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+| GET | `/api/ai/research-variables/technical/{directory}/{record_id}` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
+
+### `ai_research_variables_tasks.py`
+
+| 方法 | 路径 | admin | super_admin | director | doctor | nurse | cashier | pharmacist | guide | patient | lab_technician | registrar | PUBLIC |
+|------|------|------|------|------|------|------|------|------|------|------|------|------|------|
+| POST | `/api/ai/research-variables/context` | ✓ | ✓ | ✓ | ✓ |  |  | ✓ |  |  |  |  |  |
+| GET | `/api/ai/runs/{run_id}/research-variables/{part}` | ✓ | ✓ | ✓ | ✓ |  |  | ✓ |  |  |  |  |  |
+| GET | `/api/ai/admin/runs/{run_id}/research-variables/{part}` |  | ✓ |  |  |  |  |  |  |  |  |  |  |
 
 ### `ai_risk_rules.py`
 

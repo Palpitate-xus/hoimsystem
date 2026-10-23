@@ -1,0 +1,57 @@
+{
+  "schema_version": "research_variable_shared_history_scoped_verification_v1",
+  "scope": "Standalone76 global Super History with explicit current-purpose-authorized frozen audit; no bypass of server current project/all-patient/model purposes. No canonical or whole-browser claim.",
+  "tests": {
+    "passed": 136,
+    "whole_files": {
+      "ai-document-extraction-history.spec.js": 20,
+      "ai-research-variable-history.spec.js": 23,
+      "ai-research-variable-task-api.spec.js": 63,
+      "ai-research-variable-task-flow.spec.js": 30
+    },
+    "classification": "isolated_mock",
+    "workers": 1,
+    "retries": 0,
+    "skipped": 0,
+    "elapsed_seconds": 139.40884042624384,
+    "source_input_count": 567,
+    "sources_stable": true
+  },
+  "evidence": {
+    "report": "/tmp/hoim-research-variable-history-second-verification.json",
+    "sha256": "ad905f7d19d4df5ca5a6d8311ae6f7f4091871c0fb079c3b93547b9ec0a6252d",
+    "playwright": "/tmp/hoim-research-variable-history-second-playwright.json",
+    "playwright_sha256": "d6f9c3464da21119b5eee6db20d10e54285471329bcf9c44a01b8cdb9bdf8758",
+    "freeze": "/tmp/hoim-research-variable-history-second-source-freeze.json",
+    "freeze_sha256": "3a3e806df69181e344cc62b43274300ea46f4eb01b413daaca8743423f626570"
+  },
+  "files": {
+    "vue3-new-ui/src/components/AIRunHistory/index.vue": "bcad655ac85726ce3f4dd26a96fd8b14d2aeb8ca3bb068b702dc27f49ab72195",
+    "vue3-new-ui/src/api/ai/researchVariableTasks.js": "429b219fbac431800f7627912f838f437ddb5a8168f25c5b3bebcfde1fc9bc53",
+    "vue3-new-ui/src/api/ai/researchVariableTaskFlow.js": "0a15aed77d4f1ff92e4ad260b43a1b56fb2b4dd95250e3bf16dfe983d8a7fdb8",
+    "vue3-new-ui/e2e/ai-research-variable-history.spec.js": "426e3af3009fe6687f15f78997c00fc582786a97ebc70503d044dd3e1cc86d5b",
+    "vue3-new-ui/e2e/fixtures/research-variable-history-harness.cjs": "6c0686f1cccb8cb4adafc7f6d4735c5d062682b46ba57713b7b516ce268326b7"
+  },
+  "behavior": [
+    "Native directory uses strict original UTF8/duplicate/whole8MiB decoder and exact6field pagination wrapper; each32key metadata row is independently typed and limited to the explicit Feature/Batch. Patient and foreign source filters are refused before request.",
+    "Explicit native row or filter scope always uses typed Admin Trace and independent4/5bare parts; all bindings/source/private original literals and3raw persisted JSON hashes must match before any model/Prompt/source display. Foreign/null/unique schema markers never downgrade into generic display.",
+    "The exact original listed row is a receipt: known immutable Artifact, lease/phase AuditPK, terminal status and recorded token counters must continue in the full Trace; a self-consistent earlier queued snapshot cannot replace a terminal directory observation.",
+    "Global audit requires nonempty token/username and an actual all-string Super role array. Null andzero counters remain separate; explicit child close/before-close, token/filter/KeepAlive and held GET clear all visible private refs before late responses return.",
+    "Current ordinary Task remains separate; its API default stays auditOnlyfalse, and Super current role alone does not authorize frozen Source or restart execution."
+  ],
+  "predecessors": [
+    {
+      "path": "/tmp/hoim-research-variable-history-first-verification.json",
+      "scope": "104P1F/source stable; new mock chose the earliest actual queued Trace among sharedRunID states, and pointer mutation attempted to edit its null result_reference. Corrected exact actual directory→Trace lookup byRunID/status/usagePK and strengthened all4positive DOM status checks."
+    },
+    {
+      "path": "/tmp/hoim-research-variable-history-terminal-first-verification.json",
+      "scope": "True product RED1F16.652s/source stable: received terminal directory could display an earlier self-consistent actual queued Trace and its old pieces. Fixed shared continuity helper auditOnly handling and passed exact listed receipt into readback. Original RED remains preserved."
+    }
+  ],
+  "limits": [
+    "Actual original DTOs are replayed through real Vue/ElementPlus/request and canonical Babel. No real API/model HTTP is called by these isolated browser tests.",
+    "HMAC keys remain server-only; client checks frozen opaque anchors and ordered literal originals, not independent HMAC key recomputation.",
+    "Original first backend remains9455P1F28skip3warn; new second full runs separately on35ee810/1052 frozen inputs. This FE evidence does not relabel any backend result."
+  ]
+}

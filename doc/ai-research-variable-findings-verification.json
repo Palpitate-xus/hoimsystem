@@ -1,0 +1,44 @@
+{
+  "schema_version": "research_variable_frontend_findings_phase_verification_v1",
+  "status": "targeted_development_not_full_product_release",
+  "report": {
+    "path": "/tmp/hoim-research-variable-proof-api-findings-frozen-first-verification.json",
+    "sha256": "f426181e858f7150d7e978b60732fc7e4797d05049e5e8755247543e01ea465c"
+  },
+  "actual_cases": 117,
+  "whole_file_counts": {
+    "Source_literal_proofs": 30,
+    "Task_API_bindings_and_states": 63,
+    "real_Vue_ElementPlus_Findings_DOM": 24
+  },
+  "classification": "117isolated_mock;0production;0realHTTP in this browser suite",
+  "sources_stable": true,
+  "source_count": 557,
+  "elapsed_seconds": 88.05787966027856,
+  "actual_state_export": {
+    "path": "/tmp/hoim-research-variable-actual-state-v2-verification.json",
+    "sha256": "8c9c951e7df6cac09f7a9660b5a28f48b85ca9a31eeeeed2f6036535930bc683",
+    "result": "1passed179.17pytest/190.666outer;1051backend inputs stable, actual synthetic Main/JWT/shared worker/controlled provider HTTP; not model inference"
+  },
+  "actual_source_and_task_fixtures": "vue3-new-ui/e2e/fixtures/research-variable-task/actual-states-manifest.json",
+  "added_boundaries": [
+    "Entire original Scope patient purpose IDs and Scope content/governance anchors cannot be omitted even after available binding and metadata hashes are rebuilt.",
+    "Every Artifact UTC6 clock and actual legacy-second Run create/start/success-finish relation is checked; Source capture clock remains exact.",
+    "Native classifier recognizes independent actual result_reference, unique input_mode, explicit input key including null, selected source key and unique source domain; ordinary question prose never becomes a native marker.",
+    "Queued/running/paid-failed/cancelled-uncalled/cancelled-pending/cancelled-paid and successful partial-count records come from actual same-case API execution, with no rewritten terminal status.",
+    "Source mapping remains server-frozen HMAC anchor plus complete ordered literal reconstruction, no claimed client HMAC recomputation.",
+    "Ordinary roles compare available frozen server anchors; complete raw3 Prompt/provider/validation proof requires actual explicit Super Trace.",
+    "Findings invalidates and drops private clones on role/token/username/active/KeepAlive/close, does not restore same cached packet, and rejects late WebCrypto completion.",
+    "No model candidate is automatically saved, reviewed, published as a matrix, exported or written to clinical tables."
+  ],
+  "read_only_independent_review": {
+    "agent": "qsofa_ui",
+    "artifact": "/tmp/hoim-research-variable-readonly-marker-probe.json",
+    "scope": "Narrow actual AST marker probe plus static review only; three marker gaps fixed here. Not an independent whole Source/browser/backend pass."
+  },
+  "predecessors": [
+    "doc/ai-research-variable-frontend-proof-api-verification.json records earlier66 scoped Source/API green; kept separate from current117 whole3files.",
+    "Findings first24 development green29.8s, actual V2 replay, then final117 includes all24 at currentbyte bindings."
+  ],
+  "limits": "Source governance Panel/Input, dedicated Task Assistant/shared parent/history and canonical production/full browser validation remain pending. Backend full first is still running unchanged with one reproduced DocAnchor JSON probe ordering failure; sibling candidate fix and SQL verification are separate, not included as backend pass here."
+}

@@ -195,6 +195,8 @@ def describe_config(db: Session, spec: FeatureSpec, config: AIFeatureConfig | No
 
         return describe_configuration(db, spec, user=user, management=management)
     data = describe_feature(spec)
+    if spec.number == 76:
+        data["input_mode"] = "research_variable_extraction"
     if spec.number == 80:
         data["input_mode"] = "clinical_training_evidence"
     if spec.number == 79:

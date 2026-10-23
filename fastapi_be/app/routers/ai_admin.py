@@ -867,6 +867,7 @@ def list_global_runs(
     deidentification_case_id: str | None = Query(None, max_length=36),
     operations_case_id: Annotated[str | None, Query(max_length=36)] = None,
     rca_evidence_case_id: str | None = None,
+    research_variable_batch_id: Annotated[str | None, Query(max_length=36)] = None,
     page: int = Query(1, ge=1, le=100000),
     page_size: int = Query(30, ge=1, le=100),
     db: Session = Depends(get_db),
@@ -874,6 +875,41 @@ def list_global_runs(
 ) -> dict:
     """Return all users' audited task metadata and feedback counts without exposing full payloads."""
     request_scope = dict(locals())
+    if feature_key == "research_extraction" or research_variable_batch_id is not None:
+        from app.ai.research_variables_history import list_variable_history
+
+        data, total = list_variable_history(
+            db,
+            user,
+            feature_key=feature_key,
+            batch_id=research_variable_batch_id,
+            admin=True,
+            status=status,
+            requested_by=requested_by,
+            limit=page_size,
+            offset=(page - 1) * page_size,
+            other_scope=(
+                patient_id,
+                department_id,
+                surgery_pool_id,
+                surgery_scenario_id,
+                supply_item_kind,
+                supply_item_id,
+                supply_series_id,
+                inventory_item_kind,
+                inventory_item_id,
+                inventory_scenario_id,
+                coding_case_id,
+                document_original_id,
+                drug_label_source_binding_id,
+                document_change_scope_id,
+                deidentification_case_id,
+                operations_case_id,
+                rca_evidence_case_id,
+                outcome,
+            ),
+        )
+        return {"code": 200, "msg": "success", "data": data, "total": total, "page": page, "page_size": page_size}
     if feature_key == "operations_support" or operations_case_id is not None:
         permitted = {"feature_key", "status", "outcome", "requested_by", "operations_case_id", "page", "page_size", "db", "user"}
         if feature_key != "operations_support" or any(value is not None and value is not False for key, value in request_scope.items() if key not in permitted):
@@ -1166,11 +1202,15 @@ def list_global_runs(
     from app.ai.operations_support_shared import is_operations_task
     from app.ai.operations_support_views import technical_metadata as operations_metadata
     from app.ai.research_cohort_shared import directory_metadata, is_research_task
+    from app.ai.research_variables_task_routing import is_variable_task
+    from app.ai.research_variables_task_views import describe_variable_run
 
     data = [
         {
             **(
-                deidentification_metadata(db, user, item)
+                describe_variable_run(db, user, item, False, frozen_audit=True)
+                if is_variable_task(db, item)
+                else deidentification_metadata(db, user, item)
                 if is_deidentification_task(db, item)
                 else operations_metadata(db, user, item.run_id).model_dump(mode="json")
                 if is_operations_task(db, item)
@@ -1194,6 +1234,12 @@ def list_global_runs(
 @router.get("/ai/admin/runs/{run_id}")
 def inspect_run_trace(run_id: str, db: Session = Depends(get_db), user: User = Depends(require_roles("super_admin"))) -> dict:
     """Read the frozen prompts, requested model, source payload and append-only review history."""
+    from app.ai.research_variables_task_routing import is_variable_task
+
+    if is_variable_task(db, run_id):
+        from app.ai.research_variables_task_views import trace_variable_run
+
+        return {"code": 200, "msg": "success", "data": trace_variable_run(db, user, run_id)}
     from app.ai.rca_evidence_dispatch import is_located_rca_task
 
     if is_located_rca_task(db, run_id):

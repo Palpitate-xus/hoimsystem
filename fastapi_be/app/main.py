@@ -416,6 +416,8 @@ from app.routers import (
     ai_rca_evidence_tasks,
     ai_research_cohort_sources,
     ai_research_cohort_tasks,
+    ai_research_variables_sources,
+    ai_research_variables_tasks,
     ai_risk_rules,
     ai_roster_plans,
     ai_roster_sources,
@@ -579,6 +581,8 @@ app.include_router(ai_deidentification_tasks.router, prefix="/api")
 app.include_router(ai_operations_support_sources.router, prefix="/api")
 app.include_router(ai_operations_support_tasks.router, prefix="/api")
 app.include_router(ai_research_cohort_sources.router, prefix="/api")
+app.include_router(ai_research_variables_sources.router, prefix="/api")
+app.include_router(ai_research_variables_tasks.router, prefix="/api")
 app.include_router(ai_research_cohort_tasks.router, prefix="/api")
 app.include_router(ai_rca_evidence.router, prefix="/api")
 app.include_router(ai_rca_evidence_tasks.router, prefix="/api")

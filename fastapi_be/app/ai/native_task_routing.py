@@ -33,6 +33,7 @@ def _domains():
     from app.ai.operations_support_run_models import AIOperationsRunArtifact
     from app.ai.rca_evidence_run_models import AIRcaEvidenceRunArtifact
     from app.ai.research_cohort_artifact_models import AIResearchCohortRunArtifact
+    from app.ai.research_variables_run_models import AIResearchVariableRunArtifact
     from app.ai.satisfaction_artifact_models import AISatisfactionRunArtifact
 
     return (
@@ -47,6 +48,7 @@ def _domains():
         ("clinical_training", AITrainingRunArtifact, "submission_id"),
         ("rca", AIRcaEvidenceRunArtifact, "case_id"),
         ("infection", AIInfectionRunArtifact, "scenario_id"),
+        ("research_variables", AIResearchVariableRunArtifact, "batch_id"),
     )
 
 

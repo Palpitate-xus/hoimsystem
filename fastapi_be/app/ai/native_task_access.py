@@ -78,13 +78,17 @@ def guard_private_task_read(db, user, run_id):
     from app.ai.drug_label_runtime import guard_drug_label_run_id
     from app.ai.rca_evidence_dispatch import guard_rca_task
     from app.ai.rca_evidence_storage import locate_artifact
-    from app.ai.satisfaction_storage import guard_satisfaction_run_id
 
     # This domain has no global Gate. Only opaque immutable identities precede
     # its current Actor -> Event -> original purposes -> Task body authority.
     # Probe only this domain before the existing directory Gates. Calling its
     # all-domain classifier here would query legacy document anchors before
     # Billing -> Satisfaction -> Inventory on unrelated tasks.
+    from app.ai.research_variables_task_routing import guard_variable_task_read
+    from app.ai.satisfaction_storage import guard_satisfaction_run_id
+
+    if guard_variable_task_read(db, user, run_id, frozen_audit=user.user_role == "super_admin") is not None:
+        return
     if locate_artifact(db, run_id) is not None:
         guard_rca_task(db, user, run_id)
         return

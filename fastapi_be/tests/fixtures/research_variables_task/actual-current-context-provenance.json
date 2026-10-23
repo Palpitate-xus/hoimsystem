@@ -1,0 +1,15 @@
+{
+  "source_artifact": "/tmp/hoim-research-variables-task-context-actual-first.json",
+  "source_artifact_bytes": 135598,
+  "source_artifact_sha256": "5da36a1670d8fb86459dbaa85cc9a01c468585cb6c7f43860699e2c84c8986a9",
+  "selected_existing_keys": [
+    "selection",
+    "context",
+    "evidence",
+    "binding",
+    "source",
+    "actual_batch.original.governance -> batch_publication"
+  ],
+  "fixture_sha256": "c2afddb2625c7daf23812d74b3b89b74ba1266c1f19a7bd36d2918e51c46c4d9",
+  "scope": "Actual synthetic SQLite Scope/ACL/two-patient purposes/independently reviewed Dictionary/published Batch -> current TaskContext only. Explicit external model permission recorded before original creation. No Task Run, Provider/Prompt config, claim, model call or result is claimed."
+}

@@ -19,6 +19,10 @@ EXTRACTION_TASK_PROMPT = """根据本次受控 document_source 和可选 questio
 
 
 def system_prompt_for(context):
+    if "research_variable_binding" in context:
+        from app.ai.research_variables_prompt import SYSTEM_PROMPT
+
+        return SYSTEM_PROMPT
     from app.ai.coding_evidence_prompt import system_prompt_for as coding_system_prompt_for
 
     return EXTRACTION_SYSTEM_PROMPT if "document_binding" in context else coding_system_prompt_for(context)

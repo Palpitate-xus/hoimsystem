@@ -13,10 +13,12 @@ from app.ai.drug_label_prompt import SYSTEM_PROMPT as DRUG_LABEL_SYSTEM_PROMPT
 from app.ai.operations_support_task_prompt import SYSTEM_PROMPT as OPERATIONS_SYSTEM_PROMPT
 from app.ai.rca_evidence_task_prompt import SYSTEM_PROMPT as RCA_EVIDENCE_SYSTEM_PROMPT
 from app.ai.research_cohort_prompt import RESEARCH_SYSTEM_PROMPT
+from app.ai.research_variables_prompt import SYSTEM_PROMPT as RESEARCH_VARIABLE_SYSTEM_PROMPT
 from app.ai.satisfaction_prompt import SATISFACTION_SYSTEM_PROMPT
 
 SYSTEM_PROMPT_OVERRIDES = MappingProxyType(
     {
+        "research_extraction": RESEARCH_VARIABLE_SYSTEM_PROMPT,
         "drg_evidence_review": CODING_SYSTEM_PROMPT,
         "charge_reconciliation": CHARGE_RECONCILIATION_SYSTEM_PROMPT,
         "feedback_analysis": SATISFACTION_SYSTEM_PROMPT,

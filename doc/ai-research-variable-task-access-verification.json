@@ -1,0 +1,1545 @@
+{
+  "schema_version": "research_variable_task_access_private_mysql_verification_v1",
+  "feature_number": 76,
+  "recorded_at_utc": "2026-10-22T01:13:15.202340+00:00",
+  "status": "development_stage_targeted_not_full_release",
+  "implementation_head_before_commit": "663ae132b6881c53239f7ff1c7f51ca7afcdcdda",
+  "scope": "Standalone76 derived from Source34ab0c6 and inherited71/68 runtime, not later Main69/70/73/74/75/77/79/80 integration. All database/model contents and model replies synthetic. No real model, hospital credentials, clinical matrix/export or deployment. Default full backend regression remains pending.",
+  "changes": [
+    "Current Source/purpose/role/epoch before private Task/Batch/Dictionary bodies across actual Main detail, split parts, admin trace, feedback, and scoped history.",
+    "Generic interrupted recovery excludes every closed native marker, even feature-erased or orphaned Task; no generic rewrite.",
+    "Technical classifier uses bounded exact raw PK comparator for Unicode/control aliases under actual DB collation; technical3column identity is not authorization, and private reader still requires canonical UUID. Old non-UUID ASCII not-read remains zero domain SQL.",
+    "History parameter uses Annotated Query with actual None Python default to preserve legacy direct-call behavior; no role/source policy weakened.",
+    "Startup now registers inherited research cohort Artifact/Result2 so private migration baseline contains all220 old model tables, then own2Task tables.",
+    "Large result fixture uses100 real legacy symptom rows each100 Unicode codepoints within actual VARCHAR100, rather than relying on SQLite allowing overlong legacy values."
+  ],
+  "source12_existing_hashes_unchanged": {
+    "fastapi_be/app/ai/research_variables_authority.py": "757438ee01242d85407e78eb3d4f3e30c535fc4d97be81c2966c9b5600a21aea",
+    "fastapi_be/app/ai/research_variables_fields.py": "01cfaf6736dea03f1f9799679b29d9fe542b7f476ae33efccdf966acff635b3c",
+    "fastapi_be/app/ai/research_variables_contract.py": "4743f2399c2405f78c2157c89e4d3bef23eaa0838aebb1ded66ded9f636a851b",
+    "fastapi_be/app/ai/research_variables_dictionary.py": "f40eed69475524cf5c547ee9f8a5d1955c6ed31acacdfec7d834281b1fa4eace",
+    "fastapi_be/app/ai/research_variables_batches.py": "90a9568d342a328225d1313377e3cc7a9412020f406d05ae69700ed29abe2687",
+    "fastapi_be/app/ai/research_variables_collection.py": "7b4a65ffb1ff3cd52a9541c9bfb98f219e4cbf7007813a27902e871359826647",
+    "fastapi_be/app/ai/research_variables_capture_proof.py": "45cfab7b8580122e2edf054a51764605c6719de5c1183fb88e4f834970e45351",
+    "fastapi_be/app/ai/research_variables_snapshot.py": "c0089f2b7c82a0995d18cf9f50a8fee50e6f437c13e641449fbe5561e637e029",
+    "fastapi_be/app/ai/research_variables_batch_proof.py": "34f322cae6fb322d368d04138edf6f72828c40b010d3043e4dc5a33a64c6332b",
+    "fastapi_be/app/ai/research_variables_models.py": "7f79071e63e2cab6220576964082d543f0682951966384575f63771e511fa91e",
+    "fastapi_be/app/ai/research_variables_draft.py": "181961fdf59d679b4f721f8e686dc28899a3f025daae29bbcb0125384d4b16c4",
+    "fastapi_be/app/ai/research_variables_prompt.py": "d15eff388a383a5983eb4232668238cf5b34ef166ee74c0f529d3a35117e6a7f"
+  },
+  "changed_files_sha256": {
+    "fastapi_be/app/ai/research_variables_task_reader.py": "13e9a380fe860bcaa855fda3544afd2c224a4128c8c2c296dcdfaa20386234e0",
+    "fastapi_be/app/ai/research_variables_task_routing.py": "7dcaa71d64c6b2e5a9c8918d09acd737accdb5dda6afc998774f4ec63413ad8f",
+    "fastapi_be/app/ai/runtime.py": "5cd829aece13576ffe16e1e66aee3e8f123a571838dd65b4d41ea2675e165fbc",
+    "fastapi_be/app/models.py": "bb5d37292ff3bd8f7138325386b300562a87cc53164b6f12e0989320c9f5b6e0",
+    "fastapi_be/app/routers/ai.py": "44090318897b5b4dcbdd6e33db722e3e6bcbbcbc068aece3e2fad3a58616afd5",
+    "fastapi_be/app/routers/ai_admin.py": "a4ce28941a86076731019b8da60c4f2d0da04b03e1e90b3702b7ea3a1f1ae154",
+    "fastapi_be/tests/test_ai_research_variables_main_access.py": "741aa80e4ae4502c1e7b1274c7f1cda2678fe095d7ef57ff3e2e3da9de1ce476",
+    "fastapi_be/tests/test_ai_research_variables_result_storage.py": "2fd11bc8377c0e8a2694e8ab9fdd0711960b6d3cf2dafd5c9f266d0542665793",
+    "fastapi_be/tests/test_ai_research_variables_task_routing.py": "4642f06e38559d2b05b01c4b514d8fb3256c65c5f6d7fa0f55953f4ba1f6e8ee"
+  },
+  "pytest_attempts": {
+    "orphan_recovery_red": {
+      "path": "/tmp/hoim-research-variables-orphan-recovery-first-verification.json",
+      "sha256": "243d9f9ff07eed0085204e59995bb36ec432a6e6d2a99e5ca64ac850fda6f2de",
+      "exit_code": 1,
+      "outer_seconds": 28.982192680239677,
+      "sources_stable_during_attempt": true,
+      "frozen_input_count": 1022,
+      "current_frozen_file_differences": [
+        "fastapi_be/app/ai/research_variables_task_reader.py",
+        "fastapi_be/app/ai/research_variables_task_routing.py",
+        "fastapi_be/app/ai/runtime.py",
+        "fastapi_be/app/routers/ai.py",
+        "fastapi_be/app/routers/ai_admin.py",
+        "fastapi_be/tests/test_ai_research_variables_main_access.py",
+        "fastapi_be/tests/test_ai_research_variables_result_storage.py",
+        "fastapi_be/tests/test_ai_research_variables_task_routing.py"
+      ],
+      "summary_lines": [
+        "        monkeypatch.setattr(runtime, \"utcnow\", lambda: utcnow() + dt.timedelta(minutes=11))",
+        "        columns, seen = watch()",
+        "        try:",
+        ">           assert runtime.expire_interrupted_runs(db_session) == 0",
+        "E           assert 1 == 0",
+        "E            +  where 1 = <function expire_interrupted_runs at 0x7a146329ae80>(<sqlalchemy.orm.session.Session object at 0x7a145f747cb0>)",
+        "E            +    where <function expire_interrupted_runs at 0x7a146329ae80> = runtime.expire_interrupted_runs",
+        "",
+        "tests/test_ai_research_variables_main_access.py:214: AssertionError",
+        "=============================== warnings summary ===============================",
+        "tests/test_ai_research_variables_main_access.py::test_generic_interrupted_recovery_does_not_rewrite_an_orphan_native_task_after_feature_erasure",
+        "  /home/xusheng/miniconda3/lib/python3.13/site-packages/sqlalchemy/engine/default.py:952: DeprecationWarning: The default datetime adapter is deprecated as of Python 3.12; see the sqlite3 documentation for suggested replacement recipes",
+        "    cursor.execute(statement, parameters)",
+        "",
+        "-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html",
+        "=========================== short test summary info ============================",
+        "FAILED tests/test_ai_research_variables_main_access.py::test_generic_interrupted_recovery_does_not_rewrite_an_orphan_native_task_after_feature_erasure",
+        "1 failed, 1 warning in 18.06s"
+      ],
+      "guards": {
+        "dotenv_open_attempts": 0,
+        "shared_transport_pem_attempts": 0,
+        "socket_attempts": 0,
+        "engine_urls": [
+          "sqlite:///:memory:",
+          "sqlite:///:memory:"
+        ]
+      },
+      "command": [
+        "-p",
+        "pytest_asyncio.plugin",
+        "-p",
+        "no:cacheprovider",
+        "-q",
+        "--basetemp=/tmp/hoim-research-variables-orphan-recovery-first-pytest",
+        "--junitxml=/tmp/hoim-research-variables-orphan-recovery-first-junit.xml",
+        "tests/test_ai_research_variables_main_access.py::test_generic_interrupted_recovery_does_not_rewrite_an_orphan_native_task_after_feature_erasure"
+      ]
+    },
+    "main_access_first": {
+      "path": "/tmp/hoim-research-variables-main-access-first-verification.json",
+      "sha256": "f3ef39961d9e1a183e531cdbe358e85a29e361e4277b83579d9a6f84ffaa867b",
+      "exit_code": 1,
+      "outer_seconds": 156.1569420285523,
+      "sources_stable_during_attempt": true,
+      "frozen_input_count": 1022,
+      "current_frozen_file_differences": [
+        "fastapi_be/app/ai/research_variables_task_reader.py",
+        "fastapi_be/app/ai/research_variables_task_routing.py",
+        "fastapi_be/app/routers/ai.py",
+        "fastapi_be/app/routers/ai_admin.py",
+        "fastapi_be/tests/test_ai_research_variables_main_access.py",
+        "fastapi_be/tests/test_ai_research_variables_task_routing.py"
+      ],
+      "summary_lines": [
+        "            ordinary = await async_client.get(\"/api/ai/runs/\" + identifier, headers=sup)",
+        ">           assert ordinary.status_code == 409, ordinary.text",
+        "E           AssertionError: {\"detail\":\"原请求人、原角色或登录授权已改变；未读取任务或Batch正文\"}",
+        "E           assert 403 == 409",
+        "E            +  where 403 = <Response [403 Forbidden]>.status_code",
+        "",
+        "tests/test_ai_research_variables_main_access.py:106: AssertionError",
+        "=============================== warnings summary ===============================",
+        "tests/test_ai_research_variables_main_access.py::test_actual_authenticated_request_identity_change_clears_native_read_before_task_or_batch_body[epoch-401]",
+        "tests/test_ai_research_variables_main_access.py::test_generic_interrupted_recovery_does_not_rewrite_an_orphan_native_task_after_feature_erasure",
+        "  /home/xusheng/miniconda3/lib/python3.13/site-packages/sqlalchemy/engine/default.py:952: DeprecationWarning: The default datetime adapter is deprecated as of Python 3.12; see the sqlite3 documentation for suggested replacement recipes",
+        "    cursor.execute(statement, parameters)",
+        "",
+        "-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html",
+        "=========================== short test summary info ============================",
+        "FAILED tests/test_ai_research_variables_main_access.py::test_current_withdrawal_of_unselected_scope_patient_denies_every_main_piece_feedback_and_both_directories_before_private_body_even_super",
+        "FAILED tests/test_ai_research_variables_main_access.py::test_revoked_batch_has_no_ordinary_task_body_and_explicit_super_frozen_parts_preserve_original_publication_without_reexecution",
+        "2 failed, 29 passed, 2 warnings in 145.55s (0:02:25)"
+      ],
+      "guards": {
+        "dotenv_open_attempts": 0,
+        "shared_transport_pem_attempts": 0,
+        "socket_attempts": 0,
+        "engine_urls": [
+          "sqlite:///:memory:",
+          "sqlite:///:memory:"
+        ]
+      },
+      "command": [
+        "-p",
+        "pytest_asyncio.plugin",
+        "-p",
+        "no:cacheprovider",
+        "-q",
+        "--basetemp=/tmp/hoim-research-variables-main-access-first-pytest",
+        "--junitxml=/tmp/hoim-research-variables-main-access-first-junit.xml",
+        "tests/test_ai_research_variables_main_access.py",
+        "tests/test_ai_research_variables_task_routing.py",
+        "tests/test_ai_research_variables_result_storage.py::test_actual_bounded_legacy_fields_with_whole_published_batch_produce_over65k_result_in_separate_blob_not_run_text"
+      ]
+    },
+    "main_access_second": {
+      "path": "/tmp/hoim-research-variables-main-access-second-verification.json",
+      "sha256": "8098793075d86068111da8c36bff9a13d389f41747072d655088fce0b4aedb09",
+      "exit_code": 1,
+      "outer_seconds": 172.52926650922745,
+      "sources_stable_during_attempt": true,
+      "frozen_input_count": 1022,
+      "current_frozen_file_differences": [
+        "fastapi_be/app/ai/research_variables_task_reader.py",
+        "fastapi_be/app/ai/research_variables_task_routing.py",
+        "fastapi_be/app/routers/ai.py",
+        "fastapi_be/app/routers/ai_admin.py",
+        "fastapi_be/tests/test_ai_research_variables_main_access.py",
+        "fastapi_be/tests/test_ai_research_variables_task_routing.py"
+      ],
+      "summary_lines": [
+        "            still_denied = await async_client.get(\"/api/ai/admin/runs/\" + identifier, headers=sup)",
+        "            assert still_denied.status_code == 403",
+        "        finally:",
+        "            event.remove(Session, \"do_orm_execute\", seen)",
+        ">       assert not columns",
+        "E       AssertionError: assert not ['hoimsystem_ai_research_variable_run_artifact.source_json', 'hoimsystem_ai_research_variable_run_artifact.binding_json']",
+        "",
+        "tests/test_ai_research_variables_main_access.py:74: AssertionError",
+        "=============================== warnings summary ===============================",
+        "tests/test_ai_research_variables_main_access.py::test_actual_authenticated_request_identity_change_clears_native_read_before_task_or_batch_body[epoch-401]",
+        "tests/test_ai_research_variables_main_access.py::test_generic_interrupted_recovery_does_not_rewrite_an_orphan_native_task_after_feature_erasure",
+        "  /home/xusheng/miniconda3/lib/python3.13/site-packages/sqlalchemy/engine/default.py:952: DeprecationWarning: The default datetime adapter is deprecated as of Python 3.12; see the sqlite3 documentation for suggested replacement recipes",
+        "    cursor.execute(statement, parameters)",
+        "",
+        "-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html",
+        "=========================== short test summary info ============================",
+        "FAILED tests/test_ai_research_variables_main_access.py::test_current_withdrawal_of_unselected_scope_patient_denies_every_main_piece_feedback_and_both_directories_before_private_body_even_super",
+        "1 failed, 34 passed, 2 warnings in 161.98s (0:02:41)"
+      ],
+      "guards": {
+        "dotenv_open_attempts": 0,
+        "shared_transport_pem_attempts": 0,
+        "socket_attempts": 0,
+        "engine_urls": [
+          "sqlite:///:memory:",
+          "sqlite:///:memory:"
+        ]
+      },
+      "command": [
+        "-p",
+        "pytest_asyncio.plugin",
+        "-p",
+        "no:cacheprovider",
+        "-q",
+        "--basetemp=/tmp/hoim-research-variables-main-access-second-pytest",
+        "--junitxml=/tmp/hoim-research-variables-main-access-second-junit.xml",
+        "tests/test_ai_research_variables_main_access.py",
+        "tests/test_ai_research_variables_task_routing.py",
+        "tests/test_ai_research_variables_result_storage.py::test_actual_bounded_legacy_fields_with_whole_published_batch_produce_over65k_result_in_separate_blob_not_run_text"
+      ]
+    },
+    "main_access_third": {
+      "path": "/tmp/hoim-research-variables-main-access-third-verification.json",
+      "sha256": "af6168784ec5726ebae9f8128c6636b17e3493b3c514d30a927fa2d788e14e20",
+      "exit_code": 1,
+      "outer_seconds": 255.84697506390512,
+      "sources_stable_during_attempt": true,
+      "frozen_input_count": 1022,
+      "current_frozen_file_differences": [
+        "fastapi_be/app/ai/research_variables_task_reader.py",
+        "fastapi_be/app/ai/research_variables_task_routing.py",
+        "fastapi_be/app/routers/ai.py",
+        "fastapi_be/app/routers/ai_admin.py",
+        "fastapi_be/tests/test_ai_research_variables_task_routing.py"
+      ],
+      "summary_lines": [
+        "                    coding_case_id,",
+        "                    document_original_id,",
+        "                    outcome,",
+        "                ),",
+        "            )",
+        "E           TypeError: unsupported operand type(s) for -: 'Query' and 'int'",
+        "",
+        "app/routers/ai_admin.py:866: TypeError",
+        "=============================== warnings summary ===============================",
+        "tests/test_ai_research_variables_main_access.py::test_actual_authenticated_request_identity_change_clears_native_read_before_task_or_batch_body[epoch-401]",
+        "tests/test_ai_research_variables_main_access.py::test_generic_interrupted_recovery_does_not_rewrite_an_orphan_native_task_after_feature_erasure",
+        "  /home/xusheng/miniconda3/lib/python3.13/site-packages/sqlalchemy/engine/default.py:952: DeprecationWarning: The default datetime adapter is deprecated as of Python 3.12; see the sqlite3 documentation for suggested replacement recipes",
+        "    cursor.execute(statement, parameters)",
+        "",
+        "-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html",
+        "=========================== short test summary info ============================",
+        "FAILED tests/test_ai_admin_current_authority.py::test_audit_readers_recheck_stale_super_before_any_run_read[list]",
+        "1 failed, 66 passed, 2 warnings in 245.41s (0:04:05)"
+      ],
+      "guards": {
+        "dotenv_open_attempts": 0,
+        "shared_transport_pem_attempts": 0,
+        "socket_attempts": 0,
+        "engine_urls": [
+          "sqlite:///:memory:",
+          "sqlite:///:memory:"
+        ]
+      },
+      "command": [
+        "-p",
+        "pytest_asyncio.plugin",
+        "-p",
+        "no:cacheprovider",
+        "-q",
+        "--basetemp=/tmp/hoim-research-variables-main-access-third-pytest",
+        "--junitxml=/tmp/hoim-research-variables-main-access-third-junit.xml",
+        "tests/test_ai_research_variables_main_access.py",
+        "tests/test_ai_research_variables_task_routing.py",
+        "tests/test_ai_research_variables_result_storage.py::test_actual_bounded_legacy_fields_with_whole_published_batch_produce_over65k_result_in_separate_blob_not_run_text",
+        "tests/test_ai_research_variables_sources_http.py",
+        "tests/test_ai_admin_current_authority.py"
+      ]
+    },
+    "admin_default_green": {
+      "path": "/tmp/hoim-research-variables-admin-default-first-verification.json",
+      "sha256": "2ab43aa9dc903d9f71c4e5fb8a923b375381672245b0043dab28626c5360609d",
+      "exit_code": 0,
+      "outer_seconds": 107.88104908540845,
+      "sources_stable_during_attempt": true,
+      "frozen_input_count": 1022,
+      "current_frozen_file_differences": [
+        "fastapi_be/app/ai/research_variables_task_reader.py",
+        "fastapi_be/app/ai/research_variables_task_routing.py",
+        "fastapi_be/tests/test_ai_research_variables_task_routing.py"
+      ],
+      "summary_lines": [
+        "...........                                                              [100%]",
+        "=============================== warnings summary ===============================",
+        "tests/test_ai_research_variables_main_access.py::test_actual_authenticated_request_identity_change_clears_native_read_before_task_or_batch_body[epoch-401]",
+        "tests/test_ai_research_variables_main_access.py::test_generic_interrupted_recovery_does_not_rewrite_an_orphan_native_task_after_feature_erasure",
+        "  /home/xusheng/miniconda3/lib/python3.13/site-packages/sqlalchemy/engine/default.py:952: DeprecationWarning: The default datetime adapter is deprecated as of Python 3.12; see the sqlite3 documentation for suggested replacement recipes",
+        "    cursor.execute(statement, parameters)",
+        "",
+        "-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html",
+        "11 passed, 2 warnings in 97.89s (0:01:37)"
+      ],
+      "guards": {
+        "dotenv_open_attempts": 0,
+        "shared_transport_pem_attempts": 0,
+        "socket_attempts": 0,
+        "engine_urls": [
+          "sqlite:///:memory:",
+          "sqlite:///:memory:"
+        ]
+      },
+      "command": [
+        "-p",
+        "pytest_asyncio.plugin",
+        "-p",
+        "no:cacheprovider",
+        "-q",
+        "--basetemp=/tmp/hoim-research-variables-admin-default-first-pytest",
+        "--junitxml=/tmp/hoim-research-variables-admin-default-first-junit.xml",
+        "tests/test_ai_admin_current_authority.py",
+        "tests/test_ai_research_variables_main_access.py"
+      ]
+    },
+    "alias_reader_green": {
+      "path": "/tmp/hoim-research-variables-alias-reader-first-verification.json",
+      "sha256": "9c17c66459eda17ab7ac2c171d8bfc3e27a835a25503e562d4febc9e9c9b663c",
+      "exit_code": 0,
+      "outer_seconds": 267.37309656944126,
+      "sources_stable_during_attempt": true,
+      "frozen_input_count": 1022,
+      "current_frozen_file_differences": [],
+      "summary_lines": [
+        ".....................................................                    [100%]",
+        "53 passed in 256.96s (0:04:16)"
+      ],
+      "guards": {
+        "dotenv_open_attempts": 0,
+        "shared_transport_pem_attempts": 0,
+        "socket_attempts": 0,
+        "engine_urls": [
+          "sqlite:///:memory:",
+          "sqlite:///:memory:"
+        ]
+      },
+      "command": [
+        "-p",
+        "pytest_asyncio.plugin",
+        "-p",
+        "no:cacheprovider",
+        "-q",
+        "--basetemp=/tmp/hoim-research-variables-alias-reader-first-pytest",
+        "--junitxml=/tmp/hoim-research-variables-alias-reader-first-junit.xml",
+        "tests/test_ai_research_variables_task_routing.py",
+        "tests/test_ai_research_variables_task_reader.py",
+        "tests/test_ai_admin_current_authority.py"
+      ]
+    }
+  },
+  "known_report_scope_errata": {
+    "path": "/tmp/hoim-research-variables-access-scope-errata-first.json",
+    "sha256": "fb27c8a2b70d7278308d389de53a23994c7d6faa53cd932eabaf95d765e65d91"
+  },
+  "mysql_attempts": [
+    {
+      "attempt": "first",
+      "path": "/tmp/hoim-research-variables-task-mysql-first-attempt-220349ca00a0.json",
+      "sha256": "36d5f4cae1a3368a172afd45b44aeadf30e4c4aca0eecdd7b41f6b559d6f2018",
+      "all_checks_passed": false,
+      "seconds": 26.619,
+      "error": {
+        "type": "DataError",
+        "message": "(pymysql.err.DataError) (1406, \"Data too long for column 'username' at row 1\")\n[SQL: INSERT INTO hoimsystem_users(user_id,username,user_role) VALUES(987654,'only_synthetic_old_row','patient')]\n(Background on this error at: https://sqlalche.me/e/20/9h9h)",
+        "traceback": "Traceback (most recent call last):\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/sqlalchemy/engine/base.py\", line 1967, in _exec_single_context\n    self.dialect.do_execute(\n    ~~~~~~~~~~~~~~~~~~~~~~~^\n        cursor, str_statement, effective_parameters, context\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    )\n    ^\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/sqlalchemy/engine/default.py\", line 952, in do_execute\n    cursor.execute(statement, parameters)\n    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/pymysql/cursors.py\", line 153, in execute\n    result = self._query(query)\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/pymysql/cursors.py\", line 322, in _query\n    conn.query(q)\n    ~~~~~~~~~~^^^\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/pymysql/connections.py\", line 575, in query\n    self._affected_rows = self._read_query_result(unbuffered=unbuffered)\n                          ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/pymysql/connections.py\", line 826, in _read_query_result\n    result.read()\n    ~~~~~~~~~~~^^\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/pymysql/connections.py\", line 1203, in read\n    first_packet = self.connection._read_packet()\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/pymysql/connections.py\", line 782, in _read_packet\n    packet.raise_for_error()\n    ~~~~~~~~~~~~~~~~~~~~~~^^\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/pymysql/protocol.py\", line 219, in raise_for_error\n    err.raise_mysql_exception(self._data)\n    ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/pymysql/err.py\", line 150, in raise_mysql_exception\n    raise errorclass(errno, errval)\npymysql.err.DataError: (1406, \"Data too long for column 'username' at row 1\")\n\nThe above exception was the direct cause of the following exception:\n\nTraceback (most recent call last):\n  File \"/tmp/hoim-research-variables-task-mysql-first-private-h_6jexhu/worker.py\", line 212, in <module>\n    conn.execute(text(\"INSERT INTO hoimsystem_users(user_id,username,user_role) VALUES(987654,'only_synthetic_old_row','patient')\"))\n    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/sqlalchemy/engine/base.py\", line 1419, in execute\n    return meth(\n        self,\n        distilled_parameters,\n        execution_options or NO_OPTIONS,\n    )\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/sqlalchemy/sql/elements.py\", line 527, in _execute_on_connection\n    return connection._execute_clauseelement(\n           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^\n        self, distilled_params, execution_options\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    )\n    ^\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/sqlalchemy/engine/base.py\", line 1641, in _execute_clauseelement\n    ret = self._execute_context(\n        dialect,\n    ...<8 lines>...\n        cache_hit=cache_hit,\n    )\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/sqlalchemy/engine/base.py\", line 1846, in _execute_context\n    return self._exec_single_context(\n           ~~~~~~~~~~~~~~~~~~~~~~~~~^\n        dialect, context, statement, parameters\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    )\n    ^\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/sqlalchemy/engine/base.py\", line 1986, in _exec_single_context\n    self._handle_dbapi_exception(\n    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^\n        e, str_statement, effective_parameters, cursor, context\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    )\n    ^\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/sqlalchemy/engine/base.py\", line 2363, in _handle_dbapi_exception\n    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/sqlalchemy/engine/base.py\", line 1967, in _exec_single_context\n    self.dialect.do_execute(\n    ~~~~~~~~~~~~~~~~~~~~~~~^\n        cursor, str_statement, effective_parameters, context\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    )\n    ^\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/sqlalchemy/engine/default.py\", line 952, in do_execute\n    cursor.execute(statement, parameters)\n    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/pymysql/cursors.py\", line 153, in execute\n    result = self._query(query)\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/pymysql/cursors.py\", line 322, in _query\n    conn.query(q)\n    ~~~~~~~~~~^^^\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/pymysql/connections.py\", line 575, in query\n    self._affected_rows = self._read_query_result(unbuffered=unbuffered)\n                          ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/pymysql/connections.py\", line 826, in _read_query_result\n    result.read()\n    ~~~~~~~~~~~^^\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/pymysql/connections.py\", line 1203, in read\n    first_packet = self.connection._read_packet()\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/pymysql/connections.py\", line 782, in _read_packet\n    packet.raise_for_error()\n    ~~~~~~~~~~~~~~~~~~~~~~^^\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/pymysql/protocol.py\", line 219, in raise_for_error\n    err.raise_mysql_exception(self._data)\n    ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/pymysql/err.py\", line 150, in raise_mysql_exception\n    raise errorclass(errno, errval)\nsqlalchemy.exc.DataError: (pymysql.err.DataError) (1406, \"Data too long for column 'username' at row 1\")\n[SQL: INSERT INTO hoimsystem_users(user_id,username,user_role) VALUES(987654,'only_synthetic_old_row','patient')]\n(Background on this error at: https://sqlalche.me/e/20/9h9h)\n"
+      },
+      "runner_error": {
+        "type": "RuntimeError",
+        "message": "Verification worker failed; see recorded worker stderr and error"
+      },
+      "scope": "Independent76 Task stage: synthetic Main/JWT, controlled ASGI, actual incremental MySQL Task2 schema, source/current/claim/exact receipt and split-body boundaries. Old Source proof not reused as Task proof; no real model/clinical matrix/export.",
+      "sources_stable_during_attempt": true,
+      "current_frozen_file_differences": [
+        "doc/api-rbac-matrix.md",
+        "fastapi_be/app/ai/research_variables_task_reader.py",
+        "fastapi_be/app/ai/research_variables_task_routing.py",
+        "fastapi_be/app/ai/runtime.py",
+        "fastapi_be/app/models.py",
+        "fastapi_be/app/routers/ai.py",
+        "fastapi_be/app/routers/ai_admin.py",
+        "fastapi_be/rbac_matrix.json",
+        "fastapi_be/tests/test_ai_research_variables_result_storage.py",
+        "fastapi_be/tests/test_ai_research_variables_task_routing.py"
+      ],
+      "source_binding_count": 1021,
+      "checks": [],
+      "contention": [],
+      "atomicity": [],
+      "migration": null,
+      "cleanup_verified": true
+    },
+    {
+      "attempt": "second",
+      "path": "/tmp/hoim-research-variables-task-mysql-second-attempt-815d4f549767.json",
+      "sha256": "e9f067301bec7dfba2b5e0b58abdae0d23a5b683503f883f027555fb6adffa27",
+      "all_checks_passed": false,
+      "seconds": 30.179,
+      "error": {
+        "type": "DataError",
+        "message": "(pymysql.err.DataError) (1406, \"Data too long for column 'symptom' at row 1\")\n[SQL: INSERT INTO hoimsystem_medical_record (medical_record_id, consultation_time, doctor_id, patient_id, symptom, result, registration_uuid, status, sign_time) VALUES (%(medical_record_id)s, %(consultation_time)s, %(doctor_id)s, %(patient_id)s, %(symptom)s, %(result)s, %(registration_uuid)s, %(status)s, %(sign_time)s)]\n[SQL parameters hidden due to hide_parameters=True]\n(Background on this error at: https://sqlalche.me/e/20/9h9h)",
+        "traceback": "Traceback (most recent call last):\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/sqlalchemy/engine/base.py\", line 1936, in _exec_single_context\n    self.dialect.do_executemany(\n    ~~~~~~~~~~~~~~~~~~~~~~~~~~~^\n        cursor,\n        ^^^^^^^\n    ...<2 lines>...\n        context,\n        ^^^^^^^^\n    )\n    ^\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/sqlalchemy/dialects/mysql/mysqldb.py\", line 196, in do_executemany\n    rowcount = cursor.executemany(statement, parameters)\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/pymysql/cursors.py\", line 182, in executemany\n    return self._do_execute_many(\n           ~~~~~~~~~~~~~~~~~~~~~^\n        q_prefix,\n        ^^^^^^^^^\n    ...<4 lines>...\n        self._get_db().encoding,\n        ^^^^^^^^^^^^^^^^^^^^^^^^\n    )\n    ^\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/pymysql/cursors.py\", line 220, in _do_execute_many\n    rows += self.execute(sql + postfix)\n            ~~~~~~~~~~~~^^^^^^^^^^^^^^^\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/pymysql/cursors.py\", line 153, in execute\n    result = self._query(query)\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/pymysql/cursors.py\", line 322, in _query\n    conn.query(q)\n    ~~~~~~~~~~^^^\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/pymysql/connections.py\", line 575, in query\n    self._affected_rows = self._read_query_result(unbuffered=unbuffered)\n                          ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/pymysql/connections.py\", line 826, in _read_query_result\n    result.read()\n    ~~~~~~~~~~~^^\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/pymysql/connections.py\", line 1203, in read\n    first_packet = self.connection._read_packet()\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/pymysql/connections.py\", line 782, in _read_packet\n    packet.raise_for_error()\n    ~~~~~~~~~~~~~~~~~~~~~~^^\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/pymysql/protocol.py\", line 219, in raise_for_error\n    err.raise_mysql_exception(self._data)\n    ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/pymysql/err.py\", line 150, in raise_mysql_exception\n    raise errorclass(errno, errval)\npymysql.err.DataError: (1406, \"Data too long for column 'symptom' at row 1\")\n\nThe above exception was the direct cause of the following exception:\n\nTraceback (most recent call last):\n  File \"/tmp/hoim-research-variables-task-mysql-second-private-a9jkkr0u/worker.py\", line 238, in <module>\n    asyncio.run(checks())\n    ~~~~~~~~~~~^^^^^^^^^^\n  File \"/home/xusheng/miniconda3/lib/python3.13/asyncio/runners.py\", line 195, in run\n    return runner.run(main)\n           ~~~~~~~~~~^^^^^^\n  File \"/home/xusheng/miniconda3/lib/python3.13/asyncio/runners.py\", line 118, in run\n    return self._loop.run_until_complete(task)\n           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^\n  File \"/home/xusheng/miniconda3/lib/python3.13/asyncio/base_events.py\", line 725, in run_until_complete\n    return future.result()\n           ~~~~~~~~~~~~~^^\n  File \"/tmp/hoim-research-variables-task-mysql-second-private-a9jkkr0u/worker.py\", line 160, in checks\n    ctx=setup(kind,large=True)\n  File \"/tmp/hoim-research-variables-task-mysql-second-private-a9jkkr0u/worker.py\", line 120, in setup\n    db.add_all([models.MedicalRecord(medical_record_id=str(uuid.uuid4()),patient_id=p.patient_id,doctor_id=doctor.doctor_id,consultation_time=dt.datetime(2026,10,11,9,i),symptom='🧪'*4000,status=1) for i in range(5)]);db.commit()\n                                                                                                                                                                                                                          ~~~~~~~~~^^\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/sqlalchemy/orm/session.py\", line 2030, in commit\n    trans.commit(_to_root=True)\n    ~~~~~~~~~~~~^^^^^^^^^^^^^^^\n  File \"<string>\", line 2, in commit\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/sqlalchemy/orm/state_changes.py\", line 137, in _go\n    ret_value = fn(self, *arg, **kw)\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/sqlalchemy/orm/session.py\", line 1311, in commit\n    self._prepare_impl()\n    ~~~~~~~~~~~~~~~~~~^^\n  File \"<string>\", line 2, in _prepare_impl\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/sqlalchemy/orm/state_changes.py\", line 137, in _go\n    ret_value = fn(self, *arg, **kw)\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/sqlalchemy/orm/session.py\", line 1286, in _prepare_impl\n    self.session.flush()\n    ~~~~~~~~~~~~~~~~~~^^\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/sqlalchemy/orm/session.py\", line 4331, in flush\n    self._flush(objects)\n    ~~~~~~~~~~~^^^^^^^^^\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/sqlalchemy/orm/session.py\", line 4466, in _flush\n    with util.safe_reraise():\n         ~~~~~~~~~~~~~~~~~^^\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/sqlalchemy/util/langhelpers.py\", line 121, in __exit__\n    raise exc_value.with_traceback(exc_tb)\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/sqlalchemy/orm/session.py\", line 4427, in _flush\n    flush_context.execute()\n    ~~~~~~~~~~~~~~~~~~~~~^^\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/sqlalchemy/orm/unitofwork.py\", line 466, in execute\n    rec.execute(self)\n    ~~~~~~~~~~~^^^^^^\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/sqlalchemy/orm/unitofwork.py\", line 642, in execute\n    util.preloaded.orm_persistence.save_obj(\n    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^\n        self.mapper,\n        ^^^^^^^^^^^^\n        uow.states_for_mapper_hierarchy(self.mapper, False, False),\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n        uow,\n        ^^^^\n    )\n    ^\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/sqlalchemy/orm/persistence.py\", line 93, in save_obj\n    _emit_insert_statements(\n    ~~~~~~~~~~~~~~~~~~~~~~~^\n        base_mapper,\n        ^^^^^^^^^^^^\n    ...<3 lines>...\n        insert,\n        ^^^^^^^\n    )\n    ^\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/sqlalchemy/orm/persistence.py\", line 1048, in _emit_insert_statements\n    result = connection.execute(\n        statement, multiparams, execution_options=execution_options\n    )\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/sqlalchemy/engine/base.py\", line 1419, in execute\n    return meth(\n        self,\n        distilled_parameters,\n        execution_options or NO_OPTIONS,\n    )\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/sqlalchemy/sql/elements.py\", line 527, in _execute_on_connection\n    return connection._execute_clauseelement(\n           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^\n        self, distilled_params, execution_options\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    )\n    ^\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/sqlalchemy/engine/base.py\", line 1641, in _execute_clauseelement\n    ret = self._execute_context(\n        dialect,\n    ...<8 lines>...\n        cache_hit=cache_hit,\n    )\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/sqlalchemy/engine/base.py\", line 1846, in _execute_context\n    return self._exec_single_context(\n           ~~~~~~~~~~~~~~~~~~~~~~~~~^\n        dialect, context, statement, parameters\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    )\n    ^\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/sqlalchemy/engine/base.py\", line 1986, in _exec_single_context\n    self._handle_dbapi_exception(\n    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^\n        e, str_statement, effective_parameters, cursor, context\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    )\n    ^\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/sqlalchemy/engine/base.py\", line 2363, in _handle_dbapi_exception\n    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/sqlalchemy/engine/base.py\", line 1936, in _exec_single_context\n    self.dialect.do_executemany(\n    ~~~~~~~~~~~~~~~~~~~~~~~~~~~^\n        cursor,\n        ^^^^^^^\n    ...<2 lines>...\n        context,\n        ^^^^^^^^\n    )\n    ^\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/sqlalchemy/dialects/mysql/mysqldb.py\", line 196, in do_executemany\n    rowcount = cursor.executemany(statement, parameters)\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/pymysql/cursors.py\", line 182, in executemany\n    return self._do_execute_many(\n           ~~~~~~~~~~~~~~~~~~~~~^\n        q_prefix,\n        ^^^^^^^^^\n    ...<4 lines>...\n        self._get_db().encoding,\n        ^^^^^^^^^^^^^^^^^^^^^^^^\n    )\n    ^\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/pymysql/cursors.py\", line 220, in _do_execute_many\n    rows += self.execute(sql + postfix)\n            ~~~~~~~~~~~~^^^^^^^^^^^^^^^\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/pymysql/cursors.py\", line 153, in execute\n    result = self._query(query)\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/pymysql/cursors.py\", line 322, in _query\n    conn.query(q)\n    ~~~~~~~~~~^^^\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/pymysql/connections.py\", line 575, in query\n    self._affected_rows = self._read_query_result(unbuffered=unbuffered)\n                          ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/pymysql/connections.py\", line 826, in _read_query_result\n    result.read()\n    ~~~~~~~~~~~^^\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/pymysql/connections.py\", line 1203, in read\n    first_packet = self.connection._read_packet()\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/pymysql/connections.py\", line 782, in _read_packet\n    packet.raise_for_error()\n    ~~~~~~~~~~~~~~~~~~~~~~^^\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/pymysql/protocol.py\", line 219, in raise_for_error\n    err.raise_mysql_exception(self._data)\n    ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/pymysql/err.py\", line 150, in raise_mysql_exception\n    raise errorclass(errno, errval)\nsqlalchemy.exc.DataError: (pymysql.err.DataError) (1406, \"Data too long for column 'symptom' at row 1\")\n[SQL: INSERT INTO hoimsystem_medical_record (medical_record_id, consultation_time, doctor_id, patient_id, symptom, result, registration_uuid, status, sign_time) VALUES (%(medical_record_id)s, %(consultation_time)s, %(doctor_id)s, %(patient_id)s, %(symptom)s, %(result)s, %(registration_uuid)s, %(status)s, %(sign_time)s)]\n[SQL parameters hidden due to hide_parameters=True]\n(Background on this error at: https://sqlalche.me/e/20/9h9h)\n"
+      },
+      "runner_error": {
+        "type": "RuntimeError",
+        "message": "Verification worker failed; see recorded worker stderr and error"
+      },
+      "scope": "Independent76 Task stage: synthetic Main/JWT, controlled ASGI, actual incremental MySQL Task2 schema, source/current/claim/exact receipt and split-body boundaries. Old Source proof not reused as Task proof; no real model/clinical matrix/export.",
+      "sources_stable_during_attempt": true,
+      "current_frozen_file_differences": [
+        "doc/api-rbac-matrix.md",
+        "fastapi_be/app/ai/research_variables_task_reader.py",
+        "fastapi_be/app/ai/research_variables_task_routing.py",
+        "fastapi_be/app/ai/runtime.py",
+        "fastapi_be/app/models.py",
+        "fastapi_be/app/routers/ai.py",
+        "fastapi_be/app/routers/ai_admin.py",
+        "fastapi_be/rbac_matrix.json",
+        "fastapi_be/tests/test_ai_research_variables_result_storage.py",
+        "fastapi_be/tests/test_ai_research_variables_task_routing.py"
+      ],
+      "source_binding_count": 1021,
+      "checks": [],
+      "contention": [],
+      "atomicity": [],
+      "migration": {
+        "revision": "20261021_research_variable_runs",
+        "parent": "20261021_research_variables",
+        "up_down_up": true,
+        "old_tables_ddl_and_seed_rows_unchanged": 218,
+        "new_tables": [
+          "hoimsystem_ai_research_variable_run_artifact",
+          "hoimsystem_ai_research_variable_run_result"
+        ],
+        "utc6": [
+          [
+            "hoimsystem_ai_research_variable_run_artifact",
+            "actor_token_invalid_before",
+            "datetime",
+            6
+          ],
+          [
+            "hoimsystem_ai_research_variable_run_artifact",
+            "recorded_at",
+            "datetime",
+            6
+          ],
+          [
+            "hoimsystem_ai_research_variable_run_artifact",
+            "claimed_at",
+            "datetime",
+            6
+          ],
+          [
+            "hoimsystem_ai_research_variable_run_artifact",
+            "dispatched_at",
+            "datetime",
+            6
+          ],
+          [
+            "hoimsystem_ai_research_variable_run_result",
+            "accepted_at",
+            "datetime",
+            6
+          ]
+        ],
+        "mediumtext": [
+          [
+            "hoimsystem_ai_research_variable_run_artifact",
+            "source_json",
+            "mediumtext",
+            null
+          ],
+          [
+            "hoimsystem_ai_research_variable_run_artifact",
+            "binding_json",
+            "mediumtext",
+            null
+          ],
+          [
+            "hoimsystem_ai_research_variable_run_result",
+            "result_json",
+            "mediumtext",
+            null
+          ]
+        ],
+        "full_historical_replay": false
+      },
+      "cleanup_verified": true
+    },
+    {
+      "attempt": "third",
+      "path": "/tmp/hoim-research-variables-task-mysql-third-attempt-d6e2c13ebf3e.json",
+      "sha256": "6714271049c5981f9f07bf9f892c46299b5070903f0a4fea1c8e69918ffa028c",
+      "all_checks_passed": false,
+      "seconds": 29.372,
+      "error": {
+        "type": "DataError",
+        "message": "(pymysql.err.DataError) (1406, \"Data too long for column 'symptom' at row 1\")\n[SQL: INSERT INTO hoimsystem_medical_record (medical_record_id, consultation_time, doctor_id, patient_id, symptom, result, registration_uuid, status, sign_time) VALUES (%(medical_record_id)s, %(consultation_time)s, %(doctor_id)s, %(patient_id)s, %(symptom)s, %(result)s, %(registration_uuid)s, %(status)s, %(sign_time)s)]\n[SQL parameters hidden due to hide_parameters=True]\n(Background on this error at: https://sqlalche.me/e/20/9h9h)",
+        "traceback": "Traceback (most recent call last):\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/sqlalchemy/engine/base.py\", line 1936, in _exec_single_context\n    self.dialect.do_executemany(\n    ~~~~~~~~~~~~~~~~~~~~~~~~~~~^\n        cursor,\n        ^^^^^^^\n    ...<2 lines>...\n        context,\n        ^^^^^^^^\n    )\n    ^\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/sqlalchemy/dialects/mysql/mysqldb.py\", line 196, in do_executemany\n    rowcount = cursor.executemany(statement, parameters)\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/pymysql/cursors.py\", line 182, in executemany\n    return self._do_execute_many(\n           ~~~~~~~~~~~~~~~~~~~~~^\n        q_prefix,\n        ^^^^^^^^^\n    ...<4 lines>...\n        self._get_db().encoding,\n        ^^^^^^^^^^^^^^^^^^^^^^^^\n    )\n    ^\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/pymysql/cursors.py\", line 220, in _do_execute_many\n    rows += self.execute(sql + postfix)\n            ~~~~~~~~~~~~^^^^^^^^^^^^^^^\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/pymysql/cursors.py\", line 153, in execute\n    result = self._query(query)\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/pymysql/cursors.py\", line 322, in _query\n    conn.query(q)\n    ~~~~~~~~~~^^^\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/pymysql/connections.py\", line 575, in query\n    self._affected_rows = self._read_query_result(unbuffered=unbuffered)\n                          ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/pymysql/connections.py\", line 826, in _read_query_result\n    result.read()\n    ~~~~~~~~~~~^^\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/pymysql/connections.py\", line 1203, in read\n    first_packet = self.connection._read_packet()\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/pymysql/connections.py\", line 782, in _read_packet\n    packet.raise_for_error()\n    ~~~~~~~~~~~~~~~~~~~~~~^^\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/pymysql/protocol.py\", line 219, in raise_for_error\n    err.raise_mysql_exception(self._data)\n    ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/pymysql/err.py\", line 150, in raise_mysql_exception\n    raise errorclass(errno, errval)\npymysql.err.DataError: (1406, \"Data too long for column 'symptom' at row 1\")\n\nThe above exception was the direct cause of the following exception:\n\nTraceback (most recent call last):\n  File \"/tmp/hoim-research-variables-task-mysql-third-private-ymp0gt21/worker.py\", line 238, in <module>\n    asyncio.run(checks())\n    ~~~~~~~~~~~^^^^^^^^^^\n  File \"/home/xusheng/miniconda3/lib/python3.13/asyncio/runners.py\", line 195, in run\n    return runner.run(main)\n           ~~~~~~~~~~^^^^^^\n  File \"/home/xusheng/miniconda3/lib/python3.13/asyncio/runners.py\", line 118, in run\n    return self._loop.run_until_complete(task)\n           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^\n  File \"/home/xusheng/miniconda3/lib/python3.13/asyncio/base_events.py\", line 725, in run_until_complete\n    return future.result()\n           ~~~~~~~~~~~~~^^\n  File \"/tmp/hoim-research-variables-task-mysql-third-private-ymp0gt21/worker.py\", line 160, in checks\n    ctx=setup(kind,large=True)\n  File \"/tmp/hoim-research-variables-task-mysql-third-private-ymp0gt21/worker.py\", line 120, in setup\n    db.add_all([models.MedicalRecord(medical_record_id=str(uuid.uuid4()),patient_id=p.patient_id,doctor_id=doctor.doctor_id,consultation_time=dt.datetime(2026,10,11,9,i),symptom='🧪'*500,status=1) for i in range(40)]);db.commit()\n                                                                                                                                                                                                                          ~~~~~~~~~^^\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/sqlalchemy/orm/session.py\", line 2030, in commit\n    trans.commit(_to_root=True)\n    ~~~~~~~~~~~~^^^^^^^^^^^^^^^\n  File \"<string>\", line 2, in commit\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/sqlalchemy/orm/state_changes.py\", line 137, in _go\n    ret_value = fn(self, *arg, **kw)\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/sqlalchemy/orm/session.py\", line 1311, in commit\n    self._prepare_impl()\n    ~~~~~~~~~~~~~~~~~~^^\n  File \"<string>\", line 2, in _prepare_impl\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/sqlalchemy/orm/state_changes.py\", line 137, in _go\n    ret_value = fn(self, *arg, **kw)\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/sqlalchemy/orm/session.py\", line 1286, in _prepare_impl\n    self.session.flush()\n    ~~~~~~~~~~~~~~~~~~^^\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/sqlalchemy/orm/session.py\", line 4331, in flush\n    self._flush(objects)\n    ~~~~~~~~~~~^^^^^^^^^\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/sqlalchemy/orm/session.py\", line 4466, in _flush\n    with util.safe_reraise():\n         ~~~~~~~~~~~~~~~~~^^\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/sqlalchemy/util/langhelpers.py\", line 121, in __exit__\n    raise exc_value.with_traceback(exc_tb)\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/sqlalchemy/orm/session.py\", line 4427, in _flush\n    flush_context.execute()\n    ~~~~~~~~~~~~~~~~~~~~~^^\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/sqlalchemy/orm/unitofwork.py\", line 466, in execute\n    rec.execute(self)\n    ~~~~~~~~~~~^^^^^^\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/sqlalchemy/orm/unitofwork.py\", line 642, in execute\n    util.preloaded.orm_persistence.save_obj(\n    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^\n        self.mapper,\n        ^^^^^^^^^^^^\n        uow.states_for_mapper_hierarchy(self.mapper, False, False),\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n        uow,\n        ^^^^\n    )\n    ^\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/sqlalchemy/orm/persistence.py\", line 93, in save_obj\n    _emit_insert_statements(\n    ~~~~~~~~~~~~~~~~~~~~~~~^\n        base_mapper,\n        ^^^^^^^^^^^^\n    ...<3 lines>...\n        insert,\n        ^^^^^^^\n    )\n    ^\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/sqlalchemy/orm/persistence.py\", line 1048, in _emit_insert_statements\n    result = connection.execute(\n        statement, multiparams, execution_options=execution_options\n    )\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/sqlalchemy/engine/base.py\", line 1419, in execute\n    return meth(\n        self,\n        distilled_parameters,\n        execution_options or NO_OPTIONS,\n    )\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/sqlalchemy/sql/elements.py\", line 527, in _execute_on_connection\n    return connection._execute_clauseelement(\n           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^\n        self, distilled_params, execution_options\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    )\n    ^\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/sqlalchemy/engine/base.py\", line 1641, in _execute_clauseelement\n    ret = self._execute_context(\n        dialect,\n    ...<8 lines>...\n        cache_hit=cache_hit,\n    )\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/sqlalchemy/engine/base.py\", line 1846, in _execute_context\n    return self._exec_single_context(\n           ~~~~~~~~~~~~~~~~~~~~~~~~~^\n        dialect, context, statement, parameters\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    )\n    ^\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/sqlalchemy/engine/base.py\", line 1986, in _exec_single_context\n    self._handle_dbapi_exception(\n    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^\n        e, str_statement, effective_parameters, cursor, context\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    )\n    ^\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/sqlalchemy/engine/base.py\", line 2363, in _handle_dbapi_exception\n    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/sqlalchemy/engine/base.py\", line 1936, in _exec_single_context\n    self.dialect.do_executemany(\n    ~~~~~~~~~~~~~~~~~~~~~~~~~~~^\n        cursor,\n        ^^^^^^^\n    ...<2 lines>...\n        context,\n        ^^^^^^^^\n    )\n    ^\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/sqlalchemy/dialects/mysql/mysqldb.py\", line 196, in do_executemany\n    rowcount = cursor.executemany(statement, parameters)\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/pymysql/cursors.py\", line 182, in executemany\n    return self._do_execute_many(\n           ~~~~~~~~~~~~~~~~~~~~~^\n        q_prefix,\n        ^^^^^^^^^\n    ...<4 lines>...\n        self._get_db().encoding,\n        ^^^^^^^^^^^^^^^^^^^^^^^^\n    )\n    ^\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/pymysql/cursors.py\", line 220, in _do_execute_many\n    rows += self.execute(sql + postfix)\n            ~~~~~~~~~~~~^^^^^^^^^^^^^^^\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/pymysql/cursors.py\", line 153, in execute\n    result = self._query(query)\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/pymysql/cursors.py\", line 322, in _query\n    conn.query(q)\n    ~~~~~~~~~~^^^\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/pymysql/connections.py\", line 575, in query\n    self._affected_rows = self._read_query_result(unbuffered=unbuffered)\n                          ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/pymysql/connections.py\", line 826, in _read_query_result\n    result.read()\n    ~~~~~~~~~~~^^\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/pymysql/connections.py\", line 1203, in read\n    first_packet = self.connection._read_packet()\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/pymysql/connections.py\", line 782, in _read_packet\n    packet.raise_for_error()\n    ~~~~~~~~~~~~~~~~~~~~~~^^\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/pymysql/protocol.py\", line 219, in raise_for_error\n    err.raise_mysql_exception(self._data)\n    ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/pymysql/err.py\", line 150, in raise_mysql_exception\n    raise errorclass(errno, errval)\nsqlalchemy.exc.DataError: (pymysql.err.DataError) (1406, \"Data too long for column 'symptom' at row 1\")\n[SQL: INSERT INTO hoimsystem_medical_record (medical_record_id, consultation_time, doctor_id, patient_id, symptom, result, registration_uuid, status, sign_time) VALUES (%(medical_record_id)s, %(consultation_time)s, %(doctor_id)s, %(patient_id)s, %(symptom)s, %(result)s, %(registration_uuid)s, %(status)s, %(sign_time)s)]\n[SQL parameters hidden due to hide_parameters=True]\n(Background on this error at: https://sqlalche.me/e/20/9h9h)\n"
+      },
+      "runner_error": {
+        "type": "RuntimeError",
+        "message": "Verification worker failed; see recorded worker stderr and error"
+      },
+      "scope": "Independent76 Task stage: synthetic Main/JWT, controlled ASGI, actual incremental MySQL Task2 schema, source/current/claim/exact receipt and split-body boundaries. Old Source proof not reused as Task proof; no real model/clinical matrix/export.",
+      "sources_stable_during_attempt": true,
+      "current_frozen_file_differences": [
+        "fastapi_be/app/ai/research_variables_task_reader.py",
+        "fastapi_be/app/ai/research_variables_task_routing.py",
+        "fastapi_be/app/ai/runtime.py",
+        "fastapi_be/app/routers/ai.py",
+        "fastapi_be/app/routers/ai_admin.py",
+        "fastapi_be/tests/test_ai_research_variables_main_access.py",
+        "fastapi_be/tests/test_ai_research_variables_result_storage.py",
+        "fastapi_be/tests/test_ai_research_variables_task_routing.py"
+      ],
+      "source_binding_count": 1022,
+      "checks": [],
+      "contention": [],
+      "atomicity": [],
+      "migration": {
+        "revision": "20261021_research_variable_runs",
+        "parent": "20261021_research_variables",
+        "up_down_up": true,
+        "old_tables_ddl_and_seed_rows_unchanged": 220,
+        "new_tables": [
+          "hoimsystem_ai_research_variable_run_artifact",
+          "hoimsystem_ai_research_variable_run_result"
+        ],
+        "utc6": [
+          [
+            "hoimsystem_ai_research_variable_run_artifact",
+            "actor_token_invalid_before",
+            "datetime",
+            6
+          ],
+          [
+            "hoimsystem_ai_research_variable_run_artifact",
+            "claimed_at",
+            "datetime",
+            6
+          ],
+          [
+            "hoimsystem_ai_research_variable_run_artifact",
+            "dispatched_at",
+            "datetime",
+            6
+          ],
+          [
+            "hoimsystem_ai_research_variable_run_artifact",
+            "recorded_at",
+            "datetime",
+            6
+          ],
+          [
+            "hoimsystem_ai_research_variable_run_result",
+            "accepted_at",
+            "datetime",
+            6
+          ]
+        ],
+        "mediumtext": [
+          [
+            "hoimsystem_ai_research_variable_run_artifact",
+            "binding_json",
+            "mediumtext",
+            null
+          ],
+          [
+            "hoimsystem_ai_research_variable_run_artifact",
+            "source_json",
+            "mediumtext",
+            null
+          ],
+          [
+            "hoimsystem_ai_research_variable_run_result",
+            "result_json",
+            "mediumtext",
+            null
+          ]
+        ],
+        "full_historical_replay": false
+      },
+      "cleanup_verified": true
+    },
+    {
+      "attempt": "fourth",
+      "path": "/tmp/hoim-research-variables-task-mysql-fourth-attempt-aea6d5fd3332.json",
+      "sha256": "a5f626248555bb6e5f95e5a0710bd8ef2849be06175eaca6cdfc7efb957dfac1",
+      "all_checks_passed": false,
+      "seconds": 244.479,
+      "error": {
+        "type": "AssertionError",
+        "message": "{'actual_collation': 'mysql', 'statuses': [{'path': '/api/ai/runs/3E1872A4-FC5C-4F0B-9505-287B116581AE', 'status': 403}, {'path': '/api/ai/admin/runs/3E1872A4-FC5C-4F0B-9505-287B116581AE', 'status': 403}, {'path': 'feedback-uppercase', 'status': 403}], 'selected_private_columns': ['input_json', 'result_json', 'evidence_json', 'context_metadata_json', 'input_json', 'result_json', 'evidence_json', 'context_metadata_json', 'input_json', 'result_json', 'evidence_json', 'context_metadata_json']}",
+        "traceback": "Traceback (most recent call last):\n  File \"/tmp/hoim-research-variables-task-mysql-fourth-private-f31m5ytg/worker.py\", line 238, in <module>\n    asyncio.run(checks())\n    ~~~~~~~~~~~^^^^^^^^^^\n  File \"/home/xusheng/miniconda3/lib/python3.13/asyncio/runners.py\", line 195, in run\n    return runner.run(main)\n           ~~~~~~~~~~^^^^^^\n  File \"/home/xusheng/miniconda3/lib/python3.13/asyncio/runners.py\", line 118, in run\n    return self._loop.run_until_complete(task)\n           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^\n  File \"/home/xusheng/miniconda3/lib/python3.13/asyncio/base_events.py\", line 725, in run_until_complete\n    return future.result()\n           ~~~~~~~~~~~~~^^\n  File \"/tmp/hoim-research-variables-task-mysql-fourth-private-f31m5ytg/worker.py\", line 219, in checks\n    assert not columns,report['uppercase_uuid_probe']\n           ^^^^^^^^^^^\nAssertionError: {'actual_collation': 'mysql', 'statuses': [{'path': '/api/ai/runs/3E1872A4-FC5C-4F0B-9505-287B116581AE', 'status': 403}, {'path': '/api/ai/admin/runs/3E1872A4-FC5C-4F0B-9505-287B116581AE', 'status': 403}, {'path': 'feedback-uppercase', 'status': 403}], 'selected_private_columns': ['input_json', 'result_json', 'evidence_json', 'context_metadata_json', 'input_json', 'result_json', 'evidence_json', 'context_metadata_json', 'input_json', 'result_json', 'evidence_json', 'context_metadata_json']}\n"
+      },
+      "runner_error": {
+        "type": "RuntimeError",
+        "message": "Verification worker failed; see recorded worker stderr and error"
+      },
+      "scope": "Independent76 Task stage: synthetic Main/JWT, controlled ASGI, actual incremental MySQL Task2 schema, source/current/claim/exact receipt and split-body boundaries. Old Source proof not reused as Task proof; no real model/clinical matrix/export.",
+      "sources_stable_during_attempt": true,
+      "current_frozen_file_differences": [
+        "fastapi_be/app/ai/research_variables_task_reader.py",
+        "fastapi_be/app/ai/research_variables_task_routing.py",
+        "fastapi_be/app/routers/ai.py",
+        "fastapi_be/app/routers/ai_admin.py",
+        "fastapi_be/tests/test_ai_research_variables_main_access.py",
+        "fastapi_be/tests/test_ai_research_variables_task_routing.py"
+      ],
+      "source_binding_count": 1022,
+      "checks": [
+        {
+          "name": "actual_Main_JWT_shared_chat_split_large_blob_and_nullable_usage_trace_feedback",
+          "run_id": "df3fd4b6-0044-494e-93b8-806819301cf5",
+          "provider_calls": 1,
+          "result_bytes": 84102,
+          "usage": {
+            "input_tokens": null,
+            "output_tokens": null,
+            "complete": false,
+            "model_call_attempted": true
+          }
+        },
+        {
+          "name": "actual_Main_JWT_shared_responses_split_large_blob_and_nullable_usage_trace_feedback",
+          "run_id": "7e210ae3-c494-4501-af03-41d346bb3208",
+          "provider_calls": 1,
+          "result_bytes": 84102,
+          "usage": {
+            "input_tokens": 11,
+            "output_tokens": null,
+            "complete": false,
+            "model_call_attempted": true
+          }
+        },
+        {
+          "name": "old_RR_new_committed_Artifact_3opaque_locator_then_full_current_Source_authorized_detail"
+        },
+        {
+          "name": "paid_current_purpose_loss_shared_terminal_repeat_wrong_lease_no_BODY_no_second_HTTP_or_meter",
+          "usage": [
+            11,
+            null
+          ],
+          "body_columns_read": 0
+        }
+      ],
+      "contention": [],
+      "atomicity": [],
+      "migration": {
+        "revision": "20261021_research_variable_runs",
+        "parent": "20261021_research_variables",
+        "up_down_up": true,
+        "old_tables_ddl_and_seed_rows_unchanged": 220,
+        "new_tables": [
+          "hoimsystem_ai_research_variable_run_artifact",
+          "hoimsystem_ai_research_variable_run_result"
+        ],
+        "utc6": [
+          [
+            "hoimsystem_ai_research_variable_run_artifact",
+            "actor_token_invalid_before",
+            "datetime",
+            6
+          ],
+          [
+            "hoimsystem_ai_research_variable_run_artifact",
+            "claimed_at",
+            "datetime",
+            6
+          ],
+          [
+            "hoimsystem_ai_research_variable_run_artifact",
+            "dispatched_at",
+            "datetime",
+            6
+          ],
+          [
+            "hoimsystem_ai_research_variable_run_artifact",
+            "recorded_at",
+            "datetime",
+            6
+          ],
+          [
+            "hoimsystem_ai_research_variable_run_result",
+            "accepted_at",
+            "datetime",
+            6
+          ]
+        ],
+        "mediumtext": [
+          [
+            "hoimsystem_ai_research_variable_run_artifact",
+            "binding_json",
+            "mediumtext",
+            null
+          ],
+          [
+            "hoimsystem_ai_research_variable_run_artifact",
+            "source_json",
+            "mediumtext",
+            null
+          ],
+          [
+            "hoimsystem_ai_research_variable_run_result",
+            "result_json",
+            "mediumtext",
+            null
+          ]
+        ],
+        "full_historical_replay": false
+      },
+      "cleanup_verified": true
+    },
+    {
+      "attempt": "fifth",
+      "path": "/tmp/hoim-research-variables-task-mysql-fifth-attempt-e13933f06870.json",
+      "sha256": "8a60703e332d68bb04f0ef896776404c94ae06dc362a7e1146f7dede97a75af7",
+      "all_checks_passed": true,
+      "seconds": 237.785,
+      "error": null,
+      "runner_error": null,
+      "scope": "Independent76 Task stage: synthetic Main/JWT, controlled ASGI, actual incremental MySQL Task2 schema, source/current/claim/exact receipt and split-body boundaries. Old Source proof not reused as Task proof; no real model/clinical matrix/export.",
+      "sources_stable_during_attempt": true,
+      "current_frozen_file_differences": [
+        "fastapi_be/app/ai/research_variables_task_reader.py",
+        "fastapi_be/app/ai/research_variables_task_routing.py",
+        "fastapi_be/app/routers/ai.py",
+        "fastapi_be/app/routers/ai_admin.py",
+        "fastapi_be/tests/test_ai_research_variables_main_access.py",
+        "fastapi_be/tests/test_ai_research_variables_task_routing.py"
+      ],
+      "source_binding_count": 1022,
+      "checks": [
+        {
+          "name": "actual_Main_JWT_shared_chat_split_large_blob_and_nullable_usage_trace_feedback",
+          "run_id": "28a4e630-8eae-481e-b4b7-9eb62ef11bf4",
+          "provider_calls": 1,
+          "result_bytes": 84102,
+          "usage": {
+            "input_tokens": null,
+            "output_tokens": null,
+            "complete": false,
+            "model_call_attempted": true
+          }
+        },
+        {
+          "name": "actual_Main_JWT_shared_responses_split_large_blob_and_nullable_usage_trace_feedback",
+          "run_id": "6bdc4783-e67d-44c0-893d-704d0d0218af",
+          "provider_calls": 1,
+          "result_bytes": 84102,
+          "usage": {
+            "input_tokens": 11,
+            "output_tokens": null,
+            "complete": false,
+            "model_call_attempted": true
+          }
+        },
+        {
+          "name": "old_RR_new_committed_Artifact_3opaque_locator_then_full_current_Source_authorized_detail"
+        },
+        {
+          "name": "paid_current_purpose_loss_shared_terminal_repeat_wrong_lease_no_BODY_no_second_HTTP_or_meter",
+          "usage": [
+            11,
+            null
+          ],
+          "body_columns_read": 0
+        }
+      ],
+      "contention": [],
+      "atomicity": [],
+      "migration": {
+        "revision": "20261021_research_variable_runs",
+        "parent": "20261021_research_variables",
+        "up_down_up": true,
+        "old_tables_ddl_and_seed_rows_unchanged": 220,
+        "new_tables": [
+          "hoimsystem_ai_research_variable_run_artifact",
+          "hoimsystem_ai_research_variable_run_result"
+        ],
+        "utc6": [
+          [
+            "hoimsystem_ai_research_variable_run_artifact",
+            "actor_token_invalid_before",
+            "datetime",
+            6
+          ],
+          [
+            "hoimsystem_ai_research_variable_run_artifact",
+            "claimed_at",
+            "datetime",
+            6
+          ],
+          [
+            "hoimsystem_ai_research_variable_run_artifact",
+            "dispatched_at",
+            "datetime",
+            6
+          ],
+          [
+            "hoimsystem_ai_research_variable_run_artifact",
+            "recorded_at",
+            "datetime",
+            6
+          ],
+          [
+            "hoimsystem_ai_research_variable_run_result",
+            "accepted_at",
+            "datetime",
+            6
+          ]
+        ],
+        "mediumtext": [
+          [
+            "hoimsystem_ai_research_variable_run_artifact",
+            "binding_json",
+            "mediumtext",
+            null
+          ],
+          [
+            "hoimsystem_ai_research_variable_run_artifact",
+            "source_json",
+            "mediumtext",
+            null
+          ],
+          [
+            "hoimsystem_ai_research_variable_run_result",
+            "result_json",
+            "mediumtext",
+            null
+          ]
+        ],
+        "full_historical_replay": false
+      },
+      "cleanup_verified": true
+    },
+    {
+      "attempt": "sixth",
+      "path": "/tmp/hoim-research-variables-task-mysql-sixth-attempt-36f4af6520a0.json",
+      "sha256": "e1f7adb8a48086e7fcbdd2859f268035d22421bdb4abd4dd4ee0974a3f2015f0",
+      "all_checks_passed": false,
+      "seconds": 330.823,
+      "error": {
+        "type": "AssertionError",
+        "message": "{\"code\":200,\"msg\":\"success\",\"data\":{\"run_id\":\"6f1bb6a6-b9c1-46e4-885e-61c6791e98f8\",\"feature_key\":\"research_extraction\",\"status\":\"failed\",\"preview\":0,\"prompt_version\":0,\"provider_revision\":1,\"context_digest\":\"39d65856c44fbb41e13e4944561be4436918dc17dd6217c86a2ad4a24fa1c230\",\"patient_id\":null,\"encounter_ref\":null,\"requested_by\":987698,\"error_code\":\"VARIABLE_PROVIDER_ERROR\",\"error_message\":\"本次原领取未接受完整结果，仅保留实际已知或未知调用回执；未返回或恢复原件正文。\",\"latency_ms\":5849,\"create_time\":\"2026-10-22T00:45:48.000000Z\",\"start_time\":\"2026-10-22T00:45:59.000000Z\",\"finish_time\":\"2026-10-22T00:46:11.000000Z\",\"feature_name\":\"科研变量原文候选抽取\",\"requires_human_review\":true,\"context_metadata\":{\"clinical_context_fingerprint\":\"f21b3f9dcde3b79bf878d97b685218db0e8355aee167c87926181c07d570b526\",\"context_digest\":\"39d65856c44fbb41e13e4944561be4436918dc17dd6217c86a2ad4a24fa1c230\",\"department_ids\":[],\"feature_revision\":1,\"instructions_digest\":\"0130d70da9a5a2a5bce335f99dbc37e5b31e5c5f79386c031dab2ea6a17ae2a6\",\"missing_data\":[\"仅抽取所声明记录族的原字段或逐字区间，不代表全部医疗资料、研究变量有效性或临床结论。\",\"变量字典中的单位是人工声明；原文单位、数值、否定、未知和条件不做换算或医学归一化。\",\"缺原记录、NULL、未提出候选不等于未测、不适用、正常或疾病不存在；显式缺失状态须有原文证据。\",\"多条原记录保留全部候选和原时钟，不自动选择最近、有利结果或构造历史可得时间。\",\"读取和模型处理分别核验明确项目、对应用途及逐患者当前研究授权，包括超级管理员。\"],\"model_version\":\"synthetic-no-call\",\"request_authorization_hash\":\"628f6e9da1198ab2757fb63e2de2a5047785af044f95dd11dab6e0a048162f21\",\"snapshot_time\":\"2026-10-22T00:45:48.415151Z\",\"source_count\":1,\"source_projection_hash\":\"67b9a5769a6ea2bb3b14cd97e6c373f2d535f463129ec7e416d1566771260e71\",\"tool_fingerprint\":\"44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a\",\"validation_status\":\"unreviewed\"},\"research_variable_batch_id\":\"4bb6719d-39d6-4d8e-a133-cf7669f9f25c\",\"research_variable_artifact\":{\"schema_version\":\"research_variable_run_artifact_v1\",\"run_id\":\"6f1bb6a6-b9c1-46e4-885e-61c6791e98f8\",\"batch_id\":\"4bb6719d-39d6-4d8e-a133-cf7669f9f25c\",\"scope_id\":\"4770e20e-e12b-416b-8dfc-1622a939bb93\",\"requested_by\":987698,\"task_acl_id\":\"7a379216-790a-46bf-acd2-05ce9c1ed725\",\"actor_role\":\"admin\",\"actor_token_invalid_before\":null,\"recorded_at\":\"2026-10-22T00:45:48.415151Z\",\"source_bytes\":5319,\"binding_bytes\":2523,\"input_hash\":\"ddb1e8640812b5b1b09c9dcec5e491c8fa93845391e4aaa762a641bc16d4f319\",\"evidence_hash\":\"1a699aed14b8c51e939b202c4e3ce12e4c291e796c56238679aa414b85e097c2\",\"metadata_hash\":\"dad30e4a380d323901ad0d14c8ea0258942b5f8284ddd33167d9e173bdf1c491\",\"prompt_hash\":\"d81ff4d968cb252922381508c54d23b941e1a5b345371452876b07d6795f5a26\",\"context_digest\":\"39d65856c44fbb41e13e4944561be4436918dc17dd6217c86a2ad4a24fa1c230\",\"instructions_digest\":\"0130d70da9a5a2a5bce335f99dbc37e5b31e5c5f79386c031dab2ea6a17ae2a6\",\"source_hash\":\"67b9a5769a6ea2bb3b14cd97e6c373f2d535f463129ec7e416d1566771260e71\",\"binding_hash\":\"3438feb6be9316035bbc7492b14ff2db67a7cec273ad87b466eaa26f2a5c4782\",\"batch_content_hash\":\"c3a6794cb39eb43fe4d23b45dc27d3246db15127e661e2d0dbbc76e92b3760f2\",\"scope_content_hash\":\"3c18a50f406fed70e02efe295956284e35ff1cb0201d54d9a2d4c10aa99a42fe\",\"scope_governance_hash\":\"5e2a1fc4ddccebeb1df547d31fec9ee661d2e222172e1597e3280b778e6cb1a8\",\"request_authorization_hash\":\"628f6e9da1198ab2757fb63e2de2a5047785af044f95dd11dab6e0a048162f21\",\"create_event_id\":191,\"claim_event_id\":192,\"claim_lease\":\"310973b8-027e-4f02-938b-f096a35131b0\",\"claimed_at\":\"2026-10-22T00:45:59.686070Z\",\"dispatch_event_id\":193,\"dispatched_at\":\"2026-10-22T00:46:09.388377Z\",\"usage_event_id\":194},\"research_variable_findings\":{\"binding\":{\"schema_version\":\"research_variable_task_binding_ref_v1\",\"batch_id\":\"4bb6719d-39d6-4d8e-a133-cf7669f9f25c\",\"scope_id\":\"4770e20e-e12b-416b-8dfc-1622a939bb93\",\"requested_by\":987698,\"binding_hash\":\"3438feb6be9316035bbc7492b14ff2db67a7cec273ad87b466eaa26f2a5c4782\",\"request_authorization_hash\":\"628f6e9da1198ab2757fb63e2de2a5047785af044f95dd11dab6e0a048162f21\",\"source_projection_hash\":\"67b9a5769a6ea2bb3b14cd97e6c373f2d535f463129ec7e416d1566771260e71\",\"private_scope_hash\":\"2166efd91c502fefd7e5cb3132c61d13fc05628b46356fa0da06176790c247db\"}},\"result\":null,\"result_reference\":null,\"usage_receipt\":{\"input_tokens\":null,\"output_tokens\":null,\"complete\":false,\"model_call_attempted\":true},\"usage_receipt_status\":\"recorded\",\"input_tokens\":null,\"output_tokens\":null,\"automatic_clinical_write\":false,\"automatic_export\":false,\"frozen_audit\":false,\"parts\":{\"binding\":\"/ai/runs/6f1bb6a6-b9c1-46e4-885e-61c6791e98f8/research-variables/binding\",\"source\":\"/ai/runs/6f1bb6a6-b9c1-46e4-885e-61c6791e98f8/research-variables/source\",\"scope\":\"/ai/runs/6f1bb6a6-b9c1-46e4-885e-61c6791e98f8/research-variables/scope\",\"result\":\"/ai/runs/6f1bb6a6-b9c1-46e4-885e-61c6791e98f8/research-variables/result\",\"receipt\":\"/ai/runs/6f1bb6a6-b9c1-46e4-885e-61c6791e98f8/research-variables/receipt\"}}}",
+        "traceback": "Traceback (most recent call last):\n  File \"/tmp/hoim-research-variables-task-mysql-sixth-private-y0afc2xj/worker.py\", line 327, in <module>\n    asyncio.run(extra_checks())\n    ~~~~~~~~~~~^^^^^^^^^^^^^^^^\n  File \"/home/xusheng/miniconda3/lib/python3.13/asyncio/runners.py\", line 195, in run\n    return runner.run(main)\n           ~~~~~~~~~~^^^^^^\n  File \"/home/xusheng/miniconda3/lib/python3.13/asyncio/runners.py\", line 118, in run\n    return self._loop.run_until_complete(task)\n           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^\n  File \"/home/xusheng/miniconda3/lib/python3.13/asyncio/base_events.py\", line 725, in run_until_complete\n    return future.result()\n           ~~~~~~~~~~~~~^^\n  File \"/tmp/hoim-research-variables-task-mysql-sixth-private-y0afc2xj/worker.py\", line 280, in extra_checks\n    response=await client.get('/api/ai/runs/'+identifier,headers=ctx['headers']);assert response.status_code==200 and response.json()['data']['status']=='succeeded',response.text\n                                                                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: {\"code\":200,\"msg\":\"success\",\"data\":{\"run_id\":\"6f1bb6a6-b9c1-46e4-885e-61c6791e98f8\",\"feature_key\":\"research_extraction\",\"status\":\"failed\",\"preview\":0,\"prompt_version\":0,\"provider_revision\":1,\"context_digest\":\"39d65856c44fbb41e13e4944561be4436918dc17dd6217c86a2ad4a24fa1c230\",\"patient_id\":null,\"encounter_ref\":null,\"requested_by\":987698,\"error_code\":\"VARIABLE_PROVIDER_ERROR\",\"error_message\":\"本次原领取未接受完整结果，仅保留实际已知或未知调用回执；未返回或恢复原件正文。\",\"latency_ms\":5849,\"create_time\":\"2026-10-22T00:45:48.000000Z\",\"start_time\":\"2026-10-22T00:45:59.000000Z\",\"finish_time\":\"2026-10-22T00:46:11.000000Z\",\"feature_name\":\"科研变量原文候选抽取\",\"requires_human_review\":true,\"context_metadata\":{\"clinical_context_fingerprint\":\"f21b3f9dcde3b79bf878d97b685218db0e8355aee167c87926181c07d570b526\",\"context_digest\":\"39d65856c44fbb41e13e4944561be4436918dc17dd6217c86a2ad4a24fa1c230\",\"department_ids\":[],\"feature_revision\":1,\"instructions_digest\":\"0130d70da9a5a2a5bce335f99dbc37e5b31e5c5f79386c031dab2ea6a17ae2a6\",\"missing_data\":[\"仅抽取所声明记录族的原字段或逐字区间，不代表全部医疗资料、研究变量有效性或临床结论。\",\"变量字典中的单位是人工声明；原文单位、数值、否定、未知和条件不做换算或医学归一化。\",\"缺原记录、NULL、未提出候选不等于未测、不适用、正常或疾病不存在；显式缺失状态须有原文证据。\",\"多条原记录保留全部候选和原时钟，不自动选择最近、有利结果或构造历史可得时间。\",\"读取和模型处理分别核验明确项目、对应用途及逐患者当前研究授权，包括超级管理员。\"],\"model_version\":\"synthetic-no-call\",\"request_authorization_hash\":\"628f6e9da1198ab2757fb63e2de2a5047785af044f95dd11dab6e0a048162f21\",\"snapshot_time\":\"2026-10-22T00:45:48.415151Z\",\"source_count\":1,\"source_projection_hash\":\"67b9a5769a6ea2bb3b14cd97e6c373f2d535f463129ec7e416d1566771260e71\",\"tool_fingerprint\":\"44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a\",\"validation_status\":\"unreviewed\"},\"research_variable_batch_id\":\"4bb6719d-39d6-4d8e-a133-cf7669f9f25c\",\"research_variable_artifact\":{\"schema_version\":\"research_variable_run_artifact_v1\",\"run_id\":\"6f1bb6a6-b9c1-46e4-885e-61c6791e98f8\",\"batch_id\":\"4bb6719d-39d6-4d8e-a133-cf7669f9f25c\",\"scope_id\":\"4770e20e-e12b-416b-8dfc-1622a939bb93\",\"requested_by\":987698,\"task_acl_id\":\"7a379216-790a-46bf-acd2-05ce9c1ed725\",\"actor_role\":\"admin\",\"actor_token_invalid_before\":null,\"recorded_at\":\"2026-10-22T00:45:48.415151Z\",\"source_bytes\":5319,\"binding_bytes\":2523,\"input_hash\":\"ddb1e8640812b5b1b09c9dcec5e491c8fa93845391e4aaa762a641bc16d4f319\",\"evidence_hash\":\"1a699aed14b8c51e939b202c4e3ce12e4c291e796c56238679aa414b85e097c2\",\"metadata_hash\":\"dad30e4a380d323901ad0d14c8ea0258942b5f8284ddd33167d9e173bdf1c491\",\"prompt_hash\":\"d81ff4d968cb252922381508c54d23b941e1a5b345371452876b07d6795f5a26\",\"context_digest\":\"39d65856c44fbb41e13e4944561be4436918dc17dd6217c86a2ad4a24fa1c230\",\"instructions_digest\":\"0130d70da9a5a2a5bce335f99dbc37e5b31e5c5f79386c031dab2ea6a17ae2a6\",\"source_hash\":\"67b9a5769a6ea2bb3b14cd97e6c373f2d535f463129ec7e416d1566771260e71\",\"binding_hash\":\"3438feb6be9316035bbc7492b14ff2db67a7cec273ad87b466eaa26f2a5c4782\",\"batch_content_hash\":\"c3a6794cb39eb43fe4d23b45dc27d3246db15127e661e2d0dbbc76e92b3760f2\",\"scope_content_hash\":\"3c18a50f406fed70e02efe295956284e35ff1cb0201d54d9a2d4c10aa99a42fe\",\"scope_governance_hash\":\"5e2a1fc4ddccebeb1df547d31fec9ee661d2e222172e1597e3280b778e6cb1a8\",\"request_authorization_hash\":\"628f6e9da1198ab2757fb63e2de2a5047785af044f95dd11dab6e0a048162f21\",\"create_event_id\":191,\"claim_event_id\":192,\"claim_lease\":\"310973b8-027e-4f02-938b-f096a35131b0\",\"claimed_at\":\"2026-10-22T00:45:59.686070Z\",\"dispatch_event_id\":193,\"dispatched_at\":\"2026-10-22T00:46:09.388377Z\",\"usage_event_id\":194},\"research_variable_findings\":{\"binding\":{\"schema_version\":\"research_variable_task_binding_ref_v1\",\"batch_id\":\"4bb6719d-39d6-4d8e-a133-cf7669f9f25c\",\"scope_id\":\"4770e20e-e12b-416b-8dfc-1622a939bb93\",\"requested_by\":987698,\"binding_hash\":\"3438feb6be9316035bbc7492b14ff2db67a7cec273ad87b466eaa26f2a5c4782\",\"request_authorization_hash\":\"628f6e9da1198ab2757fb63e2de2a5047785af044f95dd11dab6e0a048162f21\",\"source_projection_hash\":\"67b9a5769a6ea2bb3b14cd97e6c373f2d535f463129ec7e416d1566771260e71\",\"private_scope_hash\":\"2166efd91c502fefd7e5cb3132c61d13fc05628b46356fa0da06176790c247db\"}},\"result\":null,\"result_reference\":null,\"usage_receipt\":{\"input_tokens\":null,\"output_tokens\":null,\"complete\":false,\"model_call_attempted\":true},\"usage_receipt_status\":\"recorded\",\"input_tokens\":null,\"output_tokens\":null,\"automatic_clinical_write\":false,\"automatic_export\":false,\"frozen_audit\":false,\"parts\":{\"binding\":\"/ai/runs/6f1bb6a6-b9c1-46e4-885e-61c6791e98f8/research-variables/binding\",\"source\":\"/ai/runs/6f1bb6a6-b9c1-46e4-885e-61c6791e98f8/research-variables/source\",\"scope\":\"/ai/runs/6f1bb6a6-b9c1-46e4-885e-61c6791e98f8/research-variables/scope\",\"result\":\"/ai/runs/6f1bb6a6-b9c1-46e4-885e-61c6791e98f8/research-variables/result\",\"receipt\":\"/ai/runs/6f1bb6a6-b9c1-46e4-885e-61c6791e98f8/research-variables/receipt\"}}}\n"
+      },
+      "runner_error": {
+        "type": "RuntimeError",
+        "message": "Verification worker failed; see recorded worker stderr and error"
+      },
+      "scope": "Independent76 Task stage: synthetic Main/JWT, controlled ASGI, actual incremental MySQL Task2 schema, source/current/claim/exact receipt and split-body boundaries. Old Source proof not reused as Task proof; no real model/clinical matrix/export.",
+      "sources_stable_during_attempt": true,
+      "current_frozen_file_differences": [
+        "fastapi_be/app/ai/research_variables_task_reader.py",
+        "fastapi_be/app/ai/research_variables_task_routing.py",
+        "fastapi_be/app/routers/ai.py",
+        "fastapi_be/app/routers/ai_admin.py",
+        "fastapi_be/tests/test_ai_research_variables_task_routing.py"
+      ],
+      "source_binding_count": 1022,
+      "checks": [
+        {
+          "name": "actual_Main_JWT_shared_chat_split_large_blob_and_nullable_usage_trace_feedback",
+          "run_id": "fe4774d8-cbdb-4642-8f1b-9dff41db3e7f",
+          "provider_calls": 1,
+          "result_bytes": 84102,
+          "usage": {
+            "input_tokens": null,
+            "output_tokens": null,
+            "complete": false,
+            "model_call_attempted": true
+          }
+        },
+        {
+          "name": "actual_Main_JWT_shared_responses_split_large_blob_and_nullable_usage_trace_feedback",
+          "run_id": "b80a4e03-2fa6-426b-aad6-712c343d193c",
+          "provider_calls": 1,
+          "result_bytes": 84102,
+          "usage": {
+            "input_tokens": 11,
+            "output_tokens": null,
+            "complete": false,
+            "model_call_attempted": true
+          }
+        },
+        {
+          "name": "old_RR_new_committed_Artifact_3opaque_locator_then_full_current_Source_authorized_detail"
+        },
+        {
+          "name": "paid_current_purpose_loss_shared_terminal_repeat_wrong_lease_no_BODY_no_second_HTTP_or_meter",
+          "usage": [
+            11,
+            null
+          ],
+          "body_columns_read": 0
+        },
+        {
+          "name": "actual_uncommitted_flush_expunge_nohint_ownSQL_3column_locator_and_rollback"
+        },
+        {
+          "name": "old_RR_current_role_reject_before_Task_BODY",
+          "body_columns_read": 0
+        },
+        {
+          "name": "old_RR_current_epoch_reject_before_Task_BODY",
+          "body_columns_read": 0
+        }
+      ],
+      "contention": [],
+      "atomicity": [],
+      "migration": {
+        "revision": "20261021_research_variable_runs",
+        "parent": "20261021_research_variables",
+        "up_down_up": true,
+        "old_tables_ddl_and_seed_rows_unchanged": 220,
+        "new_tables": [
+          "hoimsystem_ai_research_variable_run_artifact",
+          "hoimsystem_ai_research_variable_run_result"
+        ],
+        "utc6": [
+          [
+            "hoimsystem_ai_research_variable_run_artifact",
+            "actor_token_invalid_before",
+            "datetime",
+            6
+          ],
+          [
+            "hoimsystem_ai_research_variable_run_artifact",
+            "recorded_at",
+            "datetime",
+            6
+          ],
+          [
+            "hoimsystem_ai_research_variable_run_artifact",
+            "claimed_at",
+            "datetime",
+            6
+          ],
+          [
+            "hoimsystem_ai_research_variable_run_artifact",
+            "dispatched_at",
+            "datetime",
+            6
+          ],
+          [
+            "hoimsystem_ai_research_variable_run_result",
+            "accepted_at",
+            "datetime",
+            6
+          ]
+        ],
+        "mediumtext": [
+          [
+            "hoimsystem_ai_research_variable_run_artifact",
+            "source_json",
+            "mediumtext",
+            null
+          ],
+          [
+            "hoimsystem_ai_research_variable_run_artifact",
+            "binding_json",
+            "mediumtext",
+            null
+          ],
+          [
+            "hoimsystem_ai_research_variable_run_result",
+            "result_json",
+            "mediumtext",
+            null
+          ]
+        ],
+        "full_historical_replay": false
+      },
+      "cleanup_verified": true
+    },
+    {
+      "attempt": "seventh",
+      "path": "/tmp/hoim-research-variables-task-mysql-seventh-attempt-3d8d230e40bd.json",
+      "sha256": "127a72a740b6cbdcccb229720e519a0a08fac48fa7fc3038c2732188626b9039",
+      "all_checks_passed": true,
+      "seconds": 356.578,
+      "error": null,
+      "runner_error": null,
+      "scope": "Independent76 Task stage: synthetic Main/JWT, controlled ASGI, actual incremental MySQL Task2 schema, source/current/claim/exact receipt and split-body boundaries. Old Source proof not reused as Task proof; no real model/clinical matrix/export.",
+      "sources_stable_during_attempt": true,
+      "current_frozen_file_differences": [],
+      "source_binding_count": 1022,
+      "checks": [
+        {
+          "name": "actual_Main_JWT_shared_chat_split_large_blob_and_nullable_usage_trace_feedback",
+          "run_id": "62ded10a-e76a-4c38-8556-3fedaeae83d1",
+          "provider_calls": 1,
+          "result_bytes": 84102,
+          "usage": {
+            "input_tokens": null,
+            "output_tokens": null,
+            "complete": false,
+            "model_call_attempted": true
+          }
+        },
+        {
+          "name": "actual_Main_JWT_shared_responses_split_large_blob_and_nullable_usage_trace_feedback",
+          "run_id": "d80e3f00-ba85-41bf-836f-0d1abc84de66",
+          "provider_calls": 1,
+          "result_bytes": 84102,
+          "usage": {
+            "input_tokens": 11,
+            "output_tokens": null,
+            "complete": false,
+            "model_call_attempted": true
+          }
+        },
+        {
+          "name": "old_RR_new_committed_Artifact_3opaque_locator_then_full_current_Source_authorized_detail"
+        },
+        {
+          "name": "paid_current_purpose_loss_shared_terminal_repeat_wrong_lease_no_BODY_no_second_HTTP_or_meter",
+          "usage": [
+            11,
+            null
+          ],
+          "body_columns_read": 0
+        },
+        {
+          "name": "actual_uncommitted_flush_expunge_nohint_ownSQL_3column_locator_and_rollback"
+        },
+        {
+          "name": "old_RR_current_role_reject_before_Task_BODY",
+          "body_columns_read": 0
+        },
+        {
+          "name": "old_RR_current_epoch_reject_before_Task_BODY",
+          "body_columns_read": 0
+        },
+        {
+          "name": "actual71_Source_and_Anchor_backed_running_DocRun_X_does_not_block_variable_quota_queue_claim_full_detail_or_worker",
+          "short_lock_timeout_seconds": 1
+        },
+        {
+          "name": "adjacent_shared_duplicate_same_claim_during_actual_paid_HTTP_after_Source_loss_is_inert_and_first_delivery_alone_settles",
+          "http_calls": 1,
+          "usage_events": 1
+        }
+      ],
+      "contention": [],
+      "atomicity": [],
+      "migration": {
+        "revision": "20261021_research_variable_runs",
+        "parent": "20261021_research_variables",
+        "up_down_up": true,
+        "old_tables_ddl_and_seed_rows_unchanged": 220,
+        "new_tables": [
+          "hoimsystem_ai_research_variable_run_artifact",
+          "hoimsystem_ai_research_variable_run_result"
+        ],
+        "utc6": [
+          [
+            "hoimsystem_ai_research_variable_run_artifact",
+            "actor_token_invalid_before",
+            "datetime",
+            6
+          ],
+          [
+            "hoimsystem_ai_research_variable_run_artifact",
+            "recorded_at",
+            "datetime",
+            6
+          ],
+          [
+            "hoimsystem_ai_research_variable_run_artifact",
+            "claimed_at",
+            "datetime",
+            6
+          ],
+          [
+            "hoimsystem_ai_research_variable_run_artifact",
+            "dispatched_at",
+            "datetime",
+            6
+          ],
+          [
+            "hoimsystem_ai_research_variable_run_result",
+            "accepted_at",
+            "datetime",
+            6
+          ]
+        ],
+        "mediumtext": [
+          [
+            "hoimsystem_ai_research_variable_run_artifact",
+            "source_json",
+            "mediumtext",
+            null
+          ],
+          [
+            "hoimsystem_ai_research_variable_run_artifact",
+            "binding_json",
+            "mediumtext",
+            null
+          ],
+          [
+            "hoimsystem_ai_research_variable_run_result",
+            "result_json",
+            "mediumtext",
+            null
+          ]
+        ],
+        "full_historical_replay": false
+      },
+      "cleanup_verified": true
+    },
+    {
+      "attempt": "eighth",
+      "path": "/tmp/hoim-research-variables-task-mysql-eighth-attempt-9068633d3ebd.json",
+      "sha256": "6ec9d0a2fc6355663930c97d80357ab656bbf3a00d25c6e1aa614138544eda1d",
+      "all_checks_passed": false,
+      "seconds": 229.794,
+      "error": {
+        "type": "InvalidURL",
+        "message": "Invalid non-printable ASCII character in URL, '\\x00' at position 49.",
+        "traceback": "Traceback (most recent call last):\n  File \"/tmp/hoim-research-variables-task-mysql-eighth-private-1ob956ei/worker.py\", line 331, in <module>\n    asyncio.run(checks())\n    ~~~~~~~~~~~^^^^^^^^^^\n  File \"/home/xusheng/miniconda3/lib/python3.13/asyncio/runners.py\", line 195, in run\n    return runner.run(main)\n           ~~~~~~~~~~^^^^^^\n  File \"/home/xusheng/miniconda3/lib/python3.13/asyncio/runners.py\", line 118, in run\n    return self._loop.run_until_complete(task)\n           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^\n  File \"/home/xusheng/miniconda3/lib/python3.13/asyncio/base_events.py\", line 725, in run_until_complete\n    return future.result()\n           ~~~~~~~~~~~~~^^\n  File \"/tmp/hoim-research-variables-task-mysql-eighth-private-1ob956ei/worker.py\", line 219, in checks\n    response=await variant_client.get(path,headers=ctx['super_headers']);statuses.append({'path':path,'status':response.status_code})\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/httpx/_client.py\", line 1768, in get\n    return await self.request(\n           ^^^^^^^^^^^^^^^^^^^\n    ...<9 lines>...\n    )\n    ^\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/httpx/_client.py\", line 1527, in request\n    request = self.build_request(\n        method=method,\n    ...<9 lines>...\n        extensions=extensions,\n    )\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/httpx/_client.py\", line 366, in build_request\n    url = self._merge_url(url)\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/httpx/_client.py\", line 396, in _merge_url\n    merge_url = URL(url)\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/httpx/_urls.py\", line 117, in __init__\n    self._uri_reference = urlparse(url, **kwargs)\n                          ~~~~~~~~^^^^^^^^^^^^^^^\n  File \"/home/xusheng/miniconda3/lib/python3.13/site-packages/httpx/_urlparse.py\", line 229, in urlparse\n    raise InvalidURL(error)\nhttpx.InvalidURL: Invalid non-printable ASCII character in URL, '\\x00' at position 49.\n"
+      },
+      "runner_error": {
+        "type": "RuntimeError",
+        "message": "Verification worker failed; see recorded worker stderr and error"
+      },
+      "scope": "Independent76 Task stage: synthetic Main/JWT, controlled ASGI, actual incremental MySQL Task2 schema, source/current/claim/exact receipt and split-body boundaries. Old Source proof not reused as Task proof; no real model/clinical matrix/export.",
+      "sources_stable_during_attempt": true,
+      "current_frozen_file_differences": [
+        "fastapi_be/app/ai/research_variables_task_reader.py",
+        "fastapi_be/app/ai/research_variables_task_routing.py",
+        "fastapi_be/tests/test_ai_research_variables_task_routing.py"
+      ],
+      "source_binding_count": 1022,
+      "checks": [
+        {
+          "name": "actual_Main_JWT_shared_chat_split_large_blob_and_nullable_usage_trace_feedback",
+          "run_id": "75a2094c-50bb-4750-a86d-7e1e750b1ab0",
+          "provider_calls": 1,
+          "result_bytes": 84102,
+          "usage": {
+            "input_tokens": null,
+            "output_tokens": null,
+            "complete": false,
+            "model_call_attempted": true
+          }
+        },
+        {
+          "name": "actual_Main_JWT_shared_responses_split_large_blob_and_nullable_usage_trace_feedback",
+          "run_id": "4627ec27-7112-4b22-b383-955db11646e8",
+          "provider_calls": 1,
+          "result_bytes": 84102,
+          "usage": {
+            "input_tokens": 11,
+            "output_tokens": null,
+            "complete": false,
+            "model_call_attempted": true
+          }
+        },
+        {
+          "name": "old_RR_new_committed_Artifact_3opaque_locator_then_full_current_Source_authorized_detail"
+        },
+        {
+          "name": "paid_current_purpose_loss_shared_terminal_repeat_wrong_lease_no_BODY_no_second_HTTP_or_meter",
+          "usage": [
+            11,
+            null
+          ],
+          "body_columns_read": 0
+        }
+      ],
+      "contention": [],
+      "atomicity": [],
+      "migration": {
+        "revision": "20261021_research_variable_runs",
+        "parent": "20261021_research_variables",
+        "up_down_up": true,
+        "old_tables_ddl_and_seed_rows_unchanged": 220,
+        "new_tables": [
+          "hoimsystem_ai_research_variable_run_artifact",
+          "hoimsystem_ai_research_variable_run_result"
+        ],
+        "utc6": [
+          [
+            "hoimsystem_ai_research_variable_run_artifact",
+            "actor_token_invalid_before",
+            "datetime",
+            6
+          ],
+          [
+            "hoimsystem_ai_research_variable_run_artifact",
+            "claimed_at",
+            "datetime",
+            6
+          ],
+          [
+            "hoimsystem_ai_research_variable_run_artifact",
+            "dispatched_at",
+            "datetime",
+            6
+          ],
+          [
+            "hoimsystem_ai_research_variable_run_artifact",
+            "recorded_at",
+            "datetime",
+            6
+          ],
+          [
+            "hoimsystem_ai_research_variable_run_result",
+            "accepted_at",
+            "datetime",
+            6
+          ]
+        ],
+        "mediumtext": [
+          [
+            "hoimsystem_ai_research_variable_run_artifact",
+            "binding_json",
+            "mediumtext",
+            null
+          ],
+          [
+            "hoimsystem_ai_research_variable_run_artifact",
+            "source_json",
+            "mediumtext",
+            null
+          ],
+          [
+            "hoimsystem_ai_research_variable_run_result",
+            "result_json",
+            "mediumtext",
+            null
+          ]
+        ],
+        "full_historical_replay": false
+      },
+      "cleanup_verified": true
+    },
+    {
+      "attempt": "ninth",
+      "path": "/tmp/hoim-research-variables-task-mysql-ninth-attempt-fa48990c0acb.json",
+      "sha256": "d8e22f06c94a88583819ff94fd631f5887200041b61800ddde1c345a3edaa4fe",
+      "all_checks_passed": false,
+      "seconds": 60.122,
+      "error": {
+        "type": "AssertionError",
+        "message": "{'run_id_collation': 'utf8mb4_0900_ai_ci', 'model_http_calls': 1, 'cases': [{'alias': 'uppercase', 'raw_length': 36, 'matched_opaque_run_id': '43c67e3c-c8a1-43c6-a423-3d1ae40876ec', 'http_status': 404, 'selected_private_columns': []}, {'alias': 'accent', 'raw_length': 36, 'matched_opaque_run_id': '43c67e3c-c8a1-43c6-a423-3d1ae40876ec', 'http_status': 403, 'selected_private_columns': ['input_json', 'result_json', 'evidence_json', 'context_metadata_json']}, {'alias': 'nul', 'raw_length': 37, 'matched_opaque_run_id': '43c67e3c-c8a1-43c6-a423-3d1ae40876ec', 'http_status': 403, 'selected_private_columns': ['input_json', 'result_json', 'evidence_json', 'context_metadata_json']}, {'alias': 'without_hyphens', 'raw_length': 32, 'matched_opaque_run_id': None, 'http_status': 404, 'selected_private_columns': ['input_json', 'result_json', 'evidence_json', 'context_metadata_json']}, {'alias': 'braced', 'raw_length': 38, 'matched_opaque_run_id': None, 'http_status': 404, 'selected_private_columns': ['input_json', 'result_json', 'evidence_json', 'context_metadata_json']}]}",
+        "traceback": "Traceback (most recent call last):\n  File \"/tmp/hoim-research-variables-task-mysql-ninth-private-s37ydqzs/worker.py\", line 359, in <module>\n    asyncio.run(alias_only())\n    ~~~~~~~~~~~^^^^^^^^^^^^^^\n  File \"/home/xusheng/miniconda3/lib/python3.13/asyncio/runners.py\", line 195, in run\n    return runner.run(main)\n           ~~~~~~~~~~^^^^^^\n  File \"/home/xusheng/miniconda3/lib/python3.13/asyncio/runners.py\", line 118, in run\n    return self._loop.run_until_complete(task)\n           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^\n  File \"/home/xusheng/miniconda3/lib/python3.13/asyncio/base_events.py\", line 725, in run_until_complete\n    return future.result()\n           ~~~~~~~~~~~~~^^\n  File \"/tmp/hoim-research-variables-task-mysql-ninth-private-s37ydqzs/worker.py\", line 340, in alias_only\n    assert all(not item['selected_private_columns'] for item in observed if item['matched_opaque_run_id']==identifier),report['collation_alias_probe']\n           ~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: {'run_id_collation': 'utf8mb4_0900_ai_ci', 'model_http_calls': 1, 'cases': [{'alias': 'uppercase', 'raw_length': 36, 'matched_opaque_run_id': '43c67e3c-c8a1-43c6-a423-3d1ae40876ec', 'http_status': 404, 'selected_private_columns': []}, {'alias': 'accent', 'raw_length': 36, 'matched_opaque_run_id': '43c67e3c-c8a1-43c6-a423-3d1ae40876ec', 'http_status': 403, 'selected_private_columns': ['input_json', 'result_json', 'evidence_json', 'context_metadata_json']}, {'alias': 'nul', 'raw_length': 37, 'matched_opaque_run_id': '43c67e3c-c8a1-43c6-a423-3d1ae40876ec', 'http_status': 403, 'selected_private_columns': ['input_json', 'result_json', 'evidence_json', 'context_metadata_json']}, {'alias': 'without_hyphens', 'raw_length': 32, 'matched_opaque_run_id': None, 'http_status': 404, 'selected_private_columns': ['input_json', 'result_json', 'evidence_json', 'context_metadata_json']}, {'alias': 'braced', 'raw_length': 38, 'matched_opaque_run_id': None, 'http_status': 404, 'selected_private_columns': ['input_json', 'result_json', 'evidence_json', 'context_metadata_json']}]}\n"
+      },
+      "runner_error": {
+        "type": "RuntimeError",
+        "message": "Verification worker failed; see recorded worker stderr and error"
+      },
+      "scope": "Independent76 Task stage: synthetic Main/JWT, controlled ASGI, actual incremental MySQL Task2 schema, source/current/claim/exact receipt and split-body boundaries. Old Source proof not reused as Task proof; no real model/clinical matrix/export.",
+      "sources_stable_during_attempt": true,
+      "current_frozen_file_differences": [
+        "fastapi_be/app/ai/research_variables_task_reader.py",
+        "fastapi_be/app/ai/research_variables_task_routing.py",
+        "fastapi_be/tests/test_ai_research_variables_task_routing.py"
+      ],
+      "source_binding_count": 1022,
+      "checks": [],
+      "contention": [],
+      "atomicity": [],
+      "migration": {
+        "revision": "20261021_research_variable_runs",
+        "parent": "20261021_research_variables",
+        "up_down_up": true,
+        "old_tables_ddl_and_seed_rows_unchanged": 220,
+        "new_tables": [
+          "hoimsystem_ai_research_variable_run_artifact",
+          "hoimsystem_ai_research_variable_run_result"
+        ],
+        "utc6": [
+          [
+            "hoimsystem_ai_research_variable_run_artifact",
+            "actor_token_invalid_before",
+            "datetime",
+            6
+          ],
+          [
+            "hoimsystem_ai_research_variable_run_artifact",
+            "claimed_at",
+            "datetime",
+            6
+          ],
+          [
+            "hoimsystem_ai_research_variable_run_artifact",
+            "dispatched_at",
+            "datetime",
+            6
+          ],
+          [
+            "hoimsystem_ai_research_variable_run_artifact",
+            "recorded_at",
+            "datetime",
+            6
+          ],
+          [
+            "hoimsystem_ai_research_variable_run_result",
+            "accepted_at",
+            "datetime",
+            6
+          ]
+        ],
+        "mediumtext": [
+          [
+            "hoimsystem_ai_research_variable_run_artifact",
+            "binding_json",
+            "mediumtext",
+            null
+          ],
+          [
+            "hoimsystem_ai_research_variable_run_artifact",
+            "source_json",
+            "mediumtext",
+            null
+          ],
+          [
+            "hoimsystem_ai_research_variable_run_result",
+            "result_json",
+            "mediumtext",
+            null
+          ]
+        ],
+        "full_historical_replay": false
+      },
+      "cleanup_verified": true
+    },
+    {
+      "attempt": "tenth",
+      "path": "/tmp/hoim-research-variables-task-mysql-tenth-attempt-a83b77a91403.json",
+      "sha256": "7111205d2c7dc9967027aafbd04c0b50cc9e2b81e8f3d1391cdda5acb9cc33dd",
+      "all_checks_passed": true,
+      "seconds": 66.092,
+      "error": null,
+      "runner_error": null,
+      "scope": "Independent76 Task stage: synthetic Main/JWT, controlled ASGI, actual incremental MySQL Task2 schema, source/current/claim/exact receipt and split-body boundaries. Old Source proof not reused as Task proof; no real model/clinical matrix/export.",
+      "sources_stable_during_attempt": true,
+      "current_frozen_file_differences": [],
+      "source_binding_count": 1022,
+      "checks": [],
+      "contention": [],
+      "atomicity": [],
+      "migration": {
+        "revision": "20261021_research_variable_runs",
+        "parent": "20261021_research_variables",
+        "up_down_up": true,
+        "old_tables_ddl_and_seed_rows_unchanged": 220,
+        "new_tables": [
+          "hoimsystem_ai_research_variable_run_artifact",
+          "hoimsystem_ai_research_variable_run_result"
+        ],
+        "utc6": [
+          [
+            "hoimsystem_ai_research_variable_run_artifact",
+            "actor_token_invalid_before",
+            "datetime",
+            6
+          ],
+          [
+            "hoimsystem_ai_research_variable_run_artifact",
+            "claimed_at",
+            "datetime",
+            6
+          ],
+          [
+            "hoimsystem_ai_research_variable_run_artifact",
+            "dispatched_at",
+            "datetime",
+            6
+          ],
+          [
+            "hoimsystem_ai_research_variable_run_artifact",
+            "recorded_at",
+            "datetime",
+            6
+          ],
+          [
+            "hoimsystem_ai_research_variable_run_result",
+            "accepted_at",
+            "datetime",
+            6
+          ]
+        ],
+        "mediumtext": [
+          [
+            "hoimsystem_ai_research_variable_run_artifact",
+            "binding_json",
+            "mediumtext",
+            null
+          ],
+          [
+            "hoimsystem_ai_research_variable_run_artifact",
+            "source_json",
+            "mediumtext",
+            null
+          ],
+          [
+            "hoimsystem_ai_research_variable_run_result",
+            "result_json",
+            "mediumtext",
+            null
+          ]
+        ],
+        "full_historical_replay": false
+      },
+      "cleanup_verified": true
+    },
+    {
+      "attempt": "eleventh",
+      "path": "/tmp/hoim-research-variables-task-mysql-eleventh-attempt-b645a45ecfcf.json",
+      "sha256": "37e5e7a77d1d5b4b910a35aaafb49e9dd8db106005ec882071793b0fb01525a2",
+      "all_checks_passed": true,
+      "seconds": 139.811,
+      "error": null,
+      "runner_error": null,
+      "scope": "Independent76 Task stage: synthetic Main/JWT, controlled ASGI, actual incremental MySQL Task2 schema, source/current/claim/exact receipt and split-body boundaries. Old Source proof not reused as Task proof; no real model/clinical matrix/export.",
+      "sources_stable_during_attempt": true,
+      "current_frozen_file_differences": [],
+      "source_binding_count": 1022,
+      "checks": [],
+      "contention": [],
+      "atomicity": [
+        {
+          "name": "actual_MySQL_blob_trigger_rolls_back_full_blob_pointer_acceptance_and_faulted_usage",
+          "model_http_calls": 1,
+          "accept_audit_events": 0,
+          "final_usage_events": 1,
+          "actual_received_usage": [
+            11,
+            null
+          ],
+          "same_original_delivery_settled_without_replay": true
+        },
+        {
+          "name": "actual_MySQL_accept_audit_trigger_rolls_back_full_blob_pointer_acceptance_and_faulted_usage",
+          "model_http_calls": 1,
+          "accept_audit_events": 0,
+          "final_usage_events": 1,
+          "actual_received_usage": [
+            11,
+            null
+          ],
+          "same_original_delivery_settled_without_replay": true
+        },
+        {
+          "name": "actual_MySQL_usage_audit_trigger_rolls_back_full_blob_pointer_acceptance_and_faulted_usage",
+          "model_http_calls": 1,
+          "accept_audit_events": 0,
+          "final_usage_events": 1,
+          "actual_received_usage": [
+            11,
+            null
+          ],
+          "same_original_delivery_settled_without_replay": true
+        }
+      ],
+      "migration": {
+        "revision": "20261021_research_variable_runs",
+        "parent": "20261021_research_variables",
+        "up_down_up": true,
+        "old_tables_ddl_and_seed_rows_unchanged": 220,
+        "new_tables": [
+          "hoimsystem_ai_research_variable_run_artifact",
+          "hoimsystem_ai_research_variable_run_result"
+        ],
+        "utc6": [
+          [
+            "hoimsystem_ai_research_variable_run_artifact",
+            "actor_token_invalid_before",
+            "datetime",
+            6
+          ],
+          [
+            "hoimsystem_ai_research_variable_run_artifact",
+            "claimed_at",
+            "datetime",
+            6
+          ],
+          [
+            "hoimsystem_ai_research_variable_run_artifact",
+            "dispatched_at",
+            "datetime",
+            6
+          ],
+          [
+            "hoimsystem_ai_research_variable_run_artifact",
+            "recorded_at",
+            "datetime",
+            6
+          ],
+          [
+            "hoimsystem_ai_research_variable_run_result",
+            "accepted_at",
+            "datetime",
+            6
+          ]
+        ],
+        "mediumtext": [
+          [
+            "hoimsystem_ai_research_variable_run_artifact",
+            "binding_json",
+            "mediumtext",
+            null
+          ],
+          [
+            "hoimsystem_ai_research_variable_run_artifact",
+            "source_json",
+            "mediumtext",
+            null
+          ],
+          [
+            "hoimsystem_ai_research_variable_run_result",
+            "result_json",
+            "mediumtext",
+            null
+          ]
+        ],
+        "full_historical_replay": false
+      },
+      "cleanup_verified": true
+    }
+  ],
+  "mysql_scope_limits": [
+    "Task incremental up/down/up from20261021_research_variables only; old220 table DDL and seeded rows unchanged,222 total after own2. Not a replay of every historical migration.",
+    "Fresh private mysql8.0.39 containers netnone/nonroot/readonly/nohostports; only private Unix socket; cleanup verified for all retained attempts.",
+    "Final successful7/10/11 each froze1022 input files and all now match current bytes; their checks are separately scoped, not a single combined SQL run.",
+    "Focused10 covers real utf8mb4_0900_ai_ci uppercase/accent/trailing-NUL matching aliases. Hyphenless/braced IDs did not match a real PK; empty generic lookup projection is not readback of actual Task.",
+    "No claim of standalone double-claim race, paid role-loss concurrent probe, other4 later Main native domains, real model inference or clinical output quality."
+  ],
+  "retained_failure_interpretation": {
+    "first": "Probe synthetic username exceeded actual VARCHAR20.",
+    "second": "Probe baseline missed inherited cohort2 registration and original large symptom fixture exceeded actual VARCHAR100.",
+    "third": "Correct220 baseline, but intermediate500CP symptom fixture still violated actual VARCHAR100.",
+    "fourth": "Real native private-body preauthorization gap through uppercase Run alias under MySQL collation; no response-body disclosure claimed.",
+    "sixth": "Probe HTTP connection observer counted deliberately held unrelated DocRunX locker as forbidden; provider received typed unknown failure. Exact known locker was allowlisted in7, not all SQL.",
+    "eighth": "httpx rejected raw NUL URL before request; later URL used exact percent encoding.",
+    "ninth": "Real accented UUID and percent-encoded trailing NUL PK aliases selected4private Task columns before403; fixed bounded actual-collation opaque3column classifier."
+  },
+  "unit_semantics_and_receipts": "Literal extraction remains unverified candidate only. Missing/partial/null actual usage is preserved without fake0. Original dispatch PK is required for all paid terminal settlement; repeated/wrong-lease shared delivery does not read private BODY, remeter or resend.",
+  "full_backend_suite": "Not yet run for this phase; do not add scoped pytest counts or SQL checks to a full-suite total."
+}

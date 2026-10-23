@@ -1,0 +1,38 @@
+{
+  "schema_version": "research_variable_shared_parent_scoped_verification_v1",
+  "scope": "Only standalone76 tree shared AIAssistant dedicated lifecycle integration; no global History/management/canonical/fullbrowser claim. Original Doc dedicated behavior retained.",
+  "tests": {
+    "passed": 27,
+    "whole_files": {
+      "ai-document-extraction-parent.spec.js": 15,
+      "ai-research-variable-parent.spec.js": 12
+    },
+    "classification": "isolated_mock",
+    "workers": 1,
+    "retry": 0,
+    "skip": 0,
+    "elapsed_seconds": 74.29356421902776,
+    "sources_stable": true,
+    "source_input_count": 563
+  },
+  "report": {
+    "path": "/tmp/hoim-research-variable-parent-first-verification.json",
+    "sha256": "5f1d9660fe83a458118a1b0f105e527d362e7bde80505adbf5044a5eef40329d",
+    "playwright": "/tmp/hoim-research-variable-parent-first-playwright.json",
+    "playwright_sha256": "232b96eaf47598a7b8e6ccb30c20e93e95e94a031391b541ca9ec7c1739a0c75",
+    "source_freeze": "/tmp/hoim-research-variable-parent-first-source-freeze.json",
+    "source_freeze_sha256": "111196ac2eaef7e0060b939e202c18592ff66c9884f8e9f852f05ac5fe02cf99"
+  },
+  "files": {
+    "vue3-new-ui/src/components/AIAssistant/index.vue": "f626147fbadbe62bd8ff2ecf0b70f05ed65da6630fad9b0262ebe452c0f7150b",
+    "vue3-new-ui/e2e/ai-research-variable-parent.spec.js": "8bacfc3da27227ea5a3f362fa6bd7514d28c3f6939fb183055677147281fadb6",
+    "vue3-new-ui/e2e/fixtures/research-variable-parent-harness.cjs": "bd79ae545cdd327e004c6bede1e785fa60d300b46f3f7cee22c500e95a1c9ea2"
+  },
+  "behavior": [
+    "Unique explicit Batch key presence includingnull or feature76 starts a sticky dedicated lifecycle. Generic selected/null route helpers, patient/context/operational/task submit/history/dialogs remain blocked after mode/feature changes.",
+    "71 and76 retain independent first-bound sticky lifecycle; switchingfeature does not mount both children or return to generic; malformed mixed originals are refused by the existing dedicated child scope validator.",
+    "Original15 DocParent whole file and12 new VariableParent tests pass once using actual Vue/ElementPlus/request, canonical Babel and complete actual replayed Task proof; no proof verifier or clinical DTO is stubbed.",
+    "Patient/encounter/unknown/null Source keys and late config changes clear actual private child results. Only feature directory GET remains for invalid initial scope."
+  ],
+  "backend": "Original9be48bc1051-file first full still running; no BE/maps changed; separatea904e82 candidate notmerged."
+}

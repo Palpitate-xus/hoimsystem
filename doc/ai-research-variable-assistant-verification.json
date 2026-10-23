@@ -1,0 +1,67 @@
+{
+  "schema_version": "research_variable_assistant_scoped_verification_v1",
+  "scope": "Dedicated76 business Assistant and unique proof/API with actual synthetic Main/JWT/SQLite/nativeASGI replay. No shared Parent/History/management integration, Source governance UI, canonical build or full browser claim.",
+  "tests": {
+    "passed": 183,
+    "whole_files": {
+      "ai-research-variable-assistant.spec.js": 36,
+      "ai-research-variable-findings.spec.js": 24,
+      "ai-research-variable-proof.spec.js": 30,
+      "ai-research-variable-task-api.spec.js": 63,
+      "ai-research-variable-task-flow.spec.js": 30
+    },
+    "classification": "isolated_mock",
+    "workers": 1,
+    "retries": 0,
+    "skipped": 0,
+    "elapsed_seconds": 156.56249461043626,
+    "source_input_count": 563,
+    "source_stable": true
+  },
+  "evidence": {
+    "report": "/tmp/hoim-research-variable-assistant-final-verification.json",
+    "report_sha256": "df58402f39ece7c1767b0017260b1e3fb7959d3ce0655926d3728e98df96a2e0",
+    "playwright": "/tmp/hoim-research-variable-assistant-final-playwright.json",
+    "playwright_sha256": "e85eba9fe637c35f12d4030da6a1563c51f1d7dd6cdc6f457bf7c38dadc9540f",
+    "source_freeze": "/tmp/hoim-research-variable-assistant-final-source-freeze.json",
+    "source_freeze_sha256": "530c168e3f1a40068f54eff851fa4e3800dec26b559edd6c9944b3dda965ef97"
+  },
+  "files": {
+    "vue3-new-ui/src/api/ai/researchVariableTaskFlow.js": "9de2acbed8745156fe8c244c769da0b5c0d545a7451485e478b91871face0d76",
+    "vue3-new-ui/src/components/ai/ResearchVariableFindings.vue": "aa4daf6030062c181a3b4db3f286abb782e4cbe21cee62cd92d3dd48422b7659",
+    "vue3-new-ui/src/components/ai/useResearchVariableFindings.js": "86234ad2310c980a43dfe29024b9a1fbe5b3c7812f09bb5efdaaddc69011a2c5",
+    "vue3-new-ui/src/components/ai/ResearchVariableAssistant.vue": "eb65cc59e4920701764abbac92b71859020689c4d17acb6ab4e66a68eb01300d",
+    "vue3-new-ui/src/components/ai/useResearchVariableAssistant.js": "7f1c909fc755ffe51dbd5ae07249df8bb00331fda9619649e67325f1a0178183",
+    "vue3-new-ui/e2e/ai-research-variable-assistant.spec.js": "5c3ffc5ca029bf4ef1236f670cbce237d91fed80ef2b11cc072f02d7eb3f2687",
+    "vue3-new-ui/e2e/ai-research-variable-task-flow.spec.js": "9e92ca3b3027420bb298e189d4a281aee2f81456567374e5809673d2835a3aa4",
+    "vue3-new-ui/e2e/fixtures/research-variable-assistant-harness.cjs": "5c54533d79a920bf103546f65124d5e3c9f1a325446b4edd7aa3e096cca45f3b"
+  },
+  "behavior": [
+    "Explicit canonical Batch UUID and optional original question only; empty/null/Unicode whitespace preserved; no patient, encounter, free Source text or extra JSON. Batch UUID text entry is current dedicated Task entry, pending separate current Source directory Input integration.",
+    "Five strict builtin roles intersect current Feature roles; disabled Feature requires explicit Super preview. Ordinary reads do not call Super trace. Super role does not substitute for current project/all-Scope-patient research/model purpose.",
+    "Current preview POST loads and verifies both independent whole pieces; one explicit queue POST is never retried. Same requested Run/Batch/context/Prompt/Provider/original question and complete separate pieces must validate before Findings.",
+    "Only verified same-Run states poll. All previously known immutable Artifact and phase/lease/usage PKs cannot disappear or change; status may advance and actual pending cancellation may settle paid counters.",
+    "All role/token/username/config/input/active/KeepAlive/close/late GET/actual Crypto changes invalidate private fields. Failed current reads clear preview, Task, history, optional question and feedback; no generic fallback.",
+    "Feedback and cancel are manual. Explicit child close stops polling; ordinary internal child unmount does not accidentally clear a newly loaded Task. No automatic matrix/review/export/clinical write."
+  ],
+  "predecessors": [
+    {
+      "path": "/tmp/hoim-research-variable-assistant-first-verification.json",
+      "scope": "1test locator failure,1interrupted,55notstarted; source stable; stopped own Playwright with SIGINT and afterAll cleanup. Wrong nested locator under native ElInput input/textarea and nonexistent Findings testid corrected to native testid/actual aria region, without product weakening."
+    },
+    {
+      "path": "/tmp/hoim-research-variable-assistant-second-verification.json",
+      "scope": "57 whole tests green at predecessor source:33Assistant+24Findings. Subsequent2negative actual tests exposed additional frontend gaps."
+    },
+    {
+      "path": "/tmp/hoim-research-variable-task-cache-first-verification.json",
+      "scope": "2RED21.073s/source stable: refresh403 retained cached preview; received succeeded receipt accepted older actual queued. Fixed own sensitive clear and immutable/phase/terminal continuity. These failures remain RED."
+    }
+  ],
+  "boundaries": [
+    "Source/Scope/result each complete independent8MiB piece; no aggregate that silently truncates. Complete actual Provider wire capacity remains server-enforced, not promised by registration size.",
+    "Client reconstructs full ordered literal originals and precise CP references, but HMAC secret remains server-only. Ordinary view compares server-frozen task anchors; explicit Super trace additionally rehashes3raw persisted JSONs and full frozen config.",
+    "Actual ordinary-user seven-state fixture is replayed. This is not a live model/provider browser run, patient research validity, clinical effect or scientific validation.",
+    "Original backend full first remains9be48bc/1051 inputs under freeze. Separate Doc-dispatch candidatea904e82/99SQL/MySQL12 does not relabel that original full or this FE evidence."
+  ]
+}

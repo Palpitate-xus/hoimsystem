@@ -103,6 +103,12 @@ def _check_run_storage_json(serialized: dict[str, str]) -> None:
 
 def create_run(db: Session, user: User, req: RunRequest) -> AIRun:
     """Freeze an authorized, source-linked request before a durable worker processes it."""
+    if req.feature_key == "research_extraction":
+        from app.ai.research_variables_runtime import create_variable_run
+
+        return create_variable_run(db, user, req)
+    if "research_variable_batch_id" in req.input:
+        raise HTTPException(422, "科研变量批次不能混入其它任务，未读取患者或运营资料")
     if req.feature_key == "deidentification":
         from app.ai.deidentification_shared_dispatch import create_shared_run
 
@@ -437,6 +443,13 @@ def create_run(db: Session, user: User, req: RunRequest) -> AIRun:
 
 def authorize_run(db: Session, user: User, run: AIRun) -> None:
     """Re-check current permissions, including revoked care access, on every result read."""
+    from app.ai.research_variables_task_routing import is_variable_task
+
+    if is_variable_task(db, run):
+        from app.ai.research_variables_task_reader import load_task
+
+        load_task(db, user, run)
+        return
     from app.ai.rca_evidence_dispatch import guard_rca_task
 
     if guard_rca_task(db, user, run):
@@ -646,6 +659,17 @@ def describe_run(run: AIRun, include_result: bool = True, *, user: User | None =
     from app.ai.charge_reconciliation_storage import is_charge_run
 
     db = object_session(run)
+    from app.ai.research_variables_task_routing import is_variable_task
+
+    session = object_session(run)
+    if session is not None and is_variable_task(session, run):
+        from app.ai.research_variables_task_views import describe_variable_run
+
+        if user is None:
+            raise HTTPException(403, "科研变量任务需明确当前项目及逐患者用途授权")
+        return describe_variable_run(session, user, run, include_result)
+    if session is None and getattr(run, "feature_key", None) == "research_extraction":
+        raise HTTPException(403, "科研变量任务不能脱离当前授权会话展示")
     from app.ai.clinical_training_shared import is_training_task
     from app.ai.deidentification_shared import directory_metadata as deidentification_metadata
     from app.ai.deidentification_shared import is_deidentification_task
@@ -1033,6 +1057,24 @@ def claim_next_run(db: Session):
             return None
         identity = locate_native_task(db, candidate.run_id)
         domain = identity.domain if identity is not None else None
+        if domain == "research_variables":
+            from app.ai.research_variables_runtime import claim_variable_run
+
+            lease = claim_variable_run(db, candidate.run_id)
+            if lease is not None:
+                return candidate.run_id, lease
+            skipped.append(candidate.run_id)
+            continue
+        if domain is None:
+            from app.ai.research_variables_task_routing import is_variable_task
+
+            try:
+                is_variable_task(db, candidate.run_id)
+            except HTTPException as exc:
+                if exc.status_code != 409:
+                    raise
+                skipped.append(candidate.run_id)
+                continue
         if domain == "deidentification":
             claimed = claim_deidentification_run(db, candidate.run_id)
             if claimed is not None:
@@ -1239,6 +1281,17 @@ def _recheck_task(db: Session, run: AIRun) -> tuple[FeatureSpec, AIProvider, dic
 async def execute_claimed(run_id: str, lease: str, *, transport=None, research_claim_event_id=None, deidentification_claim_event_id=None) -> None:
     """Release SQL connections during inference; recheck authorization before storing results."""
     from app import database
+    from app.ai.research_variables_task_routing import is_variable_task
+
+    with database.SessionLocal() as variable_db:
+        variable_task = is_variable_task(variable_db, run_id)
+    if variable_task:
+        if research_claim_event_id is not None or deidentification_claim_event_id is not None:
+            raise HTTPException(409, "科研变量任务不能借用其它域的原领取回执")
+        from app.ai.research_variables_execution import execute_research_variables_claimed
+
+        await execute_research_variables_claimed(run_id, lease, transport=transport)
+        return
     from app.ai.charge_reconciliation_storage import is_charge_run
     from app.ai.clinical_training_shared import is_training_task
     from app.ai.deidentification_dispatch import validate_delivery as validate_deidentification_delivery
@@ -1779,11 +1832,21 @@ def expire_interrupted_runs(db: Session) -> int:
     recovered += expire_interrupted_satisfaction_runs(db)
     recovered += expire_interrupted_drug_label_runs(db)
     deadline = utcnow() - datetime.timedelta(minutes=10)
+    from sqlalchemy import func
+
+    from app.ai.research_variables_run_models import AIResearchVariableRunArtifact
+    from app.ai.research_variables_runtime import recover_variable_tasks
+    from app.ai.research_variables_task_routing import marker_predicate
+
+    recovered += recover_variable_tasks(db, deadline)
     count = (
         db.query(AIRun)
         .filter(
             AIRun.status == "running",
             AIRun.start_time < deadline,
+            AIRun.feature_key != "research_extraction",
+            ~AIRun.run_id.in_(db.query(AIResearchVariableRunArtifact.run_id)),
+            ~func.coalesce(marker_predicate(db), False),
             AIRun.feature_key != "drug_label_extraction",
             AIRun.feature_key != "infection_cluster",
             ~AIRun.run_id.in_(db.query(AIInfectionRunArtifact.run_id)),

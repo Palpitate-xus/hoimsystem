@@ -165,8 +165,8 @@ def expire_interrupted_charge_runs(db):
     """Record unknown call/usage after interruption; never repeat a billable call."""
     lock_charge_gate(db)
     deadline = sources.utcnow() - datetime.timedelta(minutes=10)
-    rows = (
-        db.query(AIRun)
+    identities = (
+        db.query(AIRun.run_id)
         .join(AIChargeRunArtifact, AIRun.run_id == AIChargeRunArtifact.run_id)
         .filter(AIRun.status.in_(["running", "cancelled"]), AIRun.start_time < deadline, AIRun.lease_token.is_not(None), AIChargeRunArtifact.receipt_event_id.is_(None))
         .order_by(AIRun.run_id)
@@ -174,6 +174,10 @@ def expire_interrupted_charge_runs(db):
         .with_for_update()
         .all()
     )
+    # Qualify and lock real69 candidates before projecting any private Task
+    # column. An unrelated native/orphan recovery emits no empty-body SELECT.
+    identifiers = [row.run_id for row in identities]
+    rows = db.query(AIRun).filter(AIRun.run_id.in_(identifiers)).order_by(AIRun.run_id).populate_existing().with_for_update().all() if identifiers else []
     try:
         for run in rows:
             run.status = "cancelled" if run.status == "cancelled" else "failed"

@@ -1,0 +1,44 @@
+{
+  "schema_version": "research_variable_task_flow_scoped_verification_v1",
+  "scope": "Actual current preview, all Scope patient-purpose manifest, two full Source pieces, original selection/question, Task receipt and independent Task pieces; ordinary excludes Super trace, explicit trace verifies raw persisted JSON. No Source CRUD/Panel/Input, Assistant/shared parent, production build or whole browser claim.",
+  "tests": {
+    "passed": 91,
+    "files": {
+      "ai-research-variable-task-api.spec.js": 63,
+      "ai-research-variable-task-flow.spec.js": 28
+    },
+    "classification": "isolated_mock",
+    "worker": 1,
+    "retries": 0,
+    "skip": 0,
+    "elapsed_seconds": 66.04800960887223,
+    "source_input_count": 557,
+    "source_stable": true
+  },
+  "evidence": {
+    "report": "/tmp/hoim-research-variable-task-flow-first-verification.json",
+    "sha256": "525e7c1184ad25bb85e9bdfaa14920754477c64bc3635ea35b78bbeb7b0bda2a",
+    "raw_playwright": "/tmp/hoim-research-variable-task-flow-first-playwright.json",
+    "raw_playwright_sha256": "fdd92e714fa9cd54a658487c7ccbf63145041670de2069cba6b2346fd3b3e388",
+    "source_freeze": "/tmp/hoim-research-variable-task-flow-first-source-freeze.json",
+    "source_freeze_sha256": "1a58d78be11a60ef55d4c655ea70dc859d384a46e67a0f507847d72fb91ffc2e"
+  },
+  "actual_fixture": {
+    "path": "vue3-new-ui/e2e/fixtures/research-variable-task/actual-states.json",
+    "sha256": "ce0df45ad3a1bbd28a763ab79d26ca6827e2eaa44c52ad89b4be5dff69db491a",
+    "scope": "Same-case actual Main/JWT/SQLite/shared worker/MockTransport export. Seven real status observations, no fabricated terminal values. Browser API routes replay these actual DTOs, not live API/model HTTP."
+  },
+  "files": {
+    "vue3-new-ui/src/api/ai/researchVariableTasks.js": "7e6f060fd4127f80b0b5965d4366a1df391c5145d736bd5c82fa56abb3f83a24",
+    "vue3-new-ui/src/api/ai/researchVariableTaskFlow.js": "c61dae23ea42e1e8e8952d635ccb56386ad1682404a52f310b38a6880608e7f1",
+    "vue3-new-ui/e2e/fixtures/research-variable-task-harness.cjs": "adef05bb60e44a366234b7b4602b786c6d6b1cfb24c0b21bfb0534b04f7d09e9",
+    "vue3-new-ui/e2e/ai-research-variable-task-flow.spec.js": "5f2d072323ebb7355c4d42aa222b2b8188f12ed30e9a21d536dc1cb4693550aa"
+  },
+  "backend": "Original first default full backend still running under immutable9be48bc, separately corrected Doc dispatch candidatea904e82 is not merged or counted here. All original1051 BE/maps remain unchanged.",
+  "engineering_limits": [
+    "HMAC mapping remains server-frozen; ordered original literal reconstruction does not claim client key recomputation.",
+    "Receipt/full GET may advance status but must preserve original requested Run UUID, Batch, context digest, Prompt version, Provider revision and original question.",
+    "Every piece is decoded with strict duplicate/UTF8/depth/node/whole8MiB limits; no aggregate Source/privateScope/result envelope is invented.",
+    "The runner inherited an older descriptive scope string naming3 files; actual command/case records and this ledger accurately identify these2 executed whole files."
+  ]
+}

@@ -1,6 +1,6 @@
 <template>
  <section aria-label="受审运维资料来源">
-  <el-alert title="这里只处理明确受审材料；不是实时系统检查，不执行命令，也不自动发现或匿名化敏感信息。" type="info" :closable="false" />
+  <el-alert title="提交前请核对材料中的敏感信息，系统不会自动脱敏。" type="info" :closable="false" />
   <p v-if="!v.allowed">当前身份或会话不可读取运维来源。</p>
   <template v-else>
    <div><el-button @click="v.changeTab('cases')">材料集目录</el-button><el-button @click="v.changeTab('releases')">审核版本目录</el-button><el-button v-if="v.canGovern" @click="v.changeTab('originals')">受控原件目录</el-button><el-button :loading="v.busy" @click="v.refresh">读取当前目录</el-button><el-button v-if="v.canGovern" @click="v.beginOriginal">登记完整原件</el-button></div>

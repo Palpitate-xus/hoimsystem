@@ -1,6 +1,6 @@
 <template>
  <section aria-label="运维原生任务技术目录">
-  <p>目录为有界分页技术记录，不代表已授权读取材料或结果；每次打开均重新核对当前来源。</p>
+  <p>可查看此前的任务；打开时会重新检查材料访问权限。</p>
   <el-button :disabled="!allowed||busy" @click="load">读取当前任务目录</el-button><p v-if="error" role="alert">{{error}}</p>
   <el-table v-if="allowed&&directory" :data="directory.items" empty-text="暂无当前目录项"><el-table-column prop="run_id" label="原任务"/><el-table-column prop="status" label="技术状态"/><el-table-column label="实际已报告用量"><template #default="{row}">{{shown(row.usage?.input_tokens)}} / {{shown(row.usage?.output_tokens)}}</template></el-table-column><el-table-column label="操作"><template #default="{row}"><el-button @click="inspect(row)">核对本条完整任务</el-button></template></el-table-column></el-table>
   <template v-if="directory"><el-button :disabled="busy||page===1" @click="page--;load()">上一页</el-button><span>第{{page}}页</span><el-button :disabled="busy||!directory.has_more" @click="page++;load()">下一页</el-button></template>

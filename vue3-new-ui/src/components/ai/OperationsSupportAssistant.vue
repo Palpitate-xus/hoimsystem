@@ -2,7 +2,7 @@
  <section aria-label="受审运维材料专用任务">
   <p v-if="!compatible" role="alert">当前功能、身份或入口不符合受审运维材料模式，未读取其它来源或生成通用任务。</p>
   <template v-else>
-   <p>仅使用明确审核发布的材料与三个固定目标；不连接实际环境，不执行命令，不填写患者或自由补充问题。</p>
+   <p>根据所选材料整理排查线索，供人工核对；不会连接系统或执行命令。</p>
    <p v-if="error" role="alert">{{error}}</p>
    <OperationsSupportInput v-for="instance in [inputKey]" :key="instance" :initial-references="entryReferences" :active="allowed" :config-revision="configKey" @selection="value=>select(instance,value)" @availability="value=>availability(instance,value)" @invalidate="invalidateInput(instance)"/>
    <el-form label-position="top"><el-form-item label="本次固定目标"><el-select v-model="objective" aria-label="本次固定目标" :disabled="busy"><el-option v-for="(label,key) in objectives" :key="key" :value="key" :label="label"/></el-select></el-form-item></el-form>

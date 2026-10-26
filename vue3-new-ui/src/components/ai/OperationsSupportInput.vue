@@ -2,7 +2,7 @@
  <section aria-label="明确运维材料集输入">
   <p v-if="!allowed||!entryValid">当前材料引用或会话无效，请重新选择运维材料。</p>
   <template v-else>
-   <p>请选择完整的当前受审材料集，不自动选择首项。材料可读与允许模型处理是分别核验的条件。</p>
+   <p>请选择已审核发布的运维材料集，再选择本次分析目标。</p>
    <div v-if="initialReferences&&!entryCleared"><p>入口材料集：{{initialReferences.operations_case_id}}</p><el-button :disabled="busy" @click="choose(initialReferences)">核对入口指定材料集</el-button><el-button @click="forgetEntry">清除入口绑定，另选材料集</el-button></div>
    <p v-if="error" role="alert">{{error}}</p>
    <p v-if="selected">已选择材料集{{selected.operations_case_id}}，共{{metadata.source_count}}份已发布文档。</p><details v-if="selected"><summary>材料核验标识</summary><p>公开SHA：{{metadata.public_hash}}</p></details>

@@ -1,8 +1,10 @@
+// Allow the original complete Root compilation (measured 29.685s) in beforeAll.
+// Runtime test/action timeouts and all source/identity assertions remain unchanged.
 const {openNativeDetails}=require('./fixtures/native-ui-details.cjs');
 const {test,expect}=require('@playwright/test');
 const {startDrugLabelRootHarness}=require('./fixtures/drug-label-root-harness.cjs');
 const {load}=require('./fixtures/load-drug-label-main.cjs');
-let harness;test.beforeAll(async()=>{harness=await startDrugLabelRootHarness();});test.afterAll(async()=>{await harness?.close();});
+let harness;test.beforeAll(async()=>{test.setTimeout(120_000);harness=await startDrugLabelRootHarness();});test.afterAll(async()=>{await harness?.close();});
 test.afterEach(async({page})=>{expect(page.__drugLabelRootState?.errors||[]).toEqual([]);});
 async function open(page,{kind='chat',roles=['super_admin'],mode='history',mutateTrace,mutateFull,mutateRows,hold,deny,selected=false}={}){
  const packet=load(kind),state={packet,calls:[],errors:[],releases:{}};page.__drugLabelRootState=state;page.on('pageerror',e=>state.errors.push(e.message));

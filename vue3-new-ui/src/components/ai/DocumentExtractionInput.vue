@@ -5,7 +5,7 @@
     <p v-if="v.error" role="alert">{{ v.error }}</p>
     <template v-if="v.authorized">
       <el-alert title="选择未核实逐字草稿抽取的原文" description="只选择当前已发布且明确完成隐私与原意审核的完整原件。不会自动选首条、登记候选或发布知识；来源声明不代表官方来源或临床已验证。" type="info" :closable="false" />
-      <p>原文登记支持4MiB；模型任务仍须对完整输入、Prompt与结果逐项核对65535字节存储上限。原始字节较小也不保证任务可运行，超限不会截断原文。</p>
+      <details><summary>原文容量与核验详情</summary><p>原文登记支持4MiB；模型任务仍须对完整输入、Prompt与结果逐项核对65535字节存储上限。原始字节较小也不保证任务可运行，超限不会截断原文。</p></details>
       <el-button :loading="v.busy" @click="v.loadPage(1)">刷新原文目录并清除选择</el-button>
       <p v-if="v.preset">预置原文ID：<code>{{ v.preset }}</code> <el-button :disabled="v.busy" @click="v.selectPreset">核对预置原件</el-button>；预置引用尚未自动建立选择。</p>
       <el-table :data="v.directory?.items||[]" :empty-text="v.directory?'本页暂无原件':'尚未读取目录'" aria-label="抽取原文元数据目录">
@@ -17,10 +17,10 @@
       <div v-if="v.original" aria-label="已核对抽取原件">
         <p role="status">原件已完整核对；仅建立原件引用，仍须由服务器核对完整任务容量与当前权限。</p>
         <p>声明标题与版本：{{ v.original.snapshot.metadata.title }} / {{ v.original.snapshot.metadata.version }}</p>
-        <p>原文ID：<code>{{ v.original.snapshot.original_id }}</code>；原UTF8 {{ v.original.snapshot.raw_bytes_length }}字节；Unicode codepoint {{ v.original.snapshot.codepoint_length }}。</p>
+        <details><summary>原件核验详情</summary><p>原文ID：<code>{{ v.original.snapshot.original_id }}</code>；原UTF8 {{ v.original.snapshot.raw_bytes_length }}字节；Unicode codepoint {{ v.original.snapshot.codepoint_length }}。</p>
         <p>原字节SHA256：<code>{{ v.original.snapshot.raw_bytes_hash }}</code>；原件SHA256：<code>{{ v.original.content_hash }}</code>；治理SHA256：<code>{{ v.original.governance_hash }}</code>。</p>
-        <p>登记UTC：{{ v.original.snapshot.recorded_at }}；实际审核UTC：{{ v.original.governance.reviewed_at }}。原可得UTC：{{ v.original.snapshot.metadata.source_available_at??'未记录' }}。</p>
-        <el-alert v-if="v.largeOriginal" title="原件原UTF8已达到或超过65535字节" description="4MiB原件登记能力不等于模型任务容量。完整任务还需保存Prompt、身份与输出；服务器会整件核对并拒绝超限，不会裁剪、摘要替换或补写原文。" type="warning" :closable="false" />
+        <p>登记UTC：{{ v.original.snapshot.recorded_at }}；实际审核UTC：{{ v.original.governance.reviewed_at }}。原可得UTC：{{ v.original.snapshot.metadata.source_available_at??'未记录' }}。</p></details>
+        <el-alert v-if="v.largeOriginal" title="原文较长，可能超出任务容量" description="提交前会检查完整任务大小；超限时会拒绝提交，保留完整原文。容量限制见核验详情。" type="warning" :closable="false" />
         <el-button v-if="!v.rawOpen" @click="v.rawOpen=true">展开已核对完整原文</el-button>
         <pre v-if="v.rawOpen" aria-label="抽取所选完整原文">{{ v.original.snapshot.text }}</pre>
       </div>

@@ -1,7 +1,7 @@
 <template>
  <section aria-label="说明书逐字抽取助手" class="drug-label-assistant">
-  <el-alert v-if="!v.mode" title="此面板仅处理第73项说明书逐字抽取；输入模式不符时不会降级为通用问答。" type="warning" :closable="false" />
-  <el-alert v-else-if="!v.scopeValid||!v.initialValid" title="说明书任务范围无效：仅接受明确绑定UUID和原样可选问题，不接受患者、就诊或其它协议引用。" type="error" :closable="false" />
+  <el-alert v-if="!v.mode" title="当前说明书提取配置不可用，请联系管理员。" type="warning" :closable="false" />
+  <el-alert v-else-if="!v.scopeValid||!v.initialValid" title="说明书来源引用无效，请重新选择。" type="error" :closable="false" />
   <el-alert v-else-if="!v.sessionAllowed" title="仅当前药师或超级管理员可使用说明书逐字抽取" type="warning" :closable="false" />
   <p v-if="v.error" role="alert">{{ v.error }}</p>
   <el-button v-if="v.closed&&v.sessionAllowed&&v.mode&&v.scopeValid&&v.initialValid&&active" @click="v.reopen">重新打开说明书助手</el-button>
@@ -9,9 +9,9 @@
    <el-alert title="仅提出待药师逐项复核的逐字字段草稿；不会自动修改药品目录、发布知识或生成临床规则。" type="warning" :closable="false" />
    <el-button @click="v.close">关闭并清除说明书助手</el-button>
    <DrugLabelSourceInput :key="v.inputKey" :active="v.active" :initial-references="v.initialReferences" :pharmaceutical-id="pharmaceuticalId" @selection="v.selected" @availability="v.availability" @invalidate="v.invalidateSelection" />
-   <p v-if="v.selection" aria-label="说明书本次来源已核对">已独立重读来源 {{ v.selection.references.drug_label_source_binding_id }}，目录 {{ v.selection.source.identity.pharmaceutical_id }}：{{ v.selection.source.identity.name===null?'名称未记录':v.selection.source.identity.name }}。仅保留身份与签署锚，不保留选择阶段完整正文。</p>
-   <el-form label-position="top"><el-form-item label="可选查找问题（原样保留，不作规范化或医学指令）"><el-input v-model="v.question" type="textarea" aria-label="说明书抽取可选问题" /></el-form-item><el-checkbox v-if="v.superUser" v-model="v.preview">明确以Super试运行</el-checkbox><el-checkbox v-if="v.superUser" v-model="v.wantTrace">明确读取Super原任务JSON审计</el-checkbox></el-form>
-   <p>模型必须获明确原文资料许可；功能启用或技术验证状态不等于说明书的官方完整性、药师执照或医学验证。</p>
+   <p v-if="v.selection" aria-label="说明书本次来源已核对">已独立重读来源 {{ v.selection.references.drug_label_source_binding_id }}，目录 {{ v.selection.source.identity.pharmaceutical_id }}：{{ v.selection.source.identity.name===null?'名称未记录':v.selection.source.identity.name }}。</p>
+   <el-form label-position="top"><el-form-item label="查找问题（可选）"><el-input v-model="v.question" type="textarea" aria-label="说明书抽取可选问题" /><small aria-label="补充问题长度">{{ Array.from(v.question).length }}/2000</small></el-form-item><el-checkbox v-if="v.superUser" v-model="v.preview">超级管理员试运行</el-checkbox><el-checkbox v-if="v.superUser" v-model="v.wantTrace">附带任务审计详情</el-checkbox></el-form>
+   <p>请核对所提供版本的完整性与适用性；模型处理需有资料使用许可。</p>
    <div><el-button :disabled="!v.canGenerate||v.busy" @click="v.inspect">预览完整说明书来源</el-button><el-button type="primary" :disabled="!v.canGenerate||v.busy" :loading="v.busy" @click="v.submit">提交未核实说明书字段抽取</el-button><el-button :disabled="!v.selection||v.busy" @click="v.loadHistory">读取此来源任务历史</el-button></div>
    <p v-if="v.message" role="status">{{ v.message }}</p>
    <ul v-if="v.history.length" aria-label="说明书来源任务历史"><li v-for="row in v.history" :key="row.run_id"><el-button :disabled="v.busy" @click="v.openRun(row.run_id)">打开说明书原任务 {{ row.run_id }}</el-button> {{ statuses[row.status] }}；输入{{ shown(row.input_tokens) }} / 输出{{ shown(row.output_tokens) }}</li></ul>
@@ -23,7 +23,7 @@
    </template>
   </template>
   <el-dialog :model-value="v.previewOpen" title="完整说明书来源预览" :before-close="v.closePreview" destroy-on-close @update:model-value="open=>{if(!open)v.closePreview()}">
-   <template v-if="v.previewData&&v.active"><p>已核对本次完整来源、独立签署与公开投影；随机技术token按本次预览生成，不要求与下一任务相同。</p><p>待提交的本地问题：{{ v.question }}</p><p>目录 {{ v.previewData.drug_label_source_record.snapshot.identity.pharmaceutical_id }}；版本 {{ v.previewData.context.drug_label_source.declared_version }}</p><el-button @click="v.previewRaw=!v.previewRaw">{{ v.previewRaw?'收起预览完整原文':'展开预览完整原文' }}</el-button><pre v-if="v.previewRaw" aria-label="说明书预览完整原文">{{ v.previewData.context.drug_label_source.text }}</pre></template><p v-else>正在核对完整来源，尚未展示正文。</p>
+   <template v-if="v.previewData&&v.active"><p>本次说明书来源与签署已核对。</p><p>待提交的本地问题：{{ v.question }}</p><p>目录 {{ v.previewData.drug_label_source_record.snapshot.identity.pharmaceutical_id }}；版本 {{ v.previewData.context.drug_label_source.declared_version }}</p><el-button @click="v.previewRaw=!v.previewRaw">{{ v.previewRaw?'收起预览完整原文':'展开预览完整原文' }}</el-button><pre v-if="v.previewRaw" aria-label="说明书预览完整原文">{{ v.previewData.context.drug_label_source.text }}</pre></template><p v-else>正在核对完整来源，尚未展示正文。</p>
   </el-dialog>
  </section>
 </template>

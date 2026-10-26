@@ -1,3 +1,4 @@
+const {openNativeDetails}=require('./fixtures/native-ui-details.cjs');
 const {test,expect}=require('@playwright/test');
 const {startDrugLabelTaskHarness}=require('./fixtures/drug-label-task-harness.cjs');
 const {load}=require('./fixtures/load-drug-label-main.cjs');
@@ -11,7 +12,7 @@ for(const kind of ['chat','responses']){
  });
  test(`actual main ${kind} nonempty literal DOM keeps BOM CRLF emoji combining marks UTC6 and codepoint span`,async({page})=>{
   await page.addInitScript(({run,trace})=>{window.__drugLabelTaskRole='super_admin';window.__drugLabelTaskScope={run,trace};},{run,trace});await page.goto(harness.origin);
-  await expect(page.getByLabel('说明书核验范围')).toBeVisible();await expect(page.getByLabel('说明书逐字字段表')).toBeVisible();
+  await openNativeDetails(page,'说明书核验范围');await expect(page.getByLabel('说明书逐字字段表')).toBeVisible();
   const span=run.result.drug_label_extraction.fields[0].spans[0],original=run.drug_label_findings.drug_label_source.text;
   expect(Array.from(original).slice(span.start,span.end).join('')).toBe(span.quote);
   await page.getByRole('button',{name:'查看第1项第1段引文',exact:true}).click();expect(await page.getByLabel('说明书字段逐字引文').textContent()).toBe(span.quote);

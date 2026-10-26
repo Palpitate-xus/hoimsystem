@@ -1,3 +1,4 @@
+const {openNativeDetails}=require('./fixtures/native-ui-details.cjs');
 const {test,expect}=require('@playwright/test');
 const {startDocumentExtractionHistoryHarness}=require('./fixtures/document-extraction-history-harness.cjs');
 const actual=require('./fixtures/document-extraction-results/actual.json');
@@ -18,7 +19,7 @@ async function open(page,{packet=actual.chat,roles=['super_admin'],token='synthe
  await page.evaluate(({roles,token})=>{const p=window.__documentHistoryProbe;p.store.commit('user/permissions',roles);p.store.commit('user/token',token);p.scope.ready=true;},{roles,token});return{calls,errors,releases,packet};
 }
 async function inspect(page){await page.getByRole('button',{name:'执行溯源',exact:true}).first().click();}
-async function accepted(page){await expect(page.getByLabel('抽取固定摘要')).toBeVisible({timeout:15000});}
+async function accepted(page){await openNativeDetails(page,'抽取固定摘要',{timeout:15000});}
 for(const kind of ['chat','responses'])test('Super History verifies actual '+kind+' trace before readonly literal draft and full evidence',async({page})=>{const s=await open(page,{packet:actual[kind]});await inspect(page);await accepted(page);await expect(page.getByLabel('抽取审计只读')).toBeVisible();await expect(page.getByRole('button',{name:'保存第1条为未审核候选',exact:true})).toHaveCount(0);await page.getByRole('button',{name:'查看依据 '+s.packet.trace.data.evidence[0].source_id,exact:true}).first().click();expect(await page.getByRole('dialog',{name:'任务原始依据',exact:true}).locator('pre').textContent()).toBe(s.packet.trace.data.document_original.snapshot.text);expect(s.calls.every(c=>c.method==='GET')).toBe(true);expect(s.errors).toEqual([]);});
 test('revoked original is visible only as retained frozen audit and cannot save',async({page})=>{const s=await open(page,{packet:states.revoked});await inspect(page);await accepted(page);await expect(page.getByLabel('抽取原文当前治理')).toContainText('已撤销');await expect(page.getByRole('button',{name:'保存第1条为未审核候选',exact:true})).toHaveCount(0);expect(s.errors).toEqual([]);});
 test('partial actual token reporting preserves unknown output in table and full trace',async({page})=>{const s=await open(page,{packet:states.states.failed});await expect(page.locator('tbody')).toContainText('11 / 未报告');await inspect(page);await expect(page.getByLabel('抽取实际用量')).toContainText('实际输入用量：11；实际输出用量：未知');expect(s.errors).toEqual([]);});

@@ -22,7 +22,7 @@
       </template>
     </template>
     <el-dialog v-model="previewOpen" title="完整双原文核对预览" width="780px" :before-close="closePreview" destroy-on-close>
-      <template v-if="previewData && active"><p>本次问题：{{ previewData.question }}</p><p>只有完整公开双原文投影与该问题发送给模型；私有目标原件保留院内。</p><p>完整提供方报文包括 Prompt 与协议头，提交前仍需服务器容量检查。</p><el-button @click="evidenceOpen = !evidenceOpen">{{ evidenceOpen ? '收起双原文证据' : '展开完整双原文证据' }}</el-button><section v-if="evidenceOpen"><div v-for="side in ['baseline','candidate']" :key="side"><strong>{{ side === 'baseline' ? '基准原文' : '候选原文' }}</strong><pre>{{ previewData.source[side].text }}</pre></div></section><p v-for="item in previewData.evidence" :key="item.source_id">引用：{{ item.source_id }}</p></template><p v-else>尚未完成原件核对。</p>
+      <template v-if="previewData && active"><p>本次问题：{{ previewData.question }}</p><p>只有完整公开双原文投影与该问题发送给模型；私有目标原件保留院内。</p><details><summary>请求容量详情</summary><p>完整提供方报文包括 Prompt 与协议头，提交前仍需服务器容量检查。</p></details><el-button @click="evidenceOpen = !evidenceOpen">{{ evidenceOpen ? '收起双原文证据' : '展开完整双原文证据' }}</el-button><section v-if="evidenceOpen"><div v-for="side in ['baseline','candidate']" :key="side"><strong>{{ side === 'baseline' ? '基准原文' : '候选原文' }}</strong><pre>{{ previewData.source[side].text }}</pre></div></section><p v-for="item in previewData.evidence" :key="item.source_id">引用：{{ item.source_id }}</p></template><p v-else>尚未完成原件核对。</p>
     </el-dialog>
   </section>
 </template>

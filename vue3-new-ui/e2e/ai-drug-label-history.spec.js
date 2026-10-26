@@ -1,3 +1,4 @@
+const {openNativeDetails}=require('./fixtures/native-ui-details.cjs');
 const {test,expect}=require('@playwright/test');
 const {startDrugLabelRootHarness}=require('./fixtures/drug-label-root-harness.cjs');
 const {load}=require('./fixtures/load-drug-label-main.cjs');
@@ -20,7 +21,7 @@ async function open(page,{kind='chat',roles=['super_admin'],mode='history',mutat
  return state;
 }
 async function inspect(page){await page.getByRole('button',{name:'执行溯源',exact:true}).first().click();}
-async function accepted(page){await expect(page.getByLabel('说明书模型摘要')).toBeVisible({timeout:15000});}
+async function accepted(page){await openNativeDetails(page,'说明书模型摘要',{timeout:15000});}
 for(const kind of ['chat','responses'])test('actual Main '+kind+' history requires independent complete run and trace before literal fields',async({page})=>{
  const s=await open(page,{kind,selected:true});await inspect(page);await accepted(page);expect(s.calls.filter(c=>c.path==='/api/ai/runs/'+s.packet.full.data.run_id)).toHaveLength(1);
  await page.getByRole('button',{name:'查看第1项第1段引文',exact:true}).click();expect(await page.getByLabel('说明书字段逐字引文').evaluate(el=>el.textContent)).toBe(s.packet.full.data.result.drug_label_extraction.fields[0].spans[0].quote);

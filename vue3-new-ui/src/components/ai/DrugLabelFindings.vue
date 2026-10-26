@@ -4,38 +4,37 @@
   <el-button v-if="v.closed&&v.sessionAllowed&&active" @click="v.reread">重新读取本次说明书任务</el-button>
   <template v-if="v.authorized">
    <el-button @click="v.close">关闭并清除说明书结果</el-button>
-   <p v-if="v.busy" role="status">正在核对完整来源、签署、逐字结果与任务锚…</p>
+   <p v-if="v.busy" role="status">正在核对说明书来源与结果…</p>
    <p v-if="v.error" role="alert">{{ v.error }}</p>
    <template v-if="v.proof">
-    <el-alert title="未核实模型字段草稿；逐字位置一致不证明医学含义、条件完整性或个体适用" type="warning" :closable="false" />
+    <el-alert title="字段草稿待药师复核，请结合完整说明书判断含义和适用条件" type="warning" :closable="false" />
     <p v-if="auditOnly" aria-label="说明书冻结审计">冻结审计只读；当前失效来源未恢复执行、签署或发布资格。</p>
-    <p aria-label="说明书读取范围">目录 {{ v.record.snapshot.identity.pharmaceutical_id }}：{{ v.source.sku.name===null?'名称未记录':v.source.sku.name }}；提交者声明版本 {{ v.source.declared_version }}。只比较名称、条码和状态及院内真实药品主键。</p>
-    <p>原文 {{ v.source.raw_bytes_length }} UTF8字节 / {{ v.source.codepoint_length }} Unicode码点；未归一化、改写或截断。</p>
-    <p aria-label="说明书核验范围">{{ v.proofNote }}</p>
-    <p>药师签署仅表示当前应用药师角色对明确身份与所提供版本的签认；未提供执照、官方完整版本或医学验证。</p>
-    <p v-if="v.proof.run" aria-label="说明书任务状态">{{ states[v.proof.run.status] }}；Run原时钟为旧表秒级naive ISO，Artifact创建/接收时钟另保留UTC6。</p>
+    <p aria-label="说明书读取范围">目录 {{ v.record.snapshot.identity.pharmaceutical_id }}：{{ v.source.sku.name===null?'名称未记录':v.source.sku.name }}；提交者声明版本 {{ v.source.declared_version }}。</p>
+    <details><summary>来源核验详情</summary><p>原文 {{ v.source.raw_bytes_length }} UTF8字节 / {{ v.source.codepoint_length }} Unicode码点；未归一化、改写或截断。</p><p aria-label="说明书核验范围">{{ v.proofNote }}</p><p v-if="v.proof.run">Run原时钟为旧表秒级naive ISO，Artifact创建/接收时钟另保留UTC6。</p></details>
+    <p>签署针对当前提供的说明书版本；正式采用前仍需核对官方版本和适用性。</p>
+    <p v-if="v.proof.run" aria-label="说明书任务状态">{{ states[v.proof.run.status] }}</p>
     <p v-if="v.proof.run" aria-label="说明书实际用量">输入用量：{{ shown(v.proof.run.input_tokens) }}；输出用量：{{ shown(v.proof.run.output_tokens) }}；{{ v.receipt===null?'实际调用与用量回执待返回':v.receipt.model_call_attempted===null?'是否实际调用未知':v.receipt.model_call_attempted?'模型已调用':'已确认模型未调用' }}。</p>
     <template v-if="v.result">
-     <p aria-label="说明书模型摘要">{{ v.result.summary }}</p>
+     <p>已整理 {{ v.rows.length }} 段待复核引文。</p><details><summary>任务摘要原文</summary><p aria-label="说明书模型摘要">{{ v.result.summary }}</p></details>
      <p>{{ coverageNote }}</p>
      <p v-if="!v.rows.length">本次没有字段草稿；不能据此认为原文没有成分、用法、禁忌或其它内容。</p>
      <el-table v-if="v.rows.length" :data="v.visibleRows" aria-label="说明书逐字字段表">
       <el-table-column label="模型类别（未核实）"><template #default="{row}">{{ labels[row.field] }}</template></el-table-column>
-      <el-table-column label="Unicode区间"><template #default="{row}">[{{ row.start }}, {{ row.end }})</template></el-table-column>
+      <el-table-column label="原文位置"><template #default="{row}">[{{ row.start }}, {{ row.end }})</template></el-table-column>
       <el-table-column prop="review_question" label="待药师复核问题" />
       <el-table-column label="逐字依据"><template #default="{row}"><el-button @click="v.inspect(row)">查看第{{ row.fieldIndex+1 }}项第{{ row.spanIndex+1 }}段引文</el-button></template></el-table-column>
      </el-table>
      <el-pagination v-if="v.rows.length>10" v-model:current-page="v.page" :page-size="10" :total="v.rows.length" layout="prev,pager,next" aria-label="说明书引文分页" />
     </template>
     <p v-else>此状态没有已接收字段草稿；未改写药品目录、知识或临床规则。</p>
-    <div><el-button @click="v.showOriginal">{{ v.rawOpen?'收起完整说明书原文':'展开完整说明书原文' }}</el-button><el-button @click="v.showPrivate">{{ v.privateOpen?'收起完整来源治理原件':'展开完整来源治理原件' }}</el-button></div>
+    <div><el-button @click="v.showOriginal">{{ v.rawOpen?'收起完整说明书原文':'展开完整说明书原文' }}</el-button><el-button @click="v.showPrivate">{{ v.privateOpen?'收起来源核验资料':'来源核验资料' }}</el-button></div>
     <pre v-if="v.rawOpen" aria-label="任务完整说明书原文">{{ v.source.text }}</pre>
     <pre v-if="v.privateOpen" aria-label="任务完整来源治理原件">{{ JSON.stringify(v.record,null,2) }}</pre>
-    <p>未知或未提供：{{ v.source.missing_catalog_or_authority_evidence.join('、') }}。未自动保存条款、发布知识、生成ClinicalRule或剂量建议。</p>
+    <p>未知或未提供：{{ v.source.missing_catalog_or_authority_evidence.join('、') }}。条款须审核后另行保存或发布。</p>
    </template>
   </template>
   <el-dialog :model-value="v.authorized&&v.quote!==null" title="本次原文逐字区间" append-to-body destroy-on-close @update:model-value="open=>{if(!open)v.quote=null}">
-   <template v-if="v.quote"><p>Unicode码点 [{{ v.quote.start }}, {{ v.quote.end }})；类别仍待药师复核。</p><pre aria-label="说明书字段逐字引文">{{ v.quote.quote }}</pre><p>{{ v.quote.review_question }}</p></template>
+   <template v-if="v.quote"><p>原文位置 [{{ v.quote.start }}, {{ v.quote.end }})；类别待药师复核。</p><pre aria-label="说明书字段逐字引文">{{ v.quote.quote }}</pre><p>{{ v.quote.review_question }}</p></template>
   </el-dialog>
  </section>
 </template>

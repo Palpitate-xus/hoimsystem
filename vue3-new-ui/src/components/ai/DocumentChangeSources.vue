@@ -29,7 +29,7 @@
           <el-form-item label="关联原文侧"><el-select v-model="v.form.side" aria-label="关联原文侧" placeholder="明确选择"><el-option label="基线原文" value="baseline" /><el-option label="候选原文" value="candidate" /></el-select></el-form-item>
           <el-form-item label="Unicode codepoint 起点（含，零起始）"><el-input v-model="v.form.start" aria-label="关联起点" placeholder="明确非负整数，可为0" /></el-form-item>
           <el-form-item label="Unicode codepoint 终点（不含）"><el-input v-model="v.form.end" aria-label="关联终点" placeholder="明确正整数" /></el-form-item>
-          <p>单条关联引文最多65535 UTF8字节；超限不会截取或替换原文。</p><pre v-if="v.quote" aria-label="逐字关联引文">{{ v.quote.quote }}</pre>
+          <details><summary>资料核验详情</summary><p>单条关联引文最多65535 UTF8字节；超限不会截取或替换原文。</p></details><pre v-if="v.quote" aria-label="逐字关联引文">{{ v.quote.quote }}</pre>
           <el-form-item label="声明的关系"><el-select v-model="v.form.dependency" aria-label="声明的关联关系" placeholder="明确选择"><el-option label="声明支持" value="declared_support" /><el-option label="声明实施" value="declared_implementation" /><el-option label="需要人工核查" value="requires_human_review" /></el-select></el-form-item>
           <el-form-item label="关联声明依据"><el-input v-model="v.form.linkBasis" aria-label="关联声明依据" type="textarea" :rows="3" /></el-form-item>
           <el-button :disabled="!v.quote||!v.target||!v.documentBasis(v.form.linkBasis)" :loading="v.busy" @click="v.enrollLink">仅登记关联草稿</el-button>
@@ -58,7 +58,7 @@
       </div>
       <section v-if="v.detail" aria-label="完整来源与显式治理">
         <p>状态：{{ v.states[v.detail.value.governance.status] }}；完整原件摘要：{{ v.detail.value.content_hash }}；当前治理摘要：{{ v.detail.value.governance_hash }}。</p>
-        <p>登记UTC6：{{ v.detail.value.snapshot.recorded_at }}；审核UTC6：{{ v.detail.value.governance.reviewed_at??'未审核' }}。</p>
+        <details><summary>资料核验详情</summary><p>登记UTC6：{{ v.detail.value.snapshot.recorded_at }}；审核UTC6：{{ v.detail.value.governance.reviewed_at??'未审核' }}。</p></details>
         <el-alert v-if="!v.detail.value.eligible" title="本件当前不具备新任务资格，完整原件仍保留供人工核对" type="warning" :closable="false" />
         <el-button @click="v.rawOpen=!v.rawOpen">{{ v.rawOpen?'关闭完整私有原件':'展开完整私有原件' }}</el-button><el-button @click="v.clearDetail">关闭并清除当前治理详情</el-button>
         <pre v-if="v.rawOpen" aria-label="完整私有比较来源">{{ v.canonical(v.detail.value) }}</pre>

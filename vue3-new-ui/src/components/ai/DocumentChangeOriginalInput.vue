@@ -11,7 +11,7 @@
         <el-table-column label="操作" width="180"><template #default="{row}"><el-button :disabled="v.busy||row.status!=='published'" @click="v.select(row.original_id,row)">选择并核对完整原件</el-button></template></el-table-column>
       </el-table>
       <el-pagination v-if="v.directory" :current-page="v.directory.page" :page-size="v.directory.page_size" :total="v.directory.total" layout="prev,pager,next,total" :disabled="v.busy" @current-change="v.loadPage" />
-      <div v-if="v.original" role="status">已核对 {{ v.original.snapshot.metadata.title }} / {{ v.original.snapshot.metadata.version }}；原UTF8 {{ v.original.snapshot.raw_bytes_length }}字节。<el-button @click="v.clear">清除原件</el-button></div>
+      <div v-if="v.original" role="status">已核对 {{ v.original.snapshot.metadata.title }} / {{ v.original.snapshot.metadata.version }}。<details><summary>原文字节数</summary><p>原UTF8 {{ v.original.snapshot.raw_bytes_length }}字节。</p></details><el-button @click="v.clear">清除原件</el-button></div>
     </template>
   </section>
 </template>

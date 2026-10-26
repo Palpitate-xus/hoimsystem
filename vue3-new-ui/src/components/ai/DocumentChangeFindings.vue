@@ -14,7 +14,7 @@
       </dl>
       <p>只比较明确的两件原文与有限目标集合；未提供全院规则覆盖。逐字相交不是已确认影响，未相交也不是无影响。</p>
       <template v-if="checked.result">
-        <p class="summary">{{ checked.result.result.summary }}</p>
+        <p>本次提出 {{ changes.length }} 项待核问题。</p><details><summary>任务摘要原文</summary><p class="summary">{{ checked.result.result.summary }}</p></details>
         <p v-if="!changes.length">未返回核对问题；这不表示没有变化或已完成全文检查。</p>
         <article v-for="(change,index) in changes" :key="index" class="question">
           <h4>待人工核实问题 {{ index + 1 }}</h4>
@@ -23,7 +23,7 @@
             <strong>{{ side === 'baseline' ? '基准原文' : '候选原文' }}</strong>
             <p v-if="!change[side + '_spans'].length">本项未引用这一侧；不能据此推断全文不存在对应内容。</p>
             <figure v-for="(span,ordinal) in change[side + '_spans']" :key="ordinal">
-              <figcaption>Unicode codepoint [{{ span.start }}, {{ span.end }}) · 逐字引文</figcaption><pre>{{ span.quote }}</pre>
+              <figcaption>原文引文</figcaption><details><summary>引文位置</summary><p>Unicode codepoint [{{ span.start }}, {{ span.end }})</p></details><pre>{{ span.quote }}</pre>
             </figure>
           </div>
           <p v-if="!change.link_overlaps.length">本问题未产生逐字相交记录；这不表示院内规则无影响。</p>

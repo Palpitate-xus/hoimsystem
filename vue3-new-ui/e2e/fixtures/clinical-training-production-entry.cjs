@@ -28,11 +28,11 @@ async function setupTrainingProduction(page,server,{role='doctor',pipeline=false
  });return s;
 }
 async function completeTrainingPractice(page){
- await page.getByRole('button',{name:'读取当前已发布课程',exact:true}).click();
+ await page.getByRole('button',{name:'选择课程',exact:true}).click();
  const published=F.data(actual('GET','/api/ai/clinical-training/published-lessons')).items,review=actual('POST','/api/ai/clinical-training/submissions').request.review_id,index=published.findIndex(x=>x.review_id===review);expect(index).toBeGreaterThanOrEqual(0);
- await page.getByRole('button',{name:'核对完整题面',exact:true}).nth(index).click();await expect(page.getByLabel('无答案完整公开题面',{exact:true})).toBeVisible();expect(await page.locator('body').innerText()).not.toContain('PRIVATE_REVIEWED_RATIONALE_SENTINEL');
+ await page.getByRole('button',{name:'开始练习',exact:true}).nth(index).click();await expect(page.getByLabel('无答案完整公开题面',{exact:true})).toBeVisible();expect(await page.locator('body').innerText()).not.toContain('PRIVATE_REVIEWED_RATIONALE_SENTINEL');
  const source=success.parts.source.value;for(const answer of source.submission.answers){const i=source.lesson.questions.findIndex(q=>q.question_id===answer.question_id),q=source.lesson.questions[i];for(const selected of answer.selected_option_ids){await page.getByLabel('题目'+(i+1),{exact:true}).getByText(q.options.find(x=>x.option_id===selected).text,{exact:true}).click();}}
- await page.getByText('我明确提交本课程全部题目；空选表示本次明确未作答',{exact:true}).click();await page.getByRole('button',{name:'提交本地练习并取得实际回执',exact:true}).click();await expect(page.getByLabel('实际提交后的固定练习反馈')).toContainText('PRIVATE_REVIEWED_RATIONALE_SENTINEL');await expect(page.getByText('已核对本人实际提交：'+id,{exact:true})).toBeVisible();
+ await page.getByText('确认提交本次作答（未选择的题目记为未作答）',{exact:true}).click();await page.getByRole('button',{name:'提交练习并查看解析',exact:true}).click();await expect(page.getByLabel('实际提交后的固定练习反馈')).toContainText('PRIVATE_REVIEWED_RATIONALE_SENTINEL');await expect(page.getByText('已核对本人实际提交：'+id,{exact:true})).toBeVisible();
 }
 async function chooseTrainingObjective(page){const select=page.getByRole('combobox',{name:'本次明确教学目标',exact:true});await select.press('ArrowDown');await page.getByRole('option',{name:'解释本次已提交练习与审核答案的相符、不同和明确未作答项',exact:true}).click();}
 async function assertTrainingStyles(page,button){await expect(button).toBeVisible();expect(['flex','inline-flex']).toContain(await button.evaluate(e=>getComputedStyle(e).display));expect(await button.evaluate(e=>getComputedStyle(e).borderTopStyle)).toBe('solid');expect(await page.evaluate(()=>Array.from(document.styleSheets).some(s=>s.href&&new URL(s.href).origin===location.origin&&new URL(s.href).pathname.endsWith('.css')))).toBe(true);}

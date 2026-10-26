@@ -1,3 +1,4 @@
+const { selectManagementTab } = require('./fixtures/ai-management-navigation.cjs');
 const { test, expect } = require('@playwright/test');
 const native = require('./fixtures/surgery-synthetic/native-transitions.json').packet;
 const business = require('./fixtures/surgery-synthetic/native-business.json');
@@ -86,13 +87,13 @@ test('生产Super按需加载原资料与完整场景治理，撤销原件可审
   const state = await setup(page); await page.goto('/#/ai/manage');
   await expect(page.getByRole('heading', { name: 'AI 管理中心', exact: true })).toBeVisible();
   expect(state.reads.some(r => r.path.includes('/surgery-sources') || r.path.includes('/surgery-scenarios'))).toBe(false);
-  await page.getByRole('tab', { name: '手术原资料与资源治理', exact: true }).click();
+  await selectManagementTab(page, '手术原资料与资源治理');
   await choose(page, '明确手术资源池', business.pool.payload.name + ' · #' + business.identity.department_id);
   await page.getByRole('button', { name: '核对完整原件', exact: true }).click();
   const original = page.getByRole('article', { name: '手术原件完整核对', exact: true });
   await expect(original).toContainText(source.content_hash); await original.getByRole('button', { name: '展开完整院内冻结原件', exact: true }).click();
   await expect(original.getByRole('textbox', { name: '完整院内手术原件', exact: true })).toHaveValue(JSON.stringify(source, null, 2));
-  await page.getByRole('tab', { name: '完整手术排程场景治理', exact: true }).click();
+  await selectManagementTab(page, '完整手术排程场景治理');
   await page.getByRole('button', { name: '核对完整场景', exact: true }).click();
   const scene = page.getByRole('article', { name: '受审完整手术场景原件', exact: true });
   await expect(scene).toContainText(scenes.http_states.revoked_super.content_hash); await expect(scene).toContainText('当前不能执行新候选任务');
@@ -103,7 +104,7 @@ test('生产Super按需加载原资料与完整场景治理，撤销原件可审
 });
 
 test('生产Super只读核对手术服务并回填实际模型，仍等待人工保存与运营验证', async ({ page }) => {
-  const state = await setup(page); await page.goto('/#/ai/manage'); await page.getByRole('tab', { name: '模型服务', exact: true }).click();
+  const state = await setup(page); await page.goto('/#/ai/manage'); await selectManagementTab(page, '模型服务');
   await page.getByRole('button', { name: '检查本地手术排程服务', exact: true }).click();
   const dialog = page.getByRole('dialog', { name: '本地手术候选优化服务核对', exact: true });
   await expect(dialog).toContainText(check.capabilities.runtime_digest); await dialog.getByRole('button', { name: '填写实际模型，待保存', exact: true }).click();

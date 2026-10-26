@@ -1,3 +1,4 @@
+const { selectManagementTab } = require('./fixtures/ai-management-navigation.cjs');
 const { test, expect } = require("@playwright/test");
 const { createHash } = require("node:crypto");
 
@@ -173,7 +174,7 @@ test("诊疗团队可选他人登记原心电但不能撤回，全缺失原记�
 });
 
 test("超管核对授权文本，按版本撤回并在清除失败后继续，保持原清除请求且不调用模型", async ({ page }) => {
-  const state = await session(page, { role: "super_admin", existing: true, failFirstPurge: true }); await page.goto("/#/ai/manage"); await page.getByRole("tab", { name: "心电原文件", exact: true }).click(); await page.getByRole("button", { name: "核对授权与原波形", exact: true }).click();
+  const state = await session(page, { role: "super_admin", existing: true, failFirstPurge: true }); await page.goto("/#/ai/manage"); await selectManagementTab(page, '心电原文件'); await page.getByRole("button", { name: "核对授权与原波形", exact: true }).click();
   const detail = page.getByRole("dialog", { name: "原始心电登记与授权核对", exact: true }); await expect(detail).toContainText("原来源授权说明 <img src=x onerror=alert(1)>"); await expect(detail.locator("img")).toHaveCount(0); expect(state.windows).toEqual([]); await detail.getByRole("button", { name: "关闭", exact: true }).click();
   await page.getByRole("button", { name: "撤回", exact: true }).click(); let box = page.locator(".el-message-box:visible"); await box.locator("input").fill("已核对本次合成信号原登记人的撤回请求"); await box.getByRole("button", { name: "撤回原心电", exact: true }).click();
   await expect.poll(() => state.withdrawals.length).toBe(1); expect(state.withdrawals[0].expected_revision).toBe(1);

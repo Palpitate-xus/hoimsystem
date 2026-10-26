@@ -1,3 +1,4 @@
+const { selectManagementTab } = require('./fixtures/ai-management-navigation.cjs');
 const { test, expect } = require("@playwright/test");
 const { createHash } = require("node:crypto");
 
@@ -45,7 +46,7 @@ async function session(page, { failFirstPurge = false, withdrawn = false } = {})
 
 test("超管按患者过滤原图，核对授权时不自动读取像素，显式加载保留私有鉴权", async ({ page }) => {
   const state = await session(page);
-  await page.goto("/#/ai/manage"); await page.getByRole("tab", { name: "影像原文件", exact: true }).click();
+  await page.goto("/#/ai/manage"); await selectManagementTab(page, '影像原文件');
   const governance = page.getByLabel("AI影像原文件治理", { exact: true });
   await governance.getByRole("spinbutton", { name: "影像治理患者ID", exact: true }).fill("1");
   await governance.getByRole("button", { name: "查询影像原文件", exact: true }).click();
@@ -64,7 +65,7 @@ test("超管按患者过滤原图，核对授权时不自动读取像素，显�
 
 test("超管按版本撤回原图，清除失败恢复时保留首次原因且不调用模型", async ({ page }) => {
   const state = await session(page, { failFirstPurge: true });
-  await page.goto("/#/ai/manage"); await page.getByRole("tab", { name: "影像原文件", exact: true }).click();
+  await page.goto("/#/ai/manage"); await selectManagementTab(page, '影像原文件');
   await page.getByRole("button", { name: "撤回", exact: true }).click();
   let box = page.locator(".el-message-box:visible"); await box.locator("input").fill("已核对登记人与患者的原图撤回请求"); await box.getByRole("button", { name: "撤回原影像", exact: true }).click();
   await expect.poll(() => state.withdrawals.length).toBe(1); expect(state.withdrawals[0]).toEqual({ expected_revision: 1, reason: "已核对登记人与患者的原图撤回请求" });
@@ -84,7 +85,7 @@ test("超管按版本撤回原图，清除失败恢复时保留首次原因且�
 
 test("超管查看冻结任务原版本与实际裁剪，当前原图已撤回不替换历史候选", async ({ page }) => {
   const state = await session(page, { withdrawn: true });
-  await page.goto("/#/ai/manage"); await page.getByRole("tab", { name: "任务与反馈", exact: true }).click();
+  await page.goto("/#/ai/manage"); await selectManagementTab(page, '任务与反馈');
   await page.getByRole("button", { name: "执行溯源", exact: true }).click();
   const trace = page.getByRole("dialog", { name: "AI 任务执行溯源", exact: true });
   await expect(trace).toContainText("任务当时原版本 1"); await expect(trace).toContainText("原坐标 x=1，y=0，宽2，高2");

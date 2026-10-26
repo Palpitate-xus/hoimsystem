@@ -1,3 +1,4 @@
+const { selectManagementTab } = require('./fixtures/ai-management-navigation.cjs');
 const { test, expect } = require("@playwright/test");
 
 const labels = ["Atelectasis", "Consolidation", "Infiltration", "Pneumothorax", "Edema", "Emphysema", "Fibrosis", "Effusion", "Pneumonia", "Pleural_Thickening", "Cardiomegaly", "Nodule", "Mass", "Hernia", "Lung Lesion", "Fracture", "Lung Opacity", "Enlarged Cardiomediastinum"];
@@ -51,7 +52,7 @@ async function openCheck(page, name = "本地影像甲") {
 
 test("超管仅获取影像服务实际能力和研究预处理，明确填表保存后才更新配置", async ({ page }) => {
   const state = await session(page);
-  await page.goto("/#/ai/manage"); await page.getByRole("tab", { name: "模型服务", exact: true }).click();
+  await page.goto("/#/ai/manage"); await selectManagementTab(page, '模型服务');
   await expect(page.getByRole("row").filter({ hasText: "普通文本服务" }).getByRole("button", { name: "检查本地影像服务", exact: true })).toHaveCount(0);
   await openCheck(page);
   const report = page.getByRole("dialog", { name: "本地影像服务核对", exact: true });
@@ -74,7 +75,7 @@ test("超管仅获取影像服务实际能力和研究预处理，明确填表�
 
 test("关闭旧影像服务检查后迟到回执不能覆盖新服务或填表目标", async ({ page }) => {
   const state = await session(page, { holdFirst: true });
-  await page.goto("/#/ai/manage"); await page.getByRole("tab", { name: "模型服务", exact: true }).click();
+  await page.goto("/#/ai/manage"); await selectManagementTab(page, '模型服务');
   await openCheck(page); await expect.poll(() => !!state.release).toBe(true);
   let report = page.getByRole("dialog", { name: "本地影像服务核对", exact: true });
   await report.getByRole("button", { name: "关闭", exact: true }).click();
@@ -91,7 +92,7 @@ test("关闭旧影像服务检查后迟到回执不能覆盖新服务或填表�
 for (const receiptMismatch of ["provider", "revision", "model"]) {
   test(`影像服务回执的${receiptMismatch}不匹配时不得填入待保存模型`, async ({ page }) => {
     const state = await session(page, { receiptMismatch });
-    await page.goto("/#/ai/manage"); await page.getByRole("tab", { name: "模型服务", exact: true }).click(); await openCheck(page);
+    await page.goto("/#/ai/manage"); await selectManagementTab(page, '模型服务'); await openCheck(page);
     await expect(page.getByText("影像服务核对回执与已保存配置不一致，请刷新后重新检查", { exact: true })).toBeVisible();
     const report = page.getByRole("dialog", { name: "本地影像服务核对", exact: true });
     await expect(report.getByRole("button", { name: "填写实际模型，待保存", exact: true })).toHaveCount(0);
@@ -101,7 +102,7 @@ for (const receiptMismatch of ["provider", "revision", "model"]) {
 
 test("影像模型标识匹配只说明配置一致，保留未验证状态并不修改任何开关", async ({ page }) => {
   const state = await session(page, { configuredMatching: true });
-  await page.goto("/#/ai/manage"); await page.getByRole("tab", { name: "模型服务", exact: true }).click(); await openCheck(page);
+  await page.goto("/#/ai/manage"); await selectManagementTab(page, '模型服务'); await openCheck(page);
   const report = page.getByRole("dialog", { name: "本地影像服务核对", exact: true });
   await expect(report).toContainText("服务声明与登记配置匹配；临床质量仍待验证");
   await expect(report).toContainText("未提供临床验证"); await expect(report).toContainText("不声称与原训练数据预处理等价");
@@ -111,7 +112,7 @@ test("影像模型标识匹配只说明配置一致，保留未验证状态并�
 
 test("等待影像能力回执时失去超管角色会清理旧报告且不接受迟到结果", async ({ page }) => {
   const state = await session(page, { holdFirst: true });
-  await page.goto("/#/ai/manage"); await page.getByRole("tab", { name: "模型服务", exact: true }).click(); await openCheck(page); await expect.poll(() => !!state.release).toBe(true);
+  await page.goto("/#/ai/manage"); await selectManagementTab(page, '模型服务'); await openCheck(page); await expect.poll(() => !!state.release).toBe(true);
   await page.evaluate(() => document.querySelector('#hoim').__vue_app__.config.globalProperties.$store.commit('user/setPermissions', ['admin']));
   await expect(page.getByRole("dialog", { name: "本地影像服务核对", exact: true })).toBeHidden();
   state.release(); await expect.poll(() => state.completed.includes(1)).toBe(true);

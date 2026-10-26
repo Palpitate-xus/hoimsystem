@@ -1,3 +1,4 @@
+const { expectManagementEntry, selectManagementTab } = require('./fixtures/ai-management-navigation.cjs');
 const {test,expect}=require('@playwright/test');
 const {startRcaProductionServer,openRcaProduction,checkedRcaProduction}=require('./fixtures/rca-evidence-production-entry.cjs');
 let server;
@@ -6,8 +7,8 @@ test.afterAll(async({},info)=>{try{expect(server.unhandled).toEqual([]);}finally
 
 test('canonical production Sup governance remains bodyless without an actual event',async({page})=>{
  const api=await openRcaProduction(page,server,{view:'manage'});
- await expect(page.getByRole('tab',{name:'说明书原文与独立签署治理',exact:true})).toBeVisible();
- await page.getByRole('tab',{name:'完整事件RCA来源治理',exact:true}).click();
+ await expectManagementEntry(page, '说明书原文与独立签署治理', true);
+ await selectManagementTab(page, '完整事件RCA来源治理');
  await expect(page.getByText('请从实际事件业务行进入并明确关联范围。',{exact:true})).toBeVisible();
  expect(api.reads.some(path=>path.includes('/rca-evidence/'))).toBe(false);
  expect(api.writes.filter(call=>call.path!=='/api/userInfo')).toEqual([]);

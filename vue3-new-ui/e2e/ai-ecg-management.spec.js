@@ -1,3 +1,4 @@
+const { selectManagementTab } = require('./fixtures/ai-management-navigation.cjs');
 const { test, expect } = require("@playwright/test");
 
 const leads = ["I", "II", "III", "aVR", "aVL", "aVF", "V1", "V2", "V3", "V4", "V5", "V6"];
@@ -48,7 +49,7 @@ async function openCheck(page, name) {
 
 test("超管核对心电原始信号能力和版本后只填待保存表单，不自动启用或推理", async ({ page }) => {
   const state = await session(page);
-  await page.goto("/#/ai/manage"); await page.getByRole("tab", { name: "模型服务", exact: true }).click();
+  await page.goto("/#/ai/manage"); await selectManagementTab(page, '模型服务');
   await expect(page.getByRole("row").filter({ hasText: "普通文本服务" }).getByRole("button", { name: "检查本地心电服务", exact: true })).toHaveCount(0);
   await openCheck(page, "本地心电甲");
   const report = page.getByRole("dialog", { name: "本地心电服务核对", exact: true });
@@ -79,7 +80,7 @@ test("超管核对心电原始信号能力和版本后只填待保存表单，�
 
 test("关闭旧心电服务检查后迟到回执不能填入另一个服务", async ({ page }) => {
   const state = await session(page, { holdFirst: true });
-  await page.goto("/#/ai/manage"); await page.getByRole("tab", { name: "模型服务", exact: true }).click();
+  await page.goto("/#/ai/manage"); await selectManagementTab(page, '模型服务');
   await openCheck(page, "本地心电甲"); await expect.poll(() => !!state.release).toBe(true);
   let report = page.getByRole("dialog", { name: "本地心电服务核对", exact: true });
   await report.getByRole("button", { name: "关闭", exact: true }).click();
@@ -97,7 +98,7 @@ test("关闭旧心电服务检查后迟到回执不能填入另一个服务", as
 
 test("心电服务回执的服务身份不匹配时不能用于填写配置", async ({ page }) => {
   const state = await session(page, { wrongTarget: true });
-  await page.goto("/#/ai/manage"); await page.getByRole("tab", { name: "模型服务", exact: true }).click();
+  await page.goto("/#/ai/manage"); await selectManagementTab(page, '模型服务');
   await openCheck(page, "本地心电甲"); await expect.poll(() => state.completed.includes(1)).toBe(true);
   await expect(page.getByText("服务核对回执与已保存配置不一致，请刷新后重新检查", { exact: true })).toBeVisible();
   const report = page.getByRole("dialog", { name: "本地心电服务核对", exact: true });
@@ -107,7 +108,7 @@ test("心电服务回执的服务身份不匹配时不能用于填写配置", as
 
 test("心电模型标识匹配只说明配置一致，保留未临床验证提示且不改配置", async ({ page }) => {
   const state = await session(page, { configuredMatching: true });
-  await page.goto("/#/ai/manage"); await page.getByRole("tab", { name: "模型服务", exact: true }).click();
+  await page.goto("/#/ai/manage"); await selectManagementTab(page, '模型服务');
   await openCheck(page, "本地心电甲");
   const report = page.getByRole("dialog", { name: "本地心电服务核对", exact: true });
   await expect(report).toContainText("服务声明与登记配置匹配；临床质量仍待验证");

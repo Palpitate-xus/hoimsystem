@@ -1,3 +1,4 @@
+const { selectManagementTab } = require('./fixtures/ai-management-navigation.cjs');
 const { test, expect } = require("@playwright/test");
 
 const model = id => `stat-forecast:${String(id).repeat(64)}`;
@@ -42,7 +43,7 @@ async function openCheck(page, name = "本地统计甲") {
 
 test("超管核对实际统计算法和范围后仅填入待保存模型，不升级效果验证", async ({ page }) => {
   const state = await session(page);
-  await page.goto("/#/ai/manage"); await page.getByRole("tab", { name: "模型服务", exact: true }).click();
+  await page.goto("/#/ai/manage"); await selectManagementTab(page, '模型服务');
   await expect(page.getByRole("row").filter({ hasText: "普通文本服务" }).getByRole("button", { name: "检查本地统计服务", exact: true })).toHaveCount(0);
   await openCheck(page);
   const report = page.getByRole("dialog", { name: "本地统计预测服务核对", exact: true });
@@ -63,7 +64,7 @@ test("超管核对实际统计算法和范围后仅填入待保存模型，不�
 
 test("关闭旧统计检查后迟到回执不替换新服务或待保存模型", async ({ page }) => {
   const state = await session(page, { holdFirst: true });
-  await page.goto("/#/ai/manage"); await page.getByRole("tab", { name: "模型服务", exact: true }).click();
+  await page.goto("/#/ai/manage"); await selectManagementTab(page, '模型服务');
   await openCheck(page); await expect.poll(() => !!state.release).toBe(true);
   await page.getByRole("dialog", { name: "本地统计预测服务核对", exact: true }).getByRole("button", { name: "关闭", exact: true }).click();
   await openCheck(page, "本地统计乙");
@@ -79,7 +80,7 @@ test("关闭旧统计检查后迟到回执不替换新服务或待保存模型",
 
 test("统计版本匹配仍保留未验证说明且不提供重复填表或业务启用", async ({ page }) => {
   const state = await session(page, { matching: true });
-  await page.goto("/#/ai/manage"); await page.getByRole("tab", { name: "模型服务", exact: true }).click(); await openCheck(page);
+  await page.goto("/#/ai/manage"); await selectManagementTab(page, '模型服务'); await openCheck(page);
   const report = page.getByRole("dialog", { name: "本地统计预测服务核对", exact: true });
   await expect(report).toContainText("服务声明与登记配置匹配；运营预测效果仍待验证");
   await expect(report).toContainText("not_provided：服务未提供独立运营效果验证");
@@ -90,7 +91,7 @@ test("统计版本匹配仍保留未验证说明且不提供重复填表或业�
 for (const mismatch of ["provider", "revision", "model"]) {
   test(`统计核对回执的${mismatch}不匹配时不允许填表`, async ({ page }) => {
     const state = await session(page, { mismatch });
-    await page.goto("/#/ai/manage"); await page.getByRole("tab", { name: "模型服务", exact: true }).click(); await openCheck(page);
+    await page.goto("/#/ai/manage"); await selectManagementTab(page, '模型服务'); await openCheck(page);
     await expect(page.getByText("核对回执与已保存统计服务配置不一致，请刷新后重试", { exact: true })).toBeVisible();
     await expect(page.getByRole("dialog", { name: "本地统计预测服务核对", exact: true }).getByRole("button", { name: "填写实际模型，待保存", exact: true })).toHaveCount(0);
     expect(state.writes).toEqual([]); expect(state.features).toEqual([]); expect(state.runs).toEqual([]);
@@ -100,7 +101,7 @@ for (const mismatch of ["provider", "revision", "model"]) {
 for (const changed of ["role", "session"]) {
   test(`统计核对途中${changed}改变后清理旧报告并拒绝迟到结果`, async ({ page }) => {
     const state = await session(page, { holdFirst: true });
-    await page.goto("/#/ai/manage"); await page.getByRole("tab", { name: "模型服务", exact: true }).click(); await openCheck(page); await expect.poll(() => !!state.release).toBe(true);
+    await page.goto("/#/ai/manage"); await selectManagementTab(page, '模型服务'); await openCheck(page); await expect.poll(() => !!state.release).toBe(true);
     await page.evaluate(changed => {
       const store = document.querySelector("#hoim").__vue_app__.config.globalProperties.$store;
       if (changed === "role") store.commit("user/setPermissions", ["admin"]);

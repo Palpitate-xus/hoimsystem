@@ -1,3 +1,4 @@
+const { selectManagementTab } = require('./fixtures/ai-management-navigation.cjs');
 const { test, expect } = require("@playwright/test");
 // Frozen, synthetic-only sources and outputs from the real stdlib kernel, validated by ForecastAnalysis.
 // These browser fixtures verify presentation and request binding, not operational effectiveness.
@@ -51,7 +52,7 @@ async function session(page, options = {}) {
   return state;
 }
 async function select(page, name, value, scope = page) { const control = scope.getByRole("combobox", { name, exact: true }); await expect(control).toBeEnabled(); await control.press("ArrowDown"); await page.locator(`#${await control.getAttribute("aria-controls")}`).getByRole("option", { name: value, exact: true }).click(); }
-async function management(page) { await page.goto("/#/ai/manage"); await page.getByRole("tab", { name: "挂号预测来源", exact: true }).click(); }
+async function management(page) { await page.goto("/#/ai/manage"); await selectManagementTab(page, '挂号预测来源'); }
 async function newSource(page) {
   await page.getByRole("button", { name: "新建覆盖声明", exact: true }).click();
   const dialog = page.getByRole("dialog", { name: "确认挂号历史覆盖并冻结来源", exact: true });

@@ -1,3 +1,4 @@
+const { selectManagementTab } = require('./fixtures/ai-management-navigation.cjs');
 const { test, expect } = require("@playwright/test");
 const { createHash } = require("node:crypto");
 const { execFileSync } = require("node:child_process");
@@ -153,7 +154,7 @@ test("上传后切换患者，迟到回执不绑定新患者且不会自动转�
 
 test("超级管理员查看原授权、按版本撤回与清除录音，全程不调用模型", async ({ page }) => {
   const state = await session(page, { role: "super_admin", existing: true });
-  await page.goto("/#/ai/manage"); await page.getByRole("tab", { name: "录音治理", exact: true }).click();
+  await page.goto("/#/ai/manage"); await selectManagementTab(page, '录音治理');
   await page.getByRole("button", { name: "查看授权与原音", exact: true }).click();
   const detail = page.getByRole("dialog", { name: "原录音登记与授权核对", exact: true });
   await expect(detail).toContainText("原授权说明 <img src=x onerror=alert(1)>"); await expect(detail.locator("img")).toHaveCount(0);

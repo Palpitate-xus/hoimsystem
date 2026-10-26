@@ -1,3 +1,4 @@
+const { selectManagementTab } = require('./fixtures/ai-management-navigation.cjs');
 const { test, expect } = require("@playwright/test");
 
 async function session(page, { holdFirst = false } = {}) {
@@ -29,7 +30,7 @@ async function check(page, name) {
 
 test("超级管理员核对实际语音模型后只填入待保存表单，不自动启用或推理", async ({ page }) => {
   const state = await session(page);
-  await page.goto("/#/ai/manage"); await page.getByRole("tab", { name: "模型服务", exact: true }).click();
+  await page.goto("/#/ai/manage"); await selectManagementTab(page, '模型服务');
   await check(page, "本地语音甲");
   const report = page.getByRole("dialog", { name: "本地语音服务核对", exact: true });
   await expect(report).toContainText(`fw:${"1".repeat(64)}`);
@@ -49,7 +50,7 @@ test("超级管理员核对实际语音模型后只填入待保存表单，不�
 
 test("关闭旧服务检查后迟到回执不覆盖新服务的实际模型", async ({ page }) => {
   const state = await session(page, { holdFirst: true });
-  await page.goto("/#/ai/manage"); await page.getByRole("tab", { name: "模型服务", exact: true }).click();
+  await page.goto("/#/ai/manage"); await selectManagementTab(page, '模型服务');
   await check(page, "本地语音甲");
   await expect.poll(() => !!state.release).toBe(true);
   let report = page.getByRole("dialog", { name: "本地语音服务核对", exact: true });

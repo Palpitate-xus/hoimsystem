@@ -1,3 +1,4 @@
+const { selectManagementTab } = require('./fixtures/ai-management-navigation.cjs');
 const { test, expect } = require("@playwright/test");
 
 // Production dist main-app routes with synthetic API contracts only. These tests
@@ -92,7 +93,7 @@ async function mutateStore(page, type) { await page.evaluate(type => { const sto
 const generate = page => page.getByRole("button", { name: "生成辅助建议", exact: true });
 
 test("超管主应用实际挂载NEWS2固定审核与冻结评估审计，不自动计算或启用", async ({ page }) => {
-  const state = await session(page, { role: "super_admin" }); await page.goto("/#/ai/manage"); await page.getByRole("tab", { name: "风险规则与评估", exact: true }).click();
+  const state = await session(page, { role: "super_admin" }); await page.goto("/#/ai/manage"); await selectManagementTab(page, '风险规则与评估');
   const panel = page.getByLabel("固定风险规则与评估来源治理", { exact: true }); await expect(panel).toContainText("合成固定规则审核"); await panel.getByRole("button", { name: "核对规则审核版本", exact: true }).click();
   const rule = page.getByRole("dialog", { name: "固定风险规则审核", exact: true }); await expect(rule).toContainText(profileId); await expect(rule).toContainText(hashes.recipe); await rule.getByRole("button", { name: "关闭", exact: true }).click();
   await panel.getByRole("tab", { name: "NEWS2评估全院审计", exact: true }).click(); await panel.getByRole("button", { name: "核对冻结NEWS2评估", exact: true }).click(); const audit = page.getByRole("dialog", { name: "NEWS2冻结评估审计", exact: true }); await expect(audit).toContainText(assessmentId); await expect(audit).toContainText(stamp); await expect(audit).toContainText(note);
@@ -101,7 +102,7 @@ test("超管主应用实际挂载NEWS2固定审核与冻结评估审计，不自
 });
 
 test("主应用NEWS2服务核对只填待保存模型，保留关闭状态和原验证说明", async ({ page }) => {
-  const state = await session(page, { role: "super_admin" }); await page.goto("/#/ai/manage"); await page.getByRole("tab", { name: "模型服务", exact: true }).click(); await page.getByRole("button", { name: "检查本地NEWS2服务", exact: true }).click();
+  const state = await session(page, { role: "super_admin" }); await page.goto("/#/ai/manage"); await selectManagementTab(page, '模型服务'); await page.getByRole("button", { name: "检查本地NEWS2服务", exact: true }).click();
   const report = page.getByRole("dialog", { name: "本地NEWS2规则服务核对", exact: true }); for (const text of [runtimeModel, "不拼接异时最新值", "完整总分未知", "not_provided", hashes.recipe, "9".repeat(64), "<img src=x onerror=alert('不执行')>"]) await expect(report).toContainText(text); await expect(report.locator("img")).toHaveCount(0);
   await report.getByRole("button", { name: "填写实际模型，待保存", exact: true }).click(); const edit = page.getByRole("dialog", { name: "编辑模型服务", exact: true }); await expect(edit.locator(".el-form-item").filter({ hasText: "模型标识" }).getByRole("textbox")).toHaveValue(runtimeModel); await expect(edit.locator(".el-form-item").filter({ hasText: "适配器验证报告" }).getByRole("textbox")).toHaveValue(state.providers[0].validation_report); await expect(edit.locator(".el-form-item").filter({ hasText: "服务启用" }).getByRole("switch")).not.toBeChecked(); await expect(edit.locator(".el-form-item").filter({ hasText: "患者资料传输" }).getByRole("switch")).not.toBeChecked();
   expect(state.checks).toEqual([{ expected_revision: 3 }]); expect(state.writes).toEqual([]); expect(state.runs).toEqual([]); expect(state.contexts).toEqual([]);
@@ -110,7 +111,7 @@ test("主应用NEWS2服务核对只填待保存模型，保留关闭状态和原
 test("主应用NEWS2能力检查途中角色或会话改变，迟到回执不能填表", async ({ page }) => {
   const state = await session(page, { role: "super_admin", hold: ({ category }) => category === "capability" ? "capability" : null });
   for (const change of ["role", "session"]) {
-    await page.goto("/#/ai/manage"); if (change === "session") await page.reload(); await page.getByRole("tab", { name: "模型服务", exact: true }).click(); await page.getByRole("button", { name: "检查本地NEWS2服务", exact: true }).click(); await expect.poll(() => !!state.releases.capability).toBe(true);
+    await page.goto("/#/ai/manage"); if (change === "session") await page.reload(); await selectManagementTab(page, '模型服务'); await page.getByRole("button", { name: "检查本地NEWS2服务", exact: true }).click(); await expect.poll(() => !!state.releases.capability).toBe(true);
     await mutateStore(page, change); await expect(page.getByRole("dialog", { name: "本地NEWS2规则服务核对", exact: true })).toBeHidden(); state.releases.capability(); await expect.poll(() => state.completed.length).toBe(change === "role" ? 1 : 2); delete state.releases.capability; await expect(page.getByRole("dialog", { name: "编辑模型服务", exact: true })).toHaveCount(0);
   }
   expect(state.checks).toEqual([{ expected_revision: 3 }, { expected_revision: 3 }]); expect(state.writes).toEqual([]); expect(state.runs).toEqual([]);

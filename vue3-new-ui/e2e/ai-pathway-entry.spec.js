@@ -1,3 +1,4 @@
+const { selectManagementTab } = require('./fixtures/ai-management-navigation.cjs');
 const { test, expect } = require("@playwright/test");
 
 async function session(page, { role = "super_admin", stale = false } = {}) {
@@ -39,7 +40,7 @@ async function session(page, { role = "super_admin", stale = false } = {}) {
 test("超级管理员导入原路径快照后逐项查看全文，单独审核发布", async ({ page }) => {
   const { state } = await session(page);
   await page.goto("/#/ai/manage");
-  await page.getByRole("tab", { name: "知识审核", exact: true }).click();
+  await selectManagementTab(page, '知识审核');
   await page.getByRole("button", { name: "从临床路径导入", exact: true }).click();
   const dialog = page.getByRole("dialog", { name: "导入临床路径待审核快照", exact: true });
   await expect(dialog.getByRole("button", { name: "保存待审核快照", exact: true })).toBeDisabled();
@@ -60,7 +61,7 @@ test("超级管理员导入原路径快照后逐项查看全文，单独审核�
 test("已停用且来源变更的路径版本不能在管理台重新发布", async ({ page }) => {
   const { state } = await session(page, { stale: true });
   await page.goto("/#/ai/manage");
-  await page.getByRole("tab", { name: "知识审核", exact: true }).click();
+  await selectManagementTab(page, '知识审核');
   await page.getByRole("button", { name: "查看与审核", exact: true }).click();
   const review = page.getByRole("dialog", { name: "院内路径 #7：院内测试路径：知识审核", exact: true });
   await expect(review).toContainText("须重新导入当前原路径后审核");

@@ -1,3 +1,4 @@
+const { selectManagementTab } = require('./fixtures/ai-management-navigation.cjs');
 const { test, expect } = require("@playwright/test");
 // API mocks test workflow binding and presentation only, not a risk model.
 const copy = value => JSON.parse(JSON.stringify(value));
@@ -109,7 +110,7 @@ test("切换患者后旧任务回执不挂到新病例，旧窗口不可继续�
 });
 
 test("超级管理员真实管理入口核对冻结窗口，不发起推理", async ({ page }) => {
-  const state = await session(page); await page.goto("/#/ai/manage"); await page.getByRole("tab", { name: "住院观测窗", exact: true }).click(); await expect(page.getByLabel("AI住院观测窗管理", { exact: true })).toContainText(a.window_id); await page.getByRole("button", { name: "核对冻结观测窗", exact: true }).click(); const dialog = page.getByRole("dialog", { name: "冻结住院观测窗审计", exact: true }); await expect(dialog).toContainText(a.content_hash); await expect(dialog.getByLabel("窗口冻结点测量", { exact: true })).toContainText("0 /min"); expect(state.adminReads).toBeGreaterThan(0); expect(state.runs).toEqual([]); expect(state.writes).toEqual([]);
+  const state = await session(page); await page.goto("/#/ai/manage"); await selectManagementTab(page, '住院观测窗'); await expect(page.getByLabel("AI住院观测窗管理", { exact: true })).toContainText(a.window_id); await page.getByRole("button", { name: "核对冻结观测窗", exact: true }).click(); const dialog = page.getByRole("dialog", { name: "冻结住院观测窗审计", exact: true }); await expect(dialog).toContainText(a.content_hash); await expect(dialog.getByLabel("窗口冻结点测量", { exact: true })).toContainText("0 /min"); expect(state.adminReads).toBeGreaterThan(0); expect(state.runs).toEqual([]); expect(state.writes).toEqual([]);
 });
 
 test("护士工作站延迟打开观测页，切换患者清除未保存测量并重新限定原住院", async ({ page }) => {

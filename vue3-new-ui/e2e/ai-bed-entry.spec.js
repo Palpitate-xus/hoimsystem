@@ -1,3 +1,4 @@
+const { selectManagementTab } = require('./fixtures/ai-management-navigation.cjs');
 const {test,expect}=require('@playwright/test');
 const source=require('./fixtures/bed-synthetic/sources.json');
 const series=require('./fixtures/bed-synthetic/series-partial.json');
@@ -45,7 +46,7 @@ test('生产Super按需加载床位原来源和完整序列，撤销冻结审计
   const state=await setup(page);await page.goto('/#/ai/manage');
   await expect(page.getByRole('heading',{name:'AI 管理中心',exact:true})).toBeVisible();
   expect(state.reads.some(r=>r.path.includes('/bed-'))).toBe(false);
-  await page.getByRole('tab',{name:'床位原来源治理',exact:true}).click();
+  await selectManagementTab(page, '床位原来源治理');
   await page.getByRole('button',{name:'核对床位原来源',exact:true}).click();
   const original=page.getByRole('dialog',{name:'病区床位原来源冻结核对',exact:true});
   await expect(original).toContainText(source.kinds.census.super_revoked.content_hash);
@@ -54,7 +55,7 @@ test('生产Super按需加载床位原来源和完整序列，撤销冻结审计
   await expect(original.locator('pre')).toContainText(source.kinds.census.super_revoked.payload.coverage_basis_note);
   await original.getByRole('button',{name:'关闭此对话框',exact:true}).click();
   await expect(original).toBeHidden();
-  await page.getByRole('tab',{name:'床位完整序列治理',exact:true}).click();
+  await selectManagementTab(page, '床位完整序列治理');
   await page.getByRole('button',{name:'核对完整床位序列',exact:true}).click();
   const frozen=page.getByRole('dialog',{name:'完整床位序列冻结核对与治理',exact:true});
   await expect(frozen).toContainText(series.super_revoked.content_hash);
@@ -67,7 +68,7 @@ test('生产Super按需加载床位原来源和完整序列，撤销冻结审计
 
 test('生产Super核对床位实际版本后只回填编辑表，不自动保存启用或验证',async({page})=>{
   const state=await setup(page);await page.goto('/#/ai/manage');
-  await page.getByRole('tab',{name:'模型服务',exact:true}).click();
+  await selectManagementTab(page, '模型服务');
   await page.getByRole('button',{name:'检查本地床位服务',exact:true}).click();
   const dialog=page.getByRole('dialog',{name:'本地床位固定预测服务核对',exact:true});
   await expect(dialog).toContainText(metadataReply.data.capabilities.runtime_digest);

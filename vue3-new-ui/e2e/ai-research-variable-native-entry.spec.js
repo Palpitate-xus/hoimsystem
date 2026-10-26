@@ -1,3 +1,4 @@
+const { selectManagementTab } = require('./fixtures/ai-management-navigation.cjs');
 const {test,expect}=require('@playwright/test');
 const {loadProductionStates,startResearchVariableProductionServer,styles,setupResearchVariableProduction,openResearchVariableWorkbench,chooseResearchVariableBatch,generateResearchVariableTask}=require('./fixtures/research-variable-production-entry.cjs');
 let server;
@@ -54,7 +55,7 @@ test('production failed current Task authorization clears prior Source and Findi
 test('production Super management loads Source only on demand then verifies the actual Scope and both independent dictionary pieces',async({page})=>{
  const state=await setupResearchVariableProduction(page,server,{role:'super_admin'});await page.goto(server.origin+'/#/ai/manage');await expect(page.getByRole('heading',{name:'AI 管理中心',exact:true})).toBeVisible();
  const sources=()=>state.reads.filter(row=>row.path.includes('/research-variables/')||row.path.includes('/research-cohort/'));
- expect(sources()).toEqual([]);await page.getByRole('tab',{name:'科研变量字典与完整批次治理',exact:true}).click();expect(sources()).toEqual([]);
+ expect(sources()).toEqual([]);await selectManagementTab(page, '科研变量字典与完整批次治理');expect(sources()).toEqual([]);
  await page.getByRole('button',{name:'读取明确项目目录',exact:true}).click();await page.getByRole('button',{name:'核对并明确本项目',exact:true}).click();await expect(page.getByText(/明确项目 .*；用途已记录 research_variable_extraction/u)).toBeVisible();
  await page.getByRole('button',{name:'刷新变量来源目录',exact:true}).click();await page.getByRole('button',{name:'按当前授权读取完整两件',exact:true}).click();
  const dialog=page.getByRole('dialog',{name:'变量来源完整核对',exact:true});await expect(dialog).toContainText('两份完整分件、原件字面值、治理关系和末次元数据已核对');

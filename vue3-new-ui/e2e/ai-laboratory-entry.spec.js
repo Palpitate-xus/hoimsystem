@@ -1,3 +1,4 @@
+const { selectManagementTab } = require('./fixtures/ai-management-navigation.cjs');
 const { test, expect } = require("@playwright/test");
 
 // These tests load the production dist main application. APIs are intercepted
@@ -99,7 +100,7 @@ async function openRisk(page, state) { await page.goto("/#/ai/workbench?feature=
 // routes with actual lazy imports; none uses the isolated component harness.
 test("超管主应用实际挂载项目映射及检验来源全院审计", async ({ page }) => {
   const state = await session(page, { role: "super_admin" }); await page.goto("/#/ai/manage");
-  await page.getByRole("tab", { name: "检验项目与来源", exact: true }).click(); const management = page.getByLabel("检验项目映射与来源治理", { exact: true });
+  await selectManagementTab(page, '检验项目与来源'); const management = page.getByLabel("检验项目映射与来源治理", { exact: true });
   await expect(management).toContainText("synthetic-lis"); await management.getByRole("button", { name: "核对项目映射", exact: true }).click();
   const mappingDialog = page.getByRole("dialog", { name: "检验项目映射审核", exact: true }); await expect(mappingDialog).toContainText(state.sources[0].snapshot.mapping.mapping_id); await expect(mappingDialog).toContainText("已发布 · v2"); await mappingDialog.getByRole("button", { name: "关闭", exact: true }).click();
   await management.getByRole("tab", { name: "检验来源全院审计", exact: true }).click(); await management.getByRole("button", { name: "核对冻结检验", exact: true }).first().click();

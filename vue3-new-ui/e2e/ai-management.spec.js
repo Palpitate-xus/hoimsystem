@@ -1,3 +1,4 @@
+const { selectManagementTab } = require('./fixtures/ai-management-navigation.cjs');
 const { test, expect } = require("@playwright/test");
 
 async function managementSession(page, role = "super_admin") {
@@ -100,7 +101,7 @@ test("超级管理员逐项查看未就绪原因而无需发起模型请求", as
 test("超级管理员追查任务当时的Prompt模型和原始反馈，反馈文本按纯文本展示", async ({ page }) => {
   await managementSession(page);
   await page.goto("/#/ai/manage");
-  await page.getByRole("tab", { name: "任务与反馈", exact: true }).click();
+  await selectManagementTab(page, '任务与反馈');
   await page.getByRole("button", { name: "执行溯源", exact: true }).click();
   const dialog = page.getByRole("dialog", { name: "AI 任务执行溯源", exact: true });
   await expect(dialog).toContainText("已留存的测试结果");

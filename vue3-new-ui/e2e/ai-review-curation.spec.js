@@ -1,3 +1,4 @@
+const { selectManagementTab } = require('./fixtures/ai-management-navigation.cjs');
 const { test, expect } = require("@playwright/test");
 
 async function session(page, { initialDraft = false, staleSource = false, holdFirstSource = false } = {}) {
@@ -44,7 +45,7 @@ async function session(page, { initialDraft = false, staleSource = false, holdFi
 
 async function openTab(page) {
   await page.goto("/#/ai/manage");
-  await page.getByRole("tab", { name: "反馈脱敏审核", exact: true }).click();
+  await selectManagementTab(page, '反馈脱敏审核');
 }
 
 test("超级管理员整理、对照审核、发布及停用片段，业务分析另须完整原件", async ({ page }) => {
@@ -82,7 +83,7 @@ test("超级管理员整理、对照审核、发布及停用片段，业务分�
   expect(state.submissions).toEqual([]);
   await drawer.locator("button.el-drawer__close-btn").click();
   await page.goto("/#/ai/manage");
-  await page.getByRole("tab", { name: "反馈脱敏审核", exact: true }).click();
+  await selectManagementTab(page, '反馈脱敏审核');
   await page.getByRole("button", { name: "查看并审核", exact: true }).click();
   await review.getByRole("textbox", { name: "本次审核或停用说明", exact: true }).fill("人工复查后停用此片段");
   await review.getByRole("button", { name: "停用版本", exact: true }).click();

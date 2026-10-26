@@ -10,13 +10,13 @@
         <div class="feature-description"><strong>需要的资料：</strong>{{ selected.inputs.join('、') }}<br /><strong>预期产出：</strong>{{ selected.deliverables.join('；') }}</div>
         <p v-if="boundClinicalReferences.length">本次绑定资料：{{ boundClinicalReferences.join('、') }}。所选记录未注明对应就诊；选择就诊仅补充临床背景，不确认其归属。</p>
         <p v-if="boundPathwayReferences.length">本次绑定：{{ boundPathwayReferences.join('、') }}。住院关联以原记录核实；路径适用条件和已审核版本仍须核对。</p>
-        <p v-if="boundNursingReferences.length && !needsRiskWindow">本次绑定：{{ boundNursingReferences.join('、') }}。按原患者与原住院核对，不能通过补充JSON替换；缺项、历史默认值及人工评分来源仍须复核。</p>
-        <p v-if="needsSupport">本次只整理明确原来源 {{ supportReferences.support_source_id }}（{{ supportReferences.support_source_kind }}）及其原关联；补充JSON不能替换原类型、原标识或原量，不代表完整交班。</p><p v-if="supportFailure" role="alert">{{ supportFailure }}</p>
+        <p v-if="boundNursingReferences.length && !needsRiskWindow">已关联本次住院的护理记录：{{ boundNursingReferences.join('、') }}。请核对标注的缺项和评分来源。</p>
+        <p v-if="needsSupport">本次整理所选单条记录，不代表完整交班。记录类型：{{ supportReferences.support_source_kind }}。</p><p v-if="supportFailure" role="alert">{{ supportFailure }}</p>
         <p v-if="sofaWasBound&&!needsSofa" role="alert">本次绑定SOFA原评估，须由超级管理员配置SOFA专用模式后再读取和计算。</p><p v-if="needsSofa">本任务只使用一件明确的完整24小时SOFA日评估或独立变化复核，逐源医生判读、记录协议、未知与假设分别保存；不使用旧观测窗。</p>
         <p v-if="needsRiskWindow">本任务使用明确选择的原住院观测窗；NEWS2/AKI/qSOFA模式另需核对明确原来源与适用性评估，补充文字或JSON不能填补原数据缺项。</p>
-        <p v-if="safeInput.audio_asset_id">本次绑定原录音 {{ safeInput.audio_asset_id }}；以原登记资料核对患者与就诊，不能通过补充JSON替换。</p>
-        <p v-if="safeInput.ecg_asset_id">本次绑定原始心电 {{ safeInput.ecg_asset_id }}；以原登记资料核对患者与就诊，不能通过补充JSON替换。</p>
-        <p v-if="safeInput.imaging_order_id">本次绑定真实影像申请 {{ safeInput.imaging_order_id }}；原像素与患者须一致，不能通过补充JSON替换申请。</p>
+        <p v-if="safeInput.audio_asset_id">已关联所选录音，请核对录音登记的患者和就诊。</p>
+        <p v-if="safeInput.ecg_asset_id">已关联所选心电记录，请核对患者、就诊和原始波形。</p>
+        <p v-if="safeInput.imaging_order_id">已关联所选影像申请，请核对患者和原始影像。</p>
         <el-alert v-if="!selected.enabled" type="info" :closable="false" title="此功能尚未面向业务启用，由超级管理员配置模型和验证状态。" class="spaced" />
         <el-form-item v-if="selected.scope === 'patient'" label="患者">
           <el-select v-model="patientId" :disabled="!!props.patientId" filterable remote :remote-method="searchPatients" placeholder="搜索有访问权限的患者" style="width: 100%">
@@ -105,7 +105,7 @@
           <el-button v-if="busy" @click="cancel">取消接收结果</el-button>
         </div>
       </template>
-      <el-empty v-else-if="!loading" description="当前角色暂无可用 AI 能力" />
+      <el-empty v-else-if="!loading && !dedicatedLifecycle" description="当前角色暂无可用 AI 能力" />
     </el-form>
     <research-variable-assistant v-if="dedicatedPanel==='research_variables'" :feature="configuredFeature||null" :feature-key="featureKey" :initial-input="props.initialInput" :patient-id="props.patientId" :encounter-ref="props.encounterRef" :active="viewActive" />
     <rca-evidence-assistant v-else-if="dedicatedPanel==='rca'" :feature="configuredFeature||null" :feature-key="featureKey" :initial-input="props.initialInput" :patient-id="props.patientId" :encounter-ref="props.encounterRef" :event-id="props.rcaEventId" :expected-patient-id="props.rcaExpectedPatientId" :active="viewActive" />
@@ -183,16 +183,18 @@
         <p v-if="run.tool_findings.icd_candidates.truncated">候选较多，已限制展示范围，可补充更具体检索词。</p>
       </div>
       <template v-if="run.status === 'succeeded'">
-        <el-alert type="info" :closable="false" title="以下内容为辅助建议或草稿，请核对事实和引用依据后使用。" />
-        <p class="plain-text">{{ run.result?.summary }}</p>
+        <p class="result-review-note">{{ documentDraft ? '文书草稿，请核对正文和复核事项后使用。' : '请结合引用依据复核以下结果。' }}</p>
+        <p v-if="!documentDraft" class="plain-text">{{ run.result?.summary }}</p>
         <el-alert v-for="(item, index) in run.result?.warnings || []" :key="'warning-' + index" type="warning" :closable="false" :title="item" class="spaced" />
         <div v-if="run.result?.missing_data?.length" class="spaced"><strong>仍需补充或核实：</strong><ul><li v-for="(item, index) in run.result.missing_data" :key="index">{{ item }}</li></ul></div>
+        <h4 v-if="documentDraft">文书正文</h4>
+        <p v-if="documentDraft && !copyableDocumentSections.length">尚无可复制的文书正文，请先核对资料缺口。</p>
         <section v-for="(section, index) in run.result?.sections || []" :key="index" class="result-section">
           <h4>{{ section.title }}</h4><p class="plain-text">{{ section.content }}</p>
           <el-button v-for="id in section.source_ids" :key="id" link type="primary" @click="inspectEvidence(id)">查看依据：{{ evidenceTitle(id) }}</el-button>
         </section>
-        <div class="actions"><el-button v-if="!run.result?.transcription&&!codingLifecycle" @click="copyDraft">复制草稿</el-button><el-button @click="feedbackDialog = true">记录复核反馈</el-button></div>
-        <p class="metadata">Prompt v{{ run.prompt_version }} · 模型配置 v{{ run.provider_revision }} · 输入/输出 {{ run.input_tokens }}/{{ run.output_tokens }} Token</p>
+        <div class="actions"><el-button v-if="!run.result?.transcription&&!codingLifecycle" :disabled="documentDraft && !copyableDocumentSections.length" @click="copyDraft">{{ documentDraft ? '复制文书正文' : '复制草稿' }}</el-button><el-button @click="feedbackDialog = true">记录复核反馈</el-button></div>
+        <el-collapse class="spaced"><el-collapse-item title="任务详情"><p v-if="documentDraft" class="plain-text">草稿范围：{{ run.result?.summary }}</p><p class="metadata">Prompt v{{ run.prompt_version }} · 模型配置 v{{ run.provider_revision }} · 任务记录输入/输出 {{ run.input_tokens ?? '未知' }}/{{ run.output_tokens ?? '未知' }} Token</p></el-collapse-item></el-collapse>
       </template>
     </el-card>
 
@@ -230,6 +232,13 @@
     </el-dialog>
     <el-dialog v-model="evidenceDialog" title="核查引用依据" width="760px"><template v-if="evidence"><p><strong>{{ evidence.title }}</strong> {{ evidence.version ? '· ' + evidence.version : '' }}</p><p v-if="evidence.source_uri" class="plain-text">来源：{{ evidence.source_uri }}</p><p v-if="evidence.observed_at">记录时间：{{ evidence.observed_at }}</p><pre class="plain-text">{{ evidence.content }}</pre></template></el-dialog>
     <el-dialog v-model="feedbackDialog" title="人工复核反馈" width="540px"><el-radio-group v-model="feedback.outcome"><el-radio value="accepted">采纳</el-radio><el-radio value="rejected">驳回</el-radio><el-radio value="modified">修改后采纳</el-radio></el-radio-group><el-input v-model="feedback.comment" type="textarea" :rows="4" maxlength="2000" placeholder="说明核查结果或修改内容；反馈不会自动写入病历、处方或医嘱" class="spaced" /><template #footer><el-button @click="feedbackDialog = false">取消</el-button><el-button type="primary" @click="submitFeedback">保存反馈</el-button></template></el-dialog>
+    <el-dialog v-model="documentCopyDialog" title="复制文书正文" width="min(760px, 96vw)" destroy-on-close @closed="clearDocumentCopy">
+      <p>选择要复制的正文。生成说明、引用链接和下列复核事项不写入文书。</p>
+      <el-checkbox-group v-model="documentCopySelection" aria-label="选择文书栏目"><el-checkbox v-for="section in copyableDocumentSections" :key="section.index" :value="section.index">{{ section.title || '正文第' + (section.index + 1) + '项' }}</el-checkbox></el-checkbox-group>
+      <template v-if="documentCopyNotes.length"><h4>复制前需核对</h4><ul><li v-for="(note, index) in documentCopyNotes" :key="index" class="plain-text">{{ note }}</li></ul><el-checkbox v-model="documentCopyReviewed">我已核对上述事项和所选正文</el-checkbox></template>
+      <h4>将复制的正文</h4><pre class="plain-text" aria-label="待复制文书正文">{{ documentCopyText }}</pre>
+      <template #footer><el-button @click="documentCopyDialog = false">取消</el-button><el-button type="primary" :disabled="!documentCopyText || (documentCopyNotes.length > 0 && !documentCopyReviewed)" @click="confirmDocumentCopy">复制选中正文</el-button></template>
+    </el-dialog>
     </template>
   </div>
 </template>
@@ -240,6 +249,7 @@ import DeidentificationPanel from '@/components/ai/DeidentificationPanel.vue';
 import { computed, defineAsyncComponent, onActivated, onBeforeUnmount, onDeactivated, onMounted, ref, watch } from "vue";
 import { useStore } from "vuex";
 import { ElMessage } from "element-plus";
+import { documentBody, documentReviewNotes, documentSections, isDocumentDraft } from "@/utils/aiDocumentDraft";
 import { cancelAIRun, createAIRun, getAIClinicalContext, getAIOperationalContext, getAIEncounters, getAIFeatures, getAIPatients, getAIPrescriptions, getAIPathwayOptions, getAIServiceOptions, getAIRun, getAIRuns, reviewAIRun } from "@/api/ai";
 import { resolveAkiEvidence } from "@/api/aiAki";
 import { resolveSupportEvidence, supportReferencesValid, verifySupportContext } from "@/api/aiSupportContext";
@@ -314,6 +324,12 @@ const statuses = { queued: "已排队", running: "生成中", succeeded: "待复
 const loading = ref(false), submitting = ref(false), patientLoading = ref(false), features = ref([]), featureKey = ref("");
 const patientId = ref(null), encounterRef = ref(""), prescriptionId = ref(null), patients = ref([]), encounters = ref([]), prescriptions = ref([]);
 const question = ref(""), codingQuery = ref(""), extraInput = ref(""), preview = ref(false), run = ref(null), history = ref([]);
+const documentDraft = computed(() => isDocumentDraft(run.value?.feature_key || featureKey.value));
+const copyableDocumentSections = computed(() => documentSections(run.value?.result));
+const documentCopyNotes = computed(() => documentReviewNotes(run.value?.result));
+const documentCopyDialog = ref(false), documentCopySelection = ref([]), documentCopyReviewed = ref(false);
+const documentCopyText = computed(() => documentBody(run.value?.result, documentCopySelection.value));
+let documentCopyTicket = null, documentCopyRunId = null;
 const contextDialog = ref(false), contextData = ref(null), evidenceDialog = ref(false), evidence = ref(null), feedbackDialog = ref(false), feedback = ref({ outcome: "accepted", comment: "" });
 const configuredFeature = computed(() => features.value.find(item => item.key === featureKey.value));
 const variableWasBound=ref(false),variableLifecycle=computed(()=>variableWasBound.value||featureKey.value==='research_extraction'||inputHas('research_variable_batch_id'));
@@ -458,6 +474,7 @@ let timer = null, pollVersion = 0, formVersion = 0, patientLoadVersion = 0, hist
 
 function supportIdentity() { return JSON.stringify([codingSelection.value,codingInitialReferences.value,codingHome.value,safeInput.value.home_id,nativeInventorySelection.value,nativeInventoryInitialReferences.value,nativeInventoryScope.value,supplySelection.value,supplyInitialReferences.value,supplyScope.value,featureKey.value, patientId.value, encounterRef.value, supportReferences.value, selected.value?.input_mode, sofaSelection.value, sofaInitialReferences.value, rosterSelection.value,rosterInitialReferences.value,bedSelection.value,bedInitialReferences.value,surgerySelection.value,surgeryInitialReferences.value,surgeryApplicationIds.value,surgeryCaseCohortBound.value,surgeryCohortValid.value,serviceDepartment.value,serviceSurgeryPool.value,serviceWard.value,(codingLifecycle.value||rosterLifecycle.value||bedLifecycle.value||surgeryLifecycle.value||supplyLifecycle.value||nativeInventoryLifecycle.value)?selected.value:null,store.state.user.username,store.state.user.accessToken, store.getters["user/permissions"]]); }
 function captureSupport(requireSofaSelection=false) { return {codingMode:needsCodingEvidence.value,codingBound:codingWasBound.value,codingHome:codingHome.value,codingReferences:codingInitialReferences.value||codingSelection.value?{...(codingInitialReferences.value||codingSelection.value)}:null,inventoryMode:needsNativeInventory.value,inventoryBound:nativeInventoryWasBound.value,inventoryScope:nativeInventoryScope.value?{...nativeInventoryScope.value}:null,inventoryReferences:nativeInventoryInitialReferences.value||nativeInventorySelection.value?{...(nativeInventoryInitialReferences.value||nativeInventorySelection.value)}:null,supplyMode:needsSupply.value,supplyBound:supplyWasBound.value,supplyScope:supplyScope.value?{...supplyScope.value}:null,supplyReferences:supplyInitialReferences.value||supplySelection.value?{...(supplyInitialReferences.value||supplySelection.value)}:null,surgeryMode:needsSurgery.value,surgeryBound:surgeryWasBound.value||surgeryCaseCohortBound.value,surgeryCohortValid:surgeryCohortValid.value,surgeryApplications:surgeryApplicationIds.value?[...surgeryApplicationIds.value]:null,pool:serviceSurgeryPool.value,surgeryReferences:surgeryInitialReferences.value||surgerySelection.value?{...(surgeryInitialReferences.value||surgerySelection.value)}:null,bedMode:needsBed.value,bedBound:bedWasBound.value,ward:serviceWard.value,bedReferences:bedInitialReferences.value||bedSelection.value?{...(bedInitialReferences.value||bedSelection.value)}:null,rosterMode:needsRoster.value,rosterBound:rosterWasBound.value,department:serviceDepartment.value,rosterReferences:rosterInitialReferences.value||rosterSelection.value?{...(rosterInitialReferences.value||rosterSelection.value)}:null, sofaMode:needsSofa.value, sofaBound:sofaWasBound.value, sofaReferences:sofaWasBound.value?{...sofaInitialReferences.value}:requireSofaSelection&&sofaSelection.value?{...sofaSelection.value}:null, key: supportIdentity(), version: selectionVersion, mode: needsSupport.value, patient: patientId.value, admission: encounterRef.value, references: needsSupport.value ? { ...supportReferences.value } : null }; }
+watch(() => [run.value?.run_id, run.value?.status, supportIdentity(), viewActive.value], clearDocumentCopy, { flush: "sync" });
 const supportCurrent = ticket => !dedicatedLifecycle.value && viewActive.value && ticket.version === selectionVersion && ticket.key === supportIdentity();
 watch(dedicatedLifecycle,value=>{if(!value)return;selectionVersion++;historyVersion++;patientLoadVersion++;formVersion++;stopPolling();run.value=null;history.value=[];contextData.value=null;contextDialog.value=false;evidence.value=null;evidenceDialog.value=false;feedbackDialog.value=false;patients.value=[];encounters.value=[];prescriptions.value=[];patientId.value=null;encounterRef.value='';prescriptionId.value=null;question.value='';extraInput.value='';preview.value=false;},{flush:'sync'});
 
@@ -814,6 +831,15 @@ const evidenceTitle = id => run.value?.evidence?.find(item => item.source_id ===
 async function inspectEvidence(id) { if(id&&typeof id==='object')id=id.source_id;const ticket=captureSupport(),currentRun=run.value;evidence.value=null;evidenceDialog.value=false;const packet=currentRun?.sofa_findings||currentRun?.sofa_change_findings;const value=codingRunHasMarkers(currentRun)?await resolveCodingEvidence(currentRun.evidence?.find(item=>item.source_id===id),currentRun.coding_findings,codingExpected(ticket),{current:()=>supportCurrent(ticket),auditOnly:false}):currentRun?.inventory_findings?await resolveInventoryEvidence(currentRun.evidence?.find(item=>item.source_id===id),currentRun.inventory_findings,nativeInventoryExpected(ticket),{current:()=>supportCurrent(ticket),auditOnly:false}):currentRun?.supply_findings?await resolveSupplyEvidence(currentRun.evidence?.find(item=>item.source_id===id),currentRun.supply_findings,supplyExpected(ticket),{current:()=>supportCurrent(ticket),auditOnly:false}):currentRun?.surgery_findings?await resolveSurgeryEvidence(currentRun.evidence?.find(item=>item.source_id===id),currentRun.surgery_findings,{departmentId:ticket.department,poolId:ticket.pool,references:ticket.surgeryReferences}):currentRun?.bed_findings?await resolveBedEvidence(currentRun.evidence?.find(item=>item.source_id===id),currentRun.bed_findings,ticket.department,ticket.ward,ticket.bedReferences):currentRun?.roster_findings?await resolveRosterEvidence(currentRun.evidence?.find(item=>item.source_id===id),currentRun.roster_findings,ticket.department,ticket.rosterReferences):packet?await resolveSofaEvidence(currentRun.evidence?.find(item=>item.source_id===id),packet,patientId.value,encounterRef.value,ticket.sofaReferences):currentRun?.support_findings?await resolveSupportEvidence(currentRun.evidence?.find(item=>item.source_id===id),currentRun.support_findings,patientId.value,encounterRef.value,needsSupport.value?supportReferences.value:null):(currentRun?.qsofa_findings?resolveQsofaEvidence:resolveAkiEvidence)(currentRun?.evidence?.find(item=>item.source_id===id),currentRun?.qsofa_findings||currentRun?.aki_findings,currentRun?.patient_id,currentRun?.encounter_ref||encounterRef.value);if(currentRun!==run.value||(codingRunHasMarkers(currentRun)||packet||currentRun?.support_findings||currentRun?.roster_findings||currentRun?.bed_findings||currentRun?.surgery_findings||currentRun?.supply_findings||currentRun?.inventory_findings)&&!supportCurrent(ticket))return;evidence.value=value;evidenceDialog.value=!!value; }
 async function inspectPreviewEvidence(id) {if(id&&typeof id==='object')id=id.source_id;const ticket=captureSupport(),packet=contextData.value;if(!contextDialog.value||!packet)return;const evidenceVersion=++previewEvidenceVersion;evidence.value=null;evidenceDialog.value=false;const c=packet?.context,sofa=c?.sofa_source||c?.sofa_change_source;const value=c&&['coding_binding','coding_source','coding_case'].some(k=>Object.hasOwn(c,k))?await resolveCodingEvidence(packet.evidence?.find(item=>item.source_id===id),c,codingExpected(ticket),{current:()=>supportCurrent(ticket),auditOnly:false}):c?.inventory_source?await resolveInventoryEvidence(packet.evidence?.find(item=>item.source_id===id),c,nativeInventoryExpected(ticket),{current:()=>supportCurrent(ticket),auditOnly:false}):c?.supply_source?await resolveSupplyEvidence(packet.evidence?.find(item=>item.source_id===id),c,supplyExpected(ticket),{current:()=>supportCurrent(ticket),auditOnly:false}):c?.surgery_source?await resolveSurgeryEvidence(packet.evidence?.find(item=>item.source_id===id),c,{departmentId:ticket.department,poolId:ticket.pool,references:ticket.surgeryReferences}):c?.bed_source?await resolveBedEvidence(packet.evidence?.find(item=>item.source_id===id),c,ticket.department,ticket.ward,ticket.bedReferences):c?.roster_source?await resolveRosterEvidence(packet.evidence?.find(item=>item.source_id===id),c,ticket.department,ticket.rosterReferences):sofa?await resolveSofaEvidence(packet.evidence?.find(item=>item.source_id===id),c,patientId.value,encounterRef.value,sofaSelection.value):c?.support_source?await resolveSupportEvidence(packet.evidence?.find(item=>item.source_id===id),c,patientId.value,encounterRef.value,supportReferences.value):(c?.qsofa_source?resolveQsofaEvidence:resolveAkiEvidence)(packet?.evidence?.find(item=>item.source_id===id),c,patientId.value,encounterRef.value);if(!contextDialog.value||evidenceVersion!==previewEvidenceVersion||packet!==contextData.value||(c?.coding_binding||sofa||c?.support_source||c?.roster_source||c?.bed_source||c?.surgery_source||c?.supply_source||c?.inventory_source)&&!supportCurrent(ticket))return;evidence.value=value;evidenceDialog.value=!!value;}
 async function copyDraft() {
+  if (documentDraft.value) {
+    if (run.value?.status !== "succeeded" || !copyableDocumentSections.value.length) return;
+    documentCopySelection.value = copyableDocumentSections.value.map(section => section.index);
+    documentCopyReviewed.value = false;
+    documentCopyTicket = captureSupport();
+    documentCopyRunId = run.value.run_id;
+    documentCopyDialog.value = true;
+    return;
+  }
   const transcript = run.value.result.transcription;
   const segments = transcript ? ["原录音转写草稿，待逐段听音与角色核对：", ...transcript.segments.map(item => `[${item.start_ms}–${item.end_ms}毫秒] ${item.speaker}（角色待核实）\n${item.text}${item.uncertain ? '\n不确定：' + item.uncertainty_note : ''}`)] : [];
   const ecg = run.value.result.ecg_analysis;
@@ -822,6 +848,22 @@ async function copyDraft() {
   const imageFindings = image ? ["原始影像候选草稿，待医生在原像素上复核（单张影像，不代表整次检查）：", `原记录 ${image.asset_id}；像素哈希 ${image.pixel_hash}；实际分析区域 ${JSON.stringify(image.processing.analysis_region)}`, ...image.findings.map(item => `${item.label}\n${item.description}\n位置：${item.location === "image" ? "图像级，未提供病灶定位" : JSON.stringify(item.region)}；${item.score == null ? "未提供模型分数" : "模型原始分数 " + item.score + "（非患病概率）"}；依据：${item.source_id}`)] : [];
   const text = [run.value.result.summary, ...run.value.result.sections.map(item => `${item.title}\n${item.content}`), ...segments, ...ecgFindings, ...imageFindings].join("\n\n");
   try { await navigator.clipboard.writeText(text); ElMessage.success("草稿已复制，请核对后使用"); } catch { ElMessage.info("当前环境无法自动复制，请选中结果文本复制"); }
+}
+function clearDocumentCopy() {
+  documentCopyDialog.value = false;
+  documentCopySelection.value = [];
+  documentCopyReviewed.value = false;
+  documentCopyTicket = null;
+  documentCopyRunId = null;
+}
+async function confirmDocumentCopy() {
+  if (!documentCopyTicket || !supportCurrent(documentCopyTicket) || run.value?.run_id !== documentCopyRunId || run.value?.status !== "succeeded" || !documentCopyText.value || (documentCopyNotes.value.length && !documentCopyReviewed.value)) {
+    clearDocumentCopy();
+    return;
+  }
+  const text = documentCopyText.value;
+  try { await navigator.clipboard.writeText(text); clearDocumentCopy(); ElMessage.success("文书正文已复制"); }
+  catch { ElMessage.info("当前环境无法自动复制，可选中预览正文手动复制"); }
 }
 async function submitFeedback() {
   if(!run.value)return;const id=run.value.run_id,ticket=captureSupport();

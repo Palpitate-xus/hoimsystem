@@ -37,6 +37,19 @@ def test_document_body_and_review_notes_have_separate_fields():
     assert "患者沟通" in FEATURE_BY_KEY["consent_material"].task_prompt
 
 
+def test_native_task_style_applies_only_to_permitted_text_fields():
+    for key in SYSTEM_PROMPT_OVERRIDES:
+        prompt = FEATURE_BY_KEY[key].task_prompt
+        assert "表达要求：" in prompt
+        assert "逐字引文不作润色" in prompt
+        assert "sections 必须" not in prompt
+    assert "没有问题时按契约返回 null" in FEATURE_BY_KEY["drg_evidence_review"].task_prompt
+    assert "没有具体待核问题时返回空 observations" in FEATURE_BY_KEY["charge_reconciliation"].task_prompt
+    assert "本任务没有可自由改写的解释字段" in FEATURE_BY_KEY["research_extraction"].task_prompt
+    assert "不增补医学解释" in FEATURE_BY_KEY["drug_label_extraction"].task_prompt
+    assert "不添加未受审教学内容" in FEATURE_BY_KEY["clinical_training"].task_prompt
+
+
 def test_writing_revision_preserves_all_frozen_fixed_system_bytes():
     # Historical native artifacts compare these exact bytes. A future System
     # migration must explicitly provide compatibility rather than relabel them.

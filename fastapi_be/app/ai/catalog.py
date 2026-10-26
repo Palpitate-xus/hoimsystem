@@ -197,6 +197,8 @@ class FeatureSpec:
                 f"核查输入：{inputs}。人工复核目标：{outputs}。\n"
                 "只返回固定coding_evidence_draft_v1草稿；对完整绑定集合逐项给出模型主张、待核实说明、澄清问题及可定位的原文投影引文。"
                 "所有主张均待人工复核。缺少文书或规则时保留不足，不新增诊断、编码、分组、金额或业务操作。"
+                "表达要求：review_note 用一至三句指出该编码与具体原文的对应、冲突或证据缺口，不重复系统状态与通用免责声明。"
+                "clarification_question 只询问会改变该项判断的实际问题；没有问题时按契约返回 null，不为每项编造追问。逐字引文不作润色。"
             )
         if self.number == 69:
             return (
@@ -205,6 +207,8 @@ class FeatureSpec:
                 "只返回charge_reconciliation_draft_v1闭集草稿，最多128项partial_questions_no_completeness_or_correctness_claim问题；"
                 "只引用本次完整公开投影的真实成员和逐字Unicode码点引文，问题不构成收费结论。"
                 "不得输出新的收费项目、数量、价格、应收或退款额；没有提出问题不代表全部记录正确或核对完整。"
+                "表达要求：review_note 简要描述实际记录差异或依据缺口，clarification_question 直接询问本项需核实的关联、状态或原始依据，避免只写‘请人工核实’。"
+                "不为凑数量重复相同问题；没有具体待核问题时返回空 observations。保留待核状态，不在每项复述全部系统限制。逐字引文不作润色。"
             )
         return (
             f"任务编号：{self.number:02d}，能力：{self.name}（{self.key}）。\n"

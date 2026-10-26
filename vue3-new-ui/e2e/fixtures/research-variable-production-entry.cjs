@@ -1,3 +1,4 @@
+const {fillNativeDetails}=require('./native-ui-details.cjs');
 const fs = require('node:fs');
 const path = require('node:path');
 const crypto = require('node:crypto');
@@ -69,7 +70,7 @@ async function setupResearchVariableProduction(page,server,{role='admin'}={}) {
 async function openResearchVariableWorkbench(page,server){
   await page.goto(server.origin+'/#/ai/workbench?feature=research_extraction');
   const panel=page.getByTestId('research-variable-assistant');
-  await panel.getByRole('textbox',{name:'明确已授权批次引用',exact:true}).waitFor();
+  await panel.getByRole('button',{name:'选择变量来源',exact:true}).waitFor();
   return panel;
 }
 async function chooseResearchVariableBatch(page,panel,state){
@@ -77,8 +78,8 @@ async function chooseResearchVariableBatch(page,panel,state){
   await expect(panel.getByTestId('variable-inspect')).toBeDisabled();
   await expect(panel.getByTestId('variable-submit')).toBeDisabled();
   const before=state.reads.length,batch=state.fixture.selection.research_variable_batch_id;
-  await panel.getByRole('textbox',{name:'明确已授权批次引用',exact:true}).fill(batch);
-  await panel.getByRole('button',{name:'读取明确已授权批次引用',exact:true}).click();
+  await fillNativeDetails(panel,'明确已授权批次引用',batch);
+  await panel.getByRole('button',{name:'读取已知批次',exact:true}).click();
   await expect(panel.getByRole('button',{name:'清除本次选择',exact:true})).toBeVisible();
   expect(state.reads.slice(before).map(row=>row.path)).toEqual([
     '/api/ai/research-variables/batches/'+batch,

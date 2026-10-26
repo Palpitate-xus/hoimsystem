@@ -27,7 +27,7 @@ class NoSql:
 
 def test_native_catalog_uses_only_explicit_batch_with_fixed_prompt_patient_data_approval_and_no_added_care_or_knowledge_scope():
     spec = FEATURE_BY_KEY["research_extraction"]
-    assert CATALOG_VERSION == "2026.10.23.32" and spec.number == 76 and spec.scope == "input"
+    assert CATALOG_VERSION == "2026.10.26.1" and spec.number == 76 and spec.scope == "input"
     assert spec.requires_patient_data_permission is True and spec.requires_knowledge is False and spec.clinical is False
     assert spec.task_prompt.endswith(DEFAULT_TASK_PROMPT) and system_prompt_for({"research_variable_binding": None}) == SYSTEM_PROMPT
     assert describe_feature(spec)["source_reference_keys"] == ["research_variable_batch_id"]

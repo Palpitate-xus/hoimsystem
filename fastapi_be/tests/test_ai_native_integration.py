@@ -42,8 +42,21 @@ print(json.dumps({'features':len(p['features']),'version':p['catalog_version'],'
     value = subprocess.run([sys.executable, "-I", "-S", "-c", script], cwd=ROOT, capture_output=True, text=True, check=True)
     assert json.loads(value.stdout) == {
         "features": 80,
-        "version": "2026.10.23.32",
-        "overrides": ["charge_reconciliation", "clinical_training", "deidentification", "drg_evidence_review", "drug_label_extraction", "feedback_analysis", "guideline_change_review", "guideline_ingestion", "incident_rca", "operations_support", "research_cohort", "research_extraction"],
+        "version": "2026.10.26.1",
+        "overrides": [
+            "charge_reconciliation",
+            "clinical_training",
+            "deidentification",
+            "drg_evidence_review",
+            "drug_label_extraction",
+            "feedback_analysis",
+            "guideline_change_review",
+            "guideline_ingestion",
+            "incident_rca",
+            "operations_support",
+            "research_cohort",
+            "research_extraction",
+        ],
     }
 
 

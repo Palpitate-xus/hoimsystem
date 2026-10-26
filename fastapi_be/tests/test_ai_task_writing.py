@@ -50,6 +50,31 @@ def test_native_task_style_applies_only_to_permitted_text_fields():
     assert "不添加未受审教学内容" in FEATURE_BY_KEY["clinical_training"].task_prompt
 
 
+def test_packaged_writing_change_preserves_saved_prompt_and_inactive_configuration(db_session, seed_data):
+    from app.ai.governance import active_prompt, describe_config
+    from app.ai.models import AIFeatureConfig, AIPromptVersion
+
+    for key in ("patient_summary", *SYSTEM_PROMPT_OVERRIDES):
+        spec = FEATURE_BY_KEY[key]
+        assert active_prompt(db_session, spec, None) == (spec.task_prompt, 0)
+        baseline = describe_config(db_session, spec, None, management=True)
+        assert baseline["enabled"] is False and baseline["validation_status"] == "unreviewed"
+        saved_text = f"已保存的院内任务版本：{key}。仅按本次实际授权资料和原有响应契约完成核对。"
+        saved = AIPromptVersion(feature_key=key, version=7, task_prompt=saved_text, change_note="保留既有自定义版本", created_by=seed_data["super_admin_user"].user_id)
+        db_session.add(saved)
+        db_session.flush()
+        config = AIFeatureConfig(feature_key=key, active_prompt_id=saved.prompt_id, allowed_roles_json=json.dumps(spec.default_roles), updated_by=seed_data["super_admin_user"].user_id)
+        db_session.add(config)
+        db_session.flush()
+        before = {column.name: getattr(config, column.name) for column in AIFeatureConfig.__table__.columns}
+        assert active_prompt(db_session, spec, config) == (saved_text, 7)
+        visible = describe_config(db_session, spec, config, management=True)
+        assert visible["prompt_version"] == 7 and visible["active_prompt_id"] == saved.prompt_id
+        assert visible["enabled"] is False and visible["validation_status"] == "unreviewed"
+        assert {column.name: getattr(config, column.name) for column in AIFeatureConfig.__table__.columns} == before
+        assert saved.task_prompt == saved_text
+
+
 def test_writing_revision_preserves_all_frozen_fixed_system_bytes():
     # Historical native artifacts compare these exact bytes. A future System
     # migration must explicitly provide compatibility rather than relabel them.

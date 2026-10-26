@@ -43,7 +43,7 @@
           <div v-if="auditOnly && superUser && detail.can_review || detail.can_revoke" aria-label="评价来源治理操作">
             <el-input v-model="governanceBasis" type="textarea" aria-label="本次评价来源治理依据" placeholder="明确本次技术审核或撤销依据，至少 20 个字符" />
             <el-button v-if="auditOnly && superUser && detail.can_review" :disabled="!satisfactionBasis(governanceBasis) || governing" @click="govern('publish')">审核发布本件</el-button><el-button v-if="auditOnly && superUser && detail.can_review" :disabled="!satisfactionBasis(governanceBasis) || governing" @click="govern('reject')">审核拒绝本件</el-button><el-button v-if="detail.can_revoke" :disabled="!satisfactionRevokeBasis(governanceBasis) || governing" @click="govern('revoke')">撤销本件</el-button>
-            <p>Super 技术发布不替代原摘录的人工隐私／原意审核。撤销至多 1000 个 Unicode 字符、4000 UTF-8 字节；完整私有治理 SHA 仅在持有完整原文时重建。</p>
+            <p>发布前仍需完成人工隐私与原意审核。</p><details><summary>资料核验详情</summary><p>Super 技术发布不替代原摘录的人工隐私／原意审核。撤销至多 1000 个 Unicode 字符、4000 UTF-8 字节；完整私有治理 SHA 仅在持有完整原文时重建。</p></details>
           </div>
         </article>
       </el-dialog>

@@ -1,11 +1,11 @@
 <template>
  <section aria-label="明确运维材料集输入">
-  <p v-if="!allowed||!entryValid">当前输入、身份或会话不可选择运维来源。仅接受规范的operations_case_id引用。</p>
+  <p v-if="!allowed||!entryValid">当前材料引用或会话无效，请重新选择运维材料。</p>
   <template v-else>
    <p>请选择完整的当前受审材料集，不自动选择首项。材料可读与允许模型处理是分别核验的条件。</p>
    <div v-if="initialReferences&&!entryCleared"><p>入口材料集：{{initialReferences.operations_case_id}}</p><el-button :disabled="busy" @click="choose(initialReferences)">核对入口指定材料集</el-button><el-button @click="forgetEntry">清除入口绑定，另选材料集</el-button></div>
    <p v-if="error" role="alert">{{error}}</p>
-   <p v-if="selected">已核对当前完整材料集{{selected.operations_case_id}}，{{metadata.source_count}}个发布文档。公开SHA：{{metadata.public_hash}}</p>
+   <p v-if="selected">已选择材料集{{selected.operations_case_id}}，共{{metadata.source_count}}份已发布文档。</p><details v-if="selected"><summary>材料核验标识</summary><p>公开SHA：{{metadata.public_hash}}</p></details>
    <el-button v-if="selected" :disabled="busy" @click="choose(selected)">重新核对当前公开材料</el-button><el-button v-if="selected" @click="clear">清除所选材料集</el-button>
    <OperationsSupportSources v-for="instance in [sourceKey]" :key="instance" :active="allowed&&entryValid" :config-revision="configRevision" @select="choose" @invalidate="invalidateSource(instance)" @source-changed="invalidateSource(instance)" />
    <el-collapse v-if="source"><el-collapse-item title="本次完整公开材料（不是受控原件）" name="source"><article v-for="doc in source.documents" :key="doc.source_id"><h3>{{doc.title}}</h3><pre>{{doc.text}}</pre></article></el-collapse-item></el-collapse>

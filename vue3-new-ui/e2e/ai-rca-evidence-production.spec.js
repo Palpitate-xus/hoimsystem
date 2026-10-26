@@ -24,7 +24,7 @@ test('canonical production actual event row selects complete Case and accepts sp
  await expect(page.getByLabel('RCA已核对Case锚')).toBeVisible();
  const input=api.packet.states.succeeded.detail.data.rca_evidence_findings.input;
  await page.getByRole('textbox',{name:'RCA原样可选问题',exact:true}).fill(input.question);
- await page.getByText('明确以Super试运行RCA',{exact:true}).click();
+ await page.getByText('超级管理员试运行RCA',{exact:true}).click();
  const button=page.getByRole('button',{name:'提交未核实RCA假设任务',exact:true});
  await expect(button).toBeEnabled();await button.click();
  await expect(page.getByLabel('RCA未核实假设列表')).toContainText('合成模型意见仍待核实');

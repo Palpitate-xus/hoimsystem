@@ -24,7 +24,7 @@
           <p v-if="!selected.claim.citations.length">本项没有逐字引文，不能当作文书支持已确认。</p>
           <el-table v-else :data="selected.claim.citations" aria-label="本项模型逐字引文">
             <el-table-column label="投影文书"><template #default="{row}">{{ fieldName(source.documents.find(d=>d.source_id===row.document_source_id)?.field) }}</template></el-table-column>
-            <el-table-column label="Unicode码点位置"><template #default="{row}">[{{ row.start }}, {{ row.end }})</template></el-table-column>
+            <el-table-column label="引文位置"><template #default="{row}">[{{ row.start }}, {{ row.end }})</template></el-table-column>
             <el-table-column prop="quote" label="逐字引文" />
             <el-table-column label="定位"><template #default="{row}"><el-button @click="selectCitation(row)">定位原文投影</el-button></template></el-table-column>
           </el-table>
@@ -34,7 +34,7 @@
       <h4>本次模型可见文书投影</h4>
       <p>直接标识最小化不保证匿名；以下位置对应投影文字，完整私有原文仍在院内快照中。</p>
       <el-button v-for="document in source.documents" :key="document.source_id" @click="selectDocument(document)">{{ fieldName(document.field) }}</el-button>
-      <template v-if="document"><p>{{ fieldName(document.field) }} · UTF-8 SHA256 {{ document.text_hash }}</p><pre aria-label="可定位的模型可见文书投影">{{ highlight.prefix }}<mark v-if="highlight.quote">{{ highlight.quote }}</mark>{{ highlight.suffix }}</pre></template>
+      <template v-if="document"><p>{{ fieldName(document.field) }}</p><details><summary>文书核验标识</summary><p>UTF-8 SHA256 {{ document.text_hash }}</p></details><pre aria-label="可定位的模型可见文书投影">{{ highlight.prefix }}<mark v-if="highlight.quote">{{ highlight.quote }}</mark>{{ highlight.suffix }}</pre></template>
       <el-button @click="inspect">查看完整来源依据</el-button>
       <el-button @click="showPrivate=!showPrivate">{{ showPrivate?'收起':'展开' }}完整院内原件</el-button>
       <pre v-if="showPrivate" aria-label="完整院内编码原件">{{ JSON.stringify(packet.coding_case.snapshot,null,2) }}</pre>

@@ -4,7 +4,7 @@
   <el-button :disabled="!readable||busy" @click="verify">核对并查看本次完整统计</el-button><el-button @click="close">关闭统计并清除来源</el-button><p v-if="error" role="alert">{{error}}</p>
   <template v-if="verified">
    <p aria-label="实际本地任务状态">任务{{verified.metadata.run_id}} · {{statusLabel(verified.metadata.status)}} · 本地统计，不调用外部模型。</p>
-   <p>只核对已获准读取的完整拆分件、SHA及精确整数统计。隐去的SQL私钥、原始Task审计与来源当前权限由服务端核验，浏览器不宣称独立重建HMAC或匿名保证。</p>
+   <details><summary>资料核验详情</summary><p>只核对已获准读取的完整拆分件、SHA及精确整数统计。隐去的SQL私钥、原始Task审计与来源当前权限由服务端核验，浏览器不宣称独立重建HMAC或匿名保证。</p></details>
    <p aria-label="实际本地计算用量">外部输入/输出tokens均为0；模型调用明确否。CPU尝试：{{tri(verified.metadata.usage?.calculation_attempted)}}；CPU完成：{{tri(verified.metadata.usage?.calculation_completed)}}；耗时：{{verified.metadata.usage?.calculation_ms===null||!verified.metadata.usage?'未知':verified.metadata.usage.calculation_ms+'毫秒'}}；收据{{verified.metadata.usage_receipt_status==='recorded'?'已记录实际审计PK '+verified.metadata.receipt_event_id:'尚待实际记录'}}。</p>
    <p>原日期范围{{source.source.scope.window.date_from}}至{{source.source.scope.window.date_to}}（含首末日，事件时区未知）；病原代码{{source.scenario.pathogen_code}}；明确alpha原文{{source.scenario.alpha_decimal}}。</p>
    <p aria-label="完整病例计数">全部原上报{{source.source.reports.length}}根；有记录的独立患者{{source.source.counts.distinct_subjects_with_records}}；人工符合{{source.source.counts.meets_definition}}、人工不符合{{source.source.counts.does_not_meet}}、未确定{{source.source.counts.undetermined}}、未评估{{source.source.counts.not_assessed}}。明确选择患者数不是监测人群分母。</p>

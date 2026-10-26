@@ -2,13 +2,13 @@
  <section aria-label="完整运维材料任务核对与草稿">
   <p>本任务只阅读明确受审材料，不观察实时环境，不执行命令，不把模型假设当作故障或兼容性结论。</p>
   <el-button v-if="allowed" :disabled="busy||!operationsId(runId)" @click="refresh">重新核对当前任务</el-button>
-  <p v-if="busy" role="status">正在核对当前权限、完整四分件与实际回执。</p><p v-if="error" role="alert">{{error}}</p>
+  <p v-if="busy" role="status">正在核对本次材料与任务结果。</p><p v-if="error" role="alert">{{error}}</p>
   <template v-if="allowed&&bundle">
    <p aria-label="运维任务状态">任务{{bundle.metadata.run_id}}：{{bundle.metadata.status}}；{{bundle.metadata.preview?'超级管理员预览任务':'明确业务任务'}}。</p>
    <p aria-label="运维实际用量">输入：{{shown(bundle.metadata.usage?.input_tokens)}}；输出：{{shown(bundle.metadata.usage?.output_tokens)}}；{{bundle.metadata.usage?.model_call_attempted===true?'已尝试模型调用':bundle.metadata.usage?.model_call_attempted===false?'已确认未调用模型':'是否调用未知'}}。{{bundle.metadata.receipt_pending?'原在途调用实际回执尚未返回。':''}}</p>
-   <p v-if="!bundle.parts" aria-label="运维仅技术范围">当前仅显示技术状态与实际已记录用量，不读取原件、公开材料、Prompt、RAW3或结果。超级管理员身份不能恢复已撤回来源。</p>
+   <p v-if="!bundle.parts" aria-label="运维仅技术范围">当前只能查看任务状态和已记录用量；已撤回或无权读取的材料不会恢复显示。</p>
    <template v-else>
-    <p>完整公开Source、实际Prompt版本、原始TEXT与具体回执主键已核对；隐藏原件与终态SQL摘要仍是服务端不透明锚。</p>
+    <details><summary>来源与任务核验详情</summary><p>完整公开Source、实际Prompt版本、原始TEXT与具体回执主键已核对；隐藏原件与终态SQL摘要仍是服务端不透明锚。</p></details>
     <p>目标：{{objectives[bundle.metadata.binding.objective]}}；材料{{source.documents.length}}件；{{source.action_basis==='missing_reviewed_runbook'?'缺少受审排查手册，不能从日志生成操作指令。':'操作参考仍须管理员核查当前环境与影响。'}}</p>
     <template v-if="result">
      <h3>待人工核实的模型草稿</h3>
@@ -18,7 +18,7 @@
      <ul aria-label="明确资料缺口"><li v-for="(gap,i) in result.gaps" :key="i">{{gap.kind}}：{{gap.explanation}}</li></ul>
      <el-form aria-label="运维草稿人工反馈" label-position="top"><el-form-item label="人工复核结论"><el-select v-model="outcome" aria-label="人工复核结论"><el-option label="接受此草稿供人工使用" value="accepted"/><el-option label="修改后使用" value="modified"/><el-option label="拒绝此草稿" value="rejected"/></el-select></el-form-item><el-form-item label="复核说明"><el-input v-model="comment" aria-label="复核说明" type="textarea"/></el-form-item><el-button :disabled="!feedbackReady||busy" @click="feedback">记录本任务人工反馈</el-button><p v-if="feedbackId">本任务反馈回执：{{feedbackId}}。这不证明当前环境或兼容性。</p></el-form>
     </template><p v-else>尚无完整成功草稿；排队、在途、取消和失败状态不等于模型完成。</p>
-    <el-button :disabled="busy" @click="openRaw">显式核对本任务原始TEXT与Prompt</el-button>
+    <el-button :disabled="busy" @click="openRaw">查看任务技术详情</el-button>
    </template>
    <el-button v-if="['queued','running'].includes(bundle.metadata.status)" :disabled="busy" @click="cancel">停止接收本任务结果</el-button>
   </template>

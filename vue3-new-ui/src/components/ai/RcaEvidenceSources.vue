@@ -20,7 +20,7 @@
     <p>当前记录状态 {{ v.detail.governance.status }}；{{ v.detailKind==='grants'?(v.detail.current_scope?'当前许可范围满足':'许可已失效'):(v.detail.eligible?'本件满足当前来源条件':'当前不可用于新任务') }}。</p>
     <el-button @click="v.showBody=!v.showBody">{{ v.showBody?'收起本件完整原件':'显式展开本件完整原件' }}</el-button>
     <pre v-if="v.showBody" aria-label="RCA本件完整私有原件">{{ pretty(v.detailKind==='grants'?v.detail.identity:v.detail.immutable) }}</pre>
-    <p>原naive时间保留“时区未提供”；登记和审核UTC6为服务器记录时钟，不冒充事件发生时刻。</p>
+    <details><summary>资料核验详情</summary><p>原naive时间保留“时区未提供”；登记和审核UTC6为服务器记录时钟，不冒充事件发生时刻。</p></details>
     <template v-if="v.detailKind!=='grants'&&v.detail.governance.status==='draft'">
      <fieldset><legend>逐项明确原文审核，不默认确认</legend>
       <el-select v-model="v.reviewForm.decision" aria-label="RCA明确审核决定" placeholder="明确发布或拒绝"><el-option label="发布这份提供稿" value="publish"/><el-option label="拒绝这份提供稿" value="reject"/></el-select>
@@ -44,7 +44,7 @@
    <label v-if="v.createKind==='originals'">从完整UTF8原文件载入文字<input type="file" aria-label="载入RCA完整UTF8原文" accept=".txt,.md" @change="event=>{const file=event.target.files?.[0];event.target.value='';v.readTextFile(file);}"/></label>
    <p v-if="v.createKind==='originals'">文件载入保留BOM和CRLF；在文本控件重新编辑会形成新的人工录入文字，应重新核对本次完整提供稿。</p>
    <template v-if="v.createKind==='originals'&&v.form.provenance?.method==='human_declared_derivative'"><el-button :disabled="!v.capture||v.busy" @click="v.readWitness">读取所选完整旧原件并绑定其SHA</el-button><p v-if="v.witness">已核对完整旧原件SHA：{{ v.witness.raw_hash }}。人工提供稿仍须单独逐字审核。</p></template>
-   <p>所有原文保留BOM、CRLF、空值与Unicode codepoint；单原文上限4MiB，完整请求/各响应8MiB，超限拒绝而不裁剪。不会自动发布、推断原因或调用模型。</p>
+   <details><summary>资料核验详情</summary><p>所有原文保留BOM、CRLF、空值与Unicode codepoint；单原文上限4MiB，完整请求/各响应8MiB，超限拒绝而不裁剪。不会自动发布、推断原因或调用模型。</p></details>
    <p v-if="v.formError" role="alert">{{ v.formError }}</p>
    <template #footer><el-button @click="v.createOpen=false">取消本次登记</el-button><el-button :loading="v.busy" :disabled="!v.createValid" @click="v.create">登记本次明确整件</el-button></template>
   </el-dialog>

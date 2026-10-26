@@ -1,8 +1,8 @@
 <template>
  <section aria-label="明确有限病例统计场景入口">
-  <p>明确选择一件当前可读且已发布的完整比较族；无默认科室、窗口或alpha。来源许可与本地版本仍在每次预览、创建和执行时重新核验。</p>
+  <p>请从目录选择统计场景，核对比较范围、时间窗口和显著性阈值后再计算。</p>
   <p v-if="!valid" role="alert">场景引用包含空值、外域字段或不是规范UUID，已清除旧选择。</p>
-  <template v-if="allowed"><el-form-item label="已提供的场景规范UUID"><el-input :model-value="enteredRef" aria-label="已提供的统计场景引用" placeholder="仅作待核对引用，不授予任何正文或执行权限" @update:model-value="entryChanged"/></el-form-item><template v-if="valid"><el-button v-if="pending" :disabled="busy" @click="refresh">核对明确统计场景引用</el-button><el-button v-if="selected" @click="clear">清除统计场景选择</el-button><p v-if="error" role="alert">{{error}}</p><p v-if="selected" aria-label="已选择完整统计场景">已明确场景{{selected.scenario_id}}；完整来源锚{{selected.source_binding.snapshot_id}}；尚未创建任务。</p><InfectionSources :key="childKey" :active="active" :governance="false" @select="select" @invalidate="unavailable" @source-changed="clear"/></template></template>
+  <template v-if="allowed"><details><summary>使用已知场景标识</summary><el-form-item label="场景UUID"><el-input :model-value="enteredRef" aria-label="已提供的统计场景引用" placeholder="粘贴已获授权的场景UUID" @update:model-value="entryChanged"/></el-form-item></details><template v-if="valid"><el-button v-if="pending" :disabled="busy" @click="refresh">核对明确统计场景引用</el-button><el-button v-if="selected" @click="clear">清除统计场景选择</el-button><p v-if="error" role="alert">{{error}}</p><p v-if="selected" aria-label="已选择完整统计场景">已明确场景{{selected.scenario_id}}；尚未创建任务。</p><InfectionSources :key="childKey" :active="active" :governance="false" @select="select" @invalidate="unavailable" @source-changed="clear"/></template></template>
   <p v-else-if="!allowed">当前身份不能读取或选择完整病例统计场景。</p>
  </section>
 </template>

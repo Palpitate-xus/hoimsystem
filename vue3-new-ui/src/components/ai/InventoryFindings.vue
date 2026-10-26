@@ -5,13 +5,13 @@
     <template v-else-if="accepted">
       <el-alert type="info" :closable="false" title="仅比较明确声明的完整候选方案；未来数量是受审情景，不是潜在需求，也不执行采购或库存变更。" />
       <p>院内物资 {{ local.item_kind }} · {{ local.item_id }}；声明数量单位 {{ local.original_unit_text??'未知（null）' }}；声明成本单位 {{ local.currency_text??'未知（null）' }} / {{ local.original_cost_unit_text??'未知（null）' }}。</p>
-      <p>明确物理范围 hospital_inventory；未来 {{ source.date_from }} 至 {{ source.date_to }}，{{ source.scenario.days.length }} 个业务日；IANA 时区 {{ source.timezone }}。资料截止 {{ source.as_of }}。</p>
+      <p>院内库存范围；未来 {{ source.date_from }} 至 {{ source.date_to }}，{{ source.scenario.days.length }} 个业务日；IANA 时区 {{ source.timezone }}。资料截止 {{ source.as_of }}。</p>
       <p v-if="accepted.run">冻结任务状态：{{ taskState(accepted.run.status) }}。</p>
       <p>声明候选 {{ source.candidates.length }} 件，零订单原件 {{ zeroOrderCount }} 件。每件方案整体比较，不重组订单行，也不自动补造零单基线。</p>
       <p>受审规则状态 {{ reviewText(source.scenario.policy.policy_review) }}：效期含当日；日初先移除已失效量，再接收当日到货，依效期和本次公开批次标识顺序分配非冻结量，最后核对共同预算和日末余量约束。这是本次明确审核的软件情景政策。</p>
       <el-button @click="emit('inspect',source.source_id)">核对本次完整库存与候选依据</el-button>
       <template v-if="analysis">
-        <p>比较已与服务器冻结的 Prompt 摘要及模型版本对齐；逐日原量、守恒和费用在浏览器独立重算。</p>
+        <details><summary>计算与模型核验详情</summary><p>比较已与服务器冻结的 Prompt 摘要及模型版本对齐；逐日原量、守恒和费用在浏览器独立重算。</p></details>
         <p>本次核对 {{ analysis.candidate_count }} 件：已核可行 {{ analysis.known_feasible_count }} 件、已核不满足约束 {{ analysis.known_infeasible_count }} 件、未知 {{ analysis.unknown_count }} 件。</p>
         <p>已核可行子集的最低明确采购成本 {{ exact(analysis.best_known_feasible_cost) }}。{{ analysis.best_among_declared_candidates?'完整声明候选集合内的最低成本已核清，全部并列项见下表。':analysis.all_declared_candidates_proven_infeasible?'该集合已核无可行方案，不产生最低可行采购成本。':'尚不能证明整个声明集合的最低成本；未知候选不能按不可行或零成本处理。' }}</p>
         <p v-if="analysis.all_declared_candidates_proven_infeasible">完整声明候选集合内，所有方案均不满足至少一项明确约束；这不代表声明集合外不存在可行方案。</p>

@@ -1,13 +1,25 @@
 <template>
   <div class="app-container ai-management">
-    <vab-page-header title="AI 管理中心" description="统一管理全院 AI 能力、模型、Prompt 版本、知识和访问授权" />
-    <el-row :gutter="16" class="summary-row">
-      <el-col v-for="item in summary" :key="item.label" :xs="12" :sm="6">
-        <el-card shadow="never"><div class="summary-value">{{ item.value }}</div><div>{{ item.label }}</div></el-card>
-      </el-col>
-    </el-row>
-    <el-card v-loading="loading">
-      <el-tabs v-model="tab">
+    <header class="ai-page-heading">
+      <h1>AI 管理中心</h1>
+      <p>配置功能与模型，审核资料，查看任务和访问记录。</p>
+    </header>
+    <dl class="management-summary">
+      <div v-for="item in summary" :key="item.label"><dt>{{ item.label }}</dt><dd class="summary-value">{{ item.value }}</dd></div>
+    </dl>
+    <section class="management-navigation" aria-label="AI 管理导航">
+      <el-radio-group :model-value="activeManagementGroup" aria-label="管理分组" @update:model-value="selectManagementGroup">
+        <el-radio-button v-for="group in availableManagementGroups" :key="group.key" :value="group.key">{{ group.label }}</el-radio-button>
+      </el-radio-group>
+      <el-select :model-value="tab" filterable aria-label="查找管理入口" placeholder="搜索全部管理入口" class="management-entry-select" @update:model-value="selectManagementTab">
+        <el-option-group v-for="group in availableManagementGroups" :key="group.key" :label="group.label">
+          <el-option v-for="entry in group.entries" :key="entry.name" :value="entry.name" :label="entry.label" />
+        </el-option-group>
+      </el-select>
+      <p class="navigation-context">{{ activeManagementGroupLabel }} · {{ currentManagementEntry?.label }}<span>可搜索全部 {{ availableManagementEntries.length }} 个管理入口</span></p>
+    </section>
+    <el-card v-loading="loading" shadow="never" class="management-content-card">
+      <el-tabs v-model="tab" class="management-content-tabs">
         <el-tab-pane label="能力与启用" name="features">
           <div class="page-toolbar">
             <el-input v-model="search" placeholder="搜索名称或功能编号" clearable class="page-search-input" />
@@ -329,6 +341,7 @@ import RcaEvidenceSources from '@/components/ai/RcaEvidenceSources.vue';
 import { computed, defineAsyncComponent, onMounted, onBeforeUnmount, onDeactivated, ref, watch } from "vue";
 import { ElMessage } from "element-plus";
 import store from "@/store";
+import { AI_MANAGEMENT_GROUPS, AI_MANAGEMENT_ENTRIES } from "@/utils/aiManagementNavigation";
 import AiRunHistory from "@/components/AIRunHistory/index.vue";
 import AiReviewCuration from "@/components/AIReviewCuration/index.vue";
 import AiAudioManagement from "@/components/AIAudioManagement/index.vue";
@@ -418,6 +431,36 @@ function resetResearchSources() { researchSourcesAuditOnly.value=false;variableS
 watch([()=>store.state.user.accessToken,()=>store.state.user.username,()=>JSON.stringify(store.state.user.permissions)],resetResearchSources);
 onDeactivated(resetResearchSources);
 onBeforeUnmount(resetResearchSources);
+
+const managementGroupSelections = new Map();
+const availableManagementEntries = computed(() => AI_MANAGEMENT_ENTRIES.filter(entry => {
+  if (entry.guard === "forecast") return canCheckForecast.value;
+  if (entry.guard === "drug_labels") return canManageDrugLabels.value;
+  if (entry.guard === "research") return canManageResearchSources.value;
+  return true;
+}));
+const availableManagementGroups = computed(() => AI_MANAGEMENT_GROUPS.map(group => ({
+  ...group, entries: availableManagementEntries.value.filter(entry => entry.group === group.key),
+})).filter(group => group.entries.length));
+const currentManagementEntry = computed(() => availableManagementEntries.value.find(entry => entry.name === tab.value));
+const activeManagementGroup = computed(() => currentManagementEntry.value?.group || "features_models");
+const activeManagementGroupLabel = computed(() => AI_MANAGEMENT_GROUPS.find(group => group.key === activeManagementGroup.value)?.label || "");
+function selectManagementTab(name) {
+  if (availableManagementEntries.value.some(entry => entry.name === name)) tab.value = name;
+}
+function selectManagementGroup(key) {
+  const entries = availableManagementEntries.value.filter(entry => entry.group === key);
+  const remembered = managementGroupSelections.get(key);
+  selectManagementTab(entries.find(entry => entry.name === remembered)?.name || entries[0]?.name);
+}
+watch(tab, name => {
+  const entry = AI_MANAGEMENT_ENTRIES.find(item => item.name === name);
+  if (entry) managementGroupSelections.set(entry.group, name);
+}, { immediate: true, flush: "sync" });
+watch(availableManagementEntries, entries => {
+  if (!entries.some(entry => entry.name === tab.value)) tab.value = "features";
+}, { flush: "sync" });
+
 
 function openNews2Check(row) {
   if (!canCheckForecast.value) return;
@@ -704,9 +747,28 @@ onMounted(refresh);
 </script>
 
 <style scoped>
-.summary-row { margin-bottom: 20px; }
-.summary-row .el-col { margin-bottom: 12px; }
-.summary-value { font-size: 30px; font-weight: 600; margin-bottom: 8px; }
+.ai-page-heading { margin-bottom: 20px; }
+.ai-page-heading h1 { margin: 0 0 8px; font-size: 24px; font-weight: 600; color: var(--el-text-color-primary); }
+.ai-page-heading p { margin: 0; color: var(--el-text-color-secondary); line-height: 1.6; }
+.management-summary { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); margin: 0 0 20px; padding: 16px 0; border-top: 1px solid var(--el-border-color-lighter); border-bottom: 1px solid var(--el-border-color-lighter); }
+.management-summary > div { padding: 0 20px; border-left: 1px solid var(--el-border-color-lighter); }
+.management-summary > div:first-child { padding-left: 0; border-left: 0; }
+.management-summary dt { color: var(--el-text-color-secondary); font-size: 13px; }
+.summary-value { margin: 8px 0 0; font-size: 24px; font-weight: 600; line-height: 1.2; color: var(--el-text-color-primary); }
+.management-navigation { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; margin-bottom: 16px; }
+.management-entry-select { width: min(360px, 100%); }
+.navigation-context { flex-basis: 100%; margin: 0; font-size: 13px; color: var(--el-text-color-regular); line-height: 1.6; }
+.navigation-context span { margin-left: 16px; color: var(--el-text-color-secondary); }
+.management-content-tabs > :deep(.el-tabs__header) { display: none; }
+.ai-management :deep(.el-card) { box-shadow: none !important; border: 1px solid var(--el-border-color-lighter); border-radius: 6px; }
+@media (max-width: 640px) {
+  .management-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 16px; }
+  .management-summary > div:nth-child(3) { padding-left: 0; border-left: 0; }
+  .management-navigation :deep(.el-radio-group) { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); width: 100%; }
+  .management-navigation :deep(.el-radio-button__inner) { width: 100%; }
+  .management-entry-select { width: 100%; }
+  .navigation-context span { display: block; margin-left: 0; }
+}
 .setup-note { font-size: 12px; color: var(--el-text-color-secondary); line-height: 1.6; }
 .field-hint { margin-left: 12px; font-size: 12px; color: #606266; }
 .prompt-text { white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.7; font-family: inherit; }

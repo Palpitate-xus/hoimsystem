@@ -21,7 +21,7 @@ async function open(page,initial={},mutateFeatures=value=>value){
  await page.goto(harness.origin);await page.waitForFunction(()=>!!window.__researchVariableAssistantProbe?.assistant);return {calls,errors};
 }
 async function noGeneric(page){await expect(page.getByRole('button',{name:'生成辅助建议',exact:true})).toHaveCount(0);await expect(page.getByText('补充 JSON（可选）',{exact:true})).toHaveCount(0);await expect(page.getByPlaceholder('搜索有访问权限的患者',{exact:true})).toHaveCount(0);}
-async function ready(page){await page.getByRole('button',{name:'显式重新读取引用完整批次',exact:true}).click();await expect(page.getByRole('button',{name:'清除本次选择',exact:true})).toBeVisible();await page.getByTestId('variable-inspect').click();await expect(page.getByTestId('variable-preview')).toBeVisible();await page.getByTestId('variable-submit').click();await expect(page.getByRole('region',{name:'科研变量逐字草稿核对'})).toBeVisible();}
+async function ready(page){await page.getByRole('button',{name:'核对传入批次',exact:true}).click();await expect(page.getByRole('button',{name:'清除本次选择',exact:true})).toBeVisible();await page.getByTestId('variable-inspect').click();await expect(page.getByTestId('variable-preview')).toBeVisible();await page.getByTestId('variable-submit').click();await expect(page.getByRole('region',{name:'科研变量逐字草稿核对'})).toBeVisible();}
 test('real shared Parent delegates76 to the actual complete-proof child and never generic patient/JSON/service routes',async({page})=>{
  const {calls,errors}=await open(page);await noGeneric(page);await ready(page);await noGeneric(page);expect(calls.filter(x=>x.method==='POST').map(x=>x.path)).toEqual(['/ai/research-variables/context','/ai/runs']);expect(calls.some(x=>/service-options|patients|operational-context/u.test(x.path))).toBe(false);expect(errors).toEqual([]);
 });
@@ -34,7 +34,7 @@ for(const change of ['feature','removed_mode','foreign_mode','patient','encounte
  await expect(page.getByTestId('variable-preview')).toHaveCount(0);await expect(page.getByRole('region',{name:'科研变量逐字草稿核对'})).toHaveCount(0);await noGeneric(page);expect(calls.slice(before)).toEqual([]);expect(errors).toEqual([]);
 });
 test('switching76 to71 preserves the first dedicated lifecycle instead of mounting both children',async({page})=>{
- const {calls,errors}=await open(page);await ready(page);const before=calls.length;await page.evaluate(()=>{window.__researchVariableAssistantProbe.assistant.$.setupState.featureKey='guideline_ingestion';});await expect(page.getByTestId('research-variable-assistant')).toBeVisible();await expect(page.getByText('请恢复第76项科研变量原文候选抽取及其专用来源模式；未进入通用任务。',{exact:true})).toBeVisible();await noGeneric(page);expect(calls.slice(before)).toEqual([]);expect(errors).toEqual([]);
+ const {calls,errors}=await open(page);await ready(page);const before=calls.length;await page.evaluate(()=>{window.__researchVariableAssistantProbe.assistant.$.setupState.featureKey='guideline_ingestion';});await expect(page.getByTestId('research-variable-assistant')).toBeVisible();await expect(page.getByText('当前科研变量提取配置不可用，请联系管理员。',{exact:true})).toBeVisible();await noGeneric(page);expect(calls.slice(before)).toEqual([]);expect(errors).toEqual([]);
 });
 test('initial foreign patient scope is rejected before any Source/context/task read',async({page})=>{
  const {calls,errors}=await open(page,{patientId:1});await expect(page.getByTestId('research-variable-assistant')).toBeVisible();await expect(page.getByTestId('variable-inspect')).toHaveCount(0);await noGeneric(page);expect(calls).toEqual([{method:'GET',path:'/ai/features'}]);expect(errors).toEqual([]);

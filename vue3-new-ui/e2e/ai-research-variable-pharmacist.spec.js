@@ -13,7 +13,7 @@ async function open(page,{hold=null,denyAfterFirst=false,mode='sources'}={}){
   else if(entry.method==='GET'&&entry.path.includes('/dictionaries/'))stage='dictionary.created.'+(entry.path.endsWith('/parts/definition')?'definition':entry.path.endsWith('/parts/scope')?'scope':'metadata');
   if(!stage){state.unexpected.push(entry);await route.fulfill({status:599,json:{detail:'No exact actual pharmacist response selected'}});return;}
   const row=byStage[stage];await route.fulfill({status:row.status,body:row.body,headers:row.response_headers});state.completed.push(entry);
- });await page.goto(harness.origin);if(mode==='input')await page.getByRole('button',{name:'打开完整变量来源目录',exact:true}).click();return state;
+ });await page.goto(harness.origin);if(mode==='input')await page.getByRole('button',{name:'选择变量来源',exact:true}).click();return state;
 }
 async function choose(page,identifier=id){await page.getByLabel('已授权变量项目标识',{exact:true}).fill(identifier);await page.getByRole('button',{name:'读取授权变量项目',exact:true}).click();}
 function clean(state){expect(state.unexpected).toEqual([]);expect(state.errors).toEqual([]);expect(state.seen.some(row=>row.path.startsWith('/api/ai/research-cohort/'))).toBe(false);}

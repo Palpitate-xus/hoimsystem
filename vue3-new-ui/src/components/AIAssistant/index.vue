@@ -194,7 +194,7 @@
           <el-button v-for="id in section.source_ids" :key="id" link type="primary" @click="inspectEvidence(id)">查看依据：{{ evidenceTitle(id) }}</el-button>
         </section>
         <div class="actions"><el-button v-if="!run.result?.transcription&&!codingLifecycle" :disabled="documentDraft && !copyableDocumentSections.length" @click="copyDraft">{{ documentDraft ? '复制文书正文' : '复制草稿' }}</el-button><el-button @click="feedbackDialog = true">记录复核反馈</el-button></div>
-        <el-collapse class="spaced"><el-collapse-item title="任务详情"><p v-if="documentDraft" class="plain-text">草稿范围：{{ run.result?.summary }}</p><p class="metadata">Prompt v{{ run.prompt_version }} · 模型配置 v{{ run.provider_revision }} · 任务记录输入/输出 {{ run.input_tokens ?? '未知' }}/{{ run.output_tokens ?? '未知' }} Token</p></el-collapse-item></el-collapse>
+        <el-collapse class="spaced"><el-collapse-item title="任务详情"><p v-if="documentDraft" class="plain-text">生成摘要：{{ run.result?.summary }}</p><p class="metadata">Prompt v{{ run.prompt_version }} · 模型配置 v{{ run.provider_revision }} · 任务记录输入/输出 {{ run.input_tokens ?? '未知' }}/{{ run.output_tokens ?? '未知' }} Token</p></el-collapse-item></el-collapse>
       </template>
     </el-card>
 
@@ -234,6 +234,7 @@
     <el-dialog v-model="feedbackDialog" title="人工复核反馈" width="540px"><el-radio-group v-model="feedback.outcome"><el-radio value="accepted">采纳</el-radio><el-radio value="rejected">驳回</el-radio><el-radio value="modified">修改后采纳</el-radio></el-radio-group><el-input v-model="feedback.comment" type="textarea" :rows="4" maxlength="2000" placeholder="说明核查结果或修改内容；反馈不会自动写入病历、处方或医嘱" class="spaced" /><template #footer><el-button @click="feedbackDialog = false">取消</el-button><el-button type="primary" @click="submitFeedback">保存反馈</el-button></template></el-dialog>
     <el-dialog v-model="documentCopyDialog" title="复制文书正文" width="min(760px, 96vw)" destroy-on-close @closed="clearDocumentCopy">
       <p>选择要复制的正文。生成说明、引用链接和下列复核事项不写入文书。</p>
+      <template v-if="run?.result?.summary"><h4>生成摘要（不复制）</h4><p class="plain-text" aria-label="文书生成摘要">{{ run.result.summary }}</p></template>
       <el-checkbox-group v-model="documentCopySelection" aria-label="选择文书栏目"><el-checkbox v-for="section in copyableDocumentSections" :key="section.index" :value="section.index">{{ section.title || '正文第' + (section.index + 1) + '项' }}</el-checkbox></el-checkbox-group>
       <template v-if="documentCopyNotes.length"><h4>复制前需核对</h4><ul><li v-for="(note, index) in documentCopyNotes" :key="index" class="plain-text">{{ note }}</li></ul><el-checkbox v-model="documentCopyReviewed">我已核对上述事项和所选正文</el-checkbox></template>
       <h4>将复制的正文</h4><pre class="plain-text" aria-label="待复制文书正文">{{ documentCopyText }}</pre>
@@ -330,6 +331,7 @@ const documentCopyNotes = computed(() => documentReviewNotes(run.value?.result))
 const documentCopyDialog = ref(false), documentCopySelection = ref([]), documentCopyReviewed = ref(false);
 const documentCopyText = computed(() => documentBody(run.value?.result, documentCopySelection.value));
 let documentCopyTicket = null, documentCopyRunId = null;
+watch(documentCopySelection, () => { documentCopyReviewed.value = false; }, { deep: true, flush: "sync" });
 const contextDialog = ref(false), contextData = ref(null), evidenceDialog = ref(false), evidence = ref(null), feedbackDialog = ref(false), feedback = ref({ outcome: "accepted", comment: "" });
 const configuredFeature = computed(() => features.value.find(item => item.key === featureKey.value));
 const variableWasBound=ref(false),variableLifecycle=computed(()=>variableWasBound.value||featureKey.value==='research_extraction'||inputHas('research_variable_batch_id'));
@@ -819,7 +821,7 @@ async function loadHistory(activeNames) {
   }
 }
 watch([() => JSON.stringify(store.getters["user/permissions"]), () => store.state.user.accessToken,()=>store.state.user.username], () => {
-  if (!needsForecast.value && !needsRiskWindow.value && !codingLifecycle.value && !supportLifecycle.value && !sofaLifecycle.value&&!rosterLifecycle.value&&!bedLifecycle.value&&!surgeryLifecycle.value&&!supplyLifecycle.value&&!nativeInventoryLifecycle.value) return;
+  if (!documentDraft.value && !needsForecast.value && !needsRiskWindow.value && !codingLifecycle.value && !supportLifecycle.value && !sofaLifecycle.value&&!rosterLifecycle.value&&!bedLifecycle.value&&!surgeryLifecycle.value&&!supplyLifecycle.value&&!nativeInventoryLifecycle.value) return;
   codingSelection.value=null;codingReady.value=false;codingHome.value=null;codingInputKey.value++;
   nativeInventorySelection.value=null;nativeInventoryReady.value=false;nativeInventoryScope.value=null;nativeInventoryInputKey.value++;
   supplySelection.value=null;supplyReady.value=false;supplyScope.value=null;supplyInputKey.value++;surgerySelection.value=null;surgeryReady.value=false;surgeryInputKey.value++;serviceSurgeryPool.value=null;rosterSelection.value=null;rosterReady.value=false;rosterInputKey.value++;bedSelection.value=null;bedReady.value=false;bedInputKey.value++;if(rosterLifecycle.value||bedLifecycle.value||surgeryLifecycle.value||supplyLifecycle.value||nativeInventoryLifecycle.value){serviceDepartment.value=null;serviceWard.value=null;}
@@ -832,7 +834,7 @@ async function inspectEvidence(id) { if(id&&typeof id==='object')id=id.source_id
 async function inspectPreviewEvidence(id) {if(id&&typeof id==='object')id=id.source_id;const ticket=captureSupport(),packet=contextData.value;if(!contextDialog.value||!packet)return;const evidenceVersion=++previewEvidenceVersion;evidence.value=null;evidenceDialog.value=false;const c=packet?.context,sofa=c?.sofa_source||c?.sofa_change_source;const value=c&&['coding_binding','coding_source','coding_case'].some(k=>Object.hasOwn(c,k))?await resolveCodingEvidence(packet.evidence?.find(item=>item.source_id===id),c,codingExpected(ticket),{current:()=>supportCurrent(ticket),auditOnly:false}):c?.inventory_source?await resolveInventoryEvidence(packet.evidence?.find(item=>item.source_id===id),c,nativeInventoryExpected(ticket),{current:()=>supportCurrent(ticket),auditOnly:false}):c?.supply_source?await resolveSupplyEvidence(packet.evidence?.find(item=>item.source_id===id),c,supplyExpected(ticket),{current:()=>supportCurrent(ticket),auditOnly:false}):c?.surgery_source?await resolveSurgeryEvidence(packet.evidence?.find(item=>item.source_id===id),c,{departmentId:ticket.department,poolId:ticket.pool,references:ticket.surgeryReferences}):c?.bed_source?await resolveBedEvidence(packet.evidence?.find(item=>item.source_id===id),c,ticket.department,ticket.ward,ticket.bedReferences):c?.roster_source?await resolveRosterEvidence(packet.evidence?.find(item=>item.source_id===id),c,ticket.department,ticket.rosterReferences):sofa?await resolveSofaEvidence(packet.evidence?.find(item=>item.source_id===id),c,patientId.value,encounterRef.value,sofaSelection.value):c?.support_source?await resolveSupportEvidence(packet.evidence?.find(item=>item.source_id===id),c,patientId.value,encounterRef.value,supportReferences.value):(c?.qsofa_source?resolveQsofaEvidence:resolveAkiEvidence)(packet?.evidence?.find(item=>item.source_id===id),c,patientId.value,encounterRef.value);if(!contextDialog.value||evidenceVersion!==previewEvidenceVersion||packet!==contextData.value||(c?.coding_binding||sofa||c?.support_source||c?.roster_source||c?.bed_source||c?.surgery_source||c?.supply_source||c?.inventory_source)&&!supportCurrent(ticket))return;evidence.value=value;evidenceDialog.value=!!value;}
 async function copyDraft() {
   if (documentDraft.value) {
-    if (run.value?.status !== "succeeded" || !copyableDocumentSections.value.length) return;
+    if (!viewActive.value || !store.state.user.accessToken || !(store.getters["user/permissions"] || []).length || run.value?.status !== "succeeded" || !copyableDocumentSections.value.length) return;
     documentCopySelection.value = copyableDocumentSections.value.map(section => section.index);
     documentCopyReviewed.value = false;
     documentCopyTicket = captureSupport();
@@ -857,7 +859,7 @@ function clearDocumentCopy() {
   documentCopyRunId = null;
 }
 async function confirmDocumentCopy() {
-  if (!documentCopyTicket || !supportCurrent(documentCopyTicket) || run.value?.run_id !== documentCopyRunId || run.value?.status !== "succeeded" || !documentCopyText.value || (documentCopyNotes.value.length && !documentCopyReviewed.value)) {
+  if (!viewActive.value || !store.state.user.accessToken || !(store.getters["user/permissions"] || []).length || !documentCopyTicket || !supportCurrent(documentCopyTicket) || run.value?.run_id !== documentCopyRunId || run.value?.status !== "succeeded" || !documentCopyText.value || (documentCopyNotes.value.length && !documentCopyReviewed.value)) {
     clearDocumentCopy();
     return;
   }

@@ -43,10 +43,30 @@ test('copying clinical text requires review and copies only explicitly selected 
   const copy = dialog.getByRole('button', { name: '复制选中正文', exact: true });
   await expect(copy).toBeDisabled();
   await expect(dialog).toContainText('尚未取得检查结果');
+  await expect(dialog.getByLabel('文书生成摘要')).toHaveText('范围说明，不属于文书正文');
+  await dialog.getByRole('checkbox', { name: '我已核对上述事项和所选正文', exact: true }).check();
   await dialog.getByRole('checkbox', { name: '现病史', exact: true }).uncheck();
+  await expect(copy).toBeDisabled();
   await dialog.getByRole('checkbox', { name: '我已核对上述事项和所选正文', exact: true }).check();
   await copy.click();
   await expect.poll(() => page.evaluate(() => window.__reviewCopied)).toBe('主诉\n\uFEFF原记录\r\n🧪e\u0301，0，不详');
+  expect(writes.map(row => row.path)).toEqual(['/api/ai/runs']);
+});
+
+for (const identity of ['role', 'token', 'username']) test('changing ' + identity + ' clears the old document and prevents reopening its copy scope', async ({ page }) => {
+  const writes = await documentSession(page);
+  await page.getByRole('button', { name: '复制文书正文', exact: true }).click();
+  await expect(page.getByRole('dialog', { name: '复制文书正文', exact: true })).toBeVisible();
+  await page.evaluate(identity => {
+    const store = document.querySelector('#hoim').__vue_app__.config.globalProperties.$store;
+    if (identity === 'role') store.commit('user/setPermissions', ['patient']);
+    else if (identity === 'token') store.commit('user/setAccessToken', 'another-synthetic-session');
+    else store.commit('user/setUsername', 'another-synthetic-doctor');
+  }, identity);
+  await expect(page.getByRole('dialog', { name: '复制文书正文', exact: true })).not.toBeVisible();
+  await expect(page.getByLabel('AI任务结果', { exact: true })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: '复制文书正文', exact: true })).toHaveCount(0);
+  expect(await page.evaluate(() => window.__reviewCopied)).toBeUndefined();
   expect(writes.map(row => row.path)).toEqual(['/api/ai/runs']);
 });
 

@@ -1,5 +1,5 @@
 const path = require("path");
-const { Configuration, CopyRspackPlugin, DefinePlugin, CssExtractRspackPlugin } = require("@rspack/core");
+const { Configuration, CopyRspackPlugin, DefinePlugin, CssExtractRspackPlugin, SwcJsMinimizerRspackPlugin, LightningCssMinimizerRspackPlugin } = require("@rspack/core");
 const HtmlRspackPlugin = require("html-rspack-plugin");
 const { VueLoaderPlugin } = require("vue-loader");
 const {PUBLIC_CONTRACTS} = require("./scripts/static-contract-data-loader.cjs");
@@ -234,6 +234,12 @@ module.exports = {
     }),
   ],
   optimization: {
+    // Additional ordinary compression passes retain the installed browser
+    // targets and default safety options; CSS keeps its default minimizer.
+    ...(mode === "production" ? {minimizer: [
+      new SwcJsMinimizerRspackPlugin({minimizerOptions: {compress: {passes: 4}}}),
+      new LightningCssMinimizerRspackPlugin(),
+    ]} : {}),
     splitChunks: {
       automaticNameDelimiter: "-",
       chunks: "all",

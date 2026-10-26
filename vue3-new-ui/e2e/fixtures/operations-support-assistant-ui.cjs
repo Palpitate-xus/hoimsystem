@@ -30,6 +30,6 @@ async function installOperationsAssistantUI(page,{preview=false,forceSuccess=fal
 async function openOperationsAssistant(page,harness,{role='admin',bound=true,preview=false}={}){
  await page.goto(harness.origin);await expect.poll(()=>page.evaluate(()=>!!window.__operationsProbe)).toBe(true);await page.evaluate(({feature,role,initialInput})=>{const p=window.__operationsProbe;p.store.commit('user/permissions',[role]);p.scope.feature=feature;p.scope.initialInput=initialInput;},{feature:preview?data(unique(x=>x.stage==='preview_queued_current'&&x.path==='/api/ai/features')).find(v=>v.key==='operations_support'):feature,role,initialInput:bound?{operations_case_id:header.case_id}:{}});
 }
-async function selectOperationsInput(page){await page.getByRole('button',{name:'核对入口指定材料集',exact:true}).click();await expect(page.getByText('已核对当前完整材料集',{exact:false})).toBeVisible();}
+async function selectOperationsInput(page){await page.getByRole('button',{name:'核对入口指定材料集',exact:true}).click();await expect(page.getByText('已选择材料集',{exact:false})).toBeVisible();}
 async function selectObjective(page){await page.getByRole('combobox',{name:'本次固定目标',exact:true}).press('ArrowDown');await page.getByRole('option',{name:'整理材料内的可引用观察与待核查故障假设',exact:true}).click();}
 module.exports={installOperationsAssistantUI,openOperationsAssistant,selectOperationsInput,selectObjective,actualOperationsAssistant:{packet,header,selection,feature,caseMetadata,phases,unique}};

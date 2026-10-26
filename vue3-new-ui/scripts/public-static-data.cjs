@@ -49,8 +49,12 @@ function encodeStaticJson(source) {
   flush();
   var packed=Buffer.from(output);
   for(const strategy of [zlib.constants.Z_DEFAULT_STRATEGY,zlib.constants.Z_FILTERED,zlib.constants.Z_FIXED]){
-    const compressed=Buffer.concat([Buffer.from([255,0,0,1]),zlib.deflateRawSync(bytes,{level:9,memLevel:9,strategy})]);
-    if(compressed.length<packed.length)packed=compressed;
+    // Try bounded build-time encoders; every result uses the same RFC1951
+    // wire format and the existing decoder verifies the original UTF8 bytes.
+    for(const memLevel of [9,8,7,6,5,4,3,2,1]){
+      const compressed=Buffer.concat([Buffer.from([255,0,0,1]),zlib.deflateRawSync(bytes,{level:9,memLevel,strategy})]);
+      if(compressed.length<packed.length)packed=compressed;
+    }
   }
   const encoded=packed.toString('base64');
   if (decodeSchemaText(encoded, bytes.length) !== text) throw new Error('Static schema UTF8 round trip changed the original bytes');

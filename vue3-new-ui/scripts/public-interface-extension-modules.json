@@ -18,6 +18,13 @@
   "src/api/ai/researchVariableTasks.js",
   "src/api/ai/taskDirectory.js",
   "src/api/ai/usageSummary.js",
+  "src/api/bedForecast.js",
+  "src/api/bedMath.js",
+  "src/api/bedSeries.js",
+  "src/api/bedSources.js",
+  "src/api/inpatientSupport.js",
+  "src/api/rosterPlans.js",
+  "src/api/rosterSources.js",
   "src/components/ai/ClinicalTrainingAssistant.vue",
   "src/components/ai/ClinicalTrainingFindings.vue",
   "src/components/ai/ClinicalTrainingPanel.vue",
@@ -58,5 +65,10 @@
   "src/components/ai/useResearchVariableAssistant.js",
   "src/components/ai/useResearchVariableFindings.js",
   "src/components/ai/useResearchVariableInput.js",
-  "src/components/ai/useResearchVariableSources.js"
+  "src/components/ai/useResearchVariableSources.js",
+  "src/utils/aiManagementNavigation.js",
+  "src/views/inpatient/surgery.vue",
+  "src/views/system/AILabMappingManagement.vue",
+  "src/views/system/AIObservationWindowManagement.vue",
+  "src/views/system/AIRiskRuleManagement.vue"
 ]

@@ -42,7 +42,7 @@
             <el-button v-if="row.status===2" size="small" type="success" @click="openAnesthesiaDialog(row)">麻醉</el-button>
             <el-button size="small" type="danger" @click="cancelApp(row)">取消</el-button>
             <el-button v-if="canRecordSurgeryOriginal" size="small" :disabled="!supportId(row.application_id)" @click="openSurgeryOriginal(row)">登记手术AI原资料</el-button>
-            <ai-action title="AI 围术期评估与用药分析" :patient-id="row.patient_id" :encounter-ref="row.admission_id || ''" :initial-input="{ surgery_application_id: row.application_id }" :feature-keys="['perioperative_assessment', 'perioperative_antibiotics', 'patient_summary', 'clinical_consistency']" initial-feature="perioperative_assessment" />
+            <ai-action label="术前评估" title="围术期评估与用药分析" :patient-id="row.patient_id" :encounter-ref="row.admission_id || ''" :initial-input="{ surgery_application_id: row.application_id }" :feature-keys="['perioperative_assessment', 'perioperative_antibiotics', 'patient_summary', 'clinical_consistency']" initial-feature="perioperative_assessment" />
           </template>
         </el-table-column>
       </el-table>

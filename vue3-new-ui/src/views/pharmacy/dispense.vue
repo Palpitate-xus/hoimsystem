@@ -32,7 +32,7 @@
             <el-button v-if="row.status===0" size="small" type="primary" @click="audit(row)">审核</el-button>
             <el-button v-if="row.status===1" size="small" type="success" @click="dispense(row)">发药</el-button>
             <el-button v-if="row.status===2" size="small" @click="handleReturn(row)">退药</el-button>
-            <ai-action title="AI 药师辅助" :patient-id="row.patient_id" :initial-input="{ prescription_id: row.uuid }" :feature-keys="['interaction_review', 'allergy_review', 'dose_review', 'medication_reconciliation', 'drug_substitution']" initial-feature="interaction_review" />
+            <ai-action label="核查用药" title="药师用药核查" :patient-id="row.patient_id" :initial-input="{ prescription_id: row.uuid }" :feature-keys="['interaction_review', 'allergy_review', 'dose_review', 'medication_reconciliation', 'drug_substitution']" initial-feature="interaction_review" />
           </template>
         </el-table-column>
       </el-table>

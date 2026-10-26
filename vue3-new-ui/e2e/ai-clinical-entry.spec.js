@@ -19,9 +19,9 @@ test("从医生病历行打开AI时绑定原患者和病历，关闭后保留原
     await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ code: 200, msg: "success", data }) });
   });
   await page.goto("/#/doctor/medicalRecord");
-  await page.getByRole("button", { name: "AI 辅助", exact: true }).click();
+  await page.getByRole("button", { name: "检查病历", exact: true }).click();
   const drawer = page.getByRole("dialog");
-  await expect(drawer).toContainText("AI 病历与诊疗辅助");
+  await expect(drawer).toContainText("病历核查与诊疗参考");
   await expect(drawer.getByRole("combobox", { name: "患者", exact: true })).toBeDisabled();
   await drawer.getByRole("button", { name: "查看本次资料", exact: true }).click();
   await expect.poll(() => previews.length).toBe(1);

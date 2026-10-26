@@ -28,7 +28,7 @@
             <el-button v-if="!row.status" size="small" type="success" @click="signRecord(row)">签名</el-button>
             <el-button size="small" @click="viewDetail(row)">详情</el-button>
             <diagnosis-review v-if="row.status" :source-id="row.uuid" @reviewed="fetchList" />
-            <ai-action title="AI 病历与诊疗辅助" :patient-id="row.patient_id" :encounter-ref="row.registration_uuid || ''" :initial-input="{ record_id: row.uuid }" :feature-keys="['patient_summary', 'outpatient_note', 'record_quality', 'treatment_pathway', 'clinical_questions', 'guideline_qa']" initial-feature="record_quality" />
+            <ai-action label="检查病历" title="病历核查与诊疗参考" :patient-id="row.patient_id" :encounter-ref="row.registration_uuid || ''" :initial-input="{ record_id: row.uuid }" :feature-keys="['patient_summary', 'outpatient_note', 'record_quality', 'treatment_pathway', 'clinical_questions', 'guideline_qa']" initial-feature="record_quality" />
             <ai-action v-if="canUseSpeech" label="AI 录音转写" title="AI 原录音与转写复核" :patient-id="row.patient_id" :encounter-ref="row.registration_uuid || ''" :feature-keys="['medical_transcription']" initial-feature="medical_transcription" />
             <ai-action v-if="canUseSpeech" label="AI 心电复核" title="AI 原始心电与候选复核" :patient-id="row.patient_id" :encounter-ref="row.registration_uuid || ''" :feature-keys="['ecg_analysis']" initial-feature="ecg_analysis" />
           </template>

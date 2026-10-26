@@ -45,7 +45,7 @@
                     <el-button size="small" @click="showRecordDetail(row)">查看</el-button>
                     <el-button v-if="row.status===0" size="small" type="primary" @click="signRecord(row)">签名</el-button>
                     <diagnosis-review v-if="row.status" source-kind="structured" :source-id="row.record_id" />
-                    <ai-action title="AI 住院病历辅助" :patient-id="row.patient_id" :encounter-ref="row.admission_id || ''" :initial-input="{ structured_record_id: row.record_id }" :feature-keys="['patient_summary', 'admission_note', 'progress_note', 'discharge_summary', 'record_quality', 'treatment_pathway', 'clinical_consistency']" initial-feature="record_quality" />
+                    <ai-action label="检查病历" title="住院病历核查与草稿" :patient-id="row.patient_id" :encounter-ref="row.admission_id || ''" :initial-input="{ structured_record_id: row.record_id }" :feature-keys="['patient_summary', 'admission_note', 'progress_note', 'discharge_summary', 'record_quality', 'treatment_pathway', 'clinical_consistency']" initial-feature="record_quality" />
                     <ai-action v-if="canUseSpeech" label="AI 录音转写" title="AI 原住院录音与转写复核" :patient-id="row.patient_id" :encounter-ref="row.admission_id || ''" :feature-keys="['medical_transcription']" initial-feature="medical_transcription" />
                     <ai-action v-if="canUseSpeech" label="AI 心电复核" title="AI 住院原始心电与候选复核" :patient-id="row.patient_id" :encounter-ref="row.admission_id || ''" :feature-keys="['ecg_analysis']" initial-feature="ecg_analysis" />
                   </template>

@@ -34,7 +34,7 @@
           <template #default="{row}">
             <el-button v-if="row.status===0 && row.charge_id" size="small" type="primary" @click="deskCharge(row)">诊间收费</el-button>
             <el-button size="small" type="danger" @click="cancel(row)">取消</el-button>
-            <ai-action title="AI 处方核查" :patient-id="row.patient_id" :initial-input="{ prescription_id: row.uuid }" :feature-keys="['interaction_review', 'allergy_review', 'drug_comparison', 'dose_review', 'antimicrobial_review']" initial-feature="interaction_review" />
+            <ai-action label="核查处方" title="处方核查" :patient-id="row.patient_id" :initial-input="{ prescription_id: row.uuid }" :feature-keys="['interaction_review', 'allergy_review', 'drug_comparison', 'dose_review', 'antimicrobial_review']" initial-feature="interaction_review" />
           </template>
         </el-table-column>
       </el-table>

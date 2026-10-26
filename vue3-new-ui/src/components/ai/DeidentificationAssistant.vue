@@ -3,14 +3,14 @@
   <p>用途 deidentification_review。临床正文出站须另有 external_model 明确许可；即使超级管理员也不能绕过项目与逐患者授权。</p>
   <p v-if="!v.mode" role="alert">本入口只允许 deidentification_evidence 独立模式；不回退到通用任务。</p>
   <p v-else-if="!v.initialValid" role="alert">来源输入含空字段、外来引用或不一致范围，已拒绝。</p>
-  <p v-else-if="!v.scopeRequest" role="status">请先提供明确项目三锚与真实患者；不会自动选择全院或首件来源。</p>
+  <p v-else-if="!v.scopeRequest" role="status">请先选择项目和患者。</p>
   <p v-else-if="!v.userAllowed" role="status">当前会话角色不可读取此用途，旧资料已清除。</p>
   <el-button v-if="v.closed" @click="v.reopen">重新打开脱敏候选助手</el-button>
   <template v-if="v.active">
    <el-button @click="v.close">关闭并清除脱敏候选助手</el-button>
    <DeidentificationInput :key="v.inputKey" :scope="scope" :patient-id="patientId" :initial-references="v.initialReferences" :active="v.active" @selection="v.selected" @availability="ok=>{if(!ok)v.unavailable()}"/>
    <p v-if="v.selection" aria-label="助手当前脱敏来源">已单独重读并绑定 {{ v.selection.case_id }}；来源选择不自动提交模型。</p>
-   <el-input v-model="v.question" type="textarea" placeholder="本次可选问题（保留原样，最多2000码点）" aria-label="脱敏候选可选问题"/>
+   <el-input v-model="v.question" type="textarea" placeholder="补充问题（可选）" aria-label="脱敏候选可选问题"/>
    <el-checkbox v-if="v.superUser" v-model="v.auditOnly">明确读取当前研究授权范围内的只读审计任务</el-checkbox>
    <el-checkbox v-if="v.superUser" v-model="v.preview">明确超级管理员配置预览；仍需要研究与出站权限</el-checkbox>
    <p v-if="!v.configured" role="status">完整模型与功能配置尚未提供，不发送正文。</p>

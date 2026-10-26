@@ -1,13 +1,13 @@
 <template>
  <section aria-label="共享病例去标识助手">
-  <p>先明确项目与单个患者的已授权Case，再核对模型所见完整所选文字和问题。模型仅提出未审核的部分逐字候选，不自动改写病历、建立Review、发布或导出。</p>
+  <p>选择项目与患者的已授权资料，再检查待去标识的原文。模型只提出候选，修改和导出需人工复核。</p>
   <p v-if="!sessionAllowed" role="status">当前会话或角色不可使用病例去标识助手。</p>
   <p v-else-if="!configValid" role="alert">当前能力配置、模式或角色不允许新任务；不会退回通用模型。</p>
   <DeidentificationSharedInput v-if="sessionAllowed" :key="inputKey" :scope="scope" :patient-id="patientId" :initial-references="initialReferences" :active="active" :config-revision="feature?.revision??null" @scope-change="scopeChanged" @selection="selectionChanged" @availability="availabilityChanged" @invalidate="inputInvalidated"/>
   <template v-if="sessionAllowed">
    <el-input v-model="question" type="textarea" @input="questionMode='text'" aria-label="病例去标识原样可选问题" :disabled="!configValid" placeholder="可留空；问题不是新增来源证据"/>
-   <p v-if="questionMode==='absent'">本次问题未提供；输入文字后按原样提交。</p><p v-else-if="questionMode==='null'">本次问题明确为NULL；输入文字后改为原样文本。</p><p>问题 {{ Array.from(question).length }}/2000 个Unicode码点；不删除空白、BOM或改写换行。</p>
-   <el-button :disabled="!canSubmit||busy" @click="preview">核对模型所见来源与原问题</el-button><el-button :disabled="!canSubmit||busy" @click="generate">提交病例去标识候选任务</el-button><el-button @click="clearAll">清除本次问题、选择与任务</el-button>
+   <small aria-label="补充问题长度">{{ Array.from(question).length }}/2000</small><p v-if="questionMode==='absent'">尚未填写补充问题。</p><p v-else-if="questionMode==='null'">传入的问题为空值；填写后将按原文提交。</p><details><summary>输入与保存详情</summary><p>问题 {{ Array.from(question).length }}/2000 个Unicode码点；不删除空白、BOM或改写换行。未提供、NULL与空文本分别保留。</p></details>
+   <el-button :disabled="!canSubmit||busy" @click="preview">预览本次资料</el-button><el-button :disabled="!canSubmit||busy" @click="generate">查找去标识候选</el-button><el-button @click="clearAll">清除本次问题、选择与任务</el-button>
    <p v-if="busy" role="status">正在按当前用途核对与提交…</p><p v-if="error" role="alert">{{ error }}</p>
    <DeidentificationSharedFindings v-if="runId" :key="findingsKey" :run-id="runId" :scope="currentScope?.scope??null" :patient-id="currentScope?.patientId??null" :references="references" :expected-input="submittedInput" :active="active" :config-revision="feature?.revision??null" @metadata="metadataChanged" @invalidate="resultInvalidated" @close="closeTask"/>
    <DeidentificationSharedTasks :active="active" :case-id="references?.deidentification_case_id??null" @open="openTask"/>

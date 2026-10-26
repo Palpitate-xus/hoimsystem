@@ -2,17 +2,17 @@
  <section aria-label="病例去标识项目与患者来源入口">
   <p>只读取明确项目中的单个实际患者；项目技术候选不授予研究、外发或导出权限。</p>
   <p v-if="!allowed" role="status">当前会话不能选择病例去标识来源。</p>
-  <p v-else-if="!validProps" role="alert">业务患者、项目三锚或唯一Case引用无效，未读取来源。</p>
+  <p v-else-if="!validProps" role="alert">患者、项目或资料引用无效，请从业务入口重新选择。</p>
   <template v-else>
-   <el-button :disabled="busy" @click="loadScopes(1)">读取当前项目技术候选</el-button>
+   <el-button :disabled="busy" @click="loadScopes(1)">选择研究项目</el-button>
    <el-select v-if="scopes.length" :model-value="selectedScope?.scope_id??null" aria-label="明确病例去标识项目" :disabled="scope!==null||busy" clearable @update:model-value="selectScope">
     <el-option v-for="row in scopes" :key="row.scope_id" :value="row.scope_id" :label="row.scope_id+' / '+row.status"/>
    </el-select>
-   <template v-if="total>100"><el-button :disabled="busy||page===1" @click="loadScopes(page-1)">上一页项目</el-button><span>第{{ page }}页，共{{ total }}个技术候选</span><el-button :disabled="busy||page*100>=total" @click="loadScopes(page+1)">下一页项目</el-button></template>
-   <p v-if="selectedScope" aria-label="明确项目技术三锚">项目 {{ selectedScope.scope_id }}；SHA只绑定该原件版本，不代表当前用途权限。</p>
+   <template v-if="total>100"><el-button :disabled="busy||page===1" @click="loadScopes(page-1)">上一页项目</el-button><span>第{{ page }}页，共{{ total }}个项目</span><el-button :disabled="busy||page*100>=total" @click="loadScopes(page+1)">下一页项目</el-button></template>
+   <p v-if="selectedScope" aria-label="明确项目技术三锚">已选择项目 {{ selectedScope.scope_id }}；使用资料时会重新核对授权。</p>
    <p v-if="patientId!==null" aria-label="业务绑定真实患者">已绑定业务患者 {{ patientId }}，不可切换为其他患者。</p>
    <template v-else-if="isSuper&&selectedScope">
-    <el-button :disabled="busy" @click="readDeclaredPatients">显式读取本项目声明的有限患者集合</el-button>
+    <el-button :disabled="busy" @click="readDeclaredPatients">查看项目内患者</el-button>
     <el-select v-if="declaredPatients.length" v-model="selectedPatient" aria-label="明确项目已声明患者" :disabled="busy" clearable @change="scopeChanged"><el-option v-for="id in declaredPatients" :key="id" :value="id" :label="'项目声明患者 '+id"/></el-select>
     <p>这只是项目原件声明的有限集合，逐患者用途与模型许可仍由当前Case读取重新核验。</p>
    </template>

@@ -1,0 +1,2937 @@
+{
+  "schema_version": "hoim_ai_experience_verification_v1",
+  "recorded_at_utc": "2026-10-26T06:55:32.855850+00:00",
+  "baseline_commit": "a6a5abf",
+  "accepted_code_commit": "2f90ddf9e56e0b42aec4bb2f7fe66c412456cdd8",
+  "scope": "AI writing, clinical document copy, native review panels, teaching flow, grouped super-administrator navigation and page-local visual presentation. Synthetic engineering checks; real model writing quality and clinical effect were not measured.",
+  "changes": [
+    "All 63 LLM default task prompts use audience-specific concise wording; 13 fixed system contracts remain byte-identical.",
+    "Packaged catalog 2026.10.26.1; saved and active custom prompts and persisted enabled/validation states are preserved.",
+    "Clinical document body, generated summary and review notes are separate; copy only selected body sections after required review. Identity, patient and task changes clear old copy scope.",
+    "Six clinical entry labels follow business actions. Available native tasks no longer show a contradictory unavailable empty state.",
+    "Native results show findings and review needs; technical proof and original bytes remain expandable. NULL, empty text and actual zero keep distinct meanings.",
+    "Teaching checks AI configuration automatically; course choice, exercise submission and AI explanation remain distinct explicit actions.",
+    "All 41 administration entries remain reachable in four groups and a global search, with original permissions and lazy loading.",
+    "Necessary dependency patches, regenerated Element Plus style closure and lossless public text storage keep the original bundle and static-record limits."
+  ],
+  "prompts": {
+    "catalog_version": "2026.10.26.1",
+    "llm_feature_count": 63,
+    "fixed_system_contracts_sha256": {
+      "shared": "39af79072a9aaa6b789b6c748d8414387c73044ddf058464da0b70f0a3e5c20e",
+      "research_extraction": "7de629cfd383f20c8c3bdccc0372e72ad268fb07af23280ccc2e7d1f653b0ddd",
+      "drg_evidence_review": "ba8c9e2e7849c90b316472ec3df37f5b7622b21d6f0fc5435b8f546214324079",
+      "charge_reconciliation": "bd440419aa1aaed76bc204a22d0304c2ded561f55e5169434fd401c5285df5d8",
+      "feedback_analysis": "efd3fca5422616201fc4611e7693a52ffa7e96827c6bab2aa1c132286241f9bf",
+      "guideline_ingestion": "2961fcc5d873abb5ede7813e7e15500f5f17bf9c3bebc3c399996118d0c49b4d",
+      "drug_label_extraction": "6847bfa62383416a1296b37c7eececccd6c2132454a8e866af35da0628e2cd2f",
+      "guideline_change_review": "3b802b38212b08e4b0079354720324d656587c46c522bc135ecf077a5377599a",
+      "research_cohort": "dde37bb46ad5abf165899b8a4c473b37f24acf772d6cedca5530a777b02d21ab",
+      "deidentification": "8bc0bbb4c4034cb1488fa7a2755f1eb7d29f9bbba0f77c761f33fc30ae0a1128",
+      "operations_support": "091019337c952d3be9ebc65dc97066167a3e46b60e6894746b8b7ff599de6ad9",
+      "clinical_training": "353b28078fb061dcde85a4b6b377feba52c23193bce5edf7a7254517d0334934",
+      "incident_rca": "56b8679b6a084a7b24984129defb4c7c06ae47d2d406921bad7d14da887926f4"
+    },
+    "fixed_system_contracts_unchanged": true,
+    "stored_custom_prompts_replaced": false,
+    "existing_configs_automatically_revalidated": false
+  },
+  "backend": {
+    "exit_code": 0,
+    "elapsed_seconds": 74.18002811353654,
+    "guards": {
+      "dotenv_open_attempts": 0,
+      "shared_transport_pem_attempts": 0,
+      "socket_attempts": 0,
+      "engine_urls": [
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:",
+        "sqlite:///:memory:"
+      ]
+    },
+    "source_hashes": {
+      "fastapi_be/app/ai/catalog.py": "e8eb3b2abefd4dd0a42607ad1863c72ee2f0091961d2ec072eff7a1bfbc092ee",
+      "fastapi_be/app/ai/clinical_training_task_prompt.py": "ad61e1482ef29a25575cf6434af5f06af7b98ed1b2b174e392f44c7f3ba30080",
+      "fastapi_be/app/ai/deidentification_prompt.py": "d8389f5849d4f52dc042dcadb21d4439ee1f6ceaad9b3b0e03e323990b077686",
+      "fastapi_be/app/ai/document_change_prompt.py": "029caffeb488e50cabcddb26751b5bbc775a4a2a39b67124783893b13e7a470f",
+      "fastapi_be/app/ai/document_extraction_prompt.py": "ef1a0d3b30a4baf29b8b0a48e6cab0fbf07c7e0ab44f3425cec887e0e43d3b0e",
+      "fastapi_be/app/ai/drug_label_prompt.py": "5d27a2bed24bdaea8f9fee8d43b8317ef9909e71f3232469426ad61e0eee166f",
+      "fastapi_be/app/ai/operations_support_task_prompt.py": "5806936e120656cdf223961753a414c634d5ec74338335f8b0dd5e42dd1c4275",
+      "fastapi_be/app/ai/rca_evidence_task_prompt.py": "ceec73ae7419cb5f30479e3d81a1ee8b5aee481b431c890166e186e6bb7de051",
+      "fastapi_be/app/ai/research_cohort_prompt.py": "d2ad817b906ec8c7e64c5d85aee31e036beb3a8adaf045cd5655c859fe395693",
+      "fastapi_be/app/ai/research_variables_prompt.py": "bae5aa47cb79f50858c3dbd90500487aaecf1aa3864290ada89753bc2a80339d",
+      "fastapi_be/app/ai/satisfaction_prompt.py": "92f3b268febf43ff569d5714259c2c05ef6aeb1925e6df6431bde5c8f0f7bf9e",
+      "fastapi_be/tests/test_ai_task_writing.py": "6a1cb7cc4ffa19a5e46f7ea0acd8fba95388a912efadfb126d3be2dbd7cdfaaa",
+      "doc/ai-prompts.json": "abf5b05f2fea3986c7353a2ce343c1a977fb6da9707d60ed6d9c910edc215c42",
+      "fastapi_be/tests/test_ai_research_variables_shared_scope.py": "0015c7f9764b19ba800bff8353443dc1a35ac79035014242730e88393dd6806b",
+      "fastapi_be/tests/test_ai_native_integration.py": "775a33f94e5825fe3677f1b8500be094ab07cf8cb44629557a8e03bcddee8f21"
+    },
+    "sources_stable": true,
+    "command": [
+      "tests/test_ai_catalog.py",
+      "tests/test_ai_task_writing.py",
+      "tests/test_ai_coding_evidence_contract.py",
+      "tests/test_ai_charge_reconciliation_draft.py",
+      "tests/test_ai_satisfaction_draft.py",
+      "tests/test_ai_document_extraction_result.py",
+      "tests/test_ai_document_change_draft.py",
+      "tests/test_ai_drug_label_draft.py",
+      "tests/test_ai_research_cohort_draft.py",
+      "tests/test_ai_deidentification_draft.py",
+      "tests/test_ai_research_variables_task_result.py",
+      "tests/test_ai_rca_evidence_contract.py",
+      "tests/test_ai_operations_support_task_contract.py",
+      "tests/test_ai_clinical_training_task_contract.py",
+      "tests/test_ai_research_variables_shared_scope.py",
+      "tests/test_ai_native_integration.py",
+      "-p",
+      "pytest_asyncio.plugin",
+      "-p",
+      "no:cacheprovider",
+      "-q",
+      "--basetemp=/tmp/hoim-ai-taste-prompt-fourth-pytest",
+      "--junitxml=/tmp/hoim-ai-taste-prompt-fourth-junit.xml"
+    ],
+    "summary_lines": [
+      "........................................................................ [ 12%]",
+      "........................................................................ [ 25%]",
+      "........................................................................ [ 37%]",
+      "........................................................................ [ 50%]",
+      "........................................................................ [ 62%]",
+      "........................................................................ [ 75%]",
+      "........................................................................ [ 87%]",
+      "........................................................................ [100%]",
+      "576 passed in 59.78s"
+    ],
+    "artifact": {
+      "path": "/tmp/hoim-ai-taste-prompt-fourth-verification.json",
+      "bytes": 3955,
+      "sha256": "8d5cc697b8329ccbf7da6bfb0f73ade9a53a4d70805198d3e1df471ae03cd56e"
+    },
+    "complete_file_count": 16,
+    "passed": 576,
+    "earlier_rounds_added_to_count": false
+  },
+  "native_browser": {
+    "scope": "Native AI business component presentation and guarded educational workflow; synthetic isolated UI only",
+    "source_baseline": "a6a5abf",
+    "commits": [
+      "a488127",
+      "8e52aee",
+      "147bbca",
+      "8ac2154",
+      "7be4da2",
+      "401e499",
+      "9426132"
+    ],
+    "native_source_file_count": 40,
+    "source_manifest_sha256": "fe3e9d3a2683f0b4750093e5f60afa6b4d93683af8ea507561c09979e12551be",
+    "static_checks": {
+      "native_sfc_parse_and_compile": 75,
+      "all_e2e_spec_syntax_parse": 265,
+      "git_diff_check": true
+    },
+    "runs": [
+      {
+        "log": "/tmp/hoim-native-taste-final-tests.log",
+        "sha256": "87dcadfdfdd5fb08bc982a56c9c317f29cea5626375b0e36e25952561a903103",
+        "collected": 429,
+        "passed": 428,
+        "failed": 1,
+        "not_run": 0,
+        "files": {
+          "e2e/ai-charge-findings.spec.js": 24,
+          "e2e/ai-clinical-training-assistant.spec.js": 22,
+          "e2e/ai-clinical-training-practice.spec.js": 13,
+          "e2e/ai-coding-findings.spec.js": 12,
+          "e2e/ai-deidentification-shared-findings.spec.js": 13,
+          "e2e/ai-document-change-findings.spec.js": 14,
+          "e2e/ai-document-extraction-findings.spec.js": 33,
+          "e2e/ai-document-extraction-input.spec.js": 27,
+          "e2e/ai-drug-label-assistant.spec.js": 28,
+          "e2e/ai-drug-label-findings.spec.js": 19,
+          "e2e/ai-drug-label-source-input.spec.js": 23,
+          "e2e/ai-infection-cluster-findings.spec.js": 12,
+          "e2e/ai-infection-cluster-input.spec.js": 8,
+          "e2e/ai-inventory-findings.spec.js": 53,
+          "e2e/ai-operations-findings.spec.js": 15,
+          "e2e/ai-rca-evidence-findings.spec.js": 25,
+          "e2e/ai-research-variable-assistant.spec.js": 39,
+          "e2e/ai-research-variable-source-dom.spec.js": 37,
+          "e2e/ai-satisfaction-findings.spec.js": 12
+        },
+        "scope": "19 complete files. One real regression: newly added question counter failed on explicit NULL. Preserve this failed run."
+      },
+      {
+        "log": "/tmp/hoim-native-variable-null-final-tests.log",
+        "sha256": "dce7b1b662f94efadd533f61b54019156cca0735c66f09943592274baa739842",
+        "collected": 39,
+        "passed": 39,
+        "failed": 0,
+        "not_run": 0,
+        "files": {
+          "e2e/ai-research-variable-assistant.spec.js": 39
+        },
+        "scope": "Whole affected research-variable assistant file after fixing display only. Original NULL DTO and API payload preserved. Does not turn the prior 429 run into a single green invocation."
+      },
+      {
+        "log": "/tmp/hoim-native-integration-first-tests.log",
+        "sha256": "27dfe244ed8506b95afac23e20815a099aaf5c19a22e25118cb486e0f40d7eeb",
+        "collected": 173,
+        "passed": 138,
+        "failed": 6,
+        "not_run": 29,
+        "files": {
+          "e2e/ai-clinical-training-shared.spec.js": 19,
+          "e2e/ai-deidentification-findings.spec.js": 22,
+          "e2e/ai-deidentification-shared-assistant.spec.js": 13,
+          "e2e/ai-document-extraction-assistant.spec.js": 31,
+          "e2e/ai-document-extraction-history.spec.js": 20,
+          "e2e/ai-drug-label-history.spec.js": 16,
+          "e2e/ai-research-cohort-tasks-ui.spec.js": 16,
+          "e2e/ai-research-variable-findings.spec.js": 24,
+          "e2e/ai-research-variable-parent.spec.js": 12
+        },
+        "scope": "9 complete-file selection. 7 files completed green; 2 full Root compile hooks timed out at 30 seconds. No failed business assertion."
+      },
+      {
+        "log": "/tmp/hoim-native-root-final-tests.log",
+        "sha256": "72d01aca2195ff736ec22160c32b3f44ad02f782f93d79d18eea93ee496f8d20",
+        "collected": 35,
+        "passed": 0,
+        "failed": 2,
+        "not_run": 33,
+        "files": {
+          "e2e/ai-clinical-training-shared.spec.js": 19,
+          "e2e/ai-drug-label-history.spec.js": 16
+        },
+        "scope": "Whole 2 Root files, 1 worker, original 30 second compile hooks; both setup hooks timed out before assertions."
+      },
+      {
+        "log": "/tmp/hoim-native-root-setup-budget-final-tests.log",
+        "sha256": "9564a3121aa65e1bb526816858de76ec9502ec970d256c7cd0e54e64656f5195",
+        "collected": 35,
+        "passed": 35,
+        "failed": 0,
+        "not_run": 0,
+        "files": {
+          "e2e/ai-clinical-training-shared.spec.js": 19,
+          "e2e/ai-drug-label-history.spec.js": 16
+        },
+        "scope": "Whole 2 Root files after measuring 3,222-module compilation at 29.685 seconds; beforeAll alone has 120-second setup allowance. One worker, zero retries, unchanged test/action/assertion timeouts and all original source/identity assertions."
+      }
+    ],
+    "harness_timing": {
+      "log": "/tmp/hoim-native-root-harness-timing-second.log",
+      "sha256": "f18318fd882fced98efeadcdc9998c7ab285fe684b0260fdba4b0ed122df3539",
+      "same_original_harness": true,
+      "configuration_changes": false,
+      "compiled_modules": 3222,
+      "compile_done_ms": 29627,
+      "ready_ms": 29685,
+      "closed_ms": 29696,
+      "errors": false,
+      "note": "First observer wrapper attempt exited at 247ms before compilation because it did not inherit DefinePlugin. Second observer retained all static members and observed the unchanged original harness."
+    },
+    "pending": [],
+    "not_claimed": [
+      "Single green 429-case invocation",
+      "Full 3908 browser suite",
+      "Real clinical/model validation",
+      "Real patient or hospital database use"
+    ],
+    "accepted_complete_files": {
+      "e2e/ai-charge-findings.spec.js": {
+        "cases": 24,
+        "evidence": "/tmp/hoim-native-taste-final-tests.log"
+      },
+      "e2e/ai-clinical-training-assistant.spec.js": {
+        "cases": 22,
+        "evidence": "/tmp/hoim-native-taste-final-tests.log"
+      },
+      "e2e/ai-clinical-training-practice.spec.js": {
+        "cases": 13,
+        "evidence": "/tmp/hoim-native-taste-final-tests.log"
+      },
+      "e2e/ai-coding-findings.spec.js": {
+        "cases": 12,
+        "evidence": "/tmp/hoim-native-taste-final-tests.log"
+      },
+      "e2e/ai-deidentification-shared-findings.spec.js": {
+        "cases": 13,
+        "evidence": "/tmp/hoim-native-taste-final-tests.log"
+      },
+      "e2e/ai-document-change-findings.spec.js": {
+        "cases": 14,
+        "evidence": "/tmp/hoim-native-taste-final-tests.log"
+      },
+      "e2e/ai-document-extraction-findings.spec.js": {
+        "cases": 33,
+        "evidence": "/tmp/hoim-native-taste-final-tests.log"
+      },
+      "e2e/ai-document-extraction-input.spec.js": {
+        "cases": 27,
+        "evidence": "/tmp/hoim-native-taste-final-tests.log"
+      },
+      "e2e/ai-drug-label-assistant.spec.js": {
+        "cases": 28,
+        "evidence": "/tmp/hoim-native-taste-final-tests.log"
+      },
+      "e2e/ai-drug-label-findings.spec.js": {
+        "cases": 19,
+        "evidence": "/tmp/hoim-native-taste-final-tests.log"
+      },
+      "e2e/ai-drug-label-source-input.spec.js": {
+        "cases": 23,
+        "evidence": "/tmp/hoim-native-taste-final-tests.log"
+      },
+      "e2e/ai-infection-cluster-findings.spec.js": {
+        "cases": 12,
+        "evidence": "/tmp/hoim-native-taste-final-tests.log"
+      },
+      "e2e/ai-infection-cluster-input.spec.js": {
+        "cases": 8,
+        "evidence": "/tmp/hoim-native-taste-final-tests.log"
+      },
+      "e2e/ai-inventory-findings.spec.js": {
+        "cases": 53,
+        "evidence": "/tmp/hoim-native-taste-final-tests.log"
+      },
+      "e2e/ai-operations-findings.spec.js": {
+        "cases": 15,
+        "evidence": "/tmp/hoim-native-taste-final-tests.log"
+      },
+      "e2e/ai-rca-evidence-findings.spec.js": {
+        "cases": 25,
+        "evidence": "/tmp/hoim-native-taste-final-tests.log"
+      },
+      "e2e/ai-research-variable-source-dom.spec.js": {
+        "cases": 37,
+        "evidence": "/tmp/hoim-native-taste-final-tests.log"
+      },
+      "e2e/ai-satisfaction-findings.spec.js": {
+        "cases": 12,
+        "evidence": "/tmp/hoim-native-taste-final-tests.log"
+      },
+      "e2e/ai-research-variable-assistant.spec.js": {
+        "cases": 39,
+        "evidence": "/tmp/hoim-native-variable-null-final-tests.log"
+      },
+      "e2e/ai-deidentification-findings.spec.js": {
+        "cases": 22,
+        "evidence": "/tmp/hoim-native-integration-first-tests.log"
+      },
+      "e2e/ai-deidentification-shared-assistant.spec.js": {
+        "cases": 13,
+        "evidence": "/tmp/hoim-native-integration-first-tests.log"
+      },
+      "e2e/ai-document-extraction-assistant.spec.js": {
+        "cases": 31,
+        "evidence": "/tmp/hoim-native-integration-first-tests.log"
+      },
+      "e2e/ai-document-extraction-history.spec.js": {
+        "cases": 20,
+        "evidence": "/tmp/hoim-native-integration-first-tests.log"
+      },
+      "e2e/ai-research-cohort-tasks-ui.spec.js": {
+        "cases": 16,
+        "evidence": "/tmp/hoim-native-integration-first-tests.log"
+      },
+      "e2e/ai-research-variable-findings.spec.js": {
+        "cases": 24,
+        "evidence": "/tmp/hoim-native-integration-first-tests.log"
+      },
+      "e2e/ai-research-variable-parent.spec.js": {
+        "cases": 12,
+        "evidence": "/tmp/hoim-native-integration-first-tests.log"
+      },
+      "e2e/ai-clinical-training-shared.spec.js": {
+        "cases": 19,
+        "evidence": "/tmp/hoim-native-root-setup-budget-final-tests.log"
+      },
+      "e2e/ai-drug-label-history.spec.js": {
+        "cases": 16,
+        "evidence": "/tmp/hoim-native-root-setup-budget-final-tests.log"
+      }
+    },
+    "accepted_unique_case_count_across_complete_files": 602,
+    "accepted_complete_file_count": 28,
+    "acceptance_scope": "28 complete isolated-mock browser files, 602 distinct cases accepted across explicit full-file runs. The earlier 429 run remains recorded as 428P/1F; its changed 39-case variable file was rerun green. Seven other full integration files passed 138 cases; the two initial setup-failed Root files were rerun in full for 35 green cases. These are not one 602-case invocation or a full 3908-case browser suite.",
+    "production_fixture_followup": {
+      "commit": "f4bc213",
+      "scope": "Read-only review of eleven-file production runner and selectors; two test helper corrections only. No additional production code, build or browser execution.",
+      "syntax_checks_passed": true,
+      "files": {
+        "vue3-new-ui/e2e/fixtures/research-variable-production-entry.cjs": "e64461c86dd3ea77e209c03f347d207fb2f5cc69a023283ec858a9aa9eec06ed",
+        "vue3-new-ui/e2e/fixtures/operations-support-production-entry.cjs": "6e26edbb23b7e0b4791fbd04f3374cb22bfc46e1f5ffd1affcc1810a5a50b8ea"
+      },
+      "runner_schema_compatible": [
+        "sources_after: path -> bytes/sha256",
+        "dist: relative asset path -> bytes/sha256"
+      ],
+      "remaining_runner_owner_note": "Use the final passing canonical record; parent static server cleanup should be in finally for collection/JSON/assertion failures."
+    }
+  },
+  "administration_browser": {
+    "scope": "AI administration navigation and page-local presentation only; synthetic isolated Vue/browser requests, no real backend, credentials, model, hospital data or deployment",
+    "commits": [
+      "72fe831",
+      "6001220",
+      "8b2baef"
+    ],
+    "implementation": {
+      "original_management_entries_preserved": 41,
+      "groups": [
+        "功能与模型",
+        "知识与数据",
+        "任务与用量",
+        "权限与审计"
+      ],
+      "original_pane_names_labels_permission_guards_lazy_and_active_conditions_preserved": true,
+      "programmatic_tab_changes_update_group": true,
+      "protected_entry_removed_and_active_content_reset_on_authority_loss": true,
+      "shared_page_header_or_global_his_styles_changed": false
+    },
+    "node": {
+      "passed": 2,
+      "failed": 0,
+      "command": "node --test vue3-new-ui/tests/aiManagementNavigation.test.cjs"
+    },
+    "vue_script_and_template_compile": [
+      "src/views/system/aiManagement.vue",
+      "src/views/ai/workbench.vue"
+    ],
+    "migration": {
+      "top_level_management_specs": 45,
+      "all_javascript_syntax_checks_passed": true,
+      "business_assertions_and_source_request_checks_preserved": true,
+      "all_45_files_runtime_executed_in_this_scope": false
+    },
+    "browser_final": {
+      "passed": 19,
+      "failed": 0,
+      "skipped": 0,
+      "retries": 0,
+      "displayed_duration": "2.3m",
+      "exit_code": 0,
+      "targets": [
+        "e2e/ai-management-navigation.spec.js",
+        "e2e/ai-research-variable-management.spec.js",
+        "e2e/ai-infection-cluster-management.spec.js"
+      ],
+      "command": "npx playwright test e2e/ai-management-navigation.spec.js e2e/ai-research-variable-management.spec.js e2e/ai-infection-cluster-management.spec.js --workers=1 --retries=0 --timeout=120000 --reporter=line --output=/tmp/hoim-ai-taste-admin-navigation-fourth-results",
+      "result_directory": "/tmp/hoim-ai-taste-admin-navigation-fourth-results"
+    },
+    "earlier_attempts": [
+      {
+        "directory": "/tmp/hoim-ai-taste-admin-navigation-results",
+        "passed": 0,
+        "failed": 1,
+        "interrupted": 1,
+        "not_run": 17,
+        "exit_code": 130,
+        "reason": "Existing isolated harness compilation exceeded default 30-second beforeAll hook; controlled interrupt before rerun with explicit 120-second compilation allowance."
+      },
+      {
+        "directory": "/tmp/hoim-ai-taste-admin-navigation-second-results",
+        "passed": 3,
+        "failed": 1,
+        "interrupted": 1,
+        "not_run": 14,
+        "exit_code": 130,
+        "reason": "New test clicked the internal Element Plus search input under selected label. Corrected to ArrowDown, and assertions target visible selected text instead of the search input query value."
+      },
+      {
+        "directory": "/tmp/hoim-ai-taste-admin-navigation-third-results",
+        "passed": 4,
+        "failed": 0,
+        "interrupted": 1,
+        "not_run": 14,
+        "exit_code": 130,
+        "reason": "New test attempted check on the hidden Element Plus original radio input; diagnostic confirms label intercepted pointer events. Corrected to click its visible associated label. No product change."
+      }
+    ],
+    "predecessor_passes_added_to_final_count": false,
+    "owned_source_hashes": {
+      "vue3-new-ui/src/views/ai/workbench.vue": "09a1e2a1624c586ef5f937b3a8462be4d78adfe196e61d4c2b4fef3c7f85b184",
+      "vue3-new-ui/src/views/system/aiManagement.vue": "2450194edd1578412f768577055222ca7bda2ac99be9e903ab181bb1df30127d",
+      "vue3-new-ui/src/utils/aiManagementNavigation.js": "23580e43bb516e44bf0a300ce26f521bf0afbf315bde969250c5c84605b5668e",
+      "vue3-new-ui/e2e/fixtures/ai-management-navigation.cjs": "bb679fa2ca7e1d0977af674a17aa4c4ad58c3dd8ffc89a4b5ba0c986668b50a1",
+      "vue3-new-ui/e2e/ai-management-navigation.spec.js": "99b6db033fb4a6c536caf0c42e393ef4e2dd200e15dcbc306dce620458548393",
+      "vue3-new-ui/tests/aiManagementNavigation.test.cjs": "80e6f7231f832f9db0e601611f5327c6090716b7fd3e1e2f3b0ab7b164b55514"
+    }
+  },
+  "node": {
+    "command": [
+      "node",
+      "--test",
+      "--test-reporter=tap",
+      "scripts/ai-document-draft.test.cjs",
+      "scripts/element-plus-style-entry.test.cjs",
+      "scripts/handle-routes-regression.test.cjs",
+      "scripts/public-interface-extension.test.cjs",
+      "scripts/public-interface-text-pool.test.cjs",
+      "scripts/public-interface-text.test.cjs",
+      "scripts/schema-data-document.test.cjs",
+      "scripts/shared-icon-components.test.cjs",
+      "scripts/static-contract-data.test.cjs",
+      "tests/aiImagePixels.test.cjs",
+      "tests/aiManagementNavigation.test.cjs",
+      "tests/aiObservationWindowInput.test.cjs",
+      "tests/aiTaskDirectory.test.cjs",
+      "tests/aiUsageSummary.test.cjs",
+      "tests/iconGallery.test.cjs",
+      "tests/publicFixedData.test.cjs",
+      "tests/rspackExit.test.cjs",
+      "tests/schemaDataCodec.test.cjs",
+      "tests/staticDeflate.test.cjs",
+      "tests/staticHtmlEncoding.test.cjs"
+    ],
+    "exit_code": 0,
+    "seconds": 7.073719972744584,
+    "test_file_count": 20,
+    "summary": [
+      "# tests 232",
+      "# pass 232",
+      "# fail 0",
+      "# cancelled 0",
+      "# skipped 0",
+      "# duration_ms 6964.065799"
+    ],
+    "log_sha256": "17c6bdf5fbc34f49b535c66e839539af5621ec87c6b81e50b307f04e74ab78f7",
+    "all_checks_passed": true
+  },
+  "canonical_build": {
+    "artifact": {
+      "path": "/tmp/hoim-ai-taste-build-sixth-20261026/verification.json",
+      "bytes": 322087,
+      "sha256": "3ed10fb30550afc833e746929601bc3d982fffdf80483ab9f00cc6dd6e39187d"
+    },
+    "command": [
+      "npm",
+      "run",
+      "verify"
+    ],
+    "exit_code": 0,
+    "seconds": 35.86505603790283,
+    "metrics": {
+      "totalJavaScript": 5963514,
+      "totalAssets": 6999313,
+      "largestJavaScript": 646741
+    },
+    "limits": {
+      "totalJavaScript": 6000000,
+      "totalAssets": 7000000,
+      "largestJavaScript": 700000
+    },
+    "source_count": 782,
+    "sources_stable": true,
+    "production_source_manifest_sha256": "87b87b757a425e359bfd5510bd22b7613c0bb74289cd15b336c3f667e3a42e36",
+    "dist_manifest_sha256": "dd5b49e426055f1d6193987e83d90dfcb2c513211db3e080e8b1ac22f4f1921a",
+    "log_sha256": "d52abe5f5cb95d2e43d8787fd7e0fe6afb494c169441405714c15b6be281a36b"
+  },
+  "production_browser": {
+    "scope": "Fifteen complete actual current-dist production browser files after AI prompt/writing/navigation/native-panel changes. Synthetic auth/HTTP only; includes explicit document section copy, credential invalidation, current source and exact recorded packets. No actual hospital DB or remote model, deployment or restart. Earlier all80/browser/backend totals are not counted here",
+    "exit_code": 0,
+    "elapsed_seconds": 149.53507547825575,
+    "command": [
+      "/home/xusheng/workspace/hoimsystem/vue3-new-ui/node_modules/.bin/playwright",
+      "test",
+      "e2e/ai-writing-experience.spec.js",
+      "e2e/ai-workbench.spec.js",
+      "e2e/ai-clinical-entry.spec.js",
+      "e2e/ai-management.spec.js",
+      "e2e/ai-task-technical-production.spec.js",
+      "e2e/ai-operations-native-entry.spec.js",
+      "e2e/ai-research-variable-native-entry.spec.js",
+      "e2e/ai-clinical-training-native-entry.spec.js",
+      "e2e/ai-drug-label-business-entry.spec.js",
+      "e2e/ai-document-extraction-native-entry.spec.js",
+      "e2e/ai-document-change-native-entry.spec.js",
+      "e2e/ai-bed-entry.spec.js",
+      "e2e/ai-roster-entry.spec.js",
+      "e2e/ai-laboratory-entry.spec.js",
+      "e2e/ai-qsofa-entry.spec.js",
+      "--workers=2",
+      "--timeout=90000",
+      "--retries=0",
+      "--forbid-only",
+      "--reporter=json",
+      "--output=/tmp/hoim-ai-taste-production-third-results"
+    ],
+    "all_checks_passed": true,
+    "collected_count": 90,
+    "collected_by_file": {
+      "ai-bed-entry.spec.js": 5,
+      "ai-clinical-entry.spec.js": 1,
+      "ai-clinical-training-native-entry.spec.js": 8,
+      "ai-document-change-native-entry.spec.js": 6,
+      "ai-document-extraction-native-entry.spec.js": 9,
+      "ai-drug-label-business-entry.spec.js": 5,
+      "ai-laboratory-entry.spec.js": 9,
+      "ai-management.spec.js": 5,
+      "ai-operations-native-entry.spec.js": 8,
+      "ai-qsofa-entry.spec.js": 9,
+      "ai-research-variable-native-entry.spec.js": 7,
+      "ai-roster-entry.spec.js": 3,
+      "ai-task-technical-production.spec.js": 4,
+      "ai-workbench.spec.js": 4,
+      "ai-writing-experience.spec.js": 7
+    },
+    "collected_execution_identities_exact": true,
+    "stats": {
+      "startTime": "2026-10-26T06:45:58.238Z",
+      "duration": 147539.979,
+      "expected": 90,
+      "skipped": 0,
+      "unexpected": 0,
+      "flaky": 0
+    },
+    "global_errors": [],
+    "sources_stable": true,
+    "dist_stable": true,
+    "production_matches_canonical": true,
+    "owned_processes_alive_after": [],
+    "parent_static_server": {
+      "origin": "http://127.0.0.1:39751",
+      "state": {
+        "closed": true,
+        "unhandled": []
+      },
+      "returncode": 0,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "report_sha256": "271b0493e7cc9f5f465195c61907f940728947e69fa39697376cf611f52b9afa",
+    "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "production_browser_artifact": {
+    "path": "/tmp/hoim-ai-taste-production-third-verification.json",
+    "bytes": 1245093,
+    "sha256": "2676d838a3df0ae80671dc082cedab0b8c4ce3453282eab333a39cc74a16b203"
+  },
+  "earlier_production_whole_file_replacement": {
+    "scope": "Fifteen complete production files, 90 distinct cases accepted across two explicitly recorded runs on the exact same final canonical dist. Fourteen unchanged whole files contribute 83 cases from the first 89-pass/1-failure run; the complete seven-case writing file is replaced by its second passing run after clicking visible checkbox labels. No original writing-file passes are added. This is whole-file acceptance, not one green 90-case invocation. Synthetic HTTP/auth only; no real model or hospital database.",
+    "all_checks_passed": true,
+    "exit_code": 0,
+    "command": [
+      [
+        "/home/xusheng/workspace/hoimsystem/vue3-new-ui/node_modules/.bin/playwright",
+        "test",
+        "e2e/ai-writing-experience.spec.js",
+        "e2e/ai-workbench.spec.js",
+        "e2e/ai-clinical-entry.spec.js",
+        "e2e/ai-management.spec.js",
+        "e2e/ai-task-technical-production.spec.js",
+        "e2e/ai-operations-native-entry.spec.js",
+        "e2e/ai-research-variable-native-entry.spec.js",
+        "e2e/ai-clinical-training-native-entry.spec.js",
+        "e2e/ai-drug-label-business-entry.spec.js",
+        "e2e/ai-document-extraction-native-entry.spec.js",
+        "e2e/ai-document-change-native-entry.spec.js",
+        "e2e/ai-bed-entry.spec.js",
+        "e2e/ai-roster-entry.spec.js",
+        "e2e/ai-laboratory-entry.spec.js",
+        "e2e/ai-qsofa-entry.spec.js",
+        "--workers=2",
+        "--timeout=90000",
+        "--retries=0",
+        "--forbid-only",
+        "--reporter=json",
+        "--output=/tmp/hoim-ai-taste-production-first-results"
+      ],
+      [
+        "/home/xusheng/workspace/hoimsystem/vue3-new-ui/node_modules/.bin/playwright",
+        "test",
+        "e2e/ai-writing-experience.spec.js",
+        "--workers=2",
+        "--timeout=90000",
+        "--retries=0",
+        "--forbid-only",
+        "--reporter=json",
+        "--output=/tmp/hoim-ai-taste-production-second-results"
+      ]
+    ],
+    "elapsed_seconds": 264.4494937788695,
+    "elapsed_seconds_scope": "Total actual time of both recorded rounds, including the first timeout; not a single accepted 90-case execution duration",
+    "collected_count": 90,
+    "collected_by_file": {
+      "ai-bed-entry.spec.js": 5,
+      "ai-clinical-entry.spec.js": 1,
+      "ai-clinical-training-native-entry.spec.js": 8,
+      "ai-document-change-native-entry.spec.js": 6,
+      "ai-document-extraction-native-entry.spec.js": 9,
+      "ai-drug-label-business-entry.spec.js": 5,
+      "ai-laboratory-entry.spec.js": 9,
+      "ai-management.spec.js": 5,
+      "ai-operations-native-entry.spec.js": 8,
+      "ai-qsofa-entry.spec.js": 9,
+      "ai-research-variable-native-entry.spec.js": 7,
+      "ai-roster-entry.spec.js": 3,
+      "ai-task-technical-production.spec.js": 4,
+      "ai-workbench.spec.js": 4,
+      "ai-writing-experience.spec.js": 7
+    },
+    "collected_execution_identities_exact": true,
+    "stats": {
+      "expected": 90,
+      "unexpected": 0,
+      "skipped": 0,
+      "flaky": 0,
+      "duration": null
+    },
+    "global_errors": [],
+    "sources_stable": true,
+    "dist_stable": true,
+    "production_matches_canonical": true,
+    "owned_processes_alive_after": [],
+    "parent_static_server": [
+      {
+        "origin": "http://127.0.0.1:38195",
+        "state": {
+          "closed": true,
+          "unhandled": []
+        },
+        "returncode": 0,
+        "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "origin": "http://127.0.0.1:44383",
+        "state": {
+          "closed": true,
+          "unhandled": []
+        },
+        "returncode": 0,
+        "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    ],
+    "report_sha256": [
+      "83134167ebee6ca5890e0bf534f8a9bf415ba7df2f141120c7c9d2975b5a6bc6",
+      "958265e7032438c0a71e7b8ba43adf30eefd294c9355c05c1122f90c8e110f01"
+    ],
+    "log_sha256": [
+      "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    ],
+    "cases": [
+      {
+        "file": "ai-bed-entry.spec.js",
+        "title": "生产Super按需加载床位原来源和完整序列，撤销冻结审计保留原文且不能用于新预测",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "retry": 0
+          }
+        ]
+      },
+      {
+        "file": "ai-bed-entry.spec.js",
+        "title": "生产Super核对床位实际版本后只回填编辑表，不自动保存启用或验证",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "retry": 0
+          }
+        ]
+      },
+      {
+        "file": "ai-bed-entry.spec.js",
+        "title": "生产Super读取床位独立Prompt并按原revision保存新版本，保持未启用未验证",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "retry": 0
+          }
+        ]
+      },
+      {
+        "file": "ai-bed-entry.spec.js",
+        "title": "生产普通管理员直达AI管理页不会读取床位治理或管理接口",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "retry": 0
+          }
+        ]
+      },
+      {
+        "file": "ai-bed-entry.spec.js",
+        "title": "生产病区页面把当前科室和病区传入AI，不默认选择序列或期限",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "retry": 0
+          }
+        ]
+      },
+      {
+        "file": "ai-clinical-entry.spec.js",
+        "title": "从医生病历行打开AI时绑定原患者和病历，关闭后保留原业务",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "retry": 0
+          }
+        ]
+      },
+      {
+        "file": "ai-clinical-training-native-entry.spec.js",
+        "title": "canonical local practice hides answer keys until actual submission and never auto-selects a model objective",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "retry": 0
+          }
+        ]
+      },
+      {
+        "file": "ai-clinical-training-native-entry.spec.js",
+        "title": "canonical common queue running and accepted result verify four original parts, exact CP evidence and actual human feedback",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "retry": 0
+          }
+        ]
+      },
+      {
+        "file": "ai-clinical-training-native-entry.spec.js",
+        "title": "canonical owner task directory opens the same actual task with current parts and honest nullable usage",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "retry": 0
+          }
+        ]
+      },
+      {
+        "file": "ai-clinical-training-native-entry.spec.js",
+        "title": "canonical Super Source governance reads metadata first and full hidden originals only by explicit action",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "retry": 0
+          }
+        ]
+      },
+      {
+        "file": "ai-clinical-training-native-entry.spec.js",
+        "title": "canonical configuration and fixed System use teaching validation with no automatic save or enabling",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "retry": 0
+          }
+        ]
+      },
+      {
+        "file": "ai-clinical-training-native-entry.spec.js",
+        "title": "canonical Super global history retains technical state and actual partial usage without recovering another learner parts",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "retry": 0
+          }
+        ]
+      },
+      {
+        "file": "ai-clinical-training-native-entry.spec.js",
+        "title": "canonical ordinary learner cannot enter management and a patient-bound teaching entry reads no Source",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "retry": 0
+          }
+        ]
+      },
+      {
+        "file": "ai-clinical-training-native-entry.spec.js",
+        "title": "canonical current Source denial removes both local practice rationale and selected model task without a new request",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "retry": 0
+          }
+        ]
+      },
+      {
+        "file": "ai-document-change-native-entry.spec.js",
+        "title": "production workbench performs explicit finite selection, complete preview and short receipt into verified split result",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "retry": 0
+          }
+        ]
+      },
+      {
+        "file": "ai-document-change-native-entry.spec.js",
+        "title": "production scope history opens original task only after current whole-source and split proof",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "retry": 0
+          }
+        ]
+      },
+      {
+        "file": "ai-document-change-native-entry.spec.js",
+        "title": "production management governance tab lazily verifies actual complete finite Source",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "retry": 0
+          }
+        ]
+      },
+      {
+        "file": "ai-document-change-native-entry.spec.js",
+        "title": "production Super history retains actual zero cancellation and partial usage in frozen split audit",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "retry": 0
+          }
+        ]
+      },
+      {
+        "file": "ai-document-change-native-entry.spec.js",
+        "title": "production mixed-domain reply cannot expose foreign findings or accepted questions",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "retry": 0
+          }
+        ]
+      },
+      {
+        "file": "ai-document-change-native-entry.spec.js",
+        "title": "production doctor cannot use Super scope governance route",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "retry": 0
+          }
+        ]
+      },
+      {
+        "file": "ai-document-extraction-native-entry.spec.js",
+        "title": "production chat original selection, literal preview, short receipt, explicit save and actual feedback remain separate",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "retry": 0
+          }
+        ]
+      },
+      {
+        "file": "ai-document-extraction-native-entry.spec.js",
+        "title": "production responses original selection, literal preview, short receipt, explicit save and actual feedback remain separate",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "retry": 0
+          }
+        ]
+      },
+      {
+        "file": "ai-document-extraction-native-entry.spec.js",
+        "title": "production original-scoped ordinary history opens only verified same-original tasks",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "retry": 0
+          }
+        ]
+      },
+      {
+        "file": "ai-document-extraction-native-entry.spec.js",
+        "title": "production Super governance loads lazily and verifies actual original UTC6 and full bytes",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "retry": 0
+          }
+        ]
+      },
+      {
+        "file": "ai-document-extraction-native-entry.spec.js",
+        "title": "production Super audit preserves actual zero cancellation and partial unknown usage without draft saving",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "retry": 0
+          }
+        ]
+      },
+      {
+        "file": "ai-document-extraction-native-entry.spec.js",
+        "title": "production ordinary doctor cannot enter document governance through management route",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "retry": 0
+          }
+        ]
+      },
+      {
+        "file": "ai-document-extraction-native-entry.spec.js",
+        "title": "production tampered frozen original JSON never becomes visible draft or save",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "retry": 0
+          }
+        ]
+      },
+      {
+        "file": "ai-document-extraction-native-entry.spec.js",
+        "title": "production current Source failure clears prior accepted result without resubmitting",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "retry": 0
+          }
+        ]
+      },
+      {
+        "file": "ai-document-extraction-native-entry.spec.js",
+        "title": "closing production preview prevents held actual Context from reopening original text",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "retry": 0
+          }
+        ]
+      },
+      {
+        "file": "ai-drug-label-business-entry.spec.js",
+        "title": "production drug row chat pharmacist binds exact SKU and complete native task",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "retry": 0
+          }
+        ]
+      },
+      {
+        "file": "ai-drug-label-business-entry.spec.js",
+        "title": "production drug row responses pharmacist binds exact SKU and complete native task",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "retry": 0
+          }
+        ]
+      },
+      {
+        "file": "ai-drug-label-business-entry.spec.js",
+        "title": "production drug row chat super_admin binds exact SKU and complete native task",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "retry": 0
+          }
+        ]
+      },
+      {
+        "file": "ai-drug-label-business-entry.spec.js",
+        "title": "production pharmacist explicitly opens SKU source/signature governance and clears it on session change",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "retry": 0
+          }
+        ]
+      },
+      {
+        "file": "ai-drug-label-business-entry.spec.js",
+        "title": "production ordinary administrator has no leaflet task or signing entry",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "retry": 0
+          }
+        ]
+      },
+      {
+        "file": "ai-laboratory-entry.spec.js",
+        "title": "超管主应用实际挂载项目映射及检验来源全院审计",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "retry": 0
+          }
+        ]
+      },
+      {
+        "file": "ai-laboratory-entry.spec.js",
+        "title": "护士主应用检验来源tab仅按当前原住院只读，切换患者重新限定目录",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "retry": 0
+          }
+        ]
+      },
+      {
+        "file": "ai-laboratory-entry.spec.js",
+        "title": "医生风险41的v2窗口展示0与定性原文和原依据，预览与任务只绑定窗口",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "retry": 0
+          }
+        ]
+      },
+      {
+        "file": "ai-laboratory-entry.spec.js",
+        "title": "医生风险入口显式撤销原检验后清除窗口选择，旧窗口不补新资料或继续提交",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "retry": 0
+          }
+        ]
+      },
+      {
+        "file": "ai-laboratory-entry.spec.js",
+        "title": "风险窗口内检验冻结patient串源拒绝，不展示或生成",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "retry": 0
+          }
+        ]
+      },
+      {
+        "file": "ai-laboratory-entry.spec.js",
+        "title": "风险窗口内检验冻结admission串源拒绝，不展示或生成",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "retry": 0
+          }
+        ]
+      },
+      {
+        "file": "ai-laboratory-entry.spec.js",
+        "title": "风险v2窗口成员冻结正文为null拒绝选中，不把元数据当完整有效检验",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "retry": 0
+          }
+        ]
+      },
+      {
+        "file": "ai-laboratory-entry.spec.js",
+        "title": "风险v2窗口成员缺少投影标识拒绝选中，不把元数据当完整有效检验",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "retry": 0
+          }
+        ]
+      },
+      {
+        "file": "ai-laboratory-entry.spec.js",
+        "title": "风险v2窗口成员投影标识未知拒绝选中，不把元数据当完整有效检验",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "retry": 0
+          }
+        ]
+      },
+      {
+        "file": "ai-management.spec.js",
+        "title": "超级管理员查看80项能力并保存独立Prompt版本",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "retry": 0
+          }
+        ]
+      },
+      {
+        "file": "ai-management.spec.js",
+        "title": "配置面板按能力限制角色并提交版本号",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "retry": 0
+          }
+        ]
+      },
+      {
+        "file": "ai-management.spec.js",
+        "title": "普通管理员直接访问管理地址也不会加载AI管理接口",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "retry": 0
+          }
+        ]
+      },
+      {
+        "file": "ai-management.spec.js",
+        "title": "超级管理员逐项查看未就绪原因而无需发起模型请求",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "retry": 0
+          }
+        ]
+      },
+      {
+        "file": "ai-management.spec.js",
+        "title": "超级管理员追查任务当时的Prompt模型和原始反馈，反馈文本按纯文本展示",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "retry": 0
+          }
+        ]
+      },
+      {
+        "file": "ai-operations-native-entry.spec.js",
+        "title": "canonical workbench requires explicit current Case and fixed objective, with real extracted CSS",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "retry": 0
+          }
+        ]
+      },
+      {
+        "file": "ai-operations-native-entry.spec.js",
+        "title": "canonical common queued→running→success verifies four original parts, exact citation/raw3 and actual feedback",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "retry": 0
+          }
+        ]
+      },
+      {
+        "file": "ai-operations-native-entry.spec.js",
+        "title": "canonical Super preview is actual queued task and explicit cancel preserves known-zero receipt without saving config",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "retry": 0
+          }
+        ]
+      },
+      {
+        "file": "ai-operations-native-entry.spec.js",
+        "title": "canonical Super management opens protected same-Case originals only explicitly, with no governance writes",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "retry": 0
+          }
+        ]
+      },
+      {
+        "file": "ai-operations-native-entry.spec.js",
+        "title": "canonical management shows actual immutable UUID Prompt/System without automatic save or enable",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "retry": 0
+          }
+        ]
+      },
+      {
+        "file": "ai-operations-native-entry.spec.js",
+        "title": "canonical Super global history reads bodyless metadata before current Source and dedicated trace/four parts",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "retry": 0
+          }
+        ]
+      },
+      {
+        "file": "ai-operations-native-entry.spec.js",
+        "title": "canonical withdrawn Source retains only genuine Super technical metadata and nullable usage, never parts or trace",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "retry": 0
+          }
+        ]
+      },
+      {
+        "file": "ai-operations-native-entry.spec.js",
+        "title": "canonical ordinary admin cannot enter management; patient-bound workbench cannot read operations Source or create task",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "retry": 0
+          }
+        ]
+      },
+      {
+        "file": "ai-qsofa-entry.spec.js",
+        "title": "Super主应用独立挂载qSOFA规则、当前临床回顾与GCS原分项审计",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "retry": 0
+          }
+        ]
+      },
+      {
+        "file": "ai-qsofa-entry.spec.js",
+        "title": "qSOFA服务检查只核对元数据并填写待保存模型，保持关闭和原验证报告",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "retry": 0
+          }
+        ]
+      },
+      {
+        "file": "ai-qsofa-entry.spec.js",
+        "title": "qSOFA服务检查途中失去Super或换会话，迟到回执不能恢复填表",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "retry": 0
+          }
+        ]
+      },
+      {
+        "file": "ai-qsofa-entry.spec.js",
+        "title": "医生主入口需双引用，缺GCS保留已知2项、当前回顾与原依据且等待任务时选源不消失",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "retry": 0
+          }
+        ]
+      },
+      {
+        "file": "ai-qsofa-entry.spec.js",
+        "title": "qSOFA主入口撤销尚在等待时已禁用旧预览和生成",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "retry": 0
+          }
+        ]
+      },
+      {
+        "file": "ai-qsofa-entry.spec.js",
+        "title": "qSOFA主入口拒绝无原文、点测串患者和GCS串住院，不只凭元数据",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "retry": 0
+          }
+        ]
+      },
+      {
+        "file": "ai-qsofa-entry.spec.js",
+        "title": "qSOFA患者与会话切换后迟到结果不能恢复另一患者的三项报告",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "retry": 0
+          }
+        ]
+      },
+      {
+        "file": "ai-qsofa-entry.spec.js",
+        "title": "qSOFA依据索引必须同source固定白名单，不能展开任意技术路径",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "retry": 0
+          }
+        ]
+      },
+      {
+        "file": "ai-qsofa-entry.spec.js",
+        "title": "旧sepsis原观测窗外部模式保留，不强制qSOFA评估或冒称计分",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "retry": 0
+          }
+        ]
+      },
+      {
+        "file": "ai-research-variable-native-entry.spec.js",
+        "title": "production workbench76 explicitly verifies a real Batch then previews and expands one queued Task to literal Findings and manual feedback",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "retry": 0
+          }
+        ]
+      },
+      {
+        "file": "ai-research-variable-native-entry.spec.js",
+        "title": "production ordinary history retains the exact selected Batch and rechecks complete parts before displaying a historical draft",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "retry": 0
+          }
+        ]
+      },
+      {
+        "file": "ai-research-variable-native-entry.spec.js",
+        "title": "production failed current Task authorization clears prior Source and Findings and keeps the error without resubmitting",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "retry": 0
+          }
+        ]
+      },
+      {
+        "file": "ai-research-variable-native-entry.spec.js",
+        "title": "production Super management loads Source only on demand then verifies the actual Scope and both independent dictionary pieces",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "retry": 0
+          }
+        ]
+      },
+      {
+        "file": "ai-research-variable-native-entry.spec.js",
+        "title": "production ordinary doctor management route is rejected before any admin or Source private request",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "retry": 0
+          }
+        ]
+      },
+      {
+        "file": "ai-research-variable-native-entry.spec.js",
+        "title": "production exact inert icon record preserves all293 actual geometries with real static CSS",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "retry": 0
+          }
+        ]
+      },
+      {
+        "file": "ai-research-variable-native-entry.spec.js",
+        "title": "production pharmacist under an explicit synthetic five-role configuration reads the actual76 project context without the74 registry",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "retry": 0
+          }
+        ]
+      },
+      {
+        "file": "ai-roster-entry.spec.js",
+        "title": "生产主应用63本地模式明确选原受审计划并显示真实最优服务量，不读旧班表或实时号源",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "retry": 0
+          }
+        ]
+      },
+      {
+        "file": "ai-roster-entry.spec.js",
+        "title": "生产Super独立计划治理按需加载完整原件，冻结场景与自由依据仅院内核对",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "retry": 0
+          }
+        ]
+      },
+      {
+        "file": "ai-roster-entry.spec.js",
+        "title": "生产Super服务管理只读核对排班metadata，填入实际模型后仍等待人工保存",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "retry": 0
+          }
+        ]
+      },
+      {
+        "file": "ai-task-technical-production.spec.js",
+        "title": "current production super administrator opens the source-free global directory",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "retry": 0
+          }
+        ]
+      },
+      {
+        "file": "ai-task-technical-production.spec.js",
+        "title": "ordinary production administrator cannot load global technical management",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "retry": 0
+          }
+        ]
+      },
+      {
+        "file": "ai-task-technical-production.spec.js",
+        "title": "current production usage tab renders exact nullable Main aggregates without Source requests",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "retry": 0
+          }
+        ]
+      },
+      {
+        "file": "ai-task-technical-production.spec.js",
+        "title": "current production usage rejects invented zero on refresh and discards old statistics",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "retry": 0
+          }
+        ]
+      },
+      {
+        "file": "ai-workbench.spec.js",
+        "title": "医生提交授权患者任务并核查引用和记录复核反馈",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "retry": 0
+          }
+        ]
+      },
+      {
+        "file": "ai-workbench.spec.js",
+        "title": "任务准备失败显示服务端原因且不重复提交",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "retry": 0
+          }
+        ]
+      },
+      {
+        "file": "ai-workbench.spec.js",
+        "title": "切换患者后历史按当前病例查询，迟到的旧病例响应不会覆盖新列表",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "retry": 0
+          }
+        ]
+      },
+      {
+        "file": "ai-workbench.spec.js",
+        "title": "提交后切换患者，迟到的任务回执不会挂到新病例或开始轮询",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "retry": 0
+          }
+        ]
+      },
+      {
+        "file": "ai-writing-experience.spec.js",
+        "title": "copying clinical text requires review and copies only explicitly selected sections",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "retry": 0
+          }
+        ]
+      },
+      {
+        "file": "ai-writing-experience.spec.js",
+        "title": "changing role clears the old document and prevents reopening its copy scope",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "retry": 0
+          }
+        ]
+      },
+      {
+        "file": "ai-writing-experience.spec.js",
+        "title": "changing token clears the old document and prevents reopening its copy scope",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "retry": 0
+          }
+        ]
+      },
+      {
+        "file": "ai-writing-experience.spec.js",
+        "title": "changing username clears the old document and prevents reopening its copy scope",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "retry": 0
+          }
+        ]
+      },
+      {
+        "file": "ai-writing-experience.spec.js",
+        "title": "a summary without clinical sections cannot be copied as a completed document",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "retry": 0
+          }
+        ]
+      },
+      {
+        "file": "ai-writing-experience.spec.js",
+        "title": "changing the patient clears the open copy scope before any clipboard operation",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "retry": 0
+          }
+        ]
+      },
+      {
+        "file": "ai-writing-experience.spec.js",
+        "title": "an available dedicated task has no contradictory unavailable-feature empty state",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "retry": 0
+          }
+        ]
+      }
+    ],
+    "test_file_difference": [
+      "vue3-new-ui/e2e/ai-writing-experience.spec.js"
+    ],
+    "source_reports": [
+      {
+        "path": "/tmp/hoim-ai-taste-production-first-verification.json",
+        "sha256": "bc396ab592274f44074b3c65a73adbcd4340d11a8fac984fd62465785be83917",
+        "stats": {
+          "startTime": "2026-10-26T06:31:19.908Z",
+          "duration": 235753.307,
+          "expected": 89,
+          "skipped": 0,
+          "unexpected": 1,
+          "flaky": 0
+        }
+      },
+      {
+        "path": "/tmp/hoim-ai-taste-production-second-verification.json",
+        "sha256": "53524811cb2f8e86eda3f6ace958a7369c52be8eb0b4de5ed8a93ab4f79f740e",
+        "stats": {
+          "startTime": "2026-10-26T06:36:22.775Z",
+          "duration": 24968.074,
+          "expected": 7,
+          "skipped": 0,
+          "unexpected": 0,
+          "flaky": 0
+        }
+      }
+    ],
+    "single_green_90_case_invocation_claimed": false
+  },
+  "native_late_template_copy": {
+    "source_difference_from_602_manifest": {
+      "vue3-new-ui/src/components/ai/OperationsSupportInput.vue": {
+        "before": "9eac26dd9564f88a8c6f279d3f8bffd8cfd572aadba0a72d000ad8dcc37f22d7",
+        "after": "94551c6aa559c9bde00913f81206c1f9e442aa610612ade2083590a111fa5300"
+      }
+    },
+    "followup": {
+      "scope": "Additional four operations template-copy changes after the original 602-case native evidence. Original record and its 40 source hashes are retained; this record establishes only the explicit new copy/script bridge and pending four-file test scope.",
+      "source_bridge": [
+        {
+          "path": "vue3-new-ui/src/components/ai/OperationsSupportAssistant.vue",
+          "before_sha256": "0ae23e0f45d0b15bc8cd41dd092050090ed1a3787ae1febabc5ca1cb11d551c5",
+          "after_sha256": "0ae23e0f45d0b15bc8cd41dd092050090ed1a3787ae1febabc5ca1cb11d551c5",
+          "script_and_style_identical": true,
+          "script_and_style_sha256": "f58b0c42a9f066dd369aa027994911a21de45d8ee895cdde1f2f46a75163f4aa"
+        },
+        {
+          "path": "vue3-new-ui/src/components/ai/OperationsSupportInput.vue",
+          "before_sha256": "94551c6aa559c9bde00913f81206c1f9e442aa610612ade2083590a111fa5300",
+          "after_sha256": "94551c6aa559c9bde00913f81206c1f9e442aa610612ade2083590a111fa5300",
+          "script_and_style_identical": true,
+          "script_and_style_sha256": "57b28e8162186f153dc406d7414d8db993d11830726bb12ddc89440c79ea73d7"
+        },
+        {
+          "path": "vue3-new-ui/src/components/ai/OperationsSupportSources.vue",
+          "before_sha256": "100911f581b59505492817e30d633b947323eaa930446512f0f551c0379f8fac",
+          "after_sha256": "100911f581b59505492817e30d633b947323eaa930446512f0f551c0379f8fac",
+          "script_and_style_identical": true,
+          "script_and_style_sha256": "f1cda6f359da3866c53098b1f17d32ec5e885d0191d9f7dfe8624f5fdc123d93"
+        },
+        {
+          "path": "vue3-new-ui/src/components/ai/OperationsSupportTasks.vue",
+          "before_sha256": "c72a34648a734593e36c70862712744e8ab97a0eeaa23052a03ced82d7547637",
+          "after_sha256": "c72a34648a734593e36c70862712744e8ab97a0eeaa23052a03ced82d7547637",
+          "script_and_style_identical": true,
+          "script_and_style_sha256": "406d785525368340ed93b1f099826dd0de7c38d76846acb9fc5e4aa72239fec0"
+        }
+      ],
+      "tests_pending": [],
+      "final_four_file_run": {
+        "scope": "New four operations template-copy changes only, after original native 602-case evidence. Four complete source UI files, synthetic HTTP/identity and exact original packets; no production build or remote model. Source/ID/request order/negative state-clearing assertions retained. Earlier 602 results are not represented as rerun on these new source bytes.",
+        "command": [
+          "/home/xusheng/workspace/hoimsystem/vue3-new-ui/node_modules/.bin/playwright",
+          "test",
+          "e2e/ai-operations-assistant.spec.js",
+          "e2e/ai-operations-input.spec.js",
+          "e2e/ai-operations-sources.spec.js",
+          "e2e/ai-operations-task-states.spec.js",
+          "--workers=2",
+          "--retries=0",
+          "--forbid-only",
+          "--reporter=json",
+          "--output=/tmp/hoim-native-operations-copy-final-results"
+        ],
+        "exit_code": 0,
+        "elapsed_seconds": 52.934,
+        "all_checks_passed": true,
+        "file_case_counts": {
+          "ai-operations-assistant.spec.js": 14,
+          "ai-operations-input.spec.js": 16,
+          "ai-operations-sources.spec.js": 10,
+          "ai-operations-task-states.spec.js": 8
+        },
+        "case_count": 48,
+        "stats": {
+          "startTime": "2026-10-26T06:45:39.573Z",
+          "duration": 51917.118,
+          "expected": 48,
+          "skipped": 0,
+          "unexpected": 0,
+          "flaky": 0
+        },
+        "cases": [
+          {
+            "file": "ai-operations-assistant.spec.js",
+            "title": "explicit Source and fixed objective are both required; no first selection or generic options",
+            "status": "expected",
+            "results": [
+              {
+                "status": "passed",
+                "retry": 0
+              }
+            ]
+          },
+          {
+            "file": "ai-operations-assistant.spec.js",
+            "title": "actual common queued→running→success polls one durable ID and verifies full four pieces",
+            "status": "expected",
+            "results": [
+              {
+                "status": "passed",
+                "retry": 0
+              }
+            ]
+          },
+          {
+            "file": "ai-operations-assistant.spec.js",
+            "title": "token clears explicit Source objective and running model task",
+            "status": "expected",
+            "results": [
+              {
+                "status": "passed",
+                "retry": 0
+              }
+            ]
+          },
+          {
+            "file": "ai-operations-assistant.spec.js",
+            "title": "username clears explicit Source objective and running model task",
+            "status": "expected",
+            "results": [
+              {
+                "status": "passed",
+                "retry": 0
+              }
+            ]
+          },
+          {
+            "file": "ai-operations-assistant.spec.js",
+            "title": "role clears explicit Source objective and running model task",
+            "status": "expected",
+            "results": [
+              {
+                "status": "passed",
+                "retry": 0
+              }
+            ]
+          },
+          {
+            "file": "ai-operations-assistant.spec.js",
+            "title": "active clears explicit Source objective and running model task",
+            "status": "expected",
+            "results": [
+              {
+                "status": "passed",
+                "retry": 0
+              }
+            ]
+          },
+          {
+            "file": "ai-operations-assistant.spec.js",
+            "title": "keepalive clears explicit Source objective and running model task",
+            "status": "expected",
+            "results": [
+              {
+                "status": "passed",
+                "retry": 0
+              }
+            ]
+          },
+          {
+            "file": "ai-operations-assistant.spec.js",
+            "title": "config clears explicit Source objective and running model task",
+            "status": "expected",
+            "results": [
+              {
+                "status": "passed",
+                "retry": 0
+              }
+            ]
+          },
+          {
+            "file": "ai-operations-assistant.spec.js",
+            "title": "foreign patient or free question entry is rejected before Source or model access",
+            "status": "expected",
+            "results": [
+              {
+                "status": "passed",
+                "retry": 0
+              }
+            ]
+          },
+          {
+            "file": "ai-operations-assistant.spec.js",
+            "title": "source lost on create clears previous ready selection and cannot show a false queued state",
+            "status": "expected",
+            "results": [
+              {
+                "status": "passed",
+                "retry": 0
+              }
+            ]
+          },
+          {
+            "file": "ai-operations-assistant.spec.js",
+            "title": "Super preview is a real queued task, never enables a feature, and actual queued cancel records known zero",
+            "status": "expected",
+            "results": [
+              {
+                "status": "passed",
+                "retry": 0
+              }
+            ]
+          },
+          {
+            "file": "ai-operations-assistant.spec.js",
+            "title": "actual accepted result feedback is explicit and does not write environment or Source",
+            "status": "expected",
+            "results": [
+              {
+                "status": "passed",
+                "retry": 0
+              }
+            ]
+          },
+          {
+            "file": "ai-operations-assistant.spec.js",
+            "title": "late create ACK after account change cannot restore the old task",
+            "status": "expected",
+            "results": [
+              {
+                "status": "passed",
+                "retry": 0
+              }
+            ]
+          },
+          {
+            "file": "ai-operations-assistant.spec.js",
+            "title": "ordinary task directory is technical until an explicitly selected original row is freshly opened",
+            "status": "expected",
+            "results": [
+              {
+                "status": "passed",
+                "retry": 0
+              }
+            ]
+          },
+          {
+            "file": "ai-operations-input.spec.js",
+            "title": "no first Case, automatic directory read or model permission is inferred on mount",
+            "status": "expected",
+            "results": [
+              {
+                "status": "passed",
+                "retry": 0
+              }
+            ]
+          },
+          {
+            "file": "ai-operations-input.spec.js",
+            "title": "explicit bound entry reads current public Source and emits exactly one Case key",
+            "status": "expected",
+            "results": [
+              {
+                "status": "passed",
+                "retry": 0
+              }
+            ]
+          },
+          {
+            "file": "ai-operations-input.spec.js",
+            "title": "actual current directory selection is fresh-read before becoming available",
+            "status": "expected",
+            "results": [
+              {
+                "status": "passed",
+                "retry": 0
+              }
+            ]
+          },
+          {
+            "file": "ai-operations-input.spec.js",
+            "title": "token change clears selected public material and availability",
+            "status": "expected",
+            "results": [
+              {
+                "status": "passed",
+                "retry": 0
+              }
+            ]
+          },
+          {
+            "file": "ai-operations-input.spec.js",
+            "title": "username change clears selected public material and availability",
+            "status": "expected",
+            "results": [
+              {
+                "status": "passed",
+                "retry": 0
+              }
+            ]
+          },
+          {
+            "file": "ai-operations-input.spec.js",
+            "title": "role change clears selected public material and availability",
+            "status": "expected",
+            "results": [
+              {
+                "status": "passed",
+                "retry": 0
+              }
+            ]
+          },
+          {
+            "file": "ai-operations-input.spec.js",
+            "title": "active change clears selected public material and availability",
+            "status": "expected",
+            "results": [
+              {
+                "status": "passed",
+                "retry": 0
+              }
+            ]
+          },
+          {
+            "file": "ai-operations-input.spec.js",
+            "title": "keepalive change clears selected public material and availability",
+            "status": "expected",
+            "results": [
+              {
+                "status": "passed",
+                "retry": 0
+              }
+            ]
+          },
+          {
+            "file": "ai-operations-input.spec.js",
+            "title": "config change clears selected public material and availability",
+            "status": "expected",
+            "results": [
+              {
+                "status": "passed",
+                "retry": 0
+              }
+            ]
+          },
+          {
+            "file": "ai-operations-input.spec.js",
+            "title": "changed explicit entry clears old selection without fetching its replacement",
+            "status": "expected",
+            "results": [
+              {
+                "status": "passed",
+                "retry": 0
+              }
+            ]
+          },
+          {
+            "file": "ai-operations-input.spec.js",
+            "title": "malformed and foreign references never trigger directory or Source reads",
+            "status": "expected",
+            "results": [
+              {
+                "status": "passed",
+                "retry": 0
+              }
+            ]
+          },
+          {
+            "file": "ai-operations-input.spec.js",
+            "title": "late 403 after deactivation cannot restore the previous entry",
+            "status": "expected",
+            "results": [
+              {
+                "status": "passed",
+                "retry": 0
+              }
+            ]
+          },
+          {
+            "file": "ai-operations-input.spec.js",
+            "title": "late 409 after deactivation cannot restore the previous entry",
+            "status": "expected",
+            "results": [
+              {
+                "status": "passed",
+                "retry": 0
+              }
+            ]
+          },
+          {
+            "file": "ai-operations-input.spec.js",
+            "title": "actual SHA await followed by clear cannot restore a selection",
+            "status": "expected",
+            "results": [
+              {
+                "status": "passed",
+                "retry": 0
+              }
+            ]
+          },
+          {
+            "file": "ai-operations-input.spec.js",
+            "title": "different directory Case is rejected while an explicit entry remains bound",
+            "status": "expected",
+            "results": [
+              {
+                "status": "passed",
+                "retry": 0
+              }
+            ]
+          },
+          {
+            "file": "ai-operations-input.spec.js",
+            "title": "tampered full Source is rejected without inventing a protected hash proof",
+            "status": "expected",
+            "results": [
+              {
+                "status": "passed",
+                "retry": 0
+              }
+            ]
+          },
+          {
+            "file": "ai-operations-sources.spec.js",
+            "title": "ordinary explicitly verifies complete published Source and emits only its canonical Case reference",
+            "status": "expected",
+            "results": [
+              {
+                "status": "passed",
+                "retry": 0
+              }
+            ]
+          },
+          {
+            "file": "ai-operations-sources.spec.js",
+            "title": "actual full manual original→redaction→independent publication→ordinary finite Case lifecycle",
+            "status": "expected",
+            "results": [
+              {
+                "status": "passed",
+                "retry": 0
+              }
+            ]
+          },
+          {
+            "file": "ai-operations-sources.spec.js",
+            "title": "Super explicitly verifies private complete transform and technical withdrawal clears full text",
+            "status": "expected",
+            "results": [
+              {
+                "status": "passed",
+                "retry": 0
+              }
+            ]
+          },
+          {
+            "file": "ai-operations-sources.spec.js",
+            "title": "token loss clears protected originals and all pending forms",
+            "status": "expected",
+            "results": [
+              {
+                "status": "passed",
+                "retry": 0
+              }
+            ]
+          },
+          {
+            "file": "ai-operations-sources.spec.js",
+            "title": "username loss clears protected originals and all pending forms",
+            "status": "expected",
+            "results": [
+              {
+                "status": "passed",
+                "retry": 0
+              }
+            ]
+          },
+          {
+            "file": "ai-operations-sources.spec.js",
+            "title": "role loss clears protected originals and all pending forms",
+            "status": "expected",
+            "results": [
+              {
+                "status": "passed",
+                "retry": 0
+              }
+            ]
+          },
+          {
+            "file": "ai-operations-sources.spec.js",
+            "title": "active loss clears protected originals and all pending forms",
+            "status": "expected",
+            "results": [
+              {
+                "status": "passed",
+                "retry": 0
+              }
+            ]
+          },
+          {
+            "file": "ai-operations-sources.spec.js",
+            "title": "keepalive loss clears protected originals and all pending forms",
+            "status": "expected",
+            "results": [
+              {
+                "status": "passed",
+                "retry": 0
+              }
+            ]
+          },
+          {
+            "file": "ai-operations-sources.spec.js",
+            "title": "late original network reply after deactivation cannot restore sensitive text",
+            "status": "expected",
+            "results": [
+              {
+                "status": "passed",
+                "retry": 0
+              }
+            ]
+          },
+          {
+            "file": "ai-operations-sources.spec.js",
+            "title": "ordinary cannot enter governance or request a private original",
+            "status": "expected",
+            "results": [
+              {
+                "status": "passed",
+                "retry": 0
+              }
+            ]
+          },
+          {
+            "file": "ai-operations-task-states.spec.js",
+            "title": "actual queued metadata and complete four parts preserve nullable usage and original lease",
+            "status": "expected",
+            "results": [
+              {
+                "status": "passed",
+                "retry": 0
+              }
+            ]
+          },
+          {
+            "file": "ai-operations-task-states.spec.js",
+            "title": "actual running metadata and complete four parts preserve nullable usage and original lease",
+            "status": "expected",
+            "results": [
+              {
+                "status": "passed",
+                "retry": 0
+              }
+            ]
+          },
+          {
+            "file": "ai-operations-task-states.spec.js",
+            "title": "actual succeeded metadata and complete four parts preserve nullable usage and original lease",
+            "status": "expected",
+            "results": [
+              {
+                "status": "passed",
+                "retry": 0
+              }
+            ]
+          },
+          {
+            "file": "ai-operations-task-states.spec.js",
+            "title": "actual queued-cancelled metadata and complete four parts preserve nullable usage and original lease",
+            "status": "expected",
+            "results": [
+              {
+                "status": "passed",
+                "retry": 0
+              }
+            ]
+          },
+          {
+            "file": "ai-operations-task-states.spec.js",
+            "title": "actual failed metadata and complete four parts preserve nullable usage and original lease",
+            "status": "expected",
+            "results": [
+              {
+                "status": "passed",
+                "retry": 0
+              }
+            ]
+          },
+          {
+            "file": "ai-operations-task-states.spec.js",
+            "title": "actual inflight-pending metadata and complete four parts preserve nullable usage and original lease",
+            "status": "expected",
+            "results": [
+              {
+                "status": "passed",
+                "retry": 0
+              }
+            ]
+          },
+          {
+            "file": "ai-operations-task-states.spec.js",
+            "title": "actual inflight-paid metadata and complete four parts preserve nullable usage and original lease",
+            "status": "expected",
+            "results": [
+              {
+                "status": "passed",
+                "retry": 0
+              }
+            ]
+          },
+          {
+            "file": "ai-operations-task-states.spec.js",
+            "title": "Source withdrawal provides genuine Super technical metadata and denies all ordinary/full parts",
+            "status": "expected",
+            "results": [
+              {
+                "status": "passed",
+                "retry": 0
+              }
+            ]
+          }
+        ],
+        "global_errors": [],
+        "source_and_test_inputs_before": {
+          "vue3-new-ui/src/components/ai/OperationsSupportAssistant.vue": {
+            "bytes": 7246,
+            "sha256": "0ae23e0f45d0b15bc8cd41dd092050090ed1a3787ae1febabc5ca1cb11d551c5"
+          },
+          "vue3-new-ui/src/components/ai/OperationsSupportInput.vue": {
+            "bytes": 4448,
+            "sha256": "94551c6aa559c9bde00913f81206c1f9e442aa610612ade2083590a111fa5300"
+          },
+          "vue3-new-ui/src/components/ai/OperationsSupportSources.vue": {
+            "bytes": 9203,
+            "sha256": "100911f581b59505492817e30d633b947323eaa930446512f0f551c0379f8fac"
+          },
+          "vue3-new-ui/src/components/ai/OperationsSupportTasks.vue": {
+            "bytes": 3293,
+            "sha256": "c72a34648a734593e36c70862712744e8ab97a0eeaa23052a03ced82d7547637"
+          },
+          "vue3-new-ui/e2e/ai-operations-assistant.spec.js": {
+            "bytes": 8493,
+            "sha256": "5cf9e7a0c3e9bcf3181cf3a203894a15481ff03e2a264ff38bb3de3c12d0c7a7"
+          },
+          "vue3-new-ui/e2e/ai-operations-input.spec.js": {
+            "bytes": 8082,
+            "sha256": "32d34db7add5d2130fd38e76b120f1c2d8db6fa5d4518eaa9fe1460e1640a10a"
+          },
+          "vue3-new-ui/e2e/ai-operations-sources.spec.js": {
+            "bytes": 8709,
+            "sha256": "c81328b16f8f975417de732f2b894b89dc83305f9067e10921cb37db01fc2c58"
+          },
+          "vue3-new-ui/e2e/ai-operations-task-states.spec.js": {
+            "bytes": 3434,
+            "sha256": "183cbd2e9684ea044d7571370953ff4332910fe36f734e1ae9305130e91792c8"
+          },
+          "vue3-new-ui/e2e/fixtures/operations-support-assistant-ui.cjs": {
+            "bytes": 6576,
+            "sha256": "4ae4054a56f3f0c8e1181d43418086a7d243e1775c88add64f378c7006555c90"
+          },
+          "vue3-new-ui/src/api/publicInterfaceExtensionTextPool.json": {
+            "bytes": 83691,
+            "sha256": "2675774fbb3620126e3a2b94e637ff675cf6127d31208457383c9a96c2f2eca8"
+          }
+        },
+        "source_and_test_inputs_after": {
+          "vue3-new-ui/src/components/ai/OperationsSupportAssistant.vue": {
+            "bytes": 7246,
+            "sha256": "0ae23e0f45d0b15bc8cd41dd092050090ed1a3787ae1febabc5ca1cb11d551c5"
+          },
+          "vue3-new-ui/src/components/ai/OperationsSupportInput.vue": {
+            "bytes": 4448,
+            "sha256": "94551c6aa559c9bde00913f81206c1f9e442aa610612ade2083590a111fa5300"
+          },
+          "vue3-new-ui/src/components/ai/OperationsSupportSources.vue": {
+            "bytes": 9203,
+            "sha256": "100911f581b59505492817e30d633b947323eaa930446512f0f551c0379f8fac"
+          },
+          "vue3-new-ui/src/components/ai/OperationsSupportTasks.vue": {
+            "bytes": 3293,
+            "sha256": "c72a34648a734593e36c70862712744e8ab97a0eeaa23052a03ced82d7547637"
+          },
+          "vue3-new-ui/e2e/ai-operations-assistant.spec.js": {
+            "bytes": 8493,
+            "sha256": "5cf9e7a0c3e9bcf3181cf3a203894a15481ff03e2a264ff38bb3de3c12d0c7a7"
+          },
+          "vue3-new-ui/e2e/ai-operations-input.spec.js": {
+            "bytes": 8082,
+            "sha256": "32d34db7add5d2130fd38e76b120f1c2d8db6fa5d4518eaa9fe1460e1640a10a"
+          },
+          "vue3-new-ui/e2e/ai-operations-sources.spec.js": {
+            "bytes": 8709,
+            "sha256": "c81328b16f8f975417de732f2b894b89dc83305f9067e10921cb37db01fc2c58"
+          },
+          "vue3-new-ui/e2e/ai-operations-task-states.spec.js": {
+            "bytes": 3434,
+            "sha256": "183cbd2e9684ea044d7571370953ff4332910fe36f734e1ae9305130e91792c8"
+          },
+          "vue3-new-ui/e2e/fixtures/operations-support-assistant-ui.cjs": {
+            "bytes": 6576,
+            "sha256": "4ae4054a56f3f0c8e1181d43418086a7d243e1775c88add64f378c7006555c90"
+          },
+          "vue3-new-ui/src/api/publicInterfaceExtensionTextPool.json": {
+            "bytes": 83691,
+            "sha256": "2675774fbb3620126e3a2b94e637ff675cf6127d31208457383c9a96c2f2eca8"
+          }
+        },
+        "inputs_stable": true,
+        "report": "/tmp/hoim-native-operations-copy-final-report.json",
+        "report_sha256": "663fcf3546f0fc7ad49e110ea6ca28c86e558b6bef5b81b17bc872b815796b46",
+        "log": "/tmp/hoim-native-operations-copy-final-tests.log",
+        "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "test_locator_commit": "2f90ddf"
+      },
+      "scripts_styles_declared_props_or_control_logic_changed": false,
+      "visible_copy_note": "Three paragraph literals and one el-alert title literal changed. The title value is user-facing text; component-declared props, scripts, styles, conditions, bindings and event handlers retain their original definitions."
+    },
+    "earlier_602_claimed_as_fresh_current_run": false
+  },
+  "dependency_audit": {
+    "command": [
+      "npm",
+      "audit",
+      "--audit-level=low",
+      "--json"
+    ],
+    "elapsed_seconds": 0.948,
+    "exit_code": 0,
+    "vulnerabilities": {
+      "info": 0,
+      "low": 0,
+      "moderate": 0,
+      "high": 0,
+      "critical": 0,
+      "total": 0
+    },
+    "lock_version_changes": {
+      "node_modules/ajv/node_modules/fast-uri": {
+        "from": "3.1.8",
+        "to": null
+      },
+      "node_modules/body-parser": {
+        "from": "2.3.0",
+        "to": "2.4.0"
+      },
+      "node_modules/content-type": {
+        "from": "2.0.0",
+        "to": "2.1.0"
+      },
+      "node_modules/fast-uri": {
+        "from": null,
+        "to": "3.1.9"
+      },
+      "node_modules/iconv-lite": {
+        "from": "0.7.2",
+        "to": "0.7.3"
+      },
+      "node_modules/qs": {
+        "from": "6.16.0",
+        "to": "6.16.1"
+      }
+    },
+    "lock_changed_fields": {
+      "": [
+        "devDependencies"
+      ],
+      "node_modules/ajv/node_modules/fast-uri": [
+        "dev",
+        "funding",
+        "integrity",
+        "license",
+        "resolved",
+        "version"
+      ],
+      "node_modules/body-parser": [
+        "dependencies",
+        "integrity",
+        "resolved",
+        "version"
+      ],
+      "node_modules/content-type": [
+        "integrity",
+        "resolved",
+        "version"
+      ],
+      "node_modules/fast-uri": [
+        "dev",
+        "funding",
+        "integrity",
+        "license",
+        "resolved",
+        "version"
+      ],
+      "node_modules/iconv-lite": [
+        "integrity",
+        "resolved",
+        "version"
+      ],
+      "node_modules/qs": [
+        "integrity",
+        "resolved",
+        "version"
+      ]
+    },
+    "dist_unchanged": true
+  },
+  "dependency_fix_sources": [
+    "https://github.com/advisories/GHSA-27r3-jxmh-p828",
+    "https://github.com/advisories/GHSA-w74x-v6f9-j3xg",
+    "https://github.com/advisories/GHSA-xhq7-xmqj-769h",
+    "https://github.com/advisories/GHSA-wjr9-j795-jxcr",
+    "https://github.com/advisories/GHSA-333x-w4r6-6crp"
+  ],
+  "earlier_attempts": {
+    "builds": [
+      {
+        "artifact": {
+          "path": "/tmp/hoim-ai-taste-build-20261026/verification.json",
+          "bytes": 321484,
+          "sha256": "e65e85f760a673b3ae9d9347f595f98f33517ee12c46a1a20aba3878bacebe0c"
+        },
+        "exit_code": 1,
+        "seconds": 1.7957871025428176,
+        "sources_stable": true,
+        "stage": "Dependency audit; build did not run",
+        "metrics": null
+      },
+      {
+        "artifact": {
+          "path": "/tmp/hoim-ai-taste-build-second-20261026/verification.json",
+          "bytes": 321629,
+          "sha256": "a251c97b2681c879dceee7e168ef5d83c476c1b80be8dd95cb8591b873ca8830"
+        },
+        "exit_code": 1,
+        "seconds": 36.71207061782479,
+        "sources_stable": true,
+        "stage": "Actual build exceeded unchanged asset budget",
+        "metrics": {
+          "totalJavaScript": 5977586,
+          "totalAssets": 7007205,
+          "largestJavaScript": 646866
+        }
+      },
+      {
+        "artifact": {
+          "path": "/tmp/hoim-ai-taste-build-third-20261026/verification.json",
+          "bytes": 321948,
+          "sha256": "5a49e515f38b058f77948d5ee67b0618ebd841f696e7c5521b03caaf7ddf60cf"
+        },
+        "exit_code": 1,
+        "seconds": 34.0543857216835,
+        "sources_stable": true,
+        "stage": "Actual build exceeded unchanged asset budget",
+        "metrics": {
+          "totalJavaScript": 5967334,
+          "totalAssets": 7001718,
+          "largestJavaScript": 646898
+        }
+      },
+      {
+        "artifact": {
+          "path": "/tmp/hoim-ai-taste-build-fourth-20261026/verification.json",
+          "bytes": 322090,
+          "sha256": "93d2fbee15b268513628425e11ea848eaab90d09fd8d89503c6f1f74ce977fa6"
+        },
+        "exit_code": 1,
+        "seconds": 36.303012972697616,
+        "sources_stable": true,
+        "stage": "Actual build exceeded unchanged asset budget",
+        "metrics": {
+          "totalJavaScript": 5965385,
+          "totalAssets": 7001234,
+          "largestJavaScript": 646898
+        }
+      }
+    ],
+    "node": [
+      {
+        "exit_code": 1,
+        "tests_executed": 0,
+        "stage": "Post-generation wrapper assertion",
+        "reason": "Wrapper incorrectly assumed unchanged text values. Public pool includes revised UI SFC sources, so changes are required. Generator itself succeeded; no product/test weakening. Second run checks generated pool against actual source.",
+        "pools": [
+          {
+            "file": "vue3-new-ui/src/api/publicInterfaceTextPool.json",
+            "old_values": 4687,
+            "new_values": 4698,
+            "removed_values": 56,
+            "added_values": 67,
+            "changed_bindings": [
+              "package-lock.json",
+              "src/components/AIAssistant/index.vue",
+              "src/components/ai/ChargeReconciliationFindings.vue",
+              "src/components/ai/CodingFindings.vue",
+              "src/components/ai/DocumentChangeAssistant.vue",
+              "src/components/ai/DocumentChangeFindings.vue",
+              "src/components/ai/DocumentChangeSources.vue",
+              "src/components/ai/DocumentEvidencePanel.vue",
+              "src/components/ai/DocumentExtractionFindings.vue",
+              "src/components/ai/DocumentExtractionInput.vue",
+              "src/components/ai/DrugLabelAssistant.vue",
+              "src/components/ai/DrugLabelFindings.vue",
+              "src/components/ai/DrugLabelSourceInput.vue",
+              "src/components/ai/InfectionAssistant.vue",
+              "src/components/ai/InfectionFindings.vue",
+              "src/components/ai/InfectionInput.vue",
+              "src/components/ai/InventoryFindings.vue",
+              "src/components/ai/RcaEvidenceFindings.vue",
+              "src/components/ai/RcaEvidenceSourceInput.vue",
+              "src/components/ai/RcaEvidenceSources.vue",
+              "src/components/ai/ResearchCohortAssistant.vue",
+              "src/components/ai/ResearchCohortFindings.vue",
+              "src/components/ai/SatisfactionFindings.vue",
+              "src/components/ai/SatisfactionInput.vue",
+              "src/components/ai/SatisfactionSourcePanel.vue",
+              "src/views/system/aiManagement.vue"
+            ],
+            "bytes": 252749,
+            "sha256": "9cb6898b630acbb4a049e82ade0f57d01888d1823f29fc99b9fd02046bb30334"
+          },
+          {
+            "file": "vue3-new-ui/src/api/publicInterfaceExtensionTextPool.json",
+            "old_values": 1241,
+            "new_values": 1216,
+            "removed_values": 86,
+            "added_values": 61,
+            "changed_bindings": [
+              "package-lock.json",
+              "src/components/ai/ClinicalTrainingAssistant.vue",
+              "src/components/ai/ClinicalTrainingFindings.vue",
+              "src/components/ai/ClinicalTrainingPractice.vue",
+              "src/components/ai/DeidentificationAssistant.vue",
+              "src/components/ai/DeidentificationFindings.vue",
+              "src/components/ai/DeidentificationInput.vue",
+              "src/components/ai/DeidentificationSharedAssistant.vue",
+              "src/components/ai/DeidentificationSharedFindings.vue",
+              "src/components/ai/DeidentificationSharedInput.vue",
+              "src/components/ai/OperationsSupportFindings.vue",
+              "src/components/ai/OperationsSupportInput.vue",
+              "src/components/ai/ResearchVariableAssistant.vue",
+              "src/components/ai/ResearchVariableFindings.vue",
+              "src/components/ai/ResearchVariableInput.vue",
+              "src/components/ai/ResearchVariableSources.vue",
+              "src/components/ai/useClinicalTrainingAssistant.js"
+            ],
+            "bytes": 61767,
+            "sha256": "a0c795c90324c4691dcb463cb8b959b3ae325c42625dec7a0be60fdd8c7c071a"
+          }
+        ]
+      },
+      {
+        "command": [
+          "node",
+          "--test",
+          "scripts/ai-document-draft.test.cjs",
+          "scripts/element-plus-style-entry.test.cjs",
+          "scripts/handle-routes-regression.test.cjs",
+          "scripts/public-interface-extension.test.cjs",
+          "scripts/public-interface-text-pool.test.cjs",
+          "scripts/public-interface-text.test.cjs",
+          "scripts/schema-data-document.test.cjs",
+          "scripts/shared-icon-components.test.cjs",
+          "scripts/static-contract-data.test.cjs",
+          "tests/aiImagePixels.test.cjs",
+          "tests/aiManagementNavigation.test.cjs",
+          "tests/aiObservationWindowInput.test.cjs",
+          "tests/aiTaskDirectory.test.cjs",
+          "tests/aiUsageSummary.test.cjs",
+          "tests/iconGallery.test.cjs",
+          "tests/publicFixedData.test.cjs",
+          "tests/rspackExit.test.cjs",
+          "tests/schemaDataCodec.test.cjs",
+          "tests/staticDeflate.test.cjs",
+          "tests/staticHtmlEncoding.test.cjs"
+        ],
+        "exit_code": 1,
+        "seconds": 7.14614793471992,
+        "pool_check_exit_code": 0,
+        "test_file_count": 20,
+        "summary": [
+          "✖ current complete source scan preserves each literal el tag independently (3511.796697ms)",
+          "ℹ tests 232",
+          "ℹ pass 231",
+          "ℹ fail 1",
+          "ℹ cancelled 0",
+          "ℹ skipped 0",
+          "ℹ todo 0",
+          "ℹ duration_ms 7067.598218",
+          "✖ current complete source scan preserves each literal el tag independently (3511.796697ms)"
+        ],
+        "log_sha256": "7dcf41e513e30c1c1ba0fdc51701f08e783db499848ccd679b62806ad3c0e263",
+        "all_checks_passed": false,
+        "diagnosis": "Generated Element Plus entry predates newly used option-group. Regenerated actual direct requirement/style closure; no test or library requirement removed."
+      }
+    ],
+    "backend_fixture_round": {
+      "artifact": {
+        "path": "/tmp/hoim-ai-taste-prompt-third-verification.json",
+        "bytes": 4939,
+        "sha256": "ecb50b094ad26a549311e7fa453679dfa81f880f31d1aad6e67a0b79f7970d42"
+      },
+      "passed": 575,
+      "failed": 1,
+      "reason": "New synthetic config fixture omitted required updated_by. Fixed fixture; final 16 complete files rerun with 576 passing."
+    },
+    "native_failures_and_whole_file_replacements": "Recorded in native_browser.runs and accepted_complete_files. No partial old passing counts are added to replacement files.",
+    "estimates_used_as_acceptance": false
+  },
+  "changed_files_sha256": {
+    "doc/ai-guide.md": "dc6e612f0028979da10ef13304a5cc5ee1b958c36cd7e6653c8c855845f24210",
+    "doc/ai-prompts.json": "abf5b05f2fea3986c7353a2ce343c1a977fb6da9707d60ed6d9c910edc215c42",
+    "fastapi_be/app/ai/catalog.py": "e8eb3b2abefd4dd0a42607ad1863c72ee2f0091961d2ec072eff7a1bfbc092ee",
+    "fastapi_be/app/ai/clinical_training_task_prompt.py": "ad61e1482ef29a25575cf6434af5f06af7b98ed1b2b174e392f44c7f3ba30080",
+    "fastapi_be/app/ai/deidentification_prompt.py": "d8389f5849d4f52dc042dcadb21d4439ee1f6ceaad9b3b0e03e323990b077686",
+    "fastapi_be/app/ai/document_change_prompt.py": "029caffeb488e50cabcddb26751b5bbc775a4a2a39b67124783893b13e7a470f",
+    "fastapi_be/app/ai/document_extraction_prompt.py": "ef1a0d3b30a4baf29b8b0a48e6cab0fbf07c7e0ab44f3425cec887e0e43d3b0e",
+    "fastapi_be/app/ai/drug_label_prompt.py": "5d27a2bed24bdaea8f9fee8d43b8317ef9909e71f3232469426ad61e0eee166f",
+    "fastapi_be/app/ai/operations_support_task_prompt.py": "5806936e120656cdf223961753a414c634d5ec74338335f8b0dd5e42dd1c4275",
+    "fastapi_be/app/ai/rca_evidence_task_prompt.py": "ceec73ae7419cb5f30479e3d81a1ee8b5aee481b431c890166e186e6bb7de051",
+    "fastapi_be/app/ai/research_cohort_prompt.py": "d2ad817b906ec8c7e64c5d85aee31e036beb3a8adaf045cd5655c859fe395693",
+    "fastapi_be/app/ai/research_variables_prompt.py": "bae5aa47cb79f50858c3dbd90500487aaecf1aa3864290ada89753bc2a80339d",
+    "fastapi_be/app/ai/satisfaction_prompt.py": "92f3b268febf43ff569d5714259c2c05ef6aeb1925e6df6431bde5c8f0f7bf9e",
+    "fastapi_be/tests/test_ai_native_integration.py": "775a33f94e5825fe3677f1b8500be094ab07cf8cb44629557a8e03bcddee8f21",
+    "fastapi_be/tests/test_ai_research_variables_shared_scope.py": "0015c7f9764b19ba800bff8353443dc1a35ac79035014242730e88393dd6806b",
+    "fastapi_be/tests/test_ai_task_writing.py": "6a1cb7cc4ffa19a5e46f7ea0acd8fba95388a912efadfb126d3be2dbd7cdfaaa",
+    "vue3-new-ui/e2e/ai-aki-entry.spec.js": "624161605b0f668685c447d7ce2599e4d1a89a1cc6263ca530ef3feb2997677f",
+    "vue3-new-ui/e2e/ai-bed-entry.spec.js": "9300910f2f1af4e80e7069e96a71edbe4a53e68ea08cee6179ed78ee4878e54c",
+    "vue3-new-ui/e2e/ai-charge-management.spec.js": "6df6ce09009e557e7f404b6a0c31f171eac9a35dd9ed6844b15deefbb2fb9557",
+    "vue3-new-ui/e2e/ai-clinical-entry.spec.js": "5e35a287f7fa7ac992219c8419628cc9a69d661f026e657f5b9025a155e4ef32",
+    "vue3-new-ui/e2e/ai-clinical-training-assistant.spec.js": "5503d31f4a49ba4cd4f85a1c38cd5a9e543f3ae041edcb4e5076ddc2f487b7c5",
+    "vue3-new-ui/e2e/ai-clinical-training-native-entry.spec.js": "034ec108323f88eb07721b1323abbf79c7eee40e0b609016e021285e471f189b",
+    "vue3-new-ui/e2e/ai-clinical-training-practice.spec.js": "c34f91b2780d8f90548016ecbbdee31ba108d247cfbcf7f8bcb33ea6c0457dd5",
+    "vue3-new-ui/e2e/ai-clinical-training-shared.spec.js": "ad979c7960f181f362116be515d4d809711f05e1c0fccb6de9697aee15bc774c",
+    "vue3-new-ui/e2e/ai-coding-native-entry.spec.js": "ad0a04265a909045d969d480d5285dff919e326c7a8845e741d449c61aef1e04",
+    "vue3-new-ui/e2e/ai-deidentification-root.spec.js": "e16dd47b2ced0c0173503fb9ba9bf7c52f48ab1fe30c49b1b67b40d46ab22de2",
+    "vue3-new-ui/e2e/ai-deidentification-shared-assistant.spec.js": "d9b88fd9bb47cd1636f67ebc87e000cf808fdd43a3e29c71f6d5b37639e1fea8",
+    "vue3-new-ui/e2e/ai-deidentification-shared-findings.spec.js": "7c79d2d3b6f30cdd3b2336a6e78d746e104d267a59701927f428f7db46c6c254",
+    "vue3-new-ui/e2e/ai-deidentification-shared-input.spec.js": "b44b32969e44f299891aa5516e7aba594282bb9ef9470188a31fb01edcd855a1",
+    "vue3-new-ui/e2e/ai-document-change-management.spec.js": "bc626bab2502becce3d39472f0ecffb669e935dcae5bd1ad3ecde2ca3c517f72",
+    "vue3-new-ui/e2e/ai-document-change-native-entry.spec.js": "a08e57ae5e15a934880ee52191608358b4239c836fc25a77acd682d902f54cde",
+    "vue3-new-ui/e2e/ai-document-extraction-assistant.spec.js": "94e22c2f5f8bfd59411fd0eb5a0005d08cf371227afcbe504dcd103bbaa2248e",
+    "vue3-new-ui/e2e/ai-document-extraction-findings.spec.js": "8fda4acb9cf276dec2189d19e131d0cfdba875c74fce88e443910dfea26d527e",
+    "vue3-new-ui/e2e/ai-document-extraction-history.spec.js": "951431e589d4b21c877cfa43757b5047609751e682f651781a71ac2085afbca2",
+    "vue3-new-ui/e2e/ai-document-extraction-input.spec.js": "4f08cfb4478db266e26fbff4003cfd912760037f6549eeedbf9a9992721213fb",
+    "vue3-new-ui/e2e/ai-document-extraction-native-entry.spec.js": "89bab72cc2465633eea565db5e541f0d6e94364f949c4595c3337b30fc1e9bb2",
+    "vue3-new-ui/e2e/ai-document-extraction-parent.spec.js": "f96e708bcae1cc59915243d608e026d177b455f2d543f2ceddde825810b47a37",
+    "vue3-new-ui/e2e/ai-drug-label-assistant.spec.js": "5b0e78ae945beb71dada1395294266b93485664e3b5c4635a68de85e32f27cb4",
+    "vue3-new-ui/e2e/ai-drug-label-findings.spec.js": "68286977c3fcca2c22723a9da8fadbf2407ff77296417a2250277b8c17161488",
+    "vue3-new-ui/e2e/ai-drug-label-history.spec.js": "0aa82ccaf88b77cff54c12f050ee168d6b1c0754f9f3087dcb13422d83d0b053",
+    "vue3-new-ui/e2e/ai-drug-label-management.spec.js": "1a409d7b038216a483dbdf9f5b2be2dc2b88f337543d8b1685825f20d72c3558",
+    "vue3-new-ui/e2e/ai-drug-label-parent.spec.js": "04026a41dd1a052509d6313ff23d7f3735c36d4d6d262c51972295275d0ac952",
+    "vue3-new-ui/e2e/ai-drug-label-source-input.spec.js": "6b0e9717f971fbab7663a899010801b4a8d46d684c226f9832bed0941c4b1224",
+    "vue3-new-ui/e2e/ai-drug-label-task-main.spec.js": "f280bbdb2333d2700304fabe136e5d6d5caf9787862b294bceaed07e94bc3818",
+    "vue3-new-ui/e2e/ai-ecg-entry.spec.js": "3a370dbd7de3233371ab455035ceb35817afb73c7b1a97f36330494c973de61b",
+    "vue3-new-ui/e2e/ai-ecg-management.spec.js": "94d125bbf5b822700a86b2576a225314ae52b06451f449021c7fce56f5af05fa",
+    "vue3-new-ui/e2e/ai-forecast-entry.spec.js": "b07d6d6598e72482b82a4f50ecf590458b06e7528266aaf1040c2839dc037d40",
+    "vue3-new-ui/e2e/ai-forecast-model-management.spec.js": "f5593550661f9ef633e10c9cf08b1914d7fb15c94fd90c669475b99a7d585954",
+    "vue3-new-ui/e2e/ai-image-management.spec.js": "dae50eece5a018aadf7673df2f0b6cef5de54aef1c1331a3e838d7315305a93f",
+    "vue3-new-ui/e2e/ai-image-model-management.spec.js": "58c124333d02ace8ad3584485026cff30f901e52eb5a3a39dfb4338a67ccc9e3",
+    "vue3-new-ui/e2e/ai-infection-cluster-input.spec.js": "ff5e409e0ad26176b728c98209e440df401e23b853e4475916676d640b058419",
+    "vue3-new-ui/e2e/ai-infection-cluster-management.spec.js": "9bb4d22ccd0fead0aec6e74da0570ed5a9d66810f9328bbbdebb5a9266446cca",
+    "vue3-new-ui/e2e/ai-infection-cluster-production.spec.js": "53103d06cf92c04083ddde63ef2f3d81df32eefd2cd229de6aa44317c84c8cb3",
+    "vue3-new-ui/e2e/ai-inventory-native-entry.spec.js": "9ff7a1bf9fe085abe83a321be64b0d3d77d036f4e8f851dc055b2e993e65c2d5",
+    "vue3-new-ui/e2e/ai-laboratory-entry.spec.js": "77fd58ab9baf36e9de2557d14b092930276a13cd9404a2da09f3f2dc5d3fe6ac",
+    "vue3-new-ui/e2e/ai-management-navigation.spec.js": "99b6db033fb4a6c536caf0c42e393ef4e2dd200e15dcbc306dce620458548393",
+    "vue3-new-ui/e2e/ai-management.spec.js": "550f805d9c98af29b6959d7045962a143712ae2657de9ff247afd4a867f4e676",
+    "vue3-new-ui/e2e/ai-news2-entry.spec.js": "393441cdac994126d0618df15312f47175e1fc52440c02df452b16325f99c72c",
+    "vue3-new-ui/e2e/ai-observation-entry.spec.js": "d1a10ae15c450e0ed6f6fa7243ffe7169395ded0bbbedcbcf3b50a6e02b5949e",
+    "vue3-new-ui/e2e/ai-operations-assistant.spec.js": "5cf9e7a0c3e9bcf3181cf3a203894a15481ff03e2a264ff38bb3de3c12d0c7a7",
+    "vue3-new-ui/e2e/ai-operations-findings.spec.js": "41646f5c3d3d10bf4a2441bcb5467c12e813ab972ef33d38a24b5c954167cba5",
+    "vue3-new-ui/e2e/ai-operations-input.spec.js": "32d34db7add5d2130fd38e76b120f1c2d8db6fa5d4518eaa9fe1460e1640a10a",
+    "vue3-new-ui/e2e/ai-operations-integration.spec.js": "a576145b53db1b98f84c516a219de72b8b1a36014fa55f4f52006afa9df38883",
+    "vue3-new-ui/e2e/ai-operations-native-entry.spec.js": "a21e9e2d7f63ff3bd0a6042d849fdeac6b2291773f1187be98c5e1b4e09b04d7",
+    "vue3-new-ui/e2e/ai-pathway-entry.spec.js": "0bf014be67515c3472451983f496e728b2c5f9970e0d11a5d546635ad6962d5e",
+    "vue3-new-ui/e2e/ai-qsofa-entry.spec.js": "2d40add3ab8301a3bd1c3b9544052e7d25b6123189451a589692548c13427778",
+    "vue3-new-ui/e2e/ai-rca-evidence-assistant.spec.js": "3bf23d9ebcf3487801793a05044fce8bf00a6e2e4c2bd7e54e42356d37c31164",
+    "vue3-new-ui/e2e/ai-rca-evidence-business-entry.spec.js": "d020419611ae018b1b6d01ec15cb00f02fdb53d1b8b3b736cd444efd3062a62d",
+    "vue3-new-ui/e2e/ai-rca-evidence-findings.spec.js": "960814d8b42ebaf0fc7aa180f27b5be1045f2b65f6995d62c8e7fd44dc380ebd",
+    "vue3-new-ui/e2e/ai-rca-evidence-production.spec.js": "17e3f9dffb8f10a9d6bbcfc08314e74e914d9eca77c67551f5eaba8394fa4658",
+    "vue3-new-ui/e2e/ai-rca-evidence-root-governance.spec.js": "6f85c02791e4bfedb776f6b9c8fa06e4fb86b683a6c3c9ac29d85712eab8cd7a",
+    "vue3-new-ui/e2e/ai-rca-evidence-root.spec.js": "cbf735944a25219cd38e3bc8772f606d2bf79059177edba04a3336fe9dba739c",
+    "vue3-new-ui/e2e/ai-research-cohort-management.spec.js": "6b37b27846253ee5e958e6e5270856c48be8a4d932fdf7f8e851d412c3b02a3d",
+    "vue3-new-ui/e2e/ai-research-cohort-root-history.spec.js": "53c03228c7d0216903a19ed955b895007e2e696208d7e00eea2ed60fe7b02c2d",
+    "vue3-new-ui/e2e/ai-research-cohort-root-management.spec.js": "5f60da44ce7fa8199859dd4abd3f7756bfde5d870029bc9128080ce3f5979277",
+    "vue3-new-ui/e2e/ai-research-cohort-root-parent.spec.js": "581d655828a69c194eb7c428f9f7365415bdd322f157ca8d4c8ae9cc1efad83a",
+    "vue3-new-ui/e2e/ai-research-cohort-tasks-ui.spec.js": "ce0089b832a655ab939f708f9c2178aefdcb7c652117442736d4b16e91cbfa23",
+    "vue3-new-ui/e2e/ai-research-variable-assistant.spec.js": "2c8a7dff68e356606676de5806144dfb23d52e66e5ca9cb1fe343e4063537fa4",
+    "vue3-new-ui/e2e/ai-research-variable-findings.spec.js": "13111af09faec9e249444719ec272504f37a4a049c38d32c8231f6b4f0b088f0",
+    "vue3-new-ui/e2e/ai-research-variable-management.spec.js": "171d751708d1d285f3d184263f3a644e5f663def51b2627e6bc2d572851212f0",
+    "vue3-new-ui/e2e/ai-research-variable-native-entry.spec.js": "0e6056a7bd69d71fadae0ba981193049323357d8f8d883fb3e06246b48945960",
+    "vue3-new-ui/e2e/ai-research-variable-parent.spec.js": "fd0ee762d6a595f2d4ebfc89fbc33d31e6c2c8d1d05ac88decff87fc0b537c28",
+    "vue3-new-ui/e2e/ai-research-variable-pharmacist.spec.js": "db77173c98a92b09c7175f1d87cbc30136044e192dcc87ccec8a0517609346bd",
+    "vue3-new-ui/e2e/ai-research-variable-source-dom.spec.js": "e5e8aa846126fe4ce9eed0665578b14b3a67632b75e75e2fd37f759616b7ac0c",
+    "vue3-new-ui/e2e/ai-review-curation.spec.js": "60f13c48beefd014772bd60cfcc2e40458d93c370f404edfb279ab15ad68dbeb",
+    "vue3-new-ui/e2e/ai-roster-entry.spec.js": "b03983c76b1119650a1ee62704e60fef410f8bc8d3b95fc7bd357d1a90ab587f",
+    "vue3-new-ui/e2e/ai-roster-source-entry.spec.js": "3ac852d4605b8faa1f7dff162b78d3506e1ca5241e722463fca3954db66fbdb6",
+    "vue3-new-ui/e2e/ai-satisfaction-management.spec.js": "89126d63f3735bdcd801c9b310eefc03c0e08ec1ed805d703853df2bd1bc58ab",
+    "vue3-new-ui/e2e/ai-sofa-entry.spec.js": "11c6bcece979e1f8eb04434ad454f3adc34e8460cfc074d5fb08640fb5b816ae",
+    "vue3-new-ui/e2e/ai-speech-entry.spec.js": "5adaf8915a364ef7bc0dd3492aa30dfeb7737838650558e86348c663d737a34a",
+    "vue3-new-ui/e2e/ai-speech-management.spec.js": "db166c2c9703a79752c43b629c2559d51724c0f522fc2a20d38df3723df50452",
+    "vue3-new-ui/e2e/ai-supply-native-entry.spec.js": "0747888141ea7c8df984a188e820c06bb473e57c3a7f85ceccac50de149b8f4a",
+    "vue3-new-ui/e2e/ai-support-entry.spec.js": "f183598af4ac54bb2a51819abfed54cb63c5c69dc9c8621f71721d11dc002551",
+    "vue3-new-ui/e2e/ai-surgery-native-entry.spec.js": "3bc79584e7590ef3a99d49f55065d4d33b7782962692cc3a676b625a976569b7",
+    "vue3-new-ui/e2e/ai-task-technical-production.spec.js": "a89144e1d0e0fefd8862cd198caa476b87c939a05043250d6c8380f85cf59929",
+    "vue3-new-ui/e2e/ai-writing-experience.spec.js": "8ac11bf6f306aeddee907a9e3a9a3f0e5b892d57f0d98840db4048912bc07b9f",
+    "vue3-new-ui/e2e/fixtures/ai-management-navigation.cjs": "bb679fa2ca7e1d0977af674a17aa4c4ad58c3dd8ffc89a4b5ba0c986668b50a1",
+    "vue3-new-ui/e2e/fixtures/clinical-training-production-entry.cjs": "9338942d5afcfd54a2d36970af3bb8a00e47677f6ded6db56f97f737db5f87a1",
+    "vue3-new-ui/e2e/fixtures/native-ui-details.cjs": "fb659a598d5f2606b61fc82169be84ddf96ae9aae0faa754712feebd2939acaf",
+    "vue3-new-ui/e2e/fixtures/operations-support-assistant-ui.cjs": "4ae4054a56f3f0c8e1181d43418086a7d243e1775c88add64f378c7006555c90",
+    "vue3-new-ui/e2e/fixtures/operations-support-production-entry.cjs": "6e26edbb23b7e0b4791fbd04f3374cb22bfc46e1f5ffd1affcc1810a5a50b8ea",
+    "vue3-new-ui/e2e/fixtures/research-variable-production-entry.cjs": "e64461c86dd3ea77e209c03f347d207fb2f5cc69a023283ec858a9aa9eec06ed",
+    "vue3-new-ui/package-lock.json": "6fb7ac768ea651b840b67c4f84cfb8d6424360e0e761384e09a5bce87da54bce",
+    "vue3-new-ui/package.json": "ab5ba5f8b1a51b7803deee010e4222d737cf8a4802c91e0d40193f65fb42985d",
+    "vue3-new-ui/rspack.config.js": "81c290a2d5a54c6ceb7ed9dfd7a823f6b6550f616c9a91c2c12a9781f1271aa0",
+    "vue3-new-ui/scripts/ai-document-draft.test.cjs": "2c11e598e18ede308b0d4c9612d4645177e3f068a918fe5894a3e2e4048b0762",
+    "vue3-new-ui/scripts/public-interface-extension-modules.json": "cee0841602f68535989be65a9da3e7c12ce98140bd0987cc8befce707b38e812",
+    "vue3-new-ui/scripts/public-static-data.cjs": "3d187e28e5943639f2ece7325b828a29a0aa5c7255395eee0eff3c7b85998b4b",
+    "vue3-new-ui/src/api/publicInterfaceExtensionTextPool.json": "2675774fbb3620126e3a2b94e637ff675cf6127d31208457383c9a96c2f2eca8",
+    "vue3-new-ui/src/api/publicInterfaceTextPool.json": "9cb6898b630acbb4a049e82ade0f57d01888d1823f29fc99b9fd02046bb30334",
+    "vue3-new-ui/src/components/AIAssistant/index.vue": "de3a19169390ae4fab8f1dc09f2b6b26c990c9719aac74c2147e38700773899e",
+    "vue3-new-ui/src/components/ai/ChargeReconciliationFindings.vue": "384b2efb8a3401575dabcae0785a7701a49c637dcd59de202abecf7225347d47",
+    "vue3-new-ui/src/components/ai/ClinicalTrainingAssistant.vue": "5f8f7c4bd67b3f4b6bd3d781b89dc21b89aa3710c573dc54f0cb5c58178f5fe6",
+    "vue3-new-ui/src/components/ai/ClinicalTrainingFindings.vue": "4d84390e6331a05f485eb52dfa3fa4a3d75bf34bbaf7893eb3a25da6d21832b7",
+    "vue3-new-ui/src/components/ai/ClinicalTrainingPractice.vue": "c010311e9ebf8dae9ccdf3473e46909960a03b8c343be25241234e68b04115df",
+    "vue3-new-ui/src/components/ai/CodingFindings.vue": "274d8f990be0af4bd289400ebfad4bd66c28d4fe3eed814afe35cf7fd61553c6",
+    "vue3-new-ui/src/components/ai/DeidentificationAssistant.vue": "4025ef3a0ee811cad7d05ef2d3f4777044eecc2955abafc99ecbe1f5932e665b",
+    "vue3-new-ui/src/components/ai/DeidentificationFindings.vue": "7337cad2c9a7c04070b22dde23dc9958f78f763fcd7bc499babdf04f6dfd9724",
+    "vue3-new-ui/src/components/ai/DeidentificationInput.vue": "846948a0e51250870419b3fc1dfdd5f83385b791a6274cbcd6991a1ed5632e2b",
+    "vue3-new-ui/src/components/ai/DeidentificationSharedAssistant.vue": "fa079c40e827954045b689cabe180a3461ac9fd7f7eb9ca745ab4f26ba4710eb",
+    "vue3-new-ui/src/components/ai/DeidentificationSharedFindings.vue": "bc5720a570087ef73997579dbb6d5635e4a17ed2d2435c08bd3910efee9159ec",
+    "vue3-new-ui/src/components/ai/DeidentificationSharedInput.vue": "173ba35dc6f40c9a2b7c57b1cc7e65c0a9a660c206549fa93eaf6ec173a681c8",
+    "vue3-new-ui/src/components/ai/DocumentChangeAssistant.vue": "e4cedc10cba0570c43c5775f95c1e4b1a7f604fe1d391aa8678dfefe05996475",
+    "vue3-new-ui/src/components/ai/DocumentChangeFindings.vue": "52c165b48eb15fd453585692e57bfa50e550ce595361b16e4b552ba12377d235",
+    "vue3-new-ui/src/components/ai/DocumentChangeOriginalInput.vue": "e1269e397ea722aa34d77de76e69921ce0870ac7eb3f8a74a7906e29710819c4",
+    "vue3-new-ui/src/components/ai/DocumentChangeSources.vue": "100237c7b85156ae904eb6383bfcc13b4bd6e1bb8088d4c1ddb53af2a65c0da0",
+    "vue3-new-ui/src/components/ai/DocumentEvidencePanel.vue": "7be81c73a0870deff9d185745ebe0a20399f40127ee715198e1b76a4645f9cfa",
+    "vue3-new-ui/src/components/ai/DocumentExtractionFindings.vue": "02b0d676032526abd10b0c4f7bf9c5e2b3eb4b97b55695fe7a8a66631f0655d8",
+    "vue3-new-ui/src/components/ai/DocumentExtractionInput.vue": "b60add3313338e9c9dc65353ab178356fac256fa74b47aa7615436f711d8ab0e",
+    "vue3-new-ui/src/components/ai/DrugLabelAssistant.vue": "a4b25442adcdc4d34fa15b9a559720921a064256cb368c9311f78bb473d21d40",
+    "vue3-new-ui/src/components/ai/DrugLabelFindings.vue": "debe0604b850442cdea68e1b37cd927e61a4997ad66a32afdf648e016ce8c220",
+    "vue3-new-ui/src/components/ai/DrugLabelSourceInput.vue": "95073e5d0d4e9eb6e1f0b500945bbaed9be1ec430ef147d11f630fe81c07a7e6",
+    "vue3-new-ui/src/components/ai/InfectionAssistant.vue": "8766879013b45a76803362eac1d7f20d312a2bc5a7b14b00a52c64ad42950f2c",
+    "vue3-new-ui/src/components/ai/InfectionFindings.vue": "5887332b305fe6b318971586d2968cfb665ac39959ac205a5419f5aa95aa5cf7",
+    "vue3-new-ui/src/components/ai/InfectionInput.vue": "6088102c880d757290b3490e896d774c6ee61ffdab6650871a312c396c5e0dbe",
+    "vue3-new-ui/src/components/ai/InventoryFindings.vue": "dd0afdf703e2e5611dacd7bfe3328f06fe0f446565dc2bf609b938942426ad00",
+    "vue3-new-ui/src/components/ai/OperationsSupportAssistant.vue": "0ae23e0f45d0b15bc8cd41dd092050090ed1a3787ae1febabc5ca1cb11d551c5",
+    "vue3-new-ui/src/components/ai/OperationsSupportFindings.vue": "7d482a2f125fe867e5dc9ef672d6f93ba56165da346a2bd1a055358b9838f60c",
+    "vue3-new-ui/src/components/ai/OperationsSupportInput.vue": "94551c6aa559c9bde00913f81206c1f9e442aa610612ade2083590a111fa5300",
+    "vue3-new-ui/src/components/ai/OperationsSupportSources.vue": "100911f581b59505492817e30d633b947323eaa930446512f0f551c0379f8fac",
+    "vue3-new-ui/src/components/ai/OperationsSupportTasks.vue": "c72a34648a734593e36c70862712744e8ab97a0eeaa23052a03ced82d7547637",
+    "vue3-new-ui/src/components/ai/RcaEvidenceFindings.vue": "0b859ecc2b3b0f60e111d4ef2bf06920cfff9efc092cf37d1558ce807d0ef79e",
+    "vue3-new-ui/src/components/ai/RcaEvidenceSourceInput.vue": "f5ed3322c6d9ec06bced1b7684091adc603ca57edb544f3a8e81e812af3d338d",
+    "vue3-new-ui/src/components/ai/RcaEvidenceSources.vue": "f7ec25613f74758193d614fa383a581c16ad09dd94b3a509cd3f8225177d10c8",
+    "vue3-new-ui/src/components/ai/ResearchCohortAssistant.vue": "7f829e126f7705f625d02f0b5d63caee3b9b4d76e40271ef1de9e0cdcde67abc",
+    "vue3-new-ui/src/components/ai/ResearchCohortFindings.vue": "1e204ae3e0b5d13e9364fd2dc518643162a1a5c1fa33f85fd79928adf7f48f71",
+    "vue3-new-ui/src/components/ai/ResearchVariableAssistant.vue": "137015669f3c7ce528cb08a01415d91a0b841694be354e764c0d17d7c5f75dde",
+    "vue3-new-ui/src/components/ai/ResearchVariableFindings.vue": "6ec2f81dd1d260b2123cecf3a402a723f879ee13e4e1ce2bcd82f77ffdaaef82",
+    "vue3-new-ui/src/components/ai/ResearchVariableInput.vue": "628cf6256b231ce4fe0148b2aa023e0b8e38ce140124e756539e5dbc51806932",
+    "vue3-new-ui/src/components/ai/ResearchVariableSources.vue": "af83e1e70eed441df4098539d0fea50d38243bd685f0140fb3e24f912eb748dd",
+    "vue3-new-ui/src/components/ai/SatisfactionFindings.vue": "1fc91d2b9ab585f626981315f66b11acb1c27d171177bacb089b4c16805cfa13",
+    "vue3-new-ui/src/components/ai/SatisfactionInput.vue": "31fedd36df2b3a70057b3e7668895cd4ba6962f7194686e8c43dea216866b1e1",
+    "vue3-new-ui/src/components/ai/SatisfactionSourcePanel.vue": "2cc8eb4fcbc76bb1e6b23245d62442353db9054728546146b85164e8bbc7672a",
+    "vue3-new-ui/src/components/ai/useClinicalTrainingAssistant.js": "3af0ff7c60e1e2eba3324c4d92a7eca8cd95c28796ec6b0efca55b49f38f745c",
+    "vue3-new-ui/src/elementPlusUsedStyles.js": "b750a5a4a1e570004a9e435085d7fa01665d899f8664557f15b8a089db9fe0a8",
+    "vue3-new-ui/src/utils/aiDocumentDraft.js": "a50453e6c626493504078d634fee9bf917f23621552bec9b97e5f11b08d50420",
+    "vue3-new-ui/src/utils/aiManagementNavigation.js": "23580e43bb516e44bf0a300ce26f521bf0afbf315bde969250c5c84605b5668e",
+    "vue3-new-ui/src/views/ai/workbench.vue": "09a1e2a1624c586ef5f937b3a8462be4d78adfe196e61d4c2b4fef3c7f85b184",
+    "vue3-new-ui/src/views/doctor/medicalRecord.vue": "0cea57e65dc4891251c97e266444ee897b557ccc900c491fb91bb069aa7e864f",
+    "vue3-new-ui/src/views/doctor/prescription.vue": "951c4ffde3806231b9c856470699e3dfa7979aacc19f69f4d582a0be753e7769",
+    "vue3-new-ui/src/views/inpatient/emr.vue": "bcf9f9563e04e66dc8342cd068d731595c024a1a31ca185225cf8f970f4c9df2",
+    "vue3-new-ui/src/views/inpatient/medicalRecordHome.vue": "da2c3ea24436b81f7102661aab90ac901a8c26fc8d1243ce5280601df6ab3dd9",
+    "vue3-new-ui/src/views/inpatient/surgery.vue": "61093f8d549336f642a0d795ed8c311bc434221f80ba1e528ee944fe3b5ee045",
+    "vue3-new-ui/src/views/pharmacy/dispense.vue": "e82623b744a27a610d460bef2f38bafea1b7e349af002cfac99be352511e477b",
+    "vue3-new-ui/src/views/system/aiManagement.vue": "2450194edd1578412f768577055222ca7bda2ac99be9e903ab181bb1df30127d",
+    "vue3-new-ui/tests/aiManagementNavigation.test.cjs": "80e6f7231f832f9db0e601611f5327c6090716b7fd3e1e2f3b0ab7b164b55514"
+  },
+  "git_author": "Palpitate-xus <palpitate.xus@outlook.com>",
+  "not_performed": [
+    "Real model inference or writing-quality evaluation",
+    "Real hospital database access",
+    "Clinical validation",
+    "Deployment, service restart or git push",
+    "Another full all80/default-backend/full-browser release run"
+  ],
+  "all_checks_passed_in_stated_scope": true,
+  "final_visual_review": {
+    "scope": "Four final canonical-dist screenshots; operations initial/ready/result and super-administrator management, synthetic HTTP replay only. Checked readable primary instructions, collapsed technical details and grouped navigation.",
+    "images": [
+      {
+        "path": "/tmp/hoim-ai-taste-operations-start-20261026-final.png",
+        "bytes": 124915,
+        "sha256": "03569c9f4ad1c72423bd67ff8896f197017ec3b81551861f4d3b64f35161c15c"
+      },
+      {
+        "path": "/tmp/hoim-ai-taste-operations-ready-20261026-final.png",
+        "bytes": 151187,
+        "sha256": "0661b539c6a985b4991b24f3a5f26206e0f705bdfe8cd4a8163736ad31d5cced"
+      },
+      {
+        "path": "/tmp/hoim-ai-taste-operations-result-20261026-final.png",
+        "bytes": 230070,
+        "sha256": "80ff9ea99c2f01a3bbe7caa8684605dbd1c03cfac3709d5229964bda92236f48"
+      },
+      {
+        "path": "/tmp/hoim-ai-taste-management-20261026-final.png",
+        "bytes": 269223,
+        "sha256": "290dea98ff684ccc3a2a41f746a23293a845d77593303f6c008e1c013c39b371"
+      }
+    ],
+    "log_sha256": "2afb904a29d9f8d785b06c57c0f14ce2e2d3262b9c968d910f0716ef84636bb6",
+    "browser_errors": [],
+    "real_model_calls": 0,
+    "static_server_closed": true
+  }
+}

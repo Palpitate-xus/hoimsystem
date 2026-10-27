@@ -1,0 +1,208 @@
+{
+  "schema_version": "hoim_final_integration_v1",
+  "recorded_at": "2026-10-27T08:11:11.683040+00:00",
+  "all_scoped_checks_passed": true,
+  "production_deployment": false,
+  "business_data_source": "Authorized disposable hoimsystem_benchmark synthetic database only; no hospital DB or real dotenv read.",
+  "clinical_or_model_quality_validated": false,
+  "source_and_runtime": {
+    "final_backend_source_freeze": "5c0d1bc",
+    "health_compose_commit": "d167e7c",
+    "window_registration_commit": "0ec0340",
+    "final_image_manifest": "/tmp/hoim-validation-20261027/final-integration/final-5c0d1bc-image-manifest.json",
+    "runtime": {
+      "api": {
+        "container_id": "667c511142ea0f1ce02714a15fbeb28725f61b095457e0745ebd505767645cea",
+        "image_id": "sha256:f0b060308f8266def03940600fa166d975579d126c64f7ae747f18a31d07248c",
+        "tag": "hoim-validation-final-backend:20261027-pg-marker",
+        "pid": 2399246,
+        "status": "running",
+        "health": "healthy",
+        "nano_cpus": 4000000000,
+        "memory_bytes": 4294967296
+      },
+      "postgres": {
+        "container_id": "0079810eec7a027281689252f9a9fd3c606461cc9b17f7074b621b902ee8d3f9",
+        "image_id": "sha256:3da88da04dd915ff9d79e16d9a102435cd65ef42e6b48e720b11a44a2ddabffe",
+        "tag": "postgres:latest",
+        "pid": 1342045,
+        "status": "running",
+        "health": "healthy",
+        "nano_cpus": 4000000000,
+        "memory_bytes": 4294967296
+      }
+    },
+    "runtime_git_note": "GitHEAD includes later tests/docs/health Compose commits; actual app image686Python hashes determine executable version.",
+    "app_source_difference_from_new_load_image": [
+      "app/ai/infection_cluster_task_storage.py"
+    ],
+    "image_app_source_host_mismatches": []
+  },
+  "database": {
+    "database": "hoimsystem_benchmark",
+    "alembic_head": "20261027_text_retry_usage",
+    "protected_large_data_preserved": true,
+    "patient_count_including_acceptance_fixtures": 100187,
+    "migration_evidence": "/tmp/hoim-validation-20261027/final-integration/public-migration-result.json",
+    "old_schema_comparison": "/tmp/hoim-validation-20261027/final-integration/old-schema-comparison.json",
+    "process": "Exact266table/column/index/FK/type/nullable/PK old-schema comparison; explicit oldhead20261023_native_variables_merge stamp; actual2upgrade migrations. No create_all/adopt-to-newhead shortcuts.",
+    "own_queue_private_schemas_remaining": []
+  },
+  "business_concurrency": {
+    "concurrencies": [
+      20,
+      50
+    ],
+    "scenarios_each": 13,
+    "all_passed": true,
+    "image_id": "sha256:7ae389fe3991e7ab62a47344ad35b92d75b0584c57c6fb03a77aca9630ddea58",
+    "evidence": [
+      "/tmp/hoim-validation-20261027/final-integration/concurrency-fixed-20.json",
+      "/tmp/hoim-validation-20261027/final-integration/concurrency-fixed-50.json"
+    ],
+    "retained_real_window_duplicate_failure": "/tmp/hoim-validation-20261027/final-integration/concurrency-20.json",
+    "registration_regression": "6entire backend files81P including4realPG tests; Ruff P."
+  },
+  "inventory_http_backpressure": {
+    "passed": true,
+    "evidence": "/tmp/hoim-validation-20261027/final-integration/inventory-backpressure-http.json",
+    "semantics": "Real independent PG inventory gate lock, valid doctor request waits~15s then503/RetryAfter1 and zero partial writes; explicit separate request succeeds after release.503 remains a failed workload request."
+  },
+  "performance": {
+    "new_image_id": "sha256:7ae389fe3991e7ab62a47344ad35b92d75b0584c57c6fb03a77aca9630ddea58",
+    "new_large_users": [
+      100,
+      200
+    ],
+    "seconds_each": 60,
+    "requests": 17304,
+    "failures": 0,
+    "source": "/tmp/hoim-validation-20261027/final-integration/performance-new/summary.json",
+    "table": "/tmp/hoim-validation-20261027/final-integration/performance-new/comparison-table.md",
+    "old17_requests": 136135,
+    "old17_failures_preserved": 26,
+    "limits": "Sharedhost with4frontend compiler/browser workers and other background jobs; no exclusive-host claim, causal speedup claim, AI inference capacity claim or new300user capacity proof. New100/200 throughput is lower than prior sequential baseline; PG4CPU saturated.",
+    "not_rerun_after_scalar_pg_classification_fix": true
+  },
+  "generic_simulated_workflows": {
+    "count": 3,
+    "features": [
+      "patient_summary",
+      "outpatient_note",
+      "operations_qa"
+    ],
+    "actual_image_id": "sha256:f0b060308f8266def03940600fa166d975579d126c64f7ae747f18a31d07248c",
+    "default_prompts": true,
+    "each_http_attempt_statuses": [
+      503,
+      503,
+      200
+    ],
+    "canonical_usage_unknown": true,
+    "feedback_each": 1,
+    "business_unchanged": true,
+    "source": "/tmp/hoim-validation-20261027/final-integration/ai-workers/generic-final-pg-marker/llm-workflows.json",
+    "database": "own temporary SQLite only",
+    "simulated": true,
+    "model_inference": false
+  },
+  "native_simulated_source_workflows": {
+    "count": 12,
+    "actual_image_id": "sha256:7ae389fe3991e7ab62a47344ad35b92d75b0584c57c6fb03a77aca9630ddea58",
+    "default_task_full_wire_verified": true,
+    "each_http_attempt_statuses": [
+      503,
+      503,
+      200
+    ],
+    "canonical_usage_unknown": true,
+    "business_unchanged": true,
+    "source": "/tmp/hoim-validation-20261027/final-integration/ai-workers/native-http-12-final-summary.json",
+    "database": "own temporary SQLite files only",
+    "coverage_limit": "Native source→common API→actual shared claim/execute→current common reader, not every native professional adoption/review workflow. FinalPG classifier change retains same SQLite instr branch; native module source hashes otherwise unchanged.",
+    "satisfaction_legacy_shadow": "Top-level0 is existing compatibility placeholder; canonical data.usage containsNULL/NULL/completeFalse and is authoritative.",
+    "simulated": true,
+    "model_inference": false
+  },
+  "postgresql_ai_queue": {
+    "passed": true,
+    "runs": 20,
+    "independent_worker_sessions": 8,
+    "exact_new_http_calls": 20,
+    "unique_claim_and_execution_each": true,
+    "succeeded": 20,
+    "feedback": 20,
+    "source_rows_unchanged": true,
+    "private_schema_dropped": true,
+    "actual_image_id": "sha256:f0b060308f8266def03940600fa166d975579d126c64f7ae747f18a31d07248c",
+    "source": "/tmp/hoim-validation-20261027/final-integration/ai-workers/pg-queue/result.json",
+    "retained_failure": "/tmp/hoim-validation-20261027/final-integration/ai-workers/pg-queue/result-attempt2.json",
+    "fixture_constraint_failure": "/tmp/hoim-validation-20261027/final-integration/ai-workers/pg-queue/result-attempt1.json",
+    "usage_note": "Simulation server performs no inference and explicitly reports zero usage; no transient failures occurred, so no unknown aggregate usage was replaced by zero.",
+    "simulated": true,
+    "model_inference": false
+  },
+  "final_smoke_openapi_sse": {
+    "passed": true,
+    "simultaneous_sse": 100,
+    "public_probes": 3,
+    "actual_authenticated_list_reads": 6,
+    "ordinary_read_while_sse": true,
+    "openapi_paths": 1012,
+    "openapi_operations": 1085,
+    "rbac_operations": 1087,
+    "route_difference": "RBAC includes3 infrastructure GETs hidden from OpenAPI; OpenAPI includes1 main welcome GET outside router scan.1087-3+1=1085; no business omission/duplicate observed.",
+    "source": "/tmp/hoim-validation-20261027/final-integration/http-openapi-sse-final-healthy.json",
+    "route_mapping": "/tmp/hoim-validation-20261027/final-integration/openapi-rbac-comparison.json"
+  },
+  "health_proxy_isolation": {
+    "passed": true,
+    "whole_benchmark_suite_passed": 57,
+    "new_actual_network_regressions": 4,
+    "main_compose_validated_not_deployed": true,
+    "runtime_evidence": "/tmp/hoim-validation-20261027/final-integration/healthcheck-after-proxy-fix.json",
+    "prior_failed_health": "/tmp/hoim-validation-20261027/final-integration/healthcheck-before-proxy-fix.json",
+    "only_proxy_environment_names_recorded": true
+  },
+  "frontend_handoff": {
+    "api": "http://127.0.0.1:18127",
+    "stable_large_data": true,
+    "origins": [
+      {
+        "origin": "http://127.0.0.1:18891",
+        "status": 200,
+        "cors_allowed": true
+      },
+      {
+        "origin": "http://127.0.0.1:18892",
+        "status": 200,
+        "cors_allowed": true
+      }
+    ],
+    "source_image": "sha256:f0b060308f8266def03940600fa166d975579d126c64f7ae747f18a31d07248c",
+    "no_more_load_or_reseed_planned": true,
+    "keep_running_until_frontend_finishes": true
+  },
+  "remaining_requirements": {
+    "formal_text_llm_configured": false,
+    "real_accepted_text_llm_inference_features": 0,
+    "clinical_validation": false,
+    "generic_specialist_implementation_gaps": [
+      "adr_signal",
+      "lab_quality_signal",
+      "pathology_screening",
+      "accessible_voice"
+    ]
+  },
+  "artifact_integrity": {
+    "summary_sources_are_preserved": true,
+    "no_original_failure_overwritten": true
+  },
+  "runtime_after_validation": {
+    "status": "all_owned_test_services_stopped_after_frontend_completion",
+    "cleanup": "/tmp/hoim-validation-20261027/final-integration/cleanup.json",
+    "validated_healthy_image_retained": "sha256:f0b060308f8266def03940600fa166d975579d126c64f7ae747f18a31d07248c",
+    "api_endpoint_no_longer_running": true,
+    "evidence_and_test_key_preserved": true
+  }
+}

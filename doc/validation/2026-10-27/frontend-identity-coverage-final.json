@@ -1,0 +1,43 @@
+{
+  "at": "2026-10-27T08:28:23.118654+00:00",
+  "acceptance_basis": "Original whole265file4012case baseline, then whole147 affected files2527cases, then whole12 corrected files205cases and wholeRCA5case standalone diagnostic; unique identity union, not one4033case run",
+  "unique_current_files": 265,
+  "unique_current_cases": 4033,
+  "outcomes": {
+    "passed": 4033
+  },
+  "logical_identity_union_exact": true,
+  "unchanged_baseline_files": 118,
+  "unchanged_baseline_cases": 1506,
+  "affected_files": 147,
+  "affected_cases": 2527,
+  "corrected_files_complete": 12,
+  "corrected_file_names": [
+    "ai-charge-business-entry.spec.js",
+    "ai-coding-assistant.spec.js",
+    "ai-document-change-parent.spec.js",
+    "ai-document-change-results.spec.js",
+    "ai-document-extraction-tasks-api.spec.js",
+    "ai-drug-label-parent.spec.js",
+    "ai-management.spec.js",
+    "ai-rca-evidence-root.spec.js",
+    "ai-research-cohort-root-history.spec.js",
+    "ai-research-cohort-root-management.spec.js",
+    "ai-research-cohort-root-parent.spec.js",
+    "medical-record.spec.js"
+  ],
+  "original_baseline_nonpassing": 281,
+  "original_baseline_nonpassing_unresolved": [],
+  "issues": [],
+  "production_source_bindings_checked": 689,
+  "production_source_changes": [],
+  "observed_parallel_instability": {
+    "file": "ai-rca-evidence-root.spec.js",
+    "case": "Responses result list",
+    "original": "1 real5s timeout retained in12file204P1F round",
+    "standalone_diagnostic": "Whole5cases5P, no source/budget change, trace0pageerrors; Chat464ms/Responses163ms result assertions",
+    "cause": "Not reproduced; not claimed fixed or absent"
+  },
+  "all_accepted": true,
+  "prep_policy": "29files32beforeAllhooks120s; original business/action/assertion timeouts and retries0 retained; original compile timeout rounds preserved"
+}

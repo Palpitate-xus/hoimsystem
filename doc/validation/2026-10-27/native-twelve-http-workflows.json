@@ -1,0 +1,322 @@
+{
+  "recorded_at": "2026-10-27T07:57:17.656488+00:00",
+  "catalog_version": "2026.10.26.1",
+  "actual_image_id": "sha256:7ae389fe3991e7ab62a47344ad35b92d75b0584c57c6fb03a77aca9630ddea58",
+  "actual_image_manifest": "/tmp/hoim-validation-20261027/final-integration/final-0ec0340-image-manifest.json",
+  "simulated": true,
+  "model_inference": false,
+  "clinical_validation": false,
+  "database": "Separate owned temporary SQLite file per native feature; real app dependencies restored after fixture constructors. No hospital/publicPG business data used.",
+  "fixture_clock_note": "Finite synthetic Source constructors reused; all test clock patches removed before enqueue, claim and execute. RCA purpose grants newly issued with a current real expiry through actual Source services.",
+  "source_and_feedback_boundary": "This validates actual source/task/claim/execute/common reader over HTTP. Generic3 workflow has feedback. It does not prove every native professional review or result-adoption workflow.",
+  "passed": true,
+  "count": 12,
+  "rows": [
+    {
+      "feature_key": "drg_evidence_review",
+      "number": 68,
+      "passed": true,
+      "catalog_default_task_sha256": "000c72aeed2db17859ac383ffa5a7bf9ee86bf01c4144ae9da449665b917ac17",
+      "full_default_task_present_in_all3_http_packets": true,
+      "attempts": 3,
+      "http_statuses": [
+        503,
+        503,
+        200
+      ],
+      "canonical_usage_unknown": true,
+      "canonical_usage_field": "top_level_tokens",
+      "business_records_unchanged": true,
+      "real_loopback_api_and_provider_http": true,
+      "result_artifact": "/tmp/hoim-validation-20261027/final-integration/ai-workers/native/drg_evidence_review/result.json",
+      "wire_artifact": "/tmp/hoim-validation-20261027/final-integration/ai-workers/native/drg_evidence_review/http.json",
+      "raw_shared_row_counter_note": "Native domains may retain immutable AIRun placeholder zero counters; the independently audited canonical receipt is authoritative and remains unknown after HTTP failures."
+    },
+    {
+      "feature_key": "charge_reconciliation",
+      "number": 69,
+      "passed": true,
+      "catalog_default_task_sha256": "c41705034487cb2a47f125abff73aef0e03fdbc7000b26ef7eaafb0d27fd4d57",
+      "full_default_task_present_in_all3_http_packets": true,
+      "attempts": 3,
+      "http_statuses": [
+        503,
+        503,
+        200
+      ],
+      "canonical_usage_unknown": true,
+      "canonical_usage_field": "usage_receipt",
+      "business_records_unchanged": true,
+      "real_loopback_api_and_provider_http": true,
+      "result_artifact": "/tmp/hoim-validation-20261027/final-integration/ai-workers/native/charge_reconciliation/result.json",
+      "wire_artifact": "/tmp/hoim-validation-20261027/final-integration/ai-workers/native/charge_reconciliation/http.json",
+      "raw_shared_row_counter_note": "Native domains may retain immutable AIRun placeholder zero counters; the independently audited canonical receipt is authoritative and remains unknown after HTTP failures."
+    },
+    {
+      "feature_key": "feedback_analysis",
+      "number": 70,
+      "passed": true,
+      "catalog_default_task_sha256": "e0262a734219ae6645a8d97445d198cf0e94d23417da006b6a48ff4c3ae5a074",
+      "full_default_task_present_in_all3_http_packets": true,
+      "attempts": 3,
+      "http_statuses": [
+        503,
+        503,
+        200
+      ],
+      "canonical_usage_unknown": true,
+      "canonical_usage_field": "usage",
+      "business_records_unchanged": true,
+      "real_loopback_api_and_provider_http": true,
+      "result_artifact": "/tmp/hoim-validation-20261027/final-integration/ai-workers/native/feedback_analysis/result.json",
+      "wire_artifact": "/tmp/hoim-validation-20261027/final-integration/ai-workers/native/feedback_analysis/http.json",
+      "raw_shared_row_counter_note": "Native domains may retain immutable AIRun placeholder zero counters; the independently audited canonical receipt is authoritative and remains unknown after HTTP failures."
+    },
+    {
+      "feature_key": "guideline_ingestion",
+      "number": 71,
+      "passed": true,
+      "catalog_default_task_sha256": "2aff9b7548b3777dd6546ebac38da96f68b7c8ecdd30d5741a809c1e3acb9689",
+      "full_default_task_present_in_all3_http_packets": true,
+      "attempts": 3,
+      "http_statuses": [
+        503,
+        503,
+        200
+      ],
+      "canonical_usage_unknown": true,
+      "canonical_usage_field": "usage_receipt",
+      "business_records_unchanged": true,
+      "real_loopback_api_and_provider_http": true,
+      "result_artifact": "/tmp/hoim-validation-20261027/final-integration/ai-workers/native/guideline_ingestion/result.json",
+      "wire_artifact": "/tmp/hoim-validation-20261027/final-integration/ai-workers/native/guideline_ingestion/http.json",
+      "raw_shared_row_counter_note": "Native domains may retain immutable AIRun placeholder zero counters; the independently audited canonical receipt is authoritative and remains unknown after HTTP failures."
+    },
+    {
+      "feature_key": "guideline_change_review",
+      "number": 72,
+      "passed": true,
+      "catalog_default_task_sha256": "cea30963fd12dc7202d920935074a45a8a656be4b9477b8a9a2dc76f9637ae55",
+      "full_default_task_present_in_all3_http_packets": true,
+      "attempts": 3,
+      "http_statuses": [
+        503,
+        503,
+        200
+      ],
+      "canonical_usage_unknown": true,
+      "canonical_usage_field": "usage_receipt",
+      "business_records_unchanged": true,
+      "real_loopback_api_and_provider_http": true,
+      "result_artifact": "/tmp/hoim-validation-20261027/final-integration/ai-workers/native/guideline_change_review/result.json",
+      "wire_artifact": "/tmp/hoim-validation-20261027/final-integration/ai-workers/native/guideline_change_review/http.json",
+      "raw_shared_row_counter_note": "Native domains may retain immutable AIRun placeholder zero counters; the independently audited canonical receipt is authoritative and remains unknown after HTTP failures."
+    },
+    {
+      "feature_key": "drug_label_extraction",
+      "number": 73,
+      "passed": true,
+      "catalog_default_task_sha256": "1e166aea5557979796717ad63459e8229f3aa0a7ce0074c884ace70a8e025e40",
+      "full_default_task_present_in_all3_http_packets": true,
+      "attempts": 3,
+      "http_statuses": [
+        503,
+        503,
+        200
+      ],
+      "canonical_usage_unknown": true,
+      "canonical_usage_field": "usage_receipt",
+      "business_records_unchanged": true,
+      "real_loopback_api_and_provider_http": true,
+      "result_artifact": "/tmp/hoim-validation-20261027/final-integration/ai-workers/native/drug_label_extraction/result.json",
+      "wire_artifact": "/tmp/hoim-validation-20261027/final-integration/ai-workers/native/drug_label_extraction/http.json",
+      "raw_shared_row_counter_note": "Native domains may retain immutable AIRun placeholder zero counters; the independently audited canonical receipt is authoritative and remains unknown after HTTP failures."
+    },
+    {
+      "feature_key": "research_cohort",
+      "number": 74,
+      "passed": true,
+      "catalog_default_task_sha256": "befd8eda8b32b702ee1a311ef6c2eb892520d7cc85d7f5df6debe13702735ef2",
+      "full_default_task_present_in_all3_http_packets": true,
+      "attempts": 3,
+      "http_statuses": [
+        503,
+        503,
+        200
+      ],
+      "canonical_usage_unknown": true,
+      "canonical_usage_field": "usage",
+      "business_records_unchanged": true,
+      "real_loopback_api_and_provider_http": true,
+      "result_artifact": "/tmp/hoim-validation-20261027/final-integration/ai-workers/native/research_cohort/result.json",
+      "wire_artifact": "/tmp/hoim-validation-20261027/final-integration/ai-workers/native/research_cohort/http.json",
+      "raw_shared_row_counter_note": "Native domains may retain immutable AIRun placeholder zero counters; the independently audited canonical receipt is authoritative and remains unknown after HTTP failures."
+    },
+    {
+      "feature_key": "deidentification",
+      "number": 75,
+      "passed": true,
+      "catalog_default_task_sha256": "840b94e7738fda9236a15db865f182850b8c552d45eabac7de05588afd36a210",
+      "full_default_task_present_in_all3_http_packets": true,
+      "attempts": 3,
+      "http_statuses": [
+        503,
+        503,
+        200
+      ],
+      "canonical_usage_unknown": true,
+      "canonical_usage_field": "usage_receipt",
+      "business_records_unchanged": true,
+      "real_loopback_api_and_provider_http": true,
+      "result_artifact": "/tmp/hoim-validation-20261027/final-integration/ai-workers/native/deidentification/result.json",
+      "wire_artifact": "/tmp/hoim-validation-20261027/final-integration/ai-workers/native/deidentification/http.json",
+      "raw_shared_row_counter_note": "Native domains may retain immutable AIRun placeholder zero counters; the independently audited canonical receipt is authoritative and remains unknown after HTTP failures."
+    },
+    {
+      "feature_key": "research_extraction",
+      "number": 76,
+      "passed": true,
+      "catalog_default_task_sha256": "939032bda003c63db314a7b7eaad8e024f12139aaff4e56a0d082107e0afe6bd",
+      "full_default_task_present_in_all3_http_packets": true,
+      "attempts": 3,
+      "http_statuses": [
+        503,
+        503,
+        200
+      ],
+      "canonical_usage_unknown": true,
+      "canonical_usage_field": "usage_receipt",
+      "business_records_unchanged": true,
+      "real_loopback_api_and_provider_http": true,
+      "result_artifact": "/tmp/hoim-validation-20261027/final-integration/ai-workers/native/research_extraction/result.json",
+      "wire_artifact": "/tmp/hoim-validation-20261027/final-integration/ai-workers/native/research_extraction/http.json",
+      "raw_shared_row_counter_note": "Native domains may retain immutable AIRun placeholder zero counters; the independently audited canonical receipt is authoritative and remains unknown after HTTP failures."
+    },
+    {
+      "feature_key": "incident_rca",
+      "number": 77,
+      "passed": true,
+      "catalog_default_task_sha256": "8bb8fd412602916ac7fa3f71a35155a546ea578a49b9e1d60165e51dffb5bec5",
+      "full_default_task_present_in_all3_http_packets": true,
+      "attempts": 3,
+      "http_statuses": [
+        503,
+        503,
+        200
+      ],
+      "canonical_usage_unknown": true,
+      "canonical_usage_field": "usage_receipt",
+      "business_records_unchanged": true,
+      "real_loopback_api_and_provider_http": true,
+      "result_artifact": "/tmp/hoim-validation-20261027/final-integration/ai-workers/native/incident_rca/result.json",
+      "wire_artifact": "/tmp/hoim-validation-20261027/final-integration/ai-workers/native/incident_rca/http.json",
+      "raw_shared_row_counter_note": "Native domains may retain immutable AIRun placeholder zero counters; the independently audited canonical receipt is authoritative and remains unknown after HTTP failures."
+    },
+    {
+      "feature_key": "operations_support",
+      "number": 79,
+      "passed": true,
+      "catalog_default_task_sha256": "6527a695ffd636065e3e3270003b6ee4ddc91df9541b6159b1a764cd1a290515",
+      "full_default_task_present_in_all3_http_packets": true,
+      "attempts": 3,
+      "http_statuses": [
+        503,
+        503,
+        200
+      ],
+      "canonical_usage_unknown": true,
+      "canonical_usage_field": "usage",
+      "business_records_unchanged": true,
+      "real_loopback_api_and_provider_http": true,
+      "result_artifact": "/tmp/hoim-validation-20261027/final-integration/ai-workers/native/operations_support/result.json",
+      "wire_artifact": "/tmp/hoim-validation-20261027/final-integration/ai-workers/native/operations_support/http.json",
+      "raw_shared_row_counter_note": "Native domains may retain immutable AIRun placeholder zero counters; the independently audited canonical receipt is authoritative and remains unknown after HTTP failures."
+    },
+    {
+      "feature_key": "clinical_training",
+      "number": 80,
+      "passed": true,
+      "catalog_default_task_sha256": "ed0aed4339c7a612c215839faf021b614da567e65977f1a69937439f045c7453",
+      "full_default_task_present_in_all3_http_packets": true,
+      "attempts": 3,
+      "http_statuses": [
+        503,
+        503,
+        200
+      ],
+      "canonical_usage_unknown": true,
+      "canonical_usage_field": "usage",
+      "business_records_unchanged": true,
+      "real_loopback_api_and_provider_http": true,
+      "result_artifact": "/tmp/hoim-validation-20261027/final-integration/ai-workers/native/clinical_training/result.json",
+      "wire_artifact": "/tmp/hoim-validation-20261027/final-integration/ai-workers/native/clinical_training/http.json",
+      "raw_shared_row_counter_note": "Native domains may retain immutable AIRun placeholder zero counters; the independently audited canonical receipt is authoritative and remains unknown after HTTP failures."
+    }
+  ],
+  "simulator_stats": {
+    "models": {
+      "hoim-simulator:charge_reconciliation": {
+        "attempts": 3,
+        "injected_failures": 2,
+        "successes": 1
+      },
+      "hoim-simulator:clinical_training": {
+        "attempts": 3,
+        "injected_failures": 2,
+        "successes": 1
+      },
+      "hoim-simulator:deidentification": {
+        "attempts": 3,
+        "injected_failures": 2,
+        "successes": 1
+      },
+      "hoim-simulator:drg_evidence_review": {
+        "attempts": 3,
+        "injected_failures": 2,
+        "successes": 1
+      },
+      "hoim-simulator:drug_label_extraction": {
+        "attempts": 3,
+        "injected_failures": 2,
+        "successes": 1
+      },
+      "hoim-simulator:feedback_analysis": {
+        "attempts": 3,
+        "injected_failures": 2,
+        "successes": 1
+      },
+      "hoim-simulator:guideline_change_review": {
+        "attempts": 3,
+        "injected_failures": 2,
+        "successes": 1
+      },
+      "hoim-simulator:guideline_ingestion": {
+        "attempts": 3,
+        "injected_failures": 2,
+        "successes": 1
+      },
+      "hoim-simulator:incident_rca": {
+        "attempts": 3,
+        "injected_failures": 2,
+        "successes": 1
+      },
+      "hoim-simulator:operations_support": {
+        "attempts": 3,
+        "injected_failures": 2,
+        "successes": 1
+      },
+      "hoim-simulator:research_cohort": {
+        "attempts": 3,
+        "injected_failures": 2,
+        "successes": 1
+      },
+      "hoim-simulator:research_extraction": {
+        "attempts": 3,
+        "injected_failures": 2,
+        "successes": 1
+      }
+    },
+    "simulated": true
+  },
+  "retained_initial_fixture_rejection": "/tmp/hoim-validation-20261027/final-integration/ai-workers/native/research_cohort-attempt1/result.json"
+}

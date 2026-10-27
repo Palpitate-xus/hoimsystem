@@ -1,0 +1,36 @@
+{
+  "passed": true,
+  "at": "2026-10-27T08:07:11.174159+00:00",
+  "image_id": "sha256:f0b060308f8266def03940600fa166d975579d126c64f7ae747f18a31d07248c",
+  "container_id": "667c511142ea0f1ce02714a15fbeb28725f61b095457e0745ebd505767645cea",
+  "health": {
+    "Status": "healthy",
+    "FailingStreak": 0,
+    "Log": [
+      {
+        "Start": "2026-10-27T08:07:04.018303598Z",
+        "End": "2026-10-27T08:07:07.098960208Z",
+        "ExitCode": -1,
+        "Output": "Health check exceeded timeout (3s)"
+      },
+      {
+        "Start": "2026-10-27T08:07:10.100428438Z",
+        "End": "2026-10-27T08:07:10.303440704Z",
+        "ExitCode": 0,
+        "Output": ""
+      }
+    ]
+  },
+  "healthcheck_command": [
+    "CMD",
+    "python",
+    "-c",
+    "import urllib.request; urllib.request.build_opener(urllib.request.ProxyHandler({})).open('http://127.0.0.1:8000/health/ready', timeout=3)"
+  ],
+  "main_compose_validation_only": true,
+  "production_stack_deployed": false,
+  "only_api_recreated": true,
+  "database_recreated": false,
+  "nano_cpus": 4000000000,
+  "memory_limit": 4294967296
+}

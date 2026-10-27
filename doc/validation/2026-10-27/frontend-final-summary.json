@@ -1,0 +1,323 @@
+{
+  "finished_at": "2026-10-27T08:28:23.297079+00:00",
+  "repository": "/home/xusheng/workspace/hoimsystem",
+  "frontend_head": "acea6d2432714cf2e98d13aaba99387e3ccb30b3",
+  "commits": [
+    {
+      "sha": "8011d97",
+      "subject": "test(ai): make isolated admin Main fixture capture reproducible"
+    },
+    {
+      "sha": "9ad7075",
+      "subject": "fix(ai): bind PostgreSQL charge float witnesses to their storage basis"
+    },
+    {
+      "sha": "4425f9d",
+      "subject": "feat(ai): manage bounded text retries and preserve legacy frozen providers"
+    },
+    {
+      "sha": "61f9e68",
+      "subject": "fix(ai): accept proven successful results with unknown model usage"
+    },
+    {
+      "sha": "345f366",
+      "subject": "perf(frontend): pool unchanged coding and stock interface text"
+    },
+    {
+      "sha": "1256627",
+      "subject": "test(e2e): separate full source compilation from business timeouts"
+    },
+    {
+      "sha": "acea6d2",
+      "subject": "test(e2e): follow business disclosures and isolate signature requests"
+    }
+  ],
+  "frontend_worktree_clean": true,
+  "git_index_empty": true,
+  "all_git_diff_check_passed": true,
+  "node": {
+    "complete_files": 22,
+    "cases": 253,
+    "passed": 253,
+    "failed": 0,
+    "skipped": 0,
+    "seconds": 8.137,
+    "log": "final-acceptance-node-audit/node-tests.log",
+    "command": "node --test tests/*.test.cjs scripts/*.test.cjs"
+  },
+  "npm_audit": {
+    "vulnerabilities": 0,
+    "seconds": 1.475,
+    "json": "final-acceptance-node-audit/audit.log",
+    "command": "npm audit --audit-level=low --json"
+  },
+  "production_build": {
+    "seconds": 36.3,
+    "javascript_bytes": 5956305,
+    "assets_bytes": 6997754,
+    "largest_javascript_bytes": 646741,
+    "limits_unchanged": {
+      "javascript_bytes": 6000000,
+      "assets_bytes": 7000000,
+      "largest_javascript_bytes": 700000
+    },
+    "log": "final-frozen-build-lossless-pool",
+    "original_over_budget_round_retained": "final-frozen-build/bundle.log assets7001898",
+    "non_e2e_source_bindings_unchanged_since_test_freeze": 818,
+    "source_changed": [],
+    "reason_no_additional_build": "Only test/fixture corrections after the successful current-byte production build; all non-E2E source hashes unchanged; actual production browser run verified every dist artifact hash stable"
+  },
+  "e2e": {
+    "whole_directory_baseline": {
+      "files": 265,
+      "cases": 4012,
+      "passed": 3731,
+      "failed_or_timed_out": 47,
+      "skipped_not_run": 234,
+      "proof": "baseline-final.json"
+    },
+    "complete_affected_round": {
+      "files": 147,
+      "cases": 2527,
+      "passed": 2440,
+      "failed": 13,
+      "beforeAll_timed_out": 4,
+      "skipped_not_run": 70,
+      "seconds": 1840.379,
+      "proof": "supplement-final-text-provider-147/round-final.json"
+    },
+    "complete_corrected_round": {
+      "files": 12,
+      "cases": 205,
+      "passed": 204,
+      "failed": 1,
+      "skipped": 0,
+      "seconds": 244.211,
+      "proof": "supplement-post147-corrections",
+      "source_stable": true
+    },
+    "standalone_diagnostic": {
+      "file": "ai-rca-evidence-root.spec.js",
+      "cases": 5,
+      "passed": 5,
+      "seconds": 41.433,
+      "proof": "supplement-rca-root-diagnostic",
+      "source_budget_changes": false,
+      "trace_page_errors": 0
+    },
+    "latest_exact_identity_union": {
+      "files": 265,
+      "cases": 4033,
+      "passed": 4033,
+      "unresolved_original_nonpassing": 0,
+      "proof": "frontend-identity-coverage-final.json",
+      "not_one_single_green_run": true
+    },
+    "observed_instability": {
+      "file": "ai-rca-evidence-root.spec.js",
+      "case": "Responses result list",
+      "original": "1 real5s timeout retained in12file204P1F round",
+      "standalone_diagnostic": "Whole5cases5P, no source/budget change, trace0pageerrors; Chat464ms/Responses163ms result assertions",
+      "cause": "Not reproduced; not claimed fixed or absent"
+    },
+    "compilation_policy": {
+      "beforeAll_files": 29,
+      "beforeAll_hooks": 32,
+      "preparation_timeout_ms": 120000,
+      "business_action_assertion_budgets_unchanged": true,
+      "retries": 0,
+      "callback_integrity_proof": "final-source-hook-index-proof.json"
+    },
+    "raw_reports": "Every full file has report.json,junit.xml,console.log,collected.json/progress.ndjson where configured; original failure/notrun rounds preserved"
+  },
+  "real_backend_fixture_capture": {
+    "main_tests": 21,
+    "passed": 21,
+    "frozen_recursive_test_modules": 34,
+    "dotenv_shared_key_socket_guard_hits": 0,
+    "proof": "final-main-admin-capture-final",
+    "permanent_script": "vue3-new-ui/scripts/capture-main-admin-fixtures.py",
+    "unknown_usage_domain_protocol_pairs": 8,
+    "unknown_usage_scope": "Actual isolated SQLite workers with MockTransport503503200 and unmodified production readers; no mounted HTTP/JWT/realLLM/clinical-validation claim; rawSQL/receipt/lease/hash preserved"
+  },
+  "schemas": {
+    "actual_generators": 9,
+    "all_checks_passed": true,
+    "proof": "final-frozen-regeneration-check",
+    "legacy_snapshot_semantics": "Missing max_attempts stays byte-preserved; explicit strictinteger1..3 only"
+  },
+  "production_browser": {
+    "pages": 5,
+    "rounds_per_cold_warm": 3,
+    "samples": 30,
+    "successful": 30,
+    "js_errors": 0,
+    "http_errors": 0,
+    "network_errors": 0,
+    "seconds": 63.792,
+    "dist_stable": true,
+    "proof": "production-browser-performance-final",
+    "backend_image": "sha256:f0b060308f8266def03940600fa166d975579d126c64f7ae747f18a31d07248c",
+    "hardware": "Shared48CPU host, loopback, API/PG4CPU4GiB, large100000patients+synthetic acceptance increments, service/database warm; cold means new browser context cache; no network/CPU throttling",
+    "medians": [
+      {
+        "role": "admin",
+        "route": "/index",
+        "mode": "cold",
+        "attempts": 3,
+        "successes": 3,
+        "business_ready_median_ms": 676.366117999999,
+        "fcp_median_ms": 532,
+        "lcp_median_ms": 532,
+        "ttfb_median_ms": 2.5,
+        "long_task_count_median": 2,
+        "long_task_total_median_ms": 386,
+        "js_error_count": 0,
+        "http_error_count": 0
+      },
+      {
+        "role": "admin",
+        "route": "/index",
+        "mode": "warm",
+        "attempts": 3,
+        "successes": 3,
+        "business_ready_median_ms": 577.9975289999984,
+        "fcp_median_ms": 448,
+        "lcp_median_ms": 448,
+        "ttfb_median_ms": 6.199999809265137,
+        "long_task_count_median": 2,
+        "long_task_total_median_ms": 240,
+        "js_error_count": 0,
+        "http_error_count": 0
+      },
+      {
+        "role": "admin",
+        "route": "/admin/patientManagement",
+        "mode": "cold",
+        "attempts": 3,
+        "successes": 3,
+        "business_ready_median_ms": 759.9423229999993,
+        "fcp_median_ms": 612,
+        "lcp_median_ms": 612,
+        "ttfb_median_ms": 2.8999996185302734,
+        "long_task_count_median": 2,
+        "long_task_total_median_ms": 443,
+        "js_error_count": 0,
+        "http_error_count": 0
+      },
+      {
+        "role": "admin",
+        "route": "/admin/patientManagement",
+        "mode": "warm",
+        "attempts": 3,
+        "successes": 3,
+        "business_ready_median_ms": 626.243896,
+        "fcp_median_ms": 512,
+        "lcp_median_ms": 512,
+        "ttfb_median_ms": 5.90000057220459,
+        "long_task_count_median": 2,
+        "long_task_total_median_ms": 270,
+        "js_error_count": 0,
+        "http_error_count": 0
+      },
+      {
+        "role": "admin",
+        "route": "/pharmacy/pharmaceutical",
+        "mode": "cold",
+        "attempts": 3,
+        "successes": 3,
+        "business_ready_median_ms": 1537.7251640000031,
+        "fcp_median_ms": 860,
+        "lcp_median_ms": 860,
+        "ttfb_median_ms": 2.6000003814697266,
+        "long_task_count_median": 3,
+        "long_task_total_median_ms": 781,
+        "js_error_count": 0,
+        "http_error_count": 0
+      },
+      {
+        "role": "admin",
+        "route": "/pharmacy/pharmaceutical",
+        "mode": "warm",
+        "attempts": 3,
+        "successes": 3,
+        "business_ready_median_ms": 1420.87759,
+        "fcp_median_ms": 748,
+        "lcp_median_ms": 748,
+        "ttfb_median_ms": 5.800000190734863,
+        "long_task_count_median": 3,
+        "long_task_total_median_ms": 571,
+        "js_error_count": 0,
+        "http_error_count": 0
+      },
+      {
+        "role": "doctor",
+        "route": "/doctor/medicalRecord",
+        "mode": "cold",
+        "attempts": 3,
+        "successes": 3,
+        "business_ready_median_ms": 1029.234543999999,
+        "fcp_median_ms": 792,
+        "lcp_median_ms": 792,
+        "ttfb_median_ms": 2.8000001907348633,
+        "long_task_count_median": 3,
+        "long_task_total_median_ms": 704,
+        "js_error_count": 0,
+        "http_error_count": 0
+      },
+      {
+        "role": "doctor",
+        "route": "/doctor/medicalRecord",
+        "mode": "warm",
+        "attempts": 3,
+        "successes": 3,
+        "business_ready_median_ms": 962.0195810000005,
+        "fcp_median_ms": 732,
+        "lcp_median_ms": 732,
+        "ttfb_median_ms": 6.199999809265137,
+        "long_task_count_median": 3,
+        "long_task_total_median_ms": 534,
+        "js_error_count": 0,
+        "http_error_count": 0
+      },
+      {
+        "role": "patient",
+        "route": "/patient/medicalRecord",
+        "mode": "cold",
+        "attempts": 3,
+        "successes": 3,
+        "business_ready_median_ms": 650.0771689999965,
+        "fcp_median_ms": 568,
+        "lcp_median_ms": 568,
+        "ttfb_median_ms": 2.799999237060547,
+        "long_task_count_median": 2,
+        "long_task_total_median_ms": 410,
+        "js_error_count": 0,
+        "http_error_count": 0
+      },
+      {
+        "role": "patient",
+        "route": "/patient/medicalRecord",
+        "mode": "warm",
+        "attempts": 3,
+        "successes": 3,
+        "business_ready_median_ms": 559.9442029999991,
+        "fcp_median_ms": 488,
+        "lcp_median_ms": 488,
+        "ttfb_median_ms": 6,
+        "long_task_count_median": 2,
+        "long_task_total_median_ms": 254,
+        "js_error_count": 0,
+        "http_error_count": 0
+      }
+    ]
+  },
+  "cleanup": {
+    "proof": "frontend-cleanup-final.json",
+    "registered_pids_checked": 10,
+    "own18800_and18891_ports": "not_listening",
+    "remaining_frontend_process_inventory": 0,
+    "scope": "Only registered own PID identities; original services8000/8091 and other users untouched"
+  },
+  "evidence_root": "/tmp/hoim-validation-20261027/frontend"
+}

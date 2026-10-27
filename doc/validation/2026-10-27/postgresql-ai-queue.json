@@ -1,0 +1,463 @@
+{
+  "synthetic_only": true,
+  "simulated": true,
+  "model_inference": false,
+  "clinical_validation": false,
+  "private_schema": "validation_ai_queue_4e291505c96448daa6981cfad4b988d3",
+  "workers": 8,
+  "requested_runs": 20,
+  "actual_app_source": "immutable release image",
+  "model_endpoint_real_http": true,
+  "source_rows_unchanged": true,
+  "queue_completed_before_feedback": true,
+  "statuses": {
+    "succeeded": 20
+  },
+  "claims": [
+    {
+      "run_id": "aa09a3b1-8897-4726-823c-b0478b85ba76",
+      "lease": "1c7bcb1f-cea8-46c1-bfef-39668b0bde89",
+      "worker": 6
+    },
+    {
+      "run_id": "51ea33c0-3bd5-4a49-b486-bf64d6b34166",
+      "lease": "f159dde6-13e0-4956-8130-7efa822f2ae0",
+      "worker": 1
+    },
+    {
+      "run_id": "40dc2b9f-10f7-4f77-b8ec-a457780972ec",
+      "lease": "8dedac6a-4b7d-4df7-a694-5a11c63fd4c6",
+      "worker": 5
+    },
+    {
+      "run_id": "4568955c-c3f2-4d68-9d66-e4a2437745d5",
+      "lease": "52cc5fa2-6478-4249-9afa-02def8662b16",
+      "worker": 3
+    },
+    {
+      "run_id": "a97d5803-1bf9-4cbf-a519-e531d8ab36cb",
+      "lease": "1c7fd46f-c06f-4314-8818-8f559bf6670d",
+      "worker": 7
+    },
+    {
+      "run_id": "c0297427-6ad5-48bf-b9db-3e4cd2f96010",
+      "lease": "cc20d1e9-4e43-4377-be04-aa7831bcabfd",
+      "worker": 4
+    },
+    {
+      "run_id": "39b19e8e-e31e-447b-9ac4-9dc1016a12ab",
+      "lease": "40cd4da2-59fd-4735-b22e-aa3ab37bfc97",
+      "worker": 3
+    },
+    {
+      "run_id": "c10c30dd-6f47-4847-8017-f1d9888dc6a6",
+      "lease": "f4f6d58d-b224-48d6-bc11-69057f80ad12",
+      "worker": 5
+    },
+    {
+      "run_id": "1666eac8-7ddb-4019-82e1-97e68d01a8e6",
+      "lease": "785dc5fb-48d9-4240-ab3d-12b78721c27a",
+      "worker": 2
+    },
+    {
+      "run_id": "e5cedb14-8646-4a2d-91b8-30489e6eee8d",
+      "lease": "d92738a3-7ade-49e7-9f4e-40adddce336e",
+      "worker": 6
+    },
+    {
+      "run_id": "9d66a580-afcb-4648-8283-ebeca905a55f",
+      "lease": "dd8eed5b-6258-4f7e-bf47-20312c565a38",
+      "worker": 5
+    },
+    {
+      "run_id": "34498afa-9fa8-4258-97b1-a316dfbf859c",
+      "lease": "efc30f3e-3137-4a94-940a-32f194a36296",
+      "worker": 7
+    },
+    {
+      "run_id": "d7a651b4-d9bf-43fe-b633-5e130f9cab52",
+      "lease": "09a76614-f98d-4a0a-9544-5c3c9c654df6",
+      "worker": 3
+    },
+    {
+      "run_id": "cf5aa182-5b0f-464c-b244-ce2ad1dae8bc",
+      "lease": "77922836-ead7-4b7f-a27b-33a7543564ae",
+      "worker": 1
+    },
+    {
+      "run_id": "f0de5646-6885-4357-8761-c88771ff9b97",
+      "lease": "924003ba-30ab-4102-99ee-b79babdb61c9",
+      "worker": 0
+    },
+    {
+      "run_id": "347c3810-4419-42cb-bc58-47336e9b1aac",
+      "lease": "78fe1e2d-3395-4add-89fa-b31424700968",
+      "worker": 5
+    },
+    {
+      "run_id": "a8e231d2-2aed-46cc-815c-6aac0698ff01",
+      "lease": "6ba6482c-6be1-4375-a816-37e26aba8135",
+      "worker": 3
+    },
+    {
+      "run_id": "18a1a140-2d57-411d-b94c-e0f32caf1169",
+      "lease": "0daed68d-220d-4bba-8394-716d59f3ded6",
+      "worker": 1
+    },
+    {
+      "run_id": "fb7d40fe-5f40-403f-9036-b74a2a5a4022",
+      "lease": "31a36120-d7e7-44b1-837f-d6f00fe09c93",
+      "worker": 6
+    },
+    {
+      "run_id": "e46aa1df-f4a0-4e82-8a0d-252571822910",
+      "lease": "a849d755-23f3-4053-950c-4da19e5ab91b",
+      "worker": 4
+    }
+  ],
+  "http_calls": [
+    {
+      "run_id": "aa09a3b1-8897-4726-823c-b0478b85ba76",
+      "http_status": 200,
+      "elapsed_seconds": 0.0190607700496912,
+      "url": "http://127.0.0.1:33967/v1/chat/completions"
+    },
+    {
+      "run_id": "51ea33c0-3bd5-4a49-b486-bf64d6b34166",
+      "http_status": 200,
+      "elapsed_seconds": 0.017926168628036976,
+      "url": "http://127.0.0.1:33967/v1/chat/completions"
+    },
+    {
+      "run_id": "40dc2b9f-10f7-4f77-b8ec-a457780972ec",
+      "http_status": 200,
+      "elapsed_seconds": 0.00862590130418539,
+      "url": "http://127.0.0.1:33967/v1/chat/completions"
+    },
+    {
+      "run_id": "4568955c-c3f2-4d68-9d66-e4a2437745d5",
+      "http_status": 200,
+      "elapsed_seconds": 0.003604860045015812,
+      "url": "http://127.0.0.1:33967/v1/chat/completions"
+    },
+    {
+      "run_id": "a97d5803-1bf9-4cbf-a519-e531d8ab36cb",
+      "http_status": 200,
+      "elapsed_seconds": 0.008907699957489967,
+      "url": "http://127.0.0.1:33967/v1/chat/completions"
+    },
+    {
+      "run_id": "c0297427-6ad5-48bf-b9db-3e4cd2f96010",
+      "http_status": 200,
+      "elapsed_seconds": 0.006450057029724121,
+      "url": "http://127.0.0.1:33967/v1/chat/completions"
+    },
+    {
+      "run_id": "39b19e8e-e31e-447b-9ac4-9dc1016a12ab",
+      "http_status": 200,
+      "elapsed_seconds": 0.00485578365623951,
+      "url": "http://127.0.0.1:33967/v1/chat/completions"
+    },
+    {
+      "run_id": "c10c30dd-6f47-4847-8017-f1d9888dc6a6",
+      "http_status": 200,
+      "elapsed_seconds": 0.006969877518713474,
+      "url": "http://127.0.0.1:33967/v1/chat/completions"
+    },
+    {
+      "run_id": "1666eac8-7ddb-4019-82e1-97e68d01a8e6",
+      "http_status": 200,
+      "elapsed_seconds": 0.0049114953726530075,
+      "url": "http://127.0.0.1:33967/v1/chat/completions"
+    },
+    {
+      "run_id": "e5cedb14-8646-4a2d-91b8-30489e6eee8d",
+      "http_status": 200,
+      "elapsed_seconds": 0.008472489193081856,
+      "url": "http://127.0.0.1:33967/v1/chat/completions"
+    },
+    {
+      "run_id": "9d66a580-afcb-4648-8283-ebeca905a55f",
+      "http_status": 200,
+      "elapsed_seconds": 0.012013762257993221,
+      "url": "http://127.0.0.1:33967/v1/chat/completions"
+    },
+    {
+      "run_id": "34498afa-9fa8-4258-97b1-a316dfbf859c",
+      "http_status": 200,
+      "elapsed_seconds": 0.03325893171131611,
+      "url": "http://127.0.0.1:33967/v1/chat/completions"
+    },
+    {
+      "run_id": "d7a651b4-d9bf-43fe-b633-5e130f9cab52",
+      "http_status": 200,
+      "elapsed_seconds": 0.03832406364381313,
+      "url": "http://127.0.0.1:33967/v1/chat/completions"
+    },
+    {
+      "run_id": "cf5aa182-5b0f-464c-b244-ce2ad1dae8bc",
+      "http_status": 200,
+      "elapsed_seconds": 0.02304124552756548,
+      "url": "http://127.0.0.1:33967/v1/chat/completions"
+    },
+    {
+      "run_id": "f0de5646-6885-4357-8761-c88771ff9b97",
+      "http_status": 200,
+      "elapsed_seconds": 0.19652802217751741,
+      "url": "http://127.0.0.1:33967/v1/chat/completions"
+    },
+    {
+      "run_id": "347c3810-4419-42cb-bc58-47336e9b1aac",
+      "http_status": 200,
+      "elapsed_seconds": 0.09144787397235632,
+      "url": "http://127.0.0.1:33967/v1/chat/completions"
+    },
+    {
+      "run_id": "a8e231d2-2aed-46cc-815c-6aac0698ff01",
+      "http_status": 200,
+      "elapsed_seconds": 0.03698672819882631,
+      "url": "http://127.0.0.1:33967/v1/chat/completions"
+    },
+    {
+      "run_id": "18a1a140-2d57-411d-b94c-e0f32caf1169",
+      "http_status": 200,
+      "elapsed_seconds": 0.25968598388135433,
+      "url": "http://127.0.0.1:33967/v1/chat/completions"
+    },
+    {
+      "run_id": "e46aa1df-f4a0-4e82-8a0d-252571822910",
+      "http_status": 200,
+      "elapsed_seconds": 0.2435137378051877,
+      "url": "http://127.0.0.1:33967/v1/chat/completions"
+    },
+    {
+      "run_id": "fb7d40fe-5f40-403f-9036-b74a2a5a4022",
+      "http_status": 200,
+      "elapsed_seconds": 0.2796841338276863,
+      "url": "http://127.0.0.1:33967/v1/chat/completions"
+    }
+  ],
+  "worker_distribution": [
+    {
+      "worker": 0,
+      "executed": 1
+    },
+    {
+      "worker": 1,
+      "executed": 3
+    },
+    {
+      "worker": 2,
+      "executed": 1
+    },
+    {
+      "worker": 3,
+      "executed": 4
+    },
+    {
+      "worker": 4,
+      "executed": 2
+    },
+    {
+      "worker": 5,
+      "executed": 4
+    },
+    {
+      "worker": 6,
+      "executed": 3
+    },
+    {
+      "worker": 7,
+      "executed": 2
+    }
+  ],
+  "run_metadata": [
+    {
+      "run_id": "a97d5803-1bf9-4cbf-a519-e531d8ab36cb",
+      "status": "succeeded",
+      "error_code": null,
+      "error_message": null,
+      "input_tokens": 0,
+      "output_tokens": 0
+    },
+    {
+      "run_id": "9d66a580-afcb-4648-8283-ebeca905a55f",
+      "status": "succeeded",
+      "error_code": null,
+      "error_message": null,
+      "input_tokens": 0,
+      "output_tokens": 0
+    },
+    {
+      "run_id": "e5cedb14-8646-4a2d-91b8-30489e6eee8d",
+      "status": "succeeded",
+      "error_code": null,
+      "error_message": null,
+      "input_tokens": 0,
+      "output_tokens": 0
+    },
+    {
+      "run_id": "1666eac8-7ddb-4019-82e1-97e68d01a8e6",
+      "status": "succeeded",
+      "error_code": null,
+      "error_message": null,
+      "input_tokens": 0,
+      "output_tokens": 0
+    },
+    {
+      "run_id": "18a1a140-2d57-411d-b94c-e0f32caf1169",
+      "status": "succeeded",
+      "error_code": null,
+      "error_message": null,
+      "input_tokens": 0,
+      "output_tokens": 0
+    },
+    {
+      "run_id": "e46aa1df-f4a0-4e82-8a0d-252571822910",
+      "status": "succeeded",
+      "error_code": null,
+      "error_message": null,
+      "input_tokens": 0,
+      "output_tokens": 0
+    },
+    {
+      "run_id": "347c3810-4419-42cb-bc58-47336e9b1aac",
+      "status": "succeeded",
+      "error_code": null,
+      "error_message": null,
+      "input_tokens": 0,
+      "output_tokens": 0
+    },
+    {
+      "run_id": "aa09a3b1-8897-4726-823c-b0478b85ba76",
+      "status": "succeeded",
+      "error_code": null,
+      "error_message": null,
+      "input_tokens": 0,
+      "output_tokens": 0
+    },
+    {
+      "run_id": "51ea33c0-3bd5-4a49-b486-bf64d6b34166",
+      "status": "succeeded",
+      "error_code": null,
+      "error_message": null,
+      "input_tokens": 0,
+      "output_tokens": 0
+    },
+    {
+      "run_id": "40dc2b9f-10f7-4f77-b8ec-a457780972ec",
+      "status": "succeeded",
+      "error_code": null,
+      "error_message": null,
+      "input_tokens": 0,
+      "output_tokens": 0
+    },
+    {
+      "run_id": "4568955c-c3f2-4d68-9d66-e4a2437745d5",
+      "status": "succeeded",
+      "error_code": null,
+      "error_message": null,
+      "input_tokens": 0,
+      "output_tokens": 0
+    },
+    {
+      "run_id": "39b19e8e-e31e-447b-9ac4-9dc1016a12ab",
+      "status": "succeeded",
+      "error_code": null,
+      "error_message": null,
+      "input_tokens": 0,
+      "output_tokens": 0
+    },
+    {
+      "run_id": "c0297427-6ad5-48bf-b9db-3e4cd2f96010",
+      "status": "succeeded",
+      "error_code": null,
+      "error_message": null,
+      "input_tokens": 0,
+      "output_tokens": 0
+    },
+    {
+      "run_id": "c10c30dd-6f47-4847-8017-f1d9888dc6a6",
+      "status": "succeeded",
+      "error_code": null,
+      "error_message": null,
+      "input_tokens": 0,
+      "output_tokens": 0
+    },
+    {
+      "run_id": "f0de5646-6885-4357-8761-c88771ff9b97",
+      "status": "succeeded",
+      "error_code": null,
+      "error_message": null,
+      "input_tokens": 0,
+      "output_tokens": 0
+    },
+    {
+      "run_id": "d7a651b4-d9bf-43fe-b633-5e130f9cab52",
+      "status": "succeeded",
+      "error_code": null,
+      "error_message": null,
+      "input_tokens": 0,
+      "output_tokens": 0
+    },
+    {
+      "run_id": "cf5aa182-5b0f-464c-b244-ce2ad1dae8bc",
+      "status": "succeeded",
+      "error_code": null,
+      "error_message": null,
+      "input_tokens": 0,
+      "output_tokens": 0
+    },
+    {
+      "run_id": "a8e231d2-2aed-46cc-815c-6aac0698ff01",
+      "status": "succeeded",
+      "error_code": null,
+      "error_message": null,
+      "input_tokens": 0,
+      "output_tokens": 0
+    },
+    {
+      "run_id": "34498afa-9fa8-4258-97b1-a316dfbf859c",
+      "status": "succeeded",
+      "error_code": null,
+      "error_message": null,
+      "input_tokens": 0,
+      "output_tokens": 0
+    },
+    {
+      "run_id": "fb7d40fe-5f40-403f-9036-b74a2a5a4022",
+      "status": "succeeded",
+      "error_code": null,
+      "error_message": null,
+      "input_tokens": 0,
+      "output_tokens": 0
+    }
+  ],
+  "simulator_before": {
+    "models": {
+      "hoim-simulator:operations_qa": {
+        "attempts": 20,
+        "injected_failures": 0,
+        "successes": 20
+      }
+    },
+    "simulated": true
+  },
+  "simulator_after": {
+    "models": {
+      "hoim-simulator:operations_qa": {
+        "attempts": 40,
+        "injected_failures": 0,
+        "successes": 40
+      }
+    },
+    "simulated": true
+  },
+  "passed": true,
+  "feedback_count": 20,
+  "elapsed_seconds": 62.681141269393265,
+  "no_duplicate_claim_or_execution": true,
+  "no_pending_tasks": true,
+  "usage_note": "Simulation server performs no inference and explicitly reports zero usage; no transient failures occurred, so no unknown aggregate usage was replaced by zero.",
+  "private_schema_dropped": true
+}

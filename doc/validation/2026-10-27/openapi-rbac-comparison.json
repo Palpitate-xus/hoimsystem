@@ -1,0 +1,39 @@
+{
+  "rbac_rows": 1087,
+  "rbac_unique_method_path": 1087,
+  "openapi_operations": 1085,
+  "rbac_not_in_openapi": [
+    [
+      "GET",
+      "/health/live"
+    ],
+    [
+      "GET",
+      "/health/ready"
+    ],
+    [
+      "GET",
+      "/metrics"
+    ]
+  ],
+  "openapi_not_in_rbac": [
+    [
+      "GET",
+      "/"
+    ]
+  ],
+  "rbac_duplicate_pairs": [],
+  "explanation": "RBAC generator scans router operations, including all3 infrastructure GET routes in observability APIRouter(include_in_schema=False). OpenAPI deliberately excludes those3, but includes app.main GET / welcome route outside router scanner.1087-3+1=1085. No duplicate method/path pairs or missing business operations observed.",
+  "extra_public_live_responses": [
+    {
+      "path": "/",
+      "status": 200,
+      "content_type": "application/json"
+    },
+    {
+      "path": "/metrics",
+      "status": 200,
+      "content_type": "text/plain; version=1.0.0; charset=utf-8"
+    }
+  ]
+}

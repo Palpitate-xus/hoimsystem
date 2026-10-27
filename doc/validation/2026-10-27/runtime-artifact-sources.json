@@ -1,0 +1,389 @@
+{
+  "recorded_at": "2026-10-27T08:21:05.113089+00:00",
+  "scope": "This subagent AI/native/simulator/migration/concurrency/load/final integration and cleanup artifact source paths. Raw evidence remains under /tmp; test secrets, .env, SQL backups and SQLite database files are intentionally not copied or enumerated as publication artifacts.",
+  "artifact_sources": [
+    {
+      "path": "/tmp/hoim-validation-20261027/ai-inventory.json",
+      "bytes": 726913,
+      "sha256": "25dcc812bc6710fc7e0e4e706708f4abd0c97b1fc0d4afbfedf1942183e5d2d0"
+    },
+    {
+      "path": "/tmp/hoim-validation-20261027/ai-inventory-before-final-integration.json",
+      "bytes": 711809,
+      "sha256": "2a1f7d8ac2afb3dc55c91e54a588f97ffaed8936fc6d683d77df665edea9604c"
+    },
+    {
+      "path": "/tmp/hoim-validation-20261027/ai-runtime/native-http-report.json",
+      "bytes": 17692,
+      "sha256": "e6c56d07578644ab2ae3af4ede1617b6c8a7b7ec176f04b52af1327f9d4a67ee"
+    },
+    {
+      "path": "/tmp/hoim-validation-20261027/ai-runtime/llm-validation-summary.json",
+      "bytes": 7575,
+      "sha256": "7b7d62165954367088ce12c48a96210055b951e947cfce5d25de51174ebe7abe"
+    },
+    {
+      "path": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/validation-summary.json",
+      "bytes": 1497,
+      "sha256": "d518e6ada718ab5466316935b286a94cc6cf745246b9e4a594a15340a7dc749a"
+    },
+    {
+      "path": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator-final-retry-summary.json",
+      "bytes": 3073,
+      "sha256": "395d7144dea4a8d944ad637f7dccefbac0ece105ff1f5bd494bb17968542cfc7"
+    },
+    {
+      "path": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator-final-code-manifest.json",
+      "bytes": 80576,
+      "sha256": "884880bf4f152d55ef4b51893627d419c38c79009a931f46dfef7f6634834b32"
+    },
+    {
+      "path": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator-final-source-followup.json",
+      "bytes": 1047,
+      "sha256": "bccfdc7cf33f91b95b5bc918f0760e11380390bfdf38bae6133bfefa09853057"
+    },
+    {
+      "path": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator-resources.json",
+      "bytes": 5605,
+      "sha256": "ae5519f50773bf3bc50425cee0d7a405bd29a96a289a9fb971ae4f06148dec86"
+    },
+    {
+      "path": "/tmp/hoim-validation-20261027/ai-runtime/surgery-postgresql/version-and-http-proof.json",
+      "bytes": 2257,
+      "sha256": "d16cdab429e1a4899794ca9506a2e3d904fb9b57dc8b208a032d66455c6113a9"
+    },
+    {
+      "path": "/tmp/hoim-validation-20261027/performance/runtime-image-manifest.json",
+      "bytes": 73365,
+      "sha256": "1db007305113b636590533bfbab3244f32c3ff85ee13e7190e796db0d5932e0b"
+    },
+    {
+      "path": "/tmp/hoim-validation-20261027/performance/campaign-original-17-results.json",
+      "bytes": 63853,
+      "sha256": "02866c6105fc7df61a05063f7ec6661780f5f9a2d3c6f1a8aba96a7a858eb217"
+    },
+    {
+      "path": "/tmp/hoim-validation-20261027/performance/performance-summary.json",
+      "bytes": 128320,
+      "sha256": "d20cd05362b5e4cc70c9114e59fd3e172ff354d3538eb974b5441cfcec15deec"
+    },
+    {
+      "path": "/tmp/hoim-validation-20261027/performance/performance-table.md",
+      "bytes": 1685,
+      "sha256": "b2a415f0f80f4015a19395390a483dee607e722be4666776ac2bdaf06502f097"
+    },
+    {
+      "path": "/tmp/hoim-validation-20261027/performance/failure-analysis.json",
+      "bytes": 1495,
+      "sha256": "89360571e23bbf1a3f4a17829cb0b6992acb7ba16b43d6472cab5bf9182ca521"
+    },
+    {
+      "path": "/tmp/hoim-validation-20261027/performance/pgcpu-control/comparison-summary.json",
+      "bytes": 15491,
+      "sha256": "9f51c003f45f8b313543bd101179185b5ac91053828f3979637002143c261564"
+    },
+    {
+      "path": "/tmp/hoim-validation-20261027/performance/pgcpu-control/comparison-table.md",
+      "bytes": 303,
+      "sha256": "8687da62e194e2b9c0c9623b2ae6c65d315d351c3cbcca26f0fb760237694690"
+    },
+    {
+      "path": "/tmp/hoim-validation-20261027/performance/pgcpu-control/postgres-restored.json",
+      "bytes": 331,
+      "sha256": "21d009a6e366741ecbb0f738e9953ecbcd9f159cad1700d430c65f4476c01c44"
+    },
+    {
+      "path": "/tmp/hoim-validation-20261027/final-integration/summary.json",
+      "bytes": 9418,
+      "sha256": "f61b051e3715d7b103d128fa830a782d9accad74d8cc6aab1acb674c42b78031"
+    },
+    {
+      "path": "/tmp/hoim-validation-20261027/final-integration/final-5c0d1bc-image-manifest.json",
+      "bytes": 93542,
+      "sha256": "eff889b1415e9a3182c4b9eda9425ec8f506665a43d95811e69c8cc987933c68"
+    },
+    {
+      "path": "/tmp/hoim-validation-20261027/final-integration/final-0ec0340-image-manifest.json",
+      "bytes": 93552,
+      "sha256": "333ae8cf671c0ebe9ea7b4561654bbb08f9b14b355b3f5e3be32e25da59bd729"
+    },
+    {
+      "path": "/tmp/hoim-validation-20261027/final-integration/final-3cce378-image-manifest.json",
+      "bytes": 93540,
+      "sha256": "f3e159c4bb2786abbda287a3ecce7fa896c8a209e5d5f78b06e673acb799e275"
+    },
+    {
+      "path": "/tmp/hoim-validation-20261027/final-integration/public-migration-result.json",
+      "bytes": 1079,
+      "sha256": "0f6103a7100bd65f8ab3e11e7d3a0c41269ad6138a1d7f6784106b1d7fcede4d"
+    },
+    {
+      "path": "/tmp/hoim-validation-20261027/final-integration/old-schema-comparison.json",
+      "bytes": 1071,
+      "sha256": "ad5d78e0cd54baad5bbfddf3f22ea3f95dc8e8c86616dae5d14e5f79192be649"
+    },
+    {
+      "path": "/tmp/hoim-validation-20261027/final-integration/concurrency-20.json",
+      "bytes": 5821,
+      "sha256": "10123c91c60aa9b777eca71353fcb3d4876bfb4e8b9dc62a69afedec6571e795"
+    },
+    {
+      "path": "/tmp/hoim-validation-20261027/final-integration/concurrency-fixed-20.json",
+      "bytes": 5819,
+      "sha256": "9bdb14358c73b3dec1121b10860b34048dd002d02bb169e241aaf4e8f7e29a95"
+    },
+    {
+      "path": "/tmp/hoim-validation-20261027/final-integration/concurrency-fixed-50.json",
+      "bytes": 5819,
+      "sha256": "c0c67d0547af41ebf4c13f9bf4c27d7d3f0962e0afe4f5defa191b06e96c03cd"
+    },
+    {
+      "path": "/tmp/hoim-validation-20261027/final-integration/inventory-backpressure-http.json",
+      "bytes": 990,
+      "sha256": "a6bbcfe36802ad684265ca7ef0a2f6408095431b768e123d37a8145c83a57587"
+    },
+    {
+      "path": "/tmp/hoim-validation-20261027/final-integration/performance-new/summary.json",
+      "bytes": 31227,
+      "sha256": "cd7b23de376ca0b4f66a79348b6ad454585ba34dd728fc7c581605a8d02441e7"
+    },
+    {
+      "path": "/tmp/hoim-validation-20261027/final-integration/performance-new/comparison-table.md",
+      "bytes": 410,
+      "sha256": "776aada11e474c4f81392d239211c059b2e361793380d7246916c418c11699da"
+    },
+    {
+      "path": "/tmp/hoim-validation-20261027/final-integration/http-openapi-sse-final-healthy.json",
+      "bytes": 11891,
+      "sha256": "9d031298c07e108eb3d6e9484cdb69d160efab35f9924d3eb1ede1ce3c9c2652"
+    },
+    {
+      "path": "/tmp/hoim-validation-20261027/final-integration/openapi-rbac-comparison.json",
+      "bytes": 957,
+      "sha256": "05a1b6b78c8718b2f45dbfc2207b8c165868a929338855d656dfdccd753425b0"
+    },
+    {
+      "path": "/tmp/hoim-validation-20261027/final-integration/healthcheck-before-proxy-fix.json",
+      "bytes": 6350,
+      "sha256": "f09527990ba52558cb4c0be01dd3abde738ba76f97723763e443e7f6d10661d8"
+    },
+    {
+      "path": "/tmp/hoim-validation-20261027/final-integration/healthcheck-after-proxy-fix.json",
+      "bytes": 1090,
+      "sha256": "5f4a6b0b75475ccc05e677ca9afa6fcd28794910d1e07bbc48cd866ccf0d649d"
+    },
+    {
+      "path": "/tmp/hoim-validation-20261027/final-integration/ai-workers/native-http-12-final-summary.json",
+      "bytes": 14761,
+      "sha256": "d1b6731c444591df70ab2f0152027ab6a83d32e28496f7372633638b8c3f401d"
+    },
+    {
+      "path": "/tmp/hoim-validation-20261027/final-integration/ai-workers/generic-final-pg-marker/llm-workflows.json",
+      "bytes": 27460,
+      "sha256": "8edbd65db7b66015c1d4833fea13f31e6b7323e4ea67fa9ab8bbad0491fd26a7"
+    },
+    {
+      "path": "/tmp/hoim-validation-20261027/final-integration/ai-workers/pg-queue/result.json",
+      "bytes": 12595,
+      "sha256": "1d81bd67bb5c1a14aa4e0270ee12306cf5a5ffad32b8fe9c29d15e6658ae205e"
+    },
+    {
+      "path": "/tmp/hoim-validation-20261027/final-integration/ai-workers/pg-queue/result-attempt1.json",
+      "bytes": 4879,
+      "sha256": "310a057c41d7142ae647a18bd6811e27934c8c7991a8144bef9f35fe8d019bda"
+    },
+    {
+      "path": "/tmp/hoim-validation-20261027/final-integration/ai-workers/pg-queue/result-attempt2.json",
+      "bytes": 9369,
+      "sha256": "624020653e0fb47ddc720683797bb5d2273f4997e32fbe2e2bbbbfffbbd1705f"
+    },
+    {
+      "path": "/tmp/hoim-validation-20261027/final-integration/ai-workers/pg-queue/execution-checkpoint.json",
+      "bytes": 12229,
+      "sha256": "f3af29341295ebb74e661a53d539a51eb75819eaf71ac0b366b7cf918b0395f1"
+    },
+    {
+      "path": "/tmp/hoim-validation-20261027/final-integration/ai-workers/pg-queue/simulator-after-attempt2.json",
+      "bytes": 161,
+      "sha256": "7fc082c90ea94fbcfb7abf53f56d8f2b2ac574a490a616dbb1db4f664d2a2357"
+    },
+    {
+      "path": "/tmp/hoim-validation-20261027/final-integration/ai-workers/native/research_cohort-attempt1/result.json",
+      "bytes": 2778,
+      "sha256": "643b8233cffdbe571a65c7d4c238e89e6b7ee60c06e1712cc3db242198028eb8"
+    },
+    {
+      "path": "/tmp/hoim-validation-20261027/final-integration/cleanup-plan.json",
+      "bytes": 8345,
+      "sha256": "7e3956c7d5f5d21cc5c0c211dd299a18a4eb998b7270b5aa239e4abfe0d01039"
+    },
+    {
+      "path": "/tmp/hoim-validation-20261027/final-integration/cleanup.json",
+      "bytes": 17182,
+      "sha256": "3423f1b760cefed13bfdbbb282768117958db0ec2aeb1ca96ef65c43a763d750"
+    },
+    {
+      "path": "/tmp/hoim-validation-20261027/backend/window-registration-pg-final-v2/result.json",
+      "bytes": 906,
+      "sha256": "5bedf33a6c8a174b687565668043530057309fd1a367eb1c281a5f60f7ef8cd0"
+    },
+    {
+      "path": "/tmp/hoim-validation-20261027/backend/window-registration-pg-final-v2.xml",
+      "bytes": 10246,
+      "sha256": "03522532a48ee3a7aa2d788a32bd321d3bd2ec6d7d75b411a16319d4daf592a1"
+    },
+    {
+      "path": "/tmp/hoim-validation-20261027/backend/benchmark-loopback-health-final/result.json",
+      "bytes": 471,
+      "sha256": "0e8ec712ebfcd660fef360e49a97c2b2f8bcfff70a23a4107f3c9cea82a8d786"
+    },
+    {
+      "path": "/tmp/hoim-validation-20261027/backend/benchmark-loopback-health-final.xml",
+      "bytes": 8235,
+      "sha256": "45782c6c20e7b550cb4f6bef6abdd67138b7ddf66cd012b6d3ddb788bd9c38ac"
+    },
+    {
+      "path": "/tmp/hoim-validation-20261027/frontend/production-browser-performance-final/summary.json",
+      "bytes": 4349,
+      "sha256": "8a4571ac4ba194c9ee031510c2b6ee2d536f7f2b41481d4f35e426f5bf1328ad"
+    }
+  ],
+  "reproduction_scripts": [
+    {
+      "path": "/tmp/hoim-validation-20261027/final-integration/acceptance-wrapper.py",
+      "bytes": 546,
+      "sha256": "d0d7cc5f8e8578a23a7b0c9f1efc6cbad31bed3770e2f05049b545fe074d6a5b"
+    },
+    {
+      "path": "/tmp/hoim-validation-20261027/final-integration/ai-workers/generic/run-workflows.py",
+      "bytes": 9060,
+      "sha256": "baa142a5ac4be436ec8953336017050285fc57b5081eb80b851faf329e5a00d5"
+    },
+    {
+      "path": "/tmp/hoim-validation-20261027/final-integration/ai-workers/generic-final-pg-marker/run-workflows.py",
+      "bytes": 9076,
+      "sha256": "6e37bdfdc7086bc430546d0410f09ecab405185e22dce0f73d0bab1ff4e7fcf6"
+    },
+    {
+      "path": "/tmp/hoim-validation-20261027/final-integration/ai-workers/launch-native-remaining.py",
+      "bytes": 1888,
+      "sha256": "53719f960308ac9cd6c792da194ef311284ae376641115af14f5bea94b78b557"
+    },
+    {
+      "path": "/tmp/hoim-validation-20261027/final-integration/ai-workers/launch-native-research-retry.py",
+      "bytes": 1797,
+      "sha256": "5252b004aacb416be66da58235b3ad03c661a3b3cf3a54f8f8460d57c5951f11"
+    },
+    {
+      "path": "/tmp/hoim-validation-20261027/final-integration/ai-workers/launch-native.py",
+      "bytes": 1901,
+      "sha256": "0a6fa3c4919823bbeefd586fb1f3f86f6f76de807b859a99706a46e21424d3b6"
+    },
+    {
+      "path": "/tmp/hoim-validation-20261027/final-integration/ai-workers/pg-queue/run-queue-attempt1.py",
+      "bytes": 6725,
+      "sha256": "95aa3076150bc8e0270d31c991f63656463ea62b6533bf154ced9a9a55efc8b4"
+    },
+    {
+      "path": "/tmp/hoim-validation-20261027/final-integration/ai-workers/pg-queue/run-queue-attempt2.py",
+      "bytes": 6719,
+      "sha256": "fc72c533515d6a75319c676dfdd1d89212543a482baef3fa34f088b41f6243ab"
+    },
+    {
+      "path": "/tmp/hoim-validation-20261027/final-integration/ai-workers/pg-queue/run-queue.py",
+      "bytes": 7678,
+      "sha256": "adc6f43a30842498a6439ebc0ecc42f0f9659fc810e985235e528d711711b773"
+    },
+    {
+      "path": "/tmp/hoim-validation-20261027/final-integration/ai-workers/run-native.py",
+      "bytes": 10193,
+      "sha256": "ddc2f8c9bbb2a0d28dba44fd84957799075efe66ebac400bfa4245b38fd21482"
+    },
+    {
+      "path": "/tmp/hoim-validation-20261027/final-integration/ai-workers/verify-native-evidence.py",
+      "bytes": 3475,
+      "sha256": "9a9b3b33fbadb8f6b650de73326bb7b83bfdbc669dde263c737b065d1c597798"
+    },
+    {
+      "path": "/tmp/hoim-validation-20261027/final-integration/apply-loopback-health-fix.py",
+      "bytes": 2592,
+      "sha256": "6fd1956303a6f1776ebb67b3f9a11b706af8f0ba82a7395827c63a16ff1c84b3"
+    },
+    {
+      "path": "/tmp/hoim-validation-20261027/final-integration/backpressure-http.py",
+      "bytes": 3991,
+      "sha256": "8186e475b5640b87f35ae487ed420a1aa481e682d372d87b6877c1beac8c110c"
+    },
+    {
+      "path": "/tmp/hoim-validation-20261027/final-integration/check-old-schema.py",
+      "bytes": 3690,
+      "sha256": "9049b714985f18ac1035c7261f2a14278bf5f0e4c1abd39628ee730bb61be459"
+    },
+    {
+      "path": "/tmp/hoim-validation-20261027/final-integration/cleanup-owned-final.py",
+      "bytes": 8722,
+      "sha256": "d5bbef7a28c9d0a6463b3a28618bf32df3674523272cd41080914e23939a7bbb"
+    },
+    {
+      "path": "/tmp/hoim-validation-20261027/final-integration/http-openapi-sse-final-healthy.py",
+      "bytes": 4660,
+      "sha256": "2532e84259ef57086a89ff81530b22684a5e393ea609f216da2d32233401153b"
+    },
+    {
+      "path": "/tmp/hoim-validation-20261027/final-integration/http-openapi-sse-pg-marker.py",
+      "bytes": 4652,
+      "sha256": "da0e5e3829ef907da5db14cd461984db4f00e5eb2ca0686018289b5a4e934aff"
+    },
+    {
+      "path": "/tmp/hoim-validation-20261027/final-integration/http-openapi-sse.py",
+      "bytes": 4632,
+      "sha256": "ffec764baa3ffbc4f3933097701b5dc14adad14f856b741ea2d3ed1116f50cd1"
+    },
+    {
+      "path": "/tmp/hoim-validation-20261027/final-integration/migrate-public.py",
+      "bytes": 3164,
+      "sha256": "8fff62097984b934289cb10b1b51db6f21391528c0d932bb025d1c828a6166d0"
+    },
+    {
+      "path": "/tmp/hoim-validation-20261027/final-integration/performance-new/round-worker.py",
+      "bytes": 5229,
+      "sha256": "0d9fbf7901901d369037ffc1f44d933a0986b305fc5e37a3ceb184d57d42f007"
+    },
+    {
+      "path": "/tmp/hoim-validation-20261027/final-integration/run-new-loads.py",
+      "bytes": 1976,
+      "sha256": "afe90379a8b9b55770273c2b5326e34c48f546ccfc218cd80e987ff931864259"
+    },
+    {
+      "path": "/tmp/hoim-validation-20261027/final-integration/summarize-final.py",
+      "bytes": 10359,
+      "sha256": "2ccebec275b362de8679be0285608a25f92d6c6ca68df288c1c9b925d9fd55d3"
+    },
+    {
+      "path": "/tmp/hoim-validation-20261027/final-integration/switch-and-concurrency.py",
+      "bytes": 5011,
+      "sha256": "f92ba113b2ed768d86533a80904510bec3987c7e273631761832d355b7892f17"
+    },
+    {
+      "path": "/tmp/hoim-validation-20261027/final-integration/switch-fixed-and-load.py",
+      "bytes": 5430,
+      "sha256": "63f9681fe91396a7a67374718a6a6510dddf76faef34e0eb6805a9625e1a5631"
+    },
+    {
+      "path": "/tmp/hoim-validation-20261027/final-integration/switch-pg-final-and-short.py",
+      "bytes": 4828,
+      "sha256": "5820dc903a0cffd821af01c20aff2668e5d0755b94d74d812c7a918c29b98e0e"
+    }
+  ],
+  "raw_evidence_directories": [
+    "/tmp/hoim-validation-20261027/performance/formal",
+    "/tmp/hoim-validation-20261027/performance/pgcpu-control/formal",
+    "/tmp/hoim-validation-20261027/final-integration/performance-new/formal",
+    "/tmp/hoim-validation-20261027/final-integration/ai-workers/native",
+    "/tmp/hoim-validation-20261027/final-integration/ai-workers/generic-final-pg-marker",
+    "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator-final-recovery-chat",
+    "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator-final-recovery-responses"
+  ],
+  "missing_optional_sources": [],
+  "preserve_secret_file_without_reading_or_archiving_contents": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/test-key.txt"
+}

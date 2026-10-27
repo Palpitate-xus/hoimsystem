@@ -1,0 +1,527 @@
+{
+  "created_at": "2026-10-27T08:20:22.859100+00:00",
+  "frontend_completion_gate": "Explicit frontend message: production performance30navigations completed08:16:11UTC, proxy18891 stopped. Root authorizes own services cleanup after this gate.",
+  "execute_default": false,
+  "processes": [
+    {
+      "pid": 1796978,
+      "port": 33955,
+      "script": "/home/xusheng/workspace/hoimsystem/fastapi_benchmark/llm_simulator.py",
+      "kind": "synthetic_simulator",
+      "pid_exists": true,
+      "identity_matches": true,
+      "listening_before": true,
+      "start_ticks": "803371340",
+      "cmdline_sha256": "33cce58dfdf966cb86bac3b04e4ab0756db786f83515593851223b0534b75af3",
+      "process_state": "S"
+    },
+    {
+      "pid": 1865956,
+      "port": 33956,
+      "script": "/home/xusheng/workspace/hoimsystem/fastapi_benchmark/llm_simulator.py",
+      "kind": "synthetic_simulator",
+      "pid_exists": false,
+      "identity_matches": false,
+      "listening_before": false
+    },
+    {
+      "pid": 1865980,
+      "port": 33957,
+      "script": "/home/xusheng/workspace/hoimsystem/fastapi_benchmark/llm_simulator.py",
+      "kind": "synthetic_simulator",
+      "pid_exists": false,
+      "identity_matches": false,
+      "listening_before": false
+    },
+    {
+      "pid": 1866016,
+      "port": 33958,
+      "script": "/home/xusheng/workspace/hoimsystem/fastapi_benchmark/llm_simulator.py",
+      "kind": "synthetic_simulator",
+      "pid_exists": false,
+      "identity_matches": false,
+      "listening_before": false
+    },
+    {
+      "pid": 1878744,
+      "port": 33959,
+      "script": "/home/xusheng/workspace/hoimsystem/fastapi_benchmark/llm_simulator.py",
+      "kind": "synthetic_simulator",
+      "pid_exists": false,
+      "identity_matches": false,
+      "listening_before": false
+    },
+    {
+      "pid": 1893456,
+      "port": 33960,
+      "script": "/home/xusheng/workspace/hoimsystem/fastapi_benchmark/llm_simulator.py",
+      "kind": "synthetic_simulator",
+      "pid_exists": true,
+      "identity_matches": true,
+      "listening_before": true,
+      "start_ticks": "803490381",
+      "cmdline_sha256": "6f90389d6151dfc1da3893ceb275a8ce19b163efa82f5862215c29e4980a6da9",
+      "process_state": "S"
+    },
+    {
+      "pid": 1893570,
+      "port": 33961,
+      "script": "/home/xusheng/workspace/hoimsystem/fastapi_benchmark/llm_simulator.py",
+      "kind": "synthetic_simulator",
+      "pid_exists": true,
+      "identity_matches": true,
+      "listening_before": true,
+      "start_ticks": "803490497",
+      "cmdline_sha256": "071b2e8d199693fe020f0d4b884a36e93b42fd534a4e4711ef6e682737ec7336",
+      "process_state": "S"
+    },
+    {
+      "pid": 1893723,
+      "port": 33962,
+      "script": "/home/xusheng/workspace/hoimsystem/fastapi_benchmark/llm_simulator.py",
+      "kind": "synthetic_simulator",
+      "pid_exists": true,
+      "identity_matches": true,
+      "listening_before": true,
+      "start_ticks": "803490614",
+      "cmdline_sha256": "c4f01154dec5a1bc2cda425dd11033d40ccc39611ae3c5dc4cc729d011c5a4c0",
+      "process_state": "S"
+    },
+    {
+      "pid": 1893840,
+      "port": 33963,
+      "script": "/home/xusheng/workspace/hoimsystem/fastapi_benchmark/llm_simulator.py",
+      "kind": "synthetic_simulator",
+      "pid_exists": true,
+      "identity_matches": true,
+      "listening_before": true,
+      "start_ticks": "803490731",
+      "cmdline_sha256": "0e69a54f88d304790faa20db52802bb5fc3816da20d4db5191cfdec94ea7c48c",
+      "process_state": "S"
+    },
+    {
+      "pid": 1893975,
+      "port": 33964,
+      "script": "/home/xusheng/workspace/hoimsystem/fastapi_benchmark/llm_simulator.py",
+      "kind": "synthetic_simulator",
+      "pid_exists": true,
+      "identity_matches": true,
+      "listening_before": true,
+      "start_ticks": "803490847",
+      "cmdline_sha256": "44884d1f2afb44e688ffb35bc4087073f8f579ee7ea924494cd69a5b8875cd29",
+      "process_state": "S"
+    },
+    {
+      "pid": 2204769,
+      "port": 33965,
+      "script": "/home/xusheng/workspace/hoimsystem/fastapi_benchmark/llm_simulator.py",
+      "kind": "synthetic_simulator",
+      "pid_exists": true,
+      "identity_matches": true,
+      "listening_before": true,
+      "start_ticks": "803802424",
+      "cmdline_sha256": "59f3af493ac6f84e88c87086ddee9e3d4ab76f78a9d138dc62a5e5a1b92ce043",
+      "process_state": "S"
+    },
+    {
+      "pid": 2227764,
+      "port": 33967,
+      "script": "/home/xusheng/workspace/hoimsystem/fastapi_benchmark/llm_simulator.py",
+      "kind": "synthetic_simulator",
+      "pid_exists": true,
+      "identity_matches": true,
+      "listening_before": true,
+      "start_ticks": "803819453",
+      "cmdline_sha256": "8c5056160e7913079e05135fd7e195e9ea6e85f1a01f37e1f1901ff18d4ff237",
+      "process_state": "S"
+    },
+    {
+      "pid": 2268712,
+      "port": 23966,
+      "script": "/home/xusheng/workspace/hoimsystem/fastapi_benchmark/llm_simulator.py",
+      "kind": "synthetic_simulator",
+      "pid_exists": true,
+      "identity_matches": true,
+      "listening_before": true,
+      "start_ticks": "803847435",
+      "cmdline_sha256": "304359ad6cf6730d122abcd3aef24ecc3ef39c08bc7556fd41e4ff608a53543f",
+      "process_state": "S"
+    },
+    {
+      "pid": 1381935,
+      "port": 58343,
+      "script_prefix": "/tmp/hoim-validation-20261027/ai-runtime/local_llm_",
+      "kind": "local_cpu_model",
+      "pid_exists": false,
+      "identity_matches": false,
+      "listening_before": false
+    },
+    {
+      "pid": 1483852,
+      "port": 33465,
+      "script_prefix": "/tmp/hoim-validation-20261027/ai-runtime/local_llm_",
+      "kind": "local_cpu_model",
+      "pid_exists": false,
+      "identity_matches": false,
+      "listening_before": false
+    },
+    {
+      "pid": 1508885,
+      "port": 40191,
+      "script_prefix": "/tmp/hoim-validation-20261027/ai-runtime/local_llm_",
+      "kind": "local_cpu_model",
+      "pid_exists": false,
+      "identity_matches": false,
+      "listening_before": false
+    },
+    {
+      "pid": 1533939,
+      "port": 48385,
+      "script_prefix": "/tmp/hoim-validation-20261027/ai-runtime/local_llm_",
+      "kind": "local_cpu_model",
+      "pid_exists": false,
+      "identity_matches": false,
+      "listening_before": false
+    },
+    {
+      "pid": 1567163,
+      "port": 49299,
+      "script_prefix": "/tmp/hoim-validation-20261027/ai-runtime/local_llm_",
+      "kind": "local_cpu_model",
+      "pid_exists": false,
+      "identity_matches": false,
+      "listening_before": false
+    },
+    {
+      "pid": 1600898,
+      "port": 46029,
+      "script_prefix": "/tmp/hoim-validation-20261027/ai-runtime/local_llm_",
+      "kind": "local_cpu_model",
+      "pid_exists": false,
+      "identity_matches": false,
+      "listening_before": false
+    }
+  ],
+  "compose_project": "hoim-validation-20261027",
+  "compose_containers": [
+    {
+      "id": "667c511142ea0f1ce02714a15fbeb28725f61b095457e0745ebd505767645cea",
+      "name": "hoim-validation-20261027-api-1",
+      "image_id": "sha256:f0b060308f8266def03940600fa166d975579d126c64f7ae747f18a31d07248c",
+      "status": "running",
+      "project_label_verified": true
+    },
+    {
+      "id": "b30034932e7f6578732f580409db1f8307ce396107694e2d21e317a44a0cd175",
+      "name": "hoim-validation-20261027-init-1",
+      "image_id": "sha256:9f7daecb1c8593eb1aff3de75a51600ac5b5908a60bb25303ca3e40e033d5dc7",
+      "status": "exited",
+      "project_label_verified": true
+    },
+    {
+      "id": "0079810eec7a027281689252f9a9fd3c606461cc9b17f7074b621b902ee8d3f9",
+      "name": "hoim-validation-20261027-db-1",
+      "image_id": "sha256:3da88da04dd915ff9d79e16d9a102435cd65ef42e6b48e720b11a44a2ddabffe",
+      "status": "running",
+      "project_label_verified": true
+    }
+  ],
+  "standalone_owned_containers": [],
+  "ports_to_verify": [
+    18127,
+    18427,
+    23966,
+    33465,
+    33955,
+    33956,
+    33957,
+    33958,
+    33959,
+    33960,
+    33961,
+    33962,
+    33963,
+    33964,
+    33965,
+    33967,
+    40191,
+    46029,
+    48385,
+    49299,
+    58343
+  ],
+  "preserve": "All /tmp evidence, test-key0600files, ownSQLite source fixtures, SQL/schema backup artifacts, source scripts and Docker images; no volume/image pruning. Only approved disposable synthetic PG tmpfs container is removed by compose down.",
+  "other_user_processes_or_main_stack_touched": false,
+  "started_at": "2026-10-27T08:20:23.018404+00:00",
+  "process_results": [
+    {
+      "pid": 1796978,
+      "port": 33955,
+      "script": "/home/xusheng/workspace/hoimsystem/fastapi_benchmark/llm_simulator.py",
+      "kind": "synthetic_simulator",
+      "pid_exists": true,
+      "identity_matches": true,
+      "listening_before": true,
+      "start_ticks": "803371340",
+      "cmdline_sha256": "33cce58dfdf966cb86bac3b04e4ab0756db786f83515593851223b0534b75af3",
+      "process_state": "S",
+      "action": "sent_sigterm_to_verified_owned_process"
+    },
+    {
+      "pid": 1865956,
+      "port": 33956,
+      "script": "/home/xusheng/workspace/hoimsystem/fastapi_benchmark/llm_simulator.py",
+      "kind": "synthetic_simulator",
+      "pid_exists": false,
+      "identity_matches": false,
+      "listening_before": false,
+      "action": "already_stopped_or_unrelated_pid_not_signalled"
+    },
+    {
+      "pid": 1865980,
+      "port": 33957,
+      "script": "/home/xusheng/workspace/hoimsystem/fastapi_benchmark/llm_simulator.py",
+      "kind": "synthetic_simulator",
+      "pid_exists": false,
+      "identity_matches": false,
+      "listening_before": false,
+      "action": "already_stopped_or_unrelated_pid_not_signalled"
+    },
+    {
+      "pid": 1866016,
+      "port": 33958,
+      "script": "/home/xusheng/workspace/hoimsystem/fastapi_benchmark/llm_simulator.py",
+      "kind": "synthetic_simulator",
+      "pid_exists": false,
+      "identity_matches": false,
+      "listening_before": false,
+      "action": "already_stopped_or_unrelated_pid_not_signalled"
+    },
+    {
+      "pid": 1878744,
+      "port": 33959,
+      "script": "/home/xusheng/workspace/hoimsystem/fastapi_benchmark/llm_simulator.py",
+      "kind": "synthetic_simulator",
+      "pid_exists": false,
+      "identity_matches": false,
+      "listening_before": false,
+      "action": "already_stopped_or_unrelated_pid_not_signalled"
+    },
+    {
+      "pid": 1893456,
+      "port": 33960,
+      "script": "/home/xusheng/workspace/hoimsystem/fastapi_benchmark/llm_simulator.py",
+      "kind": "synthetic_simulator",
+      "pid_exists": true,
+      "identity_matches": true,
+      "listening_before": true,
+      "start_ticks": "803490381",
+      "cmdline_sha256": "6f90389d6151dfc1da3893ceb275a8ce19b163efa82f5862215c29e4980a6da9",
+      "process_state": "S",
+      "action": "sent_sigterm_to_verified_owned_process"
+    },
+    {
+      "pid": 1893570,
+      "port": 33961,
+      "script": "/home/xusheng/workspace/hoimsystem/fastapi_benchmark/llm_simulator.py",
+      "kind": "synthetic_simulator",
+      "pid_exists": true,
+      "identity_matches": true,
+      "listening_before": true,
+      "start_ticks": "803490497",
+      "cmdline_sha256": "071b2e8d199693fe020f0d4b884a36e93b42fd534a4e4711ef6e682737ec7336",
+      "process_state": "S",
+      "action": "sent_sigterm_to_verified_owned_process"
+    },
+    {
+      "pid": 1893723,
+      "port": 33962,
+      "script": "/home/xusheng/workspace/hoimsystem/fastapi_benchmark/llm_simulator.py",
+      "kind": "synthetic_simulator",
+      "pid_exists": true,
+      "identity_matches": true,
+      "listening_before": true,
+      "start_ticks": "803490614",
+      "cmdline_sha256": "c4f01154dec5a1bc2cda425dd11033d40ccc39611ae3c5dc4cc729d011c5a4c0",
+      "process_state": "S",
+      "action": "sent_sigterm_to_verified_owned_process"
+    },
+    {
+      "pid": 1893840,
+      "port": 33963,
+      "script": "/home/xusheng/workspace/hoimsystem/fastapi_benchmark/llm_simulator.py",
+      "kind": "synthetic_simulator",
+      "pid_exists": true,
+      "identity_matches": true,
+      "listening_before": true,
+      "start_ticks": "803490731",
+      "cmdline_sha256": "0e69a54f88d304790faa20db52802bb5fc3816da20d4db5191cfdec94ea7c48c",
+      "process_state": "S",
+      "action": "sent_sigterm_to_verified_owned_process"
+    },
+    {
+      "pid": 1893975,
+      "port": 33964,
+      "script": "/home/xusheng/workspace/hoimsystem/fastapi_benchmark/llm_simulator.py",
+      "kind": "synthetic_simulator",
+      "pid_exists": true,
+      "identity_matches": true,
+      "listening_before": true,
+      "start_ticks": "803490847",
+      "cmdline_sha256": "44884d1f2afb44e688ffb35bc4087073f8f579ee7ea924494cd69a5b8875cd29",
+      "process_state": "S",
+      "action": "sent_sigterm_to_verified_owned_process"
+    },
+    {
+      "pid": 2204769,
+      "port": 33965,
+      "script": "/home/xusheng/workspace/hoimsystem/fastapi_benchmark/llm_simulator.py",
+      "kind": "synthetic_simulator",
+      "pid_exists": true,
+      "identity_matches": true,
+      "listening_before": true,
+      "start_ticks": "803802424",
+      "cmdline_sha256": "59f3af493ac6f84e88c87086ddee9e3d4ab76f78a9d138dc62a5e5a1b92ce043",
+      "process_state": "S",
+      "action": "sent_sigterm_to_verified_owned_process"
+    },
+    {
+      "pid": 2227764,
+      "port": 33967,
+      "script": "/home/xusheng/workspace/hoimsystem/fastapi_benchmark/llm_simulator.py",
+      "kind": "synthetic_simulator",
+      "pid_exists": true,
+      "identity_matches": true,
+      "listening_before": true,
+      "start_ticks": "803819453",
+      "cmdline_sha256": "8c5056160e7913079e05135fd7e195e9ea6e85f1a01f37e1f1901ff18d4ff237",
+      "process_state": "S",
+      "action": "sent_sigterm_to_verified_owned_process"
+    },
+    {
+      "pid": 2268712,
+      "port": 23966,
+      "script": "/home/xusheng/workspace/hoimsystem/fastapi_benchmark/llm_simulator.py",
+      "kind": "synthetic_simulator",
+      "pid_exists": true,
+      "identity_matches": true,
+      "listening_before": true,
+      "start_ticks": "803847435",
+      "cmdline_sha256": "304359ad6cf6730d122abcd3aef24ecc3ef39c08bc7556fd41e4ff608a53543f",
+      "process_state": "S",
+      "action": "sent_sigterm_to_verified_owned_process"
+    },
+    {
+      "pid": 1381935,
+      "port": 58343,
+      "kind": "local_cpu_model",
+      "pid_exists": false,
+      "identity_matches": false,
+      "listening_before": false,
+      "action": "already_stopped_or_unrelated_pid_not_signalled"
+    },
+    {
+      "pid": 1483852,
+      "port": 33465,
+      "kind": "local_cpu_model",
+      "pid_exists": false,
+      "identity_matches": false,
+      "listening_before": false,
+      "action": "already_stopped_or_unrelated_pid_not_signalled"
+    },
+    {
+      "pid": 1508885,
+      "port": 40191,
+      "kind": "local_cpu_model",
+      "pid_exists": false,
+      "identity_matches": false,
+      "listening_before": false,
+      "action": "already_stopped_or_unrelated_pid_not_signalled"
+    },
+    {
+      "pid": 1533939,
+      "port": 48385,
+      "kind": "local_cpu_model",
+      "pid_exists": false,
+      "identity_matches": false,
+      "listening_before": false,
+      "action": "already_stopped_or_unrelated_pid_not_signalled"
+    },
+    {
+      "pid": 1567163,
+      "port": 49299,
+      "kind": "local_cpu_model",
+      "pid_exists": false,
+      "identity_matches": false,
+      "listening_before": false,
+      "action": "already_stopped_or_unrelated_pid_not_signalled"
+    },
+    {
+      "pid": 1600898,
+      "port": 46029,
+      "kind": "local_cpu_model",
+      "pid_exists": false,
+      "identity_matches": false,
+      "listening_before": false,
+      "action": "already_stopped_or_unrelated_pid_not_signalled"
+    }
+  ],
+  "remaining_owned_compose_containers": [],
+  "remaining_owned_standalone_containers": [],
+  "port_listening_after": {
+    "18127": false,
+    "18427": false,
+    "23966": false,
+    "33465": false,
+    "33955": false,
+    "33956": false,
+    "33957": false,
+    "33958": false,
+    "33959": false,
+    "33960": false,
+    "33961": false,
+    "33962": false,
+    "33963": false,
+    "33964": false,
+    "33965": false,
+    "33967": false,
+    "40191": false,
+    "46029": false,
+    "48385": false,
+    "49299": false,
+    "58343": false
+  },
+  "remaining_owned_processes": [],
+  "preserved_images": [
+    {
+      "image_id": "sha256:618319ad0af72830a374795c39d6f02cb066cbc27dbe1b32863601dc94071eb2",
+      "present": true
+    },
+    {
+      "image_id": "sha256:b81838d5534810387f505539ec5427b061436c9baacd7e157643b11569200532",
+      "present": true
+    },
+    {
+      "image_id": "sha256:0d132c9c400859dade17df882cc869098e04128e9f202e4f2789a1dd831aeffc",
+      "present": true
+    },
+    {
+      "image_id": "sha256:7ae389fe3991e7ab62a47344ad35b92d75b0584c57c6fb03a77aca9630ddea58",
+      "present": true
+    },
+    {
+      "image_id": "sha256:f0b060308f8266def03940600fa166d975579d126c64f7ae747f18a31d07248c",
+      "present": true
+    }
+  ],
+  "test_key_preserved": {
+    "path": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/test-key.txt",
+    "exists": true,
+    "mode": "0o600"
+  },
+  "finished_at": "2026-10-27T08:20:31.605952+00:00",
+  "no_owned_listener": true,
+  "no_owned_containers": true,
+  "all_tmp_evidence_preserved": true,
+  "passed": true
+}

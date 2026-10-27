@@ -1,0 +1,591 @@
+{
+  "started_at": "2026-10-27T08:09:13.547024+00:00",
+  "synthetic_only": true,
+  "api": "http://127.0.0.1:18127",
+  "simultaneous_sse_target": 100,
+  "auth_tokens_persisted": false,
+  "public_smoke": [
+    {
+      "path": "/health/live",
+      "status": 200
+    },
+    {
+      "path": "/health/ready",
+      "status": 200
+    },
+    {
+      "path": "/docs",
+      "status": 200
+    }
+  ],
+  "openapi": {
+    "status": 200,
+    "paths": 1012,
+    "operations": 1085,
+    "unique_operation_ids": true,
+    "provider_retry_fields": {
+      "ProviderWrite": {
+        "type": "integer",
+        "maximum": 3.0,
+        "minimum": 1.0,
+        "title": "Max Attempts",
+        "default": 3
+      }
+    },
+    "version": "3.1.0"
+  },
+  "authenticated_smoke": [
+    {
+      "path": "/api/departmentManagement/getList",
+      "http_status": 200,
+      "business_code": 200
+    },
+    {
+      "path": "/api/doctorManagement/getList",
+      "http_status": 200,
+      "business_code": 200
+    },
+    {
+      "path": "/api/patientManagement/getList",
+      "http_status": 200,
+      "business_code": 200
+    },
+    {
+      "path": "/api/chargeManagement/getList",
+      "http_status": 200,
+      "business_code": 200
+    },
+    {
+      "path": "/api/prescriptionManagement/getList",
+      "http_status": 200,
+      "business_code": 200
+    },
+    {
+      "path": "/api/medicalRecord/getList",
+      "http_status": 200,
+      "business_code": 200
+    }
+  ],
+  "postgres_before": {
+    "active": 1,
+    "idle": 4
+  },
+  "simultaneous_sse_open": 100,
+  "postgres_while_100_streams_open": {
+    "active": 1,
+    "idle": 16
+  },
+  "ordinary_request_while_streaming": {
+    "http_status": 200,
+    "business_code": 200
+  },
+  "passed": true,
+  "sse_successes": [
+    {
+      "index": 0,
+      "first_frame_ms": 47.25001659244299,
+      "http_status": 200
+    },
+    {
+      "index": 10,
+      "first_frame_ms": 165.19988048821688,
+      "http_status": 200
+    },
+    {
+      "index": 11,
+      "first_frame_ms": 171.9865957275033,
+      "http_status": 200
+    },
+    {
+      "index": 14,
+      "first_frame_ms": 179.44878712296486,
+      "http_status": 200
+    },
+    {
+      "index": 15,
+      "first_frame_ms": 179.36667706817389,
+      "http_status": 200
+    },
+    {
+      "index": 16,
+      "first_frame_ms": 185.5382351204753,
+      "http_status": 200
+    },
+    {
+      "index": 17,
+      "first_frame_ms": 185.54720096290112,
+      "http_status": 200
+    },
+    {
+      "index": 18,
+      "first_frame_ms": 185.44540088623762,
+      "http_status": 200
+    },
+    {
+      "index": 20,
+      "first_frame_ms": 195.03446947783232,
+      "http_status": 200
+    },
+    {
+      "index": 19,
+      "first_frame_ms": 201.53097342699766,
+      "http_status": 200
+    },
+    {
+      "index": 22,
+      "first_frame_ms": 200.88641811162233,
+      "http_status": 200
+    },
+    {
+      "index": 21,
+      "first_frame_ms": 216.36701468378305,
+      "http_status": 200
+    },
+    {
+      "index": 24,
+      "first_frame_ms": 227.7505937963724,
+      "http_status": 200
+    },
+    {
+      "index": 23,
+      "first_frame_ms": 228.15202921628952,
+      "http_status": 200
+    },
+    {
+      "index": 27,
+      "first_frame_ms": 273.0462532490492,
+      "http_status": 200
+    },
+    {
+      "index": 25,
+      "first_frame_ms": 273.898184299469,
+      "http_status": 200
+    },
+    {
+      "index": 28,
+      "first_frame_ms": 288.1625182926655,
+      "http_status": 200
+    },
+    {
+      "index": 29,
+      "first_frame_ms": 303.355629555881,
+      "http_status": 200
+    },
+    {
+      "index": 30,
+      "first_frame_ms": 316.3320729508996,
+      "http_status": 200
+    },
+    {
+      "index": 31,
+      "first_frame_ms": 316.2789763882756,
+      "http_status": 200
+    },
+    {
+      "index": 32,
+      "first_frame_ms": 316.15839432924986,
+      "http_status": 200
+    },
+    {
+      "index": 26,
+      "first_frame_ms": 324.60478600114584,
+      "http_status": 200
+    },
+    {
+      "index": 34,
+      "first_frame_ms": 331.23572915792465,
+      "http_status": 200
+    },
+    {
+      "index": 35,
+      "first_frame_ms": 348.97531010210514,
+      "http_status": 200
+    },
+    {
+      "index": 33,
+      "first_frame_ms": 358.04771911352873,
+      "http_status": 200
+    },
+    {
+      "index": 36,
+      "first_frame_ms": 366.78450368344784,
+      "http_status": 200
+    },
+    {
+      "index": 37,
+      "first_frame_ms": 366.6840037330985,
+      "http_status": 200
+    },
+    {
+      "index": 38,
+      "first_frame_ms": 376.3126712292433,
+      "http_status": 200
+    },
+    {
+      "index": 40,
+      "first_frame_ms": 381.12916704267263,
+      "http_status": 200
+    },
+    {
+      "index": 39,
+      "first_frame_ms": 381.623606197536,
+      "http_status": 200
+    },
+    {
+      "index": 42,
+      "first_frame_ms": 402.46880892664194,
+      "http_status": 200
+    },
+    {
+      "index": 41,
+      "first_frame_ms": 402.98484172672033,
+      "http_status": 200
+    },
+    {
+      "index": 43,
+      "first_frame_ms": 404.0314694866538,
+      "http_status": 200
+    },
+    {
+      "index": 45,
+      "first_frame_ms": 416.14395566284657,
+      "http_status": 200
+    },
+    {
+      "index": 44,
+      "first_frame_ms": 416.6418146342039,
+      "http_status": 200
+    },
+    {
+      "index": 46,
+      "first_frame_ms": 417.1899715438485,
+      "http_status": 200
+    },
+    {
+      "index": 47,
+      "first_frame_ms": 428.1406747177243,
+      "http_status": 200
+    },
+    {
+      "index": 48,
+      "first_frame_ms": 446.3375564664602,
+      "http_status": 200
+    },
+    {
+      "index": 49,
+      "first_frame_ms": 454.205266200006,
+      "http_status": 200
+    },
+    {
+      "index": 50,
+      "first_frame_ms": 454.163383692503,
+      "http_status": 200
+    },
+    {
+      "index": 52,
+      "first_frame_ms": 465.4477946460247,
+      "http_status": 200
+    },
+    {
+      "index": 51,
+      "first_frame_ms": 466.0042095929384,
+      "http_status": 200
+    },
+    {
+      "index": 53,
+      "first_frame_ms": 472.8459380567074,
+      "http_status": 200
+    },
+    {
+      "index": 54,
+      "first_frame_ms": 480.81463016569614,
+      "http_status": 200
+    },
+    {
+      "index": 55,
+      "first_frame_ms": 497.56704922765493,
+      "http_status": 200
+    },
+    {
+      "index": 56,
+      "first_frame_ms": 506.60865753889084,
+      "http_status": 200
+    },
+    {
+      "index": 57,
+      "first_frame_ms": 506.59847166389227,
+      "http_status": 200
+    },
+    {
+      "index": 59,
+      "first_frame_ms": 529.9918567761779,
+      "http_status": 200
+    },
+    {
+      "index": 58,
+      "first_frame_ms": 530.490517616272,
+      "http_status": 200
+    },
+    {
+      "index": 60,
+      "first_frame_ms": 541.0388791933656,
+      "http_status": 200
+    },
+    {
+      "index": 62,
+      "first_frame_ms": 560.1437874138355,
+      "http_status": 200
+    },
+    {
+      "index": 61,
+      "first_frame_ms": 571.8743717297912,
+      "http_status": 200
+    },
+    {
+      "index": 63,
+      "first_frame_ms": 571.4984154328704,
+      "http_status": 200
+    },
+    {
+      "index": 64,
+      "first_frame_ms": 579.5959271490574,
+      "http_status": 200
+    },
+    {
+      "index": 65,
+      "first_frame_ms": 585.7748063281178,
+      "http_status": 200
+    },
+    {
+      "index": 66,
+      "first_frame_ms": 595.03517113626,
+      "http_status": 200
+    },
+    {
+      "index": 67,
+      "first_frame_ms": 605.086799710989,
+      "http_status": 200
+    },
+    {
+      "index": 68,
+      "first_frame_ms": 631.1949277296662,
+      "http_status": 200
+    },
+    {
+      "index": 69,
+      "first_frame_ms": 630.7453596964478,
+      "http_status": 200
+    },
+    {
+      "index": 70,
+      "first_frame_ms": 637.1470633894205,
+      "http_status": 200
+    },
+    {
+      "index": 71,
+      "first_frame_ms": 651.5108440071344,
+      "http_status": 200
+    },
+    {
+      "index": 72,
+      "first_frame_ms": 659.2451920732856,
+      "http_status": 200
+    },
+    {
+      "index": 73,
+      "first_frame_ms": 658.984100446105,
+      "http_status": 200
+    },
+    {
+      "index": 75,
+      "first_frame_ms": 670.9277415648103,
+      "http_status": 200
+    },
+    {
+      "index": 74,
+      "first_frame_ms": 671.4205052703619,
+      "http_status": 200
+    },
+    {
+      "index": 76,
+      "first_frame_ms": 677.2081488743424,
+      "http_status": 200
+    },
+    {
+      "index": 77,
+      "first_frame_ms": 685.415699146688,
+      "http_status": 200
+    },
+    {
+      "index": 78,
+      "first_frame_ms": 693.2454137131572,
+      "http_status": 200
+    },
+    {
+      "index": 79,
+      "first_frame_ms": 731.8529784679413,
+      "http_status": 200
+    },
+    {
+      "index": 80,
+      "first_frame_ms": 731.8323869258165,
+      "http_status": 200
+    },
+    {
+      "index": 81,
+      "first_frame_ms": 754.5109819620848,
+      "http_status": 200
+    },
+    {
+      "index": 83,
+      "first_frame_ms": 764.3659869208932,
+      "http_status": 200
+    },
+    {
+      "index": 82,
+      "first_frame_ms": 774.6335277333856,
+      "http_status": 200
+    },
+    {
+      "index": 84,
+      "first_frame_ms": 781.9359973073006,
+      "http_status": 200
+    },
+    {
+      "index": 86,
+      "first_frame_ms": 781.6937668249011,
+      "http_status": 200
+    },
+    {
+      "index": 85,
+      "first_frame_ms": 789.7397326305509,
+      "http_status": 200
+    },
+    {
+      "index": 93,
+      "first_frame_ms": 787.8876216709614,
+      "http_status": 200
+    },
+    {
+      "index": 90,
+      "first_frame_ms": 799.5206825435162,
+      "http_status": 200
+    },
+    {
+      "index": 87,
+      "first_frame_ms": 800.4738660529256,
+      "http_status": 200
+    },
+    {
+      "index": 91,
+      "first_frame_ms": 803.7947192788124,
+      "http_status": 200
+    },
+    {
+      "index": 89,
+      "first_frame_ms": 806.4814154058695,
+      "http_status": 200
+    },
+    {
+      "index": 88,
+      "first_frame_ms": 808.3036988973618,
+      "http_status": 200
+    },
+    {
+      "index": 92,
+      "first_frame_ms": 808.4846865385771,
+      "http_status": 200
+    },
+    {
+      "index": 95,
+      "first_frame_ms": 823.7032443284988,
+      "http_status": 200
+    },
+    {
+      "index": 94,
+      "first_frame_ms": 824.1684781387448,
+      "http_status": 200
+    },
+    {
+      "index": 96,
+      "first_frame_ms": 824.0863997489214,
+      "http_status": 200
+    },
+    {
+      "index": 97,
+      "first_frame_ms": 834.9912697449327,
+      "http_status": 200
+    },
+    {
+      "index": 98,
+      "first_frame_ms": 838.1333891302347,
+      "http_status": 200
+    },
+    {
+      "index": 99,
+      "first_frame_ms": 839.7062849253416,
+      "http_status": 200
+    },
+    {
+      "index": 2,
+      "first_frame_ms": 2389.0734165906906,
+      "http_status": 200
+    },
+    {
+      "index": 3,
+      "first_frame_ms": 2402.51512080431,
+      "http_status": 200
+    },
+    {
+      "index": 5,
+      "first_frame_ms": 2403.764464892447,
+      "http_status": 200
+    },
+    {
+      "index": 7,
+      "first_frame_ms": 2407.434271648526,
+      "http_status": 200
+    },
+    {
+      "index": 9,
+      "first_frame_ms": 2406.9457361474633,
+      "http_status": 200
+    },
+    {
+      "index": 6,
+      "first_frame_ms": 2408.926055766642,
+      "http_status": 200
+    },
+    {
+      "index": 8,
+      "first_frame_ms": 2510.377222672105,
+      "http_status": 200
+    },
+    {
+      "index": 13,
+      "first_frame_ms": 2520.4592207446694,
+      "http_status": 200
+    },
+    {
+      "index": 12,
+      "first_frame_ms": 2520.8506621420383,
+      "http_status": 200
+    },
+    {
+      "index": 1,
+      "first_frame_ms": 2524.497590959072,
+      "http_status": 200
+    },
+    {
+      "index": 4,
+      "first_frame_ms": 2527.661516331136,
+      "http_status": 200
+    }
+  ],
+  "sse_failures": [],
+  "postgres_after": {
+    "active": 1,
+    "idle": 16
+  },
+  "finished_at": "2026-10-27T08:09:23.049319+00:00"
+}

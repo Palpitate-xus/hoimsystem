@@ -1,0 +1,101 @@
+{
+  "at": "2026-10-27T08:27:24.811781+00:00",
+  "registered_processes": [
+    {
+      "registry": "/tmp/hoim-validation-20261027/frontend/owned-processes.json",
+      "field": "api_pid",
+      "pid": 1323490,
+      "alive_before": false,
+      "identity_matches_owned": false,
+      "action": "already_exited",
+      "alive_after": false
+    },
+    {
+      "registry": "/tmp/hoim-validation-20261027/frontend/owned-processes.json",
+      "field": "proxy_pid",
+      "pid": 1323817,
+      "alive_before": false,
+      "identity_matches_owned": false,
+      "action": "already_exited",
+      "alive_after": false
+    },
+    {
+      "registry": "/tmp/hoim-validation-20261027/frontend/final-partitioned/owned-processes.json",
+      "field": "api_pid",
+      "pid": 1353398,
+      "alive_before": false,
+      "identity_matches_owned": false,
+      "action": "already_exited",
+      "alive_after": false
+    },
+    {
+      "registry": "/tmp/hoim-validation-20261027/frontend/final-partitioned/owned-processes.json",
+      "field": "proxy_pid",
+      "pid": 1353993,
+      "alive_before": false,
+      "identity_matches_owned": false,
+      "action": "already_exited",
+      "alive_after": false
+    },
+    {
+      "registry": "/tmp/hoim-validation-20261027/frontend/supplement-post147-corrections/owned-processes.json",
+      "field": "api_pid",
+      "pid": 2387458,
+      "alive_before": false,
+      "identity_matches_owned": false,
+      "action": "already_exited",
+      "alive_after": false
+    },
+    {
+      "registry": "/tmp/hoim-validation-20261027/frontend/supplement-post147-corrections/owned-processes.json",
+      "field": "proxy_pid",
+      "pid": 2388155,
+      "alive_before": false,
+      "identity_matches_owned": false,
+      "action": "already_exited",
+      "alive_after": false
+    },
+    {
+      "registry": "/tmp/hoim-validation-20261027/frontend/supplement-final-text-provider-147/owned-processes.json",
+      "field": "api_pid",
+      "pid": 2132356,
+      "alive_before": false,
+      "identity_matches_owned": false,
+      "action": "already_exited",
+      "alive_after": false
+    },
+    {
+      "registry": "/tmp/hoim-validation-20261027/frontend/supplement-final-text-provider-147/owned-processes.json",
+      "field": "proxy_pid",
+      "pid": 2132930,
+      "alive_before": false,
+      "identity_matches_owned": false,
+      "action": "already_exited",
+      "alive_after": false
+    },
+    {
+      "registry": "/tmp/hoim-validation-20261027/frontend/final-partitioned/legacy-corrected-env/owned-processes.json",
+      "field": "api_pid",
+      "pid": 1373208,
+      "alive_before": false,
+      "identity_matches_owned": false,
+      "action": "already_exited",
+      "alive_after": false
+    },
+    {
+      "registry": "production-browser-performance-final/run-result.json",
+      "field": "owned_proxy_pid",
+      "pid": 2440463,
+      "alive_after": false,
+      "action": "already_closed_by_owned_supervisor"
+    }
+  ],
+  "own_service_ports": {
+    "18800": "not_listening",
+    "18891": "not_listening"
+  },
+  "foreground_tool_sessions": "All our Node/build/Playwright supervisors returned completed; no active exec sessions retained",
+  "readonly_frontend_process_inventory": [],
+  "kill_scope": "Only registered PIDs whose live command matches own18800uvicorn/18891proxy; no broad name-based termination; original8000/8091 and other users untouched",
+  "environment_boundary": "Only task-owned temporary SQLite/ASGI capture databases and the explicitly authorized synthetic PostgreSQL benchmark API used; repository .env and real business databases not read"
+}

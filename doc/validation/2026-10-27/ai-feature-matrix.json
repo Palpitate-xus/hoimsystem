@@ -2716,6 +2716,22 @@
         "real_model_inference": false,
         "source_receipt_integrity_verified": true,
         "business_row_comparison_scope": "Full non-AI business-row fingerprints are explicit in the seven newly added domains; see per-case evidence."
+      },
+      "simulated_native_source_http_workflow": {
+        "passed": true,
+        "attempts": 3,
+        "http_statuses": [
+          503,
+          503,
+          200
+        ],
+        "canonical_usage_unknown": true,
+        "business_records_unchanged": true,
+        "real_loopback_api_and_provider_http": true,
+        "evidence": "native-twelve-http-workflows.json",
+        "scope": "Source -> API create -> shared claim/execute -> current result reader; native adoption/feedback workflows not inferred",
+        "model_inference": false,
+        "default_task_sha256": "000c72aeed2db17859ac383ffa5a7bf9ee86bf01c4144ae9da449665b917ac17"
       }
     },
     {
@@ -2772,6 +2788,22 @@
         "real_model_inference": false,
         "source_receipt_integrity_verified": true,
         "business_row_comparison_scope": "Full non-AI business-row fingerprints are explicit in the seven newly added domains; see per-case evidence."
+      },
+      "simulated_native_source_http_workflow": {
+        "passed": true,
+        "attempts": 3,
+        "http_statuses": [
+          503,
+          503,
+          200
+        ],
+        "canonical_usage_unknown": true,
+        "business_records_unchanged": true,
+        "real_loopback_api_and_provider_http": true,
+        "evidence": "native-twelve-http-workflows.json",
+        "scope": "Source -> API create -> shared claim/execute -> current result reader; native adoption/feedback workflows not inferred",
+        "model_inference": false,
+        "default_task_sha256": "c41705034487cb2a47f125abff73aef0e03fdbc7000b26ef7eaafb0d27fd4d57"
       }
     },
     {
@@ -2828,6 +2860,22 @@
         "real_model_inference": false,
         "source_receipt_integrity_verified": true,
         "business_row_comparison_scope": "Full non-AI business-row fingerprints are explicit in the seven newly added domains; see per-case evidence."
+      },
+      "simulated_native_source_http_workflow": {
+        "passed": true,
+        "attempts": 3,
+        "http_statuses": [
+          503,
+          503,
+          200
+        ],
+        "canonical_usage_unknown": true,
+        "business_records_unchanged": true,
+        "real_loopback_api_and_provider_http": true,
+        "evidence": "native-twelve-http-workflows.json",
+        "scope": "Source -> API create -> shared claim/execute -> current result reader; native adoption/feedback workflows not inferred",
+        "model_inference": false,
+        "default_task_sha256": "e0262a734219ae6645a8d97445d198cf0e94d23417da006b6a48ff4c3ae5a074"
       }
     },
     {
@@ -2884,6 +2932,22 @@
         "real_model_inference": false,
         "source_receipt_integrity_verified": true,
         "business_row_comparison_scope": "Full non-AI business-row fingerprints are explicit in the seven newly added domains; see per-case evidence."
+      },
+      "simulated_native_source_http_workflow": {
+        "passed": true,
+        "attempts": 3,
+        "http_statuses": [
+          503,
+          503,
+          200
+        ],
+        "canonical_usage_unknown": true,
+        "business_records_unchanged": true,
+        "real_loopback_api_and_provider_http": true,
+        "evidence": "native-twelve-http-workflows.json",
+        "scope": "Source -> API create -> shared claim/execute -> current result reader; native adoption/feedback workflows not inferred",
+        "model_inference": false,
+        "default_task_sha256": "2aff9b7548b3777dd6546ebac38da96f68b7c8ecdd30d5741a809c1e3acb9689"
       }
     },
     {
@@ -2940,6 +3004,22 @@
         "real_model_inference": false,
         "source_receipt_integrity_verified": true,
         "business_row_comparison_scope": "Full non-AI business-row fingerprints are explicit in the seven newly added domains; see per-case evidence."
+      },
+      "simulated_native_source_http_workflow": {
+        "passed": true,
+        "attempts": 3,
+        "http_statuses": [
+          503,
+          503,
+          200
+        ],
+        "canonical_usage_unknown": true,
+        "business_records_unchanged": true,
+        "real_loopback_api_and_provider_http": true,
+        "evidence": "native-twelve-http-workflows.json",
+        "scope": "Source -> API create -> shared claim/execute -> current result reader; native adoption/feedback workflows not inferred",
+        "model_inference": false,
+        "default_task_sha256": "cea30963fd12dc7202d920935074a45a8a656be4b9477b8a9a2dc76f9637ae55"
       }
     },
     {
@@ -2996,6 +3076,22 @@
         "real_model_inference": false,
         "source_receipt_integrity_verified": true,
         "business_row_comparison_scope": "Full non-AI business-row fingerprints are explicit in the seven newly added domains; see per-case evidence."
+      },
+      "simulated_native_source_http_workflow": {
+        "passed": true,
+        "attempts": 3,
+        "http_statuses": [
+          503,
+          503,
+          200
+        ],
+        "canonical_usage_unknown": true,
+        "business_records_unchanged": true,
+        "real_loopback_api_and_provider_http": true,
+        "evidence": "native-twelve-http-workflows.json",
+        "scope": "Source -> API create -> shared claim/execute -> current result reader; native adoption/feedback workflows not inferred",
+        "model_inference": false,
+        "default_task_sha256": "1e166aea5557979796717ad63459e8229f3aa0a7ce0074c884ace70a8e025e40"
       }
     },
     {
@@ -3052,6 +3148,22 @@
         "real_model_inference": false,
         "source_receipt_integrity_verified": true,
         "business_row_comparison_scope": "Full non-AI business-row fingerprints are explicit in the seven newly added domains; see per-case evidence."
+      },
+      "simulated_native_source_http_workflow": {
+        "passed": true,
+        "attempts": 3,
+        "http_statuses": [
+          503,
+          503,
+          200
+        ],
+        "canonical_usage_unknown": true,
+        "business_records_unchanged": true,
+        "real_loopback_api_and_provider_http": true,
+        "evidence": "native-twelve-http-workflows.json",
+        "scope": "Source -> API create -> shared claim/execute -> current result reader; native adoption/feedback workflows not inferred",
+        "model_inference": false,
+        "default_task_sha256": "befd8eda8b32b702ee1a311ef6c2eb892520d7cc85d7f5df6debe13702735ef2"
       }
     },
     {
@@ -3108,6 +3220,22 @@
         "real_model_inference": false,
         "source_receipt_integrity_verified": true,
         "business_row_comparison_scope": "Full non-AI business-row fingerprints are explicit in the seven newly added domains; see per-case evidence."
+      },
+      "simulated_native_source_http_workflow": {
+        "passed": true,
+        "attempts": 3,
+        "http_statuses": [
+          503,
+          503,
+          200
+        ],
+        "canonical_usage_unknown": true,
+        "business_records_unchanged": true,
+        "real_loopback_api_and_provider_http": true,
+        "evidence": "native-twelve-http-workflows.json",
+        "scope": "Source -> API create -> shared claim/execute -> current result reader; native adoption/feedback workflows not inferred",
+        "model_inference": false,
+        "default_task_sha256": "840b94e7738fda9236a15db865f182850b8c552d45eabac7de05588afd36a210"
       }
     },
     {
@@ -3164,6 +3292,22 @@
         "real_model_inference": false,
         "source_receipt_integrity_verified": true,
         "business_row_comparison_scope": "Full non-AI business-row fingerprints are explicit in the seven newly added domains; see per-case evidence."
+      },
+      "simulated_native_source_http_workflow": {
+        "passed": true,
+        "attempts": 3,
+        "http_statuses": [
+          503,
+          503,
+          200
+        ],
+        "canonical_usage_unknown": true,
+        "business_records_unchanged": true,
+        "real_loopback_api_and_provider_http": true,
+        "evidence": "native-twelve-http-workflows.json",
+        "scope": "Source -> API create -> shared claim/execute -> current result reader; native adoption/feedback workflows not inferred",
+        "model_inference": false,
+        "default_task_sha256": "939032bda003c63db314a7b7eaad8e024f12139aaff4e56a0d082107e0afe6bd"
       }
     },
     {
@@ -3220,6 +3364,22 @@
         "real_model_inference": false,
         "source_receipt_integrity_verified": true,
         "business_row_comparison_scope": "Full non-AI business-row fingerprints are explicit in the seven newly added domains; see per-case evidence."
+      },
+      "simulated_native_source_http_workflow": {
+        "passed": true,
+        "attempts": 3,
+        "http_statuses": [
+          503,
+          503,
+          200
+        ],
+        "canonical_usage_unknown": true,
+        "business_records_unchanged": true,
+        "real_loopback_api_and_provider_http": true,
+        "evidence": "native-twelve-http-workflows.json",
+        "scope": "Source -> API create -> shared claim/execute -> current result reader; native adoption/feedback workflows not inferred",
+        "model_inference": false,
+        "default_task_sha256": "8bb8fd412602916ac7fa3f71a35155a546ea578a49b9e1d60165e51dffb5bec5"
       }
     },
     {
@@ -3297,6 +3457,22 @@
         "real_model_inference": false,
         "source_receipt_integrity_verified": true,
         "business_row_comparison_scope": "Full non-AI business-row fingerprints are explicit in the seven newly added domains; see per-case evidence."
+      },
+      "simulated_native_source_http_workflow": {
+        "passed": true,
+        "attempts": 3,
+        "http_statuses": [
+          503,
+          503,
+          200
+        ],
+        "canonical_usage_unknown": true,
+        "business_records_unchanged": true,
+        "real_loopback_api_and_provider_http": true,
+        "evidence": "native-twelve-http-workflows.json",
+        "scope": "Source -> API create -> shared claim/execute -> current result reader; native adoption/feedback workflows not inferred",
+        "model_inference": false,
+        "default_task_sha256": "6527a695ffd636065e3e3270003b6ee4ddc91df9541b6159b1a764cd1a290515"
       }
     },
     {
@@ -3354,6 +3530,22 @@
         "real_model_inference": false,
         "source_receipt_integrity_verified": true,
         "business_row_comparison_scope": "Full non-AI business-row fingerprints are explicit in the seven newly added domains; see per-case evidence."
+      },
+      "simulated_native_source_http_workflow": {
+        "passed": true,
+        "attempts": 3,
+        "http_statuses": [
+          503,
+          503,
+          200
+        ],
+        "canonical_usage_unknown": true,
+        "business_records_unchanged": true,
+        "real_loopback_api_and_provider_http": true,
+        "evidence": "native-twelve-http-workflows.json",
+        "scope": "Source -> API create -> shared claim/execute -> current result reader; native adoption/feedback workflows not inferred",
+        "model_inference": false,
+        "default_task_sha256": "ed0aed4339c7a612c215839faf021b614da567e65977f1a69937439f045c7453"
       }
     }
   ],

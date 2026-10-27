@@ -1,0 +1,32 @@
+{
+  "recorded_at": "2026-10-27T07:05:23.803907+00:00",
+  "original_rounds": 17,
+  "requests": 136135,
+  "failed_requests": 26,
+  "failure_classes": [
+    {
+      "round": "formal-large-u200-60s",
+      "failed_requests": 3,
+      "endpoints": [
+        "POST /api/prescriptionManagement/create"
+      ],
+      "exception": "sqlalchemy.exc.OperationalError / psycopg2.errors.QueryCanceled",
+      "cause": "PostgreSQL15s statement timeout waiting on inventory write gate INSERT ON CONFLICT UPDATE",
+      "server_log": "/tmp/hoim-validation-20261027/performance/large200-api-errors.log",
+      "raw_round": "/tmp/hoim-validation-20261027/performance/formal/formal-large-u200-60s"
+    },
+    {
+      "round": "formal-large-u300-60s-stress-continuation",
+      "failed_requests": 23,
+      "endpoints": "read lists/logs/stats; no write failures in this round",
+      "exception": "sqlalchemy.exc.TimeoutError",
+      "cause": "Per-worker SQLAlchemy QueuePool size10+overflow10,30s connection checkout timeout",
+      "server_log": "/tmp/hoim-validation-20261027/performance/large300-api-errors.log",
+      "raw_round": "/tmp/hoim-validation-20261027/performance/formal/formal-large-u300-60s-stress-continuation"
+    }
+  ],
+  "all_completed_round_business_write_invariants_hold": true,
+  "no_failure_reclassified_as_success": true,
+  "frozen_image_manifest": "/tmp/hoim-validation-20261027/performance/runtime-image-manifest.json",
+  "later_source_fixes_not_applied_to_this_frozen_campaign": true
+}

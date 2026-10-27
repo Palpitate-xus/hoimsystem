@@ -1,0 +1,152 @@
+{
+  "started_at": "2026-10-27T07:09:42.939311+00:00",
+  "elapsed_seconds": 41.1587309576571,
+  "exit_code": 0,
+  "command": [
+    "/tmp/hoim-validation-20261027/combined-ml-runtime/bin/python",
+    "-m",
+    "pytest",
+    "-q",
+    "-o",
+    "cache_dir=/tmp/hoim-validation-20261027/backend/optional-ml-full-files-v2/cache",
+    "/home/xusheng/workspace/hoimsystem/fastapi_be/tests/test_ai_imaging_preprocessing.py",
+    "/home/xusheng/workspace/hoimsystem/fastapi_be/tests/test_ai_imaging_model.py",
+    "/home/xusheng/workspace/hoimsystem/fastapi_be/tests/test_ai_local_imaging_real.py",
+    "/home/xusheng/workspace/hoimsystem/fastapi_be/tests/test_ai_local_ecg_real.py",
+    "/home/xusheng/workspace/hoimsystem/fastapi_be/tests/test_ai_local_speech_real.py",
+    "--junitxml=/tmp/hoim-validation-20261027/backend/optional-ml-full-files-v2/results.xml"
+  ],
+  "scope": "Five complete files, offline pinned weights, synthetic nonclinical inputs, private SQLite; no clinical quality claim",
+  "junit": {
+    "tests": "111",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0",
+    "time": "25.845"
+  },
+  "complete_files": {
+    "tests.test_ai_imaging_preprocessing": 74,
+    "tests.test_ai_imaging_model": 34,
+    "tests.test_ai_local_imaging_real": 1,
+    "tests.test_ai_local_ecg_real": 1,
+    "tests.test_ai_local_speech_real": 1
+  },
+  "source_sha256": {
+    "fastapi_be/tests/test_ai_imaging_preprocessing.py": "688a051d9683b11b01c1c7e0870fbf1f33b5295daba9637e180debe5bcd11db8",
+    "fastapi_be/tests/test_ai_imaging_model.py": "dca11e3cf5254d379859143f4e7652abaa0b16ace4027e9397c5ee4bdbe6f82f",
+    "fastapi_be/tests/test_ai_local_imaging_real.py": "3676cbc8296d4648f5ab9b1641e1c72122d5069d83b79e6d5b5fc1755edc88b5",
+    "fastapi_be/tests/test_ai_local_ecg_real.py": "f0cd0999503bc03039067287a026992de8cd56cb0213c4854e3c6bfbb5246c93",
+    "fastapi_be/tests/test_ai_local_speech_real.py": "05dc3da1f7c5ddea503e7c59fc0d90f0367bc958a127d443ef558e0717909af9"
+  },
+  "model_manifests": {
+    "hoim-imaging-model.json": {
+      "sha256": "696f14a0407b21698e7efbe4bbaf2c2aa0d77a46c0826adab332e6fdcc210968",
+      "contents": {
+        "architecture_revision": "17726dd8f5e756eec3e5ae958281a289b05b1dae",
+        "files": {
+          "LICENSE": {
+            "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+            "size": 11357
+          },
+          "NOTICE": {
+            "sha256": "d23125888206442a1f8e6f3033f7ab5c00a3ac4241e5c27e56db9d3f1ef2b394",
+            "size": 3014
+          },
+          "README.md": {
+            "sha256": "90b88ae29df845efa2ae97cb834266b3ef7d2fa720f42860ee318d6896323c0a",
+            "size": 4006
+          },
+          "config.json": {
+            "sha256": "4b78be461c44f98af46695ce5cdbe57313e97f2e6255ac7b888e0670f368a1dd",
+            "size": 1158
+          },
+          "model.safetensors": {
+            "sha256": "6b811edb354d83991e36a4836b914bf41faf8fb3203573c0a61820b97937c529",
+            "size": 28283736
+          },
+          "upstream-LICENSE.txt": {
+            "sha256": "75bdbb99fbfb7202e33f19ff8f1f2f713d309143612459274005a43aaa7f6061",
+            "size": 243
+          }
+        },
+        "format_version": "1",
+        "repository": "torchxrayvision/densenet121-res224-all",
+        "revision": "588eadcc6a744da71f8dce768bc974ec629443f5",
+        "state_schema_sha256": "51875470a4a913653c5eff6286ccc893907241d50a7e19857acf49bfef90b942",
+        "tensor_count": 727
+      }
+    },
+    "hoim-ecg-model.json": {
+      "sha256": "0aabbbdc9775139eadd724d12e85116d40eecac45b74dd00aad6831f48bf244f",
+      "contents": {
+        "files": {
+          "LICENSE": {
+            "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+            "size": 11357
+          },
+          "README.md": {
+            "sha256": "f9559d9e12bcf9321840847a040a1656e7c36d713a8d42ea88268f79be917bfc",
+            "size": 8159
+          },
+          "config.json": {
+            "sha256": "36c896f1d05b92f59a0e004ef034c69ba74ea0a77936859244bf0d94d57c66ce",
+            "size": 1093
+          },
+          "model.safetensors": {
+            "sha256": "c2497259f7f672fee5568b1906e95272f256f057a6860f3aa60acf8f8d903db8",
+            "size": 2170628
+          },
+          "provenance.json": {
+            "sha256": "4a7dddb0c52f0f47a47ae4f95446a370af14369a5de09425b73ded87de1dee13",
+            "size": 7110
+          }
+        },
+        "format_version": "1",
+        "repository": "Tumo505/SSL-ECG-Classification-model-card",
+        "revision": "6ec2ee1a1badd9508f9c1219fb07de38f3f6936b"
+      }
+    },
+    "hoim-speech-model.json": {
+      "sha256": "ede5b1e9dd775243831ab14a12e3e2b35e0fb31eabd0e445380414268bd4087a",
+      "contents": {
+        "files": {
+          "config.json": {
+            "sha256": "a73a28cdfe1c43ccc7202fa333d1f89c202477271407ae9a7f19afa52039cac8",
+            "size": 2249
+          },
+          "model.bin": {
+            "sha256": "dcb76c6586fc06cbdac6dd21f14cfd129cc4cdd9dce19bf4ffa62e59cbe6e6d1",
+            "size": 75538270
+          },
+          "tokenizer.json": {
+            "sha256": "fb7b63191e9bb045082c79fd742a3106a12c99513ab30df4a0d47fa6cb6fd0ab",
+            "size": 2203239
+          },
+          "vocabulary.txt": {
+            "sha256": "34ce3fe1c5041027b3f8d42912270993f986dbc4bb34cf27f951e34a1e453913",
+            "size": 459861
+          }
+        },
+        "format_version": "1",
+        "repository": "Systran/faster-whisper-tiny",
+        "revision": "518d6e0b5a068b278f66842b17377f9523de5cd1"
+      }
+    }
+  },
+  "runtime_versions": {
+    "torch": "2.14.1+cpu",
+    "numpy": "2.4.4",
+    "safetensors": "0.8.0",
+    "faster-whisper": "1.2.1",
+    "ctranslate2": "4.8.3",
+    "pytest": "9.0.3",
+    "fastapi": "0.136.1",
+    "sqlalchemy": "2.0.49"
+  },
+  "original_environment_attempt": {
+    "summary": "/tmp/hoim-validation-20261027/backend/optional-ml-full-files/summary.json",
+    "passed": 110,
+    "failed": 1,
+    "cause": "Initial ECG-only interpreter child intentionally stripped PYTHONPATH and lacked faster-whisper. Dedicated combined runtime .pth supplies optional libraries to the isolated child. No production source or assertion changed."
+  }
+}

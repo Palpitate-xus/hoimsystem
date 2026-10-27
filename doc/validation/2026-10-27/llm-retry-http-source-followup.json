@@ -1,0 +1,15 @@
+{
+  "recorded_at": "2026-10-27T06:58:18.894198+00:00",
+  "validated_text_retry_sha256": "e27576f6df2ddb6c459218ec9c7ca9f1f9d635544abda60c8ba6477d96c3c181",
+  "phase_start_bindings": {
+    "llm-simulator-final-exhaustion-chat": "e27576f6df2ddb6c459218ec9c7ca9f1f9d635544abda60c8ba6477d96c3c181",
+    "llm-simulator-final-exhaustion-responses": "e27576f6df2ddb6c459218ec9c7ca9f1f9d635544abda60c8ba6477d96c3c181",
+    "llm-simulator-final-recovery-chat": "e27576f6df2ddb6c459218ec9c7ca9f1f9d635544abda60c8ba6477d96c3c181",
+    "llm-simulator-final-recovery-responses": "e27576f6df2ddb6c459218ec9c7ca9f1f9d635544abda60c8ba6477d96c3c181"
+  },
+  "subsequent_source_changes_not_covered_by_this_snapshot": [
+    "fastapi_be/app/ai/satisfaction_receipts.py",
+    "fastapi_be/app/ai/text_retry.py"
+  ],
+  "known_followup": "Retry-After semantics and expanded live authorization/actor/source guard were added after this bounded-attempts HTTP campaign. Owner will independently verify latest source. Do not relabel this evidence as the later current tree."
+}

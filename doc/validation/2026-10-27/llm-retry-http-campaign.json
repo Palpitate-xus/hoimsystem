@@ -1,0 +1,76 @@
+{
+  "simulated": true,
+  "model_inference": false,
+  "clinical_validation": false,
+  "code_manifest": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator-final-code-manifest.json",
+  "recovery": {
+    "chat": {
+      "features": 63,
+      "accepted": 63,
+      "actual_network_attempts": 189,
+      "all_attempt_counts_correct": true,
+      "all_usage_unknown": true,
+      "all_expected_outcomes": true,
+      "evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator-final-recovery-chat/llm-catalog-results.json",
+      "stats": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator-final-recovery-chat/server-stats.json"
+    },
+    "responses": {
+      "features": 63,
+      "accepted": 63,
+      "actual_network_attempts": 189,
+      "all_attempt_counts_correct": true,
+      "all_usage_unknown": true,
+      "all_expected_outcomes": true,
+      "evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator-final-recovery-responses/llm-catalog-results.json",
+      "stats": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator-final-recovery-responses/server-stats.json"
+    }
+  },
+  "exhaustion": {
+    "chat": {
+      "features": 63,
+      "accepted": 0,
+      "actual_network_attempts": 189,
+      "all_attempt_counts_correct": true,
+      "all_usage_unknown": true,
+      "all_expected_outcomes": true,
+      "evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator-final-exhaustion-chat/llm-catalog-results.json",
+      "stats": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator-final-exhaustion-chat/server-stats.json",
+      "all_errors_attempts_three": true,
+      "single_attempt_suffix": true
+    },
+    "responses": {
+      "features": 63,
+      "accepted": 0,
+      "actual_network_attempts": 189,
+      "all_attempt_counts_correct": true,
+      "all_usage_unknown": true,
+      "all_expected_outcomes": true,
+      "evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator-final-exhaustion-responses/llm-catalog-results.json",
+      "stats": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator-final-exhaustion-responses/server-stats.json",
+      "all_errors_attempts_three": true,
+      "single_attempt_suffix": true
+    }
+  },
+  "workflows": {
+    "attempted": 3,
+    "passed": 3,
+    "unknown_usage": 3,
+    "feedback_rows": 3,
+    "actual_network_attempts": 9,
+    "all_counts_three_two_one": true,
+    "business_records_unchanged": true,
+    "evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator-final-workflows/llm-workflows.json"
+  },
+  "original_exhaustion_bug": {
+    "status": "fixed_and_independently_reverified",
+    "before": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator-retry-exhaustion/server-stats.json",
+    "after": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator-final-exhaustion-chat/server-stats.json",
+    "before_shared_charge_satisfaction_attempts": [
+      3,
+      5,
+      5
+    ],
+    "after_all63_both_protocols_attempts": 3
+  },
+  "source_followup": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator-final-source-followup.json"
+}

@@ -44,6 +44,9 @@ async def event_stream(
     identity: tuple[int, str, str] = Depends(get_event_identity),
 ):
     async def generate():
+        # Flush streaming headers before the first event or 15-second heartbeat.
+        # An SSE comment also keeps reconnects out of business event handling.
+        yield ": connected\n\n"
         if last_event_id:
             history = await recent_events(identity, 100)
             ids = [event["id"] for event in history]

@@ -86,19 +86,23 @@ def test_locking_reads_do_not_accept_cached_stale_revisions(db_session, seed_dat
         original = provider.revision
         raw_committed_change(db_session, "UPDATE hoimsystem_ai_provider SET revision=revision+1 WHERE provider_id=:pk", {"pk": provider.provider_id})
         req = ProviderWrite(name=provider.name, api_base=provider.api_base, model=provider.model, expected_revision=original)
-        invoke = lambda: ai_admin.update_provider(provider.provider_id, req, db_session, actor)
+        def invoke():
+            return ai_admin.update_provider(provider.provider_id, req, db_session, actor)
         assert provider.revision == original
     else:
         original = config.revision
         raw_committed_change(db_session, "UPDATE hoimsystem_ai_feature_config SET revision=revision+1 WHERE feature_key=:key", {"key": config.feature_key})
         assert config.revision == original
         if action == "feature":
-            invoke = lambda: ai_admin.update_feature(config.feature_key, FeatureWrite(expected_revision=original, daily_limit=89), db_session, actor)
+            def invoke():
+                return ai_admin.update_feature(config.feature_key, FeatureWrite(expected_revision=original, daily_limit=89), db_session, actor)
         elif action == "prompt_create":
             req = PromptWrite(expected_revision=original, task_prompt="只整理已提供的资料，保留证据和不确定性，交由医生复核，不添加未提供的事实。" * 2, change_note="合成版本冲突测试")
-            invoke = lambda: ai_admin.create_prompt(config.feature_key, req, db_session, actor)
+            def invoke():
+                return ai_admin.create_prompt(config.feature_key, req, db_session, actor)
         else:
-            invoke = lambda: ai_admin.activate_prompt(config.feature_key, PromptActivate(expected_revision=original), db_session, actor)
+            def invoke():
+                return ai_admin.activate_prompt(config.feature_key, PromptActivate(expected_revision=original), db_session, actor)
     before = snapshot(db_session)
     try:
         with pytest.raises(HTTPException) as error:

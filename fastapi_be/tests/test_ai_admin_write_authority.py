@@ -21,7 +21,6 @@ from app.main import app
 from app.models import ClinicalPathway, Patient, User
 from app.routers import ai_admin
 
-
 TABLES = (AIFeatureConfig, AIProvider, AIPromptVersion, AIKnowledgeDocument, AIPatientGrant, AIAuditEvent)
 ACTIONS = ("feature", "provider_create", "provider_update", "prompt_create", "prompt_activate", "knowledge_create", "knowledge_review", "pathway_import", "grant_create", "grant_revoke")
 PROBES = (

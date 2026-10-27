@@ -3,6 +3,7 @@
 import datetime as dt
 
 import pytest
+
 from app.ai import research_cohort_sources as sources
 from app.ai.models import AIAuditEvent
 from app.ai.research_cohort_models import AIResearchStudyScope
@@ -14,8 +15,9 @@ from tests.test_ai_research_cohort_sources import research_case as research_case
 
 @pytest.fixture
 def mounted_research_router():
-    from app.main import app
     from fastapi.routing import APIRoute
+
+    from app.main import app
 
     routes = [route for route in app.routes if isinstance(route, APIRoute) and route.endpoint.__module__ == "app.routers.ai_research_cohort_sources"]
     assert len(routes) == 23

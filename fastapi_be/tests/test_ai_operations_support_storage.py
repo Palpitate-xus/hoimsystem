@@ -4,6 +4,9 @@ import datetime as dt
 import json
 
 import pytest
+from fastapi import HTTPException
+from sqlalchemy import event, text, update
+
 from app.ai import operations_support_cases as cases
 from app.ai import operations_support_contract as c
 from app.ai import operations_support_registry as registry
@@ -14,8 +17,6 @@ from app.ai.operations_support_models import AIOperationsOriginal
 from app.ai.operations_support_run_models import AIOperationsRunArtifact
 from app.ai.operations_support_task_prompt import TASK_PROMPT
 from app.models import User
-from fastapi import HTTPException
-from sqlalchemy import event, text, update
 from tests.test_ai_operations_support_configuration import actors as actors
 from tests.test_ai_operations_support_configuration import configured as configured
 from tests.test_ai_operations_support_configuration import source as source

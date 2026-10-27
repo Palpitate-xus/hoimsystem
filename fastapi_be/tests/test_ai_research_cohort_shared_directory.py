@@ -3,6 +3,7 @@
 import hashlib
 
 import pytest
+
 from app.ai.research_cohort_cases import case_current, create_case, preview_input, review_case
 from app.ai.research_cohort_registry import create_registry_original, review_registry_original
 from app.ai.research_cohort_runtime import create_research_run

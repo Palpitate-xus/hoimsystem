@@ -8,7 +8,7 @@ from fastapi import HTTPException
 from sqlalchemy import event, inspect, select, text, update
 
 from app.ai.admin_read_snapshot import admin_read_snapshot
-from app.ai.admin_task_directory import AdminTaskMetadata, DOMAIN_FEATURES, task_directory
+from app.ai.admin_task_directory import DOMAIN_FEATURES, AdminTaskMetadata, task_directory
 from app.ai.models import AIFeedback, AIRun
 from app.ai.native_task_routing import _domains
 from app.ai.schemas import RunRequest

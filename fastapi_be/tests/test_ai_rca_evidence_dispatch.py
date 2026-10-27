@@ -3,6 +3,10 @@
 import json
 
 import pytest
+from fastapi import HTTPException
+from sqlalchemy import inspect, text
+from sqlalchemy.dialects import mysql
+
 from app.ai import native_task_access, native_task_routing, runtime
 from app.ai import rca_evidence_dispatch as dispatch
 from app.ai import rca_evidence_grants as grants
@@ -10,9 +14,6 @@ from app.ai import rca_evidence_receipts as receipts
 from app.ai.models import AIRun
 from app.ai.rca_evidence_run_models import AIRcaEvidenceRunArtifact
 from app.database import Base
-from fastapi import HTTPException
-from sqlalchemy import inspect, text
-from sqlalchemy.dialects import mysql
 from tests.test_ai_rca_evidence_configuration import configured
 from tests.test_ai_rca_evidence_execution import provider_service, setup
 from tests.test_ai_rca_evidence_execution import synthetic_host as synthetic_host

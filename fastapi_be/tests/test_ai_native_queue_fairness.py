@@ -14,7 +14,6 @@ from tests.test_ai_research_variables_task_context import research_case as resea
 from tests.test_ai_research_variables_task_context import task_factory as task_factory
 from tests.test_ai_research_variables_task_reader import actual_task as actual_task
 
-
 ORPHANS = (
     ("variables_feature", "research_extraction", {}, {}),
     ("variables_null_input", "operations_qa", {"payload": {"input": {"research_variable_batch_id": None}}}, {}),

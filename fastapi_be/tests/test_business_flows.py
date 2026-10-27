@@ -22,6 +22,27 @@ patient/cashier/pharmacist/super_admin/director/nurse/guide/lab_technician/regis
 """
 import pytest
 
+from app.models import Bed, DoctorSchedule, Ward
+
+
+@pytest.fixture
+def workflow_bed(db_session, seed_data):
+    ward = Ward(name="业务闭环病区", department_id=seed_data["department"].department_id, bed_count=1, status=0)
+    db_session.add(ward)
+    db_session.flush()
+    bed = Bed(ward_id=ward.ward_id, bed_no="FLOW-01", bed_type="普通", price_per_day=0, status=0)
+    db_session.add(bed)
+    db_session.commit()
+    return bed
+
+
+@pytest.fixture
+def workflow_schedule(db_session, seed_data):
+    schedule = DoctorSchedule(doctor_id=seed_data["director_doctor"].doctor_id, week="周一", time="01", specialist=1, number=10)
+    db_session.add(schedule)
+    db_session.commit()
+    return schedule
+
 # ===== 1. 患者门诊主流程 =====
 
 @pytest.mark.asyncio
@@ -280,16 +301,15 @@ class TestPharmacistWorkflow:
 class TestInpatientJourney:
     """入院 → 医嘱 → 护理 → 出院 完整闭环。"""
 
-    async def test_admission_to_discharge(self, async_client, auth_headers, seed_data):
+    async def test_admission_to_discharge(self, async_client, auth_headers, seed_data, workflow_bed):
         """完整住院闭环。"""
         nurse_headers = auth_headers(seed_data["nurse_user"].username)
         patient = seed_data["patient"]
         # 需要先有床位
         r = await async_client.get("/api/bed/getList", headers=nurse_headers)
         beds = r.json()["data"]
-        available_bed = next((b for b in beds if b.get("status") == 0), None)
-        if not available_bed:
-            pytest.skip("没有可用床位,跳过住院闭环测试")
+        available_bed = next(b for b in beds if b["bed_id"] == workflow_bed.bed_id)
+        assert available_bed["status"] == 0
         # 入院登记
         r = await async_client.post("/api/admission/create", headers=nurse_headers, json={
             "patient_id": patient.patient_id,
@@ -302,14 +322,12 @@ class TestInpatientJourney:
             "chief_complaint": "头晕",
             "deposit_amount": 5000.0,
         })
-        if r.json()["code"] != 200:
-            pytest.skip(f"入院登记失败,可能已存在在院记录: {r.text}")
+        assert r.json()["code"] == 200, r.text
         admission_id = r.json()["data"]["admission_id"]
         # 验证床位被占用
         r = await async_client.get("/api/bed/getList", headers=nurse_headers)
         bed_after = next((b for b in r.json()["data"] if b["bed_id"] == available_bed["bed_id"]), None)
-        if bed_after:
-            assert bed_after["status"] == 1  # 占用
+        assert bed_after is not None and bed_after["status"] == 1  # 占用
         # 出院 → 停止医嘱 + 释放床位
         r = await async_client.post("/api/discharge/doDischarge", headers=nurse_headers,
             json={"admission_id": str(admission_id), "discharge_diagnosis": "高血压好转"})
@@ -317,8 +335,7 @@ class TestInpatientJourney:
         # 床位释放
         r = await async_client.get("/api/bed/getList", headers=nurse_headers)
         bed_final = next((b for b in r.json()["data"] if b["bed_id"] == available_bed["bed_id"]), None)
-        if bed_final:
-            assert bed_final["status"] == 0  # 释放
+        assert bed_final is not None and bed_final["status"] == 0  # 释放
 
 
 # ===== 5. 违约锁定机制 =====
@@ -408,17 +425,17 @@ class TestSurgeryJourney:
 class TestCashierWorkflow:
     """收费员窗口挂号、日结对账。"""
 
-    async def test_window_registration(self, async_client, auth_headers, seed_data):
+    async def test_window_registration(self, async_client, auth_headers, seed_data, workflow_schedule):
         """收费员为患者现场挂号。"""
         cashier_headers = auth_headers(seed_data["cashier_user"].username)
         patient = seed_data["patient"]
-        schedules = (await async_client.get("/api/doctorScheduleManagement/getList",
+        schedules = (await async_client.get("/api/windowRegistration/schedules",
             headers=cashier_headers)).json()["data"]
-        if not schedules:
-            pytest.skip("无排班")
+        assert any(row["schedule_id"] == workflow_schedule.schedule_id for row in schedules)
+        schedules = [row for row in schedules if row["schedule_id"] == workflow_schedule.schedule_id]
         r = await async_client.post("/api/windowRegistration/create", headers=cashier_headers, json={
             "identity": patient.identity,
-            "schedule_id": schedules[0]["id"],
+            "schedule_id": schedules[0]["schedule_id"],
             "doctor_id": schedules[0].get("doctor_id", seed_data["doctor"].doctor_id),
             "department_id": seed_data["department"].department_id,
             "specialist": schedules[0].get("specialist", 1),
@@ -471,15 +488,12 @@ class TestAdminRBAC:
 class TestIDORPrevention:
     """IDOR 防范验证。"""
 
-    async def test_patient_cannot_cancel_others_registration(self, async_client, auth_headers, seed_data):
+    async def test_patient_cannot_cancel_others_registration(self, async_client, auth_headers, seed_data, workflow_schedule):
         """患者不能取消他人挂号。"""
         patient_headers = auth_headers(seed_data["patient_user"].username)
-        # 给 director_doctor 创建挂号挂号(patient 尝试取消它应失败)
-        director_headers = auth_headers(seed_data["director_user"].username)
-        schedule_data = (await async_client.get("/api/doctorScheduleManagement/getList",
-            headers=director_headers, params={"keyword": "内科"})).json()["data"]
-        if not schedule_data:
-            pytest.skip("无排班")
+        # Use the actual seeded schedule PK; the doctor overview returns a
+        # doctor ID, which is not a registration schedule identifier.
+        schedule_data = [{"id": workflow_schedule.schedule_id, "doctor_id": workflow_schedule.doctor_id, "specialist": workflow_schedule.specialist}]
         # 用 patient2 挂号
         patient2_headers = auth_headers(seed_data["patient2_user"].username)
         r = await async_client.post("/api/registrationManagement/create", headers=patient2_headers, json={
@@ -488,13 +502,11 @@ class TestIDORPrevention:
             "department_id": seed_data["department"].department_id,
             "specialist": schedule_data[0].get("specialist", 1),
         })
-        if r.json()["code"] != 200:
-            pytest.skip(f"挂号失败: {r.text}")
+        assert r.json()["code"] == 200, r.text
         # 找到刚挂号
         r = await async_client.get("/api/registrationManagement/getList", headers=patient2_headers)
         reg = next((x for x in r.json()["data"] if x.get("uuid")), None)
-        if not reg:
-            pytest.skip("无挂号数据")
+        assert reg is not None
         # 当前 patient 尝试取消 patient2 的挂号 → 403
         r = await async_client.post("/api/registrationManagement/cancel", headers=patient_headers,
             json={"uuid": reg["uuid"], "schedule_id": schedule_data[0]["id"]})

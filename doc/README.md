@@ -18,6 +18,7 @@ AI 平台包含 80 项能力、业务工作台及超级管理员管理中心，�
 | [实施记录](ai-implementation-plan.md) | 各功能交付过程、变更和验证范围 |
 | [全部80项集成验证](ai-final-integration-verification.json) | 工程接入的历史验收、失败轮及完整文件复验 |
 | [Prompt与界面体验验证](ai-experience-verification.json) | 2026-10-26 默认Prompt、文书复制、管理导航及业务面板优化验证 |
+| [系统功能、AI与性能验证](validation/2026-10-27/README.md) | 2026-10-27 全量回归、模拟/真实服务、事务竞争、分级负载及修复证据 |
 | [qSOFA/GCS专题验证](ai-qsofa-verification.json) | 独立风险规则与来源核对的专题记录 |
 
 首次使用从开发与使用指南开始，输入输出按能力清单查询，测试与构建结果按专题查阅。

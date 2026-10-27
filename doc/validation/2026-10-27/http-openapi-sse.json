@@ -1,0 +1,516 @@
+{
+  "started_at": "2026-10-27T06:03:29.228309+00:00",
+  "finished_at": "2026-10-27T06:03:32.924928+00:00",
+  "http_checks": {
+    "/health/live": 200,
+    "/health/ready": 200,
+    "/openapi.json": 200,
+    "/docs": 200
+  },
+  "sse_connections": 100,
+  "sse_all_initial_comments": true,
+  "first_frame_min_ms": 8.932571858167648,
+  "first_frame_max_ms": 60.574306175112724,
+  "samples": [
+    {
+      "status": 200,
+      "initial_frame": ": connected",
+      "first_frame_ms": 26.60620678216219
+    },
+    {
+      "status": 200,
+      "initial_frame": ": connected",
+      "first_frame_ms": 23.374932818114758
+    },
+    {
+      "status": 200,
+      "initial_frame": ": connected",
+      "first_frame_ms": 25.137110613286495
+    },
+    {
+      "status": 200,
+      "initial_frame": ": connected",
+      "first_frame_ms": 60.574306175112724
+    },
+    {
+      "status": 200,
+      "initial_frame": ": connected",
+      "first_frame_ms": 24.571334943175316
+    },
+    {
+      "status": 200,
+      "initial_frame": ": connected",
+      "first_frame_ms": 29.585308395326138
+    },
+    {
+      "status": 200,
+      "initial_frame": ": connected",
+      "first_frame_ms": 24.890581145882607
+    },
+    {
+      "status": 200,
+      "initial_frame": ": connected",
+      "first_frame_ms": 24.764887057244778
+    },
+    {
+      "status": 200,
+      "initial_frame": ": connected",
+      "first_frame_ms": 22.277970798313618
+    },
+    {
+      "status": 200,
+      "initial_frame": ": connected",
+      "first_frame_ms": 23.681649938225746
+    },
+    {
+      "status": 200,
+      "initial_frame": ": connected",
+      "first_frame_ms": 29.093904420733452
+    },
+    {
+      "status": 200,
+      "initial_frame": ": connected",
+      "first_frame_ms": 25.045149959623814
+    },
+    {
+      "status": 200,
+      "initial_frame": ": connected",
+      "first_frame_ms": 18.736948259174824
+    },
+    {
+      "status": 200,
+      "initial_frame": ": connected",
+      "first_frame_ms": 13.688652776181698
+    },
+    {
+      "status": 200,
+      "initial_frame": ": connected",
+      "first_frame_ms": 41.23800806701183
+    },
+    {
+      "status": 200,
+      "initial_frame": ": connected",
+      "first_frame_ms": 19.594100303947926
+    },
+    {
+      "status": 200,
+      "initial_frame": ": connected",
+      "first_frame_ms": 22.151255048811436
+    },
+    {
+      "status": 200,
+      "initial_frame": ": connected",
+      "first_frame_ms": 9.404673241078854
+    },
+    {
+      "status": 200,
+      "initial_frame": ": connected",
+      "first_frame_ms": 38.200898095965385
+    },
+    {
+      "status": 200,
+      "initial_frame": ": connected",
+      "first_frame_ms": 18.02063826471567
+    },
+    {
+      "status": 200,
+      "initial_frame": ": connected",
+      "first_frame_ms": 13.6965811252594
+    },
+    {
+      "status": 200,
+      "initial_frame": ": connected",
+      "first_frame_ms": 14.25286941230297
+    },
+    {
+      "status": 200,
+      "initial_frame": ": connected",
+      "first_frame_ms": 12.063748203217983
+    },
+    {
+      "status": 200,
+      "initial_frame": ": connected",
+      "first_frame_ms": 13.307947665452957
+    },
+    {
+      "status": 200,
+      "initial_frame": ": connected",
+      "first_frame_ms": 29.60354182869196
+    },
+    {
+      "status": 200,
+      "initial_frame": ": connected",
+      "first_frame_ms": 20.819736644625664
+    },
+    {
+      "status": 200,
+      "initial_frame": ": connected",
+      "first_frame_ms": 9.658977389335632
+    },
+    {
+      "status": 200,
+      "initial_frame": ": connected",
+      "first_frame_ms": 20.245197229087353
+    },
+    {
+      "status": 200,
+      "initial_frame": ": connected",
+      "first_frame_ms": 25.30134469270706
+    },
+    {
+      "status": 200,
+      "initial_frame": ": connected",
+      "first_frame_ms": 21.903865039348602
+    },
+    {
+      "status": 200,
+      "initial_frame": ": connected",
+      "first_frame_ms": 30.248508788645267
+    },
+    {
+      "status": 200,
+      "initial_frame": ": connected",
+      "first_frame_ms": 24.21923726797104
+    },
+    {
+      "status": 200,
+      "initial_frame": ": connected",
+      "first_frame_ms": 9.464874863624573
+    },
+    {
+      "status": 200,
+      "initial_frame": ": connected",
+      "first_frame_ms": 22.456188686192036
+    },
+    {
+      "status": 200,
+      "initial_frame": ": connected",
+      "first_frame_ms": 17.043104395270348
+    },
+    {
+      "status": 200,
+      "initial_frame": ": connected",
+      "first_frame_ms": 20.474355667829514
+    },
+    {
+      "status": 200,
+      "initial_frame": ": connected",
+      "first_frame_ms": 20.422224886715412
+    },
+    {
+      "status": 200,
+      "initial_frame": ": connected",
+      "first_frame_ms": 20.231543108820915
+    },
+    {
+      "status": 200,
+      "initial_frame": ": connected",
+      "first_frame_ms": 16.46696124225855
+    },
+    {
+      "status": 200,
+      "initial_frame": ": connected",
+      "first_frame_ms": 17.58812926709652
+    },
+    {
+      "status": 200,
+      "initial_frame": ": connected",
+      "first_frame_ms": 27.557358145713806
+    },
+    {
+      "status": 200,
+      "initial_frame": ": connected",
+      "first_frame_ms": 25.441070087254047
+    },
+    {
+      "status": 200,
+      "initial_frame": ": connected",
+      "first_frame_ms": 19.148786552250385
+    },
+    {
+      "status": 200,
+      "initial_frame": ": connected",
+      "first_frame_ms": 38.40037900954485
+    },
+    {
+      "status": 200,
+      "initial_frame": ": connected",
+      "first_frame_ms": 17.345167696475983
+    },
+    {
+      "status": 200,
+      "initial_frame": ": connected",
+      "first_frame_ms": 39.49242550879717
+    },
+    {
+      "status": 200,
+      "initial_frame": ": connected",
+      "first_frame_ms": 37.2010525316
+    },
+    {
+      "status": 200,
+      "initial_frame": ": connected",
+      "first_frame_ms": 25.146779604256153
+    },
+    {
+      "status": 200,
+      "initial_frame": ": connected",
+      "first_frame_ms": 39.88988324999809
+    },
+    {
+      "status": 200,
+      "initial_frame": ": connected",
+      "first_frame_ms": 39.282177574932575
+    },
+    {
+      "status": 200,
+      "initial_frame": ": connected",
+      "first_frame_ms": 21.53120841830969
+    },
+    {
+      "status": 200,
+      "initial_frame": ": connected",
+      "first_frame_ms": 12.402400374412537
+    },
+    {
+      "status": 200,
+      "initial_frame": ": connected",
+      "first_frame_ms": 9.385627694427967
+    },
+    {
+      "status": 200,
+      "initial_frame": ": connected",
+      "first_frame_ms": 12.65023648738861
+    },
+    {
+      "status": 200,
+      "initial_frame": ": connected",
+      "first_frame_ms": 20.29653638601303
+    },
+    {
+      "status": 200,
+      "initial_frame": ": connected",
+      "first_frame_ms": 11.038416996598244
+    },
+    {
+      "status": 200,
+      "initial_frame": ": connected",
+      "first_frame_ms": 8.932571858167648
+    },
+    {
+      "status": 200,
+      "initial_frame": ": connected",
+      "first_frame_ms": 26.376010850071907
+    },
+    {
+      "status": 200,
+      "initial_frame": ": connected",
+      "first_frame_ms": 10.915166698396206
+    },
+    {
+      "status": 200,
+      "initial_frame": ": connected",
+      "first_frame_ms": 20.70973999798298
+    },
+    {
+      "status": 200,
+      "initial_frame": ": connected",
+      "first_frame_ms": 18.269517458975315
+    },
+    {
+      "status": 200,
+      "initial_frame": ": connected",
+      "first_frame_ms": 25.18488746136427
+    },
+    {
+      "status": 200,
+      "initial_frame": ": connected",
+      "first_frame_ms": 20.037002861499786
+    },
+    {
+      "status": 200,
+      "initial_frame": ": connected",
+      "first_frame_ms": 22.02694956213236
+    },
+    {
+      "status": 200,
+      "initial_frame": ": connected",
+      "first_frame_ms": 15.619870275259018
+    },
+    {
+      "status": 200,
+      "initial_frame": ": connected",
+      "first_frame_ms": 9.144672192633152
+    },
+    {
+      "status": 200,
+      "initial_frame": ": connected",
+      "first_frame_ms": 16.423837281763554
+    },
+    {
+      "status": 200,
+      "initial_frame": ": connected",
+      "first_frame_ms": 17.519579268991947
+    },
+    {
+      "status": 200,
+      "initial_frame": ": connected",
+      "first_frame_ms": 12.253640219569206
+    },
+    {
+      "status": 200,
+      "initial_frame": ": connected",
+      "first_frame_ms": 24.924817495048046
+    },
+    {
+      "status": 200,
+      "initial_frame": ": connected",
+      "first_frame_ms": 25.55399388074875
+    },
+    {
+      "status": 200,
+      "initial_frame": ": connected",
+      "first_frame_ms": 18.579132854938507
+    },
+    {
+      "status": 200,
+      "initial_frame": ": connected",
+      "first_frame_ms": 34.03702192008495
+    },
+    {
+      "status": 200,
+      "initial_frame": ": connected",
+      "first_frame_ms": 23.909886367619038
+    },
+    {
+      "status": 200,
+      "initial_frame": ": connected",
+      "first_frame_ms": 15.909761190414429
+    },
+    {
+      "status": 200,
+      "initial_frame": ": connected",
+      "first_frame_ms": 14.304163865745068
+    },
+    {
+      "status": 200,
+      "initial_frame": ": connected",
+      "first_frame_ms": 31.1076482757926
+    },
+    {
+      "status": 200,
+      "initial_frame": ": connected",
+      "first_frame_ms": 30.98057210445404
+    },
+    {
+      "status": 200,
+      "initial_frame": ": connected",
+      "first_frame_ms": 13.42094223946333
+    },
+    {
+      "status": 200,
+      "initial_frame": ": connected",
+      "first_frame_ms": 25.56408941745758
+    },
+    {
+      "status": 200,
+      "initial_frame": ": connected",
+      "first_frame_ms": 15.508792363107204
+    },
+    {
+      "status": 200,
+      "initial_frame": ": connected",
+      "first_frame_ms": 9.87660326063633
+    },
+    {
+      "status": 200,
+      "initial_frame": ": connected",
+      "first_frame_ms": 19.611979834735394
+    },
+    {
+      "status": 200,
+      "initial_frame": ": connected",
+      "first_frame_ms": 16.104238107800484
+    },
+    {
+      "status": 200,
+      "initial_frame": ": connected",
+      "first_frame_ms": 15.461742877960205
+    },
+    {
+      "status": 200,
+      "initial_frame": ": connected",
+      "first_frame_ms": 24.367076344788074
+    },
+    {
+      "status": 200,
+      "initial_frame": ": connected",
+      "first_frame_ms": 24.65764619410038
+    },
+    {
+      "status": 200,
+      "initial_frame": ": connected",
+      "first_frame_ms": 27.87040825933218
+    },
+    {
+      "status": 200,
+      "initial_frame": ": connected",
+      "first_frame_ms": 26.512504555284977
+    },
+    {
+      "status": 200,
+      "initial_frame": ": connected",
+      "first_frame_ms": 24.6689785271883
+    },
+    {
+      "status": 200,
+      "initial_frame": ": connected",
+      "first_frame_ms": 11.332891881465912
+    },
+    {
+      "status": 200,
+      "initial_frame": ": connected",
+      "first_frame_ms": 22.34577853232622
+    },
+    {
+      "status": 200,
+      "initial_frame": ": connected",
+      "first_frame_ms": 19.93363443762064
+    },
+    {
+      "status": 200,
+      "initial_frame": ": connected",
+      "first_frame_ms": 19.913064315915108
+    },
+    {
+      "status": 200,
+      "initial_frame": ": connected",
+      "first_frame_ms": 12.346962466835976
+    },
+    {
+      "status": 200,
+      "initial_frame": ": connected",
+      "first_frame_ms": 13.939430937170982
+    },
+    {
+      "status": 200,
+      "initial_frame": ": connected",
+      "first_frame_ms": 16.089082695543766
+    },
+    {
+      "status": 200,
+      "initial_frame": ": connected",
+      "first_frame_ms": 12.4817481264472
+    },
+    {
+      "status": 200,
+      "initial_frame": ": connected",
+      "first_frame_ms": 11.57999038696289
+    },
+    {
+      "status": 200,
+      "initial_frame": ": connected",
+      "first_frame_ms": 11.807491071522236
+    }
+  ]
+}

@@ -1,578 +1,109 @@
 # 测试指南
 
-> 本文档说明如何为项目编写和运行测试，包括后端 API 测试、单元测试和前端测试。
+测试分为业务回归、权限校验、模型协议联调、浏览器验收和并发压测。不同层的通过结果分别记录：模拟模型回复通过结构校验，并不等于真实模型推理或临床质量通过。
 
----
+最近一次完整执行记录见 [2026-10-27 系统验证](validation/2026-10-27/README.md)。原始基线、失败、修复后的完整文件复验和性能测量分别保存，重复运行不累加为独立通过项。
 
-## 一、测试策略
+## 后端
 
-```
-                  ┌──────────────────┐
-                  │   E2E 测试         │   少量 (10%)
-                  │   Playwright/手工   │   核心业务流程
-                  └─────────┬──────────┘
-                            │
-            ┌───────────────┴────────────────┐
-            │   接口集成测试                    │  适量 (30%)
-            │   pytest + TestClient           │  API 行为
-            └───────────────┬────────────────┘
-                            │
-            ┌───────────────┴────────────────┐
-            │   单元测试                       │  大量 (60%)
-            │   pytest                       │  工具函数、纯逻辑
-            └────────────────────────────────┘
-```
-
-**测试金字塔原则**：
-- 单元测试多而快，覆盖业务规则
-- 集成测试中等，覆盖 API 行为
-- E2E 测试少而精，覆盖核心闭环
-
----
-
-## 二、后端测试
-
-### 2.1 测试框架
-
-- **pytest** — 测试框架
-- **TestClient** — FastAPI 提供，模拟 HTTP 请求
-- **pytest-asyncio** — 异步测试（如需要）
-
-### 2.2 目录结构
-
-```
-fastapi_be/
-├── app/
-└── tests/
-    ├── __init__.py
-    ├── conftest.py             # pytest fixtures
-    ├── test_user.py            # 用户/登录测试
-    ├── test_patient.py         # 患者管理测试
-    ├── test_doctor.py          # 医生工作站测试
-    └── test_*.py
-```
-
-### 2.3 conftest.py 示例
-
-```python
-# fastapi_be/tests/conftest.py
-import pytest
-from fastapi.testclient import TestClient
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-
-from app.main import app
-from app.database import Base, get_db
-
-
-# 测试数据库（内存 SQLite，每次测试独立）
-SQLALCHEMY_TEST_URL = "sqlite:///./test_pytest.db"
-engine = create_engine(SQLALCHEMY_TEST_URL, connect_args={"check_same_thread": False})
-TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
-
-@pytest.fixture(scope="function")
-def db():
-    Base.metadata.create_all(bind=engine)
-    db = TestingSessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-        Base.metadata.drop_all(bind=engine)
-
-
-@pytest.fixture(scope="function")
-def client(db):
-    def override_get_db():
-        try:
-            yield db
-        finally:
-            pass
-
-    app.dependency_overrides[get_db] = override_get_db
-    with TestClient(app) as c:
-        yield c
-    app.dependency_overrides.clear()
-
-
-@pytest.fixture
-def admin_token(client):
-    """登录获取管理员 token"""
-    # 先创建管理员用户
-    client.post("/api/register", json={
-        "username": "test_admin",
-        "password": "admin123",
-        "user_role": "admin",
-    })
-    # 登录
-    response = client.post("/api/login", json={
-        "username": "test_admin",
-        "password": "admin123",
-    })
-    return response.json()["data"]["accesstoken"]
-```
-
-### 2.4 编写测试用例
-
-#### 单元测试示例
-
-```python
-# tests/test_utils.py
-from app.utils import format_phone, mask_identity
-
-
-def test_format_phone():
-    assert format_phone("13800138000") == "138-0013-8000"
-    assert format_phone("") == ""
-
-
-def test_mask_identity():
-    assert mask_identity("110101199001011234") == "110101********1234"
-    assert mask_identity("") == ""
-```
-
-#### 接口测试示例
-
-```python
-# tests/test_patient.py
-def test_create_patient(client, admin_token):
-    response = client.post(
-        "/api/patientManagement/create",
-        json={"name": "张三", "sex": 1, "phone": "13800138000"},
-        headers={"accesstoken": admin_token},
-    )
-    assert response.status_code == 200
-    data = response.json()
-    assert data["code"] == 200
-    assert data["data"]["name"] == "张三"
-
-
-def test_get_patient_list(client, admin_token):
-    # 先创建测试数据
-    for i in range(3):
-        client.post(
-            "/api/patientManagement/create",
-            json={"name": f"患者{i}", "sex": i % 2},
-            headers={"accesstoken": admin_token},
-        )
-
-    # 查询列表
-    response = client.get(
-        "/api/patientManagement/getList",
-        headers={"accesstoken": admin_token},
-    )
-    assert response.status_code == 200
-    assert len(response.json()["data"]) == 3
-
-
-def test_create_patient_missing_name(client, admin_token):
-    """异常路径：缺少必填字段"""
-    response = client.post(
-        "/api/patientManagement/create",
-        json={"sex": 1},
-        headers={"accesstoken": admin_token},
-    )
-    assert response.json()["code"] == 500
-```
-
-### 2.5 API 全量测试脚本（已提供）
-
-项目已提供基于 `requests` 的全量 API 测试脚本，无需 pytest 即可运行：
-
-```bash
-# 1. 确保后端正在运行
-cd fastapi_be && uvicorn app.main:app --host 0.0.0.0 --port 8000
-
-# 2. 运行测试
-python tests/api/test_all_endpoints.py
-
-# 3. 查看结果
-cat tests/api/test_results.json    # 机器可读
-less doc/api-test-report.md        # 人类可读
-```
-
-**测试覆盖**：
-- 188 个测试用例，覆盖 248 个 API 端点
-- 正常路径、错误参数、不存在 ID、空数据、边界值
-- 认证/未授权访问测试
-
-**最新结果**：180/188 通过（95.7%），详见 [api-test-report.md](api-test-report.md)。
-
-#### 业务流程测试示例
-
-```python
-def test_appointment_flow(client, admin_token):
-    """测试完整预约流程：挂号→报到→分配队列号"""
-    # 1. 创建患者
-    patient_res = client.post("/api/patientManagement/create",
-        json={"name": "测试患者", "sex": 1, "identity": "110101199001011234"},
-        headers={"accesstoken": admin_token})
-    patient_id = patient_res.json()["data"]["id"]
-
-    # 2. 预约挂号
-    appt_res = client.post("/api/appointmentManagement/create",
-        json={"id": 1, "doctor_id": 1, "department_id": 1, ...},
-        headers={"accesstoken": admin_token})
-    assert appt_res.json()["code"] == 200
-
-    # 3. 报到签到
-    checkin_res = client.post("/api/checkIn/checkIn",
-        json={"appointment_uuid": ..., "identity": "110101199001011234"})
-    assert checkin_res.json()["code"] == 200
-    assert "queue_no" in checkin_res.json()["data"]
-```
-
-### 2.5 运行测试
+后端依赖包含 pytest、pytest-asyncio 和 httpx：
 
 ```bash
 cd fastapi_be
-source venv/bin/activate
-
-# 运行所有测试
-pytest
-
-# 运行指定文件
-pytest tests/test_patient.py
-
-# 运行指定测试
-pytest tests/test_patient.py::test_create_patient
-
-# 详细输出
-pytest -v
-
-# 显示 print 输出
-pytest -s
-
-# 失败时停止
-pytest -x
-
-# 并行运行（需要 pytest-xdist）
-pytest -n auto
-
-# 覆盖率（需要 pytest-cov）
-pytest --cov=app --cov-report=html
+python -m pip install -r requirements.txt
+python -m pytest tests --junitxml=pytest-results.xml
 ```
 
-### 2.6 测试覆盖率
+`tests/conftest.py` 在导入应用前固定使用内存 SQLite，并将请求依赖和中间件数据库会话指向同一个测试引擎。`seed_data` 创建合成业务记录和各角色用户；管理员身份通过测试夹具生成，不通过公开注册接口创建。
 
-目标覆盖率：
-- 核心业务模块（patient/doctor/charge）：≥ 70%
-- 工具函数：≥ 90%
-- 整体：≥ 60%
+完整套件适合在独立进程中按文件分片，保持文件内测试及夹具完整。每片使用独立临时目录、数据库、私有文件目录和缓存。开始前保存收集清单，结束后核对节点没有重复或遗漏；不要在同一个进程中并发共享内存 SQLite 会话。
+
+修改后的业务文件可先完整复验：
 
 ```bash
-pip install pytest-cov
-pytest --cov=app --cov-report=term-missing --cov-report=html
-
-# 打开 HTML 报告
-open htmlcov/index.html
-```
-
----
-
-## 三、前端测试
-
-### 3.1 测试框架
-
-可选方案：
-
-| 框架 | 用途 | 状态 |
-|:----:|:----|:----:|
-| Vitest | 单元测试（Vue 3 配套） | 推荐 |
-| Vue Test Utils | 组件测试 | 推荐 |
-| Playwright | E2E 测试 | 推荐 |
-| Cypress | E2E 测试 | 备选 |
-
-### 3.2 安装依赖
-
-```bash
-cd vue3-new-ui
-
-# 单元测试
-npm install -D vitest @vue/test-utils jsdom
-
-# E2E 测试
-npm install -D @playwright/test
-npx playwright install
-```
-
-### 3.3 单元测试示例
-
-```javascript
-// tests/utils.spec.js
-import { describe, it, expect } from "vitest";
-import { maskIdentity, formatPhone } from "@/utils/format";
-
-describe("maskIdentity", () => {
-  it("masks middle digits", () => {
-    expect(maskIdentity("110101199001011234")).toBe("110101********1234");
-  });
-
-  it("returns empty for null/empty", () => {
-    expect(maskIdentity("")).toBe("");
-    expect(maskIdentity(null)).toBe("");
-  });
-
-  it("returns original for short string", () => {
-    expect(maskIdentity("123")).toBe("123");
-  });
-});
-```
-
-### 3.4 组件测试示例
-
-```javascript
-// tests/components/VabPageHeader.spec.js
-import { describe, it, expect } from "vitest";
-import { mount } from "@vue/test-utils";
-import VabPageHeader from "@/components/VabPageHeader.vue";
-
-describe("VabPageHeader", () => {
-  it("renders title and description", () => {
-    const wrapper = mount(VabPageHeader, {
-      props: { title: "患者管理", description: "维护患者档案" },
-    });
-    expect(wrapper.text()).toContain("患者管理");
-    expect(wrapper.text()).toContain("维护患者档案");
-  });
-});
-```
-
-### 3.5 E2E 测试示例
-
-```javascript
-// tests/e2e/login.spec.js
-import { test, expect } from "@playwright/test";
-
-test("admin can login and see dashboard", async ({ page }) => {
-  await page.goto("http://localhost:8091");
-  await page.fill('input[placeholder*="账号"]', "admin");
-  await page.fill('input[placeholder*="密码"]', "admin123");
-  await page.click('button:has-text("登录")');
-
-  // 等待跳转到首页
-  await expect(page.locator("text=今日门诊概览")).toBeVisible();
-});
-
-
-test("patient appointment flow", async ({ page }) => {
-  // 1. 登录
-  await page.goto("http://localhost:8091");
-  await page.fill('input[placeholder*="账号"]', "patient1");
-  await page.fill('input[placeholder*="密码"]', "patient123");
-  await page.click('button:has-text("登录")');
-
-  // 2. 进入预约挂号
-  await page.click("text=预约挂号");
-
-  // 3. 点击挂号按钮
-  await page.click('button:has-text("预约挂号")');
-
-  // 4. 选择号源
-  await page.click("table tbody tr:first-child button");
-
-  // 5. 验证成功
-  await expect(page.locator("text=预约成功")).toBeVisible();
-});
-```
-
-### 3.6 运行前端测试
-
-```bash
-# 单元测试
-npm run test                  # 一次性
-npm run test:watch            # 监听模式
-
-# E2E 测试
-npm run test:e2e              # 命令行
-npm run test:e2e:ui           # UI 模式
-```
-
-需要在 `package.json` 中配置：
-
-```json
-{
-  "scripts": {
-    "test": "vitest run",
-    "test:watch": "vitest",
-    "test:e2e": "playwright test",
-    "test:e2e:ui": "playwright test --ui"
-  }
-}
-```
-
----
-
-## 四、测试数据管理
-
-### 4.1 测试数据生成
-
-后端项目根目录有数据生成脚本：
-
-```bash
-cd fastapi_be
-
-# 生成基础数据（科室、医生、患者、药品等）
-python -m tests.gen_test_data
-
-# 生成业务数据（预约、处方、就诊等）
-python -m tests.gen_business_data
-```
-
-### 4.2 测试账号
-
-测试用账号统一：
-
-| 用户名 | 密码 | 角色 |
-|:------|:-----|:----|
-| test_admin | admin123 | admin |
-| test_doctor | doctor123 | doctor |
-| test_patient | patient123 | patient |
-
-### 4.3 数据库重置
-
-```bash
-# 开发环境（SQLite）
-rm fastapi_be/test.db
-
-# 测试环境（独立 DB）
-# conftest.py 中已配置每个测试函数独立的内存数据库
-```
-
----
-
-## 五、提交前本地检查
-
-仓库不启用 GitHub Actions。提交 PR 或发布前，由提交者在本地执行以下检查并在评审中记录结果。
-
-### 5.1 后端、权限和依赖
-
-```bash
-cd fastapi_be
-pip-audit -r requirements.txt --progress-spinner off
-ruff check app tests scripts bootstrap_admin.py seed_default_accounts.py gunicorn.conf.py
-python -m compileall -q app tests scripts bootstrap_admin.py seed_default_accounts.py gunicorn.conf.py
+python -m pytest tests/test_business_flows.py tests/test_payment_integration.py
+python -m pytest tests/test_all_protected_routes.py tests/test_openapi_schema.py
+ruff check app tests
 python scripts/generate_rbac_matrix.py --check
-pytest -q
 ```
 
-### 5.2 基准工具安全性
+`test_all_protected_routes.py` 实际请求所有需登录的路由并验证 401，再为每个受角色限制的路由选择真实的禁止角色验证 403。它验证拒绝路径；业务成功流程仍由各模块测试负责。
+
+## PostgreSQL 事务与并发
+
+SQLite 回归用于业务规则和协议；并发结论使用独立 PostgreSQL 实例。以下测试显式要求本机专用库，未配置时真实 PostgreSQL 项会跳过：
 
 ```bash
-cd <仓库根目录>
-PYTHONPATH=fastapi_be pytest -q fastapi_benchmark/tests
+export HOIM_TEST_POSTGRES_URL='postgresql+psycopg2://benchmark:benchmark-local-only@127.0.0.1:18427/hoimsystem_benchmark'
+python -m pytest tests/test_postgresql_write_gates.py tests/test_ai_surgery_postgresql.py
+python -m pytest tests/test_sql_json.py tests/test_sql_text.py tests/test_sql_counts.py
 ```
 
-### 5.3 前端依赖、构建和资源预算
+测试在唯一临时 schema 或回滚事务中执行，并清理自身创建的对象。生产业务库不能用作压测目标。
+
+真实 HTTP 并发验收使用 [concurrency_acceptance.py](../fastapi_benchmark/concurrency_acceptance.py)，检查响应和数据库最终状态：
+
+```bash
+BENCHMARK_DATABASE_URL='postgresql://benchmark:benchmark-local-only@127.0.0.1:18427/hoimsystem_benchmark' \
+BENCHMARK_MODE=load \
+python ../fastapi_benchmark/concurrency_acceptance.py \
+  --host http://127.0.0.1:18127 --concurrency 20 --output /tmp/hoim-concurrency.json
+```
+
+输出文件必须不存在。每次使用新合成账号，验证账号能登录目标 API 后才执行业务写入。验收覆盖最后号源、重复预约和挂号、并行取消、支付、退费、床位占用、入院编号、发药及扫码给药。
+
+分级负载使用 [隔离压测 Compose](../fastapi_benchmark/docker-compose.yml) 和 `locust_final.py`。小、中、大档分别包含 1,000 / 10,000 / 100,000 名患者及各 5,000 / 50,000 / 500,000 条处方、费用和病历历史。患者账号使用有界家庭，预约目标绑定实际授权令牌。每轮使用新令牌、实际有效的业务标识，HTTP 成功且业务 `code=200` 才计为成功。
+
+记录实际数据库版本、镜像、源文件摘要、CPU/内存限额、worker 数、数据增量、测量时间窗、RPS、P50/P95/P99、失败率和资源采样。带思考时间的用户数不等于同时在途请求数；单轮短测也不能代替持续负载或生产容量规划。
+
+## 文本模型模拟与重试
+
+不连接真实模型时，使用 [本地模拟 LLM](../fastapi_benchmark/llm_simulator.md)。它提供真正的本机 HTTP 接口，支持 Chat Completions 和 Responses，回复明确标记为模拟，并能注入前几次 429、503 或断连。
+
+模拟验证仍走应用原有的 Prompt、闭集结构、来源和引用校验。63 次网关调用与 63 条完整业务任务是不同层级；完整任务还要验证创建、claim、worker、结果读取、反馈和业务记录未被意外改写。
+
+超级管理员在模型服务中配置“最多尝试次数（含首次）”。文本服务只对明确的临时 HTTP 错误和连接建立失败执行有限重试，总耗时服从原超时预算。鉴权、配置、结构、引用失败和已经开始交付的回复不自动重发；曾发生 HTTP 重试但无法证明完整用量时保留未知，不用末次 token 数冒充总量。
+
+## 专用模型与可选运行时
+
+普通回归不要求安装 Torch 或下载权重。数值和真实 CPU 推理测试在准备好对应依赖、固定权重后另行执行：
+
+```bash
+HOIM_IMAGING_REAL_MODEL=/path/to/verified-imaging-model \
+python -m pytest tests/test_ai_imaging_preprocessing.py tests/test_ai_imaging_model.py
+
+HOIM_IMAGING_REAL_MODEL_DIR=/path/to/verified-imaging-model \
+python -m pytest tests/test_ai_local_imaging_real.py
+
+HOIM_ECG_REAL_MODEL_DIR=/path/to/verified-ecg-model \
+python -m pytest tests/test_ai_local_ecg_real.py
+
+HOIM_SPEECH_REAL_MODEL_DIR=/path/to/verified-speech-model \
+python -m pytest tests/test_ai_local_speech_real.py
+```
+
+仅用合成图像、波形或语音验证工程链路。推理执行成功不能作为疾病识别准确率、临床适用性或运营收益的证据。
+
+## 前端
 
 ```bash
 cd vue3-new-ui
 npm ci
-npm run verify
+node --test tests/*.test.cjs
+npm run audit
+npm run build
+npm run check:bundle
+npx playwright test --list
 ```
 
-### 5.4 Compose 配置
+浏览器验收分为实际业务 API 场景和独立页面夹具场景。前者需要独立测试数据库、合成账号及生产构建的静态代理；后者由各 spec 的 helper 启动自己的页面，仍需真实浏览器。
 
-```bash
-cd <仓库根目录>
-POSTGRES_PASSWORD=validation-db-password \
-SECRET_KEY=validation-secret-key-with-more-than-32-characters \
-ALLOWED_ORIGINS=https://validation.example.com \
-docker compose config --quiet
+使用专门的验收配置设置 `fullyParallel: false`，避免同文件多个测试共享的编译服务器被并发关闭；保持重试为零，单独记录失败及复验。生产业务场景单 worker 运行，独立页面夹具可按文件适度并行。
 
-docker compose -f fastapi_benchmark/docker-compose.yml config --quiet
-```
+部分完整页面夹具需要先编译三千余模块。`source-harness-setup.cjs` 只为编译型 `beforeAll` 设置独立准备预算；业务测试、动作和断言保持原预算。报告同时保留原准备超时、实际冷编译耗时和预算修正后的整文件结果。
 
----
+修改 Prompt、公开界面文案或来源协议后，执行相应正式生成器并检查漂移。与后端摘要绑定的 Main/JWT 夹具应重新执行真实捕获流程，不能只替换 SHA 值来让测试通过。
 
-## 六、测试最佳实践
+## 结果归档
 
-### 6.1 命名
-
-- 测试文件：`test_*.py` 或 `*.spec.js`
-- 测试函数：`test_<被测对象>_<场景>_<预期>`
-
-```python
-def test_create_patient_with_valid_data_returns_200():
-    ...
-
-def test_create_patient_without_name_returns_500():
-    ...
-```
-
-### 6.2 AAA 模式
-
-每个测试遵循 Arrange-Act-Assert：
-
-```python
-def test_xxx():
-    # Arrange: 准备数据
-    data = {"name": "测试"}
-
-    # Act: 执行被测代码
-    response = client.post("/api/xxx", json=data)
-
-    # Assert: 验证结果
-    assert response.json()["code"] == 200
-```
-
-### 6.3 一个测试只验证一件事
-
-❌ **不推荐：**
-```python
-def test_patient_crud():
-    # 创建
-    client.post(...)
-    # 查询
-    client.get(...)
-    # 更新
-    client.post(...)
-    # 删除
-    client.post(...)
-```
-
-✅ **推荐：**
-```python
-def test_create_patient(): ...
-def test_get_patient_by_id(): ...
-def test_update_patient(): ...
-def test_delete_patient(): ...
-```
-
-### 6.4 使用 fixture 复用
-
-```python
-@pytest.fixture
-def sample_patient(client, admin_token):
-    response = client.post(...)
-    return response.json()["data"]
-
-
-def test_update_patient(client, admin_token, sample_patient):
-    patient_id = sample_patient["id"]
-    # ...
-```
-
----
-
-## 七、当前测试现状
-
-> ⚠️ **本项目当前测试覆盖度较低**，建议优先补充以下测试：
-
-- [ ] **核心业务流程 E2E**：登录、预约挂号、收费、发药 4 个流程
-- [ ] **关键 API 测试**：login、create_patient、create_prescription
-- [ ] **关键工具函数**：maskIdentity、parse_action_target、JWT decode
-- [ ] **权限校验**：未登录访问应返回 401，越权访问应返回 403/500
-
-详细 todo 见 [todos.md](todos.md)。
-
----
-
-## 八、参考资料
-
-- [pytest 文档](https://docs.pytest.org/)
-- [FastAPI TestClient](https://fastapi.tiangolo.com/tutorial/testing/)
-- [Vitest](https://vitest.dev/)
-- [Vue Test Utils](https://test-utils.vuejs.org/)
-- [Playwright](https://playwright.dev/)
+每次完整验证保存版本、收集清单、JUnit/Playwright JSON、覆盖率、失败与跳过原因、修复提交、整文件复验、真实服务及模拟服务的区别。发布报告附原始证据摘要和校验值；敏感配置、密钥、数据库文件及私有上传不进入版本管理。

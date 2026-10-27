@@ -1,0 +1,129 @@
+{
+  "verified_at_utc": "2026-10-27T05:26:19.032066+00:00",
+  "catalog_version": "2026.10.26.1",
+  "native_service_profiles": 13,
+  "native_feature_keys": [
+    {
+      "number": 21,
+      "key": "medical_transcription",
+      "profiles": [
+        "speech"
+      ]
+    },
+    {
+      "number": 36,
+      "key": "imaging_detection",
+      "profiles": [
+        "imaging"
+      ]
+    },
+    {
+      "number": 37,
+      "key": "ecg_analysis",
+      "profiles": [
+        "ecg"
+      ]
+    },
+    {
+      "number": 41,
+      "key": "deterioration_risk",
+      "profiles": [
+        "news2"
+      ]
+    },
+    {
+      "number": 42,
+      "key": "sepsis_risk",
+      "profiles": [
+        "qsofa",
+        "sofa"
+      ]
+    },
+    {
+      "number": 43,
+      "key": "aki_risk",
+      "profiles": [
+        "aki"
+      ]
+    },
+    {
+      "number": 62,
+      "key": "visit_forecast",
+      "profiles": [
+        "forecast"
+      ]
+    },
+    {
+      "number": 63,
+      "key": "roster_optimization",
+      "profiles": [
+        "roster"
+      ]
+    },
+    {
+      "number": 64,
+      "key": "bed_forecast",
+      "profiles": [
+        "bed"
+      ]
+    },
+    {
+      "number": 65,
+      "key": "surgery_scheduling",
+      "profiles": [
+        "surgery"
+      ]
+    },
+    {
+      "number": 66,
+      "key": "supply_forecast",
+      "profiles": [
+        "supply"
+      ]
+    },
+    {
+      "number": 67,
+      "key": "inventory_optimization",
+      "profiles": [
+        "inventory"
+      ]
+    }
+  ],
+  "real_neural_positive_profiles": [
+    "speech",
+    "ecg",
+    "imaging"
+  ],
+  "local_text_probe": {
+    "http_status": 200,
+    "seconds": 8.447,
+    "parsed_content": {
+      "status": "ready",
+      "sum": 5
+    },
+    "endpoint": null,
+    "model": "hoim-synthetic-qwen2.5-1.5b-instruct-cpu",
+    "test_key_file": "/tmp/hoim-validation-20261027/ai-runtime/llm-test-key.txt",
+    "status": "connectivity succeeded earlier; service stopped; full workflows failed"
+  },
+  "source_tree_modified_by_this_audit": false,
+  "existing_services_modified": false,
+  "business_database_accessed": false,
+  "clinical_quality_validated": false,
+  "operational_effectiveness_validated": false,
+  "native_temporary_containers_removed": 18,
+  "remaining_service": null,
+  "matrix": "/tmp/hoim-validation-20261027/ai-inventory.json",
+  "remaining_gaps": {
+    "specific_model_implementations_missing": [
+      "adr_signal",
+      "lab_quality_signal",
+      "pathology_screening",
+      "accessible_voice"
+    ],
+    "builtin_cluster_statistics_not_exercised_by_this_native_http_phase": "infection_cluster",
+    "llm_features_default_prompt_not_yet_accepted": 63
+  },
+  "owned_model_services_remaining": 0,
+  "llm_validation_summary": "/tmp/hoim-validation-20261027/ai-runtime/llm-validation-summary.json"
+}

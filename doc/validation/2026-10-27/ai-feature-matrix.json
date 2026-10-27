@@ -1,0 +1,2373 @@
+{
+  "catalog_version": "2026.10.26.1",
+  "recorded_on": "2026-10-27",
+  "scope": "Engineering, protocol and synthetic-data checks; simulated output and actual model inference are separate evidence.",
+  "features": [
+    {
+      "number": 1,
+      "key": "patient_summary",
+      "name": "患者全景摘要",
+      "engine": "llm",
+      "execution_mode": "shared_text_llm",
+      "simulated_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "clinical_validation": false,
+        "chat_default_prompt_gateway_accepted": true,
+        "responses_default_prompt_gateway_accepted": true,
+        "application_validators_unchanged": true,
+        "real_http": true,
+        "chat_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/llm-catalog-01-patient_summary.json",
+        "responses_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/responses/llm-catalog-01-patient_summary.json",
+        "full_api_worker_feedback": true,
+        "quality_validated": false
+      },
+      "real_service_validation": {
+        "actual_http_task": false,
+        "real_neural_inference": false,
+        "profiles": []
+      },
+      "coverage_gaps": [
+        "No real model inference for this feature has been executed or accepted by this inventory. Test transports/fixtures and catalog checks do not establish inference availability or medical writing quality.",
+        "No independent clinical validation or real-patient applicability assessment is established here.",
+        "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
+      ]
+    },
+    {
+      "number": 2,
+      "key": "clinical_questions",
+      "name": "智能追问提示",
+      "engine": "llm",
+      "execution_mode": "shared_text_llm",
+      "simulated_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "clinical_validation": false,
+        "chat_default_prompt_gateway_accepted": true,
+        "responses_default_prompt_gateway_accepted": true,
+        "application_validators_unchanged": true,
+        "real_http": true,
+        "chat_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/llm-catalog-02-clinical_questions.json",
+        "responses_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/responses/llm-catalog-02-clinical_questions.json",
+        "full_api_worker_feedback": false,
+        "quality_validated": false
+      },
+      "real_service_validation": {
+        "actual_http_task": false,
+        "real_neural_inference": false,
+        "profiles": []
+      },
+      "coverage_gaps": [
+        "No real model inference for this feature has been executed or accepted by this inventory. Test transports/fixtures and catalog checks do not establish inference availability or medical writing quality.",
+        "No literal feature-key reference in a top-level browser spec was found; shared/indirect fixture coverage may exist and must be verified by the executing browser suite.",
+        "No literal feature-key reference in a backend test file was found; shared catalog/gateway coverage is not a per-feature positive execution test.",
+        "No independent clinical validation or real-patient applicability assessment is established here.",
+        "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
+      ]
+    },
+    {
+      "number": 3,
+      "key": "differential_diagnosis",
+      "name": "辅助鉴别诊断",
+      "engine": "llm",
+      "execution_mode": "shared_text_llm",
+      "simulated_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "clinical_validation": false,
+        "chat_default_prompt_gateway_accepted": true,
+        "responses_default_prompt_gateway_accepted": true,
+        "application_validators_unchanged": true,
+        "real_http": true,
+        "chat_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/llm-catalog-03-differential_diagnosis.json",
+        "responses_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/responses/llm-catalog-03-differential_diagnosis.json",
+        "full_api_worker_feedback": false,
+        "quality_validated": false
+      },
+      "real_service_validation": {
+        "actual_http_task": false,
+        "real_neural_inference": false,
+        "profiles": []
+      },
+      "coverage_gaps": [
+        "No real model inference for this feature has been executed or accepted by this inventory. Test transports/fixtures and catalog checks do not establish inference availability or medical writing quality.",
+        "No literal feature-key reference in a top-level browser spec was found; shared/indirect fixture coverage may exist and must be verified by the executing browser suite.",
+        "No independent clinical validation or real-patient applicability assessment is established here.",
+        "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
+      ]
+    },
+    {
+      "number": 4,
+      "key": "investigation_advice",
+      "name": "检查检验建议",
+      "engine": "llm",
+      "execution_mode": "shared_text_llm",
+      "simulated_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "clinical_validation": false,
+        "chat_default_prompt_gateway_accepted": true,
+        "responses_default_prompt_gateway_accepted": true,
+        "application_validators_unchanged": true,
+        "real_http": true,
+        "chat_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/llm-catalog-04-investigation_advice.json",
+        "responses_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/responses/llm-catalog-04-investigation_advice.json",
+        "full_api_worker_feedback": false,
+        "quality_validated": false
+      },
+      "real_service_validation": {
+        "actual_http_task": false,
+        "real_neural_inference": false,
+        "profiles": []
+      },
+      "coverage_gaps": [
+        "No real model inference for this feature has been executed or accepted by this inventory. Test transports/fixtures and catalog checks do not establish inference availability or medical writing quality.",
+        "No literal feature-key reference in a top-level browser spec was found; shared/indirect fixture coverage may exist and must be verified by the executing browser suite.",
+        "No literal feature-key reference in a backend test file was found; shared catalog/gateway coverage is not a per-feature positive execution test.",
+        "No independent clinical validation or real-patient applicability assessment is established here.",
+        "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
+      ]
+    },
+    {
+      "number": 5,
+      "key": "treatment_pathway",
+      "name": "治疗路径推荐",
+      "engine": "llm",
+      "execution_mode": "shared_text_llm",
+      "simulated_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "clinical_validation": false,
+        "chat_default_prompt_gateway_accepted": true,
+        "responses_default_prompt_gateway_accepted": true,
+        "application_validators_unchanged": true,
+        "real_http": true,
+        "chat_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/llm-catalog-05-treatment_pathway.json",
+        "responses_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/responses/llm-catalog-05-treatment_pathway.json",
+        "full_api_worker_feedback": false,
+        "quality_validated": false
+      },
+      "real_service_validation": {
+        "actual_http_task": false,
+        "real_neural_inference": false,
+        "profiles": []
+      },
+      "coverage_gaps": [
+        "No real model inference for this feature has been executed or accepted by this inventory. Test transports/fixtures and catalog checks do not establish inference availability or medical writing quality.",
+        "No independent clinical validation or real-patient applicability assessment is established here.",
+        "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
+      ]
+    },
+    {
+      "number": 6,
+      "key": "personalized_treatment",
+      "name": "个体化治疗调整",
+      "engine": "llm",
+      "execution_mode": "shared_text_llm",
+      "simulated_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "clinical_validation": false,
+        "chat_default_prompt_gateway_accepted": true,
+        "responses_default_prompt_gateway_accepted": true,
+        "application_validators_unchanged": true,
+        "real_http": true,
+        "chat_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/llm-catalog-06-personalized_treatment.json",
+        "responses_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/responses/llm-catalog-06-personalized_treatment.json",
+        "full_api_worker_feedback": false,
+        "quality_validated": false
+      },
+      "real_service_validation": {
+        "actual_http_task": false,
+        "real_neural_inference": false,
+        "profiles": []
+      },
+      "coverage_gaps": [
+        "No real model inference for this feature has been executed or accepted by this inventory. Test transports/fixtures and catalog checks do not establish inference availability or medical writing quality.",
+        "No literal feature-key reference in a top-level browser spec was found; shared/indirect fixture coverage may exist and must be verified by the executing browser suite.",
+        "No literal feature-key reference in a backend test file was found; shared catalog/gateway coverage is not a per-feature positive execution test.",
+        "No independent clinical validation or real-patient applicability assessment is established here.",
+        "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
+      ]
+    },
+    {
+      "number": 7,
+      "key": "multimorbidity_review",
+      "name": "多病共存方案协调",
+      "engine": "llm",
+      "execution_mode": "shared_text_llm",
+      "simulated_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "clinical_validation": false,
+        "chat_default_prompt_gateway_accepted": true,
+        "responses_default_prompt_gateway_accepted": true,
+        "application_validators_unchanged": true,
+        "real_http": true,
+        "chat_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/llm-catalog-07-multimorbidity_review.json",
+        "responses_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/responses/llm-catalog-07-multimorbidity_review.json",
+        "full_api_worker_feedback": false,
+        "quality_validated": false
+      },
+      "real_service_validation": {
+        "actual_http_task": false,
+        "real_neural_inference": false,
+        "profiles": []
+      },
+      "coverage_gaps": [
+        "No real model inference for this feature has been executed or accepted by this inventory. Test transports/fixtures and catalog checks do not establish inference availability or medical writing quality.",
+        "No literal feature-key reference in a top-level browser spec was found; shared/indirect fixture coverage may exist and must be verified by the executing browser suite.",
+        "No literal feature-key reference in a backend test file was found; shared catalog/gateway coverage is not a per-feature positive execution test.",
+        "No independent clinical validation or real-patient applicability assessment is established here.",
+        "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
+      ]
+    },
+    {
+      "number": 8,
+      "key": "response_review",
+      "name": "疗效复评助手",
+      "engine": "llm",
+      "execution_mode": "shared_text_llm",
+      "simulated_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "clinical_validation": false,
+        "chat_default_prompt_gateway_accepted": true,
+        "responses_default_prompt_gateway_accepted": true,
+        "application_validators_unchanged": true,
+        "real_http": true,
+        "chat_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/llm-catalog-08-response_review.json",
+        "responses_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/responses/llm-catalog-08-response_review.json",
+        "full_api_worker_feedback": false,
+        "quality_validated": false
+      },
+      "real_service_validation": {
+        "actual_http_task": false,
+        "real_neural_inference": false,
+        "profiles": []
+      },
+      "coverage_gaps": [
+        "No real model inference for this feature has been executed or accepted by this inventory. Test transports/fixtures and catalog checks do not establish inference availability or medical writing quality.",
+        "No independent clinical validation or real-patient applicability assessment is established here.",
+        "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
+      ]
+    },
+    {
+      "number": 9,
+      "key": "referral_mdt",
+      "name": "转诊与MDT助手",
+      "engine": "llm",
+      "execution_mode": "shared_text_llm",
+      "simulated_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "clinical_validation": false,
+        "chat_default_prompt_gateway_accepted": true,
+        "responses_default_prompt_gateway_accepted": true,
+        "application_validators_unchanged": true,
+        "real_http": true,
+        "chat_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/llm-catalog-09-referral_mdt.json",
+        "responses_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/responses/llm-catalog-09-referral_mdt.json",
+        "full_api_worker_feedback": false,
+        "quality_validated": false
+      },
+      "real_service_validation": {
+        "actual_http_task": false,
+        "real_neural_inference": false,
+        "profiles": []
+      },
+      "coverage_gaps": [
+        "No real model inference for this feature has been executed or accepted by this inventory. Test transports/fixtures and catalog checks do not establish inference availability or medical writing quality.",
+        "No independent clinical validation or real-patient applicability assessment is established here.",
+        "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
+      ]
+    },
+    {
+      "number": 10,
+      "key": "guideline_qa",
+      "name": "医学指南问答",
+      "engine": "llm",
+      "execution_mode": "shared_text_llm",
+      "simulated_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "clinical_validation": false,
+        "chat_default_prompt_gateway_accepted": true,
+        "responses_default_prompt_gateway_accepted": true,
+        "application_validators_unchanged": true,
+        "real_http": true,
+        "chat_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/llm-catalog-10-guideline_qa.json",
+        "responses_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/responses/llm-catalog-10-guideline_qa.json",
+        "full_api_worker_feedback": false,
+        "quality_validated": false
+      },
+      "real_service_validation": {
+        "actual_http_task": false,
+        "real_neural_inference": false,
+        "profiles": []
+      },
+      "coverage_gaps": [
+        "No real model inference for this feature has been executed or accepted by this inventory. Test transports/fixtures and catalog checks do not establish inference availability or medical writing quality.",
+        "No literal feature-key reference in a top-level browser spec was found; shared/indirect fixture coverage may exist and must be verified by the executing browser suite.",
+        "No independent clinical validation or real-patient applicability assessment is established here.",
+        "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
+      ]
+    },
+    {
+      "number": 11,
+      "key": "drug_comparison",
+      "name": "药物方案比选",
+      "engine": "llm",
+      "execution_mode": "shared_text_llm",
+      "simulated_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "clinical_validation": false,
+        "chat_default_prompt_gateway_accepted": true,
+        "responses_default_prompt_gateway_accepted": true,
+        "application_validators_unchanged": true,
+        "real_http": true,
+        "chat_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/llm-catalog-11-drug_comparison.json",
+        "responses_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/responses/llm-catalog-11-drug_comparison.json",
+        "full_api_worker_feedback": false,
+        "quality_validated": false
+      },
+      "real_service_validation": {
+        "actual_http_task": false,
+        "real_neural_inference": false,
+        "profiles": []
+      },
+      "coverage_gaps": [
+        "No real model inference for this feature has been executed or accepted by this inventory. Test transports/fixtures and catalog checks do not establish inference availability or medical writing quality.",
+        "No literal feature-key reference in a top-level browser spec was found; shared/indirect fixture coverage may exist and must be verified by the executing browser suite.",
+        "No literal feature-key reference in a backend test file was found; shared catalog/gateway coverage is not a per-feature positive execution test.",
+        "No independent clinical validation or real-patient applicability assessment is established here.",
+        "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
+      ]
+    },
+    {
+      "number": 12,
+      "key": "prescription_draft",
+      "name": "处方草稿助手",
+      "engine": "llm",
+      "execution_mode": "shared_text_llm",
+      "simulated_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "clinical_validation": false,
+        "chat_default_prompt_gateway_accepted": true,
+        "responses_default_prompt_gateway_accepted": true,
+        "application_validators_unchanged": true,
+        "real_http": true,
+        "chat_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/llm-catalog-12-prescription_draft.json",
+        "responses_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/responses/llm-catalog-12-prescription_draft.json",
+        "full_api_worker_feedback": false,
+        "quality_validated": false
+      },
+      "real_service_validation": {
+        "actual_http_task": false,
+        "real_neural_inference": false,
+        "profiles": []
+      },
+      "coverage_gaps": [
+        "No real model inference for this feature has been executed or accepted by this inventory. Test transports/fixtures and catalog checks do not establish inference availability or medical writing quality.",
+        "No literal feature-key reference in a top-level browser spec was found; shared/indirect fixture coverage may exist and must be verified by the executing browser suite.",
+        "No independent clinical validation or real-patient applicability assessment is established here.",
+        "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
+      ]
+    },
+    {
+      "number": 13,
+      "key": "interaction_review",
+      "name": "相互作用与重复用药解释",
+      "engine": "llm",
+      "execution_mode": "shared_text_llm",
+      "simulated_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "clinical_validation": false,
+        "chat_default_prompt_gateway_accepted": true,
+        "responses_default_prompt_gateway_accepted": true,
+        "application_validators_unchanged": true,
+        "real_http": true,
+        "chat_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/llm-catalog-13-interaction_review.json",
+        "responses_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/responses/llm-catalog-13-interaction_review.json",
+        "full_api_worker_feedback": false,
+        "quality_validated": false
+      },
+      "real_service_validation": {
+        "actual_http_task": false,
+        "real_neural_inference": false,
+        "profiles": []
+      },
+      "coverage_gaps": [
+        "No real model inference for this feature has been executed or accepted by this inventory. Test transports/fixtures and catalog checks do not establish inference availability or medical writing quality.",
+        "No literal feature-key reference in a top-level browser spec was found; shared/indirect fixture coverage may exist and must be verified by the executing browser suite.",
+        "No independent clinical validation or real-patient applicability assessment is established here.",
+        "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
+      ]
+    },
+    {
+      "number": 14,
+      "key": "allergy_review",
+      "name": "过敏风险核查",
+      "engine": "llm",
+      "execution_mode": "shared_text_llm",
+      "simulated_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "clinical_validation": false,
+        "chat_default_prompt_gateway_accepted": true,
+        "responses_default_prompt_gateway_accepted": true,
+        "application_validators_unchanged": true,
+        "real_http": true,
+        "chat_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/llm-catalog-14-allergy_review.json",
+        "responses_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/responses/llm-catalog-14-allergy_review.json",
+        "full_api_worker_feedback": false,
+        "quality_validated": false
+      },
+      "real_service_validation": {
+        "actual_http_task": false,
+        "real_neural_inference": false,
+        "profiles": []
+      },
+      "coverage_gaps": [
+        "No real model inference for this feature has been executed or accepted by this inventory. Test transports/fixtures and catalog checks do not establish inference availability or medical writing quality.",
+        "No literal feature-key reference in a top-level browser spec was found; shared/indirect fixture coverage may exist and must be verified by the executing browser suite.",
+        "No independent clinical validation or real-patient applicability assessment is established here.",
+        "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
+      ]
+    },
+    {
+      "number": 15,
+      "key": "dose_review",
+      "name": "个体化剂量校验",
+      "engine": "llm",
+      "execution_mode": "shared_text_llm",
+      "simulated_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "clinical_validation": false,
+        "chat_default_prompt_gateway_accepted": true,
+        "responses_default_prompt_gateway_accepted": true,
+        "application_validators_unchanged": true,
+        "real_http": true,
+        "chat_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/llm-catalog-15-dose_review.json",
+        "responses_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/responses/llm-catalog-15-dose_review.json",
+        "full_api_worker_feedback": false,
+        "quality_validated": false
+      },
+      "real_service_validation": {
+        "actual_http_task": false,
+        "real_neural_inference": false,
+        "profiles": []
+      },
+      "coverage_gaps": [
+        "No real model inference for this feature has been executed or accepted by this inventory. Test transports/fixtures and catalog checks do not establish inference availability or medical writing quality.",
+        "No literal feature-key reference in a top-level browser spec was found; shared/indirect fixture coverage may exist and must be verified by the executing browser suite.",
+        "No literal feature-key reference in a backend test file was found; shared catalog/gateway coverage is not a per-feature positive execution test.",
+        "No independent clinical validation or real-patient applicability assessment is established here.",
+        "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
+      ]
+    },
+    {
+      "number": 16,
+      "key": "special_population_medication",
+      "name": "特殊人群用药助手",
+      "engine": "llm",
+      "execution_mode": "shared_text_llm",
+      "simulated_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "clinical_validation": false,
+        "chat_default_prompt_gateway_accepted": true,
+        "responses_default_prompt_gateway_accepted": true,
+        "application_validators_unchanged": true,
+        "real_http": true,
+        "chat_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/llm-catalog-16-special_population_medication.json",
+        "responses_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/responses/llm-catalog-16-special_population_medication.json",
+        "full_api_worker_feedback": false,
+        "quality_validated": false
+      },
+      "real_service_validation": {
+        "actual_http_task": false,
+        "real_neural_inference": false,
+        "profiles": []
+      },
+      "coverage_gaps": [
+        "No real model inference for this feature has been executed or accepted by this inventory. Test transports/fixtures and catalog checks do not establish inference availability or medical writing quality.",
+        "No literal feature-key reference in a top-level browser spec was found; shared/indirect fixture coverage may exist and must be verified by the executing browser suite.",
+        "No literal feature-key reference in a backend test file was found; shared catalog/gateway coverage is not a per-feature positive execution test.",
+        "No independent clinical validation or real-patient applicability assessment is established here.",
+        "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
+      ]
+    },
+    {
+      "number": 17,
+      "key": "antimicrobial_review",
+      "name": "抗菌药管理助手",
+      "engine": "llm",
+      "execution_mode": "shared_text_llm",
+      "simulated_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "clinical_validation": false,
+        "chat_default_prompt_gateway_accepted": true,
+        "responses_default_prompt_gateway_accepted": true,
+        "application_validators_unchanged": true,
+        "real_http": true,
+        "chat_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/llm-catalog-17-antimicrobial_review.json",
+        "responses_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/responses/llm-catalog-17-antimicrobial_review.json",
+        "full_api_worker_feedback": false,
+        "quality_validated": false
+      },
+      "real_service_validation": {
+        "actual_http_task": false,
+        "real_neural_inference": false,
+        "profiles": []
+      },
+      "coverage_gaps": [
+        "No real model inference for this feature has been executed or accepted by this inventory. Test transports/fixtures and catalog checks do not establish inference availability or medical writing quality.",
+        "No literal feature-key reference in a top-level browser spec was found; shared/indirect fixture coverage may exist and must be verified by the executing browser suite.",
+        "No literal feature-key reference in a backend test file was found; shared catalog/gateway coverage is not a per-feature positive execution test.",
+        "No independent clinical validation or real-patient applicability assessment is established here.",
+        "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
+      ]
+    },
+    {
+      "number": 18,
+      "key": "medication_reconciliation",
+      "name": "用药重整",
+      "engine": "llm",
+      "execution_mode": "shared_text_llm",
+      "simulated_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "clinical_validation": false,
+        "chat_default_prompt_gateway_accepted": true,
+        "responses_default_prompt_gateway_accepted": true,
+        "application_validators_unchanged": true,
+        "real_http": true,
+        "chat_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/llm-catalog-18-medication_reconciliation.json",
+        "responses_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/responses/llm-catalog-18-medication_reconciliation.json",
+        "full_api_worker_feedback": false,
+        "quality_validated": false
+      },
+      "real_service_validation": {
+        "actual_http_task": false,
+        "real_neural_inference": false,
+        "profiles": []
+      },
+      "coverage_gaps": [
+        "No real model inference for this feature has been executed or accepted by this inventory. Test transports/fixtures and catalog checks do not establish inference availability or medical writing quality.",
+        "No literal feature-key reference in a top-level browser spec was found; shared/indirect fixture coverage may exist and must be verified by the executing browser suite.",
+        "No independent clinical validation or real-patient applicability assessment is established here.",
+        "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
+      ]
+    },
+    {
+      "number": 19,
+      "key": "adr_signal",
+      "name": "不良反应信号发现",
+      "engine": "prediction",
+      "execution_mode": "generic_specialist_contract_only",
+      "simulated_gateway_validation": {
+        "applicable": false,
+        "reason": "This engine is not one of the63 text LLM tasks; retain its original actual native-service evidence."
+      },
+      "real_service_validation": {
+        "actual_http_task": false,
+        "real_neural_inference": false,
+        "profiles": []
+      },
+      "coverage_gaps": [
+        "No bundled ADR predictive model or feature-specific inference service.",
+        "No independent clinical validation or real-patient applicability assessment is established here."
+      ]
+    },
+    {
+      "number": 20,
+      "key": "drug_substitution",
+      "name": "缺药替代建议",
+      "engine": "llm",
+      "execution_mode": "shared_text_llm",
+      "simulated_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "clinical_validation": false,
+        "chat_default_prompt_gateway_accepted": true,
+        "responses_default_prompt_gateway_accepted": true,
+        "application_validators_unchanged": true,
+        "real_http": true,
+        "chat_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/llm-catalog-20-drug_substitution.json",
+        "responses_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/responses/llm-catalog-20-drug_substitution.json",
+        "full_api_worker_feedback": false,
+        "quality_validated": false
+      },
+      "real_service_validation": {
+        "actual_http_task": false,
+        "real_neural_inference": false,
+        "profiles": []
+      },
+      "coverage_gaps": [
+        "No real model inference for this feature has been executed or accepted by this inventory. Test transports/fixtures and catalog checks do not establish inference availability or medical writing quality.",
+        "No literal feature-key reference in a top-level browser spec was found; shared/indirect fixture coverage may exist and must be verified by the executing browser suite.",
+        "No literal feature-key reference in a backend test file was found; shared catalog/gateway coverage is not a per-feature positive execution test.",
+        "No independent clinical validation or real-patient applicability assessment is established here.",
+        "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
+      ]
+    },
+    {
+      "number": 21,
+      "key": "medical_transcription",
+      "name": "医疗语音录入",
+      "engine": "speech",
+      "execution_mode": "offline_neural_research",
+      "simulated_gateway_validation": {
+        "applicable": false,
+        "reason": "This engine is not one of the63 text LLM tasks; retain its original actual native-service evidence."
+      },
+      "real_service_validation": {
+        "actual_http_task": true,
+        "real_neural_inference": true,
+        "profiles": [
+          {
+            "kind": "speech",
+            "model_version": "fw:e2c820fa90ee6a66316dba8719eaa3eb1f6993bd78e6ab2dddbb9d4f99fbacee",
+            "http_status": 200
+          }
+        ]
+      },
+      "coverage_gaps": [
+        "CPU faster-whisper tiny ASR; speaker roles and medical accuracy require human review.",
+        "No independent clinical validation or real-patient applicability assessment is established here.",
+        "Today this feature executed successfully through an isolated specialist HTTP service using synthetic data. Hospital API/worker/provider persistence and real-world clinical/operational effectiveness are separate unverified claims in this inventory."
+      ]
+    },
+    {
+      "number": 22,
+      "key": "outpatient_note",
+      "name": "门诊病历草稿",
+      "engine": "llm",
+      "execution_mode": "shared_text_llm",
+      "simulated_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "clinical_validation": false,
+        "chat_default_prompt_gateway_accepted": true,
+        "responses_default_prompt_gateway_accepted": true,
+        "application_validators_unchanged": true,
+        "real_http": true,
+        "chat_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/llm-catalog-22-outpatient_note.json",
+        "responses_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/responses/llm-catalog-22-outpatient_note.json",
+        "full_api_worker_feedback": true,
+        "quality_validated": false
+      },
+      "real_service_validation": {
+        "actual_http_task": false,
+        "real_neural_inference": false,
+        "profiles": []
+      },
+      "coverage_gaps": [
+        "No real model inference for this feature has been executed or accepted by this inventory. Test transports/fixtures and catalog checks do not establish inference availability or medical writing quality.",
+        "No independent clinical validation or real-patient applicability assessment is established here.",
+        "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
+      ]
+    },
+    {
+      "number": 23,
+      "key": "admission_note",
+      "name": "入院记录草稿",
+      "engine": "llm",
+      "execution_mode": "shared_text_llm",
+      "simulated_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "clinical_validation": false,
+        "chat_default_prompt_gateway_accepted": true,
+        "responses_default_prompt_gateway_accepted": true,
+        "application_validators_unchanged": true,
+        "real_http": true,
+        "chat_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/llm-catalog-23-admission_note.json",
+        "responses_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/responses/llm-catalog-23-admission_note.json",
+        "full_api_worker_feedback": false,
+        "quality_validated": false
+      },
+      "real_service_validation": {
+        "actual_http_task": false,
+        "real_neural_inference": false,
+        "profiles": []
+      },
+      "coverage_gaps": [
+        "No real model inference for this feature has been executed or accepted by this inventory. Test transports/fixtures and catalog checks do not establish inference availability or medical writing quality.",
+        "No literal feature-key reference in a top-level browser spec was found; shared/indirect fixture coverage may exist and must be verified by the executing browser suite.",
+        "No independent clinical validation or real-patient applicability assessment is established here.",
+        "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
+      ]
+    },
+    {
+      "number": 24,
+      "key": "progress_note",
+      "name": "病程与查房记录",
+      "engine": "llm",
+      "execution_mode": "shared_text_llm",
+      "simulated_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "clinical_validation": false,
+        "chat_default_prompt_gateway_accepted": true,
+        "responses_default_prompt_gateway_accepted": true,
+        "application_validators_unchanged": true,
+        "real_http": true,
+        "chat_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/llm-catalog-24-progress_note.json",
+        "responses_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/responses/llm-catalog-24-progress_note.json",
+        "full_api_worker_feedback": false,
+        "quality_validated": false
+      },
+      "real_service_validation": {
+        "actual_http_task": false,
+        "real_neural_inference": false,
+        "profiles": []
+      },
+      "coverage_gaps": [
+        "No real model inference for this feature has been executed or accepted by this inventory. Test transports/fixtures and catalog checks do not establish inference availability or medical writing quality.",
+        "No literal feature-key reference in a top-level browser spec was found; shared/indirect fixture coverage may exist and must be verified by the executing browser suite.",
+        "No independent clinical validation or real-patient applicability assessment is established here.",
+        "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
+      ]
+    },
+    {
+      "number": 25,
+      "key": "discharge_summary",
+      "name": "出院小结",
+      "engine": "llm",
+      "execution_mode": "shared_text_llm",
+      "simulated_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "clinical_validation": false,
+        "chat_default_prompt_gateway_accepted": true,
+        "responses_default_prompt_gateway_accepted": true,
+        "application_validators_unchanged": true,
+        "real_http": true,
+        "chat_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/llm-catalog-25-discharge_summary.json",
+        "responses_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/responses/llm-catalog-25-discharge_summary.json",
+        "full_api_worker_feedback": false,
+        "quality_validated": false
+      },
+      "real_service_validation": {
+        "actual_http_task": false,
+        "real_neural_inference": false,
+        "profiles": []
+      },
+      "coverage_gaps": [
+        "No real model inference for this feature has been executed or accepted by this inventory. Test transports/fixtures and catalog checks do not establish inference availability or medical writing quality.",
+        "No literal feature-key reference in a top-level browser spec was found; shared/indirect fixture coverage may exist and must be verified by the executing browser suite.",
+        "No independent clinical validation or real-patient applicability assessment is established here.",
+        "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
+      ]
+    },
+    {
+      "number": 26,
+      "key": "record_quality",
+      "name": "病历语义质控",
+      "engine": "llm",
+      "execution_mode": "shared_text_llm",
+      "simulated_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "clinical_validation": false,
+        "chat_default_prompt_gateway_accepted": true,
+        "responses_default_prompt_gateway_accepted": true,
+        "application_validators_unchanged": true,
+        "real_http": true,
+        "chat_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/llm-catalog-26-record_quality.json",
+        "responses_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/responses/llm-catalog-26-record_quality.json",
+        "full_api_worker_feedback": false,
+        "quality_validated": false
+      },
+      "real_service_validation": {
+        "actual_http_task": false,
+        "real_neural_inference": false,
+        "profiles": []
+      },
+      "coverage_gaps": [
+        "No real model inference for this feature has been executed or accepted by this inventory. Test transports/fixtures and catalog checks do not establish inference availability or medical writing quality.",
+        "No independent clinical validation or real-patient applicability assessment is established here.",
+        "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
+      ]
+    },
+    {
+      "number": 27,
+      "key": "icd_candidates",
+      "name": "ICD编码候选",
+      "engine": "llm",
+      "execution_mode": "shared_text_llm",
+      "simulated_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "clinical_validation": false,
+        "chat_default_prompt_gateway_accepted": true,
+        "responses_default_prompt_gateway_accepted": true,
+        "application_validators_unchanged": true,
+        "real_http": true,
+        "chat_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/llm-catalog-27-icd_candidates.json",
+        "responses_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/responses/llm-catalog-27-icd_candidates.json",
+        "full_api_worker_feedback": false,
+        "quality_validated": false
+      },
+      "real_service_validation": {
+        "actual_http_task": false,
+        "real_neural_inference": false,
+        "profiles": []
+      },
+      "coverage_gaps": [
+        "No real model inference for this feature has been executed or accepted by this inventory. Test transports/fixtures and catalog checks do not establish inference availability or medical writing quality.",
+        "No independent clinical validation or real-patient applicability assessment is established here.",
+        "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
+      ]
+    },
+    {
+      "number": 28,
+      "key": "record_home_review",
+      "name": "病案首页核对",
+      "engine": "llm",
+      "execution_mode": "shared_text_llm",
+      "simulated_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "clinical_validation": false,
+        "chat_default_prompt_gateway_accepted": true,
+        "responses_default_prompt_gateway_accepted": true,
+        "application_validators_unchanged": true,
+        "real_http": true,
+        "chat_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/llm-catalog-28-record_home_review.json",
+        "responses_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/responses/llm-catalog-28-record_home_review.json",
+        "full_api_worker_feedback": false,
+        "quality_validated": false
+      },
+      "real_service_validation": {
+        "actual_http_task": false,
+        "real_neural_inference": false,
+        "profiles": []
+      },
+      "coverage_gaps": [
+        "No real model inference for this feature has been executed or accepted by this inventory. Test transports/fixtures and catalog checks do not establish inference availability or medical writing quality.",
+        "No independent clinical validation or real-patient applicability assessment is established here.",
+        "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
+      ]
+    },
+    {
+      "number": 29,
+      "key": "consent_material",
+      "name": "知情沟通材料助手",
+      "engine": "llm",
+      "execution_mode": "shared_text_llm",
+      "simulated_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "clinical_validation": false,
+        "chat_default_prompt_gateway_accepted": true,
+        "responses_default_prompt_gateway_accepted": true,
+        "application_validators_unchanged": true,
+        "real_http": true,
+        "chat_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/llm-catalog-29-consent_material.json",
+        "responses_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/responses/llm-catalog-29-consent_material.json",
+        "full_api_worker_feedback": false,
+        "quality_validated": false
+      },
+      "real_service_validation": {
+        "actual_http_task": false,
+        "real_neural_inference": false,
+        "profiles": []
+      },
+      "coverage_gaps": [
+        "No real model inference for this feature has been executed or accepted by this inventory. Test transports/fixtures and catalog checks do not establish inference availability or medical writing quality.",
+        "No literal feature-key reference in a top-level browser spec was found; shared/indirect fixture coverage may exist and must be verified by the executing browser suite.",
+        "No independent clinical validation or real-patient applicability assessment is established here.",
+        "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
+      ]
+    },
+    {
+      "number": 30,
+      "key": "clinical_consistency",
+      "name": "诊断医嘱文书一致性检查",
+      "engine": "llm",
+      "execution_mode": "shared_text_llm",
+      "simulated_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "clinical_validation": false,
+        "chat_default_prompt_gateway_accepted": true,
+        "responses_default_prompt_gateway_accepted": true,
+        "application_validators_unchanged": true,
+        "real_http": true,
+        "chat_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/llm-catalog-30-clinical_consistency.json",
+        "responses_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/responses/llm-catalog-30-clinical_consistency.json",
+        "full_api_worker_feedback": false,
+        "quality_validated": false
+      },
+      "real_service_validation": {
+        "actual_http_task": false,
+        "real_neural_inference": false,
+        "profiles": []
+      },
+      "coverage_gaps": [
+        "No real model inference for this feature has been executed or accepted by this inventory. Test transports/fixtures and catalog checks do not establish inference availability or medical writing quality.",
+        "No literal feature-key reference in a top-level browser spec was found; shared/indirect fixture coverage may exist and must be verified by the executing browser suite.",
+        "No literal feature-key reference in a backend test file was found; shared catalog/gateway coverage is not a per-feature positive execution test.",
+        "No independent clinical validation or real-patient applicability assessment is established here.",
+        "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
+      ]
+    },
+    {
+      "number": 31,
+      "key": "lab_interpretation",
+      "name": "医生端检验解读",
+      "engine": "llm",
+      "execution_mode": "shared_text_llm",
+      "simulated_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "clinical_validation": false,
+        "chat_default_prompt_gateway_accepted": true,
+        "responses_default_prompt_gateway_accepted": true,
+        "application_validators_unchanged": true,
+        "real_http": true,
+        "chat_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/llm-catalog-31-lab_interpretation.json",
+        "responses_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/responses/llm-catalog-31-lab_interpretation.json",
+        "full_api_worker_feedback": false,
+        "quality_validated": false
+      },
+      "real_service_validation": {
+        "actual_http_task": false,
+        "real_neural_inference": false,
+        "profiles": []
+      },
+      "coverage_gaps": [
+        "No real model inference for this feature has been executed or accepted by this inventory. Test transports/fixtures and catalog checks do not establish inference availability or medical writing quality.",
+        "No independent clinical validation or real-patient applicability assessment is established here.",
+        "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
+      ]
+    },
+    {
+      "number": 32,
+      "key": "lab_trends",
+      "name": "检验趋势分析",
+      "engine": "llm",
+      "execution_mode": "shared_text_llm",
+      "simulated_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "clinical_validation": false,
+        "chat_default_prompt_gateway_accepted": true,
+        "responses_default_prompt_gateway_accepted": true,
+        "application_validators_unchanged": true,
+        "real_http": true,
+        "chat_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/llm-catalog-32-lab_trends.json",
+        "responses_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/responses/llm-catalog-32-lab_trends.json",
+        "full_api_worker_feedback": false,
+        "quality_validated": false
+      },
+      "real_service_validation": {
+        "actual_http_task": false,
+        "real_neural_inference": false,
+        "profiles": []
+      },
+      "coverage_gaps": [
+        "No real model inference for this feature has been executed or accepted by this inventory. Test transports/fixtures and catalog checks do not establish inference availability or medical writing quality.",
+        "No literal feature-key reference in a top-level browser spec was found; shared/indirect fixture coverage may exist and must be verified by the executing browser suite.",
+        "No literal feature-key reference in a backend test file was found; shared catalog/gateway coverage is not a per-feature positive execution test.",
+        "No independent clinical validation or real-patient applicability assessment is established here.",
+        "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
+      ]
+    },
+    {
+      "number": 33,
+      "key": "critical_value_assistance",
+      "name": "危急值处置辅助",
+      "engine": "llm",
+      "execution_mode": "shared_text_llm",
+      "simulated_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "clinical_validation": false,
+        "chat_default_prompt_gateway_accepted": true,
+        "responses_default_prompt_gateway_accepted": true,
+        "application_validators_unchanged": true,
+        "real_http": true,
+        "chat_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/llm-catalog-33-critical_value_assistance.json",
+        "responses_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/responses/llm-catalog-33-critical_value_assistance.json",
+        "full_api_worker_feedback": false,
+        "quality_validated": false
+      },
+      "real_service_validation": {
+        "actual_http_task": false,
+        "real_neural_inference": false,
+        "profiles": []
+      },
+      "coverage_gaps": [
+        "No real model inference for this feature has been executed or accepted by this inventory. Test transports/fixtures and catalog checks do not establish inference availability or medical writing quality.",
+        "No literal feature-key reference in a top-level browser spec was found; shared/indirect fixture coverage may exist and must be verified by the executing browser suite.",
+        "No literal feature-key reference in a backend test file was found; shared catalog/gateway coverage is not a per-feature positive execution test.",
+        "No independent clinical validation or real-patient applicability assessment is established here.",
+        "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
+      ]
+    },
+    {
+      "number": 34,
+      "key": "lab_quality_signal",
+      "name": "检验质量异常提示",
+      "engine": "prediction",
+      "execution_mode": "generic_specialist_contract_only",
+      "simulated_gateway_validation": {
+        "applicable": false,
+        "reason": "This engine is not one of the63 text LLM tasks; retain its original actual native-service evidence."
+      },
+      "real_service_validation": {
+        "actual_http_task": false,
+        "real_neural_inference": false,
+        "profiles": []
+      },
+      "coverage_gaps": [
+        "No bundled laboratory specimen/quality classifier or dedicated service.",
+        "No literal feature-key reference in a top-level browser spec was found; shared/indirect fixture coverage may exist and must be verified by the executing browser suite.",
+        "No literal feature-key reference in a backend test file was found; shared catalog/gateway coverage is not a per-feature positive execution test.",
+        "No independent clinical validation or real-patient applicability assessment is established here."
+      ]
+    },
+    {
+      "number": 35,
+      "key": "imaging_report_assistant",
+      "name": "影像报告助手",
+      "engine": "llm",
+      "execution_mode": "shared_text_llm",
+      "simulated_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "clinical_validation": false,
+        "chat_default_prompt_gateway_accepted": true,
+        "responses_default_prompt_gateway_accepted": true,
+        "application_validators_unchanged": true,
+        "real_http": true,
+        "chat_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/llm-catalog-35-imaging_report_assistant.json",
+        "responses_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/responses/llm-catalog-35-imaging_report_assistant.json",
+        "full_api_worker_feedback": false,
+        "quality_validated": false
+      },
+      "real_service_validation": {
+        "actual_http_task": false,
+        "real_neural_inference": false,
+        "profiles": []
+      },
+      "coverage_gaps": [
+        "No real model inference for this feature has been executed or accepted by this inventory. Test transports/fixtures and catalog checks do not establish inference availability or medical writing quality.",
+        "No literal feature-key reference in a top-level browser spec was found; shared/indirect fixture coverage may exist and must be verified by the executing browser suite.",
+        "No independent clinical validation or real-patient applicability assessment is established here.",
+        "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
+      ]
+    },
+    {
+      "number": 36,
+      "key": "imaging_detection",
+      "name": "医学影像辅助识别",
+      "engine": "vision",
+      "execution_mode": "offline_neural_research",
+      "simulated_gateway_validation": {
+        "applicable": false,
+        "reason": "This engine is not one of the63 text LLM tasks; retain its original actual native-service evidence."
+      },
+      "real_service_validation": {
+        "actual_http_task": true,
+        "real_neural_inference": true,
+        "profiles": [
+          {
+            "kind": "imaging",
+            "model_version": "xrv:5ac0b6e286f810d13ad69932891bf21fcc8b336f4c72887be69318d959cb92aa",
+            "http_status": 200
+          }
+        ]
+      },
+      "coverage_gaps": [
+        "Single-frame frontal chest X-ray research classifier; 18 image-level raw scores, not broad imaging diagnosis.",
+        "No independent clinical validation or real-patient applicability assessment is established here.",
+        "Today this feature executed successfully through an isolated specialist HTTP service using synthetic data. Hospital API/worker/provider persistence and real-world clinical/operational effectiveness are separate unverified claims in this inventory."
+      ]
+    },
+    {
+      "number": 37,
+      "key": "ecg_analysis",
+      "name": "心电辅助判读",
+      "engine": "signal",
+      "execution_mode": "offline_neural_research",
+      "simulated_gateway_validation": {
+        "applicable": false,
+        "reason": "This engine is not one of the63 text LLM tasks; retain its original actual native-service evidence."
+      },
+      "real_service_validation": {
+        "actual_http_task": true,
+        "real_neural_inference": true,
+        "profiles": [
+          {
+            "kind": "ecg",
+            "model_version": "ssl-ecg:f5648cb92103d3da1c2b2fa5e7bcb84874fd5e9d0227784b14edb138b59ab8dc",
+            "http_status": 200
+          }
+        ]
+      },
+      "coverage_gaps": [
+        "Research CNN; exactly twelve original leads, 100 Hz, 1000 samples, five recording-level scores.",
+        "No independent clinical validation or real-patient applicability assessment is established here.",
+        "Today this feature executed successfully through an isolated specialist HTTP service using synthetic data. Hospital API/worker/provider persistence and real-world clinical/operational effectiveness are separate unverified claims in this inventory."
+      ]
+    },
+    {
+      "number": 38,
+      "key": "pathology_screening",
+      "name": "病理辅助筛查",
+      "engine": "vision",
+      "execution_mode": "generic_specialist_contract_only",
+      "simulated_gateway_validation": {
+        "applicable": false,
+        "reason": "This engine is not one of the63 text LLM tasks; retain its original actual native-service evidence."
+      },
+      "real_service_validation": {
+        "actual_http_task": false,
+        "real_neural_inference": false,
+        "profiles": []
+      },
+      "coverage_gaps": [
+        "Generic specialist JSON envelope exists; no bundled WSI/tissue model or native slide attachment workflow.",
+        "No literal feature-key reference in a top-level browser spec was found; shared/indirect fixture coverage may exist and must be verified by the executing browser suite.",
+        "No literal feature-key reference in a backend test file was found; shared catalog/gateway coverage is not a per-feature positive execution test.",
+        "No independent clinical validation or real-patient applicability assessment is established here."
+      ]
+    },
+    {
+      "number": 39,
+      "key": "exam_summary",
+      "name": "体检总检报告",
+      "engine": "llm",
+      "execution_mode": "shared_text_llm",
+      "simulated_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "clinical_validation": false,
+        "chat_default_prompt_gateway_accepted": true,
+        "responses_default_prompt_gateway_accepted": true,
+        "application_validators_unchanged": true,
+        "real_http": true,
+        "chat_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/llm-catalog-39-exam_summary.json",
+        "responses_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/responses/llm-catalog-39-exam_summary.json",
+        "full_api_worker_feedback": false,
+        "quality_validated": false
+      },
+      "real_service_validation": {
+        "actual_http_task": false,
+        "real_neural_inference": false,
+        "profiles": []
+      },
+      "coverage_gaps": [
+        "No real model inference for this feature has been executed or accepted by this inventory. Test transports/fixtures and catalog checks do not establish inference availability or medical writing quality.",
+        "No literal feature-key reference in a top-level browser spec was found; shared/indirect fixture coverage may exist and must be verified by the executing browser suite.",
+        "No literal feature-key reference in a backend test file was found; shared catalog/gateway coverage is not a per-feature positive execution test.",
+        "No independent clinical validation or real-patient applicability assessment is established here.",
+        "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
+      ]
+    },
+    {
+      "number": 40,
+      "key": "screening_plan",
+      "name": "筛查与复查计划",
+      "engine": "llm",
+      "execution_mode": "shared_text_llm",
+      "simulated_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "clinical_validation": false,
+        "chat_default_prompt_gateway_accepted": true,
+        "responses_default_prompt_gateway_accepted": true,
+        "application_validators_unchanged": true,
+        "real_http": true,
+        "chat_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/llm-catalog-40-screening_plan.json",
+        "responses_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/responses/llm-catalog-40-screening_plan.json",
+        "full_api_worker_feedback": false,
+        "quality_validated": false
+      },
+      "real_service_validation": {
+        "actual_http_task": false,
+        "real_neural_inference": false,
+        "profiles": []
+      },
+      "coverage_gaps": [
+        "No real model inference for this feature has been executed or accepted by this inventory. Test transports/fixtures and catalog checks do not establish inference availability or medical writing quality.",
+        "No literal feature-key reference in a top-level browser spec was found; shared/indirect fixture coverage may exist and must be verified by the executing browser suite.",
+        "No literal feature-key reference in a backend test file was found; shared catalog/gateway coverage is not a per-feature positive execution test.",
+        "No independent clinical validation or real-patient applicability assessment is established here.",
+        "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
+      ]
+    },
+    {
+      "number": 41,
+      "key": "deterioration_risk",
+      "name": "病情恶化预警",
+      "engine": "prediction",
+      "execution_mode": "deterministic_rule_service",
+      "simulated_gateway_validation": {
+        "applicable": false,
+        "reason": "This engine is not one of the63 text LLM tasks; retain its original actual native-service evidence."
+      },
+      "real_service_validation": {
+        "actual_http_task": true,
+        "real_neural_inference": false,
+        "profiles": [
+          {
+            "kind": "news2",
+            "model_version": "news2:e8b02961f3a2068beb901aad3a39c197d0dca78b4154dff2d1e2cd2c0e5a3d37",
+            "http_status": 200
+          }
+        ]
+      },
+      "coverage_gaps": [
+        "NEWS2 observed-point rule scoring; not a validated future deterioration predictor.",
+        "No independent clinical validation or real-patient applicability assessment is established here.",
+        "Today this feature executed successfully through an isolated specialist HTTP service using synthetic data. Hospital API/worker/provider persistence and real-world clinical/operational effectiveness are separate unverified claims in this inventory."
+      ]
+    },
+    {
+      "number": 42,
+      "key": "sepsis_risk",
+      "name": "脓毒症风险提示",
+      "engine": "prediction",
+      "execution_mode": "deterministic_rule_service",
+      "simulated_gateway_validation": {
+        "applicable": false,
+        "reason": "This engine is not one of the63 text LLM tasks; retain its original actual native-service evidence."
+      },
+      "real_service_validation": {
+        "actual_http_task": true,
+        "real_neural_inference": false,
+        "profiles": [
+          {
+            "kind": "qsofa",
+            "model_version": "qsofa:73d547c4edf30b8564958830d72d14a7b02f9bfb0fdfddb2b37a024409d5f331",
+            "http_status": 200
+          },
+          {
+            "kind": "sofa",
+            "model_version": "sofa1:392874e1d77f2950b14018658f99e78f710cc5a465aa490db92a978237041b0d",
+            "http_status": 200
+          }
+        ]
+      },
+      "coverage_gaps": [
+        "qSOFA and local SOFA-1 observed/change rules; not sepsis diagnosis/exclusion or future-risk probabilities.",
+        "No independent clinical validation or real-patient applicability assessment is established here.",
+        "Today this feature executed successfully through an isolated specialist HTTP service using synthetic data. Hospital API/worker/provider persistence and real-world clinical/operational effectiveness are separate unverified claims in this inventory."
+      ]
+    },
+    {
+      "number": 43,
+      "key": "aki_risk",
+      "name": "急性肾损伤风险提示",
+      "engine": "prediction",
+      "execution_mode": "deterministic_rule_service",
+      "simulated_gateway_validation": {
+        "applicable": false,
+        "reason": "This engine is not one of the63 text LLM tasks; retain its original actual native-service evidence."
+      },
+      "real_service_validation": {
+        "actual_http_task": true,
+        "real_neural_inference": false,
+        "profiles": [
+          {
+            "kind": "aki",
+            "model_version": "aki:2cf8b1ad783e803b8b592462992ffaf562a4d8c1b1daab1b57391cfb301c5cd7",
+            "http_status": 200
+          }
+        ]
+      },
+      "coverage_gaps": [
+        "KDIGO observed AKI criteria and explicit historical baseline; not a future AKI risk classifier.",
+        "No independent clinical validation or real-patient applicability assessment is established here.",
+        "Today this feature executed successfully through an isolated specialist HTTP service using synthetic data. Hospital API/worker/provider persistence and real-world clinical/operational effectiveness are separate unverified claims in this inventory."
+      ]
+    },
+    {
+      "number": 44,
+      "key": "vte_assessment",
+      "name": "VTE评估助手",
+      "engine": "llm",
+      "execution_mode": "shared_text_llm",
+      "simulated_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "clinical_validation": false,
+        "chat_default_prompt_gateway_accepted": true,
+        "responses_default_prompt_gateway_accepted": true,
+        "application_validators_unchanged": true,
+        "real_http": true,
+        "chat_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/llm-catalog-44-vte_assessment.json",
+        "responses_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/responses/llm-catalog-44-vte_assessment.json",
+        "full_api_worker_feedback": false,
+        "quality_validated": false
+      },
+      "real_service_validation": {
+        "actual_http_task": false,
+        "real_neural_inference": false,
+        "profiles": []
+      },
+      "coverage_gaps": [
+        "No real model inference for this feature has been executed or accepted by this inventory. Test transports/fixtures and catalog checks do not establish inference availability or medical writing quality.",
+        "No literal feature-key reference in a top-level browser spec was found; shared/indirect fixture coverage may exist and must be verified by the executing browser suite.",
+        "No literal feature-key reference in a backend test file was found; shared catalog/gateway coverage is not a per-feature positive execution test.",
+        "No independent clinical validation or real-patient applicability assessment is established here.",
+        "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
+      ]
+    },
+    {
+      "number": 45,
+      "key": "nursing_risk_assessment",
+      "name": "跌倒与压疮评估助手",
+      "engine": "llm",
+      "execution_mode": "shared_text_llm",
+      "simulated_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "clinical_validation": false,
+        "chat_default_prompt_gateway_accepted": true,
+        "responses_default_prompt_gateway_accepted": true,
+        "application_validators_unchanged": true,
+        "real_http": true,
+        "chat_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/llm-catalog-45-nursing_risk_assessment.json",
+        "responses_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/responses/llm-catalog-45-nursing_risk_assessment.json",
+        "full_api_worker_feedback": false,
+        "quality_validated": false
+      },
+      "real_service_validation": {
+        "actual_http_task": false,
+        "real_neural_inference": false,
+        "profiles": []
+      },
+      "coverage_gaps": [
+        "No real model inference for this feature has been executed or accepted by this inventory. Test transports/fixtures and catalog checks do not establish inference availability or medical writing quality.",
+        "No independent clinical validation or real-patient applicability assessment is established here.",
+        "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
+      ]
+    },
+    {
+      "number": 46,
+      "key": "nursing_plan",
+      "name": "护理计划草稿",
+      "engine": "llm",
+      "execution_mode": "shared_text_llm",
+      "simulated_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "clinical_validation": false,
+        "chat_default_prompt_gateway_accepted": true,
+        "responses_default_prompt_gateway_accepted": true,
+        "application_validators_unchanged": true,
+        "real_http": true,
+        "chat_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/llm-catalog-46-nursing_plan.json",
+        "responses_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/responses/llm-catalog-46-nursing_plan.json",
+        "full_api_worker_feedback": false,
+        "quality_validated": false
+      },
+      "real_service_validation": {
+        "actual_http_task": false,
+        "real_neural_inference": false,
+        "profiles": []
+      },
+      "coverage_gaps": [
+        "No real model inference for this feature has been executed or accepted by this inventory. Test transports/fixtures and catalog checks do not establish inference availability or medical writing quality.",
+        "No literal feature-key reference in a backend test file was found; shared catalog/gateway coverage is not a per-feature positive execution test.",
+        "No independent clinical validation or real-patient applicability assessment is established here.",
+        "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
+      ]
+    },
+    {
+      "number": 47,
+      "key": "handover_summary",
+      "name": "交接班重点摘要",
+      "engine": "llm",
+      "execution_mode": "shared_text_llm",
+      "simulated_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "clinical_validation": false,
+        "chat_default_prompt_gateway_accepted": true,
+        "responses_default_prompt_gateway_accepted": true,
+        "application_validators_unchanged": true,
+        "real_http": true,
+        "chat_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/llm-catalog-47-handover_summary.json",
+        "responses_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/responses/llm-catalog-47-handover_summary.json",
+        "full_api_worker_feedback": false,
+        "quality_validated": false
+      },
+      "real_service_validation": {
+        "actual_http_task": false,
+        "real_neural_inference": false,
+        "profiles": []
+      },
+      "coverage_gaps": [
+        "No real model inference for this feature has been executed or accepted by this inventory. Test transports/fixtures and catalog checks do not establish inference availability or medical writing quality.",
+        "No independent clinical validation or real-patient applicability assessment is established here.",
+        "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
+      ]
+    },
+    {
+      "number": 48,
+      "key": "perioperative_assessment",
+      "name": "围手术期评估助手",
+      "engine": "llm",
+      "execution_mode": "shared_text_llm",
+      "simulated_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "clinical_validation": false,
+        "chat_default_prompt_gateway_accepted": true,
+        "responses_default_prompt_gateway_accepted": true,
+        "application_validators_unchanged": true,
+        "real_http": true,
+        "chat_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/llm-catalog-48-perioperative_assessment.json",
+        "responses_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/responses/llm-catalog-48-perioperative_assessment.json",
+        "full_api_worker_feedback": false,
+        "quality_validated": false
+      },
+      "real_service_validation": {
+        "actual_http_task": false,
+        "real_neural_inference": false,
+        "profiles": []
+      },
+      "coverage_gaps": [
+        "No real model inference for this feature has been executed or accepted by this inventory. Test transports/fixtures and catalog checks do not establish inference availability or medical writing quality.",
+        "No literal feature-key reference in a top-level browser spec was found; shared/indirect fixture coverage may exist and must be verified by the executing browser suite.",
+        "No independent clinical validation or real-patient applicability assessment is established here.",
+        "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
+      ]
+    },
+    {
+      "number": 49,
+      "key": "perioperative_antibiotics",
+      "name": "围术期抗菌药分析",
+      "engine": "llm",
+      "execution_mode": "shared_text_llm",
+      "simulated_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "clinical_validation": false,
+        "chat_default_prompt_gateway_accepted": true,
+        "responses_default_prompt_gateway_accepted": true,
+        "application_validators_unchanged": true,
+        "real_http": true,
+        "chat_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/llm-catalog-49-perioperative_antibiotics.json",
+        "responses_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/responses/llm-catalog-49-perioperative_antibiotics.json",
+        "full_api_worker_feedback": false,
+        "quality_validated": false
+      },
+      "real_service_validation": {
+        "actual_http_task": false,
+        "real_neural_inference": false,
+        "profiles": []
+      },
+      "coverage_gaps": [
+        "No real model inference for this feature has been executed or accepted by this inventory. Test transports/fixtures and catalog checks do not establish inference availability or medical writing quality.",
+        "No independent clinical validation or real-patient applicability assessment is established here.",
+        "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
+      ]
+    },
+    {
+      "number": 50,
+      "key": "emergency_triage_assistant",
+      "name": "急诊分诊辅助",
+      "engine": "llm",
+      "execution_mode": "shared_text_llm",
+      "simulated_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "clinical_validation": false,
+        "chat_default_prompt_gateway_accepted": true,
+        "responses_default_prompt_gateway_accepted": true,
+        "application_validators_unchanged": true,
+        "real_http": true,
+        "chat_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/llm-catalog-50-emergency_triage_assistant.json",
+        "responses_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/responses/llm-catalog-50-emergency_triage_assistant.json",
+        "full_api_worker_feedback": false,
+        "quality_validated": false
+      },
+      "real_service_validation": {
+        "actual_http_task": false,
+        "real_neural_inference": false,
+        "profiles": []
+      },
+      "coverage_gaps": [
+        "No real model inference for this feature has been executed or accepted by this inventory. Test transports/fixtures and catalog checks do not establish inference availability or medical writing quality.",
+        "No literal feature-key reference in a top-level browser spec was found; shared/indirect fixture coverage may exist and must be verified by the executing browser suite.",
+        "No literal feature-key reference in a backend test file was found; shared catalog/gateway coverage is not a per-feature positive execution test.",
+        "No independent clinical validation or real-patient applicability assessment is established here.",
+        "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
+      ]
+    },
+    {
+      "number": 51,
+      "key": "conversational_triage",
+      "name": "会话式智能导诊",
+      "engine": "llm",
+      "execution_mode": "shared_text_llm",
+      "simulated_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "clinical_validation": false,
+        "chat_default_prompt_gateway_accepted": true,
+        "responses_default_prompt_gateway_accepted": true,
+        "application_validators_unchanged": true,
+        "real_http": true,
+        "chat_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/llm-catalog-51-conversational_triage.json",
+        "responses_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/responses/llm-catalog-51-conversational_triage.json",
+        "full_api_worker_feedback": false,
+        "quality_validated": false
+      },
+      "real_service_validation": {
+        "actual_http_task": false,
+        "real_neural_inference": false,
+        "profiles": []
+      },
+      "coverage_gaps": [
+        "No real model inference for this feature has been executed or accepted by this inventory. Test transports/fixtures and catalog checks do not establish inference availability or medical writing quality.",
+        "No literal feature-key reference in a top-level browser spec was found; shared/indirect fixture coverage may exist and must be verified by the executing browser suite.",
+        "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
+      ]
+    },
+    {
+      "number": 52,
+      "key": "preconsultation",
+      "name": "智能预问诊",
+      "engine": "llm",
+      "execution_mode": "shared_text_llm",
+      "simulated_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "clinical_validation": false,
+        "chat_default_prompt_gateway_accepted": true,
+        "responses_default_prompt_gateway_accepted": true,
+        "application_validators_unchanged": true,
+        "real_http": true,
+        "chat_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/llm-catalog-52-preconsultation.json",
+        "responses_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/responses/llm-catalog-52-preconsultation.json",
+        "full_api_worker_feedback": false,
+        "quality_validated": false
+      },
+      "real_service_validation": {
+        "actual_http_task": false,
+        "real_neural_inference": false,
+        "profiles": []
+      },
+      "coverage_gaps": [
+        "No real model inference for this feature has been executed or accepted by this inventory. Test transports/fixtures and catalog checks do not establish inference availability or medical writing quality.",
+        "No literal feature-key reference in a top-level browser spec was found; shared/indirect fixture coverage may exist and must be verified by the executing browser suite.",
+        "No literal feature-key reference in a backend test file was found; shared catalog/gateway coverage is not a per-feature positive execution test.",
+        "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
+      ]
+    },
+    {
+      "number": 53,
+      "key": "patient_report_explanation",
+      "name": "患者版报告解读",
+      "engine": "llm",
+      "execution_mode": "shared_text_llm",
+      "simulated_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "clinical_validation": false,
+        "chat_default_prompt_gateway_accepted": true,
+        "responses_default_prompt_gateway_accepted": true,
+        "application_validators_unchanged": true,
+        "real_http": true,
+        "chat_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/llm-catalog-53-patient_report_explanation.json",
+        "responses_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/responses/llm-catalog-53-patient_report_explanation.json",
+        "full_api_worker_feedback": false,
+        "quality_validated": false
+      },
+      "real_service_validation": {
+        "actual_http_task": false,
+        "real_neural_inference": false,
+        "profiles": []
+      },
+      "coverage_gaps": [
+        "No real model inference for this feature has been executed or accepted by this inventory. Test transports/fixtures and catalog checks do not establish inference availability or medical writing quality.",
+        "No literal feature-key reference in a top-level browser spec was found; shared/indirect fixture coverage may exist and must be verified by the executing browser suite.",
+        "No independent clinical validation or real-patient applicability assessment is established here.",
+        "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
+      ]
+    },
+    {
+      "number": 54,
+      "key": "health_education",
+      "name": "个性化健康宣教",
+      "engine": "llm",
+      "execution_mode": "shared_text_llm",
+      "simulated_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "clinical_validation": false,
+        "chat_default_prompt_gateway_accepted": true,
+        "responses_default_prompt_gateway_accepted": true,
+        "application_validators_unchanged": true,
+        "real_http": true,
+        "chat_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/llm-catalog-54-health_education.json",
+        "responses_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/responses/llm-catalog-54-health_education.json",
+        "full_api_worker_feedback": false,
+        "quality_validated": false
+      },
+      "real_service_validation": {
+        "actual_http_task": false,
+        "real_neural_inference": false,
+        "profiles": []
+      },
+      "coverage_gaps": [
+        "No real model inference for this feature has been executed or accepted by this inventory. Test transports/fixtures and catalog checks do not establish inference availability or medical writing quality.",
+        "No literal feature-key reference in a top-level browser spec was found; shared/indirect fixture coverage may exist and must be verified by the executing browser suite.",
+        "No literal feature-key reference in a backend test file was found; shared catalog/gateway coverage is not a per-feature positive execution test.",
+        "No independent clinical validation or real-patient applicability assessment is established here.",
+        "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
+      ]
+    },
+    {
+      "number": 55,
+      "key": "rehabilitation_care",
+      "name": "出院康复照护助手",
+      "engine": "llm",
+      "execution_mode": "shared_text_llm",
+      "simulated_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "clinical_validation": false,
+        "chat_default_prompt_gateway_accepted": true,
+        "responses_default_prompt_gateway_accepted": true,
+        "application_validators_unchanged": true,
+        "real_http": true,
+        "chat_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/llm-catalog-55-rehabilitation_care.json",
+        "responses_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/responses/llm-catalog-55-rehabilitation_care.json",
+        "full_api_worker_feedback": false,
+        "quality_validated": false
+      },
+      "real_service_validation": {
+        "actual_http_task": false,
+        "real_neural_inference": false,
+        "profiles": []
+      },
+      "coverage_gaps": [
+        "No real model inference for this feature has been executed or accepted by this inventory. Test transports/fixtures and catalog checks do not establish inference availability or medical writing quality.",
+        "No literal feature-key reference in a top-level browser spec was found; shared/indirect fixture coverage may exist and must be verified by the executing browser suite.",
+        "No independent clinical validation or real-patient applicability assessment is established here.",
+        "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
+      ]
+    },
+    {
+      "number": 56,
+      "key": "chronic_followup",
+      "name": "慢病随访助手",
+      "engine": "llm",
+      "execution_mode": "shared_text_llm",
+      "simulated_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "clinical_validation": false,
+        "chat_default_prompt_gateway_accepted": true,
+        "responses_default_prompt_gateway_accepted": true,
+        "application_validators_unchanged": true,
+        "real_http": true,
+        "chat_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/llm-catalog-56-chronic_followup.json",
+        "responses_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/responses/llm-catalog-56-chronic_followup.json",
+        "full_api_worker_feedback": false,
+        "quality_validated": false
+      },
+      "real_service_validation": {
+        "actual_http_task": false,
+        "real_neural_inference": false,
+        "profiles": []
+      },
+      "coverage_gaps": [
+        "No real model inference for this feature has been executed or accepted by this inventory. Test transports/fixtures and catalog checks do not establish inference availability or medical writing quality.",
+        "No literal feature-key reference in a top-level browser spec was found; shared/indirect fixture coverage may exist and must be verified by the executing browser suite.",
+        "No literal feature-key reference in a backend test file was found; shared catalog/gateway coverage is not a per-feature positive execution test.",
+        "No independent clinical validation or real-patient applicability assessment is established here.",
+        "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
+      ]
+    },
+    {
+      "number": 57,
+      "key": "medication_adherence",
+      "name": "用药依从性回访",
+      "engine": "llm",
+      "execution_mode": "shared_text_llm",
+      "simulated_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "clinical_validation": false,
+        "chat_default_prompt_gateway_accepted": true,
+        "responses_default_prompt_gateway_accepted": true,
+        "application_validators_unchanged": true,
+        "real_http": true,
+        "chat_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/llm-catalog-57-medication_adherence.json",
+        "responses_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/responses/llm-catalog-57-medication_adherence.json",
+        "full_api_worker_feedback": false,
+        "quality_validated": false
+      },
+      "real_service_validation": {
+        "actual_http_task": false,
+        "real_neural_inference": false,
+        "profiles": []
+      },
+      "coverage_gaps": [
+        "No real model inference for this feature has been executed or accepted by this inventory. Test transports/fixtures and catalog checks do not establish inference availability or medical writing quality.",
+        "No literal feature-key reference in a top-level browser spec was found; shared/indirect fixture coverage may exist and must be verified by the executing browser suite.",
+        "No literal feature-key reference in a backend test file was found; shared catalog/gateway coverage is not a per-feature positive execution test.",
+        "No independent clinical validation or real-patient applicability assessment is established here.",
+        "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
+      ]
+    },
+    {
+      "number": 58,
+      "key": "hospital_navigation",
+      "name": "院内办事与导航助手",
+      "engine": "llm",
+      "execution_mode": "shared_text_llm",
+      "simulated_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "clinical_validation": false,
+        "chat_default_prompt_gateway_accepted": true,
+        "responses_default_prompt_gateway_accepted": true,
+        "application_validators_unchanged": true,
+        "real_http": true,
+        "chat_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/llm-catalog-58-hospital_navigation.json",
+        "responses_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/responses/llm-catalog-58-hospital_navigation.json",
+        "full_api_worker_feedback": false,
+        "quality_validated": false
+      },
+      "real_service_validation": {
+        "actual_http_task": false,
+        "real_neural_inference": false,
+        "profiles": []
+      },
+      "coverage_gaps": [
+        "No real model inference for this feature has been executed or accepted by this inventory. Test transports/fixtures and catalog checks do not establish inference availability or medical writing quality.",
+        "No literal feature-key reference in a backend test file was found; shared catalog/gateway coverage is not a per-feature positive execution test.",
+        "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
+      ]
+    },
+    {
+      "number": 59,
+      "key": "appointment_assistant",
+      "name": "预约办理助手",
+      "engine": "llm",
+      "execution_mode": "shared_text_llm",
+      "simulated_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "clinical_validation": false,
+        "chat_default_prompt_gateway_accepted": true,
+        "responses_default_prompt_gateway_accepted": true,
+        "application_validators_unchanged": true,
+        "real_http": true,
+        "chat_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/llm-catalog-59-appointment_assistant.json",
+        "responses_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/responses/llm-catalog-59-appointment_assistant.json",
+        "full_api_worker_feedback": false,
+        "quality_validated": false
+      },
+      "real_service_validation": {
+        "actual_http_task": false,
+        "real_neural_inference": false,
+        "profiles": []
+      },
+      "coverage_gaps": [
+        "No real model inference for this feature has been executed or accepted by this inventory. Test transports/fixtures and catalog checks do not establish inference availability or medical writing quality.",
+        "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
+      ]
+    },
+    {
+      "number": 60,
+      "key": "accessible_voice",
+      "name": "多语言及适老语音服务",
+      "engine": "speech",
+      "execution_mode": "generic_specialist_contract_only",
+      "simulated_gateway_validation": {
+        "applicable": false,
+        "reason": "This engine is not one of the63 text LLM tasks; retain its original actual native-service evidence."
+      },
+      "real_service_validation": {
+        "actual_http_task": false,
+        "real_neural_inference": false,
+        "profiles": []
+      },
+      "coverage_gaps": [
+        "No bundled multilingual translation/TTS model, dedicated synthesis service or dedicated output-media workflow.",
+        "No literal feature-key reference in a top-level browser spec was found; shared/indirect fixture coverage may exist and must be verified by the executing browser suite.",
+        "No literal feature-key reference in a backend test file was found; shared catalog/gateway coverage is not a per-feature positive execution test."
+      ]
+    },
+    {
+      "number": 61,
+      "key": "operations_qa",
+      "name": "医院数据问答",
+      "engine": "llm",
+      "execution_mode": "shared_text_llm",
+      "simulated_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "clinical_validation": false,
+        "chat_default_prompt_gateway_accepted": true,
+        "responses_default_prompt_gateway_accepted": true,
+        "application_validators_unchanged": true,
+        "real_http": true,
+        "chat_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/llm-catalog-61-operations_qa.json",
+        "responses_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/responses/llm-catalog-61-operations_qa.json",
+        "full_api_worker_feedback": true,
+        "quality_validated": false
+      },
+      "real_service_validation": {
+        "actual_http_task": false,
+        "real_neural_inference": false,
+        "profiles": []
+      },
+      "coverage_gaps": [
+        "No real model inference for this feature has been executed or accepted by this inventory. Test transports/fixtures and catalog checks do not establish inference availability or medical writing quality.",
+        "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
+      ]
+    },
+    {
+      "number": 62,
+      "key": "visit_forecast",
+      "name": "就诊量预测",
+      "engine": "prediction",
+      "execution_mode": "deterministic_statistical_service",
+      "simulated_gateway_validation": {
+        "applicable": false,
+        "reason": "This engine is not one of the63 text LLM tasks; retain its original actual native-service evidence."
+      },
+      "real_service_validation": {
+        "actual_http_task": true,
+        "real_neural_inference": false,
+        "profiles": [
+          {
+            "kind": "forecast",
+            "model_version": "stat-forecast:bae7099dfdab478ed8ba03f6640c2ecbf0ae7c75ce7eaf415fec17ebac980411",
+            "http_status": 200
+          }
+        ]
+      },
+      "coverage_gaps": [
+        "Forecasts governed daily recorded registration counts using fixed statistical recipes.",
+        "No real operational/teaching effectiveness validation is established here.",
+        "Today this feature executed successfully through an isolated specialist HTTP service using synthetic data. Hospital API/worker/provider persistence and real-world clinical/operational effectiveness are separate unverified claims in this inventory."
+      ]
+    },
+    {
+      "number": 63,
+      "key": "roster_optimization",
+      "name": "排班与号源优化",
+      "engine": "optimizer",
+      "execution_mode": "deterministic_constraint_service",
+      "simulated_gateway_validation": {
+        "applicable": false,
+        "reason": "This engine is not one of the63 text LLM tasks; retain its original actual native-service evidence."
+      },
+      "real_service_validation": {
+        "actual_http_task": true,
+        "real_neural_inference": false,
+        "profiles": [
+          {
+            "kind": "roster",
+            "model_version": "roster:b6aad609cc2f6417991540082967074e0d8383906d37ec0edcc07b1f041ee5a6",
+            "http_status": 200
+          }
+        ]
+      },
+      "coverage_gaps": [
+        "Finite governed staff/slot constraints and optimization proof; no learned model.",
+        "No real operational/teaching effectiveness validation is established here.",
+        "Today this feature executed successfully through an isolated specialist HTTP service using synthetic data. Hospital API/worker/provider persistence and real-world clinical/operational effectiveness are separate unverified claims in this inventory."
+      ]
+    },
+    {
+      "number": 64,
+      "key": "bed_forecast",
+      "name": "床位占用与流转预测",
+      "engine": "prediction",
+      "execution_mode": "deterministic_statistical_service",
+      "simulated_gateway_validation": {
+        "applicable": false,
+        "reason": "This engine is not one of the63 text LLM tasks; retain its original actual native-service evidence."
+      },
+      "real_service_validation": {
+        "actual_http_task": true,
+        "real_neural_inference": false,
+        "profiles": [
+          {
+            "kind": "bed",
+            "model_version": "bed:f96494d13055e046bb3e517884c20df977f5fe956c2dd1d716b5f635b4afbeb6",
+            "http_status": 200
+          }
+        ]
+      },
+      "coverage_gaps": [
+        "Forecasts governed physical occupancy and actual flow series; not unmet demand or individual bed allocation.",
+        "No real operational/teaching effectiveness validation is established here.",
+        "Today this feature executed successfully through an isolated specialist HTTP service using synthetic data. Hospital API/worker/provider persistence and real-world clinical/operational effectiveness are separate unverified claims in this inventory."
+      ]
+    },
+    {
+      "number": 65,
+      "key": "surgery_scheduling",
+      "name": "手术排台优化",
+      "engine": "optimizer",
+      "execution_mode": "deterministic_constraint_service",
+      "simulated_gateway_validation": {
+        "applicable": false,
+        "reason": "This engine is not one of the63 text LLM tasks; retain its original actual native-service evidence."
+      },
+      "real_service_validation": {
+        "actual_http_task": true,
+        "real_neural_inference": false,
+        "profiles": [
+          {
+            "kind": "surgery",
+            "model_version": "surgery:0546f6b610e69d4b1110365371163130438e5f0fe21ec870470e54f414d3a329",
+            "http_status": 200
+          }
+        ]
+      },
+      "coverage_gaps": [
+        "Finite declared surgery/resources/start candidates and explicit constraints; no automatic scheduling write.",
+        "No real operational/teaching effectiveness validation is established here.",
+        "Today this feature executed successfully through an isolated specialist HTTP service using synthetic data. Hospital API/worker/provider persistence and real-world clinical/operational effectiveness are separate unverified claims in this inventory."
+      ]
+    },
+    {
+      "number": 66,
+      "key": "supply_forecast",
+      "name": "药品耗材需求预测",
+      "engine": "prediction",
+      "execution_mode": "deterministic_statistical_service",
+      "simulated_gateway_validation": {
+        "applicable": false,
+        "reason": "This engine is not one of the63 text LLM tasks; retain its original actual native-service evidence."
+      },
+      "real_service_validation": {
+        "actual_http_task": true,
+        "real_neural_inference": false,
+        "profiles": [
+          {
+            "kind": "supply",
+            "model_version": "supply:6de015bef2918eef22c4a9422e79cbf474bbde5beb4d67c768f054ac71cb9c25",
+            "http_status": 200
+          }
+        ]
+      },
+      "coverage_gaps": [
+        "Fixed six-method comparison, 28 rolling origins and three recorded-quantity targets; no latent demand/procurement inference.",
+        "No real operational/teaching effectiveness validation is established here.",
+        "Today this feature executed successfully through an isolated specialist HTTP service using synthetic data. Hospital API/worker/provider persistence and real-world clinical/operational effectiveness are separate unverified claims in this inventory."
+      ]
+    },
+    {
+      "number": 67,
+      "key": "inventory_optimization",
+      "name": "临期积压与采购分析",
+      "engine": "optimizer",
+      "execution_mode": "deterministic_constraint_service",
+      "simulated_gateway_validation": {
+        "applicable": false,
+        "reason": "This engine is not one of the63 text LLM tasks; retain its original actual native-service evidence."
+      },
+      "real_service_validation": {
+        "actual_http_task": true,
+        "real_neural_inference": false,
+        "profiles": [
+          {
+            "kind": "inventory",
+            "model_version": "inventory:9acd22aeb6d6a780884de321cc6fa8a5afc02923a0ee579c3a7b09f9cf04f00d",
+            "http_status": 200
+          }
+        ]
+      },
+      "coverage_gaps": [
+        "Exact stock conservation/cost comparison over the declared indivisible candidate set.",
+        "No real operational/teaching effectiveness validation is established here.",
+        "Today this feature executed successfully through an isolated specialist HTTP service using synthetic data. Hospital API/worker/provider persistence and real-world clinical/operational effectiveness are separate unverified claims in this inventory."
+      ]
+    },
+    {
+      "number": 68,
+      "key": "drg_evidence_review",
+      "name": "DRG和DIP编码证据核对",
+      "engine": "llm",
+      "execution_mode": "native_closed_llm_draft",
+      "simulated_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "clinical_validation": false,
+        "chat_default_prompt_gateway_accepted": true,
+        "responses_default_prompt_gateway_accepted": true,
+        "application_validators_unchanged": true,
+        "real_http": true,
+        "chat_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/llm-catalog-68-drg_evidence_review.json",
+        "responses_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/responses/llm-catalog-68-drg_evidence_review.json",
+        "full_api_worker_feedback": false,
+        "quality_validated": false
+      },
+      "real_service_validation": {
+        "actual_http_task": false,
+        "real_neural_inference": false,
+        "profiles": []
+      },
+      "coverage_gaps": [
+        "No real model inference for this feature has been executed or accepted by this inventory. Test transports/fixtures and catalog checks do not establish inference availability or medical writing quality.",
+        "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
+      ]
+    },
+    {
+      "number": 69,
+      "key": "charge_reconciliation",
+      "name": "收费与漏记账核对",
+      "engine": "llm",
+      "execution_mode": "native_closed_llm_draft",
+      "simulated_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "clinical_validation": false,
+        "chat_default_prompt_gateway_accepted": true,
+        "responses_default_prompt_gateway_accepted": true,
+        "application_validators_unchanged": true,
+        "real_http": true,
+        "chat_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/llm-catalog-69-charge_reconciliation.json",
+        "responses_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/responses/llm-catalog-69-charge_reconciliation.json",
+        "full_api_worker_feedback": false,
+        "quality_validated": false
+      },
+      "real_service_validation": {
+        "actual_http_task": false,
+        "real_neural_inference": false,
+        "profiles": []
+      },
+      "coverage_gaps": [
+        "No real model inference for this feature has been executed or accepted by this inventory. Test transports/fixtures and catalog checks do not establish inference availability or medical writing quality.",
+        "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
+      ]
+    },
+    {
+      "number": 70,
+      "key": "feedback_analysis",
+      "name": "满意度与评价证据分析",
+      "engine": "llm",
+      "execution_mode": "native_closed_llm_draft",
+      "simulated_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "clinical_validation": false,
+        "chat_default_prompt_gateway_accepted": true,
+        "responses_default_prompt_gateway_accepted": true,
+        "application_validators_unchanged": true,
+        "real_http": true,
+        "chat_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/llm-catalog-70-feedback_analysis.json",
+        "responses_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/responses/llm-catalog-70-feedback_analysis.json",
+        "full_api_worker_feedback": false,
+        "quality_validated": false
+      },
+      "real_service_validation": {
+        "actual_http_task": false,
+        "real_neural_inference": false,
+        "profiles": []
+      },
+      "coverage_gaps": [
+        "No real model inference for this feature has been executed or accepted by this inventory. Test transports/fixtures and catalog checks do not establish inference availability or medical writing quality.",
+        "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
+      ]
+    },
+    {
+      "number": 71,
+      "key": "guideline_ingestion",
+      "name": "指南入库助手",
+      "engine": "llm",
+      "execution_mode": "native_closed_llm_draft",
+      "simulated_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "clinical_validation": false,
+        "chat_default_prompt_gateway_accepted": true,
+        "responses_default_prompt_gateway_accepted": true,
+        "application_validators_unchanged": true,
+        "real_http": true,
+        "chat_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/llm-catalog-71-guideline_ingestion.json",
+        "responses_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/responses/llm-catalog-71-guideline_ingestion.json",
+        "full_api_worker_feedback": false,
+        "quality_validated": false
+      },
+      "real_service_validation": {
+        "actual_http_task": false,
+        "real_neural_inference": false,
+        "profiles": []
+      },
+      "coverage_gaps": [
+        "No real model inference for this feature has been executed or accepted by this inventory. Test transports/fixtures and catalog checks do not establish inference availability or medical writing quality.",
+        "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
+      ]
+    },
+    {
+      "number": 72,
+      "key": "guideline_change_review",
+      "name": "双原文变更核对问题",
+      "engine": "llm",
+      "execution_mode": "native_closed_llm_draft",
+      "simulated_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "clinical_validation": false,
+        "chat_default_prompt_gateway_accepted": true,
+        "responses_default_prompt_gateway_accepted": true,
+        "application_validators_unchanged": true,
+        "real_http": true,
+        "chat_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/llm-catalog-72-guideline_change_review.json",
+        "responses_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/responses/llm-catalog-72-guideline_change_review.json",
+        "full_api_worker_feedback": false,
+        "quality_validated": false
+      },
+      "real_service_validation": {
+        "actual_http_task": false,
+        "real_neural_inference": false,
+        "profiles": []
+      },
+      "coverage_gaps": [
+        "No real model inference for this feature has been executed or accepted by this inventory. Test transports/fixtures and catalog checks do not establish inference availability or medical writing quality.",
+        "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
+      ]
+    },
+    {
+      "number": 73,
+      "key": "drug_label_extraction",
+      "name": "药品说明书逐字字段复核",
+      "engine": "llm",
+      "execution_mode": "native_closed_llm_draft",
+      "simulated_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "clinical_validation": false,
+        "chat_default_prompt_gateway_accepted": true,
+        "responses_default_prompt_gateway_accepted": true,
+        "application_validators_unchanged": true,
+        "real_http": true,
+        "chat_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/llm-catalog-73-drug_label_extraction.json",
+        "responses_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/responses/llm-catalog-73-drug_label_extraction.json",
+        "full_api_worker_feedback": false,
+        "quality_validated": false
+      },
+      "real_service_validation": {
+        "actual_http_task": false,
+        "real_neural_inference": false,
+        "profiles": []
+      },
+      "coverage_gaps": [
+        "No real model inference for this feature has been executed or accepted by this inventory. Test transports/fixtures and catalog checks do not establish inference availability or medical writing quality.",
+        "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
+      ]
+    },
+    {
+      "number": 74,
+      "key": "research_cohort",
+      "name": "科研队列筛选",
+      "engine": "llm",
+      "execution_mode": "native_closed_llm_draft",
+      "simulated_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "clinical_validation": false,
+        "chat_default_prompt_gateway_accepted": true,
+        "responses_default_prompt_gateway_accepted": true,
+        "application_validators_unchanged": true,
+        "real_http": true,
+        "chat_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/llm-catalog-74-research_cohort.json",
+        "responses_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/responses/llm-catalog-74-research_cohort.json",
+        "full_api_worker_feedback": false,
+        "quality_validated": false
+      },
+      "real_service_validation": {
+        "actual_http_task": false,
+        "real_neural_inference": false,
+        "profiles": []
+      },
+      "coverage_gaps": [
+        "No real model inference for this feature has been executed or accepted by this inventory. Test transports/fixtures and catalog checks do not establish inference availability or medical writing quality.",
+        "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
+      ]
+    },
+    {
+      "number": 75,
+      "key": "deidentification",
+      "name": "病例去标识辅助",
+      "engine": "llm",
+      "execution_mode": "native_closed_llm_draft",
+      "simulated_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "clinical_validation": false,
+        "chat_default_prompt_gateway_accepted": true,
+        "responses_default_prompt_gateway_accepted": true,
+        "application_validators_unchanged": true,
+        "real_http": true,
+        "chat_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/llm-catalog-75-deidentification.json",
+        "responses_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/responses/llm-catalog-75-deidentification.json",
+        "full_api_worker_feedback": false,
+        "quality_validated": false
+      },
+      "real_service_validation": {
+        "actual_http_task": false,
+        "real_neural_inference": false,
+        "profiles": []
+      },
+      "coverage_gaps": [
+        "No real model inference for this feature has been executed or accepted by this inventory. Test transports/fixtures and catalog checks do not establish inference availability or medical writing quality.",
+        "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
+      ]
+    },
+    {
+      "number": 76,
+      "key": "research_extraction",
+      "name": "科研变量原文候选抽取",
+      "engine": "llm",
+      "execution_mode": "native_closed_llm_draft",
+      "simulated_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "clinical_validation": false,
+        "chat_default_prompt_gateway_accepted": true,
+        "responses_default_prompt_gateway_accepted": true,
+        "application_validators_unchanged": true,
+        "real_http": true,
+        "chat_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/llm-catalog-76-research_extraction.json",
+        "responses_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/responses/llm-catalog-76-research_extraction.json",
+        "full_api_worker_feedback": false,
+        "quality_validated": false
+      },
+      "real_service_validation": {
+        "actual_http_task": false,
+        "real_neural_inference": false,
+        "profiles": []
+      },
+      "coverage_gaps": [
+        "No real model inference for this feature has been executed or accepted by this inventory. Test transports/fixtures and catalog checks do not establish inference availability or medical writing quality.",
+        "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
+      ]
+    },
+    {
+      "number": 77,
+      "key": "incident_rca",
+      "name": "事件调查证据与未核实假设",
+      "engine": "llm",
+      "execution_mode": "native_closed_llm_draft",
+      "simulated_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "clinical_validation": false,
+        "chat_default_prompt_gateway_accepted": true,
+        "responses_default_prompt_gateway_accepted": true,
+        "application_validators_unchanged": true,
+        "real_http": true,
+        "chat_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/llm-catalog-77-incident_rca.json",
+        "responses_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/responses/llm-catalog-77-incident_rca.json",
+        "full_api_worker_feedback": false,
+        "quality_validated": false
+      },
+      "real_service_validation": {
+        "actual_http_task": false,
+        "real_neural_inference": false,
+        "profiles": []
+      },
+      "coverage_gaps": [
+        "No real model inference for this feature has been executed or accepted by this inventory. Test transports/fixtures and catalog checks do not establish inference availability or medical writing quality.",
+        "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
+      ]
+    },
+    {
+      "number": 78,
+      "key": "infection_cluster",
+      "name": "病例集内科室与时间关联信号",
+      "engine": "prediction",
+      "execution_mode": "in_process_exact_statistics",
+      "simulated_gateway_validation": {
+        "applicable": false,
+        "reason": "This engine is not one of the63 text LLM tasks; retain its original actual native-service evidence."
+      },
+      "real_service_validation": {
+        "actual_http_task": false,
+        "real_neural_inference": false,
+        "profiles": []
+      },
+      "coverage_gaps": [
+        "Local finite-family association statistics; not outbreak diagnosis, population rates or causality.",
+        "No independent clinical validation or real-patient applicability assessment is established here."
+      ]
+    },
+    {
+      "number": 79,
+      "key": "operations_support",
+      "name": "系统运维知识助手",
+      "engine": "llm",
+      "execution_mode": "native_closed_llm_draft",
+      "simulated_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "clinical_validation": false,
+        "chat_default_prompt_gateway_accepted": true,
+        "responses_default_prompt_gateway_accepted": true,
+        "application_validators_unchanged": true,
+        "real_http": true,
+        "chat_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/llm-catalog-79-operations_support.json",
+        "responses_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/responses/llm-catalog-79-operations_support.json",
+        "full_api_worker_feedback": false,
+        "quality_validated": false
+      },
+      "real_service_validation": {
+        "actual_http_task": false,
+        "real_neural_inference": false,
+        "profiles": []
+      },
+      "coverage_gaps": [
+        "No real model inference for this feature has been executed or accepted by this inventory. Test transports/fixtures and catalog checks do not establish inference availability or medical writing quality.",
+        "No real operational/teaching effectiveness validation is established here.",
+        "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
+      ]
+    },
+    {
+      "number": 80,
+      "key": "clinical_training",
+      "name": "模拟病例培训",
+      "engine": "llm",
+      "execution_mode": "native_closed_llm_draft",
+      "simulated_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "clinical_validation": false,
+        "chat_default_prompt_gateway_accepted": true,
+        "responses_default_prompt_gateway_accepted": true,
+        "application_validators_unchanged": true,
+        "real_http": true,
+        "chat_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/llm-catalog-80-clinical_training.json",
+        "responses_evidence": "/tmp/hoim-validation-20261027/ai-runtime/llm-simulator/responses/llm-catalog-80-clinical_training.json",
+        "full_api_worker_feedback": false,
+        "quality_validated": false
+      },
+      "real_service_validation": {
+        "actual_http_task": false,
+        "real_neural_inference": false,
+        "profiles": []
+      },
+      "coverage_gaps": [
+        "No real model inference for this feature has been executed or accepted by this inventory. Test transports/fixtures and catalog checks do not establish inference availability or medical writing quality.",
+        "No real operational/teaching effectiveness validation is established here.",
+        "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
+      ]
+    }
+  ]
+}

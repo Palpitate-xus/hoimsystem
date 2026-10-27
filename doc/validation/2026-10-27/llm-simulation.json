@@ -1,0 +1,40 @@
+{
+  "recorded_at": "2026-10-27T06:30:22.811687+00:00",
+  "simulated": true,
+  "model_inference": false,
+  "clinical_validation": false,
+  "catalog_version": "2026.10.26.1",
+  "chat": {
+    "features": 63,
+    "accepted": 63,
+    "actual_http_calls": 63
+  },
+  "responses": {
+    "features": 63,
+    "accepted": 63,
+    "actual_http_calls": 63
+  },
+  "hospital_api_worker_feedback_workflows": {
+    "attempted": 3,
+    "passed": 3,
+    "business_records_unchanged": true,
+    "feedback_rows": 3,
+    "feature_keys": [
+      "patient_summary",
+      "outpatient_note",
+      "operations_qa"
+    ]
+  },
+  "scope": "Current default Prompts and unchanged application gateways; complete synthetic public sources for12 native tasks; actual loopback sockets.126 successful gateway calls are not126 hospital worker workflows.3 shared workflows use isolated temporary SQLite and process RSA. No real-model or clinical inference validation.",
+  "initial_corrections": [
+    {
+      "feature_key": "guideline_change_review",
+      "cause": "Unpersisted synthetic AIProvider fixture omitted string validation_report; fixture corrected without changing application rules."
+    },
+    {
+      "feature_key": "deidentification",
+      "cause": "Simulator initially lacked native task+JSON and nested Responses input_text decoding; simulator fixed, actual application protocol unchanged."
+    }
+  ],
+  "prior_real_model_failures_preserved": "/tmp/hoim-validation-20261027/ai-runtime/llm-validation-summary.json"
+}

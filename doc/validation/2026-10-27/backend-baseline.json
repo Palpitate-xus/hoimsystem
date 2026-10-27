@@ -1,0 +1,525 @@
+{
+  "created_utc": "2026-10-27T06:24:58Z",
+  "artifact_dir": "/tmp/hoim-validation-20261027/backend",
+  "initial_interrupted_attempt_excluded": true,
+  "suites": {
+    "backend-0": {
+      "tests": 2347,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 2346,
+      "elapsed_seconds": 2828.075,
+      "returncode": 1
+    },
+    "backend-1": {
+      "tests": 2347,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 1,
+      "passed": 2345,
+      "elapsed_seconds": 4356.488,
+      "returncode": 1
+    },
+    "backend-2": {
+      "tests": 2347,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 2346,
+      "elapsed_seconds": 2988.025,
+      "returncode": 1
+    },
+    "backend-3": {
+      "tests": 2347,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 1,
+      "passed": 2346,
+      "elapsed_seconds": 1522.264,
+      "returncode": 0
+    },
+    "backend-4": {
+      "tests": 2346,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 1,
+      "passed": 2345,
+      "elapsed_seconds": 4249.513,
+      "returncode": 0
+    },
+    "backend-5": {
+      "tests": 2346,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 25,
+      "passed": 2321,
+      "elapsed_seconds": 2498.105,
+      "returncode": 0
+    },
+    "benchmark": {
+      "tests": 22,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 22,
+      "elapsed_seconds": 27.059,
+      "returncode": 0
+    }
+  },
+  "failures": [
+    {
+      "suite": "backend-0",
+      "classname": "tests.test_charge_reconciliation_legacy_writes",
+      "name": "test_actual_writer_current_demotion_is_denied_before_request_or_private_business_read[update_admission]",
+      "seconds": 0.056,
+      "phase": "failure",
+      "message": "  File \"<unknown>\", line 1\n    return {\"code\": 200, \"msg\": \"success\", \"data\": data}\nIndentationError: unexpected indent",
+      "trace": "/home/xusheng/workspace/hoimsystem/fastapi_be/tests/test_charge_reconciliation_legacy_writes.py:56: in test_actual_writer_current_demotion_is_denied_before_request_or_private_business_read\n    first = ast.parse(python_inspect.getsource(writer)).body[0].body[0]\n            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n/home/xusheng/miniconda3/lib/python3.13/ast.py:50: in parse\n    return compile(source, filename, mode, flags,\nE     File \"<unknown>\", line 1\nE       return {\"code\": 200, \"msg\": \"success\", \"data\": data}\nE   IndentationError: unexpected indent"
+    },
+    {
+      "suite": "backend-1",
+      "classname": "tests.test_ai_image_sources",
+      "name": "test_image_migration_roundtrip_preserves_existing_rows_and_matches_model",
+      "seconds": 13.499,
+      "phase": "failure",
+      "message": "alembic.util.exc.CommandError: No 'script_location' key found in configuration.",
+      "trace": "/home/xusheng/workspace/hoimsystem/fastapi_be/tests/test_ai_image_sources.py:388: in test_image_migration_roundtrip_preserves_existing_rows_and_matches_model\n    command.downgrade(config, \"20261020_ai_ecg_assets\")\n/home/xusheng/miniconda3/lib/python3.13/site-packages/alembic/command.py:507: in downgrade\n    script = ScriptDirectory.from_config(config)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n/home/xusheng/miniconda3/lib/python3.13/site-packages/alembic/script/base.py:171: in from_config\n    raise util.CommandError(\nE   alembic.util.exc.CommandError: No 'script_location' key found in configuration."
+    },
+    {
+      "suite": "backend-2",
+      "classname": "tests.test_ai_forecast_sources",
+      "name": "test_migration_real_upgrade_downgrade_preserves_legacy_records_and_matches_model",
+      "seconds": 12.018,
+      "phase": "failure",
+      "message": "alembic.util.exc.CommandError: No 'script_location' key found in configuration.",
+      "trace": "/home/xusheng/workspace/hoimsystem/fastapi_be/tests/test_ai_forecast_sources.py:404: in test_migration_real_upgrade_downgrade_preserves_legacy_records_and_matches_model\n    command.downgrade(config, \"20261020_ai_nursing_sources\")\n/home/xusheng/miniconda3/lib/python3.13/site-packages/alembic/command.py:507: in downgrade\n    script = ScriptDirectory.from_config(config)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n/home/xusheng/miniconda3/lib/python3.13/site-packages/alembic/script/base.py:171: in from_config\n    raise util.CommandError(\nE   alembic.util.exc.CommandError: No 'script_location' key found in configuration."
+    }
+  ],
+  "skips": [
+    {
+      "suite": "backend-1",
+      "classname": "tests.test_ai_imaging_model",
+      "name": "test_real_public_weights_synthetic_cpu_forward_only_when_explicitly_requested",
+      "seconds": 0.002,
+      "reason": "set HOIM_IMAGING_REAL_MODEL to a prepared fixed public model; synthetic smoke only",
+      "detail": "/home/xusheng/workspace/hoimsystem/fastapi_be/tests/test_ai_imaging_model.py:268: set HOIM_IMAGING_REAL_MODEL to a prepared fixed public model; synthetic smoke only"
+    },
+    {
+      "suite": "backend-3",
+      "classname": "tests.test_ai_local_ecg_real",
+      "name": "test_synthetic_ecg_registration_to_actual_cpu_classifier_and_frozen_preview",
+      "seconds": 0.001,
+      "reason": "Requires explicitly prepared pinned ECG weights and optional CPU runtime",
+      "detail": "/home/xusheng/workspace/hoimsystem/fastapi_be/tests/test_ai_local_ecg_real.py:57: Requires explicitly prepared pinned ECG weights and optional CPU runtime"
+    },
+    {
+      "suite": "backend-4",
+      "classname": "tests.test_ai_local_imaging_real",
+      "name": "test_original_synthetic_dicom_to_actual_cpu_child_and_frozen_unvalidated_preview",
+      "seconds": 0.001,
+      "reason": "Requires explicitly prepared pinned imaging weights and optional offline CPU runtime",
+      "detail": "/home/xusheng/workspace/hoimsystem/fastapi_be/tests/test_ai_local_imaging_real.py:49: Requires explicitly prepared pinned imaging weights and optional offline CPU runtime"
+    },
+    {
+      "suite": "backend-5",
+      "classname": "tests.test_ai_imaging_preprocessing",
+      "name": "test_actual_native_range_polarity_odd_crop_and_tensor_report[8-MONOCHROME2-3-4]",
+      "seconds": 0.005,
+      "reason": "could not import 'torch': No module named 'torch'",
+      "detail": "/home/xusheng/workspace/hoimsystem/fastapi_be/tests/test_ai_imaging_preprocessing.py:218: could not import 'torch': No module named 'torch'"
+    },
+    {
+      "suite": "backend-5",
+      "classname": "tests.test_ai_imaging_preprocessing",
+      "name": "test_actual_native_range_polarity_odd_crop_and_tensor_report[8-MONOCHROME1-4-3]",
+      "seconds": 0.005,
+      "reason": "could not import 'torch': No module named 'torch'",
+      "detail": "/home/xusheng/workspace/hoimsystem/fastapi_be/tests/test_ai_imaging_preprocessing.py:218: could not import 'torch': No module named 'torch'"
+    },
+    {
+      "suite": "backend-5",
+      "classname": "tests.test_ai_imaging_preprocessing",
+      "name": "test_actual_native_range_polarity_odd_crop_and_tensor_report[12-MONOCHROME2-225-226]",
+      "seconds": 0.003,
+      "reason": "could not import 'torch': No module named 'torch'",
+      "detail": "/home/xusheng/workspace/hoimsystem/fastapi_be/tests/test_ai_imaging_preprocessing.py:218: could not import 'torch': No module named 'torch'"
+    },
+    {
+      "suite": "backend-5",
+      "classname": "tests.test_ai_imaging_preprocessing",
+      "name": "test_actual_native_range_polarity_odd_crop_and_tensor_report[12-MONOCHROME1-226-225]",
+      "seconds": 0.003,
+      "reason": "could not import 'torch': No module named 'torch'",
+      "detail": "/home/xusheng/workspace/hoimsystem/fastapi_be/tests/test_ai_imaging_preprocessing.py:218: could not import 'torch': No module named 'torch'"
+    },
+    {
+      "suite": "backend-5",
+      "classname": "tests.test_ai_imaging_preprocessing",
+      "name": "test_actual_native_range_polarity_odd_crop_and_tensor_report[16-MONOCHROME2-257-256]",
+      "seconds": 0.005,
+      "reason": "could not import 'torch': No module named 'torch'",
+      "detail": "/home/xusheng/workspace/hoimsystem/fastapi_be/tests/test_ai_imaging_preprocessing.py:218: could not import 'torch': No module named 'torch'"
+    },
+    {
+      "suite": "backend-5",
+      "classname": "tests.test_ai_imaging_preprocessing",
+      "name": "test_actual_native_range_polarity_odd_crop_and_tensor_report[16-MONOCHROME1-256-257]",
+      "seconds": 0.005,
+      "reason": "could not import 'torch': No module named 'torch'",
+      "detail": "/home/xusheng/workspace/hoimsystem/fastapi_be/tests/test_ai_imaging_preprocessing.py:218: could not import 'torch': No module named 'torch'"
+    },
+    {
+      "suite": "backend-5",
+      "classname": "tests.test_ai_imaging_preprocessing",
+      "name": "test_native_224_bypasses_resize_and_uses_full_bits_range_not_observed_minmax",
+      "seconds": 0.002,
+      "reason": "could not import 'torch': No module named 'torch'",
+      "detail": "/home/xusheng/workspace/hoimsystem/fastapi_be/tests/test_ai_imaging_preprocessing.py:244: could not import 'torch': No module named 'torch'"
+    },
+    {
+      "suite": "backend-5",
+      "classname": "tests.test_ai_imaging_preprocessing",
+      "name": "test_voi_presets_and_original_padding_are_preserved_not_applied_or_imputed",
+      "seconds": 0.002,
+      "reason": "could not import 'torch': No module named 'torch'",
+      "detail": "/home/xusheng/workspace/hoimsystem/fastapi_be/tests/test_ai_imaging_preprocessing.py:263: could not import 'torch': No module named 'torch'"
+    },
+    {
+      "suite": "backend-5",
+      "classname": "tests.test_ai_imaging_preprocessing",
+      "name": "test_author_float32_resize_roundoff_is_preserved_without_clipping[256-0]",
+      "seconds": 0.003,
+      "reason": "could not import 'torch': No module named 'torch'",
+      "detail": "/home/xusheng/workspace/hoimsystem/fastapi_be/tests/test_ai_imaging_preprocessing.py:283: could not import 'torch': No module named 'torch'"
+    },
+    {
+      "suite": "backend-5",
+      "classname": "tests.test_ai_imaging_preprocessing",
+      "name": "test_author_float32_resize_roundoff_is_preserved_without_clipping[256-4095]",
+      "seconds": 0.003,
+      "reason": "could not import 'torch': No module named 'torch'",
+      "detail": "/home/xusheng/workspace/hoimsystem/fastapi_be/tests/test_ai_imaging_preprocessing.py:283: could not import 'torch': No module named 'torch'"
+    },
+    {
+      "suite": "backend-5",
+      "classname": "tests.test_ai_imaging_preprocessing",
+      "name": "test_author_float32_resize_roundoff_is_preserved_without_clipping[3907-4095]",
+      "seconds": 0.002,
+      "reason": "could not import 'torch': No module named 'torch'",
+      "detail": "/home/xusheng/workspace/hoimsystem/fastapi_be/tests/test_ai_imaging_preprocessing.py:283: could not import 'torch': No module named 'torch'"
+    },
+    {
+      "suite": "backend-5",
+      "classname": "tests.test_ai_imaging_preprocessing",
+      "name": "test_author_float32_resize_roundoff_is_preserved_without_clipping[4092-4095]",
+      "seconds": 0.003,
+      "reason": "could not import 'torch': No module named 'torch'",
+      "detail": "/home/xusheng/workspace/hoimsystem/fastapi_be/tests/test_ai_imaging_preprocessing.py:283: could not import 'torch': No module named 'torch'"
+    },
+    {
+      "suite": "backend-5",
+      "classname": "tests.test_ai_imaging_preprocessing",
+      "name": "test_resize_result_outside_fixed_roundoff_tolerance_is_rejected",
+      "seconds": 0.002,
+      "reason": "could not import 'torch': No module named 'torch'",
+      "detail": "/home/xusheng/workspace/hoimsystem/fastapi_be/tests/test_ai_imaging_preprocessing.py:307: could not import 'torch': No module named 'torch'"
+    },
+    {
+      "suite": "backend-5",
+      "classname": "tests.test_ai_imaging_preprocessing",
+      "name": "test_actual_stored_pixels_and_crop_must_match_metadata_and_have_valid_variation[below_range]",
+      "seconds": 0.002,
+      "reason": "could not import 'torch': No module named 'torch'",
+      "detail": "/home/xusheng/workspace/hoimsystem/fastapi_be/tests/test_ai_imaging_preprocessing.py:317: could not import 'torch': No module named 'torch'"
+    },
+    {
+      "suite": "backend-5",
+      "classname": "tests.test_ai_imaging_preprocessing",
+      "name": "test_actual_stored_pixels_and_crop_must_match_metadata_and_have_valid_variation[above_range]",
+      "seconds": 0.003,
+      "reason": "could not import 'torch': No module named 'torch'",
+      "detail": "/home/xusheng/workspace/hoimsystem/fastapi_be/tests/test_ai_imaging_preprocessing.py:317: could not import 'torch': No module named 'torch'"
+    },
+    {
+      "suite": "backend-5",
+      "classname": "tests.test_ai_imaging_preprocessing",
+      "name": "test_actual_stored_pixels_and_crop_must_match_metadata_and_have_valid_variation[valid_count]",
+      "seconds": 0.003,
+      "reason": "could not import 'torch': No module named 'torch'",
+      "detail": "/home/xusheng/workspace/hoimsystem/fastapi_be/tests/test_ai_imaging_preprocessing.py:317: could not import 'torch': No module named 'torch'"
+    },
+    {
+      "suite": "backend-5",
+      "classname": "tests.test_ai_imaging_preprocessing",
+      "name": "test_actual_stored_pixels_and_crop_must_match_metadata_and_have_valid_variation[valid_min]",
+      "seconds": 0.003,
+      "reason": "could not import 'torch': No module named 'torch'",
+      "detail": "/home/xusheng/workspace/hoimsystem/fastapi_be/tests/test_ai_imaging_preprocessing.py:317: could not import 'torch': No module named 'torch'"
+    },
+    {
+      "suite": "backend-5",
+      "classname": "tests.test_ai_imaging_preprocessing",
+      "name": "test_actual_stored_pixels_and_crop_must_match_metadata_and_have_valid_variation[valid_max]",
+      "seconds": 0.002,
+      "reason": "could not import 'torch': No module named 'torch'",
+      "detail": "/home/xusheng/workspace/hoimsystem/fastapi_be/tests/test_ai_imaging_preprocessing.py:317: could not import 'torch': No module named 'torch'"
+    },
+    {
+      "suite": "backend-5",
+      "classname": "tests.test_ai_imaging_preprocessing",
+      "name": "test_actual_stored_pixels_and_crop_must_match_metadata_and_have_valid_variation[all_padding_crop]",
+      "seconds": 0.002,
+      "reason": "could not import 'torch': No module named 'torch'",
+      "detail": "/home/xusheng/workspace/hoimsystem/fastapi_be/tests/test_ai_imaging_preprocessing.py:317: could not import 'torch': No module named 'torch'"
+    },
+    {
+      "suite": "backend-5",
+      "classname": "tests.test_ai_imaging_preprocessing",
+      "name": "test_actual_stored_pixels_and_crop_must_match_metadata_and_have_valid_variation[constant_valid_crop]",
+      "seconds": 0.003,
+      "reason": "could not import 'torch': No module named 'torch'",
+      "detail": "/home/xusheng/workspace/hoimsystem/fastapi_be/tests/test_ai_imaging_preprocessing.py:317: could not import 'torch': No module named 'torch'"
+    },
+    {
+      "suite": "backend-5",
+      "classname": "tests.test_ai_imaging_preprocessing",
+      "name": "test_real_public_weights_can_consume_prepared_synthetic_native_pixels_only_when_requested",
+      "seconds": 0.002,
+      "reason": "could not import 'torch': No module named 'torch'",
+      "detail": "/home/xusheng/workspace/hoimsystem/fastapi_be/tests/test_ai_imaging_preprocessing.py:343: could not import 'torch': No module named 'torch'"
+    },
+    {
+      "suite": "backend-5",
+      "classname": "tests.test_ai_local_speech_real",
+      "name": "test_synthetic_audio_registration_to_actual_recognition_and_frozen_review",
+      "seconds": 0.001,
+      "reason": "Requires explicitly prepared local weights and optional speech runtime",
+      "detail": "/home/xusheng/workspace/hoimsystem/fastapi_be/tests/test_ai_local_speech_real.py:24: Requires explicitly prepared local weights and optional speech runtime"
+    },
+    {
+      "suite": "backend-5",
+      "classname": "tests.test_business_flows.TestInpatientJourney",
+      "name": "test_admission_to_discharge",
+      "seconds": 0.072,
+      "reason": "没有可用床位,跳过住院闭环测试",
+      "detail": "/home/xusheng/workspace/hoimsystem/fastapi_be/tests/test_business_flows.py:292: 没有可用床位,跳过住院闭环测试"
+    },
+    {
+      "suite": "backend-5",
+      "classname": "tests.test_business_flows.TestCashierWorkflow",
+      "name": "test_window_registration",
+      "seconds": 0.078,
+      "reason": "无排班",
+      "detail": "/home/xusheng/workspace/hoimsystem/fastapi_be/tests/test_business_flows.py:418: 无排班"
+    },
+    {
+      "suite": "backend-5",
+      "classname": "tests.test_business_flows.TestIDORPrevention",
+      "name": "test_patient_cannot_cancel_others_registration",
+      "seconds": 0.069,
+      "reason": "无排班",
+      "detail": "/home/xusheng/workspace/hoimsystem/fastapi_be/tests/test_business_flows.py:482: 无排班"
+    }
+  ],
+  "backend_totals": {
+    "tests": 14080,
+    "passed": 14049,
+    "failures": 3,
+    "errors": 0,
+    "skipped": 28
+  },
+  "backend_elapsed_seconds_by_process": {
+    "backend-0": 2828.075,
+    "backend-1": 4356.488,
+    "backend-2": 2988.025,
+    "backend-3": 1522.264,
+    "backend-4": 4249.513,
+    "backend-5": 2498.105
+  },
+  "collection_consistency": {
+    "complete_collection": 14080,
+    "shards_collection": 14080,
+    "unique_shard_nodeids": 14080,
+    "missing": [
+      "tests/test_ai_audio_files.py::test_disk_path_uses_only_canonical_server_identifiers[76E5B40F-2B2D-4AC8-8485-C9EB5A9BE2F0]",
+      "tests/test_ai_deidentification_frozen.py::test_saved_branch_requires_exact_original_record_id_version_and_task[prompt_version_id-710c901c-ca59-41aa-ab16-9faf4edbdb27]"
+    ],
+    "unexpected": [
+      "tests/test_ai_audio_files.py::test_disk_path_uses_only_canonical_server_identifiers[50824A5C-3CCF-493F-8587-F937AD7C297B]",
+      "tests/test_ai_deidentification_frozen.py::test_saved_branch_requires_exact_original_record_id_version_and_task[prompt_version_id-588abfdb-cc0b-4f1b-b687-185f6dfeebfc]"
+    ],
+    "duplicate_count": 0,
+    "uuid_normalized_multiset_match": true,
+    "parameter_id_note": "Two parameter IDs are uuid4() values generated at module import; raw differences are retained. Exact file ownership/counts and UUID-normalized nodeid multisets match."
+  },
+  "app_coverage_totals": {
+    "covered_lines": 77599,
+    "num_statements": 86575,
+    "percent_covered": 86.21650948805943,
+    "percent_covered_display": "86",
+    "missing_lines": 8976,
+    "excluded_lines": 0,
+    "percent_statements_covered": 89.63211088651458,
+    "percent_statements_covered_display": "90",
+    "num_branches": 26778,
+    "num_partial_branches": 5480,
+    "covered_branches": 20130,
+    "missing_branches": 6648,
+    "percent_branches_covered": 75.17365001120322,
+    "percent_branches_covered_display": "75"
+  },
+  "coverage_scope": "Saved pre-fix baseline app source, six main pytest processes, line and branch coverage; subprocess-only code and new PostgreSQL helpers are excluded. Source modifications during the baseline are separately validated by complete targeted file reruns.",
+  "baseline_source_snapshot": {
+    "path": "/tmp/hoim-validation-20261027/backend/baseline-source/app",
+    "sha256_manifest": "/tmp/hoim-validation-20261027/backend/baseline-app-hashes.json"
+  },
+  "resolved_baseline_failures": [
+    {
+      "test": "tests.test_ai_forecast_sources::test_migration_real_upgrade_downgrade_preserves_legacy_records_and_matches_model",
+      "cause": "isolated temporary CWD lacked alembic.ini/script_location; original failure retained",
+      "resolution": "copied canonical alembic.ini and symlinked canonical alembic directory into each isolated CWD; entire file passed in ddl-integration-second",
+      "evidence": [
+        "/tmp/hoim-validation-20261027/backend/ddl-integration-second-0.xml",
+        "/tmp/hoim-validation-20261027/backend/ddl-integration-second-1.xml",
+        "/tmp/hoim-validation-20261027/backend/ddl-integration-second-2.xml"
+      ]
+    },
+    {
+      "test": "tests.test_ai_image_sources::test_image_migration_roundtrip_preserves_existing_rows_and_matches_model",
+      "cause": "isolated temporary CWD lacked alembic.ini/script_location; original failure retained",
+      "resolution": "same CWD correction; entire file passed in ddl-integration-second",
+      "evidence": [
+        "/tmp/hoim-validation-20261027/backend/ddl-integration-second-0.xml",
+        "/tmp/hoim-validation-20261027/backend/ddl-integration-second-1.xml",
+        "/tmp/hoim-validation-20261027/backend/ddl-integration-second-2.xml"
+      ]
+    },
+    {
+      "test": "tests.test_charge_reconciliation_legacy_writes::test_actual_writer_current_demotion_is_denied_before_request_or_private_business_read[update_admission]",
+      "cause": "inspect.getsource read edited admission.py while baseline retained old code line numbers; AST raised IndentationError",
+      "resolution": "after admission.py commit4865294 freeze, full15-test file passed",
+      "evidence": "/tmp/hoim-validation-20261027/backend/legacy-source-recheck.xml"
+    }
+  ],
+  "targeted_fix_suites": {
+    "ddl-integration-second-0": {
+      "tests": 165,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 165
+    },
+    "ddl-integration-second-1": {
+      "tests": 185,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 185
+    },
+    "ddl-integration-second-2": {
+      "tests": 118,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 118
+    },
+    "runtime-integration-0": {
+      "tests": 107,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 107
+    },
+    "runtime-integration-1": {
+      "tests": 100,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 100
+    },
+    "runtime-integration-2": {
+      "tests": 86,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 86
+    },
+    "charge-pg-integration": {
+      "tests": 85,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 85
+    },
+    "count-integration": {
+      "tests": 27,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 27
+    },
+    "legacy-source-recheck": {
+      "tests": 15,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 15
+    },
+    "runtime-json-cache": {
+      "tests": 63,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 63
+    },
+    "runtime-bytes": {
+      "tests": 16,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 16
+    },
+    "runtime-counts": {
+      "tests": 12,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 12
+    }
+  },
+  "targeted_suite_note": "Separate complete-file reruns and dialect tests verify fixes; overlapping tests are intentionally not added to the14,080 unique baseline count.",
+  "actual_route_capture": {
+    "route_method_templates": 957,
+    "app_router_method_templates": 951,
+    "calls": 10047,
+    "capture_scope": "APIRoute.handle reached; outer middleware denials before routing are not captured; no request/response bodies or tokens recorded"
+  },
+  "mounted_api_route_coverage": {
+    "inventory": "fastapi_be/rbac_matrix.json",
+    "inventory_route_methods": 1087,
+    "actually_reached_route_methods": 933,
+    "percent_reached": 85.83,
+    "note": "Actual APIRoute.handle reaches across regression only, not assertion quality or all business paths; outer middleware denials are excluded."
+  },
+  "dependencies": {
+    "fastapi": "0.136.1",
+    "httpx": "0.28.1",
+    "sqlalchemy": "2.0.49",
+    "pytest": "9.0.3",
+    "pytest-asyncio": "1.3.0",
+    "coverage": "7.15.4",
+    "pydantic": "2.12.4",
+    "pydicom": "3.0.2",
+    "numpy": "2.4.4"
+  },
+  "optional_dependency_presence": {
+    "torch": false,
+    "numpy": true,
+    "scipy": true,
+    "soundfile": false,
+    "faster_whisper": false,
+    "xdist": false,
+    "pytest_cov": true
+  }
+}

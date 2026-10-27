@@ -49,9 +49,12 @@ def build_run_metadata(environment, started_at: datetime.datetime) -> dict:
         "failures": total.num_failures,
         "failure_ratio": total.fail_ratio,
         "average_response_time_ms": total.avg_response_time,
+        "p50_response_time_ms": total.get_response_time_percentile(0.50),
         "p95_response_time_ms": total.get_response_time_percentile(0.95),
+        "p99_response_time_ms": total.get_response_time_percentile(0.99),
         "requests_per_second": total.total_rps,
-        "users": environment.runner.user_count if environment.runner else 0,
+        "configured_users": getattr(environment.parsed_options, "num_users", None),
+        "users_at_stop": environment.runner.user_count if environment.runner else 0,
     }
 
 
@@ -59,7 +62,7 @@ def register_metadata_hooks(events) -> None:
     state = {"started_at": None}
 
     @events.test_start.add_listener
-    def remember_start(_environment, **_kwargs):
+    def remember_start(environment, **_kwargs):
         state["started_at"] = datetime.datetime.now(datetime.UTC)
 
     @events.test_stop.add_listener

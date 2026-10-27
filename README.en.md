@@ -44,7 +44,7 @@ Source inventory: routes are checked against the RBAC matrix, tables are counted
 
 ### Specialized Workflows and Management
 
-- **Prescription Review Rule Engine** — 5 rule types (interaction / contraindication / dose / duplicate / allergy-keyword); severity-3 rules **block both prescribing and dispensing**
+- **Prescription Review Rule Engine** — 6 rule types (interaction / contraindication / dose / duplicate / allergy-keyword / patient context); severity-3 rules **block both prescribing and dispensing**
 - **Insurance Catalog Mapping** — local items ↔ insurance codes with category/self-pay ratio/price limit; template download + batch import
 - **CSSD** — full instrument-pack state machine (0-6) with BD-test and biological-monitor gates
 - **PIVAS** — batch flow with mandatory **dual-person check** (dispenser cannot verify own batch)
@@ -140,7 +140,8 @@ See the [capability catalog](doc/ai-capabilities.md) for inputs, outputs and def
 
 | Component | Version |
 |:---------:|:-------:|
-| Node.js | 20.19+ or 22.12+ |
+| Node.js | 20.x ≥ 20.19.0, or ≥ 22.12.0 |
+| npm | ≥ 10.0.0 |
 | Python | ≥ 3.10 |
 | Database | SQLite included (no install needed) |
 
@@ -178,7 +179,7 @@ python -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 
 Visit http://localhost:8000/docs for the auto-generated Swagger UI.
 
-To process queued AI tasks, open another terminal with the same virtual environment and database configuration:
+To process queued AI tasks, open another terminal at the repository root and use the same virtual environment and database configuration:
 
 ```bash
 cd fastapi_be
@@ -190,6 +191,8 @@ See the [deployment manual](doc/installation-guide.md#34-数据库初始化) for
 
 
 ### 3. Start Frontend
+
+Open another terminal at the repository root:
 
 ```bash
 cd vue3-new-ui
@@ -214,6 +217,8 @@ npm run verify
 - API Docs: http://localhost:8000/docs
 
 ### 5. Docker (recommended for production)
+
+Run from the repository root:
 
 ```bash
 export POSTGRES_PASSWORD='replace-with-a-strong-database-password'
@@ -300,6 +305,8 @@ For production, create the first super administrator interactively with a strong
 ### Reproducible PostgreSQL Harness
 
 The benchmark uses an isolated PostgreSQL container, four Gunicorn workers, and an ephemeral data volume. Destructive initialization accepts only a database named `hoimsystem_benchmark` and requires `BENCHMARK_RESET_CONFIRM` to match it. The `smoke`, `small`, `medium`, and `large` profiles scale up to 100,000 patients and 500,000 history rows.
+
+Run from the repository root:
 
 ```bash
 cd fastapi_benchmark

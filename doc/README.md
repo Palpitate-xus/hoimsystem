@@ -1,9 +1,8 @@
 # 文档总览
 
-AI 平台提供 80 项能力目录、业务工作台及超级管理员管理中心。功能现状、配置步骤、Prompt 和分阶段验证记录见下方 AI 平台导航。
+HOIM 医院信息管理系统的使用、开发与部署文档。可按使用场景或岗位查找操作步骤、接口、数据模型和维护指南。
 
-> 本目录包含 HIS-OP 医院门诊信息管理系统的全部技术文档。
-> 不同角色可按下方导航直达对应文档。
+AI 平台包含 80 项能力、业务工作台及超级管理员管理中心，配置步骤、Prompt 和测试记录见 AI 平台导航。
 
 ---
 
@@ -21,16 +20,16 @@ AI 平台提供 80 项能力目录、业务工作台及超级管理员管理中�
 | [Prompt与界面体验验证](ai-experience-verification.json) | 2026-10-26 默认Prompt、文书复制、管理导航及业务面板优化验证 |
 | [qSOFA/GCS专题验证](ai-qsofa-verification.json) | 独立风险规则与来源核对的专题记录 |
 
-工程验证使用各记录注明的范围，不表示实际模型质量或临床效果已验证。
+首次使用从开发与使用指南开始，输入输出按能力清单查询，测试与构建结果按专题查阅。
 
-### 📘 软件交付文档（v1.0 交付新增）
+### 📘 软件与业务文档
 
 1. **[软件说明书](software-manual.md)** — 软件概述/运行环境/功能结构/角色权限/数据与安全总览
 2. **[安装部署手册](installation-guide.md)** — 生产部署步骤/备份策略/升级发布/故障排查
 3. **[业务流程图](flowcharts/README.md)** — 8 组 58 张 Mermaid 流程图覆盖全部业务域
-4. **[业务逻辑测试报告](business-test-report.md)** — 1045 用例全通过 + 61 项业务修复清单（另有安全修复 31 项）+ 6 项已知设计限制
+4. **[业务逻辑测试报告](business-test-report.md)** — 业务场景、测试结果、规则核对与修复记录
 5. **[HIS 功能完整性盘点](his-feature-gap-analysis.md)** — 对照标准 HIS 产品的 15 方向缺口分析与建设排序
-6. **[安全上线清单](security-launch-checklist.md)** — 31 项已修复 + 上线人工阻断项
+6. **[安全上线清单](security-launch-checklist.md)** — 账号、鉴权、日志和基础设施配置核对
 
 ### 🆕 新人快速上手
 
@@ -45,13 +44,13 @@ AI 平台提供 80 项能力目录、业务工作台及超级管理员管理中�
 2. **[ADR 决策记录](adr/README.md)** — 重要架构决策的备忘录
 3. **[需求文档](demandDoc.md)** — 业务需求与非功能需求
 4. **[性能指南](performance.md)** — 性能优化方法
-5. **[路线图](todos.md)** — 已完成功能与未来规划
+5. **[路线图](todos.md)** — 功能清单与项目规划
 
 ### 💻 后端开发
 
 1. **[编码规范](coding-standards.md)** — Python/Vue/数据库/Git 全规范
 2. **[API 文档](apiDoc.md)** — 核心模块接口的入参、响应、错误码（当前 1,087 个 RBAC 路由方法的角色权限见 [api-rbac-matrix.md](api-rbac-matrix.md)）
-   - **[API 测试报告](api-test-report.md)** — 188 个用例，95.7% 通过率
+   - **[API 测试报告](api-test-report.md)** — 接口测试场景与结果记录
 3. **[数据库文档](databaseDoc.md)** — 核心表字段说明（当前 266 个 ORM 表定义分布于 `fastapi_be/app/models.py`、AI 及住院扩展模型中，以源码与迁移为准）
 4. **[数据字典](data-dictionary.md)** — 状态码、枚举值统一定义
 5. **[架构文档](architecture.md)** — 中间件、依赖、安全机制
@@ -64,12 +63,13 @@ AI 平台提供 80 项能力目录、业务工作台及超级管理员管理中�
 
 ### 🎨 前端开发
 
-1. **[编码规范](coding-standards.md)** — Vue 3 组件规范、样式工具类
-2. **[API 文档](apiDoc.md)** — 后端接口规范
-3. **[用户操作手册](user-manual.md)** — 各页面的业务流程
-4. **[架构文档](architecture.md)** — 前端目录约定与组件复用
-5. **[测试指南](testing.md)** — Vitest / Playwright 测试
-   - **[前端页面测试报告](frontend-test-report.md)** — 96 个页面审查，中文可读性达标
+1. **[前端 README](../vue3-new-ui/README.md)** / **[English](../vue3-new-ui/README.en.md)** — 启动、API 配置、AI 页面、构建与测试命令
+2. **[编码规范](coding-standards.md)** — Vue 3 组件规范、样式工具类
+3. **[API 文档](apiDoc.md)** — 后端接口规范
+4. **[用户操作手册](user-manual.md)** — 各页面的业务流程
+5. **[架构文档](architecture.md)** — 前端目录约定与组件复用
+6. **[测试指南](testing.md)** — 前端组件与 Playwright 测试
+   - **[前端页面测试报告](frontend-test-report.md)** — 页面审查与测试记录
 
 ### 🚀 运维 / DevOps
 
@@ -195,7 +195,7 @@ AI 平台提供 80 项能力目录、业务工作台及超级管理员管理中�
 
 | 日期 | 内容 |
 |:----:|:-----|
-| 2026-10-27 | 同步中英文主 README 的 AI 功能、超管入口、Prompt 和 worker 说明；核对 134 个路由模块、1,087 个 RBAC 路由方法、266 个表定义和 160 个页面，补齐 AI 验证记录导航 |
+| 2026-10-27 | 按项目功能和使用流程更新中英文主 README，重写前端中英文 README，补充数据库初始化与接管说明、AI 导航，并同步路线图中的 AI 与 DRG 状态；核对 134 个路由模块、1,087 个 RBAC 路由方法、266 个表定义和 160 个页面 |
 | 2026-09-03 | 同步 560 个路由方法、145 张表及可观测性、实时事件、集成发件箱、eMAR、CDSS、DRG/DIP 和 PostgreSQL 基准文档 |
 | 2026-05-18 | 新增第三批：performance、monitoring、data-dictionary |
 | 2026-05-18 | 新增第二批：git-workflow、release-process、glossary、ADR(5个)、CODE_OF_CONDUCT |

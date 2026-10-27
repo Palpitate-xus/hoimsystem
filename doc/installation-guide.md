@@ -151,7 +151,8 @@ MIGRATION_ADOPT_EXISTING=true python -m app.db_migrate
 
 ```bash
 # 仅在系统尚无管理员时交互式创建首个强口令超级管理员
-docker compose exec backend python bootstrap_admin.py --username <管理员工号>
+# 将 hospital-admin 替换为实际管理员工号
+docker compose exec backend python bootstrap_admin.py --username hospital-admin
 ```
 
 生产环境会拒绝运行 `seed_default_accounts.py`，不得写入 `admin/admin123` 等演示账号。首个管理员创建后，其他员工账号通过系统权限管理和医院身份开通流程创建。

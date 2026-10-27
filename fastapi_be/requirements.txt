@@ -1,6 +1,7 @@
 fastapi>=0.104.0
 uvicorn[standard]>=0.24.0
-sqlalchemy>=2.0.0
+# PostgreSQL URLs use the psycopg2 driver installed below; 2.1 defaults to psycopg 3.
+sqlalchemy>=2.0.0,<2.1
 pymysql>=1.1.0
 psycopg2-binary>=2.9.0
 cryptography>=46.0.7

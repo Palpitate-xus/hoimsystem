@@ -252,7 +252,7 @@ def get_window_registration_patient(
     current_user: User = Depends(require_roles(ROLE_CASHIER, ROLE_REGISTRAR, *ADMIN_ROLES)),
 ):
     """窗口挂号前核验患者身份并返回最小必要信息。"""
-    patient = db.query(Patient).filter(Patient.identity == identity).populate_existing().with_for_update().first()
+    patient = db.query(Patient).filter(Patient.identity == identity).first()
     if not patient:
         return {"code": 500, "msg": "病人信息不存在，请先注册"}
     return {
@@ -431,7 +431,9 @@ def window_registration(req: dict, db: Session = Depends(get_db), current_user: 
     from app.models import DoctorSchedule, Patient, Registration
 
     identity = req.get("identity")
-    patient = db.query(Patient).filter(Patient.identity == identity).first()
+    # Serialize both registration entry points on the actual patient. Locking
+    # only matching registrations cannot protect an initially empty result.
+    patient = db.query(Patient).filter(Patient.identity == identity).populate_existing().with_for_update().first()
     if not patient:
         return {"code": 500, "msg": "病人信息不存在，请先注册"}
     schedule_id = req.get("schedule_id")

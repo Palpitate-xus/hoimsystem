@@ -11,7 +11,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import mysql
 
 from alembic import op
-from app.sql_constraints import PortableCheckConstraint
+from schema_constraints_v1 import PortableCheckConstraint
 
 revision = "20261021_rca_evidence_runs"
 down_revision = "20261021_rca_evidence"

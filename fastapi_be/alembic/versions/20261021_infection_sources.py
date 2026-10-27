@@ -4,7 +4,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import mysql
 
 from alembic import op
-from app.sql_constraints import PortableCheckConstraint
+from schema_constraints_v1 import PortableCheckConstraint
 
 revision = "20261021_infection_sources"
 down_revision = "20261021_native_expanded_merge"

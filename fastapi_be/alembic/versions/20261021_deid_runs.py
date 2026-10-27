@@ -10,7 +10,7 @@ from sqlalchemy import Column, DateTime, ForeignKey, Integer, LargeBinary, Strin
 from sqlalchemy.dialects import mysql
 
 from alembic import op
-from app.sql_constraints import PortableCheckConstraint as CheckConstraint
+from schema_constraints_v1 import PortableCheckConstraint as CheckConstraint
 
 revision = "20261021_deid_runs"
 down_revision = "20261021_deidentification"

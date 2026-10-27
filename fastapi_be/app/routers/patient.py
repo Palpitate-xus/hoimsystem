@@ -320,6 +320,9 @@ def patient_registration(req: RegistrationCreateRequest, current_user: User = De
         return {"code": 500, "msg": "病人信息不存在"}
     if not patient_obj:
         return {"code": 403, "msg": "无权为该家庭成员挂号"}
+    patient_obj = db.query(Patient).filter(Patient.patient_id == patient_obj.patient_id).populate_existing().with_for_update().one_or_none()
+    if patient_obj is None:
+        return {"code": 500, "msg": "病人信息不存在"}
     reg_obj = db.query(DoctorSchedule).filter(DoctorSchedule.schedule_id == req.id).first()
     if not reg_obj:
         return {"code": 500, "msg": "排班不存在"}
@@ -340,6 +343,8 @@ def patient_registration(req: RegistrationCreateRequest, current_user: User = De
             Registration.department_id == req.department_id,
             Registration.status == 0,
         )
+        .populate_existing()
+        .with_for_update()
         .first()
     )
     if exists:

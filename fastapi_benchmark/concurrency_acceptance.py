@@ -159,6 +159,24 @@ class Acceptance:
             cancelled = db.query(self.m.Appointment).filter_by(schedule_id=sid, status=2).count()
         self.record("parallel_cancellations_restore_every_slot", responses, {"successful_requests": self.concurrency, "cancelled": self.concurrency, "remaining_slots": self.concurrency}, {"cancelled": cancelled, "remaining_slots": stock})
 
+    def registrations(self):
+        cases = [("patient_registration_duplicate_once", self.owner_id, False), ("window_registration_duplicate_once", self.patient_ids[0], True)]
+        for name, patient_id, window in cases:
+            sid, _ = self.schedule(self.concurrency, 10)
+            if window:
+                with Session(self.engine) as db:
+                    identity = db.get(self.m.Patient, patient_id).identity
+                path, role = "/api/windowRegistration/create", "admin"
+                payload = {"identity": identity, "schedule_id": sid, "doctor_id": self.doctor_id, "department_id": self.department_id, "specialist": 1}
+            else:
+                path, role = "/api/registrationManagement/create", "patient"
+                payload = {"id": sid, "doctor_id": self.doctor_id, "department_id": self.department_id, "specialist": 1, "patient_id": patient_id}
+            responses = self.parallel(path, [payload] * self.concurrency, role)
+            with Session(self.engine) as db:
+                count = db.query(self.m.Registration).filter_by(schedule_id=sid, status=0).count()
+                stock = db.get(self.m.DoctorSchedule, sid).number
+            self.record(name, responses, {"successful_requests": 1, "registrations": 1, "remaining_slots": self.concurrency - 1}, {"registrations": count, "remaining_slots": stock})
+
     def new_charge(self):
         with Session(self.engine) as db:
             pre = self.m.Prescription(patient_id=self.owner_id, doctor_id=self.doctor_id, status=1, create_time=dt.datetime.now())
@@ -307,7 +325,7 @@ def main(argv=None):
     engine = create_engine(database_url, pool_pre_ping=True)
     try:
         probe = Acceptance(host, engine, models, hash_password, args.concurrency)
-        for scenario in [probe.booking, probe.payments, probe.admissions, probe.dispensing, probe.medication_administration]:
+        for scenario in [probe.booking, probe.registrations, probe.payments, probe.admissions, probe.dispensing, probe.medication_administration]:
             scenario()
         report = {"schema_version": 1, "started_at": started.isoformat(), "finished_at": dt.datetime.now(dt.UTC).isoformat(), "elapsed_seconds": time.monotonic() - begin, "host": host, "database": make_url(database_url).render_as_string(hide_password=True), "concurrency": args.concurrency, "all_passed": all(r["passed"] for r in probe.results), "scenarios": probe.results}
         args.output.parent.mkdir(parents=True, exist_ok=True)

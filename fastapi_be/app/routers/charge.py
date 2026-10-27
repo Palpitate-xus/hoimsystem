@@ -252,7 +252,7 @@ def get_window_registration_patient(
     current_user: User = Depends(require_roles(ROLE_CASHIER, ROLE_REGISTRAR, *ADMIN_ROLES)),
 ):
     """窗口挂号前核验患者身份并返回最小必要信息。"""
-    patient = db.query(Patient).filter(Patient.identity == identity).first()
+    patient = db.query(Patient).filter(Patient.identity == identity).populate_existing().with_for_update().first()
     if not patient:
         return {"code": 500, "msg": "病人信息不存在，请先注册"}
     return {
@@ -452,7 +452,7 @@ def window_registration(req: dict, db: Session = Depends(get_db), current_user: 
         Registration.doctor_id == reg_obj.doctor_id,
         Registration.specialist == reg_obj.specialist,
         Registration.status == 0,
-    ).first():
+    ).populate_existing().with_for_update().first():
         return {"code": 500, "msg": "该患者已存在同一医生的有效挂号"}
     if reg_obj.number is None or reg_obj.number <= 0:
         return {"code": 500, "msg": "该时段号源已满"}

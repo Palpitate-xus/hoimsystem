@@ -8,7 +8,7 @@ from locust.exception import StopTest
 BENCHMARK_DIR = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(BENCHMARK_DIR))
 
-import benchmark_auth
+import benchmark_auth  # noqa: E402
 
 
 class FakeResponse:

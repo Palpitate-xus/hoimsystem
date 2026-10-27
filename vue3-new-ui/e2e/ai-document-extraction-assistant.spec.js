@@ -1,8 +1,9 @@
+const { beforeSourceHarness } = require('./fixtures/source-harness-setup.cjs');
 const {openNativeDetails}=require('./fixtures/native-ui-details.cjs');
 const {test,expect}=require('@playwright/test');
 const {startDocumentExtractionAssistantHarness}=require('./fixtures/document-extraction-assistant-harness.cjs');
 const {fixture:f,setupDocumentExtractionAssistant}=require('./fixtures/document-extraction-assistant-ui.cjs');
-let harness;test.beforeAll(async()=>{harness=await startDocumentExtractionAssistantHarness();});test.afterAll(async()=>{await harness?.close();});test.afterEach(async({page})=>{expect(page.__documentAssistantContext?.errors||[]).toEqual([]);expect(page.__documentAssistantContext?.unexpected||[]).toEqual([]);});
+let harness;beforeSourceHarness(test,async()=>{harness=await startDocumentExtractionAssistantHarness();});test.afterAll(async()=>{await harness?.close();});test.afterEach(async({page})=>{expect(page.__documentAssistantContext?.errors||[]).toEqual([]);expect(page.__documentAssistantContext?.unexpected||[]).toEqual([]);});
 async function open(page,config={},initial={}){const p=f[config.kind||'chat'],ctx=await setupDocumentExtractionAssistant(page,config);await page.addInitScript(value=>{window.__documentAssistantInitial=value;},{mode:'child',feature:p.feature,initialInput:p.request.input,...initial});await page.goto(harness.origin);await page.waitForFunction(()=>!!window.__documentAssistantProbe);return ctx;}
 async function choose(page){await expect(page.getByRole('button',{name:'核对预置原件',exact:true})).toBeEnabled();await page.getByRole('button',{name:'核对预置原件',exact:true}).click();await expect(page.getByRole('button',{name:'提交未审核条款抽取',exact:true})).toBeEnabled();}
 async function full(page){await page.getByRole('button',{name:'提交未审核条款抽取',exact:true}).click();await openNativeDetails(page,'抽取固定摘要');}

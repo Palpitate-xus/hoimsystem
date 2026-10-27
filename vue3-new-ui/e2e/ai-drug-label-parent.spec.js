@@ -1,8 +1,9 @@
+const { beforeSourceHarness } = require('./fixtures/source-harness-setup.cjs');
 const {openNativeDetails}=require('./fixtures/native-ui-details.cjs');
 const {test,expect}=require('@playwright/test');
 const {startDrugLabelRootHarness}=require('./fixtures/drug-label-root-harness.cjs');
 const {load}=require('./fixtures/load-drug-label-assistant-main.cjs');
-let harness;test.beforeAll(async()=>{harness=await startDrugLabelRootHarness();});test.afterAll(async()=>{await harness?.close();});test.afterEach(async({page})=>{expect(page.__drugLabelParentState?.errors||[]).toEqual([]);});
+let harness;beforeSourceHarness(test,async()=>{harness=await startDrugLabelRootHarness();});test.afterAll(async()=>{await harness?.close();});test.afterEach(async({page})=>{expect(page.__drugLabelParentState?.errors||[]).toEqual([]);});
 async function open(page,{kind='chat',role='pharmacist',initial={}}={}){
  const p=load(kind),state={p,calls:[],errors:[]},other={...p.feature,key:'patient_summary',number:1,name:'合成其他功能',input_mode:'text',scope:'patient'};page.__drugLabelParentState=state;page.on('pageerror',e=>state.errors.push(e.message));
  await page.context().route('**/*',r=>new URL(r.request().url()).origin===harness.origin?r.continue():r.abort());

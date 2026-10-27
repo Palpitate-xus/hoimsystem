@@ -1,7 +1,8 @@
+const { beforeSourceHarness } = require('./fixtures/source-harness-setup.cjs');
 const { expectManagementEntry, selectManagementTab } = require('./fixtures/ai-management-navigation.cjs');
 const source=require('./fixtures/charge-sources/actual.json'),{metadata}=require('./fixtures/charge-source-ui.cjs');
 const{test,expect}=require('@playwright/test'),{load}=require('./fixtures/load-charge-assistant.cjs'),{startChargeParentHarness}=require('./fixtures/charge-parent-harness.cjs');
-let harness;test.beforeAll(async()=>{harness=await startChargeParentHarness({mode:'management'});});test.afterAll(async()=>{await harness?.close();});
+let harness;beforeSourceHarness(test,async()=>{harness=await startChargeParentHarness({mode:'management'});});test.afterAll(async()=>{await harness?.close();});
 async function setup(page,role='super_admin'){
  const p=load('chat'),calls=[],errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.context().route('**/*',route=>new URL(route.request().url()).origin===harness.origin?route.continue():route.abort());

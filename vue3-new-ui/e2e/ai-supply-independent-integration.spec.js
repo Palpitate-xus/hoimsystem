@@ -1,3 +1,4 @@
+const { beforeSourceHarness } = require('./fixtures/source-harness-setup.cjs');
 const { test, expect } = require('@playwright/test');
 const { startSupplyAssistantHarness } = require('./fixtures/supply-assistant-harness.cjs');
 const { setupSupplyAssistant } = require('./fixtures/supply-assistant-ui.cjs');
@@ -5,7 +6,7 @@ const { setupSupplyAssistant } = require('./fixtures/supply-assistant-ui.cjs');
 // Real shared trace, real request client and production Babel rule. Responses
 // are isolated mocked routes carrying unchanged synthetic ORM/worker packets.
 let harness;
-test.beforeAll(async () => { harness = await startSupplyAssistantHarness(); });
+beforeSourceHarness(test,async () => { harness = await startSupplyAssistantHarness(); });
 test.afterAll(async () => { await harness?.close(); });
 test.afterEach(async ({ page }) => {
   for (const release of Object.values(page.__supplyAssistantState?.releases || {})) release();

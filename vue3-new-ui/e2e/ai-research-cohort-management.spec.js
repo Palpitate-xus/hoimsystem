@@ -1,3 +1,4 @@
+const { beforeSourceHarness } = require('./fixtures/source-harness-setup.cjs');
 const { expectManagementEntry, selectManagementTab } = require('./fixtures/ai-management-navigation.cjs');
 const{test,expect}=require('@playwright/test'),crypto=require('node:crypto');
 const B=require('./fixtures/research-cohort-sources/admin-bootstrap-actual.json'),F=require('./fixtures/research-cohort-sources/registry-ui-actual.json');
@@ -5,7 +6,7 @@ const{startResearchManagementHarness}=require('./fixtures/research-cohort-manage
 // Main/JWT bootstrap bodies are replayed unchanged; Source has separate V4
 // SQL router-function provenance. Isolated component, not production or model.
 for(const r of B.packets){if(Buffer.byteLength(r.raw_body)!==r.body_utf8_bytes||crypto.createHash('sha256').update(r.raw_body).digest('hex')!==r.body_sha256)throw Error('Actual bootstrap fixture changed');}
-let harness;test.beforeAll(async()=>{harness=await startResearchManagementHarness();});test.afterAll(async()=>{await harness?.close();});
+let harness;beforeSourceHarness(test,async()=>{harness=await startResearchManagementHarness();});test.afterAll(async()=>{await harness?.close();});
 test.afterEach(async({page})=>{const p=page.__researchManagement;if(p){expect(p.errors).toEqual([]);expect(p.unexpected).toEqual([]);for(const done of p.releases)done();}});
 async function open(page,{roles=['super_admin'],token='synthetic-research-registry-session',holdScope=false}={}){
  const p={errors:[],unexpected:[],calls:[],releases:[],holding:holdScope,release:null};page.__researchManagement=p;page.on('pageerror',e=>p.errors.push(e.message));

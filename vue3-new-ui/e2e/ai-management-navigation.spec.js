@@ -1,8 +1,9 @@
+const { beforeSourceHarness } = require('./fixtures/source-harness-setup.cjs');
 const { test, expect } = require('@playwright/test');
 const { startResearchManagementHarness } = require('./fixtures/research-cohort-management-harness.cjs');
 const { selectManagementTab, expectManagementEntry } = require('./fixtures/ai-management-navigation.cjs');
 let harness;
-test.beforeAll(async () => { harness = await startResearchManagementHarness(); });
+beforeSourceHarness(test,async () => { harness = await startResearchManagementHarness(); });
 test.afterAll(async () => { await harness?.close(); });
 async function open(page) {
   const state = { calls: [], errors: [] };

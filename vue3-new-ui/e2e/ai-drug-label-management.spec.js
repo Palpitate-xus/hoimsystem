@@ -1,8 +1,9 @@
+const { beforeSourceHarness } = require('./fixtures/source-harness-setup.cjs');
 const { expectManagementEntry, selectManagementTab } = require('./fixtures/ai-management-navigation.cjs');
 const {test,expect}=require('@playwright/test');
 const {startDrugLabelRootHarness}=require('./fixtures/drug-label-root-harness.cjs');
 const {load}=require('./fixtures/load-drug-label-assistant-main.cjs');
-let harness;test.beforeAll(async()=>{harness=await startDrugLabelRootHarness();});test.afterAll(async()=>{await harness?.close();});test.afterEach(async({page})=>{expect(page.__drugLabelManagementState?.errors||[]).toEqual([]);});
+let harness;beforeSourceHarness(test,async()=>{harness=await startDrugLabelRootHarness();});test.afterAll(async()=>{await harness?.close();});test.afterEach(async({page})=>{expect(page.__drugLabelManagementState?.errors||[]).toEqual([]);});
 async function open(page,{roles=['super_admin'],token='synthetic-governance-session'}={}){
  const p=load(),state={p,calls:[],errors:[]};page.__drugLabelManagementState=state;page.on('pageerror',e=>state.errors.push(e.message));
  await page.context().route('**/*',r=>new URL(r.request().url()).origin===harness.origin?r.continue():r.abort());await page.addInitScript(v=>{window.__drugLabelRootInitial=v;},{mode:'manage',roles,token});

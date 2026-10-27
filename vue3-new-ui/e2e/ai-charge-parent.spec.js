@@ -1,5 +1,6 @@
+const { beforeSourceHarness } = require('./fixtures/source-harness-setup.cjs');
 const{test,expect}=require('@playwright/test'),{startChargeParentHarness}=require('./fixtures/charge-parent-harness.cjs'),{setupChargeParent,readyChargeParent}=require('./fixtures/charge-parent-ui.cjs');
-let harness;test.beforeAll(async()=>{harness=await startChargeParentHarness({mode:'parent'});});test.afterAll(async()=>{await harness?.close();});
+let harness;beforeSourceHarness(test,async()=>{harness=await startChargeParentHarness({mode:'parent'});});test.afterAll(async()=>{await harness?.close();});
 for(const profile of ['chat','responses'])test(`${profile}: shared parent routes the real admission and full Case to the dedicated charge task`,async({page})=>{
  const s=await setupChargeParent(page,harness,{profile});await readyChargeParent(page);await expect(page.getByRole('combobox',{name:'患者',exact:true})).toHaveCount(0);await expect(page.getByRole('button',{name:'生成辅助建议',exact:true})).toHaveCount(0);
  await page.getByRole('button',{name:'提交待人工核对任务',exact:true}).click();await expect(page.getByLabel('本件账目任务状态')).toContainText('已接收部分模型问题',{timeout:15000});

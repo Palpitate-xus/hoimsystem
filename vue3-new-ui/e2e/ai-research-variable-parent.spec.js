@@ -1,7 +1,8 @@
+const { beforeSourceHarness } = require('./fixtures/source-harness-setup.cjs');
 const {test,expect}=require('@playwright/test');
 const F=require('./fixtures/research-variable-task/actual-states.json');
 const {startResearchVariableParentHarness}=require('./fixtures/research-variable-parent-harness.cjs');
-let harness;test.beforeAll(async()=>{harness=await startResearchVariableParentHarness();});test.afterAll(async()=>{await harness?.close();});
+let harness;beforeSourceHarness(test,async()=>{harness=await startResearchVariableParentHarness();});test.afterAll(async()=>{await harness?.close();});
 const packet=F.states.succeeded_partial,batch=F.selection.research_variable_batch_id;
 async function open(page,initial={},mutateFeatures=value=>value){
  const errors=[],calls=[];page.on('pageerror',error=>errors.push(error.message));await page.addInitScript(value=>{window.__researchVariableAssistantInitial=value;},{initialInput:F.selection,...initial});

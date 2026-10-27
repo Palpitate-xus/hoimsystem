@@ -1,7 +1,8 @@
+const { beforeSourceHarness } = require('./fixtures/source-harness-setup.cjs');
 const {test,expect}=require('@playwright/test');
 const {startDocumentChangeParentHarness}=require('./fixtures/document-change-parent-harness.cjs');
 const {fixture,scopeId,setupDocumentChangeParent}=require('./fixtures/document-change-parent-ui.cjs');
-let harness;test.beforeAll(async()=>{harness=await startDocumentChangeParentHarness();});test.afterAll(async()=>{await harness?.close();});
+let harness;beforeSourceHarness(test,async()=>{harness=await startDocumentChangeParentHarness();});test.afterAll(async()=>{await harness?.close();});
 async function open(page,options={}){const errors=[];page.on('pageerror',e=>errors.push(e.message));const result=await setupDocumentChangeParent(page,harness.origin,options);return {...result,errors};}
 async function choose(page){await page.getByRole('row').filter({hasText:scopeId}).getByRole('button',{name:'读取完整件并选择',exact:true}).click();await expect(page.getByLabel('已核对完整双原文范围')).toBeVisible();await page.getByText('明确以超级管理员试运行',{exact:true}).click();await expect(page.getByRole('button',{name:'生成未核实核对问题',exact:true})).toBeEnabled();}
 async function ready(page,options={}){const result=await open(page,options);await choose(page);await page.getByRole('button',{name:'生成未核实核对问题',exact:true}).click();await expect(page.getByText('请人工核对原文适用性？',{exact:true})).toBeVisible();return result;}

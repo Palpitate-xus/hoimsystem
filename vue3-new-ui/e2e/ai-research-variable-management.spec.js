@@ -1,8 +1,9 @@
+const { beforeSourceHarness } = require('./fixtures/source-harness-setup.cjs');
 const { expectManagementEntry, selectManagementTab } = require('./fixtures/ai-management-navigation.cjs');
 const{test,expect}=require('@playwright/test');
 const{startResearchVariableManagementHarness}=require('./fixtures/research-variable-management-harness.cjs');
 const{loadResearchVariableSource}=require('./fixtures/research-variable-source-ui.cjs');
-const F=loadResearchVariableSource(),dictionaryId=F.data('dictionary.published.metadata').record_id;let harness;test.beforeAll(async()=>{harness=await startResearchVariableManagementHarness();});test.afterAll(async()=>{await harness?.close();});
+const F=loadResearchVariableSource(),dictionaryId=F.data('dictionary.published.metadata').record_id;let harness;beforeSourceHarness(test,async()=>{harness=await startResearchVariableManagementHarness();});test.afterAll(async()=>{await harness?.close();});
 async function open(page,{initial={},hold=null}={}){
  const state={calls:[],errors:[],unknown:[],release:null};page.on('pageerror',e=>state.errors.push(e.message));await page.addInitScript(v=>{window.__researchVariableManagementInitial=v;},initial);await page.context().route('**/*',r=>new URL(r.request().url()).origin===harness.origin?r.continue():r.abort());
  await page.route('**/api/**',async route=>{const q=route.request(),u=new URL(q.url()),path=u.pathname;state.calls.push({method:q.method(),path,query:Object.fromEntries(u.searchParams)});

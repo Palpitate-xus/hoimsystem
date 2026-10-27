@@ -15,7 +15,7 @@ from app.dependencies import ADMIN_ROLES, ROLE_CASHIER, ROLE_PATIENT, ROLE_REGIS
 from app.integration_outbox import enqueue_integration_event
 from app.models import Charge, Doctor, Invoice, Patient, Payment, Prescription, Registration, User
 from app.pagination import paginate
-from app.registration import allocate_registration_id
+from app.registration import allocate_registration_id, restore_schedule_slot
 from app.schemas import (
     ChargeCommitRequest,
     ChargeRefundRequest,
@@ -313,7 +313,7 @@ def confirm_window_appointment(req: dict, db: Session = Depends(get_db), current
 
 @router.post("/windowRegistration/appointmentCancel")
 def cancel_window_appointment(req: dict, db: Session = Depends(get_db), current_user: User = Depends(require_roles(ROLE_CASHIER, ROLE_REGISTRAR, *ADMIN_ROLES))):
-    from app.models import Appointment, DoctorSchedule
+    from app.models import Appointment
 
     item = db.query(Appointment).filter(Appointment.registration_uuid == req.get("uuid")).first()
     if not item:
@@ -332,9 +332,7 @@ def cancel_window_appointment(req: dict, db: Session = Depends(get_db), current_
     # 号源回补：仅预约时实际扣减过号源（有 schedule_id）的才回补原排班。
     # 无 schedule_id 的预约（如随访生成）创建时未扣号源，回补会造成号源凭空虚增。
     if item.schedule_id:
-        schedule = db.query(DoctorSchedule).filter(DoctorSchedule.schedule_id == item.schedule_id).first()
-        if schedule:
-            schedule.number = (schedule.number or 0) + 1
+        restore_schedule_slot(db, item.schedule_id)
     db.commit()
     return {"code": 200, "msg": "success"}
 
@@ -513,7 +511,7 @@ def window_registration(req: dict, db: Session = Depends(get_db), current_user: 
 @router.post("/windowRegistration/cancel")
 def window_cancel_registration(req: dict, db: Session = Depends(get_db), current_user: User = Depends(require_roles(ROLE_CASHIER, ROLE_REGISTRAR, *ADMIN_ROLES))):
     """窗口退号"""
-    from app.models import DoctorSchedule, Registration
+    from app.models import Registration
 
     reg = db.query(Registration).filter(Registration.registration_uuid == req.get("uuid")).first()
     if not reg:
@@ -531,9 +529,7 @@ def window_cancel_registration(req: dict, db: Session = Depends(get_db), current
         return {"code": 500, "msg": "该挂号已就诊，不能退号"}
     # 仅挂号时扣减过号源（有 schedule_id）的回补原排班
     if reg.schedule_id:
-        schedule = db.query(DoctorSchedule).filter(DoctorSchedule.schedule_id == reg.schedule_id).first()
-        if schedule:
-            schedule.number = (schedule.number or 0) + 1
+        restore_schedule_slot(db, reg.schedule_id)
     db.commit()
     return {"code": 200, "msg": "success"}
 
@@ -621,7 +617,9 @@ def create_payment(req: PaymentCreateRequest, db: Session = Depends(get_db), cur
     """创建支付订单"""
     from app.models import Payment
 
-    charge = db.query(Charge).filter(Charge.charge_id == req.charge_id).first()
+    # Serialize payment-order creation on its actual charge, including the
+    # empty-child-table case where locking an existing Payment cannot help.
+    charge = db.query(Charge).filter(Charge.charge_id == req.charge_id).populate_existing().with_for_update().first()
     if not charge:
         return {"code": 500, "msg": "收费记录不存在"}
     if not (_is_cashier_role(current_user) or _owns_charge(current_user, charge)):

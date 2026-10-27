@@ -19,10 +19,12 @@ router = APIRouter()
 
 def _generate_admission_no(db: Session) -> str:
     today = datetime.datetime.now().strftime("%Y%m%d")
-    count = db.query(Admission).filter(Admission.admission_no.like(f"ZY{today}%")).count()
+    # The billing gate serializes admission creation. Use current locking reads
+    # so an older MySQL RR view cannot reuse another committed admission number.
+    count = len(db.query(Admission.admission_no).filter(Admission.admission_no.like(f"ZY{today}%")).populate_existing().with_for_update().all())
     candidate = f"ZY{today}{count + 1:03d}"
     # 并发防护：候选号已被占用时（count+1 撞号）改用序号+微秒后缀保证唯一
-    exists = db.query(Admission).filter(Admission.admission_no == candidate).first()
+    exists = db.query(Admission).filter(Admission.admission_no == candidate).populate_existing().with_for_update().first()
     if exists:
         us = datetime.datetime.now().strftime("%f")
         candidate = f"ZY{today}{count + 1:03d}{us}"
@@ -109,10 +111,11 @@ def get_admission_list(
 
 @router.post("/admission/create")
 def create_admission(req: AdmissionCreateRequest, current_user: User = Depends(require_roles(*NURSING_ROLES)), db: Session = Depends(get_db)):
-    patient = db.query(Patient).filter(Patient.patient_id == req.patient_id).first()
+    current_user = lock_charge_write(db, current_user, allowed_roles=NURSING_ROLES)
+    patient = db.query(Patient).filter(Patient.patient_id == req.patient_id).populate_existing().with_for_update().first()
     if not patient:
         return {"code": 500, "msg": "病人不存在"}
-    bed = db.query(Bed).filter(Bed.bed_id == req.bed_id).first()
+    bed = db.query(Bed).filter(Bed.bed_id == req.bed_id).populate_existing().with_for_update().first()
     if not bed:
         return {"code": 500, "msg": "床位不存在"}
     if bed.status == 1:
@@ -121,7 +124,7 @@ def create_admission(req: AdmissionCreateRequest, current_user: User = Depends(r
         return {"code": 500, "msg": "该床位已禁用"}
 
     # 检查是否已有在院记录
-    existing = db.query(Admission).filter(Admission.patient_id == req.patient_id, Admission.status == 1).first()
+    existing = db.query(Admission).filter(Admission.patient_id == req.patient_id, Admission.status == 1).populate_existing().with_for_update().first()
     if existing:
         return {"code": 500, "msg": "该病人已有在院记录"}
 

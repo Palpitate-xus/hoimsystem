@@ -3,7 +3,14 @@ import datetime
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
-from app.models import Registration, RegistrationCounter
+from app.models import DoctorSchedule, Registration, RegistrationCounter
+
+
+def restore_schedule_slot(db: Session, schedule_id: int) -> int:
+    """Return one consumed slot atomically inside the cancellation transaction."""
+    return db.query(DoctorSchedule).filter(DoctorSchedule.schedule_id == schedule_id).update(
+        {DoctorSchedule.number: func.coalesce(DoctorSchedule.number, 0) + 1}, synchronize_session="fetch"
+    )
 
 
 def allocate_registration_id(db: Session, registration_time: datetime.datetime) -> int:

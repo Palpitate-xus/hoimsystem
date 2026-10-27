@@ -1,0 +1,19 @@
+{
+  "started_at": "2026-10-27T07:27:50.194959+00:00",
+  "schema": "validation_reads_da1d228f07c34218854677f91f966303",
+  "scope": "Same complete 67 Main GET assertions and original seed fixture, on isolated real PostgreSQL private schema; only fixture engine/drop cleanup adapted",
+  "source_sha256": {
+    "tests/test_baseline_missing_reads.py": "9dcae9f74bb1f5f8aed2089eb4652a291639d6f8e21abcb4362ddca7afcb11ec",
+    "tests/conftest.py": "c37dd99fcdaeb43a0e3f4b417973f2de1ffcb24735f3719fce5f442e73274268"
+  },
+  "exit_code": 0,
+  "counts": {
+    "tests": "67",
+    "errors": "0",
+    "failures": "0",
+    "skipped": "0",
+    "time": "11.768"
+  },
+  "elapsed_seconds": 26.655454927124083,
+  "private_schema_dropped": true
+}

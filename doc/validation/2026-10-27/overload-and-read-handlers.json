@@ -139,5 +139,30 @@
     "fastapi_be/tests/test_inventory_backpressure.py": "0a84fc6d502b6cfd03673e19b6c32678ba709fb22f12cd33cdbfd291fc828eaa",
     "fastapi_be/tests/test_database_backpressure.py": "64a551c4205b43454b22a671ccbfc453fbd0f9faefb822c05b79a3968932cd89",
     "fastapi_be/tests/test_baseline_missing_reads.py": "9dcae9f74bb1f5f8aed2089eb4652a291639d6f8e21abcb4362ddca7afcb11ec"
+  },
+  "benchmark_toolchain_final": {
+    "counts": {
+      "tests": "53",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "29.592"
+    },
+    "summary": {
+      "started_at": "2026-10-27T07:15:57.579450+00:00",
+      "elapsed_seconds": 30.636853852309287,
+      "exit_code": 0,
+      "command": [
+        "/home/xusheng/miniconda3/bin/python3",
+        "-m",
+        "pytest",
+        "-q",
+        "-o",
+        "cache_dir=/tmp/hoim-validation-20261027/backend/benchmark-final/cache",
+        "/home/xusheng/workspace/hoimsystem/fastapi_be/../fastapi_benchmark/tests",
+        "--junitxml=/tmp/hoim-validation-20261027/backend/benchmark-final.xml"
+      ]
+    },
+    "warning": "One gevent/os fork deprecation warning; all53cases passed"
   }
 }

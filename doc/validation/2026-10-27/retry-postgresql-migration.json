@@ -1,0 +1,30 @@
+{
+  "schema": "validation_retry_upgrade_256fcd25e113",
+  "old_image": "sha256:618319ad0af72830a374795c39d6f02cb066cbc27dbe1b32863601dc94071eb2",
+  "source_commit": "aec9aa034f050a2e01a2132ef54b7478f38f167c",
+  "started_utc": "2026-10-27T07:16:55.025767+00:00",
+  "checks": {
+    "old_image_seed_exact_bytes": true,
+    "existing_provider_single_attempt_and_all_original_rows_unchanged": true,
+    "new_provider_server_default_three": true,
+    "actual_sql_null_usage_accepted": true,
+    "downgrade_with_unknown_usage_refused": true,
+    "known_usage_downgrade_restores_old_exact_rows": true,
+    "old_revision_schema_restored": true
+  },
+  "old_image_head": "20261023_native_variables_merge",
+  "old_metadata_tables": 266,
+  "baseline_row_hashes": {
+    "hoimsystem_ai_provider": "be6aad4239eb8fd2244a2c257c20def5722f8b22fc84a1415daa1022d6a851d4",
+    "hoimsystem_ai_run": "dc6afef74c7e4ed6c5ff466b8e1610966d9af0d6a696b8a991c46af4622e57ec",
+    "hoimsystem_patient": "28933f890e71529930d79615799b3e3731cbbdca54b7cbe4de266f06604daf1e"
+  },
+  "passed": true,
+  "private_schema_dropped": true,
+  "elapsed_seconds": 8.535,
+  "ended_utc": "2026-10-27T07:17:03.560979+00:00",
+  "migration_hashes": {
+    "fastapi_be/alembic/versions/20261027_ai_provider_retry.py": "40aef119ce6be74324104924b36c2789d39672f6810fc03cde908c8136e4b3c1",
+    "fastapi_be/alembic/versions/20261027_text_retry_usage.py": "f447995e20e7488343a525007349cc78627667fe97b00feb06f7e72b32fee628"
+  }
+}

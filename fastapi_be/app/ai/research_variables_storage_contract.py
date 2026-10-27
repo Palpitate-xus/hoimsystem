@@ -15,9 +15,10 @@ from app.ai.research_variables_fields import LIMITATIONS
 from app.ai.research_variables_prompt import SYSTEM_PROMPT
 from app.ai.research_variables_task_binding import VariableTaskBinding, binding_reference, evidence_for_binding
 from app.ai.research_variables_task_contract import MAX_RUN_TEXT_BYTES, SOURCE_DOMAIN, TaskRole, VariableTaskSelection, canonical, digest, validate_question
+from app.ai.retry_policy import ProviderRetrySnapshot
 
 
-class VariableFrozenProvider(StrictModel):
+class VariableFrozenProvider(ProviderRetrySnapshot, StrictModel):
     provider_id: Positive
     revision: Positive
     name: str = Field(min_length=1, max_length=100)

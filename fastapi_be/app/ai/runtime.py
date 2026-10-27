@@ -31,6 +31,7 @@ from app.ai.observation_windows import RISK_FEATURES, authorize_window_snapshot
 from app.ai.operational_sources import authorize_operational_snapshot, operational_context
 from app.ai.pathway_sources import PATHWAY_SOURCE_FEATURES, selected_pathway_ids
 from app.ai.qsofa_context import authorize_qsofa_snapshot
+from app.ai.retry_policy import configured_attempts, retry_snapshots_equal
 from app.ai.review_curation import authorize_feedback_snapshot
 from app.ai.schemas import RunRequest
 from app.ai.support_context import authorize_support_snapshot
@@ -84,6 +85,7 @@ def provider_snapshot(provider: AIProvider) -> dict:
     """Freeze the requested model and limits for audit without any credential or environment reference."""
     fields = ("provider_id", "revision", "name", "kind", "api_base", "model", "timeout_seconds", "max_output_tokens", "validation_report")
     snapshot = {name: getattr(provider, name) for name in fields}
+    snapshot["max_attempts"] = configured_attempts(provider)
     snapshot["temperature"] = float(provider.temperature)
     snapshot["allows_patient_data"] = bool(provider.allows_patient_data)
     snapshot["effective_output_limit"] = min(provider.max_output_tokens, settings.AI_MAX_OUTPUT_TOKENS)
@@ -1243,7 +1245,7 @@ def _recheck_task(db: Session, run: AIRun) -> tuple[FeatureSpec, AIProvider, dic
 
     if snapshot.get("catalog_version") != CATALOG_VERSION or snapshot.get("system_prompt") != system_prompt_for(snapshot["payload"]["context"]):
         raise AIExecutionError("TASK_CONTRACT_CHANGED", "任务目录或系统契约已改变，请重新创建任务")
-    if digest(provider_snapshot(provider)) != digest(snapshot.get("provider_snapshot")):
+    if not retry_snapshots_equal(provider_snapshot(provider), snapshot.get("provider_snapshot")):
         raise AIExecutionError("TASK_MODEL_CHANGED", "模型参数或输出限制已改变，请重新创建任务")
     if digest(snapshot["payload"]["context"]) != run.context_digest:
         raise AIExecutionError("TASK_SNAPSHOT_INVALID", "任务资料快照校验不一致，请重新创建任务")

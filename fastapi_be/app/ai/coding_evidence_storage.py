@@ -18,6 +18,7 @@ from app.ai.coding_evidence_models import MAX_BYTES as RESULT_BYTES
 from app.ai.coding_evidence_models import AICodingRunResult
 from app.ai.coding_evidence_sources import canonical_json, hash_content
 from app.ai.inventory_contract import identity, utc
+from app.ai.retry_policy import retry_snapshots_equal
 
 TEXT_BYTES = 65535
 
@@ -271,7 +272,7 @@ def stage_result(db, run, lease, value):
     provider = db.query(AIProvider).filter_by(provider_id=run.provider_id).populate_existing().with_for_update().one_or_none()
     if config is None or config.revision != metadata["feature_revision"] or provider is None or provider.revision != run.provider_revision:
         raise HTTPException(409, "编码证据最终接收时原功能或模型版本已经变化")
-    if check_configuration(db, actor, FEATURE_BY_KEY[run.feature_key], config, bool(run.preview)) is not provider or provider_snapshot(provider) != snapshot["provider_snapshot"]:
+    if check_configuration(db, actor, FEATURE_BY_KEY[run.feature_key], config, bool(run.preview)) is not provider or not retry_snapshots_equal(provider_snapshot(provider), snapshot["provider_snapshot"]):
         raise HTTPException(409, "编码证据最终接收时模型或适用权限已经变化")
     context = expand_context(db, snapshot["payload"]["context"], user=actor, current=True)
     bounded_result(value)

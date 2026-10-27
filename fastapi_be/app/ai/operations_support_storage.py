@@ -19,6 +19,7 @@ from app.ai.operations_support_run_models import ARTIFACT_HASHES, ARTIFACT_SCHEM
 from app.ai.operations_support_task_contract import OperationsTaskSelection
 from app.ai.operations_support_task_prompt import PROMPT_VERSION, SYSTEM_PROMPT
 from app.ai.operations_support_write_guard import current_rows, lock_operations_write
+from app.ai.retry_policy import retry_snapshot_hash_matches, retry_snapshots_equal
 from app.sql_counts import locked_row_count
 
 RAW_FIELDS = ("input_json", "evidence_json", "context_metadata_json")
@@ -247,9 +248,7 @@ def _before_bodies(db, user, run_id, *, execution):
     if execution:
         current_config = configuration(db, actor, preview=bool(receipt["original_run_header"]["preview"]))
         _, _, current_prompt, current_execution = current_config
-        if (current_prompt["prompt_id"], current_prompt["prompt_version"], current_prompt["instructions_digest"]) != (h["prompt_id"], h["prompt_version"], h["instructions_digest"]) or c.content_hash(
-            current_execution
-        ) != h["execution_snapshot_hash"]:
+        if (current_prompt["prompt_id"], current_prompt["prompt_version"], current_prompt["instructions_digest"]) != (h["prompt_id"], h["prompt_version"], h["instructions_digest"]) or not retry_snapshot_hash_matches(current_execution, h["execution_snapshot_hash"], c.content_hash):
             raise HTTPException(409, "运维当前配置、Provider或Prompt与原冻结锚不同；未读取来源或任务正文")
     else:
         row = current_rows(db.query(AIFeatureConfig.allowed_roles_json).filter_by(feature_key=FEATURE), shared=True).one_or_none()
@@ -333,7 +332,7 @@ def load_artifact(db, user, run_id, *, execution=False):
         _, _, current_prompt, current_execution = current_config
         # Other feature catalog releases do not change this immutable native Task.
         same_prompt = {key: value for key, value in current_prompt.items() if key != "catalog_version"} == {key: value for key, value in prompt.items() if key != "catalog_version"}
-        if not same_prompt or current_execution != frozen_execution:
+        if not same_prompt or not retry_snapshots_equal(current_execution, frozen_execution):
             raise HTTPException(409, "运维当前Provider、配置、Prompt或原登录epoch与冻结版本不同")
     return run, artifact, source, private, prompt, frozen_execution, selection
 

@@ -18,6 +18,7 @@ from app.ai.gateway import AIExecutionError, generate
 from app.ai.governance import active_prompt, audit, digest, encode_json
 from app.ai.models import AIAuditEvent, AIFeatureConfig, AIProvider, AIRun, utcnow
 from app.ai.native_acceptance import AUDIT_FIELDS, RUN_FIELDS, acceptance_state, verify_accepted_result
+from app.ai.retry_policy import retry_snapshots_equal
 from app.config import settings
 from app.models import User
 
@@ -77,7 +78,7 @@ def recheck(db, run, *, expected_epoch=None):
         raise AIExecutionError("TASK_EXPIRED", "任务等待时间过长，请核对当前原件后重新提交")
     spec, config, provider = _configuration(db, actor, bool(run.preview))
     prompt, version = active_prompt(db, spec, config)
-    if snapshot["catalog_version"] != CATALOG_VERSION or snapshot["provider_snapshot"] != provider_snapshot(provider) or snapshot["feature_validation"] != _validation(config):
+    if snapshot["catalog_version"] != CATALOG_VERSION or not retry_snapshots_equal(provider_snapshot(provider), snapshot["provider_snapshot"]) or snapshot["feature_validation"] != _validation(config):
         raise HTTPException(409, "原文提取的目录、模型或验证配置已改变")
     if run.prompt_version != version or snapshot["task_prompt"] != prompt:
         raise HTTPException(409, "原文提取Prompt已改变，请重新创建任务")

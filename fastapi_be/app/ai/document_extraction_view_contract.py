@@ -7,6 +7,7 @@ from pydantic import Field, model_validator
 
 from app.ai import document_evidence_contract as c
 from app.ai.document_extraction_contract import DocumentExtractionSource
+from app.ai.retry_policy import ProviderRetrySnapshot
 
 
 class DocumentExtractionBinding(c.StrictModel):
@@ -25,7 +26,7 @@ class DocumentExtractionContext(c.StrictModel):
     missing_data: list[str]
 
 
-class DocumentFrozenProvider(c.StrictModel):
+class DocumentFrozenProvider(ProviderRetrySnapshot, c.StrictModel):
     provider_id: c.Positive
     revision: c.Positive
     name: str = Field(min_length=1, max_length=100)

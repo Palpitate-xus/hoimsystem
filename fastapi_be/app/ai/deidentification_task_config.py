@@ -8,6 +8,7 @@ from app.ai.deidentification_task_contract import FEATURE_KEY, FrozenProvider, F
 from app.ai.governance import active_prompt, get_spec, provider_credential, validate_endpoint
 from app.ai.models import AIPromptVersion, AIProvider
 from app.ai.research_cohort_write_guard import current_research_rows
+from app.ai.retry_policy import configured_attempts
 from app.config import settings
 
 
@@ -37,6 +38,7 @@ def configuration(db, actor, preview=False):
         public = FrozenProvider.model_validate(
             {
                 **{key: getattr(provider, key) for key in ("provider_id", "revision", "name", "kind", "api_base", "model", "timeout_seconds", "max_output_tokens", "validation_report")},
+                "max_attempts": configured_attempts(provider),
                 "temperature": float(provider.temperature),
                 "allows_patient_data": True,
                 "effective_output_limit": min(provider.max_output_tokens, settings.AI_MAX_OUTPUT_TOKENS),

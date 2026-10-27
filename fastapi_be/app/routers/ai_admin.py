@@ -1455,7 +1455,7 @@ def _write_provider(db: Session, req: ProviderWrite, user: User, provider: AIPro
             invalidate_feature(config)
             config.revision += 1
             config.updated_by = user.user_id
-    for name in ("name", "kind", "model", "api_key_env", "timeout_seconds", "max_output_tokens", "temperature", "validation_report"):
+    for name in ("name", "kind", "model", "api_key_env", "timeout_seconds", "max_attempts", "max_output_tokens", "temperature", "validation_report"):
         setattr(provider, name, getattr(req, name))
     provider.api_base = endpoint
     provider.enabled = int(req.enabled)

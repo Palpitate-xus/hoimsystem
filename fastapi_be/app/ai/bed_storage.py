@@ -9,6 +9,7 @@ from pydantic import Field, field_validator
 
 from app.ai.bed_contract import SHA256, StrictModel, canonical_json, hash_content, identity
 from app.ai.bed_series_models import RESULT_BYTES, AIBedRunResult
+from app.ai.retry_policy import retry_snapshots_equal
 
 
 class BedResultReference(StrictModel):
@@ -109,7 +110,7 @@ def stage_result(db, run, lease, value):
         raise HTTPException(409, "床位预测最终接收时原功能或模型版本已经变化")
     from app.ai.catalog import FEATURE_BY_KEY
 
-    if check_configuration(db, actor, FEATURE_BY_KEY[run.feature_key], config, bool(run.preview)) is not provider or provider_snapshot(provider) != snapshot["provider_snapshot"]:
+    if check_configuration(db, actor, FEATURE_BY_KEY[run.feature_key], config, bool(run.preview)) is not provider or not retry_snapshots_equal(provider_snapshot(provider), snapshot["provider_snapshot"]):
         raise HTTPException(409, "床位预测最终接收时模型或适用权限已经变化")
     authorize_series(db, actor, binding["series_id"], binding=binding, locking=True)
     serialized, content_hash, size = bounded_result(value)

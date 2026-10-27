@@ -5,10 +5,11 @@ from typing import Literal
 
 from pydantic import Field, field_validator, model_validator
 
+from app.ai.retry_policy import ProviderRetrySnapshot
 from app.ai.satisfaction_contract import Positive, StrictModel
 
 
-class SatisfactionFrozenProvider(StrictModel):
+class SatisfactionFrozenProvider(ProviderRetrySnapshot, StrictModel):
     provider_id: Positive
     revision: Positive
     name: str = Field(min_length=1, max_length=80)

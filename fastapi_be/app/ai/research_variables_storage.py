@@ -23,6 +23,7 @@ from app.ai.research_variables_run_models import ARTIFACT_SCHEMA, AIResearchVari
 from app.ai.research_variables_task_binding import VariableTaskBinding
 from app.ai.research_variables_task_context import VariablePreparedContext, prepare_context, wire_parts
 from app.ai.research_variables_task_contract import FEATURE_KEY, MAX_BINDING_BYTES, MAX_RUN_TEXT_BYTES, canonical, digest, strict_json
+from app.ai.retry_policy import retry_snapshots_equal
 from app.sql_text import UTF8Bytes
 
 RUN_TEXT = ("input_json", "result_json", "evidence_json", "context_metadata_json")
@@ -130,7 +131,7 @@ def _verify_configuration(snapshot, configured):
         (snapshot.feature_validation, configured.validation_snapshot),
         (snapshot.prompt_origin, configured.prompt_origin),
     ):
-        if canonical(expected) != canonical(actual):
+        if not retry_snapshots_equal(expected, actual):
             raise HTTPException(409, "任务原模型、独立验证或Prompt配置已变化")
     if (snapshot.system_prompt, snapshot.task_prompt) != (configured.system_prompt, configured.task_prompt):
         raise HTTPException(409, "任务原完整System/Task Prompt已变化，未采用当前内容替换")

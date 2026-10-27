@@ -21,6 +21,7 @@ from app.ai.clinical_training_protocol import instructions_for
 from app.ai.clinical_training_task_contract import TrainingFeedbackSource, TrainingTaskSelection
 from app.ai.clinical_training_task_prompt import PROMPT_VERSION, SYSTEM_PROMPT, TASK_PROMPT
 from app.ai.clinical_training_write_guard import current_rows
+from app.ai.retry_policy import configured_attempts
 
 FEATURE = "clinical_training"
 FRAME_BYTES = 262144
@@ -93,6 +94,7 @@ def configuration(db, actor, *, preview, exclusive=False):
         raise HTTPException(409, "培训AI不可变Prompt实际归属、UUID或完整文本损坏") from exc
     frozen_prompt = dict(schema_version="clinical_training_prompt_snapshot_v1", prompt_id=None if prompt is None else prompt.prompt_id, prompt_version=0 if prompt is None else prompt.version, origin="packaged_task" if prompt is None else "database_version", catalog_version=CATALOG_VERSION, native_task_version=PROMPT_VERSION, system_prompt=SYSTEM_PROMPT, task_prompt=task, instructions_digest=hashlib.sha256(instructions.encode()).hexdigest())
     provider_snapshot = {name: getattr(provider, name) for name in ("provider_id", "revision", "name", "kind", "api_base", "model", "timeout_seconds", "max_output_tokens", "validation_report")}
+    provider_snapshot["max_attempts"] = configured_attempts(provider)
     provider_snapshot.update(temperature_decimal=str(temperature), allows_patient_data=bool(provider.allows_patient_data), effective_output_limit=min(provider.max_output_tokens, settings.AI_MAX_OUTPUT_TOKENS))
     execution = dict(schema_version="clinical_training_execution_snapshot_v1", feature_key=FEATURE, preview=preview, requester_epoch=dict(user_id=actor.user_id, user_role=actor.user_role, token_invalid_before=current_references.utc_text(actor.token_invalid_before) if actor.token_invalid_before is not None else None), configuration=dict(revision=config.revision, enabled=config.enabled, allowed_roles=sorted(roles), daily_limit=config.daily_limit, active_prompt_id=config.active_prompt_id), provider_snapshot=provider_snapshot, feature_validation=dict(status=config.validation_status, note=config.validation_note, validated_by=config.validated_by, validated_at=current_references.utc_text(config.validated_at) if config.validated_at is not None else None, current_validator=validator_state))
     bounded_frame(frozen_prompt)

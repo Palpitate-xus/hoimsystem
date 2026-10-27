@@ -23,6 +23,7 @@ class AIProvider(Base):
     """Administrator-managed model endpoints; credential ciphertext is never returned."""
 
     __tablename__ = "hoimsystem_ai_provider"
+    __table_args__ = (CheckConstraint("max_attempts BETWEEN 1 AND 3", name="ck_ai_provider_max_attempts"),)
 
     provider_id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(80), nullable=False, unique=True)
@@ -34,6 +35,7 @@ class AIProvider(Base):
     enabled = Column(Integer, nullable=False, default=0)
     allows_patient_data = Column(Integer, nullable=False, default=0)
     timeout_seconds = Column(Integer, nullable=False, default=30)
+    max_attempts = Column(Integer, nullable=False, default=3, server_default="3")
     max_output_tokens = Column(Integer, nullable=False, default=2000)
     temperature = Column(Numeric(4, 3), nullable=False, default=0.2)
     supported_features_json = Column(Text, nullable=False, default="[]")

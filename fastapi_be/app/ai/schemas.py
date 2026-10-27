@@ -51,11 +51,18 @@ class ProviderWrite(StrictRequest):
     enabled: bool = False
     allows_patient_data: bool = False
     timeout_seconds: int = Field(default=30, ge=3, le=120)
+    max_attempts: int = Field(default=3, strict=True, ge=1, le=3)
     max_output_tokens: int = Field(default=2000, ge=256, le=16000)
     temperature: float = Field(default=0.2, ge=0, le=1, allow_inf_nan=False)
     supported_features: list[str] = Field(default_factory=list, max_length=80)
     validation_report: str = Field(default="", max_length=5000)
     expected_revision: int = Field(default=0, ge=0)
+
+    @model_validator(mode="after")
+    def text_retry_policy(self):
+        if self.kind == "specialist":
+            self.max_attempts = 1
+        return self
 
     @field_validator("api_key_env")
     @classmethod

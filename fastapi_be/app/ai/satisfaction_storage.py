@@ -14,6 +14,7 @@ from pydantic import Field, TypeAdapter
 from sqlalchemy import inspect
 from sqlalchemy.orm import defer
 
+from app.ai.retry_policy import retry_snapshots_equal
 from app.ai.satisfaction_artifact_models import AISatisfactionRunArtifact
 from app.ai.satisfaction_context import FEATURE_KEY, SatisfactionContextBinding, expand_context, satisfaction_evidence, selection, short_context, source_binding
 from app.ai.satisfaction_contract import SHA, UUID, Positive, StrictModel
@@ -386,7 +387,7 @@ def _current_configuration(db, actor, run, snapshot, metadata):
         }
         if config.revision != metadata["feature_revision"] or provider.revision != run.provider_revision or validation != snapshot["feature_validation"]:
             raise ValueError("The original feature or provider revision changed")
-        if check_configuration(db, actor, spec, config, bool(run.preview)) is not provider or provider_snapshot(provider) != snapshot["provider_snapshot"]:
+        if check_configuration(db, actor, spec, config, bool(run.preview)) is not provider or not retry_snapshots_equal(provider_snapshot(provider), snapshot["provider_snapshot"]):
             raise ValueError("The complete current model limits or identity changed")
     except (ValueError, TypeError, KeyError) as exc:
         raise HTTPException(409, "评价最终接收时的功能、适用范围或完整模型配置已变化") from exc

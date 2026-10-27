@@ -21,6 +21,7 @@ from app.ai.drug_label_run_contract import ACCEPT_ACTION, CREATE_ACTION, USAGE_A
 from app.ai.inventory_write_guard import current_inventory_rows
 from app.ai.models import AIAuditEvent, AIFeatureConfig, AIPromptVersion, AIProvider, AIRun
 from app.ai.native_acceptance import AUDIT_FIELDS, RUN_FIELDS
+from app.ai.retry_policy import retry_snapshots_equal
 from app.config import settings
 from app.models import User
 from app.sql_counts import locked_row_count
@@ -131,7 +132,7 @@ def recheck(db, stored, *, expected_epoch=None):
     spec, config, provider, prompt, version = _configuration(db, actor, bool(current.run.preview))
     if (
         current.snapshot["catalog_version"] != CATALOG_VERSION
-        or current.snapshot["provider_snapshot"] != provider_snapshot(provider)
+        or not retry_snapshots_equal(provider_snapshot(provider), current.snapshot["provider_snapshot"])
         or current.snapshot["feature_validation"] != _validation(config)
         or current.run.prompt_version != version
         or current.snapshot["task_prompt"] != prompt

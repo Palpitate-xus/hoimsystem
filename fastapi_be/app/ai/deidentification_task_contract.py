@@ -9,6 +9,7 @@ from app.ai.deidentification_contract import SOURCE_ROLES, StrictModel
 from app.ai.deidentification_frozen import DeidentificationFrozenPrompt
 from app.ai.deidentification_protocol import question_valid
 from app.ai.research_cohort_contract import SHA, UTC, UUID, Positive, scalar
+from app.ai.retry_policy import ProviderRetrySnapshot
 
 FEATURE_KEY = "deidentification"
 
@@ -47,7 +48,7 @@ def selection(value):
     return checked.model_dump(exclude_unset=True)
 
 
-class FrozenProvider(StrictModel):
+class FrozenProvider(ProviderRetrySnapshot, StrictModel):
     provider_id: Positive
     revision: Positive
     name: Annotated[str, Field(strict=True, min_length=1, max_length=80), AfterValidator(scalar)]

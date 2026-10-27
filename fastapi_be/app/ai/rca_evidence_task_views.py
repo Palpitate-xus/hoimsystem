@@ -8,6 +8,7 @@ from app.ai import rca_evidence_case_contract as k
 from app.ai import rca_evidence_contract as c
 from app.ai import rca_evidence_input as i
 from app.ai import rca_evidence_source_contract as s
+from app.ai.retry_policy import ProviderRetrySnapshot
 
 TokenCount = Annotated[int, Field(strict=True, ge=0, le=2000000)]
 
@@ -39,7 +40,7 @@ class RcaFrozenCase(c.StrictModel):
         return value
 
 
-class RcaFrozenProvider(c.StrictModel):
+class RcaFrozenProvider(ProviderRetrySnapshot, c.StrictModel):
     provider_id: i.PositiveId
     revision: i.PositiveId
     name: str = Field(min_length=1, max_length=100)

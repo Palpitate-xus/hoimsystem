@@ -12,6 +12,7 @@ from app.ai.context import context_metadata
 from app.ai.gateway import AIExecutionError
 from app.ai.governance import active_prompt
 from app.ai.models import AIAuditEvent, AIFeatureConfig, AIPromptVersion, AIProvider, AIRun
+from app.ai.retry_policy import retry_snapshots_equal
 from app.ai.satisfaction_artifact_models import AISatisfactionRunArtifact
 from app.ai.satisfaction_context import FEATURE_KEY, expand_context, satisfaction_context, selection
 from app.ai.satisfaction_contract import SOURCE_ROLES
@@ -91,7 +92,7 @@ def recheck(db, run, *, expected_epoch=None):
     if (
         snapshot["catalog_version"] != CATALOG_VERSION
         or snapshot["system_prompt"] != SATISFACTION_SYSTEM_PROMPT
-        or snapshot["provider_snapshot"] != provider_snapshot(provider)
+        or not retry_snapshots_equal(provider_snapshot(provider), snapshot["provider_snapshot"])
         or snapshot["feature_validation"] != validation(config)
     ):
         raise HTTPException(409, "评价任务目录、固定System或完整模型及验证配置已改变")

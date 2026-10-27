@@ -13,6 +13,7 @@ from sqlalchemy.orm import Session
 
 from app.ai.catalog import FEATURE_BY_KEY, FeatureSpec, describe_feature
 from app.ai.models import AIAuditEvent, AIFeatureConfig, AIPromptVersion, AIProvider
+from app.ai.retry_policy import configured_attempts
 from app.config import settings
 
 
@@ -143,6 +144,7 @@ def describe_provider(provider: AIProvider) -> dict:
         "update_time",
     )
     data = {name: getattr(provider, name) for name in fields}
+    data["max_attempts"] = configured_attempts(provider)
     data["has_api_key"] = bool(provider.api_key_encrypted or provider.api_key_env)
     data["supported_features"] = json.loads(provider.supported_features_json)
     return data

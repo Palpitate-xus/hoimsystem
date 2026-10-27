@@ -19,6 +19,7 @@ from app.ai.operations_support_run_models import FRAME_BYTES
 from app.ai.operations_support_task_contract import OperationsTaskSelection
 from app.ai.operations_support_task_prompt import PROMPT_VERSION, SYSTEM_PROMPT, TASK_PROMPT
 from app.ai.operations_support_write_guard import OPERATIONS_SOURCE_ROLES, current_rows, lock_operations_write
+from app.ai.retry_policy import configured_attempts
 
 FEATURE = "operations_support"
 
@@ -108,6 +109,7 @@ def configuration(db, actor, *, preview, exclusive=False):
         "instructions_digest": hashlib.sha256(instructions.encode("utf-8")).hexdigest(),
     }
     provider_snapshot = {name: getattr(provider, name) for name in ("provider_id", "revision", "name", "kind", "api_base", "model", "timeout_seconds", "max_output_tokens", "validation_report")}
+    provider_snapshot["max_attempts"] = configured_attempts(provider)
     provider_snapshot.update(
         temperature_decimal=str(temperature), allows_patient_data=bool(provider.allows_patient_data), effective_output_limit=min(provider.max_output_tokens, settings.AI_MAX_OUTPUT_TOKENS)
     )

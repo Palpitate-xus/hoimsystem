@@ -6,9 +6,10 @@ from typing import Literal
 from pydantic import Field, field_validator, model_validator
 
 from app.ai.coding_evidence_input import Positive, StrictModel
+from app.ai.retry_policy import ProviderRetrySnapshot
 
 
-class CodingFrozenProvider(StrictModel):
+class CodingFrozenProvider(ProviderRetrySnapshot, StrictModel):
     provider_id: Positive
     revision: Positive
     name: str = Field(min_length=1, max_length=80)

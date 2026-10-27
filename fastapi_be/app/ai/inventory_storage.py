@@ -14,6 +14,7 @@ from pydantic import Field, field_validator
 
 from app.ai.inventory_contract import SHA256, StrictModel, canonical_json, hash_content, identity, utc
 from app.ai.inventory_scenario_models import RESULT_BYTES, AIInventoryRunResult
+from app.ai.retry_policy import retry_snapshots_equal
 
 TEXT_BYTES = 65535
 
@@ -251,7 +252,7 @@ def stage_result(db, run, lease, value):
     provider = db.query(AIProvider).filter_by(provider_id=run.provider_id).populate_existing().with_for_update().one_or_none()
     if config is None or config.revision != metadata["feature_revision"] or provider is None or provider.revision != run.provider_revision:
         raise HTTPException(409, "库存候选比较最终接收时原功能或模型版本已经变化")
-    if check_configuration(db, actor, FEATURE_BY_KEY[run.feature_key], config, bool(run.preview)) is not provider or provider_snapshot(provider) != snapshot["provider_snapshot"]:
+    if check_configuration(db, actor, FEATURE_BY_KEY[run.feature_key], config, bool(run.preview)) is not provider or not retry_snapshots_equal(provider_snapshot(provider), snapshot["provider_snapshot"]):
         raise HTTPException(409, "库存候选比较最终接收时模型或适用权限已经变化")
     _, _, source = authorize_scenario(db, actor, binding["scenario_id"], binding=binding, locking=True)
     bounded_result(value)

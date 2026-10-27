@@ -18,6 +18,7 @@ from app.ai.gateway import AIExecutionError
 from app.ai.governance import active_prompt, audit, digest
 from app.ai.models import AIFeatureConfig, AIPromptVersion, AIProvider, AIRun
 from app.ai.native_acceptance import acceptance_state
+from app.ai.retry_policy import retry_snapshots_equal
 from app.config import settings
 from app.models import User
 from app.sql_counts import locked_row_count
@@ -76,7 +77,7 @@ def recheck(db, run, *, expected_epoch=None):
     if sources.utcnow() - run.create_time > datetime.timedelta(seconds=settings.AI_MAX_QUEUE_AGE_SECONDS):
         raise AIExecutionError("TASK_EXPIRED", "任务等待时间过长，请核对当前完整账目后重新提交")
     spec, config, provider, prompt, version = _configuration(db, actor, bool(run.preview))
-    if snapshot["catalog_version"] != CATALOG_VERSION or snapshot["provider_snapshot"] != provider_snapshot(provider) or snapshot["feature_validation"] != _validation(config):
+    if snapshot["catalog_version"] != CATALOG_VERSION or not retry_snapshots_equal(provider_snapshot(provider), snapshot["provider_snapshot"]) or snapshot["feature_validation"] != _validation(config):
         raise HTTPException(409, "完整账目任务的目录、模型或验证配置已改变")
     if run.prompt_version != version or snapshot["task_prompt"] != prompt:
         raise HTTPException(409, "完整账目任务Prompt已改变，请重新创建任务")

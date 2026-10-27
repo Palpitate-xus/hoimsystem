@@ -18,6 +18,7 @@ from app.ai.research_variables_fields import VARIABLE_SOURCE_ROLES
 from app.ai.research_variables_prompt import SYSTEM_PROMPT
 from app.ai.research_variables_storage_contract import VariableFrozenProvider, VariableFrozenValidation, VariablePromptOrigin
 from app.ai.research_variables_task_contract import FEATURE_KEY, strict_json
+from app.ai.retry_policy import configured_attempts
 from app.config import settings
 from app.dependencies import VALID_USER_ROLES
 
@@ -90,6 +91,7 @@ def current_configuration(db, user, *, preview, require_credentials=False):
     try:
         frozen_provider = VariableFrozenProvider(
             **{name: getattr(provider, name) for name in ("provider_id", "revision", "name", "kind", "api_base", "model", "timeout_seconds", "max_output_tokens", "validation_report")},
+            max_attempts=configured_attempts(provider),
             temperature=float(provider.temperature),
             allows_patient_data=bool(provider.allows_patient_data),
             effective_output_limit=min(provider.max_output_tokens, settings.AI_MAX_OUTPUT_TOKENS),

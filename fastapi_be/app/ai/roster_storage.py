@@ -7,6 +7,7 @@ from typing import Literal
 from fastapi import HTTPException
 from pydantic import Field, field_validator
 
+from app.ai.retry_policy import retry_snapshots_equal
 from app.ai.roster_contract import SHA256, StrictModel, canonical_json, hash_content, identity
 from app.ai.roster_plan_models import RESULT_BYTES, AIRosterRunResult
 
@@ -100,7 +101,7 @@ def stage_result(db, run, lease, value):
         raise HTTPException(409, "排班最终接收时原功能或模型版本已经变化")
     from app.ai.catalog import FEATURE_BY_KEY
 
-    if check_configuration(db, actor, FEATURE_BY_KEY[run.feature_key], config, bool(run.preview)) is not provider or provider_snapshot(provider) != snapshot["provider_snapshot"]:
+    if check_configuration(db, actor, FEATURE_BY_KEY[run.feature_key], config, bool(run.preview)) is not provider or not retry_snapshots_equal(provider_snapshot(provider), snapshot["provider_snapshot"]):
         raise HTTPException(409, "排班最终接收时模型或适用权限已经变化")
     authorize_plan(db, actor, binding["plan_id"], binding=binding, locking=True)
     serialized, content_hash, size = bounded_result(value)

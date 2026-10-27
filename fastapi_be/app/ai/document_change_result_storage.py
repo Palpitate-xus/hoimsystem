@@ -21,6 +21,7 @@ from app.ai.document_change_run_models import AIDocumentChangeRunArtifact, AIDoc
 from app.ai.document_change_view_contract import DocumentChangeResultReference, result_packet
 from app.ai.models import AIAuditEvent, AIFeatureConfig, AIPromptVersion, AIProvider, AIRun
 from app.ai.native_acceptance import RUN_FIELDS
+from app.ai.retry_policy import retry_snapshots_equal
 
 USAGE = "run.document_change.usage"
 ACCEPT = "run.document_change.accept"
@@ -147,7 +148,7 @@ def _current_configuration(db, run, snapshot, metadata):
         raise ValueError("Non-preview acceptance requires the current enabled validated Super scope")
     if (
         snapshot["catalog_version"] != CATALOG_VERSION
-        or snapshot["provider_snapshot"] != provider_snapshot(provider)
+        or not retry_snapshots_equal(provider_snapshot(provider), snapshot["provider_snapshot"])
         or snapshot["feature_validation"] != validation
         or config.revision != metadata["feature_revision"]
     ):

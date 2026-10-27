@@ -20,6 +20,7 @@ from app.ai.clinical_training_run_models import ARTIFACT_HASHES, ARTIFACT_SCHEMA
 from app.ai.clinical_training_task_contract import TrainingFeedbackSource, TrainingTaskSelection
 from app.ai.clinical_training_task_prompt import PROMPT_VERSION, SYSTEM_PROMPT
 from app.ai.clinical_training_write_guard import TRAINING_STAFF_ROLES, current_rows
+from app.ai.retry_policy import retry_snapshot_hash_matches, retry_snapshots_equal
 from app.sql_counts import locked_row_count
 
 FEATURE = cfg.FEATURE
@@ -137,7 +138,7 @@ def _before_bodies(db, user, run_id, *, execution):
     if execution:
         current_config = cfg.configuration(db, actor, preview=bool(receipt["original_run_header"]["preview"]))
         _, _, prompt, current_execution = current_config
-        if (prompt["prompt_id"], prompt["prompt_version"], prompt["instructions_digest"]) != (h["prompt_id"], h["prompt_version"], h["instructions_digest"]) or c.content_hash(current_execution) != h["execution_snapshot_hash"]:
+        if (prompt["prompt_id"], prompt["prompt_version"], prompt["instructions_digest"]) != (h["prompt_id"], h["prompt_version"], h["instructions_digest"]) or not retry_snapshot_hash_matches(current_execution, h["execution_snapshot_hash"], c.content_hash):
             raise HTTPException(409, "培训当前配置、模型或Prompt与原冻结锚不同；未读取正文")
     technical = run_header(db, run_id)
     _verify_created(db, h, technical)
@@ -189,7 +190,7 @@ def load_artifact(db, user, run_id, *, execution=False):
         raise HTTPException(409, "培训任务原raw3或上下文摘要改变")
     if execution:
         _, _, current_prompt, current_execution = current_config
-        if {key: value for key, value in current_prompt.items() if key != "catalog_version"} != {key: value for key, value in prompt.items() if key != "catalog_version"} or current_execution != execution_snapshot:
+        if {key: value for key, value in current_prompt.items() if key != "catalog_version"} != {key: value for key, value in prompt.items() if key != "catalog_version"} or not retry_snapshots_equal(current_execution, execution_snapshot):
             raise HTTPException(409, "培训当前配置与原完整冻结快照不同")
     return run, artifact, source, prompt, execution_snapshot, selection
 

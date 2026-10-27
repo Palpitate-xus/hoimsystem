@@ -20,6 +20,7 @@ from app.ai.research_cohort_prompt import RESEARCH_SYSTEM_PROMPT, RESEARCH_TASK_
 from app.ai.research_cohort_protocol import _nonfinite, _object, model_wire
 from app.ai.research_cohort_sources import utc_text, utcnow
 from app.ai.research_cohort_write_guard import current_actor, current_research_rows, lock_research_write
+from app.ai.retry_policy import configured_attempts, retry_snapshots_equal
 
 FEATURE = "research_cohort"
 RAW_FIELDS = ("input_json", "evidence_json", "context_metadata_json")
@@ -81,6 +82,7 @@ def _configuration(db, actor, *, preview):
     task = prompt.task_prompt if prompt is not None else packaged_task_prompt()
     instructions = instructions_for(task)
     provider_snapshot = {name: getattr(provider, name) for name in ("provider_id", "revision", "name", "kind", "api_base", "model", "timeout_seconds", "max_output_tokens", "validation_report")}
+    provider_snapshot["max_attempts"] = configured_attempts(provider)
     provider_snapshot.update(temperature=float(provider.temperature), allows_patient_data=True, effective_output_limit=min(provider.max_output_tokens, settings.AI_MAX_OUTPUT_TOKENS))
     prompt_snapshot = {
         "schema_version": "research_prompt_snapshot_v1",
@@ -342,7 +344,7 @@ def load_artifact(db, user, run_id, *, audit_only=False, execution=False):
     if created is None or created.actor_id != artifact.requested_by or created.target != run_id or created.action != "research.task.artifact.create" or created.detail_json != detail:
         raise HTTPException(409, "科研创建回执不是原具体AuditPK或内容已变")
     if execution:
-        if canonical_json(_configuration(db, actor, preview=bool(run.preview))) != canonical_json((prompt, frozen_execution)):
+        if not retry_snapshots_equal(_configuration(db, actor, preview=bool(run.preview)), (prompt, frozen_execution)):
             raise HTTPException(409, "科研当前配置、Provider或Prompt版本已变化，未继续旧冻结执行")
         model_wire(source, parsed["input_json"]["question"], prompt["task_prompt"])
     return run, artifact, case, source

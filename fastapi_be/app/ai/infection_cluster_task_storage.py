@@ -344,7 +344,8 @@ def guard_run_id(db, user, rid):
 
     markers = ("infection_local_frozen_task_v1", "infection_statistics_result_pointer_v1", "infection_cluster_scenario_id")
     terms = [AIRun.feature_key == t.FEATURE_KEY]
-    terms.extend(func.instr(getattr(AIRun, field), mark) > 0 for field in t.RAW_FIELDS for mark in markers)
+    position = func.strpos if db.get_bind().dialect.name == "postgresql" else func.instr
+    terms.extend(position(getattr(AIRun, field), mark) > 0 for field in t.RAW_FIELDS for mark in markers)
     marked = db.query(AIRun.run_id).filter(AIRun.run_id == rid, or_(*terms)).populate_existing().with_for_update(read=True).one_or_none()
     if marked is not None:
         raise HTTPException(409, "旧或损坏78任务缺少真实完整Artifact，不允许通用正文或模型降级")
